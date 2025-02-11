@@ -24,15 +24,16 @@ protected:
     virtual const FName& GetId() const override;
     virtual TSharedPtr<SWidget> CreateWidget() override;
 
-public:
-    // Public Getters
-    TSharedPtr<SOdysseyPalette> PaletteWidget();
-
 protected:
     // Event Listeners
+    UOdysseyPalette* GetPalette() const;
+    UOdysseyPaletteEntryColor* GetPaletteCurrentColorEntry() const;
+    int GetPaletteCurrentSet() const;
+
+    void OnPaletteChanged(UOdysseyPalette* iPalette) const;
+    void OnPaletteCurrentColorEntrySelected(UOdysseyPaletteEntryColor* iEntry) const;
+    void OnPaletteCurrentSetSelected(int iSet) const;
 
 private:
     FOdysseyPainterEditor* mEditor;
-
-    TSharedPtr<SOdysseyPalette> mPaletteWidget;
 };

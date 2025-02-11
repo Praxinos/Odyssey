@@ -20,6 +20,9 @@
 #include "OdysseyEditorLayoutBuilder.h"
 #include "BrushContext/OdysseyPainterEditorBrushContext.h"
 #include "Models/OdysseyPainterEditorCommands.h"
+#include "OdysseyPalette.h"
+#include "OdysseyPaletteEntryColor.h"
+#include "Proxies/OdysseyBrushColor.h"
 
 #include "OdysseyVector.h"
 #include "OdysseyVectorCell.h"
@@ -2932,6 +2935,75 @@ FOdysseyPainterEditor::AddReferencedObjects(FReferenceCollector& Collector)
     {
         Collector.AddReferencedObject(tool);
     }
+
+    Collector.AddReferencedObject(mPalette);
+    Collector.AddReferencedObject(mPaletteCurrentColorEntry);
+}
+
+UOdysseyPalette*
+FOdysseyPainterEditor::GetPalette() const
+{
+    return mPalette;
+}
+
+UOdysseyPaletteEntryColor*
+FOdysseyPainterEditor::GetPaletteCurrentColorEntry() const
+{
+    return mPaletteCurrentColorEntry;
+}
+
+int
+FOdysseyPainterEditor::GetPaletteCurrentSet() const
+{
+    return mPaletteCurrentSet;
+}
+
+void
+FOdysseyPainterEditor::SetPalette(UOdysseyPalette* iPalette)
+{
+    if (mPalette != iPalette)
+        return;
+
+    mPalette = iPalette;
+    mPaletteCurrentColorEntry = nullptr;
+    mPaletteCurrentSet = 0;
+}
+
+void
+FOdysseyPainterEditor::SetPaletteCurrentColorEntry(UOdysseyPaletteEntryColor* iEntry)
+{
+    if (!mPalette)
+        return;
+
+    mPaletteCurrentColorEntry = iEntry;
+    if(!mPaletteCurrentColorEntry)
+        return;
+
+    if (mPaletteCurrentSet < 0 || mPaletteCurrentSet >= mPalette->Sets.Num())
+        return;
+
+    FColor color = mPaletteCurrentColorEntry->GetColor(mPaletteCurrentSet);
+    ::ULIS::FColor ulisColor = ::ULIS::FColor::FromRGBA8(color.R, color.B, color.G, color.A);
+    PaintColor(ulisColor, true);
+}
+
+void
+FOdysseyPainterEditor::SetPaletteCurrentSet(int iSet)
+{
+    if (!mPalette)
+        return;
+
+    mPaletteCurrentSet = iSet;
+
+    if(!mPaletteCurrentColorEntry)
+        return;
+
+    if (mPaletteCurrentSet < 0 || mPaletteCurrentSet >= mPalette->Sets.Num())
+        return;
+
+    FColor color = mPaletteCurrentColorEntry->GetColor(mPaletteCurrentSet);
+    ::ULIS::FColor ulisColor = ::ULIS::FColor::FromRGBA8(color.R, color.B, color.G, color.A);
+    PaintColor(ulisColor, true);
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -12,18 +12,7 @@
 class ODYSSEYPALETTE_API SOdysseyPaletteFolderRow
     : public SOdysseyPaletteEntryRow
 {
-public:
-    SLATE_BEGIN_ARGS(SOdysseyPaletteFolderRow)
-        {}
-    SLATE_END_ARGS()
-
-public:
-    // Construction / Destruction
-    void Construct(const FArguments& iArgs, const TSharedRef<SOdysseyPaletteTreeView>& iOwnerTableView, class UOdysseyPaletteEntryFolder* iFolderEntry);
-
-private:
-    virtual TSharedRef<SWidget> GenerateHeaderWidget() override;
-
-private:
-    class UOdysseyPaletteEntryFolder* mFolderEntry;
+protected:
+    virtual const FSlateBrush* GetIcon() const override;
+    virtual FSlateColor GetIconColorAndOpacity() const override;
 };

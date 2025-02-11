@@ -21,9 +21,6 @@ public:
     UOdysseyPalette();
 
 public:
-    /* Called when the current entry changed */
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnCurrentEntryChanged, UOdysseyPalette*)
-
     /* Called when the Entry hierarchy changed at some point */
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnHierarchyChanged, UOdysseyPalette*);
 
@@ -32,12 +29,6 @@ public:
 
 public:
     //Delegates
-
-    /**
-     * @brief Returns the CurrentLayerChanged delegate
-     */
-    static FOnCurrentEntryChanged& OnCurrentEntryChanged();
-
     /**
      * @brief Returns the HierarchyChanged delegate
      */
@@ -88,13 +79,6 @@ public:
      */
     UFUNCTION(BlueprintPure, Category="Palette")
     const TArray<UOdysseyPaletteEntry*>& GetRootEntries() const;
-
-    /**
-     * @brief Returns the set used as a FName
-     *
-     * @return FName
-     */
-    FName GetUsedSet() const;
 
     /**
      * @brief Returns all Entries
@@ -184,8 +168,7 @@ public:
     UFUNCTION(BlueprintCallable, Category="Palette")
     void MoveEntries(TArray<UOdysseyPaletteEntry*> iEntries, UOdysseyPaletteEntry* iParentEntry = nullptr, int iIndexInParent = 0);
 
-    void AddSet();
-    void DuplicateSet();
+    void DuplicateSet( int iSet );
 
     void RemoveSet(int iIndex = -1);
 
@@ -195,7 +178,6 @@ public:
 
 protected:
     //Property changed methods
-    void CurrentEntryChanged();
     void SetsChanged();
     virtual void PropertyChanged(const FName& iPropertyName);
     virtual void PostPropertyChanged(const FName& iPropertyName);
@@ -233,15 +215,9 @@ protected:
     void GetEntriesUniqueParents(TArray<UOdysseyPaletteEntry*> iEntries, TArray<UOdysseyPaletteEntry*>& oParents);
 
 public:
-    UPROPERTY(config, DuplicateTransient, meta = (AllowedClasses = "/Script/OdysseyPaletteEntry.OdysseyPaletteEntry"))
-    TSoftObjectPtr<UOdysseyPaletteEntry> CurrentEntry;
-
     UPROPERTY()
     TObjectPtr<UOdysseyPaletteEntry> PaletteRoot;
 
     UPROPERTY()
     TArray<FName> Sets;
-
-    UPROPERTY()
-    uint8 UsedSet;
 };

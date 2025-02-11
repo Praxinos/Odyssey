@@ -86,9 +86,6 @@ public:
     UFUNCTION(BlueprintPure, Category="Palette")
     UOdysseyPalette* GetPalette() const;
 
-    UFUNCTION(BlueprintPure, Category="Palette")
-    uint8 GetUsedSetInPalete() const;
-
     /**
      * @brief Returns the entries children recursively
      *

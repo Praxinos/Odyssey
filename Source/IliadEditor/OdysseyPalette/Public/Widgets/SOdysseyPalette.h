@@ -4,32 +4,42 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Engine/StaticMesh.h"
-#include "Widgets/SCompoundWidget.h"
-#include "FOdysseyPalette.h"
-#include "SOdysseyPaletteTreeView.h"
 
-/** Delegate used to set a generic object */
-DECLARE_DELEGATE_OneParam( FOnMeshChanged, UStaticMesh* );
+class UOdysseyPalette;
+class UOdysseyPaletteEntryColor;
 
 /**
  * Implements the mesh selector
  */
 class ODYSSEYPALETTE_API SOdysseyPalette : public SCompoundWidget
 {
+    SLATE_DECLARE_WIDGET(SOdysseyPalette, SCompoundWidget)
+
 public:
+    DECLARE_DELEGATE_OneParam(FOnPaletteChanged, UOdysseyPalette*)
+    DECLARE_DELEGATE_OneParam(FOnCurrentColorEntrySelected, UOdysseyPaletteEntryColor*)
+    DECLARE_DELEGATE_OneParam(FOnCurrentSetSelected, int)
+
+public:
+    SOdysseyPalette();
+
     SLATE_BEGIN_ARGS(SOdysseyPalette)
         {}
+        SLATE_ATTRIBUTE(UOdysseyPalette*, Palette)
+        SLATE_ATTRIBUTE(UOdysseyPaletteEntryColor*, CurrentColorEntry)
+        SLATE_ATTRIBUTE(int, CurrentSet)
+        SLATE_EVENT(FOnPaletteChanged, OnPaletteChanged)
+        SLATE_EVENT(FOnCurrentColorEntrySelected, OnCurrentColorEntrySelected)
+        SLATE_EVENT(FOnCurrentSetSelected, OnCurrentSetSelected)
     SLATE_END_ARGS()
 
 public:
     // Construction / Destruction
-    ~SOdysseyPalette();
     void Construct(const FArguments& InArgs);
 
 public:
-    // Getter / Setter
-    FOdysseyPalette* GetColorPalette() const;
+    class UOdysseyPalette* GetPalette() const;
+    EVisibility GetTreeViewVisibility() const;
 
 private:
     // Private internal callbacks
@@ -37,16 +47,17 @@ private:
     FString ObjectPath() const;
 
 private:
-    //Internal Widget Creation
-    TSharedRef<SWidget> CreateColorPaletteWidget();
+    class UOdysseyPaletteEntryColor* GetPaletteCurrentColorEntry() const;
+    void OnPaletteCurrentColorEntrySelected(class UOdysseyPaletteEntryColor* iEntry);
 
 private:
-    TSharedRef<ITableRow> OnGenerateRow(UOdysseyPaletteEntry* iEntry, const TSharedRef<STableViewBase>& iOwnerTable);
+    void OnPaletteChanged();
 
 private:
     // Private data
-    TSharedPtr< FOdysseyPalette > mColorPalette;
     TSharedPtr< FAssetThumbnailPool > mAssetThumbnailPool;
-    SScrollBox::FSlot*  mColorPaletteSlot;
-    TSharedPtr<SOdysseyPaletteTreeView> mPaletteTreeView;
+
+    TSlateAttribute<UOdysseyPalette*> mPaletteAttribute;
+    UOdysseyPalette* mPalette;
+    FOnPaletteChanged mOnPaletteChanged;
 };

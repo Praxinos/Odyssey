@@ -2,28 +2,42 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
 
 #include "SOdysseyPalette.h"
-#include "Widgets/Colors/SColorBlock.h"
-#include "SOdysseyPaletteAddEntryButton.h"
-#include "SOdysseyPaletteEntryRow.h"
+
+#include "OdysseyPalette.h"
+
+#include "SOdysseyPaletteTreeView.h"
+
 #include "PropertyCustomizationHelpers.h"
-#include "SOdysseyPaletteFolderRow.h"
-#include "SOdysseyPaletteColorRow.h"
-#include "OdysseyPaletteEntryColor.h"
-#include "OdysseyPaletteEntryFolder.h"
+
+SLATE_IMPLEMENT_WIDGET(SOdysseyPalette)
+void
+SOdysseyPalette::PrivateRegisterAttributes(FSlateAttributeInitializer& AttributeInitializer)
+{
+    SLATE_ADD_MEMBER_ATTRIBUTE_DEFINITION(AttributeInitializer, mPaletteAttribute, EInvalidateWidgetReason::None)
+    .OnValueChanged(FSlateAttributeDescriptor::FAttributeValueChangedDelegate::CreateLambda(
+        [](SWidget& Widget)
+        {
+            static_cast<SOdysseyPalette&>(Widget).OnPaletteChanged();
+        }
+    ));
+}
 
 /////////////////////////////////////////////////////
 // SOdysseyPalette
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
-SOdysseyPalette::~SOdysseyPalette()
-{
-    mColorPalette.Reset();
-}
 
+SOdysseyPalette::SOdysseyPalette()
+    : mPaletteAttribute(*this, nullptr)
+    , mPalette(nullptr)
+{
+}
 
 void SOdysseyPalette::Construct(const FArguments& InArgs)
 {
-    mColorPalette = MakeShareable(new FOdysseyPalette());
+    mPaletteAttribute.Assign(*this, InArgs._Palette);
+    mPalette = mPaletteAttribute.Get();
+    mOnPaletteChanged = InArgs._OnPaletteChanged;
     mAssetThumbnailPool = MakeShareable(new FAssetThumbnailPool(1024));
 
     TArray<const UClass*> allowedClasses;
@@ -52,85 +66,55 @@ void SOdysseyPalette::Construct(const FArguments& InArgs)
             .ThumbnailSizeOverride(FIntPoint(32, 32))
         ]
         + SScrollBox::Slot()
-        .Expose(mColorPaletteSlot)
         [
-            SNullWidget::NullWidget
+            SNew(SOdysseyPaletteTreeView)
+            .Visibility(this, &SOdysseyPalette::GetTreeViewVisibility)
+            .Palette(InArgs._Palette)
+            .CurrentColorEntry(InArgs._CurrentColorEntry)
+            .CurrentSet(InArgs._CurrentSet)
+            .OnCurrentColorEntrySelected(InArgs._OnCurrentColorEntrySelected)
+            .OnCurrentSetSelected(InArgs._OnCurrentSetSelected)
         ]
     ];
-
-    if( mColorPalette->GetPalette() )
-        mColorPaletteSlot->AttachWidget( CreateColorPaletteWidget());
 }
 
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------- Getter / Setter
 
-FOdysseyPalette* SOdysseyPalette::GetColorPalette() const
+EVisibility
+SOdysseyPalette::GetTreeViewVisibility() const
 {
-    return mColorPalette.Get();
+    return mPalette ? EVisibility::Visible : EVisibility::Collapsed;
 }
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Private internal callbacks
 
-void SOdysseyPalette::OnObjectChanged(const FAssetData& AssetData)
+void
+SOdysseyPalette::OnObjectChanged(const FAssetData& AssetData)
 {
-    if (AssetData.IsValid())
-        mColorPalette->SetPalette( CastChecked< UOdysseyPalette >(AssetData.GetAsset()));
-    else
-        mColorPalette->SetPalette(nullptr);
+    if (!AssetData.IsValid())
+    {
 
-    mColorPaletteSlot->DetachWidget();
+        mPalette = nullptr;
+        return;
+    }
 
-    if(mColorPalette->GetPalette())
-        mColorPaletteSlot->AttachWidget(CreateColorPaletteWidget());
+    mPalette = CastChecked< UOdysseyPalette >(AssetData.GetAsset());
 }
 
 
-FString SOdysseyPalette::ObjectPath() const
+FString
+SOdysseyPalette::ObjectPath() const
 {
-    if (!mColorPalette)
+    if (!mPalette)
         return FString();
 
-    return mColorPalette->GetPalette()->GetPathName();
+    return mPalette->GetPathName();
 }
 
-
-TSharedRef<SWidget> SOdysseyPalette::CreateColorPaletteWidget()
+void
+SOdysseyPalette::OnPaletteChanged()
 {
-    return
-        SNew(SVerticalBox)
-        + SVerticalBox::Slot()
-        .AutoHeight()
-        [
-            SAssignNew(mPaletteTreeView, SOdysseyPaletteTreeView)
-            .Palette(mColorPalette->GetPalette())
-            .OnGenerateRow(this, &SOdysseyPalette::OnGenerateRow)
-        ]
-        + SVerticalBox::Slot()
-        .Padding(FMargin(0, 5, 0, 0))
-        .HAlign(HAlign_Left)
-        .AutoHeight()
-        [
-            SNew(SOdysseyPaletteAddEntryButton)
-            .Palette(mColorPalette->GetPalette())
-        ];
-}
-
-TSharedRef<ITableRow> SOdysseyPalette::OnGenerateRow(UOdysseyPaletteEntry* iEntry, const TSharedRef<STableViewBase>& iOwnerTable)
-{
-    check(iEntry);
-
-    UClass* entryClass = iEntry->GetClass();
-
-    if (entryClass == UOdysseyPaletteEntryColor::StaticClass())
-    {
-        return SNew(SOdysseyPaletteColorRow, mPaletteTreeView.ToSharedRef(), Cast<UOdysseyPaletteEntryColor>(iEntry));
-    }
-    else if (entryClass == UOdysseyPaletteEntryFolder::StaticClass())
-    {
-        return SNew(SOdysseyPaletteFolderRow, mPaletteTreeView.ToSharedRef(), Cast<UOdysseyPaletteEntryFolder>(iEntry));
-    }
-
-    return SNew(SOdysseyPaletteEntryRow, mPaletteTreeView.ToSharedRef(), Cast<UOdysseyPaletteEntry>(iEntry)); //Default widget
+    mPalette = mPaletteAttribute.Get();
 }

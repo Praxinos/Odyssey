@@ -30,18 +30,18 @@ UOdysseyPaletteEntryColor::FOnEntryColorChanged& UOdysseyPaletteEntryColor::OnEn
     return onEntryColorChanged;
 }
 
-FColor& UOdysseyPaletteEntryColor::GetUsedColor()
+FColor& UOdysseyPaletteEntryColor::GetColor(int iSet)
 {
-    return EntryColors[ GetPalette()->UsedSet ];
+    return EntryColors[ iSet ];
 }
 
-void UOdysseyPaletteEntryColor::SetUsedColor(FColor iColor)
+void UOdysseyPaletteEntryColor::SetColor(FColor iColor, int iSet)
 {
     const FScopedTransaction transaction(NSLOCTEXT("Palette", "ChangeColorEntry_Transaction", "Change color entry"));
 
     FOdysseyObjectEditorUtils::PreChangePropertyValue(this, "EntryColors");
 
-    EntryColors[GetPalette()->UsedSet] = iColor;
+    EntryColors[iSet] = iColor;
 
     FOdysseyObjectEditorUtils::PostChangePropertyValue(this, "EntryColors", EPropertyChangeType::ValueSet);
 }

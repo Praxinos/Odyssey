@@ -12,6 +12,8 @@
 #include "OdysseyPainterEditor.h"
 #include "ISinglePropertyView.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
+#include "OdysseyPalette.h"
+#include "OdysseyPaletteEntry.h"
 
 #include "OdysseyVectorCycle.h"
 #include "OdysseyVectorGroupPaint.h"
@@ -376,17 +378,10 @@ UOdysseyPainterEditorVectorPaintBucketTool::SetBucketColor( FOdysseyVectorBucket
 
         case eBucketColorMode::Palette:
         {
-            TSharedPtr<FOdysseyPainterEditorPaletteTab> colorPaletteTab = GetEditor()->FindTab<FOdysseyPainterEditorPaletteTab>();
-            UOdysseyPalette* palette = colorPaletteTab->PaletteWidget()->GetColorPalette()->GetPalette();
-
-            if ( palette )
+            UOdysseyPaletteEntryColor* paletteEntry = GetEditor()->GetPaletteCurrentColorEntry();
+            if ( paletteEntry )
             {
-                UOdysseyPaletteEntry* paletteEntry = palette->CurrentEntry.Get();
-
-                if ( paletteEntry && paletteEntry->IsA(UOdysseyPaletteEntryColor::StaticClass()))
-                {
-                    iBucket->SetPaletteEntry( paletteEntry );
-                }
+                iBucket->SetPaletteEntry( paletteEntry );
             }
         }
         break;

@@ -41,6 +41,8 @@ class UOdysseyLayerStack;
 class FOdysseyMeshSelector;
 class FOdysseyPainterEditorRasterSelection;
 class FOdysseyVectorGroupPaint;
+class UOdysseyPalette;
+class UOdysseyPaletteEntryColor;
 
 /**
  * Base class for a Painting Editor
@@ -154,6 +156,14 @@ public:
     virtual FOdysseyMediaProvider                            GetCurrentMediaProvider();
     virtual UOdysseyLayerStack*                              LayerStack() const;
     virtual TSharedPtr<FOdysseyPainterEditorRasterSelection> RasterSelection();
+
+    UOdysseyPalette* GetPalette() const;
+    UOdysseyPaletteEntryColor* GetPaletteCurrentColorEntry() const;
+    int GetPaletteCurrentSet() const;
+
+    void SetPalette(UOdysseyPalette* iPalette);
+    void SetPaletteCurrentColorEntry(UOdysseyPaletteEntryColor* iEntry);
+    void SetPaletteCurrentSet(int iSet);
 
     TSharedPtr<FOdysseyMeshSelector>                        GetMeshSelector() const;
 
@@ -326,6 +336,10 @@ protected:
     TMap<UClass*, UOdysseyPainterEditorTool*> mCurrentMainToolPerLayerClass;
 
     FName mToolbarMenuName;
+
+    UOdysseyPalette* mPalette = nullptr;
+    UOdysseyPaletteEntryColor* mPaletteCurrentColorEntry = nullptr;
+    int mPaletteCurrentSet = INDEX_NONE;
 };
 
 template <class T>

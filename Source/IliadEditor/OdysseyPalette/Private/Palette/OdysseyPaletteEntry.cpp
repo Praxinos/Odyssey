@@ -53,11 +53,6 @@ UOdysseyPalette* UOdysseyPaletteEntry::GetPalette() const
     return Cast<UOdysseyPalette>(GetOuter());
 }
 
-uint8 UOdysseyPaletteEntry::GetUsedSetInPalete() const
-{
-    return Cast<UOdysseyPalette>(GetOuter())->UsedSet;
-}
-
 TArray<UOdysseyPaletteEntry*> UOdysseyPaletteEntry::GetChildrenRecursively(EGetEntryChildrenMethod iMethod /*= EGetEntryChildrenMethod::DepthFirst*/) const
 {
     TArray<UOdysseyPaletteEntry*> children;

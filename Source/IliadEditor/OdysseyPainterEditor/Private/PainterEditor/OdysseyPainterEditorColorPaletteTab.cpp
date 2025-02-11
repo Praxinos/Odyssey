@@ -26,7 +26,6 @@ FOdysseyPainterEditorPaletteTab::~FOdysseyPainterEditorPaletteTab()
 FOdysseyPainterEditorPaletteTab::FOdysseyPainterEditorPaletteTab(FOdysseyPainterEditor* iEditor)
     : FOdysseyEditorTab(LOCTEXT( "palette-tab.name", "Palette" ), FSlateIcon( "OdysseyStyle", "OdysseyPalette.PaletteTab" ))
     , mEditor(iEditor)
-    , mPaletteWidget(nullptr)
 {
 }
 
@@ -42,23 +41,55 @@ FOdysseyPainterEditorPaletteTab::GetId() const
 TSharedPtr<SWidget>
 FOdysseyPainterEditorPaletteTab::CreateWidget()
 {
-    mPaletteWidget = SNew( SOdysseyPalette );
-
-    return mPaletteWidget;
+    return SNew( SOdysseyPalette )
+        .Palette(this, &FOdysseyPainterEditorPaletteTab::GetPalette)
+        .CurrentColorEntry(this, &FOdysseyPainterEditorPaletteTab::GetPaletteCurrentColorEntry)
+        .CurrentSet(this, &FOdysseyPainterEditorPaletteTab::GetPaletteCurrentSet)
+        .OnPaletteChanged(this, &FOdysseyPainterEditorPaletteTab::OnPaletteChanged)
+        .OnCurrentColorEntrySelected(this, &FOdysseyPainterEditorPaletteTab::OnPaletteCurrentColorEntrySelected)
+        .OnCurrentSetSelected(this, &FOdysseyPainterEditorPaletteTab::OnPaletteCurrentSetSelected);
 }
 
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------- Public Getters
 
-TSharedPtr<SOdysseyPalette>
-FOdysseyPainterEditorPaletteTab::PaletteWidget()
+UOdysseyPalette*
+FOdysseyPainterEditorPaletteTab::GetPalette() const
 {
-    return mPaletteWidget;
+    return mEditor->GetPalette();
+}
+
+UOdysseyPaletteEntryColor*
+FOdysseyPainterEditorPaletteTab::GetPaletteCurrentColorEntry() const
+{
+    return mEditor->GetPaletteCurrentColorEntry();
+}
+
+int
+FOdysseyPainterEditorPaletteTab::GetPaletteCurrentSet() const
+{
+    return mEditor->GetPaletteCurrentSet();
+}
+
+void
+FOdysseyPainterEditorPaletteTab::OnPaletteChanged(UOdysseyPalette* iPalette) const
+{
+    return mEditor->SetPalette(iPalette);
+}
+
+void
+FOdysseyPainterEditorPaletteTab::OnPaletteCurrentColorEntrySelected(UOdysseyPaletteEntryColor* iEntry) const
+{
+    return mEditor->SetPaletteCurrentColorEntry(iEntry);
+}
+
+void
+FOdysseyPainterEditorPaletteTab::OnPaletteCurrentSetSelected(int iSet) const
+{
+    return mEditor->SetPaletteCurrentSet(iSet);
 }
 
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------- Event Listeners
-
-
 
 #undef LOCTEXT_NAMESPACE

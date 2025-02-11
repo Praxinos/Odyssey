@@ -30,8 +30,8 @@ public:
     static FOnEntryColorChanged& OnEntryColorChanged();
 
 public:
-    FColor& GetUsedColor();
-    void SetUsedColor( FColor iColor );
+    FColor& GetColor(int iSet);
+    void SetColor( FColor iColor, int iSet );
 
     virtual void AddSet() override;
     virtual void DuplicateSetAt( int iIndex = -1 ) override;

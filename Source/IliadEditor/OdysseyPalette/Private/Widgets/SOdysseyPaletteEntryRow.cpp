@@ -4,36 +4,32 @@
 #include "SOdysseyPaletteEntryRow.h"
 #include "OdysseyPaletteDragDropOperation.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
-#include "Widgets/SOdysseyPaletteExpanderArrow.h"
 #include "OdysseyStyleSet.h"
 #include "OdysseyPalette.h"
 #include "Widgets/Input/SCheckBox.h"
+#include "OdysseyPaletteEntryColor.h"
+#include "Widgets/SOdysseyPaletteTreeView.h"
 
 #define LOCTEXT_NAMESPACE "Palette"
 
 //CONSTRUCTION/DESTRUCTION----------------------------------------------- SMultiColumnTableRow
-void SOdysseyPaletteEntryRow::Construct(const FArguments& InArgs, const TSharedRef<SOdysseyPaletteTreeView>& iOwnerTableView, UOdysseyPaletteEntry* iEntry)
+void SOdysseyPaletteEntryRow::Construct(const FArguments& InArgs, const TSharedRef<SOdysseyPaletteTreeView>& iTreeView, UOdysseyPaletteEntry* iEntry)
 {
     ensure(iEntry);
     mEntry = iEntry;
+    mTreeView = iTreeView;
+    mSet = InArgs._Set;
 
     SMultiColumnTableRow<UOdysseyPaletteEntry*>::FArguments args;
     args.Style(&FOdysseyStyle::GetWidgetStyle<FTableRowStyle>("OdysseyLayerStack.AlternatedRows"))
         .OnCanAcceptDrop(this, &SOdysseyPaletteEntryRow::OnRowCanAcceptDrop)
         .OnAcceptDrop(this, &SOdysseyPaletteEntryRow::OnRowAcceptDrop)
-        .OnDragDetected(this, &SOdysseyPaletteEntryRow::OnRowDragDetected, TWeakPtr<SOdysseyPaletteTreeView>(iOwnerTableView));
+        .OnDragDetected(this, &SOdysseyPaletteEntryRow::OnRowDragDetected);
 
     SMultiColumnTableRow<UOdysseyPaletteEntry*>::Construct(
         args,
-        iOwnerTableView
+        iTreeView
     );
-
-    SignalSelectionMode = ETableRowSignalSelectionMode::Instantaneous;
-}
-
-UOdysseyPaletteEntry* SOdysseyPaletteEntryRow::GetPaletteEntry()
-{
-    return mEntry;
 }
 
 //PRIVATE API-----------------------------------------------------------
@@ -41,70 +37,75 @@ UOdysseyPaletteEntry* SOdysseyPaletteEntryRow::GetPaletteEntry()
 TSharedRef<SWidget>
 SOdysseyPaletteEntryRow::GenerateWidgetForColumn( const FName& InColumnName )
 {
-
-    if (InColumnName == "IsActivated")
+    if (InColumnName == "Header")
     {
-        return GenerateIsActivatedWidget();
-    }
-    else if (InColumnName == "Header")
-    {
-        return GenerateExpandableHeaderWidget();
+        return GenerateHeaderWidget();
     }
 
     return SNullWidget::NullWidget;
 }
 
-
 const FSlateBrush*
-SOdysseyPaletteEntryRow::GetBorder() const
+SOdysseyPaletteEntryRow::GetIcon() const
 {
-    const FSlateBrush* borderBrush = SMultiColumnTableRow<UOdysseyPaletteEntry*>::GetBorder();
-
-    if (!mEntry)
-        return borderBrush;
-
-    UOdysseyPalette* palette = mEntry->GetPalette();
-    if ( !palette || palette->CurrentEntry != mEntry)
-        return borderBrush;
-
-    const bool bIsActive = OwnerTablePtr.Pin()->AsWidget()->HasKeyboardFocus();
-    return bIsActive ? FOdysseyStyle::GetBrush("OdysseyLayerStack.CurrentLayerBackgroundBrush") : FOdysseyStyle::GetBrush("OdysseyLayerStack.CurrentLayerInactiveBackgroundBrush");
+    return FOdysseyStyle::Get().GetBrush("OdysseyPalette.EntryColor");
 }
 
+FSlateColor
+SOdysseyPaletteEntryRow::GetIconColorAndOpacity() const
+{
+    return FLinearColor::White;
+}
 
 TSharedRef<SWidget>
 SOdysseyPaletteEntryRow::GenerateHeaderWidget()
 {
-    return SAssignNew(mNameWidget, SInlineEditableTextBlock)
-        .Text(this, &SOdysseyPaletteEntryRow::GetEntryName)
-        .Font(this, &SOdysseyPaletteEntryRow::GetEntryNameFont)
-        .OnTextCommitted(this, &SOdysseyPaletteEntryRow::OnEntryNameCommited)
-        .IsSelected(this, &SOdysseyPaletteEntryRow::IsSelectedExclusively); //Allows edition to work
-}
-
-TSharedRef<SWidget>
-SOdysseyPaletteEntryRow::GenerateIsActivatedWidget()
-{
-    return SNew(SCheckBox)
-        .Type(ESlateCheckBoxType::ToggleButton)
-        .ForegroundColor(FSlateColor::UseForeground())
-        .CheckedHoveredImage(FOdysseyStyle::GetBrush("OdysseyLayerStack.Visible16"))
-        .CheckedImage(FOdysseyStyle::GetBrush("OdysseyLayerStack.Visible16"))
-        .CheckedPressedImage(FOdysseyStyle::GetBrush("OdysseyLayerStack.Visible16"))
-        .UncheckedHoveredImage(FOdysseyStyle::GetBrush("OdysseyLayerStack.NotVisible16"))
-        .UncheckedImage(FOdysseyStyle::GetBrush("OdysseyLayerStack.NotVisible16"))
-        .UncheckedPressedImage(FOdysseyStyle::GetBrush("OdysseyLayerStack.NotVisible16"))
-        //.OnCheckStateChanged(this, &SOdysseyPaletteEntryRow::OnIsActivatedCheckBoxStateChanged)
-        //.IsChecked(this, &SOdysseyPaletteEntryRow::GetIsActivatedCheckBoxState)
+    return SNew(SHorizontalBox)
+        + SHorizontalBox::Slot()
+        .AutoWidth()
+        .HAlign(HAlign_Right)
+        .VAlign(VAlign_Fill)
         [
-            //Just for the checkbox to take the space of an icon
+            SNew(SExpanderArrow, SharedThis(this) )
+            .ShouldDrawWires(true)
+        ]
+        + SHorizontalBox::Slot()
+        .AutoWidth()
+        .VAlign(VAlign_Center)
+        [
             SNew(SImage)
-                .Visibility(EVisibility::Hidden)
-                .Image(FOdysseyStyle::GetBrush("OdysseyLayerStack.Visible16"))
+            .Image(this, &SOdysseyPaletteEntryRow::GetIcon)
+            .ColorAndOpacity(this, &SOdysseyPaletteEntryRow::GetIconColorAndOpacity)
+        ]
+        + SHorizontalBox::Slot()
+        .VAlign(VAlign_Center)
+        [
+            SAssignNew(mNameWidget, SInlineEditableTextBlock)
+            .Text_Lambda(
+                [this]()
+                {
+                    return mEntry->EntryName;
+                }
+            )
+            .Font_Lambda(
+                [this]()
+                {
+                    TSharedPtr<SOdysseyPaletteTreeView> treeView = mTreeView.Pin();
+                    if (!treeView)
+                        return FAppStyle::Get().GetFontStyle("NormalFont");
+
+                    if (mEntry == treeView->GetCurrentColorEntry())
+                        return FAppStyle::Get().GetFontStyle("NormalFontBold");
+
+                    return FAppStyle::Get().GetFontStyle("NormalFont");
+                }
+            )
+            .OnTextCommitted(this, &SOdysseyPaletteEntryRow::OnEntryNameCommited)
+            .IsSelected(this, &SOdysseyPaletteEntryRow::IsSelectedExclusively) //Allows edition to work
         ];
 }
 
-TSharedRef<SWidget> SOdysseyPaletteEntryRow::GenerateExpandableHeaderWidget()
+/* TSharedRef<SWidget> SOdysseyPaletteEntryRow::GenerateExpandableHeaderWidget()
 {
     return SNew(SHorizontalBox)
         + SHorizontalBox::Slot()
@@ -129,21 +130,7 @@ TSharedRef<SWidget> SOdysseyPaletteEntryRow::GenerateExpandableHeaderWidget()
                 GenerateHeaderWidget()
             ]
         ];
-}
-
-
-void
-SOdysseyPaletteEntryRow::OnIsActivatedCheckBoxStateChanged(ECheckBoxState iState)
-{
-    FScopedTransaction ScopedTransaction(LOCTEXT("entry-row.set-is-activated", "Change Entry Active"));
-    FOdysseyObjectEditorUtils::SetPropertyValue(mEntry, GET_MEMBER_NAME_CHECKED(UOdysseyPaletteEntry, IsActivated), iState == ECheckBoxState::Checked);
-}
-
-ECheckBoxState
-SOdysseyPaletteEntryRow::GetIsActivatedCheckBoxState() const
-{
-    return mEntry->IsActivated ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
-}
+} */
 
 FText
 SOdysseyPaletteEntryRow::GetEntryName() const
@@ -366,9 +353,9 @@ SOdysseyPaletteEntryRow::OnRowAcceptDrop(const FDragDropEvent& iEvent, EItemDrop
 
 
 FReply
-SOdysseyPaletteEntryRow::OnRowDragDetected(const FGeometry& iGeometry, const FPointerEvent& iEvent, TWeakPtr<SOdysseyPaletteTreeView> iTreeView)
+SOdysseyPaletteEntryRow::OnRowDragDetected(const FGeometry& iGeometry, const FPointerEvent& iEvent)
 {
-    TSharedPtr<SOdysseyPaletteTreeView> treeView = iTreeView.Pin();
+    TSharedPtr<SOdysseyPaletteTreeView> treeView = mTreeView.Pin();
     if (treeView.IsValid() && iEvent.IsMouseButtonDown( EKeys::LeftMouseButton ))
     {
         TSharedPtr<FOdysseyPaletteDragDropOperation> operation = treeView->CreateDragDropOperation();

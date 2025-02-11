@@ -151,7 +151,7 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
 {
 #if WITH_EDITOR
     // Generic Button styles
-    Set( "Button.NoPadding", FButtonStyle()
+    Set( "Button.NoPadding", FButtonStyle(FAppStyle::Get().GetWidgetStyle< FButtonStyle >( "Button" ))
         .SetNormalPadding( FMargin(0,0) )
         .SetPressedPadding( FMargin(0,0) )
     );
