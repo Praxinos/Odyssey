@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "TextureEditor/OdysseyTextureEditorGUI.h"
+#include "OdysseyEditorLayoutBuilder.h"
 
 class FOdysseyFlipbookEditorExtension;
 class FOdysseyFlipbookEditorTimelineTab;

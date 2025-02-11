@@ -9,7 +9,7 @@
 /**
  * Implements a layer row widget
  */
-class ODYSSEYTEXTUREEDITOR_API SOdysseyTextureLayerImageRasterRow
+class SOdysseyTextureLayerImageRasterRow
     : public SOdysseyLayerRow
 {
 public:

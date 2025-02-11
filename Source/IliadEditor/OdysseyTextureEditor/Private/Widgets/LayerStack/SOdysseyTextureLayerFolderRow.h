@@ -9,7 +9,7 @@
 /**
  * Implements a layer row widget
  */
-class ODYSSEYTEXTUREEDITOR_API SOdysseyTextureLayerFolderRow
+class SOdysseyTextureLayerFolderRow
     : public SOdysseyLayerRow
 {
 public:

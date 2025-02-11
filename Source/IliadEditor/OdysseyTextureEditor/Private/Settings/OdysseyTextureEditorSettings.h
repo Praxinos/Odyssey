@@ -13,7 +13,7 @@
  * Implements the Editor's user settings.
  */
 UCLASS(config=EditorPerProjectUserSettings)
-class ODYSSEYTEXTUREEDITOR_API UOdysseyTextureEditorSettings
+class UOdysseyTextureEditorSettings
     : public UObject
 {
     GENERATED_UCLASS_BODY()

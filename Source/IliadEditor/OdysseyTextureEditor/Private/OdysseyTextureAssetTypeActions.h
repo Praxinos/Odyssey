@@ -8,7 +8,7 @@
 #include "Toolkits/IToolkitHost.h"
 
 
-class ODYSSEYTEXTUREEDITOR_API FOdysseyTextureAssetTypeActions
+class FOdysseyTextureAssetTypeActions
     : public FAssetTypeActions_Base
 {
 public:

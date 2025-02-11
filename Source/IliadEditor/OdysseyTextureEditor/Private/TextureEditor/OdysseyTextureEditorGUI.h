@@ -12,7 +12,7 @@ class FOdysseyVectorGroupPaint;
 /**
  * Implements an Editor toolkit for textures.
  */
-class ODYSSEYTEXTUREEDITOR_API FOdysseyTextureEditorGUI
+class FOdysseyTextureEditorGUI
     : public TSharedFromThis<FOdysseyTextureEditorGUI>
 {
 public:

@@ -4,7 +4,7 @@
 #include "Engine/Texture.h"
 
 
-class ODYSSEYTEXTUREEDITOR_API FOdysseyScopedTextureSettings
+class FOdysseyScopedTextureSettings
 {
 public:
     ~FOdysseyScopedTextureSettings();

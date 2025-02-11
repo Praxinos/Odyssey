@@ -8,7 +8,7 @@
 class FOdysseyTextureEditorExtension;
 class UTexture;
 
-class ODYSSEYTEXTUREEDITOR_API FOdysseyTextureEditorTextureDetailsTab :
+class FOdysseyTextureEditorTextureDetailsTab :
     public FOdysseyEditorTab
 {
 public:

@@ -5,7 +5,7 @@
 
 #include "CoreMinimal.h"
 
-class ODYSSEYTEXTUREEDITOR_API SOdysseyTextureDetails : public SCompoundWidget
+class SOdysseyTextureDetails : public SCompoundWidget
 {
 public:
     SLATE_BEGIN_ARGS(SOdysseyTextureDetails)

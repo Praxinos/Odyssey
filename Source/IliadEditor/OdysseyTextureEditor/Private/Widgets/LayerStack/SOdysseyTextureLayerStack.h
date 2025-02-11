@@ -11,7 +11,7 @@ class FOdysseyTextureEditorExtension;
 /**
  * Implements the Texture Layer stack widget
  */
-class ODYSSEYTEXTUREEDITOR_API SOdysseyTextureLayerStack
+class SOdysseyTextureLayerStack
     : public SCompoundWidget
 {
 

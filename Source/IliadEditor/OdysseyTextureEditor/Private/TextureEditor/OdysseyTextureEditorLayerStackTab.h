@@ -8,7 +8,7 @@
 class FOdysseyTextureEditorExtension;
 class UOdysseyLayerStack;
 
-class ODYSSEYTEXTUREEDITOR_API FOdysseyTextureEditorLayerStackTab :
+class FOdysseyTextureEditorLayerStackTab :
     public FOdysseyEditorTab
 {
 public:

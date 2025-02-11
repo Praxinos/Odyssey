@@ -2,16 +2,15 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
 #pragma once
 
-#include "IOdysseyTextureEditorModule.h"
-
+#include "Modules/ModuleManager.h"
 #include "IAssetTypeActions.h"
 
 class FOdysseyTextureEditorModule
-    : public IOdysseyTextureEditorModule
+    : public IModuleInterface
 {
 public:
     // IOdysseyTextureEditorModule interface
-    virtual void CreateOdysseyTextureEditor( TArray<UTexture2D*> iTextures ) override;
+    void CreateOdysseyTextureEditor( TArray<UTexture2D*> iTextures );
 
 public:
     // IModuleInterface interface

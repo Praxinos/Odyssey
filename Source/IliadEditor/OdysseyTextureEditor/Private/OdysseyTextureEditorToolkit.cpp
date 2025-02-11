@@ -4,8 +4,7 @@
 #include "OdysseyTextureEditorToolkit.h"
 
 #include "TextureEditor/OdysseyTextureEditorGUI.h"
-
-#include "IOdysseyTextureEditorModule.h"
+#include "OdysseyTextureEditorModule.h"
 
 #define LOCTEXT_NAMESPACE "TextureEditor"
 
@@ -29,7 +28,7 @@ void
 FOdysseyTextureEditorToolkit::OpenAsset(UObject* iObject)
 {
     UTexture2D* texture = Cast<UTexture2D>(iObject);
-    IOdysseyTextureEditorModule* OdysseyTextureEditorModule = &FModuleManager::GetModuleChecked<IOdysseyTextureEditorModule>("OdysseyTextureEditor");
+    FOdysseyTextureEditorModule* OdysseyTextureEditorModule = &FModuleManager::GetModuleChecked<FOdysseyTextureEditorModule>("OdysseyTextureEditor");
     OdysseyTextureEditorModule->CreateOdysseyTextureEditor( { texture } );
 }
 
