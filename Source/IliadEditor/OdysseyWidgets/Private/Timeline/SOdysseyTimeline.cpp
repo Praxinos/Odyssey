@@ -5,7 +5,7 @@
 
 #include "Fonts/FontMeasure.h"
 #include "Widgets/Layout/SGridPanel.h"
-#include "OdysseyStyleSet.h"
+#include "OdysseyStyle.h"
 
 //////////////////////////////////////////////////////////////////////////
 // SOdysseyTimeline

@@ -16,7 +16,7 @@
 #include "Widgets/Input/SNumericEntryBox.h"
 #include "Math/UnitConversion.h"
 // From module OdysseyStyle
-#include "OdysseyStyleSet.h"
+#include "OdysseyStyle.h"
 // From module OdysseyVector
 #include "OdysseyVectorLayer.h"
 #include "OdysseyVectorCell.h"

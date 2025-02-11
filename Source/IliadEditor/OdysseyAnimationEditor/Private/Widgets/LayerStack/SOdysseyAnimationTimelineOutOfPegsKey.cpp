@@ -3,7 +3,7 @@
 
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineOutOfPegsKey.h"
 #include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
-#include "OdysseyStyleSet.h"
+#include "OdysseyStyle.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineSection.h"
 #include "LayerStack/Cells/OdysseyAnimationCell.h"

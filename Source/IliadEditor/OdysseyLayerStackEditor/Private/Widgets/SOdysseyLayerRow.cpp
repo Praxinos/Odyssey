@@ -3,7 +3,7 @@
 
 #include "Widgets/SOdysseyLayerRow.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
-#include "OdysseyStyleSet.h"
+#include "OdysseyStyle.h"
 #include "Widgets/Text/SInlineEditableTextBlock.h"
 #include "Framework/Commands/GenericCommands.h"
 #include "Widgets/SOdysseyLayerStackTreeView.h"

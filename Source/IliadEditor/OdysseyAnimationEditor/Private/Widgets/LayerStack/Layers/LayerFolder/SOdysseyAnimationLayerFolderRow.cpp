@@ -5,7 +5,7 @@
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "SEnumCombo.h"
 #include "Widgets/Input/SNumericEntryBox.h"
-#include "OdysseyStyleSet.h"
+#include "OdysseyStyle.h"
 #include "LayerStack/Layers/LayerFolder/OdysseyAnimationLayerFolder.h"
 #include "Widgets/LayerStack/SOdysseyAnimationLayerStack.h"
 #include "Widgets/Input/NumericTypeInterface.h"

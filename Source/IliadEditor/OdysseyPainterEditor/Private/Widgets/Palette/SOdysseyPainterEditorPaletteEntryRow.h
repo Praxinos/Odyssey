@@ -5,7 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "Widgets/Palette/SOdysseyPainterEditorPaletteEntryRow.h"
-#include "OdysseyStyleSet.h"
+#include "OdysseyStyle.h"
 
 class UOdysseyPaletteEntry;
 

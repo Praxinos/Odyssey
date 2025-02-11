@@ -3,7 +3,7 @@
 
 #include "Widgets/LayerStack/Layers/LayerImageRaster/SOdysseyAnimationLayerImageRasterRow.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
-#include "OdysseyStyleSet.h"
+#include "OdysseyStyle.h"
 #include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
 #include "Widgets/LayerStack/Layers/LayerImageRaster/SOdysseyAnimationLayerImageRasterTimeline.h"
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineLightTableKey.h"

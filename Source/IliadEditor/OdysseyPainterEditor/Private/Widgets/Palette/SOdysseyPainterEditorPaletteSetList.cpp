@@ -4,7 +4,7 @@
 #include "Widgets/Palette/SOdysseyPainterEditorPaletteSetList.h"
 
 #include "OdysseyPalette.h"
-#include "OdysseyStyleSet.h"
+#include "OdysseyStyle.h"
 #include "Palette/OdysseyPaletteEntryColor.h"
 #include "Palette/OdysseyPaletteEntryFolder.h"
 

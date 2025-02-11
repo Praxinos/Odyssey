@@ -9,7 +9,7 @@
 #include "OdysseyLayerStack.h"
 
 #include "Widgets/Text/SInlineEditableTextBlock.h"
-#include "OdysseyStyleSet.h"
+#include "OdysseyStyle.h"
 #include "OdysseyPainterEditor.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
 // from module OdysseyVector

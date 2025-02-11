@@ -9,7 +9,7 @@
 #include "OdysseyTextureEditorModule.h"
 #include "OdysseyTextureEditorSettings.h"
 #include "OdysseyTexture.h"
-#include "OdysseyStyleSet.h"
+#include "OdysseyStyle.h"
 
 #define LOCTEXT_NAMESPACE "TextureEditor"
 

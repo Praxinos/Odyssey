@@ -4,7 +4,7 @@
 #include "Widgets/LayerStack/Cells/SOdysseyAnimationCell.h"
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
 #include "AnimationEditor/OdysseyAnimationEditorProjectSettings.h"
-#include "OdysseyStyleSet.h"
+#include "OdysseyStyle.h"
 #include "LayerStack/OdysseyAnimationLayerStack.h"
 #include "LayerStack/Cells/OdysseyAnimationCellSelection.h"
 

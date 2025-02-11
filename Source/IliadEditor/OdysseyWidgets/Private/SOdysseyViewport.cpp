@@ -17,7 +17,7 @@
 #include "Widgets/Input/NumericUnitTypeInterface.inl"
 #include "FOdysseySceneViewport.h"
 #include "Widgets/Input/SNumericEntryBox.h"
-#include "OdysseyStyleSet.h"
+#include "OdysseyStyle.h"
 #include "Math/OdysseyMathUtils.h"
 
 #include <ULIS>

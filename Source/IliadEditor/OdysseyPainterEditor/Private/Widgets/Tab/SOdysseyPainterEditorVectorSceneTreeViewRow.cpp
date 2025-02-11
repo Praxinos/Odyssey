@@ -3,7 +3,7 @@
 
 #include "Widgets/Tab/SOdysseyPainterEditorVectorSceneTreeViewRow.h"
 #include "Widgets/Text/SInlineEditableTextBlock.h"
-#include "OdysseyStyleSet.h"
+#include "OdysseyStyle.h"
 #include "OdysseyVector.h"
 #include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyVectorLayer.h"

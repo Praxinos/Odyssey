@@ -8,7 +8,7 @@
 #include "TrackEditors/SubTrackEditorBase.h"
 #include "OdysseyAnimationTimelineSectionEditor.h"
 #include "OdysseyAnimationComponent.h"
-#include "OdysseyStyleSet.h"
+#include "OdysseyStyle.h"
 #include "OdysseyAnimation.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "OdysseyAnimationTimelineTrack.h"

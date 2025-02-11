@@ -6,7 +6,7 @@
 #include "OdysseyPixelFormat.h"
 #include "ULISEventBuilder.h"
 #include "ULISLoaderModule.h"
-#include "OdysseyStyleSet.h"
+#include "OdysseyStyle.h"
 #include "OdysseyMediaRaster.h"
 #include "OdysseyRasterBlock.h"
 #include "OdysseyRasterBlockMutator.h"

@@ -3,7 +3,7 @@
 
 #include "Widgets/Palette/SOdysseyPainterEditorPaletteRow.h"
 
-#include "OdysseyStyleSet.h"
+#include "OdysseyStyle.h"
 #include "OdysseyPalette.h"
 #include "Widgets/SOdysseyPaletteSetComboBox.h"
 

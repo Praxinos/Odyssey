@@ -5,7 +5,7 @@
 
 #include "Widgets/Colors/SColorBlock.h"
 #include "Palette/OdysseyPaletteEntryColor.h"
-#include "OdysseyStyleSet.h"
+#include "OdysseyStyle.h"
 
 //CONSTRUCTION/DESTRUCTION----------------------------------------------- SMultiColumnTableRow
 void SOdysseyPainterEditorPaletteColorRow::Construct(const FArguments& InArgs, const TSharedRef<STableViewBase>& iTreeView)

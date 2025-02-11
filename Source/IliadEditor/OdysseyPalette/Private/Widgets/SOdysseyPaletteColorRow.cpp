@@ -6,7 +6,7 @@
 #include "Framework/Application/SlateApplication.h"
 #include "Layout/WidgetPath.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
-#include "OdysseyStyleSet.h"
+#include "OdysseyStyle.h"
 #include "SOdysseyPaletteEntryRow.h"
 #include "Widgets/Colors/SColorPicker.h"
 #include "OdysseyPaletteEntryColor.h"

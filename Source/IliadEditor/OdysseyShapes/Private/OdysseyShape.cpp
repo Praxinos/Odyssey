@@ -5,7 +5,7 @@
 #include "OdysseyHUDElement.h"
 #include "DetailWidgetRow.h"
 #include "Widgets/Input/SSegmentedControl.h"
-#include "OdysseyStyleSet.h"
+#include "OdysseyStyle.h"
 #include "IDetailChildrenBuilder.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyShapes"

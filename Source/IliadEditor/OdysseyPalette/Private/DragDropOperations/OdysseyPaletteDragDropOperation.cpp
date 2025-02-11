@@ -5,7 +5,7 @@
 
 #include "OdysseyPalette.h"
 #include "OdysseyPaletteEntry.h"
-#include "OdysseyStyleSet.h"
+#include "OdysseyStyle.h"
 #include "Widgets/Images/SImage.h"
 #include "Widgets/Text/STextBlock.h"
 

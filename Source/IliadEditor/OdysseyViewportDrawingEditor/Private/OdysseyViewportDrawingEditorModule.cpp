@@ -4,7 +4,7 @@
 #include "OdysseyViewportDrawingEditorModule.h"
 #include "Modules/ModuleManager.h"
 #include "Textures/SlateIcon.h"
-#include "OdysseyStyleSet.h"
+#include "OdysseyStyle.h"
 #include "EditorModeRegistry.h"
 #include "EditorModes.h"
 #include "OdysseyViewportDrawingEditorEdMode.h"

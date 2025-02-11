@@ -7,7 +7,7 @@
 #include "OdysseyAnimation.h"
 #include "OdysseyAnimationPlayer.h"
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineScrollBox.h"
-#include "OdysseyStyleSet.h"
+#include "OdysseyStyle.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "OdysseyAnimationProxy.h"
 #include "OdysseyAnimationEditorUserSettings.h"

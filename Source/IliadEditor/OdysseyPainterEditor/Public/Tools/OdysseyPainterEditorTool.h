@@ -7,7 +7,7 @@
 #include "Framework/MultiBox/MultiBoxExtender.h"
 #include "ToolMenuOwner.h"
 #include "Input/OdysseyPoint.h"
-#include "OdysseyStyleSet.h"
+#include "OdysseyStyle.h"
 #include "OdysseyHUDSystem.h"
 #include "OdysseyPainterEditorToolContext.h"
 #include "OdysseyPainterEditorToolInputProcessor.h"

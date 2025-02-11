@@ -5,7 +5,7 @@
 #include "Widgets/LayerStack/SOdysseyAnimationLayerStack.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineLightTableHeader.h"
-#include "OdysseyStyleSet.h"
+#include "OdysseyStyle.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"

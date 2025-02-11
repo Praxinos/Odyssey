@@ -6,7 +6,7 @@
 #include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 #include "Math/UnitConversion.h"
-#include "OdysseyStyleSet.h"
+#include "OdysseyStyle.h"
 #include "Widgets/Input/NumericTypeInterface.h"
 #include "Widgets/Input/NumericUnitTypeInterface.inl"
 #include "Widgets/Input/SNumericEntryBox.h"

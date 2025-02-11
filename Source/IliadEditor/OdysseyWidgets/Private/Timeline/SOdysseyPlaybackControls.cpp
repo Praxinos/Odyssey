@@ -3,7 +3,7 @@
 
 #include "SOdysseyPlaybackControls.h"
 
-#include "OdysseyStyleSet.h"
+#include "OdysseyStyle.h"
 
 
 void
