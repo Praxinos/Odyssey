@@ -43,7 +43,7 @@ private:
     EVisibility GetTreeViewVisibility() const;
 
     void OnPaletteCurrentSetSelected(int iSet);
-    void OnPaletteCurrentColorEntrySelected(UOdysseyPaletteEntryColor* iEntry);
+    void OnPaletteCurrentColorEntryChanged(UOdysseyPaletteEntryColor* iEntry);
 
     TSharedRef<SWidget> MakeCurrentColorEntryWidget();
 

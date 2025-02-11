@@ -78,6 +78,7 @@
 #include "Framework/Commands/GenericCommands.h"
 #include "PainterEditor/OdysseyPainterEditorToolMenuContext.h"
 #include "FileHelpers.h"
+#include "PainterEditor/OdysseyPainterEditorPaletteSet.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -855,8 +856,8 @@ void
 FOdysseyPainterEditor::PaintColor(const FOdysseyBrushColor& iColor, bool iIsCommit)
 {
     mPaintColor = iColor;
-    mPaletteCurrentColorEntry = nullptr;
-    mPaletteCurrentSet = 0;
+    mCurrentPaletteEntryColor = nullptr;
+    mCurrentPaletteSet = 0;
 
     //PATCH: should be automatic in the new drawing Tool, fix it asap
     if (iIsCommit)
@@ -2951,48 +2952,95 @@ FOdysseyPainterEditor::AddReferencedObjects(FReferenceCollector& Collector)
         Collector.AddReferencedObject(tool);
     }
 
-    Collector.AddReferencedObject(mPalette);
-    Collector.AddReferencedObject(mPaletteCurrentColorEntry);
+    for (TSharedPtr<FOdysseyPainterEditorPaletteSet> paletteSet : mPaletteSets)
+    {
+        UOdysseyPalette* palette = paletteSet->GetPalette();
+        Collector.AddReferencedObject(palette);
+    }
+
+    Collector.AddReferencedObject(mCurrentPaletteEntryColor);
 }
 
-UOdysseyPalette*
-FOdysseyPainterEditor::GetPalette() const
+const TArray<TSharedPtr<FOdysseyPainterEditorPaletteSet>>&
+FOdysseyPainterEditor::GetPaletteSets() const
 {
-    return mPalette;
+    return mPaletteSets;
 }
 
 UOdysseyPaletteEntryColor*
-FOdysseyPainterEditor::GetPaletteCurrentColorEntry() const
+FOdysseyPainterEditor::GetCurrentPaletteColorEntry() const
 {
-    return mPaletteCurrentColorEntry;
+    return mCurrentPaletteEntryColor;
 }
 
 int
-FOdysseyPainterEditor::GetPaletteCurrentSet() const
+FOdysseyPainterEditor::GetCurrentPaletteSet() const
 {
-    return mPaletteCurrentSet;
+    return mCurrentPaletteSet;
 }
 
 void
-FOdysseyPainterEditor::SetPalette(UOdysseyPalette* iPalette)
+FOdysseyPainterEditor::AddPaletteSet(TSharedPtr<FOdysseyPainterEditorPaletteSet> iPaletteSet)
 {
-    if (mPalette == iPalette)
-        return;
-
-    mPalette = iPalette;
-    mPaletteCurrentColorEntry = nullptr;
-    mPaletteCurrentSet = 0;
+    mPaletteSets.Add(iPaletteSet);
 }
 
 void
-FOdysseyPainterEditor::SetPaletteCurrentColorEntry(UOdysseyPaletteEntryColor* iEntry)
+FOdysseyPainterEditor::RemovePaletteSet(TSharedPtr<FOdysseyPainterEditorPaletteSet> iPaletteSet)
 {
-    if (!mPalette)
-        return;
+    mPaletteSets.Remove(iPaletteSet);
 
-    if(iEntry && mPaletteCurrentSet >= 0 && mPaletteCurrentSet < mPalette->GetSets().Num())
+    if (mCurrentPaletteEntryColor)
     {
-        FColor color = iEntry->GetColor(mPaletteCurrentSet);
+        bool shouldReset = !mPaletteSets.ContainsByPredicate(
+            [this](TSharedPtr<FOdysseyPainterEditorPaletteSet> iPaletteSet)
+            {
+                return iPaletteSet->GetPalette() == mCurrentPaletteEntryColor->GetPalette() && iPaletteSet->GetSet() == mCurrentPaletteSet;
+            }
+        );
+        if (shouldReset)
+        {
+            mCurrentPaletteEntryColor = nullptr;
+            mCurrentPaletteSet = 0;
+        }
+    }
+}
+
+/* void
+FOdysseyPainterEditor::SetPaletteSet(int iIndex, const FOdysseyPainterEditorPaletteSet& iPaletteSet)
+{
+    if (iIndex < 0 || iIndex >= mPaletteSets.Num())
+        return;
+
+    mPaletteSets[iIndex] = iPaletteSet;
+
+    if (mPaletteCurrentEntryColor.GetEntry() && !mPaletteSets.Contains(mPaletteCurrentEntryColor.GetPaletteSet()))
+    {
+        UOdysseyPalette* palette = mPaletteSets[iIndex].GetPalette();
+        if (palette->ContainsEntry(mPaletteCurrentEntryColor.GetEntry()))
+        {
+            SetPaletteCurrentColorEntry(FOdysseyPainterEditorPaletteEntryColor(mPaletteCurrentEntryColor.GetEntry(), mPaletteSets[iIndex].GetSet()));
+        }
+        else
+        {
+            mPaletteCurrentEntryColor.Reset();
+        }
+    }
+} */
+
+void
+FOdysseyPainterEditor::SetCurrentPaletteColorEntry(UOdysseyPaletteEntryColor* iEntry, int iSet)
+{
+    if (!iEntry)
+    {
+        mCurrentPaletteEntryColor = iEntry;
+        return;
+    }
+
+    UOdysseyPalette* palette = iEntry->GetPalette();
+    if(palette && iSet >= 0 && iSet < palette->GetSets().Num())
+    {
+        FColor color = iEntry->GetColor(iSet);
         ::ULIS::FColor ulisColor = ::ULIS::FColor::FromRGBA8(color.R, color.G, color.B, color.A);
 
         mPaintColor = ulisColor;
@@ -3000,28 +3048,8 @@ FOdysseyPainterEditor::SetPaletteCurrentColorEntry(UOdysseyPaletteEntryColor* iE
         //PATCH: should be automatic in the new drawing Tool, fix it asap
         FOdysseyObjectEditorUtils::SetPropertyValue(GetRasterDrawingTool()->GetBrushOptions(), GET_MEMBER_NAME_CHECKED(UOdysseyBrushOptions, Color), mPaintColor);
     }
-
-    mPaletteCurrentColorEntry = iEntry;
-}
-
-void
-FOdysseyPainterEditor::SetPaletteCurrentSet(int iSet)
-{
-    if (!mPalette)
-        return;
-
-    if(mPaletteCurrentColorEntry && iSet >= 0 && iSet < mPalette->GetSets().Num())
-    {
-        FColor color = mPaletteCurrentColorEntry->GetColor(iSet);
-        ::ULIS::FColor ulisColor = ::ULIS::FColor::FromRGBA8(color.R, color.G, color.B, color.A);
-
-        mPaintColor = ulisColor;
-
-        //PATCH: should be automatic in the new drawing Tool, fix it asap
-        FOdysseyObjectEditorUtils::SetPropertyValue(GetRasterDrawingTool()->GetBrushOptions(), GET_MEMBER_NAME_CHECKED(UOdysseyBrushOptions, Color), mPaintColor);
-    }
-
-    mPaletteCurrentSet = iSet;
+    mCurrentPaletteEntryColor = iEntry;
+    mCurrentPaletteSet = iSet;
 }
 
 #undef LOCTEXT_NAMESPACE

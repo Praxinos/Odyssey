@@ -378,13 +378,8 @@ UOdysseyPainterEditorVectorPaintBucketTool::SetBucketColor( FOdysseyVectorBucket
 
         case eBucketColorMode::Palette:
         {
-            UOdysseyPaletteEntryColor* paletteEntry = GetEditor()->GetPaletteCurrentColorEntry();
-            int paletteSet = GetEditor()->GetPaletteCurrentSet();
-            if ( paletteEntry )
-            {
-                iBucket->SetPaletteEntry( paletteEntry );
-                iBucket->SetPaletteSet( paletteSet );
-            }
+            iBucket->SetPaletteEntry( GetEditor()->GetCurrentPaletteColorEntry() );
+            iBucket->SetPaletteSet( GetEditor()->GetCurrentPaletteSet() );
         }
         break;
 

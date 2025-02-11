@@ -20,7 +20,7 @@ public:
 
 public:
     SLATE_BEGIN_ARGS(SOdysseyPaletteSetComboBox)
-        : _IsReadOnly(false)
+        : _IsReadOnly(true)
         {}
         SLATE_ARGUMENT(bool, IsReadOnly)
         SLATE_ATTRIBUTE(UOdysseyPalette*, Palette)

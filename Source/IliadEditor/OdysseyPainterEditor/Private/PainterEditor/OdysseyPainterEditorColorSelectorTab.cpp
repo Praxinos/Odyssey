@@ -9,6 +9,7 @@
 #include "Widgets/Color/SOdysseyAdvancedColorWheel.h"
 #include "Widgets/Color/SOdysseyColorSliders.h"
 #include "Widgets/Color/SOdysseyColorHexadecimal.h"
+#include "Widgets/Palette/SOdysseyPainterEditorPaletteSetList.h"
 #include "SOdysseyPalette.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
@@ -232,14 +233,14 @@ FOdysseyPainterEditorColorSelectorTab::CreateWidget()
             ]
             +SVerticalBox::Slot()
             [
-                SNew( SOdysseyPalette )
-                .Visibility(this, &FOdysseyPainterEditorColorSelectorTab::GetColorPaletteVisibility)
-                .Palette(this, &FOdysseyPainterEditorColorSelectorTab::GetPalette)
-                .CurrentColorEntry(this, &FOdysseyPainterEditorColorSelectorTab::GetPaletteCurrentColorEntry)
-                .CurrentSet(this, &FOdysseyPainterEditorColorSelectorTab::GetPaletteCurrentSet)
-                .OnPaletteChanged(this, &FOdysseyPainterEditorColorSelectorTab::OnPaletteChanged)
-                .OnCurrentColorEntrySelected(this, &FOdysseyPainterEditorColorSelectorTab::OnPaletteCurrentColorEntrySelected)
-                .OnCurrentSetSelected(this, &FOdysseyPainterEditorColorSelectorTab::OnPaletteCurrentSetSelected)
+                SNew(SOdysseyPainterEditorPaletteSetList)
+                .PaletteSets(this, &FOdysseyPainterEditorColorSelectorTab::GetPaletteSets)
+                .CurrentColorEntry(this, &FOdysseyPainterEditorColorSelectorTab::GetCurrentPaletteColorEntry)
+                .CurrentSet(this, &FOdysseyPainterEditorColorSelectorTab::GetCurrentPaletteSet)
+                //.OnPaletteSetChanged(this, &FOdysseyPainterEditorColorSelectorTab::OnPaletteSetChanged)
+                .OnAddPaletteSet(this, &FOdysseyPainterEditorColorSelectorTab::OnAddPaletteSet)
+                .OnRemovePaletteSet(this, &FOdysseyPainterEditorColorSelectorTab::OnRemovePaletteSet)
+                .OnCurrentColorEntryChanged(this, &FOdysseyPainterEditorColorSelectorTab::OnPaletteCurrentColorEntryChanged)
             ]
         ];
 }
@@ -369,22 +370,22 @@ FOdysseyPainterEditorColorSelectorTab::GetColorPaletteVisibility() const
 }
 
 
-UOdysseyPalette*
-FOdysseyPainterEditorColorSelectorTab::GetPalette() const
+TArray<TSharedPtr<FOdysseyPainterEditorPaletteSet>>
+FOdysseyPainterEditorColorSelectorTab::GetPaletteSets() const
 {
-    return mEditor->GetPalette();
+    return mEditor->GetPaletteSets();
 }
 
 UOdysseyPaletteEntryColor*
-FOdysseyPainterEditorColorSelectorTab::GetPaletteCurrentColorEntry() const
+FOdysseyPainterEditorColorSelectorTab::GetCurrentPaletteColorEntry() const
 {
-    return mEditor->GetPaletteCurrentColorEntry();
+    return mEditor->GetCurrentPaletteColorEntry();
 }
 
 int
-FOdysseyPainterEditorColorSelectorTab::GetPaletteCurrentSet() const
+FOdysseyPainterEditorColorSelectorTab::GetCurrentPaletteSet() const
 {
-    return mEditor->GetPaletteCurrentSet();
+    return mEditor->GetCurrentPaletteSet();
 }
 
 //--------------------------------------------------------------------------------------
@@ -432,21 +433,28 @@ FOdysseyPainterEditorColorSelectorTab::OnColorTypeChanged(EOdysseyPainterEditorC
 }
 
 void
-FOdysseyPainterEditorColorSelectorTab::OnPaletteChanged(UOdysseyPalette* iPalette) const
+FOdysseyPainterEditorColorSelectorTab::OnAddPaletteSet(TSharedPtr<FOdysseyPainterEditorPaletteSet> iPaletteSet)
 {
-    return mEditor->SetPalette(iPalette);
+    mEditor->AddPaletteSet(iPaletteSet);
 }
 
 void
-FOdysseyPainterEditorColorSelectorTab::OnPaletteCurrentColorEntrySelected(UOdysseyPaletteEntryColor* iEntry) const
+FOdysseyPainterEditorColorSelectorTab::OnRemovePaletteSet(TSharedPtr<FOdysseyPainterEditorPaletteSet> iPaletteSet)
 {
-    return mEditor->SetPaletteCurrentColorEntry(iEntry);
+    mEditor->RemovePaletteSet(iPaletteSet);
 }
 
-void
-FOdysseyPainterEditorColorSelectorTab::OnPaletteCurrentSetSelected(int iSet) const
+/* void
+FOdysseyPainterEditorColorSelectorTab::OnPaletteSetChanged(int iIndex, TSharedPtr<FOdysseyPainterEditorPaletteSet> iPaletteSet)
 {
-    return mEditor->SetPaletteCurrentSet(iSet);
+    mEditor->SetPaletteSet(iIndex, iPaletteSet);
+}
+*/
+
+void
+FOdysseyPainterEditorColorSelectorTab::OnPaletteCurrentColorEntryChanged(UOdysseyPaletteEntryColor* iEntry, int iSet)
+{
+    mEditor->SetCurrentPaletteColorEntry(iEntry, iSet);
 }
 
 #undef LOCTEXT_NAMESPACE

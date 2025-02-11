@@ -44,34 +44,24 @@ FOdysseyPainterEditorPaletteTab::GetId() const
 TSharedPtr<SWidget>
 FOdysseyPainterEditorPaletteTab::CreateWidget()
 {
-    return SNew( SOdysseyPalette )
+    /* return SNew( SOdysseyPalette )
         .Palette(this, &FOdysseyPainterEditorPaletteTab::GetPalette)
         .CurrentColorEntry(this, &FOdysseyPainterEditorPaletteTab::GetPaletteCurrentColorEntry)
         .CurrentSet(this, &FOdysseyPainterEditorPaletteTab::GetPaletteCurrentSet)
         .OnPaletteChanged(this, &FOdysseyPainterEditorPaletteTab::OnPaletteChanged)
         .OnCurrentColorEntrySelected(this, &FOdysseyPainterEditorPaletteTab::OnPaletteCurrentColorEntrySelected)
-        .OnCurrentSetSelected(this, &FOdysseyPainterEditorPaletteTab::OnPaletteCurrentSetSelected);
+        .OnCurrentSetSelected(this, &FOdysseyPainterEditorPaletteTab::OnPaletteCurrentSetSelected); */
+
+    return SNullWidget::NullWidget;
 }
 
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------- Public Getters
 
-UOdysseyPalette*
-FOdysseyPainterEditorPaletteTab::GetPalette() const
-{
-    return mEditor->GetPalette();
-}
-
-UOdysseyPaletteEntryColor*
+/*const FOdysseyPaletteSetEntryColor&
 FOdysseyPainterEditorPaletteTab::GetPaletteCurrentColorEntry() const
 {
     return mEditor->GetPaletteCurrentColorEntry();
-}
-
-int
-FOdysseyPainterEditorPaletteTab::GetPaletteCurrentSet() const
-{
-    return mEditor->GetPaletteCurrentSet();
 }
 
 void
@@ -90,7 +80,7 @@ void
 FOdysseyPainterEditorPaletteTab::OnPaletteCurrentSetSelected(int iSet) const
 {
     return mEditor->SetPaletteCurrentSet(iSet);
-}
+} */
 
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------- Event Listeners

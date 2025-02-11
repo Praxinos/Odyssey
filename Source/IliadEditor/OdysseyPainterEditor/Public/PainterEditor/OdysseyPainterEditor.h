@@ -41,7 +41,7 @@ class UOdysseyLayerStack;
 class FOdysseyMeshSelector;
 class FOdysseyPainterEditorRasterSelection;
 class FOdysseyVectorGroupPaint;
-class UOdysseyPalette;
+class FOdysseyPainterEditorPaletteSet;
 class UOdysseyPaletteEntryColor;
 
 /**
@@ -158,13 +158,15 @@ public:
     virtual UOdysseyLayerStack*                              LayerStack() const;
     virtual TSharedPtr<FOdysseyPainterEditorRasterSelection> RasterSelection();
 
-    UOdysseyPalette* GetPalette() const;
-    UOdysseyPaletteEntryColor* GetPaletteCurrentColorEntry() const;
-    int GetPaletteCurrentSet() const;
+    const TArray<TSharedPtr<FOdysseyPainterEditorPaletteSet>>& GetPaletteSets() const;
+    //const FOdysseyPainterEditorPaletteEntryColor& GetPaletteCurrentColorEntry() const;
+    UOdysseyPaletteEntryColor* GetCurrentPaletteColorEntry() const;
+    int GetCurrentPaletteSet() const;
 
-    void SetPalette(UOdysseyPalette* iPalette);
-    void SetPaletteCurrentColorEntry(UOdysseyPaletteEntryColor* iEntry);
-    void SetPaletteCurrentSet(int iSet);
+    void AddPaletteSet(TSharedPtr<FOdysseyPainterEditorPaletteSet> iPaletteSet);
+    void RemovePaletteSet(TSharedPtr<FOdysseyPainterEditorPaletteSet> iPaletteSet);
+
+    void SetCurrentPaletteColorEntry(UOdysseyPaletteEntryColor* iEntry, int iSet);
 
     void SetColorType(EOdysseyPainterEditorColorType iType);
 
@@ -341,9 +343,9 @@ protected:
 
     FName mToolbarMenuName;
 
-    UOdysseyPalette* mPalette = nullptr;
-    UOdysseyPaletteEntryColor* mPaletteCurrentColorEntry = nullptr;
-    int mPaletteCurrentSet = 0;
+    TArray<TSharedPtr<FOdysseyPainterEditorPaletteSet>> mPaletteSets;
+    UOdysseyPaletteEntryColor* mCurrentPaletteEntryColor = nullptr;
+    int mCurrentPaletteSet = 0;
 };
 
 template <class T>

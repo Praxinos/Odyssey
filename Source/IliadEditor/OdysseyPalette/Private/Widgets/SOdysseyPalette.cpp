@@ -16,13 +16,7 @@ SLATE_IMPLEMENT_WIDGET(SOdysseyPalette)
 void
 SOdysseyPalette::PrivateRegisterAttributes(FSlateAttributeInitializer& AttributeInitializer)
 {
-    SLATE_ADD_MEMBER_ATTRIBUTE_DEFINITION(AttributeInitializer, mPaletteAttribute, EInvalidateWidgetReason::None)
-    .OnValueChanged(FSlateAttributeDescriptor::FAttributeValueChangedDelegate::CreateLambda(
-        [](SWidget& Widget)
-        {
-            static_cast<SOdysseyPalette&>(Widget).OnPaletteChanged();
-        }
-    ));
+    SLATE_ADD_MEMBER_ATTRIBUTE_DEFINITION(AttributeInitializer, mPalette, EInvalidateWidgetReason::None);
 }
 
 /////////////////////////////////////////////////////
@@ -31,44 +25,19 @@ SOdysseyPalette::PrivateRegisterAttributes(FSlateAttributeInitializer& Attribute
 //----------------------------------------------------------- Construction / Destruction
 
 SOdysseyPalette::SOdysseyPalette()
-    : mPaletteAttribute(*this, nullptr)
-    , mPalette(nullptr)
+    : mPalette(*this, nullptr)
 {
 }
 
 void SOdysseyPalette::Construct(const FArguments& InArgs)
 {
-    mPaletteAttribute.Assign(*this, InArgs._Palette);
-    mPalette = mPaletteAttribute.Get();
-    mOnPaletteChanged = InArgs._OnPaletteChanged;
-    mAssetThumbnailPool = MakeShareable(new FAssetThumbnailPool(1024));
-
-    TArray<const UClass*> allowedClasses;
-    allowedClasses.Add(UOdysseyPalette::StaticClass());
+    mPalette.Assign(*this, InArgs._Palette);
 
     ChildSlot
     [
-        SNew(SScrollBox)
-        .Orientation(Orient_Vertical)
-        .ScrollBarAlwaysVisible(false)
-        + SScrollBox::Slot()
-        [
-            SNew(SObjectPropertyEntryBox)
-            .AllowedClass(UOdysseyPalette::StaticClass())
-            .ObjectPath(this, &SOdysseyPalette::ObjectPath)
-            .ThumbnailPool(mAssetThumbnailPool)
-            .OnObjectChanged(this, &SOdysseyPalette::OnObjectChanged)
-            .AllowClear(true)
-            .AllowCreate(true)
-            .DisplayUseSelected(false)
-            .DisplayBrowse(false)
-            .DisplayThumbnail(false)
-            .EnableContentPicker(true)
-            .DisplayCompactSize(true)
-            .DisplayThumbnail(true)
-            .ThumbnailSizeOverride(FIntPoint(32, 32))
-        ]
-        + SScrollBox::Slot()
+        SNew(SVerticalBox)
+        + SVerticalBox::Slot()
+        .AutoHeight()
         [
             SNew(SHorizontalBox)
             .Visibility(this, &SOdysseyPalette::GetTreeViewVisibility)
@@ -88,13 +57,14 @@ void SOdysseyPalette::Construct(const FArguments& InArgs)
                 .OnCurrentSetSelected(InArgs._OnCurrentSetSelected)
             ]
         ]
-        + SScrollBox::Slot()
+        + SVerticalBox::Slot()
+        .AutoHeight()
         [
             SNew(SOdysseyPaletteTreeView)
             .Visibility(this, &SOdysseyPalette::GetTreeViewVisibility)
             .Palette(InArgs._Palette)
             .CurrentColorEntry(InArgs._CurrentColorEntry)
-            .OnCurrentColorEntrySelected(InArgs._OnCurrentColorEntrySelected)
+            .OnCurrentColorEntryChanged(InArgs._OnCurrentColorEntryChanged)
         ]
     ];
 }
@@ -105,37 +75,7 @@ void SOdysseyPalette::Construct(const FArguments& InArgs)
 EVisibility
 SOdysseyPalette::GetTreeViewVisibility() const
 {
-    return mPalette ? EVisibility::Visible : EVisibility::Collapsed;
-}
-
-//--------------------------------------------------------------------------------------
-//----------------------------------------------------------- Private internal callbacks
-
-void
-SOdysseyPalette::OnObjectChanged(const FAssetData& AssetData)
-{
-    UOdysseyPalette* palette = nullptr;
-    if (AssetData.IsValid())
-    {
-        palette = CastChecked< UOdysseyPalette >(AssetData.GetAsset());
-    }
-
-    mOnPaletteChanged.ExecuteIfBound(palette);
-}
-
-FString
-SOdysseyPalette::ObjectPath() const
-{
-    if (!mPalette)
-        return FString();
-
-    return mPalette->GetPathName();
-}
-
-void
-SOdysseyPalette::OnPaletteChanged()
-{
-    mPalette = mPaletteAttribute.Get();
+    return mPalette.Get() ? EVisibility::Visible : EVisibility::Collapsed;
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -21,7 +21,7 @@ class ODYSSEYPALETTE_API SOdysseyPaletteTreeView
     SLATE_DECLARE_WIDGET(SOdysseyPaletteTreeView, STreeView<UOdysseyPaletteEntry*>)
 
 public:
-    DECLARE_DELEGATE_OneParam(FOnCurrentColorEntrySelected, UOdysseyPaletteEntryColor*)
+    DECLARE_DELEGATE_OneParam(FOnCurrentColorEntryChanged, UOdysseyPaletteEntryColor*)
 
 public:
     SLATE_BEGIN_ARGS(SOdysseyPaletteTreeView)
@@ -33,7 +33,7 @@ public:
         SLATE_ATTRIBUTE(UOdysseyPalette*, Palette)
         SLATE_ATTRIBUTE(int, Set)
         SLATE_ATTRIBUTE(UOdysseyPaletteEntryColor*, CurrentColorEntry)
-        SLATE_EVENT(FOnCurrentColorEntrySelected, OnCurrentColorEntrySelected)
+        SLATE_EVENT(FOnCurrentColorEntryChanged, OnCurrentColorEntryChanged)
     SLATE_END_ARGS()
 
 public:
@@ -177,7 +177,7 @@ protected:
     UOdysseyPaletteEntryColor* mCurrentColorEntry;
     TAttribute<int> mSet;
     UOdysseyPaletteEntry* mSelectedEntry;
-    FOnCurrentColorEntrySelected mOnCurrentColorEntrySelected;
+    FOnCurrentColorEntryChanged mOnCurrentColorEntryChanged;
     TSharedPtr<UE::Slate::Containers::TObservableArray<UOdysseyPaletteEntry*>> mItemsSource;
 
     TSharedRef<FUICommandList> mCommandList;

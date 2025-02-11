@@ -72,7 +72,7 @@ void SOdysseyPaletteTreeView::Construct(const FArguments& InArgs)
     mCurrentColorEntry = mCurrentColorEntryAttribute.Get();
     mSet = InArgs._Set;
     mSelectedEntry = mCurrentColorEntry;
-    mOnCurrentColorEntrySelected = InArgs._OnCurrentColorEntrySelected;
+    mOnCurrentColorEntryChanged = InArgs._OnCurrentColorEntryChanged;
 
     mItemsSource = MakeShared<UE::Slate::Containers::TObservableArray<UOdysseyPaletteEntry*>>();
     RefreshItemsSource();
@@ -560,11 +560,11 @@ SOdysseyPaletteTreeView::OnSelectionChanged(UOdysseyPaletteEntry* iEntry, ESelec
 
     if (!iEntry || !iEntry->IsA<UOdysseyPaletteEntryColor>())
     {
-        mOnCurrentColorEntrySelected.ExecuteIfBound(nullptr);
+        mOnCurrentColorEntryChanged.ExecuteIfBound(nullptr);
         return;
     }
 
-    mOnCurrentColorEntrySelected.ExecuteIfBound(Cast<UOdysseyPaletteEntryColor>(iEntry));
+    mOnCurrentColorEntryChanged.ExecuteIfBound(Cast<UOdysseyPaletteEntryColor>(iEntry));
 }
 
 void

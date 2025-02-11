@@ -16,8 +16,7 @@ class ODYSSEYPALETTE_API SOdysseyPalette : public SCompoundWidget
     SLATE_DECLARE_WIDGET(SOdysseyPalette, SCompoundWidget)
 
 public:
-    DECLARE_DELEGATE_OneParam(FOnPaletteChanged, UOdysseyPalette*)
-    DECLARE_DELEGATE_OneParam(FOnCurrentColorEntrySelected, UOdysseyPaletteEntryColor*)
+    DECLARE_DELEGATE_OneParam(FOnCurrentColorEntryChanged, UOdysseyPaletteEntryColor*)
     DECLARE_DELEGATE_OneParam(FOnCurrentSetSelected, int)
 
 public:
@@ -28,8 +27,7 @@ public:
         SLATE_ATTRIBUTE(UOdysseyPalette*, Palette)
         SLATE_ATTRIBUTE(UOdysseyPaletteEntryColor*, CurrentColorEntry)
         SLATE_ATTRIBUTE(int, CurrentSet)
-        SLATE_EVENT(FOnPaletteChanged, OnPaletteChanged)
-        SLATE_EVENT(FOnCurrentColorEntrySelected, OnCurrentColorEntrySelected)
+        SLATE_EVENT(FOnCurrentColorEntryChanged, OnCurrentColorEntryChanged)
         SLATE_EVENT(FOnCurrentSetSelected, OnCurrentSetSelected)
     SLATE_END_ARGS()
 
@@ -38,26 +36,14 @@ public:
     void Construct(const FArguments& InArgs);
 
 public:
-    class UOdysseyPalette* GetPalette() const;
+    UOdysseyPalette* GetPalette() const;
     EVisibility GetTreeViewVisibility() const;
 
 private:
-    // Private internal callbacks
-    void OnObjectChanged(const FAssetData& AssetData);
-    FString ObjectPath() const;
-
-private:
-    class UOdysseyPaletteEntryColor* GetPaletteCurrentColorEntry() const;
-    void OnPaletteCurrentColorEntrySelected(class UOdysseyPaletteEntryColor* iEntry);
-
-private:
-    void OnPaletteChanged();
+    UOdysseyPaletteEntryColor* GetPaletteCurrentColorEntry() const;
+    void OnPaletteCurrentColorEntrySelected(UOdysseyPaletteEntryColor* iEntry);
 
 private:
     // Private data
-    TSharedPtr< FAssetThumbnailPool > mAssetThumbnailPool;
-
-    TSlateAttribute<UOdysseyPalette*> mPaletteAttribute;
-    UOdysseyPalette* mPalette;
-    FOnPaletteChanged mOnPaletteChanged;
+    TSlateAttribute<UOdysseyPalette*> mPalette;
 };

@@ -138,7 +138,7 @@ FOdysseyVectorObjectViewPaletteCustomization::GetPaletteEntryMenuContent()
             .Visibility(this, &FOdysseyVectorObjectViewPaletteCustomization::GetTreeViewVisibility)
             .Palette(this, &FOdysseyVectorObjectViewPaletteCustomization::GetPalette)
             .CurrentColorEntry(this, &FOdysseyVectorObjectViewPaletteCustomization::GetCurrentEntryColor)
-            .OnCurrentColorEntrySelected(this, &FOdysseyVectorObjectViewPaletteCustomization::OnPaletteCurrentColorEntrySelected)
+            .OnCurrentColorEntryChanged(this, &FOdysseyVectorObjectViewPaletteCustomization::OnPaletteCurrentColorEntryChanged)
         ];
 }
 
@@ -187,7 +187,7 @@ FOdysseyVectorObjectViewPaletteCustomization::OnPaletteCurrentSetSelected(int iS
 }
 
 void
-FOdysseyVectorObjectViewPaletteCustomization::OnPaletteCurrentColorEntrySelected(UOdysseyPaletteEntryColor* iEntry)
+FOdysseyVectorObjectViewPaletteCustomization::OnPaletteCurrentColorEntryChanged(UOdysseyPaletteEntryColor* iEntry)
 {
     mPaletteEntryHandle->SetValue(iEntry);
 }

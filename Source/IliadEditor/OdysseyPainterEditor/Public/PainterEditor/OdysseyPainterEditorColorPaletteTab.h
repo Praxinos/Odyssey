@@ -26,13 +26,12 @@ protected:
 
 protected:
     // Event Listeners
-    UOdysseyPalette* GetPalette() const;
-    UOdysseyPaletteEntryColor* GetPaletteCurrentColorEntry() const;
+    /*FOdysseyPaletteSetEntryColor& GetPaletteCurrentColorEntry() const;
     int GetPaletteCurrentSet() const;
 
     void OnPaletteChanged(UOdysseyPalette* iPalette) const;
     void OnPaletteCurrentColorEntrySelected(UOdysseyPaletteEntryColor* iEntry) const;
-    void OnPaletteCurrentSetSelected(int iSet) const;
+    void OnPaletteCurrentSetSelected(int iSet) const; */
 
 private:
     FOdysseyPainterEditor* mEditor;
