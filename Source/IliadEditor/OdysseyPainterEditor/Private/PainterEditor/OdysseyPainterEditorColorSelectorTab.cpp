@@ -234,6 +234,7 @@ FOdysseyPainterEditorColorSelectorTab::CreateWidget()
             +SVerticalBox::Slot()
             [
                 SNew(SOdysseyPainterEditorPaletteSetList)
+                .Visibility(this, &FOdysseyPainterEditorColorSelectorTab::GetColorPaletteVisibility)
                 .PaletteSets(this, &FOdysseyPainterEditorColorSelectorTab::GetPaletteSets)
                 .CurrentColorEntry(this, &FOdysseyPainterEditorColorSelectorTab::GetCurrentPaletteColorEntry)
                 .CurrentSet(this, &FOdysseyPainterEditorColorSelectorTab::GetCurrentPaletteSet)
