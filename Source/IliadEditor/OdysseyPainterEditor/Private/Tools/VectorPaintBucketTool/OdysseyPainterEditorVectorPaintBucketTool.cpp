@@ -354,7 +354,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseDragVector( FOdysseyVectorGro
 void
 UOdysseyPainterEditorVectorPaintBucketTool::SetBucketColor( FOdysseyVectorBucket* iBucket )
 {
-    eBucketColorMode bucketColorMode;
+    eBucketColorMode bucketColorMode = eBucketColorMode::SolidColor;
     switch( ColorMode )
     {
         case EPaintBucketToolColorMode::LinearGradient:

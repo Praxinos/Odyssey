@@ -87,7 +87,7 @@ UOdysseyPainterEditorVectorBaseTool::DoubleClicked()
 void
 UOdysseyPainterEditorVectorBaseTool::SetPathColor( FOdysseyVectorPath* iPath )
 {
-    eBucketColorMode colorMode;
+    eBucketColorMode colorMode = eBucketColorMode::SolidColor;
     switch( GetEditor()->GetColorType() )
     {
         case EOdysseyPainterEditorColorType::Raw:
