@@ -68,7 +68,6 @@ public class OdysseyPainterEditor : ModuleRules
 
         PublicDependencyModuleNames.AddRange(
              new string[] {
-                "OdysseyPaintEngine",
                 "OdysseyShapes",
                 "OdysseyVector",
                 "OdysseyPalette",

@@ -9,7 +9,7 @@
 #include "OdysseyBlendParameters.generated.h"
 
 USTRUCT()
-struct ODYSSEYPAINTENGINE_API FOdysseyBlendParameters
+struct ODYSSEYPAINTEREDITOR_API FOdysseyBlendParameters
 {
     GENERATED_BODY()
 

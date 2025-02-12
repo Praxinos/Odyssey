@@ -5,7 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.h"
-#include "OdysseyPaintEngine.h"
+#include "PaintEngine/OdysseyPaintEngine.h"
 
 #include "OdysseyPainterEditorVectorPaintBucketTool.generated.h"
 

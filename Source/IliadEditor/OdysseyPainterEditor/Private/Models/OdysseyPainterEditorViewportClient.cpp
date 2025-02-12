@@ -27,7 +27,7 @@
 #include "Widgets/SViewport.h"
 
 #include "IOdysseyStylusInputModule.h"
-#include "OdysseyPaintEngine.h"
+#include "PaintEngine/OdysseyPaintEngine.h"
 #include "OdysseyHUDSystem.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorSettings.h"

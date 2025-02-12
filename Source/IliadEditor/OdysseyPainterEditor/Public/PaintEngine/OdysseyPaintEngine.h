@@ -6,7 +6,7 @@
 #include "CoreMinimal.h"
 
 #include "ULISInvalidTileMap.h"
-#include "OdysseyBlendParameters.h"
+#include "PaintEngine/OdysseyBlendParameters.h"
 #include "OdysseyRasterBlockMutator.h"
 #include "Misc/ITransaction.h"
 
@@ -14,7 +14,7 @@
 
 class FOdysseyRasterBlock;
 
-class ODYSSEYPAINTENGINE_API FOdysseyPaintEngine
+class ODYSSEYPAINTEREDITOR_API FOdysseyPaintEngine
 {
 public:
     // Delegates

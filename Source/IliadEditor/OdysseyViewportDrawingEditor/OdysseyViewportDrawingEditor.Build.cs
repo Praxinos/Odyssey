@@ -78,7 +78,6 @@ public class OdysseyViewportDrawingEditor : ModuleRules
                 "OdysseyPainterEditor",
                 "OdysseyTextureEditor",
                 "OdysseyImaging",
-                "OdysseyPaintEngine",
                 "OdysseyStylusInput",
                 "OdysseyStyle",
                 "OdysseyAnimationTracks",

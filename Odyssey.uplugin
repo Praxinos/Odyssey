@@ -171,11 +171,6 @@
             "LoadingPhase": "Default"
         },
         {
-            "Name": "OdysseyPaintEngine",
-            "Type": "Editor",
-            "LoadingPhase": "Default"
-        },
-        {
             "Name": "OdysseyBrushEditor",
             "Type": "Editor",
             "LoadingPhase": "Default"

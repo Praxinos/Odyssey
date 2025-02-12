@@ -1,9 +1,9 @@
 // IDDN.FR.001.250001.006.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
 
-#include "OdysseyPaintEngine.h"
+#include "PaintEngine/OdysseyPaintEngine.h"
 
-#include "OdysseyBlendParameters.h"
+#include "PaintEngine/OdysseyBlendParameters.h"
 #include "OdysseyRasterBlock.h"
 #include "OdysseyRectUtils.h"
 #include "ULISLoaderModule.h"

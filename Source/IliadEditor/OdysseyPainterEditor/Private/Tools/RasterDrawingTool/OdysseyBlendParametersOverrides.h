@@ -7,7 +7,7 @@
 #include "OdysseyBrushAssetBase.h"
 #include "UObject/ObjectMacros.h"
 #include "Image/OdysseyBlendingMode.h"
-#include "OdysseyBlendParameters.h"
+#include "PaintEngine/OdysseyBlendParameters.h"
 #include "OdysseyBlendParametersOverrides.generated.h"
 
 /////////////////////////////////////////////////////
