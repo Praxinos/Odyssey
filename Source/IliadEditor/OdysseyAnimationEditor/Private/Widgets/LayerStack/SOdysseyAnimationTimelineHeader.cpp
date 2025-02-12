@@ -38,9 +38,6 @@ int32 SOdysseyAnimationTimelineHeader::OnPaint(const FPaintArgs& Args, const FGe
     const FLinearColor& backgroundColorEven = FOdysseyStyle::GetColor("TimelineHeader.backgroundColorEven");
     const FLinearColor& backgroundColorOdd = FOdysseyStyle::GetColor("TimelineHeader.backgroundColorOdd");
 
-    FAppStyle::GetBrush( TEXT( "ProgressBar.Background" ) );
-
-
     const UOdysseyAnimationEditorUserSettings* settings = UOdysseyAnimationEditorUserSettings::Get();
     int startFrame = settings->StartFrame;
 

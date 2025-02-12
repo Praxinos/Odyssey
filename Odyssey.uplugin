@@ -186,11 +186,6 @@
             "LoadingPhase": "Default"
         },
         {
-            "Name": "OdysseyShapes",
-            "Type": "Editor",
-            "LoadingPhase": "PreDefault"
-        },
-        {
             "Name": "OdysseyStylusInput",
             "Type": "Editor"
         },

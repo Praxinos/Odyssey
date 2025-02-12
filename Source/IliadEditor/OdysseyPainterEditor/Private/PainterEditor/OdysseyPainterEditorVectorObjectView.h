@@ -22,13 +22,13 @@ struct FPaletteEntrySelection
     GENERATED_BODY()
 
     UPROPERTY(EditAnywhere, Category=Appearance)
-    UOdysseyPalette* OdysseyPalette;
+    UOdysseyPalette* OdysseyPalette = nullptr;
 
     UPROPERTY(EditAnywhere, Category=Appearance, meta = (EditCondition = "OdysseyPalette != nullptr", EditConditionHides))
-    UOdysseyPaletteEntryColor* OdysseyPaletteEntryColor;
+    UOdysseyPaletteEntryColor* OdysseyPaletteEntryColor = nullptr;
 
     UPROPERTY(EditAnywhere, Category=Appearance, meta = (EditCondition = "OdysseyPalette != nullptr", EditConditionHides))
-    int OdysseyPaletteSet;
+    int OdysseyPaletteSet = 0;
 };
 
 UCLASS()

@@ -19,6 +19,8 @@
 #include "OdysseyMediaProvider.h"
 #include "OdysseyHUDElement.h"
 #include "OdysseyHUDSystem.h"
+#include "FreehandShape/Interpolation/OdysseyInterpolationBezier.h"
+#include "FreehandShape/Interpolation/OdysseyInterpolationCatmullRom.h"
 #include "FreehandShape/Interpolation/OdysseyInterpolationLine.h"
 #include "PainterEditor/OdysseyPainterEditorRasterSelection.h"
 

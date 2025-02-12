@@ -22,6 +22,8 @@
 #include "OdysseyPainterEditorSource.h"
 #include "OdysseyMediaProvider.h"
 #include "Models/OdysseyPainterEditorCommands.h"
+#include "FreehandShape/Interpolation/OdysseyInterpolationBezier.h"
+#include "FreehandShape/Interpolation/OdysseyInterpolationCatmullRom.h"
 #include "FreehandShape/Interpolation/OdysseyInterpolationLine.h"
 #include "FreehandShape/OdysseyFreehandShapeOverrides.h"
 #include "PainterEditor/OdysseyPainterEditorRasterSelection.h"

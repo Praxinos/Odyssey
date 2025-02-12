@@ -28,6 +28,9 @@ private:
     void RegisterLevelEditorLayoutExtensions();
     void UnregisterLevelEditorLayoutExtensions();
 
+    void RegisterDetailCustomizations();
+    void UnregisterDetailCustomization();
+
 private:
     FDelegateHandle mExtendLevelEditorLayout;
 };

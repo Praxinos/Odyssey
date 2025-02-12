@@ -132,6 +132,9 @@ UOdysseyBrushAssetBase::PostLoad()
     TMap<TObjectPtr<UClass>, TObjectPtr<UObject>> overrides;
     for (auto& element : EditorOverrides)
     {
+        if (!element.Value)
+            continue;
+
         overrides.Add(element.Value->GetClass(), element.Value);
     }
     EditorOverrides = overrides;

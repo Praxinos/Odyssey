@@ -68,7 +68,6 @@ public class OdysseyPainterEditor : ModuleRules
 
         PublicDependencyModuleNames.AddRange(
              new string[] {
-                "OdysseyShapes",
                 "OdysseyVector",
                 "OdysseyPalette",
                 "OdysseyMedia",
@@ -84,6 +83,7 @@ public class OdysseyPainterEditor : ModuleRules
                 Path.Combine(ModuleDirectory, "Private", "PainterEditor"),
                 Path.Combine(ModuleDirectory, "Private", "Settings"),
                 Path.Combine(ModuleDirectory, "Private", "Tools"),
+                Path.Combine(ModuleDirectory, "Private", "Shapes"),
             }
         );
 
@@ -92,6 +92,7 @@ public class OdysseyPainterEditor : ModuleRules
                 Path.Combine(ModuleDirectory, "Public", "PainterEditor"),
                 Path.Combine(ModuleDirectory, "Public", "Settings"),
                 Path.Combine(ModuleDirectory, "Public", "Tools"),
+                Path.Combine(ModuleDirectory, "Public", "Shapes"),
             }
         );
 
