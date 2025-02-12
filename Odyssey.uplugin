@@ -200,11 +200,6 @@
             "LoadingPhase": "Default"
         },
         {
-            "Name": "OdysseyModuleLoader",
-            "Type": "Editor",
-            "LoadingPhase": "Default"
-        },
-        {
             "Name": "OdysseyFile",
             "Type": "Editor",
             "LoadingPhase": "Default"
@@ -258,14 +253,12 @@
         {
             "Name": "OdysseyFlipbook",
             "Type": "Editor",
-            "LoadingPhase": "None",
-            "Comment": "Loaded by OdysseyModulesLoader at the PostDefault LoadingPhase if Paper2D is activated"
+            "LoadingPhase": "Default"
         },
         {
             "Name": "OdysseyFlipbookEditor",
             "Type": "Editor",
-            "LoadingPhase": "None",
-            "Comment": "Loaded by OdysseyModulesLoader at the PostDefault LoadingPhase if Paper2D is activated"
+            "LoadingPhase": "Default"
         }
     ],
     "PreBuildSteps": {
