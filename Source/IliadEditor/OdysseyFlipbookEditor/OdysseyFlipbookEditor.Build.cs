@@ -56,7 +56,6 @@ public class OdysseyFlipbookEditor : ModuleRules
                 "OdysseyMedia",
                 "OdysseyPainterEditor",
                 "OdysseyStylusInput",
-                "OdysseyFlipbook",
                 "OdysseyTextureEditor",
                 "Paper2D",
                 "Paper2DEditor",

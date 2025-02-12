@@ -240,11 +240,6 @@
             "LoadingPhase": "Default"
         },
         {
-            "Name": "OdysseyFlipbook",
-            "Type": "Editor",
-            "LoadingPhase": "Default"
-        },
-        {
             "Name": "OdysseyFlipbookEditor",
             "Type": "Editor",
             "LoadingPhase": "Default"

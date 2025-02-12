@@ -10,7 +10,7 @@
 #include "OdysseyFlipbook.generated.h"
 
 UCLASS()
-class ODYSSEYFLIPBOOK_API UOdysseyFlipbook : public UObject
+class UOdysseyFlipbook : public UObject
 {
     GENERATED_BODY()
 };
