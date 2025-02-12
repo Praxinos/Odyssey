@@ -5,8 +5,8 @@
 
 #include "IOdysseyViewportDrawingEditorAdapter.h"
 
-#include "OdysseyMeshPaintRendering.h"
-#include "OdysseySeamsPaintRendering.h"
+#include "Rendering/OdysseyMeshPaintRendering.h"
+#include "Rendering/OdysseySeamsPaintRendering.h"
 #include "MeshPaintTypes.h"
 #include "TexturePaintHelpers.h"
 #include "../Classes/OdysseySurfaceTexture2DEditable.h"

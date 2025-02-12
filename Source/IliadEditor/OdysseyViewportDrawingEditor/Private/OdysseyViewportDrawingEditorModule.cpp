@@ -25,11 +25,8 @@ void
 FOdysseyViewportDrawingEditorModule::StartupModule()
 {
     RegisterEditorMode();
-
     RegisterCommands();
-
     RegisterShaders();
-
     RegisterPropertyModuleCustomizations();
 }
 
@@ -37,11 +34,8 @@ void
 FOdysseyViewportDrawingEditorModule::ShutdownModule()
 {
     UnregisterEditorMode();
-
     UnregisterCommands();
-
     UnregisterShaders();
-
     UnregisterPropertyModuleCustomizations();
 }
 

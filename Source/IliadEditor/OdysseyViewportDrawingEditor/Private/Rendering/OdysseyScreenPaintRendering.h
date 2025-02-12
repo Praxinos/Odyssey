@@ -27,7 +27,7 @@ namespace OdysseyScreenPaintRendering
 
 
     /** Binds the mesh paint vertex and pixel shaders to the graphics device */
-    void ODYSSEYMESHPAINTRENDERING_API SetMeshPaintShaders(  FRHICommandList& iRHICmdList,
+    void SetMeshPaintShaders(  FRHICommandList& iRHICmdList,
                                             FGraphicsPipelineStateInitializer& iGraphicsPSOInit,
                                             ERHIFeatureLevel::Type iFeatureLevel,
                                             const FMatrix& iTransform,

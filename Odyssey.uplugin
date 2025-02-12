@@ -134,12 +134,6 @@
             "LoadingPhase": "Default"
         },
         {
-            "Name": "OdysseyMeshPaintRendering",
-            "Type": "UncookedOnly",
-            "LoadingPhase": "PostConfigInit",
-            "Comment": "OdysseyMeshPaintRendering is UncookedOnly because it needs PostConfigInit as LoadingPhase (to register shaders), and it is only available in UncookedOnly"
-        },
-        {
             "Name": "ULISLoader",
             "Type": "Runtime",
             "LoadingPhase": "Default"
