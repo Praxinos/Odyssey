@@ -38,6 +38,7 @@ FOdysseyPainterEditorModule::StartupModule()
     RegisterSettings();
     RegisterCommands();
     RegisterLevelEditorLayoutExtensions();
+    RegisterDetailCustomizations();
 
     FOdysseyVectorBrushCustomization::Register();
     FOdysseyVectorObjectViewPaletteCustomization::Register();
@@ -50,6 +51,7 @@ FOdysseyPainterEditorModule::ShutdownModule()
     UnregisterSettings();
     UnregisterCommands();
     UnregisterLevelEditorLayoutExtensions();
+    UnregisterDetailCustomization();
 
     FOdysseyVectorBrushCustomization::Unregister();
     FOdysseyVectorObjectViewPaletteCustomization::Unregister();
@@ -119,6 +121,18 @@ FOdysseyPainterEditorModule::UnregisterLevelEditorLayoutExtensions()
 {
     FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor");
     LevelEditorModule.OnRegisterLayoutExtensions().Remove(mExtendLevelEditorLayout);
+}
+
+void
+FOdysseyPainterEditorModule::RegisterDetailCustomizations()
+{
+    FOdysseyShapes::RegisterDetailCustomization();
+}
+
+void
+FOdysseyPainterEditorModule::UnregisterDetailCustomization()
+{
+    FOdysseyShapes::UnregisterDetailCustomization();
 }
 
 IMPLEMENT_MODULE( FOdysseyPainterEditorModule, OdysseyPainterEditor );

@@ -7,7 +7,7 @@
 #include "OdysseyAnimation.h"
 #include "OdysseyAnimationPlayer.h"
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineScrollBox.h"
-#include "OdysseyStyleSet.h"
+#include "OdysseyStyle.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "OdysseyAnimationProxy.h"
 #include "OdysseyAnimationEditorUserSettings.h"
@@ -37,9 +37,6 @@ int32 SOdysseyAnimationTimelineHeader::OnPaint(const FPaintArgs& Args, const FGe
     const FSlateBrush* GenericBrush = FCoreStyle::Get().GetBrush( "GenericWhiteBox" );
     const FLinearColor& backgroundColorEven = FOdysseyStyle::GetColor("TimelineHeader.backgroundColorEven");
     const FLinearColor& backgroundColorOdd = FOdysseyStyle::GetColor("TimelineHeader.backgroundColorOdd");
-
-    FAppStyle::GetBrush( TEXT( "ProgressBar.Background" ) );
-
 
     const UOdysseyAnimationEditorUserSettings* settings = UOdysseyAnimationEditorUserSettings::Get();
     int startFrame = settings->StartFrame;

@@ -10,7 +10,7 @@
 #include "OdysseyBlockClipboardData.h"
 #include "OdysseyEditorModule.h"
 #include "OdysseyPainterEditorSource.h"
-#include "OdysseyHUDSystem.h"
+#include "OdysseyHUD.h"
 #include "OdysseyHUDElement.h"
 #include "OdysseyMediaRaster.h"
 #include "ULISLoaderModule.h"
@@ -56,6 +56,9 @@
 
 #include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
 #include "Tools/RasterEraserTool/OdysseyPainterEditorRasterEraserTool.h"
+#include "Tools/RasterSelectionTool/OdysseyPainterEditorRasterSelectionTool.h"
+#include "Tools/RasterTransformTool/OdysseyPainterEditorRasterTransformTool.h"
+#include "Tools/RasterPrimitiveDrawingTool/OdysseyPainterEditorRasterPrimitiveDrawingTool.h"
 #include "Tools/RasterPaintBucketTool/OdysseyPainterEditorRasterPaintBucketTool.h"
 #include "Tools/VectorPrimitiveDrawingTool/OdysseyPainterEditorVectorPrimitiveDrawingTool.h"
 #include "Tools/VectorPathDrawingTool/OdysseyPainterEditorVectorPathDrawingTool.h"
@@ -70,6 +73,9 @@
 #include "Tools/ColorPickerTool/OdysseyPainterEditorColorPickerTool.h"
 #include "Tools/VectorGridTool/OdysseyPainterEditorVectorGridTool.h"
 #include "Tools/VectorTransformTool/OdysseyPainterEditorVectorTransformTool.h"
+#include "Tools/VectorMatchingTool/OdysseyPainterEditorVectorMatchingTool.h"
+#include "Tools/VectorChartTool/OdysseyPainterEditorVectorChartTool.h"
+#include "Tools/VectorTrajectoryTool/OdysseyPainterEditorVectorTrajectoryTool.h"
 
 #include "Shortcuts/OdysseyLayerStackGlobalShortcuts.h"
 #include "Shortcuts/Global/OdysseyPainterEditorGlobalShortcuts.h"
@@ -106,7 +112,7 @@ FOdysseyPainterEditor::FOdysseyPainterEditor(const FName& iId, const FText& iNam
     , mCurrentTemporaryTool(nullptr)
     , mVectorHUDFlags(FOdysseyVectorHUD::HUD_MODE_OBJECT)
     , mVectorDrawingFlags(0)
-    , mHUDSystem(new FOdysseyHUDSystem())
+    , mHUDSystem(new FOdysseyHUD())
     , mRasterSelection(MakeShared< FOdysseyPainterEditorRasterSelection >())
     , mBrushContexts()
     , mPaintColor(::ULIS::FColor::Black)
@@ -596,7 +602,7 @@ FOdysseyPainterEditor::GetBrushContexts()
     return mBrushContexts;
 }
 
-FOdysseyHUDSystem*
+FOdysseyHUD*
 FOdysseyPainterEditor::HUDSystem() const
 {
     return mHUDSystem;

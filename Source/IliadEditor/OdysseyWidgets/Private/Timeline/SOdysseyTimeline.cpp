@@ -5,7 +5,7 @@
 
 #include "Fonts/FontMeasure.h"
 #include "Widgets/Layout/SGridPanel.h"
-#include "OdysseyStyleSet.h"
+#include "OdysseyStyle.h"
 
 //////////////////////////////////////////////////////////////////////////
 // SOdysseyTimeline
@@ -105,13 +105,10 @@ int32 SOdysseyTimeline::OnPaint(const FPaintArgs& Args, const FGeometry& Allotte
     const FLinearColor& backgroundColorEven = FOdysseyStyle::GetColor("FlipbookTimeline.BackgroundColorEven");
     const FLinearColor& backgroundColorOdd = FOdysseyStyle::GetColor("FlipbookTimeline.BackgroundColorOdd");
 
-    FAppStyle::GetBrush( TEXT( "ProgressBar.Background" ) );
-
     const int32 backgroundLayer = LayerId;
     const int32 textLayer = backgroundLayer + 1;
 
     const FSlateFontInfo textFontInfo = FCoreStyle::GetDefaultFontStyle("Regular", 10);
-    const FSlateBrush* backgroundBrush = FAppStyle::GetBrush( TEXT( "ProgressBar.Background" ) );
 
     // const bool bEnabled = ShouldBeEnabled( bParentEnabled );
     // const ESlateDrawEffect DrawEffects = bEnabled ? ESlateDrawEffect::None : ESlateDrawEffect::DisabledEffect;
@@ -143,20 +140,6 @@ int32 SOdysseyTimeline::OnPaint(const FPaintArgs& Args, const FGeometry& Allotte
             ESlateDrawEffect::None,
             InWidgetStyle.GetColorAndOpacityTint() * backgroundColor
         );
-
-        //Draw key line
-        /* const FVector2D pos(x, 0.f);
-        const FVector2D size(1, height);
-        FSlateDrawElement::MakeBox(
-            OutDrawElements,
-            backgroundLayer,
-            AllottedGeometry.ToPaintGeometry(pos, size),
-            backgroundBrush,
-            ESlateDrawEffect::None,
-            InWidgetStyle.GetColorAndOpacityTint()
-            ); */
-
-
 
         //Draw key num
         if (!(keyNum % frameNumberFrequency))

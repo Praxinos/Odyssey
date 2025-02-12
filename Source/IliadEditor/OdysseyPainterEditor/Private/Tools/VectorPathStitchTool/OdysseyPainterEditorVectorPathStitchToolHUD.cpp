@@ -3,6 +3,7 @@
 
 #include "Tools/VectorPathStitchTool/OdysseyPainterEditorVectorPathStitchToolHUD.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorVertex.h"
 #include "OdysseyPainterEditor.h"
 
 FOdysseyPainterEditorVectorPathStitchToolHUD::~FOdysseyPainterEditorVectorPathStitchToolHUD()

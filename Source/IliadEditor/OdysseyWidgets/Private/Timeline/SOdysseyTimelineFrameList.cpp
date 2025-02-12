@@ -9,7 +9,7 @@
 #include "SOdysseyTimelineFrame.h"
 #include "SOdysseyDropWidget.h"
 #include "FOdysseyTimelineFrameDragDropOperation.h"
-#include "OdysseyStyleSet.h"
+#include "OdysseyStyle.h"
 #include "SOdysseyTimelineFrameHandle.h"
 #include "Widgets/Colors/SColorBlock.h"
 

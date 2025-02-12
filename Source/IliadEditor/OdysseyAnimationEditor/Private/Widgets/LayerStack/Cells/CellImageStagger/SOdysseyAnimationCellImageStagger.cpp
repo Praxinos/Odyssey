@@ -3,7 +3,7 @@
 
 #include "Widgets/LayerStack/Cells/CellImageStagger/SOdysseyAnimationCellImageStagger.h"
 #include "Widgets/Input/SSpinBox.h"
-#include "OdysseyStyleSet.h"
+#include "OdysseyStyle.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 #include "OdysseyAnimationCurrentFrameMutator.h"
 #include "OdysseyAnimationEditorTimelinePosition.h"

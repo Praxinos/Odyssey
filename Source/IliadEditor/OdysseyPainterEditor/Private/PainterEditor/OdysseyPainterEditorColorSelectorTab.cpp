@@ -10,7 +10,8 @@
 #include "Widgets/Color/SOdysseyColorSliders.h"
 #include "Widgets/Color/SOdysseyColorHexadecimal.h"
 #include "Widgets/Palette/SOdysseyPainterEditorPaletteSetList.h"
-#include "SOdysseyPalette.h"
+#include "OdysseyStyle.h"
+#include "Tools/OdysseyPainterEditorTool.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 

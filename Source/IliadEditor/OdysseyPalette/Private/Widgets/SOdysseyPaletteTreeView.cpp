@@ -3,7 +3,7 @@
 
 #include "Widgets/SOdysseyPaletteTreeView.h"
 
-#include "OdysseyStyleSet.h"
+#include "OdysseyStyle.h"
 
 #include "OdysseyPalette.h"
 #include "OdysseyPaletteEntryColor.h"

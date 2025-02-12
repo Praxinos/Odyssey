@@ -5,7 +5,7 @@
 
 #include "OdysseyLayer.h"
 #include "OdysseyLayerStack.h"
-#include "OdysseyStyleSet.h"
+#include "OdysseyStyle.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 

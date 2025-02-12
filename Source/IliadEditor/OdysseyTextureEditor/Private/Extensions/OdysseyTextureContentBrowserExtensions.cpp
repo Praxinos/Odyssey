@@ -3,6 +3,7 @@
 
 #include "OdysseyTextureContentBrowserExtensions.h"
 
+#include "OdysseyTextureEditorModule.h"
 #include "AssetRegistry/AssetData.h"
 #include "AssetToolsModule.h"
 #include "ContentBrowserModule.h"
@@ -16,7 +17,6 @@
 #include "IAssetTools.h"
 #include "IContentBrowserSingleton.h"
 #include "IDesktopPlatform.h"
-#include "IOdysseyTextureEditorModule.h"
 #include "Misc/PackageName.h"
 #include "Modules/ModuleManager.h"
 #include "Misc/MessageDialog.h"
@@ -82,7 +82,7 @@ public:
 
     void ActionTextures( TArray< UTexture2D* >& iTextures ) override
     {
-        IOdysseyTextureEditorModule* OdysseyTextureEditorModule = &FModuleManager::GetModuleChecked< IOdysseyTextureEditorModule >( "OdysseyTextureEditor" );
+        FOdysseyTextureEditorModule* OdysseyTextureEditorModule = &FModuleManager::GetModuleChecked< FOdysseyTextureEditorModule >( "OdysseyTextureEditor" );
         OdysseyTextureEditorModule->CreateOdysseyTextureEditor( iTextures );
     }
 };

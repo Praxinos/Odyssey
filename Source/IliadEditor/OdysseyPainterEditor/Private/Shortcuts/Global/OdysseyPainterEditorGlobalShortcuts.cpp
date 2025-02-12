@@ -11,6 +11,8 @@
 #include "Shortcuts/Global/OdysseyPainterEditorGlobalToolsShortcuts.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
 #include "PainterEditor/OdysseyPainterEditorRasterSelection.h"
+#include "OdysseyRasterBlock.h"
+#include "ULISLoaderModule.h"
 
 FOdysseyPainterEditorGlobalShortcuts::FOdysseyPainterEditorGlobalShortcuts(FOdysseyPainterEditor* iEditor)
     : mEditor(iEditor)

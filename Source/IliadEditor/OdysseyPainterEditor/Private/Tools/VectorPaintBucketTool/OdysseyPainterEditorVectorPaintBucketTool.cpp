@@ -14,6 +14,7 @@
 #include "OdysseyPalette.h"
 #include "OdysseyPaletteEntry.h"
 
+#include "OdysseyVector.h"
 #include "OdysseyVectorCycle.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorBucket.h"

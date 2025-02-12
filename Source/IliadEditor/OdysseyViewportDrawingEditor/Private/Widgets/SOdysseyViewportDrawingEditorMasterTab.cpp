@@ -11,6 +11,7 @@
 #include "Widgets/Layout/SScrollBox.h"
 #include "Widgets/Input/SButton.h"
 #include "OdysseyPainterEditor.h"
+#include "OdysseyStyle.h"
 #include "OdysseyViewportDrawingEditorUtils.h"
 #include "SAssetView.h"
 #include "OdysseyAnimationActor.h"
@@ -18,6 +19,7 @@
 #include "Widgets/Input/SSegmentedControl.h"
 #include "Widgets/Layout/SWidgetSwitcher.h"
 #include "Widgets/Tab/SOdysseyPainterEditorTools.h"
+#include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
 
 #define LOCTEXT_NAMESPACE "ViewportDrawingEditor"
 

@@ -7,10 +7,8 @@
 #include "Framework/MultiBox/MultiBoxExtender.h"
 #include "ToolMenuOwner.h"
 #include "Input/OdysseyPoint.h"
-#include "OdysseyStyleSet.h"
-#include "OdysseyHUDSystem.h"
-#include "OdysseyPainterEditorToolContext.h"
-#include "OdysseyPainterEditorToolInputProcessor.h"
+#include "OdysseyStyle.h"
+#include "OdysseyHUD.h"
 #include "Widgets/SWidget.h"
 
 #include "PainterEditor/OdysseyPainterEditorColorTypes.h"
@@ -19,6 +17,7 @@
 
 class FOdysseyPainterEditor;
 class FOdysseyHUDElement;
+class FOdysseyPainterEditorToolInputProcessor;
 
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorTool : public UObject
@@ -84,7 +83,7 @@ public:
     virtual void ExtendToolbar( FToolBarBuilder& iBuilder );
     virtual TSharedPtr<FOdysseyHUDElement> GetHUD();
     virtual EMouseCursor::Type GetMouseCursor() const;
-    virtual void DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams);
+    virtual void DrawHUD(const FOdysseyHUD::FDrawHUDParams& iParams);
 
     virtual bool SupportsColorType(EOdysseyPainterEditorColorType iType);
 

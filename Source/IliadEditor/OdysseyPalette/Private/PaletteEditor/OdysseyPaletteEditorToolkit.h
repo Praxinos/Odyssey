@@ -14,7 +14,7 @@ class SOdysseyPaletteTreeView;
  * Implements an Editor toolkit for the Painter Editor.
  * The toolkit is the main entry point for the Painter Editor
  */
-class ODYSSEYPALETTE_API FOdysseyPaletteEditorToolkit
+class FOdysseyPaletteEditorToolkit
     : public FAssetEditorToolkit
 {
 public:

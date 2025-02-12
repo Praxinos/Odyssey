@@ -26,6 +26,7 @@
 #include "LevelEditorViewport.h"
 #include "SEditorViewport.h"
 #include "Slate/SceneViewport.h"
+#include "Tools/ColorPickerTool/OdysseyPainterEditorColorPickerTool.h"
 
 IOdysseyViewportDrawingEditorAdapter::~IOdysseyViewportDrawingEditorAdapter()
 {

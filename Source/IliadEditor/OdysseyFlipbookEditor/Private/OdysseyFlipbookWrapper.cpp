@@ -9,7 +9,6 @@
 #include "PaperImporterSettings.h"
 #include "PaperSprite.h"
 #include "Subsystems/AssetEditorSubsystem.h"
-#include "LayerStack/OdysseyTextureLayerImageRaster.h"
 #include "OdysseyTextureLayerStackUserData.h"
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "OdysseyPixelFormat.h"

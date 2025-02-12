@@ -17,12 +17,15 @@
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "OdysseyRasterBlock.h"
 #include "OdysseySurfaceTexture2DEditable.h"
+#include "OdysseyTextureLayerStack.h"
 #include "LayerStack/OdysseyTextureLayerImageRaster.h"
 #include "TextureEditor/OdysseyTextureEditorCommands.h"
 #include "TextureEditor/OdysseyTextureEditorSource.h"
 #include "TextureEditor/OdysseyTextureEditorExtension.h"
 #include "OdysseyPainterEditor.h"
 #include "AssetToolsModule.h"
+#include "ULISLoaderModule.h"
+#include "OdysseyRasterBlockMutator.h"
 
 #define LOCTEXT_NAMESPACE "TextureEditor"
 

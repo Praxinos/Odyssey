@@ -10,6 +10,7 @@
 #include "Misc/MessageDialog.h"
 #include "SOdysseySinglePropertyView.h"
 // Vector engine
+#include "OdysseyVector.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorLayer.h"
 #include "OdysseyVectorCell.h"

@@ -16,8 +16,6 @@
 #include "OdysseyFlipbookWrapper.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "UObject/SavePackage.h"
-#include "OdysseyTextureFunctionLibrary.h"
-#include "LayerStack/OdysseyTextureLayerImageRaster.h"
 #include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
 #include "ScopedTransaction.h"
 #include "OdysseyRasterBlockMutator.h"

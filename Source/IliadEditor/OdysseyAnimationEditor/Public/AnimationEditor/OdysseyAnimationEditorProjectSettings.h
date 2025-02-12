@@ -35,7 +35,7 @@ struct FAnimationCellMarkSettings
     FLinearColor Color = FLinearColor::White;
 
     UPROPERTY(EditAnywhere, Category="Cell Marks")
-    EOdysseyAnimationCellMarkSymbol Symbol;
+    EOdysseyAnimationCellMarkSymbol Symbol = EOdysseyAnimationCellMarkSymbol::Fill;
 };
 
 UCLASS(config=EditorPerProjectUserSettings)

@@ -8,6 +8,29 @@
 #include "Widgets/Tools/SOdysseyPainterEditorToolOptions.h"
 #include "Tools/RasterDrawingTool/Widgets/SOdysseyPainterEditorRasterDrawingToolBrushSelector.h"
 
+#include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
+#include "Tools/RasterEraserTool/OdysseyPainterEditorRasterEraserTool.h"
+#include "Tools/RasterSelectionTool/OdysseyPainterEditorRasterSelectionTool.h"
+#include "Tools/RasterTransformTool/OdysseyPainterEditorRasterTransformTool.h"
+#include "Tools/RasterPrimitiveDrawingTool/OdysseyPainterEditorRasterPrimitiveDrawingTool.h"
+#include "Tools/RasterPaintBucketTool/OdysseyPainterEditorRasterPaintBucketTool.h"
+#include "Tools/VectorPrimitiveDrawingTool/OdysseyPainterEditorVectorPrimitiveDrawingTool.h"
+#include "Tools/VectorPathDrawingTool/OdysseyPainterEditorVectorPathDrawingTool.h"
+#include "Tools/VectorPathEditTool/OdysseyPainterEditorVectorPathEditTool.h"
+#include "Tools/VectorSelectionTool/OdysseyPainterEditorVectorSelectionTool.h"
+#include "Tools/VectorScenePanTool/OdysseyPainterEditorVectorScenePanTool.h"
+#include "Tools/VectorEraserTool/OdysseyPainterEditorVectorEraserTool.h"
+#include "Tools/VectorPathPushTool/OdysseyPainterEditorVectorPathPushTool.h"
+#include "Tools/VectorPathSmoothTool/OdysseyPainterEditorVectorPathSmoothTool.h"
+#include "Tools/VectorPathStitchTool/OdysseyPainterEditorVectorPathStitchTool.h"
+#include "Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.h"
+#include "Tools/ColorPickerTool/OdysseyPainterEditorColorPickerTool.h"
+#include "Tools/VectorGridTool/OdysseyPainterEditorVectorGridTool.h"
+#include "Tools/VectorTransformTool/OdysseyPainterEditorVectorTransformTool.h"
+#include "Tools/VectorMatchingTool/OdysseyPainterEditorVectorMatchingTool.h"
+#include "Tools/VectorChartTool/OdysseyPainterEditorVectorChartTool.h"
+#include "Tools/VectorTrajectoryTool/OdysseyPainterEditorVectorTrajectoryTool.h"
+
 SOdysseyPainterEditorTools::~SOdysseyPainterEditorTools()
 {}
 

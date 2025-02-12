@@ -3,7 +3,7 @@
 
 #include "AnimationEditor/OdysseyAnimationEditorCommands.h"
 #include "Command/OdysseyCommandMacros.h"
-#include "OdysseyStyleSet.h"
+#include "OdysseyStyle.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 

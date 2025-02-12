@@ -7,7 +7,7 @@
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineTreeView.h"
 #include "OdysseyAnimationEditorTimelinePosition.h"
 #include "LayerStack/OdysseyAnimationLayerStack.h"
-#include "OdysseyStyleSet.h"
+#include "OdysseyStyle.h"
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineControl.h"
 #include "OdysseyAnimation.h"
 #include "OdysseyAnimationPlayer.h"

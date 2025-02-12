@@ -10,6 +10,7 @@
 #include "OdysseyVectorCell.h"
 #include "OdysseyVectorLayer.h"
 #include "Interfaces/IPluginManager.h"
+#include "OdysseyVector.h"
 
 #define INBETWEENER_INDICATOR_RADIUS 10.0f
 #define BREAKDOWN_INDICATOR_RADIUS   20.0f

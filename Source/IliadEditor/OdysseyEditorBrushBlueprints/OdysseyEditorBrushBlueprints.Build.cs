@@ -32,11 +32,10 @@ public class OdysseyEditorBrushBlueprints : ModuleRules
 
                 "OdysseyAnimation",
                 "OdysseyBrush",
-                "OdysseyLayerStack",
+                "OdysseyImaging",
                 "OdysseyLayerStackEditor",
                 "OdysseyPainterEditor",
-                "OdysseyTexture",
-                "OdysseyImaging",
+                "OdysseyTextureEditor",
 
                 "ULIS",
                 "ULISLoader",

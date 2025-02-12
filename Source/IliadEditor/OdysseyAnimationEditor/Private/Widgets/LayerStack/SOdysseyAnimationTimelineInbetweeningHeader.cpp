@@ -11,7 +11,7 @@
 #include "Widgets/Input/NumericUnitTypeInterface.inl"
 #include "Widgets/Input/SNumericEntryBox.h"
 #include "Math/UnitConversion.h"
-#include "OdysseyStyleSet.h"
+#include "OdysseyStyle.h"
 
 // from module OdysseyPainterEditor
 #include "PainterEditor/OdysseyPainterEditorSource.h"

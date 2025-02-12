@@ -6,7 +6,7 @@
 #include "Components/HorizontalBox.h"
 #include "OdysseyLayer.h"
 #include "OdysseyLayerStack.h"
-#include "OdysseyStyleSet.h"
+#include "OdysseyStyle.h"
 #include "Widgets/Images/SImage.h"
 #include "Widgets/Layout/SBorder.h"
 #include "Widgets/Text/STextBlock.h"

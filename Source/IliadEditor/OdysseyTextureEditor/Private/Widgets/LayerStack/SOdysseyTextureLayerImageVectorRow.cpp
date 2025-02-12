@@ -3,7 +3,7 @@
 
 #include "Widgets/LayerStack/SOdysseyTextureLayerImageVectorRow.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
-#include "OdysseyStyleSet.h"
+#include "OdysseyStyle.h"
 #include "LayerStack/OdysseyTextureLayerImageVector.h"
 #include "Widgets/Input/NumericTypeInterface.h"
 #include "Widgets/Input/NumericUnitTypeInterface.inl"

@@ -4,7 +4,7 @@
 #include "OdysseyViewportDrawingEditorModule.h"
 #include "Modules/ModuleManager.h"
 #include "Textures/SlateIcon.h"
-#include "OdysseyStyleSet.h"
+#include "OdysseyStyle.h"
 #include "EditorModeRegistry.h"
 #include "EditorModes.h"
 #include "OdysseyViewportDrawingEditorEdMode.h"
@@ -25,11 +25,8 @@ void
 FOdysseyViewportDrawingEditorModule::StartupModule()
 {
     RegisterEditorMode();
-
     RegisterCommands();
-
     RegisterShaders();
-
     RegisterPropertyModuleCustomizations();
 }
 
@@ -37,11 +34,8 @@ void
 FOdysseyViewportDrawingEditorModule::ShutdownModule()
 {
     UnregisterEditorMode();
-
     UnregisterCommands();
-
     UnregisterShaders();
-
     UnregisterPropertyModuleCustomizations();
 }
 

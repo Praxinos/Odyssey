@@ -13,7 +13,7 @@
 #include "OdysseyAnimation.h"
 #include "OdysseyAnimationEditorUserSettings.h"
 #include "OdysseyAnimationPlayer.h"
-#include "OdysseyStyleSet.h"
+#include "OdysseyStyle.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "Widgets/Images/SImage.h"
 #include "Widgets/Input/SComboButton.h"

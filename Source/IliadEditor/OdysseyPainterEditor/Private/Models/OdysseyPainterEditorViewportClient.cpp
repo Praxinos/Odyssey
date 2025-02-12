@@ -27,8 +27,8 @@
 #include "Widgets/SViewport.h"
 
 #include "IOdysseyStylusInputModule.h"
-#include "OdysseyPaintEngine.h"
-#include "OdysseyHUDSystem.h"
+#include "PaintEngine/OdysseyPaintEngine.h"
+#include "OdysseyHUD.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorSettings.h"
 #include "OdysseyStylusInputSettings.h"
@@ -40,6 +40,7 @@
 #include "OdysseyKeyState.h"
 #include "OdysseyHUDElement.h"
 #include "MouseDeltaTracker.h"
+#include "Tools/OdysseyPainterEditorTool.h"
 
 #include <memory>
 #include <chrono>
@@ -232,13 +233,13 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
         }
     }
 
-    FOdysseyHUDSystem::FDrawHUDParams params;
+    FOdysseyHUD::FDrawHUDParams params;
     params.mCanvas = ioCanvas;
     params.mTextureWidth = texture->GetSurfaceWidth();
     params.mTextureHeight = texture->GetSurfaceHeight();
 
     TSharedPtr<SOdysseyViewport> viewportWidget = mOdysseyPainterEditorViewportPtr.Pin();
-    params.mTextureToHUD = FOdysseyHUDSystem::FDrawHUDParams::FTextureToHUD::CreateLambda(
+    params.mTextureToHUD = FOdysseyHUD::FDrawHUDParams::FTextureToHUD::CreateLambda(
         [viewportWidget, w = params.mTextureWidth, h = params.mTextureHeight](const FVector2D& iPosition)
         {
             return viewportWidget->ToWorld(iPosition - FVector2D(w / 2.f, h / 2.f));

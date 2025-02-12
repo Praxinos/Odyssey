@@ -9,9 +9,11 @@
 #include "TextureEditor/OdysseyTextureEditorGUI.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyLayerStack.h"
+#include "OdysseyTextureLayerStack.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
 #include "TextureEditor/OdysseyTextureEditorSource.h"
 #include "HUD/OdysseyVectorHUD.h"
+#include "Tools/RasterPaintBucketTool/OdysseyPainterEditorRasterPaintBucketTool.h"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction

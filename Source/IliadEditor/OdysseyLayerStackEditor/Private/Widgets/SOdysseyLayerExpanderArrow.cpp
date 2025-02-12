@@ -4,7 +4,7 @@
 #include "Widgets/SOdysseyLayerExpanderArrow.h"
 
 #include "Framework/Application/SlateApplication.h"
-#include "OdysseyStyleSet.h"
+#include "OdysseyStyle.h"
 #include "Widgets/Input/SButton.h"
 #include "Widgets/SOdysseyLayerRow.h"
 #include "Widgets/SOdysseyLayerStackTreeView.h"

@@ -52,12 +52,10 @@ public class OdysseyPainterEditor : ModuleRules
                 "PropertyEditor",
                 "Projects",
                 "OdysseyCore",
-                "OdysseyBrush",
-                "OdysseyEditor",
-                "OdysseyHUDSystem",
+                "OdysseyHUD",
                 "OdysseyImaging",
-                "OdysseyLayerStack",
                 "OdysseyLayerStackEditor",
+                "OdysseyMaths",
                 "OdysseyStyle",
                 "OdysseyStylusInput",
                 "OdysseyVector",
@@ -68,12 +66,12 @@ public class OdysseyPainterEditor : ModuleRules
 
         PublicDependencyModuleNames.AddRange(
              new string[] {
-                "OdysseyPaintEngine",
-                "OdysseyShapes",
-                "OdysseyVector",
-                "OdysseyPalette",
+                "OdysseyBrush",
+                "OdysseyEditor",
+                "OdysseyHUD",
                 "OdysseyMedia",
-                "OdysseyHUDSystem",
+                "OdysseyPalette",
+                "OdysseyVector",
                 "ULIS",
                 "ULISLoader"
              }
@@ -85,6 +83,7 @@ public class OdysseyPainterEditor : ModuleRules
                 Path.Combine(ModuleDirectory, "Private", "PainterEditor"),
                 Path.Combine(ModuleDirectory, "Private", "Settings"),
                 Path.Combine(ModuleDirectory, "Private", "Tools"),
+                Path.Combine(ModuleDirectory, "Private", "Shapes"),
             }
         );
 
@@ -93,6 +92,7 @@ public class OdysseyPainterEditor : ModuleRules
                 Path.Combine(ModuleDirectory, "Public", "PainterEditor"),
                 Path.Combine(ModuleDirectory, "Public", "Settings"),
                 Path.Combine(ModuleDirectory, "Public", "Tools"),
+                Path.Combine(ModuleDirectory, "Public", "Shapes"),
             }
         );
 

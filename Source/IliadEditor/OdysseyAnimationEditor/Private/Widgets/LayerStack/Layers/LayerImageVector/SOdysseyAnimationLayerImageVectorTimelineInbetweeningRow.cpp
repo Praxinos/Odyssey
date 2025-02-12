@@ -16,7 +16,7 @@
 #include "OdysseyPainterEditor.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
 // From module OdysseyStyle
-#include "OdysseyStyleSet.h"
+#include "OdysseyStyle.h"
 // From module OdysseyVector
 #include "OdysseyVectorObject.h"
 #include "OdysseyVectorGroupPaint.h"

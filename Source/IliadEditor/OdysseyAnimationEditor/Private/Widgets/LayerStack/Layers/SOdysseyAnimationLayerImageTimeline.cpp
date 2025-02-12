@@ -11,7 +11,7 @@
 #include "Framework/Commands/GenericCommands.h"
 #include "AnimationEditor/OdysseyAnimationEditorCommands.h"
 #include "AnimationEditor/OdysseyAnimationEditorProjectSettings.h"
-#include "OdysseyStyleSet.h"
+#include "OdysseyStyle.h"
 #include "Shortcuts/Timeline/OdysseyAnimationTimelineCellsShortcuts.h"
 #include "Shortcuts/Timeline/OdysseyAnimationTimelineCellImageStaggerShortcuts.h"
 #include "OdysseyAnimationCurrentFrameMutator.h"

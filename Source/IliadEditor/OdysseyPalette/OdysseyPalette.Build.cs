@@ -35,6 +35,9 @@ namespace UnrealBuildTool.Rules
             PrivateIncludePaths.AddRange(
                 new string[] {
                     // ... add other private include paths required here ...
+                    Path.Combine(ModuleDirectory, "Private", "Palette"),
+                    Path.Combine(ModuleDirectory, "Private", "Widgets"),
+                    Path.Combine(ModuleDirectory, "Private", "DragDropOperations"),
                 }
                 );
 

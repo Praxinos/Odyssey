@@ -5,7 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "Framework/Commands/Commands.h"
-#include "OdysseyStyleSet.h"
+#include "OdysseyStyle.h"
 
 class FOdysseyViewportDrawingEditorCommands : public TCommands<FOdysseyViewportDrawingEditorCommands>
 {

@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "OdysseyStyleSet.h"
+#include "OdysseyStyle.h"
 
 class FOdysseyStyleDefault;
 

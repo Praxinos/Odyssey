@@ -134,12 +134,6 @@
             "LoadingPhase": "Default"
         },
         {
-            "Name": "OdysseyMeshPaintRendering",
-            "Type": "UncookedOnly",
-            "LoadingPhase": "PostConfigInit",
-            "Comment": "OdysseyMeshPaintRendering is UncookedOnly because it needs PostConfigInit as LoadingPhase (to register shaders), and it is only available in UncookedOnly"
-        },
-        {
             "Name": "ULISLoader",
             "Type": "Runtime",
             "LoadingPhase": "Default"
@@ -156,22 +150,12 @@
             "LoadingPhase": "PreDefault"
         },
         {
-            "Name": "OdysseyHUDSystem",
-            "Type": "Editor",
-            "LoadingPhase": "Default"
-        },
-        {
-            "Name": "OdysseyLayerStack",
+            "Name": "OdysseyHUD",
             "Type": "Editor",
             "LoadingPhase": "Default"
         },
         {
             "Name": "OdysseyLayerStackEditor",
-            "Type": "Editor",
-            "LoadingPhase": "Default"
-        },
-        {
-            "Name": "OdysseyPaintEngine",
             "Type": "Editor",
             "LoadingPhase": "Default"
         },
@@ -191,11 +175,6 @@
             "LoadingPhase": "Default"
         },
         {
-            "Name": "OdysseyShapes",
-            "Type": "Editor",
-            "LoadingPhase": "PreDefault"
-        },
-        {
             "Name": "OdysseyStylusInput",
             "Type": "Editor"
         },
@@ -210,22 +189,12 @@
             "LoadingPhase": "Default"
         },
         {
-            "Name": "OdysseyModuleLoader",
-            "Type": "Editor",
-            "LoadingPhase": "Default"
-        },
-        {
             "Name": "OdysseyFile",
             "Type": "Editor",
             "LoadingPhase": "Default"
         },
         {
             "Name": "OdysseyVector",
-            "Type": "Editor",
-            "LoadingPhase": "Default"
-        },
-        {
-            "Name": "OdysseyTexture",
             "Type": "Editor",
             "LoadingPhase": "Default"
         },
@@ -271,16 +240,9 @@
             "LoadingPhase": "Default"
         },
         {
-            "Name": "OdysseyFlipbook",
-            "Type": "Editor",
-            "LoadingPhase": "None",
-            "Comment": "Loaded by OdysseyModulesLoader at the PostDefault LoadingPhase if Paper2D is activated"
-        },
-        {
             "Name": "OdysseyFlipbookEditor",
             "Type": "Editor",
-            "LoadingPhase": "None",
-            "Comment": "Loaded by OdysseyModulesLoader at the PostDefault LoadingPhase if Paper2D is activated"
+            "LoadingPhase": "Default"
         }
     ],
     "PreBuildSteps": {

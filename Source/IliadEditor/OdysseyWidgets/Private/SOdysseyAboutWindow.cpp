@@ -23,7 +23,7 @@
 #include "Widgets/Views/STableRow.h"
 #include "Widgets/Views/SListView.h"
 
-#include "OdysseyStyleSet.h"
+#include "OdysseyStyle.h"
 
 #define LOCTEXT_NAMESPACE "Widgets"
 

@@ -4,6 +4,7 @@
 #include "Tools/VectorTransformTool/OdysseyPainterEditorVectorTransformToolHUD.h"
 #include "OdysseyPainterEditor.h"
 // Vector engine
+#include "OdysseyVector.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorLayer.h"

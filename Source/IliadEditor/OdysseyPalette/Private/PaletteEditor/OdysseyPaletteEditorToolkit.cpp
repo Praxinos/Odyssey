@@ -12,7 +12,7 @@
 #include "Widgets/SOdysseyPaletteTreeView.h"
 #include "Widgets/SOdysseyPaletteSetComboBox.h"
 
-#include "OdysseyStyleSet.h"
+#include "OdysseyStyle.h"
 
 #define LOCTEXT_NAMESPACE "PaletteEditor"
 

@@ -4,7 +4,7 @@
 #include "SOdysseyPaletteEntryRow.h"
 #include "OdysseyPaletteDragDropOperation.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
-#include "OdysseyStyleSet.h"
+#include "OdysseyStyle.h"
 #include "OdysseyPalette.h"
 #include "Widgets/Input/SCheckBox.h"
 #include "OdysseyPaletteEntryColor.h"

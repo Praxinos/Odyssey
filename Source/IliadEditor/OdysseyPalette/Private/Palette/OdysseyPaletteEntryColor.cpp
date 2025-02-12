@@ -2,7 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
 
 #include "Palette/OdysseyPaletteEntryColor.h"
-#include "OdysseyStyleSet.h"
+#include "OdysseyStyle.h"
 #include "OdysseyPalette.h"
 #include "Misc/TransactionObjectEvent.h"
 #include "UObject/OdysseyObjectEditorUtils.h"

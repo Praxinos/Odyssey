@@ -4,7 +4,7 @@
 #include "Widgets/Tab/SOdysseyPainterEditorVectorSceneTreeView.h"
 #include "Widgets/Tab/SOdysseyPainterEditorVectorSceneTreeViewRow.h"
 #include "Widgets/Tab/SOdysseyPainterEditorVectorSceneTreeViewContextMenu.h"
-#include "OdysseyStyleSet.h"
+#include "OdysseyStyle.h"
 #include "Framework/Commands/GenericCommands.h"
 #include "OdysseyVector.h"
 #include "OdysseyVectorCell.h"

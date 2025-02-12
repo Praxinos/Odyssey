@@ -181,7 +181,6 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "OdysseyTexture.ExportTexture_64", new IMAGE_BRUSH("OdysseyTexture/ExportTexture_64", mIcon64x64));
 
     // OdysseyLogo
-    Set( "OdysseyLogo.Odyssey16", new IMAGE_BRUSH("OdysseyTexture/Odyssey16", mIcon16x16));
     Set( "OdysseyLogo.PraxinosLogo16", new IMAGE_BRUSH("Logo/Praxinos_Logo_16", mIcon16x16));
 
     // OdysseyBrush
@@ -240,7 +239,6 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "About.UserDoc", new IMAGE_BRUSH( "About/userDoc", FVector2D( 30, 30 ) ) );
     Set( "About.Git", new IMAGE_BRUSH( "About/git", FVector2D( 30, 30 ) ) );
     Set( "About.Praxinos", new IMAGE_BRUSH( "About/praxinos", FVector2D( 128, 128 ) ) );
-    Set( "About.Odyssey", new IMAGE_BRUSH( "About/Odyssey", FVector2D( 128, 128 ) ) );
     Set( "About.Manual16", new IMAGE_BRUSH("About/Manual_16", mIcon16x16));
     Set( "About.MorePencils16", new IMAGE_BRUSH("About/More_Pencils_16", mIcon16x16));
     Set( "About.Discord2_16", new IMAGE_BRUSH("About/Discord2_16", mIcon16x16));
@@ -406,8 +404,8 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "PainterEditor.ToolsTab.Transform64", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/transform_tool", mIcon64x64 ) );
     Set( "PainterEditor.ToolsTab.Transform32", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/transform_tool", mIcon32x32 ) );
     Set( "PainterEditor.ToolsTab.Transform16", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/transform_tool", mIcon16x16 ) );
-    Set( "PainterEditor.ToolsTab.SceneScale64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/hand", mIcon64x64 ) );
-    Set( "PainterEditor.ToolsTab.SceneScale32", new IMAGE_BRUSH( "PainterEditor/ToolsTab/hand", mIcon32x32 ) );
+    Set( "PainterEditor.ToolsTab.SceneScale64", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/hand", mIcon64x64 ) );
+    Set( "PainterEditor.ToolsTab.SceneScale32", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/hand", mIcon32x32 ) );
     Set( "PainterEditor.ToolsTab.SceneScale16", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/hand", mIcon16x16 ) );
     Set( "PainterEditor.ToolsTab.ScenePan64", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/hand", mIcon64x64 ) );
     Set( "PainterEditor.ToolsTab.ScenePan32", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/hand", mIcon32x32 ) );
@@ -719,7 +717,6 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set("Animation.Timeline.Inbetweening.Backward16", new IMAGE_BRUSH("OdysseyAnimation/Timeline/Inbetweening/backward16", mIcon16x16));
 
     Set("Animation.LightTable64", new IMAGE_BRUSH("OdysseyAnimation/LightTable_64", mIcon64x64));
-    Set("Animation.LightTable24", new IMAGE_BRUSH("OdysseyAnimation/LightTable_24", mIcon24x24));
     Set("Animation.LightTable16", new IMAGE_BRUSH("OdysseyAnimation/LightTable_16", mIcon16x16));
 
     Set("Animation.LightTableToggle", FCheckBoxStyle()

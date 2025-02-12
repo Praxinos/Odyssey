@@ -1119,11 +1119,6 @@ UOdysseyPainterEditorVectorBaseTool::ExtendContextMenuObject( FOdysseyVectorGrou
         , LOCTEXT("vector-tool.object-context-menu.group-paint.tooltip", "Make Paint Group")
         , FSlateIcon()
         , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::MakePaintGroup, GetEditor(), iScene )));
-    /*menu.AddMenuEntry(
-          LOCTEXT("vector-tool.object-context-menu.trim.name", "Trim")
-        , LOCTEXT("vector-tool.object-context-menu.trim.tooltip", "Trim")
-        , FSlateIcon("OdysseyStyle", "OdysseyLogo.Odyssey16")
-        , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::Trim, iScene)));*/
     menu.AddMenuEntry(
           LOCTEXT("vector-tool.object-context-menu.group.name", "Group")
         , LOCTEXT("vector-tool.object-context-menu.group.tooltip", "Group")

@@ -28,6 +28,7 @@ namespace UnrealBuildTool.Rules
                     Path.Combine(ModuleDirectory, "Public"),
                     Path.Combine(ModuleDirectory, "Public", "Settings"),
                     Path.Combine(ModuleDirectory, "Public", "TextureEditor"),
+                    Path.Combine(ModuleDirectory, "Public", "LayerStack")
                 }
                 );
 
@@ -35,14 +36,14 @@ namespace UnrealBuildTool.Rules
                 new string[] {
                     Path.Combine(ModuleDirectory, "Private", "Settings"),
                     Path.Combine(ModuleDirectory, "Private", "TextureEditor"),
+                    Path.Combine(ModuleDirectory, "Private", "LayerStack")
                 }
                 );
 
             PublicDependencyModuleNames.AddRange(
                 new string[]
                 {
-                    "ULIS",
-                    "ULISLoader",
+                    "OdysseyLayerStackEditor"
                     // ... add other public dependencies that you statically link with here ...
                 }
                 );
@@ -60,22 +61,24 @@ namespace UnrealBuildTool.Rules
                     "InputCore",
                     "TextureEditor",
                     "ToolMenus",
-                    "OdysseyBrush",
-                    "OdysseyCore",
-                    "OdysseyPaintEngine",
-                    "OdysseyImaging",
-                    "OdysseyMedia",
-                    "OdysseyLayerStack",
-                    "OdysseyLayerStackEditor",
-                    "OdysseyEditor",
-                    "OdysseyPainterEditor",
-                    "OdysseyStyle",
-                    "OdysseyTexture",
-                    "OdysseyVector",
-                    "OdysseyWidgets",
                     "Slate",
                     "SlateCore",
                     "UnrealEd",
+                    "zlib",
+
+                    "OdysseyBrush",
+                    "OdysseyCore",
+                    "OdysseyEditor",
+                    "OdysseyFile",
+                    "OdysseyImaging",
+                    "OdysseyMedia",
+                    "OdysseyMaths",
+                    "OdysseyPainterEditor",
+                    "OdysseyStyle",
+                    "OdysseyVector",
+                    "OdysseyWidgets",
+                    "ULIS",
+                    "ULISLoader",
                 }
                 );
 
