@@ -9,7 +9,7 @@
 #include "Rendering/OdysseySeamsPaintRendering.h"
 #include "MeshPaintTypes.h"
 #include "TexturePaintHelpers.h"
-#include "../Classes/OdysseySurfaceTexture2DEditable.h"
+#include "OdysseySurfaceTexture2DEditable.h"
 
 /* -------------------------------------------------------------------  */
 
