@@ -104,6 +104,8 @@ FEposSequenceEditorStyle::InitCommands()
     Set( "EposSequenceCommands.NewStoryboardImportImageSequence", new IMAGE_BRUSH_SVG( "new-storyboard-import-image-sequence", Icon20x20 ) );
     Set( "EposSequenceCommands.NewStoryboardImportImageSequence.Small", new IMAGE_BRUSH_SVG( "new-storyboard-import-image-sequence", Icon20x20 ) );
 
+    Set( "EposSequenceCommands.ToggleStoryboardViewportCommand", new IMAGE_BRUSH_SVG( "toggle-storyboard-viewport-type", Icon20x20 ) );
+
     Set( "EposSequenceCommands.CreateCameraAtCurrentTime", new IMAGE_BRUSH_SVG( "camera-create", Icon20x20 ) );
     Set( "EposSequenceCommands.CreateCameraAtCurrentTime.Small", new IMAGE_BRUSH_SVG( "camera-create", Icon20x20 ) );
     Set( "EposSequenceCommands.SnapCameraToViewportAtCurrentTime", new IMAGE_BRUSH_SVG( "camera-snap-to-viewport", Icon20x20 ) );         // inside popup (and maybe big toolbar ?) but Icon..x.. is not used ?
