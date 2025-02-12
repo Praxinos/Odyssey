@@ -7,7 +7,7 @@
 
 /////////////////////////////////////////////////////
 // FOdysseyHUDCircle
-class ODYSSEYHUDSYSTEM_API FOdysseyHUDCircle : public FOdysseyHUDElement
+class ODYSSEYHUD_API FOdysseyHUDCircle : public FOdysseyHUDElement
 {
 public:
     // Destructor
@@ -17,7 +17,7 @@ public:
     FOdysseyHUDCircle( const FVector2D& iCenterPoint, float iRadius);
 
 public:
-    virtual void DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams) override;
+    virtual void DrawHUD(const FOdysseyHUD::FDrawHUDParams& iParams) override;
 
 public:
     void SetCenter(const FVector2D& iCenterPoint);

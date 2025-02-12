@@ -6,7 +6,7 @@
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorSource.h"
 #include "OdysseyHUDElement.h"
-#include "OdysseyHUDSystem.h"
+#include "OdysseyHUD.h"
 
 #include "FreehandShape/OdysseyFreehandShape.h"
 #include "LineShape/OdysseyLineShape.h"
@@ -18,7 +18,7 @@
 #include "OdysseyPainterEditorSource.h"
 #include "OdysseyMediaProvider.h"
 #include "OdysseyHUDElement.h"
-#include "OdysseyHUDSystem.h"
+#include "OdysseyHUD.h"
 #include "FreehandShape/Interpolation/OdysseyInterpolationBezier.h"
 #include "FreehandShape/Interpolation/OdysseyInterpolationCatmullRom.h"
 #include "FreehandShape/Interpolation/OdysseyInterpolationLine.h"

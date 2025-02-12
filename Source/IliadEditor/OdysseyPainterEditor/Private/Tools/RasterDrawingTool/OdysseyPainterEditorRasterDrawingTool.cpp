@@ -31,7 +31,7 @@
 #include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingToolOverrides.h"
 
 #include "OdysseyHUDElement.h"
-#include "OdysseyHUDSystem.h"
+#include "OdysseyHUD.h"
 #include "SOdysseySinglePropertyView.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"

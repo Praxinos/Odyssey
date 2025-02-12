@@ -16,7 +16,7 @@ FOdysseyHUDElement::FOdysseyHUDElement()
 }
 
 void
-FOdysseyHUDElement::DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams)
+FOdysseyHUDElement::DrawHUD(const FOdysseyHUD::FDrawHUDParams& iParams)
 {
     for (TSharedPtr<FOdysseyHUDElement> element : mElements)
         element->DrawHUD(iParams);

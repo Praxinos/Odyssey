@@ -9,7 +9,7 @@
 
 /////////////////////////////////////////////////////
 // FOdysseyHUDLine
-class ODYSSEYHUDSYSTEM_API FOdysseyHUDLine : public FOdysseyHUDElement
+class ODYSSEYHUD_API FOdysseyHUDLine : public FOdysseyHUDElement
 {
 public:
     // Destructor
@@ -19,7 +19,7 @@ public:
     FOdysseyHUDLine(const FVector2D& iStartPoint, const FVector2D& iEndPoint);
 
 public:
-    virtual void DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams) override;
+    virtual void DrawHUD(const FOdysseyHUD::FDrawHUDParams& iParams) override;
 
 public:
     void SetStartPoint(const FVector2D& iPoint);

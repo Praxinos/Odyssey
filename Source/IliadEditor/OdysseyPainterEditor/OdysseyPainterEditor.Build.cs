@@ -52,7 +52,7 @@ public class OdysseyPainterEditor : ModuleRules
                 "PropertyEditor",
                 "Projects",
                 "OdysseyCore",
-                "OdysseyHUDSystem",
+                "OdysseyHUD",
                 "OdysseyImaging",
                 "OdysseyLayerStackEditor",
                 "OdysseyMaths",
@@ -68,7 +68,7 @@ public class OdysseyPainterEditor : ModuleRules
              new string[] {
                 "OdysseyBrush",
                 "OdysseyEditor",
-                "OdysseyHUDSystem",
+                "OdysseyHUD",
                 "OdysseyMedia",
                 "OdysseyPalette",
                 "OdysseyVector",

@@ -1,31 +1,30 @@
 // IDDN.FR.001.250001.006.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
 
-#include "OdysseyHUDCircle.h"
-
-#include "BatchedElements.h"
+#include "OdysseyHUDEllipse.h"
 #include "CanvasTypes.h"
 
 #include "ULISLoaderModule.h"
 
-FOdysseyHUDCircle::~FOdysseyHUDCircle()
+FOdysseyHUDEllipse::~FOdysseyHUDEllipse()
 {
 
 }
 
-FOdysseyHUDCircle::FOdysseyHUDCircle(const FVector2D& iCenterPoint, float iRadius)
+FOdysseyHUDEllipse::FOdysseyHUDEllipse(const FVector2D& iCenter, int iXRadius, int iYRadius)
+    : mCenter(iCenter)
+    , mXRadius(iXRadius)
+    , mYRadius(iYRadius)
 {
-    mCenterPoint = iCenterPoint;
-    mRadius = iRadius;
 }
 
 void
-FOdysseyHUDCircle::DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams)
+FOdysseyHUDEllipse::DrawHUD(const FOdysseyHUD::FDrawHUDParams& iParams)
 {
     const FLinearColor color(0.f, 1.f, 0.f);
 
     ::ULIS::TArray<::ULIS::FVec2I> points;
-    ::ULIS::GenerateCirclePoints( ::ULIS::FVec2I(mCenterPoint.X, mCenterPoint.Y), mRadius, points );
+    ::ULIS::GenerateEllipsePoints( ::ULIS::FVec2I(mCenter.X, mCenter.Y), mXRadius, mYRadius, points );
 
     if (points.Size() < 2)
         return;
@@ -48,13 +47,37 @@ FOdysseyHUDCircle::DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams)
 }
 
 void
-FOdysseyHUDCircle::SetCenter(const FVector2D& iCenterPoint)
+FOdysseyHUDEllipse::SetCenter(const FVector2D& iCenter)
 {
-    mCenterPoint = iCenterPoint;
+    mCenter = iCenter;
 }
 
 void
-FOdysseyHUDCircle::SetRadius(float iRadius)
+FOdysseyHUDEllipse::SetXRadius(int iRadius)
 {
-    mRadius = iRadius;
+    mXRadius = iRadius;
+}
+
+void
+FOdysseyHUDEllipse::SetYRadius(int iRadius)
+{
+    mYRadius = iRadius;
+}
+
+const FVector2D&
+FOdysseyHUDEllipse::GetCenter() const
+{
+    return mCenter;
+}
+
+int
+FOdysseyHUDEllipse::GetXRadius() const
+{
+    return mXRadius;
+}
+
+int
+FOdysseyHUDEllipse::GetYRadius() const
+{
+    return mYRadius;
 }

@@ -79,7 +79,7 @@ namespace UnrealBuildTool.Rules
                     "OdysseyCore",
                     "OdysseyEditor",
                     "OdysseyFlipbookEditor",
-                    "OdysseyHUDSystem",
+                    "OdysseyHUD",
                     "OdysseyImaging",
                     "OdysseyLayerStackEditor",
                     "OdysseyMedia",

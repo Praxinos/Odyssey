@@ -7,7 +7,7 @@
 
 /////////////////////////////////////////////////////
 // FOdysseyHUDEllipse
-class ODYSSEYHUDSYSTEM_API FOdysseyHUDEllipse : public FOdysseyHUDElement
+class ODYSSEYHUD_API FOdysseyHUDEllipse : public FOdysseyHUDElement
 {
 public:
     // Destructor
@@ -17,7 +17,7 @@ public:
     FOdysseyHUDEllipse( const FVector2D& iCenter, int iXRadius, int iYRadius);
 
 public:
-    virtual void DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams) override;
+    virtual void DrawHUD(const FOdysseyHUD::FDrawHUDParams& iParams) override;
 
 public:
     void SetCenter(const FVector2D& iCenter);

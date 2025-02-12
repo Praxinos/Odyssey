@@ -4,7 +4,7 @@
 #pragma once
 
 #include "OdysseyEditor.h"
-#include "OdysseyHUDSystem.h"
+#include "OdysseyHUD.h"
 #include "OdysseyMediaProvider.h"
 #include "OdysseyVectorEngine.h"
 #include "Proxies/OdysseyBrushColor.h"
@@ -156,7 +156,7 @@ public:
     TSharedPtr<FOdysseyPainterEditorSource>              GetSource() const;
     virtual FOdysseyPainterEditorGUI*                    GetGUI();
 
-    virtual FOdysseyHUDSystem*                               HUDSystem() const;
+    virtual FOdysseyHUD*                               HUDSystem() const;
     virtual const FOdysseyBrushColor&                        PaintColor() const;
     EOdysseyPainterEditorColorType                           GetColorType() const;
     virtual FOdysseyMediaProvider                            GetCurrentMediaProvider();
@@ -284,7 +284,7 @@ private:
     void InitTools();
     void InitHUD();
 
-    void OnDrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams);
+    void OnDrawHUD(const FOdysseyHUD::FDrawHUDParams& iParams);
     UOdysseyPainterEditorTool* FindDefaultToolForCurrentLayer();
 
 protected:
@@ -307,7 +307,7 @@ protected:
     uint64                          mVectorHUDFlags;
     uint64                          mVectorDrawingFlags;
 
-    FOdysseyHUDSystem*              mHUDSystem;
+    FOdysseyHUD*              mHUDSystem;
     TSharedPtr<FOdysseyPainterEditorRasterSelection> mRasterSelection;
     TArray<FOdysseyBrushContext*>   mBrushContexts;
     FOdysseyBrushColor              mPaintColor;

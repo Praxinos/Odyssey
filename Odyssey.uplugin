@@ -150,7 +150,7 @@
             "LoadingPhase": "PreDefault"
         },
         {
-            "Name": "OdysseyHUDSystem",
+            "Name": "OdysseyHUD",
             "Type": "Editor",
             "LoadingPhase": "Default"
         },

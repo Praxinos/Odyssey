@@ -36,7 +36,7 @@ FOdysseyHUDHandle::FOdysseyHUDHandle(const FVector2D& iPosition)
 }
 
 void
-FOdysseyHUDHandle::DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams)
+FOdysseyHUDHandle::DrawHUD(const FOdysseyHUD::FDrawHUDParams& iParams)
 {
     const FLinearColor color(1.f, 0.f, 0.f);
 

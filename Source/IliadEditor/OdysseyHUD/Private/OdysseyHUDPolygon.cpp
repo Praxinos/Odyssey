@@ -16,7 +16,7 @@ FOdysseyHUDPolygon::FOdysseyHUDPolygon()
 }
 
 void
-FOdysseyHUDPolygon::DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams)
+FOdysseyHUDPolygon::DrawHUD(const FOdysseyHUD::FDrawHUDParams& iParams)
 {
     if (mPoints.Num() < 2)
         return;

@@ -7,7 +7,7 @@
 #include "Framework/Application/SlateApplication.h"
 #include "Misc/TransactionObjectEvent.h"
 #include "OdysseyPainterEditor.h"
-#include "OdysseyHUDSystem.h"
+#include "OdysseyHUD.h"
 #include "Misc/OdysseyUndoDelegates.h"
 #include "OdysseyPainterEditorToolInputProcessor.h"
 
@@ -205,7 +205,7 @@ TSharedPtr<FOdysseyHUDElement> UOdysseyPainterEditorTool::GetHUD()
 }
 
 void
-UOdysseyPainterEditorTool::DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams)
+UOdysseyPainterEditorTool::DrawHUD(const FOdysseyHUD::FDrawHUDParams& iParams)
 {
     TSharedPtr<FOdysseyHUDElement> hud = GetHUD();
     if (hud)

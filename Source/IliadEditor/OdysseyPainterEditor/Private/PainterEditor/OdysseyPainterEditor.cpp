@@ -10,7 +10,7 @@
 #include "OdysseyBlockClipboardData.h"
 #include "OdysseyEditorModule.h"
 #include "OdysseyPainterEditorSource.h"
-#include "OdysseyHUDSystem.h"
+#include "OdysseyHUD.h"
 #include "OdysseyHUDElement.h"
 #include "OdysseyMediaRaster.h"
 #include "ULISLoaderModule.h"
@@ -112,7 +112,7 @@ FOdysseyPainterEditor::FOdysseyPainterEditor(const FName& iId, const FText& iNam
     , mCurrentTemporaryTool(nullptr)
     , mVectorHUDFlags(FOdysseyVectorHUD::HUD_MODE_OBJECT)
     , mVectorDrawingFlags(0)
-    , mHUDSystem(new FOdysseyHUDSystem())
+    , mHUDSystem(new FOdysseyHUD())
     , mRasterSelection(MakeShared< FOdysseyPainterEditorRasterSelection >())
     , mBrushContexts()
     , mPaintColor(::ULIS::FColor::Black)
@@ -602,7 +602,7 @@ FOdysseyPainterEditor::GetBrushContexts()
     return mBrushContexts;
 }
 
-FOdysseyHUDSystem*
+FOdysseyHUD*
 FOdysseyPainterEditor::HUDSystem() const
 {
     return mHUDSystem;

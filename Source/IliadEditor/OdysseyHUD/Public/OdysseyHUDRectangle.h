@@ -9,7 +9,7 @@
 
 /////////////////////////////////////////////////////
 // FOdysseyHUDRectangle
-class ODYSSEYHUDSYSTEM_API FOdysseyHUDRectangle : public FOdysseyHUDElement
+class ODYSSEYHUD_API FOdysseyHUDRectangle : public FOdysseyHUDElement
 {
 public:
     // Destructor
@@ -19,7 +19,7 @@ public:
     FOdysseyHUDRectangle( const FVector2D& iTopLeftPoint, const FVector2D& iBottomRightPoint);
 
 public:
-    virtual void DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams) override;
+    virtual void DrawHUD(const FOdysseyHUD::FDrawHUDParams& iParams) override;
 
 public:
     void SetTopLeftPoint(const FVector2D& iPoint);

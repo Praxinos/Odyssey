@@ -19,7 +19,7 @@ FOdysseyHUDLine::FOdysseyHUDLine(const FVector2D& iStartPoint, const FVector2D& 
 }
 
 void
-FOdysseyHUDLine::DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams)
+FOdysseyHUDLine::DrawHUD(const FOdysseyHUD::FDrawHUDParams& iParams)
 {
     const FLinearColor color(0.f, 1.f, 0.f);
 

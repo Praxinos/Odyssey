@@ -7,7 +7,7 @@
 
 /////////////////////////////////////////////////////
 // FOdysseyHUDBezier
-class ODYSSEYHUDSYSTEM_API FOdysseyHUDBezier : public FOdysseyHUDElement
+class ODYSSEYHUD_API FOdysseyHUDBezier : public FOdysseyHUDElement
 {
 public:
     // Destructor
@@ -17,7 +17,7 @@ public:
     FOdysseyHUDBezier(const FVector2D& iStartPoint, const FVector2D& iEndPoint, const FVector2D& iControlPoint);
 
 public:
-    virtual void DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams) override;
+    virtual void DrawHUD(const FOdysseyHUD::FDrawHUDParams& iParams) override;
 
 public:
     void SetStartPoint(const FVector2D& iPoint);

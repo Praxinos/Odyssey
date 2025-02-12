@@ -18,7 +18,7 @@ FOdysseyHUDRectangle::FOdysseyHUDRectangle(const FVector2D& iTopLeftPoint, const
 }
 
 void
-FOdysseyHUDRectangle::DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams)
+FOdysseyHUDRectangle::DrawHUD(const FOdysseyHUD::FDrawHUDParams& iParams)
 {
     const FLinearColor color(0.f, 1.f, 0.f);
     FVector2D topLeft = iParams.mTextureToHUD.Execute(mTopLeftPoint);

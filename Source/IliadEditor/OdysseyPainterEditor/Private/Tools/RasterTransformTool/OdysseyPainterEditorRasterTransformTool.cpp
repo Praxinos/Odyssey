@@ -4,7 +4,7 @@
 #include "Tools/RasterTransformTool/OdysseyPainterEditorRasterTransformTool.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyMediaRaster.h"
-#include "OdysseyHUDSystem.h"
+#include "OdysseyHUD.h"
 #include "OdysseyHUDPolygon.h"
 #include "OdysseyHUDHandle.h"
 #include "OdysseyBrushTransform.h"

@@ -9,7 +9,7 @@
 
 /////////////////////////////////////////////////////
 // FOdysseyHUDPolygon
-class ODYSSEYHUDSYSTEM_API FOdysseyHUDPolygon : public FOdysseyHUDElement
+class ODYSSEYHUD_API FOdysseyHUDPolygon : public FOdysseyHUDElement
 {
 public:
     // Destructor
@@ -20,7 +20,7 @@ public:
 
 //FOdysseyHUDElement overrides
 public:
-    virtual void DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams) override;
+    virtual void DrawHUD(const FOdysseyHUD::FDrawHUDParams& iParams) override;
 
 public:
     TArray<FVector2D>& GetPoints();

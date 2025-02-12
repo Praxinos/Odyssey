@@ -4,4 +4,4 @@
 #include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
 
-IMPLEMENT_MODULE( FDefaultModuleImpl, OdysseyHUDSystem );
+IMPLEMENT_MODULE( FDefaultModuleImpl, OdysseyHUD );

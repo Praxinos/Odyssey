@@ -8,7 +8,7 @@
 class FOdysseyHUDElement;
 class FCanvas;
 
-class ODYSSEYHUDSYSTEM_API FOdysseyHUDSystem
+class ODYSSEYHUD_API FOdysseyHUD
 {
 public:
     struct FDrawHUDParams
@@ -23,8 +23,8 @@ public:
 
 public:
     // Construction / Destruction
-    ~FOdysseyHUDSystem();
-    FOdysseyHUDSystem();
+    ~FOdysseyHUD();
+    FOdysseyHUD();
 
 public:
     void AddElement(TSharedPtr<FOdysseyHUDElement> iElement);

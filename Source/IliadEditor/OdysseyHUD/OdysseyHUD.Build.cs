@@ -5,9 +5,9 @@ using System;
 using System.IO;
 using UnrealBuildTool;
 
-public class OdysseyHUDSystem : ModuleRules
+public class OdysseyHUD : ModuleRules
 {
-    public OdysseyHUDSystem(ReadOnlyTargetRules Target) : base(Target)
+    public OdysseyHUD(ReadOnlyTargetRules Target) : base(Target)
     {
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 

@@ -7,12 +7,12 @@
 
 #include "HitProxies.h"
 #include "Input/OdysseyPoint.h"
-#include "OdysseyHUDSystem.h"
+#include "OdysseyHUD.h"
 #include "UObject/GCObject.h"
 
 /////////////////////////////////////////////////////
 // UOdysseyHUDElement
-class ODYSSEYHUDSYSTEM_API FOdysseyHUDElement
+class ODYSSEYHUD_API FOdysseyHUDElement
     : public TSharedFromThis<FOdysseyHUDElement>
     , public FGCObject //Allows us to register UObjects in Garbage Collector
 {
@@ -24,7 +24,7 @@ public:
     FOdysseyHUDElement();
 
 public:
-    virtual void DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams);
+    virtual void DrawHUD(const FOdysseyHUD::FDrawHUDParams& iParams);
 
 public:
     //HitProxy version
@@ -57,7 +57,7 @@ private:
     bool mIsCaptured;
 };
 
-struct ODYSSEYHUDSYSTEM_API HOdysseyHUDElementHitProxy : public HHitProxy
+struct ODYSSEYHUD_API HOdysseyHUDElementHitProxy : public HHitProxy
 {
     DECLARE_HIT_PROXY();
 
