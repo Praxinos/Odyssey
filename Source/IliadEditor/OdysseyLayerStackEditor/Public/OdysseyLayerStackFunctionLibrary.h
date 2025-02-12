@@ -9,7 +9,7 @@
 #include "OdysseyLayerStackFunctionLibrary.generated.h"
 
 UCLASS()
-class ODYSSEYLAYERSTACK_API UOdysseyLayerStackFunctionLibrary : public UBlueprintFunctionLibrary
+class ODYSSEYLAYERSTACKEDITOR_API UOdysseyLayerStackFunctionLibrary : public UBlueprintFunctionLibrary
 {
     GENERATED_BODY()
 

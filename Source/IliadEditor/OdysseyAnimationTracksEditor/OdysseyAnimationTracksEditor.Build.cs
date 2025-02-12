@@ -46,13 +46,12 @@ namespace UnrealBuildTool.Rules
                 {
                     "OdysseyAnimation",
                     "OdysseyAnimationEditor",
+                    "OdysseyAnimationTracks",
                     "OdysseyImaging",
-                    "OdysseyLayerStack",
                     "OdysseyLayerStackEditor",
                     "OdysseyPainterEditor",
                     "OdysseyStyle",
                     "OdysseyViewportDrawingEditor",
-                    "OdysseyAnimationTracks",
 
                     "Core",
                     "CoreUObject",

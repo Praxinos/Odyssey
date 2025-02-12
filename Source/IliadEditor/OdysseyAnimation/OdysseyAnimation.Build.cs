@@ -40,6 +40,7 @@ namespace UnrealBuildTool.Rules
             PublicDependencyModuleNames.AddRange(
                 new string[]
                 {
+                    "OdysseyLayerStackEditor",
                     "blend2d",
                     "ULIS",
                     "ULISLoader",
@@ -62,7 +63,6 @@ namespace UnrealBuildTool.Rules
                     "MovieScene",
                     "OdysseyCore",
                     "OdysseyImaging",
-                    "OdysseyLayerStack",
                     "OdysseyMedia",
                     "OdysseyStyle",
                     "OdysseyMaths",

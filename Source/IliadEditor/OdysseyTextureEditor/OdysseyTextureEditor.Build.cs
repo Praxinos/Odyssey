@@ -43,8 +43,7 @@ namespace UnrealBuildTool.Rules
             PublicDependencyModuleNames.AddRange(
                 new string[]
                 {
-                    "ULIS",
-                    "ULISLoader",
+                    "OdysseyLayerStackEditor"
                     // ... add other public dependencies that you statically link with here ...
                 }
                 );
@@ -62,22 +61,24 @@ namespace UnrealBuildTool.Rules
                     "InputCore",
                     "TextureEditor",
                     "ToolMenus",
+                    "Slate",
+                    "SlateCore",
+                    "UnrealEd",
+                    "zlib",
+
                     "OdysseyBrush",
                     "OdysseyCore",
+                    "OdysseyEditor",
                     "OdysseyFile",
                     "OdysseyImaging",
                     "OdysseyMedia",
-                    "OdysseyLayerStack",
-                    "OdysseyLayerStackEditor",
-                    "OdysseyEditor",
+                    "OdysseyMaths",
                     "OdysseyPainterEditor",
                     "OdysseyStyle",
                     "OdysseyVector",
                     "OdysseyWidgets",
-                    "Slate",
-                    "SlateCore",
-                    "UnrealEd",
-                    "zlib"
+                    "ULIS",
+                    "ULISLoader",
                 }
                 );
 

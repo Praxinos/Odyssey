@@ -11,7 +11,7 @@
 #include "OdysseyLayerStack.generated.h"
 
 UCLASS(Abstract, HideDropdown, BlueprintType, config=EditorPerProjectUserSettings, PerObjectConfig)
-class ODYSSEYLAYERSTACK_API UOdysseyLayerStack
+class ODYSSEYLAYERSTACKEDITOR_API UOdysseyLayerStack
     : public UObject
     , public FOdysseyImageRenderingAbility
 {

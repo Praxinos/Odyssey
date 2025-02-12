@@ -42,7 +42,6 @@ public class OdysseyWidgets : ModuleRules
                 "RHI",
                 "OdysseyBrush",
                 "OdysseyImaging",
-                "OdysseyLayerStack",
                 "OdysseyStyle",
                 "OdysseyStylusInput",
                 "OdysseyMaths",

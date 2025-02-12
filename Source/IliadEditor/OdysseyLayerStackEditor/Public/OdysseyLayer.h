@@ -23,7 +23,7 @@ enum  class  EGetLayerChildrenMethod : uint8
 };
 
 UCLASS(Abstract, HideDropdown, BlueprintType, config=EditorPerProjectUserSettings, PerObjectConfig)
-class ODYSSEYLAYERSTACK_API UOdysseyLayer
+class ODYSSEYLAYERSTACKEDITOR_API UOdysseyLayer
     : public UObject
     , public FOdysseyImageRenderingAbility
 {

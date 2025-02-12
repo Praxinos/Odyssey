@@ -71,7 +71,6 @@ public class OdysseyViewportDrawingEditor : ModuleRules
                 "OdysseyCore",
                 "OdysseyBrush",
                 "OdysseyWidgets",
-                "OdysseyLayerStack",
                 "OdysseyHUDSystem",
                 "OdysseyEditor",
                 "OdysseyPainterEditor",

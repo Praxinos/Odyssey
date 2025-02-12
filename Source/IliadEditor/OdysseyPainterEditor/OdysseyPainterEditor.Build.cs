@@ -52,12 +52,10 @@ public class OdysseyPainterEditor : ModuleRules
                 "PropertyEditor",
                 "Projects",
                 "OdysseyCore",
-                "OdysseyBrush",
-                "OdysseyEditor",
                 "OdysseyHUDSystem",
                 "OdysseyImaging",
-                "OdysseyLayerStack",
                 "OdysseyLayerStackEditor",
+                "OdysseyMaths",
                 "OdysseyStyle",
                 "OdysseyStylusInput",
                 "OdysseyVector",
@@ -68,10 +66,12 @@ public class OdysseyPainterEditor : ModuleRules
 
         PublicDependencyModuleNames.AddRange(
              new string[] {
-                "OdysseyVector",
-                "OdysseyPalette",
-                "OdysseyMedia",
+                "OdysseyBrush",
+                "OdysseyEditor",
                 "OdysseyHUDSystem",
+                "OdysseyMedia",
+                "OdysseyPalette",
+                "OdysseyVector",
                 "ULIS",
                 "ULISLoader"
              }
