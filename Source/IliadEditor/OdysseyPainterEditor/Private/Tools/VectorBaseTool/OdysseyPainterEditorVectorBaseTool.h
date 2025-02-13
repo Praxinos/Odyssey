@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "Tools/OdysseyPainterEditorTool.h"
+#include <vector> //...
 #include "OdysseyPainterEditorVectorBaseTool.generated.h"
 
 
