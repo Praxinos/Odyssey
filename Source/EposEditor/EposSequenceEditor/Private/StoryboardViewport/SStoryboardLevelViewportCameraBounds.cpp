@@ -223,7 +223,7 @@ void SStoryboardLevelViewportCameraBounds::DrawCameraBounds(const FPaintArgs& In
         for (int i = 0; i < topLeftTriangle.VertexCount(); ++i)
         {
             Vertices[i].Position = FVector2f(InAllottedGeometry.LocalToAbsolute(topLeftTriangle[i]));
-            Vertices[i].Color = InQuadColor.ToFColor(false);
+            Vertices[i].Color = InQuadColor.ToFColor(true);
         }
 
         for (int i = 3; i < topLeftTriangle.VertexCount(); ++i)
@@ -255,7 +255,7 @@ void SStoryboardLevelViewportCameraBounds::DrawCameraBounds(const FPaintArgs& In
         for (int i = 0; i < topRightTriangle.VertexCount(); ++i)
         {
             Vertices[i].Position = FVector2f(InAllottedGeometry.LocalToAbsolute(topRightTriangle[i]));
-            Vertices[i].Color = InQuadColor.ToFColor(false);
+            Vertices[i].Color = InQuadColor.ToFColor(true);
         }
 
         for (int i = 3; i < topRightTriangle.VertexCount(); ++i)
@@ -287,7 +287,7 @@ void SStoryboardLevelViewportCameraBounds::DrawCameraBounds(const FPaintArgs& In
         for (int i = 0; i < bottomRightTriangle.VertexCount(); ++i)
         {
             Vertices[i].Position = FVector2f(InAllottedGeometry.LocalToAbsolute(bottomRightTriangle[i]));
-            Vertices[i].Color = InQuadColor.ToFColor(false);
+            Vertices[i].Color = InQuadColor.ToFColor(true);
         }
 
         for (int i = 3; i < bottomRightTriangle.VertexCount(); ++i)
@@ -320,7 +320,7 @@ void SStoryboardLevelViewportCameraBounds::DrawCameraBounds(const FPaintArgs& In
         for (int i = 0; i < bottomLeftTriangle.VertexCount(); ++i)
         {
             Vertices[i].Position = FVector2f(InAllottedGeometry.LocalToAbsolute(bottomLeftTriangle[i]));
-            Vertices[i].Color = InQuadColor.ToFColor(false);
+            Vertices[i].Color = InQuadColor.ToFColor(true);
         }
 
         for (int i = 3; i < bottomLeftTriangle.VertexCount(); ++i)

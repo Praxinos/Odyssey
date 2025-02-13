@@ -850,7 +850,7 @@ private:
 
 SStoryboardLevelViewport::~SStoryboardLevelViewport()
 {
-    FSlateApplication::Get().RegisterInputPreProcessor(mInputProcessor);
+    FSlateApplication::Get().UnregisterInputPreProcessor(mInputProcessor);
 
     if( ViewportClient->GetModeTools() )
     {
@@ -2395,7 +2395,7 @@ SStoryboardLevelViewport::OnPreviewMouseButtonDown(const FGeometry& MyGeometry, 
     );
 
     if (!activeChord.IsValidChord())
-        return FReply::Unhandled();
+        return SCompoundWidget::OnPreviewMouseButtonDown( MyGeometry, iMouseEvent );
 
 
     if (FEposSequenceEditorCommands::Get().StoryboardViewportHoldToPanZoom->HasActiveChord(activeChord))
@@ -2431,7 +2431,8 @@ SStoryboardLevelViewport::OnPreviewMouseButtonDown(const FGeometry& MyGeometry, 
 
         return FReply::Handled().CaptureMouse(AsShared()).PreventThrottling();
     }
-    return FReply::Unhandled();
+
+    return SCompoundWidget::OnPreviewMouseButtonDown( MyGeometry, iMouseEvent );
 }
 
 FReply
@@ -2496,7 +2497,8 @@ SStoryboardLevelViewport::OnMouseMove(const FGeometry& MyGeometry, const FPointe
 
         return FReply::Handled();
     }
-    return FReply::Unhandled();
+
+    return SCompoundWidget::OnMouseMove( MyGeometry, iMouseEvent );
 }
 
 FReply
@@ -2518,7 +2520,7 @@ SStoryboardLevelViewport::OnMouseButtonUp(const FGeometry& MyGeometry, const FPo
         return FReply::Handled().ReleaseMouseCapture();
     }
 
-    return FReply::Unhandled();
+    return SCompoundWidget::OnMouseButtonUp( MyGeometry, iMouseEvent );
 }
 
 FReply SStoryboardLevelViewport::OnKeyDown( const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent )
