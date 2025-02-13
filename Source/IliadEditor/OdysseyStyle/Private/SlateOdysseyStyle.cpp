@@ -585,8 +585,8 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     );
 
     //OdysseyViewportDrawingEditor
-    Set("OdysseyViewportDrawingEditMode.OdysseyViewportDrawingIcon16",new IMAGE_BRUSH("OdysseyViewportDrawing/viewport_drawing_icon_16",mIcon16x16));
-    Set("OdysseyViewportDrawingEditMode.OdysseyViewportDrawingIcon40",new IMAGE_BRUSH("OdysseyViewportDrawing/viewport_drawing_icon_40",mIcon40x40));
+    Set("OdysseyViewportDrawingEditMode.OdysseyViewportDrawingIcon16",new IMAGE_BRUSH_SVG("OdysseyViewportDrawing/viewport_drawing_icon",mIcon16x16));
+    Set("OdysseyViewportDrawingEditMode.OdysseyViewportDrawingIcon40",new IMAGE_BRUSH_SVG("OdysseyViewportDrawing/viewport_drawing_icon",mIcon40x40));
 
     //LayerStack
     {
