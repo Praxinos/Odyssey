@@ -16,6 +16,8 @@
 //#include "OdysseyHUDElement.h"
 //#include "TextureResource.h"
 
+#define LOCTEXT_NAMESPACE "PainterEditor"
+
 FOdysseyPainterEditorVectorSelectionToolHUD::~FOdysseyPainterEditorVectorSelectionToolHUD()
 {
 }
@@ -181,7 +183,7 @@ FOdysseyPainterEditorVectorSelectionToolHUD::DrawPickingArea( const FOdysseyHUDS
                 {
                     uint32 n = ( i + 1 ) % 4;
 
-                    DrawPrimitiveLine( iParams, p[i], p[n], hcColor, hcColor, 1.0f, false );
+                    DrawPrimitiveLine( iParams, p[i], p[n], hcColor, 1.0f );
                 }
             }
             break;
@@ -204,7 +206,7 @@ FOdysseyPainterEditorVectorSelectionToolHUD::DrawPickingArea( const FOdysseyHUDS
                     FVector2D p0 = iParams.mTextureToHUD.Execute( FVector2D( points[n].x, points[n].y ) );
                     FVector2D p1 = iParams.mTextureToHUD.Execute( FVector2D( points[i].x, points[i].y ) );
 
-                    DrawPrimitiveLine( iParams, p0, p1, hcColor, hcColor, 1.0f, false );
+                    DrawPrimitiveLine( iParams, p0, p1, hcColor, 1.0f );
                 }
             }
             break;
@@ -216,7 +218,7 @@ FOdysseyPainterEditorVectorSelectionToolHUD::DrawPickingArea( const FOdysseyHUDS
                     FVector2D p0 = iParams.mTextureToHUD.Execute( FVector2D( pointArray[n].x, pointArray[n].y ) );
                     FVector2D p1 = iParams.mTextureToHUD.Execute( FVector2D( pointArray[i].x, pointArray[i].y ) );
 
-                    DrawPrimitiveLine( iParams, p0, p1, hcColor, hcColor, 1.0f, false );
+                    DrawPrimitiveLine( iParams, p0, p1, hcColor, 1.0f );
                 }
             break;
 
@@ -344,3 +346,5 @@ FOdysseyPainterEditorVectorSelectionToolHUD::GenerateFreehandMask( std::vector<:
 
     return rect;
 }
+
+#undef LOCTEXT_NAMESPACE

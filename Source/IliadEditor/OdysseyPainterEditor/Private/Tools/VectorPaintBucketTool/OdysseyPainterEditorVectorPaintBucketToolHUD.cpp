@@ -9,6 +9,8 @@
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorCycle.h"
 
+#define LOCTEXT_NAMESPACE "PainterEditor"
+
 FOdysseyPainterEditorVectorPaintBucketToolHUD::~FOdysseyPainterEditorVectorPaintBucketToolHUD()
 {
 }
@@ -260,3 +262,5 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::Draw( BLContext* iBLContext )
 {
 
 }
+
+#undef LOCTEXT_NAMESPACE

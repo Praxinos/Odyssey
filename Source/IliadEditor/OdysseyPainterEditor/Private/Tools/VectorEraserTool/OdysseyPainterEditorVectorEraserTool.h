@@ -89,5 +89,4 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorEraserTool : public UO
         FOdysseyPainterEditorVectorEraserToolHUD* mEraserHUD;
         ::ULIS::FVec2D mMin;
         ::ULIS::FVec2D mMax;
-        double mZoomFactor;
 };

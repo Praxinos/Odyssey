@@ -7,6 +7,8 @@
 #include "OdysseyVectorCell.h"
 #include "OdysseyVectorGroupPaint.h"
 
+#define LOCTEXT_NAMESPACE "PainterEditor"
+
 FOdysseyPainterEditorVectorPathPushToolHUD::~FOdysseyPainterEditorVectorPathPushToolHUD()
 {
 }
@@ -53,7 +55,14 @@ FOdysseyPainterEditorVectorPathPushToolHUD::DrawHUD( const FOdysseyHUDSystem::FD
     // -> inbetweens in inbetween mode.
     FOdysseyPainterEditorVectorBaseToolHUD::DrawHUD( iParams );
 
-    DrawPrimitiveCircle( iParams, hudCursor, mPathPushTool->Radius, hcColor, bgColor, 1.0f, false );
+    // cursor
+    DrawPrimitiveCircle( iParams
+                       , hudCursor
+                       , WorldVectorToHUD( iParams
+                                         , ::ULIS::FVec2D( mX, mY )
+                                         , ::ULIS::FVec2D( mPathPushTool->Radius, 0 ) ).Distance()
+                       , hcColor
+                       , 1.0f );
 }
 
 void
@@ -67,3 +76,5 @@ FOdysseyPainterEditorVectorPathPushToolHUD::SetCursorPosition( double iX, double
     mX = iX;
     mY = iY;
 }
+
+#undef LOCTEXT_NAMESPACE

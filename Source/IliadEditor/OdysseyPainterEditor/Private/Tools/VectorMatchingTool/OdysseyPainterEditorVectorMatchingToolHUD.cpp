@@ -13,6 +13,8 @@
 #include "InbetweenerTag/InbetweenerQuad.h"
 #include "InbetweenerTag/InbetweenerBreakdown.h"
 
+#define LOCTEXT_NAMESPACE "PainterEditor"
+
 FOdysseyPainterEditorVectorMatchingToolHUD::~FOdysseyPainterEditorVectorMatchingToolHUD()
 {
 }
@@ -113,7 +115,13 @@ FOdysseyPainterEditorVectorMatchingToolHUD::DrawHUD( const FOdysseyHUDSystem::FD
         }
     }
 
-    DrawPrimitiveCircle( iParams, hudCursor, mMatchingTool->PickingRadius, hcColor, hcColor, 1.0f, false );
+    DrawPrimitiveCircle( iParams
+                       , hudCursor
+                       , WorldVectorToHUD( iParams
+                                         , ::ULIS::FVec2D( mCursorPosition.x, mCursorPosition.y )
+                                         , ::ULIS::FVec2D( mMatchingTool->PickingRadius, 0 ) ).Distance()
+                       , hcColor
+                       , 1.0f );
 }
 
 void
@@ -164,3 +172,5 @@ FOdysseyPainterEditorVectorMatchingToolHUD::PickTargetPoints( FInbetweenerBreakd
         oGridArray.push_back( iBreakdown->GetGrid() );
     }
 }
+
+#undef LOCTEXT_NAMESPACE

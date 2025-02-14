@@ -16,6 +16,7 @@
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorCell.h"
+#include "OdysseyVectorLayer.h"
 #include "OdysseyAnimationCurrentFrameMutator.h"
 #include "OdysseyAnimationPlayer.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
@@ -303,7 +304,7 @@ FOdysseyAnimationEditorSource::Clear()
             GEditor->EndTransaction();
 
             vectorCell->SetScene( new FOdysseyVectorGroupPaint("Scene") );
-            //vectorRoot->Invalidate( 0 );
+            vectorCell->GetLayer()->RequestRedraw( vectorCell, 0 );
         }
 
         FOdysseyVectorEngine::Notify( nullptr, notificationFlags );

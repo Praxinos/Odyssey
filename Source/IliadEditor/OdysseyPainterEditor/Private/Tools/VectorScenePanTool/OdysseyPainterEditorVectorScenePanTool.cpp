@@ -181,7 +181,7 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseDragVector( FOdysseyVectorGroupP
 
     // redraw
     //iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
-    iScene->GetLayer()->RequestRedraw( FOdysseyVectorCell::REDRAW_INTERACTIVE );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), FOdysseyVectorCell::REDRAW_INTERACTIVE );
 
     oSignalFlags = notificationFlags;
 }
@@ -193,7 +193,7 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseUpVector( FOdysseyVectorGroupPai
                                                         , uint64& oSignalFlags )
 {
     iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    iScene->GetLayer()->RequestRedraw( 0 );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     return true;
 }

@@ -362,7 +362,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
     }
 
     iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    iScene->GetLayer()->RequestRedraw( 0 );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     oSignalFlags = notificationFlags;
 
@@ -537,7 +537,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseUpVector( FOdysseyVectorGroupP
     }
 
     iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    iScene->GetLayer()->RequestRedraw( 0 );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     oSignalFlags = notificationFlags;
 
@@ -552,7 +552,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::PropertyChangedVector( FOdysseyVector
 
     // redraw
     iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    iScene->GetLayer()->RequestRedraw( 0 );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     return 0;
 }
@@ -607,7 +607,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::ResetRoute()
     mPickedRoute->Reset();
 
     scene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    scene->GetLayer()->RequestRedraw( 0 );
+    scene->GetLayer()->RequestRedraw( scene->GetCell(), 0 );
 }
 
 void
@@ -637,7 +637,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::DeleteRoute()
 
 
     scene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    scene->GetLayer()->RequestRedraw( 0 );
+    scene->GetLayer()->RequestRedraw( scene->GetCell(), 0 );
 }
 
 void

@@ -386,7 +386,7 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
     mDropZone = DROPZONE_NONE;
 
     itemScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    itemScene->GetLayer()->RequestRedraw( 0 );
+    itemScene->GetLayer()->RequestRedraw( itemScene->GetCell(), 0 );
 
     FOdysseyVectorEngine::Notify( itemScene, notificationFlags );
 

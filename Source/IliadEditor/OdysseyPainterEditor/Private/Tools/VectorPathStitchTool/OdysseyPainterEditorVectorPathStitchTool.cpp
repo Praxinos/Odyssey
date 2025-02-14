@@ -173,7 +173,7 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseDownVector( FOdysseyVectorGrou
                                   | FOdysseyVectorObject::UPDATE_INTERACTIVE );
     }
 
-    iScene->GetLayer()->RequestRedraw( FOdysseyVectorCell::REDRAW_INTERACTIVE );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), FOdysseyVectorCell::REDRAW_INTERACTIVE );
 
     oSignalFlags = notificationFlags;
 
@@ -199,7 +199,7 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseDragVector( FOdysseyVectorGrou
         mPathStitchHUD->SetPosition( iPointInTexture.x, iPointInTexture.y );
     }
 
-    iScene->GetLayer()->RequestRedraw( FOdysseyVectorCell::REDRAW_INTERACTIVE );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), FOdysseyVectorCell::REDRAW_INTERACTIVE );
 }
 
 bool
@@ -212,7 +212,7 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseUpVector( FOdysseyVectorGroupP
         return false;
 
     iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    iScene->GetLayer()->RequestRedraw( 0 );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     return true;
 }
@@ -222,7 +222,7 @@ UOdysseyPainterEditorVectorPathStitchTool::PropertyChangedVector( FOdysseyVector
                                                                 , const FName& iPropertyName )
 {
     iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    iScene->GetLayer()->RequestRedraw( 0 );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     return UOdysseyPainterEditorVectorBaseTool::PropertyChangedVector( iScene, iPropertyName );
 }

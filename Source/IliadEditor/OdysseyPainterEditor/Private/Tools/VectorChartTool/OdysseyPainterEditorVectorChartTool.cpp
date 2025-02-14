@@ -131,8 +131,7 @@ UOdysseyPainterEditorVectorChartTool::OnKeyUpGlobalVector( FOdysseyVectorGroupPa
       || ( key == EKeys::LeftAlt     ) || ( key == EKeys::RightAlt     ) )
     {
         // redraw
-        iScene->GetCell()->Invalidate( 0 );
-        iScene->GetLayer()->RequestRedraw( 0 );
+        iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
     }
 
     // first reset display mode
@@ -439,7 +438,7 @@ UOdysseyPainterEditorVectorChartTool::PropertyChangedVector( FOdysseyVectorGroup
     iScene->GetCell()->ResetHUD();
 
     iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    iScene->GetLayer()->RequestRedraw( 0 );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     return 0;
 }

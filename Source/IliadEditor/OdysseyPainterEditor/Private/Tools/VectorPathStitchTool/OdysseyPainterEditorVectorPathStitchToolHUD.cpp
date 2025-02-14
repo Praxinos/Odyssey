@@ -8,6 +8,8 @@
 #include "OdysseyPainterEditor.h"
 #include "SOdysseyViewport.h"
 
+#define LOCTEXT_NAMESPACE "PainterEditor"
+
 FOdysseyPainterEditorVectorPathStitchToolHUD::~FOdysseyPainterEditorVectorPathStitchToolHUD()
 {
 }
@@ -62,7 +64,7 @@ FOdysseyPainterEditorVectorPathStitchToolHUD::SetPosition( double iWorldX
     mStitchableVertex[1] = nullptr;
     mPickedPointArray.clear();
 
-    PickPoints( iWorldX, iWorldY, mPathStitchTool->PickingRadius / mPathStitchTool->GetViewport()->GetZoom(), mPickedPointArray );
+    PickPoints( iWorldX, iWorldY, mPathStitchTool->PickingRadius, mPickedPointArray );
 
     for( int i = 0; i < mPickedPointArray.size(); i++ )
     {
@@ -127,7 +129,13 @@ FOdysseyPainterEditorVectorPathStitchToolHUD::DrawHUD( const FOdysseyHUDSystem::
     }
 */
     // cursor
-    DrawPrimitiveCircle( iParams, hudCursor, mPathStitchTool->PickingRadius, hcColor, noColor, 1.0f, false );
+    DrawPrimitiveCircle( iParams
+                       , hudCursor
+                       , WorldVectorToHUD( iParams
+                                         , ::ULIS::FVec2D( mX, mY )
+                                         , ::ULIS::FVec2D( mPathStitchTool->PickingRadius, 0 ) ).Distance()
+                       , hcColor
+                       , 1.0f );
 
     if( mStitchableVertex[0] && mStitchableVertex[1] )
     {
@@ -146,3 +154,5 @@ void
 FOdysseyPainterEditorVectorPathStitchToolHUD::Draw( BLContext* iBLContext )
 {
 }
+
+#undef LOCTEXT_NAMESPACE

@@ -11,6 +11,8 @@
 #include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyVectorCell.h"
 
+#define LOCTEXT_NAMESPACE "PainterEditor"
+
 FOdysseyPainterEditorVectorTransformToolHUD::~FOdysseyPainterEditorVectorTransformToolHUD()
 {
 }
@@ -136,52 +138,47 @@ FOdysseyPainterEditorVectorTransformToolHUD::DrawGizmo( const FOdysseyHUDSystem:
     FLinearColor yAxisColor = ( mFlags & PICK_YAXIS ) ? hcColor : fgColor;
     ::ULIS::FVec2D worldXAxisStart;
     ::ULIS::FVec2D worldYAxisStart;
-    ::ULIS::FVec2D worldXAxisLength;
-    ::ULIS::FVec2D worldYAxisLength;
+    ::ULIS::FVec2D worldXAxisVector;
+    ::ULIS::FVec2D worldYAxisVector;
     ::ULIS::FVec2D worldGizmo;
+    FVector2D hudXAxisStart;
+    FVector2D hudYAxisStart;
+    FVector2D hudXAxisVector;
+    FVector2D hudYAxisVector;
 
     GetWorldGizmo( mSelectionBox
                  , mGizmo
                  , worldGizmo
                  , worldXAxisStart
                  , worldYAxisStart
-                 , worldXAxisLength
-                 , worldYAxisLength );
+                 , worldXAxisVector
+                 , worldYAxisVector );
 
-/*
+    hudXAxisStart = WorldPointToHUD( iParams, FVector2D( worldXAxisStart.x, worldXAxisStart.y ) );
+    hudYAxisStart = WorldPointToHUD( iParams, FVector2D( worldYAxisStart.x, worldYAxisStart.y ) );
+    hudXAxisVector = WorldVectorToHUD( iParams
+                                     , hudXAxisStart
+                                     , FVector2D( worldXAxisVector.x
+                                                , worldXAxisVector.y ) );
+    hudYAxisVector = WorldVectorToHUD( iParams
+                                     , hudYAxisStart
+                                     , FVector2D( worldYAxisVector.x
+                                                , worldYAxisVector.y ) );
+
     // Central circle
-
+/*
     iBLContext->setFillStyle( gizmoColor );
     iBLContext->fillCircle( worldGizmo.x, worldGizmo.y, GIZMO_RADIUS );
     iBLContext->setStrokeWidth( 1.0f );
     iBLContext->setStrokeStyle( bgColor );
     iBLContext->strokeCircle( worldGizmo.x, worldGizmo.y, GIZMO_RADIUS );
-
-    // Axises
-
-    iBLContext->setStrokeWidth( 2.0f );
-    iBLContext->setStrokeStyle( bgColor );
-    iBLContext->strokeLine( worldXAxisStart.x
-                          , worldXAxisStart.y
-                          , worldXAxisStart.x + worldXAxisLength.x
-                          , worldXAxisStart.y + worldXAxisLength.y );
-    iBLContext->strokeLine( worldYAxisStart.x
-                          , worldYAxisStart.y
-                          , worldYAxisStart.x + worldYAxisLength.x
-                          , worldYAxisStart.y + worldYAxisLength.y );
-
-    iBLContext->setStrokeWidth( 1.0f );
-    iBLContext->setStrokeStyle( xAxisColor );
-    iBLContext->strokeLine( worldXAxisStart.x
-                          , worldXAxisStart.y
-                          , worldXAxisStart.x + worldXAxisLength.x
-                          , worldXAxisStart.y + worldXAxisLength.y );
-    iBLContext->setStrokeStyle( yAxisColor );
-    iBLContext->strokeLine( worldYAxisStart.x
-                          , worldYAxisStart.y
-                          , worldYAxisStart.x + worldYAxisLength.x
-                          , worldYAxisStart.y + worldYAxisLength.y );
 */
+    // Axises
+    DrawPrimitiveLine( iParams, hudXAxisStart, hudXAxisStart + hudXAxisVector, bgColor, 2.0f );
+    DrawPrimitiveLine( iParams, hudYAxisStart, hudYAxisStart + hudYAxisVector, bgColor, 2.0f );
+
+    DrawPrimitiveLine( iParams, hudXAxisStart, hudXAxisStart + hudXAxisVector, xAxisColor, 1.0f );
+    DrawPrimitiveLine( iParams, hudYAxisStart, hudYAxisStart + hudYAxisVector, yAxisColor, 1.0f );
 }
 
 uint32
@@ -428,9 +425,8 @@ FOdysseyPainterEditorVectorTransformToolHUD::DrawHUD( const FOdysseyHUDSystem::F
 
         if( mShowSelectionBox )
         {
- //3DHUD            DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
+            DrawSelectionBox( iParams, fgColor, bgColor, hcColor, hudFlags );
 
-            //DrawSelectionBox( iScene, iFlags ); // commented out: now called from super::draw()
             DrawScalers( iParams );
         }
 
@@ -442,3 +438,5 @@ void
 FOdysseyPainterEditorVectorTransformToolHUD::Draw( BLContext* iBLContext )
 {
 }
+
+#undef LOCTEXT_NAMESPACE

@@ -15,6 +15,8 @@
 #include "CanvasTypes.h"
 #include "CanvasItem.h"
 
+#define LOCTEXT_NAMESPACE "PainterEditor"
+
 #define INBETWEENER_INDICATOR_RADIUS 10.0f
 #define BREAKDOWN_INDICATOR_RADIUS   20.0f
 #define FONT_SIZE                    28.0f
@@ -32,6 +34,18 @@ FOdysseyPainterEditorVectorChartToolHUD::FOdysseyPainterEditorVectorChartToolHUD
     //FString fontPath = IPluginManager::Get().FindPlugin( "Odyssey" )->GetBaseDir() / TEXT( "Resources/OdysseyAssetResources/Font/LoveStruck.ttf" );
 
     mFontInfo = FSlateFontInfo( LoadObject<UFont>( nullptr, TEXT("/Odyssey/Fonts/LoveStruck_Font") ), 40 );
+}
+
+void
+FOdysseyPainterEditorVectorChartToolHUD::Load()
+{
+    FText ctrlInfoText = LOCTEXT("vector-chart-tool-hud-info-ctrl", "Relative" );
+    FText shiftInfoText = LOCTEXT("vector-chart-tool-hud-info-shift", "Ease in or out" );
+    FText altInfoText = LOCTEXT("vector-chart-tool-hud-info-alt", "Magnet" );
+
+    FormatModifierInfo( &ctrlInfoText, &shiftInfoText, &altInfoText );
+
+    FOdysseyPainterEditorVectorBaseToolHUD::Load();
 }
 
 void
@@ -141,9 +155,7 @@ FOdysseyPainterEditorVectorChartToolHUD::DrawBreakdownChart( const FOdysseyHUDSy
                                     , hudCoords[2]
                                     , 24
                                     , chartColor
-                                    , blackColor
-                                    , 2.0f
-                                    , false );
+                                    , 2.0f );
     }
 
     // vertical lines
@@ -195,13 +207,13 @@ FOdysseyPainterEditorVectorChartToolHUD::DrawBreakdownChart( const FOdysseyHUDSy
                     FVector2D lineP1 = FVector2D ( hudFrameNumberPosition.x + glyphW, hudFrameNumberPosition.y + glyphH );
 
                     // underline
-                    DrawPrimitiveLine( iParams, lineP0, lineP1, chartColor, chartColor, 2.0f, false );
+                    DrawPrimitiveLine( iParams, lineP0, lineP1, chartColor, 2.0f );
                 }
                 else
                 {
                     FVector2D circleCenter = FVector2D ( hudFrameInfoPosition.x, hudFrameInfoPosition.y );
 
-                    DrawPrimitiveCircle( iParams, circleCenter, fontSize, chartColor, chartColor, 2.0f, false );
+                    DrawPrimitiveCircle( iParams, circleCenter, fontSize, chartColor, 2.0f );
                 }
 
                 // draw indicator
@@ -211,9 +223,7 @@ FOdysseyPainterEditorVectorChartToolHUD::DrawBreakdownChart( const FOdysseyHUDSy
                                  , FVector2D( hudIndicatorPosition.x - ( normalizedPerpendicular.x * BREAKDOWN_INDICATOR_RADIUS )
                                             , hudIndicatorPosition.y - ( normalizedPerpendicular.y * BREAKDOWN_INDICATOR_RADIUS ) )
                                  , chartColor
-                                 , chartColor
-                                 , 2.0f
-                                 , false );
+                                 , 2.0f );
 
                 iParams.mCanvas->DrawItem( textItem );
             }
@@ -233,9 +243,7 @@ FOdysseyPainterEditorVectorChartToolHUD::DrawBreakdownChart( const FOdysseyHUDSy
                                  , FVector2D( hudIndicatorPosition.x - ( normalizedPerpendicular.x * BREAKDOWN_INDICATOR_RADIUS )
                                             , hudIndicatorPosition.y - ( normalizedPerpendicular.y * BREAKDOWN_INDICATOR_RADIUS ) )
                                  , hovered ? iHcColor : inbetweenColor
-                                 , chartColor
-                                 , hovered ? 3.0f: 2.0f
-                                 , false );
+                                 , hovered ? 3.0f: 2.0f );
 
                 iParams.mCanvas->DrawItem( textItem );
             }
@@ -256,21 +264,11 @@ FOdysseyPainterEditorVectorChartToolHUD::DrawBreakdownChart( const FOdysseyHUDSy
 
     if( mChartTool->EditionMode == eChartEditionMode::Reshape )
     {
-        DrawPrimitiveLine( iParams
-                         , hudCoords[0]
-                         , hudCoords[1]
-                         , iFgColor
-                         , iBgColor
-                         , 2.0f
-                         , true );
+        DrawPrimitiveLine( iParams, hudCoords[0], hudCoords[1], iBgColor, 3.0f );
+        DrawPrimitiveLine( iParams, hudCoords[0], hudCoords[1], iFgColor, 2.0f );
 
-        DrawPrimitiveLine( iParams
-                         , hudCoords[1]
-                         , hudCoords[2]
-                         , iFgColor
-                         , iBgColor
-                         , 2.0f
-                         , true );
+        DrawPrimitiveLine( iParams, hudCoords[1], hudCoords[2], iBgColor, 3.0f );
+        DrawPrimitiveLine( iParams, hudCoords[1], hudCoords[2], iFgColor, 2.0f );
 
         for( uint32 i = 0; i < 3; i++ )
         {
@@ -341,6 +339,8 @@ FOdysseyPainterEditorVectorChartToolHUD::DrawHUD( const FOdysseyHUDSystem::FDraw
            breakdown->GetInbetweenerTag()->UnlockDrawing();
         }
     }
+
+   DrawModifierInfo( iParams );
 }
 
 void
@@ -448,3 +448,5 @@ FOdysseyPainterEditorVectorChartToolHUD::MoveInbetween( FOdysseyVectorTagInbetwe
 
     iInbetweenerTag->MoveInbetween( iInbetween, newSpacing, iRelative );
 }
+
+#undef LOCTEXT_NAMESPACE

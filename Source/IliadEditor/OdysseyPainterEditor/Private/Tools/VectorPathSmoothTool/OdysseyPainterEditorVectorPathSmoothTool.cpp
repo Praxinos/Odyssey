@@ -26,7 +26,6 @@ UOdysseyPainterEditorVectorPathSmoothTool::~UOdysseyPainterEditorVectorPathSmoot
 UOdysseyPainterEditorVectorPathSmoothTool::UOdysseyPainterEditorVectorPathSmoothTool()
     : UOdysseyPainterEditorVectorBaseTool( MakeShared<FOdysseyPainterEditorVectorPathSmoothToolHUD>( this ), false )
     , mUndoSegmentReshape( nullptr )
-    , mZoomFactor( 1.0f )
     , SmoothingMode( ePathSmoothingMode::Round )
     , PickingRadius( 20.0f )
     , PreserveHandleLength( false )
@@ -107,8 +106,6 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDownVector( FOdysseyVectorGrou
 {
     TSharedPtr<FOdysseyPainterEditorViewportTab> viewportTab = GetEditor()->FindTab<FOdysseyPainterEditorViewportTab>();
 
-    mZoomFactor = viewportTab->GetViewport()->GetZoom();
-
     if (iKey != EKeys::LeftMouseButton)
         return false;
 
@@ -146,7 +143,7 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseHoverVector( FOdysseyVectorGro
                                                              , uint64& oSignalFlags )
 {
 
-    mPathSmoothHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y, mZoomFactor );
+    mPathSmoothHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
 }
 
 void
@@ -159,7 +156,7 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDragVector( FOdysseyVectorGrou
     {
         std::vector<FOdysseyVectorPoint*> pickedPointArray;
 
-        mPathSmoothHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y, mZoomFactor );
+        mPathSmoothHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
 
         pickedPointArray = mPathSmoothHUD->GetPickedPointArray();
 
@@ -196,7 +193,7 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDragVector( FOdysseyVectorGrou
                                   | FOdysseyVectorObject::UPDATE_NOINBETWEENING );
     }
 
-    iScene->GetLayer()->RequestRedraw( FOdysseyVectorCell::REDRAW_INTERACTIVE );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), FOdysseyVectorCell::REDRAW_INTERACTIVE );
 }
 
 bool

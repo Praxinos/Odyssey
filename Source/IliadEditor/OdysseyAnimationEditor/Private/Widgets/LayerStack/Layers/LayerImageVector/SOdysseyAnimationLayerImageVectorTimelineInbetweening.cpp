@@ -268,7 +268,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::OnSelectionChanged( TShar
             }
         }
 
-        mAnimationLayerImageVector->GetVectorLayer()->RequestRedraw( 0 );
+        mAnimationLayerImageVector->GetVectorLayer()->RequestRedraw( nullptr, 0 );
 
         FOdysseyVectorEngine::Notify( nullptr, retFlags );
     }
@@ -408,7 +408,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::AddBreakdown()
 
         // Updates and request redraw
         mAnimationLayerImageVector->GetVectorLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-        mAnimationLayerImageVector->GetVectorLayer()->RequestRedraw( 0 );
+        mAnimationLayerImageVector->GetVectorLayer()->RequestRedraw( nullptr, 0 );
     }
 
     FOdysseyVectorEngine::Notify( nullptr, notificationFlags );
@@ -467,7 +467,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::RemoveBreakdown()
         }
         // Updates and request redraw
         mAnimationLayerImageVector->GetVectorLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-        mAnimationLayerImageVector->GetVectorLayer()->RequestRedraw( 0 );
+        mAnimationLayerImageVector->GetVectorLayer()->RequestRedraw( nullptr, 0 );
     }
 
     // static call
@@ -532,7 +532,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::ShowHideTarget()
         }
         // Updates and request redraw
         mAnimationLayerImageVector->GetVectorLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-        mAnimationLayerImageVector->GetVectorLayer()->RequestRedraw( 0 );
+        mAnimationLayerImageVector->GetVectorLayer()->RequestRedraw( nullptr, 0 );
     }
 
     // static call
@@ -599,7 +599,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::ChangeDirection()
 
     // Updates and request redraw
     mAnimationLayerImageVector->GetVectorLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    mAnimationLayerImageVector->GetVectorLayer()->RequestRedraw( 0 );
+    mAnimationLayerImageVector->GetVectorLayer()->RequestRedraw( nullptr, 0 );
 
     // static call
     FOdysseyVectorEngine::Notify( nullptr, notificationFlags );

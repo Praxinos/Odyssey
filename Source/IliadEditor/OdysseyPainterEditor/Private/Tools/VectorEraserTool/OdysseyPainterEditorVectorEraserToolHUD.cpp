@@ -8,6 +8,8 @@
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorLayer.h"
 
+#define LOCTEXT_NAMESPACE "PainterEditor"
+
 FOdysseyPainterEditorVectorEraserToolHUD::~FOdysseyPainterEditorVectorEraserToolHUD()
 {
 
@@ -22,8 +24,12 @@ FOdysseyPainterEditorVectorEraserToolHUD::FOdysseyPainterEditorVectorEraserToolH
 void
 FOdysseyPainterEditorVectorEraserToolHUD::Load()
 {
-    uint32 width = mScene->GetLayer()->GetWidth();
+    FText shiftInfoText = LOCTEXT("vector-eraser-tool-hud-info", "erase to intersection" );
+    FText altInfoText = LOCTEXT("vector-eraser-tool-hud-info", "erase whole path");
     uint32 height = mScene->GetLayer()->GetHeight();
+    uint32 width = mScene->GetLayer()->GetWidth();
+
+    FormatModifierInfo( nullptr, &shiftInfoText, &altInfoText );
 
     mBLEraserMask.create( width, height, BL_FORMAT_A8 );
 
@@ -61,7 +67,15 @@ FOdysseyPainterEditorVectorEraserToolHUD::DrawHUD( const FOdysseyHUDSystem::FDra
     // -> inbetweens in inbetween mode.
     FOdysseyPainterEditorVectorBaseToolHUD::DrawHUD( iParams );
 
-    DrawPrimitiveCircle( iParams, hudCursor, mEraserTool->Radius, hcColor, bgColor, 1.0f, false );
+    DrawPrimitiveCircle( iParams
+                       , hudCursor
+                       , WorldVectorToHUD( iParams
+                                         , ::ULIS::FVec2D( mX, mY )
+                                         , ::ULIS::FVec2D( mEraserTool->Radius, 0 ) ).Distance()
+                       , hcColor
+                       , 1.0f );
+
+    DrawModifierInfo( iParams );
 }
 
 void
@@ -86,22 +100,20 @@ FOdysseyPainterEditorVectorEraserToolHUD::Draw( BLContext* iBLContext )
 
 void
 FOdysseyPainterEditorVectorEraserToolHUD::FillCircle( double iX
-                                                    , double iY
-                                                    , double iZoomFactor )
+                                                    , double iY )
 {
     mBLEraserContext.setFillAlpha( 1.0f );
-    mBLEraserContext.fillCircle( iX, iY, mEraserTool->Radius / iZoomFactor );
+    mBLEraserContext.fillCircle( iX, iY, mEraserTool->Radius );
 }
 
 void
 FOdysseyPainterEditorVectorEraserToolHUD::StrokeLine( const ::ULIS::FVec2D& iP0
-                                                    , const ::ULIS::FVec2D& iP1
-                                                    , double iZoomFactor )
+                                                    , const ::ULIS::FVec2D& iP1 )
 {
     mBLEraserContext.setFillAlpha( 1.0f );
     mBLEraserContext.setStrokeWidth( mEraserTool->Radius * 2 );
     mBLEraserContext.strokeLine( iP0.x, iP0.y, iP1.x, iP1.y );
-    mBLEraserContext.fillCircle( iP1.x, iP1.y, mEraserTool->Radius / iZoomFactor );
+    mBLEraserContext.fillCircle( iP1.x, iP1.y, mEraserTool->Radius );
 }
 
 void
@@ -135,3 +147,5 @@ FOdysseyPainterEditorVectorEraserToolHUD::GetMask()
 {
     return &mBLEraserMask;
 }
+
+#undef LOCTEXT_NAMESPACE

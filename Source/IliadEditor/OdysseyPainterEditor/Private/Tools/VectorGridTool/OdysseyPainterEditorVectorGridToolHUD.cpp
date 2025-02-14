@@ -9,6 +9,8 @@
 #include "OdysseyPainterEditor.h"
 #include "OdysseyVectorGroupPaint.h"
 
+#define LOCTEXT_NAMESPACE "PainterEditor"
+
 FOdysseyPainterEditorVectorGridToolHUD::~FOdysseyPainterEditorVectorGridToolHUD()
 {
 }
@@ -235,9 +237,7 @@ FOdysseyPainterEditorVectorGridToolHUD::DrawSelectionRectangle( const FOdysseyHU
                                  , hudCoords[i]
                                  , hudCoords[n]
                                  , iHighlightColor
-                                 , iHighlightColor
-                                 , 1.0f
-                                 , false );
+                                 , 1.0f );
             }
         }
     }
@@ -247,6 +247,14 @@ void
 FOdysseyPainterEditorVectorGridToolHUD::Reset( )
 {
     MakeGrid( mGridTool->GetEditor()->GetVectorHUDFlags() );
+}
+
+void
+FOdysseyPainterEditorVectorGridToolHUD::Load()
+{
+    FText shiftInfoText = LOCTEXT("vector-grid-tool-hud-info-shift", "multi selection" );
+
+    FormatModifierInfo( nullptr, &shiftInfoText, nullptr );
 }
 
 void
@@ -289,7 +297,7 @@ FOdysseyPainterEditorVectorGridToolHUD::DrawHUD( const FOdysseyHUDSystem::FDrawH
             {
                 uint32 n = ( j + 1 ) % 4;
 
-                DrawPrimitiveLine( iParams, hudCoords[j], hudCoords[n], fgColor, bgColor, 1.0f, false );
+                DrawPrimitiveLine( iParams, hudCoords[j], hudCoords[n], fgColor, 1.0f );
             }
         }
 
@@ -305,6 +313,8 @@ FOdysseyPainterEditorVectorGridToolHUD::DrawHUD( const FOdysseyHUDSystem::FDrawH
                                , bgColor );
         }
     }
+
+    DrawModifierInfo( iParams );
 }
 
 void
@@ -530,3 +540,5 @@ FOdysseyPainterEditorVectorGridToolHUD::MakeGrid( uint64 iHUDFlags )
         Map();
     }
 }
+
+#undef LOCTEXT_NAMESPACE

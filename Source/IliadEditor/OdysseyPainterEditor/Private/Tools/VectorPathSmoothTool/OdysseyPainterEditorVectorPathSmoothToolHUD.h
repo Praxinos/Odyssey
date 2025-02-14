@@ -22,7 +22,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPathSmoothToolHUD : pu
         virtual void Load() override;
         virtual void Unload() override;
 
-        void SetCursorPosition( double iX, double iY, double iZoomFactor );
+        void SetCursorPosition( double iX, double iY );
         std::vector<FOdysseyVectorPoint*>& GetPickedPointArray();
 
     private:

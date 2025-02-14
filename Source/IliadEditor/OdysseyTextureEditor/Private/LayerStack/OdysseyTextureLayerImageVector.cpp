@@ -306,7 +306,7 @@ UOdysseyTextureLayerImageVector::Merge(const TArray<UOdysseyLayer*>& iLayers)
     destinationScene->UpdateMatrix();
 
     destinationScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    destinationScene->GetLayer()->RequestRedraw( 0 );
+    destinationScene->GetLayer()->RequestRedraw( destinationScene->GetCell(), 0 );
 
     FOdysseyVectorEngine::Notify( mVectorCell->GetScene(), FOdysseyVectorEngine::NOTIFY_ALL );
 }

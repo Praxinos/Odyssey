@@ -284,7 +284,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUpCutPaths( FOdysseyVectorGroupP
 
     // update. note: as the scene is invalidated, it will request a redraw as well
     iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    iScene->GetLayer()->RequestRedraw( 0 );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     return notificationFlags;
 }
@@ -352,7 +352,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUpDeletePoint( FOdysseyVectorGro
 
         // Update. note: as the scene is invalidated, it will request a redraw as well
         iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-        iScene->GetLayer()->RequestRedraw( 0 );
+        iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
         // needed for valid GUndo pointer
         GEditor->BeginTransaction(LOCTEXT("vector-path-edit-tool.transaction.delete-point","Vector Path Edit Tool"));
@@ -429,7 +429,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUpAddPoint( FOdysseyVectorGroupP
 
     // Update. note: as the scene is invalidated, it will request a redraw as well
     iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    iScene->GetLayer()->RequestRedraw( 0 );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     // needed for valid GUndo pointer
     GEditor->BeginTransaction(LOCTEXT("vector-path-edit-tool.transaction.add-point","Vector Path Edit Tool"));
@@ -503,9 +503,6 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorGro
                              | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
                              | FOdysseyPainterEditor::UI_UPDATE_TIMELINE;
 
-    TSharedPtr<FOdysseyPainterEditorViewportTab> viewportTab = GetEditor()->FindTab<FOdysseyPainterEditorViewportTab>();
-    double zoomFactor = viewportTab->GetViewport()->GetZoom();
-
     mSelectedPathArray.clear();
     mPickedVertexArray.clear();
     mPickedVertexPositionArray.clear();
@@ -518,7 +515,6 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorGro
     ( iScene
     , 0
     , [ this
-      , zoomFactor
       , iScene
       , &iPointInTexture ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
       {
@@ -530,7 +526,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorGro
 
                   path->PickPoint( iPointInTexture.x
                                  , iPointInTexture.y
-                                 , PickingRadius / zoomFactor
+                                 , PickingRadius
                                  , mPickedVertexArray
                                  , mPickedHandleArray
                                  , mPickingFlags );
@@ -695,7 +691,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorGro
 
     iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
                               | FOdysseyVectorObject::UPDATE_NOINBETWEENING );
-    iScene->GetLayer()->RequestRedraw( FOdysseyVectorCell::REDRAW_INTERACTIVE );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), FOdysseyVectorCell::REDRAW_INTERACTIVE );
 
     return notificationFlags;
 }
@@ -916,7 +912,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDragVector( FOdysseyVectorGroupP
         // Update. Note: as the seen is invalidated, it will request a redraw
         iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
                                   | FOdysseyVectorObject::UPDATE_NOINBETWEENING );
-        iScene->GetLayer()->RequestRedraw( FOdysseyVectorCell::REDRAW_INTERACTIVE );
+        iScene->GetLayer()->RequestRedraw( iScene->GetCell(), FOdysseyVectorCell::REDRAW_INTERACTIVE );
     }
 
     oSignalFlags = notificationFlags;
@@ -1041,7 +1037,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUpVector( FOdysseyVectorGroupPai
         }
 
         iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-        iScene->GetLayer()->RequestRedraw( 0 );
+        iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
     }
 
 

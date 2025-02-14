@@ -61,7 +61,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathSmoothTool : publi
     private:
         FOdysseyPainterEditorVectorPathSmoothToolHUD* mPathSmoothHUD;
         FOdysseyVectorUndoSegmentReshape* mUndoSegmentReshape;
-        double mZoomFactor;
 
     public:
         UPROPERTY( EditAnywhere

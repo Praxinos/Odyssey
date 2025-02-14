@@ -11,6 +11,8 @@
 #include "CanvasTypes.h"
 #include "CanvasItem.h"
 
+#define LOCTEXT_NAMESPACE "PainterEditor"
+
 FOdysseyPainterEditorVectorPathEditToolHUD::~FOdysseyPainterEditorVectorPathEditToolHUD()
 {
 }
@@ -38,8 +40,13 @@ FOdysseyPainterEditorVectorPathEditToolHUD::Reset()
 void
 FOdysseyPainterEditorVectorPathEditToolHUD::Load()
 {
-    uint32 width = mScene->GetLayer()->GetWidth();
+    FText ctrlInfoText = LOCTEXT("vector-path-edit-tool-hud-info-ctrl", "deform segment" );
+    FText shiftInfoText = LOCTEXT("vector-path-edit-tool-hud-info-shift", "widen vertex" );
+    FText altInfoText = LOCTEXT("vector-path-edit-tool-hud-info-alt", "add/remove vertex" );
     uint32 height = mScene->GetLayer()->GetHeight();
+    uint32 width = mScene->GetLayer()->GetWidth();
+
+    FormatModifierInfo( &ctrlInfoText, &shiftInfoText, &altInfoText );
 
     mBLSelectionMask.create( width, height, BL_FORMAT_A8 );
 
@@ -107,6 +114,8 @@ FOdysseyPainterEditorVectorPathEditToolHUD::DrawHUD( const FOdysseyHUDSystem::FD
     uint64 hudFlags = mPathEditTool->GetEditor()->GetVectorHUDFlags();
     FVector2D hudCursor = iParams.mTextureToHUD.Execute( FVector2D( mX, mY ) );
 
+    //char infoText[255] = "CTRL: deform segment      SHIFT: widen vertex        ALT: add/remove vertex";
+
     // Draw default
     // -> nothing in object mode.
     // -> vertices and segments in vertex mode.
@@ -131,7 +140,13 @@ FOdysseyPainterEditorVectorPathEditToolHUD::DrawHUD( const FOdysseyHUDSystem::FD
     }
 
     // cursor
-    DrawPrimitiveCircle( iParams, hudCursor, mPathEditTool->PickingRadius, hcColor, hcColor, 1.0f, false );
+    DrawPrimitiveCircle( iParams
+                       , hudCursor
+                       , WorldVectorToHUD( iParams
+                                         , ::ULIS::FVec2D( mX, mY )
+                                         , ::ULIS::FVec2D( mPathEditTool->PickingRadius, 0 ) ).Distance()
+                       , hcColor
+                       , 1.0f );
 
     if( mPathEditTool->GetPickingMode() == ePathPickingMode::Alter )
     {
@@ -142,7 +157,7 @@ FOdysseyPainterEditorVectorPathEditToolHUD::DrawHUD( const FOdysseyHUDSystem::FD
             FVector2D minusP1 = FVector2D( hudCursor.X + mPathEditTool->PickingRadius + 8
                                          , hudCursor.Y - mPathEditTool->PickingRadius );
 
-            DrawPrimitiveLine( iParams, minusP0, minusP1, hcColor, hcColor, 1.0f, true );
+            DrawPrimitiveLine( iParams, minusP0, minusP1, hcColor, 1.0f );
         }
         else
         {
@@ -155,14 +170,14 @@ FOdysseyPainterEditorVectorPathEditToolHUD::DrawHUD( const FOdysseyHUDSystem::FD
                                         , hudCursor.Y - mPathEditTool->PickingRadius )
                              , 4
                              , hcColor
-                             , bgColor
-                             , 1.0f
-                             , true );
+                             , 1.0f );
 
             // cutting Line
-            DrawPrimitiveLine( iParams, lineP0, lineP1, hcColor, hcColor, 1.0f, false );
+            DrawPrimitiveLine( iParams, lineP0, lineP1, hcColor, 1.0f );
         }
     }
+
+   DrawModifierInfo( iParams );
 }
 
 void
@@ -220,3 +235,5 @@ FOdysseyPainterEditorVectorPathEditToolHUD::GetCutLineP1()
 {
     return mCutLinePoint[1];
 }
+
+#undef LOCTEXT_NAMESPACE

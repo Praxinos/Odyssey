@@ -13,6 +13,8 @@
 #include "CanvasTypes.h"
 #include "CanvasItem.h"
 
+#define LOCTEXT_NAMESPACE "PainterEditor"
+
 FOdysseyPainterEditorVectorScenePanToolHUD::~FOdysseyPainterEditorVectorScenePanToolHUD()
 {
 }
@@ -21,7 +23,7 @@ FOdysseyPainterEditorVectorScenePanToolHUD::FOdysseyPainterEditorVectorScenePanT
     : FOdysseyPainterEditorVectorBaseToolHUD( iScenePanTool )
     , mScenePanTool( iScenePanTool )
 {
-    mFontInfo = FSlateFontInfo( LoadObject<UFont>( nullptr, TEXT("/Odyssey/Fonts/Lucida_Console_Font") ), 16 );
+
 }
 
 void
@@ -70,17 +72,17 @@ FOdysseyPainterEditorVectorScenePanToolHUD::DrawFrame( const FOdysseyHUDSystem::
                               , iParams.mTextureToHUD.Execute( FVector2D( texCoords[3].x + iFrameLength.x, texCoords[3].y                  ) )
                               , iParams.mTextureToHUD.Execute( FVector2D( texCoords[3].x                 , texCoords[3].y - iFrameLength.y ) ) };
 
-    DrawPrimitiveLine( iParams, hudCoords[0], hudCoords[4], iFgColor, iBgColor, 1.0f, false );
-    DrawPrimitiveLine( iParams, hudCoords[0], hudCoords[5], iFgColor, iBgColor, 1.0f, false );
+    DrawPrimitiveLine( iParams, hudCoords[0], hudCoords[4] , iFgColor, 1.0f );
+    DrawPrimitiveLine( iParams, hudCoords[0], hudCoords[5] , iFgColor, 1.0f );
 
-    DrawPrimitiveLine( iParams, hudCoords[1], hudCoords[6], iFgColor, iBgColor, 1.0f, false );
-    DrawPrimitiveLine( iParams, hudCoords[1], hudCoords[7], iFgColor, iBgColor, 1.0f, false );
+    DrawPrimitiveLine( iParams, hudCoords[1], hudCoords[6] , iFgColor, 1.0f );
+    DrawPrimitiveLine( iParams, hudCoords[1], hudCoords[7] , iFgColor, 1.0f );
 
-    DrawPrimitiveLine( iParams, hudCoords[2], hudCoords[8], iFgColor, iBgColor, 1.0f, false );
-    DrawPrimitiveLine( iParams, hudCoords[2], hudCoords[9], iFgColor, iBgColor, 1.0f, false );
+    DrawPrimitiveLine( iParams, hudCoords[2], hudCoords[8] , iFgColor, 1.0f );
+    DrawPrimitiveLine( iParams, hudCoords[2], hudCoords[9] , iFgColor, 1.0f );
 
-    DrawPrimitiveLine( iParams, hudCoords[3], hudCoords[10], iFgColor, iBgColor, 1.0f, false );
-    DrawPrimitiveLine( iParams, hudCoords[3], hudCoords[11], iFgColor, iBgColor, 1.0f, false );
+    DrawPrimitiveLine( iParams, hudCoords[3], hudCoords[10], iFgColor, 1.0f );
+    DrawPrimitiveLine( iParams, hudCoords[3], hudCoords[11], iFgColor, 1.0f );
 }
 
 void
@@ -94,11 +96,18 @@ FOdysseyPainterEditorVectorScenePanToolHUD::DrawHUD( const FOdysseyHUDSystem::FD
     uint64 hudFlags = mScenePanTool->GetEditor()->GetVectorHUDFlags();
     //char panText[255];
     //char zoomText[255];
-    char infoText[255];
+    FText infoText = FText::Format( LOCTEXT("vector-scene-pan-tool-hud-info"
+                                          , "Pan[x:{0} y:{1}]     Zoom[x:{2} y:{3}]" )
+                                  , mScene->GetTranslationX()
+                                  , mScene->GetTranslationY()
+                                  , mScene->GetScalingX()
+                                  , mScene->GetScalingY() );
+
+/*
     const UFont* font = Cast<UFont>(mFontInfo.FontObject);
     FVector2D infoAt = FVector2D( iParams.mCanvas->GetViewRect().Width() * 0.5f
                                 , iParams.mCanvas->GetViewRect().Height() - 20 );
-
+*/
     frame.x = iParams.mTextureWidth  * 0.05f;
     frame.y = iParams.mTextureHeight * 0.05f;
     frame.w = iParams.mTextureWidth  * 0.90f;
@@ -115,61 +124,12 @@ FOdysseyPainterEditorVectorScenePanToolHUD::DrawHUD( const FOdysseyHUDSystem::FD
 
     DrawFrame( iParams, frame, frameLength, fgColor, bgColor );
 
-/*
-    // Zoom Text
-    snprintf( zoomText
-            , 255
-            , "Zoom[x:%.2f y:%.2f]"
-            , mScene->GetScalingX()
-            , mScene->GetScalingY() );
-
-    FCanvasTextItem zoomItem = FCanvasTextItem( FVector2D( 0, 48 )
-                                              , FText::FromString( zoomText )
-                                              , font
-                                              , fgColor );
-
-    zoomItem.EnableShadow( FLinearColor( 0, 0, 0, 1 ) );
-
-    iParams.mCanvas->DrawItem( zoomItem );
-
-    // Pan Text
-    snprintf( panText
-            , 255
-            , "Pan[x:%.2f y:%.2f]"
-            , mScene->GetTranslationX()
-            , mScene->GetTranslationY() );
-
-    FCanvasTextItem panItem = FCanvasTextItem( FVector2D( 0, 68 )
-                                             , FText::FromString( panText )
-                                             , font
-                                             , fgColor );
-
-    panItem.EnableShadow( FLinearColor( 0, 0, 0, 1 ) );
-
-    iParams.mCanvas->DrawItem( panItem );
-*/
-
-    snprintf( infoText
-            , 255
-            , "Pan[x:%.2f y:%.2f]     Zoom[x:%.2f y:%.2f]"
-            , mScene->GetTranslationX()
-            , mScene->GetTranslationY()
-            , mScene->GetScalingX()
-            , mScene->GetScalingY() );
-
-    infoAt.X -= ( font->GetStringSize( *FString(infoText) ) * 0.5f );
-
-    FCanvasTextItem infoItem = FCanvasTextItem( infoAt
-                                              , FText::FromString( infoText )
-                                              , font
-                                              , FLinearColor( 1.0f, 0.5f, 0.0f, 1.0f ) ); // orange
-
-    infoItem.EnableShadow( FLinearColor( 0, 0, 0, 1 ) );
-
-    iParams.mCanvas->DrawItem( infoItem );
+    DrawInfo( iParams, infoText, fgColor );
 }
 
 void
 FOdysseyPainterEditorVectorScenePanToolHUD::Draw( BLContext* iBLContext )
 {
 }
+
+#undef LOCTEXT_NAMESPACE

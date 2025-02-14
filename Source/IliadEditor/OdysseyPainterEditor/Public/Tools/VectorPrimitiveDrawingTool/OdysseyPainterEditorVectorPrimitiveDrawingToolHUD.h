@@ -6,13 +6,13 @@
 #include <blend2d.h>
 #include <ULIS>
 #include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseToolHUD.h"
-#include "Tools/VectorScenePanTool/OdysseyPainterEditorVectorScenePanTool.h"
+#include "Tools/VectorPrimitiveDrawingTool/OdysseyPainterEditorVectorPrimitiveDrawingTool.h"
 
-class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorScenePanToolHUD : public FOdysseyPainterEditorVectorBaseToolHUD
+class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPrimitiveDrawingToolHUD : public FOdysseyPainterEditorVectorBaseToolHUD
 {
     public:
-        virtual ~FOdysseyPainterEditorVectorScenePanToolHUD();
-        FOdysseyPainterEditorVectorScenePanToolHUD( UOdysseyPainterEditorVectorScenePanTool* iScenePanTool );
+        virtual ~FOdysseyPainterEditorVectorPrimitiveDrawingToolHUD();
+        FOdysseyPainterEditorVectorPrimitiveDrawingToolHUD( UOdysseyPainterEditorVectorPrimitiveDrawingTool* iPrimitiveDrawingTool );
 
         void DrawHUD( const FOdysseyHUDSystem::FDrawHUDParams& iParams );
         virtual void Draw( BLContext* iBLContext ) override;
@@ -20,14 +20,13 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorScenePanToolHUD : publ
         virtual void Load() override;
         virtual void Unload() override;
 
-        void SetFactor( double iFactor );
-
     private:
         void DrawFrame( const FOdysseyHUDSystem::FDrawHUDParams& iParams
                       , ::ULIS::FRectI& iFrame
                       , ::ULIS::FVec2I& iFrameLength
                       , const FLinearColor& iFgColor
                       , const FLinearColor& iBgColor );
+
     private:
-        UOdysseyPainterEditorVectorScenePanTool* mScenePanTool;
+        UOdysseyPainterEditorVectorPrimitiveDrawingTool* mPrimitiveDrawingTool;
 };

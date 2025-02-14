@@ -13,6 +13,11 @@
 #include "InbetweenerTag/InbetweenerRoute.h"
 #include "InbetweenerTag/InbetweenerQuad.h"
 #include "InbetweenerTag/InbetweenerPoint.h"
+// for 3D HUDs
+#include "CanvasTypes.h"
+#include "CanvasItem.h"
+
+#define LOCTEXT_NAMESPACE "PainterEditor"
 
 static FInbetweenerHandleTrajectory*
 PickHandleFromTag( FOdysseyVectorTagInbetweener* iInbetweenerTag
@@ -38,6 +43,17 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::FOdysseyPainterEditorVectorTraject
     : FOdysseyPainterEditorVectorBaseToolHUD( iTrajectoryTool )
 {
     mTrajectoryTool = iTrajectoryTool;
+}
+
+void
+FOdysseyPainterEditorVectorTrajectoryToolHUD::Load()
+{
+    FText ctrlInfoText = LOCTEXT("vector-trajectory-tool-hud-info-ctrl", "deform curve" );
+    FText shiftInfoText = LOCTEXT("vector-trajectory-tool-hud-info-shift", "spacing" );
+
+    FormatModifierInfo( &ctrlInfoText, &shiftInfoText, nullptr );
+
+    FOdysseyPainterEditorVectorBaseToolHUD::Load();
 }
 
 void
@@ -296,9 +312,7 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::SetCursorPosition( double iX, doub
 
 void
 FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawQuad( const FOdysseyHUDSystem::FDrawHUDParams& iParams
-                                                      , const FLinearColor& iFgColor
-                                                      , const FLinearColor& iBgColor
-                                                      , const FLinearColor& iHcColor
+                                                      , const FLinearColor& iColor
                                                       , FInbetweenerQuad* iQuad )
 {
     ::ULIS::FRectD quadBBox = iQuad->GetBBox( eInbetweenerPointPositionType::SourcePosition );
@@ -318,11 +332,10 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawQuad( const FOdysseyHUDSystem:
                                   , iParams.mTextureToHUD.Execute( FVector2D( pointTexCoords[2].x, pointTexCoords[2].y ) )
                                   , iParams.mTextureToHUD.Execute( FVector2D( pointTexCoords[3].x, pointTexCoords[3].y ) ) };
 
-
-    DrawPrimitiveLine( iParams, pointHUDCoords[0], pointHUDCoords[1], iBgColor, iHcColor, 2.0f, false );
-    DrawPrimitiveLine( iParams, pointHUDCoords[1], pointHUDCoords[2], iBgColor, iHcColor, 2.0f, false );
-    DrawPrimitiveLine( iParams, pointHUDCoords[2], pointHUDCoords[3], iBgColor, iHcColor, 2.0f, false );
-    DrawPrimitiveLine( iParams, pointHUDCoords[3], pointHUDCoords[0], iBgColor, iHcColor, 2.0f, false );
+    DrawPrimitiveLine( iParams, pointHUDCoords[0], pointHUDCoords[1], iColor, 1.0f );
+    DrawPrimitiveLine( iParams, pointHUDCoords[1], pointHUDCoords[2], iColor, 1.0f );
+    DrawPrimitiveLine( iParams, pointHUDCoords[2], pointHUDCoords[3], iColor, 1.0f );
+    DrawPrimitiveLine( iParams, pointHUDCoords[3], pointHUDCoords[0], iColor, 1.0f );
 }
 
 void
@@ -350,7 +363,7 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawTrajectory( const FOdysseyHUDS
 
     if( iInbetweenerTag->GetInterpolationType() == eInbetweenerInterpolationType::Linear )
     {
-        DrawPrimitiveLine( iParams, p0HUDCoords, p3HUDCoords, trajectoryColor, trajectoryColor, 2.0f, false );
+        DrawPrimitiveLine( iParams, p0HUDCoords, p3HUDCoords, trajectoryColor, 2.0f );
     }
 
     if( iInbetweenerTag->GetInterpolationType() == eInbetweenerInterpolationType::ARAP )
@@ -362,7 +375,7 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawTrajectory( const FOdysseyHUDS
 
         if( iTrajectory->GetBreakdown()->GetIndex() == 0 )
         {
-            DrawQuad( iParams, iFgColor, iBgColor, iHcColor, quad );
+            DrawQuad( iParams, iFgColor, quad );
         }
 
         DrawPrimitiveBezierCubic( iParams
@@ -372,19 +385,22 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawTrajectory( const FOdysseyHUDS
                                 , p3HUDCoords
                                 , 24
                                 , trajectoryColor
-                                , trajectoryColor
-                                , 1.0f
-                                , true );
+                                , 2.0f );
 
         if( mTrajectoryTool->EditionMode == eTrajectoryEditionMode::Curve )
         {
+            // Line to handle
+            DrawPrimitiveLine  ( iParams
+                               , p0HUDCoords
+                               , p1HUDCoords
+                               , blackColor
+                               , 2.0f );
+
             DrawPrimitiveLine  ( iParams
                                , p0HUDCoords
                                , p1HUDCoords
                                , iTrajectory->GetStep(0)->IsAligned() ? greenColor : whiteColor
-                               , blackColor
-                               , 1.0f
-                               , true );
+                               , 1.0f );
 
             DrawPrimitiveHandle( iParams
                                , p1HUDCoords
@@ -392,13 +408,18 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawTrajectory( const FOdysseyHUDS
                                , iFgColor
                                , iBgColor );
 
+            // Line to handle
+            DrawPrimitiveLine  ( iParams
+                               , p3HUDCoords
+                               , p2HUDCoords
+                               , blackColor
+                               , 2.0f );
+
             DrawPrimitiveLine  ( iParams
                                , p3HUDCoords
                                , p2HUDCoords
                                , iTrajectory->GetStep(1)->IsAligned() ? greenColor : whiteColor
-                               , blackColor
-                               , 1.0f
-                               , true );
+                               , 1.0f );
 
             DrawPrimitiveHandle( iParams
                                , p2HUDCoords
@@ -444,6 +465,7 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawHUD( const FOdysseyHUDSystem::
     FLinearColor hcColor = FLinearColor( hc );
     uint64 hudFlags = mTrajectoryTool->GetEditor()->GetVectorHUDFlags();
     uint64 gridFlags = 0;
+
 
     gridFlags |= ( mTrajectoryTool->GridDisplayMode == eTrajectoryGridDisplayMode::AsPoints ) ?  FOdysseyVectorHUD::HUD_BREAKDOWN_GRID_DOTTED : 0;
     gridFlags |= ( mTrajectoryTool->EditionMode == eTrajectoryEditionMode::Add ) ? FOdysseyVectorHUD::HUD_BREAKDOWN_SOURCE_GRID : 0;
@@ -519,20 +541,26 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawHUD( const FOdysseyHUDSystem::
 
             if( hoveredQuad )
             {
+                hoveredQuad->GetGrid()->GetBreakdown()->GetInbetweenerTag()->LockDrawing();
+
                 DrawQuad( iParams
-                        , fgColor
-                        , bgColor
                         , hcColor
                         , hoveredQuad );
+
+                hoveredQuad->GetGrid()->GetBreakdown()->GetInbetweenerTag()->UnlockDrawing();
             }
 
             // prevent a crash in case the grid is rebuilt by reset the pointer to null each time.
-            mTrajectoryTool->ResetHoveredQuad();
+            //mTrajectoryTool->ResetHoveredQuad();
         }
     }
+
+    DrawModifierInfo( iParams );
 }
 
 void
 FOdysseyPainterEditorVectorTrajectoryToolHUD::Draw( BLContext* iBLContext )
 {
 }
+
+#undef LOCTEXT_NAMESPACE

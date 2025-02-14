@@ -218,7 +218,7 @@ UOdysseyPainterEditorVectorObjectView::PostEditChangeProperty( FPropertyChangedE
         mScene->GetCell()->InvalidateRect();
 
         mScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-        mScene->GetLayer()->RequestRedraw( 0 );
+        mScene->GetLayer()->RequestRedraw( mScene->GetCell(), 0 );
     }
 }
 

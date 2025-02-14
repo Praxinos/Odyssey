@@ -7,7 +7,7 @@
 #include "PainterEditor/OdysseyPainterEditorSource.h"
 #include "OdysseyMediaVector.h"
 #include "ISinglePropertyView.h"
-#include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseToolHUD.h"
+#include "Tools/VectorPrimitiveDrawingTool/OdysseyPainterEditorVectorPrimitiveDrawingToolHUD.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
 #include "SOdysseySinglePropertyView.h"
 
@@ -35,7 +35,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::~UOdysseyPainterEditorVectorPri
 }
 
 UOdysseyPainterEditorVectorPrimitiveDrawingTool::UOdysseyPainterEditorVectorPrimitiveDrawingTool()
-    : UOdysseyPainterEditorVectorBaseTool( MakeShared<FOdysseyPainterEditorVectorBaseToolHUD>( this ), true )
+    : UOdysseyPainterEditorVectorBaseTool( MakeShared<FOdysseyPainterEditorVectorPrimitiveDrawingToolHUD>( this ), true )
     , PrimitiveType ( EOdysseyVectorPrimitiveType::Ellipse )
     , Opacity( 1.0f )
     , Brush( nullptr )
@@ -191,7 +191,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDownVector( FOdysseyVect
     }
 
     // redraw
-    iScene->GetLayer()->RequestRedraw( FOdysseyVectorCell::REDRAW_INTERACTIVE );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), FOdysseyVectorCell::REDRAW_INTERACTIVE );
 
     oSignalFlags = notificationFlags;
 
@@ -299,7 +299,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDragVector( FOdysseyVect
                                   | FOdysseyVectorObject::UPDATE_NOINBETWEENING ); // update invalidated objects
     }
 
-    iScene->GetLayer()->RequestRedraw( FOdysseyVectorCell::REDRAW_INTERACTIVE );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), FOdysseyVectorCell::REDRAW_INTERACTIVE );
 
     oSignalFlags = notificationFlags;
 }
@@ -354,7 +354,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUpVector( FOdysseyVector
         iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS ); // update invalidate objects
     }
 
-    iScene->GetLayer()->RequestRedraw( 0 );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     oSignalFlags = notificationFlags;
 

@@ -102,7 +102,7 @@ UOdysseyAnimationLayerImageVector::UpdateSharedEnv()
     }
 
     mVectorLayer.Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    mVectorLayer.RequestRedraw( 0 );
+    mVectorLayer.RequestRedraw( nullptr, 0 );
 }
 
 struct FOdysseyAnimationLayerImageVectorObjectVersion
@@ -466,7 +466,7 @@ UOdysseyAnimationLayerImageVector::Merge(const TArray<UOdysseyLayer*>& iLayers)
         scene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
     }
 
-    mVectorLayer.RequestRedraw( 0 );
+    mVectorLayer.RequestRedraw( nullptr, 0 );
 
     FOdysseyVectorEngine::Notify( nullptr, FOdysseyVectorEngine::NOTIFY_ALL );
 }
@@ -698,7 +698,7 @@ UOdysseyAnimationLayerImageVector::CheckBreakdownTargetMap()
     }
 
     mVectorLayer.Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    mVectorLayer.RequestRedraw( 0 );
+    mVectorLayer.RequestRedraw( nullptr, 0 );
 
     FOdysseyVectorEngine::Notify( nullptr, 0xFFFFFFFFFFFFFFFF );
 

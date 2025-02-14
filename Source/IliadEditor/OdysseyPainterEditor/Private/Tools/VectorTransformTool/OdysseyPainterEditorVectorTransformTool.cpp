@@ -1093,7 +1093,7 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseUpVector( FOdysseyVectorGroupPa
 
             // update invalidated objects. Updating via shared Env will invalidate the engine, thus redrawing the image
             iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-            iScene->GetLayer()->RequestRedraw( 0 );
+            iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
             // quick fix to place the gizmo at the right place
             FSelectionBox& selectionBox = mTransformHUD->GetSelectionBox();

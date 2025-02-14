@@ -124,7 +124,7 @@ UOdysseyPainterEditorVectorBucketView::PostEditChangeProperty( FPropertyChangedE
                        , FName(PropertyChangedEvent.Property->GetMetaData(TEXT("Category"))) );
 
         vectorScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-        vectorScene->GetLayer()->RequestRedraw( 0 );
+        vectorScene->GetLayer()->RequestRedraw( vectorScene->GetCell(), 0 );
     }
 }
 

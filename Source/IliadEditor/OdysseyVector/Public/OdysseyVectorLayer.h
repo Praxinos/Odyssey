@@ -65,7 +65,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorLayer : public FOdysseyVectorObject
         const std::list<FOdysseyVectorTag*>& GetSharedTagList() const;
         std::mutex& GetSharedTagMutex();
         virtual void InvalidateChild( FOdysseyVectorObject* iChild, uint64 iChildInvalidationFlags ) override;
-        void RequestRedraw( uint64 iRedrawFlags );
         void RequestRedraw( FOdysseyVectorCell *iCell, uint64 iRedrawFlags );
 
         FOdysseyVectorCell* GetCellByIndex( uint32 iIndex );

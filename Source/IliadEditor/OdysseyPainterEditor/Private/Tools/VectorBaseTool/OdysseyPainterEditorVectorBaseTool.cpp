@@ -240,6 +240,8 @@ UOdysseyPainterEditorVectorBaseTool::Unload()
 {
     bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
 
+    UOdysseyPainterEditorTool::Unload();
+
     if( hasVector )
     {
         //Should be done in UnloadVector directly
@@ -279,6 +281,8 @@ UOdysseyPainterEditorVectorBaseTool::Load()
     mViewport = viewportTab->GetViewport();
 
     mPreviousMouseEvent = eMouseEventName::MouseHover;
+
+    UOdysseyPainterEditorTool::Load();
 
     if( hasVector )
     {
@@ -350,8 +354,7 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyDownVector( FOdysseyVectorGroupPaint* 
     {
         Delete();
         // force redraw
-        iScene->GetCell()->Invalidate( 0 );
-        iScene->GetLayer()->RequestRedraw( 0 );
+        iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
         oSignalFlags = 0;
 
@@ -1478,7 +1481,7 @@ UOdysseyPainterEditorVectorBaseTool::MakeTest( FOdysseyVectorGroupPaint* iScene 
 
     iScene->UpdateMatrix();
     iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    iScene->GetLayer()->RequestRedraw( 0 );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 }
 
 EMouseCursor::Type

@@ -8,6 +8,8 @@
 #include "OdysseyVectorCell.h"
 #include "OdysseyVectorGroupPaint.h"
 
+#define LOCTEXT_NAMESPACE "PainterEditor"
+
 FOdysseyPainterEditorVectorPathSmoothToolHUD::~FOdysseyPainterEditorVectorPathSmoothToolHUD()
 {
 }
@@ -59,7 +61,13 @@ FOdysseyPainterEditorVectorPathSmoothToolHUD::DrawHUD( const FOdysseyHUDSystem::
     // -> inbetweens in inbetween mode.
     FOdysseyPainterEditorVectorBaseToolHUD::DrawHUD( iParams );
 
-    DrawPrimitiveCircle( iParams, hudCursor, mPathSmoothTool->PickingRadius, hcColor, bgColor, 1.0f, false );
+    DrawPrimitiveCircle( iParams
+                       , hudCursor
+                       , WorldVectorToHUD( iParams
+                                         , ::ULIS::FVec2D( mX, mY )
+                                         , ::ULIS::FVec2D( mPathSmoothTool->PickingRadius, 0 ) ).Distance()
+                       , hcColor
+                       , 1.0f );
 }
 
 void
@@ -68,14 +76,14 @@ FOdysseyPainterEditorVectorPathSmoothToolHUD::Draw( BLContext* iBLContext )
 }
 
 void
-FOdysseyPainterEditorVectorPathSmoothToolHUD::SetCursorPosition( double iWorldX, double iWorldY, double iZoomFactor )
+FOdysseyPainterEditorVectorPathSmoothToolHUD::SetCursorPosition( double iWorldX, double iWorldY )
 {
     mX = iWorldX;
     mY = iWorldY;
 
     mPickedPointArray.clear();
 
-    PickPoints( iWorldX, iWorldY, mPathSmoothTool->PickingRadius * iZoomFactor, mPickedPointArray );
+    PickPoints( iWorldX, iWorldY, mPathSmoothTool->PickingRadius, mPickedPointArray );
 }
 
 std::vector<FOdysseyVectorPoint*>&
@@ -83,3 +91,5 @@ FOdysseyPainterEditorVectorPathSmoothToolHUD::GetPickedPointArray()
 {
     return mPickedPointArray;
 }
+
+#undef LOCTEXT_NAMESPACE

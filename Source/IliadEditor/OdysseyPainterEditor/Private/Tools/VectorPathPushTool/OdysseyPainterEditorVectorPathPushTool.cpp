@@ -24,7 +24,6 @@ UOdysseyPainterEditorVectorPathPushTool::~UOdysseyPainterEditorVectorPathPushToo
 
 UOdysseyPainterEditorVectorPathPushTool::UOdysseyPainterEditorVectorPathPushTool()
     : UOdysseyPainterEditorVectorBaseTool( MakeShared<FOdysseyPainterEditorVectorPathPushToolHUD>( this ),false )
-    , mZoomFactor( 1.0f )
     , Radius( 20.0f )
     , RestrictToSelectedObjects( false )
 {
@@ -90,8 +89,6 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDownVector( FOdysseyVectorGroupP
 {
     TSharedPtr<FOdysseyPainterEditorViewportTab> viewportTab = GetEditor()->FindTab<FOdysseyPainterEditorViewportTab>();
 
-    mZoomFactor = viewportTab->GetViewport()->GetZoom();
-
     if (iKey != EKeys::LeftMouseButton)
         return false;
 
@@ -127,7 +124,7 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDownVector( FOdysseyVectorGroupP
 
                       path->PickSegments( iPointInTexture.x
                                         , iPointInTexture.y
-                                        , Radius / mZoomFactor
+                                        , Radius
                                         , mSegmentArray
                                         , &pickedSegmentDistanceArray );
                   }
@@ -318,7 +315,7 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseUpVector( FOdysseyVectorGroupPai
     if( iKey == EKeys::LeftMouseButton )
     {
         iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS ); // update invalidated objects
-        iScene->GetLayer()->RequestRedraw( 0 );
+        iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
     }
 
     oSignalFlags = notificationFlags;

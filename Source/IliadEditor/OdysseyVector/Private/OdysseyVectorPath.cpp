@@ -3,6 +3,7 @@
 
 #include "OdysseyVectorPath.h"
 #include "OdysseyVectorSegmentCubic.h"
+#include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorCell.h"
 #include "OdysseyVector.h"
@@ -1906,7 +1907,18 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
 
     if( iDrawingFlags & FOdysseyVectorEngine::DRAWING_WIREFRAME )
     {
-        DrawStructure( iBLContext, BLRgba32( 255, 255, 255, 255 ), 2.0f, true );
+        FOdysseyVectorObject* topPaintGroup = GetAncestorByClass( FOdysseyVectorGroupPaint::StaticClass() );
+        // normally, topPaintGroup cannot be null. just a precaution.
+        FColor wireframeColor = topPaintGroup ? static_cast<FOdysseyVectorGroupPaint*>(topPaintGroup)->GetWireframeColor()
+                                              : FColor( 255, 255, 255, 255 );
+
+        DrawStructure( iBLContext
+                     , BLRgba32( wireframeColor.R
+                               , wireframeColor.G
+                               , wireframeColor.B
+                               , wireframeColor.A )
+                     , 2.0f
+                     , true );
     }
     else
     {

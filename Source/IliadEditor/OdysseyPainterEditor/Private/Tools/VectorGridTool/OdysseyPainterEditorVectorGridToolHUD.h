@@ -49,6 +49,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorGridToolHUD : public F
         virtual void DrawHUD( const FOdysseyHUDSystem::FDrawHUDParams& iParams ) override;
         virtual void Draw( BLContext* iBLContext ) override;
         virtual void Reset( ) override;
+        virtual void Load() override;
 
         bool PickNodes( double iWorldX, double iWorldY, double iWorldRadius, bool iClearSelection );
         bool PickNodes( ::ULIS::FRectD& iWorldRect, bool iClearSelection );

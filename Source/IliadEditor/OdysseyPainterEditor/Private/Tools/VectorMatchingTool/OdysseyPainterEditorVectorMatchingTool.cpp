@@ -212,7 +212,7 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseUpVector( FOdysseyVectorGroupPai
     if( iKey == EKeys::LeftMouseButton )
     {
         iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-        iScene->GetLayer()->RequestRedraw( 0 );
+        iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
     }
 
     oSignalFlags =notificationFlags;
@@ -227,7 +227,7 @@ UOdysseyPainterEditorVectorMatchingTool::PropertyChangedVector( FOdysseyVectorGr
 
     // redraw
     iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    iScene->GetLayer()->RequestRedraw( 0 );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     return 0;
 }

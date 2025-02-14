@@ -389,8 +389,7 @@ UOdysseyPainterEditorVectorTagInbetweenerView::PostEditChangeProperty( FProperty
                        , FName(PropertyChangedEvent.Property->GetMetaData(TEXT("Category"))) );
 
         // redraw
-        mScene->GetCell()->Invalidate( 0 );
-        mScene->GetLayer()->RequestRedraw( 0 );
+        mScene->GetLayer()->RequestRedraw( mScene->GetCell(), 0 );
     }
 }
 

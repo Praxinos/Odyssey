@@ -256,7 +256,7 @@ SOdysseyAnimationTimelineInbetweeningHeader::OnSelectionChanged( TSharedPtr<FInb
             }
         }
 
-        mAnimationLayerImageVector->GetVectorLayer()->RequestRedraw( 0 );
+        mAnimationLayerImageVector->GetVectorLayer()->RequestRedraw( nullptr, 0 );
 
         FOdysseyVectorEngine::Notify( nullptr, retFlags );
     }

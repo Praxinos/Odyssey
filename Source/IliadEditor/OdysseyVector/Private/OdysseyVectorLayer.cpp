@@ -83,14 +83,11 @@ FOdysseyVectorLayer::GetHeight()
 void
 FOdysseyVectorLayer::RequestRedraw( FOdysseyVectorCell *iCell, uint64 iRedrawFlags )
 {
-    InvalidateCell( iCell );
+    if( iCell )
+    {
+        InvalidateCell( iCell );
+    }
 
-    RequestRedraw( iRedrawFlags );
-}
-
-void
-FOdysseyVectorLayer::RequestRedraw( uint64 iRedrawFlags )
-{
     // the item will be removed from the list only in non-interactive modes
     mInvalidatedCellList.remove_if( [ iRedrawFlags ] ( FOdysseyVectorCell* cell )
     {

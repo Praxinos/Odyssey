@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
 #include <blend2d.h>
 #include <ULIS>
 #include "HUD/OdysseyVectorHUD.h"
@@ -141,10 +142,8 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorBaseToolHUD : public F
         void DrawPrimitivePlus( const FOdysseyHUDSystem::FDrawHUDParams& iParams
                               , const FVector2D& iHUDCoords
                               , uint32 iSize
-                              , const FLinearColor& fgColor
-                              , const FLinearColor& bgColor
-                              , float iThickness
-                              , bool iOutline );
+                              , const FLinearColor& iColor
+                              , float iThickness );
 
         void DrawPrimitiveHandle( const FOdysseyHUDSystem::FDrawHUDParams& iParams
                                 , const FVector2D& iHUDCoords
@@ -171,36 +170,28 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorBaseToolHUD : public F
                                      , const FVector2D& iHUDCoordsP2
                                      , const FVector2D& iHUDCoordsP3
                                      , uint32 iFractionCount
-                                     , const FLinearColor& fgColor
-                                     , const FLinearColor& bgColor
-                                     , float iThickness
-                                     , bool iOutline );
+                                     , const FLinearColor& iColor
+                                     , float iThickness );
 
         void DrawPrimitiveBezierQuadratic( const FOdysseyHUDSystem::FDrawHUDParams& iParams
                                          , const FVector2D& iHUDCoordsP0
                                          , const FVector2D& iHUDCoordsP1
                                          , const FVector2D& iHUDCoordsP2
                                          , uint32 iFractionCount
-                                         , const FLinearColor& fgColor
-                                         , const FLinearColor& bgColor
-                                         , float iThickness
-                                         , bool iOutline );
+                                         , const FLinearColor& iColor
+                                         , float iThickness );
 
         void DrawPrimitiveLine( const FOdysseyHUDSystem::FDrawHUDParams& iParams
                               , const FVector2D& iHUDCoordsP0
                               , const FVector2D& iHUDCoordsP1
-                              , const FLinearColor& fgColor
-                              , const FLinearColor& bgColor
-                              , float iThickness
-                              , bool iOutline );
+                              , const FLinearColor& iColor
+                              , float iThickness );
 
         void DrawPrimitiveCircle( const FOdysseyHUDSystem::FDrawHUDParams& iParams
                                 , const FVector2D& iHUDCoords
                                 , double iRadius
-                                , const FLinearColor& fgColor
-                                , const FLinearColor& bgColor
-                                , float iThickness
-                                , bool iOutline );
+                                , const FLinearColor& iColor
+                                , float iThickness );
 
         void DrawPath( const FOdysseyHUDSystem::FDrawHUDParams& iParams
                      , FOdysseyVectorPath* iPath
@@ -230,6 +221,10 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorBaseToolHUD : public F
                        , const FLinearColor& hcColor
                        , uint64 iHUDFlags );
 
+        void DrawInfo( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+                     , const FText& iText
+                     , const FLinearColor& iColor );
+
     protected:
         void UpdateSelectionBoxVertexMode();
         void UpdateSelectionBoxObjectMode( bool iForceWorld );
@@ -251,6 +246,20 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorBaseToolHUD : public F
                      , char* iText
                      , uint32 iX
                      , uint32 iY );
+        void FormatModifierInfo( const FText* iCtrlText
+                               , const FText* iShiftText
+                               , const FText* iAltText );
+        void DrawModifierInfo( const FOdysseyHUDSystem::FDrawHUDParams& iParams );
+        FVector2D WorldPointToHUD( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+                                 , const FVector2D& iWorldCoords );
+        FVector2D WorldVectorToHUD( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+                                  , const FVector2D& iWorldOriginCoords
+                                  , const FVector2D& iWorldVectorCoords );
+        ::ULIS::FVec2D WorldPointToHUD( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+                                      , const ::ULIS::FVec2D& iWorldCoords );
+        ::ULIS::FVec2D WorldVectorToHUD( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+                                       , const ::ULIS::FVec2D& iWorldOriginCoords
+                                       , const ::ULIS::FVec2D& iWorldVectorCoords );
 
     protected:
         UOdysseyPainterEditorVectorBaseTool* mBaseTool;
@@ -264,7 +273,12 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorBaseToolHUD : public F
         TObjectPtr<UTexture> mBucketPropagateTexture;
         TObjectPtr<UTexture> mHandleTexture;
         TObjectPtr<UTexture> mHandleContourTexture;
+        TObjectPtr<UTexture> mInfoBorderLeftTexture;
+        TObjectPtr<UTexture> mInfoBorderTexture;
+        TObjectPtr<UTexture> mInfoBorderRightTexture;
 
     protected:
         FPointQuadTree* mPointQuadTree;
+        FSlateFontInfo mFontInfo;
+        FText mModifierInfoText;
 };

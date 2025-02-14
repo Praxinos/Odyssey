@@ -5,6 +5,7 @@
 #include "OdysseyVectorEngine.h"
 #include "OdysseyPainterEditor.h"
 
+#define LOCTEXT_NAMESPACE "PainterEditor"
 
 FOdysseyPainterEditorVectorPathDrawingToolHUD::~FOdysseyPainterEditorVectorPathDrawingToolHUD()
 {
@@ -121,7 +122,7 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::DrawHUD( const FOdysseyHUDSystem:
 
     if( mPathDrawingTool->Stitch )
     {
-        DrawPrimitiveCircle( iParams, hudCursor, mPathDrawingTool->StitchingRadius, hcColor, hcColor, 1.0f, false );
+        DrawPrimitiveCircle( iParams, hudCursor, mPathDrawingTool->StitchingRadius, hcColor, 1.0f );
 
         if( mStitchedPointArray.size() )
         {
@@ -270,3 +271,5 @@ UE_LOG(LogTemp, Warning, TEXT("Hello World %f"), bestBezier.lastRecordRadius );
 
     return needsFullRedrawing;
 }
+
+#undef LOCTEXT_NAMESPACE

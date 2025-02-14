@@ -1011,7 +1011,7 @@ FOdysseyPainterEditor::BringForward( FOdysseyPainterEditor* iEditor, FOdysseyVec
         selectedObject->BringForward();
 
         iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-        iScene->GetLayer()->RequestRedraw( 0 );
+        iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
     }
 
     // request redraw
@@ -1050,7 +1050,7 @@ FOdysseyPainterEditor::SendBackward( FOdysseyPainterEditor* iEditor, FOdysseyVec
         selectedObject->SendBackward();
 
         iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-        iScene->GetLayer()->RequestRedraw( 0 );
+        iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
     }
 
     // request redraw
@@ -1095,7 +1095,7 @@ FOdysseyPainterEditor::ApplyTransformations( FOdysseyPainterEditor* iEditor, FOd
     }
 
     iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    iScene->GetLayer()->RequestRedraw( 0 );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
     FOdysseyVectorEngine::Notify( iScene, notificationFlags );
@@ -1145,7 +1145,7 @@ FOdysseyPainterEditor::MakePaintGroup( FOdysseyPainterEditor* iEditor, FOdysseyV
         iScene->GetCell()->SelectObject( paintGroup );
 
         iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-        iScene->GetLayer()->RequestRedraw( 0 );
+        iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
     }
 
     // call callbacks if any (for refreshing GUI e.g)
@@ -1199,7 +1199,7 @@ FOdysseyPainterEditor::Ungroup( FOdysseyPainterEditor* iEditor, FOdysseyVectorGr
             iScene->UpdateMatrix();
 
             iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-            iScene->GetLayer()->RequestRedraw( 0 );
+            iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
         }
     }
 
@@ -1231,7 +1231,7 @@ FOdysseyPainterEditor::GroupAndAddInbetweenerTag( FOdysseyPainterEditor* iEditor
 
     // note: updating via Root will request a redraw as well
     iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    iScene->GetLayer()->RequestRedraw( 0 );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
     FOdysseyVectorEngine::Notify( iScene, notificationFlags );
@@ -1286,7 +1286,7 @@ FOdysseyPainterEditor::_Group( FOdysseyPainterEditor* iEditor
         iScene->GetCell()->SelectObject( group );
 
         iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-        iScene->GetLayer()->RequestRedraw( 0 );
+        iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
     }
 
     // call callbacks if any (for refreshing GUI e.g)
@@ -1345,7 +1345,7 @@ FOdysseyPainterEditor::Subdivide( FOdysseyPainterEditor* iEditor, FOdysseyVector
     GEditor->EndTransaction();
 
     iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    iScene->GetLayer()->RequestRedraw( 0 );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     // request redraw
     //iScene->GetCell()->GetCellEngine()->Invalidate( iScene, 0 );
@@ -1396,9 +1396,7 @@ FOdysseyPainterEditor::SelectAllPoints( FOdysseyPainterEditor* iEditor, FOdyssey
         }
     }
 
-    // note: updating via Root will request a redraw as well
-    iScene->GetCell()->Invalidate( 0 );
-    iScene->GetLayer()->RequestRedraw( 0 );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
     FOdysseyVectorEngine::Notify( iScene, notificationFlags );
@@ -1429,8 +1427,7 @@ FOdysseyPainterEditor::SelectAllObjects( FOdysseyPainterEditor* iEditor, FOdysse
 
     iScene->GetCell()->SelectAllInSelectionSpace();
 
-    iScene->GetCell()->Invalidate( 0 );
-    iScene->GetLayer()->RequestRedraw( 0 );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
     FOdysseyVectorEngine::Notify( iScene, notificationFlags );
@@ -1461,7 +1458,7 @@ FOdysseyPainterEditor::ResetView( FOdysseyPainterEditor* iEditor, FOdysseyVector
     iScene->UpdateMatrix();
 
     iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    iScene->GetLayer()->RequestRedraw( 0 );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
     FOdysseyVectorEngine::Notify( iScene, notificationFlags );
@@ -1500,8 +1497,7 @@ FOdysseyPainterEditor::LockPointSelection( FOdysseyPainterEditor* iEditor, FOdys
         vertex->SetLocked( true );
     }
 
-    iScene->GetCell()->Invalidate( 0 );
-    iScene->GetLayer()->RequestRedraw( 0 );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
     FOdysseyVectorEngine::Notify( iScene, notificationFlags );
@@ -1540,8 +1536,7 @@ FOdysseyPainterEditor::UnlockPointSelection( FOdysseyPainterEditor* iEditor, FOd
         vertex->SetLocked( false );
     }
 
-    iScene->GetCell()->Invalidate(0);
-    iScene->GetLayer()->RequestRedraw( 0 );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
     FOdysseyVectorEngine::Notify( iScene, notificationFlags );
@@ -1582,7 +1577,7 @@ FOdysseyPainterEditor::UnalignPointSelection( FOdysseyPainterEditor* iEditor, FO
     }
 
     iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    iScene->GetLayer()->RequestRedraw( 0 );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
     FOdysseyVectorEngine::Notify( iScene, notificationFlags );
@@ -1628,7 +1623,7 @@ FOdysseyPainterEditor::AlignPointSelection( FOdysseyPainterEditor* iEditor, FOdy
     }
 
     iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    iScene->GetLayer()->RequestRedraw( 0 );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
     FOdysseyVectorEngine::Notify( iScene, notificationFlags );
@@ -1708,7 +1703,7 @@ FOdysseyPainterEditor::DeletePointSelection( FOdysseyPainterEditor* iEditor, FOd
     }
     GEditor->EndTransaction();
 
-    iScene->GetLayer()->RequestRedraw( 0 );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
     FOdysseyVectorEngine::Notify( iScene, notificationFlags );
@@ -1748,7 +1743,7 @@ FOdysseyPainterEditor::DeleteObjects( FOdysseyPainterEditor* iEditor, FOdysseyVe
     GEditor->EndTransaction();
 
     iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    iScene->GetLayer()->RequestRedraw( 0 );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
     FOdysseyVectorEngine::Notify( iScene, notificationFlags );
@@ -1801,7 +1796,7 @@ FOdysseyPainterEditor::RemoveInbetweenerTag( FOdysseyPainterEditor* iEditor
     GEditor->EndTransaction();
 
     iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    iScene->GetLayer()->RequestRedraw( 0 );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
     FOdysseyVectorEngine::Notify( iScene, notificationFlags );
@@ -1858,7 +1853,7 @@ FOdysseyPainterEditor::CommitSelectedInbetweenerTag( FOdysseyPainterEditor* iEdi
         GEditor->EndTransaction();
 
         iLayer->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-        iLayer->RequestRedraw( 0 );
+        iLayer->RequestRedraw( nullptr, 0 );
 
         // call callbacks if any (for refreshing GUI e.g)
         FOdysseyVectorEngine::Notify( nullptr, notificationFlags );
@@ -1912,7 +1907,7 @@ FOdysseyPainterEditor::AddInbetweenerTag( FOdysseyPainterEditor* iEditor
     GEditor->EndTransaction();
 
     iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    iScene->GetLayer()->RequestRedraw( 0 );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
     FOdysseyVectorEngine::Notify( iScene, notificationFlags );
@@ -1980,7 +1975,7 @@ FOdysseyPainterEditor::ResetInbetweenerGrid( FOdysseyPainterEditor* iEditor
     }
 
     iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    iScene->GetLayer()->RequestRedraw( 0 );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
     FOdysseyVectorEngine::Notify( iScene, notificationFlags );
@@ -2042,7 +2037,7 @@ FOdysseyPainterEditor::ResetSpacingChart( FOdysseyPainterEditor* iEditor
     }
 
     iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    iScene->GetLayer()->RequestRedraw( 0 );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
     FOdysseyVectorEngine::Notify( nullptr, notificationFlags );
@@ -2091,7 +2086,7 @@ FOdysseyPainterEditor::ResetInbetweenerTagSpacingChart( FOdysseyPainterEditor* i
     // updated invalidated objects.
     // Updating via SharedEnv this will request a redraw as well
     iLayer->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    iLayer->RequestRedraw( 0 );
+    iLayer->RequestRedraw( nullptr, 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
     FOdysseyVectorEngine::Notify( nullptr, notificationFlags );
@@ -2125,7 +2120,7 @@ FOdysseyPainterEditor::FlipHorizontal( FOdysseyPainterEditor* iEditor, FOdysseyV
     FOdysseyVectorObject::FlipObjectsHorizontal( objectList );
 
     iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    iScene->GetLayer()->RequestRedraw( 0 );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
     FOdysseyVectorEngine::Notify( iScene, notificationFlags );
@@ -2159,7 +2154,7 @@ FOdysseyPainterEditor::FlipVertical( FOdysseyPainterEditor* iEditor, FOdysseyVec
     FOdysseyVectorObject::FlipObjectsVertical( objectList );
 
     iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    iScene->GetLayer()->RequestRedraw( 0 );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
     FOdysseyVectorEngine::Notify( iScene, notificationFlags );
@@ -2219,7 +2214,7 @@ FOdysseyPainterEditor::ClearColoring( FOdysseyPainterEditor* iEditor, FOdysseyVe
     GEditor->EndTransaction();
 
     iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS ); // re-colorize paint group
-    iScene->GetLayer()->RequestRedraw( 0 );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
     FOdysseyVectorEngine::Notify( iScene, notificationFlags );
@@ -2255,7 +2250,7 @@ FOdysseyPainterEditor::DeleteBucket( FOdysseyPainterEditor* iEditor, FOdysseyVec
     }
 
     scene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS ); // re-colorize paint group
-    scene->GetLayer()->RequestRedraw( 0 );
+    scene->GetLayer()->RequestRedraw( nullptr, 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
     FOdysseyVectorEngine::Notify( scene, notificationFlags );
@@ -2297,7 +2292,7 @@ FOdysseyPainterEditor::AlterContourWidth( FOdysseyVectorGroupPaint* iScene
     //for( )
     // request redraw
     iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    iScene->GetLayer()->RequestRedraw( 0 );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
     FOdysseyVectorEngine::Notify( iScene, notificationFlags );
@@ -2334,7 +2329,7 @@ SetBucketPropagation( FOdysseyPainterEditor* iEditor, FOdysseyVectorBucket* iBuc
     iBucket->SetPropagated( iPropagate );
 
     scene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    scene->GetLayer()->RequestRedraw( 0 );
+    scene->GetLayer()->RequestRedraw( scene->GetCell(), 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
     FOdysseyVectorEngine::Notify( scene, notificationFlags );
@@ -2448,7 +2443,7 @@ FOdysseyPainterEditor::PasteSpacingChart( FOdysseyPainterEditor* iEditor
     }
 
     iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    iScene->GetLayer()->RequestRedraw( 0 );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     FOdysseyVectorEngine::Notify( nullptr, notificationFlags );
 }
@@ -2562,7 +2557,7 @@ FOdysseyPainterEditor::PasteTransformation( FOdysseyPainterEditor* iEditor, FOdy
     }
 
     iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    iScene->GetLayer()->RequestRedraw( 0 );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
     FOdysseyVectorEngine::Notify( iScene, notificationFlags );
@@ -2642,7 +2637,7 @@ FOdysseyPainterEditor::PasteObjects( FOdysseyPainterEditor* iEditor, FOdysseyVec
     }
 
     iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    iScene->GetLayer()->RequestRedraw( 0 );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
     FOdysseyVectorEngine::Notify( iScene, notificationFlags );
@@ -2672,7 +2667,7 @@ FOdysseyPainterEditor::MergeScenes( FOdysseyVectorGroupPaint* iDestinationScene
 
     iDestinationScene->UpdateMatrix();
     iDestinationScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    iDestinationScene->GetLayer()->RequestRedraw( 0 );
+    iDestinationScene->GetLayer()->RequestRedraw( iDestinationScene->GetCell(), 0 );
 
     // request redraw
 
@@ -2722,7 +2717,7 @@ FOdysseyPainterEditor::RemoveInbetweenerTag( FOdysseyPainterEditor* iEditor
         }
     }
 
-    iLayer->RequestRedraw( 0 );
+    iLayer->RequestRedraw( nullptr, 0 );
 
     // update UI
     FOdysseyVectorEngine::Notify( nullptr, notificationFlags );
@@ -2802,7 +2797,7 @@ FOdysseyPainterEditor::StitchVertices( FOdysseyPainterEditor* iEditor
     }
 
     iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    iScene->GetLayer()->RequestRedraw( 0 );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
     FOdysseyVectorEngine::Notify( iScene, notificationFlags );

@@ -47,7 +47,7 @@ FOdysseyVectorUndo::Update()
 
             FOdysseyVectorEngine::Notify( nullptr, mReturnFlags );
 
-            mLayer->RequestRedraw( 0 );
+            mLayer->RequestRedraw( nullptr, 0 );
         }
     );
 }

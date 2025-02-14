@@ -844,9 +844,14 @@ FOdysseyVectorSegmentCubic::BuildVariableAdaptive( FOdysseyVectorPoint* iFromPoi
                                                  , std::vector<FSegmentSubLine>& iSubLineBuffer )
 {
     ::ULIS::FVec2D childBezier[2][4];
-    ::ULIS::FVec2D straightVector = iBezier[3] - iBezier[0];
-    ::ULIS::FVec2D ctrlVector[2] = { iBezier[1] - iBezier[0]
-                                   , iBezier[2] - iBezier[3] };
+    ::ULIS::FVec2D worldBezier[4] = { FOdysseyVector::MapPoint( mOwner->GetWorldMatrix(), iBezier[0] )
+                                    , FOdysseyVector::MapPoint( mOwner->GetWorldMatrix(), iBezier[1] )
+                                    , FOdysseyVector::MapPoint( mOwner->GetWorldMatrix(), iBezier[2] )
+                                    , FOdysseyVector::MapPoint( mOwner->GetWorldMatrix(), iBezier[3] ) };
+    // we use world values because in case of non-uniform transformations, local values might give too shallow subdivision
+    ::ULIS::FVec2D straightVector = worldBezier[3] - worldBezier[0];
+    ::ULIS::FVec2D ctrlVector[2] = { worldBezier[1] - worldBezier[0]
+                                   , worldBezier[2] - worldBezier[3] };
     double dotLimit = 0.9996f; // cos 1.62 deg
 
     if( straightVector.DistanceSquared() )
@@ -893,7 +898,7 @@ FOdysseyVectorSegmentCubic::BuildVariableAdaptive( FOdysseyVectorPoint* iFromPoi
                                                                   , 0.5f );
 
         splitPoint = &iSubPointBuffer.emplace_back( childBezier[0][3].x
-                                                    , childBezier[0][3].y );
+                                                  , childBezier[0][3].y );
 
         BuildVariableAdaptive( iFromPoint
                               , splitPoint

@@ -357,7 +357,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorGro
 
         iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
                                   | FOdysseyVectorObject::UPDATE_NOINBETWEENING );
-        iScene->GetLayer()->RequestRedraw( FOdysseyVectorCell::REDRAW_INTERACTIVE );
+        iScene->GetLayer()->RequestRedraw( iScene->GetCell(), FOdysseyVectorCell::REDRAW_INTERACTIVE );
     }
 
     oSignalFlags = retFlags;
@@ -456,7 +456,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorGro
         // update invalidated objects. Updating via shared Env will invalidate the engine, thus redrawing the image
         iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
                                   | FOdysseyVectorObject::UPDATE_NOINBETWEENING ); // update invalidated path after segment insertion
-        iScene->GetLayer()->RequestRedraw( FOdysseyVectorCell::REDRAW_INTERACTIVE );
+        iScene->GetLayer()->RequestRedraw( iScene->GetCell(), FOdysseyVectorCell::REDRAW_INTERACTIVE );
     }
 
     oSignalFlags = notificationFlags;
@@ -592,7 +592,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorGroup
 
     // update invalidated objects. Updating via shared Env will invalidate the engine, thus redrawing the image
     iScene->GetLayer()->Update( UpdatePaintGroups ? FOdysseyVectorObject::UPDATE_PAINTGROUPS : 0 );
-    iScene->GetLayer()->RequestRedraw( 0 );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
 /*
     // in OnMouseDragVector() we are not guaranteed to get a viewport redraw from what I understand.

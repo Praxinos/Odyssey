@@ -22,6 +22,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorChartToolHUD : public 
         virtual ~FOdysseyPainterEditorVectorChartToolHUD();
         FOdysseyPainterEditorVectorChartToolHUD(  UOdysseyPainterEditorVectorChartTool* iGridTool );
 
+        virtual void Load() override;
         virtual void DrawHUD( const FOdysseyHUDSystem::FDrawHUDParams& iParams ) override;
         virtual void Draw( BLContext* iBLContext ) override;
         virtual void Reset() override;

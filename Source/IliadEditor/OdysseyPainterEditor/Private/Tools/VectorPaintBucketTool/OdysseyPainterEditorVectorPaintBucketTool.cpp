@@ -805,7 +805,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::PasteBucketParam( FOdysseyVectorBuck
     iDestinationBucket->SetCoords( destinationBucketCoords.x, destinationBucketCoords.y );
 
     scene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    scene->GetLayer()->RequestRedraw( 0 );
+    scene->GetLayer()->RequestRedraw( scene->GetCell(), 0 );
 }
 
 void
