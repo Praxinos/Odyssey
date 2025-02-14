@@ -334,46 +334,46 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         void UpdatePathList();
 
 
-    protected:
-        static const uint32 NOCYCLE  = 0;
-        static const uint32 BLOCKED  = 1;
-        static const uint32 HASCYCLE = 2;
-        // TODO: transform mPathList to mPathArray
-        std::list<FOdysseyVectorPath*> mPathList;
-        std::list<FOdysseyVectorBucket*> mSelectedBucketList;
-        std::list<FOdysseyVectorBucket*> mBucketList;
-        std::list<FOdysseyVectorCycle*> mCycleList;
-        std::vector<FOdysseyVectorVertexIntersection> mIntersectionVertexArray;
-        uint32 mPaintingCode;
-        std::mutex mMutex;
-        // short section are section with length = 0. We have to get rid of them to sanitize the graph
-        std::vector<FOdysseyVectorSection*> mShortSectionArray;
-        // temporarily store intersection info before creating them
-        std::vector<FXIntersectionRecord> mXIntersectionRecordArray;
-        std::vector<FTIntersectionRecord> mTIntersectionRecordArray;
-        // allocated in one go after all intersection info have been gathered.
-        std::vector<FOdysseyVectorSection> mSectionBuffer;
-        std::vector<FOdysseyVectorSection> mGapSectionBuffer;
-        std::vector<FOdysseyVectorSegmentCubicGap> mGapSegmentBuffer;
+protected:
+    static const uint32 NOCYCLE  = 0;
+    static const uint32 BLOCKED  = 1;
+    static const uint32 HASCYCLE = 2;
+    // TODO: transform mPathList to mPathArray
+    std::list<FOdysseyVectorPath*> mPathList;
+    std::list<FOdysseyVectorBucket*> mSelectedBucketList;
+    std::list<FOdysseyVectorBucket*> mBucketList;
+    std::list<FOdysseyVectorCycle*> mCycleList;
+    std::vector<FOdysseyVectorVertexIntersection> mIntersectionVertexArray;
+    uint32 mPaintingCode;
+    std::mutex mMutex;
+    // short section are section with length = 0. We have to get rid of them to sanitize the graph
+    std::vector<FOdysseyVectorSection*> mShortSectionArray;
+    // temporarily store intersection info before creating them
+    std::vector<FXIntersectionRecord> mXIntersectionRecordArray;
+    std::vector<FTIntersectionRecord> mTIntersectionRecordArray;
+    // allocated in one go after all intersection info have been gathered.
+    std::vector<FOdysseyVectorSection> mSectionBuffer;
+    std::vector<FOdysseyVectorSection> mGapSectionBuffer;
+    std::vector<FOdysseyVectorSegmentCubicGap> mGapSegmentBuffer;
 
-        std::vector<FOdysseyVectorVertex> mExtendedVertexBuffer;
-        std::vector<FOdysseyVectorSegmentExtended> mExtendedSegmentBuffer;
-        eSegmentExtensionScheme mSegmentExtensionScheme;
-        bool bSegmentExtensionSimplified;
-        eGapDetectionScheme mGapDetectionScheme;
+    std::vector<FOdysseyVectorVertex> mExtendedVertexBuffer;
+    std::vector<FOdysseyVectorSegmentExtended> mExtendedSegmentBuffer;
+    eSegmentExtensionScheme mSegmentExtensionScheme;
+    eGapDetectionScheme mGapDetectionScheme;
+    bool bSegmentExtensionSimplified;
 
-        uint32 mVertexID;
-        bool bMultithreaded;
-        bool bPainted;
-        bool bMonochrome;
-        FColor mMonochromeColor;
-        bool bRealtime; // relatime updates
-        double mGapTolerance;
-        bool bWireframe;
-        bool bIntersectsCanvas;
-        FColor mWireframeColor;
-        // the frame canvas path intersects with the canvas
-        FOdysseyVectorPath mCanvasPath;
-        FOdysseyVectorVertex mCanvasVertex[4];
-        FOdysseyVectorSegmentCubic mCanvasSegment[4];
+    uint32 mVertexID;
+    bool bMultithreaded;
+    bool bPainted;
+    bool bMonochrome;
+    FColor mMonochromeColor;
+    bool bRealtime; // relatime updates
+    double mGapTolerance;
+    bool bWireframe;
+    bool bIntersectsCanvas;
+    FColor mWireframeColor;
+    // the frame canvas path intersects with the canvas
+    FOdysseyVectorPath mCanvasPath;
+    FOdysseyVectorVertex mCanvasVertex[4];
+    FOdysseyVectorSegmentCubic mCanvasSegment[4];
 };

@@ -52,6 +52,20 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorGroupPaintView : publi
                           , UIMin    = "0.0" ) )
         double GapTolerance;
 
+        // commented out: now handled at layer level
+        //UPROPERTY( EditAnywhere, Category=PaintGroup )
+        //bool Wireframe;
+
+        UPROPERTY( EditAnywhere
+                 , Category = PaintGroup
+                 , meta = ( ToolTip = "Wireframe Color" ) )
+        FColor WireframeColor;
+
+        UPROPERTY( EditAnywhere
+                 , Category = PaintGroup
+                 , meta = ( ToolTip = "Intersects Canvas" ) )
+        bool IntersectsCanvas;
+
         UPROPERTY( EditAnywhere
                  , Category = GapDetection
                  , meta = ( ToolTip  = "Gap Detection Scheme" ) )
@@ -70,20 +84,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorGroupPaintView : publi
                           , EditCondition = "(GapDetectionScheme == eGapDetectionScheme::SegmentExtension)"
                           , EditConditionHides ) )
         bool SegmentExtensionSimplified;
-
-        UPROPERTY( EditAnywhere
-                 , Category = PaintGroup
-                 , meta = ( ToolTip = "Intersects Canvas" ) )
-        bool IntersectsCanvas;
-
-        // commented out: now handled at layer level
-        //UPROPERTY( EditAnywhere, Category=PaintGroup )
-        //bool Wireframe;
-
-        UPROPERTY( EditAnywhere
-                 , Category = PaintGroup
-                 , meta = ( ToolTip = "Wireframe Color" ) )
-        FColor WireframeColor;
 
         UPROPERTY( EditAnywhere
                  , Category = Advanced
