@@ -121,6 +121,8 @@ FEposSequenceEditorStyle::InitCommands()
 
     Set( "EposSequenceCommands.CreateAnimationAtCurrentTime", new IMAGE_BRUSH_SVG( "animation-create", Icon20x20 ) );
     Set( "EposSequenceCommands.CreateAnimationAtCurrentTime.Small", new IMAGE_BRUSH_SVG( "animation-create", Icon20x20 ) );
+    Set( "EposSequenceCommands.DetachAnimationAtCurrentTime", new IMAGE_BRUSH_SVG( "animation-detach", Icon20x20 ) );
+    Set( "EposSequenceCommands.DetachAnimationAtCurrentTime.Small", new IMAGE_BRUSH_SVG( "animation-detach", Icon20x20 ) );
 
     Set( "EposSequenceCommands.CreatePlaneAtCurrentTime", new IMAGE_BRUSH_SVG( "plane-create", Icon20x20 ) );
     Set( "EposSequenceCommands.CreatePlaneAtCurrentTime.Small", new IMAGE_BRUSH_SVG( "plane-create", Icon20x20 ) );

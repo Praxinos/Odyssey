@@ -16,6 +16,7 @@
 #include "EposSequenceToolbarHelpers.h"
 #include "Misc/EposSequenceFBXInterop.h"
 #include "PlaneActor.h"
+#include "OdysseyAnimationActor.h"
 #include "Shot/ShotSequence.h"
 #include "Styles/EposSequenceEditorStyle.h"
 #include "Styles/EposTracksEditorStyle.h"
@@ -339,6 +340,36 @@ FShotSequenceCustomization::BindCommands( TSharedPtr<FUICommandList> ioCommandLi
                                               } )
     );
 
+    ioCommandList->MapAction(
+        FEposSequenceEditorCommands::Get().DetachAnimationAtCurrentTime,
+        FExecuteAction::CreateLambda( [this]()
+                                      {
+                                          TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                          if( !sequencer )
+                                              return;
+                                          TArray<FGuid> animation_bindings;
+                                          int32 animation_count = ShotSequenceTools::GetAttachedAnimations( sequencer.Get(), nullptr, &animation_bindings );
+                                          if( animation_count != 1 )
+                                              return;
+                                          ShotSequenceTools::DetachAnimation( sequencer.Get(), animation_bindings[0] );
+                                      } ),
+        FCanExecuteAction::CreateLambda( [this]()
+                                         {
+                                             TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                             if( !sequencer )
+                                                 return false;
+                                             return ShotSequenceTools::GetAttachedAnimations( sequencer.Get() ) == 1;
+                                         } ),
+        FIsActionChecked(),
+        FIsActionButtonVisible::CreateLambda( [this]()
+                                              {
+                                                  TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                                  if( !sequencer )
+                                                      return false;
+                                                  return ShotSequenceTools::GetAttachedAnimations( sequencer.Get() ) <= 1;
+                                              } )
+    );
+
     //---
 
     ioCommandList->MapAction(
@@ -483,6 +514,27 @@ FShotSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuil
         FEposSequenceEditorCommands::Get().DetachPlaneAtCurrentTime->GetLabel(),
         FEposSequenceEditorCommands::Get().DetachPlaneAtCurrentTime->GetDescription(),
         FEposSequenceEditorCommands::Get().DetachPlaneAtCurrentTime->GetIcon() );
+    // The 2 following buttons should be exclusive visible:
+    // - the first button is displayed when there is only 1 animation (or 0) available
+    // - the second button is displayed when there are more than 2 animations available
+    ToolbarBuilder.AddToolBarButton( FEposSequenceEditorCommands::Get().DetachAnimationAtCurrentTime );
+    ToolbarBuilder.AddComboButton(
+        FUIAction(
+            FExecuteAction(),
+            FCanExecuteAction(),
+            FGetActionCheckState(),
+            FIsActionButtonVisible::CreateLambda( [this]()
+                                                  {
+                                                      TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                                      if( !sequencer )
+                                                          return false;
+                                                      return ShotSequenceTools::GetAttachedAnimations( sequencer.Get() ) > 1;
+                                                  } )
+        ),
+        FOnGetContent::CreateRaw( this, &FShotSequenceCustomization::MakeAnimationListMenu ),
+        FEposSequenceEditorCommands::Get().DetachAnimationAtCurrentTime->GetLabel(),
+        FEposSequenceEditorCommands::Get().DetachAnimationAtCurrentTime->GetDescription(),
+        FEposSequenceEditorCommands::Get().DetachAnimationAtCurrentTime->GetIcon() );
 
     auto GetLighttableTooltip = [this]() -> FText
     {
@@ -665,6 +717,44 @@ FShotSequenceCustomization::MakePlaneMenu()
                                                       return;
 
                                                   ShotSequenceTools::DetachPlane( sequencer.Get(), plane_binding );
+                                              } )
+            )
+        );
+    }
+
+    return MenuBuilder.MakeWidget();
+}
+
+TSharedRef<SWidget>
+FShotSequenceCustomization::MakeAnimationListMenu()
+{
+    TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+
+    FMenuBuilder MenuBuilder( true, sequencer ? sequencer->GetCommandBindings() : nullptr );
+
+    TArray<AOdysseyAnimationActor*> animations;
+    TArray<FGuid> animation_bindings;
+    int32 animation_count = ShotSequenceTools::GetAttachedAnimations( sequencer.Get(), &animations, &animation_bindings );
+    if( !animation_count )
+        return SNullWidget::NullWidget;
+
+    for( int i = 0; i < animation_count; i++ )
+    {
+        AOdysseyAnimationActor* animation = animations[i];
+        FGuid animation_binding = animation_bindings[i];
+
+        MenuBuilder.AddMenuEntry(
+            FText::FromString( animation->GetActorLabel() ),
+            FText::GetEmpty(),
+            FSlateIcon(),
+            FUIAction(
+                FExecuteAction::CreateLambda( [this, animation_binding]()
+                                              {
+                                                  TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                                  if( !sequencer )
+                                                      return;
+
+                                                  ShotSequenceTools::DetachAnimation( sequencer.Get(), animation_binding );
                                               } )
             )
         );

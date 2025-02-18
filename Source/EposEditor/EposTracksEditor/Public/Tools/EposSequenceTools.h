@@ -426,6 +426,46 @@ public:
     */
     static bool CanCreateAnimation( ISequencer* iSequencer, FFrameNumber iFrameNumber );
 
+    /**
+    *  Detach a animation of the camera in the board section
+    *
+    * @param ISequencer     iSequencer to detach a animation.
+    * @param FFrameNumber   iFrameNumber to get the board section.
+    * @param FGuid          iAnimationBinding to detach.
+    */
+    static void DetachAnimation( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<FGuid> iAnimationBindings );
+    static void DetachAnimation( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iAnimationBinding );
+
+    /**
+    *  Detach a animation of the camera in the board section
+    *
+    * @param ISequencer             iSequencer to detach a animation.
+    * @param UMovieSceneSubSection  iSubSection to detach a animation.
+    * @param FGuid                  iAnimationBinding to detach.
+    */
+    static void DetachAnimation( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, TArray<FGuid> iAnimationBindings );
+    static void DetachAnimation( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FGuid iAnimationBinding );
+
+    /**
+    *  Detach a animation of the camera in the board section
+    *
+    * @param ISequencer             iSequencer to detach a animation.
+    * @param UMovieSceneSubSection  iSubSection to detach a animation.
+    * @param FGuid                  iAnimationBinding to detach.
+    */
+    static bool CanDetachAnimation( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, TArray<FGuid> iAnimationBindings );
+    static bool CanDetachAnimation( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FGuid iAnimationBinding );
+
+    /**
+    *  Get all animations (actor & track bindings) attached to the camera in the board section
+    *
+    * @param ISequencer     iSequencer to get animations.
+    * @param FFrameNumber   iFrameNumber to get the board section.
+    * @param TArray<AOdysseyAnimationActor*>*   oAnimations to get all animation actors.
+    * @param TArray<FGuid>*                     oAnimationBindings to get all animation bindings.
+    */
+    static int32 GetAttachedAnimations( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<AOdysseyAnimationActor*>* oAnimations = nullptr, TArray<FGuid>* oAnimationBindings = nullptr );
+
 // Inside EposSequenceTools_Plane
 public:
     /**
@@ -877,11 +917,20 @@ public:
 
     static bool CanCreateAnimation( ISequencer* iSequencer, FFrameNumber iFrameNumber );
 
+    static void DetachAnimation( ISequencer* iSequencer, TArray<FGuid> iAnimationBindings );
+    static void DetachAnimation( ISequencer* iSequencer, FGuid iAnimationBinding );
+
+    static bool CanDetachAnimation( ISequencer* iSequencer, FGuid iAnimationBinding );
+
+    static int32 GetAttachedAnimations( ISequencer* iSequencer, TArray<AOdysseyAnimationActor*>* oAnimations = nullptr, TArray<FGuid>* oAnimationBindings = nullptr );
+
     static bool MoveAndScaleAnimation( AOdysseyAnimationActor* ioAnimation, const ACineCameraActor* iCamera, float iNewDistance, EScaleAnimation iScaleType );
     static bool CanMoveAndScaleAnimation( const AOdysseyAnimationActor* iAnimation, const ACineCameraActor* iCamera );
 
 private:
     static void CreateAnimation( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, const FAnimationArgs& iAnimationArgs );
+    static void DetachAnimation( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TArray<FGuid> iAnimationBinding );
+    static bool CanDetachAnimation( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TArray<FGuid> iAnimationBindings );
 
     static AOdysseyAnimationActor* SpawnAnimation( UWorld* iWorld, ACineCameraActor* iCamera, float iSafeMargin, FVector2D iRelativeScaling );
     static AOdysseyAnimationActor* SpawnAndBindAnimation( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iCameraGuid, ACineCameraActor* iCamera, FFrameNumber iFrameNumber, const FAnimationArgs& iAnimationArgs, FGuid* oGuid );

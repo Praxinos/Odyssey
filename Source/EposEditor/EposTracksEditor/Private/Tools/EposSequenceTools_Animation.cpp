@@ -397,172 +397,172 @@ ShotSequenceTools::CreateAnimation( ISequencer& iSequencer, UMovieSceneSequence*
 //{
 //    return ShotSequenceHelpers::GetAllPlanes( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), EGetPlane::kSelectedOrAll, oPlanes, oPlaneBindings );
 //}
-//
-////---
-////---
-////---
-//
-////static
-//bool
-//BoardSequenceTools::CanDetachPlane( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, TArray<FGuid> iPlaneBindings )
-//{
-//    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSubSection, iSequencer->GetFocusedTemplateID() );
-//    if( !result.mInnerSequence )
-//        return false;
-//
-//    return ShotSequenceTools::CanDetachPlane( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iPlaneBindings );
-//}
-//
-////static
-//bool
-//BoardSequenceTools::CanDetachPlane( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FGuid iPlaneBinding )
-//{
-//    return BoardSequenceTools::CanDetachPlane( iSequencer, iSubSection, TArray<FGuid>( { iPlaneBinding } ) );
-//}
-//
-////static
-//bool
-//ShotSequenceTools::CanDetachPlane( ISequencer* iSequencer, FGuid iPlaneBinding )
-//{
-//    return ShotSequenceTools::CanDetachPlane( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), TArray<FGuid>( { iPlaneBinding } ) );
-//}
-//
-////static
-//bool
-//ShotSequenceTools::CanDetachPlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TArray<FGuid> iPlaneBindings )
-//{
-//    TArray<APlaneActor*> planes;
-//    for( auto plane_binding : iPlaneBindings )
-//    {
-//        for( auto object : iSequencer.FindBoundObjects( plane_binding, iSequenceID ) )
-//            planes.Add( Cast<APlaneActor>( object ) );
-//    }
-//
-//    bool can_detach = false;
-//    for( auto plane : planes )
-//    {
-//        USceneComponent* RootComp = plane->GetRootComponent();
-//        if( !RootComp || !RootComp->GetAttachParent() )
-//            continue;
-//
-//        AActor* ParentActor = RootComp->GetAttachParent()->GetOwner();
-//        if( !ParentActor ) //TODO: confirm by comparing with the camera ? or is it enough as the planes are in the movie scene ?
-//            continue;
-//
-//        can_detach = true;
-//    }
-//
-//    return can_detach;
-//}
-//
-////-
-//
-////static
-//void
-//BoardSequenceTools::DetachPlane( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<FGuid> iPlaneBindings )
-//{
-//    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
-//    if( !result.mInnerSequence )
-//        return;
-//
-//    ShotSequenceTools::DetachPlane( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iPlaneBindings );
-//}
-//
-////static
-//void
-//BoardSequenceTools::DetachPlane( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding )
-//{
-//    BoardSequenceTools::DetachPlane( iSequencer, iFrameNumber, TArray<FGuid>( { iPlaneBinding } ) );
-//}
-//
-////static
-//void
-//BoardSequenceTools::DetachPlane( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, TArray<FGuid> iPlaneBindings )
-//{
-//    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSubSection, iSequencer->GetFocusedTemplateID() );
-//    if( !result.mInnerSequence )
-//        return;
-//
-//    ShotSequenceTools::DetachPlane( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iPlaneBindings );
-//}
-//
-////static
-//void
-//BoardSequenceTools::DetachPlane( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FGuid iPlaneBinding )
-//{
-//    BoardSequenceTools::DetachPlane( iSequencer, iSubSection, TArray<FGuid>( { iPlaneBinding } ) );
-//}
-//
-////static
-//void
-//ShotSequenceTools::DetachPlane( ISequencer* iSequencer, TArray<FGuid> iPlaneBindings )
-//{
-//    DetachPlane( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iPlaneBindings );
-//}
-//
-////static
-//void
-//ShotSequenceTools::DetachPlane( ISequencer* iSequencer, FGuid iPlaneBinding )
-//{
-//    DetachPlane( iSequencer, TArray<FGuid>( { iPlaneBinding } ) );
-//}
-//
-////static
-//void
-//ShotSequenceTools::DetachPlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TArray<FGuid> iPlaneBindings )
-//{
-//    TArray<APlaneActor*> planes;
-//
-//    for( auto plane_binding : iPlaneBindings )
-//    {
-//        for( auto object : iSequencer.FindBoundObjects( plane_binding, iSequenceID ) )
-//            planes.Add( Cast<APlaneActor>( object ) );
-//    }
-//
-//    //---
-//
-//    const FScopedTransaction transaction( LOCTEXT( "DetachPlane", "Detach Plane" ) );
-//
-//    //---
-//
-//    GEditor->SelectNone( true, true );
-//    // It's certainly safe to not check if CanDetachPlane() is ok (like CreateOpacity()/CreateDrawing)
-//    // as DetachSelectedActors() does the check
-//    for( auto plane : planes )
-//        GEditor->SelectActor( plane, true /* bInSelected */, true /* bNotify */, true /* bSelectEvenIfHidden */ );
-//
-//    GEditor->DetachSelectedActors();
-//
-//    //---
-//
-//    //iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemAdded );
-//}
-//
-////---
-//
-////static
-//int32
-//BoardSequenceTools::GetAttachedPlanes( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<APlaneActor*>* oPlanes, TArray<FGuid>* oPlaneBindings )
-//{
-//    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
-//    if( !result.mInnerSequence )
-//        return 0;
-//
-//    if( result.mInnerSequence->IsA<UBoardSequence>() )
-//        return 0;
-//
-//    return ShotSequenceHelpers::GetAttachedPlanes( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, EGetPlane::kSelectedOrAll, oPlanes, oPlaneBindings );
-//}
-//
-////static
-//int32
-//ShotSequenceTools::GetAttachedPlanes( ISequencer* iSequencer, TArray<APlaneActor*>* oPlanes, TArray<FGuid>* oPlaneBindings )
-//{
-//    return ShotSequenceHelpers::GetAttachedPlanes( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), EGetPlane::kSelectedOrAll, oPlanes, oPlaneBindings );
-//}
-//
-////---
-//
+
+//---
+//---
+//---
+
+//static
+bool
+BoardSequenceTools::CanDetachAnimation( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, TArray<FGuid> iAnimationBindings )
+{
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSubSection, iSequencer->GetFocusedTemplateID() );
+    if( !result.mInnerSequence )
+        return false;
+
+    return ShotSequenceTools::CanDetachAnimation( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iAnimationBindings );
+}
+
+//static
+bool
+BoardSequenceTools::CanDetachAnimation( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FGuid iAnimationBinding )
+{
+    return BoardSequenceTools::CanDetachAnimation( iSequencer, iSubSection, TArray<FGuid>( { iAnimationBinding } ) );
+}
+
+//static
+bool
+ShotSequenceTools::CanDetachAnimation( ISequencer* iSequencer, FGuid iAnimationBinding )
+{
+    return ShotSequenceTools::CanDetachAnimation( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), TArray<FGuid>( { iAnimationBinding } ) );
+}
+
+//static
+bool
+ShotSequenceTools::CanDetachAnimation( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TArray<FGuid> iAnimationBindings )
+{
+    TArray<AOdysseyAnimationActor*> animations;
+    for( auto animation_binding : iAnimationBindings )
+    {
+        for( auto object : iSequencer.FindBoundObjects( animation_binding, iSequenceID ) )
+            animations.Add( Cast<AOdysseyAnimationActor>( object ) );
+    }
+
+    bool can_detach = false;
+    for( auto animation : animations )
+    {
+        USceneComponent* RootComp = animation->GetRootComponent();
+        if( !RootComp || !RootComp->GetAttachParent() )
+            continue;
+
+        AActor* ParentActor = RootComp->GetAttachParent()->GetOwner();
+        if( !ParentActor ) //TODO: confirm by comparing with the camera ? or is it enough as the animations are in the movie scene ?
+            continue;
+
+        can_detach = true;
+    }
+
+    return can_detach;
+}
+
+//-
+
+//static
+void
+BoardSequenceTools::DetachAnimation( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<FGuid> iAnimationBindings )
+{
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
+    if( !result.mInnerSequence )
+        return;
+
+    ShotSequenceTools::DetachAnimation( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iAnimationBindings );
+}
+
+//static
+void
+BoardSequenceTools::DetachAnimation( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iAnimationBinding )
+{
+    BoardSequenceTools::DetachAnimation( iSequencer, iFrameNumber, TArray<FGuid>( { iAnimationBinding } ) );
+}
+
+//static
+void
+BoardSequenceTools::DetachAnimation( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, TArray<FGuid> iAnimationBindings )
+{
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSubSection, iSequencer->GetFocusedTemplateID() );
+    if( !result.mInnerSequence )
+        return;
+
+    ShotSequenceTools::DetachAnimation( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iAnimationBindings );
+}
+
+//static
+void
+BoardSequenceTools::DetachAnimation( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FGuid iAnimationBinding )
+{
+    BoardSequenceTools::DetachAnimation( iSequencer, iSubSection, TArray<FGuid>( { iAnimationBinding } ) );
+}
+
+//static
+void
+ShotSequenceTools::DetachAnimation( ISequencer* iSequencer, TArray<FGuid> iAnimationBindings )
+{
+    DetachAnimation( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iAnimationBindings );
+}
+
+//static
+void
+ShotSequenceTools::DetachAnimation( ISequencer* iSequencer, FGuid iAnimationBinding )
+{
+    DetachAnimation( iSequencer, TArray<FGuid>( { iAnimationBinding } ) );
+}
+
+//static
+void
+ShotSequenceTools::DetachAnimation( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TArray<FGuid> iAnimationBindings )
+{
+    TArray<AOdysseyAnimationActor*> animations;
+
+    for( auto animation_binding : iAnimationBindings )
+    {
+        for( auto object : iSequencer.FindBoundObjects( animation_binding, iSequenceID ) )
+            animations.Add( Cast<AOdysseyAnimationActor>( object ) );
+    }
+
+    //---
+
+    const FScopedTransaction transaction( LOCTEXT( "DetachAnimation", "Detach Animation" ) );
+
+    //---
+
+    GEditor->SelectNone( true, true );
+    // It's certainly safe to not check if CanDetachAnimation() is ok (like CreateOpacity()/CreateDrawing)
+    // as DetachSelectedActors() does the check
+    for( auto animation : animations )
+        GEditor->SelectActor( animation, true /* bInSelected */, true /* bNotify */, true /* bSelectEvenIfHidden */ );
+
+    GEditor->DetachSelectedActors();
+
+    //---
+
+    //iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemAdded );
+}
+
+//---
+
+//static
+int32
+BoardSequenceTools::GetAttachedAnimations( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<AOdysseyAnimationActor*>* oAnimations, TArray<FGuid>* oAnimationBindings )
+{
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
+    if( !result.mInnerSequence )
+        return 0;
+
+    if( result.mInnerSequence->IsA<UBoardSequence>() )
+        return 0;
+
+    return ShotSequenceHelpers::GetAttachedAnimations( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, EGetAnimation::kSelectedOrAll, oAnimations, oAnimationBindings );
+}
+
+//static
+int32
+ShotSequenceTools::GetAttachedAnimations( ISequencer* iSequencer, TArray<AOdysseyAnimationActor*>* oAnimations, TArray<FGuid>* oAnimationBindings )
+{
+    return ShotSequenceHelpers::GetAttachedAnimations( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), EGetAnimation::kSelectedOrAll, oAnimations, oAnimationBindings );
+}
+
+//---
+
 ////static
 //void
 //BoardSequenceTools::DeletePlane( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<FGuid> iPlaneBindings )
