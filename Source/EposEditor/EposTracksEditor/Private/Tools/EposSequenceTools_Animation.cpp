@@ -30,6 +30,10 @@
 #include "OdysseyAnimation.h"
 #include "OdysseyAnimationActor.h"
 #include "OdysseyAnimationComponent.h"
+#include "OdysseyAnimationTimelineSection.h"
+#include "OdysseyLayer.h"
+#include "OdysseyLayerStack.h"
+#include "ScalingComponent.h"
 #include "Settings/EposTracksEditorSettings.h"
 #include "Tools/ResourceAssetTools.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
@@ -172,7 +176,21 @@ ShotSequenceTools::SpawnAndBindAnimation( ISequencer& iSequencer, UMovieSceneSeq
 
     FGuid animationGuid = iSequencer.CreateBinding( *animation, animation_name );
 
-    //iSequencer.OnActorAddedToSequencer().Broadcast( animation, animationGuid );
+    //iSequencer.OnActorAddedToSequencer().Broadcast( animation, animationGuid ); // Already called when creating the binding for animation
+
+    // Set the post behavior to hold
+    UOdysseyLayerStack* layer_stack = new_animation->GetLayerStack();
+    for( UOdysseyLayer* layer : layer_stack->GetLayers() )
+    {
+        layer->SetPostBehaviour( EOdysseyLayerImagePostBehaviour::Hold );
+    }
+
+    // Set the size of the new section to playbackrange by default
+    ShotSequenceHelpers::FFindOrCreateTimelineResult result = ShotSequenceHelpers::FindTimelineTrackAndSections( iSequencer, iSequence, iSequenceID, animationGuid );
+    for( TWeakObjectPtr<UOdysseyAnimationTimelineSection> section : result.mSections )
+    {
+        section->SetRange( iSequence->GetMovieScene()->GetPlaybackRange() );
+    }
 
     if( oGuid )
         *oGuid = animationGuid;

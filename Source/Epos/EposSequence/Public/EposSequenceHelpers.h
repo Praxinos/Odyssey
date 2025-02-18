@@ -32,6 +32,8 @@ class UMovieSceneSequence;
 class UMovieSceneSubSection;
 class UMovieSceneTrack;
 class UMovieSceneVisibilityTrack;
+class UOdysseyAnimationTimelineTrack;
+class UOdysseyAnimationTimelineSection;
 class UStoryNote;
 class UWorld;
 class IMovieScenePlayer;
@@ -177,6 +179,17 @@ public:
     //static FFindOrCreatePlaneVisibilityResult         FindOrCreatePlaneVisibilityTrackAndSections( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding, TOptional<FFrameNumber> iFrameNumber = TOptional<FFrameNumber>() );
 
 public:
+    struct FFindOrCreateTimelineResult
+    {
+        TWeakObjectPtr<UOdysseyAnimationTimelineTrack>           mTrack;
+        bool mTrackCreated = false;
+        TArray<TWeakObjectPtr<UOdysseyAnimationTimelineSection>> mSections;
+        bool mSectionsCreated = false;
+
+        FGuid mAnimationComponentBinding; // The binding of the root component of the timeline
+    };
+    static FFindOrCreateTimelineResult           FindTimelineTrackAndSections( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iAnimationBinding, TOptional<FFrameNumber> iFrameNumber = TOptional<FFrameNumber>() );
+
     struct FFindOrCreateMaterialDrawingResult
     {
         TWeakObjectPtr<UMovieScenePrimitiveMaterialTrack>           mTrack;

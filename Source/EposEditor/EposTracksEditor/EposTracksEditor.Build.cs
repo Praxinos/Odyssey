@@ -68,6 +68,7 @@ public class EposTracksEditor : ModuleRules
                 "EposTracks",
                 "EposActors",
                 "EposPattern",
+                "OdysseyAnimationTracks",
 
                 // [EDITOR]
                 // [EDITOR] custom engine dependencies

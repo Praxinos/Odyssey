@@ -68,6 +68,7 @@ public class EposSequence : ModuleRules
                 "EposActors",
                 "EposNote",
                 "OdysseyAnimation", //TODO: must be a runtime module
+                "OdysseyAnimationTracks",
             }
             );
 

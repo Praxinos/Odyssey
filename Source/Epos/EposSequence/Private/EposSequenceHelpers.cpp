@@ -37,6 +37,9 @@
 #include "NoteTrack/MovieSceneNoteTrack.h"
 #include "NoteTrack/MovieSceneNoteSection.h"
 #include "OdysseyAnimationActor.h"
+#include "OdysseyAnimationComponent.h"
+#include "OdysseyAnimationTimelineSection.h"
+#include "OdysseyAnimationTimelineTrack.h"
 #include "PlaneActor.h"
 #include "Shot/ShotSequence.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"
@@ -880,6 +883,57 @@ ShotSequenceHelpers::FindPlaneVisibilityTrackAndSections( IMovieScenePlayer& iPl
     {
         for( auto section : result.mTrack->GetAllSections() )
             result.mSections.Add( Cast<UMovieSceneBoolSection>( section ) );
+    }
+
+    return result;
+}
+
+
+//static
+ShotSequenceHelpers::FFindOrCreateTimelineResult
+ShotSequenceHelpers::FindTimelineTrackAndSections( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iAnimationBinding, TOptional<FFrameNumber> iFrameNumber )
+{
+    FFindOrCreateTimelineResult result;
+
+    UMovieScene* moviescene = iSequence ? iSequence->GetMovieScene() : nullptr;
+    if( !moviescene )
+        return result;
+
+    TArrayView<TWeakObjectPtr<>> objects = iPlayer.FindBoundObjects( iAnimationBinding, iSequenceID );
+    if( objects.Num() != 1 )
+        return result;
+    AOdysseyAnimationActor* animation = Cast<AOdysseyAnimationActor>( objects[0] );
+    if( !animation )
+        return result;
+
+    FGuid animation_component_binding = iPlayer.FindCachedObjectId( *animation->AnimationComponent, iSequenceID );
+    if( !animation_component_binding.IsValid() )
+        return result;
+
+    //---
+
+    result.mAnimationComponentBinding = animation_component_binding;
+
+    result.mTrack = moviescene->FindTrack<UOdysseyAnimationTimelineTrack>( result.mAnimationComponentBinding );
+    if( !result.mTrack.IsValid() )
+        return result;
+
+    //---
+
+    if( iFrameNumber.IsSet() )
+    {
+        for( auto section : result.mTrack->GetAllSections() )
+        {
+            if( section->IsTimeWithinSection( iFrameNumber.GetValue() ) )
+            {
+                result.mSections.Add( Cast<UOdysseyAnimationTimelineSection>( section ) );
+            }
+        }
+    }
+    else
+    {
+        for( auto section : result.mTrack->GetAllSections() )
+            result.mSections.Add( Cast<UOdysseyAnimationTimelineSection>( section ) );
     }
 
     return result;
