@@ -31,12 +31,12 @@ private:
     void ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuilder );
     TSharedRef<SWidget> MakeCameraMenu();
     TSharedRef<SWidget> MakePlaneMenu();
-    TSharedRef<SWidget> MakeAnimationListMenu();
+    TSharedRef<SWidget> MakeAnimationMenu();
     TSharedRef<SWidget> MakeLighttableMenu();
     TSharedRef<SWidget> MakeDrawingMenu();
     TSharedRef<SWidget> MakeSettingsMenu();
     TSharedRef<SWidget> MakeTextureMenu();
-    TSharedRef<SWidget> MakeAnimationMenu();
+    TSharedRef<SWidget> MakeAnimationSettingsMenu();
     TSharedRef<SWidget> MakeHelpMenu();
 
     void BindCommands( TSharedPtr<FUICommandList> ioCommandList );

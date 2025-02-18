@@ -37,6 +37,7 @@ private:
     TSharedRef<SWidget> MakeDrawingMenu();
     TSharedRef<SWidget> MakeSettingsMenu();
     TSharedRef<SWidget> MakeTextureMenu();
+    TSharedRef<SWidget> MakeAnimationSettingsMenu();
 
     void BindCommands( TSharedPtr<FUICommandList> CommandList );
 

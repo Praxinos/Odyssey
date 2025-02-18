@@ -488,7 +488,7 @@ FShotSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuil
     ToolbarBuilder.AddToolBarButton( FEposSequenceEditorCommands::Get().CreateAnimationAtCurrentTime );
     ToolbarBuilder.AddComboButton(
         FUIAction(),
-        FOnGetContent::CreateRaw( this, &FShotSequenceCustomization::MakeAnimationMenu ),
+        FOnGetContent::CreateRaw( this, &FShotSequenceCustomization::MakeAnimationSettingsMenu ),
         LOCTEXT( "AnimationOptions", "Options" ),
         LOCTEXT( "AnimationOptionsToolTip", "Animation Options" ),
         TAttribute<FSlateIcon>(),
@@ -531,7 +531,7 @@ FShotSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuil
                                                       return ShotSequenceTools::GetAttachedAnimations( sequencer.Get() ) > 1;
                                                   } )
         ),
-        FOnGetContent::CreateRaw( this, &FShotSequenceCustomization::MakeAnimationListMenu ),
+        FOnGetContent::CreateRaw( this, &FShotSequenceCustomization::MakeAnimationMenu ),
         FEposSequenceEditorCommands::Get().DetachAnimationAtCurrentTime->GetLabel(),
         FEposSequenceEditorCommands::Get().DetachAnimationAtCurrentTime->GetDescription(),
         FEposSequenceEditorCommands::Get().DetachAnimationAtCurrentTime->GetIcon() );
@@ -726,7 +726,7 @@ FShotSequenceCustomization::MakePlaneMenu()
 }
 
 TSharedRef<SWidget>
-FShotSequenceCustomization::MakeAnimationListMenu()
+FShotSequenceCustomization::MakeAnimationMenu()
 {
     TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
 
@@ -891,7 +891,7 @@ FShotSequenceCustomization::MakeTextureMenu()
 }
 
 TSharedRef<SWidget>
-FShotSequenceCustomization::MakeAnimationMenu()
+FShotSequenceCustomization::MakeAnimationSettingsMenu()
 {
     TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
 

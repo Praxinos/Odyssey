@@ -275,6 +275,24 @@ FBoardSequenceCustomization::BindCommands( TSharedPtr<FUICommandList> ioCommandL
     );
 
     ioCommandList->MapAction(
+        FEposSequenceEditorCommands::Get().CreateAnimationAtCurrentTime,
+        FExecuteAction::CreateLambda( [this]()
+                                      {
+                                          TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                          if( !sequencer )
+                                              return;
+                                          BoardSequenceTools::CreateAnimation( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
+                                      } ),
+        FCanExecuteAction::CreateLambda( [this]()
+                                         {
+                                             TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                             if( !sequencer )
+                                                 return false;
+                                             return BoardSequenceTools::CanCreateAnimation( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
+                                         } )
+    );
+
+    ioCommandList->MapAction(
         FEposSequenceEditorCommands::Get().DetachPlaneAtCurrentTime,
         FExecuteAction::CreateLambda( [this]()
                                       {
@@ -646,6 +664,14 @@ FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBui
         FOnGetContent::CreateRaw( this, &FBoardSequenceCustomization::MakeTextureMenu ),
         LOCTEXT( "TextureOptions", "Options" ),
         LOCTEXT( "TextureOptionsToolTip", "Texture Options" ),
+        TAttribute<FSlateIcon>(),
+        true );
+    ToolbarBuilder.AddToolBarButton( FEposSequenceEditorCommands::Get().CreateAnimationAtCurrentTime );
+    ToolbarBuilder.AddComboButton(
+        FUIAction(),
+        FOnGetContent::CreateRaw( this, &FBoardSequenceCustomization::MakeAnimationSettingsMenu ),
+        LOCTEXT( "AnimationOptions", "Options" ),
+        LOCTEXT( "AnimationOptionsToolTip", "Animation Options" ),
         TAttribute<FSlateIcon>(),
         true );
     // The 2 following buttons should be exclusive visible:
@@ -1030,6 +1056,18 @@ FBoardSequenceCustomization::MakeTextureMenu()
     FMenuBuilder MenuBuilder( true, sequencer ? sequencer->GetCommandBindings() : nullptr );
 
     EposSequenceToolbarHelpers::MakeTextureSettingsEntries( MenuBuilder );
+
+    return MenuBuilder.MakeWidget();
+}
+
+TSharedRef<SWidget>
+FBoardSequenceCustomization::MakeAnimationSettingsMenu()
+{
+    TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+
+    FMenuBuilder MenuBuilder( true, sequencer ? sequencer->GetCommandBindings() : nullptr );
+
+    EposSequenceToolbarHelpers::MakeAnimationSettingsEntries( MenuBuilder );
 
     return MenuBuilder.MakeWidget();
 }
