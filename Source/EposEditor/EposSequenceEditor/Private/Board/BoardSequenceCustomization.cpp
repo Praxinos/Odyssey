@@ -28,6 +28,7 @@
 #include "EposTracksModule.h"
 #include "Misc/EposSequenceFBXInterop.h"
 #include "PlaneActor.h"
+#include "OdysseyAnimationActor.h"
 #include "Settings/EposSequenceEditorSettings.h"
 #include "Shot/ShotSequence.h"
 #include "Styles/EposSequenceEditorStyle.h"
@@ -328,6 +329,45 @@ FBoardSequenceCustomization::BindCommands( TSharedPtr<FUICommandList> ioCommandL
                                                   if( !sequencer )
                                                       return false;
                                                   return BoardSequenceTools::GetAttachedPlanes( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber ) <= 1;
+                                              } )
+    );
+
+    ioCommandList->MapAction(
+        FEposSequenceEditorCommands::Get().DetachAnimationAtCurrentTime,
+        FExecuteAction::CreateLambda( [this]()
+                                      {
+                                          TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                          if( !sequencer )
+                                              return;
+                                          TArray<FGuid> animation_bindings;
+                                          int32 animation_count = BoardSequenceTools::GetAttachedAnimations( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, nullptr, &animation_bindings );
+                                          if( animation_count != 1 )
+                                              return;
+                                          BoardSequenceTools::DetachAnimation( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, animation_bindings[0] );
+                                      } ),
+        FCanExecuteAction::CreateLambda( [this]()
+                                         {
+                                             TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                             if( !sequencer )
+                                                 return false;
+                                             int32 animation_count = BoardSequenceTools::GetAttachedAnimations( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
+                                             if( animation_count > 1 )
+                                             {
+                                                 FNotificationInfo Info( LOCTEXT( "multiple-animations", "There are multiple animations. Select one of them." ) );
+                                                 Info.ExpireDuration = 5.0f;
+                                                 FSlateNotificationManager::Get().AddNotification( Info )->SetCompletionState( SNotificationItem::CS_Fail );
+                                             }
+                                             if( animation_count != 1 )
+                                                 return false;
+                                             return true;
+                                         } ),
+        FIsActionChecked(),
+        FIsActionButtonVisible::CreateLambda( [this]()
+                                              {
+                                                  TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                                  if( !sequencer )
+                                                      return false;
+                                                  return BoardSequenceTools::GetAttachedAnimations( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber ) <= 1;
                                               } )
     );
 
@@ -695,6 +735,27 @@ FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBui
         FEposSequenceEditorCommands::Get().DetachPlaneAtCurrentTime->GetLabel(),
         FEposSequenceEditorCommands::Get().DetachPlaneAtCurrentTime->GetDescription(),
         FEposSequenceEditorCommands::Get().DetachPlaneAtCurrentTime->GetIcon() );
+    // The 2 following buttons should be exclusive visible:
+    // - the first button is displayed when there is only 1 animation (or 0) available
+    // - the second button is displayed when there are more than 2 animations available
+    ToolbarBuilder.AddToolBarButton( FEposSequenceEditorCommands::Get().DetachAnimationAtCurrentTime );
+    ToolbarBuilder.AddComboButton(
+        FUIAction(
+            FExecuteAction(),
+            FCanExecuteAction(),
+            FGetActionCheckState(),
+            FIsActionButtonVisible::CreateLambda( [this]()
+                                                  {
+                                                      TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                                      if( !sequencer )
+                                                          return false;
+                                                      return BoardSequenceTools::GetAttachedAnimations( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber ) > 1;
+                                                  } )
+        ),
+        FOnGetContent::CreateRaw( this, &FBoardSequenceCustomization::MakeAnimationMenu ),
+        FEposSequenceEditorCommands::Get().DetachAnimationAtCurrentTime->GetLabel(),
+        FEposSequenceEditorCommands::Get().DetachAnimationAtCurrentTime->GetDescription(),
+        FEposSequenceEditorCommands::Get().DetachAnimationAtCurrentTime->GetIcon() );
 
     auto GetLighttableTooltip = [this]() -> FText
         {
@@ -910,6 +971,44 @@ FBoardSequenceCustomization::MakePlaneMenu()
                                                       return;
 
                                                   BoardSequenceTools::DetachPlane( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, plane_binding );
+                                              } )
+            )
+        );
+    }
+
+    return MenuBuilder.MakeWidget();
+}
+
+TSharedRef<SWidget>
+FBoardSequenceCustomization::MakeAnimationMenu()
+{
+    TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+
+    FMenuBuilder MenuBuilder( true, sequencer ? sequencer->GetCommandBindings() : nullptr );
+
+    TArray<AOdysseyAnimationActor*> animations;
+    TArray<FGuid> animation_bindings;
+    int32 animation_count = BoardSequenceTools::GetAttachedAnimations( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, &animations, &animation_bindings );
+    if( !animation_count )
+        return SNullWidget::NullWidget;
+
+    for( int i = 0; i < animation_count; i++ )
+    {
+        AOdysseyAnimationActor* animation = animations[i];
+        FGuid animation_binding = animation_bindings[i];
+
+        MenuBuilder.AddMenuEntry(
+            FText::FromString( animation->GetActorLabel() ),
+            FText::GetEmpty(),
+            FSlateIcon(),
+            FUIAction(
+                FExecuteAction::CreateLambda( [this, animation_binding]()
+                                              {
+                                                  TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                                  if( !sequencer )
+                                                      return;
+
+                                                  BoardSequenceTools::DetachAnimation( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, animation_binding );
                                               } )
             )
         );
