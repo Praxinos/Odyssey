@@ -1271,7 +1271,7 @@ ShotSequenceHelpers::GetOpacityKey( IMovieScenePlayer& iPlayer, UMovieSceneSeque
 
 //static
 TArray<FFrameNumber>
-ShotSequenceHelpers::GetCameraTransformTimes( UMovieSceneSequence* iSequence )
+ShotSequenceHelpers::GetCameraTransformTimes( UMovieSceneSequence* iSequence, TOptional<FFrameNumber>* oDefaultFrame )
 {
     TArray<FFrameNumber> keys;
 
@@ -1314,6 +1314,9 @@ ShotSequenceHelpers::GetCameraTransformTimes( UMovieSceneSequence* iSequence )
         }
     }
 
+    if( keys.IsEmpty() && oDefaultFrame )
+        *oDefaultFrame = cameracut_section->GetTrueRange().GetLowerBoundValue();
+
     return keys;
 }
 
@@ -1338,7 +1341,7 @@ InnerToOuter( const UMovieSceneSubSection* iOuterSection, TArray<FFrameTime> iIn
 
 //static
 TArray<FFrameTime>
-BoardSequenceHelpers::GetCameraTransformTimesRecursive( const UMovieSceneSubSection& iBoardSection )
+BoardSequenceHelpers::GetCameraTransformTimesRecursive( const UMovieSceneSubSection& iBoardSection, TArray<FFrameTime>& oDefaultFrameTimes )
 {
     TArray<FFrameTime> keys;
 
@@ -1349,7 +1352,13 @@ BoardSequenceHelpers::GetCameraTransformTimesRecursive( const UMovieSceneSubSect
     // if we are on a shot subsequence
     if( innerMovieSceneSequence->IsA<UShotSequence>() )
     {
-        TArray<FFrameNumber> subframes = ShotSequenceHelpers::GetCameraTransformTimes( innerMovieSceneSequence );
+        TOptional<FFrameNumber> default_frame;
+        TArray<FFrameNumber> subframes = ShotSequenceHelpers::GetCameraTransformTimes( innerMovieSceneSequence, &default_frame );
+        if( default_frame )
+        {
+            TArray<FFrameTime> subkeys2( { *default_frame } );
+            oDefaultFrameTimes.Append( InnerToOuter( &iBoardSection, subkeys2 ) );
+        }
 
         TArray<FFrameTime> subkeys( subframes );
         keys = InnerToOuter( &iBoardSection, subkeys );
@@ -1373,12 +1382,13 @@ BoardSequenceHelpers::GetCameraTransformTimesRecursive( const UMovieSceneSubSect
         {
             UMovieSceneSubSection* subsection = Cast<UMovieSceneSubSection>( section );
             TArray<FFrameTime> section_keys;
-            section_keys = GetCameraTransformTimesRecursive( *subsection );
+            section_keys = GetCameraTransformTimesRecursive( *subsection, oDefaultFrameTimes );
 
             subkeys.Append( section_keys );
         }
 
         keys = InnerToOuter( &iBoardSection, subkeys );
+        oDefaultFrameTimes = InnerToOuter( &iBoardSection, oDefaultFrameTimes );
 
         return keys;
     }

@@ -90,7 +90,12 @@ public:
 public:
     static ACineCameraActor*    GetCamera( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID, FGuid* oCameraBinding = nullptr );
 
-    static TArray<FFrameTime>   GetCameraTransformTimesRecursive( const UMovieSceneSubSection& iSubSection );
+    /** Get all transform keys of all cameras recursively.
+      * @param UMovieSceneSubSection    iSubSection to gather all camera transform keys.
+      * @param TArray<FFrameTime>&      oDefaultFrameTimes will be filled only for shots where its camera transform has no keys.
+      * @return TArray<FFrameTime>      the camera transform key list
+      */
+    static TArray<FFrameTime>   GetCameraTransformTimesRecursive( const UMovieSceneSubSection& iSubSection, TArray<FFrameTime>& oDefaultFrameTimes );
 
 public:
     static FChannelProxyBySectionMap                BuildCameraTransformChannelProxy( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID );
@@ -139,7 +144,12 @@ class EPOSSEQUENCE_API ShotSequenceHelpers
 public:
     static ACineCameraActor*    GetCamera( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid* oCameraBinding = nullptr );
 
-    static TArray<FFrameNumber> GetCameraTransformTimes( UMovieSceneSequence* iSequence );
+    /** Get all transform keys for the camera.
+      * @param UMovieSceneSequence*     iSequence to get the camera transform keys.
+      * @param TOptional<FFrameNumber>* oDefaultFrame will be filled only if the camera transform has no keys.
+      * @return TArray<FFrameNumber>    the camera transform key list
+      */
+    static TArray<FFrameNumber> GetCameraTransformTimes( UMovieSceneSequence* iSequence, TOptional<FFrameNumber>* oDefaultFrame = nullptr );
 
     static int32                GetAllPlanes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, EGetPlane iPlaneSelection, TArray<APlaneActor*>* oPlanes, TArray<FGuid>* oPlaneBindings );
     static int32                GetAttachedPlanes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, EGetPlane iPlaneSelection, TArray<APlaneActor*>* oPlanes, TArray<FGuid>* oPlaneBindings );

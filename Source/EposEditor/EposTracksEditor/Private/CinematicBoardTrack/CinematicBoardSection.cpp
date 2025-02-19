@@ -211,6 +211,8 @@ FCinematicBoardSection::FCinematicBoardSection( TSharedPtr<ISequencer> iSequence
     // So let's try with mNeedRebuild if it's ok now (5.1)
     //BuildKeys();
     mNeedRebuild = true;
+    // Only call the parent function to only gather camera transform keys (as everything is set because no link to some widgets like BuildKeys() which needs the sequencer widget to compute channel proxies
+    FKeyThumbnailSection::BuildKeys();
 }
 
 
@@ -504,7 +506,10 @@ FCinematicBoardSection::BuildThumbnailKeys() //override
 {
     check( TimeSpace == ETimeSpace::Global ); // Otherwise, TimeSpace must be add as a parameter
 
-    TArray<FFrameTime> keys_as_frame = BoardSequenceHelpers::GetCameraTransformTimesRecursive( GetSubSectionObject() );
+    TArray<FFrameTime> default_keys;
+    TArray<FFrameTime> keys_as_frame = BoardSequenceHelpers::GetCameraTransformTimesRecursive( GetSubSectionObject(), default_keys );
+    keys_as_frame.Append( default_keys );
+    keys_as_frame.Sort();
     mThumbnailKeys = SectionHelpersConvert::FrameToSecond( &GetSubSectionObject(), keys_as_frame );
 }
 

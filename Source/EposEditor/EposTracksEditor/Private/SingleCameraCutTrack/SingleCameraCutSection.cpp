@@ -36,6 +36,7 @@ FSingleCameraCutSection::FSingleCameraCutSection(TSharedPtr<ISequencer> InSequen
     : FKeyThumbnailSection(InSequencer, InThumbnailPool, InSection)
 {
     AdditionalDrawEffect = ESlateDrawEffect::NoGamma;
+    BuildKeys();
 }
 
 FSingleCameraCutSection::~FSingleCameraCutSection()
@@ -69,7 +70,11 @@ void FSingleCameraCutSection::BuildThumbnailKeys() //override
 
     check( TimeSpace == ETimeSpace::Global ); // Otherwise, TimeSpace must be add as a parameter
 
-    TArray<FFrameNumber> keys_as_frame = ShotSequenceHelpers::GetCameraTransformTimes( moviescene_sequence );
+    TOptional<FFrameNumber> default_key;
+    TArray<FFrameNumber> keys_as_frame = ShotSequenceHelpers::GetCameraTransformTimes( moviescene_sequence, &default_key );
+    if( keys_as_frame.IsEmpty() && default_key )
+        keys_as_frame.Add( *default_key );
+
     TArray<FFrameTime> keys( keys_as_frame );
     mKeys = SectionHelpersConvert::FrameToSecond( Section, keys );
 }
