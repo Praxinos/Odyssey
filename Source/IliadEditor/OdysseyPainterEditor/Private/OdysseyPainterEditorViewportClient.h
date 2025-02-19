@@ -67,7 +67,7 @@ public:
     // FViewportClient API
     virtual void Draw( FViewport* iViewport, FCanvas* ioCanvas ) override;
 
-    virtual bool InputKey( FViewport* iViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed = 1.0f, bool iGamepad = false ) override;
+    virtual bool InputKey( const FInputKeyEventArgs& iEventArgs ) override;
     virtual void CapturedMouseMove( FViewport* iViewport, int32 iX, int32 iY ) override;
     virtual void MouseEnter( FViewport* iViewport, int32 iX, int32 iY ) override;
     virtual void MouseLeave( FViewport* iViewport ) override;

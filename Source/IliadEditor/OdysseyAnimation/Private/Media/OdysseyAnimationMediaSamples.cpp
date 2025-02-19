@@ -132,7 +132,7 @@ FOdysseyAnimationMediaSamples::SanitizeTimeRange(TRange<FMediaTimeStamp>* oTimeR
     {
         FMediaTimeStamp timestamp = timeRange.GetLowerBoundValue();
         timestamp.Time += controls->GetDuration();
-        timestamp.SequenceIndex--;
+        timestamp.SetSequenceIndex( timestamp.GetSequenceIndex( ) - 1 );
         timeRange.SetLowerBoundValue(timestamp);
         isLowerOutOfBound = false;
     }
@@ -142,7 +142,7 @@ FOdysseyAnimationMediaSamples::SanitizeTimeRange(TRange<FMediaTimeStamp>* oTimeR
     {
         FMediaTimeStamp timestamp = timeRange.GetUpperBoundValue();
         timestamp.Time -= controls->GetDuration();
-        timestamp.SequenceIndex++;
+        timestamp.SetSequenceIndex( timestamp.GetSequenceIndex() + 1 );
         timeRange.SetUpperBoundValue(timestamp);
         isUpperOutOfBound = false;
     }
@@ -195,8 +195,8 @@ FOdysseyAnimationMediaSamples::FetchBestVideoSampleForTimeRange(const TRange<FMe
     FTimespan endTime = timeRange.GetUpperBoundValue().Time;
     int startFrameIndex = FMath::Clamp(mAnimation->GetFrameIndexAtTime(startTime), 0, controls->GetFrameCount());
     int endFrameIndex = FMath::Clamp(mAnimation->GetFrameIndexAtTime(endTime), 0, controls->GetFrameCount());
-    int64 startSequenceIndex = timeRange.GetLowerBoundValue().SequenceIndex;
-    int64 endSequenceIndex = timeRange.GetUpperBoundValue().SequenceIndex;
+    int64 startSequenceIndex = timeRange.GetLowerBoundValue().GetSequenceIndex();
+    int64 endSequenceIndex = timeRange.GetUpperBoundValue().GetSequenceIndex();
 
     //Check if range is valid
     if ( startSequenceIndex > endSequenceIndex )
@@ -277,7 +277,7 @@ FOdysseyAnimationMediaSamples::PeekVideoSampleTime(FMediaTimeStamp & TimeStamp)
     TSharedPtr<FOdysseyAnimationMediaControls> controls = mControls.Pin();
 
     TimeStamp.Time = controls->GetTime();
-    TimeStamp.SequenceIndex = 0;
+    TimeStamp.SetSequenceIndex( 0 );
     return true;
 }
 

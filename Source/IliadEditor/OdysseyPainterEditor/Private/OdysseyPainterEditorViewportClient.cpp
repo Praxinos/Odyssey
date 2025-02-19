@@ -281,7 +281,7 @@ FOdysseyPainterEditorViewportClient::GetMouseCaptureMode() const
 }
 
 bool
-FOdysseyPainterEditorViewportClient::InputKey( FViewport* iViewport, int32 iControllerId, FKey iKey, EInputEvent iEvent, float iAmountDepressed, bool iGamepad )
+FOdysseyPainterEditorViewportClient::InputKey( const FInputKeyEventArgs& iEventArgs )
 {
     TSharedPtr<SOdysseyViewport> viewportWidget = mOdysseyPainterEditorViewportPtr.Pin();
     UTexture* texture       = viewportWidget->GetTexture();
@@ -290,39 +290,39 @@ FOdysseyPainterEditorViewportClient::InputKey( FViewport* iViewport, int32 iCont
     //Here you receive Mouse Buttons and Keyboard keys events
     //UE_LOG(LogTemp, Warning, TEXT("UE InputKey %s %s"), *iKey.ToString(), iEvent == EInputEvent::IE_Pressed ? TEXT("PRESSED") : iEvent == EInputEvent::IE_Released ? TEXT("RELEASED") : TEXT("OTHER"));
 
-    if( iEvent == EInputEvent::IE_Pressed )
+    if( iEventArgs.Event == EInputEvent::IE_Pressed )
     {
         //key already pressed, don't send a KeyDown or MouseDown twice
         //Can happen on windows with some touch options
-        if (mKeysPressed.Contains(iKey))
+        if (mKeysPressed.Contains( iEventArgs.Key ))
             return true;
 
-        mKeysPressed.Add( iKey );
+        mKeysPressed.Add( iEventArgs.Key );
     }
-    else if( iEvent == EInputEvent::IE_Released )
+    else if( iEventArgs.Event == EInputEvent::IE_Released )
     {
         //key already released, don't send a KeyUp or MouseUp twice
         //Can happen on windows with some touch options
-        if (!mKeysPressed.Contains(iKey))
+        if (!mKeysPressed.Contains( iEventArgs.Key ))
             return true;
 
-        mKeysPressed.Remove(iKey);
+        mKeysPressed.Remove( iEventArgs.Key );
     }
-    else if( iEvent == EInputEvent::IE_DoubleClick )
+    else if( iEventArgs.Event == EInputEvent::IE_DoubleClick )
     {
         //HUD
-        TSharedPtr<FOdysseyHUDElement> hudElement = GetHUDElement(iViewport, iViewport->GetMouseX(), iViewport->GetMouseY());
-        if (hudElement && hudElement->OnMouseDoubleClick(mCurrentHUDPoint, iKey))
+        TSharedPtr<FOdysseyHUDElement> hudElement = GetHUDElement( iEventArgs.Viewport, iEventArgs.Viewport->GetMouseX(), iEventArgs.Viewport->GetMouseY());
+        if (hudElement && hudElement->OnMouseDoubleClick(mCurrentHUDPoint, iEventArgs.Key ))
             return true;
 
-        bool ignoreDown = mOnMouseDoubleClick.IsBound() && mOnMouseDoubleClick.Execute(mCurrentPointInViewport, iKey);
+        bool ignoreDown = mOnMouseDoubleClick.IsBound() && mOnMouseDoubleClick.Execute(mCurrentPointInViewport, iEventArgs.Key );
         if (ignoreDown)
             return true;
 
-        if (mKeysPressed.Contains(iKey))
+        if (mKeysPressed.Contains( iEventArgs.Key ))
             return true;
 
-        mKeysPressed.Add( iKey );
+        mKeysPressed.Add( iEventArgs.Key );
     }
 
     //Cleanup PressedKeys
@@ -337,33 +337,33 @@ FOdysseyPainterEditorViewportClient::InputKey( FViewport* iViewport, int32 iCont
     //---
 
     //HUD
-    if (iKey == EKeys::LeftMouseButton || iKey == EKeys::RightMouseButton)
+    if ( iEventArgs.Key == EKeys::LeftMouseButton || iEventArgs.Key == EKeys::RightMouseButton)
     {
-        if (iEvent == EInputEvent::IE_Pressed || iEvent == EInputEvent::IE_DoubleClick)
+        if ( iEventArgs.Event == EInputEvent::IE_Pressed || iEventArgs.Event == EInputEvent::IE_DoubleClick)
         {
-            mCurrentHUDElement = GetHUDElement(iViewport, iViewport->GetMouseX(), iViewport->GetMouseY());
+            mCurrentHUDElement = GetHUDElement( iEventArgs.Viewport, iEventArgs.Viewport->GetMouseX(), iEventArgs.Viewport->GetMouseY());
             if (mCurrentHUDElement)
             {
                 uint32 textureFullWidth = texture->Source.IsValid() ? texture->Source.GetSizeX() : texture->GetSurfaceWidth();
                 uint32 textureFullHeight = texture->Source.IsValid() ? texture->Source.GetSizeY() : texture->GetSurfaceHeight();
-                FVector2D viewportPoint(iViewport->GetMouseX(), iViewport->GetMouseY());
+                FVector2D viewportPoint( iEventArgs.Viewport->GetMouseX(), iEventArgs.Viewport->GetMouseY());
                 mHUDMouseDownReference = viewportPoint;
                 FVector2D hudPoint = viewportWidget->ToLocal(viewportPoint) +  FVector2D(textureFullWidth / 2.f, textureFullHeight / 2.f);
 
                 mCurrentHUDPoint = FOdysseyPoint(hudPoint.X, hudPoint.Y);
                 mCurrentHUDPoint.keysDown = mKeysPressed;
 
-                if (mCurrentHUDElement->OnMouseDown(mCurrentHUDPoint, iKey))
+                if (mCurrentHUDElement->OnMouseDown(mCurrentHUDPoint, iEventArgs.Key))
                     return true;
             }
         }
-        else if(iEvent == EInputEvent::IE_Released)
+        else if( iEventArgs.Event == EInputEvent::IE_Released)
         {
             if (mCurrentHUDElement)
             {
                 uint32 textureFullWidth = texture->Source.IsValid() ? texture->Source.GetSizeX() : texture->GetSurfaceWidth();
                 uint32 textureFullHeight = texture->Source.IsValid() ? texture->Source.GetSizeY() : texture->GetSurfaceHeight();
-                FVector2D viewportPoint(iViewport->GetMouseX(), iViewport->GetMouseY());
+                FVector2D viewportPoint( iEventArgs.Viewport->GetMouseX(), iEventArgs.Viewport->GetMouseY());
 
                 float deltaX = viewportPoint.X - mHUDMouseDownReference.X;
                 float deltaY = viewportPoint.Y - mHUDMouseDownReference.Y;
@@ -375,8 +375,8 @@ FOdysseyPainterEditorViewportClient::InputKey( FViewport* iViewport, int32 iCont
                 mCurrentHUDPoint = FOdysseyPoint(hudPoint.X, hudPoint.Y);
 
                 if (bNoMouseMovement)
-                    mCurrentHUDElement->OnMouseClick(mCurrentHUDPoint, iKey);
-                mCurrentHUDElement->OnMouseUp(mCurrentHUDPoint, iKey);
+                    mCurrentHUDElement->OnMouseClick(mCurrentHUDPoint, iEventArgs.Key );
+                mCurrentHUDElement->OnMouseUp(mCurrentHUDPoint, iEventArgs.Key );
                 mCurrentHUDElement = nullptr;
                 return true;
             }
@@ -386,18 +386,18 @@ FOdysseyPainterEditorViewportClient::InputKey( FViewport* iViewport, int32 iCont
     //---
 
     FOdysseyPoint point_in_viewport( FOdysseyPoint::DefaultPoint() );
-    point_in_viewport.x = iViewport->GetMouseX();
-    point_in_viewport.y = iViewport->GetMouseY();
+    point_in_viewport.x = iEventArgs.Viewport->GetMouseX();
+    point_in_viewport.y = iEventArgs.Viewport->GetMouseY();
 
     if (!mIsMouseDown || mCurrentToolState != eState::kIdle )
         mCurrentToolState = InputChordToState();
 
-    if (!mIsMouseDown && (iKey == EKeys::LeftMouseButton || iKey == EKeys::RightMouseButton))
-        mMouseButton = iKey;
+    if (!mIsMouseDown && ( iEventArgs.Key == EKeys::LeftMouseButton || iEventArgs.Key == EKeys::RightMouseButton))
+        mMouseButton = iEventArgs.Key;
 
-    if (iKey == EKeys::LeftMouseButton || iKey == EKeys::RightMouseButton)
+    if ( iEventArgs.Key == EKeys::LeftMouseButton || iEventArgs.Key == EKeys::RightMouseButton)
     {
-        if (iEvent == EInputEvent::IE_Pressed || iEvent == EInputEvent::IE_DoubleClick)
+        if ( iEventArgs.Event == EInputEvent::IE_Pressed || iEventArgs.Event == EInputEvent::IE_DoubleClick)
         {
             StartStylusInputRecord();
             if (!mIsRecordingStylus)
@@ -405,7 +405,7 @@ FOdysseyPainterEditorViewportClient::InputKey( FViewport* iViewport, int32 iCont
                 MouseDown(point_in_viewport);
             }
         }
-        else if(iEvent == EInputEvent::IE_Released)
+        else if( iEventArgs.Event == EInputEvent::IE_Released)
         {
             if (mIsRecordingStylus)
             {
@@ -422,13 +422,13 @@ FOdysseyPainterEditorViewportClient::InputKey( FViewport* iViewport, int32 iCont
     }
     else
     {
-        if (iEvent == EInputEvent::IE_Pressed)
+        if ( iEventArgs.Event == EInputEvent::IE_Pressed)
         {
-            return KeyDown(iKey);
+            return KeyDown( iEventArgs.Key );
         }
-        else if(iEvent == EInputEvent::IE_Released)
+        else if( iEventArgs.Event == EInputEvent::IE_Released)
         {
-            return KeyUp(iKey);
+            return KeyUp( iEventArgs.Key );
         }
     }
 
