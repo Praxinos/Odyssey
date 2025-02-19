@@ -185,7 +185,7 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseHoverVector( FOdysseyVectorGro
                                                              , const FOdysseyPoint& iPointInTexture
                                                              , uint64& oSignalFlags )
 {
-    mPathStitchHUD->SetPosition( iPointInTexture.x, iPointInTexture.y );
+    mPathStitchHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
 }
 
 void
@@ -196,7 +196,7 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseDragVector( FOdysseyVectorGrou
     // Left mouse button clicked
     if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
     {
-        mPathStitchHUD->SetPosition( iPointInTexture.x, iPointInTexture.y );
+        mPathStitchHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
     }
 
     iScene->GetLayer()->RequestRedraw( iScene->GetCell(), FOdysseyVectorCell::REDRAW_INTERACTIVE );

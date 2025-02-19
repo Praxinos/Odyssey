@@ -124,6 +124,9 @@ FOdysseyPainterEditorVectorScenePanToolHUD::DrawHUD( const FOdysseyHUDSystem::FD
 
     DrawFrame( iParams, frame, frameLength, fgColor, bgColor );
 
+    // invisible plane will get mouse events
+    DrawDummyPlane( iParams );
+
     DrawInfo( iParams, infoText, fgColor );
 }
 

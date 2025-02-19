@@ -21,7 +21,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPathStitchToolHUD : pu
         virtual void Load() override;
         virtual void Unload() override;
 
-        void SetPosition( double iWorldX, double iWorldY );
+        virtual void SetCursorPosition( double iWorldX, double iWorldY ) override;
 
         FOdysseyVectorVertex** GetStitchableVertices();
 
@@ -30,6 +30,4 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPathStitchToolHUD : pu
         UOdysseyPainterEditorVectorPathStitchTool* mPathStitchTool;
         std::vector<FOdysseyVectorPoint*> mPickedPointArray;
         FOdysseyVectorVertex* mStitchableVertex[2];
-        double mX;
-        double mY;
 };

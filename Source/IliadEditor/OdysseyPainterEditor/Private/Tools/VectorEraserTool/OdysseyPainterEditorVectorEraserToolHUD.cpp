@@ -75,6 +75,9 @@ FOdysseyPainterEditorVectorEraserToolHUD::DrawHUD( const FOdysseyHUDSystem::FDra
                        , hcColor
                        , 1.0f );
 
+    // invisible plane will get mouse events
+    DrawDummyPlane( iParams );
+
     DrawModifierInfo( iParams );
 }
 

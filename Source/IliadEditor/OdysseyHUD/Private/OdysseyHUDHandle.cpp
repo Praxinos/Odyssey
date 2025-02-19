@@ -16,7 +16,8 @@ struct HOdysseyHUDHandleHitProxy : public HOdysseyHUDElementHitProxy
 {
     DECLARE_HIT_PROXY();
 
-    HOdysseyHUDHandleHitProxy(TSharedPtr<FOdysseyHUDHandle> iHUDHandle, TOptional<EMouseCursor::Type> iMouseCursor = TOptional<EMouseCursor::Type>())
+    HOdysseyHUDHandleHitProxy( TSharedPtr<FOdysseyHUDHandle> iHUDHandle
+                             , TOptional<EMouseCursor::Type> iMouseCursor = TOptional<EMouseCursor::Type>() )
         : HOdysseyHUDElementHitProxy(iHUDHandle, iMouseCursor)
     {
     }

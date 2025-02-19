@@ -146,6 +146,9 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::DrawHUD( const FOdysseyHUDSystem:
             }
         }
     }
+
+    // invisible plane will get mouse events
+    DrawDummyPlane( iParams );
 }
 
 // part of this HUD is drawn onto the image
@@ -229,47 +232,21 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::Draw( BLContext* iBLContext )
     }
 }
 
-bool
+void
 FOdysseyPainterEditorVectorPathDrawingToolHUD::SetCursorPosition( double iX, double iY )
 {
     FOdysseyVectorPathTracer& pathTracer = mPathDrawingTool->GetPathTracer();
     FTracerBezier& bestBezier = pathTracer.GetBestBezier();
-    bool needsFullRedrawing = false;
 
-    mX = iX;
-    mY = iY;
+    FOdysseyPainterEditorVectorBaseToolHUD::SetCursorPosition( iX, iY );
 
     // here we use the quadtree built buy the HUD to pick points
     if( ( mPathDrawingTool->Stitch || mPathDrawingTool->Snap ) && mPointQuadTree )
     {
-        if( mStitchedPointArray.size() )
-        {
-            needsFullRedrawing = true; // tells to redraw the whole buffer (to clear the drawing of the previous picked path)
-        }
-
         mStitchedPointArray.clear();
 
         PickPoints( iX, iY, mPathDrawingTool->StitchingRadius, mStitchedPointArray );
-
-        if( mStitchedPointArray.size() )
-        {
-            needsFullRedrawing = true; // tells to redraw the whole buffer
-        }
     }
-
-/*
-    mVertex[0].Set( bestBezier.pt[0] );
-    mVertex[0].SetRadius( bestBezier.firstRecordRadius );
-UE_LOG(LogTemp, Warning, TEXT("Hello World %f"), bestBezier.firstRecordRadius );
-    mVertex[1].Set( bestBezier.pt[3] );
-    mVertex[1].SetRadius( bestBezier.lastRecordRadius );
-UE_LOG(LogTemp, Warning, TEXT("Hello World %f"), bestBezier.lastRecordRadius );
-    mCubicSegment.GetHandle(0)->Set( bestBezier.pt[1] );
-    mCubicSegment.GetHandle(1)->Set( bestBezier.pt[2] );
-    mCubicSegment.Update( 0 );
-*/
-
-    return needsFullRedrawing;
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -63,6 +63,9 @@ FOdysseyPainterEditorVectorPathPushToolHUD::DrawHUD( const FOdysseyHUDSystem::FD
                                          , ::ULIS::FVec2D( mPathPushTool->Radius, 0 ) ).Distance()
                        , hcColor
                        , 1.0f );
+
+    // invisible plane will get mouse events
+    DrawDummyPlane( iParams );
 }
 
 void

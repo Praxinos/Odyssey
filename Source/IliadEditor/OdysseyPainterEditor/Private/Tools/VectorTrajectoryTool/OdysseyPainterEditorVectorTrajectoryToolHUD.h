@@ -59,8 +59,6 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorTrajectoryToolHUD : pu
                                           , double iWorldY
                                           , double iPickingRadius );
 
-        void SetCursorPosition( double ix, double iY );
-
     protected:
         static constexpr double WAYPOINTRADIUS = 3.5f;
 
@@ -79,5 +77,4 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorTrajectoryToolHUD : pu
     private:
         UOdysseyPainterEditorVectorTrajectoryTool* mTrajectoryTool;
         ::ULIS::FRectD mTrajectoryRect;
-        ::ULIS::FRectD mCursorPosition;
 };

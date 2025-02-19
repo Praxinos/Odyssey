@@ -55,7 +55,7 @@ TSharedPtr<SWidget>
 FOdysseyPainterEditorViewportTab::CreateWidget()
 {
     SAssignNew(mViewport, SOdysseyViewport)
-        .Texture_Raw(this, &FOdysseyPainterEditorViewportTab::Texture);
+        .Texture(this, &FOdysseyPainterEditorViewportTab::Texture);
 
     //TODO: not cool to have to go through the whole GUI for an info, move that in the painterEditor Data
     mViewportClient = MakeShareable(new FOdysseyPainterEditorViewportClient(mEditor, mViewport, mEditor->GetMeshSelector().Get()));

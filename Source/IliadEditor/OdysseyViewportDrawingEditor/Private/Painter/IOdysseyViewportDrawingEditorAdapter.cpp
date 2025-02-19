@@ -276,15 +276,20 @@ bool IOdysseyViewportDrawingEditorAdapter::MouseMove(FEditorViewportClient* iVie
 
     //HUD
     TSharedPtr<FOdysseyHUDElement> hudElement = GetHUDElement(iViewport, iViewport->GetMouseX(), iViewport->GetMouseY());
-    if (mHoveredHUDElement && !hudElement)
+
+    if (mHoveredHUDElement != hudElement)
     {
-        mHoveredHUDElement->OnMouseLeave();
-        mHoveredHUDElement = nullptr;
-    }
-    else if (!mHoveredHUDElement && hudElement)
-    {
-        mHoveredHUDElement = hudElement;
-        mHoveredHUDElement->OnMouseEnter();
+        if(mHoveredHUDElement)
+        {
+            mHoveredHUDElement->OnMouseLeave();
+            mHoveredHUDElement = nullptr;
+        }
+
+        if(hudElement)
+        {
+            mHoveredHUDElement = hudElement;
+            mHoveredHUDElement->OnMouseEnter();
+        }
     }
 
     if (mHoveredHUDElement)

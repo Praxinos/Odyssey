@@ -25,7 +25,8 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPathEditToolHUD : publ
                                    , double iRadius );
         BLImage* GetMask();
 
-        bool SetCursorPosition( double iX, double iY );
+        virtual void SetCursorPosition( double iWorldX, double iWorldY );
+
         std::vector<FOdysseyVectorPoint*>& GetHoveredPointArray();
 
         void SetCutLineP0( double iX, double iY );
@@ -48,8 +49,6 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPathEditToolHUD : publ
                      , bool iContour );
 
     private:
-        double mX;
-        double mY;
         std::vector<FOdysseyVectorPoint*> mHoveredPointArray;
         UOdysseyPainterEditorVectorPathEditTool* mPathEditTool;
         BLContext mBLSelectionContext;

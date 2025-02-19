@@ -474,8 +474,8 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyUp( const FKey& iKey )
 }
 
 bool
-UOdysseyPainterEditorVectorBaseTool::OnMouseDown( const FOdysseyPoint& iPointInTexture
-                                                , const FKey& iKey )
+UOdysseyPainterEditorVectorBaseTool::OnMouseDownViaHUD( const FOdysseyPoint& iPointInTexture
+                                                      , const FKey& iKey )
 {
     // workaround for buggy stylus drivers
     if( FilterMouseEvent( eMouseEventName::MouseDown ) == false )
@@ -504,7 +504,7 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseDown( const FOdysseyPoint& iPointInT
 }
 
 void
-UOdysseyPainterEditorVectorBaseTool::OnMouseHover( const FOdysseyPoint& iPointInTexture )
+UOdysseyPainterEditorVectorBaseTool::OnMouseHoverViaHUD( const FOdysseyPoint& iPointInTexture )
 {
     // workaround for buggy stylus drivers
     if( FilterMouseEvent( eMouseEventName::MouseHover ) == false )
@@ -538,7 +538,7 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseHover( const FOdysseyPoint& iPointIn
 TSharedPtr<SOdysseyViewport>
 UOdysseyPainterEditorVectorBaseTool::GetViewport()
 {
-    return mViewport;
+    return mViewport.Pin();
 }
 
 // WorkAround for faulty stylus drivers
@@ -584,7 +584,7 @@ UOdysseyPainterEditorVectorBaseTool::FilterMouseEvent( eMouseEventName iCurrentM
 }
 
 void
-UOdysseyPainterEditorVectorBaseTool::OnMouseDrag( const FOdysseyPoint& iPointInTexture )
+UOdysseyPainterEditorVectorBaseTool::OnMouseDragViaHUD( const FOdysseyPoint& iPointInTexture )
 {
     // workaround for buggy stylus drivers
     if( FilterMouseEvent( eMouseEventName::MouseDrag ) == false )
@@ -660,8 +660,8 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseClickVector(FOdysseyVectorGroupPaint
 }
 
 bool
-UOdysseyPainterEditorVectorBaseTool::OnMouseUp( const FOdysseyPoint& iPointInTexture
-                                              , const FKey& iKey )
+UOdysseyPainterEditorVectorBaseTool::OnMouseUpViaHUD( const FOdysseyPoint& iPointInTexture
+                                                    , const FKey& iKey )
 {
     // workaround for buggy stylus drivers
     if( FilterMouseEvent( eMouseEventName::MouseUp ) == false )

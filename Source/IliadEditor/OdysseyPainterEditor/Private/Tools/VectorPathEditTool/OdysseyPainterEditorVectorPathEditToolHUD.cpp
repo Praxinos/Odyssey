@@ -177,7 +177,10 @@ FOdysseyPainterEditorVectorPathEditToolHUD::DrawHUD( const FOdysseyHUDSystem::FD
         }
     }
 
-   DrawModifierInfo( iParams );
+    // invisible plane will get mouse events
+    DrawDummyPlane( iParams );
+
+    DrawModifierInfo( iParams );
 }
 
 void
@@ -192,22 +195,17 @@ FOdysseyPainterEditorVectorPathEditToolHUD::GetHoveredPointArray()
     return mHoveredPointArray;
 }
 
-bool
-FOdysseyPainterEditorVectorPathEditToolHUD::SetCursorPosition( double iX, double iY )
+void
+FOdysseyPainterEditorVectorPathEditToolHUD::SetCursorPosition( double iWorldX, double iWorldY )
 {
-    bool needsFullRedrawing = false;
-
-    mX = iX;
-    mY = iY;
+    FOdysseyPainterEditorVectorBaseToolHUD::SetCursorPosition( iWorldX, iWorldY );
 
     if( mPathEditTool->GetPickingMode() == ePathPickingMode::Alter )
     {
         mHoveredPointArray.clear();
 
-        PickPoints( iX, iY, mPathEditTool->PickingRadius, mHoveredPointArray );
+        PickPoints( iWorldX, iWorldY, mPathEditTool->PickingRadius, mHoveredPointArray );
     }
-
-    return needsFullRedrawing;
 }
 
 void

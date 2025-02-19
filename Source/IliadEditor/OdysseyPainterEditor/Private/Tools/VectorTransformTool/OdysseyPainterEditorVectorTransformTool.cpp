@@ -138,10 +138,7 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseHoverVector( FOdysseyVectorGrou
         imageRegion.w = width;
         imageRegion.h = height;
 
-        if( mTransformHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y ) )
-        {
-            redrawRegion = imageRegion; // redraw the whole image when the gizmo must be redrawn
-        }
+        mTransformHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
     }
 
 

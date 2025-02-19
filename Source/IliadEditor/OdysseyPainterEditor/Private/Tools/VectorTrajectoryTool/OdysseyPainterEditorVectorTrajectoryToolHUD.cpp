@@ -304,13 +304,6 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::PickWaypoint( FOdysseyVectorTagInb
 }
 
 void
-FOdysseyPainterEditorVectorTrajectoryToolHUD::SetCursorPosition( double iX, double iY )
-{
-    mCursorPosition.x = iX;
-    mCursorPosition.y = iY;
-}
-
-void
 FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawQuad( const FOdysseyHUDSystem::FDrawHUDParams& iParams
                                                       , const FLinearColor& iColor
                                                       , FInbetweenerQuad* iQuad )

@@ -67,9 +67,42 @@ class ODYSSEYPAINTEREDITOR_API FPointQuadTree
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorBaseToolHUD : public FOdysseyHUDElement, public IOdysseyVectorHUD
 {
+    protected:
+        struct BatchedLine
+        {
+            BatchedLine( FVector2D* iP0, FVector2D* iP1 )
+                : p0 ( iP0 )
+                , p1 ( iP1 )
+                , perpendicular( 0.0f, 0.0f )
+            {
+                FVector2D vec = (*iP1) - (*iP0);
+
+                if( vec.SizeSquared() )
+                {
+                    vec.Normalize();
+
+                    perpendicular.X = -vec.Y;
+                    perpendicular.Y =  vec.X;
+                }
+            }
+
+            FVector2D* p0;
+            FVector2D* p1;
+            FVector2D perpendicular;
+        };
+
     public:
         virtual ~FOdysseyPainterEditorVectorBaseToolHUD();
         FOdysseyPainterEditorVectorBaseToolHUD(  UOdysseyPainterEditorVectorBaseTool* iBaseTool );
+
+        virtual bool OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
+//        virtual bool OnMouseClick(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
+//        virtual bool OnMouseDoubleClick(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
+        virtual bool OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
+//        virtual void OnMouseEnter() override;
+        virtual void OnMouseHover(const FOdysseyPoint& iPointInTexture) override;
+//        virtual void OnMouseLeave() override;
+        virtual void OnMouseDrag(const FOdysseyPoint& iPointInTexture) override;
 
         virtual void Load( );
         virtual void Unload( );
@@ -93,6 +126,8 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorBaseToolHUD : public F
 
         void MakePointQuadTree( bool iFocusedObjectsOnly
                               , uint64 iHUDFlags );
+
+        virtual void SetCursorPosition( double iX, double iY );
 
     protected:
         void DrawSectionArray( const FOdysseyHUDSystem::FDrawHUDParams& iParams
@@ -186,6 +221,11 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorBaseToolHUD : public F
                               , const FVector2D& iHUDCoordsP1
                               , const FLinearColor& iColor
                               , float iThickness );
+        void DrawPrimitiveLineOutlined( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+                                      , const FVector2D& iHUDCoordsP0
+                                      , const FVector2D& iHUDCoordsP1
+                                      , const FLinearColor& iColor
+                                      , float iThickness );
 
         void DrawPrimitiveCircle( const FOdysseyHUDSystem::FDrawHUDParams& iParams
                                 , const FVector2D& iHUDCoords
@@ -225,6 +265,16 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorBaseToolHUD : public F
                      , const FText& iText
                      , const FLinearColor& iColor );
 
+        void DrawBatchedLines( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+                             , const std::vector<BatchedLine>& iLineBuffer
+                             , const std::vector<FVector2D>& iPointBuffer
+                             , const FLinearColor& iColor
+                             , float iThickness );
+        ::ULIS::FRectD BBoxToHUD( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+                                , const ::ULIS::FRectD& iBBox );
+
+        void DrawDummyPlane( const FOdysseyHUDSystem::FDrawHUDParams& iParams );
+
     protected:
         void UpdateSelectionBoxVertexMode();
         void UpdateSelectionBoxObjectMode( bool iForceWorld );
@@ -260,6 +310,8 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorBaseToolHUD : public F
         ::ULIS::FVec2D WorldVectorToHUD( const FOdysseyHUDSystem::FDrawHUDParams& iParams
                                        , const ::ULIS::FVec2D& iWorldOriginCoords
                                        , const ::ULIS::FVec2D& iWorldVectorCoords );
+        ::ULIS::FRectD WorldRectToHUD( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+                                     , const ::ULIS::FRectD& iWorldRect );
 
     protected:
         UOdysseyPainterEditorVectorBaseTool* mBaseTool;
@@ -268,14 +320,15 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorBaseToolHUD : public F
         std::list<FOdysseyVectorTagInbetweener*> mSelectedInbetweenerTagList;
         FOdysseyVectorGroupPaint* mScene;
         TObjectPtr<UTexture> mVertexTexture;
-        TObjectPtr<UTexture> mVertexContourTexture;
-        TObjectPtr<UTexture> mBucketInnerContourTexture;
-        TObjectPtr<UTexture> mBucketPropagateTexture;
         TObjectPtr<UTexture> mHandleTexture;
-        TObjectPtr<UTexture> mHandleContourTexture;
+        TObjectPtr<UTexture> mBucketTexture;
+        TObjectPtr<UTexture> mBucketPropagateTexture;
         TObjectPtr<UTexture> mInfoBorderLeftTexture;
         TObjectPtr<UTexture> mInfoBorderTexture;
         TObjectPtr<UTexture> mInfoBorderRightTexture;
+        TObjectPtr<UTexture> mLineOutlinedTexture;
+        double mX;
+        double mY;
 
     protected:
         FPointQuadTree* mPointQuadTree;

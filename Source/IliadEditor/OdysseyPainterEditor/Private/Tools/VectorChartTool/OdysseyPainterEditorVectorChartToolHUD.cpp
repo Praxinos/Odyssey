@@ -164,33 +164,42 @@ FOdysseyPainterEditorVectorChartToolHUD::DrawBreakdownChart( const FOdysseyHUDSy
         FInbetweenerChart::Inbetween* inbetween = &iBreakdown->GetChart()->GetInbetweenBuffer()[i];
         float indicatorX = mChartRect.x + ( inbetween->GetSpacing() * mChartRect.w );
         double quadraticT = iHUDBezier->GetQuadraticT( inbetween->GetSpacing() );
-        ::ULIS::FVec2D hudIndicatorPosition = ::ULIS::QuadraticBezierPointAtParameter( ::ULIS::FVec2D( hudCoords[0].X, hudCoords[0].Y ),
-                                                                                       ::ULIS::FVec2D( hudCoords[1].X, hudCoords[1].Y ),
-                                                                                       ::ULIS::FVec2D( hudCoords[2].X, hudCoords[2].Y ),
+        ::ULIS::FVec2D texIndicatorPosition = ::ULIS::QuadraticBezierPointAtParameter( ::ULIS::FVec2D( texCoords[0].x, texCoords[0].y ),
+                                                                                       ::ULIS::FVec2D( texCoords[1].x, texCoords[1].y ),
+                                                                                       ::ULIS::FVec2D( texCoords[2].x, texCoords[2].y ),
                                                                                        quadraticT );
-        ::ULIS::FVec2D hudIndicatorTangent = ::ULIS::QuadraticBezierTangentAtParameter( ::ULIS::FVec2D( hudCoords[0].X, hudCoords[0].Y ),
-                                                                                        ::ULIS::FVec2D( hudCoords[1].X, hudCoords[1].Y ),
-                                                                                        ::ULIS::FVec2D( hudCoords[2].X, hudCoords[2].Y ),
+        ::ULIS::FVec2D texIndicatorTangent = ::ULIS::QuadraticBezierTangentAtParameter( ::ULIS::FVec2D( texCoords[0].x, texCoords[0].y ),
+                                                                                        ::ULIS::FVec2D( texCoords[1].x, texCoords[1].y ),
+                                                                                        ::ULIS::FVec2D( texCoords[2].x, texCoords[2].y ),
                                                                                         quadraticT );
-        ::ULIS::FVec2D hudIndicatorPerpendicular = ::ULIS::FVec2D( -hudIndicatorTangent.y, hudIndicatorTangent.x );
-        bool hovered = ( inbetween == mChartTool->GetHoveredInbetween() );
-        bool current = ( inbetween->GetCellIndex() == iRenderedCellIndex );
-
-        if( hudIndicatorPerpendicular.DistanceSquared() )
+        if( texIndicatorTangent.DistanceSquared() )
         {
+            texIndicatorTangent.Normalize();
+
+            ::ULIS::FVec2D texIndicatorPerpendicular = ::ULIS::FVec2D( -texIndicatorTangent.y, texIndicatorTangent.x );
+
             float lengthFactor = ( ( inbetween->GetSpacing() == 0.0f ) || ( inbetween->GetSpacing() == 1.0f ) ) ? 1.0f : 0.6f;
-            ::ULIS::FVec2D normalizedPerpendicular = hudIndicatorPerpendicular.Normalize() * lengthFactor;
+            ::ULIS::FVec2D hudIndicatorPosition = WorldPointToHUD( iParams, texIndicatorPosition );
+            ::ULIS::FVec2D hudIndicatorTangent = WorldVectorToHUD( iParams, texIndicatorPosition, texIndicatorTangent * lengthFactor );
+            ::ULIS::FVec2D hudIndicatorPerpendicular = ::ULIS::FVec2D( -hudIndicatorTangent.y, hudIndicatorTangent.x );
+            bool hovered = ( inbetween == mChartTool->GetHoveredInbetween() );
+            bool current = ( inbetween->GetCellIndex() == iRenderedCellIndex );
+
              // Note: "* 0.1f" helps positionning the circle surrounding the numbers a bit away from the indicator
-            ::ULIS::FVec2D hudFrameInfoPosition = ::ULIS::FVec2D( hudIndicatorPosition.x + ( normalizedPerpendicular.x * 1.1f * ( FONT_SIZE + ( BREAKDOWN_INDICATOR_RADIUS ) ) )
-                                                                , hudIndicatorPosition.y + ( normalizedPerpendicular.y * 1.1f * ( FONT_SIZE + ( BREAKDOWN_INDICATOR_RADIUS ) ) ) );
+            ::ULIS::FVec2D texFrameInfoPosition = ::ULIS::FVec2D( texIndicatorPosition.x + ( texIndicatorPerpendicular.x * 1.1f * ( FONT_SIZE + ( BREAKDOWN_INDICATOR_RADIUS ) ) )
+                                                                , texIndicatorPosition.y + ( texIndicatorPerpendicular.y * 1.1f * ( FONT_SIZE + ( BREAKDOWN_INDICATOR_RADIUS ) ) ) );
+            ::ULIS::FVec2D hudFrameInfoPosition = WorldPointToHUD ( iParams, texFrameInfoPosition );
             FText glyphText = FText::AsNumber( iBreakdown->GetSourceDrawingIndex() + i + 1 );
+            ::ULIS::FVec2D texFrameNumberPosition;
             ::ULIS::FVec2D hudFrameNumberPosition;
             int32 glyphW, glyphH;
 
             font->GetStringHeightAndWidth ( glyphText.ToString(), glyphH, glyphW );
 
-            hudFrameNumberPosition = ::ULIS::FVec2D( hudFrameInfoPosition.x - ( glyphW * 0.5f )
-                                                   , hudFrameInfoPosition.y + ( glyphH * 0.5f ) );
+            texFrameNumberPosition = ::ULIS::FVec2D( texFrameInfoPosition.x - ( glyphW * 0.5f )
+                                                   , texFrameInfoPosition.y + ( glyphH * 0.5f ) );
+
+            hudFrameNumberPosition = WorldPointToHUD( iParams, texFrameNumberPosition );
 
             if( ( ( inbetween->GetSpacing() == 0.0f ) && iDrawSourceIndicator ) || ( inbetween->GetSpacing() == 1.0f ) )
             {
@@ -212,16 +221,19 @@ FOdysseyPainterEditorVectorChartToolHUD::DrawBreakdownChart( const FOdysseyHUDSy
                 else
                 {
                     FVector2D circleCenter = FVector2D ( hudFrameInfoPosition.x, hudFrameInfoPosition.y );
+                    double circleRadius = WorldVectorToHUD ( iParams
+                                                           , FVector2D( texFrameInfoPosition.x, texFrameInfoPosition.y )
+                                                           , FVector2D( fontSize, 0 ) ).Size();
 
-                    DrawPrimitiveCircle( iParams, circleCenter, fontSize, chartColor, 2.0f );
+                    DrawPrimitiveCircle( iParams, circleCenter, circleRadius, chartColor, 2.0f );
                 }
 
                 // draw indicator
                 DrawPrimitiveLine( iParams
-                                 , FVector2D( hudIndicatorPosition.x + ( normalizedPerpendicular.x * BREAKDOWN_INDICATOR_RADIUS )
-                                            , hudIndicatorPosition.y + ( normalizedPerpendicular.y * BREAKDOWN_INDICATOR_RADIUS ) )
-                                 , FVector2D( hudIndicatorPosition.x - ( normalizedPerpendicular.x * BREAKDOWN_INDICATOR_RADIUS )
-                                            , hudIndicatorPosition.y - ( normalizedPerpendicular.y * BREAKDOWN_INDICATOR_RADIUS ) )
+                                 , FVector2D( hudIndicatorPosition.x + ( hudIndicatorPerpendicular.x * BREAKDOWN_INDICATOR_RADIUS )
+                                            , hudIndicatorPosition.y + ( hudIndicatorPerpendicular.y * BREAKDOWN_INDICATOR_RADIUS ) )
+                                 , FVector2D( hudIndicatorPosition.x - ( hudIndicatorPerpendicular.x * BREAKDOWN_INDICATOR_RADIUS )
+                                            , hudIndicatorPosition.y - ( hudIndicatorPerpendicular.y * BREAKDOWN_INDICATOR_RADIUS ) )
                                  , chartColor
                                  , 2.0f );
 
@@ -238,10 +250,10 @@ FOdysseyPainterEditorVectorChartToolHUD::DrawBreakdownChart( const FOdysseyHUDSy
 
                 // draw indicator
                 DrawPrimitiveLine( iParams
-                                 , FVector2D( hudIndicatorPosition.x + ( normalizedPerpendicular.x * BREAKDOWN_INDICATOR_RADIUS )
-                                            , hudIndicatorPosition.y + ( normalizedPerpendicular.y * BREAKDOWN_INDICATOR_RADIUS ) )
-                                 , FVector2D( hudIndicatorPosition.x - ( normalizedPerpendicular.x * BREAKDOWN_INDICATOR_RADIUS )
-                                            , hudIndicatorPosition.y - ( normalizedPerpendicular.y * BREAKDOWN_INDICATOR_RADIUS ) )
+                                 , FVector2D( hudIndicatorPosition.x + ( hudIndicatorPerpendicular.x * BREAKDOWN_INDICATOR_RADIUS )
+                                            , hudIndicatorPosition.y + ( hudIndicatorPerpendicular.y * BREAKDOWN_INDICATOR_RADIUS ) )
+                                 , FVector2D( hudIndicatorPosition.x - ( hudIndicatorPerpendicular.x * BREAKDOWN_INDICATOR_RADIUS )
+                                            , hudIndicatorPosition.y - ( hudIndicatorPerpendicular.y * BREAKDOWN_INDICATOR_RADIUS ) )
                                  , hovered ? iHcColor : inbetweenColor
                                  , hovered ? 3.0f: 2.0f );
 
@@ -340,7 +352,10 @@ FOdysseyPainterEditorVectorChartToolHUD::DrawHUD( const FOdysseyHUDSystem::FDraw
         }
     }
 
-   DrawModifierInfo( iParams );
+    // invisible plane will get mouse events
+    DrawDummyPlane( iParams );
+
+    DrawModifierInfo( iParams );
 }
 
 void

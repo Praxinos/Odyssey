@@ -22,7 +22,7 @@
 #include "OdysseyMediaProvider.h"
 #include "OdysseyPainterEditorSource.h"
 #include "SOdysseySinglePropertyView.h"
-
+#include "Widgets/Input/SSegmentedControl.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -1080,8 +1080,15 @@ UOdysseyPainterEditorVectorPathEditTool::ExtendContextMenuObject( FOdysseyVector
 }
 
 void
+UOdysseyPainterEditorVectorPathEditTool::SetPickingMode( TOptional<ePathPickingMode> inValue )
+{
+}
+
+void
 UOdysseyPainterEditorVectorPathEditTool::ExtendToolbar( FToolBarBuilder& iBuilder )
 {
+    TOptional<ePathPickingMode> val;
+
     Super::ExtendToolbar(iBuilder);
 
     iBuilder.BeginSection( NAME_None );
@@ -1095,7 +1102,16 @@ UOdysseyPainterEditorVectorPathEditTool::ExtendToolbar( FToolBarBuilder& iBuilde
             .ValueWidthOverride(100.f)
         ]
     );
-
+/*
+    iBuilder.AddWidget(
+        SNew(SSegmentedControl<ePathPickingMode>)
+        + SSegmentedControl<ePathPickingMode>::Slot( ePathPickingMode::Vertex )
+         .Icon( []{ return FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathEdit64"); } )
+         .Text( []{ return FText::FromString(""); } )
+         .ToolTip( []{ return FText::FromString(""); } )
+         .Value( val )
+    );
+*/
     iBuilder.AddWidget(
         SNew(SBox)
         .Padding(10.f, 0.f, 10.f, 0.f)

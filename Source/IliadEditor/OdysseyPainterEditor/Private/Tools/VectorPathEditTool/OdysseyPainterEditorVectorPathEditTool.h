@@ -4,10 +4,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Misc/Optional.h"
+
 #include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.h"
 #include "OdysseyVectorSegment.h"
 #include "OdysseyVectorSegmentCubic.h"
+
 #include "OdysseyPainterEditorVectorPathEditTool.generated.h"
+
 
 class FOdysseyPainterEditorVectorPathEditToolHUD;
 class FOdysseyVectorVertex;
@@ -163,6 +167,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathEditTool : public 
 
         static void BuildSegmentAdjustments( const std::vector<FOdysseyVectorSegment*>& iSegmentArray
                                            , std::vector<FSegmentAdjustment>& oSegmentAdjustmentArray );
+
+        void SetPickingMode( TOptional<ePathPickingMode> inValue );
 
     private:
         FOdysseyPainterEditorVectorPathEditToolHUD *mPathEditHUD;

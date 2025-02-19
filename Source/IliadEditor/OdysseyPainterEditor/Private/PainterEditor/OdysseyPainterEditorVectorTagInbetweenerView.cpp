@@ -389,6 +389,7 @@ UOdysseyPainterEditorVectorTagInbetweenerView::PostEditChangeProperty( FProperty
                        , FName(PropertyChangedEvent.Property->GetMetaData(TEXT("Category"))) );
 
         // redraw
+        mScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
         mScene->GetLayer()->RequestRedraw( mScene->GetCell(), 0 );
     }
 }

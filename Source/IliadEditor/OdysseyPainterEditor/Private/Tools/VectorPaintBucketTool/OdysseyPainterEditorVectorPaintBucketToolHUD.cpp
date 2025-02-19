@@ -255,6 +255,9 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::DrawHUD( const FOdysseyHUDSystem:
             DrawCycle( iParams, cycle, hcColor, bgColor, hudFlags );
         }
     }
+
+    // invisible plane will get mouse events
+    DrawDummyPlane( iParams );
 }
 
 void

@@ -33,7 +33,8 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorTransformToolHUD : pub
         virtual void Draw( BLContext* iBLContext ) override;
         virtual void Reset() override;
 
-        uint32 SetCursorPosition( double iWorldX, double iWorldY );
+        virtual void SetCursorPosition( double iWorldX, double iWorldY ) override;
+
         void SetGizmo( double iLocalX, double iLocalY );
         ::ULIS::FVec2D& GetGizmo();
         uint32 GetFlags();

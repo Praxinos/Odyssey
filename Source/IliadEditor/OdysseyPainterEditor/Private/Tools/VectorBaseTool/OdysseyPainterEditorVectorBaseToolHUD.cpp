@@ -12,6 +12,9 @@
 // for 3D HUDs
 #include "CanvasTypes.h"
 #include "CanvasItem.h"
+#include "HitProxies.h"
+#include "Misc/Optional.h"
+
 
 FPointQuadTree::~FPointQuadTree()
 {
@@ -155,6 +158,19 @@ MapPoints( FOdysseyVectorObject* iObject
     }
 }
 
+struct HOdysseyHUDDummyCursorHitProxy : public HOdysseyHUDElementHitProxy
+{
+    DECLARE_HIT_PROXY();
+
+    HOdysseyHUDDummyCursorHitProxy( TSharedPtr<FOdysseyPainterEditorVectorBaseToolHUD> iToolHUD
+                                  , TOptional<EMouseCursor::Type> iMouseCursor = TOptional<EMouseCursor::Type>() )
+        : HOdysseyHUDElementHitProxy( iToolHUD, iMouseCursor )
+    {
+    }
+};
+
+IMPLEMENT_HIT_PROXY(HOdysseyHUDDummyCursorHitProxy, HOdysseyHUDElementHitProxy)
+
 void
 FOdysseyPainterEditorVectorBaseToolHUD::MakePointQuadTree( bool iFocusedObjectsOnly
                                                          , uint64 iHUDFlags )
@@ -195,9 +211,9 @@ FOdysseyPainterEditorVectorBaseToolHUD::MakePointQuadTree( bool iFocusedObjectsO
 
 void
 FOdysseyPainterEditorVectorBaseToolHUD::PickPoints( double iWorldX
-                             , double iWorldY
-                             , double iSelectionRadius
-                             , std::vector<FOdysseyVectorPoint*>& oPickedPointArray )
+                                                  , double iWorldY
+                                                  , double iSelectionRadius
+                                                  , std::vector<FOdysseyVectorPoint*>& oPickedPointArray )
 {
     if( mPointQuadTree )
     {
@@ -215,16 +231,17 @@ FOdysseyPainterEditorVectorBaseToolHUD::~FOdysseyPainterEditorVectorBaseToolHUD(
 
 FOdysseyPainterEditorVectorBaseToolHUD::FOdysseyPainterEditorVectorBaseToolHUD( UOdysseyPainterEditorVectorBaseTool* iBaseTool )
     : mBaseTool ( iBaseTool )
-    , mPointQuadTree( nullptr )
-    , mVertexTexture( LoadObject<UTexture>( nullptr, TEXT("/Odyssey/HUD/T_HUD_Vector_Vertex") ) )
-    , mVertexContourTexture( LoadObject<UTexture>( nullptr, TEXT("/Odyssey/HUD/T_HUD_Vector_Vertex_Contour") ) )
-    , mBucketInnerContourTexture( LoadObject<UTexture>( nullptr, TEXT("/Odyssey/HUD/T_HUD_Vector_Bucket_Inner_Contour") ) )
+    , mVertexTexture( LoadObject<UTexture>( nullptr, TEXT("/Odyssey/HUD/T_HUD_Vector_Vertex_Full") ) )
+    , mHandleTexture( LoadObject<UTexture>( nullptr, TEXT("/Odyssey/HUD/T_HUD_Vector_Handle_Full") ) )
+    , mBucketTexture( LoadObject<UTexture>( nullptr, TEXT("/Odyssey/HUD/T_HUD_Vector_Vertex_Full") ) )
     , mBucketPropagateTexture( LoadObject<UTexture>( nullptr, TEXT("/Odyssey/HUD/T_HUD_Vector_Bucket_Propagate") ) )
-    , mHandleTexture( LoadObject<UTexture>( nullptr, TEXT("/Odyssey/HUD/T_HUD_Vector_Handle") ) )
-    , mHandleContourTexture( LoadObject<UTexture>( nullptr, TEXT("/Odyssey/HUD/T_HUD_Vector_Handle_Contour") ) )
     , mInfoBorderLeftTexture( LoadObject<UTexture>( nullptr, TEXT("/Odyssey/HUD/T_HUD_Vector_Info_Border_Left") ) )
     , mInfoBorderTexture( LoadObject<UTexture>( nullptr, TEXT("/Odyssey/HUD/T_HUD_Vector_Info_Border") ) )
     , mInfoBorderRightTexture( LoadObject<UTexture>( nullptr, TEXT("/Odyssey/HUD/T_HUD_Vector_Info_Border_Right") ) )
+    , mLineOutlinedTexture( LoadObject<UTexture>( nullptr, TEXT("/Odyssey/HUD/T_HUD_Vector_Line_Outlined") ) )
+    , mX( 0.0f )
+    , mY( 0.0f )
+    , mPointQuadTree( nullptr )
 {
     mFontInfo = FSlateFontInfo( LoadObject<UFont>( nullptr, TEXT("/Odyssey/Fonts/Lucida_Console_Font") ), 16 );
 }
@@ -635,19 +652,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawBucket( const FOdysseyHUDSystem::FDr
                              , 1.0f
                              , 1.0f
                              , fillColor
-                             , mVertexTexture->GetResource()
-                             , ESimpleElementBlendMode::SE_BLEND_Masked );
-
-    iParams.mCanvas->DrawTile( bucketHUDCoords.X - FOdysseyVectorHUD::PELLET_RADIUS
-                             , bucketHUDCoords.Y - FOdysseyVectorHUD::PELLET_RADIUS
-                             , FOdysseyVectorHUD::PELLET_RADIUS * 2.0f
-                             , FOdysseyVectorHUD::PELLET_RADIUS * 2.0f
-                             , 0.0f
-                             , 0.0f
-                             , 1.0f
-                             , 1.0f
-                             , blackColor
-                             , mVertexContourTexture->GetResource()
+                             , mBucketTexture->GetResource()
                              , ESimpleElementBlendMode::SE_BLEND_Masked );
 
     if( iBucket->IsPropagated() )
@@ -810,6 +815,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawVertex( const FOdysseyHUDSystem::FDr
                                                   , const FLinearColor& hcColor
                                                   , uint64 iHUDFlags )
 {
+    ::ULIS::FRectD screen = ::ULIS::FRectD::FromXYWH( 0, 0, iParams.mTextureWidth, iParams.mTextureHeight );
     FOdysseyVectorPath* path = iVertex->GetOwnerAsPath();
     BLMatrix2D& worldMatrix = path->GetWorldMatrix();
     // TODO: compute that once and pass it as parameter for all vertices
@@ -821,6 +827,10 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawVertex( const FOdysseyHUDSystem::FDr
     static FLinearColor redColor    = FLinearColor(  1.0f,  0.0f,  0.0f, 1.0f );
     double vertexRadius = FOdysseyVectorHUD::VERTEXRADIUS;
     double handleRadius = FOdysseyVectorHUD::HANDLERADIUS;
+    ::ULIS::FRectD vertexBBox = ::ULIS::FRectD::FromMinMax( hudPoint.X - FOdysseyVectorHUD::VERTEXRADIUS
+                                                          , hudPoint.Y - FOdysseyVectorHUD::VERTEXRADIUS
+                                                          , hudPoint.X + FOdysseyVectorHUD::VERTEXRADIUS
+                                                          , hudPoint.Y + FOdysseyVectorHUD::VERTEXRADIUS );
 
     if ( iHUDFlags & FOdysseyVectorHUD::HUD_PATH_VERTEX_HANDLE )
     {
@@ -842,62 +852,69 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawVertex( const FOdysseyHUDSystem::FDr
         hudHandleLine[0] = FCanvasLineItem( hudPoint, hudHandleCoords[0] );
         hudHandleLine[1] = FCanvasLineItem( hudPoint, hudHandleCoords[1] );
 
-        // Line to handle
-        DrawPrimitiveLine( iParams
-                         , hudPoint
-                         , hudHandleCoords[0]
-                         , bgColor
-                         , 2.0f );
+        ::ULIS::FRectD bbox0 = ::ULIS::FRectD::FromMinMax( ::ULIS::FMath::Min( hudPoint.X, hudHandleCoords[0].X ) - handleRadius
+                                                         , ::ULIS::FMath::Min( hudPoint.Y, hudHandleCoords[0].Y ) - handleRadius
+                                                         , ::ULIS::FMath::Max( hudPoint.X, hudHandleCoords[0].X ) + handleRadius
+                                                         , ::ULIS::FMath::Max( hudPoint.Y, hudHandleCoords[0].Y ) + handleRadius );
 
-        DrawPrimitiveLine( iParams
-                         , hudPoint
-                         , hudHandleCoords[0]
-                         , whiteColor
-                         , 1.0f );
+        if( ( bbox0 & screen ).Area() )
+        {
+            // Line to handle
+            DrawPrimitiveLineOutlined( iParams
+                                     , hudPoint
+                                     , hudHandleCoords[0]
+                                     , whiteColor
+                                     , 1.0f );
 
-        // handle
-        DrawPrimitiveHandle( iParams
-                           , hudHandleCoords[0]
-                           , handleRadius
-                           , whiteColor
-                           , blackColor );
+            // handle
+            DrawPrimitiveHandle( iParams
+                               , hudHandleCoords[0]
+                               , handleRadius
+                               , whiteColor
+                               , blackColor );
+        }
 
-        // Line to handle
-        DrawPrimitiveLine( iParams
-                         , hudPoint
-                         , hudHandleCoords[1]
-                         , bgColor
-                         , 2.0f );
+        ::ULIS::FRectD bbox1 = ::ULIS::FRectD::FromMinMax( ::ULIS::FMath::Min( hudPoint.X, hudHandleCoords[1].X ) - handleRadius
+                                                         , ::ULIS::FMath::Min( hudPoint.Y, hudHandleCoords[1].Y ) - handleRadius
+                                                         , ::ULIS::FMath::Max( hudPoint.X, hudHandleCoords[1].X ) + handleRadius
+                                                         , ::ULIS::FMath::Max( hudPoint.Y, hudHandleCoords[1].Y ) + handleRadius );
 
-        DrawPrimitiveLine( iParams
-                         , hudPoint
-                         , hudHandleCoords[1]
-                         , whiteColor
-                         , 1.0f );
+        if( ( bbox1 & screen ).Area() )
+        {
+            // Line to handle
+            DrawPrimitiveLineOutlined( iParams
+                                     , hudPoint
+                                     , hudHandleCoords[1]
+                                     , whiteColor
+                                     , 1.0f );
 
-        // handle
-        DrawPrimitiveHandle( iParams
-                           , hudHandleCoords[1]
-                           , handleRadius
-                           , whiteColor
-                           , blackColor );
+            // handle
+            DrawPrimitiveHandle( iParams
+                               , hudHandleCoords[1]
+                               , handleRadius
+                               , whiteColor
+                               , blackColor );
+        }
     }
 
-    if( iVertex->IsLocked() == false )
+    if( ( vertexBBox & screen ).Area() )
     {
-        DrawPrimitiveVertex( iParams
-                           , hudPoint
-                           , vertexRadius
-                           , iVertex->IsSelected() && ( iHUDFlags & FOdysseyVectorHUD::HUD_MODE_VERTEX ) ? hcColor  : fgColor
-                           , bgColor );
-    }
-    else
-    {
-        DrawPrimitiveVertex( iParams
-                           , hudPoint
-                           , vertexRadius
-                           , iVertex->IsSelected() && ( iHUDFlags & FOdysseyVectorHUD::HUD_MODE_VERTEX ) ? hcColor  : ltgrayColor
-                           , dkgrayColor );
+        if( iVertex->IsLocked() == false )
+        {
+            DrawPrimitiveVertex( iParams
+                               , hudPoint
+                               , vertexRadius
+                               , iVertex->IsSelected() && ( iHUDFlags & FOdysseyVectorHUD::HUD_MODE_VERTEX ) ? hcColor  : fgColor
+                               , bgColor );
+        }
+        else
+        {
+            DrawPrimitiveVertex( iParams
+                               , hudPoint
+                               , vertexRadius
+                               , iVertex->IsSelected() && ( iHUDFlags & FOdysseyVectorHUD::HUD_MODE_VERTEX ) ? hcColor  : ltgrayColor
+                               , dkgrayColor );
+        }
     }
 }
 
@@ -941,7 +958,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::FormatModifierInfo( const FText* iCtrlTe
 void
 FOdysseyPainterEditorVectorBaseToolHUD::DrawModifierInfo( const FOdysseyHUDSystem::FDrawHUDParams& iParams )
 {
-    DrawInfo( iParams, mModifierInfoText, FLinearColor( 1.0f, 1.0f, 1.0f, 1.0f ) );
+    DrawInfo( iParams, mModifierInfoText, FLinearColor( 1.0f, 0.5f, 0.0f, 1.0f ) );
 }
 
 FVector2D
@@ -962,6 +979,20 @@ FOdysseyPainterEditorVectorBaseToolHUD::WorldVectorToHUD( const FOdysseyHUDSyste
     FVector2D point = iParams.mTextureToHUD.Execute( iWorldOriginCoords + iWorldVectorCoords );
 
     return FVector2D ( point.X - origin.X, point.Y - origin.Y );
+}
+
+::ULIS::FRectD
+FOdysseyPainterEditorVectorBaseToolHUD::WorldRectToHUD( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+                                                      , const ::ULIS::FRectD& iWorldRect )
+{
+    FVector2D p0 = iParams.mTextureToHUD.Execute( FVector2D( iWorldRect.x, iWorldRect.y ) );
+    FVector2D p1 = iParams.mTextureToHUD.Execute( FVector2D( iWorldRect.x + iWorldRect.w
+                                                           , iWorldRect.y + iWorldRect.h ) );
+
+    return ::ULIS::FRectD::FromMinMax( ::ULIS::FMath::Min( p0.X, p1.X )
+                                     , ::ULIS::FMath::Min( p0.Y, p1.Y )
+                                     , ::ULIS::FMath::Max( p0.X, p1.X )
+                                     , ::ULIS::FMath::Max( p0.Y, p1.Y ) );
 }
 
 ::ULIS::FVec2D
@@ -1109,24 +1140,66 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawPrimitiveHandle( const FOdysseyHUDSy
                              , mHandleTexture->GetResource()
                              , ESimpleElementBlendMode::SE_BLEND_Masked );
 
-    iParams.mCanvas->DrawTile( iHUDCoords.X - iRadius
-                             , iHUDCoords.Y - iRadius
-                             , iRadius * 2.0f
-                             , iRadius * 2.0f
-                             , 0.0f
-                             , 0.0f
-                             , 1.0f
-                             , 1.0f
-                             , iContourColor
-                             , mHandleContourTexture->GetResource()
-                             , ESimpleElementBlendMode::SE_BLEND_Masked );
-
     // inner
 //    iBLContext->setFillStyle( fgColor );
 //    iBLContext->fillCircle( iWorldx, iWorldY, iRadius );
 //    iBLContext->setStrokeWidth( 1.0f );
 //    iBLContext->setStrokeStyle( bgColor );
 //    iBLContext->strokeCircle( iWorldx, iWorldY, iRadius );
+}
+
+void
+FOdysseyPainterEditorVectorBaseToolHUD::DrawBatchedLines( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+                                                        , const std::vector<BatchedLine>& iLineBuffer
+                                                        , const std::vector<FVector2D>& iPointBuffer
+                                                        , const FLinearColor& iColor
+                                                        , float iThickness )
+{
+    FBatchedElements* batchedElements = iParams.mCanvas->GetBatchedElements(FCanvas::ET_Triangle);
+    FVector2D averagePerpendicular0 = iLineBuffer[0].perpendicular;
+    double radius = iThickness * 0.5f;
+
+    for( int32 i = 0; i < iLineBuffer.size(); i++ )
+    {
+        int32 n = i + 1;
+        const BatchedLine& line = iLineBuffer[i];
+        const BatchedLine* nextLine = ( n < iLineBuffer.size() ) ? &iLineBuffer[n] : nullptr;
+        FVector2D averagePerpendicular1 = nextLine ? ( nextLine->perpendicular + line.perpendicular ) * 0.5f
+                                                    : line.perpendicular;
+        int32 idx0, idx1, idx2, idx3;
+
+        if( averagePerpendicular1.SizeSquared() )
+        {
+            averagePerpendicular1.Normalize();
+        }
+
+        FVector4 vertex[4] = { FVector4( line.p0->X + ( averagePerpendicular0.X * radius )
+                                       , line.p0->Y + ( averagePerpendicular0.Y * radius )
+                                       , 0.0f
+                                       , 1.0f )
+                             , FVector4( line.p1->X + ( averagePerpendicular1.X * radius )
+                                       , line.p1->Y + ( averagePerpendicular1.Y * radius )
+                                       , 0.0f
+                                       , 1.0f )
+                             , FVector4( line.p1->X - ( averagePerpendicular1.X * radius )
+                                       , line.p1->Y - ( averagePerpendicular1.Y * radius )
+                                       , 0.0f
+                                       , 1.0f )
+                             , FVector4( line.p0->X - ( averagePerpendicular0.X * radius )
+                                       , line.p0->Y - ( averagePerpendicular0.Y * radius )
+                                       , 0.0f
+                                       , 1.0f ) };
+
+        idx0 = batchedElements->AddVertex( vertex[0], FVector2D(0, 0), iColor, iParams.mCanvas->GetHitProxyId() );
+        idx1 = batchedElements->AddVertex( vertex[1], FVector2D(0, 0), iColor, iParams.mCanvas->GetHitProxyId() );
+        idx2 = batchedElements->AddVertex( vertex[2], FVector2D(0, 0), iColor, iParams.mCanvas->GetHitProxyId() );
+        idx3 = batchedElements->AddVertex( vertex[3], FVector2D(0, 0), iColor, iParams.mCanvas->GetHitProxyId() );
+
+        batchedElements->AddTriangle( idx0, idx1, idx2, GWhiteTexture, BLEND_Translucent );
+        batchedElements->AddTriangle( idx2, idx3, idx0, GWhiteTexture, BLEND_Translucent );
+
+        averagePerpendicular0 = averagePerpendicular1;
+    }
 }
 
 void
@@ -1143,23 +1216,60 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawPrimitiveBezierCubic( const FOdyssey
     double stepT = 1.0f / iFractionCount;
     double t = stepT;
 
-    for( uint32 i = 0; i < iFractionCount; i++ )
+    if( ( iThickness <= 1.0f ) || ( iColor.A == 1.0f ) )
     {
-        ::ULIS::FVec2D p1 = ::ULIS::CubicBezierPointAtParameter( ::ULIS::FVec2D( iHUDCoordsP0.X, iHUDCoordsP0.Y )
-                                                               , ::ULIS::FVec2D( iHUDCoordsP1.X, iHUDCoordsP1.Y )
-                                                               , ::ULIS::FVec2D( iHUDCoordsP2.X, iHUDCoordsP2.Y )
-                                                               , ::ULIS::FVec2D( iHUDCoordsP3.X, iHUDCoordsP3.Y )
-                                                               , t );
+        for( uint32 i = 0; i < iFractionCount; i++ )
+        {
+            ::ULIS::FVec2D p1 = ::ULIS::CubicBezierPointAtParameter( ::ULIS::FVec2D( iHUDCoordsP0.X, iHUDCoordsP0.Y )
+                                                                   , ::ULIS::FVec2D( iHUDCoordsP1.X, iHUDCoordsP1.Y )
+                                                                   , ::ULIS::FVec2D( iHUDCoordsP2.X, iHUDCoordsP2.Y )
+                                                                   , ::ULIS::FVec2D( iHUDCoordsP3.X, iHUDCoordsP3.Y )
+                                                                   , t );
 
-        DrawPrimitiveLine( iParams
-                         , FVector2D( p0.x, p0.y )
-                         , FVector2D( p1.x, p1.y )
-                         , iColor
-                         , iThickness );
+            DrawPrimitiveLine( iParams
+                             , FVector2D( p0.x, p0.y )
+                             , FVector2D( p1.x, p1.y )
+                             , iColor
+                             , iThickness );
 
-        t += stepT;
+            t += stepT;
 
-        p0 = p1;
+            p0 = p1;
+        }
+    }
+    else // using DrawPrimitiveLine gives visually bad results when we need some transparency with thickness > 1.0f
+         // So we draw it a a set of triangles.
+    {
+        std::vector<FVector2D> pointBuffer;
+        std::vector<BatchedLine> lineBuffer;
+
+        pointBuffer.reserve( iFractionCount + 1 );
+        lineBuffer.reserve( iFractionCount );
+
+        pointBuffer.push_back( FVector2D( p0.x, p0.y ) );
+
+        for( uint32 i = 0; i < iFractionCount; i++ )
+        {
+            ::ULIS::FVec2D p1 = ::ULIS::CubicBezierPointAtParameter( ::ULIS::FVec2D( iHUDCoordsP0.X, iHUDCoordsP0.Y )
+                                                                   , ::ULIS::FVec2D( iHUDCoordsP1.X, iHUDCoordsP1.Y )
+                                                                   , ::ULIS::FVec2D( iHUDCoordsP2.X, iHUDCoordsP2.Y )
+                                                                   , ::ULIS::FVec2D( iHUDCoordsP3.X, iHUDCoordsP3.Y )
+                                                                   , t );
+            uint32 n = i + 1;
+
+            pointBuffer.push_back( FVector2D( p1.x, p1.y ) );
+
+            lineBuffer.emplace_back( &pointBuffer[i], &pointBuffer[n] );
+
+            t += stepT;
+
+            p0 = p1;
+        }
+
+        if( lineBuffer.size() )
+        {
+            DrawBatchedLines( iParams, lineBuffer, pointBuffer, iColor, iThickness );
+        }
     }
 }
 
@@ -1176,22 +1286,58 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawPrimitiveBezierQuadratic( const FOdy
     double stepT = 1.0f / iFractionCount;
     double t = stepT;
 
-    for( uint32 i = 0; i < iFractionCount; i++ )
+    if( ( iThickness <= 1.0f ) || ( iColor.A == 1.0f ) )
     {
-        ::ULIS::FVec2D p1 = ::ULIS::QuadraticBezierPointAtParameter( ::ULIS::FVec2D( iHUDCoordsP0.X, iHUDCoordsP0.Y )
-                                                                   , ::ULIS::FVec2D( iHUDCoordsP1.X, iHUDCoordsP1.Y )
-                                                                   , ::ULIS::FVec2D( iHUDCoordsP2.X, iHUDCoordsP2.Y )
-                                                                   , t );
+        for( uint32 i = 0; i < iFractionCount; i++ )
+        {
+            ::ULIS::FVec2D p1 = ::ULIS::QuadraticBezierPointAtParameter( ::ULIS::FVec2D( iHUDCoordsP0.X, iHUDCoordsP0.Y )
+                                                                       , ::ULIS::FVec2D( iHUDCoordsP1.X, iHUDCoordsP1.Y )
+                                                                       , ::ULIS::FVec2D( iHUDCoordsP2.X, iHUDCoordsP2.Y )
+                                                                       , t );
 
-        DrawPrimitiveLine( iParams
-                         , FVector2D( p0.x, p0.y )
-                         , FVector2D( p1.x, p1.y )
-                         , iColor
-                         , iThickness );
+            DrawPrimitiveLine( iParams
+                             , FVector2D( p0.x, p0.y )
+                             , FVector2D( p1.x, p1.y )
+                             , iColor
+                             , iThickness );
 
-        t += stepT;
+            t += stepT;
 
-        p0 = p1;
+            p0 = p1;
+        }
+    }
+    else // using DrawPrimitiveLine gives visually bad results when we need some transparency with thickness > 1.0f
+         // So we draw it a a set of triangles.
+    {
+        std::vector<FVector2D> pointBuffer;
+        std::vector<BatchedLine> lineBuffer;
+
+        pointBuffer.reserve( iFractionCount + 1 );
+        lineBuffer.reserve( iFractionCount );
+
+        pointBuffer.push_back( FVector2D( p0.x, p0.y ) );
+
+        for( uint32 i = 0; i < iFractionCount; i++ )
+        {
+            ::ULIS::FVec2D p1 = ::ULIS::QuadraticBezierPointAtParameter( ::ULIS::FVec2D( iHUDCoordsP0.X, iHUDCoordsP0.Y )
+                                                                       , ::ULIS::FVec2D( iHUDCoordsP1.X, iHUDCoordsP1.Y )
+                                                                       , ::ULIS::FVec2D( iHUDCoordsP2.X, iHUDCoordsP2.Y )
+                                                                       , t );
+            uint32 n = i + 1;
+
+            pointBuffer.push_back( FVector2D( p1.x, p1.y ) );
+
+            lineBuffer.emplace_back( &pointBuffer[i], &pointBuffer[n] );
+
+            t += stepT;
+
+            p0 = p1;
+        }
+
+        if( lineBuffer.size() )
+        {
+            DrawBatchedLines( iParams, lineBuffer, pointBuffer, iColor, iThickness );
+        }
     }
 }
 
@@ -1214,6 +1360,50 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawPrimitivePlus( const FOdysseyHUDSyst
     vertLine.LineThickness = iThickness;
     vertLine.SetColor( iColor );
     iParams.mCanvas->DrawItem( vertLine );
+}
+
+void
+FOdysseyPainterEditorVectorBaseToolHUD::DrawPrimitiveLineOutlined( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+                                                                 , const FVector2D& iHUDCoordsP0
+                                                                 , const FVector2D& iHUDCoordsP1
+                                                                 , const FLinearColor& iColor
+                                                                 , float iThickness )
+{
+    FBatchedElements* batchedElements = iParams.mCanvas->GetBatchedElements(FCanvas::ET_Triangle);
+    FVector2D vec = ( iHUDCoordsP1 - iHUDCoordsP0 );
+    FVector2D perpendicular = FVector2D( -vec.Y, vec.X );
+    double radius = ( iThickness + 1.0f ) * 0.5f;
+
+    if( perpendicular.SizeSquared() )
+    {
+        perpendicular.Normalize();
+
+        FVector4 vertex[4] = { FVector4( iHUDCoordsP0.X + ( perpendicular.X * radius )
+                                       , iHUDCoordsP0.Y + ( perpendicular.Y * radius )
+                                       , 0.0f
+                                       , 1.0f )
+                             , FVector4( iHUDCoordsP1.X + ( perpendicular.X * radius )
+                                       , iHUDCoordsP1.Y + ( perpendicular.Y * radius )
+                                       , 0.0f
+                                       , 1.0f )
+                             , FVector4( iHUDCoordsP1.X - ( perpendicular.X * radius )
+                                       , iHUDCoordsP1.Y - ( perpendicular.Y * radius )
+                                       , 0.0f
+                                       , 1.0f )
+                             , FVector4( iHUDCoordsP0.X - ( perpendicular.X * radius )
+                                       , iHUDCoordsP0.Y - ( perpendicular.Y * radius )
+                                       , 0.0f
+                                       , 1.0f ) };
+        int32 idx0, idx1, idx2, idx3;
+
+        idx0 = batchedElements->AddVertex( vertex[0], FVector2D(0, 0), iColor, iParams.mCanvas->GetHitProxyId() );
+        idx1 = batchedElements->AddVertex( vertex[1], FVector2D(1, 0), iColor, iParams.mCanvas->GetHitProxyId() );
+        idx2 = batchedElements->AddVertex( vertex[2], FVector2D(1, 1), iColor, iParams.mCanvas->GetHitProxyId() );
+        idx3 = batchedElements->AddVertex( vertex[3], FVector2D(0, 1), iColor, iParams.mCanvas->GetHitProxyId() );
+
+        batchedElements->AddTriangle( idx0, idx1, idx2, mLineOutlinedTexture->GetResource(), BLEND_Translucent );
+        batchedElements->AddTriangle( idx2, idx3, idx0, mLineOutlinedTexture->GetResource(), BLEND_Translucent );
+    }
 }
 
 void
@@ -1284,79 +1474,58 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawCubicSegment( const FOdysseyHUDSyste
                                                         , const FLinearColor& hcColor
                                                         , uint64 iHUDFlags )
 {
-    FOdysseyVectorObject* owner = iCubicSegment->GetOwner();
-    BLMatrix2D& worldMatrix = owner->GetWorldMatrix();
-    FOdysseyVectorVertex* vertex[2] = { iCubicSegment->GetVertex(0)
-                                      , iCubicSegment->GetVertex(1) };
-    FOdysseyVectorHandleSegment* handle[2] = { iCubicSegment->GetHandle(0)
-                                             , iCubicSegment->GetHandle(1) };
-    ::ULIS::FVec2D texVertex[2] = { FOdysseyVector::MapPoint( worldMatrix, vertex[0]->GetCoords() )
-                                  , FOdysseyVector::MapPoint( worldMatrix, vertex[1]->GetCoords() ) };
-    FVector2D hudVertex[2] = { iParams.mTextureToHUD.Execute( FVector2D( texVertex[0].x, texVertex[0].y ) )
-                             , iParams.mTextureToHUD.Execute( FVector2D( texVertex[1].x, texVertex[1].y ) ) };
-    ::ULIS::FVec2D texHandle[2] = { FOdysseyVector::MapPoint( worldMatrix, handle[0]->GetCoords() )
-                                  , FOdysseyVector::MapPoint( worldMatrix, handle[1]->GetCoords() ) };
-    FVector2D hudHandle[2] = { iParams.mTextureToHUD.Execute( FVector2D( texHandle[0].x, texHandle[0].y ) )
-                             , iParams.mTextureToHUD.Execute( FVector2D( texHandle[1].x, texHandle[1].y ) ) };
-    FVector2D hudFractionP0 = hudVertex[0];
-/*
-    for( uint32 n = 1; n < iCubicSegment->GetFractionPointBuffer().size(); n++ )
+    ::ULIS::FRectD screen = ::ULIS::FRectD::FromXYWH( 0, 0, iParams.mTextureWidth, iParams.mTextureHeight );
+    ::ULIS::FRectD segmentBBox = WorldRectToHUD( iParams, iCubicSegment->GetBoundingBox( true ) );
+
+    if( ( segmentBBox & screen ).Area() )
     {
-        uint32 i = n - 1;
-        FOdysseyVectorPoint& nextVertex = iCubicSegment->GetFractionPointBuffer()[i];
-        ::ULIS::FVec2D worldNextVertex = FOdysseyVector::MapPoint( worldMatrix, nextVertex.GetCoords() );
-        FVector2D hudFractionP1 = iParams.mTextureToHUD.Execute( FVector2D( worldNextVertex.x, worldNextVertex.y ) );
+        FOdysseyVectorObject* owner = iCubicSegment->GetOwner();
+        BLMatrix2D& worldMatrix = owner->GetWorldMatrix();
+        FOdysseyVectorVertex* vertex[2] = { iCubicSegment->GetVertex(0)
+                                          , iCubicSegment->GetVertex(1) };
+        FOdysseyVectorHandleSegment* handle[2] = { iCubicSegment->GetHandle(0)
+                                                 , iCubicSegment->GetHandle(1) };
+        ::ULIS::FVec2D texVertex[2] = { FOdysseyVector::MapPoint( worldMatrix, vertex[0]->GetCoords() )
+                                      , FOdysseyVector::MapPoint( worldMatrix, vertex[1]->GetCoords() ) };
+        FVector2D hudVertex[2] = { iParams.mTextureToHUD.Execute( FVector2D( texVertex[0].x, texVertex[0].y ) )
+                                 , iParams.mTextureToHUD.Execute( FVector2D( texVertex[1].x, texVertex[1].y ) ) };
+        ::ULIS::FVec2D texHandle[2] = { FOdysseyVector::MapPoint( worldMatrix, handle[0]->GetCoords() )
+                                      , FOdysseyVector::MapPoint( worldMatrix, handle[1]->GetCoords() ) };
+        FVector2D hudHandle[2] = { iParams.mTextureToHUD.Execute( FVector2D( texHandle[0].x, texHandle[0].y ) )
+                                 , iParams.mTextureToHUD.Execute( FVector2D( texHandle[1].x, texHandle[1].y ) ) };
+        FVector2D hudFractionP0 = hudVertex[0];
 
-        DrawPrimitiveLine( iParams, hudFractionP0, hudFractionP1, fgColor, bgColor, 1.0f, true );
+        DrawPrimitiveBezierCubic( iParams
+                                 , hudVertex[0]
+                                 , hudHandle[0]
+                                 , hudHandle[1]
+                                 , hudVertex[1]
+                                 , iCubicSegment->GetFractionCache().size()
+                                 , fgColor
+                                 , 1.0f );
 
-        hudFractionP0 = hudFractionP1;
-    }
-*/
-    DrawPrimitiveBezierCubic( iParams
-                             , hudVertex[0]
-                             , hudHandle[0]
-                             , hudHandle[1]
-                             , hudVertex[1]
-                             , iCubicSegment->GetFractionCache().size()
-                             , bgColor
-                             , 2.0f );
-
-    DrawPrimitiveBezierCubic( iParams
-                             , hudVertex[0]
-                             , hudHandle[0]
-                             , hudHandle[1]
-                             , hudVertex[1]
-                             , iCubicSegment->GetFractionCache().size()
-                             , fgColor
-                             , 1.0f );
-
-    if ( iHUDFlags & FOdysseyVectorHUD::HUD_PATH_SEGMENT_HANDLE )
-    {
-        static FLinearColor whiteColor = FLinearColor( 1.0f, 1.0f, 1.0f, 1.0f );
-        static FLinearColor blackColor = FLinearColor( 0.0f, 0.0f, 0.0f, 1.0f );
-        static FLinearColor greenColor = FLinearColor( 0.0f, 1.0f, 0.0f, 1.0f );
-
-        for( int i = 0; i < 2; i++ )
+        if ( iHUDFlags & FOdysseyVectorHUD::HUD_PATH_SEGMENT_HANDLE )
         {
-            // line to handle
-            DrawPrimitiveLine( iParams
-                             , hudVertex[i]
-                             , hudHandle[i]
-                             , blackColor
-                             , 2.0f );
+            static FLinearColor whiteColor = FLinearColor( 1.0f, 1.0f, 1.0f, 1.0f );
+            static FLinearColor blackColor = FLinearColor( 0.0f, 0.0f, 0.0f, 1.0f );
+            static FLinearColor greenColor = FLinearColor( 0.0f, 1.0f, 0.0f, 1.0f );
 
-            DrawPrimitiveLine( iParams
-                             , hudVertex[i]
-                             , hudHandle[i]
-                             , vertex[i]->IsHandleAligned() ? greenColor : whiteColor
-                             , 1.0f );
+            for( int i = 0; i < 2; i++ )
+            {
+                // line to handle
+                DrawPrimitiveLineOutlined( iParams
+                                         , hudVertex[i]
+                                         , hudHandle[i]
+                                         , vertex[i]->IsHandleAligned() ? greenColor : whiteColor
+                                         , 1.0f );
 
-            // control handle
-            DrawPrimitiveHandle( iParams
-                               , hudHandle[i]
-                               , FOdysseyVectorHUD::HANDLERADIUS
-                               , whiteColor
-                               , blackColor );
+                // control handle
+                DrawPrimitiveHandle( iParams
+                                   , hudHandle[i]
+                                   , FOdysseyVectorHUD::HANDLERADIUS
+                                   , whiteColor
+                                   , blackColor );
+            }
         }
     }
 }
@@ -1441,6 +1610,16 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawCycle( const FOdysseyHUDSystem::FDra
 {
     DrawSectionArray( iParams, iCycle->GetInnerSectionArray(), fgColor, bgColor, iHUDFlags );
     DrawSectionArray( iParams, iCycle->GetContourSectionArray(), fgColor, bgColor, iHUDFlags );
+}
+
+::ULIS::FRectD
+FOdysseyPainterEditorVectorBaseToolHUD::BBoxToHUD( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+                                                 , const ::ULIS::FRectD& iBBox )
+{
+    FVector2D origin = WorldPointToHUD( iParams, FVector2D( iBBox.x, iBBox.y ) );
+    FVector2D size = WorldVectorToHUD( iParams, origin, FVector2D( iBBox.w, iBBox.h ) );
+
+    return ::ULIS::FRectD::FromXYWH( origin.X, origin.Y, size.X, size.Y );
 }
 
 void
@@ -1576,26 +1755,32 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawInbetweenerInterpolatedPathAt( const
 
         if( mapAsPolyline )
         {
-            std::vector<FOdysseyVectorFraction>& fractionCache = segment->GetFractionCache();
+            uint32 fractionCount = interpolatedSegment.GetInterpolatedPointArray().size() - 1;
+            FInterpolatedPoint* point0 = interpolatedPointArray[0];
+            ::ULIS::FVec2D* localPointPosition0 = &interpolatedPointGeometryBuffer[point0->GetIndex()].position;
+            ::ULIS::FVec2D texCoords0 = FOdysseyVector::MapPoint( worldMatrix, *localPointPosition0 );
+            FVector2D hudCoords0 = iParams.mTextureToHUD.Execute( FVector2D( texCoords0.x, texCoords0.y ) );
+            std::vector<FVector2D> pointBuffer;
+            std::vector<BatchedLine> lineBuffer;
 
-            uint32 segmentPointCount = interpolatedPointArray.size();
-            ::ULIS::FVec2D perpi;
-            ::ULIS::FVec2D perpn;
+            pointBuffer.reserve( fractionCount + 1 );
+            lineBuffer.reserve( fractionCount );
 
-            for( uint32 i = 0; i < segmentPointCount - 1; i++ )
+            pointBuffer.push_back( hudCoords0 );
+
+            for( uint32 i = 0; i < fractionCount; i++ )
             {
                 uint32 n = i + 1;
-                FInterpolatedPoint* pointi = interpolatedPointArray[i];
-                FInterpolatedPoint* pointn = interpolatedPointArray[n];
-                ::ULIS::FVec2D* localPointPositioni = &interpolatedPointGeometryBuffer[pointi->GetIndex()].position;
-                ::ULIS::FVec2D* localPointPositionn = &interpolatedPointGeometryBuffer[pointn->GetIndex()].position;
-                ::ULIS::FVec2D texCoords[2] = { FOdysseyVector::MapPoint( worldMatrix, *localPointPositioni )
-                                              , FOdysseyVector::MapPoint( worldMatrix, *localPointPositionn ) };
-                FVector2D hudCoords[2] = { iParams.mTextureToHUD.Execute( FVector2D( texCoords[0].x, texCoords[0].y ) )
-                                         , iParams.mTextureToHUD.Execute( FVector2D( texCoords[1].x, texCoords[1].y ) ) };
+                FInterpolatedPoint* point1 = interpolatedPointArray[n];
+                ::ULIS::FVec2D* localPointPosition1 = &interpolatedPointGeometryBuffer[point1->GetIndex()].position;
+                ::ULIS::FVec2D texCoords1 = FOdysseyVector::MapPoint( worldMatrix, *localPointPosition1 );
+                FVector2D hudCoords1 = iParams.mTextureToHUD.Execute( FVector2D( texCoords1.x, texCoords1.y ) );
 
-                DrawPrimitiveLine( iParams, hudCoords[0], hudCoords[1], iColor, 4.0f );
+                pointBuffer.push_back( hudCoords1 );
+                lineBuffer.emplace_back( &pointBuffer[i], &pointBuffer[n] );
             }
+
+            DrawBatchedLines( iParams, lineBuffer, pointBuffer, iColor, 4.0f );
         }
         else
         {
@@ -1707,4 +1892,80 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawBreakdown( const FOdysseyHUDSystem::
                 , FLinearColor( inbetweenerTag->GetGridColor() )
                 , iHUDFlags );
     }
+}
+
+void
+FOdysseyPainterEditorVectorBaseToolHUD::OnMouseHover(const FOdysseyPoint& iPointInTexture)
+{
+    return mBaseTool->OnMouseHoverViaHUD( iPointInTexture );
+}
+
+bool
+FOdysseyPainterEditorVectorBaseToolHUD::OnMouseDown( const FOdysseyPoint& iPointInTexture
+                                                   , const FKey& iKey)
+{
+    return mBaseTool->OnMouseDownViaHUD( iPointInTexture, iKey );
+}
+
+bool
+FOdysseyPainterEditorVectorBaseToolHUD::OnMouseUp( const FOdysseyPoint& iPointInTexture
+                                                 , const FKey& iKey)
+{
+    return mBaseTool->OnMouseUpViaHUD( iPointInTexture, iKey );
+}
+
+void
+FOdysseyPainterEditorVectorBaseToolHUD::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
+{
+    SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
+
+    return mBaseTool->OnMouseDragViaHUD( iPointInTexture );
+}
+
+void
+FOdysseyPainterEditorVectorBaseToolHUD::DrawDummyPlane( const FOdysseyHUDSystem::FDrawHUDParams& iParams )
+{
+    FBatchedElements* batchedElements = iParams.mCanvas->GetBatchedElements( FCanvas::ET_Triangle );
+    FVector4 vertex[4] = { FVector4( 0
+                                   , 0
+                                   , 0.0f
+                                   , 1.0f )
+                         , FVector4( iParams.mTextureWidth
+                                   , 0
+                                   , 0.0f
+                                   , 1.0f )
+                         , FVector4( iParams.mTextureWidth
+                                   , iParams.mTextureHeight
+                                   , 0.0f
+                                   , 1.0f )
+                         , FVector4( 0
+                                   , iParams.mTextureHeight
+                                   , 0.0f
+                                   , 1.0f ) };
+
+    const FLinearColor color( 1.f, 0.f, 0.f, 0.0f );
+    int32 idx0, idx1, idx2, idx3;
+
+    if( iParams.mCanvas->IsHitTesting() )
+        iParams.mCanvas->SetHitProxy( new HOdysseyHUDDummyCursorHitProxy( SharedThis ( this ) ) );
+
+    idx0 = batchedElements->AddVertex( vertex[0], FVector2D(0, 0), color, iParams.mCanvas->GetHitProxyId() );
+    idx1 = batchedElements->AddVertex( vertex[1], FVector2D(1, 0), color, iParams.mCanvas->GetHitProxyId() );
+    idx2 = batchedElements->AddVertex( vertex[2], FVector2D(1, 1), color, iParams.mCanvas->GetHitProxyId() );
+    idx3 = batchedElements->AddVertex( vertex[3], FVector2D(0, 1), color, iParams.mCanvas->GetHitProxyId() );
+
+    batchedElements->AddTriangle( idx0, idx1, idx2, mLineOutlinedTexture->GetResource(), BLEND_Translucent );
+    batchedElements->AddTriangle( idx2, idx3, idx0, mLineOutlinedTexture->GetResource(), BLEND_Translucent );
+
+    if( iParams.mCanvas->IsHitTesting() )
+        iParams.mCanvas->SetHitProxy( nullptr );
+
+    FOdysseyHUDElement::DrawHUD(iParams);
+}
+
+void
+FOdysseyPainterEditorVectorBaseToolHUD::SetCursorPosition( double iWorldX, double iWorldY )
+{
+    mX = iWorldX;
+    mY = iWorldY;
 }

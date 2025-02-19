@@ -62,10 +62,13 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         virtual bool OnKeyUp( const FKey& iKey ) override;
         virtual bool OnKeyDownGlobal( const FKeyEvent& InKeyEvent ) override;
         virtual bool OnKeyUpGlobal( const FKeyEvent& InKeyEvent ) override;
-        virtual bool OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey );
-        virtual void OnMouseHover( const FOdysseyPoint& iPointInTexture );
-        virtual void OnMouseDrag( const FOdysseyPoint& iPointInTexture );
-        virtual bool OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey );
+
+        virtual void OnMouseHoverViaHUD( const FOdysseyPoint& iPointInTexture );
+
+        virtual bool OnMouseDownViaHUD( const FOdysseyPoint& iPointInTexture, const FKey& iKey );
+        virtual void OnMouseDragViaHUD( const FOdysseyPoint& iPointInTexture );
+        virtual bool OnMouseUpViaHUD( const FOdysseyPoint& iPointInTexture, const FKey& iKey );
+
         virtual bool OnMouseClick(const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
         virtual void Commit();
         virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
@@ -189,7 +192,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         eMouseEventName mPreviousMouseEvent; // filter faulty stylus events
         // we need the focus on the viewport for keyboard
         // and some tools need to know the viewport size
-        TSharedPtr<SOdysseyViewport> mViewport;
+        TWeakPtr<SOdysseyViewport> mViewport;
 
     public:
         //UPROPERTY( EditAnywhere, Category=Behavior )

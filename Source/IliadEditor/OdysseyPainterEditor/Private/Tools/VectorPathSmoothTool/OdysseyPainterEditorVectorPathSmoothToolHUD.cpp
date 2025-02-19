@@ -17,8 +17,6 @@ FOdysseyPainterEditorVectorPathSmoothToolHUD::~FOdysseyPainterEditorVectorPathSm
 FOdysseyPainterEditorVectorPathSmoothToolHUD::FOdysseyPainterEditorVectorPathSmoothToolHUD( UOdysseyPainterEditorVectorPathSmoothTool* iPathSmoothTool )
     : FOdysseyPainterEditorVectorBaseToolHUD( iPathSmoothTool )
     , mPathSmoothTool( iPathSmoothTool )
-    , mX( 0.0f )
-    , mY( 0.0f )
 {
 }
 
@@ -68,6 +66,9 @@ FOdysseyPainterEditorVectorPathSmoothToolHUD::DrawHUD( const FOdysseyHUDSystem::
                                          , ::ULIS::FVec2D( mPathSmoothTool->PickingRadius, 0 ) ).Distance()
                        , hcColor
                        , 1.0f );
+
+    // invisible plane will get mouse events
+    DrawDummyPlane( iParams );
 }
 
 void
@@ -78,8 +79,7 @@ FOdysseyPainterEditorVectorPathSmoothToolHUD::Draw( BLContext* iBLContext )
 void
 FOdysseyPainterEditorVectorPathSmoothToolHUD::SetCursorPosition( double iWorldX, double iWorldY )
 {
-    mX = iWorldX;
-    mY = iWorldY;
+    FOdysseyPainterEditorVectorBaseToolHUD::SetCursorPosition( iWorldX, iWorldY );
 
     mPickedPointArray.clear();
 

@@ -54,11 +54,10 @@ FOdysseyPainterEditorVectorPathStitchToolHUD::GetStitchableVertices()
 }
 
 void
-FOdysseyPainterEditorVectorPathStitchToolHUD::SetPosition( double iWorldX
-                                                         , double iWorldY )
+FOdysseyPainterEditorVectorPathStitchToolHUD::SetCursorPosition( double iWorldX
+                                                               , double iWorldY )
 {
-    mX = iWorldX;
-    mY = iWorldY;
+    SetCursorPosition( iWorldX, iWorldY );
 
     mStitchableVertex[0] = nullptr;
     mStitchableVertex[1] = nullptr;
@@ -148,6 +147,8 @@ FOdysseyPainterEditorVectorPathStitchToolHUD::DrawHUD( const FOdysseyHUDSystem::
         DrawVertex( iParams, mStitchableVertex[1], orange, bgColor, hcColor, 0 );
     }
 
+    // invisible plane will get mouse events
+    DrawDummyPlane( iParams );
 }
 
 void

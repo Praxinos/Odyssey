@@ -122,6 +122,9 @@ FOdysseyPainterEditorVectorMatchingToolHUD::DrawHUD( const FOdysseyHUDSystem::FD
                                          , ::ULIS::FVec2D( mMatchingTool->PickingRadius, 0 ) ).Distance()
                        , hcColor
                        , 1.0f );
+
+    // invisible plane will get mouse events
+    DrawDummyPlane( iParams );
 }
 
 void

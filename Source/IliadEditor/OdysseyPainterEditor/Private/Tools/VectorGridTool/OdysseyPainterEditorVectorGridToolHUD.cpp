@@ -314,6 +314,9 @@ FOdysseyPainterEditorVectorGridToolHUD::DrawHUD( const FOdysseyHUDSystem::FDrawH
         }
     }
 
+    // invisible plane will get mouse events
+    DrawDummyPlane( iParams );
+
     DrawModifierInfo( iParams );
 }
 

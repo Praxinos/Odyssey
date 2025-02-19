@@ -39,15 +39,12 @@ FOdysseyPainterEditorVectorTransformToolHUD::SetCenterGizmo( bool iCenterGizmo )
     mCenterGizmo = iCenterGizmo;
 }
 
-uint32
+void
 FOdysseyPainterEditorVectorTransformToolHUD::SetCursorPosition( double iWorldX, double iWorldY )
 {
-//    mX = iX;
-//    mY = iY;
+    FOdysseyPainterEditorVectorBaseToolHUD::SetCursorPosition( iWorldX, iWorldY );
 
     Pick( iWorldX, iWorldY );
-
-    return mFlags;
 }
 
 static void
