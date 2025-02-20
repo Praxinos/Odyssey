@@ -34,6 +34,7 @@
 #include "EposSequenceEditorCommands.h"
 #include "EposSequenceHelpers.h"
 #include "EposSequenceModule.h"
+#include "OdysseyAnimationActor.h"
 #include "PlaneActor.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"
@@ -427,6 +428,10 @@ ToolkitHelpers::CreateDefaultTracksForActor( ISequencer* iSequencer, AActor* iAc
                 CreateTrack( iSequencer, iActor, component_binding, UMovieScenePrimitiveMaterialTrack::StaticClass(), materialInfo );
             }
         }
+    }
+    else if( iActor->IsA<AOdysseyAnimationActor>() )
+    {
+        CreatePropertyTrack( iSequencer, iActor, iBinding, UMovieSceneVisibilityTrack::StaticClass(), "", "bHidden" );
     }
     // For skeletal mesh actor
     // - '3DTransform' track
