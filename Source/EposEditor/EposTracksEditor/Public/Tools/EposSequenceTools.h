@@ -427,6 +427,16 @@ public:
     static bool CanCreateAnimation( ISequencer* iSequencer, FFrameNumber iFrameNumber );
 
     /**
+    *  Get all animations (actor & track bindings) in the board section
+    *
+    * @param ISequencer     iSequencer to get animations.
+    * @param FFrameNumber   iFrameNumber to get the board section.
+    * @param TArray<AOdysseyAnimationActor*>*   oAnimations to get all animation actors.
+    * @param TArray<FGuid>*                     oAnimationBindings to get all animation bindings.
+    */
+    static int32 GetAllAnimations( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<AOdysseyAnimationActor*>* oAnimations = nullptr, TArray<FGuid>* oAnimationBindings = nullptr );
+
+    /**
     *  Detach a animation of the camera in the board section
     *
     * @param ISequencer     iSequencer to detach a animation.
@@ -465,6 +475,81 @@ public:
     * @param TArray<FGuid>*                     oAnimationBindings to get all animation bindings.
     */
     static int32 GetAttachedAnimations( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<AOdysseyAnimationActor*>* oAnimations = nullptr, TArray<FGuid>* oAnimationBindings = nullptr );
+
+    /**
+    *  Get a animation visiblity of the camera in the board section
+    *
+    * @param ISequencer     iSequencer to detach a animation.
+    * @param FFrameNumber   iFrameNumber to get the board section.
+    * @param FGuid          iAnimationBinding to get visibility.
+    */
+    static bool IsAnimationVisible( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iAnimationBinding );
+
+    /**
+    *  Get a animation visiblity of the camera in the board section
+    *
+    * @param ISequencer             iSequencer to detach a animation.
+    * @param UMovieSceneSubSection  iSubSection to detach a animation.
+    * @param FGuid                  iAnimationBinding to get visibility.
+    */
+    static bool IsAnimationVisible( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FGuid iAnimationBinding );
+
+    /**
+    *  Toggle a animation visiblity of the camera in the board section
+    *
+    * @param ISequencer     iSequencer to detach a animation.
+    * @param FFrameNumber   iFrameNumber to get the board section.
+    * @param FGuid          iAnimationBinding to toggle visibility.
+    */
+    static void ToggleAnimationVisibility( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iAnimationBinding );
+
+    /**
+    *  Toggle a animation visiblity of the camera in the board section
+    *
+    * @param ISequencer             iSequencer to detach a animation.
+    * @param UMovieSceneSubSection  iSubSection to detach a animation.
+    * @param FGuid                  iAnimationBinding to toggle visibility.
+    */
+    static void ToggleAnimationVisibility( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, TArray<FGuid> iAnimationBindings, TOptional<FGuid> iAnimationReference = TOptional<FGuid>() );
+    static void ToggleAnimationVisibility( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FGuid iAnimationBinding );
+
+    /**
+    *  Delete a animation (with its actor) of the camera in the board section
+    *
+    * @param ISequencer     iSequencer to delete a animation.
+    * @param FFrameNumber   iFrameNumber to get the board section.
+    * @param FGuid          iAnimationBinding to detach.
+    */
+    static void DeleteAnimation( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<FGuid> iAnimationBindings );
+    static void DeleteAnimation( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iAnimationBinding );
+
+    /**
+    *  Delete a animation (with its actor) of the camera in the board section
+    *
+    * @param ISequencer             iSequencer to delete a animation.
+    * @param UMovieSceneSubSection  iSubSection to delete a animation.
+    * @param FGuid                  iAnimationBinding to delete.
+    */
+    static void DeleteAnimation( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, TArray<FGuid> iAnimationBindings );
+    static void DeleteAnimation( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FGuid iAnimationBinding );
+
+    /**
+    *  Select a animation in the board section (and unselect all other animations)
+    *
+    * @param ISequencer             iSequencer to select a animation.
+    * @param UMovieSceneSubSection  iSubSection to select a animation.
+    * @param FGuid                  iAnimationBinding to select.
+    */
+    static void SelectSingleAnimation( ISequencer* iSequencer, UMovieSceneSubSection* iSubSection, FGuid iAnimationBinding );
+
+    /**
+    *  Select a animation in the board section (and keep already selected all other animations)
+    *
+    * @param ISequencer             iSequencer to select a animation.
+    * @param UMovieSceneSubSection  iSubSection to select a animation.
+    * @param FGuid                  iAnimationBinding to select.
+    */
+    static void SelectMultiAnimation( ISequencer* iSequencer, UMovieSceneSubSection* iSubSection, FGuid iAnimationBinding );
 
 // Inside EposSequenceTools_Plane
 public:
@@ -917,12 +1002,21 @@ public:
 
     static bool CanCreateAnimation( ISequencer* iSequencer, FFrameNumber iFrameNumber );
 
+    static int32 GetAllAnimations( ISequencer* iSequencer, TArray<AOdysseyAnimationActor*>* oAnimations = nullptr, TArray<FGuid>* oAnimationBindings = nullptr );
+
     static void DetachAnimation( ISequencer* iSequencer, TArray<FGuid> iAnimationBindings );
     static void DetachAnimation( ISequencer* iSequencer, FGuid iAnimationBinding );
 
     static bool CanDetachAnimation( ISequencer* iSequencer, FGuid iAnimationBinding );
 
     static int32 GetAttachedAnimations( ISequencer* iSequencer, TArray<AOdysseyAnimationActor*>* oAnimations = nullptr, TArray<FGuid>* oAnimationBindings = nullptr );
+
+    static bool IsAnimationVisible( ISequencer* iSequencer, FGuid iAnimationBinding );
+    static void ToggleAnimationVisibility( ISequencer* iSequencer, TArray<FGuid> iAnimationBindings, TOptional<FGuid> iAnimationReference = TOptional<FGuid>() );
+    static void ToggleAnimationVisibility( ISequencer* iSequencer, FGuid iAnimationBinding );
+
+    static void DeleteAnimation( ISequencer* iSequencer, TArray<FGuid> iAnimationBindings );
+    static void DeleteAnimation( ISequencer* iSequencer, FGuid iAnimationBinding );
 
     static bool MoveAndScaleAnimation( AOdysseyAnimationActor* ioAnimation, const ACineCameraActor* iCamera, float iNewDistance, EScaleAnimation iScaleType );
     static bool CanMoveAndScaleAnimation( const AOdysseyAnimationActor* iAnimation, const ACineCameraActor* iCamera );
@@ -931,6 +1025,11 @@ private:
     static void CreateAnimation( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, const FAnimationArgs& iAnimationArgs );
     static void DetachAnimation( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TArray<FGuid> iAnimationBinding );
     static bool CanDetachAnimation( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TArray<FGuid> iAnimationBindings );
+    static bool IsAnimationVisible( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iAnimationBinding );
+    static void ToggleAnimationVisibility( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TArray<FGuid> iAnimationBindings, TOptional<FGuid> iAnimationReference = TOptional<FGuid>() );
+    static void DeleteAnimation( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TArray<FGuid> iAnimationBindings );
+    static void SelectSingleAnimation( ISequencer& iSequencer, UMovieSceneSubSection* iSubSection, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iAnimationBinding );
+    static void SelectMultiAnimation( ISequencer& iSequencer, UMovieSceneSubSection* iSubSection, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iAnimationBinding );
 
     static AOdysseyAnimationActor* SpawnAnimation( UWorld* iWorld, ACineCameraActor* iCamera, float iSafeMargin, FVector2D iRelativeScaling );
     static AOdysseyAnimationActor* SpawnAndBindAnimation( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iCameraGuid, ACineCameraActor* iCamera, FFrameNumber iFrameNumber, const FAnimationArgs& iAnimationArgs, FGuid* oGuid );

@@ -91,6 +91,9 @@ FEposTracksEditorStyle::InitTracks()
     Set( "DetachPlane", new IMAGE_BRUSH_SVG( "plane-detach", Icon16x16 ) );
     Set( "CreateDrawing", new IMAGE_BRUSH_SVG( "drawing-create", Icon16x16 ) );
 
+    Set( "CreateAnimation", new IMAGE_BRUSH_SVG( "animation-create.large", Icon24x16 ) );
+    Set( "DetachAnimation", new IMAGE_BRUSH_SVG( "animation-detach", Icon16x16 ) );
+
     Set( "LighttableOff", new IMAGE_BRUSH_SVG( "lighttable-off", Icon16x16 ) );
     Set( "LighttableOn", new IMAGE_BRUSH_SVG( "lighttable-on", Icon16x16 ) );
 

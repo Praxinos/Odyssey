@@ -890,6 +890,53 @@ ShotSequenceHelpers::FindPlaneVisibilityTrackAndSections( IMovieScenePlayer& iPl
 
 
 //static
+ShotSequenceHelpers::FFindOrCreateAnimationVisibilityResult
+ShotSequenceHelpers::FindAnimationVisibilityTrackAndSections( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iAnimationBinding, TOptional<FFrameNumber> iFrameNumber )
+{
+    FFindOrCreateAnimationVisibilityResult result;
+
+    UMovieScene* moviescene = iSequence ? iSequence->GetMovieScene() : nullptr;
+    if( !moviescene )
+        return result;
+
+    FMovieSceneBinding* binding = moviescene->FindBinding( iAnimationBinding );
+    if( !binding )
+        return result;
+
+    const TArray<UMovieSceneTrack*>& tracks = binding->GetTracks();
+    for( auto track : tracks )
+    {
+        result.mTrack = Cast<UMovieSceneVisibilityTrack>( track );
+        if( result.mTrack.IsValid() )
+            break;
+    }
+
+    if( !result.mTrack.IsValid() )
+        return result;
+
+    //---
+
+    if( iFrameNumber.IsSet() )
+    {
+        for( auto section : result.mTrack->GetAllSections() )
+        {
+            if( section->IsTimeWithinSection( iFrameNumber.GetValue() ) )
+            {
+                result.mSections.Add( Cast<UMovieSceneBoolSection>( section ) );
+            }
+        }
+    }
+    else
+    {
+        for( auto section : result.mTrack->GetAllSections() )
+            result.mSections.Add( Cast<UMovieSceneBoolSection>( section ) );
+    }
+
+    return result;
+}
+
+
+//static
 ShotSequenceHelpers::FFindOrCreateTimelineResult
 ShotSequenceHelpers::FindTimelineTrackAndSections( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iAnimationBinding, TOptional<FFrameNumber> iFrameNumber )
 {
@@ -1276,7 +1323,7 @@ ShotSequenceHelpers::ConvertToOpacityKey( TWeakObjectPtr<UMovieSceneSection> iSe
 
 //static
 ShotSequenceHelpers::FFindOrCreateMaterialParameterResult
-ShotSequenceHelpers::FindMaterialParameterTrackAndSections( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding, TOptional<FFrameNumber> iFrameNumber )
+ShotSequenceHelpers::FindMaterialParameterTrackAndSections( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iBinding, TOptional<FFrameNumber> iFrameNumber )
 {
     FFindOrCreateMaterialParameterResult result;
 
@@ -1284,22 +1331,24 @@ ShotSequenceHelpers::FindMaterialParameterTrackAndSections( IMovieScenePlayer& i
     if( !moviescene )
         return result;
 
-    TArrayView<TWeakObjectPtr<>> objects = iPlayer.FindBoundObjects( iPlaneBinding, iSequenceID );
+    TArrayView<TWeakObjectPtr<>> objects = iPlayer.FindBoundObjects( iBinding, iSequenceID );
     if( objects.Num() != 1 )
         return result;
     APlaneActor* plane = Cast<APlaneActor>( objects[0] );
-    if( !plane )
+    AOdysseyAnimationActor* animation = Cast<AOdysseyAnimationActor>( objects[0] );
+    AActor* actor = plane ? Cast<AActor>( plane ) : Cast<AActor>( animation );
+    if( !actor )
         return result;
 
-    FGuid plane_component = iPlayer.FindCachedObjectId( *plane->GetRootComponent(), iSequenceID );
-    if( !plane_component.IsValid() )
+    FGuid root_component = iPlayer.FindCachedObjectId( *actor->GetRootComponent(), iSequenceID );
+    if( !root_component.IsValid() )
         return result;
 
     //---
 
-    result.mPlaneComponentBinding = plane_component;
+    result.mRootComponentBinding = root_component;
 
-    result.mTrack = moviescene->FindTrack<UMovieSceneComponentMaterialTrack>( result.mPlaneComponentBinding ); // Get only the material track of the first "material 0", should be ok as plane actor have only 1 material associated
+    result.mTrack = moviescene->FindTrack<UMovieSceneComponentMaterialTrack>( result.mRootComponentBinding ); // Get only the material track of the first "material 0", should be ok as plane/animation actor have only 1 material associated
     if( !result.mTrack.IsValid() )
         return result;
 
@@ -1332,9 +1381,9 @@ ShotSequenceHelpers::FindMaterialParameterTrackAndSections( IMovieScenePlayer& i
 
 //static
 ShotSequenceHelpers::FFindOrCreateMaterialParameterResult
-ShotSequenceHelpers::FindOrCreateMaterialParameterTrackAndSections( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding, TOptional<FFrameNumber> iFrameNumber )
+ShotSequenceHelpers::FindOrCreateMaterialParameterTrackAndSections( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iBinding, TOptional<FFrameNumber> iFrameNumber )
 {
-    FFindOrCreateMaterialParameterResult result = FindMaterialParameterTrackAndSections( iPlayer, iSequence, iSequenceID, iPlaneBinding, iFrameNumber );
+    FFindOrCreateMaterialParameterResult result = FindMaterialParameterTrackAndSections( iPlayer, iSequence, iSequenceID, iBinding, iFrameNumber );
 
     // Return if we get track AND sections (with optional iFrameNumber taken into account)
     if( result.mTrack.IsValid() && result.mSections.Num() )
@@ -1347,7 +1396,7 @@ ShotSequenceHelpers::FindOrCreateMaterialParameterTrackAndSections( IMovieSceneP
     {
         result.mTrackCreated = true;
 
-        UMovieSceneTrack* track = iSequence->GetMovieScene()->AddTrack( UMovieSceneComponentMaterialTrack::StaticClass(), result.mPlaneComponentBinding );
+        UMovieSceneTrack* track = iSequence->GetMovieScene()->AddTrack( UMovieSceneComponentMaterialTrack::StaticClass(), result.mRootComponentBinding );
         result.mTrack = Cast<UMovieSceneComponentMaterialTrack>( track );
 
         FComponentMaterialInfo material_info = { FName(), 0, EComponentMaterialType::IndexedMaterial }; //TODO: iMaterialTrackIndex;
@@ -1691,6 +1740,29 @@ ShotSequenceHelpers::GetPlaneTransformSections( IMovieScenePlayer& iPlayer, UMov
     return sections;
 }
 
+//static
+TArray<UMovieScene3DTransformSection*>
+ShotSequenceHelpers::GetAnimationTransformSections( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FGuid& iAnimationBinding )
+{
+    TArray<UMovieScene3DTransformSection*> sections;
+
+    UMovieScene* moviescene = iSequence ? iSequence->GetMovieScene() : nullptr;
+    if( !moviescene )
+        return sections;
+
+    if( !iAnimationBinding.IsValid() )
+        return sections;
+
+    UMovieSceneTrack* track = moviescene->FindTrack<UMovieScene3DTransformTrack>( iAnimationBinding );
+    if( !track )
+        return sections;
+
+    for( auto section : track->GetAllSections() )
+        sections.Add( Cast<UMovieScene3DTransformSection>( section ) );
+
+    return sections;
+}
+
 //---
 
 //static
@@ -1947,6 +2019,213 @@ ShotSequenceHelpers::BuildPlanesOpacityChannelProxy( IMovieScenePlayer& iPlayer,
             TSharedPtr<FMovieSceneChannelProxy> ChannelProxy = MakeShared<FMovieSceneChannelProxy>( MoveTemp( ChannelIndirection ) );
 
             map.Add( plane_opacity_section, ChannelProxy );
+
+            // UDN: Hook into TransformSection::OnSignatureChangedEvent to invalidate this section's channel proxy if the transform is changed.
+            // Set the delegate to the whole subsequence, then every changes (even removing section) will call the it
+            //if( !camera_transform_section->OnSignatureChanged().IsBoundToObject( this ) )
+            //    camera_transform_section->OnSignatureChanged().AddUObject( this, &UMovieSceneCinematicBoardSection::HandleInvalidateChannelProxy );
+        }
+
+        maps.Add( binding, map );
+    }
+
+    return maps;
+}
+
+//static
+TMap<FGuid, FChannelProxyBySectionMap>
+BoardSequenceHelpers::BuildAnimationsTransformChannelProxy( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID )
+{
+    FInnerSequenceResult result = GetInnerSequence( iPlayer, iSubSection, iSequenceID );
+
+    return ShotSequenceHelpers::BuildAnimationsTransformChannelProxy( iPlayer, result.mInnerSequence, result.mInnerSequenceId );
+}
+
+//static
+TMap<FGuid, FChannelProxyBySectionMap>
+ShotSequenceHelpers::BuildAnimationsTransformChannelProxy( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID )
+{
+    TMap<FGuid, FChannelProxyBySectionMap> maps;
+
+    TArray<AOdysseyAnimationActor*> animations;
+    TArray<FGuid> bindings;
+    /*int animation_count =*/ ShotSequenceHelpers::GetAllAnimations( iPlayer, iSequence, iSequenceID, EGetAnimation::kAll, &animations, &bindings );
+
+    for( auto binding : bindings )
+    {
+        FChannelProxyBySectionMap map;
+
+        //---
+
+        TArray<UMovieScene3DTransformSection*> animation_transform_sections = ShotSequenceHelpers::GetAnimationTransformSections( iPlayer, iSequence, iSequenceID, binding );
+        for( auto animation_transform_section : animation_transform_sections )
+        {
+            FMovieSceneChannelProxyData ChannelIndirection;
+
+            const FMovieSceneChannelEntry* DoubleChannelEntry = animation_transform_section->GetChannelProxy().FindEntry( FMovieSceneDoubleChannel::StaticStruct()->GetFName() );
+            if( DoubleChannelEntry )
+            {
+#if WITH_EDITOR
+                TArrayView<FMovieSceneChannel* const>              DoubleChannels = DoubleChannelEntry->GetChannels();
+                TArrayView<const FMovieSceneChannelMetaData>       MetaData = DoubleChannelEntry->GetMetaData();
+                TArrayView<const TMovieSceneExternalValue<double>> MetaDataExt = DoubleChannelEntry->GetAllExtendedEditorData<FMovieSceneDoubleChannel>();
+
+                for( int32 Index = 0; Index < DoubleChannels.Num(); ++Index )
+                {
+                    ChannelIndirection.Add( *static_cast<FMovieSceneDoubleChannel*>( DoubleChannels[Index] ), MetaData[Index], MetaDataExt[Index] );
+                }
+#else
+                TArrayView<FMovieSceneChannel* const>              DoubleChannels = DoubleChannelEntry->GetChannels();
+
+                for( int32 Index = 0; Index < DoubleChannels.Num(); ++Index )
+                {
+                    ChannelIndirection.Add( *static_cast<FMovieSceneDoubleChannel*>( DoubleChannels[Index] ) );
+                }
+#endif
+            }
+
+            TSharedPtr<FMovieSceneChannelProxy> ChannelProxy = MakeShared<FMovieSceneChannelProxy>( MoveTemp( ChannelIndirection ) );
+
+            map.Add( animation_transform_section, ChannelProxy );
+
+            // UDN: Hook into TransformSection::OnSignatureChangedEvent to invalidate this section's channel proxy if the transform is changed.
+            // Set the delegate to the whole subsequence, then every changes (even removing section) will call the it
+            //if( !camera_transform_section->OnSignatureChanged().IsBoundToObject( this ) )
+            //    camera_transform_section->OnSignatureChanged().AddUObject( this, &UMovieSceneCinematicBoardSection::HandleInvalidateChannelProxy );
+        }
+
+        maps.Add( binding, map );
+    }
+
+    return maps;
+}
+
+//static
+TMap<FGuid, FChannelProxyBySectionMap>
+BoardSequenceHelpers::BuildAnimationsTimelineChannelProxy( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID )
+{
+    FInnerSequenceResult result = GetInnerSequence( iPlayer, iSubSection, iSequenceID );
+
+    return ShotSequenceHelpers::BuildAnimationsTimelineChannelProxy( iPlayer, result.mInnerSequence, result.mInnerSequenceId );
+}
+
+//static
+TMap<FGuid, FChannelProxyBySectionMap>
+ShotSequenceHelpers::BuildAnimationsTimelineChannelProxy( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID )
+{
+    TMap<FGuid, FChannelProxyBySectionMap> maps;
+
+    TArray<AOdysseyAnimationActor*> animations;
+    TArray<FGuid> bindings;
+    /*int animation_count =*/ ShotSequenceHelpers::GetAllAnimations( iPlayer, iSequence, iSequenceID, EGetAnimation::kAll, &animations, &bindings );
+
+    for( auto binding : bindings )
+    {
+        FChannelProxyBySectionMap map;
+
+        //---
+
+        FFindOrCreateTimelineResult result = FindTimelineTrackAndSections( iPlayer, iSequence, iSequenceID, binding );
+
+        for( auto animation_timeline_section : result.mSections )
+        {
+            FMovieSceneChannelProxyData ChannelIndirection;
+
+            const FMovieSceneChannelEntry* ObjectPathChannelEntry = animation_timeline_section->GetChannelProxy().FindEntry( FMovieSceneObjectPathChannel::StaticStruct()->GetFName() );
+            if( ObjectPathChannelEntry )
+            {
+#if WITH_EDITOR
+                TArrayView<FMovieSceneChannel* const>                   ObjectPathChannels = ObjectPathChannelEntry->GetChannels();
+                TArrayView<const FMovieSceneChannelMetaData>            MetaData = ObjectPathChannelEntry->GetMetaData();
+                TArrayView<const TMovieSceneExternalValue<UObject*>>    MetaDataExt = ObjectPathChannelEntry->GetAllExtendedEditorData<FMovieSceneObjectPathChannel>();
+
+                for( int32 Index = 0; Index < ObjectPathChannels.Num(); ++Index )
+                {
+                    ChannelIndirection.Add( *static_cast<FMovieSceneObjectPathChannel*>( ObjectPathChannels[Index] ), MetaData[Index], MetaDataExt[Index] );
+                }
+#else
+                TArrayView<FMovieSceneChannel* const>                   ObjectPathChannels = ObjectPathChannelEntry->GetChannels();
+
+                for( int32 Index = 0; Index < ObjectPathChannels.Num(); ++Index )
+                {
+                    ChannelIndirection.Add( *static_cast<FMovieSceneObjectPathChannel*>( ObjectPathChannels[Index] ) );
+                }
+#endif
+            }
+
+            TSharedPtr<FMovieSceneChannelProxy> ChannelProxy = MakeShared<FMovieSceneChannelProxy>( MoveTemp( ChannelIndirection ) );
+
+            map.Add( animation_timeline_section, ChannelProxy );
+
+            // UDN: Hook into TransformSection::OnSignatureChangedEvent to invalidate this section's channel proxy if the transform is changed.
+            // Set the delegate to the whole subsequence, then every changes (even removing section) will call the it
+            //if( !camera_transform_section->OnSignatureChanged().IsBoundToObject( this ) )
+            //    camera_transform_section->OnSignatureChanged().AddUObject( this, &UMovieSceneCinematicBoardSection::HandleInvalidateChannelProxy );
+        }
+
+        maps.Add( binding, map );
+    }
+
+    return maps;
+}
+
+//static
+TMap<FGuid, FChannelProxyBySectionMap>
+BoardSequenceHelpers::BuildAnimationsOpacityChannelProxy( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID )
+{
+    FInnerSequenceResult result = GetInnerSequence( iPlayer, iSubSection, iSequenceID );
+
+    return ShotSequenceHelpers::BuildAnimationsOpacityChannelProxy( iPlayer, result.mInnerSequence, result.mInnerSequenceId );
+}
+
+//static
+TMap<FGuid, FChannelProxyBySectionMap>
+ShotSequenceHelpers::BuildAnimationsOpacityChannelProxy( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID )
+{
+    TMap<FGuid, FChannelProxyBySectionMap> maps;
+
+    TArray<AOdysseyAnimationActor*> animations;
+    TArray<FGuid> bindings;
+    /*int animation_count =*/ ShotSequenceHelpers::GetAllAnimations( iPlayer, iSequence, iSequenceID, EGetAnimation::kAll, &animations, &bindings );
+
+    for( auto binding : bindings )
+    {
+        FChannelProxyBySectionMap map;
+
+        //---
+
+        FFindOrCreateMaterialParameterResult result = FindMaterialParameterTrackAndSections( iPlayer, iSequence, iSequenceID, binding );
+
+        for( auto animation_opacity_section : result.mSections )
+        {
+            FMovieSceneChannelProxyData ChannelIndirection;
+
+            const FMovieSceneChannelEntry* FloatChannelEntry = animation_opacity_section->GetChannelProxy().FindEntry( FMovieSceneFloatChannel::StaticStruct()->GetFName() );
+            if( FloatChannelEntry )
+            {
+#if WITH_EDITOR
+                TArrayView<FMovieSceneChannel* const>                   FloatChannels = FloatChannelEntry->GetChannels();
+                TArrayView<const FMovieSceneChannelMetaData>            MetaData = FloatChannelEntry->GetMetaData();
+                TArrayView<const TMovieSceneExternalValue<float>>       MetaDataExt = FloatChannelEntry->GetAllExtendedEditorData<FMovieSceneFloatChannel>();
+
+                for( int32 Index = 0; Index < FloatChannels.Num(); ++Index )
+                {
+                    if( MetaData[Index].Name.IsEqual( TEXT("DrawingOpacity") ) )
+                        ChannelIndirection.Add( *static_cast<FMovieSceneFloatChannel*>( FloatChannels[Index] ), MetaData[Index], MetaDataExt[Index] );
+                }
+#else
+                TArrayView<FMovieSceneChannel* const>                   FloatChannels = FloatChannelEntry->GetChannels();
+
+                for( int32 Index = 0; Index < FloatChannels.Num(); ++Index )
+                {
+                    ChannelIndirection.Add( *static_cast<FMovieSceneFloatChannel*>( FloatChannels[Index] ) );
+                }
+#endif
+            }
+
+            TSharedPtr<FMovieSceneChannelProxy> ChannelProxy = MakeShared<FMovieSceneChannelProxy>( MoveTemp( ChannelIndirection ) );
+
+            map.Add( animation_opacity_section, ChannelProxy );
 
             // UDN: Hook into TransformSection::OnSignatureChangedEvent to invalidate this section's channel proxy if the transform is changed.
             // Set the delegate to the whole subsequence, then every changes (even removing section) will call the it

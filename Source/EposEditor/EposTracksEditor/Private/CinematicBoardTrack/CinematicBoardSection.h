@@ -100,6 +100,21 @@ public:
     virtual void ReBuildPlanesOpacityMetaChannel();
     virtual TSharedPtr<FMetaChannel> GetPlaneOpacityMetaChannel( FMovieScenePossessable iPossessable ) const;
 
+    virtual void BuildAnimationsTransformChannelProxy();
+    virtual FChannelProxyBySectionMap GetAnimationTransformChannelProxy( FMovieScenePossessable iPossessable ) const;
+    virtual void ReBuildAnimationsTransformMetaChannel();
+    virtual TSharedPtr<FMetaChannel> GetAnimationTransformMetaChannel( FMovieScenePossessable iPossessable ) const;
+
+    virtual void BuildAnimationsTimelineChannelProxy();
+    virtual FChannelProxyBySectionMap GetAnimationTimelineChannelProxy( FMovieScenePossessable iPossessable ) const;
+    virtual void ReBuildAnimationsTimelineMetaChannel();
+    virtual TSharedPtr<FMetaChannel> GetAnimationTimelineMetaChannel( FMovieScenePossessable iPossessable ) const;
+
+    virtual void BuildAnimationsOpacityChannelProxy();
+    virtual FChannelProxyBySectionMap GetAnimationOpacityChannelProxy( FMovieScenePossessable iPossessable ) const;
+    virtual void ReBuildAnimationsOpacityMetaChannel();
+    virtual TSharedPtr<FMetaChannel> GetAnimationOpacityMetaChannel( FMovieScenePossessable iPossessable ) const;
+
 private:
     TArray<double> mThumbnailKeys;
     FChannelProxyBySectionMap   mCameraTransformChannelProxies;
@@ -110,6 +125,12 @@ private:
     TMap<FGuid, TSharedPtr<FMetaChannel>>   mPlanesMaterialMetaChannel;
     TMap<FGuid, FChannelProxyBySectionMap>  mPlanesOpacityChannelProxies;
     TMap<FGuid, TSharedPtr<FMetaChannel>>   mPlanesOpacityMetaChannel;
+    TMap<FGuid, FChannelProxyBySectionMap>  mAnimationsTransformChannelProxies;
+    TMap<FGuid, TSharedPtr<FMetaChannel>>   mAnimationsTransformMetaChannel;
+    TMap<FGuid, FChannelProxyBySectionMap>  mAnimationsTimelineChannelProxies;
+    TMap<FGuid, TSharedPtr<FMetaChannel>>   mAnimationsTimelineMetaChannel;
+    TMap<FGuid, FChannelProxyBySectionMap>  mAnimationsOpacityChannelProxies;
+    TMap<FGuid, TSharedPtr<FMetaChannel>>   mAnimationsOpacityMetaChannel;
 
 private:
     /** Add board takes menu */

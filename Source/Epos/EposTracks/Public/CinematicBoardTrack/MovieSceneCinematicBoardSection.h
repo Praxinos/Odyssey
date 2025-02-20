@@ -120,6 +120,21 @@ private:
     TMap<FGuid, bool> mPlaneKeysAreaVisibility; //TODO: find a place to sometimes clean this map, a binding can be no more referenced with: create a plane -> collapse/uncollapse/... -> delete the plane
 
 public:
+    /** @return The visibility of a animation's keys area */
+    bool IsAnimationKeysAreaVisible( FGuid iAnimationBinding ) const;
+
+    /** Set the visibility of a animation's keys area */
+    void SetAnimationKeysAreaVisibility( FGuid iAnimationBinding, bool iVisible );
+
+    /** Toggle the visibility of a animation's keys area */
+    void ToggleAnimationKeysAreaVisibility( FGuid iAnimationBinding );
+
+private:
+    /** The visibility of keys area for each animation */
+    UPROPERTY()
+    TMap<FGuid, bool> mAnimationKeysAreaVisibility; //TODO: find a place to sometimes clean this map, a binding can be no more referenced with: create a animation -> collapse/uncollapse/... -> delete the animation
+
+public:
     /** Get the height of this track's rows */
     float GetWidgetHeight() const;
 

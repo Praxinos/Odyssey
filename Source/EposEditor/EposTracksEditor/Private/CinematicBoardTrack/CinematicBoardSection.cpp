@@ -526,6 +526,9 @@ FCinematicBoardSection::RebuildChannelProxies()
     BuildPlanesTransformChannelProxy();
     BuildPlanesMaterialChannelProxy();
     BuildPlanesOpacityChannelProxy();
+    BuildAnimationsTransformChannelProxy();
+    BuildAnimationsTimelineChannelProxy();
+    BuildAnimationsOpacityChannelProxy();
 }
 
 void
@@ -535,6 +538,9 @@ FCinematicBoardSection::RebuildMetaChannels()
     ReBuildPlanesTransformMetaChannel();
     ReBuildPlanesMaterialMetaChannel();
     ReBuildPlanesOpacityMetaChannel();
+    ReBuildAnimationsTransformMetaChannel();
+    ReBuildAnimationsTimelineMetaChannel();
+    ReBuildAnimationsOpacityMetaChannel();
 }
 
 void
@@ -728,6 +734,162 @@ FCinematicBoardSection::GetPlaneOpacityMetaChannel( FMovieScenePossessable iPoss
         return nullptr;
 
     return mPlanesOpacityMetaChannel[iPossessable.GetGuid()];
+}
+
+//-
+
+void
+FCinematicBoardSection::BuildAnimationsTransformChannelProxy()
+{
+    mAnimationsTransformChannelProxies = BoardSequenceHelpers::BuildAnimationsTransformChannelProxy( *GetSequencer(), GetSubSectionObject(), GetSequencer()->GetFocusedTemplateID() );
+
+    ReBuildAnimationsTransformMetaChannel();
+}
+
+FChannelProxyBySectionMap
+FCinematicBoardSection::GetAnimationTransformChannelProxy( FMovieScenePossessable iPossessable ) const
+{
+    if( !mAnimationsTransformChannelProxies.Contains( iPossessable.GetGuid() ) )
+        return FChannelProxyBySectionMap();
+
+    return mAnimationsTransformChannelProxies[iPossessable.GetGuid()];
+}
+
+void
+FCinematicBoardSection::ReBuildAnimationsTransformMetaChannel()
+{
+    FTimeToPixel converter( ConstructConverterForViewRange() );
+
+    const FFrameTime HalfKeySizeFrames = converter.PixelDeltaToFrame( SequencerSectionConstants::KeySize.X * .5f );
+    const FMovieSceneSequenceTransform OuterToInnerTransform = GetSubSectionObject().OuterToInnerTransform();
+    FFrameTime clicked_frame = 0; // As if we are on frame 0
+    TRange<FFrameNumber> inner_range_tolerance( ( ( clicked_frame - HalfKeySizeFrames ) * OuterToInnerTransform ).FloorToFrame(), ( ( clicked_frame + HalfKeySizeFrames ) * OuterToInnerTransform ).CeilToFrame() );
+    FFrameNumber inner_tolerance = inner_range_tolerance.Size<FFrameNumber>() / 2;
+
+    mAnimationsTransformMetaChannel.Empty();
+    for( const auto& pair : mAnimationsTransformChannelProxies )
+    {
+        FGuid guid = pair.Key;
+        FChannelProxyBySectionMap map = pair.Value;
+
+        TSharedPtr<FMetaChannel> meta_channel = MakeShared<FMetaChannel>( inner_tolerance );
+        meta_channel->Build( map );
+
+        mAnimationsTransformMetaChannel.Add( guid, meta_channel );
+    }
+}
+
+TSharedPtr<FMetaChannel>
+FCinematicBoardSection::GetAnimationTransformMetaChannel( FMovieScenePossessable iPossessable ) const
+{
+    if( !mAnimationsTransformMetaChannel.Contains( iPossessable.GetGuid() ) )
+        return nullptr;
+
+    return mAnimationsTransformMetaChannel[iPossessable.GetGuid()];
+}
+
+//-
+
+void
+FCinematicBoardSection::BuildAnimationsTimelineChannelProxy()
+{
+    mAnimationsTimelineChannelProxies = BoardSequenceHelpers::BuildAnimationsTimelineChannelProxy( *GetSequencer(), GetSubSectionObject(), GetSequencer()->GetFocusedTemplateID() );
+
+    ReBuildAnimationsTimelineMetaChannel();
+}
+
+FChannelProxyBySectionMap
+FCinematicBoardSection::GetAnimationTimelineChannelProxy( FMovieScenePossessable iPossessable ) const
+{
+    if( !mAnimationsTimelineChannelProxies.Contains( iPossessable.GetGuid() ) )
+        return FChannelProxyBySectionMap();
+
+    return mAnimationsTimelineChannelProxies[iPossessable.GetGuid()];
+}
+
+void
+FCinematicBoardSection::ReBuildAnimationsTimelineMetaChannel()
+{
+    FTimeToPixel converter( ConstructConverterForViewRange() );
+
+    const FFrameTime HalfKeySizeFrames = converter.PixelDeltaToFrame( SequencerSectionConstants::KeySize.X * .5f );
+    const FMovieSceneSequenceTransform OuterToInnerTransform = GetSubSectionObject().OuterToInnerTransform();
+    FFrameTime clicked_frame = 0; // As if we are on frame 0
+    TRange<FFrameNumber> inner_range_tolerance( ( ( clicked_frame - HalfKeySizeFrames ) * OuterToInnerTransform ).FloorToFrame(), ( ( clicked_frame + HalfKeySizeFrames ) * OuterToInnerTransform ).CeilToFrame() );
+    FFrameNumber inner_tolerance = inner_range_tolerance.Size<FFrameNumber>() / 2;
+
+    mAnimationsTimelineMetaChannel.Empty();
+    for( const auto& pair : mAnimationsTimelineChannelProxies )
+    {
+        FGuid guid = pair.Key;
+        FChannelProxyBySectionMap map = pair.Value;
+
+        TSharedPtr<FMetaChannel> meta_channel = MakeShared<FMetaChannel>( inner_tolerance );
+        meta_channel->Build( map );
+
+        mAnimationsTimelineMetaChannel.Add( guid, meta_channel );
+    }
+}
+
+TSharedPtr<FMetaChannel>
+FCinematicBoardSection::GetAnimationTimelineMetaChannel( FMovieScenePossessable iPossessable ) const
+{
+    if( !mAnimationsTimelineMetaChannel.Contains( iPossessable.GetGuid() ) )
+        return nullptr;
+
+    return mAnimationsTimelineMetaChannel[iPossessable.GetGuid()];
+}
+
+//-
+
+void
+FCinematicBoardSection::BuildAnimationsOpacityChannelProxy()
+{
+    mAnimationsOpacityChannelProxies = BoardSequenceHelpers::BuildAnimationsOpacityChannelProxy( *GetSequencer(), GetSubSectionObject(), GetSequencer()->GetFocusedTemplateID() );
+
+    ReBuildAnimationsOpacityMetaChannel();
+}
+
+FChannelProxyBySectionMap
+FCinematicBoardSection::GetAnimationOpacityChannelProxy( FMovieScenePossessable iPossessable ) const
+{
+    if( !mAnimationsOpacityChannelProxies.Contains( iPossessable.GetGuid() ) )
+        return FChannelProxyBySectionMap();
+
+    return mAnimationsOpacityChannelProxies[iPossessable.GetGuid()];
+}
+
+void
+FCinematicBoardSection::ReBuildAnimationsOpacityMetaChannel()
+{
+    FTimeToPixel converter( ConstructConverterForViewRange() );
+
+    const FFrameTime HalfKeySizeFrames = converter.PixelDeltaToFrame( SequencerSectionConstants::KeySize.X * .5f );
+    const FMovieSceneSequenceTransform OuterToInnerTransform = GetSubSectionObject().OuterToInnerTransform();
+    FFrameTime clicked_frame = 0; // As if we are on frame 0
+    TRange<FFrameNumber> inner_range_tolerance( ( ( clicked_frame - HalfKeySizeFrames ) * OuterToInnerTransform ).FloorToFrame(), ( ( clicked_frame + HalfKeySizeFrames ) * OuterToInnerTransform ).CeilToFrame() );
+    FFrameNumber inner_tolerance = inner_range_tolerance.Size<FFrameNumber>() / 2;
+
+    mAnimationsOpacityMetaChannel.Empty();
+    for( const auto& pair : mAnimationsOpacityChannelProxies )
+    {
+        FGuid guid = pair.Key;
+        FChannelProxyBySectionMap map = pair.Value;
+
+        TSharedPtr<FMetaChannel> meta_channel = MakeShared<FMetaChannel>( inner_tolerance );
+        meta_channel->Build( map );
+
+        mAnimationsOpacityMetaChannel.Add( guid, meta_channel );
+    }
+}
+
+TSharedPtr<FMetaChannel>
+FCinematicBoardSection::GetAnimationOpacityMetaChannel( FMovieScenePossessable iPossessable ) const
+{
+    if( !mAnimationsOpacityMetaChannel.Contains( iPossessable.GetGuid() ) )
+        return nullptr;
+
+    return mAnimationsOpacityMetaChannel[iPossessable.GetGuid()];
 }
 
 //---

@@ -115,6 +115,40 @@ EposTracksToolbarHelpers::MakeAnimationSettingsEntries( FMenuBuilder& iMenuBuild
 
 //static
 void
+EposTracksToolbarHelpers::MakeAnimationActorSettingsEntries( FMenuBuilder& iMenuBuilder )
+{
+    iMenuBuilder.BeginSection( NAME_None, LOCTEXT( "animation-actor-settings.section-title", "Default Animation Actor Settings" ) );
+    {
+        FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>( "PropertyEditor" );
+
+        // Create a detail view
+        FDetailsViewArgs Args;
+        Args.bAllowSearch = false;
+        Args.NameAreaSettings = FDetailsViewArgs::HideNameArea;
+        Args.ColumnWidth = .5f;
+        TSharedRef<IDetailsView> DetailView = PropertyModule.CreateDetailView( Args );
+
+        // Filter properties to only get CameraSettings ones
+        auto visible_property = []( const FPropertyAndParent& iPropertyChain )
+        {
+            FName root_name = iPropertyChain.ParentProperties.Num() ? iPropertyChain.ParentProperties[0]->GetFName() : iPropertyChain.Property.GetFName();
+            if( root_name == GET_MEMBER_NAME_CHECKED( UEposTracksEditorSettings, AnimationActorSettings ) )
+            {
+                return true;
+            }
+            return false;
+        };
+        DetailView->SetIsPropertyVisibleDelegate( FIsPropertyVisible::CreateLambda( visible_property ) );
+        // Set the object to view
+        DetailView->SetObject( GetMutableDefault<UEposTracksEditorSettings>() );
+
+        iMenuBuilder.AddWidget( DetailView, FText(), true );
+    }
+    iMenuBuilder.EndSection();
+}
+
+//static
+void
 EposTracksToolbarHelpers::MakeCameraSettingsEntries( FMenuBuilder& iMenuBuilder )
 {
     iMenuBuilder.BeginSection( NAME_None, LOCTEXT( "camera-settings.section-title", "Default Camera Settings" ) );
@@ -243,6 +277,61 @@ EposTracksToolbarHelpers::MakePlaneEntries( FMenuBuilder& iMenuBuilder, TSharedR
                                         .Text( FText::FromString( *ioPlaneName ) )
                                         .ToolTipText( LOCTEXT( "plane-set-name-tooltip", "Set the plane name" ) )
                                         .OnTextCommitted( FOnTextCommitted::CreateStatic( TextCommited, ioPlaneName, iOnTextCommit ) )
+                                        .SelectAllTextWhenFocused( true )
+                                    ]
+                               ],
+                               FText::GetEmpty() );
+    }
+    iMenuBuilder.EndSection();
+
+    if( iFocus )
+    {
+        // Same as in D:\Epic Games\UE_4.27\Engine\Source\Editor\ContentBrowser\Private\SAssetPicker.cpp
+        text_widget->RegisterActiveTimer( 0.f, FWidgetActiveTimerDelegate::CreateLambda( [=]( double InCurrentTime, float InDeltaTime ) -> EActiveTimerReturnType
+                                                                                         {
+                                                                                             if( text_widget.IsValid() )
+                                                                                             {
+                                                                                                 FWidgetPath WidgetToFocusPath;
+                                                                                                 FSlateApplication::Get().GeneratePathToWidgetUnchecked( text_widget.ToSharedRef(), WidgetToFocusPath );
+                                                                                                 FSlateApplication::Get().SetKeyboardFocus( WidgetToFocusPath, EFocusCause::SetDirectly );
+                                                                                                 WidgetToFocusPath.GetWindow()->SetWidgetToFocusOnActivate( text_widget );
+
+                                                                                                 return EActiveTimerReturnType::Stop;
+                                                                                             }
+
+                                                                                             return EActiveTimerReturnType::Continue;
+                                                                                         } ) );
+    }
+}
+
+//static
+void
+EposTracksToolbarHelpers::MakeAnimationEntries( FMenuBuilder& iMenuBuilder, TSharedRef<FString> ioAnimationName, FSimpleDelegate iOnTextCommit, bool iFocus )
+{
+    TSharedPtr<SEditableTextBox> text_widget;
+
+    iMenuBuilder.BeginSection( NAME_None, LOCTEXT( "animation-options.section-title", "Animation" ) );
+    {
+        //MenuBuilder.AddEditableText( ... ); // This won't display the section ... so use the classic widget ...
+
+        iMenuBuilder.AddWidget( SNew( SBox )
+                                .Padding( FAppStyle::Get().GetMargin( "Menu.Block.IndentedPadding" ) ) // If no label, the widget will be at the full menu width without margin
+                                [
+                                    SNew( SHorizontalBox )
+                                    + SHorizontalBox::Slot()
+                                    .FillWidth( 1.f )
+                                    [
+                                        SNew( STextBlock )
+                                        .Text( LOCTEXT( "animation-set-name-label", "Name" ) )
+                                        .ToolTipText( LOCTEXT( "animation-set-name-tooltip", "Set the animation name" ) )
+                                    ]
+                                    + SHorizontalBox::Slot()
+                                    .FillWidth( 5.f )
+                                    [
+                                        SAssignNew( text_widget, SEditableTextBox )
+                                        .Text( FText::FromString( *ioAnimationName ) )
+                                        .ToolTipText( LOCTEXT( "animation-set-name-tooltip", "Set the animation name" ) )
+                                        .OnTextCommitted( FOnTextCommitted::CreateStatic( TextCommited, ioAnimationName, iOnTextCommit ) )
                                         .SelectAllTextWhenFocused( true )
                                     ]
                                ],

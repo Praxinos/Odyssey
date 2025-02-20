@@ -481,6 +481,27 @@ UMovieSceneCinematicBoardSection::TogglePlaneKeysAreaVisibility( FGuid iPlaneBin
     SetPlaneKeysAreaVisibility( iPlaneBinding, !IsPlaneKeysAreaVisible( iPlaneBinding ) );
 }
 
+bool
+UMovieSceneCinematicBoardSection::IsAnimationKeysAreaVisible( FGuid iAnimationBinding ) const
+{
+    const bool* state = mAnimationKeysAreaVisibility.Find( iAnimationBinding );
+
+    return state ? *state : true;
+}
+
+void
+UMovieSceneCinematicBoardSection::SetAnimationKeysAreaVisibility( FGuid iAnimationBinding, bool iVisibility )
+{
+    TryModify();
+    mAnimationKeysAreaVisibility.Add( iAnimationBinding, iVisibility );
+}
+
+void
+UMovieSceneCinematicBoardSection::ToggleAnimationKeysAreaVisibility( FGuid iAnimationBinding )
+{
+    SetAnimationKeysAreaVisibility( iAnimationBinding, !IsAnimationKeysAreaVisible( iAnimationBinding ) );
+}
+
 float
 UMovieSceneCinematicBoardSection::GetWidgetHeight() const
 {

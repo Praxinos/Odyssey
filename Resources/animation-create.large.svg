@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg version="1.1" id="Layer_1" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 200 121.96">
+
+<!-- Plane borders -->
+<path stroke="white" stroke-width="8" d="
+    M30,30L110,10v100L30,90
+    z"/>
+    
+<!-- Inner plane plus -->
+<path stroke="white" stroke-width="8" d="
+    M50,60h40
+    z
+    M70,40v40
+    z"/>
+    
+<!-- Plus -->
+<path stroke="white" stroke-width="15" d="
+    M170,35h-25
+    m25,0h25
+    m-25,0v25
+    m0,-25v-25
+    "/>
+
+</svg>
