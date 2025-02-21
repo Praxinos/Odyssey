@@ -55,6 +55,9 @@ protected:
 
     virtual void RebuildMetaChannel() = 0;
 
+    virtual void ComputeClampRangePreMoveDuringDrag( TSharedPtr<FMetaChannel> iKeys, TRange<FFrameNumber>& oClampRangeInSubsequence ) const;
+    virtual void PostMoveDuringDrag( TSharedPtr<FMetaChannel> iKeys );
+
 private:
     /** Start a transaction at mouse down */
     void BeginTransaction( const FText& iTransactionDesc );
@@ -70,7 +73,8 @@ private:
 protected:
     TWeakPtr<FCinematicBoardSection>    mBoardSection;
 
-private:
+protected:
+//private:
     enum class EState
     {
         kIdle,

@@ -69,6 +69,8 @@ public class EposSequence : ModuleRules
                 "EposNote",
                 "OdysseyAnimation", //TODO: must be a runtime module
                 "OdysseyAnimationTracks",
+
+                "OdysseyLayerStackEditor",
             }
             );
 

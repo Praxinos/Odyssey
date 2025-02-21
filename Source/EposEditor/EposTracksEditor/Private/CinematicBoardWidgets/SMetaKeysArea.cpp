@@ -264,6 +264,26 @@ SMetaKeysArea::OnMouseButtonUp( const FGeometry& MyGeometry, const FPointerEvent
     return SCompoundWidget::OnMouseButtonUp( MyGeometry, MouseEvent );
 }
 
+void
+SMetaKeysArea::ComputeClampRangePreMoveDuringDrag( TSharedPtr<FMetaChannel> iKeys, TRange<FFrameNumber>& oClampRangeInSubsequence ) const
+{
+    FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+    const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
+
+    const FMovieSceneSequenceTransform OuterToInnerTransform = subsection_object->OuterToInnerTransform();
+
+    TRange<FFrameNumber> outerClampRange = subsection_object->GetTrueRange();
+    oClampRangeInSubsequence = TRange<FFrameNumber>( ( outerClampRange.GetLowerBoundValue() * OuterToInnerTransform ).FloorToFrame(), ( outerClampRange.GetUpperBoundValue() * OuterToInnerTransform ).FloorToFrame() ); // Let's see if FloorToFrame() of the upper bound value is ok, as (as a true range) it is exclusive
+
+    UE_LOG( LogTemp, Warning, TEXT( "compute clamp: all: oClampRangeInSubsequence in sequence: %d" ), oClampRangeInSubsequence.GetUpperBoundValue().Value );
+
+}
+
+void
+SMetaKeysArea::PostMoveDuringDrag( TSharedPtr<FMetaChannel> iKeys )
+{
+}
+
 FReply
 SMetaKeysArea::OnMouseMove( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) //override
 {
@@ -300,12 +320,22 @@ SMetaKeysArea::OnMouseMove( const FGeometry& MyGeometry, const FPointerEvent& Mo
         const FFrameRate inner_tick_resolution = subsection_object->GetSequence()->GetMovieScene()->GetTickResolution();
         const FFrameRate inner_display_rate = subsection_object->GetSequence()->GetMovieScene()->GetDisplayRate();
 
-        TRange<FFrameNumber> subsection_range = subsection_object->GetTrueRange();
-        TRange<FFrameNumber> inner_clamp_range( ( subsection_range.GetLowerBoundValue() * OuterToInnerTransform ).FloorToFrame(), ( subsection_range.GetUpperBoundValue() * OuterToInnerTransform ).FloorToFrame() ); // Let's see if FloorToFrame() of the upper bound value is ok, as (as a true range) it is exclusive
+        //TRange<FFrameNumber> inner_clamp_range;
+        //SMetaKeysArea::ComputeClampRangePreMoveDuringDrag( mDraggedKeys, inner_clamp_range ); // Always call the default clamp range to get min/max boundary of the whole board section in the board track
+        //TRange<FFrameNumber> inner_clamp_range2;
+        //ComputeClampRangePreMoveDuringDrag( mDraggedKeys, inner_clamp_range2 );
+        //inner_clamp_range = TRange<FFrameNumber>::Intersection( inner_clamp_range, inner_clamp_range2 );
+        TRange<FFrameNumber> inner_clamp_range;
+        ComputeClampRangePreMoveDuringDrag( mDraggedKeys, inner_clamp_range );
+
+        UE_LOG( LogTemp, Warning, TEXT( "OnMouseMove: inner_clamp_range in sequence: %d" ), inner_clamp_range.GetUpperBoundValue().Value );
 
         FFrameTime local_inner_time = mDraggedKeys->Move( inner_moved_frame, snap, inner_tick_resolution, inner_display_rate, inner_clamp_range );
+
         FMovieSceneInverseSequenceTransform localToRootTransform = OuterToInnerTransform.Inverse();
         TOptional<FFrameTime> local_time = localToRootTransform.TryTransformTime( local_inner_time );
+
+        PostMoveDuringDrag( mDraggedKeys );
 
         //---
 

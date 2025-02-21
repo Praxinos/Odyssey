@@ -7,6 +7,8 @@
 #include "OdysseyAnimationComponent.h"
 #include "OdysseyAnimationPlayer.h"
 
+#include "Channels/MovieSceneObjectPathChannel.h"
+
 #include "OdysseyAnimationTimelineSection.generated.h"
 
 enum class EMovieSceneChannelProxyType : uint8;
@@ -55,4 +57,8 @@ protected:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Animation")
     FFrameNumber StartFrameOffset = 0;
+
+public:
+    UPROPERTY()
+    FMovieSceneObjectPathChannel CutChannel;
 };

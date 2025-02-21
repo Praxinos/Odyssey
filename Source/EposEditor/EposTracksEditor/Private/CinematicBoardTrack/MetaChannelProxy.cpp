@@ -284,7 +284,17 @@ FMetaChannel::Move( const FFrameTime& iTime, bool iSnap, const FFrameRate& iTick
             // Must be done here, because if iTime is clamped outside this function, the mOffset wont be sync'ed to the real value of the subkey
             if( iTrueRangeToClamp.IsSet() )
             {
-                inner_moved_key_frame = FMath::Clamp( inner_moved_key_frame, FFrameTime( iTrueRangeToClamp->GetLowerBoundValue() ), FFrameTime( iTrueRangeToClamp->GetUpperBoundValue() - 1 ) ); // -1 because clamp is both inclusive
+                if( iTrueRangeToClamp->IsEmpty() )
+                    continue;
+
+                inner_moved_key_frame = UE::MovieScene::ClampToDiscreteRange( inner_moved_key_frame, *iTrueRangeToClamp );
+
+                //if( iTrueRangeToClamp->HasLowerBound() && iTrueRangeToClamp->HasUpperBound() )
+                //    inner_moved_key_frame = FMath::Clamp( inner_moved_key_frame, FFrameTime( iTrueRangeToClamp->GetLowerBoundValue() ), FFrameTime( iTrueRangeToClamp->GetUpperBoundValue() - 1 ) ); // -1 because clamp is both inclusive
+                //else if( iTrueRangeToClamp->HasLowerBound() )
+                //    inner_moved_key_frame = FMath::Max( inner_moved_key_frame, FFrameTime( iTrueRangeToClamp->GetLowerBoundValue() ) );
+                //else if( iTrueRangeToClamp->HasUpperBound() )
+                //    inner_moved_key_frame = FMath::Min( inner_moved_key_frame, FFrameTime( iTrueRangeToClamp->GetUpperBoundValue() - 1 ) );
             }
 
             last_inner_sub_key = inner_moved_key_frame.GetFrame();

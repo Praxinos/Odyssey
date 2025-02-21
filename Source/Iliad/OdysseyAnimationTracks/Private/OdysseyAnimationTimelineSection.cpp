@@ -3,12 +3,14 @@
 
 #include "OdysseyAnimationTimelineSection.h"
 
+#include "MovieScene.h"
+
 #include "OdysseyAnimation.h"
 #include "OdysseyAnimationComponent.h"
-#include "MovieScene.h"
 
 #include "Channels/MovieSceneChannelData.h"
 #include "Channels/MovieSceneChannelProxy.h"
+#include "Channels/MovieSceneObjectPathChannel.h"
 #include "EntitySystem/BuiltInComponentTypes.h"
 #include "EntitySystem/MovieSceneEntityBuilder.h"
 #include "Evaluation/MovieSceneRootOverridePath.h"
@@ -29,6 +31,14 @@ UOdysseyAnimationTimelineSection::UOdysseyAnimationTimelineSection(const FObject
 EMovieSceneChannelProxyType
 UOdysseyAnimationTimelineSection::CacheChannelProxy()
 {
+//    CutChannel.SetPropertyClass( UMaterialInterface::StaticClass() );
+//
+//#if WITH_EDITOR
+//    ChannelProxy = MakeShared<FMovieSceneChannelProxy>( CutChannel, FMovieSceneChannelMetaData(), TMovieSceneExternalValue<UObject*>::Make() );
+//#else
+//    ChannelProxy = MakeShared<FMovieSceneChannelProxy>( CutChannel );
+//#endif
+
     FMovieSceneChannelProxyData Channels;
     ChannelProxy = MakeShared<FMovieSceneChannelProxy>(MoveTemp(Channels));
     return EMovieSceneChannelProxyType::Dynamic;
