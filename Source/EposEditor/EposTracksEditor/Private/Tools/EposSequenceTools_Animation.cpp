@@ -75,15 +75,18 @@ FindNextFreeAnimationLocation( UWorld* iWorld, FVector iAnimationLocation, FVect
 
 //static
 AOdysseyAnimationActor*
-ShotSequenceTools::SpawnAnimation( UWorld* iWorld, ACineCameraActor* iCamera, float iSafeMargin, FVector2D iRelativeScaling )
+ShotSequenceTools::SpawnAnimation( UWorld* iWorld, ACineCameraActor* iCamera, float iFocusDistance, float iSafeMargin, FVector2D iRelativeScaling )
 {
     FActorSpawnParameters SpawnParams;
     AOdysseyAnimationActor* animation = iWorld->SpawnActor<AOdysseyAnimationActor>( SpawnParams );
     if( !animation )
         return nullptr;
+    UScalingComponent* scaling_component = animation->FindComponentByClass<UScalingComponent>();
+    if( !scaling_component )
+        return nullptr;
 
-    animation->SafeMargin = iSafeMargin;
-    animation->RelativeScaling = iRelativeScaling;
+    scaling_component->SafeMargin = iSafeMargin;
+    scaling_component->RelativeScaling = iRelativeScaling;
 
     //---
 
@@ -95,12 +98,13 @@ ShotSequenceTools::SpawnAnimation( UWorld* iWorld, ACineCameraActor* iCamera, fl
 
     //-
 
-    // Make a function GuessAnimationLocation(...)
-    float FocusDistance = 200;
-    FVector animation_location = CamLocation + CamDir * FocusDistance;
+    FVector animation_location = CamLocation + CamDir * iFocusDistance;
     animation_location = FindNextFreeAnimationLocation( iWorld, animation_location, CamLocation );
 
-    FVector animation_scale = animation->ComputeAnimationScaleWithScaleAndMargin( iCamera, FocusDistance );
+    FVector camera_view_size = scaling_component->ComputeSizeOfCameraView( iCamera, iFocusDistance );
+    camera_view_size.X = FMath::Min( camera_view_size.X, camera_view_size.Y );
+    camera_view_size.Y = FMath::Min( camera_view_size.X, camera_view_size.Y );
+    FVector animation_scale = scaling_component->ComputeScaleWithScaleAndMargin( camera_view_size );
 
     FRotator animation_rotator = CamRot;
 
@@ -108,7 +112,7 @@ ShotSequenceTools::SpawnAnimation( UWorld* iWorld, ACineCameraActor* iCamera, fl
 
     animation->SetActorScale3D( animation_scale );
     animation->SetActorLocation( animation_location );
-    animation->SetActorRotation( FRotator( 0.f, 90.f, 90.f ) );
+    //animation->SetActorRotation( FRotator( 0.f, 90.f, 90.f ) ); // Done during actor creation
     animation->AddActorWorldRotation( animation_rotator );
 
     //animation->AttachToActor( iCamera, FAttachmentTransformRules::KeepRelativeTransform ); // Done in the editor with GEditor->ParentActors();
@@ -136,11 +140,17 @@ ShotSequenceTools::SpawnAndBindAnimation( ISequencer& iSequencer, UMovieSceneSeq
     if( iAnimationArgs.mMargin.IsSet() )
         margin = iAnimationArgs.mMargin.GetValue();
 
-    AOdysseyAnimationActor* animation = ShotSequenceTools::SpawnAnimation( world, iCamera, margin, relative_scaling );
+    float focusDistance = 200;
+    AOdysseyAnimationActor* animation = ShotSequenceTools::SpawnAnimation( world, iCamera, focusDistance, margin, relative_scaling );
+
+    UScalingComponent* scaling_component = animation->FindComponentByClass<UScalingComponent>();
+    check( scaling_component );
 
     //---
 
-    FIntPoint texture_size = animation->ComputeTextureSize( iCamera, settings->AnimationSettings.Height );
+    FVector camera_view_size = scaling_component->ComputeSizeOfCameraView( iCamera, focusDistance );
+    FVector camera_view_size_with_scaling = scaling_component->ComputeScaleWithScaleAndMargin( camera_view_size );
+    FIntPoint texture_size = scaling_component->ComputeTextureSize( camera_view_size_with_scaling, settings->AnimationSettings.Height );
 
     //UMaterialInstanceConstant* new_animation = iAnimationArgs.mAnimation.IsValid()
     //                                           ? ProjectAssetTools::CreateAnimation( iSequencer, iSequence, iSequenceID, iAnimationArgs.mAnimation.Get() )
@@ -233,9 +243,16 @@ ShotSequenceTools::MoveAndScaleAnimation( AOdysseyAnimationActor* ioAnimation, c
     if( FMath::IsNearlyZero( iNewDistance ) )
         return false;
 
+    UScalingComponent* scaling_component = ioAnimation->FindComponentByClass<UScalingComponent>();
+    if( !scaling_component )
+        return false;
+
     float old_distance = FVector::Distance( iCamera->GetActorLocation(), ioAnimation->GetActorLocation() );
     FVector old_scale = ioAnimation->GetActorScale3D();
-    FVector old_scale_camera100 = ioAnimation->ComputeAnimationScaleWithScaleAndMargin( iCamera, old_distance );
+    FVector old_camera_view_size = scaling_component->ComputeSizeOfCameraView( iCamera, old_distance );
+    FVector old_scale_camera100 = scaling_component->ComputeScaleWithScaleAndMargin( old_camera_view_size );
+
+    FVector new_camera_view_size = scaling_component->ComputeSizeOfCameraView( iCamera, iNewDistance );
 
     FVector new_animation_location = iCamera->GetActorLocation() + ( ioAnimation->GetActorLocation() - iCamera->GetActorLocation() ).GetSafeNormal() * iNewDistance;
 
@@ -245,14 +262,14 @@ ShotSequenceTools::MoveAndScaleAnimation( AOdysseyAnimationActor* ioAnimation, c
     {
         case EScaleAnimation::kFitToCamera:
             {
-                FVector scale = ioAnimation->ComputeAnimationScaleWithScaleAndMargin( iCamera, iNewDistance );
+                FVector scale = scaling_component->ComputeScaleWithScaleAndMargin( new_camera_view_size );
                 ioAnimation->SetActorScale3D( scale );
             }
             break;
 
         case EScaleAnimation::kRelativeScale:
             {
-                FVector new_scale_camera100 = ioAnimation->ComputeAnimationScaleWithScaleAndMargin( iCamera, iNewDistance );
+                FVector new_scale_camera100 = scaling_component->ComputeScaleWithScaleAndMargin( new_camera_view_size );
                 FVector ratio = new_scale_camera100 / old_scale_camera100;
                 FVector new_scale = old_scale * ratio;
 

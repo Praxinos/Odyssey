@@ -244,7 +244,7 @@ FindAllAnimationPaths( const IMovieScenePlayer& iPlayer, FRelevantPathMap& oPare
 
         for( auto animation_actor : animation_actors )
         {
-            const UOdysseyAnimation* animation = animation_actor->AnimationComponent->GetAnimation();
+            const UOdysseyAnimation* animation = animation_actor->GetAnimationComponent() ? animation_actor->GetAnimationComponent()->GetAnimation() : nullptr;
             if( !animation )
                 continue;
 

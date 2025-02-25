@@ -105,7 +105,8 @@ UOdysseyAnimationComponent::UOdysseyAnimationComponent(const FObjectInitializer&
 void
 UOdysseyAnimationComponent::Initialize()
 {
-    SetStaticMesh(LoadObject<UStaticMesh>(this, TEXT("/Engine/BasicShapes/Plane.Plane")));
+    SetStaticMesh( LoadObject<UStaticMesh>( this, TEXT( "/Odyssey/S_1_Unit_Plane.S_1_Unit_Plane" ) ) );
+    //GetStaticMesh()->GetBounds().BoxExtent.X * 2.0f) // x2 to have length not radius
     SetAnimationMaterial(LoadObject<UMaterial>(this, TEXT("/Odyssey/Animation2D/DefaultAnimationMaterial.DefaultAnimationMaterial")));
 }
 
