@@ -46,7 +46,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         //Constructor
         UOdysseyPainterEditorVectorBaseTool();
         UOdysseyPainterEditorVectorBaseTool( TSharedPtr<FOdysseyPainterEditorVectorBaseToolHUD> iBaseHUD
-                                           , bool iAutoCreateFrame );
+                                           , bool iAutoCreateMedia
+                                           , bool iMouseEventViaHUD );
 
         static bool DoubleClicked();
 
@@ -63,13 +64,18 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         virtual bool OnKeyDownGlobal( const FKeyEvent& InKeyEvent ) override;
         virtual bool OnKeyUpGlobal( const FKeyEvent& InKeyEvent ) override;
 
-        virtual void OnMouseHoverViaHUD( const FOdysseyPoint& iPointInTexture );
+        virtual void OnMouseHover( const FOdysseyPoint& iPointInTexture ) override;
+        virtual bool OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
+        virtual void OnMouseDrag( const FOdysseyPoint& iPointInTexture ) override;
+        virtual bool OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
+        virtual bool OnMouseClick(const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
 
+        virtual void OnMouseHoverViaHUD( const FOdysseyPoint& iPointInTexture );
         virtual bool OnMouseDownViaHUD( const FOdysseyPoint& iPointInTexture, const FKey& iKey );
         virtual void OnMouseDragViaHUD( const FOdysseyPoint& iPointInTexture );
         virtual bool OnMouseUpViaHUD( const FOdysseyPoint& iPointInTexture, const FKey& iKey );
+        virtual bool OnMouseClickViaHUD(const FOdysseyPoint& iPointInTexture, const FKey& iKey );
 
-        virtual bool OnMouseClick(const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
         virtual void Commit();
         virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
         virtual void ExtendMenu( TSharedRef<FExtender> iExtender ) override;
@@ -125,7 +131,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
 
         void PopupContextMenu();
         TSharedPtr<SWidget> CreateContextMenu();
-
 
     private:
         void Copy();
@@ -184,6 +189,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         bool mHasContextMenu;
         bool mDragging;
         bool mAutoCreateMedia;
+        bool bMouseEventViaHUD;
         // to prevent a double mouse down bug detected in
         // FOdysseyPainterEditorViewportClient::InputKey
         // FOdysseyPainterEditorViewportClient::OnStylusStateChanged

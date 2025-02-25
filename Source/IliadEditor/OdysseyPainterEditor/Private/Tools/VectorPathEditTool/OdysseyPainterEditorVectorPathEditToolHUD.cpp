@@ -107,9 +107,9 @@ FOdysseyPainterEditorVectorPathEditToolHUD::DrawHUD( const FOdysseyHUDSystem::FD
     FLinearColor fgColor = FLinearColor( fg );
     FLinearColor bgColor = FLinearColor( bg );
     FLinearColor hcColor = FLinearColor( hc );
-    ePathPickingMode pickingMode = mPathEditTool->GetPickingMode();
-    uint64 vertexHandleFlag  = ( pickingMode == ePathPickingMode::VertexHandle  ) ? FOdysseyVectorHUD::HUD_PATH_VERTEX_HANDLE  : 0;
-    uint64 segmentHandleFlag = ( pickingMode == ePathPickingMode::SegmentHandle ) ? FOdysseyVectorHUD::HUD_PATH_SEGMENT_HANDLE
+    eVectorPathEditEditionMode pickingMode = mPathEditTool->GetEditionMode();
+    uint64 vertexHandleFlag  = ( pickingMode == eVectorPathEditEditionMode::VertexHandle  ) ? FOdysseyVectorHUD::HUD_PATH_VERTEX_HANDLE  : 0;
+    uint64 segmentHandleFlag = ( pickingMode == eVectorPathEditEditionMode::SegmentHandle ) ? FOdysseyVectorHUD::HUD_PATH_SEGMENT_HANDLE
                                                                                   | FOdysseyVectorHUD::HUD_PATH_VERTEX_ALIGNMENT : 0;
     uint64 hudFlags = mPathEditTool->GetEditor()->GetVectorHUDFlags();
     FVector2D hudCursor = iParams.mTextureToHUD.Execute( FVector2D( mX, mY ) );
@@ -148,7 +148,7 @@ FOdysseyPainterEditorVectorPathEditToolHUD::DrawHUD( const FOdysseyHUDSystem::FD
                        , hcColor
                        , 1.0f );
 
-    if( mPathEditTool->GetPickingMode() == ePathPickingMode::Alter )
+    if( mPathEditTool->GetEditionMode() == eVectorPathEditEditionMode::Alter )
     {
         if(  mHoveredPointArray.size() )
         {
@@ -180,7 +180,7 @@ FOdysseyPainterEditorVectorPathEditToolHUD::DrawHUD( const FOdysseyHUDSystem::FD
     // invisible plane will get mouse events
     DrawDummyPlane( iParams );
 
-    DrawModifierInfo( iParams );
+    //DrawModifierInfo( iParams );
 }
 
 void
@@ -200,7 +200,7 @@ FOdysseyPainterEditorVectorPathEditToolHUD::SetCursorPosition( double iWorldX, d
 {
     FOdysseyPainterEditorVectorBaseToolHUD::SetCursorPosition( iWorldX, iWorldY );
 
-    if( mPathEditTool->GetPickingMode() == ePathPickingMode::Alter )
+    if( mPathEditTool->GetEditionMode() == eVectorPathEditEditionMode::Alter )
     {
         mHoveredPointArray.clear();
 

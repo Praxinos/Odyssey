@@ -33,7 +33,6 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorMatchingToolHUD : publ
                              , std::vector<FInbetweenerPoint*>& oPointArray
                              , std::vector<float>& oDistanceArray
                              , std::vector<FInbetweenerGrid*>& oGridArray );
-        void SetCursorPosition( double iX, double iY );
 
     private:
         void DrawPaths( BLContext* iBLContext, FOdysseyVectorTagInbetweener* iInbetweenerTag );
@@ -47,5 +46,4 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorMatchingToolHUD : publ
     private:
         UOdysseyPainterEditorVectorMatchingTool* mMatchingTool;
         ::ULIS::FRectD mChartRect;
-        ::ULIS::FRectD mCursorPosition;
 };

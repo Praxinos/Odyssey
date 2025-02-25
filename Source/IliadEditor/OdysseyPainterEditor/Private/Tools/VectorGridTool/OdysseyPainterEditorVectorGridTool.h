@@ -12,8 +12,15 @@ class FGridNode;
 class FOdysseyPainterEditorVectorGridToolHUD;
 class FOdysseyVectorPoint;
 
+UENUM()
+enum class eVectorGridEditionMode : uint8
+{
+    Single = 0,
+    Multi = 1,
+};
+
 UCLASS( HideCategories = (SelectionTool) )
-class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorGridTool : public UOdysseyPainterEditorVectorSelectionTool
+class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorGridTool : public UOdysseyPainterEditorVectorBaseTool
 {
     public:
         GENERATED_BODY()
@@ -29,9 +36,17 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorGridTool : public UOdy
         virtual FText GetTooltip() const override;
 
         virtual void ExtendToolbar( FToolBarBuilder& iBuilder ) override;
+        eVectorGridEditionMode GetEditionMode();
 
     protected:
         //OdysseyPainterVectorBaseEditorTool overrides
+        bool OnKeyUpGlobalVector( FOdysseyVectorGroupPaint* iScene
+                                , const FKeyEvent& InKeyEvent
+                                , uint64& oSignalFlags );
+        bool OnKeyDownGlobalVector( FOdysseyVectorGroupPaint* iScene
+                                  , const FKeyEvent& InKeyEvent
+                                  , uint64& oSignalFlags );
+
         virtual uint64 LoadVector( FOdysseyVectorGroupPaint* iScene ) override;
         virtual uint64 UnloadVector( FOdysseyVectorGroupPaint* iScene ) override;
         //virtual bool OnKeyDownVector( FOdysseyVectorGroupPaint* iScene
@@ -50,12 +65,15 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorGridTool : public UOdy
                                       , const FKey& iKey, uint64& oSignalFlags ) override;
         virtual uint64 PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
                                             , const FName& iPropertyName ) override;
+        TSharedRef<SWidget> CreateModifierSegmentControl();
+        const FSlateBrush* GetBackgroundColor( eVectorGridEditionMode iMode ) const;
+        void SetEditionMode( eVectorGridEditionMode iMode );
 
     private:
         std::vector<FOdysseyVectorPoint*> mPointArray;
         FOdysseyPainterEditorVectorGridToolHUD* mGridHUD;
         std::vector<FGridNode *> mGridNodeArray;
-        bool mMultipleSelectionMode;
+        eVectorGridEditionMode mEditionMode;
 
     public:
         UPROPERTY( EditAnywhere

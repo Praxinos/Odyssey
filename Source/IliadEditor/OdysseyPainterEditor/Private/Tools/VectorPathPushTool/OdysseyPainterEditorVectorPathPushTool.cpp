@@ -23,7 +23,7 @@ UOdysseyPainterEditorVectorPathPushTool::~UOdysseyPainterEditorVectorPathPushToo
 }
 
 UOdysseyPainterEditorVectorPathPushTool::UOdysseyPainterEditorVectorPathPushTool()
-    : UOdysseyPainterEditorVectorBaseTool( MakeShared<FOdysseyPainterEditorVectorPathPushToolHUD>( this ),false )
+    : UOdysseyPainterEditorVectorBaseTool( MakeShared<FOdysseyPainterEditorVectorPathPushToolHUD>( this ), false, true )
     , Radius( 20.0f )
     , RestrictToSelectedObjects( false )
 {

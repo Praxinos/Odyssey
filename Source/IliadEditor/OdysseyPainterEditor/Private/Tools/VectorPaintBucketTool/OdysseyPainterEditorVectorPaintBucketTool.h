@@ -23,6 +23,13 @@ enum class EPaintBucketToolColorMode : uint8
     RadialGradient = 2,
 };
 
+UENUM()
+enum class eVectorPaintBucketEditionMode : uint8
+{
+    Default = 0,
+    Control = 1
+};
+
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPaintBucketTool : public UOdysseyPainterEditorVectorBaseTool
 {
@@ -43,7 +50,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPaintBucketTool : publ
         //Constructor
         UOdysseyPainterEditorVectorPaintBucketTool();
 
-        bool GetShowControls();
+        eVectorPaintBucketEditionMode GetEditionMode();
 
     protected:
         //OdysseyPainterVectorBaseEditorTool overrides
@@ -92,6 +99,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPaintBucketTool : publ
                                         , FOdysseyVectorBucket* iBucket );
         double GetRotationAngle( FOdysseyVectorBucket* iBucket
                                 , const FOdysseyPoint& iPointInTexture );
+        TSharedRef<SWidget> CreateModifierSegmentControl();
+        const FSlateBrush* GetBackgroundColor( eVectorPaintBucketEditionMode iMode ) const;
+        void SetEditionMode( eVectorPaintBucketEditionMode iMode );
 
     public:
         UPROPERTY( EditAnywhere
@@ -145,5 +155,5 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPaintBucketTool : publ
         FOdysseyPainterEditorVectorPaintBucketToolContextMenu* mContextMenu;
         uint32 mPickedArea;
         ::ULIS::FVec2D mOldPointInTexture;
-        bool mShowControls;
+        eVectorPaintBucketEditionMode mEditionMode;
 };

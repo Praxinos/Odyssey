@@ -13,6 +13,7 @@
 #include "PainterEditor/OdysseyPainterEditorSource.h"
 #include "Undo/OdysseyVectorUndoErase.h"
 #include "SOdysseySinglePropertyView.h"
+#include "Widgets/Input/SSegmentedControl.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -23,7 +24,8 @@ UOdysseyPainterEditorVectorEraserTool::~UOdysseyPainterEditorVectorEraserTool()
 }
 
 UOdysseyPainterEditorVectorEraserTool::UOdysseyPainterEditorVectorEraserTool()
-    : UOdysseyPainterEditorVectorBaseTool( MakeShared<FOdysseyPainterEditorVectorEraserToolHUD>( this ), false )
+    : UOdysseyPainterEditorVectorBaseTool( MakeShared<FOdysseyPainterEditorVectorEraserToolHUD>( this ), false, true )
+    , mEditionMode( eVectorEraserEditionMode::Default )
     , SplitPath( true )
     , Radius( 20.0f )
 {
@@ -65,6 +67,48 @@ UOdysseyPainterEditorVectorEraserTool::LoadVector( FOdysseyVectorGroupPaint* iSc
     iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     return 0;
+}
+
+bool
+UOdysseyPainterEditorVectorEraserTool::OnKeyDownGlobalVector( FOdysseyVectorGroupPaint* iScene
+                                                            , const FKeyEvent& InKeyEvent
+                                                            , uint64& oSignalFlags )
+{
+    if( InKeyEvent.IsRepeat() == false )
+    {
+        FKey key = InKeyEvent.GetKey();
+
+        // Note, we could FSlateApplication::Get().GetModifierKeys() as well, but for consistency
+        // with the events processing in the OnKeyUpGlobalVector(), we do like that.
+        if ( ( key == EKeys::LeftShift ) || ( key == EKeys::RightShift ) )
+        {
+            mEditionMode  = eVectorEraserEditionMode::Section;
+
+            return true;
+        }
+
+        // Note, we could FSlateApplication::Get().GetModifierKeys() as well, but for consistency
+        // with the events processing in the OnKeyUpGlobalVector(), we do like that.
+        if ( ( key == EKeys::LeftAlt ) || ( key == EKeys::RightAlt ) )
+        {
+            mEditionMode  = eVectorEraserEditionMode::Path;
+
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool
+UOdysseyPainterEditorVectorEraserTool::OnKeyUpGlobalVector( FOdysseyVectorGroupPaint* iScene
+                                                          , const FKeyEvent& InKeyEvent
+                                                          , uint64& oSignalFlags )
+{
+    // first reset display mode
+    mEditionMode = eVectorEraserEditionMode::Default;
+
+    return false;
 }
 
 bool
@@ -352,18 +396,7 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorGroupPaint
         // TODO: pass the mask image as arg to Pick function
         iScene->GetCell()->SetBLMask( mEraserHUD->GetMask() );
 
-        if ( FSlateApplication::Get().GetModifierKeys().IsShiftDown() )
-        {
-            EraseSections( iScene
-                         , erasureArea
-                         , addedObjectArray
-                         , addedVertexArray
-                         , addedSegmentArray
-                         , removedObjectArray
-                         , removedVertexArray
-                         , removedSegmentArray );
-        }
-        else
+        if ( mEditionMode == eVectorEraserEditionMode::Default )
         {
             ErasePaths( iScene
                       , erasureArea
@@ -373,6 +406,18 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorGroupPaint
                       , removedVertexArray
                       , removedSegmentArray
                       , removedObjectArray );
+        }
+
+        if ( mEditionMode == eVectorEraserEditionMode::Section )
+        {
+            EraseSections( iScene
+                         , erasureArea
+                         , addedObjectArray
+                         , addedVertexArray
+                         , addedSegmentArray
+                         , removedObjectArray
+                         , removedVertexArray
+                         , removedSegmentArray );
         }
 
         iScene->GetCell()->SetBLMask( nullptr );
@@ -405,11 +450,76 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorGroupPaint
 }
 
 void
+UOdysseyPainterEditorVectorEraserTool::SetEditionMode( eVectorEraserEditionMode iMode )
+{
+    mEditionMode = iMode;
+}
+
+const FSlateBrush*
+UOdysseyPainterEditorVectorEraserTool::GetBackgroundColor( eVectorEraserEditionMode iMode ) const
+{
+    static FSlateColorBrush orange = FSlateColorBrush( FLinearColor( 1.0f, 0.5f, 0.0f, 0.5f ) );
+
+    return ( iMode == mEditionMode ) ? &orange : nullptr;
+}
+
+TSharedRef<SWidget>
+UOdysseyPainterEditorVectorEraserTool::CreateModifierSegmentControl()
+{
+    return SNew(SSegmentedControl<eVectorEraserEditionMode>)
+           .Value_Lambda( [this]{ return mEditionMode; } )
+           .SupportsEmptySelection( false )
+           .SupportsMultiSelection( false )
+           .IsEnabled( false ) // currently not clickable - Info only
+           .OnValueChanged( SSegmentedControl<eVectorEraserEditionMode>::FOnValueChanged::CreateUObject( this, &UOdysseyPainterEditorVectorEraserTool::SetEditionMode ) )
+           // DEFAULT
+           + SSegmentedControl<eVectorEraserEditionMode>::Slot( eVectorEraserEditionMode::Default )
+           //.Icon( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Eraser16") )
+           .ToolTip( LOCTEXT("vector-eraser-tool.erasure-mode.default.name", "Default") )
+           [
+               SNew(SBorder)
+               .BorderImage_UObject( this, &UOdysseyPainterEditorVectorEraserTool::GetBackgroundColor, eVectorEraserEditionMode::Default  )
+               [
+                   SNew(SImage)
+                   .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Eraser16") )
+               ]
+           ]
+           // SHIFT
+           + SSegmentedControl<eVectorEraserEditionMode>::Slot( eVectorEraserEditionMode::Section )
+           //.Icon( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Eraser16") )
+           .ToolTip( LOCTEXT("vector-eraser-tool.erasure-mode.shift.name", "Erase to intersection (SHIFT)") )
+           [
+               SNew(SBorder)
+               .BorderImage_UObject( this, &UOdysseyPainterEditorVectorEraserTool::GetBackgroundColor, eVectorEraserEditionMode::Section  )
+               [
+                   SNew(SImage)
+                   .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Eraser16") )
+               ]
+           ]
+           // ALT
+           + SSegmentedControl<eVectorEraserEditionMode>::Slot( eVectorEraserEditionMode::Path )
+           //.Icon( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Eraser16") )
+           .ToolTip( LOCTEXT("vector-eraser-tool.erasure-mode.alt.name", "Erase whole path (ALT)") )
+           [
+               SNew(SBorder)
+               .BorderImage_UObject( this, &UOdysseyPainterEditorVectorEraserTool::GetBackgroundColor, eVectorEraserEditionMode::Path  )
+               [
+                   SNew(SImage)
+                   .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Eraser16") )
+               ]
+           ];
+}
+
+void
 UOdysseyPainterEditorVectorEraserTool::ExtendToolbar( FToolBarBuilder& iBuilder )
 {
     Super::ExtendToolbar(iBuilder);
 
     iBuilder.BeginSection( NAME_None );
+
+    iBuilder.AddWidget(
+        CreateModifierSegmentControl()
+    );
 
     iBuilder.AddWidget(
         SNew(SBox)

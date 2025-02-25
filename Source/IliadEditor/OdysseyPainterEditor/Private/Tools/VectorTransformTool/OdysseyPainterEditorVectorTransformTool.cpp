@@ -34,7 +34,7 @@ UOdysseyPainterEditorVectorTransformTool::~UOdysseyPainterEditorVectorTransformT
 }
 
 UOdysseyPainterEditorVectorTransformTool::UOdysseyPainterEditorVectorTransformTool()
-    : UOdysseyPainterEditorVectorSelectionTool( MakeShared<FOdysseyPainterEditorVectorTransformToolHUD>( this ) )
+    : UOdysseyPainterEditorVectorBaseTool( MakeShared<FOdysseyPainterEditorVectorTransformToolHUD>( this ), false, true )
     , mPickedPivot( nullptr )
     , mDragging( false )
     , PickingRadius(10.0f)
@@ -107,7 +107,7 @@ UOdysseyPainterEditorVectorTransformTool::OnKeyDownVector( FOdysseyVectorGroupPa
         return true;
     }
 
-    return UOdysseyPainterEditorVectorSelectionTool::OnKeyDownVector( iScene, iKey, oSignalFlags );
+    return UOdysseyPainterEditorVectorBaseTool::OnKeyDownVector( iScene, iKey, oSignalFlags );
 }
 
 bool
@@ -117,7 +117,7 @@ UOdysseyPainterEditorVectorTransformTool::OnKeyUpVector( FOdysseyVectorGroupPain
 {
     Uniform = UniformAtKeyDown;
 
-    return UOdysseyPainterEditorVectorSelectionTool::OnKeyUpVector( iScene, iKey, oSignalFlags );
+    return UOdysseyPainterEditorVectorBaseTool::OnKeyUpVector( iScene, iKey, oSignalFlags );
 }
 
 void
@@ -1133,7 +1133,7 @@ UOdysseyPainterEditorVectorTransformTool::PropertyChangedVector( FOdysseyVectorG
 
     iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
-    return UOdysseyPainterEditorVectorSelectionTool::PropertyChangedVector( iScene, iPropertyName );
+    return UOdysseyPainterEditorVectorBaseTool::PropertyChangedVector( iScene, iPropertyName );
 }
 
 EVisibility

@@ -43,8 +43,6 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPaintBucketToolHUD : p
                        , double iWorldY
                        , std::vector<FOdysseyVectorCycle*>& oPickedCycleArray );
 
-        void SetCursorPosition( double iWorldX, double iWorldY );
-
         uint32 PickBucketArea( FOdysseyVectorBucket* iBucket
                              , double iWorldX
                              , double iWorldY );
@@ -63,5 +61,4 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPaintBucketToolHUD : p
     private:
         UOdysseyPainterEditorVectorPaintBucketTool* mPaintBucketTool;
         std::list<FOdysseyVectorGroupPaint*> mWorkingPaintgroupList;
-        ::ULIS::FVec2D mCursorAt;
 };

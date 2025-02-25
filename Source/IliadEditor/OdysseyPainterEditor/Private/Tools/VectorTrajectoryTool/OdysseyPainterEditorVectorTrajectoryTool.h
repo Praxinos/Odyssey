@@ -18,16 +18,16 @@ class FInbetweenerRoute;
 
 
 UENUM()
-enum class eTrajectoryEditionMode : uint8
+enum class eVectorTrajectoryEditionMode : uint8
 {
-    Add     = 0 UMETA( ToolTip = "Add (default)" ),
-    Curve   = 1 UMETA( ToolTip = "Curve (Ctrl/Cmd)" ),
-    Spacing = 2 UMETA( ToolTip = "Spacing (Shift)" ),
+    Add     = 0 UMETA( DisplayName = "Add (default)" ),
+    Curve   = 1 UMETA( DisplayName = "Curve (Ctrl/Cmd)" ),
+    Spacing = 2 UMETA( DisplayName = "Spacing (Shift)" ),
     //Remove  = 3 UMETA( ToolTip = "Remove (Alt)" )
 };
 
 UENUM()
-enum class eTrajectoryGridDisplayMode : uint8
+enum class eVectorTrajectoryGridDisplayMode : uint8
 {
     AsQuads  = 0 UMETA( ToolTip = "Show grid as quads" ),
     AsPoints = 1 UMETA( ToolTip = "Show grid as points" )
@@ -53,6 +53,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTrajectoryTool : publi
         virtual FText GetTooltip() const override;
 
         virtual void ExtendToolbar( FToolBarBuilder& iBuilder ) override;
+
+        eVectorTrajectoryEditionMode GetEditionMode();
 
     protected:
         //OdysseyPainterVectorBaseEditorTool overrides
@@ -89,6 +91,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTrajectoryTool : publi
                                                , uint64 iInbetweenMenuFlags ) override;
         void ResetRoute();
         void DeleteRoute();
+        void SetEditionMode( eVectorTrajectoryEditionMode iMode );
+        const FSlateBrush* GetBackgroundColor( eVectorTrajectoryEditionMode iMode ) const;
+        TSharedRef<SWidget> CreateModifierSegmentControl();
 
     private:
         FOdysseyPainterEditorVectorTrajectoryToolHUD* mTrajectoryHUD;
@@ -97,6 +102,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTrajectoryTool : publi
         FInbetweenerWaypoint* mPickedWaypoint;
         FInbetweenerRoute* mPickedRoute;
         FInbetweenerQuad* mHoveredQuad;
+        eVectorTrajectoryEditionMode mEditionMode;
 
     public:
         UPROPERTY( EditAnywhere
@@ -113,12 +119,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTrajectoryTool : publi
 
         UPROPERTY( EditAnywhere
                  , Category = MatchingTool
-                 , meta = ( ToolTip  = "Edition Mode" ) )
-        eTrajectoryEditionMode EditionMode;
-        eTrajectoryEditionMode EditionModeAtKeyDown;
-
-        UPROPERTY( EditAnywhere
-                 , Category = MatchingTool
                  , meta = ( ToolTip  = "Grid Display Mode" ) )
-        eTrajectoryGridDisplayMode GridDisplayMode;
+        eVectorTrajectoryGridDisplayMode GridDisplayMode;
 };

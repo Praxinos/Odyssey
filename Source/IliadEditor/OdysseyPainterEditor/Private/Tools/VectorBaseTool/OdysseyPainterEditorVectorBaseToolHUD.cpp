@@ -1894,6 +1894,13 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawBreakdown( const FOdysseyHUDSystem::
     }
 }
 
+bool
+FOdysseyPainterEditorVectorBaseToolHUD::OnMouseClick( const FOdysseyPoint& iPointInTexture
+                                                    , const FKey& iKey)
+{
+    return mBaseTool->OnMouseClickViaHUD( iPointInTexture, iKey );
+}
+
 void
 FOdysseyPainterEditorVectorBaseToolHUD::OnMouseHover(const FOdysseyPoint& iPointInTexture)
 {

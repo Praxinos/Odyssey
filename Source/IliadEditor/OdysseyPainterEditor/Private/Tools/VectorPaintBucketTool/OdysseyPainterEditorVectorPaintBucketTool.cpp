@@ -25,7 +25,9 @@
 #include "Undo/OdysseyVectorUndoBucketAdd.h"
 #include "Undo/OdysseyVectorUndoBucketRemove.h"
 #include "Undo/OdysseyVectorUndoBucketParam.h"
+
 #include "SOdysseySinglePropertyView.h"
+#include "Widgets/Input/SSegmentedControl.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -36,7 +38,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::~UOdysseyPainterEditorVectorPaintBuc
 }
 
 UOdysseyPainterEditorVectorPaintBucketTool::UOdysseyPainterEditorVectorPaintBucketTool()
-    : UOdysseyPainterEditorVectorBaseTool( MakeShared<FOdysseyPainterEditorVectorPaintBucketToolHUD>( this ), false )
+    : UOdysseyPainterEditorVectorBaseTool( MakeShared<FOdysseyPainterEditorVectorPaintBucketToolHUD>( this ), false, true )
     , Propagate( true )
     , ColorMode ( EPaintBucketToolColorMode::Color )
     , Opacity( 1.0f )
@@ -44,7 +46,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::UOdysseyPainterEditorVectorPaintBuck
     , Color2( 255, 255, 255, 255 )
     , PickingRadius( 10.0f )
     , mPickedBucket( nullptr )
-    , mShowControls( false )
+    , mEditionMode( eVectorPaintBucketEditionMode::Default )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PaintBucket64");
 
@@ -109,9 +111,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnKeyDownGlobalVector( FOdysseyVecto
         if ( ( key == EKeys::LeftControl ) || ( key == EKeys::RightControl )
           || ( key == EKeys::LeftCommand ) || ( key == EKeys::RightCommand ) )
         {
-            mShowControls = true;
-
-            iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
+            mEditionMode = eVectorPaintBucketEditionMode::Control;
 
             return true;
         }
@@ -125,17 +125,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnKeyUpGlobalVector( FOdysseyVectorG
                                                                , const FKeyEvent& InKeyEvent
                                                                , uint64& oSignalFlags )
 {
-    FKey key = InKeyEvent.GetKey();
-
-    mShowControls = false;
-
-    if ( ( key == EKeys::LeftControl ) || ( key == EKeys::RightControl )
-      || ( key == EKeys::LeftCommand ) || ( key == EKeys::RightCommand ) )
-    {
-        iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
-
-        return true;
-    }
+    mEditionMode = eVectorPaintBucketEditionMode::Default;
 
     return false;
 }
@@ -659,12 +649,6 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVector( FOdysseyVectorGroup
     return true;
 }
 
-bool
-UOdysseyPainterEditorVectorPaintBucketTool::GetShowControls()
-{
-    return mShowControls;
-}
-
 void
 UOdysseyPainterEditorVectorPaintBucketTool::ExtendContextMenu( FMenuBuilder& iMenu )
 {
@@ -808,12 +792,76 @@ UOdysseyPainterEditorVectorPaintBucketTool::PasteBucketParam( FOdysseyVectorBuck
     scene->GetLayer()->RequestRedraw( scene->GetCell(), 0 );
 }
 
+eVectorPaintBucketEditionMode
+UOdysseyPainterEditorVectorPaintBucketTool::GetEditionMode()
+{
+    return mEditionMode;
+}
+
+void
+UOdysseyPainterEditorVectorPaintBucketTool::SetEditionMode( eVectorPaintBucketEditionMode iMode )
+{
+    mEditionMode = iMode;
+}
+
+const FSlateBrush*
+UOdysseyPainterEditorVectorPaintBucketTool::GetBackgroundColor( eVectorPaintBucketEditionMode iMode ) const
+{
+    static FSlateColorBrush orange = FSlateColorBrush( FLinearColor( 1.0f, 0.5f, 0.0f, 0.5f ) );
+
+    return ( iMode == mEditionMode ) ? &orange : nullptr;
+}
+
+TSharedRef<SWidget>
+UOdysseyPainterEditorVectorPaintBucketTool::CreateModifierSegmentControl()
+{
+    return SNew(SSegmentedControl<eVectorPaintBucketEditionMode>)
+           .Value_Lambda( [this]{ return mEditionMode; } )
+           .SupportsEmptySelection( false )
+           .SupportsMultiSelection( false )
+           .IsEnabled( false ) // currently not clickable - Info only
+           .OnValueChanged( SSegmentedControl<eVectorPaintBucketEditionMode>::FOnValueChanged::CreateUObject( this, &UOdysseyPainterEditorVectorPaintBucketTool::SetEditionMode ) )
+           // DEFAULT
+           + SSegmentedControl<eVectorPaintBucketEditionMode>::Slot( eVectorPaintBucketEditionMode::Default )
+           //.Icon( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PaintBucket16") )
+           .ToolTip( LOCTEXT("vector-paint-bucket-tool.edition-mode.default.name", "Default") )
+           [
+               SNew(SBorder)
+               .BorderImage_UObject( this, &UOdysseyPainterEditorVectorPaintBucketTool::GetBackgroundColor, eVectorPaintBucketEditionMode::Default  )
+               [
+                   SNew(SImage)
+                   .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PaintBucket16") )
+               ]
+           ]
+           // CTRL
+           + SSegmentedControl<eVectorPaintBucketEditionMode>::Slot( eVectorPaintBucketEditionMode::Control )
+           //.Icon( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PaintBucket16") )
+#if PLATFORM_WINDOWS
+           .ToolTip( LOCTEXT("vector-paint-bucket-tool.edition-mode.ctrl.name", "Control radial/linear gradient settings (CTRL)") )
+#endif
+#if PLATFORM_MAC
+           .ToolTip( LOCTEXT("vector-paint-bucket-tool.edition-mode.ctrl.name", "Erase to intersection (CMD)") )
+#endif
+           [
+               SNew(SBorder)
+               .BorderImage_UObject( this, &UOdysseyPainterEditorVectorPaintBucketTool::GetBackgroundColor, eVectorPaintBucketEditionMode::Control )
+               [
+                   SNew(SImage)
+                   .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PaintBucket16") )
+               ]
+           ];
+}
+
 void
 UOdysseyPainterEditorVectorPaintBucketTool::ExtendToolbar( FToolBarBuilder& iBuilder )
 {
     Super::ExtendToolbar(iBuilder);
 
     iBuilder.BeginSection( NAME_None );
+
+    iBuilder.AddWidget(
+        CreateModifierSegmentControl()
+    );
 
     iBuilder.AddWidget(
         SNew(SBox)

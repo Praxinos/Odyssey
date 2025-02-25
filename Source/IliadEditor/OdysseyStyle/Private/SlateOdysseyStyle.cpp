@@ -483,6 +483,12 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set("PainterEditor.ColorSelector.ColorType.Raw", new IMAGE_BRUSH_SVG( "PainterEditor/ColorSelector/color_type_raw", mIcon16x16 ));
     Set("PainterEditor.ColorSelector.ColorType.Indexed", new IMAGE_BRUSH_SVG( "PainterEditor/ColorSelector/color_type_indexed", mIcon16x16 ));
 
+    //Tools Modifier keys shortcuts
+    Set( "PainterEditor.ToolsShortcuts.PathEditAddRemoveVertex20", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/path_edit_tool_add_remove_vertex", mIcon20x20 ) );
+    Set( "PainterEditor.ToolsShortcuts.PathEditDeformSegment20", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/path_edit_tool_deform_segment", mIcon20x20 ) );
+    Set( "PainterEditor.ToolsShortcuts.PathEditMoveVertex20", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/path_edit_tool_move_vertex", mIcon20x20 ) );
+    Set( "PainterEditor.ToolsShortcuts.PathEditWidenVertex20", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/path_edit_tool_widen_vertex", mIcon20x20 ) );
+
     //OdysseyPainterEditorTools
     Set( "OdysseyPainterEditorTools.Tile", FTableRowStyle(mCoreTableRowStyle)
 

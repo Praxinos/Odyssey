@@ -103,6 +103,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorBaseToolHUD : public F
         virtual void OnMouseHover(const FOdysseyPoint& iPointInTexture) override;
 //        virtual void OnMouseLeave() override;
         virtual void OnMouseDrag(const FOdysseyPoint& iPointInTexture) override;
+        virtual bool OnMouseClick( const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
 
         virtual void Load( );
         virtual void Unload( );

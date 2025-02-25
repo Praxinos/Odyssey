@@ -564,6 +564,8 @@ bool IOdysseyViewportDrawingEditorAdapter::CapturedMouseMove(FEditorViewportClie
         if (mExtension->ViewportToHUD(iViewportClient, viewportPoint, hudPoint))
         {
             mCurrentHUDPoint = FOdysseyPoint(hudPoint.X, hudPoint.Y);
+            mCurrentHUDPoint.keysDown = mKeysPressed;
+            mCurrentHUDPoint.ComputeRelativeParameters(mCurrentStrokeRay.mPoint);
             mCurrentHUDElement->OnMouseDrag(mCurrentHUDPoint);
             return true;
         }

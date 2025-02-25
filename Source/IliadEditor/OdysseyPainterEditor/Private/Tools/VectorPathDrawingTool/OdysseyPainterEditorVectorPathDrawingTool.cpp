@@ -28,7 +28,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::~UOdysseyPainterEditorVectorPathDraw
 }
 
 UOdysseyPainterEditorVectorPathDrawingTool::UOdysseyPainterEditorVectorPathDrawingTool()
-    : UOdysseyPainterEditorVectorBaseTool( MakeShared<FOdysseyPainterEditorVectorPathDrawingToolHUD>( this ), true )
+    : UOdysseyPainterEditorVectorBaseTool( MakeShared<FOdysseyPainterEditorVectorPathDrawingToolHUD>( this ), true, false )
     , ColorMode( eForegroundColorMode::SolidColor )
     , Opacity( 1.0f )
     , Brush( nullptr )
@@ -55,7 +55,6 @@ UOdysseyPainterEditorVectorPathDrawingTool::UOdysseyPainterEditorVectorPathDrawi
 
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
-
 
 void
 UOdysseyPainterEditorVectorPathDrawingTool::BindShortcuts(FBaseToolkit* iToolkit)

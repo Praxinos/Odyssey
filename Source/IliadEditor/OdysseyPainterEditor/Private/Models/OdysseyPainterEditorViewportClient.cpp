@@ -450,8 +450,14 @@ FOdysseyPainterEditorViewportClient::CapturedMouseMove( FViewport* iViewport, in
         uint32 textureFullWidth = texture->Source.IsValid() ? texture->Source.GetSizeX() : texture->GetSurfaceWidth();
         uint32 textureFullHeight = texture->Source.IsValid() ? texture->Source.GetSizeY() : texture->GetSurfaceHeight();
         FVector2D viewportPoint(iViewport->GetMouseX(), iViewport->GetMouseY());
-        FVector2D hudPoint = viewportWidget->ToLocal(viewportPoint) +  FVector2D(textureFullWidth / 2.f, textureFullHeight / 2.f);
-        mCurrentHUDPoint = FOdysseyPoint(hudPoint.X, hudPoint.Y);
+        FVector2D hudPointCoords = viewportWidget->ToLocal(viewportPoint) +  FVector2D(textureFullWidth / 2.f, textureFullHeight / 2.f);
+        FOdysseyPoint hudPoint = FOdysseyPoint(hudPointCoords.X, hudPointCoords.Y);
+
+        hudPoint.keysDown = mKeysPressed;
+        hudPoint.ComputeRelativeParameters(mCurrentHUDPoint);
+
+        mCurrentHUDPoint = hudPoint;
+
         mCurrentHUDElement->OnMouseDrag(mCurrentHUDPoint);
         return;
     }
@@ -522,8 +528,13 @@ FOdysseyPainterEditorViewportClient::MouseMove(FViewport* iViewport, int32 iX, i
         uint32 textureFullWidth = texture->Source.IsValid() ? texture->Source.GetSizeX() : texture->GetSurfaceWidth();
         uint32 textureFullHeight = texture->Source.IsValid() ? texture->Source.GetSizeY() : texture->GetSurfaceHeight();
         FVector2D viewportPoint(iViewport->GetMouseX(), iViewport->GetMouseY());
-        FVector2D hudPoint = viewportWidget->ToLocal(viewportPoint) +  FVector2D(textureFullWidth / 2.f, textureFullHeight / 2.f);
-        mCurrentHUDPoint = FOdysseyPoint(hudPoint.X, hudPoint.Y);
+        FVector2D hudPointCoords = viewportWidget->ToLocal(viewportPoint) +  FVector2D(textureFullWidth / 2.f, textureFullHeight / 2.f);
+        FOdysseyPoint hudPoint = FOdysseyPoint(hudPointCoords.X, hudPointCoords.Y);
+
+        hudPoint.ComputeRelativeParameters(mCurrentHUDPoint);
+
+        mCurrentHUDPoint = hudPoint;
+
         mHoveredHUDElement->OnMouseHover(mCurrentHUDPoint);
     }
 

@@ -43,6 +43,32 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::Unload()
 {
 }
 
+//--------------------------------------------------------------------------------------
+// we cannot use the HUD for event handling because we need the pressure
+// so the get back to the tool handling all hover/down/drag/up events for consistency
+void
+FOdysseyPainterEditorVectorPathDrawingToolHUD::OnMouseHover( const FOdysseyPoint& iPointInTexture )
+{
+}
+
+bool
+FOdysseyPainterEditorVectorPathDrawingToolHUD::OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
+{
+    return false;
+}
+
+void
+FOdysseyPainterEditorVectorPathDrawingToolHUD::OnMouseDrag( const FOdysseyPoint& iPointInTexture )
+{
+}
+
+bool
+FOdysseyPainterEditorVectorPathDrawingToolHUD::OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
+{
+    return false;
+}
+//--------------------------------------------------------------------------------------
+
 std::vector<FOdysseyVectorPoint*>&
 FOdysseyPainterEditorVectorPathDrawingToolHUD::GetStitchedPointArray()
 {
@@ -148,7 +174,7 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::DrawHUD( const FOdysseyHUDSystem:
     }
 
     // invisible plane will get mouse events
-    DrawDummyPlane( iParams );
+    //DrawDummyPlane( iParams );
 }
 
 // part of this HUD is drawn onto the image

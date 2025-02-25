@@ -18,9 +18,11 @@ FOdysseyPainterEditorVectorTransformToolHUD::~FOdysseyPainterEditorVectorTransfo
 }
 
 FOdysseyPainterEditorVectorTransformToolHUD::FOdysseyPainterEditorVectorTransformToolHUD( UOdysseyPainterEditorVectorTransformTool* iTransformTool )
-    : FOdysseyPainterEditorVectorSelectionToolHUD( iTransformTool )
+    : FOdysseyPainterEditorVectorBaseToolHUD( iTransformTool )
     , mFlags( 0 )
     , mCenterGizmo( true )
+    , mShowSelectionBox( true )
+    , mShowSelectionIfEmpty ( false )
 {
     mTransformTool = iTransformTool;
 
@@ -40,11 +42,17 @@ FOdysseyPainterEditorVectorTransformToolHUD::SetCenterGizmo( bool iCenterGizmo )
 }
 
 void
-FOdysseyPainterEditorVectorTransformToolHUD::SetCursorPosition( double iWorldX, double iWorldY )
+FOdysseyPainterEditorVectorTransformToolHUD::ShowSelectionBox( bool iShowSelectionBox )
 {
-    FOdysseyPainterEditorVectorBaseToolHUD::SetCursorPosition( iWorldX, iWorldY );
+    mShowSelectionBox = iShowSelectionBox;
+}
 
-    Pick( iWorldX, iWorldY );
+void
+FOdysseyPainterEditorVectorTransformToolHUD::OnMouseHover( const FOdysseyPoint& iPointInTexture )
+{
+    FOdysseyPainterEditorVectorBaseToolHUD::SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
+
+    Pick( iPointInTexture.x, iPointInTexture.y );
 }
 
 static void
@@ -183,7 +191,8 @@ FOdysseyPainterEditorVectorTransformToolHUD::Pick( double iWorldX, double iWorld
 {
     uint32 newFlags = 0;
 
-    mFlags &= (~PICK_CHANGED);
+    //mFlags &= (~PICK_CHANGED);
+    mFlags = 0;
 
     if( mSelectionBox.rect.Area() )
     {
@@ -429,6 +438,9 @@ FOdysseyPainterEditorVectorTransformToolHUD::DrawHUD( const FOdysseyHUDSystem::F
 
         DrawGizmo( iParams );
     }
+
+    // invisible plane will get mouse events
+    DrawDummyPlane( iParams );
 }
 
 void

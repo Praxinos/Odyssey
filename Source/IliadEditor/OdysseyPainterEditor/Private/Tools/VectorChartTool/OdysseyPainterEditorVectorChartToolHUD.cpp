@@ -274,13 +274,10 @@ FOdysseyPainterEditorVectorChartToolHUD::DrawBreakdownChart( const FOdysseyHUDSy
         }
     }
 
-    if( mChartTool->EditionMode == eChartEditionMode::Reshape )
+    if( mChartTool->GetEditionMode() == eVectorChartEditionMode::Reshape )
     {
-        DrawPrimitiveLine( iParams, hudCoords[0], hudCoords[1], iBgColor, 3.0f );
-        DrawPrimitiveLine( iParams, hudCoords[0], hudCoords[1], iFgColor, 2.0f );
-
-        DrawPrimitiveLine( iParams, hudCoords[1], hudCoords[2], iBgColor, 3.0f );
-        DrawPrimitiveLine( iParams, hudCoords[1], hudCoords[2], iFgColor, 2.0f );
+        DrawPrimitiveLineOutlined( iParams, hudCoords[0], hudCoords[1], iFgColor, 1.0f );
+        DrawPrimitiveLineOutlined( iParams, hudCoords[1], hudCoords[2], iFgColor, 1.0f );
 
         for( uint32 i = 0; i < 3; i++ )
         {
@@ -355,7 +352,7 @@ FOdysseyPainterEditorVectorChartToolHUD::DrawHUD( const FOdysseyHUDSystem::FDraw
     // invisible plane will get mouse events
     DrawDummyPlane( iParams );
 
-    DrawModifierInfo( iParams );
+    //DrawModifierInfo( iParams );
 }
 
 void

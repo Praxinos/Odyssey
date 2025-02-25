@@ -19,7 +19,7 @@ class FOdysseyVectorGroupPaint;
 class FOdysseyVectorHandleSegment;
 
 UENUM()
-enum class ePathPickingMode : uint8
+enum class eVectorPathEditEditionMode : uint8
 {
     Vertex = 0,
     VertexHandle = 1,
@@ -89,7 +89,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathEditTool : public 
         virtual bool IsActivable() const override;
 
         uint64 GetPickingFlags();
-        ePathPickingMode GetPickingMode();
+        eVectorPathEditEditionMode GetEditionMode();
 
         virtual FText GetTooltip() const override;
 
@@ -168,7 +168,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathEditTool : public 
         static void BuildSegmentAdjustments( const std::vector<FOdysseyVectorSegment*>& iSegmentArray
                                            , std::vector<FSegmentAdjustment>& oSegmentAdjustmentArray );
 
-        void SetPickingMode( TOptional<ePathPickingMode> inValue );
+        void SetEditionMode( eVectorPathEditEditionMode inValue );
+        TSharedRef<SWidget> CreateModifierSegmentControl();
+        const FSlateBrush* GetBackgroundColor( eVectorPathEditEditionMode iMode ) const;
 
     private:
         FOdysseyPainterEditorVectorPathEditToolHUD *mPathEditHUD;
@@ -180,7 +182,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathEditTool : public 
         std::vector<FSegmentAdjustment> mSegmentAdjustmentArray;
         std::vector<FOdysseyVectorPath*> mSelectedPathArray;
         uint64 mPickingFlags;
-        ePathPickingMode mPickingMode;
+        eVectorPathEditEditionMode mEditionMode;
         ::ULIS::FVec2D mPointInTextureAtDown;
 
     public:

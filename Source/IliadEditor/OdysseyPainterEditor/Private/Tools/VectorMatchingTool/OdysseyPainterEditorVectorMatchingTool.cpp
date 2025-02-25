@@ -23,7 +23,7 @@ UOdysseyPainterEditorVectorMatchingTool::~UOdysseyPainterEditorVectorMatchingToo
 }
 
 UOdysseyPainterEditorVectorMatchingTool::UOdysseyPainterEditorVectorMatchingTool()
-    : UOdysseyPainterEditorVectorBaseTool( MakeShared<FOdysseyPainterEditorVectorMatchingToolHUD>( this ), false )
+    : UOdysseyPainterEditorVectorBaseTool( MakeShared<FOdysseyPainterEditorVectorMatchingToolHUD>( this ), false, true )
     , PickingRadius( 75 )
     , MatchingInfluence( eMatchingInfluence::Radial )
     , Rigidity( 5 )

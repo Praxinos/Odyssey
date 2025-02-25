@@ -39,10 +39,13 @@ UOdysseyPainterEditorVectorBaseTool::UOdysseyPainterEditorVectorBaseTool()
 
 }
 
-UOdysseyPainterEditorVectorBaseTool::UOdysseyPainterEditorVectorBaseTool( TSharedPtr<FOdysseyPainterEditorVectorBaseToolHUD> iBaseHUD, bool iAutoCreateMedia)
+UOdysseyPainterEditorVectorBaseTool::UOdysseyPainterEditorVectorBaseTool( TSharedPtr<FOdysseyPainterEditorVectorBaseToolHUD> iBaseHUD
+                                                                        , bool iAutoCreateMedia
+                                                                        , bool iMouseEventViaHUD )
     : mBaseHUD( iBaseHUD )
     , mHasContextMenu(true)
     , mAutoCreateMedia( iAutoCreateMedia )
+    , bMouseEventViaHUD( iMouseEventViaHUD )
 {
 }
 
@@ -474,6 +477,22 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyUp( const FKey& iKey )
 }
 
 bool
+UOdysseyPainterEditorVectorBaseTool::OnMouseDown( const FOdysseyPoint& iPointInTexture
+                                                , const FKey& iKey )
+{
+    if( bMouseEventViaHUD )
+    {
+        // do nothing
+    }
+    else
+    {
+        return OnMouseDownViaHUD( iPointInTexture, iKey );
+    }
+
+    return false;
+}
+
+bool
 UOdysseyPainterEditorVectorBaseTool::OnMouseDownViaHUD( const FOdysseyPoint& iPointInTexture
                                                       , const FKey& iKey )
 {
@@ -501,6 +520,19 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseDownViaHUD( const FOdysseyPoint& iPo
     bool handled = OnMouseDownVector( vectorScene, iPointInTexture, iKey, notificationFlags );
     FOdysseyVectorEngine::Notify( vectorScene, notificationFlags );
     return handled;
+}
+
+void
+UOdysseyPainterEditorVectorBaseTool::OnMouseHover( const FOdysseyPoint& iPointInTexture )
+{
+    if( bMouseEventViaHUD )
+    {
+        // do nothing
+    }
+    else
+    {
+        return OnMouseHoverViaHUD( iPointInTexture );
+    }
 }
 
 void
@@ -584,6 +616,19 @@ UOdysseyPainterEditorVectorBaseTool::FilterMouseEvent( eMouseEventName iCurrentM
 }
 
 void
+UOdysseyPainterEditorVectorBaseTool::OnMouseDrag( const FOdysseyPoint& iPointInTexture )
+{
+    if( bMouseEventViaHUD )
+    {
+        // do nothing
+    }
+    else
+    {
+        OnMouseDragViaHUD( iPointInTexture );
+    }
+}
+
+void
 UOdysseyPainterEditorVectorBaseTool::OnMouseDragViaHUD( const FOdysseyPoint& iPointInTexture )
 {
     // workaround for buggy stylus drivers
@@ -615,7 +660,22 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseDragViaHUD( const FOdysseyPoint& iPo
 }
 
 bool
-UOdysseyPainterEditorVectorBaseTool::OnMouseClick(const FOdysseyPoint& iPointInTexture, const FKey& iKey )
+UOdysseyPainterEditorVectorBaseTool::OnMouseClick( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
+{
+    if( bMouseEventViaHUD )
+    {
+        // do nothing
+    }
+    else
+    {
+        return OnMouseClickViaHUD( iPointInTexture, iKey );
+    }
+
+    return false;
+}
+
+bool
+UOdysseyPainterEditorVectorBaseTool::OnMouseClickViaHUD( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
 {
     FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
     if (mediaProvider.IsLocked())
@@ -651,11 +711,27 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseClick(const FOdysseyPoint& iPointInT
 }
 
 bool
-UOdysseyPainterEditorVectorBaseTool::OnMouseClickVector(FOdysseyVectorGroupPaint* iScene
-                                      , const FOdysseyPoint& iPointInTexture
-                                      , const FKey& iKey
-                                      , uint64& oSignalFlags )
+UOdysseyPainterEditorVectorBaseTool::OnMouseClickVector( FOdysseyVectorGroupPaint* iScene
+                                                       , const FOdysseyPoint& iPointInTexture
+                                                       , const FKey& iKey
+                                                       , uint64& oSignalFlags )
 {
+    return false;
+}
+
+bool
+UOdysseyPainterEditorVectorBaseTool::OnMouseUp( const FOdysseyPoint& iPointInTexture
+                                              , const FKey& iKey )
+{
+    if( bMouseEventViaHUD )
+    {
+        // do nothing
+    }
+    else
+    {
+        return OnMouseUpViaHUD( iPointInTexture, iKey );
+    }
+
     return false;
 }
 

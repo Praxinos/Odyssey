@@ -21,13 +21,13 @@ enum class eChartType : uint8
 };
 
 UENUM()
-enum class eChartEditionMode : uint8
+enum class eVectorChartEditionMode : uint8
 {
     OneByOne     = 0 UMETA( ToolTip = "One by one (default)" ),
     Relative     = 1 UMETA( ToolTip = "Relative (Ctrl/Cmd)" ),
     EaseInOrOut  = 2 UMETA( ToolTip = "Shift" ),
     Magnet       = 3 UMETA( ToolTip = "Alt" ),
-    Reshape      = 4,
+    Reshape      = 4 UMETA( ToolTip = "Ctrl + Shift" ),
 };
 
 UCLASS( HideCategories = (SelectionTool) )
@@ -49,6 +49,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorChartTool : public UOd
         FInbetweenerChart::Inbetween* GetHoveredInbetween();
 
         virtual void ExtendToolbar( FToolBarBuilder& iBuilder ) override;
+        eVectorChartEditionMode GetEditionMode();
 
     protected:
         //OdysseyPainterVectorBaseEditorTool overrides
@@ -80,6 +81,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorChartTool : public UOd
                                         , uint64& oSignalFlags ) override;
         virtual uint64 PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
                                             , const FName& iPropertyName ) override;
+        TSharedRef<SWidget> CreateModifierSegmentControl();
+        void SetEditionMode( eVectorChartEditionMode iMode );
+        const FSlateBrush* GetBackgroundColor( eVectorChartEditionMode iMode ) const;
 
     private:
         FOdysseyPainterEditorVectorChartToolHUD* mChartHUD;
@@ -89,6 +93,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorChartTool : public UOd
         FInbetweenerChart::HUDBezier::Point* mPickedBezierPoint;
         ::ULIS::FVec2D mMouseAtDown;
         float mStrength;
+        eVectorChartEditionMode mEditionMode;
 
     public:
         UPROPERTY( EditAnywhere
@@ -108,12 +113,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorChartTool : public UOd
                           , EditCondition = "( EditionMode == eChartEditionMode::EaseInOrOut ) || ( EditionMode == eChartEditionMode::Magnet )"
                           , EditConditionHides ) )
         uint32 Factor;
-
-        UPROPERTY( EditAnywhere
-                 , Category = ChartTool
-                 , meta = ( ToolTip  = "Edition Mode" ) )
-        eChartEditionMode EditionMode;
-        eChartEditionMode EditionModeAtKeyDown;
 
         UPROPERTY( EditAnywhere
                  , Category = ChartTool

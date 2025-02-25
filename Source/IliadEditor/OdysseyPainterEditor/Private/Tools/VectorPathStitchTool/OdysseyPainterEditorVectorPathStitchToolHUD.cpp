@@ -57,7 +57,7 @@ void
 FOdysseyPainterEditorVectorPathStitchToolHUD::SetCursorPosition( double iWorldX
                                                                , double iWorldY )
 {
-    SetCursorPosition( iWorldX, iWorldY );
+    FOdysseyPainterEditorVectorBaseToolHUD::SetCursorPosition( iWorldX, iWorldY );
 
     mStitchableVertex[0] = nullptr;
     mStitchableVertex[1] = nullptr;

@@ -24,8 +24,6 @@ FOdysseyPainterEditorVectorSelectionToolHUD::~FOdysseyPainterEditorVectorSelecti
 
 FOdysseyPainterEditorVectorSelectionToolHUD::FOdysseyPainterEditorVectorSelectionToolHUD( UOdysseyPainterEditorVectorSelectionTool* iSelectionTool )
     : FOdysseyPainterEditorVectorBaseToolHUD( iSelectionTool )
-    , mShowSelectionBox( true )
-    , mShowSelectionIfEmpty ( false )
 {
     mSelectionTool = iSelectionTool;
 }
@@ -70,12 +68,6 @@ FOdysseyPainterEditorVectorSelectionToolHUD::GetMask()
     return &mBLSelectionMask;
 }
 
-void
-FOdysseyPainterEditorVectorSelectionToolHUD::ShowSelectionBox( bool iShowSelectionBox )
-{
-    mShowSelectionBox = iShowSelectionBox;
-}
-
 //3D HUD
 void
 FOdysseyPainterEditorVectorSelectionToolHUD::DrawHUD( const FOdysseyHUDSystem::FDrawHUDParams& iParams )
@@ -114,7 +106,10 @@ FOdysseyPainterEditorVectorSelectionToolHUD::DrawHUD( const FOdysseyHUDSystem::F
 
     DrawPickingArea( iParams, fgColor, bgColor, hcColor );
 
-    FOdysseyHUDElement::DrawHUD( iParams );
+    // invisible plane will get mouse events
+    DrawDummyPlane( iParams );
+
+    //FOdysseyHUDElement::DrawHUD( iParams );
 }
 
 void

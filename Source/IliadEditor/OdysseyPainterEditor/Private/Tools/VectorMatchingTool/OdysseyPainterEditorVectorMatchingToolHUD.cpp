@@ -47,7 +47,7 @@ FOdysseyPainterEditorVectorMatchingToolHUD::DrawHUD( const FOdysseyHUDSystem::FD
     uint64 hudFlags = mMatchingTool->GetEditor()->GetVectorHUDFlags();
     FOdysseyVectorLayer *sharedEnv = mScene->GetLayer();
     uint64 gridDotted = mMatchingTool->GridDisplayMode == eMatchingGridDisplayMode::AsPoints ?  FOdysseyVectorHUD::HUD_BREAKDOWN_GRID_DOTTED : 0;
-    FVector2D hudCursor = iParams.mTextureToHUD.Execute( FVector2D( mCursorPosition.x, mCursorPosition.y ) );
+    FVector2D hudCursor = iParams.mTextureToHUD.Execute( FVector2D( mX, mY ) );
 
     // Draw default
     // -> nothing in object mode.
@@ -118,7 +118,7 @@ FOdysseyPainterEditorVectorMatchingToolHUD::DrawHUD( const FOdysseyHUDSystem::FD
     DrawPrimitiveCircle( iParams
                        , hudCursor
                        , WorldVectorToHUD( iParams
-                                         , ::ULIS::FVec2D( mCursorPosition.x, mCursorPosition.y )
+                                         , ::ULIS::FVec2D( mX, mY )
                                          , ::ULIS::FVec2D( mMatchingTool->PickingRadius, 0 ) ).Distance()
                        , hcColor
                        , 1.0f );
@@ -130,13 +130,6 @@ FOdysseyPainterEditorVectorMatchingToolHUD::DrawHUD( const FOdysseyHUDSystem::FD
 void
 FOdysseyPainterEditorVectorMatchingToolHUD::Draw( BLContext* iBLContext )
 {
-}
-
-void
-FOdysseyPainterEditorVectorMatchingToolHUD::SetCursorPosition( double iX, double iY )
-{
-    mCursorPosition.x = iX;
-    mCursorPosition.y = iY;
 }
 
 void

@@ -9,6 +9,8 @@
 #include "PainterEditor/OdysseyPainterEditorSource.h"
 #include "Misc/MessageDialog.h"
 #include "SOdysseySinglePropertyView.h"
+#include "Widgets/Input/SSegmentedControl.h"
+
 // Vector engine
 #include "OdysseyVector.h"
 #include "OdysseyVectorGroupPaint.h"
@@ -37,12 +39,12 @@ UOdysseyPainterEditorVectorTrajectoryTool::~UOdysseyPainterEditorVectorTrajector
 }
 
 UOdysseyPainterEditorVectorTrajectoryTool::UOdysseyPainterEditorVectorTrajectoryTool()
-    : UOdysseyPainterEditorVectorBaseTool(MakeShared<FOdysseyPainterEditorVectorTrajectoryToolHUD>( this ), false)
+    : UOdysseyPainterEditorVectorBaseTool(MakeShared<FOdysseyPainterEditorVectorTrajectoryToolHUD>( this ), false, true )
     , mHoveredQuad( nullptr )
+    , mEditionMode( eVectorTrajectoryEditionMode::Add )
     , PickingRadius( 10.0f )
     , ShowInbetweens( true )
-    , EditionMode( eTrajectoryEditionMode::Add )
-    , GridDisplayMode( eTrajectoryGridDisplayMode::AsPoints )
+    , GridDisplayMode( eVectorTrajectoryGridDisplayMode::AsPoints )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Trajectory64");
 
@@ -91,20 +93,15 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnKeyDownGlobalVector( FOdysseyVector
     if( InKeyEvent.IsRepeat() == false )
     {
         FKey key = InKeyEvent.GetKey();
-        uint64 notificationFlags = 0;
 
-        EditionModeAtKeyDown = EditionMode;
-
-        //EditionMode = eTrajectoryEditionMode::Add;
+        mEditionMode = eVectorTrajectoryEditionMode::Add;
 
         // Note, we could FSlateApplication::Get().GetModifierKeys() as well, but for consistency
         // with the events processing in the OnKeyUpGlobalVector(), we do like that.
         if ( ( key == EKeys::LeftControl ) || ( key == EKeys::RightControl )
           || ( key == EKeys::LeftCommand ) || ( key == EKeys::RightCommand ) )
         {
-            ///EditionMode = eTrajectoryEditionMode::Curve;
-            EditionMode = ( EditionMode == eTrajectoryEditionMode::Curve    ) ? eTrajectoryEditionMode::Add
-                                                                              : eTrajectoryEditionMode::Curve;
+            mEditionMode = eVectorTrajectoryEditionMode::Curve;
 
         }
 
@@ -112,14 +109,8 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnKeyDownGlobalVector( FOdysseyVector
         // with the events processing in the OnKeyUpGlobalVector(), we do like that.
         if ( ( key == EKeys::LeftShift ) || ( key == EKeys::RightShift ) )
         {
-            //EditionMode = eTrajectoryEditionMode::Spacing;
-            EditionMode  = ( EditionMode == eTrajectoryEditionMode::Spacing ) ? eTrajectoryEditionMode::Add
-                                                                              : eTrajectoryEditionMode::Spacing;
+            mEditionMode = eVectorTrajectoryEditionMode::Spacing;
         }
-
-        iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
-
-        oSignalFlags = notificationFlags;
     }
 
     return false;
@@ -131,24 +122,11 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnKeyUpGlobalVector( FOdysseyVectorGr
                                                               , uint64& oSignalFlags )
 {
     FKey key = InKeyEvent.GetKey();
-    uint64 notificationFlags = 0;
-
-    // note, we cannot use FSlateApplication::Get().GetModifierKeys()
-    // because the keys are already released. For consistency we do
-    // the same in the KeyDown event even though we could use
-    // FSlateApplication::Get().GetModifierKeys()
-    if ( ( key == EKeys::LeftControl ) || ( key == EKeys::RightControl )
-      || ( key == EKeys::LeftCommand ) || ( key == EKeys::RightCommand )
-      || ( key == EKeys::LeftShift   ) || ( key == EKeys::RightShift   )
-      || ( key == EKeys::LeftAlt     ) || ( key == EKeys::RightAlt     ) )
-    {
-        iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
-    }
 
     // first reset display mode
-    EditionMode = EditionModeAtKeyDown;
+    mEditionMode = eVectorTrajectoryEditionMode::Add;
 
-    oSignalFlags = notificationFlags;
+
     return false;
 }
 
@@ -196,7 +174,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
     {
-        if( EditionMode == eTrajectoryEditionMode::Add )
+        if( mEditionMode == eVectorTrajectoryEditionMode::Add )
         {
             if( mTrajectoryHUD->GetSelectedInbetweenerTagList().size() )
             {
@@ -237,7 +215,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
             }
         }
 
-        if( EditionMode == eTrajectoryEditionMode::Curve )
+        if( mEditionMode == eVectorTrajectoryEditionMode::Curve )
         {
             mPickedHandle = mTrajectoryHUD->PickHandle( iPointInTexture.x
                                                       , iPointInTexture.y
@@ -270,7 +248,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
             }
         }
 
-        if( EditionMode == eTrajectoryEditionMode::Spacing )
+        if( mEditionMode == eVectorTrajectoryEditionMode::Spacing )
         {
             if( mTrajectoryHUD->GetSelectedInbetweenerTagList().size() )
             {
@@ -300,8 +278,8 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
                 }
             }
         }
-
-        if( ( EditionMode == eTrajectoryEditionMode::Add     ) && ( FSlateApplication::Get().GetModifierKeys().AnyModifiersDown() == false ) )
+/*
+        if( ( mEditionMode == eVectorTrajectoryEditionMode::Add     ) && ( FSlateApplication::Get().GetModifierKeys().AnyModifiersDown() == false ) )
         {
             if( addedRoute == nullptr )
             {
@@ -310,7 +288,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
             }
         }
 
-        if( ( EditionMode == eTrajectoryEditionMode::Curve   ) && ( FSlateApplication::Get().GetModifierKeys().AnyModifiersDown() == false ) )
+        if( ( mEditionMode == eVectorTrajectoryEditionMode::Curve   ) && ( FSlateApplication::Get().GetModifierKeys().AnyModifiersDown() == false ) )
         {
             if((  mPickedHandle == nullptr ) && ( mPickedStep == nullptr ) )
             {
@@ -319,7 +297,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
             }
         }
 
-        if( ( EditionMode == eTrajectoryEditionMode::Spacing ) && ( FSlateApplication::Get().GetModifierKeys().AnyModifiersDown() == false ) )
+        if( ( mEditionMode == eVectorTrajectoryEditionMode::Spacing ) && ( FSlateApplication::Get().GetModifierKeys().AnyModifiersDown() == false ) )
         {
            if( mPickedWaypoint == nullptr )
            {
@@ -327,9 +305,10 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
                                    , FText::FromString( TEXT ( WARNING_MODE_SHIFT ) ) );
            }
         }
+*/
 
 /*
-        if( EditionMode == eTrajectoryEditionMode::Remove )
+        if( EditionMode == eVectorTrajectoryEditionMode::Remove )
         {
             FInbetweenerRoute* pickedRoute = mTrajectoryHUD->PickRoute( iScene
                                                                       , iPointInTexture.x
@@ -390,7 +369,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseHoverVector( FOdysseyVectorGro
 
     mTrajectoryHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
 
-    if( EditionMode == eTrajectoryEditionMode::Add )
+    if( mEditionMode == eVectorTrajectoryEditionMode::Add )
     {
         if( mTrajectoryHUD->GetSelectedInbetweenerTagList().size() )
         {
@@ -430,11 +409,11 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDragVector( FOdysseyVectorGrou
 
     if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
     {
-        if( EditionMode == eTrajectoryEditionMode::Add )
+        if( mEditionMode == eVectorTrajectoryEditionMode::Add )
         {
         }
 
-        if( EditionMode == eTrajectoryEditionMode::Spacing )
+        if( mEditionMode == eVectorTrajectoryEditionMode::Spacing )
         {
             if( mPickedWaypoint )
             {
@@ -459,7 +438,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDragVector( FOdysseyVectorGrou
             }
         }
 
-        if( EditionMode == eTrajectoryEditionMode::Curve )
+        if( mEditionMode == eVectorTrajectoryEditionMode::Curve )
         {
             if( mPickedHandle )
             {
@@ -640,6 +619,78 @@ UOdysseyPainterEditorVectorTrajectoryTool::DeleteRoute()
     scene->GetLayer()->RequestRedraw( scene->GetCell(), 0 );
 }
 
+eVectorTrajectoryEditionMode
+UOdysseyPainterEditorVectorTrajectoryTool::GetEditionMode()
+{
+    return mEditionMode;
+}
+
+void
+UOdysseyPainterEditorVectorTrajectoryTool::SetEditionMode( eVectorTrajectoryEditionMode iMode )
+{
+    mEditionMode = iMode;
+}
+
+const FSlateBrush*
+UOdysseyPainterEditorVectorTrajectoryTool::GetBackgroundColor( eVectorTrajectoryEditionMode iMode ) const
+{
+    static FSlateColorBrush orange = FSlateColorBrush( FLinearColor( 1.0f, 0.5f, 0.0f, 0.5f ) );
+
+    return ( iMode == mEditionMode ) ? &orange : nullptr;
+}
+
+TSharedRef<SWidget>
+UOdysseyPainterEditorVectorTrajectoryTool::CreateModifierSegmentControl()
+{
+    return SNew(SSegmentedControl<eVectorTrajectoryEditionMode>)
+           .Value_Lambda( [this]{ return mEditionMode; } )
+           .SupportsEmptySelection( false )
+           .SupportsMultiSelection( false )
+           .IsEnabled( false ) // currently not clickable - Info only
+           .OnValueChanged( SSegmentedControl<eVectorTrajectoryEditionMode>::FOnValueChanged::CreateUObject( this, &UOdysseyPainterEditorVectorTrajectoryTool::SetEditionMode ) )
+           // DEFAULT
+           + SSegmentedControl<eVectorTrajectoryEditionMode>::Slot( eVectorTrajectoryEditionMode::Add )
+           //.Icon( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Trajectory16") )
+           .ToolTip( LOCTEXT("vector-trajectory-tool.edition-mode.default.name", "Default") )
+           [
+               SNew(SBorder)
+               .BorderImage_UObject( this, &UOdysseyPainterEditorVectorTrajectoryTool::GetBackgroundColor, eVectorTrajectoryEditionMode::Add  )
+               [
+                   SNew(SImage)
+                   .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Trajectory16") )
+               ]
+           ]
+           // CTRL
+           + SSegmentedControl<eVectorTrajectoryEditionMode>::Slot( eVectorTrajectoryEditionMode::Curve )
+           //.Icon( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Trajectory16") )
+#if PLATFORM_WINDOWS
+           .ToolTip( LOCTEXT("vector-trajectory-tool.edition-mode.ctrl.name", "Curve (CTRL)") )
+#endif
+#if PLATFORM_MAC
+           .ToolTip( LOCTEXT("vector-trajectory-tool.edition-mode.cmd.name", "Adjust curve (CMD)") )
+#endif
+           [
+               SNew(SBorder)
+               .BorderImage_UObject( this, &UOdysseyPainterEditorVectorTrajectoryTool::GetBackgroundColor, eVectorTrajectoryEditionMode::Curve  )
+               [
+                   SNew(SImage)
+                   .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Trajectory16") )
+               ]
+           ]
+           // SHIFT
+           + SSegmentedControl<eVectorTrajectoryEditionMode>::Slot( eVectorTrajectoryEditionMode::Spacing )
+           //.Icon( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Trajectory16") )
+           .ToolTip( LOCTEXT("vector-trajectory-tool.edition-mode.shift.name", "Spacing (SHIFT)") )
+           [
+               SNew(SBorder)
+               .BorderImage_UObject( this, &UOdysseyPainterEditorVectorTrajectoryTool::GetBackgroundColor, eVectorTrajectoryEditionMode::Spacing  )
+               [
+                   SNew(SImage)
+                   .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Trajectory16") )
+               ]
+           ];
+}
+
 void
 UOdysseyPainterEditorVectorTrajectoryTool::ExtendToolbar( FToolBarBuilder& iBuilder )
 {
@@ -648,21 +699,15 @@ UOdysseyPainterEditorVectorTrajectoryTool::ExtendToolbar( FToolBarBuilder& iBuil
     iBuilder.BeginSection( NAME_None );
 
     iBuilder.AddWidget(
-        SNew(SBox)
-        .Padding(10.f, 0.f, 10.f, 0.f)
-        [
-            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTrajectoryTool, ShowInbetweens ), FSinglePropertyParams())
-            .InnerPadding(10.f)
-        ]
+        CreateModifierSegmentControl()
     );
 
     iBuilder.AddWidget(
         SNew(SBox)
         .Padding(10.f, 0.f, 10.f, 0.f)
         [
-            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTrajectoryTool, EditionMode ), FSinglePropertyParams())
+            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTrajectoryTool, ShowInbetweens ), FSinglePropertyParams())
             .InnerPadding(10.f)
-            .ValueWidthOverride(100.f)
         ]
     );
 

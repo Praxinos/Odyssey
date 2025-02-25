@@ -33,9 +33,9 @@ UOdysseyPainterEditorVectorPathEditTool::~UOdysseyPainterEditorVectorPathEditToo
 }
 
 UOdysseyPainterEditorVectorPathEditTool::UOdysseyPainterEditorVectorPathEditTool()
-    : UOdysseyPainterEditorVectorBaseTool( MakeShared<FOdysseyPainterEditorVectorPathEditToolHUD>( this ), false )
+    : UOdysseyPainterEditorVectorBaseTool( MakeShared<FOdysseyPainterEditorVectorPathEditToolHUD>( this ), false, true )
     , mPickingFlags ( FOdysseyVectorPath::PICK_VERTEX )
-    , mPickingMode  ( ePathPickingMode::Vertex )
+    , mEditionMode  ( eVectorPathEditEditionMode::Vertex )
     , PickingRadius(10.0f)
     , WidenAllAlong( true )
 {
@@ -103,7 +103,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnKeyDownGlobalVector( FOdysseyVectorGr
         if ( ( key == EKeys::LeftControl ) || ( key == EKeys::RightControl )
           || ( key == EKeys::LeftCommand ) || ( key == EKeys::RightCommand ) )
         {
-            mPickingMode   = ePathPickingMode::SegmentHandle;
+            mEditionMode   = eVectorPathEditEditionMode::SegmentHandle;
             mPickingFlags  = FOdysseyVectorPath::PICK_HANDLE_SEGMENT
                            | FOdysseyVectorPath::PICK_VERTEX ;
 
@@ -116,7 +116,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnKeyDownGlobalVector( FOdysseyVectorGr
         // with the events processing in the OnKeyUpGlobalVector(), we do like that.
         if ( ( key == EKeys::LeftShift ) || ( key == EKeys::RightShift ) )
         {
-            mPickingMode  = ePathPickingMode::VertexHandle;
+            mEditionMode  = eVectorPathEditEditionMode::VertexHandle;
             mPickingFlags = FOdysseyVectorPath::PICK_HANDLE_VERTEX;
 
             iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
@@ -128,7 +128,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnKeyDownGlobalVector( FOdysseyVectorGr
         // with the events processing in the OnKeyUpGlobalVector(), we do like that.
         if ( ( key == EKeys::LeftAlt ) || ( key == EKeys::RightAlt ) )
         {
-            mPickingMode  = ePathPickingMode::Alter;
+            mEditionMode  = eVectorPathEditEditionMode::Alter;
             mPickingFlags = FOdysseyVectorPath::PICK_VERTEX;
 
             iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
@@ -160,7 +160,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnKeyUpGlobalVector( FOdysseyVectorGrou
     }
 
     // first reset display mode
-    mPickingMode = ePathPickingMode::Vertex;
+    mEditionMode = eVectorPathEditEditionMode::Vertex;
     mPickingFlags = FOdysseyVectorPath::PICK_VERTEX;
 
     return false;
@@ -539,7 +539,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorGro
       } );
 
     // Link or Unlink segment handles
-    if( ( mPickingMode == ePathPickingMode::SegmentHandle ) &&  ( mPickedVertexArray.size() == 1 ) )
+    if( ( mEditionMode == eVectorPathEditEditionMode::SegmentHandle ) &&  ( mPickedVertexArray.size() == 1 ) )
     {
         FOdysseyVectorVertex* vertex = mPickedVertexArray[0];
 
@@ -565,9 +565,9 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorGro
     // Else, save point coordinates before changing them
     else
     {
-        switch( mPickingMode )
+        switch( mEditionMode )
         {
-            case ePathPickingMode::VertexHandle :
+            case eVectorPathEditEditionMode::VertexHandle :
                 // needed for valid GUndo pointer
                 GEditor->BeginTransaction(LOCTEXT("vector-path-edit-tool.transaction.edit-vertex-handle","Vector Path Edit Tool"));
                 if( GUndo )
@@ -594,7 +594,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorGro
                 GEditor->EndTransaction();
             break;
 
-            case ePathPickingMode::Vertex :
+            case eVectorPathEditEditionMode::Vertex :
             {
                 std::vector<FOdysseyVectorSegment*> alteredSegmentArray;
 
@@ -637,7 +637,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorGro
             }
             break;
 
-            case ePathPickingMode::SegmentHandle :
+            case eVectorPathEditEditionMode::SegmentHandle :
             {
                 std::vector<FOdysseyVectorSegment*> alteredSegmentArray;
                 std::vector<FOdysseyVectorVertex*> connectedVertexArray;
@@ -715,9 +715,9 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownVector( FOdysseyVectorGroupP
         mPathEditHUD->SetCutLineP0( iPointInTexture.x, iPointInTexture.y );
         mPathEditHUD->SetCutLineP1( iPointInTexture.x, iPointInTexture.y );
 
-        switch( mPickingMode )
+        switch( mEditionMode )
         {
-            case ePathPickingMode::Alter :
+            case eVectorPathEditEditionMode::Alter :
             // dealt with in OnMouseUpVector
             break;
 
@@ -850,7 +850,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDragVector( FOdysseyVectorGroupP
         }
         */
 
-        if( mPickingMode == ePathPickingMode::VertexHandle  )
+        if( mEditionMode == eVectorPathEditEditionMode::VertexHandle  )
         {
             for( int i = 0; i < mPickedVertexArray.size(); i++ )
             {
@@ -863,7 +863,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDragVector( FOdysseyVectorGroupP
             }
         }
 
-        if( mPickingMode == ePathPickingMode::Vertex        )
+        if( mEditionMode == eVectorPathEditEditionMode::Vertex        )
         {
             for( int i = 0; i < mPickedVertexArray.size(); i++ )
             {
@@ -879,8 +879,8 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDragVector( FOdysseyVectorGroupP
             }
         }
 
-        if( ( mPickingMode == ePathPickingMode::SegmentHandle )
-        ||  ( mPickingMode == ePathPickingMode::Vertex        ) )
+        if( ( mEditionMode == eVectorPathEditEditionMode::SegmentHandle )
+        ||  ( mEditionMode == eVectorPathEditEditionMode::Vertex        ) )
         {
             for( int i = 0; i < mPickedHandleArray.size(); i++ )
             {
@@ -901,7 +901,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDragVector( FOdysseyVectorGroupP
         }
 
         // adjust handle length to keep the same ratio as before the editing
-        if( mPickingMode == ePathPickingMode::Vertex )
+        if( mEditionMode == eVectorPathEditEditionMode::Vertex )
         {
             for( FSegmentAdjustment& segmentAdjustment : mSegmentAdjustmentArray )
             {
@@ -985,9 +985,9 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUpVector( FOdysseyVectorGroupPai
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
     {
-        switch( mPickingMode )
+        switch( mEditionMode )
         {
-            case ePathPickingMode::Alter :
+            case eVectorPathEditEditionMode::Alter :
             {
                 std::vector<FOdysseyVectorPoint*>& hoveredPointArray = mPathEditHUD->GetHoveredPointArray();
 
@@ -1046,12 +1046,6 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUpVector( FOdysseyVectorGroupPai
     return true;
 }
 
-ePathPickingMode
-UOdysseyPainterEditorVectorPathEditTool::GetPickingMode()
-{
-    return mPickingMode;
-}
-
 uint64
 UOdysseyPainterEditorVectorPathEditTool::GetPickingFlags()
 {
@@ -1079,19 +1073,102 @@ UOdysseyPainterEditorVectorPathEditTool::ExtendContextMenuObject( FOdysseyVector
 // the caller will call menu.EndSection()
 }
 
-void
-UOdysseyPainterEditorVectorPathEditTool::SetPickingMode( TOptional<ePathPickingMode> inValue )
+eVectorPathEditEditionMode
+UOdysseyPainterEditorVectorPathEditTool::GetEditionMode()
 {
+    return mEditionMode;
+}
+
+void
+UOdysseyPainterEditorVectorPathEditTool::SetEditionMode( eVectorPathEditEditionMode iMode )
+{
+    mEditionMode = iMode;
+}
+
+const FSlateBrush*
+UOdysseyPainterEditorVectorPathEditTool::GetBackgroundColor( eVectorPathEditEditionMode iMode ) const
+{
+    static FSlateColorBrush orange = FSlateColorBrush( FLinearColor( 1.0f, 0.5f, 0.0f, 0.5f ) );
+
+    return ( iMode == mEditionMode ) ? &orange : nullptr;
+}
+
+TSharedRef<SWidget>
+UOdysseyPainterEditorVectorPathEditTool::CreateModifierSegmentControl()
+{
+    return SNew(SSegmentedControl<eVectorPathEditEditionMode>)
+           .Value_Lambda( [this]{ return mEditionMode; } )
+           .SupportsEmptySelection( false )
+           .SupportsMultiSelection( false )
+           .IsEnabled( false ) // currently not clickable - Info only
+           .OnValueChanged( SSegmentedControl<eVectorPathEditEditionMode>::FOnValueChanged::CreateUObject( this, &UOdysseyPainterEditorVectorPathEditTool::SetEditionMode ) )
+           // DEFAULT
+           + SSegmentedControl<eVectorPathEditEditionMode>::Slot( eVectorPathEditEditionMode::Vertex )
+           //.Icon( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathEdit16") )
+           .ToolTip( LOCTEXT("vector-path-edit-tool.edition-mode.default.name", "Default") )
+           [
+               SNew(SBorder)
+               .BorderImage_UObject( this, &UOdysseyPainterEditorVectorPathEditTool::GetBackgroundColor, eVectorPathEditEditionMode::Vertex  )
+               [
+                   SNew(SImage)
+                   .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsShortcuts.PathEditMoveVertex20") )
+               ]
+           ]
+           // CTRL
+           + SSegmentedControl<eVectorPathEditEditionMode>::Slot( eVectorPathEditEditionMode::SegmentHandle )
+           //.Icon( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathEdit16") )
+#if PLATFORM_WINDOWS
+           .ToolTip( LOCTEXT("vector-path-edit-tool.edition-mode.ctrl.name", "Deform Segment (CTRL)") )
+#endif
+#if PLATFORM_MAC
+           .ToolTip( LOCTEXT("vector-path-edit-tool.edition-mode.cmd.name", "Deform Segment (CMD)") )
+#endif
+           [
+               SNew(SBorder)
+               .BorderImage_UObject( this, &UOdysseyPainterEditorVectorPathEditTool::GetBackgroundColor, eVectorPathEditEditionMode::SegmentHandle  )
+               [
+                   SNew(SImage)
+                   .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsShortcuts.PathEditDeformSegment20") )
+               ]
+           ]
+           // SHIFT
+           + SSegmentedControl<eVectorPathEditEditionMode>::Slot( eVectorPathEditEditionMode::VertexHandle )
+           //.Icon( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathEdit16") )
+           .ToolTip( LOCTEXT("vector-path-edit-tool.edition-mode.shift.name", "Widen Vertex (SHIFT)") )
+           [
+               SNew(SBorder)
+               .BorderImage_UObject( this, &UOdysseyPainterEditorVectorPathEditTool::GetBackgroundColor, eVectorPathEditEditionMode::VertexHandle  )
+               [
+                   SNew(SImage)
+                   .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsShortcuts.PathEditWidenVertex20") )
+               ]
+           ]
+           // ALT
+           + SSegmentedControl<eVectorPathEditEditionMode>::Slot( eVectorPathEditEditionMode::Alter )
+           //.Icon( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathEdit16") )
+           .ToolTip( LOCTEXT("vector-path-edit-tool.edition-mode.alt.name", "Add/Remove Vertex (ALT)") )
+           [
+               SNew(SBorder)
+               .BorderImage_UObject( this, &UOdysseyPainterEditorVectorPathEditTool::GetBackgroundColor, eVectorPathEditEditionMode::Alter  )
+               [
+                   SNew(SImage)
+                   .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsShortcuts.PathEditAddRemoveVertex20") )
+               ]
+           ];
 }
 
 void
 UOdysseyPainterEditorVectorPathEditTool::ExtendToolbar( FToolBarBuilder& iBuilder )
 {
-    TOptional<ePathPickingMode> val;
+    //TOptional<eVectorPathEditEditionMode> val;
 
     Super::ExtendToolbar(iBuilder);
 
     iBuilder.BeginSection( NAME_None );
+
+    iBuilder.AddWidget(
+        CreateModifierSegmentControl()
+    );
 
     iBuilder.AddWidget(
         SNew(SBox)
@@ -1102,16 +1179,41 @@ UOdysseyPainterEditorVectorPathEditTool::ExtendToolbar( FToolBarBuilder& iBuilde
             .ValueWidthOverride(100.f)
         ]
     );
+
 /*
     iBuilder.AddWidget(
-        SNew(SSegmentedControl<ePathPickingMode>)
-        + SSegmentedControl<ePathPickingMode>::Slot( ePathPickingMode::Vertex )
-         .Icon( []{ return FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathEdit64"); } )
-         .Text( []{ return FText::FromString(""); } )
-         .ToolTip( []{ return FText::FromString(""); } )
-         .Value( val )
+        SNew(SBox)
+        .Padding(10.f, 0.f, 10.f, 0.f)
+        [
+            SNew(SHorizontalBox)
+            + SHorizontalBox::Slot()
+            .MinWidth( 16 )
+            [
+                SNew(SImage)
+                .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathEdit16") )
+            ]
+            + SHorizontalBox::Slot()
+            .MinWidth( 16 )
+            [
+                SNew(SImage)
+                .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathEdit16") )
+            ]
+            + SHorizontalBox::Slot()
+            .MinWidth( 16 )
+            [
+                SNew(SImage)
+                .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathEdit16") )
+            ]
+            + SHorizontalBox::Slot()
+            .MinWidth( 16 )
+            [
+                SNew(SImage)
+                .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathEdit16") )
+            ]
+        ]
     );
 */
+
     iBuilder.AddWidget(
         SNew(SBox)
         .Padding(10.f, 0.f, 10.f, 0.f)

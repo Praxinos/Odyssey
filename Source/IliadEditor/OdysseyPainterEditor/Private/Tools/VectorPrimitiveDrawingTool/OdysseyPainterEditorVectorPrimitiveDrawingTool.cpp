@@ -35,7 +35,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::~UOdysseyPainterEditorVectorPri
 }
 
 UOdysseyPainterEditorVectorPrimitiveDrawingTool::UOdysseyPainterEditorVectorPrimitiveDrawingTool()
-    : UOdysseyPainterEditorVectorBaseTool( MakeShared<FOdysseyPainterEditorVectorPrimitiveDrawingToolHUD>( this ), true )
+    : UOdysseyPainterEditorVectorBaseTool( MakeShared<FOdysseyPainterEditorVectorPrimitiveDrawingToolHUD>( this ), true, true )
     , PrimitiveType ( EOdysseyVectorPrimitiveType::Ellipse )
     , Opacity( 1.0f )
     , Brush( nullptr )

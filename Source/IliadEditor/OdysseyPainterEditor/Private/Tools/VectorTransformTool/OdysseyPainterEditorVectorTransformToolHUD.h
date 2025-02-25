@@ -6,9 +6,9 @@
 #include <blend2d.h>
 #include <ULIS>
 #include "Tools/VectorTransformTool/OdysseyPainterEditorVectorTransformTool.h"
-#include "Tools/VectorSelectionTool/OdysseyPainterEditorVectorSelectionToolHUD.h"
+#include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseToolHUD.h"
 
-class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorTransformToolHUD : public FOdysseyPainterEditorVectorSelectionToolHUD
+class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorTransformToolHUD : public FOdysseyPainterEditorVectorBaseToolHUD
 {
     public:
         static const uint32 AXIS_LENGTH   = 70;
@@ -32,8 +32,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorTransformToolHUD : pub
         virtual void DrawHUD( const FOdysseyHUDSystem::FDrawHUDParams& iParams ) override;
         virtual void Draw( BLContext* iBLContext ) override;
         virtual void Reset() override;
-
-        virtual void SetCursorPosition( double iWorldX, double iWorldY ) override;
+        virtual void OnMouseHover( const FOdysseyPoint& iPointInTexture ) override;
 
         void SetGizmo( double iLocalX, double iLocalY );
         ::ULIS::FVec2D& GetGizmo();
@@ -41,6 +40,8 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorTransformToolHUD : pub
         uint32 Pick( double iWorldX, double iWorldY );
         void CenterGizmo();
         void SetCenterGizmo( bool iCenterGizmo );
+
+        void ShowSelectionBox( bool iShowSelectionBox );
 
     private:
         uint32 PickScalers( double iWorldX, double iWorldY );
@@ -50,7 +51,6 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorTransformToolHUD : pub
         void DrawGizmo( const FOdysseyHUDSystem::FDrawHUDParams& iParams );
         void DrawScalers( const FOdysseyHUDSystem::FDrawHUDParams& iParams );
 
-
     private:
         UOdysseyPainterEditorVectorTransformTool* mTransformTool;
         ::ULIS::FVec2D mGizmo;
@@ -58,4 +58,6 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorTransformToolHUD : pub
         ::ULIS::FVec2D mXAxis;
         ::ULIS::FVec2D mYAxis;
         bool mCenterGizmo;
+        bool mShowSelectionBox;
+        bool mShowSelectionIfEmpty;
 };

@@ -24,7 +24,7 @@ UOdysseyPainterEditorVectorPathSmoothTool::~UOdysseyPainterEditorVectorPathSmoot
 }
 
 UOdysseyPainterEditorVectorPathSmoothTool::UOdysseyPainterEditorVectorPathSmoothTool()
-    : UOdysseyPainterEditorVectorBaseTool( MakeShared<FOdysseyPainterEditorVectorPathSmoothToolHUD>( this ), false )
+    : UOdysseyPainterEditorVectorBaseTool( MakeShared<FOdysseyPainterEditorVectorPathSmoothToolHUD>( this ), false, true )
     , mUndoSegmentReshape( nullptr )
     , SmoothingMode( ePathSmoothingMode::Round )
     , PickingRadius( 20.0f )

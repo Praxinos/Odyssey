@@ -20,7 +20,6 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorSelectionToolHUD : pub
         virtual void Load() override;
         virtual void Unload() override;
         virtual void Reset( ) override;
-        void ShowSelectionBox( bool iShowSelectionBox );
         void Init( uint32 iWidth, uint32 iHeight );
         void GetSelectedVertices( std::vector<FOdysseyVectorPoint*>& oPointArray );
 
@@ -70,7 +69,4 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorSelectionToolHUD : pub
         //bool mSelecting;
         BLContext mBLSelectionContext;
         BLImage mBLSelectionMask;
-
-        bool mShowSelectionBox;
-        bool mShowSelectionIfEmpty;
 };

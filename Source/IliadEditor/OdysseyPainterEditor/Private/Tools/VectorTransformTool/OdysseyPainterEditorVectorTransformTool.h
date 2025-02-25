@@ -4,7 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Tools/VectorSelectionTool/OdysseyPainterEditorVectorSelectionTool.h"
+#include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.h"
 
 #include "OdysseyPainterEditorVectorTransformTool.generated.h"
 
@@ -22,7 +22,7 @@ enum class eTransformShowInbetweens : uint8
 };
 
 UCLASS( HideCategories = (SelectionTool) )
-class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTransformTool : public UOdysseyPainterEditorVectorSelectionTool
+class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTransformTool : public UOdysseyPainterEditorVectorBaseTool
 {
     public:
         GENERATED_BODY()

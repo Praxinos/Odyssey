@@ -16,7 +16,7 @@ FOdysseyPainterEditorVectorGridToolHUD::~FOdysseyPainterEditorVectorGridToolHUD(
 }
 
 FOdysseyPainterEditorVectorGridToolHUD::FOdysseyPainterEditorVectorGridToolHUD( UOdysseyPainterEditorVectorGridTool* iGridTool )
-    : FOdysseyPainterEditorVectorSelectionToolHUD( iGridTool )
+    : FOdysseyPainterEditorVectorBaseToolHUD( iGridTool )
 {
     mGridTool = iGridTool;
 }
@@ -317,7 +317,7 @@ FOdysseyPainterEditorVectorGridToolHUD::DrawHUD( const FOdysseyHUDSystem::FDrawH
     // invisible plane will get mouse events
     DrawDummyPlane( iParams );
 
-    DrawModifierInfo( iParams );
+    //DrawModifierInfo( iParams );
 }
 
 void

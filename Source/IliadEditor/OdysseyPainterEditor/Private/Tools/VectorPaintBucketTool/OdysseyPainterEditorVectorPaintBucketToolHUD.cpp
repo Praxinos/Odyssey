@@ -97,7 +97,7 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::PickBucketArea( FOdysseyVectorBuc
     ::ULIS::FVec2D pickDif = ::ULIS::FVec2D( iWorldX - bucketWorldCoords.x
                                            , iWorldY - bucketWorldCoords.y );
 
-    if( mPaintBucketTool->GetShowControls() )
+    if( mPaintBucketTool->GetEditionMode() == eVectorPaintBucketEditionMode::Control )
     {
         if( iBucket->GetColorMode() == eBucketColorMode::LinearGradient )
         {
@@ -145,14 +145,6 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::PickBucketArea( FOdysseyVectorBuc
     }
 
     return PICK_NONE;
-}
-
-void
-FOdysseyPainterEditorVectorPaintBucketToolHUD::SetCursorPosition( double iWorldX
-                                                                , double iWorldY )
-{
-    mCursorAt.x = iWorldX;
-    mCursorAt.y = iWorldY;
 }
 
 void
@@ -206,7 +198,7 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::DrawHUD( const FOdysseyHUDSystem:
     FLinearColor fgColor = FLinearColor( fg );
     FLinearColor bgColor = FLinearColor( bg );
     FLinearColor hcColor = FLinearColor( hc );
-    uint64 viewBucketHandleFlag = mPaintBucketTool->GetShowControls() ? FOdysseyVectorHUD::HUD_GROUPPAINT_BUCKET_HANDLE : 0;
+    uint64 viewBucketHandleFlag = ( mPaintBucketTool->GetEditionMode() == eVectorPaintBucketEditionMode::Control ) ? FOdysseyVectorHUD::HUD_GROUPPAINT_BUCKET_HANDLE : 0;
     uint64 hudFlags = mPaintBucketTool->GetEditor()->GetVectorHUDFlags();
     std::vector<FOdysseyVectorCycle*> pickedCycleArray;
 
@@ -237,15 +229,9 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::DrawHUD( const FOdysseyHUDSystem:
                      | viewBucketHandleFlag );
     }
 
-    // draw selection box only if we restrict erasure to the selection
-    if( mScene->GetCell()->GetSelectedObjectList().size() )
+    if( mPaintBucketTool->GetEditionMode() == eVectorPaintBucketEditionMode::Default )
     {
- //3DHUD        DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
-    }
-
-    if( mPaintBucketTool->GetShowControls() == false )
-    {
-        PickCycles( mCursorAt.x, mCursorAt.y, pickedCycleArray );
+        PickCycles( mX, mY, pickedCycleArray );
 
         for( FOdysseyVectorCycle* cycle : pickedCycleArray)
         {

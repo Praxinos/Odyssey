@@ -13,6 +13,7 @@
 #include "OdysseyVectorLayer.h"
 #include "OdysseyVectorTagInbetweener.h"
 #include "SOdysseySinglePropertyView.h"
+#include "Widgets/Input/SSegmentedControl.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -23,10 +24,10 @@ UOdysseyPainterEditorVectorChartTool::~UOdysseyPainterEditorVectorChartTool()
 }
 
 UOdysseyPainterEditorVectorChartTool::UOdysseyPainterEditorVectorChartTool()
-    : UOdysseyPainterEditorVectorBaseTool( MakeShared<FOdysseyPainterEditorVectorChartToolHUD>( this ), false )
+    : UOdysseyPainterEditorVectorBaseTool( MakeShared<FOdysseyPainterEditorVectorChartToolHUD>( this ), false, true )
     , PickingRadius( 10.0f )
     , Factor( 1 )
-    , EditionMode ( eChartEditionMode::OneByOne )
+    , mEditionMode ( eVectorChartEditionMode::OneByOne )
     , ChartType ( eChartType::Partial )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Chart64");
@@ -77,38 +78,48 @@ UOdysseyPainterEditorVectorChartTool::OnKeyDownGlobalVector( FOdysseyVectorGroup
     {
         FKey key = InKeyEvent.GetKey();
 
-        EditionModeAtKeyDown = EditionMode;
-
         // Note, we could FSlateApplication::Get().GetModifierKeys() as well, but for consistency
         // with the events processing in the OnKeyUpGlobalVector(), we do like that.
         if ( ( key == EKeys::LeftControl ) || ( key == EKeys::RightControl )
           || ( key == EKeys::LeftCommand ) || ( key == EKeys::RightCommand ) )
         {
-            //EditionMode  = eChartEditionMode::Relative;
-            EditionMode = ( EditionMode == eChartEditionMode::Relative ) ? eChartEditionMode::OneByOne
-                                                                         : eChartEditionMode::Relative;
+            if ( FSlateApplication::Get().GetModifierKeys().IsShiftDown() )
+            {
+                mEditionMode  = eVectorChartEditionMode::Reshape;
+            }
+            else
+            {
+                mEditionMode  = eVectorChartEditionMode::Relative;
+            }
+
+            return true;
         }
 
         // Note, we could FSlateApplication::Get().GetModifierKeys() as well, but for consistency
         // with the events processing in the OnKeyUpGlobalVector(), we do like that.
         if ( ( key == EKeys::LeftShift ) || ( key == EKeys::RightShift ) )
         {
-            //EditionMode  = eChartEditionMode::EaseInOrOut;
-            EditionMode = ( EditionMode == eChartEditionMode::EaseInOrOut ) ? eChartEditionMode::OneByOne
-                                                                            : eChartEditionMode::EaseInOrOut;
+            if ( FSlateApplication::Get().GetModifierKeys().IsCommandDown() ||
+                 FSlateApplication::Get().GetModifierKeys().IsControlDown() )
+            {
+                mEditionMode  = eVectorChartEditionMode::Reshape;
+            }
+            else
+            {
+                mEditionMode  = eVectorChartEditionMode::EaseInOrOut;
+            }
+
+            return true;
         }
 
         // Note, we could FSlateApplication::Get().GetModifierKeys() as well, but for consistency
         // with the events processing in the OnKeyUpGlobalVector(), we do like that.
         if ( ( key == EKeys::LeftAlt ) || ( key == EKeys::RightAlt ) )
         {
-            //EditionMode  = eChartEditionMode::Magnet;
-            EditionMode = ( EditionMode == eChartEditionMode::Magnet ) ? eChartEditionMode::OneByOne
-                                                                       : eChartEditionMode::Magnet;
-        }
+            mEditionMode  = eVectorChartEditionMode::Magnet;
 
-        // Calling Update via Root will request a redraw even if root is not invalidated
-        iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
+            return true;
+        }
     }
 
     return false;
@@ -119,24 +130,7 @@ UOdysseyPainterEditorVectorChartTool::OnKeyUpGlobalVector( FOdysseyVectorGroupPa
                                                          , const FKeyEvent& InKeyEvent
                                                          , uint64& oSignalFlags )
 {
-    FKey key = InKeyEvent.GetKey();
-
-    // note, we cannot use FSlateApplication::Get().GetModifierKeys()
-    // because the keys are already released. For consistency we do
-    // the same in the KeyDown event even though we could use
-    // FSlateApplication::Get().GetModifierKeys()
-    if ( ( key == EKeys::LeftControl ) || ( key == EKeys::RightControl )
-      || ( key == EKeys::LeftCommand ) || ( key == EKeys::RightCommand )
-      || ( key == EKeys::LeftShift   ) || ( key == EKeys::RightShift   )
-      || ( key == EKeys::LeftAlt     ) || ( key == EKeys::RightAlt     ) )
-    {
-        // redraw
-        iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
-    }
-
-    // first reset display mode
-    EditionMode = EditionModeAtKeyDown;
-
+    mEditionMode = eVectorChartEditionMode::OneByOne;
 
     return false;
 }
@@ -165,10 +159,10 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDownVector( FOdysseyVectorGroupPain
     {
         if( mChartHUD->GetBreakdownList().size() )
         {
-            if( ( EditionMode == eChartEditionMode::OneByOne    )
-            ||  ( EditionMode == eChartEditionMode::Relative    )
-            ||  ( EditionMode == eChartEditionMode::EaseInOrOut )
-            ||  ( EditionMode == eChartEditionMode::Magnet      ) )
+            if( ( mEditionMode == eVectorChartEditionMode::OneByOne    )
+            ||  ( mEditionMode == eVectorChartEditionMode::Relative    )
+            ||  ( mEditionMode == eVectorChartEditionMode::EaseInOrOut )
+            ||  ( mEditionMode == eVectorChartEditionMode::Magnet      ) )
             {
                 mPickedInbetween = mChartHUD->PickInbetween( iPointInTexture.x
                                                            , iPointInTexture.y );
@@ -201,7 +195,7 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDownVector( FOdysseyVectorGroupPain
                 }
             }
 
-            if( EditionMode == eChartEditionMode::Reshape )
+            if( mEditionMode == eVectorChartEditionMode::Reshape )
             {
                 mPickedBezierPoint = mChartHUD->PickBezierPoint( iPointInTexture.x
                                                                , iPointInTexture.y
@@ -252,9 +246,9 @@ UOdysseyPainterEditorVectorChartTool::OnMouseHoverVector( FOdysseyVectorGroupPai
 {
     mHoveredInbetween = nullptr;
 
-    if( ( EditionMode == eChartEditionMode::OneByOne    )
-     || ( EditionMode == eChartEditionMode::Relative    )
-     || ( EditionMode == eChartEditionMode::Magnet      ) )
+    if( ( mEditionMode == eVectorChartEditionMode::OneByOne    )
+     || ( mEditionMode == eVectorChartEditionMode::Relative    )
+     || ( mEditionMode == eVectorChartEditionMode::Magnet      ) )
     {
         // TODO: highlight grid handles ?
         mHoveredInbetween = mChartHUD->PickInbetween( iPointInTexture.x
@@ -286,7 +280,7 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDragVector( FOdysseyVectorGroupPain
     {
         if( mChartHUD->GetBreakdownList().size() )
         {
-            if( EditionMode == eChartEditionMode::OneByOne )
+            if( mEditionMode == eVectorChartEditionMode::OneByOne )
             {
                 if( mPickedInbetween )
                 {
@@ -301,7 +295,7 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDragVector( FOdysseyVectorGroupPain
                 }
             }
 
-            if( EditionMode == eChartEditionMode::Relative )
+            if( mEditionMode == eVectorChartEditionMode::Relative )
             {
                 if ( mPickedInbetween )
                 {
@@ -317,7 +311,7 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDragVector( FOdysseyVectorGroupPain
                 }
             }
 
-            if( EditionMode == eChartEditionMode::EaseInOrOut )
+            if( mEditionMode == eVectorChartEditionMode::EaseInOrOut )
             {
                 // applies to the current breakdown, not only the one next to a click.
                 for( FInbetweenerBreakdown* breakdown : mChartHUD->GetBreakdownList() )
@@ -340,7 +334,7 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDragVector( FOdysseyVectorGroupPain
                 }
             }
 
-            if( EditionMode == eChartEditionMode::Magnet )
+            if( mEditionMode == eVectorChartEditionMode::Magnet )
             {
                 if( mPickedInbetween )
                 {
@@ -351,7 +345,7 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDragVector( FOdysseyVectorGroupPain
                 }
             }
 
-            if( EditionMode == eChartEditionMode::Reshape )
+            if( mEditionMode == eVectorChartEditionMode::Reshape )
             {
                 ::ULIS::FVec2D deltaPosition = ::ULIS::FVec2D( pointInTexture.deltaPosition.X
                                                              , pointInTexture.deltaPosition.Y );
@@ -443,6 +437,107 @@ UOdysseyPainterEditorVectorChartTool::PropertyChangedVector( FOdysseyVectorGroup
     return 0;
 }
 
+eVectorChartEditionMode
+UOdysseyPainterEditorVectorChartTool::GetEditionMode()
+{
+    return mEditionMode;
+}
+
+void
+UOdysseyPainterEditorVectorChartTool::SetEditionMode( eVectorChartEditionMode iMode )
+{
+    mEditionMode = iMode;
+}
+
+const FSlateBrush*
+UOdysseyPainterEditorVectorChartTool::GetBackgroundColor( eVectorChartEditionMode iMode ) const
+{
+    static FSlateColorBrush orange = FSlateColorBrush( FLinearColor( 1.0f, 0.5f, 0.0f, 0.5f ) );
+
+    return ( iMode == mEditionMode ) ? &orange : nullptr;
+}
+
+TSharedRef<SWidget>
+UOdysseyPainterEditorVectorChartTool::CreateModifierSegmentControl()
+{
+    return SNew(SSegmentedControl<eVectorChartEditionMode>)
+           .Value_Lambda( [this]{ return mEditionMode; } )
+           .SupportsEmptySelection( false )
+           .SupportsMultiSelection( false )
+           .IsEnabled( false ) // currently not clickable - Info only
+           .OnValueChanged( SSegmentedControl<eVectorChartEditionMode>::FOnValueChanged::CreateUObject( this, &UOdysseyPainterEditorVectorChartTool::SetEditionMode ) )
+           // DEFAULT
+           + SSegmentedControl<eVectorChartEditionMode>::Slot( eVectorChartEditionMode::OneByOne )
+           //.Icon( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Chart16") )
+           .ToolTip( LOCTEXT("vector-trajectory-tool.edition-mode.default.name", "Default") )
+           [
+               SNew(SBorder)
+               .BorderImage_UObject( this, &UOdysseyPainterEditorVectorChartTool::GetBackgroundColor, eVectorChartEditionMode::OneByOne  )
+               [
+                   SNew(SImage)
+                   .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Chart16") )
+               ]
+           ]
+           // CTRL
+           + SSegmentedControl<eVectorChartEditionMode>::Slot( eVectorChartEditionMode::Relative )
+           //.Icon( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Chart16") )
+#if PLATFORM_WINDOWS
+           .ToolTip( LOCTEXT("vector-chart-tool.edition-mode.ctrl.name", "Relative (CTRL)") )
+#endif
+#if PLATFORM_MAC
+           .ToolTip( LOCTEXT("vector-chart-tool.edition-mode.cmd.name", "Relative (CMD)") )
+#endif
+           [
+               SNew(SBorder)
+               .BorderImage_UObject( this, &UOdysseyPainterEditorVectorChartTool::GetBackgroundColor, eVectorChartEditionMode::Relative  )
+               [
+                   SNew(SImage)
+                   .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Chart16") )
+               ]
+           ]
+           // SHIFT
+           + SSegmentedControl<eVectorChartEditionMode>::Slot( eVectorChartEditionMode::EaseInOrOut )
+           //.Icon( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Chart16") )
+           .ToolTip( LOCTEXT("vector-chart-tool.edition-mode.shift.name", "EaseInOrOut (SHIFT)") )
+           [
+               SNew(SBorder)
+               .BorderImage_UObject( this, &UOdysseyPainterEditorVectorChartTool::GetBackgroundColor, eVectorChartEditionMode::EaseInOrOut  )
+               [
+                   SNew(SImage)
+                   .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Chart16") )
+               ]
+           ]
+           // ALT
+           + SSegmentedControl<eVectorChartEditionMode>::Slot( eVectorChartEditionMode::Magnet )
+           //.Icon( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Chart16") )
+           .ToolTip( LOCTEXT("vector-chart-tool.edition-mode.alt.name", "Magnet (ALT)") )
+           [
+               SNew(SBorder)
+               .BorderImage_UObject( this, &UOdysseyPainterEditorVectorChartTool::GetBackgroundColor, eVectorChartEditionMode::Magnet  )
+               [
+                   SNew(SImage)
+                   .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Chart16") )
+               ]
+           ]
+           // CTRL + SHIFT
+           + SSegmentedControl<eVectorChartEditionMode>::Slot( eVectorChartEditionMode::Reshape )
+           //.Icon( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Chart16") )
+#if PLATFORM_WINDOWS
+           .ToolTip( LOCTEXT("vector-chart-tool.edition-mode.alt.name", "Reshape (CTRL + SHIFT)") )
+#endif
+#if PLATFORM_MAC
+           .ToolTip( LOCTEXT("vector-chart-tool.edition-mode.alt.name", "Reshape (CMD + SHIFT)") )
+#endif
+           [
+               SNew(SBorder)
+               .BorderImage_UObject( this, &UOdysseyPainterEditorVectorChartTool::GetBackgroundColor, eVectorChartEditionMode::Reshape  )
+               [
+                   SNew(SImage)
+                   .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Chart16") )
+               ]
+           ];
+}
+
 void
 UOdysseyPainterEditorVectorChartTool::ExtendToolbar( FToolBarBuilder& iBuilder )
 {
@@ -451,13 +546,7 @@ UOdysseyPainterEditorVectorChartTool::ExtendToolbar( FToolBarBuilder& iBuilder )
     iBuilder.BeginSection( NAME_None );
 
     iBuilder.AddWidget(
-        SNew(SBox)
-        .Padding(10.f, 0.f, 10.f, 0.f)
-        [
-            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorChartTool, EditionMode ), FSinglePropertyParams())
-            .InnerPadding(10.f)
-            .ValueWidthOverride(100.f)
-        ]
+        CreateModifierSegmentControl()
     );
 
     iBuilder.AddWidget(

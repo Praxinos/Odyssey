@@ -14,6 +14,14 @@ class FOdysseyVectorObject;
 class FOdysseyVectorSegment;
 class FOdysseyVectorVertex;
 
+UENUM()
+enum class eVectorEraserEditionMode : uint8
+{
+    Default = 0,
+    Section = 1,
+    Path    = 2,
+};
+
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorEraserTool : public UOdysseyPainterEditorVectorBaseTool
 {
@@ -37,6 +45,12 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorEraserTool : public UO
         //OdysseyPainterVectorBaseEditorTool overrides
         virtual uint64 LoadVector( FOdysseyVectorGroupPaint* iScene ) override;
         virtual uint64 UnloadVector( FOdysseyVectorGroupPaint* iScene ) override;
+        virtual bool OnKeyDownGlobalVector( FOdysseyVectorGroupPaint* iScene
+                                          , const FKeyEvent& InKeyEvent
+                                          , uint64& oSignalFlags ) override;
+        virtual bool OnKeyUpGlobalVector( FOdysseyVectorGroupPaint* iScene
+                                        , const FKeyEvent& InKeyEvent
+                                        , uint64& oSignalFlags ) override;
         //virtual bool OnKeyDownVector( FOdysseyVectorGroupPaint* iScene
         //                            , const FKey& iKey, uint64& oSignalFlags ) override;
         //virtual bool OnKeyUpVector( FOdysseyVectorGroupPaint* iScene, const FKey& iKey, uint64& oSignalFlags ) override;
@@ -71,6 +85,15 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorEraserTool : public UO
                           , std::vector<FOdysseyVectorObject*>& oRemovedObjectArray
                           , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
                           , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray );
+        TSharedRef<SWidget> CreateModifierSegmentControl();
+        const FSlateBrush* GetBackgroundColor( eVectorEraserEditionMode iMode ) const;
+        void SetEditionMode( eVectorEraserEditionMode iMode );
+
+    private:
+        FOdysseyPainterEditorVectorEraserToolHUD* mEraserHUD;
+        eVectorEraserEditionMode mEditionMode;
+        ::ULIS::FVec2D mMin;
+        ::ULIS::FVec2D mMax;
 
     public:
         UPROPERTY( EditAnywhere
@@ -84,9 +107,4 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorEraserTool : public UO
                           , ClampMin = "0"
                           , UIMin    = "0") )
         uint32 Radius;
-
-    private:
-        FOdysseyPainterEditorVectorEraserToolHUD* mEraserHUD;
-        ::ULIS::FVec2D mMin;
-        ::ULIS::FVec2D mMax;
 };

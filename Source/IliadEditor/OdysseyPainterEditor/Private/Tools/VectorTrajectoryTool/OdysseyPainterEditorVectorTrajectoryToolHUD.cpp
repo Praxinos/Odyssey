@@ -380,20 +380,14 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawTrajectory( const FOdysseyHUDS
                                 , trajectoryColor
                                 , 2.0f );
 
-        if( mTrajectoryTool->EditionMode == eTrajectoryEditionMode::Curve )
+        if( mTrajectoryTool->GetEditionMode() == eVectorTrajectoryEditionMode::Curve )
         {
             // Line to handle
-            DrawPrimitiveLine  ( iParams
-                               , p0HUDCoords
-                               , p1HUDCoords
-                               , blackColor
-                               , 2.0f );
-
-            DrawPrimitiveLine  ( iParams
-                               , p0HUDCoords
-                               , p1HUDCoords
-                               , iTrajectory->GetStep(0)->IsAligned() ? greenColor : whiteColor
-                               , 1.0f );
+            DrawPrimitiveLineOutlined  ( iParams
+                                       , p0HUDCoords
+                                       , p1HUDCoords
+                                       , iTrajectory->GetStep(0)->IsAligned() ? greenColor : whiteColor
+                                       , 1.0f );
 
             DrawPrimitiveHandle( iParams
                                , p1HUDCoords
@@ -402,17 +396,11 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawTrajectory( const FOdysseyHUDS
                                , iBgColor );
 
             // Line to handle
-            DrawPrimitiveLine  ( iParams
-                               , p3HUDCoords
-                               , p2HUDCoords
-                               , blackColor
-                               , 2.0f );
-
-            DrawPrimitiveLine  ( iParams
-                               , p3HUDCoords
-                               , p2HUDCoords
-                               , iTrajectory->GetStep(1)->IsAligned() ? greenColor : whiteColor
-                               , 1.0f );
+            DrawPrimitiveLineOutlined  ( iParams
+                                       , p3HUDCoords
+                                       , p2HUDCoords
+                                       , iTrajectory->GetStep(1)->IsAligned() ? greenColor : whiteColor
+                                       , 1.0f );
 
             DrawPrimitiveHandle( iParams
                                , p2HUDCoords
@@ -421,7 +409,7 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawTrajectory( const FOdysseyHUDS
                                , iBgColor );
         }
 
-        if( mTrajectoryTool->EditionMode == eTrajectoryEditionMode::Spacing )
+        if( mTrajectoryTool->GetEditionMode() == eVectorTrajectoryEditionMode::Spacing )
         {
             for( uint32 i = 1; i < iTrajectory->GetWaypointBuffer().size() - 1; i++ )
             {
@@ -460,8 +448,8 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawHUD( const FOdysseyHUDSystem::
     uint64 gridFlags = 0;
 
 
-    gridFlags |= ( mTrajectoryTool->GridDisplayMode == eTrajectoryGridDisplayMode::AsPoints ) ?  FOdysseyVectorHUD::HUD_BREAKDOWN_GRID_DOTTED : 0;
-    gridFlags |= ( mTrajectoryTool->EditionMode == eTrajectoryEditionMode::Add ) ? FOdysseyVectorHUD::HUD_BREAKDOWN_SOURCE_GRID : 0;
+    gridFlags |= ( mTrajectoryTool->GridDisplayMode == eVectorTrajectoryGridDisplayMode::AsPoints ) ?  FOdysseyVectorHUD::HUD_BREAKDOWN_GRID_DOTTED : 0;
+    gridFlags |= ( mTrajectoryTool->GetEditionMode() == eVectorTrajectoryEditionMode::Add ) ? FOdysseyVectorHUD::HUD_BREAKDOWN_SOURCE_GRID : 0;
 
     // Draw default
     // -> nothing in object mode.
@@ -528,7 +516,7 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawHUD( const FOdysseyHUDSystem::
             inbetweenerTag->UnlockDrawing();
         }
 
-        if( mTrajectoryTool->EditionMode == eTrajectoryEditionMode::Add )
+        if( mTrajectoryTool->GetEditionMode() == eVectorTrajectoryEditionMode::Add )
         {
             FInbetweenerQuad* hoveredQuad = mTrajectoryTool->GetHoveredQuad();
 
@@ -548,7 +536,10 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawHUD( const FOdysseyHUDSystem::
         }
     }
 
-    DrawModifierInfo( iParams );
+    // invisible plane will get mouse events
+    DrawDummyPlane( iParams );
+
+    //DrawModifierInfo( iParams );
 }
 
 void

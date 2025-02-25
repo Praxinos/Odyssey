@@ -25,6 +25,11 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPathDrawingToolHUD : p
         virtual void Load() override;
         virtual void Unload() override;
 
+        virtual void OnMouseHover( const FOdysseyPoint& iPointInTexture ) override;
+        virtual bool OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
+        virtual void OnMouseDrag( const FOdysseyPoint& iPointInTexture ) override;
+        virtual bool OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
+
         virtual void SetCursorPosition( double iWorldX, double iWorldY ) override;
         std::vector<FOdysseyVectorPoint*>& GetStitchedPointArray();
 

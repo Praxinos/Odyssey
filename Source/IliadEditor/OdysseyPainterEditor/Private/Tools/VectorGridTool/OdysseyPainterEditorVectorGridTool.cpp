@@ -13,6 +13,7 @@
 #include "OdysseyVectorCell.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "SOdysseySinglePropertyView.h"
+#include "Widgets/Input/SSegmentedControl.h"
 
 // testing
 #include "Import/svg/OdysseyVectorImportSVG.h"
@@ -30,8 +31,8 @@ UOdysseyPainterEditorVectorGridTool::~UOdysseyPainterEditorVectorGridTool()
 }
 
 UOdysseyPainterEditorVectorGridTool::UOdysseyPainterEditorVectorGridTool()
-    : UOdysseyPainterEditorVectorSelectionTool( MakeShared<FOdysseyPainterEditorVectorGridToolHUD>( this ) )
-    , mMultipleSelectionMode( false )
+    : UOdysseyPainterEditorVectorBaseTool( MakeShared<FOdysseyPainterEditorVectorGridToolHUD>( this ), false, true )
+    , mEditionMode( eVectorGridEditionMode::Single )
     , DivisionsX( 4 )
     , DivisionsY( 4 )
     , PickingRadius( 10.0f )
@@ -85,6 +86,38 @@ UOdysseyPainterEditorVectorGridTool::LoadVector( FOdysseyVectorGroupPaint* iScen
 }
 
 bool
+UOdysseyPainterEditorVectorGridTool::OnKeyDownGlobalVector( FOdysseyVectorGroupPaint* iScene
+                                                          , const FKeyEvent& InKeyEvent
+                                                          , uint64& oSignalFlags )
+{
+    if( InKeyEvent.IsRepeat() == false )
+    {
+        FKey key = InKeyEvent.GetKey();
+
+        // Note, we could FSlateApplication::Get().GetModifierKeys() as well, but for consistency
+        // with the events processing in the OnKeyUpGlobalVector(), we do like that.
+        if ( ( key == EKeys::LeftShift ) || ( key == EKeys::RightShift ) )
+        {
+            mEditionMode = eVectorGridEditionMode::Multi;
+
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool
+UOdysseyPainterEditorVectorGridTool::OnKeyUpGlobalVector( FOdysseyVectorGroupPaint* iScene
+                                                        , const FKeyEvent& InKeyEvent
+                                                        , uint64& oSignalFlags )
+{
+    mEditionMode = eVectorGridEditionMode::Single;
+
+    return false;
+}
+
+bool
 UOdysseyPainterEditorVectorGridTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                       , const FOdysseyPoint& iPointInTexture
                                                       , const FKey& iKey
@@ -113,13 +146,13 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDownVector( FOdysseyVectorGroupPaint
         GEditor->EndTransaction();
 
         // multiple selection mode
-        if ( FSlateApplication::Get().GetModifierKeys().IsShiftDown() )
+        if (  mEditionMode == eVectorGridEditionMode::Multi )
         {
-            mMultipleSelectionMode = true;
-
             mGridHUD->StartSelectionRectangle( iPointInTexture.x, iPointInTexture.y );
         }
-        else
+
+        // single selection mode
+        if (  mEditionMode == eVectorGridEditionMode::Single )
         {
             bool picked;
 
@@ -160,11 +193,12 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDragVector( FOdysseyVectorGroupPaint
 
     if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
     {
-        if( mMultipleSelectionMode == true )
+        if( mEditionMode == eVectorGridEditionMode::Multi )
         {
             mGridHUD->DragSelectionRectangle( iPointInTexture.x, iPointInTexture.y );
         }
-        else
+
+        if (  mEditionMode == eVectorGridEditionMode::Single )
         {
             FSelectionBox& selectionBox = mGridHUD->GetSelectionBox();
 
@@ -205,12 +239,10 @@ UOdysseyPainterEditorVectorGridTool::OnMouseUpVector( FOdysseyVectorGroupPaint* 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
     {
-        if( mMultipleSelectionMode == true )
+        if( mEditionMode == eVectorGridEditionMode::Multi )
         {
             mGridHUD->EndSelectionRectangle( FSlateApplication::Get().GetModifierKeys().IsControlDown() ? false : true );
         }
-
-        mMultipleSelectionMode = false;
     }
 
     iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
@@ -229,7 +261,62 @@ UOdysseyPainterEditorVectorGridTool::PropertyChangedVector( FOdysseyVectorGroupP
     iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
     iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
-    return UOdysseyPainterEditorVectorSelectionTool::PropertyChangedVector( iScene, iPropertyName );
+    return UOdysseyPainterEditorVectorBaseTool::PropertyChangedVector( iScene, iPropertyName );
+}
+
+eVectorGridEditionMode
+UOdysseyPainterEditorVectorGridTool::GetEditionMode()
+{
+    return mEditionMode;
+}
+
+void
+UOdysseyPainterEditorVectorGridTool::SetEditionMode( eVectorGridEditionMode iMode )
+{
+    mEditionMode = iMode;
+}
+
+const FSlateBrush*
+UOdysseyPainterEditorVectorGridTool::GetBackgroundColor( eVectorGridEditionMode iMode ) const
+{
+    static FSlateColorBrush orange = FSlateColorBrush( FLinearColor( 1.0f, 0.5f, 0.0f, 0.5f ) );
+
+    return ( iMode == mEditionMode ) ? &orange : nullptr;
+}
+
+TSharedRef<SWidget>
+UOdysseyPainterEditorVectorGridTool::CreateModifierSegmentControl()
+{
+    return SNew(SSegmentedControl<eVectorGridEditionMode>)
+           .Value_Lambda( [this]{ return mEditionMode; } )
+           .SupportsEmptySelection( false )
+           .SupportsMultiSelection( false )
+           .IsEnabled( false ) // currently not clickable - Info only
+           .OnValueChanged( SSegmentedControl<eVectorGridEditionMode>::FOnValueChanged::CreateUObject( this, &UOdysseyPainterEditorVectorGridTool::SetEditionMode ) )
+           // DEFAULT
+           + SSegmentedControl<eVectorGridEditionMode>::Slot( eVectorGridEditionMode::Single )
+           //.Icon( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathEdit16") )
+           .ToolTip( LOCTEXT("vector-grid-tool.edition-mode.default.name", "Single-selection") )
+           [
+               SNew(SBorder)
+               .BorderImage_UObject( this, &UOdysseyPainterEditorVectorGridTool::GetBackgroundColor, eVectorGridEditionMode::Single  )
+               [
+                   SNew(SImage)
+                   .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathEdit16") )
+               ]
+           ]
+           // SHIFT
+           + SSegmentedControl<eVectorGridEditionMode>::Slot( eVectorGridEditionMode::Multi )
+           //.Icon( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathEdit16") )
+           .ToolTip( LOCTEXT("vector-grid-tool.edition-mode.shift.name", "Multi-selection (SHIFT)") )
+           [
+               SNew(SBorder)
+               .BorderImage_UObject( this, &UOdysseyPainterEditorVectorGridTool::GetBackgroundColor, eVectorGridEditionMode::Multi  )
+               [
+                   SNew(SImage)
+                   .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathEdit16") )
+               ]
+           ];
 }
 
 void
@@ -238,6 +325,10 @@ UOdysseyPainterEditorVectorGridTool::ExtendToolbar( FToolBarBuilder& iBuilder )
     Super::ExtendToolbar(iBuilder);
 
     iBuilder.BeginSection( NAME_None );
+
+    iBuilder.AddWidget(
+        CreateModifierSegmentControl()
+    );
 
     iBuilder.AddWidget(
         SNew(SBox)

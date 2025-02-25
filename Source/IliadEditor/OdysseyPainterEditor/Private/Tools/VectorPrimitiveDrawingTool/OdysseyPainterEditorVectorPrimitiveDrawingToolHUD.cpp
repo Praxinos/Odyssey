@@ -20,7 +20,7 @@ FOdysseyPainterEditorVectorPrimitiveDrawingToolHUD::~FOdysseyPainterEditorVector
 }
 
 FOdysseyPainterEditorVectorPrimitiveDrawingToolHUD::FOdysseyPainterEditorVectorPrimitiveDrawingToolHUD( UOdysseyPainterEditorVectorPrimitiveDrawingTool* iPrimitiveDrawingTool )
-    : FOdysseyPainterEditorVectorBaseToolHUD( mPrimitiveDrawingTool )
+    : FOdysseyPainterEditorVectorBaseToolHUD( iPrimitiveDrawingTool )
     , mPrimitiveDrawingTool( iPrimitiveDrawingTool )
 {
 
@@ -53,7 +53,7 @@ FOdysseyPainterEditorVectorPrimitiveDrawingToolHUD::DrawHUD( const FOdysseyHUDSy
     // invisible plane will get mouse events
     DrawDummyPlane( iParams );
 
-    DrawModifierInfo( iParams );
+    //DrawModifierInfo( iParams );
 }
 
 void
