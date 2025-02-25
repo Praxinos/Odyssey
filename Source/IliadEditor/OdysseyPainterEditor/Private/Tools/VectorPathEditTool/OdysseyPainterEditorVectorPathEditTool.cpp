@@ -1101,6 +1101,7 @@ UOdysseyPainterEditorVectorPathEditTool::CreateModifierSegmentControl()
            .SupportsEmptySelection( false )
            .SupportsMultiSelection( false )
            .IsEnabled( false ) // currently not clickable - Info only
+           .UniformPadding( FMargin( 2, 0, 2, 0 ) )
            .OnValueChanged( SSegmentedControl<eVectorPathEditEditionMode>::FOnValueChanged::CreateUObject( this, &UOdysseyPainterEditorVectorPathEditTool::SetEditionMode ) )
            // DEFAULT
            + SSegmentedControl<eVectorPathEditEditionMode>::Slot( eVectorPathEditEditionMode::Vertex )
