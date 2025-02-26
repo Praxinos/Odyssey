@@ -208,8 +208,6 @@ void
 FOdysseyViewportDrawingEditorToolkit::RequestModeUITabs()
 {
     FModeToolkit::RequestModeUITabs();
-    /* if (TSharedPtr<FAssetEditorModeUILayer> modeUILayerPtr = ModeUILayer.Pin())
-        mEditor->BuildModeLayout(modeUILayerPtr); */
 }
 
 void

@@ -1,14 +1,14 @@
 // IDDN.FR.001.250001.006.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
 
-#include "OdysseyFlipbookEditorTimelineTab.h"
+#include "OdysseyPainterEditorFlipbookTimelineTab.h"
 
-#include "OdysseyFlipbookEditorExtension.h"
 #include "OdysseyFlipbookEditorCommands.h"
 #include "OdysseyPainterEditor.h"
 #include "SOdysseyFlipbookTimelineView.h"
 #include "Types/NavigationMetaData.h"
 #include "Texture/OdysseyTextureEditorSource.h"
+#include "OdysseyPainterEditorFlipbookUtils.h"
 #include "Toolkits/AssetEditorToolkit.h"
 #include "PaperSprite.h"
 #include "Widgets/Docking/SDockTab.h"
@@ -16,24 +16,24 @@
 #define LOCTEXT_NAMESPACE "FlipbookEditor"
 
 const FName&
-FOdysseyFlipbookEditorTimelineTab::StaticId()
+FOdysseyPainterEditorFlipbookTimelineTab::StaticId()
 {
     static FName Id = TEXT("OdysseyFlipbookEditor_Timeline");
     return Id;
 }
 
 /////////////////////////////////////////////////////
-// FOdysseyFlipbookEditorTimelineTab
+// FOdysseyPainterEditorFlipbookTimelineTab
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
-FOdysseyFlipbookEditorTimelineTab::~FOdysseyFlipbookEditorTimelineTab()
+FOdysseyPainterEditorFlipbookTimelineTab::~FOdysseyPainterEditorFlipbookTimelineTab()
 {
 }
 
-FOdysseyFlipbookEditorTimelineTab::FOdysseyFlipbookEditorTimelineTab(FOdysseyFlipbookEditorExtension* iExtension)
+FOdysseyPainterEditorFlipbookTimelineTab::FOdysseyPainterEditorFlipbookTimelineTab(FOdysseyPainterEditor* iEditor)
     : FOdysseyEditorTab(LOCTEXT( "timeline-tab.name", "Timeline" ),
                         FSlateIcon( "OdysseyStyle", "FlipbookEditor.Layers16" )) //TODO: Timeline Icon
-    , mExtension(iExtension)
+    , mEditor(iEditor)
     , mTimeline(nullptr)
 {
 }
@@ -42,30 +42,29 @@ FOdysseyFlipbookEditorTimelineTab::FOdysseyFlipbookEditorTimelineTab(FOdysseyFli
 //--------------------------------------------------- FOdysseyFlipbookEditorTab interface
 
 const FName&
-FOdysseyFlipbookEditorTimelineTab::GetId() const
+FOdysseyPainterEditorFlipbookTimelineTab::GetId() const
 {
     return StaticId();
 }
 
 TSharedPtr<SWidget>
-FOdysseyFlipbookEditorTimelineTab::CreateWidget()
+FOdysseyPainterEditorFlipbookTimelineTab::CreateWidget()
 {
     mTimeline = SNew(SOdysseyFlipbookTimelineView)
-        //.FlipbookWrapper_Raw(this, &FOdysseyFlipbookEditorTimelineTab::FlipbookWrapper) //TODO:
-        .FlipbookWrapper(FlipbookWrapper())
-        .OnScrubStarted_Raw(this, &FOdysseyFlipbookEditorTimelineTab::OnTimelineScrubStarted)
-        .OnScrubStopped_Raw(this, &FOdysseyFlipbookEditorTimelineTab::OnTimelineScrubStopped)
-        .OnCurrentKeyframeChanged_Raw(this, &FOdysseyFlipbookEditorTimelineTab::OnTimelineCurrentKeyframeChanged)
-        .OnFlipbookChanged_Raw(this, &FOdysseyFlipbookEditorTimelineTab::OnFlipbookChanged)
-        .OnSpriteCreated_Raw(this, &FOdysseyFlipbookEditorTimelineTab::OnSpriteCreated)
-        .OnTextureCreated_Raw(this, &FOdysseyFlipbookEditorTimelineTab::OnTextureCreated)
-        .OnKeyframeRemoved_Raw(this, &FOdysseyFlipbookEditorTimelineTab::OnKeyframeRemoved);
+        .Flipbook(this, &FOdysseyPainterEditorFlipbookTimelineTab::GetFlipbook)
+        .OnScrubStarted_Raw(this, &FOdysseyPainterEditorFlipbookTimelineTab::OnTimelineScrubStarted)
+        .OnScrubStopped_Raw(this, &FOdysseyPainterEditorFlipbookTimelineTab::OnTimelineScrubStopped)
+        .OnCurrentKeyframeChanged_Raw(this, &FOdysseyPainterEditorFlipbookTimelineTab::OnTimelineCurrentKeyframeChanged)
+        .OnFlipbookChanged_Raw(this, &FOdysseyPainterEditorFlipbookTimelineTab::OnFlipbookChanged)
+        .OnSpriteCreated_Raw(this, &FOdysseyPainterEditorFlipbookTimelineTab::OnSpriteCreated)
+        .OnTextureCreated_Raw(this, &FOdysseyPainterEditorFlipbookTimelineTab::OnTextureCreated)
+        .OnKeyframeRemoved_Raw(this, &FOdysseyPainterEditorFlipbookTimelineTab::OnKeyframeRemoved);
 
     return mTimeline;
 }
 
 void
-FOdysseyFlipbookEditorTimelineTab::BindShortcuts(FBaseToolkit* iToolkit)
+FOdysseyPainterEditorFlipbookTimelineTab::BindShortcuts(FBaseToolkit* iToolkit)
 {
     const TSharedRef<FUICommandList>& toolkitCommands = iToolkit->GetToolkitCommands();
     const FOdysseyFlipbookEditorCommands& flipbookEditorCommands = FOdysseyFlipbookEditorCommands::Get();
@@ -77,116 +76,125 @@ FOdysseyFlipbookEditorTimelineTab::BindShortcuts(FBaseToolkit* iToolkit)
     #undef MAP_ACTION
 
     BindNavigationShortcuts(iToolkit);
-    mTimeline->BindCommands(toolkitCommands);
+
+    if (mTimeline)
+        mTimeline->BindCommands(toolkitCommands);
+}
+
+bool
+FOdysseyPainterEditorFlipbookTimelineTab::CanOpen() const
+{
+    return !!GetFlipbook();
 }
 
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------- Public Getters
 
 TSharedPtr<SOdysseyFlipbookTimelineView>
-FOdysseyFlipbookEditorTimelineTab::Timeline()
+FOdysseyPainterEditorFlipbookTimelineTab::Timeline()
 {
     return mTimeline;
 }
 
-//--------------------------------------------------------------------------------------
-//----------------------------------------------------------------------- Widget Getters
-
-TSharedPtr<FOdysseyFlipbookWrapper>
-FOdysseyFlipbookEditorTimelineTab::FlipbookWrapper() const
+UPaperFlipbook*
+FOdysseyPainterEditorFlipbookTimelineTab::GetFlipbook() const
 {
-    return mExtension->FlipbookWrapper();
+    return Cast<UPaperFlipbook>(mEditor->GetEditedObject());
 }
+
+
 
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------- Event Listeners
 
 void
-FOdysseyFlipbookEditorTimelineTab::OnTimelineCurrentKeyframeChanged(int32 iKeyframe)
+FOdysseyPainterEditorFlipbookTimelineTab::OnTimelineCurrentKeyframeChanged(int32 iKeyframe)
 {
     SetTextureAtKeyframeIndex(mTimeline->GetCurrentKeyframeIndex());
 }
 
 void
-FOdysseyFlipbookEditorTimelineTab::OnTimelineScrubStarted()
+FOdysseyPainterEditorFlipbookTimelineTab::OnTimelineScrubStarted()
 {
     //TODO: lock paintengine, to avoid drawing while scrubbing
     SetTextureAtKeyframeIndex(mTimeline->GetCurrentKeyframeIndex());
 }
 
 void
-FOdysseyFlipbookEditorTimelineTab::OnTimelineScrubStopped()
+FOdysseyPainterEditorFlipbookTimelineTab::OnTimelineScrubStopped()
 {
     //TODO: unlock paintengine, to avoid drawing while scrubbing
     SetTextureAtKeyframeIndex(mTimeline->GetCurrentKeyframeIndex());
-
-    //Cleanup Preview Surface
-    mExtension->PreviewTexture(NULL);
 }
 
 void
-FOdysseyFlipbookEditorTimelineTab::OnFlipbookChanged()
+FOdysseyPainterEditorFlipbookTimelineTab::OnFlipbookChanged()
 {
     SetTextureAtKeyframeIndex(mTimeline->GetCurrentKeyframeIndex());
 }
 
 void
-FOdysseyFlipbookEditorTimelineTab::OnSpriteCreated(UPaperSprite* iSprite)
+FOdysseyPainterEditorFlipbookTimelineTab::OnSpriteCreated(UPaperSprite* iSprite)
 {
-    mExtension->GetEditor()->AddEditedObject(iSprite);
+    mEditor->AddEditedObject(iSprite);
 }
 
 void
-FOdysseyFlipbookEditorTimelineTab::OnTextureCreated(UTexture2D* iTexture)
+FOdysseyPainterEditorFlipbookTimelineTab::OnTextureCreated(UTexture2D* iTexture, FOdysseyTextureConfiguration iTextureConfiguration)
 {
-    mExtension->GetEditor()->AddEditedObject(iTexture);
+    mEditor->AddEditedObject(iTexture);
 }
 
 void
-FOdysseyFlipbookEditorTimelineTab::OnKeyframeRemoved(FPaperFlipbookKeyFrame& iKeyframe)
+FOdysseyPainterEditorFlipbookTimelineTab::OnKeyframeRemoved(FPaperFlipbookKeyFrame& iKeyframe)
 {
     if (!iKeyframe.Sprite)
         return;
 
-    mExtension->GetEditor()->RemoveEditedObject(iKeyframe.Sprite);
+    mEditor->RemoveEditedObject(iKeyframe.Sprite);
 
     UTexture2D* texture = iKeyframe.Sprite->GetSourceTexture();
     if (!texture)
         return;
 
-    mExtension->GetEditor()->RemoveEditedObject(texture);
+    mEditor->RemoveEditedObject(texture);
 }
 
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Methods
 
 void
-FOdysseyFlipbookEditorTimelineTab::SetTextureAtKeyframeIndex(int32 iKeyframeIndex)
+FOdysseyPainterEditorFlipbookTimelineTab::SetTextureAtKeyframeIndex(int32 iKeyframeIndex)
 {
-    UTexture2D* texture = FlipbookWrapper()->GetKeyframeTexture(iKeyframeIndex);
 
-    //TODO: Instead of going through the GUI, make a Player class in the data and get the condition from there
-    if (mTimeline->IsScrubbing())
-    {
-        mExtension->PreviewTexture(texture);
+    UObject* editedObject = mEditor->GetEditedObject();
+    if (!editedObject)
         return;
-    }
 
+    if (!editedObject->IsA<UPaperFlipbook>())
+        return;
+
+    UPaperFlipbook* flipbook = Cast<UPaperFlipbook>(editedObject);
+
+    UTexture2D* texture = OdysseyPainterEditorFlipbookUtils::GetKeyframeTexture(flipbook, iKeyframeIndex);
     if (texture)
     {
         TSharedPtr<FOdysseyTextureEditorSource> source = MakeShared<FOdysseyTextureEditorSource>(texture);
-        mExtension->GetEditor()->SetSource(source);
+        mEditor->SetSource(source);
     }
     else
     {
-        mExtension->GetEditor()->SetSource(nullptr);
+        mEditor->SetSource(nullptr);
     }
 }
 
 void
-FOdysseyFlipbookEditorTimelineTab::BindNavigationShortcuts(FBaseToolkit* iToolkit)
+FOdysseyPainterEditorFlipbookTimelineTab::BindNavigationShortcuts(FBaseToolkit* iToolkit)
 {
     if (!iToolkit->IsAssetEditor())
+        return;
+
+    if (!mTimeline)
         return;
 
     FAssetEditorToolkit* toolkit = static_cast<FAssetEditorToolkit*>(iToolkit);

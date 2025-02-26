@@ -67,5 +67,4 @@ private:
     TMap<FName, TArray<FName>> mOpenedTabIds; //Ids of tabs that should be opened when activating a Mode Editor
     FDelegateHandle mExtendLevelEditorLayout;
     FDelegateHandle mAnimationExtendLevelEditorLayout;
-    FDelegateHandle mFlipbookExtendLevelEditorLayout;
 };

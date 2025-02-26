@@ -11,8 +11,12 @@
 #include "OdysseyPainterEditorCommands.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorSource.h"
+#include "OdysseyPainterEditorFlipbookTimelineTab.h"
+#include "OdysseyPainterEditorFlipbookUtils.h"
 #include "Toolkits/BaseToolkit.h"
+#include "SOdysseyFlipbookTimelineView.h"
 #include "Tools/ColorPickerTool/OdysseyPainterEditorColorPickerTool.h"
+#include "PaperFlipbook.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -146,7 +150,34 @@ FOdysseyPainterEditorViewportTab::SetTexture(const TAttribute<UTexture*>& iTextu
 UTexture*
 FOdysseyPainterEditorViewportTab::Texture() const
 {
-    return mTexture.Get();
+    UObject* editedObject = mEditor->GetEditedObject();
+    if (!editedObject)
+        return nullptr;
+
+    if (!editedObject->IsA<UPaperFlipbook>())
+    {
+        TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
+        if (!source)
+            return nullptr;
+
+        return source->DisplayTexture();
+    }
+
+    UPaperFlipbook* flipbook = Cast<UPaperFlipbook>(editedObject);
+
+    TSharedPtr<FOdysseyPainterEditorFlipbookTimelineTab> timelineTab = mEditor->FindTab<FOdysseyPainterEditorFlipbookTimelineTab>();
+    if (timelineTab->Timeline() && timelineTab->Timeline()->IsScrubbing())
+    {
+        int32 index = timelineTab->Timeline()->GetCurrentKeyframeIndex();
+        UTexture2D* texture = OdysseyPainterEditorFlipbookUtils::GetKeyframeTexture(flipbook, index);
+        return texture;
+    }
+
+    TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
+    if (!source)
+        return nullptr;
+
+    return source->DisplayTexture();
 }
 
 //--------------------------------------------------------------------------------------

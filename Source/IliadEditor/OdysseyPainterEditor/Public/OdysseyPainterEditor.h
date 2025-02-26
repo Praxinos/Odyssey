@@ -25,6 +25,9 @@ class FOdysseyVectorPath;
 class FOdysseyPainterEditorPaletteSet;
 class UOdysseyPaletteEntryColor;
 class FOdysseyPainterEditorGUI;
+class FOdysseyPainterEditorFlipbookListener;
+class UPaperSprite;
+class UTexture2D;
 
 class UOdysseyPainterEditorRasterDrawingTool;
 class UOdysseyPainterEditorRasterEraserTool;
@@ -77,6 +80,9 @@ public:
     const FName& GetId() const;
     UObject* GetEditedObject() const;
 
+    void SetEditedObject(UObject* iObject);
+    void OnFlipbookSpriteTextureChanged(UPaperSprite* iSprite, UTexture2D* iOldTexture);
+
     void AddEditedObject(UObject* iObject);
     void RemoveEditedObject(UObject* iObject);
 
@@ -95,8 +101,6 @@ public:
     FSimpleDelegate& OnRegenerateToolbarAndMenus();
 
     FOdysseyEditorShortcuts& GetShortcuts();
-
-    void BuildModeLayout(TSharedPtr<FAssetEditorModeUILayer> iModeUILayerPtr);
 
 public:
     // Overridable Methods
@@ -335,10 +339,11 @@ protected:
     TWeakPtr<FBaseToolkit> mToolkit;
     FName mId;
     FText mName;
-    UObject* mEditedObject;
+    UObject* mEditedObject = nullptr;
     TArray<TSharedPtr<FOdysseyEditorTab>> mTabs;
     TArray<UObject*> mAdditionalEditedObjects;
     FString mTabsSaveFilename;
+    TSharedPtr<FOdysseyPainterEditorFlipbookListener> mFlipbookListener;
 
     FOnAddEditedObject mOnAddEditedObject;
     FOnRemoveEditedObject mOnRemoveEditedObject;

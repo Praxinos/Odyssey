@@ -26,6 +26,12 @@
 #include "OdysseyPalette.h"
 #include "OdysseyPaletteEntryColor.h"
 #include "Proxies/OdysseyBrushColor.h"
+#include "PaperFlipbook.h"
+#include "PaperSprite.h"
+#include "OdysseyPainterEditorFlipbookUtils.h"
+#include "OdysseyPainterEditorFlipbookListener.h"
+#include "OdysseyPainterEditorFlipbookTimelineTab.h"
+#include "SOdysseyFlipbookTimelineView.h"
 
 #include "OdysseyVector.h"
 #include "OdysseyVectorCell.h"
@@ -180,6 +186,112 @@ FOdysseyPainterEditor::OnAddEditedObjectDelegate()
     return mOnAddEditedObject;
 }
 
+void
+FOdysseyPainterEditor::SetEditedObject(UObject* iObject)
+{
+    if (mEditedObject && mEditedObject->IsA<UPaperFlipbook>())
+    {
+        UPaperFlipbook* flipbook = Cast<UPaperFlipbook>(mEditedObject);
+        mFlipbookListener = nullptr;
+        for (int32 index = 0; index < flipbook->GetNumKeyFrames(); ++index)
+        {
+            UPaperSprite* sprite = OdysseyPainterEditorFlipbookUtils::GetKeyframeSprite(flipbook, index);
+            if (!sprite)
+                continue;
+
+            RemoveEditedObject(sprite);
+
+            UTexture2D* texture = OdysseyPainterEditorFlipbookUtils::GetKeyframeTexture(flipbook, index);
+            if (!texture)
+                continue;
+
+            RemoveEditedObject(texture);
+        }
+    }
+
+    mEditedObject = iObject;
+    if (!iObject)
+    {
+        SetSource(nullptr);
+        return;
+    }
+
+    if (mEditedObject->IsA<UOdysseyAnimation>())
+    {
+        TSharedPtr<FOdysseyAnimationEditorSource> source = MakeShared<FOdysseyAnimationEditorSource>(Cast<UOdysseyAnimation>(mEditedObject));
+        SetSource(source);
+    }
+    else if (mEditedObject->IsA<UTexture2D>())
+    {
+        TSharedPtr<FOdysseyTextureEditorSource> source = MakeShared<FOdysseyTextureEditorSource>(Cast<UTexture2D>(mEditedObject));
+        SetSource(source);
+    }
+    else if (mEditedObject->IsA<UPaperFlipbook>())
+    {
+        UPaperFlipbook* flipbook = Cast<UPaperFlipbook>(mEditedObject);
+        mFlipbookListener = MakeShared<FOdysseyPainterEditorFlipbookListener>(flipbook);
+        mFlipbookListener->OnSpriteTextureChanged().AddRaw(this, &FOdysseyPainterEditor::OnFlipbookSpriteTextureChanged);
+
+        //Find all additional Edited Objects (Sprites and Textures)
+        for (int32 index = 0; index < flipbook->GetNumKeyFrames(); ++index)
+        {
+            UPaperSprite* sprite = OdysseyPainterEditorFlipbookUtils::GetKeyframeSprite(flipbook, index);
+            if (!sprite)
+                continue;
+
+            AddEditedObject(sprite);
+
+            UTexture2D* texture = OdysseyPainterEditorFlipbookUtils::GetKeyframeTexture(flipbook, index);
+            if (!texture)
+                continue;
+
+            AddEditedObject(texture);
+        }
+
+        //Set Texture Source if needed
+        if (flipbook->GetNumKeyFrames() > 0)
+        {
+            UTexture2D* texture = OdysseyPainterEditorFlipbookUtils::GetKeyframeTexture(flipbook, 0);
+            TSharedPtr<FOdysseyTextureEditorSource> source = MakeShared<FOdysseyTextureEditorSource>(texture);
+            SetSource(source);
+        }
+    }
+}
+
+void
+FOdysseyPainterEditor::OnFlipbookSpriteTextureChanged(UPaperSprite* iSprite, UTexture2D* iOldTexture)
+{
+    if (!mEditedObject->IsA<UPaperFlipbook>())
+        return;
+
+    UPaperFlipbook* flipbook = Cast<UPaperFlipbook>(mEditedObject);
+
+    UTexture2D* texture = iSprite->GetSourceTexture();
+    for (int i = 0; i < flipbook->GetNumKeyFrames(); i++)
+    {
+        UPaperSprite* sprite = OdysseyPainterEditorFlipbookUtils::GetKeyframeSprite(flipbook, i);
+        if (sprite == iSprite)
+        {
+            if (iOldTexture)
+                RemoveEditedObject(iOldTexture);
+
+            if (texture)
+                AddEditedObject(texture);
+        }
+    }
+
+    TSharedPtr<FOdysseyPainterEditorFlipbookTimelineTab> timelineTab = FindTab<FOdysseyPainterEditorFlipbookTimelineTab>();
+    int32 index = timelineTab->Timeline()->GetCurrentKeyframeIndex();
+
+    UPaperSprite* sprite = OdysseyPainterEditorFlipbookUtils::GetKeyframeSprite(flipbook, index);
+    if (sprite != iSprite)
+        return;
+
+    TSharedPtr<FOdysseyTextureEditorSource> source = MakeShared<FOdysseyTextureEditorSource>(texture);
+    SetSource(source);
+}
+
+
 FOdysseyPainterEditor::FOnRemoveEditedObject&
 FOdysseyPainterEditor::OnRemoveEditedObjectDelegate()
 {
@@ -259,15 +371,6 @@ FOdysseyPainterEditor::UnregisterTabSpawners( const TSharedRef< FTabManager >& i
     for (TSharedPtr<FOdysseyEditorTab> tab : mTabs)
     {
         tab->Unregister();
-    }
-}
-
-void
-FOdysseyPainterEditor::BuildModeLayout(TSharedPtr<FAssetEditorModeUILayer> iModeUILayerPtr)
-{
-    for (TSharedPtr<FOdysseyEditorTab> tab : mTabs)
-    {
-        iModeUILayerPtr->SetModePanelInfo(tab->GetId(), tab->GetMinorTabConfig());
     }
 }
 

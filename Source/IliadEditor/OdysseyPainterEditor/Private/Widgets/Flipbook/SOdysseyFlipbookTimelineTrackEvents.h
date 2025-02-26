@@ -4,12 +4,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "SOdysseyFlipbookTimelineFrameListEvents.h"
 #include "PaperFlipbook.h"
+#include "SOdysseyFlipbookTimelineFrameListEvents.h"
+#include "Texture/SOdysseyTextureConfigureWindow.h"
 
 DECLARE_DELEGATE(FOnStructureChanged)
 DECLARE_DELEGATE(FOnFlipbookChanged)
 DECLARE_DELEGATE_OneParam(FOnKeyframeRemoved, FPaperFlipbookKeyFrame&)
 DECLARE_DELEGATE_OneParam(FOnKeyframeAdded, FPaperFlipbookKeyFrame&)
 DECLARE_DELEGATE_OneParam(FOnSpriteCreated, UPaperSprite*)
-DECLARE_DELEGATE_OneParam(FOnTextureCreated, UTexture2D*)
+DECLARE_DELEGATE_TwoParams(FOnTextureCreated, UTexture2D*, FOdysseyTextureConfiguration)

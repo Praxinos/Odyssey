@@ -12,21 +12,23 @@ class SOdysseyFlipbookTimeline;
 class SOdysseyFlipbookTimelineTrack;
 class UTexture2D;
 class UPaperSprite;
-class FOdysseyFlipbookWrapper;
 
 /**
  * Implements the Timeline widget
  */
 class SOdysseyFlipbookTimelineView : public SCompoundWidget
 {
+    SLATE_DECLARE_WIDGET(SOdysseyFlipbookTimelineView, SCompoundWidget)
+
 public:
 
     SLATE_BEGIN_ARGS(SOdysseyFlipbookTimelineView)
+        : _Flipbook(nullptr)
         {}
         /** Called to populate the add combo button in the toolbar. */
         // SLATE_EVENT( FOnGetAddMenuContent, OnGetAddMenuContent )
         /** Extender to use for the add menu. */
-        SLATE_ARGUMENT( TSharedPtr<FOdysseyFlipbookWrapper>, FlipbookWrapper )
+        SLATE_ATTRIBUTE(UPaperFlipbook*, Flipbook)
         SLATE_EVENT(FOnCurrentKeyframeChanged, OnCurrentKeyframeChanged)
         SLATE_EVENT(FOnPlayStarted, OnPlayStarted)
         SLATE_EVENT(FOnPlayStopped, OnPlayStopped)
@@ -44,6 +46,7 @@ public:
 public:
     // Construction / Destruction
     ~SOdysseyFlipbookTimelineView();
+    SOdysseyFlipbookTimelineView();
     void Construct(const FArguments& InArgs);
     void BindCommands(const TSharedRef<FUICommandList>& iCommandList);
 
@@ -103,7 +106,7 @@ private:
     float ZoomSliderValue() const;
 
     void OnSpriteCreated(UPaperSprite* iSprite);
-    void OnTextureCreated(UTexture2D* iTexture);
+    void OnTextureCreated(UTexture2D* iTexture, FOdysseyTextureConfiguration iTextureConfiguration);
 
 private:
     //Manipulations
@@ -125,13 +128,15 @@ private:
 private:
     TArray<SNumericDropDown<float>::FNamedValue> FrameRateDropDownValues() const;
     float GetFrameRate() const;
+    FOdysseyTextureConfiguration GetTextureConfiguration() const;
 
 private:
     //Slate
     EVisibility FixCurrentFrameVisibility() const;
+    void Rebuild();
 
 private:
-    TWeakPtr<FOdysseyFlipbookWrapper> mFlipbookWrapper;
+    TSlateAttribute<UPaperFlipbook*> mFlipbook;
 
     bool mIsPlaying;
     bool mIsPlayingBackward;
@@ -155,4 +160,6 @@ private:
     //FOnFramesEditStop mOnFramesEditStop;
     FOnSpriteCreated mOnSpriteCreated;
     FOnTextureCreated mOnTextureCreated;
+    FOnKeyframeRemoved mOnKeyframeRemoved;
+    FOdysseyTextureConfiguration mTextureConfiguration;
 };

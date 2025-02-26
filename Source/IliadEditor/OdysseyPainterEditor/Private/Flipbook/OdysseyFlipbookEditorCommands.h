@@ -41,7 +41,5 @@ public:
     TSharedPtr<FUICommandInfo> LastFrame;
     TSharedPtr<FUICommandInfo> ToggleLooping;
 
-    //TSharedPtr<FUICommandInfo> PickNewSpriteForKeyFrame;
-    //TSharedPtr<FUICommandInfo> EditSpriteForKeyFrame;
     TSharedPtr<FUICommandInfo> ShowSpriteInContentBrowser;
 };

@@ -105,19 +105,7 @@ FOdysseyPainterEditorStandaloneToolkit::Open()
     );
     RegenerateMenusAndToolbars();
 
-    if (mEditedObject->IsA<UOdysseyAnimation>())
-    {
-        TSharedPtr<FOdysseyAnimationEditorSource> source = MakeShared<FOdysseyAnimationEditorSource>(Cast<UOdysseyAnimation>(mEditedObject));
-        mEditor->SetSource(source);
-    }
-    else if (mEditedObject->IsA<UTexture2D>())
-    {
-        TSharedPtr<FOdysseyTextureEditorSource> source = MakeShared<FOdysseyTextureEditorSource>(Cast<UTexture2D>(mEditedObject));
-        mEditor->SetSource(source);
-    }
-    else if (mEditedObject->IsA<UPaperFlipbook>())
-    {
-    }
+    mEditor->SetEditedObject(mEditedObject);
 }
 
 //--------------------------------------------------------------------------------------

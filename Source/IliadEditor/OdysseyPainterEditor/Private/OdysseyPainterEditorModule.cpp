@@ -35,7 +35,6 @@
 #include "OdysseyAnimationEditorUserSettings.h"
 #include "OdysseyAnimationEditorCommands.h"
 #include "OdysseyFlipbookEditorCommands.h"
-#include "OdysseyFlipbookEditorGUI.h"
 #include "Tools/OutOfPegsTool/OdysseyAnimationEditorOutOfPegsTool.h"
 #include "StandaloneEditor/OdysseyPainterEditorStandaloneToolkit.h"
 
@@ -248,7 +247,6 @@ FOdysseyPainterEditorModule::RegisterLevelEditorLayoutExtensions()
     FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor");
     mExtendLevelEditorLayout = LevelEditorModule.OnRegisterLayoutExtensions().AddStatic(&FOdysseyPainterEditorGUI::ExtendLevelEditorLayout);
     mAnimationExtendLevelEditorLayout = LevelEditorModule.OnRegisterLayoutExtensions().AddStatic(&FOdysseyAnimationEditorGUI::ExtendLevelEditorLayout);
-    mFlipbookExtendLevelEditorLayout = LevelEditorModule.OnRegisterLayoutExtensions().AddStatic(&FOdysseyFlipbookEditorGUI::ExtendLevelEditorLayout);
 }
 
 void
@@ -257,7 +255,6 @@ FOdysseyPainterEditorModule::UnregisterLevelEditorLayoutExtensions()
     FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor");
     LevelEditorModule.OnRegisterLayoutExtensions().Remove(mExtendLevelEditorLayout);
     LevelEditorModule.OnRegisterLayoutExtensions().Remove(mAnimationExtendLevelEditorLayout);
-    LevelEditorModule.OnRegisterLayoutExtensions().Remove(mFlipbookExtendLevelEditorLayout);
 }
 
 void

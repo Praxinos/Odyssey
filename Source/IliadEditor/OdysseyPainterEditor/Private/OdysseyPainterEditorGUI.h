@@ -42,6 +42,7 @@ protected:
     void    CreateLeftSection(FOdysseyEditorLayoutBuilder& iBuilder);
     void    CreateRightSection(FOdysseyEditorLayoutBuilder& iBuilder);
     void    CreateCenterSection(FOdysseyEditorLayoutBuilder& iBuilder);
+    void    CreateBottomSection(FOdysseyEditorLayoutBuilder& iBuilder);
 
 protected:
     // Shortcuts

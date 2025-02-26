@@ -5,13 +5,14 @@
 
 #include "OdysseyEditorTab.h"
 #include "PaperFlipbook.h"
+#include "SOdysseyFlipbookTimelineViewEvents.h"
 
 class FOdysseyFlipbookEditorExtension;
 class SOdysseyFlipbookTimelineView;
-class FOdysseyFlipbookWrapper;
 class UPaperSprite;
+class FOdysseyPainterEditor;
 
-class FOdysseyFlipbookEditorTimelineTab :
+class FOdysseyPainterEditorFlipbookTimelineTab :
     public FOdysseyEditorTab
 {
 public:
@@ -19,22 +20,20 @@ public:
 
 public:
     // Construction / Destruction
-    virtual ~FOdysseyFlipbookEditorTimelineTab();
-    FOdysseyFlipbookEditorTimelineTab(FOdysseyFlipbookEditorExtension* iExtension);
+    virtual ~FOdysseyPainterEditorFlipbookTimelineTab();
+    FOdysseyPainterEditorFlipbookTimelineTab(FOdysseyPainterEditor* iEditor);
 
 protected:
     // FOdysseyEditorTab interface
     virtual const FName& GetId() const override;
     virtual TSharedPtr<SWidget> CreateWidget() override;
     virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
+    virtual bool CanOpen() const override;
 
 public:
     // Public Getters
     TSharedPtr<SOdysseyFlipbookTimelineView> Timeline();
-
-public:
-    // Widget Getters
-    virtual TSharedPtr<FOdysseyFlipbookWrapper> FlipbookWrapper() const;
+    UPaperFlipbook* GetFlipbook() const;
 
 protected:
     // Event Listeners
@@ -43,7 +42,7 @@ protected:
     virtual void OnTimelineScrubStopped();
     virtual void OnFlipbookChanged();
     virtual void OnSpriteCreated(UPaperSprite* iSprite);
-    virtual void OnTextureCreated(UTexture2D* iTexture);
+    virtual void OnTextureCreated(UTexture2D* iTexture, FOdysseyTextureConfiguration iTextureConfiguration);
     virtual void OnKeyframeRemoved(FPaperFlipbookKeyFrame& iKeyframe);
 
 private:
@@ -52,7 +51,7 @@ private:
     void BindNavigationShortcuts(FBaseToolkit* iToolkit);
 
 private:
-    FOdysseyFlipbookEditorExtension* mExtension;
+    FOdysseyPainterEditor* mEditor;
 
     TSharedPtr<SOdysseyFlipbookTimelineView> mTimeline;
 };

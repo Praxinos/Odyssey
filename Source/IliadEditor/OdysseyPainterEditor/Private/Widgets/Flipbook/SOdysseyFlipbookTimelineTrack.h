@@ -8,14 +8,16 @@
 
 class SOdysseyFlipbookTimelineFrameList;
 class SOdysseyFlipbookTimelineFrame;
-class FOdysseyFlipbookWrapper;
+class FOdysseyPainterEditorFlipbookListener;
+class UPaperFlipbook;
 
 class SOdysseyFlipbookTimelineTrack : public SCompoundWidget
 {
 public:
     SLATE_BEGIN_ARGS(SOdysseyFlipbookTimelineTrack)
         {}
-        SLATE_ARGUMENT( TSharedPtr<FOdysseyFlipbookWrapper>, FlipbookWrapper )
+        SLATE_ARGUMENT(UPaperFlipbook*, Flipbook)
+        SLATE_ATTRIBUTE(FOdysseyTextureConfiguration, TextureConfiguration)
         SLATE_ATTRIBUTE( float, FrameSize )
         SLATE_EVENT( FOnFlipbookChanged, OnFlipbookChanged)
         SLATE_EVENT( FOnKeyframeRemoved, OnKeyframeRemoved)
@@ -29,11 +31,9 @@ public:
 
     // Construct the widget
     void Construct( const FArguments& InArgs );
-    void BindCommands(const TSharedRef<FUICommandList>& iCommandList);
 
 public:
     //Accessors
-    TSharedPtr<FOdysseyFlipbookWrapper> FlipbookWrapper() const;
     float FrameSize() const;
 
 public:
@@ -78,11 +78,12 @@ private:
     void CloseMenu();
     void OnAssetSelected(const FAssetData& AssetData, int32 iFrameIndex);
     void OnSpriteTextureChanged(UPaperSprite* iSprite, UTexture2D* iOldTexture);
-    void OnFlipbookChanged();
 
 private:
-    TWeakPtr<FOdysseyFlipbookWrapper> mFlipbookWrapper;
+    UPaperFlipbook* mFlipbook;
+    TUniquePtr<FOdysseyPainterEditorFlipbookListener> mListener;
     TAttribute<float>     mFrameSize;
+    TAttribute<FOdysseyTextureConfiguration> mTextureConfiguration;
     TSharedPtr<SOdysseyFlipbookTimelineFrameList> mFrameList;
     TSharedPtr<FAssetThumbnailPool> mAssetThumbnailPool;
     TSharedPtr<FUICommandList> mFrameCommandList; //List of commands we can use on a frame

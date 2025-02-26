@@ -9,6 +9,7 @@
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorColorSelectorTab.h"
 #include "OdysseyPainterEditorCommands.h"
+#include "OdysseyPainterEditorFlipbookTimelineTab.h"
 #include "OdysseyPainterEditorLayerStackTab.h"
 #include "OdysseyPainterEditorMeshSelectorTab.h"
 #include "OdysseyPainterEditorRasterSelection.h"
@@ -85,9 +86,11 @@ FOdysseyPainterEditorGUI::CreateTabs()
     TSharedRef<FOdysseyPainterEditorVectorSceneTreeViewTab> vectorSceneTreeViewTab = MakeShared<FOdysseyPainterEditorVectorSceneTreeViewTab>(mEditor);
     TSharedRef<FOdysseyPainterEditorLayerStackTab> layerStackTab = MakeShared<FOdysseyPainterEditorLayerStackTab>(mEditor);
     TSharedRef<FOdysseyPainterEditorTextureDetailsTab> textureDetailsTab = MakeShared<FOdysseyPainterEditorTextureDetailsTab>(mEditor);
-
+    TSharedRef<FOdysseyPainterEditorFlipbookTimelineTab> timelineTab = MakeShared<FOdysseyPainterEditorFlipbookTimelineTab>(mEditor);
 
     //Used for the viewport drawing editor to know which tab to open by default
+
+    timelineTab->ShouldOpenByDefault(true);
     colorSelectorTab->ShouldOpenByDefault(true);
     toolsTab->ShouldOpenByDefault(true);
     layerStackTab->ShouldOpenByDefault(true);
@@ -99,6 +102,7 @@ FOdysseyPainterEditorGUI::CreateTabs()
     mEditor->AddTab(vectorSceneTreeViewTab);
     mEditor->AddTab(layerStackTab);
     mEditor->AddTab(textureDetailsTab);
+    mEditor->AddTab(timelineTab);
 }
 
 void
@@ -183,6 +187,7 @@ FOdysseyPainterEditorGUI::BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder)
     CreateLeftSection(iBuilder);
     CreateCenterSection(iBuilder);
     CreateRightSection(iBuilder);
+    CreateBottomSection(iBuilder);
 }
 
 void
@@ -260,6 +265,20 @@ FOdysseyPainterEditorGUI::CreateCenterSection(FOdysseyEditorLayoutBuilder& iBuil
     centerSplitter->Split
     (
         viewportStack
+    );
+}
+
+void
+FOdysseyPainterEditorGUI::CreateBottomSection(FOdysseyEditorLayoutBuilder& iBuilder)
+{
+    TSharedRef<FTabManager::FSplitter> mainVerticalSplitter = iBuilder.GetSplitter("MainVerticalSplitter");
+    TSharedRef<FTabManager::FStack> flipbookTimelineStack = iBuilder.CreateStack("FlipbookTimelineStack");
+    flipbookTimelineStack->SetHideTabWell(false);
+    flipbookTimelineStack->SetSizeCoefficient(0.2f);
+    flipbookTimelineStack->AddTab(FOdysseyPainterEditorFlipbookTimelineTab::StaticId(), ETabState::OpenedTab);
+    mainVerticalSplitter->Split
+    (
+        flipbookTimelineStack
     );
 }
 
