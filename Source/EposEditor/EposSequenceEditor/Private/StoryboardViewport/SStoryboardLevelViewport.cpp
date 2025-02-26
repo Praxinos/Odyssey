@@ -205,38 +205,6 @@ FStoryboardLevelViewportClient::DrawCanvas(FViewport& InViewport, FSceneView& Vi
     {
         ViewportGeometry.WidgetSize = FVector2D(CanvasSize);
         ViewportGeometry.WidgetSize /= ViewportGeometry.WidgetDPIScale;
-
-        ViewportGeometry.CameraBounds.Min = FVector2D::ZeroVector;
-        ViewportGeometry.CameraBounds.Max = ViewportGeometry.WidgetSize;
-
-        AspectRatio = ViewportGeometry.WidgetSize.X / ViewportGeometry.WidgetSize.Y;
-
-        if (IsAnyActorLocked())
-        {
-            UCameraComponent* cameraComponent = GetCameraComponentForView();
-            if (cameraComponent)
-            {
-                const float DesiredAspectRatio = cameraComponent->AspectRatio;
-
-                if (!FMath::IsNearlyEqual(AspectRatio, DesiredAspectRatio))
-                {
-                    if (AspectRatio > DesiredAspectRatio)
-                    {
-                        const float DesiredWidth = ViewportGeometry.WidgetSize.Y * DesiredAspectRatio;
-                        const float Slack = (ViewportGeometry.WidgetSize.X - DesiredWidth) * 0.5f;
-                        ViewportGeometry.CameraBounds.Min.X += Slack;
-                        ViewportGeometry.CameraBounds.Max.X -= Slack;
-                    }
-                    else
-                    {
-                        const float DesiredHeight = ViewportGeometry.WidgetSize.X / DesiredAspectRatio;
-                        const float Slack = (ViewportGeometry.WidgetSize.Y - DesiredHeight) * 0.5f;
-                        ViewportGeometry.CameraBounds.Min.Y += Slack;
-                        ViewportGeometry.CameraBounds.Max.Y -= Slack;
-                    }
-                }
-            }
-        }
     }
 
     UpdateCameraBounds();
@@ -256,7 +224,7 @@ float FStoryboardLevelViewportClient::GetFOV() const
         return GetDefaultFOV();
 
     float fov = FOVAngle;
-    if (IsAnyActorLocked())
+    if (IsAnyActorLocked() || IsLockedToCinematic())
     {
         UCameraComponent* cameraComponent = GetCameraComponentForView();
         if (cameraComponent)
@@ -283,11 +251,36 @@ FStoryboardLevelViewportClient::CalcSceneView(FSceneViewFamily* ViewFamily, cons
         return SceneView;
     }
 
-    if (IsAnyActorLocked())
+    ViewportGeometry.CameraBounds.Min = FVector2D::ZeroVector;
+    ViewportGeometry.CameraBounds.Max = ViewportGeometry.WidgetSize;
+
+    AspectRatio = ViewportGeometry.WidgetSize.X / ViewportGeometry.WidgetSize.Y;
+
+    if (IsAnyActorLocked() || IsLockedToCinematic())
     {
         UCameraComponent* cameraComponent = GetCameraComponentForView();
         if (cameraComponent)
         {
+            const float DesiredAspectRatio = cameraComponent->AspectRatio;
+
+            if (!FMath::IsNearlyEqual(AspectRatio, DesiredAspectRatio))
+            {
+                if (AspectRatio > DesiredAspectRatio)
+                {
+                    const float DesiredWidth = ViewportGeometry.WidgetSize.Y * DesiredAspectRatio;
+                    const float Slack = (ViewportGeometry.WidgetSize.X - DesiredWidth) * 0.5f;
+                    ViewportGeometry.CameraBounds.Min.X += Slack;
+                    ViewportGeometry.CameraBounds.Max.X -= Slack;
+                }
+                else
+                {
+                    const float DesiredHeight = ViewportGeometry.WidgetSize.X / DesiredAspectRatio;
+                    const float Slack = (ViewportGeometry.WidgetSize.Y - DesiredHeight) * 0.5f;
+                    ViewportGeometry.CameraBounds.Min.Y += Slack;
+                    ViewportGeometry.CameraBounds.Max.Y -= Slack;
+                }
+            }
+
             ControllingActorViewInfo.Location = cameraComponent->GetComponentLocation();
             ControllingActorViewInfo.Rotation = cameraComponent->GetComponentRotation();
         }
