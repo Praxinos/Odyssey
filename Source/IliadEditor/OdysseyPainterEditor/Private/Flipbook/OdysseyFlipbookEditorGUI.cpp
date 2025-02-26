@@ -104,21 +104,6 @@ FOdysseyFlipbookEditorGUI::CreateTabs()
     mExtension->GetEditor()->AddTab(timelineTab);
 }
 
-/* TSharedRef<FTabManager::FSplitter>
-FOdysseyFlipbookEditorGUI::CreateMainSection()
-{
-    return FOdysseyTextureEditorGUI::CreateMainSection()
-        // Timeline + Notes
-        ->Split
-        (
-            FTabManager::NewStack()
-            // Timeline
-            ->AddTab(mTimelineTab->ID(), ETabState::OpenedTab)
-            ->SetHideTabWell(false)
-            ->SetSizeCoefficient(0.2f)
-        );
-} */
-
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Getters
 

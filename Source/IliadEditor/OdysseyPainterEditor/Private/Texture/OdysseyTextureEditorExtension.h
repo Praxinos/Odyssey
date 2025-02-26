@@ -7,7 +7,6 @@
 #include "OdysseyPainterEditorExtension.h"
 
 class FOdysseyPainterEditor;
-class FOdysseyTextureEditorGUI;
 class FOdysseyTextureEditorSource;
 class FOdysseyLayerStackEditorBrushContext;
 class UOdysseyLayerStack;
@@ -24,8 +23,6 @@ public:
 public:
     virtual void Initialize() override;
     virtual void Finalize() override;
-    virtual void ExtendMenu( TSharedRef<FExtender> iExtender ) override;
-    virtual void BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder) override;
 
 public:
     UTexture2D* Texture() const;
@@ -40,6 +37,5 @@ private:
 
 private:
     TSharedPtr<FOdysseyTextureEditorSource> mTextureSource;
-    TSharedPtr<FOdysseyTextureEditorGUI> mGUI;
     TSharedPtr<FOdysseyLayerStackEditorBrushContext> mLayerStackBrushEditorContext;
 };

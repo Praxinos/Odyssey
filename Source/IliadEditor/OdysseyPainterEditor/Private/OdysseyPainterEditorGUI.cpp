@@ -2,25 +2,33 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
 
 #include "OdysseyPainterEditorGUI.h"
-#include "OdysseyEditorTab.h"
-#include "OdysseyPainterEditor.h"
-#include "SOdysseyTabletAPISwitcher.h"
-#include "OdysseyPainterEditorCommands.h"
 
+#include "OdysseyEditorTab.h"
+#include "OdysseyLayerStack.h"
+#include "OdysseyMediaVector.h"
+#include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorColorSelectorTab.h"
+#include "OdysseyPainterEditorCommands.h"
+#include "OdysseyPainterEditorLayerStackTab.h"
 #include "OdysseyPainterEditorMeshSelectorTab.h"
+#include "OdysseyPainterEditorRasterSelection.h"
+#include "OdysseyPainterEditorSource.h"
+#include "OdysseyPainterEditorTextureDetailsTab.h"
 #include "OdysseyPainterEditorToolsTab.h"
 #include "OdysseyPainterEditorViewportTab.h"
 #include "OdysseyPainterEditorVectorSceneTreeViewTab.h"
+#include "OdysseyTextureLayerImageVector.h"
+#include "OdysseyTextureLayerStack.h"
+#include "OdysseyVectorGroupPaint.h"
+
+#include "SOdysseyTabletAPISwitcher.h"
 
 #include "Framework/Docking/LayoutExtender.h"
 #include "LevelEditor.h"
 #include "ToolMenus.h"
 #include "Toolkits/AssetEditorModeUILayer.h"
-#include "OdysseyPainterEditorSource.h"
-#include "OdysseyPainterEditorRasterSelection.h"
 
-#include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
+#include "RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -30,12 +38,19 @@
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyPainterEditorGUI::~FOdysseyPainterEditorGUI()
 {
+    UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
+    FOdysseyVectorEngine::OnNotifyDelegate().RemoveAll(this);
 }
 
 FOdysseyPainterEditorGUI::FOdysseyPainterEditorGUI(FOdysseyPainterEditor* iEditor)
     : mEditor(iEditor)
 {
-
+    // Get sure the binding is set up everytime we add or remove a layer in the layer stack.
+    UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw( this, &FOdysseyPainterEditorGUI::OnCurrentLayerChanged );
+    // bind refresh function to delegates on existing vector scenes at load. Needed to refresh necessary widgets.
+    FOdysseyVectorEngine::OnNotifyDelegate().AddRaw( this, &FOdysseyPainterEditorGUI::OnVectorSceneNotify );
+    // bind refresh function to delegates on existing vector scenes when the source changes. Needed to refresh necessary widgets.
+    mEditor->OnSourceChanged().AddRaw( this, &FOdysseyPainterEditorGUI::OnSourceChanged );
 }
 
 //--------------------------------------------------------------------------------------
@@ -57,6 +72,7 @@ FOdysseyPainterEditorGUI::ExtendLevelEditorLayout(FLayoutExtender& Extender)
 {
     Extender.ExtendLayout(FTabId(TEXT("PlacementBrowser")), ELayoutExtensionPosition::Below, FTabManager::FTab(FOdysseyPainterEditorToolsTab::StaticId(), ETabState::ClosedTab));
     Extender.ExtendLayout(FTabId(TEXT("LevelEditorSceneOutliner")), ELayoutExtensionPosition::Below, FTabManager::FTab(FOdysseyPainterEditorColorSelectorTab::StaticId(), ETabState::ClosedTab));
+    Extender.ExtendLayout(FTabId(TEXT("LevelEditorSelectionDetails")), ELayoutExtensionPosition::Above, FTabManager::FTab(FOdysseyPainterEditorLayerStackTab::StaticId(), ETabState::ClosedTab));
 }
 
 void
@@ -67,17 +83,22 @@ FOdysseyPainterEditorGUI::CreateTabs()
     TSharedRef<FOdysseyPainterEditorColorSelectorTab> colorSelectorTab = MakeShared<FOdysseyPainterEditorColorSelectorTab>(mEditor);
     TSharedRef<FOdysseyPainterEditorToolsTab> toolsTab = MakeShared<FOdysseyPainterEditorToolsTab>(mEditor);
     TSharedRef<FOdysseyPainterEditorVectorSceneTreeViewTab> vectorSceneTreeViewTab = MakeShared<FOdysseyPainterEditorVectorSceneTreeViewTab>(mEditor);
+    TSharedRef<FOdysseyPainterEditorLayerStackTab> layerStackTab = MakeShared<FOdysseyPainterEditorLayerStackTab>(mEditor);
+    TSharedRef<FOdysseyPainterEditorTextureDetailsTab> textureDetailsTab = MakeShared<FOdysseyPainterEditorTextureDetailsTab>(mEditor);
+
 
     //Used for the viewport drawing editor to know which tab to open by default
     colorSelectorTab->ShouldOpenByDefault(true);
     toolsTab->ShouldOpenByDefault(true);
+    layerStackTab->ShouldOpenByDefault(true);
 
     mEditor->AddTab(toolsTab);
-
     mEditor->AddTab(meshSelectorTab);
     mEditor->AddTab(viewportTab);
     mEditor->AddTab(colorSelectorTab);
     mEditor->AddTab(vectorSceneTreeViewTab);
+    mEditor->AddTab(layerStackTab);
+    mEditor->AddTab(textureDetailsTab);
 }
 
 void
@@ -200,9 +221,29 @@ FOdysseyPainterEditorGUI::CreateRightSection(FOdysseyEditorLayoutBuilder& iBuild
     colorSelectorStack->SetSizeCoefficient(0.3f);
     colorSelectorStack->AddTab(FOdysseyPainterEditorColorSelectorTab::StaticId(), ETabState::OpenedTab);
 
+    TSharedRef<FTabManager::FStack> textureLayerStackStack = iBuilder.CreateStack("TextureLayerStackStack");
+    textureLayerStackStack->SetHideTabWell(false);
+    textureLayerStackStack->SetSizeCoefficient(0.35f);
+    textureLayerStackStack->AddTab(FOdysseyPainterEditorLayerStackTab::StaticId(), ETabState::OpenedTab);
+
+    TSharedRef<FTabManager::FStack> textureDetailsStack = iBuilder.CreateStack("TextureDetailsStack");
+    textureDetailsStack->SetHideTabWell(false);
+    textureDetailsStack->SetSizeCoefficient(0.15f);
+    textureDetailsStack->AddTab(FOdysseyPainterEditorLayerStackTab::StaticId(), ETabState::OpenedTab);
+
     rightSplitter->Split
     (
         colorSelectorStack
+    );
+
+    rightSplitter->Split
+    (
+        textureLayerStackStack
+    );
+
+    rightSplitter->Split
+    (
+        textureDetailsStack
     );
 }
 
@@ -269,6 +310,94 @@ FOdysseyPainterEditorGUI::ClearCurrentSelection()
 void FOdysseyPainterEditorGUI::InvertSelection()
 {
     mEditor->RasterSelection()->Invert();
+}
+
+void
+FOdysseyPainterEditorGUI::OnCurrentLayerChanged( UOdysseyLayerStack* iLayerStack )
+{
+    UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(iLayerStack->CurrentLayer.Get());
+
+    if( currentVectorLayer )
+    {
+        FOdysseyVectorGroupPaint* vectorScene = currentVectorLayer->GetVectorCell()->GetScene();
+
+        OnVectorSceneNotify( vectorScene, FOdysseyVectorEngine::NOTIFY_ALL );
+    }
+    else
+    {
+        TSharedPtr<FOdysseyPainterEditorVectorSceneTreeViewTab> vectorSceneTreeViewTab = mEditor->FindTab<FOdysseyPainterEditorVectorSceneTreeViewTab>();
+
+        vectorSceneTreeViewTab.Get()->UpdateSceneTreeView( nullptr );
+        vectorSceneTreeViewTab.Get()->UpdateObjectPropertiesPanel( nullptr );
+    }
+}
+
+
+void
+FOdysseyPainterEditorGUI::OnSourceChanged()
+{
+    if( mEditor->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>() )
+    {
+        // It would be better if this is done in OnMouseDown()
+        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = mEditor->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
+
+        if( mediaVectors.Num() > 0 )
+        {
+            FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
+
+            OnVectorSceneNotify( vectorScene, FOdysseyVectorEngine::NOTIFY_ALL );
+        }
+        else
+        {
+            OnVectorSceneNotify( nullptr, FOdysseyVectorEngine::NOTIFY_ALL );
+        }
+    }
+}
+
+//--------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------ Getters
+
+void
+FOdysseyPainterEditorGUI::OnVectorSceneNotify( FOdysseyVectorGroupPaint* iScene, uint64 iSignalFlags )
+{
+    TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
+    if (!source)
+        return;
+
+    TSharedPtr<FOdysseyPainterEditorVectorSceneTreeViewTab> vectorSceneTreeViewTab = mEditor->FindTab<FOdysseyPainterEditorVectorSceneTreeViewTab>();
+
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(source->GetLayerStack());
+
+    // layerStack might be NULL when closing the program
+    if( layerStack )
+    {
+        UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
+
+        if( currentVectorLayer )
+        {
+            FOdysseyVectorGroupPaint* currentScene = currentVectorLayer->GetVectorCell()->GetScene();
+
+            if( iSignalFlags & FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW )
+            {
+                vectorSceneTreeViewTab.Get()->UpdateSceneTreeView( ( iScene == nullptr ) ? currentScene
+                                                                                         : iScene );
+            }
+
+            if( iSignalFlags & FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS )
+            {
+                vectorSceneTreeViewTab.Get()->UpdateObjectPropertiesPanel( ( iScene == nullptr ) ? currentScene
+                                                                                                 : iScene );
+            }
+
+            if( iSignalFlags & FOdysseyPainterEditor::UI_UPDATE_HUD )
+            {
+                if( currentScene )
+                {
+                    currentScene->GetCell()->ResetHUD();
+                }
+            }
+        }
+    }
 }
 
 #undef LOCTEXT_NAMESPACE

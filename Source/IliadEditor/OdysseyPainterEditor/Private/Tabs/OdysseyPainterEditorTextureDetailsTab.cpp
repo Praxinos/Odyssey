@@ -1,7 +1,7 @@
 // IDDN.FR.001.250001.006.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
 
-#include "OdysseyTextureEditorTextureDetailsTab.h"
+#include "OdysseyPainterEditorTextureDetailsTab.h"
 
 #include "SOdysseyTextureDetails.h"
 #include "Texture/OdysseyTextureEditorSource.h"
@@ -11,23 +11,23 @@
 #define LOCTEXT_NAMESPACE "TextureEditor"
 
 const FName&
-FOdysseyTextureEditorTextureDetailsTab::StaticId()
+FOdysseyPainterEditorTextureDetailsTab::StaticId()
 {
     static FName Id = TEXT("OdysseyTextureEditor_TextureDetails"); //Keep ColorSelector instead of ColorWheel because changing that ID would show an empty panel to users who already opened the previous ColorSelector Panel
     return Id;
 }
 
 /////////////////////////////////////////////////////
-// FOdysseyTextureEditorTextureDetailsTab
+// FOdysseyPainterEditorTextureDetailsTab
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
-FOdysseyTextureEditorTextureDetailsTab::~FOdysseyTextureEditorTextureDetailsTab()
+FOdysseyPainterEditorTextureDetailsTab::~FOdysseyPainterEditorTextureDetailsTab()
 {
 }
 
-FOdysseyTextureEditorTextureDetailsTab::FOdysseyTextureEditorTextureDetailsTab(FOdysseyTextureEditorExtension* iExtension)
+FOdysseyPainterEditorTextureDetailsTab::FOdysseyPainterEditorTextureDetailsTab(FOdysseyPainterEditor* iEditor)
     : FOdysseyEditorTab( LOCTEXT( "texture-details-tab.name", "Texture Details" ), FSlateIcon( "OdysseyStyle", "PainterEditor.Trombone16" ))
-    , mExtension(iExtension)
+    , mEditor(iEditor)
 {
 }
 
@@ -35,25 +35,25 @@ FOdysseyTextureEditorTextureDetailsTab::FOdysseyTextureEditorTextureDetailsTab(F
 //--------------------------------------------------- FOdysseyTextureEditorTab interface
 
 const FName&
-FOdysseyTextureEditorTextureDetailsTab::GetId() const
+FOdysseyPainterEditorTextureDetailsTab::GetId() const
 {
     return StaticId();
 }
 
 TSharedPtr<SWidget>
-FOdysseyTextureEditorTextureDetailsTab::CreateWidget()
+FOdysseyPainterEditorTextureDetailsTab::CreateWidget()
 {
     return SNew( SOdysseyTextureDetails )
-        .Texture( this, &FOdysseyTextureEditorTextureDetailsTab::Texture );
+        .Texture( this, &FOdysseyPainterEditorTextureDetailsTab::Texture );
 }
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------- Widget Getters
 
 UTexture*
-FOdysseyTextureEditorTextureDetailsTab::Texture() const
+FOdysseyPainterEditorTextureDetailsTab::Texture() const
 {
-    TSharedPtr<FOdysseyPainterEditorSource> source = mExtension->GetEditor()->GetSource();
+    TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
     if (!source || source->Id() != FOdysseyTextureEditorSource::StaticId())
         return nullptr;
 

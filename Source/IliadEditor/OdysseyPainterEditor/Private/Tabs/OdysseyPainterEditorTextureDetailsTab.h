@@ -5,10 +5,10 @@
 
 #include "OdysseyEditorTab.h"
 
-class FOdysseyTextureEditorExtension;
+class FOdysseyPainterEditor;
 class UTexture;
 
-class FOdysseyTextureEditorTextureDetailsTab :
+class FOdysseyPainterEditorTextureDetailsTab :
     public FOdysseyEditorTab
 {
 public:
@@ -16,8 +16,8 @@ public:
 
 public:
     // Construction / Destruction
-    virtual ~FOdysseyTextureEditorTextureDetailsTab();
-    FOdysseyTextureEditorTextureDetailsTab(FOdysseyTextureEditorExtension* iExtension);
+    virtual ~FOdysseyPainterEditorTextureDetailsTab();
+    FOdysseyPainterEditorTextureDetailsTab(FOdysseyPainterEditor* iEditor);
 
 protected:
     // FOdysseyTextureEditorTab interface
@@ -32,5 +32,5 @@ protected:
     // Event Listeners
 
 private:
-    FOdysseyTextureEditorExtension* mExtension;
+    FOdysseyPainterEditor* mEditor;
 };

@@ -6,7 +6,6 @@
 #include "LayerStack/OdysseyTextureLayer.h"
 #include "Tools/RasterPaintBucketTool/OdysseyTextureEditorRasterPaintBucketToolSourceProvider.h"
 #include "OdysseyLayerStackEditorBrushContext.h"
-#include "Texture/OdysseyTextureEditorGUI.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyLayerStack.h"
 #include "OdysseyTextureLayerStack.h"
@@ -25,7 +24,6 @@ FOdysseyTextureEditorExtension::~FOdysseyTextureEditorExtension()
 FOdysseyTextureEditorExtension::FOdysseyTextureEditorExtension(FOdysseyPainterEditor* iEditor)
     : FOdysseyPainterEditorExtension(iEditor)
     , mTextureSource(nullptr)
-    , mGUI(nullptr)
     , mLayerStackBrushEditorContext(MakeShared<FOdysseyLayerStackEditorBrushContext>(nullptr))
 {
 }
@@ -33,9 +31,6 @@ FOdysseyTextureEditorExtension::FOdysseyTextureEditorExtension(FOdysseyPainterEd
 void
 FOdysseyTextureEditorExtension::Initialize()
 {
-    mGUI = MakeShared<FOdysseyTextureEditorGUI>(this);
-    mGUI->Init();
-
     mEditor->SetVectorHUDFlags( FOdysseyVectorHUD::HUD_MODE_OBJECT
                               | FOdysseyVectorHUD::HUD_MODE_OBJECT_ALLOWED
                               | FOdysseyVectorHUD::HUD_MODE_VERTEX_ALLOWED );
@@ -47,18 +42,6 @@ void
 FOdysseyTextureEditorExtension::Finalize()
 {
     GetEditor()->OnSourceChanged().RemoveAll(this);
-}
-
-void
-FOdysseyTextureEditorExtension::ExtendMenu( TSharedRef<FExtender> iExtender )
-{
-    mGUI->ExtendMenu(iExtender);
-}
-
-void
-FOdysseyTextureEditorExtension::BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder)
-{
-    mGUI->BuildLayout(iBuilder);
 }
 
 //--------------------------------------------------------------------------------------

@@ -37,9 +37,9 @@ SOdysseyTextureLayerStack::SOdysseyTextureLayerStack()
 
 //CONSTRUCTION/DESTRUCTION-----------------------------------------------
 void
-SOdysseyTextureLayerStack::Construct(const FArguments& InArgs, FOdysseyTextureEditorExtension* iTextureExtension)
+SOdysseyTextureLayerStack::Construct(const FArguments& InArgs, FOdysseyPainterEditor* iEditor)
 {
-    mExtension = iTextureExtension;
+    mEditor = iEditor;
     mLayerStack.Assign(*this, InArgs._LayerStack);
 
     this->RebuildWidgets();
@@ -65,7 +65,7 @@ SOdysseyTextureLayerStack::RebuildWidgets()
             + SVerticalBox::Slot()
             .FillHeight(1.0)
             [
-                SAssignNew(mTreeView, SOdysseyTextureLayerStackTreeView, mExtension)
+                SAssignNew(mTreeView, SOdysseyTextureLayerStackTreeView, mEditor)
                 .LayerStack(layerstack)
                 .OnGenerateRow(this, &SOdysseyTextureLayerStack::OnGenerateRow)
             ];

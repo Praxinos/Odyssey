@@ -5,10 +5,10 @@
 
 #include "OdysseyEditorTab.h"
 
-class FOdysseyTextureEditorExtension;
+class FOdysseyPainterEditor;
 class UOdysseyLayerStack;
 
-class FOdysseyTextureEditorLayerStackTab :
+class FOdysseyPainterEditorLayerStackTab :
     public FOdysseyEditorTab
 {
 public:
@@ -16,8 +16,8 @@ public:
 
 public:
     // Construction / Destruction
-    virtual ~FOdysseyTextureEditorLayerStackTab();
-    FOdysseyTextureEditorLayerStackTab(FOdysseyTextureEditorExtension* iExtension);
+    virtual ~FOdysseyPainterEditorLayerStackTab();
+    FOdysseyPainterEditorLayerStackTab(FOdysseyPainterEditor* iEditor);
 
 protected:
     // FOdysseyTextureEditorTab interface
@@ -45,5 +45,5 @@ private:
     virtual void ChangeLayerOpacity(float iOpacity);
 
 private:
-    FOdysseyTextureEditorExtension* mExtension;
+    FOdysseyPainterEditor* mEditor;
 };

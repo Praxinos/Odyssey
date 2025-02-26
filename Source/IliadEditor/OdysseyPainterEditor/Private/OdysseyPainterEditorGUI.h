@@ -10,6 +10,8 @@ class FOdysseyPainterEditor;
 class FOdysseyVectorEngine;
 class FOdysseyVectorScene;
 class FBaseToolkit;
+class UOdysseyLayerStack;
+class FOdysseyVectorGroupPaint;
 
 /**
  * Implements an Editor toolkit for textures.
@@ -51,6 +53,12 @@ protected:
     void InvertSelection();
 
     void ToggleEraserButton();
+
+private:
+    //Vector
+    void OnCurrentLayerChanged( UOdysseyLayerStack* iLayerStack );
+    void OnSourceChanged();
+    void OnVectorSceneNotify( FOdysseyVectorGroupPaint* iScene, uint64 iSignalFlags );
 
 private:
     FOdysseyPainterEditor*                          mEditor;

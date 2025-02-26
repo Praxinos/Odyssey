@@ -1,7 +1,7 @@
 // IDDN.FR.001.250001.006.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
 
-#include "OdysseyTextureEditorLayerStackTab.h"
+#include "OdysseyPainterEditorLayerStackTab.h"
 
 #include "Widgets/Texture/LayerStack/SOdysseyTextureLayerStack.h"
 #include "ToolMenus.h"
@@ -31,23 +31,23 @@
 
 
 const FName&
-FOdysseyTextureEditorLayerStackTab::StaticId()
+FOdysseyPainterEditorLayerStackTab::StaticId()
 {
     static FName Id = TEXT("OdysseyTextureEditor_LayerStack"); //Keep ColorSelector instead of ColorWheel because changing that ID would show an empty panel to users who already opened the previous ColorSelector Panel
     return Id;
 }
 
 /////////////////////////////////////////////////////
-// FOdysseyTextureEditorLayerStackTab
+// FOdysseyPainterEditorLayerStackTab
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
-FOdysseyTextureEditorLayerStackTab::~FOdysseyTextureEditorLayerStackTab()
+FOdysseyPainterEditorLayerStackTab::~FOdysseyPainterEditorLayerStackTab()
 {
 }
 
-FOdysseyTextureEditorLayerStackTab::FOdysseyTextureEditorLayerStackTab(FOdysseyTextureEditorExtension* iExtension)
+FOdysseyPainterEditorLayerStackTab::FOdysseyPainterEditorLayerStackTab(FOdysseyPainterEditor* iEditor)
     : FOdysseyEditorTab(LOCTEXT( "layerstack-tab.name", "Layer Stack" ), FSlateIcon( "OdysseyStyle", "PainterEditor.Layers16" ))
-    , mExtension(iExtension)
+    , mEditor(iEditor)
 {
 }
 
@@ -55,27 +55,27 @@ FOdysseyTextureEditorLayerStackTab::FOdysseyTextureEditorLayerStackTab(FOdysseyT
 //--------------------------------------------------- FOdysseyTextureEditorTab interface
 
 const FName&
-FOdysseyTextureEditorLayerStackTab::GetId() const
+FOdysseyPainterEditorLayerStackTab::GetId() const
 {
     return StaticId();
 }
 
 TSharedPtr<SWidget>
-FOdysseyTextureEditorLayerStackTab::CreateWidget()
+FOdysseyPainterEditorLayerStackTab::CreateWidget()
 {
-    return SNew(SOdysseyTextureLayerStack, mExtension)
-            .LayerStack(this, &FOdysseyTextureEditorLayerStackTab::LayerStack);
+    return SNew(SOdysseyTextureLayerStack, mEditor)
+            .LayerStack(this, &FOdysseyPainterEditorLayerStackTab::LayerStack);
 }
 
 void
-FOdysseyTextureEditorLayerStackTab::BindShortcuts(FBaseToolkit* iToolkit)
+FOdysseyPainterEditorLayerStackTab::BindShortcuts(FBaseToolkit* iToolkit)
 {
     const TSharedRef<FUICommandList>& toolkitCommands = iToolkit->GetToolkitCommands();
     MapActions(toolkitCommands);
 }
 
 void
-FOdysseyTextureEditorLayerStackTab::ExtendMenu( TSharedRef<FExtender> iExtender )
+FOdysseyPainterEditorLayerStackTab::ExtendMenu( TSharedRef<FExtender> iExtender )
 {
     ExtendMenuFile(iExtender);
 }
@@ -84,9 +84,9 @@ FOdysseyTextureEditorLayerStackTab::ExtendMenu( TSharedRef<FExtender> iExtender 
 //----------------------------------------------------------------------- Widget Getters
 
 UOdysseyLayerStack*
-FOdysseyTextureEditorLayerStackTab::LayerStack() const
+FOdysseyPainterEditorLayerStackTab::LayerStack() const
 {
-    TSharedPtr<FOdysseyPainterEditorSource> source = mExtension->GetEditor()->GetSource();
+    TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
     if (!source || source->Id() != FOdysseyTextureEditorSource::StaticId())
         return nullptr;
 
@@ -100,11 +100,11 @@ FOdysseyTextureEditorLayerStackTab::LayerStack() const
 //------------------------------------------------------------------------------ Methods
 
 void
-FOdysseyTextureEditorLayerStackTab::MapActions( TSharedPtr<FUICommandList> iCommandList )
+FOdysseyPainterEditorLayerStackTab::MapActions( TSharedPtr<FUICommandList> iCommandList )
 {
     const FOdysseyPainterEditorCommands& painterEditorCommands = FOdysseyPainterEditorCommands::Get();
 
-    #define MAP_ACTION(action, ...) iCommandList->MapAction( action, FExecuteAction::CreateSP( this, &FOdysseyTextureEditorLayerStackTab::__VA_ARGS__ ), FCanExecuteAction() );
+    #define MAP_ACTION(action, ...) iCommandList->MapAction( action, FExecuteAction::CreateSP( this, &FOdysseyPainterEditorLayerStackTab::__VA_ARGS__ ), FCanExecuteAction() );
 
     MAP_ACTION(painterEditorCommands.ImportTexturesAsLayers, ImportTexturesAsLayers )
     MAP_ACTION(painterEditorCommands.ExportLayersAsTextures, ExportLayersAsTextures )
@@ -126,7 +126,7 @@ FOdysseyTextureEditorLayerStackTab::MapActions( TSharedPtr<FUICommandList> iComm
 }
 
 void
-FOdysseyTextureEditorLayerStackTab::ExtendMenuFile( TSharedRef<FExtender> iExtender )
+FOdysseyPainterEditorLayerStackTab::ExtendMenuFile( TSharedRef<FExtender> iExtender )
 {
     TSharedPtr<FUICommandList> commandList = MakeShared<FUICommandList>();
     MapActions(commandList);
@@ -137,11 +137,7 @@ FOdysseyTextureEditorLayerStackTab::ExtendMenuFile( TSharedRef<FExtender> iExten
         FMenuExtensionDelegate::CreateLambda(
             [this](FMenuBuilder& iBuilder)
             {
-                FOdysseyPainterEditor* editor = mExtension->GetEditor();
-                if (!editor)
-                    return;
-
-                TSharedPtr<FOdysseyPainterEditorSource> source = editor->GetSource();
+                TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
                 if (!source || source->Id() != FOdysseyTextureEditorSource::StaticId())
                     return;
 
@@ -159,9 +155,9 @@ FOdysseyTextureEditorLayerStackTab::ExtendMenuFile( TSharedRef<FExtender> iExten
 }
 
 void
-FOdysseyTextureEditorLayerStackTab::ExportTextureToOperatingSystem()
+FOdysseyPainterEditorLayerStackTab::ExportTextureToOperatingSystem()
 {
-    TSharedPtr<FOdysseyPainterEditorSource> source = mExtension->GetEditor()->GetSource();
+    TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
     if (!source || source->Id() != FOdysseyTextureEditorSource::StaticId())
         return;
 
@@ -261,13 +257,13 @@ FOdysseyTextureEditorLayerStackTab::ExportTextureToOperatingSystem()
 
 
 void
-FOdysseyTextureEditorLayerStackTab::ImportTexturesAsLayers()
+FOdysseyPainterEditorLayerStackTab::ImportTexturesAsLayers()
 {
     UOdysseyLayerStack* layerStack = LayerStack();
     if ( !layerStack )
         return;
 
-    TSharedPtr<FOdysseyPainterEditorSource> source = mExtension->GetEditor()->GetSource();
+    TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
     if (!source || source->Id() != FOdysseyTextureEditorSource::StaticId())
         return;
 
@@ -318,13 +314,13 @@ FOdysseyTextureEditorLayerStackTab::ImportTexturesAsLayers()
 }
 
 void
-FOdysseyTextureEditorLayerStackTab::ExportLayersAsTextures()
+FOdysseyPainterEditorLayerStackTab::ExportLayersAsTextures()
 {
     UOdysseyLayerStack* layerStack = LayerStack();
     if ( !layerStack )
         return;
 
-    TSharedPtr<FOdysseyPainterEditorSource> source = mExtension->GetEditor()->GetSource();
+    TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
     if (!source || source->Id() != FOdysseyTextureEditorSource::StaticId())
         return;
 
@@ -394,7 +390,7 @@ FOdysseyTextureEditorLayerStackTab::ExportLayersAsTextures()
 }
 
 void
-FOdysseyTextureEditorLayerStackTab::ExportCurrentLayerAsTexture()
+FOdysseyPainterEditorLayerStackTab::ExportCurrentLayerAsTexture()
 {
     UOdysseyLayerStack* layerStack = LayerStack();
     if ( !layerStack )
@@ -413,7 +409,7 @@ FOdysseyTextureEditorLayerStackTab::ExportCurrentLayerAsTexture()
     if (!object)
         return;
 
-    TSharedPtr<FOdysseyPainterEditorSource> source = mExtension->GetEditor()->GetSource();
+    TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
     if (!source || source->Id() != FOdysseyTextureEditorSource::StaticId())
         return;
 
@@ -445,7 +441,7 @@ FOdysseyTextureEditorLayerStackTab::ExportCurrentLayerAsTexture()
 }
 
 void
-FOdysseyTextureEditorLayerStackTab::CreateNewLayer()
+FOdysseyPainterEditorLayerStackTab::CreateNewLayer()
 {
     UOdysseyLayerStack* layerStack = LayerStack();
     if ( !layerStack )
@@ -483,7 +479,7 @@ FOdysseyTextureEditorLayerStackTab::CreateNewLayer()
 }
 
 void
-FOdysseyTextureEditorLayerStackTab::ChangeLayerOpacity( float iOpacity )
+FOdysseyPainterEditorLayerStackTab::ChangeLayerOpacity( float iOpacity )
 {
     UOdysseyLayerStack* layerStack = LayerStack();
     if ( !layerStack )

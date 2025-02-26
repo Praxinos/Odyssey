@@ -5,17 +5,17 @@
 
 #include "Widgets/SOdysseyLayerStackTreeView.h"
 
-class FOdysseyTextureEditorExtension;
+class FOdysseyPainterEditor;
 
 class SOdysseyTextureLayerStackTreeView
     : public SOdysseyLayerStackTreeView
 {
 public:
     SOdysseyTextureLayerStackTreeView();
-    void Construct(const FArguments& InArgs, FOdysseyTextureEditorExtension* iTextureExtension);
+    void Construct(const FArguments& InArgs, FOdysseyPainterEditor* iEditor);
 
 public:
-    FOdysseyTextureEditorExtension* GetTextureEditorExtension() const;
+    FOdysseyPainterEditor* GetEditor() const;
 
     virtual TArray<TSharedPtr<FExtender>> ExtendContextMenu();
 
@@ -24,5 +24,5 @@ private:
     void Action_ConvertLayerToRasterLayer();
 
 private:
-    FOdysseyTextureEditorExtension* mExtension;
+    FOdysseyPainterEditor* mEditor;
 };

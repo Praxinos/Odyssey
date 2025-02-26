@@ -6,7 +6,7 @@
 class SOdysseyTextureLayerStackTreeView;
 class UOdysseyLayerStack;
 class UOdysseyLayer;
-class FOdysseyTextureEditorExtension;
+class FOdysseyPainterEditor;
 
 /**
  * Implements the Texture Layer stack widget
@@ -28,14 +28,14 @@ public:
     ~SOdysseyTextureLayerStack();
     SOdysseyTextureLayerStack();
 
-    void Construct(const FArguments& InArgs, FOdysseyTextureEditorExtension* iTextureExtension);
+    void Construct(const FArguments& InArgs, FOdysseyPainterEditor* iEditor);
 
 private:
     TSharedRef<ITableRow> OnGenerateRow(UOdysseyLayer* iLayer, const TSharedRef<STableViewBase>& iOwnerTable);
     void RebuildWidgets();
 
 private:
-    FOdysseyTextureEditorExtension* mExtension;
+    FOdysseyPainterEditor* mEditor;
     TSlateAttribute<UOdysseyLayerStack*> mLayerStack;
     TSharedPtr<SOdysseyTextureLayerStackTreeView> mTreeView;
 };
