@@ -11,7 +11,6 @@
 #include "OdysseyPainterEditorVectorSceneTreeViewTab.h"
 #include "OdysseyMediaVector.h"
 #include "OdysseyPainterEditor.h"
-#include "Texture/OdysseyTextureEditorCommands.h"
 #include "OdysseyPainterEditorSource.h"
 // Vector engine
 #include "OdysseyVectorGroupPaint.h"
@@ -159,17 +158,6 @@ FOdysseyTextureEditorGUI::CreateRightSection()
 void
 FOdysseyTextureEditorGUI::ExtendMenu( TSharedRef<FExtender> iExtender )
 {
-}
-
-void
-FOdysseyTextureEditorGUI::BindShortcuts(FBaseToolkit* iToolkit)
-{
-    const TSharedRef<FUICommandList>& toolkitCommands = iToolkit->GetToolkitCommands();
-    const FOdysseyTextureEditorCommands& textureEditorCommands = FOdysseyTextureEditorCommands::Get();
-
-    #define MAP_ACTION(action, ...) toolkitCommands->MapAction( action, FExecuteAction::CreateSP( this, &FOdysseyTextureEditorGUI::__VA_ARGS__ ), FCanExecuteAction() );
-
-    #undef MAP_ACTION
 }
 
 //--------------------------------------------------------------------------------------

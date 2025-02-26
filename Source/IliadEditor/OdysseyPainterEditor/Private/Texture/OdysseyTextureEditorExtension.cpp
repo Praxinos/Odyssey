@@ -56,12 +56,6 @@ FOdysseyTextureEditorExtension::ExtendMenu( TSharedRef<FExtender> iExtender )
 }
 
 void
-FOdysseyTextureEditorExtension::BindShortcuts(FBaseToolkit* iToolkit)
-{
-    mGUI->BindShortcuts(iToolkit);
-}
-
-void
 FOdysseyTextureEditorExtension::BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder)
 {
     mGUI->BuildLayout(iBuilder);

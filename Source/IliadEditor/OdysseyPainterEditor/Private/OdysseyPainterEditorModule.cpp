@@ -34,7 +34,6 @@
 #include "OdysseyAnimationEditorProjectSettings.h"
 #include "OdysseyAnimationEditorUserSettings.h"
 #include "OdysseyAnimationEditorCommands.h"
-#include "Texture/OdysseyTextureEditorCommands.h"
 #include "Texture/OdysseyTextureEditorGUI.h"
 #include "OdysseyFlipbookEditorCommands.h"
 #include "OdysseyFlipbookEditorGUI.h"
@@ -204,7 +203,6 @@ FOdysseyPainterEditorModule::RegisterCommands()
 {
     FOdysseyPainterEditorCommands::Register();
     FOdysseyAnimationEditorCommands::Register();
-    FOdysseyTextureEditorCommands::Register();
     FOdysseyFlipbookEditorCommands::Register();
     FOdysseyViewportDrawingEditorCommands::Register();
 }
@@ -214,7 +212,6 @@ FOdysseyPainterEditorModule::UnregisterCommands()
 {
     FOdysseyPainterEditorCommands::Unregister();
     FOdysseyAnimationEditorCommands::Unregister();
-    FOdysseyTextureEditorCommands::Unregister();
     FOdysseyFlipbookEditorCommands::Unregister();
     FOdysseyViewportDrawingEditorCommands::Unregister();
 }

@@ -16,6 +16,8 @@ namespace
     const FName HelpShortcuts = "Help Shortcuts";
     const FName UncategorizedYetShortcuts = "Uncategorized Yet Shortcuts";
     const FName ToolsShortcuts = "Tools Shortcuts";
+    const FName LayerStackShortcuts = "LayerStack Shortcuts";
+    const FName ImportExportShortcuts = "Import & Export Shortcuts";
 }
 
 FOdysseyPainterEditorCommands::FOdysseyPainterEditorCommands()
@@ -28,11 +30,15 @@ FOdysseyPainterEditorCommands::FOdysseyPainterEditorCommands()
     AddBundle(HelpShortcuts, LOCTEXT("editor-commands.category.help-shortcuts", "Help Shortcuts"));
     AddBundle(ToolsShortcuts, LOCTEXT("editor-commands.category.tools-shortcuts", "Tools Shortcuts"));
     AddBundle(UncategorizedYetShortcuts, LOCTEXT("editor-commands.category.uncategorized-yet-shortcuts", "Uncategorized Yet Shortcuts"));
+    AddBundle(LayerStackShortcuts, LOCTEXT("editor-commands.category.layerstack-shortcuts-category", "LayerStack Shortcuts"));
+    AddBundle(ImportExportShortcuts, LOCTEXT("editor-commands.category.import-export-shortcuts", "Import & Export Shortcuts"));
 }
 
 void
 FOdysseyPainterEditorCommands::RegisterCommands()
 {
+    RegisterTextureCommands();
+
 // Help Shortcuts Category
     UI_BUNDLE_COMMAND( AboutOdyssey, HelpShortcuts, "About Odyssey", "About Odyssey",                                                                             EUserInterfaceActionType::Button, FInputChord() );
     UI_BUNDLE_COMMAND( VisitPraxinosWebsite, HelpShortcuts, "Praxinos Website...", "Praxinos Website...",                                                   EUserInterfaceActionType::Button, FInputChord() );
@@ -162,6 +168,28 @@ FOdysseyPainterEditorCommands::RegisterCommands()
     UI_BUNDLE_COMMAND( ActivateVectorScenePanTool, ToolsShortcuts, "Activate Vector Scene Pan Tool", "Activates the editor Vector Scene Pan tool", EUserInterfaceActionType::Button, FInputChord(EKeys::H) );
     UI_BUNDLE_COMMAND( ActivateVectorSelectionTool, ToolsShortcuts, "Activate Vector Selection Tool", "Activates the editor Vector Selection tool", EUserInterfaceActionType::Button, FInputChord() );
     UI_BUNDLE_COMMAND( ActivateVectorTransformTool, ToolsShortcuts, "Activate Vector Transform Tool", "Activates the editor Vector Transform tool", EUserInterfaceActionType::Button, FInputChord() );
+
+    // LayerStack Shortcuts Category
+    UI_BUNDLE_COMMAND( CreateNewLayer, LayerStackShortcuts, "Create New Layer", "Create new image layer",                                                                                                      EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::N));
+    UI_BUNDLE_COMMAND( ChangeLayerOpacity10, LayerStackShortcuts, "Change current Layer Opacity to 10%", "Change current Layer Opacity to 10%",                                                                EUserInterfaceActionType::Button, FInputChord());
+    UI_BUNDLE_COMMAND( ChangeLayerOpacity20, LayerStackShortcuts, "Change current Layer Opacity to 20%", "Change current Layer Opacity to 20%",                                                                EUserInterfaceActionType::Button, FInputChord());
+    UI_BUNDLE_COMMAND( ChangeLayerOpacity30, LayerStackShortcuts, "Change current Layer Opacity to 30%", "Change current Layer Opacity to 30%",                                                                EUserInterfaceActionType::Button, FInputChord());
+    UI_BUNDLE_COMMAND( ChangeLayerOpacity40, LayerStackShortcuts, "Change current Layer Opacity to 40%", "Change current Layer Opacity to 40%",                                                                EUserInterfaceActionType::Button, FInputChord());
+    UI_BUNDLE_COMMAND( ChangeLayerOpacity50, LayerStackShortcuts, "Change current Layer Opacity to 50%", "Change current Layer Opacity to 50%",                                                                EUserInterfaceActionType::Button, FInputChord());
+    UI_BUNDLE_COMMAND( ChangeLayerOpacity60, LayerStackShortcuts, "Change current Layer Opacity to 60%", "Change current Layer Opacity to 60%",                                                                EUserInterfaceActionType::Button, FInputChord());
+    UI_BUNDLE_COMMAND( ChangeLayerOpacity70, LayerStackShortcuts, "Change current Layer Opacity to 70%", "Change current Layer Opacity to 70%",                                                                EUserInterfaceActionType::Button, FInputChord());
+    UI_BUNDLE_COMMAND( ChangeLayerOpacity80, LayerStackShortcuts, "Change current Layer Opacity to 80%", "Change current Layer Opacity to 80%",                                                                EUserInterfaceActionType::Button, FInputChord());
+    UI_BUNDLE_COMMAND( ChangeLayerOpacity90, LayerStackShortcuts, "Change current Layer Opacity to 90%", "Change current Layer Opacity to 90%",                                                                EUserInterfaceActionType::Button, FInputChord());
+    UI_BUNDLE_COMMAND( ChangeLayerOpacity100, LayerStackShortcuts, "Change current Layer Opacity to 100%", "Change current Layer Opacity to 100%",                                                             EUserInterfaceActionType::Button, FInputChord());
+}
+
+void
+FOdysseyPainterEditorCommands::RegisterTextureCommands()
+{
+    UI_BUNDLE_COMMAND( ImportTexturesAsLayers, ImportExportShortcuts, "Import Textures As Layers", "Import several textures from the content-browser as layers",                                               EUserInterfaceActionType::Button, FInputChord());
+    UI_BUNDLE_COMMAND( ExportLayersAsTextures, ImportExportShortcuts, "Export Layers As Textures", "Export existing layers as textures within the content-browser",                                            EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::E));
+    UI_BUNDLE_COMMAND( ExportCurrentLayerAsTexture, ImportExportShortcuts, "Export Current Layer As Texture", "Export current layers as texture within the content-browser",                                   EUserInterfaceActionType::Button, FInputChord());
+    UI_BUNDLE_COMMAND( ExportTextureToOperatingSystem, ImportExportShortcuts, "Export Texture To Operating System", "Export current texture to your operating system, several file format are available",      EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::F));
 }
 
 #undef LOCTEXT_NAMESPACE

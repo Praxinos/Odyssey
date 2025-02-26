@@ -19,7 +19,7 @@
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "OdysseyTextureLayerStack.h"
 #include "LayerStack/OdysseyTextureLayerImageRaster.h"
-#include "Texture/OdysseyTextureEditorCommands.h"
+#include "OdysseyPainterEditorCommands.h"
 #include "Texture/OdysseyTextureEditorSource.h"
 #include "Texture/OdysseyTextureEditorExtension.h"
 #include "OdysseyPainterEditor.h"
@@ -102,25 +102,25 @@ FOdysseyTextureEditorLayerStackTab::LayerStack() const
 void
 FOdysseyTextureEditorLayerStackTab::MapActions( TSharedPtr<FUICommandList> iCommandList )
 {
-    const FOdysseyTextureEditorCommands& textureEditorCommands = FOdysseyTextureEditorCommands::Get();
+    const FOdysseyPainterEditorCommands& painterEditorCommands = FOdysseyPainterEditorCommands::Get();
 
     #define MAP_ACTION(action, ...) iCommandList->MapAction( action, FExecuteAction::CreateSP( this, &FOdysseyTextureEditorLayerStackTab::__VA_ARGS__ ), FCanExecuteAction() );
 
-    MAP_ACTION(textureEditorCommands.ImportTexturesAsLayers, ImportTexturesAsLayers )
-    MAP_ACTION(textureEditorCommands.ExportLayersAsTextures, ExportLayersAsTextures )
-    MAP_ACTION(textureEditorCommands.ExportCurrentLayerAsTexture, ExportCurrentLayerAsTexture )
-    MAP_ACTION(textureEditorCommands.ExportTextureToOperatingSystem, ExportTextureToOperatingSystem )
-    MAP_ACTION(textureEditorCommands.CreateNewLayer, CreateNewLayer )
-    MAP_ACTION(textureEditorCommands.ChangeLayerOpacity10, ChangeLayerOpacity, 0.1f )
-    MAP_ACTION(textureEditorCommands.ChangeLayerOpacity20, ChangeLayerOpacity, 0.2f )
-    MAP_ACTION(textureEditorCommands.ChangeLayerOpacity30, ChangeLayerOpacity, 0.3f )
-    MAP_ACTION(textureEditorCommands.ChangeLayerOpacity40, ChangeLayerOpacity, 0.4f )
-    MAP_ACTION(textureEditorCommands.ChangeLayerOpacity50, ChangeLayerOpacity, 0.5f )
-    MAP_ACTION(textureEditorCommands.ChangeLayerOpacity60, ChangeLayerOpacity, 0.6f )
-    MAP_ACTION(textureEditorCommands.ChangeLayerOpacity70, ChangeLayerOpacity, 0.7f )
-    MAP_ACTION(textureEditorCommands.ChangeLayerOpacity80, ChangeLayerOpacity, 0.8f )
-    MAP_ACTION(textureEditorCommands.ChangeLayerOpacity90, ChangeLayerOpacity, 0.9f )
-    MAP_ACTION(textureEditorCommands.ChangeLayerOpacity100, ChangeLayerOpacity, 1.0f )
+    MAP_ACTION(painterEditorCommands.ImportTexturesAsLayers, ImportTexturesAsLayers )
+    MAP_ACTION(painterEditorCommands.ExportLayersAsTextures, ExportLayersAsTextures )
+    MAP_ACTION(painterEditorCommands.ExportCurrentLayerAsTexture, ExportCurrentLayerAsTexture )
+    MAP_ACTION(painterEditorCommands.ExportTextureToOperatingSystem, ExportTextureToOperatingSystem )
+    MAP_ACTION(painterEditorCommands.CreateNewLayer, CreateNewLayer )
+    MAP_ACTION(painterEditorCommands.ChangeLayerOpacity10, ChangeLayerOpacity, 0.1f )
+    MAP_ACTION(painterEditorCommands.ChangeLayerOpacity20, ChangeLayerOpacity, 0.2f )
+    MAP_ACTION(painterEditorCommands.ChangeLayerOpacity30, ChangeLayerOpacity, 0.3f )
+    MAP_ACTION(painterEditorCommands.ChangeLayerOpacity40, ChangeLayerOpacity, 0.4f )
+    MAP_ACTION(painterEditorCommands.ChangeLayerOpacity50, ChangeLayerOpacity, 0.5f )
+    MAP_ACTION(painterEditorCommands.ChangeLayerOpacity60, ChangeLayerOpacity, 0.6f )
+    MAP_ACTION(painterEditorCommands.ChangeLayerOpacity70, ChangeLayerOpacity, 0.7f )
+    MAP_ACTION(painterEditorCommands.ChangeLayerOpacity80, ChangeLayerOpacity, 0.8f )
+    MAP_ACTION(painterEditorCommands.ChangeLayerOpacity90, ChangeLayerOpacity, 0.9f )
+    MAP_ACTION(painterEditorCommands.ChangeLayerOpacity100, ChangeLayerOpacity, 1.0f )
 
     #undef MAP_ACTION
 }
@@ -147,10 +147,10 @@ FOdysseyTextureEditorLayerStackTab::ExtendMenuFile( TSharedRef<FExtender> iExten
 
                 iBuilder.BeginSection("OdysseyTexture", LOCTEXT("main-menu.file.texture-import-export-section.name", "Texture Import/Export"));
                 {
-                    iBuilder.AddMenuEntry( FOdysseyTextureEditorCommands::Get().ImportTexturesAsLayers );
-                    iBuilder.AddMenuEntry( FOdysseyTextureEditorCommands::Get().ExportLayersAsTextures );
-                    iBuilder.AddMenuEntry( FOdysseyTextureEditorCommands::Get().ExportCurrentLayerAsTexture );
-                    iBuilder.AddMenuEntry( FOdysseyTextureEditorCommands::Get().ExportTextureToOperatingSystem );
+                    iBuilder.AddMenuEntry( FOdysseyPainterEditorCommands::Get().ImportTexturesAsLayers );
+                    iBuilder.AddMenuEntry( FOdysseyPainterEditorCommands::Get().ExportLayersAsTextures );
+                    iBuilder.AddMenuEntry( FOdysseyPainterEditorCommands::Get().ExportCurrentLayerAsTexture );
+                    iBuilder.AddMenuEntry( FOdysseyPainterEditorCommands::Get().ExportTextureToOperatingSystem );
                 }
                 iBuilder.EndSection();
             }
