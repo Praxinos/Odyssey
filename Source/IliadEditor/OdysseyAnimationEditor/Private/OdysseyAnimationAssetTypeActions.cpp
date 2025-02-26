@@ -5,7 +5,7 @@
 
 #include "ContentBrowserModule.h"
 #include "IContentBrowserSingleton.h"
-#include "OdysseyAnimationEditorModule.h"
+#include "OdysseyPainterEditorModule.h"
 #include "OdysseyAnimation.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
@@ -58,8 +58,8 @@ void FOdysseyAnimationAssetTypeActions::OpenAssetEditor(const TArray<UObject*>& 
         if (!animation)
             continue;
 
-        FOdysseyAnimationEditorModule* odysseyAnimationEditorModule = &FModuleManager::LoadModuleChecked<FOdysseyAnimationEditorModule>("OdysseyAnimationEditor");
-        odysseyAnimationEditorModule->CreateOdysseyAnimationEditor(animation);
+        FOdysseyPainterEditorModule* painterEditorModule = &FModuleManager::GetModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
+        painterEditorModule->OpenStandaloneEditorForAsset(animation);
     }
 }
 

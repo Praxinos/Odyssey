@@ -12,7 +12,7 @@ class FOdysseyFlipbookEditorModule
 {
 public:
     // IOdysseyFlipbookEditorModule interface
-    virtual void CreateOdysseyFlipbookEditor( TArray<UPaperFlipbook*> iFlipbook ) override;
+    //virtual void CreateOdysseyFlipbookEditor( TArray<UPaperFlipbook*> iFlipbook ) override;
 
     // IModuleInterface interface
     virtual void StartupModule() override;

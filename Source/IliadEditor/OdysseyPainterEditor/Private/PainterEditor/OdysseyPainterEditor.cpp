@@ -88,6 +88,7 @@
 #include "PainterEditor/OdysseyPainterEditorToolMenuContext.h"
 #include "FileHelpers.h"
 #include "PainterEditor/OdysseyPainterEditorPaletteSet.h"
+#include "Toolkits/AssetEditorModeUILayer.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -103,9 +104,8 @@ FOdysseyPainterEditor::~FOdysseyPainterEditor()
 
 }
 
-FOdysseyPainterEditor::FOdysseyPainterEditor(const FName& iId, const FText& iName, UObject* iEditedObject, const FName& iLayoutName)
-    : FOdysseyEditor(iId, iName, iEditedObject)
-    , mLayoutName(iLayoutName)
+FOdysseyPainterEditor::FOdysseyPainterEditor(TSharedRef<FBaseToolkit> iToolkit)
+    : mToolkit(iToolkit)
     , mSource(nullptr)
     , mMeshSelector(MakeShared<FOdysseyMeshSelector>())
     , mCurrentMainTool(nullptr)
@@ -167,6 +167,129 @@ FOdysseyPainterEditor::Initialize()
         extension->Initialize();
 }
 
+FOdysseyPainterEditor::FOnAddEditedObject&
+FOdysseyPainterEditor::OnAddEditedObjectDelegate()
+{
+    return mOnAddEditedObject;
+}
+
+FOdysseyPainterEditor::FOnRemoveEditedObject&
+FOdysseyPainterEditor::OnRemoveEditedObjectDelegate()
+{
+    return mOnRemoveEditedObject;
+}
+
+FSimpleDelegate&
+FOdysseyPainterEditor::OnRegenerateToolbarAndMenus()
+{
+    return mOnRegenerateToolbarAndMenus;
+}
+
+TArray<UObject*>
+FOdysseyPainterEditor::GetAdditionalEditedObjects()
+{
+    return mAdditionalEditedObjects;
+}
+
+FOdysseyEditorShortcuts&
+FOdysseyPainterEditor::GetShortcuts()
+{
+    return mShortcuts;
+}
+
+bool
+FOdysseyPainterEditor::OnCloseRequested()
+{
+    return true;
+}
+
+void
+FOdysseyPainterEditor::AddTab(TSharedRef<FOdysseyEditorTab> iTab)
+{
+    mTabs.Add(iTab);
+}
+
+void
+FOdysseyPainterEditor::InitTabs()
+{
+    for (const TSharedPtr<FOdysseyEditorTab> tab : mTabs)
+    {
+        tab->Init();
+    }
+}
+
+const TArray<TSharedPtr<FOdysseyEditorTab>>&
+FOdysseyPainterEditor::GetTabs() const
+{
+    return mTabs;
+}
+
+void
+FOdysseyPainterEditor::CloseAllTabs()
+{
+    for (TSharedPtr<FOdysseyEditorTab> tab : mTabs)
+    {
+        if (tab->IsOpened())
+            tab->Close();
+    }
+}
+
+void
+FOdysseyPainterEditor::RegisterTabSpawners( const TSharedRef< FTabManager >& iTabManager)
+{
+    TSharedPtr<FWorkspaceItem> workspaceMenuCategory = iTabManager->AddLocalWorkspaceMenuCategory(mName);
+    TSharedRef<FWorkspaceItem> workspaceMenuCategoryRef = workspaceMenuCategory.ToSharedRef();
+    for (TSharedPtr<FOdysseyEditorTab> tab : mTabs)
+    {
+        tab->SetTabManager(iTabManager);
+        tab->Register(workspaceMenuCategoryRef);
+    }
+}
+
+void
+FOdysseyPainterEditor::UnregisterTabSpawners( const TSharedRef< FTabManager >& iTabManager )
+{
+    for (TSharedPtr<FOdysseyEditorTab> tab : mTabs)
+    {
+        tab->Unregister();
+    }
+}
+
+void
+FOdysseyPainterEditor::BuildModeLayout(TSharedPtr<FAssetEditorModeUILayer> iModeUILayerPtr)
+{
+    for (TSharedPtr<FOdysseyEditorTab> tab : mTabs)
+    {
+        iModeUILayerPtr->SetModePanelInfo(tab->GetId(), tab->GetMinorTabConfig());
+    }
+}
+
+const FName&
+FOdysseyPainterEditor::GetId() const
+{
+    return mId;
+}
+
+UObject*
+FOdysseyPainterEditor::GetEditedObject() const
+{
+    return mEditedObject;
+}
+
+void
+FOdysseyPainterEditor::AddEditedObject(UObject* iObject)
+{
+    mAdditionalEditedObjects.Add(iObject);
+    mOnAddEditedObject.Broadcast(iObject);
+}
+
+void
+FOdysseyPainterEditor::RemoveEditedObject(UObject* iObject)
+{
+    mAdditionalEditedObjects.Remove(iObject);
+    mOnRemoveEditedObject.Broadcast(iObject);
+}
+
 TSharedRef<FTabManager::FLayout>
 FOdysseyPainterEditor::CreateLayout()
 {
@@ -182,7 +305,14 @@ FOdysseyPainterEditor::CreateLayout()
 void
 FOdysseyPainterEditor::BindShortcuts(FBaseToolkit* iToolkit)
 {
-    FOdysseyEditor::BindShortcuts(iToolkit);
+    const TSharedRef<FUICommandList>& toolkitCommands = iToolkit->GetToolkitCommands();
+    mShortcuts.MapActionsToCommandList(toolkitCommands);
+
+    //TODO: Use only mShortcuts instead of BindShortcuts (better coding style)
+    for (TSharedPtr<FOdysseyEditorTab> tab : mTabs)
+    {
+        tab->BindShortcuts(iToolkit);
+    }
 
     GetGUI()->BindShortcuts(iToolkit);
 
@@ -193,7 +323,6 @@ FOdysseyPainterEditor::BindShortcuts(FBaseToolkit* iToolkit)
 
     //---
 
-    const TSharedRef<FUICommandList>& toolkitCommands = iToolkit->GetToolkitCommands();
     const FOdysseyPainterEditorCommands& painterEditorCommands = FOdysseyPainterEditorCommands::Get();
 
     #define MAP_ACTION(action, ...) toolkitCommands->MapAction( action, FExecuteAction::CreateRaw( this, &FOdysseyPainterEditor::__VA_ARGS__ ), FCanExecuteAction() );
@@ -206,7 +335,10 @@ FOdysseyPainterEditor::BindShortcuts(FBaseToolkit* iToolkit)
 void
 FOdysseyPainterEditor::ExtendMenu( TSharedRef<FExtender> iExtender )
 {
-    FOdysseyEditor::ExtendMenu(iExtender);
+    for (const TSharedPtr<FOdysseyEditorTab> tab : mTabs)
+    {
+        tab->ExtendMenu( iExtender );
+    }
 
     for (UOdysseyPainterEditorTool* tool : mTools)
     {
@@ -228,8 +360,6 @@ FOdysseyPainterEditor::InitToolMenuContext(FToolMenuContext& MenuContext)
 void
 FOdysseyPainterEditor::ExtendLevelEditorToolbar(UToolMenu* iToolbar)
 {
-    FOdysseyEditor::ExtendLevelEditorToolbar(iToolbar);
-
     mToolbarMenuName = iToolbar->GetMenuName();
 
     iToolbar->AddDynamicSection(
@@ -247,8 +377,6 @@ FOdysseyPainterEditor::ExtendLevelEditorToolbar(UToolMenu* iToolbar)
 void
 FOdysseyPainterEditor::ExtendAssetEditorToolbar(UToolMenu* iToolbar)
 {
-    FOdysseyEditor::ExtendAssetEditorToolbar(iToolbar);
-
     mToolbarMenuName = iToolbar->GetMenuName();
 
     iToolbar->AddDynamicSection(
@@ -381,6 +509,9 @@ FOdysseyPainterEditor::ExtendToolbarToolParameters(FToolBarBuilder& iBuilder)
 void
 FOdysseyPainterEditor::OnClose()
 {
+    //Here is where we should clean everything prior to editor destruction
+    mTabs.Empty(); //ensure all tabs are destroyed, because some need the editor on destruction
+
     //BE CAREFUL: OnClose can be called twice when quiting Unreal Engine
     // due to a bug in Unreal code
 
@@ -394,8 +525,6 @@ FOdysseyPainterEditor::OnClose()
     UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
     delete mHUDSystem;
     mHUDSystem = nullptr;
-
-    FOdysseyEditor::OnClose();
 }
 
 void
@@ -956,8 +1085,6 @@ FOdysseyPainterEditor::OnApplyOverrides(const TMap<FName, UObject*>& iOverrides)
 void
 FOdysseyPainterEditor::Tick(float iDeltaTime)
 {
-    FOdysseyEditor::Tick(iDeltaTime);
-
     UOdysseyPainterEditorTool* tool = GetCurrentTool();
     if (tool)
         tool->Tick(iDeltaTime);
@@ -2806,10 +2933,15 @@ FOdysseyPainterEditor::StitchVertices( FOdysseyPainterEditor* iEditor
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------- FGCObject implementation
 
+FString
+FOdysseyPainterEditor::GetReferencerName() const
+{
+    return "FOdysseyPainterEditor";
+}
+
 void
 FOdysseyPainterEditor::AddReferencedObjects(FReferenceCollector& Collector)
 {
-    FOdysseyEditor::AddReferencedObjects(Collector);
     for (UOdysseyPainterEditorTool* tool : mTools)
     {
         Collector.AddReferencedObject(tool);

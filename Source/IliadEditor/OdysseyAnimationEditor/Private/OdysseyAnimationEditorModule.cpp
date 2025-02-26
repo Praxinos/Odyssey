@@ -14,7 +14,6 @@
 #include "Toolkits/AssetEditorToolkit.h"
 
 #include "OdysseyAnimationActorFactory.h"
-#include "OdysseyAnimationEditorToolkit.h"
 #include "OdysseyAnimationAssetTypeActions.h"
 #include "OdysseyAnimationAssetTypeActions.h"
 #include "AnimationEditor/OdysseyAnimationEditorCommands.h"
@@ -39,7 +38,7 @@
    FOdysseyAnimationEditorModule
 -----------------------------------------------------------------------------*/
 
-TSharedRef<FOdysseyAnimationEditorToolkit>
+/* TSharedRef<FOdysseyAnimationEditorToolkit>
 FOdysseyAnimationEditorModule::CreateOdysseyAnimationEditor( UOdysseyAnimation* iAnimation )
 {
     TSharedPtr<FOdysseyPainterEditor> editor = MakeShared<FOdysseyPainterEditor>(
@@ -60,7 +59,7 @@ FOdysseyAnimationEditorModule::CreateOdysseyAnimationEditor( UOdysseyAnimation* 
     editor->SetSource(source);
 
     return toolkit.ToSharedRef();
-}
+}*/
 
 void
 FOdysseyAnimationEditorModule::StartupModule()

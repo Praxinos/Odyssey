@@ -10,7 +10,7 @@ class FOdysseyTextureEditorModule
 {
 public:
     // IOdysseyTextureEditorModule interface
-    void CreateOdysseyTextureEditor( TArray<UTexture2D*> iTextures );
+    //void CreateOdysseyTextureEditor( TArray<UTexture2D*> iTextures );
 
 public:
     // IModuleInterface interface

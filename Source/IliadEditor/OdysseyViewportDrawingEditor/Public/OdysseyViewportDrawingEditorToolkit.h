@@ -3,19 +3,28 @@
 
 #pragma once
 
-#include "OdysseyModeToolkit.h"
 #include "OdysseyPainterEditor.h"
-
+#include "Toolkits/BaseToolkit.h"
 
 class FOdysseyViewportDrawingEditor;
 class FOdysseyViewportDrawingEditorExtension;
 class FOdysseyAnimationEditorExtension;
 class FEdMode;
 
-class ODYSSEYVIEWPORTDRAWINGEDITOR_API FOdysseyViewportDrawingEditorToolkit : public FOdysseyModeToolkit
+class ODYSSEYVIEWPORTDRAWINGEDITOR_API FOdysseyViewportDrawingEditorToolkit
+    : public FModeToolkit
+    , public IAssetEditorInstance
 {
 public:
-    FOdysseyViewportDrawingEditorToolkit(TSharedRef<FOdysseyPainterEditor> iEditor, FEdMode* iEdMode);
+    ~FOdysseyViewportDrawingEditorToolkit();
+    FOdysseyViewportDrawingEditorToolkit(FEdMode* iEdMode);
+
+    void Initialize(
+        FEdMode* iEditorMode,
+        const TSharedPtr<IToolkitHost>& iInitToolkitHost
+    );
+
+    TSharedPtr<FOdysseyPainterEditor> GetEditor() const;
 
     virtual TSharedPtr<SWidget> GetInlineContent() const override;
     virtual FEdMode* GetEditorMode() const override;
@@ -24,7 +33,10 @@ public:
     virtual FName GetToolkitFName() const override;
     virtual FText GetBaseToolkitName() const override;
 
-    virtual void InvokeUI() override;
+    void OnAddEditedObject(UObject* iObject);
+    void OnRemoveEditedObject(UObject* iObject);
+
+    virtual void ExtendSecondaryModeToolbar(UToolMenu *InModeToolbarMenu) override;
 
     //If we fill the array with names, a mode toolbar will pop in our edMode
     //virtual void GetToolPaletteNames( TArray<FName>& ioPaletteNames ) const override;
@@ -33,8 +45,34 @@ public:
     TSharedPtr<FOdysseyViewportDrawingEditorExtension> GetViewportDrawingExtension() const;
     TSharedPtr<FOdysseyAnimationEditorExtension> GetAnimationExtension() const;
 
+public:
+    //from IAssetEditorInstance
+    virtual FName GetEditorName() const override;
+    virtual void FocusWindow(UObject* ObjectToFocusOn = nullptr) override;
+    virtual bool CloseWindow() override;
+    virtual bool IsPrimaryEditor() const override;
+    virtual void InvokeTab(const struct FTabId& TabId) override;
+    virtual FName GetToolbarTabId() const override;
+    virtual TSharedPtr<class FTabManager> GetAssociatedTabManager() override;
+    virtual double GetLastActivationTime() override;
+    virtual void RemoveEditingAsset(UObject* Asset) override;
+    virtual void RequestModeUITabs() override;
+    virtual void InvokeUI() override;
+    virtual void SetModeUILayer(const TSharedPtr<FAssetEditorModeUILayer> InLayer) override;
+
+    void RebuildLevelEditorMenu() const;
+
+    void OnToolkitHostReadyForUI();
+    void OnToolkitHostShutdownUI();
+
+    void SaveOpenedTabs();
+    void LoadOpenedTabs();
+
 private:
+    TSharedPtr<FOdysseyPainterEditor> mEditor;
     TSharedPtr<FOdysseyViewportDrawingEditorExtension> mViewportDrawingExtension;
     TSharedPtr<FOdysseyAnimationEditorExtension> mAnimationExtension;
     FEdMode* mEdMode;
+    bool mTabSaved;
+    TSharedPtr<FExtender> mLevelEditorMenuExtender;
 };

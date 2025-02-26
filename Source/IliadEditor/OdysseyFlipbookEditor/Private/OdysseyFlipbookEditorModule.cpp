@@ -5,7 +5,6 @@
 
 #include "TextureEditor/OdysseyTextureEditorExtension.h"
 #include "FlipbookEditor/OdysseyFlipbookEditorExtension.h"
-#include "OdysseyFlipbookEditorToolkit.h"
 #include "ISettingsModule.h"
 #include "FlipbookEditor/OdysseyFlipbookEditorGUI.h"
 #include "LevelEditor.h"
@@ -136,6 +135,7 @@ FOdysseyFlipbookEditorModule::UnregisterSettings()
     settingsModule->UnregisterSettings( "Editor", "Plugins", "OdysseyFlipbookEditor" );
 }
 
+/*
 void
 FOdysseyFlipbookEditorModule::CreateOdysseyFlipbookEditor( TArray<UPaperFlipbook*> iFlipbooks )
 {
@@ -185,6 +185,9 @@ FOdysseyFlipbookEditorModule::CreateOdysseyFlipbookEditor( TArray<UPaperFlipbook
             continue;
         }
 
+        FOdysseyPainterEditorModule* painterEditorModule = &FModuleManager::GetModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
+        painterEditorModule->OpenStandaloneEditorForAsset(Flipbook);
+
         TSharedPtr<FOdysseyPainterEditor> editor = MakeShared<FOdysseyPainterEditor>(
             TEXT("OdysseyFlipbookEditor"),
             LOCTEXT("main-menu.category", "Odyssey Flipbook Editor"),
@@ -203,7 +206,7 @@ FOdysseyFlipbookEditorModule::CreateOdysseyFlipbookEditor( TArray<UPaperFlipbook
 
         flipbookExtension->SetFlipbook(Flipbook);
     }
-}
+} */
 
 void
 FOdysseyFlipbookEditorModule::RegisterCommands()

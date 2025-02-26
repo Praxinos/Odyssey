@@ -19,7 +19,7 @@
 #include "Textures/SlateIcon.h"
 #include "PaperSprite.h"
 
-#include "IOdysseyFlipbookEditorModule.h"
+#include "OdysseyPainterEditorModule.h"
 
 #define LOCTEXT_NAMESPACE "FlipbookEditor"
 
@@ -101,8 +101,16 @@ FOdysseyFlipbookContentBrowserExtensions::EditFlipbooksWarning()
 void
 FEditFlipbookExtension::EditFlipbooks( TArray<UPaperFlipbook*>& iFlipbooks )
 {
-    IOdysseyFlipbookEditorModule* odysseyFlipbookEditorModule = &FModuleManager::GetModuleChecked<IOdysseyFlipbookEditorModule>( "OdysseyFlipbookEditor" );
-    odysseyFlipbookEditorModule->CreateOdysseyFlipbookEditor( iFlipbooks );
+    for (auto ObjIt = iFlipbooks.CreateConstIterator(); ObjIt; ++ObjIt)
+    {
+        auto odysseyFlipbook = Cast<UPaperFlipbook>(*ObjIt);
+
+        if (odysseyFlipbook != NULL)
+        {
+            FOdysseyPainterEditorModule* painterEditorModule = &FModuleManager::GetModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
+            painterEditorModule->OpenStandaloneEditorForAsset(odysseyFlipbook);
+        }
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////

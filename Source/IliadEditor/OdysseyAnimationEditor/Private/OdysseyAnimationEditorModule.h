@@ -11,7 +11,7 @@ class FOdysseyAnimationEditorModule
 {
 public:
     // IOdysseyAnimationEditorModule interface
-    virtual TSharedRef<FOdysseyAnimationEditorToolkit> CreateOdysseyAnimationEditor( UOdysseyAnimation* iAnimation ) override;
+    //virtual TSharedRef<FOdysseyAnimationEditorToolkit> CreateOdysseyAnimationEditor( UOdysseyAnimation* iAnimation ) override;
 
 public:
     // IModuleInterface interface

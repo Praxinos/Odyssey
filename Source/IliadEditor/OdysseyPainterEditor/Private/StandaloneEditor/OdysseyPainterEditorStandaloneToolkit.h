@@ -3,34 +3,33 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "Toolkits/AssetEditorToolkit.h"
 
-class FOdysseyEditor;
+class FOdysseyPainterEditor;
+class FTabManager;
 
-/**
- * Implements an Editor toolkit for the Painter Editor.
- * The toolkit is the main entry point for the Painter Editor
- */
-class ODYSSEYEDITOR_API FOdysseyAssetEditorToolkit
+class FOdysseyPainterEditorStandaloneToolkit
     : public FAssetEditorToolkit
 {
 public:
     // Construction / Destruction
-    virtual ~FOdysseyAssetEditorToolkit();
-    FOdysseyAssetEditorToolkit(const FName& iAppIdentifier);
+    virtual ~FOdysseyPainterEditorStandaloneToolkit();
+    FOdysseyPainterEditorStandaloneToolkit(UObject* iEditedObject);
 
 public:
-    void Initialize(UObject* iEditedObject, TSharedPtr<FOdysseyEditor> iEditor);
+    void Open();
 
 protected:
     // FAssetEditorToolkit interface
     virtual void SaveAssetAs_Execute() override;
     virtual bool OnRequestClose() override;
     virtual void OnClose() override;
-    virtual void RegisterTabSpawners(const TSharedRef<class FTabManager>& iTabManager) override;
-    virtual void UnregisterTabSpawners(const TSharedRef<class FTabManager>& iTabManager) override;
+    virtual void RegisterTabSpawners(const TSharedRef<FTabManager>& iTabManager) override;
+    virtual void UnregisterTabSpawners(const TSharedRef<FTabManager>& iTabManager) override;
     virtual FText GetToolkitName() const override;
+    virtual FText GetBaseToolkitName() const override;
+    virtual FName GetToolkitFName() const override;
+    virtual FString GetWorldCentricTabPrefix() const override;
     virtual FText GetToolkitToolTipText() const override;
     virtual FLinearColor GetWorldCentricTabColorScale() const override;
     virtual void InitToolMenuContext(FToolMenuContext& MenuContext) override;
@@ -39,14 +38,15 @@ protected:
     virtual bool CanReimport() const;
     virtual bool CanReimport(UObject* EditingObject) const;
 
-protected:
-    virtual void OpenAsset(UObject* iObject) = 0;
-
 private:
     void OnAddEditedObject(UObject* iObject);
     void OnRemoveEditedObject(UObject* iObject);
 
 private:
+    UObject* mEditedObject;
     FName mAppIdentifier;
-    TSharedPtr<FOdysseyEditor> mEditor;
+    FText mTitle;
+    FName mLayoutName;
+    FString mWorldCentricTabPrefix;
+    TSharedPtr<FOdysseyPainterEditor> mEditor;
 };

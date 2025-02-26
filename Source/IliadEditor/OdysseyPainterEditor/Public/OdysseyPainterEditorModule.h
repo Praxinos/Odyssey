@@ -3,13 +3,16 @@
 
 #include "Modules/ModuleManager.h"
 
-class FOdysseyPainterEditorModule
+class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorModule
     : public IModuleInterface
 {
 public:
     // IModuleInterface interface
     virtual void StartupModule() override;
     virtual void ShutdownModule() override;
+
+public:
+    virtual void OpenStandaloneEditorForAsset( UObject* iAsset );
 
 private:
     //Settings
@@ -31,6 +34,18 @@ private:
     void RegisterDetailCustomizations();
     void UnregisterDetailCustomization();
 
+public:
+    //Tabs State Loading / Saving
+    void SetOpenedTabIds(const FName& iEditorName, const TArray<FName>& iTabIds);
+    const TArray<FName>& GetOpenedTabIds(const FName& iEditorName, const TArray<FName>& iDefaultOpenedTabIds);
+
 private:
+    FString GetOpenedTabIdsProjectPath() const;
+    FString GetOpenedTabIdsSavedPath() const;
+    void LoadOpenedTabIds(const FName& iEditorName, const TArray<FName>& iDefaultOpenedTabIds);
+    void SaveOpenedTabIds(const FName& iEditorName);
+
+private:
+    TMap<FName, TArray<FName>> mOpenedTabIds; //Ids of tabs that should be opened when activating a Mode Editor
     FDelegateHandle mExtendLevelEditorLayout;
 };

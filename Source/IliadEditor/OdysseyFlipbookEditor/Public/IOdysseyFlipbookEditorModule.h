@@ -14,5 +14,5 @@ class IOdysseyFlipbookEditorModule
     : public IModuleInterface
 {
 public:
-    virtual void CreateOdysseyFlipbookEditor( TArray<UPaperFlipbook*> iFlipbook ) = 0;
+    //virtual void CreateOdysseyFlipbookEditor( TArray<UPaperFlipbook*> iFlipbook ) = 0;
 };

@@ -22,6 +22,7 @@
 #include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingToolOverrides.h"
 
 #include "PainterEditor/OdysseyPainterEditorGUI.h"
+#include "StandaloneEditor/OdysseyPainterEditorStandaloneToolkit.h"
 #include <ULIS>
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
@@ -30,6 +31,30 @@
    FOdysseyPainterEditorModule
 -----------------------------------------------------------------------------*/
 
+void
+FOdysseyPainterEditorModule::OpenStandaloneEditorForAsset( UObject* iAsset )
+{
+    if (!iAsset)
+        return;
+
+    /* TSharedPtr<FOdysseyPainterEditor> editor = MakeShared<FOdysseyPainterEditor>(
+        editorId,
+        editorName,
+        iAsset,
+        editorLayoutName
+    ); */
+
+    /* TSharedRef<FOdysseyAnimationEditorExtension> animationExtension = MakeShared<FOdysseyAnimationEditorExtension>(editor.Get());
+    editor->AddExtension(animationExtension); */
+
+    TSharedRef<FOdysseyPainterEditorStandaloneToolkit> toolkit = MakeShared<FOdysseyPainterEditorStandaloneToolkit>(iAsset);
+    toolkit->Open();
+
+    //-----
+
+    /* TSharedPtr<FOdysseyAnimationEditorSource> source = MakeShared<FOdysseyAnimationEditorSource>(iAnimation);
+    editor->SetSource(source); */
+}
 
 void
 FOdysseyPainterEditorModule::StartupModule()
@@ -55,6 +80,13 @@ FOdysseyPainterEditorModule::ShutdownModule()
 
     FOdysseyVectorBrushCustomization::Unregister();
     FOdysseyVectorObjectViewPaletteCustomization::Unregister();
+
+    //---
+    for (const auto& element : mOpenedTabIds)
+    {
+        const FName& editorName = element.Key;
+        SaveOpenedTabIds(editorName);
+    }
 }
 
 void
@@ -133,6 +165,88 @@ void
 FOdysseyPainterEditorModule::UnregisterDetailCustomization()
 {
     FOdysseyShapes::UnregisterDetailCustomization();
+}
+
+void
+FOdysseyPainterEditorModule::SetOpenedTabIds(const FName& iEditorName, const TArray<FName>& iTabIds)
+{
+    TArray<FName>& tabIds = mOpenedTabIds.FindOrAdd(iEditorName);
+    tabIds = iTabIds;
+}
+
+const TArray<FName>&
+FOdysseyPainterEditorModule::GetOpenedTabIds(const FName& iEditorName, const TArray<FName>& iDefaultOpenedTabIds)
+{
+    if (!mOpenedTabIds.Contains(iEditorName))
+        LoadOpenedTabIds(iEditorName, iDefaultOpenedTabIds);
+
+    return mOpenedTabIds[iEditorName];
+}
+
+FString
+FOdysseyPainterEditorModule::GetOpenedTabIdsSavedPath() const
+{
+    FString filename = FApp::GetProjectName() + FString("OdysseyLayout.ini");
+    return FPaths::Combine(FPlatformProcess::UserSettingsDir(), FApp::GetEpicProductIdentifier(), TEXT("Editor"), TEXT("Odyssey"), filename);
+}
+
+FString
+FOdysseyPainterEditorModule::GetOpenedTabIdsProjectPath() const
+{
+    FString filename = "OdysseyLayout.ini";
+    return FPaths::Combine(FPaths::ProjectConfigDir(), filename);
+}
+
+void
+FOdysseyPainterEditorModule::LoadOpenedTabIds(const FName& iEditorName, const TArray<FName>& iDefaultOpenedTabIds)
+{
+    FString savedPath = GetOpenedTabIdsSavedPath();
+    FString projectPath = GetOpenedTabIdsProjectPath();
+
+    TArray<FName>& tabIds = mOpenedTabIds.FindOrAdd(iEditorName);
+
+    FConfigFile* configFile = GConfig->Find(savedPath);
+    if ( !configFile || !configFile->Contains(iEditorName.ToString()) )
+    {
+        configFile = GConfig->Find(projectPath);
+
+        if ( !configFile || !configFile->Contains(iEditorName.ToString()) )
+        {
+            tabIds = iDefaultOpenedTabIds;
+            return;
+        }
+    }
+
+    TArray<FString> tabStringIds;
+    configFile->GetArray(
+        *iEditorName.ToString(),
+        TEXT("OpenedTabs"),
+        tabStringIds);
+
+    tabIds.Empty();
+    for ( const FString& tabId : tabStringIds )
+    {
+        tabIds.Add(FName(tabId));
+    }
+}
+
+void
+FOdysseyPainterEditorModule::SaveOpenedTabIds(const FName& iEditorName)
+{
+    FString savedPath = GetOpenedTabIdsSavedPath();
+    TArray<FName>& tabIds = mOpenedTabIds.FindOrAdd(iEditorName);
+
+    TArray<FString> tabStringIds;
+    for ( const FName& tabId : tabIds )
+    {
+        tabStringIds.Add(tabId.ToString());
+    }
+
+    GConfig->SetArray(
+        *iEditorName.ToString(),
+        TEXT("OpenedTabs"),
+        tabStringIds,
+        savedPath);
 }
 
 IMPLEMENT_MODULE( FOdysseyPainterEditorModule, OdysseyPainterEditor );

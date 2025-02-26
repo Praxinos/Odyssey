@@ -15,7 +15,6 @@
 #include "PainterEditor/OdysseyPainterEditor.h"
 #include "TextureEditor/OdysseyTextureEditorExtension.h"
 #include "OdysseyTextureEditorSettings.h"
-#include "OdysseyTextureEditorToolkit.h"
 #include "OdysseyTextureAssetTypeActions.h"
 #include "OdysseyTextureAssetTypeActions.h"
 #include "TextureEditor/OdysseyTextureEditorCommands.h"
@@ -30,7 +29,7 @@
    FOdysseyTextureEditorModule
 -----------------------------------------------------------------------------*/
 
-void
+/*void
 FOdysseyTextureEditorModule::CreateOdysseyTextureEditor( TArray<UTexture2D*> iTextures )
 {
     UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem< UAssetEditorSubsystem >();
@@ -65,7 +64,7 @@ FOdysseyTextureEditorModule::CreateOdysseyTextureEditor( TArray<UTexture2D*> iTe
         TSharedPtr<FOdysseyTextureEditorSource> source = MakeShared<FOdysseyTextureEditorSource>(texture);
         editor->SetSource(source);
     }
-}
+}-*/
 
 void
 FOdysseyTextureEditorModule::StartupModule()

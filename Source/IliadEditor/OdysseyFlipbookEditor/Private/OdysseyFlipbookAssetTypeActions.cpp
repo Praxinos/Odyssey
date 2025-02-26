@@ -7,9 +7,9 @@
 #include "ContentBrowserModule.h"
 #include "IContentBrowserSingleton.h"
 #include "OdysseyFlipbook.h"
-#include "OdysseyFlipbookEditorModule.h"
 #include "OdysseyFlipbookWrapper.h"
 #include "OdysseyPainterEditorSettings.h"
+#include "OdysseyPainterEditorModule.h"
 
 #define LOCTEXT_NAMESPACE "FlipbookEditor"
 
@@ -61,8 +61,8 @@ void FOdysseyFlipbookAssetTypeActions::OpenAssetEditor(const TArray<UObject*>& I
 
         if (odysseyFlipbook != NULL)
         {
-            FOdysseyFlipbookEditorModule* odysseyFlipbookModule = &FModuleManager::LoadModuleChecked<FOdysseyFlipbookEditorModule>("OdysseyFlipbookEditor");
-            odysseyFlipbookModule->CreateOdysseyFlipbookEditor({odysseyFlipbook});
+            FOdysseyPainterEditorModule* painterEditorModule = &FModuleManager::GetModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
+            painterEditorModule->OpenStandaloneEditorForAsset(odysseyFlipbook);
         }
     }
 

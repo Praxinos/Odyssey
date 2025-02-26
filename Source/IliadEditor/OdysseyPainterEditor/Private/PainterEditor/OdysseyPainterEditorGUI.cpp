@@ -4,7 +4,6 @@
 #include "OdysseyPainterEditorGUI.h"
 #include "OdysseyEditorTab.h"
 #include "OdysseyPainterEditor.h"
-#include "OdysseyAssetEditorToolkit.h"
 #include "SOdysseyTabletAPISwitcher.h"
 #include "Models/OdysseyPainterEditorCommands.h"
 

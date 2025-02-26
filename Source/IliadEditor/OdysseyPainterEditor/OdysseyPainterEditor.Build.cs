@@ -32,25 +32,28 @@ public class OdysseyPainterEditor : ModuleRules
 
         PrivateDependencyModuleNames.AddRange(
             new string[] {
-                "blend2d",
                 "AppFramework",
                 "Core",
                 "CoreUObject",
-                "Slate",
-                "SlateCore",
-                "UnrealEd",
-                "InputCore",
-                "LevelEditor",
                 "Engine",
-                "RHI",
-                "RenderCore",
-                "RawMesh",
-                "ToolMenus",
                 "EditorStyle",
                 "EditorFramework",
                 "EditorWidgets",
+                "InputCore",
+                "LevelEditor",
+                "Paper2D",
                 "PropertyEditor",
                 "Projects",
+                "RHI",
+                "RenderCore",
+                "RawMesh",
+                "Slate",
+                "SlateCore",
+                "ToolMenus",
+                "ToolWidgets",
+                "UnrealEd",
+
+                "OdysseyAnimation",
                 "OdysseyCore",
                 "OdysseyHUD",
                 "OdysseyImaging",
@@ -60,7 +63,8 @@ public class OdysseyPainterEditor : ModuleRules
                 "OdysseyStylusInput",
                 "OdysseyVector",
                 "OdysseyWidgets",
-                "ToolWidgets"
+
+                "blend2d"
             }
         );
 
@@ -72,6 +76,7 @@ public class OdysseyPainterEditor : ModuleRules
                 "OdysseyMedia",
                 "OdysseyPalette",
                 "OdysseyVector",
+
                 "ULIS",
                 "ULISLoader"
              }

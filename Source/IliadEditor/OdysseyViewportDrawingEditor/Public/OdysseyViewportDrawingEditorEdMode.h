@@ -64,7 +64,6 @@ private:
     void OnResetViewMode();
 
 private:
-    TSharedPtr<FOdysseyPainterEditor> mEditor;
     TSharedPtr<FOdysseyViewportDrawingEditorToolkit> mViewportDrawingEditorToolkit;
     FOdysseyViewportDrawingEditorPainter* mViewportDrawingEditorPainter;
     TSharedPtr<FOdysseyViewportDrawingEditorExtension> mViewportDrawingEditorExtension;

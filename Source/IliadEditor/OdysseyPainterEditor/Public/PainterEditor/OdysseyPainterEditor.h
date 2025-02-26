@@ -3,8 +3,9 @@
 
 #pragma once
 
-#include "OdysseyEditor.h"
 #include "OdysseyHUD.h"
+#include "OdysseyEditorTab.h"
+#include "OdysseyEditorShortcuts.h"
 #include "OdysseyMediaProvider.h"
 #include "OdysseyVectorEngine.h"
 #include "Proxies/OdysseyBrushColor.h"
@@ -53,22 +54,65 @@ class UOdysseyPainterEditorVectorTrajectoryTool;
  * Base class for a Painting Editor
  */
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditor
-    : public FOdysseyEditor
+    : public FGCObject //Allows us to register External UObject in Garbage Collector
+    , public FTickableEditorObject //Allows us to react to Tick events
+    , public TSharedFromThis<FOdysseyPainterEditor>
 {
+public:
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnAddEditedObject, UObject*);
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnRemoveEditedObject, UObject*);
+
 public:
     // Construction / Destruction
     virtual ~FOdysseyPainterEditor();
-    FOdysseyPainterEditor(const FName& iId, const FText& iName, UObject* iEditedObject, const FName& iLayoutName);
+    FOdysseyPainterEditor(TSharedRef<FBaseToolkit> iToolkit);
 
 public:
-    virtual void Initialize() override;
-    virtual TSharedRef<FTabManager::FLayout> CreateLayout() override;
-    virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
-    virtual void ExtendMenu( TSharedRef<FExtender> iExtender ) override;
-    virtual void ExtendLevelEditorToolbar( UToolMenu* iToolbar ) override;
-    virtual void ExtendAssetEditorToolbar(UToolMenu* iToolbar) override;
-    virtual void OnClose() override;
-    virtual void InitToolMenuContext(FToolMenuContext& MenuContext) override;
+    const FName& GetId() const;
+    UObject* GetEditedObject() const;
+
+    void AddEditedObject(UObject* iObject);
+    void RemoveEditedObject(UObject* iObject);
+
+    void AddTab(TSharedRef<FOdysseyEditorTab> iTab);
+    template<class T> void RemoveTab();
+    template<class T> TSharedPtr<T> FindTab() const;
+    const TArray<TSharedPtr<FOdysseyEditorTab>>& GetTabs() const;
+    void InitTabs();
+    void CloseAllTabs();
+
+    void RegisterTabSpawners( const TSharedRef<FTabManager>& iTabManager );
+    void UnregisterTabSpawners( const TSharedRef<FTabManager>& iTabManager );
+
+    FOnAddEditedObject& OnAddEditedObjectDelegate();
+    FOnRemoveEditedObject& OnRemoveEditedObjectDelegate();
+    FSimpleDelegate& OnRegenerateToolbarAndMenus();
+
+    FOdysseyEditorShortcuts& GetShortcuts();
+
+    void BuildModeLayout(TSharedPtr<FAssetEditorModeUILayer> iModeUILayerPtr);
+
+public:
+    // Overridable Methods
+    void Initialize();
+    TSharedRef<FTabManager::FLayout> CreateLayout();
+    void BindShortcuts(FBaseToolkit* iToolkit);
+    void ExtendMenu( TSharedRef<FExtender> iExtender );
+    void ExtendLevelEditorToolbar( UToolMenu* iToolbar );
+    void ExtendAssetEditorToolbar( UToolMenu* iToolbar );
+    bool OnCloseRequested();
+    void OnClose();
+    TArray<UObject*> GetAdditionalEditedObjects();
+    void InitToolMenuContext(FToolMenuContext& MenuContext);
+
+protected:
+    // FGCObject implementation
+    virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
+    virtual FString GetReferencerName() const override;
+
+    // FTickableEditorObject implementation
+    virtual void Tick(float DeltaTime) override;
+    virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT( FOdysseyPainterEditor, STATGROUP_Tickables); }
 
 public:
     //Tools
@@ -273,13 +317,6 @@ protected:
     virtual void OnApplyOverrides(const TMap<FName, UObject*>& iOverrides);
     void OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack);
 
-    // FTickableEditorObject implementation
-    virtual void Tick(float DeltaTime) override;
-
-protected:
-    // FGCObject implementation
-    virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
-
 private:
     void InitTools();
     void InitHUD();
@@ -288,7 +325,19 @@ private:
     UOdysseyPainterEditorTool* FindDefaultToolForCurrentLayer();
 
 protected:
-    FText                                    mName;
+    TWeakPtr<FBaseToolkit> mToolkit;
+    FName mId;
+    FText mName;
+    UObject* mEditedObject;
+    TArray<TSharedPtr<FOdysseyEditorTab>> mTabs;
+    TArray<UObject*> mAdditionalEditedObjects;
+    FString mTabsSaveFilename;
+
+    FOnAddEditedObject mOnAddEditedObject;
+    FOnRemoveEditedObject mOnRemoveEditedObject;
+    FSimpleDelegate mOnRegenerateToolbarAndMenus;
+
+    FOdysseyEditorShortcuts mShortcuts;
     FName                                    mLayoutName;
     TSharedPtr<FTabManager::FLayout>         mLayout;
     static TSharedPtr<::ULIS::FBlock>        mCopyBlock; // Pixel block in clipboard (ctrl + c, ctrl + v)
@@ -356,4 +405,28 @@ T* FOdysseyPainterEditor::AddTool()
     tool->SetEditor(this);
     mTools.Add(tool);
     return tool;
+}
+
+template<class T>
+void
+FOdysseyPainterEditor::RemoveTab()
+{
+    TSharedPtr<FOdysseyEditorTab> tab = FindTab<T>();
+    if (!tab)
+        return;
+
+    mTabs.RemoveSingle(tab);
+}
+
+template<class T>
+TSharedPtr<T>
+FOdysseyPainterEditor::FindTab() const
+{
+    const FName& id = T::StaticId();
+    for (const TSharedPtr<FOdysseyEditorTab> tab : mTabs)
+    {
+        if (tab->GetId() == id)
+            return StaticCastSharedPtr<T>(tab);
+    }
+    return nullptr;
 }

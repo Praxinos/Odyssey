@@ -98,7 +98,7 @@ FOdysseyViewportDrawingEditorEdMode::DrawHUD(FEditorViewportClient* ViewportClie
     if (!mViewportDrawingEditorExtension->GetDrawHUDParams(View, Canvas, scaleFactor, params))
         return;
 
-    mEditor->HUDSystem()->DrawHUD(params);
+    GetEditor()->HUDSystem()->DrawHUD(params);
 }
 
 
@@ -187,16 +187,9 @@ void FOdysseyViewportDrawingEditorEdMode::Enter()
 
     //checkf(mViewportDrawingEditorPainter != nullptr, TEXT("ViewportDrawingEditorPainter was not created"));
 
-    mEditor = MakeShared<FOdysseyPainterEditor>(
-        TEXT("OdysseyViewportDrawingEditor"),
-        LOCTEXT("main-menu.category", "Odyssey Viewport Drawing Editor"),
-        nullptr,
-        "OdysseyViewportDrawingEditor_Layout"
-    );
-
     if (UsesToolkits() && !Toolkit.IsValid())
     {
-        mViewportDrawingEditorToolkit = MakeShared<FOdysseyViewportDrawingEditorToolkit>(mEditor.ToSharedRef(), this);
+        mViewportDrawingEditorToolkit = MakeShared<FOdysseyViewportDrawingEditorToolkit>(this);
         Toolkit = mViewportDrawingEditorToolkit;
         mViewportDrawingEditorToolkit->Initialize(this, Owner->GetToolkitHost());
 
@@ -257,15 +250,16 @@ void FOdysseyViewportDrawingEditorEdMode::Exit()
         Toolkit.Reset();
     }
 
+    if (mViewportDrawingEditorToolkit)
+    {
+        mViewportDrawingEditorToolkit->GetEditor()->OnClose();
+        mViewportDrawingEditorToolkit = nullptr;
+    }
     mViewportDrawingEditorExtension = nullptr;
-    mViewportDrawingEditorToolkit = nullptr;
 
     //mViewportDrawingEditorPainter->Finalize();
     //delete mViewportDrawingEditorPainter;
     //mViewportDrawingEditorPainter = nullptr;
-
-    mEditor->OnClose();
-    mEditor = nullptr;
 
     // Call parent implementation
     FEdMode::Exit();
@@ -274,7 +268,10 @@ void FOdysseyViewportDrawingEditorEdMode::Exit()
 FOdysseyPainterEditor*
 FOdysseyViewportDrawingEditorEdMode::GetEditor() const
 {
-    return mEditor.Get();
+    if (!mViewportDrawingEditorToolkit)
+        return nullptr;
+
+    return mViewportDrawingEditorToolkit->GetEditor().Get();
 }
 
 TSharedPtr<FOdysseyViewportDrawingEditorToolkit>

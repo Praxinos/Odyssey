@@ -24,6 +24,7 @@
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "OdysseyPixelFormat.h"
 #include "Textures/SlateIcon.h"
+#include "OdysseyPainterEditorModule.h"
 #include "ULISLoaderModule.h"
 #include <ULIS>
 
@@ -82,8 +83,14 @@ public:
 
     void ActionTextures( TArray< UTexture2D* >& iTextures ) override
     {
-        FOdysseyTextureEditorModule* OdysseyTextureEditorModule = &FModuleManager::GetModuleChecked< FOdysseyTextureEditorModule >( "OdysseyTextureEditor" );
-        OdysseyTextureEditorModule->CreateOdysseyTextureEditor( iTextures );
+        for (UTexture2D* texture : iTextures)
+        {
+            if (!texture)
+                continue;
+
+            FOdysseyPainterEditorModule* painterEditorModule = &FModuleManager::GetModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
+            painterEditorModule->OpenStandaloneEditorForAsset(texture);
+        }
     }
 };
 
