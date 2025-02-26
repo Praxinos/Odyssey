@@ -4,9 +4,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "PainterEditor/OdysseyPainterEditorExtension.h"
+#include "OdysseyPainterEditorExtension.h"
 #include "OdysseyAnimationEditorTimelinePosition.h"
-#include "OdysseyAnimationEditorFlipSystem.h"
 #include "OdysseyImageRenderingAbility.h"
 
 class FOdysseyPainterEditor;
@@ -18,6 +17,7 @@ class FOdysseyAnimationEditorGUI;
 class FOdysseyLayerStackEditorBrushContext;
 class FOdysseyAnimationGlobalShortcuts;
 class UOdysseyAnimationEditorOutOfPegsTool;
+class FOdysseyAnimationEditorFlipSystem;
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyAnimationEditorExtension
     : public FOdysseyPainterEditorExtension

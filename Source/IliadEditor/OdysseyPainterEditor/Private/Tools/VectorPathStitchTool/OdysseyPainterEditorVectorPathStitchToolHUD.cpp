@@ -92,7 +92,7 @@ FOdysseyPainterEditorVectorPathStitchToolHUD::SetCursorPosition( double iWorldX
 }
 
 void
-FOdysseyPainterEditorVectorPathStitchToolHUD::DrawHUD( const FOdysseyHUDSystem::FDrawHUDParams& iParams )
+FOdysseyPainterEditorVectorPathStitchToolHUD::DrawHUD( const FOdysseyHUD::FDrawHUDParams& iParams )
 {
     FLinearColor fgColor = FLinearColor( FOdysseyVectorHUD::GetForegroundColor() );
     FLinearColor bgColor = FLinearColor( FOdysseyVectorHUD::GetBackgroundColor() );

@@ -8,7 +8,7 @@
 #include "OdysseyAnimationFactory.h"
 #include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
 #include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
-#include "Widgets/Animation/LayerStack/SOdysseyAnimationLayerStack.h"
+#include "Widgets/Animation/Timeline/SOdysseyAnimationLayerStack.h"
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "Widgets/Animation/SOdysseyAnimationExportImageSequenceDialog.h"
 #include "PaperFlipbook.h"

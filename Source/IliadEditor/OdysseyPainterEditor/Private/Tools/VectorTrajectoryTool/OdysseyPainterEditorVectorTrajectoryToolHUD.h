@@ -24,7 +24,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorTrajectoryToolHUD : pu
         FOdysseyPainterEditorVectorTrajectoryToolHUD(  UOdysseyPainterEditorVectorTrajectoryTool* iGridTool );
 
         virtual void Load() override;
-        void DrawHUD( const FOdysseyHUDSystem::FDrawHUDParams& iParams ) override;
+        void DrawHUD( const FOdysseyHUD::FDrawHUDParams& iParams ) override;
         virtual void Draw( BLContext* iBLContext ) override;
         virtual void Reset() override;
         FInbetweenerInbetween* PickInbetween( FOdysseyVectorTagInbetweener* iInbetweenerTag
@@ -63,14 +63,14 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorTrajectoryToolHUD : pu
         static constexpr double WAYPOINTRADIUS = 3.5f;
 
     private:
-        void DrawTrajectory( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+        void DrawTrajectory( const FOdysseyHUD::FDrawHUDParams& iParams
                            , const FLinearColor& iFgColor
                            , const FLinearColor& iBgColor
                            , const FLinearColor& iHcColor
                            , FOdysseyVectorTagInbetweener* iInbetweenerTag
                            , FInbetweenerTrajectory* iTrajectory );
 
-        void DrawQuad( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+        void DrawQuad( const FOdysseyHUD::FDrawHUDParams& iParams
                            , const FLinearColor& iColor
                            , FInbetweenerQuad* iQuad );
 

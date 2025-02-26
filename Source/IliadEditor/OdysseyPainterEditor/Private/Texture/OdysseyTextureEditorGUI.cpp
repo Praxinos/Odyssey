@@ -8,11 +8,11 @@
 #include "OdysseyTextureEditorTextureDetailsTab.h"
 #include "Texture/OdysseyTextureEditorExtension.h"
 #include "Framework/Docking/LayoutExtender.h"
-#include "PainterEditor/OdysseyPainterEditorVectorSceneTreeViewTab.h"
+#include "OdysseyPainterEditorVectorSceneTreeViewTab.h"
 #include "OdysseyMediaVector.h"
 #include "OdysseyPainterEditor.h"
 #include "Texture/OdysseyTextureEditorCommands.h"
-#include "PainterEditor/OdysseyPainterEditorSource.h"
+#include "OdysseyPainterEditorSource.h"
 // Vector engine
 #include "OdysseyVectorGroupPaint.h"
 

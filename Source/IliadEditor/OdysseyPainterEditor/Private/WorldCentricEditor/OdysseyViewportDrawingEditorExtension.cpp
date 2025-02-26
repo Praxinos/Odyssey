@@ -4,8 +4,8 @@
 #include "OdysseyViewportDrawingEditorExtension.h"
 
 #include "OdysseyViewportDrawingEditorGUI.h"
-#include "PainterEditor/OdysseyPainterEditor.h"
-#include "PainterEditor/OdysseyPainterEditorSource.h"
+#include "OdysseyPainterEditor.h"
+#include "OdysseyPainterEditorSource.h"
 #include "LevelEditorSequencerIntegration.h"
 #include "MeshPaintAdapterFactory.h"
 #include "MediaTexture.h"

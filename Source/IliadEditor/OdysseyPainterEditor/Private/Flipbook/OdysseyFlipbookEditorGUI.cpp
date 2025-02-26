@@ -5,10 +5,10 @@
 
 #include "OdysseyFlipbookEditorTimelineTab.h"
 #include "Framework/Docking/LayoutExtender.h"
-#include "Flipbook/OdysseyFlipbookEditorExtension.h"
+#include "OdysseyFlipbookEditorExtension.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorViewportTab.h"
-#include "PainterEditor/OdysseyPainterEditorSource.h"
+#include "OdysseyPainterEditorSource.h"
 #include "SOdysseyFlipbookTimelineView.h"
 
 /////////////////////////////////////////////////////

@@ -6,7 +6,7 @@
 #include "OdysseyMediaVector.h"
 #include "OdysseyPainterEditor.h"
 #include "ISinglePropertyView.h"
-#include "PainterEditor/OdysseyPainterEditorSource.h"
+#include "OdysseyPainterEditorSource.h"
 #include "Misc/MessageDialog.h"
 #include "SOdysseySinglePropertyView.h"
 #include "Widgets/Input/SSegmentedControl.h"

@@ -6,7 +6,7 @@
 #include "ISequencer.h"
 #include "EditorModeManager.h"
 
-#include "Widgets/Animation/LayerStack/SOdysseyAnimationTimelineTreeView.h"
+#include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineTreeView.h"
 #include "Animation/OdysseyAnimationEditorTimelinePosition.h"
 #include "LayerStack/OdysseyAnimationLayerStack.h"
 #include "OdysseyViewportDrawingEditorEdMode.h"

@@ -3,8 +3,8 @@
 
 #include "Shortcuts/AnimationTimeline/OdysseyAnimationTimelineCellImageRasterShortcuts.h"
 
-#include "Widgets/Animation/LayerStack/Cells/CellImageStagger/SOdysseyAnimationCellImageStagger.h"
-#include "Widgets/Animation/LayerStack/Cells/CellImageRaster/SOdysseyAnimationCellImageRaster.h"
+#include "Widgets/Animation/Timeline/Cells/CellImageStagger/SOdysseyAnimationCellImageStagger.h"
+#include "Widgets/Animation/Timeline/Cells/CellImageRaster/SOdysseyAnimationCellImageRaster.h"
 #include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
 #include "OdysseyAnimationEditorCommands.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"

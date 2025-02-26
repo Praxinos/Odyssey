@@ -3,7 +3,7 @@
 
 #include "IOdysseyViewportDrawingEditorAdapter.h"
 
-#include "PainterEditor/OdysseyPainterEditorSource.h"
+#include "OdysseyPainterEditorSource.h"
 #include "OdysseyTextureEditorSource.h"
 #include "OdysseyBrushAssetBase.h"
 #include "OdysseyViewportDrawingEditorViewportClient.h"
@@ -20,7 +20,7 @@
 #include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
 #include "TexturePaintHelpers.h"
 #include "OdysseyKeyState.h"
-#include "Models/OdysseyPainterEditorCommands.h"
+#include "OdysseyPainterEditorCommands.h"
 #include "OdysseyViewportDrawingEditorExtension.h"
 #include "OdysseyPainterEditor.h"
 #include "LevelEditorViewport.h"

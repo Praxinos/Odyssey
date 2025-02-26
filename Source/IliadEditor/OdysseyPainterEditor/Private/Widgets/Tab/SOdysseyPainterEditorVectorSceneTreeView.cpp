@@ -12,7 +12,7 @@
 #include "HUD/OdysseyVectorHUD.h"
 #include "OdysseyPainterEditor.h"
 #include "Undo/OdysseyVectorUndoSelectObject.h"
-#include "PainterEditor/OdysseyPainterEditorSource.h"
+#include "OdysseyPainterEditorSource.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 

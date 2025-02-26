@@ -12,9 +12,9 @@
 #include "ISinglePropertyView.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Widgets/Layout/SWrapBox.h"
-#include "PainterEditor/OdysseyPainterEditorSource.h"
+#include "OdysseyPainterEditorSource.h"
 #include "GenericPlatform/GenericPlatformTime.h"
-#include "Models/OdysseyPainterEditorCommands.h"
+#include "OdysseyPainterEditorCommands.h"
 #include "Toolkits/BaseToolkit.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "SOdysseySinglePropertyView.h"
@@ -29,7 +29,6 @@ UOdysseyPainterEditorVectorPathDrawingTool::~UOdysseyPainterEditorVectorPathDraw
 
 UOdysseyPainterEditorVectorPathDrawingTool::UOdysseyPainterEditorVectorPathDrawingTool()
     : UOdysseyPainterEditorVectorBaseTool( MakeShared<FOdysseyPainterEditorVectorPathDrawingToolHUD>( this ), true, false )
-    , ColorMode( eForegroundColorMode::SolidColor )
     , Opacity( 1.0f )
     , Brush( nullptr )
     , TracingType( eTracingType::Organic )

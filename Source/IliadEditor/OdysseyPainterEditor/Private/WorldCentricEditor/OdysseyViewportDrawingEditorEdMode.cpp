@@ -3,7 +3,7 @@
 
 #include "OdysseyViewportDrawingEditorEdMode.h"
 
-#include "PainterEditor/OdysseyPainterEditor.h"
+#include "OdysseyPainterEditor.h"
 #include "OdysseyViewportDrawingEditorExtension.h"
 
 #include "EdMode.h"

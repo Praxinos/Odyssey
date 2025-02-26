@@ -23,7 +23,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorChartToolHUD : public 
         FOdysseyPainterEditorVectorChartToolHUD(  UOdysseyPainterEditorVectorChartTool* iGridTool );
 
         virtual void Load() override;
-        virtual void DrawHUD( const FOdysseyHUDSystem::FDrawHUDParams& iParams ) override;
+        virtual void DrawHUD( const FOdysseyHUD::FDrawHUDParams& iParams ) override;
         virtual void Draw( BLContext* iBLContext ) override;
         virtual void Reset() override;
         FInbetweenerChart::Inbetween* PickInbetween( double iWorldX
@@ -44,7 +44,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorChartToolHUD : public 
                                             , double iRadius );
 
     private:
-        void DrawBreakdownChart( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+        void DrawBreakdownChart( const FOdysseyHUD::FDrawHUDParams& iParams
                                , const FLinearColor& iFgColor
                                , const FLinearColor& iBgColor
                                , const FLinearColor& iHcColor

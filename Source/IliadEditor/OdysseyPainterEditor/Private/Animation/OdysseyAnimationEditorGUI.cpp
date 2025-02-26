@@ -8,7 +8,7 @@
 #include "OdysseyAnimationEditorTimelineTab.h"
 #include "OdysseyAnimationEditorAnimationDetailsTab.h"
 #include "Framework/Docking/LayoutExtender.h"
-#include "PainterEditor/OdysseyPainterEditorVectorSceneTreeViewTab.h"
+#include "OdysseyPainterEditorVectorSceneTreeViewTab.h"
 #include "OdysseyMediaVector.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorSource.h"
@@ -25,14 +25,14 @@
 #include "Undo/OdysseyVectorUndoTagInbetweenerBreakdownAlter.h"
 
 #include "Widgets/Layout/SWidgetSwitcher.h"
-#include "Widgets/Animation/LayerStack/SOdysseyAnimationLayerStack.h"
-#include "Widgets/Animation/LayerStack/SOdysseyAnimationTimelineInbetweeningHeader.h"
-#include "Widgets/Animation/LayerStack/SOdysseyAnimationTimelineInbetweeningHeaderRow.h"
-#include "Widgets/Animation/LayerStack/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorRow.h"
-#include "Widgets/Animation/LayerStack/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorTimeline.h"
-#include "Widgets/Animation/LayerStack/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorTimelineInbetweening.h"
+#include "Widgets/Animation/Timeline/SOdysseyAnimationLayerStack.h"
+#include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineInbetweeningHeader.h"
+#include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineInbetweeningHeaderRow.h"
+#include "Widgets/Animation/Timeline/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorRow.h"
+#include "Widgets/Animation/Timeline/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorTimeline.h"
+#include "Widgets/Animation/Timeline/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorTimelineInbetweening.h"
 
-#include "Widgets/Animation/LayerStack/SOdysseyAnimationTimelineTreeView.h"
+#include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineTreeView.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditorGUI"
 

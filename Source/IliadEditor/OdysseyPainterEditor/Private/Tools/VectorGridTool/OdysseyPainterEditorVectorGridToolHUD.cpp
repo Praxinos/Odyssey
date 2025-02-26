@@ -4,6 +4,7 @@
 #include "Tools/VectorGridTool/OdysseyPainterEditorVectorGridToolHUD.h"
 #include "Tools/VectorGridTool/OdysseyPainterEditorVectorGridTool.h"
 #include "OdysseyPainterEditor.h"
+#include "OdysseyVector.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorCell.h"
 #include "OdysseyPainterEditor.h"
@@ -213,7 +214,7 @@ FOdysseyPainterEditorVectorGridToolHUD::PickNodes( ::ULIS::FRectD& iWorldRect, b
 }
 
 void
-FOdysseyPainterEditorVectorGridToolHUD::DrawSelectionRectangle( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+FOdysseyPainterEditorVectorGridToolHUD::DrawSelectionRectangle( const FOdysseyHUD::FDrawHUDParams& iParams
                                                               , FLinearColor& iHighlightColor )
 {
     if( mWorldSelDrag != mWorldSelStart )
@@ -263,7 +264,7 @@ FOdysseyPainterEditorVectorGridToolHUD::Draw( BLContext* iBLContext )
 }
 
 void
-FOdysseyPainterEditorVectorGridToolHUD::DrawHUD( const FOdysseyHUDSystem::FDrawHUDParams& iParams )
+FOdysseyPainterEditorVectorGridToolHUD::DrawHUD( const FOdysseyHUD::FDrawHUDParams& iParams )
 {
     FLinearColor fgColor = FLinearColor( FOdysseyVectorHUD::GetForegroundColor() );
     FLinearColor bgColor = FLinearColor( FOdysseyVectorHUD::GetBackgroundColor() );

@@ -7,11 +7,11 @@
 #include "OdysseyMediaRaster.h"
 #include "OdysseyPainterEditor.h"
 #include "Palette/OdysseyPaletteEntryColor.h"
-#include "PainterEditor/OdysseyPainterEditorSource.h"
+#include "OdysseyPainterEditorSource.h"
 #include "OdysseyPainterEditorViewportTab.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "OdysseyHUDElement.h"
-#include "PainterEditor/OdysseyPainterEditorRasterSelection.h"
+#include "OdysseyPainterEditorRasterSelection.h"
 #include "SOdysseySinglePropertyView.h"
 #include "ULISLoaderModule.h"
 

@@ -3,14 +3,14 @@
 
 #include "Shortcuts/Global/OdysseyPainterEditorGlobalShortcuts.h"
 
-#include "Models/OdysseyPainterEditorCommands.h"
+#include "OdysseyPainterEditorCommands.h"
 #include "OdysseyBlockClipboardData.h"
 #include "OdysseyEditorModule.h"
 #include "OdysseyMediaRaster.h"
 #include "OdysseyPainterEditor.h"
 #include "Shortcuts/Global/OdysseyPainterEditorGlobalToolsShortcuts.h"
-#include "PainterEditor/OdysseyPainterEditorSource.h"
-#include "PainterEditor/OdysseyPainterEditorRasterSelection.h"
+#include "OdysseyPainterEditorSource.h"
+#include "OdysseyPainterEditorRasterSelection.h"
 #include "OdysseyRasterBlock.h"
 #include "ULISLoaderModule.h"
 

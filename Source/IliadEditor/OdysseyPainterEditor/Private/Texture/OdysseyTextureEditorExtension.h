@@ -4,7 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "PainterEditor/OdysseyPainterEditorExtension.h"
+#include "OdysseyPainterEditorExtension.h"
 
 class FOdysseyPainterEditor;
 class FOdysseyTextureEditorGUI;

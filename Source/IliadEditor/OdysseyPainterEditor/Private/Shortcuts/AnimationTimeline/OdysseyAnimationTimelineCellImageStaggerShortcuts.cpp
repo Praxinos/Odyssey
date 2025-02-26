@@ -3,7 +3,7 @@
 
 #include "Shortcuts/AnimationTimeline/OdysseyAnimationTimelineCellImageStaggerShortcuts.h"
 
-#include "Widgets/Animation/LayerStack/Cells/CellImageStagger/SOdysseyAnimationCellImageStagger.h"
+#include "Widgets/Animation/Timeline/Cells/CellImageStagger/SOdysseyAnimationCellImageStagger.h"
 #include "OdysseyAnimationEditorCommands.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 #include "OdysseyLayerStack.h"

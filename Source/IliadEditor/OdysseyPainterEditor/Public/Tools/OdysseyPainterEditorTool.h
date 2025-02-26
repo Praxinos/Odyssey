@@ -11,7 +11,7 @@
 #include "OdysseyHUD.h"
 #include "Widgets/SWidget.h"
 
-#include "PainterEditor/OdysseyPainterEditorColorTypes.h"
+#include "OdysseyPainterEditor.h"
 
 #include "OdysseyPainterEditorTool.generated.h"
 

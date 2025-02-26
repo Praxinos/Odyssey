@@ -4,7 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "DragDropOperations/OdysseyLayerStackDragDropOperation.h"
+#include "OdysseyLayerStackDragDropOperation.h"
 #include "Framework/MultiBox/MultiBoxExtender.h"
 #include "OdysseyLayer.h"
 #include "Widgets/Views/STreeView.h"

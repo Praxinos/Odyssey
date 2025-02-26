@@ -94,15 +94,12 @@ public class OdysseyPainterEditor : ModuleRules
         PrivateIncludePaths.AddRange(
             new string[] {
                 Path.Combine(ModuleDirectory, "Private", "Animation"),
-                Path.Combine(ModuleDirectory, "Private", "BrushContext"),
                 Path.Combine(ModuleDirectory, "Private", "Flipbook"),
-                Path.Combine(ModuleDirectory, "Private", "Models"),
-                Path.Combine(ModuleDirectory, "Private", "PaintEngine"),
-                Path.Combine(ModuleDirectory, "Private", "PainterEditor"),
-                Path.Combine(ModuleDirectory, "Private", "Settings"),
                 Path.Combine(ModuleDirectory, "Private", "Shapes"),
                 Path.Combine(ModuleDirectory, "Private", "Shortcuts"),
                 Path.Combine(ModuleDirectory, "Private", "StandaloneEditor"),
+                Path.Combine(ModuleDirectory, "Private", "Tabs"),
+                Path.Combine(ModuleDirectory, "Private", "Tabs", "VectorSceneTreeView"),
                 Path.Combine(ModuleDirectory, "Private", "Texture"),
                 Path.Combine(ModuleDirectory, "Private", "Tools"),
                 Path.Combine(ModuleDirectory, "Private", "Widgets"),
@@ -121,17 +118,11 @@ public class OdysseyPainterEditor : ModuleRules
         PublicIncludePaths.AddRange(
             new string[] {
                 Path.Combine(ModuleDirectory, "Public", "Animation"),
-                Path.Combine(ModuleDirectory, "Public", "BrushContext"),
-                Path.Combine(ModuleDirectory, "Public", "Models"),
-                Path.Combine(ModuleDirectory, "Public", "PaintEngine"),
-                Path.Combine(ModuleDirectory, "Public", "PainterEditor"),
-                Path.Combine(ModuleDirectory, "Public", "Settings"),
-                Path.Combine(ModuleDirectory, "Public", "Shapes"),
-                Path.Combine(ModuleDirectory, "Public", "Texture"),
                 Path.Combine(ModuleDirectory, "Public", "Tools"),
+                Path.Combine(ModuleDirectory, "Public", "Tools", "OutOfPegsTool"),
                 Path.Combine(ModuleDirectory, "Public", "Widgets"),
                 Path.Combine(ModuleDirectory, "Public", "Widgets", "Animation"),
-                Path.Combine(ModuleDirectory, "Public", "Widgets", "Tab"),
+                Path.Combine(ModuleDirectory, "Public", "Widgets", "Animation", "Timeline"),
                 Path.Combine(ModuleDirectory, "Public", "WorldCentricEditor"),
             }
         );

@@ -1,11 +1,11 @@
 // IDDN.FR.001.250001.006.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
 
-#include "Flipbook/OdysseyFlipbookEditorExtension.h"
+#include "OdysseyFlipbookEditorExtension.h"
 
-#include "PainterEditor/OdysseyPainterEditor.h"
-#include "Flipbook/OdysseyFlipbookEditorGUI.h"
-#include "Flipbook/OdysseyFlipbookEditorTimelineTab.h"
+#include "OdysseyPainterEditor.h"
+#include "OdysseyFlipbookEditorGUI.h"
+#include "OdysseyFlipbookEditorTimelineTab.h"
 #include "Widgets/Flipbook/SOdysseyFlipbookTimelineView.h"
 #include "Texture/OdysseyTextureEditorSource.h"
 #include "PaperSprite.h"

@@ -6,7 +6,7 @@
 #include "CoreMinimal.h"
 #include "OdysseyPaletteEntry.h"
 #include "Widgets/Views/STreeView.h"
-#include "DragDropOperations/OdysseyPaletteDragDropOperation.h"
+#include "OdysseyPaletteDragDropOperation.h"
 #include "Widgets/Input/SComboBox.h"
 
 class UOdysseyPalette;

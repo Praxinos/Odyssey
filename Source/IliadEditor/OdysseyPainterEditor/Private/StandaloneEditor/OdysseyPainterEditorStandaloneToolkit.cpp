@@ -5,7 +5,7 @@
 
 #include "OdysseyAnimation.h"
 #include "OdysseyPainterEditorModule.h"
-#include "PainterEditor/OdysseyPainterEditor.h"
+#include "OdysseyPainterEditor.h"
 
 #include "Engine/Texture2D.h"
 #include "PaperFlipbook.h"

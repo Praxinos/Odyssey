@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "PainterEditor/OdysseyPainterEditorSource.h"
+#include "OdysseyPainterEditorSource.h"
 
 #include "OdysseyTextureLayerStack.h"
 

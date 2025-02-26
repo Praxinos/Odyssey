@@ -10,7 +10,7 @@
 #include "OdysseyVector.h"
 #include "OdysseyVectorCell.h"
 #include "OdysseyVectorLayer.h"
-#include "PainterEditor/OdysseyPainterEditorSource.h"
+#include "OdysseyPainterEditorSource.h"
 #include "Undo/OdysseyVectorUndoErase.h"
 #include "SOdysseySinglePropertyView.h"
 #include "Widgets/Input/SSegmentedControl.h"

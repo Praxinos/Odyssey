@@ -22,7 +22,7 @@
 #include "FreehandShape/Interpolation/OdysseyInterpolationBezier.h"
 #include "FreehandShape/Interpolation/OdysseyInterpolationCatmullRom.h"
 #include "FreehandShape/Interpolation/OdysseyInterpolationLine.h"
-#include "PainterEditor/OdysseyPainterEditorRasterSelection.h"
+#include "OdysseyPainterEditorRasterSelection.h"
 
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "SOdysseySinglePropertyView.h"

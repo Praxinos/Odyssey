@@ -7,7 +7,7 @@
 #include <ULIS>
 #include "ULISLoaderModule.h"
 #include "OdysseyLayerStack.h"
-#include "BrushContext/OdysseyLayerStackEditorBrushContext.h"
+#include "OdysseyLayerStackEditorBrushContext.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 #include "LayerStack/OdysseyTextureLayer.h"
 #include "LayerStack/OdysseyTextureLayerStack.h"

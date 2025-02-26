@@ -6,7 +6,7 @@
 #include "CoreMinimal.h"
 #include "OdysseyFlipbookWrapper.h"
 #include "OdysseySurfaceTexture2D.h"
-#include "PainterEditor/OdysseyPainterEditorExtension.h"
+#include "OdysseyPainterEditorExtension.h"
 
 class FOdysseyPainterEditor;
 class FOdysseyFlipbookEditorGUI;

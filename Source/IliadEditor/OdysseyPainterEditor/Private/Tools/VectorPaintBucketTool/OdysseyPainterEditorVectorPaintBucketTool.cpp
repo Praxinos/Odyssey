@@ -10,7 +10,7 @@
 #include "OdysseyPainterEditorVectorBucketView.h"
 #include "OdysseyPainterEditor.h"
 #include "ISinglePropertyView.h"
-#include "PainterEditor/OdysseyPainterEditorSource.h"
+#include "OdysseyPainterEditorSource.h"
 #include "OdysseyPalette.h"
 #include "OdysseyPaletteEntry.h"
 

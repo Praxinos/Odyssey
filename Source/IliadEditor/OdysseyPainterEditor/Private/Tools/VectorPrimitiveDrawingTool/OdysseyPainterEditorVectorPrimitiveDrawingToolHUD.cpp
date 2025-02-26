@@ -48,7 +48,7 @@ FOdysseyPainterEditorVectorPrimitiveDrawingToolHUD::Unload()
 }
 
 void
-FOdysseyPainterEditorVectorPrimitiveDrawingToolHUD::DrawHUD( const FOdysseyHUDSystem::FDrawHUDParams& iParams )
+FOdysseyPainterEditorVectorPrimitiveDrawingToolHUD::DrawHUD( const FOdysseyHUD::FDrawHUDParams& iParams )
 {
     // invisible plane will get mouse events
     DrawDummyPlane( iParams );

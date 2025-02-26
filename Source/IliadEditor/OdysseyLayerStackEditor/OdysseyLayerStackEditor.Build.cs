@@ -22,6 +22,28 @@ public class OdysseyLayerStackEditor : ModuleRules
             OptimizeCode = CodeOptimization.Never;
         }
 
+        PublicIncludePaths.AddRange(
+            new string[] {
+                Path.Combine(ModuleDirectory, "Public", "BrushContext"),
+                Path.Combine(ModuleDirectory, "Public", "Commands"),
+                Path.Combine(ModuleDirectory, "Public", "Controllers"),
+                Path.Combine(ModuleDirectory, "Public", "DragDropOperations"),
+                Path.Combine(ModuleDirectory, "Public", "Shortcuts"),
+                Path.Combine(ModuleDirectory, "Public", "Widgets"),
+            }
+        );
+
+        PrivateIncludePaths.AddRange(
+            new string[] {
+                Path.Combine(ModuleDirectory, "Private", "BrushContext"),
+                Path.Combine(ModuleDirectory, "Private", "Commands"),
+                Path.Combine(ModuleDirectory, "Private", "Controllers"),
+                Path.Combine(ModuleDirectory, "Private", "DragDropOperations"),
+                Path.Combine(ModuleDirectory, "Private", "Shortcuts"),
+                Path.Combine(ModuleDirectory, "Private", "Widgets"),
+            }
+        );
+
         PublicDependencyModuleNames.AddRange(
             new string[] {
                 "OdysseyCore",

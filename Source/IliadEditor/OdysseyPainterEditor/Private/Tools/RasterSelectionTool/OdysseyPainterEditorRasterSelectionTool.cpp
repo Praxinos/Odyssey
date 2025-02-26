@@ -3,7 +3,7 @@
 
 #include "Tools/RasterSelectionTool/OdysseyPainterEditorRasterSelectionTool.h"
 #include "OdysseyMediaRaster.h"
-#include "PainterEditor/OdysseyPainterEditorRasterSelection.h"
+#include "OdysseyPainterEditorRasterSelection.h"
 #include "OdysseyPainterEditor.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "OdysseyHUDElement.h"
@@ -14,7 +14,7 @@
 #include "PolygonShape/OdysseyPolygonShape.h"
 #include "EllipseShape/OdysseyEllipseShape.h"
 #include "BezierShape/OdysseyBezierShape.h"
-#include "PainterEditor/OdysseyPainterEditorViewportTab.h"
+#include "OdysseyPainterEditorViewportTab.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorRasterSelectionTool"
 

@@ -4,7 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "PainterEditor/OdysseyPainterEditorPaletteSet.h"
+#include "OdysseyPainterEditorPaletteSet.h"
 
 class UOdysseyPaletteEntry;
 

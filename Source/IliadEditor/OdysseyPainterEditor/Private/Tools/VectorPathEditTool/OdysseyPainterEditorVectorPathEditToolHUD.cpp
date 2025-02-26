@@ -99,7 +99,7 @@ FOdysseyPainterEditorVectorPathEditToolHUD::GenerateMask( double iX
 }
 
 void
-FOdysseyPainterEditorVectorPathEditToolHUD::DrawHUD( const FOdysseyHUDSystem::FDrawHUDParams& iParams )
+FOdysseyPainterEditorVectorPathEditToolHUD::DrawHUD( const FOdysseyHUD::FDrawHUDParams& iParams )
 {
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
