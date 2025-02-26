@@ -6,14 +6,13 @@
 #include "ISequencer.h"
 #include "EditorModeManager.h"
 
-#include "Widgets/LayerStack/SOdysseyAnimationTimelineTreeView.h"
-#include "OdysseyAnimationEditorTimelinePosition.h"
+#include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineTreeView.h"
+#include "Animation/OdysseyPainterEditorAnimationTImelinePosition.h"
 #include "LayerStack/OdysseyAnimationLayerStack.h"
 #include "OdysseyViewportDrawingEditorEdMode.h"
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
-#include "AnimationEditor/OdysseyAnimationEditorExtension.h"
 #include "OdysseyViewportDrawingEditorToolkit.h"
-#include "Tools/OutOfPegsTool/OdysseyAnimationEditorOutOfPegsTool.h"
+#include "Tools/OutOfPegsTool/OdysseyPainterEditorAnimationOutOfPegsTool.h"
 #include "OdysseyAnimationComponent.h"
 #include "OdysseyAnimationTimelineTrack.h"
 #include "OdysseyAnimationTimelineSection.h"
@@ -34,7 +33,7 @@ FOdysseyAnimationTimelineSectionEditor::~FOdysseyAnimationTimelineSectionEditor(
 FOdysseyAnimationTimelineSectionEditor::FOdysseyAnimationTimelineSectionEditor(TSharedPtr<ISequencer> InSequencer, UOdysseyAnimationTimelineSection* InSection)
     : mSequencer( InSequencer )
     , mSection(InSection)
-    , mTimelinePosition(MakeShared<FOdysseyAnimationEditorTimelinePosition>())
+    , mTimelinePosition(MakeShared<FOdysseyPainterEditorAnimationTImelinePosition>())
 {
     mTimelinePosition->SetPadding(0.f);
     mTimelinePosition->HasMinZoom(false);
@@ -184,15 +183,11 @@ FOdysseyAnimationTimelineSectionEditor::RebuildSectionWidget()
                     if(!toolkit)
                         return nullptr;
 
-                    TSharedPtr<FOdysseyAnimationEditorExtension> animationExtension = toolkit->GetAnimationExtension();
-                    if (!animationExtension)
-                        return nullptr;
-
-                    if (animationExtension->Animation() != animation)
-                        return nullptr;
-
                     FOdysseyPainterEditor* editor = odysseyEdMode->GetEditor();
                     if (!editor)
+                        return nullptr;
+
+                    if (editor->GetAnimation() != animation)
                         return nullptr;
 
                     return editor;
@@ -224,15 +219,11 @@ FOdysseyAnimationTimelineSectionEditor::RebuildSectionWidget()
                     if (!animation)
                         return;
 
-                    TSharedPtr<FOdysseyAnimationEditorExtension> animationExtension = toolkit->GetAnimationExtension();
-                    if (!animationExtension)
+                    if (editor->GetAnimation() != animation)
                         return;
 
-                    if (animationExtension->Animation() != animation)
-                        return;
-
-                    animationExtension->GetOutOfPegsTool()->SetCell(iCell);
-                    editor->ActivateTemporaryTool(animationExtension->GetOutOfPegsTool());
+                    editor->GetOutOfPegsTool()->SetCell(iCell);
+                    editor->ActivateTemporaryTool(editor->GetOutOfPegsTool());
                 }
             )
             .OnInactivateOutOfPegs_Lambda(
@@ -248,14 +239,6 @@ FOdysseyAnimationTimelineSectionEditor::RebuildSectionWidget()
                     FOdysseyViewportDrawingEditorEdMode* odysseyEdMode = static_cast<FOdysseyViewportDrawingEditorEdMode*>(edMode);
                     FOdysseyPainterEditor* editor = odysseyEdMode->GetEditor();
                     if (!editor)
-                        return;
-
-                    TSharedPtr<FOdysseyViewportDrawingEditorToolkit> toolkit = odysseyEdMode->GetViewportDrawingEditorToolkit();
-                    if(!toolkit)
-                        return;
-
-                    TSharedPtr<FOdysseyAnimationEditorExtension> animationExtension = toolkit->GetAnimationExtension();
-                    if (!animationExtension)
                         return;
 
                     editor->InactivateTemporaryTool();
@@ -284,22 +267,18 @@ FOdysseyAnimationTimelineSectionEditor::RebuildSectionWidget()
                     if (!animation)
                         return ECheckBoxState::Unchecked;
 
-                    TSharedPtr<FOdysseyAnimationEditorExtension> animationExtension = toolkit->GetAnimationExtension();
-                    if (!animationExtension)
-                        return ECheckBoxState::Unchecked;
-
-                    if (animationExtension->Animation() != animation)
+                    if (editor->GetAnimation() != animation)
                         return ECheckBoxState::Unchecked;
 
                     UOdysseyPainterEditorTool* tool = editor->GetCurrentTool();
                     if (!tool)
                         return ECheckBoxState::Unchecked;
 
-                    bool isToolActive = tool->IsA(UOdysseyAnimationEditorOutOfPegsTool::StaticClass());
+                    bool isToolActive = tool->IsA(UOdysseyPainterEditorAnimationOutOfPegsTool::StaticClass());
                     if (!isToolActive)
                         return ECheckBoxState::Unchecked;
 
-                    UOdysseyAnimationEditorOutOfPegsTool* outOfPegsTool = Cast<UOdysseyAnimationEditorOutOfPegsTool>(tool);
+                    UOdysseyPainterEditorAnimationOutOfPegsTool* outOfPegsTool = Cast<UOdysseyPainterEditorAnimationOutOfPegsTool>(tool);
                     if (outOfPegsTool->GetCell() != iCell)
                         return ECheckBoxState::Unchecked;
 

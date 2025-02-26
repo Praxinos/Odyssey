@@ -4,7 +4,6 @@
 #include "OdysseyTextureImportFactory.h"
 
 #include "Editor.h"
-#include "EditorStyleSet.h"
 #include "Engine/Texture2D.h"
 
 #include "OdysseySurfaceTexture2DEditable.h"

@@ -2,21 +2,16 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
 #pragma once
 
-#include "IOdysseyFlipbookEditorModule.h"
+#include "Modules/ModuleManager.h"
 
-class UPaperFlipbook;
 class IAssetTypeActions;
 
 class FOdysseyFlipbookEditorModule
-    : public IOdysseyFlipbookEditorModule
+    : public IModuleInterface
 {
 public:
-    // IOdysseyFlipbookEditorModule interface
-    virtual void CreateOdysseyFlipbookEditor( TArray<UPaperFlipbook*> iFlipbook ) override;
-
     // IModuleInterface interface
     virtual void StartupModule() override;
-
     virtual void ShutdownModule() override;
 
     // AssetTypeActions
@@ -24,23 +19,13 @@ public:
     void UnregisterAssetTypeActions();
 
 private:
-
     // Settings
     void RegisterSettings();
     void UnregisterSettings();
-
-    // Commands
-    void RegisterCommands();
-    void UnregisterCommands();
-
-    //Level Editor Layout
-    void RegisterLevelEditorLayoutExtensions();
-    void UnregisterLevelEditorLayoutExtensions();
 
 private:
     /** All created asset type actions. Cached here so that we can unregister them during shutdown. */
     TSharedPtr<IAssetTypeActions> mOdysseyTypeActions;
     // AssetTypeActions that don't belong to us, we keep track of them to be able to (un)register them, based on Odyssey preferences
     TSharedPtr<IAssetTypeActions> mUETypeActions;
-    FDelegateHandle mExtendLevelEditorLayout;
 };

@@ -4,8 +4,6 @@
 #include "Tools/VectorPathEditTool/OdysseyPainterEditorVectorPathEditTool.h"
 #include "Tools/VectorPathEditTool/OdysseyPainterEditorVectorPathEditToolHUD.h"
 #include "OdysseyPainterEditor.h"
-#include "PainterEditor/OdysseyPainterEditorSource.h"
-#include "OdysseyPainterEditorViewportTab.h"
 #include "OdysseyMediaVector.h"
 #include "OdysseyVector.h"
 #include "OdysseyVectorLayer.h"

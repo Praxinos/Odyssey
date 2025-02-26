@@ -112,19 +112,6 @@ FOdysseyEditorTab::GetTabManager() const
     return mTabManager.Pin();
 }
 
-FMinorTabConfig
-FOdysseyEditorTab::GetMinorTabConfig()
-{
-    //Used to register tabs into the mode toolkit
-    //Also allows us to define a default layout
-    FMinorTabConfig config(GetId());
-    config.OnSpawnTab = FOnSpawnTab::CreateSP( AsShared(), &FOdysseyEditorTab::SpawnTab );
-    config.TabLabel = DisplayName();
-    config.TabIcon = Icon();
-
-    return config;
-}
-
 bool
 FOdysseyEditorTab::ShouldOpenByDefault() const
 {
@@ -145,10 +132,18 @@ FOdysseyEditorTab::Register( TSharedRef<FWorkspaceItem>& iWorkspaceMenuCategoryR
         return;
 
     FOnSpawnTab onSpawnTab = FOnSpawnTab::CreateSP( AsShared(), &FOdysseyEditorTab::SpawnTab );
+    TAttribute<ETabSpawnerMenuType::Type> menuType = MakeAttributeLambda(
+        [this]() -> ETabSpawnerMenuType::Type
+        {
+            return CanOpen() ? ETabSpawnerMenuType::Enabled : ETabSpawnerMenuType::Hidden;
+        }
+    );
     tabManager->RegisterTabSpawner(GetId(), onSpawnTab )
         .SetDisplayName( DisplayName() )
         .SetGroup(iWorkspaceMenuCategoryRef)
-        .SetIcon( Icon() );
+        .SetIcon( Icon() )
+        .SetReadOnlyBehavior( ETabReadOnlyBehavior::Hidden )
+        .SetMenuType( menuType );
 }
 
 void
@@ -170,6 +165,7 @@ FOdysseyEditorTab::SpawnTab( const FSpawnTabArgs& iArgs )
             mWidget.ToSharedRef()
         ];
 }
+
 
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Getters

@@ -23,7 +23,6 @@ public:
     bool IsOpened() const;
     const FText& GetName() const;
     const FSlateIcon& GetIcon() const;
-    FMinorTabConfig GetMinorTabConfig();
 
     bool ShouldOpenByDefault() const;
     void ShouldOpenByDefault(bool iShouldOpenByDefault);

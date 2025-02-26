@@ -111,7 +111,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorBaseToolHUD : public F
         // old HUD system
         virtual void Draw( BLContext* iBLContext ) override;
 
-        virtual void DrawHUD( const FOdysseyHUDSystem::FDrawHUDParams& iParams ) override;
+        virtual void DrawHUD( const FOdysseyHUD::FDrawHUDParams& iParams ) override;
 
         FSelectionBox& GetSelectionBox();
 
@@ -131,76 +131,76 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorBaseToolHUD : public F
         virtual void SetCursorPosition( double iX, double iY );
 
     protected:
-        void DrawSectionArray( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+        void DrawSectionArray( const FOdysseyHUD::FDrawHUDParams& iParams
                              , std::vector<FOdysseyVectorSection*>& isectionArray
                              , const FLinearColor& fgColor
                              , const FLinearColor& bgColor
                              , uint64 iHUDFlags );
 
-        void DrawHierarchy( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+        void DrawHierarchy( const FOdysseyHUD::FDrawHUDParams& iParams
                           , FOdysseyVectorObject* iTopObject
                           , const FLinearColor& iForegroundColor
                           , const FLinearColor& iBackgroundColor
                           , const FLinearColor& iHighlightColor
                           , uint64 iHUDFlags );
 
-        void DrawVertex( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+        void DrawVertex( const FOdysseyHUD::FDrawHUDParams& iParams
                        , FOdysseyVectorVertex* iVertex
                        , const FLinearColor& fgColor
                        , const FLinearColor& bgColor
                        , const FLinearColor& hcColor
                        , uint64 iHUDFlags );
 
-        void DrawBreakdown( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+        void DrawBreakdown( const FOdysseyHUD::FDrawHUDParams& iParams
                           , FInbetweenerBreakdown* iBreakdown
                           , const FLinearColor& iSourceDrawingColor
                           , const FLinearColor& iTargetDrawingColor
                           , uint64 iHUDFlags );
 
-        void DrawGrid( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+        void DrawGrid( const FOdysseyHUD::FDrawHUDParams& iParams
                      , FInbetweenerGrid* iGrid
                      , eInbetweenerPointPositionType iPositionType
                      , const FLinearColor& iColor
                      , uint64 iHUDFlags );
 
-        void DrawCycle( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+        void DrawCycle( const FOdysseyHUD::FDrawHUDParams& iParams
                       , FOdysseyVectorCycle* iCycle
                       , const FLinearColor& fgColor
                       , const FLinearColor& bgColor
                       , uint64 iHUDFlags );
 
-        void DrawInbetweenerInterpolatedPathAt( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+        void DrawInbetweenerInterpolatedPathAt( const FOdysseyHUD::FDrawHUDParams& iParams
                                               , FOdysseyVectorTagInbetweener* iInbetweenerTag
                                               , FInterpolatedPath* iInterpolatedPath
                                               , FInbetweenerChart::Inbetween* iInbetween
                                               , const FLinearColor& iColor );
 
-        void DrawPrimitivePlus( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+        void DrawPrimitivePlus( const FOdysseyHUD::FDrawHUDParams& iParams
                               , const FVector2D& iHUDCoords
                               , uint32 iSize
                               , const FLinearColor& iColor
                               , float iThickness );
 
-        void DrawPrimitiveHandle( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+        void DrawPrimitiveHandle( const FOdysseyHUD::FDrawHUDParams& iParams
                                 , const FVector2D& iHUDCoords
                                 , double iRadius
                                 , const FLinearColor& fgColor
                                 , const FLinearColor& bgColor );
 
-        void DrawPrimitiveVertex( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+        void DrawPrimitiveVertex( const FOdysseyHUD::FDrawHUDParams& iParams
                                 , const FVector2D& iHUDCoords
                                 , double iRadius
                                 , const FLinearColor& fgColor
                                 , const FLinearColor& bgColor );
 
-        void DrawPrimitiveBucket( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+        void DrawPrimitiveBucket( const FOdysseyHUD::FDrawHUDParams& iParams
                                 , const FVector2D& iHUDCoords
                                 , double iRadius
                                 , const FLinearColor& iFillColor
                                 , const FLinearColor& iOuterCountourColor
                                 , const FLinearColor& iInnerContourColor );
 
-        void DrawPrimitiveBezierCubic( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+        void DrawPrimitiveBezierCubic( const FOdysseyHUD::FDrawHUDParams& iParams
                                      , const FVector2D& iHUDCoordsP0
                                      , const FVector2D& iHUDCoordsP1
                                      , const FVector2D& iHUDCoordsP2
@@ -209,7 +209,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorBaseToolHUD : public F
                                      , const FLinearColor& iColor
                                      , float iThickness );
 
-        void DrawPrimitiveBezierQuadratic( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+        void DrawPrimitiveBezierQuadratic( const FOdysseyHUD::FDrawHUDParams& iParams
                                          , const FVector2D& iHUDCoordsP0
                                          , const FVector2D& iHUDCoordsP1
                                          , const FVector2D& iHUDCoordsP2
@@ -217,64 +217,64 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorBaseToolHUD : public F
                                          , const FLinearColor& iColor
                                          , float iThickness );
 
-        void DrawPrimitiveLine( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+        void DrawPrimitiveLine( const FOdysseyHUD::FDrawHUDParams& iParams
                               , const FVector2D& iHUDCoordsP0
                               , const FVector2D& iHUDCoordsP1
                               , const FLinearColor& iColor
                               , float iThickness );
-        void DrawPrimitiveLineOutlined( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+        void DrawPrimitiveLineOutlined( const FOdysseyHUD::FDrawHUDParams& iParams
                                       , const FVector2D& iHUDCoordsP0
                                       , const FVector2D& iHUDCoordsP1
                                       , const FLinearColor& iColor
                                       , float iThickness );
 
-        void DrawPrimitiveCircle( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+        void DrawPrimitiveCircle( const FOdysseyHUD::FDrawHUDParams& iParams
                                 , const FVector2D& iHUDCoords
                                 , double iRadius
                                 , const FLinearColor& iColor
                                 , float iThickness );
 
-        void DrawPath( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+        void DrawPath( const FOdysseyHUD::FDrawHUDParams& iParams
                      , FOdysseyVectorPath* iPath
                      , const FLinearColor& fgColor
                      , const FLinearColor& bgColor
                      , const FLinearColor& hcColor
                      , uint64 iHUDFlags );
 
-        void DrawCubicSegment( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+        void DrawCubicSegment( const FOdysseyHUD::FDrawHUDParams& iParams
                              , FOdysseyVectorSegmentCubic* iCubicSegment
                              , const FLinearColor& fgColor
                              , const FLinearColor& bgColor
                              , const FLinearColor& hcColor
                              , uint64 iHUDFlags );
 
-        void DrawGroupPaint( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+        void DrawGroupPaint( const FOdysseyHUD::FDrawHUDParams& iParams
                            , FOdysseyVectorGroupPaint* iPaintGroup
                            , const FLinearColor& fgColor
                            , const FLinearColor& bgColor
                            , const FLinearColor& hcColor
                            , uint64 iHUDFlags );
 
-        void DrawBucket( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+        void DrawBucket( const FOdysseyHUD::FDrawHUDParams& iParams
                        , FOdysseyVectorBucket* iBucket
                        , const FLinearColor& fgColor
                        , const FLinearColor& bgColor
                        , const FLinearColor& hcColor
                        , uint64 iHUDFlags );
 
-        void DrawInfo( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+        void DrawInfo( const FOdysseyHUD::FDrawHUDParams& iParams
                      , const FText& iText
                      , const FLinearColor& iColor );
 
-        void DrawBatchedLines( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+        void DrawBatchedLines( const FOdysseyHUD::FDrawHUDParams& iParams
                              , const std::vector<BatchedLine>& iLineBuffer
                              , const std::vector<FVector2D>& iPointBuffer
                              , const FLinearColor& iColor
                              , float iThickness );
-        ::ULIS::FRectD BBoxToHUD( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+        ::ULIS::FRectD BBoxToHUD( const FOdysseyHUD::FDrawHUDParams& iParams
                                 , const ::ULIS::FRectD& iBBox );
 
-        void DrawDummyPlane( const FOdysseyHUDSystem::FDrawHUDParams& iParams );
+        void DrawDummyPlane( const FOdysseyHUD::FDrawHUDParams& iParams );
 
     protected:
         void UpdateSelectionBoxVertexMode();
@@ -283,7 +283,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorBaseToolHUD : public F
         void UpdateSelectionBox( bool iForceWorld
                                , uint64 iHUDFlags );
 
-        void DrawSelectionBox( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+        void DrawSelectionBox( const FOdysseyHUD::FDrawHUDParams& iParams
                              , const FLinearColor& iForegroundColor
                              , const FLinearColor& iBackgroundColor
                              , const FLinearColor& iHighlightColor
@@ -300,18 +300,18 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorBaseToolHUD : public F
         void FormatModifierInfo( const FText* iCtrlText
                                , const FText* iShiftText
                                , const FText* iAltText );
-        void DrawModifierInfo( const FOdysseyHUDSystem::FDrawHUDParams& iParams );
-        FVector2D WorldPointToHUD( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+        void DrawModifierInfo( const FOdysseyHUD::FDrawHUDParams& iParams );
+        FVector2D WorldPointToHUD( const FOdysseyHUD::FDrawHUDParams& iParams
                                  , const FVector2D& iWorldCoords );
-        FVector2D WorldVectorToHUD( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+        FVector2D WorldVectorToHUD( const FOdysseyHUD::FDrawHUDParams& iParams
                                   , const FVector2D& iWorldOriginCoords
                                   , const FVector2D& iWorldVectorCoords );
-        ::ULIS::FVec2D WorldPointToHUD( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+        ::ULIS::FVec2D WorldPointToHUD( const FOdysseyHUD::FDrawHUDParams& iParams
                                       , const ::ULIS::FVec2D& iWorldCoords );
-        ::ULIS::FVec2D WorldVectorToHUD( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+        ::ULIS::FVec2D WorldVectorToHUD( const FOdysseyHUD::FDrawHUDParams& iParams
                                        , const ::ULIS::FVec2D& iWorldOriginCoords
                                        , const ::ULIS::FVec2D& iWorldVectorCoords );
-        ::ULIS::FRectD WorldRectToHUD( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+        ::ULIS::FRectD WorldRectToHUD( const FOdysseyHUD::FDrawHUDParams& iParams
                                      , const ::ULIS::FRectD& iWorldRect );
 
     protected:

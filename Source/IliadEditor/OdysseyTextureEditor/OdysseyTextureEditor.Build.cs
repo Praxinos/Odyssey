@@ -25,25 +25,17 @@ namespace UnrealBuildTool.Rules
 
             PublicIncludePaths.AddRange(
                 new string[] {
-                    Path.Combine(ModuleDirectory, "Public"),
-                    Path.Combine(ModuleDirectory, "Public", "Settings"),
-                    Path.Combine(ModuleDirectory, "Public", "TextureEditor"),
-                    Path.Combine(ModuleDirectory, "Public", "LayerStack")
                 }
                 );
 
             PrivateIncludePaths.AddRange(
                 new string[] {
-                    Path.Combine(ModuleDirectory, "Private", "Settings"),
-                    Path.Combine(ModuleDirectory, "Private", "TextureEditor"),
-                    Path.Combine(ModuleDirectory, "Private", "LayerStack")
                 }
                 );
 
             PublicDependencyModuleNames.AddRange(
                 new string[]
                 {
-                    "OdysseyLayerStackEditor"
                     // ... add other public dependencies that you statically link with here ...
                 }
                 );
@@ -54,31 +46,23 @@ namespace UnrealBuildTool.Rules
                     "AssetTools",
                     "Core",
                     "CoreUObject",
-                    "DesktopPlatform",
-                    "EditorStyle",
                     "EditorWidgets",
                     "Engine",
                     "InputCore",
-                    "TextureEditor",
-                    "ToolMenus",
                     "Slate",
                     "SlateCore",
+                    "TextureEditor",
                     "UnrealEd",
-                    "zlib",
 
-                    "OdysseyBrush",
-                    "OdysseyCore",
-                    "OdysseyEditor",
-                    "OdysseyFile",
                     "OdysseyImaging",
-                    "OdysseyMedia",
-                    "OdysseyMaths",
+                    "OdysseyLayerStackEditor",
                     "OdysseyPainterEditor",
                     "OdysseyStyle",
-                    "OdysseyVector",
+                    "OdysseyTexture",
                     "OdysseyWidgets",
+
                     "ULIS",
-                    "ULISLoader",
+                    "zlib"
                 }
                 );
 

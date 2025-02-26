@@ -3,10 +3,11 @@
 
 #include "Tools/VectorTransformTool/OdysseyPainterEditorVectorTransformTool.h"
 #include "Tools/VectorTransformTool/OdysseyPainterEditorVectorTransformToolHUD.h"
+#include "Tools/VectorSelectionTool/OdysseyPainterEditorVectorSelectionTool.h"
 #include "OdysseyPainterEditorViewportTab.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyMediaVector.h"
-#include "PainterEditor/OdysseyPainterEditorSource.h"
+#include "OdysseyPainterEditorSource.h"
 #include "ISinglePropertyView.h"
 #include "SOdysseySinglePropertyView.h"
 // Vector engine

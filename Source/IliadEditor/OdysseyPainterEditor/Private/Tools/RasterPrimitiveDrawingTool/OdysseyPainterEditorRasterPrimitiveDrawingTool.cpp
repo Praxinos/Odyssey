@@ -16,8 +16,8 @@
 #include "OdysseyHUDElement.h"
 #include "OdysseyHUD.h"
 #include "OdysseyHUDHandle.h"
-#include "PainterEditor/OdysseyPainterEditorSource.h"
-#include "PainterEditor/OdysseyPainterEditorRasterSelection.h"
+#include "OdysseyPainterEditorSource.h"
+#include "OdysseyPainterEditorRasterSelection.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 

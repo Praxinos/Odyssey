@@ -38,7 +38,7 @@ FOdysseyPainterEditorVectorMatchingToolHUD::Reset()
 }
 
 void
-FOdysseyPainterEditorVectorMatchingToolHUD::DrawHUD( const FOdysseyHUDSystem::FDrawHUDParams& iParams )
+FOdysseyPainterEditorVectorMatchingToolHUD::DrawHUD( const FOdysseyHUD::FDrawHUDParams& iParams )
 {
     FLinearColor fgColor = FLinearColor( FOdysseyVectorHUD::GetForegroundColor() );
     FLinearColor bgColor = FLinearColor( FOdysseyVectorHUD::GetBackgroundColor() );

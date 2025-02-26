@@ -3,12 +3,12 @@
 
 #include "Tools/VectorPrimitiveDrawingTool/OdysseyPainterEditorVectorPrimitiveDrawingTool.h"
 #include "OdysseyPaletteEntryColor.h"
-#include "PainterEditor/OdysseyPainterEditor.h"
-#include "PainterEditor/OdysseyPainterEditorSource.h"
+#include "OdysseyPainterEditor.h"
+#include "OdysseyPainterEditorSource.h"
 #include "OdysseyMediaVector.h"
 #include "ISinglePropertyView.h"
 #include "Tools/VectorPrimitiveDrawingTool/OdysseyPainterEditorVectorPrimitiveDrawingToolHUD.h"
-#include "PainterEditor/OdysseyPainterEditorSource.h"
+#include "OdysseyPainterEditorSource.h"
 #include "SOdysseySinglePropertyView.h"
 
 // Vector engine

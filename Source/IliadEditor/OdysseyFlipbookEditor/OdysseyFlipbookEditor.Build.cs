@@ -24,75 +24,43 @@ public class OdysseyFlipbookEditor : ModuleRules
 
         PrivateIncludePathModuleNames.AddRange(
             new string[] {
-                "Settings",
-                "PropertyEditor",
-                "AssetTools",
             }
         );
 
         PrivateDependencyModuleNames.AddRange(
             new string[] {
-                "AppFramework",
+                "AssetTools",
                 "Core",
                 "CoreUObject",
+                "Engine",
+                "Paper2D",
+                "Paper2DEditor",
+                "Settings",
                 "Slate",
                 "SlateCore",
                 "UnrealEd",
-                "InputCore",
-                "Engine",
-                "RHI",
-                "RenderCore",
-                "RawMesh",
-                "EditorStyle",
-                "KismetWidgets",
-                "PropertyEditor",
-                "Projects",
-                "OdysseyCore",
-                "OdysseyStyle",
-                "OdysseyBrush",
-                "OdysseyWidgets",
-                "OdysseyImaging",
-                "OdysseyEditor",
-                "OdysseyMedia",
+
                 "OdysseyPainterEditor",
-                "OdysseyStylusInput",
-                "OdysseyTextureEditor",
-                "Paper2D",
-                "Paper2DEditor",
             }
         );
 
         PrivateIncludePaths.AddRange(
             new string[] {
-                Path.Combine(ModuleDirectory, "Private", "Extensions"),
-                Path.Combine(ModuleDirectory, "Private", "Models"),
-                Path.Combine(ModuleDirectory, "Private", "FlipbookEditor"),
-                Path.Combine(ModuleDirectory, "Private", "Settings"),
-                Path.Combine(ModuleDirectory, "Private", "Widgets"),
             }
         );
 
         PublicIncludePaths.AddRange(
             new string[] {
-                Path.Combine(ModuleDirectory, "Public"),
-                Path.Combine(ModuleDirectory, "Public", "Settings"),
-                Path.Combine(ModuleDirectory, "Public", "FlipbookEditor"),
             }
         );
 
         PublicDependencyModuleNames.AddRange(
              new string[] {
-                "ULIS",
-                "ULISLoader"
              }
         );
 
         DynamicallyLoadedModuleNames.AddRange(
              new string[] {
-                "MainFrame",
-                "WorkspaceMenuStructure",
-                "AssetTools",
-                "PackagesDialog"
              }
         );
 

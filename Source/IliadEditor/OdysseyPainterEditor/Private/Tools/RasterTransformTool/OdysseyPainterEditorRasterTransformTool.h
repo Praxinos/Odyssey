@@ -5,7 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "Tools/RasterBaseTool/OdysseyPainterEditorRasterBaseTool.h"
-#include "PaintEngine/OdysseyPaintEngine.h"
+#include "OdysseyPaintEngine.h"
 #include "RasterSelectionTool/OdysseyPainterEditorRasterSelectionTool.h"
 #include "OdysseyPainterEditorRasterTransformTool.generated.h"
 

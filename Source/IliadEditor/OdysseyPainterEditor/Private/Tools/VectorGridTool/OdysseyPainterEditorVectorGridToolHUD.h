@@ -46,7 +46,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorGridToolHUD : public F
         virtual ~FOdysseyPainterEditorVectorGridToolHUD();
         FOdysseyPainterEditorVectorGridToolHUD(  UOdysseyPainterEditorVectorGridTool* iGridTool );
 
-        virtual void DrawHUD( const FOdysseyHUDSystem::FDrawHUDParams& iParams ) override;
+        virtual void DrawHUD( const FOdysseyHUD::FDrawHUDParams& iParams ) override;
         virtual void Draw( BLContext* iBLContext ) override;
         virtual void Reset( ) override;
         virtual void Load() override;
@@ -74,7 +74,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorGridToolHUD : public F
         void Map();
         void DeformCell( FGridCell& iCell );
         void UnselectNodes();
-        void DrawSelectionRectangle( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+        void DrawSelectionRectangle( const FOdysseyHUD::FDrawHUDParams& iParams
                                    , FLinearColor& iHighlightColor );
 
     private:

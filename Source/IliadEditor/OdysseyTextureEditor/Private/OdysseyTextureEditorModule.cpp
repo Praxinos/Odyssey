@@ -4,25 +4,12 @@
 #include "OdysseyTextureEditorModule.h"
 
 #include "AssetToolsModule.h"
-#include "CoreMinimal.h"
+#include "ContentBrowserModule.h"
 #include "ISettingsModule.h"
-#include "LevelEditor.h"
-#include "Modules/ModuleManager.h"
-#include "PropertyEditorModule.h"
-#include "Settings/ContentBrowserSettings.h"
-#include "Toolkits/AssetEditorToolkit.h"
-
-#include "PainterEditor/OdysseyPainterEditor.h"
-#include "TextureEditor/OdysseyTextureEditorExtension.h"
+#include "OdysseyTextureAssetTypeActions.h"
+#include "OdysseyTextureContentBrowserExtensions.h"
 #include "OdysseyTextureEditorSettings.h"
-#include "OdysseyTextureEditorToolkit.h"
-#include "OdysseyTextureAssetTypeActions.h"
-#include "OdysseyTextureAssetTypeActions.h"
-#include "TextureEditor/OdysseyTextureEditorCommands.h"
-#include "TextureEditor/OdysseyTextureEditorSource.h"
-#include "TextureEditor/OdysseyTextureEditorGUI.h"
-#include "Extensions/OdysseyTextureContentBrowserExtensions.h"
-#include "Extensions/OdysseyTextureExportFolderExtension.h"
+#include "OdysseyTextureExportFolderExtension.h"
 
 #define LOCTEXT_NAMESPACE "TextureEditor"
 
@@ -30,7 +17,7 @@
    FOdysseyTextureEditorModule
 -----------------------------------------------------------------------------*/
 
-void
+/*void
 FOdysseyTextureEditorModule::CreateOdysseyTextureEditor( TArray<UTexture2D*> iTextures )
 {
     UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem< UAssetEditorSubsystem >();
@@ -62,10 +49,10 @@ FOdysseyTextureEditorModule::CreateOdysseyTextureEditor( TArray<UTexture2D*> iTe
         TSharedPtr<FOdysseyTextureEditorToolkit> toolkit = MakeShared<FOdysseyTextureEditorToolkit>();
         toolkit->Initialize(texture, editor);
 
-        TSharedPtr<FOdysseyTextureEditorSource> source = MakeShared<FOdysseyTextureEditorSource>(texture);
+        TSharedPtr<FOdysseyPainterEditorTextureSource> source = MakeShared<FOdysseyPainterEditorTextureSource>(texture);
         editor->SetSource(source);
     }
-}
+}-*/
 
 void
 FOdysseyTextureEditorModule::StartupModule()
@@ -73,12 +60,6 @@ FOdysseyTextureEditorModule::StartupModule()
     // Register Assets Types Actions once the main loop is initialized
     // see here : https://udn.unrealengine.com/s/question/0D54z00007DVU5KCAX/two-assettypeactions-for-the-same-type-force-priority-
     FCoreDelegates::OnFEngineLoopInitComplete.AddRaw(this, &FOdysseyTextureEditorModule::RegisterAssetTypeActions);
-
-    // Register Commands
-    RegisterCommands();
-
-    // Register Settings
-    RegisterSettings();
 
     // Install Content Browser Extionsion Hooks
     if (!IsRunningCommandlet())
@@ -89,7 +70,7 @@ FOdysseyTextureEditorModule::StartupModule()
         FOdysseyTextureExportFolderExtension::Register( contentBrowserModule );
     }
 
-    RegisterLevelEditorLayoutExtensions();
+    RegisterSettings();
 }
 
 void
@@ -101,16 +82,10 @@ FOdysseyTextureEditorModule::ShutdownModule()
     // Uninstall Content Browser Extionsion Hooks
     FOdysseyTextureContentBrowserExtensions::RemoveHooks();
 
-    // Unregister Settings
-    UnregisterSettings();
-
-    // Unregister Commands
-    UnregisterCommands();
-
     // Unregister Assets Type Actions
     UnregisterAssetTypeActions();
 
-    UnregisterLevelEditorLayoutExtensions();
+    UnregisterSettings();
 }
 
 void
@@ -142,13 +117,14 @@ void
 FOdysseyTextureEditorModule::RegisterSettings()
 {
     ISettingsModule* settingsModule = FModuleManager::GetModulePtr<ISettingsModule>( "Settings" );
+
     if( !settingsModule )
         return;
 
     settingsModule->RegisterSettings( "Editor", "Plugins", "OdysseyTexture2DEditor"
-                                        , LOCTEXT( "settings.name", "Odyssey Texture2D Editor" )
-                                        , LOCTEXT( "settings.tooltip", "Configure the look and feel of the Odyssey Editor." )
-                                        , GetMutableDefault<UOdysseyTextureEditorSettings>() );
+        , LOCTEXT( "settings.name", "Odyssey Texture2D Editor" )
+        , LOCTEXT( "settings.tooltip", "Configure the look and feel of the Odyssey Editor." )
+        , GetMutableDefault<UOdysseyTextureEditorSettings>() );
 }
 
 void
@@ -160,32 +136,6 @@ FOdysseyTextureEditorModule::UnregisterSettings()
         return;
 
     settingsModule->UnregisterSettings( "Editor", "Plugins", "OdysseyTexture2DEditor" );
-}
-
-void
-FOdysseyTextureEditorModule::RegisterCommands()
-{
-    FOdysseyTextureEditorCommands::Register();
-}
-
-void
-FOdysseyTextureEditorModule::UnregisterCommands()
-{
-    FOdysseyTextureEditorCommands::Unregister();
-}
-
-void
-FOdysseyTextureEditorModule::RegisterLevelEditorLayoutExtensions()
-{
-    FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor");
-    mExtendLevelEditorLayout = LevelEditorModule.OnRegisterLayoutExtensions().AddStatic(&FOdysseyTextureEditorGUI::ExtendLevelEditorLayout);
-}
-
-void
-FOdysseyTextureEditorModule::UnregisterLevelEditorLayoutExtensions()
-{
-    FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor");
-    LevelEditorModule.OnRegisterLayoutExtensions().Remove(mExtendLevelEditorLayout);
 }
 
 IMPLEMENT_MODULE( FOdysseyTextureEditorModule, OdysseyTextureEditor );

@@ -3,14 +3,15 @@
 
 #include "Shortcuts/Global/OdysseyPainterEditorGlobalShortcuts.h"
 
-#include "Models/OdysseyPainterEditorCommands.h"
+#include "OdysseyPainterEditorCommands.h"
 #include "OdysseyBlockClipboardData.h"
 #include "OdysseyEditorModule.h"
 #include "OdysseyMediaRaster.h"
 #include "OdysseyPainterEditor.h"
 #include "Shortcuts/Global/OdysseyPainterEditorGlobalToolsShortcuts.h"
-#include "PainterEditor/OdysseyPainterEditorSource.h"
-#include "PainterEditor/OdysseyPainterEditorRasterSelection.h"
+#include "Shortcuts/Global/OdysseyPainterEditorGlobalLayersShortcuts.h"
+#include "OdysseyPainterEditorSource.h"
+#include "OdysseyPainterEditorRasterSelection.h"
 #include "OdysseyRasterBlock.h"
 #include "ULISLoaderModule.h"
 
@@ -18,6 +19,7 @@ FOdysseyPainterEditorGlobalShortcuts::FOdysseyPainterEditorGlobalShortcuts(FOdys
     : mEditor(iEditor)
 {
     Add(MakeShared<FOdysseyPainterEditorGlobalToolsShortcuts>(iEditor));
+    Add(MakeShared<FOdysseyPainterEditorGlobalLayersShortcuts>(iEditor));
 }
 
 void FOdysseyPainterEditorGlobalShortcuts::MapActionsToCommandList(TSharedRef<FUICommandList> iCommandList)

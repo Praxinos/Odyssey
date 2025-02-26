@@ -6,9 +6,8 @@
 #include "ContentBrowserModule.h"
 #include "IContentBrowserSingleton.h"
 #include "Interfaces/ITextureEditorModule.h"
-#include "OdysseyTextureEditorModule.h"
+#include "OdysseyPainterEditorModule.h"
 #include "OdysseyTextureEditorSettings.h"
-#include "OdysseyTexture.h"
 #include "OdysseyStyle.h"
 
 #define LOCTEXT_NAMESPACE "TextureEditor"
@@ -55,21 +54,21 @@ void FOdysseyTextureAssetTypeActions::OpenAssetEditor(const TArray<UObject*>& In
 {
     EToolkitMode::Type Mode = EditWithinLevelEditor.IsValid() ? EToolkitMode::WorldCentric : EToolkitMode::Standalone;
 
-    for (auto ObjIt = InObjects.CreateConstIterator(); ObjIt; ++ObjIt)
+    for (UObject* object : InObjects)
     {
-        auto odysseyTexture = Cast<UTexture2D>(*ObjIt);
-        if (odysseyTexture != NULL)
+        UTexture2D* texture = Cast<UTexture2D>(object);
+        if (!texture)
+            continue;
+
+        if( UOdysseyTextureEditorSettings::Get()->OdysseyDefaultEditorEnabled )
         {
-            if( UOdysseyTextureEditorSettings::Get()->OdysseyDefaultEditorEnabled )
-            {
-                FOdysseyTextureEditorModule* odysseyTextureModule = &FModuleManager::LoadModuleChecked<FOdysseyTextureEditorModule>("OdysseyTextureEditor");
-                odysseyTextureModule->CreateOdysseyTextureEditor( { odysseyTexture } );
-            }
-            else
-            {
-                ITextureEditorModule* TextureEditorModule = &FModuleManager::LoadModuleChecked<ITextureEditorModule>("TextureEditor");
-                TextureEditorModule->CreateTextureEditor(Mode, EditWithinLevelEditor, odysseyTexture);
-            }
+            FOdysseyPainterEditorModule* painterEditorModule = &FModuleManager::GetModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
+            painterEditorModule->OpenStandaloneEditorForAsset(texture);
+        }
+        else
+        {
+            ITextureEditorModule* TextureEditorModule = &FModuleManager::LoadModuleChecked<ITextureEditorModule>("TextureEditor");
+            TextureEditorModule->CreateTextureEditor(Mode, EditWithinLevelEditor, texture);
         }
     }
 }

@@ -1,0 +1,66 @@
+// IDDN.FR.001.250001.006.S.P.2019.000.00000
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
+
+#include "OdysseyPainterEditorAnimationDetailsTab.h"
+
+#include "OdysseyPainterEditor.h"
+#include "OdysseyPainterEditorAnimationSource.h"
+#include "OdysseyPainterEditor.h"
+#include "OdysseyPainterEditorSource.h"
+#include "Widgets/Animation/SOdysseyAnimationDetails.h"
+
+#define LOCTEXT_NAMESPACE "AnimationEditor"
+
+const FName&
+FOdysseyPainterEditorAnimationDetailsTab::StaticId()
+{
+    static FName Id = TEXT("OdysseyAnimationEditor_AnimationDetails"); //Dont change, Old Id for retro compatibility
+    return Id;
+}
+
+/////////////////////////////////////////////////////
+// FOdysseyPainterEditorAnimationDetailsTab
+//--------------------------------------------------------------------------------------
+//----------------------------------------------------------- Construction / Destruction
+FOdysseyPainterEditorAnimationDetailsTab::~FOdysseyPainterEditorAnimationDetailsTab()
+{
+}
+
+FOdysseyPainterEditorAnimationDetailsTab::FOdysseyPainterEditorAnimationDetailsTab(FOdysseyPainterEditor* iEditor)
+    : FOdysseyEditorTab( LOCTEXT( "animation-details-tab.name", "Animation Details" ), FSlateIcon( "OdysseyStyle", "PainterEditor.Trombone16" ))
+    , mEditor(iEditor)
+{
+}
+
+const FName&
+FOdysseyPainterEditorAnimationDetailsTab::GetId() const
+{
+    return StaticId();
+}
+
+TSharedPtr<SWidget>
+FOdysseyPainterEditorAnimationDetailsTab::CreateWidget()
+{
+    return SNew( SOdysseyAnimationDetails )
+        .Animation( this, &FOdysseyPainterEditorAnimationDetailsTab::Animation );
+}
+
+//--------------------------------------------------------------------------------------
+//----------------------------------------------------------------------- Widget Getters
+
+UOdysseyAnimation*
+FOdysseyPainterEditorAnimationDetailsTab::Animation() const
+{
+    TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
+    if (!source || source->Id() != FOdysseyPainterEditorAnimationSource::StaticId())
+        return nullptr;
+
+    TSharedPtr<FOdysseyPainterEditorAnimationSource> animationSource = StaticCastSharedPtr<FOdysseyPainterEditorAnimationSource>(source);
+
+    return animationSource->GetAnimation();
+}
+
+//--------------------------------------------------------------------------------------
+//---------------------------------------------------------------------- Event Listeners
+
+#undef LOCTEXT_NAMESPACE

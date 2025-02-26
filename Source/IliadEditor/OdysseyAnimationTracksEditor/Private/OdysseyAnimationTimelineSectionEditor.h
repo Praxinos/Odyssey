@@ -7,7 +7,7 @@
 #include "Widgets/Layout/SBox.h"
 
 class UOdysseyAnimationTimelineSection;
-class FOdysseyAnimationEditorTimelinePosition;
+class FOdysseyPainterEditorAnimationTImelinePosition;
 class UOdysseyAnimationComponent;
 class UOdysseyLayer;
 
@@ -55,7 +55,7 @@ private:
     UOdysseyAnimationComponent* mComponent; //used to remove callbacks
     TSharedPtr<SBox> mSectionWidget;
     UOdysseyAnimationTimelineSection* mSection;
-    TSharedRef<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
+    TSharedRef<FOdysseyPainterEditorAnimationTImelinePosition> mTimelinePosition;
 
     FFrameNumber mInitialStartOffsetDuringResize;
     FFrameNumber mInitialStartTimeDuringResize;

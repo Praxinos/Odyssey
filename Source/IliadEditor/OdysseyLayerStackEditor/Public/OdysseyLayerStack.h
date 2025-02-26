@@ -222,6 +222,9 @@ protected:
     virtual void PostPropertyChanged(const FName& iPropertyName);
 
 public:
+    virtual int GetWidth() const { return -1; };
+    virtual int GetHeight() const { return -1; };
+    virtual ::ULIS::eFormat  GetFormat() const { return ::ULIS::Format_RGBA8; };
     //Called by layers when there Parent or Children changed
     void HierarchyChanged();
 

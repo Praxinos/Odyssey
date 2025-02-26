@@ -10,7 +10,7 @@
 #include "OdysseyVectorCell.h"
 #include "OdysseyPainterEditor.h"
 #include "Undo/OdysseyVectorUndoTransferObjects.h"
-#include "PainterEditor/OdysseyPainterEditorSource.h"
+#include "OdysseyPainterEditorSource.h"
 #include "Widgets/Tab/SOdysseyPainterEditorVectorSceneTreeView.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"

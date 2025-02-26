@@ -16,7 +16,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPathSmoothToolHUD : pu
         virtual ~FOdysseyPainterEditorVectorPathSmoothToolHUD();
         FOdysseyPainterEditorVectorPathSmoothToolHUD( UOdysseyPainterEditorVectorPathSmoothTool* iPathSmoothTool );
 
-        virtual void DrawHUD( const FOdysseyHUDSystem::FDrawHUDParams& iParams ) override;
+        virtual void DrawHUD( const FOdysseyHUD::FDrawHUDParams& iParams ) override;
         virtual void Draw( BLContext* iBLContext ) override;
         virtual void Reset() override;
         virtual void Load() override;

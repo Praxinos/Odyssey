@@ -3,7 +3,7 @@
 
 #include "Widgets/SOdysseyAnimationTimelineTrack.h"
 
-#include "Widgets/LayerStack/SOdysseyAnimationLayerStackTreeView.h"
+#include "Widgets/Animation/Timeline/SOdysseyAnimationLayerStackTreeView.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "TrackEditors/SubTrackEditorBase.h"
 #include "OdysseyAnimationTimelineSectionEditor.h"
@@ -14,7 +14,6 @@
 #include "OdysseyAnimationTimelineTrack.h"
 #include "OdysseyViewportDrawingEditorEdMode.h"
 #include "EditorModeManager.h"
-#include "AnimationEditor/OdysseyAnimationEditorExtension.h"
 #include "OdysseyViewportDrawingEditorToolkit.h"
 #include "Widgets/Input/SCheckBox.h"
 
@@ -97,13 +96,6 @@ SOdysseyAnimationTimelineTrack::RebuildWidgets()
 
                         TSharedPtr<FOdysseyViewportDrawingEditorToolkit> toolkit = odysseyEdMode->GetViewportDrawingEditorToolkit();
                         if(!toolkit)
-                            return nullptr;
-
-                        TSharedPtr<FOdysseyAnimationEditorExtension> animationExtension = toolkit->GetAnimationExtension();
-                        if (!animationExtension)
-                            return nullptr;
-
-                        if (animationExtension->Animation() != animation)
                             return nullptr;
 
                         FOdysseyPainterEditor* editor = odysseyEdMode->GetEditor();

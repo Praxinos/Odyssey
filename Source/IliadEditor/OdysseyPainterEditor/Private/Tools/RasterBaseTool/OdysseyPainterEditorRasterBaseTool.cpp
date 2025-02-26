@@ -8,7 +8,7 @@
 #include "OdysseyPainterEditorViewportTab.h"
 #include "ISinglePropertyView.h"
 #include "OdysseyMediaRaster.h"
-#include "PainterEditor/OdysseyPainterEditorRasterSelection.h"
+#include "OdysseyPainterEditorRasterSelection.h"
 #include "Shortcuts/Global/OdysseyPainterEditorGlobalShortcuts.h"
 #include "PropertyHandle.h"
 

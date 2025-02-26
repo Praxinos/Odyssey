@@ -6,7 +6,7 @@
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorSource.h"
 #include "OdysseyMediaVector.h"
-#include "PainterEditor/OdysseyPainterEditorSource.h"
+#include "OdysseyPainterEditorSource.h"
 // Vector engine
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorLayer.h"

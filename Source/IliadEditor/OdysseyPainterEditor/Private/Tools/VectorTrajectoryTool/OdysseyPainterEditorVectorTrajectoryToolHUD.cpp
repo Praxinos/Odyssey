@@ -304,7 +304,7 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::PickWaypoint( FOdysseyVectorTagInb
 }
 
 void
-FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawQuad( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawQuad( const FOdysseyHUD::FDrawHUDParams& iParams
                                                       , const FLinearColor& iColor
                                                       , FInbetweenerQuad* iQuad )
 {
@@ -332,7 +332,7 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawQuad( const FOdysseyHUDSystem:
 }
 
 void
-FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawTrajectory( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawTrajectory( const FOdysseyHUD::FDrawHUDParams& iParams
                                                             , const FLinearColor& iFgColor
                                                             , const FLinearColor& iBgColor
                                                             , const FLinearColor& iHcColor
@@ -436,7 +436,7 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawTrajectory( const FOdysseyHUDS
 }
 
 void
-FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawHUD( const FOdysseyHUDSystem::FDrawHUDParams& iParams )
+FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawHUD( const FOdysseyHUD::FDrawHUDParams& iParams )
 {
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();

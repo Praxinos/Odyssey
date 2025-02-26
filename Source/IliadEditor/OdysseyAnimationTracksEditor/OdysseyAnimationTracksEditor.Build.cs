@@ -45,13 +45,11 @@ namespace UnrealBuildTool.Rules
                 new string[]
                 {
                     "OdysseyAnimation",
-                    "OdysseyAnimationEditor",
                     "OdysseyAnimationTracks",
                     "OdysseyImaging",
                     "OdysseyLayerStackEditor",
                     "OdysseyPainterEditor",
                     "OdysseyStyle",
-                    "OdysseyViewportDrawingEditor",
 
                     "Core",
                     "CoreUObject",

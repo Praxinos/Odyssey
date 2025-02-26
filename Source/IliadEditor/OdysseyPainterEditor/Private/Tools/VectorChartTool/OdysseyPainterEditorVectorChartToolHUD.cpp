@@ -111,7 +111,7 @@ FOdysseyPainterEditorVectorChartToolHUD::UpdateBreakdown()
 }
 
 void
-FOdysseyPainterEditorVectorChartToolHUD::DrawBreakdownChart( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+FOdysseyPainterEditorVectorChartToolHUD::DrawBreakdownChart( const FOdysseyHUD::FDrawHUDParams& iParams
                                                            , const FLinearColor& iFgColor
                                                            , const FLinearColor& iBgColor
                                                            , const FLinearColor& iHcColor
@@ -287,7 +287,7 @@ FOdysseyPainterEditorVectorChartToolHUD::DrawBreakdownChart( const FOdysseyHUDSy
 }
 
 void
-FOdysseyPainterEditorVectorChartToolHUD::DrawHUD( const FOdysseyHUDSystem::FDrawHUDParams& iParams )
+FOdysseyPainterEditorVectorChartToolHUD::DrawHUD( const FOdysseyHUD::FDrawHUDParams& iParams )
 {
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();

@@ -7,12 +7,13 @@
 #include <ULIS>
 #include "ULISLoaderModule.h"
 #include "OdysseyLayerStack.h"
-#include "BrushContext/OdysseyLayerStackEditorBrushContext.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 #include "LayerStack/OdysseyTextureLayer.h"
 #include "LayerStack/OdysseyTextureLayerStack.h"
 #include "OdysseyPixelFormat.h"
 #include "OdysseyAnimation.h"
+#include "OdysseyPainterEditor.h"
+#include "OdysseyPainterEditorBrushContext.h"
 
 //---
 namespace
@@ -24,13 +25,17 @@ namespace
         if( !BrushInstance )
             return nullptr;
 
-        FOdysseyLayerStackEditorBrushContext* context = BrushInstance->GetContext<FOdysseyLayerStackEditorBrushContext>("FOdysseyLayerStackEditorBrushContext");
+        FOdysseyPainterEditorBrushContext* context = BrushInstance->GetContext<FOdysseyPainterEditorBrushContext>("FOdysseyPainterEditorBrushContext");
         if (!context)
+            return nullptr;
+
+        FOdysseyPainterEditor* editor = context->Editor();
+        if (!editor)
             return nullptr;
 
         //---
 
-        return context->GetLayerStack();
+        return editor->LayerStack();
     }
 
     FOdysseyBlockProxy

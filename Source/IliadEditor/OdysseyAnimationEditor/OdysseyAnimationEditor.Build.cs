@@ -25,22 +25,17 @@ namespace UnrealBuildTool.Rules
 
             PublicIncludePaths.AddRange(
                 new string[] {
-                    Path.Combine(ModuleDirectory, "Public"),
-                    Path.Combine(ModuleDirectory, "Public", "AnimationEditor"),
                 }
                 );
 
             PrivateIncludePaths.AddRange(
                 new string[] {
-                    Path.Combine(ModuleDirectory, "Private", "AnimationEditor"),
                 }
                 );
 
             PublicDependencyModuleNames.AddRange(
                 new string[]
                 {
-                    "ULIS",
-                    "ULISLoader",
                     // ... add other public dependencies that you statically link with here ...
                 }
                 );
@@ -78,14 +73,12 @@ namespace UnrealBuildTool.Rules
                     "OdysseyBrush",
                     "OdysseyCore",
                     "OdysseyEditor",
-                    "OdysseyFlipbookEditor",
                     "OdysseyHUD",
                     "OdysseyImaging",
                     "OdysseyLayerStackEditor",
                     "OdysseyMedia",
                     "OdysseyPainterEditor",
                     "OdysseyStyle",
-                    "OdysseyTextureEditor",
                     "OdysseyVector",
                     "OdysseyWidgets",
                 }

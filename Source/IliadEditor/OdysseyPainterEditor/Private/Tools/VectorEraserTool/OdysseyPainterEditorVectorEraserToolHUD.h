@@ -14,7 +14,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorEraserToolHUD : public
         virtual ~FOdysseyPainterEditorVectorEraserToolHUD();
         FOdysseyPainterEditorVectorEraserToolHUD(  UOdysseyPainterEditorVectorEraserTool* iEraserTool );
 
-        void DrawHUD( const FOdysseyHUDSystem::FDrawHUDParams& iParams );
+        void DrawHUD( const FOdysseyHUD::FDrawHUDParams& iParams );
         virtual void Draw( BLContext* iBLContext ) override;
         virtual void Reset() override;
         virtual void Load() override;

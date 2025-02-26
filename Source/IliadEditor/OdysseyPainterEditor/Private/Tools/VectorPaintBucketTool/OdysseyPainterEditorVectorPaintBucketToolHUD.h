@@ -32,7 +32,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPaintBucketToolHUD : p
         virtual void Unload() override;
         void UpdateWorkingPaintgroupList();
 
-        void DrawHUD( const FOdysseyHUDSystem::FDrawHUDParams& iParams );
+        void DrawHUD( const FOdysseyHUD::FDrawHUDParams& iParams );
 
         void SetCycle( FOdysseyVectorCycle* iCycle );
 

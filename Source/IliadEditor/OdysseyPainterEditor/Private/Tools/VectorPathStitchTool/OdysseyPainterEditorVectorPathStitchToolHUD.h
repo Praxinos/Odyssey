@@ -15,7 +15,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPathStitchToolHUD : pu
         FOdysseyPainterEditorVectorPathStitchToolHUD(  UOdysseyPainterEditorVectorPathStitchTool* iPathStitchTool );
 
         virtual void Draw( BLContext* iBLContext ) override;
-        virtual void DrawHUD( const FOdysseyHUDSystem::FDrawHUDParams& iParams ) override;
+        virtual void DrawHUD( const FOdysseyHUD::FDrawHUDParams& iParams ) override;
 
         virtual void Reset() override;
         virtual void Load() override;

@@ -190,7 +190,7 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::PickBucket( double iWorldX
 }
 
 void
-FOdysseyPainterEditorVectorPaintBucketToolHUD::DrawHUD( const FOdysseyHUDSystem::FDrawHUDParams& iParams )
+FOdysseyPainterEditorVectorPaintBucketToolHUD::DrawHUD( const FOdysseyHUD::FDrawHUDParams& iParams )
 {
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();

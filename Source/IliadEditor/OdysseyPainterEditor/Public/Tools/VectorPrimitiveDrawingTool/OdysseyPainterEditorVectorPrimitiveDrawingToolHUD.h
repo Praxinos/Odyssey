@@ -14,14 +14,14 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPrimitiveDrawingToolHU
         virtual ~FOdysseyPainterEditorVectorPrimitiveDrawingToolHUD();
         FOdysseyPainterEditorVectorPrimitiveDrawingToolHUD( UOdysseyPainterEditorVectorPrimitiveDrawingTool* iPrimitiveDrawingTool );
 
-        void DrawHUD( const FOdysseyHUDSystem::FDrawHUDParams& iParams );
+        void DrawHUD( const FOdysseyHUD::FDrawHUDParams& iParams );
         virtual void Draw( BLContext* iBLContext ) override;
         virtual void Reset() override;
         virtual void Load() override;
         virtual void Unload() override;
 
     private:
-        void DrawFrame( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+        void DrawFrame( const FOdysseyHUD::FDrawHUDParams& iParams
                       , ::ULIS::FRectI& iFrame
                       , ::ULIS::FVec2I& iFrameLength
                       , const FLinearColor& iFgColor
