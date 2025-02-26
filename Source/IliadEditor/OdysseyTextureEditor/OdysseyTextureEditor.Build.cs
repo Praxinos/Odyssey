@@ -34,7 +34,6 @@ namespace UnrealBuildTool.Rules
 
             PrivateIncludePaths.AddRange(
                 new string[] {
-                    Path.Combine(ModuleDirectory, "Private", "Settings"),
                     Path.Combine(ModuleDirectory, "Private", "TextureEditor"),
                     Path.Combine(ModuleDirectory, "Private", "LayerStack")
                 }

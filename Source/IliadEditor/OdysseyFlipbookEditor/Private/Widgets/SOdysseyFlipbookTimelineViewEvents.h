@@ -4,7 +4,7 @@
 #pragma once
 
 #include "SOdysseyFlipbookTimelineTrackEvents.h"
-#include "SOdysseyTimelineEvents.h"
+#include "SOdysseyFlipbookTimelineEvents.h"
 
 // Called when the selection changes
 DECLARE_DELEGATE(FOnPlayStarted)

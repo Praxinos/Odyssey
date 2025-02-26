@@ -6,8 +6,8 @@
 #include "SOdysseyFlipbookTimelineTrackEvents.h"
 #include "PaperFlipbook.h"
 
-class SOdysseyTimelineFrameList;
-class SOdysseyTimelineFrame;
+class SOdysseyFlipbookTimelineFrameList;
+class SOdysseyFlipbookTimelineFrame;
 class FOdysseyFlipbookWrapper;
 
 class SOdysseyFlipbookTimelineTrack : public SCompoundWidget
@@ -59,12 +59,12 @@ private:
 
 private:
     //Events
-    /* void OnFrameLengthChanged(TSharedPtr<SOdysseyTimelineFrame> iFrame);
+    /* void OnFrameLengthChanged(TSharedPtr<SOdysseyFlipbookTimelineFrame> iFrame);
     FReply OnFrameListDrop(const FGeometry& iGeometry, const FDragDropEvent& iDragDropEvent);
-    FReply OnFrameDrop(TSharedPtr<SOdysseyTimelineFrame> iFrame, const FGeometry& iGeometry, const FDragDropEvent& iDragDropEvent, int32 iIndexOffset);
-    FReply OnFrameDragDetected(TSharedPtr<SOdysseyTimelineFrame> iFrame, const FGeometry& iGeometry, const FPointerEvent& iMouseEvent);
-    bool OnFrameAcceptDrop(TSharedPtr<SOdysseyTimelineFrame> iFrame, const FGeometry& iGeometry, const FDragDropEvent& iDragDropEvent);
-    TSharedRef<SWidget> GenerateFrameContextMenu(TSharedPtr<SOdysseyTimelineFrame> iFrame); */
+    FReply OnFrameDrop(TSharedPtr<SOdysseyFlipbookTimelineFrame> iFrame, const FGeometry& iGeometry, const FDragDropEvent& iDragDropEvent, int32 iIndexOffset);
+    FReply OnFrameDragDetected(TSharedPtr<SOdysseyFlipbookTimelineFrame> iFrame, const FGeometry& iGeometry, const FPointerEvent& iMouseEvent);
+    bool OnFrameAcceptDrop(TSharedPtr<SOdysseyFlipbookTimelineFrame> iFrame, const FGeometry& iGeometry, const FDragDropEvent& iDragDropEvent);
+    TSharedRef<SWidget> GenerateFrameContextMenu(TSharedPtr<SOdysseyFlipbookTimelineFrame> iFrame); */
 
 
     void OnFramesMoved(TArray<int32> iSrcIndexes, int32 iDstIndexes);
@@ -83,7 +83,7 @@ private:
 private:
     TWeakPtr<FOdysseyFlipbookWrapper> mFlipbookWrapper;
     TAttribute<float>     mFrameSize;
-    TSharedPtr<SOdysseyTimelineFrameList> mFrameList;
+    TSharedPtr<SOdysseyFlipbookTimelineFrameList> mFrameList;
     TSharedPtr<FAssetThumbnailPool> mAssetThumbnailPool;
     TSharedPtr<FUICommandList> mFrameCommandList; //List of commands we can use on a frame
     /* FOnStructureChanged mOnStructureChanged; */

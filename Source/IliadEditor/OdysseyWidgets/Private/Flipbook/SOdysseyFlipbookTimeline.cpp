@@ -1,0 +1,378 @@
+// IDDN.FR.001.250001.006.S.P.2019.000.00000
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
+
+#include "SOdysseyFlipbookTimeline.h"
+
+#include "Fonts/FontMeasure.h"
+#include "Widgets/Layout/SGridPanel.h"
+#include "OdysseyStyle.h"
+
+//////////////////////////////////////////////////////////////////////////
+// SOdysseyFlipbookTimeline
+
+const float defaultFrameSize = 50.f; //in pixels
+const float defaultHeight = 25.f; //in pixels
+
+void SOdysseyFlipbookTimeline::Construct(const FArguments& InArgs)
+{
+    mZoom = FMath::Clamp(InArgs._Zoom, 0.01f, 1.0f);
+    mOffset = InArgs._Offset;
+    mScrubPosition = InArgs._ScrubPosition;
+
+    mOnScrubStarted = InArgs._OnScrubStarted;
+    mOnScrubPositionChanged = InArgs._OnScrubPositionChanged;
+    mOnScrubStopped = InArgs._OnScrubStopped;
+    mOnOffsetChanged = InArgs._OnOffsetChanged;
+    mOnZoomChanged = InArgs._OnZoomChanged;
+
+    mContent = InArgs._Content.Widget;
+
+    mIsOffsetting = false;
+    mIsScrubbing = false;
+
+    SAssignNew(mScrollBarH, SScrollBar)
+        .Orientation(Orient_Horizontal)
+        .AlwaysShowScrollbar(false);
+
+    SAssignNew(mScrollBarV, SScrollBar)
+        .Orientation(Orient_Vertical)
+        .AlwaysShowScrollbar(false);
+
+    SAssignNew(mScrollBoxH, SScrollBox)
+        .Orientation(Orient_Horizontal)
+        .ExternalScrollbar(mScrollBarH)
+        .OnUserScrolled(this, &SOdysseyFlipbookTimeline::OnScrollBarUserScrolled)
+        + SScrollBox::Slot()
+        .VAlign(VAlign_Top)
+        [
+            SNew(SBox)
+            .MinDesiredWidth(this, &SOdysseyFlipbookTimeline::GetScrollBoxHWidth)
+            .Clipping(EWidgetClipping::ClipToBoundsAlways)
+            [
+                mContent.ToSharedRef()
+            ]
+        ];
+
+    SAssignNew(mScrollBoxV, SScrollBox)
+        .Orientation(Orient_Vertical)
+        .ExternalScrollbar(mScrollBarV)
+        + SScrollBox::Slot()
+        .VAlign(VAlign_Top)
+        [
+            SNew(SBox)
+            .MinDesiredWidth(this, &SOdysseyFlipbookTimeline::GetScrollBoxVHeight)
+            .Clipping(EWidgetClipping::ClipToBoundsAlways)
+            [
+                mScrollBoxH.ToSharedRef()
+            ]
+        ];
+
+    ChildSlot
+    .Padding(0.f, defaultHeight, 0.f, 0.f) // padding to draw the header
+    [
+        SNew(SHorizontalBox)
+        .Clipping(EWidgetClipping::ClipToBounds)
+        + SHorizontalBox::Slot()
+        .FillWidth(1.0f) //content fills the remaining width
+        [
+            SNew(SVerticalBox)
+            .Clipping(EWidgetClipping::ClipToBounds)
+            + SVerticalBox::Slot()
+            .FillHeight(1.0f) //content fills the remaining height
+            [
+                mScrollBoxV.ToSharedRef()
+            ]
+            + SVerticalBox::Slot()
+            .Padding(0.0f, 1.0f, 0.0f, 0.0f)
+            .AutoHeight() //scrollbar takes all the space it needs
+            [
+                mScrollBarH.ToSharedRef()
+            ]
+        ]
+        + SHorizontalBox::Slot()
+        .AutoWidth() //scrollbar takes all the space it needs
+        [
+            mScrollBarV.ToSharedRef()
+        ]
+    ];
+}
+
+int32 SOdysseyFlipbookTimeline::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
+{
+    const bool bActiveFeedback = IsHovered() || mIsScrubbing;
+
+    const FSlateBrush* GenericBrush = FCoreStyle::Get().GetBrush( "GenericWhiteBox" );
+    const FLinearColor& backgroundColorEven = FOdysseyStyle::GetColor("FlipbookTimeline.BackgroundColorEven");
+    const FLinearColor& backgroundColorOdd = FOdysseyStyle::GetColor("FlipbookTimeline.BackgroundColorOdd");
+
+    const int32 backgroundLayer = LayerId;
+    const int32 textLayer = backgroundLayer + 1;
+
+    const FSlateFontInfo textFontInfo = FCoreStyle::GetDefaultFontStyle("Regular", 10);
+
+    // const bool bEnabled = ShouldBeEnabled( bParentEnabled );
+    // const ESlateDrawEffect DrawEffects = bEnabled ? ESlateDrawEffect::None : ESlateDrawEffect::DisabledEffect;
+
+    const float height = AllottedGeometry.GetLocalSize().Y;
+    const float width = AllottedGeometry.GetLocalSize().X;
+    const float contentWidth = mContent->GetCachedGeometry().GetLocalSize().X;
+    float offsetPercent = mScrollBarH->DistanceFromTop();
+    float offset = FMath::Max(0.0f, (offsetPercent * contentWidth / FrameSize()));
+    const float frameSize = FrameSize();
+    const float frameNumberMinSize = 30.f;
+    const int32 frameNumberFrequency = FMath::Max(1, FGenericPlatformMath::CeilToInt(frameNumberMinSize / frameSize));
+    int32 startKey = FGenericPlatformMath::FloorToInt(offset);
+    int32 endKey = FGenericPlatformMath::CeilToInt(offset + (width / frameSize));
+    for(int32 keyNum = startKey; keyNum <= endKey; keyNum++)
+    {
+        float x = (keyNum - offset) * frameSize;
+
+        //Draw background
+        const FColor backgroundColor = (keyNum & 1) ? backgroundColorOdd.ToFColor(true) : backgroundColorEven.ToFColor(true);
+        const FVector2D pos(x, 0.f);
+        const FVector2D size(frameSize, height);
+
+        FSlateDrawElement::MakeBox(
+            OutDrawElements,
+            backgroundLayer,
+            AllottedGeometry.ToPaintGeometry( size, FSlateLayoutTransform( 1.0, TransformPoint( 1.0, pos ) ) ),
+            GenericBrush,
+            ESlateDrawEffect::None,
+            InWidgetStyle.GetColorAndOpacityTint() * backgroundColor
+        );
+
+        //Draw key num
+        if (!(keyNum % frameNumberFrequency))
+        {
+            const FString frameString = FString::Printf(TEXT("%d"), keyNum);
+            const FVector2D textPos(x + 2.f, 0.f);
+
+            const TSharedRef< FSlateFontMeasure > fontMeasureService = FSlateApplication::Get().GetRenderer()->GetFontMeasureService();
+            const FVector2D textSize = fontMeasureService->Measure(frameString, textFontInfo);
+
+            FSlateDrawElement::MakeText(
+                OutDrawElements,
+                textLayer,
+                AllottedGeometry.ToPaintGeometry( textSize, FSlateLayoutTransform( 1.0, TransformPoint( 1.0, textPos ) ) ),
+                frameString,
+                textFontInfo,
+                ESlateDrawEffect::None);
+        }
+    }
+
+    LayerId = SCompoundWidget::OnPaint( Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
+
+    // Draw a line for the current scrub cursor
+    ++LayerId;
+
+    const float linePosition = ( mScrubPosition - offset) * frameSize;
+
+    /* TArray<FVector2D> LinePoints;
+    LinePoints.Add(FVector2D(linePosition, 0.f));
+    LinePoints.Add(FVector2D(linePosition, AllottedGeometry.GetLocalSize().Y)); */
+
+    FLinearColor lineColor = FLinearColor::Red;
+    lineColor.A = 0.3f;
+
+    FSlateDrawElement::MakeBox(
+        OutDrawElements,
+        LayerId,
+        AllottedGeometry.ToPaintGeometry( FVector2D(17.0f, height), FSlateLayoutTransform( 1.0, TransformPoint( 1.0, FVector2D(linePosition - 8.0f, 0.f) ) ) ),
+        GenericBrush,
+        ESlateDrawEffect::None,
+        lineColor
+    );
+
+    FSlateDrawElement::MakeBox(
+        OutDrawElements,
+        LayerId,
+        AllottedGeometry.ToPaintGeometry( FVector2D(3.0f, height), FSlateLayoutTransform( 1.0, TransformPoint( 1.0, FVector2D(linePosition - 1.0f, 0.f) ) ) ),
+        GenericBrush,
+        ESlateDrawEffect::None,
+        FLinearColor::Red
+    );
+
+    /* FSlateDrawElement::MakeLines(
+        OutDrawElements,
+        LayerId,
+        AllottedGeometry.ToPaintGeometry(),
+        LinePoints,
+        ESlateDrawEffect::None,
+        FLinearColor::Red
+    ); */
+
+    return LayerId;
+}
+
+FReply SOdysseyFlipbookTimeline::OnMouseWheel(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
+{
+    if (MouseEvent.IsControlDown())
+    {
+        const float minZoom = 0.01f;
+        const float maxZoom = 1.0f;
+        const float directionScale = 0.08f;
+        const float direction = MouseEvent.GetWheelDelta();
+
+        Zoom(mZoom * (1.0f + direction * directionScale));
+        return FReply::Handled();
+    }
+    else
+    {
+        return FReply::Unhandled();
+    }
+}
+
+FReply SOdysseyFlipbookTimeline::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
+{
+    if (MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
+    {
+        if (MouseEvent.IsControlDown())
+        {
+            mIsOffsetting = true;
+            mOffsetMousePosition = MouseEvent.GetScreenSpacePosition();
+            mOffsetMousePosition.Y = mOffset;
+            return FReply::Handled();
+        }
+        else
+        {
+            mIsScrubbing = true;
+            mOnScrubStarted.ExecuteIfBound();
+
+            const float minScrub = 0.0f;
+            ScrubPosition(MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()).X / FrameSize() + mOffset);
+
+            // This has prevent throttling on so that viewports continue to run whilst dragging the slider
+            return FReply::Handled().CaptureMouse( SharedThis(this) ).PreventThrottling();
+        }
+    }
+    else
+    {
+        return FReply::Unhandled();
+    }
+}
+
+FReply SOdysseyFlipbookTimeline::OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
+{
+    if (mIsOffsetting)
+    {
+        const float minOffset = 0.0f;
+        float mouseOffset = MouseEvent.GetScreenSpacePosition().X - mOffsetMousePosition.X;
+        Offset(FMath::Max(minOffset, mOffsetMousePosition.Y - (mouseOffset / FrameSize()))); //mOffsetMousePosition.Y contains the starting offset instead of the Y position
+        return FReply::Handled();
+    }
+    else if(mIsScrubbing)
+    {
+        const float minScrub = 0.0f;
+        ScrubPosition(MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()).X / FrameSize() + mOffset);
+        return FReply::Handled();
+    }
+    else
+    {
+        return FReply::Unhandled();
+    }
+}
+
+FReply SOdysseyFlipbookTimeline::OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
+{
+    if (mIsOffsetting)
+    {
+        mIsOffsetting = false;
+        return FReply::Handled();
+    }
+    else if (mIsScrubbing)
+    {
+        const float minScrub = 0.0f;
+        ScrubPosition(MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()).X / FrameSize() + mOffset);
+
+        mIsScrubbing = false;
+        mOnScrubStopped.ExecuteIfBound();
+        return FReply::Handled().ReleaseMouseCapture();
+    }
+    else
+    {
+        return FReply::Unhandled();
+    }
+}
+
+void
+SOdysseyFlipbookTimeline::OnScrollBarUserScrolled(float iScrollOffset)
+{
+    Offset(FMath::Max(0.0f, iScrollOffset / FrameSize()));
+}
+
+// 1.0 = 100%
+float
+SOdysseyFlipbookTimeline::Zoom() const
+{
+    return mZoom;
+}
+
+void
+SOdysseyFlipbookTimeline::Zoom(float iZoom)
+{
+    const float oldZoom = mZoom;
+    mZoom = FMath::Clamp(iZoom, 0.01f, 1.0f);
+    mOnZoomChanged.ExecuteIfBound(oldZoom);
+}
+
+float
+SOdysseyFlipbookTimeline::Offset() const
+{
+    return mOffset;
+}
+
+void
+SOdysseyFlipbookTimeline::Offset(float iOffset)
+{
+    const float oldOffset = mOffset;
+    mOffset = iOffset;
+    mScrollBoxH->SetScrollOffset(iOffset * FrameSize());
+    mOnOffsetChanged.ExecuteIfBound(oldOffset);
+}
+
+float
+SOdysseyFlipbookTimeline::ScrubPosition() const
+{
+    return mScrubPosition;
+}
+
+void
+SOdysseyFlipbookTimeline::ScrubPosition(float iPosition)
+{
+    float oldPosition = mScrubPosition;
+    mScrubPosition = FMath::Max(iPosition, 0.0f);
+    mOnScrubPositionChanged.ExecuteIfBound(oldPosition);
+}
+
+// Offset of the timeline in seconds
+float
+SOdysseyFlipbookTimeline::FrameSize() const
+{
+    return defaultFrameSize * mZoom;
+}
+
+bool
+SOdysseyFlipbookTimeline::IsScrubbing() const
+{
+    return mIsScrubbing;
+}
+
+FOptionalSize
+SOdysseyFlipbookTimeline::GetScrollBoxHWidth() const
+{
+    if (!mScrollBoxH.IsValid())
+        return FOptionalSize(0.0f);
+
+    float hSize = mScrollBoxH->GetCachedGeometry().GetLocalSize().X - 1.0f;
+    return FOptionalSize(hSize);
+}
+
+FOptionalSize
+SOdysseyFlipbookTimeline::GetScrollBoxVHeight() const
+{
+    if (!mScrollBoxV.IsValid())
+        return FOptionalSize(0.0f);
+
+    float hSize = mScrollBoxV->GetCachedGeometry().GetLocalSize().Y - 1.0f;
+    return FOptionalSize(hSize);
+}

@@ -4,7 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "SOdysseyTimelineFrameListEvents.h"
+#include "SOdysseyFlipbookTimelineFrameListEvents.h"
 #include "PaperFlipbook.h"
 
 DECLARE_DELEGATE(FOnStructureChanged)

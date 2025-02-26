@@ -8,8 +8,8 @@
 #include "GenericPlatform/GenericPlatformMath.h"
 #include "Widgets/Input/SSlider.h"
 
-#include "SOdysseyPlaybackControls.h"
-#include "SOdysseyTimeline.h"
+#include "SOdysseyFlipbookPlaybackControls.h"
+#include "SOdysseyFlipbookTimeline.h"
 #include "SOdysseyFlipbookTimelineTrack.h"
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "OdysseyFlipbookWrapper.h"
@@ -137,7 +137,7 @@ void SOdysseyFlipbookTimelineView::Construct(const FArguments& InArgs)
         .FillHeight(1.0f)
         .Padding(0, 0, 0, 0)
         [
-            SAssignNew(mTimelineWidget, SOdysseyTimeline)
+            SAssignNew(mTimelineWidget, SOdysseyFlipbookTimeline)
             .OnScrubStarted(this, &SOdysseyFlipbookTimelineView::OnScrubStarted)
             .OnScrubPositionChanged(this, &SOdysseyFlipbookTimelineView::OnScrubPositionChanged)
             .OnScrubStopped(InArgs._OnScrubStopped)

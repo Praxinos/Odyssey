@@ -3,7 +3,7 @@
 
 #include "Widgets/SOdysseyAnimationTimelineTrack.h"
 
-#include "Widgets/LayerStack/SOdysseyAnimationLayerStackTreeView.h"
+#include "Widgets/Animation/LayerStack/SOdysseyAnimationLayerStackTreeView.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "TrackEditors/SubTrackEditorBase.h"
 #include "OdysseyAnimationTimelineSectionEditor.h"
@@ -14,7 +14,7 @@
 #include "OdysseyAnimationTimelineTrack.h"
 #include "OdysseyViewportDrawingEditorEdMode.h"
 #include "EditorModeManager.h"
-#include "AnimationEditor/OdysseyAnimationEditorExtension.h"
+#include "Animation/OdysseyAnimationEditorExtension.h"
 #include "OdysseyViewportDrawingEditorToolkit.h"
 #include "Widgets/Input/SCheckBox.h"
 

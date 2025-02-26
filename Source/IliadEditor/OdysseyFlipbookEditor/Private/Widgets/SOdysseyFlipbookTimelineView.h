@@ -8,7 +8,7 @@
 
 // Called when the selection changes
 
-class SOdysseyTimeline;
+class SOdysseyFlipbookTimeline;
 class SOdysseyFlipbookTimelineTrack;
 class UTexture2D;
 class UPaperSprite;
@@ -140,7 +140,7 @@ private:
     float mScrubPositionBeforePlay;
 
     //Widgets
-    TSharedPtr<SOdysseyTimeline> mTimelineWidget;
+    TSharedPtr<SOdysseyFlipbookTimeline> mTimelineWidget;
     TSharedPtr<SOdysseyFlipbookTimelineTrack> mTimelineTrackWidget;
 
     //Events

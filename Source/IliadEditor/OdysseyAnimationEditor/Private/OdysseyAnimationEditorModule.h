@@ -2,12 +2,11 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
 #pragma once
 
-#include "IOdysseyAnimationEditorModule.h"
-
+#include "Modules/ModuleManager.h"
 #include "IAssetTypeActions.h"
 
 class FOdysseyAnimationEditorModule
-    : public IOdysseyAnimationEditorModule
+    : public IModuleInterface
 {
 public:
     // IOdysseyAnimationEditorModule interface
@@ -23,24 +22,6 @@ private:
     void RegisterAssetTypeActions();
     void UnregisterAssetTypeActions();
 
-    //Settings
-    void RegisterSettings();
-    void UnregisterSettings();
-
-    //Commands
-    void RegisterCommands();
-    void UnregisterCommands();
-
-    //Level Editor Layout
-    void RegisterLevelEditorLayoutExtensions();
-    void UnregisterLevelEditorLayoutExtensions();
-
-    void RegisterDetailCustomizations();
-    void UnregisterDetailCustomization();
-
-    void RegisterThumbnailRenderers();
-    void UnregisterThumbnailRenderers();
-
     void RegisterFactoryDelayed();
     void RegisterPlacementFactories();
     void UnregisterPlacementFactories();
@@ -49,5 +30,4 @@ private:
 private:
     /** All created asset type actions. Cached here so that we can unregister them during shutdown. */
     TSharedPtr<IAssetTypeActions> mOdysseyTypeActions;
-    FDelegateHandle mExtendLevelEditorLayout;
 };

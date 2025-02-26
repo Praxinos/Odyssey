@@ -61,15 +61,14 @@ public class OdysseyWidgets : ModuleRules
 
         PrivateIncludePaths.AddRange(
             new string[] {
-                Path.Combine(ModuleDirectory, "Private", "Timeline"),
+                Path.Combine(ModuleDirectory, "Private", "Flipbook"),
             }
         );
 
         PublicIncludePaths.AddRange(
             new string[] {
                 Path.Combine(ModuleDirectory, "Public"),
-                Path.Combine(ModuleDirectory, "Public", "Timeline"),
-                Path.Combine(ModuleDirectory, "Public", "Timeline", "Events"),
+                Path.Combine(ModuleDirectory, "Public", "Flipbook"),
                 Path.Combine(ModuleDirectory, "Public", "Common"),
                 Path.Combine(ModuleDirectory, "Public", "Common", "Events"),
             }

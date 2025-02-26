@@ -14,7 +14,7 @@
 
 #include "PainterEditor/OdysseyPainterEditor.h"
 #include "TextureEditor/OdysseyTextureEditorExtension.h"
-#include "OdysseyTextureEditorSettings.h"
+#include "Settings/OdysseyTextureEditorSettings.h"
 #include "OdysseyTextureAssetTypeActions.h"
 #include "OdysseyTextureAssetTypeActions.h"
 #include "TextureEditor/OdysseyTextureEditorCommands.h"

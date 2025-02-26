@@ -7,7 +7,7 @@
 #include "IContentBrowserSingleton.h"
 #include "Interfaces/ITextureEditorModule.h"
 #include "OdysseyPainterEditorModule.h"
-#include "OdysseyTextureEditorSettings.h"
+#include "Settings/OdysseyTextureEditorSettings.h"
 #include "OdysseyTexture.h"
 #include "OdysseyStyle.h"
 

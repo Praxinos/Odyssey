@@ -5,8 +5,8 @@
 
 #include "IAssetTools.h"
 #include "Fonts/FontMeasure.h"
-#include "SOdysseyTimelineFrameList.h"
-#include "SOdysseyTimelineFrame.h"
+#include "SOdysseyFlipbookTimelineFrameList.h"
+#include "SOdysseyFlipbookTimelineFrame.h"
 #include "OdysseyFlipbookEditorCommands.h"
 
 #include "Widgets/Layout/SScaleBox.h"
@@ -51,7 +51,7 @@ void SOdysseyFlipbookTimelineTrack::Construct( const SOdysseyFlipbookTimelineTra
     ChildSlot
     [
         //Frames
-        SAssignNew(mFrameList, SOdysseyTimelineFrameList)
+        SAssignNew(mFrameList, SOdysseyFlipbookTimelineFrameList)
         .FrameSize(mFrameSize)
         .OnFramesMoved(this, &SOdysseyFlipbookTimelineTrack::OnFramesMoved)
         .OnFramesLengthChanged(this, &SOdysseyFlipbookTimelineTrack::OnFramesLengthChanged)

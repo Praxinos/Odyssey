@@ -34,6 +34,13 @@ private:
     void RegisterDetailCustomizations();
     void UnregisterDetailCustomization();
 
+    void RegisterThumbnailRenderers();
+    void UnregisterThumbnailRenderers();
+    void RegisterPlacementFactories();
+    void UnregisterPlacementFactories();
+    void RegisterFactoryDelayed();
+    void ReorderFactories();
+
 public:
     //Tabs State Loading / Saving
     void SetOpenedTabIds(const FName& iEditorName, const TArray<FName>& iTabIds);
@@ -48,4 +55,5 @@ private:
 private:
     TMap<FName, TArray<FName>> mOpenedTabIds; //Ids of tabs that should be opened when activating a Mode Editor
     FDelegateHandle mExtendLevelEditorLayout;
+    FDelegateHandle mAnimationExtendLevelEditorLayout;
 };

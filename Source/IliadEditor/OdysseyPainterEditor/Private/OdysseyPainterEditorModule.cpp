@@ -20,10 +20,18 @@
 #include "Tools/RasterDrawingTool/OdysseyBlendParametersOverrides.h"
 #include "FreehandShape/OdysseyFreehandShapeOverrides.h"
 #include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingToolOverrides.h"
+#include "ActorFactories/ActorFactory.h"
 
+#include "LayerStack/Cells/OdysseyAnimationCell.h"
+#include "LayerStack/Cells/OdysseyAnimationCellThumbnailRenderer.h"
 #include "PainterEditor/OdysseyPainterEditorGUI.h"
+#include "OdysseyAnimation.h"
+#include "OdysseyAnimationEditorGUI.h"
+#include "OdysseyAnimationEditorProjectSettings.h"
+#include "OdysseyAnimationEditorUserSettings.h"
+#include "OdysseyAnimationEditorCommands.h"
+#include "Tools/OutOfPegsTool/OdysseyAnimationEditorOutOfPegsTool.h"
 #include "StandaloneEditor/OdysseyPainterEditorStandaloneToolkit.h"
-#include <ULIS>
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -64,6 +72,7 @@ FOdysseyPainterEditorModule::StartupModule()
     RegisterCommands();
     RegisterLevelEditorLayoutExtensions();
     RegisterDetailCustomizations();
+    RegisterThumbnailRenderers();
 
     FOdysseyVectorBrushCustomization::Register();
     FOdysseyVectorObjectViewPaletteCustomization::Register();
@@ -77,6 +86,7 @@ FOdysseyPainterEditorModule::ShutdownModule()
     UnregisterCommands();
     UnregisterLevelEditorLayoutExtensions();
     UnregisterDetailCustomization();
+    UnregisterThumbnailRenderers();
 
     FOdysseyVectorBrushCustomization::Unregister();
     FOdysseyVectorObjectViewPaletteCustomization::Unregister();
@@ -101,6 +111,16 @@ FOdysseyPainterEditorModule::RegisterSettings()
                                         , LOCTEXT( "settings.name", "Odyssey Painter Editor" )
                                         , LOCTEXT( "settings.tooltip", "Configure the look and feel of the Odyssey Editor." )
                                         , GetMutableDefault<UOdysseyPainterEditorSettings>() );
+
+    settingsModule->RegisterSettings( "Project", "Plugins", "OdysseyAnimationEditor"
+                                        , LOCTEXT( "settings.name", "2D Animation Editor" )
+                                        , LOCTEXT( "settings.tooltip", "Configure the look and feel of the 2D Animation Editor." )
+                                        , GetMutableDefault<UOdysseyAnimationEditorProjectSettings>() );
+
+    settingsModule->RegisterSettings( "Editor", "Plugins", "OdysseyAnimationEditorUserSettings"
+                                        , LOCTEXT( "settings.name", "2D Animation Editor" )
+                                        , LOCTEXT( "settings.tooltip", "Configure the look and feel of the 2D Animation Editor." )
+                                        , GetMutableDefault<UOdysseyAnimationEditorUserSettings>() );
 }
 
 void
@@ -112,18 +132,34 @@ FOdysseyPainterEditorModule::UnregisterSettings()
         return;
 
     settingsModule->UnregisterSettings( "Editor", "Plugins", "OdysseyPainterEditor" );
+    settingsModule->UnregisterSettings( "Editor", "Plugins", "OdysseyAnimationEditor" );
+    settingsModule->UnregisterSettings( "Editor", "Plugins", "OdysseyAnimationEditorUserSettings" );
 }
 
 void
 FOdysseyPainterEditorModule::RegisterCommands()
 {
     FOdysseyPainterEditorCommands::Register();
+    FOdysseyAnimationEditorCommands::Register();
 }
 
 void
 FOdysseyPainterEditorModule::UnregisterCommands()
 {
     FOdysseyPainterEditorCommands::Unregister();
+    FOdysseyAnimationEditorCommands::Unregister();
+}
+
+void
+FOdysseyPainterEditorModule::RegisterThumbnailRenderers()
+{
+    UThumbnailManager::Get().RegisterCustomRenderer(UOdysseyAnimationCell::StaticClass(), UOdysseyAnimationCellThumbnailRenderer::StaticClass());
+}
+
+void
+FOdysseyPainterEditorModule::UnregisterThumbnailRenderers()
+{
+    //UThumbnailManager::Get().UnregisterCustomRenderer(UOdysseyAnimationCellImageRaster::StaticClass());
 }
 
 void
@@ -146,6 +182,7 @@ FOdysseyPainterEditorModule::RegisterLevelEditorLayoutExtensions()
 {
     FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor");
     mExtendLevelEditorLayout = LevelEditorModule.OnRegisterLayoutExtensions().AddStatic(&FOdysseyPainterEditorGUI::ExtendLevelEditorLayout);
+    mAnimationExtendLevelEditorLayout = LevelEditorModule.OnRegisterLayoutExtensions().AddStatic(&FOdysseyAnimationEditorGUI::ExtendLevelEditorLayout);
 }
 
 void
@@ -153,18 +190,24 @@ FOdysseyPainterEditorModule::UnregisterLevelEditorLayoutExtensions()
 {
     FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor");
     LevelEditorModule.OnRegisterLayoutExtensions().Remove(mExtendLevelEditorLayout);
+    LevelEditorModule.OnRegisterLayoutExtensions().Remove(mAnimationExtendLevelEditorLayout);
 }
 
 void
 FOdysseyPainterEditorModule::RegisterDetailCustomizations()
 {
     FOdysseyShapes::RegisterDetailCustomization();
+
+    FOdysseyAnimationEditorFlipSystem::RegisterDetailCustomization();
+    FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
+    PropertyModule.RegisterCustomClassLayout(UOdysseyAnimationEditorOutOfPegsTool::StaticClass()->GetFName(), FOnGetDetailCustomizationInstance::CreateStatic(&FOdysseyAnimationEditorOutOfPegsToolDetails::MakeInstance));
 }
 
 void
 FOdysseyPainterEditorModule::UnregisterDetailCustomization()
 {
     FOdysseyShapes::UnregisterDetailCustomization();
+    FOdysseyAnimationEditorFlipSystem::UnregisterDetailCustomization();
 }
 
 void

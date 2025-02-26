@@ -7,7 +7,7 @@
 #include "OdysseyPainterEditorModule.h"
 #include "LevelEditor.h"
 #include "Widgets/SOdysseyViewportDrawingEditorMasterTab.h"
-#include "AnimationEditor/OdysseyAnimationEditorExtension.h"
+#include "OdysseyAnimationEditorExtension.h"
 #include "TextureEditor/OdysseyTextureEditorExtension.h"
 #include "Interfaces/IMainFrameModule.h"
 #include "ViewportDrawingEditor/OdysseyViewportDrawingEditorExtension.h"
