@@ -20,7 +20,7 @@
 #include "OdysseyTextureLayerStack.h"
 #include "LayerStack/OdysseyTextureLayerImageRaster.h"
 #include "OdysseyPainterEditorCommands.h"
-#include "Texture/OdysseyTextureEditorSource.h"
+#include "OdysseyPainterEditorTextureSource.h"
 #include "OdysseyPainterEditor.h"
 #include "AssetToolsModule.h"
 #include "ULISLoaderModule.h"
@@ -32,7 +32,7 @@
 const FName&
 FOdysseyPainterEditorLayerStackTab::StaticId()
 {
-    static FName Id = TEXT("OdysseyTextureEditor_LayerStack"); //Keep ColorSelector instead of ColorWheel because changing that ID would show an empty panel to users who already opened the previous ColorSelector Panel
+    static FName Id = TEXT("OdysseyTextureEditor_LayerStack");  //Dont change, Old Id for retro compatibility
     return Id;
 }
 
@@ -49,9 +49,6 @@ FOdysseyPainterEditorLayerStackTab::FOdysseyPainterEditorLayerStackTab(FOdysseyP
     , mEditor(iEditor)
 {
 }
-
-//--------------------------------------------------------------------------------------
-//--------------------------------------------------- FOdysseyTextureEditorTab interface
 
 const FName&
 FOdysseyPainterEditorLayerStackTab::GetId() const
@@ -86,7 +83,7 @@ UOdysseyLayerStack*
 FOdysseyPainterEditorLayerStackTab::LayerStack() const
 {
     TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
-    if (!source || source->Id() != FOdysseyTextureEditorSource::StaticId())
+    if (!source || source->Id() != FOdysseyPainterEditorTextureSource::StaticId())
         return nullptr;
 
     return source->GetLayerStack();
@@ -109,17 +106,6 @@ FOdysseyPainterEditorLayerStackTab::MapActions( TSharedPtr<FUICommandList> iComm
     MAP_ACTION(painterEditorCommands.ExportLayersAsTextures, ExportLayersAsTextures )
     MAP_ACTION(painterEditorCommands.ExportCurrentLayerAsTexture, ExportCurrentLayerAsTexture )
     MAP_ACTION(painterEditorCommands.ExportTextureToOperatingSystem, ExportTextureToOperatingSystem )
-    MAP_ACTION(painterEditorCommands.CreateNewLayer, CreateNewLayer )
-    MAP_ACTION(painterEditorCommands.ChangeLayerOpacity10, ChangeLayerOpacity, 0.1f )
-    MAP_ACTION(painterEditorCommands.ChangeLayerOpacity20, ChangeLayerOpacity, 0.2f )
-    MAP_ACTION(painterEditorCommands.ChangeLayerOpacity30, ChangeLayerOpacity, 0.3f )
-    MAP_ACTION(painterEditorCommands.ChangeLayerOpacity40, ChangeLayerOpacity, 0.4f )
-    MAP_ACTION(painterEditorCommands.ChangeLayerOpacity50, ChangeLayerOpacity, 0.5f )
-    MAP_ACTION(painterEditorCommands.ChangeLayerOpacity60, ChangeLayerOpacity, 0.6f )
-    MAP_ACTION(painterEditorCommands.ChangeLayerOpacity70, ChangeLayerOpacity, 0.7f )
-    MAP_ACTION(painterEditorCommands.ChangeLayerOpacity80, ChangeLayerOpacity, 0.8f )
-    MAP_ACTION(painterEditorCommands.ChangeLayerOpacity90, ChangeLayerOpacity, 0.9f )
-    MAP_ACTION(painterEditorCommands.ChangeLayerOpacity100, ChangeLayerOpacity, 1.0f )
 
     #undef MAP_ACTION
 }
@@ -137,7 +123,7 @@ FOdysseyPainterEditorLayerStackTab::ExtendMenuFile( TSharedRef<FExtender> iExten
             [this](FMenuBuilder& iBuilder)
             {
                 TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
-                if (!source || source->Id() != FOdysseyTextureEditorSource::StaticId())
+                if (!source || source->Id() != FOdysseyPainterEditorTextureSource::StaticId())
                     return;
 
                 iBuilder.BeginSection("OdysseyTexture", LOCTEXT("main-menu.file.texture-import-export-section.name", "Texture Import/Export"));
@@ -157,10 +143,10 @@ void
 FOdysseyPainterEditorLayerStackTab::ExportTextureToOperatingSystem()
 {
     TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
-    if (!source || source->Id() != FOdysseyTextureEditorSource::StaticId())
+    if (!source || source->Id() != FOdysseyPainterEditorTextureSource::StaticId())
         return;
 
-    TSharedPtr<FOdysseyTextureEditorSource> textureSource = StaticCastSharedPtr<FOdysseyTextureEditorSource>(source);
+    TSharedPtr<FOdysseyPainterEditorTextureSource> textureSource = StaticCastSharedPtr<FOdysseyPainterEditorTextureSource>(source);
 
     UTexture* currentTexture = textureSource->GetTexture();
     IDesktopPlatform* desktopPlatformHandle = FDesktopPlatformModule::Get();
@@ -263,10 +249,10 @@ FOdysseyPainterEditorLayerStackTab::ImportTexturesAsLayers()
         return;
 
     TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
-    if (!source || source->Id() != FOdysseyTextureEditorSource::StaticId())
+    if (!source || source->Id() != FOdysseyPainterEditorTextureSource::StaticId())
         return;
 
-    TSharedPtr<FOdysseyTextureEditorSource> textureSource = StaticCastSharedPtr<FOdysseyTextureEditorSource>(source);
+    TSharedPtr<FOdysseyPainterEditorTextureSource> textureSource = StaticCastSharedPtr<FOdysseyPainterEditorTextureSource>(source);
     UTexture* currentTexture = textureSource->GetTexture();
 
     FScopedTransaction ScopedTransaction(LOCTEXT("import-textures-as-layers.transaction.import", "Import Textures As Layers"));
@@ -320,10 +306,10 @@ FOdysseyPainterEditorLayerStackTab::ExportLayersAsTextures()
         return;
 
     TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
-    if (!source || source->Id() != FOdysseyTextureEditorSource::StaticId())
+    if (!source || source->Id() != FOdysseyPainterEditorTextureSource::StaticId())
         return;
 
-    TSharedPtr<FOdysseyTextureEditorSource> textureSource = StaticCastSharedPtr<FOdysseyTextureEditorSource>(source);
+    TSharedPtr<FOdysseyPainterEditorTextureSource> textureSource = StaticCastSharedPtr<FOdysseyPainterEditorTextureSource>(source);
     UTexture* texture = textureSource->GetTexture();
 
     FSaveAssetDialogConfig saveAssetDialogConfig;
@@ -409,10 +395,10 @@ FOdysseyPainterEditorLayerStackTab::ExportCurrentLayerAsTexture()
         return;
 
     TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
-    if (!source || source->Id() != FOdysseyTextureEditorSource::StaticId())
+    if (!source || source->Id() != FOdysseyPainterEditorTextureSource::StaticId())
         return;
 
-    TSharedPtr<FOdysseyTextureEditorSource> textureSource = StaticCastSharedPtr<FOdysseyTextureEditorSource>(source);
+    TSharedPtr<FOdysseyPainterEditorTextureSource> textureSource = StaticCastSharedPtr<FOdysseyPainterEditorTextureSource>(source);
     UTexture* texture = textureSource->GetTexture();
 
     TArray<UOdysseyLayer*> layers = layerStack->GetLayers();
@@ -437,67 +423,6 @@ FOdysseyPainterEditorLayerStackTab::ExportCurrentLayerAsTexture()
     outTexture->PostEditChange();
     outTexture->UpdateResource();
     outTexture->MarkPackageDirty();
-}
-
-void
-FOdysseyPainterEditorLayerStackTab::CreateNewLayer()
-{
-    UOdysseyLayerStack* layerStack = LayerStack();
-    if ( !layerStack )
-        return;
-
-    UOdysseyLayer* layer = nullptr;
-    {
-    #ifdef WITH_EDITOR
-        FScopedTransaction ScopedTransaction(LOCTEXT("layerstack-tab.transaction.shortcut.create-new-layer", "Add Layer"));
-    #endif
-        UOdysseyLayer* currentLayer = layerStack->CurrentLayer.Get();
-        if (currentLayer)
-        {
-            if (currentLayer->CanHaveChildren && currentLayer->DisplayChildren)
-            {
-                layer = layerStack->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass(), currentLayer);
-            }
-            else
-            {
-                UOdysseyLayer* parent = currentLayer->GetParent();
-                int index = currentLayer->GetIndexInParent();
-                layer = layerStack->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass(), parent, index);
-            }
-        }
-        else
-        {
-            layer = layerStack->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass());
-        }
-
-        if (!layer)
-            return;
-    }
-
-    FOdysseyObjectEditorUtils::SetPropertyValue(layerStack, GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer), layer);
-}
-
-void
-FOdysseyPainterEditorLayerStackTab::ChangeLayerOpacity( float iOpacity )
-{
-    UOdysseyLayerStack* layerStack = LayerStack();
-    if ( !layerStack )
-        return;
-
-    if ( !layerStack->CurrentLayer )
-        return;
-
-    if ( layerStack->CurrentLayer->IsLockedRecursively() )
-        return;
-
-    if ( !FOdysseyObjectEditorUtils::HasProperty(layerStack->CurrentLayer.Get(), "Opacity") )
-        return;
-
-
-#ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("layerstack-tab.transaction.shortcut.set-layer-opacity", "Change Layer Opacity"));
-#endif
-    FOdysseyObjectEditorUtils::SetPropertyValue(layerStack->CurrentLayer.Get(), GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Opacity), FMath::Clamp(iOpacity, 0.f, 1.f));
 }
 
 #undef LOCTEXT_NAMESPACE

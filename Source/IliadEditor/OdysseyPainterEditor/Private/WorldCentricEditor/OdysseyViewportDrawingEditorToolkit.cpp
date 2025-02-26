@@ -7,7 +7,6 @@
 #include "OdysseyPainterEditorModule.h"
 #include "LevelEditor.h"
 #include "Widgets/SOdysseyViewportDrawingEditorMasterTab.h"
-#include "OdysseyAnimationEditorExtension.h"
 #include "Interfaces/IMainFrameModule.h"
 #include "OdysseyViewportDrawingEditorExtension.h"
 #include "Toolkits/AssetEditorModeUILayer.h"
@@ -47,10 +46,8 @@ FOdysseyViewportDrawingEditorToolkit::Initialize(
 {
     mEditor = MakeShared<FOdysseyPainterEditor>(SharedThis(this));
 
-    mAnimationExtension = MakeShared<FOdysseyAnimationEditorExtension>(mEditor.Get());
     mViewportDrawingExtension = MakeShared<FOdysseyViewportDrawingEditorExtension>(mEditor.Get());
 
-    mEditor->AddExtension(mAnimationExtension.ToSharedRef());
     mEditor->AddExtension(mViewportDrawingExtension.ToSharedRef());
 
     mEditor->Initialize();
@@ -248,7 +245,7 @@ FOdysseyViewportDrawingEditorToolkit::SaveOpenedTabs()
             tabIds.Add(tab->GetId());
     }
 
-    FOdysseyPainterEditorModule& odysseyEditorModule = FModuleManager::LoadModuleChecked<FOdysseyPainterEditorModule>("OdysseyEditor");
+    FOdysseyPainterEditorModule& odysseyEditorModule = FModuleManager::LoadModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
     odysseyEditorModule.SetOpenedTabIds(mEditor->GetId(), tabIds);
 }
 
@@ -263,7 +260,7 @@ FOdysseyViewportDrawingEditorToolkit::LoadOpenedTabs()
             defaultOpenedTabIds.Add(tab->GetId());
     }
 
-    FOdysseyPainterEditorModule& odysseyEditorModule = FModuleManager::LoadModuleChecked<FOdysseyPainterEditorModule>("OdysseyEditor");
+    FOdysseyPainterEditorModule& odysseyEditorModule = FModuleManager::LoadModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
     const TArray<FName>& tabIds = odysseyEditorModule.GetOpenedTabIds(mEditor->GetId(), defaultOpenedTabIds);
     for (TSharedPtr<FOdysseyEditorTab> tab : tabs)
     {
@@ -323,12 +320,6 @@ TSharedPtr<FOdysseyViewportDrawingEditorExtension>
 FOdysseyViewportDrawingEditorToolkit::GetViewportDrawingExtension() const
 {
     return mViewportDrawingExtension;
-}
-
-TSharedPtr<FOdysseyAnimationEditorExtension>
-FOdysseyViewportDrawingEditorToolkit::GetAnimationExtension() const
-{
-    return mAnimationExtension;
 }
 
 /* void

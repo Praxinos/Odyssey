@@ -7,7 +7,7 @@
 
 class UOdysseyAnimation;
 class UOdysseyAnimationPlayer;
-class FOdysseyAnimationEditorTimelinePosition;
+class FOdysseyPainterEditorAnimationTImelinePosition;
 
 class SOdysseyAnimationTimelineHeader
     : public SCompoundWidget
@@ -19,7 +19,7 @@ public:
     {}
         SLATE_ARGUMENT( UOdysseyAnimation*, Animation )
         SLATE_ARGUMENT( UOdysseyAnimationPlayer*, Player )
-        SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
+        SLATE_ARGUMENT( TSharedPtr<FOdysseyPainterEditorAnimationTImelinePosition>, TimelinePosition )
     SLATE_END_ARGS()
 
     void Construct(const FArguments& InArgs);
@@ -38,7 +38,7 @@ private:
 private:
     UOdysseyAnimation* mAnimation;
     UOdysseyAnimationPlayer* mPlayer;
-    TSharedPtr<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
+    TSharedPtr<FOdysseyPainterEditorAnimationTImelinePosition> mTimelinePosition;
 
     bool mIsScrubbing = false;
 };

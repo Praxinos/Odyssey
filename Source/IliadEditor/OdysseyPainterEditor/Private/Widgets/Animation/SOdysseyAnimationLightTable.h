@@ -6,7 +6,6 @@
 #include "CoreMinimal.h"
 #include "Widgets/Input/SButton.h"
 
-class FOdysseyAnimationEditorExtension;
 class UOdysseyLayerStack;
 class UOdysseyAnimationLayerStack;
 
@@ -22,7 +21,7 @@ public:
         SLATE_ATTRIBUTE( UOdysseyAnimationLayerStack*, LayerStack )
     SLATE_END_ARGS()
 
-    void Construct(const FArguments& InArgs, FOdysseyAnimationEditorExtension* iExtension);
+    void Construct(const FArguments& InArgs);
 
     SOdysseyAnimationLightTable();
     ~SOdysseyAnimationLightTable();
@@ -51,7 +50,6 @@ private:
     TSharedRef<SWidget> GenerateNextKeyWidget(int iKeyIndex);
 
 private:
-    FOdysseyAnimationEditorExtension* mExtension;
     TSharedPtr<SHorizontalBox> mSlidersBox;
     bool mRebuildRequested;
     TSlateAttribute<UOdysseyAnimationLayerStack*> mLayerStack;

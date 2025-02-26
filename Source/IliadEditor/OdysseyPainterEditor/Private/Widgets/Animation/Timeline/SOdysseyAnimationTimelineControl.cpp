@@ -3,10 +3,10 @@
 
 #include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineControl.h"
 #include "OdysseyKeyState.h"
-#include "OdysseyAnimationEditorCommands.h"
+#include "OdysseyPainterEditorAnimationCommands.h"
 #include "OdysseyAnimation.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
-#include "OdysseyAnimationEditorTimelinePosition.h"
+#include "OdysseyPainterEditorAnimationTImelinePosition.h"
 
 SOdysseyAnimationTimelineControl::SOdysseyAnimationTimelineControl()
     : mOffsetMousePosition(0)
@@ -133,7 +133,7 @@ SOdysseyAnimationTimelineControl::OnPreviewMouseButtonDown(const FGeometry& MyGe
         )
     );
 
-    if (FOdysseyAnimationEditorCommands::Get().PanZoomTimeline->HasActiveChord(activeChord))
+    if (FOdysseyPainterEditorAnimationCommands::Get().PanZoomTimeline->HasActiveChord(activeChord))
     {
         if (MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
         {

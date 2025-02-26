@@ -6,7 +6,7 @@
 #include "CoreMinimal.h"
 
 class UOdysseyAnimation;
-class FOdysseyAnimationEditorTimelinePosition;
+class FOdysseyPainterEditorAnimationTImelinePosition;
 
 class SOdysseyAnimationTimelineControl
     : public SCompoundWidget
@@ -19,7 +19,7 @@ public:
         SLATE_DEFAULT_SLOT( FArguments, Content )
         SLATE_ARGUMENT(UOdysseyAnimation*, Animation)
         SLATE_ATTRIBUTE(int, CurrentFrame)
-        SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
+        SLATE_ARGUMENT( TSharedPtr<FOdysseyPainterEditorAnimationTImelinePosition>, TimelinePosition )
         SLATE_ATTRIBUTE( FInt32Range, CustomValidRange)
     SLATE_END_ARGS()
 
@@ -44,7 +44,7 @@ private:
 
 private:
     UOdysseyAnimation* mAnimation;
-    TSharedPtr<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
+    TSharedPtr<FOdysseyPainterEditorAnimationTImelinePosition> mTimelinePosition;
     TAttribute<int> mCurrentFrame;
     TAttribute<FInt32Range> mCustomValidRange;
 

@@ -4,7 +4,7 @@
 #include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineOutOfPegs.h"
 #include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineOutOfPegsKey.h"
 #include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
-#include "Tools/OutOfPegsTool/OdysseyAnimationEditorOutOfPegsTool.h"
+#include "Tools/OutOfPegsTool/OdysseyPainterEditorAnimationOutOfPegsTool.h"
 #include "OdysseyAnimation.h"
 #include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineSection.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"

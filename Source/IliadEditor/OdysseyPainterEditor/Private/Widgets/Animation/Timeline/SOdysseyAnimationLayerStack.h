@@ -15,7 +15,7 @@ class SOdysseyLayerStackTreeView;
 class SOdysseyAnimationTimelineTreeView;
 class UOdysseyAnimationLayerStack;
 class FOdysseyAnimationTimelineTool;
-class FOdysseyAnimationEditorTimelinePosition;
+class FOdysseyPainterEditorAnimationTImelinePosition;
 class UOdysseyAnimation;
 class UOdysseyAnimationPlayer;
 class FOdysseyPainterEditor;
@@ -38,7 +38,7 @@ public:
         SLATE_ATTRIBUTE( EVisibility, PlayerControlsVisibility)
         SLATE_ATTRIBUTE( EVisibility, ScrollbarVisibility)
         SLATE_ATTRIBUTE( float, PlaybackFramesPerSecond )
-        SLATE_ATTRIBUTE( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
+        SLATE_ATTRIBUTE( TSharedPtr<FOdysseyPainterEditorAnimationTImelinePosition>, TimelinePosition )
         SLATE_ATTRIBUTE( FInt32Range, CustomValidRange)
         SLATE_EVENT(SOdysseyAnimationTimelineOutOfPegsKey::FOnActivateOutOfPegs, OnActivateOutOfPegs)
         SLATE_EVENT(FSimpleDelegate, OnInactivateOutOfPegs)
@@ -75,7 +75,7 @@ private:
     TAttribute<EVisibility> mPlayerControlsVisibility;
     TAttribute<EVisibility> mScrollbarVisibility;
     TAttribute<float> mPlaybackFramesPerSecond;
-    TAttribute<TSharedPtr<FOdysseyAnimationEditorTimelinePosition>> mTimelinePosition;
+    TAttribute<TSharedPtr<FOdysseyPainterEditorAnimationTImelinePosition>> mTimelinePosition;
     TAttribute<FInt32Range> mCustomValidRange;
     SOdysseyAnimationTimelineOutOfPegsKey::FOnActivateOutOfPegs mOnActivateOutOfPegs;
     FSimpleDelegate mOnInactivateOutOfPegs;

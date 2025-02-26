@@ -5,9 +5,9 @@
 #include "TimelineTools/OdysseyAnimationTimelineSelectionTool.h"
 #include "TimelineTools/OdysseyAnimationTimelineMoveTool.h"
 #include "TimelineTools/OdysseyAnimationTimelineCutTool.h"
-#include "OdysseyAnimationEditorCommands.h"
+#include "OdysseyPainterEditorAnimationCommands.h"
 #include "OdysseyKeyState.h"
-#include "OdysseyAnimationEditorCommands.h"
+#include "OdysseyPainterEditorAnimationCommands.h"
 #include "Framework/Application/SlateApplication.h"
 
 FOdysseyAnimationTimelineTools&
@@ -23,7 +23,7 @@ FOdysseyAnimationTimelineTools::FOdysseyAnimationTimelineTools()
 }
 
 TSharedPtr<FOdysseyAnimationTimelineTool>
-FOdysseyAnimationTimelineTools::CreateTool(TSharedRef<FOdysseyAnimationEditorTimelinePosition> iTimelinePosition, TSharedRef<FOdysseyAnimationCellSelection> iTimelineCellSelection) const
+FOdysseyAnimationTimelineTools::CreateTool(TSharedRef<FOdysseyPainterEditorAnimationTImelinePosition> iTimelinePosition, TSharedRef<FOdysseyAnimationCellSelection> iTimelineCellSelection) const
 {
     switch(mCurrentTool)
     {
@@ -53,15 +53,15 @@ FOdysseyAnimationTimelineTools::GetCurrentTool() const
         )
     );
 
-    if (FOdysseyAnimationEditorCommands::Get().HoldActivateTimelineSelectionTool->HasActiveChord(activeChord))
+    if (FOdysseyPainterEditorAnimationCommands::Get().HoldActivateTimelineSelectionTool->HasActiveChord(activeChord))
     {
         return EOdysseyTimelineTool::Selection;
     }
-    else if (FOdysseyAnimationEditorCommands::Get().HoldActivateTimelineMoveTool->HasActiveChord(activeChord))
+    else if (FOdysseyPainterEditorAnimationCommands::Get().HoldActivateTimelineMoveTool->HasActiveChord(activeChord))
     {
         return EOdysseyTimelineTool::Move;
     }
-    else if (FOdysseyAnimationEditorCommands::Get().HoldActivateTimelineCutTool->HasActiveChord(activeChord))
+    else if (FOdysseyPainterEditorAnimationCommands::Get().HoldActivateTimelineCutTool->HasActiveChord(activeChord))
     {
         return EOdysseyTimelineTool::Cut;
     }

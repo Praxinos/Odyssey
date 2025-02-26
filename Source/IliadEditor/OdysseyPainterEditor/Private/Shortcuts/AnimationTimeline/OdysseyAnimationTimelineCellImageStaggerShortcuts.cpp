@@ -4,7 +4,7 @@
 #include "Shortcuts/AnimationTimeline/OdysseyAnimationTimelineCellImageStaggerShortcuts.h"
 
 #include "Widgets/Animation/Timeline/Cells/CellImageStagger/SOdysseyAnimationCellImageStagger.h"
-#include "OdysseyAnimationEditorCommands.h"
+#include "OdysseyPainterEditorAnimationCommands.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 #include "OdysseyLayerStack.h"
 #include "OdysseyAnimation.h"
@@ -23,7 +23,7 @@ void
 FOdysseyAnimationTimelineCellImageStaggerShortcuts::MapActionsToCommandList(TSharedRef<FUICommandList> iCommandList)
 {
     iCommandList->MapAction(
-        FOdysseyAnimationEditorCommands::Get().ConvertToReferenceCells,
+        FOdysseyPainterEditorAnimationCommands::Get().ConvertToReferenceCells,
         FExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellImageStaggerShortcuts::Action_ConvertToReferenceCells),
         FCanExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellImageStaggerShortcuts::CanAction_ConvertToReferenceCells)
     );

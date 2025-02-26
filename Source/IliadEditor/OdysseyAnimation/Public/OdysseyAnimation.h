@@ -125,7 +125,7 @@ public:
 
 protected:
     friend class UOdysseyAnimationFactory;
-    friend class UOdysseyAnimationEditorAnimationFunctionLibrary;
+    friend class UOdysseyPainterEditorAnimationFunctionLibrary;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(DisplayName="Width"), Category="Odyssey|Animation")
     int mWidth = -1;

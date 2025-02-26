@@ -151,10 +151,7 @@ UTexture*
 FOdysseyPainterEditorViewportTab::Texture() const
 {
     UObject* editedObject = mEditor->GetEditedObject();
-    if (!editedObject)
-        return nullptr;
-
-    if (!editedObject->IsA<UPaperFlipbook>())
+    if (!editedObject || !editedObject->IsA<UPaperFlipbook>())
     {
         TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
         if (!source)

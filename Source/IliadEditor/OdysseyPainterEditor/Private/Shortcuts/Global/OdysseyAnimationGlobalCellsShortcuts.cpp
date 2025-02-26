@@ -2,8 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Shortcuts/Global/OdysseyAnimationGlobalCellsShortcuts.h"
-#include "OdysseyAnimationEditorCommands.h"
-#include "OdysseyAnimationEditorExtension.h"
+#include "OdysseyPainterEditorAnimationCommands.h"
 #include "LayerStack/OdysseyAnimationLayerStack.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
@@ -12,12 +11,13 @@
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "LayerStack/Cells/OdysseyAnimationCellSelection.h"
 #include "ScopedTransaction.h"
+#include "OdysseyPainterEditor.h"
 
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
-FOdysseyAnimationGlobalCellsShortcuts::FOdysseyAnimationGlobalCellsShortcuts(TSharedPtr<FOdysseyAnimationEditorExtension> iExtension)
-    : mExtension(iExtension)
+FOdysseyAnimationGlobalCellsShortcuts::FOdysseyAnimationGlobalCellsShortcuts(FOdysseyPainterEditor* iEditor)
+    : mEditor(iEditor)
 {
 }
 
@@ -25,27 +25,27 @@ void
 FOdysseyAnimationGlobalCellsShortcuts::MapActionsToCommandList(TSharedRef<FUICommandList> iCommandList)
 {
     iCommandList->MapAction(
-        FOdysseyAnimationEditorCommands::Get().BreakCell,
+        FOdysseyPainterEditorAnimationCommands::Get().BreakCell,
         FExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalCellsShortcuts::Action_BreakCell),
         FCanExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalCellsShortcuts::CanAction_BreakCell)
     );
 
     iCommandList->MapAction(
-        FOdysseyAnimationEditorCommands::Get().BreakAndClearCell,
+        FOdysseyPainterEditorAnimationCommands::Get().BreakAndClearCell,
         FExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalCellsShortcuts::Action_BreakAndClearCell),
         FCanExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalCellsShortcuts::CanAction_BreakAndClearCell)
     );
 
     iCommandList->MapAction(
-        FOdysseyAnimationEditorCommands::Get().RemoveCellMark,
+        FOdysseyPainterEditorAnimationCommands::Get().RemoveCellMark,
         FExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalCellsShortcuts::Action_RemoveCellMark),
         FCanExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalCellsShortcuts::CanAction_RemoveCellMark)
     );
 
-    for (int i = 0; i < FOdysseyAnimationEditorCommands::Get().SetCellMark.Num(); i++)
+    for (int i = 0; i < FOdysseyPainterEditorAnimationCommands::Get().SetCellMark.Num(); i++)
     {
         iCommandList->MapAction(
-            FOdysseyAnimationEditorCommands::Get().SetCellMark[i],
+            FOdysseyPainterEditorAnimationCommands::Get().SetCellMark[i],
             FExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalCellsShortcuts::Action_SetCellMark, i),
             FCanExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalCellsShortcuts::CanAction_SetCellMark, i)
         );
@@ -57,15 +57,11 @@ FOdysseyAnimationGlobalCellsShortcuts::MapActionsToCommandList(TSharedRef<FUICom
 void
 FOdysseyAnimationGlobalCellsShortcuts::Action_BreakCell()
 {
-    TSharedPtr<FOdysseyAnimationEditorExtension> extension = mExtension.Pin();
-    if (!extension)
-        return;
-
-    UOdysseyAnimation* animation = extension->Animation();
+    UOdysseyAnimation* animation = mEditor->GetAnimation();
     if (!animation)
         return;
 
-    UOdysseyAnimationLayerStack* layerStack = extension->LayerStack();
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(mEditor->LayerStack());
     if (!layerStack)
         return;
 
@@ -103,15 +99,11 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_BreakCell()
 void
 FOdysseyAnimationGlobalCellsShortcuts::Action_BreakAndClearCell()
 {
-    TSharedPtr<FOdysseyAnimationEditorExtension> extension = mExtension.Pin();
-    if (!extension)
-        return;
-
-    UOdysseyAnimation* animation = extension->Animation();
+    UOdysseyAnimation* animation = mEditor->GetAnimation();
     if (!animation)
         return;
 
-    UOdysseyAnimationLayerStack* layerStack = extension->LayerStack();
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(mEditor->LayerStack());
     if (!layerStack)
         return;
 
@@ -145,15 +137,11 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_BreakAndClearCell()
 void
 FOdysseyAnimationGlobalCellsShortcuts::Action_RemoveCellMark()
 {
-    TSharedPtr<FOdysseyAnimationEditorExtension> extension = mExtension.Pin();
-    if (!extension)
-        return;
-
-    UOdysseyAnimation* animation = extension->Animation();
+    UOdysseyAnimation* animation = mEditor->GetAnimation();
     if (!animation)
         return;
 
-    UOdysseyAnimationLayerStack* layerStack = extension->LayerStack();
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(mEditor->LayerStack());
     if (!layerStack)
         return;
 
@@ -190,15 +178,11 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_RemoveCellMark()
 void
 FOdysseyAnimationGlobalCellsShortcuts::Action_SetCellMark(int iMarkId)
 {
-    TSharedPtr<FOdysseyAnimationEditorExtension> extension = mExtension.Pin();
-    if (!extension)
-        return;
-
-    UOdysseyAnimation* animation = extension->Animation();
+    UOdysseyAnimation* animation = mEditor->GetAnimation();
     if (!animation)
         return;
 
-    UOdysseyAnimationLayerStack* layerStack = extension->LayerStack();
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(mEditor->LayerStack());
     if (!layerStack)
         return;
 
@@ -247,15 +231,11 @@ FOdysseyAnimationGlobalCellsShortcuts::CanAction_BreakAndClearCell()
 bool
 FOdysseyAnimationGlobalCellsShortcuts::CanAction_RemoveCellMark()
 {
-    TSharedPtr<FOdysseyAnimationEditorExtension> extension = mExtension.Pin();
-    if (!extension)
-        return false;
-
-    UOdysseyAnimation* animation = extension->Animation();
+    UOdysseyAnimation* animation = mEditor->GetAnimation();
     if (!animation)
         return false;
 
-    UOdysseyAnimationLayerStack* layerStack = extension->LayerStack();
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(mEditor->LayerStack());
     if (!layerStack)
         return false;
 
@@ -280,15 +260,11 @@ FOdysseyAnimationGlobalCellsShortcuts::CanAction_RemoveCellMark()
 bool
 FOdysseyAnimationGlobalCellsShortcuts::CanAction_SetCellMark(int iMarkId)
 {
-    TSharedPtr<FOdysseyAnimationEditorExtension> extension = mExtension.Pin();
-    if (!extension)
-        return false;
-
-    UOdysseyAnimation* animation = extension->Animation();
+    UOdysseyAnimation* animation = mEditor->GetAnimation();
     if (!animation)
         return false;
 
-    UOdysseyAnimationLayerStack* layerStack = extension->LayerStack();
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(mEditor->LayerStack());
     if (!layerStack)
         return false;
 

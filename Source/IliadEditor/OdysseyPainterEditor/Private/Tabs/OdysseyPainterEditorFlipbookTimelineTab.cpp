@@ -3,11 +3,11 @@
 
 #include "OdysseyPainterEditorFlipbookTimelineTab.h"
 
-#include "OdysseyFlipbookEditorCommands.h"
+#include "OdysseyPainterEditorFlipbookCommands.h"
 #include "OdysseyPainterEditor.h"
 #include "SOdysseyFlipbookTimelineView.h"
 #include "Types/NavigationMetaData.h"
-#include "Texture/OdysseyTextureEditorSource.h"
+#include "OdysseyPainterEditorTextureSource.h"
 #include "OdysseyPainterEditorFlipbookUtils.h"
 #include "Toolkits/AssetEditorToolkit.h"
 #include "PaperSprite.h"
@@ -18,7 +18,7 @@
 const FName&
 FOdysseyPainterEditorFlipbookTimelineTab::StaticId()
 {
-    static FName Id = TEXT("OdysseyFlipbookEditor_Timeline");
+    static FName Id = TEXT("OdysseyFlipbookEditor_Timeline");  //Dont change, Old Id for retro compatibility
     return Id;
 }
 
@@ -37,9 +37,6 @@ FOdysseyPainterEditorFlipbookTimelineTab::FOdysseyPainterEditorFlipbookTimelineT
     , mTimeline(nullptr)
 {
 }
-
-//--------------------------------------------------------------------------------------
-//--------------------------------------------------- FOdysseyFlipbookEditorTab interface
 
 const FName&
 FOdysseyPainterEditorFlipbookTimelineTab::GetId() const
@@ -67,7 +64,7 @@ void
 FOdysseyPainterEditorFlipbookTimelineTab::BindShortcuts(FBaseToolkit* iToolkit)
 {
     const TSharedRef<FUICommandList>& toolkitCommands = iToolkit->GetToolkitCommands();
-    const FOdysseyFlipbookEditorCommands& flipbookEditorCommands = FOdysseyFlipbookEditorCommands::Get();
+    const FOdysseyPainterEditorFlipbookCommands& flipbookEditorCommands = FOdysseyPainterEditorFlipbookCommands::Get();
 
     #define MAP_ACTION(action, ...) toolkitCommands->MapAction( action, FExecuteAction::CreateSP( this, &FOdysseyPainterEditorViewportTab::__VA_ARGS__ ), FCanExecuteAction() );
 
@@ -179,7 +176,7 @@ FOdysseyPainterEditorFlipbookTimelineTab::SetTextureAtKeyframeIndex(int32 iKeyfr
     UTexture2D* texture = OdysseyPainterEditorFlipbookUtils::GetKeyframeTexture(flipbook, iKeyframeIndex);
     if (texture)
     {
-        TSharedPtr<FOdysseyTextureEditorSource> source = MakeShared<FOdysseyTextureEditorSource>(texture);
+        TSharedPtr<FOdysseyPainterEditorTextureSource> source = MakeShared<FOdysseyPainterEditorTextureSource>(texture);
         mEditor->SetSource(source);
     }
     else

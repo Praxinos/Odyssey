@@ -7,7 +7,6 @@
 #include "PaperFlipbook.h"
 #include "SOdysseyFlipbookTimelineViewEvents.h"
 
-class FOdysseyFlipbookEditorExtension;
 class SOdysseyFlipbookTimelineView;
 class UPaperSprite;
 class FOdysseyPainterEditor;

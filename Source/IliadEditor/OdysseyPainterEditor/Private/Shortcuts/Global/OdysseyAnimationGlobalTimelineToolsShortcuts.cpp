@@ -1,7 +1,7 @@
 // IDDN.FR.001.250001.006.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
 #include "Shortcuts/Global/OdysseyAnimationGlobalTimelineToolsShortcuts.h"
-#include "OdysseyAnimationEditorCommands.h"
+#include "OdysseyPainterEditorAnimationCommands.h"
 #include "TimelineTools/OdysseyAnimationTimelineTools.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
@@ -15,17 +15,17 @@ FOdysseyAnimationGlobalTimelineToolsShortcuts::MapActionsToCommandList(TSharedRe
 {
     //Tools actions
     iCommandList->MapAction(
-        FOdysseyAnimationEditorCommands::Get().ActivateTimelineSelectionTool,
+        FOdysseyPainterEditorAnimationCommands::Get().ActivateTimelineSelectionTool,
         FExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalTimelineToolsShortcuts::Action_ActivateTimelineSelectionTool)
     );
 
     iCommandList->MapAction(
-        FOdysseyAnimationEditorCommands::Get().ActivateTimelineMoveTool,
+        FOdysseyPainterEditorAnimationCommands::Get().ActivateTimelineMoveTool,
         FExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalTimelineToolsShortcuts::Action_ActivateTimelineMoveTool)
     );
 
     iCommandList->MapAction(
-        FOdysseyAnimationEditorCommands::Get().ActivateTimelineCutTool,
+        FOdysseyPainterEditorAnimationCommands::Get().ActivateTimelineCutTool,
         FExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalTimelineToolsShortcuts::Action_ActivateTimelineCutTool)
     );
 }

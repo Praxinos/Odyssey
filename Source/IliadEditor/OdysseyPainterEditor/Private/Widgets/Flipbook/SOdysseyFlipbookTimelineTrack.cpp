@@ -7,7 +7,7 @@
 #include "Fonts/FontMeasure.h"
 #include "SOdysseyFlipbookTimelineFrameList.h"
 #include "SOdysseyFlipbookTimelineFrame.h"
-#include "OdysseyFlipbookEditorCommands.h"
+#include "OdysseyPainterEditorFlipbookCommands.h"
 
 #include "Widgets/Layout/SScaleBox.h"
 #include "PaperImporterSettings.h"
@@ -261,7 +261,7 @@ SOdysseyFlipbookTimelineTrack::OnFramesEditCancel()
 FReply
 SOdysseyFlipbookTimelineTrack::OnGenerateFrameContextMenu(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent, int32 iFrameIndex)
 {
-    const FOdysseyFlipbookEditorCommands& flipbookCommands = FOdysseyFlipbookEditorCommands::Get();
+    const FOdysseyPainterEditorFlipbookCommands& flipbookCommands = FOdysseyPainterEditorFlipbookCommands::Get();
     TSharedPtr<FUICommandList> frameCommandList = MakeShareable(new FUICommandList());
     frameCommandList->MapAction(FGenericCommands::Get().Duplicate, FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineTrack::DuplicateFrame, iFrameIndex));
     frameCommandList->MapAction(FGenericCommands::Get().Delete, FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineTrack::DeleteFrame, iFrameIndex));

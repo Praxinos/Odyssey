@@ -8,6 +8,8 @@
 #include "ObjectEditorUtils.h"
 
 #include "OdysseyAnimation.h"
+#include "OdysseyPainterEditorAnimationFlipSystem.h"
+#include "OdysseyPainterEditorAnimationTImelinePosition.h"
 #include "OdysseyBlockClipboardData.h"
 #include "OdysseyEditorModule.h"
 #include "OdysseyPainterEditorSource.h"
@@ -83,14 +85,16 @@
 #include "Tools/VectorMatchingTool/OdysseyPainterEditorVectorMatchingTool.h"
 #include "Tools/VectorChartTool/OdysseyPainterEditorVectorChartTool.h"
 #include "Tools/VectorTrajectoryTool/OdysseyPainterEditorVectorTrajectoryTool.h"
+#include "Tools/OutOfPegsTool/OdysseyPainterEditorAnimationOutOfPegsTool.h"
 
 #include "Shortcuts/OdysseyLayerStackGlobalShortcuts.h"
 #include "Shortcuts/Global/OdysseyPainterEditorGlobalShortcuts.h"
 #include "Shortcuts/Global/OdysseyPainterEditorGlobalToolsShortcuts.h"
+#include "Shortcuts/Global/OdysseyAnimationGlobalShortcuts.h"
 #include "Mesh/FOdysseyMeshSelector.h"
 #include "OdysseyPainterEditorSource.h"
-#include "OdysseyAnimationEditorSource.h"
-#include "OdysseyTextureEditorSource.h"
+#include "OdysseyPainterEditorAnimationSource.h"
+#include "OdysseyPainterEditorTextureSource.h"
 #include "OdysseyPainterEditorRasterSelection.h"
 #include "Toolkits/BaseToolkit.h"
 #include "Framework/Commands/GenericCommands.h"
@@ -125,6 +129,8 @@ FOdysseyPainterEditor::FOdysseyPainterEditor(TSharedRef<FBaseToolkit> iToolkit)
     , mRasterSelection(MakeShared< FOdysseyPainterEditorRasterSelection >())
     , mBrushContexts()
     , mPaintColor(::ULIS::FColor::Black)
+    , mAnimationPlaybackFramesPerSecond(0)
+    , mAnimationTimelinePosition(MakeShared<FOdysseyPainterEditorAnimationTImelinePosition>())
     , mRasterDrawingTool(nullptr)
     , mRasterEraserTool(nullptr)
     , mRasterSelectionTool(nullptr)
@@ -145,8 +151,14 @@ FOdysseyPainterEditor::FOdysseyPainterEditor(TSharedRef<FBaseToolkit> iToolkit)
     , mVectorTransformTool(nullptr)
     , mVectorMatchingTool(nullptr)
     , mVectorChartTool(nullptr)
+    , mOutOfPegsTool(nullptr)
+    , mAnimationFlipSystem(MakeShared<FOdysseyPainterEditorAnimationFlipSystem>(this))
 {
+    UOdysseyLayer::OnMediaChanged().AddRaw(this, &FOdysseyPainterEditor::OnMediaChanged);
     UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw(this, &FOdysseyPainterEditor::OnCurrentLayerChanged);
+    UOdysseyAnimation::OnCurrentFrameChanged().AddRaw(this, &FOdysseyPainterEditor::OnCurrentFrameChanged);
+    FOdysseyImageRenderingAbility::OnImageRenderingChangedDelegate().AddRaw(this, &FOdysseyPainterEditor::OnImageRenderingChanged);
+
     mBrushContexts.Add(new FOdysseyPainterEditorBrushContext(this));
 }
 
@@ -170,10 +182,14 @@ FOdysseyPainterEditor::Initialize()
     GetShortcuts().Add(MakeShared<FOdysseyLayerStackGlobalShortcuts>(layerStackAttr));
     GetShortcuts().Add(MakeShared<FOdysseyPainterEditorGlobalToolsShortcuts>(this));
     GetShortcuts().Add(MakeShared<FOdysseyPainterEditorGlobalShortcuts>(this));
+    GetShortcuts().Add(MakeShared<FOdysseyAnimationGlobalShortcuts>(this));
 
     SetVectorHUDFlags( FOdysseyVectorHUD::HUD_MODE_OBJECT
         | FOdysseyVectorHUD::HUD_MODE_OBJECT_ALLOWED
-        | FOdysseyVectorHUD::HUD_MODE_VERTEX_ALLOWED );
+        | FOdysseyVectorHUD::HUD_MODE_VERTEX_ALLOWED
+        | FOdysseyVectorHUD::HUD_MODE_INBETWEEN_ALLOWED );
+
+    FSlateApplication::Get().RegisterInputPreProcessor(mAnimationFlipSystem);
 
     //Init the extensions
     for (TSharedPtr<FOdysseyPainterEditorExtension> extension : mExtensions)
@@ -218,12 +234,12 @@ FOdysseyPainterEditor::SetEditedObject(UObject* iObject)
 
     if (mEditedObject->IsA<UOdysseyAnimation>())
     {
-        TSharedPtr<FOdysseyAnimationEditorSource> source = MakeShared<FOdysseyAnimationEditorSource>(Cast<UOdysseyAnimation>(mEditedObject));
+        TSharedPtr<FOdysseyPainterEditorAnimationSource> source = MakeShared<FOdysseyPainterEditorAnimationSource>(Cast<UOdysseyAnimation>(mEditedObject));
         SetSource(source);
     }
     else if (mEditedObject->IsA<UTexture2D>())
     {
-        TSharedPtr<FOdysseyTextureEditorSource> source = MakeShared<FOdysseyTextureEditorSource>(Cast<UTexture2D>(mEditedObject));
+        TSharedPtr<FOdysseyPainterEditorTextureSource> source = MakeShared<FOdysseyPainterEditorTextureSource>(Cast<UTexture2D>(mEditedObject));
         SetSource(source);
     }
     else if (mEditedObject->IsA<UPaperFlipbook>())
@@ -252,7 +268,7 @@ FOdysseyPainterEditor::SetEditedObject(UObject* iObject)
         if (flipbook->GetNumKeyFrames() > 0)
         {
             UTexture2D* texture = OdysseyPainterEditorFlipbookUtils::GetKeyframeTexture(flipbook, 0);
-            TSharedPtr<FOdysseyTextureEditorSource> source = MakeShared<FOdysseyTextureEditorSource>(texture);
+            TSharedPtr<FOdysseyPainterEditorTextureSource> source = MakeShared<FOdysseyPainterEditorTextureSource>(texture);
             SetSource(source);
         }
     }
@@ -287,7 +303,7 @@ FOdysseyPainterEditor::OnFlipbookSpriteTextureChanged(UPaperSprite* iSprite, UTe
     if (sprite != iSprite)
         return;
 
-    TSharedPtr<FOdysseyTextureEditorSource> source = MakeShared<FOdysseyTextureEditorSource>(texture);
+    TSharedPtr<FOdysseyPainterEditorTextureSource> source = MakeShared<FOdysseyPainterEditorTextureSource>(texture);
     SetSource(source);
 }
 
@@ -542,6 +558,12 @@ FOdysseyPainterEditor::ExtendToolbarSaveAssetButton(FToolBarBuilder& iBuilder)
     iBuilder.EndSection();
 }
 
+float
+FOdysseyPainterEditor::GetAnimationPlaybackFramesPerSecond() const
+{
+    return mAnimationPlaybackFramesPerSecond;
+}
+
 void
 FOdysseyPainterEditor::ExtendToolbarToolParameters(FToolBarBuilder& iBuilder)
 {
@@ -633,6 +655,11 @@ FOdysseyPainterEditor::OnClose()
     mGUI->Finalize();
 
     UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
+    UOdysseyAnimation::OnCurrentFrameChanged().RemoveAll(this);
+    FOdysseyImageRenderingAbility::OnImageRenderingChangedDelegate().RemoveAll(this);
+    UOdysseyLayer::OnMediaChanged().RemoveAll(this);
+    FSlateApplication::Get().UnregisterInputPreProcessor(mAnimationFlipSystem);
+
     delete mHUDSystem;
     mHUDSystem = nullptr;
 }
@@ -667,6 +694,7 @@ FOdysseyPainterEditor::InitTools()
     mVectorMatchingTool = AddTool<UOdysseyPainterEditorVectorMatchingTool>();
     mVectorChartTool = AddTool<UOdysseyPainterEditorVectorChartTool>();
     mVectorTrajectoryTool = AddTool<UOdysseyPainterEditorVectorTrajectoryTool>();
+    mOutOfPegsTool = AddTool<UOdysseyPainterEditorAnimationOutOfPegsTool>();
     mRasterDrawingTool->SetBrushContexts(&mBrushContexts);
 }
 
@@ -835,6 +863,12 @@ FOdysseyPainterEditor::GetColorPickerTool() const
     return mColorPickerTool;
 }
 
+UOdysseyPainterEditorAnimationOutOfPegsTool*
+FOdysseyPainterEditor::GetOutOfPegsTool() const
+{
+    return mOutOfPegsTool;
+}
+
 TArray<FOdysseyBrushContext*>&
 FOdysseyPainterEditor::GetBrushContexts()
 {
@@ -853,6 +887,33 @@ FOdysseyPainterEditor::PaintColor() const
     return mPaintColor;
 }
 
+UOdysseyAnimation*
+FOdysseyPainterEditor::GetAnimation() const
+{
+    if (!mSource && mSource->Id() != FOdysseyPainterEditorAnimationSource::StaticId() )
+        return nullptr;
+
+
+    TSharedPtr<FOdysseyPainterEditorAnimationSource> animationSource = StaticCastSharedPtr<FOdysseyPainterEditorAnimationSource>(mSource);
+    return animationSource->GetAnimation();
+}
+
+UOdysseyAnimationPlayer*
+FOdysseyPainterEditor::GetAnimationPlayer() const
+{
+    if (!mSource && mSource->Id() != FOdysseyPainterEditorAnimationSource::StaticId() )
+        return nullptr;
+
+
+    TSharedPtr<FOdysseyPainterEditorAnimationSource> animationSource = StaticCastSharedPtr<FOdysseyPainterEditorAnimationSource>(mSource);
+    return animationSource->GetAnimationPlayer();
+}
+
+TSharedPtr<FOdysseyPainterEditorAnimationFlipSystem>
+FOdysseyPainterEditor::GetAnimationFlipSystem() const
+{
+    return mAnimationFlipSystem;
+}
 
 EOdysseyPainterEditorColorType
 FOdysseyPainterEditor::GetColorType() const
@@ -1073,12 +1134,12 @@ FOdysseyPainterEditor::GetCurrentFrame() const
     if (!mSource)
         return INDEX_NONE;
 
-    if (mSource->Id() == FOdysseyTextureEditorSource::StaticId() )
+    if (mSource->Id() == FOdysseyPainterEditorTextureSource::StaticId() )
         return 0;
 
-    if (mSource->Id() == FOdysseyAnimationEditorSource::StaticId() )
+    if (mSource->Id() == FOdysseyPainterEditorAnimationSource::StaticId() )
     {
-        TSharedPtr<FOdysseyAnimationEditorSource> animationSource = StaticCastSharedPtr<FOdysseyAnimationEditorSource>(mSource);
+        TSharedPtr<FOdysseyPainterEditorAnimationSource> animationSource = StaticCastSharedPtr<FOdysseyPainterEditorAnimationSource>(mSource);
         UOdysseyAnimation* animation = animationSource->GetAnimation();
         if (!animation)
             return INDEX_NONE;
@@ -1104,6 +1165,8 @@ FOdysseyPainterEditor::SetSource(TSharedPtr<FOdysseyPainterEditorSource> iSource
 
         mRasterSelection.Reset();
         mRasterSelection = MakeShared< FOdysseyPainterEditorRasterSelection >();
+
+        mAnimationTimelinePosition->Reset();
     }
 
     if (iSource)
@@ -1126,6 +1189,15 @@ FOdysseyPainterEditor::SetSource(TSharedPtr<FOdysseyPainterEditorSource> iSource
         }
     }
 
+    //Is the source an animation
+    if (mSource && mSource->Id() != FOdysseyPainterEditorAnimationSource::StaticId())
+    {
+        TSharedPtr<FOdysseyPainterEditorAnimationSource> animSource = StaticCastSharedPtr<FOdysseyPainterEditorAnimationSource>(mSource);
+        UOdysseyAnimation* animation = animSource->GetAnimation();
+        mImageRenderingComposition = animation->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Render, animation->CurrentFrame);
+        mAnimationPlaybackFramesPerSecond = animation->GetFramesPerSecond();
+    }
+
     OnSourceChanged().Broadcast();
 }
 
@@ -1139,6 +1211,12 @@ FOdysseyPainterEditor::PaintColor(const FOdysseyBrushColor& iColor, bool iIsComm
     //PATCH: should be automatic in the new drawing Tool, fix it asap
     if (iIsCommit)
         FOdysseyObjectEditorUtils::SetPropertyValue(GetRasterDrawingTool()->GetBrushOptions(), GET_MEMBER_NAME_CHECKED(UOdysseyBrushOptions, Color), iColor);
+}
+
+TSharedRef<FOdysseyPainterEditorAnimationTImelinePosition>
+FOdysseyPainterEditor::GetAnimationTimelinePosition()
+{
+    return mAnimationTimelinePosition;
 }
 
 UOdysseyPainterEditorTool*
@@ -3178,6 +3256,48 @@ FOdysseyPainterEditor::SetCurrentPaletteColorEntry(UOdysseyPaletteEntryColor* iE
     }
     mCurrentPaletteEntryColor = iEntry;
     mCurrentPaletteSet = iSet;
+}
+
+void
+FOdysseyPainterEditor::OnCurrentFrameChanged(UOdysseyAnimation* iAnimation)
+{
+    UOdysseyAnimation* animation = GetAnimation();
+    if (iAnimation != animation)
+        return;
+
+    //Preload the new current frame for edition
+    TArray<FGuid> imageRenderingComposition = animation->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Render, animation->CurrentFrame);
+    if ( imageRenderingComposition == mImageRenderingComposition )
+        return;
+
+    mImageRenderingComposition = imageRenderingComposition;
+    SanitizeCurrentTool();
+}
+
+void
+FOdysseyPainterEditor::OnMediaChanged()
+{
+    SanitizeCurrentTool(); //Refresh the current tool
+}
+
+void
+FOdysseyPainterEditor::OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent)
+{
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyPainterEditor::OnImageRenderingChanged);
+    if (iEvent.IsInteractive() || iEvent.GetType() != FOdysseyImageRenderingChangedEvent::eEventType::kCompositionChange)
+        return;
+
+    UOdysseyAnimation* animation = GetAnimation();
+    if (!animation)
+        return;
+
+    TArray<FGuid> imageRenderingComposition = animation->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Render, animation->CurrentFrame);
+    if ( imageRenderingComposition == mImageRenderingComposition )
+        return;
+
+    mImageRenderingComposition = imageRenderingComposition;
+
+    SanitizeCurrentTool();
 }
 
 #undef LOCTEXT_NAMESPACE

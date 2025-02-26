@@ -16,7 +16,7 @@ public:
     {}
         SLATE_DEFAULT_SLOT( FArguments, Content )
         SLATE_ATTRIBUTE(float, WidthInFrames)
-        SLATE_ARGUMENT(TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition)
+        SLATE_ARGUMENT(TSharedPtr<FOdysseyPainterEditorAnimationTImelinePosition>, TimelinePosition)
         SLATE_ARGUMENT(EHorizontalAlignment, HAlign)
         SLATE_ARGUMENT(EVerticalAlignment, VAlign)
     SLATE_END_ARGS()
@@ -31,7 +31,7 @@ private:
     virtual FOptionalSize GetSectionWidth() const;
 
 private:
-    TSharedPtr<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
+    TSharedPtr<FOdysseyPainterEditorAnimationTImelinePosition> mTimelinePosition;
     TAttribute<float> mWidthInFrames;
     TAttribute<float> mHeightInScreenUnits;
     TSharedPtr<SBox> mBox;

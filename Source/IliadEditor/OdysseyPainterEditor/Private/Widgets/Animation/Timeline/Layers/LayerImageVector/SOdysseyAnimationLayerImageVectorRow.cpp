@@ -15,7 +15,6 @@
 #include "SEnumCombo.h"
 #include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineLightTableHeader.h"
 #include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineInbetweeningHeader.h"
-#include "OdysseyAnimationEditorExtension.h"
 #include "OdysseyPainterEditor.h"
 #include "HUD/OdysseyVectorHUD.h"
 #include "ScopedTransaction.h"

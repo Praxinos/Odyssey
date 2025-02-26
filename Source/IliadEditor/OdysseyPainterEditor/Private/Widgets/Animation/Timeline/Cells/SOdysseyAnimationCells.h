@@ -8,7 +8,7 @@
 
 class FOdysseyAnimationCellsMutator;
 class FOdysseyAnimationTimelineTool;
-class FOdysseyAnimationEditorTimelinePosition;
+class FOdysseyPainterEditorAnimationTImelinePosition;
 /**
  * Implements a layer row widget
  */
@@ -21,7 +21,7 @@ public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationCells)
         : _ShowHandles(false)
         {}
-        SLATE_ARGUMENT(TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition)
+        SLATE_ARGUMENT(TSharedPtr<FOdysseyPainterEditorAnimationTImelinePosition>, TimelinePosition)
         SLATE_EVENT(FOnCreateCellWidget, OnCreateCellWidget)
         SLATE_ATTRIBUTE(bool, ShowHandles)
     SLATE_END_ARGS()
@@ -114,7 +114,7 @@ private:
     float FrameToMousePosition(float iFrame) const;
 
 private:
-    TSharedPtr<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
+    TSharedPtr<FOdysseyPainterEditorAnimationTImelinePosition> mTimelinePosition;
     class UOdysseyAnimationLayer* mAnimationLayer;
     TSharedPtr<FOdysseyAnimationTimelineTool> mTool;
 

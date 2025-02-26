@@ -3,7 +3,7 @@
 
 #include "Widgets/Animation/Timeline/Cells/SOdysseyAnimationCell.h"
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
-#include "OdysseyAnimationEditorProjectSettings.h"
+#include "OdysseyPainterEditorAnimationProjectSettings.h"
 #include "OdysseyStyle.h"
 #include "LayerStack/OdysseyAnimationLayerStack.h"
 #include "LayerStack/Cells/OdysseyAnimationCellSelection.h"
@@ -146,7 +146,7 @@ SOdysseyAnimationCell::GetMarkBrush() const
     if (mCell->Mark == INDEX_NONE)
         return nullptr;
 
-    UOdysseyAnimationEditorProjectSettings* settings = UOdysseyAnimationEditorProjectSettings::Get();
+    UOdysseyPainterEditorAnimationProjectSettings* settings = UOdysseyPainterEditorAnimationProjectSettings::Get();
     const FAnimationCellMarkSettings& markSettings = settings->AnimationCellsMarks[mCell->Mark];
     const FSlateBrush* icon = FCoreStyle::Get().GetBrush( "GenericWhiteBox" );
     switch(markSettings.Symbol)
@@ -171,7 +171,7 @@ SOdysseyAnimationCell::GetMarkOpacity() const
     if (mCell->Mark == INDEX_NONE)
         return 0.f;
 
-    UOdysseyAnimationEditorProjectSettings* settings = UOdysseyAnimationEditorProjectSettings::Get();
+    UOdysseyPainterEditorAnimationProjectSettings* settings = UOdysseyPainterEditorAnimationProjectSettings::Get();
     const FAnimationCellMarkSettings& markSettings = settings->AnimationCellsMarks[mCell->Mark];
     if (markSettings.Symbol != EOdysseyAnimationCellMarkSymbol::Fill)
         return 1.f;
@@ -185,7 +185,7 @@ SOdysseyAnimationCell::GetMarkColor() const
     if (mCell->Mark == INDEX_NONE)
         return FLinearColor();
 
-    UOdysseyAnimationEditorProjectSettings* settings = UOdysseyAnimationEditorProjectSettings::Get();
+    UOdysseyPainterEditorAnimationProjectSettings* settings = UOdysseyPainterEditorAnimationProjectSettings::Get();
     const FAnimationCellMarkSettings& markSettings = settings->AnimationCellsMarks[mCell->Mark];
     FLinearColor color = markSettings.Color;
     color.A = settings->AnimationCellsMarksFillOpacity / 100.f;
@@ -199,7 +199,7 @@ SOdysseyAnimationCell::IsMarkSymbol() const
     if (mCell->Mark == INDEX_NONE)
         return false;
 
-    UOdysseyAnimationEditorProjectSettings* settings = UOdysseyAnimationEditorProjectSettings::Get();
+    UOdysseyPainterEditorAnimationProjectSettings* settings = UOdysseyPainterEditorAnimationProjectSettings::Get();
     const FAnimationCellMarkSettings& markSettings = settings->AnimationCellsMarks[mCell->Mark];
     return markSettings.Symbol != EOdysseyAnimationCellMarkSymbol::Fill;
 }
@@ -210,7 +210,7 @@ SOdysseyAnimationCell::IsMarkFill() const
     if (mCell->Mark == INDEX_NONE)
         return false;
 
-    UOdysseyAnimationEditorProjectSettings* settings = UOdysseyAnimationEditorProjectSettings::Get();
+    UOdysseyPainterEditorAnimationProjectSettings* settings = UOdysseyPainterEditorAnimationProjectSettings::Get();
     const FAnimationCellMarkSettings& markSettings = settings->AnimationCellsMarks[mCell->Mark];
     return markSettings.Symbol == EOdysseyAnimationCellMarkSymbol::Fill;
 }

@@ -4,7 +4,7 @@
 #include "IOdysseyViewportDrawingEditorAdapter.h"
 
 #include "OdysseyPainterEditorSource.h"
-#include "OdysseyTextureEditorSource.h"
+#include "OdysseyPainterEditorTextureSource.h"
 #include "OdysseyBrushAssetBase.h"
 #include "OdysseyViewportDrawingEditorViewportClient.h"
 #include "IOdysseyStylusInputModule.h"

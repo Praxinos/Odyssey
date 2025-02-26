@@ -5,7 +5,7 @@
 
 #include "TimelineTools/OdysseyAnimationTimelineTool.h"
 
-class FOdysseyAnimationEditorTimelinePosition;
+class FOdysseyPainterEditorAnimationTImelinePosition;
 class FOdysseyAnimationCellsMutator;
 
 class FOdysseyAnimationTimelineMoveTool
@@ -13,7 +13,7 @@ class FOdysseyAnimationTimelineMoveTool
 {
 public:
     virtual ~FOdysseyAnimationTimelineMoveTool();
-    FOdysseyAnimationTimelineMoveTool(TSharedRef<FOdysseyAnimationEditorTimelinePosition> iTimelinePosition);
+    FOdysseyAnimationTimelineMoveTool(TSharedRef<FOdysseyPainterEditorAnimationTImelinePosition> iTimelinePosition);
 
 public:
     virtual FReply OnMouseButtonDown(const FMouseEventParams& iParams) override;

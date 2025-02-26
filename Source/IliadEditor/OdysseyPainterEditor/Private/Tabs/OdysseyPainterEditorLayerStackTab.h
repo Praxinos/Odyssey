@@ -20,7 +20,6 @@ public:
     FOdysseyPainterEditorLayerStackTab(FOdysseyPainterEditor* iEditor);
 
 protected:
-    // FOdysseyTextureEditorTab interface
     virtual const FName& GetId() const override;
     virtual TSharedPtr<SWidget> CreateWidget() override;
     virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
@@ -41,8 +40,6 @@ private:
     virtual void ExportTextureToOperatingSystem();
     virtual void ExportLayersAsTextures();
     virtual void ExportCurrentLayerAsTexture();
-    virtual void CreateNewLayer();
-    virtual void ChangeLayerOpacity(float iOpacity);
 
 private:
     FOdysseyPainterEditor* mEditor;

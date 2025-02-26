@@ -49,7 +49,7 @@ FOdysseyTextureEditorModule::CreateOdysseyTextureEditor( TArray<UTexture2D*> iTe
         TSharedPtr<FOdysseyTextureEditorToolkit> toolkit = MakeShared<FOdysseyTextureEditorToolkit>();
         toolkit->Initialize(texture, editor);
 
-        TSharedPtr<FOdysseyTextureEditorSource> source = MakeShared<FOdysseyTextureEditorSource>(texture);
+        TSharedPtr<FOdysseyPainterEditorTextureSource> source = MakeShared<FOdysseyPainterEditorTextureSource>(texture);
         editor->SetSource(source);
     }
 }-*/

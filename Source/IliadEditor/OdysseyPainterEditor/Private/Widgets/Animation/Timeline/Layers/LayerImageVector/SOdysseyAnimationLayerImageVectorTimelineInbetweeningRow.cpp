@@ -1,7 +1,6 @@
 // IDDN.FR.001.250001.006.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
 
-// From module OdysseyAnimationEditor
 #include "Widgets/Animation/Timeline/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow.h"
 #include "Widgets/Animation/Timeline/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorTimelineInbetweening.h"
 #include "Widgets/Animation/Timeline/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorTimeline.h"
@@ -27,7 +26,7 @@
 #include "Undo/OdysseyVectorUndoTagInbetweenerBreakdownAlter.h"
 #include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
-#include "OdysseyAnimationEditorTimelinePosition.h"
+#include "OdysseyPainterEditorAnimationTImelinePosition.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -153,7 +152,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseMove ( const FG
 {
     //STableRow<TSharedPtr<FInbetweeningListViewItem>>::OnMouseMove( MyGeometry, MouseEvent );
     TSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening> treeView = StaticCastSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening>(OwnerTablePtr.Pin());
-    TSharedPtr<FOdysseyAnimationEditorTimelinePosition> timelinePosition = treeView->GetTimelinePosition();
+    TSharedPtr<FOdysseyPainterEditorAnimationTImelinePosition> timelinePosition = treeView->GetTimelinePosition();
 
     if( MouseEvent.IsMouseButtonDown( EKeys::LeftMouseButton ) )
     {
@@ -413,7 +412,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
     const FColor& inbetweenerTagColor = mInbetweenerTag->GetInbetweenColor();
     // offset in "number of frames"
 
-    TSharedPtr<FOdysseyAnimationEditorTimelinePosition> timelinePosition = treeView->GetTimelinePosition();
+    TSharedPtr<FOdysseyPainterEditorAnimationTImelinePosition> timelinePosition = treeView->GetTimelinePosition();
     float offset = timelinePosition->GetOffset();
     float frameSize = timelinePosition->GetFrameSize();
     //float scrollByPixels = offset * frameSize /* * mLayoutScaleMultiplier */;
@@ -658,7 +657,7 @@ float
 SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::MousePositionToFrame(float iX) const
 {
     TSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening> treeView = StaticCastSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening>(OwnerTablePtr.Pin());
-    TSharedPtr<FOdysseyAnimationEditorTimelinePosition> timelinePosition = treeView->GetTimelinePosition();
+    TSharedPtr<FOdysseyPainterEditorAnimationTImelinePosition> timelinePosition = treeView->GetTimelinePosition();
     return iX / timelinePosition->GetFrameSize();
 }
 
@@ -666,7 +665,7 @@ float
 SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::FrameToMousePosition(float iFrame) const
 {
     TSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening> treeView = StaticCastSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening>(OwnerTablePtr.Pin());
-    TSharedPtr<FOdysseyAnimationEditorTimelinePosition> timelinePosition = treeView->GetTimelinePosition();
+    TSharedPtr<FOdysseyPainterEditorAnimationTImelinePosition> timelinePosition = treeView->GetTimelinePosition();
     return iFrame * timelinePosition->GetFrameSize();
 }
 

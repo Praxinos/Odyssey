@@ -2,19 +2,19 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Shortcuts/Global/OdysseyAnimationGlobalTimelineShortcuts.h"
-#include "OdysseyAnimationEditorCommands.h"
-#include "OdysseyAnimationEditorExtension.h"
+#include "OdysseyPainterEditorAnimationCommands.h"
+#include "OdysseyPainterEditor.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "OdysseyAnimation.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
 #include "OdysseyAnimationPlayer.h"
-#include "OdysseyAnimationEditorUserSettings.h"
+#include "OdysseyPainterEditorAnimationUserSettings.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
-FOdysseyAnimationGlobalTimelineShortcuts::FOdysseyAnimationGlobalTimelineShortcuts(TSharedPtr<FOdysseyAnimationEditorExtension> iExtension)
-    : mExtension(iExtension)
+FOdysseyAnimationGlobalTimelineShortcuts::FOdysseyAnimationGlobalTimelineShortcuts(FOdysseyPainterEditor* iEditor)
+    : mEditor(iEditor)
 {
 }
 
@@ -23,74 +23,74 @@ FOdysseyAnimationGlobalTimelineShortcuts::MapActionsToCommandList(TSharedRef<FUI
 {
     //Navigation Actions
     iCommandList->MapAction(
-        FOdysseyAnimationEditorCommands::Get().NavigateToNextFrame,
+        FOdysseyPainterEditorAnimationCommands::Get().NavigateToNextFrame,
         FExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalTimelineShortcuts::Action_NavigateToNextFrame)
     );
 
     iCommandList->MapAction(
-        FOdysseyAnimationEditorCommands::Get().NavigateToPreviousFrame,
+        FOdysseyPainterEditorAnimationCommands::Get().NavigateToPreviousFrame,
         FExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalTimelineShortcuts::Action_NavigateToPreviousFrame)
     );
 
     iCommandList->MapAction(
-        FOdysseyAnimationEditorCommands::Get().NavigateToNextCell,
+        FOdysseyPainterEditorAnimationCommands::Get().NavigateToNextCell,
         FExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalTimelineShortcuts::Action_NavigateToNextCell)
     );
 
     iCommandList->MapAction(
-        FOdysseyAnimationEditorCommands::Get().NavigateToPreviousCell,
+        FOdysseyPainterEditorAnimationCommands::Get().NavigateToPreviousCell,
         FExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalTimelineShortcuts::Action_NavigateToPreviousCell)
     );
 
     iCommandList->MapAction(
-        FOdysseyAnimationEditorCommands::Get().NavigateToAnimationFirstFrame,
+        FOdysseyPainterEditorAnimationCommands::Get().NavigateToAnimationFirstFrame,
         FExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalTimelineShortcuts::Action_NavigateToAnimationFirstFrame)
     );
 
     iCommandList->MapAction(
-        FOdysseyAnimationEditorCommands::Get().NavigateToAnimationLastFrame,
+        FOdysseyPainterEditorAnimationCommands::Get().NavigateToAnimationLastFrame,
         FExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalTimelineShortcuts::Action_NavigateToAnimationLastFrame)
     );
 
     iCommandList->MapAction(
-        FOdysseyAnimationEditorCommands::Get().Play,
+        FOdysseyPainterEditorAnimationCommands::Get().Play,
         FExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalTimelineShortcuts::Action_Play)
     );
 
     iCommandList->MapAction(
-        FOdysseyAnimationEditorCommands::Get().PlayStop,
+        FOdysseyPainterEditorAnimationCommands::Get().PlayStop,
         FExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalTimelineShortcuts::Action_PlayStop)
     );
 
     iCommandList->MapAction(
-        FOdysseyAnimationEditorCommands::Get().PlayReversed,
+        FOdysseyPainterEditorAnimationCommands::Get().PlayReversed,
         FExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalTimelineShortcuts::Action_PlayReversed)
     );
 
     iCommandList->MapAction(
-        FOdysseyAnimationEditorCommands::Get().Stop,
+        FOdysseyPainterEditorAnimationCommands::Get().Stop,
         FExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalTimelineShortcuts::Action_Stop)
     );
 
     iCommandList->MapAction(
-        FOdysseyAnimationEditorCommands::Get().ActivateLooping,
+        FOdysseyPainterEditorAnimationCommands::Get().ActivateLooping,
         FExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalTimelineShortcuts::Action_ActivateLooping)
     );
 
     iCommandList->MapAction(
-        FOdysseyAnimationEditorCommands::Get().InactivateLooping,
+        FOdysseyPainterEditorAnimationCommands::Get().InactivateLooping,
         FExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalTimelineShortcuts::Action_InactivateLooping)
     );
 
     iCommandList->MapAction(
-        FOdysseyAnimationEditorCommands::Get().ToggleLooping,
+        FOdysseyPainterEditorAnimationCommands::Get().ToggleLooping,
         FExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalTimelineShortcuts::Action_ToggleLooping)
     );
 
-    for (int i = 0; i < FOdysseyAnimationEditorCommands::Get().Flip.Num(); i++)
+    for (int i = 0; i < FOdysseyPainterEditorAnimationCommands::Get().Flip.Num(); i++)
     {
         iCommandList->MapAction(
-            FOdysseyAnimationEditorCommands::Get().Flip[i],
+            FOdysseyPainterEditorAnimationCommands::Get().Flip[i],
             FExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalTimelineShortcuts::Action_Flip, i )
         );
     }
@@ -99,11 +99,7 @@ FOdysseyAnimationGlobalTimelineShortcuts::MapActionsToCommandList(TSharedRef<FUI
 void
 FOdysseyAnimationGlobalTimelineShortcuts::Action_NavigateToNextFrame()
 {
-    TSharedPtr<FOdysseyAnimationEditorExtension> extension = mExtension.Pin();
-    if (!extension)
-        return;
-
-    UOdysseyAnimation* animation = extension->Animation();
+    UOdysseyAnimation* animation = mEditor->GetAnimation();
     if (!animation)
         return;
 
@@ -114,11 +110,7 @@ FOdysseyAnimationGlobalTimelineShortcuts::Action_NavigateToNextFrame()
 void
 FOdysseyAnimationGlobalTimelineShortcuts::Action_NavigateToPreviousFrame()
 {
-    TSharedPtr<FOdysseyAnimationEditorExtension> extension = mExtension.Pin();
-    if (!extension)
-        return;
-
-    UOdysseyAnimation* animation = extension->Animation();
+    UOdysseyAnimation* animation = mEditor->GetAnimation();
     if (!animation)
         return;
 
@@ -132,15 +124,11 @@ FOdysseyAnimationGlobalTimelineShortcuts::Action_NavigateToPreviousFrame()
 void
 FOdysseyAnimationGlobalTimelineShortcuts::Action_NavigateToNextCell()
 {
-    TSharedPtr<FOdysseyAnimationEditorExtension> extension = mExtension.Pin();
-    if (!extension)
-        return;
-
-    UOdysseyAnimation* animation = extension->Animation();
+    UOdysseyAnimation* animation = mEditor->GetAnimation();
     if (!animation)
         return;
 
-    UOdysseyAnimationLayerStack* layerStack = extension->LayerStack();
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(mEditor->LayerStack());
     if (!layerStack)
         return;
 
@@ -177,15 +165,11 @@ FOdysseyAnimationGlobalTimelineShortcuts::Action_NavigateToNextCell()
 void
 FOdysseyAnimationGlobalTimelineShortcuts::Action_NavigateToPreviousCell()
 {
-    TSharedPtr<FOdysseyAnimationEditorExtension> extension = mExtension.Pin();
-    if (!extension)
-        return;
-
-    UOdysseyAnimation* animation = extension->Animation();
+    UOdysseyAnimation* animation = mEditor->GetAnimation();
     if (!animation)
         return;
 
-    UOdysseyAnimationLayerStack* layerStack = extension->LayerStack();
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(mEditor->LayerStack());
     if (!layerStack)
         return;
 
@@ -222,11 +206,7 @@ FOdysseyAnimationGlobalTimelineShortcuts::Action_NavigateToPreviousCell()
 void
 FOdysseyAnimationGlobalTimelineShortcuts::Action_NavigateToAnimationFirstFrame()
 {
-    TSharedPtr<FOdysseyAnimationEditorExtension> extension = mExtension.Pin();
-    if (!extension)
-        return;
-
-    UOdysseyAnimation* animation = extension->Animation();
+    UOdysseyAnimation* animation = mEditor->GetAnimation();
     if (!animation)
         return;
 
@@ -237,11 +217,7 @@ FOdysseyAnimationGlobalTimelineShortcuts::Action_NavigateToAnimationFirstFrame()
 void
 FOdysseyAnimationGlobalTimelineShortcuts::Action_NavigateToAnimationLastFrame()
 {
-    TSharedPtr<FOdysseyAnimationEditorExtension> extension = mExtension.Pin();
-    if (!extension)
-        return;
-
-    UOdysseyAnimation* animation = extension->Animation();
+    UOdysseyAnimation* animation = mEditor->GetAnimation();
     if (!animation)
         return;
 
@@ -252,11 +228,7 @@ FOdysseyAnimationGlobalTimelineShortcuts::Action_NavigateToAnimationLastFrame()
 void
 FOdysseyAnimationGlobalTimelineShortcuts::Action_Play()
 {
-    TSharedPtr<FOdysseyAnimationEditorExtension> extension = mExtension.Pin();
-    if (!extension)
-        return;
-
-    UOdysseyAnimationPlayer* player = extension->Player();
+    UOdysseyAnimationPlayer* player = mEditor->GetAnimationPlayer();
     if (!player)
         return;
 
@@ -266,11 +238,7 @@ FOdysseyAnimationGlobalTimelineShortcuts::Action_Play()
 void
 FOdysseyAnimationGlobalTimelineShortcuts::Action_PlayStop()
 {
-    TSharedPtr<FOdysseyAnimationEditorExtension> extension = mExtension.Pin();
-    if (!extension)
-        return;
-
-    UOdysseyAnimationPlayer* player = extension->Player();
+    UOdysseyAnimationPlayer* player = mEditor->GetAnimationPlayer();
     if (!player)
         return;
 
@@ -283,11 +251,7 @@ FOdysseyAnimationGlobalTimelineShortcuts::Action_PlayStop()
 void
 FOdysseyAnimationGlobalTimelineShortcuts::Action_PlayReversed()
 {
-    TSharedPtr<FOdysseyAnimationEditorExtension> extension = mExtension.Pin();
-    if (!extension)
-        return;
-
-    UOdysseyAnimationPlayer* player = extension->Player();
+    UOdysseyAnimationPlayer* player = mEditor->GetAnimationPlayer();
     if (!player)
         return;
     player->Play(true);
@@ -296,11 +260,7 @@ FOdysseyAnimationGlobalTimelineShortcuts::Action_PlayReversed()
 void
 FOdysseyAnimationGlobalTimelineShortcuts::Action_Stop()
 {
-    TSharedPtr<FOdysseyAnimationEditorExtension> extension = mExtension.Pin();
-    if (!extension)
-        return;
-
-    UOdysseyAnimationPlayer* player = extension->Player();
+    UOdysseyAnimationPlayer* player = mEditor->GetAnimationPlayer();
     if (!player)
         return;
     player->Stop();
@@ -309,11 +269,7 @@ FOdysseyAnimationGlobalTimelineShortcuts::Action_Stop()
 void
 FOdysseyAnimationGlobalTimelineShortcuts::Action_ActivateLooping()
 {
-    TSharedPtr<FOdysseyAnimationEditorExtension> extension = mExtension.Pin();
-    if (!extension)
-        return;
-
-    UOdysseyAnimationPlayer* player = extension->Player();
+    UOdysseyAnimationPlayer* player = mEditor->GetAnimationPlayer();
     if (!player)
         return;
     FOdysseyObjectEditorUtils::SetPropertyValue(player, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationPlayer, IsLooping), true);
@@ -322,11 +278,7 @@ FOdysseyAnimationGlobalTimelineShortcuts::Action_ActivateLooping()
 void
 FOdysseyAnimationGlobalTimelineShortcuts::Action_InactivateLooping()
 {
-    TSharedPtr<FOdysseyAnimationEditorExtension> extension = mExtension.Pin();
-    if (!extension)
-        return;
-
-    UOdysseyAnimationPlayer* player = extension->Player();
+    UOdysseyAnimationPlayer* player = mEditor->GetAnimationPlayer();
     if (!player)
         return;
     FOdysseyObjectEditorUtils::SetPropertyValue(player, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationPlayer, IsLooping), false);
@@ -335,11 +287,7 @@ FOdysseyAnimationGlobalTimelineShortcuts::Action_InactivateLooping()
 void
 FOdysseyAnimationGlobalTimelineShortcuts::Action_ToggleLooping()
 {
-    TSharedPtr<FOdysseyAnimationEditorExtension> extension = mExtension.Pin();
-    if (!extension)
-        return;
-
-    UOdysseyAnimationPlayer* player = extension->Player();
+    UOdysseyAnimationPlayer* player = mEditor->GetAnimationPlayer();
     if (!player)
         return;
     FOdysseyObjectEditorUtils::SetPropertyValue(player, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationPlayer, IsLooping), !player->IsLooping);
@@ -348,12 +296,8 @@ FOdysseyAnimationGlobalTimelineShortcuts::Action_ToggleLooping()
 void
 FOdysseyAnimationGlobalTimelineShortcuts::Action_Flip(int iConfigurationIndex)
 {
-    TSharedPtr<FOdysseyAnimationEditorExtension> extension = mExtension.Pin();
-    if (!extension)
-        return;
-
-    const UOdysseyAnimationEditorUserSettings* settings = UOdysseyAnimationEditorUserSettings::Get();
-    extension->FlipSystem()->StartFlipping(settings->FlipConfigurations[iConfigurationIndex]);
+    const UOdysseyPainterEditorAnimationUserSettings* settings = UOdysseyPainterEditorAnimationUserSettings::Get();
+    mEditor->GetAnimationFlipSystem()->StartFlipping(settings->FlipConfigurations[iConfigurationIndex]);
 }
 
 

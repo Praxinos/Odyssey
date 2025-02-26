@@ -6,7 +6,6 @@
 #include "Framework/Commands/UICommandList.h"
 
 class UOdysseyLayerStack;
-class FOdysseyAnimationEditorExtension;
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyAnimationTimelineCellImageStaggerShortcuts
 {

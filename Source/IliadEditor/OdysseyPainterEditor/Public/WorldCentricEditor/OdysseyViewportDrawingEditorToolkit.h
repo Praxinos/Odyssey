@@ -8,7 +8,6 @@
 
 class FOdysseyViewportDrawingEditor;
 class FOdysseyViewportDrawingEditorExtension;
-class FOdysseyAnimationEditorExtension;
 class FEdMode;
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyViewportDrawingEditorToolkit
@@ -43,7 +42,6 @@ public:
     //virtual void BuildToolPalette( FName iPalette, class FToolBarBuilder& ioToolbarBuilder ) override;
 
     TSharedPtr<FOdysseyViewportDrawingEditorExtension> GetViewportDrawingExtension() const;
-    TSharedPtr<FOdysseyAnimationEditorExtension> GetAnimationExtension() const;
 
 public:
     //from IAssetEditorInstance
@@ -71,7 +69,6 @@ public:
 private:
     TSharedPtr<FOdysseyPainterEditor> mEditor;
     TSharedPtr<FOdysseyViewportDrawingEditorExtension> mViewportDrawingExtension;
-    TSharedPtr<FOdysseyAnimationEditorExtension> mAnimationExtension;
     FEdMode* mEdMode;
     bool mTabSaved;
     TSharedPtr<FExtender> mLevelEditorMenuExtender;

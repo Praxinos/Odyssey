@@ -3,7 +3,6 @@
 
 #pragma once
 
-class FOdysseyAnimationEditorExtension;
 class UOdysseyAnimationLayerStack;
 class FUICommandList;
 class FOdysseyAnimationTimelineCellsShortcuts;

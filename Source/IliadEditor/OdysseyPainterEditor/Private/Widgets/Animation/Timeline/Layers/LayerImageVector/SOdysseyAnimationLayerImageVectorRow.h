@@ -8,7 +8,7 @@
 
 class SOdysseyAnimationTimelineInbetweeningHeader;
 
-class FOdysseyAnimationEditorTimelinePosition;
+class FOdysseyPainterEditorAnimationTImelinePosition;
 class FOdysseyPainterEditor;
 /**
  * Implements a layer row widget
@@ -21,7 +21,7 @@ public:
         : _PainterEditor(nullptr)
         {}
         SLATE_ATTRIBUTE(int, CurrentFrame)
-        SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
+        SLATE_ARGUMENT( TSharedPtr<FOdysseyPainterEditorAnimationTImelinePosition>, TimelinePosition )
         SLATE_ATTRIBUTE(FOdysseyPainterEditor*, PainterEditor)
     SLATE_END_ARGS()
 

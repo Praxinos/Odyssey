@@ -346,34 +346,7 @@ public:
     TSharedPtr<FUICommandInfo> CreateNewLayer;
 
     /** Action for deleting the current layer */
-    TSharedPtr<FUICommandInfo> ChangeLayerOpacity10;
-
-    /** Action for deleting the current layer */
-    TSharedPtr<FUICommandInfo> ChangeLayerOpacity20;
-
-    /** Action for deleting the current layer */
-    TSharedPtr<FUICommandInfo> ChangeLayerOpacity30;
-
-    /** Action for deleting the current layer */
-    TSharedPtr<FUICommandInfo> ChangeLayerOpacity40;
-
-    /** Action for deleting the current layer */
-    TSharedPtr<FUICommandInfo> ChangeLayerOpacity50;
-
-    /** Action for deleting the current layer */
-    TSharedPtr<FUICommandInfo> ChangeLayerOpacity60;
-
-    /** Action for deleting the current layer */
-    TSharedPtr<FUICommandInfo> ChangeLayerOpacity70;
-
-    /** Action for deleting the current layer */
-    TSharedPtr<FUICommandInfo> ChangeLayerOpacity80;
-
-    /** Action for deleting the current layer */
-    TSharedPtr<FUICommandInfo> ChangeLayerOpacity90;
-
-    /** Action for deleting the current layer */
-    TSharedPtr<FUICommandInfo> ChangeLayerOpacity100;
+    TArray<TSharedPtr<FUICommandInfo>> ChangeLayerOpacity;
 
     TSharedPtr<FUICommandInfo> ImportTexturesAsLayers;
     TSharedPtr<FUICommandInfo> ExportLayersAsTextures;

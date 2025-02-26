@@ -7,7 +7,7 @@
 #include "LayerStack/Cells/CellImageStagger/OdysseyAnimationCellImageStagger.h"
 #include "Widgets/Input/SSpinBox.h"
 
-class FOdysseyAnimationEditorTimelinePosition;
+class FOdysseyPainterEditorAnimationTImelinePosition;
 class SOdysseyAnimationCellImageStagger
     : public SCompoundWidget
 {
@@ -16,7 +16,7 @@ public:
         : _ShowContent(true)
         {}
         SLATE_ATTRIBUTE(bool, ShowContent)
-        SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
+        SLATE_ARGUMENT( TSharedPtr<FOdysseyPainterEditorAnimationTImelinePosition>, TimelinePosition )
     SLATE_END_ARGS()
 
 public:
@@ -48,7 +48,7 @@ private:
 private:
     UOdysseyAnimationCellImageStagger* mCell;
     TAttribute<bool> mShowContent;
-    TSharedPtr<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
+    TSharedPtr<FOdysseyPainterEditorAnimationTImelinePosition> mTimelinePosition;
     FText mSetReachTransactionName;
 
     bool mIsEditingReach;

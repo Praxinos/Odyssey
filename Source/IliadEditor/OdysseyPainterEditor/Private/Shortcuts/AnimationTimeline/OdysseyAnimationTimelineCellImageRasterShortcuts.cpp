@@ -6,7 +6,7 @@
 #include "Widgets/Animation/Timeline/Cells/CellImageStagger/SOdysseyAnimationCellImageStagger.h"
 #include "Widgets/Animation/Timeline/Cells/CellImageRaster/SOdysseyAnimationCellImageRaster.h"
 #include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
-#include "OdysseyAnimationEditorCommands.h"
+#include "OdysseyPainterEditorAnimationCommands.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 #include "OdysseyLayerStack.h"
 #include "OdysseyAnimation.h"
@@ -29,7 +29,7 @@ void
 FOdysseyAnimationTimelineCellImageRasterShortcuts::MapActionsToCommandList(TSharedRef<FUICommandList> iCommandList)
 {
     iCommandList->MapAction(
-        FOdysseyAnimationEditorCommands::Get().CrossFade,
+        FOdysseyPainterEditorAnimationCommands::Get().CrossFade,
         FExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade),
         FCanExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellImageRasterShortcuts::CanAction_CrossFade)
     );

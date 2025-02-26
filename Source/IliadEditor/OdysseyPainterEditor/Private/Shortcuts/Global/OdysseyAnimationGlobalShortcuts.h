@@ -6,12 +6,11 @@
 #include "OdysseyEditorShortcuts.h"
 
 class FUICommandList;
-class FOdysseyAnimationEditorExtension;
-
+class FOdysseyPainterEditor;
 class ODYSSEYPAINTEREDITOR_API FOdysseyAnimationGlobalShortcuts
     : public FOdysseyEditorShortcuts
 {
 public:
     virtual ~FOdysseyAnimationGlobalShortcuts() {};
-    FOdysseyAnimationGlobalShortcuts(TSharedPtr<FOdysseyAnimationEditorExtension> iExtension);
+    FOdysseyAnimationGlobalShortcuts(FOdysseyPainterEditor* iEditor);
 };

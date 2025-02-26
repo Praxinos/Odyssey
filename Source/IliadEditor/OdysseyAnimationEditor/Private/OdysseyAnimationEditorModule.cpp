@@ -15,29 +15,6 @@
    FOdysseyAnimationEditorModule
 -----------------------------------------------------------------------------*/
 
-/* TSharedRef<FOdysseyAnimationEditorToolkit>
-FOdysseyAnimationEditorModule::CreateOdysseyAnimationEditor( UOdysseyAnimation* iAnimation )
-{
-    TSharedPtr<FOdysseyPainterEditor> editor = MakeShared<FOdysseyPainterEditor>(
-        TEXT("OdysseyAnimationEditor"),
-        LOCTEXT("main-menu.category", "Odyssey Animation Editor"),
-        iAnimation,
-        "OdysseyAnimationEditor_Layout"
-    );
-
-    TSharedRef<FOdysseyAnimationEditorExtension> animationExtension = MakeShared<FOdysseyAnimationEditorExtension>(editor.Get());
-    editor->AddExtension(animationExtension);
-
-    TSharedPtr<FOdysseyAnimationEditorToolkit> toolkit = MakeShared<FOdysseyAnimationEditorToolkit>();
-    toolkit->Initialize(iAnimation, editor);
-    //-----
-
-    TSharedPtr<FOdysseyAnimationEditorSource> source = MakeShared<FOdysseyAnimationEditorSource>(iAnimation);
-    editor->SetSource(source);
-
-    return toolkit.ToSharedRef();
-}*/
-
 void
 FOdysseyAnimationEditorModule::StartupModule()
 {

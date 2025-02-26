@@ -2,7 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "TimelineTools/OdysseyAnimationTimelineSelectionTool.h"
-#include "OdysseyAnimationEditorTimelinePosition.h"
+#include "OdysseyPainterEditorAnimationTImelinePosition.h"
 #include "OdysseyAnimationCellsDragDropOperation.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
@@ -12,7 +12,7 @@ FOdysseyAnimationTimelineSelectionTool::~FOdysseyAnimationTimelineSelectionTool(
 {
 }
 
-FOdysseyAnimationTimelineSelectionTool::FOdysseyAnimationTimelineSelectionTool(TSharedRef<FOdysseyAnimationEditorTimelinePosition> iTimelinePosition, TSharedRef<FOdysseyAnimationCellSelection> iTimelineCellSelection)
+FOdysseyAnimationTimelineSelectionTool::FOdysseyAnimationTimelineSelectionTool(TSharedRef<FOdysseyPainterEditorAnimationTImelinePosition> iTimelinePosition, TSharedRef<FOdysseyAnimationCellSelection> iTimelineCellSelection)
     : FOdysseyAnimationTimelineTool(iTimelinePosition)
     , mTimelineCellSelection(iTimelineCellSelection)
 {

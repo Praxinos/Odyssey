@@ -10,8 +10,8 @@
 #include "OdysseyStyle.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "OdysseyAnimationProxy.h"
-#include "OdysseyAnimationEditorUserSettings.h"
-#include "OdysseyAnimationEditorTimelinePosition.h"
+#include "OdysseyPainterEditorAnimationUserSettings.h"
+#include "OdysseyPainterEditorAnimationTImelinePosition.h"
 
 //////////////////////////////////////////////////////////////////////////
 // SOdysseyAnimationTimelineHeader
@@ -38,7 +38,7 @@ int32 SOdysseyAnimationTimelineHeader::OnPaint(const FPaintArgs& Args, const FGe
     const FLinearColor& backgroundColorEven = FOdysseyStyle::GetColor("TimelineHeader.backgroundColorEven");
     const FLinearColor& backgroundColorOdd = FOdysseyStyle::GetColor("TimelineHeader.backgroundColorOdd");
 
-    const UOdysseyAnimationEditorUserSettings* settings = UOdysseyAnimationEditorUserSettings::Get();
+    const UOdysseyPainterEditorAnimationUserSettings* settings = UOdysseyPainterEditorAnimationUserSettings::Get();
     int startFrame = settings->StartFrame;
 
     const int32 backgroundLayer = LayerId;

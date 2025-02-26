@@ -11,7 +11,7 @@
 #include "OdysseyEditorModule.h"
 #include "Dialogs/Dialogs.h"
 #include "Widgets/Input/SNumericEntryBox.h"
-#include "OdysseyAnimationEditorCommands.h"
+#include "OdysseyPainterEditorAnimationCommands.h"
 #include "OdysseyAnimation.h"
 #include "OdysseyAnimationCurrentFrameMutator.h"
 #include "LayerStack/Cells/OdysseyAnimationCellSelection.h"
@@ -59,25 +59,25 @@ FOdysseyAnimationTimelineCellsShortcuts::MapActionsToCommandList(TSharedRef<FUIC
     );
 
     iCommandList->MapAction(
-        FOdysseyAnimationEditorCommands::Get().ConvertToStaggerCell,
+        FOdysseyPainterEditorAnimationCommands::Get().ConvertToStaggerCell,
         FExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellsShortcuts::Action_ConvertToStaggerCell),
         FCanExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellsShortcuts::CanAction_ConvertToStaggerCell)
     );
 
     iCommandList->MapAction(
-        FOdysseyAnimationEditorCommands::Get().IncreaseCellExposure,
+        FOdysseyPainterEditorAnimationCommands::Get().IncreaseCellExposure,
         FExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellsShortcuts::Action_IncreaseCellExposure),
         FCanExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellsShortcuts::CanAction_IncreaseCellExposure)
     );
 
     iCommandList->MapAction(
-        FOdysseyAnimationEditorCommands::Get().DecreaseCellExposure,
+        FOdysseyPainterEditorAnimationCommands::Get().DecreaseCellExposure,
         FExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellsShortcuts::Action_DecreaseCellExposure),
         FCanExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellsShortcuts::CanAction_DecreaseCellExposure)
     );
 
     iCommandList->MapAction(
-        FOdysseyAnimationEditorCommands::Get().SetCellExposure,
+        FOdysseyPainterEditorAnimationCommands::Get().SetCellExposure,
         FExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellsShortcuts::Action_SetCellExposure),
         FCanExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellsShortcuts::CanAction_SetCellExposure)
     );

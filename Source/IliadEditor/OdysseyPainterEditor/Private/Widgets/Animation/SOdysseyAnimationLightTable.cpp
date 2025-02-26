@@ -8,7 +8,6 @@
 #include "Widgets/Input/SEditableTextBox.h"
 #include "Widgets/Input/SSlider.h"
 #include "OdysseyLayerStack.h"
-#include "OdysseyAnimationEditorExtension.h"
 #include "LayerStack/OdysseyAnimationLayerStack.h"
 
 #include "UObject/OdysseyObjectEditorUtils.h"
@@ -38,11 +37,10 @@ SOdysseyAnimationLightTable::SOdysseyAnimationLightTable()
 }
 
 void
-SOdysseyAnimationLightTable::Construct(const FArguments& InArgs, FOdysseyAnimationEditorExtension* iExtension)
+SOdysseyAnimationLightTable::Construct(const FArguments& InArgs)
 {
     UOdysseyLayerStack::OnCurrentLayerChanged().AddSP(this, &SOdysseyAnimationLightTable::OnCurrentLayerChanged);
 
-    mExtension = iExtension;
     mLayerStack.Assign(*this, InArgs._LayerStack);
 
     ChildSlot
@@ -155,7 +153,7 @@ SOdysseyAnimationLightTable::GenerateNextKeyWidget(int iKeyIndex)
 void
 SOdysseyAnimationLightTable::OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack)
 {
-    if (mExtension->LayerStack() != iLayerStack)
+    if (mLayerStack.Get() != iLayerStack)
         return;
 
     RequestRebuild();
@@ -164,7 +162,7 @@ SOdysseyAnimationLightTable::OnCurrentLayerChanged(UOdysseyLayerStack* iLayerSta
 void
 SOdysseyAnimationLightTable::OnPreviousKeyIsActivatedCheckStateChanged( ECheckBoxState iState, int iKeyIndex )
 {
-    UOdysseyAnimationLayerStack* layerStack = mExtension->LayerStack();
+    UOdysseyAnimationLayerStack* layerStack = mLayerStack.Get();
     if (!layerStack)
         return;
 
@@ -180,7 +178,7 @@ SOdysseyAnimationLightTable::OnPreviousKeyIsActivatedCheckStateChanged( ECheckBo
 void
 SOdysseyAnimationLightTable::OnNextKeyIsActivatedCheckStateChanged( ECheckBoxState iState, int iKeyIndex )
 {
-    UOdysseyAnimationLayerStack* layerStack = mExtension->LayerStack();
+    UOdysseyAnimationLayerStack* layerStack = mLayerStack.Get();
     if (!layerStack)
         return;
 
@@ -196,7 +194,7 @@ SOdysseyAnimationLightTable::OnNextKeyIsActivatedCheckStateChanged( ECheckBoxSta
 ECheckBoxState
 SOdysseyAnimationLightTable::GetPreviousKeyIsActivated( int iKeyIndex ) const
 {
-    UOdysseyAnimationLayerStack* layerStack = mExtension->LayerStack();
+    UOdysseyAnimationLayerStack* layerStack = mLayerStack.Get();
     if (!layerStack)
         return ECheckBoxState::Unchecked;
 
@@ -210,7 +208,7 @@ SOdysseyAnimationLightTable::GetPreviousKeyIsActivated( int iKeyIndex ) const
 ECheckBoxState
 SOdysseyAnimationLightTable::GetNextKeyIsActivated( int iKeyIndex ) const
 {
-    UOdysseyAnimationLayerStack* layerStack = mExtension->LayerStack();
+    UOdysseyAnimationLayerStack* layerStack = mLayerStack.Get();
     if (!layerStack)
         return ECheckBoxState::Unchecked;
 
@@ -224,7 +222,7 @@ SOdysseyAnimationLightTable::GetNextKeyIsActivated( int iKeyIndex ) const
 void
 SOdysseyAnimationLightTable::OnPreviousKeyOpacitySliderValueChanged( float iValue, int iKeyIndex)
 {
-    UOdysseyAnimationLayerStack* layerStack = mExtension->LayerStack();
+    UOdysseyAnimationLayerStack* layerStack = mLayerStack.Get();
     if (!layerStack)
         return;
 
@@ -240,7 +238,7 @@ SOdysseyAnimationLightTable::OnPreviousKeyOpacitySliderValueChanged( float iValu
 void
 SOdysseyAnimationLightTable::OnNextKeyOpacitySliderValueChanged( float iValue, int iKeyIndex)
 {
-    UOdysseyAnimationLayerStack* layerStack = mExtension->LayerStack();
+    UOdysseyAnimationLayerStack* layerStack = mLayerStack.Get();
     if (!layerStack)
         return;
 
@@ -256,7 +254,7 @@ SOdysseyAnimationLightTable::OnNextKeyOpacitySliderValueChanged( float iValue, i
 float
 SOdysseyAnimationLightTable::GetPreviousKeyOpacity( int iKeyIndex ) const
 {
-    UOdysseyAnimationLayerStack* layerStack = mExtension->LayerStack();
+    UOdysseyAnimationLayerStack* layerStack = mLayerStack.Get();
     if (!layerStack)
         return 0.f;
 
@@ -270,7 +268,7 @@ SOdysseyAnimationLightTable::GetPreviousKeyOpacity( int iKeyIndex ) const
 float
 SOdysseyAnimationLightTable::GetNextKeyOpacity( int iKeyIndex ) const
 {
-    UOdysseyAnimationLayerStack* layerStack = mExtension->LayerStack();
+    UOdysseyAnimationLayerStack* layerStack = mLayerStack.Get();
     if (!layerStack)
         return 0.f;
 

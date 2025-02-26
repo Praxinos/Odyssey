@@ -9,8 +9,8 @@
 #include "TimelineTools/OdysseyAnimationTimelineTool.h"
 #include "OdysseyAnimationCellsDragDropOperation.h"
 #include "Framework/Commands/GenericCommands.h"
-#include "OdysseyAnimationEditorCommands.h"
-#include "OdysseyAnimationEditorProjectSettings.h"
+#include "OdysseyPainterEditorAnimationCommands.h"
+#include "OdysseyPainterEditorAnimationProjectSettings.h"
 #include "OdysseyStyle.h"
 #include "Shortcuts/AnimationTimeline/OdysseyAnimationTimelineCellsShortcuts.h"
 #include "Shortcuts/AnimationTimeline/OdysseyAnimationTimelineCellImageStaggerShortcuts.h"
@@ -18,7 +18,7 @@
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineScrollBox.h"
 #include "TimelineTools/OdysseyAnimationTimelineTools.h"
-#include "OdysseyAnimationEditorTimelinePosition.h"
+#include "OdysseyPainterEditorAnimationTImelinePosition.h"
 #include "LayerStack/Cells/OdysseyAnimationCellSelection.h"
 #include "ScopedTransaction.h"
 #include "Widgets/Input/SButton.h"
@@ -491,10 +491,10 @@ SOdysseyAnimationLayerImageTimeline::BuildContextMenu(FMenuBuilder& iMenuBuilder
     iMenuBuilder.EndSection();
 
     iMenuBuilder.BeginSection("Cells", LOCTEXT("timeline-cells.context-menu.cells-section.name", "Cells"));
-        iMenuBuilder.AddMenuEntry(FOdysseyAnimationEditorCommands::Get().ConvertToStaggerCell, TEXT("ConvertToStagger"));
-        iMenuBuilder.AddMenuEntry(FOdysseyAnimationEditorCommands::Get().ConvertToReferenceCells);
+        iMenuBuilder.AddMenuEntry(FOdysseyPainterEditorAnimationCommands::Get().ConvertToStaggerCell, TEXT("ConvertToStagger"));
+        iMenuBuilder.AddMenuEntry(FOdysseyPainterEditorAnimationCommands::Get().ConvertToReferenceCells);
         iMenuBuilder.AddMenuEntry(
-            FOdysseyAnimationEditorCommands::Get().SetCellExposure,
+            FOdysseyPainterEditorAnimationCommands::Get().SetCellExposure,
             NAME_None,
             LOCTEXT("timeline-cells.context-menu.set-selected-cells-exposure.name", "Set Exposure")
         );
@@ -509,7 +509,7 @@ SOdysseyAnimationLayerImageTimeline::BuildContextMenu(FMenuBuilder& iMenuBuilder
 TSharedRef<SWidget>
 SOdysseyAnimationLayerImageTimeline::CreateCellMarkMenuWidget(int iMarkId)
 {
-    UOdysseyAnimationEditorProjectSettings* settings = UOdysseyAnimationEditorProjectSettings::Get();
+    UOdysseyPainterEditorAnimationProjectSettings* settings = UOdysseyPainterEditorAnimationProjectSettings::Get();
     const FAnimationCellMarkSettings& markSettings = settings->AnimationCellsMarks[iMarkId];
     const FSlateBrush* icon = FCoreStyle::Get().GetBrush( "GenericWhiteBox" );
     switch(markSettings.Symbol)
@@ -560,7 +560,7 @@ SOdysseyAnimationLayerImageTimeline::BuildCellsMarksSubMenu(FMenuBuilder& iMenuB
 
     iMenuBuilder.AddSeparator();
 
-    UOdysseyAnimationEditorProjectSettings* settings = UOdysseyAnimationEditorProjectSettings::Get();
+    UOdysseyPainterEditorAnimationProjectSettings* settings = UOdysseyPainterEditorAnimationProjectSettings::Get();
     for (int i = 0; i < settings->AnimationCellsMarks.Num(); i++)
     {
         iMenuBuilder.AddMenuEntry(

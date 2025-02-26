@@ -4,10 +4,10 @@
 #include "OdysseyPainterEditorStandaloneToolkit.h"
 
 #include "OdysseyAnimation.h"
-#include "OdysseyAnimationEditorSource.h"
+#include "OdysseyPainterEditorAnimationSource.h"
 #include "OdysseyPainterEditorModule.h"
 #include "OdysseyPainterEditor.h"
-#include "OdysseyTextureEditorSource.h"
+#include "OdysseyPainterEditorTextureSource.h"
 
 #include "Engine/Texture2D.h"
 #include "PaperFlipbook.h"

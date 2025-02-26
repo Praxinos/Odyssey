@@ -6,7 +6,7 @@
 #include "OdysseyStyle.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 #include "OdysseyAnimationCurrentFrameMutator.h"
-#include "OdysseyAnimationEditorTimelinePosition.h"
+#include "OdysseyPainterEditorAnimationTImelinePosition.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "ScopedTransaction.h"
 #include "Widgets/Input/SComboButton.h"

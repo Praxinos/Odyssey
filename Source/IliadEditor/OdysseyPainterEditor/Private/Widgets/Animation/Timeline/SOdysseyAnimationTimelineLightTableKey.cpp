@@ -6,8 +6,7 @@
 #include "OdysseyStyle.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
-#include "OdysseyAnimationEditorExtension.h"
-#include "Tools/OutOfPegsTool/OdysseyAnimationEditorOutOfPegsTool.h"
+#include "Tools/OutOfPegsTool/OdysseyPainterEditorAnimationOutOfPegsTool.h"
 #include "OdysseyPainterEditor.h"
 #include "SOdysseyAnimationTimelineSection.h"
 

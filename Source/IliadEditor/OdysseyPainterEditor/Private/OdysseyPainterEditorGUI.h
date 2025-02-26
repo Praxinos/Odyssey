@@ -12,6 +12,7 @@ class FOdysseyVectorScene;
 class FBaseToolkit;
 class UOdysseyLayerStack;
 class FOdysseyVectorGroupPaint;
+class UOdysseyAnimation;
 
 /**
  * Implements an Editor toolkit for textures.
@@ -60,6 +61,9 @@ private:
     void OnCurrentLayerChanged( UOdysseyLayerStack* iLayerStack );
     void OnSourceChanged();
     void OnVectorSceneNotify( FOdysseyVectorGroupPaint* iScene, uint64 iSignalFlags );
+    void OnCurrentFrameChanged( UOdysseyAnimation* iAnimation );
+    void ParseVectorNotifications( FOdysseyVectorGroupPaint* iScene, uint64 iSignalFlags );
+    void OnMediaChanged();
 
 private:
     FOdysseyPainterEditor*                          mEditor;

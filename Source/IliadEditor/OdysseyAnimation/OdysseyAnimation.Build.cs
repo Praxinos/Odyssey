@@ -28,12 +28,38 @@ namespace UnrealBuildTool.Rules
             PublicIncludePaths.AddRange(
                 new string[] {
                     // ... add public include paths required here ...
+                    Path.Combine(ModuleDirectory, "Public", "LayerStack"),
+                    Path.Combine(ModuleDirectory, "Public", "LayerStack", "Cells"),
+                    Path.Combine(ModuleDirectory, "Public", "LayerStack", "Cells", "CellImageRaster"),
+                    Path.Combine(ModuleDirectory, "Public", "LayerStack", "Cells", "CellImageStagger"),
+                    Path.Combine(ModuleDirectory, "Public", "LayerStack", "Cells", "CellImageVector"),
+                    Path.Combine(ModuleDirectory, "Public", "LayerStack", "Layers"),
+                    Path.Combine(ModuleDirectory, "Public", "LayerStack", "Layers", "LayerFolder"),
+                    Path.Combine(ModuleDirectory, "Public", "LayerStack", "Layers", "LayerImageRaster"),
+                    Path.Combine(ModuleDirectory, "Public", "LayerStack", "Layers", "LayerImageVector"),
+                    Path.Combine(ModuleDirectory, "Public", "LayerStack", "Layers", "LayerRoot"),
+                    Path.Combine(ModuleDirectory, "Public", "LayerStack", "LightTable"),
+                    Path.Combine(ModuleDirectory, "Public", "Media"),
+                    Path.Combine(ModuleDirectory, "Public", "Widgets"),
                 }
                 );
 
             PrivateIncludePaths.AddRange(
                 new string[] {
                     // ... add other private include paths required here ...
+                    Path.Combine(ModuleDirectory, "Private", "LayerStack"),
+                    Path.Combine(ModuleDirectory, "Private", "LayerStack", "Cells"),
+                    Path.Combine(ModuleDirectory, "Private", "LayerStack", "Cells", "CellImageRaster"),
+                    Path.Combine(ModuleDirectory, "Private", "LayerStack", "Cells", "CellImageStagger"),
+                    Path.Combine(ModuleDirectory, "Private", "LayerStack", "Cells", "CellImageVector"),
+                    Path.Combine(ModuleDirectory, "Private", "LayerStack", "Layers"),
+                    Path.Combine(ModuleDirectory, "Private", "LayerStack", "Layers", "LayerFolder"),
+                    Path.Combine(ModuleDirectory, "Private", "LayerStack", "Layers", "LayerImageRaster"),
+                    Path.Combine(ModuleDirectory, "Private", "LayerStack", "Layers", "LayerImageVector"),
+                    Path.Combine(ModuleDirectory, "Private", "LayerStack", "Layers", "LayerRoot"),
+                    Path.Combine(ModuleDirectory, "Private", "LayerStack", "LightTable"),
+                    Path.Combine(ModuleDirectory, "Private", "Media"),
+                    Path.Combine(ModuleDirectory, "Private", "Widgets"),
                 }
                 );
 

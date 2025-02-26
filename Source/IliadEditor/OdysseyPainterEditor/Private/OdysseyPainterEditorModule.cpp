@@ -30,12 +30,11 @@
 #include "OdysseyAnimationCellThumbnailRenderer.h"
 #include "OdysseyPainterEditorGUI.h"
 #include "OdysseyAnimation.h"
-#include "OdysseyAnimationEditorGUI.h"
-#include "OdysseyAnimationEditorProjectSettings.h"
-#include "OdysseyAnimationEditorUserSettings.h"
-#include "OdysseyAnimationEditorCommands.h"
-#include "OdysseyFlipbookEditorCommands.h"
-#include "Tools/OutOfPegsTool/OdysseyAnimationEditorOutOfPegsTool.h"
+#include "OdysseyPainterEditorAnimationProjectSettings.h"
+#include "OdysseyPainterEditorAnimationUserSettings.h"
+#include "OdysseyPainterEditorAnimationCommands.h"
+#include "OdysseyPainterEditorFlipbookCommands.h"
+#include "Tools/OutOfPegsTool/OdysseyPainterEditorAnimationOutOfPegsTool.h"
 #include "StandaloneEditor/OdysseyPainterEditorStandaloneToolkit.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
@@ -50,23 +49,8 @@ FOdysseyPainterEditorModule::OpenStandaloneEditorForAsset( UObject* iAsset )
     if (!iAsset)
         return;
 
-    /* TSharedPtr<FOdysseyPainterEditor> editor = MakeShared<FOdysseyPainterEditor>(
-        editorId,
-        editorName,
-        iAsset,
-        editorLayoutName
-    ); */
-
-    /* TSharedRef<FOdysseyAnimationEditorExtension> animationExtension = MakeShared<FOdysseyAnimationEditorExtension>(editor.Get());
-    editor->AddExtension(animationExtension); */
-
     TSharedRef<FOdysseyPainterEditorStandaloneToolkit> toolkit = MakeShared<FOdysseyPainterEditorStandaloneToolkit>(iAsset);
     toolkit->Open();
-
-    //-----
-
-    /* TSharedPtr<FOdysseyAnimationEditorSource> source = MakeShared<FOdysseyAnimationEditorSource>(iAnimation);
-    editor->SetSource(source); */
 }
 
 void
@@ -175,12 +159,12 @@ FOdysseyPainterEditorModule::RegisterSettings()
     settingsModule->RegisterSettings( "Project", "Plugins", "OdysseyAnimationEditor"
         , LOCTEXT( "settings.name", "2D Animation Editor" )
         , LOCTEXT( "settings.tooltip", "Configure the look and feel of the 2D Animation Editor." )
-        , GetMutableDefault<UOdysseyAnimationEditorProjectSettings>() );
+        , GetMutableDefault<UOdysseyPainterEditorAnimationProjectSettings>() );
 
-    settingsModule->RegisterSettings( "Editor", "Plugins", "OdysseyAnimationEditorUserSettings"
+    settingsModule->RegisterSettings( "Editor", "Plugins", "OdysseyPainterEditorAnimationUserSettings"
         , LOCTEXT( "settings.name", "2D Animation Editor" )
         , LOCTEXT( "settings.tooltip", "Configure the look and feel of the 2D Animation Editor." )
-        , GetMutableDefault<UOdysseyAnimationEditorUserSettings>() );
+        , GetMutableDefault<UOdysseyPainterEditorAnimationUserSettings>() );
 }
 
 void
@@ -193,15 +177,15 @@ FOdysseyPainterEditorModule::UnregisterSettings()
 
     settingsModule->UnregisterSettings( "Editor", "Plugins", "OdysseyPainterEditor" );
     settingsModule->UnregisterSettings( "Editor", "Plugins", "OdysseyAnimationEditor" );
-    settingsModule->UnregisterSettings( "Editor", "Plugins", "OdysseyAnimationEditorUserSettings" );
+    settingsModule->UnregisterSettings( "Editor", "Plugins", "OdysseyPainterEditorAnimationUserSettings" );
 }
 
 void
 FOdysseyPainterEditorModule::RegisterCommands()
 {
     FOdysseyPainterEditorCommands::Register();
-    FOdysseyAnimationEditorCommands::Register();
-    FOdysseyFlipbookEditorCommands::Register();
+    FOdysseyPainterEditorAnimationCommands::Register();
+    FOdysseyPainterEditorFlipbookCommands::Register();
     FOdysseyViewportDrawingEditorCommands::Register();
 }
 
@@ -209,8 +193,8 @@ void
 FOdysseyPainterEditorModule::UnregisterCommands()
 {
     FOdysseyPainterEditorCommands::Unregister();
-    FOdysseyAnimationEditorCommands::Unregister();
-    FOdysseyFlipbookEditorCommands::Unregister();
+    FOdysseyPainterEditorAnimationCommands::Unregister();
+    FOdysseyPainterEditorFlipbookCommands::Unregister();
     FOdysseyViewportDrawingEditorCommands::Unregister();
 }
 
@@ -246,7 +230,6 @@ FOdysseyPainterEditorModule::RegisterLevelEditorLayoutExtensions()
 {
     FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor");
     mExtendLevelEditorLayout = LevelEditorModule.OnRegisterLayoutExtensions().AddStatic(&FOdysseyPainterEditorGUI::ExtendLevelEditorLayout);
-    mAnimationExtendLevelEditorLayout = LevelEditorModule.OnRegisterLayoutExtensions().AddStatic(&FOdysseyAnimationEditorGUI::ExtendLevelEditorLayout);
 }
 
 void
@@ -254,7 +237,6 @@ FOdysseyPainterEditorModule::UnregisterLevelEditorLayoutExtensions()
 {
     FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor");
     LevelEditorModule.OnRegisterLayoutExtensions().Remove(mExtendLevelEditorLayout);
-    LevelEditorModule.OnRegisterLayoutExtensions().Remove(mAnimationExtendLevelEditorLayout);
 }
 
 void
@@ -262,16 +244,16 @@ FOdysseyPainterEditorModule::RegisterDetailCustomizations()
 {
     FOdysseyShapes::RegisterDetailCustomization();
 
-    FOdysseyAnimationEditorFlipSystem::RegisterDetailCustomization();
+    FOdysseyPainterEditorAnimationFlipSystem::RegisterDetailCustomization();
     FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
-    PropertyModule.RegisterCustomClassLayout(UOdysseyAnimationEditorOutOfPegsTool::StaticClass()->GetFName(), FOnGetDetailCustomizationInstance::CreateStatic(&FOdysseyAnimationEditorOutOfPegsToolDetails::MakeInstance));
+    PropertyModule.RegisterCustomClassLayout(UOdysseyPainterEditorAnimationOutOfPegsTool::StaticClass()->GetFName(), FOnGetDetailCustomizationInstance::CreateStatic(&FOdysseyPainterEditorAnimationOutOfPegsToolDetails::MakeInstance));
 }
 
 void
 FOdysseyPainterEditorModule::UnregisterDetailCustomization()
 {
     FOdysseyShapes::UnregisterDetailCustomization();
-    FOdysseyAnimationEditorFlipSystem::UnregisterDetailCustomization();
+    FOdysseyPainterEditorAnimationFlipSystem::UnregisterDetailCustomization();
 }
 
 void

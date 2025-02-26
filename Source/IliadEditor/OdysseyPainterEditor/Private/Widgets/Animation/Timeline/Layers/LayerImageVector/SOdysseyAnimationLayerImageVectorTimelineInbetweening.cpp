@@ -1,7 +1,6 @@
 // IDDN.FR.001.250001.006.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
-// From module OdysseyAnimationEditor
 #include "Widgets/Animation/Timeline/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorTimelineInbetweening.h"
 #include "Widgets/Animation/Timeline/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow.h"
 #include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineInbetweeningHeaderRow.h"
@@ -29,7 +28,7 @@
 #include "Undo/OdysseyVectorUndoTagInbetweenerBreakdownAdd.h"
 #include "Undo/OdysseyVectorUndoTagInbetweenerBreakdownRemove.h"
 #include "Undo/OdysseyVectorUndoTagInbetweenerBreakdownTargetVisibility.h"
-#include "OdysseyAnimationEditorTimelinePosition.h"
+#include "OdysseyPainterEditorAnimationTImelinePosition.h"
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
 
 #include "Framework/Commands/GenericCommands.h"
@@ -92,7 +91,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::GetEditor() const
     return mEditor.Get();
 }
 
-TSharedPtr<FOdysseyAnimationEditorTimelinePosition>
+TSharedPtr<FOdysseyPainterEditorAnimationTImelinePosition>
 SOdysseyAnimationLayerImageVectorTimelineInbetweening::GetTimelinePosition() const
 {
     return mTimelinePosition;

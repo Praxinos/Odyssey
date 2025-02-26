@@ -12,7 +12,7 @@ class FInbetweeningListViewItem;
 class UOdysseyAnimationLayerImageVector;
 class FOdysseyVectorTagInbetweener;
 class FOdysseyVectorEngine;
-class FOdysseyAnimationEditorTimelinePosition;
+class FOdysseyPainterEditorAnimationTImelinePosition;
 class FOdysseyPainterEditor;
 class FOdysseyVectorGroupPaint;
 
@@ -29,7 +29,7 @@ class SOdysseyAnimationLayerImageVectorTimelineInbetweening
         SLATE_BEGIN_ARGS(SOdysseyAnimationLayerImageVectorTimelineInbetweening)
             : _PainterEditor(nullptr)
             {}
-            SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
+            SLATE_ARGUMENT( TSharedPtr<FOdysseyPainterEditorAnimationTImelinePosition>, TimelinePosition )
             SLATE_ATTRIBUTE(FOdysseyPainterEditor*, PainterEditor)
         SLATE_END_ARGS()
 
@@ -43,7 +43,7 @@ class SOdysseyAnimationLayerImageVectorTimelineInbetweening
         const FSlateBrush *GetBackwardArrowBrush();
         virtual FReply OnKeyDown( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent ) override;
         FOdysseyPainterEditor* GetEditor() const;
-        TSharedPtr<FOdysseyAnimationEditorTimelinePosition> GetTimelinePosition() const;
+        TSharedPtr<FOdysseyPainterEditorAnimationTImelinePosition> GetTimelinePosition() const;
 
     protected:
         void OnSelectionChanged( TSharedPtr<FInbetweeningListViewItem> iItem, ESelectInfo::Type SelectInfo );
@@ -78,7 +78,7 @@ class SOdysseyAnimationLayerImageVectorTimelineInbetweening
         FVector2D mCursorPos;
         const FSlateBrush *mForwardArrowBrush;
         const FSlateBrush *mBackwardArrowBrush;
-        TSharedPtr<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
+        TSharedPtr<FOdysseyPainterEditorAnimationTImelinePosition> mTimelinePosition;
         TAttribute<FOdysseyPainterEditor*> mEditor;
         TSharedRef<FUICommandList> mCommandList;
 };

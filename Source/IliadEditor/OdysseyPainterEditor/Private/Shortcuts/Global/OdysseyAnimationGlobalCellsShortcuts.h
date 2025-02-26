@@ -5,14 +5,14 @@
 
 #include "OdysseyEditorShortcuts.h"
 
-class FOdysseyAnimationEditorExtension;
+class FOdysseyPainterEditor;
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyAnimationGlobalCellsShortcuts
     : public IOdysseyEditorShortcuts
 {
 public:
     virtual ~FOdysseyAnimationGlobalCellsShortcuts() {};
-    FOdysseyAnimationGlobalCellsShortcuts(TSharedPtr<FOdysseyAnimationEditorExtension> iExtension);
+    FOdysseyAnimationGlobalCellsShortcuts(FOdysseyPainterEditor* iEditor);
 
 public:
     //Common Shortcuts
@@ -33,5 +33,5 @@ public:
     virtual void MapActionsToCommandList(TSharedRef<FUICommandList> iCommandList) override;
 
 private:
-    TWeakPtr<FOdysseyAnimationEditorExtension> mExtension;
+    FOdysseyPainterEditor* mEditor;
 };

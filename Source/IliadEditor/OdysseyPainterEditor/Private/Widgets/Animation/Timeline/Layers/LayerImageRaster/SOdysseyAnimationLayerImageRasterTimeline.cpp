@@ -9,7 +9,7 @@
 #include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
 #include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
 #include "OdysseyAnimation.h"
-#include "OdysseyAnimationEditorCommands.h"
+#include "OdysseyPainterEditorAnimationCommands.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
@@ -76,7 +76,7 @@ SOdysseyAnimationLayerImageRasterTimeline::ExtendContextMenu()
             [](FMenuBuilder& iMenuBuilder)
             {
                 iMenuBuilder.AddMenuEntry(
-                    FOdysseyAnimationEditorCommands::Get().CrossFade,
+                    FOdysseyPainterEditorAnimationCommands::Get().CrossFade,
                     NAME_None,
                     LOCTEXT("timeline-cells.context-menu.cross-fade.name", "Cross Fade")
                 );

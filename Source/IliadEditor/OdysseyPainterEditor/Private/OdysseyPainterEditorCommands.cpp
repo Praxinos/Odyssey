@@ -171,16 +171,22 @@ FOdysseyPainterEditorCommands::RegisterCommands()
 
     // LayerStack Shortcuts Category
     UI_BUNDLE_COMMAND( CreateNewLayer, LayerStackShortcuts, "Create New Layer", "Create new image layer",                                                                                                      EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::N));
-    UI_BUNDLE_COMMAND( ChangeLayerOpacity10, LayerStackShortcuts, "Change current Layer Opacity to 10%", "Change current Layer Opacity to 10%",                                                                EUserInterfaceActionType::Button, FInputChord());
-    UI_BUNDLE_COMMAND( ChangeLayerOpacity20, LayerStackShortcuts, "Change current Layer Opacity to 20%", "Change current Layer Opacity to 20%",                                                                EUserInterfaceActionType::Button, FInputChord());
-    UI_BUNDLE_COMMAND( ChangeLayerOpacity30, LayerStackShortcuts, "Change current Layer Opacity to 30%", "Change current Layer Opacity to 30%",                                                                EUserInterfaceActionType::Button, FInputChord());
-    UI_BUNDLE_COMMAND( ChangeLayerOpacity40, LayerStackShortcuts, "Change current Layer Opacity to 40%", "Change current Layer Opacity to 40%",                                                                EUserInterfaceActionType::Button, FInputChord());
-    UI_BUNDLE_COMMAND( ChangeLayerOpacity50, LayerStackShortcuts, "Change current Layer Opacity to 50%", "Change current Layer Opacity to 50%",                                                                EUserInterfaceActionType::Button, FInputChord());
-    UI_BUNDLE_COMMAND( ChangeLayerOpacity60, LayerStackShortcuts, "Change current Layer Opacity to 60%", "Change current Layer Opacity to 60%",                                                                EUserInterfaceActionType::Button, FInputChord());
-    UI_BUNDLE_COMMAND( ChangeLayerOpacity70, LayerStackShortcuts, "Change current Layer Opacity to 70%", "Change current Layer Opacity to 70%",                                                                EUserInterfaceActionType::Button, FInputChord());
-    UI_BUNDLE_COMMAND( ChangeLayerOpacity80, LayerStackShortcuts, "Change current Layer Opacity to 80%", "Change current Layer Opacity to 80%",                                                                EUserInterfaceActionType::Button, FInputChord());
-    UI_BUNDLE_COMMAND( ChangeLayerOpacity90, LayerStackShortcuts, "Change current Layer Opacity to 90%", "Change current Layer Opacity to 90%",                                                                EUserInterfaceActionType::Button, FInputChord());
-    UI_BUNDLE_COMMAND( ChangeLayerOpacity100, LayerStackShortcuts, "Change current Layer Opacity to 100%", "Change current Layer Opacity to 100%",                                                             EUserInterfaceActionType::Button, FInputChord());
+    for (int i = 0; i <= 10; i++)
+    {
+        FNumberFormattingOptions options;
+        options.SetMinimumIntegralDigits(2);
+        TSharedPtr<FUICommandInfo> commandInfo = FUICommandInfoDecl(
+              this->AsShared()
+            , FName( *FString::Printf( TEXT( "ChangeLayerOpacity%d" ), i * 10 ))
+            , FText::Format( LOCTEXT( "commands.change-layer-opacity.label", "Change current Layer Opacity to {0}%"), FText::AsNumber(i * 10, &options) )
+            , FText::Format( LOCTEXT( "commands.change-layer-opacity.tooltip", "Change current Layer Opacity to {0}%"), FText::AsNumber(i * 10, &options))
+            , LayerStackShortcuts
+        )
+        .UserInterfaceType( EUserInterfaceActionType::Button )
+        .DefaultChord( FInputChord() );
+
+        ChangeLayerOpacity.Add(commandInfo);
+    }
 }
 
 void

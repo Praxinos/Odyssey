@@ -1,0 +1,79 @@
+// IDDN.FR.001.250001.006.S.P.2019.000.00000
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
+
+#pragma once
+
+#include "OdysseyEditorTab.h"
+
+class FOdysseyPainterEditor;
+class UOdysseyAnimationLayerStack;
+class UOdysseyAnimation;
+class UOdysseyAnimationPlayer;
+class UOdysseyAnimationCell;
+class FOdysseyPainterEditorAnimationTImelinePosition;
+
+class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorAnimationTimelineTab :
+    public FOdysseyEditorTab
+{
+public:
+    static const FName& StaticId();
+
+public:
+    // Construction / Destruction
+    virtual ~FOdysseyPainterEditorAnimationTimelineTab();
+    FOdysseyPainterEditorAnimationTimelineTab(FOdysseyPainterEditor* iEditor);
+
+public:
+    void SetEmptyTimelineWidget(TSharedRef<SWidget> iWidget);
+
+    FInt32Range GetAnimationValidRange() const;
+    void SetAnimationValidRange(const TAttribute<FInt32Range>& iValue);
+
+protected:
+    virtual const FName& GetId() const override;
+    virtual TSharedPtr<SWidget> CreateWidget() override;
+    virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
+    virtual void ExtendMenu(TSharedRef<FExtender> iExtender) override;
+
+protected:
+    // Widget Getters
+    virtual UOdysseyAnimation* Animation() const;
+    virtual UOdysseyAnimationPlayer* Player() const;
+    virtual float PlaybackFramesPerSecond() const;
+    TSharedPtr<FOdysseyPainterEditorAnimationTImelinePosition> GetTimelinePosition() const;
+
+protected:
+    // Event
+    //DEBUG:
+    FReply OnAddFrameClicked();
+    //DEBUG:
+
+private:
+    //Methods
+    virtual void ExtendMenuFile(TSharedRef<FExtender> iExtender);
+
+    void BuildImportMenu(FMenuBuilder& iMenuBuilder);
+    void BuildExportMenu(FMenuBuilder& iMenuBuilder);
+
+    void MapActions( TSharedPtr<FUICommandList> iCommandList );
+
+    virtual void ImportTextureSequence();
+    void ImportImageSequence();
+    void ExportImageSequence();
+    void ExportAsFlipbook();
+
+    void StepForward();
+    void StepBackward();
+
+    TSharedPtr<SWidget> CreateDefaultEmptyTimelineTabWidget() const;
+
+    void OnActivateOutOfPegs(UOdysseyAnimationCell* iCell);
+    void OnInactivateOutOfPegs();
+    ECheckBoxState OnIsOutOfPegsChecked(UOdysseyAnimationCell* iCell);
+
+private:
+    FOdysseyPainterEditor* mEditor;
+    FText mEmptyTimelineMessage;
+    TSharedPtr<SWidget> mEmptyTimelineTabWidget;
+    TAttribute<FInt32Range> mAnimationValidRange;
+};

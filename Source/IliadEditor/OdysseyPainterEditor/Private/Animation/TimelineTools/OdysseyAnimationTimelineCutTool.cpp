@@ -3,7 +3,7 @@
 
 #include "TimelineTools/OdysseyAnimationTimelineCutTool.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
-#include "OdysseyAnimationEditorTimelinePosition.h"
+#include "OdysseyPainterEditorAnimationTImelinePosition.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
 
@@ -13,7 +13,7 @@ FOdysseyAnimationTimelineCutTool::~FOdysseyAnimationTimelineCutTool()
 {
 }
 
-FOdysseyAnimationTimelineCutTool::FOdysseyAnimationTimelineCutTool(TSharedRef<FOdysseyAnimationEditorTimelinePosition> iTimelinePosition)
+FOdysseyAnimationTimelineCutTool::FOdysseyAnimationTimelineCutTool(TSharedRef<FOdysseyPainterEditorAnimationTImelinePosition> iTimelinePosition)
     : FOdysseyAnimationTimelineTool(iTimelinePosition)
 {
 }

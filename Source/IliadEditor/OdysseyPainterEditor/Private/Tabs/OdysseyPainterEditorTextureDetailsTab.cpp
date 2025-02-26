@@ -4,7 +4,7 @@
 #include "OdysseyPainterEditorTextureDetailsTab.h"
 
 #include "SOdysseyTextureDetails.h"
-#include "Texture/OdysseyTextureEditorSource.h"
+#include "OdysseyPainterEditorTextureSource.h"
 #include "OdysseyPainterEditor.h"
 
 #define LOCTEXT_NAMESPACE "TextureEditor"
@@ -12,7 +12,7 @@
 const FName&
 FOdysseyPainterEditorTextureDetailsTab::StaticId()
 {
-    static FName Id = TEXT("OdysseyTextureEditor_TextureDetails"); //Keep ColorSelector instead of ColorWheel because changing that ID would show an empty panel to users who already opened the previous ColorSelector Panel
+    static FName Id = TEXT("OdysseyTextureEditor_TextureDetails");   //Dont change, Old Id for retro compatibility
     return Id;
 }
 
@@ -29,9 +29,6 @@ FOdysseyPainterEditorTextureDetailsTab::FOdysseyPainterEditorTextureDetailsTab(F
     , mEditor(iEditor)
 {
 }
-
-//--------------------------------------------------------------------------------------
-//--------------------------------------------------- FOdysseyTextureEditorTab interface
 
 const FName&
 FOdysseyPainterEditorTextureDetailsTab::GetId() const
@@ -53,10 +50,10 @@ UTexture*
 FOdysseyPainterEditorTextureDetailsTab::Texture() const
 {
     TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
-    if (!source || source->Id() != FOdysseyTextureEditorSource::StaticId())
+    if (!source || source->Id() != FOdysseyPainterEditorTextureSource::StaticId())
         return nullptr;
 
-    TSharedPtr<FOdysseyTextureEditorSource> textureSource = StaticCastSharedPtr<FOdysseyTextureEditorSource>(source);
+    TSharedPtr<FOdysseyPainterEditorTextureSource> textureSource = StaticCastSharedPtr<FOdysseyPainterEditorTextureSource>(source);
 
     return textureSource->GetTexture();
 }

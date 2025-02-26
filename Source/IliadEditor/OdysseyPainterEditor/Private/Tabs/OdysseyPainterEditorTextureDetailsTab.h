@@ -20,7 +20,6 @@ public:
     FOdysseyPainterEditorTextureDetailsTab(FOdysseyPainterEditor* iEditor);
 
 protected:
-    // FOdysseyTextureEditorTab interface
     virtual const FName& GetId() const override;
     virtual TSharedPtr<SWidget> CreateWidget() override;
 

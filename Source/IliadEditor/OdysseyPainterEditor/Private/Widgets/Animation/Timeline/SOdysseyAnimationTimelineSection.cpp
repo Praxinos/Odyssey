@@ -3,7 +3,7 @@
 
 #include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineSection.h"
 
-#include "OdysseyAnimationEditorTimelinePosition.h"
+#include "OdysseyPainterEditorAnimationTImelinePosition.h"
 
 void
 SOdysseyAnimationTimelineSection::Construct(const FArguments& iArgs)

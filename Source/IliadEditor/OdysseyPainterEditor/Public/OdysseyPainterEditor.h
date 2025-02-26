@@ -9,6 +9,8 @@
 #include "OdysseyMediaProvider.h"
 #include "OdysseyVectorEngine.h"
 #include "Proxies/OdysseyBrushColor.h"
+#include "OdysseyPainterEditorAnimationTImelinePosition.h"
+#include "OdysseyImageRenderingAbility.h"
 #include <ULIS>
 
 class IOdysseySurfaceEditable;
@@ -51,6 +53,11 @@ class UOdysseyPainterEditorVectorTransformTool;
 class UOdysseyPainterEditorVectorMatchingTool;
 class UOdysseyPainterEditorVectorChartTool;
 class UOdysseyPainterEditorVectorTrajectoryTool;
+
+class UOdysseyAnimation;
+class UOdysseyAnimationPlayer;
+class UOdysseyPainterEditorAnimationOutOfPegsTool;
+class FOdysseyPainterEditorAnimationFlipSystem;
 
 UENUM()
 enum class EOdysseyPainterEditorColorType : uint8
@@ -200,6 +207,8 @@ public:
     virtual UOdysseyPainterEditorVectorPaintBucketTool*              GetVectorPaintBucketTool() const;
     virtual UOdysseyPainterEditorColorPickerTool*                    GetColorPickerTool() const;
 
+    UOdysseyPainterEditorAnimationOutOfPegsTool* GetOutOfPegsTool() const;
+
 public:
     // Getters
     FSimpleMulticastDelegate& OnSourceChanged();
@@ -212,6 +221,13 @@ public:
 
     virtual FOdysseyHUD*                               HUDSystem() const;
     virtual const FOdysseyBrushColor&                        PaintColor() const;
+
+    float                                                    GetAnimationPlaybackFramesPerSecond() const;
+
+    UOdysseyAnimation*                                       GetAnimation() const;
+    UOdysseyAnimationPlayer*                                 GetAnimationPlayer() const;
+    TSharedPtr<FOdysseyPainterEditorAnimationFlipSystem>            GetAnimationFlipSystem() const;
+    TSharedRef<FOdysseyPainterEditorAnimationTImelinePosition>      GetAnimationTimelinePosition();
     EOdysseyPainterEditorColorType                           GetColorType() const;
     virtual FOdysseyMediaProvider                            GetCurrentMediaProvider();
     virtual UOdysseyLayerStack*                              LayerStack() const;
@@ -327,6 +343,9 @@ protected:
     //Callbacks
     virtual void OnApplyOverrides(const TMap<FName, UObject*>& iOverrides);
     void OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack);
+    void OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent);
+    void OnCurrentFrameChanged(UOdysseyAnimation* iAnimation);
+    void OnMediaChanged();
 
 private:
     void InitTools();
@@ -371,6 +390,8 @@ protected:
     TSharedPtr<FOdysseyPainterEditorRasterSelection> mRasterSelection;
     TArray<FOdysseyBrushContext*>   mBrushContexts;
     FOdysseyBrushColor              mPaintColor;
+    float mAnimationPlaybackFramesPerSecond;
+    TSharedRef<FOdysseyPainterEditorAnimationTImelinePosition> mAnimationTimelinePosition;
     EOdysseyPainterEditorColorType  mColorType = EOdysseyPainterEditorColorType::Raw;
     FSimpleMulticastDelegate        mOnCurrentToolChanged;
     FSimpleMulticastDelegate        mOnCurrentMainToolChanged;
@@ -399,6 +420,7 @@ protected:
     TObjectPtr<UOdysseyPainterEditorVectorMatchingTool> mVectorMatchingTool;
     TObjectPtr<UOdysseyPainterEditorVectorChartTool> mVectorChartTool;
     TObjectPtr<UOdysseyPainterEditorVectorTrajectoryTool> mVectorTrajectoryTool;
+    TObjectPtr<UOdysseyPainterEditorAnimationOutOfPegsTool> mOutOfPegsTool;
 
     TMap<UClass*, UOdysseyPainterEditorTool*> mCurrentMainToolPerLayerClass;
 
@@ -407,6 +429,8 @@ protected:
     TArray<TSharedPtr<FOdysseyPainterEditorPaletteSet>> mPaletteSets;
     UOdysseyPaletteEntryColor* mCurrentPaletteEntryColor = nullptr;
     int mCurrentPaletteSet = 0;
+    TSharedPtr<FOdysseyPainterEditorAnimationFlipSystem> mAnimationFlipSystem;
+    TArray<FGuid> mImageRenderingComposition;
 };
 
 template <class T>

@@ -15,7 +15,7 @@
 #include "OdysseyPainterEditorFlipbookListener.h"
 #include "OdysseyPainterEditorFlipbookUtils.h"
 #include "PaperSprite.h"
-#include "OdysseyFlipbookEditorCommands.h"
+#include "OdysseyPainterEditorFlipbookCommands.h"
 
 #define LOCTEXT_NAMESPACE "FlipbookEditor"
 #define MaxZoom 1.0
@@ -822,20 +822,20 @@ SOdysseyFlipbookTimelineView::OnTextureCreated(UTexture2D* iTexture, FOdysseyTex
 void
 SOdysseyFlipbookTimelineView::BindCommands(const TSharedRef<FUICommandList>& iCommandList)
 {
-    iCommandList->MapAction(FOdysseyFlipbookEditorCommands::Get().AddNewKeyFrame, FUIAction( FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::AddFrame)));
-    iCommandList->MapAction(FOdysseyFlipbookEditorCommands::Get().AddNewKeyFrameAfter, FUIAction( FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::AddFrameAfter)));
-    iCommandList->MapAction(FOdysseyFlipbookEditorCommands::Get().AddNewKeyFrameBefore, FUIAction( FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::AddFrameBefore)));
-    iCommandList->MapAction(FOdysseyFlipbookEditorCommands::Get().PlayForward, FUIAction( FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::PlayOrPause, false)));
-    iCommandList->MapAction(FOdysseyFlipbookEditorCommands::Get().PlayBackward, FUIAction( FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::PlayOrPause, true)));
-    iCommandList->MapAction(FOdysseyFlipbookEditorCommands::Get().Pause, FUIAction( FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::Pause)));
-    iCommandList->MapAction(FOdysseyFlipbookEditorCommands::Get().Stop, FUIAction( FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::Stop)));
-    iCommandList->MapAction(FOdysseyFlipbookEditorCommands::Get().PreviousFrame, FUIAction( FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::ScrubToPreviousFrame)));
-    iCommandList->MapAction(FOdysseyFlipbookEditorCommands::Get().NextFrame, FUIAction( FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::ScrubToNextFrame)));
-    iCommandList->MapAction(FOdysseyFlipbookEditorCommands::Get().PreviousKeyFrame, FUIAction( FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::ScrubToPreviousKeyFrame)));
-    iCommandList->MapAction(FOdysseyFlipbookEditorCommands::Get().NextKeyFrame, FUIAction( FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::ScrubToNextKeyFrame)));
-    iCommandList->MapAction(FOdysseyFlipbookEditorCommands::Get().FirstFrame, FUIAction( FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::ScrubToFirstFrame)));
-    iCommandList->MapAction(FOdysseyFlipbookEditorCommands::Get().LastFrame, FUIAction( FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::ScrubToLastFrame)));
-    iCommandList->MapAction(FOdysseyFlipbookEditorCommands::Get().ToggleLooping, FUIAction( FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::ToggleLooping)));
+    iCommandList->MapAction(FOdysseyPainterEditorFlipbookCommands::Get().AddNewKeyFrame, FUIAction( FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::AddFrame)));
+    iCommandList->MapAction(FOdysseyPainterEditorFlipbookCommands::Get().AddNewKeyFrameAfter, FUIAction( FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::AddFrameAfter)));
+    iCommandList->MapAction(FOdysseyPainterEditorFlipbookCommands::Get().AddNewKeyFrameBefore, FUIAction( FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::AddFrameBefore)));
+    iCommandList->MapAction(FOdysseyPainterEditorFlipbookCommands::Get().PlayForward, FUIAction( FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::PlayOrPause, false)));
+    iCommandList->MapAction(FOdysseyPainterEditorFlipbookCommands::Get().PlayBackward, FUIAction( FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::PlayOrPause, true)));
+    iCommandList->MapAction(FOdysseyPainterEditorFlipbookCommands::Get().Pause, FUIAction( FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::Pause)));
+    iCommandList->MapAction(FOdysseyPainterEditorFlipbookCommands::Get().Stop, FUIAction( FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::Stop)));
+    iCommandList->MapAction(FOdysseyPainterEditorFlipbookCommands::Get().PreviousFrame, FUIAction( FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::ScrubToPreviousFrame)));
+    iCommandList->MapAction(FOdysseyPainterEditorFlipbookCommands::Get().NextFrame, FUIAction( FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::ScrubToNextFrame)));
+    iCommandList->MapAction(FOdysseyPainterEditorFlipbookCommands::Get().PreviousKeyFrame, FUIAction( FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::ScrubToPreviousKeyFrame)));
+    iCommandList->MapAction(FOdysseyPainterEditorFlipbookCommands::Get().NextKeyFrame, FUIAction( FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::ScrubToNextKeyFrame)));
+    iCommandList->MapAction(FOdysseyPainterEditorFlipbookCommands::Get().FirstFrame, FUIAction( FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::ScrubToFirstFrame)));
+    iCommandList->MapAction(FOdysseyPainterEditorFlipbookCommands::Get().LastFrame, FUIAction( FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::ScrubToLastFrame)));
+    iCommandList->MapAction(FOdysseyPainterEditorFlipbookCommands::Get().ToggleLooping, FUIAction( FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::ToggleLooping)));
 }
 
 #undef LOCTEXT_NAMESPACE

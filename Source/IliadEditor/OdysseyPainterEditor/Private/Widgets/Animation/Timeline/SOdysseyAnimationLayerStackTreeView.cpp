@@ -4,7 +4,6 @@
 #include "Widgets/Animation/Timeline/SOdysseyAnimationLayerStackTreeView.h"
 
 #include "Shortcuts/AnimationTimeline/OdysseyAnimationTimelineShortcuts.h"
-#include "OdysseyAnimationEditorExtension.h"
 #include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
 #include "LayerStack/OdysseyAnimationLayerStack.h"
 #include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineToolSelector.h"

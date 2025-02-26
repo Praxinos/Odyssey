@@ -4,7 +4,6 @@
 #include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineInbetweeningHeader.h"
 #include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineInbetweeningHeaderRow.h"
 #include "LayerStack/OdysseyAnimationLayerStack.h"
-#include "OdysseyAnimationEditorExtension.h"
 #include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
 
 #include "Widgets/Input/NumericTypeInterface.h"

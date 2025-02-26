@@ -2,7 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
 
 #include "OdysseyViewportDrawingEditorGUI.h"
-#include "OdysseyAnimationEditorTimelineTab.h"
+#include "OdysseyPainterEditorAnimationTimelineTab.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyViewportDrawingEditorExtension.h"
 #include "OdysseyAnimationTimelineTrack.h"
@@ -49,7 +49,7 @@ void
 FOdysseyViewportDrawingEditorGUI::CustomizeAnimationEditorTimeline()
 {
     FOdysseyPainterEditor* editor = mExtension->GetEditor();
-    TSharedPtr<FOdysseyAnimationEditorTimelineTab> timelineTab = editor->FindTab<FOdysseyAnimationEditorTimelineTab>();
+    TSharedPtr<FOdysseyPainterEditorAnimationTimelineTab> timelineTab = editor->FindTab<FOdysseyPainterEditorAnimationTimelineTab>();
     if (!timelineTab)
         return;
 

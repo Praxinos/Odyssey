@@ -6,7 +6,7 @@
 #include "CoreMinimal.h"
 
 class SOdysseyAnimationTimelineScrollPanel;
-class FOdysseyAnimationEditorTimelinePosition;
+class FOdysseyPainterEditorAnimationTImelinePosition;
 
 class SOdysseyAnimationTimelineScrollBox
     : public SCompoundWidget
@@ -18,7 +18,7 @@ public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineScrollBox)
         {}
         SLATE_SLOT_ARGUMENT( FSlot, Slots )
-        SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
+        SLATE_ARGUMENT( TSharedPtr<FOdysseyPainterEditorAnimationTImelinePosition>, TimelinePosition )
     SLATE_END_ARGS()
 
 public:
@@ -42,7 +42,7 @@ class SOdysseyAnimationTimelineScrollPanel
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineScrollPanel)
         {}
-        SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
+        SLATE_ARGUMENT( TSharedPtr<FOdysseyPainterEditorAnimationTImelinePosition>, TimelinePosition )
     SLATE_END_ARGS()
 
 public:
@@ -74,6 +74,6 @@ private:
 
 private:
     //State
-    TSharedPtr<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
+    TSharedPtr<FOdysseyPainterEditorAnimationTImelinePosition> mTimelinePosition;
     TPanelChildren<SOdysseyAnimationTimelineScrollBox::FSlot>   mChildren;
 };
