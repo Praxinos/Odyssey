@@ -50,8 +50,6 @@ private:
     void OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent);
     void OnLayerMediaChanged();
 
-    void ConfigureTools();
-
 public:
     TSharedPtr<FOdysseyAnimationEditorSource> mAnimationSource;
     TSharedPtr<FOdysseyAnimationEditorGUI> mGUI;

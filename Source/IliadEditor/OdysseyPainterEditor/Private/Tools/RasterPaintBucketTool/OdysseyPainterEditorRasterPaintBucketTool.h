@@ -6,12 +6,13 @@
 #include "CoreMinimal.h"
 #include "Tools/RasterBaseTool/OdysseyPainterEditorRasterBaseTool.h"
 #include "OdysseyPaintEngine.h"
-#include "Tools/RasterPaintBucketTool/OdysseyPainterEditorRasterPaintBucketToolSourceProvider.h"
 
 #include "OdysseyPainterEditorRasterPaintBucketTool.generated.h"
 
 class FOdysseyPaintEngine;
+class FOdysseyImageRenderingAbility;
 class FOdysseyPainterEditorRasterPaintBucketToolSourceProvider;
+class UOdysseyLayer;
 
 UENUM()
 enum class EOdysseyRasterPaintBucketToolColorToleranceSource : uint8
@@ -20,6 +21,16 @@ enum class EOdysseyRasterPaintBucketToolColorToleranceSource : uint8
     Transparency,
     ColorAndTransparency,
     Luminosity
+};
+
+UENUM()
+enum class EOdysseyRasterPaintBucketToolSource : uint8
+{
+    Custom UMETA(Hidden),
+    CurrentLayer,
+    ForegroundLayers,
+    BackgroundLayers,
+    AllLayers
 };
 
 UCLASS()
@@ -77,6 +88,13 @@ private:
     void IncludeColor( ::ULIS::FColor iColor );
 
     void OnRasterSelectionChanged();
+
+    TSharedPtr<::ULIS::FBlock> GetCurrentLayerBlock() const;
+    TSharedPtr<::ULIS::FBlock> GetForegroundLayersBlock() const;
+    TSharedPtr<::ULIS::FBlock> GetBackgroundLayersBlock() const;
+    TSharedPtr<::ULIS::FBlock> GetAllLayersBlock() const;
+    TArray<FOdysseyImageRenderingAbility*> GetBackgroundLayersToExclude(UOdysseyLayer* iLayer) const;
+    TArray<FOdysseyImageRenderingAbility*> GetForegroundLayersToExclude(UOdysseyLayer* iLayer) const;
 
 public:
     UPROPERTY( EditAnywhere, Category=RasterPaintBucketTool)

@@ -21,7 +21,6 @@
 #include "LayerStack/OdysseyTextureLayerImageRaster.h"
 #include "OdysseyPainterEditorCommands.h"
 #include "Texture/OdysseyTextureEditorSource.h"
-#include "Texture/OdysseyTextureEditorExtension.h"
 #include "OdysseyPainterEditor.h"
 #include "AssetToolsModule.h"
 #include "ULISLoaderModule.h"

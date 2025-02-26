@@ -22,6 +22,36 @@ UOdysseyAnimationLayerStack::UOdysseyAnimationLayerStack()
     LayerRootClass = UOdysseyAnimationLayerRoot::StaticClass();
 }
 
+int
+UOdysseyAnimationLayerStack::GetWidth() const
+{
+    UOdysseyAnimation* animation = GetAnimation();
+    if (!animation)
+        return Super::GetWidth();
+
+    return animation->GetWidth();
+}
+
+int
+UOdysseyAnimationLayerStack::GetHeight() const
+{
+    UOdysseyAnimation* animation = GetAnimation();
+    if (!animation)
+        return Super::GetHeight();
+
+    return animation->GetHeight();
+}
+
+::ULIS::eFormat
+UOdysseyAnimationLayerStack::GetFormat() const
+{
+    UOdysseyAnimation* animation = GetAnimation();
+    if (!animation)
+        return Super::GetFormat();
+
+    return animation->GetFormat();
+}
+
 UOdysseyAnimation*
 UOdysseyAnimationLayerStack::GetAnimation() const
 {

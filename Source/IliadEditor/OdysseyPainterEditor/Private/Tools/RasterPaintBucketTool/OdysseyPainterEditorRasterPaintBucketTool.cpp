@@ -13,6 +13,8 @@
 #include "OdysseyHUDElement.h"
 #include "OdysseyPainterEditorRasterSelection.h"
 #include "SOdysseySinglePropertyView.h"
+#include "OdysseyLayer.h"
+#include "OdysseyLayerStack.h"
 #include "ULISLoaderModule.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
@@ -445,10 +447,23 @@ UOdysseyPainterEditorRasterPaintBucketTool::ConvertMaskBlockToColorBlock(TShared
 TSharedPtr<::ULIS::FBlock>
 UOdysseyPainterEditorRasterPaintBucketTool::GetSourceBlock() const
 {
-    if (!mSourceProvider)
-        return nullptr;
+    switch(Source)
+    {
+        //Current Layer
+        case EOdysseyRasterPaintBucketToolSource::CurrentLayer :
+            return GetCurrentLayerBlock();
+        //Foreground Layers
+        case EOdysseyRasterPaintBucketToolSource::ForegroundLayers :
+            return GetForegroundLayersBlock();
+        //Background Layers
+        case EOdysseyRasterPaintBucketToolSource::BackgroundLayers :
+            return GetBackgroundLayersBlock();
+        //All Layers
+        case EOdysseyRasterPaintBucketToolSource::AllLayers :
+            return GetAllLayersBlock();
+    }
 
-    return mSourceProvider->GetSourceBlock(Source);
+    return nullptr;
 }
 
 void
@@ -534,6 +549,155 @@ UOdysseyPainterEditorRasterPaintBucketTool::OnRasterSelectionChanged()
     {
         mPaintEngine.SetMaskBlock(rasterSelection->GetBlock());
     }
+}
+
+TSharedPtr<::ULIS::FBlock>
+UOdysseyPainterEditorRasterPaintBucketTool::GetCurrentLayerBlock() const
+{
+    UOdysseyLayerStack* layerStack = GetEditor()->LayerStack();
+    if (!layerStack)
+        return nullptr;
+
+    TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(layerStack->GetWidth(), layerStack->GetHeight(), layerStack->GetFormat());
+    TSharedPtr<IOdysseyImageRenderer> renderer = layerStack->CurrentLayer->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, GetEditor()->GetCurrentFrame());
+    renderer->Init();
+
+    FOdysseyImageRendererCopyParams params(block, { block->Rect() });
+    renderer->Copy(params, {});
+
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(layerStack->GetFormat());
+    ctx.Finish();
+
+    return block;
+}
+
+TSharedPtr<::ULIS::FBlock>
+UOdysseyPainterEditorRasterPaintBucketTool::GetForegroundLayersBlock() const
+{
+    UOdysseyLayerStack* layerStack = GetEditor()->LayerStack();
+    if (!layerStack)
+        return nullptr;
+
+    TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(layerStack->GetWidth(), layerStack->GetHeight(), layerStack->GetFormat());
+    TArray<FOdysseyImageRenderingAbility*> layersToExclude = GetForegroundLayersToExclude(layerStack->CurrentLayer);
+    FImageRendererFilter filter = FImageRendererFilter::CreateLambda(
+        [layersToExclude](const FOdysseyImageRenderingAbility* iRenderingAbility)
+        {
+            return !layersToExclude.Contains(iRenderingAbility);
+        }
+    );
+
+    TSharedPtr<IOdysseyImageRenderer> renderer = layerStack->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, GetEditor()->GetCurrentFrame(), filter);
+    if (!renderer)
+        return nullptr;
+
+    renderer->Init();
+
+    FOdysseyImageRendererCopyParams params(block, { block->Rect() });
+    renderer->Copy(params, {});
+
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(layerStack->GetFormat());
+    ctx.Finish();
+
+    return block;
+}
+
+TSharedPtr<::ULIS::FBlock>
+UOdysseyPainterEditorRasterPaintBucketTool::GetBackgroundLayersBlock() const
+{
+    UOdysseyLayerStack* layerStack = GetEditor()->LayerStack();
+    if (!layerStack)
+        return nullptr;
+
+    TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(layerStack->GetWidth(), layerStack->GetHeight(), layerStack->GetFormat());
+    TArray<FOdysseyImageRenderingAbility*> layersToExclude = GetBackgroundLayersToExclude(layerStack->CurrentLayer);
+    FImageRendererFilter filter = FImageRendererFilter::CreateLambda(
+        [layersToExclude](const FOdysseyImageRenderingAbility* iRenderingAbility) -> bool
+        {
+            return !layersToExclude.Contains(iRenderingAbility);
+        }
+    );
+
+    TSharedPtr<IOdysseyImageRenderer> renderer = layerStack->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, GetEditor()->GetCurrentFrame(), filter);
+    if (!renderer)
+        return nullptr;
+
+    renderer->Init();
+    FOdysseyImageRendererCopyParams params(block, { block->Rect() });
+    renderer->Copy(params, {});
+
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(layerStack->GetFormat());
+    ctx.Finish();
+
+    return block;
+}
+
+TSharedPtr<::ULIS::FBlock>
+UOdysseyPainterEditorRasterPaintBucketTool::GetAllLayersBlock() const
+{
+    UOdysseyLayerStack* layerStack = GetEditor()->LayerStack();
+    if (!layerStack)
+        return nullptr;
+
+    TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(layerStack->GetWidth(), layerStack->GetHeight(), layerStack->GetFormat());
+    TSharedPtr<IOdysseyImageRenderer> renderer = layerStack->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, GetEditor()->GetCurrentFrame());
+    renderer->Init();
+    FOdysseyImageRendererCopyParams params(block, { block->Rect() });
+    renderer->Copy(params, {});
+
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(layerStack->GetFormat());
+    ctx.Finish();
+
+    return block;
+}
+
+TArray<FOdysseyImageRenderingAbility*>
+UOdysseyPainterEditorRasterPaintBucketTool::GetBackgroundLayersToExclude(UOdysseyLayer* iLayer) const
+{
+    TArray<FOdysseyImageRenderingAbility*> resultLayers;
+
+    UOdysseyLayerStack* layerStack = GetEditor()->LayerStack();
+    if (!layerStack)
+        return resultLayers;
+
+    TArray<UOdysseyLayer*> layers = layerStack->GetLayers();
+    for( int i = 0; i < layers.Num(); i++ )
+    {
+        if (iLayer->IsChildOf(layers[i]) && (iLayer->GetParent() != layers[i] || iLayer->GetIndexInParent() != layers[i]->GetChildren().Num() - 1))
+            continue;
+
+        if (iLayer->IsChildOf(layers[i]))
+            continue;
+
+        resultLayers.Add(layers[i]);
+
+        if (layers[i] == iLayer)
+            break;
+    }
+
+    return resultLayers;
+}
+
+TArray<FOdysseyImageRenderingAbility*>
+UOdysseyPainterEditorRasterPaintBucketTool::GetForegroundLayersToExclude(UOdysseyLayer* iLayer) const
+{
+    TArray<FOdysseyImageRenderingAbility*> resultLayers;
+
+    UOdysseyLayerStack* layerStack = GetEditor()->LayerStack();
+    if (!layerStack)
+        return resultLayers;
+
+    TArray<UOdysseyLayer*> layers = layerStack->GetLayers();
+
+    for( int i = layers.Num() - 1; i >= 0; i-- )
+    {
+        resultLayers.Add(layers[i]);
+
+        if (layers[i] == iLayer)
+            break;
+    }
+
+    return resultLayers;
 }
 
 #undef LOCTEXT_NAMESPACE

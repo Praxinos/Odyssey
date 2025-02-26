@@ -4,8 +4,10 @@
 #include "OdysseyPainterEditorStandaloneToolkit.h"
 
 #include "OdysseyAnimation.h"
+#include "OdysseyAnimationEditorSource.h"
 #include "OdysseyPainterEditorModule.h"
 #include "OdysseyPainterEditor.h"
+#include "OdysseyTextureEditorSource.h"
 
 #include "Engine/Texture2D.h"
 #include "PaperFlipbook.h"
@@ -66,7 +68,7 @@ FOdysseyPainterEditorStandaloneToolkit::Open()
         mEditor->ExtendAssetEditorToolbar( ToolBar );
     }
 
-    FAssetEditorToolkit::InitAssetEditor( EToolkitMode::Standalone, NULL, mAppIdentifier, mEditor->CreateLayout(), true, true, editedObjects);
+    FAssetEditorToolkit::InitAssetEditor( EToolkitMode::Standalone, NULL, mAppIdentifier, mEditor->CreateLayout(mLayoutName), true, true, editedObjects);
 
     //Add Odyssey Specific section to the main menu to add entries at the right place easier
     UToolMenu* fileMenu = UToolMenus::Get()->ExtendMenu(*(GetToolMenuName().ToString() + FString(".File")));
@@ -102,6 +104,20 @@ FOdysseyPainterEditorStandaloneToolkit::Open()
         }
     );
     RegenerateMenusAndToolbars();
+
+    if (mEditedObject->IsA<UOdysseyAnimation>())
+    {
+        TSharedPtr<FOdysseyAnimationEditorSource> source = MakeShared<FOdysseyAnimationEditorSource>(Cast<UOdysseyAnimation>(mEditedObject));
+        mEditor->SetSource(source);
+    }
+    else if (mEditedObject->IsA<UTexture2D>())
+    {
+        TSharedPtr<FOdysseyTextureEditorSource> source = MakeShared<FOdysseyTextureEditorSource>(Cast<UTexture2D>(mEditedObject));
+        mEditor->SetSource(source);
+    }
+    else if (mEditedObject->IsA<UPaperFlipbook>())
+    {
+    }
 }
 
 //--------------------------------------------------------------------------------------

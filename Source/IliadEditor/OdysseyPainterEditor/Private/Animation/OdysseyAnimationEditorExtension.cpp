@@ -12,7 +12,6 @@
 #include "OdysseyLayer.h"
 #include "OdysseyPainterEditor.h"
 #include "Shortcuts/Global/OdysseyAnimationGlobalShortcuts.h"
-#include "Tools/RasterPaintBucketTool/OdysseyAnimationEditorRasterPaintBucketToolSourceProvider.h"
 #include "Tools/OutOfPegsTool/OdysseyAnimationEditorOutOfPegsTool.h"
 #include "HUD/OdysseyVectorHUD.h"
 #include "Tools/RasterPaintBucketTool/OdysseyPainterEditorRasterPaintBucketTool.h"
@@ -112,8 +111,6 @@ FOdysseyAnimationEditorExtension::OnSourceChanged()
 
     GetEditor()->GetBrushContexts().Add(mLayerStackBrushEditorContext.Get());
     mLayerStackBrushEditorContext->SetLayerStack(mAnimationSource->GetLayerStack());
-
-    ConfigureTools();
 }
 
 //--------------------------------------------------------------------------------------
@@ -209,12 +206,6 @@ FOdysseyAnimationEditorExtension::OnCurrentFrameChanged(UOdysseyAnimation* iAnim
     GetEditor()->SanitizeCurrentTool();
 }
 
-void
-FOdysseyAnimationEditorExtension::ConfigureTools()
-{
-    TSharedPtr<FOdysseyAnimationEditorRasterPaintBucketToolSourceProvider> provider = MakeShared<FOdysseyAnimationEditorRasterPaintBucketToolSourceProvider>(this);
-    GetEditor()->GetRasterPaintBucketTool()->SetSourceProvider(provider);
-}//--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Getters
 
 UOdysseyAnimationEditorOutOfPegsTool*

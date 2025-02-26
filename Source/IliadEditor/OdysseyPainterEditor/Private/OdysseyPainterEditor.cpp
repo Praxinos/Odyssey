@@ -7,6 +7,7 @@
 #include "Tools/OdysseyPainterEditorTool.h"
 #include "ObjectEditorUtils.h"
 
+#include "OdysseyAnimation.h"
 #include "OdysseyBlockClipboardData.h"
 #include "OdysseyEditorModule.h"
 #include "OdysseyPainterEditorSource.h"
@@ -82,6 +83,8 @@
 #include "Shortcuts/Global/OdysseyPainterEditorGlobalToolsShortcuts.h"
 #include "Mesh/FOdysseyMeshSelector.h"
 #include "OdysseyPainterEditorSource.h"
+#include "OdysseyAnimationEditorSource.h"
+#include "OdysseyTextureEditorSource.h"
 #include "OdysseyPainterEditorRasterSelection.h"
 #include "Toolkits/BaseToolkit.h"
 #include "Framework/Commands/GenericCommands.h"
@@ -161,6 +164,10 @@ FOdysseyPainterEditor::Initialize()
     GetShortcuts().Add(MakeShared<FOdysseyLayerStackGlobalShortcuts>(layerStackAttr));
     GetShortcuts().Add(MakeShared<FOdysseyPainterEditorGlobalToolsShortcuts>(this));
     GetShortcuts().Add(MakeShared<FOdysseyPainterEditorGlobalShortcuts>(this));
+
+    SetVectorHUDFlags( FOdysseyVectorHUD::HUD_MODE_OBJECT
+        | FOdysseyVectorHUD::HUD_MODE_OBJECT_ALLOWED
+        | FOdysseyVectorHUD::HUD_MODE_VERTEX_ALLOWED );
 
     //Init the extensions
     for (TSharedPtr<FOdysseyPainterEditorExtension> extension : mExtensions)
@@ -291,9 +298,9 @@ FOdysseyPainterEditor::RemoveEditedObject(UObject* iObject)
 }
 
 TSharedRef<FTabManager::FLayout>
-FOdysseyPainterEditor::CreateLayout()
+FOdysseyPainterEditor::CreateLayout(const FName& iLayoutName)
 {
-    FOdysseyEditorLayoutBuilder builder(mLayoutName);
+    FOdysseyEditorLayoutBuilder builder(iLayoutName);
     mGUI->BuildLayout(builder);
 
     for (TSharedPtr<FOdysseyPainterEditorExtension> extension : mExtensions)
@@ -955,6 +962,28 @@ TSharedPtr<FOdysseyMeshSelector>
 FOdysseyPainterEditor::GetMeshSelector() const
 {
     return mMeshSelector;
+}
+
+int
+FOdysseyPainterEditor::GetCurrentFrame() const
+{
+    if (!mSource)
+        return INDEX_NONE;
+
+    if (mSource->Id() == FOdysseyTextureEditorSource::StaticId() )
+        return 0;
+
+    if (mSource->Id() == FOdysseyAnimationEditorSource::StaticId() )
+    {
+        TSharedPtr<FOdysseyAnimationEditorSource> animationSource = StaticCastSharedPtr<FOdysseyAnimationEditorSource>(mSource);
+        UOdysseyAnimation* animation = animationSource->GetAnimation();
+        if (!animation)
+            return INDEX_NONE;
+
+        return animation->CurrentFrame;
+    }
+
+    return INDEX_NONE;
 }
 
 //--------------------------------------------------------------------------------------

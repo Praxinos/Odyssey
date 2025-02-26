@@ -38,6 +38,11 @@ public:
     ~UOdysseyTextureLayerStack();
     UOdysseyTextureLayerStack();
 
+public:
+    virtual int GetWidth() const override;
+    virtual int GetHeight() const override;
+    virtual ::ULIS::eFormat  GetFormat() const override;
+
     virtual void PostLoad() override;
 
 public:

@@ -25,8 +25,6 @@
 #include "Misc/MessageDialog.h"
 
 #include "OdysseyViewportDrawingEditorToolkit.h"
-//#include "OdysseyViewportDrawingEditorPainter.h"
-#include "OdysseyTextureEditorExtension.h"
 #include "Adapters/IOdysseyViewportDrawingEditorAdapter.h"
 
 #include "UObject/UObjectGlobals.h"

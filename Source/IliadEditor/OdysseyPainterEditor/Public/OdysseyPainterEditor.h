@@ -101,7 +101,7 @@ public:
 public:
     // Overridable Methods
     void Initialize();
-    TSharedRef<FTabManager::FLayout> CreateLayout();
+    TSharedRef<FTabManager::FLayout> CreateLayout(const FName& iLayoutName);
     void BindShortcuts(FBaseToolkit* iToolkit);
     void ExtendMenu( TSharedRef<FExtender> iExtender );
     void ExtendLevelEditorToolbar( UToolMenu* iToolbar );
@@ -212,6 +212,7 @@ public:
     virtual FOdysseyMediaProvider                            GetCurrentMediaProvider();
     virtual UOdysseyLayerStack*                              LayerStack() const;
     virtual TSharedPtr<FOdysseyPainterEditorRasterSelection> RasterSelection();
+    int GetCurrentFrame() const;
 
     const TArray<TSharedPtr<FOdysseyPainterEditorPaletteSet>>& GetPaletteSets() const;
     //const FOdysseyPainterEditorPaletteEntryColor& GetPaletteCurrentColorEntry() const;
@@ -344,7 +345,6 @@ protected:
     FSimpleDelegate mOnRegenerateToolbarAndMenus;
 
     FOdysseyEditorShortcuts mShortcuts;
-    FName                                    mLayoutName;
     TSharedPtr<FTabManager::FLayout>         mLayout;
     static TSharedPtr<::ULIS::FBlock>        mCopyBlock; // Pixel block in clipboard (ctrl + c, ctrl + v)
     FRenderCommandFence mPixelFence;

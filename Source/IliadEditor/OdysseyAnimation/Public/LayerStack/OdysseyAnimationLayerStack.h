@@ -23,6 +23,11 @@ public:
     UOdysseyAnimationLayerStack();
 
 public:
+    virtual int GetWidth() const override;
+    virtual int GetHeight() const override;
+    virtual ::ULIS::eFormat  GetFormat() const override;
+
+public:
     UFUNCTION(BlueprintPure, Category="Odyssey|LayerStack")
     UOdysseyAnimation* GetAnimation() const;
 

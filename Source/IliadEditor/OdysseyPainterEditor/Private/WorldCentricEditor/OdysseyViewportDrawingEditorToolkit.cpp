@@ -8,7 +8,6 @@
 #include "LevelEditor.h"
 #include "Widgets/SOdysseyViewportDrawingEditorMasterTab.h"
 #include "OdysseyAnimationEditorExtension.h"
-#include "OdysseyTextureEditorExtension.h"
 #include "Interfaces/IMainFrameModule.h"
 #include "OdysseyViewportDrawingEditorExtension.h"
 #include "Toolkits/AssetEditorModeUILayer.h"
@@ -48,11 +47,9 @@ FOdysseyViewportDrawingEditorToolkit::Initialize(
 {
     mEditor = MakeShared<FOdysseyPainterEditor>(SharedThis(this));
 
-    TSharedRef<FOdysseyTextureEditorExtension> textureExtension = MakeShared<FOdysseyTextureEditorExtension>(mEditor.Get());
     mAnimationExtension = MakeShared<FOdysseyAnimationEditorExtension>(mEditor.Get());
     mViewportDrawingExtension = MakeShared<FOdysseyViewportDrawingEditorExtension>(mEditor.Get());
 
-    mEditor->AddExtension(textureExtension);
     mEditor->AddExtension(mAnimationExtension.ToSharedRef());
     mEditor->AddExtension(mViewportDrawingExtension.ToSharedRef());
 

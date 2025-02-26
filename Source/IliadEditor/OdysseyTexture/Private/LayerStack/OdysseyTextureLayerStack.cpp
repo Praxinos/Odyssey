@@ -94,6 +94,36 @@ UOdysseyTextureLayerStack::PostLoad()
         mInvalidTileMap = FULISInvalidTileMap(64, texture->Source.GetSizeX(), texture->Source.GetSizeY());
 }
 
+int
+UOdysseyTextureLayerStack::GetWidth() const
+{
+    UTexture2D* texture = GetTexture();
+    if (!texture)
+        return Super::GetWidth();
+
+    return texture->GetSizeX();
+}
+
+int
+UOdysseyTextureLayerStack::GetHeight() const
+{
+    UTexture2D* texture = GetTexture();
+    if (!texture)
+        return Super::GetHeight();
+
+    return texture->GetSizeY();
+}
+
+::ULIS::eFormat
+UOdysseyTextureLayerStack::GetFormat() const
+{
+    UTexture2D* texture = GetTexture();
+    if (!texture)
+        return Super::GetFormat();
+
+    return ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
+}
+
 UTexture2D*
 UOdysseyTextureLayerStack::GetTexture() const
 {
