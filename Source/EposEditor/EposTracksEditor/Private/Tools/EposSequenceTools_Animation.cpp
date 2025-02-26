@@ -85,37 +85,39 @@ ShotSequenceTools::SpawnAnimation( UWorld* iWorld, ACineCameraActor* iCamera, fl
     if( !scaling_component )
         return nullptr;
 
-    scaling_component->SafeMargin = iSafeMargin;
-    scaling_component->RelativeScaling = iRelativeScaling;
+    scaling_component->SetSafeMargin( iSafeMargin );
+    scaling_component->SetRelativeScaling( iRelativeScaling );
 
-    //---
+    scaling_component->UpdateToCamera( iCamera, iFocusDistance );
 
-    FTransform camera_transform = iCamera->GetRootComponent()->GetComponentTransform();
+    ////---
 
-    FVector const CamLocation = camera_transform.GetLocation();
-    FVector const CamDir = camera_transform.GetRotation().Vector();
-    FRotator const CamRot = camera_transform.Rotator();
+    //FTransform camera_transform = iCamera->GetRootComponent()->GetComponentTransform();
 
-    //-
+    //FVector const CamLocation = camera_transform.GetLocation();
+    //FVector const CamDir = camera_transform.GetRotation().Vector();
+    //FRotator const CamRot = camera_transform.Rotator();
 
-    FVector animation_location = CamLocation + CamDir * iFocusDistance;
-    animation_location = FindNextFreeAnimationLocation( iWorld, animation_location, CamLocation );
+    ////-
 
-    FVector camera_view_size = scaling_component->ComputeSizeOfCameraView( iCamera, iFocusDistance );
-    camera_view_size.X = FMath::Min( camera_view_size.X, camera_view_size.Y );
-    camera_view_size.Y = FMath::Min( camera_view_size.X, camera_view_size.Y );
-    FVector animation_scale = scaling_component->ComputeScaleWithScaleAndMargin( camera_view_size );
+    //FVector animation_location = CamLocation + CamDir * iFocusDistance;
+    //animation_location = FindNextFreeAnimationLocation( iWorld, animation_location, CamLocation );
 
-    FRotator animation_rotator = CamRot;
+    //FVector camera_view_size = scaling_component->ComputeSizeOfCameraView( iCamera, iFocusDistance );
+    //camera_view_size.X = FMath::Min( camera_view_size.X, camera_view_size.Y );
+    //camera_view_size.Y = FMath::Min( camera_view_size.X, camera_view_size.Y );
+    //FVector animation_scale = scaling_component->ComputeScaleWithScaleAndMargin( camera_view_size );
 
-    //---
+    //FRotator animation_rotator = CamRot;
 
-    animation->SetActorScale3D( animation_scale );
-    animation->SetActorLocation( animation_location );
-    //animation->SetActorRotation( FRotator( 0.f, 90.f, 90.f ) ); // Done during actor creation
-    animation->AddActorWorldRotation( animation_rotator );
+    ////---
 
-    //animation->AttachToActor( iCamera, FAttachmentTransformRules::KeepRelativeTransform ); // Done in the editor with GEditor->ParentActors();
+    //animation->SetActorScale3D( animation_scale );
+    //animation->SetActorLocation( animation_location );
+    ////animation->SetActorRotation( FRotator( 0.f, 90.f, 90.f ) ); // Done during actor creation
+    //animation->AddActorWorldRotation( animation_rotator );
+
+    ////animation->AttachToActor( iCamera, FAttachmentTransformRules::KeepRelativeTransform ); // Done in the editor with GEditor->ParentActors();
 
     return animation;
 }

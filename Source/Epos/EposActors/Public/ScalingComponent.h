@@ -24,13 +24,29 @@ public:
 
     virtual FIntPoint ComputeTextureSize( const FVector& iCameraViewSize, int32 iTextureHeight ) const;
 
-public:
-    /** Get the margin as percent (0.1 for 10%) */
-    virtual float GetSafeMargin() const;
-    /** Get the relative scaling as percent (1. for 100%) */
-    virtual FVector2D GetRelativeScaling() const;
+    virtual void UpdateToCamera( const ACineCameraActor* iCamera, float iDistance );
 
 public:
+    /** Set the margin as percent (10. for 10%) */
+    virtual void SetSafeMargin( float iMargin );
+    /** Get the margin as percent (10. for 10%) */
+    virtual float GetSafeMargin() const;
+    /** Set the relative scaling as percent (100. for 100%) */
+    virtual void SetRelativeScaling( FVector2D iRelativeScaling );
+    /** Get the relative scaling as percent (100. for 100%) */
+    virtual FVector2D GetRelativeScaling() const;
+
+private:
+    /** Get the margin as percent (0.1 for 10%) */
+    virtual float GetSafeMarginNormalized() const;
+    /** Get the relative scaling as percent (1. for 100%) */
+    virtual FVector2D GetRelativeScalingNormalized() const;
+
+    virtual void UpdateToCamera();
+
+    virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
+
+private:
     /** This will make the actor bigger than the original size viewed by the camera by adding a margin to the actor */
     UPROPERTY( EditAnywhere, Category="Scaling", meta=(UIMin="0", ClampMin="0", UIMax="200", ClampMax="200", Units=Percent) )
     float SafeMargin = 0.f;
@@ -42,4 +58,7 @@ public:
       */
     UPROPERTY( EditAnywhere, Category="Scaling", meta=(AllowPreserveRatio) )
     FVector2D RelativeScaling = { 100.f, 100.f };
+
+    UPROPERTY()
+    TWeakObjectPtr<const ACineCameraActor> Camera;
 };
