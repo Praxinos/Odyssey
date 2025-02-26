@@ -8,6 +8,12 @@
 #include "OdysseyFlipbookFactory.generated.h"
 
 UCLASS()
+class UOdysseyFlipbook : public UObject
+{
+    GENERATED_BODY()
+};
+
+UCLASS()
 class UOdysseyFlipbookFactory : public UPaperFlipbookFactory
 {
     GENERATED_UCLASS_BODY()

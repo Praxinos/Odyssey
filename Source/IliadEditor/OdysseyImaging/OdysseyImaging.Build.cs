@@ -27,7 +27,6 @@ public class OdysseyImaging : ModuleRules
                 "Core",
                 "CoreUObject",
                 "DerivedDataCache",
-                "Engine",
                 "ImageCore",
                 "Paper2D",
                 "Paper2DEditor",
@@ -40,16 +39,18 @@ public class OdysseyImaging : ModuleRules
 
                 "OdysseyCore",
                 "OdysseyFile",
-                "OdysseyMaths",
-                "OdysseyVector",
-                "blend2d",
+                "OdysseyMaths"
              }
         );
 
         PublicDependencyModuleNames.AddRange(
              new string[] {
+                "Engine",
+                "blend2d",
                 "ULIS",
-                "ULISLoader"
+                "ULISLoader",
+
+                "OdysseyVector",
              }
         );
 

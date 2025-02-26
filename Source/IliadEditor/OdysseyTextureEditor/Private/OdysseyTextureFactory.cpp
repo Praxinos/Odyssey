@@ -4,12 +4,11 @@
 #include "OdysseyTextureFactory.h"
 
 #include "Editor.h"
-#include "EditorStyleSet.h"
 #include "Engine/Texture2D.h"
 
 #include "ULISLoaderModule.h"
 #include "OdysseySurfaceTexture2DEditable.h"
-#include "Widgets/SOdysseyTextureConfigureWindow.h"
+#include "Texture/SOdysseyTextureConfigureWindow.h"
 
 #include <ULIS>
 

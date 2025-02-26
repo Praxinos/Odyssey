@@ -7,8 +7,7 @@
 #include "IContentBrowserSingleton.h"
 #include "Interfaces/ITextureEditorModule.h"
 #include "OdysseyPainterEditorModule.h"
-#include "Settings/OdysseyTextureEditorSettings.h"
-#include "OdysseyTexture.h"
+#include "OdysseyTextureEditorSettings.h"
 #include "OdysseyStyle.h"
 
 #define LOCTEXT_NAMESPACE "TextureEditor"

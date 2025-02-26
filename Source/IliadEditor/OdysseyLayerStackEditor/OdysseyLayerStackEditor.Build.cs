@@ -24,7 +24,9 @@ public class OdysseyLayerStackEditor : ModuleRules
 
         PublicDependencyModuleNames.AddRange(
             new string[] {
+                "OdysseyCore",
                 "OdysseyMedia",
+                "OdysseyImaging",
             }
         );
 
@@ -43,10 +45,8 @@ public class OdysseyLayerStackEditor : ModuleRules
                 "ToolMenus",
                 "ToolWidgets",
 
-                "OdysseyCore",
                 "OdysseyBrush",
                 "OdysseyEditor",
-                "OdysseyImaging",
                 "OdysseyMaths",
                 "OdysseyStyle",
 

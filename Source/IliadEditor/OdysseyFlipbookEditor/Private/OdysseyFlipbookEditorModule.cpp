@@ -3,19 +3,13 @@
 
 #include "OdysseyFlipbookEditorModule.h"
 
-#include "TextureEditor/OdysseyTextureEditorExtension.h"
-#include "FlipbookEditor/OdysseyFlipbookEditorExtension.h"
-#include "ISettingsModule.h"
-#include "FlipbookEditor/OdysseyFlipbookEditorGUI.h"
-#include "LevelEditor.h"
-#include "OdysseyFlipbookContentBrowserExtensions.h"
 #include "AssetToolsModule.h"
+#include "ISettingsModule.h"
 #include "PaperFlipbook.h"
+
 #include "OdysseyFlipbookAssetTypeActions.h"
+#include "OdysseyFlipbookContentBrowserExtensions.h"
 #include "OdysseyFlipbookEditorSettings.h"
-#include "PaperSprite.h"
-#include "OdysseyPainterEditor.h"
-#include "Models/OdysseyFlipbookEditorCommands.h"
 
 #define LOCTEXT_NAMESPACE "FlipbookEditor"
 
@@ -26,18 +20,9 @@
 void
 FOdysseyFlipbookEditorModule::StartupModule()
 {
-    mOdysseyTypeActions = nullptr;
-    mUETypeActions = nullptr;
-
     // Register Assets Types Actions once the main loop is initialized
     // see here : https://udn.unrealengine.com/s/question/0D54z00007DVU5KCAX/two-assettypeactions-for-the-same-type-force-priority-
     FCoreDelegates::OnFEngineLoopInitComplete.AddRaw(this, &FOdysseyFlipbookEditorModule::RegisterAssetTypeActions);
-
-    // Register Commands
-    RegisterCommands();
-
-    // Register Settings
-    RegisterSettings();
 
     // Install Content Browser Extionsion Hooks
     if (!IsRunningCommandlet())
@@ -45,7 +30,7 @@ FOdysseyFlipbookEditorModule::StartupModule()
         FOdysseyFlipbookContentBrowserExtensions::InstallHooks();
     }
 
-    RegisterLevelEditorLayoutExtensions();
+    RegisterSettings();
 }
 
 void
@@ -57,16 +42,13 @@ FOdysseyFlipbookEditorModule::ShutdownModule()
     // Uninstall Content Browser Extionsion Hooks
     FOdysseyFlipbookContentBrowserExtensions::RemoveHooks();
 
-    // Unregister Settings
-    UnregisterSettings();
-
-    // Unregister Commands
-    UnregisterCommands();
-
     // Unregister Assets Type Actions
     UnregisterAssetTypeActions();
 
-    UnregisterLevelEditorLayoutExtensions();
+    UnregisterSettings();
+
+    mOdysseyTypeActions = nullptr;
+    mUETypeActions = nullptr;
 }
 
 void
@@ -115,13 +97,14 @@ void
 FOdysseyFlipbookEditorModule::RegisterSettings()
 {
     ISettingsModule* settingsModule = FModuleManager::GetModulePtr<ISettingsModule>( "Settings" );
+
     if( !settingsModule )
         return;
 
     settingsModule->RegisterSettings( "Editor", "Plugins", "OdysseyFlipbookEditor"
-                                        , LOCTEXT( "settings.name", "Odyssey Flipbook Editor" )
-                                        , LOCTEXT( "settings.tooltip", "Configure the look and feel of the Odyssey Editor." )
-                                        , GetMutableDefault<UOdysseyFlipbookEditorSettings>() );
+        , LOCTEXT( "settings.name", "Odyssey Flipbook Editor" )
+        , LOCTEXT( "settings.tooltip", "Configure the look and feel of the Odyssey Editor." )
+        , GetMutableDefault<UOdysseyFlipbookEditorSettings>() );
 }
 
 void
@@ -207,32 +190,6 @@ FOdysseyFlipbookEditorModule::CreateOdysseyFlipbookEditor( TArray<UPaperFlipbook
         flipbookExtension->SetFlipbook(Flipbook);
     }
 } */
-
-void
-FOdysseyFlipbookEditorModule::RegisterCommands()
-{
-    FOdysseyFlipbookEditorCommands::Register();
-}
-
-void
-FOdysseyFlipbookEditorModule::UnregisterCommands()
-{
-    FOdysseyFlipbookEditorCommands::Unregister();
-}
-
-void
-FOdysseyFlipbookEditorModule::RegisterLevelEditorLayoutExtensions()
-{
-    FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor");
-    mExtendLevelEditorLayout = LevelEditorModule.OnRegisterLayoutExtensions().AddStatic(&FOdysseyFlipbookEditorGUI::ExtendLevelEditorLayout);
-}
-
-void
-FOdysseyFlipbookEditorModule::UnregisterLevelEditorLayoutExtensions()
-{
-    FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor");
-    LevelEditorModule.OnRegisterLayoutExtensions().Remove(mExtendLevelEditorLayout);
-}
 
 IMPLEMENT_MODULE( FOdysseyFlipbookEditorModule, OdysseyFlipbookEditor );
 

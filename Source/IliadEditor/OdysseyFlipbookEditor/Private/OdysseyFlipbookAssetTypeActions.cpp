@@ -4,11 +4,6 @@
 #include "OdysseyFlipbookAssetTypeActions.h"
 
 #include "PaperFlipbook.h"
-#include "ContentBrowserModule.h"
-#include "IContentBrowserSingleton.h"
-#include "OdysseyFlipbook.h"
-#include "OdysseyFlipbookWrapper.h"
-#include "OdysseyPainterEditorSettings.h"
 #include "OdysseyPainterEditorModule.h"
 
 #define LOCTEXT_NAMESPACE "FlipbookEditor"

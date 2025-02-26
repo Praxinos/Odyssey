@@ -41,7 +41,12 @@ public class OdysseyPainterEditor : ModuleRules
                 "EditorWidgets",
                 "InputCore",
                 "LevelEditor",
+                "MediaAssets",
+                "MediaPlate",
+                "MeshPaint",
+                "MovieScene",
                 "Paper2D",
+                "Paper2DEditor",
                 "PropertyEditor",
                 "Projects",
                 "RHI",
@@ -49,11 +54,14 @@ public class OdysseyPainterEditor : ModuleRules
                 "RawMesh",
                 "Slate",
                 "SlateCore",
+                "Sequencer",
                 "ToolMenus",
                 "ToolWidgets",
                 "UnrealEd",
+                "ViewportInteraction",
 
                 "OdysseyAnimation",
+                "OdysseyAnimationTracks",
                 "OdysseyCore",
                 "OdysseyHUD",
                 "OdysseyImaging",
@@ -61,6 +69,7 @@ public class OdysseyPainterEditor : ModuleRules
                 "OdysseyMaths",
                 "OdysseyStyle",
                 "OdysseyStylusInput",
+                "OdysseyTexture",
                 "OdysseyVector",
                 "OdysseyWidgets",
 
@@ -84,22 +93,46 @@ public class OdysseyPainterEditor : ModuleRules
 
         PrivateIncludePaths.AddRange(
             new string[] {
-                Path.Combine(ModuleDirectory, "Private", "Models"),
                 Path.Combine(ModuleDirectory, "Private", "Animation"),
+                Path.Combine(ModuleDirectory, "Private", "BrushContext"),
+                Path.Combine(ModuleDirectory, "Private", "Flipbook"),
+                Path.Combine(ModuleDirectory, "Private", "Models"),
+                Path.Combine(ModuleDirectory, "Private", "PaintEngine"),
                 Path.Combine(ModuleDirectory, "Private", "PainterEditor"),
                 Path.Combine(ModuleDirectory, "Private", "Settings"),
-                Path.Combine(ModuleDirectory, "Private", "Tools"),
                 Path.Combine(ModuleDirectory, "Private", "Shapes"),
+                Path.Combine(ModuleDirectory, "Private", "Shortcuts"),
+                Path.Combine(ModuleDirectory, "Private", "StandaloneEditor"),
+                Path.Combine(ModuleDirectory, "Private", "Texture"),
+                Path.Combine(ModuleDirectory, "Private", "Tools"),
+                Path.Combine(ModuleDirectory, "Private", "Widgets"),
+                Path.Combine(ModuleDirectory, "Private", "Widgets", "Animation"),
+                Path.Combine(ModuleDirectory, "Private", "Widgets", "Brush"),
+                Path.Combine(ModuleDirectory, "Private", "Widgets", "Color"),
+                Path.Combine(ModuleDirectory, "Private", "Widgets", "Flipbook"),
+                Path.Combine(ModuleDirectory, "Private", "Widgets", "Palette"),
+                Path.Combine(ModuleDirectory, "Private", "Widgets", "Tab"),
+                Path.Combine(ModuleDirectory, "Private", "Widgets", "Texture"),
+                Path.Combine(ModuleDirectory, "Private", "Widgets", "Tools"),
+                Path.Combine(ModuleDirectory, "Private", "WorldCentricEditor"),
             }
         );
 
         PublicIncludePaths.AddRange(
             new string[] {
                 Path.Combine(ModuleDirectory, "Public", "Animation"),
+                Path.Combine(ModuleDirectory, "Public", "BrushContext"),
+                Path.Combine(ModuleDirectory, "Public", "Models"),
+                Path.Combine(ModuleDirectory, "Public", "PaintEngine"),
                 Path.Combine(ModuleDirectory, "Public", "PainterEditor"),
                 Path.Combine(ModuleDirectory, "Public", "Settings"),
-                Path.Combine(ModuleDirectory, "Public", "Tools"),
                 Path.Combine(ModuleDirectory, "Public", "Shapes"),
+                Path.Combine(ModuleDirectory, "Public", "Texture"),
+                Path.Combine(ModuleDirectory, "Public", "Tools"),
+                Path.Combine(ModuleDirectory, "Public", "Widgets"),
+                Path.Combine(ModuleDirectory, "Public", "Widgets", "Animation"),
+                Path.Combine(ModuleDirectory, "Public", "Widgets", "Tab"),
+                Path.Combine(ModuleDirectory, "Public", "WorldCentricEditor"),
             }
         );
 

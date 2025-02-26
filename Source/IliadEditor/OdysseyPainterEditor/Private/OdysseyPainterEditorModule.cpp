@@ -21,6 +21,10 @@
 #include "FreehandShape/OdysseyFreehandShapeOverrides.h"
 #include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingToolOverrides.h"
 #include "ActorFactories/ActorFactory.h"
+#include "EditorModeRegistry.h"
+#include "OdysseyViewportDrawingEditorEdMode.h"
+#include "Interfaces/IPluginManager.h"
+#include "OdysseyViewportDrawingEditorCommands.h"
 
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
 #include "LayerStack/Cells/OdysseyAnimationCellThumbnailRenderer.h"
@@ -30,6 +34,10 @@
 #include "OdysseyAnimationEditorProjectSettings.h"
 #include "OdysseyAnimationEditorUserSettings.h"
 #include "OdysseyAnimationEditorCommands.h"
+#include "Texture/OdysseyTextureEditorCommands.h"
+#include "Texture/OdysseyTextureEditorGUI.h"
+#include "Flipbook/OdysseyFlipbookEditorCommands.h"
+#include "Flipbook/OdysseyFlipbookEditorGUI.h"
 #include "Tools/OutOfPegsTool/OdysseyAnimationEditorOutOfPegsTool.h"
 #include "StandaloneEditor/OdysseyPainterEditorStandaloneToolkit.h"
 
@@ -73,6 +81,9 @@ FOdysseyPainterEditorModule::StartupModule()
     RegisterLevelEditorLayoutExtensions();
     RegisterDetailCustomizations();
     RegisterThumbnailRenderers();
+    RegisterEditorMode();
+    RegisterShaders();
+    RegisterPropertyModuleCustomizations();
 
     FOdysseyVectorBrushCustomization::Register();
     FOdysseyVectorObjectViewPaletteCustomization::Register();
@@ -87,6 +98,9 @@ FOdysseyPainterEditorModule::ShutdownModule()
     UnregisterLevelEditorLayoutExtensions();
     UnregisterDetailCustomization();
     UnregisterThumbnailRenderers();
+    UnregisterEditorMode();
+    UnregisterShaders();
+    UnregisterPropertyModuleCustomizations();
 
     FOdysseyVectorBrushCustomization::Unregister();
     FOdysseyVectorObjectViewPaletteCustomization::Unregister();
@@ -100,6 +114,55 @@ FOdysseyPainterEditorModule::ShutdownModule()
 }
 
 void
+FOdysseyPainterEditorModule::RegisterEditorMode()
+{
+    FEditorModeRegistry::Get().RegisterMode<FOdysseyViewportDrawingEditorEdMode>(
+        FOdysseyViewportDrawingEditorEdMode::EM_OdysseyViewportDrawingEditorEdModeId,
+        LOCTEXT("editor-mode.name", "Odyssey"),
+        FSlateIcon(FOdysseyStyle::GetStyleSetName(), "OdysseyViewportDrawingEditMode.OdysseyViewportDrawingIcon40", "OdysseyViewportDrawingEditMode.OdysseyViewportDrawingIcon16"),
+        true, 200 );
+}
+
+void
+FOdysseyPainterEditorModule::UnregisterEditorMode()
+{
+    FEditorModeRegistry::Get().UnregisterMode(FOdysseyViewportDrawingEditorEdMode::EM_OdysseyViewportDrawingEditorEdModeId);
+}
+
+void
+FOdysseyPainterEditorModule::RegisterShaders()
+{
+    FString PluginShaderDir = FPaths::Combine(IPluginManager::Get().FindPlugin(TEXT("Odyssey"))->GetBaseDir(),TEXT("Shaders"));
+    AddShaderSourceDirectoryMapping(TEXT("/Plugin/Odyssey"),PluginShaderDir);
+}
+
+void
+FOdysseyPainterEditorModule::RegisterPropertyModuleCustomizations()
+{
+    /** Register detail/property customization */
+    FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
+    FModuleManager::Get().LoadModule("MeshPaint");
+}
+
+void
+FOdysseyPainterEditorModule::UnregisterPropertyModuleCustomizations()
+{
+    /** De-register detail/property customization */
+    FPropertyEditorModule* PropertyModule = FModuleManager::GetModulePtr<FPropertyEditorModule>("PropertyEditor");
+    if (PropertyModule)
+    {
+        PropertyModule->UnregisterCustomClassLayout("OdysseyViewportDrawingEditorSettings");
+        PropertyModule->UnregisterCustomPropertyTypeLayout("OdysseyViewportDrawingEditorTexturePaintSettings");
+    }
+}
+
+void
+FOdysseyPainterEditorModule::UnregisterShaders()
+{
+    //No method available to unregister Shaders directories
+}
+
+void
 FOdysseyPainterEditorModule::RegisterSettings()
 {
     ISettingsModule* settingsModule = FModuleManager::GetModulePtr<ISettingsModule>( "Settings" );
@@ -108,19 +171,19 @@ FOdysseyPainterEditorModule::RegisterSettings()
         return;
 
     settingsModule->RegisterSettings( "Editor", "Plugins", "OdysseyPainterEditor"
-                                        , LOCTEXT( "settings.name", "Odyssey Painter Editor" )
-                                        , LOCTEXT( "settings.tooltip", "Configure the look and feel of the Odyssey Editor." )
-                                        , GetMutableDefault<UOdysseyPainterEditorSettings>() );
+        , LOCTEXT( "settings.name", "Odyssey Painter Editor" )
+        , LOCTEXT( "settings.tooltip", "Configure the look and feel of the Odyssey Editor." )
+        , GetMutableDefault<UOdysseyPainterEditorSettings>() );
 
     settingsModule->RegisterSettings( "Project", "Plugins", "OdysseyAnimationEditor"
-                                        , LOCTEXT( "settings.name", "2D Animation Editor" )
-                                        , LOCTEXT( "settings.tooltip", "Configure the look and feel of the 2D Animation Editor." )
-                                        , GetMutableDefault<UOdysseyAnimationEditorProjectSettings>() );
+        , LOCTEXT( "settings.name", "2D Animation Editor" )
+        , LOCTEXT( "settings.tooltip", "Configure the look and feel of the 2D Animation Editor." )
+        , GetMutableDefault<UOdysseyAnimationEditorProjectSettings>() );
 
     settingsModule->RegisterSettings( "Editor", "Plugins", "OdysseyAnimationEditorUserSettings"
-                                        , LOCTEXT( "settings.name", "2D Animation Editor" )
-                                        , LOCTEXT( "settings.tooltip", "Configure the look and feel of the 2D Animation Editor." )
-                                        , GetMutableDefault<UOdysseyAnimationEditorUserSettings>() );
+        , LOCTEXT( "settings.name", "2D Animation Editor" )
+        , LOCTEXT( "settings.tooltip", "Configure the look and feel of the 2D Animation Editor." )
+        , GetMutableDefault<UOdysseyAnimationEditorUserSettings>() );
 }
 
 void
@@ -141,6 +204,9 @@ FOdysseyPainterEditorModule::RegisterCommands()
 {
     FOdysseyPainterEditorCommands::Register();
     FOdysseyAnimationEditorCommands::Register();
+    FOdysseyTextureEditorCommands::Register();
+    FOdysseyFlipbookEditorCommands::Register();
+    FOdysseyViewportDrawingEditorCommands::Register();
 }
 
 void
@@ -148,6 +214,9 @@ FOdysseyPainterEditorModule::UnregisterCommands()
 {
     FOdysseyPainterEditorCommands::Unregister();
     FOdysseyAnimationEditorCommands::Unregister();
+    FOdysseyTextureEditorCommands::Unregister();
+    FOdysseyFlipbookEditorCommands::Unregister();
+    FOdysseyViewportDrawingEditorCommands::Unregister();
 }
 
 void
@@ -183,6 +252,8 @@ FOdysseyPainterEditorModule::RegisterLevelEditorLayoutExtensions()
     FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor");
     mExtendLevelEditorLayout = LevelEditorModule.OnRegisterLayoutExtensions().AddStatic(&FOdysseyPainterEditorGUI::ExtendLevelEditorLayout);
     mAnimationExtendLevelEditorLayout = LevelEditorModule.OnRegisterLayoutExtensions().AddStatic(&FOdysseyAnimationEditorGUI::ExtendLevelEditorLayout);
+    mTextureExtendLevelEditorLayout = LevelEditorModule.OnRegisterLayoutExtensions().AddStatic(&FOdysseyTextureEditorGUI::ExtendLevelEditorLayout);
+    mFlipbookExtendLevelEditorLayout = LevelEditorModule.OnRegisterLayoutExtensions().AddStatic(&FOdysseyFlipbookEditorGUI::ExtendLevelEditorLayout);
 }
 
 void
@@ -191,6 +262,8 @@ FOdysseyPainterEditorModule::UnregisterLevelEditorLayoutExtensions()
     FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor");
     LevelEditorModule.OnRegisterLayoutExtensions().Remove(mExtendLevelEditorLayout);
     LevelEditorModule.OnRegisterLayoutExtensions().Remove(mAnimationExtendLevelEditorLayout);
+    LevelEditorModule.OnRegisterLayoutExtensions().Remove(mTextureExtendLevelEditorLayout);
+    LevelEditorModule.OnRegisterLayoutExtensions().Remove(mFlipbookExtendLevelEditorLayout);
 }
 
 void

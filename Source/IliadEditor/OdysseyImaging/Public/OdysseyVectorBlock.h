@@ -11,7 +11,6 @@
 #include "OdysseyVectorEngine.h"
 
 class FOdysseyVectorCell;
-class FOdysseyVectorEngine;
 class FOdysseyVectorGroupPaint;
 
 class ODYSSEYIMAGING_API FOdysseyVectorBlock : public TSharedFromThis<FOdysseyVectorBlock>

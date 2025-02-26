@@ -22,23 +22,11 @@ private:
     void RegisterAssetTypeActions();
     void UnregisterAssetTypeActions();
 
-    //Settings
+    // Settings
     void RegisterSettings();
     void UnregisterSettings();
-
-    //Commands
-    void RegisterCommands();
-    void UnregisterCommands();
-
-    //Level Editor Layout
-    void RegisterLevelEditorLayoutExtensions();
-    void UnregisterLevelEditorLayoutExtensions();
 
 private:
     /** All created asset type actions. Cached here so that we can unregister them during shutdown. */
     TSharedPtr<IAssetTypeActions> mOdysseyTypeActions;
-    FDelegateHandle mExtendLevelEditorLayout;
-
-    /** Holds the menu extensibility manager. */
-    TSharedPtr<FExtensibilityManager> mMenuExtensibilityManager;
 };

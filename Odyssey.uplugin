@@ -199,12 +199,12 @@
             "LoadingPhase": "Default"
         },
         {
-            "Name": "OdysseyTextureEditor",
+            "Name": "OdysseyTexture",
             "Type": "Editor",
             "LoadingPhase": "Default"
         },
         {
-            "Name": "OdysseyViewportDrawingEditor",
+            "Name": "OdysseyTextureEditor",
             "Type": "Editor",
             "LoadingPhase": "Default"
         },

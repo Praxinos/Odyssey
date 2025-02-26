@@ -7,7 +7,7 @@
 #include "Factories/Factory.h"
 #include "Templates/SubclassOf.h"
 #include "UObject/ObjectMacros.h"
-#include "Widgets/SOdysseyTextureConfigureWindow.h"
+#include "Texture/SOdysseyTextureConfigureWindow.h"
 
 #include "OdysseyTextureFactory.generated.h"
 
