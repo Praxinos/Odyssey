@@ -44,6 +44,8 @@ public:
         SLATE_EVENT(FSimpleDelegate, OnInactivateOutOfPegs)
         SLATE_EVENT(SOdysseyAnimationTimelineOutOfPegsKey::FOnIsOutOfPegsChecked, OnIsOutOfPegsChecked)
         SLATE_ATTRIBUTE(FOdysseyPainterEditor*, PainterEditor)
+        SLATE_EVENT(FSimpleDelegate, OnScrubStart)
+        SLATE_EVENT(FSimpleDelegate, OnScrubEnd)
     SLATE_END_ARGS()
 
 public:
@@ -87,4 +89,6 @@ private:
     TSharedPtr<SScrollBar> mTimelineScrollBarV;
     TSharedPtr<SSplitter> mSplitter;
     TAttribute<FOdysseyPainterEditor*> mEditor;
+    FSimpleDelegate mOnScrubStart;
+    FSimpleDelegate mOnScrubEnd;
 };

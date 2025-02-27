@@ -20,6 +20,8 @@ public:
         SLATE_ARGUMENT( UOdysseyAnimation*, Animation )
         SLATE_ARGUMENT( UOdysseyAnimationPlayer*, Player )
         SLATE_ARGUMENT( TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition>, TimelinePosition )
+        SLATE_EVENT(FSimpleDelegate, OnScrubStart)
+        SLATE_EVENT(FSimpleDelegate, OnScrubEnd)
     SLATE_END_ARGS()
 
     void Construct(const FArguments& InArgs);
@@ -41,4 +43,7 @@ private:
     TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition> mTimelinePosition;
 
     bool mIsScrubbing = false;
+    FSimpleDelegate mOnScrubStart;
+
+    FSimpleDelegate mOnScrubEnd;
 };

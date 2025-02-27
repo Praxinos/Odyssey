@@ -43,6 +43,8 @@ SOdysseyAnimationTimelineTreeView::Construct(const FArguments& InArgs)
                 .Animation(mLayerStack->GetAnimation())
                 .Player(mPlayer)
                 .TimelinePosition(mTimelinePosition)
+                .OnScrubStart(InArgs._OnScrubStart)
+                .OnScrubEnd(InArgs._OnScrubEnd)
             ]
         ]
     };

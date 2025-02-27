@@ -84,6 +84,7 @@ public:
     virtual TSharedPtr<FOdysseyHUDElement> GetHUD();
     virtual EMouseCursor::Type GetMouseCursor() const;
     virtual void DrawHUD(const FOdysseyHUD::FDrawHUDParams& iParams);
+    virtual bool IsHUDVisible() const;
 
     virtual bool SupportsColorType(EOdysseyPainterEditorColorType iType);
 

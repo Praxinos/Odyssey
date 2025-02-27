@@ -57,6 +57,8 @@ SOdysseyAnimationLayerStack::Construct(const FArguments& InArgs)
     mOnIsOutOfPegsChecked = InArgs._OnIsOutOfPegsChecked;
     mCustomValidRange = InArgs._CustomValidRange;
     mEditor = InArgs._PainterEditor;
+    mOnScrubStart = InArgs._OnScrubStart;
+    mOnScrubEnd = InArgs._OnScrubEnd;
 
     RebuildWidgets();
 }
@@ -144,6 +146,8 @@ SOdysseyAnimationLayerStack::RebuildWidgets()
                     .OnIsOutOfPegsChecked(mOnIsOutOfPegsChecked)
                     .ExternalScrollbar(dummyScrollBar)
                     .OnTreeViewScrolled(this, &SOdysseyAnimationLayerStack::OnTimelineTreeViewScrolled)
+                    .OnScrubStart(mOnScrubStart)
+                    .OnScrubEnd(mOnScrubEnd)
                 ]
             ]
             + SHorizontalBox::Slot()

@@ -70,6 +70,8 @@ private:
     void OnActivateOutOfPegs(UOdysseyAnimationCell* iCell);
     void OnInactivateOutOfPegs();
     ECheckBoxState OnIsOutOfPegsChecked(UOdysseyAnimationCell* iCell);
+    void OnScrubStart();
+    void OnScrubEnd();
 
 private:
     FOdysseyPainterEditor* mEditor;

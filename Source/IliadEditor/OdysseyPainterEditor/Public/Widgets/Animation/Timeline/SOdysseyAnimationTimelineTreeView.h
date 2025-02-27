@@ -26,15 +26,17 @@ public:
         , _ExternalScrollbar(nullptr)
         , _PainterEditor(nullptr)
         {}
+        SLATE_ATTRIBUTE(FOdysseyPainterEditor*, PainterEditor)
         SLATE_ARGUMENT( UOdysseyAnimationLayerStack*, LayerStack )
         SLATE_ARGUMENT( UOdysseyAnimationPlayer*, Player )
         SLATE_ARGUMENT( TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition>, TimelinePosition )
+        SLATE_ARGUMENT( TSharedPtr<SScrollBar>, ExternalScrollbar )
         SLATE_EVENT(FOnActivateOutOfPegs, OnActivateOutOfPegs)
         SLATE_EVENT(FSimpleDelegate, OnInactivateOutOfPegs)
         SLATE_EVENT(FOnIsOutOfPegsChecked, OnIsOutOfPegsChecked)
-        SLATE_ARGUMENT( TSharedPtr<SScrollBar>, ExternalScrollbar )
         SLATE_EVENT( FOnTableViewScrolled, OnTreeViewScrolled )
-        SLATE_ATTRIBUTE(FOdysseyPainterEditor*, PainterEditor)
+        SLATE_EVENT(FSimpleDelegate, OnScrubStart)
+        SLATE_EVENT(FSimpleDelegate, OnScrubEnd)
     SLATE_END_ARGS()
 
 public:

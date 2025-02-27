@@ -10,6 +10,7 @@
 #include "OdysseyHUD.h"
 #include "Misc/OdysseyUndoDelegates.h"
 #include "OdysseyPainterEditorToolInputProcessor.h"
+#include "OdysseyAnimationPlayer.h"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
@@ -22,6 +23,7 @@ UOdysseyPainterEditorTool::UOdysseyPainterEditorTool()
     , mIsActivated(false)
 {
     mHUD = MakeShared<FOdysseyHUDElement>();
+    mHUD->SetIsVisible(MakeAttributeUObject(this, &UOdysseyPainterEditorTool::IsHUDVisible));
     mInputProcessor = MakeShared<FOdysseyPainterEditorToolInputProcessor>(this);
 }
 
@@ -209,7 +211,16 @@ UOdysseyPainterEditorTool::DrawHUD(const FOdysseyHUD::FDrawHUDParams& iParams)
 {
     TSharedPtr<FOdysseyHUDElement> hud = GetHUD();
     if (hud)
-        hud->DrawHUD(iParams);
+        hud->Draw(iParams);
+}
+
+bool
+UOdysseyPainterEditorTool::IsHUDVisible() const
+{
+    UOdysseyAnimationPlayer* player = mEditor->GetAnimationPlayer();
+    if (player && player->Status == EOdysseyAnimationPlayerStatus::Playing)
+        return false;
+    return !mEditor->GetAnimationTimelineIsScrubbing();
 }
 
 EMouseCursor::Type UOdysseyPainterEditorTool::GetMouseCursor() const

@@ -33,6 +33,6 @@ FOdysseyHUD::DrawHUD( const FDrawHUDParams& iParams )
 {
     for (TSharedPtr<FOdysseyHUDElement> element : mElements)
     {
-        element->DrawHUD(iParams);
+        element->Draw(iParams);
     }
 }

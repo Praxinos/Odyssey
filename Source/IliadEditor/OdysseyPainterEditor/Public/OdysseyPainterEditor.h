@@ -228,6 +228,8 @@ public:
     UOdysseyAnimationPlayer*                                 GetAnimationPlayer() const;
     TSharedPtr<FOdysseyPainterEditorAnimationFlipSystem>            GetAnimationFlipSystem() const;
     TSharedRef<FOdysseyPainterEditorAnimationTimelinePosition>      GetAnimationTimelinePosition();
+    void SetAnimationTimelineIsScrubbing(bool iIsScrubbing);
+    bool GetAnimationTimelineIsScrubbing() const;
     EOdysseyPainterEditorColorType                           GetColorType() const;
     virtual FOdysseyMediaProvider                            GetCurrentMediaProvider();
     virtual UOdysseyLayerStack*                              LayerStack() const;
@@ -431,6 +433,7 @@ protected:
     int mCurrentPaletteSet = 0;
     TSharedPtr<FOdysseyPainterEditorAnimationFlipSystem> mAnimationFlipSystem;
     TArray<FGuid> mImageRenderingComposition;
+    bool mAnimationTimelineIsScrubbing = false;
 };
 
 template <class T>

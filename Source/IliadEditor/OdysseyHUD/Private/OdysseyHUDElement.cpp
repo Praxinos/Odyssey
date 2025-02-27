@@ -12,14 +12,25 @@ FOdysseyHUDElement::~FOdysseyHUDElement()
 
 FOdysseyHUDElement::FOdysseyHUDElement()
     : mIsCaptured( false )
+    , mIsVisible(true)
 {
+}
+
+void
+FOdysseyHUDElement::Draw(const FOdysseyHUD::FDrawHUDParams& iParams)
+{
+    if (!IsVisible())
+        return;
+
+    DrawHUD(iParams);
+
+    for (TSharedPtr<FOdysseyHUDElement> element : mElements)
+        element->Draw(iParams);
 }
 
 void
 FOdysseyHUDElement::DrawHUD(const FOdysseyHUD::FDrawHUDParams& iParams)
 {
-    for (TSharedPtr<FOdysseyHUDElement> element : mElements)
-        element->DrawHUD(iParams);
 }
 
 void FOdysseyHUDElement::AddElement(TSharedPtr<FOdysseyHUDElement> iElementToAdd)
@@ -49,6 +60,18 @@ bool FOdysseyHUDElement::IsCaptured() const
 void FOdysseyHUDElement::Capture(bool iCapture)
 {
     mIsCaptured = iCapture;
+}
+
+bool
+FOdysseyHUDElement::IsVisible() const
+{
+    return mIsVisible.Get();
+}
+
+void
+FOdysseyHUDElement::SetIsVisible(TAttribute<bool> iIsVisible)
+{
+    mIsVisible = iIsVisible;
 }
 
 bool

@@ -24,7 +24,7 @@ public:
     FOdysseyHUDElement();
 
 public:
-    virtual void DrawHUD(const FOdysseyHUD::FDrawHUDParams& iParams);
+    void Draw(const FOdysseyHUD::FDrawHUDParams& iParams);
 
 public:
     //HitProxy version
@@ -45,6 +45,12 @@ public:
     bool IsCaptured() const;
     void Capture(bool iCapture);
 
+    bool IsVisible() const;
+    void SetIsVisible(TAttribute<bool> iIsVisible);
+
+protected:
+    virtual void DrawHUD(const FOdysseyHUD::FDrawHUDParams& iParams);
+
 protected:
     // FGCObject implementation
     virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
@@ -55,6 +61,7 @@ private:
 
     /** If this element is captured by mouse or keyboard shortcut, then the associated viewport shouldn't do anything else than manipulating this HUD */
     bool mIsCaptured;
+    TAttribute<bool> mIsVisible;
 };
 
 struct ODYSSEYHUD_API HOdysseyHUDElementHitProxy : public HHitProxy

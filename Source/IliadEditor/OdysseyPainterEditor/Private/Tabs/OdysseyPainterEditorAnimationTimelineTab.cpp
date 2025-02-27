@@ -85,6 +85,8 @@ FOdysseyPainterEditorAnimationTimelineTab::CreateWidget()
             .OnInactivateOutOfPegs(this, &FOdysseyPainterEditorAnimationTimelineTab::OnInactivateOutOfPegs)
             .OnIsOutOfPegsChecked(this, &FOdysseyPainterEditorAnimationTimelineTab::OnIsOutOfPegsChecked)
             .CustomValidRange(this, &FOdysseyPainterEditorAnimationTimelineTab::GetAnimationValidRange)
+            .OnScrubStart(this, &FOdysseyPainterEditorAnimationTimelineTab::OnScrubStart)
+            .OnScrubEnd(this, &FOdysseyPainterEditorAnimationTimelineTab::OnScrubEnd)
         ]
         +SWidgetSwitcher::Slot()
         [
@@ -143,6 +145,18 @@ TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition>
 FOdysseyPainterEditorAnimationTimelineTab::GetTimelinePosition() const
 {
     return mEditor->GetAnimationTimelinePosition();
+}
+
+void
+FOdysseyPainterEditorAnimationTimelineTab::OnScrubStart()
+{
+    mEditor->SetAnimationTimelineIsScrubbing(true);
+}
+
+void
+FOdysseyPainterEditorAnimationTimelineTab::OnScrubEnd()
+{
+    mEditor->SetAnimationTimelineIsScrubbing(false);
 }
 
 //--------------------------------------------------------------------------------------

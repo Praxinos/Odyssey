@@ -22,6 +22,8 @@ SOdysseyAnimationTimelineHeader::Construct(const FArguments& InArgs)
     mAnimation = InArgs._Animation;
     mPlayer = InArgs._Player;
     mTimelinePosition = InArgs._TimelinePosition;
+    mOnScrubStart = InArgs._OnScrubStart;
+    mOnScrubEnd = InArgs._OnScrubEnd;
 
     ChildSlot
     [
@@ -126,6 +128,7 @@ SOdysseyAnimationTimelineHeader::OnMouseButtonDown(const FGeometry& MyGeometry, 
     if (mPlayer && !mIsScrubbing && MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
     {
         mIsScrubbing = true;
+        mOnScrubStart.ExecuteIfBound();
 
         const float minScrub = 0.0f;
         float posX = MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()).X;
@@ -163,6 +166,8 @@ SOdysseyAnimationTimelineHeader::OnMouseButtonUp(const FGeometry& MyGeometry, co
 {
     if (mPlayer && mIsScrubbing)
     {
+        mOnScrubEnd.ExecuteIfBound();
+
         const float minScrub = 0.0f;
         float posX = MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()).X;
         float frame = MousePositionToFrame(posX);
