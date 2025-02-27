@@ -890,7 +890,7 @@ FOdysseyPainterEditor::PaintColor() const
 UOdysseyAnimation*
 FOdysseyPainterEditor::GetAnimation() const
 {
-    if (!mSource && mSource->Id() != FOdysseyPainterEditorAnimationSource::StaticId() )
+    if (!mSource || mSource->Id() != FOdysseyPainterEditorAnimationSource::StaticId() )
         return nullptr;
 
 
@@ -901,7 +901,7 @@ FOdysseyPainterEditor::GetAnimation() const
 UOdysseyAnimationPlayer*
 FOdysseyPainterEditor::GetAnimationPlayer() const
 {
-    if (!mSource && mSource->Id() != FOdysseyPainterEditorAnimationSource::StaticId() )
+    if (!mSource || mSource->Id() != FOdysseyPainterEditorAnimationSource::StaticId() )
         return nullptr;
 
 
@@ -1190,7 +1190,7 @@ FOdysseyPainterEditor::SetSource(TSharedPtr<FOdysseyPainterEditorSource> iSource
     }
 
     //Is the source an animation
-    if (mSource && mSource->Id() != FOdysseyPainterEditorAnimationSource::StaticId())
+    if (mSource && mSource->Id() == FOdysseyPainterEditorAnimationSource::StaticId())
     {
         TSharedPtr<FOdysseyPainterEditorAnimationSource> animSource = StaticCastSharedPtr<FOdysseyPainterEditorAnimationSource>(mSource);
         UOdysseyAnimation* animation = animSource->GetAnimation();

@@ -187,8 +187,8 @@ UOdysseyAnimationComponent::AnimationChanged()
         {
             float scaleW = (float)Animation->GetWidth() / (float)Animation->GetHeight();
             SetRelativeScale3D(FVector(scaleW, 1, 1));
-            MarkRenderStateDirty();
         }
+        MarkRenderStateDirty();
     }
 }
 
@@ -285,8 +285,16 @@ UOdysseyAnimationComponent::RefreshMaterialTexture()
         return;
 
     UTexture* texture = player->GetTexture();
+    if (texture)
+    {
+        materialInstance->SetTextureParameterValueEditorOnly(FMaterialParameterInfo("AnimationTexture"), texture);
+    }
+    else
+    {
+        //Needed because SetTextureParameterValueEditorOnly does nothing if texture is nullptr
+        materialInstance->ClearParameterValuesEditorOnly();
+    }
 
-    materialInstance->SetTextureParameterValueEditorOnly(FMaterialParameterInfo("AnimationTexture"), texture);
     materialInstance->PostEditChange();
 
     FMaterialUpdateContext UpdateContext(FMaterialUpdateContext::EOptions::Default, GMaxRHIShaderPlatform);

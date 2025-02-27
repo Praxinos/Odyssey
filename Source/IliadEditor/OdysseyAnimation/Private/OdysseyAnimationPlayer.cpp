@@ -399,6 +399,7 @@ UOdysseyAnimationPlayer::AnimationChanged()
     if (!Animation)
     {
         Texture = nullptr;
+        mRenderer = nullptr;
         return;
     }
 

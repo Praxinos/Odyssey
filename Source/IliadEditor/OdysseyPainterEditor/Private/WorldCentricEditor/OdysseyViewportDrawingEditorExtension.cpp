@@ -461,12 +461,12 @@ FOdysseyViewportDrawingEditorExtension::SetTextureInternal(UTexture* iTexture)
         }
         else
         {
-        UTexture2D* texture = Cast<UTexture2D>(mTexture);
+            UTexture2D* texture = Cast<UTexture2D>(mTexture);
 
-        //TODO: change the texture for display
+            //TODO: change the texture for display
 
-        TSharedPtr<FOdysseyPainterEditorTextureSource> source = MakeShared<FOdysseyPainterEditorTextureSource>(texture);
-        mEditor->SetSource(source);
+            TSharedPtr<FOdysseyPainterEditorTextureSource> source = MakeShared<FOdysseyPainterEditorTextureSource>(texture);
+            mEditor->SetSource(source);
         }
     }
 
