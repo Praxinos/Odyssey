@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Calque_1" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 64 64">
+  <!-- Generator: Adobe Illustrator 29.3.0, SVG Export Plug-In . SVG Version: 2.1.0 Build 146)  -->
+  <defs>
+    <style>
+      .st0 {
+        stroke: #00a998;
+      }
+
+      .st0, .st1 {
+        fill: none;
+        stroke-miterlimit: 10;
+        stroke-width: 6px;
+      }
+
+      .st2 {
+        fill: url(#Dégradé_sans_nom_4);
+      }
+
+      .st1 {
+        stroke: #d0d0d0;
+      }
+    </style>
+    <linearGradient id="Dégradé_sans_nom_4" data-name="Dégradé sans nom 4" x1="0" y1="32" x2="64" y2="32" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff" stop-opacity="0"/>
+      <stop offset="1" stop-color="#0a9"/>
+    </linearGradient>
+  </defs>
+  <rect class="st2" x="0" y="0" width="64" height="64" rx="32" ry="32" transform="translate(32 -13.3) rotate(45)"/>
+  <g id="Calque_11" data-name="Calque_1">
+    <line class="st0" x1="14.8" y1="15.2" x2="49.4" y2="49.8"/>
+  </g>
+  <rect class="st1" x="3" y="3" width="14" height="14"/>
+  <rect class="st1" x="47" y="46.8" width="14" height="14"/>
+</svg>

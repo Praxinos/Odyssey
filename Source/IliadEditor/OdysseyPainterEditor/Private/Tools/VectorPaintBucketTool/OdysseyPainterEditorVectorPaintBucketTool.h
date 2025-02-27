@@ -27,7 +27,8 @@ UENUM()
 enum class eVectorPaintBucketEditionMode : uint8
 {
     Default = 0,
-    Control = 1
+    Control = 1,
+    Remove = 2
 };
 
 UCLASS()

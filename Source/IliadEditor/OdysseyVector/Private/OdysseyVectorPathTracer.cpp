@@ -7,15 +7,10 @@
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorLayer.h"
 #include "OdysseyVectorCell.h"
+#include "OdysseyVector.h"
 
 FOdysseyVectorPathTracer::~FOdysseyVectorPathTracer()
 {
-    mBLContext.end();
-
-    if( mBLImage )
-    {
-        delete mBLImage;
-    }
 }
 
 FOdysseyVectorPathTracer::FOdysseyVectorPathTracer()
@@ -29,8 +24,6 @@ FOdysseyVectorPathTracer::FOdysseyVectorPathTracer()
     mPointArray.reserve(100);
     mRecordArray.reserve(100);
     mEdgeArray.reserve(100);
-
-    mBLContext.setCompOp( BL_COMP_OP_SRC_COPY );
 }
 
 void
@@ -48,25 +41,6 @@ FOdysseyVectorPathTracer::SetDotLimit( double iDotLimit )
 void
 FOdysseyVectorPathTracer::Init( FOdysseyVectorGroupPaint* iScene )
 {
-    BLImageData imageData;
-
-    mWidth = iScene->GetLayer()->GetWidth();
-    mHeight = iScene->GetLayer()->GetHeight();
-
-    if( mBLImage )
-    {
-        delete mBLImage;
-    }
-
-    mBLImage = new BLImage( mWidth, mHeight, BL_FORMAT_A8 );
-
-    mBLImage->getData( &imageData );
-
-    mPixelData = (uint8*)imageData.pixelData;
-
-    mBLContext.begin( *mBLImage );
-    mBLContext.clearAll();
-
     Reset();
 }
 
@@ -276,53 +250,41 @@ FOdysseyVectorPathTracer::AdjustBezierHandle( ::ULIS::FVec2D iBezier[4]
 bool
 FOdysseyVectorPathTracer::TestBezier( ::ULIS::FVec2D iBezier[4] )
 {
-    if( ( fabs( iBezier[0].x - iBezier[1].x ) < 1.0f )
-     && ( fabs( iBezier[0].x - iBezier[2].x ) < 1.0f )
-     && ( fabs( iBezier[0].x - iBezier[3].x ) < 1.0f )
-     && ( fabs( iBezier[0].y - iBezier[1].y ) < 1.0f )
-     && ( fabs( iBezier[0].y - iBezier[2].y ) < 1.0f )
-     && ( fabs( iBezier[0].y - iBezier[3].y ) < 1.0f ) )
+    // take 3 sample points are check how far they are from the edges
+    ::ULIS::FVec2D samples[3] = { ::ULIS::CubicBezierPointAtParameter( iBezier[0]
+                                                                     , iBezier[1]
+                                                                     , iBezier[2]
+                                                                     , iBezier[3]
+                                                                     , 0.25f )
+                                , ::ULIS::CubicBezierPointAtParameter( iBezier[0]
+                                                                     , iBezier[1]
+                                                                     , iBezier[2]
+                                                                     , iBezier[3]
+                                                                     , 0.50f )
+                                , ::ULIS::CubicBezierPointAtParameter( iBezier[0]
+                                                                     , iBezier[1]
+                                                                     , iBezier[2]
+                                                                     , iBezier[3]
+                                                                     , 0.75f ) };
+
+    double toleranceSquared = mTracingWidth * mTracingWidth;
+
+    for( uint32 i = 0; i < 3; i++ )
     {
-        int32 x = (int)iBezier[0].x;
-        int32 y = (int)iBezier[0].y;
+        double minDistance = DBL_MAX;
 
-        if( ( x >= 0 ) && ( x < (int)mWidth ) && ( y >= 0 ) && ( y < (int)mHeight ) )
+        for( FTracerEdge& edge : mEdgeArray )
         {
-            uint32 offset = ( y * mWidth ) + x;
+            double dist;
+            double t = FOdysseyVector::DistanceToSegmentConstrained( samples[i], edge.p0, edge.p1, dist );
 
-            if ( mPixelData[offset] == 0 )
+            if( dist < minDistance )
             {
-                return false;
+                minDistance = dist;
             }
         }
-        else
-        {
-            return false;
-        }
-    }
-    else // refine
-    {
-        ::ULIS::FVec2D childBezier[2][4];
 
-        memcpy( childBezier[0], iBezier, sizeof( childBezier[0] ) );
-        memcpy( childBezier[1], iBezier, sizeof( childBezier[1] ) );
-
-        ::ULIS::CubicBezierSplitAtParameter       <::ULIS::FVec2D>( &childBezier[0][0]
-                                                                  , &childBezier[0][1]
-                                                                  , &childBezier[0][2]
-                                                                  , &childBezier[0][3]
-                                                                  , 0.5f );
-        if( TestBezier( childBezier[0] ) == false )
-        {
-            return false;
-        }
-
-        ::ULIS::CubicBezierInverseSplitAtParameter<::ULIS::FVec2D>( &childBezier[1][0]
-                                                                  , &childBezier[1][1]
-                                                                  , &childBezier[1][2]
-                                                                  , &childBezier[1][3]
-                                                                  , 0.5f );
-        if( TestBezier( childBezier[1] ) == false )
+        if( FOdysseyVector::MapVector( mCubicPath->GetWorldMatrix(), ::ULIS::FVec2D( minDistance, 0.0f ) ).DistanceSquared() > toleranceSquared )
         {
             return false;
         }
@@ -341,30 +303,6 @@ FTracerBezier&
 FOdysseyVectorPathTracer::GetRawBezier()
 {
     return mRawBezier;
-}
-
-void
-FOdysseyVectorPathTracer::TraceEdge( FTracerEdge* iEdge, double iAlpha )
-{
-    double circleRadius = mTracingWidth * 0.5f;
-
-    mBLContext.setFillAlpha( iAlpha );
-    mBLContext.setStrokeAlpha( iAlpha );
-    mBLContext.setStrokeWidth( mTracingWidth );
-
-    mBLContext.fillCircle( iEdge->p0.x, iEdge->p0.y, circleRadius );
-    mBLContext.strokeLine( iEdge->p0.x, iEdge->p0.y
-                         , iEdge->p1.x, iEdge->p1.y );
-    mBLContext.fillCircle( iEdge->p1.x, iEdge->p1.y, circleRadius );
-}
-
-void
-FOdysseyVectorPathTracer::TraceEdges( double iAlpha )
-{
-    for( int i = 0; i < mEdgeArray.size(); i++ )
-    {
-        TraceEdge( &mEdgeArray[i], iAlpha );
-    }
 }
 
 bool
@@ -458,10 +396,6 @@ FOdysseyVectorPathTracer::ClearTo( uint32 iRecordID, uint32 iEdgeID )
 
     mRecordArray = newRecordArray;
 
-    // clear edges until the one passed as parameter
-    //TraceEdges( 0.0f, 6.0f ); // erase // commented out. For some reason it does not work.
-    mBLContext.clearAll();
-
     newEdgeArray.reserve( mEdgeArray.size() );
 
     while( mEdgeArray[edgeRank++].id != iEdgeID );
@@ -472,7 +406,6 @@ FOdysseyVectorPathTracer::ClearTo( uint32 iRecordID, uint32 iEdgeID )
     }
 
     mEdgeArray = newEdgeArray;
-    TraceEdges( 1.0f ); // trace again
 }
 
 FOdysseyVectorVertex*
@@ -631,12 +564,6 @@ FOdysseyVectorPathTracer::Trace( FOdysseyVectorVertex* iPreviousVertex
                 }
             }
 
-            // draw alpha to pixel buffer
-            TraceEdge( &newEdge, 1.0f );
-
-            // unsure if useful
-            mBLContext.flush(BL_CONTEXT_FLUSH_SYNC);
-
             if( ( lastRecord->smooth == false ) && ( lastEdge != nullptr ) )
             {
                 FOdysseyVectorVertex* newVertex;
@@ -668,12 +595,6 @@ FOdysseyVectorPathTracer::Trace( FOdysseyVectorVertex* iPreviousVertex
     mPointID++;
 
     return newSegment;
-}
-
-BLImage*
-FOdysseyVectorPathTracer::GetBLImage()
-{
-    return mBLImage;
 }
 
 void

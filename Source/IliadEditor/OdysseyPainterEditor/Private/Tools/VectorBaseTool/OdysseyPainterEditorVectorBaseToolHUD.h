@@ -8,6 +8,7 @@
 #include <ULIS>
 #include "HUD/OdysseyVectorHUD.h"
 #include "OdysseyHUDElement.h"
+#include "OdysseyHUD.h"
 #include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.h"
 
 class FOdysseyVectorGroupPaint;

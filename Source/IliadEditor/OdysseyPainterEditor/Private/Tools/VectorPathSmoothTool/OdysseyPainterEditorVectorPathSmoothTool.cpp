@@ -166,25 +166,28 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDragVector( FOdysseyVectorGrou
             {
                 FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>(pickedPointArray[i]);
 
-                // record vertex and connected segments segment for undos first
-                if( mUndoSegmentReshape->HasVertex( vertex ) == false )
+                if( ( RestrictToSelectedObjects == false ) || ( vertex->GetOwnerAsPath()->IsSelected() ) )
                 {
-                    mUndoSegmentReshape->RecordVertex( vertex );
-                }
+                    // record vertex and connected segments segment for undos first
+                    if( mUndoSegmentReshape->HasVertex( vertex ) == false )
+                    {
+                        mUndoSegmentReshape->RecordVertex( vertex );
+                    }
 
-                // then sharp or smooth
-                if( SmoothingMode == ePathSmoothingMode::Sharp )
-                {
-                    FOdysseyVectorPath::SharpSegments( vertex, PreserveHandleLength );
+                    // then sharp or smooth
+                    if( SmoothingMode == ePathSmoothingMode::Sharp )
+                    {
+                        FOdysseyVectorPath::SharpSegments( vertex, PreserveHandleLength );
 
-                    vertex->SetHandleAligned( false );
-                }
+                        vertex->SetHandleAligned( false );
+                    }
 
-                if( SmoothingMode == ePathSmoothingMode::Round )
-                {
-                    FOdysseyVectorPath::SmoothSegments( vertex, PreserveHandleLength );
+                    if( SmoothingMode == ePathSmoothingMode::Round )
+                    {
+                        FOdysseyVectorPath::SmoothSegments( vertex, PreserveHandleLength );
 
-                    vertex->SetHandleAligned( true );
+                        vertex->SetHandleAligned( true );
+                    }
                 }
             }
         }

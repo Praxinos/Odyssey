@@ -10,8 +10,6 @@
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPathSmoothToolHUD : public FOdysseyPainterEditorVectorBaseToolHUD
 {
-
-
     public:
         virtual ~FOdysseyPainterEditorVectorPathSmoothToolHUD();
         FOdysseyPainterEditorVectorPathSmoothToolHUD( UOdysseyPainterEditorVectorPathSmoothTool* iPathSmoothTool );

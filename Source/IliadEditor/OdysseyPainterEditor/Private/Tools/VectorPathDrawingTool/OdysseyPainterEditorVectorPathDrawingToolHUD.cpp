@@ -229,31 +229,6 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::Draw( BLContext* iBLContext )
             DrawEdge( iBLContext, prevEdge, &edgeArray[i], nextEdge );
         }
 
-        if( mPathDrawingTool->Debug )
-        {
-            BLImage* mask = pathTracer.GetBLImage();
-
-            iBLContext->blitImage( BLPoint( 0, 0 ), *mask );
-
-            iBLContext->setStrokeStyle( BLRgba32( 255, 0, 0, 255 ) );
-            iBLContext->setStrokeWidth( 1.0f );
-            BLPath rawPath;
-            rawPath.moveTo( rawBezier.pt[0].x, rawBezier.pt[0].y );
-            rawPath.cubicTo( rawBezier.pt[1].x, rawBezier.pt[1].y
-                           , rawBezier.pt[2].x, rawBezier.pt[2].y
-                           , rawBezier.pt[3].x, rawBezier.pt[3].y );
-            iBLContext->strokePath( rawPath );
-
-            iBLContext->setStrokeStyle( BLRgba32( 0, 255, 0, 255 ) );
-            iBLContext->setStrokeWidth( 1.0f );
-            BLPath bestPath;
-            bestPath.moveTo( bestBezier.pt[0].x, bestBezier.pt[0].y );
-            bestPath.cubicTo( bestBezier.pt[1].x, bestBezier.pt[1].y
-                            , bestBezier.pt[2].x, bestBezier.pt[2].y
-                            , bestBezier.pt[3].x, bestBezier.pt[3].y );
-            iBLContext->strokePath( bestPath );
-        }
-
         iBLContext->restore();
     }
 }

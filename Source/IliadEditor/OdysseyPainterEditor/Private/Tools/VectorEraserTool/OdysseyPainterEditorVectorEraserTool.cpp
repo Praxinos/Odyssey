@@ -471,41 +471,42 @@ UOdysseyPainterEditorVectorEraserTool::CreateModifierSegmentControl()
            .SupportsEmptySelection( false )
            .SupportsMultiSelection( false )
            .IsEnabled( false ) // currently not clickable - Info only
+           .UniformPadding( FMargin( 2, 0, 2, 0 ) )
            .OnValueChanged( SSegmentedControl<eVectorEraserEditionMode>::FOnValueChanged::CreateUObject( this, &UOdysseyPainterEditorVectorEraserTool::SetEditionMode ) )
            // DEFAULT
            + SSegmentedControl<eVectorEraserEditionMode>::Slot( eVectorEraserEditionMode::Default )
-           //.Icon( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Eraser16") )
+           //.Icon( FOdysseyStyle::GetBrush( "PainterEditor.ToolsShortcuts.EraserEraseDefault20") )
            .ToolTip( LOCTEXT("vector-eraser-tool.erasure-mode.default.name", "Default") )
            [
                SNew(SBorder)
                .BorderImage_UObject( this, &UOdysseyPainterEditorVectorEraserTool::GetBackgroundColor, eVectorEraserEditionMode::Default  )
                [
                    SNew(SImage)
-                   .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Eraser16") )
+                   .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsShortcuts.EraserEraseDefault20") )
                ]
            ]
            // SHIFT
            + SSegmentedControl<eVectorEraserEditionMode>::Slot( eVectorEraserEditionMode::Section )
-           //.Icon( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Eraser16") )
+           //.Icon( FOdysseyStyle::GetBrush( "PainterEditor.ToolsShortcuts.EraserEraseToIntersection20") )
            .ToolTip( LOCTEXT("vector-eraser-tool.erasure-mode.shift.name", "Erase to intersection (SHIFT)") )
            [
                SNew(SBorder)
                .BorderImage_UObject( this, &UOdysseyPainterEditorVectorEraserTool::GetBackgroundColor, eVectorEraserEditionMode::Section  )
                [
                    SNew(SImage)
-                   .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Eraser16") )
+                   .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsShortcuts.EraserEraseToIntersection20") )
                ]
            ]
            // ALT
            + SSegmentedControl<eVectorEraserEditionMode>::Slot( eVectorEraserEditionMode::Path )
-           //.Icon( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Eraser16") )
+           //.Icon( FOdysseyStyle::GetBrush( "PainterEditor.ToolsShortcuts.EraserEraseWholePath20") )
            .ToolTip( LOCTEXT("vector-eraser-tool.erasure-mode.alt.name", "Erase whole path (ALT)") )
            [
                SNew(SBorder)
                .BorderImage_UObject( this, &UOdysseyPainterEditorVectorEraserTool::GetBackgroundColor, eVectorEraserEditionMode::Path  )
                [
                    SNew(SImage)
-                   .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Eraser16") )
+                   .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsShortcuts.EraserEraseWholePath20") )
                ]
            ];
 }

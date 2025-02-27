@@ -103,7 +103,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathTracer
         FTracerBezier& GetRawBezier();
         void AttachPath( FOdysseyVectorPath* iCubicPath );
         FOdysseyVectorPath* GetPath();
-        BLImage* GetBLImage();
         FOdysseyVectorSegment* Trace( FOdysseyVectorVertex* iStitchedVertex
                                     , double iWorldX
                                     , double iWorldY
@@ -129,8 +128,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathTracer
                                , uint32 iAt );
         ::ULIS::FVec2D GetSamplePointAtParameter( double iEdgeChainLength, double iAt );
         double GetEdgeChainLength();
-        void TraceEdges( double iAlpha );
-        void TraceEdge( FTracerEdge* iEdge, double iAlpha );
         void SetDotLimit( double iDotLimit );
         void SetTracingWidth( double iTracingWidth );
         ::ULIS::FRectD GetRedrawRect();
@@ -140,8 +137,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathTracer
         uint32 mPointID;
         double mSampleDistance;
         double mTracingWidth;
-        BLImage* mBLImage;
-        BLContext mBLContext;
         std::vector<FTracerPoint> mPointArray;
         std::vector<FTracerRecord> mRecordArray;
         std::vector<FTracerEdge> mEdgeArray;
@@ -151,5 +146,4 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathTracer
         FTracerBezier mRawBezier;
         FOdysseyVectorPath* mCubicPath;
         uint32 mWidth, mHeight;
-        uint8* mPixelData;
 };

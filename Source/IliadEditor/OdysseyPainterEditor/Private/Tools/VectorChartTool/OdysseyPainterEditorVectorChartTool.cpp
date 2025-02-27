@@ -465,22 +465,23 @@ UOdysseyPainterEditorVectorChartTool::CreateModifierSegmentControl()
            .SupportsEmptySelection( false )
            .SupportsMultiSelection( false )
            .IsEnabled( false ) // currently not clickable - Info only
+           .UniformPadding( FMargin( 2, 0, 2, 0 ) )
            .OnValueChanged( SSegmentedControl<eVectorChartEditionMode>::FOnValueChanged::CreateUObject( this, &UOdysseyPainterEditorVectorChartTool::SetEditionMode ) )
            // DEFAULT
            + SSegmentedControl<eVectorChartEditionMode>::Slot( eVectorChartEditionMode::OneByOne )
-           //.Icon( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Chart16") )
+           //.Icon( FOdysseyStyle::GetBrush( "PainterEditor.ToolsShortcuts.ChartOnyByOne20") )
            .ToolTip( LOCTEXT("vector-trajectory-tool.edition-mode.default.name", "Default") )
            [
                SNew(SBorder)
                .BorderImage_UObject( this, &UOdysseyPainterEditorVectorChartTool::GetBackgroundColor, eVectorChartEditionMode::OneByOne  )
                [
                    SNew(SImage)
-                   .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Chart16") )
+                   .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsShortcuts.ChartOnyByOne20") )
                ]
            ]
            // CTRL
            + SSegmentedControl<eVectorChartEditionMode>::Slot( eVectorChartEditionMode::Relative )
-           //.Icon( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Chart16") )
+           //.Icon( FOdysseyStyle::GetBrush( "PainterEditor.ToolsShortcuts.ChartRelative20") )
 #if PLATFORM_WINDOWS
            .ToolTip( LOCTEXT("vector-chart-tool.edition-mode.ctrl.name", "Relative (CTRL)") )
 #endif
@@ -492,36 +493,36 @@ UOdysseyPainterEditorVectorChartTool::CreateModifierSegmentControl()
                .BorderImage_UObject( this, &UOdysseyPainterEditorVectorChartTool::GetBackgroundColor, eVectorChartEditionMode::Relative  )
                [
                    SNew(SImage)
-                   .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Chart16") )
+                   .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsShortcuts.ChartRelative20") )
                ]
            ]
            // SHIFT
            + SSegmentedControl<eVectorChartEditionMode>::Slot( eVectorChartEditionMode::EaseInOrOut )
-           //.Icon( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Chart16") )
+           //.Icon( FOdysseyStyle::GetBrush( "PainterEditor.ToolsShortcuts.ChartEaseInOrOut20") )
            .ToolTip( LOCTEXT("vector-chart-tool.edition-mode.shift.name", "EaseInOrOut (SHIFT)") )
            [
                SNew(SBorder)
                .BorderImage_UObject( this, &UOdysseyPainterEditorVectorChartTool::GetBackgroundColor, eVectorChartEditionMode::EaseInOrOut  )
                [
                    SNew(SImage)
-                   .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Chart16") )
+                   .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsShortcuts.ChartEaseInOrOut20") )
                ]
            ]
            // ALT
            + SSegmentedControl<eVectorChartEditionMode>::Slot( eVectorChartEditionMode::Magnet )
-           //.Icon( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Chart16") )
+           //.Icon( FOdysseyStyle::GetBrush( "PainterEditor.ToolsShortcuts.ChartMagnet20") )
            .ToolTip( LOCTEXT("vector-chart-tool.edition-mode.alt.name", "Magnet (ALT)") )
            [
                SNew(SBorder)
                .BorderImage_UObject( this, &UOdysseyPainterEditorVectorChartTool::GetBackgroundColor, eVectorChartEditionMode::Magnet  )
                [
                    SNew(SImage)
-                   .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Chart16") )
+                   .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsShortcuts.ChartMagnet20") )
                ]
            ]
            // CTRL + SHIFT
            + SSegmentedControl<eVectorChartEditionMode>::Slot( eVectorChartEditionMode::Reshape )
-           //.Icon( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Chart16") )
+           //.Icon( FOdysseyStyle::GetBrush( "PainterEditor.ToolsShortcuts.ChartReshape20") )
 #if PLATFORM_WINDOWS
            .ToolTip( LOCTEXT("vector-chart-tool.edition-mode.alt.name", "Reshape (CTRL + SHIFT)") )
 #endif
@@ -533,7 +534,7 @@ UOdysseyPainterEditorVectorChartTool::CreateModifierSegmentControl()
                .BorderImage_UObject( this, &UOdysseyPainterEditorVectorChartTool::GetBackgroundColor, eVectorChartEditionMode::Reshape  )
                [
                    SNew(SImage)
-                   .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Chart16") )
+                   .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsShortcuts.ChartReshape20") )
                ]
            ];
 }

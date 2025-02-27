@@ -647,22 +647,23 @@ UOdysseyPainterEditorVectorTrajectoryTool::CreateModifierSegmentControl()
            .SupportsEmptySelection( false )
            .SupportsMultiSelection( false )
            .IsEnabled( false ) // currently not clickable - Info only
+           .UniformPadding( FMargin( 2, 0, 2, 0 ) )
            .OnValueChanged( SSegmentedControl<eVectorTrajectoryEditionMode>::FOnValueChanged::CreateUObject( this, &UOdysseyPainterEditorVectorTrajectoryTool::SetEditionMode ) )
            // DEFAULT
            + SSegmentedControl<eVectorTrajectoryEditionMode>::Slot( eVectorTrajectoryEditionMode::Add )
-           //.Icon( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Trajectory16") )
+           //.Icon( FOdysseyStyle::GetBrush( "PainterEditor.ToolsShortcuts.TrajectoryAdd20") )
            .ToolTip( LOCTEXT("vector-trajectory-tool.edition-mode.default.name", "Default") )
            [
                SNew(SBorder)
                .BorderImage_UObject( this, &UOdysseyPainterEditorVectorTrajectoryTool::GetBackgroundColor, eVectorTrajectoryEditionMode::Add  )
                [
                    SNew(SImage)
-                   .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Trajectory16") )
+                   .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsShortcuts.TrajectoryAdd20") )
                ]
            ]
            // CTRL
            + SSegmentedControl<eVectorTrajectoryEditionMode>::Slot( eVectorTrajectoryEditionMode::Curve )
-           //.Icon( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Trajectory16") )
+           //.Icon( FOdysseyStyle::GetBrush( "PainterEditor.ToolsShortcuts.TrajectoryEditCurve20") )
 #if PLATFORM_WINDOWS
            .ToolTip( LOCTEXT("vector-trajectory-tool.edition-mode.ctrl.name", "Curve (CTRL)") )
 #endif
@@ -674,19 +675,19 @@ UOdysseyPainterEditorVectorTrajectoryTool::CreateModifierSegmentControl()
                .BorderImage_UObject( this, &UOdysseyPainterEditorVectorTrajectoryTool::GetBackgroundColor, eVectorTrajectoryEditionMode::Curve  )
                [
                    SNew(SImage)
-                   .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Trajectory16") )
+                   .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsShortcuts.TrajectoryEditCurve20") )
                ]
            ]
            // SHIFT
            + SSegmentedControl<eVectorTrajectoryEditionMode>::Slot( eVectorTrajectoryEditionMode::Spacing )
-           //.Icon( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Trajectory16") )
+           //.Icon( FOdysseyStyle::GetBrush( "PainterEditor.ToolsShortcuts.TrajectoryEditSpacing20") )
            .ToolTip( LOCTEXT("vector-trajectory-tool.edition-mode.shift.name", "Spacing (SHIFT)") )
            [
                SNew(SBorder)
                .BorderImage_UObject( this, &UOdysseyPainterEditorVectorTrajectoryTool::GetBackgroundColor, eVectorTrajectoryEditionMode::Spacing  )
                [
                    SNew(SImage)
-                   .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Trajectory16") )
+                   .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsShortcuts.TrajectoryEditSpacing20") )
                ]
            ];
 }

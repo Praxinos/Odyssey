@@ -295,26 +295,26 @@ UOdysseyPainterEditorVectorGridTool::CreateModifierSegmentControl()
            .OnValueChanged( SSegmentedControl<eVectorGridEditionMode>::FOnValueChanged::CreateUObject( this, &UOdysseyPainterEditorVectorGridTool::SetEditionMode ) )
            // DEFAULT
            + SSegmentedControl<eVectorGridEditionMode>::Slot( eVectorGridEditionMode::Single )
-           //.Icon( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathEdit16") )
+           //.Icon( FOdysseyStyle::GetBrush( "PainterEditor.ToolsShortcuts.GridSingleSelection20") )
            .ToolTip( LOCTEXT("vector-grid-tool.edition-mode.default.name", "Single-selection") )
            [
                SNew(SBorder)
                .BorderImage_UObject( this, &UOdysseyPainterEditorVectorGridTool::GetBackgroundColor, eVectorGridEditionMode::Single  )
                [
                    SNew(SImage)
-                   .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathEdit16") )
+                   .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsShortcuts.GridSingleSelection20") )
                ]
            ]
            // SHIFT
            + SSegmentedControl<eVectorGridEditionMode>::Slot( eVectorGridEditionMode::Multi )
-           //.Icon( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathEdit16") )
+           //.Icon( FOdysseyStyle::GetBrush( "PainterEditor.ToolsShortcuts.GridMultipleSelection20") )
            .ToolTip( LOCTEXT("vector-grid-tool.edition-mode.shift.name", "Multi-selection (SHIFT)") )
            [
                SNew(SBorder)
                .BorderImage_UObject( this, &UOdysseyPainterEditorVectorGridTool::GetBackgroundColor, eVectorGridEditionMode::Multi  )
                [
                    SNew(SImage)
-                   .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathEdit16") )
+                   .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsShortcuts.GridMultipleSelection20") )
                ]
            ];
 }

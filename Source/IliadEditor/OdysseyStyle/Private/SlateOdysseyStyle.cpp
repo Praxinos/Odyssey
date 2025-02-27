@@ -488,6 +488,22 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "PainterEditor.ToolsShortcuts.PathEditDeformSegment20", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/path_edit_tool_deform_segment", mIcon20x20 ) );
     Set( "PainterEditor.ToolsShortcuts.PathEditMoveVertex20", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/path_edit_tool_move_vertex", mIcon20x20 ) );
     Set( "PainterEditor.ToolsShortcuts.PathEditWidenVertex20", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/path_edit_tool_widen_vertex", mIcon20x20 ) );
+    Set( "PainterEditor.ToolsShortcuts.EraserEraseDefault20", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/eraser_tool_erase_default", mIcon20x20 ) );
+    Set( "PainterEditor.ToolsShortcuts.EraserEraseToIntersection20", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/eraser_tool_erase_to_intersection", mIcon20x20 ) );
+    Set( "PainterEditor.ToolsShortcuts.EraserEraseWholePath20", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/eraser_tool_erase_whole_path", mIcon20x20 ) );
+    Set( "PainterEditor.ToolsShortcuts.TrajectoryAdd20", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/trajectory_tool_add", mIcon20x20 ) );
+    Set( "PainterEditor.ToolsShortcuts.TrajectoryEditCurve20", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/trajectory_tool_edit_curve", mIcon20x20 ) );
+    Set( "PainterEditor.ToolsShortcuts.TrajectoryEditSpacing20", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/trajectory_tool_edit_spacing", mIcon20x20 ) );
+    Set( "PainterEditor.ToolsShortcuts.ChartOnyByOne20", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/chart_tool_one_by_one", mIcon20x20 ) );
+    Set( "PainterEditor.ToolsShortcuts.ChartRelative20", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/chart_tool_relative", mIcon20x20 ) );
+    Set( "PainterEditor.ToolsShortcuts.ChartEaseInOrOut20", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/chart_tool_ease_in_or_out", mIcon20x20 ) );
+    Set( "PainterEditor.ToolsShortcuts.ChartMagnet20", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/chart_tool_magnet", mIcon20x20 ) );
+    Set( "PainterEditor.ToolsShortcuts.ChartReshape20", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/chart_tool_reshape", mIcon20x20 ) );
+    Set( "PainterEditor.ToolsShortcuts.PaintBucketAddMove20", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/paint_bucket_tool_add_move", mIcon20x20 ) );
+    Set( "PainterEditor.ToolsShortcuts.PaintBucketRemove20", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/paint_bucket_tool_remove", mIcon20x20 ) );
+    Set( "PainterEditor.ToolsShortcuts.PaintBucketRadialLinear20", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/paint_bucket_tool_radial_linear", mIcon20x20 ) );
+    Set( "PainterEditor.ToolsShortcuts.GridSingleSelection20", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/grid_tool_single_selection", mIcon20x20 ) );
+    Set( "PainterEditor.ToolsShortcuts.GridMultipleSelection20", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/grid_tool_multiple_selection", mIcon20x20 ) );
 
     //OdysseyPainterEditorTools
     Set( "OdysseyPainterEditorTools.Tile", FTableRowStyle(mCoreTableRowStyle)

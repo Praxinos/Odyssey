@@ -10,6 +10,7 @@
 #include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorCycle.h"
+#include "OdysseyVector.h"
 // for 3D HUDs
 #include "CanvasTypes.h"
 #include "CanvasItem.h"
@@ -913,7 +914,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawVertex( const FOdysseyHUD::FDrawHUDP
             DrawPrimitiveVertex( iParams
                                , hudPoint
                                , vertexRadius
-                               , iVertex->IsSelected() && ( iHUDFlags & FOdysseyVectorHUD::HUD_MODE_VERTEX ) ? hcColor  : ltgrayColor
+                               , iVertex->IsSelected() && ( iHUDFlags & FOdysseyVectorHUD::HUD_MODE_VERTEX ) ? ( hcColor * 0.5f )  : ltgrayColor
                                , dkgrayColor );
         }
     }

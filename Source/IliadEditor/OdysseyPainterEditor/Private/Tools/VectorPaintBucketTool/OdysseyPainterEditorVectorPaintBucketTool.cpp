@@ -115,6 +115,15 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnKeyDownGlobalVector( FOdysseyVecto
 
             return true;
         }
+
+        // Note, we could FSlateApplication::Get().GetModifierKeys() as well, but for consistency
+        // with the events processing in the OnKeyUpGlobalVector(), we do like that.
+        if ( ( key == EKeys::LeftAlt ) || ( key == EKeys::RightAlt ) )
+        {
+            mEditionMode = eVectorPaintBucketEditionMode::Remove;
+
+            return true;
+        }
     }
 
     return false;
@@ -612,7 +621,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVector( FOdysseyVectorGroup
             switch( mPickedArea )
             {
                 case FOdysseyPainterEditorVectorPaintBucketToolHUD::PICK_BUCKET:
-                    if ( FSlateApplication::Get().GetModifierKeys().IsAltDown() )
+                    if ( mEditionMode == eVectorPaintBucketEditionMode::Remove )
                     {
                         notificationFlags |= OnMouseUpVectorRemoveBucket( iScene, mPickedBucket );
                         //OnMouseUpVectorClearBucket( iScene, mPickedBucket );
@@ -823,19 +832,19 @@ UOdysseyPainterEditorVectorPaintBucketTool::CreateModifierSegmentControl()
            .OnValueChanged( SSegmentedControl<eVectorPaintBucketEditionMode>::FOnValueChanged::CreateUObject( this, &UOdysseyPainterEditorVectorPaintBucketTool::SetEditionMode ) )
            // DEFAULT
            + SSegmentedControl<eVectorPaintBucketEditionMode>::Slot( eVectorPaintBucketEditionMode::Default )
-           //.Icon( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PaintBucket16") )
-           .ToolTip( LOCTEXT("vector-paint-bucket-tool.edition-mode.default.name", "Default") )
+           //.Icon( FOdysseyStyle::GetBrush( "PainterEditor.ToolsShortcuts.PaintBucketAddMove20") )
+           .ToolTip( LOCTEXT("vector-paint-bucket-tool.edition-mode.default.name", "Add bucket") )
            [
                SNew(SBorder)
                .BorderImage_UObject( this, &UOdysseyPainterEditorVectorPaintBucketTool::GetBackgroundColor, eVectorPaintBucketEditionMode::Default  )
                [
                    SNew(SImage)
-                   .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PaintBucket16") )
+                   .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsShortcuts.PaintBucketAddMove20") )
                ]
            ]
            // CTRL
            + SSegmentedControl<eVectorPaintBucketEditionMode>::Slot( eVectorPaintBucketEditionMode::Control )
-           //.Icon( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PaintBucket16") )
+           //.Icon( FOdysseyStyle::GetBrush( "PainterEditor.ToolsShortcuts.PaintBucketRadialLinear20") )
 #if PLATFORM_WINDOWS
            .ToolTip( LOCTEXT("vector-paint-bucket-tool.edition-mode.ctrl.name", "Control radial/linear gradient settings (CTRL)") )
 #endif
@@ -847,7 +856,19 @@ UOdysseyPainterEditorVectorPaintBucketTool::CreateModifierSegmentControl()
                .BorderImage_UObject( this, &UOdysseyPainterEditorVectorPaintBucketTool::GetBackgroundColor, eVectorPaintBucketEditionMode::Control )
                [
                    SNew(SImage)
-                   .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PaintBucket16") )
+                   .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsShortcuts.PaintBucketRadialLinear20") )
+               ]
+           ]
+           // ALT
+           + SSegmentedControl<eVectorPaintBucketEditionMode>::Slot( eVectorPaintBucketEditionMode::Remove )
+           //.Icon( FOdysseyStyle::GetBrush( "PainterEditor.ToolsShortcuts.PaintBucketRemove20") )
+           .ToolTip( LOCTEXT("vector-paint-bucket-tool.edition-mode.remove.name", "Remove bucket (ALT)") )
+           [
+               SNew(SBorder)
+               .BorderImage_UObject( this, &UOdysseyPainterEditorVectorPaintBucketTool::GetBackgroundColor, eVectorPaintBucketEditionMode::Remove  )
+               [
+                   SNew(SImage)
+                   .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsShortcuts.PaintBucketRemove20") )
                ]
            ];
 }
