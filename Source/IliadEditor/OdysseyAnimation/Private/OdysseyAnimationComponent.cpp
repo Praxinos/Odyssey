@@ -112,12 +112,18 @@ UOdysseyAnimationComponent::UOdysseyAnimationComponent(const FObjectInitializer&
     bCastDynamicShadow = true;
     bSelectable = true;
 
-    UMaterial* material = LoadObject<UMaterial>(this, TEXT("/Odyssey/Animation2D/DefaultAnimationMaterial.DefaultAnimationMaterial"));
-    UMaterialInstanceConstant* materialInstance = CreateDefaultSubobject<UMaterialInstanceConstant>(TEXT("DefaultAnimationMaterialInstance"));
-    materialInstance->SetParentEditorOnly(material);
-    SetMaterial(0, materialInstance);
-
+    Material = LoadObject<UMaterial>(this, TEXT("/Odyssey/Animation2D/DefaultAnimationMaterial.DefaultAnimationMaterial"));
     DefaultPlayer = CreateDefaultSubobject<UOdysseyAnimationPlayer>(TEXT("DefaultPlayer"));
+
+    GenerateMaterialInstance();
+}
+
+void
+UOdysseyAnimationComponent::GenerateMaterialInstance()
+{
+    MaterialInstance = CreateDefaultSubobject<UMaterialInstanceConstant>(TEXT("MaterialInstance"));
+    MaterialInstance->SetParentEditorOnly(Material);
+    SetMaterial(0, MaterialInstance);
 }
 
 void
@@ -158,6 +164,8 @@ UOdysseyAnimationComponent::PropertyChanged(const FName& iPropertyName)
         AnimationChanged();
     if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationComponent, Player) )
         PlayerChanged();
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationComponent, Material) )
+        MaterialChanged();
 }
 
 void
@@ -219,6 +227,13 @@ UOdysseyAnimationComponent::PlayerChanged()
 }
 
 void
+UOdysseyAnimationComponent::MaterialChanged()
+{
+    MaterialInstance->SetParentEditorOnly(Material);
+    RefreshMaterialTexture();
+}
+
+void
 UOdysseyAnimationComponent::OnDefaultPlayerTextureChanged()
 {
     RefreshMaterialTexture();
@@ -276,8 +291,7 @@ UOdysseyAnimationComponent::PostDuplicate(bool bDuplicateForPIE)
 void
 UOdysseyAnimationComponent::RefreshMaterialTexture()
 {
-    UMaterialInstanceConstant* materialInstance = Cast<UMaterialInstanceConstant>(GetMaterial(0));
-    if (!materialInstance)
+    if (!MaterialInstance)
         return;
 
     UOdysseyAnimationPlayer* player = GetActivePlayer();
@@ -287,17 +301,17 @@ UOdysseyAnimationComponent::RefreshMaterialTexture()
     UTexture* texture = player->GetTexture();
     if (texture)
     {
-        materialInstance->SetTextureParameterValueEditorOnly(FMaterialParameterInfo("AnimationTexture"), texture);
+        MaterialInstance->SetTextureParameterValueEditorOnly(FMaterialParameterInfo("AnimationTexture"), texture);
     }
     else
     {
         //Needed because SetTextureParameterValueEditorOnly does nothing if texture is nullptr
-        materialInstance->ClearParameterValuesEditorOnly();
+        MaterialInstance->ClearParameterValuesEditorOnly();
     }
 
-    materialInstance->PostEditChange();
+    MaterialInstance->PostEditChange();
 
     FMaterialUpdateContext UpdateContext(FMaterialUpdateContext::EOptions::Default, GMaxRHIShaderPlatform);
-    UpdateContext.AddMaterialInstance(materialInstance);
-    materialInstance->MarkPackageDirty();
+    UpdateContext.AddMaterialInstance(MaterialInstance);
+    MaterialInstance->MarkPackageDirty();
 }

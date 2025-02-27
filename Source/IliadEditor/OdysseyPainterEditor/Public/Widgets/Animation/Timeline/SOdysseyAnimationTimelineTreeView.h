@@ -22,9 +22,9 @@ public:
 
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineTreeView)
-        : _Player(nullptr)
+        : _PainterEditor(nullptr)
+        , _Player(nullptr)
         , _ExternalScrollbar(nullptr)
-        , _PainterEditor(nullptr)
         {}
         SLATE_ATTRIBUTE(FOdysseyPainterEditor*, PainterEditor)
         SLATE_ARGUMENT( UOdysseyAnimationLayerStack*, LayerStack )

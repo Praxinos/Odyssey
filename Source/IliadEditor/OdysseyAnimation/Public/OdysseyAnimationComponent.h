@@ -19,7 +19,7 @@ enum class EOdysseyAnimationComponentMode
 /**
  * A component containing an animation to attach to an actor
  */
-UCLASS(Blueprintable, ClassGroup=(Animation), editinlinenew, meta=(BlueprintSpawnableComponent, PrioritizeCategories="Actions"))
+UCLASS(Blueprintable, ClassGroup=(Animation), HideCategories=(Materials), editinlinenew, meta=(BlueprintSpawnableComponent, PrioritizeCategories="Actions"))
 class ODYSSEYANIMATION_API UOdysseyAnimationComponent : public UStaticMeshComponent
 {
     GENERATED_UCLASS_BODY()
@@ -55,8 +55,10 @@ protected:
     virtual void ModeChanged();
     virtual void AnimationChanged();
     virtual void PlayerChanged();
+    void MaterialChanged();
 
 private:
+    void GenerateMaterialInstance();
     void RefreshMaterialTexture();
 
     void OnDefaultPlayerTextureChanged();
@@ -72,12 +74,18 @@ public:
     UPROPERTY( EditAnywhere, BlueprintReadWrite, Category="Animation", meta=(EditCondition = "Mode==EOdysseyAnimationComponentMode::Player", EditConditionHides))
     TObjectPtr<UOdysseyAnimationPlayer> Player;
 
+    UPROPERTY( EditAnywhere, BlueprintReadWrite, Category="Animation")
+    TObjectPtr<UMaterialInterface> Material;
+
 private:
     UPROPERTY(Transient)
     TObjectPtr<UOdysseyAnimationPlayer> DefaultPlayer;
 
     UPROPERTY()
     TObjectPtr<UOdysseyAnimationPlayer> PreviousPlayer;
+
+    UPROPERTY()
+    TObjectPtr<UMaterialInstanceConstant> MaterialInstance;
 
     FSimpleMulticastDelegate mOnAnimationChanged;
     FSimpleMulticastDelegate mOnPlayerChanged;

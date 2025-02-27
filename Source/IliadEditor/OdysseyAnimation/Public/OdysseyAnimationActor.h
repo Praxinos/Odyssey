@@ -14,7 +14,7 @@ class UOdysseyAnimationComponent;
  * This actor is created when you drag a animation asset from the content browser into the level, and
  * it is just a thin wrapper around a UOdysseyAnimationComponent that actually references the asset.
  */
-UCLASS(ComponentWrapperClass, meta=(PrioritizeCategories="Actions"))
+UCLASS(HideCategories=(Materials), meta=(PrioritizeCategories="Actions"))
 class ODYSSEYANIMATION_API AOdysseyAnimationActor : public AActor
 {
     GENERATED_UCLASS_BODY()
