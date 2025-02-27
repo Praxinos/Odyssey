@@ -5,14 +5,14 @@
 
 #include "TimelineTools/OdysseyAnimationTimelineTool.h"
 
-class FOdysseyPainterEditorAnimationTImelinePosition;
+class FOdysseyPainterEditorAnimationTimelinePosition;
 
 class FOdysseyAnimationTimelineCutTool
     : public FOdysseyAnimationTimelineTool
 {
 public:
     virtual ~FOdysseyAnimationTimelineCutTool();
-    FOdysseyAnimationTimelineCutTool(TSharedRef<FOdysseyPainterEditorAnimationTImelinePosition> iTimelinePosition);
+    FOdysseyAnimationTimelineCutTool(TSharedRef<FOdysseyPainterEditorAnimationTimelinePosition> iTimelinePosition);
 
 public:
     virtual FReply OnMouseButtonUp(const FMouseEventParams& iParams) override;

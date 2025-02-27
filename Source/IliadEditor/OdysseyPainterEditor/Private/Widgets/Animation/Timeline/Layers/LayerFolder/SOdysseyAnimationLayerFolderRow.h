@@ -7,7 +7,7 @@
 #include "Widgets/Animation/Timeline/Layers/SOdysseyAnimationLayerRow.h"
 
 
-class FOdysseyPainterEditorAnimationTImelinePosition;
+class FOdysseyPainterEditorAnimationTimelinePosition;
 class UOdysseyAnimationLayerFolder;
 class FOdysseyPainterEditor;
 /**
@@ -20,7 +20,7 @@ public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationLayerFolderRow)
         : _PainterEditor(nullptr)
         {}
-        SLATE_ARGUMENT( TSharedPtr<FOdysseyPainterEditorAnimationTImelinePosition>, TimelinePosition )
+        SLATE_ARGUMENT( TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition>, TimelinePosition )
         SLATE_ATTRIBUTE(FOdysseyPainterEditor*, PainterEditor)
     SLATE_END_ARGS()
 

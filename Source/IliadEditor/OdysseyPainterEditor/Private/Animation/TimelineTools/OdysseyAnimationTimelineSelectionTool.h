@@ -7,7 +7,7 @@
 #include "Input/Reply.h"
 
 class FOdysseyAnimationCellSelection;
-class FOdysseyPainterEditorAnimationTImelinePosition;
+class FOdysseyPainterEditorAnimationTimelinePosition;
 class UOdysseyAnimationCell;
 
 class FOdysseyAnimationTimelineSelectionTool
@@ -15,7 +15,7 @@ class FOdysseyAnimationTimelineSelectionTool
 {
 public:
     virtual ~FOdysseyAnimationTimelineSelectionTool();
-    FOdysseyAnimationTimelineSelectionTool(TSharedRef<FOdysseyPainterEditorAnimationTImelinePosition> iTimelinePosition, TSharedRef<FOdysseyAnimationCellSelection> iTimelineCellSelection);
+    FOdysseyAnimationTimelineSelectionTool(TSharedRef<FOdysseyPainterEditorAnimationTimelinePosition> iTimelinePosition, TSharedRef<FOdysseyAnimationCellSelection> iTimelineCellSelection);
 
 public:
     virtual FReply OnMouseButtonDown(const FMouseEventParams& iParams) override;

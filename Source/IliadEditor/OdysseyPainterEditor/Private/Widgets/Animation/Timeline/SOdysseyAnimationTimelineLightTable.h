@@ -10,7 +10,7 @@
 class UOdysseyAnimationLayer;
 class UOdysseyAnimation;
 class UOdysseyAnimationCell;
-class FOdysseyPainterEditorAnimationTImelinePosition;
+class FOdysseyPainterEditorAnimationTimelinePosition;
 
 class SOdysseyAnimationTimelineLightTable
     : public SCompoundWidget
@@ -18,7 +18,7 @@ class SOdysseyAnimationTimelineLightTable
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineLightTable)
     {}
-        SLATE_ARGUMENT(TSharedPtr<FOdysseyPainterEditorAnimationTImelinePosition>, TimelinePosition)
+        SLATE_ARGUMENT(TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition>, TimelinePosition)
     SLATE_END_ARGS()
 
     void Construct(

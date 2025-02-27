@@ -9,7 +9,7 @@
 
 class UOdysseyAnimationLayer;
 class UOdysseyAnimation;
-class FOdysseyPainterEditorAnimationTImelinePosition;
+class FOdysseyPainterEditorAnimationTimelinePosition;
 
 class SOdysseyAnimationTimelineOutOfPegs
     : public SCompoundWidget
@@ -20,7 +20,7 @@ public:
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineOutOfPegs)
     {}
-        SLATE_ARGUMENT(TSharedPtr<FOdysseyPainterEditorAnimationTImelinePosition>, TimelinePosition)
+        SLATE_ARGUMENT(TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition>, TimelinePosition)
         SLATE_EVENT(SOdysseyAnimationTimelineOutOfPegsKey::FOnActivateOutOfPegs, OnActivateOutOfPegs)
         SLATE_EVENT(FSimpleDelegate, OnInactivateOutOfPegs)
         SLATE_EVENT(SOdysseyAnimationTimelineOutOfPegsKey::FOnIsOutOfPegsChecked, OnIsOutOfPegsChecked)

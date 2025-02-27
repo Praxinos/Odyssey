@@ -2,10 +2,10 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 #pragma once
 
-class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorAnimationTImelinePosition
+class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorAnimationTimelinePosition
 {
 public:
-    FOdysseyPainterEditorAnimationTImelinePosition(); //default
+    FOdysseyPainterEditorAnimationTimelinePosition(); //default
 
 public:
     void CanZoom(bool iCanZoom);

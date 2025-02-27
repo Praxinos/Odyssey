@@ -8,7 +8,7 @@
 
 class UOdysseyAnimationLayer;
 class UOdysseyAnimationCell;
-class FOdysseyPainterEditorAnimationTImelinePosition;
+class FOdysseyPainterEditorAnimationTimelinePosition;
 
 class SOdysseyAnimationTimelineLightTableKey
     : public SCompoundWidget
@@ -19,7 +19,7 @@ public:
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineLightTableKey)
     {}
-        SLATE_ARGUMENT(TSharedPtr<FOdysseyPainterEditorAnimationTImelinePosition>, TimelinePosition)
+        SLATE_ARGUMENT(TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition>, TimelinePosition)
         SLATE_ATTRIBUTE(UOdysseyAnimationCell*, Cell)
         SLATE_ATTRIBUTE(FOdysseyAnimationLightTableKey, Key)
         SLATE_EVENT(FOnKeyChanged, OnChanged)

@@ -8,7 +8,7 @@ FOdysseyAnimationTimelineTool::~FOdysseyAnimationTimelineTool()
 
 }
 
-FOdysseyAnimationTimelineTool::FOdysseyAnimationTimelineTool(TSharedRef<FOdysseyPainterEditorAnimationTImelinePosition> iTimelinePosition)
+FOdysseyAnimationTimelineTool::FOdysseyAnimationTimelineTool(TSharedRef<FOdysseyPainterEditorAnimationTimelinePosition> iTimelinePosition)
     : mTimelinePosition(iTimelinePosition)
 {
 

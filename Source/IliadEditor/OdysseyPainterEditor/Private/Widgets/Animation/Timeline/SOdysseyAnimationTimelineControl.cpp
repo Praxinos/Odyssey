@@ -6,7 +6,7 @@
 #include "OdysseyPainterEditorAnimationCommands.h"
 #include "OdysseyAnimation.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
-#include "OdysseyPainterEditorAnimationTImelinePosition.h"
+#include "OdysseyPainterEditorAnimationTimelinePosition.h"
 
 SOdysseyAnimationTimelineControl::SOdysseyAnimationTimelineControl()
     : mOffsetMousePosition(0)

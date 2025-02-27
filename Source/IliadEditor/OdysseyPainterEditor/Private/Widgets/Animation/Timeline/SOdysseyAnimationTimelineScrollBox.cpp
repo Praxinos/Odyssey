@@ -2,7 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineScrollBox.h"
-#include "OdysseyPainterEditorAnimationTImelinePosition.h"
+#include "OdysseyPainterEditorAnimationTimelinePosition.h"
 #include "Layout/LayoutUtils.h"
 
 SOdysseyAnimationTimelineScrollBox::FSlot::FSlotArguments

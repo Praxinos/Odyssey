@@ -7,7 +7,6 @@
 #include "Widgets/Layout/SBox.h"
 
 class UOdysseyAnimationTimelineSection;
-class FOdysseyPainterEditorAnimationTImelinePosition;
 class UOdysseyAnimationComponent;
 class UOdysseyLayer;
 
@@ -28,34 +27,23 @@ public:
     virtual TSharedRef<SWidget> GenerateSectionWidget() override;
     virtual bool IsReadOnly() const override;
     virtual int32 OnPaintSection( FSequencerSectionPainter& InPainter ) const override;
-    virtual void Tick( const FGeometry& AllottedGeometry, const FGeometry& ClippedGeometry, const double InCurrentTime, const float InDeltaTime ) override;
     virtual void BeginResizeSection() override;
     virtual void ResizeSection(ESequencerSectionResizeMode ResizeMode, FFrameNumber ResizeTime) override;
 
     static float GetCollapsedSectionHeight();
-    //static float GetUncollapsedSectionHeight(UOdysseyAnimationComponent* iComponent);
-    //static float GetTreeViewHeight(UOdysseyAnimationComponent* iComponent);
 
 public:
     TSharedPtr<ISequencer> GetSequencer() const;
 
 private:
-    //static float GetLayerHeight(UOdysseyLayer* iLayer);
-    void RebuildSectionWidget();
-
     UOdysseyAnimationComponent* GetComponent() const;
     EVisibility GetLayersVisibility() const;
-
-    void OnAnimationChanged();
-    void OnPlayerChanged();
-    void OnModeChanged();
 
 private:
     TWeakPtr<ISequencer> mSequencer;
     UOdysseyAnimationComponent* mComponent; //used to remove callbacks
-    TSharedPtr<SBox> mSectionWidget;
+    TSharedPtr<SWidget> mSectionWidget;
     UOdysseyAnimationTimelineSection* mSection;
-    TSharedRef<FOdysseyPainterEditorAnimationTImelinePosition> mTimelinePosition;
 
     FFrameNumber mInitialStartOffsetDuringResize;
     FFrameNumber mInitialStartTimeDuringResize;

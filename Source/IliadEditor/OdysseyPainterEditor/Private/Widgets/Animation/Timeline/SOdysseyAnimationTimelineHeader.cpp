@@ -11,7 +11,7 @@
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "OdysseyAnimationProxy.h"
 #include "OdysseyPainterEditorAnimationUserSettings.h"
-#include "OdysseyPainterEditorAnimationTImelinePosition.h"
+#include "OdysseyPainterEditorAnimationTimelinePosition.h"
 
 //////////////////////////////////////////////////////////////////////////
 // SOdysseyAnimationTimelineHeader

@@ -18,7 +18,7 @@
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineScrollBox.h"
 #include "TimelineTools/OdysseyAnimationTimelineTools.h"
-#include "OdysseyPainterEditorAnimationTImelinePosition.h"
+#include "OdysseyPainterEditorAnimationTimelinePosition.h"
 #include "LayerStack/Cells/OdysseyAnimationCellSelection.h"
 #include "ScopedTransaction.h"
 #include "Widgets/Input/SButton.h"

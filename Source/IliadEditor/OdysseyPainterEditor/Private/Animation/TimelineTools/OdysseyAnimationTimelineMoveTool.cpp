@@ -3,7 +3,7 @@
 
 #include "TimelineTools/OdysseyAnimationTimelineMoveTool.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
-#include "OdysseyPainterEditorAnimationTImelinePosition.h"
+#include "OdysseyPainterEditorAnimationTimelinePosition.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
@@ -12,7 +12,7 @@ FOdysseyAnimationTimelineMoveTool::~FOdysseyAnimationTimelineMoveTool()
 {
 }
 
-FOdysseyAnimationTimelineMoveTool::FOdysseyAnimationTimelineMoveTool(TSharedRef<FOdysseyPainterEditorAnimationTImelinePosition> iTimelinePosition)
+FOdysseyAnimationTimelineMoveTool::FOdysseyAnimationTimelineMoveTool(TSharedRef<FOdysseyPainterEditorAnimationTimelinePosition> iTimelinePosition)
     : FOdysseyAnimationTimelineTool(iTimelinePosition)
 {
 }

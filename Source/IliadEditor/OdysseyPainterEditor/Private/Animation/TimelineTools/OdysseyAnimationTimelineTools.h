@@ -16,7 +16,7 @@ class FOdysseyAnimationTimelineSelectionTool;
 class FOdysseyAnimationTimelineMoveTool;
 class FOdysseyAnimationTimelineCutTool;
 class FOdysseyAnimationTimelineTool;
-class FOdysseyPainterEditorAnimationTImelinePosition;
+class FOdysseyPainterEditorAnimationTimelinePosition;
 class FOdysseyAnimationCellSelection;
 
 class FOdysseyAnimationTimelineTools
@@ -28,7 +28,7 @@ private:
     FOdysseyAnimationTimelineTools();
 
 public:
-    TSharedPtr<FOdysseyAnimationTimelineTool> CreateTool(TSharedRef<FOdysseyPainterEditorAnimationTImelinePosition> iTimelinePosition, TSharedRef<FOdysseyAnimationCellSelection> iTimelineCellSelection) const;
+    TSharedPtr<FOdysseyAnimationTimelineTool> CreateTool(TSharedRef<FOdysseyPainterEditorAnimationTimelinePosition> iTimelinePosition, TSharedRef<FOdysseyAnimationCellSelection> iTimelineCellSelection) const;
     EOdysseyTimelineTool GetCurrentTool() const;
     void SetCurrentTool(EOdysseyTimelineTool iTool);
 

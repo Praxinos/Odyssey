@@ -11,7 +11,7 @@
 #include "Widgets/Input/SComboButton.h"
 #include "TimelineTools/OdysseyAnimationTimelineTool.h"
 #include "TimelineTools/OdysseyAnimationTimelineTools.h"
-#include "OdysseyPainterEditorAnimationTImelinePosition.h"
+#include "OdysseyPainterEditorAnimationTimelinePosition.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"

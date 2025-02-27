@@ -9,7 +9,7 @@
 #include "OdysseyMediaProvider.h"
 #include "OdysseyVectorEngine.h"
 #include "Proxies/OdysseyBrushColor.h"
-#include "OdysseyPainterEditorAnimationTImelinePosition.h"
+#include "OdysseyPainterEditorAnimationTimelinePosition.h"
 #include "OdysseyImageRenderingAbility.h"
 #include <ULIS>
 
@@ -227,7 +227,7 @@ public:
     UOdysseyAnimation*                                       GetAnimation() const;
     UOdysseyAnimationPlayer*                                 GetAnimationPlayer() const;
     TSharedPtr<FOdysseyPainterEditorAnimationFlipSystem>            GetAnimationFlipSystem() const;
-    TSharedRef<FOdysseyPainterEditorAnimationTImelinePosition>      GetAnimationTimelinePosition();
+    TSharedRef<FOdysseyPainterEditorAnimationTimelinePosition>      GetAnimationTimelinePosition();
     EOdysseyPainterEditorColorType                           GetColorType() const;
     virtual FOdysseyMediaProvider                            GetCurrentMediaProvider();
     virtual UOdysseyLayerStack*                              LayerStack() const;
@@ -391,7 +391,7 @@ protected:
     TArray<FOdysseyBrushContext*>   mBrushContexts;
     FOdysseyBrushColor              mPaintColor;
     float mAnimationPlaybackFramesPerSecond;
-    TSharedRef<FOdysseyPainterEditorAnimationTImelinePosition> mAnimationTimelinePosition;
+    TSharedRef<FOdysseyPainterEditorAnimationTimelinePosition> mAnimationTimelinePosition;
     EOdysseyPainterEditorColorType  mColorType = EOdysseyPainterEditorColorType::Raw;
     FSimpleMulticastDelegate        mOnCurrentToolChanged;
     FSimpleMulticastDelegate        mOnCurrentMainToolChanged;

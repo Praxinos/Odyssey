@@ -8,7 +8,7 @@
 class UOdysseyAnimationLayerStack;
 class UOdysseyAnimationPlayer;
 class FOdysseyAnimationTimelineShortcuts;
-class FOdysseyPainterEditorAnimationTImelinePosition;
+class FOdysseyPainterEditorAnimationTimelinePosition;
 class UOdysseyAnimationCell;
 class ITableRow;
 class FOdysseyPainterEditor;
@@ -28,7 +28,7 @@ public:
         {}
         SLATE_ARGUMENT( UOdysseyAnimationLayerStack*, LayerStack )
         SLATE_ARGUMENT( UOdysseyAnimationPlayer*, Player )
-        SLATE_ARGUMENT( TSharedPtr<FOdysseyPainterEditorAnimationTImelinePosition>, TimelinePosition )
+        SLATE_ARGUMENT( TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition>, TimelinePosition )
         SLATE_EVENT(FOnActivateOutOfPegs, OnActivateOutOfPegs)
         SLATE_EVENT(FSimpleDelegate, OnInactivateOutOfPegs)
         SLATE_EVENT(FOnIsOutOfPegsChecked, OnIsOutOfPegsChecked)
@@ -53,7 +53,7 @@ private:
     UOdysseyAnimationLayerStack* mLayerStack;
     UOdysseyAnimationPlayer* mPlayer;
     TSharedPtr<FOdysseyAnimationTimelineShortcuts> mTimelineShortcuts;
-    TSharedPtr<FOdysseyPainterEditorAnimationTImelinePosition> mTimelinePosition;
+    TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition> mTimelinePosition;
     FOnActivateOutOfPegs mOnActivateOutOfPegs;
     FSimpleDelegate mOnInactivateOutOfPegs;
     FOnIsOutOfPegsChecked mOnIsOutOfPegsChecked;

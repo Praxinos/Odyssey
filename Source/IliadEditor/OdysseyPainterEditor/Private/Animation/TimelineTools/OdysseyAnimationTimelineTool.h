@@ -7,7 +7,7 @@
 #include "Layout/Geometry.h"
 #include "Input/Events.h"
 #include "Input/Reply.h"
-#include "OdysseyPainterEditorAnimationTImelinePosition.h"
+#include "OdysseyPainterEditorAnimationTimelinePosition.h"
 
 class FOdysseyAnimationTimelineTool
 {
@@ -27,7 +27,7 @@ public:
 public:
     virtual ~FOdysseyAnimationTimelineTool();
 
-    FOdysseyAnimationTimelineTool(TSharedRef<FOdysseyPainterEditorAnimationTImelinePosition> iTimelinePosition);
+    FOdysseyAnimationTimelineTool(TSharedRef<FOdysseyPainterEditorAnimationTimelinePosition> iTimelinePosition);
 
 public:
     struct FMouseEventParams
@@ -52,5 +52,5 @@ public:
     float FrameToMousePosition(float iFrame) const;
 
 protected:
-    TSharedRef<FOdysseyPainterEditorAnimationTImelinePosition> mTimelinePosition;
+    TSharedRef<FOdysseyPainterEditorAnimationTimelinePosition> mTimelinePosition;
 };

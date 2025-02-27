@@ -1,10 +1,10 @@
 // IDDN.FR.001.250001.006.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
-#include "OdysseyPainterEditorAnimationTImelinePosition.h"
+#include "OdysseyPainterEditorAnimationTimelinePosition.h"
 #include "OdysseyStyle.h"
 
-FOdysseyPainterEditorAnimationTImelinePosition::FOdysseyPainterEditorAnimationTImelinePosition()
+FOdysseyPainterEditorAnimationTimelinePosition::FOdysseyPainterEditorAnimationTimelinePosition()
     : mBaseFrameSize(50.f)
     , mOffset(0.f)
     , mZoom(1.f)
@@ -19,49 +19,49 @@ FOdysseyPainterEditorAnimationTImelinePosition::FOdysseyPainterEditorAnimationTI
 }
 
 void
-FOdysseyPainterEditorAnimationTImelinePosition::CanZoom(bool iCanZoom)
+FOdysseyPainterEditorAnimationTimelinePosition::CanZoom(bool iCanZoom)
 {
     mCanZoom = false;
 }
 
 bool
-FOdysseyPainterEditorAnimationTImelinePosition::CanZoom() const
+FOdysseyPainterEditorAnimationTimelinePosition::CanZoom() const
 {
     return mCanZoom;
 }
 
 void
-FOdysseyPainterEditorAnimationTImelinePosition::SetBaseFrameSize(float iFrameSize)
+FOdysseyPainterEditorAnimationTimelinePosition::SetBaseFrameSize(float iFrameSize)
 {
     mBaseFrameSize = iFrameSize;
 }
 
 float
-FOdysseyPainterEditorAnimationTImelinePosition::GetBaseFrameSize() const
+FOdysseyPainterEditorAnimationTimelinePosition::GetBaseFrameSize() const
 {
     return mBaseFrameSize;
 }
 
 float
-FOdysseyPainterEditorAnimationTImelinePosition::GetFrameSize() const
+FOdysseyPainterEditorAnimationTimelinePosition::GetFrameSize() const
 {
     return mBaseFrameSize * mZoom;
 }
 
 void
-FOdysseyPainterEditorAnimationTImelinePosition::ZoomIn()
+FOdysseyPainterEditorAnimationTimelinePosition::ZoomIn()
 {
     SetZoom(mZoom * (1.0f - mZoomStep));
 }
 
 void
-FOdysseyPainterEditorAnimationTImelinePosition::ZoomOut()
+FOdysseyPainterEditorAnimationTimelinePosition::ZoomOut()
 {
     SetZoom(mZoom * (1.0f + mZoomStep));
 }
 
 void
-FOdysseyPainterEditorAnimationTImelinePosition::SetZoom(float iZoom)
+FOdysseyPainterEditorAnimationTimelinePosition::SetZoom(float iZoom)
 {
     float zoom = iZoom;
     if (mHasMinZoom)
@@ -74,99 +74,99 @@ FOdysseyPainterEditorAnimationTImelinePosition::SetZoom(float iZoom)
 }
 
 void
-FOdysseyPainterEditorAnimationTImelinePosition::SetMinZoom(float iZoom)
+FOdysseyPainterEditorAnimationTimelinePosition::SetMinZoom(float iZoom)
 {
     mMinZoom = iZoom;
     SetZoom(mZoom);
 }
 
 void
-FOdysseyPainterEditorAnimationTImelinePosition::SetMaxZoom(float iZoom)
+FOdysseyPainterEditorAnimationTimelinePosition::SetMaxZoom(float iZoom)
 {
     mMaxZoom = iZoom;
     SetZoom(mZoom);
 }
 
 void
-FOdysseyPainterEditorAnimationTImelinePosition::SetZoomStep(float iZoom)
+FOdysseyPainterEditorAnimationTimelinePosition::SetZoomStep(float iZoom)
 {
     mZoomStep = iZoom;
 }
 
 float
-FOdysseyPainterEditorAnimationTImelinePosition::GetZoom() const
+FOdysseyPainterEditorAnimationTimelinePosition::GetZoom() const
 {
     return mZoom;
 }
 
 float
-FOdysseyPainterEditorAnimationTImelinePosition::GetMinZoom() const
+FOdysseyPainterEditorAnimationTimelinePosition::GetMinZoom() const
 {
     return mMinZoom;
 }
 
 float
-FOdysseyPainterEditorAnimationTImelinePosition::GetMaxZoom() const
+FOdysseyPainterEditorAnimationTimelinePosition::GetMaxZoom() const
 {
     return mMaxZoom;
 }
 
 float
-FOdysseyPainterEditorAnimationTImelinePosition::GetZoomStep() const
+FOdysseyPainterEditorAnimationTimelinePosition::GetZoomStep() const
 {
     return mZoomStep;
 }
 
 void
-FOdysseyPainterEditorAnimationTImelinePosition::SetOffset(float iOffset)
+FOdysseyPainterEditorAnimationTimelinePosition::SetOffset(float iOffset)
 {
     mOffset = FMath::Max(0, iOffset);
 }
 
 float
-FOdysseyPainterEditorAnimationTImelinePosition::GetOffset() const
+FOdysseyPainterEditorAnimationTimelinePosition::GetOffset() const
 {
     return mOffset;
 }
 
 void
-FOdysseyPainterEditorAnimationTImelinePosition::SetPadding(float iPadding)
+FOdysseyPainterEditorAnimationTimelinePosition::SetPadding(float iPadding)
 {
     mPadding = iPadding;
 }
 
 float
-FOdysseyPainterEditorAnimationTImelinePosition::GetPadding() const
+FOdysseyPainterEditorAnimationTimelinePosition::GetPadding() const
 {
     return mPadding;
 }
 
 bool
-FOdysseyPainterEditorAnimationTImelinePosition::HasMinZoom() const
+FOdysseyPainterEditorAnimationTimelinePosition::HasMinZoom() const
 {
     return mHasMinZoom;
 }
 
 void
-FOdysseyPainterEditorAnimationTImelinePosition::HasMinZoom(bool iHasMinZoom)
+FOdysseyPainterEditorAnimationTimelinePosition::HasMinZoom(bool iHasMinZoom)
 {
     mHasMinZoom = iHasMinZoom;
 }
 
 bool
-FOdysseyPainterEditorAnimationTImelinePosition::HasMaxZoom() const
+FOdysseyPainterEditorAnimationTimelinePosition::HasMaxZoom() const
 {
     return mHasMaxZoom;
 }
 
 void
-FOdysseyPainterEditorAnimationTImelinePosition::HasMaxZoom(bool iHasMaxZoom)
+FOdysseyPainterEditorAnimationTimelinePosition::HasMaxZoom(bool iHasMaxZoom)
 {
     mHasMaxZoom = iHasMaxZoom;
 }
 
 void
-FOdysseyPainterEditorAnimationTImelinePosition::Reset()
+FOdysseyPainterEditorAnimationTimelinePosition::Reset()
 {
-    *this = FOdysseyPainterEditorAnimationTImelinePosition();
+    *this = FOdysseyPainterEditorAnimationTimelinePosition();
 }

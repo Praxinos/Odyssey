@@ -5,7 +5,7 @@
 #include "Widgets/Animation/SOdysseyAnimationPlaybackControls.h"
 #include "Widgets/Animation/Timeline/SOdysseyAnimationLayerStackTreeView.h"
 #include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineTreeView.h"
-#include "OdysseyPainterEditorAnimationTImelinePosition.h"
+#include "OdysseyPainterEditorAnimationTimelinePosition.h"
 #include "LayerStack/OdysseyAnimationLayerStack.h"
 #include "OdysseyStyle.h"
 #include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineControl.h"
@@ -182,7 +182,7 @@ SOdysseyAnimationLayerStack::OnTimelineScrollBarHScrolled(float iOffset)
     if (!animation)
         return;
 
-    TSharedPtr<FOdysseyPainterEditorAnimationTImelinePosition> timelinePosition = mTimelinePosition.Get();
+    TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition> timelinePosition = mTimelinePosition.Get();
 
     int lastFrameIndex = animation->GetFrameRange().GetUpperBoundValue();
     float frameWidth = timelinePosition->GetFrameSize();
@@ -236,7 +236,7 @@ SOdysseyAnimationLayerStack::Tick( const FGeometry& AllottedGeometry, const doub
 
     const TIndirectArray<SHeaderRow::FColumn>& columns = headerRow->GetColumns();
 
-    TSharedPtr<FOdysseyPainterEditorAnimationTImelinePosition> timelinePosition = mTimelinePosition.Get();
+    TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition> timelinePosition = mTimelinePosition.Get();
 
     for ( const SHeaderRow::FColumn& column : columns )
     {

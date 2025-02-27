@@ -23,7 +23,7 @@ FOdysseyAnimationTimelineTools::FOdysseyAnimationTimelineTools()
 }
 
 TSharedPtr<FOdysseyAnimationTimelineTool>
-FOdysseyAnimationTimelineTools::CreateTool(TSharedRef<FOdysseyPainterEditorAnimationTImelinePosition> iTimelinePosition, TSharedRef<FOdysseyAnimationCellSelection> iTimelineCellSelection) const
+FOdysseyAnimationTimelineTools::CreateTool(TSharedRef<FOdysseyPainterEditorAnimationTimelinePosition> iTimelinePosition, TSharedRef<FOdysseyAnimationCellSelection> iTimelineCellSelection) const
 {
     switch(mCurrentTool)
     {

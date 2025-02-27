@@ -28,7 +28,7 @@
 #include "Undo/OdysseyVectorUndoTagInbetweenerBreakdownAdd.h"
 #include "Undo/OdysseyVectorUndoTagInbetweenerBreakdownRemove.h"
 #include "Undo/OdysseyVectorUndoTagInbetweenerBreakdownTargetVisibility.h"
-#include "OdysseyPainterEditorAnimationTImelinePosition.h"
+#include "OdysseyPainterEditorAnimationTimelinePosition.h"
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
 
 #include "Framework/Commands/GenericCommands.h"
@@ -91,7 +91,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::GetEditor() const
     return mEditor.Get();
 }
 
-TSharedPtr<FOdysseyPainterEditorAnimationTImelinePosition>
+TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition>
 SOdysseyAnimationLayerImageVectorTimelineInbetweening::GetTimelinePosition() const
 {
     return mTimelinePosition;

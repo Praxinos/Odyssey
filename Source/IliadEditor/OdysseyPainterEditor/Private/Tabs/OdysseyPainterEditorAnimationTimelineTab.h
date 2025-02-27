@@ -10,7 +10,7 @@ class UOdysseyAnimationLayerStack;
 class UOdysseyAnimation;
 class UOdysseyAnimationPlayer;
 class UOdysseyAnimationCell;
-class FOdysseyPainterEditorAnimationTImelinePosition;
+class FOdysseyPainterEditorAnimationTimelinePosition;
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorAnimationTimelineTab :
     public FOdysseyEditorTab
@@ -40,7 +40,7 @@ protected:
     virtual UOdysseyAnimation* Animation() const;
     virtual UOdysseyAnimationPlayer* Player() const;
     virtual float PlaybackFramesPerSecond() const;
-    TSharedPtr<FOdysseyPainterEditorAnimationTImelinePosition> GetTimelinePosition() const;
+    TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition> GetTimelinePosition() const;
 
 protected:
     // Event

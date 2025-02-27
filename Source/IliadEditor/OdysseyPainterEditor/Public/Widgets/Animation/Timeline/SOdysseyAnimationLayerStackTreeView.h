@@ -6,7 +6,7 @@
 #include "Widgets/SOdysseyLayerStackTreeView.h"
 
 class FOdysseyAnimationTimelineShortcuts;
-class FOdysseyPainterEditorAnimationTImelinePosition;
+class FOdysseyPainterEditorAnimationTimelinePosition;
 class UOdysseyAnimationLayerStack;
 class FOdysseyPainterEditor;
 
@@ -19,7 +19,7 @@ public:
         , _PainterEditor(nullptr)
         {}
         SLATE_ARGUMENT( UOdysseyAnimationLayerStack*, LayerStack )
-        SLATE_ARGUMENT( TSharedPtr<FOdysseyPainterEditorAnimationTImelinePosition>, TimelinePosition )
+        SLATE_ARGUMENT( TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition>, TimelinePosition )
         SLATE_ARGUMENT( TOptional<TArray<SHeaderRow::FColumn::FArguments>>, Columns )
         SLATE_EVENT( FOnGenerateRow, OnGenerateRow )
         SLATE_ARGUMENT( TSharedPtr<SScrollBar>, ExternalScrollbar )
@@ -46,7 +46,7 @@ private:
 
 private:
     TSharedPtr<FOdysseyAnimationTimelineShortcuts> mTimelineShortcuts;
-    TSharedPtr<FOdysseyPainterEditorAnimationTImelinePosition> mTimelinePosition;
+    TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition> mTimelinePosition;
 
     UOdysseyAnimationLayerStack* mLayerStack;
     TAttribute<FOdysseyPainterEditor*> mEditor;

@@ -9,7 +9,7 @@
 
 #include "OdysseyAnimation.h"
 #include "OdysseyPainterEditorAnimationFlipSystem.h"
-#include "OdysseyPainterEditorAnimationTImelinePosition.h"
+#include "OdysseyPainterEditorAnimationTimelinePosition.h"
 #include "OdysseyBlockClipboardData.h"
 #include "OdysseyEditorModule.h"
 #include "OdysseyPainterEditorSource.h"
@@ -130,7 +130,7 @@ FOdysseyPainterEditor::FOdysseyPainterEditor(TSharedRef<FBaseToolkit> iToolkit)
     , mBrushContexts()
     , mPaintColor(::ULIS::FColor::Black)
     , mAnimationPlaybackFramesPerSecond(0)
-    , mAnimationTimelinePosition(MakeShared<FOdysseyPainterEditorAnimationTImelinePosition>())
+    , mAnimationTimelinePosition(MakeShared<FOdysseyPainterEditorAnimationTimelinePosition>())
     , mRasterDrawingTool(nullptr)
     , mRasterEraserTool(nullptr)
     , mRasterSelectionTool(nullptr)
@@ -1213,7 +1213,7 @@ FOdysseyPainterEditor::PaintColor(const FOdysseyBrushColor& iColor, bool iIsComm
         FOdysseyObjectEditorUtils::SetPropertyValue(GetRasterDrawingTool()->GetBrushOptions(), GET_MEMBER_NAME_CHECKED(UOdysseyBrushOptions, Color), iColor);
 }
 
-TSharedRef<FOdysseyPainterEditorAnimationTImelinePosition>
+TSharedRef<FOdysseyPainterEditorAnimationTimelinePosition>
 FOdysseyPainterEditor::GetAnimationTimelinePosition()
 {
     return mAnimationTimelinePosition;

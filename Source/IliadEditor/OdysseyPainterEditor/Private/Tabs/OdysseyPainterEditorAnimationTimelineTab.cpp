@@ -139,7 +139,7 @@ FOdysseyPainterEditorAnimationTimelineTab::PlaybackFramesPerSecond() const
     return mEditor->GetAnimationPlaybackFramesPerSecond();
 }
 
-TSharedPtr<FOdysseyPainterEditorAnimationTImelinePosition>
+TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition>
 FOdysseyPainterEditorAnimationTimelineTab::GetTimelinePosition() const
 {
     return mEditor->GetAnimationTimelinePosition();

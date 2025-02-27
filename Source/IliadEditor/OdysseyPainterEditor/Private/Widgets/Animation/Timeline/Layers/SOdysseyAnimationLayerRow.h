@@ -7,7 +7,7 @@
 #include "Widgets/SOdysseyLayerRow.h"
 
 class SOdysseyAnimationLayerStack;
-class FOdysseyPainterEditorAnimationTImelinePosition;
+class FOdysseyPainterEditorAnimationTimelinePosition;
 
 /**
  * Implements a layer row widget
@@ -18,7 +18,7 @@ class SOdysseyAnimationLayerRow
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationLayerRow)
         {}
-        SLATE_ARGUMENT( TSharedPtr<FOdysseyPainterEditorAnimationTImelinePosition>, TimelinePosition )
+        SLATE_ARGUMENT( TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition>, TimelinePosition )
     SLATE_END_ARGS()
 
 public:
@@ -41,5 +41,5 @@ private:
 protected:
     UOdysseyAnimationLayer* mLayer;
     TAttribute<int> mCurrentFrame;
-    TSharedPtr<FOdysseyPainterEditorAnimationTImelinePosition> mTimelinePosition;
+    TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition> mTimelinePosition;
 };

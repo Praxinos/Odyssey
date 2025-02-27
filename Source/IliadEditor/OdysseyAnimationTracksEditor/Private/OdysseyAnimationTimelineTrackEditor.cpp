@@ -14,8 +14,10 @@
 #include "OdysseyAnimationComponent.h"
 #include "OdysseyAnimationTimelineTrack.h"
 #include "OdysseyAnimationTimelineSection.h"
-#include "Widgets/SOdysseyAnimationTimelineTrack.h"
 #include "OdysseyAnimationTimelineSectionEditor.h"
+#include "OdysseyStyle.h"
+#include "UObject/OdysseyObjectEditorUtils.h"
+#include "Widgets/SOdysseyAnimationTimelineTrack.h"
 
 #define LOCTEXT_NAMESPACE "AnimationTrack"
 
@@ -206,6 +208,7 @@ FOdysseyAnimationTimelineTrackEditor::BuildOutlinerColumnWidget(const FBuildColu
     UOdysseyAnimationTimelineTrack* track = Cast<UOdysseyAnimationTimelineTrack>(iParams.TrackModel->GetTrack());
     ::UE::Sequencer::TViewModelPtr< ::UE::Sequencer::FSequencerEditorViewModel > editorViewModel = iParams.Editor->CastThisShared< ::UE::Sequencer::FSequencerEditorViewModel >();
     ::UE::Sequencer::TViewModelPtr<::UE::Sequencer::IOutlinerExtension> outlinerExtension = iParams.ViewModel.ImplicitCast();
+    TSharedRef<UE::Sequencer::ISequencerTreeViewRow> row = iParams.TreeViewRow;
     if (!track || !editorViewModel || !outlinerExtension)
         return nullptr;
 
@@ -255,8 +258,67 @@ FOdysseyAnimationTimelineTrackEditor::BuildOutlinerColumnWidget(const FBuildColu
 
     if (iColumnName == ::UE::Sequencer::FCommonOutlinerNames::Label)
     {
-        return SNew(SOdysseyAnimationTimelineTrack, component, track, iParams)
-                .Clipping(EWidgetClipping::ClipToBoundsAlways);
+        const FCheckBoxStyle* displayLayersToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("Sequencer.AnimationTimelineTrack.DisplayLayersToggle");
+
+        return SNew(SVerticalBox)
+        + SVerticalBox::Slot()
+        .AutoHeight()
+        [
+            SNew(SBox)
+            .HeightOverride(FOdysseyAnimationTimelineSectionEditor::GetCollapsedSectionHeight())
+            .VAlign(VAlign_Center)
+            [
+                SNew(SHorizontalBox)
+                + SHorizontalBox::Slot()
+                .Padding(
+                    MakeAttributeLambda(
+                        [row]() -> FMargin
+                        {
+                            const int32 NestingDepth = FMath::Max(0, row->GetIndentLevel());
+                            const float Indent = 10.f;
+                            return FMargin( NestingDepth * Indent, 0.f, 2.f, 0.f );
+                        }
+                    )
+                )
+                .VAlign(VAlign_Center)
+                .AutoWidth()
+                [
+                    SNew(SCheckBox)
+                    .Style(displayLayersToggleStyle)
+                    .OnCheckStateChanged_Lambda(
+                        [track](ECheckBoxState iState)
+                        {
+                            FOdysseyObjectEditorUtils::SetPropertyValue(track, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationTimelineTrack, DisplayLayers), iState == ECheckBoxState::Checked);
+                        }
+                    )
+                    .IsChecked_Lambda(
+                        [track]()
+                        {
+                            return track->DisplayLayers ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+                        }
+                    )
+                ]
+                + SHorizontalBox::Slot()
+                .VAlign(VAlign_Center)
+                .HAlign(HAlign_Left)
+                [
+                    SNew(STextBlock)
+                    .Text(LOCTEXT("sequencer.animation-timeline-track.name", "Timeline"))
+                ]
+            ]
+        ]
+        + SVerticalBox::Slot()
+        .AutoHeight()
+        [
+            SNew(SOdysseyAnimationTimelineTrack, component, track, iParams, SequencerPtr)
+                .Visibility_Lambda(
+                    [track]()
+                    {
+                        return track->DisplayLayers ? EVisibility::Visible : EVisibility::Collapsed;
+                    }
+                )
+                .Clipping(EWidgetClipping::ClipToBoundsAlways)
+        ];
     }
 
     return FMovieSceneTrackEditor::BuildOutlinerColumnWidget(iParams, iColumnName);
