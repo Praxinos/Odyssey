@@ -101,7 +101,7 @@ ShotSequenceTools::SpawnPlane( UWorld* iWorld, ACineCameraActor* iCamera, float 
 
     plane->SetActorScale3D( plane_scale );
     plane->SetActorLocation( plane_location );
-    plane->SetActorRotation( FRotator( 0.f, 90.f, 90.f ) );
+    //plane->SetActorRotation( FRotator( 0.f, 90.f, 90.f ) );
     plane->AddActorWorldRotation( plane_rotator );
 
     //plane->AttachToActor( iCamera, FAttachmentTransformRules::KeepRelativeTransform ); // Done in the editor with GEditor->ParentActors();

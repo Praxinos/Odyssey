@@ -21,6 +21,8 @@ APlaneActor::APlaneActor( const FObjectInitializer& ObjectInitializer )
     UStaticMesh* plane_mesh = LoadObject<UStaticMesh>( nullptr, TEXT( "/Odyssey/S_1_Unit_Plane.S_1_Unit_Plane" ) );
     check( plane_mesh );
     GetStaticMeshComponent()->SetStaticMesh( plane_mesh );
+
+    GetStaticMeshComponent()->SetRelativeRotation( FRotator( 0, 90, 90 ) );
 }
 
 void
