@@ -134,6 +134,22 @@ UScalingComponent::PostEditChangeProperty( FPropertyChangedEvent& PropertyChange
 
 //---
 
+const ACineCameraActor*
+UScalingComponent::GuessAttachedCineCamera() const
+{
+    AActor* actor = GetOwner();
+    AActor* parent = actor->GetAttachParentActor();
+    while( parent )
+    {
+        if( parent->IsA<ACineCameraActor>() )
+            return Cast<ACineCameraActor>( parent );
+
+        parent = parent->GetAttachParentActor();
+    }
+
+    return nullptr;
+}
+
 #include "EngineUtils.h"
 
 static
@@ -186,8 +202,8 @@ UScalingComponent::UpdateToCamera( const ACineCameraActor* iCamera, float iFocus
     FVector animation_location = CamLocation + CamDir * iFocusDistance;
     animation_location = FindNextFreeAnimationLocation( Camera->GetWorld(), GetOwner()->GetClass(), animation_location, CamLocation );
 
-    SetRelativeLocation( animation_location );
-    //GetOwner()->SetActorLocation( animation_location );
+    //SetRelativeLocation( animation_location );
+    GetOwner()->SetActorLocation( animation_location );
 
     //---
 
@@ -199,10 +215,11 @@ UScalingComponent::UpdateToCamera( const ACineCameraActor* iCamera, float iFocus
 void
 UScalingComponent::UpdateToCamera()
 {
-    if( !Camera.IsValid() )
+    const ACineCameraActor* camera = GuessAttachedCineCamera();
+    if( !camera )
         return;
 
-    FTransform camera_transform = Camera->GetRootComponent()->GetComponentTransform();
+    FTransform camera_transform = camera->GetRootComponent()->GetComponentTransform();
 
     FVector const CamLocation = camera_transform.GetLocation();
     FVector const CamDir = camera_transform.GetRotation().Vector();
@@ -210,25 +227,24 @@ UScalingComponent::UpdateToCamera()
 
     //-
 
-    float distance = FVector::Distance( Camera->GetActorLocation(), GetOwner()->GetActorLocation() );
-    //float distance = FVector::Distance( Camera->GetActorLocation(), GetRelativeLocation() );
+    float distance = FVector::Distance( camera->GetActorLocation(), GetOwner()->GetActorLocation() );
 
-    FVector camera_view_size = ComputeSizeOfCameraView( Camera.Get(), distance );
-    camera_view_size.X = FMath::Min( camera_view_size.X, camera_view_size.Y );
-    camera_view_size.Y = FMath::Min( camera_view_size.X, camera_view_size.Y );
+    FVector camera_view_size = ComputeSizeOfCameraView( camera, distance );
+    //camera_view_size.X = FMath::Min( camera_view_size.X, camera_view_size.Y );
+    //camera_view_size.Y = FMath::Min( camera_view_size.X, camera_view_size.Y );
     FVector animation_scale = ComputeScaleWithScaleAndMargin( camera_view_size );
 
     FRotator animation_rotator = CamRot;
 
     //---
 
-    SetRelativeScale3D( animation_scale );
-    //GetOwner()->SetActorRotation( FRotator( 0.f, 90.f, 90.f ) ); // Done during actor creation
-    SetWorldRotation( animation_rotator );
-
-    //GetOwner()->SetActorScale3D( animation_scale );
+    //SetRelativeScale3D( animation_scale );
     ////GetOwner()->SetActorRotation( FRotator( 0.f, 90.f, 90.f ) ); // Done during actor creation
-    //GetOwner()->AddActorWorldRotation( animation_rotator );
+    //SetWorldRotation( animation_rotator );
+
+    GetOwner()->SetActorScale3D( animation_scale );
+    GetOwner()->SetActorRotation( FRotator( 0.f, 90.f, 90.f ) ); //TODO: should be computed via VectorUp and VectorFace ?
+    GetOwner()->AddActorWorldRotation( animation_rotator );
 }
 
 //---

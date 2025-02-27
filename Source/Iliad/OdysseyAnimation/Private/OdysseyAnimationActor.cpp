@@ -45,11 +45,13 @@ AOdysseyAnimationActor::AOdysseyAnimationActor(const FObjectInitializer& ObjectI
 {
     ScalingComponent = CreateDefaultSubobject<UScalingComponent>( TEXT( "Scaling" ) );
 
-    SetRootComponent( ScalingComponent );
+    //SetRootComponent( ScalingComponent );
 
     AnimationComponent = CreateDefaultSubobject<UOdysseyAnimationComponent>( AnimationComponentName );
     AnimationComponent->SetRelativeRotation( FRotator( 0, 90, 90 ) );
-    AnimationComponent->SetupAttachment( ScalingComponent );
+    //AnimationComponent->SetupAttachment( ScalingComponent );
+
+    SetRootComponent( AnimationComponent );
 }
 
 #if WITH_EDITOR

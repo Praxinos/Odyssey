@@ -167,6 +167,8 @@ ShotSequenceTools::SpawnAndBindAnimation( ISequencer& iSequencer, UMovieSceneSeq
 
     animation->GetAnimationComponent()->SetAnimation( new_animation );
 
+    scaling_component->UpdateToCamera();
+
     //-
 
     GEditor->ParentActors( iCamera, animation, NAME_None );
