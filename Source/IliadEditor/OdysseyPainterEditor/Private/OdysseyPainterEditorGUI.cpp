@@ -461,6 +461,8 @@ FOdysseyPainterEditorGUI::OnVectorSceneNotify( FOdysseyVectorGroupPaint* iScene,
         {
             FOdysseyVectorGroupPaint* currentScene = currentTextureVectorLayer->GetVectorCell()->GetScene();
             ParseVectorNotifications( currentScene, iSignalFlags );
+
+            return;
         }
     }
     // for some reason when Unreal loads, the layerstack is NULL. But the medias exist. So in that case we use
