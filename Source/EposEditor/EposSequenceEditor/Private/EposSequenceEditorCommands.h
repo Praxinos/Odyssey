@@ -65,13 +65,6 @@ public:
     TSharedPtr<FUICommandInfo> OpenSequenceEditorSettings;
     TSharedPtr<FUICommandInfo> OpenTrackEditorSettings;
     TSharedPtr<FUICommandInfo> OpenNamingConventionEditorSettings;
-
-    TSharedPtr<FUICommandInfo> GotoPraxinos;
-    TSharedPtr<FUICommandInfo> GotoForum;
-    TSharedPtr<FUICommandInfo> GotoDiscord;
-    TSharedPtr<FUICommandInfo> GotoUserDocumentation;
-    TSharedPtr<FUICommandInfo> GotoProjects;
-    TSharedPtr<FUICommandInfo> OpenAboutWindow;
 };
 
 //---
@@ -82,13 +75,6 @@ public:
     static void OpenSequenceEditorSettings();
     static void OpenTrackEditorSettings();
     static void OpenNamingConventionEditorSettings();
-
-    static void GotoPraxinos();
-    static void GotoForum();
-    static void GotoDiscord();
-    static void GotoUserDocumentation();
-    static void GotoProjects();
-    static void OpenAboutWindow();
 
 public:
     static void MapActions( TSharedPtr<FUICommandList> ioCommandList );

@@ -53,6 +53,8 @@ public:
     void Initialize();
     void SetupGeneralStyles();
     void SetupClassIconsAndThumbnails();
+    void SetupOdysseyCommands();
+    void SetupOdysseyAboutWindow();
 
 public:
     const FVector2D mIcon7x16;
@@ -69,6 +71,7 @@ public:
     const FVector2D mIcon22x22;
     const FVector2D mIcon24x24;
     const FVector2D mIcon25x25;
+    const FVector2D mIcon30x30;
     const FVector2D mIcon32x32;
     const FVector2D mIcon40x40;
     const FVector2D mIcon48x48;
@@ -106,6 +109,7 @@ FOdysseyStyleDefault::FOdysseyStyleDefault()
     , mIcon22x22( 22.0f, 22.0f )
     , mIcon24x24( 24.0f, 24.0f )
     , mIcon25x25( 25.0f, 25.0f )
+    , mIcon30x30( 30.0f, 30.0f )
     , mIcon32x32( 32.0f, 32.0f )
     , mIcon40x40( 40.0f, 40.0f )
     , mIcon48x48( 48.0f, 48.0f )
@@ -137,6 +141,8 @@ FOdysseyStyleDefault::Initialize()
 
     SetupGeneralStyles();
     SetupClassIconsAndThumbnails();
+    SetupOdysseyCommands();
+    SetupOdysseyAboutWindow();
 }
 
 void
@@ -920,6 +926,60 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "PaletteEditor.Tab.Colors", new IMAGE_BRUSH_SVG( "PaletteEditor/tab_colors", mIcon16x16 ) );
 
 #endif
+}
+
+
+
+void
+FOdysseyStyleDefault::SetupOdysseyCommands()
+{
+    Set("OdysseyCommands.OpenOdysseyAboutWindow", new IMAGE_BRUSH_SVG("OdysseyCoreEditor/Commands/open-about-window", mIcon20x20));
+    Set("OdysseyCommands.OpenOdysseyAboutWindow.Small", new IMAGE_BRUSH_SVG("OdysseyCoreEditor/Commands/open-about-window", mIcon20x20));
+    Set("OdysseyCommands.OpenOdysseyDocumentation", new IMAGE_BRUSH_SVG("OdysseyCoreEditor/Commands/go-to-user-documentation", mIcon20x20));
+    Set("OdysseyCommands.OpenOdysseyDocumentation.Small", new IMAGE_BRUSH_SVG("OdysseyCoreEditor/Commands/go-to-user-documentation", mIcon20x20));
+}
+
+void
+FOdysseyStyleDefault::SetupOdysseyAboutWindow()
+{
+    //---
+
+    static const FVector2D Icon30x30(30.0f, 30.0f);
+
+    Set("Odyssey.About.Facebook", new IMAGE_BRUSH_SVG("OdysseyCoreEditor/AboutWindow/facebook", Icon30x30));
+    Set("Odyssey.About.LinkedIn", new IMAGE_BRUSH_SVG("OdysseyCoreEditor/AboutWindow/linkedin", Icon30x30));
+    Set("Odyssey.About.Youtube", new IMAGE_BRUSH_SVG("OdysseyCoreEditor/AboutWindow/youtube", Icon30x30));
+    Set("Odyssey.About.Twitter", new IMAGE_BRUSH_SVG("OdysseyCoreEditor/AboutWindow/twitter", Icon30x30));
+    Set("Odyssey.About.Instagram", new IMAGE_BRUSH_SVG("OdysseyCoreEditor/AboutWindow/instagram", Icon30x30));
+    Set("Odyssey.About.Discord", new IMAGE_BRUSH_SVG("OdysseyCoreEditor/AboutWindow/discord", Icon30x30));
+    Set("Odyssey.About.UserDoc", new IMAGE_BRUSH_SVG("OdysseyCoreEditor/AboutWindow/user-doc", Icon30x30));
+    Set("Odyssey.About.Git", new IMAGE_BRUSH_SVG("OdysseyCoreEditor/AboutWindow/github", Icon30x30));
+    Set("Odyssey.About.Praxinos", new IMAGE_BRUSH_SVG("OdysseyCoreEditor/AboutWindow/praxinos", mIcon128x128));
+    Set("Odyssey.About.Odyssey", new IMAGE_BRUSH_SVG("OdysseyCoreEditor/AboutWindow/odyssey", mIcon128x128));
+
+    Set("Odyssey.About.UnderlineText", FTextBlockStyle(FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>("NormalUnderlinedText"))
+        .SetFontSize(10)
+        .SetColorAndOpacity(FLinearColor(1.f, 1.f, 1.f))
+    );
+    Set("Odyssey.About.SmallText", FTextBlockStyle(FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>("SmallText"))
+        .SetColorAndOpacity(FLinearColor(1.f, 1.f, 1.f))
+    );
+    Set("Odyssey.About.BigText", FTextBlockStyle(FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>("NormalText"))
+        .SetFontSize(15)
+        .SetColorAndOpacity(FLinearColor(1.f, 1.f, 1.f))
+    );
+
+    Set("Odyssey.About.UnderlineSubduedText", FTextBlockStyle(FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>("NormalUnderlinedText"))
+        .SetFontSize(10)
+        .SetColorAndOpacity(FLinearColor(FColor(128, 128, 128)))
+    );
+    Set("Odyssey.About.SmallSubduedText", FTextBlockStyle(FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>("SmallText"))
+        .SetColorAndOpacity(FLinearColor(FColor(128, 128, 128)))
+    );
+    Set("Odyssey.About.BigSubduedText", FTextBlockStyle(FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>("NormalText"))
+        .SetFontSize(15)
+        .SetColorAndOpacity(FLinearColor(FColor(128, 128, 128)))
+    );
 }
 
 /* FSlateOdysseyStyle static initialization

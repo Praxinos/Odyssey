@@ -24,7 +24,6 @@ public class OdysseyLayerStackEditor : ModuleRules
 
         PublicIncludePaths.AddRange(
             new string[] {
-                Path.Combine(ModuleDirectory, "Public", "BrushContext"),
                 Path.Combine(ModuleDirectory, "Public", "Commands"),
                 Path.Combine(ModuleDirectory, "Public", "Controllers"),
                 Path.Combine(ModuleDirectory, "Public", "DragDropOperations"),
@@ -35,7 +34,6 @@ public class OdysseyLayerStackEditor : ModuleRules
 
         PrivateIncludePaths.AddRange(
             new string[] {
-                Path.Combine(ModuleDirectory, "Private", "BrushContext"),
                 Path.Combine(ModuleDirectory, "Private", "Commands"),
                 Path.Combine(ModuleDirectory, "Private", "Controllers"),
                 Path.Combine(ModuleDirectory, "Private", "DragDropOperations"),

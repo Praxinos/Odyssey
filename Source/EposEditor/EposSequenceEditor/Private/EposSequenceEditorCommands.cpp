@@ -112,14 +112,6 @@ FEposSequenceEditorCommands::RegisterCommands()
     UI_COMMAND( OpenSequenceEditorSettings,         "Sequence Settings...", "Open sequence settings", EUserInterfaceActionType::Button, FInputChord() );
     UI_COMMAND( OpenTrackEditorSettings,            "Track Settings...", "Open track settings", EUserInterfaceActionType::Button, FInputChord() );
     UI_COMMAND( OpenNamingConventionEditorSettings, "Naming Convention Settings...", "Open naming convention settings", EUserInterfaceActionType::Button, FInputChord() );
-
-    UI_COMMAND( GotoPraxinos,                       "Praxinos website...", "Go to Praxinos website", EUserInterfaceActionType::Button, FInputChord() );
-    UI_COMMAND( GotoForum,                          "Praxinos forum...", "Go to Praxinos forum", EUserInterfaceActionType::Button, FInputChord() );
-    UI_COMMAND( GotoDiscord,                        "Praxinos discord...", "Go to Praxinos discord", EUserInterfaceActionType::Button, FInputChord() );
-    UI_COMMAND( GotoUserDocumentation,              "Epos User Documentation...", "Go to User Documentation", EUserInterfaceActionType::Button, FInputChord() );
-    UI_COMMAND( GotoProjects,                       "Epos Samples...", "Download projects made by Epos", EUserInterfaceActionType::Button, FInputChord() );
-
-    UI_COMMAND( OpenAboutWindow,                    "About Epos...", "Open the About window", EUserInterfaceActionType::Button, FInputChord() );
 }
 
 //---
@@ -145,87 +137,12 @@ FEposSequenceEditorActionCallbacks::OpenNamingConventionEditorSettings()
     FModuleManager::LoadModuleChecked<ISettingsModule>( "Settings" ).ShowViewer( "Editor", "Plugins", "NamingConventionSettings" );
 }
 
-//static
-void
-FEposSequenceEditorActionCallbacks::GotoPraxinos()
-{
-    FPlatformProcess::LaunchURL( TEXT( "https://praxinos.coop" ), nullptr, nullptr );
-}
-
-//static
-void
-FEposSequenceEditorActionCallbacks::GotoForum()
-{
-    FPlatformProcess::LaunchURL( TEXT( "https://praxinos.coop/forum/" ), nullptr, nullptr );
-}
-
-//static
-void
-FEposSequenceEditorActionCallbacks::GotoDiscord()
-{
-    FPlatformProcess::LaunchURL( TEXT( "https://discord.gg/gEd6pj7" ), nullptr, nullptr );
-}
-
-//static
-void
-FEposSequenceEditorActionCallbacks::GotoUserDocumentation()
-{
-    FPlatformProcess::LaunchURL( TEXT( "https://praxinos.coop/epos-user-doc" ), nullptr, nullptr );
-}
-
-//static
-void
-FEposSequenceEditorActionCallbacks::GotoProjects()
-{
-    FPlatformProcess::LaunchURL( TEXT( "https://praxinos.coop/epos-projects" ), nullptr, nullptr );
-}
-
-//static
-void
-FEposSequenceEditorActionCallbacks::OpenAboutWindow()
-{
-    TSharedPtr<SWindow> root = FGlobalTabmanager::Get()->GetRootWindow();
-    SAboutWindow::Open( root );
-}
-
 //---
 
 //static
 void
 FEposSequenceEditorActionCallbacks::MapActions( TSharedPtr<FUICommandList> ioCommandList )
 {
-    ioCommandList->MapAction(
-        FEposSequenceEditorCommands::Get().GotoPraxinos,
-        FExecuteAction::CreateStatic( &GotoPraxinos )
-    );
-
-    ioCommandList->MapAction(
-        FEposSequenceEditorCommands::Get().GotoForum,
-        FExecuteAction::CreateStatic( &GotoForum )
-    );
-
-    ioCommandList->MapAction(
-        FEposSequenceEditorCommands::Get().GotoDiscord,
-        FExecuteAction::CreateStatic( &GotoDiscord )
-    );
-
-    ioCommandList->MapAction(
-        FEposSequenceEditorCommands::Get().GotoUserDocumentation,
-        FExecuteAction::CreateStatic( &GotoUserDocumentation )
-    );
-
-    ioCommandList->MapAction(
-        FEposSequenceEditorCommands::Get().GotoProjects,
-        FExecuteAction::CreateStatic( &GotoProjects )
-    );
-
-    ioCommandList->MapAction(
-        FEposSequenceEditorCommands::Get().OpenAboutWindow,
-        FExecuteAction::CreateStatic( &OpenAboutWindow )
-    );
-
-    //---
-
     ioCommandList->MapAction(
         FEposSequenceEditorCommands::Get().OpenSequenceEditorSettings,
         FExecuteAction::CreateStatic( &OpenSequenceEditorSettings )
@@ -246,13 +163,6 @@ FEposSequenceEditorActionCallbacks::MapActions( TSharedPtr<FUICommandList> ioCom
 void
 FEposSequenceEditorActionCallbacks::UnmapActions( TSharedPtr<FUICommandList> ioCommandList )
 {
-    ioCommandList->UnmapAction( FEposSequenceEditorCommands::Get().GotoPraxinos );
-    ioCommandList->UnmapAction( FEposSequenceEditorCommands::Get().GotoForum );
-    ioCommandList->UnmapAction( FEposSequenceEditorCommands::Get().GotoDiscord );
-    ioCommandList->UnmapAction( FEposSequenceEditorCommands::Get().GotoUserDocumentation );
-    ioCommandList->UnmapAction( FEposSequenceEditorCommands::Get().GotoProjects );
-    ioCommandList->UnmapAction( FEposSequenceEditorCommands::Get().OpenAboutWindow );
-
     ioCommandList->UnmapAction( FEposSequenceEditorCommands::Get().OpenSequenceEditorSettings );
     ioCommandList->UnmapAction( FEposSequenceEditorCommands::Get().OpenTrackEditorSettings );
     ioCommandList->UnmapAction( FEposSequenceEditorCommands::Get().OpenNamingConventionEditorSettings );

@@ -264,22 +264,4 @@ EposSequenceToolbarHelpers::MakeSettingsEntries( FMenuBuilder& iMenuBuilder, ISe
     iMenuBuilder.EndSection();
 }
 
-//static
-void
-EposSequenceToolbarHelpers::MakeHelpEntries( FMenuBuilder& iMenuBuilder )
-{
-    iMenuBuilder.AddMenuEntry( FEposSequenceEditorCommands::Get().GotoPraxinos );
-    iMenuBuilder.AddMenuEntry( FEposSequenceEditorCommands::Get().GotoForum );
-    iMenuBuilder.AddMenuEntry( FEposSequenceEditorCommands::Get().GotoDiscord );
-
-    iMenuBuilder.AddSeparator();
-
-    iMenuBuilder.AddMenuEntry( FEposSequenceEditorCommands::Get().GotoUserDocumentation );
-    iMenuBuilder.AddMenuEntry( FEposSequenceEditorCommands::Get().GotoProjects );
-
-    iMenuBuilder.AddSeparator();
-
-    iMenuBuilder.AddMenuEntry( FEposSequenceEditorCommands::Get().OpenAboutWindow );
-}
-
 #undef LOCTEXT_NAMESPACE

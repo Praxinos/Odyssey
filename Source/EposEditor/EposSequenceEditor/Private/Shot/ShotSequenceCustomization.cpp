@@ -594,15 +594,6 @@ FShotSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuil
         LOCTEXT( "SettingsToolTip", "Set sequence settings" ),
         FSlateIcon( FEposSequenceEditorStyle::Get().GetStyleSetName(), "Settings" ) );
 
-    ToolbarBuilder.AddSeparator();
-
-    ToolbarBuilder.AddComboButton(
-        FUIAction(),
-        FOnGetContent::CreateRaw( this, &FShotSequenceCustomization::MakeHelpMenu ),
-        LOCTEXT( "Help", "Help" ),
-        LOCTEXT( "HelpToolTip", "Help" ),
-        FSlateIcon( FEposSequenceEditorStyle::Get().GetStyleSetName(), "Help" ) );
-
     ToolbarBuilder.EndStyleOverride();
 }
 
@@ -779,18 +770,6 @@ FShotSequenceCustomization::MakeTextureMenu()
     FMenuBuilder MenuBuilder( true, sequencer ? sequencer->GetCommandBindings() : nullptr );
 
     EposSequenceToolbarHelpers::MakeTextureSettingsEntries( MenuBuilder );
-
-    return MenuBuilder.MakeWidget();
-}
-
-TSharedRef<SWidget>
-FShotSequenceCustomization::MakeHelpMenu()
-{
-    TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
-
-    FMenuBuilder MenuBuilder( true, sequencer ? sequencer->GetCommandBindings() : nullptr );
-
-    EposSequenceToolbarHelpers::MakeHelpEntries( MenuBuilder );
 
     return MenuBuilder.MakeWidget();
 }

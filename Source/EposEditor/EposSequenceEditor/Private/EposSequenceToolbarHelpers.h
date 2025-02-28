@@ -15,5 +15,4 @@ public:
     static void MakeCameraSettingsEntries( FMenuBuilder& iMenuBuilder );
 
     static void MakeSettingsEntries( FMenuBuilder& iMenuBuilder, ISequencer* iSequencer );
-    static void MakeHelpEntries( FMenuBuilder& iMenuBuilder );
 };

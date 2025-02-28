@@ -74,6 +74,16 @@
     ],
     "Modules": [
         {
+            "Name": "OdysseyCommonWidgets",
+            "Type": "Editor",
+            "LoadingPhase": "Default"
+        },
+        {
+            "Name": "OdysseyCoreEditor",
+            "Type": "Editor",
+            "LoadingPhase": "Default"
+        },
+        {
             "Name": "EposMovieScene",
             "Type": "Runtime",
             "LoadingPhase": "Default"

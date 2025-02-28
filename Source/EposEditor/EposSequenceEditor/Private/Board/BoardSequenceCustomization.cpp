@@ -832,15 +832,6 @@ FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBui
 
     ToolbarBuilder.AddSeparator();
 
-    ToolbarBuilder.AddComboButton(
-        FUIAction(),
-        FOnGetContent::CreateRaw( this, &FBoardSequenceCustomization::MakeHelpMenu ),
-        LOCTEXT( "Help", "Help" ),
-        LOCTEXT( "HelpToolTip", "Help" ),
-        FSlateIcon( FEposSequenceEditorStyle::Get().GetStyleSetName(), "Help" )  );
-
-    ToolbarBuilder.AddSeparator();
-
     ToolbarBuilder.AddWidget( SNew( SInfoBar )
                               .Padding( FMargin( 10.f, 3.f ) ) // To simulate a space with the previous separator
                               .Text_Raw( this, &FBoardSequenceCustomization::CreateInfoText )
@@ -1039,18 +1030,6 @@ FBoardSequenceCustomization::MakeTextureMenu()
     FMenuBuilder MenuBuilder( true, sequencer ? sequencer->GetCommandBindings() : nullptr );
 
     EposSequenceToolbarHelpers::MakeTextureSettingsEntries( MenuBuilder );
-
-    return MenuBuilder.MakeWidget();
-}
-
-TSharedRef<SWidget>
-FBoardSequenceCustomization::MakeHelpMenu()
-{
-    TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
-
-    FMenuBuilder MenuBuilder( true, sequencer ? sequencer->GetCommandBindings() : nullptr );
-
-    EposSequenceToolbarHelpers::MakeHelpEntries( MenuBuilder );
 
     return MenuBuilder.MakeWidget();
 }

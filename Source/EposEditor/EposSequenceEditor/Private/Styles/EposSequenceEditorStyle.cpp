@@ -136,9 +136,6 @@ FEposSequenceEditorStyle::InitCommands()
     Set( "EposSequenceCommands.OpenNamingConventionEditorSettings", new IMAGE_BRUSH_SVG( "epos-settings", Icon20x20 ) );
     Set( "EposSequenceCommands.OpenNamingConventionEditorSettings.Small", new IMAGE_BRUSH_SVG( "epos-settings", Icon20x20 ) );
 
-    Set( "EposSequenceCommands.OpenAboutWindow", new IMAGE_BRUSH_SVG( "epos-about", Icon20x20 ) );
-    Set( "EposSequenceCommands.OpenAboutWindow.Small", new IMAGE_BRUSH_SVG( "epos-about", Icon20x20 ) );
-
     Set( "EposSequenceCommands.StoryboardViewportResetPanZoomRotate", new IMAGE_BRUSH_SVG( "viewport-reset-transform", Icon20x20 ) );
     Set( "EposSequenceCommands.StoryboardViewportResetPanZoomRotate.Small", new IMAGE_BRUSH_SVG( "viewport-reset-transform", Icon20x20 ) );
 }
