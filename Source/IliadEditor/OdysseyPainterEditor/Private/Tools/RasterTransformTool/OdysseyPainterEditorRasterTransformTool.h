@@ -74,7 +74,7 @@ private:
     void BlendTransformAreaToPaintBlock();
 
     void CommitTransform();
-    void ClearTransform( bool iInactivateTransformTool = false );
+    void ClearTransform();
     void ClearBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock);
 
     //Copy from GeomTools.cpp

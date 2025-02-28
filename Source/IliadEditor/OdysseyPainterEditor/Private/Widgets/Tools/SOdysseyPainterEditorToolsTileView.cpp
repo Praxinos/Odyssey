@@ -26,6 +26,7 @@ SOdysseyPainterEditorToolsTileView::Construct(const FArguments& InArgs)
     {
         verticalBox->AddSlot()
         .AutoHeight()
+        .Padding(4)
         [
             SNew(SCheckBox)
             .Style( checkboxStyle )
@@ -33,11 +34,11 @@ SOdysseyPainterEditorToolsTileView::Construct(const FArguments& InArgs)
             .IsChecked(this, &SOdysseyPainterEditorToolsTileView::IsToolChecked, tool)
             .Visibility(this, &SOdysseyPainterEditorToolsTileView::ToolVisibility, tool)
             .ToolTipText(this, &SOdysseyPainterEditorToolsTileView::ToolTooltip, tool)
-            .Padding(FMargin(2.f))
+            .Padding(FMargin(4.f))
             [
                 SNew(SImage)
                 .Image(&tool->Icon)
-                .DesiredSizeOverride(FVector2D(32.f, 32.f))
+                .DesiredSizeOverride(FVector2D(20.f, 20.f))
             ]
         ];
     }
@@ -45,6 +46,7 @@ SOdysseyPainterEditorToolsTileView::Construct(const FArguments& InArgs)
     ChildSlot
     .HAlign(HAlign_Fill)
     .VAlign(VAlign_Fill)
+    .Padding(4)
     [
         verticalBox
     ];
