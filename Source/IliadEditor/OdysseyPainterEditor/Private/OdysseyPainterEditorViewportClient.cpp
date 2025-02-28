@@ -349,7 +349,10 @@ FOdysseyPainterEditorViewportClient::InputKey( FViewport* iViewport, int32 iCont
                 FVector2D viewportPoint(iViewport->GetMouseX(), iViewport->GetMouseY());
                 mHUDMouseDownReference = viewportPoint;
                 FVector2D hudPoint = viewportWidget->ToLocal(viewportPoint) +  FVector2D(textureFullWidth / 2.f, textureFullHeight / 2.f);
+
                 mCurrentHUDPoint = FOdysseyPoint(hudPoint.X, hudPoint.Y);
+                mCurrentHUDPoint.keysDown = mKeysPressed;
+
                 if (mCurrentHUDElement->OnMouseDown(mCurrentHUDPoint, iKey))
                     return true;
             }

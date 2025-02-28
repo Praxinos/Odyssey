@@ -118,6 +118,20 @@ UOdysseyPainterEditorVectorGridTool::OnKeyUpGlobalVector( FOdysseyVectorGroupPai
 }
 
 bool
+UOdysseyPainterEditorVectorGridTool::NodesAlreadySelected( std::vector<FGridNode *>& iNodeArray )
+{
+    for( FGridNode* node : iNodeArray )
+    {
+        if( node->IsSelected() == false )
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool
 UOdysseyPainterEditorVectorGridTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                       , const FOdysseyPoint& iPointInTexture
                                                       , const FKey& iKey
@@ -135,7 +149,9 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDownVector( FOdysseyVectorGroupPaint
         GEditor->BeginTransaction(LOCTEXT("vector-grid-tool.transaction.edit-grid","Vector Grid Tool"));
         if( GUndo )
         {
-            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoPointPosition( iScene, mPointArray, notificationFlags );
+            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoPointPosition( iScene
+                                                                          , mPointArray
+                                                                          , notificationFlags );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -154,18 +170,24 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDownVector( FOdysseyVectorGroupPaint
         // single selection mode
         if (  mEditionMode == eVectorGridEditionMode::Single )
         {
-            bool picked;
+            std::vector<FGridNode *> nodeArray;
 
-            mGridHUD->GetSelection( mGridNodeArray );
+            mGridHUD->PickNodes( iPointInTexture.x
+                               , iPointInTexture.y
+                               , PickingRadius
+                               , nodeArray );
 
-            picked = mGridHUD->PickNodes( iPointInTexture.x
-                                        , iPointInTexture.y
-                                        , PickingRadius
-                                        , FSlateApplication::Get().GetModifierKeys().IsControlDown() ? false : true );
-
-            if( picked == true )
+            if( FSlateApplication::Get().GetModifierKeys().IsControlDown() == false )
             {
-                mGridHUD->GetSelection( mGridNodeArray );
+                if( NodesAlreadySelected( nodeArray ) == false )
+                {
+                    mGridHUD->ClearSelection();
+                }
+            }
+
+            for( FGridNode* node : nodeArray )
+            {
+                node->SetSelected( true );
             }
         }
     }
@@ -206,10 +228,14 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDragVector( FOdysseyVectorGroupPaint
             {
                 BLPoint spaceDif = selectionBox.inverseWorldMatrix.mapVector( iPointInTexture.deltaPosition.X
                                                                             , iPointInTexture.deltaPosition.Y );
+                std::vector<FGridNode *> nodeArray;
 
-                for( int i = 0; i < mGridNodeArray.size(); i++ )
+                mGridHUD->GetSelection( nodeArray );
+
+                for( int i = 0; i < nodeArray.size(); i++ )
                 {
-                    mGridNodeArray[i]->Set( mGridNodeArray[i]->GetX() + spaceDif.x, mGridNodeArray[i]->GetY() + spaceDif.y );
+                    nodeArray[i]->Set( nodeArray[i]->GetX() + spaceDif.x
+                                     , nodeArray[i]->GetY() + spaceDif.y );
                 }
 
                 mGridHUD->Deform();
@@ -241,7 +267,19 @@ UOdysseyPainterEditorVectorGridTool::OnMouseUpVector( FOdysseyVectorGroupPaint* 
     {
         if( mEditionMode == eVectorGridEditionMode::Multi )
         {
-            mGridHUD->EndSelectionRectangle( FSlateApplication::Get().GetModifierKeys().IsControlDown() ? false : true );
+            std::vector<FGridNode *> nodeArray;
+
+            mGridHUD->EndSelectionRectangle( nodeArray );
+
+            if( nodeArray.size() && ( FSlateApplication::Get().GetModifierKeys().IsControlDown() == false ) )
+            {
+                mGridHUD->ClearSelection();
+            }
+
+            for( FGridNode* node : nodeArray )
+            {
+                node->SetSelected( true );
+            }
         }
     }
 
@@ -249,6 +287,17 @@ UOdysseyPainterEditorVectorGridTool::OnMouseUpVector( FOdysseyVectorGroupPaint* 
     iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     return true;
+}
+
+bool
+UOdysseyPainterEditorVectorGridTool::OnMouseClickVector( FOdysseyVectorGroupPaint* iScene
+                                                       , const FOdysseyPoint& iPointInTexture
+                                                       , const FKey& iKey
+                                                       , uint64& oSignalFlags )
+{
+    mGridHUD->ClearSelection();
+
+    return false;
 }
 
 uint64
@@ -279,9 +328,9 @@ UOdysseyPainterEditorVectorGridTool::SetEditionMode( eVectorGridEditionMode iMod
 const FSlateBrush*
 UOdysseyPainterEditorVectorGridTool::GetBackgroundColor( eVectorGridEditionMode iMode ) const
 {
-    static FSlateColorBrush orange = FSlateColorBrush( FLinearColor( 1.0f, 0.5f, 0.0f, 0.5f ) );
+    static FSlateColorBrush selected = FSlateColorBrush( FStyleColors::Select );
 
-    return ( iMode == mEditionMode ) ? &orange : nullptr;
+    return ( iMode == mEditionMode ) ? &selected : nullptr;
 }
 
 TSharedRef<SWidget>

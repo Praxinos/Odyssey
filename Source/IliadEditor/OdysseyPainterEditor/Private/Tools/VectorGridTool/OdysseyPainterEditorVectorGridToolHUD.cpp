@@ -109,7 +109,7 @@ FOdysseyPainterEditorVectorGridToolHUD::DragSelectionRectangle( double iWorldX, 
 }
 
 void
-FOdysseyPainterEditorVectorGridToolHUD::EndSelectionRectangle( bool iClearSelection )
+FOdysseyPainterEditorVectorGridToolHUD::EndSelectionRectangle( std::vector<FGridNode*>& oNodeArray )
 {
     double xmin = ::ULIS::FMath::Min( mWorldSelDrag.x, mWorldSelStart.x );
     double ymin = ::ULIS::FMath::Min( mWorldSelDrag.y, mWorldSelStart.y );
@@ -120,7 +120,7 @@ FOdysseyPainterEditorVectorGridToolHUD::EndSelectionRectangle( bool iClearSelect
     mWorldSelDrag.x = mWorldSelStart.x = 0.0f;
     mWorldSelDrag.y = mWorldSelStart.y = 0.0f;
 
-    PickNodes( worldRect, iClearSelection );
+    PickNodes( worldRect, oNodeArray );
 }
 
 void
@@ -146,18 +146,13 @@ FOdysseyPainterEditorVectorGridToolHUD::ClearSelection()
     }
 }
 
-bool
+void
 FOdysseyPainterEditorVectorGridToolHUD::PickNodes( double iWorldX
                                                  , double iWorldY
                                                  , double iWorldRadius
-                                                 , bool iClearSelection )
+                                                 , std::vector<FGridNode*>& oNodeArray )
 {
     bool picked = false;
-
-    if( iClearSelection )
-    {
-        ClearSelection();
-    }
 
     if( mSelectionBox.rect.Area() )
     {
@@ -171,26 +166,16 @@ FOdysseyPainterEditorVectorGridToolHUD::PickNodes( double iWorldX
 
             if ( vec.Distance() <= iWorldRadius )
             {
-                node->SetSelected( true );
-
-                picked = true;
+                oNodeArray.push_back( node );
             }
         }
     }
-
-    return picked;
 }
 
-bool
-FOdysseyPainterEditorVectorGridToolHUD::PickNodes( ::ULIS::FRectD& iWorldRect, bool iClearSelection )
+void
+FOdysseyPainterEditorVectorGridToolHUD::PickNodes( ::ULIS::FRectD& iWorldRect
+                                                  , std::vector<FGridNode*>& oNodeArray )
 {
-    bool picked = false;
-
-    if( iClearSelection )
-    {
-        ClearSelection();
-    }
-
     if( mSelectionBox.rect.Area() )
     {
         BLMatrix2D worldMatrix = mSelectionBox.worldMatrix;
@@ -203,14 +188,10 @@ FOdysseyPainterEditorVectorGridToolHUD::PickNodes( ::ULIS::FRectD& iWorldRect, b
 
             if ( iWorldRect.HitTest( coords ) )
             {
-                node->SetSelected( true );
-
-                picked = true;
+                oNodeArray.push_back( node );
             }
         }
     }
-
-    return picked;
 }
 
 void

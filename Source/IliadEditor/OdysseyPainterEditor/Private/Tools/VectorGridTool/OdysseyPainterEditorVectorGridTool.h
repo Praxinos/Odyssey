@@ -63,16 +63,20 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorGridTool : public UOdy
         virtual bool OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                       , const FOdysseyPoint& iPointInTexture
                                       , const FKey& iKey, uint64& oSignalFlags ) override;
+        virtual bool OnMouseClickVector( FOdysseyVectorGroupPaint* iScene
+                                       , const FOdysseyPoint& iPointInTexture
+                                       , const FKey& iKey
+                                       , uint64& oSignalFlags ) override;
         virtual uint64 PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
                                             , const FName& iPropertyName ) override;
         TSharedRef<SWidget> CreateModifierSegmentControl();
         const FSlateBrush* GetBackgroundColor( eVectorGridEditionMode iMode ) const;
         void SetEditionMode( eVectorGridEditionMode iMode );
+        bool NodesAlreadySelected( std::vector<FGridNode *>& iNodeArray );
 
     private:
         std::vector<FOdysseyVectorPoint*> mPointArray;
         FOdysseyPainterEditorVectorGridToolHUD* mGridHUD;
-        std::vector<FGridNode *> mGridNodeArray;
         eVectorGridEditionMode mEditionMode;
 
     public:

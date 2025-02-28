@@ -634,9 +634,9 @@ UOdysseyPainterEditorVectorTrajectoryTool::SetEditionMode( eVectorTrajectoryEdit
 const FSlateBrush*
 UOdysseyPainterEditorVectorTrajectoryTool::GetBackgroundColor( eVectorTrajectoryEditionMode iMode ) const
 {
-    static FSlateColorBrush orange = FSlateColorBrush( FLinearColor( 1.0f, 0.5f, 0.0f, 0.5f ) );
+    static FSlateColorBrush selected = FSlateColorBrush( FStyleColors::Select );
 
-    return ( iMode == mEditionMode ) ? &orange : nullptr;
+    return ( iMode == mEditionMode ) ? &selected : nullptr;
 }
 
 TSharedRef<SWidget>

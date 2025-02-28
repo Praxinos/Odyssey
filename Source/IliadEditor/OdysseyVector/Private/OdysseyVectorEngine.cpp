@@ -826,7 +826,10 @@ FOdysseyVectorEngine::TracePolygon( const ::ULIS::FVec2I* iPoint
                 mHorizontalLineBuffer[i].inited = 0;
 
                 if( ( mHorizontalLineBuffer[i].x1 >= 0 )
-                 && ( mHorizontalLineBuffer[i].x0 < (int32) mRenderData.size.w ) )
+                 && ( mHorizontalLineBuffer[i].x0 < (int32) mRenderData.size.w )
+                 // we don't draw the last line to prevent 2 horizontal lines from 2 different polygons
+                 // overlapping. this is still experimental, I am not sure this is the right thing to do.
+                 && ( i != ymax ) )
                 {
                     // this is to prevent overlapping in semi-transparent drawings.
                     // Note: this could be made useless by using a Z-buffer, but we'll save this option for later.

@@ -312,15 +312,26 @@ UOdysseyPainterEditorVectorEraserTool::ErasePaths( FOdysseyVectorGroupPaint* iSc
                                                               , iErasureArea
                                                               , nullptr ) )
                   {
-                      if( path->Erase( oAddedObjectArray
-                                     , oAddedVertexArray
-                                     , oAddedSegmentArray
-                                     , oRemovedVertexArray
-                                     , oRemovedSegmentArray
-                                     , false
-                                     , SplitPath ) )
+                      if( mEditionMode == eVectorEraserEditionMode::Default )
                       {
-                          oRemovedObjectArray.push_back( path );
+                          if( path->Erase( oAddedObjectArray
+                                         , oAddedVertexArray
+                                         , oAddedSegmentArray
+                                         , oRemovedVertexArray
+                                         , oRemovedSegmentArray
+                                         , false
+                                         , SplitPath ) )
+                          {
+                              oRemovedObjectArray.push_back( path );
+                          }
+                      }
+
+                      if( mEditionMode == eVectorEraserEditionMode::Path )
+                      {
+                          if( path->Pick( iScene, iErasureArea, FOdysseyVectorObject::PICK_MASK_BASED ) )
+                          {
+                              oRemovedObjectArray.push_back( path );
+                          }
                       }
                   }
               }
@@ -396,7 +407,8 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorGroupPaint
         // TODO: pass the mask image as arg to Pick function
         iScene->GetCell()->SetBLMask( mEraserHUD->GetMask() );
 
-        if ( mEditionMode == eVectorEraserEditionMode::Default )
+        if ( ( mEditionMode == eVectorEraserEditionMode::Default )
+          || ( mEditionMode == eVectorEraserEditionMode::Path    ) )
         {
             ErasePaths( iScene
                       , erasureArea
@@ -458,9 +470,9 @@ UOdysseyPainterEditorVectorEraserTool::SetEditionMode( eVectorEraserEditionMode 
 const FSlateBrush*
 UOdysseyPainterEditorVectorEraserTool::GetBackgroundColor( eVectorEraserEditionMode iMode ) const
 {
-    static FSlateColorBrush orange = FSlateColorBrush( FLinearColor( 1.0f, 0.5f, 0.0f, 0.5f ) );
+    static FSlateColorBrush selected = FSlateColorBrush( FStyleColors::Select );
 
-    return ( iMode == mEditionMode ) ? &orange : nullptr;
+    return ( iMode == mEditionMode ) ? &selected : nullptr;
 }
 
 TSharedRef<SWidget>

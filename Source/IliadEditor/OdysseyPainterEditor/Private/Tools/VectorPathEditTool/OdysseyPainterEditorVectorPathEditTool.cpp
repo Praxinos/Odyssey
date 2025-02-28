@@ -749,12 +749,10 @@ UOdysseyPainterEditorVectorPathEditTool::DragVertexHandle( FOdysseyVectorVertex 
                                                          , bool iWidenAllAlong )
 {
     FOdysseyVectorPath* path = iVertex->GetOwnerAsPath();
-    ::ULIS::FVec2D localMouseAtDown = FOdysseyVector::MapVector( path->GetInverseWorldMatrix(), mPointInTextureAtDown );
-    ::ULIS::FVec2D localMouse = FOdysseyVector::MapVector( path->GetInverseWorldMatrix(), iPointInTexture );
-    double ratio = ::ULIS::FVec2D( iVertex->GetX() - localMouse.x
-                                 , iVertex->GetY() - localMouse.y ).Distance() /
-                   ::ULIS::FVec2D( iVertex->GetX() - localMouseAtDown.x
-                                 , iVertex->GetY() - localMouseAtDown.y ).Distance();
+    ::ULIS::FVec2D localMouse = FOdysseyVector::MapVector( path->GetInverseWorldMatrix()
+                                                         , iPointInTexture );
+    double ratio = ( ::ULIS::FVec2D( iVertex->GetX() - localMouse.x
+                                   , iVertex->GetY() - localMouse.y ).Distance() ) / iVertex->GetRadius();
 
     if( iWidenAllAlong )
     {
@@ -767,8 +765,6 @@ UOdysseyPainterEditorVectorPathEditTool::DragVertexHandle( FOdysseyVectorVertex 
     {
         iVertex->SetRadius( iVertex->GetRadius() * ratio );
     }
-
-    mPointInTextureAtDown = iPointInTexture;
 }
 
 void
@@ -1086,9 +1082,9 @@ UOdysseyPainterEditorVectorPathEditTool::SetEditionMode( eVectorPathEditEditionM
 const FSlateBrush*
 UOdysseyPainterEditorVectorPathEditTool::GetBackgroundColor( eVectorPathEditEditionMode iMode ) const
 {
-    static FSlateColorBrush orange = FSlateColorBrush( FLinearColor( 1.0f, 0.5f, 0.0f, 0.5f ) );
+    static FSlateColorBrush selected = FSlateColorBrush( FStyleColors::Select );
 
-    return ( iMode == mEditionMode ) ? &orange : nullptr;
+    return ( iMode == mEditionMode ) ? &selected : nullptr;
 }
 
 TSharedRef<SWidget>

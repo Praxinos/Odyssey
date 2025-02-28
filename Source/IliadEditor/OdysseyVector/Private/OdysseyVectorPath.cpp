@@ -919,6 +919,12 @@ FOdysseyVectorPath::SegmentAdditionPolicy( FWayPoint* iWayPoint0
         {
             retFlags |= eSegmentAdditionFlags::KeepOriginalSegment;
         }
+
+        if( ( iWayPoint0->flags & FWayPoint::InsideErasureArea )
+         && ( iWayPoint1->flags & FWayPoint::InsideErasureArea ) )
+        {
+            retFlags |= eSegmentAdditionFlags::RemoveOriginalSegment;
+        }
     }
 
     if( ( iWayPoint0->flags & FWayPoint::OutsideErasureArea )

@@ -163,82 +163,78 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseDownVector( FOdysseyVectorGro
             mPickedArea = mBucketHUD->PickBucketArea( mPickedBucket, iPointInTexture.x, iPointInTexture.y );
         }
 
-        // Left mouse-click
-        if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
+        if( mPickedBucket )
         {
-            if( mPickedBucket )
+            FOdysseyVectorObject* bucketOwner = mPickedBucket->GetOwner();
+            FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(bucketOwner);
+
+            switch( mPickedArea )
             {
-                FOdysseyVectorObject* bucketOwner = mPickedBucket->GetOwner();
-                FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(bucketOwner);
-
-                switch( mPickedArea )
-                {
-                    // assuming bucket will be moved by the user
-                    case FOdysseyPainterEditorVectorPaintBucketToolHUD::PICK_BUCKET :
-                        // needed for valid GUndo pointer
-                        GEditor->BeginTransaction(LOCTEXT("vector-paint-bucket-tool.transaction.move-bucket","Paint Bucket"));
-                        if( GUndo )
-                        {
-                            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoPointPosition( iScene
-                                                                                          , mPickedBucket
-                                                                                          , retFlags );
-
-                            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-
-                            TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
-                            if (source)
-                                source->RecordCurrentFrameUndo();
-                        }
-                        GEditor->EndTransaction();
-
-                        mPointPosition.x = mPickedBucket->GetX();
-                        mPointPosition.y = mPickedBucket->GetY();
-                    break;
-
-                    case FOdysseyPainterEditorVectorPaintBucketToolHUD::PICK_HANDLE :
-                        // needed for valid GUndo pointer
-                        GEditor->BeginTransaction(LOCTEXT("vector-paint-bucket-tool.transaction.rotate-bucket","Paint Bucket"));
-                        if( GUndo )
-                        {
-                            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( iScene
-                                                                                        , mPickedBucket
-                                                                                        , retFlags );
-
-                            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-
-                            TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
-                            if (source)
-                                source->RecordCurrentFrameUndo();
-                        }
-                        GEditor->EndTransaction();
-
-                        mPointRotation = mPickedBucket->GetRotation();
-                    break;
-
-                    case FOdysseyPainterEditorVectorPaintBucketToolHUD::PICK_RADIAL_AREA:
-                    case FOdysseyPainterEditorVectorPaintBucketToolHUD::PICK_RADIAL_HANDLE:
+                // assuming bucket will be moved by the user
+                case FOdysseyPainterEditorVectorPaintBucketToolHUD::PICK_BUCKET :
+                    // needed for valid GUndo pointer
+                    GEditor->BeginTransaction(LOCTEXT("vector-paint-bucket-tool.transaction.move-bucket","Paint Bucket"));
+                    if( GUndo )
                     {
-                        // needed for valid GUndo pointer
-                        GEditor->BeginTransaction(LOCTEXT("vector-paint-bucket-tool.transaction.alter-bucket","Paint Bucket"));
-                        if( GUndo )
-                        {
-                            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( iScene
-                                                                                        , mPickedBucket
-                                                                                        , retFlags );
+                        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoPointPosition( iScene
+                                                                                      , mPickedBucket
+                                                                                      , retFlags );
 
-                            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
-                            TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
-                            if (source)
-                                source->RecordCurrentFrameUndo();
-                        }
-                        GEditor->EndTransaction();
+                        TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
+                        if (source)
+                            source->RecordCurrentFrameUndo();
                     }
-                    break;
+                    GEditor->EndTransaction();
 
-                    default :
-                    break;
+                    mPointPosition.x = mPickedBucket->GetX();
+                    mPointPosition.y = mPickedBucket->GetY();
+                break;
+
+                case FOdysseyPainterEditorVectorPaintBucketToolHUD::PICK_HANDLE :
+                    // needed for valid GUndo pointer
+                    GEditor->BeginTransaction(LOCTEXT("vector-paint-bucket-tool.transaction.rotate-bucket","Paint Bucket"));
+                    if( GUndo )
+                    {
+                        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( iScene
+                                                                                    , mPickedBucket
+                                                                                    , retFlags );
+
+                        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+
+                        TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
+                        if (source)
+                            source->RecordCurrentFrameUndo();
+                    }
+                    GEditor->EndTransaction();
+
+                    mPointRotation = mPickedBucket->GetRotation();
+                break;
+
+                case FOdysseyPainterEditorVectorPaintBucketToolHUD::PICK_RADIAL_AREA:
+                case FOdysseyPainterEditorVectorPaintBucketToolHUD::PICK_RADIAL_HANDLE:
+                {
+                    // needed for valid GUndo pointer
+                    GEditor->BeginTransaction(LOCTEXT("vector-paint-bucket-tool.transaction.alter-bucket","Paint Bucket"));
+                    if( GUndo )
+                    {
+                        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( iScene
+                                                                                    , mPickedBucket
+                                                                                    , retFlags );
+
+                        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+
+                        TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
+                        if (source)
+                            source->RecordCurrentFrameUndo();
+                    }
+                    GEditor->EndTransaction();
                 }
+                break;
+
+                default :
+                break;
             }
         }
     }
@@ -816,9 +812,9 @@ UOdysseyPainterEditorVectorPaintBucketTool::SetEditionMode( eVectorPaintBucketEd
 const FSlateBrush*
 UOdysseyPainterEditorVectorPaintBucketTool::GetBackgroundColor( eVectorPaintBucketEditionMode iMode ) const
 {
-    static FSlateColorBrush orange = FSlateColorBrush( FLinearColor( 1.0f, 0.5f, 0.0f, 0.5f ) );
+    static FSlateColorBrush selected = FSlateColorBrush( FStyleColors::Select );
 
-    return ( iMode == mEditionMode ) ? &orange : nullptr;
+    return ( iMode == mEditionMode ) ? &selected : nullptr;
 }
 
 TSharedRef<SWidget>
@@ -828,6 +824,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::CreateModifierSegmentControl()
            .Value_Lambda( [this]{ return mEditionMode; } )
            .SupportsEmptySelection( false )
            .SupportsMultiSelection( false )
+           .UniformPadding( FMargin( 2, 0, 2, 0 ) )
            .IsEnabled( false ) // currently not clickable - Info only
            .OnValueChanged( SSegmentedControl<eVectorPaintBucketEditionMode>::FOnValueChanged::CreateUObject( this, &UOdysseyPainterEditorVectorPaintBucketTool::SetEditionMode ) )
            // DEFAULT
