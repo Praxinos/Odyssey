@@ -12,9 +12,9 @@ class ACineCameraActor;
 /**
  * A component containing management of actor scaling from camera
  */
-UCLASS()
+UCLASS( meta = ( BlueprintSpawnableComponent ) )
 class EPOSACTORS_API UScalingComponent
-    : public USceneComponent
+    : public UActorComponent
 {
     GENERATED_UCLASS_BODY()
 
@@ -24,7 +24,8 @@ public:
 
     virtual FIntPoint ComputeTextureSize( const FVector& iCameraViewSize, int32 iTextureHeight ) const;
 
-    virtual void UpdateToCamera( const ACineCameraActor* iCamera, float iDistance );
+    //virtual void UpdateToCamera( const ACineCameraActor* iCamera, float iDistance );
+    //virtual void UpdateToCamera();
 
 public:
     /** Set the margin as percent (10. for 10%) */
@@ -36,15 +37,15 @@ public:
     /** Get the relative scaling as percent (100. for 100%) */
     virtual FVector2D GetRelativeScaling() const;
 
-private:
+public:
     /** Get the margin as percent (0.1 for 10%) */
     virtual float GetSafeMarginNormalized() const;
     /** Get the relative scaling as percent (1. for 100%) */
     virtual FVector2D GetRelativeScalingNormalized() const;
 
-    virtual void UpdateToCamera();
+    //virtual const ACineCameraActor* GuessAttachedCineCamera() const;
 
-    virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
+    //virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
 
 private:
     /** This will make the actor bigger than the original size viewed by the camera by adding a margin to the actor */
@@ -58,7 +59,4 @@ private:
       */
     UPROPERTY( EditAnywhere, Category="Scaling", meta=(AllowPreserveRatio) )
     FVector2D RelativeScaling = { 100.f, 100.f };
-
-    UPROPERTY()
-    TWeakObjectPtr<const ACineCameraActor> Camera;
 };

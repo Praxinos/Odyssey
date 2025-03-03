@@ -32,13 +32,7 @@ public:
     UOdysseyAnimationComponent*         GetAnimationComponent();
     const UOdysseyAnimationComponent*   GetAnimationComponent() const;
 
-    UScalingComponent*         GetScalingComponent();
-    const UScalingComponent*   GetScalingComponent() const;
-
 protected:
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Animation")
-    TObjectPtr<UScalingComponent> ScalingComponent;
-
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Animation")
     TObjectPtr<UOdysseyAnimationComponent> AnimationComponent;
 
