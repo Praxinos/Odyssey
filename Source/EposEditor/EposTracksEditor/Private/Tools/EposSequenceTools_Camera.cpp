@@ -22,6 +22,7 @@
 #include "EposSequenceHelpers.h"
 #include "NamingConvention.h"
 #include "PlaneActor.h"
+#include "ScalingComponent.h"
 #include "Settings/EposTracksEditorSettings.h"
 #include "Shot/ShotSequence.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
@@ -1358,10 +1359,15 @@ ShotSequenceTools::SetCameraFocalLengthAndScalePlane( TArray<TWeakObjectPtr<APla
         if( !plane.IsValid() || !ShotSequenceTools::CanMoveAndScalePlane( plane.Get(), ioCamera ) )
             continue;
 
+        UScalingComponent* scaling_component = plane->FindComponentByClass<UScalingComponent>();
+        if( !scaling_component )
+            continue;
+
         planes.Add( plane );
         current_distances.Add( FVector::Distance( ioCamera->GetActorLocation(), plane->GetActorLocation() ) );
         old_scales.Add( plane->GetActorScale3D() );
-        old_scales_camera100.Add( plane->ComputePlaneScaleWithScaleAndMargin( ioCamera, current_distances.Last() ) );
+        FVector camera_view_size = scaling_component->ComputeSizeOfCameraView( ioCamera, current_distances.Last() );
+        old_scales_camera100.Add( scaling_component->ComputeScaleWithScaleAndMargin( camera_view_size ) );
     }
 
     ioCamera->GetCineCameraComponent()->SetCurrentFocalLength( iNewFocalLength );
@@ -1374,18 +1380,24 @@ ShotSequenceTools::SetCameraFocalLengthAndScalePlane( TArray<TWeakObjectPtr<APla
         FVector old_scale = old_scales[i];
         FVector old_scale_camera100 = old_scales_camera100[i];
 
+        UScalingComponent* scaling_component = plane->FindComponentByClass<UScalingComponent>();
+        if( !scaling_component )
+            continue;
+
+        FVector camera_view_size = scaling_component->ComputeSizeOfCameraView( ioCamera, current_distance );
+
         switch( iScaleType )
         {
             case EScalePlane::kFitToCamera:
             {
-                FVector scale = plane->ComputePlaneScaleWithScaleAndMargin( ioCamera, current_distance );
+                FVector scale = scaling_component->ComputeScaleWithScaleAndMargin( camera_view_size );
                 plane->SetActorScale3D( scale );
             }
             break;
 
             case EScalePlane::kRelativeScale:
             {
-                FVector new_scale_camera100 = plane->ComputePlaneScaleWithScaleAndMargin( ioCamera, current_distance );
+                FVector new_scale_camera100 = scaling_component->ComputeScaleWithScaleAndMargin( camera_view_size );
                 FVector ratio = new_scale_camera100 / old_scale_camera100;
                 FVector new_scale = old_scale * ratio;
 

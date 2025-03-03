@@ -28,6 +28,7 @@
 #include "EposSequenceHelpers.h"
 #include "NamingConvention.h"
 #include "PlaneActor.h"
+#include "ScalingComponent.h"
 #include "Settings/EposTracksEditorSettings.h"
 #include "Tools/ResourceAssetTools.h"
 
@@ -68,15 +69,29 @@ FindNextFreePlaneLocation( UWorld* iWorld, FVector iPlaneLocation, FVector iCame
 
 //static
 APlaneActor*
-ShotSequenceTools::SpawnPlane( UWorld* iWorld, ACineCameraActor* iCamera, float iSafeMargin, FVector2D iRelativeScaling )
+ShotSequenceTools::SpawnPlane( UWorld* iWorld, ACineCameraActor* iCamera, float iFocusDistance, float iSafeMargin, FVector2D iRelativeScaling )
 {
     FActorSpawnParameters SpawnParams;
     APlaneActor* plane = iWorld->SpawnActor<APlaneActor>( SpawnParams );
     if( !plane )
         return nullptr;
 
-    plane->SafeMargin = iSafeMargin;
-    plane->RelativeScaling = iRelativeScaling;
+    // Using this will delete the component once the actor is renamed at the end of SpawnAndBindPlane() -_-
+    //UActorComponent* actor_component = plane->AddComponentByClass( UScalingComponent::StaticClass(), false, FTransform::Identity, false );
+    // So create and attach/register it to the actor in 2 steps
+    UScalingComponent* actor_component = NewObject<UScalingComponent>( plane, UScalingComponent::StaticClass() );
+    plane->FinishAddComponent( actor_component, false, FTransform::Identity );
+
+    check( actor_component );
+    UScalingComponent* scaling_component = Cast<UScalingComponent>( actor_component );
+    check( scaling_component );
+
+    scaling_component = plane->FindComponentByClass<UScalingComponent>();
+    if( !scaling_component )
+        return nullptr;
+
+    scaling_component->SetSafeMargin( iSafeMargin );
+    scaling_component->SetRelativeScaling( iRelativeScaling );
 
     //---
 
@@ -93,7 +108,8 @@ ShotSequenceTools::SpawnPlane( UWorld* iWorld, ACineCameraActor* iCamera, float 
     FVector plane_location = CamLocation + CamDir * FocusDistance;
     plane_location = FindNextFreePlaneLocation( iWorld, plane_location, CamLocation );
 
-    FVector plane_scale = plane->ComputePlaneScaleWithScaleAndMargin( iCamera, FocusDistance );
+    FVector camera_view_size = scaling_component->ComputeSizeOfCameraView( iCamera, iFocusDistance );
+    FVector plane_scale = scaling_component->ComputeScaleWithScaleAndMargin( camera_view_size );
 
     FRotator plane_rotator = CamRot;
 
@@ -101,7 +117,6 @@ ShotSequenceTools::SpawnPlane( UWorld* iWorld, ACineCameraActor* iCamera, float 
 
     plane->SetActorScale3D( plane_scale );
     plane->SetActorLocation( plane_location );
-    //plane->SetActorRotation( FRotator( 0.f, 90.f, 90.f ) );
     plane->AddActorWorldRotation( plane_rotator );
 
     //plane->AttachToActor( iCamera, FAttachmentTransformRules::KeepRelativeTransform ); // Done in the editor with GEditor->ParentActors();
@@ -129,11 +144,17 @@ ShotSequenceTools::SpawnAndBindPlane( ISequencer& iSequencer, UMovieSceneSequenc
     if( iPlaneArgs.mMargin.IsSet() )
         margin = iPlaneArgs.mMargin.GetValue();
 
-    APlaneActor* plane = ShotSequenceTools::SpawnPlane( world, iCamera, margin, relative_scaling );
+    float focusDistance = 200;
+    APlaneActor* plane = ShotSequenceTools::SpawnPlane( world, iCamera, focusDistance, margin, relative_scaling );
+
+    UScalingComponent* scaling_component = plane->FindComponentByClass<UScalingComponent>();
+    check( scaling_component );
 
     //---
 
-    FIntPoint texture_size = plane->ComputeTextureSize( iCamera, settings->TextureSettings.Height );
+    FVector camera_view_size = scaling_component->ComputeSizeOfCameraView( iCamera, focusDistance );
+    FVector camera_view_size_with_scaling = scaling_component->ComputeScaleWithScaleAndMargin( camera_view_size );
+    FIntPoint texture_size = scaling_component->ComputeTextureSize( camera_view_size_with_scaling, settings->TextureSettings.Height );
 
     UMaterialInstanceConstant* new_material = iPlaneArgs.mTexture.IsValid()
                                               ? ProjectAssetTools::CreateMaterialAndTexture( iSequencer, iSequence, iSequenceID, iPlaneArgs.mTexture.Get() )
@@ -207,9 +228,16 @@ ShotSequenceTools::MoveAndScalePlane( APlaneActor* ioPlane, const ACineCameraAct
     if( FMath::IsNearlyZero( iNewDistance ) )
         return false;
 
+    UScalingComponent* scaling_component = ioPlane->FindComponentByClass<UScalingComponent>();
+    if( !scaling_component )
+        return false;
+
     float old_distance = FVector::Distance( iCamera->GetActorLocation(), ioPlane->GetActorLocation() );
     FVector old_scale = ioPlane->GetActorScale3D();
-    FVector old_scale_camera100 = ioPlane->ComputePlaneScaleWithScaleAndMargin( iCamera, old_distance );
+    FVector old_camera_view_size = scaling_component->ComputeSizeOfCameraView( iCamera, old_distance );
+    FVector old_scale_camera100 = scaling_component->ComputeScaleWithScaleAndMargin( old_camera_view_size );
+
+    FVector new_camera_view_size = scaling_component->ComputeSizeOfCameraView( iCamera, iNewDistance );
 
     FVector new_plane_location = iCamera->GetActorLocation() + ( ioPlane->GetActorLocation() - iCamera->GetActorLocation() ).GetSafeNormal() * iNewDistance;
 
@@ -219,14 +247,14 @@ ShotSequenceTools::MoveAndScalePlane( APlaneActor* ioPlane, const ACineCameraAct
     {
         case EScalePlane::kFitToCamera:
             {
-                FVector scale = ioPlane->ComputePlaneScaleWithScaleAndMargin( iCamera, iNewDistance );
+                FVector scale = scaling_component->ComputeScaleWithScaleAndMargin( new_camera_view_size );
                 ioPlane->SetActorScale3D( scale );
             }
             break;
 
         case EScalePlane::kRelativeScale:
             {
-                FVector new_scale_camera100 = ioPlane->ComputePlaneScaleWithScaleAndMargin( iCamera, iNewDistance );
+                FVector new_scale_camera100 = scaling_component->ComputeScaleWithScaleAndMargin( new_camera_view_size );
                 FVector ratio = new_scale_camera100 / old_scale_camera100;
                 FVector new_scale = old_scale * ratio;
 

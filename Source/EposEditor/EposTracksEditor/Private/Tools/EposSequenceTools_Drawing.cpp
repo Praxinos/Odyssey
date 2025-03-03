@@ -22,6 +22,7 @@
 #include "Board/BoardSequence.h"
 #include "EposSequenceHelpers.h"
 #include "PlaneActor.h"
+#include "ScalingComponent.h"
 #include "Settings/EposTracksEditorSettings.h"
 #include "Tools/ResourceAssetTools.h"
 
@@ -186,8 +187,14 @@ ShotSequenceTools::CreateDrawing( ISequencer& iSequencer, UMovieSceneSequence* i
             if( !plane )
                 continue;
 
+            UScalingComponent* scaling_component = plane->FindComponentByClass<UScalingComponent>();
+            if( !scaling_component )
+                continue;
+
+            FVector camera_view_size = scaling_component->ComputeSizeOfCameraView( camera, 200 /* arbitrary as we only need its ratio */ );
+            FVector camera_view_size_with_scaling = scaling_component->ComputeScaleWithScaleAndMargin( camera_view_size );
             const UEposTracksEditorSettings* settings = GetDefault<UEposTracksEditorSettings>();
-            FIntPoint texture_size = plane->ComputeTextureSize( camera, settings->TextureSettings.Height );
+            FIntPoint texture_size = scaling_component->ComputeTextureSize( camera_view_size_with_scaling, settings->TextureSettings.Height );
 
             if( channel->GetNumKeys() )
             {
@@ -199,7 +206,9 @@ ShotSequenceTools::CreateDrawing( ISequencer& iSequencer, UMovieSceneSequence* i
                 UMaterialInstance* material = first_drawing.GetMaterial();
                 UTexture2D* first_texture = ProjectAssetTools::GetTexture2D( iSequence, material );
                 if( first_texture )
-                    texture_size = plane->ComputeTextureSize( camera, first_texture->GetSurfaceHeight() );
+                {
+                    texture_size = scaling_component->ComputeTextureSize( camera_view_size_with_scaling, first_texture->GetSurfaceHeight() );
+                }
             }
 
             new_material = ProjectAssetTools::CreateMaterialAndTexture( iSequencer, iSequence, iSequenceID, texture_size );
