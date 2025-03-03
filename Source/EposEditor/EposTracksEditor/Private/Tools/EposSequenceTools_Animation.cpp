@@ -82,6 +82,11 @@ ShotSequenceTools::SpawnAnimation( UWorld* iWorld, ACineCameraActor* iCamera, fl
     if( !animation )
         return nullptr;
 
+#if UE_BUILD_DEBUG
+    if( UMaterialInstanceConstant* material = Cast<UMaterialInstanceConstant>( animation->GetAnimationComponent()->GetMaterial( 0 ) ) )
+        material->SetScalarParameterValueEditorOnly( FMaterialParameterInfo( "Overlay" ), 1 );
+#endif
+
     // Using this will delete the component once the actor is renamed at the end of SpawnAndBindPlane() -_-
     //UActorComponent* actor_component = plane->AddComponentByClass( UScalingComponent::StaticClass(), false, FTransform::Identity, false );
     // So create and attach/register it to the actor in 2 steps
