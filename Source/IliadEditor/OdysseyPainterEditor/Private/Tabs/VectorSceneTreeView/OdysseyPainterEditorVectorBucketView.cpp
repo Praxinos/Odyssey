@@ -30,7 +30,6 @@ void
 UOdysseyPainterEditorVectorBucketView::ImportParam()
 {
     ColorMode = mBucket->GetColorMode();
-    SpreadingPolicy = mBucket->GetSpreadingPolicy();
     SolidColor  = mBucket->GetSolidColor();
     Rotation = mBucket->GetRotation();
     Propagated = mBucket->IsPropagated();
@@ -57,9 +56,6 @@ UOdysseyPainterEditorVectorBucketView::PropertyChanged( const FName& iPropertyNa
     {
         if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorBucketView, ColorMode) )
             mBucket->SetColorMode( ColorMode );
-
-        if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorBucketView, SpreadingPolicy) )
-            mBucket->SetSpreadingPolicy( SpreadingPolicy );
 
         // note: iMemberPropertyName because FColor is a struct
         // and we can edit individual struct members RGBA

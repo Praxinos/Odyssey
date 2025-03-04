@@ -251,25 +251,30 @@ bool
 FOdysseyVectorPathTracer::TestBezier( ::ULIS::FVec2D iBezier[4] )
 {
     // take 3 sample points are check how far they are from the edges
-    ::ULIS::FVec2D samples[3] = { ::ULIS::CubicBezierPointAtParameter( iBezier[0]
+    ::ULIS::FVec2D samples[4] = { ::ULIS::CubicBezierPointAtParameter( iBezier[0]
                                                                      , iBezier[1]
                                                                      , iBezier[2]
                                                                      , iBezier[3]
-                                                                     , 0.25f )
+                                                                     , 0.15f )
                                 , ::ULIS::CubicBezierPointAtParameter( iBezier[0]
                                                                      , iBezier[1]
                                                                      , iBezier[2]
                                                                      , iBezier[3]
-                                                                     , 0.50f )
+                                                                     , 0.40f )
                                 , ::ULIS::CubicBezierPointAtParameter( iBezier[0]
                                                                      , iBezier[1]
                                                                      , iBezier[2]
                                                                      , iBezier[3]
-                                                                     , 0.75f ) };
+                                                                     , 0.60f )
+                                , ::ULIS::CubicBezierPointAtParameter( iBezier[0]
+                                                                     , iBezier[1]
+                                                                     , iBezier[2]
+                                                                     , iBezier[3]
+                                                                     , 0.85f ) };
 
-    double toleranceSquared = mTracingWidth * mTracingWidth;
+    double toleranceSquared = mTracingWidth * mTracingWidth * 0.25f;
 
-    for( uint32 i = 0; i < 3; i++ )
+    for( uint32 i = 0; i < 4; i++ )
     {
         double minDistance = DBL_MAX;
 

@@ -48,7 +48,7 @@ namespace FOdysseyVectorExportV1
     void WriteBucketGradientStop( FColor& iStopColor, double iStopAt, FArchive &Ar );
     void WriteBucketRotation( FOdysseyVectorBucket& iBucket, FArchive &Ar );
     void WriteBucketPosition( FOdysseyVectorBucket& iBucket, FArchive &Ar );
-    void WriteBucketSpreading( FOdysseyVectorBucket& iBucket, FArchive &Ar );
+    //void WriteBucketSpreading( FOdysseyVectorBucket& iBucket, FArchive &Ar );
     void WriteBucketPropagated( FOdysseyVectorBucket& iBucket, FArchive &Ar );
     void WriteBucketPaletteEntry( FOdysseyVectorBucket& iBucket, FArchive& Ar);
 

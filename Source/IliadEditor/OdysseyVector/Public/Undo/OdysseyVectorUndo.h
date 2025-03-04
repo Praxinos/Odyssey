@@ -221,7 +221,6 @@ class ODYSSEYVECTOR_API FSnapshotBucket : public FSnapshotPoint
 
     private:
         eBucketColorMode mColorMode;
-        eBucketSpreadingPolicy mSpreadingPolicy;
         FColor mSolidColor;
         double mRotation;
         bool mPropagated;

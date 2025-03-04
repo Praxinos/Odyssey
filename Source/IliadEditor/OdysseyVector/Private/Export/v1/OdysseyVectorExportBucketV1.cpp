@@ -32,7 +32,7 @@ FOdysseyVectorExportV1::WriteBucketPropagated( FOdysseyVectorBucket& iBucket, FA
         Ar << propagated;
     } );
 }
-
+/*
 void
 FOdysseyVectorExportV1::WriteBucketSpreading( FOdysseyVectorBucket& iBucket, FArchive &Ar )
 {
@@ -45,7 +45,7 @@ FOdysseyVectorExportV1::WriteBucketSpreading( FOdysseyVectorBucket& iBucket, FAr
         Ar << spreadingPolicy;
     } );
 }
-
+*/
 void
 FOdysseyVectorExportV1::WriteBucketPosition( FOdysseyVectorBucket& iBucket, FArchive &Ar )
 {
@@ -136,7 +136,7 @@ FOdysseyVectorExportV1::WriteBucket( FOdysseyVectorBucket& iBucket, FArchive &Ar
                             , Ar
                             , [&iBucket](FArchive &Ar) -> void
     {
-        WriteBucketSpreading( iBucket, Ar );
+        //WriteBucketSpreading( iBucket, Ar );
         WriteBucketPaletteEntry( iBucket, Ar );
         WriteBucketPosition( iBucket, Ar );
         WriteBucketRotation( iBucket, Ar );

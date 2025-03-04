@@ -1205,9 +1205,16 @@ FOdysseyVectorTagInbetweener::GetCell()
 FOdysseyVectorCell*
 FOdysseyVectorTagInbetweener::GetSourceCell()
 {
-    uint32 sourceCellIndex = GetSourceCellIndex();
+    FOdysseyVectorLayer* layer = GetOwner()->GetLayer();
 
-    return GetOwner()->GetLayer()->GetCellByIndex( sourceCellIndex );
+    if( layer )
+    {
+        uint32 sourceCellIndex = GetSourceCellIndex();
+
+        return layer->GetCellByIndex( sourceCellIndex );
+    }
+
+    return nullptr;
 }
 
 int32
@@ -1219,9 +1226,16 @@ FOdysseyVectorTagInbetweener::GetSourceCellIndex()
 FOdysseyVectorCell*
 FOdysseyVectorTagInbetweener::GetTargetCell()
 {
-    uint32 targetCellIndex = GetTargetCellIndex();
+    FOdysseyVectorLayer* layer = GetOwner()->GetLayer();
 
-    return GetOwner()->GetLayer()->GetCellByIndex( targetCellIndex );
+    if( layer )
+    {
+        uint32 targetCellIndex = GetTargetCellIndex();
+
+        return layer->GetCellByIndex( targetCellIndex );
+    }
+
+    return nullptr;
 }
 
 int32

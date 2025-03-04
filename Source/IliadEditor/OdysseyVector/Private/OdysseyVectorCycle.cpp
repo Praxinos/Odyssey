@@ -437,18 +437,15 @@ FOdysseyVectorCycle::Draw( BLContext* iBLContext
             {
                 case eBucketColorMode::LinearGradient :
                 {
-                    eBucketSpreadingPolicy spreadingPolicy = bucket->GetSpreadingPolicy();
-                    ::ULIS::FRectD bbox = spreadingPolicy == eBucketSpreadingPolicy::Group ? mOwner->GetBBox( false, false ) : GetBBox( false );
-                    double linearMinX = /*bbox.x0*/bbox.x;
-                    double linearMinY = /*bbox.y0*/bbox.y;
-                    double linearMaxX = /*bbox.x1*/bbox.x + bbox.w;
-                    double linearMaxY = /*bbox.y1*/bbox.y + bbox.h;
-                    BLGradient linear( BLLinearGradientValues( 0, 0, bbox.w, 0 ) );
+                    ::ULIS::FVec2D p0 = bucket->GetLinearP0();
+                    ::ULIS::FVec2D p1 = bucket->GetLinearP1();
+                    BLGradient linear( BLLinearGradientValues( p0.x, p0.y, p1.x, p1.y ) );
                     FColor& gradientColor0 = bucket->GetGradientColor0();
                     FColor& gradientColor1 = bucket->GetGradientColor1();
                     BLRgba32 BLColor0;
                     BLRgba32 BLColor1;
                     // easier to deal with degrees to position the gradient
+/*
                     double rotate = bucket->GetRotation() / M_PI * 180.0f;
 
                     if( ( rotate >=  0.0f ) && ( rotate <  90.0f ) )
@@ -459,6 +456,7 @@ FOdysseyVectorCycle::Draw( BLContext* iBLContext
                         linear.translate( linearMaxX, linearMaxY );
                     if( ( rotate > 270.0f ) && ( rotate < 360.0f ) )
                         linear.translate( linearMinX, linearMaxY );
+*/
 
                     linear.rotate( bucket->GetRotation() );
 
@@ -482,15 +480,14 @@ FOdysseyVectorCycle::Draw( BLContext* iBLContext
 
                 case eBucketColorMode::RadialGradient :
                 {
-                    eBucketSpreadingPolicy spreadingPolicy = bucket->GetSpreadingPolicy();
-                    ::ULIS::FRectD bbox = spreadingPolicy == eBucketSpreadingPolicy::Group ? mOwner->GetBBox( true, false ) : GetBBox( false );
+                    ::ULIS::FRectD bbox = mOwner->GetBBox( false, false );
                     ::ULIS::FVec2D& radialOffset = bucket->GetRadialOffset();
                     ::ULIS::FVec2D& bucketCoords = bucket->GetCoords();
                     BLGradient radial( BLRadialGradientValues( bucketCoords.x + radialOffset.x
-                                                                , bucketCoords.y + radialOffset.y
-                                                                , bucketCoords.x + radialOffset.x
-                                                                , bucketCoords.y + radialOffset.y
-                                                                , bucket->GetRadialRadius() ) );
+                                                             , bucketCoords.y + radialOffset.y
+                                                             , bucketCoords.x + radialOffset.x
+                                                             , bucketCoords.y + radialOffset.y
+                                                             , bucket->GetRadialRadius() ) );
                     FColor& gradientColor0 = bucket->GetGradientColor0();
                     FColor& gradientColor1 = bucket->GetGradientColor1();
                     BLRgba32 BLColor0;

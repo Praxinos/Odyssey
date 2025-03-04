@@ -47,7 +47,7 @@ FOdysseyVectorImportV1::ReadBucket( FOdysseyVectorBucket& iBucket, uint64 iChunk
                     }
                 }
                 break;
-
+/*
                 case FOdysseyFile::VectorV1::CHUNK_BUCKET_SPREADING:
                 {
                     uint32 spreadingPolicy;
@@ -57,7 +57,7 @@ FOdysseyVectorImportV1::ReadBucket( FOdysseyVectorBucket& iBucket, uint64 iChunk
                     iBucket.SetSpreadingPolicy(static_cast<eBucketSpreadingPolicy>(spreadingPolicy));
                 }
                 break;
-
+*/
                 case FOdysseyFile::VectorV1::CHUNK_BUCKET_PROPAGATED:
                 {
                     uint32 propagated;

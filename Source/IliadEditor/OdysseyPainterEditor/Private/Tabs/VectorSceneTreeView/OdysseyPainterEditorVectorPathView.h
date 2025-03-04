@@ -13,7 +13,7 @@
 
 #include "OdysseyPainterEditorVectorPathView.generated.h"
 
-UCLASS()
+UCLASS( HideCategories = (SelectionTool) )
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathView : public UOdysseyPainterEditorVectorObjectView
 {
     public:

@@ -62,7 +62,7 @@ namespace FOdysseyVectorExportV2
     void WriteBucketGradientStop( FColor& iStopColor, double iStopAt, FArchive &Ar );
     void WriteBucketRotation( FOdysseyVectorBucket& iBucket, FArchive &Ar );
     void WriteBucketPosition( FOdysseyVectorBucket& iBucket, FArchive &Ar );
-    void WriteBucketSpreading( FOdysseyVectorBucket& iBucket, FArchive &Ar );
+    //void WriteBucketSpreading( FOdysseyVectorBucket& iBucket, FArchive &Ar );
     void WriteBucketPropagated( FOdysseyVectorBucket& iBucket, FArchive &Ar );
     void WriteBucketPaletteEntryMark1( FOdysseyVectorBucket& iBucket, FArchive& Ar);
     void WriteBucketPaletteEntryMark2( FOdysseyVectorBucket& iBucket, FArchive& Ar);

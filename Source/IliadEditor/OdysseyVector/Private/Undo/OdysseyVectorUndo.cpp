@@ -1167,11 +1167,6 @@ FSnapshotBucket::FSnapshotBucket( FOdysseyVectorBucket* iBucket, uint64 iSnapsho
         mColorMode = iBucket->GetColorMode();
     }
 
-    if( iSnapshotFlags & FSnapshotFlags::Point::Bucket::SPREADINGPOLICY )
-    {
-        mSpreadingPolicy = iBucket->GetSpreadingPolicy();
-    }
-
     if( iSnapshotFlags & FSnapshotFlags::Point::Bucket::SOLIDCOLOR )
     {
         mSolidColor = iBucket->GetSolidColor();
@@ -1238,15 +1233,6 @@ FSnapshotBucket::Restore()
         bucket->SetColorMode( mColorMode );
         // swap
         mColorMode = currentColorMode;
-    }
-
-    if( mSnapshotFlags & FSnapshotFlags::Point::Bucket::SPREADINGPOLICY )
-    {
-        eBucketSpreadingPolicy currentSpreadingPolicy = bucket->GetSpreadingPolicy();
-
-        bucket->SetSpreadingPolicy( mSpreadingPolicy );
-        // swap
-        mSpreadingPolicy = currentSpreadingPolicy;
     }
 
     if( mSnapshotFlags & FSnapshotFlags::Point::Bucket::SOLIDCOLOR )

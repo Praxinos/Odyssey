@@ -18,6 +18,8 @@ FOdysseyVectorBucket::~FOdysseyVectorBucket()
 FOdysseyVectorBucket::FOdysseyVectorBucket( FOdysseyVectorObject* iOwner
                                           , FOdysseyVectorBucket* iImportFrom )
     : mOwner ( iOwner )
+    , mLinearP0( 0.0f, 0.0f )
+    , mLinearP1( 0.0f, 0.0f )
 {
     BLMatrix2D& ownerInverseWorldMatrix = iOwner->GetInverseWorldMatrix();
     BLMatrix2D& importWorldMatrix = iImportFrom->GetOwner()->GetWorldMatrix();
@@ -51,7 +53,6 @@ FOdysseyVectorBucket::FOdysseyVectorBucket( FOdysseyVectorObject* iOwner
     SetGradientColor0( 255, 255, 255, 255 );
     SetGradientColor1( 255, 255, 255, 255 );
     SetColorMode( eBucketColorMode::SolidColor );
-    SetSpreadingPolicy( eBucketSpreadingPolicy::Group );
     SetRadialRadius( 80.0f );
     SetRadialOffset( ::ULIS::FVec2D( 0.0f, 0.0f ) );
 }
@@ -99,29 +100,52 @@ void
 FOdysseyVectorBucket::SetColorMode( eBucketColorMode iColorMode )
 {
     mColorMode = iColorMode;
-}
 
-eBucketSpreadingPolicy
-FOdysseyVectorBucket::GetSpreadingPolicy()
-{
-    return mSpreadingPolicy;
-}
+    if( mColorMode == eBucketColorMode::LinearGradient )
+    {
+        if( mLinearP0 == mLinearP1 )
+        {
+            ::ULIS::FRectD bbox = GetOwner()->GetBBox( false, false );
 
-void
-FOdysseyVectorBucket::SetSpreadingPolicy( eBucketSpreadingPolicy iSpreadingPolicy )
-{
-    mSpreadingPolicy = iSpreadingPolicy;
+            mLinearP0 = ::ULIS::FVec2D(   bbox.x           , mCoords.y );
+            mLinearP1 = ::ULIS::FVec2D( ( bbox.x + bbox.w ), mCoords.y );
+        }
+    }
 }
 
 void
 FOdysseyVectorBucket::SetRotation( double iRotation )
 {
-    mRotation = fmod( iRotation, M_PI * 2.0f );
+    mLinearRotation = fmod( iRotation, M_PI * 2.0f );
 
-    if( mRotation < 0.0f )
+    if( mLinearRotation < 0.0f )
     {
-        mRotation += ( M_PI * 2.0f );
+        mLinearRotation += ( M_PI * 2.0f );
     }
+}
+
+void
+FOdysseyVectorBucket::SetLinearP0( const ::ULIS::FVec2D& iP0 )
+{
+    mLinearP0 = iP0;
+}
+
+void
+FOdysseyVectorBucket::SetLinearP1( const ::ULIS::FVec2D& iP1 )
+{
+    mLinearP1 = iP1;
+}
+
+::ULIS::FVec2D
+FOdysseyVectorBucket::GetLinearP0()
+{
+    return mLinearP0;
+}
+
+::ULIS::FVec2D
+FOdysseyVectorBucket::GetLinearP1()
+{
+    return mLinearP1;
 }
 
 bool
@@ -260,20 +284,19 @@ FOdysseyVectorBucket::GetColor()
 double
 FOdysseyVectorBucket::GetRotation()
 {
-    return mRotation;
+    return mLinearRotation;
 }
 
 void
 FOdysseyVectorBucket::Copy( FOdysseyVectorBucket* iDestinationBucket )
 {
-    iDestinationBucket->mCoords                      = mCoords;
+    iDestinationBucket->mCoords          = mCoords;
 
     iDestinationBucket->mPaletteEntry    = mPaletteEntry;
     iDestinationBucket->mPaletteSet      = mPaletteSet;
     iDestinationBucket->mColorMode       = mColorMode;
-    iDestinationBucket->mSpreadingPolicy = mSpreadingPolicy;
     iDestinationBucket->mSolidColor      = mSolidColor;
-    iDestinationBucket->mRotation        = mRotation;
+    iDestinationBucket->mLinearRotation        = mLinearRotation;
     iDestinationBucket->bPropagated      = bPropagated;
     iDestinationBucket->mColorMode       = mColorMode;
     iDestinationBucket->mGradientColor0  = mGradientColor0;

@@ -8,6 +8,7 @@
 #include "OdysseyVectorBucket.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorCycle.h"
+#include "OdysseyVector.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -101,14 +102,24 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::PickBucketArea( FOdysseyVectorBuc
     {
         if( iBucket->GetColorMode() == eBucketColorMode::LinearGradient )
         {
-            ::ULIS::FVec2D handleWorldCoords = bucketWorldCoords + ( FOdysseyVectorHUD::GetBucketHandleVector( iBucket, true ) * FOdysseyVectorHUD::HANDLE_DISTANCE );
-            ::ULIS::FVec2D handleDif = ::ULIS::FVec2D( iWorldX - handleWorldCoords.x
-                                                     , iWorldY - handleWorldCoords.y );
+            BLMatrix2D& worldMatrix = iBucket->GetOwner()->GetWorldMatrix();
+            ::ULIS::FVec2D localP0 = iBucket->GetLinearP0();
+            ::ULIS::FVec2D localP1 = iBucket->GetLinearP1();
+            ::ULIS::FVec2D worldHandle[2] = { FOdysseyVector::MapPoint( worldMatrix, localP0 )
+                                            , FOdysseyVector::MapPoint( worldMatrix, localP1 ) };
 
-            if ( handleDif.Distance() < mPaintBucketTool->PickingRadius )
+            if( ::ULIS::FVec2D( iWorldX - worldHandle[0].x
+                              , iWorldY - worldHandle[0].y ).Distance() < mPaintBucketTool->PickingRadius )
             {
-                return PICK_HANDLE;
+                return PICK_LINEAR_HANDLE0;
             }
+
+            if( ::ULIS::FVec2D( iWorldX - worldHandle[1].x
+                              , iWorldY - worldHandle[1].y ).Distance() < mPaintBucketTool->PickingRadius )
+            {
+                return PICK_LINEAR_HANDLE1;
+            }
+
         }
 
         if( iBucket->GetColorMode() == eBucketColorMode::RadialGradient )

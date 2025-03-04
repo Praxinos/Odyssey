@@ -38,13 +38,6 @@ enum class eBackgroundColorMode : uint8
     Palette  = uint8(eBucketColorMode::Palette)
 };
 
-UENUM()
-enum class eBucketSpreadingPolicy : uint8
-{
-    Group = 0,
-    Local = 1
-};
-
 class ODYSSEYVECTOR_API FOdysseyVectorBucket : public FOdysseyVectorPoint
 {
     private:
@@ -138,12 +131,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorBucket : public FOdysseyVectorPoint
          * @return the angle in radians
          */
         double GetRotation();
-
-        /**
-         * @brief Set this bucket's spreading policy
-         * @return the spreading policy
-         */
-        eBucketSpreadingPolicy GetSpreadingPolicy();
 
         /**
          * @brief Get this bucket's solid color
@@ -264,24 +251,21 @@ class ODYSSEYVECTOR_API FOdysseyVectorBucket : public FOdysseyVectorPoint
         void SetSolidColor( FColor& iColor );
 
         /**
-         * @brief Set this bucket's spreading policy
-         * @param iColorMode see enum eBucketSpreadingPolicy
-         */
-        void SetSpreadingPolicy( eBucketSpreadingPolicy iSpreadingPolicy );
-
-        /**
          * @brief Set this bucket's rotation angle for linear gradient
          * @param iRotation the angle in radians
          */
         void SetRotation( double iRotation );
 
+        ::ULIS::FVec2D GetLinearP0();
+        ::ULIS::FVec2D GetLinearP1();
+        void SetLinearP0( const ::ULIS::FVec2D& iP0 );
+        void SetLinearP1( const ::ULIS::FVec2D& iP1 );
+
     protected:
         FOdysseyVectorObject* mOwner;
         bool bSelected;
         eBucketColorMode mColorMode;
-        eBucketSpreadingPolicy mSpreadingPolicy;
         FColor mSolidColor;
-        double mRotation;
         bool bPropagated;
         FColor mGradientColor0;
         FColor mGradientColor1;
@@ -290,4 +274,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorBucket : public FOdysseyVectorPoint
         /* The Palette Entry associated with this vector object, if any*/
         UOdysseyPaletteEntry* mPaletteEntry;
         int mPaletteSet;
+        ::ULIS::FVec2D mLinearP0;
+        ::ULIS::FVec2D mLinearP1;
+        ::ULIS::FVec2D mLinearTranslation;
+        double mLinearRotation;
 };

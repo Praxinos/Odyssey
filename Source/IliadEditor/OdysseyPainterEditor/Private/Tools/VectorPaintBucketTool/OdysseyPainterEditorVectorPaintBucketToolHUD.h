@@ -16,12 +16,15 @@ class FOdysseyVectorGroupPaint;
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPaintBucketToolHUD : public FOdysseyPainterEditorVectorBaseToolHUD
 {
     public:
-        static const uint32 PICK_NONE          = 0;
-        static const uint32 PICK_HANDLE        = 1;
-        static const uint32 PICK_BUCKET        = 2;
-        static const uint32 PICK_RADIAL_HANDLE = 3;
-        static const uint32 PICK_RADIAL_AREA   = 4;
-        static const uint32 PICK_PROPAGATE     = 5;
+        static const uint32 PICK_NONE           = 0;
+        static const uint32 PICK_HANDLE         = 1;
+        static const uint32 PICK_BUCKET         = 2;
+        static const uint32 PICK_RADIAL_HANDLE  = 3;
+        static const uint32 PICK_RADIAL_AREA    = 4;
+        static const uint32 PICK_LINEAR_HANDLE0 = 5;
+        static const uint32 PICK_LINEAR_HANDLE1 = 6;
+        static const uint32 PICK_LINEAR_AREA    = 7;
+        static const uint32 PICK_PROPAGATE      = 8;
 
         virtual ~FOdysseyPainterEditorVectorPaintBucketToolHUD();
         FOdysseyPainterEditorVectorPaintBucketToolHUD(  UOdysseyPainterEditorVectorPaintBucketTool* iVectorPaintBucketTool );

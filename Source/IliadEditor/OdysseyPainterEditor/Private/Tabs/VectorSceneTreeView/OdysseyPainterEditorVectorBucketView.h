@@ -46,11 +46,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBucketView : public UO
 
         UPROPERTY( EditAnywhere
                  , Category = "Bucket"
-                 , meta = ( ToolTip  = "Spreading Policy" ) )
-        eBucketSpreadingPolicy SpreadingPolicy;
-
-        UPROPERTY( EditAnywhere
-                 , Category = "Bucket"
                  , meta = ( ToolTip  = "Solid Color"
                           , EditCondition = "(ColorMode == eBucketColorMode::SolidColor)"
                           , EditConditionHides ) )

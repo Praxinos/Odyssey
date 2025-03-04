@@ -613,17 +613,33 @@ FInbetweenerBreakdown::GetDrawingCount()
 FOdysseyVectorCell*
 FInbetweenerBreakdown::GetSourceCell()
 {
-    uint32 sourceCellIndex = GetSourceCellIndex();
+    FOdysseyVectorLayer* layer = mInbetweenerTag->GetOwner()->GetLayer();
 
-    return mInbetweenerTag->GetOwner()->GetLayer()->GetCellByIndex( sourceCellIndex );
+    // layer can be null when the cell is removed from the layer
+    if( layer )
+    {
+        uint32 sourceCellIndex = GetSourceCellIndex();
+
+        return layer->GetCellByIndex( sourceCellIndex );
+    }
+
+    return nullptr;
 }
 
 FOdysseyVectorCell*
 FInbetweenerBreakdown::GetTargetCell()
 {
-    uint32 targetCellIndex = GetTargetCellIndex();
+    FOdysseyVectorLayer* layer = mInbetweenerTag->GetOwner()->GetLayer();
 
-    return mInbetweenerTag->GetOwner()->GetLayer()->GetCellByIndex( targetCellIndex );
+    // layer can be null when the cell is removed from the layer
+    if( layer )
+    {
+        uint32 targetCellIndex = GetTargetCellIndex();
+
+        return layer->GetCellByIndex( targetCellIndex );
+    }
+
+    return nullptr;
 }
 
 

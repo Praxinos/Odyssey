@@ -333,6 +333,18 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseDragVector( FOdysseyVectorGro
                 }
                 break;
 
+                case FOdysseyPainterEditorVectorPaintBucketToolHUD::PICK_LINEAR_HANDLE0:
+                {
+                    mPickedBucket->SetLinearP0( ::ULIS::FVec2D( localPoint.x, localPoint.y ) );
+                }
+                break;
+
+                case FOdysseyPainterEditorVectorPaintBucketToolHUD::PICK_LINEAR_HANDLE1:
+                {
+                    mPickedBucket->SetLinearP1( ::ULIS::FVec2D( localPoint.x, localPoint.y ) );
+                }
+                break;
+
                 default :
                 break;
             }

@@ -600,20 +600,47 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawBucket( const FOdysseyHUD::FDrawHUDP
     FLinearColor propColor = iBucket->IsPropagated() ? FLinearColor( 0.0f, 1.0f, 0.0f, 1.0f ) : fgColor;
     static FLinearColor blackColor = FLinearColor( 0.0f, 0.0f, 0.0f, 1.0f );
     static FLinearColor whiteColor = FLinearColor( 1.0f, 1.0f, 1.0f, 1.0f );
+    static FLinearColor greyColor = FLinearColor( 0.75f, 0.75f, 0.75f, 0.5 );
 
     if( iHUDFlags & FOdysseyVectorHUD::HUD_GROUPPAINT_BUCKET_HANDLE )
     {
         if( iBucket->GetColorMode() == eBucketColorMode::LinearGradient )
         {
+            BLMatrix2D& worldMatrix = iBucket->GetOwner()->GetWorldMatrix();
             ::ULIS::FVec2D handleVector = FOdysseyVectorHUD::GetBucketHandleVector( iBucket, true );
             FVector2D handleHUDCoords = bucketHUDCoords + ( FVector2D( handleVector.x, handleVector.y ) * FOdysseyVectorHUD::HANDLE_DISTANCE );
+            ::ULIS::FVec2D localP0 = iBucket->GetLinearP0();
+            ::ULIS::FVec2D localP1 = iBucket->GetLinearP1();
+            ::ULIS::FVec2D worldHandle[2] = { FOdysseyVector::MapPoint( worldMatrix, localP0 )
+                                            , FOdysseyVector::MapPoint( worldMatrix, localP1 ) };
+            FVector2D hudHandle[2] = { WorldPointToHUD ( iParams, FVector2D( worldHandle[0].x,  worldHandle[0].y ) )
+                                     , WorldPointToHUD ( iParams, FVector2D( worldHandle[1].x,  worldHandle[1].y ) ) };
+            FLinearColor linearColor0 = FLinearColor( iBucket->GetGradientColor0() );
+            FLinearColor linearColor1 = FLinearColor( iBucket->GetGradientColor1() );
 
+            DrawPrimitiveLineOutlined( iParams
+                                     , bucketHUDCoords
+                                     , ( hudHandle[1] + hudHandle[0] ) * 0.5f
+                                     , greyColor
+                                     , 1.0f );
+
+            DrawPrimitiveLineOutlined( iParams
+                                     , hudHandle[0]
+                                     , hudHandle[1]
+                                     , whiteColor
+                                     , 1.0f );
+
+            DrawPrimitiveHandle( iParams, hudHandle[0], FOdysseyVectorHUD::HANDLE_RADIUS, linearColor0, blackColor );
+            DrawPrimitiveHandle( iParams, hudHandle[1], FOdysseyVectorHUD::HANDLE_RADIUS, linearColor1, blackColor );
+
+/*
             // Bucket-to-handle line
             DrawPrimitiveLine( iParams, bucketHUDCoords, handleHUDCoords, blackColor, 2.0f );
             DrawPrimitiveLine( iParams, bucketHUDCoords, handleHUDCoords, whiteColor, 1.0f );
 
             // Handle
             DrawPrimitiveHandle( iParams, handleHUDCoords, FOdysseyVectorHUD::HANDLE_RADIUS, whiteColor, blackColor );
+*/
         }
 
         if( iBucket->GetColorMode() == eBucketColorMode::RadialGradient )
@@ -625,16 +652,14 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawBucket( const FOdysseyHUD::FDrawHUDP
             double radialRadius = ( radialHandleWorldCoords - radialWorldCoords ).Distance();
 
             // Bucket-to-radial line
-            DrawPrimitiveLine( iParams, bucketHUDCoords, radialHUDCoords, blackColor, 2.0f );
-            DrawPrimitiveLine( iParams, bucketHUDCoords, radialHUDCoords, whiteColor, 1.0f );
+            DrawPrimitiveLineOutlined( iParams, bucketHUDCoords, radialHUDCoords, greyColor, 1.0f );
 
             // Radial Circle
             DrawPrimitiveCircle( iParams, radialHUDCoords, FOdysseyVectorHUD::RADIAL_AREA_RADIUS, blackColor, 2.0f );
             DrawPrimitiveCircle( iParams, radialHUDCoords, FOdysseyVectorHUD::RADIAL_AREA_RADIUS, whiteColor, 1.0f );
 
             // Radial-to-RadialHandle line
-            DrawPrimitiveLine( iParams, radialHUDCoords, radialHandleHUDCoords, blackColor, 2.0f );
-            DrawPrimitiveLine( iParams, radialHUDCoords, radialHandleHUDCoords, whiteColor, 1.0f );
+            DrawPrimitiveLineOutlined( iParams, radialHUDCoords, radialHandleHUDCoords, whiteColor, 1.0f );
 
             // RadialHandle Circle
             DrawPrimitiveCircle( iParams, radialHUDCoords, radialRadius, blackColor, 2.0f );
