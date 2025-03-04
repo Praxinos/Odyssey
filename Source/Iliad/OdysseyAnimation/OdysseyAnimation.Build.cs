@@ -79,7 +79,6 @@ namespace UnrealBuildTool.Rules
                     "RHI",
                     "CinematicCamera",
                     // ... add private dependencies that you statically link with here ...
-                    "EposActors",
                 }
                 );
 
