@@ -31,7 +31,7 @@
 #include "EposSequenceModule.h"
 #include "INamingFormatter.h"
 #include "PlaneActor.h"
-//#include "OdysseyAnimationActor.h" // See comment in UShotSequence::CanPossessObject()
+#include "OdysseyAnimationActor.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
 #include "NoteTrack/MovieSceneNoteTrack.h"
 
@@ -226,6 +226,14 @@ void UShotSequence::BindPossessableObject( const FGuid& ObjectId, UObject& Posse
             PlanesBindingReferences.AddBinding( ObjectId, &PossessedObject, Context );
         }
     }
+    else if( PossessedObject.IsA<AOdysseyAnimationActor>()
+             || PossessedObject.IsA<UActorComponent>() && PossessedObject.GetTypedOuter<AOdysseyAnimationActor>() )
+    {
+        if( Context )
+        {
+            AnimationsBindingReferences.AddBinding( ObjectId, &PossessedObject, Context );
+        }
+    }
     else
     {
         if( Context )
@@ -245,14 +253,7 @@ bool UShotSequence::CanPossessObject( UObject& Object, UObject* InPlaybackContex
         || Object.IsA<ANiagaraActor>()
         || Object.IsA<APaperFlipbookActor>()
         || Object.IsA<AMediaPlate>()
-        //TODO: this must be temporary until OdysseyAnimation will be a runtime module
-        // Otherwise (for now), as it is an editor module, it must be included in .cs
-        // and a runtime module should avoid include editor module
-        // but once OdysseyAnimation will be an runtime module (containing asset and actor),
-        // it can be included in this epos module to be able to use the IsA<>() function
-        // (keep also in mind, in this case, there will be a dependency between EposSequence module and OdysseyAnimation module)
-        || Object.GetClass()->GetName() == TEXT( "OdysseyAnimationActor" )
-        //|| Object.IsA<AOdysseyAnimationActor>()
+        || Object.IsA<AOdysseyAnimationActor>()
         || ExactCast<AActor>( &Object ); // Empty Actor
 }
 
@@ -265,6 +266,7 @@ void UShotSequence::LocateBoundObjects( const FGuid& ObjectId, UObject* Context,
 {
     CameraBindingReferences.ResolveBinding( ObjectId, Context, OutObjects );
     PlanesBindingReferences.ResolveBinding( ObjectId, Context, OutObjects );
+    AnimationsBindingReferences.ResolveBinding( ObjectId, Context, OutObjects );
     ActorsBindingReferences.ResolveBinding( ObjectId, Context, OutObjects );
 }
 
@@ -287,6 +289,7 @@ void UShotSequence::UnbindPossessableObjects( const FGuid& ObjectId )
 {
     CameraBindingReferences.RemoveBinding( ObjectId );
     PlanesBindingReferences.RemoveBinding( ObjectId );
+    AnimationsBindingReferences.RemoveBinding( ObjectId );
     ActorsBindingReferences.RemoveBinding( ObjectId );
 }
 
@@ -294,6 +297,7 @@ void UShotSequence::UnbindObjects( const FGuid& ObjectId, const TArray<UObject*>
 {
     CameraBindingReferences.RemoveObjects( ObjectId, InObjects, Context );
     PlanesBindingReferences.RemoveObjects( ObjectId, InObjects, Context );
+    AnimationsBindingReferences.RemoveObjects( ObjectId, InObjects, Context );
     ActorsBindingReferences.RemoveObjects( ObjectId, InObjects, Context );
 }
 
@@ -301,6 +305,7 @@ void UShotSequence::UnbindInvalidObjects( const FGuid& ObjectId, UObject* Contex
 {
     CameraBindingReferences.RemoveInvalidObjects( ObjectId, Context );
     PlanesBindingReferences.RemoveInvalidObjects( ObjectId, Context );
+    AnimationsBindingReferences.RemoveInvalidObjects( ObjectId, Context );
     ActorsBindingReferences.RemoveInvalidObjects( ObjectId, Context );
 }
 
@@ -416,6 +421,26 @@ void UShotSequence::GetAssetRegistryTags( FAssetRegistryTagsContext ioContext ) 
         ioContext.AddTag( { "Planes", "(0)", FAssetRegistryTag::TT_Alphabetical } );
     }
 
+    if( AnimationsBindingReferences.GetAllReferences().Num() )
+    {
+        int animation_count = 0;
+        TArrayView<const FMovieSceneBindingReference> references = AnimationsBindingReferences.GetAllReferences();
+        for( const FMovieSceneBindingReference& reference : references )
+        {
+            FMovieScenePossessable* possessable = MovieScene->FindPossessable( reference.ID );
+            if( possessable && !possessable->GetParent().IsValid() /* to get only root animations */ )
+            {
+                animation_count++;
+            }
+        }
+
+        ioContext.AddTag( { "Animations", FString::FromInt( animation_count ), FAssetRegistryTag::TT_Alphabetical } );
+    }
+    else
+    {
+        ioContext.AddTag( { "Animations", "(0)", FAssetRegistryTag::TT_Alphabetical } );
+    }
+
     if( ActorsBindingReferences.GetAllReferences().Num() )
     {
         int actor_count = 0;
@@ -446,6 +471,13 @@ void UShotSequence::GetAssetRegistryTagMetadata( TMap<FName, FAssetRegistryTagMe
         FAssetRegistryTagMetadata()
         .SetDisplayName( NSLOCTEXT( "ShotSequence", "Camera_Label", "Camera in shot" ) )
         .SetTooltip( NSLOCTEXT( "ShotSequence", "Camera_Tooltip", "The camera bound to this shot sequence" ) )
+    );
+
+    OutMetadata.Add(
+        "Animations",
+        FAssetRegistryTagMetadata()
+        .SetDisplayName( NSLOCTEXT( "ShotSequence", "Animations_Label", "Animations in shot" ) )
+        .SetTooltip( NSLOCTEXT( "ShotSequence", "Animations_Tooltip", "The animations bound to this shot sequence" ) )
     );
 
     OutMetadata.Add(

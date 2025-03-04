@@ -70,6 +70,8 @@ public:
     UPROPERTY()
     FShotSequenceBindingReferences PlanesBindingReferences;
     UPROPERTY()
+    FShotSequenceBindingReferences AnimationsBindingReferences;
+    UPROPERTY()
     FShotSequenceBindingReferences ActorsBindingReferences;
 
     UPROPERTY()
