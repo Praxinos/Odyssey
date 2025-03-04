@@ -55,6 +55,8 @@
 #include "EposSequenceHelpers.h"
 #include "NoteTrack/MovieSceneNoteSection.h"
 #include "PlaneActor.h"
+#include "OdysseyAnimationActor.h"
+#include "ScalingComponent.h"
 #include "StoryNote.h"
 #include "StoryboardViewport/StoryboardLevelViewportToolbarContext.h"
 #include "StoryboardViewport/FilmOverlays.h"
@@ -898,7 +900,7 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
 
     OverlayWidget = SNew( SFilmOverlay ).Visibility( EVisibility::HitTestInvisible );
 
-    ViewportClient->GetModeTools()->OnEditorModeIDChanged().AddSP( this, &SStoryboardLevelViewport::OnToggleAllPlanes );
+    ViewportClient->GetModeTools()->OnEditorModeIDChanged().AddSP( this, &SStoryboardLevelViewport::OnPickEditorModeChanged );
 
     //---
 
@@ -960,9 +962,9 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                                          {
                                              mStartStoryboardActorPicking = true;
                                          } )
-        .OnGetAllowedClasses( FOnGetAllowedClasses::CreateSP( this, &SStoryboardLevelViewport::OnGetAllowedClassesForPlaneDistance ) )
-        .OnShouldFilterActor( FOnShouldFilterActor::CreateSP( this, &SStoryboardLevelViewport::OnShouldFilterActorForPlaneDistance ) )
-        .OnActorSelected( FOnActorSelected::CreateSP( this, &SStoryboardLevelViewport::OnActorSelectedForPlaneDistance ) );
+        .OnGetAllowedClasses( FOnGetAllowedClasses::CreateSP( this, &SStoryboardLevelViewport::OnGetAllowedClassesForActorDistance ) )
+        .OnShouldFilterActor( FOnShouldFilterActor::CreateSP( this, &SStoryboardLevelViewport::OnShouldFilterActorForActorDistance ) )
+        .OnActorSelected( FOnActorSelected::CreateSP( this, &SStoryboardLevelViewport::OnActorSelectedForActorDistance ) );
 
 
     //---
@@ -1003,9 +1005,9 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
 
     // The following option button WON'T be displayed -_-
     //menu.AddToolBarWidget( PropertyCustomizationHelpers::MakeInteractiveActorPicker(
-    //    FOnGetAllowedClasses::CreateSP( this, &SStoryboardLevelViewport::OnGetAllowedClassesForPlaneDistance ),
-    //    FOnShouldFilterActor::CreateSP( this, &SStoryboardLevelViewport::OnShouldFilterActorForPlaneDistance ),
-    //    FOnActorSelected::CreateSP( this, &SStoryboardLevelViewport::OnActorSelectedForPlaneDistance ) ) );
+    //    FOnGetAllowedClasses::CreateSP( this, &SStoryboardLevelViewport::OnGetAllowedClassesForActorDistance ),
+    //    FOnShouldFilterActor::CreateSP( this, &SStoryboardLevelViewport::OnShouldFilterActorForActorDistance ),
+    //    FOnActorSelected::CreateSP( this, &SStoryboardLevelViewport::OnActorSelectedForActorDistance ) ) );
 
     // The following option button WILL be displayed -_-
     ////menu.AddToolBarButton( FEposSequenceEditorCommands::Get().StoryboardViewportResetPanZoomRotate );
@@ -1024,10 +1026,10 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
     //---
 
     //HACK: ue4
-    TSharedPtr<SSpinBox<float>> planeDistanceSpinBox;
+    TSharedPtr<SSpinBox<float>> actorDistanceSpinBox;
     TSharedPtr<SSpinBox<float>> cameraFocalLengthSpinBox;
 
-    const UEnum* scalePlaneEnum = FindObject<UEnum>( nullptr, TEXT( "/Script/EposTracksEditor.EScalePlane" ) );
+    const UEnum* scaleActorEnum = FindObject<UEnum>( nullptr, TEXT( "/Script/EposTracksEditor.EScaleActor" ) );
 
     mNoteSplitter = SNew( SSplitter )
         .Orientation( Orient_Vertical )
@@ -1116,6 +1118,17 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                                     .Text_Lambda([this] { return FText::Join( FText::FromString( TEXT(", ") ), UIData.SelectedPlanes ); })
                                     .ToolTipText(LOCTEXT("SelectedPlanes", "The name of all selected planes."))
                                 ]
+
+                                + SHorizontalBox::Slot()
+                                .HAlign(HAlign_Right)
+                                .AutoWidth()
+                                .Padding(FMargin(5.f, 0.f, 0.f, 0.f))
+                                [
+                                    SNew(STextBlock)
+                                    .ColorAndOpacity(Gray)
+                                    .Text_Lambda([this] { return FText::Join( FText::FromString( TEXT(", ") ), UIData.SelectedAnimations ); })
+                                    .ToolTipText(LOCTEXT("SelectedAnimations", "The name of all selected animations."))
+                                ]
                             ]
 
                             + SHorizontalBox::Slot()
@@ -1152,7 +1165,7 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                             + SWidgetSwitcher::Slot()
                             [
                                 SNew( SHorizontalBox )
-                                .Visibility( this, &SStoryboardLevelViewport::GetMoveAndScalePlaneVisibility )
+                                .Visibility( this, &SStoryboardLevelViewport::GetMoveAndScaleActorVisibility )
 
                                 + SHorizontalBox::Slot()
                                 .AutoWidth()
@@ -1161,22 +1174,22 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                                 [
                                     SNew(STextBlock)
                                     .ColorAndOpacity(Gray)
-                                    .Text_Lambda([this] { return FText::Format( LOCTEXT( "PlaneDistanceLabel", "{0} Distance" ), mPlaneToMove.IsValid() ? FText::FromString( mPlaneToMove->GetActorLabel() ) : FText::GetEmpty() ); })
+                                    .Text_Lambda([this] { return FText::Format( LOCTEXT( "ActorDistanceLabel", "{0} Distance" ), mActorToMove.IsValid() ? FText::FromString( mActorToMove->GetActorLabel() ) : FText::GetEmpty() ); })
                                 ]
 
                                 + SHorizontalBox::Slot()
                                 .AutoWidth()
                                 [
-                                    SAssignNew( planeDistanceSpinBox, SSpinBox<float> )
-                                    .ToolTipText( LOCTEXT( "PlaneDistanceTooltip", "Modify the distance between the selected plane and its parent camera." ) )
+                                    SAssignNew( actorDistanceSpinBox, SSpinBox<float> )
+                                    .ToolTipText( LOCTEXT( "ActorDistanceTooltip", "Modify the distance between the selected actor and its parent camera." ) )
                                     .PreventThrottling( true ) // To refresh the viewport during value change
                                     .LinearDeltaSensitivity( 15 )  // If we're an unbounded spinbox, what value do we divide mouse movement by before multiplying by Delta. Requires Delta to be set.
                                     .Delta( 1 )
                                     .SliderExponent( 0.8f ) // Can't work properly if the following options are in use :  .LinearDeltaSensitivity .MinValue .MaxValue
                                     .SliderExponentNeutralValue( 100 )
-                                    .Value( this, &SStoryboardLevelViewport::GetMoveAndScalePlaneDistance )
-                                    .OnValueChanged( this, &SStoryboardLevelViewport::SetMoveAndScalePlaneDistance )
-                                    .OnValueCommitted_Lambda( [this]( float iNewValue, ETextCommit::Type iType ) { SetMoveAndScalePlaneDistance( iNewValue ); } )
+                                    .Value( this, &SStoryboardLevelViewport::GetMoveAndScaleActorDistance )
+                                    .OnValueChanged( this, &SStoryboardLevelViewport::SetMoveAndScaleActorDistance )
+                                    .OnValueCommitted_Lambda( [this]( float iNewValue, ETextCommit::Type iType ) { SetMoveAndScaleActorDistance( iNewValue ); } )
                                 ]
 
                                 //+ SHorizontalBox::Slot()
@@ -1205,19 +1218,19 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                                 [
                                     SNew(STextBlock)
                                     .ColorAndOpacity(Gray)
-                                    .Text( LOCTEXT( "PlaneScaleLabel", "Scale" ) )
+                                    .Text( LOCTEXT( "ActorScaleLabel", "Scale" ) )
                                 ]
 
                                 + SHorizontalBox::Slot()
                                 .AutoWidth()
                                 [
-                                    SNew( SEnumComboBox, scalePlaneEnum )
-                                    .CurrentValue( this, &SStoryboardLevelViewport::GetScalePlaneType )
+                                    SNew( SEnumComboBox, scaleActorEnum )
+                                    .CurrentValue( this, &SStoryboardLevelViewport::GetScaleActorType )
                                     //.ButtonStyle( FAppStyle::Get(), "FlatButton.Light" )
                                     //.ContentPadding( FMargin( 2, 0 ) )
                                     //.Font( FAppStyle::Get().GetFontStyle( "Sequencer.AnimationOutliner.RegularFont" ) )
-                                    .OnEnumSelectionChanged( this, &SStoryboardLevelViewport::OnScalePlaneTypeChanged )
-                                    .ToolTipText( LOCTEXT( "PlaneScaleTooltip", "Scale the plane accordingly to its parent camera." ) )
+                                    .OnEnumSelectionChanged( this, &SStoryboardLevelViewport::OnScaleActorTypeChanged )
+                                    .ToolTipText( LOCTEXT( "ActorScaleTooltip", "Scale the actor accordingly to its parent camera." ) )
                                 ]
                             ]
 
@@ -1258,19 +1271,19 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                                 [
                                     SNew(STextBlock)
                                     .ColorAndOpacity(Gray)
-                                    .Text( LOCTEXT( "PlaneScaleLabel", "Scale" ) )
+                                    .Text( LOCTEXT( "ActorScaleLabel", "Scale" ) )
                                 ]
 
                                 + SHorizontalBox::Slot()
                                 .AutoWidth()
                                 [
-                                    SNew( SEnumComboBox, scalePlaneEnum )
-                                    .CurrentValue( this, &SStoryboardLevelViewport::GetScalePlaneType )
+                                    SNew( SEnumComboBox, scaleActorEnum )
+                                    .CurrentValue( this, &SStoryboardLevelViewport::GetScaleActorType )
                                     //.ButtonStyle( FAppStyle::Get(), "FlatButton.Light" )
                                     //.ContentPadding( FMargin( 2, 0 ) )
                                     //.Font( FAppStyle::Get().GetFontStyle( "Sequencer.AnimationOutliner.RegularFont" ) )
-                                    .OnEnumSelectionChanged( this, &SStoryboardLevelViewport::OnScalePlaneTypeChanged )
-                                    .ToolTipText( LOCTEXT( "PlaneScaleTooltip", "Scale the plane accordingly to its parent camera." ) )
+                                    .OnEnumSelectionChanged( this, &SStoryboardLevelViewport::OnScaleActorTypeChanged )
+                                    .ToolTipText( LOCTEXT( "ActorScaleTooltip", "Scale the actor accordingly to its parent camera." ) )
                                 ]
                             ]
                         ]
@@ -1290,8 +1303,8 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
     //TODO: HACK:
     // UE5: MaxFractionnal digits is set correctly in UE5.
     // UE4, we have to call SetMaxFractionnalDigits/SetMinFractionalDigits
-    planeDistanceSpinBox->SetMinFractionalDigits( 4 );
-    planeDistanceSpinBox->SetMaxFractionalDigits( 4 );
+    actorDistanceSpinBox->SetMinFractionalDigits( 4 );
+    actorDistanceSpinBox->SetMaxFractionalDigits( 4 );
     cameraFocalLengthSpinBox->SetMinFractionalDigits( 4 );
     cameraFocalLengthSpinBox->SetMaxFractionalDigits( 4 );
 
@@ -2009,44 +2022,44 @@ SStoryboardLevelViewport::GetScaleVisibleWidgetIndex() const
 }
 
 EVisibility
-SStoryboardLevelViewport::GetMoveAndScalePlaneVisibility() const
+SStoryboardLevelViewport::GetMoveAndScaleActorVisibility() const
 {
-    if( !mPlaneToMove.IsValid() )
+    if( !mActorToMove.IsValid() )
         return EVisibility::Hidden;
 
-    ACineCameraActor* camera = Cast<ACineCameraActor>( mPlaneToMove->GetAttachParentActor() );
+    ACineCameraActor* camera = Cast<ACineCameraActor>( mActorToMove->GetAttachParentActor() );
 
-    return ShotSequenceTools::CanMoveAndScalePlane( mPlaneToMove.Get(), camera ) ? EVisibility::Visible : EVisibility::Hidden;
+    return ShotSequenceTools::CanMoveAndScaleActor( mActorToMove.Get(), camera ) ? EVisibility::Visible : EVisibility::Hidden;
 }
 
 float
-SStoryboardLevelViewport::GetMoveAndScalePlaneDistance() const
+SStoryboardLevelViewport::GetMoveAndScaleActorDistance() const
 {
-    if( !mPlaneToMove.IsValid() )
+    if( !mActorToMove.IsValid() )
         return 0.f;
 
-    ACineCameraActor* camera = Cast<ACineCameraActor>( mPlaneToMove->GetAttachParentActor() );
+    ACineCameraActor* camera = Cast<ACineCameraActor>( mActorToMove->GetAttachParentActor() );
 
-    if( !ShotSequenceTools::CanMoveAndScalePlane( mPlaneToMove.Get(), camera ) )
+    if( !ShotSequenceTools::CanMoveAndScaleActor( mActorToMove.Get(), camera ) )
         return 0.f;
 
-    float distance = camera->GetDistanceTo( mPlaneToMove.Get() );
+    float distance = camera->GetDistanceTo( mActorToMove.Get() );
 
     return distance;
 }
 void
-SStoryboardLevelViewport::SetMoveAndScalePlaneDistance( float iDistance )
+SStoryboardLevelViewport::SetMoveAndScaleActorDistance( float iDistance )
 {
-    if( !mPlaneToMove.IsValid() )
+    if( !mActorToMove.IsValid() )
         return;
 
-    ACineCameraActor* camera = Cast<ACineCameraActor>( mPlaneToMove->GetAttachParentActor() );
+    ACineCameraActor* camera = Cast<ACineCameraActor>( mActorToMove->GetAttachParentActor() );
 
-    ShotSequenceTools::MoveAndScalePlane( mPlaneToMove.Get(), camera, iDistance, mScalePlaneType );
+    ShotSequenceTools::MoveAndScaleActor( mActorToMove.Get(), camera, iDistance, mScaleActorType );
 }
 
 void
-SStoryboardLevelViewport::OnToggleAllPlanes( const FEditorModeID& iMode, bool bIsEntering )
+SStoryboardLevelViewport::OnPickEditorModeChanged( const FEditorModeID& iMode, bool bIsEntering )
 {
     if( iMode != FBuiltinEditorModes::EM_ActorPicker )
         return;
@@ -2056,44 +2069,48 @@ SStoryboardLevelViewport::OnToggleAllPlanes( const FEditorModeID& iMode, bool bI
 
     if( bIsEntering )
     {
-        HideAllPlanes();
+        HideAllActors<APlaneActor>();
+        HideAllActors<AOdysseyAnimationActor>();
     }
     else
     {
-        ShowAllPlanes();
+        ShowAllActors<APlaneActor>();
+        ShowAllActors<AOdysseyAnimationActor>();
         mStartStoryboardActorPicking = false;
     }
 }
 
+template<typename T>
 void
-SStoryboardLevelViewport::HideAllPlanes()
+SStoryboardLevelViewport::HideAllActors()
 {
     UWorld* world = ViewportClient->GetWorld();
-    for( TActorIterator<APlaneActor> it( world ); it; ++it )
+    for( TActorIterator<T> it( world ); it; ++it )
     {
-        APlaneActor* plane_actor = *it;
+        T* plane_actor = *it;
 
         if( plane_actor->IsHiddenEd() )
             continue;
 
         plane_actor->SetIsTemporarilyHiddenInEditor( true );
-        mPlanesTemporaryHidden.Add( plane_actor );
+        mActorsTemporaryHidden.Add( plane_actor );
     }
 }
 
+template<typename T>
 void
-SStoryboardLevelViewport::ShowAllPlanes()
+SStoryboardLevelViewport::ShowAllActors()
 {
-    for( APlaneActor* plane_actor : mPlanesTemporaryHidden )
+    for( AActor* actor : mActorsTemporaryHidden )
     {
-        plane_actor->SetIsTemporarilyHiddenInEditor( false );
+        actor->SetIsTemporarilyHiddenInEditor( false );
     }
 
-    mPlanesTemporaryHidden.Empty();
+    mActorsTemporaryHidden.Empty();
 }
 
 void
-SStoryboardLevelViewport::OnGetAllowedClassesForPlaneDistance( TArray<const UClass*>& ioAllowedClasses )
+SStoryboardLevelViewport::OnGetAllowedClassesForActorDistance( TArray<const UClass*>& ioAllowedClasses )
 {
     //ioAllowedClasses.Add( AStaticMeshActor::StaticClass() );
     //ioAllowedClasses.Add( ASkeletalMeshActor::StaticClass() );
@@ -2101,7 +2118,7 @@ SStoryboardLevelViewport::OnGetAllowedClassesForPlaneDistance( TArray<const UCla
 }
 
 bool
-SStoryboardLevelViewport::OnShouldFilterActorForPlaneDistance( const AActor* const iActor )
+SStoryboardLevelViewport::OnShouldFilterActorForActorDistance( const AActor* const iActor )
 {
     ////if( iActor->IsA<APlaneActor>() )
     //    return false;
@@ -2110,12 +2127,12 @@ SStoryboardLevelViewport::OnShouldFilterActorForPlaneDistance( const AActor* con
 }
 
 void
-SStoryboardLevelViewport::OnActorSelectedForPlaneDistance( AActor* ioActor )
+SStoryboardLevelViewport::OnActorSelectedForActorDistance( AActor* ioActor )
 {
-    if( !mPlaneToMove.IsValid() )
+    if( !mActorToMove.IsValid() )
         return;
 
-    ACineCameraActor* camera = Cast<ACineCameraActor>( mPlaneToMove->GetAttachParentActor() );
+    ACineCameraActor* camera = Cast<ACineCameraActor>( mActorToMove->GetAttachParentActor() );
     if( !camera )
         return;
 
@@ -2146,7 +2163,7 @@ SStoryboardLevelViewport::OnActorSelectedForPlaneDistance( AActor* ioActor )
     }
 
     // Select the closest distance from the camera to move the "plane to move"
-    ShotSequenceTools::MoveAndScalePlane( mPlaneToMove.Get(), camera, FMath::Min( distances ), mScalePlaneType );
+    ShotSequenceTools::MoveAndScaleActor( mActorToMove.Get(), camera, FMath::Min( distances ), mScaleActorType );
 }
 
 static
@@ -2203,10 +2220,10 @@ CreateSceneViewFromCamera( ACameraActor* iCamera, FStoryboardLevelViewportClient
 TOptional<FConvexVolume>
 SStoryboardLevelViewport::GetCameraFrustum() const
 {
-    if( !mPlaneToMove.IsValid() )
+    if( !mActorToMove.IsValid() )
         return TOptional<FConvexVolume>();
 
-    ACineCameraActor* camera = Cast<ACineCameraActor>( mPlaneToMove->GetAttachParentActor() );
+    ACineCameraActor* camera = Cast<ACineCameraActor>( mActorToMove->GetAttachParentActor() );
     if( !camera )
         return TOptional<FConvexVolume>();
 
@@ -2312,7 +2329,7 @@ SStoryboardLevelViewport::OnActorPickerListMenuContent()
                                SceneOutlinerModule.CreateActorPicker( InitOptions, FOnActorPicked::CreateLambda( [this]( AActor* Actor )
                                                                                                                  {
                                                                                                                      FSlateApplication::Get().DismissAllMenus();
-                                                                                                                     OnActorSelectedForPlaneDistance( Actor );
+                                                                                                                     OnActorSelectedForActorDistance( Actor );
                                                                                                                  } ) )
                            ],
                            FText::GetEmpty()
@@ -2324,14 +2341,14 @@ SStoryboardLevelViewport::OnActorPickerListMenuContent()
 }
 
 int32
-SStoryboardLevelViewport::GetScalePlaneType() const
+SStoryboardLevelViewport::GetScaleActorType() const
 {
-    return int32( mScalePlaneType );
+    return int32( mScaleActorType );
 }
 void
-SStoryboardLevelViewport::OnScalePlaneTypeChanged( int32 iScalePlaneType, ESelectInfo::Type iSelectType )
+SStoryboardLevelViewport::OnScaleActorTypeChanged( int32 iScaleActorType, ESelectInfo::Type iSelectType )
 {
-    mScalePlaneType = EScalePlane( iScalePlaneType );
+    mScaleActorType = EScaleActor( iScaleActorType );
 }
 
 EVisibility
@@ -2362,15 +2379,15 @@ SStoryboardLevelViewport::SetCameraFocalLength( float iFocalLength )
     TArray<AActor*> children;
     mCameraToFocalLength->GetAttachedActors( children );
 
-    TArray<TWeakObjectPtr<APlaneActor>> planes;
+    TArray<TWeakObjectPtr<AActor>> actors;
     for( auto child : children )
     {
-        APlaneActor* plane = Cast<APlaneActor>( child );
-        if( plane )
-            planes.Add( plane );
+        UScalingComponent* scaling_component = child->FindComponentByClass<UScalingComponent>();
+        if( scaling_component )
+            actors.Add( child );
     }
 
-    ShotSequenceTools::SetCameraFocalLengthAndScalePlane( planes, mCameraToFocalLength.Get(), iFocalLength, mScalePlaneType );
+    ShotSequenceTools::SetCameraFocalLengthAndScaleActor( actors, mCameraToFocalLength.Get(), iFocalLength, mScaleActorType );
 }
 
 //---
@@ -2708,29 +2725,33 @@ void SStoryboardLevelViewport::Tick(const FGeometry& AllottedGeometry, const dou
     //-
 
     UIData.SelectedPlanes.Empty();
+    UIData.SelectedAnimations.Empty();
 
     USelection* SelectedActors = GEditor->GetSelectedActors();
     TArray<APlaneActor*> selected_planes;
+    TArray<AOdysseyAnimationActor*> selected_animations;
     TArray<ACineCameraActor*> selected_cameras;
     SelectedActors->GetSelectedObjects( selected_planes );
+    SelectedActors->GetSelectedObjects( selected_animations );
     SelectedActors->GetSelectedObjects( selected_cameras );
 
     for( auto selected_plane : selected_planes )
-        UIData.SelectedPlanes.Add( FText::FromString( selected_plane->GetName() ) );
+        UIData.SelectedPlanes.Add( FText::FromString( selected_plane->GetActorNameOrLabel() ) );
+
+    for( auto selected_animation : selected_animations )
+        UIData.SelectedAnimations.Add( FText::FromString( selected_animation->GetActorNameOrLabel() ) );
 
     //-
 
-    mPlaneToMove = nullptr;
+    mActorToMove = nullptr;
     if( selected_planes.Num() == 1 )
-    {
-        mPlaneToMove = selected_planes[0];
-    }
+        mActorToMove = selected_planes[0];
+    if( selected_animations.Num() == 1 )
+        mActorToMove = selected_animations[0];
 
     mCameraToFocalLength = nullptr;
     if( selected_cameras.Num() == 1 )
-    {
         mCameraToFocalLength = selected_cameras[0];
-    }
 
     //-
 

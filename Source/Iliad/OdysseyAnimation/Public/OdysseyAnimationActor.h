@@ -8,7 +8,6 @@
 
 class ACineCameraActor;
 class UOdysseyAnimationComponent;
-class UScalingComponent;
 
 /**
  * An instance of a UOdysseyAnimation in a level.

@@ -16,6 +16,7 @@
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 #include "Export/ImageSequence/ExportImageSequenceSettings.h"
 #include "Export/PDF/ExportPDFSettings.h"
+#include "Tools/EposSequenceTools.h"
 #include "Import/ImportImageSequenceSettings.h"
 
 #include "EposSequenceEditorBlueprintLibrary.generated.h"
@@ -382,14 +383,32 @@ public:
     /**
      * Move and scale a plane from the camera
      */
+    UE_DEPRECATED( 5.6, "Use MoveAndScaleActor that takes a EScaleActor" )
+    PRAGMA_DISABLE_DEPRECATION_WARNINGS // To only have the deprecation warning (about EScalePlane enum) in BP and not during c++ build
     UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor" )
     static void MoveAndScalePlane( APlaneActor* Plane, const ACineCameraActor* Camera, float NewDistance, EScalePlane ScaleType );
+    PRAGMA_ENABLE_DEPRECATION_WARNINGS
 
     /**
      * Move and scale a plane from the camera
      */
+    UE_DEPRECATED( 5.6, "Use SetCameraFocalLengthAndScaleActor that takes a EScaleActor" )
+    PRAGMA_DISABLE_DEPRECATION_WARNINGS // To only have the deprecation warning (about EScalePlane enum) in BP and not during c++ build
     UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor" )
     static void SetCameraFocalLengthAndScalePlane( TArray<APlaneActor*> Planes, ACineCameraActor* Camera, float NewFocalLength, EScalePlane ScaleType );
+    PRAGMA_ENABLE_DEPRECATION_WARNINGS
+
+    /**
+     * Move and scale a plane or animation from the camera
+     */
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor" )
+    static void MoveAndScaleActor( AActor* Actor, const ACineCameraActor* Camera, float NewDistance, EScaleActor ScaleType );
+
+    /**
+     * Modify camera focal length and scale a plane or animation accordingly
+     */
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor" )
+    static void SetCameraFocalLengthAndScaleActor( TArray<AActor*> Actors, ACineCameraActor* Camera, float NewFocalLength, EScaleActor ScaleType );
 
 public:
 

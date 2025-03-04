@@ -10,7 +10,6 @@
 #include "OdysseyAnimation.h"
 #include "OdysseyAnimationComponent.h"
 #include "OdysseyAnimationPlayer.h"
-#include "ScalingComponent.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(OdysseyAnimationActor)
 

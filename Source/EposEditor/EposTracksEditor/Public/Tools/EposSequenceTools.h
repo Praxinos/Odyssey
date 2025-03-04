@@ -832,8 +832,9 @@ public:
 
 //---
 
+
 UENUM( BlueprintType )
-enum class EScalePlane : uint8
+enum class UE_DEPRECATED( 5.6, "Use EScaleActor" ) EScalePlane : uint8
 {
     // The plane won't scale
     kNo                 UMETA( DisplayName = "No Scale" ),
@@ -845,7 +846,7 @@ enum class EScalePlane : uint8
 };
 
 UENUM( BlueprintType )
-enum class EScaleAnimation : uint8
+enum class EScaleActor : uint8
 {
     // The animation won't scale
     kNo                 UMETA( DisplayName = "No Scale" ),
@@ -905,6 +906,10 @@ public:
 
 private:
     static void RenameBinding( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iBinding, FString iNewLabel );
+
+public:
+    static bool MoveAndScaleActor( AActor* ioActor, const ACineCameraActor* iCamera, float iNewDistance, EScaleActor iScaleType );
+    static bool CanMoveAndScaleActor( const AActor* iActor, const ACineCameraActor* iCamera );
 
 // Inside EposSequenceTools_Camera
 public:
@@ -994,7 +999,7 @@ private:
     static void GotoNextCameraPosition( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber );
 
 public:
-    static bool SetCameraFocalLengthAndScalePlane( TArray<TWeakObjectPtr<APlaneActor>> ioPlanes, ACineCameraActor* ioCamera, float iNewFocalLength, EScalePlane iScaleType );
+    static bool SetCameraFocalLengthAndScaleActor( TArray<TWeakObjectPtr<AActor>> ioActors, ACineCameraActor* ioCamera, float iNewFocalLength, EScaleActor iScaleType );
 
 // Inside EposSequenceTools_Animation
 public:
@@ -1017,9 +1022,6 @@ public:
 
     static void DeleteAnimation( ISequencer* iSequencer, TArray<FGuid> iAnimationBindings );
     static void DeleteAnimation( ISequencer* iSequencer, FGuid iAnimationBinding );
-
-    static bool MoveAndScaleAnimation( AOdysseyAnimationActor* ioAnimation, const ACineCameraActor* iCamera, float iNewDistance, EScaleAnimation iScaleType );
-    static bool CanMoveAndScaleAnimation( const AOdysseyAnimationActor* iAnimation, const ACineCameraActor* iCamera );
 
 private:
     static void CreateAnimation( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, const FAnimationArgs& iAnimationArgs );
@@ -1055,9 +1057,6 @@ public:
 
     static void DeletePlane( ISequencer* iSequencer, TArray<FGuid> iPlaneBindings );
     static void DeletePlane( ISequencer* iSequencer, FGuid iPlaneBinding );
-
-    static bool MoveAndScalePlane( APlaneActor* ioPlane, const ACineCameraActor* iCamera, float iNewDistance, EScalePlane iScaleType );
-    static bool CanMoveAndScalePlane( const APlaneActor* iPlane, const ACineCameraActor* iCamera );
 
 private:
     static void CreatePlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, const FPlaneArgs& iPlaneArgs );

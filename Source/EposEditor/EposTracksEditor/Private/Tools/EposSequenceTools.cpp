@@ -4,6 +4,7 @@
 #include "Tools/EposSequenceTools.h"
 
 #include "AnimatedRange.h"
+#include "CineCameraActor.h"
 #include "ISequencer.h"
 #include "MovieScene.h"
 #include "MovieSceneSection.h"
@@ -13,6 +14,7 @@
 
 #include "Board/BoardSequence.h"
 #include "EposSequenceHelpers.h"
+#include "ScalingComponent.h"
 #include "Shot/ShotSequence.h"
 
 #define LOCTEXT_NAMESPACE "EposSequenceTools"
@@ -153,6 +155,85 @@ ShotSequenceTools::RenameBinding( ISequencer& iSequencer, UMovieSceneSequence* i
         FActorLabelUtilities::RenameExistingActor( actor, new_possessable.GetName() );
 
     iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::RefreshAllImmediately );
+}
+
+//---
+
+//static
+bool
+ShotSequenceTools::CanMoveAndScaleActor( const AActor* iActor, const ACineCameraActor* iCamera )
+{
+    if( !iActor || !iCamera )
+        return false;
+
+    // Already normalized
+    FVector camera_lookat = iCamera->GetActorForwardVector();
+    FVector animation_lookat = iActor->GetActorUpVector();
+
+    if( !FVector::Parallel( camera_lookat, animation_lookat ) )
+        return false;
+
+    FVector camera_to_animation( iActor->GetActorLocation() - iCamera->GetActorLocation() );
+    camera_to_animation.Normalize();
+
+    if( !FVector::Coplanar( iCamera->GetActorLocation(), camera_lookat, iCamera->GetActorLocation(), camera_to_animation ) )
+        return false;
+
+    return true;
+};
+
+//static
+bool
+ShotSequenceTools::MoveAndScaleActor( AActor* ioActor, const ACineCameraActor* iCamera, float iNewDistance, EScaleActor iScaleType )
+{
+    if( !ShotSequenceTools::CanMoveAndScaleActor( ioActor, iCamera ) )
+        return false;
+
+    if( FMath::IsNearlyZero( iNewDistance ) )
+        return false;
+
+    UScalingComponent* scaling_component = ioActor->FindComponentByClass<UScalingComponent>();
+    if( !scaling_component )
+        return false;
+
+    float old_distance = FVector::Distance( iCamera->GetActorLocation(), ioActor->GetActorLocation() );
+    FVector old_scale = ioActor->GetActorScale3D();
+    FVector old_camera_view_size = scaling_component->ComputeSizeOfCameraView( iCamera, old_distance );
+    FVector old_scale_camera100 = scaling_component->ComputeScaleWithScaleAndMargin( old_camera_view_size );
+
+    FVector new_camera_view_size = scaling_component->ComputeSizeOfCameraView( iCamera, iNewDistance );
+
+    FVector new_animation_location = iCamera->GetActorLocation() + ( ioActor->GetActorLocation() - iCamera->GetActorLocation() ).GetSafeNormal() * iNewDistance;
+
+    ioActor->SetActorLocation( new_animation_location );
+
+    switch( iScaleType )
+    {
+        case EScaleActor::kFitToCamera:
+        {
+            FVector scale = scaling_component->ComputeScaleWithScaleAndMargin( new_camera_view_size );
+            ioActor->SetActorScale3D( scale );
+        }
+        break;
+
+        case EScaleActor::kRelativeScale:
+        {
+            FVector new_scale_camera100 = scaling_component->ComputeScaleWithScaleAndMargin( new_camera_view_size );
+            FVector ratio = new_scale_camera100 / old_scale_camera100;
+            FVector new_scale = old_scale * ratio;
+
+            ioActor->SetActorScale3D( new_scale );
+        }
+        break;
+
+        case EScaleActor::kNo:
+            // nothing to do
+            break;
+
+        default: checkNoEntry();
+    }
+
+    return true;
 }
 
 
