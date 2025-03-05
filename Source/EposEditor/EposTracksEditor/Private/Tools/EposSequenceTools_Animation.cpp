@@ -82,6 +82,8 @@ ShotSequenceTools::SpawnAnimation( UWorld* iWorld, ACineCameraActor* iCamera, fl
     if( !animation )
         return nullptr;
 
+    animation->SetActorHiddenInGame( true );
+
 #if UE_BUILD_DEBUG
     if( UMaterialInstanceConstant* material = Cast<UMaterialInstanceConstant>( animation->GetAnimationComponent()->GetMaterial( 0 ) ) )
         material->SetScalarParameterValueEditorOnly( FMaterialParameterInfo( "Overlay" ), 1 );
