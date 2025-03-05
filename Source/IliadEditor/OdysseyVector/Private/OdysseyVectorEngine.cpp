@@ -633,10 +633,10 @@ static inline void TraceHorizontalLine ( const FHorizontalLine *hline
                         // https://en.wikipedia.org/wiki/Alpha_compositing
                         // Premultiplied OVER operation
                         double BAf = ( double ) BA * iOpacity / 255;
-                        uint8 B = ( BB * BAf ) + ( srcimg[aoffset][0] * ( 1.0f - BAf ) );
-                        uint8 G = ( BG * BAf ) + ( srcimg[aoffset][1] * ( 1.0f - BAf ) );
-                        uint8 R = ( BR * BAf ) + ( srcimg[aoffset][2] * ( 1.0f - BAf ) );
-                        uint8 A =   BA         + ( srcimg[aoffset][3] * ( 1.0f - BAf ) );
+                        uint8 B = ( BB * BAf      ) + ( srcimg[aoffset][0] * ( 1.0f - BAf ) );
+                        uint8 G = ( BG * BAf      ) + ( srcimg[aoffset][1] * ( 1.0f - BAf ) );
+                        uint8 R = ( BR * BAf      ) + ( srcimg[aoffset][2] * ( 1.0f - BAf ) );
+                        uint8 A = ( BA * iOpacity ) + ( srcimg[aoffset][3] * ( 1.0f - BAf ) );
 
                         srcimg[aoffset][0] = B;
                         srcimg[aoffset][1] = G;
@@ -672,45 +672,48 @@ FOdysseyVectorEngine::FillQuad( BLContext* iBLContext
                               , int32  iBrushBitsPerPixel
                               , uint64 iPolygonDrawingFlags )
 {
-    const BLMatrix2D& userMatrix = iBLContext->userMatrix();
-    BLPoint worldPoint[4] = { userMatrix.mapPoint( iPoint[0].x, iPoint[0].y )
-                            , userMatrix.mapPoint( iPoint[1].x, iPoint[1].y )
-                            , userMatrix.mapPoint( iPoint[2].x, iPoint[2].y )
-                            , userMatrix.mapPoint( iPoint[3].x, iPoint[3].y ) };
-    ::ULIS::FVec2I intPt[4] = { { (int32)worldPoint[0].x, (int32)worldPoint[0].y }
-                              , { (int32)worldPoint[1].x, (int32)worldPoint[1].y }
-                              , { (int32)worldPoint[2].x, (int32)worldPoint[2].y }
-                              , { (int32)worldPoint[3].x, (int32)worldPoint[3].y } };
-    int32 xmin = intPt[0].x;
-    int32 xmax = intPt[0].x;
-    int32 ymin = intPt[0].y;
-    int32 ymax = intPt[0].y;
-
-    for( int i = 1; i < 4; i++ )
+    if( iOpacity )
     {
-        if( intPt[i].x < xmin ) xmin = intPt[i].x;
-        if( intPt[i].x > xmax ) xmax = intPt[i].x;
-        if( intPt[i].y < ymin ) ymin = intPt[i].y;
-        if( intPt[i].y > ymax ) ymax = intPt[i].y;
-    }
+        const BLMatrix2D& userMatrix = iBLContext->userMatrix();
+        BLPoint worldPoint[4] = { userMatrix.mapPoint( iPoint[0].x, iPoint[0].y )
+                                , userMatrix.mapPoint( iPoint[1].x, iPoint[1].y )
+                                , userMatrix.mapPoint( iPoint[2].x, iPoint[2].y )
+                                , userMatrix.mapPoint( iPoint[3].x, iPoint[3].y ) };
+        ::ULIS::FVec2I intPt[4] = { { (int32)worldPoint[0].x, (int32)worldPoint[0].y }
+                                  , { (int32)worldPoint[1].x, (int32)worldPoint[1].y }
+                                  , { (int32)worldPoint[2].x, (int32)worldPoint[2].y }
+                                  , { (int32)worldPoint[3].x, (int32)worldPoint[3].y } };
+        int32 xmin = intPt[0].x;
+        int32 xmax = intPt[0].x;
+        int32 ymin = intPt[0].y;
+        int32 ymax = intPt[0].y;
 
-    // don't draw if quad is outside the screen
-    if( ( ( xmin ) < (int32) mRenderData.size.w )
-     && ( ( xmax ) > 0                          )
-     && ( ( ymin ) < (int32) mRenderData.size.h )
-     && ( ( ymax ) > 0                          ) )
-    {
-        TracePolygon( intPt
-                    , iU
-                    , iV
-                    , 4
-                    , iOpacity
-                    , iColor
-                    , iBrushPixelData
-                    , iBrushWidth
-                    , iBrushHeight
-                    , iBrushBitsPerPixel
-                    , iPolygonDrawingFlags );
+        for( int i = 1; i < 4; i++ )
+        {
+            if( intPt[i].x < xmin ) xmin = intPt[i].x;
+            if( intPt[i].x > xmax ) xmax = intPt[i].x;
+            if( intPt[i].y < ymin ) ymin = intPt[i].y;
+            if( intPt[i].y > ymax ) ymax = intPt[i].y;
+        }
+
+        // don't draw if quad is outside the screen
+        if( ( ( xmin ) < (int32) mRenderData.size.w )
+         && ( ( xmax ) > 0                          )
+         && ( ( ymin ) < (int32) mRenderData.size.h )
+         && ( ( ymax ) > 0                          ) )
+        {
+            TracePolygon( intPt
+                        , iU
+                        , iV
+                        , 4
+                        , iOpacity
+                        , iColor
+                        , iBrushPixelData
+                        , iBrushWidth
+                        , iBrushHeight
+                        , iBrushBitsPerPixel
+                        , iPolygonDrawingFlags );
+        }
     }
 }
 
@@ -729,43 +732,46 @@ FOdysseyVectorEngine::FillTriangle( BLContext* iBLContext
                                   , int32  iBrushBitsPerPixel
                                   , uint64 iPolygonDrawingFlags )
 {
-    const BLMatrix2D& userMatrix = iBLContext->userMatrix();
-    BLPoint worldPoint[3] = { userMatrix.mapPoint( iPoint[0].x, iPoint[0].y )
-                            , userMatrix.mapPoint( iPoint[1].x, iPoint[1].y )
-                            , userMatrix.mapPoint( iPoint[2].x, iPoint[2].y ) };
-    ::ULIS::FVec2I intPt[3] = { { (int32)worldPoint[0].x, (int32)worldPoint[0].y }
-                              , { (int32)worldPoint[1].x, (int32)worldPoint[1].y }
-                              , { (int32)worldPoint[2].x, (int32)worldPoint[2].y } };
-    int32 xmin = intPt[0].x;
-    int32 xmax = intPt[0].x;
-    int32 ymin = intPt[0].y;
-    int32 ymax = intPt[0].y;
-
-    for( int i = 1; i < 3; i++ )
+    if( iOpacity )
     {
-        if( intPt[i].x < xmin ) xmin = intPt[i].x;
-        if( intPt[i].x > xmax ) xmax = intPt[i].x;
-        if( intPt[i].y < ymin ) ymin = intPt[i].y;
-        if( intPt[i].y > ymax ) ymax = intPt[i].y;
-    }
+        const BLMatrix2D& userMatrix = iBLContext->userMatrix();
+        BLPoint worldPoint[3] = { userMatrix.mapPoint( iPoint[0].x, iPoint[0].y )
+                                , userMatrix.mapPoint( iPoint[1].x, iPoint[1].y )
+                                , userMatrix.mapPoint( iPoint[2].x, iPoint[2].y ) };
+        ::ULIS::FVec2I intPt[3] = { { (int32)worldPoint[0].x, (int32)worldPoint[0].y }
+                                  , { (int32)worldPoint[1].x, (int32)worldPoint[1].y }
+                                  , { (int32)worldPoint[2].x, (int32)worldPoint[2].y } };
+        int32 xmin = intPt[0].x;
+        int32 xmax = intPt[0].x;
+        int32 ymin = intPt[0].y;
+        int32 ymax = intPt[0].y;
 
-    // don't draw if quad is outside the screen
-    if( ( ( xmin ) < (int32) mRenderData.size.w )
-     && ( ( xmax ) > 0                          )
-     && ( ( ymin ) < (int32) mRenderData.size.h )
-     && ( ( ymax ) > 0                          ) )
-    {
-        TracePolygon( intPt
-                    , iU
-                    , iV
-                    , 3
-                    , iOpacity
-                    , iColor
-                    , iBrushPixelData
-                    , iBrushWidth
-                    , iBrushHeight
-                    , iBrushBitsPerPixel
-                    , iPolygonDrawingFlags );
+        for( int i = 1; i < 3; i++ )
+        {
+            if( intPt[i].x < xmin ) xmin = intPt[i].x;
+            if( intPt[i].x > xmax ) xmax = intPt[i].x;
+            if( intPt[i].y < ymin ) ymin = intPt[i].y;
+            if( intPt[i].y > ymax ) ymax = intPt[i].y;
+        }
+
+        // don't draw if quad is outside the screen
+        if( ( ( xmin ) < (int32) mRenderData.size.w )
+         && ( ( xmax ) > 0                          )
+         && ( ( ymin ) < (int32) mRenderData.size.h )
+         && ( ( ymax ) > 0                          ) )
+        {
+            TracePolygon( intPt
+                        , iU
+                        , iV
+                        , 3
+                        , iOpacity
+                        , iColor
+                        , iBrushPixelData
+                        , iBrushWidth
+                        , iBrushHeight
+                        , iBrushBitsPerPixel
+                        , iPolygonDrawingFlags );
+        }
     }
 }
 

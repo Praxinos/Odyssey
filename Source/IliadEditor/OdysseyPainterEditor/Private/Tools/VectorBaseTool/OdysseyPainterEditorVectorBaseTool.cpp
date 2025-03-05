@@ -364,21 +364,19 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyDownVector( FOdysseyVectorGroupPaint* 
         return true;
     }
 
-    //if( iKey == EKeys::Add )
-    //{
-    //    IncreaseContourWidth();
-
-    //      oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
-    //      return true;
-    //}
-
-    //if( iKey == EKeys::Subtract )
-    //{
-    //    DecreaseContourWidth();
-
-    //      oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
-    //      return true;
-    //}
+//    if( iKey == EKeys::Add )
+//    {
+//        IncreaseContourWidth();
+//
+//        return true;
+//    }
+//
+//    if( iKey == EKeys::Subtract )
+//    {
+//        DecreaseContourWidth();
+//
+//        return true;
+//    }
 
     return false;
 }

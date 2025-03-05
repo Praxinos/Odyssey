@@ -749,8 +749,8 @@ UOdysseyPainterEditorVectorPathEditTool::DragVertexHandle( FOdysseyVectorVertex 
                                                          , bool iWidenAllAlong )
 {
     FOdysseyVectorPath* path = iVertex->GetOwnerAsPath();
-    ::ULIS::FVec2D localMouse = FOdysseyVector::MapVector( path->GetInverseWorldMatrix()
-                                                         , iPointInTexture );
+    ::ULIS::FVec2D localMouse = FOdysseyVector::MapPoint( path->GetInverseWorldMatrix()
+                                                        , iPointInTexture );
     double ratio = ( ::ULIS::FVec2D( iVertex->GetX() - localMouse.x
                                    , iVertex->GetY() - localMouse.y ).Distance() ) / iVertex->GetRadius();
 
