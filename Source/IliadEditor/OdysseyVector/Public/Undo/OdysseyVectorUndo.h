@@ -54,7 +54,9 @@ namespace FSnapshotFlags
             static const uint64 RADIALRADIUS    = ( 1ULL <<  8 );
             static const uint64 RADIALOFFSET    = ( 1ULL <<  9 );
             static const uint64 PALETTEENTRY    = ( 1ULL << 10 );
-            static const uint64 PALETTESET    = ( 1ULL << 11 );
+            static const uint64 PALETTESET      = ( 1ULL << 11 );
+            static const uint64 LINEARP0        = ( 1ULL << 12 );
+            static const uint64 LINEARP1        = ( 1ULL << 13 );
             static const uint64 PARAM = ( COLORMODE
                                         | SPREADINGPOLICY
                                         | SOLIDCOLOR
@@ -65,7 +67,9 @@ namespace FSnapshotFlags
                                         | RADIALRADIUS
                                         | RADIALOFFSET
                                         | PALETTEENTRY
-                                        | PALETTESET );
+                                        | PALETTESET
+                                        | LINEARP0
+                                        | LINEARP1 );
         }
     }
 
@@ -228,6 +232,8 @@ class ODYSSEYVECTOR_API FSnapshotBucket : public FSnapshotPoint
         FColor mGradientColor1;
         double mRadialRadius;
         ::ULIS::FVec2D mRadialOffset;
+        ::ULIS::FVec2D mLinearP0;
+        ::ULIS::FVec2D mLinearP1;
         UOdysseyPaletteEntry* mPaletteEntry;
         int mPaletteSet;
 };

@@ -103,6 +103,34 @@ FOdysseyVectorExportV2::WriteBucketPosition( FOdysseyVectorBucket& iBucket, FArc
 }
 
 void
+FOdysseyVectorExportV2::WriteBucketGradientLinearP0( FOdysseyVectorBucket& iBucket, FArchive &Ar )
+{
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_BUCKET_GRADIENT_LINEARP0
+                            , Ar
+                            , [&iBucket](FArchive &Ar) -> void
+    {
+        ::ULIS::FVec2D linearP0 = iBucket.GetLinearP0();
+
+        Ar << linearP0.x;
+        Ar << linearP0.y;
+    } );
+}
+
+void
+FOdysseyVectorExportV2::WriteBucketGradientLinearP1( FOdysseyVectorBucket& iBucket, FArchive &Ar )
+{
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_BUCKET_GRADIENT_LINEARP1
+                            , Ar
+                            , [&iBucket](FArchive &Ar) -> void
+    {
+        ::ULIS::FVec2D linearP1 = iBucket.GetLinearP1();
+
+        Ar << linearP1.x;
+        Ar << linearP1.y;
+    } );
+}
+/*
+void
 FOdysseyVectorExportV2::WriteBucketRotation( FOdysseyVectorBucket& iBucket, FArchive &Ar )
 {
     FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_BUCKET_ROTATION
@@ -114,7 +142,7 @@ FOdysseyVectorExportV2::WriteBucketRotation( FOdysseyVectorBucket& iBucket, FArc
         Ar << rotation;
     } );
 }
-
+*/
 void
 FOdysseyVectorExportV2::WriteBucketGradientRadialRadius( FOdysseyVectorBucket& iBucket, FArchive &Ar )
 {
@@ -177,6 +205,8 @@ FOdysseyVectorExportV2::WriteBucketGradient( FOdysseyVectorBucket& iBucket, FArc
         WriteBucketGradientStop( gradientColor1, 1.0f, Ar );
         WriteBucketGradientRadialRadius( iBucket, Ar );
         WriteBucketGradientRadialOffset( iBucket, Ar );
+        WriteBucketGradientLinearP0( iBucket, Ar );
+        WriteBucketGradientLinearP1( iBucket, Ar );
     } );
 }
 
@@ -209,7 +239,7 @@ FOdysseyVectorExportV2::WriteBucket( FOdysseyVectorBucket& iBucket, FArchive &Ar
     {
         //WriteBucketSpreading( iBucket, Ar );
         WriteBucketPosition( iBucket, Ar );
-        WriteBucketRotation( iBucket, Ar );
+        //WriteBucketRotation( iBucket, Ar );
         WriteBucketPropagated( iBucket, Ar );
 
         if( iBucket.GetColorMode() == eBucketColorMode::Palette )

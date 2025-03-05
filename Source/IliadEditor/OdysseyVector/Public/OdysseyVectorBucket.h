@@ -267,6 +267,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorBucket : public FOdysseyVectorPoint
         eBucketColorMode mColorMode;
         FColor mSolidColor;
         bool bPropagated;
+        double mRotation;
         FColor mGradientColor0;
         FColor mGradientColor1;
         double mRadialRadius; // radius in radial mode
@@ -276,6 +277,4 @@ class ODYSSEYVECTOR_API FOdysseyVectorBucket : public FOdysseyVectorPoint
         int mPaletteSet;
         ::ULIS::FVec2D mLinearP0;
         ::ULIS::FVec2D mLinearP1;
-        ::ULIS::FVec2D mLinearTranslation;
-        double mLinearRotation;
 };

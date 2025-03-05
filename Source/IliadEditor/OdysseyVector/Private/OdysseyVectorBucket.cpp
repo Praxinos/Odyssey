@@ -20,6 +20,7 @@ FOdysseyVectorBucket::FOdysseyVectorBucket( FOdysseyVectorObject* iOwner
     : mOwner ( iOwner )
     , mLinearP0( 0.0f, 0.0f )
     , mLinearP1( 0.0f, 0.0f )
+    , mRotation ( 0.0f ) // deprecated but kept for compatibility with older file format
 {
     BLMatrix2D& ownerInverseWorldMatrix = iOwner->GetInverseWorldMatrix();
     BLMatrix2D& importWorldMatrix = iImportFrom->GetOwner()->GetWorldMatrix();
@@ -48,7 +49,6 @@ FOdysseyVectorBucket::FOdysseyVectorBucket( FOdysseyVectorObject* iOwner
 {
     SetSolidColor( 160, 160, 160, 255 );
 
-    SetRotation( 0.0f );
     SetPropagated( false );
     SetGradientColor0( 255, 255, 255, 255 );
     SetGradientColor1( 255, 255, 255, 255 );
@@ -116,12 +116,13 @@ FOdysseyVectorBucket::SetColorMode( eBucketColorMode iColorMode )
 void
 FOdysseyVectorBucket::SetRotation( double iRotation )
 {
-    mLinearRotation = fmod( iRotation, M_PI * 2.0f );
+    mRotation = iRotation;
+}
 
-    if( mLinearRotation < 0.0f )
-    {
-        mLinearRotation += ( M_PI * 2.0f );
-    }
+double
+FOdysseyVectorBucket::GetRotation()
+{
+    return mRotation;
 }
 
 void
@@ -281,12 +282,6 @@ FOdysseyVectorBucket::GetColor()
     return FColor(0,0,0,255);
 }
 
-double
-FOdysseyVectorBucket::GetRotation()
-{
-    return mLinearRotation;
-}
-
 void
 FOdysseyVectorBucket::Copy( FOdysseyVectorBucket* iDestinationBucket )
 {
@@ -296,13 +291,14 @@ FOdysseyVectorBucket::Copy( FOdysseyVectorBucket* iDestinationBucket )
     iDestinationBucket->mPaletteSet      = mPaletteSet;
     iDestinationBucket->mColorMode       = mColorMode;
     iDestinationBucket->mSolidColor      = mSolidColor;
-    iDestinationBucket->mLinearRotation        = mLinearRotation;
     iDestinationBucket->bPropagated      = bPropagated;
     iDestinationBucket->mColorMode       = mColorMode;
     iDestinationBucket->mGradientColor0  = mGradientColor0;
     iDestinationBucket->mGradientColor1  = mGradientColor1;
     iDestinationBucket->mRadialRadius    = mRadialRadius;
     iDestinationBucket->mRadialOffset    = mRadialOffset;
+    iDestinationBucket->mLinearP0        = mLinearP0;
+    iDestinationBucket->mLinearP1        = mLinearP1;
 
     iDestinationBucket->Invalidate();
 }

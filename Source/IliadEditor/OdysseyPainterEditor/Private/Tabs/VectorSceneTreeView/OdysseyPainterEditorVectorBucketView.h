@@ -53,13 +53,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBucketView : public UO
 
         UPROPERTY( EditAnywhere
                  , Category = "Bucket"
-                 , meta = ( ToolTip  = "Rotation"
-                          , EditCondition = "(ColorMode == eBucketColorMode::LinearGradient)"
-                          , EditConditionHides ) )
-        double Rotation;
-
-        UPROPERTY( EditAnywhere
-                 , Category = "Bucket"
                  , meta = ( ToolTip  = "Propagated" ) )
         bool Propagated;
 

@@ -44,7 +44,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::UOdysseyPainterEditorVectorPaintBuck
     , Opacity( 1.0f )
     , Color1( 255, 255, 255, 255 )
     , Color2( 255, 255, 255, 255 )
-    , PickingRadius( 10.0f )
+    , PickingRadius( 20.0f )
     , mPickedBucket( nullptr )
     , mEditionMode( eVectorPaintBucketEditionMode::Default )
 {
@@ -192,26 +192,8 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseDownVector( FOdysseyVectorGro
                     mPointPosition.y = mPickedBucket->GetY();
                 break;
 
-                case FOdysseyPainterEditorVectorPaintBucketToolHUD::PICK_HANDLE :
-                    // needed for valid GUndo pointer
-                    GEditor->BeginTransaction(LOCTEXT("vector-paint-bucket-tool.transaction.rotate-bucket","Paint Bucket"));
-                    if( GUndo )
-                    {
-                        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( iScene
-                                                                                    , mPickedBucket
-                                                                                    , retFlags );
-
-                        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-
-                        TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
-                        if (source)
-                            source->RecordCurrentFrameUndo();
-                    }
-                    GEditor->EndTransaction();
-
-                    mPointRotation = mPickedBucket->GetRotation();
-                break;
-
+                case FOdysseyPainterEditorVectorPaintBucketToolHUD::PICK_LINEAR_HANDLE0 :
+                case FOdysseyPainterEditorVectorPaintBucketToolHUD::PICK_LINEAR_HANDLE1 :
                 case FOdysseyPainterEditorVectorPaintBucketToolHUD::PICK_RADIAL_AREA:
                 case FOdysseyPainterEditorVectorPaintBucketToolHUD::PICK_RADIAL_HANDLE:
                 {
@@ -302,14 +284,6 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseDragVector( FOdysseyVectorGro
                 case FOdysseyPainterEditorVectorPaintBucketToolHUD::PICK_BUCKET :
                     mPickedBucket->Set( mPickedBucket->GetX() + localVector.x
                                       , mPickedBucket->GetY() + localVector.y );
-                break;
-
-                case FOdysseyPainterEditorVectorPaintBucketToolHUD::PICK_HANDLE:
-                {
-                    double deltaAngle = GetRotationAngle( mPickedBucket, iPointInTexture );
-
-                    mPickedBucket->SetRotation( mPickedBucket->GetRotation() + deltaAngle );
-                }
                 break;
 
                 case FOdysseyPainterEditorVectorPaintBucketToolHUD::PICK_RADIAL_AREA:
@@ -652,7 +626,10 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVector( FOdysseyVectorGroup
         }
         else
         {
-            notificationFlags |= OnMouseUpVectorCreateBucket( iScene, iPointInTexture, iKey );
+            if ( mEditionMode == eVectorPaintBucketEditionMode::Default )
+            {
+                notificationFlags |= OnMouseUpVectorCreateBucket( iScene, iPointInTexture, iKey );
+            }
         }
 
         mPickedBucket = nullptr;

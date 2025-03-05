@@ -218,7 +218,7 @@ namespace FOdysseyFile
                             static const uint32 CHUNK_BUCKET_ENTRY = 0x94267aa5; // container
                                 static const uint32 CHUNK_BUCKET_SPREADING = 0x402c03f1;  // uint32(spreadingPolicy)
                                 static const uint32 CHUNK_BUCKET_POSITION = 0xd492a193; // uint8(R)-uint8(G)-uint8(B)-uint8(A)
-                                static const uint32 CHUNK_BUCKET_ROTATION =  0xbbc2dd97; // double(rotation)
+            /* Deprecated */    static const uint32 CHUNK_BUCKET_ROTATION =  0xbbc2dd97; // double(rotation)
                                 static const uint32 CHUNK_BUCKET_PROPAGATED = 0x2c1333ce; // uint32(bool)
                                 static const uint32 CHUNK_BUCKET_COLORMODE = 0x9529f13e;  // uint32(colorMode)
                                 static const uint32 CHUNK_BUCKET_PALETTEENTRY_MK1 = 0xac23cabe; // FName to load PaletteEntry
@@ -229,6 +229,8 @@ namespace FOdysseyFile
                                     static const uint32 CHUNK_BUCKET_GRADIENT_STOP = 0xd0dfb9d3; // uint8(R)-uint8(G)-uint8(B)-uint8(A)-float(stop)
                                     static const uint32 CHUNK_BUCKET_GRADIENT_RADIALRADIUS = 0xcdbd0ebb; // double(radius)
                                     static const uint32 CHUNK_BUCKET_GRADIENT_RADIALOFFSET = 0xafcbaa31; // double(x),double(y)
+                                    static const uint32 CHUNK_BUCKET_GRADIENT_LINEARP0 = 0x71644b2f; // double(x),double(y)
+                                    static const uint32 CHUNK_BUCKET_GRADIENT_LINEARP1 = 0x6637bb9; // double(x),double(y)
 
                     static const uint32 CHUNK_SCENE =  0xfe491c66; // container
                         // ... +inherited chunks.

@@ -17,7 +17,6 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPaintBucketToolHUD : p
 {
     public:
         static const uint32 PICK_NONE           = 0;
-        static const uint32 PICK_HANDLE         = 1;
         static const uint32 PICK_BUCKET         = 2;
         static const uint32 PICK_RADIAL_HANDLE  = 3;
         static const uint32 PICK_RADIAL_AREA    = 4;

@@ -9,6 +9,10 @@
 #include "OdysseyFile.h"
 #include "OdysseyVectorBucket.h"
 
+#ifndef M_PI
+#define M_PI 3.1415926535f
+#endif
+
 void
 FOdysseyVectorImportV1::ReadBucket( FOdysseyVectorBucket& iBucket, uint64 iChunkEnd, FArchive &Ar )
 {

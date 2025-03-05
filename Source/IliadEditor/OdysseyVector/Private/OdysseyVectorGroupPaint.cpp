@@ -265,7 +265,7 @@ FOdysseyVectorGroupPaint::~FOdysseyVectorGroupPaint()
 
 FOdysseyVectorGroupPaint::FOdysseyVectorGroupPaint( const FString& iName )
     : FOdysseyVectorGroup( iName )
-    , mSegmentExtensionScheme( eSegmentExtensionScheme::Single )
+    , mSegmentExtensionScheme( eSegmentExtensionScheme::Triple )
     , mGapDetectionScheme( eGapDetectionScheme::SegmentExtension )
     , bSegmentExtensionSimplified ( false )
     , mCanvasPath ( "CanvasPath" )

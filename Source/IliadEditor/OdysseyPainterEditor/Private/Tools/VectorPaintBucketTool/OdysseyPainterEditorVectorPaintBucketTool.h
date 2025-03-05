@@ -151,7 +151,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPaintBucketTool : publ
         double mDownMouseX;
         double mDownMouseY;
         ::ULIS::FVec2D mPointPosition;
-        double mPointRotation;
         FOdysseyPainterEditorVectorPaintBucketToolHUD* mBucketHUD;
         FOdysseyPainterEditorVectorPaintBucketToolContextMenu* mContextMenu;
         uint32 mPickedArea;

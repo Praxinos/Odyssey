@@ -444,19 +444,9 @@ FOdysseyVectorCycle::Draw( BLContext* iBLContext
                     FColor& gradientColor1 = bucket->GetGradientColor1();
                     BLRgba32 BLColor0;
                     BLRgba32 BLColor1;
-                    // easier to deal with degrees to position the gradient
-/*
+                    // rotation is mostly useless because now the gradient linear orientation is set
+                    // by the pmosition of its endpoints but it is kept for compatibility
                     double rotate = bucket->GetRotation() / M_PI * 180.0f;
-
-                    if( ( rotate >=  0.0f ) && ( rotate <  90.0f ) )
-                        linear.translate( linearMinX, linearMinY );
-                    if( ( rotate >  90.0f ) && ( rotate < 180.0f ) )
-                        linear.translate( linearMaxX, linearMinY );
-                    if( ( rotate > 180.0f ) && ( rotate < 270.0f ) )
-                        linear.translate( linearMaxX, linearMaxY );
-                    if( ( rotate > 270.0f ) && ( rotate < 360.0f ) )
-                        linear.translate( linearMinX, linearMaxY );
-*/
 
                     linear.rotate( bucket->GetRotation() );
 

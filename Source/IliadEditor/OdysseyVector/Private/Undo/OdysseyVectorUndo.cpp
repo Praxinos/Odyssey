@@ -1202,6 +1202,16 @@ FSnapshotBucket::FSnapshotBucket( FOdysseyVectorBucket* iBucket, uint64 iSnapsho
         mRadialOffset = iBucket->GetRadialOffset();
     }
 
+    if( iSnapshotFlags & FSnapshotFlags::Point::Bucket::LINEARP0 )
+    {
+        mLinearP0 = iBucket->GetLinearP0();
+    }
+
+    if( iSnapshotFlags & FSnapshotFlags::Point::Bucket::LINEARP1 )
+    {
+        mLinearP1 = iBucket->GetLinearP1();
+    }
+
     if( iSnapshotFlags & FSnapshotFlags::Point::Bucket::PALETTEENTRY )
     {
         mPaletteEntry = iBucket->GetPaletteEntry();
@@ -1244,13 +1254,22 @@ FSnapshotBucket::Restore()
         mSolidColor = currentSolidColor;
     }
 
-    if( mSnapshotFlags & FSnapshotFlags::Point::Bucket::ROTATION )
+    if( mSnapshotFlags & FSnapshotFlags::Point::Bucket::LINEARP0 )
     {
-        double currentRotation = bucket->GetRotation();
+        ::ULIS::FVec2D currentLinearP0 = bucket->GetLinearP0();
 
-        bucket->SetRotation( mRotation );
+        bucket->SetLinearP0( mLinearP0 );
         // swap
-        mRotation = currentRotation;
+        mLinearP0 = currentLinearP0;
+    }
+
+    if( mSnapshotFlags & FSnapshotFlags::Point::Bucket::LINEARP1 )
+    {
+        ::ULIS::FVec2D currentLinearP1 = bucket->GetLinearP1();
+
+        bucket->SetLinearP1( mLinearP1 );
+        // swap
+        mLinearP1 = currentLinearP1;
     }
 
     if( mSnapshotFlags & FSnapshotFlags::Point::Bucket::PROPAGATION )

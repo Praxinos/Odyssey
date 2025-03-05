@@ -31,7 +31,6 @@ UOdysseyPainterEditorVectorBucketView::ImportParam()
 {
     ColorMode = mBucket->GetColorMode();
     SolidColor  = mBucket->GetSolidColor();
-    Rotation = mBucket->GetRotation();
     Propagated = mBucket->IsPropagated();
     GradientColor0 = mBucket->GetGradientColor0();
     GradientColor1 = mBucket->GetGradientColor1();
@@ -61,9 +60,6 @@ UOdysseyPainterEditorVectorBucketView::PropertyChanged( const FName& iPropertyNa
         // and we can edit individual struct members RGBA
         if( ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorBucketView, SolidColor) ) || ( iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorBucketView, SolidColor) ) )
             mBucket->SetSolidColor( SolidColor );
-
-        if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorBucketView, Rotation) )
-            mBucket->SetRotation( Rotation );
 
         if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorBucketView, Propagated) )
             mBucket->SetPropagated( Propagated );

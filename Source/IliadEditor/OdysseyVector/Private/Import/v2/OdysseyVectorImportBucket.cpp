@@ -101,7 +101,7 @@ FOdysseyVectorImportV2::ReadBucket( FOdysseyVectorBucket& iBucket, uint64 iChunk
                     iBucket.SetPropagated( propagated ? true : false );
                 }
                 break;
-
+/*
                 case FOdysseyFile::VectorV2::CHUNK_BUCKET_ROTATION:
                 {
                     double rotation;
@@ -109,6 +109,30 @@ FOdysseyVectorImportV2::ReadBucket( FOdysseyVectorBucket& iBucket, uint64 iChunk
                     Ar << rotation;
 
                     iBucket.SetRotation( rotation );
+                }
+                break;
+*/
+                case FOdysseyFile::VectorV2::CHUNK_BUCKET_GRADIENT_LINEARP0:
+                {
+                    double x;
+                    double y;
+
+                    Ar << x;
+                    Ar << y;
+
+                    iBucket.SetLinearP0( ::ULIS::FVec2D( x, y ) );
+                }
+                break;
+
+                case FOdysseyFile::VectorV2::CHUNK_BUCKET_GRADIENT_LINEARP1:
+                {
+                    double x;
+                    double y;
+
+                    Ar << x;
+                    Ar << y;
+
+                    iBucket.SetLinearP1( ::ULIS::FVec2D( x, y ) );
                 }
                 break;
 
