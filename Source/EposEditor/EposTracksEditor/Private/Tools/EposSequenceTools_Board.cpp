@@ -26,6 +26,8 @@
 #include "EposSequenceHelpers.h"
 #include "NamingConvention.h"
 #include "NoteTrack/MovieSceneNoteSection.h"
+#include "OdysseyAnimationActor.h"
+#include "OdysseyAnimationComponent.h"
 #include "Settings/EposTracksSettings.h"
 #include "Settings/NamingConventionSettings.h"
 #include "Shot/ShotSequence.h"
@@ -967,16 +969,23 @@ ShotSequenceTools::CloneInnerContent( ISequencer* iSequencer, UMovieSceneSequenc
 
     //for( int i = 0; i < plane_count; i++ )
     //{
-    //    bool attachPlaneToCamera = false;
-    //    USceneComponent* RootComp = planes[i]->GetRootComponent();
-    //    if( RootComp && RootComp->GetAttachParent() )
-    //    {
-    //        AActor* ParentActor = RootComp->GetAttachParent()->GetOwner();
-    //        attachPlaneToCamera = ( ParentActor == camera );
-    //    }
+    //    AActor* ParentActor = planes[i]->GetAttachParentActor();
+    //    bool attachPlaneToCamera = ( ParentActor && ParentActor == camera );
 
     //    CloneInnerPlane( iSequencer, iSequence, iSequenceID, iSequence->GetMovieScene(), iEmptyDrawings, planes[i], plane_bindings[i], cloned_camera, attachPlaneToCamera );
     //}
+
+    TArray<AOdysseyAnimationActor*> animations;
+    TArray<FGuid> animation_bindings;
+    int32 animation_count = ShotSequenceHelpers::GetAllAnimations( *iSequencer, iSequence, iSequenceID, EGetAnimation::kAll, &animations, &animation_bindings );
+
+    for( int i = 0; i < animation_count; i++ )
+    {
+        AActor* ParentActor = animations[i]->GetAttachParentActor();
+        bool attachAnimationToCamera = ( ParentActor && ParentActor == camera );
+
+        CloneInnerAnimation( iSequencer, iSequence, iSequenceID, iSequence->GetMovieScene(), animations[i], animation_bindings[i], cloned_camera, attachAnimationToCamera );
+    }
 
     //---
 
@@ -1070,5 +1079,57 @@ ShotSequenceTools::CloneInnerContent( ISequencer* iSequencer, UMovieSceneSequenc
 //
 //    iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemsChanged );
 //}
+
+//static
+void
+ShotSequenceTools::CloneInnerAnimation( ISequencer* iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, UMovieScene* iMovieScene, AOdysseyAnimationActor* iAnimationToClone, FGuid iAnimationBinding, ACineCameraActor* iClonedCamera, bool iAttachAnimationToCamera )
+{
+    FActorSpawnParameters animationSpawnParams;
+    animationSpawnParams.Template = iAnimationToClone;
+    AOdysseyAnimationActor* cloned_animation = iAnimationToClone->GetWorld()->SpawnActor<AOdysseyAnimationActor>( animationSpawnParams );
+    if( !cloned_animation )
+        return;
+
+    UEposMovieSceneSequence* epos_sequence = Cast<UEposMovieSceneSequence>( iSequence );
+    check( epos_sequence );
+
+    FString cloned_animation_path;
+    FString cloned_animation_name;
+    NamingConvention::GenerateAnimationActorPathName( *iSequencer, *epos_sequence, iSequenceID, cloned_animation_path, cloned_animation_name );
+    cloned_animation_name = iAnimationToClone->GetActorLabel(); // As the animation actor is cloned, just keep the same name (let see when shot/camera name are a part of the animation name...)
+
+    cloned_animation->SetFolderPath( *cloned_animation_path );
+    FActorLabelUtilities::RenameExistingActor( cloned_animation, cloned_animation_name, false ); // The shot name is displayed in another column in the world outliner
+
+    cloned_animation->SetActorTransform( iAnimationToClone->GetTransform() ); // Should be done, because for attached animation, its new transform are totally weird
+    cloned_animation->SetActorHiddenInGame( true ); // As it was created with the class constructor which set it to true, otherwise the actor to clone is certainly displayed, then the cloned actor will have false by default
+
+    //-
+
+    if( iAttachAnimationToCamera )
+        GEditor->ParentActors( iClonedCamera, cloned_animation, NAME_None );
+
+    //-
+
+    cloned_animation_name = NamingConvention::GenerateAnimationTrackName( *iSequencer, *epos_sequence, iSequenceID, cloned_animation );
+
+    iSequence->UnbindPossessableObjects( iAnimationBinding );
+    iSequence->BindPossessableObject( iAnimationBinding, *cloned_animation, iSequencer->GetPlaybackContext() );
+    iMovieScene->FindPossessable( iAnimationBinding )->SetName( cloned_animation_name );
+
+    iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemsChanged );
+
+    //---
+
+    UOdysseyAnimation* new_animation = ProjectAssetTools::CloneAnimation( *iSequencer, iSequence, iSequenceID, iAnimationToClone->GetAnimationComponent()->GetAnimation() );
+    if( !new_animation )
+        return;
+
+    FTransform transform = cloned_animation->GetTransform();
+    cloned_animation->GetAnimationComponent()->InitializeFromAnimation( new_animation );
+    cloned_animation->SetActorTransform( transform );
+
+    iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemsChanged );
+}
 
 #undef LOCTEXT_NAMESPACE

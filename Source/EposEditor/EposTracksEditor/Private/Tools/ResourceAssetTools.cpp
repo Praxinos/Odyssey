@@ -68,6 +68,31 @@ ProjectAssetTools::CreateAnimation( const IMovieScenePlayer& iPlayer, UMovieScen
     return new_animation;
 }
 
+//static
+UOdysseyAnimation*
+ProjectAssetTools::CloneAnimation( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, UOdysseyAnimation* iAnimationToClone )
+{
+    UEposMovieSceneSequence* epos_sequence = Cast<UEposMovieSceneSequence>( iSequence );
+    if( !epos_sequence )
+    {
+        checkf( false, TEXT( "iSequence is certainly a LevelSequence, manage it" ) );
+
+        return nullptr;
+    }
+
+    FString animation_path;
+    FString animation_name;
+    FString animation_pathname = NamingConvention::GenerateAnimationAssetPathName( iPlayer, *epos_sequence, iSequenceID, animation_path, animation_name );
+
+    //---
+
+    UObject* new_object = UEditorAssetLibrary::DuplicateLoadedAsset( iAnimationToClone, animation_pathname );
+
+    UOdysseyAnimation* new_animation = Cast<UOdysseyAnimation>( new_object );
+
+    return new_animation;
+}
+
 //---
 
 //static

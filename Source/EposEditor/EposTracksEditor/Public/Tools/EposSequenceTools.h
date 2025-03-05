@@ -711,6 +711,9 @@ private:
     */
     static void CloneInnerContent( ISequencer* iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, bool iEmptyDrawings );
 
+private:
+    static void CloneInnerAnimation( ISequencer* iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, UMovieScene* iMovieScene, AOdysseyAnimationActor* iAnimationToClone, FGuid iAnimationBinding, ACineCameraActor* iClonedCamera, bool iAttachAnimationToCamera );
+
 public:
     static void StepToNextShot( ISequencer* iSequencer );
     static void StepToPreviousShot( ISequencer* iSequencer );
