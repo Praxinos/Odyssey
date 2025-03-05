@@ -1,0 +1,4 @@
+../../../Templates/TP_Mannequin3DBP/manifest.json
+../../../Templates/TP_Mannequin3DBP/Config/config.ini
+../../../Templates/TP_Mannequin3DBP/Media/TP_Mannequin3DBP.png
+../../../Templates/TP_Mannequin3DBP/Media/TP_Mannequin3DBP_Preview.png

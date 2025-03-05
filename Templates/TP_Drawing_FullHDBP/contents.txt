@@ -1,0 +1,4 @@
+../../../Templates/TP_Drawing_FullHDBP/manifest.json
+../../../Templates/TP_Drawing_FullHDBP/Config/config.ini
+../../../Templates/TP_Drawing_FullHDBP/Media/TP_Drawing_FullHDBP.png
+../../../Templates/TP_Drawing_FullHDBP/Media/TP_Drawing_FullHDBP_Preview.png
