@@ -1,4 +1,4 @@
-../../../Templates/TPO_Mannequin3D/manifest.json
-../../../Templates/TPO_Mannequin3D/Config/config.ini
-../../../Templates/TPO_Mannequin3D/Media/TPO_Mannequin3D.png
-../../../Templates/TPO_Mannequin3D/Media/TPO_Mannequin3D_Preview.png
+../../../Templates/TP_Mannequin3D/manifest.json
+../../../Templates/TP_Mannequin3D/Config/config.ini
+../../../Templates/TP_Mannequin3D/Media/TPO_Mannequin3D.png
+../../../Templates/TP_Mannequin3D/Media/TPO_Mannequin3D_Preview.png

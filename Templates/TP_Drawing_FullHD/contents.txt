@@ -1,4 +1,4 @@
-../../../Templates/TPO_Drawing_FullHD/manifest.json
-../../../Templates/TPO_Drawing_FullHD/Config/config.ini
-../../../Templates/TPO_Drawing_FullHD/Media/TPO_Drawing_FullHD.png
-../../../Templates/TPO_Drawing_FullHD/Media/TPO_Drawing_FullHD_Preview.png
+../../../Templates/TP_Drawing_FullHD/manifest.json
+../../../Templates/TP_Drawing_FullHD/Config/config.ini
+../../../Templates/TP_Drawing_FullHD/Media/TPO_Drawing_FullHD.png
+../../../Templates/TP_Drawing_FullHD/Media/TPO_Drawing_FullHD_Preview.png
