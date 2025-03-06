@@ -5,7 +5,7 @@
 	"Description": "",
 	"Modules": [
 		{
-			"Name": "TP_FirstPerson",
+			"Name": "TP_SB2D3D_4K",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
 		}

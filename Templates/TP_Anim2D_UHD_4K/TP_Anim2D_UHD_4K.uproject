@@ -5,7 +5,7 @@
 	"Description": "",
 	"Modules": [
 		{
-			"Name": "TP_FirstPerson",
+			"Name": "TP_Anim2D_UHD_4K",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
 		}

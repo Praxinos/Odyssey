@@ -5,7 +5,7 @@
 	"Description": "",
 	"Modules": [
 		{
-			"Name": "TP_FirstPerson",
+			"Name": "TP_2DEnv3D_FullHD",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
 		}

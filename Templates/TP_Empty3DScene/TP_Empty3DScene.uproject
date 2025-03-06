@@ -5,7 +5,7 @@
 	"Description": "",
 	"Modules": [
 		{
-			"Name": "TP_FirstPerson",
+			"Name": "TP_Empty3DScene",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
 		}
