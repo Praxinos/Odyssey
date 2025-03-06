@@ -1,0 +1,4 @@
+../../../Templates/TP_SB2D3D_UHD_4KBP/manifest.json
+../../../Templates/TP_SB2D3D_UHD_4KBP/Config/config.ini
+../../../Templates/TP_SB2D3D_UHD_4KBP/Media/TP_SB2D3D_UHD_4KBP.png
+../../../Templates/TP_SB2D3D_UHD_4KBP/Media/TP_SB2D3D_UHD_4KBP_Preview.png

@@ -1,0 +1,29 @@
+{
+	"Version": 1,
+	"Name":
+	[
+		{
+			"Language": "en",
+			"Text": "Blank"
+		}
+	],
+	"Description":
+	[
+		{
+			"Language": "en",
+			"Text": "An empty project with some basic game framework code classes created."
+		}
+	],
+	"AssetTypes": [],	
+	"SearchTags": [],
+	"ClassTypes": "",
+	"Category": "CodeFeature",
+	"FocusAsset": "",
+	"Thumbnail": "TP_SB2D3D_UHD_4K.png",
+	"Screenshots":
+	[
+		"TP_SB2D3D_UHD_4K_Preview.png"
+	],
+	"SortKey": "_62",
+	"AdditionalFeaturePacks": []
+}
