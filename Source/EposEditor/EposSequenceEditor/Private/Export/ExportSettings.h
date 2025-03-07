@@ -17,6 +17,10 @@ struct FExportMarkSettings
     GENERATED_BODY()
 
 public:
+    /** Make a panel when an animation cut exists. */
+    UPROPERTY(config, BlueprintReadWrite, EditAnywhere, Category="Mark")
+    bool AnimationCuts { true };
+
     /** Make a panel when a drawing exists. */
     UPROPERTY(config, BlueprintReadWrite, EditAnywhere, Category="Mark")
     bool Drawings { true };

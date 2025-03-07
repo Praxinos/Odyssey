@@ -199,6 +199,7 @@ public:
         TArray<TWeakObjectPtr<UOdysseyAnimationTimelineSection>> mSections;
         bool mSectionsCreated = false;
 
+        TWeakObjectPtr<AOdysseyAnimationActor> mAnimationActor;
         FGuid mAnimationComponentBinding; // The binding of the root component of the timeline
     };
     static FFindOrCreateTimelineResult                  FindTimelineTrackAndSections( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iAnimationBinding, TOptional<FFrameNumber> iFrameNumber = TOptional<FFrameNumber>() );
