@@ -56,12 +56,9 @@ public:
     virtual void RemoveEditingAsset(UObject* Asset) override;
     virtual void RequestModeUITabs() override;
     virtual void InvokeUI() override;
-    virtual void SetModeUILayer(const TSharedPtr<FAssetEditorModeUILayer> InLayer) override;
+    virtual void ShutdownUI() override;
 
     void RebuildLevelEditorMenu() const;
-
-    void OnToolkitHostReadyForUI();
-    void OnToolkitHostShutdownUI();
 
     void SaveOpenedTabs();
     void LoadOpenedTabs();

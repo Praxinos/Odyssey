@@ -208,33 +208,6 @@ FOdysseyViewportDrawingEditorToolkit::RequestModeUITabs()
 }
 
 void
-FOdysseyViewportDrawingEditorToolkit::SetModeUILayer(const TSharedPtr<FAssetEditorModeUILayer> InLayer)
-{
-    FModeToolkit::SetModeUILayer(InLayer);
-
-    if(!InLayer)
-        return;
-
-    checkf(!InLayer->ToolkitHostShutdownUI().IsBound(), TEXT("ToolkitHostShutdownUI is already bound, search for who bound it before us"));
-    InLayer->ToolkitHostShutdownUI().BindSP(SharedThis(this), &FOdysseyViewportDrawingEditorToolkit::OnToolkitHostShutdownUI);
-}
-
-void FOdysseyViewportDrawingEditorToolkit::OnToolkitHostShutdownUI()
-{
-    FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>(TEXT("LevelEditor"));
-
-    /* Save Opened Tabs Ids */
-    SaveOpenedTabs();
-
-    mEditor->CloseAllTabs();
-    mEditor->UnregisterTabSpawners(LevelEditorModule.GetLevelEditorTabManager()->AsShared());
-
-    LevelEditorModule.GetMenuExtensibilityManager()->RemoveExtender(mLevelEditorMenuExtender);
-    mLevelEditorMenuExtender = nullptr;
-    RebuildLevelEditorMenu();
-}
-
-void
 FOdysseyViewportDrawingEditorToolkit::SaveOpenedTabs()
 {
     TArray<FName> tabIds;
@@ -296,6 +269,22 @@ FOdysseyViewportDrawingEditorToolkit::InvokeUI()
     const TSharedPtr<SWidget> Content = GetInlineContent() ;
     if ( Content && InlineContentHolder.IsValid() )
         InlineContentHolder->SetContent( Content.ToSharedRef() );
+}
+
+void
+FOdysseyViewportDrawingEditorToolkit::ShutdownUI()
+{
+    FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>(TEXT("LevelEditor"));
+
+    /* Save Opened Tabs Ids */
+    SaveOpenedTabs();
+
+    mEditor->CloseAllTabs();
+    mEditor->UnregisterTabSpawners(LevelEditorModule.GetLevelEditorTabManager()->AsShared());
+
+    LevelEditorModule.GetMenuExtensibilityManager()->RemoveExtender(mLevelEditorMenuExtender);
+    mLevelEditorMenuExtender = nullptr;
+    RebuildLevelEditorMenu();
 }
 
 /* void
