@@ -152,6 +152,9 @@ UOdysseyAnimationComponent::PostLoad()
     DefaultPlayer->OnTextureChanged().RemoveAll(this);
     DefaultPlayer->OnTextureChanged().AddUObject(this, &UOdysseyAnimationComponent::OnDefaultPlayerTextureChanged);
 
+    if (!MaterialInstance) //Compatibility with some internal projects
+        GenerateMaterialInstance();
+
     RefreshMaterialTexture();
 }
 
