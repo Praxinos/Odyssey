@@ -1,4 +1,0 @@
-../../../Templates/TPO_Empty3DScene/manifest.json
-../../../Templates/TPO_Empty3DScene/Config/config.ini
-../../../Templates/TPO_Empty3DScene/Media/TPO_Empty3DScene.png
-../../../Templates/TPO_Empty3DScene/Media/TPO_Empty3DScene_Preview.png

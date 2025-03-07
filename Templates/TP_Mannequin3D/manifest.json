@@ -1,0 +1,29 @@
+{
+	"Version": 1,
+	"Name":
+	[
+		{
+			"Language": "en",
+			"Text": "Blank"
+		}
+	],
+	"Description":
+	[
+		{
+			"Language": "en",
+			"Text": "An empty project with some basic game framework code classes created."
+		}
+	],
+	"AssetTypes": [],	
+	"SearchTags": [],
+	"ClassTypes": "",
+	"Category": "CodeFeature",
+	"FocusAsset": "",
+	"Thumbnail": "TP_Mannequin3D.png",
+	"Screenshots":
+	[
+		"TP_Mannequin3D_Preview.png"
+	],
+	"SortKey": "_80",
+	"AdditionalFeaturePacks": []
+}

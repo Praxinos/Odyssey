@@ -1,4 +1,0 @@
-../../../Templates/TPO_Texture_2048/manifest.json
-../../../Templates/TPO_Texture_2048/Config/config.ini
-../../../Templates/TPO_Texture_2048/Media/TPO_Texture_2048.png
-../../../Templates/TPO_Texture_2048/Media/TPO_Texture_2048_Preview.png

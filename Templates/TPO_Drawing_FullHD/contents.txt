@@ -1,4 +1,0 @@
-../../../Templates/TPO_Drawing_FullHD/manifest.json
-../../../Templates/TPO_Drawing_FullHD/Config/config.ini
-../../../Templates/TPO_Drawing_FullHD/Media/TPO_Drawing_FullHD.png
-../../../Templates/TPO_Drawing_FullHD/Media/TPO_Drawing_FullHD_Preview.png

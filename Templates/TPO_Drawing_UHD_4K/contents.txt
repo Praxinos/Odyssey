@@ -1,4 +1,0 @@
-../../../Templates/TPO_Drawing_UHD_4K/manifest.json
-../../../Templates/TPO_Drawing_UHD_4K/Config/config.ini
-../../../Templates/TPO_Drawing_UHD_4K/Media/TPO_Drawing_UHD_4K.png
-../../../Templates/TPO_Drawing_UHD_4K/Media/TPO_Drawing_UHD_4K_Preview.png

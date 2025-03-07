@@ -1,0 +1,4 @@
+../../../Templates/TP_SB2D3D_FullHD/manifest.json
+../../../Templates/TP_SB2D3D_FullHD/Config/config.ini
+../../../Templates/TP_SB2D3D_FullHD/Media/TP_SB2D3D_FullHD.png
+../../../Templates/TP_SB2D3D_FullHD/Media/TP_SB2D3D_FullHD_Preview.png

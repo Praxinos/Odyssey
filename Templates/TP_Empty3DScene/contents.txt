@@ -1,0 +1,4 @@
+../../../Templates/TP_Empty3DScene/manifest.json
+../../../Templates/TP_Empty3DScene/Config/config.ini
+../../../Templates/TP_Empty3DScene/Media/TP_Empty3DScene.png
+../../../Templates/TP_Empty3DScene/Media/TP_Empty3DScene_Preview.png

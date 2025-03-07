@@ -1,0 +1,29 @@
+{
+	"Version": 1,
+	"Name":
+	[
+		{
+			"Language": "en",
+			"Text": "Blank"
+		}
+	],
+	"Description":
+	[
+		{
+			"Language": "en",
+			"Text": "A clean empty project with no code."
+		}
+	],
+	"AssetTypes": [],
+	"SearchTags": [],
+	"ClassTypes": "",
+	"Category": "BlueprintFeature",
+	"FocusAsset": "",
+	"Thumbnail": "TP_Drawing_FullHDBP.png", 
+	"Screenshots":
+	[
+		"TP_Drawing_FullHDBP_Preview.png"
+	],
+	"SortKey": "_61",
+	"AdditionalFeaturePacks": []
+}

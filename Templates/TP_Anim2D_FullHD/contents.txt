@@ -1,0 +1,4 @@
+../../../Templates/TP_Anim2D_FullHD/manifest.json
+../../../Templates/TP_Anim2D_FullHD/Config/config.ini
+../../../Templates/TP_Anim2D_FullHD/Media/TP_Anim2D_FullHD.png
+../../../Templates/TP_Anim2D_FullHD/Media/TP_Anim2D_FullHD_Preview.png

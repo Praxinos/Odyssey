@@ -1,0 +1,4 @@
+../../../Templates/TP_Drawing_UHD_4K/manifest.json
+../../../Templates/TP_Drawing_UHD_4K/Config/config.ini
+../../../Templates/TP_Drawing_UHD_4K/Media/TP_Drawing_UHD_4K.png
+../../../Templates/TP_Drawing_UHD_4K/Media/TP_Drawing_UHD_4K_Preview.png

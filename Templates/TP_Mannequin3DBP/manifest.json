@@ -1,0 +1,29 @@
+{
+	"Version": 1,
+	"Name":
+	[
+		{
+			"Language": "en",
+			"Text": "Blank"
+		}
+	],
+	"Description":
+	[
+		{
+			"Language": "en",
+			"Text": "A clean empty project with no code."
+		}
+	],
+	"AssetTypes": [],
+	"SearchTags": [],
+	"ClassTypes": "",
+	"Category": "BlueprintFeature",
+	"FocusAsset": "",
+	"Thumbnail": "TP_Mannequin3DBP.png", 
+	"Screenshots":
+	[
+		"TP_Mannequin3DBP_Preview.png"
+	],
+	"SortKey": "_80",
+	"AdditionalFeaturePacks": []
+}
