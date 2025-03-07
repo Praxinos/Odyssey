@@ -80,7 +80,7 @@ struct FOdysseyAnimationTimelineSectionExecutionToken
             frame = startOverlap > 1.f - UE_SMALL_NUMBER ? startFrameInt : startFrameInt + 1;
         }
 
-        player->SeekToFrame(frame);
+        player->SeekToFrameImmediate(frame);
         if (frame != animation->CurrentFrame)
             FObjectEditorUtils::SetPropertyValue(animation, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), frame);
     }

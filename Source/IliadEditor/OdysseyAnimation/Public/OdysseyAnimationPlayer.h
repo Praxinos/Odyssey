@@ -69,6 +69,7 @@ public:
 
     void SeekToTime(FTimespan iTime);
     void SeekToFrame(int iFrameIndex);
+    void SeekToFrameImmediate(int iFrameIndex);
 
     UTexture2D* GetTexture() const;
 

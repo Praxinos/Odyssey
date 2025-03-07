@@ -127,6 +127,18 @@ UOdysseyAnimationPlayer::SeekToFrame(int iFrameIndex)
     mOnCurrentTimeChanged.Broadcast();
 }
 
+void
+UOdysseyAnimationPlayer::SeekToFrameImmediate(int iFrameIndex)
+{
+    FTimespan currentTime = FTimespan::FromSeconds(iFrameIndex / Animation->GetFramesPerSecond());
+    if (currentTime == mCurrentTime)
+        return;
+
+    mCurrentTime = currentTime;
+    UpdateTexture();
+    mOnCurrentTimeChanged.Broadcast();
+}
+
 UTexture2D*
 UOdysseyAnimationPlayer::GetTexture() const
 {
