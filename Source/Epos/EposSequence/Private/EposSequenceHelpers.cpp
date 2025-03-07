@@ -952,8 +952,10 @@ ShotSequenceHelpers::FindTimelineTrackAndSections( IMovieScenePlayer& iPlayer, U
     AOdysseyAnimationActor* animation = Cast<AOdysseyAnimationActor>( objects[0] );
     if( !animation )
         return result;
+    if( !animation->GetAnimationComponent() )
+        return result;
 
-    FGuid animation_component_binding = iPlayer.FindCachedObjectId( *animation->AnimationComponent, iSequenceID );
+    FGuid animation_component_binding = iPlayer.FindCachedObjectId( *animation->GetAnimationComponent(), iSequenceID );
     if( !animation_component_binding.IsValid() )
         return result;
 
@@ -1334,19 +1336,27 @@ ShotSequenceHelpers::FindMaterialParameterTrackAndSections( IMovieScenePlayer& i
     TArrayView<TWeakObjectPtr<>> objects = iPlayer.FindBoundObjects( iBinding, iSequenceID );
     if( objects.Num() != 1 )
         return result;
-    APlaneActor* plane = Cast<APlaneActor>( objects[0] );
-    AOdysseyAnimationActor* animation = Cast<AOdysseyAnimationActor>( objects[0] );
-    AActor* actor = plane ? Cast<AActor>( plane ) : Cast<AActor>( animation );
-    if( !actor )
+    AActor* a = Cast<AActor>( objects[0] );
+    UActorComponent* component = a->FindComponentByClass<UOdysseyAnimationComponent>();
+    if( !component )
+        component = a->GetRootComponent();
+    if( !component )
         return result;
 
-    FGuid root_component = iPlayer.FindCachedObjectId( *actor->GetRootComponent(), iSequenceID );
-    if( !root_component.IsValid() )
+    //APlaneActor* plane = Cast<APlaneActor>( objects[0] );
+    //AOdysseyAnimationActor* animation = Cast<AOdysseyAnimationActor>( objects[0] );
+    //AActor* actor = plane ? Cast<AActor>( plane ) : Cast<AActor>( animation );
+    //if( !actor )
+    //    return result;
+
+    //FGuid root_component_binding = iPlayer.FindCachedObjectId( *actor->GetRootComponent(), iSequenceID );
+    FGuid root_component_binding = iPlayer.FindCachedObjectId( *component, iSequenceID );
+    if( !root_component_binding.IsValid() )
         return result;
 
     //---
 
-    result.mRootComponentBinding = root_component;
+    result.mRootComponentBinding = root_component_binding;
 
     result.mTrack = moviescene->FindTrack<UMovieSceneComponentMaterialTrack>( result.mRootComponentBinding ); // Get only the material track of the first "material 0", should be ok as plane/animation actor have only 1 material associated
     if( !result.mTrack.IsValid() )

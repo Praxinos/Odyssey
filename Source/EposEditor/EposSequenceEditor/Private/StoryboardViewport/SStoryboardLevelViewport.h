@@ -20,7 +20,6 @@
 #include "Tools/EposSequenceTools.h"
 
 class ACineCameraActor;
-class APlaneActor;
 class FAssetEditorViewportLayout;
 class FEposSequenceEditorToolkit;
 class FLevelViewportLayout;
@@ -107,6 +106,8 @@ struct FUIData
 
     /** The text that represents the selected planes */
     TArray<FText> SelectedPlanes;
+    /** The text that represents the selected animations */
+    TArray<FText> SelectedAnimations;
 
     /** The tick resolution of the master */
     FFrameRate OuterResolution;
@@ -219,24 +220,24 @@ private:
 public:
     int32 GetScaleVisibleWidgetIndex() const;
 
-    EVisibility GetMoveAndScalePlaneVisibility() const;
+    EVisibility GetMoveAndScaleActorVisibility() const;
 
-    float GetMoveAndScalePlaneDistance() const;
-    void SetMoveAndScalePlaneDistance( float iDistance );
+    float GetMoveAndScaleActorDistance() const;
+    void SetMoveAndScaleActorDistance( float iDistance );
 
-    void HideAllPlanes();
-    void ShowAllPlanes();
-    void OnToggleAllPlanes( const FEditorModeID& iMode, bool bIsEntering );
+    template<typename T> void HideAllActors();
+    template<typename T> void ShowAllActors();
+    void OnPickEditorModeChanged( const FEditorModeID& iMode, bool bIsEntering );
 
-    void OnGetAllowedClassesForPlaneDistance( TArray<const UClass*>& ioAllowedClasses );
-    bool OnShouldFilterActorForPlaneDistance( const AActor* const iActor );
-    void OnActorSelectedForPlaneDistance( AActor* ioActor );
+    void OnGetAllowedClassesForActorDistance( TArray<const UClass*>& ioAllowedClasses );
+    bool OnShouldFilterActorForActorDistance( const AActor* const iActor );
+    void OnActorSelectedForActorDistance( AActor* ioActor );
 
     TOptional<FConvexVolume> GetCameraFrustum() const;
     TSharedRef<SWidget> OnActorPickerListMenuContent();
 
-    int32 GetScalePlaneType() const;
-    void OnScalePlaneTypeChanged( int32 iScalePlaneType, ESelectInfo::Type iSelectType );
+    int32 GetScaleActorType() const;
+    void OnScaleActorTypeChanged( int32 iScaleActorType, ESelectInfo::Type iSelectType );
 
     EVisibility GetCameraFocalLengthVisibility() const;
 
@@ -324,12 +325,12 @@ private:
     TSharedPtr<SSplitter> mNoteSplitter;
 
     TWeakObjectPtr<ACineCameraActor>    mCameraToFocalLength;
-    TWeakObjectPtr<APlaneActor>         mPlaneToMove;
+    TWeakObjectPtr<AActor>              mActorToMove;
     TSharedPtr<SWidget>                 mActorInteractivePickerWidget;
     bool                                mStartStoryboardActorPicking = false;
-    TArray<APlaneActor*>                mPlanesTemporaryHidden;
+    TArray<AActor*>                     mActorsTemporaryHidden;
     TSharedPtr<SComboButton>            mActorPickerComboList;
-    EScalePlane                         mScalePlaneType { EScalePlane::kFitToCamera };
+    EScaleActor                         mScaleActorType = EScaleActor::kFitToCamera;
     TArray<TWeakObjectPtr<UStoryNote>>  mNotes;
     TSharedPtr<SNotesInViewport>        mWidgetNotesInViewport;
     TSharedPtr<SNotesAsOverlay>         mWidgetNotesAsOverlay;

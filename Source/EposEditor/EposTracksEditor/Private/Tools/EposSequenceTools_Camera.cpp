@@ -22,6 +22,7 @@
 #include "EposSequenceHelpers.h"
 #include "NamingConvention.h"
 #include "PlaneActor.h"
+#include "ScalingComponent.h"
 #include "Settings/EposTracksEditorSettings.h"
 #include "Shot/ShotSequence.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
@@ -1347,53 +1348,64 @@ ShotSequenceTools::GotoNextCameraPosition( ISequencer& iSequencer, UMovieSceneSe
 
 //static
 bool
-ShotSequenceTools::SetCameraFocalLengthAndScalePlane( TArray<TWeakObjectPtr<APlaneActor>> ioPlanes, ACineCameraActor* ioCamera, float iNewFocalLength, EScalePlane iScaleType )
+ShotSequenceTools::SetCameraFocalLengthAndScaleActor( TArray<TWeakObjectPtr<AActor>> ioActors, ACineCameraActor* ioCamera, float iNewFocalLength, EScaleActor iScaleType )
 {
-    TArray<TWeakObjectPtr<APlaneActor>> planes;
+    TArray<TWeakObjectPtr<AActor>> actors;
     TArray<float> current_distances;
     TArray<FVector> old_scales;
     TArray<FVector> old_scales_camera100;
-    for( auto plane : ioPlanes )
+    for( auto actor : ioActors )
     {
-        if( !plane.IsValid() || !ShotSequenceTools::CanMoveAndScalePlane( plane.Get(), ioCamera ) )
+        if( !actor.IsValid() || !ShotSequenceTools::CanMoveAndScaleActor( actor.Get(), ioCamera ) )
             continue;
 
-        planes.Add( plane );
-        current_distances.Add( FVector::Distance( ioCamera->GetActorLocation(), plane->GetActorLocation() ) );
-        old_scales.Add( plane->GetActorScale3D() );
-        old_scales_camera100.Add( plane->ComputePlaneScaleWithScaleAndMargin( ioCamera, current_distances.Last() ) );
+        UScalingComponent* scaling_component = actor->FindComponentByClass<UScalingComponent>();
+        if( !scaling_component )
+            continue;
+
+        actors.Add( actor );
+        current_distances.Add( FVector::Distance( ioCamera->GetActorLocation(), actor->GetActorLocation() ) );
+        old_scales.Add( actor->GetActorScale3D() );
+        FVector camera_view_size = scaling_component->ComputeSizeOfCameraView( ioCamera, current_distances.Last() );
+        old_scales_camera100.Add( scaling_component->ComputeScaleWithScaleAndMargin( camera_view_size ) );
     }
 
     ioCamera->GetCineCameraComponent()->SetCurrentFocalLength( iNewFocalLength );
 
-    for( int i = 0; i < planes.Num(); i++ )
+    for( int i = 0; i < actors.Num(); i++ )
     {
-        APlaneActor* plane = planes[i].Get();
-        check( plane );
+        AActor* actor = actors[i].Get();
+        check( actor );
         float current_distance = current_distances[i];
         FVector old_scale = old_scales[i];
         FVector old_scale_camera100 = old_scales_camera100[i];
 
+        UScalingComponent* scaling_component = actor->FindComponentByClass<UScalingComponent>();
+        if( !scaling_component )
+            continue;
+
+        FVector camera_view_size = scaling_component->ComputeSizeOfCameraView( ioCamera, current_distance );
+
         switch( iScaleType )
         {
-            case EScalePlane::kFitToCamera:
+            case EScaleActor::kFitToCamera:
             {
-                FVector scale = plane->ComputePlaneScaleWithScaleAndMargin( ioCamera, current_distance );
-                plane->SetActorScale3D( scale );
+                FVector scale = scaling_component->ComputeScaleWithScaleAndMargin( camera_view_size );
+                actor->SetActorScale3D( scale );
             }
             break;
 
-            case EScalePlane::kRelativeScale:
+            case EScaleActor::kRelativeScale:
             {
-                FVector new_scale_camera100 = plane->ComputePlaneScaleWithScaleAndMargin( ioCamera, current_distance );
+                FVector new_scale_camera100 = scaling_component->ComputeScaleWithScaleAndMargin( camera_view_size );
                 FVector ratio = new_scale_camera100 / old_scale_camera100;
                 FVector new_scale = old_scale * ratio;
 
-                plane->SetActorScale3D( new_scale );
+                actor->SetActorScale3D( new_scale );
             }
             break;
 
-            case EScalePlane::kNo:
+            case EScaleActor::kNo:
                 // nothing to do
                 break;
 

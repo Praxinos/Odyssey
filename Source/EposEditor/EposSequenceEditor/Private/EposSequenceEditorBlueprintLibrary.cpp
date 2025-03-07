@@ -34,6 +34,7 @@
 #include "Import/ImportImageSequenceImporter.h"
 #include "Import/ImportImageSequenceStruct.h"
 #include "PlaneActor.h"
+#include "OdysseyAnimationActor.h"
 #include "Settings/EposSequenceEditorSettings.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrackInstance.h"
 #include "Shot/ShotSequence.h"
@@ -702,6 +703,9 @@ void UEposSequenceEditorBlueprintLibrary::CloseEposSequence()
 
 //---
 
+PRAGMA_DISABLE_DEPRECATION_WARNINGS // To only have the deprecation warning (about EScalePlane enum) in BP and not during c++ build
+
+//DEPRECATED
 //static
 void
 UEposSequenceEditorBlueprintLibrary::MoveAndScalePlane( APlaneActor* ioPlane, const ACineCameraActor* iCamera, float iNewDistance, EScalePlane iScaleType )
@@ -709,9 +713,10 @@ UEposSequenceEditorBlueprintLibrary::MoveAndScalePlane( APlaneActor* ioPlane, co
     if( !ioPlane || !iCamera )
         return;
 
-    ShotSequenceTools::MoveAndScalePlane( ioPlane, iCamera, iNewDistance, iScaleType );
+    ShotSequenceTools::MoveAndScaleActor( ioPlane, iCamera, iNewDistance, static_cast<EScaleActor>( iScaleType ) );
 }
 
+//DEPRECATED
 //static
 void
 UEposSequenceEditorBlueprintLibrary::SetCameraFocalLengthAndScalePlane( TArray<APlaneActor*> ioPlanes, ACineCameraActor* ioCamera, float iNewFocalLength, EScalePlane iScaleType )
@@ -719,9 +724,33 @@ UEposSequenceEditorBlueprintLibrary::SetCameraFocalLengthAndScalePlane( TArray<A
     if( !ioCamera )
         return;
 
-    TArray<TWeakObjectPtr<APlaneActor>> planes( ioPlanes );
+    TArray<TWeakObjectPtr<AActor>> planes( ioPlanes );
 
-    ShotSequenceTools::SetCameraFocalLengthAndScalePlane( planes, ioCamera, iNewFocalLength, iScaleType );
+    ShotSequenceTools::SetCameraFocalLengthAndScaleActor( planes, ioCamera, iNewFocalLength, static_cast<EScaleActor>( iScaleType ) );
+}
+
+PRAGMA_ENABLE_DEPRECATION_WARNINGS
+
+//static
+void
+UEposSequenceEditorBlueprintLibrary::MoveAndScaleActor( AActor* ioActor, const ACineCameraActor* iCamera, float iNewDistance, EScaleActor iScaleType )
+{
+    if( !ioActor || !iCamera )
+        return;
+
+    ShotSequenceTools::MoveAndScaleActor( ioActor, iCamera, iNewDistance, iScaleType );
+}
+
+//static
+void
+UEposSequenceEditorBlueprintLibrary::SetCameraFocalLengthAndScaleActor( TArray<AActor*> ioActor, ACineCameraActor* ioCamera, float iNewFocalLength, EScaleActor iScaleType )
+{
+    if( !ioCamera )
+        return;
+
+    TArray<TWeakObjectPtr<AActor>> actors( ioActor );
+
+    ShotSequenceTools::SetCameraFocalLengthAndScaleActor( actors, ioCamera, iNewFocalLength, iScaleType );
 }
 
 //---

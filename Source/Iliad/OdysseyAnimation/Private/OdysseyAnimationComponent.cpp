@@ -105,7 +105,8 @@ UOdysseyAnimationComponent::UOdysseyAnimationComponent(const FObjectInitializer&
 void
 UOdysseyAnimationComponent::Initialize()
 {
-    SetStaticMesh(LoadObject<UStaticMesh>(this, TEXT("/Engine/BasicShapes/Plane.Plane")));
+    SetStaticMesh( LoadObject<UStaticMesh>( this, TEXT( "/Odyssey/S_1_Unit_Plane.S_1_Unit_Plane" ) ) );
+    //GetStaticMesh()->GetBounds().BoxExtent.X * 2.0f) // x2 to have length not radius
     SetAnimationMaterial(LoadObject<UMaterial>(this, TEXT("/Odyssey/Animation2D/DefaultAnimationMaterial.DefaultAnimationMaterial")));
 }
 
@@ -126,6 +127,20 @@ UOdysseyAnimationComponent::InitializeFromPlayer(UOdysseyAnimationPlayer* iPlaye
     SetMode(EOdysseyAnimationComponentMode::Animation);
     SetAnimation(nullptr);
     SetPlayer(iPlayer);
+}
+
+void
+UOdysseyAnimationComponent::PostLoad()
+{
+    Super::PostLoad();
+
+    if( GetStaticMesh()->GetPathName() == TEXT( "/Engine/BasicShapes/Plane.Plane" ) ) // Old mesh (deprecated) used for animation actor component
+    {
+        SetStaticMesh( LoadObject<UStaticMesh>( this, TEXT( "/Odyssey/S_1_Unit_Plane.S_1_Unit_Plane" ) ) );
+        FVector old_scale = GetRelativeScale3D();
+        FVector new_scale = old_scale * FVector( 100.f, 100.f, 1.f ); // Because Plane.Plane mesh is 100x100 and S_1_Unit_Plane.S_1_Unit_Plane is 1x1
+        SetRelativeScale3D( new_scale );
+    }
 }
 
 void
@@ -165,7 +180,7 @@ UOdysseyAnimationComponent::AnimationChanged()
         if (Animation)
         {
             float scaleW = (float)Animation->GetWidth() / (float)Animation->GetHeight();
-            SetRelativeScale3D(FVector(scaleW, 1, 1));
+            SetRelativeScale3D(FVector(scaleW * 100.f, 1 * 100.f, 1)); // *100: to have something more visible than 1x1
         }
         MarkRenderStateDirty();
     }
@@ -183,7 +198,7 @@ UOdysseyAnimationComponent::PlayerChanged()
             {
                 UFUNCTION(Category = "Actions", CallInEditor)
                 float scaleW = (float)animation->GetWidth() / (float)animation->GetHeight();
-                SetRelativeScale3D(FVector(scaleW, 1, 1));
+                SetRelativeScale3D(FVector(scaleW * 100.f, 1 * 100.f, 1)); // *100: to have something more visible than 1x1
             }
         }
 

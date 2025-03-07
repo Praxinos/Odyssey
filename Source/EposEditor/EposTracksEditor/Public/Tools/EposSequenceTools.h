@@ -832,8 +832,9 @@ public:
 
 //---
 
+
 UENUM( BlueprintType )
-enum class EScalePlane : uint8
+enum class UE_DEPRECATED( 5.6, "Use EScaleActor" ) EScalePlane : uint8
 {
     // The plane won't scale
     kNo                 UMETA( DisplayName = "No Scale" ),
@@ -845,7 +846,7 @@ enum class EScalePlane : uint8
 };
 
 UENUM( BlueprintType )
-enum class EScaleAnimation : uint8
+enum class EScaleActor : uint8
 {
     // The animation won't scale
     kNo                 UMETA( DisplayName = "No Scale" ),
@@ -905,6 +906,10 @@ public:
 
 private:
     static void RenameBinding( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iBinding, FString iNewLabel );
+
+public:
+    static bool MoveAndScaleActor( AActor* ioActor, const ACineCameraActor* iCamera, float iNewDistance, EScaleActor iScaleType );
+    static bool CanMoveAndScaleActor( const AActor* iActor, const ACineCameraActor* iCamera );
 
 // Inside EposSequenceTools_Camera
 public:
@@ -994,7 +999,7 @@ private:
     static void GotoNextCameraPosition( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber );
 
 public:
-    static bool SetCameraFocalLengthAndScalePlane( TArray<TWeakObjectPtr<APlaneActor>> ioPlanes, ACineCameraActor* ioCamera, float iNewFocalLength, EScalePlane iScaleType );
+    static bool SetCameraFocalLengthAndScaleActor( TArray<TWeakObjectPtr<AActor>> ioActors, ACineCameraActor* ioCamera, float iNewFocalLength, EScaleActor iScaleType );
 
 // Inside EposSequenceTools_Animation
 public:
@@ -1018,9 +1023,6 @@ public:
     static void DeleteAnimation( ISequencer* iSequencer, TArray<FGuid> iAnimationBindings );
     static void DeleteAnimation( ISequencer* iSequencer, FGuid iAnimationBinding );
 
-    static bool MoveAndScaleAnimation( AOdysseyAnimationActor* ioAnimation, const ACineCameraActor* iCamera, float iNewDistance, EScaleAnimation iScaleType );
-    static bool CanMoveAndScaleAnimation( const AOdysseyAnimationActor* iAnimation, const ACineCameraActor* iCamera );
-
 private:
     static void CreateAnimation( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, const FAnimationArgs& iAnimationArgs );
     static void DetachAnimation( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TArray<FGuid> iAnimationBinding );
@@ -1031,7 +1033,7 @@ private:
     static void SelectSingleAnimation( ISequencer& iSequencer, UMovieSceneSubSection* iSubSection, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iAnimationBinding );
     static void SelectMultiAnimation( ISequencer& iSequencer, UMovieSceneSubSection* iSubSection, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iAnimationBinding );
 
-    static AOdysseyAnimationActor* SpawnAnimation( UWorld* iWorld, ACineCameraActor* iCamera, float iSafeMargin, FVector2D iRelativeScaling );
+    static AOdysseyAnimationActor* SpawnAnimation( UWorld* iWorld, ACineCameraActor* iCamera, float iFocusDistance, float iSafeMargin, FVector2D iRelativeScaling );
     static AOdysseyAnimationActor* SpawnAndBindAnimation( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iCameraGuid, ACineCameraActor* iCamera, FFrameNumber iFrameNumber, const FAnimationArgs& iAnimationArgs, FGuid* oGuid );
 
 // Inside EposSequenceTools_Plane
@@ -1056,9 +1058,6 @@ public:
     static void DeletePlane( ISequencer* iSequencer, TArray<FGuid> iPlaneBindings );
     static void DeletePlane( ISequencer* iSequencer, FGuid iPlaneBinding );
 
-    static bool MoveAndScalePlane( APlaneActor* ioPlane, const ACineCameraActor* iCamera, float iNewDistance, EScalePlane iScaleType );
-    static bool CanMoveAndScalePlane( const APlaneActor* iPlane, const ACineCameraActor* iCamera );
-
 private:
     static void CreatePlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, const FPlaneArgs& iPlaneArgs );
     static void DetachPlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TArray<FGuid> iPlaneBinding );
@@ -1069,7 +1068,7 @@ private:
     static void SelectSinglePlane( ISequencer& iSequencer, UMovieSceneSubSection* iSubSection, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding );
     static void SelectMultiPlane( ISequencer& iSequencer, UMovieSceneSubSection* iSubSection, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding );
 
-    static APlaneActor* SpawnPlane( UWorld* iWorld, ACineCameraActor* iCamera, float iSafeMargin, FVector2D iRelativeScaling );
+    static APlaneActor* SpawnPlane( UWorld* iWorld, ACineCameraActor* iCamera, float iFocusDistance, float iSafeMargin, FVector2D iRelativeScaling );
     static APlaneActor* SpawnAndBindPlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iCameraGuid, ACineCameraActor* iCamera, FFrameNumber iFrameNumber, const FPlaneArgs& iPlaneArgs, FGuid* oGuid );
 
 // Inside EposSequenceTools_Drawing
