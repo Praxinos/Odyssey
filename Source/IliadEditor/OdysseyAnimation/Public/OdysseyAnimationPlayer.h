@@ -48,7 +48,7 @@ public:
     FSimpleMulticastDelegate& OnPause();
     FSimpleMulticastDelegate& OnStop();
 
-public:
+protected:
     virtual void PostLoad() override;
     virtual void PostDuplicate(EDuplicateMode::Type iDuplicateMode) override;
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent) override;
@@ -71,7 +71,7 @@ public:
     void SeekToFrame(int iFrameIndex);
     void SeekToFrameImmediate(int iFrameIndex);
 
-    UTexture2D* GetTexture() const;
+    UTexture2D* GetTexture();
 
     FTimespan GetCurrentTime() const;
     bool IsBackward() const;
@@ -105,7 +105,7 @@ public:
     UPROPERTY()
     bool IsLooping = true;
 
-public:
+private:
     UPROPERTY(Transient, DuplicateTransient)
     TObjectPtr<UTexture2D> Texture;
 

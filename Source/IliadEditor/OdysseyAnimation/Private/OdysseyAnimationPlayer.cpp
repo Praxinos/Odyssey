@@ -140,8 +140,11 @@ UOdysseyAnimationPlayer::SeekToFrameImmediate(int iFrameIndex)
 }
 
 UTexture2D*
-UOdysseyAnimationPlayer::GetTexture() const
+UOdysseyAnimationPlayer::GetTexture()
 {
+    if( !Texture )
+        AnimationChanged();
+
     return Texture;
 }
 
@@ -546,7 +549,8 @@ UOdysseyAnimationPlayer::PostLoad()
     if (GetFlags() & RF_ClassDefaultObject)
         return;
 
-    AnimationChanged();
+    if( !Texture )
+        AnimationChanged();
 
     //will create the texture if needed
     if (Animation)
