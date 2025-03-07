@@ -78,7 +78,7 @@ public:
     TObjectPtr<UMaterialInterface> Material;
 
 private:
-    UPROPERTY(Transient)
+    UPROPERTY()
     TObjectPtr<UOdysseyAnimationPlayer> DefaultPlayer;
 
     UPROPERTY()

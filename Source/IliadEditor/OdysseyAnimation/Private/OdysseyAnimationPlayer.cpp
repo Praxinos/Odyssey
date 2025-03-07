@@ -534,6 +534,8 @@ UOdysseyAnimationPlayer::PostLoad()
     if (GetFlags() & RF_ClassDefaultObject)
         return;
 
+    AnimationChanged();
+
     //will create the texture if needed
     if (Animation)
     {
