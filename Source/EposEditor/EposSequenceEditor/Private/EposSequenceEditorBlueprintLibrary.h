@@ -109,8 +109,21 @@ public:
     /**
      * Create a camera in a subsection at the given frame
      */
+    UE_DEPRECATED( 5.6, "Use CreateCameraWithPlane" )
     UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board" )
     static void CreateCamera( UMovieSceneSubSection* SubSection );
+
+    /**
+     * Create a camera in a subsection at the given frame
+     */
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board" )
+    static void CreateCameraWithPlane( UMovieSceneSubSection* SubSection );
+
+    /**
+     * Create a camera in a subsection at the given frame
+     */
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board" )
+    static void CreateCameraWithAnimation( UMovieSceneSubSection* SubSection );
 
 public:
 
@@ -267,8 +280,21 @@ public:
     /**
      * Create a camera in a shot at the given frame
      */
+    UE_DEPRECATED( 5.6, "Use CreateCameraWithPlane" )
     UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Shot" )
     static void CreateCamera();
+
+    /**
+     * Create a camera in a shot at the given frame
+     */
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Shot" )
+    static void CreateCameraWithPlane();
+
+    /**
+     * Create a camera in a shot at the given frame
+     */
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Shot" )
+    static void CreateCameraWithAnimation();
 
 public:
 

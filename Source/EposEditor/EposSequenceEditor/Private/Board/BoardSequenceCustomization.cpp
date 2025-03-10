@@ -154,7 +154,7 @@ FBoardSequenceCustomization::BindCommands( TSharedPtr<FUICommandList> ioCommandL
                                           TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
                                           if( !sequencer )
                                               return;
-                                          BoardSequenceTools::CreateCameraWithPlane( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
+                                          BoardSequenceTools::CreateCameraWithAnimation( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
                                       } ),
         FCanExecuteAction::CreateLambda( [this]()
                                          {

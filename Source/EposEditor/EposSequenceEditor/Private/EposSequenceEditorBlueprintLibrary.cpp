@@ -174,6 +174,13 @@ UBoardSequenceEditorBlueprintLibrary::ImportImageSequence( const FString& iBoard
 void
 UBoardSequenceEditorBlueprintLibrary::CreateCamera( UMovieSceneSubSection* iSubSection )
 {
+    CreateCameraWithPlane( iSubSection );
+}
+
+//static
+void
+UBoardSequenceEditorBlueprintLibrary::CreateCameraWithPlane( UMovieSceneSubSection* iSubSection )
+{
     UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( iSubSection );
 
     if( !CurrentSequencer.IsValid() )
@@ -187,6 +194,25 @@ UBoardSequenceEditorBlueprintLibrary::CreateCamera( UMovieSceneSubSection* iSubS
     FCameraArgs camera_args;
     FPlaneArgs plane_args;
     BoardSequenceTools::CreateCameraWithPlane( sequencer, *board_section, board_section->GetTrueRange().GetLowerBoundValue() );
+}
+
+//static
+void
+UBoardSequenceEditorBlueprintLibrary::CreateCameraWithAnimation( UMovieSceneSubSection* iSubSection )
+{
+    UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( iSubSection );
+
+    if( !CurrentSequencer.IsValid() )
+        return;
+
+    if( !board_section )
+        return;
+
+    ISequencer* sequencer = CurrentSequencer.Pin().Get();
+
+    FCameraArgs camera_args;
+    FAnimationArgs animation_args;
+    BoardSequenceTools::CreateCameraWithAnimation( sequencer, *board_section, board_section->GetTrueRange().GetLowerBoundValue() );
 }
 
 //static
@@ -497,6 +523,13 @@ UShotSequenceEditorBlueprintLibrary::StepToPreviousShot()
 void
 UShotSequenceEditorBlueprintLibrary::CreateCamera()
 {
+    CreateCameraWithPlane();
+}
+
+//static
+void
+UShotSequenceEditorBlueprintLibrary::CreateCameraWithPlane()
+{
     if( !CurrentSequencer.IsValid() )
         return;
 
@@ -505,6 +538,20 @@ UShotSequenceEditorBlueprintLibrary::CreateCamera()
     FCameraArgs camera_args;
     FPlaneArgs plane_args;
     ShotSequenceTools::CreateCameraWithPlane( sequencer );
+}
+
+//static
+void
+UShotSequenceEditorBlueprintLibrary::CreateCameraWithAnimation()
+{
+    if( !CurrentSequencer.IsValid() )
+        return;
+
+    ISequencer* sequencer = CurrentSequencer.Pin().Get();
+
+    FCameraArgs camera_args;
+    FAnimationArgs animation_args;
+    ShotSequenceTools::CreateCameraWithAnimation( sequencer );
 }
 
 //static

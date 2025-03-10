@@ -192,7 +192,7 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
 }
 
 void
-SCinematicBoardSectionThumbnails::CreateCamera( TSharedRef<FString> iCameraName, TSharedRef<FString> iPlaneName )
+SCinematicBoardSectionThumbnails::CreateCameraWithPlane( TSharedRef<FString> iCameraName, TSharedRef<FString> iPlaneName )
 {
     if( !mBoardSection.IsValid() )
         return;
@@ -204,6 +204,21 @@ SCinematicBoardSectionThumbnails::CreateCamera( TSharedRef<FString> iCameraName,
     FPlaneArgs plane_args;
     plane_args.mName = *iPlaneName;
     BoardSequenceTools::CreateCameraWithPlane( sequencer, section_object->GetInclusiveStartFrame(), camera_args, plane_args );
+}
+
+void
+SCinematicBoardSectionThumbnails::CreateCameraWithAnimation( TSharedRef<FString> iCameraName, TSharedRef<FString> iAnimationName )
+{
+    if( !mBoardSection.IsValid() )
+        return;
+
+    ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
+    UMovieSceneSection* section_object = mBoardSection.Pin()->GetSectionObject();
+    FCameraArgs camera_args;
+    camera_args.mName = *iCameraName;
+    FAnimationArgs animation_args;
+    animation_args.mName = *iAnimationName;
+    BoardSequenceTools::CreateCameraWithAnimation( sequencer, section_object->GetInclusiveStartFrame(), camera_args, animation_args );
 }
 
 TSharedRef<SWidget>
@@ -228,40 +243,94 @@ SCinematicBoardSectionThumbnails::MakeCreateCameraMenu()
     TSharedRef<FString> plane_name = MakeShared<FString>();
     NamingConvention::GeneratePlaneActorPathName( *sequencer, *inner_epos_sequence, result.mInnerSequenceId, plane_path, *plane_name );
 
+    FString animation_path;
+    TSharedRef<FString> animation_name = MakeShared<FString>();
+    NamingConvention::GenerateAnimationActorPathName( *sequencer, *inner_epos_sequence, result.mInnerSequenceId, animation_path, *animation_name );
+
+    auto CanCreateCamera = [this]() -> bool
+        {
+            if( !mBoardSection.IsValid() )
+                return false;
+
+            //PATCH
+            if( !GCurrentLevelEditingViewportClient )
+                return false;
+            //PATCH
+
+            ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
+            UMovieSceneSection* section_object = mBoardSection.Pin()->GetSectionObject();
+            return BoardSequenceTools::CanCreateCamera( sequencer, section_object->GetInclusiveStartFrame() );
+        };
+
     //---
 
-    EposTracksToolbarHelpers::MakeCameraEntries( MenuBuilder, camera_name, FSimpleDelegate::CreateRaw( this, &SCinematicBoardSectionThumbnails::CreateCamera, camera_name, plane_name ) );
+    EposTracksToolbarHelpers::MakeCameraEntries( MenuBuilder, camera_name, FSimpleDelegate::CreateRaw( this, &SCinematicBoardSectionThumbnails::CreateCameraWithAnimation, camera_name, animation_name ) );
     EposTracksToolbarHelpers::MakeCameraSettingsEntries( MenuBuilder );
 
-    EposTracksToolbarHelpers::MakePlaneEntries( MenuBuilder, plane_name, FSimpleDelegate::CreateRaw( this, &SCinematicBoardSectionThumbnails::CreateCamera, camera_name, plane_name ), false /* iFocus */ );
+    //---
+
+    EposTracksToolbarHelpers::MakeAnimationEntries( MenuBuilder, animation_name, FSimpleDelegate::CreateRaw( this, &SCinematicBoardSectionThumbnails::CreateCameraWithAnimation, camera_name, animation_name ) );
+    EposTracksToolbarHelpers::MakeAnimationActorSettingsEntries( MenuBuilder );
+    EposTracksToolbarHelpers::MakeAnimationSettingsEntries( MenuBuilder );
+
+    auto CreateCameraWithAnimationOnClick = [this, camera_name, animation_name]() -> FReply
+        {
+            if( !mBoardSection.IsValid() )
+                return FReply::Unhandled();
+
+            CreateCameraWithAnimation( camera_name, animation_name );
+
+            return FReply::Handled();
+        };
+
+    MenuBuilder.AddWidget( SNew( SVerticalBox )
+                           + SVerticalBox::Slot()
+                           .AutoHeight()
+                           [
+                               SNew( SHorizontalBox )
+                                   + SHorizontalBox::Slot()
+                                   .HAlign( HAlign_Center )
+                                   [
+                                       SNew( SButton )
+                                           .Text( LOCTEXT( "create-camera-and-animation-label", "Create a new camera and its animation" ) )
+                                           .ToolTipText( LOCTEXT( "create-camera-and-animation-tooltip", "Create a new camera and its animation with those settings" ) )
+                                           .OnClicked_Lambda( CreateCameraWithAnimationOnClick )
+                                           .IsEnabled_Lambda( CanCreateCamera )
+                                   ]
+                           ]
+                           //PATCH
+                           + SVerticalBox::Slot()
+                           .AutoHeight()
+                           .HAlign( HAlign_Center )
+                           [
+                               SNew( STextBlock )
+                                   .Text( FText::FromString( TEXT( "/!\\ Select an actor in the viewport first /!\\" ) ) )
+                                   .ColorAndOpacity( FLinearColor::Yellow )
+                                   .Visibility_Lambda( []() -> EVisibility
+                                                       {
+                                                           return !GCurrentLevelEditingViewportClient ? EVisibility::Visible : EVisibility::Collapsed;
+                                                       } )
+                           ],
+                           //PATCH
+                           FText::GetEmpty(),
+                           true /* NoIndent */ );
+
+    //---
+
+    EposTracksToolbarHelpers::MakePlaneEntries( MenuBuilder, plane_name, FSimpleDelegate::CreateRaw( this, &SCinematicBoardSectionThumbnails::CreateCameraWithPlane, camera_name, plane_name ), false /* iFocus */ );
     EposTracksToolbarHelpers::MakePlaneSettingsEntries( MenuBuilder );
     EposTracksToolbarHelpers::MakeTextureSettingsEntries( MenuBuilder );
 
     //---
 
-    auto CreateCameraOnClick = [this, camera_name, plane_name]() -> FReply
+    auto CreateCameraWithPlaneOnClick = [this, camera_name, plane_name]() -> FReply
     {
         if( !mBoardSection.IsValid() )
             return FReply::Unhandled();
 
-        CreateCamera( camera_name, plane_name );
+        CreateCameraWithPlane( camera_name, plane_name );
 
         return FReply::Handled();
-    };
-
-    auto CanCreateCamera = [this]() -> bool
-    {
-        if( !mBoardSection.IsValid() )
-            return false;
-
-        //PATCH
-        if( !GCurrentLevelEditingViewportClient )
-            return false;
-        //PATCH
-
-        ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
-        UMovieSceneSection* section_object = mBoardSection.Pin()->GetSectionObject();
-        return BoardSequenceTools::CanCreateCamera( sequencer, section_object->GetInclusiveStartFrame() );
     };
 
     MenuBuilder.AddWidget( SNew( SVerticalBox )
@@ -275,7 +344,7 @@ SCinematicBoardSectionThumbnails::MakeCreateCameraMenu()
                                    SNew( SButton )
                                    .Text( LOCTEXT( "create-camera-and-plane-label", "Create a new camera and its plane" ) )
                                    .ToolTipText( LOCTEXT( "create-camera-and-plane-tooltip", "Create a new camera and its plane with those settings" ) )
-                                   .OnClicked_Lambda( CreateCameraOnClick )
+                                   .OnClicked_Lambda( CreateCameraWithPlaneOnClick )
                                    .IsEnabled_Lambda( CanCreateCamera )
                                ]
                            ]
