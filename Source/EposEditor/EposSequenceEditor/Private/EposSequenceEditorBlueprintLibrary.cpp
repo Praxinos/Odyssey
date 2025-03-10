@@ -186,7 +186,7 @@ UBoardSequenceEditorBlueprintLibrary::CreateCamera( UMovieSceneSubSection* iSubS
 
     FCameraArgs camera_args;
     FPlaneArgs plane_args;
-    BoardSequenceTools::CreateCamera( sequencer, *board_section, board_section->GetTrueRange().GetLowerBoundValue() );
+    BoardSequenceTools::CreateCameraWithPlane( sequencer, *board_section, board_section->GetTrueRange().GetLowerBoundValue() );
 }
 
 //static
@@ -504,7 +504,7 @@ UShotSequenceEditorBlueprintLibrary::CreateCamera()
 
     FCameraArgs camera_args;
     FPlaneArgs plane_args;
-    ShotSequenceTools::CreateCamera( sequencer );
+    ShotSequenceTools::CreateCameraWithPlane( sequencer );
 }
 
 //static

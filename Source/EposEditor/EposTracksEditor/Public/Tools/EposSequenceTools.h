@@ -210,7 +210,15 @@ public:
     * @param ISequencer     iSequencer to add a new camera.
     * @param FFrameNumber   iFrameNumber to get the board section.
     */
-    static void CreateCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber, const FCameraArgs& iCameraArgs = FCameraArgs(), const FPlaneArgs& iPlaneArgs = FPlaneArgs() );
+    static void CreateCameraWithPlane( ISequencer* iSequencer, FFrameNumber iFrameNumber, const FCameraArgs& iCameraArgs = FCameraArgs(), const FPlaneArgs& iPlaneArgs = FPlaneArgs() );
+
+    /**
+    *  Create a new camera (actor & track & cameracut track) in the board section
+    *
+    * @param ISequencer     iSequencer to add a new camera.
+    * @param FFrameNumber   iFrameNumber to get the board section.
+    */
+    static void CreateCameraWithAnimation( ISequencer* iSequencer, FFrameNumber iFrameNumber, const FCameraArgs& iCameraArgs = FCameraArgs(), const FAnimationArgs& iAnimationArgs = FAnimationArgs() );
 
     /**
     *  Create a new camera (actor & track & cameracut track) in the board section
@@ -219,7 +227,16 @@ public:
     * @param UMovieSceneSubSection  iSubSection to add a new camera.
     * @param FFrameNumber           iFrameNumber to get the board section.
     */
-    static void CreateCamera( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, const FCameraArgs& iCameraArgs = FCameraArgs(), const FPlaneArgs& iPlaneArgs = FPlaneArgs() );
+    static void CreateCameraWithPlane( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, const FCameraArgs& iCameraArgs = FCameraArgs(), const FPlaneArgs& iPlaneArgs = FPlaneArgs() );
+
+    /**
+    *  Create a new camera (actor & track & cameracut track) in the board section
+    *
+    * @param ISequencer             iSequencer to add a new camera.
+    * @param UMovieSceneSubSection  iSubSection to add a new camera.
+    * @param FFrameNumber           iFrameNumber to get the board section.
+    */
+    static void CreateCameraWithAnimation( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, const FCameraArgs& iCameraArgs = FCameraArgs(), const FAnimationArgs& iAnimationArgs = FAnimationArgs() );
 
 public:
     /**
@@ -925,7 +942,14 @@ public:
     *
     * @param ISequencer iSequencer to add Camera track and CameraCut track.
     */
-    static void CreateCamera( ISequencer* iSequencer, const FCameraArgs& iCameraArgs = FCameraArgs(), const FPlaneArgs& iPlaneArgs = FPlaneArgs() );
+    static void CreateCameraWithPlane( ISequencer* iSequencer, const FCameraArgs& iCameraArgs = FCameraArgs(), const FPlaneArgs& iPlaneArgs = FPlaneArgs() );
+
+    /**
+    *  Add a Camera track
+    *
+    * @param ISequencer iSequencer to add Camera track and CameraCut track.
+    */
+    static void CreateCameraWithAnimation( ISequencer* iSequencer, const FCameraArgs& iCameraArgs = FCameraArgs(), const FAnimationArgs& iAnimationArgs = FAnimationArgs() );
 
     static bool CanCreateCamera( ISequencer* iSequencer );
 
@@ -958,11 +982,11 @@ public:
     static void StopPilotingCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber, ACineCameraActor* iCamera, const TOptional<FTransformData>& iPreviousTransform, const FTransformData& iNewTransform );
 
 private:
-    static void CreateCamera( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FCameraArgs& iCameraArgs, const FPlaneArgs& iPlaneArgs );
+    static void CreateCamera( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FCameraArgs& iCameraArgs, const FPlaneArgs* iPlaneArgs, const FAnimationArgs* iAnimationArgs );
 
     static ACineCameraActor* SpawnCamera( UWorld* iWorld, const FTransform& iTransform );
-    static ACineCameraActor* SpawnAndBindCamera( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FCameraArgs& iCameraArgs, const FPlaneArgs& iPlaneArgs, FGuid* oGuid );
-    static void CameraAdded( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid CameraGuid, ACineCameraActor* iCamera, FFrameNumber FrameNumber, const FPlaneArgs& iPlaneArgs );
+    static ACineCameraActor* SpawnAndBindCamera( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FCameraArgs& iCameraArgs, FGuid* oGuid );
+    static void CameraAdded( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid CameraGuid, ACineCameraActor* iCamera, FFrameNumber FrameNumber, const FPlaneArgs* iPlaneArgs, const FAnimationArgs* iAnimationArgs );
     static void CreateCameraCut( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FGuid iCameraGuid, FFrameNumber iFrameNumber );
 
     static bool SnapCameraToViewport( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, ACineCameraActor* ioCamera, FGuid iCameraGuid, FFrameNumber iFrameNumber, const FTransform& iNewTransform, EMovieSceneKeyInterpolation iInterpolation );

@@ -169,7 +169,7 @@ FShotSequenceCustomization::BindCommands( TSharedPtr<FUICommandList> ioCommandLi
                                           TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
                                           if( !sequencer )
                                               return;
-                                          ShotSequenceTools::CreateCamera( sequencer.Get() );
+                                          ShotSequenceTools::CreateCameraWithPlane( sequencer.Get() );
                                       } ),
         FCanExecuteAction::CreateLambda( [this]()
                                          {

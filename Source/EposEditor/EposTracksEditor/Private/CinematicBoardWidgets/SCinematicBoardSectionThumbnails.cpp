@@ -203,7 +203,7 @@ SCinematicBoardSectionThumbnails::CreateCamera( TSharedRef<FString> iCameraName,
     camera_args.mName = *iCameraName;
     FPlaneArgs plane_args;
     plane_args.mName = *iPlaneName;
-    BoardSequenceTools::CreateCamera( sequencer, section_object->GetInclusiveStartFrame(), camera_args, plane_args );
+    BoardSequenceTools::CreateCameraWithPlane( sequencer, section_object->GetInclusiveStartFrame(), camera_args, plane_args );
 }
 
 TSharedRef<SWidget>

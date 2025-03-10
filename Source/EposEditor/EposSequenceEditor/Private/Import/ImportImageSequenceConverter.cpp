@@ -183,7 +183,7 @@ FImportImageSequenceConverter::CreateDrawings( const TArray<FImportImageSequence
         FPlaneArgs plane_args;
         plane_args.mMargin = 0.f;
         plane_args.mTexture = texture;
-        BoardSequenceTools::CreateCamera( sequencer, iSubSection->GetTrueRange().GetLowerBoundValue(), camera_args, plane_args );
+        BoardSequenceTools::CreateCameraWithPlane( sequencer, iSubSection->GetTrueRange().GetLowerBoundValue(), camera_args, plane_args );
     }
 
     //sequencer->ForceEvaluate();
