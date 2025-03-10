@@ -90,6 +90,24 @@ SPanelTileView::Construct( const FArguments& InArgs, const TSharedRef<STableView
         }
     }
 
+    if( mPanelItem->mPanel.mSourceAnimationCut.IsSet() )
+    {
+        const FExportPanelSourceAnimationCut& source_animationcut = mPanelItem->mPanel.mSourceAnimationCut.GetValue();
+
+        if( source_animationcut.mAnimationCuts.Num() == 1 )
+        {
+            FGuid binding = source_animationcut.mAnimationCuts[0].mBindingId;
+
+            FText track_name = mPanelItem->mPanel.mSequence->GetMovieScene()->GetObjectDisplayName( binding );
+
+            panel_source = FText::Format( LOCTEXT( "panel-item.source.animationcut-1", "{0}" ), track_name );
+        }
+        else if( source_animationcut.mAnimationCuts.Num() > 1 )
+        {
+            panel_source = LOCTEXT( "panel-item.source.animationcut-n", "multiple animations" );
+        }
+    }
+
     //---
 
     STableRow::Construct(
@@ -265,6 +283,24 @@ SPanelTileView::GetTooltipText() const
             //int32 index = channel->GetIndex( drawing.mKeyHandle );
 
             line = FText::Format( LOCTEXT( "item.source-drawing-entry.tooltip", "- {0}" ), mPanelItem->mPanel.mSequence->GetMovieScene()->GetObjectDisplayName( binding ) );
+            tooltip_texts.Add( line );
+        }
+    }
+
+    if( mPanelItem->mPanel.mSourceAnimationCut.IsSet() && mPanelItem->mPanel.mSourceAnimationCut.GetValue().mAnimationCuts.Num() )
+    {
+        const FExportPanelSourceAnimationCut& source_animationcut = mPanelItem->mPanel.mSourceAnimationCut.GetValue();
+
+        TSet<FGuid> bindings;
+        for( auto cut_and_binding : source_animationcut.mAnimationCuts )
+            bindings.Add( cut_and_binding.mBindingId );
+
+        FText line = FText::Format( LOCTEXT( "item.source-animationcut-list.tooltip", "Animation cut appearing in {0}|plural(one=animation,other=animations):" ), bindings.Num() );
+        tooltip_texts.Add( line );
+
+        for( FGuid binding : bindings )
+        {
+            line = FText::Format( LOCTEXT( "item.source-animationcut-entry.tooltip", "- {0}" ), mPanelItem->mPanel.mSequence->GetMovieScene()->GetObjectDisplayName( binding ) );
             tooltip_texts.Add( line );
         }
     }
