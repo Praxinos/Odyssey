@@ -174,7 +174,9 @@ ShotSequenceTools::SpawnAndBindAnimation( ISequencer& iSequencer, UMovieSceneSeq
     if( settings->AnimationSettings.AddLayerBackground )
         background_layer_color = settings->AnimationSettings.LayerBackgroundColor;
 
-    UOdysseyAnimation* new_animation = ProjectAssetTools::CreateAnimation( iSequencer, iSequence, iSequenceID, texture_size, settings->AnimationSettings.Format, settings->AnimationSettings.FrameRate, settings->AnimationSettings.DefaultLayerClass, background_layer_color );
+    UOdysseyAnimation* new_animation = iAnimationArgs.mAnimation.IsValid()
+                                       ? iAnimationArgs.mAnimation.Get()
+                                       : ProjectAssetTools::CreateAnimation( iSequencer, iSequence, iSequenceID, texture_size, settings->AnimationSettings.Format, settings->AnimationSettings.FrameRate, settings->AnimationSettings.DefaultLayerClass, background_layer_color );
     if( !new_animation )
         return nullptr;
 
