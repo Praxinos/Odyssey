@@ -961,6 +961,8 @@ ShotSequenceHelpers::FindTimelineTrackAndSections( IMovieScenePlayer& iPlayer, U
 
     //---
 
+    result.mAnimationActor = animation;
+
     result.mAnimationComponentBinding = animation_component_binding;
 
     result.mTrack = moviescene->FindTrack<UOdysseyAnimationTimelineTrack>( result.mAnimationComponentBinding );

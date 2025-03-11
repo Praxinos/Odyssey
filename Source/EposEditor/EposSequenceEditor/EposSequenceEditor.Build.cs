@@ -112,6 +112,7 @@ public class EposSequenceEditor : ModuleRules
                 "EposTracksEditor",
                 "EposNamingConvention",
                 "libharu",
+                "OdysseyAnimationTracks",
                 "OdysseyAnimation", //TODO: move to runtime part above
                 "OdysseyImaging", //TODO: remove once OdysseyAnimation is runtime
                 "MediaAssets", //TODO: remove once OdysseyAnimation is runtime
