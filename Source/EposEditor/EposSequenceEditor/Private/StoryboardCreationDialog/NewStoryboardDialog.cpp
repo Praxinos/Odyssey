@@ -783,10 +783,7 @@ SNewStoryboardSettings::OnCreateStoryboard()
 
         case ELevelDestination::NewSublevel:
         {
-            ULevelStreaming* new_level_streaming = EditorLevelUtils::CreateNewStreamingLevelForWorld( *GWorld, ULevelStreamingDynamic::StaticClass(), mStoryboardSettings->LevelPath.Path / mStoryboardSettings->LevelName
-                                                                                                      , false /*bMoveSelectedActorsIntoNewLevel*/
-                                                                                                      , nullptr /*InTemplateWorld*/
-                                                                                                      , false /*bInUseSaveAs*/ );
+            ULevelStreaming* new_level_streaming = EditorLevelUtils::CreateNewStreamingLevel( ULevelStreamingDynamic::StaticClass(), mStoryboardSettings->LevelPath.Path / mStoryboardSettings->LevelName, false /*bMoveSelectedActorsIntoNewLevel*/ );
             if( !new_level_streaming )
                 return FReply::Handled();
         }

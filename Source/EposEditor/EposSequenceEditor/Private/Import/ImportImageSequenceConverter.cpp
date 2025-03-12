@@ -5,14 +5,26 @@
 
 #include "AssetToolsModule.h"
 #include "Factories/TextureFactory.h"
+#include "ImageUtils.h"
 #include "ISequencer.h"
 #include "Sections/MovieSceneSubSection.h"
 
+#include "Animation/OdysseyPainterEditorAnimationImport.h"
 #include "Board/BoardSequence.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "EposSequenceHelpers.h"
+#include "LayerStack/Cells/OdysseyAnimationCell.h"
+#include "LayerStack/Layers/OdysseyAnimationLayer.h"
+#include "LayerStack/OdysseyAnimationLayerStack.h"
 #include "NamingConvention.h"
+#include "OdysseyAnimation.h"
+#include "OdysseyAnimationActor.h"
+#include "OdysseyAnimationComponent.h"
+#include "OdysseyLayer.h"
+#include "OdysseyLayerStack.h"
+#include "Settings/EposTracksEditorSettings.h"
 #include "Tools/EposSequenceTools.h"
+#include "Tools/ResourceAssetTools.h"
 
 #define LOCTEXT_NAMESPACE "ImportImageSequenceConverter"
 
@@ -120,7 +132,8 @@ FImportImageSequenceConverter::CreateShotsRecursive( const TArray<FImportImageSe
         FImportImageSequenceShot shot = iShots[i];
         UMovieSceneSubSection* subsection = CastChecked<UMovieSceneSubSection>( sections[i] );
 
-        CreateDrawings( shot.Panels, subsection );
+        //CreateDrawings( shot.Panels, subsection ); //TODO: how to select between them ?
+        CreateAnimation( shot.Panels, subsection );
     }
 }
 
@@ -224,6 +237,94 @@ FImportImageSequenceConverter::CreateDrawings( const TArray<FImportImageSequence
         duration_in_tick = ConvertFromDisplayRateToTickResolution( panel.Duration );
         next_frame_number += duration_in_tick;
     }
+}
+
+void
+FImportImageSequenceConverter::CreateAnimation( const TArray<FImportImageSequencePanel>& iPanels, UMovieSceneSubSection* iSubSection )
+{
+    check( iPanels.Num() );
+
+    ISequencer* sequencer = mSequencer.Pin().Get();
+
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, *iSubSection, sequencer->GetFocusedTemplateID() );
+    check( result.mInnerSequence )
+
+    //---
+
+    TArray<UTexture2D*> textures;
+    TArray<int32> durations;
+    for( int i = 0; i < iPanels.Num(); i++ )
+    {
+        FImage image;
+        FImageUtils::LoadImage( *iPanels[i].Pathfile.FilePath, image );
+        UTexture2D* texture = Cast<UTexture2D>( FImageUtils::CreateTexture( ETextureClass::TwoD, image, GetTransientPackage(), FGuid::NewGuid().ToString() ) );
+
+        textures.Add( texture );
+
+        durations.Add( iPanels[i].Duration );
+    }
+
+    check( textures.Num() == durations.Num() );
+
+    //---
+
+    UOdysseyAnimation* new_animation = nullptr;
+    if( textures.Num() )
+    {
+        const UEposTracksEditorSettings* settings = GetDefault<UEposTracksEditorSettings>();
+        TOptional<FLinearColor> background_layer_color;
+        FIntPoint texture_size( textures[0]->Source.GetSizeX(), textures[0]->Source.GetSizeY() );
+
+        new_animation = ProjectAssetTools::CreateAnimation( *sequencer, result.mInnerSequence, result.mInnerSequenceId, texture_size, settings->AnimationSettings.Format, settings->AnimationSettings.FrameRate, UOdysseyAnimationLayerImageRaster::StaticClass(), background_layer_color );
+
+        if( new_animation )
+        {
+            // Remove all existing layers
+            UOdysseyLayerStack* layer_stack = new_animation->GetLayerStack();
+            layer_stack->RemoveLayers( layer_stack->GetLayers() );
+
+            //---
+
+            // Import the textures (create layer, cells, ...)
+            FOdysseyPainterEditorAnimationImport import_sequence;
+            UOdysseyAnimationLayerImageRaster* animation_layer = import_sequence.ImportTextureSequence( new_animation, textures, nullptr, 0 );
+
+            //---
+
+            TArray<UOdysseyLayerCell*> cells = animation_layer->GetCells();
+            // To have at least durations as long as cells
+            if( !ensure( durations.Num() >= cells.Num() ) )
+            {
+                int32 diff = cells.Num() - durations.Num();
+                TArray<int32> padding;
+                while( padding.Num() != diff )
+                    padding.Add( 48 ); // Arbitrary
+                durations.Append( padding );
+
+                check( durations.Num() == cells.Num() );
+            }
+
+            // Set the exposure of all cells
+            for( int i = 0; i < cells.Num(); i++ )
+            {
+                //int32 duration_in_tick = ConvertFromDisplayRateToTickResolution( iPanels[0].Duration );
+
+                cells[i]->SetExposure( durations[i] );
+            }
+        }
+    }
+
+    //---
+
+    {
+        FCameraArgs camera_args;
+        FAnimationArgs animation_args;
+        animation_args.mMargin = 0.f;
+        animation_args.mAnimation = new_animation;
+        BoardSequenceTools::CreateCameraWithAnimation( sequencer, iSubSection->GetTrueRange().GetLowerBoundValue(), camera_args, animation_args );
+    }
+
+    //sequencer->ForceEvaluate();
 }
 
 //---

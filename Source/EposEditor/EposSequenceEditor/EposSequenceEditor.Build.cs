@@ -117,6 +117,7 @@ public class EposSequenceEditor : ModuleRules
                 "OdysseyImaging", //TODO: remove once OdysseyAnimation is runtime
                 "MediaAssets", //TODO: remove once OdysseyAnimation is runtime
                 "OdysseyLayerStackEditor", //TODO: remove it ? ot keep it ? (will be layer stack full editor ?)
+                "OdysseyPainterEditor", // import image sequence
             }
             );
 
