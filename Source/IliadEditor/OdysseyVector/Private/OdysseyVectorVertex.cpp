@@ -234,6 +234,32 @@ FindNextSectionLinkInfo( FSectionLinkInfo* iLastSectionLinkInfo
     return nullptr;
 }
 
+uint32
+FOdysseyVectorVertex::GetErasedSectionCount( FOdysseyVectorObject *iOwner )
+{
+    uint32 eraseSectionCount = 0;
+
+    for( FSectionLinkInfo& sectionLinkInfo : mSectionLinkInfoList )
+    {
+        if( sectionLinkInfo.section->IsErased() )
+        {
+            if( iOwner == nullptr )
+            {
+                eraseSectionCount++;
+            }
+            else
+            {
+                if( sectionLinkInfo.section->GetSegment()->GetOwner() == iOwner )
+                {
+                    eraseSectionCount++;
+                }
+            }
+        }
+    }
+
+    return eraseSectionCount;
+}
+
 FSectionLinkInfo*
 FOdysseyVectorVertex::GetOtherSectionLinkInfo( FSectionLinkInfo* iLastSectionLinkInfo )
 {
@@ -246,6 +272,14 @@ FOdysseyVectorVertex::GetOtherSectionLinkInfo( FSectionLinkInfo* iLastSectionLin
     }
 
     return nullptr;
+}
+
+void
+FOdysseyVectorVertex::Print()
+{
+    ::ULIS::FVec2D worldCoords = GetWorldCoords();
+
+     UE_LOG(LogTemp, Warning, TEXT("Vertex Coords: %f %f"), worldCoords.x, worldCoords.y );
 }
 
 FSectionLinkInfo*
@@ -743,9 +777,26 @@ FOdysseyVectorVertex::GetSegmentCount( )
 }
 
 uint32
-FOdysseyVectorVertex::GetSectionCount()
+FOdysseyVectorVertex::GetSectionCount( FOdysseyVectorObject* iOwner )
 {
-    return mSectionLinkInfoList.size();
+    uint32 sectionCount = 0;
+
+    if( iOwner == nullptr )
+    {
+        sectionCount = mSectionLinkInfoList.size();
+    }
+    else
+    {
+        for( FSectionLinkInfo& sectionLinkInfo : mSectionLinkInfoList )
+        {
+            if( sectionLinkInfo.section->GetSegment()->GetOwner() == iOwner )
+            {
+                sectionCount++;
+            }
+        }
+    }
+
+    return sectionCount;
 }
 
 std::list<FOdysseyVectorSegment*>&

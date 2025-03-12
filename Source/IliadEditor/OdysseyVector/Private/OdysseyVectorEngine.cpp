@@ -249,10 +249,12 @@ FOdysseyVectorEngine::Render( BLContext* iBLContext
         }
 
         // redraw HUDs that need to be fused with the render.
+        scene->GetCell()->LockDrawing();
         for( IOdysseyVectorHUD *hud : scene->GetCell()->GetHUDList() )
         {
             hud->Draw( iBLContext );
         }
+        scene->GetCell()->UnlockDrawing();
 
         iBLContext->flush(BL_CONTEXT_FLUSH_SYNC);
     }

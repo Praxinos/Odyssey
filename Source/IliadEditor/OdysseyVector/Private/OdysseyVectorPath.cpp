@@ -892,60 +892,31 @@ FOdysseyVectorPath::PickVertex( std::vector<FOdysseyVectorVertex*>& oPickedVerte
 
 eSegmentAdditionFlags
 FOdysseyVectorPath::SegmentAdditionPolicy( FWayPoint* iWayPoint0
+                                         , FWayFragment* iWayFragment
                                          , FWayPoint* iWayPoint1
                                          , bool iSplit )
 {
-    eSegmentAdditionFlags retFlags = eSegmentAdditionFlags::None;
+    eSegmentAdditionFlags retFlags = eSegmentAdditionFlags::RemoveOriginalSegment;
 
     if( iSplit )
     {
+        if( iWayFragment->erased == false )
+        {
+            if( iWayPoint0->flags & FWayPoint::BordersErasureArea )
+            {
+                retFlags |= eSegmentAdditionFlags::CreateNewPath;
+            }
+        }
+    }
+
+    if( iWayFragment->erased == false )
+    {
+        retFlags |= eSegmentAdditionFlags::CreateDerivedSegment;
+    }
+
+    if( iWayFragment->erased == true )
+    {
         retFlags |= eSegmentAdditionFlags::RemoveOriginalSegment;
-
-        if( ( iWayPoint0->flags & FWayPoint::OutsideErasureArea )
-         && ( iWayPoint1->flags & FWayPoint::OutsideErasureArea ) )
-        {
-            retFlags |= eSegmentAdditionFlags::CreateDerivedSegment;
-        }
-
-        if( iWayPoint0->flags & FWayPoint::LeavesErasureArea )
-        {
-            retFlags |= eSegmentAdditionFlags::CreateNewPath;
-        }
-    }
-    else
-    {
-        if( ( iWayPoint0->flags & FWayPoint::OutsideErasureArea )
-         && ( iWayPoint1->flags & FWayPoint::OutsideErasureArea ) )
-        {
-            retFlags |= eSegmentAdditionFlags::KeepOriginalSegment;
-        }
-
-        if( ( iWayPoint0->flags & FWayPoint::InsideErasureArea )
-         && ( iWayPoint1->flags & FWayPoint::InsideErasureArea ) )
-        {
-            retFlags |= eSegmentAdditionFlags::RemoveOriginalSegment;
-        }
-    }
-
-    if( ( iWayPoint0->flags & FWayPoint::OutsideErasureArea )
-     && ( iWayPoint1->flags & FWayPoint::EntersErasureArea  ) )
-    {
-        retFlags |= ( eSegmentAdditionFlags::RemoveOriginalSegment
-                    | eSegmentAdditionFlags::CreateDerivedSegment );
-    }
-
-    if( ( iWayPoint0->flags & FWayPoint::LeavesErasureArea  )
-     && ( iWayPoint1->flags & FWayPoint::OutsideErasureArea ) )
-    {
-        retFlags |= ( eSegmentAdditionFlags::RemoveOriginalSegment
-                    | eSegmentAdditionFlags::CreateDerivedSegment );
-    }
-
-    if( ( iWayPoint0->flags & FWayPoint::LeavesErasureArea )
-     && ( iWayPoint1->flags & FWayPoint::EntersErasureArea ) )
-    {
-        retFlags |= ( eSegmentAdditionFlags::RemoveOriginalSegment
-                    | eSegmentAdditionFlags::CreateDerivedSegment );
     }
 
     return retFlags;
@@ -962,8 +933,7 @@ FOdysseyVectorPath::VertexAdditionPolicy( FWayPoint* iWayPoint, bool iSplit )
         {
             retFlags |= ( eVertexAdditionFlags::RemoveOriginalVertex );
 
-            if( ( iWayPoint->flags & FWayPoint::LeavesErasureArea )
-             || ( iWayPoint->flags & FWayPoint::EntersErasureArea ) )
+            if( iWayPoint->flags & FWayPoint::BordersErasureArea )
             {
                 if( iWayPoint->vertex->GetSegmentCount() == 2 )
                 {
@@ -986,15 +956,7 @@ FOdysseyVectorPath::VertexAdditionPolicy( FWayPoint* iWayPoint, bool iSplit )
         }
     }
 
-    if( iWayPoint->flags & FWayPoint::EntersErasureArea )
-    {
-        if( ( iWayPoint->flags & FWayPoint::Original ) == 0 )
-        {
-            retFlags |= eVertexAdditionFlags::CreateBoundaryVertex;
-        }
-    }
-
-    if( iWayPoint->flags & FWayPoint::LeavesErasureArea )
+    if( iWayPoint->flags & FWayPoint::BordersErasureArea )
     {
         if( ( iWayPoint->flags & FWayPoint::Original ) == 0 )
         {
@@ -1003,6 +965,20 @@ FOdysseyVectorPath::VertexAdditionPolicy( FWayPoint* iWayPoint, bool iSplit )
     }
 
     return retFlags;
+}
+
+bool
+FOdysseyVectorPath::HasErasedSection()
+{
+    for( FOdysseyVectorSegment* segment : mSegmentList )
+    {
+        if( segment->GetSectionCount() )
+        {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 void
@@ -1063,7 +1039,10 @@ FOdysseyVectorPath::ParseWayPoints( std::vector<FWayPoint>& iWayPointArray
         {
             FWayPoint* wayPoint0 = &iWayPointArray[wayFragment.indexWayPoint0];
             FWayPoint* wayPoint1 = &iWayPointArray[wayFragment.indexWayPoint1];
-            eSegmentAdditionFlags segmentAdditionFlags = SegmentAdditionPolicy( wayPoint0, wayPoint1, iSplit );
+            eSegmentAdditionFlags segmentAdditionFlags = SegmentAdditionPolicy( wayPoint0
+                                                                              , &wayFragment
+                                                                              , wayPoint1
+                                                                              , iSplit );
 
             //UE_LOG(LogTemp, Warning, TEXT("fragment : %d:%x %d:%x"), wayPoint0->vertex->GetID(), wayPoint0->flags
             //                                                       , wayPoint1->vertex->GetID(), wayPoint1->flags );

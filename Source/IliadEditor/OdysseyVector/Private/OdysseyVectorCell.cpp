@@ -197,19 +197,31 @@ FOdysseyVectorCell::GetHUDList()
 void
 FOdysseyVectorCell::AddHUD( IOdysseyVectorHUD* iHUDObject )
 {
+    LockDrawing();
+
     GetHUDList().push_back( iHUDObject );
+
+    UnlockDrawing();
 }
 
 void
 FOdysseyVectorCell::RemoveHUD( IOdysseyVectorHUD* iHUDObject )
 {
+    LockDrawing();
+
     GetHUDList().remove( iHUDObject );
+
+    UnlockDrawing();
 }
 
 void
 FOdysseyVectorCell::ClearHUD()
 {
+    LockDrawing();
+
     GetHUDList().clear();
+
+    UnlockDrawing();
 }
 
 void

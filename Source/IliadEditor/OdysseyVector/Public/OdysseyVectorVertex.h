@@ -208,7 +208,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
          * @brief Get the number of sections connected to this vertex. Equals to a call to "GetSectionList().size()".
          * @return the number of sections connected to this vertex.
          */
-        virtual uint32 GetSectionCount();
+        virtual uint32 GetSectionCount( FOdysseyVectorObject* iOwner );
 
         /**
          * @brief Get a reference to the list of sections connected to this vertex.
@@ -411,6 +411,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
 
         // a version that does not invalidate the owner
         void SetCoordsSilent( ::ULIS::FVec2D& iCoords );
+        uint32 GetErasedSectionCount( FOdysseyVectorObject* iOwner );
+        void Print();
 
     protected:
         /**

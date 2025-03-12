@@ -71,8 +71,8 @@ bool
 FOdysseyVectorSection::IsValid()
 {
     if( ( mLength == 0.0f )
-     && ( ( mVertex[0]->GetSectionCount() > 2 )
-       || ( mVertex[1]->GetSectionCount() > 2 ) ) )
+     && ( ( mVertex[0]->GetSectionCount( nullptr ) > 2 )
+       || ( mVertex[1]->GetSectionCount( nullptr ) > 2 ) ) )
     {
         return false;
     }
@@ -84,6 +84,13 @@ FOdysseyVectorObject*
 FOdysseyVectorSection::GetOwner()
 {
     return mOwner;
+}
+
+bool
+FOdysseyVectorSection::IsGap()
+{
+    return ( mSegment->GetClass() == FOdysseyVectorSegmentCubicGap::StaticClass() )
+        || ( mSegment->GetClass() == FOdysseyVectorSegmentExtended::StaticClass() );
 }
 
 void

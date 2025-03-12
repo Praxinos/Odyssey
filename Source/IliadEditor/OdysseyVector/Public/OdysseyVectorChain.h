@@ -27,9 +27,8 @@ struct FWayPoint
     // WayPoint flags
     static const uint32 Original           = ( 1 << 0 );
     static const uint32 OutsideErasureArea = ( 1 << 1 );
-    static const uint32 EntersErasureArea  = ( 1 << 2 );
+    static const uint32 BordersErasureArea = ( 1 << 2 );
     static const uint32 InsideErasureArea  = ( 1 << 3 );
-    static const uint32 LeavesErasureArea  = ( 1 << 4 );
 
     FWayPoint()
     {
@@ -61,11 +60,13 @@ struct FWayFragment
     uint32 indexWayPoint0;
     uint32 indexWayPoint1;
     ::ULIS::FVec2D bezier[4];
+    bool erased;
 
     FWayFragment( FOdysseyVectorSegment* iSegment
                 , std::vector<FWayPoint>& iWayPointArray
                 , uint32 iIndexWayPoint0
-                , uint32 iIndexWayPoint1 );
+                , uint32 iIndexWayPoint1
+                , bool iErased );
 };
 
 /** A class that contains an ordered and contiguous chain of segments and vertices
@@ -86,7 +87,7 @@ class FOdysseyVectorChain
 
         void IterateSegments( std::function<bool( FOdysseyVectorVertex*, FOdysseyVectorSegment*)> iCallback );
         void IterateSections( std::function<bool( FOdysseyVectorVertex*, FOdysseyVectorSection*)> iCallback );
-
+        static void ExtendErasedSection( FOdysseyVectorPath* iPath, FSectionLinkInfo* iLastSectionInfo );
 
     private :
         bool EraseSections( BLImageData* iImageData
@@ -108,7 +109,7 @@ class FOdysseyVectorChain
                             , int32 iY1
                             , double iT1
                             , BLImageData* iImageData
-                            , FWayPoint* lastWayPoint
+                            , FWayPoint* iFirstChainedWayPoint
                             , std::vector<FWayPoint>& oWayPointArray
                             , std::vector<FWayFragment>& oWayFragmentArray
                             , FOdysseyVectorSegment* iSegment
@@ -123,20 +124,14 @@ class FOdysseyVectorChain
                         , const ::ULIS::FRectD& iMaskRect
                         , const uint8* iMaskPixelData );
         bool PickSections( std::vector<FOdysseyVectorSection*>& oPickedSectionArray );
-        static void ExtendErasedSection( FOdysseyVectorVertex* iVertex
-                                       , FOdysseyVectorSection* iFromSection );
-        uint32 GetErasureFlags( FOdysseyVectorSection* iPrevSection
-                              , FOdysseyVectorVertex* iVertex
-                              , FOdysseyVectorSection* iNextSection );
+
+        uint32 GetErasureFlags( FOdysseyVectorVertex* iVertex );
         void GetSections( FOdysseyVectorVertex* iVertex
                         , FOdysseyVectorPath* iPath
                         , std::vector<FOdysseyVectorSection*>& oSectionArray );
         void GetSections( FOdysseyVectorVertexIntersection* iIntersectionVertex
                         , FOdysseyVectorSegment* iSegment
                         , std::vector<FOdysseyVectorSection*>& oSectionArray );
-        FSectionLinkInfo* GetNextSectionLinkInfo( FOdysseyVectorSection* iLastSection
-                                                , FOdysseyVectorVertex* iLastSectionVertex
-                                                , uint32 iLastSectionVertexIndex );
 
     private :
         FOdysseyVectorPath* mPath;

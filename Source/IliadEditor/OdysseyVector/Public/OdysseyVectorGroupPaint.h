@@ -323,7 +323,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
                                         , const BLMatrix2D& iConversionMatrix
                                         , std::vector<FOdysseyVectorVertex>& iExtendedVertexBuffer
                                         , std::vector<FOdysseyVectorSegmentExtended>& iExtendedSegmentBuffer
-                                                      , double iGapTolerance );
+                                        , double iGapTolerance );
 
         bool IntersectGapSection( FOdysseyVectorSection* iGapSection
                                 , FOdysseyVectorSegmentCubic* iSegment );

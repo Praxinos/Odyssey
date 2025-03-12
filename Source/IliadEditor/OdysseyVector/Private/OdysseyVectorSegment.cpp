@@ -24,6 +24,8 @@ FOdysseyVectorSegment::FOdysseyVectorSegment( FOdysseyVectorObject* iOwner
     , mTextureStartU ( 0.0f )
     , mTextureEndU ( 0.0f )
     , mNeedsWidth ( iNeedsWidth )
+    , mSectionBuffer ( nullptr ) // used for erasing sections
+    , mSectionCount ( 0 ) // used for erasing sections
 {
 }
 
@@ -334,13 +336,36 @@ FOdysseyVectorSegment::GetIntersectionSlotCount()
     return mIntersectionSlotCount;
 }
 
+void
+FOdysseyVectorSegment::ResetSectionBuffer()
+{
+    mSectionBuffer = nullptr;
+    mSectionCount = 0;
+}
+
+uint32
+FOdysseyVectorSegment::GetSectionCount()
+{
+    return mSectionCount;
+}
+
+FOdysseyVectorSection*
+FOdysseyVectorSegment::GetSectionBuffer()
+{
+    return mSectionBuffer;
+}
+
+
 // MUST be called only on segments belonging to this path (because of the section)
 void
-FOdysseyVectorSegment::ClearIntersections()
+FOdysseyVectorSegment::ClearIntersections( FOdysseyVectorSection* iSectionBuffer, uint32 iSectionCount )
 {
     mIntersectionList.clear();
 
     mIntersectionSlotCount = 0;
+
+    mSectionBuffer = iSectionBuffer;
+    mSectionCount = iSectionCount;
 }
 
 bool

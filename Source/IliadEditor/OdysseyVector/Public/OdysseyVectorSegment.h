@@ -162,7 +162,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
        /**
          * @brief Remove all intersection vertices and all sections (sub-segments).
          */
-        void ClearIntersections();
+        void ClearIntersections( FOdysseyVectorSection* iSectionBuffer, uint32 iSectionCount );
 
 
         void AddIntersection ( FOdysseyVectorIntersection* iIntersection );
@@ -239,6 +239,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
         double GetTextureStartU();
         double GetTextureEndU();
 
+        FOdysseyVectorSection* GetSectionBuffer();
+        uint32 GetSectionCount();
+        void ResetSectionBuffer();
+
     protected:
         void DrawFractionCache( BLContext* iBLContext );
 
@@ -261,4 +265,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
         double mTextureStartU;
         double mTextureEndU;
         bool mNeedsWidth;
+        FOdysseyVectorSection* mSectionBuffer;
+        uint32 mSectionCount;
 };

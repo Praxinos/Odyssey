@@ -1305,6 +1305,7 @@ FOdysseyVectorGroupPaint::CreateSegmentSections( FOdysseyVectorSegment* iSegment
     FOdysseyVectorVertex* segmentVertex1 = iSegment->GetVertex(1);
     FOdysseyVectorVertex* sectionVertex0 = segmentVertex0;
     double sectionVertex0T = 0.0f;
+    FOdysseyVectorSection* sectionBufferStart = &mSectionBuffer[mSectionBuffer.size()];
 
     if( intersectionList.size() )
     {
@@ -1335,7 +1336,7 @@ FOdysseyVectorGroupPaint::CreateSegmentSections( FOdysseyVectorSegment* iSegment
                                , 1.0f
                                , mShortSectionArray );
 
-    iSegment->ClearIntersections();
+    iSegment->ClearIntersections( sectionBufferStart, intersectionList.size() + 1 );
 }
 
 void
@@ -2524,8 +2525,8 @@ FOdysseyVectorGroupPaint::SimplifyGraph()
             {
                 if( section->GetVertex(0) != section->GetVertex(1) ) // exclude loops
                 {
-                    if( ( section->GetVertex(0)->GetSectionCount() == 1 )
-                    ||  ( section->GetVertex(1)->GetSectionCount() == 1 )
+                    if( ( section->GetVertex(0)->GetSectionCount( nullptr ) == 1 )
+                    ||  ( section->GetVertex(1)->GetSectionCount( nullptr ) == 1 )
                     // filter invalid section with length 0. Yes, this can happend due to floating point imprecision
                     // when an intersection is very very close to the end vertex.
                     /*||  ( section->IsValid() == false )*/ )
@@ -2546,8 +2547,8 @@ FOdysseyVectorGroupPaint::SimplifyGraph()
             {
                 //if( section->GetSegment() )
                 {
-                    if( ( section->GetVertex(0)->GetSectionCount() == 1 )
-                    ||  ( section->GetVertex(1)->GetSectionCount() == 1 ) )
+                    if( ( section->GetVertex(0)->GetSectionCount( nullptr ) == 1 )
+                    ||  ( section->GetVertex(1)->GetSectionCount( nullptr ) == 1 ) )
                     {
                         keepSimplifying = true;
 
@@ -2615,6 +2616,7 @@ FOdysseyVectorGroupPaint::Clear()
             {
                 // compute the box
                 SetSegmentBBox( segment, conversionMatrix );
+                segment->ResetSectionBuffer();
             }
 
             for( FOdysseyVectorVertex *vertex : path->GetVertexList() )
@@ -2642,6 +2644,7 @@ FOdysseyVectorGroupPaint::Clear()
             {
                 // compute the box
                 SetSegmentBBox( segment, conversionMatrix );
+                segment->ResetSectionBuffer();
             }
 
             for( FOdysseyVectorVertex *vertex : path->GetVertexList() )
@@ -2947,11 +2950,12 @@ FOdysseyVectorGroupPaint::PickErasedSections( std::vector<FOdysseyVectorSection*
 
     for( FOdysseyVectorSection& section : mSectionBuffer )
     {
-        if( PickSection( &section, maskRect, (uint8*) maskData.pixelData ) )
+        if( section.GetSegment()->GetOwner()->GetClass() == FOdysseyVectorPath::StaticClass() )
         {
-            oErasedSectionArray.push_back( &section );
-
-            section.SetErased( true );
+            if( PickSection( &section, maskRect, (uint8*) maskData.pixelData ) )
+            {
+                oErasedSectionArray.push_back( &section );
+            }
         }
     }
 }
@@ -2990,12 +2994,14 @@ FOdysseyVectorGroupPaint::EraseSections( std::vector<FOdysseyVectorObject*>& oAd
     // the end of the chain or an intersection
     for( FOdysseyVectorSection* section : erasedSectionArray )
     {
-        section->SetErased( true );
+        FSectionLinkInfo* left  = section->GetVertex(0)->GetSectionLinkInfo( section, 0 );
+        FSectionLinkInfo* right = section->GetVertex(1)->GetSectionLinkInfo( section, 1 );
 
-        // static call
-        FOdysseyVectorChain::ExtendErasedSection( section->GetVertex(0), section );
-        // static call
-        FOdysseyVectorChain::ExtendErasedSection( section->GetVertex(1), section );
+        if( section->IsErased() == false )
+        {
+            FOdysseyVectorChain::ExtendErasedSection( section->GetSegment()->GetOwnerAsPath(), left );
+            FOdysseyVectorChain::ExtendErasedSection( section->GetSegment()->GetOwnerAsPath(), right );
+        }
     }
 
     // do not use mPathList because it may contains the canvas path
@@ -3005,15 +3011,18 @@ FOdysseyVectorGroupPaint::EraseSections( std::vector<FOdysseyVectorObject*>& oAd
         {
             FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>( child );
 
-            if( path->Erase( oAddedPathArray
-                           , oAddedVertexArray
-                           , oAddedSegmentArray
-                           , oRemovedVertexArray
-                           , oRemovedSegmentArray
-                           , true
-                           , iSplit ) )
+            if( path->HasErasedSection() )
             {
-                oRemovedPathArray.push_back( path );
+                if( path->Erase( oAddedPathArray
+                               , oAddedVertexArray
+                               , oAddedSegmentArray
+                               , oRemovedVertexArray
+                               , oRemovedSegmentArray
+                               , true
+                               , iSplit ) )
+                {
+                    oRemovedPathArray.push_back( path );
+                }
             }
         }
     }

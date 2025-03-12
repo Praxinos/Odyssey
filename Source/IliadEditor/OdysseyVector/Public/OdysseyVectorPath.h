@@ -467,6 +467,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
                       , double iCombinedOpacity
                       , FOdysseyVectorChain& iChain
                       , uint64 iDrawingFlags );
+        bool HasErasedSection();
 
     protected:
         void DrawJoint( BLContext* iBLContext, FOdysseyVectorVertex* iVertex, uint64 iFlags );
@@ -499,6 +500,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
 
         eVertexAdditionFlags VertexAdditionPolicy( FWayPoint* iWayPoint, bool iSplit );
         eSegmentAdditionFlags SegmentAdditionPolicy( FWayPoint* iWayPoint0
+                                                   , FWayFragment* iWayFragment
                                                    , FWayPoint* iWayPoint1
                                                    , bool iSplit );
 
