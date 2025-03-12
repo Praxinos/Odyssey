@@ -221,6 +221,26 @@ FImportImageSequenceImporter::Build( const FPatternKeywordLists& iPatternKeyword
         if( frame_duration > 0 )
             panel->Duration = frame_duration;
     }
+
+    Algo::StableSort( mImageSequenceStruct.Boards, []( const FImportImageSequenceBoard& iBoard1, const FImportImageSequenceBoard& iBoard2 )
+                      {
+                          return iBoard1.Id < iBoard2.Id;
+                      } );
+
+    for( FImportImageSequenceBoard& board : mImageSequenceStruct.Boards )
+    {
+        Algo::StableSort( board.Shots, []( const FImportImageSequenceShot& iShot1, const FImportImageSequenceShot& iShot2 )
+                          {
+                              return iShot1.Id < iShot2.Id;
+                          } );
+        for( FImportImageSequenceShot& shot : board.Shots )
+        {
+            Algo::StableSort( shot.Panels, []( const FImportImageSequencePanel& iPanel1, const FImportImageSequencePanel& iPanel2 )
+                              {
+                                  return iPanel1.Id < iPanel2.Id;
+                              } );
+        }
+    }
 }
 
 //---
