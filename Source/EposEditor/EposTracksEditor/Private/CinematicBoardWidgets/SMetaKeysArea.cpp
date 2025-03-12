@@ -296,7 +296,7 @@ SMetaKeysArea::OnMouseMove( const FGeometry& MyGeometry, const FPointerEvent& Mo
         // For the moment, this should always be the case (until meta keys selection)
         check( mDraggedKeys->NumMetaKeys() == 1 );
 
-        const bool snap = sequencer->GetSequencerSettings()->GetIsSnapEnabled() && sequencer->GetSequencerSettings()->GetSnapKeyTimesToInterval();
+        const bool snap = sequencer->GetSequencerSettings()->GetIsSnapEnabled() && sequencer->GetSequencerSettings()->GetForceWholeFrames();
         const FFrameRate inner_tick_resolution = subsection_object->GetSequence()->GetMovieScene()->GetTickResolution();
         const FFrameRate inner_display_rate = subsection_object->GetSequence()->GetMovieScene()->GetDisplayRate();
 
