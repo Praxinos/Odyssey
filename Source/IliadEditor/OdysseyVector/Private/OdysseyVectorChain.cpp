@@ -338,36 +338,33 @@ FOdysseyVectorChain::EraseSections( BLImageData* iImageData
                 if( erasureFlag & FWayPoint::BordersErasureArea )
                 {
                     double t = section->GetSegmentT( nextVertexIndex );
-                    // Prevents creation of micro segments
-                    if( ( t > 0.0f ) && (  t < 1.0f ) )
-                    {
-                        double radius = ( t * segmentVertex1->GetRadius() ) + ( ( 1.0f - t ) * segmentVertex0->GetRadius() );
-                        ::ULIS::FVec2D& vertexCoords = nextVertex->GetCoords();
-                        // owner is the paintgroup
-                        BLMatrix2D& ownerWorldMatrix = nextVertex->GetOwner()->GetWorldMatrix();
-                        BLPoint vertexWorldCoords = ownerWorldMatrix.mapPoint( vertexCoords.x
-                                                                             , vertexCoords.y );
-                        BLPoint vertexPathCoords  = pathInverseWorldMatrix.mapPoint( vertexWorldCoords.x
-                                                                                   , vertexWorldCoords.y );
-                        FOdysseyVectorVertex* derivedVertex = new FOdysseyVectorVertex( vertexPathCoords.x
-                                                                                      , vertexPathCoords.y
-                                                                                      , radius );
 
-                        // for indexing
-                        derivedVertex->SetID( oWayPointArray.size() );
+                    double radius = ( t * segmentVertex1->GetRadius() ) + ( ( 1.0f - t ) * segmentVertex0->GetRadius() );
+                    ::ULIS::FVec2D& vertexCoords = nextVertex->GetCoords();
+                    // owner is the paintgroup
+                    BLMatrix2D& ownerWorldMatrix = nextVertex->GetOwner()->GetWorldMatrix();
+                    BLPoint vertexWorldCoords = ownerWorldMatrix.mapPoint( vertexCoords.x
+                                                                         , vertexCoords.y );
+                    BLPoint vertexPathCoords  = pathInverseWorldMatrix.mapPoint( vertexWorldCoords.x
+                                                                               , vertexWorldCoords.y );
+                    FOdysseyVectorVertex* derivedVertex = new FOdysseyVectorVertex( vertexPathCoords.x
+                                                                                  , vertexPathCoords.y
+                                                                                  , radius );
 
-                        oWayPointArray.emplace_back( derivedVertex
-                                                   , intersectionVertex
-                                                   , erasureFlag
-                                                   , t );
+                    // for indexing
+                    derivedVertex->SetID( oWayPointArray.size() );
 
-                        // Note: wayFragments use waypoints ID because the array might grow (thus the pointer would change)
-                        oWayFragmentArray.emplace_back( segment
-                                                      , oWayPointArray
-                                                      , chainedVertex->GetID()
-                                                      , derivedVertex->GetID()
-                                                      , section->IsErased() );
-                    }
+                    oWayPointArray.emplace_back( derivedVertex
+                                               , intersectionVertex
+                                               , erasureFlag
+                                               , std::clamp<double>( t, 0.001f, 0.999f ) );
+
+                    // Note: wayFragments use waypoints ID because the array might grow (thus the pointer would change)
+                    oWayFragmentArray.emplace_back( segment
+                                                  , oWayPointArray
+                                                  , chainedVertex->GetID()
+                                                  , derivedVertex->GetID()
+                                                  , section->IsErased() );
                 }
             }
 
