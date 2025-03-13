@@ -890,256 +890,21 @@ FOdysseyVectorPath::PickVertex( std::vector<FOdysseyVectorVertex*>& oPickedVerte
     }
 }
 
-eSegmentAdditionFlags
-FOdysseyVectorPath::SegmentAdditionPolicy( FWayPoint* iWayPoint0
-                                         , FWayFragment* iWayFragment
-                                         , FWayPoint* iWayPoint1
-                                         , bool iSplit )
-{
-    eSegmentAdditionFlags retFlags = eSegmentAdditionFlags::RemoveOriginalSegment;
-
-    if( iSplit )
-    {
-        if( iWayFragment->erased == false )
-        {
-            if( iWayPoint0->flags & FWayPoint::BordersErasureArea )
-            {
-                retFlags |= eSegmentAdditionFlags::CreateNewPath;
-            }
-        }
-    }
-
-    if( iWayFragment->erased == false )
-    {
-        retFlags |= eSegmentAdditionFlags::CreateDerivedSegment;
-    }
-
-    if( iWayFragment->erased == true )
-    {
-        retFlags |= eSegmentAdditionFlags::RemoveOriginalSegment;
-    }
-
-    return retFlags;
-}
-
-eVertexAdditionFlags
-FOdysseyVectorPath::VertexAdditionPolicy( FWayPoint* iWayPoint, bool iSplit )
-{
-    eVertexAdditionFlags retFlags = eVertexAdditionFlags::None;
-
-    if( iSplit )
-    {
-        if( iWayPoint->flags & FWayPoint::Original )
-        {
-            retFlags |= ( eVertexAdditionFlags::RemoveOriginalVertex );
-
-            if( iWayPoint->flags & FWayPoint::BordersErasureArea )
-            {
-                if( iWayPoint->vertex->GetSegmentCount() == 2 )
-                {
-                    retFlags |= ( eVertexAdditionFlags::CreateDerivedVertex );
-                }
-            }
-
-            if( iWayPoint->flags & FWayPoint::OutsideErasureArea )
-            {
-                retFlags |= ( eVertexAdditionFlags::CreateDerivedVertex );
-            }
-        }
-    }
-
-    if( iWayPoint->flags & FWayPoint::InsideErasureArea )
-    {
-        if( iWayPoint->flags & FWayPoint::Original )
-        {
-            retFlags |= eVertexAdditionFlags::RemoveOriginalVertex;
-        }
-    }
-
-    if( iWayPoint->flags & FWayPoint::BordersErasureArea )
-    {
-        if( ( iWayPoint->flags & FWayPoint::Original ) == 0 )
-        {
-            retFlags |= eVertexAdditionFlags::CreateBoundaryVertex;
-        }
-    }
-
-    return retFlags;
-}
-
 bool
 FOdysseyVectorPath::HasErasedSection()
 {
     for( FOdysseyVectorSegment* segment : mSegmentList )
     {
-        if( segment->GetSectionCount() )
+        for( uint32 i = 0; i < segment->GetSectionCount(); i++ )
         {
-            return true;
+            if( segment->GetSectionBuffer()[i].IsErased() )
+            {
+                 return true;
+            }
         }
     }
 
     return false;
-}
-
-void
-FOdysseyVectorPath::ParseWayPoints( std::vector<FWayPoint>& iWayPointArray
-                                  , std::vector<FWayFragment>& iWayFragmentArray
-                                  , std::vector<FOdysseyVectorObject*>& oAddedPathArray
-                                  , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
-                                  , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
-                                  , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
-                                  , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
-                                  , bool iSplit )
-{
-    FOdysseyVectorPath* currentPath = iSplit ? nullptr : this;
-    uint32 addedSegmentCountBeforeAlter = oAddedSegmentArray.size();
-
-    if( iWayPointArray.size() )
-    {
-        FWayPoint& firstWayPoint = iWayPointArray[0];
-
-        // step 1 : create needed vertices
-        for( FWayPoint& wayPoint : iWayPointArray )
-        {
-            eVertexAdditionFlags vertexAdditionFlags = VertexAdditionPolicy( &wayPoint, iSplit );
-
-            if( ( vertexAdditionFlags & eVertexAdditionFlags::RemoveOriginalVertex ) == eVertexAdditionFlags::RemoveOriginalVertex )
-            {
-                // mark original vertex for deletion. No duplicates (duplicates happen in case of loops)
-                if( std::find( oRemovedVertexArray.begin(), oRemovedVertexArray.end(), wayPoint.vertex ) == oRemovedVertexArray.end() )
-                {
-                    oRemovedVertexArray.push_back( wayPoint.vertex );
-                }
-            }
-
-            // boundary vertices are guaranteed unique per nature, no need to check uniqueness
-            if( ( vertexAdditionFlags & eVertexAdditionFlags::CreateBoundaryVertex ) == eVertexAdditionFlags::CreateBoundaryVertex )
-            {
-                oAddedVertexArray.push_back( wayPoint.vertex );
-            }
-
-            if( ( vertexAdditionFlags & eVertexAdditionFlags::CreateDerivedVertex ) == eVertexAdditionFlags::CreateDerivedVertex )
-            {
-                ::ULIS::FVec2D& coords = wayPoint.vertex->GetCoords();
-                double radius = wayPoint.vertex->GetRadius();
-                bool handleAligned = wayPoint.vertex->IsHandleAligned();
-                uint32 vertexID = wayPoint.vertex->GetID();
-
-                // replaces the current original vertex. The latter is already saved in oRemovedVertexArray
-                wayPoint.vertex = new FOdysseyVectorVertex( coords.x, coords.y, radius );
-                wayPoint.vertex->SetHandleAligned( handleAligned );
-                wayPoint.vertex->SetID( vertexID );
-
-                // a new vertex for each former vertex
-                oAddedVertexArray.push_back( wayPoint.vertex );
-            }
-        }
-
-        for( FWayFragment& wayFragment : iWayFragmentArray )
-        {
-            FWayPoint* wayPoint0 = &iWayPointArray[wayFragment.indexWayPoint0];
-            FWayPoint* wayPoint1 = &iWayPointArray[wayFragment.indexWayPoint1];
-            eSegmentAdditionFlags segmentAdditionFlags = SegmentAdditionPolicy( wayPoint0
-                                                                              , &wayFragment
-                                                                              , wayPoint1
-                                                                              , iSplit );
-
-            //UE_LOG(LogTemp, Warning, TEXT("fragment : %d:%x %d:%x"), wayPoint0->vertex->GetID(), wayPoint0->flags
-            //                                                       , wayPoint1->vertex->GetID(), wayPoint1->flags );
-
-
-            if( ( segmentAdditionFlags & eSegmentAdditionFlags::RemoveOriginalSegment ) == eSegmentAdditionFlags::RemoveOriginalSegment )
-            {
-                // mark original segment for deletion. No duplicates
-                if( std::find( oRemovedSegmentArray.begin(), oRemovedSegmentArray.end(), wayFragment.segment ) == oRemovedSegmentArray.end() )
-                {
-                    oRemovedSegmentArray.push_back( wayFragment.segment );
-                }
-            }
-
-            if( ( segmentAdditionFlags & eSegmentAdditionFlags::CreateDerivedSegment ) == eSegmentAdditionFlags::CreateDerivedSegment )
-            {
-                if( ( segmentAdditionFlags & eSegmentAdditionFlags::CreateNewPath ) == eSegmentAdditionFlags::CreateNewPath )
-                {
-                    currentPath = new FOdysseyVectorPath( GetName() );
-                    // for postprocessing. the path is not added to the parent yet
-                    currentPath->SetParent( mParent );
-                    ExportParam( currentPath, true );
-                    CopyTransformation( *currentPath );
-
-                    oAddedPathArray.push_back( currentPath );
-                }
-
-                FOdysseyVectorVertex* destVertex0 = wayPoint0->vertex;
-                FOdysseyVectorVertex* destVertex1 = wayPoint1->vertex;
-                // currentPath can be null at first for some segments. This will be handled
-                // in a second pass this is needed for segment chains that loop.
-                FOdysseyVectorSegmentCubic* newSegment = new FOdysseyVectorSegmentCubic( currentPath
-                                                                                       , destVertex0
-                                                                                       , wayFragment.bezier[1].x
-                                                                                       , wayFragment.bezier[1].y
-                                                                                       , wayFragment.bezier[2].x
-                                                                                       , wayFragment.bezier[2].y
-                                                                                       , destVertex1
-                                                                                       , true );
-
-                // store path here even if technically the vertex does not belong to the path yet.
-                // it will once we call path->AddVertex() in the FOdysseyVectorPath::Erase() func.
-                wayPoint0->vertex->SetOwner( currentPath );
-                wayPoint1->vertex->SetOwner( currentPath );
-
-                // mark new segment for addition
-                oAddedSegmentArray.push_back( newSegment );
-            }
-        }
-
-        // second pass to assign segment that belong to no path yet.
-        // This is needed to handle chains that loop. This is necessary only in split mode.
-        // This works because the segments are ordered.
-        if( iSplit )
-        {
-            for( int i = addedSegmentCountBeforeAlter; i < oAddedSegmentArray.size(); i++ )
-            {
-                FOdysseyVectorSegment* segment = oAddedSegmentArray[i];
-                FOdysseyVectorPath* segmentPath = segment->GetOwnerAsPath();
-
-                if( segmentPath == nullptr )
-                {
-                    FOdysseyVectorVertex* vertex0 = segment->GetVertex(0);
-                    FOdysseyVectorVertex* vertex1 = segment->GetVertex(1);
-
-                    if( vertex0->GetOwner() )
-                    {
-                        segmentPath = vertex0->GetOwnerAsPath();
-                    }
-
-                    if( vertex1->GetOwner() )
-                    {
-                        segmentPath = vertex1->GetOwnerAsPath();
-                    }
-
-                    // if segmentPath is still null, it means segment vertices were
-                    // not assigned a path via another neighbour segment. In that
-                    // case we create a new path and assign them to it.
-                    if( segmentPath == nullptr )
-                    {
-                        segmentPath = new FOdysseyVectorPath( GetName() );
-                        // for postprocessing. the path is not added to the parent yet
-                        segmentPath->SetParent( mParent );
-                        ExportParam( segmentPath, true );
-                        CopyTransformation( *segmentPath );
-
-                        oAddedPathArray.push_back( segmentPath );
-                    }
-
-                    // store ptr now for later use with path->AddVertex() / path->AddSegment()
-                    vertex0->SetOwner( segmentPath );
-                    vertex1->SetOwner( segmentPath );
-                    segment->SetOwner( segmentPath );
-                }
-            }
-        }
-    }
 }
 
 void
@@ -1198,11 +963,11 @@ FOdysseyVectorPath::Erase( std::vector<FOdysseyVectorObject*>& oAddedPathArray
 
         for( FOdysseyVectorChain& chain : mChainArray )
         {
-            std::vector<FWayFragment> wayFragmentArray;
-            std::vector<FWayPoint> wayPointArray;
+            std::vector<FWayFragment> wayFragmentBuffer;
+            std::vector<FWayPoint> wayPointBuffer;
 
-            wayPointArray.reserve( 10 );
-            wayFragmentArray.reserve( 10 );
+            wayPointBuffer.reserve( 10 );
+            wayFragmentBuffer.reserve( 10 );
 
             // this will return an array of "way points". they are the original
             // points + the points at a contrast zone (erasure boundary).
@@ -1212,11 +977,11 @@ FOdysseyVectorPath::Erase( std::vector<FOdysseyVectorObject*>& oAddedPathArray
             // depending on the spliting mode, so it is the responsibility of EraseNoSplit() and
             // EraseNoSplit() to allocate new vertices / segments or paths
             bool hit = iWholeSection ? chain.EraseSections( &imageData
-                                                          , wayPointArray
-                                                          , wayFragmentArray )
+                                                          , wayPointBuffer
+                                                          , wayFragmentBuffer )
                                      : chain.EraseSegments( &imageData
-                                                          , wayPointArray
-                                                          , wayFragmentArray );
+                                                          , wayPointBuffer
+                                                          , wayFragmentBuffer );
 
             if( hit )
             {
@@ -1224,14 +989,14 @@ FOdysseyVectorPath::Erase( std::vector<FOdysseyVectorObject*>& oAddedPathArray
                 // determine which vertices / segments will be deleted and which will be kept
                 // it differs in SPLIT and NOSPLIT modes. SPLIT modes removes only those erased,
                 // split removes all
-                ParseWayPoints( wayPointArray
-                              , wayFragmentArray
-                              , oAddedPathArray
-                              , oAddedVertexArray
-                              , oAddedSegmentArray
-                              , oRemovedVertexArray
-                              , oRemovedSegmentArray
-                              , iSplit );
+                chain.ParseWayPoints( wayPointBuffer
+                                    , wayFragmentBuffer
+                                    , oAddedPathArray
+                                    , oAddedVertexArray
+                                    , oAddedSegmentArray
+                                    , oRemovedVertexArray
+                                    , oRemovedSegmentArray
+                                    , iSplit );
             }
         }
 

@@ -2525,8 +2525,8 @@ FOdysseyVectorGroupPaint::SimplifyGraph()
             {
                 if( section->GetVertex(0) != section->GetVertex(1) ) // exclude loops
                 {
-                    if( ( section->GetVertex(0)->GetSectionCount( nullptr ) == 1 )
-                    ||  ( section->GetVertex(1)->GetSectionCount( nullptr ) == 1 )
+                    if( ( section->GetVertex(0)->GetSectionCount( eVertexSectionTypeQuery::Any, nullptr, nullptr ) == 1 )
+                    ||  ( section->GetVertex(1)->GetSectionCount( eVertexSectionTypeQuery::Any, nullptr, nullptr ) == 1 )
                     // filter invalid section with length 0. Yes, this can happend due to floating point imprecision
                     // when an intersection is very very close to the end vertex.
                     /*||  ( section->IsValid() == false )*/ )
@@ -2547,8 +2547,8 @@ FOdysseyVectorGroupPaint::SimplifyGraph()
             {
                 //if( section->GetSegment() )
                 {
-                    if( ( section->GetVertex(0)->GetSectionCount( nullptr ) == 1 )
-                    ||  ( section->GetVertex(1)->GetSectionCount( nullptr ) == 1 ) )
+                    if( ( section->GetVertex(0)->GetSectionCount( eVertexSectionTypeQuery::Any, nullptr, nullptr ) == 1 )
+                    ||  ( section->GetVertex(1)->GetSectionCount( eVertexSectionTypeQuery::Any, nullptr, nullptr ) == 1 ) )
                     {
                         keepSimplifying = true;
 
@@ -2997,7 +2997,7 @@ FOdysseyVectorGroupPaint::EraseSections( std::vector<FOdysseyVectorObject*>& oAd
         FSectionLinkInfo* left  = section->GetVertex(0)->GetSectionLinkInfo( section, 0 );
         FSectionLinkInfo* right = section->GetVertex(1)->GetSectionLinkInfo( section, 1 );
 
-        if( section->IsErased() == false )
+        if( ( section->IsErased() == false ) && ( section->IsGap() == false ) )
         {
             FOdysseyVectorChain::ExtendErasedSection( section->GetSegment()->GetOwnerAsPath(), left );
             FOdysseyVectorChain::ExtendErasedSection( section->GetSegment()->GetOwnerAsPath(), right );

@@ -17,6 +17,14 @@ class FOdysseyVectorObject;
 class FOdysseyVectorVertex;
 class FOdysseyVectorHandleSegment;
 
+UENUM(BlueprintType)
+enum class eVertexSectionTypeQuery : uint8
+{
+    Any = 0,
+    SameSegment = 1,
+    SameOwner = 2
+};
+
 struct FExplorationPair
 {
     FOdysseyVectorSection* returnSection;
@@ -208,7 +216,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
          * @brief Get the number of sections connected to this vertex. Equals to a call to "GetSectionList().size()".
          * @return the number of sections connected to this vertex.
          */
-        virtual uint32 GetSectionCount( FOdysseyVectorObject* iOwner );
+        uint32 GetSectionCount( eVertexSectionTypeQuery iQuery
+                              , FOdysseyVectorObject* iOwner
+                              , FOdysseyVectorSegment* iSegment );
 
         /**
          * @brief Get a reference to the list of sections connected to this vertex.
@@ -411,7 +421,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
 
         // a version that does not invalidate the owner
         void SetCoordsSilent( ::ULIS::FVec2D& iCoords );
-        uint32 GetErasedSectionCount( FOdysseyVectorObject* iOwner );
+        uint32 GetErasedSectionCount( eVertexSectionTypeQuery iQuery
+                                    , FOdysseyVectorObject* iOwner
+                                    , FOdysseyVectorSegment* iSegment );
         void Print();
 
     protected:

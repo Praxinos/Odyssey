@@ -458,6 +458,8 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorGroupPaint
 
     oSignalFlags = notificationFlags;
 
+    iScene->GetCell()->InvalidateRect(); // force redraw the whole thing to clear the blended HUD
+
     return true;
 }
 

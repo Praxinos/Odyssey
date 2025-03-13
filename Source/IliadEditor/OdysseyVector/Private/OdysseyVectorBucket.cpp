@@ -18,9 +18,9 @@ FOdysseyVectorBucket::~FOdysseyVectorBucket()
 FOdysseyVectorBucket::FOdysseyVectorBucket( FOdysseyVectorObject* iOwner
                                           , FOdysseyVectorBucket* iImportFrom )
     : mOwner ( iOwner )
+    , mRotation ( 0.0f ) // deprecated but kept for compatibility with older file format
     , mLinearP0( 0.0f, 0.0f )
     , mLinearP1( 0.0f, 0.0f )
-    , mRotation ( 0.0f ) // deprecated but kept for compatibility with older file format
 {
     BLMatrix2D& ownerInverseWorldMatrix = iOwner->GetInverseWorldMatrix();
     BLMatrix2D& importWorldMatrix = iImportFrom->GetOwner()->GetWorldMatrix();

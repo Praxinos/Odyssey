@@ -71,8 +71,8 @@ bool
 FOdysseyVectorSection::IsValid()
 {
     if( ( mLength == 0.0f )
-     && ( ( mVertex[0]->GetSectionCount( nullptr ) > 2 )
-       || ( mVertex[1]->GetSectionCount( nullptr ) > 2 ) ) )
+     && ( ( mVertex[0]->GetSectionCount( eVertexSectionTypeQuery::Any, nullptr, nullptr ) > 2 )
+       || ( mVertex[1]->GetSectionCount( eVertexSectionTypeQuery::Any, nullptr, nullptr ) > 2 ) ) )
     {
         return false;
     }

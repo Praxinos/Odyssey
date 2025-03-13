@@ -15,6 +15,30 @@ class FOdysseyVectorPath;
 class FOdysseyVectorObject;
 class FOdysseyVectorVertexIntersection;
 struct FSectionLinkInfo;
+struct FWayFragment;
+
+enum class eSegmentAdditionFlags : uint8
+{
+    None                  =        0  ,
+    KeepOriginalSegment   = ( 1 << 0 ),
+    RemoveOriginalSegment = ( 1 << 1 ),
+    CreateDerivedSegment  = ( 1 << 2 ),
+    CreateNewPath         = ( 1 << 3 )
+};
+
+// define bitwise op
+ENUM_CLASS_FLAGS(eSegmentAdditionFlags)
+
+enum class eVertexAdditionFlags : uint8
+{
+    None                 =        0  ,
+    RemoveOriginalVertex = ( 1 << 0 ),
+    CreateDerivedVertex  = ( 1 << 1 ),
+    CreateBoundaryVertex = ( 1 << 2 )
+};
+
+// define bitwise op
+ENUM_CLASS_FLAGS(eVertexAdditionFlags)
 
 // a waypoint is met at segment vertex or when a constrast is met
 struct FWayPoint
@@ -23,6 +47,7 @@ struct FWayPoint
     FOdysseyVectorVertex* vertex;
     uint32 flags;
     double t;
+    std::vector<FWayFragment*> fragmentArray;
 
     // WayPoint flags
     static const uint32 Original           = ( 1 << 0 );
@@ -40,6 +65,8 @@ struct FWayPoint
         intersectionVertex = nullptr;
         vertex = iVertex;
         flags = iWayPointFlags;
+
+        fragmentArray.reserve( 2 );
     }
 
     FWayPoint( FOdysseyVectorVertex* iVertex
@@ -51,22 +78,45 @@ struct FWayPoint
         intersectionVertex = iIntersectionVertex;
         flags = iWayPointFlags;
         t = iT;
+
+        fragmentArray.reserve( 2 );
+    }
+};
+
+struct FMetaFragment
+{
+    FOdysseyVectorSegment* segment;
+    uint32 wayPoint0Index;
+    uint32 wayPoint1Index;
+    bool erased;
+
+    FMetaFragment( FOdysseyVectorSegment* iSegment
+                 , uint32 iWayPoint0Index
+                 , uint32 iWayPoint1Index
+                 , bool iErased )
+        : segment( iSegment )
+        , wayPoint0Index( iWayPoint0Index )
+        , wayPoint1Index( iWayPoint1Index )
+        , erased( iErased )
+    {
     }
 };
 
 struct FWayFragment
 {
     FOdysseyVectorSegment* segment;
-    uint32 indexWayPoint0;
-    uint32 indexWayPoint1;
+    FWayPoint* wayPoint0;
+    FWayPoint* wayPoint1;
     ::ULIS::FVec2D bezier[4];
     bool erased;
 
     FWayFragment( FOdysseyVectorSegment* iSegment
-                , std::vector<FWayPoint>& iWayPointArray
-                , uint32 iIndexWayPoint0
-                , uint32 iIndexWayPoint1
+                , FWayPoint* iWayPoint0
+                , FWayPoint* iWayPoint1
                 , bool iErased );
+
+    FWayFragment* GetNext();
+    FWayFragment* GetPrev();
 };
 
 /** A class that contains an ordered and contiguous chain of segments and vertices
@@ -89,6 +139,15 @@ class FOdysseyVectorChain
         void IterateSections( std::function<bool( FOdysseyVectorVertex*, FOdysseyVectorSection*)> iCallback );
         static void ExtendErasedSection( FOdysseyVectorPath* iPath, FSectionLinkInfo* iLastSectionInfo );
 
+        void ParseWayPoints( std::vector<FWayPoint>& iWayPointArray
+                           , std::vector<FWayFragment>& iWayFragmentArray
+                           , std::vector<FOdysseyVectorObject*>& oAddedPathArray
+                           , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
+                           , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
+                           , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
+                           , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
+                           , bool iSplit );
+
     private :
         bool EraseSections( BLImageData* iImageData
                           , std::vector<FWayPoint>& oWayPointArray
@@ -102,18 +161,20 @@ class FOdysseyVectorChain
 
         bool SegmentCreationPolicy( FWayPoint* iWayPoint0, FWayPoint* iWayPoint1 );
 
-        FWayPoint* TraceLine( int32 iX0
-                            , int32 iY0
-                            , double iT0
-                            , int32 iX1
-                            , int32 iY1
-                            , double iT1
-                            , BLImageData* iImageData
-                            , FWayPoint* iFirstChainedWayPoint
-                            , std::vector<FWayPoint>& oWayPointArray
-                            , std::vector<FWayFragment>& oWayFragmentArray
-                            , FOdysseyVectorSegment* iSegment
-                            , bool iRevert );
+        FOdysseyVectorVertex* TraceLine( int32 iX0
+                                       , int32 iY0
+                                       , double iT0
+                                       , double iRadius0
+                                       , int32 iX1
+                                       , int32 iY1
+                                       , double iT1
+                                       , double iRadius1
+                                       , BLImageData* iImageData
+                                       , std::vector<FWayPoint>& oWayPointBuffer
+                                       , std::vector<FMetaFragment>& oMetaFragmentBuffer
+                                       , FOdysseyVectorVertex* iChainVertex
+                                       , FOdysseyVectorSegment* iSegment
+                                       , bool iRevert );
 
         bool Trace( BLImageData* iImageData
                   , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
@@ -125,13 +186,18 @@ class FOdysseyVectorChain
                         , const uint8* iMaskPixelData );
         bool PickSections( std::vector<FOdysseyVectorSection*>& oPickedSectionArray );
 
-        uint32 GetErasureFlags( FOdysseyVectorVertex* iVertex );
         void GetSections( FOdysseyVectorVertex* iVertex
                         , FOdysseyVectorPath* iPath
                         , std::vector<FOdysseyVectorSection*>& oSectionArray );
         void GetSections( FOdysseyVectorVertexIntersection* iIntersectionVertex
                         , FOdysseyVectorSegment* iSegment
                         , std::vector<FOdysseyVectorSection*>& oSectionArray );
+        static eVertexAdditionFlags VertexAdditionPolicy( FWayPoint* iWayPoint, bool iSplit );
+        static eSegmentAdditionFlags SegmentAdditionPolicy( FWayFragment* iFragment, bool iSplit );
+        static FWayFragment* GetStartFragment( FWayFragment* iFragment );
+        void VertexToWaypoint( BLImageData* iImageData
+                             , FOdysseyVectorVertex* iVertex
+                             , std::vector<FWayPoint>& oWayPointArray );
 
     private :
         FOdysseyVectorPath* mPath;

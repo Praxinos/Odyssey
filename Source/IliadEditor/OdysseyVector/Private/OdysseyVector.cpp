@@ -428,7 +428,7 @@ FOdysseyVector::BezierExtract( const ::ULIS::FVec2D& iP0
 
     ::ULIS::CubicBezierInverseSplitAtParameter<::ULIS::FVec2D>( &oP0, &oP1, &oP2, &oP3, fromT );
 
-    toT = ( toT - fromT ) / ( 1.0f - fromT ); // adjust t
+    toT = ( fromT == 1.0f ) ? 1.0f : ( toT - fromT ) / ( 1.0f - fromT ); // adjust t
 
     ::ULIS::CubicBezierSplitAtParameter<::ULIS::FVec2D>( &oP0, &oP1, &oP2, &oP3, toT );
 }

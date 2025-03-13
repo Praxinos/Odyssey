@@ -235,7 +235,9 @@ FindNextSectionLinkInfo( FSectionLinkInfo* iLastSectionLinkInfo
 }
 
 uint32
-FOdysseyVectorVertex::GetErasedSectionCount( FOdysseyVectorObject *iOwner )
+FOdysseyVectorVertex::GetErasedSectionCount( eVertexSectionTypeQuery iQuery
+                                           , FOdysseyVectorObject* iOwner
+                                           , FOdysseyVectorSegment* iSegment )
 {
     uint32 eraseSectionCount = 0;
 
@@ -243,16 +245,28 @@ FOdysseyVectorVertex::GetErasedSectionCount( FOdysseyVectorObject *iOwner )
     {
         if( sectionLinkInfo.section->IsErased() )
         {
-            if( iOwner == nullptr )
+            switch( iQuery )
             {
-                eraseSectionCount++;
-            }
-            else
-            {
-                if( sectionLinkInfo.section->GetSegment()->GetOwner() == iOwner )
-                {
+                case eVertexSectionTypeQuery::Any :
                     eraseSectionCount++;
-                }
+                break;
+
+                case eVertexSectionTypeQuery::SameSegment :
+                    if( sectionLinkInfo.section->GetSegment() == iSegment )
+                    {
+                        eraseSectionCount++;
+                    }
+                break;
+
+                case eVertexSectionTypeQuery::SameOwner :
+                    if( sectionLinkInfo.section->GetSegment()->GetOwner() == iOwner )
+                    {
+                        eraseSectionCount++;
+                    }
+                break;
+
+                default :
+                break;
             }
         }
     }
@@ -777,23 +791,40 @@ FOdysseyVectorVertex::GetSegmentCount( )
 }
 
 uint32
-FOdysseyVectorVertex::GetSectionCount( FOdysseyVectorObject* iOwner )
+FOdysseyVectorVertex::GetSectionCount( eVertexSectionTypeQuery iQuery
+                                     , FOdysseyVectorObject* iOwner
+                                     , FOdysseyVectorSegment* iSegment  )
 {
     uint32 sectionCount = 0;
 
-    if( iOwner == nullptr )
+    switch( iQuery )
     {
-        sectionCount = mSectionLinkInfoList.size();
-    }
-    else
-    {
-        for( FSectionLinkInfo& sectionLinkInfo : mSectionLinkInfoList )
-        {
-            if( sectionLinkInfo.section->GetSegment()->GetOwner() == iOwner )
+        case eVertexSectionTypeQuery::Any :
+            sectionCount = mSectionLinkInfoList.size();
+        break;
+
+        case eVertexSectionTypeQuery::SameSegment :
+            for( FSectionLinkInfo& sectionLinkInfo : mSectionLinkInfoList )
             {
-                sectionCount++;
+                if( sectionLinkInfo.section->GetSegment() == iSegment )
+                {
+                    sectionCount++;
+                }
             }
-        }
+        break;
+
+        case eVertexSectionTypeQuery::SameOwner :
+            for( FSectionLinkInfo& sectionLinkInfo : mSectionLinkInfoList )
+            {
+                if( sectionLinkInfo.section->GetSegment()->GetOwner() == iOwner )
+                {
+                    sectionCount++;
+                }
+            }
+        break;
+
+        default :
+        break;
     }
 
     return sectionCount;

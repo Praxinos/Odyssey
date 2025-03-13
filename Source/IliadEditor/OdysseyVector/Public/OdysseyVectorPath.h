@@ -37,29 +37,6 @@ enum ePointSelectionFlags : uint8
 // define bitwise op
 ENUM_CLASS_FLAGS(ePointSelectionFlags)
 
-enum class eSegmentAdditionFlags : uint8
-{
-    None                  =        0  ,
-    KeepOriginalSegment   = ( 1 << 0 ),
-    RemoveOriginalSegment = ( 1 << 1 ),
-    CreateDerivedSegment  = ( 1 << 2 ),
-    CreateNewPath         = ( 1 << 3 )
-};
-
-// define bitwise op
-ENUM_CLASS_FLAGS(eSegmentAdditionFlags)
-
-enum class eVertexAdditionFlags : uint8
-{
-    None                 =        0  ,
-    RemoveOriginalVertex = ( 1 << 0 ),
-    CreateDerivedVertex  = ( 1 << 1 ),
-    CreateBoundaryVertex = ( 1 << 2 )
-};
-
-// define bitwise op
-ENUM_CLASS_FLAGS(eVertexAdditionFlags)
-
 class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
 {
     private:
@@ -488,21 +465,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
                               , double iEndU
                               , double iCombinedOpacity
                               , uint64 iDrawingFlags );
-
-        void ParseWayPoints( std::vector<FWayPoint>& iWayPointArray
-                           , std::vector<FWayFragment>& iWayFragmentArray
-                           , std::vector<FOdysseyVectorObject*>& oAddedPathArray
-                           , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
-                           , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
-                           , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
-                           , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
-                           , bool iSplit );
-
-        eVertexAdditionFlags VertexAdditionPolicy( FWayPoint* iWayPoint, bool iSplit );
-        eSegmentAdditionFlags SegmentAdditionPolicy( FWayPoint* iWayPoint0
-                                                   , FWayFragment* iWayFragment
-                                                   , FWayPoint* iWayPoint1
-                                                   , bool iSplit );
 
     protected :
         std::vector<FOdysseyVectorChain> mChainArray;
