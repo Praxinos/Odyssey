@@ -181,17 +181,19 @@ SOdysseyAnimationPlaybackControls::OnPlayClicked()
     TArray<UOdysseyAnimationCell*> selectedCells = mAnimation->GetLayerStack()->GetCellSelection()->GetSelectedCells();
     if (selectedCells.IsEmpty())
     {
-        mPlayer->SetFrameRange(TOptional<FInt32Range>());
+        mPlayer->SetFrameRange(TOptional<TRange<FFrameTime>>());
     }
     else
     {
-        TArray<FInt32Range> ranges;
+        TArray<TRange<FFrameTime>> ranges;
         for (UOdysseyAnimationCell* cell : selectedCells)
         {
-            ranges.Add(cell->GetFrameRange());
+            FInt32Range frameRange = cell->GetFrameRange();
+            TRange<FFrameTime> frameTimeRange(frameRange.GetLowerBoundValue(), frameRange.GetLowerBoundValue() + 1);
+            ranges.Add(frameTimeRange);
         }
 
-        FInt32Range range = FInt32Range::Hull(ranges);
+        TRange<FFrameTime> range = TRange<FFrameTime>::Hull(ranges);
         mPlayer->SetFrameRange(range);
     }
     mPlayer->Play(false);
@@ -204,17 +206,19 @@ SOdysseyAnimationPlaybackControls::OnPlayBackwardClicked()
     TArray<UOdysseyAnimationCell*> selectedCells = mAnimation->GetLayerStack()->GetCellSelection()->GetSelectedCells();
     if (selectedCells.IsEmpty())
     {
-        mPlayer->SetFrameRange(TOptional<FInt32Range>());
+        mPlayer->SetFrameRange(TOptional<TRange<FFrameTime>>());
     }
     else
     {
-        TArray<FInt32Range> ranges;
+        TArray<TRange<FFrameTime>> ranges;
         for (UOdysseyAnimationCell* cell : selectedCells)
         {
-            ranges.Add(cell->GetFrameRange());
+            FInt32Range frameRange = cell->GetFrameRange();
+            TRange<FFrameTime> frameTimeRange(frameRange.GetLowerBoundValue(), frameRange.GetLowerBoundValue() + 1);
+            ranges.Add(frameTimeRange);
         }
 
-        FInt32Range range = FInt32Range::Hull(ranges);
+        TRange<FFrameTime> range = TRange<FFrameTime>::Hull(ranges);
         mPlayer->SetFrameRange(range);
     }
     mPlayer->Play(true);

@@ -438,7 +438,7 @@ FOdysseyPainterEditorAnimationFlipSystem::EndFlipping()
     else
     {
         mEditor->GetAnimationPlayer()->SetRenderType(mInitialRenderType);
-        int frame = mAnimation->GetFrameIndexAtTime(mEditor->GetAnimationPlayer()->GetCurrentTime());
+        int frame = mEditor->GetAnimationPlayer()->GetCurrentFrame().GetFrame().Value;
         FOdysseyObjectEditorUtils::SetPropertyValue(mAnimation, GET_MEMBER_NAME_CHECKED( UOdysseyAnimation, CurrentFrame), frame);
     }
 }

@@ -49,7 +49,7 @@ public:
     //Events
     FSimpleMulticastDelegate& OnAnimationChanged();
     FSimpleMulticastDelegate& OnTextureChanged();
-    FSimpleMulticastDelegate& OnCurrentTimeChanged();
+    FSimpleMulticastDelegate& OnCurrentFrameChanged();
     FSimpleMulticastDelegate& OnPlay();
     FSimpleMulticastDelegate& OnStop();
 
@@ -64,7 +64,7 @@ protected:
     void AnimationChanged();
     void TextureChanged();
     void StatusChanged();
-    void FrameRateChanged();
+    void PlayRateChanged();
     void IsLoopingChanged();
 
 public:
@@ -72,32 +72,31 @@ public:
     void Pause();
     void Stop();
 
-    void SeekToTime(FTimespan iTime);
-    void SeekToFrame(int iFrameIndex);
-    void SeekToFrameImmediate(int iFrameIndex);
+    void SeekToFrame(FFrameTime iFrame);
+    void SeekToFrameImmediate(FFrameTime iFrame);
 
     UTexture2D* GetTexture();
     EOdysseyAnimationPlayerStatus GetStatus() const;
 
-    FTimespan GetCurrentTime() const;
+    FFrameTime GetCurrentFrame() const;
 
-    bool GetDuration(FTimespan& oTime) const;
+    bool GetDuration(FFrameTime& oTime) const;
 
-    bool GetCurrentTimeInPlayerBounds(FTimespan& oTime) const;
-    bool GetCurrentFrameInAnimationBounds(int& oFrame) const;
+    bool GetFrameInAnimationBounds(FFrameTime iFrame, FFrameTime& oFrame) const;
+    bool GetCurrentFrameInAnimationBounds(FFrameTime& oFrame) const;
 
     void SetPreBehaviour(EOdysseyAnimationPlayerPostBehaviour iValue);
     void SetPostBehaviour(EOdysseyAnimationPlayerPostBehaviour iValue);
 
-    bool ApplyPreBehaviour(FTimespan iTime, FTimespan& oTime) const;
-    bool ApplyPostBehaviour(FTimespan iTime, FTimespan& oTime) const;
+    bool ApplyPreBehaviour(FFrameTime iFrame, FFrameTime& oFrame) const;
+    bool ApplyPostBehaviour(FFrameTime iFrame, FFrameTime& oFrame) const;
 
     bool IsBackward() const;
 
     void SetRenderType(IOdysseyImageRenderer::eRenderType iRenderType);
     IOdysseyImageRenderer::eRenderType GetRenderType() const;
 
-    void SetFrameRange(const TOptional<FInt32Range>& iRange);
+    void SetFrameRange(const TOptional<TRange<FFrameTime>>& iRange);
 
 #if WITH_EDITOR
     void SetIgnoreAnimationBounds(bool iValue);
@@ -119,7 +118,7 @@ public:
     TObjectPtr<UOdysseyAnimation> Animation;
 
     UPROPERTY()
-    double FrameRate = 1.0f; //1.0f means 100% of the animation framepersecond
+    float PlayRate = 1.0f; //1.0f means 100% of the animation framepersecond
 
     UPROPERTY()
     bool UsePreBehaviour = true;
@@ -144,8 +143,8 @@ private:
     bool mIgnoreAnimationBounds = false;
 #endif
     bool mIsBackward = false;
-    FTimespan mCurrentTime;
-    TOptional<TRange<FTimespan>> mRange;
+    FFrameTime mCurrentFrame;
+    TOptional<TRange<FFrameTime>> mRange;
     TArray<FGuid>   mImageRenderingComposition;
     FULISInvalidTileMap mInvalidTileMap;
     EOdysseyAnimationPlayerStatus Status = EOdysseyAnimationPlayerStatus::Stopped;
@@ -160,7 +159,7 @@ private:
     //Events
     FSimpleMulticastDelegate mOnAnimationChanged;
     FSimpleMulticastDelegate mOnTextureChanged;
-    FSimpleMulticastDelegate mOnCurrentTimeChanged;
+    FSimpleMulticastDelegate mOnCurrentFrameChanged;
     FSimpleMulticastDelegate mOnPlay;
     FSimpleMulticastDelegate mOnStop;
 };

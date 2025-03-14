@@ -140,7 +140,7 @@ FOdysseyViewportDrawingEditorExtension::OnSourceChanged()
         UOdysseyAnimationPlayer* player = animationSource->GetAnimationPlayer();
         if (player)
         {
-            player->OnCurrentTimeChanged().RemoveAll(this);
+            player->OnCurrentFrameChanged().RemoveAll(this);
         }
     }
 
@@ -170,7 +170,7 @@ FOdysseyViewportDrawingEditorExtension::OnSourceChanged()
         UOdysseyAnimationPlayer* player = animationSource->GetAnimationPlayer();
         if (player)
         {
-            player->OnCurrentTimeChanged().AddRaw(this, &FOdysseyViewportDrawingEditorExtension::OnAnimationPlayerCurrentTimeChanged);
+            player->OnCurrentFrameChanged().AddRaw(this, &FOdysseyViewportDrawingEditorExtension::OnAnimationPlayerCurrentFrameChanged);
         }
     }
 
@@ -566,66 +566,112 @@ FOdysseyViewportDrawingEditorExtension::SyncSequencerWithAnimationPlayer()
         if (!section)
             continue;
 
-        int animationDisplayedFrame = 0;
-        if (!player->GetCurrentFrameInAnimationBounds(animationDisplayedFrame))
+        FFrameTime animationCurrentFrame = 0;
+        if (!player->GetCurrentFrameInAnimationBounds(animationCurrentFrame))
             continue;
+
+        FFrameRate tickResolution = movieScene->GetTickResolution();
+        FFrameRate displayRate = sequencer->GetFocusedDisplayRate();
+        TRange<FFrameNumber> sectionRange = section->GetTrueRange();
+
+        FFrameTime currentFrame = FFrameRate::TransformTime(sequencer->GetLocalTime().Time.FrameNumber, tickResolution, displayRate);
+        currentFrame = currentFrame.FloorToFrame();
+        currentFrame = FFrameRate::TransformTime(currentFrame, displayRate, tickResolution);
+
+        FOdysseyAnimationTimelineSectionParams params;
+        params.SectionStartFrame = sectionRange.GetLowerBoundValue();
+        params.SectionEndFrame = sectionRange.GetUpperBoundValue();
+        params.StartFrameOffset = section->GetStartFrameOffset();
+        params.Animation = section->GetAnimation();
+        params.PreBehaviour = section->GetPreBehaviour();
+        params.PostBehaviour = section->GetPostBehaviour();
+        TRange<FFrameTime> range(currentFrame, currentFrame);
+        FFrameTime evaluatedFrame = FOdysseyAnimationTimelineTemplate::GetEvaluatedFrame(animation, range, params, tickResolution);
+        if (!player->GetFrameInAnimationBounds(evaluatedFrame, evaluatedFrame))
+            continue;
+
+        if (evaluatedFrame.GetFrame() == animationCurrentFrame.GetFrame())
+            continue;
+
+        FFrameRate animationFrameRate(animation->GetFramesPerSecond() * 100, 100);
+        FFrameTime newTime = FFrameRate::TransformTime(animationCurrentFrame.GetFrame(), animationFrameRate, tickResolution);
+        newTime += sectionRange.GetLowerBoundValue();
+        newTime -= section->GetStartFrameOffset();
+        newTime = FFrameRate::TransformTime(newTime, tickResolution, displayRate);
+        newTime = newTime.CeilToFrame();
+        newTime = FFrameRate::TransformTime(newTime, displayRate, tickResolution);
+
+        sequencer->SetLocalTime(newTime, STM_Interval);
+
+        /* FFrameTime animationNextFrame = animationCurrentFrame + FFrameTime(1);
+        FFrameRate animationFrameRate(animation->GetFramesPerSecond() * 100, 100);
 
         FFrameRate tickResolution = movieScene->GetTickResolution();
         FFrameRate displayRate = sequencer->GetFocusedDisplayRate();
 
         TRange<FFrameNumber> sectionRange = section->GetTrueRange();
-        FFrameNumber sectionStartFrame = sectionRange.GetLowerBoundValue();
-        FFrameNumber sectionEndFrame = FFrameRate::TransformTime(FFrameRate::TransformTime(sectionRange.GetUpperBoundValue() - 1, tickResolution, displayRate).FloorToFrame(), displayRate, tickResolution).FrameNumber;
+        FFrameTime firstFrame(sectionRange.GetLowerBoundValue() - section->GetStartFrameOffset());
+        FFrameTime lastFrame(sectionRange.GetUpperBoundValue() - section->GetStartFrameOffset());
 
-        double totalSeconds = animationDisplayedFrame / animation->FramesPerSecond;
-        FFrameNumber frame = tickResolution.AsFrameNumber(totalSeconds) + sectionStartFrame;
-        double totalSecondsNext = (animationDisplayedFrame + 1) / animation->FramesPerSecond;
-        FFrameNumber frameNext = tickResolution.AsFrameNumber(totalSecondsNext) + sectionStartFrame;
+        lastFrame = FFrameRate::TransformTime(lastFrame, tickResolution, displayRate);
+        lastFrame = lastFrame.FloorToFrame();
+        lastFrame = FFrameRate::TransformTime(lastFrame, displayRate, tickResolution);
 
-        FFrameTime currentFrame = FFrameRate::TransformTime(FFrameRate::TransformTime(sequencer->GetLocalTime().Time.FrameNumber, tickResolution, displayRate).FloorToFrame(), displayRate, tickResolution);
 
-        if (currentFrame >= frame && currentFrame < frameNext)
+        animationCurrentFrame = FFrameRate::TransformTime(animationCurrentFrame, animationFrameRate, tickResolution);
+        animationCurrentFrame += sectionRange.GetLowerBoundValue() + section->GetStartFrameOffset();
+        //animationCurrentFrame = FFrameRate::TransformTime(animationCurrentFrame, tickResolution, displayRate);
+        //animationCurrentFrame = animationCurrentFrame.FloorToFrame();
+        animationNextFrame = FFrameRate::TransformTime(animationNextFrame, animationFrameRate, tickResolution);
+        animationNextFrame += sectionRange.GetLowerBoundValue() + section->GetStartFrameOffset();
+        //animationCurrentFrame = FFrameRate::TransformTime(animationCurrentFrame, displayRate, tickResolution);
+
+        FFrameTime currentFrame = FFrameRate::TransformTime(sequencer->GetLocalTime().Time.FrameNumber, tickResolution, displayRate);
+        currentFrame = currentFrame.FloorToFrame();
+        currentFrame = FFrameRate::TransformTime(currentFrame, displayRate, tickResolution);
+
+        if (currentFrame >= animationCurrentFrame && currentFrame < animationNextFrame)
             return;
 
-        if (frame < sectionStartFrame)
+        if (animationCurrentFrame < firstFrame)
         {
             FOdysseyAnimationTimelineSectionParams params;
-            params.SectionStartFrame = sectionStartFrame;
-            params.SectionEndFrame = sectionEndFrame;
+            params.SectionStartFrame = sectionRange.GetLowerBoundValue();
+            params.SectionEndFrame = sectionRange.GetUpperBoundValue();
             params.StartFrameOffset = section->GetStartFrameOffset();
             params.Animation = section->GetAnimation();
             params.PreBehaviour = section->GetPreBehaviour();
             params.PostBehaviour = section->GetPostBehaviour();
-            TRange<FFrameTime> range = TRange<FFrameTime>::Inclusive(sectionStartFrame, sectionStartFrame);
+            TRange<FFrameTime> range = TRange<FFrameTime>::Inclusive(firstFrame, firstFrame);
             FOdysseyAnimationTimelineTemplate::EvaluateImmediate(animationComponent, range, params, tickResolution);
             return;
         }
-        if (frame > sectionEndFrame)
+        if (animationCurrentFrame > lastFrame)
         {
             FOdysseyAnimationTimelineSectionParams params;
-            params.SectionStartFrame = sectionStartFrame;
-            params.SectionEndFrame = sectionEndFrame;
+            params.SectionStartFrame = sectionRange.GetLowerBoundValue();
+            params.SectionEndFrame = sectionRange.GetUpperBoundValue();
             params.StartFrameOffset = section->GetStartFrameOffset();
             params.Animation = section->GetAnimation();
             params.PreBehaviour = section->GetPreBehaviour();
             params.PostBehaviour = section->GetPostBehaviour();
-            TRange<FFrameTime> range = TRange<FFrameTime>::Inclusive(sectionEndFrame, sectionEndFrame);
+            TRange<FFrameTime> range = TRange<FFrameTime>::Inclusive(lastFrame, lastFrame);
             FOdysseyAnimationTimelineTemplate::EvaluateImmediate(animationComponent, range, params, tickResolution);
             return;
         }
 
-        frame = FMath::Clamp(frame, sectionStartFrame, sectionEndFrame);
-        FFrameTime intervalNextFrame = FFrameRate::TransformTime(FFrameRate::TransformTime(frame, tickResolution, displayRate).CeilToFrame(), displayRate, tickResolution);
-        FFrameTime intervalPrevFrame = FFrameRate::TransformTime(FFrameRate::TransformTime(frame, tickResolution, displayRate).FloorToFrame(), displayRate, tickResolution);
+        animationCurrentFrame = FMath::Clamp(animationCurrentFrame, firstFrame, lastFrame);
+        FFrameTime intervalNextFrame = FFrameRate::TransformTime(FFrameRate::TransformTime(animationCurrentFrame, tickResolution, displayRate).CeilToFrame(), displayRate, tickResolution);
+        FFrameTime intervalPrevFrame = FFrameRate::TransformTime(FFrameRate::TransformTime(animationCurrentFrame, tickResolution, displayRate).FloorToFrame(), displayRate, tickResolution);
 
-        if (frameNext >= intervalNextFrame)
+        if (animationNextFrame >= intervalNextFrame)
         {
             sequencer->SetLocalTime(intervalNextFrame, STM_Interval);
         }
         else
         {
             sequencer->SetLocalTime(intervalPrevFrame, STM_Interval);
-        }
+        } */
     }
 }
 
@@ -1010,7 +1056,7 @@ void FOdysseyViewportDrawingEditorExtension::EnableDelegatesSequencer()
 }
 
 void
-FOdysseyViewportDrawingEditorExtension::OnAnimationPlayerCurrentTimeChanged()
+FOdysseyViewportDrawingEditorExtension::OnAnimationPlayerCurrentFrameChanged()
 {
     SyncMediaPlayerWithAnimationPlayer();
     SyncSequencerWithAnimationPlayer();
@@ -1072,11 +1118,9 @@ FOdysseyViewportDrawingEditorExtension::SyncMediaPlayerWithAnimationPlayer()
     if (!animation || !player)
         return;
 
-    FTimespan timespan = player->GetCurrentTime();
+    FFrameTime currentFrame = player->GetCurrentFrame();
 
-    //1
-    int currentFrame = animation->GetFrameIndexAtTime(timespan);
-    SyncMediaPlayerWithAnimationFrame(currentFrame);
+    SyncMediaPlayerWithAnimationFrame(currentFrame.GetFrame().Value);
 }
 
 void
