@@ -65,6 +65,9 @@ public:
     UOdysseyAnimationCell* GetCellAtFrame(int Frame) const;
 
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
+    int GetCellIndexAtFrame(int Frame) const;
+
+    UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     bool HasCellAtFrame(int Frame) const;
 
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer", meta=(DeterminesOutputType = "CellType"))
@@ -72,6 +75,9 @@ public:
 
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer", meta=(DeterminesOutputType = "CellType"))
     TArray<UOdysseyAnimationCell*> AddCells(TSubclassOf<UOdysseyAnimationCell> CellType, int Index = -1, int Count = 1 );
+
+    void AddNullCell(int Index = -1 );
+    void AddNullCells(int Index = -1, int Count = 1 );
 
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     void RemoveCell(UOdysseyAnimationCell* Cell); //Prevent Empty Layer ?

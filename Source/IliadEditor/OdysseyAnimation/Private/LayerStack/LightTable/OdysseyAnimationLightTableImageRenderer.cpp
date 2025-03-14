@@ -25,6 +25,9 @@ FOdysseyAnimationLightTableImageRenderer::FOdysseyAnimationLightTableImageRender
             if (keyCellIndex >= 0 && keyCellIndex < iLayer->GetCells().Num())
             {
                 UOdysseyAnimationCell* keyCell = iLayer->GetCells()[keyCellIndex];
+                if (!keyCell)
+                    continue;
+
                 FVector2D outOfPegsPan = keyCell->OutOfPegs.Pan;
                 float outOfPegsRotation = keyCell->OutOfPegs.Rotation;
                 float outOfPegsZoom = keyCell->OutOfPegs.Zoom;
@@ -56,6 +59,9 @@ FOdysseyAnimationLightTableImageRenderer::FOdysseyAnimationLightTableImageRender
             if (keyCellIndex >= 0 && keyCellIndex < iLayer->GetCells().Num())
             {
                 UOdysseyAnimationCell* keyCell = iLayer->GetCells()[keyCellIndex];
+                if (!keyCell)
+                    continue;
+
                 FVector2D outOfPegsPan = keyCell->OutOfPegs.Pan;
                 float outOfPegsRotation = keyCell->OutOfPegs.Rotation;
                 float outOfPegsZoom = keyCell->OutOfPegs.Zoom;

@@ -6,6 +6,7 @@
 void
 SOdysseyHandle::Construct( const SOdysseyHandle::FArguments& InArgs)
 {
+    mIsDraggable = InArgs._IsDraggable;
     mOnDragStarted = InArgs._OnDragStarted;
     mOnDragged = InArgs._OnDragged;
     mOnDragStopped = InArgs._OnDragStopped;
@@ -21,6 +22,9 @@ SOdysseyHandle::Construct( const SOdysseyHandle::FArguments& InArgs)
 FReply
 SOdysseyHandle::OnMouseButtonDown(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent)
 {
+    if (!mIsDraggable.Get())
+        return FReply::Unhandled();
+
     if (iMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
     {
         mIsDragging = true;
@@ -33,6 +37,9 @@ SOdysseyHandle::OnMouseButtonDown(const FGeometry& iGeometry, const FPointerEven
 FReply
 SOdysseyHandle::OnMouseMove(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent)
 {
+    if (!mIsDraggable.Get())
+        return FReply::Unhandled();
+
     if (mIsDragging)
     {
         mOnDragged.ExecuteIfBound(iGeometry, iMouseEvent);
@@ -44,6 +51,9 @@ SOdysseyHandle::OnMouseMove(const FGeometry& iGeometry, const FPointerEvent& iMo
 FReply
 SOdysseyHandle::OnMouseButtonUp(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent)
 {
+    if (!mIsDraggable.Get())
+        return FReply::Unhandled();
+
     if (mIsDragging)
     {
         mIsDragging = false;
@@ -56,6 +66,9 @@ SOdysseyHandle::OnMouseButtonUp(const FGeometry& iGeometry, const FPointerEvent&
 TOptional<EMouseCursor::Type>
 SOdysseyHandle::GetCursor() const
 {
+    if (!mIsDraggable.Get())
+        return TOptional<EMouseCursor::Type>();
+
     if (!IsEnabled())
         return TOptional<EMouseCursor::Type>();
 

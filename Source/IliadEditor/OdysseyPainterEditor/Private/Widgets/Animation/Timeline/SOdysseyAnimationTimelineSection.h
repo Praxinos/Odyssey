@@ -13,7 +13,9 @@ public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineSection)
         : _HAlign(HAlign_Fill)
         , _VAlign(VAlign_Fill)
-    {}
+    {
+        _Visibility = EVisibility::SelfHitTestInvisible;
+    }
         SLATE_DEFAULT_SLOT( FArguments, Content )
         SLATE_ATTRIBUTE(float, WidthInFrames)
         SLATE_ARGUMENT(TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition>, TimelinePosition)

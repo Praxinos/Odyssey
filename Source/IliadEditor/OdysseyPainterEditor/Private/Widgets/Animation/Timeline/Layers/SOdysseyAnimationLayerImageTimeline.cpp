@@ -137,6 +137,12 @@ TSharedRef<SWidget>
 SOdysseyAnimationLayerImageTimeline::GenerateMainRowTimelineWidget()
 {
     return SNew(SOdysseyAnimationCells, mLayer)
+        .Cells_Lambda(
+            [this]() -> TArray<UOdysseyAnimationCell*>
+            {
+                return mLayer->GetCells();
+            }
+        )
         .TimelinePosition(mTimelinePosition)
         .IsEnabled_Lambda([this](){ return !mLayer->IsLockedRecursively();})
         .OnCreateCellWidget(this, &SOdysseyAnimationLayerImageTimeline::OnGenerateCellWidget)

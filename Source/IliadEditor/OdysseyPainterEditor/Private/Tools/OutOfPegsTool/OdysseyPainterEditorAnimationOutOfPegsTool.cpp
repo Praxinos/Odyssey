@@ -482,6 +482,7 @@ UOdysseyPainterEditorAnimationOutOfPegsTool::ResetAll()
     const TArray<UOdysseyAnimationCell*> cells = mCell->GetLayer()->GetCells();
     for (UOdysseyAnimationCell* cell : cells)
     {
-        FOdysseyObjectEditorUtils::SetPropertyValue(cell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, OutOfPegs), FOdysseyAnimationCellOutOfPegs());
+        if (cell)
+            FOdysseyObjectEditorUtils::SetPropertyValue(cell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, OutOfPegs), FOdysseyAnimationCellOutOfPegs());
     }
 }

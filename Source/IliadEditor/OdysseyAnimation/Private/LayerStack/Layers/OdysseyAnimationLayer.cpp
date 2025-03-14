@@ -62,14 +62,10 @@ UOdysseyAnimationLayer::GetFrameRange() const
         ranges.Add(animationLayer->GetFrameRange());
     }
 
-
-    if (Cells.IsEmpty())
+    if (!Cells.IsEmpty())
     {
-        ranges.Add(FInt32Range::Exclusive(CellsOffset, CellsOffset ));
-    }
-    else
-    {
-        ranges.Add(FInt32Range::Inclusive(CellsOffset, Cells.Last()->GetFrameRange().GetUpperBoundValue() ));
+        const TArray<FInt32Range>& cellFrameRanges = GetCellsFrameRanges();
+        ranges.Add(FInt32Range::Inclusive( cellFrameRanges[0].GetLowerBoundValue(), cellFrameRanges.Last().GetUpperBoundValue() ));
     }
 
     return FInt32Range::Hull(ranges);
@@ -271,21 +267,35 @@ UOdysseyAnimationLayer::GetCells() const
 UOdysseyAnimationCell*
 UOdysseyAnimationLayer::GetCellAtFrame(int Frame) const
 {
-    if( Frame < CellsOffset )
+    int cellIndex = GetCellIndexAtFrame(Frame);
+    if (cellIndex == INDEX_NONE)
         return nullptr;
+
+    return Cells[cellIndex];
+}
+
+int
+UOdysseyAnimationLayer::GetCellIndexAtFrame(int Frame) const
+{
+    if( Frame < CellsOffset )
+        return INDEX_NONE;
 
     int frameIndex = CellsOffset;
     for (int i = 0; i < Cells.Num(); i++)
     {
         UOdysseyAnimationCell* cell = Cells[i];
+        int cellExposure = 1;
+        if (cell)
+            cellExposure = cell->Exposure;
 
-        if ( frameIndex + cell->Exposure - 1 >= Frame)
-            return cell;
 
-        frameIndex += cell->Exposure;
+        if ( frameIndex + cellExposure - 1 >= Frame)
+            return i;
+
+        frameIndex += cellExposure;
     }
 
-    return nullptr;
+    return INDEX_NONE;
 }
 
 bool
@@ -303,13 +313,47 @@ UOdysseyAnimationLayer::GetCellsFrameRanges() const
         uint32 startFrame = CellsOffset;
         for (TObjectPtr<UOdysseyAnimationCell> cell : Cells)
         {
-            FInt32Range frameRange = FInt32Range::Inclusive(startFrame, startFrame + cell->Exposure - 1);
+            int cellExposure = 1;
+            if (cell)
+                cellExposure = cell->Exposure;
+
+            FInt32Range frameRange = FInt32Range::Inclusive(startFrame, startFrame + cellExposure - 1);
             mCellsFrameRanges.Add(frameRange);
-            startFrame += cell->Exposure;
+            startFrame += cellExposure;
         }
     }
 
     return mCellsFrameRanges;
+}
+
+void
+UOdysseyAnimationLayer::AddNullCell(int Index)
+{
+    AddNullCells(Index);
+}
+
+void
+UOdysseyAnimationLayer::AddNullCells(int Index, int Count)
+{
+    if (Index < 0 )
+    {
+        Index = Cells.Num();
+    }
+    else
+    {
+        Index = FMath::Clamp(Index, 0, Cells.Num());
+    }
+
+    TArray<UOdysseyAnimationCell*> cells;
+    for (int i = 0; i < Count; i++)
+    {
+        //Create the Layer
+        cells.Add(nullptr);
+    }
+
+    FOdysseyObjectEditorUtils::PreChangePropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Cells));
+    Cells.Insert(cells, Index);
+    FOdysseyObjectEditorUtils::PostChangePropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Cells), EPropertyChangeType::ArrayAdd);
 }
 
 UOdysseyAnimationCell*
@@ -365,6 +409,9 @@ UOdysseyAnimationLayer::AddCells(TSubclassOf<UOdysseyAnimationCell> CellType, in
 void
 UOdysseyAnimationLayer::RemoveCell(UOdysseyAnimationCell* Cell)
 {
+    if (!Cell) //if you need to remove a null cell use RemoveCellAtIndex
+        return;
+
     RemoveCells({Cell});
     checkf(Cell->GetLayer() == this, TEXT("Layer does not contain the cell to remove"));
 }
@@ -375,6 +422,9 @@ UOdysseyAnimationLayer::RemoveCells(const TArray<UOdysseyAnimationCell*>& iCells
     TArray<UOdysseyAnimationCell*> cells;
     for (UOdysseyAnimationCell* cell : iCells)
     {
+        if (!cell) //if you need to remove a null cell use RemoveCellAtIndex
+            continue;
+
         if (!ensureMsgf(cell->GetLayer() == this, TEXT("Layer does not contain the cell to remove")))
             continue;
 
@@ -393,7 +443,8 @@ UOdysseyAnimationLayer::RemoveCellAtIndex(int Index)
     if (Index < 0 || Index >= Cells.Num())
         return;
 
-    FOdysseyObjectEditorUtils::SetPropertyValue(Cells[Index], GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, IndexInLayer), INDEX_NONE);
+    if (Cells[Index])
+        FOdysseyObjectEditorUtils::SetPropertyValue(Cells[Index], GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, IndexInLayer), INDEX_NONE);
 
     FOdysseyObjectEditorUtils::PreChangePropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Cells));
     Cells.RemoveAt(Index);
@@ -416,7 +467,8 @@ UOdysseyAnimationLayer::GetLighttableImageRenderingComposition(int iFrameIndex) 
             if (keyCellIndex >= 0 && keyCellIndex < Cells.Num())
             {
                 UOdysseyAnimationCell* keyCell = GetCells()[keyCellIndex];
-                idComposition.Append(keyCell->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Render, 0));
+                if (keyCell)
+                    idComposition.Append(keyCell->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Render, 0));
             }
         }
 
@@ -426,7 +478,8 @@ UOdysseyAnimationLayer::GetLighttableImageRenderingComposition(int iFrameIndex) 
             if (keyCellIndex >= 0 && keyCellIndex < Cells.Num())
             {
                 UOdysseyAnimationCell* keyCell = GetCells()[keyCellIndex];
-                idComposition.Append(keyCell->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Render, 0));
+                if (!keyCell)
+                    idComposition.Append(keyCell->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Render, 0));
             }
         }
     }
@@ -439,6 +492,9 @@ UOdysseyAnimationLayer::UpdateCellsIndexInLayer()
 {
     for (int i = 0; i < Cells.Num(); i++)
     {
+        if (!Cells[i])
+            continue;
+
         FOdysseyObjectEditorUtils::SetPropertyValue(Cells[i], GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, IndexInLayer), i);
     }
 }

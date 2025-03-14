@@ -291,6 +291,9 @@ SOdysseyAnimationPlaybackControls::OnPreviousKeyClicked()
     }
 
     UOdysseyAnimationCell* cell = layer->GetCells()[index];
+    if (!cell)
+        return FReply::Handled();
+
     range = cell->GetFrameRange();
     FOdysseyObjectEditorUtils::SetPropertyValue(mAnimation, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), range.GetLowerBoundValue());
     return FReply::Handled();
@@ -331,6 +334,9 @@ SOdysseyAnimationPlaybackControls::OnNextKeyClicked()
     }
 
     UOdysseyAnimationCell* cell = layer->GetCells()[index];
+    if (!cell)
+        return FReply::Handled();
+
     range = cell->GetFrameRange();
     FOdysseyObjectEditorUtils::SetPropertyValue(mAnimation, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), range.GetLowerBoundValue());
     return FReply::Handled();

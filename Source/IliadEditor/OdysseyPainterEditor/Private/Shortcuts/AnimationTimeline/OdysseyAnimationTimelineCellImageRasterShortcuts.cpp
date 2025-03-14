@@ -104,7 +104,7 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
         //Reduce the original cell to 1 frame Exposure
         FOdysseyObjectEditorUtils::SetPropertyValue(selectedCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), 1);
 
-        if (nextCellIndex < layer->GetCells().Num())
+        if (nextCellIndex < layer->GetCells().Num() || !layer->GetCells()[nextCellIndex])
         {
             UOdysseyAnimationCell* nextCell = layer->GetCells()[nextCellIndex];
             TSharedPtr<::ULIS::FBlock> endBlock = MakeShared<::ULIS::FBlock>(animation->GetWidth(), animation->GetHeight(), animation->GetFormat());
