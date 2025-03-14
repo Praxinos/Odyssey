@@ -1102,7 +1102,7 @@ FOdysseyViewportDrawingEditorExtension::SyncAnimationCurrentFrameWithMediaPlayer
     UMediaTexture* texture = Cast<UMediaTexture>(mTexture);
     UMediaPlayer* mediaPlayer = texture->GetMediaPlayer();
     UOdysseyAnimationPlayer* animationPlayer = animationSource->GetAnimationPlayer();
-    if (!mediaPlayer || mediaPlayer->IsPlaying() || animationPlayer->Status == EOdysseyAnimationPlayerStatus::Playing)
+    if (!mediaPlayer || mediaPlayer->IsPlaying() || animationPlayer->GetStatus() == EOdysseyAnimationPlayerStatus::Playing)
         return;
 
     UMediaPlaylist& playlist = mediaPlayer->GetPlaylistRef();

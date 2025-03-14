@@ -25,6 +25,16 @@ enum class EOdysseyAnimationPlayerStatus
     Stopped
 };
 
+
+
+UENUM(BlueprintType)
+enum class EOdysseyAnimationPlayerPostBehaviour : uint8
+{
+    None,
+    Hold,
+    Loop
+};
+
 UCLASS()
 class ODYSSEYANIMATION_API UOdysseyAnimationPlayer
     : public UObject
@@ -39,13 +49,8 @@ public:
     //Events
     FSimpleMulticastDelegate& OnAnimationChanged();
     FSimpleMulticastDelegate& OnTextureChanged();
-    FSimpleMulticastDelegate& OnStatusChanged();
-    FSimpleMulticastDelegate& OnFrameRateChanged();
-    FSimpleMulticastDelegate& OnTextureUpdated();
-    FSimpleMulticastDelegate& OnIsLoopingChanged();
     FSimpleMulticastDelegate& OnCurrentTimeChanged();
     FSimpleMulticastDelegate& OnPlay();
-    FSimpleMulticastDelegate& OnPause();
     FSimpleMulticastDelegate& OnStop();
 
 protected:
@@ -72,15 +77,28 @@ public:
     void SeekToFrameImmediate(int iFrameIndex);
 
     UTexture2D* GetTexture();
+    EOdysseyAnimationPlayerStatus GetStatus() const;
 
     FTimespan GetCurrentTime() const;
+
+    bool GetDuration(FTimespan& oTime) const;
+
+    bool GetCurrentTimeInPlayerBounds(FTimespan& oTime) const;
+    bool GetCurrentFrameInAnimationBounds(int& oFrame) const;
+    bool ApplyPreBehaviour(FTimespan iTime, FTimespan& oTime) const;
+    bool ApplyPostBehaviour(FTimespan iTime, FTimespan& oTime) const;
+
     bool IsBackward() const;
 
     void SetRenderType(IOdysseyImageRenderer::eRenderType iRenderType);
     IOdysseyImageRenderer::eRenderType GetRenderType() const;
 
-    void SetTimeRange(const TOptional<TRange<FTimespan>>& iRange);
     void SetFrameRange(const TOptional<FInt32Range>& iRange);
+
+#if WITH_EDITOR
+    void SetIgnoreAnimationBounds(bool iValue);
+    bool GetIgnoreAnimationBounds() const;
+#endif
 
 protected:
     // FTickableEditorObject implementation
@@ -97,24 +115,36 @@ public:
     TObjectPtr<UOdysseyAnimation> Animation;
 
     UPROPERTY()
-    EOdysseyAnimationPlayerStatus Status = EOdysseyAnimationPlayerStatus::Stopped;
-
-    UPROPERTY()
     double FrameRate = 1.0f; //1.0f means 100% of the animation framepersecond
 
     UPROPERTY()
-    bool IsLooping = true;
+    bool UsePreBehaviour = true;
 
-private:
+    UPROPERTY()
+    EOdysseyAnimationPlayerPostBehaviour PreBehaviour = EOdysseyAnimationPlayerPostBehaviour::Loop;
+
+    UPROPERTY()
+    bool UsePostBehaviour = true;
+
+    UPROPERTY()
+    EOdysseyAnimationPlayerPostBehaviour PostBehaviour = EOdysseyAnimationPlayerPostBehaviour::Loop;
+
+    UPROPERTY()
+    bool IsLooping = true;
+public:
     UPROPERTY(Transient, DuplicateTransient)
     TObjectPtr<UTexture2D> Texture;
 
 private:
+#if WITH_EDITOR
+    bool mIgnoreAnimationBounds = false;
+#endif
     bool mIsBackward = false;
     FTimespan mCurrentTime;
     TOptional<TRange<FTimespan>> mRange;
     TArray<FGuid>   mImageRenderingComposition;
     FULISInvalidTileMap mInvalidTileMap;
+    EOdysseyAnimationPlayerStatus Status = EOdysseyAnimationPlayerStatus::Stopped;
 
     /**
      * We keep the renderer in memory to ensure all blocks are loaded and ready to be used instead of being recached
@@ -126,12 +156,7 @@ private:
     //Events
     FSimpleMulticastDelegate mOnAnimationChanged;
     FSimpleMulticastDelegate mOnTextureChanged;
-    FSimpleMulticastDelegate mOnTextureUpdated;
-    FSimpleMulticastDelegate mOnStatusChanged;
-    FSimpleMulticastDelegate mOnFrameRateChanged;
-    FSimpleMulticastDelegate mOnIsLoopingChanged;
     FSimpleMulticastDelegate mOnCurrentTimeChanged;
     FSimpleMulticastDelegate mOnPlay;
-    FSimpleMulticastDelegate mOnPause;
     FSimpleMulticastDelegate mOnStop;
 };

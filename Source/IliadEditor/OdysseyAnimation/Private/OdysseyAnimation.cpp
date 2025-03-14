@@ -86,23 +86,18 @@ FInt32Range
 UOdysseyAnimation::GetFrameRange() const
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyAnimation::GetFrameRange);
-    //TODO: deduce frame count from :
-    // - startPoint / endPoint
 
     if ( !mLayerStack )
         return FInt32Range::Empty();
 
-    FInt32Range layerStackFrameRange = mLayerStack->GetFrameRange();
-    return FInt32Range::Inclusive(0, layerStackFrameRange.GetUpperBoundValue()); //Animation starts always at 0 if there is no startPoint
+    return mLayerStack->GetFrameRange();
 }
 
 int
 UOdysseyAnimation::GetFrameCount() const
 {
     FInt32Range frameRange = GetFrameRange();
-    int startFrame = frameRange.GetUpperBound().IsInclusive() ? frameRange.GetLowerBoundValue() : frameRange.GetLowerBoundValue() + 1;
-    int endFrame = frameRange.GetUpperBound().IsInclusive() ? frameRange.GetUpperBoundValue() : frameRange.GetUpperBoundValue() - 1;
-    return FMath::Max(0, endFrame - startFrame + 1);
+    return FMath::Max(0, frameRange.GetUpperBoundValue() - frameRange.GetLowerBoundValue() + 1);
 }
 
 double
@@ -131,7 +126,7 @@ UOdysseyAnimation::GetLeftBoundValue() const
     {
         case EOdysseyAnimationBoundMode::Automatic:
         {
-            FInt32Range frameRange = mLayerStack->GetFrameRange();
+            FInt32Range frameRange = GetFrameRange();
             return frameRange.GetLowerBoundValue();
         }
         break;
@@ -154,7 +149,7 @@ UOdysseyAnimation::GetRightBoundValue() const
     {
         case EOdysseyAnimationBoundMode::Automatic:
         {
-            FInt32Range frameRange = mLayerStack->GetFrameRange();
+            FInt32Range frameRange = GetFrameRange();
             return frameRange.GetUpperBoundValue();
         }
         break;
@@ -325,14 +320,14 @@ UOdysseyAnimation::PropertyChanged(const FName& iPropertyName)
 
     if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, LeftBoundMode) )
     {
-        FInt32Range frameRange = mLayerStack->GetFrameRange();
+        FInt32Range frameRange = GetFrameRange();
         LeftBound = frameRange.GetLowerBoundValue();
         RightBound = FMath::Max(GetLeftBoundValue(), RightBound);
     }
 
     if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, RightBoundMode) )
     {
-        FInt32Range frameRange = mLayerStack->GetFrameRange();
+        FInt32Range frameRange = GetFrameRange();
         RightBound = frameRange.GetUpperBoundValue();
         LeftBound = FMath::Min(LeftBound, GetRightBoundValue());
     }
@@ -341,7 +336,7 @@ UOdysseyAnimation::PropertyChanged(const FName& iPropertyName)
     {
         if (LeftBoundMode == EOdysseyAnimationBoundMode::Automatic)
         {
-            FInt32Range frameRange = mLayerStack->GetFrameRange();
+            FInt32Range frameRange = GetFrameRange();
             LeftBound = frameRange.GetLowerBoundValue();
         }
         else
@@ -354,7 +349,7 @@ UOdysseyAnimation::PropertyChanged(const FName& iPropertyName)
     {
         if (RightBoundMode == EOdysseyAnimationBoundMode::Automatic)
         {
-            FInt32Range frameRange = mLayerStack->GetFrameRange();
+            FInt32Range frameRange = GetFrameRange();
             RightBound = frameRange.GetUpperBoundValue();
         }
         else

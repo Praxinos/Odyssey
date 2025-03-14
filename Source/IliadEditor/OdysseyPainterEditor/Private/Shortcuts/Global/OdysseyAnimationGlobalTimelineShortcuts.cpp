@@ -254,7 +254,7 @@ FOdysseyAnimationGlobalTimelineShortcuts::Action_PlayStop()
     if (!player)
         return;
 
-    if (player->Status == EOdysseyAnimationPlayerStatus::Playing )
+    if (player->GetStatus() == EOdysseyAnimationPlayerStatus::Playing )
         player->Stop();
     else
         player->Play();

@@ -244,10 +244,9 @@ SOdysseyAnimationTimelineHeader::OnMouseButtonDown(const FGeometry& MyGeometry, 
         const float minScrub = 0.0f;
         float posX = MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()).X;
         float frame = MousePositionToFrame(posX);
-        FTimespan time = FTimespan::FromSeconds(FMath::Max(0.f, frame) / mAnimation->GetFramesPerSecond());
         mPlayer->Stop();
         mPlayer->SetRenderType(IOdysseyImageRenderer::eRenderType::Render);
-        mPlayer->SeekToTime(time);
+        mPlayer->SeekToFrame(frame);
 
         // This has prevent throttling on so that viewports continue to run whilst dragging the slider
         return FReply::Handled().CaptureMouse( SharedThis(this) ).PreventThrottling();
@@ -265,7 +264,7 @@ SOdysseyAnimationTimelineHeader::OnMouseMove(const FGeometry& MyGeometry, const 
         float posX = MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()).X;
         float frame = MousePositionToFrame(posX);
         FTimespan time = FTimespan::FromSeconds(FMath::Max(0.f, frame) / mAnimation->GetFramesPerSecond());
-        mPlayer->SeekToTime(time);
+        mPlayer->SeekToFrame(frame);
         return FReply::Handled();
     }
 

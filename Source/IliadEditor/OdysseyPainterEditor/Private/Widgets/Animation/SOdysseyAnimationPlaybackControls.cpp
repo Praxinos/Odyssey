@@ -132,7 +132,7 @@ SOdysseyAnimationPlaybackControls::IsPlayingForward() const
     if (!mPlayer)
         return false;
 
-    return mPlayer->Status == EOdysseyAnimationPlayerStatus::Playing && !mPlayer->IsBackward();
+    return mPlayer->GetStatus() == EOdysseyAnimationPlayerStatus::Playing && !mPlayer->IsBackward();
 }
 
 bool
@@ -141,7 +141,7 @@ SOdysseyAnimationPlaybackControls::IsPlayingBackward() const
     if (!mPlayer)
         return false;
 
-    return mPlayer->Status == EOdysseyAnimationPlayerStatus::Playing && mPlayer->IsBackward();
+    return mPlayer->GetStatus() == EOdysseyAnimationPlayerStatus::Playing && mPlayer->IsBackward();
 }
 
 
@@ -231,7 +231,7 @@ SOdysseyAnimationPlaybackControls::OnStopClicked()
 FReply
 SOdysseyAnimationPlaybackControls::OnBeginningClicked()
 {
-    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimation, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), 0);
+    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimation, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), mAnimation->GetFrameRange().GetLowerBoundValue());
     return FReply::Handled();
 }
 
