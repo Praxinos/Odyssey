@@ -30,7 +30,6 @@ enum class EOdysseyAnimationPlayerStatus
 UENUM(BlueprintType)
 enum class EOdysseyAnimationPlayerPostBehaviour : uint8
 {
-    None,
     Hold,
     Loop
 };

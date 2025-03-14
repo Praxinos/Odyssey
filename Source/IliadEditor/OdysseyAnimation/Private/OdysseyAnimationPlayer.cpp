@@ -89,7 +89,7 @@ UOdysseyAnimationPlayer::SeekToFrame(FFrameTime iFrame)
 }
 
 void
-UOdysseyAnimationPlayer::SeekToFrameImmediate(int iFrameIndex)
+UOdysseyAnimationPlayer::SeekToFrameImmediate(FFrameTime iFrame)
 {
     if (mCurrentFrame == iFrame)
         return;
@@ -228,12 +228,6 @@ UOdysseyAnimationPlayer::ApplyPreBehaviour(FFrameTime iFrame, FFrameTime& oFrame
 
     switch(PreBehaviour)
     {
-        case EOdysseyAnimationPlayerPostBehaviour::None:
-        {
-            return false;
-        }
-        break;
-
         case EOdysseyAnimationPlayerPostBehaviour::Hold:
         {
             oFrame = FFrameTime(Animation->GetLeftBoundValue());
@@ -264,12 +258,6 @@ UOdysseyAnimationPlayer::ApplyPostBehaviour(FFrameTime iFrame, FFrameTime& oFram
 
     switch(PostBehaviour)
     {
-        case EOdysseyAnimationPlayerPostBehaviour::None:
-        {
-            return false;
-        }
-        break;
-
         case EOdysseyAnimationPlayerPostBehaviour::Hold:
         {
             oFrame = FFrameTime(Animation->GetRightBoundValue());
