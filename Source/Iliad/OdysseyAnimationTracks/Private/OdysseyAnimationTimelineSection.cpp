@@ -3,6 +3,10 @@
 
 #include "OdysseyAnimationTimelineSection.h"
 
+#include "OdysseyAnimation.h"
+#include "OdysseyAnimationComponent.h"
+#include "MovieScene.h"
+
 #include "Channels/MovieSceneChannelData.h"
 #include "Channels/MovieSceneChannelProxy.h"
 #include "EntitySystem/BuiltInComponentTypes.h"
@@ -22,12 +26,6 @@ UOdysseyAnimationTimelineSection::UOdysseyAnimationTimelineSection(const FObject
 
 //---
 
-void
-UOdysseyAnimationTimelineSection::PostInitProperties()
-{
-    Super::PostInitProperties();
-}
-
 EMovieSceneChannelProxyType
 UOdysseyAnimationTimelineSection::CacheChannelProxy()
 {
@@ -36,14 +34,83 @@ UOdysseyAnimationTimelineSection::CacheChannelProxy()
     return EMovieSceneChannelProxyType::Dynamic;
 }
 
+UOdysseyAnimation*
+UOdysseyAnimationTimelineSection::GetAnimation() const
+{
+    return Animation;
+}
+EOdysseyAnimationPlayerPostBehaviour
+UOdysseyAnimationTimelineSection::GetPreBehaviour() const
+{
+    return PreBehaviour;
+}
+
+EOdysseyAnimationPlayerPostBehaviour
+UOdysseyAnimationTimelineSection::GetPostBehaviour() const
+{
+    return PostBehaviour;
+}
+
+FFrameNumber
+UOdysseyAnimationTimelineSection::GetStartFrameOffset() const
+{
+    return StartFrameOffset;
+}
+
+void
+UOdysseyAnimationTimelineSection::SetAnimation(UOdysseyAnimation* iAnimation)
+{
+    Animation = iAnimation;
+    MarkAsChanged();
+}
+
+void
+UOdysseyAnimationTimelineSection::SetPreBehaviour(EOdysseyAnimationPlayerPostBehaviour iValue)
+{
+    PreBehaviour = iValue;
+    MarkAsChanged();
+}
+
+void
+UOdysseyAnimationTimelineSection::SetPostBehaviour(EOdysseyAnimationPlayerPostBehaviour iValue)
+{
+    PostBehaviour = iValue;
+    MarkAsChanged();
+}
+
+void
+UOdysseyAnimationTimelineSection::SetStartFrameOffset(FFrameNumber iOffset)
+{
+    StartFrameOffset = iOffset;
+    MarkAsChanged();
+}
+
 void
 UOdysseyAnimationTimelineSection::MigrateFrameTimes(FFrameRate SourceRate, FFrameRate DestinationRate)
 {
-    if (StartFrameOffset.Value > 0)
-    {
-        FFrameNumber NewStartFrameOffset = ConvertFrameTime(FFrameTime(StartFrameOffset), SourceRate, DestinationRate).FloorToFrame();
-        StartFrameOffset = NewStartFrameOffset;
-    }
+    FFrameNumber NewStartFrameOffset = ConvertFrameTime(FFrameTime(StartFrameOffset), SourceRate, DestinationRate).FloorToFrame();
+    StartFrameOffset = NewStartFrameOffset;
+}
+
+TRange<FFrameNumber>
+UOdysseyAnimationTimelineSection::GetDefaultSectionRange(UOdysseyAnimationTimelineSection* iSection)
+{
+    UOdysseyAnimation* animation = iSection->Animation;
+    if (!animation)
+        return TRange<FFrameNumber>();
+
+    FFrameRate animationFrameRate(animation->GetFramesPerSecond() * 100, 100);
+
+    FFrameNumber animationLeftBoundFrame(animation->GetLeftBoundValue());
+    FFrameNumber animationRightBoundFrame(animation->GetRightBoundValue() + 1);
+
+    UMovieScene* outer_movie_scene = iSection->GetTypedOuter<UMovieScene>();
+    FFrameTime animationLeftBoundTime = FFrameRate::TransformTime(animationLeftBoundFrame, animationFrameRate, outer_movie_scene->GetDisplayRate());
+    animationLeftBoundFrame = FFrameRate::TransformTime(animationLeftBoundTime, outer_movie_scene->GetDisplayRate(), outer_movie_scene->GetTickResolution()).GetFrame();
+    FFrameTime animationRightBoundTime = FFrameRate::TransformTime(animationRightBoundFrame, animationFrameRate, outer_movie_scene->GetDisplayRate());
+    animationRightBoundFrame = FFrameRate::TransformTime(animationRightBoundTime, outer_movie_scene->GetDisplayRate(), outer_movie_scene->GetTickResolution()).GetFrame();
+
+    return TRange<FFrameNumber>(animationLeftBoundFrame, animationRightBoundFrame);
 }
 
 #undef LOCTEXT_NAMESPACE

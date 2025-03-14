@@ -8,7 +8,6 @@
 #include "Framework/Commands/GenericCommands.h"
 #include "Widgets/SOdysseyLayerStackTreeView.h"
 #include "Widgets/Layout/SWidgetSwitcher.h"
-#include "UObject/OdysseyObjectEditorUtils.h"
 #include "OdysseyLayerStack.h"
 #include "Widgets/SOdysseyLayerExpanderArrow.h"
 #include "Widgets/Input/SNumericEntryBox.h"

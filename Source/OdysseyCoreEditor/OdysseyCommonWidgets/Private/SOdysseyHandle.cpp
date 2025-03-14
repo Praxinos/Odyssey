@@ -1,11 +1,12 @@
 // IDDN.FR.001.250001.006.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
 
-#include "Widgets/Animation/Timeline/Cells/SOdysseyAnimationCellHandle.h"
+#include "SOdysseyHandle.h"
 
 void
-SOdysseyAnimationCellHandle::Construct( const SOdysseyAnimationCellHandle::FArguments& InArgs)
+SOdysseyHandle::Construct( const SOdysseyHandle::FArguments& InArgs)
 {
+    mIsDraggable = InArgs._IsDraggable;
     mOnDragStarted = InArgs._OnDragStarted;
     mOnDragged = InArgs._OnDragged;
     mOnDragStopped = InArgs._OnDragStopped;
@@ -19,8 +20,11 @@ SOdysseyAnimationCellHandle::Construct( const SOdysseyAnimationCellHandle::FArgu
 }
 
 FReply
-SOdysseyAnimationCellHandle::OnMouseButtonDown(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent)
+SOdysseyHandle::OnMouseButtonDown(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent)
 {
+    if (!mIsDraggable.Get())
+        return FReply::Unhandled();
+
     if (iMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
     {
         mIsDragging = true;
@@ -31,8 +35,11 @@ SOdysseyAnimationCellHandle::OnMouseButtonDown(const FGeometry& iGeometry, const
 }
 
 FReply
-SOdysseyAnimationCellHandle::OnMouseMove(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent)
+SOdysseyHandle::OnMouseMove(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent)
 {
+    if (!mIsDraggable.Get())
+        return FReply::Unhandled();
+
     if (mIsDragging)
     {
         mOnDragged.ExecuteIfBound(iGeometry, iMouseEvent);
@@ -42,8 +49,11 @@ SOdysseyAnimationCellHandle::OnMouseMove(const FGeometry& iGeometry, const FPoin
 }
 
 FReply
-SOdysseyAnimationCellHandle::OnMouseButtonUp(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent)
+SOdysseyHandle::OnMouseButtonUp(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent)
 {
+    if (!mIsDraggable.Get())
+        return FReply::Unhandled();
+
     if (mIsDragging)
     {
         mIsDragging = false;
@@ -54,8 +64,11 @@ SOdysseyAnimationCellHandle::OnMouseButtonUp(const FGeometry& iGeometry, const F
 }
 
 TOptional<EMouseCursor::Type>
-SOdysseyAnimationCellHandle::GetCursor() const
+SOdysseyHandle::GetCursor() const
 {
+    if (!mIsDraggable.Get())
+        return TOptional<EMouseCursor::Type>();
+
     if (!IsEnabled())
         return TOptional<EMouseCursor::Type>();
 

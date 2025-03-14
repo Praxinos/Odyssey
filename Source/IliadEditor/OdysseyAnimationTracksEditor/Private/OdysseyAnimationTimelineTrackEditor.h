@@ -33,6 +33,5 @@ public:
 private:
     void AddAnimationTrack(TArray<FGuid> ObjectBindings);
     FKeyPropertyResult AddAnimationTrackKeyInternal(FFrameNumber KeyTime, TArray<FGuid> ObjectBindings);
-    static float GetDefaultSectionDuration(UOdysseyAnimationComponent* iComponent);
     FReply OnAddButtonClicked(FGuid iObjectBinding);
 };

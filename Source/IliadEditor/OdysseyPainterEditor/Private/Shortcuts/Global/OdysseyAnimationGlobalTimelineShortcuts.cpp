@@ -151,12 +151,18 @@ FOdysseyAnimationGlobalTimelineShortcuts::Action_NavigateToNextCell()
     }
     else
     {
-        UOdysseyAnimationCell* cell = currentLayer->GetCellAtFrame(currentFrame);
-        if (!cell || cell == currentLayer->GetCells().Last())
+        cellIndex = currentLayer->GetCellIndexAtFrame(currentFrame);
+        if (cellIndex == INDEX_NONE)
             return;
 
-        cellIndex = cell->IndexInLayer + 1;
+        cellIndex++;
     }
+
+    while(cellIndex < currentLayer->GetCells().Num() && !currentLayer->GetCells()[cellIndex])
+    cellIndex++;
+
+    if (cellIndex >= currentLayer->GetCells().Num())
+        return;
 
     UOdysseyAnimationCell* nextCell = currentLayer->GetCells()[cellIndex];
     FOdysseyObjectEditorUtils::SetPropertyValue(animation, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), nextCell->GetFrameRange().GetLowerBoundValue());
@@ -192,12 +198,18 @@ FOdysseyAnimationGlobalTimelineShortcuts::Action_NavigateToPreviousCell()
     }
     else
     {
-        UOdysseyAnimationCell* cell = currentLayer->GetCellAtFrame(currentFrame);
-        if (!cell || cell == currentLayer->GetCells()[0])
+        cellIndex = currentLayer->GetCellIndexAtFrame(currentFrame);
+        if (cellIndex == INDEX_NONE)
             return;
 
-        cellIndex = cell->IndexInLayer - 1;
+        cellIndex--;
     }
+
+    while(cellIndex >= 0 && !currentLayer->GetCells()[cellIndex])
+        cellIndex--;
+
+    if (cellIndex < 0)
+        return;
 
     UOdysseyAnimationCell* prevCell = currentLayer->GetCells()[cellIndex];
     FOdysseyObjectEditorUtils::SetPropertyValue(animation, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), prevCell->GetFrameRange().GetLowerBoundValue());
@@ -242,7 +254,7 @@ FOdysseyAnimationGlobalTimelineShortcuts::Action_PlayStop()
     if (!player)
         return;
 
-    if (player->Status == EOdysseyAnimationPlayerStatus::Playing )
+    if (player->GetStatus() == EOdysseyAnimationPlayerStatus::Playing )
         player->Stop();
     else
         player->Play();
@@ -299,8 +311,5 @@ FOdysseyAnimationGlobalTimelineShortcuts::Action_Flip(int iConfigurationIndex)
     const UOdysseyPainterEditorAnimationUserSettings* settings = UOdysseyPainterEditorAnimationUserSettings::Get();
     mEditor->GetAnimationFlipSystem()->StartFlipping(settings->FlipConfigurations[iConfigurationIndex]);
 }
-
-
-
 
 #undef LOCTEXT_NAMESPACE

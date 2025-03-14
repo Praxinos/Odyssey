@@ -26,21 +26,9 @@ UOdysseyAnimationPlayer::OnTextureChanged()
 }
 
 FSimpleMulticastDelegate&
-UOdysseyAnimationPlayer::OnTextureUpdated()
+UOdysseyAnimationPlayer::OnCurrentFrameChanged()
 {
-    return mOnTextureUpdated;
-}
-
-FSimpleMulticastDelegate&
-UOdysseyAnimationPlayer::OnIsLoopingChanged()
-{
-    return mOnIsLoopingChanged;
-}
-
-FSimpleMulticastDelegate&
-UOdysseyAnimationPlayer::OnCurrentTimeChanged()
-{
-    return mOnCurrentTimeChanged;
+    return mOnCurrentFrameChanged;
 }
 
 FSimpleMulticastDelegate&
@@ -50,37 +38,19 @@ UOdysseyAnimationPlayer::OnPlay()
 }
 
 FSimpleMulticastDelegate&
-UOdysseyAnimationPlayer::OnPause()
-{
-    return mOnPause;
-}
-
-FSimpleMulticastDelegate&
 UOdysseyAnimationPlayer::OnStop()
 {
     return mOnStop;
 }
 
-void
-UOdysseyAnimationPlayer::SetTimeRange(const TOptional<TRange<FTimespan>>& iRange)
+UOdysseyAnimationPlayer::UOdysseyAnimationPlayer()
 {
-    mRange = iRange;
 }
 
 void
-UOdysseyAnimationPlayer::SetFrameRange(const TOptional<FInt32Range>& iRange)
+UOdysseyAnimationPlayer::SetFrameRange(const TOptional<TRange<FFrameTime>>& iRange)
 {
-    if (iRange.IsSet())
-    {
-        mRange = TRange<FTimespan>::Inclusive(
-            FTimespan::FromSeconds(iRange->GetLowerBoundValue() / Animation->GetFramesPerSecond()),
-            FTimespan::FromSeconds((iRange->GetUpperBoundValue() + 1)  / Animation->GetFramesPerSecond())
-        );
-    }
-    else
-    {
-        mRange = TOptional<TRange<FTimespan>>();
-    }
+    mRange = iRange;
 }
 
 void
@@ -90,7 +60,7 @@ UOdysseyAnimationPlayer::Play(bool iBackward)
     Status = EOdysseyAnimationPlayerStatus::Playing;
 
     if (mRange.IsSet())
-        mCurrentTime = FMath::Clamp(mCurrentTime, mRange->GetLowerBoundValue(), mRange->GetUpperBoundValue());
+        mCurrentFrame = FMath::Clamp(mCurrentFrame, mRange->GetLowerBoundValue(), mRange->GetUpperBoundValue());
 
     mOnPlay.Broadcast();
 }
@@ -99,7 +69,6 @@ void
 UOdysseyAnimationPlayer::Pause()
 {
     Status = EOdysseyAnimationPlayerStatus::Paused;
-    mOnPause.Broadcast();
 }
 
 void
@@ -110,33 +79,24 @@ UOdysseyAnimationPlayer::Stop()
 }
 
 void
-UOdysseyAnimationPlayer::SeekToTime(FTimespan iTime)
+UOdysseyAnimationPlayer::SeekToFrame(FFrameTime iFrame)
 {
-    mCurrentTime = iTime;
-    mOnCurrentTimeChanged.Broadcast();
+    if (mCurrentFrame == iFrame)
+        return;
+
+    mCurrentFrame = iFrame;
+    mOnCurrentFrameChanged.Broadcast();
 }
 
 void
-UOdysseyAnimationPlayer::SeekToFrame(int iFrameIndex)
+UOdysseyAnimationPlayer::SeekToFrameImmediate(FFrameTime iFrame)
 {
-    FTimespan currentTime = FTimespan::FromSeconds(iFrameIndex / Animation->GetFramesPerSecond());
-    if (currentTime == mCurrentTime)
+    if (mCurrentFrame == iFrame)
         return;
 
-    mCurrentTime = currentTime;
-    mOnCurrentTimeChanged.Broadcast();
-}
-
-void
-UOdysseyAnimationPlayer::SeekToFrameImmediate(int iFrameIndex)
-{
-    FTimespan currentTime = FTimespan::FromSeconds(iFrameIndex / Animation->GetFramesPerSecond());
-    if (currentTime == mCurrentTime)
-        return;
-
-    mCurrentTime = currentTime;
+    mCurrentFrame = iFrame;
     UpdateTexture();
-    mOnCurrentTimeChanged.Broadcast();
+    mOnCurrentFrameChanged.Broadcast();
 }
 
 UTexture2D*
@@ -148,11 +108,248 @@ UOdysseyAnimationPlayer::GetTexture()
     return Texture;
 }
 
-FTimespan
-UOdysseyAnimationPlayer::GetCurrentTime() const
+FFrameTime
+UOdysseyAnimationPlayer::GetCurrentFrame() const
 {
-    return mCurrentTime;
+    return mCurrentFrame;
 }
+
+bool
+UOdysseyAnimationPlayer::GetDuration(FFrameTime& oFrame) const
+{
+    if (!Animation)
+        return false;
+
+    int frameDuration = Animation->GetRightBoundValue() - Animation->GetLeftBoundValue() + 1;
+    if (mIgnoreAnimationBounds)
+        frameDuration = Animation->GetFrameCount();
+
+    oFrame = FFrameTime(frameDuration);
+    return true;
+}
+
+EOdysseyAnimationPlayerStatus
+UOdysseyAnimationPlayer::GetStatus() const
+{
+    return Status;
+}
+
+/* bool
+UOdysseyAnimationPlayer::GetTimeInPlayerBounds(FTimespan iTime, FTimespan& oTime) const
+{
+    FTimespan duration;
+    if (!GetDuration(duration))
+        return false;
+
+    if (mIgnoreAnimationBounds)
+    {
+        oTime = iTime;
+        return true;
+    }
+
+    if(iTime < 0)
+    {
+        return ApplyPreBehaviour(iTime, oTime);
+    }
+    else if (iTime >= duration)
+    {
+        return ApplyPostBehaviour(iTime, oTime);
+    }
+
+    oTime = iTime;
+    return true;
+} */
+
+/* bool
+UOdysseyAnimationPlayer::GetCurrentTimeInPlayerBounds(FTimespan& oTime) const
+{
+    return GetTimeInPlayerBounds(mCurrentTime, oTime);
+} */
+
+bool
+UOdysseyAnimationPlayer::GetFrameInAnimationBounds(FFrameTime iFrame, FFrameTime& oFrame) const
+{
+    if (!Animation)
+        return false;
+
+    FFrameTime leftBound = FFrameTime(Animation->GetLeftBoundValue());
+    FFrameTime rightBound = FFrameTime(Animation->GetRightBoundValue()) + FFrameTime(1);
+
+    if (mIgnoreAnimationBounds)
+    {
+        oFrame = iFrame;
+    }
+    else if(iFrame < leftBound)
+    {
+        if (!ApplyPreBehaviour(iFrame, oFrame))
+            return false;
+    }
+    else if (iFrame >= rightBound)
+    {
+        if (!ApplyPostBehaviour(iFrame, oFrame))
+            return false;
+    }
+    else
+    {
+        oFrame = iFrame;
+    }
+
+    //oFrame += leftBound;
+
+    return true;
+}
+
+bool
+UOdysseyAnimationPlayer::GetCurrentFrameInAnimationBounds(FFrameTime& oFrame) const
+{
+    return GetFrameInAnimationBounds(mCurrentFrame, oFrame);
+}
+
+void
+UOdysseyAnimationPlayer::SetPreBehaviour(EOdysseyAnimationPlayerPostBehaviour iValue)
+{
+    PreBehaviour = iValue;
+}
+
+void
+UOdysseyAnimationPlayer::SetPostBehaviour(EOdysseyAnimationPlayerPostBehaviour iValue)
+{
+    PostBehaviour = iValue;
+}
+
+bool
+UOdysseyAnimationPlayer::ApplyPreBehaviour(FFrameTime iFrame, FFrameTime& oFrame) const
+{
+    if (!Animation)
+        return false;
+
+    if (!UsePreBehaviour)
+        return false;
+
+    switch(PreBehaviour)
+    {
+        case EOdysseyAnimationPlayerPostBehaviour::Hold:
+        {
+            oFrame = FFrameTime(Animation->GetLeftBoundValue());
+        }
+        break;
+
+        case EOdysseyAnimationPlayerPostBehaviour::Loop:
+        {
+            FFrameTime duration;
+            if (!GetDuration(duration))
+                return false;
+
+            FFrameTime leftBound = FFrameTime(Animation->GetLeftBoundValue());
+            FFrameTime rightBound = FFrameTime(Animation->GetRightBoundValue());
+            FFrameTime positiveFrame = (iFrame - leftBound + 1) * -1;
+            oFrame = rightBound - (positiveFrame % duration) + leftBound;
+        }
+        break;
+    }
+    return true;
+}
+
+bool
+UOdysseyAnimationPlayer::ApplyPostBehaviour(FFrameTime iFrame, FFrameTime& oFrame) const
+{
+    if (!UsePostBehaviour)
+        return false;
+
+    switch(PostBehaviour)
+    {
+        case EOdysseyAnimationPlayerPostBehaviour::Hold:
+        {
+            oFrame = FFrameTime(Animation->GetRightBoundValue());
+        }
+        break;
+
+        case EOdysseyAnimationPlayerPostBehaviour::Loop:
+        {
+            FFrameTime duration;
+            if (!GetDuration(duration))
+                return false;
+
+            FFrameTime leftBound = FFrameTime(Animation->GetLeftBoundValue());
+
+            oFrame = (iFrame - leftBound) % duration + leftBound;
+        }
+        break;
+    }
+
+    return true;
+}
+
+/* bool
+UOdysseyAnimationPlayer::ApplyPreBehaviour(FTimespan iTime, FTimespan& oTime) const
+{
+    if (!UsePreBehaviour)
+        return false;
+
+    switch(PreBehaviour)
+    {
+        case EOdysseyAnimationPlayerPostBehaviour::None:
+        {
+            return false;
+        }
+        break;
+
+        case EOdysseyAnimationPlayerPostBehaviour::Hold:
+        {
+            oTime = FTimespan(0);
+        }
+        break;
+
+        case EOdysseyAnimationPlayerPostBehaviour::Loop:
+        {
+            FTimespan duration;
+            if (!GetDuration(duration))
+                return false;
+
+            FTimespan positiveTime = (mCurrentTime * -1);
+            oTime = duration - (positiveTime % duration);
+        }
+        break;
+    }
+    return true;
+}
+
+bool
+UOdysseyAnimationPlayer::ApplyPostBehaviour(FTimespan iTime, FTimespan& oTime) const
+{
+    if (!UsePostBehaviour)
+        return false;
+
+    switch(PostBehaviour)
+    {
+        case EOdysseyAnimationPlayerPostBehaviour::None:
+        {
+            return false;
+        }
+        break;
+
+        case EOdysseyAnimationPlayerPostBehaviour::Hold:
+        {
+            FTimespan duration;
+            if (!GetDuration(duration))
+                return false;
+            oTime = FMath::Max(FTimespan(0), duration - FTimespan(1));
+        }
+        break;
+
+        case EOdysseyAnimationPlayerPostBehaviour::Loop:
+        {
+            FTimespan duration;
+            if (!GetDuration(duration))
+                return false;
+
+            oTime = mCurrentTime % duration;
+        }
+        break;
+    }
+
+    return true;
+} */
 
 bool
 UOdysseyAnimationPlayer::IsBackward() const
@@ -183,51 +380,55 @@ UOdysseyAnimationPlayer::Tick(float iDeltaTime)
 
     if (Status == EOdysseyAnimationPlayerStatus::Playing)
     {
-        FTimespan lowerLimit = mRange.IsSet() ? mRange->GetLowerBoundValue() : FTimespan::Zero();
-        FTimespan upperLimit = mRange.IsSet() ? mRange->GetUpperBoundValue() : Animation->GetDuration();
+        FFrameTime duration;
+        if (!GetDuration(duration))
+            return;
+
+        FFrameTime leftBound = mIgnoreAnimationBounds ? FFrameTime(Animation->GetFrameRange().GetLowerBoundValue()) : FFrameTime(Animation->GetLeftBoundValue());
+        FFrameTime rightBound = mIgnoreAnimationBounds ? FFrameTime(Animation->GetFrameRange().GetUpperBoundValue()) : FFrameTime(Animation->GetRightBoundValue()) + FFrameTime(1);
 
         bool bStop = false;
-        FTimespan newTime = mCurrentTime;
+        FFrameTime newFrame = mCurrentFrame;
         if ( mIsBackward )
         {
-            newTime -= FTimespan::FromSeconds(iDeltaTime * FrameRate);
-            if ( newTime < lowerLimit )
+            newFrame -= FFrameTime::FromDecimal(iDeltaTime * PlayRate * Animation->GetFramesPerSecond());
+            if (newFrame < leftBound)
             {
                 if ( IsLooping )
                 {
-                    while ( newTime < lowerLimit )
+                    while ( newFrame < leftBound )
                     {
-                        newTime += (upperLimit - lowerLimit);
+                        newFrame += duration;
                     }
                 }
-                else
+                else if (!UsePreBehaviour)
                 {
-                    newTime = lowerLimit;
+                    newFrame = leftBound;
                     bStop = true;
                 }
             }
         }
         else
         {
-            newTime += FTimespan::FromSeconds(iDeltaTime * FrameRate);
-            if ( newTime > upperLimit )
+            newFrame += FFrameTime::FromDecimal(iDeltaTime * PlayRate * Animation->GetFramesPerSecond());
+            if (newFrame >= rightBound + FFrameTime(1))
             {
                 if ( IsLooping )
                 {
-                    while ( newTime > upperLimit )
+                    while ( newFrame >= rightBound + FFrameTime(1) )
                     {
-                        newTime -= (upperLimit - lowerLimit);
+                        newFrame -= duration;
                     }
                 }
-                else
+                else if (!UsePostBehaviour)
                 {
-                    newTime = upperLimit;
+                    newFrame = rightBound;
                     bStop = true;
                 }
             }
         }
 
-        SeekToTime(newTime);
+        SeekToFrame(newFrame);
         if (bStop)
             Stop();
     }
@@ -244,15 +445,15 @@ UOdysseyAnimationPlayer::UpdateTexture()
     if (!Animation)
         return;
 
-    int frameIndex = Animation->GetFrameIndexAtTime(mCurrentTime);
-    if ( frameIndex == INDEX_NONE )
+    FFrameTime frame;
+    if (!GetCurrentFrameInAnimationBounds(frame))
         return;
 
-    TArray<FGuid> imageRenderingComposition = Animation->GetImageRenderingComposition(mRenderType, frameIndex);
+    TArray<FGuid> imageRenderingComposition = Animation->GetImageRenderingComposition(mRenderType, frame.GetFrame().Value);
     if ( imageRenderingComposition != mImageRenderingComposition )
     {
         mImageRenderingComposition = imageRenderingComposition;
-        TSharedPtr<IOdysseyImageRenderer> renderer = Animation->BuildImageRenderer(mRenderType, frameIndex);
+        TSharedPtr<IOdysseyImageRenderer> renderer = Animation->BuildImageRenderer(mRenderType, frame.GetFrame().Value);
         renderer->Init();
         mRenderer = renderer; //Init Renderer before assigning mRenderer to avoid caching (raster / vector blocks) when unneeded
 
@@ -269,13 +470,12 @@ UOdysseyAnimationPlayer::UpdateTexture()
 
         CopyBlocksToTexture({ block }, { rect });
         mInvalidTileMap.Clear();
-        mOnTextureUpdated.Broadcast();
         return;
     }
 
     if (!mInvalidTileMap.InvalidTiles().IsEmpty())
     {
-        TSharedPtr<IOdysseyImageRenderer> renderer = Animation->BuildImageRenderer(mRenderType, frameIndex);
+        TSharedPtr<IOdysseyImageRenderer> renderer = Animation->BuildImageRenderer(mRenderType, frame.GetFrame().Value);
         renderer->Init();
         mRenderer = renderer; //Init Renderer before assigning mRenderer to avoid caching (raster / vector blocks) when unneeded
 
@@ -299,10 +499,6 @@ UOdysseyAnimationPlayer::UpdateTexture()
         CopyBlocksToTexture(blocks, invalidRects);
 
         mInvalidTileMap.Clear();
-        {
-            TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyAnimationPlayer::UpdateTexture::OnTextureUpdated);
-            mOnTextureUpdated.Broadcast();
-        }
     }
 }
 
@@ -327,11 +523,11 @@ UOdysseyAnimationPlayer::OnImageRenderingChanged(const FOdysseyImageRenderingCha
         if ( !mImageRenderingComposition.Contains(iEvent.GetId()) )
             return;
 
-        int frameIndex = Animation->GetFrameIndexAtTime(mCurrentTime);
-        if (frameIndex == INDEX_NONE)
+        FFrameTime frame;
+        if (!GetCurrentFrameInAnimationBounds(frame))
             return;
 
-        TArray<FGuid> imageRenderingComposition = Animation->GetImageRenderingComposition(mRenderType, frameIndex);
+        TArray<FGuid> imageRenderingComposition = Animation->GetImageRenderingComposition(mRenderType, frame.GetFrame().Value);
         if ( imageRenderingComposition == mImageRenderingComposition )
             return;
 
@@ -403,10 +599,6 @@ UOdysseyAnimationPlayer::CopyBlocksToTexture(const TArray<TSharedPtr<::ULIS::FBl
     fence.Wait();
 }
 
-UOdysseyAnimationPlayer::UOdysseyAnimationPlayer()
-{
-}
-
 void
 UOdysseyAnimationPlayer::AnimationChanged()
 {
@@ -446,12 +638,7 @@ UOdysseyAnimationPlayer::StatusChanged()
 }
 
 void
-UOdysseyAnimationPlayer::FrameRateChanged()
-{
-}
-
-void
-UOdysseyAnimationPlayer::IsLoopingChanged()
+UOdysseyAnimationPlayer::PlayRateChanged()
 {
 }
 
@@ -468,11 +655,8 @@ UOdysseyAnimationPlayer::PropertyChanged(const FName& iPropertyName)
     if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationPlayer, Status) )
         StatusChanged();
 
-    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationPlayer, FrameRate) )
-        FrameRateChanged();
-
-    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationPlayer, IsLooping) )
-        IsLoopingChanged();
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationPlayer, PlayRate) )
+        PlayRateChanged();
 }
 
 void
@@ -487,21 +671,6 @@ UOdysseyAnimationPlayer::PostPropertyChanged(const FName& iPropertyName)
     if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationPlayer, Texture) )
     {
         mOnTextureChanged.Broadcast();
-    }
-
-    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationPlayer, Status) )
-    {
-        mOnStatusChanged.Broadcast();
-    }
-
-    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationPlayer, FrameRate) )
-    {
-        mOnFrameRateChanged.Broadcast();
-    }
-
-    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationPlayer, IsLooping) )
-    {
-        mOnIsLoopingChanged.Broadcast();
     }
 }
 
@@ -572,3 +741,17 @@ UOdysseyAnimationPlayer::PostDuplicate(EDuplicateMode::Type iDuplicateMode)
     AnimationChanged();
     mImageRenderingComposition.Empty();
 }
+
+#if WITH_EDITOR
+void
+UOdysseyAnimationPlayer::SetIgnoreAnimationBounds(bool iValue)
+{
+    mIgnoreAnimationBounds = iValue;
+}
+
+bool
+UOdysseyAnimationPlayer::GetIgnoreAnimationBounds() const
+{
+    return mIgnoreAnimationBounds;
+}
+#endif

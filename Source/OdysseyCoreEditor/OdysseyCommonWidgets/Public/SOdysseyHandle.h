@@ -5,15 +5,17 @@
 
 #include "CoreMinimal.h"
 
-class SOdysseyAnimationCellHandle : public SCompoundWidget
+class ODYSSEYCOMMONWIDGETS_API SOdysseyHandle : public SCompoundWidget
 {
 public:
     DECLARE_DELEGATE_TwoParams(FOnDragEvent, const FGeometry& iGeometry, const FPointerEvent& iMouseEvent)
 
 public:
-    SLATE_BEGIN_ARGS(SOdysseyAnimationCellHandle)
+    SLATE_BEGIN_ARGS(SOdysseyHandle)
+        : _IsDraggable(true)
     {}
         SLATE_DEFAULT_SLOT(FArguments, Content)
+        SLATE_ATTRIBUTE(bool, IsDraggable)
         SLATE_EVENT(FOnDragEvent, OnDragStarted)
         SLATE_EVENT(FOnDragEvent, OnDragged)
         SLATE_EVENT(FOnDragEvent, OnDragStopped)
@@ -33,6 +35,7 @@ protected:
     virtual TOptional<EMouseCursor::Type> GetCursor() const override;
 
 private:
+    TAttribute<bool> mIsDraggable;
     bool mIsDragging;
     FOnDragEvent mOnDragStarted;
     FOnDragEvent mOnDragged;

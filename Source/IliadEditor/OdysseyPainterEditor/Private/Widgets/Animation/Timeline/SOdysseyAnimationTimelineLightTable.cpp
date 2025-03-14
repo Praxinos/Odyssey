@@ -33,6 +33,9 @@ SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysse
 
                     int firstCellIndex = FMath::Max(mCurrentCell->IndexInLayer - 10, 0);
                     UOdysseyAnimationCell* cell = mLayer->GetCells()[firstCellIndex];
+                    if (!cell)
+                        return 0;
+
                     int width = cell->GetFrameRange().GetLowerBoundValue();
                     return width;
                 }
@@ -60,7 +63,7 @@ SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysse
 
                     const TArray<UOdysseyAnimationCell*>& cells = mLayer->GetCells();
                     int cellIndex = mCurrentCell->IndexInLayer - i - 1;
-                    if (cellIndex < 0 || cellIndex >= cells.Num())
+                    if (cellIndex < 0 || cellIndex >= cells.Num() || !cells[cellIndex])
                         return 0;
 
                     return cells[cellIndex]->Exposure;
@@ -76,7 +79,7 @@ SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysse
                             return EVisibility::Collapsed;
 
                         int cellIndex = mCurrentCell->IndexInLayer - i - 1;
-                        if (cellIndex < 0 || cellIndex >= mLayer->GetCells().Num())
+                        if (cellIndex < 0 || cellIndex >= mLayer->GetCells().Num() || !mLayer->GetCells()[cellIndex])
                             return EVisibility::Collapsed;
 
                         return EVisibility::Visible;
@@ -91,7 +94,7 @@ SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysse
 
                         const TArray<UOdysseyAnimationCell*>& cells = mLayer->GetCells();
                         int cellIndex = mCurrentCell->IndexInLayer - i - 1;
-                        if (cellIndex < 0 || cellIndex >= cells.Num())
+                        if (cellIndex < 0 || cellIndex >= cells.Num() || !mLayer->GetCells()[cellIndex])
                             return nullptr;
 
                         return cells[cellIndex];
@@ -164,7 +167,7 @@ SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysse
 
                     const TArray<UOdysseyAnimationCell*>& cells = mLayer->GetCells();
                     int cellIndex = mCurrentCell->IndexInLayer + i + 1;
-                    if (cellIndex < 0 || cellIndex >= cells.Num())
+                    if (cellIndex < 0 || cellIndex >= cells.Num() || !cells[cellIndex])
                         return 0;
 
                     return cells[cellIndex]->Exposure;
@@ -180,7 +183,7 @@ SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysse
                             return EVisibility::Collapsed;
 
                         int cellIndex = mCurrentCell->IndexInLayer + i + 1;
-                        if (cellIndex < 0 || cellIndex >= mLayer->GetCells().Num())
+                        if (cellIndex < 0 || cellIndex >= mLayer->GetCells().Num() || !mLayer->GetCells()[cellIndex])
                             return EVisibility::Collapsed;
 
                         return EVisibility::Visible;
@@ -195,7 +198,7 @@ SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysse
 
                         const TArray<UOdysseyAnimationCell*>& cells = mLayer->GetCells();
                         int cellIndex = mCurrentCell->IndexInLayer + i + 1;
-                        if (cellIndex < 0 || cellIndex >= cells.Num())
+                        if (cellIndex < 0 || cellIndex >= cells.Num() || !mLayer->GetCells()[cellIndex])
                             return nullptr;
 
                         return cells[cellIndex];

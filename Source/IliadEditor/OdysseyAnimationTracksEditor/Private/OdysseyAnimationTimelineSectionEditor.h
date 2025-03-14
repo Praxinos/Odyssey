@@ -5,7 +5,9 @@
 
 #include "TrackEditors/SubTrackEditorBase.h"
 #include "Widgets/Layout/SBox.h"
+#include "OdysseyAnimationPlayer.h"
 
+class UOdysseyAnimation;
 class UOdysseyAnimationTimelineSection;
 class UOdysseyAnimationComponent;
 class UOdysseyLayer;
@@ -36,8 +38,14 @@ public:
     TSharedPtr<ISequencer> GetSequencer() const;
 
 private:
-    UOdysseyAnimationComponent* GetComponent() const;
     EVisibility GetLayersVisibility() const;
+    UOdysseyAnimation* GetAnimation() const;
+    EOdysseyAnimationPlayerPostBehaviour GetPreBehaviour() const;
+    EOdysseyAnimationPlayerPostBehaviour GetPostBehaviour() const;
+    FFrameNumber GetStartFrameOffset() const;
+
+    void OnPreBehaviourChanged(EOdysseyAnimationPlayerPostBehaviour iValue);
+    void OnPostBehaviourChanged(EOdysseyAnimationPlayerPostBehaviour iValue);
 
 private:
     TWeakPtr<ISequencer> mSequencer;

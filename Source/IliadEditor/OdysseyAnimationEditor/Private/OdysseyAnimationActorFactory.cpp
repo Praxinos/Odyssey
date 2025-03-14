@@ -35,7 +35,13 @@ void UOdysseyAnimationActorFactory::PostSpawnActor(UObject* iAsset, AActor* iAct
     AOdysseyAnimationActor* animationActor = CastChecked<AOdysseyAnimationActor>(iActor);
 
     if (animationActor->AnimationComponent)
-        FOdysseyObjectEditorUtils::SetPropertyValue(animationActor->AnimationComponent, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationComponent, Animation), animation);
+    {
+        animationActor->AnimationComponent->UnregisterComponent();
+        animationActor->AnimationComponent->SetAnimation(animation);
+        // Init Component
+        animationActor->AnimationComponent->RegisterComponent();
+    }
+
 
     //Set plane in front of the camera
 

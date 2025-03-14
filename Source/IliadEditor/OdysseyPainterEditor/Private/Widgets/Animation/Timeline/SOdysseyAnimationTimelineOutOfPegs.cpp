@@ -33,6 +33,9 @@ SOdysseyAnimationTimelineOutOfPegs::Construct(const FArguments& InArgs, UOdyssey
 
                     int firstCellIndex = FMath::Max(mCurrentCell->IndexInLayer - 10, 0);
                     UOdysseyAnimationCell* cell = mLayer->GetCells()[firstCellIndex];
+                    if( !cell )
+                        return 0;
+
                     int width = cell->GetFrameRange().GetLowerBoundValue();
                     return width;
                 }
@@ -60,7 +63,7 @@ SOdysseyAnimationTimelineOutOfPegs::Construct(const FArguments& InArgs, UOdyssey
 
                     const TArray<UOdysseyAnimationCell*>& cells = mLayer->GetCells();
                     int cellIndex = mCurrentCell->IndexInLayer - i - 1;
-                    if (cellIndex < 0 || cellIndex >= cells.Num())
+                    if (cellIndex < 0 || cellIndex >= cells.Num() || !mLayer->GetCells()[cellIndex])
                         return 0;
 
                     return cells[cellIndex]->Exposure;
@@ -76,7 +79,7 @@ SOdysseyAnimationTimelineOutOfPegs::Construct(const FArguments& InArgs, UOdyssey
                             return EVisibility::Collapsed;
 
                         int cellIndex = mCurrentCell->IndexInLayer - i - 1;
-                        if (cellIndex < 0 || cellIndex >= mLayer->GetCells().Num())
+                        if (cellIndex < 0 || cellIndex >= mLayer->GetCells().Num() || !mLayer->GetCells()[cellIndex])
                             return EVisibility::Collapsed;
 
                         return EVisibility::Visible;
@@ -91,7 +94,7 @@ SOdysseyAnimationTimelineOutOfPegs::Construct(const FArguments& InArgs, UOdyssey
 
                         const TArray<UOdysseyAnimationCell*>& cells = mLayer->GetCells();
                         int cellIndex = mCurrentCell->IndexInLayer - i - 1;
-                        if (cellIndex < 0 || cellIndex >= cells.Num())
+                        if (cellIndex < 0 || cellIndex >= cells.Num() || !mLayer->GetCells()[cellIndex])
                             return nullptr;
 
                         return cells[cellIndex];
@@ -151,7 +154,7 @@ SOdysseyAnimationTimelineOutOfPegs::Construct(const FArguments& InArgs, UOdyssey
 
                     const TArray<UOdysseyAnimationCell*>& cells = mLayer->GetCells();
                     int cellIndex = mCurrentCell->IndexInLayer + i + 1;
-                    if (cellIndex < 0 || cellIndex >= cells.Num())
+                    if (cellIndex < 0 || cellIndex >= cells.Num() || !mLayer->GetCells()[cellIndex])
                         return 0;
 
                     return cells[cellIndex]->Exposure;
@@ -167,7 +170,7 @@ SOdysseyAnimationTimelineOutOfPegs::Construct(const FArguments& InArgs, UOdyssey
                             return EVisibility::Collapsed;
 
                         int cellIndex = mCurrentCell->IndexInLayer + i + 1;
-                        if (cellIndex < 0 || cellIndex >= mLayer->GetCells().Num())
+                        if (cellIndex < 0 || cellIndex >= mLayer->GetCells().Num() || !mLayer->GetCells()[cellIndex])
                             return EVisibility::Collapsed;
 
                         return EVisibility::Visible;
@@ -182,7 +185,7 @@ SOdysseyAnimationTimelineOutOfPegs::Construct(const FArguments& InArgs, UOdyssey
 
                         const TArray<UOdysseyAnimationCell*>& cells = mLayer->GetCells();
                         int cellIndex = mCurrentCell->IndexInLayer + i + 1;
-                        if (cellIndex < 0 || cellIndex >= cells.Num())
+                        if (cellIndex < 0 || cellIndex >= cells.Num() || !mLayer->GetCells()[cellIndex])
                             return nullptr;
 
                         return cells[cellIndex];

@@ -21,6 +21,13 @@ enum class EOdysseyAnimationFormat : uint8
     RGBAF UMETA(DisplayName = "RGBA F")
 };
 
+UENUM()
+enum class EOdysseyAnimationBoundMode : uint8
+{
+    Automatic,
+    Manual
+};
+
 UCLASS(config=EditorPerProjectUserSettings, PerObjectConfig, HideCategories=(Platforms))
 class ODYSSEYANIMATION_API UOdysseyAnimation
     : public UBaseMediaSource
@@ -71,6 +78,16 @@ public:
     int GetFrameCount() const;
 
     double GetFramesPerSecond() const;
+
+    EOdysseyAnimationBoundMode GetLeftBoundMode() const;
+    EOdysseyAnimationBoundMode GetRightBoundMode() const;
+    int GetLeftBoundValue() const;
+    int GetRightBoundValue() const;
+
+    void SetLeftBoundMode(EOdysseyAnimationBoundMode iMode);
+    void SetRightBoundMode(EOdysseyAnimationBoundMode iMode);
+    void SetLeftBoundValue(int iValue);
+    void SetRightBoundValue(int iValue);
 
     //Time
     //Index to the frame at a given time
@@ -135,6 +152,18 @@ protected:
 
     UPROPERTY()
     int mFormat = ::ULIS::Format_BGRA8; //Deprecated: only present for compatibility, use Format instead
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Odyssey|Animation")
+    EOdysseyAnimationBoundMode LeftBoundMode = EOdysseyAnimationBoundMode::Automatic;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Odyssey|Animation", meta=(EditCondition="LeftBoundMode != EOdysseyAnimationBoundMode::Automatic", EditConditionHides))
+    int LeftBound = 0;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Odyssey|Animation")
+    EOdysseyAnimationBoundMode RightBoundMode = EOdysseyAnimationBoundMode::Automatic;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Odyssey|Animation", meta=(EditCondition="RightBoundMode != EOdysseyAnimationBoundMode::Automatic", EditConditionHides))
+    int RightBound = 0;
 
     UPROPERTY(BlueprintReadOnly, Category="Odyssey|Animation")
     EOdysseyAnimationFormat Format = EOdysseyAnimationFormat::BGRA8;

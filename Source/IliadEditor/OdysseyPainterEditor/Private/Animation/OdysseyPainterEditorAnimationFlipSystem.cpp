@@ -438,7 +438,7 @@ FOdysseyPainterEditorAnimationFlipSystem::EndFlipping()
     else
     {
         mEditor->GetAnimationPlayer()->SetRenderType(mInitialRenderType);
-        int frame = mAnimation->GetFrameIndexAtTime(mEditor->GetAnimationPlayer()->GetCurrentTime());
+        int frame = mEditor->GetAnimationPlayer()->GetCurrentFrame().GetFrame().Value;
         FOdysseyObjectEditorUtils::SetPropertyValue(mAnimation, GET_MEMBER_NAME_CHECKED( UOdysseyAnimation, CurrentFrame), frame);
     }
 }
@@ -697,9 +697,10 @@ FOdysseyPainterEditorAnimationFlipSystem::GetKeyFrame(int iDelta, int& oFrame)
                 currentKeyFrame = 0;
             }
 
+            const TArray<FInt32Range>& cellsFrameRanges = layer->GetCellsFrameRanges();
             for (int i = 0; i < cells.Num(); i++)
             {
-                FInt32Range cellRange = cells[i]->GetFrameRange();
+                const FInt32Range& cellRange = cellsFrameRanges[i];
                 if (cellRange.GetUpperBoundValue() < leftLimit)
                     continue;
 
@@ -713,10 +714,13 @@ FOdysseyPainterEditorAnimationFlipSystem::GetKeyFrame(int iDelta, int& oFrame)
                     continue;
                 }
 
-                int markId = cells[i]->Mark;
-                if (markId != INDEX_NONE && (markId == mFlipConfiguration.KeysCellMark || mFlipConfiguration.KeysCellMark == ALL_CELLMARKS_INDEX) )
+                if (cells[i])
                 {
-                    keyFrames.Add(FMath::Clamp(cellRange.GetLowerBoundValue(), leftLimit, rightLimit));
+                    int markId = cells[i]->Mark;
+                    if (markId != INDEX_NONE && (markId == mFlipConfiguration.KeysCellMark || mFlipConfiguration.KeysCellMark == ALL_CELLMARKS_INDEX) )
+                    {
+                        keyFrames.Add(FMath::Clamp(cellRange.GetLowerBoundValue(), leftLimit, rightLimit));
+                    }
                 }
             }
 
@@ -824,6 +828,9 @@ FOdysseyPainterEditorAnimationFlipSystem::GetLimits(EOdysseyAnimationFlipLimits 
             for (int i = startCellIndex + 1; i < cells.Num(); i++)
             {
                 UOdysseyAnimationCell* cell = cells[i];
+                if (!cell)
+                    continue;
+
                 if (cell->Mark == mFlipConfiguration.LimitsCellMark || ( mFlipConfiguration.LimitsCellMark == ALL_CELLMARKS_INDEX && cell->Mark != INDEX_NONE) )
                 {
                     oRightLimit = cell->GetFrameRange().GetLowerBoundValue();
@@ -834,6 +841,9 @@ FOdysseyPainterEditorAnimationFlipSystem::GetLimits(EOdysseyAnimationFlipLimits 
             for (int i = startCellIndex - 1; i >= 0; i--)
             {
                 UOdysseyAnimationCell* cell = cells[i];
+                if (!cell)
+                    continue;
+
                 if (cell->Mark == mFlipConfiguration.LimitsCellMark || ( mFlipConfiguration.LimitsCellMark == ALL_CELLMARKS_INDEX && cell->Mark != INDEX_NONE) )
                 {
                     oLeftLimit = cell->GetFrameRange().GetLowerBoundValue();

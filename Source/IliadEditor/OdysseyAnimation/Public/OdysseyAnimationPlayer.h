@@ -25,6 +25,15 @@ enum class EOdysseyAnimationPlayerStatus
     Stopped
 };
 
+
+
+UENUM(BlueprintType)
+enum class EOdysseyAnimationPlayerPostBehaviour : uint8
+{
+    Hold,
+    Loop
+};
+
 UCLASS()
 class ODYSSEYANIMATION_API UOdysseyAnimationPlayer
     : public UObject
@@ -39,13 +48,8 @@ public:
     //Events
     FSimpleMulticastDelegate& OnAnimationChanged();
     FSimpleMulticastDelegate& OnTextureChanged();
-    FSimpleMulticastDelegate& OnStatusChanged();
-    FSimpleMulticastDelegate& OnFrameRateChanged();
-    FSimpleMulticastDelegate& OnTextureUpdated();
-    FSimpleMulticastDelegate& OnIsLoopingChanged();
-    FSimpleMulticastDelegate& OnCurrentTimeChanged();
+    FSimpleMulticastDelegate& OnCurrentFrameChanged();
     FSimpleMulticastDelegate& OnPlay();
-    FSimpleMulticastDelegate& OnPause();
     FSimpleMulticastDelegate& OnStop();
 
 protected:
@@ -59,7 +63,7 @@ protected:
     void AnimationChanged();
     void TextureChanged();
     void StatusChanged();
-    void FrameRateChanged();
+    void PlayRateChanged();
     void IsLoopingChanged();
 
 public:
@@ -67,20 +71,36 @@ public:
     void Pause();
     void Stop();
 
-    void SeekToTime(FTimespan iTime);
-    void SeekToFrame(int iFrameIndex);
-    void SeekToFrameImmediate(int iFrameIndex);
+    void SeekToFrame(FFrameTime iFrame);
+    void SeekToFrameImmediate(FFrameTime iFrame);
 
     UTexture2D* GetTexture();
+    EOdysseyAnimationPlayerStatus GetStatus() const;
 
-    FTimespan GetCurrentTime() const;
+    FFrameTime GetCurrentFrame() const;
+
+    bool GetDuration(FFrameTime& oTime) const;
+
+    bool GetFrameInAnimationBounds(FFrameTime iFrame, FFrameTime& oFrame) const;
+    bool GetCurrentFrameInAnimationBounds(FFrameTime& oFrame) const;
+
+    void SetPreBehaviour(EOdysseyAnimationPlayerPostBehaviour iValue);
+    void SetPostBehaviour(EOdysseyAnimationPlayerPostBehaviour iValue);
+
+    bool ApplyPreBehaviour(FFrameTime iFrame, FFrameTime& oFrame) const;
+    bool ApplyPostBehaviour(FFrameTime iFrame, FFrameTime& oFrame) const;
+
     bool IsBackward() const;
 
     void SetRenderType(IOdysseyImageRenderer::eRenderType iRenderType);
     IOdysseyImageRenderer::eRenderType GetRenderType() const;
 
-    void SetTimeRange(const TOptional<TRange<FTimespan>>& iRange);
-    void SetFrameRange(const TOptional<FInt32Range>& iRange);
+    void SetFrameRange(const TOptional<TRange<FFrameTime>>& iRange);
+
+#if WITH_EDITOR
+    void SetIgnoreAnimationBounds(bool iValue);
+    bool GetIgnoreAnimationBounds() const;
+#endif
 
 protected:
     // FTickableEditorObject implementation
@@ -97,24 +117,36 @@ public:
     TObjectPtr<UOdysseyAnimation> Animation;
 
     UPROPERTY()
-    EOdysseyAnimationPlayerStatus Status = EOdysseyAnimationPlayerStatus::Stopped;
+    float PlayRate = 1.0f; //1.0f means 100% of the animation framepersecond
 
     UPROPERTY()
-    double FrameRate = 1.0f; //1.0f means 100% of the animation framepersecond
+    bool UsePreBehaviour = true;
+
+    UPROPERTY()
+    EOdysseyAnimationPlayerPostBehaviour PreBehaviour = EOdysseyAnimationPlayerPostBehaviour::Loop;
+
+    UPROPERTY()
+    bool UsePostBehaviour = true;
+
+    UPROPERTY()
+    EOdysseyAnimationPlayerPostBehaviour PostBehaviour = EOdysseyAnimationPlayerPostBehaviour::Loop;
 
     UPROPERTY()
     bool IsLooping = true;
-
-private:
+public:
     UPROPERTY(Transient, DuplicateTransient)
     TObjectPtr<UTexture2D> Texture;
 
 private:
+#if WITH_EDITOR
+    bool mIgnoreAnimationBounds = false;
+#endif
     bool mIsBackward = false;
-    FTimespan mCurrentTime;
-    TOptional<TRange<FTimespan>> mRange;
+    FFrameTime mCurrentFrame;
+    TOptional<TRange<FFrameTime>> mRange;
     TArray<FGuid>   mImageRenderingComposition;
     FULISInvalidTileMap mInvalidTileMap;
+    EOdysseyAnimationPlayerStatus Status = EOdysseyAnimationPlayerStatus::Stopped;
 
     /**
      * We keep the renderer in memory to ensure all blocks are loaded and ready to be used instead of being recached
@@ -126,12 +158,7 @@ private:
     //Events
     FSimpleMulticastDelegate mOnAnimationChanged;
     FSimpleMulticastDelegate mOnTextureChanged;
-    FSimpleMulticastDelegate mOnTextureUpdated;
-    FSimpleMulticastDelegate mOnStatusChanged;
-    FSimpleMulticastDelegate mOnFrameRateChanged;
-    FSimpleMulticastDelegate mOnIsLoopingChanged;
-    FSimpleMulticastDelegate mOnCurrentTimeChanged;
+    FSimpleMulticastDelegate mOnCurrentFrameChanged;
     FSimpleMulticastDelegate mOnPlay;
-    FSimpleMulticastDelegate mOnPause;
     FSimpleMulticastDelegate mOnStop;
 };

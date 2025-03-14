@@ -3,6 +3,7 @@
 
 #include "OdysseyAnimationTimelineTrack.h"
 
+#include "OdysseyAnimation.h"
 #include "MovieScene.h"
 
 #include "OdysseyAnimationTimelineTemplate.h"
@@ -18,15 +19,23 @@ UOdysseyAnimationTimelineTrack::UOdysseyAnimationTimelineTrack(const FObjectInit
 }
 
 UMovieSceneSection*
-UOdysseyAnimationTimelineTrack::AddNewSection(FFrameNumber KeyTime, float iDurationInSeconds)
+UOdysseyAnimationTimelineTrack::AddNewSection(FFrameNumber KeyTime, UOdysseyAnimation* iAnimation)
 {
-
     UMovieScene* movieScene = GetTypedOuter<UMovieScene>();
     if (!movieScene)
         return nullptr;
 
     UOdysseyAnimationTimelineSection* NewSection = Cast<UOdysseyAnimationTimelineSection>(CreateNewSection());
-    NewSection->InitialPlacement(Sections, KeyTime, movieScene->GetTickResolution().AsFrameNumber(iDurationInSeconds).Value, 0);
+    NewSection->SetAnimation(iAnimation);
+
+    TRange<FFrameNumber> defaultRange = UOdysseyAnimationTimelineSection::GetDefaultSectionRange(NewSection);
+    int32 animationDuration = UE::MovieScene::DiscreteSize(defaultRange);
+
+    FFrameRate animationFrameRate(iAnimation->GetFramesPerSecond() * 100, 100);
+    FFrameNumber animationLeftBoundFrame(iAnimation->GetLeftBoundValue());
+
+    NewSection->SetStartFrameOffset(FFrameRate::TransformTime(animationLeftBoundFrame, animationFrameRate, movieScene->GetDisplayRate()).GetFrame());
+    NewSection->InitialPlacement(Sections, KeyTime, animationDuration, false);
 
     AddSection(*NewSection);
     UpdateEasing();

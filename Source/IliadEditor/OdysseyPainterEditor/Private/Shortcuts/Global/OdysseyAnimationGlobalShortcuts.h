@@ -13,4 +13,11 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyAnimationGlobalShortcuts
 public:
     virtual ~FOdysseyAnimationGlobalShortcuts() {};
     FOdysseyAnimationGlobalShortcuts(FOdysseyPainterEditor* iEditor);
+
+public:
+    //Shortcuts
+    virtual void MapActionsToCommandList(TSharedRef<FUICommandList> iCommandList) override;
+
+private:
+    FOdysseyPainterEditor* mEditor;
 };

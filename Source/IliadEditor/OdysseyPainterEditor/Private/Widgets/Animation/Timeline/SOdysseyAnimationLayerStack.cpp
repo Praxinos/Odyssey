@@ -269,7 +269,10 @@ SOdysseyAnimationLayerStack::Tick( const FGeometry& AllottedGeometry, const doub
 int
 SOdysseyAnimationLayerStack::GetCurrentFrame() const
 {
-    return mAnimation.Get()->GetFrameIndexAtTime(mPlayer.Get()->GetCurrentTime());
+    FFrameTime frame = 0;
+    if (!mPlayer.Get()->GetCurrentFrameInAnimationBounds(frame))
+        return INDEX_NONE;
+    return frame.GetFrame().Value;
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -33,7 +33,6 @@ FOdysseyPainterEditorAnimationSource::StaticId()
 
 FOdysseyPainterEditorAnimationSource::~FOdysseyPainterEditorAnimationSource()
 {
-
 }
 
 FOdysseyPainterEditorAnimationSource::FOdysseyPainterEditorAnimationSource(UOdysseyAnimation* iAnimation)
@@ -41,6 +40,9 @@ FOdysseyPainterEditorAnimationSource::FOdysseyPainterEditorAnimationSource(UOdys
     //, mTexture( NewObject<UOdysseyAnimationTexture>() )
     , mPlayer ( NewObject<UOdysseyAnimationPlayer>() )
 {
+    mPlayer->UsePreBehaviour = false;
+    mPlayer->UsePostBehaviour = true;
+    mPlayer->SetIgnoreAnimationBounds(true);
 }
 
 const FGuid&

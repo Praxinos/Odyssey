@@ -77,4 +77,9 @@ public:
 
     /** Flip System */
     TArray<TSharedPtr<FUICommandInfo>> Flip;
+
+    TSharedPtr<FUICommandInfo> SetAnimationLeftBoundAutomatic;
+    TSharedPtr<FUICommandInfo> SetAnimationLeftBoundManual;
+    TSharedPtr<FUICommandInfo> SetAnimationRightBoundAutomatic;
+    TSharedPtr<FUICommandInfo> SetAnimationRightBoundManual;
 };

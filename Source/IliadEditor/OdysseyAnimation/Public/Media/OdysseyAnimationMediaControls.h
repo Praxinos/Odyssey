@@ -31,12 +31,15 @@ public:
     virtual TRangeSet<float> GetSupportedRates(EMediaRateThinning Thinning) const override;
     virtual bool IsLooping() const override;
     virtual bool Seek(const FTimespan& Time) override;
+    virtual bool Seek(const FTimespan& InNewTime, const FMediaSeekParams& InAdditionalParams) override;
     virtual bool SetLooping(bool Looping) override;
     virtual bool SetRate(float Rate) override;
     virtual void SetBlockingPlaybackHint(bool bFacadeWillUseBlockingPlayback) override;
 
     //deprecated: but needed to compile and used in FOdysseyAnimationMediaSamples
     virtual FTimespan GetTime() const override;
+
+    int GetSequenceIndex() const;
 
 public:
     void SetState(EMediaState iState);
@@ -55,5 +58,6 @@ private:
     bool mIsLooping;
     float mRate;
     FTimespan mTime;
+    int mSequenceIndex = 0;
     TOptional<int> mFrameToIncludeIntoDuration;
 };

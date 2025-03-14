@@ -9,18 +9,22 @@
 class FOdysseyAnimationCellsMutator;
 class FOdysseyAnimationTimelineTool;
 class FOdysseyPainterEditorAnimationTimelinePosition;
+
 /**
  * Implements a layer row widget
  */
 class SOdysseyAnimationCells
     : public SCompoundWidget
 {
+    SLATE_DECLARE_WIDGET(SOdysseyAnimationCells, SCompoundWidget)
+
     DECLARE_DELEGATE_RetVal_OneParam(TSharedRef<SWidget>, FOnCreateCellWidget, UOdysseyAnimationCell*)
 
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationCells)
         : _ShowHandles(false)
         {}
+        SLATE_ATTRIBUTE(TArray<UOdysseyAnimationCell*>, Cells)
         SLATE_ARGUMENT(TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition>, TimelinePosition)
         SLATE_EVENT(FOnCreateCellWidget, OnCreateCellWidget)
         SLATE_ATTRIBUTE(bool, ShowHandles)
@@ -42,21 +46,27 @@ public:
     virtual FReply OnMouseMove(const FGeometry& iGeometry, const FPointerEvent& iEvent) override;
     virtual FReply OnMouseButtonUp(const FGeometry& iGeometry, const FPointerEvent& iEvent) override;
     virtual FReply OnDragDetected(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent) override;
-    virtual void Tick( const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime ) override;
+    //virtual void Tick( const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime ) override;
+
 
 private:
-    const TArray<UOdysseyAnimationCell*>& GetCells() const;
+    struct FCellItem
+    {
+        UOdysseyAnimationCell* mCell = nullptr;
+    };
+
+private:
+    TSharedRef<ITableRow> OnGenerateRow(TSharedPtr<FCellItem> iCell, const TSharedRef<STableViewBase>& iOwnerTable);
 
     TSharedRef<SWidget> CreateCellWidget(int iCellIndex);
-    TSharedRef<SWidget> CreateTimingHandleWidget(int iCellIndex);
-    TSharedRef<SWidget> CreateExposureHandleWidget(int iCellIndex);
-    TSharedRef<SWidget> CreateAddCellsHandleRightWidget();
-    TSharedRef<SWidget> CreateAddCellsHandleLeftWidget();
-    TSharedRef<SWidget> CreateCellBreakIndicatorWidget(int iCellIndex);
+    TSharedRef<SWidget> CreateTimingHandleWidget();
+    //TSharedRef<SWidget> CreateExposureHandleWidget(int iCellIndex);
+    TSharedRef<SWidget> CreateAddCellsHandleWidget();
+    TSharedRef<SWidget> CreateCellBreakIndicatorWidget();
 
-    void RefreshCells();
+    //void RefreshCells();
     void RefreshTempCells();
-    void AddCellSection(int iCellIndex);
+    //void AddCellSection(int iCellIndex);
     void AddTempCellSection(bool iPost);
 
     void SelectAllFrames();
@@ -68,7 +78,7 @@ private:
 private:
     //Widget Methods
     float GetOffset() const;
-    void UpdateHandlesVisibility();
+    void UpdateHoveredCell();
 
     //EVisibility GetFrameSelectorVisibility() const;
 
@@ -77,12 +87,12 @@ private:
     float GetCellExposure(UOdysseyAnimationCell* iCell) const;
 
     EVisibility GetExposureHandleVisibility(UOdysseyAnimationCell* iCell) const;
-    void OnExposureHandleDragStarted(const FGeometry& iGeometry, const FPointerEvent& iEvent, int iCellIndex);
+    void OnExposureHandleDragStarted(const FGeometry& iGeometry, const FPointerEvent& iEvent);
     void OnExposureHandleDragged(const FGeometry& iGeometry, const FPointerEvent& iEvent);
     void OnExposureHandleDragStopped(const FGeometry& iGeometry, const FPointerEvent& iEvent);
 
     EVisibility GetTimingHandleVisibility(UOdysseyAnimationCell* iCell) const;
-    void OnTimingHandleDragStarted(const FGeometry& iGeometry, const FPointerEvent& iEvent, int iCellIndex);
+    void OnTimingHandleDragStarted(const FGeometry& iGeometry, const FPointerEvent& iEvent);
     void OnTimingHandleDragged(const FGeometry& iGeometry, const FPointerEvent& iEvent);
     void OnTimingHandleDragStopped(const FGeometry& iGeometry, const FPointerEvent& iEvent);
 
@@ -92,11 +102,10 @@ private:
     void OnAddCellsHandleDragged(const FGeometry& iGeometry, const FPointerEvent& iEvent);
     void OnAddCellsHandleDragStopped(const FGeometry& iGeometry, const FPointerEvent& iEvent);
 
-    EVisibility GetCellBreakIndicatorVisibility(UOdysseyAnimationCell* iCell) const;
-    EVisibility GetCellBreakIndicatorCopyVisibility(UOdysseyAnimationCell* iCell) const;
-    EVisibility GetCellBreakIndicatorBlankVisibility(UOdysseyAnimationCell* iCell) const;
-    float GetCellBreakIndicatorOffset(UOdysseyAnimationCell* iCell) const;
-    float GetCellBreakIndicatorWidth(UOdysseyAnimationCell* iCell) const;
+    EVisibility GetCellBreakIndicatorVisibility() const;
+    EVisibility GetCellBreakIndicatorBlankVisibility() const;
+    float GetCellBreakIndicatorOffset() const;
+    float GetCellBreakIndicatorWidth() const;
 
     const FSlateBrush* GetPreBehaviourBrush() const;
     TSharedRef<SWidget> GetPreBehaviourMenuContent();
@@ -113,7 +122,12 @@ private:
     float MousePositionToFrame(float iX) const;
     float FrameToMousePosition(float iFrame) const;
 
+    void RefreshItemsSource();
+
 private:
+    TSlateAttribute<TArray<UOdysseyAnimationCell*>> mCells;
+    TSharedPtr<UE::Slate::Containers::TObservableArray<TSharedPtr<FCellItem>>> mItemsSource;
+
     TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition> mTimelinePosition;
     class UOdysseyAnimationLayer* mAnimationLayer;
     TSharedPtr<FOdysseyAnimationTimelineTool> mTool;
@@ -123,7 +137,6 @@ private:
 
     //Handles visibility management
     TAttribute<bool> mShowHandles;
-    bool mLockHandlesVisibility;
     UOdysseyAnimationCell* mHoveredCell; //cell that can display its exposure handle
     TArray<UOdysseyAnimationCell*> mTimingHandleCells; //cells that can display their timing handle
 
@@ -149,25 +162,28 @@ private:
 
     struct
     {
-        int mCellIndex;
-        double mMousePosition;
-        int mInitialExposure;
+        bool mIsDragging = false;
+        UOdysseyAnimationCell* mCell = nullptr;
+        double mMousePosition = 0;
+        int mInitialExposure = 0;
     } mExposureHandleDragData;
 
     struct
     {
-        int mCellIndex;
-        int mMinOffset;
-        bool mHasMaxOffset;
-        int mMaxOffset;
-        double mMousePosition;
+        bool mIsDragging = false;
+        UOdysseyAnimationCell* mCell = nullptr;
+        int mMinOffset = 0;
+        bool mHasMaxOffset = false;
+        int mMaxOffset = 0;
+        double mMousePosition = 0;
 
-        int mInitialOffset;
+        int mInitialOffset = 0;
         TMap<UOdysseyAnimationCell*, int> mAffectedCells;
     } mTimingHandleDragData;
 
     struct
     {
+        bool mIsDragging = false;
         int mMinOffset;
         int mMaxOffset;
         bool mHasMaxOffset;

@@ -66,6 +66,9 @@ FOdysseyAnimationCellSelection::CleanSelectedCells()
     mSelectedCells = mSelectedCells.FilterByPredicate(
         [cells](UOdysseyAnimationCell* iCell)
         {
+            if (!iCell)
+                return false;
+
             return cells.Contains(iCell);
         }
     );
@@ -139,6 +142,9 @@ FOdysseyAnimationCellSelection::SelectCell(UOdysseyAnimationCell* iCell, bool iS
         return;
     }
 
+    if (!iCell)
+        return;
+
     if (!currentLayer->GetCells().Contains(iCell))
         return;
 
@@ -171,6 +177,8 @@ FOdysseyAnimationCellSelection::SetSelectedCells(const TArray<UOdysseyAnimationC
             return iCellA.IndexInLayer < iCellB.IndexInLayer;
         }
     );
+
+    CleanSelectedCells();
 }
 
 const TArray<UOdysseyAnimationCell*>&

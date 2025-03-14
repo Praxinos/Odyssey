@@ -28,7 +28,6 @@ FOdysseyAnimationTimelineSectionEditor::FOdysseyAnimationTimelineSectionEditor(T
     : mSequencer( InSequencer )
     , mSection(InSection)
 {
-    mComponent = GetComponent();
 }
 
 TSharedPtr<ISequencer>
@@ -72,7 +71,6 @@ FOdysseyAnimationTimelineSectionEditor::GetSectionToolTip() const
 TSharedRef<SWidget>
 FOdysseyAnimationTimelineSectionEditor::GenerateSectionWidget()
 {
-    UOdysseyAnimationComponent* component = GetComponent();
     TSharedPtr<ISequencer> sequencer = GetSequencer();
 
     mSectionWidget = SNew(SVerticalBox)
@@ -88,10 +86,53 @@ FOdysseyAnimationTimelineSectionEditor::GenerateSectionWidget()
         + SVerticalBox::Slot()
         .AutoHeight()
         [
-            SNew(SOdysseyAnimationTimelineSection, sequencer, mSection, mComponent)
+            SNew(SOdysseyAnimationTimelineSection, sequencer, mSection)
+            .Animation(this, &FOdysseyAnimationTimelineSectionEditor::GetAnimation)
+            .PreBehaviour(this, &FOdysseyAnimationTimelineSectionEditor::GetPreBehaviour)
+            .PostBehaviour(this, &FOdysseyAnimationTimelineSectionEditor::GetPostBehaviour)
+            .StartFrameOffset(this, &FOdysseyAnimationTimelineSectionEditor::GetStartFrameOffset)
+            .OnPreBehaviourChanged(this, &FOdysseyAnimationTimelineSectionEditor::OnPreBehaviourChanged)
+            .OnPostBehaviourChanged(this, &FOdysseyAnimationTimelineSectionEditor::OnPostBehaviourChanged)
         ];
 
     return mSectionWidget.ToSharedRef();
+}
+
+
+UOdysseyAnimation*
+FOdysseyAnimationTimelineSectionEditor::GetAnimation() const
+{
+    return mSection->GetAnimation();
+}
+
+FFrameNumber
+FOdysseyAnimationTimelineSectionEditor::GetStartFrameOffset() const
+{
+    return mSection->GetStartFrameOffset();
+}
+
+EOdysseyAnimationPlayerPostBehaviour
+FOdysseyAnimationTimelineSectionEditor::GetPreBehaviour() const
+{
+    return mSection->GetPreBehaviour();
+}
+
+EOdysseyAnimationPlayerPostBehaviour
+FOdysseyAnimationTimelineSectionEditor::GetPostBehaviour() const
+{
+    return mSection->GetPostBehaviour();
+}
+
+void
+FOdysseyAnimationTimelineSectionEditor::OnPreBehaviourChanged(EOdysseyAnimationPlayerPostBehaviour iValue)
+{
+    mSection->SetPreBehaviour(iValue);
+}
+
+void
+FOdysseyAnimationTimelineSectionEditor::OnPostBehaviourChanged(EOdysseyAnimationPlayerPostBehaviour iValue)
+{
+    mSection->SetPostBehaviour(iValue);
 }
 
 bool
@@ -111,39 +152,10 @@ FOdysseyAnimationTimelineSectionEditor::OnPaintSection( FSequencerSectionPainter
     return InPainter.LayerId;
 }
 
-UOdysseyAnimationComponent*
-FOdysseyAnimationTimelineSectionEditor::GetComponent() const
-{
-    UOdysseyAnimationTimelineTrack* track = mSection->GetTypedOuter<UOdysseyAnimationTimelineTrack>();
-
-    TSharedPtr<ISequencer> sequencer = GetSequencer();
-    if (!sequencer)
-        return nullptr;
-
-    TArrayView<TWeakObjectPtr<>> boundObjects = sequencer->FindObjectsInCurrentSequence(track->FindObjectBindingGuid());
-    for (TWeakObjectPtr<>& boundObjectPtr : boundObjects)
-    {
-        UObject* boundObject = boundObjectPtr.Get();
-        if (!boundObject)
-            continue;
-
-        if (!boundObject->IsA<UOdysseyAnimationComponent>())
-            continue;
-
-        UOdysseyAnimationComponent* animationComponent = Cast<UOdysseyAnimationComponent>(boundObject);
-        if (!animationComponent)
-            continue;
-
-        return animationComponent;
-    }
-
-    return nullptr;
-}
-
 void
 FOdysseyAnimationTimelineSectionEditor::BeginResizeSection()
 {
-    mInitialStartOffsetDuringResize = mSection->StartFrameOffset;
+    mInitialStartOffsetDuringResize = mSection->GetStartFrameOffset();
     mInitialStartTimeDuringResize = mSection->HasStartFrame() ? mSection->GetInclusiveStartFrame() : 0;
 
     ISequencerSection::BeginResizeSection();
@@ -154,17 +166,7 @@ FOdysseyAnimationTimelineSectionEditor::ResizeSection(ESequencerSectionResizeMod
 {
     if (iResizeMode == SSRM_LeadingEdge)
     {
-        FFrameNumber mStartOffset = iResizeTime - mInitialStartTimeDuringResize;
-        mStartOffset += mInitialStartOffsetDuringResize;
-
-        // Ensure start offset is not less than 0
-        if (mStartOffset < 0)
-        {
-            iResizeTime = iResizeTime - mStartOffset;
-            mStartOffset = FFrameNumber(0);
-        }
-
-        mSection->StartFrameOffset = mStartOffset;
+        mSection->SetStartFrameOffset(mInitialStartOffsetDuringResize - (mInitialStartTimeDuringResize - iResizeTime));
     }
 
     ISequencerSection::ResizeSection(iResizeMode, iResizeTime);

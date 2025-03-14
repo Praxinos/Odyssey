@@ -24,10 +24,15 @@ struct FOdysseyAnimationTimelineSectionParams
     FFrameNumber StartFrameOffset;
 
     UPROPERTY()
-    bool bLooping;
+    TObjectPtr<UOdysseyAnimation> Animation;
+
+    UPROPERTY()
+    EOdysseyAnimationPlayerPostBehaviour PreBehaviour = EOdysseyAnimationPlayerPostBehaviour::Loop;
+
+    UPROPERTY()
+    EOdysseyAnimationPlayerPostBehaviour PostBehaviour = EOdysseyAnimationPlayerPostBehaviour::Loop;
 
     FOdysseyAnimationTimelineSectionParams()
-        : bLooping(false)
     {}
 };
 
@@ -61,13 +66,10 @@ public:
     virtual void TearDown(FPersistentEvaluationData& PersistentData, IMovieScenePlayer& Player) const override;
 
 public:
-    static void GetStartTimeAndDuration(const TRange<FFrameTime>& iRange, const FOdysseyAnimationTimelineSectionParams& iParams, const FFrameRate& iFrameRate, double& oStartTime, double& oDuration);
+    static FFrameNumber GetEvaluatedFrame(UOdysseyAnimation* iComponent, const TRange<FFrameTime>& iRange, const FOdysseyAnimationTimelineSectionParams& iParams, const FFrameRate& iFrameRate);
     static void EvaluateImmediate(UOdysseyAnimationComponent* iComponent, const TRange<FFrameTime>& iRange, const FOdysseyAnimationTimelineSectionParams& iParams, const FFrameRate& iFrameRate );
 
 private:
-    UPROPERTY()
-    FOdysseyAnimationTimelineSectionParams mParams;
-
     UPROPERTY()
     TObjectPtr<const UOdysseyAnimationTimelineSection> mSection;
 };

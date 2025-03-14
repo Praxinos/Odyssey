@@ -70,7 +70,8 @@ FOdysseyAnimationMediaControls::GetFrameCount() const
 FInt32Range
 FOdysseyAnimationMediaControls::GetFrameRange() const
 {
-    FInt32Range frameRange = mAnimation->GetFrameRange();
+
+    FInt32Range frameRange = FInt32Range::Inclusive(mAnimation->GetLeftBoundValue(), mAnimation->GetRightBoundValue());
     if (mFrameToIncludeIntoDuration.IsSet())
     {
         frameRange.SetLowerBoundValue(FMath::Min(frameRange.GetLowerBoundValue(), mFrameToIncludeIntoDuration.GetValue()));
@@ -124,6 +125,13 @@ FOdysseyAnimationMediaControls::GetTime() const
     return mTime;
 }
 
+int
+FOdysseyAnimationMediaControls::GetSequenceIndex() const
+{
+    //deprecated: but needed to compile
+    return mSequenceIndex;
+}
+
 bool
 FOdysseyAnimationMediaControls::IsLooping() const
 {
@@ -146,6 +154,13 @@ FOdysseyAnimationMediaControls::Seek(const FTimespan& iTime)
     player->GetEventSink().ReceiveMediaEvent(EMediaEvent::SeekCompleted);
 
     return true;
+}
+
+bool
+FOdysseyAnimationMediaControls::Seek(const FTimespan& InNewTime, const FMediaSeekParams& InAdditionalParams)
+{
+    mSequenceIndex = InAdditionalParams.NewSequenceIndex.Get(0);
+    return IMediaControls::Seek(InNewTime, InAdditionalParams);
 }
 
 bool

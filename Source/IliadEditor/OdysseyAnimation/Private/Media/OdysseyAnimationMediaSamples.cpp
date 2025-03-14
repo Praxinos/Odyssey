@@ -277,7 +277,7 @@ FOdysseyAnimationMediaSamples::PeekVideoSampleTime(FMediaTimeStamp & TimeStamp)
     TSharedPtr<FOdysseyAnimationMediaControls> controls = mControls.Pin();
 
     TimeStamp.Time = controls->GetTime();
-    TimeStamp.SetSequenceIndex( 0 );
+    TimeStamp.SetSequenceIndex( controls->GetSequenceIndex() );
     return true;
 }
 
