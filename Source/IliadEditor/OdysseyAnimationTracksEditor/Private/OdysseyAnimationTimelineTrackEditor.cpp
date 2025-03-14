@@ -73,34 +73,14 @@ FOdysseyAnimationTimelineTrackEditor::OnNewActorTrackAdded(const AActor& iActor,
         return;
 
     animationTrack->Modify();
+    animationTrack->Component = animationComponent;
 
-    UMovieSceneSection* section = animationTrack->AddNewSection(iSequencer->GetLocalTime().Time.FrameNumber, GetDefaultSectionDuration(animationComponent));
+    UMovieSceneSection* section = animationTrack->AddNewSection(iSequencer->GetLocalTime().Time.FrameNumber);
     section->Modify();
 
     iSequencer->EmptySelection();
     iSequencer->SelectSection(section);
     iSequencer->ThrobSectionSelection();
-}
-
-float
-FOdysseyAnimationTimelineTrackEditor::GetDefaultSectionDuration(UOdysseyAnimationComponent* iComponent)
-{
-    float duration = 10.f;
-    if (!iComponent)
-        return duration;
-
-    UOdysseyAnimation* animation = iComponent->GetActiveAnimation();
-    if (!animation)
-        return duration;
-
-    FInt32Range range = animation->GetFrameRange();
-    int32 lastFrame = range.GetUpperBoundValue();
-    if (lastFrame >= 0)
-    {
-        duration = (lastFrame + 1) / animation->GetFramesPerSecond();
-    }
-
-    return duration;
 }
 
 bool
@@ -151,6 +131,7 @@ FOdysseyAnimationTimelineTrackEditor::AddAnimationTrackKeyInternal(FFrameNumber 
             if (ObjectBindingGuid.IsValid())
             {
                 FFindOrCreateTrackResult TrackResult = FindOrCreateTrackForObject(ObjectBindingGuid, UOdysseyAnimationTimelineTrack::StaticClass());
+
                 UMovieSceneTrack* Track = TrackResult.Track;
                 UOdysseyAnimationTimelineTrack* animationTrack = Cast<UOdysseyAnimationTimelineTrack>(Track);
                 KeyPropertyResult.bTrackCreated |= TrackResult.bWasCreated;
@@ -178,7 +159,11 @@ FOdysseyAnimationTimelineTrackEditor::AddAnimationTrackKeyInternal(FFrameNumber 
                     if (component)
                     {
                         animationTrack->Modify();
-                        UMovieSceneSection* NewSection = animationTrack->AddNewSection(KeyTime, GetDefaultSectionDuration(component));
+
+                        if (TrackResult.bWasCreated)
+                            animationTrack->Component = component;
+
+                        UMovieSceneSection* NewSection = animationTrack->AddNewSection(KeyTime);
                         NewSection->Modify();
                         KeyPropertyResult.bTrackModified = true;
                         KeyPropertyResult.SectionsCreated.Add(NewSection);

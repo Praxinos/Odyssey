@@ -157,17 +157,7 @@ FOdysseyAnimationTimelineSectionEditor::ResizeSection(ESequencerSectionResizeMod
 {
     if (iResizeMode == SSRM_LeadingEdge)
     {
-        FFrameNumber mStartOffset = iResizeTime - mInitialStartTimeDuringResize;
-        mStartOffset += mInitialStartOffsetDuringResize;
-
-        // Ensure start offset is not less than 0
-        if (mStartOffset < 0)
-        {
-            iResizeTime = iResizeTime - mStartOffset;
-            mStartOffset = FFrameNumber(0);
-        }
-
-        mSection->StartFrameOffset = mStartOffset;
+        mSection->StartFrameOffset = iResizeTime - mInitialStartTimeDuringResize + mInitialStartOffsetDuringResize;
     }
 
     ISequencerSection::ResizeSection(iResizeMode, iResizeTime);

@@ -8,6 +8,7 @@
 #include "OdysseyAnimationTimelineSection.generated.h"
 
 enum class EMovieSceneChannelProxyType : uint8;
+class UOdysseyAnimationComponent;
 
 /**
  * Defines the section for a template sequence track.
@@ -16,10 +17,12 @@ UCLASS()
 class ODYSSEYANIMATIONTRACKS_API UOdysseyAnimationTimelineSection
     : public UMovieSceneSection
 {
-public:
-
     GENERATED_BODY()
 
+public:
+    static TRange<FFrameNumber> GetDefaultSectionRange(UOdysseyAnimationTimelineSection* iSection, UOdysseyAnimationComponent* iComponent);
+
+public:
     UOdysseyAnimationTimelineSection(const FObjectInitializer& ObjInitializer);
 
 public:
@@ -28,8 +31,10 @@ public:
 protected:
     virtual EMovieSceneChannelProxyType CacheChannelProxy() override;
     virtual void MigrateFrameTimes(FFrameRate SourceRate, FFrameRate DestinationRate) override;
-
 public:
+    UPROPERTY()
+    UOdysseyAnimationComponent* Component = nullptr;
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Animation")
     FFrameNumber StartFrameOffset = 0;
 };

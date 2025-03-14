@@ -3,6 +3,10 @@
 
 #include "OdysseyAnimationTimelineSection.h"
 
+#include "OdysseyAnimation.h"
+#include "OdysseyAnimationComponent.h"
+#include "MovieScene.h"
+
 #include "Channels/MovieSceneChannelData.h"
 #include "Channels/MovieSceneChannelProxy.h"
 #include "EntitySystem/BuiltInComponentTypes.h"
@@ -44,6 +48,30 @@ UOdysseyAnimationTimelineSection::MigrateFrameTimes(FFrameRate SourceRate, FFram
         FFrameNumber NewStartFrameOffset = ConvertFrameTime(FFrameTime(StartFrameOffset), SourceRate, DestinationRate).FloorToFrame();
         StartFrameOffset = NewStartFrameOffset;
     }
+}
+
+TRange<FFrameNumber>
+UOdysseyAnimationTimelineSection::GetDefaultSectionRange(UOdysseyAnimationTimelineSection* iSection, UOdysseyAnimationComponent* iComponent)
+{
+    if (!iComponent)
+        return TRange<FFrameNumber>();
+
+    UOdysseyAnimation* animation = iComponent->GetActiveAnimation();
+    if (!animation)
+        return TRange<FFrameNumber>();
+
+    FFrameRate animationFrameRate(animation->GetFramesPerSecond() * 100, 100);
+
+    FFrameNumber animationLeftBoundFrame(animation->GetLeftBoundValue());
+    FFrameNumber animationRightBoundFrame(animation->GetRightBoundValue() + 1);
+
+    UMovieScene* outer_movie_scene = iSection->GetTypedOuter<UMovieScene>();
+    FFrameTime animationLeftBoundTime = FFrameRate::TransformTime(animationLeftBoundFrame, animationFrameRate, outer_movie_scene->GetDisplayRate());
+    animationLeftBoundFrame = FFrameRate::TransformTime(animationLeftBoundTime, outer_movie_scene->GetDisplayRate(), outer_movie_scene->GetTickResolution()).GetFrame();
+    FFrameTime animationRightBoundTime = FFrameRate::TransformTime(animationRightBoundFrame, animationFrameRate, outer_movie_scene->GetDisplayRate());
+    animationRightBoundFrame = FFrameRate::TransformTime(animationRightBoundTime, outer_movie_scene->GetDisplayRate(), outer_movie_scene->GetTickResolution()).GetFrame();
+
+    return TRange<FFrameNumber>(animationLeftBoundFrame, animationRightBoundFrame);
 }
 
 #undef LOCTEXT_NAMESPACE

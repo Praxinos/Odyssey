@@ -8,6 +8,8 @@
 
 #include "OdysseyAnimationTimelineTrack.generated.h"
 
+class UOdysseyAnimationComponent;
+
 UCLASS()
 class ODYSSEYANIMATIONTRACKS_API UOdysseyAnimationTimelineTrack
     : public UMovieSceneNameableTrack
@@ -18,7 +20,7 @@ public:
 
     UOdysseyAnimationTimelineTrack(const FObjectInitializer& ObjectInitializer);
 
-    virtual UMovieSceneSection* AddNewSection(FFrameNumber KeyTime, float iDurationInSeconds);
+    virtual UMovieSceneSection* AddNewSection(FFrameNumber KeyTime);
 
 public:
     // UMovieSceneTrack interface
@@ -67,6 +69,9 @@ private:
 #endif
 
 public:
+    UPROPERTY()
+    UOdysseyAnimationComponent* Component = nullptr;
+
     UPROPERTY()
     bool DisplayLayers = true;
 };
