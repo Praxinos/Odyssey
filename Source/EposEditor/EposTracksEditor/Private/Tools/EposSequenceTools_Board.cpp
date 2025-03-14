@@ -17,6 +17,7 @@
 #include "MovieSceneTimeHelpers.h"
 #include "MovieSceneToolHelpers.h"
 #include "MovieSceneToolsProjectSettings.h"
+#include "Subsystems/EditorActorSubsystem.h"
 #include "UObject/UObjectIterator.h"
 #include "Widgets/Notifications/SNotificationList.h"
 
@@ -1084,11 +1085,18 @@ ShotSequenceTools::CloneInnerContent( ISequencer* iSequencer, UMovieSceneSequenc
 void
 ShotSequenceTools::CloneInnerAnimation( ISequencer* iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, UMovieScene* iMovieScene, AOdysseyAnimationActor* iAnimationToClone, FGuid iAnimationBinding, ACineCameraActor* iClonedCamera, bool iAttachAnimationToCamera )
 {
-    FActorSpawnParameters animationSpawnParams;
-    animationSpawnParams.Template = iAnimationToClone;
-    AOdysseyAnimationActor* cloned_animation = iAnimationToClone->GetWorld()->SpawnActor<AOdysseyAnimationActor>( animationSpawnParams );
+    UEditorActorSubsystem* editorActorSubsystem = GEditor->GetEditorSubsystem<UEditorActorSubsystem>();
+
+    TArray<AActor*> actors = editorActorSubsystem->DuplicateActors( { iAnimationToClone }, iAnimationToClone->GetWorld() );
+    AOdysseyAnimationActor* cloned_animation = Cast<AOdysseyAnimationActor>( actors.Num() ? actors[0] : nullptr );
     if( !cloned_animation )
         return;
+
+    //FActorSpawnParameters animationSpawnParams;
+    //animationSpawnParams.Template = iAnimationToClone;
+    //AOdysseyAnimationActor* cloned_animation = iAnimationToClone->GetWorld()->SpawnActor<AOdysseyAnimationActor>( animationSpawnParams );
+    //if( !cloned_animation )
+    //    return;
 
     UEposMovieSceneSequence* epos_sequence = Cast<UEposMovieSceneSequence>( iSequence );
     check( epos_sequence );
