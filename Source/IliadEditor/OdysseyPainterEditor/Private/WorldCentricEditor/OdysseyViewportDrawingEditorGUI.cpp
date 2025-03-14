@@ -154,8 +154,8 @@ FOdysseyViewportDrawingEditorGUI::CustomizeAnimationEditorTimeline()
                 FFrameNumber endFrame = sectionRange.GetUpperBoundValue() - 1; //-1 because upperboundvalue is exclusive
                 FFrameTime endTime = FFrameRate::TransformTime(FFrameRate::TransformTime(endFrame, tickResolution, displayRate).FloorToFrame(), displayRate, tickResolution);
 
-                int validRangeStartFrame = FMath::FloorToInt(tickResolution.AsSeconds(section->StartFrameOffset) * animation->FramesPerSecond);
-                int validRangeEndFrame = FMath::FloorToInt(tickResolution.AsSeconds(section->StartFrameOffset + endTime.FrameNumber - startFrame ) * animation->FramesPerSecond);
+                int validRangeStartFrame = FMath::FloorToInt(tickResolution.AsSeconds(section->GetStartFrameOffset()) * animation->FramesPerSecond);
+                int validRangeEndFrame = FMath::FloorToInt(tickResolution.AsSeconds(section->GetStartFrameOffset() + endTime.FrameNumber - startFrame ) * animation->FramesPerSecond);
                 FInt32Range validRange = FInt32Range::Inclusive(validRangeStartFrame, validRangeEndFrame);
                 return validRange;
             }

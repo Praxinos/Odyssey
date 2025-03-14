@@ -34,6 +34,57 @@ UOdysseyAnimationTimelineSection::CacheChannelProxy()
     return EMovieSceneChannelProxyType::Dynamic;
 }
 
+UOdysseyAnimation*
+UOdysseyAnimationTimelineSection::GetAnimation() const
+{
+    return Animation;
+}
+EOdysseyAnimationPlayerPostBehaviour
+UOdysseyAnimationTimelineSection::GetPreBehaviour() const
+{
+    return PreBehaviour;
+}
+
+EOdysseyAnimationPlayerPostBehaviour
+UOdysseyAnimationTimelineSection::GetPostBehaviour() const
+{
+    return PostBehaviour;
+}
+
+FFrameNumber
+UOdysseyAnimationTimelineSection::GetStartFrameOffset() const
+{
+    return StartFrameOffset;
+}
+
+void
+UOdysseyAnimationTimelineSection::SetAnimation(UOdysseyAnimation* iAnimation)
+{
+    Animation = iAnimation;
+    MarkAsChanged();
+}
+
+void
+UOdysseyAnimationTimelineSection::SetPreBehaviour(EOdysseyAnimationPlayerPostBehaviour iValue)
+{
+    PreBehaviour = iValue;
+    MarkAsChanged();
+}
+
+void
+UOdysseyAnimationTimelineSection::SetPostBehaviour(EOdysseyAnimationPlayerPostBehaviour iValue)
+{
+    PostBehaviour = iValue;
+    MarkAsChanged();
+}
+
+void
+UOdysseyAnimationTimelineSection::SetStartFrameOffset(FFrameNumber iOffset)
+{
+    StartFrameOffset = iOffset;
+    MarkAsChanged();
+}
+
 void
 UOdysseyAnimationTimelineSection::MigrateFrameTimes(FFrameRate SourceRate, FFrameRate DestinationRate)
 {

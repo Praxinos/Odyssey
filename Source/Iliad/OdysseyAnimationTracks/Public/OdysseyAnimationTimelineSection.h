@@ -28,10 +28,22 @@ public:
 public:
     UOdysseyAnimationTimelineSection(const FObjectInitializer& ObjInitializer);
 
+public:
+    UOdysseyAnimation* GetAnimation() const;
+    EOdysseyAnimationPlayerPostBehaviour GetPreBehaviour() const;
+    EOdysseyAnimationPlayerPostBehaviour GetPostBehaviour() const;
+    FFrameNumber GetStartFrameOffset() const;
+
+    void SetAnimation(UOdysseyAnimation* iAnimation);
+    void SetPreBehaviour(EOdysseyAnimationPlayerPostBehaviour iValue);
+    void SetPostBehaviour(EOdysseyAnimationPlayerPostBehaviour iValue);
+    void SetStartFrameOffset(FFrameNumber iOffset);
+
 protected:
     virtual EMovieSceneChannelProxyType CacheChannelProxy() override;
     virtual void MigrateFrameTimes(FFrameRate SourceRate, FFrameRate DestinationRate) override;
-public:
+
+protected:
     UPROPERTY( EditAnywhere, BlueprintReadWrite, Category="Animation")
     TObjectPtr<UOdysseyAnimation> Animation;
 

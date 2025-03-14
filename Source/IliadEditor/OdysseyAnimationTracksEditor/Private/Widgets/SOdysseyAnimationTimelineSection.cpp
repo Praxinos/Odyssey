@@ -223,7 +223,7 @@ SOdysseyAnimationTimelineSection::RebuildWidgets()
         [
             SNew(SBox)
             .WidthOverride_Lambda(
-                [this]()
+                [this, animation]()
                 {
                     TSharedPtr<ISequencer> sequencer = mSequencer.Pin();
                     if (!sequencer)
@@ -235,7 +235,10 @@ SOdysseyAnimationTimelineSection::RebuildWidgets()
                     FVector2f local_size = geometry.GetLocalSize();
                     FTimeToPixel timeToPixel = track_model->GetTimeToPixel( local_size.X );
 
-                    return timeToPixel.FrameDeltaToPixel(mStartFrameOffset.Get());
+                    FFrameRate animationFrameRate(animation->GetFramesPerSecond() * 100, 100);
+                    FFrameTime animationLeftBound = FFrameRate::TransformTime(animation->GetLeftBoundValue(), animationFrameRate, sequencer->GetFocusedTickResolution());
+
+                    return timeToPixel.FrameDeltaToPixel(animationLeftBound - mStartFrameOffset.Get());
                 }
             )
             [
@@ -281,16 +284,17 @@ SOdysseyAnimationTimelineSection::RebuildWidgets()
                     FTimeToPixel timeToPixel = track_model->GetTimeToPixel( local_size.X );
 
                     FFrameRate animationFrameRate(animation->GetFramesPerSecond() * 100, 100);
-                    FFrameNumber animationDuration(animation->GetRightBoundValue() - animation->GetLeftBoundValue() + 1);
+                    FFrameTime animationStartFrame(animation->GetLeftBoundValue());
+                    FFrameTime animationEndFrame(animation->GetRightBoundValue() + 1);
+                    FFrameTime sectionDuration = mSection->GetRange().GetUpperBoundValue() - mSection->GetRange().GetLowerBoundValue();
+                    animationStartFrame = FFrameRate::TransformTime(animationStartFrame, animationFrameRate, sequencer->GetFocusedTickResolution());
+                    animationEndFrame = FFrameRate::TransformTime(animationEndFrame, animationFrameRate, sequencer->GetFocusedTickResolution());
 
-                    FFrameTime displayedDuration = FFrameRate::TransformTime(animationDuration, animationFrameRate, sequencer->GetFocusedTickResolution());
-                    displayedDuration += FMath::Min(FFrameNumber(0), mStartFrameOffset.Get());
+                    animationStartFrame = FMath::Max(animationStartFrame, FFrameTime(mStartFrameOffset.Get()));
+                    animationEndFrame = FMath::Min(animationEndFrame, sectionDuration + mStartFrameOffset.Get());
 
-                    FFrameTime maxDisplayedDuration = mSection->GetRange().GetUpperBoundValue() - mSection->GetRange().GetLowerBoundValue();
-                    maxDisplayedDuration -= FMath::Max(FFrameNumber(0), mStartFrameOffset.Get());
-
-                    displayedDuration = FMath::Min(maxDisplayedDuration, displayedDuration);
-                    return timeToPixel.FrameDeltaToPixel(displayedDuration);
+                    FFrameTime animationDuration = FMath::Max(FFrameTime(0), animationEndFrame - animationStartFrame);
+                    return timeToPixel.FrameDeltaToPixel(animationDuration);
                 }
             )
             [
@@ -367,23 +371,23 @@ SOdysseyAnimationTimelineSection::Tick(const FGeometry& AllottedGeometry, const 
     if (!animation)
         return;
 
-    float animationFramesPerSecond = animation->GetFramesPerSecond();
-    FFrameRate animationFrameRate(animation->GetFramesPerSecond() * 100, 100);
 
     FMovieSceneFrameRange sectionRange = mSection->SectionRange;
     FFrameNumber sectionFrameLength = sectionRange.Value.GetUpperBoundValue() - sectionRange.Value.GetLowerBoundValue();
     double sectionSecondLength = movieScene->GetTickResolution().AsSeconds(sectionFrameLength);
 
+    float animationFramesPerSecond = animation->GetFramesPerSecond();
     double animationSecondInPixels = (animationFramesPerSecond * mTimelinePosition->GetBaseFrameSize());
     double sequencerSecondInPixels = AllottedGeometry.Size.X / sectionSecondLength;
-
     double zoom = sequencerSecondInPixels / animationSecondInPixels;
     mTimelinePosition->SetZoom(zoom);
 
-    FFrameNumber negativeStartOffset = FMath::Min(FFrameNumber(0), mStartFrameOffset.Get());
-    FFrameTime startOffset = FFrameRate::TransformTime(-negativeStartOffset, movieScene->GetTickResolution(), animationFrameRate);
+    FFrameRate animationFrameRate(animation->GetFramesPerSecond() * 100, 100);
+    FFrameTime startOffset = FMath::Max(FFrameTime(0), FFrameTime(mStartFrameOffset.Get()));
+    startOffset = FFrameRate::TransformTime(startOffset, movieScene->GetTickResolution(), animationFrameRate);
+    float offset = FMath::Max(animation->GetLeftBoundValue(), startOffset.GetFrame().Value + startOffset.GetSubFrame());
 
-    mTimelinePosition->SetOffset(animation->GetLeftBoundValue() + startOffset.GetFrame().Value + startOffset.GetSubFrame());
+    mTimelinePosition->SetOffset( offset );
 }
 
 EVisibility

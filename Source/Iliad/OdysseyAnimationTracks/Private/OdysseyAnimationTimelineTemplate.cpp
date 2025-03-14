@@ -67,10 +67,9 @@ struct FOdysseyAnimationTimelineSectionExecutionToken
         player->SetPostBehaviour(iParams.PostBehaviour);
 
         FFrameRate animationFrameRate(animation->GetFramesPerSecond() * 100, 100);
-        FFrameTime animationLeftBound = FFrameRate::TransformTime(animation->GetLeftBoundValue(), animationFrameRate, iFrameRate);
 
-        FFrameTime rangeStartFrame = iRange.GetLowerBoundValue() - iParams.SectionStartFrame - iParams.StartFrameOffset + animationLeftBound;
-        FFrameTime rangeEndFrame = iRange.GetUpperBoundValue() - iParams.SectionStartFrame - iParams.StartFrameOffset + animationLeftBound;
+        FFrameTime rangeStartFrame = iRange.GetLowerBoundValue() - iParams.SectionStartFrame + iParams.StartFrameOffset;
+        FFrameTime rangeEndFrame = iRange.GetUpperBoundValue() - iParams.SectionStartFrame + iParams.StartFrameOffset;
 
         FFrameTime startFrame = FFrameRate::TransformTime(rangeStartFrame, iFrameRate, animationFrameRate);
         FFrameTime endFrame = FFrameRate::TransformTime(rangeEndFrame, iFrameRate, animationFrameRate);
@@ -107,19 +106,6 @@ private:
 FOdysseyAnimationTimelineTemplate::FOdysseyAnimationTimelineTemplate(const UOdysseyAnimationTimelineSection& InSection, const UOdysseyAnimationTimelineTrack& InTrack)
     : mSection(&InSection)
 {
-    if (InSection.HasStartFrame())
-    {
-        mParams.SectionStartFrame = InSection.GetRange().GetLowerBoundValue();
-    }
-    if (InSection.HasEndFrame())
-    {
-        mParams.SectionEndFrame = InSection.GetRange().GetUpperBoundValue();
-    }
-
-    mParams.StartFrameOffset = InSection.StartFrameOffset;
-    mParams.Animation = InSection.Animation;
-    mParams.PreBehaviour = InSection.PreBehaviour;
-    mParams.PostBehaviour = InSection.PostBehaviour;
 }
 
 
@@ -135,10 +121,18 @@ FOdysseyAnimationTimelineTemplate::Evaluate(const FMovieSceneEvaluationOperand& 
     if (Context.IsPostRoll())
         return;
 
-    if (Context.GetTime().FrameNumber > mParams.SectionEndFrame || Context.GetTime().FrameNumber < mParams.SectionStartFrame)
+    if (Context.GetTime().FrameNumber > mSection->GetRange().GetUpperBoundValue() || Context.GetTime().FrameNumber < mSection->GetRange().GetLowerBoundValue())
         return;
 
-    ExecutionTokens.Add(FOdysseyAnimationTimelineSectionExecutionToken(Context.GetRange(), mParams, Context.GetFrameRate()));
+    FOdysseyAnimationTimelineSectionParams params;
+    params.SectionStartFrame = mSection->GetRange().GetLowerBoundValue();
+    params.SectionEndFrame = mSection->GetRange().GetUpperBoundValue();
+    params.StartFrameOffset = mSection->GetStartFrameOffset();
+    params.Animation = mSection->GetAnimation();
+    params.PreBehaviour = mSection->GetPreBehaviour();
+    params.PostBehaviour = mSection->GetPostBehaviour();
+
+    ExecutionTokens.Add(FOdysseyAnimationTimelineSectionExecutionToken(Context.GetRange(), params, Context.GetFrameRate()));
 }
 
 void

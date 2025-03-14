@@ -71,8 +71,5 @@ public:
 
 private:
     UPROPERTY()
-    FOdysseyAnimationTimelineSectionParams mParams;
-
-    UPROPERTY()
     TObjectPtr<const UOdysseyAnimationTimelineSection> mSection;
 };

@@ -102,37 +102,37 @@ FOdysseyAnimationTimelineSectionEditor::GenerateSectionWidget()
 UOdysseyAnimation*
 FOdysseyAnimationTimelineSectionEditor::GetAnimation() const
 {
-    return mSection->Animation;
+    return mSection->GetAnimation();
 }
 
 FFrameNumber
 FOdysseyAnimationTimelineSectionEditor::GetStartFrameOffset() const
 {
-    return mSection->StartFrameOffset;
+    return mSection->GetStartFrameOffset();
 }
 
 EOdysseyAnimationPlayerPostBehaviour
 FOdysseyAnimationTimelineSectionEditor::GetPreBehaviour() const
 {
-    return mSection->PreBehaviour;
+    return mSection->GetPreBehaviour();
 }
 
 EOdysseyAnimationPlayerPostBehaviour
 FOdysseyAnimationTimelineSectionEditor::GetPostBehaviour() const
 {
-    return mSection->PostBehaviour;
+    return mSection->GetPostBehaviour();
 }
 
 void
 FOdysseyAnimationTimelineSectionEditor::OnPreBehaviourChanged(EOdysseyAnimationPlayerPostBehaviour iValue)
 {
-    mSection->PreBehaviour = iValue;
+    mSection->SetPreBehaviour(iValue);
 }
 
 void
 FOdysseyAnimationTimelineSectionEditor::OnPostBehaviourChanged(EOdysseyAnimationPlayerPostBehaviour iValue)
 {
-    mSection->PostBehaviour = iValue;
+    mSection->SetPostBehaviour(iValue);
 }
 
 bool
@@ -155,7 +155,7 @@ FOdysseyAnimationTimelineSectionEditor::OnPaintSection( FSequencerSectionPainter
 void
 FOdysseyAnimationTimelineSectionEditor::BeginResizeSection()
 {
-    mInitialStartOffsetDuringResize = mSection->StartFrameOffset;
+    mInitialStartOffsetDuringResize = mSection->GetStartFrameOffset();
     mInitialStartTimeDuringResize = mSection->HasStartFrame() ? mSection->GetInclusiveStartFrame() : 0;
 
     ISequencerSection::BeginResizeSection();
@@ -166,7 +166,7 @@ FOdysseyAnimationTimelineSectionEditor::ResizeSection(ESequencerSectionResizeMod
 {
     if (iResizeMode == SSRM_LeadingEdge)
     {
-        mSection->StartFrameOffset = mInitialStartOffsetDuringResize + (mInitialStartTimeDuringResize - iResizeTime);
+        mSection->SetStartFrameOffset(mInitialStartOffsetDuringResize - (mInitialStartTimeDuringResize - iResizeTime));
     }
 
     ISequencerSection::ResizeSection(iResizeMode, iResizeTime);

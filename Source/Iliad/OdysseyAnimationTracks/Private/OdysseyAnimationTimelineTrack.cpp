@@ -26,14 +26,15 @@ UOdysseyAnimationTimelineTrack::AddNewSection(FFrameNumber KeyTime, UOdysseyAnim
         return nullptr;
 
     UOdysseyAnimationTimelineSection* NewSection = Cast<UOdysseyAnimationTimelineSection>(CreateNewSection());
-    NewSection->Animation = iAnimation;
+    NewSection->SetAnimation(iAnimation);
 
     TRange<FFrameNumber> defaultRange = UOdysseyAnimationTimelineSection::GetDefaultSectionRange(NewSection);
-    /* FFrameNumber animationLeftBoundFrame = UE::MovieScene::DiscreteInclusiveLower( defaultRange );
-    FFrameNumber animationRightBoundFrame = UE::MovieScene::DiscreteExclusiveUpper( defaultRange ); */
     int32 animationDuration = UE::MovieScene::DiscreteSize(defaultRange);
 
-    NewSection->StartFrameOffset = 0;
+    FFrameRate animationFrameRate(iAnimation->GetFramesPerSecond() * 100, 100);
+    FFrameNumber animationLeftBoundFrame(iAnimation->GetLeftBoundValue());
+
+    NewSection->SetStartFrameOffset(FFrameRate::TransformTime(animationLeftBoundFrame, animationFrameRate, movieScene->GetDisplayRate()).GetFrame());
     NewSection->InitialPlacement(Sections, KeyTime, animationDuration, false);
 
     AddSection(*NewSection);

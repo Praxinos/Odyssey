@@ -566,7 +566,9 @@ FOdysseyViewportDrawingEditorExtension::SyncSequencerWithAnimationPlayer()
         if (!section)
             continue;
 
-        int animationDisplayedFrame = animation->GetFrameIndexAtTime(player->GetCurrentTime());
+        int animationDisplayedFrame = 0;
+        if (!player->GetCurrentFrameInAnimationBounds(animationDisplayedFrame))
+            continue;
 
         FFrameRate tickResolution = movieScene->GetTickResolution();
         FFrameRate displayRate = sequencer->GetFocusedDisplayRate();
@@ -590,10 +592,10 @@ FOdysseyViewportDrawingEditorExtension::SyncSequencerWithAnimationPlayer()
             FOdysseyAnimationTimelineSectionParams params;
             params.SectionStartFrame = sectionStartFrame;
             params.SectionEndFrame = sectionEndFrame;
-            params.StartFrameOffset = section->StartFrameOffset;
-            params.Animation = section->Animation;
-            params.PreBehaviour = section->PreBehaviour;
-            params.PostBehaviour = section->PostBehaviour;
+            params.StartFrameOffset = section->GetStartFrameOffset();
+            params.Animation = section->GetAnimation();
+            params.PreBehaviour = section->GetPreBehaviour();
+            params.PostBehaviour = section->GetPostBehaviour();
             TRange<FFrameTime> range = TRange<FFrameTime>::Inclusive(sectionStartFrame, sectionStartFrame);
             FOdysseyAnimationTimelineTemplate::EvaluateImmediate(animationComponent, range, params, tickResolution);
             return;
@@ -603,10 +605,10 @@ FOdysseyViewportDrawingEditorExtension::SyncSequencerWithAnimationPlayer()
             FOdysseyAnimationTimelineSectionParams params;
             params.SectionStartFrame = sectionStartFrame;
             params.SectionEndFrame = sectionEndFrame;
-            params.StartFrameOffset = section->StartFrameOffset;
-            params.Animation = section->Animation;
-            params.PreBehaviour = section->PreBehaviour;
-            params.PostBehaviour = section->PostBehaviour;
+            params.StartFrameOffset = section->GetStartFrameOffset();
+            params.Animation = section->GetAnimation();
+            params.PreBehaviour = section->GetPreBehaviour();
+            params.PostBehaviour = section->GetPostBehaviour();
             TRange<FFrameTime> range = TRange<FFrameTime>::Inclusive(sectionEndFrame, sectionEndFrame);
             FOdysseyAnimationTimelineTemplate::EvaluateImmediate(animationComponent, range, params, tickResolution);
             return;
