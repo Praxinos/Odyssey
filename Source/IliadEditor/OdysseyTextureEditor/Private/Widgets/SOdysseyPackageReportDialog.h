@@ -1,5 +1,5 @@
-// IDDN.FR.001.250001.005.S.P.2019.000.00000
-// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
+// IDDN.FR.001.060015.013.S.X.2019.000.00000
+// ODYSSEY is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 // This a copy of SPackageReportDialog.h private in the source code of UE4
 // see: https://udn.unrealengine.com/s/question/0D54z0000775oOGCAY/spackagereportdialog-and-sdiscoveringassetsdialog-are-private

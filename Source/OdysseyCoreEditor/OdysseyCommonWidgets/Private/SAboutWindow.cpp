@@ -1,5 +1,5 @@
-// IDDN.FR.001.060015.008.S.X.2019.000.00000
-// Odyssey is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
+// IDDN.FR.001.060015.013.S.X.2019.000.00000
+// ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "SAboutWindow.h"
 
@@ -148,7 +148,7 @@ SAboutWindow::Construct( const FArguments& iArgs )
                 .Padding( FMargin( 0.f, 2.f, 0.f, 12.f ) )
                 [
                     SNew( STextBlock )
-                    .Text( LOCTEXT( "copyright.iddn", "IDDN.FR.001.060015.008.S.X.2019.000.00000" ) )
+                    .Text( LOCTEXT( "copyright.iddn", "IDDN.FR.001.060015.013.S.X.2019.000.00000" ) )
                     .TextStyle(FOdysseyStyle::Get(), "Odyssey.About.SmallText" )
                 ]
                 + SVerticalBox::Slot()
