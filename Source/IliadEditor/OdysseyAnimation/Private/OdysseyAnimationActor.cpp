@@ -67,7 +67,7 @@ AOdysseyAnimationActor::MoveInFrontOfCamera()
     SetActorRotation( plane_rotator );
 }
 
-FName AOdysseyAnimationActor::AnimationComponentName(TEXT("AnimationComponentName0"));
+FName AOdysseyAnimationActor::AnimationComponentName(TEXT("AnimationComponent"));
 
 AOdysseyAnimationActor::AOdysseyAnimationActor(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer)
