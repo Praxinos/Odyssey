@@ -80,60 +80,67 @@ SOdysseyAnimationCells::Construct(
         ]
         + SHorizontalBox::Slot()
         .AutoWidth()
-        .Padding(FMargin(-preBehaviourPadding, 0, 0, 0))
+        .Padding(FMargin(-preBehaviourPadding, 0, 0.f, 0))
         [
             SNew(SBox)
+            .Padding(FMargin(0, 0, 4.f, 0))
             .WidthOverride(preBehaviourPadding)
+            .HAlign(HAlign_Right)
+            .VAlign(VAlign_Center)
             [
-                SNew(SHorizontalBox)
-                + SHorizontalBox::Slot()
-                .HAlign(HAlign_Right)
-                .VAlign(VAlign_Center)
+                SNew(SComboButton)
+                .ButtonStyle(&FAppStyle::Get().GetWidgetStyle< FButtonStyle >( "SimpleButton" ))
+                .HasDownArrow(false)
+                .OnGetMenuContent(this, &SOdysseyAnimationCells::GetPreBehaviourMenuContent)
+                .ButtonContent()
                 [
-                    SNew(SComboButton)
-                    .ButtonStyle(&FAppStyle::Get().GetWidgetStyle< FButtonStyle >( "SimpleButton" ))
-                    .HasDownArrow(false)
-                    .OnGetMenuContent(this, &SOdysseyAnimationCells::GetPreBehaviourMenuContent)
-                    .ButtonContent()
-                    [
-                        SNew(SImage)
-                        .Image(this, &SOdysseyAnimationCells::GetPreBehaviourBrush)
-                        .ColorAndOpacity(preBehaviourColor)
-                    ]
-                ]
-                + SHorizontalBox::Slot()
-                .AutoWidth()
-                [
-                    //Add Cells Handle
-                    CreateAddCellsHandleLeftWidget()
+                    SNew(SImage)
+                    .Image(this, &SOdysseyAnimationCells::GetPreBehaviourBrush)
+                    .ColorAndOpacity(preBehaviourColor)
                 ]
             ]
         ]
         + SHorizontalBox::Slot()
         .AutoWidth()
         [
-            SAssignNew(mTempPreCellsBox, SHorizontalBox)
+            SNew(SOverlay)
+            + SOverlay::Slot()
+            [
+                SNew(SHorizontalBox)
+                + SHorizontalBox::Slot()
+                .AutoWidth()
+                [
+                    SAssignNew(mTempPreCellsBox, SHorizontalBox)
+                ]
+                + SHorizontalBox::Slot()
+                .AutoWidth()
+                [
+                    SAssignNew(mCellsBox, SHorizontalBox)
+                ]
+                + SHorizontalBox::Slot()
+                .AutoWidth()
+                [
+                    SAssignNew(mTempPostCellsBox, SHorizontalBox)
+                ]
+            ]
+            + SOverlay::Slot()
+            .HAlign(HAlign_Left)
+            .VAlign(VAlign_Bottom)
+            [
+                //Add Cells Handle
+                CreateAddCellsHandleLeftWidget()
+            ]
+            + SOverlay::Slot()
+            .HAlign(HAlign_Right)
+            .VAlign(VAlign_Top)
+            [
+                //Add Cells Handle
+                CreateAddCellsHandleRightWidget()
+            ]
         ]
         + SHorizontalBox::Slot()
         .AutoWidth()
-        [
-            SAssignNew(mCellsBox, SHorizontalBox)
-        ]
-        + SHorizontalBox::Slot()
-        .AutoWidth()
-        [
-            SAssignNew(mTempPostCellsBox, SHorizontalBox)
-        ]
-        + SHorizontalBox::Slot()
-        .AutoWidth()
-        .HAlign(HAlign_Left)
-        .VAlign(VAlign_Top)
-        [
-            //Add Cells Handle
-            CreateAddCellsHandleRightWidget()
-        ]
-        + SHorizontalBox::Slot()
-        .AutoWidth()
+        .Padding(FMargin(4.f, 0.f, 0.f, 0.f))
         .HAlign(HAlign_Left)
         .VAlign(VAlign_Center)
         [
