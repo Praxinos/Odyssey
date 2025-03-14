@@ -7,7 +7,7 @@
 #include "Widgets/Layout/SMissingWidget.h"
 #include "OdysseyStyle.h"
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
-#include "Widgets/Animation/Timeline/Cells/SOdysseyAnimationCellHandle.h"
+#include "SOdysseyHandle.h"
 #include "Widgets/Input/SComboButton.h"
 #include "TimelineTools/OdysseyAnimationTimelineTool.h"
 #include "TimelineTools/OdysseyAnimationTimelineTools.h"
@@ -287,7 +287,7 @@ SOdysseyAnimationCells::CreateTimingHandleWidget(int iCellIndex)
         .WidthOverride(mTimingHandleBrush->ImageSize.X)
         .HeightOverride(mTimingHandleBrush->ImageSize.Y)
         [
-            SNew(SOdysseyAnimationCellHandle)
+            SNew(SOdysseyHandle)
             .OnDragStarted(this, &SOdysseyAnimationCells::OnTimingHandleDragStarted, iCellIndex)
             .OnDragged(this, &SOdysseyAnimationCells::OnTimingHandleDragged)
             .OnDragStopped(this, &SOdysseyAnimationCells::OnTimingHandleDragStopped)
@@ -307,7 +307,7 @@ SOdysseyAnimationCells::CreateExposureHandleWidget(int iCellIndex)
         .WidthOverride(mExposureHandleBrush->ImageSize.X)
         .HeightOverride(mExposureHandleBrush->ImageSize.Y)
         [
-            SNew(SOdysseyAnimationCellHandle)
+            SNew(SOdysseyHandle)
             .OnDragStarted(this, &SOdysseyAnimationCells::OnExposureHandleDragStarted, iCellIndex)
             .OnDragged(this, &SOdysseyAnimationCells::OnExposureHandleDragged)
             .OnDragStopped(this, &SOdysseyAnimationCells::OnExposureHandleDragStopped)
@@ -360,7 +360,7 @@ SOdysseyAnimationCells::CreateCellBreakIndicatorWidget(int iCellIndex)
 TSharedRef<SWidget>
 SOdysseyAnimationCells::CreateAddCellsHandleRightWidget()
 {
-    return SNew(SOdysseyAnimationCellHandle)
+    return SNew(SOdysseyHandle)
         .OnDragStarted(this, &SOdysseyAnimationCells::OnAddCellsHandleDragStarted, true)
         .OnDragged(this, &SOdysseyAnimationCells::OnAddCellsHandleDragged)
         .OnDragStopped(this, &SOdysseyAnimationCells::OnAddCellsHandleDragStopped)
@@ -383,7 +383,7 @@ SOdysseyAnimationCells::CreateAddCellsHandleLeftWidget()
         .HAlign(HAlign_Right)
         .VAlign(VAlign_Bottom)
         [
-            SNew(SOdysseyAnimationCellHandle)
+            SNew(SOdysseyHandle)
             .OnDragStarted(this, &SOdysseyAnimationCells::OnAddCellsHandleDragStarted, false)
             .OnDragged(this, &SOdysseyAnimationCells::OnAddCellsHandleDragged)
             .OnDragStopped(this, &SOdysseyAnimationCells::OnAddCellsHandleDragStopped)

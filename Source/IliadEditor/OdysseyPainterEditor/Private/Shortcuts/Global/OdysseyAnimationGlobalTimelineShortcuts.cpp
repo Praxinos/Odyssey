@@ -300,7 +300,4 @@ FOdysseyAnimationGlobalTimelineShortcuts::Action_Flip(int iConfigurationIndex)
     mEditor->GetAnimationFlipSystem()->StartFlipping(settings->FlipConfigurations[iConfigurationIndex]);
 }
 
-
-
-
 #undef LOCTEXT_NAMESPACE

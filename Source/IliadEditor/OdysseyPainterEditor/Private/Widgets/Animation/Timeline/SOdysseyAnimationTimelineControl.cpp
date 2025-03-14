@@ -5,6 +5,7 @@
 #include "OdysseyKeyState.h"
 #include "OdysseyPainterEditorAnimationCommands.h"
 #include "OdysseyAnimation.h"
+#include "OdysseyStyle.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "OdysseyPainterEditorAnimationTimelinePosition.h"
 
@@ -39,6 +40,12 @@ SOdysseyAnimationTimelineControl::OnPaint(const FPaintArgs& Args, const FGeometr
 
     const FSlateBrush* GenericBrush = FCoreStyle::Get().GetBrush("GenericWhiteBox");
 
+    FLinearColor outOfRangeColor = FOdysseyStyle::Get().GetSlateColor("Animation.Timeline.OutOfRangeColor").GetSpecifiedColor();
+    outOfRangeColor.A = FOdysseyStyle::Get().GetFloat("Animation.Timeline.OutOfRangeColorOpacity");
+
+    FLinearColor outOfBoundColor = FOdysseyStyle::Get().GetSlateColor("Animation.Timeline.OutOfBoundColor").GetSpecifiedColor();
+    outOfBoundColor.A = FOdysseyStyle::Get().GetFloat("Animation.Timeline.OutOfBoundColorOpacity");
+
     const float height = AllottedGeometry.GetLocalSize().Y;
     const float width = AllottedGeometry.GetLocalSize().X;
     const float frameSize = mTimelinePosition->GetFrameSize();
@@ -61,11 +68,8 @@ SOdysseyAnimationTimelineControl::OnPaint(const FPaintArgs& Args, const FGeometr
     FInt32Range validRange = mCustomValidRange.Get();
     if (!validRange.IsEmpty())
     {
-        FLinearColor outOfRangeColor = FLinearColor::Black;
-        outOfRangeColor.A = 0.3f;
-
-        float leftRangeX = FMath::Min(width, FrameToMousePosition(validRange.GetLowerBoundValue()));
-        float rightRangeX = FMath::Max(0, FrameToMousePosition(validRange.GetUpperBoundValue() + 1));
+        float leftRangeX = FrameToMousePosition(validRange.GetLowerBoundValue());
+        float rightRangeX = FrameToMousePosition(validRange.GetUpperBoundValue() + 1);
 
         if (leftRangeX > 0.f)
         {
@@ -90,6 +94,36 @@ SOdysseyAnimationTimelineControl::OnPaint(const FPaintArgs& Args, const FGeometr
                 outOfRangeColor
             );
         }
+    }
+
+    int leftBoundFrame = mAnimation->GetLeftBoundValue();
+    int rightBoundFrame = mAnimation->GetRightBoundValue();
+
+    float leftBoundX = FrameToMousePosition(leftBoundFrame);
+    float rightBoundX = FrameToMousePosition(rightBoundFrame + 1);
+
+    if ( leftBoundX > 0.f )
+    {
+        FSlateDrawElement::MakeBox(
+            OutDrawElements,
+            LayerId,
+            AllottedGeometry.ToPaintGeometry(FVector2D(leftBoundX, height), FSlateLayoutTransform(1.0, TransformPoint(1.0, FVector2D(0.f, 0.f)))),
+            GenericBrush,
+            ESlateDrawEffect::None,
+            outOfBoundColor
+        );
+    }
+
+    if ( rightBoundX < width )
+    {
+        FSlateDrawElement::MakeBox(
+            OutDrawElements,
+            LayerId,
+            AllottedGeometry.ToPaintGeometry(FVector2D(width - rightBoundX, height), FSlateLayoutTransform(1.0, TransformPoint(1.0, FVector2D(rightBoundX, 0.f)))),
+            GenericBrush,
+            ESlateDrawEffect::None,
+            outOfBoundColor
+        );
     }
 
     ++LayerId;

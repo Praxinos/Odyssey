@@ -33,6 +33,7 @@ public class OdysseyCommonWidgets : ModuleRules
                 // [RUNTIME] engine dependencies
 				"Core",
 				"CoreUObject",
+                "InputCore",
                 "Slate",
                 "SlateCore",
                 "Projects",

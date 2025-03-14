@@ -63,6 +63,7 @@ public class OdysseyPainterEditor : ModuleRules
                 "OdysseyAnimation",
                 "OdysseyAnimationTracks",
                 "OdysseyCore",
+                "OdysseyCommonWidgets",
                 "OdysseyHUD",
                 "OdysseyImaging",
                 "OdysseyLayerStackEditor",

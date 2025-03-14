@@ -744,6 +744,18 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set("Animation.Timeline.Inbetweening.Forward16", new IMAGE_BRUSH("OdysseyAnimation/Timeline/Inbetweening/forward16", mIcon16x16));
     Set("Animation.Timeline.Inbetweening.Backward16", new IMAGE_BRUSH("OdysseyAnimation/Timeline/Inbetweening/backward16", mIcon16x16));
 
+    Set("Animation.Timeline.OutOfRangeColor", FStyleColors::AccentBlack);
+    Set("Animation.Timeline.OutOfRangeColorOpacity", 0.3f);
+
+    Set("Animation.Timeline.OutOfBoundColor", FStyleColors::AccentBlack);
+    Set("Animation.Timeline.OutOfBoundColorOpacity", 0.3f);
+
+    Set("Animation.Timeline.LeftBoundColor", FStyleColors::AccentGreen);
+    Set("Animation.Timeline.RightBoundColor", FStyleColors::AccentRed);
+
+    Set("Animation.Timeline.LeftBoundHandle", new IMAGE_BRUSH("OdysseyAnimation/Timeline/Header/AnimationLeftBoundHandle_16", mIcon16x16));
+    Set("Animation.Timeline.RightBoundHandle", new IMAGE_BRUSH("OdysseyAnimation/Timeline/Header/AnimationRightBoundHandle_16", mIcon16x16));
+
     Set("Animation.LightTable64", new IMAGE_BRUSH("OdysseyAnimation/LightTable_64", mIcon64x64));
     Set("Animation.LightTable16", new IMAGE_BRUSH("OdysseyAnimation/LightTable_16", mIcon16x16));
 

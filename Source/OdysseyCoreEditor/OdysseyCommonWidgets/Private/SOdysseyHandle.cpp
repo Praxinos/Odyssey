@@ -1,10 +1,10 @@
 // IDDN.FR.001.250001.006.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
 
-#include "Widgets/Animation/Timeline/Cells/SOdysseyAnimationCellHandle.h"
+#include "SOdysseyHandle.h"
 
 void
-SOdysseyAnimationCellHandle::Construct( const SOdysseyAnimationCellHandle::FArguments& InArgs)
+SOdysseyHandle::Construct( const SOdysseyHandle::FArguments& InArgs)
 {
     mOnDragStarted = InArgs._OnDragStarted;
     mOnDragged = InArgs._OnDragged;
@@ -19,7 +19,7 @@ SOdysseyAnimationCellHandle::Construct( const SOdysseyAnimationCellHandle::FArgu
 }
 
 FReply
-SOdysseyAnimationCellHandle::OnMouseButtonDown(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent)
+SOdysseyHandle::OnMouseButtonDown(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent)
 {
     if (iMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
     {
@@ -31,7 +31,7 @@ SOdysseyAnimationCellHandle::OnMouseButtonDown(const FGeometry& iGeometry, const
 }
 
 FReply
-SOdysseyAnimationCellHandle::OnMouseMove(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent)
+SOdysseyHandle::OnMouseMove(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent)
 {
     if (mIsDragging)
     {
@@ -42,7 +42,7 @@ SOdysseyAnimationCellHandle::OnMouseMove(const FGeometry& iGeometry, const FPoin
 }
 
 FReply
-SOdysseyAnimationCellHandle::OnMouseButtonUp(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent)
+SOdysseyHandle::OnMouseButtonUp(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent)
 {
     if (mIsDragging)
     {
@@ -54,7 +54,7 @@ SOdysseyAnimationCellHandle::OnMouseButtonUp(const FGeometry& iGeometry, const F
 }
 
 TOptional<EMouseCursor::Type>
-SOdysseyAnimationCellHandle::GetCursor() const
+SOdysseyHandle::GetCursor() const
 {
     if (!IsEnabled())
         return TOptional<EMouseCursor::Type>();

@@ -12,6 +12,7 @@
 #include "OdysseyRasterBlockMutator.h"
 #include "OdysseyAnimationProxy.h"
 #include "Misc/OdysseyUndoDelegates.h"
+#include "UObject/OdysseyObjectEditorUtils.h"
 
 #include "Misc/TransactionObjectEvent.h"
 
@@ -108,6 +109,94 @@ double
 UOdysseyAnimation::GetFramesPerSecond() const
 {
     return FramesPerSecond;
+}
+
+EOdysseyAnimationBoundMode
+UOdysseyAnimation::GetLeftBoundMode() const
+{
+    return LeftBoundMode;
+}
+
+EOdysseyAnimationBoundMode
+UOdysseyAnimation::GetRightBoundMode() const
+{
+    return RightBoundMode;
+}
+
+int
+UOdysseyAnimation::GetLeftBoundValue() const
+{
+#if WITH_EDITOR
+    switch(LeftBoundMode)
+    {
+        case EOdysseyAnimationBoundMode::Automatic:
+        {
+            FInt32Range frameRange = mLayerStack->GetFrameRange();
+            return frameRange.GetLowerBoundValue();
+        }
+        break;
+
+        case EOdysseyAnimationBoundMode::Manual:
+        {
+            return FMath::Max(0, LeftBound);
+        }
+        break;
+    }
+#endif
+    return LeftBound;
+}
+
+int
+UOdysseyAnimation::GetRightBoundValue() const
+{
+#if WITH_EDITOR
+    switch(RightBoundMode)
+    {
+        case EOdysseyAnimationBoundMode::Automatic:
+        {
+            FInt32Range frameRange = mLayerStack->GetFrameRange();
+            return frameRange.GetUpperBoundValue();
+        }
+        break;
+
+        case EOdysseyAnimationBoundMode::Manual:
+        {
+            return FMath::Max(0, RightBound);
+        }
+        break;
+    }
+#endif
+    return RightBound;
+}
+
+void
+UOdysseyAnimation::SetLeftBoundMode(EOdysseyAnimationBoundMode iMode)
+{
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, LeftBoundMode), iMode);
+}
+
+void
+UOdysseyAnimation::SetRightBoundMode(EOdysseyAnimationBoundMode iMode)
+{
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, RightBoundMode), iMode);
+}
+
+void
+UOdysseyAnimation::SetLeftBoundValue(int iValue)
+{
+    if (LeftBoundMode != EOdysseyAnimationBoundMode::Manual)
+        return;
+
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, LeftBound), iValue);
+}
+
+void
+UOdysseyAnimation::SetRightBoundValue(int iValue)
+{
+    if (RightBoundMode != EOdysseyAnimationBoundMode::Manual)
+        return;
+
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, RightBound), iValue);
 }
 
 int
@@ -233,6 +322,46 @@ UOdysseyAnimation::PropertyChanged(const FName& iPropertyName)
 {
     if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame) )
         CurrentFrame = FMath::Max(0, CurrentFrame);
+
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, LeftBoundMode) )
+    {
+        FInt32Range frameRange = mLayerStack->GetFrameRange();
+        LeftBound = frameRange.GetLowerBoundValue();
+        RightBound = FMath::Max(GetLeftBoundValue(), RightBound);
+    }
+
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, RightBoundMode) )
+    {
+        FInt32Range frameRange = mLayerStack->GetFrameRange();
+        RightBound = frameRange.GetUpperBoundValue();
+        LeftBound = FMath::Min(LeftBound, GetRightBoundValue());
+    }
+
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, LeftBound) )
+    {
+        if (LeftBoundMode == EOdysseyAnimationBoundMode::Automatic)
+        {
+            FInt32Range frameRange = mLayerStack->GetFrameRange();
+            LeftBound = frameRange.GetLowerBoundValue();
+        }
+        else
+        {
+            LeftBound = FMath::Clamp(LeftBound, 0, GetRightBoundValue());
+        }
+    }
+
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, RightBound) )
+    {
+        if (RightBoundMode == EOdysseyAnimationBoundMode::Automatic)
+        {
+            FInt32Range frameRange = mLayerStack->GetFrameRange();
+            RightBound = frameRange.GetUpperBoundValue();
+        }
+        else
+        {
+            RightBound = FMath::Max( RightBound, GetLeftBoundValue() );
+        }
+    }
 }
 
 void

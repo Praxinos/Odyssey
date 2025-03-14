@@ -75,6 +75,9 @@ FOdysseyAnimationTimelineSectionEditor::GenerateSectionWidget()
     UOdysseyAnimationComponent* component = GetComponent();
     TSharedPtr<ISequencer> sequencer = GetSequencer();
 
+    if (!mComponent)
+        return SNullWidget::NullWidget;
+
     mSectionWidget = SNew(SVerticalBox)
         + SVerticalBox::Slot()
         .AutoHeight()

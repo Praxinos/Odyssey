@@ -103,6 +103,11 @@ FOdysseyPainterEditorAnimationCommands::RegisterCommands()
 
         Flip.Add(commandInfo);
     }
+
+    UI_BUNDLE_COMMAND( SetAnimationLeftBoundAutomatic, TimelineShortcuts, "Set Animation Left Bound To Automatic", "Set Animation Left Bound To Automatic", EUserInterfaceActionType::RadioButton, FInputChord());
+    UI_BUNDLE_COMMAND( SetAnimationLeftBoundManual, TimelineShortcuts, "Set Animation Left Bound To Manual", "Set Animation Left Bound To Manual", EUserInterfaceActionType::RadioButton, FInputChord());
+    UI_BUNDLE_COMMAND( SetAnimationRightBoundAutomatic, TimelineShortcuts, "Set Animation Right Bound To Automatic", "Set Animation Right Bound To Automatic", EUserInterfaceActionType::RadioButton, FInputChord());
+    UI_BUNDLE_COMMAND( SetAnimationRightBoundManual, TimelineShortcuts, "Set Animation Right Bound To Manual", "Set Animation Right Bound To Manual", EUserInterfaceActionType::RadioButton, FInputChord());
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -37,6 +37,24 @@ private:
     float MousePositionToFrame(float iX) const;
     float FrameToMousePosition(float iFrame) const;
 
+    void OnLeftHandleDragStarted(const FGeometry& iGeometry, const FPointerEvent& iEvent);
+    void OnLeftHandleDragged(const FGeometry& iGeometry, const FPointerEvent& iEvent);
+    void OnLeftHandleStopped(const FGeometry& iGeometry, const FPointerEvent& iEvent);
+    void OnRightHandleDragStarted(const FGeometry& iGeometry, const FPointerEvent& iEvent);
+    void OnRightHandleDragged(const FGeometry& iGeometry, const FPointerEvent& iEvent);
+    void OnRightHandleStopped(const FGeometry& iGeometry, const FPointerEvent& iEvent);
+    void BuildContextMenu(FMenuBuilder& iMenuBuilder);
+    void MapContextMenuActions(TSharedPtr<FUICommandList> iCommandList);
+
+    void OnAnimationLeftBoundValueCommitted(int iValue, ETextCommit::Type iType);
+    void OnAnimationLeftBoundValueChanged(int iValue);
+    void OnAnimationLeftBoundBeginSliderMovement();
+    void OnAnimationLeftBoundEndSliderMovement(int iValue);
+    void OnAnimationRightBoundValueCommitted(int iValue, ETextCommit::Type iType);
+    void OnAnimationRightBoundValueChanged(int iValue);
+    void OnAnimationRightBoundBeginSliderMovement();
+    void OnAnimationRightBoundEndSliderMovement(int iValue);
+
 private:
     UOdysseyAnimation* mAnimation;
     UOdysseyAnimationPlayer* mPlayer;
@@ -46,4 +64,8 @@ private:
     FSimpleDelegate mOnScrubStart;
 
     FSimpleDelegate mOnScrubEnd;
+
+    double mHandleMousePosition;
+    int mInitialLeftBound;
+    int mInitialRightBound;
 };
