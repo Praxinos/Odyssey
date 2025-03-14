@@ -49,6 +49,45 @@ UOdysseyAnimationComponent::GetActivePlayer() const
     return nullptr;
 }
 
+EOdysseyAnimationComponentMode
+UOdysseyAnimationComponent::GetMode() const
+{
+    return Mode;
+}
+
+void
+UOdysseyAnimationComponent::SetAnimation(UOdysseyAnimation* iAnimation)
+{
+    if (iAnimation == Animation )
+        return;
+
+    Animation = iAnimation;
+    AnimationChanged();
+    mOnAnimationChanged.Broadcast();
+}
+
+void
+UOdysseyAnimationComponent::SetPlayer(UOdysseyAnimationPlayer* iPlayer)
+{
+    if (iPlayer == Player )
+        return;
+
+    Player = iPlayer;
+    OnPlayerChanged();
+    mOnPlayerChanged.Broadcast();
+}
+
+void
+UOdysseyAnimationComponent::SetMode(EOdysseyAnimationComponentMode iMode)
+{
+    if (iMode == Mode )
+        return;
+
+    Mode = iMode;
+    OnModeChanged();
+    mOnModeChanged.Broadcast();
+}
+
 FSimpleMulticastDelegate&
 UOdysseyAnimationComponent::OnAnimationChanged()
 {

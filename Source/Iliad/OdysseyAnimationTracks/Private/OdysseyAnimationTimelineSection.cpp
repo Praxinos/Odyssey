@@ -26,12 +26,6 @@ UOdysseyAnimationTimelineSection::UOdysseyAnimationTimelineSection(const FObject
 
 //---
 
-void
-UOdysseyAnimationTimelineSection::PostInitProperties()
-{
-    Super::PostInitProperties();
-}
-
 EMovieSceneChannelProxyType
 UOdysseyAnimationTimelineSection::CacheChannelProxy()
 {
@@ -43,20 +37,14 @@ UOdysseyAnimationTimelineSection::CacheChannelProxy()
 void
 UOdysseyAnimationTimelineSection::MigrateFrameTimes(FFrameRate SourceRate, FFrameRate DestinationRate)
 {
-    if (StartFrameOffset.Value > 0)
-    {
-        FFrameNumber NewStartFrameOffset = ConvertFrameTime(FFrameTime(StartFrameOffset), SourceRate, DestinationRate).FloorToFrame();
-        StartFrameOffset = NewStartFrameOffset;
-    }
+    FFrameNumber NewStartFrameOffset = ConvertFrameTime(FFrameTime(StartFrameOffset), SourceRate, DestinationRate).FloorToFrame();
+    StartFrameOffset = NewStartFrameOffset;
 }
 
 TRange<FFrameNumber>
-UOdysseyAnimationTimelineSection::GetDefaultSectionRange(UOdysseyAnimationTimelineSection* iSection, UOdysseyAnimationComponent* iComponent)
+UOdysseyAnimationTimelineSection::GetDefaultSectionRange(UOdysseyAnimationTimelineSection* iSection)
 {
-    if (!iComponent)
-        return TRange<FFrameNumber>();
-
-    UOdysseyAnimation* animation = iComponent->GetActiveAnimation();
+    UOdysseyAnimation* animation = iSection->Animation;
     if (!animation)
         return TRange<FFrameNumber>();
 

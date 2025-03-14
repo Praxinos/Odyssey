@@ -67,10 +67,12 @@ AOdysseyAnimationActor::MoveInFrontOfCamera()
     SetActorRotation( plane_rotator );
 }
 
+FName AOdysseyAnimationActor::AnimationComponentName(TEXT("AnimationComponentName0"));
+
 AOdysseyAnimationActor::AOdysseyAnimationActor(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer)
 {
-    RootComponent = AnimationComponent = CreateDefaultSubobject<UOdysseyAnimationComponent>(TEXT("AnimationComponent"));
+    RootComponent = AnimationComponent = CreateDefaultSubobject<UOdysseyAnimationComponent>(AnimationComponentName);
     AnimationComponent->SetRelativeRotation(FRotator(0, 90, 90));
 }
 
@@ -82,10 +84,10 @@ bool AOdysseyAnimationActor::GetReferencedContentObjects(TArray<UObject*>& Objec
     if (!AnimationComponent)
         return true;
 
-    switch(AnimationComponent->Mode)
+    switch(AnimationComponent->GetMode())
     {
-        case EOdysseyAnimationComponentMode::Animation : Objects.Add(AnimationComponent->Animation); break;
-        case EOdysseyAnimationComponentMode::Player : Objects.Add(AnimationComponent->Player); break;
+        case EOdysseyAnimationComponentMode::Animation : Objects.Add(AnimationComponent->GetActiveAnimation()); break;
+        case EOdysseyAnimationComponentMode::Player : Objects.Add(AnimationComponent->GetActivePlayer()); break;
     }
     return true;
 }

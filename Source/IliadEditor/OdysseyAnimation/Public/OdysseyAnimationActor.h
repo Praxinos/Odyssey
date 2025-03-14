@@ -42,4 +42,6 @@ public:
 public:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Animation")
     TObjectPtr<UOdysseyAnimationComponent> AnimationComponent;
+
+    static FName AnimationComponentName;
 };

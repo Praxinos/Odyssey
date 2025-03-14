@@ -208,6 +208,18 @@ UOdysseyAnimationPlayer::GetCurrentFrameInAnimationBounds(int& oFrame) const
     return true;
 }
 
+void
+UOdysseyAnimationPlayer::SetPreBehaviour(EOdysseyAnimationPlayerPostBehaviour iValue)
+{
+    PreBehaviour = iValue;
+}
+
+void
+UOdysseyAnimationPlayer::SetPostBehaviour(EOdysseyAnimationPlayerPostBehaviour iValue)
+{
+    PostBehaviour = iValue;
+}
+
 bool
 UOdysseyAnimationPlayer::ApplyPreBehaviour(FTimespan iTime, FTimespan& oTime) const
 {
@@ -248,7 +260,7 @@ UOdysseyAnimationPlayer::ApplyPostBehaviour(FTimespan iTime, FTimespan& oTime) c
     if (!UsePostBehaviour)
         return false;
 
-    switch(PreBehaviour)
+    switch(PostBehaviour)
     {
         case EOdysseyAnimationPlayerPostBehaviour::None:
         {

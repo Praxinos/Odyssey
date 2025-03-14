@@ -4,7 +4,6 @@
 #include "OdysseyAnimationTimelineTrack.h"
 
 #include "OdysseyAnimation.h"
-#include "OdysseyAnimationComponent.h"
 #include "MovieScene.h"
 
 #include "OdysseyAnimationTimelineTemplate.h"
@@ -20,21 +19,21 @@ UOdysseyAnimationTimelineTrack::UOdysseyAnimationTimelineTrack(const FObjectInit
 }
 
 UMovieSceneSection*
-UOdysseyAnimationTimelineTrack::AddNewSection(FFrameNumber KeyTime)
+UOdysseyAnimationTimelineTrack::AddNewSection(FFrameNumber KeyTime, UOdysseyAnimation* iAnimation)
 {
     UMovieScene* movieScene = GetTypedOuter<UMovieScene>();
     if (!movieScene)
         return nullptr;
 
     UOdysseyAnimationTimelineSection* NewSection = Cast<UOdysseyAnimationTimelineSection>(CreateNewSection());
-    NewSection->Component = Component;
+    NewSection->Animation = iAnimation;
 
-    TRange<FFrameNumber> defaultRange = UOdysseyAnimationTimelineSection::GetDefaultSectionRange(NewSection, Component);
-    FFrameNumber animationLeftBoundFrame = UE::MovieScene::DiscreteInclusiveLower( defaultRange );
-    FFrameNumber animationRightBoundFrame = UE::MovieScene::DiscreteExclusiveUpper( defaultRange );
+    TRange<FFrameNumber> defaultRange = UOdysseyAnimationTimelineSection::GetDefaultSectionRange(NewSection);
+    /* FFrameNumber animationLeftBoundFrame = UE::MovieScene::DiscreteInclusiveLower( defaultRange );
+    FFrameNumber animationRightBoundFrame = UE::MovieScene::DiscreteExclusiveUpper( defaultRange ); */
     int32 animationDuration = UE::MovieScene::DiscreteSize(defaultRange);
 
-    NewSection->StartFrameOffset = animationLeftBoundFrame;
+    NewSection->StartFrameOffset = 0;
     NewSection->InitialPlacement(Sections, KeyTime, animationDuration, false);
 
     AddSection(*NewSection);

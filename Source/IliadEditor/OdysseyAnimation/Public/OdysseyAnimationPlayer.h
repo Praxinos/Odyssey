@@ -85,6 +85,10 @@ public:
 
     bool GetCurrentTimeInPlayerBounds(FTimespan& oTime) const;
     bool GetCurrentFrameInAnimationBounds(int& oFrame) const;
+
+    void SetPreBehaviour(EOdysseyAnimationPlayerPostBehaviour iValue);
+    void SetPostBehaviour(EOdysseyAnimationPlayerPostBehaviour iValue);
+
     bool ApplyPreBehaviour(FTimespan iTime, FTimespan& oTime) const;
     bool ApplyPostBehaviour(FTimespan iTime, FTimespan& oTime) const;
 

@@ -53,6 +53,7 @@ namespace UnrealBuildTool.Rules
 
                     "Core",
                     "CoreUObject",
+                    "EditorWidgets",
                     "Engine",
                     "InputCore",
                     "LevelSequence",

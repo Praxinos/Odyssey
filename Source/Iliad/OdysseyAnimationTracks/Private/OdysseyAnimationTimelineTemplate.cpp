@@ -18,9 +18,10 @@
 struct FOdysseyAnimationTimelineSectionExecutionToken
     : IMovieSceneExecutionToken
 {
-    FOdysseyAnimationTimelineSectionExecutionToken(double iStartTime, double iDuration)
-        : mStartTime(iStartTime)
-        , mDuration(iDuration)
+    FOdysseyAnimationTimelineSectionExecutionToken(const TRange<FFrameTime>& iRange, const FOdysseyAnimationTimelineSectionParams& iParams, const FFrameRate& iFrameRate)
+        : mRange(iRange)
+        , mParams(iParams)
+        , mFrameRate(iFrameRate)
     { }
 
     virtual void Execute(const FMovieSceneContext& Context, const FMovieSceneEvaluationOperand& Operand, FPersistentEvaluationData& PersistentData, IMovieScenePlayer& Player) override
@@ -37,22 +38,22 @@ struct FOdysseyAnimationTimelineSectionExecutionToken
                     continue;
 
                 component = Cast<UOdysseyAnimationComponent>(BoundObject);
-                    break;
+                break;
             }
         }
 
-        Execute(component, mStartTime, mDuration);
+        Execute(component, mRange, mParams, mFrameRate);
     }
 
 #if PLATFORM_WINDOWS
     __declspec(noinline)
 #endif
-    static void Execute(UOdysseyAnimationComponent* iComponent, double iStartTime, double iDuration)
+    static void Execute(UOdysseyAnimationComponent* iComponent, const TRange<FFrameTime>& iRange, const FOdysseyAnimationTimelineSectionParams& iParams, const FFrameRate& iFrameRate)
     {
         if (!iComponent)
             return;
 
-        UOdysseyAnimation* animation = iComponent->GetActiveAnimation();
+        UOdysseyAnimation* animation = iParams.Animation;
         if (!animation)
             return;
 
@@ -60,34 +61,43 @@ struct FOdysseyAnimationTimelineSectionExecutionToken
         if (!player)
             return;
 
-        double startFrame = animation->GetFramesPerSecond() * iStartTime;
-        double endFrame = animation->GetFramesPerSecond() * (iStartTime + iDuration);
+        iComponent->SetMode(EOdysseyAnimationComponentMode::Animation);
+        iComponent->SetAnimation(iParams.Animation);
+        player->SetPreBehaviour(iParams.PreBehaviour);
+        player->SetPostBehaviour(iParams.PostBehaviour);
 
-        int startFrameInt = FMath::Floor(startFrame);
-        int endFrameInt = FMath::Floor(endFrame);
+        FFrameRate animationFrameRate(animation->GetFramesPerSecond() * 100, 100);
+        FFrameTime animationLeftBound = FFrameRate::TransformTime(animation->GetLeftBoundValue(), animationFrameRate, iFrameRate);
 
-        int frame = startFrameInt;
-        if (endFrameInt == startFrameInt + 1)
+        FFrameTime rangeStartFrame = iRange.GetLowerBoundValue() - iParams.SectionStartFrame - iParams.StartFrameOffset + animationLeftBound;
+        FFrameTime rangeEndFrame = iRange.GetUpperBoundValue() - iParams.SectionStartFrame - iParams.StartFrameOffset + animationLeftBound;
+
+        FFrameTime startFrame = FFrameRate::TransformTime(rangeStartFrame, iFrameRate, animationFrameRate);
+        FFrameTime endFrame = FFrameRate::TransformTime(rangeEndFrame, iFrameRate, animationFrameRate);
+
+        FFrameNumber frame = startFrame.GetFrame();
+        if (startFrame.GetFrame() == endFrame.GetFrame())
         {
-            double startOverlap = 1.0f - (startFrame - startFrameInt);
-            double endOverlap = endFrame - endFrameInt;
-
-            frame = startOverlap > endOverlap ? startFrameInt : endFrameInt;
+            //Do Nothing
         }
-        else if (endFrameInt > startFrameInt + 1)
+        else if (endFrame.GetFrame() == startFrame.GetFrame() + 1)
         {
-            double startOverlap = 1.0f - (startFrame - startFrameInt);
-            frame = startOverlap > 1.f - UE_SMALL_NUMBER ? startFrameInt : startFrameInt + 1;
+            frame = endFrame.GetSubFrame() > startFrame.GetSubFrame() ? endFrame.GetFrame() : startFrame.GetFrame();
+        }
+        else if (endFrame.GetFrame() > startFrame.GetFrame() + 1)
+        {
+            frame = startFrame.GetSubFrame() > 1.f - UE_SMALL_NUMBER ? startFrame.GetFrame() : startFrame.GetFrame() + 1;
         }
 
-        player->SeekToFrameImmediate(frame);
+        player->SeekToFrameImmediate(frame.Value);
         if (frame != animation->CurrentFrame)
-            FObjectEditorUtils::SetPropertyValue(animation, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), frame);
+            FObjectEditorUtils::SetPropertyValue(animation, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), frame.Value);
     }
 
 private:
-    double mStartTime;
-    double mDuration;
+    TRange<FFrameTime> mRange;
+    FOdysseyAnimationTimelineSectionParams mParams;
+    FFrameRate mFrameRate;
 };
 
 
@@ -105,8 +115,11 @@ FOdysseyAnimationTimelineTemplate::FOdysseyAnimationTimelineTemplate(const UOdys
     {
         mParams.SectionEndFrame = InSection.GetRange().GetUpperBoundValue();
     }
-    mParams.bLooping = 0.f; //InSection.bLooping;
+
     mParams.StartFrameOffset = InSection.StartFrameOffset;
+    mParams.Animation = InSection.Animation;
+    mParams.PreBehaviour = InSection.PreBehaviour;
+    mParams.PostBehaviour = InSection.PostBehaviour;
 }
 
 
@@ -125,29 +138,13 @@ FOdysseyAnimationTimelineTemplate::Evaluate(const FMovieSceneEvaluationOperand& 
     if (Context.GetTime().FrameNumber > mParams.SectionEndFrame || Context.GetTime().FrameNumber < mParams.SectionStartFrame)
         return;
 
-    double startTime = 0.f;
-    double duration = 0.f;
-    GetStartTimeAndDuration(Context.GetRange(), mParams, Context.GetFrameRate(), startTime, duration);
-    ExecutionTokens.Add(FOdysseyAnimationTimelineSectionExecutionToken(startTime, duration));
-}
-
-void
-FOdysseyAnimationTimelineTemplate::GetStartTimeAndDuration(const TRange<FFrameTime>& iRange, const FOdysseyAnimationTimelineSectionParams& iParams, const FFrameRate& iFrameRate, double& oStartTime, double& oDuration)
-{
-    const FFrameTime FrameTime(iRange.GetLowerBoundValue() - iParams.SectionStartFrame + iParams.StartFrameOffset);
-    oStartTime = iFrameRate.AsSeconds(FrameTime);
-
-    // With zero-length frames (which can occur occasionally), we use the fixed frame time, matching previous behavior.
-    oDuration = FMath::Clamp( (iRange.Size<FFrameTime>()) / iFrameRate, iFrameRate.AsSeconds(FFrameTime(1)), iFrameRate.AsSeconds((iParams.SectionEndFrame - iParams.SectionStartFrame) - FrameTime));
+    ExecutionTokens.Add(FOdysseyAnimationTimelineSectionExecutionToken(Context.GetRange(), mParams, Context.GetFrameRate()));
 }
 
 void
 FOdysseyAnimationTimelineTemplate::EvaluateImmediate(UOdysseyAnimationComponent* iComponent, const TRange<FFrameTime>& iRange, const FOdysseyAnimationTimelineSectionParams& iParams, const FFrameRate& iFrameRate )
 {
-    double startTime = 0.f;
-    double duration = 0.f;
-    GetStartTimeAndDuration(iRange, iParams, iFrameRate, startTime, duration);
-    FOdysseyAnimationTimelineSectionExecutionToken::Execute(iComponent, startTime, duration);
+    FOdysseyAnimationTimelineSectionExecutionToken::Execute(iComponent, iRange, iParams, iFrameRate);
 }
 
 UScriptStruct&

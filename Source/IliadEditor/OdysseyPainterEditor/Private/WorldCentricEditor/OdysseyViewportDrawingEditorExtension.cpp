@@ -455,7 +455,7 @@ FOdysseyViewportDrawingEditorExtension::SetTextureInternal(UTexture* iTexture)
             if (!animationComponent)
             return;
 
-            TSharedPtr<FOdysseyPainterEditorAnimationSource> animationSource = MakeShared<FOdysseyPainterEditorAnimationSource>(animationComponent->Animation);
+            TSharedPtr<FOdysseyPainterEditorAnimationSource> animationSource = MakeShared<FOdysseyPainterEditorAnimationSource>(animationComponent->GetActiveAnimation());
             animationSource->SetExternalPlayer(animationComponent->GetActivePlayer());
             mEditor->SetSource(animationSource);
         }
@@ -591,6 +591,9 @@ FOdysseyViewportDrawingEditorExtension::SyncSequencerWithAnimationPlayer()
             params.SectionStartFrame = sectionStartFrame;
             params.SectionEndFrame = sectionEndFrame;
             params.StartFrameOffset = section->StartFrameOffset;
+            params.Animation = section->Animation;
+            params.PreBehaviour = section->PreBehaviour;
+            params.PostBehaviour = section->PostBehaviour;
             TRange<FFrameTime> range = TRange<FFrameTime>::Inclusive(sectionStartFrame, sectionStartFrame);
             FOdysseyAnimationTimelineTemplate::EvaluateImmediate(animationComponent, range, params, tickResolution);
             return;
@@ -601,6 +604,9 @@ FOdysseyViewportDrawingEditorExtension::SyncSequencerWithAnimationPlayer()
             params.SectionStartFrame = sectionStartFrame;
             params.SectionEndFrame = sectionEndFrame;
             params.StartFrameOffset = section->StartFrameOffset;
+            params.Animation = section->Animation;
+            params.PreBehaviour = section->PreBehaviour;
+            params.PostBehaviour = section->PostBehaviour;
             TRange<FFrameTime> range = TRange<FFrameTime>::Inclusive(sectionEndFrame, sectionEndFrame);
             FOdysseyAnimationTimelineTemplate::EvaluateImmediate(animationComponent, range, params, tickResolution);
             return;

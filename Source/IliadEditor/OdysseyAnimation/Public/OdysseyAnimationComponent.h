@@ -34,6 +34,11 @@ public:
 public:
     UOdysseyAnimation* GetActiveAnimation() const;
     UOdysseyAnimationPlayer* GetActivePlayer() const;
+    EOdysseyAnimationComponentMode GetMode() const;
+
+    void SetAnimation(UOdysseyAnimation* iAnimation);
+    void SetPlayer(UOdysseyAnimationPlayer* iPlayer);
+    void SetMode(EOdysseyAnimationComponentMode iMode);
 
     FSimpleMulticastDelegate& OnAnimationChanged();
     FSimpleMulticastDelegate& OnPlayerChanged();
@@ -64,7 +69,7 @@ private:
     void OnDefaultPlayerTextureChanged();
     void OnPlayerTextureChanged();
 
-public:
+protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Animation")
     EOdysseyAnimationComponentMode Mode = EOdysseyAnimationComponentMode::Animation;
 

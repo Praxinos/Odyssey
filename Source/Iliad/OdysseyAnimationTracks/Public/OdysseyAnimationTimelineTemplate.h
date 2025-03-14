@@ -24,10 +24,15 @@ struct FOdysseyAnimationTimelineSectionParams
     FFrameNumber StartFrameOffset;
 
     UPROPERTY()
-    bool bLooping;
+    TObjectPtr<UOdysseyAnimation> Animation;
+
+    UPROPERTY()
+    EOdysseyAnimationPlayerPostBehaviour PreBehaviour = EOdysseyAnimationPlayerPostBehaviour::Loop;
+
+    UPROPERTY()
+    EOdysseyAnimationPlayerPostBehaviour PostBehaviour = EOdysseyAnimationPlayerPostBehaviour::Loop;
 
     FOdysseyAnimationTimelineSectionParams()
-        : bLooping(false)
     {}
 };
 

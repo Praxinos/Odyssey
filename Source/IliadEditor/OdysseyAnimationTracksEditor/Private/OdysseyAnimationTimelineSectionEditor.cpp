@@ -28,7 +28,6 @@ FOdysseyAnimationTimelineSectionEditor::FOdysseyAnimationTimelineSectionEditor(T
     : mSequencer( InSequencer )
     , mSection(InSection)
 {
-    mComponent = GetComponent();
 }
 
 TSharedPtr<ISequencer>
@@ -72,11 +71,7 @@ FOdysseyAnimationTimelineSectionEditor::GetSectionToolTip() const
 TSharedRef<SWidget>
 FOdysseyAnimationTimelineSectionEditor::GenerateSectionWidget()
 {
-    UOdysseyAnimationComponent* component = GetComponent();
     TSharedPtr<ISequencer> sequencer = GetSequencer();
-
-    if (!mComponent)
-        return SNullWidget::NullWidget;
 
     mSectionWidget = SNew(SVerticalBox)
         + SVerticalBox::Slot()
@@ -91,10 +86,53 @@ FOdysseyAnimationTimelineSectionEditor::GenerateSectionWidget()
         + SVerticalBox::Slot()
         .AutoHeight()
         [
-            SNew(SOdysseyAnimationTimelineSection, sequencer, mSection, mComponent)
+            SNew(SOdysseyAnimationTimelineSection, sequencer, mSection)
+            .Animation(this, &FOdysseyAnimationTimelineSectionEditor::GetAnimation)
+            .PreBehaviour(this, &FOdysseyAnimationTimelineSectionEditor::GetPreBehaviour)
+            .PostBehaviour(this, &FOdysseyAnimationTimelineSectionEditor::GetPostBehaviour)
+            .StartFrameOffset(this, &FOdysseyAnimationTimelineSectionEditor::GetStartFrameOffset)
+            .OnPreBehaviourChanged(this, &FOdysseyAnimationTimelineSectionEditor::OnPreBehaviourChanged)
+            .OnPostBehaviourChanged(this, &FOdysseyAnimationTimelineSectionEditor::OnPostBehaviourChanged)
         ];
 
     return mSectionWidget.ToSharedRef();
+}
+
+
+UOdysseyAnimation*
+FOdysseyAnimationTimelineSectionEditor::GetAnimation() const
+{
+    return mSection->Animation;
+}
+
+FFrameNumber
+FOdysseyAnimationTimelineSectionEditor::GetStartFrameOffset() const
+{
+    return mSection->StartFrameOffset;
+}
+
+EOdysseyAnimationPlayerPostBehaviour
+FOdysseyAnimationTimelineSectionEditor::GetPreBehaviour() const
+{
+    return mSection->PreBehaviour;
+}
+
+EOdysseyAnimationPlayerPostBehaviour
+FOdysseyAnimationTimelineSectionEditor::GetPostBehaviour() const
+{
+    return mSection->PostBehaviour;
+}
+
+void
+FOdysseyAnimationTimelineSectionEditor::OnPreBehaviourChanged(EOdysseyAnimationPlayerPostBehaviour iValue)
+{
+    mSection->PreBehaviour = iValue;
+}
+
+void
+FOdysseyAnimationTimelineSectionEditor::OnPostBehaviourChanged(EOdysseyAnimationPlayerPostBehaviour iValue)
+{
+    mSection->PostBehaviour = iValue;
 }
 
 bool
@@ -114,35 +152,6 @@ FOdysseyAnimationTimelineSectionEditor::OnPaintSection( FSequencerSectionPainter
     return InPainter.LayerId;
 }
 
-UOdysseyAnimationComponent*
-FOdysseyAnimationTimelineSectionEditor::GetComponent() const
-{
-    UOdysseyAnimationTimelineTrack* track = mSection->GetTypedOuter<UOdysseyAnimationTimelineTrack>();
-
-    TSharedPtr<ISequencer> sequencer = GetSequencer();
-    if (!sequencer)
-        return nullptr;
-
-    TArrayView<TWeakObjectPtr<>> boundObjects = sequencer->FindObjectsInCurrentSequence(track->FindObjectBindingGuid());
-    for (TWeakObjectPtr<>& boundObjectPtr : boundObjects)
-    {
-        UObject* boundObject = boundObjectPtr.Get();
-        if (!boundObject)
-            continue;
-
-        if (!boundObject->IsA<UOdysseyAnimationComponent>())
-            continue;
-
-        UOdysseyAnimationComponent* animationComponent = Cast<UOdysseyAnimationComponent>(boundObject);
-        if (!animationComponent)
-            continue;
-
-        return animationComponent;
-    }
-
-    return nullptr;
-}
-
 void
 FOdysseyAnimationTimelineSectionEditor::BeginResizeSection()
 {
@@ -157,7 +166,7 @@ FOdysseyAnimationTimelineSectionEditor::ResizeSection(ESequencerSectionResizeMod
 {
     if (iResizeMode == SSRM_LeadingEdge)
     {
-        mSection->StartFrameOffset = iResizeTime - mInitialStartTimeDuringResize + mInitialStartOffsetDuringResize;
+        mSection->StartFrameOffset = mInitialStartOffsetDuringResize + (mInitialStartTimeDuringResize - iResizeTime);
     }
 
     ISequencerSection::ResizeSection(iResizeMode, iResizeTime);

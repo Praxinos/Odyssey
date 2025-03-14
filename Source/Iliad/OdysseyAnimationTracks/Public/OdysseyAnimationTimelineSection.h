@@ -4,11 +4,14 @@
 #pragma once
 
 #include "MovieSceneSection.h"
+#include "OdysseyAnimationComponent.h"
+#include "OdysseyAnimationPlayer.h"
 
 #include "OdysseyAnimationTimelineSection.generated.h"
 
 enum class EMovieSceneChannelProxyType : uint8;
-class UOdysseyAnimationComponent;
+class UOdysseyAnimation;
+class UOdysseyAnimationPlayer;
 
 /**
  * Defines the section for a template sequence track.
@@ -20,20 +23,23 @@ class ODYSSEYANIMATIONTRACKS_API UOdysseyAnimationTimelineSection
     GENERATED_BODY()
 
 public:
-    static TRange<FFrameNumber> GetDefaultSectionRange(UOdysseyAnimationTimelineSection* iSection, UOdysseyAnimationComponent* iComponent);
+    static TRange<FFrameNumber> GetDefaultSectionRange(UOdysseyAnimationTimelineSection* iSection);
 
 public:
     UOdysseyAnimationTimelineSection(const FObjectInitializer& ObjInitializer);
-
-public:
-    virtual void PostInitProperties() override;
 
 protected:
     virtual EMovieSceneChannelProxyType CacheChannelProxy() override;
     virtual void MigrateFrameTimes(FFrameRate SourceRate, FFrameRate DestinationRate) override;
 public:
-    UPROPERTY()
-    UOdysseyAnimationComponent* Component = nullptr;
+    UPROPERTY( EditAnywhere, BlueprintReadWrite, Category="Animation")
+    TObjectPtr<UOdysseyAnimation> Animation;
+
+    UPROPERTY( EditAnywhere, BlueprintReadWrite, Category="Animation")
+    EOdysseyAnimationPlayerPostBehaviour PreBehaviour = EOdysseyAnimationPlayerPostBehaviour::Loop;
+
+    UPROPERTY( EditAnywhere, BlueprintReadWrite, Category="Animation")
+    EOdysseyAnimationPlayerPostBehaviour PostBehaviour = EOdysseyAnimationPlayerPostBehaviour::Loop;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Animation")
     FFrameNumber StartFrameOffset = 0;
