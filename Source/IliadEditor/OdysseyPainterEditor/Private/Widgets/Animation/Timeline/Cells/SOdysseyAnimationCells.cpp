@@ -89,6 +89,7 @@ SOdysseyAnimationCells::Construct(
             .VAlign(VAlign_Center)
             [
                 SNew(SComboButton)
+                .Visibility_Lambda([this]() { return mAnimationLayer->CellsOffset > 0 ? EVisibility::Visible : EVisibility::Hidden; })
                 .ButtonStyle(&FAppStyle::Get().GetWidgetStyle< FButtonStyle >( "SimpleButton" ))
                 .HasDownArrow(false)
                 .OnGetMenuContent(this, &SOdysseyAnimationCells::GetPreBehaviourMenuContent)
@@ -882,7 +883,7 @@ SOdysseyAnimationCells::GetAddCellsHandleLeftVisibility() const
     if (mAnimationLayer->IsLockedRecursively())
         return EVisibility::Hidden;
 
-    return mShowHandles.Get() ? EVisibility::Visible : EVisibility::Hidden;
+    return mShowHandles.Get() && mAnimationLayer->CellsOffset > 0 ? EVisibility::Visible : EVisibility::Hidden;
 }
 
 void
