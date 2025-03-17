@@ -314,6 +314,38 @@ UShotSequence::IsTrackSupportedImpl( TSubclassOf<class UMovieSceneTrack> InTrack
     //return Super::IsTrackSupported( InTrackClass );
 }
 
+#include "Filters/Filters/SequencerTrackFilters.h"
+//#include "MediaSequencerFilters.h"
+//#include "Sequencer/NiagaraSequence/NiagaraSequencerFilters.h"
+
+// They can't be included, because a dependencies loop appears
+// EposNamingConvention -> EposSequence -> EposTracksEditor -> EposNameingConvention
+//#include "Filters/CinematicBoardSequencerFilters.h"
+//#include "Filters/NoteSequencerFilters.h"
+//#include "Filters/SingleCameraCutSequencerFilters.h"
+
+bool
+UShotSequence::IsFilterSupportedImpl( const FString& iFilterName ) const //override
+{
+    TArray<FString> validTrackFilters = {
+        // Filters usable inside both board and shot sequence
+        FSequencerTrackFilter_Audio::StaticName(),
+        FSequencerTrackFilter_LevelVisibility::StaticName(),
+        FSequencerTrackFilter_Fade::StaticName(),
+        FSequencerTrackFilter_SkeletalMesh::StaticName(),
+        FSequencerTrackFilter_Folder::StaticName(),
+        TEXT( "Media" ), //FSequencerTrackFilter_Media::StaticName(), // private and header in cpp
+        TEXT( "Niagara" ), //FSequencerTrackFilter_Niagara::StaticName(), // private and header in cpp
+        TEXT( "Note" ),
+
+        // Filters usable only inside shot sequence
+        FSequencerTrackFilter_Camera::StaticName(),
+        TEXT( "SingleCameraCut" ),
+    };
+
+    return validTrackFilters.Contains( iFilterName );
+}
+
 FText UShotSequence::GetDisplayName() const
 {
     //return UMovieSceneSequence::GetDisplayName();
