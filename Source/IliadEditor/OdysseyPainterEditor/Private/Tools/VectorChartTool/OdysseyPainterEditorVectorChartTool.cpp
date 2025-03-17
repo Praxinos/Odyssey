@@ -25,9 +25,9 @@ UOdysseyPainterEditorVectorChartTool::~UOdysseyPainterEditorVectorChartTool()
 
 UOdysseyPainterEditorVectorChartTool::UOdysseyPainterEditorVectorChartTool()
     : UOdysseyPainterEditorVectorBaseTool( MakeShared<FOdysseyPainterEditorVectorChartToolHUD>( this ), false, true )
+    , mEditionMode ( eVectorChartEditionMode::OneByOne )
     , PickingRadius( 10.0f )
     , Factor( 1 )
-    , mEditionMode ( eVectorChartEditionMode::OneByOne )
     , ChartType ( eChartType::Partial )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Chart64");

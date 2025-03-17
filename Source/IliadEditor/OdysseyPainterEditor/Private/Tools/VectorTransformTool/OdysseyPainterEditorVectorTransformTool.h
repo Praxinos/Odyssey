@@ -17,8 +17,11 @@ class FOdysseyVectorObject;
 UENUM()
 enum class eTransformShowInbetweens : uint8
 {
-    Surrounding = 0 UMETA( ToolTip = "" ),
-    All         = 1 UMETA( ToolTip = "" )
+    None                    = 0 UMETA( ToolTip = "" ),
+    Surrounding             = 1 UMETA( ToolTip = "" ),
+    SourceAndBreakdownsOnly = 2 UMETA( ToolTip = "Source and breakdowns only" ),
+    SourceOnly              = 3 UMETA( ToolTip = "Source only" ),
+    All                     = 4 UMETA( ToolTip = "" )
 };
 
 UCLASS( HideCategories = (SelectionTool) )
@@ -105,7 +108,12 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTransformTool : public
                  , Category=TransformTool
                  , meta = ( ToolTip = "World" ) )
         bool World;
-
+/*
+        UPROPERTY( EditAnywhere
+                 , Category=TransformTool
+                 , meta = ( ToolTip = "KeepPathWidth" ) )
+        bool KeepPathWidth;
+*/
         UPROPERTY( EditDefaultsOnly
                  , Category = TransformTool )
         bool bInbetweenMode;

@@ -40,6 +40,7 @@ UOdysseyPainterEditorVectorTransformTool::UOdysseyPainterEditorVectorTransformTo
     , mDragging( false )
     , PickingRadius(10.0f)
     , Uniform( true )
+    //, KeepPathWidth( false )
     , World( false )
     , bInbetweenMode( false )
     , ShowInbetweens( eTransformShowInbetweens::Surrounding )
@@ -734,11 +735,12 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorGr
     double difx = localCoords.x - oldLocalCoords.x;
     double dify = localCoords.y - oldLocalCoords.y;
     double oldX1 = selectionBox.rect.x
-            , oldY1 = selectionBox.rect.y
-            , oldX2 = selectionBox.rect.x + selectionBox.rect.w
-            , oldY2 = selectionBox.rect.y + selectionBox.rect.h;
+         , oldY1 = selectionBox.rect.y
+         , oldX2 = selectionBox.rect.x + selectionBox.rect.w
+         , oldY2 = selectionBox.rect.y + selectionBox.rect.h;
     double oldDiagonal = sqrt( ( selectionBox.rect.w * selectionBox.rect.w )
                              + ( selectionBox.rect.h * selectionBox.rect.h ) );
+    double selectionBoxSurface = selectionBox.rect.w * selectionBox.rect.h;
     double x1 = 0.0f, y1 = 0.0f, x2 = 0.0f, y2 = 0.0f;
     ::ULIS::FVec2D pivot;
 
@@ -786,7 +788,7 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorGr
         pivot.y = oldY1;
     }
 
-    //if( ( hudFlags & FOdysseyPainterEditorVectorObjectScaleToolHUD::HANDLE_MASK ) != 0 )
+    if( selectionBoxSurface )
     {
         BLMatrix2D spaceMatrix = selectionBox.worldMatrix;
         BLMatrix2D inverseSpaceMatrix;
@@ -844,6 +846,36 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorGr
 
         if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_OBJECT )
         {
+/*
+            if( KeepPathWidth )
+            {
+                double surfaceRatio = ( x2mx1 * y2my1 ) / ( selectionBoxSurface );
+                double scaleFactor = 1.0f / ( surfaceRatio );
+
+                // run lambda recursively on altered paths
+                FOdysseyVectorObject::Traverse
+                ( iScene
+                , 0
+                ,[ iScene
+                 , scaleFactor ]( FOdysseyVectorObject* object, uint64 travesalFlags ) -> uint64
+                {
+                    if( iScene->GetCell()->ObjectHasFocus( object, travesalFlags ) )
+                    {
+                        if( object->GetClass() == FOdysseyVectorPath::StaticClass() )
+                        {
+                            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
+
+                            // compensate. 2D dimensions evolves at the square of the scaling factor.
+                            path->AlterRadius( scaleFactor );
+
+                            return FOdysseyVectorObject::TRAVERSE_OBJECT_ACCEPTED;
+                        }
+                    }
+
+                    return 0;
+                } );
+            }
+*/
             // run lambda recursively on altered objects
             FOdysseyVectorObject::Traverse
             ( iScene

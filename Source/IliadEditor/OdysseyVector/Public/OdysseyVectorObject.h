@@ -39,6 +39,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         static const uint32 COPY_NOTAG               = ( 1 << 2 );
 
         // traversal flags
+        static const uint64 TRAVERSE_CONTINUE               = ( 0 );
         static const uint64 TRAVERSE_STOP                   = ( 1 << 0 );
         static const uint64 TRAVERSE_OBJECT_ACCEPTED        = ( 1 << 1 );
         static const uint64 TRAVERSE_PARENT_HASFOCUS        = ( 1 << 2 );
