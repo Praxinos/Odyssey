@@ -240,65 +240,75 @@ FOdysseyAnimationTimelineTrackEditor::BuildOutlinerColumnWidget(const FBuildColu
     {
         const FCheckBoxStyle* displayLayersToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("Sequencer.AnimationTimelineTrack.DisplayLayersToggle");
 
-        return SNew(SVerticalBox)
-        + SVerticalBox::Slot()
-        .AutoHeight()
-        [
-            SNew(SBox)
-            .HeightOverride(FOdysseyAnimationTimelineSectionEditor::GetCollapsedSectionHeight())
-            .VAlign(VAlign_Center)
+        return SNew(SBox)
+            .HeightOverride_Lambda(
+                [outlinerExtension]()
+                {
+                    return outlinerExtension->GetOutlinerSizing().GetTotalHeight();
+                }
+            )
             [
-                SNew(SHorizontalBox)
-                + SHorizontalBox::Slot()
-                .Padding(
-                    MakeAttributeLambda(
-                        [row]() -> FMargin
-                        {
-                            const int32 NestingDepth = FMath::Max(0, row->GetIndentLevel());
-                            const float Indent = 10.f;
-                            return FMargin( NestingDepth * Indent, 0.f, 2.f, 0.f );
-                        }
-                    )
-                )
-                .VAlign(VAlign_Center)
-                .AutoWidth()
+
+                SNew(SVerticalBox)
+                .Clipping(EWidgetClipping::ClipToBounds)
+                + SVerticalBox::Slot()
+                .AutoHeight()
                 [
-                    SNew(SCheckBox)
-                    .Style(displayLayersToggleStyle)
-                    .OnCheckStateChanged_Lambda(
-                        [track](ECheckBoxState iState)
-                        {
-                            FOdysseyObjectEditorUtils::SetPropertyValue(track, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationTimelineTrack, DisplayLayers), iState == ECheckBoxState::Checked);
-                        }
-                    )
-                    .IsChecked_Lambda(
-                        [track]()
-                        {
-                            return track->DisplayLayers ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
-                        }
-                    )
+                    SNew(SBox)
+                    .HeightOverride(FOdysseyAnimationTimelineSectionEditor::GetCollapsedSectionHeight())
+                    .VAlign(VAlign_Center)
+                    [
+                        SNew(SHorizontalBox)
+                        + SHorizontalBox::Slot()
+                        .Padding(
+                            MakeAttributeLambda(
+                                [row]() -> FMargin
+                                {
+                                    const int32 NestingDepth = FMath::Max(0, row->GetIndentLevel());
+                                    const float Indent = 10.f;
+                                    return FMargin( NestingDepth * Indent, 0.f, 2.f, 0.f );
+                                }
+                            )
+                        )
+                        .VAlign(VAlign_Center)
+                        .AutoWidth()
+                        [
+                            SNew(SCheckBox)
+                            .Style(displayLayersToggleStyle)
+                            .OnCheckStateChanged_Lambda(
+                                [track](ECheckBoxState iState)
+                                {
+                                    FOdysseyObjectEditorUtils::SetPropertyValue(track, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationTimelineTrack, DisplayLayers), iState == ECheckBoxState::Checked);
+                                }
+                            )
+                            .IsChecked_Lambda(
+                                [track]()
+                                {
+                                    return track->DisplayLayers ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+                                }
+                            )
+                        ]
+                        + SHorizontalBox::Slot()
+                        .VAlign(VAlign_Center)
+                        .HAlign(HAlign_Left)
+                        [
+                            SNew(STextBlock)
+                            .Text(LOCTEXT("sequencer.animation-timeline-track.name", "Timeline"))
+                        ]
+                    ]
                 ]
-                + SHorizontalBox::Slot()
-                .VAlign(VAlign_Center)
-                .HAlign(HAlign_Left)
+                + SVerticalBox::Slot()
                 [
-                    SNew(STextBlock)
-                    .Text(LOCTEXT("sequencer.animation-timeline-track.name", "Timeline"))
+                    SNew(SOdysseyAnimationTimelineTrack, component, track, iParams, SequencerPtr)
+                        .Visibility_Lambda(
+                            [track]()
+                            {
+                                return track->DisplayLayers ? EVisibility::Visible : EVisibility::Collapsed;
+                            }
+                        )
+                        .Clipping(EWidgetClipping::ClipToBoundsAlways)
                 ]
-            ]
-        ]
-        + SVerticalBox::Slot()
-        .AutoHeight()
-        [
-            SNew(SOdysseyAnimationTimelineTrack, component, track, iParams, SequencerPtr)
-                .Visibility_Lambda(
-                    [track]()
-                    {
-                        return track->DisplayLayers ? EVisibility::Visible : EVisibility::Collapsed;
-                    }
-                )
-                .Clipping(EWidgetClipping::ClipToBoundsAlways)
-        ];
+            ];
     }
 
     return FMovieSceneTrackEditor::BuildOutlinerColumnWidget(iParams, iColumnName);
