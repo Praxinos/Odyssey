@@ -444,9 +444,9 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawHUD( const FOdysseyHUD::FDrawH
     FLinearColor fgColor = FLinearColor( fg );
     FLinearColor bgColor = FLinearColor( bg );
     FLinearColor hcColor = FLinearColor( hc );
+    FVector2D hudCursor = iParams.mTextureToHUD.Execute( FVector2D( mX, mY ) );
     uint64 hudFlags = mTrajectoryTool->GetEditor()->GetVectorHUDFlags();
     uint64 gridFlags = 0;
-
 
     gridFlags |= ( mTrajectoryTool->GridDisplayMode == eVectorTrajectoryGridDisplayMode::AsPoints ) ?  FOdysseyVectorHUD::HUD_BREAKDOWN_GRID_DOTTED : 0;
     gridFlags |= ( mTrajectoryTool->GetEditionMode() == eVectorTrajectoryEditionMode::Add ) ? FOdysseyVectorHUD::HUD_BREAKDOWN_SOURCE_GRID : 0;
@@ -534,6 +534,19 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawHUD( const FOdysseyHUD::FDrawH
             // prevent a crash in case the grid is rebuilt by reset the pointer to null each time.
             //mTrajectoryTool->ResetHoveredQuad();
         }
+    }
+
+    if( ( mTrajectoryTool->GetEditionMode() == eVectorTrajectoryEditionMode::Curve   )
+    ||  ( mTrajectoryTool->GetEditionMode() == eVectorTrajectoryEditionMode::Spacing ) )
+    {
+        // cursor
+        DrawPrimitiveCircle( iParams
+                            , hudCursor
+                            , WorldVectorToHUD( iParams
+                                              , ::ULIS::FVec2D( mX, mY )
+                                              , ::ULIS::FVec2D( mTrajectoryTool->PickingRadius, 0 ) ).Distance()
+                            , hcColor
+                            , 1.0f );
     }
 
     // invisible plane will get mouse events

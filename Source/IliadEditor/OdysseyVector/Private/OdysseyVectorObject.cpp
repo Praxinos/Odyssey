@@ -86,6 +86,8 @@ void
 FOdysseyVectorObject::SetOpacity( double iOpacity )
 {
     mOpacity = iOpacity;
+
+    Invalidate( FOdysseyVectorObject::INVALIDATE_COLOR );
 }
 
 void

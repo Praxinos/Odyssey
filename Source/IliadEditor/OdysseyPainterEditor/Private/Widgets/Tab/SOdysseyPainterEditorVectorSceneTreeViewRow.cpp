@@ -46,11 +46,40 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::SOdysseyPainterEditorVectorSceneTre
 {
 }
 
+ECheckBoxState
+SOdysseyPainterEditorVectorSceneTreeViewRow::GetVisibility() const
+{
+    return ( mItem->GetVectorObject()->GetOpacity() == 1.0f ) ? ECheckBoxState::Checked
+                                                              : ECheckBoxState::Unchecked;
+}
+
+void
+SOdysseyPainterEditorVectorSceneTreeViewRow::OnCheckBoxStateChanged( ECheckBoxState iState )
+{
+    switch( iState )
+    {
+        case ECheckBoxState::Checked :
+            mItem->GetVectorObject()->SetOpacity( 1.0f );
+        break;
+
+        case ECheckBoxState::Unchecked :
+            mItem->GetVectorObject()->SetOpacity( 0.0f );
+        break;
+
+        default :
+        break;
+    }
+
+    mItem->GetVectorObject()->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    mItem->GetVectorObject()->GetLayer()->RequestRedraw( mItem->GetVectorObject()->GetCell(), 0 );
+}
+
 void
 SOdysseyPainterEditorVectorSceneTreeViewRow::Construct( const typename STableRow<TSharedPtr<FVectorSceneTreeViewItem>>::FArguments& InArgs
                                                       , const TSharedRef< STableViewBase >& InOwnerTableView
                                                       , const TSharedPtr<FVectorSceneTreeViewItem> iItem )
 {
+    const FCheckBoxStyle* isActivatedToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("LayerStack.IsActivatedToggle");
     STableRow<TSharedPtr<FVectorSceneTreeViewItem>>::Construct( InArgs, InOwnerTableView );
     FOdysseyVectorObject* vectorObject = iItem->GetVectorObject();
     TSharedPtr<SHorizontalBox> tagBox;
@@ -115,6 +144,16 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::Construct( const typename STableRow
                     .Image( objectIcon )
                 ]
                 + SHorizontalBox::Slot()
+                .Padding( 2, 0 )
+                .AutoWidth()
+                [
+                    SNew( SCheckBox )
+                    .Style(isActivatedToggleStyle)
+                    .OnCheckStateChanged(this, &SOdysseyPainterEditorVectorSceneTreeViewRow::OnCheckBoxStateChanged)
+                    .IsChecked(this, &SOdysseyPainterEditorVectorSceneTreeViewRow::GetVisibility)
+                ]
+                + SHorizontalBox::Slot()
+                .Padding( 2, 0 )
                 .AutoWidth()
                 [
                     mTextBlockWidget.ToSharedRef()

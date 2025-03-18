@@ -707,6 +707,16 @@ UOdysseyPainterEditorVectorTrajectoryTool::ExtendToolbar( FToolBarBuilder& iBuil
         SNew(SBox)
         .Padding(10.f, 0.f, 10.f, 0.f)
         [
+            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTrajectoryTool, PickingRadius ), FSinglePropertyParams())
+            .InnerPadding(10.f)
+            .ValueWidthOverride(100.f)
+        ]
+    );
+
+    iBuilder.AddWidget(
+        SNew(SBox)
+        .Padding(10.f, 0.f, 10.f, 0.f)
+        [
             SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTrajectoryTool, ShowInbetweens ), FSinglePropertyParams())
             .InnerPadding(10.f)
         ]

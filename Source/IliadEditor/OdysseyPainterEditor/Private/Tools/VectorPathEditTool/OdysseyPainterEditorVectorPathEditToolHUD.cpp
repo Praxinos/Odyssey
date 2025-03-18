@@ -139,15 +139,6 @@ FOdysseyPainterEditorVectorPathEditToolHUD::DrawHUD( const FOdysseyHUD::FDrawHUD
                      | segmentHandleFlag );
     }
 
-    // cursor
-    DrawPrimitiveCircle( iParams
-                       , hudCursor
-                       , WorldVectorToHUD( iParams
-                                         , ::ULIS::FVec2D( mX, mY )
-                                         , ::ULIS::FVec2D( mPathEditTool->PickingRadius, 0 ) ).Distance()
-                       , hcColor
-                       , 1.0f );
-
     if( mPathEditTool->GetEditionMode() == eVectorPathEditEditionMode::Alter )
     {
         if(  mHoveredPointArray.size() )
@@ -175,6 +166,18 @@ FOdysseyPainterEditorVectorPathEditToolHUD::DrawHUD( const FOdysseyHUD::FDrawHUD
             // cutting Line
             DrawPrimitiveLine( iParams, lineP0, lineP1, hcColor, 1.0f );
         }
+    }
+
+    if( ( mPathEditTool->GetEditionMode() == eVectorPathEditEditionMode::Alter ) == 0 )
+    {
+        // cursor
+        DrawPrimitiveCircle( iParams
+                           , hudCursor
+                           , WorldVectorToHUD( iParams
+                                             , ::ULIS::FVec2D( mX, mY )
+                                             , ::ULIS::FVec2D( mPathEditTool->PickingRadius, 0 ) ).Distance()
+                           , hcColor
+                           , 1.0f );
     }
 
     // invisible plane will get mouse events

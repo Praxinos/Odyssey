@@ -108,8 +108,10 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTrajectoryTool : publi
         UPROPERTY( EditAnywhere
                  , Category = TrajectoryTool
                  , meta = ( ToolTip  = "Picking Radius"
-                          , ClampMin = "0"
-                          , UIMin    = "0" ) )
+                          , ClampMin = "1"
+                          , UIMin    = "1"
+                          , ClampMax = "100"
+                          , UIMax    = "100" ) )
         uint32 PickingRadius;
 
         UPROPERTY( EditAnywhere
