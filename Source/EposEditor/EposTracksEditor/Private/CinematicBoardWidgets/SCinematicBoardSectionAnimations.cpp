@@ -865,7 +865,7 @@ SCinematicBoardSectionAnimationTransformKeys::OnMouseMove( const FGeometry& MyGe
 const FSlateBrush*
 SCinematicBoardSectionAnimationTransformKeys::GetBackgroundBrush() const //override
 {
-    static FSlateColorBrush background_brush = FSlateColorBrush( FLinearColor( .06f, .15f, .14f ) );
+    static FSlateColorBrush background_brush = FSlateColorBrush( FLinearColor( .05f, .13f, .12f ) );
 
     return &background_brush;
 }
@@ -896,6 +896,7 @@ public:
     void Construct( const FArguments& InArgs, TSharedRef<FCinematicBoardSection> iBoardSection );
 
     // SWidget overrides
+    virtual FVector2D ComputeDesiredSize( float ) const override;
     virtual int32 OnPaint( const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled ) const override;
 
     virtual FReply OnMouseButtonDown( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) override;
@@ -932,6 +933,15 @@ SCinematicBoardSectionAnimationTimelineKeys::Construct( const FArguments& InArgs
     [
         SNew( SBox )
     ];
+}
+
+FVector2D
+SCinematicBoardSectionAnimationTimelineKeys::ComputeDesiredSize( float ) const //override
+{
+    FVector2D size = GetDesiredSize();
+    size.Y = SequencerSectionConstants::DefaultSectionHeight * 3 + 5.f;
+
+    return size;
 }
 
 //---

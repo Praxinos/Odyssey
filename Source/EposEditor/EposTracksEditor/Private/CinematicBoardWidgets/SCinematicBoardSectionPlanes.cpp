@@ -1200,7 +1200,7 @@ SCinematicBoardSectionPlaneMaterialKeys::OnMouseMove( const FGeometry& MyGeometr
 const FSlateBrush*
 SCinematicBoardSectionPlaneMaterialKeys::GetBackgroundBrush() const //override
 {
-    static FSlateColorBrush background_brush = FSlateColorBrush( FLinearColor( .06f, .15f, .14f ) );
+    static FSlateColorBrush background_brush = FSlateColorBrush( FLinearColor( .05f, .13f, .12f ) );
 
     return &background_brush;
 }
