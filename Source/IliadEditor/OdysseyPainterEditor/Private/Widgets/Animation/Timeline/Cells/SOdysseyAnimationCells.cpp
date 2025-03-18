@@ -300,6 +300,7 @@ SOdysseyAnimationCells::CreateTimingHandleWidget()
             [
                 SNew(SOverlay)
                 + SOverlay::Slot()
+                .Padding(FMargin(1, 1, 0, 0))
                 .HAlign(HAlign_Left)
                 .VAlign(VAlign_Top)
                 [
@@ -331,7 +332,7 @@ SOdysseyAnimationCells::CreateTimingHandleWidget()
                     ]
                 ]
                 + SOverlay::Slot()
-                .Padding(FMargin(0, 0, -mTimingHandleBrush->ImageSize.X, 0))
+                .Padding(FMargin(0, 1, -mTimingHandleBrush->ImageSize.X-1, 0))
                 .HAlign(HAlign_Right)
                 .VAlign(VAlign_Top)
                 [
@@ -364,7 +365,7 @@ SOdysseyAnimationCells::CreateTimingHandleWidget()
                     ]
                 ]
                 + SOverlay::Slot()
-                .Padding(FMargin(-mExposureHandleBrush->ImageSize.X, 0, 0, 0))
+                .Padding(FMargin(-mExposureHandleBrush->ImageSize.X-1, 0, 0, 1))
                 .HAlign(HAlign_Left)
                 .VAlign(VAlign_Bottom)
                 [
@@ -397,6 +398,7 @@ SOdysseyAnimationCells::CreateTimingHandleWidget()
                     ]
                 ]
                 + SOverlay::Slot()
+                .Padding(FMargin(0, 0, 1, 1))
                 .HAlign(HAlign_Right)
                 .VAlign(VAlign_Bottom)
                 [

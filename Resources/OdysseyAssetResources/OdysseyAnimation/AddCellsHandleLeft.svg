@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Calque_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 512 512">
+  <!-- Generator: Adobe Illustrator 29.3.1, SVG Export Plug-In . SVG Version: 2.1.0 Build 151)  -->
+  <defs>
+    <style>
+      .st0 {
+        fill: #c7c7c7;
+        stroke: #000;
+        stroke-miterlimit: 10;
+        stroke-width: 16px;
+      }
+    </style>
+  </defs>
+  <path class="st0" d="M8.2,9.5v495.1s493.7,0,493.7,0C497.6,230.5,278.2,9.5,8.2,9.5Z"/>
+  <g id="Calque_11" data-name="Calque_1" image-rendering="optimizeQuality" shape-rendering="geometricPrecision" text-rendering="geometricPrecision">
+    <polygon points="65 344.4 164.8 344.4 164.8 444.2 227.2 444.2 227.2 344.4 327 344.4 327 281.9 227.2 281.9 227.2 182.2 164.8 182.2 164.8 281.9 65 281.9 65 344.4"/>
+  </g>
+</svg>

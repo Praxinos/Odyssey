@@ -800,10 +800,10 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set("Animation.LightTable.Options.DisplayPosition.UnderLayer", new IMAGE_BRUSH_SVG("OdysseyAnimation/LightTable_Options_DisplayPosition_UnderLayer", mIcon16x16));
 
 
-    Set("Animation.AddCellsHandleRight", new IMAGE_BRUSH("OdysseyAnimation/AddCellsHandleRight_16", mIcon16x16));
-    Set("Animation.AddCellsHandleLeft", new IMAGE_BRUSH("OdysseyAnimation/AddCellsHandleLeft_16", mIcon16x16));
-    Set("Animation.CellTimingHandle", new IMAGE_BRUSH("OdysseyAnimation/CellTimingHandle_16", mIcon16x16));
-    Set("Animation.CellExposureHandle", new IMAGE_BRUSH("OdysseyAnimation/CellExposureHandle_16", mIcon16x16));
+    Set("Animation.AddCellsHandleRight", new IMAGE_BRUSH_SVG("OdysseyAnimation/AddCellsHandleRight", mIcon16x16));
+    Set("Animation.AddCellsHandleLeft", new IMAGE_BRUSH_SVG("OdysseyAnimation/AddCellsHandleLeft", mIcon16x16));
+    Set("Animation.CellTimingHandle", new IMAGE_BRUSH_SVG("OdysseyAnimation/CellTimingHandle", mIcon16x16));
+    Set("Animation.CellExposureHandle", new IMAGE_BRUSH_SVG("OdysseyAnimation/CellExposureHandle", mIcon16x16));
     Set("Animation.CellBreakIndicator", new IMAGE_BRUSH("OdysseyAnimation/CellBreakIndicator", FVector2D(2, 4), FLinearColor::White, ESlateBrushTileType::Vertical));
     Set("Animation.CellBreakIndicatorExtended", new IMAGE_BRUSH("OdysseyAnimation/CellBreakIndicatorExtended", FVector2D(32, 32), FLinearColor::White, ESlateBrushTileType::Both));
 
