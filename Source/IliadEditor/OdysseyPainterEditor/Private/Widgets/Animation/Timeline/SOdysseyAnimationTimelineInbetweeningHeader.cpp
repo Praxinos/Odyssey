@@ -45,6 +45,8 @@ void
 SOdysseyAnimationTimelineInbetweeningHeader::Construct( const FArguments& InArgs
                                                       , UOdysseyAnimationLayerImageVector* iAnimationLayerImageVector )
 {
+    static FTableViewStyle style = FOdysseyStyle::GetWidgetStyle<FTableViewStyle>("Inbetweening.TableView");
+
     mAnimationLayerImageVector = iAnimationLayerImageVector;
     mEditor = InArgs._PainterEditor;
 
@@ -64,6 +66,8 @@ SOdysseyAnimationTimelineInbetweeningHeader::Construct( const FArguments& InArgs
         .SelectionMode( ESelectionMode::Multi )
         //.HeaderRow(headerRow)
     );
+
+    SetStyle( &style );
 
     Update();
 }

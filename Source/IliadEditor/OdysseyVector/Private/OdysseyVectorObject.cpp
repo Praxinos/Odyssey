@@ -36,7 +36,8 @@ FOdysseyVectorObject::FOdysseyVectorObject( const FString& iName )
     : mParent( nullptr )
     , bSelected( false )
     , bExpanded( false )
-    , bIsSystem( false )
+    , bSystem( false )
+    , bVisible ( true )
     , mBackgroundBucket( this, 0.0f, 0.0f, false )
     , mForegroundBucket( this, 0.0f, 0.0f, false )
     , mInvalidationFlags ( 0 )
@@ -196,7 +197,7 @@ FOdysseyVectorObject::Added()
 bool
 FOdysseyVectorObject::IsSystem()
 {
-    return bIsSystem;
+    return bSystem;
 }
 
 void
@@ -475,6 +476,38 @@ FOdysseyVectorObject::RecursiveRemoveTagByType( uint32 iTagType
     }
 }
 
+void
+FOdysseyVectorObject::SetVisible( bool iVisible )
+{
+    bVisible = iVisible;
+}
+
+bool
+FOdysseyVectorObject::IsVisible( bool iHierarchical )
+{
+    if( iHierarchical )
+    {
+        FOdysseyVectorObject* object = this;
+
+        while( object )
+        {
+            if( object->IsVisible( false ) == false )
+            {
+                return false;
+            }
+
+            object = object->GetParent();
+        }
+
+    }
+    else
+    {
+        return bVisible;
+    }
+
+    return true;
+}
+
 FOdysseyVectorObject*
 FOdysseyVectorObject::CopyShape( uint64 iCopyFlags )
 {
@@ -548,6 +581,7 @@ FOdysseyVectorObject::ExportParam( FOdysseyVectorObject* iDestinationObject, boo
     iDestinationObject->mBackgroundBucket.SetGradientColor1( mBackgroundBucket.GetGradientColor1() );
 
     iDestinationObject->SetOpacity( mOpacity );
+    iDestinationObject->SetExpanded( IsExpanded() );
 
     if( iInvalidate )
     {
@@ -772,7 +806,8 @@ FOdysseyVectorObject::Draw( BLContext* iBLContext
                           , double iAncestorsOpacity
                           , uint64 iFlags )
 {
-    double combinedOpacity = iAncestorsOpacity *= mOpacity;
+    double visible = bVisible ? 1.0f : 0.0f;
+    double combinedOpacity = ( iAncestorsOpacity *= mOpacity ) * visible;
 
     LockDrawing();
 

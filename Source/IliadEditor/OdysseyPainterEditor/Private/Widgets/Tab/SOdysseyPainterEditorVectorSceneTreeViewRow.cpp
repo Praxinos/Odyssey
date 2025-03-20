@@ -10,6 +10,7 @@
 #include "OdysseyVectorCell.h"
 #include "OdysseyPainterEditor.h"
 #include "Undo/OdysseyVectorUndoTransferObjects.h"
+#include "Undo/OdysseyVectorUndoObjectParam.h"
 #include "OdysseyPainterEditorSource.h"
 #include "Widgets/Tab/SOdysseyPainterEditorVectorSceneTreeView.h"
 
@@ -47,23 +48,48 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::SOdysseyPainterEditorVectorSceneTre
 }
 
 ECheckBoxState
-SOdysseyPainterEditorVectorSceneTreeViewRow::GetVisibility() const
+SOdysseyPainterEditorVectorSceneTreeViewRow::GetHierarchicalVisibility() const
 {
-    return ( mItem->GetVectorObject()->GetOpacity() == 1.0f ) ? ECheckBoxState::Checked
-                                                              : ECheckBoxState::Unchecked;
+    bool visibility = mItem->GetVectorObject()->IsVisible( true );
+
+    return ( visibility ) ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+}
+
+bool
+SOdysseyPainterEditorVectorSceneTreeViewRow::IsVisibilityEnabled() const
+{
+    return mItem->GetVectorObject()->GetParent()->IsVisible( true );
 }
 
 void
 SOdysseyPainterEditorVectorSceneTreeViewRow::OnCheckBoxStateChanged( ECheckBoxState iState )
 {
+    uint32 notificationFlags = 0;
+
+    GEditor->BeginTransaction(LOCTEXT("vector-scene-tree-view.transaction.object-visibility", "Set Object Visibility"));
+    if( GUndo )
+    {
+        FOdysseyVectorUndo* undo = static_cast<FOdysseyVectorUndo*>( new FOdysseyVectorUndoObjectParam( mItem->GetVectorObject()->GetScene()
+                                                                                                      , mItem->GetVectorObject()
+                                                                                                      , notificationFlags ) );
+
+        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+
+        const TSharedPtr< SOdysseyPainterEditorVectorSceneTreeView > treeView = StaticCastSharedPtr<SOdysseyPainterEditorVectorSceneTreeView>(OwnerTablePtr.Pin());
+        TSharedPtr<FOdysseyPainterEditorSource> source = treeView->GetEditor()->GetSource();
+        if (source)
+            source->RecordCurrentFrameUndo();
+    }
+    GEditor->EndTransaction();
+
     switch( iState )
     {
         case ECheckBoxState::Checked :
-            mItem->GetVectorObject()->SetOpacity( 1.0f );
+            mItem->GetVectorObject()->SetVisible( true );
         break;
 
         case ECheckBoxState::Unchecked :
-            mItem->GetVectorObject()->SetOpacity( 0.0f );
+            mItem->GetVectorObject()->SetVisible( false );
         break;
 
         default :
@@ -148,9 +174,10 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::Construct( const typename STableRow
                 .AutoWidth()
                 [
                     SNew( SCheckBox )
-                    .Style(isActivatedToggleStyle)
-                    .OnCheckStateChanged(this, &SOdysseyPainterEditorVectorSceneTreeViewRow::OnCheckBoxStateChanged)
-                    .IsChecked(this, &SOdysseyPainterEditorVectorSceneTreeViewRow::GetVisibility)
+                    .Style( isActivatedToggleStyle )
+                    .OnCheckStateChanged( this, &SOdysseyPainterEditorVectorSceneTreeViewRow::OnCheckBoxStateChanged)
+                    .IsChecked( this, &SOdysseyPainterEditorVectorSceneTreeViewRow::GetHierarchicalVisibility)
+                    .IsEnabled( this, &SOdysseyPainterEditorVectorSceneTreeViewRow::IsVisibilityEnabled )
                 ]
                 + SHorizontalBox::Slot()
                 .Padding( 2, 0 )

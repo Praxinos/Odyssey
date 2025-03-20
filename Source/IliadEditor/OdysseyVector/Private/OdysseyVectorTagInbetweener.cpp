@@ -1567,7 +1567,7 @@ FOdysseyVectorTagInbetweener::Draw( FOdysseyVectorGroupPaint* iDisplayedScene
     LockDrawing();
 
     // check the object is still displayed (it could have been removed but still in memory)
-    if( mOwner->GetScene() )
+    if( /*mOwner->GetScene()*/ mOwner->IsVisible( true ) )
     {
 
         FOdysseyVectorCell* tagCell = mOwner->GetScene()->GetCell();

@@ -4,9 +4,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "OdysseyShape.h"
 #include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.h"
 #include "OdysseyVectorBrush.h"
+
 #include "OdysseyPainterEditorVectorPrimitiveDrawingTool.generated.h"
+
 
 class FOdysseyVectorLine;
 class FOdysseyVectorPrimitive;
@@ -66,27 +69,23 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPrimitiveDrawingTool :
 
     public:
         UPROPERTY( EditAnywhere
-                 , Category=PrimitiveDrawingTool
-                 , meta = ( ToolTip = "Primitive Type" ) )
-        EOdysseyVectorPrimitiveType PrimitiveType;
-
-        //UPROPERTY( EditAnywhere, Category=PrimitiveDrawingTool, meta = (ClampMin = "0.0",UIMin = "0.0", ClampMax = "1.0", UIMax = "1.0" ))
-        double Opacity;
+                 , Category = "Shape" )
+        FOdysseyShapes Shapes;
 
         UPROPERTY( EditAnywhere
-                 , Category=PrimitiveDrawingTool
+                 , Category = "Parameters"
                  , meta = ( ToolTip = "Brush" ) )
         FOdysseyVectorBrush Brush;
 
         UPROPERTY( EditAnywhere
-                 , Category=PrimitiveDrawingTool
+                 , Category = "Parameters"
                  , meta = ( ToolTip  = "Stroke Width"
                           , ClampMin = "0.0"
                           , UIMin    = "0.0" ) )
         double StrokeWidth;
 
         UPROPERTY( EditAnywhere
-                 , Category=PrimitiveDrawingTool
+                 , Category = "Parameters"
                  , meta = ( ToolTip  = "Uniform" ) )
         bool Uniform;
         bool UniformAtKeyDown;

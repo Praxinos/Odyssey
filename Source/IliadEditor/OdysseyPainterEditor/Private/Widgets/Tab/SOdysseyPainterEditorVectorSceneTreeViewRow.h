@@ -72,8 +72,9 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorSceneTreeViewRow
         void OnTextChanged( const FText& InText, ETextCommit::Type CommitInfo );
         bool OnVerifyTextChanged( const FText& NewText, FText& OutErrorMessage );
         virtual ESelectionMode::Type GetSelectionMode () const;
-        ECheckBoxState GetVisibility() const;
+        ECheckBoxState GetHierarchicalVisibility() const;
         void OnCheckBoxStateChanged( ECheckBoxState iState );
+        bool IsVisibilityEnabled() const;
 
     protected:
         uint32 mDropZone;

@@ -587,6 +587,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         static uint64 Traverse( FOdysseyVectorObject* iObject
                               , uint64 iTraversalFlags
                               , std::function<uint64(FOdysseyVectorObject*,uint64)> iCallback );
+        bool IsVisible( bool iHierarchical );
+        void SetVisible( bool iVisible );
 
     protected:
 
@@ -616,7 +618,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         FOdysseyVectorObject* mParent;
         bool bSelected;
         bool bExpanded;
-        bool bIsSystem;
+        bool bSystem;
+        bool bVisible;
         ::ULIS::FRectD mBBox;
         ::ULIS::FRectD mInDepthBBox;
         FOdysseyVectorBucket mBackgroundBucket;

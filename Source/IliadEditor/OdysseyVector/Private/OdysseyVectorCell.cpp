@@ -19,7 +19,7 @@ FOdysseyVectorCell::FOdysseyVectorCell( IOdysseyVectorCell* iCellInterface
     , mInvalidatedRect( 0, 0, 0, 0 )
     , bPendingRedraw ( false )
 {
-    bIsSystem = true;
+    bSystem = true;
 
     SetScene( iScene );
 }

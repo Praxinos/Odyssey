@@ -14,14 +14,14 @@ FOdysseyVectorLayer::FOdysseyVectorLayer( IOdysseyVectorLayer* iLayerInterface )
     : FOdysseyVectorObject("Layer")
     , mLayerInterface( iLayerInterface )
 {
-    bIsSystem = true;
+    bSystem = true;
 }
 
 FOdysseyVectorLayer::FOdysseyVectorLayer()
     : FOdysseyVectorObject("Layer")
     , mLayerInterface( nullptr )
 {
-    bIsSystem = true;
+    bSystem = true;
 }
 
 void

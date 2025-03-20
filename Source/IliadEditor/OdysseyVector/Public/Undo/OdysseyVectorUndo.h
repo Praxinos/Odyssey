@@ -140,37 +140,39 @@ namespace FSnapshotFlags
         static const uint64 TRANSFORMATIONS           = ( 1ULL <<  0 );
         static const uint64 COLORING                  = ( 1ULL <<  1 );
         static const uint64 OPACITY                   = ( 1ULL <<  2 );
-        static const uint64 NAME                      = ( 1ULL <<  3 );
-        static const uint64 HIERARCHY                 = ( 1ULL <<  4 );
-        static const uint64 CHILDREN_TRANSFORMATIONS  = ( 1ULL <<  5 );
+        static const uint64 VISIBILITY                = ( 1ULL <<  3 );
+        static const uint64 NAME                      = ( 1ULL <<  4 );
+        static const uint64 HIERARCHY                 = ( 1ULL <<  5 );
+        static const uint64 CHILDREN_TRANSFORMATIONS  = ( 1ULL <<  6 );
         static const uint64 PARAM                     = ( TRANSFORMATIONS
                                                         | COLORING
+                                                        | VISIBILITY
                                                         | OPACITY
                                                         | NAME );
         namespace Path
         {
-            static const uint64 VERTICES                  = ( 1ULL <<  6 );
-            static const uint64 SEGMENTS                  = ( 1ULL <<  7 );
-            static const uint64 SELECTED_VERTICES         = ( 1ULL <<  8 );
-            static const uint64 TOPOLOGY                  = ( 1ULL <<  9 );
-            static const uint64 BRUSH                     = ( 1ULL << 10 );
-            static const uint64 JOINTTYPE                 = ( 1ULL << 11 );
-            static const uint64 MITERLIMIT                = ( 1ULL << 12 );
+            static const uint64 VERTICES                  = ( 1ULL <<  7 );
+            static const uint64 SEGMENTS                  = ( 1ULL <<  8 );
+            static const uint64 SELECTED_VERTICES         = ( 1ULL <<  9 );
+            static const uint64 TOPOLOGY                  = ( 1ULL << 10 );
+            static const uint64 BRUSH                     = ( 1ULL << 11 );
+            static const uint64 JOINTTYPE                 = ( 1ULL << 12 );
+            static const uint64 MITERLIMIT                = ( 1ULL << 13 );
             static const uint64 PARAM                     = ( BRUSH
                                                             | JOINTTYPE
                                                             | MITERLIMIT );
         }
         namespace GroupPaint
         {
-            static const uint64 BUCKETS                   = ( 1ULL <<  6 );
-            static const uint64 SELECTED_BUCKETS          = ( 1ULL <<  7 );
-            static const uint64 PAINTED                   = ( 1ULL <<  8 );
-            static const uint64 MONOCHROME                = ( 1ULL <<  9 );
-            static const uint64 MONOCHROMECOLOR           = ( 1ULL << 10 );
-            static const uint64 REALTIME                  = ( 1ULL << 11 );
-            static const uint64 GAPTOLERANCE              = ( 1ULL << 12 );
-            static const uint64 WIREFRAME                 = ( 1ULL << 13 );
-            static const uint64 WIREFRAMECOLOR            = ( 1ULL << 14 );
+            static const uint64 BUCKETS                   = ( 1ULL <<  7 );
+            static const uint64 SELECTED_BUCKETS          = ( 1ULL <<  8 );
+            static const uint64 PAINTED                   = ( 1ULL <<  9 );
+            static const uint64 MONOCHROME                = ( 1ULL << 10 );
+            static const uint64 MONOCHROMECOLOR           = ( 1ULL << 11 );
+            static const uint64 REALTIME                  = ( 1ULL << 12 );
+            static const uint64 GAPTOLERANCE              = ( 1ULL << 13 );
+            static const uint64 WIREFRAME                 = ( 1ULL << 14 );
+            static const uint64 WIREFRAMECOLOR            = ( 1ULL << 15 );
             static const uint64 PARAM                     = ( PAINTED
                                                             | MONOCHROME
                                                             | MONOCHROMECOLOR
@@ -540,6 +542,7 @@ class ODYSSEYVECTOR_API FSnapshotObject
         double mScalingY;
         FString mName;
         double mOpacity;
+        bool bVisibility;
 };
 
 class ODYSSEYVECTOR_API FSnapshotPath : public FSnapshotObject

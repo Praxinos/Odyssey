@@ -55,8 +55,8 @@ UOdysseyPainterEditorVectorObjectView::ImportParam()
         ScalingY     = focusedObject->GetScalingY();
 
         // Category "Appearance"
-        Opacity         = focusedObject->GetOpacity();
-        Visible = Opacity ? true : false;
+        Opacity = focusedObject->GetOpacity();
+        Visible = focusedObject->IsVisible( false );
 
         ForegroundColorMode = static_cast<eForegroundColorMode>(focusedObject->GetForegroundBucket().GetColorMode());
         BackgroundColorMode = static_cast<eBackgroundColorMode>(focusedObject->GetBackgroundBucket().GetColorMode());
@@ -149,7 +149,7 @@ UOdysseyPainterEditorVectorObjectView::PropertyChanged( const FName& iPropertyNa
             selectedObject->SetOpacity( Opacity );
 
         if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, Visible) )
-            selectedObject->SetOpacity( Visible ? 1.0f : 0.0f );
+            selectedObject->SetVisible( Visible );
 
         if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, ForegroundColorMode) )
             selectedObject->GetForegroundBucket().SetColorMode( static_cast<eBucketColorMode>(ForegroundColorMode) );

@@ -217,6 +217,19 @@ FOdysseyVectorExportV2::WriteObjectBackgroundColor( FOdysseyVectorObject& iObjec
 }
 
 void
+FOdysseyVectorExportV2::WriteObjectVisibility( FOdysseyVectorObject& iObject, FArchive &Ar )
+{
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_OBJECT_VISIBILITY
+                            , Ar
+                            , [&iObject](FArchive &Ar) -> void
+    {
+        uint32 visible = iObject.IsVisible( false ) ? 1 : 0;
+
+        Ar << visible;
+    } );
+}
+
+void
 FOdysseyVectorExportV2::WriteObjectOpacity( FOdysseyVectorObject& iObject, FArchive &Ar )
 {
     FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_OBJECT_OPACITY
@@ -248,6 +261,7 @@ FOdysseyVectorExportV2::WriteObjectChunks( FOdysseyVectorObject& iObject, FArchi
     WriteObjectParentID( iObject, Ar );
     WriteObjectName( iObject, Ar );
     WriteObjectTransform( iObject, Ar );
+    WriteObjectVisibility( iObject, Ar );
     WriteObjectOpacity( iObject, Ar );
     WriteObjectExpansion( iObject, Ar );
     WriteObjectForegroundBucket( iObject, Ar );

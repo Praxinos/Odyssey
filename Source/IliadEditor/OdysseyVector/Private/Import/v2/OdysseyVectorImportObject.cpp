@@ -210,13 +210,27 @@ FOdysseyVectorImportV2::ParseObjectChunks( FOdysseyVectorObject& iObject
         }
         break;
 
+        case FOdysseyFile::VectorV2::CHUNK_OBJECT_VISIBILITY:
+        {
+            uint32 visibility;
+
+            Ar << visibility;
+
+            iObject.SetVisible( visibility ? true : false );
+        }
+        break;
+
         case FOdysseyFile::VectorV2::CHUNK_OBJECT_OPACITY:
         {
             double opacity;
 
             Ar << opacity;
 
-            iObject.SetOpacity( opacity ? 1.0f : 0.0f );
+            iObject.SetOpacity( opacity );
+
+#if ( ENGINE_MAJOR_VERSION <= 5 ) && ( ENGINE_MINOR_VERSION < 6 )
+            iObject.SetVisible( opacity ? true : false );
+#endif
         }
         break;
 

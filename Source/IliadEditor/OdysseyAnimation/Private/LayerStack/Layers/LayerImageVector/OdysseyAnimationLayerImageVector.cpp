@@ -90,7 +90,8 @@ UOdysseyAnimationLayerImageVector::UpdateSharedEnv()
 
     for (UOdysseyAnimationCell* cell : Cells)
     {
-        if (!cell->IsA<UOdysseyAnimationCellImageVector>())
+        // note: a cell can be nullptr
+        if ( cell && !cell->IsA<UOdysseyAnimationCellImageVector>())
             continue;
 
         UOdysseyAnimationCellImageVector* cellVector = Cast<UOdysseyAnimationCellImageVector>(cell);

@@ -946,6 +946,11 @@ FSnapshotObject::FSnapshotObject( FOdysseyVectorObject* iObject, uint64 iSnapsho
         mOpacity = iObject->GetOpacity();
     }
 
+    if( mSnapshotFlags & FSnapshotFlags::Object::OPACITY )
+    {
+        bVisibility = iObject->IsVisible( false );
+    }
+
     if( mSnapshotFlags & FSnapshotFlags::Object::NAME )
     {
         mName = iObject->GetName();
@@ -1027,6 +1032,15 @@ FSnapshotObject::Restore()
         mObject->SetOpacity( mOpacity );
         // swap
         mOpacity = currentOpacity;
+    }
+
+    if( mSnapshotFlags & FSnapshotFlags::Object::VISIBILITY )
+    {
+        bool currentVisibility = mObject->IsVisible( false );
+
+        mObject->SetVisible( bVisibility );
+        // swap
+        bVisibility = currentVisibility;
     }
 
     if( mSnapshotFlags & FSnapshotFlags::Object::NAME )

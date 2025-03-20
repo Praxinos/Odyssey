@@ -43,6 +43,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::SOdysseyAnimationLayer
     : mPickedBreakdown( nullptr )
     , mCandidateTargetCellBox( 0, 0, 0.0f, 0.0f, 0.0f, 0.0f )
 {
+    static FSlateColorBrush defaultBrush = FSlateColorBrush ( FLinearColor ( 0.0f, 0.0f, 0.0f, 0.0f ) );
 }
 
 void
@@ -50,22 +51,14 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::Construct( const typen
                                                                    , const TSharedRef< STableViewBase >& InOwnerTableView
                                                                    , const TSharedPtr<FInbetweeningListViewItem> iITem )
 {
+    static FTableRowStyle style = FOdysseyStyle::GetWidgetStyle<FTableRowStyle>("Inbetweening.TableRow");
+
     STableRow<TSharedPtr<FInbetweeningListViewItem>>::Construct( InArgs, InOwnerTableView );
 
+    Style = &style;
+
     mInbetweenerTag = iITem.Get()->GetInbetweenerTag();
-
-    //mCellsBox = SNew(SHorizontalBox);
-
-    //SetContent( mCellsBox.ToSharedRef() );
-/*
-    ChildSlot
-    [
-        SNew( STextBlock)
-        .Text( this, &SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::GetInbetweenerTagInbetweenCount )
-    ];
-*/
 }
-
 
 FReply
 SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonDown( const FGeometry & MyGeometry
@@ -406,6 +399,8 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
                                                                  , bool bParentEnabled ) const
 {
     TSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening> treeView = StaticCastSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening>(OwnerTablePtr.Pin());
+    UOdysseyAnimationLayerImageVector* layer = treeView.Get()->GetAnimationLayerImageVector();
+    UOdysseyLayerStack* layerStack = layer->GetLayerStack();
     // compute geometry
     uint32 inbetweenCount = ( mInbetweenerTag->GetLength() - 2 );
     uint32 breakdownCount = mInbetweenerTag->GetBreakdownCount();
@@ -426,6 +421,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
                                                                        , LayerId
                                                                        , InWidgetStyle
                                                                        , bParentEnabled );
+
     ++LayerId;
     // declared static to save some CPU cycles as there is no need to initialize them at each all
     static const FLinearColor strokeColor = FLinearColor( 0.75f, 0.75f, 0.75f, 1.00f );
@@ -436,7 +432,24 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
                                                         , 0.25f
                                                         , 0.25f );
     static const FLinearColor targetColor = FLinearColor( 1.0f, 0.50f, 0.50f, 0.50f );
+    //static FSlateColorBrush layerSelected = FSlateColorBrush( FStyleColors::Select );
     TArray< FVector2D > framePointBuffer;
+
+    if( layerStack->CurrentLayer == layer )
+    {
+        if( mInbetweenerTag->GetOwner()->IsSelected() )
+        {
+            FSlateDrawElement::MakeBox( OutDrawElements
+                                      , LayerId
+                                      , AllottedGeometry.ToPaintGeometry( FVector2D( mBoxPos.X
+                                                                                   , mBoxPos.Y )
+                                                                        , FVector2D( mBoxSize.X
+                                                                                   , mBoxSize.Y ) )
+                                      , &defaultBrush
+                                      , ESlateDrawEffect::None
+                                      , FStyleColors::PrimaryPress.GetColor( FWidgetStyle() ) );
+        }
+    }
 
     for( int i = 0; ( i < (int) mCellBoxBuffer.Num() ); i++ )
     {

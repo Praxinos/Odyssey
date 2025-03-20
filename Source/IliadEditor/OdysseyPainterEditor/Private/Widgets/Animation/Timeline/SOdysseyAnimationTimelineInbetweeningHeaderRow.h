@@ -44,6 +44,16 @@ class SOdysseyAnimationTimelineInbetweeningHeaderRow
 
     protected:
         virtual FVector2D ComputeDesiredSize ( float LayoutScaleMultiplier ) const override;
+        ECheckBoxState GetVisibility() const;
+        void OnCheckBoxStateChanged( ECheckBoxState iState );
+        bool IsVisibilityEnabled() const;
+        int32 OnPaint( const FPaintArgs& Args
+                     , const FGeometry& AllottedGeometry
+                     , const FSlateRect& MyCullingRect
+                     , FSlateWindowElementList& OutDrawElements
+                     , int32 LayerId
+                     , const FWidgetStyle& InWidgetStyle
+                     , bool bParentEnabled ) const override;
 
     protected:
         FOdysseyVectorTagInbetweener* mInbetweenerTag;

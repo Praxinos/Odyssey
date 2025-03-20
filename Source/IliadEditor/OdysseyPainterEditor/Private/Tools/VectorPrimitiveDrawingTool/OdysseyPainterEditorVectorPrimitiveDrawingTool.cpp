@@ -36,8 +36,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::~UOdysseyPainterEditorVectorPri
 
 UOdysseyPainterEditorVectorPrimitiveDrawingTool::UOdysseyPainterEditorVectorPrimitiveDrawingTool()
     : UOdysseyPainterEditorVectorBaseTool( MakeShared<FOdysseyPainterEditorVectorPrimitiveDrawingToolHUD>( this ), true, true )
-    , PrimitiveType ( EOdysseyVectorPrimitiveType::Ellipse )
-    , Opacity( 1.0f )
+    //, PrimitiveType ( EOdysseyVectorPrimitiveType::Ellipse )
     , Brush( nullptr )
     , StrokeWidth( 4.0f )
     , Uniform( false )
@@ -47,6 +46,12 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::UOdysseyPainterEditorVectorPrim
     , mEllipseNumber( 0 )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Shapes64");
+
+    Shapes.AddShapeType( EOdysseyShapeType::kLine, nullptr );
+    Shapes.AddShapeType( EOdysseyShapeType::kRectangle, nullptr );
+    Shapes.AddShapeType( EOdysseyShapeType::kEllipse, nullptr );
+
+    Shapes.SetActiveShapeType( EOdysseyShapeType::kEllipse );
 }
 
 //--------------------------------------------------------------------------------------
@@ -157,25 +162,28 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDownVector( FOdysseyVect
 
         mPrimitive = nullptr;
 
-        switch( PrimitiveType )
+        switch( Shapes.GetActiveShapeType() )
         {
-            case EOdysseyVectorPrimitiveType::Rectangle:
+            case EOdysseyShapeType::kEllipse:
+                mPrimitive = new FOdysseyVectorEllipse( FString("Ellipse_" + FString::FromInt( mEllipseNumber++ )), 0.0f, 0.0f, width.Distance() );
+            break;
+
+            case EOdysseyShapeType::kRectangle :
                 mPrimitive = new FOdysseyVectorRectangle( FString("Rectangle_") + FString::FromInt( mRectangleNumber++ ), 0.0f, 0.0f, width.Distance() );
             break;
 
-            case EOdysseyVectorPrimitiveType::Line:
+            case EOdysseyShapeType::kLine:
                 mPrimitive = new FOdysseyVectorLine( FString("Line_") + FString::FromInt( mLineNumber++ ), 0.0f, 0.0f, width.Distance() );
             break;
 
             default:
-                mPrimitive = new FOdysseyVectorEllipse( FString("Ellipse_" + FString::FromInt( mEllipseNumber++ )), 0.0f, 0.0f, width.Distance() );
             break;
         }
 
         parentObject->AppendChild( mPrimitive );
 
         SetPathColor( mPrimitive );
-        mPrimitive->SetOpacity( Opacity );
+        mPrimitive->SetOpacity( 1.0f );
         mPrimitive->SetBrush( Brush );
         //mPrimitive->SetForegroundColor( ueColor );
         mPrimitive->Translate( localCoords.x, localCoords.y );
@@ -235,9 +243,9 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDragVector( FOdysseyVect
                                                                          , iPointInTexture.y - mMouseDown.y );
             ::ULIS::FVec2D size = ::ULIS::FVec2D( bldif.x, bldif.y );
 
-            switch( PrimitiveType )
+            switch( Shapes.GetActiveShapeType() )
             {
-                case EOdysseyVectorPrimitiveType::Ellipse:
+                case EOdysseyShapeType::kEllipse:
                 {
                     FOdysseyVectorEllipse* ellipse = static_cast<FOdysseyVectorEllipse*>(mPrimitive);
 
@@ -251,7 +259,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDragVector( FOdysseyVect
                 }
                 break;
 
-                case EOdysseyVectorPrimitiveType::Rectangle:
+                case EOdysseyShapeType::kRectangle:
                 {
                     FOdysseyVectorRectangle* rectangle = static_cast<FOdysseyVectorRectangle*>(mPrimitive);
 
@@ -265,7 +273,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDragVector( FOdysseyVect
                 }
                 break;
 
-                case EOdysseyVectorPrimitiveType::Line:
+                case EOdysseyShapeType::kLine:
                 {
                     FOdysseyVectorLine* line = static_cast<FOdysseyVectorLine*>(mPrimitive);
 
@@ -377,17 +385,17 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::ExtendToolbar( FToolBarBuilder&
             .ValueWidthOverride(100.f)
         ]
     );
-
+/*
     iBuilder.AddWidget(
         SNew(SBox)
         .Padding(10.f, 0.f, 10.f, 0.f)
         [
-            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorPrimitiveDrawingTool, PrimitiveType ), FSinglePropertyParams())
+            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorPrimitiveDrawingTool, Shapes ), FSinglePropertyParams())
             .InnerPadding(10.f)
             .ValueWidthOverride(100.f)
         ]
     );
-
+*/
     iBuilder.EndSection();
 }
 

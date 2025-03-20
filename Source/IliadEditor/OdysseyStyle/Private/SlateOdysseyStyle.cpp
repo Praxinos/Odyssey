@@ -859,6 +859,25 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set("Animation.LightTable.OutOfPegs.Button.Off", new IMAGE_BRUSH_SVG("OdysseyAnimation/out-of-pegs-off", mIcon16x16));
     Set("Animation.LightTable.OutOfPegs.Button.Color", primary);
 
+    // Inbetweening
+    Set("Inbetweening.TableView", FTableViewStyle()
+        .SetBackgroundBrush(FSlateNoResource())
+    );
+
+    Set("Inbetweening.TableRow", FTableRowStyle()
+        .SetActiveBrush( FSlateNoResource() )
+        .SetActiveHighlightedBrush( FSlateNoResource() )
+        .SetActiveHoveredBrush( FSlateNoResource() )
+        .SetEvenRowBackgroundBrush( FSlateNoResource() )
+        .SetEvenRowBackgroundHoveredBrush(FSlateNoResource() )
+        .SetOddRowBackgroundBrush(FSlateNoResource() )
+        .SetOddRowBackgroundHoveredBrush(FSlateNoResource() )
+        .SetInactiveBrush( FSlateNoResource() )
+        .SetInactiveHighlightedBrush(FSlateNoResource() )
+        .SetInactiveHoveredBrush( FSlateNoResource() )
+        .SetSelectorFocusedBrush( FSlateNoResource() )
+    );
+
     //Texture
     Set("Texture.AlphaLockedToggle", FCheckBoxStyle()
         //.Padding(FMargin(0,0,0,0))
