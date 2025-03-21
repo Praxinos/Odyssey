@@ -508,10 +508,14 @@ UOdysseyAnimationLayerImageVector::GetCellByIndex( uint32 iIndex )
     if( ( iIndex >= 0 ) && ( iIndex < cellCount ) )
     {
         UOdysseyAnimationCell* cell = Cells[iIndex];
-        if (!cell->IsA<UOdysseyAnimationCellImageVector>())
-            return nullptr;
 
-        return Cast<UOdysseyAnimationCellImageVector>(cell)->GetVectorCell();
+        if( cell )
+        {
+            if (!cell->IsA<UOdysseyAnimationCellImageVector>())
+                return nullptr;
+
+            return Cast<UOdysseyAnimationCellImageVector>(cell)->GetVectorCell();
+        }
     }
 
     return nullptr;

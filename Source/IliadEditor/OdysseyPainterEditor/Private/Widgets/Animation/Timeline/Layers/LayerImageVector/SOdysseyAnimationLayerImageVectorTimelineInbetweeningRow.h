@@ -31,10 +31,11 @@ class SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow
         {
         }
 
-        static const uint32 TYPE_SOURCE    = ( 1UL << 0 );
-        static const uint32 TYPE_INBETWEEN = ( 1UL << 1 );
-        static const uint32 TYPE_TARGET    = ( 1UL << 2 );
-        static const uint32 TYPE_VISIBLE   = ( 1UL << 3 );
+        static const uint32 TYPE_SOURCE     = ( 1UL << 0 );
+        static const uint32 TYPE_INBETWEEN  = ( 1UL << 1 );
+        static const uint32 TYPE_TARGET     = ( 1UL << 2 );
+        static const uint32 TYPE_VISIBLE    = ( 1UL << 3 );
+        static const uint32 TYPE_INCOMPLETE = ( 1UL << 4 );
 
         uint32 type;
         uint32 index;

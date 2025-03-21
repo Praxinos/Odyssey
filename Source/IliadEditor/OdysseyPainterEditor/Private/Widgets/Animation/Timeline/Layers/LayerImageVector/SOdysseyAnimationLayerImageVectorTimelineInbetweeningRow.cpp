@@ -339,6 +339,10 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::CacheDesiredSize ( flo
                                   , targetCell->GetLength() * frameWidth /* * LayoutScaleMultiplier */
                                   , mBoxSize.Y );
         }
+        else
+        {
+            mCellBoxBuffer.Last().type |= CellBox::TYPE_INCOMPLETE;
+        }
     }
 
     // the whole bounding box
@@ -531,6 +535,13 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
                     arrow.Push( FVector2D( midX + visibilityGap + 2, midY - 5 ) );
                     arrow.Push( FVector2D( midX + visibilityGap + 6, midY     ) );
                     arrow.Push( FVector2D( midX + visibilityGap + 2, midY + 5 ) );
+                }
+
+                if( cellBox.type & CellBox::TYPE_INCOMPLETE )
+                {
+                    arrow.Push( FVector2D( cellBox.w - 4, midY - 5 ) );
+                    arrow.Push( FVector2D( cellBox.w    , midY     ) );
+                    arrow.Push( FVector2D( cellBox.w - 4, midY + 5 ) );
                 }
             }
 
