@@ -25,7 +25,7 @@ UOdysseyPainterEditorVectorChartTool::~UOdysseyPainterEditorVectorChartTool()
 
 UOdysseyPainterEditorVectorChartTool::UOdysseyPainterEditorVectorChartTool()
     : UOdysseyPainterEditorVectorBaseTool( MakeShared<FOdysseyPainterEditorVectorChartToolHUD>( this ), false, true )
-    , mEditionMode ( eVectorChartEditionMode::OneByOne )
+    , EditionMode ( eVectorChartEditionMode::OneByOne )
     , PickingRadius( 10.0f )
     , Factor( 1 )
     , ChartType ( eChartType::Partial )
@@ -85,11 +85,11 @@ UOdysseyPainterEditorVectorChartTool::OnKeyDownGlobalVector( FOdysseyVectorGroup
         {
             if ( FSlateApplication::Get().GetModifierKeys().IsShiftDown() )
             {
-                mEditionMode  = eVectorChartEditionMode::Reshape;
+                EditionMode  = eVectorChartEditionMode::Reshape;
             }
             else
             {
-                mEditionMode  = eVectorChartEditionMode::Relative;
+                EditionMode  = eVectorChartEditionMode::Relative;
             }
 
             return true;
@@ -102,11 +102,11 @@ UOdysseyPainterEditorVectorChartTool::OnKeyDownGlobalVector( FOdysseyVectorGroup
             if ( FSlateApplication::Get().GetModifierKeys().IsCommandDown() ||
                  FSlateApplication::Get().GetModifierKeys().IsControlDown() )
             {
-                mEditionMode  = eVectorChartEditionMode::Reshape;
+                EditionMode  = eVectorChartEditionMode::Reshape;
             }
             else
             {
-                mEditionMode  = eVectorChartEditionMode::EaseInOrOut;
+                EditionMode  = eVectorChartEditionMode::EaseInOrOut;
             }
 
             return true;
@@ -116,7 +116,7 @@ UOdysseyPainterEditorVectorChartTool::OnKeyDownGlobalVector( FOdysseyVectorGroup
         // with the events processing in the OnKeyUpGlobalVector(), we do like that.
         if ( ( key == EKeys::LeftAlt ) || ( key == EKeys::RightAlt ) )
         {
-            mEditionMode  = eVectorChartEditionMode::Magnet;
+            EditionMode  = eVectorChartEditionMode::Magnet;
 
             return true;
         }
@@ -130,7 +130,7 @@ UOdysseyPainterEditorVectorChartTool::OnKeyUpGlobalVector( FOdysseyVectorGroupPa
                                                          , const FKeyEvent& InKeyEvent
                                                          , uint64& oSignalFlags )
 {
-    mEditionMode = eVectorChartEditionMode::OneByOne;
+    EditionMode = eVectorChartEditionMode::OneByOne;
 
     return false;
 }
@@ -159,10 +159,9 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDownVector( FOdysseyVectorGroupPain
     {
         if( mChartHUD->GetBreakdownList().size() )
         {
-            if( ( mEditionMode == eVectorChartEditionMode::OneByOne    )
-            ||  ( mEditionMode == eVectorChartEditionMode::Relative    )
-            ||  ( mEditionMode == eVectorChartEditionMode::EaseInOrOut )
-            ||  ( mEditionMode == eVectorChartEditionMode::Magnet      ) )
+            if( ( EditionMode == eVectorChartEditionMode::OneByOne    )
+            ||  ( EditionMode == eVectorChartEditionMode::Relative    )
+            ||  ( EditionMode == eVectorChartEditionMode::Magnet      ) )
             {
                 mPickedInbetween = mChartHUD->PickInbetween( iPointInTexture.x
                                                            , iPointInTexture.y );
@@ -187,15 +186,16 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDownVector( FOdysseyVectorGroupPain
                     }
                     GEditor->EndTransaction();
                 }
-                else
-                {
-                    mPickedBreakdown = mChartHUD->PickBreakdown( iPointInTexture.x
-                                                               , iPointInTexture.y
-                                                               , PickingRadius );
-                }
             }
 
-            if( mEditionMode == eVectorChartEditionMode::Reshape )
+            if( EditionMode == eVectorChartEditionMode::EaseInOrOut )
+            {
+                mPickedBreakdown = mChartHUD->PickBreakdown( iPointInTexture.x
+                                                           , iPointInTexture.y
+                                                           , PickingRadius );
+            }
+
+            if( EditionMode == eVectorChartEditionMode::Reshape )
             {
                 mPickedBezierPoint = mChartHUD->PickBezierPoint( iPointInTexture.x
                                                                , iPointInTexture.y
@@ -246,9 +246,9 @@ UOdysseyPainterEditorVectorChartTool::OnMouseHoverVector( FOdysseyVectorGroupPai
 {
     mHoveredInbetween = nullptr;
 
-    if( ( mEditionMode == eVectorChartEditionMode::OneByOne    )
-     || ( mEditionMode == eVectorChartEditionMode::Relative    )
-     || ( mEditionMode == eVectorChartEditionMode::Magnet      ) )
+    if( ( EditionMode == eVectorChartEditionMode::OneByOne    )
+     || ( EditionMode == eVectorChartEditionMode::Relative    )
+     || ( EditionMode == eVectorChartEditionMode::Magnet      ) )
     {
         // TODO: highlight grid handles ?
         mHoveredInbetween = mChartHUD->PickInbetween( iPointInTexture.x
@@ -280,7 +280,7 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDragVector( FOdysseyVectorGroupPain
     {
         if( mChartHUD->GetBreakdownList().size() )
         {
-            if( mEditionMode == eVectorChartEditionMode::OneByOne )
+            if( EditionMode == eVectorChartEditionMode::OneByOne )
             {
                 if( mPickedInbetween )
                 {
@@ -295,7 +295,7 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDragVector( FOdysseyVectorGroupPain
                 }
             }
 
-            if( mEditionMode == eVectorChartEditionMode::Relative )
+            if( EditionMode == eVectorChartEditionMode::Relative )
             {
                 if ( mPickedInbetween )
                 {
@@ -311,14 +311,14 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDragVector( FOdysseyVectorGroupPain
                 }
             }
 
-            if( mEditionMode == eVectorChartEditionMode::EaseInOrOut )
+            if( EditionMode == eVectorChartEditionMode::EaseInOrOut )
             {
                 // applies to the current breakdown, not only the one next to a click.
-                for( FInbetweenerBreakdown* breakdown : mChartHUD->GetBreakdownList() )
+                if ( mPickedBreakdown )
                 {
                     if( pointInTexture.x < mMouseAtDown.x )
                     {
-                        breakdown->EaseIn( mStrength, Factor );
+                        mPickedBreakdown->EaseIn( mStrength, Factor );
 
                         mStrength = std::clamp( ( pointInTexture.deltaPosition.X < 0.0f ) ? mStrength + 0.2f
                                                                                           : mStrength - 0.2f, 0.0f, 1.0f );
@@ -326,7 +326,7 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDragVector( FOdysseyVectorGroupPain
 
                     if( pointInTexture.x > mMouseAtDown.x )
                     {
-                        breakdown->EaseOut( mStrength, Factor );
+                        mPickedBreakdown->EaseOut( mStrength, Factor );
 
                         mStrength = std::clamp( ( pointInTexture.deltaPosition.X > 0.0f ) ? mStrength + 0.2f
                                                                                           : mStrength - 0.2f, 0.0f, 1.0f );
@@ -334,7 +334,7 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDragVector( FOdysseyVectorGroupPain
                 }
             }
 
-            if( mEditionMode == eVectorChartEditionMode::Magnet )
+            if( EditionMode == eVectorChartEditionMode::Magnet )
             {
                 if( mPickedInbetween )
                 {
@@ -345,7 +345,7 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDragVector( FOdysseyVectorGroupPain
                 }
             }
 
-            if( mEditionMode == eVectorChartEditionMode::Reshape )
+            if( EditionMode == eVectorChartEditionMode::Reshape )
             {
                 ::ULIS::FVec2D deltaPosition = ::ULIS::FVec2D( pointInTexture.deltaPosition.X
                                                              , pointInTexture.deltaPosition.Y );
@@ -440,13 +440,13 @@ UOdysseyPainterEditorVectorChartTool::PropertyChangedVector( FOdysseyVectorGroup
 eVectorChartEditionMode
 UOdysseyPainterEditorVectorChartTool::GetEditionMode()
 {
-    return mEditionMode;
+    return EditionMode;
 }
 
 void
 UOdysseyPainterEditorVectorChartTool::SetEditionMode( eVectorChartEditionMode iMode )
 {
-    mEditionMode = iMode;
+    EditionMode = iMode;
 }
 
 const FSlateBrush*
@@ -454,14 +454,14 @@ UOdysseyPainterEditorVectorChartTool::GetBackgroundColor( eVectorChartEditionMod
 {
     static FSlateColorBrush selected = FSlateColorBrush( FStyleColors::Select );
 
-    return ( iMode == mEditionMode ) ? &selected : nullptr;
+    return ( iMode == EditionMode ) ? &selected : nullptr;
 }
 
 TSharedRef<SWidget>
 UOdysseyPainterEditorVectorChartTool::CreateModifierSegmentControl()
 {
     return SNew(SSegmentedControl<eVectorChartEditionMode>)
-           .Value_Lambda( [this]{ return mEditionMode; } )
+           .Value_Lambda( [this]{ return EditionMode; } )
            .SupportsEmptySelection( false )
            .SupportsMultiSelection( false )
            .IsEnabled( false ) // currently not clickable - Info only

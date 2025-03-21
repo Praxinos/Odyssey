@@ -15,11 +15,13 @@
 #include "CanvasTypes.h"
 #include "CanvasItem.h"
 
+#include "Fonts/FontMeasure.h"
+
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
 #define INBETWEENER_INDICATOR_RADIUS 10.0f
 #define BREAKDOWN_INDICATOR_RADIUS   20.0f
-#define FONT_SIZE                    28.0f
+#define FONT_SIZE                    16.0f
 #define DEFAULT_SURFACE              (1920*1080)
 
 FOdysseyPainterEditorVectorChartToolHUD::~FOdysseyPainterEditorVectorChartToolHUD()
@@ -33,7 +35,7 @@ FOdysseyPainterEditorVectorChartToolHUD::FOdysseyPainterEditorVectorChartToolHUD
 {
     //FString fontPath = IPluginManager::Get().FindPlugin( "Odyssey" )->GetBaseDir() / TEXT( "Resources/OdysseyAssetResources/Font/LoveStruck.ttf" );
 
-    mFontInfo = FSlateFontInfo( LoadObject<UFont>( nullptr, TEXT("/Odyssey/Fonts/LoveStruck_Font") ), 40 );
+    mChartFontInfo = FSlateFontInfo( LoadObject<UFont>( nullptr, TEXT("/Odyssey/Fonts/LoveStruck_Font") ), FONT_SIZE );
 }
 
 void
@@ -126,7 +128,7 @@ FOdysseyPainterEditorVectorChartToolHUD::DrawBreakdownChart( const FOdysseyHUD::
     FInbetweenerChart* chart = iBreakdown->GetChart();
     double cursorRadius = mChartRect.h *.5f;
     float indicatorY = mChartRect.y + cursorRadius;
-    float fontSize = mFontInfo.Size;
+    float fontSize = mChartFontInfo.Size;
     FLinearColor chartColor = FLinearColor( inbetweenerTag->GetChartColor() );
     FLinearColor inbetweenColor = FLinearColor( inbetweenerTag->GetInbetweenColor() );
     FLinearColor blackColor = FLinearColor( 0.0f, 0.0f, 0.0f, 1.0f );
@@ -142,7 +144,7 @@ FOdysseyPainterEditorVectorChartToolHUD::DrawBreakdownChart( const FOdysseyHUD::
     FVector2D hudCoords[3] = { iParams.mTextureToHUD.Execute( FVector2D( texCoords[0].x, texCoords[0].y ) )
                              , iParams.mTextureToHUD.Execute( FVector2D( texCoords[1].x, texCoords[1].y ) )
                              , iParams.mTextureToHUD.Execute( FVector2D( texCoords[2].x, texCoords[2].y ) ) };
-    const UFont* font = Cast<UFont>(mFontInfo.FontObject);
+    const UFont* font = Cast<UFont>(mChartFontInfo.FontObject);
 
     // force inbetween opacity
     inbetweenColor.A = 1.0f;
@@ -180,7 +182,7 @@ FOdysseyPainterEditorVectorChartToolHUD::DrawBreakdownChart( const FOdysseyHUD::
 
             float lengthFactor = ( ( inbetween->GetSpacing() == 0.0f ) || ( inbetween->GetSpacing() == 1.0f ) ) ? 1.0f : 0.6f;
             ::ULIS::FVec2D hudIndicatorPosition = WorldPointToHUD( iParams, texIndicatorPosition );
-            ::ULIS::FVec2D hudIndicatorTangent = WorldVectorToHUD( iParams, texIndicatorPosition, texIndicatorTangent * lengthFactor );
+            ::ULIS::FVec2D hudIndicatorTangent = WorldVectorToHUD( iParams, texIndicatorPosition, texIndicatorTangent );
             ::ULIS::FVec2D hudIndicatorPerpendicular = ::ULIS::FVec2D( -hudIndicatorTangent.y, hudIndicatorTangent.x );
             bool hovered = ( inbetween == mChartTool->GetHoveredInbetween() );
             bool current = ( inbetween->GetCellIndex() == iRenderedCellIndex );
@@ -188,89 +190,92 @@ FOdysseyPainterEditorVectorChartToolHUD::DrawBreakdownChart( const FOdysseyHUD::
              // Note: "* 0.1f" helps positionning the circle surrounding the numbers a bit away from the indicator
             ::ULIS::FVec2D texFrameInfoPosition = ::ULIS::FVec2D( texIndicatorPosition.x + ( texIndicatorPerpendicular.x * 1.1f * ( FONT_SIZE + ( BREAKDOWN_INDICATOR_RADIUS ) ) )
                                                                 , texIndicatorPosition.y + ( texIndicatorPerpendicular.y * 1.1f * ( FONT_SIZE + ( BREAKDOWN_INDICATOR_RADIUS ) ) ) );
-            ::ULIS::FVec2D hudFrameInfoPosition = WorldPointToHUD ( iParams, texFrameInfoPosition );
             FText glyphText = FText::AsNumber( iBreakdown->GetSourceDrawingIndex() + i + 1 );
             ::ULIS::FVec2D texFrameNumberPosition;
-            ::ULIS::FVec2D hudFrameNumberPosition;
+            UE::Slate::FDeprecateVector2DResult glyphMesure;
             int32 glyphW, glyphH;
 
-            font->GetStringHeightAndWidth ( glyphText.ToString(), glyphH, glyphW );
+            glyphMesure = FSlateApplication::Get().GetRenderer()->GetFontMeasureService()->Measure ( glyphText.ToString()
+                                                                                                   , mChartFontInfo
+                                                                                                   , 1.0f );
+            glyphW = glyphMesure.X;
+            glyphH = glyphMesure.Y;
 
-            texFrameNumberPosition = ::ULIS::FVec2D( texFrameInfoPosition.x - ( glyphW * 0.5f )
-                                                   , texFrameInfoPosition.y + ( glyphH * 0.5f ) );
-
-            hudFrameNumberPosition = WorldPointToHUD( iParams, texFrameNumberPosition );
+            hudIndicatorPerpendicular.Normalize();
 
             if( ( ( inbetween->GetSpacing() == 0.0f ) && iDrawSourceIndicator ) || ( inbetween->GetSpacing() == 1.0f ) )
             {
+                ::ULIS::FVec2D hudFrameInfoPosition = hudIndicatorPosition + ( 1.1f * hudIndicatorPerpendicular * ( BREAKDOWN_INDICATOR_RADIUS + FONT_SIZE ) );
+                ::ULIS::FVec2D hudFrameNumberPosition = ::ULIS::FVec2D( hudFrameInfoPosition.x - ( glyphW    * 0.5f )
+                                                                      , hudFrameInfoPosition.y - ( FONT_SIZE * 0.5f ) );
                 FCanvasTextItem textItem = FCanvasTextItem( FVector2D( hudFrameNumberPosition.x
                                                                      , hudFrameNumberPosition.y )
                                                           , glyphText
-                                                          , font
+                                                          , mChartFontInfo
                                                           , chartColor );
+
 
                 if( ( ( inbetween->GetSpacing() == 0.0f ) && prevBreakdown )
                  || ( ( inbetween->GetSpacing() == 1.0f ) && nextBreakdown ) )
                 {
-                    FVector2D lineP0 = FVector2D ( hudFrameNumberPosition.x         , hudFrameNumberPosition.y + glyphH );
-                    FVector2D lineP1 = FVector2D ( hudFrameNumberPosition.x + glyphW, hudFrameNumberPosition.y + glyphH );
+                    FVector2D lineP0 = FVector2D ( hudFrameNumberPosition.x         , hudFrameNumberPosition.y + FONT_SIZE + 2 );
+                    FVector2D lineP1 = FVector2D ( hudFrameNumberPosition.x + glyphW, hudFrameNumberPosition.y + FONT_SIZE + 2 );
 
                     // underline
-                    DrawPrimitiveLine( iParams, lineP0, lineP1, chartColor, 2.0f );
+                    DrawPrimitiveLineOutlined( iParams, lineP0, lineP1, chartColor, 1.0f );
                 }
                 else
                 {
                     FVector2D circleCenter = FVector2D ( hudFrameInfoPosition.x, hudFrameInfoPosition.y );
-                    double circleRadius = WorldVectorToHUD ( iParams
-                                                           , FVector2D( texFrameInfoPosition.x, texFrameInfoPosition.y )
-                                                           , FVector2D( fontSize, 0 ) ).Size();
 
-                    DrawPrimitiveCircle( iParams, circleCenter, circleRadius, chartColor, 2.0f );
+                    DrawPrimitiveCircle( iParams, circleCenter, FONT_SIZE, chartColor, 1.0f );
                 }
 
                 // draw indicator
-                DrawPrimitiveLine( iParams
-                                 , FVector2D( hudIndicatorPosition.x + ( hudIndicatorPerpendicular.x * BREAKDOWN_INDICATOR_RADIUS )
-                                            , hudIndicatorPosition.y + ( hudIndicatorPerpendicular.y * BREAKDOWN_INDICATOR_RADIUS ) )
-                                 , FVector2D( hudIndicatorPosition.x - ( hudIndicatorPerpendicular.x * BREAKDOWN_INDICATOR_RADIUS )
-                                            , hudIndicatorPosition.y - ( hudIndicatorPerpendicular.y * BREAKDOWN_INDICATOR_RADIUS ) )
-                                 , chartColor
-                                 , 2.0f );
+                DrawPrimitiveLineOutlined( iParams
+                                         , FVector2D( hudIndicatorPosition.x + ( hudIndicatorPerpendicular.x * BREAKDOWN_INDICATOR_RADIUS )
+                                                    , hudIndicatorPosition.y + ( hudIndicatorPerpendicular.y * BREAKDOWN_INDICATOR_RADIUS ) )
+                                         , FVector2D( hudIndicatorPosition.x - ( hudIndicatorPerpendicular.x * BREAKDOWN_INDICATOR_RADIUS )
+                                                    , hudIndicatorPosition.y - ( hudIndicatorPerpendicular.y * BREAKDOWN_INDICATOR_RADIUS ) )
+                                         , chartColor
+                                         , 1.0f );
+
+                if( current )
+                {
+                    textItem.EnableShadow( blackColor );
+                }
 
                 iParams.mCanvas->DrawItem( textItem );
             }
 
             if ( ( inbetween->GetSpacing() > 0.0f ) && ( inbetween->GetSpacing() < 1.0f ) )
             {
+                ::ULIS::FVec2D hudFrameInfoPosition = hudIndicatorPosition + ( 1.1f * hudIndicatorPerpendicular * ( INBETWEENER_INDICATOR_RADIUS + FONT_SIZE ) );
+                ::ULIS::FVec2D hudFrameNumberPosition = ::ULIS::FVec2D( hudFrameInfoPosition.x - ( glyphW * 0.5f )
+                                                                      , hudFrameInfoPosition.y - ( glyphH * 0.5f ) );
                 FCanvasTextItem textItem = FCanvasTextItem( FVector2D( hudFrameNumberPosition.x
                                                                      , hudFrameNumberPosition.y )
                                                           , glyphText
-                                                          , font
+                                                          , mChartFontInfo
                                                           , hovered ? iHcColor : inbetweenColor );
 
                 // draw indicator
-                DrawPrimitiveLine( iParams
-                                 , FVector2D( hudIndicatorPosition.x + ( hudIndicatorPerpendicular.x * BREAKDOWN_INDICATOR_RADIUS )
-                                            , hudIndicatorPosition.y + ( hudIndicatorPerpendicular.y * BREAKDOWN_INDICATOR_RADIUS ) )
-                                 , FVector2D( hudIndicatorPosition.x - ( hudIndicatorPerpendicular.x * BREAKDOWN_INDICATOR_RADIUS )
-                                            , hudIndicatorPosition.y - ( hudIndicatorPerpendicular.y * BREAKDOWN_INDICATOR_RADIUS ) )
-                                 , hovered ? iHcColor : inbetweenColor
-                                 , hovered ? 3.0f: 2.0f );
+                DrawPrimitiveLineOutlined( iParams
+                                         , FVector2D( hudIndicatorPosition.x + ( hudIndicatorPerpendicular.x * INBETWEENER_INDICATOR_RADIUS )
+                                                    , hudIndicatorPosition.y + ( hudIndicatorPerpendicular.y * INBETWEENER_INDICATOR_RADIUS ) )
+                                         , FVector2D( hudIndicatorPosition.x - ( hudIndicatorPerpendicular.x * INBETWEENER_INDICATOR_RADIUS )
+                                                    , hudIndicatorPosition.y - ( hudIndicatorPerpendicular.y * INBETWEENER_INDICATOR_RADIUS ) )
+                                         , hovered ? iHcColor : inbetweenColor
+                                         , hovered ? 2.0f: 1.0f );
+
+                if( current )
+                {
+                    textItem.EnableShadow( blackColor );
+                }
 
                 iParams.mCanvas->DrawItem( textItem );
+
             }
-
-            if( current )
-            {
-                FCanvasTextItem textItem = FCanvasTextItem( FVector2D( hudFrameNumberPosition.x
-                                                                     , hudFrameNumberPosition.y )
-                                                          , glyphText
-                                                          , font
-                                                          , blackColor );
-
-                iParams.mCanvas->DrawItem( textItem );
-            }
-
         }
     }
 

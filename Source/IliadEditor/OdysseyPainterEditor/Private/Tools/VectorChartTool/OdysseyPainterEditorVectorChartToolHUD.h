@@ -57,5 +57,5 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorChartToolHUD : public 
         UOdysseyPainterEditorVectorChartTool* mChartTool;
         std::list<FInbetweenerBreakdown*> mBreakdownList;
         ::ULIS::FRectD mChartRect;
-        FSlateFontInfo mFontInfo;
+        FSlateFontInfo mChartFontInfo;
 };

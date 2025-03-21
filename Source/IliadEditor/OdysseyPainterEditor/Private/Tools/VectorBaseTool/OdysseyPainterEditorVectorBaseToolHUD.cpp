@@ -245,7 +245,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::FOdysseyPainterEditorVectorBaseToolHUD( 
     , mY( 0.0f )
     , mPointQuadTree( nullptr )
 {
-    mFontInfo = FSlateFontInfo( LoadObject<UFont>( nullptr, TEXT("/Odyssey/Fonts/Lucida_Console_Font") ), 16 );
+    mFontInfo = FSlateFontInfo( LoadObject<UFont>( nullptr, TEXT("/Odyssey/Fonts/Lucida_Console_Font") ), 9 );
 }
 
 void
@@ -1098,7 +1098,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawInfo( const FOdysseyHUD::FDrawHUDPar
 
     FCanvasTextItem infoItem = FCanvasTextItem( infoAt
                                               , iText
-                                              , font
+                                              , mFontInfo
                                               , iColor );
 
     //infoItem.EnableShadow( FLinearColor( 0, 0, 0, 1 ) );

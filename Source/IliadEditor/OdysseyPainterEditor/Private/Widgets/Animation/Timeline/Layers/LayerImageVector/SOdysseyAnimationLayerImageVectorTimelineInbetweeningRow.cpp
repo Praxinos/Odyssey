@@ -539,9 +539,9 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
 
                 if( cellBox.type & CellBox::TYPE_INCOMPLETE )
                 {
-                    arrow.Push( FVector2D( cellBox.w - 4, midY - 5 ) );
-                    arrow.Push( FVector2D( cellBox.w    , midY     ) );
-                    arrow.Push( FVector2D( cellBox.w - 4, midY + 5 ) );
+                    arrow.Push( FVector2D( cellBox.w - 6, midY - 5 ) );
+                    arrow.Push( FVector2D( cellBox.w - 2, midY     ) );
+                    arrow.Push( FVector2D( cellBox.w - 6, midY + 5 ) );
                 }
             }
 
