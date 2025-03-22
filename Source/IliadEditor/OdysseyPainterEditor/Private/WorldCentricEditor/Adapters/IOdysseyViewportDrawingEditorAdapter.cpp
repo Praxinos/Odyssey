@@ -481,6 +481,7 @@ bool IOdysseyViewportDrawingEditorAdapter::InputKey(FEditorViewportClient* iView
     //we filter some mouse events to allow (return false) :
     // - double click on meshes
     // - right click camera movement
+    // - Rotation around mesh
     //and disallow (return true) left click camera movement
     bool isMouseEvent = iKey == EKeys::LeftMouseButton || iKey == EKeys::RightMouseButton;
     if (isOutsideTexture && isMouseEvent)
@@ -493,6 +494,9 @@ bool IOdysseyViewportDrawingEditorAdapter::InputKey(FEditorViewportClient* iView
             return false;
 
         if (iKey == EKeys::RightMouseButton ) //Moving camera
+            return false;
+
+        if( iKey == EKeys::LeftMouseButton && mKeysPressed.Contains( EKeys::LeftAlt )) //Allow rotation around object
             return false;
 
         return true;
