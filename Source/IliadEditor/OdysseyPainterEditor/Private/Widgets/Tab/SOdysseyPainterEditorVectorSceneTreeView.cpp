@@ -28,9 +28,20 @@ SOdysseyPainterEditorVectorSceneTreeView::SOdysseyPainterEditorVectorSceneTreeVi
 }
 
 void
-SOdysseyPainterEditorVectorSceneTreeView::Construct( const FArguments& InArgs, FOdysseyPainterEditor* iEditor)
+SOdysseyPainterEditorVectorSceneTreeView::Construct( const FArguments& InArgs )
 {
-    mEditor = iEditor;
+    static FHeaderRowStyle style;
+    TSharedPtr<SHeaderRow> headerRow = SNew(SHeaderRow)
+                                      .Style( &style );
+    SHeaderRow::FColumn::FArguments columnArg;
+
+    columnArg.ColumnId( "Visible" );
+    //columnArg.DefaultLabel( TEXT("Visible") );
+
+    headerRow.Get()->AddColumn ( columnArg );
+
+    mEditor = InArgs._Editor;
+
     STreeView<TSharedPtr<FVectorSceneTreeViewItem>>::Construct(
         STreeView<TSharedPtr<FVectorSceneTreeViewItem>>::FArguments()
         // for some reason, SetTreeItemsSource does not work, so we have to use an array that we

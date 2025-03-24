@@ -21,7 +21,9 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorSceneTreeView
 {
     public:
         SLATE_BEGIN_ARGS(SOdysseyPainterEditorVectorSceneTreeView)
+        : _Editor(nullptr)
             {}
+        SLATE_ARGUMENT( FOdysseyPainterEditor*, Editor )
         SLATE_END_ARGS()
 
     public:
@@ -29,7 +31,7 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorSceneTreeView
         ~SOdysseyPainterEditorVectorSceneTreeView();
         SOdysseyPainterEditorVectorSceneTreeView();
 
-        void Construct(const FArguments& InArgs, FOdysseyPainterEditor* iEditor);
+        void Construct(const FArguments& InArgs );
 
         void Update( FOdysseyVectorGroupPaint* iScene );
 

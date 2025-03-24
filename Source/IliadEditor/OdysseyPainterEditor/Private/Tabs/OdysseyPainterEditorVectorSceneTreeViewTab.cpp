@@ -125,7 +125,8 @@ FOdysseyPainterEditorVectorSceneTreeViewTab::CreateObjectPropertiesPanel()
 TSharedPtr<SWidget>
 FOdysseyPainterEditorVectorSceneTreeViewTab::CreateWidget()
 {
-    mVectorSceneTreeView = SNew( SOdysseyPainterEditorVectorSceneTreeView, mEditor );
+    mVectorSceneTreeView = SNew( SOdysseyPainterEditorVectorSceneTreeView )
+                           .Editor( mEditor );
     mDetailsView = CreateObjectPropertiesPanel();
 
     return SNew(SWidgetSwitcher)

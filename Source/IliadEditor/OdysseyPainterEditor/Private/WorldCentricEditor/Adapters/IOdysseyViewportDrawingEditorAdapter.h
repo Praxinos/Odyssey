@@ -142,6 +142,7 @@ protected:
     bool mIsPickingColor = false;
 
     FOdysseyPoint mCurrentHUDPoint;
+    FOdysseyPoint mLastHUDPoint;
     TSharedPtr<FOdysseyHUDElement> mCurrentHUDElement;
     TSharedPtr<FOdysseyHUDElement> mHoveredHUDElement;
 };

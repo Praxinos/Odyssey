@@ -298,6 +298,7 @@ bool IOdysseyViewportDrawingEditorAdapter::MouseMove(FEditorViewportClient* iVie
         FVector2D hudPoint;
         if (mExtension->ViewportToHUD(iViewportClient, viewportPoint, hudPoint))
         {
+            mLastHUDPoint = mCurrentHUDPoint;
             mCurrentHUDPoint = FOdysseyPoint(hudPoint.X, hudPoint.Y);
             mHoveredHUDElement->OnMouseHover(mCurrentHUDPoint);
         }
@@ -441,6 +442,7 @@ bool IOdysseyViewportDrawingEditorAdapter::InputKey(FEditorViewportClient* iView
                 FVector2D hudPoint;
                 if (mExtension->ViewportToHUD(iViewportClient, viewportPoint, hudPoint))
                 {
+                    mLastHUDPoint = mCurrentHUDPoint;
                     mCurrentHUDPoint = FOdysseyPoint(hudPoint.X, hudPoint.Y);
                     if (mCurrentHUDElement->OnMouseDown(mCurrentHUDPoint, iKey))
                     {
@@ -457,7 +459,9 @@ bool IOdysseyViewportDrawingEditorAdapter::InputKey(FEditorViewportClient* iView
                 FVector2D hudPoint;
                 if (mExtension->ViewportToHUD(iViewportClient, viewportPoint, hudPoint))
                 {
-                    mCurrentHUDPoint = FOdysseyPoint(hudPoint.X, hudPoint.Y);
+                    mLastHUDPoint = mCurrentHUDPoint;
+                    mCurrentHUDPoint.x = hudPoint.X;
+                    mCurrentHUDPoint.y = hudPoint.Y;
                     mCurrentHUDElement->OnMouseUp(mCurrentHUDPoint, iKey);
                     mCurrentHUDElement = nullptr;
                 }
@@ -567,10 +571,13 @@ bool IOdysseyViewportDrawingEditorAdapter::CapturedMouseMove(FEditorViewportClie
         FVector2D hudPoint;
         if (mExtension->ViewportToHUD(iViewportClient, viewportPoint, hudPoint))
         {
-            mCurrentHUDPoint = FOdysseyPoint(hudPoint.X, hudPoint.Y);
+            mLastHUDPoint = mCurrentHUDPoint;
+            mCurrentHUDPoint.x = hudPoint.X;
+            mCurrentHUDPoint.y = hudPoint.Y;
             mCurrentHUDPoint.keysDown = mKeysPressed;
-            mCurrentHUDPoint.ComputeRelativeParameters(mCurrentStrokeRay.mPoint);
+            mCurrentHUDPoint.ComputeRelativeParameters(mLastHUDPoint);
             mCurrentHUDElement->OnMouseDrag(mCurrentHUDPoint);
+
             return true;
         }
     }
@@ -615,6 +622,7 @@ IOdysseyViewportDrawingEditorAdapter::HandleClick(FEditorViewportClient* iViewpo
         FVector2D hudPoint;
         if (mExtension->ViewportToHUD(iViewportClient, viewportPoint, hudPoint))
         {
+            mLastHUDPoint = mCurrentHUDPoint;
             mCurrentHUDPoint = FOdysseyPoint(hudPoint.X, hudPoint.Y);
             if (mCurrentHUDElement->OnMouseClick(mCurrentHUDPoint, iClick.GetKey()))
             {

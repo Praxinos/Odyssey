@@ -229,11 +229,15 @@ FOdysseyVectorCell::ResetHUD()
 {
     FOdysseyVectorGroupPaint* scene = GetScene();
 
+    LockDrawing();
+
     for( IOdysseyVectorHUD *hud : GetHUDList() )
     {
         hud->SetScene( scene );
         hud->Reset();
     }
+
+    UnlockDrawing();
 }
 
 void
