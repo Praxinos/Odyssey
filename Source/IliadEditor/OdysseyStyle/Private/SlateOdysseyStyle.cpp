@@ -338,11 +338,11 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
 
     Set("PainterEditor.FlipVertical32", new IMAGE_BRUSH_SVG("PainterEditor/flip_vertical", mIcon32x32));
     Set("PainterEditor.FlipHorizontal32", new IMAGE_BRUSH_SVG("PainterEditor/flip_horizontal", mIcon32x32));
-    Set("PainterEditor.FlipVertical16", new IMAGE_BRUSH_SVG("PainterEditor/flip_vertical", mIcon16x16));
-    Set("PainterEditor.FlipHorizontal16", new IMAGE_BRUSH_SVG("PainterEditor/flip_horizontal", mIcon16x16));
+    Set("PainterEditor.FlipVertical16", new IMAGE_BRUSH_SVG("PainterEditor/flip_vertical_2", mIcon16x16));
+    Set("PainterEditor.FlipHorizontal16", new IMAGE_BRUSH_SVG("PainterEditor/flip_horizontal_2", mIcon16x16));
 
-    Set("PainterEditor.FlipVerticalFilled32", new IMAGE_BRUSH_SVG("PainterEditor/flip_vertical_filled", mIcon32x32));
-    Set("PainterEditor.FlipHorizontalFilled32", new IMAGE_BRUSH_SVG("PainterEditor/flip_horizontal_filled", mIcon32x32));
+    //Set("PainterEditor.FlipVerticalFilled32", new IMAGE_BRUSH_SVG("PainterEditor/flip_vertical_filled", mIcon32x32));
+    //Set("PainterEditor.FlipHorizontalFilled32", new IMAGE_BRUSH_SVG("PainterEditor/flip_horizontal_filled", mIcon32x32));
 
     Set( "PainterEditor.Draw64", new IMAGE_BRUSH( "PainterEditor/draw_64", mIcon64x64 ) );
     Set( "PainterEditor.Draw16", new IMAGE_BRUSH( "PainterEditor/draw_16", mIcon16x16 ) );

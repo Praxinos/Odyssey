@@ -1,7 +1,15 @@
-<?xml version="1.0"?>
-<svg width="512" height="512" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg" clip-rule="evenodd" fill-rule="evenodd">
- <g class="layer">
-  <title>Layer 1</title>
-  <path d="m256,0c70.69,0 134.69,28.66 181.02,74.98c46.32,46.33 74.98,110.33 74.98,181.02c0,70.69 -28.66,134.69 -74.98,181.02c-46.33,46.32 -110.33,74.98 -181.02,74.98c-70.69,0 -134.69,-28.66 -181.02,-74.98c-46.32,-46.33 -74.98,-110.33 -74.98,-181.02c0,-70.69 28.66,-134.69 74.98,-181.02c46.33,-46.32 110.33,-74.98 181.02,-74.98zm147.19,108.81c-37.67,-37.66 -89.71,-60.96 -147.19,-60.96c-57.48,0 -109.52,23.3 -147.19,60.96c-37.66,37.67 -60.96,89.71 -60.96,147.19c0,57.48 23.3,109.52 60.96,147.19c37.67,37.66 89.71,60.96 147.19,60.96c57.48,0 109.52,-23.3 147.19,-60.96c37.66,-37.67 60.96,-89.71 60.96,-147.19c0,-57.48 -23.3,-109.52 -60.96,-147.19z" fill="#ffffff" fill-rule="nonzero" id="svg_1"/>
- </g>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Calque_1" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:svg="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Generator: Adobe Illustrator 29.3.1, SVG Export Plug-In . SVG Version: 2.1.0 Build 151)  -->
+  <defs>
+    <style>
+      .st0 {
+        fill: #0a9;
+        stroke: #d0d0d0;
+        stroke-miterlimit: 10;
+        stroke-width: 60px;
+      }
+    </style>
+  </defs>
+  <circle class="st0" cx="256" cy="256" r="205.1"/>
 </svg>
