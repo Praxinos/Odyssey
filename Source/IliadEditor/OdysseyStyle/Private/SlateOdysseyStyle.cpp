@@ -396,6 +396,18 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "PainterEditor.VectorSceneTreeView.Group", new IMAGE_BRUSH_SVG( "OdysseyVectorSceneTreeView/group", mIcon16x16 ) );
     Set( "PainterEditor.VectorSceneTreeView.MenuIcon", new IMAGE_BRUSH_SVG( "OdysseyVectorSceneTreeView/MenuIcon", mIcon16x16 ) );
 
+    Set("VectorSceneTreeView.IsVisibleToggle", FCheckBoxStyle()
+        .SetPadding(FMargin(8)) //8 because left+right = 16 and top+bottom = 16
+        .SetForegroundColor(FLinearColor(0, 0, 0, 0))
+        .SetCheckBoxType(ESlateCheckBoxType::ToggleButton)
+        .SetUncheckedImage(*FAppStyle::Get().GetBrush("Level.NotVisibleIcon16x"))
+        .SetUncheckedHoveredImage(*FAppStyle::Get().GetBrush("Level.NotVisibleIcon16x"))
+        .SetUncheckedPressedImage(*FAppStyle::Get().GetBrush("Level.NotVisibleIcon16x"))
+        .SetCheckedImage(FSlateNoResource())
+        .SetCheckedHoveredImage(*FAppStyle::Get().GetBrush("Level.VisibleIcon16x"))
+        .SetCheckedPressedImage(*FAppStyle::Get().GetBrush("Level.VisibleIcon16x"))
+    );
+
     //PainterEditor - Top Bar
     Set( "PainterEditor.TopBar.Undo32", new IMAGE_BRUSH_SVG( "PainterEditor/undo", mIcon32x32 ) );
     Set( "PainterEditor.TopBar.Redo32", new IMAGE_BRUSH_SVG( "PainterEditor/redo", mIcon32x32 ) );

@@ -1575,6 +1575,11 @@ FOdysseyPainterEditor::GroupAndAddInbetweenerTag( FOdysseyPainterEditor* iEditor
                                                                                        , eInbetweenerGridType::ARAP );
 
         group->AddTag( inbetweenerTag );
+
+        if( inbetweenerTag->GetTargetCell() == nullptr )
+        {
+            inbetweenerTag->SetInterpolationDirection( eInbetweenerInterpolationDirection::Backward );
+        }
     }
 
     // note: updating via Root will request a redraw as well
@@ -2233,6 +2238,11 @@ FOdysseyPainterEditor::AddInbetweenerTag( FOdysseyPainterEditor* iEditor
                                                                                            , eInbetweenerGridType::ARAP );
 
             selectedObject->AddTag( inbetweenerTag );
+
+            if( inbetweenerTag->GetTargetCell() == nullptr )
+            {
+                inbetweenerTag->SetInterpolationDirection( eInbetweenerInterpolationDirection::Backward );
+            }
 
             addedTagArray.push_back( inbetweenerTag );
         }

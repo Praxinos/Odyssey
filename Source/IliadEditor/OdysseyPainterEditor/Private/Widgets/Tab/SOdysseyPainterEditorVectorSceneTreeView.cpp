@@ -30,15 +30,21 @@ SOdysseyPainterEditorVectorSceneTreeView::SOdysseyPainterEditorVectorSceneTreeVi
 void
 SOdysseyPainterEditorVectorSceneTreeView::Construct( const FArguments& InArgs )
 {
-    static FHeaderRowStyle style;
     TSharedPtr<SHeaderRow> headerRow = SNew(SHeaderRow)
-                                      .Style( &style );
-    SHeaderRow::FColumn::FArguments columnArg;
-
-    columnArg.ColumnId( "Visible" );
-    //columnArg.DefaultLabel( TEXT("Visible") );
-
-    headerRow.Get()->AddColumn ( columnArg );
+                                      .Visibility( EVisibility::Collapsed )
+                                      + SHeaderRow::Column("Visible")
+                                      .FixedWidth( 24.0f )
+                                      [
+                                          SNew(SBorder)
+                                          .Padding(0,0)
+                                          .BorderBackgroundColor( FSlateColor( FLinearColor( 0, 0, 0, 0 ) ) )
+                                          .Content()
+                                          [
+                                              SNew(SImage)
+                                              .Image( FOdysseyStyle::GetBrush("Level.VisibleIcon16x") )
+                                          ]
+                                      ]
+                                      + SHeaderRow::Column("Name");
 
     mEditor = InArgs._Editor;
 
@@ -54,7 +60,7 @@ SOdysseyPainterEditorVectorSceneTreeView::Construct( const FArguments& InArgs )
         //.OnItemScrolledIntoView(this, &SOdysseyLayerStackTreeView::OnItemScrolledIntoView)
         .OnContextMenuOpening( this, &SOdysseyPainterEditorVectorSceneTreeView::OnContextMenuOpening )
         //.SelectionMode( ESelectionMode::Multi )
-        //.HeaderRow(headerRow)
+        .HeaderRow(headerRow)
     );
 }
 

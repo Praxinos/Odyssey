@@ -31,7 +31,7 @@ class FVectorSceneTreeViewItem
  * Implements the Scene Tree View Widget
  */
 class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorSceneTreeViewRow
-    : public STableRow<TSharedPtr<FVectorSceneTreeViewItem>>
+    : public SMultiColumnTableRow<TSharedPtr<FVectorSceneTreeViewItem>>
 {
     public:
         ~SOdysseyPainterEditorVectorSceneTreeViewRow();
@@ -45,6 +45,7 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorSceneTreeViewRow
         void Construct( const typename STableRow<TSharedPtr<FVectorSceneTreeViewItem>>::FArguments& InArgs
                       , const TSharedRef< STableViewBase >& InOwnerTableView
                       , const TSharedPtr<FVectorSceneTreeViewItem> iItem );
+        virtual TSharedRef< SWidget > GenerateWidgetForColumn ( const FName& InColumnName ) override;
 
         void Rename();
         FReply OnMouseButtonUp( const FGeometry & MyGeometry

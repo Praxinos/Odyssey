@@ -754,25 +754,25 @@ FSnapshotTagInbetweener::RecordAlteredState()
 {
     RecordLocalState( &mAlteredState );
 
-    // restore breakdown layout
+    // Snapshot breakdown layout
     if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::BREAKDOWNS )
     {
         mLayoutSnapshot.RecordAlteredState();
     }
 
-    // restore breakdowns if any
+    // Snapshot breakdowns if any
     for( FSnapshotInbetweenerBreakdown& inbetweenerBreakdownSnapshot : mInbetweenerBreakdownSnapshotBuffer )
     {
         inbetweenerBreakdownSnapshot.RecordAlteredState();
     }
 
-    // restore route layout
+    // Snapshot route layout
     if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::ROUTES )
     {
         mDynamicsSnapshot.RecordAlteredState();
     }
 
-    // restore routes if any
+    // Snapshot routes if any
     for( FSnapshotRoute& routeSnapshot : mRouteSnapshotBuffer )
     {
         routeSnapshot.RecordAlteredState();

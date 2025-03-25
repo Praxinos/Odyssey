@@ -3005,23 +3005,27 @@ FOdysseyVectorGroupPaint::EraseSections( std::vector<FOdysseyVectorObject*>& oAd
     }
 
     // do not use mPathList because it may contains the canvas path
-    for( FOdysseyVectorObject* child : mChildrenList )
+    for( FOdysseyVectorObject* child : mPathList )
     {
         if( child->GetClass() == FOdysseyVectorPath::StaticClass() )
         {
             FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>( child );
 
-            if( path->HasErasedSection() )
+            // do not erase the canvas path
+            if( path != &mCanvasPath )
             {
-                if( path->Erase( oAddedPathArray
-                               , oAddedVertexArray
-                               , oAddedSegmentArray
-                               , oRemovedVertexArray
-                               , oRemovedSegmentArray
-                               , true
-                               , iSplit ) )
+                if( path->HasErasedSection() )
                 {
-                    oRemovedPathArray.push_back( path );
+                    if( path->Erase( oAddedPathArray
+                                   , oAddedVertexArray
+                                   , oAddedSegmentArray
+                                   , oRemovedVertexArray
+                                   , oRemovedSegmentArray
+                                   , true
+                                   , iSplit ) )
+                    {
+                        oRemovedPathArray.push_back( path );
+                    }
                 }
             }
         }

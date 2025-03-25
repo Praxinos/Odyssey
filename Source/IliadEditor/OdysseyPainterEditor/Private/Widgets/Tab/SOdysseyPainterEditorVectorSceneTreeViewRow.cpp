@@ -105,92 +105,114 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::Construct( const typename STableRow
                                                       , const TSharedRef< STableViewBase >& InOwnerTableView
                                                       , const TSharedPtr<FVectorSceneTreeViewItem> iItem )
 {
-    const FCheckBoxStyle* isActivatedToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("LayerStack.IsActivatedToggle");
-    STableRow<TSharedPtr<FVectorSceneTreeViewItem>>::Construct( InArgs, InOwnerTableView );
-    FOdysseyVectorObject* vectorObject = iItem->GetVectorObject();
-    TSharedPtr<SHorizontalBox> tagBox;
-    const FSlateBrush* objectIcon = nullptr;
-    const FSlateBrush* inbetweenerTagIcon = nullptr;
-    uint32 cellIndex = vectorObject->GetCell()->GetIndex();
-
-    //inbetweenerTagIcon = FOdysseyStyle::GetBrush( "PainterEditor.VectorSceneTreeView.InbetweenerTag16" );
-    inbetweenerTagIcon = FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Matching16" );
-
-    if ( vectorObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
-    {
-        objectIcon = FOdysseyStyle::GetBrush( "PainterEditor.VectorSceneTreeView.Paintgroup" );
-    }
-    else
-    if ( vectorObject->HasBaseClass( FOdysseyVectorGroup::StaticClass() ) )
-    {
-        objectIcon = FOdysseyStyle::GetBrush( "PainterEditor.VectorSceneTreeView.Group" );
-    }
-    else
-    if ( vectorObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
-    {
-        objectIcon = FOdysseyStyle::GetBrush( "PainterEditor.VectorSceneTreeView.Path" );
-    }
-    else
-    {
-        objectIcon = FOdysseyStyle::GetBrush( "PainterEditor.VectorSceneTreeView.null16" );
-    }
-
     mItem = iItem;
 
-    mTextBlockWidget = SNew(SInlineEditableTextBlock)
-                       // display cell name only for insensitive objects, i.e objects from another cell
-                       .Text( FText::FromString( iItem->IsSensitive() ? vectorObject->GetName()
-                                                                      : FString::Printf( TEXT("Cell %d / "), cellIndex )
-                                                                      + vectorObject->GetName() ) )
-                       .OnVerifyTextChanged( this, &SOdysseyPainterEditorVectorSceneTreeViewRow::OnVerifyTextChanged )
-                       .OnTextCommitted( this, &SOdysseyPainterEditorVectorSceneTreeViewRow::OnTextChanged );
+    SMultiColumnTableRow <TSharedPtr<FVectorSceneTreeViewItem>>::Construct( InArgs, InOwnerTableView );
+}
 
-    tagBox = SNew(SHorizontalBox);
-
-    for( FOdysseyVectorTag* tag : vectorObject->GetTagList() )
+TSharedRef<SWidget>
+SOdysseyPainterEditorVectorSceneTreeViewRow::GenerateWidgetForColumn ( const FName& InColumnName )
+{
+    if( InColumnName == "Visible" )
     {
-        if( tag->GetClass() == FOdysseyVectorTagInbetweener::StaticClass() )
-        {
-            //Cells widgets
-            tagBox->AddSlot()
-            .AutoWidth()
-            [
-                SNew( SImage )
-                .Image( inbetweenerTagIcon )
-            ];
-        }
+        const FCheckBoxStyle* isVisibleToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("VectorSceneTreeView.IsVisibleToggle");
+
+        return SNew(SBorder)
+            .Padding(4, 0)
+               .BorderBackgroundColor( FSlateColor( FLinearColor( 0, 0, 0, 0 ) ) )
+               [
+                   SNew( SCheckBox )
+                  .IsEnabled( mItem.Get()->IsSensitive() )
+                  .Style( isVisibleToggleStyle )
+                  .OnCheckStateChanged( this, &SOdysseyPainterEditorVectorSceneTreeViewRow::OnCheckBoxStateChanged)
+                  .IsChecked( this, &SOdysseyPainterEditorVectorSceneTreeViewRow::GetHierarchicalVisibility)
+                  .IsEnabled( this, &SOdysseyPainterEditorVectorSceneTreeViewRow::IsVisibilityEnabled )
+               ];
     }
 
-    SetContent( SNew(SHorizontalBox)
-                .IsEnabled( mItem.Get()->IsSensitive() )
-                + SHorizontalBox::Slot()
+    if( InColumnName == "Name" )
+    {
+        FOdysseyVectorObject* vectorObject = mItem->GetVectorObject();
+        TSharedPtr<SHorizontalBox> tagBox;
+        const FSlateBrush* objectIcon = nullptr;
+        const FSlateBrush* inbetweenerTagIcon = nullptr;
+        uint32 cellIndex = vectorObject->GetCell()->GetIndex();
+
+        //inbetweenerTagIcon = FOdysseyStyle::GetBrush( "PainterEditor.VectorSceneTreeView.InbetweenerTag16" );
+        inbetweenerTagIcon = FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Matching16" );
+
+        if ( vectorObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+        {
+            objectIcon = FOdysseyStyle::GetBrush( "PainterEditor.VectorSceneTreeView.Paintgroup" );
+        }
+        else
+        if ( vectorObject->HasBaseClass( FOdysseyVectorGroup::StaticClass() ) )
+        {
+            objectIcon = FOdysseyStyle::GetBrush( "PainterEditor.VectorSceneTreeView.Group" );
+        }
+        else
+        if ( vectorObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+        {
+            objectIcon = FOdysseyStyle::GetBrush( "PainterEditor.VectorSceneTreeView.Path" );
+        }
+        else
+        {
+            objectIcon = FOdysseyStyle::GetBrush( "PainterEditor.VectorSceneTreeView.null16" );
+        }
+
+        mTextBlockWidget = SNew(SInlineEditableTextBlock)
+                           // display cell name only for insensitive objects, i.e objects from another cell
+                           .Text( FText::FromString( mItem->IsSensitive() ? vectorObject->GetName()
+                                                                          : FString::Printf( TEXT("Cell %d / "), cellIndex )
+                                                                          + vectorObject->GetName() ) )
+                           .OnVerifyTextChanged( this, &SOdysseyPainterEditorVectorSceneTreeViewRow::OnVerifyTextChanged )
+                           .OnTextCommitted( this, &SOdysseyPainterEditorVectorSceneTreeViewRow::OnTextChanged );
+
+        tagBox = SNew(SHorizontalBox);
+
+        for( FOdysseyVectorTag* tag : vectorObject->GetTagList() )
+        {
+            if( tag->GetClass() == FOdysseyVectorTagInbetweener::StaticClass() )
+            {
+                //Cells widgets
+                tagBox->AddSlot()
                 .AutoWidth()
                 [
                     SNew( SImage )
-                    .Image( objectIcon )
-                ]
-                + SHorizontalBox::Slot()
-                .Padding( 2, 0 )
-                .AutoWidth()
-                [
-                    SNew( SCheckBox )
-                    .Style( isActivatedToggleStyle )
-                    .OnCheckStateChanged( this, &SOdysseyPainterEditorVectorSceneTreeViewRow::OnCheckBoxStateChanged)
-                    .IsChecked( this, &SOdysseyPainterEditorVectorSceneTreeViewRow::GetHierarchicalVisibility)
-                    .IsEnabled( this, &SOdysseyPainterEditorVectorSceneTreeViewRow::IsVisibilityEnabled )
-                ]
-                + SHorizontalBox::Slot()
-                .Padding( 2, 0 )
-                .AutoWidth()
-                [
-                    mTextBlockWidget.ToSharedRef()
-                ]
-                + SHorizontalBox::Slot()
-                .Padding( 10, 0 )
-                .AutoWidth()
-                [
-                    tagBox.ToSharedRef()
-                ] );
+                    .Image( inbetweenerTagIcon )
+                ];
+            }
+        }
+
+        return SNew(SHorizontalBox)
+                    .IsEnabled( mItem.Get()->IsSensitive() )
+                    +SHorizontalBox::Slot()
+                    .AutoWidth()
+                    .Padding(6.f, 0.f, 0.f, 0.f)
+                    [
+                        SNew( SExpanderArrow, SharedThis(this) ).IndentAmount(12)
+                    ]
+                    + SHorizontalBox::Slot()
+                    .AutoWidth()
+                    [
+                        SNew( SImage )
+                        .Image( objectIcon )
+                    ]
+                    + SHorizontalBox::Slot()
+                    .Padding( 2, 0 )
+                    .AutoWidth()
+                    [
+                        mTextBlockWidget.ToSharedRef()
+                    ]
+                    + SHorizontalBox::Slot()
+                    .Padding( 10, 0 )
+                    .AutoWidth()
+                    [
+                        tagBox.ToSharedRef()
+                    ];
+    }
+
+    return SNullWidget::NullWidget;
 }
 
 FReply
