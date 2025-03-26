@@ -63,7 +63,6 @@ FOdysseyPainterEditorModule::StartupModule()
     RegisterDetailCustomizations();
     RegisterThumbnailRenderers();
     RegisterEditorMode();
-    RegisterShaders();
     RegisterPropertyModuleCustomizations();
 
     FOdysseyVectorBrushCustomization::Register();
@@ -80,7 +79,6 @@ FOdysseyPainterEditorModule::ShutdownModule()
     UnregisterDetailCustomization();
     UnregisterThumbnailRenderers();
     UnregisterEditorMode();
-    UnregisterShaders();
     UnregisterPropertyModuleCustomizations();
 
     FOdysseyVectorBrushCustomization::Unregister();
@@ -111,13 +109,6 @@ FOdysseyPainterEditorModule::UnregisterEditorMode()
 }
 
 void
-FOdysseyPainterEditorModule::RegisterShaders()
-{
-    FString PluginShaderDir = FPaths::Combine(IPluginManager::Get().FindPlugin(TEXT("Odyssey"))->GetBaseDir(),TEXT("Shaders"));
-    AddShaderSourceDirectoryMapping(TEXT("/Plugin/Odyssey"),PluginShaderDir);
-}
-
-void
 FOdysseyPainterEditorModule::RegisterPropertyModuleCustomizations()
 {
     /** Register detail/property customization */
@@ -135,12 +126,6 @@ FOdysseyPainterEditorModule::UnregisterPropertyModuleCustomizations()
         PropertyModule->UnregisterCustomClassLayout("OdysseyViewportDrawingEditorSettings");
         PropertyModule->UnregisterCustomPropertyTypeLayout("OdysseyViewportDrawingEditorTexturePaintSettings");
     }
-}
-
-void
-FOdysseyPainterEditorModule::UnregisterShaders()
-{
-    //No method available to unregister Shaders directories
 }
 
 void

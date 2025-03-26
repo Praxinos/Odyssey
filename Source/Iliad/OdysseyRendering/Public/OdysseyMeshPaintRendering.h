@@ -5,31 +5,33 @@
 
 #include "CoreMinimal.h"
 #include "RHIDefinitions.h"
+#include "RHIFeatureLevel.h"
 
 class FRHICommandList;
 class UTextureRenderTarget2D;
 class FGraphicsPipelineStateInitializer;
+class UTexture2D;
 
-namespace OdysseySeamsPaintRendering
+namespace OdysseyMeshPaintRendering
 {
     /** Batched element parameters for mesh paint shaders */
-    struct FOdysseySeamsPaintShaderParameters
+    struct FOdysseyMeshPaintShaderParameters
     {
     public:
-        UTextureRenderTarget2D* Stroke2D;
-        UTextureRenderTarget2D* SeamMaskRenderTarget;
+        UTexture2D* Stroke2D;
 
-        float WidthPixelOffset;
-        float HeightPixelOffset;
+        FMatrix WorldToBrushMatrix;
+        FVector2D TextureHitPoint;
+        float StampQuality;
     };
 
 
     /** Binds the mesh paint vertex and pixel shaders to the graphics device */
-    void SetSeamsPaintShaders(  FRHICommandList& iRHICmdList,
+    ODYSSEYRENDERING_API void SetMeshPaintShaders(  FRHICommandList& iRHICmdList,
                                             FGraphicsPipelineStateInitializer& iGraphicsPSOInit,
                                             ERHIFeatureLevel::Type iFeatureLevel,
                                             const FMatrix& iTransform,
                                             const float iGamma,
-                                            const FOdysseySeamsPaintShaderParameters& iShaderParams );
+                                            const FOdysseyMeshPaintShaderParameters& iShaderParams );
 
 }

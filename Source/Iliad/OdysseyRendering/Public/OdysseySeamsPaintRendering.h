@@ -10,28 +10,26 @@ class FRHICommandList;
 class UTextureRenderTarget2D;
 class FGraphicsPipelineStateInitializer;
 
-namespace OdysseyScreenPaintRendering
+namespace OdysseySeamsPaintRendering
 {
     /** Batched element parameters for mesh paint shaders */
-    struct FOdysseyScreenPaintShaderParameters
+    struct FOdysseySeamsPaintShaderParameters
     {
     public:
-        UTexture2D* Stroke2D;
+        UTextureRenderTarget2D* Stroke2D;
+        UTextureRenderTarget2D* SeamMaskRenderTarget;
 
-        FMatrix WorldToBrushMatrix;
-        FVector2D TextureHitPoint;
-        float StampQuality;
-        FVector xScreenAxis;
-        FVector yScreenAxis;
+        float WidthPixelOffset;
+        float HeightPixelOffset;
     };
 
 
     /** Binds the mesh paint vertex and pixel shaders to the graphics device */
-    void SetMeshPaintShaders(  FRHICommandList& iRHICmdList,
+    ODYSSEYRENDERING_API void SetSeamsPaintShaders(  FRHICommandList& iRHICmdList,
                                             FGraphicsPipelineStateInitializer& iGraphicsPSOInit,
                                             ERHIFeatureLevel::Type iFeatureLevel,
                                             const FMatrix& iTransform,
                                             const float iGamma,
-                                            const FOdysseyScreenPaintShaderParameters& iShaderParams );
+                                            const FOdysseySeamsPaintShaderParameters& iShaderParams );
 
 }

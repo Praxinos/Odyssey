@@ -256,6 +256,7 @@ TArray<::ULIS::FRectI> FOdysseyViewportDrawingEditorMeshBasedAdapter::GetMinimal
     rects.Add( ::ULIS::FRectI::FromMinMax(minX, minY, maxX, maxY) );
     return rects;
 
+    //Get minimal area, but a lot of rectangles
     //First step, we get all bounding rectangles from the triangles
     /*for (int i = 0; i < iTriangles.Num(); i++)
     {
@@ -415,10 +416,7 @@ float FOdysseyViewportDrawingEditorMeshBasedAdapter::GetStampQuality()
         }
 
         ::ULIS::FRectI rect = mStrokeBufferSurfaceTexture2DEditable->Block()->Rect();
-        //InvalidateTextureFromData( iStampParams.mBlock, mStrokeBufferSurfaceTexture2DEditable->Texture(), iStampParams.mRects.GetData(), iStampParams.mRects.Num() );
-        InvalidateTextureFromData( iStampParams.mBlock, mStrokeBufferSurfaceTexture2DEditable->Texture(), &rect, 1 );
-
-        //mStrokeBufferTexture2D = NewRGBAFTextureFromBlockData(iStampParams.mBlock);
+        InvalidateTextureFromData( iStampParams.mBlock, mStrokeBufferSurfaceTexture2DEditable->Texture(), iStampParams.mRects.GetData(), iStampParams.mRects.Num() );
     }
 
     TRefCountPtr< FOdysseyMeshPaintBatchedElementParameters > meshPaintBatchedElementParameters(new FOdysseyMeshPaintBatchedElementParameters());
@@ -491,7 +489,7 @@ float FOdysseyViewportDrawingEditorMeshBasedAdapter::GetStampQuality()
 
     // Tell the rendering thread to draw any remaining batched elements
     {
-        strokePaintCanvas.Flush_GameThread(true);
+        strokePaintCanvas.Flush_GameThread(); //VERY SLOW
     }
 
     {
@@ -562,13 +560,14 @@ float FOdysseyViewportDrawingEditorMeshBasedAdapter::GetStampQuality()
     TriItemList.BlendMode = SE_BLEND_Opaque;
     strokePaintCanvas.DrawItem(TriItemList);
     {
-        strokePaintCanvas.Flush_GameThread(true);
+        strokePaintCanvas.Flush_GameThread(); //VERY SLOW
     }
 
 
     TArray<::ULIS::FRectI> rects;
     rects = GetMinimalRectanglesForTriangleSet(triangleInfo, mStrokeBufferRenderTarget2D->GetSurfaceWidth(), mStrokeBufferRenderTarget2D->GetSurfaceHeight());
 
+    //-- VERY SLOW
     mPixelFence.BeginFence();
     mPixelFence.Wait();
 
@@ -578,35 +577,6 @@ float FOdysseyViewportDrawingEditorMeshBasedAdapter::GetStampQuality()
             [this, strokeRenderTargetResource, rects, i](FRHICommandListImmediate& RHICmdList)
             {
                 // Copy (resolve) the rendered image from the frame buffer to its render target texture*/
-                /*RHICmdList.CopyToResolveTarget(
-                    brushRenderTargetResource->GetRenderTargetTexture(),        // Source texture
-                    brushRenderTargetResource->TextureRHI,
-                    FResolveParams());                                    // Resolve parameters
-
-                TArray<FRHIGPUTextureReadback> readbufferArray;
-
-                for (int i = 0; i < rects.Num(); i++)
-                {
-                    mColorDataPtr.Add(nullptr);
-                    readbufferArray.Add(FRHIGPUTextureReadback(TEXT("ReadMeshPaintTextureOdyssey" + i)));
-
-                    //for (int y = rects[i].y; y < rects[i].y + rects[i].h; y++)
-                    //{
-                    //    readbufferArray[i].EnqueueCopy(RHICmdList, brushRenderTargetResource->GetRenderTargetTexture(), FResolveRect(rects[i].x, rects[i].y + y, rects[i].x + rects[i].w, 1));
-                    //}
-
-                    readbufferArray[i].EnqueueCopy(RHICmdList, brushRenderTargetResource->GetRenderTargetTexture(), FResolveRect(rects[i].x, rects[i].y, rects[i].x + rects[i].w, rects[i].y + rects[i].h));
-
-                }
-
-                RHICmdList.BlockUntilGPUIdle();
-
-                for (int i = 0; i < rects.Num(); i++)
-                {
-                    mColorDataPtr[i] = (FColor*)readbufferArray[i].Lock(4 * rects[i].w * rects[i].h);
-                    readbufferArray[i].Unlock();
-                }*/
-
                 if( mColorData.Num() < rects.Num() )
                     mColorData.Add(TArray<FLinearColor>());
 
@@ -616,9 +586,7 @@ float FOdysseyViewportDrawingEditorMeshBasedAdapter::GetStampQuality()
 
     mPixelFence.BeginFence();
     mPixelFence.Wait();
-
-    //Resets the color of all pixels in mStrokeBufferRenderTarget2D for next stamp. Is there a better way to do it ?
-    //mStrokeBufferRenderTarget2D->UpdateResource();
+    //-- VERY SLOW
 
     TArray<::ULIS::FEvent> eventBlend;
     ::ULIS::eFormat target_format = ::ULIS::eFormat::Format_RGBAF;

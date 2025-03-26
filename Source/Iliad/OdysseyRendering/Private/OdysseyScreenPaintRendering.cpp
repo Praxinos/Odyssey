@@ -20,7 +20,7 @@ namespace OdysseyScreenPaintRendering
 {
 
     /** Mesh paint vertex shader */
-    class TOdysseyScreenPaintVertexShader : public FGlobalShader
+    class ODYSSEYRENDERING_API TOdysseyScreenPaintVertexShader : public FGlobalShader
     {
         DECLARE_SHADER_TYPE(TOdysseyScreenPaintVertexShader, Global);
 
@@ -51,11 +51,11 @@ namespace OdysseyScreenPaintRendering
     };
 
 
-    IMPLEMENT_SHADER_TYPE(, TOdysseyScreenPaintVertexShader, TEXT("/Plugins/Odyssey/Private/OdysseyScreenPaintShader.usf"), TEXT("MainVS"), SF_Vertex);
+    IMPLEMENT_SHADER_TYPE(, TOdysseyScreenPaintVertexShader, TEXT("/Plugin/Odyssey/Private/OdysseyScreenPaintShader.usf"), TEXT("MainVS"), SF_Vertex);
 
 
     /** Mesh paint pixel shader */
-    class TOdysseyScreenPaintPixelShader : public FGlobalShader
+    class ODYSSEYRENDERING_API TOdysseyScreenPaintPixelShader : public FGlobalShader
     {
         DECLARE_SHADER_TYPE(TOdysseyScreenPaintPixelShader, Global);
     public:
@@ -120,7 +120,7 @@ namespace OdysseyScreenPaintRendering
         LAYOUT_FIELD(FShaderParameter, yScreenAxisParameter);
     };
 
-    IMPLEMENT_SHADER_TYPE(, TOdysseyScreenPaintPixelShader, TEXT("/Plugins/Odyssey/Private/OdysseyScreenPaintShader.usf"), TEXT("MainPS"), SF_Pixel);
+    IMPLEMENT_SHADER_TYPE(, TOdysseyScreenPaintPixelShader, TEXT("/Plugin/Odyssey/Private/OdysseyScreenPaintShader.usf"), TEXT("MainPS"), SF_Pixel);
 
     typedef FSimpleElementVertexDeclaration FMeshPaintDilateVertexDeclaration;
     TGlobalResource< FMeshPaintDilateVertexDeclaration > GMeshPaintDilateVertexDeclaration;

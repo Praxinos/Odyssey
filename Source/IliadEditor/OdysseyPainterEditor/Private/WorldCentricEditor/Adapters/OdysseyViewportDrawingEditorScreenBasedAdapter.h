@@ -5,8 +5,8 @@
 
 #include "IOdysseyViewportDrawingEditorAdapter.h"
 
-#include "Rendering/OdysseyScreenPaintRendering.h"
-#include "Rendering/OdysseySeamsPaintRendering.h"
+#include "OdysseyScreenPaintRendering.h"
+#include "OdysseySeamsPaintRendering.h"
 #include "MeshPaintTypes.h"
 #include "TexturePaintHelpers.h"
 

@@ -135,6 +135,11 @@
             "LoadingPhase": "Default"
         },
         {
+            "Name": "OdysseyRendering",
+            "Type": "Runtime",
+            "LoadingPhase": "PostConfigInit"
+        },
+        {
             "Name": "OdysseyMaths",
             "Type": "Runtime",
             "LoadingPhase": "Default"
