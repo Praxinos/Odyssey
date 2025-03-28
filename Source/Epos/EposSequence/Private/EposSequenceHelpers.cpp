@@ -2130,6 +2130,164 @@ BoardSequenceHelpers::BuildAnimationsTimelineChannelProxy( IMovieScenePlayer& iP
     return ShotSequenceHelpers::BuildAnimationsTimelineChannelProxy( iPlayer, result.mInnerSequence, result.mInnerSequenceId );
 }
 
+#if WITH_EDITOR
+
+FAnimationCutEntry::FAnimationCutEntry( UOdysseyAnimationLayer* iLayer, UOdysseyAnimationCell* iCell )
+    : mLayer( iLayer )
+    , mCell( iCell )
+{
+    mFrameReference = iCell->GetFrameRange().GetLowerBoundValue(); // Always inclusive
+}
+
+FFrameNumber
+FAnimationCutEntry::GetFrameReference() const
+{
+    return mFrameReference;
+}
+
+const UOdysseyAnimationLayer*
+FAnimationCutEntry::GetLayer() const
+{
+    return mLayer;
+}
+
+UOdysseyAnimationLayer*
+FAnimationCutEntry::GetLayer()
+{
+    return mLayer;
+}
+
+const UOdysseyAnimationCell*
+FAnimationCutEntry::GetCell() const
+{
+    return mCell;
+}
+
+UOdysseyAnimationCell*
+FAnimationCutEntry::GetCell()
+{
+    return mCell;
+}
+
+//---
+
+FAnimationCut::FAnimationCut()
+{
+}
+
+FFrameNumber
+FAnimationCut::GetFrameReference() const
+{
+    TSet<FFrameNumber> frames;
+    for( FAnimationCutEntry entry : mAnimationCutEntries )
+        frames.Add( entry.GetFrameReference() );
+    check( frames.Num() == 1 );
+
+    return frames.Array()[0];
+}
+
+const TArray<FAnimationCutEntry>&
+FAnimationCut::GetEntries()
+{
+    return mAnimationCutEntries;
+}
+
+void
+FAnimationCut::AddNewEntry( const FAnimationCutEntry& iAnimationCutEntry )
+{
+    check( !mAnimationCutEntries.ContainsByPredicate( [iAnimationCutEntry]( const FAnimationCutEntry& iEntry )
+                                                      {
+                                                          return iEntry.GetLayer() == iAnimationCutEntry.GetLayer();
+                                                      } ) );
+
+    mAnimationCutEntries.Add( iAnimationCutEntry );
+}
+
+//---
+
+FAnimationCuts::FAnimationCuts()
+{
+}
+
+void
+FAnimationCuts::Build( UOdysseyAnimation* iAnimation )
+{
+    UOdysseyAnimationLayerStack* layer_stack = iAnimation ? iAnimation->GetLayerStack() : nullptr;
+    TArray<UOdysseyLayer*> layers = layer_stack ? layer_stack->GetLayers() : TArray<UOdysseyLayer*>();
+    TSet<UOdysseyAnimationLayer*> animation_layers;
+    for( UOdysseyLayer* layer : layers )
+        animation_layers.Add( Cast<UOdysseyAnimationLayer>( layer ) );
+    animation_layers.Remove( nullptr );
+
+    for( UOdysseyAnimationLayer* layer : animation_layers )
+    {
+        TArray<UOdysseyAnimationCell*> cells = layer->GetCells();
+        for( UOdysseyAnimationCell* cell : cells )
+        {
+            FAnimationCutEntry animationcutentry( layer, cell );
+
+            FAnimationCut* animationcut = mAnimationCuts.Find( animationcutentry.GetFrameReference() );
+            if( animationcut )
+            {
+                animationcut->AddNewEntry( animationcutentry );
+            }
+            else
+            {
+                FAnimationCut new_animationcut;
+                new_animationcut.AddNewEntry( animationcutentry );
+
+                mAnimationCuts.Add( animationcutentry.GetFrameReference(), new_animationcut );
+            }
+
+        }
+    }
+
+    mAnimationCuts.KeyStableSort( []( FFrameNumber iA, FFrameNumber iB )
+                                  {
+                                      return iA < iB;
+                                  } );
+}
+
+const TMap<FFrameNumber, FAnimationCut>&
+FAnimationCuts::GetAnimationCuts() const
+{
+    return mAnimationCuts;
+}
+
+#endif
+
+FFrameNumber
+ShotSequenceHelpers::ConvertFrameFromTimelineToSequence( FFrameNumber iFrameInTimeline, UOdysseyAnimationTimelineSection* iSection )
+{
+    UMovieSceneSequence* sequence = iSection->GetTypedOuter<UMovieSceneSequence>();
+
+    // Convert a real timeline frame to a sequence frame (change framerate from animation framerate to sequence framerate (aka tickresolution))
+    FFrameTime frametime_in_timeline = FFrameRate::TransformTime( iFrameInTimeline, FFrameRate( iSection->GetAnimation()->GetFramesPerSecond() * 1000, 1000 ), sequence->GetMovieScene()->GetTickResolution() );
+    FFrameNumber frame_in_timeline = frametime_in_timeline.GetFrame(); // It should be ok (?), otherwise return a FFrameTime
+
+    // Apply all offsets in sequence framerate (aka tickresolution)
+    FFrameNumber frame_in_section = frame_in_timeline + iSection->GetStartFrameOffset();
+    FFrameNumber frame_in_sequence = frame_in_section + iSection->GetTrueRange().GetLowerBoundValue();
+
+    return frame_in_sequence;
+}
+
+FFrameNumber
+ShotSequenceHelpers::ConvertFrameFromSequenceToTimeline( FFrameNumber iFrameInSequence, UOdysseyAnimationTimelineSection* iSection )
+{
+    UMovieSceneSequence* sequence = iSection->GetTypedOuter<UMovieSceneSequence>();
+
+    // Apply all offsets in sequence framerate (aka tickresolution)
+    FFrameNumber frame_in_section = iFrameInSequence - iSection->GetTrueRange().GetLowerBoundValue();
+    FFrameNumber frame_in_timeline = frame_in_section - iSection->GetStartFrameOffset();
+
+    // Convert a sequence frame to a real timeline frame (change framerate from sequence framerate (aka tickresolution) to animation framerate)
+    FFrameTime frametime_in_timeline = FFrameRate::TransformTime( frame_in_timeline, sequence->GetMovieScene()->GetTickResolution(), FFrameRate( iSection->GetAnimation()->GetFramesPerSecond() * 1000, 1000 ) );
+    frame_in_timeline = frametime_in_timeline.GetFrame();
+
+    return frame_in_timeline;
+}
+
 //static
 TMap<FGuid, FChannelProxyBySectionMap>
 ShotSequenceHelpers::BuildAnimationsTimelineChannelProxy( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID )
@@ -2158,6 +2316,24 @@ ShotSequenceHelpers::BuildAnimationsTimelineChannelProxy( IMovieScenePlayer& iPl
             //if( ObjectPathChannelEntry )
             //{
 #if WITH_EDITOR
+                //TODO: first try to use specific class but don't know how to use it inside channel ...
+                //FAnimationCuts animationcuts;
+                //animationcuts.Build( animation_timeline_section->GetAnimation() );
+
+                //for( auto pair : animationcuts.GetAnimationCuts() )
+                //{
+                //    FFrameNumber frame_in_timeline = pair.Key;
+                //    FAnimationCut animationcut = pair.Value;
+
+                //    FFrameNumber frame_in_sequence = ConvertFrameFromTimelineToSequence( frame_in_timeline, animation_timeline_section.Get() );
+
+                //    //animation_timeline_section->CutChannel.GetData().AddKey( frame_in_sequence, FMovieSceneObjectPathChannelKeyValue( cell ) );
+                //}
+
+                //ChannelIndirection.Add( animation_timeline_section->CutChannel, FMovieSceneChannelMetaData(), TMovieSceneExternalValue<UObject*>::Make() );
+
+
+
                 UOdysseyAnimation* animation = animation_timeline_section->GetAnimation();
 
                 UOdysseyAnimationLayerStack* layer_stack = animation ? animation->GetLayerStack() : nullptr;
@@ -2186,6 +2362,8 @@ ShotSequenceHelpers::BuildAnimationsTimelineChannelProxy( IMovieScenePlayer& iPl
                 }
                 frames.Sort( TLess<>() );
                 ChannelIndirection.Add( animation_timeline_section->CutChannel, FMovieSceneChannelMetaData(), TMovieSceneExternalValue<UObject*>::Make() );
+
+
 
                 //TArrayView<FMovieSceneChannel* const>                   ObjectPathChannels = ObjectPathChannelEntry->GetChannels();
                 //TArrayView<const FMovieSceneChannelMetaData>            MetaData = ObjectPathChannelEntry->GetMetaData();

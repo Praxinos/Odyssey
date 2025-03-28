@@ -32,6 +32,7 @@ class UMovieSceneSequence;
 class UMovieSceneSubSection;
 class UMovieSceneTrack;
 class UMovieSceneVisibilityTrack;
+class UOdysseyAnimation;
 class UOdysseyAnimationTimelineTrack;
 class UOdysseyAnimationTimelineSection;
 class UStoryNote;
@@ -139,6 +140,59 @@ struct EPOSSEQUENCE_API FDrawing
     friend EPOSSEQUENCE_API bool operator==( const FDrawing& iLhs, const FDrawing& iRhs );
 };
 
+#if WITH_EDITOR
+
+class UOdysseyAnimationLayer;
+class UOdysseyAnimationCell;
+
+class EPOSSEQUENCE_API FAnimationCutEntry
+{
+public:
+    FAnimationCutEntry( UOdysseyAnimationLayer* iLayer, UOdysseyAnimationCell* iCell );
+
+    FFrameNumber GetFrameReference() const;
+
+    const UOdysseyAnimationLayer* GetLayer() const;
+    UOdysseyAnimationLayer* GetLayer();
+    const UOdysseyAnimationCell* GetCell() const;
+    UOdysseyAnimationCell* GetCell();
+
+private:
+    UOdysseyAnimationLayer* mLayer;
+    UOdysseyAnimationCell* mCell;
+    FFrameNumber mFrameReference;
+};
+
+class EPOSSEQUENCE_API FAnimationCut
+{
+public:
+    FAnimationCut();
+
+    FFrameNumber GetFrameReference() const;
+
+    void AddNewEntry( const FAnimationCutEntry& iAnimationCutEntry );
+
+    const TArray<FAnimationCutEntry>& GetEntries();
+
+private:
+    TArray<FAnimationCutEntry> mAnimationCutEntries;
+};
+
+class EPOSSEQUENCE_API FAnimationCuts
+{
+public:
+    FAnimationCuts();
+
+    void Build( UOdysseyAnimation* iAnimation );
+
+    const TMap<FFrameNumber, FAnimationCut>& GetAnimationCuts() const;
+
+private:
+    TMap<FFrameNumber, FAnimationCut> mAnimationCuts;
+};
+
+#endif
+
 struct EPOSSEQUENCE_API FKeyOpacity
 {
     FMovieSceneFloatChannel*            mChannel { nullptr };
@@ -154,6 +208,10 @@ struct EPOSSEQUENCE_API FKeyOpacity
 
 class EPOSSEQUENCE_API ShotSequenceHelpers
 {
+public:
+    static FFrameNumber ConvertFrameFromTimelineToSequence( FFrameNumber iFrameInTimeline, UOdysseyAnimationTimelineSection* iSection );
+    static FFrameNumber ConvertFrameFromSequenceToTimeline( FFrameNumber iFrameInSequence, UOdysseyAnimationTimelineSection* iSection );
+
 public:
     static ACineCameraActor*    GetCamera( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid* oCameraBinding = nullptr );
 
