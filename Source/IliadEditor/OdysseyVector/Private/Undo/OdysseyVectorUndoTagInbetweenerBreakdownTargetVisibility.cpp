@@ -38,7 +38,9 @@ FOdysseyVectorUndoTagInbetweenerBreakdownTargetVisibility::FOdysseyVectorUndoTag
 
     for( FInbetweenerBreakdown* breakdown : iBreakdownList )
     {
-        mBreakdownSnapshotBuffer.emplace_back( breakdown, FSnapshotFlags::Breakdown::TARGETVISIBILITY );
+        mBreakdownSnapshotBuffer.emplace_back( breakdown
+                                             , FSnapshotFlags::Breakdown::TARGETVISIBILITY
+                                             , eSnapshotState::Initial );
     }
 }
 
@@ -50,7 +52,7 @@ FOdysseyVectorUndoTagInbetweenerBreakdownTargetVisibility::Apply( UObject* iIgno
 
     for( FSnapshotInbetweenerBreakdown& breakdownSnapshot : mBreakdownSnapshotBuffer )
     {
-        breakdownSnapshot.LoadAlteredState();
+        breakdownSnapshot.LoadState( eSnapshotState::Altered );
     }
 
     // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
@@ -65,8 +67,8 @@ FOdysseyVectorUndoTagInbetweenerBreakdownTargetVisibility::Revert( UObject* iIgn
 
     for( FSnapshotInbetweenerBreakdown& breakdownSnapshot : mBreakdownSnapshotBuffer )
     {
-        breakdownSnapshot.RecordAlteredState(); // will run once
-        breakdownSnapshot.LoadInitialState();
+        breakdownSnapshot.RecordState( eSnapshotState::Altered ); // will run once
+        breakdownSnapshot.LoadState( eSnapshotState::Initial );
     }
 
     // Update vector scenes and call callbacks if any (for refreshing GUI e.g)

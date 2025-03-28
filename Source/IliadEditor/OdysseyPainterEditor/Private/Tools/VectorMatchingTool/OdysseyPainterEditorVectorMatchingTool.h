@@ -83,6 +83,12 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorMatchingTool : public 
     public:
         UPROPERTY( EditAnywhere
                  , Category = MatchingTool
+                 , meta = ( DisplayName = "Show Inbetweens"
+                          , ToolTip = "Show Inbetweens" ) )
+        eShowInbetweens ShowInbetweens;
+
+        UPROPERTY( EditAnywhere
+                 , Category = MatchingTool
                  , meta = ( ToolTip  = "Picking Radius"
                           , ClampMin = "0"
                           , UIMin    = "0" ) )
@@ -109,12 +115,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorMatchingTool : public 
                  , meta = ( DisplayName = "Move picked area only"
                           , ToolTip  = "Move picked area only" ) )
         bool RigidifySelectionOnly;
-
-        UPROPERTY( EditAnywhere
-                 , Category = MatchingTool
-                 , meta = ( DisplayName = "Show Inbetweens"
-                          , ToolTip  = "Show Inbetweens" ) )
-        bool ShowInbetweens;
 
         UPROPERTY( EditAnywhere
                  , Category = MatchingTool

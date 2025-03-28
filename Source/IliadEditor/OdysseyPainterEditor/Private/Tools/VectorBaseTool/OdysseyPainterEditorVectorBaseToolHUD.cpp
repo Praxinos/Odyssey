@@ -174,6 +174,90 @@ struct HOdysseyHUDDummyCursorHitProxy : public HOdysseyHUDElementHitProxy
 IMPLEMENT_HIT_PROXY(HOdysseyHUDDummyCursorHitProxy, HOdysseyHUDElementHitProxy)
 
 void
+FOdysseyPainterEditorVectorBaseToolHUD::DrawInbetweens( const FOdysseyHUD::FDrawHUDParams& iParams
+                                                      , FInbetweenerBreakdown* iBreakdown
+                                                      , eShowInbetweens ShowInbetweens
+                                                      , uint64 iSourceExtraHUDFlags
+                                                      , uint64 iTargetExtraHUDFlags )
+{
+    FInbetweenerBreakdown* firstBreakdown = iBreakdown->GetInbetweenerTag()->GetBreakdownList().front();
+    FInbetweenerBreakdown* lastBreakdown = iBreakdown->GetInbetweenerTag()->GetBreakdownList().back();
+
+    iBreakdown->GetInbetweenerTag()->LockDrawing();
+
+    if( ( ShowInbetweens == eShowInbetweens::All )
+     || ( ShowInbetweens == eShowInbetweens::SourceOnly )
+     || ( ShowInbetweens == eShowInbetweens::SourceAndBreakdownsOnly ) )
+    {
+        DrawBreakdown( iParams
+                     , firstBreakdown
+                     , FLinearColor( 0.5f, 0.5f, 0.5f, 1.0f )
+                     , FLinearColor( 1.0f, 0.5f, 0.5f, 1.0f )
+                     , FOdysseyVectorHUD::HUD_BREAKDOWN_SOURCE
+                     | iSourceExtraHUDFlags );
+    }
+
+    if( ShowInbetweens == eShowInbetweens::All )
+    {
+        for( FInbetweenerBreakdown* otherBreakdown : iBreakdown->GetInbetweenerTag()->GetBreakdownList() )
+        {
+            DrawBreakdown( iParams
+                         , otherBreakdown
+                         , FLinearColor( 0.5f, 0.5f, 0.5f, 1.0f )
+                         , FLinearColor( 0.5f, 0.5f, 0.5f, 1.0f )
+                         , ( ( otherBreakdown == firstBreakdown ) ? 0
+                                                                  : FOdysseyVectorHUD::HUD_BREAKDOWN_SOURCE )
+                         | FOdysseyVectorHUD::HUD_BREAKDOWN_INBETWEEN
+                         | ( ( otherBreakdown == iBreakdown     ) ? 0
+                                                                  : FOdysseyVectorHUD::HUD_BREAKDOWN_TARGET ) );
+        }
+    }
+
+    if( ShowInbetweens == eShowInbetweens::Surrounding )
+    {
+        FInbetweenerBreakdown* nextBreakdown = iBreakdown->GetNextBreakdown();
+
+        if( nextBreakdown )
+        {
+            DrawBreakdown( iParams
+                         , nextBreakdown
+                         , FLinearColor( 0.5f, 0.5f, 0.5f, 1.0f )
+                         , FLinearColor( 0.5f, 0.5f, 0.5f, 1.0f )
+                         , FOdysseyVectorHUD::HUD_BREAKDOWN_INBETWEEN );
+        }
+
+        DrawBreakdown( iParams
+                     , iBreakdown
+                     , FLinearColor( 0.5f, 0.5f, 0.5f, 1.0f )
+                     , FLinearColor( 0.5f, 0.5f, 0.5f, 1.0f )
+                     , FOdysseyVectorHUD::HUD_BREAKDOWN_INBETWEEN );
+    }
+
+    if( ShowInbetweens == eShowInbetweens::SourceAndBreakdownsOnly )
+    {
+        for( FInbetweenerBreakdown* otherBreakdown : iBreakdown->GetInbetweenerTag()->GetBreakdownList() )
+        {
+            DrawBreakdown( iParams
+                         , otherBreakdown
+                         , FLinearColor( 0.5f, 0.5f, 0.5f, 1.0f )
+                         , FLinearColor( 0.5f, 0.5f, 0.5f, 1.0f )
+                         , 0
+                         | ( ( otherBreakdown == iBreakdown     ) ? 0
+                                                                  : FOdysseyVectorHUD::HUD_BREAKDOWN_TARGET ) );
+        }
+    }
+
+    DrawBreakdown( iParams
+                 , iBreakdown
+                 , FLinearColor( 0.5f, 0.5f, 0.5f, 1.0f )
+                 , FLinearColor( 1.0f, 0.5f, 0.5f, 1.0f )
+                 , FOdysseyVectorHUD::HUD_BREAKDOWN_TARGET
+                 | iTargetExtraHUDFlags );
+
+    iBreakdown->GetInbetweenerTag()->UnlockDrawing();
+}
+
+void
 FOdysseyPainterEditorVectorBaseToolHUD::MakePointQuadTree( bool iFocusedObjectsOnly
                                                          , uint64 iHUDFlags )
 {
@@ -271,7 +355,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::Reset()
 
     if( hudFlags & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
     {
-        UpdateSelectionInbetweenMode();
+        UpdateSelectionInbetweenMode( true );
     }
 }
 
@@ -282,10 +366,10 @@ FOdysseyPainterEditorVectorBaseToolHUD::GetSelectionBox()
 }
 
 void
-FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionInbetweenMode()
+FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionInbetweenMode( bool iOnTargetCellOnly )
 {
     FOdysseyVectorLayer* sharedEnv = mScene->GetLayer();
-    uint32 cellIndex = mScene->GetCell()->GetIndex();
+    int32 cellIndex = mScene->GetCell()->GetIndex();
 
     mSelectedInbetweenerTagList.clear();
     mSelectedBreakdownList.clear();
@@ -299,14 +383,27 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionInbetweenMode()
 
             if( tag->GetOwner()->IsSelected() )
             {
+                FInbetweenerBreakdown* selectedBreakdown = nullptr;
+
                 mSelectedInbetweenerTagList.push_back( inbetweenerTag );
 
                 for( FInbetweenerBreakdown* breakdown : inbetweenerTag->GetBreakdownList() )
                 {
 
-                    if( breakdown->GetTargetCellIndex() == cellIndex )
+                    if( ( ( cellIndex >  breakdown->GetSourceCellIndex() ) && ( cellIndex <= breakdown->GetTargetCellIndex() ) )
+                     || ( ( cellIndex == breakdown->GetSourceCellIndex() ) && ( breakdown->GetPrevBreakdown() == nullptr     ) ) )
                     {
-                        mSelectedBreakdownList.push_back( breakdown );
+                        if( iOnTargetCellOnly == false )
+                        {
+                            mSelectedBreakdownList.push_back( breakdown );
+                        }
+                        else
+                        {
+                            if ( cellIndex == breakdown->GetTargetCellIndex() )
+                            {
+                                mSelectedBreakdownList.push_back( breakdown );
+                            }
+                        }
                     }
                 }
             }
@@ -1907,7 +2004,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawBreakdown( const FOdysseyHUD::FDrawH
         DrawGrid( iParams
                 , iBreakdown->GetGrid()
                 , eInbetweenerPointPositionType::SourcePosition
-                , FLinearColor( inbetweenerTag->GetGridColor() )
+                , iSourceDrawingColor
                 , iHUDFlags );
     }
 

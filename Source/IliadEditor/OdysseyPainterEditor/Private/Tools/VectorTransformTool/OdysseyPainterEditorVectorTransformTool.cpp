@@ -43,7 +43,7 @@ UOdysseyPainterEditorVectorTransformTool::UOdysseyPainterEditorVectorTransformTo
     //, KeepPathWidth( false )
     , World( false )
     , bInbetweenMode( false )
-    , ShowInbetweens( eTransformShowInbetweens::Surrounding )
+    , ShowInbetweens( eShowInbetweens::Surrounding )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Transform32");
 

@@ -23,7 +23,7 @@ FOdysseyVectorUndoTagInbetweenerTrajectoryAlter::FOdysseyVectorUndoTagInbetweene
                                                                                                 , FInbetweenerTrajectory* iTrajectory
                                                                                                 , uint64 iReturnFlags )
     : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
-    , mTrajectorySnapshot( iTrajectory, FSnapshotFlags::Trajectory::BEZIER )
+    , mTrajectorySnapshot( iTrajectory, FSnapshotFlags::Trajectory::BEZIER, eSnapshotState::Initial )
 {
 }
 
@@ -33,7 +33,7 @@ FOdysseyVectorUndoTagInbetweenerTrajectoryAlter::Apply( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Apply( iIgnored );
 
-    mTrajectorySnapshot.LoadAlteredState();
+    mTrajectorySnapshot.LoadState( eSnapshotState::Altered );
 
     // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
     Update();
@@ -45,8 +45,8 @@ FOdysseyVectorUndoTagInbetweenerTrajectoryAlter::Revert( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Revert( iIgnored );
 
-    mTrajectorySnapshot.RecordAlteredState();
-    mTrajectorySnapshot.LoadInitialState();
+    mTrajectorySnapshot.RecordState( eSnapshotState::Altered );
+    mTrajectorySnapshot.LoadState( eSnapshotState::Initial );
 
     // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
     Update();

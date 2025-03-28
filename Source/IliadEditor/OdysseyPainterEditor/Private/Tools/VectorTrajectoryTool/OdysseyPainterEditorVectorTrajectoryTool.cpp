@@ -43,8 +43,8 @@ UOdysseyPainterEditorVectorTrajectoryTool::UOdysseyPainterEditorVectorTrajectory
     , mHoveredQuad( nullptr )
     , mEditionMode( eVectorTrajectoryEditionMode::Add )
     , PickingRadius( 10.0f )
-    , ShowInbetweens( true )
     , GridDisplayMode( eVectorTrajectoryGridDisplayMode::AsPoints )
+    , ShowInbetweens( eShowInbetweens::All )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Trajectory64");
 
@@ -707,9 +707,8 @@ UOdysseyPainterEditorVectorTrajectoryTool::ExtendToolbar( FToolBarBuilder& iBuil
         SNew(SBox)
         .Padding(10.f, 0.f, 10.f, 0.f)
         [
-            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTrajectoryTool, PickingRadius ), FSinglePropertyParams())
+            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTrajectoryTool, ShowInbetweens ), FSinglePropertyParams())
             .InnerPadding(10.f)
-            .ValueWidthOverride(100.f)
         ]
     );
 
@@ -717,8 +716,9 @@ UOdysseyPainterEditorVectorTrajectoryTool::ExtendToolbar( FToolBarBuilder& iBuil
         SNew(SBox)
         .Padding(10.f, 0.f, 10.f, 0.f)
         [
-            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTrajectoryTool, ShowInbetweens ), FSinglePropertyParams())
+            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTrajectoryTool, PickingRadius ), FSinglePropertyParams())
             .InnerPadding(10.f)
+            .ValueWidthOverride(100.f)
         ]
     );
 

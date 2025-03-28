@@ -28,8 +28,8 @@ UOdysseyPainterEditorVectorMatchingTool::UOdysseyPainterEditorVectorMatchingTool
     , MatchingInfluence( eMatchingInfluence::Radial )
     , Rigidity( 5 )
     , RigidifySelectionOnly( false )
-    , ShowInbetweens ( false )
     , GridDisplayMode ( eMatchingGridDisplayMode::AsQuads )
+    , ShowInbetweens ( eShowInbetweens::None )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Matching64");
 
@@ -243,6 +243,15 @@ UOdysseyPainterEditorVectorMatchingTool::ExtendToolbar( FToolBarBuilder& iBuilde
         SNew(SBox)
         .Padding(10.f, 0.f, 10.f, 0.f)
         [
+            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorMatchingTool, ShowInbetweens ), FSinglePropertyParams())
+            .InnerPadding(10.f)
+        ]
+    );
+
+    iBuilder.AddWidget(
+        SNew(SBox)
+        .Padding(10.f, 0.f, 10.f, 0.f)
+        [
             SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorMatchingTool, PickingRadius ), FSinglePropertyParams())
             .InnerPadding(10.f)
             .ValueWidthOverride(100.f)
@@ -264,15 +273,6 @@ UOdysseyPainterEditorVectorMatchingTool::ExtendToolbar( FToolBarBuilder& iBuilde
         .Padding(10.f, 0.f, 10.f, 0.f)
         [
             SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorMatchingTool, RigidifySelectionOnly ), FSinglePropertyParams())
-            .InnerPadding(10.f)
-        ]
-    );
-
-    iBuilder.AddWidget(
-        SNew(SBox)
-        .Padding(10.f, 0.f, 10.f, 0.f)
-        [
-            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorMatchingTool, ShowInbetweens ), FSinglePropertyParams())
             .InnerPadding(10.f)
         ]
     );

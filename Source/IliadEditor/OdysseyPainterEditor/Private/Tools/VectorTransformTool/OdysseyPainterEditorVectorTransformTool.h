@@ -14,16 +14,6 @@ class FOdysseyVectorUndo;
 class FInbetweenerBreakdown;
 class FOdysseyVectorObject;
 
-UENUM()
-enum class eTransformShowInbetweens : uint8
-{
-    None                    = 0 UMETA( ToolTip = "" ),
-    Surrounding             = 1 UMETA( ToolTip = "" ),
-    SourceAndBreakdownsOnly = 2 UMETA( ToolTip = "Source and breakdowns only" ),
-    SourceOnly              = 3 UMETA( ToolTip = "Source only" ),
-    All                     = 4 UMETA( ToolTip = "" )
-};
-
 UCLASS( HideCategories = (SelectionTool) )
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTransformTool : public UOdysseyPainterEditorVectorBaseTool
 {
@@ -92,6 +82,13 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTransformTool : public
 
     public:
         UPROPERTY( EditAnywhere
+                 , Category = TransformTool
+                 , meta = ( ToolTip = "Show Inbetweens"
+                          , EditCondition = "bInbetweenMode"
+                          , EditConditionHides ) )
+        eShowInbetweens ShowInbetweens;
+
+        UPROPERTY( EditAnywhere
                  , Category=TransformTool
                  , meta = ( ToolTip  = "PickingRadius"
                           , ClampMin = "0"
@@ -117,11 +114,4 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTransformTool : public
         UPROPERTY( EditDefaultsOnly
                  , Category = TransformTool )
         bool bInbetweenMode;
-
-        UPROPERTY( EditAnywhere
-                 , Category = TransformTool
-                 , meta = ( ToolTip = "Show Inbetweens"
-                          , EditCondition = "bInbetweenMode"
-                          , EditConditionHides ) )
-        eTransformShowInbetweens ShowInbetweens;
 };

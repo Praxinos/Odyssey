@@ -26,6 +26,12 @@ class FOdysseyVectorTagInbetweener;
 class FOdysseyVectorLayer;
 class FOdysseyVectorCell;
 
+enum class eSnapshotState : uint8
+{
+    Initial = 0,
+    Altered = 1
+};
+
 namespace FSnapshotFlags
 {
     static const uint64 ALL = 0xFFFFFFFFFFFFFFFFULL;
@@ -270,15 +276,12 @@ class ODYSSEYVECTOR_API FSnapshotTrajectory
 
     public:
         virtual ~FSnapshotTrajectory();
-        FSnapshotTrajectory( FInbetweenerTrajectory* iTrajectory, uint64 iSnapshotFlags );
+        FSnapshotTrajectory( FInbetweenerTrajectory* iTrajectory
+                           , uint64 iSnapshotFlags
+                           , eSnapshotState iState );
 
-        void RecordAlteredState();
-        bool LoadInitialState();
-        bool LoadAlteredState();
-
-    protected:
-        void RecordLocalState( State* iState );
-        bool LoadState( State* iState );
+        void RecordState( eSnapshotState iState );
+        bool LoadState( eSnapshotState iState );
 
         static void WaypointSpacingToArray( FInbetweenerTrajectory* iTrajectory
                                           , std::vector<float>& oSpacingBuffer );
@@ -303,15 +306,11 @@ class ODYSSEYVECTOR_API FSnapshotStep
 
     public:
         virtual ~FSnapshotStep();
-        FSnapshotStep( FInbetweenerStep* iStep );
+        FSnapshotStep( FInbetweenerStep* iStep
+                     , eSnapshotState iState );
 
-        void RecordAlteredState();
-        bool LoadInitialState();
-        bool LoadAlteredState();
-
-    protected:
-        void RecordLocalState( State* iState );
-        bool LoadState( State* iState );
+        void RecordState( eSnapshotState iStateType );
+        bool LoadState( eSnapshotState iStateType );
 
     protected:
         FInbetweenerRoute* mRoute;
@@ -322,21 +321,31 @@ class ODYSSEYVECTOR_API FSnapshotStep
 
 class ODYSSEYVECTOR_API FSnapshotRoute
 {
+    struct State
+    {
+        bool inited;
+        std::vector<FSnapshotTrajectory> trajectorySnapshotBuffer;
+        std::vector<FSnapshotStep> stepSnapshotBuffer;
+
+        State() { inited = false; }
+    };
+
     public:
         virtual ~FSnapshotRoute();
         FSnapshotRoute( FInbetweenerRoute* iRoute
                       , uint64 iSnapshotflags
-                      , uint64 iTrajectorySnapshotflags );
+                      , uint64 iTrajectorySnapshotFlags
+                      , eSnapshotState iState );
 
-        void RecordAlteredState();
-        bool LoadInitialState();
-        bool LoadAlteredState();
+        bool LoadState( eSnapshotState iStateType );
+        void RecordState( eSnapshotState iStateType );
 
     protected:
         FInbetweenerRoute* mRoute;
         uint64 mSnapshotFlags;
-        std::vector<FSnapshotTrajectory> mTrajectorySnapshotBuffer;
-        std::vector<FSnapshotStep> mStepSnapshotBuffer;
+        uint64 mTrajectorySnapshotFlags;
+        State mInitialState;
+        State mAlteredState;
 };
 
 class ODYSSEYVECTOR_API FSnapshotLayout
@@ -347,21 +356,17 @@ class ODYSSEYVECTOR_API FSnapshotLayout
         std::vector<FInbetweenerBreakdown*> breakdownArray;
         std::vector<uint32> targetBuffer;
 
+        ~State();
         State() { inited = false; }
     };
 
     public:
         ~FSnapshotLayout();
-        FSnapshotLayout();
-        FSnapshotLayout( FOdysseyVectorTagInbetweener* iInbetweenerTag );
+        FSnapshotLayout( FOdysseyVectorTagInbetweener* iInbetweenerTag
+                       , eSnapshotState iState );
 
-        void RecordAlteredState();
-        bool LoadInitialState();
-        bool LoadAlteredState();
-
-    protected:
-        void RecordLocalState( State* iState );
-        bool LoadState( State* iState );
+        void RecordState( eSnapshotState iStateType );
+        bool LoadState( eSnapshotState iStateType );
 
     protected:
         FOdysseyVectorTagInbetweener* mInbetweenerTag;
@@ -382,19 +387,14 @@ class ODYSSEYVECTOR_API FSnapshotDynamics
     public:
         ~FSnapshotDynamics();
         FSnapshotDynamics();
-        FSnapshotDynamics( FOdysseyVectorTagInbetweener* iInbetweenerTag );
+        FSnapshotDynamics( FOdysseyVectorTagInbetweener* iInbetweenerTag
+                         , eSnapshotState iState );
 
-        void RecordAlteredState();
-        bool LoadInitialState();
-        bool LoadAlteredState();
-
-    protected:
-        void RecordLocalState( State* iState );
-        bool LoadState( State* iState );
+        void RecordState( eSnapshotState iStateType );
+        bool LoadState( eSnapshotState iStateType );
 
     protected:
         FOdysseyVectorTagInbetweener* mInbetweenerTag;
-        bool bApplied;
         State mInitialState;
         State mAlteredState;
 };
@@ -414,15 +414,11 @@ class ODYSSEYVECTOR_API FSnapshotInbetweenerChart
         ~FSnapshotInbetweenerChart();
         FSnapshotInbetweenerChart();
         FSnapshotInbetweenerChart( FInbetweenerChart* iChart
-                                 , uint64 iSnapshotFlags );
+                                 , uint64 iSnapshotFlags
+                                 , eSnapshotState iState );
 
-        void RecordAlteredState();
-        bool LoadInitialState();
-        bool LoadAlteredState();
-
-    protected:
-        void RecordLocalState( State* iState );
-        bool LoadState( State* iState );
+        void RecordState( eSnapshotState iStateType );
+        bool LoadState( eSnapshotState iStateType );
 
     protected:
         FInbetweenerChart* mChart;
@@ -443,6 +439,7 @@ class ODYSSEYVECTOR_API FSnapshotInbetweenerBreakdown
         double scalingX;
         double scalingY;
         bool targetVisibility;
+        std::vector<FSnapshotInbetweenerChart> chartSnapshotBuffer;
 
         State() { inited = false; }
     };
@@ -450,20 +447,15 @@ class ODYSSEYVECTOR_API FSnapshotInbetweenerBreakdown
     public:
         virtual ~FSnapshotInbetweenerBreakdown();
         FSnapshotInbetweenerBreakdown( FInbetweenerBreakdown* iBreakdown
-                                     , uint64 iSnapshotFlags );
+                                     , uint64 iSnapshotFlags
+                                     , eSnapshotState iState );
 
-        void RecordAlteredState();
-        bool LoadInitialState();
-        bool LoadAlteredState();
-
-    protected:
-        void RecordLocalState( State* iState );
-        bool LoadState( State* iState );
+        void RecordState( eSnapshotState iStateType );
+        bool LoadState( eSnapshotState iStateType );
 
     protected:
         FInbetweenerBreakdown* mBreakdown;
         uint64 mSnapshotFlags;
-        FSnapshotInbetweenerChart mChartSnapshot;
         State mInitialState;
         State mAlteredState;
 };
@@ -488,6 +480,10 @@ class ODYSSEYVECTOR_API FSnapshotTagInbetweener
         bool square;
         bool withThickness;
         bool constantWidth;
+        std::vector<FSnapshotLayout> layoutSnapshotBuffer;
+        std::vector<FSnapshotDynamics> dynamicsSnapshotBuffer;
+        std::vector<FSnapshotInbetweenerBreakdown> inbetweenerBreakdownSnapshotBuffer;
+        std::vector<FSnapshotRoute> routeSnapshotBuffer;
 
         State() { inited = false; }
     };
@@ -498,23 +494,18 @@ class ODYSSEYVECTOR_API FSnapshotTagInbetweener
                                , uint64 iSnapshotFlags
                                , uint64 iBreakdownSnapshotFlags
                                , uint64 iRouteSnapshotFlags
-                               , uint64 iTrajectorySnapshotFlags );
+                               , uint64 iTrajectorySnapshotFlags
+                               , eSnapshotState iStateType );
 
-        void RecordAlteredState();
-        bool LoadInitialState();
-        bool LoadAlteredState();
-
-    protected:
-        void RecordLocalState( State* iState );
-        bool LoadLocalState( State* iState );
+        void RecordState( eSnapshotState iStateType );
+        bool LoadState( eSnapshotState iStateType );
 
     protected:
         uint64 mSnapshotFlags;
+        uint64 mBreakdownSnapshotFlags;
+        uint64 mRouteSnapshotFlags;
+        uint64 mTrajectorySnapshotFlags;
         FOdysseyVectorTagInbetweener* mInbetweenerTag;
-        FSnapshotLayout mLayoutSnapshot;
-        FSnapshotDynamics mDynamicsSnapshot;
-        std::vector<FSnapshotInbetweenerBreakdown> mInbetweenerBreakdownSnapshotBuffer;
-        std::vector<FSnapshotRoute> mRouteSnapshotBuffer;
         State mInitialState;
         State mAlteredState;
 };

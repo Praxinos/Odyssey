@@ -549,6 +549,8 @@ FOdysseyVectorTagInbetweener::ResetLayout( bool iFreeMemNow )
     mBreakdownList.remove_if( [ this
                               , iFreeMemNow ]( FInbetweenerBreakdown* breakdown )
                               {
+                                  breakdown->SetInbetweenerTag( nullptr );
+
                                   if( iFreeMemNow )
                                   {
                                       delete breakdown;

@@ -33,7 +33,7 @@ FOdysseyPainterEditorVectorMatchingToolHUD::Reset()
 
     if( hudFlags & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
     {
-        UpdateSelectionInbetweenMode();
+        UpdateSelectionInbetweenMode( true );
     }
 }
 
@@ -57,60 +57,22 @@ FOdysseyPainterEditorVectorMatchingToolHUD::DrawHUD( const FOdysseyHUD::FDrawHUD
 
     if( hudFlags & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
     {
-        // Caution: even though here we pick a tag that is displayed in the scene,
-        // it does not mean it belongs to an object that belongs to the scene.
-        for( FOdysseyVectorTag* tag : sharedEnv->GetSharedTagList() )
+        for( FInbetweenerBreakdown* breakdown : mSelectedBreakdownList )
         {
-            if( ( tag->GetClass() == FOdysseyVectorTagInbetweener::StaticClass() )
-             && ( tag->GetOwner()->IsSelected() ) )
+            FOdysseyVectorTagInbetweener* inbetweenerTag = breakdown->GetInbetweenerTag();
+            // Caution: even though here we pick a tag that is displayed in the scene,
+            // it does not mean it belongs to an object that belongs to the scene.
+            FOdysseyVectorGroupPaint* inbetweenerTagScene = inbetweenerTag->GetOwner()->GetScene();
+            uint32 currentCellIndex = mScene->GetCell()->GetIndex();
+
+            if( breakdown->GetTargetCellIndex() == currentCellIndex )
             {
-                FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
-                FOdysseyVectorGroupPaint* inbetweenerTagScene = inbetweenerTag->GetOwner()->GetScene();
-                uint32 currentCellIndex = mScene->GetCell()->GetIndex();
-
-                inbetweenerTag->LockDrawing();
-
-                for( FInbetweenerBreakdown* breakdown : inbetweenerTag->GetBreakdownList() )
-                {
-                    if( breakdown->GetTargetCellIndex() == currentCellIndex )
-                    {
-                        if( mMatchingTool->ShowInbetweens )
-                        {
-                            FInbetweenerBreakdown* nextBreakdown = breakdown->GetNextBreakdown();
-
-                            DrawBreakdown( iParams
-                                         , breakdown
-                                         , FLinearColor( 0.5f, 0.5f, 0.5f, 1.0f )
-                                         , FLinearColor( 1.0f, 0.5f, 0.5f, 1.0f )
-                                         , FOdysseyVectorHUD::HUD_BREAKDOWN_INBETWEEN /*| HUD_INBETWEEN_FADEFROMTARGET*/ );
-
-                            if( nextBreakdown )
-                            {
-                                DrawBreakdown( iParams
-                                             , nextBreakdown
-                                             , FLinearColor( 0.5f, 0.5f, 0.5f, 1.0f )
-                                             , FLinearColor( 1.0f, 0.5f, 0.5f, 1.0f )
-                                             , FOdysseyVectorHUD::HUD_BREAKDOWN_INBETWEEN /*| HUD_INBETWEEN_FADEFROMSOURCE*/ );
-                            }
-                        }
-
-                        DrawBreakdown( iParams
-                                     , breakdown
-                                     , FLinearColor( 0.5f, 0.5f, 0.5f, 1.0f )
-                                     , FLinearColor( 1.0f, 0.5f, 0.5f, 1.0f )
-                                     , FOdysseyVectorHUD::HUD_BREAKDOWN_TARGET_GRID
-                                     | gridDotted
-                                     | FOdysseyVectorHUD::HUD_BREAKDOWN_TARGET );
-
-                        /*DrawTargetGrid ( iBLContext
-                                       , breakdown
-                                       , fgColor
-                                       , bgColor
-                                       , hcColor );*/
-                    }
-                }
-
-                inbetweenerTag->UnlockDrawing();
+                DrawInbetweens( iParams
+                              , breakdown
+                              , mMatchingTool->ShowInbetweens
+                              , 0
+                              , FOdysseyVectorHUD::HUD_BREAKDOWN_TARGET_GRID
+                              | gridDotted );
             }
         }
     }

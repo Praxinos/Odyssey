@@ -63,7 +63,7 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::Reset()
 
     if( hudFlags & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
     {
-        UpdateSelectionInbetweenMode();
+        UpdateSelectionInbetweenMode( false );
     }
 }
 
@@ -459,46 +459,18 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawHUD( const FOdysseyHUD::FDrawH
 
     if( hudFlags & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
     {
+        for( FInbetweenerBreakdown* breakdown : mSelectedBreakdownList )
+        {
+            DrawInbetweens( iParams
+                          , breakdown
+                          , mTrajectoryTool->ShowInbetweens
+                          , FOdysseyVectorHUD::HUD_BREAKDOWN_SOURCE_GRID
+                          , 0 );
+        }
+
         for( FOdysseyVectorTagInbetweener* inbetweenerTag : mSelectedInbetweenerTagList )
         {
             inbetweenerTag->LockDrawing();
-
-            for( FInbetweenerBreakdown* breakdown : inbetweenerTag->GetBreakdownList() )
-            {
-                FInbetweenerBreakdown* nextBreakdown = breakdown->GetNextBreakdown();
-                FInbetweenerBreakdown* prevBreakdown = breakdown->GetPrevBreakdown();
-
-                DrawBreakdown( iParams
-                             , breakdown
-                             , FLinearColor( 0.5f, 0.5f, 0.5f, 1.0f )
-                             , FLinearColor( 1.0f, 0.5f, 0.5f, 1.0f )
-                             , ( FOdysseyVectorHUD::HUD_BREAKDOWN_SOURCE
-                             | ( ( prevBreakdown == nullptr ) ? gridFlags : 0 ) ) );
-
-                if( mTrajectoryTool->ShowInbetweens )
-                {
-                    DrawBreakdown( iParams
-                                 , breakdown
-                                 , FLinearColor( 0.5f, 0.5f, 0.5f, 1.0f )
-                                 , FLinearColor( 1.0f, 0.5f, 0.5f, 1.0f )
-                                 , FOdysseyVectorHUD::HUD_BREAKDOWN_INBETWEEN /*| HUD_INBETWEEN_FADEFROMTARGET*/ );
-
-                    if( nextBreakdown )
-                    {
-                        DrawBreakdown( iParams
-                                     , nextBreakdown
-                                     , FLinearColor( 0.5f, 0.5f, 0.5f, 1.0f )
-                                     , FLinearColor( 1.0f, 0.5f, 0.5f, 1.0f )
-                                     , FOdysseyVectorHUD::HUD_BREAKDOWN_INBETWEEN /*| HUD_INBETWEEN_FADEFROMSOURCE*/ );
-                    }
-                }
-
-                DrawBreakdown( iParams
-                             , breakdown
-                             , FLinearColor( 0.5f, 0.5f, 0.5f, 1.0f )
-                             , FLinearColor( 1.0f, 0.5f, 0.5f, 1.0f )
-                             , FOdysseyVectorHUD::HUD_BREAKDOWN_TARGET );
-            }
 
             for( FInbetweenerRoute* route : inbetweenerTag->GetRouteList() )
             {

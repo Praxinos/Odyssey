@@ -340,7 +340,7 @@ FOdysseyPainterEditorVectorTransformToolHUD::Reset( )
 
     if( hudFlags & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
     {
-        UpdateSelectionInbetweenMode();
+        UpdateSelectionInbetweenMode( true );
     }
 
     UpdateSelectionBox( mTransformTool->World, mTransformTool->GetEditor()->GetVectorHUDFlags() );
@@ -373,101 +373,11 @@ FOdysseyPainterEditorVectorTransformToolHUD::DrawHUD( const FOdysseyHUD::FDrawHU
     {
         for( FInbetweenerBreakdown* breakdown : mSelectedBreakdownList )
         {
-            breakdown->GetInbetweenerTag()->LockDrawing();
-
-            if( mTransformTool->ShowInbetweens == eTransformShowInbetweens::All )
-            {
-                for( FInbetweenerBreakdown* otherBreakdown : breakdown->GetInbetweenerTag()->GetBreakdownList() )
-                {
-                    DrawBreakdown( iParams
-                                 , otherBreakdown
-                                 , FLinearColor( 0.5f, 0.5f, 0.5f, 1.0f )
-                                 , FLinearColor( 0.5f, 0.5f, 0.5f, 1.0f )
-                                 , FOdysseyVectorHUD::HUD_BREAKDOWN_SOURCE
-                                 | FOdysseyVectorHUD::HUD_BREAKDOWN_INBETWEEN
-                                 | FOdysseyVectorHUD::HUD_BREAKDOWN_TARGET );
-                }
-
-                DrawBreakdown( iParams
-                                 , breakdown
-                                 , FLinearColor( 0.5f, 0.5f, 0.5f, 1.0f )
-                                 , FLinearColor( 1.0f, 0.5f, 0.5f, 1.0f )
-                                 , FOdysseyVectorHUD::HUD_BREAKDOWN_INBETWEEN
-                                 | FOdysseyVectorHUD::HUD_BREAKDOWN_TARGET );
-            }
-
-            if( mTransformTool->ShowInbetweens == eTransformShowInbetweens::Surrounding )
-            {
-                FInbetweenerBreakdown* nextBreakdown = breakdown->GetNextBreakdown();
-
-                if( nextBreakdown )
-                {
-                    DrawBreakdown( iParams
-                                 , nextBreakdown
-                                 , FLinearColor( 0.5f, 0.5f, 0.5f, 1.0f )
-                                 , FLinearColor( 0.5f, 0.5f, 0.5f, 1.0f )
-                                 , FOdysseyVectorHUD::HUD_BREAKDOWN_INBETWEEN );
-                }
-
-                DrawBreakdown( iParams
-                             , breakdown
-                             , FLinearColor( 0.5f, 0.5f, 0.5f, 1.0f )
-                             , FLinearColor( 1.0f, 0.5f, 0.5f, 1.0f )
-                             , FOdysseyVectorHUD::HUD_BREAKDOWN_INBETWEEN
-                             | FOdysseyVectorHUD::HUD_BREAKDOWN_TARGET );
-
-            }
-
-            if( mTransformTool->ShowInbetweens == eTransformShowInbetweens::SourceOnly )
-            {
-                FInbetweenerBreakdown* firstBreakdown = breakdown->GetInbetweenerTag()->GetBreakdownList().front();
-
-                DrawBreakdown( iParams
-                             , firstBreakdown
-                             , FLinearColor( 0.5f, 0.5f, 0.5f, 1.0f )
-                             , FLinearColor( 1.0f, 0.5f, 0.5f, 1.0f )
-                             , FOdysseyVectorHUD::HUD_BREAKDOWN_SOURCE );
-
-                DrawBreakdown( iParams
-                             , breakdown
-                             , FLinearColor( 0.5f, 0.5f, 0.5f, 1.0f )
-                             , FLinearColor( 1.0f, 0.5f, 0.5f, 1.0f )
-                             , FOdysseyVectorHUD::HUD_BREAKDOWN_TARGET );
-            }
-
-            if( mTransformTool->ShowInbetweens == eTransformShowInbetweens::SourceAndBreakdownsOnly )
-            {
-                for( FInbetweenerBreakdown* otherBreakdown : breakdown->GetInbetweenerTag()->GetBreakdownList() )
-                {
-                    if( breakdown != otherBreakdown )
-                    {
-                        DrawBreakdown( iParams
-                                     , otherBreakdown
-                                     , FLinearColor( 0.5f, 0.5f, 0.5f, 1.0f )
-                                     , FLinearColor( 0.5f, 0.5f, 0.5f, 1.0f )
-                                     , FOdysseyVectorHUD::HUD_BREAKDOWN_SOURCE
-                                     | FOdysseyVectorHUD::HUD_BREAKDOWN_TARGET );
-                    }
-                }
-
-                DrawBreakdown( iParams
-                                 , breakdown
-                                 , FLinearColor( 0.5f, 0.5f, 0.5f, 1.0f )
-                                 , FLinearColor( 1.0f, 0.5f, 0.5f, 1.0f )
-                                 , FOdysseyVectorHUD::HUD_BREAKDOWN_SOURCE
-                                 | FOdysseyVectorHUD::HUD_BREAKDOWN_TARGET );
-            }
-
-            if( mTransformTool->ShowInbetweens == eTransformShowInbetweens::None )
-            {
-                DrawBreakdown( iParams
-                             , breakdown
-                             , FLinearColor( 0.5f, 0.5f, 0.5f, 1.0f )
-                             , FLinearColor( 1.0f, 0.5f, 0.5f, 1.0f )
-                             , FOdysseyVectorHUD::HUD_BREAKDOWN_TARGET );
-            }
-
-            breakdown->GetInbetweenerTag()->UnlockDrawing();
+            DrawInbetweens( iParams
+                          , breakdown
+                          , mTransformTool->ShowInbetweens
+                          , 0
+                          , 0 );
         }
     }
 

@@ -29,6 +29,16 @@ enum class eMouseEventName : uint8
     MouseUp    = 3
 };
 
+UENUM()
+enum class eShowInbetweens : uint8
+{
+    None                    = 0 UMETA( ToolTip = "" ),
+    Surrounding             = 1 UMETA( ToolTip = "" ),
+    SourceAndBreakdownsOnly = 2 UMETA( ToolTip = "Source and breakdowns only" ),
+    SourceOnly              = 3 UMETA( ToolTip = "Source only" ),
+    All                     = 4 UMETA( ToolTip = "" )
+};
+
 UCLASS(Abstract, HideDropdown)
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdysseyPainterEditorTool
 {
@@ -199,6 +209,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         // we need the focus on the viewport for keyboard
         // and some tools need to know the viewport size
         TWeakPtr<SOdysseyViewport> mViewport;
+        FOdysseyVectorCell* mHUDCell;
 
     public:
         //UPROPERTY( EditAnywhere, Category=Behavior )

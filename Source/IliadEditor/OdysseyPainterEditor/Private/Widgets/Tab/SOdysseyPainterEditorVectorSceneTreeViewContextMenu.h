@@ -9,6 +9,7 @@
 
 class SOdysseyPainterEditorVectorSceneTreeView;
 class FOdysseyVectorGroupPaint;
+class FOdysseyPainterEditor;
 
 class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorSceneTreeViewContextMenu
 {
@@ -19,5 +20,6 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorSceneTreeViewContextMe
     protected:
         static bool CanAddInbetweener( FOdysseyVectorGroupPaint* iScene );
         static bool CanAlterInbetweener( FOdysseyVectorGroupPaint* iScene );
+        static void Group( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iPaintGroup );
 
 };

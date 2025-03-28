@@ -258,7 +258,7 @@ SOdysseyPainterEditorVectorSceneTreeView::Update( FOdysseyVectorGroupPaint* iSce
                     int32 sourceCellIndex = inbetweenerTag->GetSourceCellIndex();
                     int32 targetCellIndex = inbetweenerTag->GetTargetCellIndex();
 
-                    if ((sceneCellIndex > sourceCellIndex) && ( sceneCellIndex < targetCellIndex ) )
+                    if ((sceneCellIndex > sourceCellIndex) && ( sceneCellIndex <= targetCellIndex ) )
                     {
                         FOdysseyVectorObject* owner = inbetweenerTag->GetOwner();
 

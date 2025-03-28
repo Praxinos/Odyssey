@@ -28,7 +28,8 @@ FOdysseyVectorUndoTagInbetweenerChartAlter::FOdysseyVectorUndoTagInbetweenerChar
                                               , 0
                                               , FSnapshotFlags::Breakdown::CHART
                                               , 0
-                                              , 0 );
+                                              , 0
+                                              , eSnapshotState::Initial );
 }
 
 FOdysseyVectorUndoTagInbetweenerChartAlter::FOdysseyVectorUndoTagInbetweenerChartAlter( FOdysseyVectorGroupPaint* iScene
@@ -44,7 +45,8 @@ FOdysseyVectorUndoTagInbetweenerChartAlter::FOdysseyVectorUndoTagInbetweenerChar
                                                   , 0
                                                   , FSnapshotFlags::Breakdown::CHART
                                                   , 0
-                                                  , 0 );
+                                                  , 0
+                                                  , eSnapshotState::Initial );
     }
 }
 
@@ -63,7 +65,8 @@ FOdysseyVectorUndoTagInbetweenerChartAlter::FOdysseyVectorUndoTagInbetweenerChar
                                                   , 0
                                                   , FSnapshotFlags::Breakdown::CHART
                                                   , 0
-                                                  , 0 );
+                                                  , 0
+                                                  , eSnapshotState::Initial );
     }
 }
 
@@ -75,7 +78,7 @@ FOdysseyVectorUndoTagInbetweenerChartAlter::Apply( UObject* iIgnored )
 
     for( FSnapshotTagInbetweener& inbetweenerTagSnapshot : mInbetweenerTagSnapshotBuffer )
     {
-        inbetweenerTagSnapshot.LoadAlteredState();
+        inbetweenerTagSnapshot.LoadState( eSnapshotState::Altered );
     }
 
     // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
@@ -90,8 +93,8 @@ FOdysseyVectorUndoTagInbetweenerChartAlter::Revert( UObject* iIgnored )
 
     for( FSnapshotTagInbetweener& inbetweenerTagSnapshot : mInbetweenerTagSnapshotBuffer )
     {
-        inbetweenerTagSnapshot.RecordAlteredState();
-        inbetweenerTagSnapshot.LoadInitialState();
+        inbetweenerTagSnapshot.RecordState( eSnapshotState::Altered );
+        inbetweenerTagSnapshot.LoadState( eSnapshotState::Initial );
     }
 
     // Update vector scenes and call callbacks if any (for refreshing GUI e.g)

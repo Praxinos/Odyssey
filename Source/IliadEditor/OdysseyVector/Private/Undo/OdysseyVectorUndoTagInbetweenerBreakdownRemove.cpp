@@ -45,7 +45,8 @@ FOdysseyVectorUndoTagInbetweenerBreakdownRemove::FOdysseyVectorUndoTagInbetweene
                                                   , ( FSnapshotFlags::Route::TRAJECTORIES
                                                     | FSnapshotFlags::Route::STEPS )
                                                   , ( FSnapshotFlags::Trajectory::BEZIER
-                                                    | FSnapshotFlags::Trajectory::WAYPOINTS ) );
+                                                    | FSnapshotFlags::Trajectory::WAYPOINTS )
+                                                  , eSnapshotState::Initial );
     }
 }
 
@@ -57,7 +58,7 @@ FOdysseyVectorUndoTagInbetweenerBreakdownRemove::Apply( UObject* iIgnored )
 
     for( FSnapshotTagInbetweener& inbetweenerTagSnapshot : mInbetweenerTagSnapshotBuffer )
     {
-        inbetweenerTagSnapshot.LoadAlteredState();
+        inbetweenerTagSnapshot.LoadState( eSnapshotState::Altered );
     }
 
     // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
@@ -72,8 +73,8 @@ FOdysseyVectorUndoTagInbetweenerBreakdownRemove::Revert( UObject* iIgnored )
 
     for( FSnapshotTagInbetweener& inbetweenerTagSnapshot : mInbetweenerTagSnapshotBuffer )
     {
-        inbetweenerTagSnapshot.RecordAlteredState();
-        inbetweenerTagSnapshot.LoadInitialState();
+        inbetweenerTagSnapshot.RecordState( eSnapshotState::Altered );
+        inbetweenerTagSnapshot.LoadState( eSnapshotState::Initial );
     }
 
     // Update vector scenes and call callbacks if any (for refreshing GUI e.g)

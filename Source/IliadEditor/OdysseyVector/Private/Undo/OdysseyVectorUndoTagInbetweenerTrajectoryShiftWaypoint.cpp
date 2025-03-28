@@ -24,7 +24,9 @@ FOdysseyVectorUndoTagInbetweenerTrajectoryShiftWaypoint::FOdysseyVectorUndoTagIn
                                                                                                                 , uint64 iReturnFlags )
     : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
 {
-    mTrajectorySnapshotBuffer.emplace_back( iTrajectory, FSnapshotFlags::Trajectory::WAYPOINTS );
+    mTrajectorySnapshotBuffer.emplace_back( iTrajectory
+                                          , FSnapshotFlags::Trajectory::WAYPOINTS
+                                          , eSnapshotState::Initial );
 }
 
 void
@@ -35,7 +37,7 @@ FOdysseyVectorUndoTagInbetweenerTrajectoryShiftWaypoint::Apply( UObject* iIgnore
 
     for( FSnapshotTrajectory& trajectorySnapshot : mTrajectorySnapshotBuffer )
     {
-        trajectorySnapshot.LoadAlteredState();
+        trajectorySnapshot.LoadState( eSnapshotState::Altered );
     }
 
     // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
@@ -50,8 +52,8 @@ FOdysseyVectorUndoTagInbetweenerTrajectoryShiftWaypoint::Revert( UObject* iIgnor
 
     for( FSnapshotTrajectory& trajectorySnapshot : mTrajectorySnapshotBuffer )
     {
-        trajectorySnapshot.RecordAlteredState();
-        trajectorySnapshot.LoadInitialState();
+        trajectorySnapshot.RecordState( eSnapshotState::Altered );
+        trajectorySnapshot.LoadState( eSnapshotState::Initial );
     }
 
     // Update vector scenes and call callbacks if any (for refreshing GUI e.g)

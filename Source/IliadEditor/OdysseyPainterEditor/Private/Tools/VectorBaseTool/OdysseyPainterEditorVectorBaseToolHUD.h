@@ -132,6 +132,12 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorBaseToolHUD : public F
         virtual void SetCursorPosition( double iX, double iY );
 
     protected:
+        void DrawInbetweens( const FOdysseyHUD::FDrawHUDParams& iParams
+                           , FInbetweenerBreakdown* iBreakdown
+                           , eShowInbetweens ShowInbetweens
+                           , uint64 iSourceExtraHUDFlags
+                           , uint64 iTargetExtraHUDFlags );
+
         void DrawSectionArray( const FOdysseyHUD::FDrawHUDParams& iParams
                              , std::vector<FOdysseyVectorSection*>& isectionArray
                              , const FLinearColor& fgColor
@@ -289,7 +295,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorBaseToolHUD : public F
                              , const FLinearColor& iBackgroundColor
                              , const FLinearColor& iHighlightColor
                              , uint64 iHUDFlags );
-        void UpdateSelectionInbetweenMode();
+        void UpdateSelectionInbetweenMode( bool iOnTargetCellOnly );
         void DrawText( BLContext* iBLContext
                      , const BLFont& iBLFont
                      , const BLRgba32& iForegroundColor

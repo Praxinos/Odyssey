@@ -136,7 +136,8 @@ UOdysseyPainterEditorVectorTagInbetweenerView::PropertyChanged( const FName& iPr
                                                               , const FName& iMemberPropertyName
                                                               , const FName& iCategory)
 {
-    static bool warningGridDeformationResetShown = false;
+    static bool divisionWarningGridDeformationResetShown = false;
+    static bool squareWarningGridDeformationResetShown = false;
 
     if( SelectionHasRoutes() )
     {
@@ -186,12 +187,28 @@ UOdysseyPainterEditorVectorTagInbetweenerView::PropertyChanged( const FName& iPr
     }
 
     // popup will display only once
-    if( warningGridDeformationResetShown == false )
+    if( divisionWarningGridDeformationResetShown == false )
     {
         if( ( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, DivisionX ) )
           ||( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, DivisionY ) )
-          ||( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, Divisions ) )
-          ||( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, Square    ) ) )
+          ||( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, Divisions ) ) )        {
+            FText dialogText = FText::FromString( TEXT ( WARNING_GRID_DEFORMATION_RESET ) );
+
+            if( FMessageDialog::Open( EAppMsgType::OkCancel, dialogText ) == EAppReturnType::Cancel )
+            {
+                // restore displayed values
+                ImportParam();
+
+                return;
+            }
+        }
+
+        divisionWarningGridDeformationResetShown = true;
+    }
+
+    if( squareWarningGridDeformationResetShown == false )
+    {
+        if( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, Square ) )
         {
             FText dialogText = FText::FromString( TEXT ( WARNING_GRID_DEFORMATION_RESET ) );
 
@@ -204,7 +221,7 @@ UOdysseyPainterEditorVectorTagInbetweenerView::PropertyChanged( const FName& iPr
             }
         }
 
-        warningGridDeformationResetShown = true;
+        squareWarningGridDeformationResetShown = true;
     }
 
     for( FOdysseyVectorTagInbetweener* selectedInbetweenerTag : mSelectedInbetweenerTagArray )
@@ -309,12 +326,9 @@ UOdysseyPainterEditorVectorTagInbetweenerView::MakeUndo( const FName& iPropertyN
                                                                     , mSelectedInbetweenerTagArray
                                                                     , notificationFlags );
 
-    if( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, DivisionX ) )
-        return new FOdysseyVectorUndoTagInbetweenerGridSize( mScene
-                                                           , mSelectedInbetweenerTagArray
-                                                           , notificationFlags );
-
-    if( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, DivisionY ) )
+    if( ( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, DivisionX ) )
+      ||( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, DivisionY ) )
+      ||( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, Divisions ) ) )
         return new FOdysseyVectorUndoTagInbetweenerGridSize( mScene
                                                            , mSelectedInbetweenerTagArray
                                                            , notificationFlags );

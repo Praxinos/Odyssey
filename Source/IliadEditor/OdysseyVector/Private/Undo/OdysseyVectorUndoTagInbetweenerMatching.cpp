@@ -29,7 +29,9 @@ FOdysseyVectorUndoTagInbetweenerMatching::FOdysseyVectorUndoTagInbetweenerMatchi
 
     for( FInbetweenerBreakdown* breakdown : iBreakdownList )
     {
-        mBreakdownSnapshotBuffer.emplace_back( breakdown, FSnapshotFlags::Breakdown::GRIDGEOMETRY );
+        mBreakdownSnapshotBuffer.emplace_back( breakdown
+                                             , FSnapshotFlags::Breakdown::GRIDGEOMETRY
+                                             , eSnapshotState::Initial );
     }
 }
 
@@ -51,7 +53,9 @@ FOdysseyVectorUndoTagInbetweenerMatching::FOdysseyVectorUndoTagInbetweenerMatchi
     {
         for( FInbetweenerBreakdown* breakdown : inbetweenerTag->GetBreakdownList() )
         {
-            mBreakdownSnapshotBuffer.emplace_back( breakdown, FSnapshotFlags::Breakdown::GRIDGEOMETRY );
+            mBreakdownSnapshotBuffer.emplace_back( breakdown
+                                                 , FSnapshotFlags::Breakdown::GRIDGEOMETRY
+                                                 , eSnapshotState::Initial );
         }
     }
 }
@@ -64,7 +68,7 @@ FOdysseyVectorUndoTagInbetweenerMatching::Apply( UObject* iIgnored )
 
     for( FSnapshotInbetweenerBreakdown& breakdownSnapshot : mBreakdownSnapshotBuffer )
     {
-        breakdownSnapshot.LoadAlteredState();
+        breakdownSnapshot.LoadState( eSnapshotState::Altered );
     }
 
     // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
@@ -79,8 +83,8 @@ FOdysseyVectorUndoTagInbetweenerMatching::Revert( UObject* iIgnored )
 
     for( FSnapshotInbetweenerBreakdown& breakdownSnapshot : mBreakdownSnapshotBuffer )
     {
-        breakdownSnapshot.RecordAlteredState();
-        breakdownSnapshot.LoadInitialState();
+        breakdownSnapshot.RecordState( eSnapshotState::Altered );
+        breakdownSnapshot.LoadState( eSnapshotState::Initial );
     }
 
     // Update vector scenes and call callbacks if any (for refreshing GUI e.g)

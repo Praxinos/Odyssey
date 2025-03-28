@@ -46,6 +46,7 @@ UOdysseyPainterEditorVectorBaseTool::UOdysseyPainterEditorVectorBaseTool( TShare
     , mHasContextMenu(true)
     , mAutoCreateMedia( iAutoCreateMedia )
     , bMouseEventViaHUD( iMouseEventViaHUD )
+    , mHUDCell( nullptr )
 {
 }
 
@@ -242,6 +243,8 @@ void
 UOdysseyPainterEditorVectorBaseTool::Unload()
 {
     bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+    FOdysseyVectorGroupPaint* vectorScene = nullptr;
+    uint64 notificationFlags = 0;
 
     UOdysseyPainterEditorTool::Unload();
 
@@ -250,24 +253,28 @@ UOdysseyPainterEditorVectorBaseTool::Unload()
         //Should be done in UnloadVector directly
         TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
 
+
         if( mediaVectors.Num() > 0 )
         {
-            FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
-            uint64 notificationFlags;
-
+            vectorScene = mediaVectors[0]->GetScene();
             notificationFlags = UnloadVector( vectorScene );
-
-            FOdysseyVectorEngine::Notify( vectorScene, notificationFlags );
-
-            if( mBaseHUD )
-            {
-                mBaseHUD->Unload();
-                // 2D HUD
-                vectorScene->GetCell()->RemoveHUD( mBaseHUD.Get() );
-                // 3D HUD
-                mHUD->RemoveElement( mBaseHUD );
-            }
         }
+    }
+
+    FOdysseyVectorEngine::Notify( vectorScene, notificationFlags );
+
+    if( mBaseHUD )
+    {
+        mBaseHUD->Unload();
+        // 2D HUD
+        // Note: Unload() might be call on a frame without a cell, thus vectorScene would be NULL
+        // and we would not be able to unload the HUD from FOdysseyVectorCell:mHUDList
+        if( mHUDCell )
+        {
+            mHUDCell->RemoveHUD( mBaseHUD.Get() );
+        }
+        // 3D HUD
+        mHUD->RemoveElement( mBaseHUD );
     }
 }
 
@@ -287,6 +294,8 @@ UOdysseyPainterEditorVectorBaseTool::Load()
 
     UOdysseyPainterEditorTool::Load();
 
+    mHUDCell = nullptr;
+
     if( hasVector )
     {
         // It would be better if this is done in OnMouseDown()
@@ -304,7 +313,10 @@ UOdysseyPainterEditorVectorBaseTool::Load()
                 mBaseHUD->SetScene( vectorScene );
                 mBaseHUD->Load();
                 // 2D HUD
-                vectorScene->GetCell()->AddHUD( mBaseHUD.Get() );
+                // Note: Unload() might be call on a frame without a cell, thus vectorScene would be NULL
+                // and we would not be able to unload the HUD from FOdysseyVectorCell:mHUDList
+                mHUDCell = vectorScene->GetCell();
+                mHUDCell->AddHUD( mBaseHUD.Get() );
                 // 3D HUD
                 mHUD->AddElement( mBaseHUD );
 
@@ -1025,6 +1037,30 @@ UOdysseyPainterEditorVectorBaseTool::SetVectorEditionFlags( uint64 iViewMode )
     if( mediaVectors.Num() )
     {
         FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
+
+        // select a object with an inbetweener tag if none are selected
+        if( iViewMode & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
+        {
+            FOdysseyVectorTag* selectedTag = vectorScene->GetLayer()->GetSelectedTagByClassType( FOdysseyVectorTagInbetweener::StaticClass() );
+
+            if ( selectedTag == nullptr )
+            {
+                FOdysseyVectorTag* lastTag = nullptr;
+
+                for( FOdysseyVectorTag* tag : vectorScene->GetLayer()->GetSharedTagList() )
+                {
+                    if( tag->GetClass() == FOdysseyVectorTagInbetweener::StaticClass() )
+                    {
+                        lastTag = tag;
+                    }
+                }
+
+                if( lastTag )
+                {
+                    lastTag->GetOwner()->GetCell()->SelectObject( lastTag->GetOwner() );
+                }
+            }
+        }
 
         FOdysseyVectorEngine::Notify( vectorScene, FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
                                                  | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW

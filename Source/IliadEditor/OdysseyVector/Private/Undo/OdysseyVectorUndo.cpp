@@ -56,12 +56,14 @@ FSnapshotTrajectory::~FSnapshotTrajectory()
 {
 }
 
-FSnapshotTrajectory::FSnapshotTrajectory( FInbetweenerTrajectory* iTrajectory, uint64 iSnapshotFlags )
+FSnapshotTrajectory::FSnapshotTrajectory( FInbetweenerTrajectory* iTrajectory
+                                        , uint64 iSnapshotFlags
+                                        , eSnapshotState iState )
     : mSnapshotFlags( iSnapshotFlags )
     , mRoute( iTrajectory->GetRoute() )
     , mIndex( iTrajectory - &iTrajectory->GetRoute()->GetTrajectoryBuffer()[0] )
 {
-    RecordLocalState( &mInitialState );
+    RecordState( iState );
 }
 
 // static
@@ -81,44 +83,69 @@ FSnapshotTrajectory::WaypointSpacingToArray( FInbetweenerTrajectory* iTrajectory
 }
 
 void
-FSnapshotTrajectory::RecordLocalState( FSnapshotTrajectory::State* iState )
+FSnapshotTrajectory::RecordState( eSnapshotState iStateType )
 {
-    if( iState->inited == false )
+    FSnapshotTrajectory::State* requestedState = nullptr;
+
+    switch( iStateType )
+    {
+        case eSnapshotState::Initial :
+            requestedState = &mInitialState;
+        break;
+
+        case eSnapshotState::Altered :
+            requestedState = &mAlteredState;
+        break;
+
+        default :
+        break;
+    }
+
+    if( requestedState->inited == false )
     {
         FInbetweenerTrajectory* trajectory = &mRoute->GetTrajectoryBuffer()[mIndex];
 
         if( mSnapshotFlags & FSnapshotFlags::Trajectory::BEZIER )
         {
-            iState->handleDirection[0] = trajectory->GetHandle(0)->GetDirection();
-            iState->handleDirection[1] = trajectory->GetHandle(1)->GetDirection();
-            iState->handleLengthRatio[0] = trajectory->GetHandle(0)->GetLengthRatio();
-            iState->handleLengthRatio[1] = trajectory->GetHandle(1)->GetLengthRatio();
+            requestedState->handleDirection[0] = trajectory->GetHandle(0)->GetDirection();
+            requestedState->handleDirection[1] = trajectory->GetHandle(1)->GetDirection();
+            requestedState->handleLengthRatio[0] = trajectory->GetHandle(0)->GetLengthRatio();
+            requestedState->handleLengthRatio[1] = trajectory->GetHandle(1)->GetLengthRatio();
         }
 
         if( mSnapshotFlags & FSnapshotFlags::Trajectory::WAYPOINTS )
         {
-            WaypointSpacingToArray( trajectory, iState->waypointSpacingBuffer );
+            WaypointSpacingToArray( trajectory, requestedState->waypointSpacingBuffer );
         }
 
-        iState->inited = true;
+        requestedState->inited = true;
     }
 }
 
-void
-FSnapshotTrajectory::RecordAlteredState()
-{
-    RecordLocalState( &mAlteredState );
-}
-
 bool
-FSnapshotTrajectory::LoadState( FSnapshotTrajectory::State* iState )
+FSnapshotTrajectory::LoadState( eSnapshotState iStateType )
 {
     FInbetweenerTrajectory* trajectory = &mRoute->GetTrajectoryBuffer()[mIndex];
+    FSnapshotTrajectory::State* requestedState = nullptr;
+
+    switch( iStateType )
+    {
+        case eSnapshotState::Initial :
+            requestedState = &mInitialState;
+        break;
+
+        case eSnapshotState::Altered :
+            requestedState = &mAlteredState;
+        break;
+
+        default :
+        break;
+    }
 
     if( mSnapshotFlags & FSnapshotFlags::Trajectory::BEZIER )
     {
-        trajectory->GetHandle(0)->Set( iState->handleDirection[0], iState->handleLengthRatio[0] );
-        trajectory->GetHandle(1)->Set( iState->handleDirection[1], iState->handleLengthRatio[1] );
+        trajectory->GetHandle(0)->Set( requestedState->handleDirection[0], requestedState->handleLengthRatio[0] );
+        trajectory->GetHandle(1)->Set( requestedState->handleDirection[1], requestedState->handleLengthRatio[1] );
     }
 
     if( mSnapshotFlags & FSnapshotFlags::Trajectory::WAYPOINTS )
@@ -126,79 +153,80 @@ FSnapshotTrajectory::LoadState( FSnapshotTrajectory::State* iState )
         std::vector<FInbetweenerWaypoint>& waypointBuffer = trajectory->GetWaypointBuffer();
 
         waypointBuffer.clear();
-        waypointBuffer.reserve( iState->waypointSpacingBuffer.size() );
+        waypointBuffer.reserve( requestedState->waypointSpacingBuffer.size() );
 
-        for( int i = 0; i < iState->waypointSpacingBuffer.size(); i++ )
+        for( int i = 0; i < requestedState->waypointSpacingBuffer.size(); i++ )
         {
             FInbetweenerWaypoint& waypoint = waypointBuffer.emplace_back( trajectory );
 
-            waypoint.SetT( iState->waypointSpacingBuffer[i] );
+            waypoint.SetT( requestedState->waypointSpacingBuffer[i] );
         }
     }
 
     return true; // loading succeded
 }
 
-bool
-FSnapshotTrajectory::LoadInitialState()
-{
-    return LoadState( &mInitialState );
-}
-
-bool
-FSnapshotTrajectory::LoadAlteredState()
-{
-    return LoadState( &mAlteredState );
-}
-
 FSnapshotStep::~FSnapshotStep()
 {
 }
 
-FSnapshotStep::FSnapshotStep( FInbetweenerStep* iStep )
+FSnapshotStep::FSnapshotStep( FInbetweenerStep* iStep, eSnapshotState iState )
     : mRoute( iStep->GetRoute() )
     , mIndex( iStep - &iStep->GetRoute()->GetStepBuffer()[0] )
 {
-    RecordLocalState( &mInitialState );
+    RecordState( iState );
 }
 
 void
-FSnapshotStep::RecordLocalState( FSnapshotStep::State* iState )
+FSnapshotStep::RecordState( eSnapshotState iStateType )
 {
-    if( iState->inited == false )
-    {
-        iState->aligned = mRoute->GetStepBuffer()[mIndex].IsAligned();
+    FSnapshotStep::State* requestedState = nullptr;
 
-        iState->inited = true;
+    switch( iStateType )
+    {
+        case eSnapshotState::Initial :
+            requestedState = &mInitialState;
+        break;
+
+        case eSnapshotState::Altered :
+            requestedState = &mAlteredState;
+        break;
+
+        default :
+        break;
+    }
+
+    if( requestedState->inited == false )
+    {
+        requestedState->aligned = mRoute->GetStepBuffer()[mIndex].IsAligned();
+
+        requestedState->inited = true;
     }
 }
 
 bool
-FSnapshotStep::LoadState( FSnapshotStep::State* iState )
+FSnapshotStep::LoadState( eSnapshotState iStateType )
 {
     FInbetweenerStep* step = &mRoute->GetStepBuffer()[mIndex];
+    FSnapshotStep::State* requestedState = nullptr;
 
-    step->SetAligned( iState->aligned );
+    switch( iStateType )
+    {
+        case eSnapshotState::Initial :
+            requestedState = &mInitialState;
+        break;
+
+        case eSnapshotState::Altered :
+            requestedState = &mAlteredState;
+        break;
+
+        default :
+        break;
+    }
+
+    step->SetAligned( requestedState->aligned );
 
     return true;
-}
-
-void
-FSnapshotStep::RecordAlteredState()
-{
-    RecordLocalState( &mAlteredState );
-}
-
-bool
-FSnapshotStep::LoadInitialState()
-{
-    return LoadState( &mInitialState );
-}
-
-bool
-FSnapshotStep::LoadAlteredState()
-{
-    return LoadState( &mAlteredState );
 }
 
 FSnapshotRoute::~FSnapshotRoute()
@@ -207,150 +235,189 @@ FSnapshotRoute::~FSnapshotRoute()
 
 FSnapshotRoute::FSnapshotRoute( FInbetweenerRoute* iRoute
                               , uint64 iSnapshotflags
-                              , uint64 iTrajectorySnapshotFlags )
+                              , uint64 iTrajectorySnapshotFlags
+                              , eSnapshotState iStateType )
     : mRoute( iRoute )
     , mSnapshotFlags( iSnapshotflags ) // unused
+    , mTrajectorySnapshotFlags( iTrajectorySnapshotFlags )
 {
-    if( mSnapshotFlags & FSnapshotFlags::Route::TRAJECTORIES )
-    {
-        mTrajectorySnapshotBuffer.reserve( iRoute->GetInbetweenerTag()->GetBreakdownCount() );
-
-        for( FInbetweenerTrajectory& trajectory : iRoute->GetTrajectoryBuffer() )
-        {
-            mTrajectorySnapshotBuffer.emplace_back( &trajectory, iTrajectorySnapshotFlags );
-        }
-    }
-
-    if( mSnapshotFlags & FSnapshotFlags::Route::STEPS )
-    {
-        mStepSnapshotBuffer.reserve( iRoute->GetInbetweenerTag()->GetBreakdownCount() );
-
-        for( FInbetweenerStep& step : iRoute->GetStepBuffer() )
-        {
-            mStepSnapshotBuffer.emplace_back( &step );
-        }
-    }
+    RecordState( iStateType );
 }
 
 void
-FSnapshotRoute::RecordAlteredState()
+FSnapshotRoute::RecordState( eSnapshotState iStateType )
 {
-    if( mSnapshotFlags & FSnapshotFlags::Route::TRAJECTORIES )
+    FSnapshotRoute::State* requestedState = nullptr;
+
+    switch( iStateType )
     {
-        for( FSnapshotTrajectory& trajectorySnapshot : mTrajectorySnapshotBuffer )
-        {
-            trajectorySnapshot.RecordAlteredState();
-        }
+        case eSnapshotState::Initial :
+            requestedState = &mInitialState;
+        break;
+
+        case eSnapshotState::Altered :
+            requestedState = &mAlteredState;
+        break;
+
+        default :
+        break;
     }
 
-    if( mSnapshotFlags & FSnapshotFlags::Route::STEPS )
+    if( requestedState->inited == false )
     {
-        for( FSnapshotStep& stepSnapshot : mStepSnapshotBuffer )
+        if( mSnapshotFlags & FSnapshotFlags::Route::TRAJECTORIES )
         {
-            stepSnapshot.RecordAlteredState();
+            requestedState->trajectorySnapshotBuffer.reserve( mRoute->GetInbetweenerTag()->GetBreakdownCount() );
+
+            for( FInbetweenerTrajectory& trajectory : mRoute->GetTrajectoryBuffer() )
+            {
+                requestedState->trajectorySnapshotBuffer.emplace_back( &trajectory
+                                                                     , mTrajectorySnapshotFlags
+                                                                     , iStateType );
+            }
         }
+
+        if( mSnapshotFlags & FSnapshotFlags::Route::STEPS )
+        {
+            requestedState->stepSnapshotBuffer.reserve( mRoute->GetInbetweenerTag()->GetBreakdownCount() );
+
+            for( FInbetweenerStep& step : mRoute->GetStepBuffer() )
+            {
+                requestedState->stepSnapshotBuffer.emplace_back( &step, iStateType );
+            }
+        }
+
+        requestedState->inited = true;
     }
 }
 
 bool
-FSnapshotRoute::LoadInitialState()
+FSnapshotRoute::LoadState( eSnapshotState iStateType )
 {
+    FSnapshotRoute::State* requestedState = nullptr;
+
+    switch( iStateType )
+    {
+        case eSnapshotState::Initial :
+            requestedState = &mInitialState;
+        break;
+
+        case eSnapshotState::Altered :
+            requestedState = &mAlteredState;
+        break;
+
+        default :
+        break;
+    }
+
     if( mSnapshotFlags & FSnapshotFlags::Route::TRAJECTORIES )
     {
-        for( FSnapshotTrajectory& trajectorySnapshot : mTrajectorySnapshotBuffer )
+        for( FSnapshotTrajectory& trajectorySnapshot : requestedState->trajectorySnapshotBuffer )
         {
-            trajectorySnapshot.LoadInitialState();
+            trajectorySnapshot.LoadState( iStateType );
         }
     }
 
     if( mSnapshotFlags & FSnapshotFlags::Route::STEPS )
     {
-        for( FSnapshotStep& stepSnapshot : mStepSnapshotBuffer )
+        for( FSnapshotStep& stepSnapshot : requestedState->stepSnapshotBuffer )
         {
-            stepSnapshot.LoadInitialState();
+            stepSnapshot.LoadState( iStateType );
         }
     }
 
     return true;
 }
 
-bool
-FSnapshotRoute::LoadAlteredState()
+FSnapshotLayout::State::~State()
 {
-    if( mSnapshotFlags & FSnapshotFlags::Route::TRAJECTORIES )
+    for( FInbetweenerBreakdown* breakdown : breakdownArray )
     {
-        for( FSnapshotTrajectory& trajectorySnapshot : mTrajectorySnapshotBuffer )
+        if ( breakdown->GetInbetweenerTag() == nullptr )
         {
-            trajectorySnapshot.LoadAlteredState();
+            delete breakdown;
         }
     }
-
-    if( mSnapshotFlags & FSnapshotFlags::Route::STEPS )
-    {
-        for( FSnapshotStep& stepSnapshot : mStepSnapshotBuffer )
-        {
-            stepSnapshot.LoadAlteredState();
-        }
-    }
-
-    return true;
 }
 
 FSnapshotLayout::~FSnapshotLayout()
 {
 }
 
-FSnapshotLayout::FSnapshotLayout()
+FSnapshotLayout::FSnapshotLayout( FOdysseyVectorTagInbetweener* iInbetweenerTag
+                                , eSnapshotState iStateType )
+    : mInbetweenerTag ( iInbetweenerTag )
 {
+    RecordState( iStateType );
 }
 
 void
-FSnapshotLayout::RecordLocalState( FSnapshotLayout::State* iState )
+FSnapshotLayout::RecordState( eSnapshotState iStateType )
 {
-    if( iState->inited == false )
+    FSnapshotLayout::State* requestedState = nullptr;
+
+    switch( iStateType )
+    {
+        case eSnapshotState::Initial :
+            requestedState = &mInitialState;
+        break;
+
+        case eSnapshotState::Altered :
+            requestedState = &mAlteredState;
+        break;
+
+        default :
+        break;
+    }
+
+    if( requestedState->inited == false )
     {
         uint32 breakdownCount = mInbetweenerTag->GetBreakdownCount();
 
-        iState->breakdownArray.clear();
-        iState->breakdownArray.reserve( breakdownCount );
+        requestedState->breakdownArray.clear();
+        requestedState->breakdownArray.reserve( breakdownCount );
 
-        iState->targetBuffer.clear();
-        iState->targetBuffer.reserve( breakdownCount );
+        requestedState->targetBuffer.clear();
+        requestedState->targetBuffer.reserve( breakdownCount );
 
         for( FInbetweenerBreakdown* breakdown : mInbetweenerTag->GetBreakdownList() )
         {
-            iState->breakdownArray.emplace_back( breakdown );
-            iState->targetBuffer.emplace_back( breakdown->GetTargetDrawingIndex() );
+            requestedState->breakdownArray.emplace_back( breakdown );
+            requestedState->targetBuffer.emplace_back( breakdown->GetTargetDrawingIndex() );
         }
 
-        iState->inited = true;
+        requestedState->inited = true;
     }
 }
 
-FSnapshotLayout::FSnapshotLayout( FOdysseyVectorTagInbetweener* iInbetweenerTag )
-    : mInbetweenerTag ( iInbetweenerTag )
-{
-    RecordLocalState( &mInitialState );
-}
-
-void
-FSnapshotLayout::RecordAlteredState()
-{
-    RecordLocalState( &mAlteredState );
-}
-
 bool
-FSnapshotLayout::LoadState( FSnapshotLayout::State* iState )
+FSnapshotLayout::LoadState( eSnapshotState iStateType )
 {
+    FSnapshotLayout::State* requestedState = nullptr;
+
+    switch( iStateType )
+    {
+        case eSnapshotState::Initial :
+            requestedState = &mInitialState;
+        break;
+
+        case eSnapshotState::Altered :
+            requestedState = &mAlteredState;
+        break;
+
+        default :
+        break;
+    }
+
     // erase all breakdowns except the default one
     mInbetweenerTag->ResetLayout( false );
 
-    for( uint32 i = 0; i < iState->breakdownArray.size(); i++ )
+    for( uint32 i = 0; i < requestedState->breakdownArray.size(); i++ )
     {
-        FInbetweenerBreakdown* breakdown =  iState->breakdownArray[i];
+        FInbetweenerBreakdown* breakdown =  requestedState->breakdownArray[i];
 
-        mInbetweenerTag->AddBreakdown( iState->breakdownArray[i]
-                                     , iState->targetBuffer[i]
+        mInbetweenerTag->AddBreakdown( requestedState->breakdownArray[i]
+                                     , requestedState->targetBuffer[i]
                                      , false
                                      , false );
     }
@@ -358,38 +425,21 @@ FSnapshotLayout::LoadState( FSnapshotLayout::State* iState )
     return true;
 }
 
-bool
-FSnapshotLayout::LoadInitialState()
-{
-    return LoadState( &mInitialState );
-}
-
-bool
-FSnapshotLayout::LoadAlteredState()
-{
-    return LoadState( &mAlteredState );
-}
-
 FSnapshotDynamics::~FSnapshotDynamics()
 {
-    if( bApplied )
+    for( FInbetweenerRoute* route : mInitialState.routeArray )
     {
-        for( FInbetweenerRoute* route : mInitialState.routeArray )
+        if( route->GetInbetweenerTag() == nullptr )
         {
-            if( route->GetInbetweenerTag() == nullptr )
-            {
-                delete route;
-            }
+            delete route;
         }
     }
-    else
+
+    for( FInbetweenerRoute* route : mAlteredState.routeArray )
     {
-        for( FInbetweenerRoute* route : mAlteredState.routeArray )
+        if( route->GetInbetweenerTag() == nullptr )
         {
-            if( route->GetInbetweenerTag() == nullptr )
-            {
-                delete route;
-            }
+            delete route;
         }
     }
 }
@@ -398,43 +448,68 @@ FSnapshotDynamics::FSnapshotDynamics()
 {
 }
 
-FSnapshotDynamics::FSnapshotDynamics( FOdysseyVectorTagInbetweener* iInbetweenerTag )
+FSnapshotDynamics::FSnapshotDynamics( FOdysseyVectorTagInbetweener* iInbetweenerTag
+                                    , eSnapshotState iStateType )
     : mInbetweenerTag( iInbetweenerTag )
-    , bApplied ( true )
 {
-    RecordLocalState( &mInitialState );
+    RecordState( iStateType );
 }
 
 void
-FSnapshotDynamics::RecordLocalState( FSnapshotDynamics::State* iState )
+FSnapshotDynamics::RecordState( eSnapshotState iStateType )
 {
-    if( iState->inited == false )
+    FSnapshotDynamics::State* requestedState = nullptr;
+
+    switch( iStateType )
     {
-        // Do not forget to clear as it could be called several times when calling Preswap()
-        iState->routeArray.clear();
-        iState->routeArray.reserve( mInbetweenerTag->GetRouteList().size() );
+        case eSnapshotState::Initial :
+            requestedState = &mInitialState;
+        break;
+
+        case eSnapshotState::Altered :
+            requestedState = &mAlteredState;
+        break;
+
+        default :
+        break;
+    }
+
+    if( requestedState->inited == false )
+    {
+        requestedState->routeArray.clear();
+        requestedState->routeArray.reserve( mInbetweenerTag->GetRouteList().size() );
 
         for( FInbetweenerRoute* route : mInbetweenerTag->GetRouteList() )
         {
-            iState->routeArray.push_back( route );
+            requestedState->routeArray.push_back( route );
         }
 
-        iState->inited = true;
+        requestedState->inited = true;
     }
 }
 
-void
-FSnapshotDynamics::RecordAlteredState()
-{
-    RecordLocalState( &mAlteredState );
-}
-
 bool
-FSnapshotDynamics::LoadState( FSnapshotDynamics::State* iState )
+FSnapshotDynamics::LoadState( eSnapshotState iStateType )
 {
+    FSnapshotDynamics::State* requestedState = nullptr;
+
+    switch( iStateType )
+    {
+        case eSnapshotState::Initial :
+            requestedState = &mInitialState;
+        break;
+
+        case eSnapshotState::Altered :
+            requestedState = &mAlteredState;
+        break;
+
+        default :
+        break;
+    }
+
     mInbetweenerTag->RemoveAllRoutes();
 
-    for( FInbetweenerRoute* route : iState->routeArray )
+    for( FInbetweenerRoute* route : requestedState->routeArray )
     {
         mInbetweenerTag->AddRoute( route );
     }
@@ -442,207 +517,214 @@ FSnapshotDynamics::LoadState( FSnapshotDynamics::State* iState )
     return true;
 }
 
-bool
-FSnapshotDynamics::LoadInitialState()
-{
-    bApplied = false;
-
-    return LoadState( &mInitialState );
-}
-
-bool
-FSnapshotDynamics::LoadAlteredState()
-{
-    bApplied = true;
-
-    return LoadState( &mAlteredState );
-}
-
 FSnapshotInbetweenerChart::~FSnapshotInbetweenerChart()
 {
 }
 
 FSnapshotInbetweenerChart::FSnapshotInbetweenerChart( FInbetweenerChart* iChart
-                                                    , uint64 iSnapshotFlags )
+                                                    , uint64 iSnapshotFlags
+                                                    , eSnapshotState iStateType )
     : mChart( iChart )
     , mSnapshotFlags( iSnapshotFlags )
 {
-    RecordLocalState( &mInitialState );
+    RecordState( iStateType );
 }
 
 void
-FSnapshotInbetweenerChart::RecordLocalState( FSnapshotInbetweenerChart::State* iState )
+FSnapshotInbetweenerChart::RecordState( eSnapshotState iStateType )
 {
-    if( iState->inited == false )
+    FSnapshotInbetweenerChart::State* requestedState = nullptr;
+
+    switch( iStateType )
+    {
+        case eSnapshotState::Initial :
+            requestedState = &mInitialState;
+        break;
+
+        case eSnapshotState::Altered :
+            requestedState = &mAlteredState;
+        break;
+
+        default :
+        break;
+    }
+
+    if( requestedState->inited == false )
     {
         uint32 drawingCount = mChart->GetBreakdown()->GetDrawingCount();
 
         // save bezier
         if( mSnapshotFlags & FSnapshotFlags::Chart::BEZIER )
         {
-            iState->HUDBezier[0] = mChart->GetHUDBezier()->GetPoints()[0].GetPosition();
-            iState->HUDBezier[1] = mChart->GetHUDBezier()->GetPoints()[1].GetPosition();
-            iState->HUDBezier[2] = mChart->GetHUDBezier()->GetPoints()[2].GetPosition();
+            requestedState->HUDBezier[0] = mChart->GetHUDBezier()->GetPoints()[0].GetPosition();
+            requestedState->HUDBezier[1] = mChart->GetHUDBezier()->GetPoints()[1].GetPosition();
+            requestedState->HUDBezier[2] = mChart->GetHUDBezier()->GetPoints()[2].GetPosition();
         }
 
         // save spacing
         if( mSnapshotFlags & FSnapshotFlags::Chart::SPACING )
         {
-            iState->spacing.resize( drawingCount );
+            requestedState->spacing.resize( drawingCount );
 
             for( uint32 i = 0; i < drawingCount; i++ )
             {
-                 iState->spacing[i] = mChart->GetInbetweenBuffer()[i].GetSpacing();
+                 requestedState->spacing[i] = mChart->GetInbetweenBuffer()[i].GetSpacing();
             }
         }
 
-        iState->inited = true;
+        requestedState->inited = true;
     }
 }
 
-void
-FSnapshotInbetweenerChart::RecordAlteredState()
-{
-    RecordLocalState( &mAlteredState );
-}
-
 bool
-FSnapshotInbetweenerChart::LoadState( FSnapshotInbetweenerChart::State* iState )
+FSnapshotInbetweenerChart::LoadState( eSnapshotState iStateType )
 {
+    FSnapshotInbetweenerChart::State* requestedState = nullptr;
+
+    switch( iStateType )
+    {
+        case eSnapshotState::Initial :
+            requestedState = &mInitialState;
+        break;
+
+        case eSnapshotState::Altered :
+            requestedState = &mAlteredState;
+        break;
+
+        default :
+        break;
+    }
+
     // restore bezier
     if( mSnapshotFlags & FSnapshotFlags::Chart::BEZIER )
     {
-        mChart->GetHUDBezier()->GetPoints()[0].SetPosition( iState->HUDBezier[0].x, iState->HUDBezier[0].y );
-        mChart->GetHUDBezier()->GetPoints()[1].SetPosition( iState->HUDBezier[1].x, iState->HUDBezier[1].y );
-        mChart->GetHUDBezier()->GetPoints()[2].SetPosition( iState->HUDBezier[2].x, iState->HUDBezier[2].y );
+        mChart->GetHUDBezier()->GetPoints()[0].SetPosition( requestedState->HUDBezier[0].x, requestedState->HUDBezier[0].y );
+        mChart->GetHUDBezier()->GetPoints()[1].SetPosition( requestedState->HUDBezier[1].x, requestedState->HUDBezier[1].y );
+        mChart->GetHUDBezier()->GetPoints()[2].SetPosition( requestedState->HUDBezier[2].x, requestedState->HUDBezier[2].y );
     }
 
     // restore spacing
     if( mSnapshotFlags & FSnapshotFlags::Chart::SPACING )
     {
-        for( uint32 i = 0; i < iState->spacing.size(); i++ )
+        for( uint32 i = 0; i < requestedState->spacing.size(); i++ )
         {
-            mChart->GetInbetweenBuffer()[i].SetSpacing( iState->spacing[i] );
+            mChart->GetInbetweenBuffer()[i].SetSpacing( requestedState->spacing[i] );
         }
     }
 
     return true;
 }
 
-bool
-FSnapshotInbetweenerChart::LoadInitialState()
-{
-    return LoadState( &mInitialState );
-}
-
-bool
-FSnapshotInbetweenerChart::LoadAlteredState()
-{
-    return LoadState( &mAlteredState );
-}
-
 FSnapshotInbetweenerBreakdown::~FSnapshotInbetweenerBreakdown()
 {
 }
 
-void
-FSnapshotInbetweenerBreakdown::RecordLocalState( FSnapshotInbetweenerBreakdown::State* iState )
+FSnapshotInbetweenerBreakdown::FSnapshotInbetweenerBreakdown( FInbetweenerBreakdown* iBreakdown
+                                                            , uint64 iSnapshotFlags
+                                                            , eSnapshotState iState )
+    : mBreakdown( iBreakdown )
+    , mSnapshotFlags( iSnapshotFlags )
 {
-    if( iState->inited == false )
+    RecordState( iState );
+}
+
+void
+FSnapshotInbetweenerBreakdown::RecordState( eSnapshotState iStateType )
+{
+    FSnapshotInbetweenerBreakdown::State* requestedState = nullptr;
+
+    switch( iStateType )
+    {
+        case eSnapshotState::Initial :
+            requestedState = &mInitialState;
+        break;
+
+        case eSnapshotState::Altered :
+            requestedState = &mAlteredState;
+        break;
+
+        default :
+        break;
+    }
+
+    if( requestedState->inited == false )
     {
         if( mSnapshotFlags & FSnapshotFlags::Breakdown::GRIDGEOMETRY )
         {
-            mBreakdown->GetGrid()->GetGeometry( iState->gridGeometry
+            mBreakdown->GetGrid()->GetGeometry( requestedState->gridGeometry
                                               , eInbetweenerPointPositionType::TargetPosition );
         }
 
         if( mSnapshotFlags & FSnapshotFlags::Breakdown::TRANSFORMATIONS )
         {
-            mBreakdown->GetTargetTransform( iState->translationX
-                                          , iState->translationY
-                                          , iState->rotation
-                                          , iState->scalingX
-                                          , iState->scalingY );
+            mBreakdown->GetTargetTransform( requestedState->translationX
+                                          , requestedState->translationY
+                                          , requestedState->rotation
+                                          , requestedState->scalingX
+                                          , requestedState->scalingY );
         }
 
         if( mSnapshotFlags & FSnapshotFlags::Breakdown::TARGETVISIBILITY )
         {
-            iState->targetVisibility  = mBreakdown->IsTargetVisible();
+            requestedState->targetVisibility  = mBreakdown->IsTargetVisible();
         }
 
-        iState->inited = true;
+        if( mSnapshotFlags & FSnapshotFlags::Breakdown::CHART )
+        {
+            requestedState->chartSnapshotBuffer.emplace_back( mBreakdown->GetChart()
+                                                            , ( ( mSnapshotFlags & FSnapshotFlags::Breakdown::CHART ) ? FSnapshotFlags::ALL : 0 )
+                                                            , iStateType );
+        }
+
+        requestedState->inited = true;
     }
 }
 
-FSnapshotInbetweenerBreakdown::FSnapshotInbetweenerBreakdown( FInbetweenerBreakdown* iBreakdown
-                                                            , uint64 iSnapshotFlags )
-    : mBreakdown( iBreakdown )
-    , mSnapshotFlags( iSnapshotFlags )
-    , mChartSnapshot( iBreakdown->GetChart()
-                    , ( mSnapshotFlags & FSnapshotFlags::Breakdown::CHART ) ? FSnapshotFlags::ALL
-                                                                            : 0  )
-{
-    RecordLocalState( &mInitialState );
-}
-
-void
-FSnapshotInbetweenerBreakdown::RecordAlteredState()
-{
-    RecordLocalState( &mAlteredState );
-
-    mChartSnapshot.RecordAlteredState();
-}
-
 bool
-FSnapshotInbetweenerBreakdown::LoadState( FSnapshotInbetweenerBreakdown::State* iState )
+FSnapshotInbetweenerBreakdown::LoadState( eSnapshotState iStateType )
 {
+    FSnapshotInbetweenerBreakdown::State* requestedState = nullptr;
+
+    switch( iStateType )
+    {
+        case eSnapshotState::Initial :
+            requestedState = &mInitialState;
+        break;
+
+        case eSnapshotState::Altered :
+            requestedState = &mAlteredState;
+        break;
+
+        default :
+        break;
+    }
+
     if( mSnapshotFlags & FSnapshotFlags::Breakdown::GRIDGEOMETRY )
     {
-        mBreakdown->GetGrid()->SetGeometry( iState->gridGeometry
+        mBreakdown->GetGrid()->SetGeometry( requestedState->gridGeometry
                                           , eInbetweenerPointPositionType::TargetPosition
                                           , true );
     }
 
     if( mSnapshotFlags & FSnapshotFlags::Breakdown::TRANSFORMATIONS )
     {
-        mBreakdown->SetTargetTransform( iState->translationX
-                                      , iState->translationY
-                                      , iState->rotation
-                                      , iState->scalingX
-                                      , iState->scalingY );
+        mBreakdown->SetTargetTransform( requestedState->translationX
+                                      , requestedState->translationY
+                                      , requestedState->rotation
+                                      , requestedState->scalingX
+                                      , requestedState->scalingY );
 
         mBreakdown->UpdateMatrix();
     }
 
     if( mSnapshotFlags & FSnapshotFlags::Breakdown::TARGETVISIBILITY )
     {
-        mBreakdown->SetTargetVisibility( iState->targetVisibility );
+        mBreakdown->SetTargetVisibility( requestedState->targetVisibility );
     }
-
-    return true; // restore succeeded
-}
-
-bool
-FSnapshotInbetweenerBreakdown::LoadInitialState()
-{
-    LoadState( &mInitialState );
 
     if( mSnapshotFlags & FSnapshotFlags::Breakdown::CHART )
     {
-        mChartSnapshot.LoadInitialState();
-    }
-
-    return true; // restore succeeded
-}
-
-bool
-FSnapshotInbetweenerBreakdown::LoadAlteredState()
-{
-    LoadState( &mAlteredState );
-
-    if( mSnapshotFlags & FSnapshotFlags::Breakdown::CHART )
-    {
-        mChartSnapshot.LoadAlteredState();
+        requestedState->chartSnapshotBuffer[0].LoadState( iStateType );
     }
 
     return true; // restore succeeded
@@ -652,241 +734,209 @@ FSnapshotTagInbetweener::~FSnapshotTagInbetweener()
 {
 }
 
-void
-FSnapshotTagInbetweener::RecordLocalState( FSnapshotTagInbetweener::State* iState )
+FSnapshotTagInbetweener::FSnapshotTagInbetweener( FOdysseyVectorTagInbetweener* iInbetweenerTag
+                                                , uint64 iSnapshotFlags
+                                                , uint64 iBreakdownSnapshotFlags
+                                                , uint64 iRouteSnapshotFlags
+                                                , uint64 iTrajectorySnapshotFlags
+                                                , eSnapshotState iStateType )
+    : mSnapshotFlags( iSnapshotFlags )
+    , mInbetweenerTag( iInbetweenerTag )
+    , mBreakdownSnapshotFlags( iBreakdownSnapshotFlags )
+    , mRouteSnapshotFlags( iRouteSnapshotFlags )
+    , mTrajectorySnapshotFlags( iTrajectorySnapshotFlags )
 {
-    if( iState->inited == false )
+    RecordState( iStateType );
+}
+
+void
+FSnapshotTagInbetweener::RecordState( eSnapshotState iStateType )
+{
+    FSnapshotTagInbetweener::State *requestedState = nullptr;
+
+    switch( iStateType )
     {
-        iState->interpolationDirection = mInbetweenerTag->GetInterpolationDirection();
+        case eSnapshotState::Initial :
+            requestedState = &mInitialState;
+        break;
+
+        case eSnapshotState::Altered :
+            requestedState = &mAlteredState;
+        break;
+
+        default :
+        break;
+    }
+
+    if( requestedState->inited == false )
+    {
+        requestedState->interpolationDirection = mInbetweenerTag->GetInterpolationDirection();
 
         if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::WITHTHICKNESS )
         {
-            iState->withThickness = mInbetweenerTag->GetWithThickness();
+            requestedState->withThickness = mInbetweenerTag->GetWithThickness();
         }
 
         if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::CONSTANTWIDTH )
         {
-            iState->constantWidth = mInbetweenerTag->HasConstantWidth();
+            requestedState->constantWidth = mInbetweenerTag->HasConstantWidth();
         }
 
         if( ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDSIZE )
          || ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDTYPE )
          || ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::SQUARE   ) )
         {
-            iState->gridSizeX = mInbetweenerTag->GetGridNumQuadX();
-            iState->gridSizeY = mInbetweenerTag->GetGridNumQuadY();
-            iState->square    = mInbetweenerTag->IsSquare();
-            iState->gridType  = mInbetweenerTag->GetGridType();
+            requestedState->gridSizeX = mInbetweenerTag->GetGridNumQuadX();
+            requestedState->gridSizeY = mInbetweenerTag->GetGridNumQuadY();
+            requestedState->square    = mInbetweenerTag->IsSquare();
+            requestedState->gridType  = mInbetweenerTag->GetGridType();
         }
 
         if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::INTERPOLATIONTYPE )
         {
-            iState->interpolationType = mInbetweenerTag->GetInterpolationType();
+            requestedState->interpolationType = mInbetweenerTag->GetInterpolationType();
         }
 
         if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::COLOR )
         {
-            iState->inbetweenColor = mInbetweenerTag->GetInbetweenColor();
-            iState->chartColor = mInbetweenerTag->GetChartColor();
-            iState->gridColor = mInbetweenerTag->GetGridColor();
-            iState->trajectoryColor = mInbetweenerTag->GetTrajectoryColor();
+            requestedState->inbetweenColor = mInbetweenerTag->GetInbetweenColor();
+            requestedState->chartColor = mInbetweenerTag->GetChartColor();
+            requestedState->gridColor = mInbetweenerTag->GetGridColor();
+            requestedState->trajectoryColor = mInbetweenerTag->GetTrajectoryColor();
         }
 
         if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::MAPASPOLYLINE )
         {
-            iState->mapAsPolyline = mInbetweenerTag->GetMapAsPolyline();
+            requestedState->mapAsPolyline = mInbetweenerTag->GetMapAsPolyline();
         }
 
-        iState->inited = true;
-    }
-}
-
-FSnapshotTagInbetweener::FSnapshotTagInbetweener( FOdysseyVectorTagInbetweener* iInbetweenerTag
-                                                , uint64 iSnapshotFlags
-                                                , uint64 iBreakdownSnapshotFlags
-                                                , uint64 iRouteSnapshotFlags
-                                                , uint64 iTrajectorySnapshotFlags )
-    : mSnapshotFlags( iSnapshotFlags )
-    , mInbetweenerTag( iInbetweenerTag )
-    , mLayoutSnapshot() // Breakdown Layout
-    , mDynamicsSnapshot() // Route Layout
-{
-    RecordLocalState( &mInitialState );
-
-    // Snapshot Breakdown Layout
-    if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::BREAKDOWNS )
-    {
-        mLayoutSnapshot = FSnapshotLayout( mInbetweenerTag );
-    }
-
-    // Snapshot Breakdowns
-    if( iBreakdownSnapshotFlags )
-    {
-        mInbetweenerBreakdownSnapshotBuffer.reserve( iInbetweenerTag->GetBreakdownCount() );
-
-        for( FInbetweenerBreakdown* breakdown : iInbetweenerTag->GetBreakdownList() )
+        // Snapshot breakdown layout
+        if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::BREAKDOWNS )
         {
-            mInbetweenerBreakdownSnapshotBuffer.emplace_back( breakdown, iBreakdownSnapshotFlags );
+            requestedState->layoutSnapshotBuffer.emplace_back( mInbetweenerTag, iStateType );
         }
-    }
 
-    // Snapshot Route Layout
-    if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::ROUTES )
-    {
-        mDynamicsSnapshot = FSnapshotDynamics( mInbetweenerTag );
-    }
-
-    // Snapshot Routes
-    if( iRouteSnapshotFlags )
-    {
-        mRouteSnapshotBuffer.reserve( mInbetweenerTag->GetRouteList().size() );
-
-        // Adding or Removing a breakdown will affect routes. Restore them.
-        for( FInbetweenerRoute* route : mInbetweenerTag->GetRouteList() )
+        // Snapshot breakdowns if any
+        if( mBreakdownSnapshotFlags )
         {
-            mRouteSnapshotBuffer.emplace_back( route, iRouteSnapshotFlags, iTrajectorySnapshotFlags );
+            requestedState->inbetweenerBreakdownSnapshotBuffer.reserve( mInbetweenerTag->GetBreakdownCount() );
+
+            for( FInbetweenerBreakdown* breakdown : mInbetweenerTag->GetBreakdownList() )
+            {
+                requestedState->inbetweenerBreakdownSnapshotBuffer.emplace_back( breakdown
+                                                                               , mBreakdownSnapshotFlags
+                                                                               , iStateType );
+            }
         }
-    }
-}
 
-void
-FSnapshotTagInbetweener::RecordAlteredState()
-{
-    RecordLocalState( &mAlteredState );
+        // Snapshot route layout
+        if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::ROUTES )
+        {
+            requestedState->dynamicsSnapshotBuffer.emplace_back( mInbetweenerTag, iStateType );
+        }
 
-    // Snapshot breakdown layout
-    if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::BREAKDOWNS )
-    {
-        mLayoutSnapshot.RecordAlteredState();
-    }
+        // Snapshot routes if any
+        if( mRouteSnapshotFlags )
+        {
+            requestedState->routeSnapshotBuffer.reserve( mInbetweenerTag->GetRouteList().size() );
 
-    // Snapshot breakdowns if any
-    for( FSnapshotInbetweenerBreakdown& inbetweenerBreakdownSnapshot : mInbetweenerBreakdownSnapshotBuffer )
-    {
-        inbetweenerBreakdownSnapshot.RecordAlteredState();
-    }
+            for( FInbetweenerRoute* route : mInbetweenerTag->GetRouteList() )
+            {
+                requestedState->routeSnapshotBuffer.emplace_back( route
+                                                                , mRouteSnapshotFlags
+                                                                , mTrajectorySnapshotFlags
+                                                                , iStateType );
+            }
+        }
 
-    // Snapshot route layout
-    if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::ROUTES )
-    {
-        mDynamicsSnapshot.RecordAlteredState();
-    }
-
-    // Snapshot routes if any
-    for( FSnapshotRoute& routeSnapshot : mRouteSnapshotBuffer )
-    {
-        routeSnapshot.RecordAlteredState();
+        requestedState->inited = true;
     }
 }
 
 bool
-FSnapshotTagInbetweener::LoadLocalState( FSnapshotTagInbetweener::State* iState )
+FSnapshotTagInbetweener::LoadState( eSnapshotState iStateType )
 {
-    mInbetweenerTag->SetInterpolationDirection( iState->interpolationDirection );
+    FSnapshotTagInbetweener::State *requestedState = nullptr;
+
+    switch( iStateType )
+    {
+        case eSnapshotState::Initial :
+            requestedState = &mInitialState;
+        break;
+
+        case eSnapshotState::Altered :
+            requestedState = &mAlteredState;
+        break;
+
+        default :
+        break;
+    }
+
+    mInbetweenerTag->SetInterpolationDirection( requestedState->interpolationDirection );
 
     if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::WITHTHICKNESS )
     {
-        mInbetweenerTag->SetWithThickness( iState->withThickness );
+        mInbetweenerTag->SetWithThickness( requestedState->withThickness );
     }
 
     if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::CONSTANTWIDTH )
     {
-        mInbetweenerTag->SetConstantWidth( iState->constantWidth );
+        mInbetweenerTag->SetConstantWidth( requestedState->constantWidth );
     }
 
     if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::MAPASPOLYLINE )
     {
-        mInbetweenerTag->SetMapAsPolyline( iState->mapAsPolyline );
+        mInbetweenerTag->SetMapAsPolyline( requestedState->mapAsPolyline );
     }
 
     if( ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDSIZE )
      || ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDTYPE )
      || ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::SQUARE   ) )
     {
-        mInbetweenerTag->SetGrid( iState->gridType
-                                , iState->gridSizeX
-                                , iState->gridSizeY
-                                , iState->square );
+        mInbetweenerTag->SetGrid( requestedState->gridType
+                                , requestedState->gridSizeX
+                                , requestedState->gridSizeY
+                                , requestedState->square );
     }
 
     if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::INTERPOLATIONTYPE )
     {
-        mInbetweenerTag->SetInterpolationType( iState->interpolationType );
+        mInbetweenerTag->SetInterpolationType( requestedState->interpolationType );
     }
 
     if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::COLOR )
     {
-        mInbetweenerTag->SetInbetweenColor( iState->inbetweenColor );
-        mInbetweenerTag->SetChartColor( iState->chartColor );
-        mInbetweenerTag->SetGridColor( iState->gridColor );
-        mInbetweenerTag->SetTrajectoryColor( iState->trajectoryColor );
+        mInbetweenerTag->SetInbetweenColor( requestedState->inbetweenColor );
+        mInbetweenerTag->SetChartColor( requestedState->chartColor );
+        mInbetweenerTag->SetGridColor( requestedState->gridColor );
+        mInbetweenerTag->SetTrajectoryColor( requestedState->trajectoryColor );
+    }
+
+    // restore breakdown layout
+    if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::BREAKDOWNS )
+    {
+        requestedState->layoutSnapshotBuffer[0].LoadState( iStateType );
+    }
+
+    // restore breakdowns if any
+    for( FSnapshotInbetweenerBreakdown& inbetweenerBreakdownSnapshot : requestedState->inbetweenerBreakdownSnapshotBuffer )
+    {
+        inbetweenerBreakdownSnapshot.LoadState( iStateType );
+    }
+
+    // restore route layout
+    if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::ROUTES )
+    {
+        requestedState->dynamicsSnapshotBuffer[0].LoadState( iStateType );
+    }
+
+    // restore routes if any
+    for( FSnapshotRoute& routeSnapshot : requestedState->routeSnapshotBuffer )
+    {
+        routeSnapshot.LoadState( iStateType );
     }
 
     return true; // restore succeeded
-}
-
-bool
-FSnapshotTagInbetweener::LoadInitialState()
-{
-    LoadLocalState( &mInitialState );
-
-    // restore breakdown layout
-    if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::BREAKDOWNS )
-    {
-        mLayoutSnapshot.LoadInitialState();
-    }
-
-    // restore breakdowns if any
-    for( FSnapshotInbetweenerBreakdown& inbetweenerBreakdownSnapshot : mInbetweenerBreakdownSnapshotBuffer )
-    {
-        inbetweenerBreakdownSnapshot.LoadInitialState();
-    }
-
-    // restore route layout
-    if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::ROUTES )
-    {
-        mDynamicsSnapshot.LoadInitialState();
-    }
-
-    // restore routes if any
-    for( FSnapshotRoute& routeSnapshot : mRouteSnapshotBuffer )
-    {
-        routeSnapshot.LoadInitialState();
-    }
-
-    return true; // loading succeeded
-}
-
-bool
-FSnapshotTagInbetweener::LoadAlteredState()
-{
-    LoadLocalState( &mAlteredState );
-
-    // restore breakdown layout
-    if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::BREAKDOWNS )
-    {
-        mLayoutSnapshot.LoadAlteredState();
-    }
-
-    // restore breakdowns if any
-    for( FSnapshotInbetweenerBreakdown& inbetweenerBreakdownSnapshot : mInbetweenerBreakdownSnapshotBuffer )
-    {
-        inbetweenerBreakdownSnapshot.LoadAlteredState();
-    }
-
-    // restore route layout
-    if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::ROUTES )
-    {
-        mDynamicsSnapshot.LoadAlteredState();
-    }
-
-    // restore routes if any
-    for( FSnapshotRoute& routeSnapshot : mRouteSnapshotBuffer )
-    {
-        routeSnapshot.LoadAlteredState();
-    }
-
-    return true; // loading succeeded
 }
 
 FSnapshotObject::~FSnapshotObject()

@@ -33,7 +33,8 @@ FOdysseyVectorUndoTagInbetweenerReset::FOdysseyVectorUndoTagInbetweenerReset( FO
     {
         mBreakdownSnapshotBuffer.emplace_back( breakdown
                                              , ( iResetGridGeometry    ? FSnapshotFlags::Breakdown::GRIDGEOMETRY    : 0 )
-                                             | ( iResetTransformations ? FSnapshotFlags::Breakdown::TRANSFORMATIONS : 0 ) );
+                                             | ( iResetTransformations ? FSnapshotFlags::Breakdown::TRANSFORMATIONS : 0 )
+                                             , eSnapshotState::Initial );
     }
 }
 
@@ -59,7 +60,8 @@ FOdysseyVectorUndoTagInbetweenerReset::FOdysseyVectorUndoTagInbetweenerReset( FO
         {
             mBreakdownSnapshotBuffer.emplace_back( breakdown
                                                  , ( iResetGridGeometry    ? FSnapshotFlags::Breakdown::GRIDGEOMETRY    : 0 )
-                                                 | ( iResetTransformations ? FSnapshotFlags::Breakdown::TRANSFORMATIONS : 0 ) );
+                                                 | ( iResetTransformations ? FSnapshotFlags::Breakdown::TRANSFORMATIONS : 0 )
+                                                 , eSnapshotState::Initial );
         }
     }
 }
@@ -72,7 +74,7 @@ FOdysseyVectorUndoTagInbetweenerReset::Apply( UObject* iIgnored )
 
     for( FSnapshotInbetweenerBreakdown& breakdownSnapshot : mBreakdownSnapshotBuffer )
     {
-        breakdownSnapshot.LoadAlteredState();
+        breakdownSnapshot.LoadState( eSnapshotState::Altered );
     }
 
     // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
@@ -87,8 +89,8 @@ FOdysseyVectorUndoTagInbetweenerReset::Revert( UObject* iIgnored )
 
     for( FSnapshotInbetweenerBreakdown& breakdownSnapshot : mBreakdownSnapshotBuffer )
     {
-        breakdownSnapshot.RecordAlteredState();
-        breakdownSnapshot.LoadInitialState();
+        breakdownSnapshot.RecordState( eSnapshotState::Altered );
+        breakdownSnapshot.LoadState( eSnapshotState::Initial );
     }
 
     // Update vector scenes and call callbacks if any (for refreshing GUI e.g)

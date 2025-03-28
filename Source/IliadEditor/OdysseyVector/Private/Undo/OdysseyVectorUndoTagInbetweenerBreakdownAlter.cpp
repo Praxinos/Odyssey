@@ -31,7 +31,8 @@ FOdysseyVectorUndoTagInbetweenerBreakdownAlter::FOdysseyVectorUndoTagInbetweener
                                               , ( FSnapshotFlags::Route::TRAJECTORIES
                                                 | FSnapshotFlags::Route::STEPS )
                                               , ( FSnapshotFlags::Trajectory::BEZIER
-                                                | FSnapshotFlags::Trajectory::WAYPOINTS ) );
+                                                | FSnapshotFlags::Trajectory::WAYPOINTS )
+                                              , eSnapshotState::Initial );
 }
 
 FOdysseyVectorUndoTagInbetweenerBreakdownAlter::FOdysseyVectorUndoTagInbetweenerBreakdownAlter( FOdysseyVectorLayer* iSharedEnv
@@ -50,7 +51,8 @@ FOdysseyVectorUndoTagInbetweenerBreakdownAlter::FOdysseyVectorUndoTagInbetweener
                                                  , ( FSnapshotFlags::Route::TRAJECTORIES
                                                    | FSnapshotFlags::Route::STEPS )
                                                  , ( FSnapshotFlags::Trajectory::BEZIER
-                                                   | FSnapshotFlags::Trajectory::WAYPOINTS ) );
+                                                   | FSnapshotFlags::Trajectory::WAYPOINTS )
+                                                 , eSnapshotState::Initial );
     }
 }
 
@@ -70,7 +72,8 @@ FOdysseyVectorUndoTagInbetweenerBreakdownAlter::FOdysseyVectorUndoTagInbetweener
                                                  , ( FSnapshotFlags::Route::TRAJECTORIES
                                                    | FSnapshotFlags::Route::STEPS )
                                                  , ( FSnapshotFlags::Trajectory::BEZIER
-                                                   | FSnapshotFlags::Trajectory::WAYPOINTS ) );
+                                                   | FSnapshotFlags::Trajectory::WAYPOINTS )
+                                                 , eSnapshotState::Initial );
     }
 }
 
@@ -82,7 +85,7 @@ FOdysseyVectorUndoTagInbetweenerBreakdownAlter::Apply( UObject* iIgnored )
 
     for( FSnapshotTagInbetweener& inbetweenerTagsnapshot : mInbetweenerTagSnapshotArray )
     {
-        inbetweenerTagsnapshot.LoadAlteredState();
+        inbetweenerTagsnapshot.LoadState( eSnapshotState::Altered );
     }
 
     // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
@@ -97,8 +100,8 @@ FOdysseyVectorUndoTagInbetweenerBreakdownAlter::Revert( UObject* iIgnored )
 
     for( FSnapshotTagInbetweener& inbetweenerTagsnapshot : mInbetweenerTagSnapshotArray )
     {
-        inbetweenerTagsnapshot.RecordAlteredState();
-        inbetweenerTagsnapshot.LoadInitialState();
+        inbetweenerTagsnapshot.RecordState( eSnapshotState::Altered );
+        inbetweenerTagsnapshot.LoadState( eSnapshotState::Initial );
     }
 
     // Update vector scenes and call callbacks if any (for refreshing GUI e.g)

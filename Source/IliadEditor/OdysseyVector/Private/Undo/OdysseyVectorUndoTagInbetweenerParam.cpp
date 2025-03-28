@@ -43,7 +43,8 @@ FOdysseyVectorUndoTagInbetweenerWithThickness::FOdysseyVectorUndoTagInbetweenerW
                                                  , FSnapshotFlags::Tag::Inbetweener::WITHTHICKNESS
                                                  , 0    // save all breakdown details
                                                  , 0    // save all route details
-                                                 , 0 ); // save all trajectory details
+                                                 , 0
+                                                 , eSnapshotState::Initial ); // save all trajectory details
     }
 }
 
@@ -65,7 +66,8 @@ FOdysseyVectorUndoTagInbetweenerConstantWidth::FOdysseyVectorUndoTagInbetweenerC
                                                  , FSnapshotFlags::Tag::Inbetweener::CONSTANTWIDTH
                                                  , 0    // save all breakdown details
                                                  , 0    // save all route details
-                                                 , 0 ); // save all trajectory details
+                                                 , 0
+                                                 , eSnapshotState::Initial ); // save all trajectory details
     }
 }
 
@@ -88,7 +90,8 @@ FOdysseyVectorUndoTagInbetweenerGridSize::FOdysseyVectorUndoTagInbetweenerGridSi
                                                    | FSnapshotFlags::Tag::Inbetweener::ROUTES )
                                                  , FSnapshotFlags::ALL    // save all breakdown details
                                                  , FSnapshotFlags::ALL    // save all route details
-                                                 , FSnapshotFlags::ALL ); // save all trajectory details
+                                                 , FSnapshotFlags::ALL
+                                                 , eSnapshotState::Initial ); // save all trajectory details
     }
 }
 
@@ -110,7 +113,8 @@ FOdysseyVectorUndoTagInbetweenerGridType::FOdysseyVectorUndoTagInbetweenerGridTy
                                                    | FSnapshotFlags::Tag::Inbetweener::BREAKDOWNS )
                                                  , FSnapshotFlags::ALL    // save all breakdown details
                                                  , 0                      // ignore route details
-                                                 , FSnapshotFlags::ALL ); // save all trajectory details
+                                                 , FSnapshotFlags::ALL
+                                                 , eSnapshotState::Initial ); // save all trajectory details
     }
 }
 
@@ -133,7 +137,8 @@ FOdysseyVectorUndoTagInbetweenerSquare::FOdysseyVectorUndoTagInbetweenerSquare( 
                                                    | FSnapshotFlags::Tag::Inbetweener::ROUTES )
                                                  , FSnapshotFlags::ALL    // save all breakdown details
                                                  , FSnapshotFlags::ALL    // save all route details
-                                                 , FSnapshotFlags::ALL ); // save all trajectory details
+                                                 , FSnapshotFlags::ALL
+                                                 , eSnapshotState::Initial ); // save all trajectory details
     }
 }
 
@@ -155,7 +160,8 @@ FOdysseyVectorUndoTagInbetweenerInterpolationType::FOdysseyVectorUndoTagInbetwee
                                                    | FSnapshotFlags::Tag::Inbetweener::ROUTES )
                                                  , 0                      // ignore breakdowns (grids)
                                                  , FSnapshotFlags::ALL    // save all route details
-                                                 , FSnapshotFlags::ALL ); // save all trajectory details
+                                                 , FSnapshotFlags::ALL
+                                                 , eSnapshotState::Initial ); // save all trajectory details
     }
 }
 
@@ -176,7 +182,8 @@ FOdysseyVectorUndoTagInbetweenerColor::FOdysseyVectorUndoTagInbetweenerColor( FO
                                                  , FSnapshotFlags::Tag::Inbetweener::COLOR
                                                  , 0
                                                  , 0
-                                                 , 0 );
+                                                 , 0
+                                                 , eSnapshotState::Initial );
     }
 }
 
@@ -197,7 +204,8 @@ FOdysseyVectorUndoTagInbetweenerMapAsPolyline::FOdysseyVectorUndoTagInbetweenerM
                                                  , FSnapshotFlags::Tag::Inbetweener::MAPASPOLYLINE
                                                  , 0
                                                  , 0
-                                                 , 0 );
+                                                 , 0
+                                                 , eSnapshotState::Initial );
     }
 }
 
@@ -209,7 +217,7 @@ FOdysseyVectorUndoTagInbetweenerParam::Apply( UObject* iIgnored )
 
     for( FSnapshotTagInbetweener& inbetweenerTagSnapshot : mInbetweenerTagSnapshotArray )
     {
-        inbetweenerTagSnapshot.LoadAlteredState();
+        inbetweenerTagSnapshot.LoadState( eSnapshotState::Altered );
     }
 
     // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
@@ -224,8 +232,8 @@ FOdysseyVectorUndoTagInbetweenerParam::Revert( UObject* iIgnored )
 
     for( FSnapshotTagInbetweener& inbetweenerTagSnapshot : mInbetweenerTagSnapshotArray )
     {
-        inbetweenerTagSnapshot.RecordAlteredState();
-        inbetweenerTagSnapshot.LoadInitialState();
+        inbetweenerTagSnapshot.RecordState( eSnapshotState::Altered );
+        inbetweenerTagSnapshot.LoadState( eSnapshotState::Initial );
     }
 
     // Update vector scenes and call callbacks if any (for refreshing GUI e.g)

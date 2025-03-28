@@ -9,6 +9,7 @@
 #include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyVectorLayer.h"
 #include "OdysseyVectorCell.h"
+#include "Dialogs/Dialogs.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -41,7 +42,7 @@ SOdysseyPainterEditorVectorSceneTreeViewContextMenu::CreateWidget( SOdysseyPaint
             LOCTEXT("vector-scene-tree-view.context-menu.group.name", "Group")
           , LOCTEXT("vector-scene-tree-view.context-menu.group.tooltip", "Group")
           , FSlateIcon()
-          , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::Group, iTreeView->GetEditor(), vectorScene )));
+          , FUIAction(FExecuteAction::CreateStatic( &SOdysseyPainterEditorVectorSceneTreeViewContextMenu::Group, iTreeView->GetEditor(), vectorScene )));
 
         menu.AddMenuEntry(
             LOCTEXT("vector-scene-tree-view.context-menu.ungroup.name", "Ungroup")
@@ -108,6 +109,22 @@ SOdysseyPainterEditorVectorSceneTreeViewContextMenu::CreateWidget( SOdysseyPaint
     menu.EndSection();
 
     return menu.MakeWidget();
+}
+
+// static
+void
+SOdysseyPainterEditorVectorSceneTreeViewContextMenu::Group( FOdysseyPainterEditor* iEditor
+                                                          , FOdysseyVectorGroupPaint* iPaintGroup )
+{
+    SGenericDialogWidget::FArguments args;
+
+    SGenericDialogWidget::OpenDialog( FText::FromString( "test" )
+                                    , SNew(SEditableTextBox)
+                                      .Text( FText::FromString("New Group") )
+                                    , args
+                                    , true );
+
+    FOdysseyPainterEditor::Group( iEditor, iPaintGroup );
 }
 
 // static
