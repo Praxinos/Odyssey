@@ -117,13 +117,13 @@ SOdysseyPainterEditorVectorSceneTreeViewContextMenu::Group( FOdysseyPainterEdito
                                                           , FOdysseyVectorGroupPaint* iPaintGroup )
 {
     SGenericDialogWidget::FArguments args;
-
+/*
     SGenericDialogWidget::OpenDialog( FText::FromString( "test" )
                                     , SNew(SEditableTextBox)
                                       .Text( FText::FromString("New Group") )
                                     , args
                                     , true );
-
+*/
     FOdysseyPainterEditor::Group( iEditor, iPaintGroup );
 }
 
