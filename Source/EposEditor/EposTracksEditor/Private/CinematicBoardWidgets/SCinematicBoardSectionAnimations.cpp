@@ -1029,9 +1029,13 @@ SCinematicBoardSectionAnimationTimelineKeys::BuildKeyContextMenu( FMenuBuilder& 
 
             FMovieSceneObjectPathChannelKeyValue value;
             UE::MovieScene::GetKeyValue( object_channel, subkey.mKeyHandle, value );
-            UOdysseyAnimationCell* cell = Cast<UOdysseyAnimationCell>( value.Get() );
+            //UOdysseyAnimationCell* cell = Cast<UOdysseyAnimationCell>( value.Get() );
 
-            animation = cell->GetAnimation();
+            //animation = cell->GetAnimation();
+
+            UAnimationCutKey* key = Cast<UAnimationCutKey>( value.Get() );
+
+            animation = key->AnimationCut.GetEntries()[0].GetCell()->GetAnimation();
         }
     }
 
@@ -1080,10 +1084,16 @@ SCinematicBoardSectionAnimationTimelineKeys::GetKeyTooltipText( TSharedPtr<FMeta
 
             FMovieSceneObjectPathChannelKeyValue value;
             UE::MovieScene::GetKeyValue( object_channel, subkey.mKeyHandle, value );
-            UOdysseyAnimationCell* cell = Cast<UOdysseyAnimationCell>( value.Get() );
+            //UOdysseyAnimationCell* cell = Cast<UOdysseyAnimationCell>( value.Get() );
+            UAnimationCutKey* key = Cast<UAnimationCutKey>( value.Get() );
 
-            map.Add( frame, cell->GetLayer()->GetLayerName() );
-            animation = cell->GetAnimation();
+            //map.Add( frame, cell->GetLayer()->GetLayerName() );
+            //animation = cell->GetAnimation();
+            for( FAnimationCutEntry animationcut_entry : key->AnimationCut.GetEntries() )
+            {
+                map.Add( frame, animationcut_entry.GetCell()->GetLayer()->GetLayerName() );
+                animation = animationcut_entry.GetCell()->GetAnimation();
+            }
         }
     }
 
@@ -1140,35 +1150,6 @@ SCinematicBoardSectionAnimationTimelineKeys::OnMouseButtonUp( const FGeometry& M
     return SMetaKeysArea::OnMouseButtonUp( MyGeometry, MouseEvent );
 }
 
-struct FCellFrameConverter
-{
-    FFrameNumber FrameInSubsequence = -1;
-    FFrameNumber FrameInSection = -1;
-    FFrameNumber FrameInTimeline = -1;
-
-    void ConvertFrameFromTimelineToSequence( FFrameNumber iFrameInTimeline, const UOdysseyAnimationTimelineSection& iTimelineSection, const UMovieSceneSequence& iSequence );
-    void ConvertFrameFromSequenceToTimeline( FFrameNumber iFrameInSubsequence, const UOdysseyAnimationTimelineSection& iTimelineSection, const UMovieSceneSequence& iSequence );
-};
-
-void
-FCellFrameConverter::ConvertFrameFromTimelineToSequence( FFrameNumber iFrameInTimeline, const UOdysseyAnimationTimelineSection& iTimelineSection, const UMovieSceneSequence& iSequence )
-{
-    FrameInTimeline = iFrameInTimeline;
-    FFrameTime start_frametime_in_section = FFrameRate::TransformTime( FrameInTimeline, FFrameRate( iTimelineSection.GetAnimation()->GetFramesPerSecond() * 1000, 1000 ), iSequence.GetMovieScene()->GetTickResolution() );
-    FFrameNumber start_frame_in_timeline = start_frametime_in_section.GetFrame();
-    FFrameNumber section_offset = iTimelineSection.GetTrueRange().GetLowerBoundValue();
-    FrameInSection = start_frame_in_timeline + section_offset;
-    FrameInSubsequence = FrameInSection + iTimelineSection.GetStartFrameOffset(); //TODO: GetStartFrameOffset() in which frame rate ??????????????????????
-}
-
-void
-FCellFrameConverter::ConvertFrameFromSequenceToTimeline( FFrameNumber iFrameInSubsequence, const UOdysseyAnimationTimelineSection& iTimelineSection, const UMovieSceneSequence& iSequence )
-{
-    FrameInSubsequence = iFrameInSubsequence;
-    FrameInSection = FrameInSubsequence - iTimelineSection.GetTrueRange().GetLowerBoundValue();
-    FrameInTimeline = FFrameRate::TransformTime( FrameInSection, iSequence.GetMovieScene()->GetTickResolution(), FFrameRate( iTimelineSection.GetAnimation()->GetFramesPerSecond() * 1000, 1000 ) ).GetFrame() - iTimelineSection.GetStartFrameOffset();
-}
-
 void
 SCinematicBoardSectionAnimationTimelineKeys::FindLimitCells( TSharedPtr<FMetaChannel> iKeys, TMap<UOdysseyAnimationLayer*, FCellEntry>& oPreviousCells, TMap<UOdysseyAnimationLayer*, FCellEntry>& oLastCells ) const
 {
@@ -1199,33 +1180,38 @@ SCinematicBoardSectionAnimationTimelineKeys::FindLimitCells( TSharedPtr<FMetaCha
             FMovieSceneObjectPathChannelKeyValue value;
             UE::MovieScene::GetKeyValue( object_channel, subkey.mKeyHandle, value );
 
-            UOdysseyAnimationCell* cell = Cast<UOdysseyAnimationCell>( value.Get() );
-            if( cell && inner_sequence )
+            //UOdysseyAnimationCell* cell = Cast<UOdysseyAnimationCell>( value.Get() );
+            UAnimationCutKey* key = Cast<UAnimationCutKey>( value.Get() );
+            for( FAnimationCutEntry animationcut_entry : key->AnimationCut.GetEntries() )
             {
-                FCellEntry cell_entry = {
-                    cell,
-                    Cast<UOdysseyAnimationTimelineSection>( subkey.mSection ),
-                    inner_sequence,
-                };
+                UOdysseyAnimationCell* cell = animationcut_entry.GetCell();
+                //UOdysseyAnimationCell* cell = key->AnimationCut.GetEntries()[0].GetCell();
+                if( cell && inner_sequence )
+                {
+                    FCellEntry cell_entry = {
+                        cell,
+                        Cast<UOdysseyAnimationTimelineSection>( subkey.mSection ),
+                        inner_sequence,
+                    };
 
-                FCellFrameConverter converter;
-                converter.ConvertFrameFromSequenceToTimeline( frame, *cell_entry.Section, *cell_entry.Sequence );
+                    FFrameNumber frame_in_timeline = ShotSequenceHelpers::ConvertFrameFromSequenceToTimeline( frame, cell_entry.Section );
 
-                UE_LOG( LogTemp, Warning, TEXT( "FindLimitCells: current frame in subsequence: %d" ), frame.Value );
-                UE_LOG( LogTemp, Warning, TEXT( "FindLimitCells: current converter.FrameInTimeline: %d" ), converter.FrameInTimeline.Value );
+                    UE_LOG( LogTemp, Warning, TEXT( "FindLimitCells: current frame in subsequence: %d" ), frame.Value );
+                    UE_LOG( LogTemp, Warning, TEXT( "FindLimitCells: current frame_in_timeline: %d" ), frame_in_timeline.Value );
 
-                UE_LOG( LogTemp, Warning, TEXT( "FindLimitCells: cell: %d" ), cell->GetFrameRange().GetLowerBoundValue() );
+                    UE_LOG( LogTemp, Warning, TEXT( "FindLimitCells: cell: %d" ), cell->GetFrameRange().GetLowerBoundValue() );
 
-                cell_entry.PreviousFrameInTimeline = cell->GetFrameRange().GetLowerBoundValue();
-                cell_entry.NewFrameInTimeline = converter.FrameInTimeline;
-                //cell_entry.OffsetInTimeline = converter.FrameInTimeline - cell->GetFrameRange().GetLowerBoundValue();
-                //FFrameNumber offset = converter.FrameInTimeline - cell->GetFrameRange().GetLowerBoundValue();
-                //UE_LOG( LogTemp, Warning, TEXT( "FindLimitCells: offset: %d" ), offset.Value );
-                //offsets.Add( offset );
+                    cell_entry.PreviousFrameInTimeline = cell->GetFrameRange().GetLowerBoundValue();
+                    cell_entry.NewFrameInTimeline = frame_in_timeline;
+                    //cell_entry.OffsetInTimeline = converter.FrameInTimeline - cell->GetFrameRange().GetLowerBoundValue();
+                    //FFrameNumber offset = converter.FrameInTimeline - cell->GetFrameRange().GetLowerBoundValue();
+                    //UE_LOG( LogTemp, Warning, TEXT( "FindLimitCells: offset: %d" ), offset.Value );
+                    //offsets.Add( offset );
 
-                //UE_LOG( LogTemp, Warning, TEXT( "FindLimitCells: cell_entry.OffsetInTimeline: %d" ), cell_entry.OffsetInTimeline.Value );
+                    //UE_LOG( LogTemp, Warning, TEXT( "FindLimitCells: cell_entry.OffsetInTimeline: %d" ), cell_entry.OffsetInTimeline.Value );
 
-                dragged_cells_per_layer.Add( cell->GetLayer(), cell_entry );
+                    dragged_cells_per_layer.Add( cell->GetLayer(), cell_entry );
+                }
             }
         }
     }
@@ -1291,11 +1277,10 @@ SCinematicBoardSectionAnimationTimelineKeys::ComputeClampRangePreMoveDuringDrag(
     ShotSequenceHelpers::FFindOrCreateTimelineResult result = ShotSequenceHelpers::FindTimelineTrackAndSections( *sequencer, result_inner.mInnerSequence, result_inner.mInnerSequenceId, mBinding.GetGuid(), clamp_max2 );
     if( result.mSections.Num() )
     {
-        FCellFrameConverter converter;
-        converter.ConvertFrameFromSequenceToTimeline( clamp_max2, *result.mSections[0], *result_inner.mInnerSequence );
-        converter.ConvertFrameFromTimelineToSequence( converter.FrameInTimeline, *result.mSections[0], *result_inner.mInnerSequence );
+        FFrameNumber frame_in_timeline = ShotSequenceHelpers::ConvertFrameFromSequenceToTimeline( clamp_max2, result.mSections[0].Get() );
+        FFrameNumber frame_in_sequence = ShotSequenceHelpers::ConvertFrameFromTimelineToSequence( frame_in_timeline, result.mSections[0].Get() );
 
-        clamp_max2 = converter.FrameInSubsequence;
+        clamp_max2 = frame_in_sequence;
     }
 
     board_section_clamp_range_in_subsequence.SetUpperBound( TRangeBound<FFrameNumber>::Inclusive( clamp_max2 ) );
@@ -1322,10 +1307,9 @@ SCinematicBoardSectionAnimationTimelineKeys::ComputeClampRangePreMoveDuringDrag(
 
         clamp_min = start_frame_in_timeline_with_1_exposure;
 
-        FCellFrameConverter converter;
-        converter.ConvertFrameFromTimelineToSequence( clamp_min, *cell_entry.Section, *cell_entry.Sequence );
+        FFrameNumber clamp_min_in_sequence = ShotSequenceHelpers::ConvertFrameFromTimelineToSequence( clamp_min, cell_entry.Section );
 
-        prev_last_cell_clamp_range_in_subsequence.SetLowerBound( TRangeBound<FFrameNumber>::Inclusive( converter.FrameInSubsequence ) );
+        prev_last_cell_clamp_range_in_subsequence.SetLowerBound( TRangeBound<FFrameNumber>::Inclusive( clamp_min_in_sequence ) );
     }
 
     FFrameNumber clamp_max = TNumericLimits<FFrameNumber>::Max();
@@ -1340,10 +1324,9 @@ SCinematicBoardSectionAnimationTimelineKeys::ComputeClampRangePreMoveDuringDrag(
 
         clamp_max = last_frame_in_timeline_less_1_exposure;
 
-        FCellFrameConverter converter;
-        converter.ConvertFrameFromTimelineToSequence( clamp_max, *cell_entry.Section, *cell_entry.Sequence );
+        FFrameNumber clamp_max_in_sequence = ShotSequenceHelpers::ConvertFrameFromTimelineToSequence( clamp_max, cell_entry.Section );
 
-        prev_last_cell_clamp_range_in_subsequence.SetUpperBound( TRangeBound<FFrameNumber>::Inclusive( converter.FrameInSubsequence ) );
+        prev_last_cell_clamp_range_in_subsequence.SetUpperBound( TRangeBound<FFrameNumber>::Inclusive( clamp_max_in_sequence ) );
     }
 
     //---
@@ -1438,100 +1421,100 @@ SCinematicBoardSectionAnimationTimelineKeys::OnMouseMove( const FGeometry& MyGeo
         if( !mDraggedKeys.IsValid() )
             return reply;
 
-        FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
-        const UMovieSceneSubSection& subsection_object = board_section->GetSubSectionObject();
-        UMovieSceneSequence* inner_sequence = subsection_object.GetSequence();
-        UMovieScene* inner_moviescene = inner_sequence ? inner_sequence->GetMovieScene() : nullptr;
+        //FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+        //const UMovieSceneSubSection& subsection_object = board_section->GetSubSectionObject();
+        //UMovieSceneSequence* inner_sequence = subsection_object.GetSequence();
+        //UMovieScene* inner_moviescene = inner_sequence ? inner_sequence->GetMovieScene() : nullptr;
 
-        // For the moment, this should always be the case (until meta keys selection)
-        // (Like in the parent, to not forget it here if meta keys selection is done)
-        check( mDraggedKeys->NumMetaKeys() == 1 );
+        //// For the moment, this should always be the case (until meta keys selection)
+        //// (Like in the parent, to not forget it here if meta keys selection is done)
+        //check( mDraggedKeys->NumMetaKeys() == 1 );
 
-        TMultiMap<UOdysseyAnimationLayer* , UOdysseyAnimationCell*> dragged_cells_per_layer;
-        FFrameNumber new_frame_in_sequence = -1;
-        FFrameNumber new_frame_in_section = -1;
-        FFrameNumber new_frame_in_timeline = -1;
-        FFrameNumber offset = 0;
-        for( auto pair : mDraggedKeys->GetMetaKeys() )
-        {
-            for( const auto& subkey : pair.Value.mSubKeys )
-            {
-                TMovieSceneChannelHandle<FMovieSceneObjectPathChannel> channel_handle = subkey.mChannelHandle.Cast<FMovieSceneObjectPathChannel>();
-                FMovieSceneObjectPathChannel* object_channel = channel_handle.Get();
+        //TMultiMap<UOdysseyAnimationLayer* , UOdysseyAnimationCell*> dragged_cells_per_layer;
+        //FFrameNumber new_frame_in_sequence = -1;
+        //FFrameNumber new_frame_in_section = -1;
+        //FFrameNumber new_frame_in_timeline = -1;
+        //FFrameNumber offset = 0;
+        //for( auto pair : mDraggedKeys->GetMetaKeys() )
+        //{
+        //    for( const auto& subkey : pair.Value.mSubKeys )
+        //    {
+        //        TMovieSceneChannelHandle<FMovieSceneObjectPathChannel> channel_handle = subkey.mChannelHandle.Cast<FMovieSceneObjectPathChannel>();
+        //        FMovieSceneObjectPathChannel* object_channel = channel_handle.Get();
 
-                FFrameNumber frame;
-                object_channel->GetKeyTime( subkey.mKeyHandle, frame );
+        //        FFrameNumber frame;
+        //        object_channel->GetKeyTime( subkey.mKeyHandle, frame );
 
-                FMovieSceneObjectPathChannelKeyValue value;
-                UE::MovieScene::GetKeyValue( object_channel, subkey.mKeyHandle, value );
-                UOdysseyAnimationCell* cell = Cast<UOdysseyAnimationCell>( value.Get() );
-                if( cell && inner_sequence )
-                {
-                    FCellFrameConverter converter;
-                    converter.ConvertFrameFromSequenceToTimeline( frame, *Cast<UOdysseyAnimationTimelineSection>( subkey.mSection ), *inner_sequence );
+        //        FMovieSceneObjectPathChannelKeyValue value;
+        //        UE::MovieScene::GetKeyValue( object_channel, subkey.mKeyHandle, value );
+        //        UOdysseyAnimationCell* cell = Cast<UOdysseyAnimationCell>( value.Get() );
+        //        if( cell && inner_sequence )
+        //        {
+        //            FCellFrameConverter converter;
+        //            converter.ConvertFrameFromSequenceToTimeline( frame, *Cast<UOdysseyAnimationTimelineSection>( subkey.mSection ), *inner_sequence );
 
 
 
-                    dragged_cells_per_layer.Add( cell->GetLayer(), cell );
-                    //dragged_cells.Add( cell );
-                    offset = converter.FrameInTimeline - cell->GetFrameRange().GetLowerBoundValue(); //TODO: must be stored in an map for each layer (?)
-                }
-            }
-        }
+        //            dragged_cells_per_layer.Add( cell->GetLayer(), cell );
+        //            //dragged_cells.Add( cell );
+        //            offset = converter.FrameInTimeline - cell->GetFrameRange().GetLowerBoundValue(); //TODO: must be stored in an map for each layer (?)
+        //        }
+        //    }
+        //}
 
-        UE_LOG( LogTemp, Warning, TEXT( "move: new_frame_in_sequence: %d" ), new_frame_in_sequence.Value );
-        UE_LOG( LogTemp, Warning, TEXT( "move: new_frame_in_section: %d" ), new_frame_in_section.Value );
-        UE_LOG( LogTemp, Warning, TEXT( "move: new_frame_in_timeline: %d" ), new_frame_in_timeline.Value );
-        UE_LOG( LogTemp, Warning, TEXT( "move: offset: %d" ), offset.Value );
+        //UE_LOG( LogTemp, Warning, TEXT( "move: new_frame_in_sequence: %d" ), new_frame_in_sequence.Value );
+        //UE_LOG( LogTemp, Warning, TEXT( "move: new_frame_in_section: %d" ), new_frame_in_section.Value );
+        //UE_LOG( LogTemp, Warning, TEXT( "move: new_frame_in_timeline: %d" ), new_frame_in_timeline.Value );
+        //UE_LOG( LogTemp, Warning, TEXT( "move: offset: %d" ), offset.Value );
 
-        if( dragged_cells_per_layer.IsEmpty() )
-            return reply;
+        //if( dragged_cells_per_layer.IsEmpty() )
+        //    return reply;
 
-        //TArray<int> cell_indexes;
-        //for( UOdysseyAnimationCell* dragged_cell : dragged_cells )
-        //    cell_indexes.Add( dragged_cell->IndexInLayer );
-        //Algo::Sort( cell_indexes );
+        ////TArray<int> cell_indexes;
+        ////for( UOdysseyAnimationCell* dragged_cell : dragged_cells )
+        ////    cell_indexes.Add( dragged_cell->IndexInLayer );
+        ////Algo::Sort( cell_indexes );
 
-        TMap<UOdysseyAnimationLayer*, UOdysseyAnimationCell*> previous_cell_per_layer;
-        TMap<UOdysseyAnimationLayer*, UOdysseyAnimationCell*> last_cell_per_layer;
+        //TMap<UOdysseyAnimationLayer*, UOdysseyAnimationCell*> previous_cell_per_layer;
+        //TMap<UOdysseyAnimationLayer*, UOdysseyAnimationCell*> last_cell_per_layer;
 
-        TArray<UOdysseyAnimationLayer*> layers;
-        dragged_cells_per_layer.GetKeys( layers );
-        for( UOdysseyAnimationLayer* layer : layers )
-        {
-            TArray<UOdysseyAnimationCell*> cells;
-            dragged_cells_per_layer.GenerateValueArray( cells );
+        //TArray<UOdysseyAnimationLayer*> layers;
+        //dragged_cells_per_layer.GetKeys( layers );
+        //for( UOdysseyAnimationLayer* layer : layers )
+        //{
+        //    TArray<UOdysseyAnimationCell*> cells;
+        //    dragged_cells_per_layer.GenerateValueArray( cells );
 
-            Algo::SortBy( cells, &UOdysseyAnimationCell::IndexInLayer );
+        //    Algo::SortBy( cells, &UOdysseyAnimationCell::IndexInLayer );
 
-            int index_previous = cells[0]->IndexInLayer - 1;
-            int index_last = cells.Last()->IndexInLayer;
+        //    int index_previous = cells[0]->IndexInLayer - 1;
+        //    int index_last = cells.Last()->IndexInLayer;
 
-            if( layer->GetCells().IsValidIndex( index_previous ) )
-            {
-                check( !previous_cell_per_layer.Find( layer ) );
-                previous_cell_per_layer.Add( layer, layer->GetCells()[index_previous] );
-            }
+        //    if( layer->GetCells().IsValidIndex( index_previous ) )
+        //    {
+        //        check( !previous_cell_per_layer.Find( layer ) );
+        //        previous_cell_per_layer.Add( layer, layer->GetCells()[index_previous] );
+        //    }
 
-            check( !last_cell_per_layer.Find( layer ) );
-            last_cell_per_layer.Add( layer, layer->GetCells()[index_last] );
-        }
+        //    check( !last_cell_per_layer.Find( layer ) );
+        //    last_cell_per_layer.Add( layer, layer->GetCells()[index_last] );
+        //}
 
-        if( offset < 0 )
-        {
-            for( const auto& pair : previous_cell_per_layer )
-            {
-                UOdysseyAnimationLayer* layer = pair.Key;
-                UOdysseyAnimationCell* previous_cell = pair.Value;
+        //if( offset < 0 )
+        //{
+        //    for( const auto& pair : previous_cell_per_layer )
+        //    {
+        //        UOdysseyAnimationLayer* layer = pair.Key;
+        //        UOdysseyAnimationCell* previous_cell = pair.Value;
 
-                int diff = FMath::Min( previous_cell->Exposure - 1, -offset.Value );
+        //        int diff = FMath::Min( previous_cell->Exposure - 1, -offset.Value );
 
-                FOdysseyObjectEditorUtils::SetPropertyValue( previous_cell, GET_MEMBER_NAME_CHECKED( UOdysseyAnimationCell, Exposure ), previous_cell->Exposure - diff );
+        //        FOdysseyObjectEditorUtils::SetPropertyValue( previous_cell, GET_MEMBER_NAME_CHECKED( UOdysseyAnimationCell, Exposure ), previous_cell->Exposure - diff );
 
-                UOdysseyAnimationCell* last_cell = *last_cell_per_layer.Find( layer );
-                FOdysseyObjectEditorUtils::SetPropertyValue( last_cell, GET_MEMBER_NAME_CHECKED( UOdysseyAnimationCell, Exposure ), last_cell->Exposure + diff );
-            }
-        }
+        //        UOdysseyAnimationCell* last_cell = *last_cell_per_layer.Find( layer );
+        //        FOdysseyObjectEditorUtils::SetPropertyValue( last_cell, GET_MEMBER_NAME_CHECKED( UOdysseyAnimationCell, Exposure ), last_cell->Exposure + diff );
+        //    }
+        //}
 
 
 

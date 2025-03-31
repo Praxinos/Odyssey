@@ -142,25 +142,29 @@ struct EPOSSEQUENCE_API FDrawing
 
 #if WITH_EDITOR
 
-class UOdysseyAnimationLayer;
 class UOdysseyAnimationCell;
 
 class EPOSSEQUENCE_API FAnimationCutEntry
 {
 public:
-    FAnimationCutEntry( UOdysseyAnimationLayer* iLayer, UOdysseyAnimationCell* iCell );
+    enum class ESide : uint8
+    {
+        kLeft,
+        kRight,
+    };
 
+public:
+    FAnimationCutEntry( UOdysseyAnimationCell* iCell );
+
+    ESide GetSide() const;
     FFrameNumber GetFrameReference() const;
 
-    const UOdysseyAnimationLayer* GetLayer() const;
-    UOdysseyAnimationLayer* GetLayer();
     const UOdysseyAnimationCell* GetCell() const;
     UOdysseyAnimationCell* GetCell();
 
 private:
-    UOdysseyAnimationLayer* mLayer;
     UOdysseyAnimationCell* mCell;
-    FFrameNumber mFrameReference;
+    ESide mSide;
 };
 
 class EPOSSEQUENCE_API FAnimationCut
@@ -172,7 +176,8 @@ public:
 
     void AddNewEntry( const FAnimationCutEntry& iAnimationCutEntry );
 
-    const TArray<FAnimationCutEntry>& GetEntries();
+    const TArray<FAnimationCutEntry>& GetEntries() const;
+    TArray<FAnimationCutEntry>& GetEntries();
 
 private:
     TArray<FAnimationCutEntry> mAnimationCutEntries;
@@ -189,6 +194,16 @@ public:
 
 private:
     TMap<FFrameNumber, FAnimationCut> mAnimationCuts;
+};
+
+UCLASS()
+class EPOSSEQUENCE_API UAnimationCutKey
+    : public UObject
+{
+    GENERATED_BODY()
+
+public:
+    FAnimationCut AnimationCut;
 };
 
 #endif
