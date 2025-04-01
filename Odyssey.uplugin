@@ -71,6 +71,10 @@
         {
             "Enabled": true,
             "Name": "Paper2D"
+        },
+        {
+            "Enabled": true,
+            "Name": "ControlRig"
         }
     ],
     "Modules": [

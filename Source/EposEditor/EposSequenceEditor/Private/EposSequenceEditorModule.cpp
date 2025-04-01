@@ -10,6 +10,7 @@
 #include "LevelEditor.h"
 #include "Modules/ModuleManager.h"
 #include "PropertyEditorModule.h"
+#include "Sequencer/EditModeAnimationUtil.h"
 #include "SequencerSettings.h"
 
 #include "Board/BoardSequence.h"
@@ -154,6 +155,12 @@ FEposSequenceEditorModule::RegisterLevelEditorExtensions()
 
     FViewportTypeDefinition StoryboardViewportType = FViewportTypeDefinition::FromType<FStoryboardViewportLayoutEntity>( FEposSequenceEditorCommands::Get().ToggleStoryboardViewportCommand );
     LevelEditorModule.RegisterViewportType( "Storyboard", StoryboardViewportType );
+
+    //---
+
+    UE::AnimationEditMode::FCustomMovieSceneRegistry& registry = UE::AnimationEditMode::FCustomMovieSceneRegistry::Get();
+    registry.RegisterSequence<UShotSequence>();
+    registry.RegisterSequence<UBoardSequence>();
 }
 
 void
