@@ -47,8 +47,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorTag
         virtual void ObjectRemoved();
         virtual void Added();
         virtual void Removed();
-        void LockDrawing();
-        void UnlockDrawing();
         virtual FOdysseyVectorTag* Copy( FOdysseyVectorObject* iOwnerObject ) = 0;
 
         FOdysseyVectorObject* GetOwner( );
@@ -57,9 +55,4 @@ class ODYSSEYVECTOR_API FOdysseyVectorTag
         FOdysseyVectorObject* mOwner;
         uint32 mFlags;
         bool bShared;
-
-    public:
-        // mutex to prevent drawing whil update isn't complete. this is necessary due to the Proxy renderer
-        // which runs in a different thread
-        std::mutex mDrawingMutex;
 };

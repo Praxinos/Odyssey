@@ -207,8 +207,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void DrawPathsInbetween( FOdysseyVectorGroupPaint* iDisplayedScene
                                , FInbetweenerChart::Inbetween* inbetween
                                , BLContext* iBLContext
-                               , FOdysseyVectorEngine* iEngine
-                               , bool iLock );
+                               , FOdysseyVectorEngine* iEngine );
 
         //void DeformObjectsAtTarget();
         void DeformObjectsAtSource();
@@ -233,8 +232,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
                        //, ::ULIS::FVec2D* iPointPositionBuffer
                        //, const BLMatrix2D& iWorldMatrix
                        , BLContext* iBLContext
-                       , FOdysseyVectorEngine* iEngine
-                       , bool iLock );
+                       , FOdysseyVectorEngine* iEngine );
         uint32 GetBreakdownCount();
         void RemoveBreakdown( FInbetweenerBreakdown* iBreakdown, bool iFreeMemNow );
         FInbetweenerBreakdown* GetBreakdown( uint32 iDrawingIndex, bool iStrict );

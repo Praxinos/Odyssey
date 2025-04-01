@@ -116,6 +116,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::Update()
 {
     mItemsSource.Reset();
 
+    mAnimationLayerImageVector->GetVectorLayer()->GetSharedTagMutex().lock();
     for( FOdysseyVectorTag* tag : mAnimationLayerImageVector->GetVectorLayer()->GetSharedTagList() )
     {
         if( tag->GetClass() == FOdysseyVectorTagInbetweener::StaticClass() )
@@ -125,6 +126,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::Update()
             mItemsSource.Insert( MakeShareable( new FInbetweeningListViewItem(inbetweenerTag) ), 0 );
         }
     }
+    mAnimationLayerImageVector->GetVectorLayer()->GetSharedTagMutex().unlock();
 
     SelectedItems.Empty();
 

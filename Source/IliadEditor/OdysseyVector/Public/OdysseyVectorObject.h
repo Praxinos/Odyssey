@@ -589,6 +589,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
                               , std::function<uint64(FOdysseyVectorObject*,uint64)> iCallback );
         bool IsVisible( bool iHierarchical );
         void SetVisible( bool iVisible );
+        void InvalideTree( uint64 iInvalidationFlags );
 
     protected:
 

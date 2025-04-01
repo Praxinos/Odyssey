@@ -470,7 +470,7 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawHUD( const FOdysseyHUD::FDrawH
 
         for( FOdysseyVectorTagInbetweener* inbetweenerTag : mSelectedInbetweenerTagList )
         {
-            inbetweenerTag->LockDrawing();
+            inbetweenerTag->GetOwner()->LockDrawing();
 
             for( FInbetweenerRoute* route : inbetweenerTag->GetRouteList() )
             {
@@ -485,7 +485,7 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawHUD( const FOdysseyHUD::FDrawH
                 }
             }
 
-            inbetweenerTag->UnlockDrawing();
+            inbetweenerTag->GetOwner()->UnlockDrawing();
         }
 
         if( mTrajectoryTool->GetEditionMode() == eVectorTrajectoryEditionMode::Add )
@@ -494,13 +494,13 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawHUD( const FOdysseyHUD::FDrawH
 
             if( hoveredQuad )
             {
-                hoveredQuad->GetGrid()->GetBreakdown()->GetInbetweenerTag()->LockDrawing();
+                hoveredQuad->GetGrid()->GetBreakdown()->GetInbetweenerTag()->GetOwner()->LockDrawing();
 
                 DrawQuad( iParams
                         , hcColor
                         , hoveredQuad );
 
-                hoveredQuad->GetGrid()->GetBreakdown()->GetInbetweenerTag()->UnlockDrawing();
+                hoveredQuad->GetGrid()->GetBreakdown()->GetInbetweenerTag()->GetOwner()->UnlockDrawing();
             }
 
             // prevent a crash in case the grid is rebuilt by reset the pointer to null each time.

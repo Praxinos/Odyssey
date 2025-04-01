@@ -315,7 +315,7 @@ FOdysseyPainterEditorVectorChartToolHUD::DrawHUD( const FOdysseyHUD::FDrawHUDPar
         {
             FInbetweenerBreakdown* prevBreakdown = breakdown->GetPrevBreakdown();
 
-            breakdown->GetInbetweenerTag()->LockDrawing();
+            breakdown->GetInbetweenerTag()->GetOwner()->LockDrawing();
 
             DrawBreakdown( iParams
                          , breakdown
@@ -350,7 +350,7 @@ FOdysseyPainterEditorVectorChartToolHUD::DrawHUD( const FOdysseyHUD::FDrawHUDPar
                                   , true );
             }
 
-           breakdown->GetInbetweenerTag()->UnlockDrawing();
+           breakdown->GetInbetweenerTag()->GetOwner()->UnlockDrawing();
         }
     }
 

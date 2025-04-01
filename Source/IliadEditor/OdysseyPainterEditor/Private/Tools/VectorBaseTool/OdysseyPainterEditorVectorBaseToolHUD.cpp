@@ -180,10 +180,10 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawInbetweens( const FOdysseyHUD::FDraw
                                                       , uint64 iSourceExtraHUDFlags
                                                       , uint64 iTargetExtraHUDFlags )
 {
+    iBreakdown->GetInbetweenerTag()->GetOwner()->LockDrawing();
+
     FInbetweenerBreakdown* firstBreakdown = iBreakdown->GetInbetweenerTag()->GetBreakdownList().front();
     FInbetweenerBreakdown* lastBreakdown = iBreakdown->GetInbetweenerTag()->GetBreakdownList().back();
-
-    iBreakdown->GetInbetweenerTag()->LockDrawing();
 
     if( ( ShowInbetweens == eShowInbetweens::All )
      || ( ShowInbetweens == eShowInbetweens::SourceOnly )
@@ -254,7 +254,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawInbetweens( const FOdysseyHUD::FDraw
                  , FOdysseyVectorHUD::HUD_BREAKDOWN_TARGET
                  | iTargetExtraHUDFlags );
 
-    iBreakdown->GetInbetweenerTag()->UnlockDrawing();
+    iBreakdown->GetInbetweenerTag()->GetOwner()->UnlockDrawing();
 }
 
 void
@@ -1754,8 +1754,6 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawPath( const FOdysseyHUD::FDrawHUDPar
                                                 , const FLinearColor& hcColor
                                                 , uint64 iHUDFlags )
 {
-    iPath->LockDrawing();
-
     std::list<FOdysseyVectorSegment*>& segmentList = iPath->GetSegmentList();
     std::list<FOdysseyVectorVertex*>& vertexList = iPath->GetVertexList();
 
@@ -1795,8 +1793,6 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawPath( const FOdysseyHUD::FDrawHUDPar
             }
         }
     }
-
-    iPath->UnlockDrawing();
 }
 
 void

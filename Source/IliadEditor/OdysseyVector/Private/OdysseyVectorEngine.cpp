@@ -241,7 +241,9 @@ FOdysseyVectorEngine::Render( BLContext* iBLContext
                 // only draw tag as a shared tag if it does NOT belong to the scene
                 if( tagOwner->GetScene() != scene )
                 {
+                    tagOwner->LockDrawing();
                     tag->Draw( scene, iBLContext, this, sanitizedRect, 1.0f, iDrawingFlags );
+                    tagOwner->UnlockDrawing();
                 }
             }
 

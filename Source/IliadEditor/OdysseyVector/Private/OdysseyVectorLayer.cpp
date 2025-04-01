@@ -192,7 +192,7 @@ FOdysseyVectorLayer::GetSelectedTagByClassType( uint32 iClassType )
 
 void
 FOdysseyVectorLayer::GetSelectedTagByClassType( uint32 iClassType
-                                                  , std::list<FOdysseyVectorTag*>& oSelectedTagList )
+                                              , std::list<FOdysseyVectorTag*>& oSelectedTagList )
 {
     for( FOdysseyVectorTag* tag : mSharedTagList )
     {

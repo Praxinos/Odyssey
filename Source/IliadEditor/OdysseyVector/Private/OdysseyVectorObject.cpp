@@ -282,6 +282,7 @@ FOdysseyVectorObject::Update( uint32 iUpdateFlags )
 
                                                 return child->IsInvalidated() == false;
                                             } );
+
         UpdateShape( iUpdateFlags );
 
         if( ( mInvalidationFlags & INVALIDATE_SHAPE       )
@@ -477,9 +478,24 @@ FOdysseyVectorObject::RecursiveRemoveTagByType( uint32 iTagType
 }
 
 void
+FOdysseyVectorObject::InvalideTree( uint64 iInvalidationFlags )
+{
+    Invalidate( iInvalidationFlags );
+
+
+    for( FOdysseyVectorObject* child : mChildrenList )
+    {
+        child->InvalideTree( iInvalidationFlags );
+    }
+}
+
+void
 FOdysseyVectorObject::SetVisible( bool iVisible )
 {
     bVisible = iVisible;
+
+    // visibility has consequences on the whole tree. We then have to invalidate the whole tree.
+    InvalideTree( 0 );
 }
 
 bool

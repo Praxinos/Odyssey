@@ -611,7 +611,7 @@ FOdysseyVectorTagInbetweener::AddBreakdown( FInbetweenerBreakdown* iNewBreakdown
 
         curChart->GetSpacing( curChartSpacingBuffer );
 
-        LockDrawing();
+        mOwner->LockDrawing();
 
         // This is for an already existing breakdown if it had been removed before
         // (then its pointer to the tag would be null)
@@ -715,7 +715,7 @@ FOdysseyVectorTagInbetweener::AddBreakdown( FInbetweenerBreakdown* iNewBreakdown
             newBreakdown->UpdateMatrix();
         }
 
-        UnlockDrawing();
+        mOwner->UnlockDrawing();
 
         // Invalidation might trigger a redrawing. It must be done outside the mutex locking mechanism
         // because redrawing will also lock the mutex.
@@ -728,7 +728,7 @@ FOdysseyVectorTagInbetweener::AddBreakdown( FInbetweenerBreakdown* iNewBreakdown
         FInbetweenerBreakdown* newBreakdown = iNewBreakdown ? iNewBreakdown
                                                             : new FInbetweenerBreakdown( this );
 
-        LockDrawing();
+        mOwner->LockDrawing();
 
         newBreakdown->SetInbetweenerTag( this );
 
@@ -743,7 +743,7 @@ FOdysseyVectorTagInbetweener::AddBreakdown( FInbetweenerBreakdown* iNewBreakdown
         // because redrawing will also lock the mutex.
         Invalidate( INVALIDATE_BREAKDOWN_LIST );
 
-        UnlockDrawing();
+        mOwner->UnlockDrawing();
 
         return newBreakdown;
     }
@@ -823,7 +823,7 @@ FOdysseyVectorTagInbetweener::GetBreakdownItem( uint32 iDrawingIndex, bool iStri
 void
 FOdysseyVectorTagInbetweener::RemoveBreakdown( FInbetweenerBreakdown* iBreakdown, bool iFreeMemNow )
 {
-    LockDrawing();
+    mOwner->LockDrawing();
 
     if( mBreakdownList.size() > 1 )
     {
@@ -886,7 +886,7 @@ FOdysseyVectorTagInbetweener::RemoveBreakdown( FInbetweenerBreakdown* iBreakdown
         }
     }
 
-    UnlockDrawing();
+    mOwner->UnlockDrawing();
 
     // Invalidation might trigger a redrawing. It must be done outside the mutex locking mechanism
     // because redrawing will also lock the mutex.
@@ -1063,8 +1063,6 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
     if( ( bShared == true )
      && ( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_NOINBETWEENING ) == 0 ) )
     {
-        LockDrawing();
-
         if( ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_HIERARCHY      )
          || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_SHAPE          )
          || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_TOPOLOGY       )
@@ -1076,13 +1074,7 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
             for( FInbetweenerBreakdown* breakdown : mBreakdownList )
             {
                 std::vector<::ULIS::FVec2D> targetGeometry;
-/*
-                // save positions for restoring when calling Make()
-                if( iUpdateFlags & FOdysseyVectorObject::UPDATE_FROMFILE )
-                {
-                    breakdown->GetGrid()->GetGeometry( sourceGeometry, eInbetweenerPointPositionType::SourcePosition );
-                }
-*/
+
                 breakdown->GetGrid()->GetGeometry( targetGeometry, eInbetweenerPointPositionType::TargetPosition );
                 // Note: we cannot call Invalidate in Make() (hence the "false" arg), so we set the flags manually.
                 breakdown->GetGrid()->Make( targetGeometry, false );
@@ -1126,7 +1118,7 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
 
         // will update grids' center of mass (needed for interpolation).
         // MUST be done after mapping because mapping will elimniate some quads, and this is taken into account
-        // for the center of mass.�
+        // for the center of mass.
         for( FInbetweenerBreakdown* breakdown : mBreakdownList )
         {
             FInbetweenerChart::Inbetween* inbetween = &breakdown->GetChart()->GetInbetweenBuffer().back();
@@ -1182,8 +1174,6 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
         {
             mInvalidationFlags = 0;
         }
-
-        UnlockDrawing();
     }
 
     if( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_INTERACTIVE ) == 0 )
@@ -1566,8 +1556,6 @@ FOdysseyVectorTagInbetweener::Draw( FOdysseyVectorGroupPaint* iDisplayedScene
 {
     FOdysseyVectorCell* displayedCell = iDisplayedScene->GetCell();
 
-    LockDrawing();
-
     // check the object is still displayed (it could have been removed but still in memory)
     if( /*mOwner->GetScene()*/ mOwner->IsVisible( true ) )
     {
@@ -1604,8 +1592,7 @@ FOdysseyVectorTagInbetweener::Draw( FOdysseyVectorGroupPaint* iDisplayedScene
                         DrawPathsInbetween( iDisplayedScene
                                           , inbetween
                                           , iBLContext
-                                          , iEngine
-                                          , false );
+                                          , iEngine );
                     }
                 }
             }
@@ -1613,8 +1600,6 @@ FOdysseyVectorTagInbetweener::Draw( FOdysseyVectorGroupPaint* iDisplayedScene
 
         iBLContext->restore();
     }
-
-    UnlockDrawing();
 }
 
 static ::ULIS::FVec2D
@@ -1653,14 +1638,8 @@ FOdysseyVectorTagInbetweener::DrawPathAt( FOdysseyVectorGroupPaint* iDisplayedSc
                                         , FInbetweenerChart::Inbetween* iInbetween
                                         , FInterpolatedPath* iInterpolatedPath
                                         , BLContext* iBLContext
-                                        , FOdysseyVectorEngine* iEngine
-                                        , bool iLock )
+                                        , FOdysseyVectorEngine* iEngine )
 {
-    if( iLock )
-        LockDrawing();
-
-    iInterpolatedPath->GetOriginalPath()->LockDrawing();
-
     uint32 pointCount = iInterpolatedPath->GetInterpolatedPointBuffer().size();
     uint32 inbetweenAbsoluteIndex = iInbetween->GetIndexInInbetweener();
     FInterpolatedPath::PointGeometry* interpolatedPointGeometryBuffer = &iInterpolatedPath->GetInterpolatedPointGeometryBuffer()[pointCount * inbetweenAbsoluteIndex];
@@ -1682,6 +1661,12 @@ FOdysseyVectorTagInbetweener::DrawPathAt( FOdysseyVectorGroupPaint* iDisplayedSc
     iBLContext->setFillStyle( BLRgba32( pathColor.R, pathColor.G, pathColor.B, pathColor.A ) );
 
     brush.Lock();
+
+    // object is already locked when tag::Draw is called, we only lock/unlock if it's not the same object
+    if( iInterpolatedPath->GetOriginalPath() != mOwner )
+    {
+        iInterpolatedPath->GetOriginalPath()->LockDrawing();
+    }
 
     if( bMapAsPolyline )
     {
@@ -1895,10 +1880,11 @@ FOdysseyVectorTagInbetweener::DrawPathAt( FOdysseyVectorGroupPaint* iDisplayedSc
 
     brush.Unlock();
 
-    iInterpolatedPath->GetOriginalPath()->UnlockDrawing();
-
-    if( iLock )
-        UnlockDrawing();
+    // object is already locked when tag::Draw is called, we only lock/unlock if it's not the same object
+    if( iInterpolatedPath->GetOriginalPath() != mOwner )
+    {
+        iInterpolatedPath->GetOriginalPath()->UnlockDrawing();
+    }
 }
 
 std::vector<FInterpolatedPath>&
@@ -1931,12 +1917,8 @@ void
 FOdysseyVectorTagInbetweener::DrawPathsInbetween( FOdysseyVectorGroupPaint* iDisplayedScene
                                                 , FInbetweenerChart::Inbetween* inbetween
                                                 , BLContext* iBLContext
-                                                , FOdysseyVectorEngine* iEngine
-                                                , bool iLock )
+                                                , FOdysseyVectorEngine* iEngine )
 {
-    if( iLock )
-        LockDrawing();
-
     iBLContext->save();
     iBLContext->resetMatrix();
 
@@ -1948,14 +1930,10 @@ FOdysseyVectorTagInbetweener::DrawPathsInbetween( FOdysseyVectorGroupPaint* iDis
                   //, pointPositionBuffer
                   //, worldMatrix
                   , iBLContext
-                  , iEngine
-                  , false );
+                  , iEngine );
     }
 
     iBLContext->restore();
-
-    if( iLock )
-        UnlockDrawing();
 }
 
 void
