@@ -8,6 +8,7 @@
 
 class FInbetweenerRoute;
 class FInbetweenerTrajectory;
+struct FInbetweenerDrawing;
 
 class ODYSSEYVECTOR_API FInbetweenerStep
 {
@@ -19,7 +20,8 @@ class ODYSSEYVECTOR_API FInbetweenerStep
         bool IsAligned();
 
         void AddTrajectory( FInbetweenerTrajectory* iTrajectory );
-
+        void SmoothTrajectories();
+        FInbetweenerDrawing* GetDrawing();
         FInbetweenerRoute* GetRoute();
 
     public:

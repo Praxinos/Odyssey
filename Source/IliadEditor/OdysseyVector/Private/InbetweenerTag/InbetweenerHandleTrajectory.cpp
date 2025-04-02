@@ -4,6 +4,7 @@
 #include "InbetweenerTag/InbetweenerHandleTrajectory.h"
 #include "InbetweenerTag/InbetweenerTrajectory.h"
 #include "InbetweenerTag/InbetweenerRoute.h"
+#include "InbetweenerTag/InbetweenerChart.h"
 #include "OdysseyVectorTagInbetweener.h"
 
 FInbetweenerHandleTrajectory::FInbetweenerHandleTrajectory( FInbetweenerTrajectory* iTrajectory )

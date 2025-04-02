@@ -86,6 +86,15 @@ FInbetweenerRoute::Resize()
 }
 
 void
+FInbetweenerRoute::Smooth()
+{
+    for( FInbetweenerStep& step : mStepBuffer )
+    {
+        step.SmoothTrajectories();
+    }
+}
+
+void
 FInbetweenerRoute::Fit( uint32 iFitFrom )
 {
     uint32 i = 0;
@@ -98,10 +107,10 @@ FInbetweenerRoute::Fit( uint32 iFitFrom )
             int32 divisionCount = divisionBuffer.size();
             FInbetweenerGrid* grid = breakdown->GetGrid();
             std::vector<::ULIS::FVec2D> pointBuffer;
-            std::vector<float> spacingBuffer;
+            std::vector<float> linearTBuffer;
             ::ULIS::FVec2D gridPoint;
 
-            breakdown->GetChart()->GetSpacing( spacingBuffer );
+            breakdown->GetChart()->GetSpacing( linearTBuffer );
 
             pointBuffer.reserve( divisionCount );
 
@@ -110,35 +119,37 @@ FInbetweenerRoute::Fit( uint32 iFitFrom )
                                                                       , mQuadV );
 
             //// curve fitting is buggy when a breakdown is added. commented-out.
-            ////pointBuffer.push_back( FOdysseyVector::MapPoint( divisionBuffer.front().drawing->localMatrix, gridPoint ) );
+            pointBuffer.push_back( FOdysseyVector::MapPoint( divisionBuffer.front().mDrawing->localMatrix, gridPoint ) );
 
             //// route must be disable before ARAP Precompute or else ARAP will try to use it.
             //// but the route is not ready yet (not all trajectories are set )
-            ////Disable();
-            ////if( divisionCount - 2 > 0 )
-            ////{
-            ////    grid->PrecomputeARAPInterpolation();
+            Disable();
+            if( divisionCount - 2 > 0 )
+            {
+                grid->PrecomputeARAPInterpolation();
 
-            ////    for( int32 j = 1; j < ( divisionCount - 1 ); j++ )
-            ////    {
-            ////        FInbetweenerChart::Inbetween& inbetween = divisionBuffer[j];
+                for( int32 j = 1; j < ( divisionCount - 1 ); j++ )
+                {
+                    FInbetweenerChart::Inbetween& inbetween = divisionBuffer[j];
 
-            ////        grid->ComputeARAPInterpolation( &inbetween, false );
+                    grid->ComputeARAPInterpolation( &inbetween, false );
 
-            ////        gridPoint = grid->GetQuadBuffer()[GetQuadIndex()].GetPoint( eInbetweenerPointPositionType::InterpPosition
-            ////                                                                  , mQuadU
-            ////                                                                  , mQuadV );
-            ////        pointBuffer.push_back( FOdysseyVector::MapPoint( inbetween.drawing->localMatrix, gridPoint ) );
-            ////    }
-            ////}
-            ////Enable();
+                    gridPoint = grid->GetQuadBuffer()[GetQuadIndex()].GetPoint( eInbetweenerPointPositionType::InterpPosition
+                                                                              , mQuadU
+                                                                              , mQuadV );
+                    pointBuffer.push_back( FOdysseyVector::MapPoint( inbetween.mDrawing->localMatrix, gridPoint ) );
+                }
+            }
+            Enable();
 
             gridPoint = grid->GetQuadBuffer()[GetQuadIndex()].GetPoint( eInbetweenerPointPositionType::TargetPosition
                                                                       , mQuadU
                                                                       , mQuadV );
-            ////pointBuffer.push_back( FOdysseyVector::MapPoint( divisionBuffer.back().drawing->localMatrix, gridPoint ) );
+            pointBuffer.push_back( FOdysseyVector::MapPoint( divisionBuffer.back().mDrawing->localMatrix, gridPoint ) );
 
-            ////mTrajectoryBuffer[i].FitBezier(  pointBuffer, spacingBuffer );
+            // Note: for T values we should normally use the cubic T values, but the linear T values
+            // give results good enough so that we don't need the extra computation.
+            mTrajectoryBuffer[i].FitBezier(  pointBuffer, linearTBuffer );
         }
 
         i++;

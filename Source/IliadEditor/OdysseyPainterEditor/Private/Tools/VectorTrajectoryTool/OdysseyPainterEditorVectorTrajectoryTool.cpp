@@ -444,13 +444,13 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDragVector( FOdysseyVectorGrou
             {
                 FInbetweenerTrajectory* trajectory = mPickedHandle->GetTrajectory();
                 BLMatrix2D ownerInverseWorldMatrix = trajectory->GetRoute()->GetInbetweenerTag()->GetOwner()->GetInverseWorldMatrix();
-                uint32 endpointIndex = ( mPickedHandle == trajectory->GetHandle(0) ) ? 0 : 3;
-                uint32 handleIndex   = ( mPickedHandle == trajectory->GetHandle(0) ) ? 1 : 2;
+                uint32 bezierEndpointIndex = ( mPickedHandle == trajectory->GetHandle(0) ) ? 0 : 3;
+                uint32 bezierHandleIndex   = ( mPickedHandle == trajectory->GetHandle(0) ) ? 1 : 2;
                 BLPoint diff = ownerInverseWorldMatrix.mapVector( deltaPositionCumul.X
                                                                 , deltaPositionCumul.Y );
                 ::ULIS::FVec2D* cubicBezier = trajectory->GetCubicBezier();
-                ::ULIS::FVec2D controlPosition = cubicBezier[endpointIndex];
-                ::ULIS::FVec2D handlePosition = cubicBezier[handleIndex];
+                ::ULIS::FVec2D controlPosition = cubicBezier[bezierEndpointIndex];
+                ::ULIS::FVec2D handlePosition = cubicBezier[bezierHandleIndex];
                 ::ULIS::FVec2D direction = ( ( handlePosition + ::ULIS::FVec2D( diff.x, diff.y ) ) - controlPosition );
 
                 if( direction.DistanceSquared() )
@@ -461,7 +461,13 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDragVector( FOdysseyVectorGrou
 
                     direction.Normalize();
 
-                    mPickedHandle->Set( direction, lengthRatio );
+                    uint32 handleIndex = ( mPickedHandle == trajectory->GetHandle( 0 ) ) ? 0
+                                                                                                              : 1;
+                    uint32 drawingIndex = ( handleIndex == 0 ) ? trajectory->GetBreakdown()->GetSourceDrawingIndex()
+                                                               : trajectory->GetBreakdown()->GetTargetDrawingIndex();
+                    FInbetweenerDrawing* drawing = trajectory->GetRoute()->GetInbetweenerTag()->GetDrawing( drawingIndex );
+
+                    mPickedHandle->Set( FOdysseyVector::MapVector( drawing->inverseMatrix, direction ), lengthRatio );
                 }
             }
         }

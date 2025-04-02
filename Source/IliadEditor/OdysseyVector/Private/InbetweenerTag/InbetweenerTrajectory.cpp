@@ -37,6 +37,8 @@ FInbetweenerTrajectory::Init( uint32 iDrawingCount )
     mFractionBuffer.resize( FRACTIONCOUNT );
 
     Resize( iDrawingCount );
+    // we need the cubic bezier to be ready so that we can mooth the trajectories
+    Update();
 }
 
 FInbetweenerTrajectory*
@@ -106,8 +108,8 @@ FInbetweenerTrajectory::Update()
 
     bezierLength = ( mCubicBezier[3] - mCubicBezier[0] ).Distance();
 
-    mCubicBezier[1] = mCubicBezier[0] + ( mHandle[0].GetDirection() * mHandle[0].GetLengthRatio() * bezierLength );
-    mCubicBezier[2] = mCubicBezier[3] + ( mHandle[1].GetDirection() * mHandle[1].GetLengthRatio() * bezierLength );
+    mCubicBezier[1] = mCubicBezier[0] + ( FOdysseyVector::MapVector( sourceLocalMatrix, mHandle[0].GetDirection() ) * mHandle[0].GetLengthRatio() * bezierLength );
+    mCubicBezier[2] = mCubicBezier[3] + ( FOdysseyVector::MapVector( targetLocalMatrix, mHandle[1].GetDirection() ) * mHandle[1].GetLengthRatio() * bezierLength );
 
     cubicBezierLength = FOdysseyVector::GetCubicBezierApproximateLength( mCubicBezier
                                                                        , FRACTIONCOUNT
@@ -374,10 +376,10 @@ FInbetweenerTrajectory::FitBezier( const std::vector<::ULIS::FVec2D> &data
     BLMatrix2D::invert( sourceLocalInverseMatrix, sourceLocalMatrix );
     BLMatrix2D::invert( targetLocalInverseMatrix, targetLocalMatrix );
 
-    M << -1.0, 3.0, -3.0, 1.0,
-          3.0, -6.0, 3.0, 0.0,
-         -3.0, 3.0, 0.0, 0.0,
-          1.0, 0.0, 0.0, 0.0;
+    M << -1.0,  3.0, -3.0, 1.0,
+          3.0, -6.0,  3.0, 0.0,
+         -3.0,  3.0,  0.0, 0.0,
+          1.0,  0.0,  0.0, 0.0;
 
     T = Eigen::MatrixXd(data.size(), 4);
     D = Eigen::MatrixXd(data.size(), 2);

@@ -461,10 +461,18 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawHUD( const FOdysseyHUD::FDrawH
     {
         for( FInbetweenerBreakdown* breakdown : mSelectedBreakdownList )
         {
+            FInbetweenerBreakdown* firstBreakdown = breakdown->GetInbetweenerTag()->GetBreakdownList().front();
+
+            DrawBreakdown( iParams
+                         , firstBreakdown
+                         , FLinearColor( 0.5f, 0.5f, 0.5f, 1.0f )
+                         , FLinearColor( 1.0f, 0.5f, 0.5f, 1.0f )
+                         , FOdysseyVectorHUD::HUD_BREAKDOWN_SOURCE_GRID );
+
             DrawInbetweens( iParams
                           , breakdown
                           , mTrajectoryTool->ShowInbetweens
-                          , FOdysseyVectorHUD::HUD_BREAKDOWN_SOURCE_GRID
+                          , 0
                           , 0 );
         }
 

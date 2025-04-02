@@ -484,23 +484,13 @@ FInbetweenerBreakdown::UpdateMatrix()
     drawing->localMatrix.rotate( mTargetRotation * M_PI / 180.0f );
     drawing->localMatrix.scale( mTargetScalingX, mTargetScalingY );
 
+    BLMatrix2D::invert( drawing->inverseMatrix, drawing->localMatrix );
+
     drawing->worldMatrix = mInbetweenerTag->GetOwner()->GetWorldMatrix();
     drawing->worldMatrix.transform( drawing->localMatrix );
 
     BLMatrix2D::invert( drawing->inverseWorldMatrix, drawing->worldMatrix );
 
-/*
-    mTargetWorldMatrix = mOwner->GetWorldMatrix();
-    mTargetWorldMatrix.transform( mTargetLocalMatrix );
-
-    BLMatrix2D::invert( mTargetInverseWorldMatrix, mTargetWorldMatrix );
-
-    // first drawing does not need interpolation. It is actually the source position
-    for( uint32 drawingIndex = 1; drawingIndex < GetDrawingCount(); drawingIndex++ )
-    {
-        InterpolateTransform( drawingIndex );
-    }
-*/
     mInbetweenerTag->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_CELLS
                                | FOdysseyVectorTagInbetweener::INVALIDATE_ROUTES
                                | FOdysseyVectorTagInbetweener::INVALIDATE_SPACING );

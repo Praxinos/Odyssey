@@ -37,6 +37,7 @@ class ODYSSEYVECTOR_API FInbetweenerRoute
         void Fit( uint32 iFitFrom );
         void Reset();
         bool IsEnabled();
+        void Smooth();
 
     protected:
         void Disable();

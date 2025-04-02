@@ -184,7 +184,7 @@ FOdysseyVector::MapPoint( const BLMatrix2D& iMatrix
 }
 
 ::ULIS::FVec2D
-FOdysseyVector::MapVector( BLMatrix2D& iMatrix
+FOdysseyVector::MapVector( const BLMatrix2D& iMatrix
                          , const ::ULIS::FVec2D& iPoint )
 {
     BLPoint pt = iMatrix.mapVector( iPoint.x, iPoint.y );

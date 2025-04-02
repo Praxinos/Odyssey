@@ -446,7 +446,12 @@ FOdysseyVectorTagInbetweener::AddRoute( const ::ULIS::FVec2D& iLocalCoords, bool
 
         if( iFit )
         {
-            //route->Fit( 0 );
+            route->Fit( 0 );
+        }
+        // Smooth the first route only. The other route will be fitted via ARAP
+        if( mRouteList.size() == 1 )
+        {
+            route->Smooth();
         }
 
         return route;
