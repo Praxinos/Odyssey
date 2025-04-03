@@ -16,6 +16,15 @@
 
 class FOdysseyPainterEditor;
 
+UENUM()
+enum class eVectorObjectViewClass : uint8
+{
+    Object = 0,
+    Path = 1,
+    Group = 2,
+    GroupPaint = 3
+};
+
 USTRUCT()
 struct FPaletteEntrySelection
 {
@@ -56,6 +65,11 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectView : public UO
         std::list<FOdysseyVectorObject*> mFocusedObjectList;
 
     public:
+        // hidden property for use with EditCondition
+        UPROPERTY( EditDefaultsOnly
+                 , Category=Identity )
+        eVectorObjectViewClass Class;
+
         UPROPERTY( EditAnywhere
                  , Category=Identity
                  , meta = ( ToolTip = "Name" ) )
@@ -115,13 +129,15 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectView : public UO
 
         UPROPERTY( EditAnywhere
                  , Category=Appearance
-                 , meta = ( ToolTip = "Background Color Mode" ) )
+                 , meta = ( ToolTip = "Background Color Mode"
+                          , EditCondition = "( Class == eVectorObjectViewClass::GroupPaint )"
+                          , EditConditionHides ) )
         eBackgroundColorMode BackgroundColorMode;
 
         UPROPERTY( EditAnywhere
                  , Category=Appearance
                  , meta = ( ToolTip = "Background Color"
-                          , EditCondition = "(BackgroundColorMode == eBackgroundColorMode::SolidColor)"
+                          , EditCondition = "( Class == eVectorObjectViewClass::GroupPaint ) && ( BackgroundColorMode == eBackgroundColorMode::SolidColor )"
                           , EditConditionHides ) )
         FColor BackgroundColor;
 

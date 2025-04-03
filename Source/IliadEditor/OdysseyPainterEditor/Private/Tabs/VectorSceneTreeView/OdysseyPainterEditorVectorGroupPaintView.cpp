@@ -22,6 +22,7 @@ UOdysseyPainterEditorVectorGroupPaintView::UOdysseyPainterEditorVectorGroupPaint
     , Realtime( false )
     , Multithreaded( true )
 {
+    Class = eVectorObjectViewClass::GroupPaint;
 }
 
 void

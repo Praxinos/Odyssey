@@ -1391,15 +1391,29 @@ UOdysseyPainterEditorVectorBaseTool::ExtendContextMenuInbetween( FOdysseyVectorG
 
     menu.AddMenuEntry(
             LOCTEXT("vector-tool.inbetween-context-menu.commit-inbetweener-tag.name", "Commit Inbetweener Tag")
-            , LOCTEXT("vector-tool.inbetween-context-menu.commit-inbetweener-tag.tooltip", "Commit Inbetweener Tag")
-            , FSlateIcon()
-            , FUIAction( FExecuteAction::CreateStatic( &FOdysseyPainterEditor::CommitSelectedInbetweenerTag, GetEditor(), iScene->GetLayer() )
-                       , FCanExecuteAction::CreateUObject( this, &UOdysseyPainterEditorVectorBaseTool::CanAlterTag, iScene )));
+          , LOCTEXT("vector-tool.inbetween-context-menu.commit-inbetweener-tag.tooltip", "Commit Inbetweener Tag")
+          , FSlateIcon()
+          , FUIAction( FExecuteAction::CreateStatic( &FOdysseyPainterEditor::CommitSelectedInbetweenerTag, GetEditor(), iScene->GetLayer() )
+                     , FCanExecuteAction::CreateUObject( this, &UOdysseyPainterEditorVectorBaseTool::CanAlterTag, iScene )));
 
     menu.AddSubMenu(
-            LOCTEXT("vector-tool.inbetween-context-menu.reset-grid.name", "Reset Grid")
-        , LOCTEXT("vector-tool.inbetween-context-menu.reset-grid.tooltip", "Reset Grid")
-        , FNewMenuDelegate::CreateUObject( this, &UOdysseyPainterEditorVectorBaseTool::ResetGridMenu, iScene ) );
+        LOCTEXT("vector-tool.inbetween-context-menu.reset-grid.name", "Reset Grid")
+      , LOCTEXT("vector-tool.inbetween-context-menu.reset-grid.tooltip", "Reset Grid")
+      , FNewMenuDelegate::CreateUObject( this, &UOdysseyPainterEditorVectorBaseTool::ResetGridMenu, iScene ) );
+
+    menu.AddMenuEntry(
+        LOCTEXT("vector-tool.inbetween-context-menu.copy-grid.name", "Copy Grid")
+      , LOCTEXT("vector-tool.inbetween-context-menu.copy-grid.tooltip", "Copy Grid")
+      , FSlateIcon()
+      , FUIAction( FExecuteAction::CreateStatic( &FOdysseyPainterEditor::CopyInbetweenerGrid, iScene )
+                 , FCanExecuteAction::CreateUObject( this, &UOdysseyPainterEditorVectorBaseTool::CanAlterTag, iScene )));
+
+    menu.AddMenuEntry(
+        LOCTEXT("vector-tool.inbetween-context-menu.paste-grid.name", "Paste Grid")
+      , LOCTEXT("vector-tool.inbetween-context-menu.paste-grid.tooltip", "Paste Grid")
+      , FSlateIcon()
+      , FUIAction( FExecuteAction::CreateStatic( &FOdysseyPainterEditor::PasteInbetweenerGrid, GetEditor(), iScene )
+                 , FCanExecuteAction::CreateUObject( this, &UOdysseyPainterEditorVectorBaseTool::CanAlterTag, iScene )));
 
     menu.AddSubMenu(
             LOCTEXT("vector-tool.inbetween-context-menu.reset-spacing.name", "Reset Spacing")

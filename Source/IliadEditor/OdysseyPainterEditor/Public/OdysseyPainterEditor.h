@@ -321,6 +321,8 @@ public:
     static void RemoveInbetweenerTag( FOdysseyPainterEditor* iEditor
                                     , FOdysseyVectorLayer* iSharedEnv );
     static void Subdivide( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
+    static void PasteInbetweenerGrid( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
+    static void CopyInbetweenerGrid( FOdysseyVectorGroupPaint* iScene );
 
 public:
     static const uint64 UI_UPDATE_SCENETREEVIEW = ( 1ULL << ( FOdysseyVectorEngine::NOTIFY_RESERVED_SHIFT + 0 ) );

@@ -2271,6 +2271,110 @@ FOdysseyPainterEditor::AddInbetweenerTag( FOdysseyPainterEditor* iEditor
     FOdysseyVectorEngine::Notify( iScene, notificationFlags );
 }
 
+static std::vector<::ULIS::FVec2D>&
+GetCopiedInbetweenerGridGeometry()
+{
+    static std::vector<::ULIS::FVec2D> inbetweenerGridGeometry;
+
+    return inbetweenerGridGeometry;
+}
+
+static ::ULIS::FVec2I&
+GetCopiedInbetweenerGridSize()
+{
+    static ::ULIS::FVec2I gridSize;
+
+    return gridSize;
+}
+
+// static
+void
+FOdysseyPainterEditor::CopyInbetweenerGrid( FOdysseyVectorGroupPaint* iScene )
+{
+    std::list<FOdysseyVectorTag*> selectedTagList;
+
+    iScene->GetLayer()->GetSelectedTagByClassType( FOdysseyVectorTagInbetweener::StaticClass()
+                                                 , selectedTagList );
+
+    for( FOdysseyVectorTag* tag : selectedTagList )
+    {
+        FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
+        FInbetweenerBreakdown* breakdown = inbetweenerTag->GetBreakdownByCellIndex( iScene->GetCell()->GetIndex() );
+
+        if( breakdown )
+        {
+            breakdown->GetGrid()->GetGeometry( GetCopiedInbetweenerGridGeometry()
+                                             , eInbetweenerPointPositionType::TargetPosition );
+
+            GetCopiedInbetweenerGridSize().x = inbetweenerTag->GetGridNumQuadX();
+            GetCopiedInbetweenerGridSize().y = inbetweenerTag->GetGridNumQuadY();
+
+            break;
+        }
+    }
+}
+
+// static
+void
+FOdysseyPainterEditor::PasteInbetweenerGrid( FOdysseyPainterEditor* iEditor
+                                           , FOdysseyVectorGroupPaint* iScene )
+{
+    std::list<FOdysseyVectorTag*> selectedTagList;
+    std::list<FInbetweenerBreakdown*> selectedBreakdownList;
+    std::vector<::ULIS::FVec2D>& copiedGridGeometry = GetCopiedInbetweenerGridGeometry();
+    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_HUD;
+
+    iScene->GetLayer()->GetSelectedTagByClassType( FOdysseyVectorTagInbetweener::StaticClass()
+                                                 , selectedTagList );
+
+    for( FOdysseyVectorTag* tag : selectedTagList )
+    {
+        FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
+        FInbetweenerBreakdown* breakdown = inbetweenerTag->GetBreakdownByCellIndex( iScene->GetCell()->GetIndex() );
+
+        if( breakdown )
+        {
+            if( ( GetCopiedInbetweenerGridSize().x == inbetweenerTag->GetGridNumQuadX() )
+             && ( GetCopiedInbetweenerGridSize().y == inbetweenerTag->GetGridNumQuadY() ) )
+            {
+                selectedBreakdownList.push_back( breakdown );
+            }
+        }
+    }
+
+    if( selectedBreakdownList.size() )
+    {
+        // needed for valid GUndo pointer
+        GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.paste-grid-geometry","Paste Grid Geometry"));
+        if( GUndo )
+        {
+                FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerMatching( iScene
+                                                                                       , selectedBreakdownList
+                                                                                       , notificationFlags );
+
+            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+
+            TSharedPtr<FOdysseyPainterEditorSource> source = iEditor->GetSource();
+            if (source)
+                source->RecordCurrentFrameUndo();
+        }
+        GEditor->EndTransaction();
+
+        for( FInbetweenerBreakdown* breakdown : selectedBreakdownList )
+        {
+            breakdown->GetGrid()->SetGeometry( copiedGridGeometry
+                                             , eInbetweenerPointPositionType::TargetPosition
+                                             , true );
+        }
+    }
+
+    iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
+
+    // call callbacks if any (for refreshing GUI e.g)
+    FOdysseyVectorEngine::Notify( iScene, notificationFlags );
+}
+
 // static
 void
 FOdysseyPainterEditor::ResetInbetweenerGrid( FOdysseyPainterEditor* iEditor
@@ -2283,7 +2387,7 @@ FOdysseyPainterEditor::ResetInbetweenerGrid( FOdysseyPainterEditor* iEditor
     std::list<FOdysseyVectorTag*> selectedTagList;
 
     iScene->GetLayer()->GetSelectedTagByClassType( FOdysseyVectorTagInbetweener::StaticClass()
-                                                     , selectedTagList );
+                                                 , selectedTagList );
 
     for( FOdysseyVectorTag* tag : selectedTagList )
     {
@@ -2295,7 +2399,7 @@ FOdysseyPainterEditor::ResetInbetweenerGrid( FOdysseyPainterEditor* iEditor
     if( selectedInbetweenerTagList.size() )
     {
         // needed for valid GUndo pointer
-        GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.reset-chart","Reset Spacing Chart"));
+        GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.reset-chart","Reset Inbetweener Grid"));
         if( GUndo )
         {
             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerReset( iScene
@@ -2314,7 +2418,7 @@ FOdysseyPainterEditor::ResetInbetweenerGrid( FOdysseyPainterEditor* iEditor
 
         for( FOdysseyVectorTagInbetweener* inbetweenerTag : selectedInbetweenerTagList )
         {
-            FInbetweenerBreakdown* breakdown = inbetweenerTag->GetBreakdownByCellIndex( iScene->GetCell()->GetCell()->GetIndex() );
+            FInbetweenerBreakdown* breakdown = inbetweenerTag->GetBreakdownByCellIndex( iScene->GetCell()->GetIndex() );
 
             if( breakdown )
             {

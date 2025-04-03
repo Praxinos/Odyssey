@@ -82,10 +82,12 @@ FOdysseyVectorBrush::SetTexture( UTexture2D* iTexture )
         // leave the textures that way.
         iTexture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
         iTexture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
-        iTexture->SRGB = false;
-        //iTexture->DeferCompression = false;
-        //iTexture->MipLoadOptions = ETextureMipLoadOptions::OnlyFirstMip;
-        //iTexture->LODGroup = TextureGroup::TEXTUREGROUP_UI;
+        // According to tutorials I found, this is set to false in order to be able to read the pixels
+        // but then it triggers a breakpoint in TextureDerivedDataTask.cpp:422 at
+        // check(MipView.GammaSpace == LayerData.SourceGammaSpace);
+        // it turns out if I leave it to its original value, we can still read the pixels and
+        // the error disappears, so I'll leave it that way (commented-out).
+        //iTexture->SRGB = false;
         iTexture->UpdateResource();
 
         width  = iTexture->GetSizeX();
