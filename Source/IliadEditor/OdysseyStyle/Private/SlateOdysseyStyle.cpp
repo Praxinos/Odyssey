@@ -289,9 +289,9 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "PainterEditor.Tools16", new IMAGE_BRUSH( "PainterEditor/tools_16", mIcon16x16 ) );
     Set( "PainterEditor.Tools", new IMAGE_BRUSH_SVG( "PainterEditor/tools", mIcon16x16 ) );
 
-    Set( "PainterEditor.Layers64", new IMAGE_BRUSH( "PainterEditor/layers_64", mIcon64x64 ) );
-    Set( "PainterEditor.Layers20", new IMAGE_BRUSH( "PainterEditor/layers_20", mIcon20x20 ) );
-    Set( "PainterEditor.Layers16", new IMAGE_BRUSH( "PainterEditor/layers_16", mIcon16x16 ) );
+    Set( "PainterEditor.Layers64", new IMAGE_BRUSH_SVG( "PainterEditor/layers", mIcon64x64 ) );
+    Set( "PainterEditor.Layers20", new IMAGE_BRUSH_SVG( "PainterEditor/layers", mIcon20x20 ) );
+    Set( "PainterEditor.Layers16", new IMAGE_BRUSH_SVG( "PainterEditor/layers", mIcon16x16 ) );
 
     Set( "PainterEditor.ColorSliders64", new IMAGE_BRUSH( "PainterEditor/color_sliders_64", mIcon64x64 ) );
     Set( "PainterEditor.ColorSliders16", new IMAGE_BRUSH( "PainterEditor/color_sliders_16", mIcon16x16 ) );
@@ -765,8 +765,8 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set("Animation.Timeline.LeftBoundColor", FStyleColors::AccentGreen);
     Set("Animation.Timeline.RightBoundColor", FStyleColors::AccentRed);
 
-    Set("Animation.Timeline.LeftBoundHandle", new IMAGE_BRUSH("OdysseyAnimation/Timeline/Header/AnimationLeftBoundHandle_16", mIcon16x16));
-    Set("Animation.Timeline.RightBoundHandle", new IMAGE_BRUSH("OdysseyAnimation/Timeline/Header/AnimationRightBoundHandle_16", mIcon16x16));
+    Set("Animation.Timeline.LeftBoundHandle", new IMAGE_BRUSH_SVG("OdysseyAnimation/Timeline/Header/AnimationLeftBoundHandle", mIcon16x16));
+    Set("Animation.Timeline.RightBoundHandle", new IMAGE_BRUSH_SVG("OdysseyAnimation/Timeline/Header/AnimationRightBoundHandle", mIcon16x16));
 
     Set("Animation.LightTable64", new IMAGE_BRUSH("OdysseyAnimation/LightTable_64", mIcon64x64));
     Set("Animation.LightTable16", new IMAGE_BRUSH("OdysseyAnimation/LightTable_16", mIcon16x16));

@@ -1,25 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg id="Calque_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 256 256">
-  <!-- Generator: Adobe Illustrator 29.3.1, SVG Export Plug-In . SVG Version: 2.1.0 Build 151)  -->
+  <!-- Generator: Adobe Illustrator 29.4.0, SVG Export Plug-In . SVG Version: 2.1.0 Build 152)  -->
   <defs>
     <style>
       .st0 {
-        stroke: #d0d0d0;
-      }
-
-      .st0, .st1 {
-        fill: none;
-        stroke-miterlimit: 10;
-        stroke-width: 24px;
+        fill: #fff;
       }
 
       .st1 {
-        stroke: #00ad96;
+        fill: #00ad96;
+      }
+
+      .st2 {
+        fill: #d1d1d1;
       }
     </style>
   </defs>
-  <line class="st0" x1="9.5" y1="222.7" x2="112.8" y2="119.4"/>
-  <line class="st0" x1="9.5" y1="33.3" x2="112.8" y2="136.6"/>
-  <line class="st1" x1="246.2" y1="222.7" x2="142.9" y2="119.4"/>
-  <line class="st1" x1="246.2" y1="33.3" x2="142.9" y2="136.6"/>
+  <path class="st1" d="M146.3,128l109.7-75.6v151.2l-109.7-75.6ZM243.8,75.1l-76.7,52.9,76.7,52.9v-105.8Z"/>
+  <polygon class="st2" points="0 52.4 0 203.6 109.7 128 0 52.4"/>
+  <rect class="st0" x="116.4" y="98.6" width="23.3" height="12.2" transform="translate(23.3 232.7) rotate(-90)"/>
+  <rect class="st0" x="116.4" y="238.2" width="23.3" height="12.2" transform="translate(-116.3 372.4) rotate(-90)"/>
+  <rect class="st0" x="116.4" y="52" width="23.3" height="12.2" transform="translate(69.9 186.2) rotate(-90)"/>
+  <rect class="st0" x="116.4" y="145.2" width="23.3" height="12.2" transform="translate(-23.2 279.3) rotate(-90)"/>
+  <rect class="st0" x="116.4" y="191.7" width="23.3" height="12.2" transform="translate(-69.8 325.9) rotate(-90)"/>
+  <rect class="st0" x="116.4" y="5.5" width="23.3" height="12.2" transform="translate(116.4 139.7) rotate(-90)"/>
 </svg>
