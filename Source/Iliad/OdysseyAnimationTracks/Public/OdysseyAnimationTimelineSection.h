@@ -7,7 +7,7 @@
 #include "OdysseyAnimationComponent.h"
 #include "OdysseyAnimationPlayer.h"
 
-#include "Channels/MovieSceneObjectPathChannel.h"
+#include "OdysseyAnimationCutChannel.h"
 
 #include "OdysseyAnimationTimelineSection.generated.h"
 
@@ -60,5 +60,5 @@ protected:
 
 public:
     UPROPERTY()
-    FMovieSceneObjectPathChannel CutChannel;
+    FOdysseyAnimationCutChannel AnimationCutChannel;
 };

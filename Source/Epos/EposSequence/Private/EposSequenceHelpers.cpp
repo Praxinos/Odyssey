@@ -39,6 +39,7 @@
 #include "OdysseyAnimation.h"
 #include "OdysseyAnimationActor.h"
 #include "OdysseyAnimationComponent.h"
+#include "OdysseyAnimationCut.h"
 #include "OdysseyAnimationTimelineSection.h"
 #include "OdysseyAnimationTimelineTrack.h"
 #include "PlaneActor.h"
@@ -2130,136 +2131,6 @@ BoardSequenceHelpers::BuildAnimationsTimelineChannelProxy( IMovieScenePlayer& iP
     return ShotSequenceHelpers::BuildAnimationsTimelineChannelProxy( iPlayer, result.mInnerSequence, result.mInnerSequenceId );
 }
 
-#if WITH_EDITOR
-
-FAnimationCutEntry::FAnimationCutEntry( UOdysseyAnimationCell* iCell )
-    : mCell( iCell )
-{
-    mSide = ESide::kLeft;
-}
-
-FAnimationCutEntry::ESide
-FAnimationCutEntry::GetSide() const
-{
-    return mSide;
-}
-
-FFrameNumber
-FAnimationCutEntry::GetFrameReference() const
-{
-    switch( mSide )
-    {
-        default:
-        case ESide::kLeft:  return mCell->GetFrameRange().GetLowerBoundValue(); // Always inclusive
-        case ESide::kRight: return mCell->GetFrameRange().GetUpperBoundValue(); // Always inclusive
-    }
-}
-
-const UOdysseyAnimationCell*
-FAnimationCutEntry::GetCell() const
-{
-    return mCell;
-}
-
-UOdysseyAnimationCell*
-FAnimationCutEntry::GetCell()
-{
-    return mCell;
-}
-
-//---
-
-FAnimationCut::FAnimationCut()
-{
-}
-
-FFrameNumber
-FAnimationCut::GetFrameReference() const
-{
-    TSet<FFrameNumber> frames;
-    for( FAnimationCutEntry entry : mAnimationCutEntries )
-        frames.Add( entry.GetFrameReference() );
-    check( frames.Num() == 1 );
-
-    return frames.Array()[0];
-}
-
-const TArray<FAnimationCutEntry>&
-FAnimationCut::GetEntries() const
-{
-    return mAnimationCutEntries;
-}
-
-TArray<FAnimationCutEntry>&
-FAnimationCut::GetEntries()
-{
-    return mAnimationCutEntries;
-}
-
-void
-FAnimationCut::AddNewEntry( const FAnimationCutEntry& iAnimationCutEntry )
-{
-    check( !mAnimationCutEntries.ContainsByPredicate( [iAnimationCutEntry]( const FAnimationCutEntry& iEntry )
-                                                      {
-                                                          return iEntry.GetCell()->GetLayer() == iAnimationCutEntry.GetCell()->GetLayer();
-                                                      } ) );
-
-    mAnimationCutEntries.Add( iAnimationCutEntry );
-}
-
-//---
-
-FAnimationCuts::FAnimationCuts()
-{
-}
-
-void
-FAnimationCuts::Build( UOdysseyAnimation* iAnimation )
-{
-    UOdysseyAnimationLayerStack* layer_stack = iAnimation ? iAnimation->GetLayerStack() : nullptr;
-    TArray<UOdysseyLayer*> layers = layer_stack ? layer_stack->GetLayers() : TArray<UOdysseyLayer*>();
-    TSet<UOdysseyAnimationLayer*> animation_layers;
-    for( UOdysseyLayer* layer : layers )
-        animation_layers.Add( Cast<UOdysseyAnimationLayer>( layer ) );
-    animation_layers.Remove( nullptr );
-
-    for( UOdysseyAnimationLayer* layer : animation_layers )
-    {
-        TArray<UOdysseyAnimationCell*> cells = layer->GetCells();
-        for( UOdysseyAnimationCell* cell : cells )
-        {
-            FAnimationCutEntry animationcutentry( cell );
-
-            FAnimationCut* animationcut = mAnimationCuts.Find( animationcutentry.GetFrameReference() );
-            if( animationcut )
-            {
-                animationcut->AddNewEntry( animationcutentry );
-            }
-            else
-            {
-                FAnimationCut new_animationcut;
-                new_animationcut.AddNewEntry( animationcutentry );
-
-                mAnimationCuts.Add( animationcutentry.GetFrameReference(), new_animationcut );
-            }
-
-        }
-    }
-
-    mAnimationCuts.KeyStableSort( []( FFrameNumber iA, FFrameNumber iB )
-                                  {
-                                      return iA < iB;
-                                  } );
-}
-
-const TMap<FFrameNumber, FAnimationCut>&
-FAnimationCuts::GetAnimationCuts() const
-{
-    return mAnimationCuts;
-}
-
-#endif
-
 FFrameNumber
 ShotSequenceHelpers::ConvertFrameFromTimelineToSequence( FFrameNumber iFrameInTimeline, UOdysseyAnimationTimelineSection* iSection )
 {
@@ -2314,32 +2185,53 @@ ShotSequenceHelpers::BuildAnimationsTimelineChannelProxy( IMovieScenePlayer& iPl
         {
             FMovieSceneChannelProxyData ChannelIndirection;
 
-            animation_timeline_section->CutChannel.Reset();
+            animation_timeline_section->AnimationCutChannel.Reset();
 
             //const FMovieSceneChannelEntry* ObjectPathChannelEntry = animation_timeline_section->GetChannelProxy().FindEntry( FMovieSceneObjectPathChannel::StaticStruct()->GetFName() );
             //if( ObjectPathChannelEntry )
             //{
 #if WITH_EDITOR
-                //TODO: first try to use specific class but don't know how to use it inside channel ...
-                FAnimationCuts animationcuts;
-                animationcuts.Build( animation_timeline_section->GetAnimation() );
+                FAnimationCuts animationcuts( animation_timeline_section->GetAnimation() );
+                animationcuts.Build();
 
-                for( auto pair : animationcuts.GetAnimationCuts() )
+                for( auto pair : animationcuts.GetMap() )
                 {
                     FFrameNumber frame_in_timeline = pair.Key;
                     FAnimationCut animationcut = pair.Value;
 
                     FFrameNumber frame_in_sequence = ConvertFrameFromTimelineToSequence( frame_in_timeline, animation_timeline_section.Get() );
 
-                    //UAnimationCutKey* cut = NewObject<UAnimationCutKey>( nullptr, *FGuid::NewGuid().ToString() );
-                    UAnimationCutKey* cut = NewObject<UAnimationCutKey>( animation_timeline_section.Get() );
-                    cut->AnimationCut = animationcut;
+                    FOdysseyAnimationCutValue value;
+                    value.Value = animationcut;
 
-                    //animation_timeline_section->CutChannel.GetData().AddKey( frame_in_sequence, FMovieSceneObjectPathChannelKeyValue( nullptr ) );
-                    animation_timeline_section->CutChannel.GetData().AddKey( frame_in_sequence, FMovieSceneObjectPathChannelKeyValue( cut ) );
+                    animation_timeline_section->AnimationCutChannel.GetData().AddKey( frame_in_sequence, value );
                 }
 
-                ChannelIndirection.Add( animation_timeline_section->CutChannel, FMovieSceneChannelMetaData(), TMovieSceneExternalValue<UObject*>::Make() );
+                ChannelIndirection.Add( animation_timeline_section->AnimationCutChannel, FMovieSceneChannelMetaData() );
+                //ChannelIndirection.Add( animation_timeline_section->AnimationCutChannel, FMovieSceneChannelMetaData(), TMovieSceneExternalValue<FOdysseyAnimationCutValue>::Make() );
+
+
+
+                ////TODO: first try to use specific class but don't know how to use it inside channel ...
+                //FAnimationCuts animationcuts;
+                //animationcuts.Build( animation_timeline_section->GetAnimation() );
+
+                //for( auto pair : animationcuts.GetAnimationCuts() )
+                //{
+                //    FFrameNumber frame_in_timeline = pair.Key;
+                //    FAnimationCut animationcut = pair.Value;
+
+                //    FFrameNumber frame_in_sequence = ConvertFrameFromTimelineToSequence( frame_in_timeline, animation_timeline_section.Get() );
+
+                //    //UAnimationCutKey* cut = NewObject<UAnimationCutKey>( nullptr, *FGuid::NewGuid().ToString() );
+                //    UAnimationCutKey* cut = NewObject<UAnimationCutKey>( animation_timeline_section.Get() );
+                //    cut->AnimationCut = animationcut;
+
+                //    //animation_timeline_section->CutChannel.GetData().AddKey( frame_in_sequence, FMovieSceneObjectPathChannelKeyValue( nullptr ) );
+                //    animation_timeline_section->AnimationCutChannel.GetData().AddKey( frame_in_sequence, FMovieSceneObjectPathChannelKeyValue( cut ) );
+                //}
+
+                //ChannelIndirection.Add( animation_timeline_section->AnimationCutChannel, FMovieSceneChannelMetaData(), TMovieSceneExternalValue<UObject*>::Make() );
 
 
 

@@ -33,6 +33,8 @@
 #include "NamingConvention.h"
 #include "OdysseyAnimationActor.h"
 #include "OdysseyAnimationCell.h"
+#include "OdysseyAnimationCut.h"
+#include "OdysseyAnimationCutChannel.h"
 #include "OdysseyAnimationTimelineSection.h"
 #include "Tools/LighttableTools.h"
 #include "Tools/ResourceAssetTools.h"
@@ -930,19 +932,6 @@ protected:
     virtual void PostMoveDuringDrag( TSharedPtr<FMetaChannel> iKeys ) override;
 
 private:
-    struct FCellEntry
-    {
-        UOdysseyAnimationCell* Cell = nullptr;
-        UOdysseyAnimationTimelineSection* Section = nullptr;
-        UMovieSceneSequence* Sequence = nullptr;
-        FFrameNumber PreviousFrameInTimeline = -1;
-        FFrameNumber NewFrameInTimeline = -1;
-        //FFrameNumber OffsetInTimeline = -1;
-    };
-
-    void FindLimitCells( TSharedPtr<FMetaChannel> iKeys, TMap<UOdysseyAnimationLayer*, FCellEntry>& oPreviousCells, TMap<UOdysseyAnimationLayer*, FCellEntry>& oLastCells ) const;
-
-private:
     FMovieScenePossessable              mBinding;
 };
 
@@ -1021,21 +1010,17 @@ SCinematicBoardSectionAnimationTimelineKeys::BuildKeyContextMenu( FMenuBuilder& 
     {
         for( const auto& subkey : pair.Value.mSubKeys )
         {
-            TMovieSceneChannelHandle<FMovieSceneObjectPathChannel> channel_handle = subkey.mChannelHandle.Cast<FMovieSceneObjectPathChannel>();
-            FMovieSceneObjectPathChannel* object_channel = channel_handle.Get();
+            TMovieSceneChannelHandle<FOdysseyAnimationCutChannel> channel_handle = subkey.mChannelHandle.Cast<FOdysseyAnimationCutChannel>();
+            FOdysseyAnimationCutChannel* object_channel = channel_handle.Get();
 
-            FFrameNumber frame;
-            object_channel->GetKeyTime( subkey.mKeyHandle, frame );
+            FFrameNumber frame_in_sequence;
+            object_channel->GetKeyTime( subkey.mKeyHandle, frame_in_sequence );
 
-            FMovieSceneObjectPathChannelKeyValue value;
+            FOdysseyAnimationCutValue value;
             UE::MovieScene::GetKeyValue( object_channel, subkey.mKeyHandle, value );
-            //UOdysseyAnimationCell* cell = Cast<UOdysseyAnimationCell>( value.Get() );
+            FAnimationCut animationcut = value.Value;
 
-            //animation = cell->GetAnimation();
-
-            UAnimationCutKey* key = Cast<UAnimationCutKey>( value.Get() );
-
-            animation = key->AnimationCut.GetEntries()[0].GetCell()->GetAnimation();
+            animation = animationcut.GetAnimation();
         }
     }
 
@@ -1076,23 +1061,21 @@ SCinematicBoardSectionAnimationTimelineKeys::GetKeyTooltipText( TSharedPtr<FMeta
     {
         for( const auto& subkey : pair.Value.mSubKeys )
         {
-            TMovieSceneChannelHandle<FMovieSceneObjectPathChannel> channel_handle = subkey.mChannelHandle.Cast<FMovieSceneObjectPathChannel>();
-            FMovieSceneObjectPathChannel* object_channel = channel_handle.Get();
+            TMovieSceneChannelHandle<FOdysseyAnimationCutChannel> channel_handle = subkey.mChannelHandle.Cast<FOdysseyAnimationCutChannel>();
+            FOdysseyAnimationCutChannel* object_channel = channel_handle.Get();
 
-            FFrameNumber frame;
-            object_channel->GetKeyTime( subkey.mKeyHandle, frame );
+            FFrameNumber frame_in_sequence;
+            object_channel->GetKeyTime( subkey.mKeyHandle, frame_in_sequence );
 
-            FMovieSceneObjectPathChannelKeyValue value;
+            FOdysseyAnimationCutValue value;
             UE::MovieScene::GetKeyValue( object_channel, subkey.mKeyHandle, value );
-            //UOdysseyAnimationCell* cell = Cast<UOdysseyAnimationCell>( value.Get() );
-            UAnimationCutKey* key = Cast<UAnimationCutKey>( value.Get() );
+            FAnimationCut animationcut = value.Value;
+            animation = animationcut.GetAnimation();
 
-            //map.Add( frame, cell->GetLayer()->GetLayerName() );
-            //animation = cell->GetAnimation();
-            for( FAnimationCutEntry animationcut_entry : key->AnimationCut.GetEntries() )
+            TArray<UOdysseyAnimationCell*> cells = animationcut.GetCellsReference();
+            for( UOdysseyAnimationCell* cell : cells )
             {
-                map.Add( frame, animationcut_entry.GetCell()->GetLayer()->GetLayerName() );
-                animation = animationcut_entry.GetCell()->GetAnimation();
+                map.Add( frame_in_sequence, cell->GetLayer()->GetLayerName() );
             }
         }
     }
@@ -1151,115 +1134,6 @@ SCinematicBoardSectionAnimationTimelineKeys::OnMouseButtonUp( const FGeometry& M
 }
 
 void
-SCinematicBoardSectionAnimationTimelineKeys::FindLimitCells( TSharedPtr<FMetaChannel> iKeys, TMap<UOdysseyAnimationLayer*, FCellEntry>& oPreviousCells, TMap<UOdysseyAnimationLayer*, FCellEntry>& oLastCells ) const
-{
-    oPreviousCells.Empty();
-    oLastCells.Empty();
-
-    FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
-    const UMovieSceneSubSection& subsection_object = board_section->GetSubSectionObject();
-    UMovieSceneSequence* inner_sequence = subsection_object.GetSequence();
-
-    // For the moment, this should always be the case (until meta keys selection)
-    // (Like in the parent, to not forget it here if meta keys selection is done)
-    check( iKeys->NumMetaKeys() == 1 );
-
-    //TSet<FFrameNumber> offsets;
-
-    TMultiMap<UOdysseyAnimationLayer*, FCellEntry> dragged_cells_per_layer;
-    for( auto pair : iKeys->GetMetaKeys() )
-    {
-        for( const auto& subkey : pair.Value.mSubKeys )
-        {
-            TMovieSceneChannelHandle<FMovieSceneObjectPathChannel> channel_handle = subkey.mChannelHandle.Cast<FMovieSceneObjectPathChannel>();
-            FMovieSceneObjectPathChannel* object_channel = channel_handle.Get();
-
-            FFrameNumber frame;
-            object_channel->GetKeyTime( subkey.mKeyHandle, frame );
-
-            FMovieSceneObjectPathChannelKeyValue value;
-            UE::MovieScene::GetKeyValue( object_channel, subkey.mKeyHandle, value );
-
-            //UOdysseyAnimationCell* cell = Cast<UOdysseyAnimationCell>( value.Get() );
-            UAnimationCutKey* key = Cast<UAnimationCutKey>( value.Get() );
-            for( FAnimationCutEntry animationcut_entry : key->AnimationCut.GetEntries() )
-            {
-                UOdysseyAnimationCell* cell = animationcut_entry.GetCell();
-                //UOdysseyAnimationCell* cell = key->AnimationCut.GetEntries()[0].GetCell();
-                if( cell && inner_sequence )
-                {
-                    FCellEntry cell_entry = {
-                        cell,
-                        Cast<UOdysseyAnimationTimelineSection>( subkey.mSection ),
-                        inner_sequence,
-                    };
-
-                    FFrameNumber frame_in_timeline = ShotSequenceHelpers::ConvertFrameFromSequenceToTimeline( frame, cell_entry.Section );
-
-                    UE_LOG( LogTemp, Warning, TEXT( "FindLimitCells: current frame in subsequence: %d" ), frame.Value );
-                    UE_LOG( LogTemp, Warning, TEXT( "FindLimitCells: current frame_in_timeline: %d" ), frame_in_timeline.Value );
-
-                    UE_LOG( LogTemp, Warning, TEXT( "FindLimitCells: cell: %d" ), cell->GetFrameRange().GetLowerBoundValue() );
-
-                    cell_entry.PreviousFrameInTimeline = cell->GetFrameRange().GetLowerBoundValue();
-                    cell_entry.NewFrameInTimeline = frame_in_timeline;
-                    //cell_entry.OffsetInTimeline = converter.FrameInTimeline - cell->GetFrameRange().GetLowerBoundValue();
-                    //FFrameNumber offset = converter.FrameInTimeline - cell->GetFrameRange().GetLowerBoundValue();
-                    //UE_LOG( LogTemp, Warning, TEXT( "FindLimitCells: offset: %d" ), offset.Value );
-                    //offsets.Add( offset );
-
-                    //UE_LOG( LogTemp, Warning, TEXT( "FindLimitCells: cell_entry.OffsetInTimeline: %d" ), cell_entry.OffsetInTimeline.Value );
-
-                    dragged_cells_per_layer.Add( cell->GetLayer(), cell_entry );
-                }
-            }
-        }
-    }
-
-    if( dragged_cells_per_layer.IsEmpty() )
-        return;
-
-    //check( offsets.Num() == 1 );
-    //FFrameNumber offset = offsets.Array()[0];
-
-    //UE_LOG( LogTemp, Warning, TEXT( "FindLimitCells: offset: %d" ), offset.Value );
-
-    TArray<UOdysseyAnimationLayer*> layers;
-    dragged_cells_per_layer.GetKeys( layers );
-    for( UOdysseyAnimationLayer* layer : layers )
-    {
-        TArray<FCellEntry> cell_entries;
-        dragged_cells_per_layer.MultiFind( layer, cell_entries );
-
-        Algo::Sort( cell_entries, []( const FCellEntry& iCellEntry1, const FCellEntry& iCellEntry2 )
-                    {
-                        return iCellEntry1.Cell->IndexInLayer < iCellEntry2.Cell->IndexInLayer;
-                    } );
-
-        int index_previous = cell_entries[0].Cell->IndexInLayer - 1;
-        int index_last = cell_entries.Last().Cell->IndexInLayer;
-
-        if( layer->GetCells().IsValidIndex( index_previous ) )
-        {
-            check( !oPreviousCells.Find( layer ) );
-            FCellEntry cell_entry = {
-                layer->GetCells()[index_previous],
-                cell_entries[0].Section,
-                cell_entries[0].Sequence,
-                //layer->GetCells()[index_previous]->GetFrameRange().GetLowerBoundValue() + offset,
-                //cell_entries[0].OffsetInTimeline,
-                0,
-                0,
-            };
-            oPreviousCells.Add( layer, cell_entry );
-        }
-
-        check( !oLastCells.Find( layer ) );
-        oLastCells.Add( layer, cell_entries.Last() ); // The last entry is already filled, so just use it
-    }
-}
-
-void
 SCinematicBoardSectionAnimationTimelineKeys::ComputeClampRangePreMoveDuringDrag( TSharedPtr<FMetaChannel> iKeys, TRange<FFrameNumber>& oClampRangeInSubsequence ) const //override
 {
     TRange<FFrameNumber> board_section_clamp_range_in_subsequence;
@@ -1287,46 +1161,69 @@ SCinematicBoardSectionAnimationTimelineKeys::ComputeClampRangePreMoveDuringDrag(
 
     //---
 
-    TMap<UOdysseyAnimationLayer*, FCellEntry> previous_cell_per_layer;
-    TMap<UOdysseyAnimationLayer*, FCellEntry> last_cell_per_layer;
-    FindLimitCells( iKeys, previous_cell_per_layer, last_cell_per_layer );
-
-    //---
-
-    TRange<FFrameNumber> prev_last_cell_clamp_range_in_subsequence = TRange<FFrameNumber>::All();
-
-    FFrameNumber clamp_min = TNumericLimits<FFrameNumber>::Min();
-    for( const auto& pair : previous_cell_per_layer )
+    UOdysseyAnimation* animation = nullptr;
+    TMap<FFrameNumber, FAnimationCut> dragged_animationcuts_map;
+    for( auto pair : iKeys->GetMetaKeys() )
     {
-        FCellEntry cell_entry = pair.Value;
+        for( const auto& subkey : pair.Value.mSubKeys )
+        {
+            TMovieSceneChannelHandle<FOdysseyAnimationCutChannel> channel_handle = subkey.mChannelHandle.Cast<FOdysseyAnimationCutChannel>();
+            FOdysseyAnimationCutChannel* object_channel = channel_handle.Get();
 
-        FFrameNumber start_frame_in_timeline = cell_entry.Cell->GetFrameRange().GetLowerBoundValue();
-        FFrameNumber start_frame_in_timeline_with_1_exposure = start_frame_in_timeline + 1;
-        if( start_frame_in_timeline_with_1_exposure < clamp_min )
-            continue;
+            FFrameNumber frame_in_sequence;
+            object_channel->GetKeyTime( subkey.mKeyHandle, frame_in_sequence );
 
-        clamp_min = start_frame_in_timeline_with_1_exposure;
+            FFrameNumber frame_in_timeline = ShotSequenceHelpers::ConvertFrameFromSequenceToTimeline( frame_in_sequence, Cast<UOdysseyAnimationTimelineSection>( subkey.mSection ) );
 
-        FFrameNumber clamp_min_in_sequence = ShotSequenceHelpers::ConvertFrameFromTimelineToSequence( clamp_min, cell_entry.Section );
+            FOdysseyAnimationCutValue value;
+            UE::MovieScene::GetKeyValue( object_channel, subkey.mKeyHandle, value );
+            FAnimationCut animationcut = value.Value;
 
-        prev_last_cell_clamp_range_in_subsequence.SetLowerBound( TRangeBound<FFrameNumber>::Inclusive( clamp_min_in_sequence ) );
+            dragged_animationcuts_map.Add( frame_in_timeline, animationcut );
+
+            animation = animationcut.GetAnimation();
+        }
     }
 
-    FFrameNumber clamp_max = TNumericLimits<FFrameNumber>::Max();
-    for( const auto& pair : last_cell_per_layer )
+    dragged_animationcuts_map.KeyStableSort( []( FFrameNumber iA, FFrameNumber iB )
+                                             {
+                                                 return iA < iB;
+                                             } );
+
+    if( dragged_animationcuts_map.IsEmpty() )
+        return;
+
+    TPair<FFrameNumber, FAnimationCut> first_pair = dragged_animationcuts_map.Array()[0];
+    TPair<FFrameNumber, FAnimationCut> last_pair = dragged_animationcuts_map.Array().Last();
+
+    FAnimationCuts animationcuts( animation );
+    animationcuts.Build();
+
+    FAnimationCut previous_animationcut;
+    bool has_previous_animationcut = animationcuts.FindPreviousAnimationCut( first_pair.Value, previous_animationcut );
+    FAnimationCut next_animationcut;
+    bool has_next_animationcut = animationcuts.FindNextAnimationCut( last_pair.Value, next_animationcut );
+
+    FFrameNumber previous_animationcut_frame;
+    bool has_previous_animationcut_frame = has_previous_animationcut ? animationcuts.FindAnimationCutKey( previous_animationcut, previous_animationcut_frame ) : false;
+    FFrameNumber next_animationcut_frame;
+    bool has_next_animationcut_frame = has_next_animationcut ? animationcuts.FindAnimationCutKey( next_animationcut, next_animationcut_frame ) : false;
+
+    TRange<FFrameNumber> prev_last_cell_clamp_range_in_subsequence = TRange<FFrameNumber>::All();
+    if( has_previous_animationcut_frame )
     {
-        FCellEntry cell_entry = pair.Value;
-
-        FFrameNumber last_frame_in_timeline = cell_entry.Cell->GetFrameRange().GetUpperBoundValue(); // Inclusive
-        FFrameNumber last_frame_in_timeline_less_1_exposure = last_frame_in_timeline; // No need to -1, as last_frame_in_timeline is inclusive but the upper bound range will be exclusive
-        if( last_frame_in_timeline_less_1_exposure > clamp_max )
-            continue;
-
-        clamp_max = last_frame_in_timeline_less_1_exposure;
-
-        FFrameNumber clamp_max_in_sequence = ShotSequenceHelpers::ConvertFrameFromTimelineToSequence( clamp_max, cell_entry.Section );
-
-        prev_last_cell_clamp_range_in_subsequence.SetUpperBound( TRangeBound<FFrameNumber>::Inclusive( clamp_max_in_sequence ) );
+        FFrameNumber frame_in_sequence = ShotSequenceHelpers::ConvertFrameFromTimelineToSequence( previous_animationcut_frame + 1, result.mSections[0].Get() );
+        prev_last_cell_clamp_range_in_subsequence.SetLowerBound( TRangeBound<FFrameNumber>::Inclusive( frame_in_sequence ) );
+    }
+    else
+    {
+        FFrameNumber frame_in_sequence = ShotSequenceHelpers::ConvertFrameFromTimelineToSequence( 0, result.mSections[0].Get() ); // If no previous animationcut, the timeline can't never be before frame 0
+        prev_last_cell_clamp_range_in_subsequence.SetLowerBound( TRangeBound<FFrameNumber>::Inclusive( frame_in_sequence ) );
+    }
+    if( has_next_animationcut_frame )
+    {
+        FFrameNumber frame_in_sequence = ShotSequenceHelpers::ConvertFrameFromTimelineToSequence( next_animationcut_frame - 1, result.mSections[0].Get() );
+        prev_last_cell_clamp_range_in_subsequence.SetUpperBound( TRangeBound<FFrameNumber>::Inclusive( frame_in_sequence ) );
     }
 
     //---
@@ -1337,236 +1234,53 @@ SCinematicBoardSectionAnimationTimelineKeys::ComputeClampRangePreMoveDuringDrag(
 void
 SCinematicBoardSectionAnimationTimelineKeys::PostMoveDuringDrag( TSharedPtr<FMetaChannel> iKeys ) //override
 {
-    TMap<UOdysseyAnimationLayer*, FCellEntry> previous_cell_per_layer;
-    TMap<UOdysseyAnimationLayer*, FCellEntry> last_cell_per_layer;
-    FindLimitCells( iKeys, previous_cell_per_layer, last_cell_per_layer );
-
-    //---
-
-    for( const auto& pair : last_cell_per_layer )
+    UOdysseyAnimation* animation = nullptr;
+    TMap<FFrameNumber, FAnimationCut> dragged_animationcuts_map;
+    for( auto pair : iKeys->GetMetaKeys() )
     {
-        UOdysseyAnimationLayer* layer = pair.Key;
-        UOdysseyAnimationCell* last_cell = pair.Value.Cell;
-        //FFrameNumber offset = pair.Value.OffsetInTimeline;
-        FFrameNumber offset = pair.Value.NewFrameInTimeline - pair.Value.PreviousFrameInTimeline;
-
-        UOdysseyAnimationCell* previous_cell = previous_cell_per_layer.Find( layer ) ? previous_cell_per_layer.Find( layer )->Cell : nullptr;
-
-        UE_LOG( LogTemp, Warning, TEXT( "post move: offset: %d" ), offset.Value );
-
-        if( offset < 0 )
+        for( const auto& subkey : pair.Value.mSubKeys )
         {
-            if( previous_cell )
-            {
-                int diff = FMath::Min( previous_cell->Exposure - 1, -offset.Value );
+            TMovieSceneChannelHandle<FOdysseyAnimationCutChannel> channel_handle = subkey.mChannelHandle.Cast<FOdysseyAnimationCutChannel>();
+            FOdysseyAnimationCutChannel* object_channel = channel_handle.Get();
 
-                UE_LOG( LogTemp, Warning, TEXT( "post move: previous_cell: diff: %d" ), diff );
-                UE_LOG( LogTemp, Warning, TEXT( "post move: previous_cell: old Exposure: %d" ), previous_cell->Exposure );
+            FFrameNumber frame_in_sequence;
+            object_channel->GetKeyTime( subkey.mKeyHandle, frame_in_sequence );
 
-                FOdysseyObjectEditorUtils::SetPropertyValue( previous_cell, GET_MEMBER_NAME_CHECKED( UOdysseyAnimationCell, Exposure ), previous_cell->Exposure - diff );
+            FFrameNumber frame_in_timeline = ShotSequenceHelpers::ConvertFrameFromSequenceToTimeline( frame_in_sequence, Cast<UOdysseyAnimationTimelineSection>( subkey.mSection ) );
 
-                UE_LOG( LogTemp, Warning, TEXT( "post move: previous_cell: new Exposure: %d" ), previous_cell->Exposure );
+            FOdysseyAnimationCutValue value;
+            UE::MovieScene::GetKeyValue( object_channel, subkey.mKeyHandle, value );
+            FAnimationCut animationcut = value.Value;
 
-                FOdysseyObjectEditorUtils::SetPropertyValue( last_cell, GET_MEMBER_NAME_CHECKED( UOdysseyAnimationCell, Exposure ), last_cell->Exposure + diff );
-            }
-            else
-            {
-                int diff = -offset.Value;
+            dragged_animationcuts_map.Add( frame_in_timeline, animationcut );
 
-                UE_LOG( LogTemp, Warning, TEXT( "post move: last_cell: diff: %d" ), diff );
-
-                FOdysseyObjectEditorUtils::SetPropertyValue( last_cell, GET_MEMBER_NAME_CHECKED( UOdysseyAnimationCell, Exposure ), last_cell->Exposure + diff );
-                FOdysseyObjectEditorUtils::SetPropertyValue( layer, GET_MEMBER_NAME_CHECKED( UOdysseyAnimationLayer, CellsOffset ), layer->CellsOffset - diff );
-            }
-        }
-        else if( offset > 0 )
-        {
-            if( previous_cell )
-            {
-                int diff = FMath::Min( last_cell->Exposure - 1, offset.Value );
-
-                UE_LOG( LogTemp, Warning, TEXT( "post move: last_cell: diff: %d" ), diff );
-                UE_LOG( LogTemp, Warning, TEXT( "post move: last_cell: old Exposure: %d" ), last_cell->Exposure );
-
-                FOdysseyObjectEditorUtils::SetPropertyValue( last_cell, GET_MEMBER_NAME_CHECKED( UOdysseyAnimationCell, Exposure ), last_cell->Exposure - diff );
-
-                UE_LOG( LogTemp, Warning, TEXT( "post move: last_cell: new Exposure: %d" ), last_cell->Exposure );
-
-                FOdysseyObjectEditorUtils::SetPropertyValue( previous_cell, GET_MEMBER_NAME_CHECKED( UOdysseyAnimationCell, Exposure ), previous_cell->Exposure + diff );
-            }
-            else
-            {
-                int diff = FMath::Min( last_cell->Exposure - 1, offset.Value );
-
-                UE_LOG( LogTemp, Warning, TEXT( "post move: last_cell: diff: %d" ), diff );
-
-                FOdysseyObjectEditorUtils::SetPropertyValue( last_cell, GET_MEMBER_NAME_CHECKED( UOdysseyAnimationCell, Exposure ), last_cell->Exposure - diff );
-                FOdysseyObjectEditorUtils::SetPropertyValue( layer, GET_MEMBER_NAME_CHECKED( UOdysseyAnimationLayer, CellsOffset ), layer->CellsOffset + diff );
-            }
+            animation = animationcut.GetAnimation();
         }
     }
+
+    dragged_animationcuts_map.KeyStableSort( []( FFrameNumber iA, FFrameNumber iB )
+                                             {
+                                                 return iA < iB;
+                                             } );
+
+    if( dragged_animationcuts_map.IsEmpty() )
+        return;
+
+    FAnimationCuts animationcuts( animation );
+    animationcuts.Build();
+
+    TArray<FAnimationCut> dragged_animationcuts;
+    dragged_animationcuts_map.GenerateValueArray( dragged_animationcuts );
+    TArray<FFrameNumber> new_frames;
+    dragged_animationcuts_map.GenerateKeyArray( new_frames );
+
+    animationcuts.UpdateAnimationCuts( dragged_animationcuts, new_frames );
 }
 
 FReply
 SCinematicBoardSectionAnimationTimelineKeys::OnMouseMove( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) //override
 {
     return SMetaKeysArea::OnMouseMove( MyGeometry, MouseEvent );
-
-
-
-    FReply reply = SMetaKeysArea::OnMouseMove( MyGeometry, MouseEvent );
-
-    if( mState == EState::kDragging )
-    {
-        if( !mDraggedKeys.IsValid() )
-            return reply;
-
-        //FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
-        //const UMovieSceneSubSection& subsection_object = board_section->GetSubSectionObject();
-        //UMovieSceneSequence* inner_sequence = subsection_object.GetSequence();
-        //UMovieScene* inner_moviescene = inner_sequence ? inner_sequence->GetMovieScene() : nullptr;
-
-        //// For the moment, this should always be the case (until meta keys selection)
-        //// (Like in the parent, to not forget it here if meta keys selection is done)
-        //check( mDraggedKeys->NumMetaKeys() == 1 );
-
-        //TMultiMap<UOdysseyAnimationLayer* , UOdysseyAnimationCell*> dragged_cells_per_layer;
-        //FFrameNumber new_frame_in_sequence = -1;
-        //FFrameNumber new_frame_in_section = -1;
-        //FFrameNumber new_frame_in_timeline = -1;
-        //FFrameNumber offset = 0;
-        //for( auto pair : mDraggedKeys->GetMetaKeys() )
-        //{
-        //    for( const auto& subkey : pair.Value.mSubKeys )
-        //    {
-        //        TMovieSceneChannelHandle<FMovieSceneObjectPathChannel> channel_handle = subkey.mChannelHandle.Cast<FMovieSceneObjectPathChannel>();
-        //        FMovieSceneObjectPathChannel* object_channel = channel_handle.Get();
-
-        //        FFrameNumber frame;
-        //        object_channel->GetKeyTime( subkey.mKeyHandle, frame );
-
-        //        FMovieSceneObjectPathChannelKeyValue value;
-        //        UE::MovieScene::GetKeyValue( object_channel, subkey.mKeyHandle, value );
-        //        UOdysseyAnimationCell* cell = Cast<UOdysseyAnimationCell>( value.Get() );
-        //        if( cell && inner_sequence )
-        //        {
-        //            FCellFrameConverter converter;
-        //            converter.ConvertFrameFromSequenceToTimeline( frame, *Cast<UOdysseyAnimationTimelineSection>( subkey.mSection ), *inner_sequence );
-
-
-
-        //            dragged_cells_per_layer.Add( cell->GetLayer(), cell );
-        //            //dragged_cells.Add( cell );
-        //            offset = converter.FrameInTimeline - cell->GetFrameRange().GetLowerBoundValue(); //TODO: must be stored in an map for each layer (?)
-        //        }
-        //    }
-        //}
-
-        //UE_LOG( LogTemp, Warning, TEXT( "move: new_frame_in_sequence: %d" ), new_frame_in_sequence.Value );
-        //UE_LOG( LogTemp, Warning, TEXT( "move: new_frame_in_section: %d" ), new_frame_in_section.Value );
-        //UE_LOG( LogTemp, Warning, TEXT( "move: new_frame_in_timeline: %d" ), new_frame_in_timeline.Value );
-        //UE_LOG( LogTemp, Warning, TEXT( "move: offset: %d" ), offset.Value );
-
-        //if( dragged_cells_per_layer.IsEmpty() )
-        //    return reply;
-
-        ////TArray<int> cell_indexes;
-        ////for( UOdysseyAnimationCell* dragged_cell : dragged_cells )
-        ////    cell_indexes.Add( dragged_cell->IndexInLayer );
-        ////Algo::Sort( cell_indexes );
-
-        //TMap<UOdysseyAnimationLayer*, UOdysseyAnimationCell*> previous_cell_per_layer;
-        //TMap<UOdysseyAnimationLayer*, UOdysseyAnimationCell*> last_cell_per_layer;
-
-        //TArray<UOdysseyAnimationLayer*> layers;
-        //dragged_cells_per_layer.GetKeys( layers );
-        //for( UOdysseyAnimationLayer* layer : layers )
-        //{
-        //    TArray<UOdysseyAnimationCell*> cells;
-        //    dragged_cells_per_layer.GenerateValueArray( cells );
-
-        //    Algo::SortBy( cells, &UOdysseyAnimationCell::IndexInLayer );
-
-        //    int index_previous = cells[0]->IndexInLayer - 1;
-        //    int index_last = cells.Last()->IndexInLayer;
-
-        //    if( layer->GetCells().IsValidIndex( index_previous ) )
-        //    {
-        //        check( !previous_cell_per_layer.Find( layer ) );
-        //        previous_cell_per_layer.Add( layer, layer->GetCells()[index_previous] );
-        //    }
-
-        //    check( !last_cell_per_layer.Find( layer ) );
-        //    last_cell_per_layer.Add( layer, layer->GetCells()[index_last] );
-        //}
-
-        //if( offset < 0 )
-        //{
-        //    for( const auto& pair : previous_cell_per_layer )
-        //    {
-        //        UOdysseyAnimationLayer* layer = pair.Key;
-        //        UOdysseyAnimationCell* previous_cell = pair.Value;
-
-        //        int diff = FMath::Min( previous_cell->Exposure - 1, -offset.Value );
-
-        //        FOdysseyObjectEditorUtils::SetPropertyValue( previous_cell, GET_MEMBER_NAME_CHECKED( UOdysseyAnimationCell, Exposure ), previous_cell->Exposure - diff );
-
-        //        UOdysseyAnimationCell* last_cell = *last_cell_per_layer.Find( layer );
-        //        FOdysseyObjectEditorUtils::SetPropertyValue( last_cell, GET_MEMBER_NAME_CHECKED( UOdysseyAnimationCell, Exposure ), last_cell->Exposure + diff );
-        //    }
-        //}
-
-
-
-
-        RebuildMetaChannel();
-
-        //TArray<TRange<FFrameNumber>> full_dragged_cell_ranges;
-        //for( UOdysseyAnimationCell* cell : dragged_cells )
-        //{
-        //    TRange<FFrameNumber> cell_range = TRange<FFrameNumber>::Inclusive( cell->GetFrameRange().GetLowerBoundValue(), cell->GetFrameRange().GetUpperBoundValue() ); // GetFrameRange() always inclusive
-        //    full_dragged_cell_ranges.Add( cell_range );
-        //}
-        //TRange<FFrameNumber> full_dragged_cell_range = TRange<FFrameNumber>::Hull( full_dragged_cell_ranges );
-
-        //UOdysseyAnimationCell* previous_cell = nullptr;
-        //UOdysseyAnimationCell* next_cell = nullptr;
-        //for( UOdysseyAnimationCell* cell : layer->GetCells() )
-        //{
-        //    TRange<FFrameNumber> cell_range = TRange<FFrameNumber>::Inclusive( cell->GetFrameRange().GetLowerBoundValue(), cell->GetFrameRange().GetUpperBoundValue() ); // GetFrameRange() always inclusive
-
-        //    if( full_dragged_cell_range.Contains( cell_range ) )
-        //        continue;
-
-        //    if( cell_range.GetUpperBoundValue() < full_dragged_cell_range.GetLowerBoundValue() )
-        //    {
-        //        if( previous_cell )
-        //        {
-        //            TRange<FFrameNumber> previous_cell_range = TRange<FFrameNumber>::Inclusive( previous_cell->GetFrameRange().GetLowerBoundValue(), previous_cell->GetFrameRange().GetUpperBoundValue() ); // GetFrameRange() always inclusive
-        //            if( previous_cell_range.GetLowerBoundValue() < full_dragged_cell_range.GetLowerBoundValue() )
-        //            {
-        //                previous_cell = cell;
-        //            }
-        //        }
-        //    }
-
-        //    if( cell_range.GetLowerBoundValue() > full_dragged_cell_range.GetUpperBoundValue() )
-        //    {
-        //        if( next_cell )
-        //        {
-        //            TRange<FFrameNumber> next_cell_range = TRange<FFrameNumber>::Inclusive( next_cell->GetFrameRange().GetLowerBoundValue(), next_cell->GetFrameRange().GetUpperBoundValue() ); // GetFrameRange() always inclusive
-        //            if( next_cell_range.GetLowerBoundValue() < full_dragged_cell_range.GetLowerBoundValue() )
-        //            {
-        //                next_cell = cell;
-        //            }
-        //        }
-        //    }
-        //}
-
-
-    }
-
-    return reply;
 }
 
 const FSlateBrush*
