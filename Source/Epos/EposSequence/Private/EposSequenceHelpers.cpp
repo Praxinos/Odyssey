@@ -2270,7 +2270,7 @@ ShotSequenceHelpers::ConvertFrameFromTimelineToSequence( FFrameNumber iFrameInTi
     FFrameNumber frame_in_timeline = frametime_in_timeline.GetFrame(); // It should be ok (?), otherwise return a FFrameTime
 
     // Apply all offsets in sequence framerate (aka tickresolution)
-    FFrameNumber frame_in_section = frame_in_timeline + iSection->GetStartFrameOffset();
+    FFrameNumber frame_in_section = frame_in_timeline - iSection->GetStartFrameOffset();
     FFrameNumber frame_in_sequence = frame_in_section + iSection->GetTrueRange().GetLowerBoundValue();
 
     return frame_in_sequence;
@@ -2283,7 +2283,7 @@ ShotSequenceHelpers::ConvertFrameFromSequenceToTimeline( FFrameNumber iFrameInSe
 
     // Apply all offsets in sequence framerate (aka tickresolution)
     FFrameNumber frame_in_section = iFrameInSequence - iSection->GetTrueRange().GetLowerBoundValue();
-    FFrameNumber frame_in_timeline = frame_in_section - iSection->GetStartFrameOffset();
+    FFrameNumber frame_in_timeline = frame_in_section + iSection->GetStartFrameOffset();
 
     // Convert a sequence frame to a real timeline frame (change framerate from sequence framerate (aka tickresolution) to animation framerate)
     FFrameTime frametime_in_timeline = FFrameRate::TransformTime( frame_in_timeline, sequence->GetMovieScene()->GetTickResolution(), FFrameRate( iSection->GetAnimation()->GetFramesPerSecond() * 1000, 1000 ) );
