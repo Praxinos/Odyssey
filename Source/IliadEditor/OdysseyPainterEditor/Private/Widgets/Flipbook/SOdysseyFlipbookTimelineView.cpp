@@ -358,6 +358,9 @@ SOdysseyFlipbookTimelineView::OnScrubPositionChanged(float iOldPosition)
 void
 SOdysseyFlipbookTimelineView::PlayOrPause(bool iBackward)
 {
+    if (!mFlipbook.Get())
+        return;
+
     if (mIsPlaying && mIsPlayingBackward == iBackward)
     {
         Pause();
@@ -389,6 +392,9 @@ SOdysseyFlipbookTimelineView::Play(bool iBackward)
 void
 SOdysseyFlipbookTimelineView::Stop()
 {
+    if (!mFlipbook.Get())
+        return;
+
     if (!mIsPlaying)
         return;
 
@@ -407,6 +413,9 @@ SOdysseyFlipbookTimelineView::Stop()
 void
 SOdysseyFlipbookTimelineView::Pause()
 {
+    if (!mFlipbook.Get())
+        return;
+
     if (!mIsPlaying)
         return;
 
@@ -636,6 +645,9 @@ SOdysseyFlipbookTimelineView::AddFrame()
 void
 SOdysseyFlipbookTimelineView::AddFrameAfter()
 {
+    if (!mFlipbook.Get())
+        return;
+
     int32 index = GetCurrentKeyframeIndex();
     if (index < 0 || index >= mFlipbook.Get()->GetNumKeyFrames())
     {
@@ -656,6 +668,9 @@ SOdysseyFlipbookTimelineView::AddFrameAfter()
 void
 SOdysseyFlipbookTimelineView::AddFrameBefore()
 {
+    if (!mFlipbook.Get())
+        return;
+
     int32 index = GetCurrentKeyframeIndex();
     if (index < 0 || index >= mFlipbook.Get()->GetNumKeyFrames())
     {
@@ -675,18 +690,27 @@ SOdysseyFlipbookTimelineView::AddFrameBefore()
 void
 SOdysseyFlipbookTimelineView::ScrubToFirstFrame()
 {
+    if (!mFlipbook.Get())
+        return;
+
     mTimelineWidget->ScrubPosition(0.5f);
 }
 
 void
 SOdysseyFlipbookTimelineView::ScrubToLastFrame()
 {
+    if (!mFlipbook.Get())
+        return;
+
     mTimelineWidget->ScrubPosition(mFlipbook.Get()->GetNumFrames() - 0.5f);
 }
 
 void
 SOdysseyFlipbookTimelineView::ScrubToNextFrame()
 {
+    if (!mFlipbook.Get())
+        return;
+
     if (mTimelineWidget->ScrubPosition() < 0.f)
     {
         mTimelineWidget->ScrubPosition(0.5f);
@@ -699,6 +723,9 @@ SOdysseyFlipbookTimelineView::ScrubToNextFrame()
 void
 SOdysseyFlipbookTimelineView::ScrubToPreviousFrame()
 {
+    if (!mFlipbook.Get())
+        return;
+
     if (mTimelineWidget->ScrubPosition() < 1.0f)
         return;
 
@@ -708,6 +735,9 @@ SOdysseyFlipbookTimelineView::ScrubToPreviousFrame()
 void
 SOdysseyFlipbookTimelineView::ScrubToNextKeyFrame()
 {
+    if (!mFlipbook.Get())
+        return;
+
     int32 index = OdysseyPainterEditorFlipbookUtils::GetKeyframeIndexAtPosition(mFlipbook.Get(), mTimelineWidget->ScrubPosition());
     if (index >= mFlipbook.Get()->GetNumKeyFrames() - 1)
         return;
@@ -734,6 +764,9 @@ SOdysseyFlipbookTimelineView::ScrubToNextKeyFrame()
 void
 SOdysseyFlipbookTimelineView::ScrubToPreviousKeyFrame()
 {
+    if (!mFlipbook.Get())
+        return;
+
     int32 index = OdysseyPainterEditorFlipbookUtils::GetKeyframeIndexAtPosition(mFlipbook.Get(), mTimelineWidget->ScrubPosition());
     if (index == 0)
         return;
