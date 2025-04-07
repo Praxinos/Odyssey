@@ -40,6 +40,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroup : public FOdysseyVectorObject
         void Init( FString& iName );
         virtual void UpdateBBox();
 
+        FColor GetHUDColor();
+        void SetHUDColor( const FColor& iHUDColor );
+
     protected:
        /**
          * @brief Pick this shape.
@@ -58,4 +61,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroup : public FOdysseyVectorObject
          * @param iFlags update flags from the engine.
          */
         virtual void UpdateShape( uint32 iUpdateFlags ) override;
+
+
+    protected:
+        FColor mHUDColor;
 };

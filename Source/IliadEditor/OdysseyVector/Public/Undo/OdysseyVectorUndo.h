@@ -150,42 +150,38 @@ namespace FSnapshotFlags
         static const uint64 NAME                      = ( 1ULL <<  4 );
         static const uint64 HIERARCHY                 = ( 1ULL <<  5 );
         static const uint64 CHILDREN_TRANSFORMATIONS  = ( 1ULL <<  6 );
-        static const uint64 PARAM                     = ( TRANSFORMATIONS
-                                                        | COLORING
-                                                        | VISIBILITY
-                                                        | OPACITY
-                                                        | NAME );
+
         namespace Path
         {
-            static const uint64 VERTICES                  = ( 1ULL <<  7 );
-            static const uint64 SEGMENTS                  = ( 1ULL <<  8 );
-            static const uint64 SELECTED_VERTICES         = ( 1ULL <<  9 );
-            static const uint64 TOPOLOGY                  = ( 1ULL << 10 );
-            static const uint64 BRUSH                     = ( 1ULL << 11 );
-            static const uint64 JOINTTYPE                 = ( 1ULL << 12 );
-            static const uint64 MITERLIMIT                = ( 1ULL << 13 );
-            static const uint64 PARAM                     = ( BRUSH
-                                                            | JOINTTYPE
-                                                            | MITERLIMIT );
+            static const uint64 VERTICES          = ( 1ULL <<  7 );
+            static const uint64 SEGMENTS          = ( 1ULL <<  8 );
+            static const uint64 SELECTED_VERTICES = ( 1ULL <<  9 );
+            static const uint64 TOPOLOGY          = ( 1ULL << 10 );
+            static const uint64 BRUSH             = ( 1ULL << 11 );
+            static const uint64 JOINTTYPE         = ( 1ULL << 12 );
+            static const uint64 MITERLIMIT        = ( 1ULL << 13 );
         }
-        namespace GroupPaint
+
+        namespace Group
         {
-            static const uint64 BUCKETS                   = ( 1ULL <<  7 );
-            static const uint64 SELECTED_BUCKETS          = ( 1ULL <<  8 );
-            static const uint64 PAINTED                   = ( 1ULL <<  9 );
-            static const uint64 MONOCHROME                = ( 1ULL << 10 );
-            static const uint64 MONOCHROMECOLOR           = ( 1ULL << 11 );
-            static const uint64 REALTIME                  = ( 1ULL << 12 );
-            static const uint64 GAPTOLERANCE              = ( 1ULL << 13 );
-            static const uint64 WIREFRAME                 = ( 1ULL << 14 );
-            static const uint64 WIREFRAMECOLOR            = ( 1ULL << 15 );
-            static const uint64 PARAM                     = ( PAINTED
-                                                            | MONOCHROME
-                                                            | MONOCHROMECOLOR
-                                                            | REALTIME
-                                                            | GAPTOLERANCE
-                                                            | WIREFRAME
-                                                            | WIREFRAMECOLOR );
+            static const uint64 HUDCOLOR = ( 1ULL <<  7 );
+
+            namespace Paint
+            {
+                static const uint64 BUCKETS                    = ( 1ULL <<  8 );
+                static const uint64 SELECTED_BUCKETS           = ( 1ULL <<  9 );
+                static const uint64 PAINTED                    = ( 1ULL << 10 );
+                static const uint64 MONOCHROME                 = ( 1ULL << 11 );
+                static const uint64 MONOCHROMECOLOR            = ( 1ULL << 12 );
+                static const uint64 REALTIME                   = ( 1ULL << 13 );
+                static const uint64 GAPTOLERANCE               = ( 1ULL << 14 );
+                static const uint64 WIREFRAME                  = ( 1ULL << 15 );
+                static const uint64 WIREFRAMECOLOR             = ( 1ULL << 16 );
+                static const uint64 INTERSECTSCANVAS           = ( 1ULL << 17 );
+                static const uint64 GAPDETECTIONSCHEME         = ( 1ULL << 18 );
+                static const uint64 SEGMENTEXTENSIONSCHEME     = ( 1ULL << 19 );
+                static const uint64 SEGMENTEXTENSIONSIMPLIFIED = ( 1ULL << 20 );
+            }
         }
     }
 }
@@ -555,7 +551,19 @@ class ODYSSEYVECTOR_API FSnapshotPath : public FSnapshotObject
         double mMiterLimit;
 };
 
-class ODYSSEYVECTOR_API FSnapshotGroupPaint : public FSnapshotObject
+class ODYSSEYVECTOR_API FSnapshotGroup : public FSnapshotObject
+{
+    public:
+        virtual ~FSnapshotGroup();
+        FSnapshotGroup( FOdysseyVectorGroup* iGroup, uint64 iSnapshotFlags );
+
+        virtual bool Restore() override;
+
+    private:
+        FColor mHUDColor;
+};
+
+class ODYSSEYVECTOR_API FSnapshotGroupPaint : public FSnapshotGroup
 {
     public:
         virtual ~FSnapshotGroupPaint();

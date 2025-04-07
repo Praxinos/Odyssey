@@ -561,7 +561,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         virtual void Added();
         virtual void Removed();
         bool IsSystem();
-        FOdysseyVectorObject* GetAncestorByClass( uint32 iClass  );
+        FOdysseyVectorObject* GetAncestorByClass( uint32 iClass, bool iBaseClass );
         void LockDrawing();
         void UnlockDrawing();
 
@@ -590,6 +590,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         bool IsVisible( bool iHierarchical );
         void SetVisible( bool iVisible );
         void InvalideTree( uint64 iInvalidationFlags );
+        virtual FColor GetHUDColor();
 
     protected:
 

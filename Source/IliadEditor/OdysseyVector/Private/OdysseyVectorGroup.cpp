@@ -3,9 +3,11 @@
 
 #include "OdysseyVectorGroup.h"
 #include "OdysseyVectorEngine.h"
+#include "HUD/OdysseyVectorHUD.h"
 
 FOdysseyVectorGroup::FOdysseyVectorGroup( const FString& iName )
     : FOdysseyVectorObject( iName )
+    , mHUDColor( FOdysseyVectorHUD::GetForegroundColor() )
 {
 }
 
@@ -72,4 +74,16 @@ void
 FOdysseyVectorGroup::UpdateShape( uint32 iUpdateFlags )
 {
 
+}
+
+FColor
+FOdysseyVectorGroup::GetHUDColor()
+{
+    return mHUDColor;
+}
+
+void
+FOdysseyVectorGroup::SetHUDColor( const FColor& iHUDColor )
+{
+    mHUDColor = iHUDColor;
 }

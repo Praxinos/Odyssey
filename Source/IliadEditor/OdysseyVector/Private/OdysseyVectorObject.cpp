@@ -9,6 +9,7 @@
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorLayer.h"
 #include "OdysseyVectorCell.h"
+#include "HUD/OdysseyVectorHUD.h"
 #include "Palette/OdysseyPaletteEntryColor.h"
 
 #ifndef M_PI
@@ -166,6 +167,14 @@ CheckCommonClass( std::list<FOdysseyVectorObject*>& iObjectList, uint32 iCommonC
     }
 
     return 0;
+}
+
+FColor
+FOdysseyVectorObject::GetHUDColor()
+{
+    FOdysseyVectorObject* group = GetAncestorByClass( FOdysseyVectorGroup::StaticClass(), true );
+
+    return group ? group->GetHUDColor() : FOdysseyVectorHUD::GetForegroundColor();
 }
 
 uint32
@@ -726,13 +735,13 @@ FOdysseyVectorObject::UnlockDrawing()
 }
 
 FOdysseyVectorObject*
-FOdysseyVectorObject::GetAncestorByClass( uint32 iClass  )
+FOdysseyVectorObject::GetAncestorByClass( uint32 iClass, bool iBaseClass )
 {
     FOdysseyVectorObject* parent = mParent;
 
     while ( parent )
     {
-        if( parent->GetClass() == iClass )
+        if( ( iBaseClass && parent->HasBaseClass( iClass )  ) || parent->GetClass() == iClass )
         {
             return parent;
         }

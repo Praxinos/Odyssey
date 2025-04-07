@@ -9,12 +9,12 @@
 #include <Core/Core.h>
 #include <Image/Block.h>
 #include "OdysseyVectorGroupPaint.h"
-#include "OdysseyPainterEditorVectorObjectView.h"
+#include "OdysseyPainterEditorVectorGroupView.h"
 
 #include "OdysseyPainterEditorVectorGroupPaintView.generated.h"
 
 UCLASS()
-class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorGroupPaintView : public UOdysseyPainterEditorVectorObjectView
+class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorGroupPaintView : public UOdysseyPainterEditorVectorGroupView
 {
     public:
         GENERATED_BODY()

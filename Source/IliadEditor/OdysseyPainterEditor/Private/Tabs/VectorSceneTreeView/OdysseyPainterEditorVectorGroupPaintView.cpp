@@ -8,7 +8,7 @@ UOdysseyPainterEditorVectorGroupPaintView::~UOdysseyPainterEditorVectorGroupPain
 }
 
 UOdysseyPainterEditorVectorGroupPaintView::UOdysseyPainterEditorVectorGroupPaintView()
-    : UOdysseyPainterEditorVectorObjectView()
+    : UOdysseyPainterEditorVectorGroupView()
     , Painted( true )
     , Monochrome( false )
     , MonochromeColor( 127, 127, 127, 255 )
@@ -22,13 +22,13 @@ UOdysseyPainterEditorVectorGroupPaintView::UOdysseyPainterEditorVectorGroupPaint
     , Realtime( false )
     , Multithreaded( true )
 {
-    Class = eVectorObjectViewClass::GroupPaint;
+    bDisplayBackgroundProperties = true;
 }
 
 void
 UOdysseyPainterEditorVectorGroupPaintView::ImportParam()
 {
-    UOdysseyPainterEditorVectorObjectView::ImportParam();
+    UOdysseyPainterEditorVectorGroupView::ImportParam();
 
     for( FOdysseyVectorObject* selectedObject : mFocusedObjectList )
     {
@@ -60,9 +60,9 @@ UOdysseyPainterEditorVectorGroupPaintView::PropertyChanged( const FName& iProper
                                                           , const FName& iMemberPropertyName
                                                           , const FName& iCategory)
 {
-    UOdysseyPainterEditorVectorObjectView::PropertyChanged( iPropertyName
-                                                          , iMemberPropertyName
-                                                          , iCategory );
+    UOdysseyPainterEditorVectorGroupView::PropertyChanged( iPropertyName
+                                                         , iMemberPropertyName
+                                                         , iCategory );
 
     for( FOdysseyVectorObject* selectedObject : mFocusedObjectList )
     {

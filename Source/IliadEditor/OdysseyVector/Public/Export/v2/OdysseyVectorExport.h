@@ -97,6 +97,7 @@ namespace FOdysseyVectorExportV2
     ////////////////////////////////////
     void ODYSSEYVECTOR_API WriteGroup( FOdysseyVectorGroup& iGroup, FArchive &Ar );
     void WriteGroupChunks( FOdysseyVectorGroup& iGroup, FArchive &Ar );
+    void WriteGroupHUDColor( FOdysseyVectorGroup& iGroup, FArchive &Ar );
 
     ////////////////////////////////////
     void ODYSSEYVECTOR_API WriteGroupPaint( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar );

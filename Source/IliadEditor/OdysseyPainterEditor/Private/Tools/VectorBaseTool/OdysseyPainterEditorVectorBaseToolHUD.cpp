@@ -862,7 +862,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawHierarchy( const FOdysseyHUD::FDrawH
 
                       DrawPath( iParams
                               , path
-                              , iForegroundColor
+                              , /*iForegroundColor*/path->GetHUDColor()
                               , iBackgroundColor
                               , iHighlightColor
                               , iHUDFlags );

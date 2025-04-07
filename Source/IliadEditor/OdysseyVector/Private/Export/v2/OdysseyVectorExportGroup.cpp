@@ -6,6 +6,26 @@
 #include "OdysseyFile.h"
 #include "OdysseyVectorGroup.h"
 
+void
+FOdysseyVectorExportV2::WriteGroupHUDColor( FOdysseyVectorGroup& iGroup, FArchive &Ar )
+{
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_GROUP_HUDCOLOR
+                            , Ar
+                            , [&iGroup](FArchive &Ar) -> void
+    {
+        FColor HUDColor = iGroup.GetHUDColor();
+        uint8 R = HUDColor.R
+            , G = HUDColor.G
+            , B = HUDColor.G
+            , A = HUDColor.A;
+
+        Ar << R;
+        Ar << G;
+        Ar << B;
+        Ar << A;
+    } );
+}
+
 // Write chunks without encapsulation within the GroupPaint chunk header
 void
 FOdysseyVectorExportV2::WriteGroupChunks( FOdysseyVectorGroup& iGroup, FArchive &Ar )
@@ -13,7 +33,7 @@ FOdysseyVectorExportV2::WriteGroupChunks( FOdysseyVectorGroup& iGroup, FArchive 
     // inherited chunks
     WriteObjectChunks( iGroup, Ar );
     // own chunks
-    // ...Nothing to write.
+    WriteGroupHUDColor( iGroup, Ar );
 }
 
 // Write chunks with encapsulation within the GroupPaint chunk header

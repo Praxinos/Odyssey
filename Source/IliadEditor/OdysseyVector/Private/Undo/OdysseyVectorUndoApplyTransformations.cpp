@@ -43,7 +43,7 @@ FOdysseyVectorUndoApplyTransformations::FOdysseyVectorUndoApplyTransformations( 
             mObjectSnapshotArray.push_back( new FSnapshotGroupPaint( paintGroup
                                                                    , FSnapshotFlags::Object::TRANSFORMATIONS
                                                                    //| FSnapshotFlags::Object::CHILDREN_TRANSFORMATIONS
-                                                                   | FSnapshotFlags::Object::GroupPaint::BUCKETS ) );
+                                                                   | FSnapshotFlags::Object::Group::Paint::BUCKETS ) );
         }
         else
         {

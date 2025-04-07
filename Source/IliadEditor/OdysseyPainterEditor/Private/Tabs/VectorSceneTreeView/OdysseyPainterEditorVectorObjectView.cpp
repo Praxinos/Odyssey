@@ -19,7 +19,6 @@ UOdysseyPainterEditorVectorObjectView::~UOdysseyPainterEditorVectorObjectView()
 UOdysseyPainterEditorVectorObjectView::UOdysseyPainterEditorVectorObjectView()
     : mEditor( nullptr )
     , mScene( nullptr )
-    , Class( eVectorObjectViewClass::Object )
     , Name( "VectorObject" )
     , TranslationX ( 0.0f )
     , TranslationY ( 0.0f )
@@ -37,6 +36,8 @@ UOdysseyPainterEditorVectorObjectView::UOdysseyPainterEditorVectorObjectView()
                       , FOdysseyVectorObject::BACKGROUNDCOLOR_DEFAULT_G
                       , FOdysseyVectorObject::BACKGROUNDCOLOR_DEFAULT_B
                       , FOdysseyVectorObject::BACKGROUNDCOLOR_DEFAULT_A )
+    , bDisplayBackgroundProperties( false )
+    , bDisplayForegroundProperties( false )
 {
 }
 
@@ -199,7 +200,10 @@ UOdysseyPainterEditorVectorObjectView::PostEditChangeProperty( FPropertyChangedE
         GEditor->BeginTransaction(LOCTEXT("vector-object.transaction.property-changed","Property Changed"));
         if( GUndo )
         {
-            FOdysseyVectorUndo *undo = new FOdysseyVectorUndoObjectParam( mScene, mFocusedObjectList, notificationFlags );
+            FOdysseyVectorUndo *undo = new FOdysseyVectorUndoObjectParam( mScene
+                                                                        , mFocusedObjectList
+                                                                        , FName(PropertyChangedEvent.Property->GetMetaData(TEXT("Category")))
+                                                                        , notificationFlags );
             // We use GEditor as the UObject, otherwise if we use "this", at each UNDO, PostEditChangeProperty() will be called
             // which will again call StoreUndo + this will lead to a crash. I don't know however what will be the consequences
             // of a call to GEditor::PostEditChangeProperty()

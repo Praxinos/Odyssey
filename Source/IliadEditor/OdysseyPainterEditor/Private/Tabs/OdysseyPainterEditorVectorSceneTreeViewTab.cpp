@@ -10,6 +10,7 @@
 #include "Widgets/Layout/SWidgetSwitcher.h"
 #include "OdysseyPainterEditorVectorObjectView.h"
 #include "OdysseyPainterEditorVectorPathView.h"
+#include "OdysseyPainterEditorVectorGroupView.h"
 #include "OdysseyPainterEditorVectorGroupPaintView.h"
 #include "OdysseyPainterEditorVectorTagInbetweenerView.h"
 
@@ -38,6 +39,7 @@ FOdysseyPainterEditorVectorSceneTreeViewTab::FOdysseyPainterEditorVectorSceneTre
 {
     mObjectView = NewObject<UOdysseyPainterEditorVectorObjectView>();
     mPathView = NewObject<UOdysseyPainterEditorVectorPathView>();
+    mGroupView = NewObject<UOdysseyPainterEditorVectorGroupView>();
     mGroupPaintView = NewObject<UOdysseyPainterEditorVectorGroupPaintView>();
     mTagInbetweenerView = NewObject<UOdysseyPainterEditorVectorTagInbetweenerView>();
 }
@@ -84,15 +86,19 @@ FOdysseyPainterEditorVectorSceneTreeViewTab::UpdateObjectPropertiesPanel( FOdyss
                     mDetailsView->SetObject( mPathView );
                 }
 
-                if( ( objectClass == FOdysseyVectorGroupPaint::StaticClass() )
-                 || ( objectClass == FOdysseyVectorGroupPaint::StaticClass() ) )
+                if( objectClass == FOdysseyVectorGroup::StaticClass() )
+                {
+                    mGroupView->Update( mEditor, iScene, focusedObjectList );
+                    mDetailsView->SetObject( mGroupView );
+                }
+
+                if( objectClass == FOdysseyVectorGroupPaint::StaticClass() )
                 {
                     mGroupPaintView->Update( mEditor, iScene, focusedObjectList );
                     mDetailsView->SetObject( mGroupPaintView );
                 }
 
-                if( ( objectClass == FOdysseyVectorObject::StaticClass() )
-                 || ( objectClass == FOdysseyVectorGroup::StaticClass() ) )
+                if( objectClass == FOdysseyVectorObject::StaticClass() )
                 {
                     // default
                     mObjectView->Update( mEditor, iScene, focusedObjectList );
@@ -187,6 +193,7 @@ FOdysseyPainterEditorVectorSceneTreeViewTab::AddReferencedObjects(FReferenceColl
     // Prevent these UObjects from being destroyed by garbage collection
     Collector.AddReferencedObject(mObjectView);
     Collector.AddReferencedObject(mPathView);
+    Collector.AddReferencedObject(mGroupView);
     Collector.AddReferencedObject(mGroupPaintView);
     Collector.AddReferencedObject(mTagInbetweenerView);
     //Collector.AddReferencedObject(mDetailsView);

@@ -1618,15 +1618,51 @@ FSnapshotPath::Restore()
     return false;
 }
 
+FSnapshotGroup::~FSnapshotGroup()
+{
+}
+
+FSnapshotGroup::FSnapshotGroup( FOdysseyVectorGroup* iGroup
+                              , uint64 iSnapshotFlags )
+    : FSnapshotObject( iGroup, iSnapshotFlags )
+{
+    if( iSnapshotFlags & FSnapshotFlags::Object::Group::HUDCOLOR )
+    {
+        mHUDColor = iGroup->GetHUDColor();
+    }
+}
+
+bool
+FSnapshotGroup::Restore()
+{
+    if( FSnapshotObject::Restore() )
+    {
+        FOdysseyVectorGroup* group = static_cast<FOdysseyVectorGroup*>(mObject);
+
+        if( mSnapshotFlags & FSnapshotFlags::Object::Group::HUDCOLOR )
+        {
+            FColor currentHUDColor = group->GetHUDColor();
+
+            group->SetHUDColor( mHUDColor );
+
+            mHUDColor = currentHUDColor;
+        }
+
+        return true;
+    }
+
+    return false;
+}
+
 FSnapshotGroupPaint::~FSnapshotGroupPaint()
 {
 }
 
 FSnapshotGroupPaint::FSnapshotGroupPaint( FOdysseyVectorGroupPaint* iPaintGroup
                                         , uint64 iSnapshotFlags )
-    : FSnapshotObject( iPaintGroup, iSnapshotFlags )
+    : FSnapshotGroup( iPaintGroup, iSnapshotFlags )
 {
-    if( iSnapshotFlags & FSnapshotFlags::Object::GroupPaint::BUCKETS )
+    if( iSnapshotFlags & FSnapshotFlags::Object::Group::Paint::BUCKETS )
     {
         std::list<FOdysseyVectorBucket*>& bucketList = iPaintGroup->GetBucketList();
 
@@ -1638,41 +1674,41 @@ FSnapshotGroupPaint::FSnapshotGroupPaint( FOdysseyVectorGroupPaint* iPaintGroup
         }
     }
 
-    if( iSnapshotFlags & FSnapshotFlags::Object::GroupPaint::SELECTED_BUCKETS )
+    if( iSnapshotFlags & FSnapshotFlags::Object::Group::Paint::SELECTED_BUCKETS )
     {
         mSelectedBucketList = iPaintGroup->GetSelectedBucketList();
     }
 
-    if( mSnapshotFlags & FSnapshotFlags::Object::GroupPaint::PAINTED )
+    if( mSnapshotFlags & FSnapshotFlags::Object::Group::Paint::PAINTED )
     {
         bPainted = iPaintGroup->IsPainted();
     }
 
-    if( mSnapshotFlags & FSnapshotFlags::Object::GroupPaint::MONOCHROME )
+    if( mSnapshotFlags & FSnapshotFlags::Object::Group::Paint::MONOCHROME )
     {
         bMonochrome = iPaintGroup->IsMonochrome();
     }
 
-    if( mSnapshotFlags & FSnapshotFlags::Object::GroupPaint::MONOCHROMECOLOR )
+    if( mSnapshotFlags & FSnapshotFlags::Object::Group::Paint::MONOCHROMECOLOR )
     {
         mMonochromeColor = iPaintGroup->GetMonochromeColor();
     }
-    if( mSnapshotFlags & FSnapshotFlags::Object::GroupPaint::REALTIME )
+    if( mSnapshotFlags & FSnapshotFlags::Object::Group::Paint::REALTIME )
     {
         bRealtime = iPaintGroup->IsRealtime();
     }
 
-    if( mSnapshotFlags & FSnapshotFlags::Object::GroupPaint::GAPTOLERANCE )
+    if( mSnapshotFlags & FSnapshotFlags::Object::Group::Paint::GAPTOLERANCE )
     {
         mGapTolerance = iPaintGroup->GetGapTolerance();
     }
 
-    if( mSnapshotFlags & FSnapshotFlags::Object::GroupPaint::WIREFRAME )
+    if( mSnapshotFlags & FSnapshotFlags::Object::Group::Paint::WIREFRAME )
     {
         bWireframe = iPaintGroup->IsWireframe();
     }
 
-    if( mSnapshotFlags & FSnapshotFlags::Object::GroupPaint::WIREFRAMECOLOR )
+    if( mSnapshotFlags & FSnapshotFlags::Object::Group::Paint::WIREFRAMECOLOR )
     {
         mWireframeColor = iPaintGroup->GetWireframeColor();
     }
@@ -1681,11 +1717,11 @@ FSnapshotGroupPaint::FSnapshotGroupPaint( FOdysseyVectorGroupPaint* iPaintGroup
 bool
 FSnapshotGroupPaint::Restore()
 {
-    if( FSnapshotObject::Restore() )
+    if( FSnapshotGroup::Restore() )
     {
         FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(mObject);
 
-        if( mSnapshotFlags & FSnapshotFlags::Object::GroupPaint::BUCKETS )
+        if( mSnapshotFlags & FSnapshotFlags::Object::Group::Paint::BUCKETS )
         {
             for( int i = 0; i < mBucketSnapshotArray.size(); i++ )
             {
@@ -1693,7 +1729,7 @@ FSnapshotGroupPaint::Restore()
             }
         }
 
-        if( mSnapshotFlags & FSnapshotFlags::Object::GroupPaint::SELECTED_BUCKETS )
+        if( mSnapshotFlags & FSnapshotFlags::Object::Group::Paint::SELECTED_BUCKETS )
         {
             std::list<FOdysseyVectorBucket*> currentBucketList = paintGroup->GetSelectedBucketList();
 
@@ -1707,7 +1743,7 @@ FSnapshotGroupPaint::Restore()
             mSelectedBucketList = currentBucketList;
         }
 
-        if( mSnapshotFlags & FSnapshotFlags::Object::GroupPaint::PAINTED )
+        if( mSnapshotFlags & FSnapshotFlags::Object::Group::Paint::PAINTED )
         {
             bool currentPainted = paintGroup->IsPainted();
 
@@ -1716,7 +1752,7 @@ FSnapshotGroupPaint::Restore()
             bPainted = currentPainted;
         }
 
-        if( mSnapshotFlags & FSnapshotFlags::Object::GroupPaint::MONOCHROME )
+        if( mSnapshotFlags & FSnapshotFlags::Object::Group::Paint::MONOCHROME )
         {
             bool currentMonochrome = paintGroup->IsMonochrome();
 
@@ -1725,7 +1761,7 @@ FSnapshotGroupPaint::Restore()
             bMonochrome = currentMonochrome;
         }
 
-        if( mSnapshotFlags & FSnapshotFlags::Object::GroupPaint::MONOCHROMECOLOR )
+        if( mSnapshotFlags & FSnapshotFlags::Object::Group::Paint::MONOCHROMECOLOR )
         {
             FColor currentMonochromeColor = paintGroup->GetMonochromeColor();
 
@@ -1733,7 +1769,7 @@ FSnapshotGroupPaint::Restore()
             // swap
             mMonochromeColor = currentMonochromeColor;
         }
-        if( mSnapshotFlags & FSnapshotFlags::Object::GroupPaint::REALTIME )
+        if( mSnapshotFlags & FSnapshotFlags::Object::Group::Paint::REALTIME )
         {
             bool currentRealtime = paintGroup->IsRealtime();
 
@@ -1742,7 +1778,7 @@ FSnapshotGroupPaint::Restore()
             bRealtime = currentRealtime;
         }
 
-        if( mSnapshotFlags & FSnapshotFlags::Object::GroupPaint::GAPTOLERANCE )
+        if( mSnapshotFlags & FSnapshotFlags::Object::Group::Paint::GAPTOLERANCE )
         {
             double currentGapTolerance = paintGroup->GetGapTolerance();
 
@@ -1751,7 +1787,7 @@ FSnapshotGroupPaint::Restore()
             mGapTolerance = currentGapTolerance;
         }
 
-        if( mSnapshotFlags & FSnapshotFlags::Object::GroupPaint::WIREFRAME )
+        if( mSnapshotFlags & FSnapshotFlags::Object::Group::Paint::WIREFRAME )
         {
             bool currentWireframe = paintGroup->IsWireframe();
 
@@ -1760,7 +1796,7 @@ FSnapshotGroupPaint::Restore()
             bWireframe = currentWireframe;
         }
 
-        if( mSnapshotFlags & FSnapshotFlags::Object::GroupPaint::WIREFRAMECOLOR )
+        if( mSnapshotFlags & FSnapshotFlags::Object::Group::Paint::WIREFRAMECOLOR )
         {
             FColor currentWireframeColor = paintGroup->GetWireframeColor();
 

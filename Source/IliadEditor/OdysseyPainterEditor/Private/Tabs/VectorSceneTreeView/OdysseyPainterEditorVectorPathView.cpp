@@ -11,6 +11,7 @@ UOdysseyPainterEditorVectorPathView::UOdysseyPainterEditorVectorPathView()
     : UOdysseyPainterEditorVectorObjectView()
     , Brush ( nullptr )
 {
+    bDisplayForegroundProperties = true;
 }
 
 void

@@ -18,13 +18,19 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoObjectParam : public FOdysseyVectorUnd
         ~FOdysseyVectorUndoObjectParam();
          FOdysseyVectorUndoObjectParam( FOdysseyVectorGroupPaint* iScene
                                       , FOdysseyVectorObject* iObject
+                                      , const FName& iCategoryName
                                       , uint64 iReturnFlags );
          FOdysseyVectorUndoObjectParam( FOdysseyVectorGroupPaint* iScene
                                       , const std::vector<FOdysseyVectorObject*>& iObjectArray
+                                      , const FName& iCategoryName
                                       , uint64 iReturnFlags );
          FOdysseyVectorUndoObjectParam( FOdysseyVectorGroupPaint* iScene
                                       , const std::list<FOdysseyVectorObject*>& iObjectList
+                                      , const FName& iCategoryName
                                       , uint64 iReturnFlags );
+        FOdysseyVectorUndoObjectParam( FOdysseyVectorGroupPaint* iScene
+                                     , FOdysseyVectorObject* iObject
+                                     , uint64 iReturnFlags );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;
@@ -36,8 +42,20 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoObjectParam : public FOdysseyVectorUnd
         virtual FString ToString() const override;
 
     protected:
-        FSnapshotObject* CreateObjectSnapshot( FOdysseyVectorObject* iObject );
+        FSnapshotObject* CreateObjectSnapshot( FOdysseyVectorObject* iObject
+                                             , const FName& iCategoryName );
+        FSnapshotObject* CreateObjectSnapshot( FOdysseyVectorObject* iObject
+                                             , uint64 iObjectParamFlags );
 
-    private:
+    protected:
         std::vector<FSnapshotObject*> mObjectSnapshotArray;
+};
+
+class ODYSSEYVECTOR_API FOdysseyVectorUndoObjectVisibility : public FOdysseyVectorUndoObjectParam
+{
+    public:
+        ~FOdysseyVectorUndoObjectVisibility();
+         FOdysseyVectorUndoObjectVisibility( FOdysseyVectorGroupPaint* iScene
+                                           , FOdysseyVectorObject* iObject
+                                           , uint64 iReturnFlags );
 };

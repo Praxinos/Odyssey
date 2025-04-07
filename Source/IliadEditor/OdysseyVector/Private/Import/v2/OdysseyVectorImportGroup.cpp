@@ -12,15 +12,23 @@ FOdysseyVectorImportV2::ParseGroupChunks( FOdysseyVectorGroup& iGroup
                                         , uint64 iChunkLen
                                         , FArchive &Ar )
 {
-/* skeleton if more cases must be handled
     switch( iChunkID )
     {
+        case FOdysseyFile::VectorV2::CHUNK_GROUP_HUDCOLOR :
+            uint8 R, G, B, A;
+
+            Ar << R;
+            Ar << G;
+            Ar << B;
+            Ar << A;
+
+            iGroup.SetHUDColor( FColor( R, G, B, A ) );
+        break;
+
         default:
             FOdysseyVectorImportV2::ParseObjectChunks( iGroup, iChunkID, iChunkLen, Ar );
         break;
     }
-*/
-    FOdysseyVectorImportV2::ParseObjectChunks( iGroup, iChunkID, iChunkLen, Ar );
 }
 
 void

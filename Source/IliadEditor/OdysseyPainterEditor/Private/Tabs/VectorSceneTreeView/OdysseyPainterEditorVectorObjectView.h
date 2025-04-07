@@ -16,15 +16,6 @@
 
 class FOdysseyPainterEditor;
 
-UENUM()
-enum class eVectorObjectViewClass : uint8
-{
-    Object = 0,
-    Path = 1,
-    Group = 2,
-    GroupPaint = 3
-};
-
 USTRUCT()
 struct FPaletteEntrySelection
 {
@@ -40,7 +31,7 @@ struct FPaletteEntrySelection
     int OdysseyPaletteSet = 0;
 };
 
-UCLASS()
+UCLASS( meta = ( HideCategories = Hidden ) )
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectView : public UObject
 {
     public:
@@ -67,8 +58,13 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectView : public UO
     public:
         // hidden property for use with EditCondition
         UPROPERTY( EditDefaultsOnly
-                 , Category=Identity )
-        eVectorObjectViewClass Class;
+                 , Category=Hidden )
+        bool bDisplayBackgroundProperties;
+
+        // hidden property for use with EditCondition
+        UPROPERTY( EditDefaultsOnly
+                 , Category=Hidden )
+        bool bDisplayForegroundProperties;
 
         UPROPERTY( EditAnywhere
                  , Category=Identity
@@ -111,39 +107,41 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectView : public UO
 
         UPROPERTY( EditAnywhere
                  , Category=Appearance
-                 , meta = ( ToolTip = "Foreground Color Mode" ) )
+                 , meta = ( ToolTip = "Foreground Color Mode"
+                          , EditCondition = "( bDisplayForegroundProperties )"
+                          , EditConditionHides ) )
         eForegroundColorMode ForegroundColorMode;
 
         UPROPERTY( EditAnywhere
                  , Category=Appearance
                  , meta = ( ToolTip = "Foreground Color"
-                          , EditCondition = "(ForegroundColorMode == eForegroundColorMode::SolidColor)"
-                          , EditConditionHides) )
+                          , EditCondition = "( bDisplayForegroundProperties ) && ( ForegroundColorMode == eForegroundColorMode::SolidColor )"
+                          , EditConditionHides ) )
         FColor ForegroundColor;
 
         UPROPERTY( EditAnywhere,
                    Category=Appearance,
-                   meta = ( EditCondition = "(ForegroundColorMode == eForegroundColorMode::Palette)"
-                          , EditConditionHides ))
+                   meta = ( EditCondition = "( bDisplayForegroundProperties ) && ( ForegroundColorMode == eForegroundColorMode::Palette )"
+                          , EditConditionHides ) )
         FPaletteEntrySelection ForegroundPaletteSelection;
 
         UPROPERTY( EditAnywhere
                  , Category=Appearance
                  , meta = ( ToolTip = "Background Color Mode"
-                          , EditCondition = "( Class == eVectorObjectViewClass::GroupPaint )"
+                          , EditCondition = "( bDisplayBackgroundProperties )"
                           , EditConditionHides ) )
         eBackgroundColorMode BackgroundColorMode;
 
         UPROPERTY( EditAnywhere
                  , Category=Appearance
                  , meta = ( ToolTip = "Background Color"
-                          , EditCondition = "( Class == eVectorObjectViewClass::GroupPaint ) && ( BackgroundColorMode == eBackgroundColorMode::SolidColor )"
+                          , EditCondition = "( bDisplayBackgroundProperties ) && ( BackgroundColorMode == eBackgroundColorMode::SolidColor )"
                           , EditConditionHides ) )
         FColor BackgroundColor;
 
-        UPROPERTY(EditAnywhere,
-            Category=Appearance,
-            meta = (EditCondition = "(BackgroundColorMode == eBackgroundColorMode::Palette)"
-                , EditConditionHides))
+        UPROPERTY( EditAnywhere
+                 , Category = Appearance
+                 , meta = ( EditCondition = "( bDisplayBackgroundProperties ) && ( BackgroundColorMode == eBackgroundColorMode::Palette )"
+                          , EditConditionHides ) )
         FPaletteEntrySelection BackgroundPaletteSelection;
 };

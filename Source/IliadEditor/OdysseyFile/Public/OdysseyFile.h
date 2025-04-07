@@ -201,6 +201,7 @@ namespace FOdysseyFile
 
                     static const uint32 CHUNK_GROUP = 0x4af0b779; // container
                         // ... +inherited chunks.
+                        static const uint32 CHUNK_GROUP_HUDCOLOR = 0x4910099c; // uint8(R)-uint8(G)-uint8(B)-uint8(A)
 
                     static const uint32 CHUNK_GROUPPAINT = 0xac92b85d; // container
                         // ... +inherited chunks.
@@ -218,7 +219,7 @@ namespace FOdysseyFile
                         static const uint32 CHUNK_GROUPPAINT_BUCKETS = 0x5791cb88; // container
                             static const uint32 CHUNK_BUCKET_ENTRY = 0x94267aa5; // container
                                 static const uint32 CHUNK_BUCKET_SPREADING = 0x402c03f1;  // uint32(spreadingPolicy)
-                                static const uint32 CHUNK_BUCKET_POSITION = 0xd492a193; // uint8(R)-uint8(G)-uint8(B)-uint8(A)
+                                static const uint32 CHUNK_BUCKET_POSITION = 0xd492a193; // double(x),double(y)
             /* Deprecated */    static const uint32 CHUNK_BUCKET_ROTATION =  0xbbc2dd97; // double(rotation)
                                 static const uint32 CHUNK_BUCKET_PROPAGATED = 0x2c1333ce; // uint32(bool)
                                 static const uint32 CHUNK_BUCKET_COLORMODE = 0x9529f13e;  // uint32(colorMode)

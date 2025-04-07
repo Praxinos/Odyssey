@@ -31,7 +31,7 @@ FOdysseyVectorUndoSelectVertex::FOdysseyVectorUndoSelectVertex( FOdysseyVectorGr
         {
             FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(object);
 
-            mPaintgroupSnapshotArray.emplace_back( paintGroup, FSnapshotFlags::Object::GroupPaint::SELECTED_BUCKETS );
+            mPaintgroupSnapshotArray.emplace_back( paintGroup, FSnapshotFlags::Object::Group::Paint::SELECTED_BUCKETS );
         }
     }
 }

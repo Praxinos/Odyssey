@@ -13,6 +13,7 @@ class FOdysseyVectorGroupPaint;
 
 class UOdysseyPainterEditorVectorObjectView;
 class UOdysseyPainterEditorVectorPathView;
+class UOdysseyPainterEditorVectorGroupView;
 class UOdysseyPainterEditorVectorGroupPaintView;
 class UOdysseyPainterEditorVectorTagInbetweenerView;
 
@@ -50,6 +51,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorSceneTreeViewTab :
 
         TObjectPtr<UOdysseyPainterEditorVectorObjectView> mObjectView;
         TObjectPtr<UOdysseyPainterEditorVectorPathView> mPathView;
+        TObjectPtr<UOdysseyPainterEditorVectorGroupView> mGroupView;
         TObjectPtr<UOdysseyPainterEditorVectorGroupPaintView> mGroupPaintView;
         TObjectPtr<UOdysseyPainterEditorVectorTagInbetweenerView> mTagInbetweenerView;
 
