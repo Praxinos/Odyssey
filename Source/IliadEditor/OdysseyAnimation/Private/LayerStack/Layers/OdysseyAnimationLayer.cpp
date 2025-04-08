@@ -478,7 +478,7 @@ UOdysseyAnimationLayer::GetLighttableImageRenderingComposition(int iFrameIndex) 
             if (keyCellIndex >= 0 && keyCellIndex < Cells.Num())
             {
                 UOdysseyAnimationCell* keyCell = GetCells()[keyCellIndex];
-                if (!keyCell)
+                if (keyCell)
                     idComposition.Append(keyCell->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Render, 0));
             }
         }
