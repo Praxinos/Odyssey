@@ -14,6 +14,8 @@
 #include "OdysseyPainterEditorSource.h"
 #include "Widgets/Tab/SOdysseyPainterEditorVectorSceneTreeView.h"
 #include "Widgets/Colors/SColorBlock.h"
+#include "Widgets/Colors/SColorPicker.h"
+#include "Dialogs/Dialogs.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -134,14 +136,22 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::GenerateWidgetForColumn ( const FNa
     if( InColumnName == "HUD Color" )
     {
         return SNew(SBorder)
-            .Padding(0, 1)
+               .Padding(0, 1)
                .BorderBackgroundColor( FSlateColor( FLinearColor( 0, 0, 0, 0 ) ) )
                [
                    SNew( SColorBlock )
                   .IsEnabled( mItem->GetVectorObject()->HasBaseClass( FOdysseyVectorGroup::StaticClass() ) )
+                  .OnMouseButtonDown( FPointerEventHandler::CreateSP( this, &SOdysseyPainterEditorVectorSceneTreeViewRow::PickColor ) )
                   .Color_Lambda( [this]
                                  {
-                                     return FLinearColor( mItem->GetVectorObject()->GetHUDColor() );
+                                     FLinearColor LinearHUDColor = FLinearColor( mItem->GetVectorObject()->GetHUDColor() );
+
+                                     if( mItem->GetVectorObject()->HasBaseClass( FOdysseyVectorGroup::StaticClass() ) == false )
+                                     {
+                                         LinearHUDColor.A *= 0.5f;
+                                     }
+
+                                     return LinearHUDColor;
                                  } )
                ];
     }
@@ -231,7 +241,38 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::GenerateWidgetForColumn ( const FNa
     return SNullWidget::NullWidget;
 }
 
+FReply
+SOdysseyPainterEditorVectorSceneTreeViewRow::PickColor( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent )
+{
+    if ( MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton )
+    {
+        const TSharedPtr< SOdysseyPainterEditorVectorSceneTreeView > treeView = StaticCastSharedPtr<SOdysseyPainterEditorVectorSceneTreeView>(OwnerTablePtr.Pin());
 
+        FColorPickerArgs args;
+
+        args.ParentWidget = treeView;
+        args.InitialColor = FLinearColor( mItem->GetVectorObject()->GetHUDColor() );
+        args.bIsModal = true;
+        args.OnColorCommitted = FOnLinearColorValueChanged::CreateSP( this, &SOdysseyPainterEditorVectorSceneTreeViewRow::OnColorCommitted );
+
+        OpenColorPicker( args );
+
+        return FReply::Handled();
+    }
+
+    return FReply::Unhandled();
+}
+
+void
+SOdysseyPainterEditorVectorSceneTreeViewRow::OnColorCommitted( FLinearColor iColor )
+{
+    if( mItem.Get()->GetVectorObject()->HasBaseClass( FOdysseyVectorGroup::StaticClass() ) )
+    {
+        FOdysseyVectorGroup* group = static_cast<FOdysseyVectorGroup*>( mItem.Get()->GetVectorObject() );
+
+        group->SetHUDColor( iColor.ToFColor( true ) );
+    }
+}
 
 FReply
 SOdysseyPainterEditorVectorSceneTreeViewRow::OnMouseButtonUp( const FGeometry & MyGeometry

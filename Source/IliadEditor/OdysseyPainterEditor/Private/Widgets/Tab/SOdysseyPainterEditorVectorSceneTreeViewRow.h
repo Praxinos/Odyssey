@@ -76,6 +76,8 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorSceneTreeViewRow
         ECheckBoxState GetHierarchicalVisibility() const;
         void OnCheckBoxStateChanged( ECheckBoxState iState );
         bool IsVisibilityEnabled() const;
+        FReply PickColor( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent );
+        void OnColorCommitted( FLinearColor iColor );
 
     protected:
         uint32 mDropZone;

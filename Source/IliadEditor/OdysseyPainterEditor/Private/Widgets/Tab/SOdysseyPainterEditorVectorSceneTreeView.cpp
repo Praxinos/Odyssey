@@ -45,7 +45,7 @@ SOdysseyPainterEditorVectorSceneTreeView::Construct( const FArguments& InArgs )
                                           ]
                                       ]
                                       + SHeaderRow::Column("HUD Color")
-                                      .FixedWidth( 2.0f )
+                                      .FixedWidth( 3.0f )
                                       [
                                           SNullWidget::NullWidget
                                       ]
