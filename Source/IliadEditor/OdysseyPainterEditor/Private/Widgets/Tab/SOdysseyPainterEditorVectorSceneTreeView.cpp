@@ -44,6 +44,11 @@ SOdysseyPainterEditorVectorSceneTreeView::Construct( const FArguments& InArgs )
                                               .Image( FOdysseyStyle::GetBrush("Level.VisibleIcon16x") )
                                           ]
                                       ]
+                                      + SHeaderRow::Column("HUD Color")
+                                      .FixedWidth( 2.0f )
+                                      [
+                                          SNullWidget::NullWidget
+                                      ]
                                       + SHeaderRow::Column("Name");
 
     mEditor = InArgs._Editor;

@@ -13,6 +13,7 @@
 #include "Undo/OdysseyVectorUndoObjectParam.h"
 #include "OdysseyPainterEditorSource.h"
 #include "Widgets/Tab/SOdysseyPainterEditorVectorSceneTreeView.h"
+#include "Widgets/Colors/SColorBlock.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -130,6 +131,21 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::GenerateWidgetForColumn ( const FNa
                ];
     }
 
+    if( InColumnName == "HUD Color" )
+    {
+        return SNew(SBorder)
+            .Padding(0, 1)
+               .BorderBackgroundColor( FSlateColor( FLinearColor( 0, 0, 0, 0 ) ) )
+               [
+                   SNew( SColorBlock )
+                  .IsEnabled( mItem->GetVectorObject()->HasBaseClass( FOdysseyVectorGroup::StaticClass() ) )
+                  .Color_Lambda( [this]
+                                 {
+                                     return FLinearColor( mItem->GetVectorObject()->GetHUDColor() );
+                                 } )
+               ];
+    }
+
     if( InColumnName == "Name" )
     {
         FOdysseyVectorObject* vectorObject = mItem->GetVectorObject();
@@ -214,6 +230,8 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::GenerateWidgetForColumn ( const FNa
 
     return SNullWidget::NullWidget;
 }
+
+
 
 FReply
 SOdysseyPainterEditorVectorSceneTreeViewRow::OnMouseButtonUp( const FGeometry & MyGeometry
