@@ -10,6 +10,7 @@
 #include "OdysseyVectorPath.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorLayer.h"
+#include "OdysseyVectorCell.h"
 #include "Misc/OdysseyUndoDelegates.h"
 
 FOdysseyVectorUndo::~FOdysseyVectorUndo()
@@ -46,6 +47,12 @@ FOdysseyVectorUndo::Update()
             mLayer->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
             FOdysseyVectorEngine::Notify( nullptr, mReturnFlags );
+
+            // prepare for full redraw
+            for( FOdysseyVectorCell* cell : mLayer->GetInvalidateCellList() )
+            {
+                cell->InvalidateRect();
+            }
 
             mLayer->RequestRedraw( nullptr, 0 );
         }

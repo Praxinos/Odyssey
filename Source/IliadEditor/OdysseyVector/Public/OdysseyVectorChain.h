@@ -149,8 +149,7 @@ class FOdysseyVectorChain
                            , bool iSplit );
 
     private :
-        bool EraseSections( BLImageData* iImageData
-                          , std::vector<FWayPoint>& oWayPointArray
+        bool EraseSections( std::vector<FWayPoint>& oWayPointArray
                           , std::vector<FWayFragment>& oWayFragmentArray );
 
         bool EraseSegments( BLImageData* iImageData

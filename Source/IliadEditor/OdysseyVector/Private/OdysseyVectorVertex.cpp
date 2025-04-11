@@ -138,7 +138,7 @@ FSectionLinkInfo*
 FOdysseyVectorVertex::GetSectionLinkInfo( FOdysseyVectorSection* iSection
                                         , uint32 iSectionVertexIndex )
 {
-    for( FSectionLinkInfo& sectionLinkInfo : mSectionLinkInfoList )
+   for( FSectionLinkInfo& sectionLinkInfo : mSectionLinkInfoList )
     {
         if( ( sectionLinkInfo.section            == iSection            )
          && ( sectionLinkInfo.sectionVertexIndex == iSectionVertexIndex ) )

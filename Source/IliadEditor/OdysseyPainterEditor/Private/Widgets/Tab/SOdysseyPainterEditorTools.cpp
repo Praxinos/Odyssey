@@ -18,6 +18,7 @@
 #include "Tools/VectorPathDrawingTool/OdysseyPainterEditorVectorPathDrawingTool.h"
 #include "Tools/VectorPathEditTool/OdysseyPainterEditorVectorPathEditTool.h"
 #include "Tools/VectorSelectionTool/OdysseyPainterEditorVectorSelectionTool.h"
+#include "Tools/VectorCutTool/OdysseyPainterEditorVectorCutTool.h"
 #include "Tools/VectorScenePanTool/OdysseyPainterEditorVectorScenePanTool.h"
 #include "Tools/VectorEraserTool/OdysseyPainterEditorVectorEraserTool.h"
 #include "Tools/VectorPathPushTool/OdysseyPainterEditorVectorPathPushTool.h"
@@ -58,6 +59,7 @@ SOdysseyPainterEditorTools::Construct(const FArguments& InArgs)
         editor->GetVectorPathEditTool(),
         editor->GetVectorPrimitiveDrawingTool(),
         editor->GetVectorSelectionTool(),
+        editor->GetVectorCutTool(),
         editor->GetVectorTransformTool(),
         editor->GetVectorScenePanTool(),
         editor->GetVectorPathPushTool(),

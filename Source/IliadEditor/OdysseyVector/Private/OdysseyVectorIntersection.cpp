@@ -11,17 +11,17 @@ FOdysseyVectorIntersection::FOdysseyVectorIntersection()
 {
 }
 
-FOdysseyVectorIntersection::FOdysseyVectorIntersection( FOdysseyVectorVertexIntersection* iIntersectionVertex
+FOdysseyVectorIntersection::FOdysseyVectorIntersection( FOdysseyVectorVertex* iVertex
                                                       , double iSegmentT )
-    : mIntersectionVertex( iIntersectionVertex )
+    : mVertex( iVertex )
     , mSegmentT( iSegmentT )
 {
 }
 
-FOdysseyVectorVertexIntersection*
-FOdysseyVectorIntersection::GetIntersectionVertex()
+FOdysseyVectorVertex*
+FOdysseyVectorIntersection::GetVertex()
 {
-    return mIntersectionVertex;
+    return mVertex;
 }
 
 double

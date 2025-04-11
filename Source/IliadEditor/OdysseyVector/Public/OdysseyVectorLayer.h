@@ -75,6 +75,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorLayer : public FOdysseyVectorObject
         uint32 GetHeight();
         void InvalidateCell( FOdysseyVectorCell* iCell );
         virtual uint32 RemoveChild( FOdysseyVectorObject* iChild ) override;
+        std::list<FOdysseyVectorCell*>& GetInvalidateCellList();
 
     private:
         std::list<FOdysseyVectorCell*> mInvalidatedCellList;

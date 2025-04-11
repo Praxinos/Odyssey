@@ -21,10 +21,18 @@ FOdysseyVectorSection::FOdysseyVectorSection( FOdysseyVectorObject* iOwner // pa
                                             , FOdysseyVectorVertex* iVertex1
                                             , double iSegmentT0
                                             , double iSegmentT1
-                                            , std::vector<FOdysseyVectorSection*>& oShortSectionArray
+                                            , bool iStitchShortSections
+                                            , std::vector<FOdysseyVectorSection*>* oShortSectionArray
  )
 {
-    Init( iOwner, iSegment, iVertex0, iVertex1, iSegmentT0, iSegmentT1, oShortSectionArray );
+    Init( iOwner
+        , iSegment
+        , iVertex0
+        , iVertex1
+        , iSegmentT0
+        , iSegmentT1
+        , iStitchShortSections
+        , oShortSectionArray );
 }
 
 void
@@ -100,7 +108,8 @@ FOdysseyVectorSection::Init( FOdysseyVectorObject* iOwner // usually the paintgr
                            , FOdysseyVectorVertex* iVertex1
                            , double iSegmentT0
                            , double iSegmentT1
-                           , std::vector<FOdysseyVectorSection*>& oShortSectionArray )
+                           , bool iStitchShortSections
+                           , std::vector<FOdysseyVectorSection*>* oShortSectionArray )
 {
     BLMatrix2D& ownerInverseWorldMatrix = iOwner->GetInverseWorldMatrix();
     static ::ULIS::FVec2D zeroVector = ::ULIS::FVec2D( 0.0f, 0.0f );
@@ -251,9 +260,12 @@ FOdysseyVectorSection::Init( FOdysseyVectorObject* iOwner // usually the paintgr
         }
     }
 
-    if( mLength == 0.0f )
+    if( iStitchShortSections )
     {
-        oShortSectionArray.push_back( this );
+        if( mLength == 0.0f )
+        {
+            oShortSectionArray->push_back( this );
+        }
     }
 
     Link();

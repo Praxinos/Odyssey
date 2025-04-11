@@ -445,6 +445,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
                       , FOdysseyVectorChain& iChain
                       , uint64 iDrawingFlags );
         bool HasErasedSection();
+        void SplitCut( const std::vector<::ULIS::FVec2D>& iSelectionPointArray
+                     , std::vector<FOdysseyVectorObject*>& oAddedPathArray
+                     , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
+                     , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
+                     , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
+                     , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
+                     , bool iSplit );
 
     protected:
         void DrawJoint( BLContext* iBLContext, FOdysseyVectorVertex* iVertex, uint64 iFlags );

@@ -73,6 +73,7 @@
 #include "Tools/VectorPathDrawingTool/OdysseyPainterEditorVectorPathDrawingTool.h"
 #include "Tools/VectorPathEditTool/OdysseyPainterEditorVectorPathEditTool.h"
 #include "Tools/VectorSelectionTool/OdysseyPainterEditorVectorSelectionTool.h"
+#include "Tools/VectorCutTool/OdysseyPainterEditorVectorCutTool.h"
 #include "Tools/VectorScenePanTool/OdysseyPainterEditorVectorScenePanTool.h"
 #include "Tools/VectorEraserTool/OdysseyPainterEditorVectorEraserTool.h"
 #include "Tools/VectorPathPushTool/OdysseyPainterEditorVectorPathPushTool.h"
@@ -140,6 +141,7 @@ FOdysseyPainterEditor::FOdysseyPainterEditor(TSharedRef<FBaseToolkit> iToolkit)
     , mVectorPathDrawingTool(nullptr)
     , mVectorPathEditTool(nullptr)
     , mVectorSelectionTool(nullptr)
+    , mVectorCutTool(nullptr)
     , mVectorScenePanTool(nullptr)
     , mVectorEraserTool(nullptr)
     , mVectorPathPushTool(nullptr)
@@ -682,6 +684,7 @@ FOdysseyPainterEditor::InitTools()
     mRasterPrimitiveDrawingTool = AddTool<UOdysseyPainterEditorRasterPrimitiveDrawingTool>();
     mVectorPrimitiveDrawingTool = AddTool<UOdysseyPainterEditorVectorPrimitiveDrawingTool>();
     mVectorSelectionTool = AddTool<UOdysseyPainterEditorVectorSelectionTool>();
+    mVectorCutTool = AddTool<UOdysseyPainterEditorVectorCutTool>();
     mVectorScenePanTool = AddTool<UOdysseyPainterEditorVectorScenePanTool>();
     mVectorEraserTool = AddTool<UOdysseyPainterEditorVectorEraserTool>();
     mVectorPathPushTool = AddTool<UOdysseyPainterEditorVectorPathPushTool>();
@@ -789,6 +792,12 @@ UOdysseyPainterEditorVectorSelectionTool*
 FOdysseyPainterEditor::GetVectorSelectionTool() const
 {
     return mVectorSelectionTool;
+}
+
+UOdysseyPainterEditorVectorCutTool*
+FOdysseyPainterEditor::GetVectorCutTool() const
+{
+    return mVectorCutTool;
 }
 
 UOdysseyPainterEditorVectorGridTool*

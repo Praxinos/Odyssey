@@ -572,7 +572,7 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegment* iSegment0
                                           , FOdysseyVectorSegment* iSegment1
                                           , const ::ULIS::FVec2D& iSegment1MinInParentWithTolerance
                                           , const ::ULIS::FVec2D& iSegment1MaxInParentWithTolerance
-                                          , std::vector<FXIntersectionRecord>& oIntersectionRecordArray )
+                                          , std::vector<FOdysseyVectorVertexIntersection::XRecord>& oIntersectionRecordArray )
 {
     FOdysseyVectorVertex* segment0Vertex0 = iSegment0->GetVertex(0);
     FOdysseyVectorVertex* segment0Vertex1 = iSegment0->GetVertex(1);
@@ -1287,7 +1287,8 @@ FOdysseyVectorGroupPaint::CreateVertexGapSegment( FOdysseyVectorVertex* iVertex 
                                                                                  , iVertex
                                                                                  , 0.0f
                                                                                  , 1.0f
-                                                                                 , mShortSectionArray );
+                                                                                 , true
+                                                                                 , &mShortSectionArray );
             //newGapSection.Link();
 
             // unlink now if gap section is colinear with vertex segment. It creates a mess in
@@ -1297,6 +1298,21 @@ FOdysseyVectorGroupPaint::CreateVertexGapSegment( FOdysseyVectorVertex* iVertex 
     }
 }
 
+void
+FOdysseyVectorGroupPaint::CreateSegmentSections( FOdysseyVectorSegment* iSegment )
+{
+    std::list<FOdysseyVectorIntersection*>& intersectionList = iSegment->GetIntersectionList();
+    FOdysseyVectorSection* sectionBufferStart = &mSectionBuffer[mSectionBuffer.size()];
+
+    iSegment->CreateSections( this
+                            , mSectionBuffer
+                            , true
+                            , &mShortSectionArray );
+
+    iSegment->ClearIntersections( sectionBufferStart, intersectionList.size() + 1 );
+}
+
+/*
 void
 FOdysseyVectorGroupPaint::CreateSegmentSections( FOdysseyVectorSegment* iSegment )
 {
@@ -1311,7 +1327,7 @@ FOdysseyVectorGroupPaint::CreateSegmentSections( FOdysseyVectorSegment* iSegment
     {
         for( FOdysseyVectorIntersection* intersection : intersectionList )
         {
-            FOdysseyVectorVertex* sectionVertex1 = intersection->GetIntersectionVertex();
+            FOdysseyVectorVertex* sectionVertex1 = intersection->GetVertex();
             double sectionVertex1T = intersection->GetSegmentT();
             // constructor also links sections to the vertex
 
@@ -1338,6 +1354,7 @@ FOdysseyVectorGroupPaint::CreateSegmentSections( FOdysseyVectorSegment* iSegment
 
     iSegment->ClearIntersections( sectionBufferStart, intersectionList.size() + 1 );
 }
+*/
 
 void
 FOdysseyVectorGroupPaint::CreatePathSections( FOdysseyVectorPath* iPath
@@ -2286,7 +2303,7 @@ FOdysseyVectorGroupPaint::BuildGraph()
                                     + mTIntersectionRecordArray.size() );
 
     // then init X-Junction intersection vertices.
-    for( FXIntersectionRecord& XintersectionRecord : mXIntersectionRecordArray )
+    for( FOdysseyVectorVertexIntersection::XRecord& XintersectionRecord : mXIntersectionRecordArray )
     {
         mIntersectionVertexArray.emplace_back( this
                                              , XintersectionRecord.x
@@ -2298,7 +2315,7 @@ FOdysseyVectorGroupPaint::BuildGraph()
     }
 
     // then init T-Junction intersection vertices (gaps).
-    for( FTIntersectionRecord& TintersectionRecord : mTIntersectionRecordArray )
+    for( FOdysseyVectorVertexIntersection::TRecord& TintersectionRecord : mTIntersectionRecordArray )
     {
         FOdysseyVectorVertexIntersection* intersectionVertex =
         &mIntersectionVertexArray.emplace_back( this

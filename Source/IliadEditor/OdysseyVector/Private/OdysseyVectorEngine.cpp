@@ -261,6 +261,13 @@ FOdysseyVectorEngine::Render( BLContext* iBLContext
         iBLContext->flush(BL_CONTEXT_FLUSH_SYNC);
     }
 
+/*
+    if( scene->GetCell()->GetBLMask() )
+    {
+        iBLContext->blitImage( BLPoint(0,0), *scene->GetCell()->GetBLMask() );
+        iBLContext->flush(BL_CONTEXT_FLUSH_SYNC);
+    }
+*/
     // reset invalidation region
     // ( refresh the whole screen at next iteration unless this is set
     // to some value ).

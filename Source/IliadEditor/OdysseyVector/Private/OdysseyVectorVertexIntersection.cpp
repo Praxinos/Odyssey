@@ -7,8 +7,63 @@
 #include "OdysseyVectorPath.h"
 #include "OdysseyVector.h"
 
+// for X-Junction Gaps
+FOdysseyVectorVertexIntersection::XRecord::XRecord( double iX
+                                                  , double iY
+                                                  , FOdysseyVectorSegment* iSegment0
+                                                  , double iSegment0T
+                                                  , FOdysseyVectorSegment* iSegment1
+                                                  , double iSegment1T )
+        : segment0 ( iSegment0 )
+        , segment1 ( iSegment1 )
+        , segment0T( iSegment0T )
+        , segment1T( iSegment1T )
+        , x( iX )
+        , y( iY )
+{
+    iSegment0->AddIntersectionSlot();
+    iSegment1->AddIntersectionSlot();
+}
+
+// for T-Junction Gaps
+FOdysseyVectorVertexIntersection::TRecord::TRecord( double iX
+                                                  , double iY
+                                                  , FOdysseyVectorSegment* iSegment
+                                                  , double iSegmentT
+                                                  , FOdysseyVectorVertex* iVertex )
+        : segment( iSegment )
+        , segmentT( iSegmentT )
+        , x( iX )
+        , y( iY )
+        , vertex( iVertex )
+{
+    iSegment->AddIntersectionSlot();
+}
+
 FOdysseyVectorVertexIntersection::~FOdysseyVectorVertexIntersection()
 {
+}
+
+FOdysseyVectorVertexIntersection::FOdysseyVectorVertexIntersection( FOdysseyVectorObject* iOwner
+                                                                  , double iX
+                                                                  , double iY
+                                                                  , FOdysseyVectorSegment* iSegment
+                                                                  , double iSegmentT
+                                                                  , FOdysseyVectorVertex* iVertex )
+    : FOdysseyVectorVertex ( iX, iY, 0.0f )
+    , mIntersection { FOdysseyVectorIntersection( this, iSegmentT  )
+                    , FOdysseyVectorIntersection( /* empty ctor */ ) }
+    , mSegment { iSegment, nullptr }
+{
+    SetOwner( iOwner );
+
+    // attach to segments. T-Junction, one segment only.
+    Attach();
+
+    if( iVertex )
+    {
+        iVertex->SetNearestVertex( this, 0.0f );
+    }
 }
 
 FOdysseyVectorVertexIntersection::FOdysseyVectorVertexIntersection( FOdysseyVectorObject* iOwner
@@ -55,25 +110,6 @@ FOdysseyVectorVertexIntersection::Detach()
     {
         mSegment[1]->RemoveIntersection( &mIntersection[1] );
     }
-}
-
-FOdysseyVectorVertexIntersection::FOdysseyVectorVertexIntersection( FOdysseyVectorObject* iOwner
-                                                                  , double iX
-                                                                  , double iY
-                                                                  , FOdysseyVectorSegment* iSegment
-                                                                  , double iSegmentT
-                                                                  , FOdysseyVectorVertex* iVertex )
-    : FOdysseyVectorVertex ( iX, iY, 0.0f )
-    , mIntersection { FOdysseyVectorIntersection( this, iSegmentT  )
-                    , FOdysseyVectorIntersection( /* empty ctor */ ) }
-    , mSegment { iSegment, nullptr }
-{
-    SetOwner( iOwner );
-
-    // attach to segments. T-Junction, one segment only.
-    Attach();
-
-    iVertex->SetNearestVertex( this, 0.0f );
 }
 
 double

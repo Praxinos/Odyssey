@@ -1,7 +1,7 @@
 // IDDN.FR.001.060015.013.S.X.2019.000.00000
 // ODYSSEY is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
-#include "Tools/VectorSelectionTool/OdysseyPainterEditorVectorSelectionToolHUD.h"
+#include "Tools/VectorCutTool/OdysseyPainterEditorVectorCutToolHUD.h"
 #include "OdysseyPainterEditor.h"
 // Vector engine
 #include "OdysseyVectorGroupPaint.h"
@@ -18,18 +18,18 @@
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
-FOdysseyPainterEditorVectorSelectionToolHUD::~FOdysseyPainterEditorVectorSelectionToolHUD()
+FOdysseyPainterEditorVectorCutToolHUD::~FOdysseyPainterEditorVectorCutToolHUD()
 {
 }
 
-FOdysseyPainterEditorVectorSelectionToolHUD::FOdysseyPainterEditorVectorSelectionToolHUD( UOdysseyPainterEditorVectorSelectionTool* iSelectionTool )
+FOdysseyPainterEditorVectorCutToolHUD::FOdysseyPainterEditorVectorCutToolHUD( UOdysseyPainterEditorVectorCutTool* iSelectionTool )
     : FOdysseyPainterEditorVectorBaseToolHUD( iSelectionTool )
 {
-    mSelectionTool = iSelectionTool;
+    mCutTool = iSelectionTool;
 }
 
 void
-FOdysseyPainterEditorVectorSelectionToolHUD::Load()
+FOdysseyPainterEditorVectorCutToolHUD::Load()
 {
     uint32 width = mScene->GetLayer()->GetWidth();
     uint32 height = mScene->GetLayer()->GetHeight();
@@ -42,15 +42,15 @@ FOdysseyPainterEditorVectorSelectionToolHUD::Load()
 }
 
 void
-FOdysseyPainterEditorVectorSelectionToolHUD::Unload()
+FOdysseyPainterEditorVectorCutToolHUD::Unload()
 {
     mBLSelectionContext.end();
 }
 
 void
-FOdysseyPainterEditorVectorSelectionToolHUD::Reset()
+FOdysseyPainterEditorVectorCutToolHUD::Reset()
 {
-    uint64 hudFlags = mSelectionTool->GetEditor()->GetVectorHUDFlags();
+    uint64 hudFlags = mCutTool->GetEditor()->GetVectorHUDFlags();
 
     if( hudFlags & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
     {
@@ -63,21 +63,21 @@ FOdysseyPainterEditorVectorSelectionToolHUD::Reset()
 }
 
 BLImage*
-FOdysseyPainterEditorVectorSelectionToolHUD::GetMask()
+FOdysseyPainterEditorVectorCutToolHUD::GetMask()
 {
     return &mBLSelectionMask;
 }
 
 //3D HUD
 void
-FOdysseyPainterEditorVectorSelectionToolHUD::DrawHUD( const FOdysseyHUD::FDrawHUDParams& iParams )
+FOdysseyPainterEditorVectorCutToolHUD::DrawHUD( const FOdysseyHUD::FDrawHUDParams& iParams )
 {
     FLinearColor fgColor = FLinearColor( FOdysseyVectorHUD::GetForegroundColor() );
     FLinearColor bgColor = FLinearColor( FOdysseyVectorHUD::GetBackgroundColor() );
     FLinearColor hcColor = FLinearColor( FOdysseyVectorHUD::GetHighlightColor() );
 
     uint32 selectedObjectCount = mScene->GetCell()->GetSelectedObjectList().size();
-    uint64 hudFlags = mSelectionTool->GetEditor()->GetVectorHUDFlags();
+    uint64 hudFlags = mCutTool->GetEditor()->GetVectorHUDFlags();
 
     // Draw object details only in vertex mode
     if( hudFlags & FOdysseyVectorHUD::HUD_MODE_VERTEX )
@@ -113,7 +113,7 @@ FOdysseyPainterEditorVectorSelectionToolHUD::DrawHUD( const FOdysseyHUD::FDrawHU
 }
 
 void
-FOdysseyPainterEditorVectorSelectionToolHUD::DrawSelectionSpace( BLContext* iBLContext
+FOdysseyPainterEditorVectorCutToolHUD::DrawSelectionSpace( BLContext* iBLContext
                                                                , uint64 iFlags )
 {
     BLPoint topLeft = { 0, 0 };
@@ -148,20 +148,20 @@ FOdysseyPainterEditorVectorSelectionToolHUD::DrawSelectionSpace( BLContext* iBLC
 }
 
 void
-FOdysseyPainterEditorVectorSelectionToolHUD::DrawPickingArea( const FOdysseyHUD::FDrawHUDParams& iParams
+FOdysseyPainterEditorVectorCutToolHUD::DrawPickingArea( const FOdysseyHUD::FDrawHUDParams& iParams
                                                             , const FLinearColor& fgColor
                                                             , const FLinearColor& bgColor
                                                             , const FLinearColor& hcColor )
 {
-    std::vector<::ULIS::FVec2D>& pointArray = mSelectionTool->GetPointArray();
+    std::vector<::ULIS::FVec2D>& pointArray = mCutTool->GetPointArray();
 
     if( pointArray.size() > 1 )
     {
         FBatchedElements* batchedElements = iParams.mCanvas->GetBatchedElements(FCanvas::ET_Line);
 
-        switch( mSelectionTool->GetSelectionShape() )
+        switch( mCutTool->GetCutShape() )
         {
-            case EOdysseyVectorSelectionShape::Rectangle :
+            case EOdysseyVectorCutShape::Rectangle :
             {
                 double xmin = ::ULIS::FMath::Min( pointArray[0].x, pointArray[1].x );
                 double ymin = ::ULIS::FMath::Min( pointArray[0].y, pointArray[1].y );
@@ -183,7 +183,7 @@ FOdysseyPainterEditorVectorSelectionToolHUD::DrawPickingArea( const FOdysseyHUD:
             }
             break;
 
-            case EOdysseyVectorSelectionShape::Circle:
+            case EOdysseyVectorCutShape::Circle:
             {
                 double xmin = ::ULIS::FMath::Min( pointArray[0].x, pointArray[1].x );
                 double ymin = ::ULIS::FMath::Min( pointArray[0].y, pointArray[1].y );
@@ -206,7 +206,16 @@ FOdysseyPainterEditorVectorSelectionToolHUD::DrawPickingArea( const FOdysseyHUD:
             }
             break;
 
-            case EOdysseyVectorSelectionShape::Freehand :
+            case EOdysseyVectorCutShape::Line :
+            {
+                FVector2D p0 = iParams.mTextureToHUD.Execute( FVector2D( pointArray[0].x, pointArray[0].y ) );
+                FVector2D p1 = iParams.mTextureToHUD.Execute( FVector2D( pointArray[1].x, pointArray[1].y ) );
+
+                DrawPrimitiveLine( iParams, p0, p1, hcColor, 1.0f );
+            }
+            break;
+
+            case EOdysseyVectorCutShape::Freehand :
                 for( int i = 0; i < pointArray.size(); i++ )
                 {
                     int n = ( i + 1 ) % pointArray.size();
@@ -225,7 +234,7 @@ FOdysseyPainterEditorVectorSelectionToolHUD::DrawPickingArea( const FOdysseyHUD:
 }
 
 void
-FOdysseyPainterEditorVectorSelectionToolHUD::Draw( BLContext* iBLContext )
+FOdysseyPainterEditorVectorCutToolHUD::Draw( BLContext* iBLContext )
 {
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
@@ -234,13 +243,13 @@ FOdysseyPainterEditorVectorSelectionToolHUD::Draw( BLContext* iBLContext )
     BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
     uint32 selectedObjectCount = mScene->GetCell()->GetSelectedObjectList().size();
-    uint64 hudFlags = mSelectionTool->GetEditor()->GetVectorHUDFlags();
+    uint64 hudFlags = mCutTool->GetEditor()->GetVectorHUDFlags();
 
     DrawSelectionSpace( iBLContext, hudFlags );
 }
 
 void
-FOdysseyPainterEditorVectorSelectionToolHUD::ClearMask()
+FOdysseyPainterEditorVectorCutToolHUD::ClearMask()
 {
     mBLSelectionContext.save();
 
@@ -253,15 +262,26 @@ FOdysseyPainterEditorVectorSelectionToolHUD::ClearMask()
 }
 
 ::ULIS::FRectD
-FOdysseyPainterEditorVectorSelectionToolHUD::GenerateCircleMask( double iX, double iY, double iRadius )
+FOdysseyPainterEditorVectorCutToolHUD::GenerateCircleMask( double iX, double iY, double iRadius, bool iStroke )
 {
     mBLSelectionContext.save();
-
     mBLSelectionContext.setCompOp( BL_COMP_OP_SRC_COPY );
-    mBLSelectionContext.setFillAlpha( 1.0f );
-    mBLSelectionContext.fillCircle( iX, iY, iRadius );
-    mBLSelectionContext.flush( BL_CONTEXT_FLUSH_SYNC );
+    mBLSelectionContext.setFillAlpha( 0.0f );
+    mBLSelectionContext.clearAll();
 
+    if( iStroke )
+    {
+        mBLSelectionContext.setStrokeAlpha( 1.0f );
+        mBLSelectionContext.setStrokeWidth( 1.0f );
+        mBLSelectionContext.strokeCircle( iX, iY, iRadius );
+    }
+    else
+    {
+        mBLSelectionContext.setFillAlpha( 1.0f );
+        mBLSelectionContext.fillCircle( iX, iY, iRadius );
+    }
+
+    mBLSelectionContext.flush( BL_CONTEXT_FLUSH_SYNC );
     mBLSelectionContext.restore();
 
     return ::ULIS::FRectD::FromMinMax( iX - iRadius, iY - iRadius
@@ -269,24 +289,55 @@ FOdysseyPainterEditorVectorSelectionToolHUD::GenerateCircleMask( double iX, doub
 }
 
 ::ULIS::FRectD
-FOdysseyPainterEditorVectorSelectionToolHUD::GenerateRectangleMask( const ::ULIS::FRectD& iRect )
+FOdysseyPainterEditorVectorCutToolHUD::GenerateRectangleMask( const ::ULIS::FRectD& iRect, bool iStroke )
 {
     mBLSelectionContext.save();
-
     mBLSelectionContext.setCompOp( BL_COMP_OP_SRC_COPY );
     mBLSelectionContext.setFillAlpha( 0.0f );
     mBLSelectionContext.clearAll();
-    mBLSelectionContext.setFillAlpha( 1.0f );
-    mBLSelectionContext.fillRect( iRect.x, iRect.y, iRect.w, iRect.h );
-    mBLSelectionContext.flush( BL_CONTEXT_FLUSH_SYNC );
 
+    if( iStroke )
+    {
+        mBLSelectionContext.setStrokeAlpha( 1.0f );
+        mBLSelectionContext.setStrokeWidth( 1.0f );
+        mBLSelectionContext.strokeRect( iRect.x, iRect.y, iRect.w, iRect.h );
+    }
+    else
+    {
+        mBLSelectionContext.setFillAlpha( 1.0f );
+        mBLSelectionContext.fillRect( iRect.x, iRect.y, iRect.w, iRect.h );
+    }
+
+    mBLSelectionContext.flush( BL_CONTEXT_FLUSH_SYNC );
     mBLSelectionContext.restore();
 
     return iRect;
 }
 
 ::ULIS::FRectD
-FOdysseyPainterEditorVectorSelectionToolHUD::GenerateFreehandMask( std::vector<::ULIS::FVec2D>& iPointArray )
+FOdysseyPainterEditorVectorCutToolHUD::GenerateLineMask( const ::ULIS::FVec2D& iPoint0
+                                                       , const ::ULIS::FVec2D& iPoint1 )
+{
+    mBLSelectionContext.save();
+    mBLSelectionContext.setCompOp( BL_COMP_OP_SRC_COPY );
+    mBLSelectionContext.setFillAlpha( 0.0f );
+    mBLSelectionContext.clearAll();
+
+    mBLSelectionContext.setStrokeAlpha( 1.0f );
+    mBLSelectionContext.setStrokeWidth( 1.0f );
+    mBLSelectionContext.strokeLine( iPoint0.x, iPoint0.y, iPoint1.x, iPoint1.y );
+
+    mBLSelectionContext.flush( BL_CONTEXT_FLUSH_SYNC );
+    mBLSelectionContext.restore();
+
+    return ::ULIS::FRectD::FromMinMax( ::ULIS::FMath::Min( iPoint0.x, iPoint1.x )
+                                     , ::ULIS::FMath::Min( iPoint0.y, iPoint1.y )
+                                     , ::ULIS::FMath::Max( iPoint0.x, iPoint1.x )
+                                     , ::ULIS::FMath::Max( iPoint0.y, iPoint1.y ) );
+}
+
+::ULIS::FRectD
+FOdysseyPainterEditorVectorCutToolHUD::GenerateFreehandMask( std::vector<::ULIS::FVec2D>& iPointArray, bool iStroke  )
 {
     ::ULIS::FRectD rect = { 0, 0, 0, 0 };
     BLPath path;
@@ -334,8 +385,17 @@ FOdysseyPainterEditorVectorSelectionToolHUD::GenerateFreehandMask( std::vector<:
 
         rect = ::ULIS::FRectD::FromMinMax( x1, y1, x2, y2 );
 
-        mBLSelectionContext.setFillAlpha(1.0f);
-        mBLSelectionContext.fillPath( path );
+        if( iStroke )
+        {
+            mBLSelectionContext.setStrokeAlpha(1.0f);
+            mBLSelectionContext.setStrokeWidth( 1.0f );
+            mBLSelectionContext.strokePath( path );
+        }
+        else
+        {
+            mBLSelectionContext.setFillAlpha(1.0f);
+            mBLSelectionContext.fillPath( path );
+        }
     }
 
     mBLSelectionContext.flush(BL_CONTEXT_FLUSH_SYNC);

@@ -948,77 +948,75 @@ FOdysseyVectorPath::Erase( std::vector<FOdysseyVectorObject*>& oAddedPathArray
                          , bool iWholeSection
                          , bool iSplit )
 {
+    uint32 removedSegmentCountBeforeAlter = oRemovedSegmentArray.size();
+    uint32 removedVertexCountBeforeAlter = oRemovedVertexArray.size();
+    uint32 addedSegmentCountBeforeAlter = oAddedSegmentArray.size();
+    uint32 addedVertexCountBeforeAlter = oAddedVertexArray.size();
     BLImage* blimg = GetCell()->GetBLMask(); // the mask image must be selected by the vector engine at this point
-
+    BLImageData imageData;
 
     if( blimg )
     {
-        uint32 removedSegmentCountBeforeAlter = oRemovedSegmentArray.size();
-        uint32 removedVertexCountBeforeAlter = oRemovedVertexArray.size();
-        uint32 addedSegmentCountBeforeAlter = oAddedSegmentArray.size();
-        uint32 addedVertexCountBeforeAlter = oAddedVertexArray.size();
-        BLImageData imageData;
-
         blimg->getData( &imageData );
+    }
 
-        for( FOdysseyVectorChain& chain : mChainArray )
+    for( FOdysseyVectorChain& chain : mChainArray )
+    {
+        std::vector<FWayFragment> wayFragmentBuffer;
+        std::vector<FWayPoint> wayPointBuffer;
+
+        wayPointBuffer.reserve( 10 );
+        wayFragmentBuffer.reserve( 10 );
+
+        // this will return an array of "way points". they are the original
+        // points + the points at a contrast zone (erasure boundary).
+        // it will fill a "way segment" array, which are the segments that
+        // should be created between those way points.
+        // no vertex or segment is allocated in chain.HitMask(). the allocation differs
+        // depending on the spliting mode, so it is the responsibility of EraseNoSplit() and
+        // EraseNoSplit() to allocate new vertices / segments or paths
+        bool hit = iWholeSection ? chain.EraseSections( wayPointBuffer
+                                                      , wayFragmentBuffer )
+                                 : ( blimg ? chain.EraseSegments( &imageData
+                                                                , wayPointBuffer
+                                                                , wayFragmentBuffer )
+                                           : false );
+
+        if( hit )
         {
-            std::vector<FWayFragment> wayFragmentBuffer;
-            std::vector<FWayPoint> wayPointBuffer;
-
-            wayPointBuffer.reserve( 10 );
-            wayFragmentBuffer.reserve( 10 );
-
-            // this will return an array of "way points". they are the original
-            // points + the points at a contrast zone (erasure boundary).
-            // it will fill a "way segment" array, which are the segments that
-            // should be created between those way points.
-            // no vertex or segment is allocated in chain.HitMask(). the allocation differs
-            // depending on the spliting mode, so it is the responsibility of EraseNoSplit() and
-            // EraseNoSplit() to allocate new vertices / segments or paths
-            bool hit = iWholeSection ? chain.EraseSections( &imageData
-                                                          , wayPointBuffer
-                                                          , wayFragmentBuffer )
-                                     : chain.EraseSegments( &imageData
-                                                          , wayPointBuffer
-                                                          , wayFragmentBuffer );
-
-            if( hit )
-            {
-                // proceed now we know we have hit anything
-                // determine which vertices / segments will be deleted and which will be kept
-                // it differs in SPLIT and NOSPLIT modes. SPLIT modes removes only those erased,
-                // split removes all
-                chain.ParseWayPoints( wayPointBuffer
-                                    , wayFragmentBuffer
-                                    , oAddedPathArray
-                                    , oAddedVertexArray
-                                    , oAddedSegmentArray
-                                    , oRemovedVertexArray
-                                    , oRemovedSegmentArray
-                                    , iSplit );
-            }
+            // proceed now we know we have hit anything
+            // determine which vertices / segments will be deleted and which will be kept
+            // it differs in SPLIT and NOSPLIT modes. SPLIT modes removes only those erased,
+            // split removes all
+            chain.ParseWayPoints( wayPointBuffer
+                                , wayFragmentBuffer
+                                , oAddedPathArray
+                                , oAddedVertexArray
+                                , oAddedSegmentArray
+                                , oRemovedVertexArray
+                                , oRemovedSegmentArray
+                                , iSplit );
         }
+    }
 
-        for( int i = removedSegmentCountBeforeAlter; i < oRemovedSegmentArray.size(); i++ )
-        {
-            oRemovedSegmentArray[i]->GetOwnerAsPath()->RemoveSegment( oRemovedSegmentArray[i] );
-        }
+    for( int i = removedSegmentCountBeforeAlter; i < oRemovedSegmentArray.size(); i++ )
+    {
+        oRemovedSegmentArray[i]->GetOwnerAsPath()->RemoveSegment( oRemovedSegmentArray[i] );
+    }
 
-        for( int i = removedVertexCountBeforeAlter; i < oRemovedVertexArray.size(); i++ )
-        {
-            oRemovedVertexArray[i]->GetOwnerAsPath()->RemoveVertex( oRemovedVertexArray[i] );
-        }
+    for( int i = removedVertexCountBeforeAlter; i < oRemovedVertexArray.size(); i++ )
+    {
+        oRemovedVertexArray[i]->GetOwnerAsPath()->RemoveVertex( oRemovedVertexArray[i] );
+    }
 
-        for( int i = addedVertexCountBeforeAlter; i < oAddedVertexArray.size(); i++ )
-        {
-            oAddedVertexArray[i]->GetOwnerAsPath()->AddVertex( oAddedVertexArray[i] );
-        }
+    for( int i = addedVertexCountBeforeAlter; i < oAddedVertexArray.size(); i++ )
+    {
+        oAddedVertexArray[i]->GetOwnerAsPath()->AddVertex( oAddedVertexArray[i] );
+    }
 
-        for( int i = addedSegmentCountBeforeAlter; i < oAddedSegmentArray.size(); i++ )
-        {
-            oAddedSegmentArray[i]->GetOwnerAsPath()->AddSegment( oAddedSegmentArray[i] );
-        }
+    for( int i = addedSegmentCountBeforeAlter; i < oAddedSegmentArray.size(); i++ )
+    {
+        oAddedSegmentArray[i]->GetOwnerAsPath()->AddSegment( oAddedSegmentArray[i] );
     }
 
     //UE_LOG(LogTemp, Warning, TEXT("Removed Segments: %d"), oRemovedSegmentArray.size() );
@@ -1188,6 +1186,109 @@ FOdysseyVectorPath::PickPoint( double iWorldX
     }
 
     return anythingPicked;
+}
+
+void
+FOdysseyVectorPath::SplitCut( const std::vector<::ULIS::FVec2D>& iSelectionPointArray
+                            , std::vector<FOdysseyVectorObject*>& oAddedPathArray
+                            , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
+                            , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
+                            , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
+                            , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
+                            , bool iSplit )
+{
+    std::vector<FOdysseyVectorVertexIntersection::TRecord> TRecordBuffer;
+    std::vector<FOdysseyVectorSection> sectionBuffer;
+    std::vector<FOdysseyVectorVertexIntersection> intersectionVertexBuffer;
+    uint32 sectionCount = 0;
+
+    for( FOdysseyVectorSegment* segment : mSegmentList )
+    {
+        sectionCount++;
+
+        for( uint32 i = 0; i < iSelectionPointArray.size(); i++ )
+        {
+            uint32 n = ( i + 1 ) % iSelectionPointArray.size();
+            ::ULIS::FVec2D linePoint0 = FOdysseyVector::MapPoint( mInverseWorldMatrix, iSelectionPointArray[i] );
+            ::ULIS::FVec2D linePoint1 = FOdysseyVector::MapPoint( mInverseWorldMatrix, iSelectionPointArray[n] );
+
+            for( FOdysseyVectorFraction& fraction : segment->GetFractionCache() )
+            {
+                double line0t, line1t;
+
+                if( FOdysseyVector::IntersectSegment( linePoint0
+                                                    , linePoint1
+                                                    , fraction.point[0]->GetCoords()
+                                                    , fraction.point[1]->GetCoords()
+                                                    , &line0t
+                                                    , &line1t ) )
+                {
+                    double t = fraction.fromT + ( ( fraction.toT - fraction.fromT ) * line1t );
+                    ::ULIS::FVec2D coords = segment->GetPointAt( t );
+
+                    // We add 2 separate intersections. // first
+                    TRecordBuffer.emplace_back( coords.x, coords.y, segment, t, nullptr );
+
+                    // second
+                    TRecordBuffer.emplace_back( coords.x, coords.y, segment, t, nullptr );
+
+                    sectionCount += 2;
+                }
+            }
+        }
+    }
+
+    intersectionVertexBuffer.reserve( TRecordBuffer.size() );
+
+    for( FOdysseyVectorVertexIntersection::TRecord& record : TRecordBuffer )
+    {
+        intersectionVertexBuffer.emplace_back( this
+                                             , record.x
+                                             , record.y
+                                             , record.segment
+                                             , record.segmentT
+                                             , nullptr );
+        // Note: intersectionVertex add an intersection to the segment at construction.
+    }
+
+    sectionBuffer.reserve( sectionCount );
+
+    for( FOdysseyVectorSegment* segment : mSegmentList )
+    {
+        std::list<FOdysseyVectorIntersection*>& intersectionList = segment->GetIntersectionList();
+        FOdysseyVectorSection* sectionBufferStart = &sectionBuffer[sectionBuffer.size()];
+        uint32 segmentSectionCount = intersectionList.size() + 1;
+
+        segment->CreateSections( this
+                               , sectionBuffer
+                               , false
+                               , nullptr );
+
+
+        for( uint32 i = 0; i < segmentSectionCount; i++ )
+        {
+            if( ( i % 2 ) == 1 )
+            {
+                sectionBufferStart[i].SetErased( true );
+            }
+        }
+
+        segment->ClearIntersections( sectionBufferStart, segmentSectionCount );
+    }
+
+    Erase( oAddedPathArray
+         , oAddedVertexArray
+         , oAddedSegmentArray
+         , oRemovedVertexArray
+         , oRemovedSegmentArray
+         , true
+         , true );
+
+    // unlink sections
+    for( FOdysseyVectorSection& section : sectionBuffer )
+    {
+        section.Unlink( false );
+    }
 }
 
 void

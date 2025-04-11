@@ -297,8 +297,7 @@ GetErasureFlags( FOdysseyVectorVertex* iVertex
 }
 
 bool
-FOdysseyVectorChain::EraseSections( BLImageData* iImageData
-                                  , std::vector<FWayPoint>& oWayPointBuffer
+FOdysseyVectorChain::EraseSections( std::vector<FWayPoint>& oWayPointBuffer
                                   , std::vector<FWayFragment>& oWayFragmentBuffer )
 {
     BLMatrix2D& pathInverseWorldMatrix = mPath->GetInverseWorldMatrix();
@@ -724,6 +723,7 @@ FOdysseyVectorChain::TraceLine( int32 iX0
     uint32 hitCount = 0;
     uint8 lastAlphaValue = GetAlpha( iX0, iY0, iImageData );
     ::ULIS::FVec2D bezier[4];
+    double lastT = iT0;
 
     if ( ddx > ddy )
     {
@@ -734,7 +734,9 @@ FOdysseyVectorChain::TraceLine( int32 iX0
             if( CheckContrast( alphaValue, lastAlphaValue ) )
             {
                 double radius = ( t * iRadius1 ) + ( ( 1.0f - t ) * iRadius0 );
-                ::ULIS::FVec2D newVertexAt = iSegment->GetPointAt( t );
+                // coords will always be right outside the erasure area
+                ::ULIS::FVec2D newVertexAt = alphaValue ? iSegment->GetPointAt( lastT )
+                                                        : iSegment->GetPointAt( t );
                 FOdysseyVectorVertex* newVertex = new FOdysseyVectorVertex( newVertexAt.x
                                                                           , newVertexAt.y
                                                                           , radius );
@@ -756,6 +758,7 @@ FOdysseyVectorChain::TraceLine( int32 iX0
             }
 
             lastAlphaValue = alphaValue;
+            lastT = t;
 
             cumul += ddy;
             x     += px;
@@ -777,7 +780,9 @@ FOdysseyVectorChain::TraceLine( int32 iX0
             if( CheckContrast( alphaValue, lastAlphaValue ) )
             {
                 double radius = ( t * iRadius1 ) + ( ( 1.0f - t ) * iRadius0 );
-                ::ULIS::FVec2D newVertexAt = iSegment->GetPointAt( t );
+                // coords will always be right outside the erasure area
+                ::ULIS::FVec2D newVertexAt = alphaValue ? iSegment->GetPointAt( lastT )
+                                                        : iSegment->GetPointAt( t );
                 FOdysseyVectorVertex* newVertex = new FOdysseyVectorVertex( newVertexAt.x
                                                                           , newVertexAt.y
                                                                           , radius );
@@ -799,6 +804,7 @@ FOdysseyVectorChain::TraceLine( int32 iX0
             }
 
             lastAlphaValue = alphaValue;
+            lastT = t;
 
             cumul += ddx;
             y     += py;

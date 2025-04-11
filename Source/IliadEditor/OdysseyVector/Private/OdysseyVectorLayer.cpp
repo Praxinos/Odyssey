@@ -24,6 +24,12 @@ FOdysseyVectorLayer::FOdysseyVectorLayer()
     bSystem = true;
 }
 
+std::list<FOdysseyVectorCell*>&
+FOdysseyVectorLayer::GetInvalidateCellList()
+{
+    return mInvalidatedCellList;
+}
+
 void
 FOdysseyVectorLayer::InvalidateCell( FOdysseyVectorCell* iCell )
 {

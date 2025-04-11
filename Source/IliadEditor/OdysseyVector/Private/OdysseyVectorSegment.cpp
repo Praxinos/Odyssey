@@ -304,6 +304,51 @@ FOdysseyVectorSegment::GetOwner()
 }
 
 void
+FOdysseyVectorSegment::CreateSections( FOdysseyVectorObject* iSectionOwner
+                                     , std::vector<FOdysseyVectorSection>& iSectionBuffer
+                                     , bool iStitchShortSections
+                                     , std::vector<FOdysseyVectorSection*>* iShortSectionArray )
+{
+    std::list<FOdysseyVectorIntersection*>& intersectionList = mIntersectionList;
+    FOdysseyVectorVertex* segmentVertex0 = GetVertex(0);
+    FOdysseyVectorVertex* segmentVertex1 = GetVertex(1);
+    FOdysseyVectorVertex* sectionVertex0 = segmentVertex0;
+    double sectionVertex0T = 0.0f;
+    FOdysseyVectorSection* sectionBufferStart = &iSectionBuffer[iSectionBuffer.size()];
+
+    if( intersectionList.size() )
+    {
+        for( FOdysseyVectorIntersection* intersection : intersectionList )
+        {
+            FOdysseyVectorVertex* sectionVertex1 = intersection->GetVertex();
+            double sectionVertex1T = intersection->GetSegmentT();
+            // constructor also links sections to the vertex
+
+            iSectionBuffer.emplace_back( iSectionOwner
+                                       , this
+                                       , sectionVertex0
+                                       , sectionVertex1
+                                       , sectionVertex0T
+                                       , sectionVertex1T
+                                       , iStitchShortSections
+                                       , iShortSectionArray );
+
+            sectionVertex0 = sectionVertex1;
+            sectionVertex0T = sectionVertex1T;
+        }
+    }
+
+    iSectionBuffer.emplace_back( iSectionOwner
+                               , this
+                               , sectionVertex0
+                               , segmentVertex1 // segment's second end point
+                               , sectionVertex0T
+                               , 1.0f
+                               , iStitchShortSections
+                               , iShortSectionArray );
+}
+
+void
 FOdysseyVectorSegment::AddIntersection ( FOdysseyVectorIntersection* iIntersection )
 {
     std::list<FOdysseyVectorIntersection*>::iterator it = std::find_if ( mIntersectionList.begin()
@@ -404,22 +449,6 @@ std::list<FOdysseyVectorIntersection*>&
 FOdysseyVectorSegment::GetIntersectionList()
 {
     return mIntersectionList;
-}
-
-void
-FOdysseyVectorSegment::GetUniqueIntersectionVertex( std::vector<FOdysseyVectorVertexIntersection*>& oIntersectionVertexArray )
-{
-    for( FOdysseyVectorIntersection* intersection : mIntersectionList )
-    {
-        FOdysseyVectorVertexIntersection* intersectionVertex = intersection->GetIntersectionVertex();
-
-        if( std::find( oIntersectionVertexArray.begin()
-                     , oIntersectionVertexArray.end()
-                     , intersectionVertex ) == oIntersectionVertexArray.end() )
-        {
-            oIntersectionVertexArray.push_back( intersectionVertex );
-        }
-    }
 }
 
 bool

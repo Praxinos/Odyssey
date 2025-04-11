@@ -11,7 +11,7 @@
 #include "OdysseyVectorVertex.h"
 
 class FOdysseyVectorGroupPaint;
-class FOdysseyVectorVertexIntersection;
+class FOdysseyVectorVertex;
 
 class ODYSSEYVECTOR_API FOdysseyVectorIntersection
 {
@@ -26,14 +26,14 @@ class ODYSSEYVECTOR_API FOdysseyVectorIntersection
         /**
           * @brief
           */
-        FOdysseyVectorIntersection( FOdysseyVectorVertexIntersection* iIntersectionVertex
+        FOdysseyVectorIntersection( FOdysseyVectorVertex* iVertex
                                   , double iSegmentT );
 
-        FOdysseyVectorVertexIntersection* GetIntersectionVertex();
+        FOdysseyVectorVertex* GetVertex();
 
         double GetSegmentT();
 
     protected:
-        FOdysseyVectorVertexIntersection* mIntersectionVertex;
+        FOdysseyVectorVertex* mVertex;
         double mSegmentT;
 };

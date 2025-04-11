@@ -41,6 +41,7 @@ class UOdysseyPainterEditorVectorPrimitiveDrawingTool;
 class UOdysseyPainterEditorVectorPathDrawingTool;
 class UOdysseyPainterEditorVectorPathEditTool;
 class UOdysseyPainterEditorVectorSelectionTool;
+class UOdysseyPainterEditorVectorCutTool;
 class UOdysseyPainterEditorVectorScenePanTool;
 class UOdysseyPainterEditorVectorEraserTool;
 class UOdysseyPainterEditorVectorPathPushTool;
@@ -194,6 +195,7 @@ public:
     virtual UOdysseyPainterEditorVectorPathDrawingTool*              GetVectorPathDrawingTool() const;
     virtual UOdysseyPainterEditorVectorPathEditTool*                 GetVectorPathEditTool() const;
     virtual UOdysseyPainterEditorVectorSelectionTool*                GetVectorSelectionTool() const;
+    virtual UOdysseyPainterEditorVectorCutTool*                      GetVectorCutTool() const;
     virtual UOdysseyPainterEditorVectorGridTool*                     GetVectorGridTool() const;
     virtual UOdysseyPainterEditorVectorTransformTool*                GetVectorTransformTool() const;
     virtual UOdysseyPainterEditorVectorMatchingTool*                 GetVectorMatchingTool() const;
@@ -412,6 +414,7 @@ protected:
     TObjectPtr<UOdysseyPainterEditorVectorPathDrawingTool> mVectorPathDrawingTool;
     TObjectPtr<UOdysseyPainterEditorVectorPathEditTool> mVectorPathEditTool;
     TObjectPtr<UOdysseyPainterEditorVectorSelectionTool> mVectorSelectionTool;
+    TObjectPtr<UOdysseyPainterEditorVectorCutTool> mVectorCutTool;
     TObjectPtr<UOdysseyPainterEditorVectorScenePanTool> mVectorScenePanTool;
     TObjectPtr<UOdysseyPainterEditorVectorEraserTool> mVectorEraserTool;
     TObjectPtr<UOdysseyPainterEditorVectorPathPushTool> mVectorPathPushTool;

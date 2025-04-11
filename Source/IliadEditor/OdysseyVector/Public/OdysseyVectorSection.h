@@ -37,7 +37,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorSection
                              , FOdysseyVectorVertex* iVertex1
                              , double iSectionT0
                              , double iSectionT1
-                             , std::vector<FOdysseyVectorSection*>& oShortSectionArray );
+                             , bool iStitchShortSections
+                             , std::vector<FOdysseyVectorSection*>* oShortSectionArray );
 
 
         static void ListToArray( const std::list<FOdysseyVectorSection*>& iSectionList
@@ -49,7 +50,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorSection
                  , FOdysseyVectorVertex* iVertex1
                  , double iSectionT0
                  , double iSectionT1
-                 , std::vector<FOdysseyVectorSection*>& oShortSectionArray );
+                 , bool iStitchShortSections
+                 , std::vector<FOdysseyVectorSection*>* oShortSectionArray );
 
        /**
          * @brief Get the segment it lies on.
