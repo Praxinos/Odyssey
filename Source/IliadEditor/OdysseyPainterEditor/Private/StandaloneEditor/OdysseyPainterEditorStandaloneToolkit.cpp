@@ -67,6 +67,10 @@ FOdysseyPainterEditorStandaloneToolkit::Open()
         UToolMenu* ToolBar = UToolMenus::Get()->RegisterMenu(MenuName, "AssetEditor.DefaultToolBar", EMultiBoxType::ToolBar);
         mEditor->ExtendAssetEditorToolbar( ToolBar );
     }
+    else
+    {
+        mEditor->ExtendAssetEditorToolbar( UToolMenus::Get()->ExtendMenu(MenuName) );
+    }
 
     FAssetEditorToolkit::InitAssetEditor( EToolkitMode::Standalone, NULL, mAppIdentifier, mEditor->CreateLayout(mLayoutName), true, true, editedObjects);
 
@@ -150,7 +154,6 @@ FOdysseyPainterEditorStandaloneToolkit::OnRequestClose()
 void
 FOdysseyPainterEditorStandaloneToolkit::OnClose()
 {
-    //Here is where we should clean everything prior to editor destruction
     mEditor->OnClose();
 }
 
