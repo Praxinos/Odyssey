@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "OdysseyShape.h"
 #include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.h"
 #include <ULIS>
 
@@ -96,7 +97,6 @@ protected:
 
 public:
     UPROPERTY( EditAnywhere
-             , Category=SelectionTool
-             , meta = ( ToolTip  = "Selection Shape" ) )
-    EOdysseyVectorSelectionShape SelectionShape;
+             , Category = "Shape" )
+    FOdysseyShapes Shapes;
 };

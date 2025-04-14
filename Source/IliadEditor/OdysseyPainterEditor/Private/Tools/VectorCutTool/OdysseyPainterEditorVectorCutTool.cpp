@@ -32,10 +32,16 @@ UOdysseyPainterEditorVectorCutTool::~UOdysseyPainterEditorVectorCutTool()
 
 UOdysseyPainterEditorVectorCutTool::UOdysseyPainterEditorVectorCutTool()
     : UOdysseyPainterEditorVectorBaseTool( MakeShared<FOdysseyPainterEditorVectorCutToolHUD>( this ), false, true )
-    , CutShape( EOdysseyVectorCutShape::Freehand )
     , mMouseCursor ( EMouseCursor::Crosshairs )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathCut64");
+
+    Shapes.AddShapeType( EOdysseyShapeType::kLine, nullptr );
+    Shapes.AddShapeType( EOdysseyShapeType::kRectangle, nullptr );
+    Shapes.AddShapeType( EOdysseyShapeType::kEllipse, nullptr );
+    Shapes.AddShapeType( EOdysseyShapeType::kFreehand, nullptr );
+
+    Shapes.SetActiveShapeType( EOdysseyShapeType::kFreehand );
 
     mPickHUD = static_cast<FOdysseyPainterEditorVectorCutToolHUD*>( mBaseHUD.Get() );
 }
@@ -117,9 +123,9 @@ UOdysseyPainterEditorVectorCutTool::OnMouseDownVector( FOdysseyVectorGroupPaint*
     {
         mPointArray.clear();
 
-        switch( CutShape )
+        switch( Shapes.GetActiveShapeType() )
         {
-            case EOdysseyVectorCutShape::Line :
+            case EOdysseyShapeType::kLine :
                 mPointArray.resize( 2 );
 
                 mPointArray[0] = mPointArray[1] = ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y );
@@ -148,10 +154,10 @@ UOdysseyPainterEditorVectorCutTool::OnMouseDragVector( FOdysseyVectorGroupPaint*
     {
         ::ULIS::FVec2D point = { iPointInTexture.x, iPointInTexture.y };
 
-        switch( CutShape )
+        switch( Shapes.GetActiveShapeType() )
         {
-            case EOdysseyVectorCutShape::Rectangle:
-            case EOdysseyVectorCutShape::Circle :
+            case EOdysseyShapeType::kRectangle:
+            case EOdysseyShapeType::kEllipse :
             {
                 ::ULIS::FVec2D downPoint = mPointArray[0];
 
@@ -161,11 +167,11 @@ UOdysseyPainterEditorVectorCutTool::OnMouseDragVector( FOdysseyVectorGroupPaint*
             }
             break;
 
-            case EOdysseyVectorCutShape::Freehand :
+            case EOdysseyShapeType::kFreehand :
                 mPointArray.push_back( point );
             break;
 
-            case EOdysseyVectorCutShape::Line :
+            case EOdysseyShapeType::kLine :
                 mPointArray[1] = point;
             break;
 
@@ -187,9 +193,9 @@ UOdysseyPainterEditorVectorCutTool::GenerateMask( bool iStroke )
 
     if( mPointArray.size() > 1 )
     {
-        switch( CutShape )
+        switch( Shapes.GetActiveShapeType() )
         {
-            case EOdysseyVectorCutShape::Rectangle:
+            case EOdysseyShapeType::kRectangle:
             {
                 double xmin = ::ULIS::FMath::Min( mPointArray[0].x, mPointArray[1].x );
                 double ymin = ::ULIS::FMath::Min( mPointArray[0].y, mPointArray[1].y );
@@ -201,7 +207,7 @@ UOdysseyPainterEditorVectorCutTool::GenerateMask( bool iStroke )
             }
             break;
 
-            case EOdysseyVectorCutShape::Circle:
+            case EOdysseyShapeType::kEllipse:
             {
                 ::ULIS::FVec2D diagonal = ::ULIS::FVec2D( mPointArray[1] - mPointArray[0] );
 
@@ -212,13 +218,13 @@ UOdysseyPainterEditorVectorCutTool::GenerateMask( bool iStroke )
             }
             break;
 
-            case EOdysseyVectorCutShape::Line:
+            case EOdysseyShapeType::kLine:
             {
                 return mPickHUD->GenerateLineMask( mPointArray[0], mPointArray[1] );
             }
             break;
 
-            case EOdysseyVectorCutShape::Freehand:
+            case EOdysseyShapeType::kFreehand:
                 return mPickHUD->GenerateFreehandMask( mPointArray, iStroke );
             break;
 
@@ -270,7 +276,7 @@ UOdysseyPainterEditorVectorCutTool::OnMouseUpVectorObjectMode( FOdysseyVectorGro
                 , removedSegmentArray
                 , removedObjectArray );
 
-        if( CutShape != EOdysseyVectorCutShape::Line )
+        if( Shapes.GetActiveShapeType() != EOdysseyShapeType::kLine )
         {
             // the mask now becomes a filled area
             roi = GenerateMask( false );
@@ -443,30 +449,25 @@ UOdysseyPainterEditorVectorCutTool::GetPointArray()
     return mPointArray;
 }
 
-EOdysseyVectorCutShape
-UOdysseyPainterEditorVectorCutTool::GetCutShape()
-{
-    return CutShape;
-}
-
 void
 UOdysseyPainterEditorVectorCutTool::ExtendToolbar( FToolBarBuilder& iBuilder )
 {
     Super::ExtendToolbar(iBuilder);
-
+/*
     iBuilder.BeginSection( NAME_None );
 
     iBuilder.AddWidget(
         SNew(SBox)
         .Padding(10.f, 0.f, 10.f, 0.f)
         [
-            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorCutTool, CutShape ), FSinglePropertyParams())
+            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorCutTool, Shapes ), FSinglePropertyParams())
             .InnerPadding(10.f)
             .ValueWidthOverride(100.f)
         ]
     );
 
     iBuilder.EndSection();
+*/
 }
 
 FText

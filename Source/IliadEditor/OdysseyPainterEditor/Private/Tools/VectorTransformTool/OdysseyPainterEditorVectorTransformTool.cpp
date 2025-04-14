@@ -1068,6 +1068,9 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDragVector( FOdysseyVectorGroup
             }
         }
 
+        // redraw whole screen
+        iScene->GetCell()->InvalidateRect();
+
         iScene->GetLayer()->RequestRedraw( iScene->GetCell(), FOdysseyVectorCell::REDRAW_INTERACTIVE );
     }
 

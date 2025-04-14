@@ -159,9 +159,9 @@ FOdysseyPainterEditorVectorSelectionToolHUD::DrawPickingArea( const FOdysseyHUD:
     {
         FBatchedElements* batchedElements = iParams.mCanvas->GetBatchedElements(FCanvas::ET_Line);
 
-        switch( mSelectionTool->GetSelectionShape() )
+        switch( mSelectionTool->Shapes.GetActiveShapeType() )
         {
-            case EOdysseyVectorSelectionShape::Rectangle :
+            case EOdysseyShapeType::kRectangle :
             {
                 double xmin = ::ULIS::FMath::Min( pointArray[0].x, pointArray[1].x );
                 double ymin = ::ULIS::FMath::Min( pointArray[0].y, pointArray[1].y );
@@ -183,7 +183,7 @@ FOdysseyPainterEditorVectorSelectionToolHUD::DrawPickingArea( const FOdysseyHUD:
             }
             break;
 
-            case EOdysseyVectorSelectionShape::Circle:
+            case EOdysseyShapeType::kEllipse:
             {
                 double xmin = ::ULIS::FMath::Min( pointArray[0].x, pointArray[1].x );
                 double ymin = ::ULIS::FMath::Min( pointArray[0].y, pointArray[1].y );
@@ -206,7 +206,7 @@ FOdysseyPainterEditorVectorSelectionToolHUD::DrawPickingArea( const FOdysseyHUD:
             }
             break;
 
-            case EOdysseyVectorSelectionShape::Freehand :
+            case EOdysseyShapeType::kFreehand :
                 for( int i = 0; i < pointArray.size(); i++ )
                 {
                     int n = ( i + 1 ) % pointArray.size();

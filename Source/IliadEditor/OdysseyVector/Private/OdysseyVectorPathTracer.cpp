@@ -271,6 +271,7 @@ FOdysseyVectorPathTracer::TestBezier( ::ULIS::FVec2D iBezier[4] )
                                                                      , iBezier[2]
                                                                      , iBezier[3]
                                                                      , 0.85f ) };
+    double tolerance = mTracingWidth * 0.5f;
 
     for( uint32 i = 0; i < 4; i++ )
     {
@@ -287,7 +288,7 @@ FOdysseyVectorPathTracer::TestBezier( ::ULIS::FVec2D iBezier[4] )
             }
         }
 
-        if( minDistance > mTracingWidth )
+        if( minDistance > tolerance )
         {
             return false;
         }

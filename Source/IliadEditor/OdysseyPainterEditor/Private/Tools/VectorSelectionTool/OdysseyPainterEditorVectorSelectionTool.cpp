@@ -32,18 +32,28 @@ UOdysseyPainterEditorVectorSelectionTool::~UOdysseyPainterEditorVectorSelectionT
 
 UOdysseyPainterEditorVectorSelectionTool::UOdysseyPainterEditorVectorSelectionTool()
     : UOdysseyPainterEditorVectorBaseTool( MakeShared<FOdysseyPainterEditorVectorSelectionToolHUD>( this ), false, true )
-    , SelectionShape( EOdysseyVectorSelectionShape::Freehand )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Lasso64");
+
+    Shapes.AddShapeType( EOdysseyShapeType::kRectangle, nullptr );
+    Shapes.AddShapeType( EOdysseyShapeType::kEllipse, nullptr );
+    Shapes.AddShapeType( EOdysseyShapeType::kFreehand, nullptr );
+
+    Shapes.SetActiveShapeType( EOdysseyShapeType::kFreehand );
 
     mPickHUD = static_cast<FOdysseyPainterEditorVectorSelectionToolHUD*>( mBaseHUD.Get() );
 }
 
 UOdysseyPainterEditorVectorSelectionTool::UOdysseyPainterEditorVectorSelectionTool( TSharedPtr<FOdysseyPainterEditorVectorBaseToolHUD> iHUD )
     : UOdysseyPainterEditorVectorBaseTool( iHUD, false, true )
-    , SelectionShape( EOdysseyVectorSelectionShape::Freehand )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Lasso64");
+
+    Shapes.AddShapeType( EOdysseyShapeType::kRectangle, nullptr );
+    Shapes.AddShapeType( EOdysseyShapeType::kEllipse, nullptr );
+    Shapes.AddShapeType( EOdysseyShapeType::kFreehand, nullptr );
+
+    Shapes.SetActiveShapeType( EOdysseyShapeType::kFreehand );
 
     mPickHUD = static_cast<FOdysseyPainterEditorVectorSelectionToolHUD*>( mBaseHUD.Get() );
 }
@@ -116,10 +126,10 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseDragVector( FOdysseyVectorGroup
     {
         ::ULIS::FVec2D point = { iPointInTexture.x, iPointInTexture.y };
 
-        switch( SelectionShape )
+        switch( Shapes.GetActiveShapeType() )
         {
-            case EOdysseyVectorSelectionShape::Rectangle:
-            case EOdysseyVectorSelectionShape::Circle :
+            case EOdysseyShapeType::kRectangle:
+            case EOdysseyShapeType::kEllipse :
             {
                 ::ULIS::FVec2D downPoint = mPointArray[0];
 
@@ -129,7 +139,7 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseDragVector( FOdysseyVectorGroup
             }
             break;
 
-            case EOdysseyVectorSelectionShape::Freehand :
+            case EOdysseyShapeType::kFreehand :
                 mPointArray.push_back( point );
             break;
 
@@ -151,9 +161,9 @@ UOdysseyPainterEditorVectorSelectionTool::GenerateMask()
 
     if( mPointArray.size() > 1 )
     {
-        switch( SelectionShape )
+        switch( Shapes.GetActiveShapeType() )
         {
-            case EOdysseyVectorSelectionShape::Rectangle:
+            case EOdysseyShapeType::kRectangle:
             {
                 double xmin = ::ULIS::FMath::Min( mPointArray[0].x, mPointArray[1].x );
                 double ymin = ::ULIS::FMath::Min( mPointArray[0].y, mPointArray[1].y );
@@ -165,7 +175,7 @@ UOdysseyPainterEditorVectorSelectionTool::GenerateMask()
             }
             break;
 
-            case EOdysseyVectorSelectionShape::Circle:
+            case EOdysseyShapeType::kEllipse:
             {
                 ::ULIS::FVec2D diagonal = ::ULIS::FVec2D( mPointArray[1] - mPointArray[0] );
 
@@ -173,7 +183,7 @@ UOdysseyPainterEditorVectorSelectionTool::GenerateMask()
             }
             break;
 
-            case EOdysseyVectorSelectionShape::Freehand:
+            case EOdysseyShapeType::kFreehand:
                 return mPickHUD->GenerateFreehandMask( mPointArray );
             break;
 
@@ -440,17 +450,11 @@ UOdysseyPainterEditorVectorSelectionTool::GetPointArray()
     return mPointArray;
 }
 
-EOdysseyVectorSelectionShape
-UOdysseyPainterEditorVectorSelectionTool::GetSelectionShape()
-{
-    return SelectionShape;
-}
-
 void
 UOdysseyPainterEditorVectorSelectionTool::ExtendToolbar( FToolBarBuilder& iBuilder )
 {
     Super::ExtendToolbar(iBuilder);
-
+/*
     iBuilder.BeginSection( NAME_None );
 
     iBuilder.AddWidget(
@@ -464,6 +468,7 @@ UOdysseyPainterEditorVectorSelectionTool::ExtendToolbar( FToolBarBuilder& iBuild
     );
 
     iBuilder.EndSection();
+*/
 }
 
 FText

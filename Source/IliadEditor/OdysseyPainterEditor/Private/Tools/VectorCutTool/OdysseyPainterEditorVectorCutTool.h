@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "OdysseyShape.h"
 #include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.h"
 #include <ULIS>
 
@@ -100,7 +101,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorCutTool : public UOdys
 
     public:
         UPROPERTY( EditAnywhere
-                 , Category=CutTool
-                 , meta = ( ToolTip  = "Cut Shape" ) )
-        EOdysseyVectorCutShape CutShape;
+                 , Category = "Shape" )
+        FOdysseyShapes Shapes;
 };

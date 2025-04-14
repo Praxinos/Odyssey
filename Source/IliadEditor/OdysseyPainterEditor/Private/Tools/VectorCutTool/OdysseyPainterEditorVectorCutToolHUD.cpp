@@ -159,9 +159,9 @@ FOdysseyPainterEditorVectorCutToolHUD::DrawPickingArea( const FOdysseyHUD::FDraw
     {
         FBatchedElements* batchedElements = iParams.mCanvas->GetBatchedElements(FCanvas::ET_Line);
 
-        switch( mCutTool->GetCutShape() )
+        switch( mCutTool->Shapes.GetActiveShapeType() )
         {
-            case EOdysseyVectorCutShape::Rectangle :
+            case EOdysseyShapeType::kRectangle :
             {
                 double xmin = ::ULIS::FMath::Min( pointArray[0].x, pointArray[1].x );
                 double ymin = ::ULIS::FMath::Min( pointArray[0].y, pointArray[1].y );
@@ -183,7 +183,7 @@ FOdysseyPainterEditorVectorCutToolHUD::DrawPickingArea( const FOdysseyHUD::FDraw
             }
             break;
 
-            case EOdysseyVectorCutShape::Circle:
+            case EOdysseyShapeType::kEllipse:
             {
                 double xmin = ::ULIS::FMath::Min( pointArray[0].x, pointArray[1].x );
                 double ymin = ::ULIS::FMath::Min( pointArray[0].y, pointArray[1].y );
@@ -206,7 +206,7 @@ FOdysseyPainterEditorVectorCutToolHUD::DrawPickingArea( const FOdysseyHUD::FDraw
             }
             break;
 
-            case EOdysseyVectorCutShape::Line :
+            case EOdysseyShapeType::kLine :
             {
                 FVector2D p0 = iParams.mTextureToHUD.Execute( FVector2D( pointArray[0].x, pointArray[0].y ) );
                 FVector2D p1 = iParams.mTextureToHUD.Execute( FVector2D( pointArray[1].x, pointArray[1].y ) );
@@ -215,7 +215,7 @@ FOdysseyPainterEditorVectorCutToolHUD::DrawPickingArea( const FOdysseyHUD::FDraw
             }
             break;
 
-            case EOdysseyVectorCutShape::Freehand :
+            case EOdysseyShapeType::kFreehand :
                 for( int i = 0; i < pointArray.size(); i++ )
                 {
                     int n = ( i + 1 ) % pointArray.size();
