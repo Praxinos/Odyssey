@@ -192,8 +192,12 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseUpVector( FOdysseyVectorGroupPai
                                                         , const FKey& iKey
                                                         , uint64& oSignalFlags )
 {
+    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS;
+
     iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
     iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
+
+    oSignalFlags = notificationFlags;
 
     return true;
 }

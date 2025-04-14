@@ -341,14 +341,14 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorGro
             path->AddVertex( mStitchedVertex );
         }
 
+        mPathTracer.AttachPath( path );
+
         mPathTracer.Trace( nullptr
                          , iPointInTexture.x
                          , iPointInTexture.y
                          , pointRadius );
 
         path->SetBrush( Brush );
-
-        mPathTracer.AttachPath( path );
 
         //iScene->ClearSelection();
         //iScene->Select( path );

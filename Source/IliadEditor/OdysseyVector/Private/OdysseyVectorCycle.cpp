@@ -446,9 +446,9 @@ FOdysseyVectorCycle::Draw( BLContext* iBLContext
                     BLRgba32 BLColor1;
                     // rotation is mostly useless because now the gradient linear orientation is set
                     // by the pmosition of its endpoints but it is kept for compatibility
-                    double rotate = bucket->GetRotation() / M_PI * 180.0f;
+                    //double rotate = bucket->GetRotation() / M_PI * 180.0f;
 
-                    linear.rotate( bucket->GetRotation() );
+                    //linear.rotate( bucket->GetRotation() );
 
                     BLColor0.setR( gradientColor0.R );
                     BLColor0.setG( gradientColor0.G );

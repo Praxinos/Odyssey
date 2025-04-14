@@ -272,8 +272,6 @@ FOdysseyVectorPathTracer::TestBezier( ::ULIS::FVec2D iBezier[4] )
                                                                      , iBezier[3]
                                                                      , 0.85f ) };
 
-    double toleranceSquared = mTracingWidth * mTracingWidth * 0.25f;
-
     for( uint32 i = 0; i < 4; i++ )
     {
         double minDistance = DBL_MAX;
@@ -289,7 +287,7 @@ FOdysseyVectorPathTracer::TestBezier( ::ULIS::FVec2D iBezier[4] )
             }
         }
 
-        if( FOdysseyVector::MapVector( mCubicPath->GetWorldMatrix(), ::ULIS::FVec2D( minDistance, 0.0f ) ).DistanceSquared() > toleranceSquared )
+        if( minDistance > mTracingWidth )
         {
             return false;
         }
