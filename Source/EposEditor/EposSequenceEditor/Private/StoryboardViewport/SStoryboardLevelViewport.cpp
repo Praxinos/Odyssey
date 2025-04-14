@@ -511,7 +511,7 @@ FStoryboardLevelViewportClient::CalcSceneView(FSceneViewFamily* ViewFamily, cons
     SceneView->FOV = ViewFOV;
     SceneView->DesiredFOV = ViewFOV;
     SceneView->ViewRotation = SceneView->ViewRotation - FRotator(0, 0, mZoomController.GetRotation());
-    SceneView->UpdateViewMatrix();
+    //SceneView->UpdateViewMatrix(); //TODO FIX TO BE ENABLE TO ROTATE VIEWPORT
 
     return SceneView;
 }
