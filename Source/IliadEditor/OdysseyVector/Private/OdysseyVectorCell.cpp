@@ -17,8 +17,8 @@ FOdysseyVectorCell::FOdysseyVectorCell( IOdysseyVectorCell* iCellInterface
     , mSelectionSpace( nullptr )
     //, mInvalidTileMap( 64, iCell->GetWidth(), iCell->GetHeight() )
     , mInvalidatedRect( 0, 0, 0, 0 )
-    , bPendingRedraw ( false )
     , mBLMask ( nullptr )
+    , bPendingRedraw ( false )
 {
     bSystem = true;
 

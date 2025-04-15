@@ -19,6 +19,8 @@ UOdysseyPainterEditorVectorObjectView::~UOdysseyPainterEditorVectorObjectView()
 UOdysseyPainterEditorVectorObjectView::UOdysseyPainterEditorVectorObjectView()
     : mEditor( nullptr )
     , mScene( nullptr )
+    , bDisplayBackgroundProperties( false )
+    , bDisplayForegroundProperties( false )
     , Name( "VectorObject" )
     , TranslationX ( 0.0f )
     , TranslationY ( 0.0f )
@@ -36,8 +38,6 @@ UOdysseyPainterEditorVectorObjectView::UOdysseyPainterEditorVectorObjectView()
                       , FOdysseyVectorObject::BACKGROUNDCOLOR_DEFAULT_G
                       , FOdysseyVectorObject::BACKGROUNDCOLOR_DEFAULT_B
                       , FOdysseyVectorObject::BACKGROUNDCOLOR_DEFAULT_A )
-    , bDisplayBackgroundProperties( false )
-    , bDisplayForegroundProperties( false )
 {
 }
 
