@@ -42,9 +42,9 @@ UOdysseyPainterEditorVectorTrajectoryTool::UOdysseyPainterEditorVectorTrajectory
     : UOdysseyPainterEditorVectorBaseTool(MakeShared<FOdysseyPainterEditorVectorTrajectoryToolHUD>( this ), false, true )
     , mHoveredQuad( nullptr )
     , mEditionMode( eVectorTrajectoryEditionMode::Add )
+    , ShowInbetweens( eShowInbetweens::All )
     , PickingRadius( 10.0f )
     , GridDisplayMode( eVectorTrajectoryGridDisplayMode::AsPoints )
-    , ShowInbetweens( eShowInbetweens::All )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Trajectory64");
 

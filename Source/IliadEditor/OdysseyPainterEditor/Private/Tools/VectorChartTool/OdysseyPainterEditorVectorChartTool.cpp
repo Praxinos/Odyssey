@@ -25,8 +25,8 @@ UOdysseyPainterEditorVectorChartTool::~UOdysseyPainterEditorVectorChartTool()
 
 UOdysseyPainterEditorVectorChartTool::UOdysseyPainterEditorVectorChartTool()
     : UOdysseyPainterEditorVectorBaseTool( MakeShared<FOdysseyPainterEditorVectorChartToolHUD>( this ), false, true )
-    , EditionMode ( eVectorChartEditionMode::OneByOne )
     , PickingRadius( 10.0f )
+    , EditionMode ( eVectorChartEditionMode::OneByOne )
     , Factor( 1 )
     , ChartType ( eChartType::Partial )
 {

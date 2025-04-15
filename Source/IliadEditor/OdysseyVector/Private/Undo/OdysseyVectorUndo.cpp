@@ -748,10 +748,10 @@ FSnapshotTagInbetweener::FSnapshotTagInbetweener( FOdysseyVectorTagInbetweener* 
                                                 , uint64 iTrajectorySnapshotFlags
                                                 , eSnapshotState iStateType )
     : mSnapshotFlags( iSnapshotFlags )
-    , mInbetweenerTag( iInbetweenerTag )
     , mBreakdownSnapshotFlags( iBreakdownSnapshotFlags )
     , mRouteSnapshotFlags( iRouteSnapshotFlags )
     , mTrajectorySnapshotFlags( iTrajectorySnapshotFlags )
+    , mInbetweenerTag( iInbetweenerTag )
 {
     RecordState( iStateType );
 }

@@ -38,12 +38,12 @@ UOdysseyPainterEditorVectorTransformTool::UOdysseyPainterEditorVectorTransformTo
     : UOdysseyPainterEditorVectorBaseTool( MakeShared<FOdysseyPainterEditorVectorTransformToolHUD>( this ), false, true )
     , mPickedPivot( nullptr )
     , mDragging( false )
+    , ShowInbetweens( eShowInbetweens::Surrounding )
     , PickingRadius(10.0f)
     , Uniform( true )
     //, KeepPathWidth( false )
     , World( false )
     , bInbetweenMode( false )
-    , ShowInbetweens( eShowInbetweens::Surrounding )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Transform32");
 

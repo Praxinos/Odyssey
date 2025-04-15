@@ -24,12 +24,12 @@ UOdysseyPainterEditorVectorMatchingTool::~UOdysseyPainterEditorVectorMatchingToo
 
 UOdysseyPainterEditorVectorMatchingTool::UOdysseyPainterEditorVectorMatchingTool()
     : UOdysseyPainterEditorVectorBaseTool( MakeShared<FOdysseyPainterEditorVectorMatchingToolHUD>( this ), false, true )
+    , ShowInbetweens ( eShowInbetweens::None )
     , PickingRadius( 75 )
     , MatchingInfluence( eMatchingInfluence::Radial )
     , Rigidity( 5 )
     , RigidifySelectionOnly( false )
     , GridDisplayMode ( eMatchingGridDisplayMode::AsQuads )
-    , ShowInbetweens ( eShowInbetweens::None )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Matching64");
 
