@@ -362,8 +362,7 @@ private:
 
 protected:
     TWeakPtr<FBaseToolkit> mToolkit;
-    FName mId;
-    FText mName;
+    FName mName;
     UObject* mEditedObject = nullptr;
     TArray<TSharedPtr<FOdysseyEditorTab>> mTabs;
     TArray<UObject*> mAdditionalEditedObjects;

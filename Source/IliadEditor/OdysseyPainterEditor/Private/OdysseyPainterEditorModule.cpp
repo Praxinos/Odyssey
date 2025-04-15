@@ -308,6 +308,11 @@ void
 FOdysseyPainterEditorModule::SaveOpenedTabIds(const FName& iEditorName)
 {
     FString savedPath = GetOpenedTabIdsSavedPath();
+    if (!FPaths::FileExists(savedPath))
+    {
+        FFileHelper::SaveStringToFile(TEXT(""), *savedPath);
+    }
+
     TArray<FName>& tabIds = mOpenedTabIds.FindOrAdd(iEditorName);
 
     TArray<FString> tabStringIds;
@@ -321,6 +326,8 @@ FOdysseyPainterEditorModule::SaveOpenedTabIds(const FName& iEditorName)
         TEXT("OpenedTabs"),
         tabStringIds,
         savedPath);
+
+    GConfig->Flush(true, savedPath);
 }
 
 IMPLEMENT_MODULE( FOdysseyPainterEditorModule, OdysseyPainterEditor );

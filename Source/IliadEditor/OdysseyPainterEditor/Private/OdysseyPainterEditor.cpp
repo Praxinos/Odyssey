@@ -120,6 +120,7 @@ FOdysseyPainterEditor::~FOdysseyPainterEditor()
 
 FOdysseyPainterEditor::FOdysseyPainterEditor(TSharedRef<FBaseToolkit> iToolkit)
     : mToolkit(iToolkit)
+    , mName("OdysseyPainterEditor")
     , mSource(nullptr)
     , mMeshSelector(MakeShared<FOdysseyMeshSelector>())
     , mCurrentMainTool(nullptr)
@@ -374,7 +375,7 @@ FOdysseyPainterEditor::CloseAllTabs()
 void
 FOdysseyPainterEditor::RegisterTabSpawners( const TSharedRef< FTabManager >& iTabManager)
 {
-    TSharedPtr<FWorkspaceItem> workspaceMenuCategory = iTabManager->AddLocalWorkspaceMenuCategory(mName);
+    TSharedPtr<FWorkspaceItem> workspaceMenuCategory = iTabManager->AddLocalWorkspaceMenuCategory(FText::FromName(mName));
     TSharedRef<FWorkspaceItem> workspaceMenuCategoryRef = workspaceMenuCategory.ToSharedRef();
     for (TSharedPtr<FOdysseyEditorTab> tab : mTabs)
     {
@@ -395,7 +396,7 @@ FOdysseyPainterEditor::UnregisterTabSpawners( const TSharedRef< FTabManager >& i
 const FName&
 FOdysseyPainterEditor::GetId() const
 {
-    return mId;
+    return mName;
 }
 
 UObject*
