@@ -741,10 +741,10 @@ FOdysseyVectorChain::TraceLine( int32 iX0
                                                                           , newVertexAt.y
                                                                           , radius );
                 uint32 waypointID = oWayPointBuffer.size();
-
+                uint32 flag = FWayPoint::BordersErasureArea;
                 oWayPointBuffer.emplace_back( newVertex
                                             , nullptr
-                                            , FWayPoint::BordersErasureArea
+                                            , flag
                                             , t );
 
                 newVertex->SetID( waypointID );
@@ -787,10 +787,10 @@ FOdysseyVectorChain::TraceLine( int32 iX0
                                                                           , newVertexAt.y
                                                                           , radius );
                 uint32 waypointID = oWayPointBuffer.size();
-
+                uint32 flag = FWayPoint::BordersErasureArea;
                 oWayPointBuffer.emplace_back( newVertex
                                             , nullptr
-                                            , FWayPoint::BordersErasureArea
+                                            , flag
                                             , t );
 
                 newVertex->SetID( waypointID );
