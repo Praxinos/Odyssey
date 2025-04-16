@@ -567,7 +567,7 @@ FOdysseyPainterEditorGUI::ParseVectorNotifications( FOdysseyVectorGroupPaint* iS
 void
 FOdysseyPainterEditorGUI::OnMediaChanged()
 {
-    UOdysseyAnimationLayerImageVector* currentVectorLayer = Cast<UOdysseyAnimationLayerImageVector>(mEditor->LayerStack()->CurrentLayer.Get());
+    //UOdysseyAnimationLayerImageVector* currentVectorLayer = Cast<UOdysseyAnimationLayerImageVector>(mEditor->LayerStack()->CurrentLayer.Get());
     uint64 returnFlags = FOdysseyPainterEditor::UI_UPDATE_TIMELINE
                        | FOdysseyPainterEditor::UI_UPDATE_HUD;
 
