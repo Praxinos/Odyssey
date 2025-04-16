@@ -179,7 +179,7 @@ FAnimationCut::GetRangeLimit() const
     return range;
 }
 
-int32
+void
 FAnimationCut::Offset( int32 iOffset )
 {
     TRange<FFrameNumber> range_limit = GetRangeLimit();
@@ -212,195 +212,16 @@ FAnimationCut::Offset( int32 iOffset )
         }
     }
 
-    for( FAnimationCutEntry entry : mAnimationCutEntries )
+    for( FAnimationCutEntry& entry : mAnimationCutEntries )
     {
         entry.SetFrame( new_frame );
     }
-
-    return clamped_offset;
 }
 
 void
 FAnimationCut::AddNewEntry( const FAnimationCutEntry& iAnimationCutEntry )
 {
     mAnimationCutEntries.Add( iAnimationCutEntry );
-}
-
-//---
-
-FAnimationCuts::FAnimationCuts()
-{
-}
-
-FAnimationCuts::FAnimationCuts( UOdysseyAnimation* iAnimation )
-    : mAnimation( iAnimation )
-{
-}
-
-void
-FAnimationCuts::Build()
-{
-    UOdysseyAnimationLayerStack* layer_stack = mAnimation ? mAnimation->GetLayerStack() : nullptr;
-    TArray<UOdysseyLayer*> layers = layer_stack ? layer_stack->GetLayers() : TArray<UOdysseyLayer*>();
-    TSet<UOdysseyAnimationLayer*> animation_layers;
-    for( UOdysseyLayer* layer : layers )
-        animation_layers.Add( Cast<UOdysseyAnimationLayer>( layer ) );
-    animation_layers.Remove( nullptr );
-
-    for( UOdysseyAnimationLayer* layer : animation_layers )
-    {
-        UOdysseyAnimationCell* previous_cell = nullptr;
-        TArray<UOdysseyAnimationCell*> cells = layer->GetCells();
-        for( UOdysseyAnimationCell* cell : cells )
-        {
-            {
-                FAnimationCutEntry animationcutentry( previous_cell, cell );
-
-                FAnimationCut* animationcut = mAnimationCutPerFrameMap.Find( animationcutentry.GetFrameReference() );
-                if( animationcut )
-                {
-                    animationcut->AddNewEntry( animationcutentry );
-                }
-                else
-                {
-                    FAnimationCut new_animationcut;
-                    new_animationcut.AddNewEntry( animationcutentry );
-
-                    mAnimationCutPerFrameMap.Add( animationcutentry.GetFrameReference(), new_animationcut );
-                }
-            }
-
-            previous_cell = cell;
-
-            if( cell == cells.Last() )
-            {
-                FAnimationCutEntry animationcutentry( previous_cell, nullptr );
-
-                FAnimationCut* animationcut = mAnimationCutPerFrameMap.Find( animationcutentry.GetFrameReference() );
-                if( animationcut )
-                {
-                    animationcut->AddNewEntry( animationcutentry );
-                }
-                else
-                {
-                    FAnimationCut new_animationcut;
-                    new_animationcut.AddNewEntry( animationcutentry );
-
-                    mAnimationCutPerFrameMap.Add( animationcutentry.GetFrameReference(), new_animationcut );
-                }
-            }
-        }
-    }
-
-    mAnimationCutPerFrameMap.KeyStableSort( []( FFrameNumber iA, FFrameNumber iB )
-                                    {
-                                        return iA < iB;
-                                    } );
-}
-
-const TMap<FFrameNumber, FAnimationCut>&
-FAnimationCuts::GetMap() const
-{
-    return mAnimationCutPerFrameMap;
-}
-
-bool
-FAnimationCuts::FindAnimationCutKey( const FAnimationCut& iAnimationCut, FFrameNumber& oFrame ) const
-{
-    const FFrameNumber* frame = mAnimationCutPerFrameMap.FindKey( iAnimationCut );
-    if( !frame )
-        return false;
-
-    oFrame = *frame;
-    return true;
-}
-
-bool
-FAnimationCuts::FindPreviousAnimationCut( const FAnimationCut& iAnimationCut, FAnimationCut& oPreviousAnimationCut ) const
-{
-    bool has_previous_frame = false;
-
-    FFrameNumber frame;
-    if( !FindAnimationCutKey( iAnimationCut, frame ) )
-        return has_previous_frame;
-
-    TArray<FFrameNumber> keys;
-    mAnimationCutPerFrameMap.GetKeys( keys );
-    for( FFrameNumber key : keys )
-    {
-        if( frame > key )
-        {
-            has_previous_frame = true;
-            oPreviousAnimationCut = mAnimationCutPerFrameMap[key];
-            continue;
-        }
-
-        break;
-    }
-
-    return has_previous_frame;
-}
-
-bool
-FAnimationCuts::FindNextAnimationCut( const FAnimationCut& iAnimationCut, FAnimationCut& oNextAnimationCut ) const
-{
-    bool has_next_frame = false;
-
-    FFrameNumber frame;
-    if( !FindAnimationCutKey( iAnimationCut, frame ) )
-        return has_next_frame;
-
-    TArray<FFrameNumber> keys;
-    mAnimationCutPerFrameMap.GetKeys( keys );
-    Algo::Reverse( keys ); // Reverse to start from end !
-    for( FFrameNumber key : keys )
-    {
-        if( frame < key )
-        {
-            has_next_frame = true;
-            oNextAnimationCut = mAnimationCutPerFrameMap[key];
-            continue;
-        }
-
-        break;
-    }
-
-    return has_next_frame;
-}
-
-void
-FAnimationCuts::UpdateAnimationCuts( const TArray<FAnimationCut>& iAnimationCuts, const TArray<FFrameNumber>& iNewFrames )
-{
-    TSet<int32> offsets;
-    for( int i = 0; i < iAnimationCuts.Num(); i++ )
-    {
-        const FAnimationCut& animationcut_moved = iAnimationCuts[i];
-        FFrameNumber new_frame = iNewFrames[i];
-
-        FFrameNumber reference_frame = animationcut_moved.GetFrameReference();
-
-        offsets.Add( ( new_frame - reference_frame ).Value );
-    }
-    check( offsets.Num() == 1 );
-
-    int32 offset = offsets.Array()[0];
-
-    //---
-
-    for( int i = 0; i < iAnimationCuts.Num(); i++ )
-    {
-        const FAnimationCut& animationcut_moved = iAnimationCuts[i];
-        FFrameNumber new_frame = iNewFrames[i];
-
-        FFrameNumber frame;
-        bool found = FindAnimationCutKey( animationcut_moved, frame );
-        if( !ensure( found ) )
-            continue;
-
-        FAnimationCut& animationcut = mAnimationCutPerFrameMap.FindChecked( frame );
-
-        offset = animationcut.Offset( offset );
-    }
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -7,6 +7,7 @@
 #include "OdysseyAnimationComponent.h"
 #include "OdysseyAnimationPlayer.h"
 
+#include "OdysseyAnimationCut.h"
 #include "OdysseyAnimationCutChannel.h"
 
 #include "OdysseyAnimationTimelineSection.generated.h"
@@ -41,9 +42,19 @@ public:
     void SetPostBehaviour(EOdysseyAnimationPlayerPostBehaviour iValue);
     void SetStartFrameOffset(FFrameNumber iOffset);
 
+    FFrameNumber ConvertFrameFromTimelineToSequence( FFrameNumber iFrameInTimeline );
+    FFrameNumber ConvertFrameFromSequenceToTimeline( FFrameNumber iFrameInSequence );
+
+    FOdysseyAnimationCutChannel& GetAnimationCutChannel();
+    const FOdysseyAnimationCutChannel& GetAnimationCutChannel() const;
+
+    virtual void RebuildAnimationCuts();
+
 protected:
     virtual EMovieSceneChannelProxyType CacheChannelProxy() override;
     virtual void MigrateFrameTimes(FFrameRate SourceRate, FFrameRate DestinationRate) override;
+
+    virtual void BuildAnimationCuts();
 
 protected:
     UPROPERTY( EditAnywhere, BlueprintReadWrite, Category="Animation")
@@ -58,7 +69,6 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Animation")
     FFrameNumber StartFrameOffset = 0;
 
-public:
     UPROPERTY()
     FOdysseyAnimationCutChannel AnimationCutChannel;
 };

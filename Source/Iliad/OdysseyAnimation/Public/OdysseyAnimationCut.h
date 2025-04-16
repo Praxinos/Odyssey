@@ -27,13 +27,6 @@ public:
 
     void SetFrame( FFrameNumber iNewFrame );
 
-public:
-    friend bool operator==( const FAnimationCutEntry& A, const FAnimationCutEntry& B )
-    {
-        return A.mCellBefore == B.mCellBefore
-            && A.mCellAfter == B.mCellAfter;
-    }
-
 private:
     UPROPERTY()
     TObjectPtr<UOdysseyAnimationCell> mCellBefore;
@@ -55,44 +48,11 @@ public:
     TArray<UOdysseyAnimationCell*> GetCellsReference() const;
     TRange<FFrameNumber> GetRangeLimit() const;
 
-    int32 Offset( int32 iOffset );
+    void Offset( int32 iOffset );
 
     void AddNewEntry( const FAnimationCutEntry& iAnimationCutEntry );
-
-public:
-    friend bool operator==( const FAnimationCut& A, const FAnimationCut& B )
-    {
-        return A.mAnimationCutEntries == B.mAnimationCutEntries;
-    }
 
 private:
     UPROPERTY()
     TArray<FAnimationCutEntry> mAnimationCutEntries;
-};
-
-USTRUCT()
-struct ODYSSEYANIMATION_API FAnimationCuts
-{
-    GENERATED_BODY()
-
-public:
-    FAnimationCuts();
-
-    FAnimationCuts( UOdysseyAnimation* iAnimation );
-
-    void Build();
-
-    const TMap<FFrameNumber, FAnimationCut>& GetMap() const;
-
-    bool FindAnimationCutKey( const FAnimationCut& iAnimationCut, FFrameNumber& oFrame ) const;
-
-    bool FindPreviousAnimationCut( const FAnimationCut& iAnimationCut, FAnimationCut& oPreviousAnimationCut ) const;
-    bool FindNextAnimationCut( const FAnimationCut& iAnimationCut, FAnimationCut& oNextAnimationCut ) const;
-
-    void UpdateAnimationCuts( const TArray<FAnimationCut>& iAnimationCuts, const TArray<FFrameNumber>& iNewFrames );
-
-private:
-    TObjectPtr<UOdysseyAnimation> mAnimation;
-
-    TMap<FFrameNumber, FAnimationCut> mAnimationCutPerFrameMap;
 };

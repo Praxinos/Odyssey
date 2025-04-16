@@ -231,11 +231,35 @@ FMetaChannel::FillWithTime( const FFrameTime& iTime, const FFrameNumber& iTolera
 {
     TRange<FFrameNumber> range( ( iTime - iTolerance ).GetFrame(), ( iTime + iTolerance ).GetFrame() + 1 );
 
+    // Try to find the closest metakey of iTime
+    // If 2 metakeys are close enough (inside the same tolerance range), both can be added to new metachannel
+    // But at this time, only 1 metakey must be available in the new metachannel
+    // Because this function is only used to get metakey under the mouse
+    // And at this time, GUI doesn't manage metakey selection, so multiple check(metakey==1) are used
+    TOptional<TPair<FFrameNumber, FMetaKey>> closest_pair;
     for( const auto& pair : mMetaKeys )
     {
-        if( range.Contains( pair.Key ) )
-            ioMetaChannel->mMetaKeys.Add( pair.Key, pair.Value );
+        FFrameNumber frame = pair.Key;
+        FMetaKey meta_key = pair.Value;
+
+        if( range.Contains( frame ) )
+        {
+            if( !closest_pair )
+            {
+                closest_pair = pair;
+            }
+            else
+            {
+                if( FMath::Abs( ( closest_pair->Key - iTime ).AsDecimal() ) > FMath::Abs( ( frame - iTime ).AsDecimal() ) )
+                {
+                    closest_pair = pair;
+                }
+            }
+        }
     }
+
+    if( closest_pair )
+        ioMetaChannel->mMetaKeys.Add( *closest_pair );
 
     for( auto& pair : ioMetaChannel->mMetaKeys )
     {

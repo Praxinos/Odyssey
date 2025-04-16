@@ -1139,7 +1139,7 @@ SCinematicBoardSectionAnimationTimelineKeys::ComputeClampRangePreMoveDuringDrag(
     TRange<FFrameNumber> board_section_clamp_range_in_subsequence;
     SMetaKeysArea::ComputeClampRangePreMoveDuringDrag( mDraggedKeys, board_section_clamp_range_in_subsequence ); // Always call the default clamp range to get min/max boundary of the whole board section in the board track
 
-
+    //-
 
     FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
     const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
@@ -1151,8 +1151,9 @@ SCinematicBoardSectionAnimationTimelineKeys::ComputeClampRangePreMoveDuringDrag(
     ShotSequenceHelpers::FFindOrCreateTimelineResult result = ShotSequenceHelpers::FindTimelineTrackAndSections( *sequencer, result_inner.mInnerSequence, result_inner.mInnerSequenceId, mBinding.GetGuid(), clamp_max2 );
     if( result.mSections.Num() )
     {
-        FFrameNumber frame_in_timeline = ShotSequenceHelpers::ConvertFrameFromSequenceToTimeline( clamp_max2, result.mSections[0].Get() );
-        FFrameNumber frame_in_sequence = ShotSequenceHelpers::ConvertFrameFromTimelineToSequence( frame_in_timeline, result.mSections[0].Get() );
+        //TODO: certainly make a loop over all sections (?)
+        FFrameNumber frame_in_timeline = result.mSections[0]->ConvertFrameFromSequenceToTimeline( clamp_max2 );
+        FFrameNumber frame_in_sequence = result.mSections[0]->ConvertFrameFromTimelineToSequence( frame_in_timeline );
 
         clamp_max2 = frame_in_sequence;
     }
@@ -1161,68 +1162,115 @@ SCinematicBoardSectionAnimationTimelineKeys::ComputeClampRangePreMoveDuringDrag(
 
     //---
 
-    UOdysseyAnimation* animation = nullptr;
-    TMap<FFrameNumber, FAnimationCut> dragged_animationcuts_map;
+    // Get all key handles for each section
+    TMultiMap<UOdysseyAnimationTimelineSection*, FKeyHandle> dragged_keys_map;
     for( auto pair : iKeys->GetMetaKeys() )
     {
         for( const auto& subkey : pair.Value.mSubKeys )
         {
+            UOdysseyAnimationTimelineSection* animation_timeline_section = Cast<UOdysseyAnimationTimelineSection>( subkey.mSection );
+            if( !animation_timeline_section )
+                continue;
+
             TMovieSceneChannelHandle<FOdysseyAnimationCutChannel> channel_handle = subkey.mChannelHandle.Cast<FOdysseyAnimationCutChannel>();
             FOdysseyAnimationCutChannel* object_channel = channel_handle.Get();
+            check( object_channel == &animation_timeline_section->GetAnimationCutChannel() );
 
-            FFrameNumber frame_in_sequence;
-            object_channel->GetKeyTime( subkey.mKeyHandle, frame_in_sequence );
-
-            FFrameNumber frame_in_timeline = ShotSequenceHelpers::ConvertFrameFromSequenceToTimeline( frame_in_sequence, Cast<UOdysseyAnimationTimelineSection>( subkey.mSection ) );
-
-            FOdysseyAnimationCutValue value;
-            UE::MovieScene::GetKeyValue( object_channel, subkey.mKeyHandle, value );
-            FAnimationCut animationcut = value.Value;
-
-            dragged_animationcuts_map.Add( frame_in_timeline, animationcut );
-
-            animation = animationcut.GetAnimation();
+            dragged_keys_map.Add( animation_timeline_section, subkey.mKeyHandle );
         }
     }
 
-    dragged_animationcuts_map.KeyStableSort( []( FFrameNumber iA, FFrameNumber iB )
-                                             {
-                                                 return iA < iB;
-                                             } );
+    // Get the key handle limits combining all sections
+    TPair<UOdysseyAnimationTimelineSection*, FKeyHandle> first_limit_handle;
+    TPair<UOdysseyAnimationTimelineSection*, FKeyHandle> last_limit_handle;
 
-    if( dragged_animationcuts_map.IsEmpty() )
-        return;
-
-    TPair<FFrameNumber, FAnimationCut> first_pair = dragged_animationcuts_map.Array()[0];
-    TPair<FFrameNumber, FAnimationCut> last_pair = dragged_animationcuts_map.Array().Last();
-
-    FAnimationCuts animationcuts( animation );
-    animationcuts.Build();
-
-    FAnimationCut previous_animationcut;
-    bool has_previous_animationcut = animationcuts.FindPreviousAnimationCut( first_pair.Value, previous_animationcut );
-    FAnimationCut next_animationcut;
-    bool has_next_animationcut = animationcuts.FindNextAnimationCut( last_pair.Value, next_animationcut );
-
-    FFrameNumber previous_animationcut_frame;
-    bool has_previous_animationcut_frame = has_previous_animationcut ? animationcuts.FindAnimationCutKey( previous_animationcut, previous_animationcut_frame ) : false;
-    FFrameNumber next_animationcut_frame;
-    bool has_next_animationcut_frame = has_next_animationcut ? animationcuts.FindAnimationCutKey( next_animationcut, next_animationcut_frame ) : false;
-
-    TRange<FFrameNumber> prev_last_cell_clamp_range_in_subsequence = TRange<FFrameNumber>::All();
-    if( has_previous_animationcut_frame )
+    TSet<UOdysseyAnimationTimelineSection*> sections;
+    dragged_keys_map.GetKeys( sections );
+    for( UOdysseyAnimationTimelineSection* section : sections )
     {
-        FFrameNumber frame_in_sequence = ShotSequenceHelpers::ConvertFrameFromTimelineToSequence( previous_animationcut_frame + 1, result.mSections[0].Get() );
+        TArray<FKeyHandle> handles;
+        dragged_keys_map.MultiFind( section, handles );
+
+        FKeyHandle previous_handle_in_section = section->GetAnimationCutChannel().FindPreviousKey( handles );
+        FKeyHandle next_handle_in_section = section->GetAnimationCutChannel().FindNextKey( handles );
+
+        if( previous_handle_in_section.IsValid() )
+        {
+            FFrameNumber previous_frame_in_section;
+            section->GetAnimationCutChannel().GetKeyTime( previous_handle_in_section, previous_frame_in_section );
+
+            if( !first_limit_handle.Key )
+            {
+                first_limit_handle.Key = section;
+                first_limit_handle.Value = previous_handle_in_section;
+            }
+            else
+            {
+                FFrameNumber previous_frame;
+                first_limit_handle.Key->GetAnimationCutChannel().GetKeyTime( first_limit_handle.Value, previous_frame );
+
+                if( previous_frame_in_section < previous_frame )
+                {
+                    first_limit_handle.Key = section;
+                    first_limit_handle.Value = previous_handle_in_section;
+                }
+            }
+        }
+        if( next_handle_in_section.IsValid() )
+        {
+            FFrameNumber next_frame_in_section;
+            section->GetAnimationCutChannel().GetKeyTime( next_handle_in_section, next_frame_in_section );
+
+            if( !last_limit_handle.Key )
+            {
+                last_limit_handle.Key = section;
+                last_limit_handle.Value = next_handle_in_section;
+            }
+            else
+            {
+                FFrameNumber next_frame;
+                last_limit_handle.Key->GetAnimationCutChannel().GetKeyTime( last_limit_handle.Value, next_frame );
+
+                if( next_frame_in_section > next_frame )
+                {
+                    last_limit_handle.Key = section;
+                    last_limit_handle.Value = next_handle_in_section;
+                }
+            }
+        }
+    }
+
+    // Compute the limit range of both key handle limits
+    TRange<FFrameNumber> prev_last_cell_clamp_range_in_subsequence = TRange<FFrameNumber>::All();
+    if( first_limit_handle.Key )
+    {
+        FFrameNumber frame_in_sequence;
+        first_limit_handle.Key->GetAnimationCutChannel().GetKeyTime( first_limit_handle.Value, frame_in_sequence );
+        FFrameNumber frame_in_timeline = first_limit_handle.Key->ConvertFrameFromSequenceToTimeline( frame_in_sequence );
+        frame_in_sequence = first_limit_handle.Key->ConvertFrameFromTimelineToSequence( frame_in_timeline + 1 );
+
         prev_last_cell_clamp_range_in_subsequence.SetLowerBound( TRangeBound<FFrameNumber>::Inclusive( frame_in_sequence ) );
     }
     else
     {
-        FFrameNumber frame_in_sequence = ShotSequenceHelpers::ConvertFrameFromTimelineToSequence( 0, result.mSections[0].Get() ); // If no previous animationcut, the timeline can't never be before frame 0
-        prev_last_cell_clamp_range_in_subsequence.SetLowerBound( TRangeBound<FFrameNumber>::Inclusive( frame_in_sequence ) );
+        FFrameNumber frame_in_sequence_min_0 = TNumericLimits<FFrameNumber>::Max();
+        for( UOdysseyAnimationTimelineSection* section : sections )
+        {
+            FFrameNumber frame_in_sequence_0 = section->ConvertFrameFromTimelineToSequence( 0 ); // If no previous animationcut, the timeline can't never be before frame 0
+            if( frame_in_sequence_min_0 > frame_in_sequence_0 )
+                frame_in_sequence_min_0 = frame_in_sequence_0;
+        }
+
+        if( sections.Num() )
+            prev_last_cell_clamp_range_in_subsequence.SetLowerBound( TRangeBound<FFrameNumber>::Inclusive( frame_in_sequence_min_0 ) );
     }
-    if( has_next_animationcut_frame )
+    if( last_limit_handle.Key )
     {
-        FFrameNumber frame_in_sequence = ShotSequenceHelpers::ConvertFrameFromTimelineToSequence( next_animationcut_frame - 1, result.mSections[0].Get() );
+        FFrameNumber frame_in_sequence;
+        last_limit_handle.Key->GetAnimationCutChannel().GetKeyTime( last_limit_handle.Value, frame_in_sequence );
+        FFrameNumber frame_in_timeline = last_limit_handle.Key->ConvertFrameFromSequenceToTimeline( frame_in_sequence );
+        frame_in_sequence = last_limit_handle.Key->ConvertFrameFromTimelineToSequence( frame_in_timeline - 1 );
+
         prev_last_cell_clamp_range_in_subsequence.SetUpperBound( TRangeBound<FFrameNumber>::Inclusive( frame_in_sequence ) );
     }
 
@@ -1234,47 +1282,74 @@ SCinematicBoardSectionAnimationTimelineKeys::ComputeClampRangePreMoveDuringDrag(
 void
 SCinematicBoardSectionAnimationTimelineKeys::PostMoveDuringDrag( TSharedPtr<FMetaChannel> iKeys ) //override
 {
-    UOdysseyAnimation* animation = nullptr;
-    TMap<FFrameNumber, FAnimationCut> dragged_animationcuts_map;
+    struct FKeyHandleAndFrames
+    {
+        FKeyHandle KeyHandle;
+        FFrameNumber NewFrame;
+        FAnimationCut AnimationCut;
+    };
+
+    TMap<UOdysseyAnimationTimelineSection*, TArray<FKeyHandleAndFrames>> dragged_animationcuts_map;
     for( auto pair : iKeys->GetMetaKeys() )
     {
         for( const auto& subkey : pair.Value.mSubKeys )
         {
+            UOdysseyAnimationTimelineSection* animation_timeline_section = Cast<UOdysseyAnimationTimelineSection>( subkey.mSection );
+            if( !animation_timeline_section )
+                continue;
+
             TMovieSceneChannelHandle<FOdysseyAnimationCutChannel> channel_handle = subkey.mChannelHandle.Cast<FOdysseyAnimationCutChannel>();
             FOdysseyAnimationCutChannel* object_channel = channel_handle.Get();
 
             FFrameNumber frame_in_sequence;
             object_channel->GetKeyTime( subkey.mKeyHandle, frame_in_sequence );
 
-            FFrameNumber frame_in_timeline = ShotSequenceHelpers::ConvertFrameFromSequenceToTimeline( frame_in_sequence, Cast<UOdysseyAnimationTimelineSection>( subkey.mSection ) );
+            FFrameNumber frame_in_timeline = animation_timeline_section->ConvertFrameFromSequenceToTimeline( frame_in_sequence );
 
             FOdysseyAnimationCutValue value;
             UE::MovieScene::GetKeyValue( object_channel, subkey.mKeyHandle, value );
             FAnimationCut animationcut = value.Value;
 
-            dragged_animationcuts_map.Add( frame_in_timeline, animationcut );
+            FKeyHandleAndFrames new_key_handle = { subkey.mKeyHandle, frame_in_timeline, animationcut };
+            TArray<FKeyHandleAndFrames>* key_handles = dragged_animationcuts_map.Find( animation_timeline_section );
+            if( !key_handles )
+            {
+                TArray<FKeyHandleAndFrames> new_key_handles;
+                new_key_handles.Add( new_key_handle );
 
-            animation = animationcut.GetAnimation();
+                dragged_animationcuts_map.Add( animation_timeline_section, new_key_handles );
+            }
+            else
+            {
+                key_handles->Add( new_key_handle );
+            }
         }
     }
-
-    dragged_animationcuts_map.KeyStableSort( []( FFrameNumber iA, FFrameNumber iB )
-                                             {
-                                                 return iA < iB;
-                                             } );
 
     if( dragged_animationcuts_map.IsEmpty() )
         return;
 
-    FAnimationCuts animationcuts( animation );
-    animationcuts.Build();
+    for( auto pair : dragged_animationcuts_map )
+    {
+        UOdysseyAnimationTimelineSection* animation_timeline_section = pair.Key;
+        TArray<FKeyHandleAndFrames> dragged_key_handles = pair.Value;
 
-    TArray<FAnimationCut> dragged_animationcuts;
-    dragged_animationcuts_map.GenerateValueArray( dragged_animationcuts );
-    TArray<FFrameNumber> new_frames;
-    dragged_animationcuts_map.GenerateKeyArray( new_frames );
+        TArray<FKeyHandle> key_handles;
+        TArray<FFrameNumber> new_frames;
+        for( const FKeyHandleAndFrames& handles_and_frames : dragged_key_handles )
+        {
+            key_handles.Add( handles_and_frames.KeyHandle );
+            new_frames.Add( handles_and_frames.NewFrame );
+        }
 
-    animationcuts.UpdateAnimationCuts( dragged_animationcuts, new_frames );
+        animation_timeline_section->GetAnimationCutChannel().MoveTo( key_handles, new_frames );
+    }
+
+    //for( auto pair : dragged_animationcuts_map )
+    //{
+    //    UOdysseyAnimationTimelineSection* animation_timeline_section = pair.Key;
+    //    animation_timeline_section->RebuildAnimationCuts();
+    //}
 }
 
 FReply

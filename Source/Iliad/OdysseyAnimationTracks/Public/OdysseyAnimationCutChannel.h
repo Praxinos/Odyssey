@@ -39,7 +39,7 @@ namespace MovieSceneClipboard
 
 /** Defines data for keys in this emitter section. */
 USTRUCT()
-struct FOdysseyAnimationCutValue
+struct FOdysseyAnimationCutValue //TODO: really necessary ?!
 {
     GENERATED_BODY()
 
@@ -106,6 +106,13 @@ struct FOdysseyAnimationCutChannel : public FMovieSceneChannel
      * @return true if the channel was evaluated successfully, false otherwise
      */
     ODYSSEYANIMATIONTRACKS_API bool Evaluate( FFrameTime InTime, FOdysseyAnimationCutValue& OutValue ) const;
+
+    ODYSSEYANIMATIONTRACKS_API void Offset( TArrayView<const FKeyHandle> InHandles, FFrameNumber DeltaPosition );
+
+    ODYSSEYANIMATIONTRACKS_API FKeyHandle FindPreviousKey( const TArray<FKeyHandle>& iKeyHandles );
+    ODYSSEYANIMATIONTRACKS_API FKeyHandle FindNextKey( const TArray<FKeyHandle>& iKeyHandles );
+
+    ODYSSEYANIMATIONTRACKS_API void MoveTo( const TArray<FKeyHandle>& iKeyHandles, const TArray<FFrameNumber>& iNewFrames );
 
 public:
 

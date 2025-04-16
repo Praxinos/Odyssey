@@ -156,10 +156,6 @@ struct EPOSSEQUENCE_API FKeyOpacity
 class EPOSSEQUENCE_API ShotSequenceHelpers
 {
 public:
-    static FFrameNumber ConvertFrameFromTimelineToSequence( FFrameNumber iFrameInTimeline, UOdysseyAnimationTimelineSection* iSection );
-    static FFrameNumber ConvertFrameFromSequenceToTimeline( FFrameNumber iFrameInSequence, UOdysseyAnimationTimelineSection* iSection );
-
-public:
     static ACineCameraActor*    GetCamera( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid* oCameraBinding = nullptr );
 
     /** Get all transform keys for the camera.
