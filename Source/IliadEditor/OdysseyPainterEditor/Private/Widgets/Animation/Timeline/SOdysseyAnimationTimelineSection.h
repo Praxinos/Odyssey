@@ -14,7 +14,7 @@ public:
         : _HAlign(HAlign_Fill)
         , _VAlign(VAlign_Fill)
     {
-        _Visibility = EVisibility::SelfHitTestInvisible;
+        _Visibility = EVisibility::Visible;
     }
         SLATE_DEFAULT_SLOT( FArguments, Content )
         SLATE_ATTRIBUTE(float, WidthInFrames)
