@@ -18,6 +18,10 @@
 #include "OdysseyRasterBlockMutator.h"
 #include "OdysseyLayerCellSelection.h"
 #include "ScopedTransaction.h"
+#include "RenderGraphBuilder.h"
+#include "ScreenPass.h"
+#include "OdysseyBlendShader.h"
+#include "OdysseyPixelFormat.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -39,42 +43,40 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::MapActionsToCommandList(TShar
 void
 FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
 {
-    /* UOdysseyAnimation* animation = mAnimation.Get();
+    UOdysseyAnimation* animation = mAnimation.Get();
     if (!animation)
         return;
 
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(animation->GetLayerStack());
+    UOdysseyLayerStack* layerStack = animation->GetLayerStack();
     if (!layerStack)
         return;
 
-    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerStack->GetCurrentLayer());
-    if (!layer || !layer->IsA(UOdysseyAnimationLayerImageRaster::StaticClass()))
+    UOdysseyLayer* layer = layerStack->GetCurrentLayer();
+    if (!layer)
         return;
 
     if (layer->IsLockedRecursively())
         return;
 
-    UOdysseyAnimationLayerImageRaster* layerImageRaster = Cast<UOdysseyAnimationLayerImageRaster>(layer);
-
-    TArray<UOdysseyLayerCell*> selectedCells = layerImageRaster->GetLayerStack()->GetCellSelection()->GetSelectedCells();
+    TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
     if (selectedCells.IsEmpty())
         return;
 
     bool hasCellsToCrossFade = selectedCells.ContainsByPredicate(
         [](UOdysseyLayerCell* iCell)
         {
-            return iCell->Exposure > 1;
+            return iCell->GetExposure() > 1;
         }
     );
     if (!hasCellsToCrossFade)
         return;
 
-    ::ULIS::eFormat format = ::ULIS::Format_BGRA8;
+    /* ::ULIS::eFormat format = ::ULIS::Format_BGRA8;
     switch(animation->GetFormat())
     {
         case EOdysseyAnimationFormat::BGRA8: format = ::ULIS::Format_BGRA8;
         case EOdysseyAnimationFormat::RGBAF: format = ::ULIS::Format_RGBAF;
-    }
+    } */
 
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("cell-image-raster.transaction.cross-fade", "Cross Fade"));
@@ -95,43 +97,44 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
     TArray<UOdysseyLayerCell*> cellsToSelect = selectedCells;
 
     //Cross Fade all selected cells
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
+    //::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
+
+    FIntRect rect = layerStack->GetDefaultRenderRect();
+    TStrongObjectPtr<UTextureRenderTarget2D> startRenderTarget(NewObject<UTextureRenderTarget2D>());
+    TStrongObjectPtr<UTextureRenderTarget2D> endRenderTarget(NewObject<UTextureRenderTarget2D>());
+    TStrongObjectPtr<UTextureRenderTarget2D> destinationRenderTarget(NewObject<UTextureRenderTarget2D>());
+    startRenderTarget->InitAutoFormat(rect.Width(), rect.Height());
+    endRenderTarget->InitAutoFormat(rect.Width(), rect.Height());
+    destinationRenderTarget->InitAutoFormat(rect.Width(), rect.Height());
 
     FScopedSlowTask selectedCellsProgress(selectedCells.Num());
     for (UOdysseyLayerCell* selectedCell : selectedCells)
     {
         selectedCellsProgress.EnterProgressFrame();
-        TSharedPtr<::ULIS::FBlock> startBlock = MakeShared<::ULIS::FBlock>(animation->GetWidth(), animation->GetHeight(), format);
-        ctx.Clear(*startBlock);
-        ctx.Finish();
-        TSharedPtr<IOdysseyImageRenderer> renderer = selectedCell->BuildImageRenderer(EOdysseyRenderingType::Render, 0);
-        renderer->Init();
+        selectedCell->Render_GameThread(
+            startRenderTarget.Get(),
+            FFrameNumber(0),
+            EOdysseyRenderingType::Render
+        );
 
-        FOdysseyImageRendererCopyParams startParams(startBlock, { ::ULISUtils::ToIntRect(startBlock->Rect()) });
-        renderer->Copy(startParams, {});
-        ctx.Finish();
-
-        int cellIndex = selectedCell->IndexInLayer;
+        int cellIndex = selectedCell->GetIndexInLayer();
         int nextCellIndex = cellIndex + 1;
-        int crossFadelength = selectedCell->Exposure;
+        int crossFadelength = selectedCell->GetExposure();
 
         //Reduce the original cell to 1 frame Exposure
-        FOdysseyObjectEditorUtils::SetPropertyValue(selectedCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), 1);
+        selectedCell->SetExposure(1);
 
         if (nextCellIndex < layer->GetCells().Num() || !layer->GetCells()[nextCellIndex])
         {
             UOdysseyLayerCell* nextCell = layer->GetCells()[nextCellIndex];
-            TSharedPtr<::ULIS::FBlock> endBlock = MakeShared<::ULIS::FBlock>(animation->GetWidth(), animation->GetHeight(), format);
-            ctx.Clear(*endBlock);
-            ctx.Finish();
-            renderer = nextCell->BuildImageRenderer(EOdysseyRenderingType::Render, 0);
-            renderer->Init();
 
-            FOdysseyImageRendererCopyParams endParams(endBlock, { ::ULISUtils::ToIntRect(endBlock->Rect()) });
-            renderer->Copy(endParams, {});
-            ctx.Finish();
+            nextCell->Render_GameThread(
+                endRenderTarget.Get(),
+                FFrameNumber(0),
+                EOdysseyRenderingType::Render
+            );
 
-            TArray<UOdysseyLayerCell*> rasterCells = layer->AddCells(UOdysseyAnimationCellImageRaster::StaticClass(), selectedCell->IndexInLayer + 1, crossFadelength - 1);
+            TArray<UOdysseyLayerCell*> rasterCells = layer->AddCells(UOdysseyAnimationCellImageRaster::StaticClass(), selectedCell->GetIndexInLayer() + 1, crossFadelength - 1);
 
             FScopedSlowTask framesProgress(crossFadelength);
             for (int j = 1; j < crossFadelength; j++)
@@ -140,38 +143,65 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
 
                 UOdysseyAnimationCellImageRaster* rasterCell = Cast<UOdysseyAnimationCellImageRaster>(rasterCells[j - 1]);
 
-                FOdysseyRasterBlockMutator mutator(rasterCell->GetRasterBlock(), false);
-                mutator.EditTilesFromRects(
-                    { rasterCell->GetRasterBlock()->GetRect() },
-                    [&](TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+                const ERHIFeatureLevel::Type featureLevel = GMaxRHIFeatureLevel;
+
+                ENQUEUE_RENDER_COMMAND(IOdysseyTextureRenderingAbility_RenderRectAtRect)(
+                    [startRenderTarget, endRenderTarget, destinationRenderTarget, featureLevel, rect, crossFadelength, j](FRHICommandListImmediate& RHICmdList)
                     {
-                        ctx.Clear(*iBlock);
-                        ctx.Finish();
+                        FRDGBuilder graphBuilder(RHICmdList);
 
-                        ctx.Blend(
-                            *startBlock
-                            , *iBlock
-                            , ::ULIS::FRectI::Auto
-                            , ::ULIS::FVec2I(0)
-                            , ::ULIS::Blend_Add
-                            , ::ULIS::Alpha_Add
-                            , 1.f - (float(j) / float(crossFadelength))
-                        );
-                        ctx.Finish();
+                        FRDGTextureRef startTexture = startRenderTarget->GetRenderTargetResource()->GetRenderTargetTexture( graphBuilder );
+                        FRDGTextureRef endTexture = endRenderTarget->GetRenderTargetResource()->GetRenderTargetTexture( graphBuilder );
+                        FRDGTextureRef destinationTexture = destinationRenderTarget->GetRenderTargetResource()->GetRenderTargetTexture( graphBuilder );
 
-                        ctx.Blend(
-                            *endBlock
-                            , *iBlock
-                            , ::ULIS::FRectI::Auto
-                            , ::ULIS::FVec2I(0)
-                            , ::ULIS::Blend_Add
-                            , ::ULIS::Alpha_Add
-                            , float(j) / float(crossFadelength)
+                        AddClearRenderTargetPass(graphBuilder, destinationTexture, FLinearColor::Transparent, rect);
+
+                        FOdysseyBlendShader::BlendRect(
+                            graphBuilder,
+                            featureLevel,
+                            destinationTexture,
+                            startTexture,
+                            destinationTexture,
+                            rect,
+                            rect,
+                            FMatrix::Identity,
+                            EOdysseyBlendingMode::kAdd,
+                            EOdysseyAlphaMode::kAdd,
+                            1.f - (float(j) / float(crossFadelength)),
+                            EOdysseyAntiAliasing::NearestNeighbor
                         );
-                        ctx.Finish();
-                        return {};
+
+                        FOdysseyBlendShader::BlendRect(
+                            graphBuilder,
+                            featureLevel,
+                            destinationTexture,
+                            endTexture,
+                            destinationTexture,
+                            rect,
+                            rect,
+                            FMatrix::Identity,
+                            EOdysseyBlendingMode::kAdd,
+                            EOdysseyAlphaMode::kAdd,
+                            float(j) / float(crossFadelength),
+                            EOdysseyAntiAliasing::NearestNeighbor
+                        );
+
+                        graphBuilder.Execute();
                     }
                 );
+
+                FImage OutImage;
+                if (!FImageUtils::GetRenderTargetImage(destinationRenderTarget.Get(), OutImage))
+                    return;
+
+                ::ULIS::eFormat format = ULISFormatForRawImageFormat(OutImage.Format);
+
+                ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
+                TSharedPtr<::ULIS::FBlock> block = MakeShareable(new ::ULIS::FBlock( rect.Width(), rect.Height(), format ));
+                CopyImageToBlock(OutImage, block.Get());
+
+                FOdysseyRasterBlockMutator mutator(rasterCell->GetRasterBlock(), false);
+                mutator.Copy(block, {::ULISUtils::ToULISRectI(rect)});
                 mutator.Commit();
             }
 
@@ -179,7 +209,7 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
         }
         else
         {
-            TArray<UOdysseyLayerCell*> rasterCells = layer->AddCells(UOdysseyAnimationCellImageRaster::StaticClass(), selectedCell->IndexInLayer + 1, crossFadelength - 1);
+            TArray<UOdysseyLayerCell*> rasterCells = layer->AddCells(UOdysseyAnimationCellImageRaster::StaticClass(), selectedCell->GetIndexInLayer() + 1, crossFadelength - 1);
 
             FScopedSlowTask framesProgress(crossFadelength);
             for (int j = 1; j < crossFadelength; j++)
@@ -188,33 +218,55 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
 
                 UOdysseyAnimationCellImageRaster* rasterCell = Cast<UOdysseyAnimationCellImageRaster>(rasterCells[j - 1]);
 
-                FOdysseyRasterBlockMutator mutator(rasterCell->GetRasterBlock(), false);
-                mutator.EditTilesFromRects(
-                    { rasterCell->GetRasterBlock()->GetRect() },
-                    [&](TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
-                    {
-                        ctx.Clear(*iBlock);
-                        ctx.Finish();
+                const ERHIFeatureLevel::Type featureLevel = GMaxRHIFeatureLevel;
 
-                        ctx.Blend(
-                            *startBlock
-                            , *iBlock
-                            , ::ULIS::FRectI::Auto
-                            , ::ULIS::FVec2I(0)
-                            , ::ULIS::Blend_Add
-                            , ::ULIS::Alpha_Add
-                            , 1.f - (float(j) / float(crossFadelength))
+                ENQUEUE_RENDER_COMMAND(IOdysseyTextureRenderingAbility_RenderRectAtRect)(
+                    [startRenderTarget, endRenderTarget, destinationRenderTarget, featureLevel, rect, crossFadelength, j](FRHICommandListImmediate& RHICmdList)
+                    {
+                        FRDGBuilder graphBuilder(RHICmdList);
+
+                        FRDGTextureRef startTexture = startRenderTarget->GetRenderTargetResource()->GetRenderTargetTexture( graphBuilder );
+                        FRDGTextureRef destinationTexture = destinationRenderTarget->GetRenderTargetResource()->GetRenderTargetTexture( graphBuilder );
+
+                        AddClearRenderTargetPass(graphBuilder, destinationTexture, FLinearColor::Transparent, rect);
+
+                        FOdysseyBlendShader::BlendRect(
+                            graphBuilder,
+                            featureLevel,
+                            destinationTexture,
+                            startTexture,
+                            destinationTexture,
+                            rect,
+                            rect,
+                            FMatrix::Identity,
+                            EOdysseyBlendingMode::kAdd,
+                            EOdysseyAlphaMode::kAdd,
+                            1.f - (float(j) / float(crossFadelength)),
+                            EOdysseyAntiAliasing::NearestNeighbor
                         );
-                        ctx.Finish();
-                        return {};
+
+                        graphBuilder.Execute();
                     }
                 );
+
+                FImage OutImage;
+                if (!FImageUtils::GetRenderTargetImage(destinationRenderTarget.Get(), OutImage))
+                    return;
+
+                ::ULIS::eFormat format = ULISFormatForRawImageFormat(OutImage.Format);
+
+                ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
+                TSharedPtr<::ULIS::FBlock> block = MakeShareable(new ::ULIS::FBlock( rect.Width(), rect.Height(), format ));
+                CopyImageToBlock(OutImage, block.Get());
+
+                FOdysseyRasterBlockMutator mutator(rasterCell->GetRasterBlock(), false);
+                mutator.Copy(block, {::ULISUtils::ToULISRectI(rect)});
                 mutator.Commit();
             }
             cellsToSelect.Append(rasterCells);
         }
     }
-    layerStack->GetCellSelection()->SetSelectedCells(cellsToSelect); */
+    layerStack->GetCellSelection()->SetSelectedCells(cellsToSelect);
 }
 
 bool
