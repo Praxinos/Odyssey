@@ -333,6 +333,8 @@ UOdysseyAnimationLayerImageVector::Merge(const TArray<UOdysseyLayer*>& iLayers)
     if ( !animation )
         return;
 
+    Modify();
+
     //Get all frame ranges and combine them
     TArray<FInt32Range> frameRanges = {};
     for (int layerIndex = 0; layerIndex < iLayers.Num(); layerIndex++)

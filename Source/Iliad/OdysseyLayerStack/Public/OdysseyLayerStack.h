@@ -273,12 +273,6 @@ public:
     UFUNCTION(BlueprintPure, Category="Odyssey|LayerStack")
     TArray<TSubclassOf<UOdysseyLayer>> GetSupportedLayerClasses() const;
 
-    UFUNCTION(BlueprintPure, Category="Odyssey|LayerStack")
-    bool IsSRGB() const;
-
-    UFUNCTION(BlueprintCallable, Category="Odyssey|LayerStack")
-    void SetIsSRGB(bool Value);
-
 protected:
     //Default properties
     UPROPERTY(Transient)
@@ -294,9 +288,6 @@ protected:
 
     UPROPERTY(Transient)
     TObjectPtr<UClass> LayerRootClass;
-
-    UPROPERTY(Transient)
-    bool bIsSRGB = true;
 
 #if WITH_EDITORONLY_DATA
     UPROPERTY(config)

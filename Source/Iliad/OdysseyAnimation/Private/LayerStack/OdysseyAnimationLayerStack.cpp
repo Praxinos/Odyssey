@@ -2,7 +2,6 @@
 // ODYSSEY is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "OdysseyAnimationLayerStack.h"
-#include "LayerRoot/OdysseyAnimationLayerRoot.h"
 #include "LayerFolder/OdysseyAnimationLayerFolder.h"
 #include "OdysseyAnimationLayerImageRaster.h"
 #include "OdysseyAnimationLayerImageVector.h"
@@ -15,8 +14,6 @@ UOdysseyAnimationLayerStack::UOdysseyAnimationLayerStack()
     SupportedLayerClasses.Add(UOdysseyAnimationLayerFolder::StaticClass());
     SupportedLayerClasses.Add(UOdysseyAnimationLayerImageRaster::StaticClass());
     SupportedLayerClasses.Add(UOdysseyAnimationLayerImageVector::StaticClass());
-
-    LayerRootClass = UOdysseyAnimationLayerRoot::StaticClass();
 }
 
 void

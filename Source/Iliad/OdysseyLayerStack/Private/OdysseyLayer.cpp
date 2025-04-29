@@ -434,6 +434,8 @@ UOdysseyLayer::AddCells(TSubclassOf<UOdysseyLayerCell> CellType, int Index, int 
     if (!SupportedCellTypes.Contains(cellType))
         return {};
 
+    Modify();
+
     if (Index < 0 )
     {
         Index = Cells.Num();
@@ -473,6 +475,8 @@ UOdysseyLayer::RemoveCell(UOdysseyLayerCell* Cell)
 void
 UOdysseyLayer::RemoveCells(const TArray<UOdysseyLayerCell*>& iCells)
 {
+    Modify();
+
     TArray<UOdysseyLayerCell*> cells;
     for (UOdysseyLayerCell* cell : iCells)
     {
@@ -496,6 +500,8 @@ UOdysseyLayer::RemoveCellAtIndex(int Index)
     if (Index < 0 || Index >= Cells.Num())
         return;
 
+    Modify();
+
     if (Cells[Index])
         Cells[Index]->IndexInLayer = INDEX_NONE;
 
@@ -506,6 +512,8 @@ UOdysseyLayer::RemoveCellAtIndex(int Index)
 void
 UOdysseyLayer::RemoveAllCells()
 {
+    Modify();
+
     Cells.Empty();
     CellsChanged();
 }
@@ -528,6 +536,8 @@ UOdysseyLayer::CopyCell(UOdysseyLayerCell* Cell, int Index)
     //No Layer
     if(!Cell)
         return nullptr;
+
+    Modify();
 
     if (Index < 0 )
     {
@@ -573,6 +583,8 @@ UOdysseyLayer::CopyCells(TArray<UOdysseyLayerCell*> iCells, int Index)
     //No Layers
     if (iCells.IsEmpty())
         return cellCopies;
+
+    Modify();
 
     for (UOdysseyLayerCell* cell : iCells)
     {
@@ -749,6 +761,8 @@ UOdysseyLayer::GetDefaultRenderRect() const
 void
 UOdysseyLayer::SetCellsOffset(int Value)
 {
+    Modify();
+
     CellsOffset = Value;
     InvalidateCellsFrameRanges();
     RenderingCompositionChanged();
@@ -761,6 +775,8 @@ UOdysseyLayer::SetCellsOffset(int Value)
 void
 UOdysseyLayer::SetPreBehaviour(EOdysseyLayerImagePostBehaviour Value)
 {
+    Modify();
+
     PreBehaviour = Value;
     RenderingCompositionChanged();
 }
@@ -768,6 +784,8 @@ UOdysseyLayer::SetPreBehaviour(EOdysseyLayerImagePostBehaviour Value)
 void
 UOdysseyLayer::SetPostBehaviour(EOdysseyLayerImagePostBehaviour Value)
 {
+    Modify();
+
     PostBehaviour = Value;
     RenderingCompositionChanged();
 }
@@ -781,6 +799,8 @@ UOdysseyLayer::AddChild(UOdysseyLayer* Layer, int IndexInParent)
 void
 UOdysseyLayer::AddChildren(TArray<UOdysseyLayer*> Layers, int IndexInParent)
 {
+    Modify();
+
     for (UOdysseyLayer* layer : Layers)
         ensure(!layer->Parent);
 
@@ -835,6 +855,8 @@ UOdysseyLayer::RemoveChildren(TArray<UOdysseyLayer*> Layers)
     if (Layers.Num() <= 0)
         return;
 
+    Modify();
+
     for (UOdysseyLayer* layer : Layers)
     {
         layer->Parent = nullptr;
@@ -852,12 +874,14 @@ UOdysseyLayer::RemoveChildren(TArray<UOdysseyLayer*> Layers)
 void
 UOdysseyLayer::SetLayerName(FText Value)
 {
+    Modify();
     Name = Value;
 }
 
 void
 UOdysseyLayer::SetIsActivated(bool Value)
 {
+    Modify();
     bIsActivated = Value;
     if (Parent)
         Parent->RenderingCompositionChanged();
@@ -867,6 +891,7 @@ UOdysseyLayer::SetIsActivated(bool Value)
 void
 UOdysseyLayer::SetIsLocked(bool Value)
 {
+    Modify();
     bIsLocked = Value;
 }
 
@@ -900,6 +925,7 @@ UOdysseyLayer::SetDisplayOptions(bool Value)
 void
 UOdysseyLayer::SetBlendMode(EOdysseyBlendingMode Value)
 {
+    Modify();
     BlendMode = Value;
     RenderingChanged();
 }
@@ -907,6 +933,7 @@ UOdysseyLayer::SetBlendMode(EOdysseyBlendingMode Value)
 void
 UOdysseyLayer::SetOpacity(float Value)
 {
+    Modify();
     Opacity = Value;
     RenderingChanged();
 }
@@ -915,6 +942,7 @@ UOdysseyLayer::SetOpacity(float Value)
 void
 UOdysseyLayer::SetOpacityInteractive(float Value)
 {
+    Modify();
     Opacity = Value;
     RenderingChanged(true);
 }
@@ -922,6 +950,7 @@ UOdysseyLayer::SetOpacityInteractive(float Value)
 void
 UOdysseyLayer::SetCellsOffsetInteractive(float Value)
 {
+    Modify();
     CellsOffset = Value;
     InvalidateCellsFrameRanges();
     RenderingCompositionChanged(true);

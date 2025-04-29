@@ -6,7 +6,6 @@
 
 #include "OdysseyAnimation.h"
 #include "OdysseyAnimationLayerStack.h"
-#include "OdysseyAnimationLayerRoot.h"
 #include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineScrollBox.h"
 #include "OdysseyStyle.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
@@ -148,8 +147,6 @@ int32 SOdysseyAnimationTimelineHeader::OnPaint(const FPaintArgs& Args, const FGe
 
     UOdysseyAnimation* animation = mAnimation;
     UOdysseyAnimationLayerStack* layerstack = Cast<UOdysseyAnimationLayerStack>(animation->GetLayerStack());
-    UOdysseyAnimationLayerRoot* layerRoot = Cast<UOdysseyAnimationLayerRoot>(layerstack->GetLayerRoot());
-    //TSharedPtr<FOdysseyAnimationProxy> proxy = layerRoot->GetProxy();
     FInt32Range animationRange = animation->GetFrameRange();
 
     for(int32 keyNum = startKey; keyNum <= endKey; keyNum++)

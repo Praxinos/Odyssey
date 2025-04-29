@@ -131,6 +131,8 @@ UOdysseyAnimationLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
     if ( !animation )
         return;
 
+    Modify();
+
     //Get all frame ranges and combine them
     TArray<FInt32Range> frameRanges = {};
     for (int layerIndex = 0; layerIndex < iLayers.Num(); layerIndex++)
@@ -248,7 +250,7 @@ UOdysseyAnimationLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
 
         FImage OutImage;
         if (!FImageUtils::GetRenderTargetImage(destinationRenderTarget.Get(), OutImage))
-            return;
+            continue;
 
         ::ULIS::eFormat format = ULISFormatForRawImageFormat(OutImage.Format);
 

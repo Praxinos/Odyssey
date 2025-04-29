@@ -275,6 +275,7 @@ UOdysseyAnimation::GetRightBoundValue() const
 void
 UOdysseyAnimation::SetLeftBoundMode(EOdysseyAnimationBoundMode iMode)
 {
+    Modify();
     LeftBoundMode = iMode;
 
 #if WITH_EDITOR
@@ -285,6 +286,7 @@ UOdysseyAnimation::SetLeftBoundMode(EOdysseyAnimationBoundMode iMode)
 void
 UOdysseyAnimation::SetRightBoundMode(EOdysseyAnimationBoundMode iMode)
 {
+    Modify();
     RightBoundMode = iMode;
 
 #if WITH_EDITOR
@@ -295,6 +297,7 @@ UOdysseyAnimation::SetRightBoundMode(EOdysseyAnimationBoundMode iMode)
 void
 UOdysseyAnimation::SetLeftBoundValue(int iValue)
 {
+    Modify();
     LeftBound = iValue;
 
 #if WITH_EDITOR
@@ -305,6 +308,7 @@ UOdysseyAnimation::SetLeftBoundValue(int iValue)
 void
 UOdysseyAnimation::SetRightBoundValue(int iValue)
 {
+    Modify();
     RightBound = iValue;
 
 #if WITH_EDITOR

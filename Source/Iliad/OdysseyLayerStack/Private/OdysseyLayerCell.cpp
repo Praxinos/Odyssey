@@ -91,6 +91,8 @@ UOdysseyLayerCell::GetMark() const
 void
 UOdysseyLayerCell::SetExposure(int Value)
 {
+    Modify();
+
     Exposure = Value;
 
     if (GetLayer())
@@ -124,6 +126,8 @@ UOdysseyLayerCell::InitTexture()
 void
 UOdysseyLayerCell::SetExposureInteractive(int Value)
 {
+    Modify();
+
     Exposure = Value;
 
     if (GetLayer())
@@ -135,6 +139,8 @@ UOdysseyLayerCell::SetExposureInteractive(int Value)
 void
 UOdysseyLayerCell::SetMark(int Value)
 {
+    Modify();
+
     Mark = Value;
 }
 
@@ -162,6 +168,8 @@ UOdysseyLayerCell::Break(int Frame, bool bClear)
 {
     if (Frame <= 0 || Frame >= Exposure)
         return nullptr;
+
+    Modify();
 
     UOdysseyLayerCell* newCell = nullptr;
     if (bClear)

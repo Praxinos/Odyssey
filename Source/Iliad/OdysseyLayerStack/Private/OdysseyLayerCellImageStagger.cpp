@@ -111,6 +111,7 @@ UOdysseyLayerCellImageStagger::GetReach() const
 void
 UOdysseyLayerCellImageStagger::SetBehaviour(EOdysseyLayerCellImageStaggerBehaviour Value)
 {
+    Modify();
     Behaviour = Value;
     RenderingCompositionChanged();
 }
@@ -118,6 +119,7 @@ UOdysseyLayerCellImageStagger::SetBehaviour(EOdysseyLayerCellImageStaggerBehavio
 void
 UOdysseyLayerCellImageStagger::SetReach(int Value, bool IsInteractive)
 {
+    Modify();
     Reach = Value;
     RenderingCompositionChanged(IsInteractive);
 }
@@ -158,6 +160,7 @@ UOdysseyLayerCellImageStagger::Break(int Frame, bool bClear)
     if (!cell)
         return nullptr;
 
+    Modify();
     UOdysseyLayerCell* newCell = nullptr;
     if (bClear)
     {

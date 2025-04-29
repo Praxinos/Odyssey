@@ -4,6 +4,7 @@
 #include "OdysseyLayerStack.h"
 
 #include "OdysseyLayer.h"
+#include "OdysseyLayerRoot.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Misc/ScopedSlowTask.h"
 #include "OdysseyLayerStackFunctionLibrary.h"
@@ -27,8 +28,7 @@ UOdysseyLayerStack::PostInitProperties()
     if (HasAnyFlags(RF_ClassDefaultObject))
         return;
 
-    if ( LayerRootClass )
-        LayerRoot = NewObject<UOdysseyLayer>(this, LayerRootClass, NAME_None, RF_Public | RF_Transactional);
+    LayerRoot = NewObject<UOdysseyLayerRoot>(this, NAME_None, RF_Public | RF_Transactional);
 }
 
 void
@@ -659,19 +659,6 @@ TSubclassOf<UOdysseyLayer>
 UOdysseyLayerStack::GetLayerRootClass() const
 {
     return LayerRootClass;
-}
-
-bool
-UOdysseyLayerStack::IsSRGB() const
-{
-    return bIsSRGB;
-}
-
-void
-UOdysseyLayerStack::SetIsSRGB(bool Value)
-{
-    bIsSRGB = Value;
-    RenderingChanged();
 }
 
 bool
