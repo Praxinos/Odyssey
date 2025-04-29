@@ -22,6 +22,9 @@
 #include "UObject/DevObjectVersion.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "ULISUtils.h"
+#include "Engine/TextureRenderTarget2D.h"
+#include "ImageUtils.h"
+#include "OdysseyBlendShader.h"
 #endif
 
 #define LOCTEXT_NAMESPACE "Animation"
@@ -121,7 +124,7 @@ UOdysseyAnimationLayerImageRaster::Serialize(FArchive& Ar)
 void
 UOdysseyAnimationLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
 {
-    /* if (IsLocked)
+    if (IsLocked())
         return;
 
     UOdysseyAnimation* animation = GetAnimation();
@@ -141,7 +144,7 @@ UOdysseyAnimationLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
     FInt32Range frameRange = FInt32Range::Hull(frameRanges);
 
     //Deduce offset from frame ranges
-    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, CellsOffset), frameRange.GetLowerBoundValue());
+    SetCellsOffset(frameRange.GetLowerBoundValue());
 
     //Get cell ranges from each frame ImageRenderAbility composition
     int startFrame = frameRange.GetLowerBound().IsInclusive() ? frameRange.GetLowerBoundValue() : frameRange.GetLowerBoundValue() + 1;
@@ -173,49 +176,90 @@ UOdysseyAnimationLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
         }
     }
 
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
-
     RemoveCells(Cells);
     TArray<UOdysseyLayerCell*> cells = AddCells(UOdysseyAnimationCellImageRaster::StaticClass(), 0, cellRanges.Num());
+
+    FIntRect rect = GetDefaultRenderRect();
+    TStrongObjectPtr<UTextureRenderTarget2D> layerRenderTarget(NewObject<UTextureRenderTarget2D>());
+    TStrongObjectPtr<UTextureRenderTarget2D> destinationRenderTarget(NewObject<UTextureRenderTarget2D>());
+    layerRenderTarget->InitAutoFormat(rect.Width(), rect.Height());
+    destinationRenderTarget->InitAutoFormat(rect.Width(), rect.Height());
 
     for (int i = 0; i < cellRanges.Num(); i++)
     {
         const FInt32Range& cellRange = cellRanges[i];
-        UOdysseyAnimationCellImageRaster*cell = Cast<UOdysseyAnimationCellImageRaster>(cells[i]);
-        FOdysseyObjectEditorUtils::SetPropertyValue(cell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), cellRange.GetUpperBoundValue() - cellRange.GetLowerBoundValue() + 1);
-
-        TSharedPtr<FOdysseyRasterBlock> rasterBlock = cell->GetRasterBlock();
-        FOdysseyRasterBlockMutator blockMutator(rasterBlock);
-
+        UOdysseyAnimationCellImageRaster* cell = Cast<UOdysseyAnimationCellImageRaster>(cells[i]);
         int frame = cellRange.GetLowerBoundValue();
-        ::ULIS::FRectI rect = ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight());
 
-        blockMutator.EditTilesFromRects(
-            { rect },
-            [&](TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+        cell->SetExposure(cellRange.GetUpperBoundValue() - cellRange.GetLowerBoundValue() + 1);
+
+        //Clear the destination rendertarget before blending on it
+        ENQUEUE_RENDER_COMMAND(IOdysseyTextureRenderingAbility_RenderRectAtRect)(
+            [destinationRenderTarget, rect](FRHICommandListImmediate& RHICmdList)
             {
-                TArray<::ULIS::FEvent> lastEvent;
-                for (int layerIndex = 0; layerIndex < iLayers.Num(); layerIndex++)
-                {
-                    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(iLayers[layerIndex]);
-                    if ( !layer )
-                        continue;
-
-                    TSharedPtr<IOdysseyImageRenderer> renderer = layer->BuildImageRenderer(EOdysseyRenderingType::Render, frame);
-                    renderer->Init();
-
-                    FOdysseyImageRendererBlendParams params(iBlock, { ::ULISUtils::ToIntRect(rect) });
-                    params.mBlendMode = (::ULIS::eBlendMode)layer->BlendMode;
-                    params.mOpacity = layer->Opacity;
-                    lastEvent = renderer->Blend(params, lastEvent);
-                }
-
-                return lastEvent;
+                FRDGBuilder graphBuilder(RHICmdList);
+                FRDGTextureRef destinationTexture = destinationRenderTarget->GetRenderTargetResource()->GetRenderTargetTexture( graphBuilder );
+                AddClearRenderTargetPass(graphBuilder, destinationTexture, FLinearColor::Transparent, rect);
+                graphBuilder.Execute();
             }
         );
-    }
 
-    ctx.Finish(); */
+        for (int layerIndex = 0; layerIndex < iLayers.Num(); layerIndex++)
+        {
+            UOdysseyLayer* layer = iLayers[layerIndex];
+            if ( !layer )
+                continue;
+
+            layer->Render_GameThread(
+                layerRenderTarget.Get(),
+                FFrameNumber(frame),
+                EOdysseyRenderingType::Render
+            );
+
+            const ERHIFeatureLevel::Type featureLevel = GMaxRHIFeatureLevel;
+
+            ENQUEUE_RENDER_COMMAND(IOdysseyTextureRenderingAbility_RenderRectAtRect)(
+                [layerRenderTarget, destinationRenderTarget, featureLevel, rect, layer](FRHICommandListImmediate& RHICmdList)
+                {
+                    FRDGBuilder graphBuilder(RHICmdList);
+
+                    FRDGTextureRef layerTexture = layerRenderTarget->GetRenderTargetResource()->GetRenderTargetTexture( graphBuilder );
+                    FRDGTextureRef destinationTexture = destinationRenderTarget->GetRenderTargetResource()->GetRenderTargetTexture( graphBuilder );
+
+                    FOdysseyBlendShader::BlendRect(
+                        graphBuilder,
+                        featureLevel,
+                        destinationTexture,
+                        layerTexture,
+                        destinationTexture,
+                        rect,
+                        rect,
+                        FMatrix::Identity,
+                        layer->GetBlendMode(),
+                        EOdysseyAlphaMode::kNormal,
+                        layer->GetOpacity(),
+                        EOdysseyAntiAliasing::NearestNeighbor
+                    );
+
+                    graphBuilder.Execute();
+                }
+            );
+        }
+
+        FImage OutImage;
+        if (!FImageUtils::GetRenderTargetImage(destinationRenderTarget.Get(), OutImage))
+            return;
+
+        ::ULIS::eFormat format = ULISFormatForRawImageFormat(OutImage.Format);
+
+        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
+        TSharedPtr<::ULIS::FBlock> block = MakeShareable(new ::ULIS::FBlock( rect.Width(), rect.Height(), format ));
+        CopyImageToBlock(OutImage, block.Get());
+
+        FOdysseyRasterBlockMutator mutator(cell->GetRasterBlock());
+        mutator.Copy(block, {::ULISUtils::ToULISRectI(rect)});
+        mutator.Commit();
+    }
 }
 
 TSharedPtr<IOdysseyMedia>
