@@ -31,7 +31,6 @@ public:
         , _PlayerControlsVisibility(EVisibility::Visible)
         , _ScrollbarVisibility(EVisibility::Visible)
         , _PlaybackFramesPerSecond(24.0f)
-        , _PainterEditor(nullptr)
         {}
         SLATE_ATTRIBUTE( UOdysseyAnimation*, Animation )
         SLATE_ATTRIBUTE( UOdysseyAnimationPlayer*, Player )
@@ -43,7 +42,6 @@ public:
         SLATE_EVENT(SOdysseyAnimationTimelineOutOfPegsKey::FOnActivateOutOfPegs, OnActivateOutOfPegs)
         SLATE_EVENT(FSimpleDelegate, OnInactivateOutOfPegs)
         SLATE_EVENT(SOdysseyAnimationTimelineOutOfPegsKey::FOnIsOutOfPegsChecked, OnIsOutOfPegsChecked)
-        SLATE_ATTRIBUTE(FOdysseyPainterEditor*, PainterEditor)
         SLATE_EVENT(FSimpleDelegate, OnScrubStart)
         SLATE_EVENT(FSimpleDelegate, OnScrubEnd)
     SLATE_END_ARGS()
@@ -58,12 +56,16 @@ public:
     TSharedPtr<SOdysseyAnimationTimelineTreeView> GetTimelineTreeView() const;
 
 private:
+    virtual FNavigationReply OnNavigation(const FGeometry& MyGeometry, const FNavigationEvent& InNavigationEvent) override;
     virtual void Tick( const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime ) override;
 
 private:
     void OnTimelineScrollBarHScrolled(float iOffset);
     void OnTreeViewScrolled(double iOffset);
     void OnTimelineTreeViewScrolled(double iOffset);
+    void OnTransactCurrentFrame(TOptional<int> iFrame);
+    void OnCurrentFrameChanged(int iFrame);
+    void OnCurrentFrameCommited(int iFrame);
     void RebuildWidgets();
 
     void OnLayerAdded(UOdysseyLayer* iLayer);
@@ -88,7 +90,6 @@ private:
     TSharedPtr<SScrollBar> mTimelineScrollBarH;
     TSharedPtr<SScrollBar> mTimelineScrollBarV;
     TSharedPtr<SSplitter> mSplitter;
-    TAttribute<FOdysseyPainterEditor*> mEditor;
     FSimpleDelegate mOnScrubStart;
     FSimpleDelegate mOnScrubEnd;
 };

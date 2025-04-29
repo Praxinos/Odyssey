@@ -4,18 +4,18 @@
 #include "Widgets/Animation/Timeline/SOdysseyAnimationLayerStackTreeView.h"
 
 #include "Shortcuts/AnimationTimeline/OdysseyAnimationTimelineShortcuts.h"
-#include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
-#include "LayerStack/OdysseyAnimationLayerStack.h"
+#include "OdysseyAnimationLayerImageRaster.h"
+#include "OdysseyAnimationLayerStack.h"
 #include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineToolSelector.h"
 #include "Widgets/SOdysseyLayerStackAddLayerButton.h"
-#include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
-#include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVector.h"
-#include "LayerStack/Layers/LayerFolder/OdysseyAnimationLayerFolder.h"
+#include "OdysseyAnimationCellImageRaster.h"
+#include "OdysseyAnimationCellImageVector.h"
+#include "LayerFolder/OdysseyAnimationLayerFolder.h"
 #include "Widgets/Animation/Timeline/Layers/LayerFolder/SOdysseyAnimationLayerFolderRow.h"
 #include "Widgets/Animation/Timeline/Layers/LayerImageRaster/SOdysseyAnimationLayerImageRasterRow.h"
-#include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
+#include "OdysseyAnimationLayerImageVector.h"
 #include "Widgets/Animation/Timeline/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorRow.h"
-#include "LayerStack/Cells/OdysseyAnimationCellSelection.h"
+#include "OdysseyLayerCellSelection.h"
 #include "ScopedTransaction.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
@@ -31,9 +31,10 @@ SOdysseyAnimationLayerStackTreeView::Construct(const FArguments& InArgs)
     mTimelinePosition = InArgs._TimelinePosition;
 
     mLayerStack = InArgs._LayerStack;
-    mEditor = InArgs._PainterEditor;
+    if (!mLayerStack)
+        return;
 
-    mTimelineShortcuts = MakeShared<FOdysseyAnimationTimelineShortcuts>(mLayerStack);
+    mTimelineShortcuts = MakeShared<FOdysseyAnimationTimelineShortcuts>(mLayerStack->GetAnimation(), InArgs._CurrentFrame, InArgs._OnTransactCurrentFrame);
 
     SOdysseyLayerStackTreeView::Construct(
         SOdysseyLayerStackTreeView::FArguments()
@@ -85,7 +86,6 @@ SOdysseyAnimationLayerStackTreeView::OnGenerateRow(UOdysseyLayer* iLayer, const 
     else if (layerClass == UOdysseyAnimationLayerImageVector::StaticClass())
     {
         return SNew(SOdysseyAnimationLayerImageVectorRow, SharedThis(this), Cast<UOdysseyAnimationLayerImageVector>(iLayer))
-            .PainterEditor(mEditor)
             .TimelinePosition(mTimelinePosition);
     }
 
@@ -118,10 +118,6 @@ SOdysseyAnimationLayerStackTreeView::OnFocusReceived(const FGeometry& MyGeometry
 TArray<TSharedPtr<FExtender>>
 SOdysseyAnimationLayerStackTreeView::ExtendContextMenu()
 {
-    //TODO:
-    // Create a Seperated File to manage Vector Specific options
-    // Include it here and call the extension
-
     TSharedPtr<FExtender> extender = MakeShared<FExtender>();
     extender->AddMenuExtension(
         "LayerSection"

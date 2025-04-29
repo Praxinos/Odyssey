@@ -98,7 +98,7 @@ FOdysseyViewportDrawingEditorGUI::CustomizeAnimationEditorTimeline()
             if (!animationComponent)
                 return FInt32Range::Empty();
 
-            UOdysseyAnimation* animation = animationComponent->GetActiveAnimation();
+            UOdysseyAnimation* animation = animationComponent->GetAnimation();
             if (!animation)
                 return FInt32Range::Empty();
 

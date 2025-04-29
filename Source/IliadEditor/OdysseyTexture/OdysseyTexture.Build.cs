@@ -39,6 +39,7 @@ namespace UnrealBuildTool.Rules
                 new string[]
                 {
                     // ... add other public dependencies that you statically link with here ...
+                    "OdysseyLayerStack",
                     "OdysseyLayerStackEditor",
                 }
                 );
@@ -51,11 +52,15 @@ namespace UnrealBuildTool.Rules
                     "Engine",
                     "Kismet",
                     "SlateCore",
+                    "RHI",
+                    "RenderCore",
 
+                    "OdysseyCore",
+                    "OdysseyCoreEditor",
                     "OdysseyFile",
                     "OdysseyImaging",
-                    "OdysseyMaths",
                     "OdysseyMedia",
+                    "OdysseyRendering",
                     "OdysseyStyle",
                     "OdysseyVector",
                     "ULIS",

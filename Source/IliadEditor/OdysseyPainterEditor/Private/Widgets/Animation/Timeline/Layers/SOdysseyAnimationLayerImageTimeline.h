@@ -4,7 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "LayerStack/Layers/OdysseyAnimationLayer.h"
+#include "OdysseyAnimationLayer.h"
 #include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineOutOfPegsKey.h"
 #include "Widgets/Animation/Timeline/Layers/SOdysseyAnimationLayerTimeline.h"
 
@@ -23,18 +23,22 @@ class SOdysseyAnimationLayerImageTimeline
     : public SOdysseyAnimationLayerTimeline
 {
 public:
+    DECLARE_DELEGATE_OneParam(FOnTransactCurrentFrame, TOptional<int>)
+
+public:
     // Construction / Destruction
     virtual ~SOdysseyAnimationLayerImageTimeline();
     SOdysseyAnimationLayerImageTimeline();
 
     SLATE_BEGIN_ARGS(SOdysseyAnimationLayerImageTimeline)
-        : _PainterEditor(nullptr)
+        : _CurrentFrame(0)
         {}
         SLATE_ARGUMENT( TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition>, TimelinePosition )
+        SLATE_ATTRIBUTE(int, CurrentFrame)
+        SLATE_EVENT(FOnTransactCurrentFrame, OnTransactCurrentFrame)
         SLATE_EVENT(SOdysseyAnimationTimelineOutOfPegsKey::FOnActivateOutOfPegs, OnActivateOutOfPegs)
         SLATE_EVENT(FSimpleDelegate, OnInactivateOutOfPegs)
         SLATE_EVENT(SOdysseyAnimationTimelineOutOfPegsKey::FOnIsOutOfPegsChecked, OnIsOutOfPegsChecked)
-        SLATE_ATTRIBUTE(FOdysseyPainterEditor*, PainterEditor)
     SLATE_END_ARGS()
 
 public:
@@ -52,7 +56,7 @@ protected:
     virtual FMargin GetRowPadding(FName iRow) const override;
 
     TSharedRef<SWidget> GenerateMainRowTimelineWidget();
-    TSharedRef<SWidget> GenerateLightTableRowTimelineWidget();
+    TSharedRef<SWidget> GenerateLighttableRowTimelineWidget();
     TSharedRef<SWidget> GenerateOutOfPegsRowTimelineWidget();
 
 public:
@@ -73,16 +77,16 @@ public:
     UOdysseyAnimationLayer* GetLayer() const;
 
 protected:
-    virtual TSharedRef<SWidget> OnGenerateCellWidget(UOdysseyAnimationCell* iCell) = 0;
+    virtual TSharedRef<SWidget> OnGenerateCellWidget(UOdysseyLayerCell* iCell) = 0;
 
 protected:
     //TArray<TSharedPtr<FOdysseyAnimationCell>> GetSelectedCells() const;
     //FReply OnCellsSelectionDragged();
 
-    EVisibility GetLightTableVisibility() const;
+    EVisibility GetLighttableVisibility() const;
 
     FOptionalSize GetCellsHeight() const;
-    FOptionalSize GetLightTableHeight() const;
+    FOptionalSize GetLighttableHeight() const;
     bool DisplayOptions() const;
 
     bool GetShowCellsHandles() const;
@@ -111,10 +115,12 @@ private:
 
 protected:
     UOdysseyAnimationLayer* mLayer;
+    TAttribute<int> mCurrentFrame;
     TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition> mTimelinePosition;
     SOdysseyAnimationTimelineOutOfPegsKey::FOnActivateOutOfPegs mOnActivateOutOfPegs;
     FSimpleDelegate mOnInactivateOutOfPegs;
     SOdysseyAnimationTimelineOutOfPegsKey::FOnIsOutOfPegsChecked mOnIsOutOfPegsChecked;
+    FOnTransactCurrentFrame mOnTransactCurrentFrame;
 
     TSharedPtr<FOdysseyAnimationTimelineTool> mTool;
 
@@ -132,5 +138,4 @@ protected:
 
     TSharedPtr<FOdysseyAnimationTimelineCellsShortcuts> mAnimationTimelineCellsShortcuts;
     TSharedPtr<FOdysseyAnimationTimelineCellImageStaggerShortcuts> mAnimationTimelineCellImageStaggerShortcuts;
-    TAttribute<FOdysseyPainterEditor*> mEditor;
 };

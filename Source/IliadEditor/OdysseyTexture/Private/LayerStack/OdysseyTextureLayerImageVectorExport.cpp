@@ -1,8 +1,8 @@
 // IDDN.FR.001.060015.013.S.X.2019.000.00000
 // ODYSSEY is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
-#include "LayerStack/OdysseyTextureLayerImageVectorExport.h"
-#include "LayerStack/OdysseyTextureLayerImageVector.h"
+#include "OdysseyTextureLayerImageVectorExport.h"
+#include "OdysseyTextureLayerImageVector.h"
 #include "Export/v2/OdysseyVectorExport.h"
 #include "OdysseyFile.h"
 #include "OdysseyVectorEngine.h"

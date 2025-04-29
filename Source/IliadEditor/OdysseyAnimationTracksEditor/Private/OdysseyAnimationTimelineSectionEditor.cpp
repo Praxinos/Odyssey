@@ -7,9 +7,8 @@
 #include "EditorModeManager.h"
 
 #include "Animation/OdysseyPainterEditorAnimationTimelinePosition.h"
-#include "LayerStack/OdysseyAnimationLayerStack.h"
 #include "OdysseyViewportDrawingEditorEdMode.h"
-#include "LayerStack/Cells/OdysseyAnimationCell.h"
+#include "OdysseyAnimationCell.h"
 #include "OdysseyViewportDrawingEditorToolkit.h"
 #include "Tools/OutOfPegsTool/OdysseyPainterEditorAnimationOutOfPegsTool.h"
 #include "OdysseyAnimationComponent.h"

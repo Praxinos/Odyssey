@@ -5,7 +5,7 @@
 
 #include "CoreMinimal.h"
 
-//#include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
+//#include "OdysseyLighttable.h"
 
 class FInbetweeningListViewItem;
 class FOdysseyVectorLayer;
@@ -19,14 +19,16 @@ class SOdysseyAnimationTimelineInbetweeningHeader
     : public SListView<TSharedPtr<FInbetweeningListViewItem>>
 {
     public:
+        DECLARE_DELEGATE_OneParam(FOnTransactCurrentFrame, TOptional<int>)
+
+    public:
         ~SOdysseyAnimationTimelineInbetweeningHeader();
         SOdysseyAnimationTimelineInbetweeningHeader();
 
     public:
         SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineInbetweeningHeader)
-            : _PainterEditor(nullptr)
             {}
-            SLATE_ATTRIBUTE(FOdysseyPainterEditor*, PainterEditor)
+            SLATE_EVENT(FOnTransactCurrentFrame, OnTransactCurrentFrame)
         SLATE_END_ARGS()
 
         void Construct( const FArguments& InArgs, UOdysseyAnimationLayerImageVector* iAnimationLayerImageVector );
@@ -34,7 +36,6 @@ class SOdysseyAnimationTimelineInbetweeningHeader
         virtual FReply OnKeyDown ( const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent ) override;
         virtual FReply OnKeyUp ( const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent ) override;
         void Update();
-        FOdysseyPainterEditor* GetEditor() const;
 
     protected:
         void OnSelectionChanged( TSharedPtr<FInbetweeningListViewItem> iItem, ESelectInfo::Type SelectInfo );
@@ -60,6 +61,6 @@ class SOdysseyAnimationTimelineInbetweeningHeader
     protected:
         UOdysseyAnimationLayerImageVector* mAnimationLayerImageVector;
         TArray<TSharedPtr<FInbetweeningListViewItem>> mItemsSource;
-        TAttribute<FOdysseyPainterEditor*> mEditor;
         TSharedRef<FUICommandList> mCommandList;
+        FOnTransactCurrentFrame mOnTransactCurrentFrame;
 };

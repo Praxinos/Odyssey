@@ -51,6 +51,7 @@ public class OdysseyPainterEditor : ModuleRules
                 "Projects",
                 "RHI",
                 "RenderCore",
+                "Renderer",
                 "RawMesh",
                 "Slate",
                 "SlateCore",
@@ -66,8 +67,8 @@ public class OdysseyPainterEditor : ModuleRules
                 "OdysseyCommonWidgets",
                 "OdysseyHUD",
                 "OdysseyImaging",
+                "OdysseyLayerStack",
                 "OdysseyLayerStackEditor",
-                "OdysseyMaths",
                 "OdysseyRendering",
                 "OdysseyStyle",
                 "OdysseyStylusInput",
@@ -82,10 +83,12 @@ public class OdysseyPainterEditor : ModuleRules
         PublicDependencyModuleNames.AddRange(
              new string[] {
                 "OdysseyBrush",
+                "OdysseyCoreEditor",
                 "OdysseyEditor",
                 "OdysseyHUD",
                 "OdysseyMedia",
                 "OdysseyPalette",
+                "OdysseyRendering",
                 "OdysseyVector",
 
                 "ULIS",
@@ -120,6 +123,7 @@ public class OdysseyPainterEditor : ModuleRules
         PublicIncludePaths.AddRange(
             new string[] {
                 Path.Combine(ModuleDirectory, "Public", "Animation"),
+                Path.Combine(ModuleDirectory, "Public", "Sources"),
                 Path.Combine(ModuleDirectory, "Public", "Tools"),
                 Path.Combine(ModuleDirectory, "Public", "Tools", "OutOfPegsTool"),
                 Path.Combine(ModuleDirectory, "Public", "Widgets"),

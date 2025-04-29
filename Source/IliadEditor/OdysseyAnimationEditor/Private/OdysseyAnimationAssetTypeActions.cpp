@@ -44,7 +44,7 @@ FOdysseyAnimationAssetTypeActions::GetCategories()
 void
 FOdysseyAnimationAssetTypeActions::BuildBackendFilter( FARFilter & InFilter )
 {
-    InFilter.ClassNames.Add( UOdysseyAnimation::StaticClass()->GetFName());
+    InFilter.ClassPaths.Add( UOdysseyAnimation::StaticClass()->GetClassPathName());
 }
 
 

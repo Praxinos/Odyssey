@@ -49,7 +49,7 @@ public:
 
 private:
     void OnCellOutOfPegsChanged(bool iIsInteractive);
-    void OnLightTableChanged();
+    void OnLighttableChanged();
     void RebuildHUD();
     void RefreshHUD();
     FVector2D GetCenter() const;

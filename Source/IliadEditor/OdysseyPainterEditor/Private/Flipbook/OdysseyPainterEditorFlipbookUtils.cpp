@@ -165,7 +165,6 @@ FixKeyFrame(UPaperFlipbook* iFlipbook, int32 iIndex, UTexture2D** oTexture, UPap
 void
 MoveKeyFrames(UPaperFlipbook* iFlipbook, TArray<int32> iSrcIndexes, int32 iDstIndex)
 {
-    //TODO: Do it by changing UProperties
     FScopedFlipbookMutator mutator(iFlipbook);
 
     //store keyframes in the given order
@@ -197,7 +196,6 @@ MoveKeyFrames(UPaperFlipbook* iFlipbook, TArray<int32> iSrcIndexes, int32 iDstIn
 void
 RemoveKeyFrame(UPaperFlipbook* iFlipbook, int32 iIndex)
 {
-    //TODO: Do it with UProperties
     FPaperFlipbookKeyFrame keyframe = iFlipbook->GetKeyFrameChecked(iIndex);
 
     //Remove from Data
@@ -290,7 +288,6 @@ CreateSprite(UPaperFlipbook* iFlipbook, FString iName)
 void
 SetKeyframeSprite(UPaperFlipbook* iFlipbook, int32 iIndex, UPaperSprite* iSprite)
 {
-    //TODO: Do It With UProperties
     FScopedFlipbookMutator mutator(iFlipbook);
     mutator.KeyFrames[iIndex].Sprite = iSprite;
 

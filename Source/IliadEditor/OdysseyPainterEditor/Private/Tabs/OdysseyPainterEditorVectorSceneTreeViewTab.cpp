@@ -3,6 +3,7 @@
 
 #include "OdysseyPainterEditorVectorSceneTreeViewTab.h"
 #include "Widgets/Tab/SOdysseyPainterEditorVectorSceneTreeView.h"
+#include "Widgets/Tab/SOdysseyPainterEditorVectorSceneDetailsView.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyVector.h"
 #include "OdysseyVectorCell.h"
@@ -13,6 +14,12 @@
 #include "OdysseyPainterEditorVectorGroupView.h"
 #include "OdysseyPainterEditorVectorGroupPaintView.h"
 #include "OdysseyPainterEditorVectorTagInbetweenerView.h"
+#include "OdysseyMediaVector.h"
+#include "OdysseyTextureLayerImageVector.h"
+#include "OdysseyAnimationLayerImageVector.h"
+#include "OdysseyAnimationCellImageVector.h"
+#include "OdysseyAnimationPlayer.h"
+#include "OdysseyAnimationCurrentFrameMutator.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -37,11 +44,6 @@ FOdysseyPainterEditorVectorSceneTreeViewTab::FOdysseyPainterEditorVectorSceneTre
                          FSlateIcon( "OdysseyStyle", "PainterEditor.VectorSceneTreeView.MenuIcon" ))
     , mEditor(iEditor)
 {
-    mObjectView = NewObject<UOdysseyPainterEditorVectorObjectView>();
-    mPathView = NewObject<UOdysseyPainterEditorVectorPathView>();
-    mGroupView = NewObject<UOdysseyPainterEditorVectorGroupView>();
-    mGroupPaintView = NewObject<UOdysseyPainterEditorVectorGroupPaintView>();
-    mTagInbetweenerView = NewObject<UOdysseyPainterEditorVectorTagInbetweenerView>();
 }
 
 //--------------------------------------------------------------------------------------
@@ -53,88 +55,9 @@ FOdysseyPainterEditorVectorSceneTreeViewTab::GetId() const
     return StaticId();
 }
 
-void
-FOdysseyPainterEditorVectorSceneTreeViewTab::UpdateObjectPropertiesPanel( FOdysseyVectorGroupPaint* iScene )
-{
-    mDetailsView->SetObject( nullptr );
-
-    if( iScene )
-    {
-        mScene = iScene;
-
-        if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
-        {
-            if( mTagInbetweenerView->Update( mEditor, iScene ) )
-            {
-                mDetailsView->SetObject( mTagInbetweenerView );
-            }
-        }
-        else
-        {
-            // defaults to scene
-            std::list<FOdysseyVectorObject*>& sceneAsList = iScene->GetCell()->GetChildrenList();
-            std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetCell()->GetSelectedObjectList();
-            std::list<FOdysseyVectorObject*>& focusedObjectList = selectedObjectList.size() ? selectedObjectList
-                                                                                            : sceneAsList;
-            uint32 objectClass = FOdysseyVectorObject::GetCommonClass( focusedObjectList );
-
-            if( objectClass )
-            {
-                if( objectClass == FOdysseyVectorPath::StaticClass() )
-                {
-                    mPathView->Update( mEditor, iScene, focusedObjectList );
-                    mDetailsView->SetObject( mPathView );
-                }
-
-                if( objectClass == FOdysseyVectorGroup::StaticClass() )
-                {
-                    mGroupView->Update( mEditor, iScene, focusedObjectList );
-                    mDetailsView->SetObject( mGroupView );
-                }
-
-                if( objectClass == FOdysseyVectorGroupPaint::StaticClass() )
-                {
-                    mGroupPaintView->Update( mEditor, iScene, focusedObjectList );
-                    mDetailsView->SetObject( mGroupPaintView );
-                }
-
-                if( objectClass == FOdysseyVectorObject::StaticClass() )
-                {
-                    // default
-                    mObjectView->Update( mEditor, iScene, focusedObjectList );
-                    mDetailsView->SetObject( mObjectView );
-                }
-            }
-        }
-    }
-}
-
-TSharedPtr<IDetailsView>
-FOdysseyPainterEditorVectorSceneTreeViewTab::CreateObjectPropertiesPanel()
-{
-    FPropertyEditorModule& PropertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
-    FDetailsViewArgs DetailsViewArgs;
-    TSharedPtr<IDetailsView> detailsView;
-
-    DetailsViewArgs.bUpdatesFromSelection = false;
-    DetailsViewArgs.bLockable = false;
-    DetailsViewArgs.bAllowSearch = false;
-    DetailsViewArgs.NameAreaSettings = FDetailsViewArgs::HideNameArea;
-
-    detailsView = PropertyEditorModule.CreateDetailView(DetailsViewArgs);
-
-    detailsView->SetObject(nullptr);
-
-    return detailsView;
-}
-
 TSharedPtr<SWidget>
 FOdysseyPainterEditorVectorSceneTreeViewTab::CreateWidget()
 {
-    mVectorSceneTreeView = SNew( SOdysseyPainterEditorVectorSceneTreeView )
-                           .Editor( mEditor );
-    mDetailsView = CreateObjectPropertiesPanel();
-
     return SNew(SWidgetSwitcher)
         .WidgetIndex(this, &FOdysseyPainterEditorVectorSceneTreeViewTab::WidgetIndex)
         +SWidgetSwitcher::Slot()
@@ -149,54 +72,85 @@ FOdysseyPainterEditorVectorSceneTreeViewTab::CreateWidget()
             .Orientation( EOrientation::Orient_Vertical )
             +SSplitter::Slot()
             [
-                mVectorSceneTreeView.ToSharedRef()
+                SNew( SOdysseyPainterEditorVectorSceneTreeView )
+                .Editor(mEditor)
+                .Scene(this, &FOdysseyPainterEditorVectorSceneTreeViewTab::GetScene)
             ]
             +SSplitter::Slot()
             [
-                mDetailsView.ToSharedRef()
+                SNew( SOdysseyPainterEditorVectorSceneDetailsView, mEditor )
+                .Scene(this, &FOdysseyPainterEditorVectorSceneTreeViewTab::GetScene)
             ]
         ];
 
 }
 
 void
-FOdysseyPainterEditorVectorSceneTreeViewTab::OnRefresh( FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditorVectorSceneTreeViewTab::OnTransactCurrentFrame(TOptional<int> iFrame) const
 {
-    mScene = iScene;
-    Update( iScene );
+    UOdysseyAnimationPlayer* player = mEditor->GetAnimationPlayer();
+    if (!player)
+        return;
+
+    int frame = iFrame.Get(player->GetCurrentFrame().FrameNumber.Value);
+
+    FOdysseyAnimationCurrentFrameMutator currentFrameMutator(player);
+    currentFrameMutator.Set(frame);
+    currentFrameMutator.Commit();
 }
 
-void
-FOdysseyPainterEditorVectorSceneTreeViewTab::UpdateSceneTreeView( FOdysseyVectorGroupPaint* iScene )
+uint64
+FOdysseyPainterEditorVectorSceneTreeViewTab::GetVectorHUDFlags() const
 {
-    mScene = iScene;
-    mVectorSceneTreeView.Get()->Update( iScene );
+    return mEditor->GetVectorHUDFlags();
 }
 
-void
-FOdysseyPainterEditorVectorSceneTreeViewTab::Update( FOdysseyVectorGroupPaint* iScene )
+FOdysseyVectorGroupPaint*
+FOdysseyPainterEditorVectorSceneTreeViewTab::GetScene() const
 {
-    mScene = iScene;
-    UpdateSceneTreeView( iScene );
-    UpdateObjectPropertiesPanel( iScene );
-}
+    UOdysseyLayerStack* layerStack = mEditor->LayerStack();
 
-FString
-FOdysseyPainterEditorVectorSceneTreeViewTab::GetReferencerName() const
-{
-    return "FOdysseyPainterEditorVectorSceneTreeViewTab";
-}
+    // for some reason when Unreal loads, the layerstack is NULL. But the medias exist. So in that case we use
+    // the media provider.
+    if( !layerStack )
+    {
+        if ( !mEditor->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>() )
+            return nullptr;
 
-void
-FOdysseyPainterEditorVectorSceneTreeViewTab::AddReferencedObjects(FReferenceCollector& Collector)
-{
-    // Prevent these UObjects from being destroyed by garbage collection
-    Collector.AddReferencedObject(mObjectView);
-    Collector.AddReferencedObject(mPathView);
-    Collector.AddReferencedObject(mGroupView);
-    Collector.AddReferencedObject(mGroupPaintView);
-    Collector.AddReferencedObject(mTagInbetweenerView);
-    //Collector.AddReferencedObject(mDetailsView);
+        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = mEditor->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
+
+        if( mediaVectors.IsEmpty() )
+            return nullptr;
+
+        return mediaVectors[0]->GetScene();
+    }
+
+    // layerStack might be NULL when closing the program
+    UOdysseyTextureLayerImageVector* currentTextureVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->GetCurrentLayer());
+    UOdysseyAnimationLayerImageVector* currentAnimationVectorLayer = Cast<UOdysseyAnimationLayerImageVector>(layerStack->GetCurrentLayer());
+
+    if(  currentAnimationVectorLayer )
+    {
+        UOdysseyAnimationPlayer* player = mEditor->GetAnimationPlayer();
+        if (!player)
+            return nullptr;
+
+        int frame = player->GetCurrentFrame().FrameNumber.Value;
+        UOdysseyLayerCell* cell = currentAnimationVectorLayer->GetCellAtFrame(frame);
+        if (!cell || !cell->IsA<UOdysseyAnimationCellImageVector>())
+            return nullptr;
+
+        UOdysseyAnimationCellImageVector* cellVector = Cast<UOdysseyAnimationCellImageVector>(cell);
+
+        // Note: iScene is ignored. We update the widget according to the current scene if any.
+        return cellVector->GetVectorCell()->GetScene();
+    }
+    else if (currentTextureVectorLayer)
+    {
+        return currentTextureVectorLayer->GetVectorCell()->GetScene();
+    }
+
+    return nullptr;
 }
 
 //--------------------------------------------------------------------------------------
@@ -205,7 +159,7 @@ FOdysseyPainterEditorVectorSceneTreeViewTab::AddReferencedObjects(FReferenceColl
 int
 FOdysseyPainterEditorVectorSceneTreeViewTab::WidgetIndex() const
 {
-    if (mScene)
+    if (GetScene())
         return 1;
     return 0;
 }

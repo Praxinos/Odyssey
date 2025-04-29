@@ -3,15 +3,18 @@
 
 #include "OdysseyTextureEditorFunctionLibrary.h"
 #include "OdysseyLayerStack.h"
+#include "OdysseyTextureLayerStack.h"
+#include "OdysseyTextureLayer.h"
 #include "AssetToolsModule.h"
 #include "IAssetTools.h"
 #include "OdysseyPixelFormat.h"
 #include "OdysseyTextureFactory.h"
 #include "OdysseyTextureFunctionLibrary.h"
-#include "LayerStack/OdysseyTextureLayerImageRaster.h"
-#include "LayerStack/OdysseyTextureLayerStack.h"
+#include "OdysseyTextureLayerImageRaster.h"
+#include "OdysseyTextureLayerStack.h"
 #include "OdysseyRasterBlockMutator.h"
 #include "ULISLoaderModule.h"
+#include "OdysseyExportImage.h"
 
 UOdysseyTextureFactory*
 UOdysseyTextureEditorTextureFunctionLibrary::GetTextureFactory()
@@ -174,13 +177,9 @@ UOdysseyTextureEditorTextureFunctionLibrary::ExportAsImage(
     if ( !layerStack )
         return TEXT("");
 
-    ::ULIS::FRectI rect = ::ULIS::FRectI::FromXYWH(0, 0, Texture->Source.GetSizeX(), Texture->Source.GetSizeY());
+    FIntRect rect(0, 0, Texture->Source.GetSizeX(), Texture->Source.GetSizeY());
 
-    ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(Texture->Source.GetFormat());
-    //let's ensure the format has alpha, so add alpha channel of needed
-    format = static_cast< ::ULIS::eFormat >(format | ULIS_W_ALPHA( 1 ) );
-
-    return layerStack->ExportAsImage(format, 0, Format, rect, Filename, Path );
+    return Odyssey::ExportAsImage(layerStack, 0, Format, rect, Filename, Path );
 }
 
 FString
@@ -195,13 +194,8 @@ UOdysseyTextureEditorLayerFunctionLibrary::ExportAsImage(
         return TEXT("");
 
     UTexture2D* texture = Layer->GetTexture();
-
-    ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
-    //let's ensure the format has alpha, so add alpha channel of needed
-    format = static_cast< ::ULIS::eFormat >(format | ULIS_W_ALPHA( 1 ) );
-
-    ::ULIS::FRectI rect = ::ULIS::FRectI::FromXYWH(0, 0, texture->Source.GetSizeX(), texture->Source.GetSizeY());
-    return Layer->ExportAsImage(format, 0, Format, rect, Filename, Path );
+    FIntRect rect(0, 0, texture->Source.GetSizeX(), texture->Source.GetSizeY());
+    return Odyssey::ExportAsImage(Layer, 0, Format, rect, Filename, Path );
 }
 
 UTexture2D*
@@ -214,8 +208,7 @@ UOdysseyTextureEditorLayerFunctionLibrary::ExportAsTexture(
     if (!Layer)
         return nullptr;
 
-
     UTexture2D* texture = Layer->GetTexture();
-    ::ULIS::FRectI rect = ::ULIS::FRectI::FromXYWH(0, 0, texture->Source.GetSizeX(), texture->Source.GetSizeY());
-    return Layer->ExportAsTexture(0, rect, texture->Source.GetFormat(), Filename, Path );
+    FIntRect rect (0, 0, texture->Source.GetSizeX(), texture->Source.GetSizeY());
+    return Odyssey::ExportAsTexture(Layer, 0, rect, Filename, Path );
 }

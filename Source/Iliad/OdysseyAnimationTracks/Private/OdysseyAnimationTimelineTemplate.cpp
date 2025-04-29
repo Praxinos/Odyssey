@@ -5,7 +5,6 @@
 
 #include "OdysseyAnimation.h"
 #include "OdysseyAnimationPlayer.h"
-#include "UObject/OdysseyObjectEditorUtils.h"
 #include "OdysseyAnimationComponent.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(OdysseyAnimationTimelineTemplate)
@@ -57,7 +56,7 @@ struct FOdysseyAnimationTimelineSectionExecutionToken
         if (!animation)
             return;
 
-        UOdysseyAnimationPlayer* player = iComponent->GetActivePlayer();
+        UOdysseyAnimationPlayer* player = iComponent->GetPlayer();
         if (!player)
             return;
 
@@ -68,14 +67,6 @@ struct FOdysseyAnimationTimelineSectionExecutionToken
 
         FFrameNumber frame = FOdysseyAnimationTimelineTemplate::GetEvaluatedFrame(animation, iRange, iParams, iFrameRate);
         player->SeekToFrameImmediate(frame.Value);
-        if (frame != animation->CurrentFrame)
-        {
-            FFrameTime animationCurrentFrame;
-            if (!player->GetCurrentFrameInAnimationBounds(animationCurrentFrame))
-                return;
-
-            FObjectEditorUtils::SetPropertyValue(animation, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), animationCurrentFrame.GetFrame().Value);
-        }
     }
 
 private:

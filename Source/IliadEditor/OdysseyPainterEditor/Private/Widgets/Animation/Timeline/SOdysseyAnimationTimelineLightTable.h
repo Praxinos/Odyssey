@@ -4,20 +4,22 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "OdysseyImageRenderingAbility.h"
-#include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineLightTableKey.h"
+#include "OdysseyRenderingAbility.h"
+#include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineLighttableKey.h"
 
 class UOdysseyAnimationLayer;
 class UOdysseyAnimation;
 class UOdysseyAnimationCell;
 class FOdysseyPainterEditorAnimationTimelinePosition;
 
-class SOdysseyAnimationTimelineLightTable
+class SOdysseyAnimationTimelineLighttable
     : public SCompoundWidget
 {
 public:
-    SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineLightTable)
+    SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineLighttable)
+    : _CurrentFrame(0)
     {}
+        SLATE_ATTRIBUTE(int, CurrentFrame)
         SLATE_ARGUMENT(TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition>, TimelinePosition)
     SLATE_END_ARGS()
 
@@ -27,11 +29,9 @@ public:
     );
 
 private:
-    void OnCurrentFrameChanged(UOdysseyAnimation* iAnimation);
-    void OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent);
-    void Update();
+    UOdysseyAnimationCell* GetCurrentCell() const;
 
 private:
+    TAttribute<int> mCurrentFrame;
     UOdysseyAnimationLayer* mLayer = nullptr;
-    UOdysseyAnimationCell* mCurrentCell = nullptr;
 };

@@ -6,11 +6,12 @@
 #include "Widgets/Animation/Timeline/SOdysseyAnimationLayerStackTreeView.h"
 #include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineTreeView.h"
 #include "OdysseyPainterEditorAnimationTimelinePosition.h"
-#include "LayerStack/OdysseyAnimationLayerStack.h"
+#include "OdysseyAnimationLayerStack.h"
+#include "OdysseyAnimationPlayer.h"
+#include "OdysseyAnimationCurrentFrameMutator.h"
 #include "OdysseyStyle.h"
 #include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineControl.h"
 #include "OdysseyAnimation.h"
-#include "OdysseyAnimationPlayer.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -56,7 +57,6 @@ SOdysseyAnimationLayerStack::Construct(const FArguments& InArgs)
     mOnInactivateOutOfPegs = InArgs._OnInactivateOutOfPegs;
     mOnIsOutOfPegsChecked = InArgs._OnIsOutOfPegsChecked;
     mCustomValidRange = InArgs._CustomValidRange;
-    mEditor = InArgs._PainterEditor;
     mOnScrubStart = InArgs._OnScrubStart;
     mOnScrubEnd = InArgs._OnScrubEnd;
 
@@ -71,7 +71,9 @@ SOdysseyAnimationLayerStack::RebuildWidgets()
     if (!animation)
         return;
 
-    UOdysseyAnimationLayerStack* layerStack = animation->GetLayerStack();
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(animation->GetLayerStack());
+    if (!layerStack)
+        return;
 
     mTimelineScrollBarV = SNew(SScrollBar)
         .Visibility(mScrollbarVisibility)
@@ -90,7 +92,6 @@ SOdysseyAnimationLayerStack::RebuildWidgets()
         .Visibility(mPlayerControlsVisibility)
         .Animation(mAnimation.Get())
         .Player(mPlayer.Get())
-        .PlaybackFramesPerSecond(mPlaybackFramesPerSecond)
     ]
     +SVerticalBox::Slot()
     .FillHeight(1.0f)
@@ -98,32 +99,33 @@ SOdysseyAnimationLayerStack::RebuildWidgets()
         SAssignNew(mSplitter, SSplitter)
         .Orientation(EOrientation::Orient_Horizontal)
         .OnSplitterFinishedResizing_Lambda(
-            [this]()
+            [this, layerStack]()
             {
-                mAnimation.Get()->TimelineSplitterPosition = mSplitter->SlotAt(0).GetSizeValue();
-                mAnimation.Get()->SaveConfig();
+                layerStack->SetTimelineSplitterPosition(mSplitter->SlotAt(0).GetSizeValue());
+                layerStack->SaveConfig();
             }
         )
         + SSplitter::Slot()
         .Value_Lambda(
-            [this]()
+            [this, layerStack]()
             {
-                return mAnimation.Get()->TimelineSplitterPosition;
+                return layerStack->GetTimelineSplitterPosition();
             }
         )
         .OnSlotResized_Lambda(
-            [this](float iSize)
+            [this, layerStack](float iSize)
             {
-                mAnimation.Get()->TimelineSplitterPosition = iSize;
+                layerStack->SetTimelineSplitterPosition(iSize);
             }
         )
         [
             SAssignNew(mTreeView, SOdysseyAnimationLayerStackTreeView)
-            .PainterEditor(mEditor)
             .LayerStack(layerStack)
             .TimelinePosition(mTimelinePosition.Get())
             .ExternalScrollbar(mTimelineScrollBarV)
             .OnTreeViewScrolled(this, &SOdysseyAnimationLayerStack::OnTreeViewScrolled)
+            .CurrentFrame(this, &SOdysseyAnimationLayerStack::GetCurrentFrame)
+            .OnTransactCurrentFrame(this, &SOdysseyAnimationLayerStack::OnTransactCurrentFrame)
         ]
         + SSplitter::Slot()
         [
@@ -137,9 +139,9 @@ SOdysseyAnimationLayerStack::RebuildWidgets()
                 .CustomValidRange(mCustomValidRange)
                 [
                     SAssignNew(mTimelineTreeView, SOdysseyAnimationTimelineTreeView)
-                    .PainterEditor(mEditor)
                     .LayerStack(layerStack)
-                    .Player(mPlayer.Get())
+                    .CurrentFrame(this, &SOdysseyAnimationLayerStack::GetCurrentFrame)
+                    .OnTransactCurrentFrame(this, &SOdysseyAnimationLayerStack::OnTransactCurrentFrame)
                     .TimelinePosition(mTimelinePosition.Get())
                     .OnActivateOutOfPegs(mOnActivateOutOfPegs)
                     .OnInactivateOutOfPegs(mOnInactivateOutOfPegs)
@@ -148,6 +150,8 @@ SOdysseyAnimationLayerStack::RebuildWidgets()
                     .OnTreeViewScrolled(this, &SOdysseyAnimationLayerStack::OnTimelineTreeViewScrolled)
                     .OnScrubStart(mOnScrubStart)
                     .OnScrubEnd(mOnScrubEnd)
+                    .OnCurrentFrameChanged(this, &SOdysseyAnimationLayerStack::OnCurrentFrameChanged)
+                    .OnCurrentFrameCommited(this, &SOdysseyAnimationLayerStack::OnCurrentFrameCommited)
                 ]
             ]
             + SHorizontalBox::Slot()
@@ -177,6 +181,24 @@ SOdysseyAnimationLayerStack::RebuildWidgets()
     ];
 
     this->ChildSlot.AttachWidget(widget.ToSharedRef());
+}
+
+FNavigationReply
+SOdysseyAnimationLayerStack::OnNavigation(const FGeometry& MyGeometry, const FNavigationEvent& InNavigationEvent)
+{
+    UOdysseyAnimationPlayer* player = mPlayer.Get();
+    if (!player)
+        return FNavigationReply::Stop();
+
+    if (InNavigationEvent.GetNavigationType() == EUINavigation::Left)
+    {
+        player->SeekToFrame(player->GetCurrentFrame() - 1);
+    }
+    else if (InNavigationEvent.GetNavigationType() == EUINavigation::Right)
+    {
+        player->SeekToFrame(player->GetCurrentFrame() + 1);
+    }
+    return FNavigationReply::Stop();
 }
 
 void
@@ -269,10 +291,45 @@ SOdysseyAnimationLayerStack::Tick( const FGeometry& AllottedGeometry, const doub
 int
 SOdysseyAnimationLayerStack::GetCurrentFrame() const
 {
-    FFrameTime frame = 0;
-    if (!mPlayer.Get()->GetCurrentFrameInAnimationBounds(frame))
-        return INDEX_NONE;
-    return frame.GetFrame().Value;
+    UOdysseyAnimationPlayer* player = mPlayer.Get();
+    if (!player)
+        return 0;
+
+    return player->GetDisplayedFrame().FrameNumber.Value;
+}
+
+void
+SOdysseyAnimationLayerStack::OnCurrentFrameChanged(int iFrame)
+{
+    UOdysseyAnimationPlayer* player = mPlayer.Get();
+    if (!player)
+        return;
+
+    player->SeekToFrame(iFrame);
+}
+
+void
+SOdysseyAnimationLayerStack::OnCurrentFrameCommited(int iFrame)
+{
+    UOdysseyAnimationPlayer* player = mPlayer.Get();
+    if (!player)
+        return;
+
+    player->SeekToFrame(iFrame);
+}
+
+void
+SOdysseyAnimationLayerStack::OnTransactCurrentFrame(TOptional<int> iFrame)
+{
+    UOdysseyAnimationPlayer* player = mPlayer.Get();
+    if (!player)
+        return;
+
+    int frame = iFrame.Get(player->GetCurrentFrame().FrameNumber.Value);
+
+    FOdysseyAnimationCurrentFrameMutator currentFrameMutator(player);
+    currentFrameMutator.Set(frame);
+    currentFrameMutator.Commit();
 }
 
 #undef LOCTEXT_NAMESPACE

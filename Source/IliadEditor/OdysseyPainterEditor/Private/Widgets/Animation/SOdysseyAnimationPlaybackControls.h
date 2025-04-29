@@ -19,7 +19,6 @@ public:
         {}
         SLATE_ARGUMENT(UOdysseyAnimation*, Animation)
         SLATE_ARGUMENT(UOdysseyAnimationPlayer*, Player)
-        SLATE_ATTRIBUTE(float, PlaybackFramesPerSecond)
     SLATE_END_ARGS()
 
     void Construct(const FArguments& InArgs);
@@ -49,7 +48,6 @@ private:
     FReply OnLoopClicked();
 
 private:
-    TAttribute<float> mPlaybackFramesPerSecond;
     UOdysseyAnimation* mAnimation;
     UOdysseyAnimationPlayer* mPlayer;
 };

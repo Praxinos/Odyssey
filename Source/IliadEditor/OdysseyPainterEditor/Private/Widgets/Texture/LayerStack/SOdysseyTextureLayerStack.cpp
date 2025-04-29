@@ -3,9 +3,9 @@
 
 #include "Widgets/Texture/LayerStack/SOdysseyTextureLayerStack.h"
 #include "Widgets/SOdysseyLayerStackAddLayerButton.h"
-#include "LayerStack/OdysseyTextureLayerFolder.h"
-#include "LayerStack/OdysseyTextureLayerImageRaster.h"
-#include "LayerStack/OdysseyTextureLayerImageVector.h"
+#include "OdysseyTextureLayerFolder.h"
+#include "OdysseyTextureLayerImageRaster.h"
+#include "OdysseyTextureLayerImageVector.h"
 #include "Widgets/Texture/LayerStack/SOdysseyTextureLayerFolderRow.h"
 #include "Widgets/Texture/LayerStack/SOdysseyTextureLayerImageRasterRow.h"
 #include "Widgets/Texture/LayerStack/SOdysseyTextureLayerImageVectorRow.h"
@@ -37,9 +37,8 @@ SOdysseyTextureLayerStack::SOdysseyTextureLayerStack()
 
 //CONSTRUCTION/DESTRUCTION-----------------------------------------------
 void
-SOdysseyTextureLayerStack::Construct(const FArguments& InArgs, FOdysseyPainterEditor* iEditor)
+SOdysseyTextureLayerStack::Construct(const FArguments& InArgs)
 {
-    mEditor = iEditor;
     mLayerStack.Assign(*this, InArgs._LayerStack);
 
     this->RebuildWidgets();
@@ -65,7 +64,7 @@ SOdysseyTextureLayerStack::RebuildWidgets()
             + SVerticalBox::Slot()
             .FillHeight(1.0)
             [
-                SAssignNew(mTreeView, SOdysseyTextureLayerStackTreeView, mEditor)
+                SAssignNew(mTreeView, SOdysseyTextureLayerStackTreeView)
                 .LayerStack(layerstack)
                 .OnGenerateRow(this, &SOdysseyTextureLayerStack::OnGenerateRow)
             ];

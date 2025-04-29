@@ -3,7 +3,7 @@
 
 #pragma once
 
-class UOdysseyAnimationLayerStack;
+class UOdysseyAnimation;
 class FUICommandList;
 class FOdysseyAnimationTimelineCellsShortcuts;
 class FOdysseyAnimationTimelineCellImageRasterShortcuts;
@@ -12,7 +12,14 @@ class FOdysseyAnimationTimelineCellImageStaggerShortcuts;
 class ODYSSEYPAINTEREDITOR_API FOdysseyAnimationTimelineShortcuts
 {
 public:
-    FOdysseyAnimationTimelineShortcuts(UOdysseyAnimationLayerStack* iLayerStack);
+    DECLARE_DELEGATE_OneParam(FOnTransactCurrentFrame, TOptional<int> /*iFrame*/)
+
+public:
+    FOdysseyAnimationTimelineShortcuts(
+        const TAttribute<UOdysseyAnimation*>& iAnimation,
+        const TAttribute<int>& iCurrentFrame,
+        const FOnTransactCurrentFrame& iOnTransactCurrentFrame
+    );
 
 public:
     TSharedRef<FUICommandList> GetCommandList() const;

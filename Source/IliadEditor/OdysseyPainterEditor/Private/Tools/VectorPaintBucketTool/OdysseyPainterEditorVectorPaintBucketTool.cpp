@@ -593,7 +593,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVector( FOdysseyVectorGroup
                                                            , const FKey& iKey
                                                            , uint64& oSignalFlags )
 {
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_HUD;
+    uint64 notificationFlags = FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )

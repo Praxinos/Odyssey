@@ -28,14 +28,13 @@ public:
     ~SOdysseyTextureLayerStack();
     SOdysseyTextureLayerStack();
 
-    void Construct(const FArguments& InArgs, FOdysseyPainterEditor* iEditor);
+    void Construct(const FArguments& InArgs);
 
 private:
     TSharedRef<ITableRow> OnGenerateRow(UOdysseyLayer* iLayer, const TSharedRef<STableViewBase>& iOwnerTable);
     void RebuildWidgets();
 
 private:
-    FOdysseyPainterEditor* mEditor;
     TSlateAttribute<UOdysseyLayerStack*> mLayerStack;
     TSharedPtr<SOdysseyTextureLayerStackTreeView> mTreeView;
 };

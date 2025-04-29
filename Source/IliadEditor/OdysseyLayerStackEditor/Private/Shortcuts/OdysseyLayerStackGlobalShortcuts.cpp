@@ -45,7 +45,7 @@ FOdysseyLayerStackGlobalShortcuts::Action_NavigateToNextLayer()
     if (!layerStack)
         return;
 
-    UOdysseyLayer* currentLayer = layerStack->CurrentLayer.Get();
+    UOdysseyLayer* currentLayer = layerStack->GetCurrentLayer();
     if (!currentLayer)
         return;
 
@@ -68,12 +68,12 @@ FOdysseyLayerStackGlobalShortcuts::Action_NavigateToNextLayer()
         isHidden = parents.ContainsByPredicate(
             [](UOdysseyLayer* iLayer)
             {
-                return !iLayer->DisplayChildren;
+                return !iLayer->ShouldDisplayChildren();
             }
         );
     }
 
-    FOdysseyObjectEditorUtils::SetPropertyValue(layerStack, GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer), layer);
+    layerStack->SetCurrentLayer(layer);
 }
 
 void
@@ -84,7 +84,7 @@ FOdysseyLayerStackGlobalShortcuts::Action_NavigateToPreviousLayer()
     if (!layerStack)
         return;
 
-    UOdysseyLayer* currentLayer = layerStack->CurrentLayer.Get();
+    UOdysseyLayer* currentLayer = layerStack->GetCurrentLayer();
     if (!currentLayer)
         return;
 
@@ -107,12 +107,12 @@ FOdysseyLayerStackGlobalShortcuts::Action_NavigateToPreviousLayer()
         isHidden = parents.ContainsByPredicate(
             [](UOdysseyLayer* iLayer)
             {
-                return !iLayer->DisplayChildren;
+                return !iLayer->ShouldDisplayChildren();
             }
         );
     }
 
-    FOdysseyObjectEditorUtils::SetPropertyValue(layerStack, GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer), layer);
+    layerStack->SetCurrentLayer(layer);
 }
 
 void
@@ -122,14 +122,14 @@ FOdysseyLayerStackGlobalShortcuts::Action_OpenFolderLayer()
     if (!layerStack)
         return;
 
-    UOdysseyLayer* currentLayer = layerStack->CurrentLayer.Get();
+    UOdysseyLayer* currentLayer = layerStack->GetCurrentLayer();
     if (!currentLayer)
         return;
 
     if (currentLayer->GetChildren().Num() <= 0)
         return;
 
-    FOdysseyObjectEditorUtils::SetPropertyValue(currentLayer, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, DisplayChildren), true);
+    currentLayer->SetDisplayChildren(true);
 }
 
 void
@@ -139,14 +139,14 @@ FOdysseyLayerStackGlobalShortcuts::Action_CloseFolderLayer()
     if (!layerStack)
         return;
 
-    UOdysseyLayer* currentLayer = layerStack->CurrentLayer.Get();
+    UOdysseyLayer* currentLayer = layerStack->GetCurrentLayer();
     if (!currentLayer)
         return;
 
     if (currentLayer->GetChildren().Num() <= 0)
         return;
 
-    FOdysseyObjectEditorUtils::SetPropertyValue(currentLayer, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, DisplayChildren), false);
+    currentLayer->SetDisplayChildren(false);
 }
 
 #undef LOCTEXT_NAMESPACE

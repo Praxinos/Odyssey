@@ -4,7 +4,7 @@
 #include "Widgets/Texture/LayerStack/SOdysseyTextureLayerImageRasterRow.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "OdysseyStyle.h"
-#include "LayerStack/OdysseyTextureLayerImageRaster.h"
+#include "OdysseyTextureLayerImageRaster.h"
 #include "Widgets/Input/NumericTypeInterface.h"
 #include "Widgets/Input/NumericUnitTypeInterface.inl"
 #include "Widgets/Input/SNumericEntryBox.h"
@@ -52,13 +52,13 @@ SOdysseyTextureLayerImageRasterRow::GenerateMainRowHeaderOptionWidgets()
 void
 SOdysseyTextureLayerImageRasterRow::OnIsAlphaLockedCheckStateChanged(ECheckBoxState iState)
 {
-    FOdysseyObjectEditorUtils::SetPropertyValue(mTextureLayerImageRaster, GET_MEMBER_NAME_CHECKED(UOdysseyTextureLayerImageRaster, IsAlphaLocked), iState == ECheckBoxState::Checked);
+    mTextureLayerImageRaster->SetIsAlphaLocked(iState == ECheckBoxState::Checked);
 }
 
 ECheckBoxState
 SOdysseyTextureLayerImageRasterRow::GetIsAlphaLockedIsChecked() const
 {
-    return mTextureLayerImageRaster->IsAlphaLocked ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+    return mTextureLayerImageRaster->IsAlphaLocked() ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
 
 #undef LOCTEXT_NAMESPACE

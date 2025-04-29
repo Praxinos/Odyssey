@@ -11,7 +11,7 @@
 #include "IStructureDetailsView.h"
 #include "OdysseyPixelFormat.h"
 #include "ULISLoaderModule.h"
-#include "LayerStack/OdysseyTextureLayerImageRaster.h"
+#include "OdysseyTextureLayerImageRaster.h"
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "OdysseyTextureLayerStackUserData.h"
 #include "OdysseyRasterBlockMutator.h"
@@ -112,14 +112,14 @@ FOdysseyTextureConfiguration::CreateTexture(UObject* iParent, FName iName, EObje
 
         //Set the layer as Current Layer
         UOdysseyTextureLayerImageRaster* layer = Cast<UOdysseyTextureLayerImageRaster>(layerStack->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass(), nullptr, 1));
-        layer->Name = LOCTEXT("texture.default-background-layer.name", "Background");
+        layer->SetLayerName(LOCTEXT("texture.default-background-layer.name", "Background"));
 
         //Fill LayerImage with content of Texture
         TSharedPtr<FOdysseyRasterBlock> rasterBlock = layer->GetRasterBlock();
         FOdysseyRasterBlockMutator rasterBlockMutator(rasterBlock, false);
         rasterBlockMutator.EditTilesFromRects(
             { ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) },
-            [&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<ULIS::FEvent>
+            [&](TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyInvalidTileMap& iTileMap) -> TArray<ULIS::FEvent>
             {
                 FillOdysseyBlockFromUTextureData(iBlock.Get(), texture, iBlock->Format());
                 return {};

@@ -4,14 +4,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Widgets/Views/STableViewBase.h"
-#include "Widgets/Views/STableRow.h"
-#include "Widgets/Views/STreeView.h"
-#include "Widgets/Tab/SOdysseyPainterEditorVectorSceneTreeViewRow.h"
-#include "OdysseyVectorGroupPaint.h"
-#include "Framework/Commands/UICommandList.h"
 
 class FOdysseyPainterEditor;
+class FOdysseyVectorGroupPaint;
+class FVectorSceneTreeViewItem;
 
 /**
  * Implements the Scene Tree View Widget
@@ -19,11 +15,14 @@ class FOdysseyPainterEditor;
 class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorSceneTreeView
     : public STreeView<TSharedPtr<FVectorSceneTreeViewItem>>
 {
+    SLATE_DECLARE_WIDGET(SOdysseyPainterEditorVectorSceneTreeView, STreeView<TSharedPtr<FVectorSceneTreeViewItem>>)
+
     public:
         SLATE_BEGIN_ARGS(SOdysseyPainterEditorVectorSceneTreeView)
         : _Editor(nullptr)
             {}
-        SLATE_ARGUMENT( FOdysseyPainterEditor*, Editor )
+            SLATE_ARGUMENT( FOdysseyPainterEditor*, Editor )
+            SLATE_ATTRIBUTE(FOdysseyVectorGroupPaint*, Scene)
         SLATE_END_ARGS()
 
     public:
@@ -33,7 +32,7 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorSceneTreeView
 
         void Construct(const FArguments& InArgs );
 
-        void Update( FOdysseyVectorGroupPaint* iScene );
+        void Update();
 
         void RenameSelectedItem();
 
@@ -76,7 +75,12 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorSceneTreeView
 
         FReply OnKeyDown( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent );
 
+        void OnVectorSceneNotify( FOdysseyVectorGroupPaint* iScene, uint64 iSignalFlags );
+        void ParseVectorNotifications( uint64 iSignalFlags );
+        void OnSceneChanged();
+
     protected:
+        TSlateAttribute<FOdysseyVectorGroupPaint*> mScene;
         FOdysseyPainterEditor* mEditor;
         TSharedPtr<FVectorSceneTreeViewItem> mRootItem;
         TArray<TSharedPtr<FVectorSceneTreeViewItem>> mItemsSource;

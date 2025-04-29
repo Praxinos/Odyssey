@@ -6,22 +6,24 @@
 #include "CoreMinimal.h"
 
 class UOdysseyAnimation;
-class UOdysseyAnimationPlayer;
 class FOdysseyPainterEditorAnimationTimelinePosition;
 
 class SOdysseyAnimationTimelineHeader
     : public SCompoundWidget
 {
 public:
+    DECLARE_DELEGATE_OneParam(FOnCurrentFrameChanged, int /*iFrame*/);
+
+public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineHeader)
         : _Animation(nullptr)
-        , _Player(nullptr)
     {}
         SLATE_ARGUMENT( UOdysseyAnimation*, Animation )
-        SLATE_ARGUMENT( UOdysseyAnimationPlayer*, Player )
         SLATE_ARGUMENT( TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition>, TimelinePosition )
         SLATE_EVENT(FSimpleDelegate, OnScrubStart)
         SLATE_EVENT(FSimpleDelegate, OnScrubEnd)
+        SLATE_EVENT(FOnCurrentFrameChanged, OnCurrentFrameChanged)
+        SLATE_EVENT(FOnCurrentFrameChanged, OnCurrentFrameCommited)
     SLATE_END_ARGS()
 
     void Construct(const FArguments& InArgs);
@@ -57,8 +59,9 @@ private:
 
 private:
     UOdysseyAnimation* mAnimation;
-    UOdysseyAnimationPlayer* mPlayer;
     TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition> mTimelinePosition;
+    FOnCurrentFrameChanged mOnCurrentFrameChanged;
+    FOnCurrentFrameChanged mOnCurrentFrameCommited;
 
     bool mIsScrubbing = false;
     FSimpleDelegate mOnScrubStart;

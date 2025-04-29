@@ -211,6 +211,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         TWeakPtr<SOdysseyViewport> mViewport;
         FOdysseyVectorCell* mHUDCell;
 
+        TSharedPtr<::ULIS::FBlock> mVectorBlock;
+
     public:
         //UPROPERTY( EditAnywhere, Category=Behavior )
         //bool RestrictToSelectedObjects;

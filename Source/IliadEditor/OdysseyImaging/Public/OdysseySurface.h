@@ -14,8 +14,8 @@ public:
 
 public:
     // Public API
-    virtual UTexture*             Texture() = 0; //TODO: Change to UTexture*
-    virtual const UTexture*       Texture() const = 0; //TODO: Change to UTexture*
+    virtual UTexture*             Texture() = 0;
+    virtual const UTexture*       Texture() const = 0;
 
 public:
     // Public Tampon Methods

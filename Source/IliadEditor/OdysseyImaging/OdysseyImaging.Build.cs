@@ -39,7 +39,7 @@ public class OdysseyImaging : ModuleRules
 
                 "OdysseyCore",
                 "OdysseyFile",
-                "OdysseyMaths"
+                "OdysseyRendering"
              }
         );
 
@@ -50,6 +50,7 @@ public class OdysseyImaging : ModuleRules
                 "ULIS",
                 "ULISLoader",
 
+                "OdysseyCoreEditor",
                 "OdysseyVector",
              }
         );

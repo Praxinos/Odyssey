@@ -5,6 +5,8 @@
 
 #include "Modules/ModuleManager.h"
 
+class FOdysseyPainterEditor;
+
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorModule
     : public IModuleInterface
 {
@@ -15,6 +17,10 @@ public:
 
 public:
     virtual void OpenStandaloneEditorForAsset( UObject* iAsset );
+
+    void AddOpenedEditor(FOdysseyPainterEditor* iEdtor);
+    void RemoveOpenedEditor(FOdysseyPainterEditor* iEdtor);
+    FOdysseyPainterEditor* GetOpenedEditorForAsset(UObject* iObject);
 
 private:
     //Settings
@@ -68,4 +74,5 @@ private:
 private:
     TMap<FName, TArray<FName>> mOpenedTabIds; //Ids of tabs that should be opened when activating a Mode Editor
     FDelegateHandle mExtendLevelEditorLayout;
+    TArray<FOdysseyPainterEditor*> mOpenedEditors;
 };

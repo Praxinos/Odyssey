@@ -91,6 +91,11 @@ public:
 
     FOdysseyVectorEngine& GetEngine();
 
+    const ::ULIS::FRectI& GetSanitizedRect() const { return mSanitizedRect; }
+    bool NeedsRender() const { return mNeedsRender; }
+
+    void Render(::ULIS::FBlock& ioBlock, const ::ULIS::FRectI& iRect, uint64 iDrawingFlags);
+
 private:
     enum eBlockState
     {
@@ -101,7 +106,6 @@ private:
 
     static void CleanupBlock(uint8* iData, void* iInfo);
     static void CleanupHUDBlock(uint8* iData, void* iInfo);
-    void Render(::ULIS::FBlock& ioBlock, uint64 iDrawingFlags);
     void RenderHUD(::ULIS::FBlock& ioBlock );
     void OnVectorRootRequestRedraw( FOdysseyVectorGroupPaint* iIgnored, uint64 iSignalFlags );
     void Invalidate( const ::ULIS::FRectD& iRect, bool iIsInteractive );
@@ -118,6 +122,8 @@ private:
     int mHeight;
     ::ULIS::eFormat mFormat;
     ::ULIS::FRectI mSanitizedRect;
+    TSharedPtr<BLImage> mBLImage;
+    TSharedPtr<BLContext> mBLContext;
     //uint64 mRenderFlags; //See DRAWING_IGNORECOLOR for example
 
     //
@@ -130,8 +136,6 @@ private:
     {
         FGuid mId;
         ::ULIS::eFormat mFormat;
-        TSharedPtr<BLImage> mBLImage;
-        TSharedPtr<BLContext> mBLContext;
         FUniqueBuffer mBuffer;
         //eBlockState mState;
         bool mNeedsCache;

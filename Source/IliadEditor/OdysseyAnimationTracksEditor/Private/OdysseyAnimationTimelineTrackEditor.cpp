@@ -12,6 +12,7 @@
 #include "OdysseyAnimation.h"
 #include "OdysseyAnimationActor.h"
 #include "OdysseyAnimationComponent.h"
+#include "OdysseyAnimationLayerStack.h"
 #include "OdysseyAnimationTimelineTrack.h"
 #include "OdysseyAnimationTimelineSection.h"
 #include "OdysseyAnimationTimelineSectionEditor.h"
@@ -74,7 +75,7 @@ FOdysseyAnimationTimelineTrackEditor::OnNewActorTrackAdded(const AActor& iActor,
 
     animationTrack->Modify();
 
-    UMovieSceneSection* section = animationTrack->AddNewSection(iSequencer->GetLocalTime().Time.FrameNumber, animationComponent->GetActiveAnimation());
+    UMovieSceneSection* section = animationTrack->AddNewSection(iSequencer->GetLocalTime().Time.FrameNumber, animationComponent->GetAnimation());
     section->Modify();
 
     iSequencer->EmptySelection();
@@ -158,7 +159,7 @@ FOdysseyAnimationTimelineTrackEditor::AddAnimationTrackKeyInternal(FFrameNumber 
                     if (component)
                     {
                         animationTrack->Modify();
-                        UMovieSceneSection* NewSection = animationTrack->AddNewSection(KeyTime, component->GetActiveAnimation());
+                        UMovieSceneSection* NewSection = animationTrack->AddNewSection(KeyTime, component->GetAnimation());
                         NewSection->Modify();
                         KeyPropertyResult.bTrackModified = true;
                         KeyPropertyResult.SectionsCreated.Add(NewSection);
@@ -299,7 +300,7 @@ FOdysseyAnimationTimelineTrackEditor::BuildOutlinerColumnWidget(const FBuildColu
                 ]
                 + SVerticalBox::Slot()
                 [
-                    SNew(SOdysseyAnimationTimelineTrack, component, track, iParams, SequencerPtr)
+                    SNew(SOdysseyAnimationTimelineTrack, track, iParams, SequencerPtr)
                         .Visibility_Lambda(
                             [track]()
                             {
@@ -307,6 +308,19 @@ FOdysseyAnimationTimelineTrackEditor::BuildOutlinerColumnWidget(const FBuildColu
                             }
                         )
                         .Clipping(EWidgetClipping::ClipToBoundsAlways)
+                        .LayerStack_Lambda(
+                            [component]() -> UOdysseyAnimationLayerStack*
+                            {
+                                if (!component)
+                                    return nullptr;
+
+                                UOdysseyAnimation* animation = component->GetAnimation();
+                                if (!animation)
+                                    return nullptr;
+
+                                return Cast<UOdysseyAnimationLayerStack>(animation->GetLayerStack());
+                            }
+                        )
                 ]
             ];
     }

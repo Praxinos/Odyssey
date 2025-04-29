@@ -1,22 +1,20 @@
 // IDDN.FR.001.060015.013.S.X.2019.000.00000
 // ODYSSEY is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
 
-#include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineLightTable.h"
-#include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineLightTableKey.h"
-#include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
+#include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineLighttable.h"
+#include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineLighttableKey.h"
+#include "OdysseyLighttable.h"
 #include "OdysseyAnimation.h"
 #include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineSection.h"
-#include "LayerStack/Layers/OdysseyAnimationLayer.h"
-#include "LayerStack/Cells/OdysseyAnimationCell.h"
+#include "OdysseyAnimationLayer.h"
+#include "OdysseyAnimationCell.h"
 #include "OdysseyPainterEditor.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 
 void
-SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysseyAnimationLayer* iLayer)
+SOdysseyAnimationTimelineLighttable::Construct(const FArguments& InArgs, UOdysseyAnimationLayer* iLayer)
 {
-    UOdysseyAnimation::OnCurrentFrameChanged().AddSP(SharedThis(this), &SOdysseyAnimationTimelineLightTable::OnCurrentFrameChanged);
-    FOdysseyImageRenderingAbility::OnImageRenderingChangedDelegate().AddSP(this, &SOdysseyAnimationTimelineLightTable::OnImageRenderingChanged);
-
+    mCurrentFrame = InArgs._CurrentFrame;
     mLayer = iLayer;
 
     TSharedRef<SHorizontalBox> horizontalBox = SNew(SHorizontalBox)
@@ -28,11 +26,12 @@ SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysse
             .WidthInFrames_Lambda(
                 [this]()
                 {
-                    if (!mCurrentCell)
+                    UOdysseyLayerCell* currentCell = GetCurrentCell();
+                    if (!currentCell)
                         return 0;
 
-                    int firstCellIndex = FMath::Max(mCurrentCell->IndexInLayer - 10, 0);
-                    UOdysseyAnimationCell* cell = mLayer->GetCells()[firstCellIndex];
+                    int firstCellIndex = FMath::Max(currentCell->GetIndexInLayer() - 10, 0);
+                    UOdysseyLayerCell* cell = mLayer->GetCells()[firstCellIndex];
                     if (!cell)
                         return 0;
 
@@ -58,62 +57,65 @@ SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysse
             .WidthInFrames_Lambda(
                 [this, i]()
                 {
-                    if (!mCurrentCell)
+                    UOdysseyLayerCell* currentCell = GetCurrentCell();
+                    if (!currentCell)
                         return 0;
 
-                    const TArray<UOdysseyAnimationCell*>& cells = mLayer->GetCells();
-                    int cellIndex = mCurrentCell->IndexInLayer - i - 1;
+                    const TArray<UOdysseyLayerCell*>& cells = mLayer->GetCells();
+                    int cellIndex = currentCell->GetIndexInLayer() - i - 1;
                     if (cellIndex < 0 || cellIndex >= cells.Num() || !cells[cellIndex])
                         return 0;
 
-                    return cells[cellIndex]->Exposure;
+                    return cells[cellIndex]->GetExposure();
                 }
             )
             [
 
-                SNew(SOdysseyAnimationTimelineLightTableKey)
+                SNew(SOdysseyAnimationTimelineLighttableKey)
                 .Visibility_Lambda(
                     [this, i]()
                     {
-                        if (!mCurrentCell)
+                        UOdysseyLayerCell* currentCell = GetCurrentCell();
+                        if (!currentCell)
                             return EVisibility::Collapsed;
 
-                        int cellIndex = mCurrentCell->IndexInLayer - i - 1;
+                        int cellIndex = currentCell->GetIndexInLayer() - i - 1;
                         if (cellIndex < 0 || cellIndex >= mLayer->GetCells().Num() || !mLayer->GetCells()[cellIndex])
                             return EVisibility::Collapsed;
 
                         return EVisibility::Visible;
                     }
                 )
-                .Key_Lambda([this, i]() { return mLayer->Lighttable.PreviousKeys[i];})
+                .Key_Lambda([this, i]() { return mLayer->GetLighttable().PreviousKeys[i];})
                 .Cell_Lambda(
                     [this, i]() -> UOdysseyAnimationCell*
                     {
-                        if (!mCurrentCell)
+                        UOdysseyLayerCell* currentCell = GetCurrentCell();
+                        if (!currentCell)
                             return nullptr;
 
-                        const TArray<UOdysseyAnimationCell*>& cells = mLayer->GetCells();
-                        int cellIndex = mCurrentCell->IndexInLayer - i - 1;
+                        const TArray<UOdysseyLayerCell*>& cells = mLayer->GetCells();
+                        int cellIndex = currentCell->GetIndexInLayer() - i - 1;
                         if (cellIndex < 0 || cellIndex >= cells.Num() || !mLayer->GetCells()[cellIndex])
                             return nullptr;
 
-                        return cells[cellIndex];
+                        return Cast<UOdysseyAnimationCell>(cells[cellIndex]);
                     }
                 )
                 .OnChanged_Lambda(
-                    [this, i](FOdysseyAnimationLightTableKey iKey)
+                    [this, i](FOdysseyLighttableKey iKey)
                     {
-                        FOdysseyAnimationLightTable lighttable = mLayer->Lighttable;
+                        FOdysseyLighttable lighttable = mLayer->GetLighttable();
                         lighttable.PreviousKeys[i] = iKey;
-                        FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable, EPropertyChangeType::Interactive);
+                        mLayer->SetLighttableInteractive(lighttable);
                     }
                 )
                 .OnCommited_Lambda(
-                    [this, i](FOdysseyAnimationLightTableKey iKey)
+                    [this, i](FOdysseyLighttableKey iKey)
                     {
-                        FOdysseyAnimationLightTable lighttable = mLayer->Lighttable;
+                        FOdysseyLighttable lighttable = mLayer->GetLighttable();
                         lighttable.PreviousKeys[i] = iKey;
-                        FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable, EPropertyChangeType::ValueSet);
+                        mLayer->SetLighttable(lighttable);
                     }
                 )
                 .TimelinePosition(InArgs._TimelinePosition)
@@ -130,7 +132,8 @@ SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysse
         .Visibility_Lambda(
             [this]()
             {
-                if (!mCurrentCell)
+                UOdysseyLayerCell* currentCell = GetCurrentCell();
+                if (!currentCell)
                     return EVisibility::Collapsed;
 
                 return EVisibility::Visible;
@@ -139,10 +142,11 @@ SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysse
         .WidthInFrames_Lambda(
             [this]()
             {
-                if (!mCurrentCell)
+                UOdysseyLayerCell* currentCell = GetCurrentCell();
+                if (!currentCell)
                     return 0;
 
-                return mCurrentCell->Exposure;
+                return currentCell->GetExposure();
             }
         )
         [
@@ -162,62 +166,65 @@ SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysse
             .WidthInFrames_Lambda(
                 [this, i]()
                 {
-                    if (!mCurrentCell)
+                    UOdysseyLayerCell* currentCell = GetCurrentCell();
+                    if (!currentCell)
                         return 0;
 
-                    const TArray<UOdysseyAnimationCell*>& cells = mLayer->GetCells();
-                    int cellIndex = mCurrentCell->IndexInLayer + i + 1;
+                    const TArray<UOdysseyLayerCell*>& cells = mLayer->GetCells();
+                    int cellIndex = currentCell->GetIndexInLayer() + i + 1;
                     if (cellIndex < 0 || cellIndex >= cells.Num() || !cells[cellIndex])
                         return 0;
 
-                    return cells[cellIndex]->Exposure;
+                    return cells[cellIndex]->GetExposure();
                 }
             )
             [
 
-                SNew(SOdysseyAnimationTimelineLightTableKey)
+                SNew(SOdysseyAnimationTimelineLighttableKey)
                 .Visibility_Lambda(
                     [this, i]()
                     {
-                        if (!mCurrentCell)
+                        UOdysseyLayerCell* currentCell = GetCurrentCell();
+                        if (!currentCell)
                             return EVisibility::Collapsed;
 
-                        int cellIndex = mCurrentCell->IndexInLayer + i + 1;
+                        int cellIndex = currentCell->GetIndexInLayer() + i + 1;
                         if (cellIndex < 0 || cellIndex >= mLayer->GetCells().Num() || !mLayer->GetCells()[cellIndex])
                             return EVisibility::Collapsed;
 
                         return EVisibility::Visible;
                     }
                 )
-                .Key_Lambda([this, i]() { return mLayer->Lighttable.NextKeys[i];})
+                .Key_Lambda([this, i]() { return mLayer->GetLighttable().NextKeys[i];})
                 .Cell_Lambda(
                     [this, i]() -> UOdysseyAnimationCell*
                     {
-                        if (!mCurrentCell)
+                        UOdysseyLayerCell* currentCell = GetCurrentCell();
+                        if (!currentCell)
                             return nullptr;
 
-                        const TArray<UOdysseyAnimationCell*>& cells = mLayer->GetCells();
-                        int cellIndex = mCurrentCell->IndexInLayer + i + 1;
+                        const TArray<UOdysseyLayerCell*>& cells = mLayer->GetCells();
+                        int cellIndex = currentCell->GetIndexInLayer() + i + 1;
                         if (cellIndex < 0 || cellIndex >= cells.Num() || !mLayer->GetCells()[cellIndex])
                             return nullptr;
 
-                        return cells[cellIndex];
+                        return Cast<UOdysseyAnimationCell>(cells[cellIndex]);
                     }
                 )
                 .OnChanged_Lambda(
-                    [this, i](FOdysseyAnimationLightTableKey iKey)
+                    [this, i](FOdysseyLighttableKey iKey)
                     {
-                        FOdysseyAnimationLightTable lighttable = mLayer->Lighttable;
+                        FOdysseyLighttable lighttable = mLayer->GetLighttable();
                         lighttable.NextKeys[i] = iKey;
-                        FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable, EPropertyChangeType::Interactive);
+                        mLayer->SetLighttableInteractive(lighttable);
                     }
                 )
                 .OnCommited_Lambda(
-                    [this, i](FOdysseyAnimationLightTableKey iKey)
+                    [this, i](FOdysseyLighttableKey iKey)
                     {
-                        FOdysseyAnimationLightTable lighttable = mLayer->Lighttable;
+                        FOdysseyLighttable lighttable = mLayer->GetLighttable();
                         lighttable.NextKeys[i] = iKey;
-                        FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable, EPropertyChangeType::ValueSet);
+                        mLayer->SetLighttable(lighttable);
                     }
                 )
                 .TimelinePosition(InArgs._TimelinePosition)
@@ -229,48 +236,10 @@ SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysse
     [
         horizontalBox
     ];
-
-    Update();
 }
 
-void
-SOdysseyAnimationTimelineLightTable::OnCurrentFrameChanged(UOdysseyAnimation* iAnimation)
+UOdysseyAnimationCell*
+SOdysseyAnimationTimelineLighttable::GetCurrentCell() const
 {
-    if (iAnimation != mLayer->GetAnimation())
-        return;
-
-    Update();
-}
-
-void
-SOdysseyAnimationTimelineLightTable::OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent)
-{
-    TRACE_CPUPROFILER_EVENT_SCOPE(SOdysseyAnimationTimelineLightTable::OnImageRenderingChanged);
-    if (iEvent.IsInteractive())
-        return;
-
-    if (iEvent.GetType() != FOdysseyImageRenderingChangedEvent::eEventType::kCompositionChange)
-        return;
-
-    UOdysseyAnimation* animation = mLayer->GetAnimation();
-    if (!animation)
-        return;
-
-    TArray<FGuid> composition = mLayer->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Editor, animation->CurrentFrame);
-    if (!composition.Contains(iEvent.GetId()))
-        return;
-
-    Update();
-}
-
-void
-SOdysseyAnimationTimelineLightTable::Update()
-{
-    TRACE_CPUPROFILER_EVENT_SCOPE(SOdysseyAnimationTimelineLightTable::Update);
-    UOdysseyAnimation* animation = mLayer->GetAnimation();
-    if (!animation)
-        return;
-
-    int currentFrame = animation->CurrentFrame;
-    mCurrentCell = mLayer->GetCellAtFrame(currentFrame);
+    return Cast<UOdysseyAnimationCell>(mLayer->GetCellAtFrame(mCurrentFrame.Get()));
 }

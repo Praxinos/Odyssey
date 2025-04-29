@@ -5,7 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/ObjectMacros.h"
-#include "Image/OdysseyBlendingMode.h"
+#include "OdysseyBlendingMode.h"
 #include "OdysseyBlendParameters.generated.h"
 
 USTRUCT()

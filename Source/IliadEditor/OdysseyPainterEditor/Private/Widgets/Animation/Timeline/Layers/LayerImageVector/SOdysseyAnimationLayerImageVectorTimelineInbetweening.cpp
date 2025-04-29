@@ -4,11 +4,13 @@
 #include "Widgets/Animation/Timeline/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorTimelineInbetweening.h"
 #include "Widgets/Animation/Timeline/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow.h"
 #include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineInbetweeningHeaderRow.h"
-#include "LayerStack/OdysseyAnimationLayerStack.h"
-#include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
+#include "OdysseyAnimation.h"
+#include "OdysseyAnimationLayerStack.h"
+#include "OdysseyAnimationLayerImageVector.h"
 // From module OdysseyPainterEditor
 #include "OdysseyPainterEditorSource.h"
 #include "OdysseyPainterEditor.h"
+#include "OdysseyPainterEditorModule.h"
 // From U.E
 #include "Widgets/Input/NumericTypeInterface.h"
 #include "Widgets/Input/NumericUnitTypeInterface.inl"
@@ -29,7 +31,7 @@
 #include "Undo/OdysseyVectorUndoTagInbetweenerBreakdownRemove.h"
 #include "Undo/OdysseyVectorUndoTagInbetweenerBreakdownTargetVisibility.h"
 #include "OdysseyPainterEditorAnimationTimelinePosition.h"
-#include "LayerStack/Cells/OdysseyAnimationCell.h"
+#include "OdysseyAnimationCell.h"
 
 #include "Framework/Commands/GenericCommands.h"
 
@@ -56,7 +58,6 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::Construct( const FArgumen
 
     mAnimationLayerImageVector = iAnimationLayerImageVector;
     mTimelinePosition = InArgs._TimelinePosition;
-    mEditor = InArgs._PainterEditor;
 
     // bind refresh function to delegates on existing vector scenes at load. Needed to refresh necessary widgets.
     FOdysseyVectorEngine::OnNotifyDelegate().AddRaw( this, &SOdysseyAnimationLayerImageVectorTimelineInbetweening::OnVectorSceneNotify );
@@ -87,12 +88,6 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::OnVectorSceneNotify( FOdy
     {
         Update();
     }
-}
-
-FOdysseyPainterEditor*
-SOdysseyAnimationLayerImageVectorTimelineInbetweening::GetEditor() const
-{
-    return mEditor.Get();
 }
 
 TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition>
@@ -223,7 +218,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::OnSelectionChanged( TShar
 {
     std::list<FOdysseyVectorCell*> cellList;
     uint64 retFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                    | FOdysseyPainterEditor::UI_UPDATE_HUD;
+                    | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     if( SelectInfo != ESelectInfo::Type::Direct )
     {
@@ -284,7 +279,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::Private_IsItemSelected( c
 {
     UOdysseyLayerStack* layerStack = mAnimationLayerImageVector->GetLayerStack();
 
-    return iItem.Get()->GetInbetweenerTag()->GetOwner()->IsSelected() && ( layerStack->CurrentLayer == mAnimationLayerImageVector );
+    return iItem.Get()->GetInbetweenerTag()->GetOwner()->IsSelected() && ( layerStack->GetCurrentLayer() == mAnimationLayerImageVector );
 }
 
 UOdysseyAnimationLayerImageVector*
@@ -361,14 +356,14 @@ void
 SOdysseyAnimationLayerImageVectorTimelineInbetweening::AddBreakdown()
 {
     int breakdownFrameIndex = MousePositionToFrame( mCursorPos.X );
-    UOdysseyAnimationCell* cell = mAnimationLayerImageVector->GetCellAtFrame( breakdownFrameIndex );
+    UOdysseyLayerCell* cell = mAnimationLayerImageVector->GetCellAtFrame( breakdownFrameIndex );
     if (!cell)
         return;
 
-    int breakdownCellIndex = cell->IndexInLayer;
+    int breakdownCellIndex = cell->GetIndexInLayer();
     std::list<FOdysseyVectorTagInbetweener*> selectedInbetweenerTagList;
     std::list<FOdysseyVectorEngine*> engineList;
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_HUD;
+    uint64 notificationFlags = FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     GetSelectedInbetweenerTags( selectedInbetweenerTagList );
 
@@ -384,7 +379,8 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::AddBreakdown()
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
-            FOdysseyPainterEditor* editor = mEditor.Get();
+            FOdysseyPainterEditorModule& painterEditorModule = FModuleManager::GetModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
+            FOdysseyPainterEditor* editor = painterEditorModule.GetOpenedEditorForAsset(mAnimationLayerImageVector->GetAnimation());
             if (editor)
             {
                 TSharedPtr<FOdysseyPainterEditorSource> source = editor->GetSource();
@@ -423,13 +419,13 @@ void
 SOdysseyAnimationLayerImageVectorTimelineInbetweening::RemoveBreakdown()
 {
     int breakdownFrameIndex = MousePositionToFrame( mCursorPos.X );
-    UOdysseyAnimationCell* cell = mAnimationLayerImageVector->GetCellAtFrame( breakdownFrameIndex );
+    UOdysseyLayerCell* cell = mAnimationLayerImageVector->GetCellAtFrame( breakdownFrameIndex );
     if (!cell)
         return;
 
-    int breakdownCellIndex = cell->IndexInLayer;
+    int breakdownCellIndex = cell->GetIndexInLayer();
     std::list<FOdysseyVectorTagInbetweener*> selectedInbetweenerTagList;
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_HUD;
+    uint64 notificationFlags = FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     GetSelectedInbetweenerTags( selectedInbetweenerTagList );
 
@@ -445,7 +441,8 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::RemoveBreakdown()
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
-            FOdysseyPainterEditor* editor = mEditor.Get();
+            FOdysseyPainterEditorModule& painterEditorModule = FModuleManager::GetModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
+            FOdysseyPainterEditor* editor = painterEditorModule.GetOpenedEditorForAsset(mAnimationLayerImageVector->GetAnimation());
             if (editor)
             {
                 TSharedPtr<FOdysseyPainterEditorSource> source = editor->GetSource();
@@ -483,14 +480,14 @@ void
 SOdysseyAnimationLayerImageVectorTimelineInbetweening::ShowHideTarget()
 {
     int breakdownFrameIndex = MousePositionToFrame( mCursorPos.X );
-    UOdysseyAnimationCell* cell = mAnimationLayerImageVector->GetCellAtFrame( breakdownFrameIndex );
+    UOdysseyLayerCell* cell = mAnimationLayerImageVector->GetCellAtFrame( breakdownFrameIndex );
     if (!cell)
         return;
 
-    int breakdownCellIndex = cell->IndexInLayer;
+    int breakdownCellIndex = cell->GetIndexInLayer();
     std::list<FOdysseyVectorTagInbetweener*> selectedInbetweenerTagList;
     std::list<FInbetweenerBreakdown*> breakdownList;
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_HUD;
+    uint64 notificationFlags = FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     GetSelectedInbetweenerTags( selectedInbetweenerTagList );
 
@@ -518,7 +515,8 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::ShowHideTarget()
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
-            FOdysseyPainterEditor* editor = mEditor.Get();
+            FOdysseyPainterEditorModule& painterEditorModule = FModuleManager::GetModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
+            FOdysseyPainterEditor* editor = painterEditorModule.GetOpenedEditorForAsset(mAnimationLayerImageVector->GetAnimation());
             if (editor)
             {
                 TSharedPtr<FOdysseyPainterEditorSource> source = editor->GetSource();
@@ -561,7 +559,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::ChangeDirection()
 {
     std::list<FOdysseyVectorTagInbetweener*> selectedInbetweenerTagList;
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_TIMELINE
-                             | FOdysseyPainterEditor::UI_UPDATE_HUD;
+                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     GetSelectedInbetweenerTags( selectedInbetweenerTagList );
 
@@ -622,7 +620,8 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::MapActionsToCommandList()
 void
 SOdysseyAnimationLayerImageVectorTimelineInbetweening::RemoveInbetweenerTag()
 {
-    FOdysseyPainterEditor* editor = mEditor.Get();
+    FOdysseyPainterEditorModule& painterEditorModule = FModuleManager::GetModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
+    FOdysseyPainterEditor* editor = painterEditorModule.GetOpenedEditorForAsset(mAnimationLayerImageVector->GetAnimation());
 
     // note: editor is NULL in the Sequencer
     FOdysseyPainterEditor::RemoveInbetweenerTag( editor, mAnimationLayerImageVector->GetVectorLayer() );

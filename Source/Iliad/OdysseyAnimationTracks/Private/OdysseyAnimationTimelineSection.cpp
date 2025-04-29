@@ -101,8 +101,9 @@ UOdysseyAnimationTimelineSection::GetDefaultSectionRange(UOdysseyAnimationTimeli
 
     FFrameRate animationFrameRate(animation->GetFramesPerSecond() * 100, 100);
 
-    FFrameNumber animationLeftBoundFrame(animation->GetLeftBoundValue());
-    FFrameNumber animationRightBoundFrame(animation->GetRightBoundValue() + 1);
+    FInt32Range frameRange = animation->GetFrameRange();
+    FFrameNumber animationLeftBoundFrame(frameRange.GetLowerBoundValue());
+    FFrameNumber animationRightBoundFrame(frameRange.GetUpperBoundValue() + 1);
 
     UMovieScene* outer_movie_scene = iSection->GetTypedOuter<UMovieScene>();
     FFrameTime animationLeftBoundTime = FFrameRate::TransformTime(animationLeftBoundFrame, animationFrameRate, outer_movie_scene->GetDisplayRate());

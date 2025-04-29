@@ -6,13 +6,15 @@
 #include "Containers/Queue.h"
 #include "HAL/Runnable.h"
 #include "ThumbnailRendering/ThumbnailRenderer.h"
-#include "OdysseyImageRenderingAbility.h"
+#include "OdysseyRenderingAbility.h"
 #include "UObject/GCObject.h"
+#include <ULIS>
 
 #include "OdysseyAnimationCellThumbnailRenderer.generated.h"
 
 class UOdysseyAnimationCell;
 class UTexture2D;
+class IOdysseyImageRenderer;
 
 struct FOdysseyAnimationCellThumbnailTask
 {
@@ -38,12 +40,9 @@ public:
 
 private:
     UPROPERTY()
-    TMap<FVector2D, UTexture2D*> Textures;
-
-    UPROPERTY()
     TObjectPtr<UTexture2D> mCheckerboardTexture;
 };
-
+/*
 class FOdysseyAnimationCellThumbnailProxy
     : public FRunnable
     , public FGCObject
@@ -85,3 +84,4 @@ private:
     FCriticalSection mFinishedCellsMutex;
     TArray<UOdysseyAnimationCell*> mFinishedCells;
 };
+*/

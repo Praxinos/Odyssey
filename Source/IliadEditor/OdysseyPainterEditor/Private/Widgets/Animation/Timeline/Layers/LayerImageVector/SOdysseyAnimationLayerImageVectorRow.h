@@ -17,12 +17,14 @@ class SOdysseyAnimationLayerImageVectorRow
     : public SOdysseyAnimationLayerRow
 {
 public:
+    DECLARE_DELEGATE_OneParam(FOnTransactCurrentFrame, TOptional<int>)
+
+public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationLayerImageVectorRow)
-        : _PainterEditor(nullptr)
         {}
         SLATE_ATTRIBUTE(int, CurrentFrame)
         SLATE_ARGUMENT( TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition>, TimelinePosition )
-        SLATE_ATTRIBUTE(FOdysseyPainterEditor*, PainterEditor)
+        SLATE_EVENT(FOnTransactCurrentFrame, OnTransactCurrentFrame)
     SLATE_END_ARGS()
 
 public:
@@ -51,5 +53,4 @@ private:
 private:
     TSharedPtr<SOdysseyAnimationTimelineInbetweeningHeader> mInbetweeningHeader;
     class UOdysseyAnimationLayerImageVector* mAnimationLayerImageVector;
-    TAttribute<FOdysseyPainterEditor*> mEditor;
 };

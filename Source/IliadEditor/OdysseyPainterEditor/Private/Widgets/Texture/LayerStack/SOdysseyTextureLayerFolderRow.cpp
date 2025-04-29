@@ -6,7 +6,7 @@
 #include "SEnumCombo.h"
 #include "Widgets/Input/SNumericEntryBox.h"
 #include "OdysseyStyle.h"
-#include "LayerStack/OdysseyTextureLayerFolder.h"
+#include "OdysseyTextureLayerFolder.h"
 #include "Widgets/Input/NumericTypeInterface.h"
 #include "Widgets/Input/NumericUnitTypeInterface.inl"
 #include "Math/UnitConversion.h"

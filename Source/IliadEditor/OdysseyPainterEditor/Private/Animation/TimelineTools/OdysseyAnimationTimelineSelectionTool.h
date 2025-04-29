@@ -6,16 +6,16 @@
 #include "TimelineTools/OdysseyAnimationTimelineTool.h"
 #include "Input/Reply.h"
 
-class FOdysseyAnimationCellSelection;
+class FOdysseyLayerCellSelection;
 class FOdysseyPainterEditorAnimationTimelinePosition;
-class UOdysseyAnimationCell;
+class UOdysseyLayerCell;
 
 class FOdysseyAnimationTimelineSelectionTool
     : public FOdysseyAnimationTimelineTool
 {
 public:
     virtual ~FOdysseyAnimationTimelineSelectionTool();
-    FOdysseyAnimationTimelineSelectionTool(TSharedRef<FOdysseyPainterEditorAnimationTimelinePosition> iTimelinePosition, TSharedRef<FOdysseyAnimationCellSelection> iTimelineCellSelection);
+    FOdysseyAnimationTimelineSelectionTool(TSharedRef<FOdysseyPainterEditorAnimationTimelinePosition> iTimelinePosition, TSharedRef<FOdysseyLayerCellSelection> iTimelineCellSelection);
 
 public:
     virtual FReply OnMouseButtonDown(const FMouseEventParams& iParams) override;
@@ -55,12 +55,12 @@ private:
         NonContiguous
     };
 
-    TSharedRef<FOdysseyAnimationCellSelection> mTimelineCellSelection;
+    TSharedRef<FOdysseyLayerCellSelection> mTimelineCellSelection;
     bool mIsSelecting = false;
     bool mIsDragDetected = false;
     bool mIsDragnDrop = false;
     ESelectionMode mSelectionMode = ESelectionMode::Default;
     bool mShouldDeselect = false;
-    TArray<UOdysseyAnimationCell*> mInitialSelection;
-    UOdysseyAnimationCell* mCellCursor; //Most of the time same as mTimelineParams->GetCellSelectionCursor() but can be different in some cases
+    TArray<UOdysseyLayerCell*> mInitialSelection;
+    UOdysseyLayerCell* mCellCursor; //Most of the time same as mTimelineParams->GetCellSelectionCursor() but can be different in some cases
 };

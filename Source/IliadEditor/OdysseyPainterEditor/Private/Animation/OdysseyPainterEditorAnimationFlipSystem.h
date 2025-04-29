@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "Framework/Application/IInputProcessor.h"
 #include "InputCoreTypes.h"
-#include "OdysseyImageRenderer.h"
 #include "OdysseyPainterEditorAnimationFlipSystem.generated.h"
 
 UENUM()
@@ -149,5 +148,5 @@ private:
     bool mIsFlipping = false;
     int mStartFrame = 0;
     FOdysseyAnimationFlipConfiguration mFlipConfiguration;
-    IOdysseyImageRenderer::eRenderType mInitialRenderType = IOdysseyImageRenderer::eRenderType::Render;
+    uint64 mInitialRenderType = EOdysseyRenderingType::Render;
 };

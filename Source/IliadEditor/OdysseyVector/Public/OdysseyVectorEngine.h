@@ -12,7 +12,7 @@
 
 #include "OdysseyVectorObject.h"
 
-#include "ULISInvalidTileMap.h"
+#include "OdysseyInvalidTileMap.h"
 
 
 //#include "OdysseyVectorGroupPaint.generated.h"
@@ -61,8 +61,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
         static const uint64 DRAWING_IGNORECOLOR       = ( 1ULL <<  3 );
 
 
+
         // Notifications flags
         static const uint64 NOTIFY_ALL                = 0x0FFFFFFFFFFFFFFF;
+        static const uint64 NOTIFY_UPDATE_HUD         = ( 1ULL <<  0 );
         static const uint64 NOTIFY_RESERVED_SHIFT     = ( 15 );
 
         static FNotifyDelegate& OnNotifyDelegate();
@@ -86,9 +88,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
         /**
          * @brief Returns the invalid Tile map containing invalid rects
          *
-         * @return const FULISInvalidTileMap&
+         * @return const FOdysseyInvalidTileMap&
          */
-        FULISInvalidTileMap& GetInvalidTileMap();
+        FOdysseyInvalidTileMap& GetInvalidTileMap();
 
         /**
          * @brief render the current HUD.
@@ -180,7 +182,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
     protected:
         uint64 mInvalidationFlags;
         //FInvalidateDelegate mOnInvalidateDelegate;
-        //FULISInvalidTileMap mInvalidTileMap;
+        //FOdysseyInvalidTileMap mInvalidTileMap;
         std::vector<FHorizontalLine> mHorizontalLineBuffer;
         uint32 mProcessorCount;
         BLImageData mRenderData; // for direct drawing via our own drawing routines.

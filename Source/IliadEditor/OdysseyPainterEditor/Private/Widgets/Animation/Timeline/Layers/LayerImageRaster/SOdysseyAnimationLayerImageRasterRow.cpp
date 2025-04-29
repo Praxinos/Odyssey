@@ -4,10 +4,10 @@
 #include "Widgets/Animation/Timeline/Layers/LayerImageRaster/SOdysseyAnimationLayerImageRasterRow.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "OdysseyStyle.h"
-#include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
+#include "OdysseyAnimationLayerImageRaster.h"
 #include "Widgets/Animation/Timeline/Layers/LayerImageRaster/SOdysseyAnimationLayerImageRasterTimeline.h"
-#include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineLightTableKey.h"
-#include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineLightTableHeader.h"
+#include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineLighttableKey.h"
+#include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineLighttableHeader.h"
 #include "Widgets/Animation/Timeline/SOdysseyAnimationLayerStack.h"
 #include "Widgets/Colors/SColorBlock.h"
 #include "Widgets/Colors/SColorPicker.h"
@@ -29,7 +29,6 @@ void SOdysseyAnimationLayerImageRasterRow::Construct(
 {
     ensure(iAnimationLayerImageRaster);
     mAnimationLayerImageRaster = iAnimationLayerImageRaster;
-    mEditor = InArgs._PainterEditor;
 
     SOdysseyAnimationLayerRow::Construct(
         SOdysseyAnimationLayerRow::FArguments()
@@ -62,13 +61,13 @@ SOdysseyAnimationLayerImageRasterRow::GenerateMainRowHeaderOptionWidgets()
 void
 SOdysseyAnimationLayerImageRasterRow::OnIsAlphaLockedCheckStateChanged(ECheckBoxState iState)
 {
-    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageRaster, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayerImageRaster,  IsAlphaLocked), iState == ECheckBoxState::Checked);
+    mAnimationLayerImageRaster->SetIsAlphaLocked(iState == ECheckBoxState::Checked);
 }
 
 ECheckBoxState
 SOdysseyAnimationLayerImageRasterRow::GetIsAlphaLockedIsChecked() const
 {
-    return mAnimationLayerImageRaster->IsAlphaLocked ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+    return mAnimationLayerImageRaster->IsAlphaLocked() ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
 
 #undef LOCTEXT_NAMESPACE

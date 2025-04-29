@@ -39,7 +39,6 @@ protected:
     // Widget Getters
     virtual UOdysseyAnimation* Animation() const;
     virtual UOdysseyAnimationPlayer* Player() const;
-    virtual float PlaybackFramesPerSecond() const;
     TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition> GetTimelinePosition() const;
 
 protected:

@@ -4,18 +4,19 @@
 #include "Shortcuts/AnimationTimeline/OdysseyAnimationTimelineCellImageStaggerShortcuts.h"
 
 #include "Widgets/Animation/Timeline/Cells/CellImageStagger/SOdysseyAnimationCellImageStagger.h"
+#include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorAnimationCommands.h"
-#include "LayerStack/Layers/OdysseyAnimationLayer.h"
+#include "OdysseyAnimationLayer.h"
 #include "OdysseyLayerStack.h"
 #include "OdysseyAnimation.h"
 #include "ULISLoaderModule.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
-#include "LayerStack/Cells/OdysseyAnimationCellSelection.h"
+#include "OdysseyLayerCellSelection.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
-FOdysseyAnimationTimelineCellImageStaggerShortcuts::FOdysseyAnimationTimelineCellImageStaggerShortcuts(UOdysseyLayerStack* iLayerStack)
-    : mLayerStack(iLayerStack)
+FOdysseyAnimationTimelineCellImageStaggerShortcuts::FOdysseyAnimationTimelineCellImageStaggerShortcuts(const TAttribute<UOdysseyAnimation*>& iAnimation)
+    : mAnimation(iAnimation)
 {
 }
 
@@ -32,37 +33,43 @@ FOdysseyAnimationTimelineCellImageStaggerShortcuts::MapActionsToCommandList(TSha
 void
 FOdysseyAnimationTimelineCellImageStaggerShortcuts::Action_ConvertToReferenceCells()
 {
-    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(mLayerStack->CurrentLayer.Get());
+    UOdysseyAnimation* animation = mAnimation.Get();
+    if (!animation)
+        return;
+
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(animation->GetLayerStack());
+    if (!layerStack)
+        return;
+
+    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerStack->GetCurrentLayer());
     if (!layer)
         return;
 
     if (layer->IsLockedRecursively())
         return;
 
-    UOdysseyAnimation* animation = layer->GetAnimation();
-    if (!animation)
+    TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
+    if (selectedCells.IsEmpty())
         return;
 
-    TArray<UOdysseyAnimationCell*> selectedCells = layer->GetLayerStack()->GetCellSelection()->GetSelectedCells();
-    if (selectedCells.IsEmpty())
-    {
-        UOdysseyAnimationCell* cell = layer->GetCellAtFrame(animation->CurrentFrame);
-        if (!cell)
-            return;
-
-        selectedCells.Add(cell);
-    }
-
-    TArray<UOdysseyAnimationCell*> staggerCells = selectedCells.FilterByPredicate(
-        [](UOdysseyAnimationCell* iCell)
+    TArray<UOdysseyLayerCell*> staggerCells = selectedCells.FilterByPredicate(
+        [](UOdysseyLayerCell* iCell)
         {
-            return iCell->IsA<UOdysseyAnimationCellImageStagger>();
+            return iCell->IsA<UOdysseyLayerCellImageStagger>();
         }
     );
 
     if (staggerCells.IsEmpty())
         return;
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(animation->GetFormat());
+
+    ::ULIS::eFormat format = ::ULIS::Format_BGRA8;
+    switch(animation->GetFormat())
+    {
+        case EOdysseyAnimationFormat::BGRA8: format = ::ULIS::Format_BGRA8;
+        case EOdysseyAnimationFormat::RGBAF: format = ::ULIS::Format_RGBAF;
+    }
+
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
 
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("animation.cell.transaction.convert-to-reference-cell", "Convert To Reference Cell"));
@@ -73,30 +80,30 @@ FOdysseyAnimationTimelineCellImageStaggerShortcuts::Action_ConvertToReferenceCel
 
     struct FResultingCell
     {
-        UOdysseyAnimationCell* mReferenceCell;
+        UOdysseyLayerCell* mReferenceCell;
         int mExposure;
     };
 
-    TMap<UOdysseyAnimationCell*, TArray<FResultingCell>> resultingCellsByCell;
-    for (UOdysseyAnimationCell* cell : staggerCells)
+    TMap<UOdysseyLayerCell*, TArray<FResultingCell>> resultingCellsByCell;
+    for (UOdysseyLayerCell* cell : staggerCells)
     {
         progressBar.EnterProgressFrame();
 
-        UOdysseyAnimationCellImageStagger* staggerCell = Cast<UOdysseyAnimationCellImageStagger>(cell);
+        UOdysseyLayerCellImageStagger* staggerCell = Cast<UOdysseyLayerCellImageStagger>(cell);
 
-        UOdysseyAnimationCell* referenceCell = staggerCell->GetReferenceCellAtFrame(0);
+        UOdysseyLayerCell* referenceCell = staggerCell->GetReferenceCellAtFrame(0);
         if (!referenceCell)
             continue;
 
         FResultingCell resultingCell;
         resultingCell.mReferenceCell = referenceCell;
-        resultingCell.mExposure = staggerCell->Exposure;
+        resultingCell.mExposure = staggerCell->GetExposure();
 
         TArray<FResultingCell> resultingCells;
         resultingCells.Add(resultingCell);
 
-        FScopedSlowTask loopProgress(staggerCell->Exposure - 1);
-        for (int i = 1; i < staggerCell->Exposure; i++)
+        FScopedSlowTask loopProgress(staggerCell->GetExposure() - 1);
+        for (int i = 1; i < staggerCell->GetExposure(); i++)
         {
             loopProgress.EnterProgressFrame();
 
@@ -104,10 +111,10 @@ FOdysseyAnimationTimelineCellImageStaggerShortcuts::Action_ConvertToReferenceCel
             if (!referenceCell || referenceCell == resultingCells.Last().mReferenceCell)
                 continue;
 
-            resultingCells.Last().mExposure = i - (staggerCell->Exposure - resultingCells.Last().mExposure);
+            resultingCells.Last().mExposure = i - (staggerCell->GetExposure() - resultingCells.Last().mExposure);
 
             resultingCell.mReferenceCell = referenceCell;
-            resultingCell.mExposure = staggerCell->Exposure - i;
+            resultingCell.mExposure = staggerCell->GetExposure() - i;
 
             resultingCells.Add(resultingCell);
         }
@@ -117,11 +124,11 @@ FOdysseyAnimationTimelineCellImageStaggerShortcuts::Action_ConvertToReferenceCel
 
     for (auto element : resultingCellsByCell)
     {
-        UOdysseyAnimationCell* originalCell = element.Key;
+        UOdysseyLayerCell* originalCell = element.Key;
         TArray<FResultingCell> resultingCells = element.Value;
 
-        int indexInLayer = originalCell->IndexInLayer;
-        TArray<UOdysseyAnimationCell*> referenceCells;
+        int indexInLayer = originalCell->GetIndexInLayer();
+        TArray<UOdysseyLayerCell*> referenceCells;
 
         for (int i = 0; i < resultingCells.Num(); i++)
         {
@@ -129,47 +136,47 @@ FOdysseyAnimationTimelineCellImageStaggerShortcuts::Action_ConvertToReferenceCel
             referenceCells.Add(resultingCell.mReferenceCell);
         }
 
-        TArray<UOdysseyAnimationCell*> newCells = layer->CopyCells(referenceCells, originalCell->IndexInLayer);
+        TArray<UOdysseyLayerCell*> newCells = layer->CopyCells(referenceCells, originalCell->GetIndexInLayer());
         layer->RemoveCell(originalCell);
 
         for (int i = 0; i < resultingCells.Num(); i++)
         {
-            FOdysseyObjectEditorUtils::SetPropertyValue(newCells[i], GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), resultingCells[i].mExposure);
+            newCells[i]->SetExposure(resultingCells[i].mExposure);
         }
 
         selectedCells.Remove(originalCell);
         selectedCells.Append(newCells);
     }
 
-    layer->GetLayerStack()->GetCellSelection()->SetSelectedCells(selectedCells);
+    layerStack->GetCellSelection()->SetSelectedCells(selectedCells);
 }
 
 bool
 FOdysseyAnimationTimelineCellImageStaggerShortcuts::CanAction_ConvertToReferenceCells()
 {
-    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(mLayerStack->CurrentLayer.Get());
+    UOdysseyAnimation* animation = mAnimation.Get();
+    if (!animation)
+        return false;
+
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(animation->GetLayerStack());
+    if (!layerStack)
+        return false;
+
+    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerStack->GetCurrentLayer());
     if (!layer)
         return false;
 
     if (layer->IsLockedRecursively())
         return false;
 
-    UOdysseyAnimation* animation = layer->GetAnimation();
-    if (!animation)
+    TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
+    if (selectedCells.IsEmpty())
         return false;
 
-    TArray<UOdysseyAnimationCell*> selectedCells = layer->GetLayerStack()->GetCellSelection()->GetSelectedCells();
-    if (selectedCells.IsEmpty())
-    {
-        UOdysseyAnimationCell* cell = layer->GetCellAtFrame(animation->CurrentFrame);
-        if (!cell)
-            return false;
-    }
-
-    TArray<UOdysseyAnimationCell*> staggerCells = selectedCells.FilterByPredicate(
-        [](UOdysseyAnimationCell* iCell)
+    TArray<UOdysseyLayerCell*> staggerCells = selectedCells.FilterByPredicate(
+        [](UOdysseyLayerCell* iCell)
         {
-            return iCell->IsA<UOdysseyAnimationCellImageStagger>();
+            return iCell->IsA<UOdysseyLayerCellImageStagger>();
         }
     );
 

@@ -15,6 +15,7 @@ int TextureSourceFormatBytesPerPixel(ETextureSourceFormat iFormat)
         case TSF_BGRE8:     return 4;
         case TSF_RGBA16:    return 8;
         case TSF_RGBA16F:   return 8;
+        case TSF_RGBA32F:   return 16;
         case TSF_Invalid:
         case TSF_MAX:
         default: break;
@@ -33,6 +34,29 @@ bool TextureSourceFormatNeedsConversionToULISFormat( ETextureSourceFormat iForma
             break;
     }
     return false;
+}
+
+bool RawImageFormatNeedsConversionToULISFormat( ERawImageFormat::Type iFormat )
+{
+    switch( iFormat )
+    {
+        case ERawImageFormat::BGRE8:
+        case ERawImageFormat::RGBA16F:
+            return true;
+        default:
+            break;
+    }
+    return false;
+}
+
+void
+ConvertRawImageFormatToULISFormat( const uint8* iSrc, uint8* oDst, int iWidth, int iHeight, ERawImageFormat::Type iFormat)
+{
+    switch( iFormat )
+    {
+        case ERawImageFormat::BGRE8: ConvertTextureSourceFormatToULISFormat(iSrc, oDst, iWidth, iHeight, TSF_BGRE8); break;
+        case ERawImageFormat::RGBA16F: ConvertTextureSourceFormatToULISFormat(iSrc, oDst, iWidth, iHeight, TSF_RGBA16F); break;
+    }
 }
 
 void
@@ -129,7 +153,8 @@ ConvertULISFormatToTextureSourceFormat( const uint8* iSrc, uint8* oDst, int iWid
         case TSF_BGRA8:     ret = ::ULIS::Format_BGRA8;     break;
         case TSF_BGRE8:     ret = ::ULIS::Format_RGBF;      break;
         case TSF_RGBA16:    ret = ::ULIS::Format_RGBA16;    break;
-        case TSF_RGBA16F:   ret = ::ULIS::Format_RGBAF;     break; //TODO: Change to RGBA16G ULIS FORMAT (RGBA half floating points 16 bits, see Unreal implementation)
+        case TSF_RGBA16F:   ret = ::ULIS::Format_RGBAF;     break;
+        case TSF_RGBA32F:   ret = ::ULIS::Format_RGBAF;     break;
         case TSF_MAX:       ret = 0;                        break;
         default:            ret = 0;                        break;
     }
@@ -162,6 +187,23 @@ ConvertULISFormatToTextureSourceFormat( const uint8* iSrc, uint8* oDst, int iWid
     return  static_cast< ::ULIS::eFormat >( ret );
 }
 
+::ULIS::eFormat ULISFormatForRawImageFormat( ERawImageFormat::Type iFormat )
+{
+    switch( iFormat )
+    {
+        case ERawImageFormat::G8: return ::ULIS::Format_G8;
+        case ERawImageFormat::BGRA8: return ::ULIS::Format_BGRA8;
+        case ERawImageFormat::BGRE8: return ::ULIS::Format_RGBF;
+        case ERawImageFormat::RGBA16: return ::ULIS::Format_RGBA16;
+        case ERawImageFormat::RGBA16F: return ::ULIS::Format_RGBAF;
+        case ERawImageFormat::RGBA32F: return ::ULIS::Format_RGBAF;
+        case ERawImageFormat::G16: return ::ULIS::Format_G16;
+        case ERawImageFormat::R16F: return ::ULIS::Format_G16;
+        case ERawImageFormat::R32F: return ::ULIS::Format_GF;
+    }
+    return  static_cast< ::ULIS::eFormat >( 0 );
+}
+
 ETextureSourceFormat TextureSourceFormatForULISFormat( ::ULIS::eFormat iFormat )
 {
     ETextureSourceFormat ret = TSF_Invalid;
@@ -170,7 +212,7 @@ ETextureSourceFormat TextureSourceFormatForULISFormat( ::ULIS::eFormat iFormat )
         case ::ULIS::Format_G16:    ret = TSF_G16;      break;
         case ::ULIS::Format_BGRA8:  ret = TSF_BGRA8;    break;
         case ::ULIS::Format_RGBA16: ret = TSF_RGBA16;   break;
-        case ::ULIS::Format_RGBAF:  ret = TSF_RGBA16F;  break;
+        case ::ULIS::Format_RGBAF:  ret = TSF_RGBA32F;  break;
         default:                    ret = TSF_Invalid;  break;
     }
     checkf(ret,TEXT("Error, bad format !")); // Crash
@@ -186,6 +228,7 @@ EPixelFormat PixelFormatForULISFormat( ::ULIS::eFormat iFormat )
         case ::ULIS::Format_ARGB8:  ret = PF_A8R8G8B8;              break;
         case ::ULIS::Format_BGRA8:  ret = PF_B8G8R8A8;              break;
         case ::ULIS::Format_ABGRF:  ret = PF_A32B32G32R32F;         break;
+        case ::ULIS::Format_RGBAF:  ret = PF_FloatRGBA;         break;
         //case ::ULIS::Format_RGBA32: ret = PF_R32G32B32A32_UINT;     break; // Disabled 32bit support
         case ::ULIS::Format_RGBA16: ret = PF_R16G16B16A16_UINT;     break;
         case ::ULIS::Format_RGBA8:  ret = PF_R8G8B8A8_UINT;         break;

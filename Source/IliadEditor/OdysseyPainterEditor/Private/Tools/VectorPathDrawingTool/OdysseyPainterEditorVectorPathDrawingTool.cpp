@@ -263,7 +263,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorGro
     ::ULIS::FVec2D vertexWorldCoords = ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y );
     uint64 retFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
                     | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                    | FOdysseyPainterEditor::UI_UPDATE_HUD; // re-creates the quadtree
+                    | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD; // re-creates the quadtree
 
     mPathTracer.Reset();
     mStitchedVertex = nullptr;
@@ -472,7 +472,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorGroup
     ::ULIS::FVec2D vertexWorldCoords = ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y );
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
                              | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                             | FOdysseyPainterEditor::UI_UPDATE_HUD; // re-creates the quadtree;
+                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD; // re-creates the quadtree;
 
     mTimeAtUp = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 

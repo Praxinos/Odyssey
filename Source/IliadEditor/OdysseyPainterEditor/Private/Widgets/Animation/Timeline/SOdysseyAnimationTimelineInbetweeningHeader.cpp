@@ -3,8 +3,9 @@
 
 #include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineInbetweeningHeader.h"
 #include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineInbetweeningHeaderRow.h"
-#include "LayerStack/OdysseyAnimationLayerStack.h"
-#include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
+#include "OdysseyAnimation.h"
+#include "OdysseyAnimationLayerStack.h"
+#include "OdysseyAnimationLayerImageVector.h"
 
 #include "Widgets/Input/NumericTypeInterface.h"
 #include "Widgets/Input/NumericUnitTypeInterface.inl"
@@ -15,6 +16,7 @@
 // from module OdysseyPainterEditor
 #include "OdysseyPainterEditorSource.h"
 #include "OdysseyPainterEditor.h"
+#include "OdysseyPainterEditorModule.h"
 
 // from module OdysseyVector
 #include "OdysseyVectorLayer.h"
@@ -48,7 +50,7 @@ SOdysseyAnimationTimelineInbetweeningHeader::Construct( const FArguments& InArgs
     static FTableViewStyle style = FOdysseyStyle::GetWidgetStyle<FTableViewStyle>("Inbetweening.TableView");
 
     mAnimationLayerImageVector = iAnimationLayerImageVector;
-    mEditor = InArgs._PainterEditor;
+    mOnTransactCurrentFrame = InArgs._OnTransactCurrentFrame;
 
     // bind refresh function to delegates on existing vector scenes at load. Needed to refresh necessary widgets.
     FOdysseyVectorEngine::OnNotifyDelegate().AddRaw( this, &SOdysseyAnimationTimelineInbetweeningHeader::OnVectorSceneNotify );
@@ -211,7 +213,7 @@ SOdysseyAnimationTimelineInbetweeningHeader::OnSelectionChanged( TSharedPtr<FInb
 {
     std::list<FOdysseyVectorCell*> cellList;
     uint64 retFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                    | FOdysseyPainterEditor::UI_UPDATE_HUD;
+                    | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     if( SelectInfo != ESelectInfo::Type::Direct )
     {
@@ -272,14 +274,15 @@ SOdysseyAnimationTimelineInbetweeningHeader::Private_IsItemSelected( const TShar
 {
     UOdysseyLayerStack* layerStack = mAnimationLayerImageVector->GetLayerStack();
 
-    return iItem.Get()->GetInbetweenerTag()->GetOwner()->IsSelected() && ( layerStack->CurrentLayer == mAnimationLayerImageVector );
+    return iItem.Get()->GetInbetweenerTag()->GetOwner()->IsSelected() && ( layerStack->GetCurrentLayer() == mAnimationLayerImageVector );
 }
 
 TSharedRef<ITableRow>
 SOdysseyAnimationTimelineInbetweeningHeader::OnGenerateRow( TSharedPtr<FInbetweeningListViewItem> iItem
                                                           , const TSharedRef<STableViewBase>& iOwnerTable )
 {
-    return SNew( SOdysseyAnimationTimelineInbetweeningHeaderRow, iOwnerTable, iItem );
+    return SNew( SOdysseyAnimationTimelineInbetweeningHeaderRow, iOwnerTable, iItem )
+        .OnTransactCurrentFrame(mOnTransactCurrentFrame);
 }
 
 TSharedPtr<SWidget>
@@ -308,7 +311,8 @@ SOdysseyAnimationTimelineInbetweeningHeader::OnContextMenuOpening()
 void
 SOdysseyAnimationTimelineInbetweeningHeader::Commit()
 {
-    FOdysseyPainterEditor* editor = mEditor.Get();
+    FOdysseyPainterEditorModule& painterEditorModule = FModuleManager::GetModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
+    FOdysseyPainterEditor* editor = painterEditorModule.GetOpenedEditorForAsset(mAnimationLayerImageVector->GetAnimation());
 
     // note: editor is NULL in the Sequencer
     FOdysseyPainterEditor::CommitSelectedInbetweenerTag( editor, mAnimationLayerImageVector->GetVectorLayer() );
@@ -317,7 +321,8 @@ SOdysseyAnimationTimelineInbetweeningHeader::Commit()
 void
 SOdysseyAnimationTimelineInbetweeningHeader::ResetSpacingCharts()
 {
-    FOdysseyPainterEditor* editor = mEditor.Get();
+    FOdysseyPainterEditorModule& painterEditorModule = FModuleManager::GetModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
+    FOdysseyPainterEditor* editor = painterEditorModule.GetOpenedEditorForAsset(mAnimationLayerImageVector->GetAnimation());
 
     // note: editor is NULL in the Sequencer
     FOdysseyPainterEditor::ResetInbetweenerTagSpacingChart( editor, mAnimationLayerImageVector->GetVectorLayer() );
@@ -326,7 +331,8 @@ SOdysseyAnimationTimelineInbetweeningHeader::ResetSpacingCharts()
 void
 SOdysseyAnimationTimelineInbetweeningHeader::RemoveInbetweenerTag()
 {
-    FOdysseyPainterEditor* editor = mEditor.Get();
+    FOdysseyPainterEditorModule& painterEditorModule = FModuleManager::GetModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
+    FOdysseyPainterEditor* editor = painterEditorModule.GetOpenedEditorForAsset(mAnimationLayerImageVector->GetAnimation());
 
     // note: editor is NULL in the Sequencer
     FOdysseyPainterEditor::RemoveInbetweenerTag( editor, mAnimationLayerImageVector->GetVectorLayer() );
@@ -336,12 +342,6 @@ UOdysseyAnimationLayerImageVector*
 SOdysseyAnimationTimelineInbetweeningHeader::GetAnimationLayerImageVector()
 {
     return mAnimationLayerImageVector;
-}
-
-FOdysseyPainterEditor*
-SOdysseyAnimationTimelineInbetweeningHeader::GetEditor() const
-{
-    return mEditor.Get();
 }
 
 void

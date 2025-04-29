@@ -1,7 +1,7 @@
 // IDDN.FR.001.060015.013.S.X.2019.000.00000
 // ODYSSEY is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
 #include "Widgets/Animation/Timeline/Layers/SOdysseyAnimationLayerTimeline.h"
-#include "LayerStack/Layers/OdysseyAnimationLayer.h"
+#include "OdysseyAnimationLayer.h"
 #include "OdysseyStyle.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
@@ -33,7 +33,7 @@ SOdysseyAnimationLayerTimeline::GetBorder() const
         return borderBrush;
 
     UOdysseyLayerStack* layerStack = GetLayer()->GetLayerStack();
-    if ( !layerStack || layerStack->CurrentLayer != GetLayer())
+    if ( !layerStack || layerStack->GetCurrentLayer() != GetLayer())
         return borderBrush;
 
     return FOdysseyStyle::GetBrush("OdysseyLayerStack.CurrentLayerInactiveBackgroundBrush");

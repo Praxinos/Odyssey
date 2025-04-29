@@ -8,23 +8,25 @@
 class FOdysseyAnimationTimelineShortcuts;
 class FOdysseyPainterEditorAnimationTimelinePosition;
 class UOdysseyAnimationLayerStack;
-class FOdysseyPainterEditor;
 
 class ODYSSEYPAINTEREDITOR_API SOdysseyAnimationLayerStackTreeView
     : public SOdysseyLayerStackTreeView
 {
+    DECLARE_DELEGATE_OneParam(FOnTransactCurrentFrame, TOptional<int>)
+
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationLayerStackTreeView)
-        : _ExternalScrollbar(nullptr)
-        , _PainterEditor(nullptr)
+        : _CurrentFrame(0)
+        , _ExternalScrollbar(nullptr)
         {}
         SLATE_ARGUMENT( UOdysseyAnimationLayerStack*, LayerStack )
+        SLATE_ATTRIBUTE( int, CurrentFrame )
         SLATE_ARGUMENT( TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition>, TimelinePosition )
         SLATE_ARGUMENT( TOptional<TArray<SHeaderRow::FColumn::FArguments>>, Columns )
         SLATE_EVENT( FOnGenerateRow, OnGenerateRow )
         SLATE_ARGUMENT( TSharedPtr<SScrollBar>, ExternalScrollbar )
         SLATE_EVENT( FOnTableViewScrolled, OnTreeViewScrolled )
-        SLATE_ATTRIBUTE(FOdysseyPainterEditor*, PainterEditor)
+        SLATE_EVENT(FOnTransactCurrentFrame, OnTransactCurrentFrame)
     SLATE_END_ARGS()
 
 public:
@@ -49,5 +51,4 @@ private:
     TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition> mTimelinePosition;
 
     UOdysseyAnimationLayerStack* mLayerStack;
-    TAttribute<FOdysseyPainterEditor*> mEditor;
 };

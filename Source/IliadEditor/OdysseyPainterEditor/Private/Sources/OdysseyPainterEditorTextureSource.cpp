@@ -2,10 +2,10 @@
 // ODYSSEY is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
 
 #include "OdysseyPainterEditorTextureSource.h"
-#include "LayerStack/OdysseyTextureLayerStack.h"
+#include "OdysseyTextureLayerStack.h"
 #include "OdysseyTextureLayerStackUserData.h"
-#include "LayerStack/OdysseyTextureLayerImageRaster.h"
-#include "LayerStack/OdysseyTextureLayerImageVector.h"
+#include "OdysseyTextureLayerImageRaster.h"
+#include "OdysseyTextureLayerImageVector.h"
 #include "OdysseyRasterBlockMutator.h"
 #include "ULISLoaderModule.h"
 #include "Undo/OdysseyVectorUndoSceneClear.h"
@@ -19,6 +19,7 @@
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorCell.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
+#include "Engine/TextureRenderTarget2D.h"
 
 #define LOCTEXT_NAMESPACE "TextureEditor"
 
@@ -58,7 +59,7 @@ FOdysseyPainterEditorTextureSource::Height() const
 }
 
 void
-FOdysseyPainterEditorTextureSource::Activate()
+FOdysseyPainterEditorTextureSource::Activate(FOdysseyPainterEditor* iEditor)
 {
     AddEditedObject(mTexture);
 
@@ -68,7 +69,7 @@ FOdysseyPainterEditorTextureSource::Activate()
     if ( layerStack )
         layerStack->ActivateTextureFastUpdate();
 
-    FOdysseyPainterEditorSource::Activate();
+    FOdysseyPainterEditorSource::Activate(iEditor);
 }
 
 void
@@ -87,16 +88,6 @@ UTexture*
 FOdysseyPainterEditorTextureSource::DisplayTexture() const
 {
     return mTexture;
-}
-
-TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>
-FOdysseyPainterEditorTextureSource::GetDisplayBlock()
-{
-    UOdysseyTextureLayerStack* layerStack = GetLayerStack();
-    if (!layerStack)
-        return nullptr;
-
-    return layerStack->GetSurface()->Block();
 }
 
 UTexture2D*
@@ -147,7 +138,7 @@ FOdysseyPainterEditorTextureSource::GetCurrentMediaProvider()
     if (!layerStack)
         return FOdysseyMediaProvider();
 
-    UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
+    UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->GetCurrentLayer());
     if (!currentLayer)
         return FOdysseyMediaProvider();
 
@@ -165,14 +156,14 @@ FOdysseyPainterEditorTextureSource::Clear()
     if ( !layerStack )
         return;
 
-    //UOdysseyTextureLayerImageRaster* currentLayerRaster = Cast<UOdysseyTextureLayerImageRaster>(layerStack->CurrentLayer.Get());
-    //UOdysseyTextureLayerImageVector* currentLayerVector = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
+    //UOdysseyTextureLayerImageRaster* currentLayerRaster = Cast<UOdysseyTextureLayerImageRaster>(layerStack->GetCurrentLayer());
+    //UOdysseyTextureLayerImageVector* currentLayerVector = Cast<UOdysseyTextureLayerImageVector>(layerStack->GetCurrentLayer());
 
     #ifdef WITH_EDITOR
         FScopedTransaction ScopedTransaction(LOCTEXT("actions.clear", "Clear"));
     #endif
 
-    UOdysseyLayer* currentLayer = layerStack->CurrentLayer.Get();
+    UOdysseyLayer* currentLayer = layerStack->GetCurrentLayer();
     if (!currentLayer)
         return;
 
@@ -192,7 +183,7 @@ FOdysseyPainterEditorTextureSource::Clear()
             FOdysseyRasterBlockMutator mutator(rasterBlock);
             mutator.EditTilesFromRects(
                 { ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) },
-                [&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+                [&](TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
                 {
                     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
                     ::ULIS::FEvent eventClear;
@@ -241,7 +232,7 @@ FOdysseyPainterEditorTextureSource::ClearFromCopyBlock(TSharedPtr<::ULIS::FBlock
     FScopedTransaction ScopedTransaction(LOCTEXT("actions.cut", "Cut"));
 #endif
 
-    UOdysseyLayer* currentLayer = layerStack->CurrentLayer.Get();
+    UOdysseyLayer* currentLayer = layerStack->GetCurrentLayer();
     if (!currentLayer)
         return;
 
@@ -261,7 +252,7 @@ FOdysseyPainterEditorTextureSource::ClearFromCopyBlock(TSharedPtr<::ULIS::FBlock
             FOdysseyRasterBlockMutator mutator(rasterBlock);
             mutator.EditTilesFromRects(
                 { ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) },
-                [&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+                [&](TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
                 {
                     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
                     ::ULIS::FEvent eventCut;
@@ -301,7 +292,7 @@ void FOdysseyPainterEditorTextureSource::PasteBlockToCurrentLayer(TSharedPtr<::U
     FScopedTransaction ScopedTransaction(LOCTEXT("actions.paste", "Paste"));
 #endif
 
-    UOdysseyLayer* currentLayer = layerStack->CurrentLayer.Get();
+    UOdysseyLayer* currentLayer = layerStack->GetCurrentLayer();
     if (!currentLayer)
         return;
 
@@ -344,7 +335,7 @@ void FOdysseyPainterEditorTextureSource::PasteBlockToCurrentLayer(TSharedPtr<::U
             FOdysseyRasterBlockMutator mutator(rasterBlock);
             mutator.EditTilesFromRects(
                 { ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) },
-                [&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+                [&](TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
                 {
                     ::ULIS::FEvent eventPaste;
 
@@ -388,7 +379,7 @@ FOdysseyPainterEditorTextureSource::PasteBlockToNewLayer( TSharedPtr<::ULIS::FBl
     GetLayerStack()->Modify();
 
     UOdysseyTextureLayerImageRaster* layer = Cast< UOdysseyTextureLayerImageRaster >(GetLayerStack()->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass()));
-    FOdysseyObjectEditorUtils::SetPropertyValue(GetLayerStack(), GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer), layer);
+    GetLayerStack()->SetCurrentLayer(layer);
 
     FOdysseyRasterBlockMutator mutator(layer->GetRasterBlock());
     mutator.Copy(iBlock, {});

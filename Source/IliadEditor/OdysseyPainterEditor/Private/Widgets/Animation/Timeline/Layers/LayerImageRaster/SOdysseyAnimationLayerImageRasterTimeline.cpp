@@ -4,10 +4,10 @@
 #include "Widgets/Animation/Timeline/Layers/LayerImageRaster/SOdysseyAnimationLayerImageRasterTimeline.h"
 #include "Widgets/Animation/Timeline/Cells/CellImageStagger/SOdysseyAnimationCellImageStagger.h"
 #include "Widgets/Animation/Timeline/Cells/CellImageRaster/SOdysseyAnimationCellImageRaster.h"
-#include "LayerStack/Cells/CellImageStagger/OdysseyAnimationCellImageStagger.h"
+#include "OdysseyLayerCellImageStagger.h"
 #include "Shortcuts/AnimationTimeline/OdysseyAnimationTimelineCellImageRasterShortcuts.h"
-#include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
-#include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
+#include "OdysseyAnimationLayerImageRaster.h"
+#include "OdysseyAnimationCellImageRaster.h"
 #include "OdysseyAnimation.h"
 #include "OdysseyPainterEditorAnimationCommands.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
@@ -23,7 +23,7 @@ SOdysseyAnimationLayerImageRasterTimeline::SOdysseyAnimationLayerImageRasterTime
 }
 
 TSharedRef<SWidget>
-SOdysseyAnimationLayerImageRasterTimeline::OnGenerateCellWidget(UOdysseyAnimationCell* iCell)
+SOdysseyAnimationLayerImageRasterTimeline::OnGenerateCellWidget(UOdysseyLayerCell* iCell)
 {
     if (!iCell)
     {
@@ -35,9 +35,9 @@ SOdysseyAnimationLayerImageRasterTimeline::OnGenerateCellWidget(UOdysseyAnimatio
         return SNew(SOdysseyAnimationCellImageRaster, Cast<UOdysseyAnimationCellImageRaster>(iCell))
             .Clipping(EWidgetClipping::ClipToBoundsAlways);
     }
-    else if (iCell->IsA<UOdysseyAnimationCellImageStagger>())
+    else if (iCell->IsA<UOdysseyLayerCellImageStagger>())
     {
-        return SNew(SOdysseyAnimationCellImageStagger, Cast<UOdysseyAnimationCellImageStagger>(iCell))
+        return SNew(SOdysseyAnimationCellImageStagger, Cast<UOdysseyLayerCellImageStagger>(iCell))
             .TimelinePosition(mTimelinePosition);
     }
 
@@ -51,10 +51,10 @@ SOdysseyAnimationLayerImageRasterTimeline::OnPreviewMouseButtonDown(const FGeome
     if (!layerStack)
         return SOdysseyAnimationLayerImageTimeline::OnPreviewMouseButtonDown(MyGeometry, MouseEvent);
 
-    if (layerStack->CurrentLayer.Get() == mLayer)
+    if (layerStack->GetCurrentLayer() == mLayer)
         return SOdysseyAnimationLayerImageTimeline::OnPreviewMouseButtonDown(MyGeometry, MouseEvent);
 
-    FOdysseyObjectEditorUtils::SetPropertyValue(layerStack, GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer), mLayer);
+    layerStack->SetCurrentLayer(mLayer);
 
     return SOdysseyAnimationLayerImageTimeline::OnPreviewMouseButtonDown(MyGeometry, MouseEvent);
 }
@@ -63,7 +63,7 @@ TSharedPtr<FExtender>
 SOdysseyAnimationLayerImageRasterTimeline::ExtendContextMenu()
 {
     TSharedRef<FUICommandList> commandList = MakeShared<FUICommandList>();
-    mAnimationTimelineCellImageRasterShortcuts = MakeShared<FOdysseyAnimationTimelineCellImageRasterShortcuts>(mLayer->GetLayerStack());
+    mAnimationTimelineCellImageRasterShortcuts = MakeShared<FOdysseyAnimationTimelineCellImageRasterShortcuts>(mLayer->GetAnimation());
     mAnimationTimelineCellImageRasterShortcuts->MapActionsToCommandList(commandList);
 
     TSharedRef<FExtender> extender = MakeShared<FExtender>();

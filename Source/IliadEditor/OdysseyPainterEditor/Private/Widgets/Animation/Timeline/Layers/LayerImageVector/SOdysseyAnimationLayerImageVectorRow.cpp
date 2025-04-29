@@ -4,16 +4,18 @@
 #include "Widgets/Animation/Timeline/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorRow.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "OdysseyStyle.h"
-#include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
+#include "OdysseyAnimation.h"
+#include "OdysseyAnimationLayerImageVector.h"
+#include "OdysseyPainterEditorModule.h"
 #include "Widgets/Animation/Timeline/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorTimeline.h"
-#include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineLightTableKey.h"
+#include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineLighttableKey.h"
 #include "Widgets/Animation/Timeline/SOdysseyAnimationLayerStack.h"
 #include "Widgets/Input/NumericTypeInterface.h"
 #include "Widgets/Input/NumericUnitTypeInterface.inl"
 #include "Widgets/Input/SNumericEntryBox.h"
 #include "Math/UnitConversion.h"
 #include "SEnumCombo.h"
-#include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineLightTableHeader.h"
+#include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineLighttableHeader.h"
 #include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineInbetweeningHeader.h"
 #include "OdysseyPainterEditor.h"
 #include "HUD/OdysseyVectorHUD.h"
@@ -31,7 +33,6 @@ void SOdysseyAnimationLayerImageVectorRow::Construct(
 {
     ensure(iAnimationLayerImageVector);
     mAnimationLayerImageVector = iAnimationLayerImageVector;
-    mEditor = InArgs._PainterEditor;
 
     SOdysseyAnimationLayerRow::Construct(
         SOdysseyAnimationLayerRow::FArguments()
@@ -90,8 +91,7 @@ SOdysseyAnimationLayerImageVectorRow::GenerateMainRowHeaderOptionWidgets()
 TSharedRef<SWidget>
 SOdysseyAnimationLayerImageVectorRow::GenerateInbetweeningRowHeaderWidget()
 {
-    return SAssignNew( mInbetweeningHeader, SOdysseyAnimationTimelineInbetweeningHeader, mAnimationLayerImageVector)
-        .PainterEditor(mEditor);
+    return SAssignNew( mInbetweeningHeader, SOdysseyAnimationTimelineInbetweeningHeader, mAnimationLayerImageVector);
 }
 
 EVisibility
@@ -99,7 +99,8 @@ SOdysseyAnimationLayerImageVectorRow::GetRowVisibility(FName iRow) const
 {
     if (iRow == "Inbetweening")
     {
-        FOdysseyPainterEditor* editor = mEditor.Get();
+        FOdysseyPainterEditorModule& painterEditorModule = FModuleManager::GetModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
+        FOdysseyPainterEditor* editor = painterEditorModule.GetOpenedEditorForAsset(mAnimationLayerImageVector->GetAnimation());
         if (!editor)
             return EVisibility::Collapsed;
 
@@ -119,26 +120,26 @@ void
 SOdysseyAnimationLayerImageVectorRow::OnIsWireframeCheckStateChanged( ECheckBoxState iState )
 {
     FScopedTransaction ScopedTransaction(LOCTEXT("layer-image-vector.transaction.set-wireframe", "Change Layer Wireframe status"));
-    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageVector, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayerImageVector, IsWireframe), iState == ECheckBoxState::Checked);
+    mAnimationLayerImageVector->SetIsWireframe(iState == ECheckBoxState::Checked);
 }
 
 void
 SOdysseyAnimationLayerImageVectorRow::OnIsColoredCheckStateChanged( ECheckBoxState iState )
 {
     FScopedTransaction ScopedTransaction(LOCTEXT("layer-image-vector.transaction.set-coloring", "Change Layer Coloring"));
-    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageVector, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayerImageVector, IsColored), iState == ECheckBoxState::Checked);
+    mAnimationLayerImageVector->SetIsColored(iState == ECheckBoxState::Checked);
 }
 
 ECheckBoxState
 SOdysseyAnimationLayerImageVectorRow::GetIsWireframeIsChecked() const
 {
-    return mAnimationLayerImageVector->IsWireframe ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+    return mAnimationLayerImageVector->IsWireframe() ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
 
 ECheckBoxState
 SOdysseyAnimationLayerImageVectorRow::GetIsColoredIsChecked() const
 {
-    return mAnimationLayerImageVector->IsColored ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+    return mAnimationLayerImageVector->IsColored() ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -406,7 +406,7 @@ void UOdysseyPainterEditorRasterTransformTool::UpdateTransformHUD()
     mRasterMutator.SetRasterBlock(rasterBlock);
     mRasterMutator.EditTilesFromRects(
         { boundingBox },
-        [&, referenceBlock = mSelectionBlock](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+        [&, referenceBlock = mSelectionBlock](TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
         {
             ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
             ::ULIS::FEvent blendEvent;

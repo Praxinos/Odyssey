@@ -245,22 +245,6 @@ SOdysseyAnimationTimelineControl::OnMouseButtonUp(const FGeometry& MyGeometry, c
     return FReply::Unhandled();
 }
 
-FNavigationReply
-SOdysseyAnimationTimelineControl::OnNavigation(const FGeometry& MyGeometry, const FNavigationEvent& InNavigationEvent)
-{
-    if (InNavigationEvent.GetNavigationType() == EUINavigation::Left)
-    {
-        int frame = FMath::Max(0, mAnimation->CurrentFrame - 1);
-        FOdysseyObjectEditorUtils::SetPropertyValue(mAnimation, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), frame);
-    }
-    else if (InNavigationEvent.GetNavigationType() == EUINavigation::Right)
-    {
-        int frame = mAnimation->CurrentFrame + 1;
-        FOdysseyObjectEditorUtils::SetPropertyValue(mAnimation, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), frame);
-    }
-    return FNavigationReply::Stop();
-}
-
 float
 SOdysseyAnimationTimelineControl::MousePositionToFrame(float iX) const
 {

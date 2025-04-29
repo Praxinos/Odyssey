@@ -3,8 +3,8 @@
 
 #include "OdysseyPainterEditorAnimationTimelineTab.h"
 
-#include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
-#include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
+#include "OdysseyAnimationLayerImageRaster.h"
+#include "OdysseyAnimationCellImageRaster.h"
 #include "Widgets/Animation/Timeline/SOdysseyAnimationLayerStack.h"
 #include "ULISEventBuilder.h"
 #include "ULISLoaderModule.h"
@@ -25,7 +25,6 @@
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorAnimationSource.h"
 #include "OdysseyAnimation.h"
-#include "OdysseyAnimationCurrentFrameMutator.h"
 #include "OdysseyPainterEditorAnimationFunctionLibrary.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "Tools/OutOfPegsTool/OdysseyPainterEditorAnimationOutOfPegsTool.h"
@@ -76,10 +75,8 @@ FOdysseyPainterEditorAnimationTimelineTab::CreateWidget()
         +SWidgetSwitcher::Slot()
         [
             SNew(SOdysseyAnimationLayerStack)
-            .PainterEditor(mEditor)
             .Animation(this, &FOdysseyPainterEditorAnimationTimelineTab::Animation)
             .Player(this, &FOdysseyPainterEditorAnimationTimelineTab::Player)
-            .PlaybackFramesPerSecond(this, &FOdysseyPainterEditorAnimationTimelineTab::PlaybackFramesPerSecond)
             .TimelinePosition(this, &FOdysseyPainterEditorAnimationTimelineTab::GetTimelinePosition)
             .OnActivateOutOfPegs(this, &FOdysseyPainterEditorAnimationTimelineTab::OnActivateOutOfPegs)
             .OnInactivateOutOfPegs(this, &FOdysseyPainterEditorAnimationTimelineTab::OnInactivateOutOfPegs)
@@ -135,12 +132,6 @@ FOdysseyPainterEditorAnimationTimelineTab::Player() const
     return animSource->GetAnimationPlayer();
 }
 
-float
-FOdysseyPainterEditorAnimationTimelineTab::PlaybackFramesPerSecond() const
-{
-    return mEditor->GetAnimationPlaybackFramesPerSecond();
-}
-
 TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition>
 FOdysseyPainterEditorAnimationTimelineTab::GetTimelinePosition() const
 {
@@ -150,13 +141,21 @@ FOdysseyPainterEditorAnimationTimelineTab::GetTimelinePosition() const
 void
 FOdysseyPainterEditorAnimationTimelineTab::OnScrubStart()
 {
-    mEditor->SetAnimationTimelineIsScrubbing(true);
+    UOdysseyAnimationPlayer* player = Player();
+    if (!player)
+        return;
+
+    player->BeginScrub();
 }
 
 void
 FOdysseyPainterEditorAnimationTimelineTab::OnScrubEnd()
 {
-    mEditor->SetAnimationTimelineIsScrubbing(false);
+    UOdysseyAnimationPlayer* player = Player();
+    if (!player)
+        return;
+
+    player->EndScrub();
 }
 
 //--------------------------------------------------------------------------------------
@@ -277,7 +276,7 @@ FOdysseyPainterEditorAnimationTimelineTab::ImportTextureSequence()
     TArray<UTexture2D*> textures;
     for(FAssetData& assetData : assetsData)
     {
-        textures.Add(Cast<UTexture2D>(assetsData[0].GetAsset()));
+        textures.Add(Cast<UTexture2D>(assetData.GetAsset()));
     }
 
     UOdysseyPainterEditorAnimationFunctionLibrary::ImportTextureSequence(animation, textures);
@@ -293,7 +292,7 @@ FOdysseyPainterEditorAnimationTimelineTab::ImportImageSequence()
     TSharedPtr<FOdysseyPainterEditorAnimationSource> animationSource = StaticCastSharedPtr<FOdysseyPainterEditorAnimationSource>(source);
 
     UOdysseyAnimation* animation = animationSource->GetAnimation();
-    UOdysseyAnimationLayerStack* layerStack = animation->GetLayerStack();
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(animation->GetLayerStack());
     IDesktopPlatform* desktopPlatformHandle = FDesktopPlatformModule::Get();
     TArray< FString > filenames;
     bool dialogValidated = desktopPlatformHandle->OpenFileDialog(
@@ -344,7 +343,7 @@ FOdysseyPainterEditorAnimationTimelineTab::ExportAsFlipbook()
     UOdysseyAnimation* animation = animationSource->GetAnimation();
 
     FSaveAssetDialogConfig saveAssetDialogConfig;
-    saveAssetDialogConfig.DialogTitleOverride = LOCTEXT( "export-layers-as-textures.save-asset-dialog.title", "Export Layers As Texture" );
+    saveAssetDialogConfig.DialogTitleOverride = LOCTEXT( "export-as-flipbook.save-asset-dialog.title", "Export As Flipbook" );
     saveAssetDialogConfig.DefaultPath = FPaths::GetPath(animation->GetPathName() );
     saveAssetDialogConfig.DefaultAssetName = animation->GetName() + TEXT("_Flipbook");
     saveAssetDialogConfig.AssetClassNames.Add( UPaperFlipbook::StaticClass()->GetClassPathName() );

@@ -9,32 +9,33 @@
 #include "Styling/SlateTypes.h"
 #include "Widgets/SCompoundWidget.h"
 
-class UOdysseyLayer;
-class UOdysseyAnimationComponent;
 class UOdysseyAnimationTimelineTrack;
+class UOdysseyAnimationLayerStack;
 namespace UE::Sequencer { class ISequencerTreeViewRow; }
 
 class SOdysseyAnimationTimelineTrack
     : public SCompoundWidget
 {
+    SLATE_DECLARE_WIDGET(SOdysseyAnimationTimelineTrack, SCompoundWidget)
+
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineTrack)
     {}
+        SLATE_ATTRIBUTE(UOdysseyAnimationLayerStack*, LayerStack)
     SLATE_END_ARGS()
 
 public:
-    void Construct(const FArguments& iArgs, UOdysseyAnimationComponent* iComponent, UOdysseyAnimationTimelineTrack* iTrack, const FBuildColumnWidgetParams& iParams, TSharedPtr<ISequencer> iSequencer);
+    SOdysseyAnimationTimelineTrack();
+
+    void Construct(const FArguments& iArgs, UOdysseyAnimationTimelineTrack* iTrack, const FBuildColumnWidgetParams& iParams, TSharedPtr<ISequencer> iSequencer);
     virtual FReply OnPreviewMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 
 private:
     void RebuildWidgets();
-
-    void OnAnimationChanged();
-    void OnPlayerChanged();
-    void OnModeChanged();
+    void OnLayerStackChanged();
 
 private:
-    UOdysseyAnimationComponent* mComponent;
+    TSlateAttribute<UOdysseyAnimationLayerStack*> mLayerStack;
     UOdysseyAnimationTimelineTrack* mTrack;
     TWeakPtr<UE::Sequencer::ISequencerTreeViewRow> mRow; //Must be a WeakPtr, otherwise the row is never killed and is still displayed when it should be hidden
     TWeakPtr<ISequencer> mSequencer;

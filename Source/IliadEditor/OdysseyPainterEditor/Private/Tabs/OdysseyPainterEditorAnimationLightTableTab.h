@@ -8,7 +8,7 @@
 class FOdysseyPainterEditor;
 class UOdysseyAnimationLayerStack;
 
-class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorAnimationLightTableTab :
+class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorAnimationLighttableTab :
     public FOdysseyEditorTab
 {
 public:
@@ -16,8 +16,8 @@ public:
 
 public:
     // Construction / Destruction
-    virtual ~FOdysseyPainterEditorAnimationLightTableTab();
-    FOdysseyPainterEditorAnimationLightTableTab(FOdysseyPainterEditor* iEditor);
+    virtual ~FOdysseyPainterEditorAnimationLighttableTab();
+    FOdysseyPainterEditorAnimationLighttableTab(FOdysseyPainterEditor* iEditor);
 
 protected:
     virtual const FName& GetId() const override;

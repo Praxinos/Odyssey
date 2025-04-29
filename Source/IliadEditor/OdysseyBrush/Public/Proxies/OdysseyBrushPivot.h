@@ -34,8 +34,6 @@ enum  class  EPivotOffsetMode : uint8
     kAbsolute       UMETA( DisplayName="Absolute pixel" ),
 };
 
-
-
 /////////////////////////////////////////////////////
 // Odyssey Brush Pivot
 USTRUCT( BlueprintType, meta=(DisplayName="FHandlePosition") )

@@ -46,16 +46,6 @@ UOdysseyLineShape::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
     bool snapAngles = SnapAngles ^ mInvertSnapAngles;
     if( snapAngles )
     {
-        //TODO: Angles
-        /* float shiftX = mEndPoint.x - mStartPoint.x;
-        float shiftY = c.y - mStartPoint.y;
-        float angleStep = PI / 8.f;
-        float sinLimit = sin(angleStep);
-        float cosLimit = cos(angleStep);
-
-        float angle = FMath::RadiansToDegrees(FMath::Atan2(shiftY, shiftX));
-        float sinAngle = sin(angle);
-        float cosAngle = cos(angle); */
         int shiftX = FMath::Abs( mEndPoint.x - mStartPoint.x);
         int shiftY = FMath::Abs( mEndPoint.y - mStartPoint.y);
 

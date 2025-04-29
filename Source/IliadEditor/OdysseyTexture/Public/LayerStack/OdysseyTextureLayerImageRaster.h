@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include "LayerStack/OdysseyTextureLayer.h"
-#include "Image/OdysseyBlendingMode.h"
+#include "OdysseyTextureLayer.h"
+#include "OdysseyBlendingMode.h"
 #include "Misc/TransactionObjectEvent.h"
 #include "Misc/ITransaction.h"
 #include "Misc/ITransactionObjectAnnotation.h"
@@ -33,6 +33,13 @@ public:
     TSharedPtr<FOdysseyRasterBlock> GetRasterBlock() const;
 
 public:
+    UFUNCTION(BlueprintCallable, Category="Odyssey|Cell")
+    void SetIsAlphaLocked(bool Value);
+
+    UFUNCTION(BlueprintPure, Category="Odyssey|Cell")
+    bool IsAlphaLocked() const;
+
+public:
     // UOdysseyLayer Overrides
 
     /**
@@ -50,7 +57,9 @@ protected:
 public:
     // UObject overrides
     virtual void PostInitProperties() override;
-    virtual void PostDuplicate(bool bDuplicateForPIE) override;
+    virtual void PostLoad() override;
+    virtual void PostDuplicate(EDuplicateMode::Type iDuplicateMode) override;
+    virtual void PreSave(FObjectPreSaveContext SaveContext) override;
 
 public:
     //UObject overrides
@@ -63,12 +72,14 @@ public:
     virtual void Serialize(FArchive& Ar) override;
 
 public:
-    //FOdysseyImageRenderingAbility overrides
-    virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame = 0, FImageRendererFilter iFilter = FImageRendererFilter()) const override;
-    virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame = 0) const override;
+    //IOdysseyRenderingAbility overrides
+    virtual TArray<FGuid> GetRenderingComposition(uint64 iRenderType, int iFrame = 0) const override;
 
 private:
-    TArray<::ULIS::FEvent> RasterBlockPostProcess(const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock>>& iOriginalBlocks, const FULISInvalidTileMap& iInvalidMap, const TArray<::ULIS::FEvent>& iWaitList);
+    void InitTexture();
+    void InitRasterBlock() const;
+
+    TArray<::ULIS::FEvent> RasterBlockPostProcess(const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock>>& iOriginalBlocks, const FOdysseyInvalidTileMap& iInvalidMap, const TArray<::ULIS::FEvent>& iWaitList);
 
 private:
     //Import/Export
@@ -76,13 +87,9 @@ private:
     friend class FOdysseyTextureLayerImageRasterImport;
 
 private:
-    TSharedPtr<FOdysseyRasterBlock> RasterBlock;
+    mutable TSharedPtr<FOdysseyRasterBlock> RasterBlock;
 
 private:
-    UFUNCTION(BlueprintSetter)
-    void IsAlphaLockedBlueprintSetter(bool Value);
-
-public:
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, NonTransactional, Category="Odyssey|Layer")
-    bool IsAlphaLocked = false;
+    UPROPERTY(NonTransactional)
+    bool bIsAlphaLocked = false;
 };

@@ -245,9 +245,9 @@ namespace FOdysseyFile
         // constants were initially computed from the CRC32 checksum of the constant's name, even though the constant's name may have changed over time
         // Just be sure the Chunk ID is unique and any ID will make it.
         // You can use website https://crc32.online/ to generate a code
-        static const uint32 CHUNK_CELL =  0xf93591b3; // container
-            static const uint32 CHUNK_CELL_LENGTH = 0x5dbe40b7; // uint32 (Length)
-            static const uint32 CHUNK_CELL_MARKID = 0x866d04a6; // FString (MarkId)
+        //static const uint32 CHUNK_CELL =  0xf93591b3; // container //Not used anymore, moved to OdysseyLayerCellImport to remove dependency to an Editor module while keeping retro compatibility
+            //static const uint32 CHUNK_CELL_LENGTH = 0x5dbe40b7; // uint32 (Length) //Not used anymore, moved to OdysseyLayerCellImport to remove dependency to an Editor module while keeping retro compatibility
+            //static const uint32 CHUNK_CELL_MARKID = 0x866d04a6; // FString (MarkId) //Not used anymore, moved to OdysseyLayerCellImport to remove dependency to an Editor module while keeping retro compatibility
 
         static const uint32 CHUNK_CELLIMAGEVECTOR =  0x60fdee3a; // container
             static const uint32 CHUNK_CELLIMAGEVECTOR_RESOLUTION = 0xc1bb48e1; // uint32(Width)-uint32(Height)
@@ -258,9 +258,9 @@ namespace FOdysseyFile
         static const uint32 CHUNK_CELLIMAGERASTER =  0xa37598ec; // container
             static const uint32 CHUNK_CELLIMAGERASTER_RASTERBLOCK = 0xf83974c6; // FOdysseyRasterBlock(Block)
 
-        static const uint32 CHUNK_CELLIMAGESTAGGER = 0x559ff069; // container
-            static const uint32 CHUNK_CELLIMAGESTAGGER_BEHAVIOUR = 0xdd0542e9; // uint32 (Behaviour)
-            static const uint32 CHUNK_CELLIMAGESTAGGER_REACH = 0x98930ed0; // uint32 (Reach)
+        //static const uint32 CHUNK_CELLIMAGESTAGGER = 0x559ff069; // container  //Not used anymore, moved to OdysseyLayerCellImageStaggerImport to remove dependency to an Editor module while keeping retro compatibility
+            //static const uint32 CHUNK_CELLIMAGESTAGGER_BEHAVIOUR = 0xdd0542e9; // uint32 (Behaviour)  //Not used anymore, moved to OdysseyLayerCellImageStaggerImport to remove dependency to an Editor module while keeping retro compatibility
+            //static const uint32 CHUNK_CELLIMAGESTAGGER_REACH = 0x98930ed0; // uint32 (Reach)  //Not used anymore, moved to OdysseyLayerCellImageStaggerImport to remove dependency to an Editor module while keeping retro compatibility
 
         static const uint32 CHUNK_CELLSCONTAINER =  0x5024f733; // container
             static const uint32 CHUNK_CELLSCONTAINER_OFFSET =  0x3e91fadd; // uint32 (offset)
@@ -270,21 +270,20 @@ namespace FOdysseyFile
 
         static const uint32 CHUNK_LAYERIMAGERASTER = 0xc19199d8; //container
             static const uint32 CHUNK_LAYERIMAGERASTER_CELLSCONTAINER = 0x8334465; //FOdysseyAnimationCellsContainer(CellContainer)
-            static const uint32 CHUNK_LAYERIMAGERASTER_LIGHTTABLE = 0x914a7195; //FOdysseyAnimationLightTable(LightTable)
+            static const uint32 CHUNK_LAYERIMAGERASTER_Lighttable = 0x914a7195; //FOdysseyLighttable(Lighttable)
 
         static const uint32 CHUNK_LAYERIMAGEVECTOR = 0x576c21b; //container
             static const uint32 CHUNK_LAYERIMAGEVECTOR_CELLSCONTAINER = 0x75494fd4; //FOdysseyAnimationCellsContainer(CellContainer)
-            static const uint32 CHUNK_LAYERIMAGEVECTOR_LIGHTTABLE = 0x484ee3b4; //FOdysseyAnimationLightTable(LightTable)
+            static const uint32 CHUNK_LAYERIMAGEVECTOR_Lighttable = 0x484ee3b4; //FOdysseyLighttable(Lighttable)
 
-        static const uint32 CHUNK_LIGHTTABLE = 0x5240eec2; //container
-            static const uint32 CHUNK_LIGHTTABLE_DISPLAY_POSITION = 0x472555c; //EOdysseyLightTableDisplayPosition
-            static const uint32 CHUNK_LIGHTTABLE_COLORS = 0x854e88aa; //EOdysseyLightTableDisplayPosition
-            static const uint32 CHUNK_LIGHTTABLE_CONTRAST = 0x4e98233c; //FLinearColor(PreviousKeysColor) + FLinearColor(NextKeysColor)
-            static const uint32 CHUNK_LIGHTTABLE_KEYS = 0x825ce6e5; //20x FOdysseyAnimationLightTableKey
-                static const uint32 CHUNK_LIGHTTABLE_KEY = 0x5b785423; //FOdysseyAnimationLightTableKey
-                    static const uint32 CHUNK_LIGHTTABLE_KEY_ISACTIVATED = 0xea8a5d86; //bool
-                    static const uint32 CHUNK_LIGHTTABLE_KEY_OPACITY = 0x21ab66; //float
-
+        //static const uint32 CHUNK_LIGHTTABLE = 0x5240eec2; //container //Not used anymore, moved to OdysseyLightTableImport and OdysseyLightTableKeyImport to remove dependency to an Editor module while keeping retro compatibility
+            //static const uint32 CHUNK_LIGHTTABLE_DISPLAY_POSITION = 0x472555c; //EOdysseyLighttableDisplayPosition //Not used anymore, moved to OdysseyLightTableImport and OdysseyLightTableKeyImport to remove dependency to an Editor module while keeping retro compatibility
+            //static const uint32 CHUNK_LIGHTTABLE_COLORS = 0x854e88aa; //EOdysseyLighttableDisplayPosition //Not used anymore, moved to OdysseyLightTableImport and OdysseyLightTableKeyImport to remove dependency to an Editor module while keeping retro compatibility
+            //static const uint32 CHUNK_LIGHTTABLE_CONTRAST = 0x4e98233c; //FLinearColor(PreviousKeysColor) + FLinearColor(NextKeysColor) //Not used anymore, moved to OdysseyLightTableImport and OdysseyLightTableKeyImport to remove dependency to an Editor module while keeping retro compatibility
+            //static const uint32 CHUNK_LIGHTTABLE_KEYS = 0x825ce6e5; //20x FOdysseyLighttableKey //Not used anymore, moved to OdysseyLightTableImport and OdysseyLightTableKeyImport to remove dependency to an Editor module while keeping retro compatibility
+                //static const uint32 CHUNK_LIGHTTABLE_KEY = 0x5b785423; //FOdysseyLighttableKey //Not used anymore, moved to OdysseyLightTableImport and OdysseyLightTableKeyImport to remove dependency to an Editor module while keeping retro compatibility
+                    //static const uint32 CHUNK_LIGHTTABLE_KEY_ISACTIVATED = 0xea8a5d86; //bool //Not used anymore, moved to OdysseyLightTableImport and OdysseyLightTableKeyImport to remove dependency to an Editor module while keeping retro compatibility
+                    //static const uint32 CHUNK_LIGHTTABLE_KEY_OPACITY = 0x21ab66; //float //Not used anymore, moved to OdysseyLightTableImport and OdysseyLightTableKeyImport to remove dependency to an Editor module while keeping retro compatibility
     }
 
     namespace RasterBlock

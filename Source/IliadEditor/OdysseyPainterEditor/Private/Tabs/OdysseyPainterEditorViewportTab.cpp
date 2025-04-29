@@ -61,10 +61,8 @@ FOdysseyPainterEditorViewportTab::CreateWidget()
     SAssignNew(mViewport, SOdysseyViewport)
         .Texture(this, &FOdysseyPainterEditorViewportTab::Texture);
 
-    //TODO: not cool to have to go through the whole GUI for an info, move that in the painterEditor Data
     mViewportClient = MakeShareable(new FOdysseyPainterEditorViewportClient(mEditor, mViewport, mEditor->GetMeshSelector().Get()));
 
-    //TODO: manage colorpicking here, viewportClient itself should not know the action to pick a color
     mViewportClient->OnPickColor().BindRaw(this, &FOdysseyPainterEditorViewportTab::HandleViewportColorPicked);
     mViewportClient->OnMouseDown().BindRaw(this, &FOdysseyPainterEditorViewportTab::OnViewportMouseDown);
     mViewportClient->OnMouseClick().BindRaw(this, &FOdysseyPainterEditorViewportTab::OnViewportMouseClick);

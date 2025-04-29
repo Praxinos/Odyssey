@@ -6,13 +6,21 @@
 #include "OdysseyEditorShortcuts.h"
 
 class FOdysseyPainterEditor;
+class UOdysseyAnimation;
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyAnimationGlobalCellsShortcuts
     : public IOdysseyEditorShortcuts
 {
 public:
+    DECLARE_DELEGATE_OneParam(FOnTransactCurrentFrame, TOptional<int> /*iFrame*/)
+
+public:
     virtual ~FOdysseyAnimationGlobalCellsShortcuts() {};
-    FOdysseyAnimationGlobalCellsShortcuts(FOdysseyPainterEditor* iEditor);
+    FOdysseyAnimationGlobalCellsShortcuts(
+        const TAttribute<UOdysseyAnimation*>& iAnimation,
+        const TAttribute<int>& iCurrentFrame,
+        const FOnTransactCurrentFrame& iOnTransactCurrentFrame
+    );
 
 public:
     //Common Shortcuts
@@ -33,5 +41,7 @@ public:
     virtual void MapActionsToCommandList(TSharedRef<FUICommandList> iCommandList) override;
 
 private:
-    FOdysseyPainterEditor* mEditor;
+    TAttribute<UOdysseyAnimation*> mAnimation;
+    TAttribute<int> mCurrentFrame;
+    FOnTransactCurrentFrame mOnTransactCurrentFrame;
 };

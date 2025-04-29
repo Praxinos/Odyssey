@@ -2,8 +2,8 @@
 // ODYSSEY is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Widgets/Animation/Timeline/Layers/SOdysseyAnimationLayerImageTimeline.h"
-#include "LayerStack/Cells/CellImageStagger/OdysseyAnimationCellImageStagger.h"
-#include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineLightTable.h"
+#include "OdysseyLayerCellImageStagger.h"
+#include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineLighttable.h"
 #include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineOutOfPegs.h"
 #include "Widgets/Animation/Timeline/Cells/SOdysseyAnimationCells.h"
 #include "TimelineTools/OdysseyAnimationTimelineTool.h"
@@ -14,12 +14,11 @@
 #include "OdysseyStyle.h"
 #include "Shortcuts/AnimationTimeline/OdysseyAnimationTimelineCellsShortcuts.h"
 #include "Shortcuts/AnimationTimeline/OdysseyAnimationTimelineCellImageStaggerShortcuts.h"
-#include "OdysseyAnimationCurrentFrameMutator.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineScrollBox.h"
 #include "TimelineTools/OdysseyAnimationTimelineTools.h"
 #include "OdysseyPainterEditorAnimationTimelinePosition.h"
-#include "LayerStack/Cells/OdysseyAnimationCellSelection.h"
+#include "OdysseyLayerCellSelection.h"
 #include "ScopedTransaction.h"
 #include "Widgets/Input/SButton.h"
 
@@ -46,11 +45,12 @@ SOdysseyAnimationLayerImageTimeline::Construct(
 {
     ensure(iLayer);
     mLayer = iLayer;
+    mCurrentFrame = iArgs._CurrentFrame;
     mTimelinePosition = iArgs._TimelinePosition;
     mOnActivateOutOfPegs = iArgs._OnActivateOutOfPegs;
     mOnInactivateOutOfPegs = iArgs._OnInactivateOutOfPegs;
     mOnIsOutOfPegsChecked = iArgs._OnIsOutOfPegsChecked;
-    mEditor = iArgs._PainterEditor;
+    mOnTransactCurrentFrame = iArgs._OnTransactCurrentFrame;
 
     SOdysseyAnimationLayerTimeline::Construct(SOdysseyAnimationLayerTimeline::FArguments(), iOwnerTableView, iLayer);
 }
@@ -78,7 +78,7 @@ SOdysseyAnimationLayerImageTimeline::GenerateWidget( const FName& iRow, const FN
     }
     if (iRow == "Lighttable")
     {
-        return GenerateLightTableRowTimelineWidget();
+        return GenerateLighttableRowTimelineWidget();
     }
     if (iRow == "OutOfPegs")
     {
@@ -138,7 +138,7 @@ SOdysseyAnimationLayerImageTimeline::GenerateMainRowTimelineWidget()
 {
     return SNew(SOdysseyAnimationCells, mLayer)
         .Cells_Lambda(
-            [this]() -> TArray<UOdysseyAnimationCell*>
+            [this]() -> TArray<UOdysseyLayerCell*>
             {
                 return mLayer->GetCells();
             }
@@ -150,16 +150,18 @@ SOdysseyAnimationLayerImageTimeline::GenerateMainRowTimelineWidget()
 }
 
 TSharedRef<SWidget>
-SOdysseyAnimationLayerImageTimeline::GenerateLightTableRowTimelineWidget()
+SOdysseyAnimationLayerImageTimeline::GenerateLighttableRowTimelineWidget()
 {
-    return SNew(SOdysseyAnimationTimelineLightTable, mLayer)
-        .TimelinePosition(mTimelinePosition);
+    return SNew(SOdysseyAnimationTimelineLighttable, mLayer)
+        .TimelinePosition(mTimelinePosition)
+        .CurrentFrame(mCurrentFrame);
 }
 
 TSharedRef<SWidget>
 SOdysseyAnimationLayerImageTimeline::GenerateOutOfPegsRowTimelineWidget()
 {
     return SNew(SOdysseyAnimationTimelineOutOfPegs, mLayer)
+        .CurrentFrame(mCurrentFrame)
         .TimelinePosition(mTimelinePosition)
         .OnActivateOutOfPegs(mOnActivateOutOfPegs)
         .OnInactivateOutOfPegs(mOnInactivateOutOfPegs)
@@ -229,11 +231,11 @@ SOdysseyAnimationLayerImageTimeline::OnMouseButtonUp(const FGeometry& iGeometry,
             return FReply::Unhandled();
 
         //On Right click, select cell if none are selected yet
-        UOdysseyAnimationCell* cell = mLayer->GetCellAtFrame(frame);
+        UOdysseyLayerCell* cell = mLayer->GetCellAtFrame(frame);
         if (!cell)
             return FReply::Unhandled();
 
-        const TArray<UOdysseyAnimationCell*> selectedCells = mLayer->GetLayerStack()->GetCellSelection()->GetSelectedCells();
+        const TArray<UOdysseyLayerCell*> selectedCells = mLayer->GetLayerStack()->GetCellSelection()->GetSelectedCells();
         if (selectedCells.IsEmpty() || !selectedCells.Contains(cell))
             mLayer->GetLayerStack()->GetCellSelection()->SetSelectedCells({cell});
 
@@ -377,19 +379,19 @@ SOdysseyAnimationLayerImageTimeline::OnDragOver(const FGeometry& iGeometry, cons
     float posX = iGeometry.AbsoluteToLocal(iEvent.GetScreenSpacePosition()).X;
     float frame = MousePositionToFrame(posX);
 
-    UOdysseyAnimationCell* cell = mLayer->GetCellAtFrame((int)frame);
+    UOdysseyLayerCell* cell = mLayer->GetCellAtFrame((int)frame);
     if (!cell)
         return FReply::Unhandled();
 
     int cellStartFrame = cell->GetFrameRange().GetLowerBoundValue();
-    float position = (frame - cellStartFrame) / cell->Exposure;
+    float position = (frame - cellStartFrame) / cell->GetExposure();
     if (position < 0.5f)
     {
         mDragPosition = cellStartFrame;
     }
     else
     {
-        mDragPosition = cellStartFrame + cell->Exposure;
+        mDragPosition = cellStartFrame + cell->GetExposure();
     }
 
     /*
@@ -404,9 +406,9 @@ SOdysseyAnimationLayerImageTimeline::OnDragOver(const FGeometry& iGeometry, cons
     UOdysseyAnimationLayer* layer = operation->GetLayer();
     if (layer == mLayer)
     {
-        const TArray<UOdysseyAnimationCell*> selectedCells = mLayer->GetLayerStack()->GetCellSelection()->GetSelectedCells();
-        UOdysseyAnimationCell* nextCell = layer->GetCellAtFrame(mDragPosition);
-        UOdysseyAnimationCell* previousCell = layer->GetCellAtFrame(mDragPosition - 1);
+        const TArray<UOdysseyLayerCell*> selectedCells = mLayer->GetLayerStack()->GetCellSelection()->GetSelectedCells();
+        UOdysseyLayerCell* nextCell = layer->GetCellAtFrame(mDragPosition);
+        UOdysseyLayerCell* previousCell = layer->GetCellAtFrame(mDragPosition - 1);
 
         if (selectedCells.Contains(nextCell) && selectedCells.Contains(previousCell))
         {
@@ -586,17 +588,17 @@ SOdysseyAnimationLayerImageTimeline::BuildCellsMarksSubMenu(FMenuBuilder& iMenuB
 void
 SOdysseyAnimationLayerImageTimeline::MapActions(TSharedPtr<FUICommandList> iCommandList, int iFrame)
 {
-    mAnimationTimelineCellsShortcuts = MakeShared<FOdysseyAnimationTimelineCellsShortcuts>(mLayer->GetLayerStack());
+    mAnimationTimelineCellsShortcuts = MakeShared<FOdysseyAnimationTimelineCellsShortcuts>(mLayer->GetAnimation(), mCurrentFrame, mOnTransactCurrentFrame);
     mAnimationTimelineCellsShortcuts->MapActionsToCommandList(iCommandList.ToSharedRef());
 
-    mAnimationTimelineCellImageStaggerShortcuts = MakeShared<FOdysseyAnimationTimelineCellImageStaggerShortcuts>(mLayer->GetLayerStack());
+    mAnimationTimelineCellImageStaggerShortcuts = MakeShared<FOdysseyAnimationTimelineCellImageStaggerShortcuts>(mLayer->GetAnimation());
     mAnimationTimelineCellImageStaggerShortcuts->MapActionsToCommandList(iCommandList.ToSharedRef());
 }
 
 EVisibility
-SOdysseyAnimationLayerImageTimeline::GetLightTableVisibility() const
+SOdysseyAnimationLayerImageTimeline::GetLighttableVisibility() const
 {
-    return mLayer->Lighttable.bIsActivated && mLayer->DisplayOptions ? EVisibility::Visible : EVisibility::Collapsed;
+    return mLayer->GetLighttable().bIsActivated && mLayer->ShouldDisplayOptions() ? EVisibility::Visible : EVisibility::Collapsed;
 }
 
 bool
@@ -605,7 +607,7 @@ SOdysseyAnimationLayerImageTimeline::GetShowCellsHandles() const
     if (mLayer->IsLockedRecursively())
         return false;
 
-    return mLayer->DisplayOptions;;
+    return mLayer->ShouldDisplayOptions();
 }
 
 FReply
@@ -628,20 +630,17 @@ SOdysseyAnimationLayerImageTimeline::RemoveCellMark()
     if (mLayer->IsLockedRecursively())
         return;
 
-    TArray<UOdysseyAnimationCell*> selectedCells = mLayer->GetLayerStack()->GetCellSelection()->GetSelectedCells();
+    TArray<UOdysseyLayerCell*> selectedCells = mLayer->GetLayerStack()->GetCellSelection()->GetSelectedCells();
     if (selectedCells.IsEmpty())
         return;
 
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.set-mark", "Set cell mark"));
 #endif
-    FOdysseyAnimationCurrentFrameMutator currentFrameMutator(selectedCells[0]->GetAnimation());
-    currentFrameMutator.Set(selectedCells[0]->GetFrameRange().GetLowerBoundValue());
-    currentFrameMutator.Commit();
-
-    for (UOdysseyAnimationCell* selectedCell : selectedCells)
+    mOnTransactCurrentFrame.ExecuteIfBound(selectedCells[0]->GetFrameRange().GetLowerBoundValue());
+    for (UOdysseyLayerCell* selectedCell : selectedCells)
     {
-        FOdysseyObjectEditorUtils::SetPropertyValue(selectedCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Mark), INDEX_NONE);
+        selectedCell->SetMark(INDEX_NONE);
     }
 }
 
@@ -651,7 +650,7 @@ SOdysseyAnimationLayerImageTimeline::CanRemoveCellMark() const
     if (mLayer->IsLockedRecursively())
         return false;
 
-    TArray<UOdysseyAnimationCell*> selectedCells = mLayer->GetLayerStack()->GetCellSelection()->GetSelectedCells();
+    TArray<UOdysseyLayerCell*> selectedCells = mLayer->GetLayerStack()->GetCellSelection()->GetSelectedCells();
     if (selectedCells.IsEmpty())
         return false;
 
@@ -664,20 +663,17 @@ SOdysseyAnimationLayerImageTimeline::SetCellMark( int iMarkId )
     if (mLayer->IsLockedRecursively())
         return;
 
-    TArray<UOdysseyAnimationCell*> selectedCells = mLayer->GetLayerStack()->GetCellSelection()->GetSelectedCells();
+    TArray<UOdysseyLayerCell*> selectedCells = mLayer->GetLayerStack()->GetCellSelection()->GetSelectedCells();
     if (selectedCells.IsEmpty())
         return;
 
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.set-mark", "Set cell mark"));
 #endif
-    FOdysseyAnimationCurrentFrameMutator currentFrameMutator(selectedCells[0]->GetAnimation());
-    currentFrameMutator.Set(selectedCells[0]->GetFrameRange().GetLowerBoundValue());
-    currentFrameMutator.Commit();
-
-    for (UOdysseyAnimationCell* selectedCell : selectedCells)
+    mOnTransactCurrentFrame.ExecuteIfBound(selectedCells[0]->GetFrameRange().GetLowerBoundValue());
+    for (UOdysseyLayerCell* selectedCell : selectedCells)
     {
-        FOdysseyObjectEditorUtils::SetPropertyValue(selectedCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Mark), iMarkId);
+        selectedCell->SetMark(iMarkId);
     }
 }
 
@@ -687,7 +683,7 @@ SOdysseyAnimationLayerImageTimeline::CanSetCellMark() const
     if (mLayer->IsLockedRecursively())
         return false;
 
-    TArray<UOdysseyAnimationCell*> selectedCells = mLayer->GetLayerStack()->GetCellSelection()->GetSelectedCells();
+    TArray<UOdysseyLayerCell*> selectedCells = mLayer->GetLayerStack()->GetCellSelection()->GetSelectedCells();
     if (selectedCells.IsEmpty())
         return false;
 
@@ -700,13 +696,13 @@ SOdysseyAnimationLayerImageTimeline::IsCellMarkChecked(int iMarkId) const
     if (mLayer->IsLockedRecursively())
         return false;
 
-    TArray<UOdysseyAnimationCell*> selectedCells = mLayer->GetLayerStack()->GetCellSelection()->GetSelectedCells();
+    TArray<UOdysseyLayerCell*> selectedCells = mLayer->GetLayerStack()->GetCellSelection()->GetSelectedCells();
     if (selectedCells.IsEmpty())
         return false;
 
-    for (UOdysseyAnimationCell* selectedCell : selectedCells)
+    for (UOdysseyLayerCell* selectedCell : selectedCells)
     {
-        if (selectedCell->Mark != iMarkId)
+        if (selectedCell->GetMark() != iMarkId)
             return false;
     }
 

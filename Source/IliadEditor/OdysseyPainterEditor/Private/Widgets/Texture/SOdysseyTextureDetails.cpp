@@ -235,7 +235,7 @@ SOdysseyTextureDetails::GetCurrentText() const
 
     // Editor dimensions (takes user specified mip setting into account)
     // const int32 MipLevel = FMath::Max(GetMipLevel(), 0);
-    const int32 MipLevel = 0; //TODO: manage this when we will be able to select the MipLevel to Preview
+    const int32 MipLevel = 0;
     uint32 PreviewEffectiveTextureWidth = FMath::Max<uint32>(ActualWidth >> MipLevel, 1);
     uint32 PreviewEffectiveTextureHeight = FMath::Max<uint32>(ActualHeight >> MipLevel, 1);;
     uint32 PreviewEffectiveTextureDepth = FMath::Max<uint32>(ActualDepth >> MipLevel, 1);

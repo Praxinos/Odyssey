@@ -4,24 +4,24 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
+#include "OdysseyLighttable.h"
 
 class UOdysseyAnimationLayer;
 class UOdysseyAnimationCell;
 class FOdysseyPainterEditorAnimationTimelinePosition;
 
-class SOdysseyAnimationTimelineLightTableKey
+class SOdysseyAnimationTimelineLighttableKey
     : public SCompoundWidget
 {
 public:
-    DECLARE_DELEGATE_OneParam(FOnKeyChanged, FOdysseyAnimationLightTableKey)
+    DECLARE_DELEGATE_OneParam(FOnKeyChanged, FOdysseyLighttableKey)
 
 public:
-    SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineLightTableKey)
+    SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineLighttableKey)
     {}
         SLATE_ARGUMENT(TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition>, TimelinePosition)
         SLATE_ATTRIBUTE(UOdysseyAnimationCell*, Cell)
-        SLATE_ATTRIBUTE(FOdysseyAnimationLightTableKey, Key)
+        SLATE_ATTRIBUTE(FOdysseyLighttableKey, Key)
         SLATE_EVENT(FOnKeyChanged, OnChanged)
         SLATE_EVENT(FOnKeyChanged, OnCommited)
     SLATE_END_ARGS()
@@ -30,18 +30,18 @@ public:
 
 private:
     TAttribute<UOdysseyAnimationCell*> mCell;
-    TAttribute<FOdysseyAnimationLightTableKey> mKey;
+    TAttribute<FOdysseyLighttableKey> mKey;
 };
 
-class SOdysseyAnimationTimelineLightTableKeySlider
+class SOdysseyAnimationTimelineLighttableKeySlider
     : public SLeafWidget
 {
 public:
-    SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineLightTableKeySlider)
+    SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineLighttableKeySlider)
     {}
-        SLATE_ATTRIBUTE(FOdysseyAnimationLightTableKey, Key)
-        SLATE_EVENT(SOdysseyAnimationTimelineLightTableKey::FOnKeyChanged, OnChanged)
-        SLATE_EVENT(SOdysseyAnimationTimelineLightTableKey::FOnKeyChanged, OnCommited)
+        SLATE_ATTRIBUTE(FOdysseyLighttableKey, Key)
+        SLATE_EVENT(SOdysseyAnimationTimelineLighttableKey::FOnKeyChanged, OnChanged)
+        SLATE_EVENT(SOdysseyAnimationTimelineLighttableKey::FOnKeyChanged, OnCommited)
     SLATE_END_ARGS()
 
     void Construct(const FArguments& InArgs);
@@ -55,13 +55,13 @@ private:
     virtual FVector2D ComputeDesiredSize(float iLayoutScaleMultiplier) const override;
 
 private:
-    TAttribute<FOdysseyAnimationLightTableKey> mKey;
+    TAttribute<FOdysseyLighttableKey> mKey;
     UOdysseyAnimationLayer* mLayer = nullptr;
 
     float mDraggingPosition = 0.f;
     float mOldOpacity = 0.f;
     bool mDragging = false;
 
-    SOdysseyAnimationTimelineLightTableKey::FOnKeyChanged mOnChanged;
-    SOdysseyAnimationTimelineLightTableKey::FOnKeyChanged mOnCommited;
+    SOdysseyAnimationTimelineLighttableKey::FOnKeyChanged mOnChanged;
+    SOdysseyAnimationTimelineLighttableKey::FOnKeyChanged mOnCommited;
 };

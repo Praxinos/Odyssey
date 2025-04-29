@@ -5,15 +5,17 @@
 
 #include "OdysseyPainterEditor.h"
 #include "Shortcuts/Global/OdysseyAnimationGlobalCellsShortcuts.h"
-#include "Shortcuts/Global/OdysseyAnimationGlobalTimelineShortcuts.h"
 #include "Shortcuts/Global/OdysseyAnimationGlobalTimelineToolsShortcuts.h"
 #include "Shortcuts/Global/OdysseyAnimationGlobalTimelineHeaderShortcuts.h"
 
-FOdysseyAnimationGlobalShortcuts::FOdysseyAnimationGlobalShortcuts(FOdysseyPainterEditor* iEditor)
-    : mEditor(iEditor)
+FOdysseyAnimationGlobalShortcuts::FOdysseyAnimationGlobalShortcuts(
+    const TAttribute<UOdysseyAnimation*>& iAnimation,
+    const TAttribute<int>& iCurrentFrame,
+    const FOnTransactCurrentFrame& iOnTransactCurrentFrame
+)
+    : mAnimation(iAnimation)
 {
-    Add(MakeShared<FOdysseyAnimationGlobalCellsShortcuts>(iEditor));
-    Add(MakeShared<FOdysseyAnimationGlobalTimelineShortcuts>(iEditor));
+    Add(MakeShared<FOdysseyAnimationGlobalCellsShortcuts>(iAnimation, iCurrentFrame, iOnTransactCurrentFrame));
     Add(MakeShared<FOdysseyAnimationGlobalTimelineToolsShortcuts>());
 }
 
@@ -24,11 +26,6 @@ FOdysseyAnimationGlobalShortcuts::MapActionsToCommandList(TSharedRef<FUICommandL
 
     OdysseyAnimationGlobalTimelineHeaderShortcuts::MapActions_SetAnimationBounds(
         iCommandList,
-        MakeAttributeLambda(
-            [this]() -> UOdysseyAnimation*
-            {
-                return mEditor->GetAnimation();
-            }
-        )
+        mAnimation
     );
 }

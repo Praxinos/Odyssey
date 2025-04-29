@@ -1,32 +1,32 @@
 // IDDN.FR.001.060015.013.S.X.2019.000.00000
 // ODYSSEY is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
 
-#include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineLightTableHeader.h"
+#include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineLighttableHeader.h"
 
-#include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
-#include "LayerStack/Layers/OdysseyAnimationLayer.h"
+#include "OdysseyLighttable.h"
+#include "OdysseyAnimationLayer.h"
 #include "Math/UnitConversion.h"
 #include "OdysseyStyle.h"
 #include "Widgets/Input/NumericTypeInterface.h"
 #include "Widgets/Input/NumericUnitTypeInterface.inl"
 #include "Widgets/Input/SNumericEntryBox.h"
-#include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineLightTableKey.h"
+#include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineLighttableKey.h"
 #include "Widgets/Colors/SColorBlock.h"
 #include "Widgets/Colors/SColorPicker.h"
-#include "SOdysseyAnimationTimelineLightTable.h"
+#include "SOdysseyAnimationTimelineLighttable.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
-SOdysseyAnimationTimelineLightTableHeader::SOdysseyAnimationTimelineLightTableHeader()
-    : mLightTablePreviousKeysColorBlockWidget(nullptr)
-    , mLightTableNextKeysColorBlockWidget(nullptr)
+SOdysseyAnimationTimelineLighttableHeader::SOdysseyAnimationTimelineLighttableHeader()
+    : mLighttablePreviousKeysColorBlockWidget(nullptr)
+    , mLighttableNextKeysColorBlockWidget(nullptr)
 {
 
 }
 
 void
-SOdysseyAnimationTimelineLightTableHeader::Construct(const FArguments& iArgs)
+SOdysseyAnimationTimelineLighttableHeader::Construct(const FArguments& iArgs)
 {
     mLayer = iArgs._Layer;
 
@@ -41,14 +41,14 @@ SOdysseyAnimationTimelineLightTableHeader::Construct(const FArguments& iArgs)
             + SHorizontalBox::Slot()
             [
                 SNew(STextBlock)
-                .Text(LOCTEXT("lighttable.timeline-header.name", "LightTable"))
+                .Text(LOCTEXT("lighttable.timeline-header.name", "Lighttable"))
             ]
             + SHorizontalBox::Slot()
             .AutoWidth()
             [
                 SNew(SComboButton)
-                .ComboButtonStyle(&FOdysseyStyle::GetWidgetStyle<FComboButtonStyle>("Animation.LightTable.Options"))
-                .OnGetMenuContent(this, &SOdysseyAnimationTimelineLightTableHeader::OnOptionsGetMenuContent)
+                .ComboButtonStyle(&FOdysseyStyle::GetWidgetStyle<FComboButtonStyle>("Animation.Lighttable.Options"))
+                .OnGetMenuContent(this, &SOdysseyAnimationTimelineLighttableHeader::OnOptionsGetMenuContent)
                 .HasDownArrow(false)
             ]
         ]
@@ -59,21 +59,21 @@ SOdysseyAnimationTimelineLightTableHeader::Construct(const FArguments& iArgs)
             + SHorizontalBox::Slot()
             .Padding(0.f, 0.f, 1.f, 0.f)
             [
-                SAssignNew(mLightTablePreviousKeysColorBlockWidget, SColorBlock)
+                SAssignNew(mLighttablePreviousKeysColorBlockWidget, SColorBlock)
                 .CornerRadius(FVector4(4.0f,4.0f,4.0f,4.0f))
-                .Color(this, &SOdysseyAnimationTimelineLightTableHeader::GetLightTablePreviousKeysColor)
+                .Color(this, &SOdysseyAnimationTimelineLighttableHeader::GetLighttablePreviousKeysColor)
                 .UseSRGB(true)
-                .OnMouseButtonDown(this, &SOdysseyAnimationTimelineLightTableHeader::OnLightTablePreviousKeysColorMouseButtonDown)
+                .OnMouseButtonDown(this, &SOdysseyAnimationTimelineLighttableHeader::OnLighttablePreviousKeysColorMouseButtonDown)
                 .AlphaDisplayMode(EColorBlockAlphaDisplayMode::Ignore)
             ]
             + SHorizontalBox::Slot()
             .Padding(1.f, 0.f, 0.f, 0.f)
             [
-                SAssignNew(mLightTableNextKeysColorBlockWidget, SColorBlock)
+                SAssignNew(mLighttableNextKeysColorBlockWidget, SColorBlock)
                 .CornerRadius(FVector4(4.0f,4.0f,4.0f,4.0f))
-                .Color(this, &SOdysseyAnimationTimelineLightTableHeader::GetLightTableNextKeysColor)
+                .Color(this, &SOdysseyAnimationTimelineLighttableHeader::GetLighttableNextKeysColor)
                 .UseSRGB(true)
-                .OnMouseButtonDown(this, &SOdysseyAnimationTimelineLightTableHeader::OnLightTableNextKeysColorMouseButtonDown)
+                .OnMouseButtonDown(this, &SOdysseyAnimationTimelineLighttableHeader::OnLighttableNextKeysColorMouseButtonDown)
                 .AlphaDisplayMode(EColorBlockAlphaDisplayMode::Ignore)
             ]
         ]
@@ -81,50 +81,50 @@ SOdysseyAnimationTimelineLightTableHeader::Construct(const FArguments& iArgs)
 }
 
 FLinearColor
-SOdysseyAnimationTimelineLightTableHeader::GetLightTablePreviousKeysColor() const
+SOdysseyAnimationTimelineLighttableHeader::GetLighttablePreviousKeysColor() const
 {
-    return mLayer->Lighttable.PreviousKeysColor;
+    return mLayer->GetLighttable().PreviousKeysColor;
 }
 
 FLinearColor
-SOdysseyAnimationTimelineLightTableHeader::GetLightTableNextKeysColor() const
+SOdysseyAnimationTimelineLighttableHeader::GetLighttableNextKeysColor() const
 {
-    return mLayer->Lighttable.NextKeysColor;
+    return mLayer->GetLighttable().NextKeysColor;
 }
 
 FReply
-SOdysseyAnimationTimelineLightTableHeader::OnLightTablePreviousKeysColorMouseButtonDown(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent) const
+SOdysseyAnimationTimelineLighttableHeader::OnLighttablePreviousKeysColorMouseButtonDown(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent) const
 {
     FColorPickerArgs PickerArgs;
     {
         PickerArgs.bUseAlpha = false;
         PickerArgs.bOnlyRefreshOnMouseUp = false;
         PickerArgs.bOnlyRefreshOnOk = false;
-        PickerArgs.InitialColor = GetLightTablePreviousKeysColor();
-        PickerArgs.ParentWidget = mLightTablePreviousKeysColorBlockWidget;
+        PickerArgs.InitialColor = GetLighttablePreviousKeysColor();
+        PickerArgs.ParentWidget = mLighttablePreviousKeysColorBlockWidget;
         PickerArgs.bOpenAsMenu = true;
         PickerArgs.OnColorCommitted = FOnLinearColorValueChanged::CreateLambda(
             [this](FLinearColor iColor)
             {
-                FOdysseyAnimationLightTable lighttable = mLayer->Lighttable;
+                FOdysseyLighttable lighttable = mLayer->GetLighttable();
                 lighttable.PreviousKeysColor = iColor;
-                FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable, EPropertyChangeType::Interactive);
+                mLayer->SetLighttableInteractive(lighttable);
             }
         );
         /** A delegate to be called when the color picker window closes. */
         PickerArgs.OnColorPickerWindowClosed = FOnWindowClosed::CreateLambda(
             [this](const TSharedRef<SWindow>& iWindow)
             {
-                FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), mLayer->Lighttable, EPropertyChangeType::ValueSet);
+                mLayer->SetLighttable(mLayer->GetLighttable());
             }
         );
 
         PickerArgs.OnColorPickerCancelled = FOnColorPickerCancelled::CreateLambda(
             [this](FLinearColor iColor)
             {
-                FOdysseyAnimationLightTable lighttable = mLayer->Lighttable;
+                FOdysseyLighttable lighttable = mLayer->GetLighttable();
                 lighttable.PreviousKeysColor = iColor;
-                FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable, EPropertyChangeType::ValueSet);
+                mLayer->SetLighttable(lighttable);
             }
         );
     }
@@ -135,38 +135,38 @@ SOdysseyAnimationTimelineLightTableHeader::OnLightTablePreviousKeysColorMouseBut
 }
 
 FReply
-SOdysseyAnimationTimelineLightTableHeader::OnLightTableNextKeysColorMouseButtonDown(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent) const
+SOdysseyAnimationTimelineLighttableHeader::OnLighttableNextKeysColorMouseButtonDown(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent) const
 {
     FColorPickerArgs PickerArgs;
     {
         PickerArgs.bUseAlpha = false;
         PickerArgs.bOnlyRefreshOnMouseUp = false;
         PickerArgs.bOnlyRefreshOnOk = false;
-        PickerArgs.InitialColor = GetLightTableNextKeysColor();
-        PickerArgs.ParentWidget = mLightTableNextKeysColorBlockWidget;
+        PickerArgs.InitialColor = GetLighttableNextKeysColor();
+        PickerArgs.ParentWidget = mLighttableNextKeysColorBlockWidget;
         PickerArgs.bOpenAsMenu = true;
         PickerArgs.OnColorCommitted = FOnLinearColorValueChanged::CreateLambda(
             [this](FLinearColor iColor)
             {
-                FOdysseyAnimationLightTable lighttable = mLayer->Lighttable;
+                FOdysseyLighttable lighttable = mLayer->GetLighttable();
                 lighttable.NextKeysColor = iColor;
-                FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable, EPropertyChangeType::Interactive);
+                mLayer->SetLighttableInteractive(lighttable);
             }
         );
         /** A delegate to be called when the color picker window closes. */
         PickerArgs.OnColorPickerWindowClosed = FOnWindowClosed::CreateLambda(
             [this](const TSharedRef<SWindow>& iWindow)
             {
-                FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), mLayer->Lighttable, EPropertyChangeType::ValueSet);
+                mLayer->SetLighttable(mLayer->GetLighttable());
             }
         );
 
         PickerArgs.OnColorPickerCancelled = FOnColorPickerCancelled::CreateLambda(
             [this](FLinearColor iColor)
             {
-                FOdysseyAnimationLightTable lighttable = mLayer->Lighttable;
+                FOdysseyLighttable lighttable = mLayer->GetLighttable();
                 lighttable.NextKeysColor = iColor;
-                FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable, EPropertyChangeType::ValueSet);
+                mLayer->SetLighttable(lighttable);
             }
         );
     }
@@ -177,19 +177,19 @@ SOdysseyAnimationTimelineLightTableHeader::OnLightTableNextKeysColorMouseButtonD
 }
 
 TSharedRef< SWidget >
-SOdysseyAnimationTimelineLightTableHeader::OnOptionsGetMenuContent()
+SOdysseyAnimationTimelineLighttableHeader::OnOptionsGetMenuContent()
 {
     FMenuBuilder menuBuilder(true, nullptr);
     menuBuilder.BeginSection("Display Position", LOCTEXT("lighttable.timeline-header.options-menu.display-position-section.name", "Display Position"));
     {
         menuBuilder.AddMenuEntry(
             LOCTEXT("lighttable.timeline-header.options-menu.display-position-above-layer.name", "Above Layer")
-            , LOCTEXT("lighttable.timeline-header.options-menu.display-position-above-layer.tooltip", "Displays the lightTable frames above Layer")
-            , FSlateIcon("OdysseyStyle", "Animation.LightTable.Options.DisplayPosition.AboveLayer")
+            , LOCTEXT("lighttable.timeline-header.options-menu.display-position-above-layer.tooltip", "Displays the lighttable frames above Layer")
+            , FSlateIcon("OdysseyStyle", "Animation.Lighttable.Options.DisplayPosition.AboveLayer")
             , FUIAction(
-                FExecuteAction::CreateRaw( this, &SOdysseyAnimationTimelineLightTableHeader::SetDisplayPosition, EOdysseyLightTableDisplayPosition::AboveLayer )
+                FExecuteAction::CreateRaw( this, &SOdysseyAnimationTimelineLighttableHeader::SetDisplayPosition, EOdysseyLighttableDisplayPosition::AboveLayer )
                 , FCanExecuteAction::CreateLambda([](){return true;})
-                , FIsActionChecked::CreateRaw(this, &SOdysseyAnimationTimelineLightTableHeader::IsDisplayPositionSet, EOdysseyLightTableDisplayPosition::AboveLayer )
+                , FIsActionChecked::CreateRaw(this, &SOdysseyAnimationTimelineLighttableHeader::IsDisplayPositionSet, EOdysseyLighttableDisplayPosition::AboveLayer )
             )
             , NAME_None
             , EUserInterfaceActionType::RadioButton
@@ -197,12 +197,12 @@ SOdysseyAnimationTimelineLightTableHeader::OnOptionsGetMenuContent()
 
         menuBuilder.AddMenuEntry(
             LOCTEXT("lighttable.timeline-header.options-menu.display-position-under-layer.name", "Under Layer")
-            , LOCTEXT("lighttable.timeline-header.options-menu.display-position-under-layer.tooltip", "Displays the lightTable frames under Layer")
-            , FSlateIcon("OdysseyStyle", "Animation.LightTable.Options.DisplayPosition.UnderLayer")
+            , LOCTEXT("lighttable.timeline-header.options-menu.display-position-under-layer.tooltip", "Displays the lighttable frames under Layer")
+            , FSlateIcon("OdysseyStyle", "Animation.Lighttable.Options.DisplayPosition.UnderLayer")
             , FUIAction(
-                FExecuteAction::CreateRaw( this, &SOdysseyAnimationTimelineLightTableHeader::SetDisplayPosition, EOdysseyLightTableDisplayPosition::UnderLayer )
+                FExecuteAction::CreateRaw( this, &SOdysseyAnimationTimelineLighttableHeader::SetDisplayPosition, EOdysseyLighttableDisplayPosition::UnderLayer )
                 , FCanExecuteAction::CreateLambda([](){return true;})
-                , FIsActionChecked::CreateRaw(this, &SOdysseyAnimationTimelineLightTableHeader::IsDisplayPositionSet, EOdysseyLightTableDisplayPosition::UnderLayer )
+                , FIsActionChecked::CreateRaw(this, &SOdysseyAnimationTimelineLighttableHeader::IsDisplayPositionSet, EOdysseyLighttableDisplayPosition::UnderLayer )
             )
             , NAME_None
             , EUserInterfaceActionType::RadioButton
@@ -226,7 +226,7 @@ SOdysseyAnimationTimelineLightTableHeader::OnOptionsGetMenuContent()
                 .Value_Lambda(
                     [this]()
                     {
-                        return (int)(mLayer->Lighttable.PreviousKeysContrast + 0.5f);
+                        return (int)(mLayer->GetLighttable().PreviousKeysContrast + 0.5f);
                     }
                 )
                 .TypeInterface(MakeShareable( new TNumericUnitTypeInterface<int32>( EUnit::Percentage ) ))
@@ -235,8 +235,8 @@ SOdysseyAnimationTimelineLightTableHeader::OnOptionsGetMenuContent()
                 .Delta(1)*/
                 .MinDesiredValueWidth(50)
                 .Justification(ETextJustify::Type::Right)
-                .OnValueChanged(this, &SOdysseyAnimationTimelineLightTableHeader::OnPreviousKeysContrastValueChanged)
-                .OnValueCommitted(this, &SOdysseyAnimationTimelineLightTableHeader::OnPreviousKeysContrastValueCommitted)
+                .OnValueChanged(this, &SOdysseyAnimationTimelineLighttableHeader::OnPreviousKeysContrastValueChanged)
+                .OnValueCommitted(this, &SOdysseyAnimationTimelineLighttableHeader::OnPreviousKeysContrastValueCommitted)
 
             ]
             , LOCTEXT("lighttable.timeline-header.options-menu.previous-keys-contrast.name", "Previous Keys Contrast")
@@ -257,15 +257,15 @@ SOdysseyAnimationTimelineLightTableHeader::OnOptionsGetMenuContent()
                 .Value_Lambda(
                     [this]()
                     {
-                        return (int)(mLayer->Lighttable.NextKeysContrast + 0.5f);
+                        return (int)(mLayer->GetLighttable().NextKeysContrast + 0.5f);
                     }
                 )
                 .TypeInterface(MakeShareable( new TNumericUnitTypeInterface<int32>( EUnit::Percentage ) ))
                 .AllowSpin(true)
                 .MinDesiredValueWidth(50)
                 .Justification(ETextJustify::Type::Right)
-                .OnValueChanged(this, &SOdysseyAnimationTimelineLightTableHeader::OnNextKeysContrastValueChanged)
-                .OnValueCommitted(this, &SOdysseyAnimationTimelineLightTableHeader::OnNextKeysContrastValueCommitted)
+                .OnValueChanged(this, &SOdysseyAnimationTimelineLighttableHeader::OnNextKeysContrastValueChanged)
+                .OnValueCommitted(this, &SOdysseyAnimationTimelineLighttableHeader::OnNextKeysContrastValueCommitted)
             ]
             , LOCTEXT("lighttable.timeline-header.options-menu.next-keys-contrast.name", "Next Keys Contrast")
             , true
@@ -277,49 +277,49 @@ SOdysseyAnimationTimelineLightTableHeader::OnOptionsGetMenuContent()
 }
 
 void
-SOdysseyAnimationTimelineLightTableHeader::OnPreviousKeysContrastValueCommitted(int iValue, ETextCommit::Type iType)
+SOdysseyAnimationTimelineLighttableHeader::OnPreviousKeysContrastValueCommitted(int iValue, ETextCommit::Type iType)
 {
-    FOdysseyAnimationLightTable lighttable = mLayer->Lighttable;
+    FOdysseyLighttable lighttable = mLayer->GetLighttable();
     lighttable.PreviousKeysContrast = iValue;
-    FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable, EPropertyChangeType::ValueSet);
+    mLayer->SetLighttable(lighttable);
 }
 
 void
-SOdysseyAnimationTimelineLightTableHeader::OnPreviousKeysContrastValueChanged(int iValue)
+SOdysseyAnimationTimelineLighttableHeader::OnPreviousKeysContrastValueChanged(int iValue)
 {
-    FOdysseyAnimationLightTable lighttable = mLayer->Lighttable;
+    FOdysseyLighttable lighttable = mLayer->GetLighttable();
     lighttable.PreviousKeysContrast = iValue;
-    FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable, EPropertyChangeType::Interactive);
+    mLayer->SetLighttableInteractive(lighttable);
 }
 
 void
-SOdysseyAnimationTimelineLightTableHeader::OnNextKeysContrastValueCommitted(int iValue, ETextCommit::Type iType)
+SOdysseyAnimationTimelineLighttableHeader::OnNextKeysContrastValueCommitted(int iValue, ETextCommit::Type iType)
 {
-    FOdysseyAnimationLightTable lighttable = mLayer->Lighttable;
+    FOdysseyLighttable lighttable = mLayer->GetLighttable();
     lighttable.NextKeysContrast = iValue;
-    FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable, EPropertyChangeType::ValueSet);
+    mLayer->SetLighttable(lighttable);
 }
 
 void
-SOdysseyAnimationTimelineLightTableHeader::OnNextKeysContrastValueChanged(int iValue)
+SOdysseyAnimationTimelineLighttableHeader::OnNextKeysContrastValueChanged(int iValue)
 {
-    FOdysseyAnimationLightTable lighttable = mLayer->Lighttable;
+    FOdysseyLighttable lighttable = mLayer->GetLighttable();
     lighttable.NextKeysContrast = iValue;
-    FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable, EPropertyChangeType::Interactive);
+    mLayer->SetLighttableInteractive(lighttable);
 }
 
 void
-SOdysseyAnimationTimelineLightTableHeader::SetDisplayPosition(EOdysseyLightTableDisplayPosition iPosition)
+SOdysseyAnimationTimelineLighttableHeader::SetDisplayPosition(EOdysseyLighttableDisplayPosition iPosition)
 {
-    FOdysseyAnimationLightTable lighttable = mLayer->Lighttable;
+    FOdysseyLighttable lighttable = mLayer->GetLighttable();
     lighttable.DisplayPosition = iPosition;
-    FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable);
+    mLayer->SetLighttable(lighttable);
 }
 
 bool
-SOdysseyAnimationTimelineLightTableHeader::IsDisplayPositionSet(EOdysseyLightTableDisplayPosition iPosition) const
+SOdysseyAnimationTimelineLighttableHeader::IsDisplayPositionSet(EOdysseyLighttableDisplayPosition iPosition) const
 {
-    return mLayer->Lighttable.DisplayPosition == iPosition;
+    return mLayer->GetLighttable().DisplayPosition == iPosition;
 }
 
 #undef LOCTEXT_NAMESPACE

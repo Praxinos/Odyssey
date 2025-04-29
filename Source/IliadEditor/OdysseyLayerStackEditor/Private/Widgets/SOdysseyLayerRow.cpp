@@ -90,8 +90,8 @@ SOdysseyLayerRow::GenerateMainRowHeaderWidget()
         [
             SNew( SOdysseyLayerExpanderArrow, SharedThis(this) )
                 .ArrowPadding(FMargin(0.f, 2.f, 0.f, 0.f))
-                .ExpanderImageOpened(GetLayer()->IconExpanded.GetIcon())
-                .ExpanderImageClosed(GetLayer()->Icon.GetIcon())
+                .ExpanderImageOpened(GetLayer()->GetIconExpanded().GetIcon())
+                .ExpanderImageClosed(GetLayer()->GetIcon().GetIcon())
                 .IndentAmount(16.f)
                 .ShouldDrawWires( true )
         ]
@@ -112,7 +112,7 @@ SOdysseyLayerRow::GenerateMainRowHeaderWidget()
         [
             SNew(SNumericEntryBox<int>)
             .Visibility(this, &SOdysseyLayerRow::GetCollapsedOpacityVisibility)
-            .Value_Lambda([this]() { return (int)(GetLayer()->Opacity * 100.f + 0.5f);})
+            .Value_Lambda([this]() { return (int)(GetLayer()->GetOpacity() * 100.f + 0.5f);})
             .AllowSpin(true)
             .ShiftMouseMovePixelPerDelta(10)
             .Delta(1)
@@ -157,7 +157,7 @@ SOdysseyLayerRow::GenerateBlendRowHeaderWidget()
         [
             SNew(SNumericEntryBox<int>)
             .IsEnabled_Lambda([this](){ return !GetLayer()->IsLockedRecursively();})
-            .Value_Lambda([this]() { return (int)(GetLayer()->Opacity * 100.f + 0.5f);})
+            .Value_Lambda([this]() { return (int)(GetLayer()->GetOpacity() * 100.f + 0.5f);})
             .TypeInterface(MakeShareable( new TNumericUnitTypeInterface<int32>( EUnit::Percentage ) ))
             .AllowSpin(true)
             .ShiftMouseMovePixelPerDelta(10)
@@ -178,7 +178,7 @@ SOdysseyLayerRow::GenerateBlendRowHeaderWidget()
         [
             SNew(SEnumComboBox, StaticEnum<EOdysseyBlendingMode>())
             .IsEnabled_Lambda([this](){ return !GetLayer()->IsLockedRecursively();})
-            .CurrentValue_Lambda([this](){ return (int32)GetLayer()->BlendMode;})
+            .CurrentValue_Lambda([this](){ return (int32)GetLayer()->GetBlendMode();})
             .ContentPadding(FMargin(0))
             .OnEnumSelectionChanged(this, &SOdysseyLayerRow::OnBlendModeComboBoxChanged)
         ];
@@ -233,39 +233,39 @@ void
 SOdysseyLayerRow::OnIsActivatedCheckBoxStateChanged(ECheckBoxState iState)
 {
     FScopedTransaction ScopedTransaction(LOCTEXT("layer.transaction.set-is-activated", "Change Layer Active"));
-    FOdysseyObjectEditorUtils::SetPropertyValue(GetLayer(), GET_MEMBER_NAME_CHECKED(UOdysseyLayer, IsActivated), iState == ECheckBoxState::Checked);
+    GetLayer()->SetIsActivated(iState == ECheckBoxState::Checked);
 }
 
 ECheckBoxState
 SOdysseyLayerRow::GetIsActivatedCheckBoxState() const
 {
-    return GetLayer()->IsActivated ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+    return GetLayer()->IsActivated() ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
 
 void
 SOdysseyLayerRow::OnIsLockedCheckBoxStateChanged(ECheckBoxState iState)
 {
     FScopedTransaction ScopedTransaction(LOCTEXT("layer.transaction.set-is-locked", "Change Layer Lock"));
-    FOdysseyObjectEditorUtils::SetPropertyValue(GetLayer(), GET_MEMBER_NAME_CHECKED(UOdysseyLayer, IsLocked), iState == ECheckBoxState::Checked);
+    GetLayer()->SetIsLocked(iState == ECheckBoxState::Checked);
 }
 
 ECheckBoxState
 SOdysseyLayerRow::GetIsLockedCheckBoxState() const
 {
-    return GetLayer()->IsLocked ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+    return GetLayer()->IsLocked() ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
 
 FText
 SOdysseyLayerRow::GetLayerName() const
 {
-    return GetLayer()->Name;
+    return GetLayer()->GetLayerName();
 }
 
 void
 SOdysseyLayerRow::OnLayerNameCommited(const FText& iText, ETextCommit::Type iType)
 {
     FScopedTransaction ScopedTransaction(LOCTEXT("layer.transaction.set-name", "Change Layer Name"));
-    FOdysseyObjectEditorUtils::SetPropertyValue(GetLayer(), GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Name), iText);
+    GetLayer()->SetLayerName(iText);
 }
 
 FSlateFontInfo
@@ -276,7 +276,7 @@ SOdysseyLayerRow::GetLayerNameFont() const
 
     UOdysseyLayerStack* layerStack = GetLayer()->GetLayerStack();
 
-    if (!layerStack || layerStack->CurrentLayer != GetLayer())
+    if (!layerStack || layerStack->GetCurrentLayer() != GetLayer())
         return FStyleDefaults::GetFontInfo();
 
     return FAppStyle::Get().GetFontStyle("NormalFontBold");
@@ -318,13 +318,13 @@ SOdysseyLayerRow::OnRowDragDetected(const FGeometry& iGeometry, const FPointerEv
 void
 SOdysseyLayerRow::OnDisplayOptionsCheckBoxStateChanged(ECheckBoxState iState)
 {
-    FOdysseyObjectEditorUtils::SetPropertyValue(GetLayer(), GET_MEMBER_NAME_CHECKED(UOdysseyLayer, DisplayOptions), iState == ECheckBoxState::Checked);
+    GetLayer()->SetDisplayOptions(iState == ECheckBoxState::Checked);
 }
 
 ECheckBoxState
 SOdysseyLayerRow::GetDisplayOptionsCheckBoxState() const
 {
-    return GetLayer()->DisplayOptions ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+    return GetLayer()->ShouldDisplayOptions() ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
 
 void
@@ -335,7 +335,7 @@ SOdysseyLayerRow::OnBlendModeComboBoxChanged(int32 iValue, ESelectInfo::Type iSe
 
     //Creating a transaction here manages entering a value using keyboard
     FScopedTransaction ScopedTransaction(LOCTEXT("layer.transaction.set-blend-mode", "Change Layer BlendMode"));
-    FOdysseyObjectEditorUtils::SetPropertyValue(GetLayer(), GET_MEMBER_NAME_CHECKED(UOdysseyLayer, BlendMode), EOdysseyBlendingMode(iValue));
+    GetLayer()->SetBlendMode(EOdysseyBlendingMode(iValue));
 }
 
 void
@@ -346,7 +346,7 @@ SOdysseyLayerRow::OnOpacityValueCommitted(int iValue, ETextCommit::Type iType)
 
     //Creating a transaction here manages entering a value using keyboard
     FScopedTransaction ScopedTransaction(mSetOpacityTransactionName);
-    FOdysseyObjectEditorUtils::SetPropertyValue(GetLayer(), GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Opacity), iValue / 100.f, EPropertyChangeType::ValueSet);
+    GetLayer()->SetOpacity(iValue / 100.f);
 }
 
 void
@@ -355,7 +355,7 @@ SOdysseyLayerRow::OnOpacityValueChanged(int iValue)
     if ( GetLayer()->IsLockedRecursively() )
         return;
 
-    FOdysseyObjectEditorUtils::SetPropertyValue(GetLayer(), GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Opacity), iValue / 100.f, EPropertyChangeType::Interactive);
+    GetLayer()->SetOpacityInteractive(iValue / 100.f);
 }
 
 void
@@ -374,7 +374,7 @@ SOdysseyLayerRow::OnOpacityEndSliderMovement(int iValue)
 EVisibility
 SOdysseyLayerRow::GetCollapsedOpacityVisibility() const
 {
-    return GetLayer()->DisplayOptions ? EVisibility::Collapsed : EVisibility::Visible;
+    return GetLayer()->ShouldDisplayOptions() ? EVisibility::Collapsed : EVisibility::Visible;
 }
 
 #undef LOCTEXT_NAMESPACE

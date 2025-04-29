@@ -6,6 +6,7 @@
 #include "OdysseyRasterBlock.h"
 #include "Editor.h"
 #include "ULISLoaderModule.h"
+#include "ULISUtils.h"
 
 FOdysseyRasterBlockMutator::~FOdysseyRasterBlockMutator()
 {
@@ -41,17 +42,17 @@ FOdysseyRasterBlockMutator::SetRasterBlock(TSharedPtr<FOdysseyRasterBlock> iRast
     mRasterBlock = iRasterBlock;
     if ( mRasterBlock )
     {
-        mInvalidTileMap = FULISInvalidTileMap(64, mRasterBlock->GetWidth(), mRasterBlock->GetHeight());
+        mInvalidTileMap = FOdysseyInvalidTileMap(64, mRasterBlock->GetWidth(), mRasterBlock->GetHeight());
         mBlock = iRasterBlock->GetBlock();
     }
     else
     {
-        mInvalidTileMap = FULISInvalidTileMap();
+        mInvalidTileMap = FOdysseyInvalidTileMap();
         mBlock = nullptr;
     }
 }
 
-const FULISInvalidTileMap&
+const FOdysseyInvalidTileMap&
 FOdysseyRasterBlockMutator::GetInvalidTileMap() const
 {
     return mInvalidTileMap;
@@ -76,8 +77,8 @@ FOdysseyRasterBlockMutator::ResetTilesFromRects(const TArray<::ULIS::FRectI>& iR
         return;
 
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(mRasterBlock->GetFormat());
-    FULISInvalidTileMap invalidTileMap(64, mRasterBlock->GetWidth(), mRasterBlock->GetHeight());
-    invalidTileMap.Invalidate(iRects);
+    FOdysseyInvalidTileMap invalidTileMap(64, mRasterBlock->GetWidth(), mRasterBlock->GetHeight());
+    invalidTileMap.Invalidate(::ULISUtils::ToIntRects(iRects));
     TArray<FIntPoint> invalidTiles = invalidTileMap.InvalidTiles();
     for (const FIntPoint& tile : invalidTiles)
     {
@@ -85,21 +86,22 @@ FOdysseyRasterBlockMutator::ResetTilesFromRects(const TArray<::ULIS::FRectI>& iR
             continue;
 
         TSharedPtr<::ULIS::FBlock> originalBlock = mOriginalTileBlocks[tile];
-        ULIS::FRectI rect = invalidTileMap.GetTileRect(tile);
+        ULIS::FRectI rect = ::ULISUtils::ToULISRectI(invalidTileMap.GetTileRect(tile));
         ctx.Copy( *originalBlock, *mBlock, originalBlock->Rect(), rect.Position(), ::ULIS::FSchedulePolicy::AsyncCacheEfficient );
     }
     ctx.Finish();
 }
 
 void
-FOdysseyRasterBlockMutator::EditTilesFromRects(const TArray<::ULIS::FRectI>& iRects, TFunction<TArray<::ULIS::FEvent>(TSharedPtr<::ULIS::FBlock>, const FULISInvalidTileMap&)> iDelegate)
+FOdysseyRasterBlockMutator::EditTilesFromRects(const TArray<::ULIS::FRectI>& iRects, TFunction<TArray<::ULIS::FEvent>(TSharedPtr<::ULIS::FBlock>, const FOdysseyInvalidTileMap&)> iDelegate)
 {
     if (!mRasterBlock)
         return;
 
-    FULISInvalidTileMap invalidTileMap(64, mRasterBlock->GetWidth(), mRasterBlock->GetHeight());
-    invalidTileMap.Invalidate(iRects);
-    mInvalidTileMap.Invalidate(iRects);
+    FOdysseyInvalidTileMap invalidTileMap(64, mRasterBlock->GetWidth(), mRasterBlock->GetHeight());
+    TArray<FIntRect> rects = ::ULISUtils::ToIntRects(iRects);
+    invalidTileMap.Invalidate(rects);
+    mInvalidTileMap.Invalidate(rects);
 
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(mRasterBlock->GetFormat());
     TArray<FIntPoint> tileIndexes = invalidTileMap.InvalidTiles();
@@ -110,7 +112,7 @@ FOdysseyRasterBlockMutator::EditTilesFromRects(const TArray<::ULIS::FRectI>& iRe
         if (mOriginalTileBlocks.Contains(tileIndex))
             continue;
 
-        ::ULIS::FRectI rect = mInvalidTileMap.GetTileRect(tileIndex);
+        ::ULIS::FRectI rect = ::ULISUtils::ToULISRectI(mInvalidTileMap.GetTileRect(tileIndex));
         TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> tileBlock = MakeShared<::ULIS::FBlock>(tileSize, tileSize, mRasterBlock->GetFormat());
         ctx.Copy(*mBlock, *tileBlock, rect, ::ULIS::FVec2I(0), ::ULIS::FSchedulePolicy::AsyncCacheEfficient);
         mOriginalTileBlocks.Add(tileIndex, tileBlock);
@@ -125,7 +127,7 @@ FOdysseyRasterBlockMutator::EditTilesFromRects(const TArray<::ULIS::FRectI>& iRe
     }
     ctx.Finish();
 
-    mRasterBlock->OnBlockChanged().Broadcast(invalidTileMap.InvalidRects()); //always send at least one interactive event
+    mRasterBlock->OnBlockChanged().Broadcast(::ULISUtils::ToULISRectIs(invalidTileMap.InvalidRects())); //always send at least one interactive event
 }
 
 void
@@ -139,7 +141,7 @@ FOdysseyRasterBlockMutator::Commit()
 
 
     mRasterBlock->InvalidateCache();
-    mRasterBlock->OnBlockCommited().Broadcast(mInvalidTileMap.InvalidRects());
+    mRasterBlock->OnBlockCommited().Broadcast(::ULISUtils::ToULISRectIs(mInvalidTileMap.InvalidRects()));
     if ( mStoreUndo && GEditor->IsTransactionActive() )
     {
         mRasterBlockUndoBuilder.StoreUndo(*this);
@@ -169,7 +171,7 @@ FOdysseyRasterBlockMutator::Abort()
 
         TSharedPtr<::ULIS::FBlock> originalBlock = mOriginalTileBlocks[tileIndex];
 
-        ::ULIS::FRectI rect = mInvalidTileMap.GetTileRect(tileIndex);
+        ::ULIS::FRectI rect = ::ULISUtils::ToULISRectI(mInvalidTileMap.GetTileRect(tileIndex));
         rects.Add(rect);
         ctx.Copy(*originalBlock, *mBlock, originalBlock->Rect(), rect.Position(), ::ULIS::FSchedulePolicy::AsyncCacheEfficient);
     }
@@ -184,7 +186,7 @@ void
 FOdysseyRasterBlockMutator::Copy(TSharedPtr<::ULIS::FBlock> iBlockToCopy, const TArray<::ULIS::FRectI>& iRects)
 {
     EditTilesFromRects(iRects,
-        [this, iBlockToCopy](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+        [this, iBlockToCopy](TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
         {
             ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iBlock->Format());
             ctx.ConvertFormat(*iBlockToCopy, *mBlock);

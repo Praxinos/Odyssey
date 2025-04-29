@@ -26,7 +26,7 @@
 #include "Interfaces/IPluginManager.h"
 #include "OdysseyViewportDrawingEditorCommands.h"
 
-#include "LayerStack/Cells/OdysseyAnimationCell.h"
+#include "OdysseyAnimationCell.h"
 #include "OdysseyAnimationCellThumbnailRenderer.h"
 #include "OdysseyPainterEditorGUI.h"
 #include "OdysseyAnimation.h"
@@ -51,6 +51,35 @@ FOdysseyPainterEditorModule::OpenStandaloneEditorForAsset( UObject* iAsset )
 
     TSharedRef<FOdysseyPainterEditorStandaloneToolkit> toolkit = MakeShared<FOdysseyPainterEditorStandaloneToolkit>(iAsset);
     toolkit->Open();
+}
+
+void
+FOdysseyPainterEditorModule::AddOpenedEditor(FOdysseyPainterEditor* iEditor)
+{
+    mOpenedEditors.AddUnique(iEditor);
+}
+
+void
+FOdysseyPainterEditorModule::RemoveOpenedEditor(FOdysseyPainterEditor* iEditor)
+{
+    mOpenedEditors.Remove(iEditor);
+}
+
+FOdysseyPainterEditor*
+FOdysseyPainterEditorModule::GetOpenedEditorForAsset(UObject* iObject)
+{
+    for (FOdysseyPainterEditor* editor : mOpenedEditors)
+    {
+        UObject* editedObject = editor->GetEditedObject();
+        if (editedObject == iObject)
+            return editor;
+
+        TArray<UObject*> additionalEditedObjects = editor->GetAdditionalEditedObjects();
+        if (additionalEditedObjects.Contains(iObject))
+            return editor;
+    }
+
+    return nullptr;
 }
 
 void

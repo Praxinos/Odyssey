@@ -2,29 +2,47 @@
 // ODYSSEY is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Widgets/Tab/SOdysseyPainterEditorVectorSceneTreeView.h"
+#include "Framework/Commands/GenericCommands.h"
+#include "OdysseyPainterEditor.h"
+#include "OdysseyVectorCell.h"
+#include "OdysseyVectorEngine.h"
+#include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVectorLayer.h"
+#include "OdysseyVectorObject.h"
+#include "OdysseyVectorTag.h"
+#include "OdysseyVectorTagInbetweener.h"
+#include "OdysseyStyle.h"
+#include "Undo/OdysseyVectorUndo.h"
+#include "Undo/OdysseyVectorUndoSelectObject.h"
 #include "Widgets/Tab/SOdysseyPainterEditorVectorSceneTreeViewRow.h"
 #include "Widgets/Tab/SOdysseyPainterEditorVectorSceneTreeViewContextMenu.h"
-#include "OdysseyStyle.h"
-#include "Framework/Commands/GenericCommands.h"
-#include "OdysseyVector.h"
-#include "OdysseyVectorCell.h"
-#include "OdysseyVectorLayer.h"
-#include "HUD/OdysseyVectorHUD.h"
-#include "OdysseyPainterEditor.h"
-#include "Undo/OdysseyVectorUndoSelectObject.h"
-#include "OdysseyPainterEditorSource.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
+SLATE_IMPLEMENT_WIDGET(SOdysseyPainterEditorVectorSceneTreeView)
+void
+SOdysseyPainterEditorVectorSceneTreeView::PrivateRegisterAttributes(FSlateAttributeInitializer& AttributeInitializer)
+{
+    SLATE_ADD_MEMBER_ATTRIBUTE_DEFINITION(AttributeInitializer, mScene, EInvalidateWidgetReason::None)
+    .OnValueChanged(FSlateAttributeDescriptor::FAttributeValueChangedDelegate::CreateLambda(
+        [](SWidget& Widget)
+        {
+            static_cast<SOdysseyPainterEditorVectorSceneTreeView&>(Widget).OnSceneChanged();
+        }
+    ));
+}
 
 SOdysseyPainterEditorVectorSceneTreeView::~SOdysseyPainterEditorVectorSceneTreeView()
 {
+    FOdysseyVectorEngine::OnNotifyDelegate().RemoveAll(this);
 }
 
 SOdysseyPainterEditorVectorSceneTreeView::SOdysseyPainterEditorVectorSceneTreeView()
-    : mCommandList(MakeShared<FUICommandList>())
+    : mScene(*this, nullptr)
+    , mCommandList(MakeShared<FUICommandList>())
 {
     MapActionsToCommandList();
+    FOdysseyVectorEngine::OnNotifyDelegate().AddRaw( this, &SOdysseyPainterEditorVectorSceneTreeView::OnVectorSceneNotify );
 }
 
 void
@@ -50,8 +68,8 @@ SOdysseyPainterEditorVectorSceneTreeView::Construct( const FArguments& InArgs )
                                           SNullWidget::NullWidget
                                       ]
                                       + SHeaderRow::Column("Name");
-
     mEditor = InArgs._Editor;
+    mScene.Assign(*this, InArgs._Scene);
 
     STreeView<TSharedPtr<FVectorSceneTreeViewItem>>::Construct(
         STreeView<TSharedPtr<FVectorSceneTreeViewItem>>::FArguments()
@@ -238,55 +256,53 @@ SOdysseyPainterEditorVectorSceneTreeView::Private_IsItemSelected( const TSharedP
 }
 
 void
-SOdysseyPainterEditorVectorSceneTreeView::Update( FOdysseyVectorGroupPaint* iScene )
+SOdysseyPainterEditorVectorSceneTreeView::Update()
 {
     uint64 hudFlags = mEditor->GetVectorHUDFlags();
 
     mItemsSource.Empty();
-
+    SelectedItems.Empty();
     RequestTreeRefresh();
 
-    if( iScene )
+    FOdysseyVectorGroupPaint* scene = mScene.Get();
+    if (!scene)
+        return;
+
+    //if( hudFlags & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
     {
-        //if( hudFlags & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
+        int32 sceneCellIndex = scene->GetCell()->GetIndex();
+        FOdysseyVectorLayer* sharedEnv = scene->GetLayer();
+        if (!sharedEnv)
+            return;
+
+        for( FOdysseyVectorTag* tag : sharedEnv->GetSharedTagList() )
         {
-            int32 sceneCellIndex = iScene->GetCell()->GetIndex();
-            FOdysseyVectorLayer* sharedEnv = iScene->GetLayer();
-            if (!sharedEnv)
-                return;
-
-            for( FOdysseyVectorTag* tag : sharedEnv->GetSharedTagList() )
+            if( tag->GetClass() == FOdysseyVectorTagInbetweener::StaticClass() )
             {
-                if( tag->GetClass() == FOdysseyVectorTagInbetweener::StaticClass() )
-                {
-                    FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
-                    int32 sourceCellIndex = inbetweenerTag->GetSourceCellIndex();
-                    int32 targetCellIndex = inbetweenerTag->GetTargetCellIndex();
+                FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
+                int32 sourceCellIndex = inbetweenerTag->GetSourceCellIndex();
+                int32 targetCellIndex = inbetweenerTag->GetTargetCellIndex();
 
+                if ((sceneCellIndex > sourceCellIndex) && ( sceneCellIndex < targetCellIndex ) )
+                {
                     if ((sceneCellIndex > sourceCellIndex) && ( sceneCellIndex <= targetCellIndex ) )
                     {
                         FOdysseyVectorObject* owner = inbetweenerTag->GetOwner();
-
                         mItemsSource.Add( MakeShareable(new FVectorSceneTreeViewItem( owner, false ) ) );
                     }
                 }
             }
         }
-
-        mRootItem = MakeShareable(new FVectorSceneTreeViewItem(iScene, true ));
-
-        BuildTree( mRootItem );
-
-        mItemsSource.Add( mRootItem );
-
-        RequestTreeRefresh();
-
-        // Expand items if need
-        ExpandTree( mRootItem );
-        // Select items if needed
-        SelectedItems.Empty();
-        //SelectTree( mRootItem );
     }
+
+    mRootItem = MakeShareable(new FVectorSceneTreeViewItem(scene, true ));
+
+    BuildTree( mRootItem );
+
+    mItemsSource.Add( mRootItem );
+
+    // Expand items if need
+    ExpandTree( mRootItem );
 }
 
 void
@@ -320,7 +336,7 @@ SOdysseyPainterEditorVectorSceneTreeView::OnSelectionChanged( TSharedPtr<FVector
 {
     uint64 retFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
                     | FOdysseyPainterEditor::UI_UPDATE_TIMELINE
-                    | FOdysseyPainterEditor::UI_UPDATE_HUD;
+                    | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     if( mRootItem && ( SelectInfo != ESelectInfo::Type::Direct ) )
     {
@@ -443,6 +459,29 @@ SOdysseyPainterEditorVectorSceneTreeView::MapActionsToCommandList()
         FGenericCommands::Get().Paste,
         FExecuteAction::CreateRaw( this, &SOdysseyPainterEditorVectorSceneTreeView::PasteObjects )
     );
+}
+
+void
+SOdysseyPainterEditorVectorSceneTreeView::OnVectorSceneNotify( FOdysseyVectorGroupPaint* iScene, uint64 iSignalFlags )
+{
+    if (iScene != mScene.Get())
+        return;
+
+    ParseVectorNotifications( iSignalFlags );
+}
+
+
+void
+SOdysseyPainterEditorVectorSceneTreeView::ParseVectorNotifications( uint64 iSignalFlags )
+{
+    if( iSignalFlags & FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW )
+        Update();
+}
+
+void
+SOdysseyPainterEditorVectorSceneTreeView::OnSceneChanged()
+{
+    ParseVectorNotifications(FOdysseyVectorEngine::NOTIFY_ALL);
 }
 
 #undef LOCTEXT_NAMESPACE

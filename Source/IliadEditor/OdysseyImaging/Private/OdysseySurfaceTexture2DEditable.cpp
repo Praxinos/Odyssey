@@ -28,6 +28,25 @@
 
 /////////////////////////////////////////////////////
 // Utlity
+
+void
+CopyImageToBlock(const FImage& iImage, ::ULIS::FBlock* iBlock)
+{
+    checkf(iBlock->Width() == iImage.GetWidth() &&
+           iBlock->Height() == iImage.GetHeight()
+           ,TEXT("Sizes do not match"));
+
+    void* ptr = iImage.GetPixelPointer(0, 0);
+    if (RawImageFormatNeedsConversionToULISFormat(iImage.Format))
+    {
+        ConvertRawImageFormatToULISFormat((uint8*)ptr, iBlock->Bits(), iBlock->Width(), iBlock->Height(), iImage.Format);
+    }
+    else
+    {
+        FMemory::Memcpy(iBlock->Bits(), (uint8*)ptr, iBlock->BytesTotal());
+    }
+}
+
 void
 CopyUTextureSourceDataIntoBlock(::ULIS::FBlock* iBlock,UTexture* iTexture)
 {
@@ -201,6 +220,7 @@ GetRawImageFormatFromTextureSourceFormat(ETextureSourceFormat iFormat)
         case TSF_BGRE8:     return ERawImageFormat::BGRE8;
         case TSF_RGBA16:    return ERawImageFormat::RGBA16;
         case TSF_RGBA16F:   return ERawImageFormat::RGBA16F;
+        case TSF_RGBA32F:   return ERawImageFormat::RGBA32F;
         default: break;
     }
     return ERawImageFormat::BGRA8;
@@ -257,12 +277,11 @@ InvalidateTextureFromSourceDataUsingSortedRects( const ::ULIS::FBlock* iData, UT
      * This is clearly a big Patch and should be provided by Epic Games in the first place.
      */
 
-
     ////////////////////////////
+
     // Do nothing if there is no input rects
     if( ioSrcRects.Num() == 0 )
         return;
-
 
     ////////////////////////////
 #ifdef UE_BUILD_DEBUG
@@ -391,7 +410,7 @@ InvalidateTextureFromSourceDataUsingSortedRects( const ::ULIS::FBlock* iData, UT
             tileBlocks[i].Reserve( ioSrcRects[i].Num() );
             for( int32 j = 0; j < ioSrcRects[i].Num(); ++j ) {
 
-                EGammaSpace gammaSpace = ERawImageFormat::GetDefaultGammaSpace(fmt);
+                EGammaSpace gammaSpace = (fmt != ERawImageFormat::G8 && fmt != ERawImageFormat::BGRA8) || !iTexture->SRGB ? EGammaSpace::Linear : EGammaSpace::sRGB;
 
                 const int len = ioSrcRects[i][j].h;
                 tileImages[i].Emplace(
@@ -480,6 +499,9 @@ InvalidateTextureFromSourceDataUsingSortedRects( const ::ULIS::FBlock* iData, UT
     // before on this texture or if someone from outside disabled it.
     iTexture->TemporarilyDisableStreaming();
 
+    //TemporarilyDisableStreaming() can call UpdateResource()
+    //And UpdateTextureRegions needs any compilation of the texture to be finished
+    FTextureCompilingManager::Get().FinishCompilation({ iTexture });
 
     ////////////////////////////
     // Send the image data to the graphics card and wait for it to finish
@@ -512,9 +534,19 @@ InvalidateTextureFromSourceDataUsingSortedRects( const ::ULIS::FBlock* iData, UT
 void
 InvalidateTextureFromSourceData( const ::ULIS::FBlock* iData, UTexture2D* iTexture, const ::ULIS::FRectI* iRects, const uint32 iNumRects )
 {
+    TArray< ::ULIS::FRectI > rects(iRects, iNumRects);
+    rects = rects.FilterByPredicate( [iTexture]( const ::ULIS::FRectI& iRect ) {
+        return iRect.w > 0 && iRect.h > 0 && iRect.x >= 0 && iRect.y >= 0 && iRect.x + iRect.w <= iTexture->GetSurfaceWidth() && iRect.y + iRect.h <= iTexture->GetSurfaceHeight();
+    } );
+
     TArray< TArray< ::ULIS::FRectI > > sortedRects;
-    SortRects( iRects, iNumRects, sortedRects );
+    SortRects( rects.GetData(), rects.Num(), sortedRects );
     InvalidateTextureFromSourceDataUsingSortedRects( iData, iTexture, sortedRects );
+
+
+    /*TArray< TArray< ::ULIS::FRectI > > sortedRects;
+    SortRects( iRects, iNumRects, sortedRects );
+    InvalidateTextureFromSourceDataUsingSortedRects( iData, iTexture, sortedRects );*/
 }
 
 void
@@ -565,7 +597,7 @@ FOdysseySurfaceTexture2DEditable::~FOdysseySurfaceTexture2DEditable()
     }
 }
 
-FOdysseySurfaceTexture2DEditable::FOdysseySurfaceTexture2DEditable(int iWidth,int iHeight, ::ULIS::eFormat iFormat)
+FOdysseySurfaceTexture2DEditable::FOdysseySurfaceTexture2DEditable(int iWidth,int iHeight, ::ULIS::eFormat iFormat, bool iSRGB)
     : mIsBorrowedTexture(false)
 {
     EPixelFormat pixelFormat = PixelFormatForULISFormat(iFormat);
@@ -576,7 +608,11 @@ FOdysseySurfaceTexture2DEditable::FOdysseySurfaceTexture2DEditable(int iWidth,in
     mTexture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
 
     //IsImageInfoValid() in ImageCore.h allows use of sRGB only on G8 and BGRA8 textures
-    mTexture->SRGB = pixelFormat == EPixelFormat::PF_G8 || pixelFormat == EPixelFormat::PF_B8G8R8A8;
+    if (iSRGB)
+        mTexture->SRGB = pixelFormat == EPixelFormat::PF_G8 || pixelFormat == EPixelFormat::PF_B8G8R8A8;
+    else
+        mTexture->SRGB = false;
+
     mTexture->Filter = TextureFilter::TF_Nearest;
     mTexture->UpdateResource();
     FTextureCompilingManager::Get().FinishCompilation({mTexture.Get()});
@@ -625,7 +661,7 @@ FOdysseySurfaceTexture2DEditable::FOdysseySurfaceTexture2DEditable(UTexture2D* i
     CopyUTextureSourceDataIntoBlock( mBlock.Get(), mTexture.Get());
 }
 
-FOdysseySurfaceTexture2DEditable::FOdysseySurfaceTexture2DEditable(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock)
+FOdysseySurfaceTexture2DEditable::FOdysseySurfaceTexture2DEditable(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock, bool iSRGB)
     : mIsBorrowedTexture(false)
 {
     checkf(iBlock,TEXT("Cannot Initialize with Null borrowed block"));
@@ -640,7 +676,10 @@ FOdysseySurfaceTexture2DEditable::FOdysseySurfaceTexture2DEditable(TSharedPtr<::
     mTexture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
 
     //IsImageInfoValid() in ImageCore.h allows use of sRGB only on G8 and BGRA8 textures
-    mTexture->SRGB = pixelFormat == EPixelFormat::PF_G8 || pixelFormat == EPixelFormat::PF_B8G8R8A8;
+    if (iSRGB)
+        mTexture->SRGB = pixelFormat == EPixelFormat::PF_G8 || pixelFormat == EPixelFormat::PF_B8G8R8A8;
+    else
+        mTexture->SRGB = false;
     mTexture->Filter = TextureFilter::TF_Nearest;
     mTexture->UpdateResource();
     FTextureCompilingManager::Get().FinishCompilation({ mTexture.Get() });

@@ -10,7 +10,7 @@
 #include "OdysseyPainterEditorRasterPaintBucketTool.generated.h"
 
 class FOdysseyPaintEngine;
-class FOdysseyImageRenderingAbility;
+class IOdysseyRenderingAbility;
 class FOdysseyPainterEditorRasterPaintBucketToolSourceProvider;
 class UOdysseyLayer;
 
@@ -93,8 +93,8 @@ private:
     TSharedPtr<::ULIS::FBlock> GetForegroundLayersBlock() const;
     TSharedPtr<::ULIS::FBlock> GetBackgroundLayersBlock() const;
     TSharedPtr<::ULIS::FBlock> GetAllLayersBlock() const;
-    TArray<FOdysseyImageRenderingAbility*> GetBackgroundLayersToExclude(UOdysseyLayer* iLayer) const;
-    TArray<FOdysseyImageRenderingAbility*> GetForegroundLayersToExclude(UOdysseyLayer* iLayer) const;
+    TArray<IOdysseyRenderingAbility*> GetBackgroundLayersToExclude(UOdysseyLayer* iLayer) const;
+    TArray<IOdysseyRenderingAbility*> GetForegroundLayersToExclude(UOdysseyLayer* iLayer) const;
 
 public:
     UPROPERTY( EditAnywhere, Category=RasterPaintBucketTool)

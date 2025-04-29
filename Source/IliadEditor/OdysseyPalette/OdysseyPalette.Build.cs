@@ -63,6 +63,7 @@ namespace UnrealBuildTool.Rules
                     "InputCore",
                     "ToolMenus",
                     "OdysseyCore",
+                    "OdysseyCoreEditor",
                     "Slate",
                     "SlateCore",
                     "UnrealEd",

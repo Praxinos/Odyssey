@@ -43,6 +43,10 @@ class IOdysseyVectorCell
         virtual int32 GetIndex() = 0;
         virtual uint32 GetLength() = 0;
         virtual uint32 GetFrame() = 0;
+
+        //ERIC PATCH: allows the tool to retrieve the block and keep it in memory while editing
+        //See LoadVector() call in UOdysseyPainterEditorVectorBaseTool
+        virtual TSharedPtr<::ULIS::FBlock> GetBlock() const = 0;
 };
 
 class ODYSSEYVECTOR_API FOdysseyVectorCell : public FOdysseyVectorObject

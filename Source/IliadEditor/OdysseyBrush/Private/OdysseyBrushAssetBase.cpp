@@ -977,7 +977,6 @@ UOdysseyBrushAssetBase::PostEditChangeProperty(struct FPropertyChangedEvent& Pro
 {
     Super::PostEditChangeProperty(PropertyChangedEvent);
 
-    //TODO: don't react if we are the default subobject
     if (GetMaskedFlags(RF_ClassDefaultObject) == RF_ClassDefaultObject)
         return;
 

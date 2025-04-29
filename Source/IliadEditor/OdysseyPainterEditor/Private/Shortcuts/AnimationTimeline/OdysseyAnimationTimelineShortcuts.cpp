@@ -6,15 +6,19 @@
 #include "Shortcuts/AnimationTimeline/OdysseyAnimationTimelineCellsShortcuts.h"
 #include "Shortcuts/AnimationTimeline/OdysseyAnimationTimelineCellImageRasterShortcuts.h"
 #include "Shortcuts/AnimationTimeline/OdysseyAnimationTimelineCellImageStaggerShortcuts.h"
-#include "LayerStack/OdysseyAnimationLayerStack.h"
+#include "OdysseyAnimationLayerStack.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
-FOdysseyAnimationTimelineShortcuts::FOdysseyAnimationTimelineShortcuts(UOdysseyAnimationLayerStack* iLayerStack)
+FOdysseyAnimationTimelineShortcuts::FOdysseyAnimationTimelineShortcuts(
+    const TAttribute<UOdysseyAnimation*>& iAnimation,
+    const TAttribute<int>& iCurrentFrame,
+    const FOnTransactCurrentFrame& iOnTransactCurrentFrame
+)
     : mCommandList(MakeShared<FUICommandList>())
-    , mCellsShortcuts(MakeShared<FOdysseyAnimationTimelineCellsShortcuts>(iLayerStack))
-    , mCellImageRasterShortcuts(MakeShared<FOdysseyAnimationTimelineCellImageRasterShortcuts>(iLayerStack))
-    , mCellImageStaggerShortcuts(MakeShared<FOdysseyAnimationTimelineCellImageStaggerShortcuts>(iLayerStack))
+    , mCellsShortcuts(MakeShared<FOdysseyAnimationTimelineCellsShortcuts>(iAnimation, iCurrentFrame, iOnTransactCurrentFrame))
+    , mCellImageRasterShortcuts(MakeShared<FOdysseyAnimationTimelineCellImageRasterShortcuts>(iAnimation))
+    , mCellImageStaggerShortcuts(MakeShared<FOdysseyAnimationTimelineCellImageStaggerShortcuts>(iAnimation))
 {
     MapActionsToCommandList();
 }

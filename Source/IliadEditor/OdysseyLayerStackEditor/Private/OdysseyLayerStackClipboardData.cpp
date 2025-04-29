@@ -56,15 +56,15 @@ TArray<UOdysseyLayer*>
 FOdysseyLayerStackClipboardData::Paste(UOdysseyLayerStack* iLayerStack) const
 {
     TArray<UOdysseyLayer*> pastedLayers;
-    UOdysseyLayer* currentLayer = iLayerStack->CurrentLayer.Get();
+    UOdysseyLayer* currentLayer = iLayerStack->GetCurrentLayer();
     UOdysseyLayer* parent = currentLayer->GetParent();
     int index = currentLayer->GetIndexInParent();
 
-    if (currentLayer->CanHaveChildren && currentLayer->DisplayChildren)
+    if (currentLayer->CanHaveChildren() && currentLayer->ShouldDisplayChildren())
         pastedLayers = iLayerStack->CopyLayers(mLayers, currentLayer);
     else
         pastedLayers = iLayerStack->CopyLayers(mLayers, parent, index);
 
-    FOdysseyObjectEditorUtils::SetPropertyValue(iLayerStack, GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer), pastedLayers[0]);
+    iLayerStack->SetCurrentLayer(pastedLayers[0]);
     return pastedLayers;
 }

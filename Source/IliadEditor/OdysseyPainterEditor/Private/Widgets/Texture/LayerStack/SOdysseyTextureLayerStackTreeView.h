@@ -12,17 +12,12 @@ class SOdysseyTextureLayerStackTreeView
 {
 public:
     SOdysseyTextureLayerStackTreeView();
-    void Construct(const FArguments& InArgs, FOdysseyPainterEditor* iEditor);
+    void Construct(const FArguments& InArgs);
 
 public:
-    FOdysseyPainterEditor* GetEditor() const;
-
     virtual TArray<TSharedPtr<FExtender>> ExtendContextMenu();
 
 private:
     void ExtendContextMenuLayerSection(FMenuBuilder& iMenuBuilder);
     void Action_ConvertLayerToRasterLayer();
-
-private:
-    FOdysseyPainterEditor* mEditor;
 };

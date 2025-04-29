@@ -8,10 +8,11 @@
 #include "ObjectEditorUtils.h"
 
 #include "OdysseyAnimation.h"
+#include "OdysseyAnimationPlayer.h"
 #include "OdysseyPainterEditorAnimationFlipSystem.h"
 #include "OdysseyPainterEditorAnimationTimelinePosition.h"
 #include "OdysseyBlockClipboardData.h"
-#include "OdysseyEditorModule.h"
+#include "OdysseyCoreEditorModule.h"
 #include "OdysseyPainterEditorSource.h"
 #include "OdysseyHUD.h"
 #include "OdysseyHUDElement.h"
@@ -25,6 +26,7 @@
 #include "OdysseyEditorLayoutBuilder.h"
 #include "OdysseyPainterEditorBrushContext.h"
 #include "OdysseyPainterEditorCommands.h"
+#include "OdysseyPainterEditorModule.h"
 #include "OdysseyPalette.h"
 #include "OdysseyPaletteEntryColor.h"
 #include "Proxies/OdysseyBrushColor.h"
@@ -34,6 +36,7 @@
 #include "OdysseyPainterEditorFlipbookListener.h"
 #include "OdysseyPainterEditorFlipbookTimelineTab.h"
 #include "SOdysseyFlipbookTimelineView.h"
+#include "OdysseyAnimationCurrentFrameMutator.h"
 
 #include "OdysseyVector.h"
 #include "OdysseyVectorCell.h"
@@ -131,7 +134,6 @@ FOdysseyPainterEditor::FOdysseyPainterEditor(TSharedRef<FBaseToolkit> iToolkit)
     , mRasterSelection(MakeShared< FOdysseyPainterEditorRasterSelection >())
     , mBrushContexts()
     , mPaintColor(::ULIS::FColor::Black)
-    , mAnimationPlaybackFramesPerSecond(0)
     , mAnimationTimelinePosition(MakeShared<FOdysseyPainterEditorAnimationTimelinePosition>())
     , mRasterDrawingTool(nullptr)
     , mRasterEraserTool(nullptr)
@@ -159,8 +161,6 @@ FOdysseyPainterEditor::FOdysseyPainterEditor(TSharedRef<FBaseToolkit> iToolkit)
 {
     UOdysseyLayer::OnMediaChanged().AddRaw(this, &FOdysseyPainterEditor::OnMediaChanged);
     UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw(this, &FOdysseyPainterEditor::OnCurrentLayerChanged);
-    UOdysseyAnimation::OnCurrentFrameChanged().AddRaw(this, &FOdysseyPainterEditor::OnCurrentFrameChanged);
-    FOdysseyImageRenderingAbility::OnImageRenderingChangedDelegate().AddRaw(this, &FOdysseyPainterEditor::OnImageRenderingChanged);
 
     mBrushContexts.Add(new FOdysseyPainterEditorBrushContext(this));
 }
@@ -171,6 +171,9 @@ FOdysseyPainterEditor::FOdysseyPainterEditor(TSharedRef<FBaseToolkit> iToolkit)
 void
 FOdysseyPainterEditor::Initialize()
 {
+    FOdysseyPainterEditorModule& painterEditorModule = FModuleManager::GetModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
+    painterEditorModule.AddOpenedEditor(this);
+
     InitHUD();
 
     //Init Tools
@@ -181,11 +184,38 @@ FOdysseyPainterEditor::Initialize()
     mGUI->Initialize();
 
     //Init the shortcuts
-    TAttribute<UOdysseyLayerStack*> layerStackAttr = TAttribute<UOdysseyLayerStack*>::CreateRaw(this, &FOdysseyPainterEditor::LayerStack);
-    GetShortcuts().Add(MakeShared<FOdysseyLayerStackGlobalShortcuts>(layerStackAttr));
+
+    TAttribute<UOdysseyAnimation*> animation = MakeAttributeRaw(this, &FOdysseyPainterEditor::GetAnimation);
+    TAttribute<UOdysseyLayerStack*> layerStack = MakeAttributeRaw(this, &FOdysseyPainterEditor::LayerStack);
+    TAttribute<int> currentFrame = MakeAttributeLambda(
+        [this]() -> int
+        {
+            UOdysseyAnimationPlayer* player =  GetAnimationPlayer();
+            if (!player)
+                return 0;
+
+            return player->GetCurrentFrame().FrameNumber.Value;
+        }
+    );
+    auto onTransactCurrentFrame = FOdysseyAnimationGlobalShortcuts::FOnTransactCurrentFrame::CreateLambda(
+        [this, currentFrame](TOptional<int> iFrame)
+        {
+            UOdysseyAnimationPlayer* player =  GetAnimationPlayer();
+            if (!player)
+                return;
+
+            int frame = iFrame.Get(currentFrame.Get());
+
+            FOdysseyAnimationCurrentFrameMutator currentFrameMutator(player);
+            currentFrameMutator.Set(frame);
+            currentFrameMutator.Commit();
+        }
+    );
+
+    GetShortcuts().Add(MakeShared<FOdysseyLayerStackGlobalShortcuts>(layerStack));
     GetShortcuts().Add(MakeShared<FOdysseyPainterEditorGlobalToolsShortcuts>(this));
     GetShortcuts().Add(MakeShared<FOdysseyPainterEditorGlobalShortcuts>(this));
-    GetShortcuts().Add(MakeShared<FOdysseyAnimationGlobalShortcuts>(this));
+    GetShortcuts().Add(MakeShared<FOdysseyAnimationGlobalShortcuts>(animation, currentFrame, onTransactCurrentFrame));
 
     SetVectorHUDFlags( FOdysseyVectorHUD::HUD_MODE_OBJECT
         | FOdysseyVectorHUD::HUD_MODE_OBJECT_ALLOWED
@@ -561,12 +591,6 @@ FOdysseyPainterEditor::ExtendToolbarSaveAssetButton(FToolBarBuilder& iBuilder)
     iBuilder.EndSection();
 }
 
-float
-FOdysseyPainterEditor::GetAnimationPlaybackFramesPerSecond() const
-{
-    return mAnimationPlaybackFramesPerSecond;
-}
-
 void
 FOdysseyPainterEditor::ExtendToolbarToolParameters(FToolBarBuilder& iBuilder)
 {
@@ -658,13 +682,14 @@ FOdysseyPainterEditor::OnClose()
     mGUI->Finalize();
 
     UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
-    UOdysseyAnimation::OnCurrentFrameChanged().RemoveAll(this);
-    FOdysseyImageRenderingAbility::OnImageRenderingChangedDelegate().RemoveAll(this);
     UOdysseyLayer::OnMediaChanged().RemoveAll(this);
     FSlateApplication::Get().UnregisterInputPreProcessor(mAnimationFlipSystem);
 
     delete mHUDSystem;
     mHUDSystem = nullptr;
+
+    FOdysseyPainterEditorModule& painterEditorModule = FModuleManager::GetModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
+    painterEditorModule.RemoveOpenedEditor(this);
 }
 
 void
@@ -1024,7 +1049,7 @@ FOdysseyPainterEditor::ActivateMainTool( UOdysseyPainterEditorTool* iTool )
 
     if (LayerStack())
     {
-        UOdysseyLayer* currentLayer = LayerStack()->CurrentLayer.Get();
+        UOdysseyLayer* currentLayer = LayerStack()->GetCurrentLayer();
         if (currentLayer)
         {
             UClass* layerClass = currentLayer->GetClass();
@@ -1088,7 +1113,11 @@ FOdysseyPainterEditor::SanitizeCurrentTool()
 {
     InactivateAllTools();
 
-    UOdysseyLayer* currentLayer = LayerStack()->CurrentLayer.Get();
+    UOdysseyLayerStack* layerStack = LayerStack();
+    if (!layerStack)
+        return;
+
+    UOdysseyLayer* currentLayer = layerStack->GetCurrentLayer();
     if (!currentLayer)
         return;
 
@@ -1150,11 +1179,11 @@ FOdysseyPainterEditor::GetCurrentFrame() const
     if (mSource->Id() == FOdysseyPainterEditorAnimationSource::StaticId() )
     {
         TSharedPtr<FOdysseyPainterEditorAnimationSource> animationSource = StaticCastSharedPtr<FOdysseyPainterEditorAnimationSource>(mSource);
-        UOdysseyAnimation* animation = animationSource->GetAnimation();
-        if (!animation)
+        UOdysseyAnimationPlayer* player = animationSource->GetAnimationPlayer();
+        if (!player)
             return INDEX_NONE;
 
-        return animation->CurrentFrame;
+        return player->GetCurrentFrame().FrameNumber.Value;
     }
 
     return INDEX_NONE;
@@ -1184,7 +1213,7 @@ FOdysseyPainterEditor::SetSource(TSharedPtr<FOdysseyPainterEditorSource> iSource
         mSource = iSource;
         mSource->OnAddEditedObjectDelegate().AddLambda([this](UObject* iObject) { AddEditedObject(iObject);});
         mSource->OnRemoveEditedObjectDelegate().AddLambda([this](UObject* iObject) { RemoveEditedObject(iObject);});
-        mSource->Activate();
+        mSource->Activate(this);
 
         mRasterSelection->Init(mSource->Width(), mSource->Height());
 
@@ -1197,15 +1226,6 @@ FOdysseyPainterEditor::SetSource(TSharedPtr<FOdysseyPainterEditorSource> iSource
             //select the best tool
             SanitizeCurrentTool();
         }
-    }
-
-    //Is the source an animation
-    if (mSource && mSource->Id() == FOdysseyPainterEditorAnimationSource::StaticId())
-    {
-        TSharedPtr<FOdysseyPainterEditorAnimationSource> animSource = StaticCastSharedPtr<FOdysseyPainterEditorAnimationSource>(mSource);
-        UOdysseyAnimation* animation = animSource->GetAnimation();
-        mImageRenderingComposition = animation->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Render, animation->CurrentFrame);
-        mAnimationPlaybackFramesPerSecond = animation->GetFramesPerSecond();
     }
 
     OnSourceChanged().Broadcast();
@@ -1227,17 +1247,6 @@ TSharedRef<FOdysseyPainterEditorAnimationTimelinePosition>
 FOdysseyPainterEditor::GetAnimationTimelinePosition()
 {
     return mAnimationTimelinePosition;
-}
-
-void
-FOdysseyPainterEditor::SetAnimationTimelineIsScrubbing(bool iIsScrubbing)
-{
-    mAnimationTimelineIsScrubbing = iIsScrubbing;
-}
-bool
-FOdysseyPainterEditor::GetAnimationTimelineIsScrubbing() const
-{
-    return mAnimationTimelineIsScrubbing;
 }
 
 UOdysseyPainterEditorTool*
@@ -1346,7 +1355,7 @@ FOdysseyPainterEditor::BringForward( FOdysseyPainterEditor* iEditor, FOdysseyVec
 {
     FOdysseyVectorObject* selectedObject = iScene->GetCell()->GetLastSelectedObject();
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                             | FOdysseyPainterEditor::UI_UPDATE_HUD;
+                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     if( selectedObject )
     {
@@ -1385,7 +1394,7 @@ FOdysseyPainterEditor::SendBackward( FOdysseyPainterEditor* iEditor, FOdysseyVec
 {
     FOdysseyVectorObject* selectedObject = iScene->GetCell()->GetLastSelectedObject();
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                             | FOdysseyPainterEditor::UI_UPDATE_HUD;
+                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     if( selectedObject )
     {
@@ -1425,7 +1434,7 @@ FOdysseyPainterEditor::ApplyTransformations( FOdysseyPainterEditor* iEditor, FOd
     std::list<FOdysseyVectorObject*> objectList;
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
                              | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                             | FOdysseyPainterEditor::UI_UPDATE_HUD;
+                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     // concerns only top-most objects of a branch, including the scene
     iScene->GetCell()->GetFocusedAncestorList( objectList );
@@ -1469,7 +1478,7 @@ FOdysseyPainterEditor::MakePaintGroup( FOdysseyPainterEditor* iEditor, FOdysseyV
     FOdysseyVectorGroupPaint* paintGroup;
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
                              | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                             | FOdysseyPainterEditor::UI_UPDATE_HUD;
+                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     // concerns all selected objects of a branch but the scene
     iScene->GetCell()->GetFocusedObjectList( objectList );
@@ -1518,7 +1527,7 @@ FOdysseyPainterEditor::Ungroup( FOdysseyPainterEditor* iEditor, FOdysseyVectorGr
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
                              | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
                              | FOdysseyPainterEditor::UI_UPDATE_TIMELINE
-                             | FOdysseyPainterEditor::UI_UPDATE_HUD;
+                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     if( selectedObject )
     {
@@ -1574,7 +1583,7 @@ FOdysseyPainterEditor::GroupAndAddInbetweenerTag( FOdysseyPainterEditor* iEditor
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
                              | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
                              | FOdysseyPainterEditor::UI_UPDATE_TIMELINE
-                             | FOdysseyPainterEditor::UI_UPDATE_HUD;
+                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     if( group )
     {
@@ -1620,7 +1629,7 @@ FOdysseyPainterEditor::_Group( FOdysseyPainterEditor* iEditor
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
                              | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
                              | FOdysseyPainterEditor::UI_UPDATE_TIMELINE
-                             | FOdysseyPainterEditor::UI_UPDATE_HUD;
+                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     iScene->GetCell()->GetFocusedAncestorList( objectList );
 
@@ -1665,7 +1674,7 @@ FOdysseyPainterEditor::Subdivide( FOdysseyPainterEditor* iEditor, FOdysseyVector
     std::list<FOdysseyVectorObject*> objectList;
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
                              | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                             | FOdysseyPainterEditor::UI_UPDATE_HUD;
+                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
     std::vector<FOdysseyVectorPath*> addedPathArray;
     std::vector<FOdysseyVectorVertex*> addedVertexArray;
     std::vector<FOdysseyVectorSegment*> addedSegmentArray;
@@ -1721,7 +1730,7 @@ FOdysseyPainterEditor::SelectAllPoints( FOdysseyPainterEditor* iEditor, FOdyssey
     std::list<FOdysseyVectorObject*> objectList;
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
                              | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                             | FOdysseyPainterEditor::UI_UPDATE_HUD;
+                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     // concerns all selected objects of a branch including implicit selection
     iScene->GetCell()->GetFocusedObjectList( objectList );
@@ -1770,7 +1779,7 @@ void
 FOdysseyPainterEditor::SelectAllObjects( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene )
 {
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                             | FOdysseyPainterEditor::UI_UPDATE_HUD;
+                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     // needed for undos
     GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.select-all-objects", "Select All"));
@@ -1801,7 +1810,7 @@ void
 FOdysseyPainterEditor::ResetView( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene )
 {
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                             | FOdysseyPainterEditor::UI_UPDATE_HUD;
+                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     // needed for undos
     GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.reset-view", "Reset view"));
@@ -1832,7 +1841,7 @@ void
 FOdysseyPainterEditor::LockPointSelection( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene )
 {
     std::vector<FOdysseyVectorVertex*> selectedVertexArray; // for undoing
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_HUD;
+    uint64 notificationFlags = FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     selectedVertexArray.reserve( 50 );
 
@@ -1871,7 +1880,7 @@ void
 FOdysseyPainterEditor::UnlockPointSelection( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene )
 {
     std::vector<FOdysseyVectorVertex*> selectedVertexArray; // for undoing
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_HUD;
+    uint64 notificationFlags = FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     selectedVertexArray.reserve( 50 );
 
@@ -1910,7 +1919,7 @@ void
 FOdysseyPainterEditor::UnalignPointSelection( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene )
 {
     std::vector<FOdysseyVectorVertex*> selectedVertexArray; // for undoing
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_HUD;
+    uint64 notificationFlags = FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     selectedVertexArray.reserve( 50 );
 
@@ -1951,7 +1960,7 @@ void
 FOdysseyPainterEditor::AlignPointSelection( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene )
 {
     std::vector<FOdysseyVectorVertex*> selectedVertexArray; // for undoing
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_HUD;
+    uint64 notificationFlags = FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     selectedVertexArray.reserve( 50 );
 
@@ -2006,7 +2015,7 @@ FOdysseyPainterEditor::DeletePointSelection( FOdysseyPainterEditor* iEditor, FOd
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
                              | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
                              | FOdysseyPainterEditor::UI_UPDATE_TIMELINE
-                             | FOdysseyPainterEditor::UI_UPDATE_HUD;
+                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
     // concerns all selected objects of a branch including implicit selection
     iScene->GetCell()->GetFocusedObjectList( objectList );
 
@@ -2081,7 +2090,7 @@ FOdysseyPainterEditor::DeleteObjects( FOdysseyPainterEditor* iEditor, FOdysseyVe
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
                              | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
                              | FOdysseyPainterEditor::UI_UPDATE_TIMELINE
-                             | FOdysseyPainterEditor::UI_UPDATE_HUD;
+                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     removedObjectArray.reserve( selectedObjectList.size() );
 
@@ -2122,7 +2131,7 @@ FOdysseyPainterEditor::RemoveInbetweenerTag( FOdysseyPainterEditor* iEditor
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
                              | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
                              | FOdysseyPainterEditor::UI_UPDATE_TIMELINE
-                             | FOdysseyPainterEditor::UI_UPDATE_HUD;
+                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     removedTagArray.reserve( selectedObjectList.size() );
 
@@ -2176,7 +2185,7 @@ FOdysseyPainterEditor::CommitSelectedInbetweenerTag( FOdysseyPainterEditor* iEdi
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
                              | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
                              | FOdysseyPainterEditor::UI_UPDATE_TIMELINE
-                             | FOdysseyPainterEditor::UI_UPDATE_HUD;
+                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
     std::list<FOdysseyVectorTag*> selectedTagList;
 
     iLayer->GetSelectedTagByClassType( FOdysseyVectorTagInbetweener::StaticClass(), selectedTagList );
@@ -2233,7 +2242,7 @@ FOdysseyPainterEditor::AddInbetweenerTag( FOdysseyPainterEditor* iEditor
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
                              | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
                              | FOdysseyPainterEditor::UI_UPDATE_TIMELINE
-                             | FOdysseyPainterEditor::UI_UPDATE_HUD;
+                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     for( FOdysseyVectorObject* selectedObject : selectedObjectList )
     {
@@ -2332,7 +2341,7 @@ FOdysseyPainterEditor::PasteInbetweenerGrid( FOdysseyPainterEditor* iEditor
     std::list<FOdysseyVectorTag*> selectedTagList;
     std::list<FInbetweenerBreakdown*> selectedBreakdownList;
     std::vector<::ULIS::FVec2D>& copiedGridGeometry = GetCopiedInbetweenerGridGeometry();
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_HUD;
+    uint64 notificationFlags = FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     iScene->GetLayer()->GetSelectedTagByClassType( FOdysseyVectorTagInbetweener::StaticClass()
                                                  , selectedTagList );
@@ -2393,7 +2402,7 @@ FOdysseyPainterEditor::ResetInbetweenerGrid( FOdysseyPainterEditor* iEditor
                                            , bool iResetDeformation )
 {
     std::list<FOdysseyVectorTagInbetweener*> selectedInbetweenerTagList;
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_HUD;
+    uint64 notificationFlags = FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
     std::list<FOdysseyVectorTag*> selectedTagList;
 
     iScene->GetLayer()->GetSelectedTagByClassType( FOdysseyVectorTagInbetweener::StaticClass()
@@ -2460,7 +2469,7 @@ FOdysseyPainterEditor::ResetSpacingChart( FOdysseyPainterEditor* iEditor
                                         , bool iResetPositionning
                                         , bool iCurrentBreakdownOnly )
 {
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_HUD;
+    uint64 notificationFlags = FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
     std::list<FOdysseyVectorTag*> selectedTagList;
     uint32 cellIndex = iScene->GetCell()->GetIndex();
 
@@ -2520,7 +2529,7 @@ void
 FOdysseyPainterEditor::ResetInbetweenerTagSpacingChart( FOdysseyPainterEditor* iEditor
                                                       , FOdysseyVectorLayer* iLayer )
 {
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_HUD;
+    uint64 notificationFlags = FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
     std::list<FOdysseyVectorTag*> selectedTagList;
 
     iLayer->GetSelectedTagByClassType( FOdysseyVectorTagInbetweener::StaticClass()
@@ -2570,7 +2579,7 @@ FOdysseyPainterEditor::FlipHorizontal( FOdysseyPainterEditor* iEditor, FOdysseyV
 {
     std::list<FOdysseyVectorObject*> objectList;
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                             | FOdysseyPainterEditor::UI_UPDATE_HUD;
+                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     // concerns only the top-most selected objects of a branch, including the scene
     iScene->GetCell()->GetFocusedAncestorList( objectList );
@@ -2604,7 +2613,7 @@ FOdysseyPainterEditor::FlipVertical( FOdysseyPainterEditor* iEditor, FOdysseyVec
 {
     std::list<FOdysseyVectorObject*> objectList;
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                             | FOdysseyPainterEditor::UI_UPDATE_HUD;
+                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     // concerns only the top-most selected objects of a branch, including the scene
     iScene->GetCell()->GetFocusedAncestorList( objectList );
@@ -2638,7 +2647,7 @@ FOdysseyPainterEditor::ClearColoring( FOdysseyPainterEditor* iEditor, FOdysseyVe
 {
     std::vector<FOdysseyVectorBucket*> bucketArray;
     std::list<FOdysseyVectorObject*> objectList;
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_HUD;
+    uint64 notificationFlags = FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     // concerns all objects of a branch, including the scene
     iScene->GetCell()->GetFocusedObjectList( objectList );
@@ -2698,7 +2707,7 @@ FOdysseyPainterEditor::DeleteBucket( FOdysseyPainterEditor* iEditor, FOdysseyVec
 {
     FOdysseyVectorObject* ownerObject = iBucket->GetOwner();
     FOdysseyVectorGroupPaint* scene = ownerObject->GetScene();
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_HUD;
+    uint64 notificationFlags = FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     if( ownerObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
     {
@@ -2734,7 +2743,7 @@ FOdysseyPainterEditor::AlterContourWidth( FOdysseyVectorGroupPaint* iScene
                                         , bool   iAbsolute )
 {
     //std::list<FOdysseyVectorGroupPaint*> paintgroupList;
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_HUD;
+    uint64 notificationFlags = FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     FOdysseyVectorObject::Traverse
     ( iScene
@@ -2772,9 +2781,9 @@ FOdysseyPainterEditor::AlterContourWidth( FOdysseyVectorGroupPaint* iScene
 
 bool FOdysseyPainterEditor::HasCopyBlockClipboard()
 {
-    FOdysseyEditorModule& odysseyEditorModule = FModuleManager::Get().LoadModuleChecked<FOdysseyEditorModule>(TEXT("OdysseyEditor"));
+    FOdysseyCoreEditorModule& odysseyCoreEditorModule = FModuleManager::Get().LoadModuleChecked<FOdysseyCoreEditorModule>(TEXT("OdysseyCoreEditor"));
 
-    return odysseyEditorModule.GetClipboard()->GetId() == FOdysseyBlockClipboardData::StaticId();
+    return odysseyCoreEditorModule.GetClipboard()->GetId() == FOdysseyBlockClipboardData::StaticId();
 }
 
 static void
@@ -2836,7 +2845,7 @@ FOdysseyPainterEditor::PasteSpacingChart( FOdysseyPainterEditor* iEditor
                                         , bool iCurrentBreakdownOnly )
 {
     std::list<std::vector<float>>& spacingList = GetCopiedChart();
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_HUD;
+    uint64 notificationFlags = FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
     uint32 cellIndex = iScene->GetCell()->GetIndex();
     std::list<FOdysseyVectorTag*> selectedTagList;
 
@@ -3002,7 +3011,7 @@ FOdysseyPainterEditor::PasteTransformation( FOdysseyPainterEditor* iEditor, FOdy
 {
     FOdysseyVectorObject* selectedObject = iScene->GetCell()->GetLastSelectedObject();
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                             | FOdysseyPainterEditor::UI_UPDATE_HUD;
+                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     if( selectedObject )
     {
@@ -3065,7 +3074,7 @@ FOdysseyPainterEditor::PasteObjects( FOdysseyPainterEditor* iEditor, FOdysseyVec
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
                              | FOdysseyPainterEditor::UI_UPDATE_TIMELINE
                              | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                             | FOdysseyPainterEditor::UI_UPDATE_HUD;
+                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     // TODO: Check why pastedObjectList has to be copied, unclear
     // First copy all objects. This is needed to record their state-before-addition for the UNDO operation.
@@ -3123,7 +3132,7 @@ FOdysseyPainterEditor::MergeScenes( FOdysseyVectorGroupPaint* iDestinationScene
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
                              | FOdysseyPainterEditor::UI_UPDATE_TIMELINE
                              | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                             | FOdysseyPainterEditor::UI_UPDATE_HUD;
+                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     for( int i = 0; i < iSourceSceneArray.Num(); i++ )
     {
@@ -3155,7 +3164,7 @@ FOdysseyPainterEditor::RemoveInbetweenerTag( FOdysseyPainterEditor* iEditor
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_TIMELINE
                              | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
                              | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                             | FOdysseyPainterEditor::UI_UPDATE_HUD;
+                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
     std::list<FOdysseyVectorTag*> tagList;
 
     iLayer->GetSelectedTagByClassType( FOdysseyVectorTagInbetweener::StaticClass()
@@ -3216,7 +3225,7 @@ FOdysseyPainterEditor::StitchVertices( FOdysseyPainterEditor* iEditor
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
                              | FOdysseyPainterEditor::UI_UPDATE_TIMELINE
                              | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                             | FOdysseyPainterEditor::UI_UPDATE_HUD;
+                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     if( ( iVertexA->GetSegmentCount() == 1 ) && ( iVertexB->GetSegmentCount() == 1 ) )
     {
@@ -3394,45 +3403,9 @@ FOdysseyPainterEditor::SetCurrentPaletteColorEntry(UOdysseyPaletteEntryColor* iE
 }
 
 void
-FOdysseyPainterEditor::OnCurrentFrameChanged(UOdysseyAnimation* iAnimation)
-{
-    UOdysseyAnimation* animation = GetAnimation();
-    if (iAnimation != animation)
-        return;
-
-    //Preload the new current frame for edition
-    TArray<FGuid> imageRenderingComposition = animation->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Render, animation->CurrentFrame);
-    if ( imageRenderingComposition == mImageRenderingComposition )
-        return;
-
-    mImageRenderingComposition = imageRenderingComposition;
-    SanitizeCurrentTool();
-}
-
-void
 FOdysseyPainterEditor::OnMediaChanged()
 {
     SanitizeCurrentTool(); //Refresh the current tool
-}
-
-void
-FOdysseyPainterEditor::OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent)
-{
-    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyPainterEditor::OnImageRenderingChanged);
-    if (iEvent.IsInteractive() || iEvent.GetType() != FOdysseyImageRenderingChangedEvent::eEventType::kCompositionChange)
-        return;
-
-    UOdysseyAnimation* animation = GetAnimation();
-    if (!animation)
-        return;
-
-    TArray<FGuid> imageRenderingComposition = animation->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Render, animation->CurrentFrame);
-    if ( imageRenderingComposition == mImageRenderingComposition )
-        return;
-
-    mImageRenderingComposition = imageRenderingComposition;
-
-    SanitizeCurrentTool();
 }
 
 #undef LOCTEXT_NAMESPACE

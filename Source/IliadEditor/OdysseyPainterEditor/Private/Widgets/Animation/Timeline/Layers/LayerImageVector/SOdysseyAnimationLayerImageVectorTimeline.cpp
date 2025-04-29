@@ -4,11 +4,12 @@
 #include "Widgets/Animation/Timeline/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorTimeline.h"
 #include "Widgets/Animation/Timeline/Cells/CellImageStagger/SOdysseyAnimationCellImageStagger.h"
 #include "Widgets/Animation/Timeline/Cells/CellImageVector/SOdysseyAnimationCellImageVector.h"
-#include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
+#include "OdysseyAnimationLayerImageVector.h"
 #include "Widgets/Animation/Timeline/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorTimelineInbetweening.h"
-#include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVector.h"
-#include "LayerStack/Cells/CellImageStagger/OdysseyAnimationCellImageStagger.h"
+#include "OdysseyAnimationCellImageVector.h"
+#include "OdysseyLayerCellImageStagger.h"
 #include "OdysseyPainterEditor.h"
+#include "OdysseyPainterEditorModule.h"
 #include "OdysseyAnimation.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "HUD/OdysseyVectorHUD.h"
@@ -26,7 +27,8 @@ SOdysseyAnimationLayerImageVectorTimeline::GetRowVisibility(FName iRow) const
 {
     if (iRow == "Inbetweening")
     {
-        FOdysseyPainterEditor* editor = mEditor.Get();
+        FOdysseyPainterEditorModule& painterEditorModule = FModuleManager::GetModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
+        FOdysseyPainterEditor* editor = painterEditorModule.GetOpenedEditorForAsset(mLayer->GetAnimation());
         if (!editor)
             return EVisibility::Collapsed;
 
@@ -39,7 +41,8 @@ SOdysseyAnimationLayerImageVectorTimeline::GetRowVisibility(FName iRow) const
 EVisibility
 SOdysseyAnimationLayerImageVectorTimeline::IsInbetweeningTimelineVisible() const
 {
-    FOdysseyPainterEditor* editor = mEditor.Get();
+    FOdysseyPainterEditorModule& painterEditorModule = FModuleManager::GetModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
+    FOdysseyPainterEditor* editor = painterEditorModule.GetOpenedEditorForAsset(mLayer->GetAnimation());
     if (!editor)
         return EVisibility::Collapsed;
 
@@ -53,7 +56,7 @@ SOdysseyAnimationLayerImageVectorTimeline::GetInbetweeningListView()
 }
 
 TSharedRef<SWidget>
-SOdysseyAnimationLayerImageVectorTimeline::OnGenerateCellWidget(UOdysseyAnimationCell* iCell)
+SOdysseyAnimationLayerImageVectorTimeline::OnGenerateCellWidget(UOdysseyLayerCell* iCell)
 {
     if (!iCell)
     {
@@ -65,9 +68,9 @@ SOdysseyAnimationLayerImageVectorTimeline::OnGenerateCellWidget(UOdysseyAnimatio
         return SNew(SOdysseyAnimationCellImageVector, Cast<UOdysseyAnimationCellImageVector>(iCell))
             .Clipping(EWidgetClipping::ClipToBoundsAlways);
     }
-    else if (iCell->IsA<UOdysseyAnimationCellImageStagger>())
+    else if (iCell->IsA<UOdysseyLayerCellImageStagger>())
     {
-        return SNew(SOdysseyAnimationCellImageStagger, Cast<UOdysseyAnimationCellImageStagger>(iCell))
+        return SNew(SOdysseyAnimationCellImageStagger, Cast<UOdysseyLayerCellImageStagger>(iCell))
             .TimelinePosition(mTimelinePosition);
     }
 
@@ -81,10 +84,10 @@ SOdysseyAnimationLayerImageVectorTimeline::OnPreviewMouseButtonDown(const FGeome
     if (!layerStack)
         return SOdysseyAnimationLayerImageTimeline::OnPreviewMouseButtonDown(MyGeometry, MouseEvent);
 
-    if (layerStack->CurrentLayer.Get() == mLayer)
+    if (layerStack->GetCurrentLayer() == mLayer)
         return SOdysseyAnimationLayerImageTimeline::OnPreviewMouseButtonDown(MyGeometry, MouseEvent);
 
-    FOdysseyObjectEditorUtils::SetPropertyValue(layerStack, GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer), mLayer);
+    layerStack->SetCurrentLayer(mLayer);
 
     return SOdysseyAnimationLayerImageTimeline::OnPreviewMouseButtonDown(MyGeometry, MouseEvent);
 }
@@ -107,7 +110,6 @@ SOdysseyAnimationLayerImageVectorTimeline::GenerateInbetweeningRowTimelineWidget
 {
     return SAssignNew( mInbetweeningListView, SOdysseyAnimationLayerImageVectorTimelineInbetweening
                                 , Cast<UOdysseyAnimationLayerImageVector>(mLayer) )
-                            .PainterEditor(mEditor)
                             .TimelinePosition(mTimelinePosition)
                             .Visibility( this, &SOdysseyAnimationLayerImageVectorTimeline::IsInbetweeningTimelineVisible );
 }

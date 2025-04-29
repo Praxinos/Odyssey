@@ -4,8 +4,8 @@
 #pragma once
 
 #include "OdysseyRasterBlockUndo.h"
-#include "Misc/OdysseyHandle.h"
-#include "ULISInvalidTileMap.h"
+#include "OdysseyInvalidTileMap.h"
+#include <ULIS>
 
 namespace ULIS { class FBlock; }
 namespace ULIS { class FEvent; }
@@ -22,11 +22,11 @@ public:
     void SetRasterBlock(TSharedPtr<FOdysseyRasterBlock> iRasterBlock);
 
     TSharedPtr<FOdysseyRasterBlock> GetRasterBlock() const;
-    const FULISInvalidTileMap& GetInvalidTileMap() const;
+    const FOdysseyInvalidTileMap& GetInvalidTileMap() const;
     const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock>>& GetOriginalTileBlocks() const;
 
     void ResetTilesFromRects(const TArray<::ULIS::FRectI>& iRects);
-    void EditTilesFromRects(const TArray<::ULIS::FRectI>& iRects, TFunction<TArray<::ULIS::FEvent>(TSharedPtr<::ULIS::FBlock>, const FULISInvalidTileMap&)> iDelegate);
+    void EditTilesFromRects(const TArray<::ULIS::FRectI>& iRects, TFunction<TArray<::ULIS::FEvent>(TSharedPtr<::ULIS::FBlock>, const FOdysseyInvalidTileMap&)> iDelegate);
 
     void Copy(TSharedPtr<::ULIS::FBlock> iBlock, const TArray<::ULIS::FRectI>& iRects);
 
@@ -35,7 +35,7 @@ public:
 
 private:
     TSharedPtr<FOdysseyRasterBlock> mRasterBlock;
-    FULISInvalidTileMap mInvalidTileMap;
+    FOdysseyInvalidTileMap mInvalidTileMap;
     TMap<FIntPoint, TSharedPtr<::ULIS::FBlock>> mOriginalTileBlocks;
     FOdysseyRasterBlockUndoBuilder mRasterBlockUndoBuilder;
     TSharedPtr<::ULIS::FBlock> mBlock;

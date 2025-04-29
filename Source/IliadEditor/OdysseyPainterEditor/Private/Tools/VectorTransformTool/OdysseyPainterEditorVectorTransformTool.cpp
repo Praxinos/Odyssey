@@ -188,7 +188,7 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDownVector( FOdysseyVectorGroup
     if (iKey != EKeys::LeftMouseButton)
         return false;
 
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_HUD;
+    uint64 notificationFlags = FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     mTransformHUD->SetCenterGizmo( false );
 

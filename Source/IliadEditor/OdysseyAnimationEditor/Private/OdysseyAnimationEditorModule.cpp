@@ -93,6 +93,9 @@ void
 FOdysseyAnimationEditorModule::ReorderFactories()
 {
     UPlacementSubsystem* placementSubsystem = GEditor->GetEditorSubsystem<UPlacementSubsystem>();
+    if ( !placementSubsystem )
+        return;
+
     TArray<TScriptInterface<IAssetFactoryInterface>> factories_to_move;
 
     UOdysseyAnimation* animation = NewObject<UOdysseyAnimation>( GetTransientPackage(), UOdysseyAnimation::StaticClass(), FName( TEXT( "Transient_Animation" ) ), RF_Transient );

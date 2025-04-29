@@ -5,12 +5,13 @@
 
 #include "Framework/Commands/UICommandList.h"
 
-class UOdysseyLayerStack;
+class UOdysseyAnimation;
+class FOdysseyPainterEditor;
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyAnimationTimelineCellImageRasterShortcuts
 {
 public:
-    FOdysseyAnimationTimelineCellImageRasterShortcuts(UOdysseyLayerStack* iLayerStack);
+    FOdysseyAnimationTimelineCellImageRasterShortcuts(const TAttribute<UOdysseyAnimation*>& iAnimation);
 
 public:
     //Shortcuts
@@ -22,5 +23,5 @@ public:
     bool CanAction_CrossFade();
 
 private:
-    UOdysseyLayerStack* mLayerStack;
+    TAttribute<UOdysseyAnimation*> mAnimation;
 };

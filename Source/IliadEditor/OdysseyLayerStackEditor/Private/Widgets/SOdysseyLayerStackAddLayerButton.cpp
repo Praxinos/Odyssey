@@ -49,16 +49,16 @@ TSharedRef<SWidget> SOdysseyLayerStackAddLayerButton::MakeMenu()
     menuBuilder.BeginSection("AddLayers");
     {
         //Default Layers
-        for( UClass* layerClass : layerStack->CompatibleLayers )
+        for( UClass* layerClass : layerStack->GetSupportedLayerClasses() )
         {
             UOdysseyLayer* layerCDO = layerClass->GetDefaultObject<UOdysseyLayer>();
             if (!layerCDO)
                 continue;
 
             menuBuilder.AddMenuEntry(
-                layerCDO->LayerTypeName,
-                layerCDO->Description,
-                layerCDO->Icon,
+                layerCDO->GetLayerTypeName(),
+                layerCDO->GetDescription(),
+                layerCDO->GetIcon(),
                 FUIAction(FExecuteAction::CreateRaw(this, &SOdysseyLayerStackAddLayerButton::AddLayerFromClass, FAssetData(layerClass)))
                 //We give a FAssetData(layerClass) instead of the layerClass directly, because layerClass could be detroyed
                 //between the moment the user clicks on the button, and the one he clicks on the menu entry.
@@ -113,10 +113,10 @@ SOdysseyLayerStackAddLayerButton::AddLayerFromClass(FAssetData iAssetData)
     FScopedTransaction ScopedTransaction(LOCTEXT("add-layer-button.transaction.add-layer", "Add Layer"));
 #endif
 
-    UOdysseyLayer* currentLayer = layerStack->CurrentLayer.Get();
+    UOdysseyLayer* currentLayer = layerStack->GetCurrentLayer();
     if (currentLayer)
     {
-        if (currentLayer->CanHaveChildren && currentLayer->DisplayChildren)
+        if (currentLayer->CanHaveChildren() && currentLayer->ShouldDisplayChildren())
         {
             currentLayer = layerStack->AddLayer(layerClass, currentLayer);
         }
@@ -133,7 +133,7 @@ SOdysseyLayerStackAddLayerButton::AddLayerFromClass(FAssetData iAssetData)
     }
 
     mOnAdded.ExecuteIfBound(currentLayer);
-    FOdysseyObjectEditorUtils::SetPropertyValue(layerStack, GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer), currentLayer);
+    layerStack->SetCurrentLayer(currentLayer);
 }
 
 #undef LOCTEXT_NAMESPACE

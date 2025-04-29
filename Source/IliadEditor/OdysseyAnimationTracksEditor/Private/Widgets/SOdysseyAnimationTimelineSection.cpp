@@ -15,6 +15,7 @@
 #include "OdysseyAnimationCell.h"
 #include "OdysseyAnimationComponent.h"
 #include "OdysseyAnimationPlayer.h"
+#include "OdysseyAnimationLayerStack.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorAnimationOutOfPegsTool.h"
 #include "OdysseyPainterEditorAnimationTimelinePosition.h"
@@ -87,42 +88,11 @@ SOdysseyAnimationTimelineSection::OnPreviewMouseButtonDown(const FGeometry& MyGe
     return SCompoundWidget::OnPreviewMouseButtonDown(MyGeometry, MouseEvent);
 }
 
-FOdysseyPainterEditor*
-SOdysseyAnimationTimelineSection::GetPainterEditor() const
-{
-    UOdysseyAnimation* animation = mAnimation.Get();
-    if (!animation)
-        return nullptr;
-
-    if (!GLevelEditorModeTools().IsModeActive( FOdysseyViewportDrawingEditorEdMode::EM_OdysseyViewportDrawingEditorEdModeId ))
-        return nullptr;
-
-    FEdMode* edMode = GLevelEditorModeTools().GetActiveMode( FOdysseyViewportDrawingEditorEdMode::EM_OdysseyViewportDrawingEditorEdModeId );
-    if (!edMode)
-        return nullptr;
-
-    FOdysseyViewportDrawingEditorEdMode* odysseyEdMode = static_cast<FOdysseyViewportDrawingEditorEdMode*>(edMode);
-
-    TSharedPtr<FOdysseyViewportDrawingEditorToolkit> toolkit = odysseyEdMode->GetViewportDrawingEditorToolkit();
-    if(!toolkit)
-        return nullptr;
-
-    FOdysseyPainterEditor* editor = odysseyEdMode->GetEditor();
-    if (!editor)
-        return nullptr;
-
-    if (editor->GetAnimation() != animation)
-        return nullptr;
-
-    return editor;
-}
-
 void
 SOdysseyAnimationTimelineSection::OnActivateOutOfPegs(UOdysseyAnimationCell* iCell)
 {
-
     if (!GLevelEditorModeTools().IsModeActive( FOdysseyViewportDrawingEditorEdMode::EM_OdysseyViewportDrawingEditorEdModeId ))
-    return;
+        return;
 
     FEdMode* edMode = GLevelEditorModeTools().GetActiveMode( FOdysseyViewportDrawingEditorEdMode::EM_OdysseyViewportDrawingEditorEdModeId );
     if (!edMode)
@@ -216,6 +186,8 @@ SOdysseyAnimationTimelineSection::RebuildWidgets()
     if (!animation)
         return;
 
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(animation->GetLayerStack());
+
     TSharedPtr<SWidget> widget = SNew(SHorizontalBox)
         .Visibility(this, &SOdysseyAnimationTimelineSection::GetLayersVisibility)
         + SHorizontalBox::Slot()
@@ -299,8 +271,7 @@ SOdysseyAnimationTimelineSection::RebuildWidgets()
             )
             [
                 SNew( SOdysseyAnimationTimelineTreeView )
-                .PainterEditor(this, &SOdysseyAnimationTimelineSection::GetPainterEditor)
-                .LayerStack(animation->GetLayerStack())
+                .LayerStack(layerStack)
                 .TimelinePosition(mTimelinePosition)
                 .OnActivateOutOfPegs(this, &SOdysseyAnimationTimelineSection::OnActivateOutOfPegs)
                 .OnInactivateOutOfPegs(this, &SOdysseyAnimationTimelineSection::OnInactivateOutOfPegs)

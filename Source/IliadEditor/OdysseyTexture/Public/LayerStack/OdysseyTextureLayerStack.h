@@ -5,16 +5,17 @@
 
 #include "OdysseyLayerStack.h"
 #include "OdysseySurfaceTexture2DEditable.h"
-#include "Misc/OdysseyHandle.h"
 #include "Tickable.h"
-#include "ULISInvalidTileMap.h"
-#include "OdysseyImageRenderingAbility.h"
+#include "OdysseyInvalidTileMap.h"
+#include "OdysseyRenderingAbility.h"
 
 #include <ULIS>
 
 #include "OdysseyTextureLayerStack.generated.h"
 
 class UOdysseyTextureLayer;
+class IOdysseyImageRenderer;
+class UTextureRenderTarget2D;
 
 UENUM()
 enum class EOdysseyTextureLayerStackTextureUpdateMode
@@ -39,10 +40,10 @@ public:
     UOdysseyTextureLayerStack();
 
 public:
-    virtual int GetWidth() const override;
-    virtual int GetHeight() const override;
-    virtual ::ULIS::eFormat  GetFormat() const override;
+    //virtual int GetWidth() const override;
+    //virtual int GetHeight() const override;
 
+    virtual void PostInitProperties() override;
     virtual void PostLoad() override;
 
 public:
@@ -96,8 +97,8 @@ public:
     void UpdateTexture(bool iForceRefresh = false);
 
 public:
-    //FOdysseyImageRenderingAbility overrides
-    virtual TArray<::ULIS::FRectI> GetImageRenderingRects() const override;
+    //IOdysseyRenderingAbility overrides
+    virtual FIntRect GetDefaultRenderRect() const override;
 
 private:
     virtual bool IsTickableInEditor() const override { return true; }
@@ -107,20 +108,23 @@ private:
 private:
     void CompressTexture();
     void UncompressTexture();
-    void FastUpdateTexture(const TArray<::ULIS::FRectI>& iRects);
+    void FastUpdateTexture(const TArray<FIntRect>& iRects);
     void UpdateTextureSource();
 
     //React to Texture property changes, updating texture source if we are in fast update
     void OnPreGlobalObjectPropertyChanged(UObject* iObject, const FEditPropertyChain& iEditPropertyChain);
     void OnPackagePreSave(UPackage* iPackage, FObjectPreSaveContext ObjectSaveContext);
     void OnPackageSaved(const FString& iPackageFilename, UPackage* iPackage, FObjectPostSaveContext ObjectSaveContext);
-    void OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent);
+    void OnRenderingChanged(const FOdysseyRenderingChangedEvent& iEvent);
 
 private:
     TSharedPtr<FOdysseySurfaceTexture2DEditable> mTextureFastUpdateSurface;
     int mTextureCompressionNone;
 
     EOdysseyTextureLayerStackTextureUpdateMode mTextureUpdateMode = EOdysseyTextureLayerStackTextureUpdateMode::OnTick;
-    FULISInvalidTileMap mInvalidTileMap;
-    TSharedPtr<IOdysseyImageRenderer> mRenderer; //Used for FastUpdateTexture to keep the LayerStack Ready to render
+    FOdysseyInvalidTileMap mInvalidTileMap;
+
+public:
+    UPROPERTY(Transient)
+    TObjectPtr<UTextureRenderTarget2D> RenderTarget;
 };

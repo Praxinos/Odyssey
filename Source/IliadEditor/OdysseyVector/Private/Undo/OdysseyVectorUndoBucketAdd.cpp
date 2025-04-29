@@ -4,7 +4,6 @@
 #include "Undo/OdysseyVectorUndoBucketAdd.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorLayer.h"
-#include "Misc/OdysseyUndoDelegates.h"
 
 FOdysseyVectorUndoBucketAdd::~FOdysseyVectorUndoBucketAdd()
 {

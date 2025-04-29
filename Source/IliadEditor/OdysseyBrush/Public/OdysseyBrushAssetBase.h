@@ -355,13 +355,9 @@ public:
     UFUNCTION(BlueprintPure, Category="Odyssey|Canvas", meta = ( DisplayName="Get Canvas Rectangle" ))
     FOdysseyBrushRect GetCanvasRect();
 
-    //TODO: GetCanvas Transform
-
     //Gets Stroke Block.
     UFUNCTION( BlueprintPure, Category="Odyssey|Stroke")
     FOdysseyBlockProxy GetStrokeBlock( FOdysseyBrushRect Area );
-
-    //TODO: GetLayerStack...()
 
 public:
     /*******************************/

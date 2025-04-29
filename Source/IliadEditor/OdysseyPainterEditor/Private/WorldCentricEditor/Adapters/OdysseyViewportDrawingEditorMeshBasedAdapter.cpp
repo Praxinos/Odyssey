@@ -438,7 +438,7 @@ float FOdysseyViewportDrawingEditorMeshBasedAdapter::GetStampQuality()
     const FVector componentSpaceCameraPosition(componentToWorldMatrix.InverseTransformPosition(mCurrentStrokeRay.mRayOrigin));
     const FVector componentSpaceBrushPosition(componentToWorldMatrix.InverseTransformPosition(traceHitResult.Location));
 
-    //Todo: make ellipseIntersectTriangles ?
+    //TODO: make ellipseIntersectTriangles ?
     TArray<uint32> triangles;
     float brushSize = FMath::Max(iStampParams.mBlock->Width(), iStampParams.mBlock->Height());// * FMath::Max3(mExtension->Actor()->GetActorScale().X, mExtension->Actor()->GetActorScale().Y, mExtension->Actor()->GetActorScale().Z);
     brushSize *= brushSize;

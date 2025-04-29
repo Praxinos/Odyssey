@@ -24,6 +24,19 @@ public class OdysseyLayerStackEditor : ModuleRules
 
         PublicIncludePaths.AddRange(
             new string[] {
+                // ... add public include paths required here ...
+            }
+            );
+
+        PrivateIncludePaths.AddRange(
+            new string[] {
+                // ... add other private include paths required here ...
+            }
+            );
+
+        PublicIncludePaths.AddRange(
+            new string[] {
+                Path.Combine(ModuleDirectory, "Public", "Widgets"),
                 Path.Combine(ModuleDirectory, "Public", "Commands"),
                 Path.Combine(ModuleDirectory, "Public", "Controllers"),
                 Path.Combine(ModuleDirectory, "Public", "DragDropOperations"),
@@ -34,6 +47,7 @@ public class OdysseyLayerStackEditor : ModuleRules
 
         PrivateIncludePaths.AddRange(
             new string[] {
+                Path.Combine(ModuleDirectory, "Private", "Widgets"),
                 Path.Combine(ModuleDirectory, "Private", "Commands"),
                 Path.Combine(ModuleDirectory, "Private", "Controllers"),
                 Path.Combine(ModuleDirectory, "Private", "DragDropOperations"),
@@ -44,9 +58,8 @@ public class OdysseyLayerStackEditor : ModuleRules
 
         PublicDependencyModuleNames.AddRange(
             new string[] {
-                "OdysseyCore",
-                "OdysseyMedia",
-                "OdysseyImaging",
+                "Slate",
+                "OdysseyEditor",
             }
         );
 
@@ -58,20 +71,28 @@ public class OdysseyLayerStackEditor : ModuleRules
                 "EditorWidgets",
                 "Engine",
                 "InputCore",
-                "Slate",
+                "RenderCore",
+                "Renderer",
+                "RHI",
                 "SlateCore",
-                "UMG",
-                "UnrealEd",
                 "ToolMenus",
                 "ToolWidgets",
+                "UnrealEd",
 
-                "OdysseyBrush",
-                "OdysseyEditor",
-                "OdysseyMaths",
+                "OdysseyAnimation",
+                "OdysseyCore",
+                "OdysseyCoreEditor",
+                "OdysseyFile",
+                "OdysseyImaging",
+                "OdysseyLayerStack",
+                "OdysseyMedia",
+                "OdysseyRendering",
                 "OdysseyStyle",
+                "OdysseyVector",
 
+                "blend2d",
                 "ULIS",
-                "ULISLoader"
+                "ULISLoader",
             }
         );
 

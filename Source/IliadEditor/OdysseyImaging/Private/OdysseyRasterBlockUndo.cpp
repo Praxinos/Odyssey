@@ -12,6 +12,7 @@
 #include "DerivedDataRequestOwner.h"
 #include "DerivedDataCache.h"
 #include "CoreTypes.h"
+#include "ULISUtils.h"
 
 #define FOdysseyRasterBlockUndo_CACHE_NAME TEXT("OdysseyRasterBlockUndo")
 #define FOdysseyRasterBlockUndo_CACHE_VERSION TEXT("C0E3215B0E9A4983B2C0C01131A37935")
@@ -36,7 +37,7 @@ FOdysseyRasterBlockUndoBuilder::BuildRedoData(const FOdysseyRasterBlockMutator& 
     if ( originalTileBlocks.IsEmpty() )
         return;
 
-    const FULISInvalidTileMap& invalidTileMap = iRasterBlockMutator.GetInvalidTileMap();
+    const FOdysseyInvalidTileMap& invalidTileMap = iRasterBlockMutator.GetInvalidTileMap();
     FMemoryWriter writer(oData); //allows us to save rectangles alongside the block
 
     TArray<FIntPoint> tileIndexes;
@@ -46,7 +47,7 @@ FOdysseyRasterBlockUndoBuilder::BuildRedoData(const FOdysseyRasterBlockMutator& 
     writer << numTiles;
     for (const FIntPoint& tileIndex : tileIndexes)
     {
-        ::ULIS::FRectI rect = invalidTileMap.GetTileRect(tileIndex);
+        ::ULIS::FRectI rect = ::ULISUtils::ToULISRectI(invalidTileMap.GetTileRect(tileIndex));
         writer << rect.x;
         writer << rect.y;
         writer << rect.w;
@@ -61,7 +62,7 @@ FOdysseyRasterBlockUndoBuilder::BuildRedoData(const FOdysseyRasterBlockMutator& 
     for (int i = 0; i < tileIndexes.Num(); i++)
     {
         TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> blockToSave = MakeShared<::ULIS::FBlock>(oData.GetData() + dataStart, tileSize, tileSize, iRasterBlockMutator.GetRasterBlock()->GetFormat());
-        ::ULIS::FRectI rect = invalidTileMap.GetTileRect(tileIndexes[i]);
+        ::ULIS::FRectI rect = ::ULISUtils::ToULISRectI(invalidTileMap.GetTileRect(tileIndexes[i]));
         ctx.Copy(*iBlock, *blockToSave, rect, ::ULIS::FVec2I(0, 0), ::ULIS::FSchedulePolicy::AsyncCacheEfficient);
         dataStart += tileSize * tileSize * iBlock->BytesPerPixel();
         ctx.Finish();
@@ -75,7 +76,7 @@ FOdysseyRasterBlockUndoBuilder::BuildUndoData(const FOdysseyRasterBlockMutator& 
     if ( originalTileBlocks.IsEmpty() )
         return;
 
-    const FULISInvalidTileMap& invalidTileMap = iRasterBlockMutator.GetInvalidTileMap();
+    const FOdysseyInvalidTileMap& invalidTileMap = iRasterBlockMutator.GetInvalidTileMap();
     FMemoryWriter writer(oData); //allows us to save rectangles alongside the block
 
     TArray<FIntPoint> tileIndexes;
@@ -85,7 +86,7 @@ FOdysseyRasterBlockUndoBuilder::BuildUndoData(const FOdysseyRasterBlockMutator& 
     writer << numTiles;
     for (const FIntPoint& tileIndex : tileIndexes)
     {
-        ::ULIS::FRectI rect = invalidTileMap.GetTileRect(tileIndex);
+        ::ULIS::FRectI rect = ::ULISUtils::ToULISRectI(invalidTileMap.GetTileRect(tileIndex));
         writer << rect.x;
         writer << rect.y;
         writer << rect.w;

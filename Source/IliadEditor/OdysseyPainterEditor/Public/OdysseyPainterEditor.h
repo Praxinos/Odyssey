@@ -10,13 +10,13 @@
 #include "OdysseyVectorEngine.h"
 #include "Proxies/OdysseyBrushColor.h"
 #include "OdysseyPainterEditorAnimationTimelinePosition.h"
-#include "OdysseyImageRenderingAbility.h"
+#include "OdysseyPainterEditorSource.h"
+#include "OdysseyRenderingAbility.h"
 #include <ULIS>
 
 class IOdysseySurfaceEditable;
 class UOdysseyPainterEditorTool;
 class FOdysseyBrushContext;
-class FOdysseyPainterEditorSource;
 class FOdysseyPainterEditorExtension;
 class UOdysseyLayerStack;
 class FOdysseyMeshSelector;
@@ -219,19 +219,16 @@ public:
     FSimpleMulticastDelegate& OnCurrentTemporaryToolChanged();
 
     TSharedPtr<FOdysseyPainterEditorSource>              GetSource() const;
+    template<class T> TSharedPtr<T> GetSourceTyped() const;
     virtual FOdysseyPainterEditorGUI*                    GetGUI();
 
     virtual FOdysseyHUD*                               HUDSystem() const;
     virtual const FOdysseyBrushColor&                        PaintColor() const;
 
-    float                                                    GetAnimationPlaybackFramesPerSecond() const;
-
     UOdysseyAnimation*                                       GetAnimation() const;
     UOdysseyAnimationPlayer*                                 GetAnimationPlayer() const;
     TSharedPtr<FOdysseyPainterEditorAnimationFlipSystem>            GetAnimationFlipSystem() const;
     TSharedRef<FOdysseyPainterEditorAnimationTimelinePosition>      GetAnimationTimelinePosition();
-    void SetAnimationTimelineIsScrubbing(bool iIsScrubbing);
-    bool GetAnimationTimelineIsScrubbing() const;
     EOdysseyPainterEditorColorType                           GetColorType() const;
     virtual FOdysseyMediaProvider                            GetCurrentMediaProvider();
     virtual UOdysseyLayerStack*                              LayerStack() const;
@@ -330,7 +327,6 @@ public:
     static const uint64 UI_UPDATE_SCENETREEVIEW = ( 1ULL << ( FOdysseyVectorEngine::NOTIFY_RESERVED_SHIFT + 0 ) );
     static const uint64 UI_UPDATE_TIMELINE      = ( 1ULL << ( FOdysseyVectorEngine::NOTIFY_RESERVED_SHIFT + 1 ) );
     static const uint64 UI_UPDATE_OBJECTDETAILS = ( 1ULL << ( FOdysseyVectorEngine::NOTIFY_RESERVED_SHIFT + 2 ) );
-    static const uint64 UI_UPDATE_HUD           = ( 1ULL << ( FOdysseyVectorEngine::NOTIFY_RESERVED_SHIFT + 3 ) );
 
     // Utility functions
     bool HasCopyBlockClipboard(); //Did we copied a selection inside a block ? (Ctrl + C)
@@ -349,7 +345,7 @@ protected:
     //Callbacks
     virtual void OnApplyOverrides(const TMap<FName, UObject*>& iOverrides);
     void OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack);
-    void OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent);
+    void OnRenderingChanged(const FOdysseyRenderingChangedEvent& iEvent);
     void OnCurrentFrameChanged(UOdysseyAnimation* iAnimation);
     void OnMediaChanged();
 
@@ -395,7 +391,6 @@ protected:
     TSharedPtr<FOdysseyPainterEditorRasterSelection> mRasterSelection;
     TArray<FOdysseyBrushContext*>   mBrushContexts;
     FOdysseyBrushColor              mPaintColor;
-    float mAnimationPlaybackFramesPerSecond;
     TSharedRef<FOdysseyPainterEditorAnimationTimelinePosition> mAnimationTimelinePosition;
     EOdysseyPainterEditorColorType  mColorType = EOdysseyPainterEditorColorType::Raw;
     FSimpleMulticastDelegate        mOnCurrentToolChanged;
@@ -471,4 +466,15 @@ FOdysseyPainterEditor::FindTab() const
             return StaticCastSharedPtr<T>(tab);
     }
     return nullptr;
+}
+
+template<class T>
+TSharedPtr<T>
+FOdysseyPainterEditor::GetSourceTyped() const
+{
+    TSharedPtr<FOdysseyPainterEditorSource> source = GetSource();
+    if (!source || source->Id() != T::StaticId())
+        return nullptr;
+
+    return StaticCastSharedPtr<T>(source);
 }

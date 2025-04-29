@@ -11,7 +11,7 @@ class UTextureRenderTarget2D;
 /////////////////////////////////////////////////////
 // Utlity
 
-//TODO: Convert to / Duplicate to UTexture* for each function here
+ODYSSEYIMAGING_API void CopyImageToBlock(const FImage& iImage, ::ULIS::FBlock* iBlock);
 ODYSSEYIMAGING_API void CopyUTextureSourceDataIntoBlock( ::ULIS::FBlock* iBlock,UTexture* iTexture );
 ODYSSEYIMAGING_API void CopyURenderTargetPixelDataIntoBlock( ::ULIS::FBlock* iBlock,UTextureRenderTarget2D* iRenderTarget );
 ODYSSEYIMAGING_API void CopyBlockDataIntoUTexture( const ::ULIS::FBlock* iBlock,UTexture2D* iTexture );
@@ -36,7 +36,7 @@ public:
 
     // Responsible for its underlying ::ULIS::FBlock TArray allocation
     // With transient UTexture
-    FOdysseySurfaceTexture2DEditable( int iWidth, int iHeight, ::ULIS::eFormat iFormat = ::ULIS::Format_BGRA8 );
+    FOdysseySurfaceTexture2DEditable( int iWidth, int iHeight, ::ULIS::eFormat iFormat = ::ULIS::Format_BGRA8, bool iSRGB = true );
 
     // Responsible for nothing
     FOdysseySurfaceTexture2DEditable(UTexture2D* iTexture, TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock);
@@ -47,7 +47,7 @@ public:
 
     // Responsible for its underlying UTexture2D
     // With borrowed ::ULIS::FBlock, not responsible for its Allocation / Deallocation
-    FOdysseySurfaceTexture2DEditable(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock);
+    FOdysseySurfaceTexture2DEditable(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock, bool iSRGB = true);
 
 private:
     // Forbid Copy Constructor and Copy Assignement Operator

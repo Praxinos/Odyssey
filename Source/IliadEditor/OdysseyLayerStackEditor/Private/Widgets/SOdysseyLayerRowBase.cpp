@@ -105,7 +105,7 @@ SOdysseyLayerRowBase::GetBorder() const
         return borderBrush;
 
     UOdysseyLayerStack* layerStack = mLayer->GetLayerStack();
-    if ( !layerStack || layerStack->CurrentLayer != mLayer)
+    if ( !layerStack || layerStack->GetCurrentLayer() != mLayer)
         return borderBrush;
 
     const bool bIsActive = OwnerTablePtr.Pin()->AsWidget()->HasKeyboardFocus();
@@ -195,7 +195,7 @@ SOdysseyLayerRowBase::OnRowCanAcceptDrop(const FDragDropEvent& iEvent, EItemDrop
 
     FGeometry geometry = GetTickSpaceGeometry();
     const FVector2D localPointerPos = geometry.AbsoluteToLocal(iEvent.GetScreenSpacePosition());
-    EItemDropZone expectedDropZone = ComputeItemDropZoneForLeaf(localPointerPos, geometry.GetLocalSize(), mLayer->CanHaveChildren, mLayer->DisplayChildren);
+    EItemDropZone expectedDropZone = ComputeItemDropZoneForLeaf(localPointerPos, geometry.GetLocalSize(), mLayer->CanHaveChildren(), mLayer->ShouldDisplayChildren());
 
     if ( operationLayerStack == layerStack ) //droped from same layerstack, do a move of topmost dropped layers
     {
@@ -280,7 +280,7 @@ SOdysseyLayerRowBase::OnRowAcceptDrop(const FDragDropEvent& iEvent, EItemDropZon
                 #ifdef WITH_EDITOR
                     FScopedTransaction ScopedTransaction(moveLayersTransactionName);
                 #endif
-                if ( mLayer->CanHaveChildren )
+                if ( mLayer->CanHaveChildren() )
                 {
 
                     layerStack->MoveLayers(layers, mLayer, 0);
@@ -295,7 +295,7 @@ SOdysseyLayerRowBase::OnRowAcceptDrop(const FDragDropEvent& iEvent, EItemDropZon
                 #ifdef WITH_EDITOR
                     FScopedTransaction ScopedTransaction(copyLayersTransactionName);
                 #endif
-                if ( mLayer->CanHaveChildren )
+                if ( mLayer->CanHaveChildren() )
                 {
                     layerStack->CopyLayers(layers, mLayer, 0);
                 }

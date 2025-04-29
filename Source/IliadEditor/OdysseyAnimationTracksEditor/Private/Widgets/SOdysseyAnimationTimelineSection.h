@@ -14,7 +14,6 @@
 
 class UOdysseyAnimationTimelineSection;
 class FOdysseyPainterEditorAnimationTimelinePosition;
-class FOdysseyPainterEditor;
 class UOdysseyAnimationCell;
 class UOdysseyAnimation;
 class UOdysseyAnimationPlayer;
@@ -54,7 +53,6 @@ private:
 
     void OnAnimationChanged();
 
-    FOdysseyPainterEditor* GetPainterEditor() const;
     void OnActivateOutOfPegs(UOdysseyAnimationCell* iCell);
     void OnInactivateOutOfPegs();
     ECheckBoxState OnIsOutOfPegsChecked(UOdysseyAnimationCell* iCell);
