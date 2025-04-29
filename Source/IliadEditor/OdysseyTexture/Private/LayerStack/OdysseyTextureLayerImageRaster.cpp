@@ -14,7 +14,6 @@
 #include "OdysseyRasterBlockUndo.h"
 #include "OdysseyTextureLayerImageRaster.h"
 #include "OdysseySurfaceTexture2DEditable.h"
-#include "OdysseyTextureLayerImageRasterImageRenderer.h"
 #include "OdysseyTextureLayerImageRasterImport.h"
 #include "OdysseyTextureLayerImageRasterExport.h"
 #include "OdysseyTextureLayerStack.h"
@@ -53,7 +52,7 @@ UOdysseyTextureLayerImageRaster::OnBlockCommited(const TArray<::ULIS::FRectI>& i
 void
 UOdysseyTextureLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
 {
-    FOdysseyRasterBlockMutator mutator(RasterBlock);
+    /* FOdysseyRasterBlockMutator mutator(RasterBlock);
     mutator.EditTilesFromRects(
         { ::ULIS::FRectI::FromXYWH(0, 0, RasterBlock->GetWidth(), RasterBlock->GetHeight()) },
         [&](TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
@@ -78,7 +77,7 @@ UOdysseyTextureLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
             return { lastEvent };
         }
     );
-    mutator.Commit();
+    mutator.Commit(); */
 }
 
 void
@@ -205,15 +204,6 @@ UOdysseyTextureLayerImageRaster::RasterBlockPostProcess(const TMap<FIntPoint, TS
     }
 
     return events;
-}
-
-TSharedPtr<IOdysseyImageRenderer>
-UOdysseyTextureLayerImageRaster::BuildImageRenderer(EOdysseyRenderingType iRenderType, int iFrame, FImageRendererFilter iFilter) const
-{
-    if (iFilter.IsBound() && !iFilter.Execute(this))
-        return nullptr;
-
-    return MakeShared<FOdysseyTextureLayerImageRasterImageRenderer>(this, iRenderType, GetRenderingRects(), iFilter);
 }
 
 TArray<FGuid>

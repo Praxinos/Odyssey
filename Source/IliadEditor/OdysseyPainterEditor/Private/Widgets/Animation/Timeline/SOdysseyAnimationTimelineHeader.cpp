@@ -148,7 +148,7 @@ int32 SOdysseyAnimationTimelineHeader::OnPaint(const FPaintArgs& Args, const FGe
 
     UOdysseyAnimation* animation = mAnimation;
     UOdysseyAnimationLayerStack* layerstack = Cast<UOdysseyAnimationLayerStack>(animation->GetLayerStack());
-    UOdysseyAnimationLayerRoot* layerRoot = Cast<UOdysseyAnimationLayerRoot>(layerstack->LayerRoot);
+    UOdysseyAnimationLayerRoot* layerRoot = Cast<UOdysseyAnimationLayerRoot>(layerstack->GetLayerRoot());
     //TSharedPtr<FOdysseyAnimationProxy> proxy = layerRoot->GetProxy();
     FInt32Range animationRange = animation->GetFrameRange();
 

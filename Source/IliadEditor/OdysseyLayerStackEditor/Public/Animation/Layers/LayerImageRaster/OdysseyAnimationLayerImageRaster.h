@@ -33,8 +33,8 @@ public:
 
 public:
     //IOdysseyRenderingAbility overrides
-    virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(EOdysseyRenderingType iRenderType, int iFrame, FImageRendererFilter iFilter = FImageRendererFilter()) const override;
     virtual TArray<FGuid> GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrameIndex) const override;
+    virtual void RenderToTexture(FCanvas* iCanvas, FFrameNumber iFrame, const FIntRect& iSrcRect, const FIntRect& iDstRect) const override;
 
 private:
     TSharedPtr<IOdysseyMedia> CreateMediaRaster(int iFrameIndex);
@@ -43,6 +43,8 @@ private:
     void CreateCell( const FName& iCellType);
 
 private:
+    friend class FOdysseyAnimationLayerImageRasterImport;
+
     UFUNCTION(BlueprintSetter)
     void IsAlphaLockedBlueprintSetter(bool Value);
 

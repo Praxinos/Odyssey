@@ -31,7 +31,7 @@ FOdysseyAnimationTimelineMoveTool::OnMouseButtonDown(const FMouseEventParams& iP
         mOffsettingLayer = true;
         mLayerOffsetData.mIsDragDetected = false;
         mLayerOffsetData.mMousePosition = iParams.mMouseEvent.GetScreenSpacePosition().X;
-        mLayerOffsetData.mInitialOffset = iParams.mLayer->CellsOffset;
+        mLayerOffsetData.mInitialOffset = iParams.mLayer->GetCellsOffset();
 
         return FReply::Handled().DetectDrag(iParams.mWidget.ToSharedRef(), EKeys::LeftMouseButton);
     }
@@ -74,7 +74,7 @@ FOdysseyAnimationTimelineMoveTool::OnMouseMove(const FMouseEventParams& iParams)
         float mouseOffset = iParams.mMouseEvent.GetScreenSpacePosition().X - mLayerOffsetData.mMousePosition;
         int offset = (int)(mLayerOffsetData.mInitialOffset + (mouseOffset / mTimelinePosition->GetFrameSize()));
 
-        FOdysseyObjectEditorUtils::SetPropertyValue(iParams.mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, CellsOffset), FMath::Max(minOffset, offset), EPropertyChangeType::Interactive);
+        iParams.mLayer->SetCellsOffsetInteractive(FMath::Max(minOffset, offset));
 
         return FReply::Handled();
     }
@@ -98,7 +98,7 @@ FOdysseyAnimationTimelineMoveTool::OnMouseButtonUp(const FMouseEventParams& iPar
         mLayerOffsetData.mIsDragDetected = false;
         mOffsettingLayer = false;
 
-        FOdysseyObjectEditorUtils::SetPropertyValue(iParams.mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, CellsOffset), iParams.mLayer->CellsOffset, EPropertyChangeType::ValueSet);
+        iParams.mLayer->SetCellsOffset(iParams.mLayer->GetCellsOffset());
         #ifdef WITH_EDITOR
             GEditor->EndTransaction();
         #endif

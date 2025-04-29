@@ -19,8 +19,10 @@ FOdysseyAnimationCellImageVectorExport::WriteResolution( UOdysseyAnimationCellIm
                             , Ar
                             , [iAnimationCellImageVector](FArchive &Ar) -> void
     {
-        uint32 width = iAnimationCellImageVector->GetLayer()->GetAnimation()->GetWidth();
-        uint32 height = iAnimationCellImageVector->GetLayer()->GetAnimation()->GetHeight();
+        UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(iAnimationCellImageVector->GetLayer());
+
+        uint32 width = layer->GetAnimation()->GetWidth();
+        uint32 height = layer->GetAnimation()->GetHeight();
 
         Ar << width;
         Ar << height;

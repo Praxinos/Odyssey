@@ -40,12 +40,9 @@ public:
 
 private:
     UPROPERTY()
-    TMap<FVector2D, UTexture2D*> Textures;
-
-    UPROPERTY()
     TObjectPtr<UTexture2D> mCheckerboardTexture;
 };
-
+/*
 class FOdysseyAnimationCellThumbnailProxy
     : public FRunnable
     , public FGCObject
@@ -87,3 +84,4 @@ private:
     FCriticalSection mFinishedCellsMutex;
     TArray<UOdysseyAnimationCell*> mFinishedCells;
 };
+*/

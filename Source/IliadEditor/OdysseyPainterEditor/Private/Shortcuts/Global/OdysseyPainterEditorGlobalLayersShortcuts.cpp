@@ -60,14 +60,14 @@ FOdysseyPainterEditorGlobalLayersShortcuts::Action_CreateNewLayer()
     #endif
         layerStack->Modify();
 
-        UOdysseyLayer* currentLayer = layerStack->CurrentLayer.Get();
+        UOdysseyLayer* currentLayer = layerStack->GetCurrentLayer();
         UOdysseyLayer* parent = nullptr;
         int index = INDEX_NONE;
         if (currentLayer)
         {
             parent = currentLayer;
             index = INDEX_NONE;
-            if (!currentLayer->CanHaveChildren || !currentLayer->DisplayChildren)
+            if (!currentLayer->CanHaveChildren() || !currentLayer->ShouldDisplayChildren())
             {
                 parent = currentLayer->GetParent();
                 index = currentLayer->GetIndexInParent();
@@ -91,7 +91,7 @@ FOdysseyPainterEditorGlobalLayersShortcuts::Action_CreateNewLayer()
                 return;
 
             animLayer->AddCell(UOdysseyAnimationCellImageRaster::StaticClass());
-            FOdysseyObjectEditorUtils::SetPropertyValue(animLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, CellsOffset), player->GetCurrentFrame().FrameNumber.Value);
+            animLayer->SetCellsOffset(player->GetCurrentFrame().FrameNumber.Value);
 
             FOdysseyAnimationCurrentFrameMutator currentFrameMutator(player);
             currentFrameMutator.Set(player->GetCurrentFrame().FrameNumber.Value);
@@ -103,7 +103,7 @@ FOdysseyPainterEditorGlobalLayersShortcuts::Action_CreateNewLayer()
         }
     }
 
-    FOdysseyObjectEditorUtils::SetPropertyValue(layerStack, GET_MEMBER_NAME_CHECKED( UOdysseyLayerStack, CurrentLayer), layer);
+    layerStack->SetCurrentLayer(layer);
 }
 
 void
@@ -113,20 +113,17 @@ FOdysseyPainterEditorGlobalLayersShortcuts::Action_ChangeLayerOpacity(float iOpa
     if ( !layerStack )
         return;
 
-    if ( !layerStack->CurrentLayer )
+    if ( !layerStack->GetCurrentLayer() )
         return;
 
-    if ( layerStack->CurrentLayer->IsLockedRecursively() )
-        return;
-
-    if ( !FOdysseyObjectEditorUtils::HasProperty(layerStack->CurrentLayer.Get(), "Opacity") )
+    if ( layerStack->GetCurrentLayer()->IsLockedRecursively() )
         return;
 
 
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("global-layers-shortcuts.transaction..set-layer-opacity", "Change Layer Opacity"));
 #endif
-    FOdysseyObjectEditorUtils::SetPropertyValue(layerStack->CurrentLayer.Get(), GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Opacity), FMath::Clamp(iOpacity, 0.f, 1.f));
+    layerStack->GetCurrentLayer()->SetOpacity(FMath::Clamp(iOpacity, 0.f, 1.f));
 }
 
 bool
@@ -146,13 +143,10 @@ FOdysseyPainterEditorGlobalLayersShortcuts::CanAction_ChangeLayerOpacity()
     if ( !layerStack )
         return false;
 
-    if ( !layerStack->CurrentLayer )
+    if ( !layerStack->GetCurrentLayer() )
         return false;
 
-    if ( layerStack->CurrentLayer->IsLockedRecursively() )
-        return false;
-
-    if ( !FOdysseyObjectEditorUtils::HasProperty(layerStack->CurrentLayer.Get(), "Opacity") )
+    if ( layerStack->GetCurrentLayer()->IsLockedRecursively() )
         return false;
 
     return true;

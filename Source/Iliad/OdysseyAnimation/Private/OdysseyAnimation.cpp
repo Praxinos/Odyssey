@@ -128,24 +128,22 @@ UOdysseyAnimation::GetRenderingComposition(EOdysseyRenderingType iRenderType, in
 #endif
 }
 
-TArray<FIntRect>
-UOdysseyAnimation::GetRenderingRects() const
+FIntRect
+UOdysseyAnimation::GetDefaultRenderRect() const
 {
-    return { FIntRect(0, 0, GetWidth(), GetHeight()) };
+    return FIntRect(0, 0, GetWidth(), GetHeight());
 }
 
 void
-UOdysseyAnimation::RenderToTextureFromRects(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, const TArray<FIntRect>& iRects, const FIntPoint& iPos) const
+UOdysseyAnimation::RenderToTexture(FCanvas* iCanvas, FFrameNumber iFrame, const FIntRect& iSrcRect, const FIntRect& iDstRect) const
 {
 #if WITH_EDITOR
     if (!mLayerStack || !mLayerStack->Implements<UOdysseyTextureRenderingAbility>())
         return;
 
-    IOdysseyTextureRenderingAbility::Execute_RenderRectsAtPosition(mLayerStack, iRenderTarget, iFrame, iRects, iPos);
+    IOdysseyTextureRenderingAbility* renderingInterface = Cast<IOdysseyTextureRenderingAbility>(mLayerStack);
+    renderingInterface->RenderToTexture(iCanvas, iFrame, iSrcRect, iDstRect);
 #else
-    FTextureRenderTargetResource* dstResource = iRenderTarget->GameThread_GetRenderTargetResource();
-    FCanvas Canvas(dstResource, nullptr, FGameTime(), iRenderTarget->GetWorld()->GetFeatureLevel());
-
     FTextureResource* srcResource = nullptr;
     int frameIndex = GetFrameIndexAtFrame(iFrame.Value);
     if (frameIndex != INDEX_NONE)
@@ -154,27 +152,22 @@ UOdysseyAnimation::RenderToTextureFromRects(UTextureRenderTarget2D* iRenderTarge
             srcResource = Frames[frameIndex].Texture->GetResource();
     }
 
-    //Canvas.Clear(FLinearColor::Transparent);
-    for (int i = 0; i < iRects.Num(); i++)
-    {
-        const FIntRect& rect = iRects[i];
-        FIntPoint pos = rect.Min - iPos;
+    FIntPoint pos = iSrcRect.Min - iPos;
 
-        double x = pos.X;
-        double y = pos.Y;
-        double w = rect.Width();
-        double h = rect.Height();
-        float u = float(rect.Min.X) / GetWidth();
-        float v = float(rect.Min.Y) / GetHeight();
-        float sizeU = float(rect.Max.X) / GetWidth();
-        float sizeV = float(rect.Max.Y) / GetHeight();
-        Canvas.DrawTile(x, y, w, h, u, v, sizeU, sizeV, FLinearColor::Transparent, GWhiteTexture, SE_BLEND_Opaque);
+    double x = iDstRect.Min.X;
+    double y = iDstRect.Min.Y;
+    double w = iDstRect.Width();
+    double h = iDstRect.Height();
+    float u = float(iSrcRect.Min.X) / GetWidth();
+    float v = float(iSrcRect.Min.Y) / GetHeight();
+    float sizeU = float(iSrcRect.Max.X) / GetWidth();
+    float sizeV = float(iSrcRect.Max.Y) / GetHeight();
+    iCanvas->DrawTile(x, y, w, h, u, v, sizeU, sizeV, FLinearColor::Transparent, GWhiteTexture, SE_BLEND_Opaque);
 
-        if (srcResource)
-            Canvas.DrawTile(x, y, w, h, u, v, sizeU, sizeV, FLinearColor::White, srcResource, SE_BLEND_AlphaBlend);
+    if (srcResource)
+        iCanvas->DrawTile(x, y, w, h, u, v, sizeU, sizeV, FLinearColor::White, srcResource, SE_BLEND_AlphaBlend);
 
-        Canvas.Flush_GameThread(true);
-    }
+    iCanvas->Flush_GameThread(true);
 #endif
 }
 
@@ -437,7 +430,7 @@ UOdysseyAnimation::PreSave(FObjectPreSaveContext SaveContext)
 
         lastRenderingComposition = renderingComposition;
 
-        Execute_RenderRects(this, renderTarget.Get(), FFrameNumber(i), { FIntRect(0, 0, GetWidth(), GetHeight()) });
+        Execute_Render(this, renderTarget.Get(), FFrameNumber(i));
 
         UTexture2D* texture = NewObject<UTexture2D>(this, NAME_None, RF_Public);
         renderTarget.Get()->UpdateTexture(texture);

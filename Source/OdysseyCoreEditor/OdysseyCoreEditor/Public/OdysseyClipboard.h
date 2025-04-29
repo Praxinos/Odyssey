@@ -5,7 +5,7 @@
 
 #include "CoreMinimal.h"
 
-class ODYSSEYEDITOR_API IOdysseyClipboardData
+class ODYSSEYCOREEDITOR_API IOdysseyClipboardData
 {
 public:
     IOdysseyClipboardData(const FGuid& iId)
@@ -19,7 +19,7 @@ private:
     FGuid mId;
 };
 
-class ODYSSEYEDITOR_API FOdysseyClipboard
+class ODYSSEYCOREEDITOR_API FOdysseyClipboard
 {
 public:
     FOdysseyClipboard()

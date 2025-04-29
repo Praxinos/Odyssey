@@ -274,7 +274,7 @@ SOdysseyAnimationTimelineInbetweeningHeader::Private_IsItemSelected( const TShar
 {
     UOdysseyLayerStack* layerStack = mAnimationLayerImageVector->GetLayerStack();
 
-    return iItem.Get()->GetInbetweenerTag()->GetOwner()->IsSelected() && ( layerStack->CurrentLayer == mAnimationLayerImageVector );
+    return iItem.Get()->GetInbetweenerTag()->GetOwner()->IsSelected() && ( layerStack->GetCurrentLayer() == mAnimationLayerImageVector );
 }
 
 TSharedRef<ITableRow>

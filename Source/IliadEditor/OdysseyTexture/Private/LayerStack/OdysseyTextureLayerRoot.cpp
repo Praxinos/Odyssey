@@ -5,5 +5,5 @@
 
 UOdysseyTextureLayerRoot::UOdysseyTextureLayerRoot()
 {
-    CanHaveChildren = true;
+    bCanHaveChildren = true;
 }

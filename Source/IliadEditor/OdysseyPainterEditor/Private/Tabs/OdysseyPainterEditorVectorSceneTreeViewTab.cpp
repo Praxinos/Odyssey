@@ -126,8 +126,8 @@ FOdysseyPainterEditorVectorSceneTreeViewTab::GetScene() const
     }
 
     // layerStack might be NULL when closing the program
-    UOdysseyTextureLayerImageVector* currentTextureVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
-    UOdysseyAnimationLayerImageVector* currentAnimationVectorLayer = Cast<UOdysseyAnimationLayerImageVector>(layerStack->CurrentLayer.Get());
+    UOdysseyTextureLayerImageVector* currentTextureVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->GetCurrentLayer());
+    UOdysseyAnimationLayerImageVector* currentAnimationVectorLayer = Cast<UOdysseyAnimationLayerImageVector>(layerStack->GetCurrentLayer());
 
     if(  currentAnimationVectorLayer )
     {
@@ -136,7 +136,7 @@ FOdysseyPainterEditorVectorSceneTreeViewTab::GetScene() const
             return nullptr;
 
         int frame = player->GetCurrentFrame().FrameNumber.Value;
-        UOdysseyAnimationCell* cell = currentAnimationVectorLayer->GetCellAtFrame(frame);
+        UOdysseyLayerCell* cell = currentAnimationVectorLayer->GetCellAtFrame(frame);
         if (!cell || !cell->IsA<UOdysseyAnimationCellImageVector>())
             return nullptr;
 

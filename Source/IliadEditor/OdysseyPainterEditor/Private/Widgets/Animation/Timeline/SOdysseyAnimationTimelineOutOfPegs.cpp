@@ -26,12 +26,12 @@ SOdysseyAnimationTimelineOutOfPegs::Construct(const FArguments& InArgs, UOdyssey
             .WidthInFrames_Lambda(
                 [this]()
                 {
-                    UOdysseyAnimationCell* currentCell = GetCurrentCell();
+                    UOdysseyLayerCell* currentCell = GetCurrentCell();
                     if (!currentCell)
                         return 0;
 
-                    int firstCellIndex = FMath::Max(currentCell->IndexInLayer - 10, 0);
-                    UOdysseyAnimationCell* cell = mLayer->GetCells()[firstCellIndex];
+                    int firstCellIndex = FMath::Max(currentCell->GetIndexInLayer() - 10, 0);
+                    UOdysseyLayerCell* cell = mLayer->GetCells()[firstCellIndex];
                     if( !cell )
                         return 0;
 
@@ -57,16 +57,16 @@ SOdysseyAnimationTimelineOutOfPegs::Construct(const FArguments& InArgs, UOdyssey
             .WidthInFrames_Lambda(
                 [this, i]()
                 {
-                    UOdysseyAnimationCell* currentCell = GetCurrentCell();
+                    UOdysseyLayerCell* currentCell = GetCurrentCell();
                     if (!currentCell)
                         return 0;
 
-                    const TArray<UOdysseyAnimationCell*>& cells = mLayer->GetCells();
-                    int cellIndex = currentCell->IndexInLayer - i - 1;
+                    const TArray<UOdysseyLayerCell*>& cells = mLayer->GetCells();
+                    int cellIndex = currentCell->GetIndexInLayer() - i - 1;
                     if (cellIndex < 0 || cellIndex >= cells.Num() || !mLayer->GetCells()[cellIndex])
                         return 0;
 
-                    return cells[cellIndex]->Exposure;
+                    return cells[cellIndex]->GetExposure();
                 }
             )
             [
@@ -75,31 +75,31 @@ SOdysseyAnimationTimelineOutOfPegs::Construct(const FArguments& InArgs, UOdyssey
                 .Visibility_Lambda(
                     [this, i]()
                     {
-                        UOdysseyAnimationCell* currentCell = GetCurrentCell();
+                        UOdysseyLayerCell* currentCell = GetCurrentCell();
                         if (!currentCell)
                             return EVisibility::Collapsed;
 
-                        int cellIndex = currentCell->IndexInLayer - i - 1;
+                        int cellIndex = currentCell->GetIndexInLayer() - i - 1;
                         if (cellIndex < 0 || cellIndex >= mLayer->GetCells().Num() || !mLayer->GetCells()[cellIndex])
                             return EVisibility::Collapsed;
 
                         return EVisibility::Visible;
                     }
                 )
-                .Key_Lambda([this, i]() { return mLayer->Lighttable.PreviousKeys[i];})
+                .Key_Lambda([this, i]() { return mLayer->GetLighttable().PreviousKeys[i];})
                 .Cell_Lambda(
                     [this, i]() -> UOdysseyAnimationCell*
                     {
-                        UOdysseyAnimationCell* currentCell = GetCurrentCell();
+                        UOdysseyLayerCell* currentCell = GetCurrentCell();
                         if (!currentCell)
                             return nullptr;
 
-                        const TArray<UOdysseyAnimationCell*>& cells = mLayer->GetCells();
-                        int cellIndex = currentCell->IndexInLayer - i - 1;
+                        const TArray<UOdysseyLayerCell*>& cells = mLayer->GetCells();
+                        int cellIndex = currentCell->GetIndexInLayer() - i - 1;
                         if (cellIndex < 0 || cellIndex >= cells.Num() || !mLayer->GetCells()[cellIndex])
                             return nullptr;
 
-                        return cells[cellIndex];
+                        return Cast<UOdysseyAnimationCell>(cells[cellIndex]);
                     }
                 )
                 .TimelinePosition(InArgs._TimelinePosition)
@@ -119,7 +119,7 @@ SOdysseyAnimationTimelineOutOfPegs::Construct(const FArguments& InArgs, UOdyssey
         .Visibility_Lambda(
             [this]()
             {
-                UOdysseyAnimationCell* currentCell = GetCurrentCell();
+                UOdysseyLayerCell* currentCell = GetCurrentCell();
                 if (!currentCell)
                     return EVisibility::Collapsed;
 
@@ -129,11 +129,11 @@ SOdysseyAnimationTimelineOutOfPegs::Construct(const FArguments& InArgs, UOdyssey
         .WidthInFrames_Lambda(
             [this]()
             {
-                UOdysseyAnimationCell* currentCell = GetCurrentCell();
+                UOdysseyLayerCell* currentCell = GetCurrentCell();
                 if (!currentCell)
                     return 0;
 
-                return currentCell->Exposure;
+                return currentCell->GetExposure();
             }
         )
         [
@@ -153,16 +153,16 @@ SOdysseyAnimationTimelineOutOfPegs::Construct(const FArguments& InArgs, UOdyssey
             .WidthInFrames_Lambda(
                 [this, i]()
                 {
-                    UOdysseyAnimationCell* currentCell = GetCurrentCell();
+                    UOdysseyLayerCell* currentCell = GetCurrentCell();
                     if (!currentCell)
                         return 0;
 
-                    const TArray<UOdysseyAnimationCell*>& cells = mLayer->GetCells();
-                    int cellIndex = currentCell->IndexInLayer + i + 1;
+                    const TArray<UOdysseyLayerCell*>& cells = mLayer->GetCells();
+                    int cellIndex = currentCell->GetIndexInLayer() + i + 1;
                     if (cellIndex < 0 || cellIndex >= cells.Num() || !mLayer->GetCells()[cellIndex])
                         return 0;
 
-                    return cells[cellIndex]->Exposure;
+                    return cells[cellIndex]->GetExposure();
                 }
             )
             [
@@ -171,31 +171,31 @@ SOdysseyAnimationTimelineOutOfPegs::Construct(const FArguments& InArgs, UOdyssey
                 .Visibility_Lambda(
                     [this, i]()
                     {
-                        UOdysseyAnimationCell* currentCell = GetCurrentCell();
+                        UOdysseyLayerCell* currentCell = GetCurrentCell();
                         if (!currentCell)
                             return EVisibility::Collapsed;
 
-                        int cellIndex = currentCell->IndexInLayer + i + 1;
+                        int cellIndex = currentCell->GetIndexInLayer() + i + 1;
                         if (cellIndex < 0 || cellIndex >= mLayer->GetCells().Num() || !mLayer->GetCells()[cellIndex])
                             return EVisibility::Collapsed;
 
                         return EVisibility::Visible;
                     }
                 )
-                .Key_Lambda([this, i]() { return mLayer->Lighttable.NextKeys[i];})
+                .Key_Lambda([this, i]() { return mLayer->GetLighttable().NextKeys[i];})
                 .Cell_Lambda(
                     [this, i]() -> UOdysseyAnimationCell*
                     {
-                        UOdysseyAnimationCell* currentCell = GetCurrentCell();
+                        UOdysseyLayerCell* currentCell = GetCurrentCell();
                         if (!currentCell)
                             return nullptr;
 
-                        const TArray<UOdysseyAnimationCell*>& cells = mLayer->GetCells();
-                        int cellIndex = currentCell->IndexInLayer + i + 1;
+                        const TArray<UOdysseyLayerCell*>& cells = mLayer->GetCells();
+                        int cellIndex = currentCell->GetIndexInLayer() + i + 1;
                         if (cellIndex < 0 || cellIndex >= cells.Num() || !mLayer->GetCells()[cellIndex])
                             return nullptr;
 
-                        return cells[cellIndex];
+                        return Cast<UOdysseyAnimationCell>(cells[cellIndex]);
                     }
                 )
                 .TimelinePosition(InArgs._TimelinePosition)
@@ -219,5 +219,5 @@ SOdysseyAnimationTimelineOutOfPegs::Construct(const FArguments& InArgs, UOdyssey
 UOdysseyAnimationCell*
 SOdysseyAnimationTimelineOutOfPegs::GetCurrentCell() const
 {
-    return mLayer->GetCellAtFrame(mCurrentFrame.Get());
+    return Cast<UOdysseyAnimationCell>(mLayer->GetCellAtFrame(mCurrentFrame.Get()));
 }

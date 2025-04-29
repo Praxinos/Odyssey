@@ -67,10 +67,8 @@ public:
 
     /**
      * @brief Returns the full rect that can be rendered
-     *
-     * @return ::ULIS::FRect
      */
-    virtual TArray<FIntRect> GetRenderingRects() const;
+    virtual FIntRect GetDefaultRenderRect() const;
 
     /**
      * @brief Returns the image rendering id of this rendering ability, without underlying ids

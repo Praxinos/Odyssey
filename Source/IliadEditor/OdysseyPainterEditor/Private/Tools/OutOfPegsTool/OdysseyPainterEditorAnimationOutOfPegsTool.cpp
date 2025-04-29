@@ -200,7 +200,7 @@ UOdysseyPainterEditorAnimationOutOfPegsTool::SetCell(UOdysseyAnimationCell* iCel
 
     if (mCell)
     {
-        mLayer = mCell->GetLayer();
+        mLayer = Cast<UOdysseyAnimationLayer>(mCell->GetLayer());
         mLayer->OnLightTableChanged().AddUObject(this, &UOdysseyPainterEditorAnimationOutOfPegsTool::OnLightTableChanged);
 
         Pan = mCell->OutOfPegs.Pan;
@@ -226,7 +226,7 @@ UOdysseyPainterEditorAnimationOutOfPegsTool::OnCellOutOfPegsChanged(bool iIsInte
 void
 UOdysseyPainterEditorAnimationOutOfPegsTool::OnLightTableChanged()
 {
-    if (!mLayer->Lighttable.bIsActivated)
+    if (!mLayer->GetLighttable().bIsActivated)
     {
         GetEditor()->InactivateTemporaryTool();
     }
@@ -296,11 +296,7 @@ UOdysseyPainterEditorAnimationOutOfPegsTool::RebuildHUD()
 FVector2D
 UOdysseyPainterEditorAnimationOutOfPegsTool::GetCenter() const
 {
-    UOdysseyAnimationLayer* layer = mCell->GetLayer();
-    if (!layer)
-        return FVector2D();
-
-    UOdysseyAnimation* animation = layer->GetAnimation();
+    UOdysseyAnimation* animation = mCell->GetAnimation();
     if (!animation)
         return FVector2D();
 
@@ -315,11 +311,7 @@ UOdysseyPainterEditorAnimationOutOfPegsTool::GetCenter() const
 void
 UOdysseyPainterEditorAnimationOutOfPegsTool::RefreshHUD()
 {
-    UOdysseyAnimationLayer* layer = mCell->GetLayer();
-    if (!layer)
-        return;
-
-    UOdysseyAnimation* animation = layer->GetAnimation();
+    UOdysseyAnimation* animation = mCell->GetAnimation();
     if (!animation)
         return;
 
@@ -479,10 +471,11 @@ UOdysseyPainterEditorAnimationOutOfPegsTool::Reset()
 void
 UOdysseyPainterEditorAnimationOutOfPegsTool::ResetAll()
 {
-    const TArray<UOdysseyAnimationCell*> cells = mCell->GetLayer()->GetCells();
-    for (UOdysseyAnimationCell* cell : cells)
+    const TArray<UOdysseyLayerCell*> cells = mLayer->GetCells();
+    for (UOdysseyLayerCell* cell : cells)
     {
-        if (cell)
-            FOdysseyObjectEditorUtils::SetPropertyValue(cell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, OutOfPegs), FOdysseyAnimationCellOutOfPegs());
+        UOdysseyAnimationCell* animationCell = Cast<UOdysseyAnimationCell>(cell);
+        if (animationCell)
+            FOdysseyObjectEditorUtils::SetPropertyValue(animationCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, OutOfPegs), FOdysseyAnimationCellOutOfPegs());
     }
 }

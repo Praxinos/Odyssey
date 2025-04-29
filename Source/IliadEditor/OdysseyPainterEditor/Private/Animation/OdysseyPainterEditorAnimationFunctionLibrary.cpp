@@ -174,7 +174,7 @@ UOdysseyPainterEditorAnimationLayerFunctionLibrary::ImportTextureSequence(UOdyss
     progressBar.MakeDialog();
 
 
-    TArray<UOdysseyAnimationCell*> cells = Layer->AddCells(UOdysseyAnimationCellImageRaster::StaticClass(), iCellIndex, Textures.Num());
+    TArray<UOdysseyLayerCell*> cells = Layer->AddCells(UOdysseyAnimationCellImageRaster::StaticClass(), iCellIndex, Textures.Num());
     TArray<UOdysseyAnimationCellImageRaster*> rasterCells;
     for( int i = 0; i < cells.Num(); i++ )
     {
@@ -288,7 +288,7 @@ UOdysseyPainterEditorAnimationLayerFunctionLibrary::ImportImageSequence(UOdyssey
         FScopedTransaction ScopedTransaction(LOCTEXT("animation-editor.transaction.import-image-sequence", "Import Image Sequence"));
     #endif
 
-    TArray<UOdysseyAnimationCell*> cells = Layer->AddCells(UOdysseyAnimationCellImageRaster::StaticClass(), iCellIndex, blocks.Num());
+    TArray<UOdysseyLayerCell*> cells = Layer->AddCells(UOdysseyAnimationCellImageRaster::StaticClass(), iCellIndex, blocks.Num());
 
     TArray<UOdysseyAnimationCellImageRaster*> rasterCells;
     for (int i = 0; i < cells.Num(); i++)
@@ -320,16 +320,8 @@ UOdysseyPainterEditorAnimationLayerFunctionLibrary::ExportAsImageSequence(
         return {};
 
     UOdysseyAnimation* animation = Layer->GetAnimation();
-
-    ::ULIS::eFormat format = ::ULIS::Format_BGRA8;
-    switch(animation->GetFormat())
-    {
-        case EOdysseyAnimationFormat::BGRA8: format = ::ULIS::Format_BGRA8;
-        case EOdysseyAnimationFormat::RGBAF: format = ::ULIS::Format_RGBAF;
-    }
-
     FIntRect rect(0, 0, animation->GetWidth(), animation->GetHeight());
-    return Odyssey::ExportAsImageSequence(Layer, format, FrameRange, rect, Filename, Path, Format );
+    return Odyssey::ExportAsImageSequence(Layer, FrameRange, rect, Filename, Path, Format, true );
 }
 
 FString
@@ -345,15 +337,8 @@ UOdysseyPainterEditorAnimationLayerFunctionLibrary::ExportFrameAsImage(
         return TEXT("");
 
     UOdysseyAnimation* animation = Layer->GetAnimation();
-    ::ULIS::eFormat format = ::ULIS::Format_BGRA8;
-    switch(animation->GetFormat())
-    {
-        case EOdysseyAnimationFormat::BGRA8: format = ::ULIS::Format_BGRA8;
-        case EOdysseyAnimationFormat::RGBAF: format = ::ULIS::Format_RGBAF;
-    }
-
     FIntRect rect(0, 0, animation->GetWidth(), animation->GetHeight());
-    return Odyssey::ExportAsImage(Layer, format, Frame, Format, rect, Filename, Path );
+    return Odyssey::ExportAsImage(Layer, Frame, Format, rect, Filename, Path, true );
 }
 
 UTexture2D*
@@ -368,16 +353,8 @@ UOdysseyPainterEditorAnimationLayerFunctionLibrary::ExportFrameAsTexture(
         return nullptr;
 
     UOdysseyAnimation* animation = Layer->GetAnimation();
-    ::ULIS::eFormat format = ::ULIS::Format_BGRA8;
-    switch(animation->GetFormat())
-    {
-        case EOdysseyAnimationFormat::BGRA8: format = ::ULIS::Format_BGRA8;
-        case EOdysseyAnimationFormat::RGBAF: format = ::ULIS::Format_RGBAF;
-    }
-
     FIntRect rect(0, 0, animation->GetWidth(), animation->GetHeight());
-    ETextureSourceFormat textureSourceFormat = TextureSourceFormatForULISFormat(format);
-    return Odyssey::ExportAsTexture(Layer, Frame, rect, textureSourceFormat, Filename, Path );
+    return Odyssey::ExportAsTexture(Layer, Frame, rect, Filename, Path );
 }
 
 TArray<UTexture2D*>
@@ -387,17 +364,8 @@ UOdysseyPainterEditorAnimationLayerFunctionLibrary::ExportAsTextureSequence(UOdy
         return {};
 
     UOdysseyAnimation* animation = Layer->GetAnimation();
-
-    ::ULIS::eFormat format = ::ULIS::Format_BGRA8;
-    switch(animation->GetFormat())
-    {
-        case EOdysseyAnimationFormat::BGRA8: format = ::ULIS::Format_BGRA8;
-        case EOdysseyAnimationFormat::RGBAF: format = ::ULIS::Format_RGBAF;
-    }
-
     return Odyssey::ExportAsTextureSequence(
         Layer,
-        format,
         FrameRange,
         FIntRect(0, 0, animation->GetWidth(), animation->GetHeight()),
         AssetName,
@@ -412,16 +380,8 @@ UOdysseyPainterEditorAnimationLayerFunctionLibrary::ExportAsFlipbook(UOdysseyAni
         return nullptr;
 
     UOdysseyAnimation* animation = Layer->GetAnimation();
-    ::ULIS::eFormat format = ::ULIS::Format_BGRA8;
-    switch(animation->GetFormat())
-    {
-        case EOdysseyAnimationFormat::BGRA8: format = ::ULIS::Format_BGRA8;
-        case EOdysseyAnimationFormat::RGBAF: format = ::ULIS::Format_RGBAF;
-    }
-
     return Odyssey::ExportAsFlipbook(
         Layer,
-        format,
         FrameRange,
         FIntRect(0, 0, animation->GetWidth(), animation->GetHeight()),
         animation->FramesPerSecond,

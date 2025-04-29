@@ -179,7 +179,7 @@ FOdysseyPainterEditorAnimationSource::GetCurrentMediaProvider()
     if (!layerStack)
         return FOdysseyMediaProvider();
 
-    UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(layerStack->CurrentLayer.Get());
+    UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(layerStack->GetCurrentLayer());
     if (!currentLayer)
         return FOdysseyMediaProvider();
 
@@ -245,7 +245,7 @@ FOdysseyPainterEditorAnimationSource::Clear()
 {
     FText transactionName = LOCTEXT("actions.clear", "Clear");
 
-    UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(GetLayerStack()->CurrentLayer.Get());
+    UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(GetLayerStack()->GetCurrentLayer());
     if (!currentLayer)
         return;
 
@@ -322,7 +322,7 @@ void FOdysseyPainterEditorAnimationSource::ClearFromCopyBlock(TSharedPtr<::ULIS:
 {
     FText transactionName = LOCTEXT("actions.cut", "Cut");
 
-    UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(GetLayerStack()->CurrentLayer.Get());
+    UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(GetLayerStack()->GetCurrentLayer());
     if (!currentLayer)
         return;
 
@@ -397,7 +397,7 @@ void FOdysseyPainterEditorAnimationSource::PasteBlockToCurrentLayer(TSharedPtr<:
     FScopedTransaction ScopedTransaction(LOCTEXT("actions.paste", "Paste"));
 #endif
 
-    UOdysseyLayer* currentLayer = layerStack->CurrentLayer.Get();
+    UOdysseyLayer* currentLayer = layerStack->GetCurrentLayer();
     if (!currentLayer)
         return;
 
@@ -496,10 +496,7 @@ FOdysseyPainterEditorAnimationSource::PasteBlockToNewLayer( TSharedPtr<::ULIS::F
     UOdysseyAnimationLayerImageRaster* layer = Cast< UOdysseyAnimationLayerImageRaster >(GetLayerStack()->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass()));
     layer->Modify();
 
-    GetLayerStack()->CurrentLayer = layer;
-
-    FPropertyChangedEvent PropertyChangedEvent(UOdysseyLayerStack::StaticClass()->FindPropertyByName(GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer)), EPropertyChangeType::ValueSet);
-    GetLayerStack()->PostEditChangeProperty(PropertyChangedEvent);
+    GetLayerStack()->SetCurrentLayer(layer);
 
     UOdysseyAnimationCellImageRaster* cell = Cast<UOdysseyAnimationCellImageRaster>(layer->AddCell(UOdysseyAnimationCellImageRaster::StaticClass(), player->GetCurrentFrame().FrameNumber.Value));
     cell->Modify();

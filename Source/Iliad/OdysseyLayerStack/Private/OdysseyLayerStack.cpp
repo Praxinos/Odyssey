@@ -6,15 +6,16 @@
 #include "OdysseyLayer.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Misc/ScopedSlowTask.h"
-#include "UObject/OdysseyObjectEditorUtils.h"
 #include "OdysseyLayerStackFunctionLibrary.h"
 #include "Misc/TransactionObjectEvent.h"
-#include "Misc/OdysseyUndoDelegates.h"
-#include "OdysseySurfaceTexture2DEditable.h"
-#include "ULISLoaderModule.h"
-#include "ULISUtils.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "CanvasTypes.h"
+
+
+UOdysseyLayerStack::UOdysseyLayerStack()
+    : mCellSelection(MakeShared<FOdysseyLayerCellSelection>(this))
+{
+}
 
 void
 UOdysseyLayerStack::PostInitProperties()
@@ -61,7 +62,7 @@ UOdysseyLayerStack::OnCurrentLayerChanged()
 bool
 UOdysseyLayerStack::SupportsLayerClass(UClass* iClass) const
 {
-    if (CompatibleLayers.Contains(iClass))
+    if (SupportedLayerClasses.Contains(iClass))
         return true;
 
     return false;
@@ -70,16 +71,16 @@ UOdysseyLayerStack::SupportsLayerClass(UClass* iClass) const
 FInt32Range
 UOdysseyLayerStack::GetFrameRange() const
 {
-    return FInt32Range::Inclusive(0, 0);
+    return LayerRoot->GetFrameRange();
+}
+
+TSharedRef<FOdysseyLayerCellSelection>
+UOdysseyLayerStack::GetCellSelection() const
+{
+    return mCellSelection;
 }
 
 //--- Layers management
-
-void
-UOdysseyLayerStack::CurrentLayerBlueprintSetter(UOdysseyLayer* Layer)
-{
-    FObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer), Layer);
-}
 
 UOdysseyLayer*
 UOdysseyLayerStack::AddLayer(TSubclassOf<UOdysseyLayer> LayerType, UOdysseyLayer* ParentLayer, int IndexInParent)
@@ -108,7 +109,7 @@ UOdysseyLayerStack::AddLayers(TSubclassOf<UOdysseyLayer> LayerType, UOdysseyLaye
     if (!ParentLayer)
         ParentLayer = LayerRoot;
 
-    if (!ParentLayer->CanHaveChildren || !ContainsLayer(ParentLayer))
+    if (!ParentLayer->CanHaveChildren() || !ContainsLayer(ParentLayer))
         return {};
 
     //Create the Layer
@@ -122,8 +123,7 @@ UOdysseyLayerStack::AddLayers(TSubclassOf<UOdysseyLayer> LayerType, UOdysseyLaye
         layers.Add(layer);
     }
 
-    //Add the layer to the hierarchy
-    AddLayersToHierarchy(layers, ParentLayer, IndexInParent);
+    ParentLayer->AddChildren(layers, IndexInParent);
 
     return layers;
 }
@@ -135,7 +135,7 @@ UOdysseyLayerStack::RemoveLayer(UOdysseyLayer* Layer)
     if (!Layer || !ContainsLayer(Layer))
         return;
 
-    RemoveLayersFromHierarchy({Layer});
+    Layer->GetParent()->RemoveChild(Layer);
 }
 
 void
@@ -153,7 +153,11 @@ UOdysseyLayerStack::RemoveLayers(TArray<UOdysseyLayer*> Layers)
     if (Layers.Num() <= 0)
         return;
 
-    RemoveLayersFromHierarchy(Layers);
+    for (UOdysseyLayer* layer : Layers)
+    {
+        //Remove the layer
+        layer->GetParent()->RemoveChild(layer);
+    }
 }
 
 UOdysseyLayer*
@@ -164,7 +168,7 @@ UOdysseyLayerStack::DuplicateLayer(UOdysseyLayer* Layer)
         return nullptr;
 
     //Duplicate the layer
-    UOdysseyLayer* layerDuplicate = CopyLayerInternal(Layer, Layer->Parent, Layer->Parent->Children.Find(Layer));
+    UOdysseyLayer* layerDuplicate = CopyLayerInternal(Layer, Layer->GetParent(), Layer->GetParent()->GetChildren().Find(Layer));
 
     return layerDuplicate;
 }
@@ -212,12 +216,12 @@ UOdysseyLayerStack::DuplicateLayers(TArray<UOdysseyLayer*> Layers)
     for (UOdysseyLayer* layer : Layers)
     {
         //Duplicate the layer
-        UOdysseyLayer* layerCopy = CopyLayerInternal(layer, layer->Parent, layer->Parent->Children.Find(layer));
+        UOdysseyLayer* layerCopy = CopyLayerInternal(layer, layer->GetParent(), layer->GetParent()->GetChildren().Find(layer));
         layersDuplicates.Add(layerCopy);
     }
 
     if (layersDuplicates.Num() != 0)
-        FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer), layersDuplicates[0]);
+        SetCurrentLayer(layersDuplicates[0]);
 
     return layersDuplicates;
 }
@@ -233,7 +237,7 @@ UOdysseyLayerStack::CopyLayer(UOdysseyLayer* Layer, UOdysseyLayer* ParentLayer, 
         ParentLayer = LayerRoot;
 
     //If the given parent can't have children or isn't contained in this layerstack
-    if (ParentLayer && (!ParentLayer->CanHaveChildren || !ContainsLayer(ParentLayer)) )
+    if (ParentLayer && (!ParentLayer->CanHaveChildren() || !ContainsLayer(ParentLayer)) )
         return nullptr;
 
     //Duplicate the layer
@@ -249,7 +253,7 @@ UOdysseyLayerStack::CopyLayers(TArray<UOdysseyLayer*> Layers, UOdysseyLayer* Par
         ParentLayer = LayerRoot;
 
     //If the given parent can't have children or isn't contained in this layerstack
-    if (ParentLayer && (!ParentLayer->CanHaveChildren || !ContainsLayer(ParentLayer)))
+    if (ParentLayer && (!ParentLayer->CanHaveChildren() || !ContainsLayer(ParentLayer)))
         return layerCopies;
 
     //Sanitize Layers array
@@ -363,15 +367,14 @@ UOdysseyLayerStack::MergeLayers(TArray<UOdysseyLayer*> iLayers)
         return nullptr;
 
     //Add the layer to the hierarchy
-    UOdysseyLayer* parent = layersToMerge.Last()->Parent;
+    UOdysseyLayer* parent = layersToMerge.Last()->GetParent();
     int indexInParent = layersToMerge.Last()->GetIndexInParent();
 
     //Merge layers in the new layer
     mergedLayer->Merge(layersToMerge);
-    AddLayersToHierarchy({ mergedLayer }, parent, indexInParent);
 
-    //Remove merged layers from the hierarchy
-    RemoveLayersFromHierarchy(layersToMerge);
+    parent->AddChild(mergedLayer, indexInParent);
+    parent->RemoveChildren(layersToMerge);
 
     return mergedLayer;
 }
@@ -387,7 +390,7 @@ UOdysseyLayerStack::CanMoveLayer(UOdysseyLayer* Layer, UOdysseyLayer* ParentLaye
         ParentLayer = LayerRoot;
 
     //If the given parent can't have children or isn't contained in this layerstack
-    if (!ParentLayer->CanHaveChildren || !ContainsLayer(ParentLayer))
+    if (!ParentLayer->CanHaveChildren() || !ContainsLayer(ParentLayer))
         return false;
 
     //Does Layer contain Parent Layer
@@ -404,7 +407,7 @@ UOdysseyLayerStack::CanMoveLayers(TArray<UOdysseyLayer*> Layers, UOdysseyLayer* 
         ParentLayer = LayerRoot;
 
     //If the given parent can't have children or isn't contained in this layerstack
-    if (!ParentLayer->CanHaveChildren || !ContainsLayer(ParentLayer))
+    if (!ParentLayer->CanHaveChildren() || !ContainsLayer(ParentLayer))
         return false;
 
     //Sanitize Layers array
@@ -437,30 +440,14 @@ UOdysseyLayerStack::MoveLayer(UOdysseyLayer* Layer, UOdysseyLayer* ParentLayer, 
     if ( !ParentLayer )
         ParentLayer = LayerRoot;
 
-    int oldIndex = Layer->Parent->Children.Find(Layer);
-    if (Layer->Parent == ParentLayer && oldIndex == IndexInParent)
+    UOdysseyLayer* oldParent = Layer->GetParent();
+    int oldIndex = oldParent->GetChildren().Find(Layer);
+    if (oldParent == ParentLayer && oldIndex == IndexInParent)
         return;
 
-    bool bChangeParent = Layer->Parent != ParentLayer;
-
-    if (bChangeParent)
-    {
-        FOdysseyObjectEditorUtils::PreChangePropertyValue(Layer, "Parent");
-        FOdysseyObjectEditorUtils::PreChangePropertyValue(Layer->Parent, "Children");
-    }
-    FOdysseyObjectEditorUtils::PreChangePropertyValue(ParentLayer, "Children");
-
-    int index = FMath::Clamp(IndexInParent, 0, ParentLayer->Children.Num());
-    Layer->Parent->Children.Remove(Layer);
-    ParentLayer->Children.Insert(Layer, (Layer->Parent == ParentLayer && oldIndex < index) ? index - 1 : index);
-    Layer->Parent = ParentLayer;
-
-    if (bChangeParent)
-    {
-        FOdysseyObjectEditorUtils::PostChangePropertyValue(Layer, "Parent", EPropertyChangeType::ValueSet);
-        FOdysseyObjectEditorUtils::PostChangePropertyValue(Layer, "Children", EPropertyChangeType::ArrayRemove);
-    }
-    FOdysseyObjectEditorUtils::PostChangePropertyValue(ParentLayer, "Children", EPropertyChangeType::ArrayAdd);
+    int index = FMath::Clamp(IndexInParent, 0, ParentLayer->GetChildren().Num());
+    oldParent->RemoveChild(Layer);
+    ParentLayer->AddChild(Layer, (oldParent == ParentLayer && oldIndex < index) ? index - 1 : index);
 }
 
 void
@@ -470,7 +457,7 @@ UOdysseyLayerStack::MoveLayers(TArray<UOdysseyLayer*> Layers, UOdysseyLayer* Par
         ParentLayer = LayerRoot;
 
     //If the given parent can't have children or isn't contained in this layerstack
-    if ( !ParentLayer->CanHaveChildren || !ContainsLayer(ParentLayer))
+    if ( !ParentLayer->CanHaveChildren() || !ContainsLayer(ParentLayer))
         return;
 
     //Sanitize Layers array
@@ -514,51 +501,20 @@ UOdysseyLayerStack::MoveLayers(TArray<UOdysseyLayer*> Layers, UOdysseyLayer* Par
     if ( Layers.Num() <= 0 )
         return;
 
-    TArray<UOdysseyLayer*> layersParentChanged;
-    TArray<UOdysseyLayer*> layersChildrenChanged;
-
-    layersChildrenChanged.AddUnique(ParentLayer);
-    FOdysseyObjectEditorUtils::PreChangePropertyValue(ParentLayer, "Children");
-
-    int index = FMath::Clamp(IndexInParent, 0, ParentLayer->Children.Num());
+    int index = FMath::Clamp(IndexInParent, 0, ParentLayer->GetChildren().Num());
     for (UOdysseyLayer* layer : Layers)
     {
-        UOdysseyLayer* oldParent = layer->Parent;
+        UOdysseyLayer* oldParent = layer->GetParent();
         bool bChangeParent = oldParent != ParentLayer;
-
-        if (bChangeParent)
-        {
-            FOdysseyObjectEditorUtils::PreChangePropertyValue(layer, "Parent");
-            FOdysseyObjectEditorUtils::PreChangePropertyValue(oldParent, "Children");
-            layersParentChanged.AddUnique(layer);
-            layersChildrenChanged.AddUnique(oldParent);
-        }
-
-        int oldIndex = oldParent->Children.Find(layer);
+        int oldIndex = oldParent->GetChildren().Find(layer);
         if (!bChangeParent && oldIndex < index)
             index--;
 
-        oldParent->Children.Remove(layer);
+        oldParent->RemoveChild(layer);
     }
-    index = FMath::Clamp(IndexInParent, 0, ParentLayer->Children.Num());
-
-    for (UOdysseyLayer* layer : Layers)
-    {
-        ParentLayer->Children.Insert(layer, index);
-        layer->Parent = ParentLayer;
-    }
-
-    for (UOdysseyLayer* layer : layersParentChanged)
-    {
-        FOdysseyObjectEditorUtils::PostChangePropertyValue(layer, "Parent", EPropertyChangeType::ValueSet);
-    }
-
-    for (UOdysseyLayer* layer : layersChildrenChanged)
-    {
-        FOdysseyObjectEditorUtils::PostChangePropertyValue(layer, "Children", EPropertyChangeType::ArrayRemove);
-    }
-
-    FOdysseyObjectEditorUtils::PostChangePropertyValue(ParentLayer, "Children", EPropertyChangeType::ArrayAdd);
+    index = FMath::Clamp(IndexInParent, 0, ParentLayer->GetChildren().Num());
+;
+    ParentLayer->AddChildren(Layers, index);
 }
 
 bool
@@ -576,7 +532,7 @@ UOdysseyLayerStack::ContainsLayer(const UOdysseyLayer* Layer) const
 const TArray<UOdysseyLayer*>&
 UOdysseyLayerStack::GetRootLayers() const
 {
-    return LayerRoot->Children;
+    return LayerRoot->GetChildren();
 }
 
 TArray<UOdysseyLayer*>
@@ -594,42 +550,10 @@ UOdysseyLayerStack::CreateLayer(UClass* iLayerType)
         return nullptr;
 
     //Name the layer
-    FString name = layer->DefaultName.ToString() + TEXT(" ") + FString::FromInt(GetLayers().Num() + 1);
-    layer->Name = FText::FromString(name);
+    FString name = layer->GetDefaultName().ToString() + TEXT(" ") + FString::FromInt(GetLayers().Num() + 1);
+    layer->SetLayerName(FText::FromString(name));
 
     return layer;
-}
-
-void
-UOdysseyLayerStack::AddLayersToHierarchy(TArray<UOdysseyLayer*> iLayers, UOdysseyLayer* iParent, int iIndexInParent)
-{
-    //Call propertyPreChange in a stable state of the layerstack
-    FOdysseyObjectEditorUtils::PreChangePropertyValue(iParent, "Children");
-    for ( UOdysseyLayer* layer : iLayers )
-    {
-        FOdysseyObjectEditorUtils::PreChangePropertyValue(layer, "Parent");
-    }
-
-    for (UOdysseyLayer* layer : iLayers)
-    {
-        layer->Children.Empty();
-    }
-
-    //Add Layers to parent's children
-    iParent->Children.Insert(iLayers, FMath::Clamp(iIndexInParent, 0, iParent->Children.Num()));
-
-    for ( UOdysseyLayer* layer : iLayers )
-    {
-        //Make sure layer is accessible in the hierarchy map
-        layer->Parent = iParent;
-    }
-
-    //Call propertyPostChange in a stable state of the layerstack
-    FOdysseyObjectEditorUtils::PostChangePropertyValue(iParent, "Children", EPropertyChangeType::ArrayAdd);
-    for ( UOdysseyLayer* layer : iLayers )
-    {
-        FOdysseyObjectEditorUtils::PostChangePropertyValue(layer, "Parent", EPropertyChangeType::ValueSet);
-    }
 }
 
 void
@@ -637,37 +561,8 @@ UOdysseyLayerStack::GetLayersUniqueParents(TArray<UOdysseyLayer*> iLayers, TArra
 {
     for (UOdysseyLayer* layer : iLayers)
     {
-        oParents.AddUnique(layer->Parent);
+        oParents.AddUnique(layer->GetParent());
     }
-}
-
-void
-UOdysseyLayerStack::RemoveLayersFromHierarchy(TArray<UOdysseyLayer*> iLayers)
-{
-    TArray<UOdysseyLayer*> parents;
-    TArray<UOdysseyLayer*> layersToRemove = UOdysseyLayerStackFunctionLibrary::FilterTopmostLayers(iLayers);
-    GetLayersUniqueParents(layersToRemove, parents);
-
-    //Call propertyPreChange in a stable state of the layerstack
-    for ( UOdysseyLayer* layer : layersToRemove )
-        FOdysseyObjectEditorUtils::PreChangePropertyValue(layer, "Parent");
-
-    for ( UOdysseyLayer* parent : parents)
-        FOdysseyObjectEditorUtils::PreChangePropertyValue(parent, "Children");
-
-    for ( UOdysseyLayer* layer : layersToRemove )
-        layer->Parent = nullptr;
-
-    for ( UOdysseyLayer* parent : parents )
-        for ( UOdysseyLayer* layer : layersToRemove )
-            parent->Children.Remove(layer);
-
-    //Call propertyPostChange in a stable state of the layerstack
-    for ( UOdysseyLayer* layer : layersToRemove )
-        FOdysseyObjectEditorUtils::PostChangePropertyValue(layer, "Parent", EPropertyChangeType::ValueSet);
-
-    for ( UOdysseyLayer* parent : parents )
-        FOdysseyObjectEditorUtils::PostChangePropertyValue(parent, "Children", EPropertyChangeType::ArrayRemove);
 }
 
 UOdysseyLayer*
@@ -678,11 +573,11 @@ UOdysseyLayerStack::CopyLayerInternal(UOdysseyLayer* iLayer, UOdysseyLayer* iPar
     if (!duplicatedLayer)
         return nullptr;
 
-    AddLayersToHierarchy({duplicatedLayer}, iParent, iIndexInParent);
+    iParent->AddChild(duplicatedLayer, iIndexInParent);
 
-    for(UOdysseyLayer* child : iLayer->Children )
+    for(UOdysseyLayer* child : iLayer->GetChildren() )
     {
-        CopyLayerInternal(child, duplicatedLayer, iLayer->Children.Num());
+        CopyLayerInternal(child, duplicatedLayer, iLayer->GetChildren().Num());
     }
 
     return duplicatedLayer;
@@ -697,59 +592,78 @@ UOdysseyLayerStack::HierarchyChanged()
 }
 
 void
-UOdysseyLayerStack::CurrentLayerChanged()
-{
-}
-
-void
-UOdysseyLayerStack::PropertyChanged(const FName& iPropertyName)
-{
-    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer) )
-        CurrentLayerChanged();
-}
-
-void
-UOdysseyLayerStack::PostPropertyChanged(const FName& iPropertyName)
-{
-    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer) )
-        OnCurrentLayerChanged().Broadcast(this);
-}
-
-void
-UOdysseyLayerStack::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent)
-{
-    if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
-        return;
-
-    PropertyChanged(PropertyChangedEvent.GetPropertyName());
-    PostPropertyChanged(PropertyChangedEvent.GetPropertyName());
-}
-
-void
 UOdysseyLayerStack::PostTransacted(const FTransactionObjectEvent& iTransactionEvent)
 {
     Super::PostTransacted(iTransactionEvent);
 
-    if (iTransactionEvent.GetEventType() != ETransactionObjectEventType::UndoRedo)
+    if ( iTransactionEvent.GetEventType() != ETransactionObjectEventType::UndoRedo )
         return;
 
     const TArray<FName>& changedPropertyNames = iTransactionEvent.GetChangedProperties();
-    for (const FName& propertyName : changedPropertyNames)
-    {
-        PropertyChanged(propertyName);
-        FOdysseyUndoDelegates::Get().OnAfterUndoRedo().AddLambda(
-            [this, propertyName](bool iIsRedo)
-            {
-                PostPropertyChanged(propertyName);
-            }
-        );
-    }
+    if (changedPropertyNames.Contains(GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer)))
+        OnCurrentLayerChanged().Broadcast(this);
 }
 
 void
-UOdysseyLayerStack::RenderToTextureFromRects(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, const TArray<FIntRect>& iRects, const FIntPoint& iPos) const
+UOdysseyLayerStack::SetCurrentLayer(UOdysseyLayer* Layer)
 {
-    if (!iRenderTarget)
+    CurrentLayer = Layer;
+    OnCurrentLayerChanged().Broadcast(this);
+}
+
+void
+UOdysseyLayerStack::SetTimelineSplitterPosition(float iValue)
+{
+    TimelineSplitterPosition = iValue;
+}
+
+float
+UOdysseyLayerStack::GetTimelineSplitterPosition() const
+{
+    return TimelineSplitterPosition;
+}
+
+TArray<TSubclassOf<UOdysseyLayer>>
+UOdysseyLayerStack::GetSupportedLayerClasses() const
+{
+    return SupportedLayerClasses;
+}
+
+UOdysseyLayer*
+UOdysseyLayerStack::GetCurrentLayer() const
+{
+    return CurrentLayer;
+}
+
+UOdysseyLayer*
+UOdysseyLayerStack::GetLayerRoot() const
+{
+    return LayerRoot;
+}
+
+TSubclassOf<UOdysseyLayer>
+UOdysseyLayerStack::GetLayerRootClass() const
+{
+    return LayerRootClass;
+}
+
+bool
+UOdysseyLayerStack::IsSRGB() const
+{
+    return bIsSRGB;
+}
+
+void
+UOdysseyLayerStack::SetIsSRGB(bool Value)
+{
+    bIsSRGB = Value;
+    RenderingChanged();
+}
+
+void
+UOdysseyLayerStack::RenderToTexture(FCanvas* iCanvas, FFrameNumber iFrame, const FIntRect& iSrcRect, const FIntRect& iDstRect) const
+{
+    /* if (!iRenderTarget)
         return;
 
     if (!mSurface)
@@ -758,36 +672,26 @@ UOdysseyLayerStack::RenderToTextureFromRects(UTextureRenderTarget2D* iRenderTarg
     TSharedPtr<IOdysseyImageRenderer> renderer = LayerRoot->BuildImageRenderer(EOdysseyRenderingType::Render, iFrame.Value);
     renderer->Init();
 
-    FOdysseyImageRendererCopyParams params(mSurface->Block(), iRects, ::ULIS::FVec2I(iPos.X, iPos.Y));
+    FOdysseyImageRendererCopyParams params(mSurface->Block(), {iSrcRect}, ::ULIS::FVec2I(iPos.X, iPos.Y));
     renderer->Copy(params, {});
 
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(mSurface->Block()->Format());
     ctx.Finish();
 
-    mSurface->Invalidate(::ULISUtils::ToULISRectIs(iRects));
+    mSurface->Invalidate(::ULISUtils::ToULISRectIs({iSrcRect}));
 
     FTextureResource* srcResource = mSurface->Texture()->GetResource();
-    FTextureRenderTargetResource* dstResource = iRenderTarget->GameThread_GetRenderTargetResource();
-
-    FCanvas Canvas(dstResource, nullptr, FGameTime(), GEditor->GetEditorWorldContext().World()->GetFeatureLevel());
-    //Canvas.Clear(FLinearColor::Transparent);
-    for (int i = 0; i < iRects.Num(); i++)
-    {
-        const FIntRect& rect = iRects[i];
-        FIntPoint pos = rect.Min - iPos;
-
-        double x = pos.X;
-        double y = pos.Y;
-        double w = rect.Width();
-        double h = rect.Height();
-        float u = float(rect.Min.X) / GetWidth();
-        float v = float(rect.Min.Y) / GetHeight();
-        float sizeU = float(rect.Max.X) / GetWidth();
-        float sizeV = float(rect.Max.Y) / GetHeight();
-        Canvas.DrawTile(x, y, w, h, u, v, sizeU, sizeV, FLinearColor::Transparent, srcResource, SE_BLEND_Opaque);
-        Canvas.DrawTile(x, y, w, h, u, v, sizeU, sizeV, FLinearColor::White, srcResource, SE_BLEND_AlphaBlend);
-        Canvas.Flush_GameThread(true);
-    }
+    double x = iDstRect.Min.X;
+    double y = iDstRect.Min.Y;
+    double w = iDstRect.Width();
+    double h = iDstRect.Height();
+    float u = float(iSrcRect.Min.X) / GetWidth();
+    float v = float(iSrcRect.Min.Y) / GetHeight();
+    float sizeU = float(iSrcRect.Max.X) / GetWidth();
+    float sizeV = float(iSrcRect.Max.Y) / GetHeight();
+    iCanvas->DrawTile(x, y, w, h, u, v, sizeU, sizeV, FLinearColor::Transparent, srcResource, SE_BLEND_Opaque);
+    iCanvas->DrawTile(x, y, w, h, u, v, sizeU, sizeV, FLinearColor::White, srcResource, SE_BLEND_AlphaBlend);
+    iCanvas->Flush_GameThread(true); */
 }
 
 TArray<FGuid>

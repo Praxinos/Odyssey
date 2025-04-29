@@ -7,12 +7,17 @@
 #include "Modules/ModuleInterface.h"
 #include "Modules/ModuleManager.h"
 
-class FOdysseyCoreEditorModule : public IModuleInterface
+class FOdysseyClipboard;
+
+class ODYSSEYCOREEDITOR_API FOdysseyCoreEditorModule : public IModuleInterface
 {
 public:
     // IModuleInterface interface
     virtual void StartupModule() override;
     virtual void ShutdownModule() override;
+
+public:
+    TSharedPtr<FOdysseyClipboard> GetClipboard() const;
 
 private:
     void RegisterCommands();
@@ -23,4 +28,7 @@ private:
 private:
     void OpenAboutWindow();
     void GotoUserDocumentation();
+
+private:
+    TSharedPtr<FOdysseyClipboard> mClipboard;
 };

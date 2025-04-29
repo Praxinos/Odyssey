@@ -5,7 +5,7 @@
 
 #include "OdysseyPainterEditorCommands.h"
 #include "OdysseyBlockClipboardData.h"
-#include "OdysseyEditorModule.h"
+#include "OdysseyCoreEditorModule.h"
 #include "OdysseyMediaRaster.h"
 #include "OdysseyPainterEditor.h"
 #include "Shortcuts/Global/OdysseyPainterEditorGlobalToolsShortcuts.h"
@@ -63,7 +63,7 @@ void FOdysseyPainterEditorGlobalShortcuts::Action_CopyCurrentSelection()
     if (mediaRasters.Num() <= 0)
         return;
 
-    FOdysseyEditorModule& odysseyEditorModule = FModuleManager::Get().LoadModuleChecked<FOdysseyEditorModule>(TEXT("OdysseyEditor"));
+    FOdysseyCoreEditorModule& odysseyCoreEditorModule = FModuleManager::Get().LoadModuleChecked<FOdysseyCoreEditorModule>(TEXT("OdysseyCoreEditor"));
 
     TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRasters[0]->GetRasterBlock();
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = rasterBlock->GetBlock();
@@ -114,7 +114,7 @@ void FOdysseyPainterEditorGlobalShortcuts::Action_CopyCurrentSelection()
     }
 
     TSharedPtr<FOdysseyBlockClipboardData> clipboardData = MakeShared<FOdysseyBlockClipboardData>(copyBlock);
-    odysseyEditorModule.GetClipboard()->SetData(clipboardData);
+    odysseyCoreEditorModule.GetClipboard()->SetData(clipboardData);
 }
 
 void FOdysseyPainterEditorGlobalShortcuts::Action_CutCurrentSelection()
@@ -126,7 +126,7 @@ void FOdysseyPainterEditorGlobalShortcuts::Action_CutCurrentSelection()
     if (mediaRasters.Num() <= 0)
         return;
 
-    FOdysseyEditorModule& odysseyEditorModule = FModuleManager::Get().LoadModuleChecked<FOdysseyEditorModule>(TEXT("OdysseyEditor"));
+    FOdysseyCoreEditorModule& odysseyCoreEditorModule = FModuleManager::Get().LoadModuleChecked<FOdysseyCoreEditorModule>(TEXT("OdysseyCoreEditor"));
 
     TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRasters[0]->GetRasterBlock();
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = rasterBlock->GetBlock();
@@ -179,7 +179,7 @@ void FOdysseyPainterEditorGlobalShortcuts::Action_CutCurrentSelection()
     mEditor->GetSource()->ClearFromCopyBlock(copyBlock);
 
     TSharedPtr<FOdysseyBlockClipboardData> clipboardData = MakeShared<FOdysseyBlockClipboardData>(copyBlock);
-    odysseyEditorModule.GetClipboard()->SetData(clipboardData);
+    odysseyCoreEditorModule.GetClipboard()->SetData(clipboardData);
 }
 
 void FOdysseyPainterEditorGlobalShortcuts::Action_PasteCurrentSelection()
@@ -187,9 +187,9 @@ void FOdysseyPainterEditorGlobalShortcuts::Action_PasteCurrentSelection()
     if (!mEditor)
         return;
 
-    FOdysseyEditorModule& odysseyEditorModule = FModuleManager::Get().LoadModuleChecked<FOdysseyEditorModule>(TEXT("OdysseyEditor"));
+    FOdysseyCoreEditorModule& odysseyCoreEditorModule = FModuleManager::Get().LoadModuleChecked<FOdysseyCoreEditorModule>(TEXT("OdysseyCoreEditor"));
 
-    TSharedPtr<FOdysseyBlockClipboardData> clipboardData = odysseyEditorModule.GetClipboard()->GetData<FOdysseyBlockClipboardData>();
+    TSharedPtr<FOdysseyBlockClipboardData> clipboardData = odysseyCoreEditorModule.GetClipboard()->GetData<FOdysseyBlockClipboardData>();
 
     mEditor->GetSource()->PasteBlockToCurrentLayer(clipboardData->GetBlock());
 }
@@ -200,9 +200,9 @@ void FOdysseyPainterEditorGlobalShortcuts::Action_PasteCurrentSelectionInNewLaye
     if (!mEditor)
         return;
 
-    FOdysseyEditorModule& odysseyEditorModule = FModuleManager::Get().LoadModuleChecked<FOdysseyEditorModule>(TEXT("OdysseyEditor"));
+    FOdysseyCoreEditorModule& odysseyCoreEditorModule = FModuleManager::Get().LoadModuleChecked<FOdysseyCoreEditorModule>(TEXT("OdysseyCoreEditor"));
 
-    TSharedPtr<FOdysseyBlockClipboardData> clipboardData = odysseyEditorModule.GetClipboard()->GetData<FOdysseyBlockClipboardData>();
+    TSharedPtr<FOdysseyBlockClipboardData> clipboardData = odysseyCoreEditorModule.GetClipboard()->GetData<FOdysseyBlockClipboardData>();
 
     mEditor->GetSource()->PasteBlockToNewLayer(clipboardData->GetBlock());
 }

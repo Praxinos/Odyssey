@@ -3,7 +3,6 @@
 
 #include "OdysseyAnimationCellImageStagger.h"
 #include "OdysseyAnimationCellImageStaggerImport.h"
-#include "OdysseyAnimationCellImageStaggerImageRenderer.h"
 #include "OdysseyAnimationLayer.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 
@@ -20,20 +19,11 @@ UOdysseyAnimationCellImageStagger::OldSerialize(FArchive& Ar)
     }
 }
 
-TSharedPtr<IOdysseyImageRenderer>
-UOdysseyAnimationCellImageStagger::BuildImageRenderer(EOdysseyRenderingType iRenderType, int iFrame, FImageRendererFilter iFilter) const
-{
-    if (iFilter.IsBound() && !iFilter.Execute(this))
-        return nullptr;
-
-    return MakeShared<FOdysseyAnimationCellImageStaggerImageRenderer>(this, iFrame, iRenderType, GetRenderingRects(), iFilter);
-}
-
 UOdysseyAnimationCell*
 UOdysseyAnimationCellImageStagger::GetReferenceCellAtFrame(int Frame, bool Recursive) const
 {
     int staggerFrame = GetReferenceFrameAtFrame(Frame);
-    UOdysseyAnimationCell* referenceCell = GetLayer()->GetCellAtFrame(staggerFrame);
+    UOdysseyAnimationCell* referenceCell = Cast<UOdysseyAnimationCell>(GetLayer()->GetCellAtFrame(staggerFrame));
     if (!referenceCell)
         return nullptr;
 
@@ -43,7 +33,7 @@ UOdysseyAnimationCellImageStagger::GetReferenceCellAtFrame(int Frame, bool Recur
     {
         UOdysseyAnimationCellImageStagger* referenceStaggerCell = Cast<UOdysseyAnimationCellImageStagger>(referenceCell);
         staggerFrame = referenceStaggerCell->GetReferenceFrameAtFrame(frame);
-        referenceCell = GetLayer()->GetCellAtFrame(staggerFrame);
+        referenceCell = Cast<UOdysseyAnimationCell>(GetLayer()->GetCellAtFrame(staggerFrame));
         if (!referenceCell)
             return nullptr;
 
@@ -116,7 +106,7 @@ UOdysseyAnimationCellImageStagger::GetRenderingComposition(EOdysseyRenderingType
     if (staggerFrame == INDEX_NONE)
         return idComposition;
 
-    UOdysseyAnimationCell* cell =  GetLayer()->GetCellAtFrame(staggerFrame);
+    UOdysseyAnimationCell* cell = Cast<UOdysseyAnimationCell>(GetLayer()->GetCellAtFrame(staggerFrame));
     if (!cell)
         return idComposition;
 
@@ -126,23 +116,23 @@ UOdysseyAnimationCellImageStagger::GetRenderingComposition(EOdysseyRenderingType
     return idComposition;
 }
 
-TArray<FIntRect>
-UOdysseyAnimationCellImageStagger::GetRenderingRects() const
+FIntRect
+UOdysseyAnimationCellImageStagger::GetDefaultRenderRect() const
 {
-    return GetLayer()->GetRenderingRects();
+    return GetLayer()->GetDefaultRenderRect();
 }
 
-UOdysseyAnimationCell*
+UOdysseyLayerCell*
 UOdysseyAnimationCellImageStagger::Break(int Frame, bool bClear)
 {
     if (Frame <= 0 || Frame >= Exposure)
         return nullptr;
 
-    UOdysseyAnimationCell* cell = GetReferenceCellAtFrame(Frame);
+    UOdysseyLayerCell* cell = GetReferenceCellAtFrame(Frame);
     if (!cell)
         return nullptr;
 
-    UOdysseyAnimationCell* newCell = nullptr;
+    UOdysseyLayerCell* newCell = nullptr;
     if (bClear)
     {
         newCell = GetLayer()->AddCell(cell->GetClass(), IndexInLayer + 1);
@@ -151,8 +141,8 @@ UOdysseyAnimationCellImageStagger::Break(int Frame, bool bClear)
     {
         newCell = GetLayer()->CopyCell(cell, IndexInLayer + 1);
     }
-    FOdysseyObjectEditorUtils::SetPropertyValue(newCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), Exposure - Frame);
-    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), Frame);
+    newCell->SetExposure(GetExposure() - Frame);
+    SetExposure(Frame);
 
     return newCell;
 }
@@ -209,4 +199,10 @@ void
 UOdysseyAnimationCellImageStagger::ReachBlueprintSetter(int Value)
 {
     FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCellImageStagger, Reach), Value);
+}
+
+void
+UOdysseyAnimationCellImageStagger::RenderToTexture(FCanvas* iCanvas, FFrameNumber iFrame, const FIntRect& iSrcRect, const FIntRect& iDstRect) const
+{
+
 }

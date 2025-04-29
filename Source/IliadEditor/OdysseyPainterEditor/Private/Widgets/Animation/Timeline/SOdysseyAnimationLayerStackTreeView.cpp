@@ -15,7 +15,7 @@
 #include "Widgets/Animation/Timeline/Layers/LayerImageRaster/SOdysseyAnimationLayerImageRasterRow.h"
 #include "OdysseyAnimationLayerImageVector.h"
 #include "Widgets/Animation/Timeline/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorRow.h"
-#include "OdysseyAnimationCellSelection.h"
+#include "OdysseyLayerCellSelection.h"
 #include "ScopedTransaction.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"

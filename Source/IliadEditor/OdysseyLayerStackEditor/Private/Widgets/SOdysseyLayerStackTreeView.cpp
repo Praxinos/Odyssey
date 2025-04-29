@@ -378,7 +378,7 @@ SOdysseyLayerStackTreeView::RefreshAllExpansionStates()
         if(!layer )
             continue;
 
-        SetItemExpansion(layer, layer->DisplayChildren);
+        SetItemExpansion(layer, layer->ShouldDisplayChildren());
     }
 }
 
@@ -406,7 +406,7 @@ SOdysseyLayerStackTreeView::SetCurrentLayerFromSelectorItem()
 
     if (!SelectorItem)
     {
-        FOdysseyObjectEditorUtils::SetPropertyValue(mLayerStack, GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer), mLayerStack->GetRootLayers()[0]);
+        mLayerStack->SetCurrentLayer(mLayerStack->GetRootLayers()[0]);
         return;
     }
 
@@ -414,10 +414,10 @@ SOdysseyLayerStackTreeView::SetCurrentLayerFromSelectorItem()
     if (selectorLayerStack != mLayerStack )
         return;
 
-    if (SelectorItem == mLayerStack->CurrentLayer)
+    if (SelectorItem == mLayerStack->GetCurrentLayer())
         return;
 
-    FOdysseyObjectEditorUtils::SetPropertyValue(mLayerStack, GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer), SelectorItem);
+    mLayerStack->SetCurrentLayer(SelectorItem);
 }
 
 void
@@ -430,7 +430,7 @@ SOdysseyLayerStackTreeView::Private_SignalSelectionChanged(ESelectInfo::Type Sel
     }
 
     //Ensure selectorItem = currentLayer if currentLayer is selected
-    UOdysseyLayer* currentLayer = mLayerStack->CurrentLayer.Get();
+    UOdysseyLayer* currentLayer = mLayerStack->GetCurrentLayer();
     if ( currentLayer && Private_IsItemSelected(currentLayer) )
     {
         Private_SetItemSelection(currentLayer, true, true);
@@ -457,7 +457,7 @@ SOdysseyLayerStackTreeView::OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStac
 
     Private_ClearSelection();
 
-    UOdysseyLayer* currentLayer = mLayerStack->CurrentLayer.Get();
+    UOdysseyLayer* currentLayer = mLayerStack->GetCurrentLayer();
     if( currentLayer )
     {
         Private_SetItemSelection(currentLayer, true, true);
@@ -533,10 +533,10 @@ SOdysseyLayerStackTreeView::OnLayerDisplayChildrenChanged(UOdysseyLayer* iLayerN
     if (iLayerNode->GetLayerStack() != mLayerStack )
         return;
 
-    if(IsItemExpanded(Cast<UOdysseyLayer>(iLayerNode)) == iLayerNode->DisplayChildren )
+    if(IsItemExpanded(Cast<UOdysseyLayer>(iLayerNode)) == iLayerNode->ShouldDisplayChildren() )
         return;
 
-    SetItemExpansion(Cast<UOdysseyLayer>(iLayerNode), iLayerNode->DisplayChildren);
+    SetItemExpansion(Cast<UOdysseyLayer>(iLayerNode), iLayerNode->ShouldDisplayChildren());
 }
 
 void
@@ -554,7 +554,7 @@ SOdysseyLayerStackTreeView::OnLayerDisplayOptionsChanged(UOdysseyLayer* iLayerNo
 void
 SOdysseyLayerStackTreeView::OnExpansionChanged( UOdysseyLayer* iLayerNode, bool iIsExpanded )
 {
-    FOdysseyObjectEditorUtils::SetPropertyValue(iLayerNode, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, DisplayChildren), iIsExpanded);
+    iLayerNode->SetDisplayChildren(iIsExpanded);
 }
 
 void
@@ -566,7 +566,7 @@ SOdysseyLayerStackTreeView::OnItemScrolledIntoView(UOdysseyLayer* iLayer, const 
     if (!iLayer || !iRow)
         return;
 
-    if (mIsRenamePending && iLayer == mLayerStack->CurrentLayer)
+    if (mIsRenamePending && iLayer == mLayerStack->GetCurrentLayer())
     {
         TSharedPtr<SOdysseyLayerRow> layerRow = StaticCastSharedPtr<SOdysseyLayerRow>(iRow);
         layerRow->Rename();

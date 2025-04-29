@@ -166,13 +166,13 @@ SOdysseyAnimationLightTable::OnPreviousKeyIsActivatedCheckStateChanged( ECheckBo
     if (!layerStack)
         return;
 
-    UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(layerStack->CurrentLayer.Get());
+    UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(layerStack->GetCurrentLayer());
     if (!currentLayer)
         return;
 
-    FOdysseyAnimationLightTable lighttable = currentLayer->Lighttable;
+    FOdysseyAnimationLightTable lighttable = currentLayer->GetLighttable();
     lighttable.PreviousKeys[iKeyIndex].bIsActivated = iState == ECheckBoxState::Checked;
-    FOdysseyObjectEditorUtils::SetPropertyValue(currentLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable);
+    currentLayer->SetLighttable(lighttable);
 }
 
 void
@@ -182,13 +182,13 @@ SOdysseyAnimationLightTable::OnNextKeyIsActivatedCheckStateChanged( ECheckBoxSta
     if (!layerStack)
         return;
 
-    UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(layerStack->CurrentLayer.Get());
+    UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(layerStack->GetCurrentLayer());
     if (!currentLayer)
         return;
 
-    FOdysseyAnimationLightTable lighttable = currentLayer->Lighttable;
+    FOdysseyAnimationLightTable lighttable = currentLayer->GetLighttable();
     lighttable.NextKeys[iKeyIndex].bIsActivated = iState == ECheckBoxState::Checked;
-    FOdysseyObjectEditorUtils::SetPropertyValue(currentLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable);
+    currentLayer->SetLighttable(lighttable);
 }
 
 ECheckBoxState
@@ -198,11 +198,11 @@ SOdysseyAnimationLightTable::GetPreviousKeyIsActivated( int iKeyIndex ) const
     if (!layerStack)
         return ECheckBoxState::Unchecked;
 
-    UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(layerStack->CurrentLayer.Get());
+    UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(layerStack->GetCurrentLayer());
     if (!currentLayer)
         return ECheckBoxState::Unchecked;
 
-    return currentLayer->Lighttable.PreviousKeys[iKeyIndex].bIsActivated ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+    return currentLayer->GetLighttable().PreviousKeys[iKeyIndex].bIsActivated ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
 
 ECheckBoxState
@@ -212,11 +212,11 @@ SOdysseyAnimationLightTable::GetNextKeyIsActivated( int iKeyIndex ) const
     if (!layerStack)
         return ECheckBoxState::Unchecked;
 
-    UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(layerStack->CurrentLayer.Get());
+    UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(layerStack->GetCurrentLayer());
     if (!currentLayer)
         return ECheckBoxState::Unchecked;
 
-    return currentLayer->Lighttable.NextKeys[iKeyIndex].bIsActivated ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+    return currentLayer->GetLighttable().NextKeys[iKeyIndex].bIsActivated ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
 
 void
@@ -226,13 +226,13 @@ SOdysseyAnimationLightTable::OnPreviousKeyOpacitySliderValueChanged( float iValu
     if (!layerStack)
         return;
 
-    UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(layerStack->CurrentLayer.Get());
+    UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(layerStack->GetCurrentLayer());
     if (!currentLayer)
         return;
 
-    FOdysseyAnimationLightTable lighttable = currentLayer->Lighttable;
+    FOdysseyAnimationLightTable lighttable = currentLayer->GetLighttable();
     lighttable.PreviousKeys[iKeyIndex].Opacity = iValue;
-    FOdysseyObjectEditorUtils::SetPropertyValue(currentLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable);
+    currentLayer->SetLighttable(lighttable);
 }
 
 void
@@ -242,13 +242,13 @@ SOdysseyAnimationLightTable::OnNextKeyOpacitySliderValueChanged( float iValue, i
     if (!layerStack)
         return;
 
-    UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(layerStack->CurrentLayer.Get());
+    UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(layerStack->GetCurrentLayer());
     if (!currentLayer)
         return;
 
-    FOdysseyAnimationLightTable lighttable = currentLayer->Lighttable;
+    FOdysseyAnimationLightTable lighttable = currentLayer->GetLighttable();
     lighttable.NextKeys[iKeyIndex].Opacity = iValue;
-    FOdysseyObjectEditorUtils::SetPropertyValue(currentLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable);
+    currentLayer->SetLighttable(lighttable);
 }
 
 float
@@ -258,11 +258,11 @@ SOdysseyAnimationLightTable::GetPreviousKeyOpacity( int iKeyIndex ) const
     if (!layerStack)
         return 0.f;
 
-    UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(layerStack->CurrentLayer.Get());
+    UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(layerStack->GetCurrentLayer());
     if (!currentLayer)
         return 0.f;
 
-    return currentLayer->Lighttable.PreviousKeys[iKeyIndex].Opacity;
+    return currentLayer->GetLighttable().PreviousKeys[iKeyIndex].Opacity;
 }
 
 float
@@ -272,9 +272,9 @@ SOdysseyAnimationLightTable::GetNextKeyOpacity( int iKeyIndex ) const
     if (!layerStack)
         return 0.f;
 
-    UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(layerStack->CurrentLayer.Get());
+    UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(layerStack->GetCurrentLayer());
     if (!currentLayer)
         return 0.f;
 
-    return currentLayer->Lighttable.NextKeys[iKeyIndex].Opacity;
+    return currentLayer->GetLighttable().NextKeys[iKeyIndex].Opacity;
 }

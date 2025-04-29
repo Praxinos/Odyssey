@@ -56,7 +56,7 @@ SOdysseyAnimationLayerImageVectorTimeline::GetInbetweeningListView()
 }
 
 TSharedRef<SWidget>
-SOdysseyAnimationLayerImageVectorTimeline::OnGenerateCellWidget(UOdysseyAnimationCell* iCell)
+SOdysseyAnimationLayerImageVectorTimeline::OnGenerateCellWidget(UOdysseyLayerCell* iCell)
 {
     if (!iCell)
     {
@@ -84,10 +84,10 @@ SOdysseyAnimationLayerImageVectorTimeline::OnPreviewMouseButtonDown(const FGeome
     if (!layerStack)
         return SOdysseyAnimationLayerImageTimeline::OnPreviewMouseButtonDown(MyGeometry, MouseEvent);
 
-    if (layerStack->CurrentLayer.Get() == mLayer)
+    if (layerStack->GetCurrentLayer() == mLayer)
         return SOdysseyAnimationLayerImageTimeline::OnPreviewMouseButtonDown(MyGeometry, MouseEvent);
 
-    FOdysseyObjectEditorUtils::SetPropertyValue(layerStack, GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer), mLayer);
+    layerStack->SetCurrentLayer(mLayer);
 
     return SOdysseyAnimationLayerImageTimeline::OnPreviewMouseButtonDown(MyGeometry, MouseEvent);
 }

@@ -3,7 +3,6 @@
 
 #include "OdysseyLayerStackDragDropOperation.h"
 
-#include "Components/HorizontalBox.h"
 #include "OdysseyLayer.h"
 #include "OdysseyLayerStack.h"
 #include "OdysseyStyle.h"
@@ -47,7 +46,7 @@ FText
 FOdysseyLayerStackDragDropOperation::GetText() const
 {
     if (mLayers.Num() == 1)
-        return mLayers[0]->Name;
+        return mLayers[0]->GetLayerName();
 
     return FText::Format(LOCTEXT("drag-drop-operation.transaction.layers-count", "{0} Layers"), FText::AsNumber(mLayers.Num()));
 }
@@ -56,7 +55,7 @@ const FSlateBrush*
 FOdysseyLayerStackDragDropOperation::GetIcon() const
 {
     if (mLayers.Num() == 1)
-        return mLayers[0]->Icon.GetIcon();
+        return mLayers[0]->GetIcon().GetIcon();
 
     return FOdysseyStyle::GetBrush("PainterEditor.Layers16");
 }

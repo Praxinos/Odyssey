@@ -60,7 +60,7 @@ IOdysseyRenderingAbility::IOdysseyRenderingAbility()
 void
 IOdysseyRenderingAbility::RenderingChanged(bool iIsInteractive)
 {
-    FOdysseyRenderingChangedEvent eventChanged(FOdysseyRenderingChangedEvent::eEventType::kValueChange, iIsInteractive, GetRenderingId(), GetRenderingRects());
+    FOdysseyRenderingChangedEvent eventChanged(FOdysseyRenderingChangedEvent::eEventType::kValueChange, iIsInteractive, GetRenderingId(), { GetDefaultRenderRect() });
     OnRenderingPreChangedDelegate().Broadcast(eventChanged);
     OnRenderingChangedDelegate().Broadcast(eventChanged);
 }
@@ -88,11 +88,11 @@ IOdysseyRenderingAbility::RenderingCompositionChanged(bool iIsInteractive)
     }
 }
 
-TArray<FIntRect>
-IOdysseyRenderingAbility::GetRenderingRects() const
+FIntRect
+IOdysseyRenderingAbility::GetDefaultRenderRect() const
 {
     check(false); //If you need it, override it in your class
-    return {};
+    return FIntRect(0, 0, 0, 0);
 }
 
 FGuid

@@ -12,7 +12,7 @@ UOdysseyTextureLayerFolder::UOdysseyTextureLayerFolder()
     DefaultName = LOCTEXT("layer-folder.default-name", "Folder");
     Icon = FSlateIcon(FAppStyle::GetAppStyleSetName(), "ContentBrowser.AssetTreeFolderClosed");
     IconExpanded = FSlateIcon(FAppStyle::GetAppStyleSetName(), "ContentBrowser.AssetTreeFolderOpen");
-    CanHaveChildren = true;
+    bCanHaveChildren = true;
 }
 
 TSet<UClass*>

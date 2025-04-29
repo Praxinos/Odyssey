@@ -2,61 +2,17 @@
 // ODYSSEY is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "OdysseyAnimationCell.h"
-#include "OdysseyAnimationCellImport.h"
 #include "OdysseyAnimationLayer.h"
 #include "Misc/TransactionObjectEvent.h"
 #include "OdysseyAnimation.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "Misc/OdysseyUndoDelegates.h"
 
-UOdysseyAnimationLayer*
-UOdysseyAnimationCell::GetLayer() const
-{
-    return Cast<UOdysseyAnimationLayer>(GetOuter());
-}
-
 UOdysseyAnimation*
 UOdysseyAnimationCell::GetAnimation() const
 {
-    return GetLayer() ? GetLayer()->GetAnimation() : nullptr;
-}
-
-void
-UOdysseyAnimationCell::OldSerialize(FArchive& Ar)
-{
-    if( !Ar.IsLoading() )
-        return;
-
-    if (!FOdysseyAnimationCellImport::Read( this, Ar ))
-    {
-        //Old Style No Chunk Loading
-        Ar << Exposure;
-    }
-}
-
-UOdysseyAnimationLayerStack*
-UOdysseyAnimationCell::GetLayerStack() const
-{
-    return GetLayer() ? Cast<UOdysseyAnimationLayerStack>(GetLayer()->GetLayerStack()) : nullptr;
-}
-
-FOdysseyMediaProvider
-UOdysseyAnimationCell::GetMediaProvider(uint32 iFrameIndex) const
-{
-    return FOdysseyMediaProvider();
-}
-
-FInt32Range
-UOdysseyAnimationCell::GetFrameRange() const
-{
-    if (!GetLayer())
-        return FInt32Range::Empty();
-
-    const TArray<FInt32Range>& frameRanges = GetLayer()->GetCellsFrameRanges();
-    if (IndexInLayer < 0 || IndexInLayer >= frameRanges.Num())
-        return FInt32Range::Empty();
-
-    return GetLayer()->GetCellsFrameRanges()[IndexInLayer];
+    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(GetLayer());
+    return layer ? layer->GetAnimation() : nullptr;
 }
 
 bool
@@ -85,42 +41,16 @@ UOdysseyAnimationCell::OnOutOfPegsChanged()
     return mOnOutOfPegsChanged;
 }
 
-FSimpleMulticastDelegate&
-UOdysseyAnimationCell::OnThumbnailChanged()
-{
-    return mOnThumbnailChanged;
-}
-
-FSimpleMulticastDelegate&
-UOdysseyAnimationCell::OnThumbnailDirtied()
-{
-    return mOnThumbnailDirtied;
-}
-
 void
 UOdysseyAnimationCell::OutOfPegsChanged(bool iIsInteractive)
 {
 }
 
 void
-UOdysseyAnimationCell::ExposureChanged(bool iIsInteractive)
-{
-    if (GetLayer())
-        GetLayer()->InvalidateCellsFrameRanges();
-}
-
-void
 UOdysseyAnimationCell::PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive)
 {
     if (iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, OutOfPegs))
-    {
         OutOfPegsChanged(iIsInteractive);
-    }
-
-    if (iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure))
-    {
-        ExposureChanged(iIsInteractive);
-    }
 }
 
 void
@@ -130,11 +60,6 @@ UOdysseyAnimationCell::PostPropertyChanged(const FName& iPropertyName, bool iIsI
     {
         mOnOutOfPegsChanged.Broadcast(iIsInteractive);
         RenderingChanged(iIsInteractive);
-    }
-
-    if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure))
-    {
-        RenderingCompositionChanged(iIsInteractive);
     }
 }
 
@@ -165,62 +90,6 @@ UOdysseyAnimationCell::PostTransacted(const FTransactionObjectEvent& iTransactio
             }
         );
     }
-}
-
-UOdysseyAnimationCell*
-UOdysseyAnimationCell::Break(int Frame, bool bClear)
-{
-    if (Frame <= 0 || Frame >= Exposure)
-        return nullptr;
-
-    UOdysseyAnimationCell* newCell = nullptr;
-    if (bClear)
-    {
-        newCell = GetLayer()->AddCell(GetClass(), IndexInLayer + 1);
-    }
-    else
-    {
-        newCell = GetLayer()->CopyCell(this, IndexInLayer + 1);
-    }
-
-    FOdysseyObjectEditorUtils::SetPropertyValue(newCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), Exposure - Frame);
-    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), Frame);
-
-    return newCell;
-}
-
-void
-UOdysseyAnimationCell::DirtyThumbnail()
-{
-    if (ThumbnailIsDirty)
-        return;
-
-    ThumbnailIsDirty = true;
-    mOnThumbnailDirtied.Broadcast();
-}
-
-void
-UOdysseyAnimationCell::UndirtyThumbnail()
-{
-    ThumbnailIsDirty = false;
-}
-
-bool
-UOdysseyAnimationCell::IsThumbnailDirty() const
-{
-    return ThumbnailIsDirty;
-}
-
-void
-UOdysseyAnimationCell::ExposureBlueprintSetter(int Value)
-{
-    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), Value);
-}
-
-void
-UOdysseyAnimationCell::MarkBlueprintSetter(int Value)
-{
-    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Mark), Value);
 }
 
 void

@@ -33,7 +33,7 @@ SOdysseyAnimationLayerTimeline::GetBorder() const
         return borderBrush;
 
     UOdysseyLayerStack* layerStack = GetLayer()->GetLayerStack();
-    if ( !layerStack || layerStack->CurrentLayer != GetLayer())
+    if ( !layerStack || layerStack->GetCurrentLayer() != GetLayer())
         return borderBrush;
 
     return FOdysseyStyle::GetBrush("OdysseyLayerStack.CurrentLayerInactiveBackgroundBrush");

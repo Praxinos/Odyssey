@@ -33,20 +33,20 @@ FOdysseyAnimationTimelineCutTool::OnMouseButtonUp(const FMouseEventParams& iPara
     float posX = iParams.mGeometry.AbsoluteToLocal(iParams.mMouseEvent.GetScreenSpacePosition()).X;
     int frame = (int)(MousePositionToFrame(posX) + 0.5f);
 
-    UOdysseyAnimationCell* cell = iParams.mLayer->GetCellAtFrame(frame);
+    UOdysseyLayerCell* cell = iParams.mLayer->GetCellAtFrame(frame);
     if (!cell || cell->GetFrameRange().GetLowerBoundValue() == frame)
         return FReply::Unhandled();
 
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("timeline.cut-tool.transaction.break-cell", "Break Cell"));
 #endif
-    UOdysseyAnimationCell* newCell = cell->Break(frame - cell->GetFrameRange().GetLowerBoundValue(), !iParams.mMouseEvent.IsControlDown());
+    UOdysseyLayerCell* newCell = cell->Break(frame - cell->GetFrameRange().GetLowerBoundValue(), !iParams.mMouseEvent.IsControlDown());
     if (!newCell)
         return FReply::Unhandled();
 
     //Remove mark from the new cell, because we consider the new cell will be modified by the user and will not represent the original cell anymore
     //This is an arbitrary choice, you are free to change this behaviour whenever you want without any side effect
-    FOdysseyObjectEditorUtils::SetPropertyValue(newCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Mark), INDEX_NONE);
+    newCell->SetMark(INDEX_NONE);
 
     return FReply::Handled();
 }

@@ -33,4 +33,7 @@ public:
      * @return TSet<UClass*>
      */
     virtual TSet<UClass*> GetMergeLayerTypesFromTypes(TSet<UClass*> iLayerTypes) const override;
+
+
+    virtual void RenderToTexture(FCanvas* iCanvas, FFrameNumber iFrame, const FIntRect& iSrcRect, const FIntRect& iDstRect) const override;
 };

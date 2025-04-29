@@ -304,6 +304,7 @@ FOdysseyAnimationMediaSamples::Update(int iFrameIndex, int64 iSequenceIndex)
         return;
 
     mImageRenderingComposition = imageRenderingComposition;
+
     IOdysseyTextureRenderingAbility::Execute_Render(mAnimation, mRenderTarget.Get(), FFrameNumber(mCurrentFrameIndex));
 }
 
@@ -347,6 +348,10 @@ FOdysseyAnimationMediaSamples::Render()
     if ( mInvalidTileMap.InvalidTiles().IsEmpty() )
         return;
 
-    IOdysseyTextureRenderingAbility::Execute_RenderRects(mAnimation, mRenderTarget.Get(), FFrameNumber(mCurrentFrameIndex), mInvalidTileMap.InvalidRects());
+    for (const FIntRect& rect : mInvalidTileMap.InvalidRects())
+    {
+        IOdysseyTextureRenderingAbility::Execute_RenderRect(mAnimation, mRenderTarget.Get(), FFrameNumber(mCurrentFrameIndex), rect);
+    }
+
     mInvalidTileMap.Clear();
 }

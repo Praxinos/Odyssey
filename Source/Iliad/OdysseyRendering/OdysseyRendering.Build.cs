@@ -22,10 +22,39 @@ public class OdysseyRendering : ModuleRules
             OptimizeCode = CodeOptimization.Never;
         }
 
+        PublicIncludePaths.AddRange(
+            new string[] {
+                Path.Combine(ModuleDirectory, "Public", "CPU"),
+            }
+        );
+
+        PrivateIncludePaths.AddRange(
+            new string[] {
+                Path.Combine(ModuleDirectory, "Private", "CPU"),
+            }
+        );
+
+        PublicIncludePathModuleNames.AddRange(
+            new string[] {
+                "OdysseyCore",
+            }
+        );
+
+        PrivateIncludePathModuleNames.AddRange(
+            new string[] {
+            }
+        );
+
+        PublicDependencyModuleNames.AddRange(
+            new string[] {
+            }
+        );
+
         PrivateDependencyModuleNames.AddRange(
              new string[] {
                 "Core",
                 "CoreUObject",
+                "DerivedDataCache",
                 "Engine",
                 "InputCore",
                 "Projects",
@@ -35,9 +64,29 @@ public class OdysseyRendering : ModuleRules
                 "SlateCore",
                 "Slate",
 
-                "OdysseyCore"
+                "OdysseyCore",
              }
         );
+
+
+        //---
+        /* if (Target.Type == TargetType.Editor)
+        {
+            PublicDependencyModuleNames.AddRange(
+                new string[] {
+                    "ULIS",//--- Link to ULIS only if TargetType is Editor
+                    "ULISLoader"//--- Link to ULIS only if TargetType is Editor
+                }
+            );
+
+            PrivateDependencyModuleNames.AddRange(
+                new string[] {
+                    "blend2d",
+                    "OdysseyFile", //Needed to load VectorBlock and RasterBlock
+                    "OdysseyVector", //Needed to load VectorBlock and RasterBlock
+                }
+            );
+        } */
 
         //--- WIBU
 

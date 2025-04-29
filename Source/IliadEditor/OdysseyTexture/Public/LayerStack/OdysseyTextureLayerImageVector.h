@@ -52,22 +52,18 @@ public:
     virtual void PostInitProperties() override;
     virtual void PostLoad() override;
     virtual void PostDuplicate(bool bDuplicateForPIE) override;
+    virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
     virtual void Merge(const TArray<UOdysseyLayer*>& Layers) override;
 
     FOdysseyVectorCell* GetVectorCell();
     FOdysseyVectorImportV2* GetImporterV2();
 
-    void IsWireframeChanged();
-    void IsColoredChanged();
     void Serialize(FArchive& Ar);
-    virtual void PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive) override;
-    virtual void PostPropertyChanged(const FName& iPropertyName, bool iIsInteractive) override;
 
     virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const override;
 
 public:
     //IOdysseyRenderingAbility overrides
-    virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(EOdysseyRenderingType iRenderType, int iFrame = 0, FImageRendererFilter iFilter = FImageRendererFilter()) const override;
     virtual TArray<FGuid> GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrame = 0) const override;
 
 private:
@@ -92,19 +88,25 @@ private:
     friend class FOdysseyTextureLayerImageVectorExport;
     friend class FOdysseyTextureLayerImageVectorImport;
 
-private:
-    UFUNCTION(BlueprintSetter)
-    void IsWireframeBlueprintSetter(bool Value);
-
-    UFUNCTION(BlueprintSetter)
-    void IsColoredBlueprintSetter(bool Value);
-
 public:
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, NonTransactional, Category="Odyssey|Layer")
-    bool IsWireframe = false;
+    UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
+    void SetIsWireframe(bool Value);
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, NonTransactional, Category="Odyssey|Layer")
-    bool IsColored = true;
+    UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
+    void SetIsColored(bool Value);
+
+    UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
+    bool IsWireframe() const;
+
+    UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
+    bool IsColored() const;
+
+protected:
+    UPROPERTY(NonTransactional)
+    bool bIsWireframe = false;
+
+    UPROPERTY(NonTransactional)
+    bool bIsColored = true;
 
 private:
     FOdysseyVectorImportV2 mImporterV2;

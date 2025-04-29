@@ -6,19 +6,7 @@
 #include "CoreMinimal.h"
 #include "Memory/SharedBuffer.h"
 
-/*
-struct FBlockCleanupInfo
-{
-    FGuid mId;
-    int mWidth;
-    int mHeight;
-    int mFormat;
-    bool mIsCacheInvalid;
-    TSharedPtr<FThreadSafeCounter> mAvailableCounter;
-};
-*/
-
-class ODYSSEYIMAGING_API FOdysseyDiskCache
+class ODYSSEYCORE_API FOdysseyDiskCache
 {
 public:
     // Construction / Destruction

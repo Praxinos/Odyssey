@@ -390,7 +390,11 @@ UOdysseyAnimationPlayer::UpdateTexture()
 
     if (!mInvalidTileMap.InvalidTiles().IsEmpty())
     {
-        IOdysseyTextureRenderingAbility::Execute_RenderRects(Animation, RenderTarget, frame.GetFrame(), mInvalidTileMap.InvalidRects());
+        for (const FIntRect& rect : mInvalidTileMap.InvalidRects())
+        {
+            IOdysseyTextureRenderingAbility::Execute_RenderRect(Animation, RenderTarget, frame.GetFrame(), rect);
+        }
+
         mInvalidTileMap.Clear();
     }
 }

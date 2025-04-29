@@ -558,7 +558,7 @@ UOdysseyPainterEditorRasterPaintBucketTool::GetCurrentLayerBlock() const
     if (!layerStack)
         return nullptr;
 
-    TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(layerStack->GetWidth(), layerStack->GetHeight(), layerStack->GetFormat());
+    /* TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(layerStack->GetWidth(), layerStack->GetHeight(), layerStack->GetFormat());
     TSharedPtr<IOdysseyImageRenderer> renderer = layerStack->CurrentLayer->BuildImageRenderer(EOdysseyRenderingType::Render, GetEditor()->GetCurrentFrame());
     renderer->Init();
 
@@ -568,7 +568,9 @@ UOdysseyPainterEditorRasterPaintBucketTool::GetCurrentLayerBlock() const
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(layerStack->GetFormat());
     ctx.Finish();
 
-    return block;
+    return block; */
+
+    return nullptr;
 }
 
 TSharedPtr<::ULIS::FBlock>
@@ -578,6 +580,7 @@ UOdysseyPainterEditorRasterPaintBucketTool::GetForegroundLayersBlock() const
     if (!layerStack)
         return nullptr;
 
+    /*
     TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(layerStack->GetWidth(), layerStack->GetHeight(), layerStack->GetFormat());
     TArray<IOdysseyRenderingAbility*> layersToExclude = GetForegroundLayersToExclude(layerStack->CurrentLayer);
     FImageRendererFilter filter = FImageRendererFilter::CreateLambda(
@@ -599,7 +602,9 @@ UOdysseyPainterEditorRasterPaintBucketTool::GetForegroundLayersBlock() const
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(layerStack->GetFormat());
     ctx.Finish();
 
-    return block;
+    return block; */
+
+    return nullptr;
 }
 
 TSharedPtr<::ULIS::FBlock>
@@ -609,7 +614,7 @@ UOdysseyPainterEditorRasterPaintBucketTool::GetBackgroundLayersBlock() const
     if (!layerStack)
         return nullptr;
 
-    TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(layerStack->GetWidth(), layerStack->GetHeight(), layerStack->GetFormat());
+    /* TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(layerStack->GetWidth(), layerStack->GetHeight(), layerStack->GetFormat());
     TArray<IOdysseyRenderingAbility*> layersToExclude = GetBackgroundLayersToExclude(layerStack->CurrentLayer);
     FImageRendererFilter filter = FImageRendererFilter::CreateLambda(
         [layersToExclude](const IOdysseyRenderingAbility* iRenderingAbility) -> bool
@@ -629,7 +634,8 @@ UOdysseyPainterEditorRasterPaintBucketTool::GetBackgroundLayersBlock() const
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(layerStack->GetFormat());
     ctx.Finish();
 
-    return block;
+    return block; */
+    return nullptr;
 }
 
 TSharedPtr<::ULIS::FBlock>
@@ -639,7 +645,7 @@ UOdysseyPainterEditorRasterPaintBucketTool::GetAllLayersBlock() const
     if (!layerStack)
         return nullptr;
 
-    TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(layerStack->GetWidth(), layerStack->GetHeight(), layerStack->GetFormat());
+    /* TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(layerStack->GetWidth(), layerStack->GetHeight(), layerStack->GetFormat());
     TSharedPtr<IOdysseyImageRenderer> renderer = layerStack->LayerRoot->BuildImageRenderer(EOdysseyRenderingType::Render, GetEditor()->GetCurrentFrame());
     renderer->Init();
     FOdysseyImageRendererCopyParams params(block, { ::ULISUtils::ToIntRect(block->Rect()) });
@@ -648,7 +654,8 @@ UOdysseyPainterEditorRasterPaintBucketTool::GetAllLayersBlock() const
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(layerStack->GetFormat());
     ctx.Finish();
 
-    return block;
+    return block; */
+    return nullptr;
 }
 
 TArray<IOdysseyRenderingAbility*>

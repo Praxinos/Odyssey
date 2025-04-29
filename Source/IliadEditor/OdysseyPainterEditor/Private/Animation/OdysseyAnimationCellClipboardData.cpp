@@ -13,7 +13,7 @@ FOdysseyAnimationCellClipboardData::FOdysseyAnimationCellClipboardData()
 
 }
 
-FOdysseyAnimationCellClipboardData::FOdysseyAnimationCellClipboardData(const TArray<UOdysseyAnimationCell*>& iCells)
+FOdysseyAnimationCellClipboardData::FOdysseyAnimationCellClipboardData(const TArray<UOdysseyLayerCell*>& iCells)
     : IOdysseyClipboardData(StaticId())
 {
     Copy(iCells);
@@ -27,12 +27,12 @@ FOdysseyAnimationCellClipboardData::StaticId()
 }
 
 void
-FOdysseyAnimationCellClipboardData::Copy(const TArray<UOdysseyAnimationCell*>& iCells)
+FOdysseyAnimationCellClipboardData::Copy(const TArray<UOdysseyLayerCell*>& iCells)
 {
     mCellCopies.Empty();
-    for (UOdysseyAnimationCell* cell : iCells)
+    for (UOdysseyLayerCell* cell : iCells)
     {
-        mCellCopies.Add({cell, cell->Exposure});
+        mCellCopies.Add({cell, cell->GetExposure()});
     }
 }
 
@@ -54,8 +54,8 @@ FOdysseyAnimationCellClipboardData::Paste(UOdysseyAnimationLayer* iLayer, int iF
     }
     else
     {
-        UOdysseyAnimationCell* cell = iLayer->GetCellAtFrame(iFrame);
-        cellIndex = cell->IndexInLayer;
+        UOdysseyLayerCell* cell = iLayer->GetCellAtFrame(iFrame);
+        cellIndex = cell->GetIndexInLayer();
         int cellFrame = iFrame - cell->GetFrameRange().GetLowerBoundValue();
         if (cellFrame != 0)
         {
@@ -67,8 +67,8 @@ FOdysseyAnimationCellClipboardData::Paste(UOdysseyAnimationLayer* iLayer, int iF
     for (int i = 0; i < mCellCopies.Num(); i++)
     {
         const FCellCopy& cellCopy = mCellCopies[i];
-        UOdysseyAnimationCell* cell = iLayer->CopyCell(cellCopy.mCell, cellIndex + i);
-        FOdysseyObjectEditorUtils::SetPropertyValue(cell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), cellCopy.mExposure);
+        UOdysseyLayerCell* cell = iLayer->CopyCell(cellCopy.mCell, cellIndex + i);
+        cell->SetExposure(cellCopy.mExposure);
     }
 }
 

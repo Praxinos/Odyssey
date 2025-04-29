@@ -80,10 +80,8 @@ public class OdysseyLayerStackEditor : ModuleRules
 
         PublicDependencyModuleNames.AddRange(
             new string[] {
-                "OdysseyCore",
-                "OdysseyMedia",
-                "OdysseyImaging",
-                "OdysseyRendering",
+                "Slate",
+                "OdysseyEditor",
             }
         );
 
@@ -95,25 +93,25 @@ public class OdysseyLayerStackEditor : ModuleRules
                 "EditorWidgets",
                 "Engine",
                 "InputCore",
-                "RHI",
-                "RenderCore",
-                "Slate",
                 "SlateCore",
-                "UMG",
-                "UnrealEd",
                 "ToolMenus",
                 "ToolWidgets",
+                "UnrealEd",
 
                 "OdysseyAnimation",
+                "OdysseyCore",
                 "OdysseyCoreEditor",
-                "OdysseyBrush",
                 "OdysseyFile",
-                "OdysseyEditor",
+                "OdysseyImaging",
+                "OdysseyLayerStack",
+                "OdysseyMedia",
+                "OdysseyRendering",
                 "OdysseyStyle",
                 "OdysseyVector",
 
+                "blend2d",
                 "ULIS",
-                "ULISLoader"
+                "ULISLoader",
             }
         );
 

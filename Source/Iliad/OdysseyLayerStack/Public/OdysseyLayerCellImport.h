@@ -3,20 +3,17 @@
 
 #pragma once
 
-#include <Core/Core.h>
-
-class UOdysseyAnimationCell;
-
-class FOdysseyAnimationCellImport
+class UOdysseyLayerCell;
+class FOdysseyLayerCellImport
 {
 public:
     /**
      * @brief Imports Data from the given archive into the given object
      *
-     * @param iAnimationCell
+     * @param iCell
      * @param Ar
      */
-    static bool ODYSSEYLAYERSTACKEDITOR_API Read( UOdysseyAnimationCell* iAnimationCell
+    static bool ODYSSEYLAYERSTACK_API Read( UOdysseyLayerCell* iCell
                                   , FArchive &Ar );
 
 private:
@@ -24,7 +21,7 @@ private:
      * Private import functions
      */
 
-    static void Read( UOdysseyAnimationCell* iAnimationCell
+    static void Read( UOdysseyLayerCell* iCell
                                   , FArchive &Ar
                                   , uint64 iChunkEnd );
 };

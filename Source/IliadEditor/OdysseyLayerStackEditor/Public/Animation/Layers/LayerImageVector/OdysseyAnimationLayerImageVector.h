@@ -6,8 +6,6 @@
 #include "OdysseyAnimationLayer.h"
 #include "OdysseyBlendingMode.h"
 
-#include <ULIS>
-
 #include "OdysseyVector.h"
 #include "OdysseyVectorLayer.h" // interface
 
@@ -60,8 +58,8 @@ public:
 
 public:
     //IOdysseyRenderingAbility overrides
-    virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(EOdysseyRenderingType iRenderType, int iFrame, FImageRendererFilter iFilter = FImageRendererFilter()) const override;
     virtual TArray<FGuid> GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrameIndex) const override;
+    virtual void RenderToTexture(FCanvas* iCanvas, FFrameNumber iFrame, const FIntRect& iSrcRect, const FIntRect& iDstRect) const override;
 
 public:
     // Implements Interface IOdysseyVectorLayer
@@ -75,20 +73,16 @@ public:
 protected:
     void IsColoredChanged();
     void IsWireframeChanged();
-    virtual void CellsChanged(bool iIsInteractive) override;
-    virtual void PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive) override;
-    virtual void PostPropertyChanged(const FName& iPropertyName, bool iIsInteractive) override;
+    virtual void CellsChanged() override;
     void MakeBreakdownTargetMap();
     void CheckBreakdownTargetMap();
 
 public:
-
 #ifdef WITH_EDITOR
-
-virtual TArray<FName> GetRows() const override;
-virtual int GetRowHeight(FName iSubRowName) const override;
-virtual bool IsRowVisible(FName iSubRowName) const override;
-
+    virtual TArray<FName> GetRows() const override;
+    virtual int GetRowHeight(FName iSubRowName) const override;
+    virtual bool IsRowVisible(FName iSubRowName) const override;
+    virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
 #endif //WITH_EDITOR
 
 private:
@@ -96,21 +90,28 @@ private:
     TSharedPtr<IOdysseyMedia> GetCellMediaVector(uint32 iFrameIndex) const;
     void AutoCreateCell(int iFrameIndex);
 
-private:
-    UFUNCTION(BlueprintSetter)
-    void IsWireframeBlueprintSetter(bool Value);
-
-    UFUNCTION(BlueprintSetter)
-    void IsColoredBlueprintSetter(bool Value);
-
 public:
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Odyssey|Layer", BlueprintSetter=IsWireframeBlueprintSetter, NonTransactional)
-    bool IsWireframe = false;
+    UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
+    void SetIsWireframe(bool Value);
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Odyssey|Layer", BlueprintSetter=IsColoredBlueprintSetter, NonTransactional)
-    bool IsColored = true;
+    UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
+    void SetIsColored(bool Value);
+
+    UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
+    bool IsWireframe() const;
+
+    UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
+    bool IsColored() const;
+
+protected:
+    UPROPERTY(NonTransactional)
+    bool bIsWireframe = false;
+
+    UPROPERTY(NonTransactional)
+    bool bIsColored = true;
 
 private:
+    friend class FOdysseyAnimationLayerImageVectorImport;
     // mSharedEnv MUST be before mCellsContainer because of the destruction order
     FOdysseyVectorLayer mVectorLayer;
     TMap<FInbetweenerBreakdown*, FOdysseyVectorCell*> mBreakdownTargetMap;

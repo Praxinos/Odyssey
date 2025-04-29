@@ -9,6 +9,7 @@
 #include "OdysseyAnimationCellImageVector.h"
 #include "OdysseyAnimationCellImageRaster.h"
 #include "Widgets/SOdysseyAnimationConfigureWindow.h"
+#include "OdysseyRasterBlock.h"
 #include "OdysseyRasterBlockMutator.h"
 #include "ULISLoaderModule.h"
 
@@ -71,7 +72,7 @@ UOdysseyAnimationFactory::FactoryCreateNew( UClass* iClass, UObject* iParent, FN
         case EOdysseyAnimationDefaultLayerType::Raster:
         {
             UOdysseyAnimationLayerImageRaster* layer = Cast<UOdysseyAnimationLayerImageRaster>(layerStack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass()));
-            layerStack->CurrentLayer = layer;
+            layerStack->SetCurrentLayer(layer);
             layer->AddCell(UOdysseyAnimationCellImageRaster::StaticClass());
         }
         break;
@@ -79,7 +80,7 @@ UOdysseyAnimationFactory::FactoryCreateNew( UClass* iClass, UObject* iParent, FN
         case EOdysseyAnimationDefaultLayerType::Vector:
         {
             UOdysseyAnimationLayerImageVector* layer = Cast<UOdysseyAnimationLayerImageVector>(layerStack->AddLayer(UOdysseyAnimationLayerImageVector::StaticClass()));
-            layerStack->CurrentLayer = layer;
+            layerStack->SetCurrentLayer(layer);
             layer->AddCell(UOdysseyAnimationCellImageVector::StaticClass());
         }
         break;
@@ -92,8 +93,8 @@ UOdysseyAnimationFactory::FactoryCreateNew( UClass* iClass, UObject* iParent, FN
     if (mConfiguration.BackgroundColor != EOdysseyAnimationBackgroundColor::Transparent)
     {
         UOdysseyAnimationLayerImageRaster* backgroundLayer = Cast<UOdysseyAnimationLayerImageRaster>(layerStack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass(), nullptr, 1));
-        backgroundLayer->PostBehaviour = EOdysseyAnimationLayerImagePostBehaviour::Hold;
-        backgroundLayer->Name = LOCTEXT("animation.default-background-layer.name", "Background");
+        backgroundLayer->SetPostBehaviour(EOdysseyLayerImagePostBehaviour::Hold);
+        backgroundLayer->SetLayerName(LOCTEXT("animation.default-background-layer.name", "Background"));
 
         UOdysseyAnimationCellImageRaster* backgroundCell = Cast<UOdysseyAnimationCellImageRaster>(backgroundLayer->AddCell(UOdysseyAnimationCellImageRaster::StaticClass()));
         TSharedPtr<FOdysseyRasterBlock> backgroundRasterBlock = backgroundCell->GetRasterBlock();

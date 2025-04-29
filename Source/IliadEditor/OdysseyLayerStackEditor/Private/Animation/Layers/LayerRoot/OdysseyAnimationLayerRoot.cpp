@@ -5,8 +5,8 @@
 
 UOdysseyAnimationLayerRoot::UOdysseyAnimationLayerRoot()
 {
-    CanHaveChildren = true;
-    HasLighttable = false;
+    bCanHaveChildren = true;
+    bHasLighttable = false;
 }
 
 void
@@ -25,6 +25,12 @@ UOdysseyAnimationLayerRoot::PostLoad()
 {
     Super::PostLoad();
     //mProxy->PostLoad();
+}
+
+void
+UOdysseyAnimationLayerRoot::RenderToTexture(FCanvas* iCanvas, FFrameNumber iFrame, const FIntRect& iSrcRect, const FIntRect& iDstRect) const
+{
+
 }
 
 /* TSharedPtr<FOdysseyAnimationProxy>

@@ -14,8 +14,8 @@ UOdysseyAnimationLayerFolder::UOdysseyAnimationLayerFolder()
 
     Icon = FSlateIcon(FAppStyle::GetAppStyleSetName(), "ContentBrowser.AssetTreeFolderClosed");
     IconExpanded = FSlateIcon(FAppStyle::GetAppStyleSetName(), "ContentBrowser.AssetTreeFolderOpen");
-    CanHaveChildren = true;
-    HasLighttable = false;
+    bCanHaveChildren = true;
+    bHasLighttable = false;
 }
 
 TSet<UClass*>
@@ -44,6 +44,12 @@ UOdysseyAnimationLayerFolder::GetMergeLayerTypesFromTypes(TSet<UClass*> iLayerTy
     }
 
     return types;
+}
+
+void
+UOdysseyAnimationLayerFolder::RenderToTexture(FCanvas* iCanvas, FFrameNumber iFrame, const FIntRect& iSrcRect, const FIntRect& iDstRect) const
+{
+
 }
 
 #undef LOCTEXT_NAMESPACE

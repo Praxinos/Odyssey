@@ -16,7 +16,7 @@
 #include "Shortcuts/AnimationTimeline/OdysseyAnimationTimelineCellImageStaggerShortcuts.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "OdysseyRasterBlockMutator.h"
-#include "OdysseyAnimationCellSelection.h"
+#include "OdysseyLayerCellSelection.h"
 #include "ScopedTransaction.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
@@ -39,7 +39,7 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::MapActionsToCommandList(TShar
 void
 FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
 {
-    UOdysseyAnimation* animation = mAnimation.Get();
+    /* UOdysseyAnimation* animation = mAnimation.Get();
     if (!animation)
         return;
 
@@ -47,7 +47,7 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
     if (!layerStack)
         return;
 
-    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerStack->CurrentLayer.Get());
+    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerStack->GetCurrentLayer());
     if (!layer || !layer->IsA(UOdysseyAnimationLayerImageRaster::StaticClass()))
         return;
 
@@ -56,12 +56,12 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
 
     UOdysseyAnimationLayerImageRaster* layerImageRaster = Cast<UOdysseyAnimationLayerImageRaster>(layer);
 
-    TArray<UOdysseyAnimationCell*> selectedCells = layerImageRaster->GetLayerStack()->GetCellSelection()->GetSelectedCells();
+    TArray<UOdysseyLayerCell*> selectedCells = layerImageRaster->GetLayerStack()->GetCellSelection()->GetSelectedCells();
     if (selectedCells.IsEmpty())
         return;
 
     bool hasCellsToCrossFade = selectedCells.ContainsByPredicate(
-        [](UOdysseyAnimationCell* iCell)
+        [](UOdysseyLayerCell* iCell)
         {
             return iCell->Exposure > 1;
         }
@@ -92,13 +92,13 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
 
     //Get the selected cells again to ensure having the converted cells
     selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
-    TArray<UOdysseyAnimationCell*> cellsToSelect = selectedCells;
+    TArray<UOdysseyLayerCell*> cellsToSelect = selectedCells;
 
     //Cross Fade all selected cells
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
 
     FScopedSlowTask selectedCellsProgress(selectedCells.Num());
-    for (UOdysseyAnimationCell* selectedCell : selectedCells)
+    for (UOdysseyLayerCell* selectedCell : selectedCells)
     {
         selectedCellsProgress.EnterProgressFrame();
         TSharedPtr<::ULIS::FBlock> startBlock = MakeShared<::ULIS::FBlock>(animation->GetWidth(), animation->GetHeight(), format);
@@ -120,7 +120,7 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
 
         if (nextCellIndex < layer->GetCells().Num() || !layer->GetCells()[nextCellIndex])
         {
-            UOdysseyAnimationCell* nextCell = layer->GetCells()[nextCellIndex];
+            UOdysseyLayerCell* nextCell = layer->GetCells()[nextCellIndex];
             TSharedPtr<::ULIS::FBlock> endBlock = MakeShared<::ULIS::FBlock>(animation->GetWidth(), animation->GetHeight(), format);
             ctx.Clear(*endBlock);
             ctx.Finish();
@@ -131,7 +131,7 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
             renderer->Copy(endParams, {});
             ctx.Finish();
 
-            TArray<UOdysseyAnimationCell*> rasterCells = layer->AddCells(UOdysseyAnimationCellImageRaster::StaticClass(), selectedCell->IndexInLayer + 1, crossFadelength - 1);
+            TArray<UOdysseyLayerCell*> rasterCells = layer->AddCells(UOdysseyAnimationCellImageRaster::StaticClass(), selectedCell->IndexInLayer + 1, crossFadelength - 1);
 
             FScopedSlowTask framesProgress(crossFadelength);
             for (int j = 1; j < crossFadelength; j++)
@@ -179,7 +179,7 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
         }
         else
         {
-            TArray<UOdysseyAnimationCell*> rasterCells = layer->AddCells(UOdysseyAnimationCellImageRaster::StaticClass(), selectedCell->IndexInLayer + 1, crossFadelength - 1);
+            TArray<UOdysseyLayerCell*> rasterCells = layer->AddCells(UOdysseyAnimationCellImageRaster::StaticClass(), selectedCell->IndexInLayer + 1, crossFadelength - 1);
 
             FScopedSlowTask framesProgress(crossFadelength);
             for (int j = 1; j < crossFadelength; j++)
@@ -214,7 +214,7 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
             cellsToSelect.Append(rasterCells);
         }
     }
-    layerStack->GetCellSelection()->SetSelectedCells(cellsToSelect);
+    layerStack->GetCellSelection()->SetSelectedCells(cellsToSelect); */
 }
 
 bool
@@ -228,23 +228,23 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::CanAction_CrossFade()
     if (!layerStack)
         return false;
 
-    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerStack->CurrentLayer.Get());
+    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerStack->GetCurrentLayer());
     if (!layer || !layer->IsA(UOdysseyAnimationLayerImageRaster::StaticClass()))
         return false;
 
     if (layer->IsLockedRecursively())
         return false;
 
-    UOdysseyAnimationLayerImageRaster* layerImageRaster = Cast<UOdysseyAnimationLayerImageRaster>(layerStack->CurrentLayer.Get());
+    UOdysseyAnimationLayerImageRaster* layerImageRaster = Cast<UOdysseyAnimationLayerImageRaster>(layerStack->GetCurrentLayer());
 
-    const TArray<UOdysseyAnimationCell*> selectedCells = layerImageRaster->GetLayerStack()->GetCellSelection()->GetSelectedCells();
+    const TArray<UOdysseyLayerCell*> selectedCells = layerImageRaster->GetLayerStack()->GetCellSelection()->GetSelectedCells();
     if (selectedCells.IsEmpty())
         return false;
 
     bool hasCellsToCrossFade = selectedCells.ContainsByPredicate(
-        [](UOdysseyAnimationCell* iCell)
+        [](UOdysseyLayerCell* iCell)
         {
-            return iCell->Exposure > 1;
+            return iCell->GetExposure() > 1;
         }
     );
     if (!hasCellsToCrossFade)

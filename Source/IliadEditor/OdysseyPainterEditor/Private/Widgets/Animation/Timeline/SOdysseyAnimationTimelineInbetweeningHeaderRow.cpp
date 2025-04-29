@@ -163,7 +163,7 @@ SOdysseyAnimationTimelineInbetweeningHeaderRow::OnPaint( const FPaintArgs& Args
     UOdysseyLayerStack* layerStack = layer->GetLayerStack();
     static FSlateBrush defaultBrush;
 
-    if( layerStack->CurrentLayer == layer )
+    if( layerStack->GetCurrentLayer() == layer )
     {
         if( mInbetweenerTag->GetOwner()->IsSelected() )
         {
@@ -195,7 +195,7 @@ SOdysseyAnimationTimelineInbetweeningHeaderRow::OnMouseButtonDown( const FGeomet
     UOdysseyAnimationLayerImageVector* layer = treeView.Get()->GetAnimationLayerImageVector();
     UOdysseyLayerStack* layerStack = layer->GetLayerStack();
 
-    if ( layerStack->CurrentLayer.Get() != layer )
+    if ( layerStack->GetCurrentLayer() != layer )
     {
         FOdysseyObjectEditorUtils::SetPropertyValue( layerStack, "CurrentLayer", layer );
     }

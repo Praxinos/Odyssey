@@ -139,6 +139,17 @@
             "LoadingPhase": "Default"
         },
         {
+            "Name": "OdysseyLayerStack",
+            "Type": "Runtime",
+            "LoadingPhase": "Default"
+        },
+
+        {
+            "Name": "OdysseyMedia",
+            "Type": "Runtime",
+            "LoadingPhase": "Default"
+        },
+        {
             "Name": "OdysseyRendering",
             "Type": "Runtime",
             "LoadingPhase": "PostConfigInit"
@@ -248,11 +259,6 @@
             "Type": "UncookedOnly",
             "LoadingPhase": "PostDefault",
             "Comment": "OdysseyBrush is UncookedOnly so that its nodes can be used in FunctionLibraries. And having this module avoids switching main editor modules to UncookedOnly"
-        },
-        {
-            "Name": "OdysseyMedia",
-            "Type": "Editor",
-            "LoadingPhase": "Default"
         },
         {
             "Name": "OdysseyFlipbookEditor",

@@ -42,7 +42,6 @@ public:
 public:
     virtual int GetWidth() const override;
     virtual int GetHeight() const override;
-    virtual ::ULIS::eFormat  GetFormat() const override;
 
     virtual void PostInitProperties() override;
     virtual void PostLoad() override;
@@ -99,7 +98,7 @@ public:
 
 public:
     //IOdysseyRenderingAbility overrides
-    virtual TArray<FIntRect> GetRenderingRects() const override;
+    virtual FIntRect GetDefaultRenderRect() const override;
 
 private:
     virtual bool IsTickableInEditor() const override { return true; }

@@ -5,14 +5,14 @@
 #include "OdysseyPainterEditorAnimationTimelinePosition.h"
 #include "OdysseyAnimationCellsDragDropOperation.h"
 #include "OdysseyAnimationLayer.h"
-#include "OdysseyAnimationCell.h"
-#include "OdysseyAnimationCellSelection.h"
+#include "OdysseyLayerCell.h"
+#include "OdysseyLayerCellSelection.h"
 
 FOdysseyAnimationTimelineSelectionTool::~FOdysseyAnimationTimelineSelectionTool()
 {
 }
 
-FOdysseyAnimationTimelineSelectionTool::FOdysseyAnimationTimelineSelectionTool(TSharedRef<FOdysseyPainterEditorAnimationTimelinePosition> iTimelinePosition, TSharedRef<FOdysseyAnimationCellSelection> iTimelineCellSelection)
+FOdysseyAnimationTimelineSelectionTool::FOdysseyAnimationTimelineSelectionTool(TSharedRef<FOdysseyPainterEditorAnimationTimelinePosition> iTimelinePosition, TSharedRef<FOdysseyLayerCellSelection> iTimelineCellSelection)
     : FOdysseyAnimationTimelineTool(iTimelinePosition)
     , mTimelineCellSelection(iTimelineCellSelection)
 {
@@ -135,7 +135,7 @@ FOdysseyAnimationTimelineSelectionTool::OnDefaultSelectionMouseButtonDown(const 
     }
 
     mIsDragnDrop = false;
-    mInitialSelection = TArray<UOdysseyAnimationCell*>();
+    mInitialSelection = TArray<UOdysseyLayerCell*>();
 
     if (!SetCellSelectionCursorAtFrame(iParams.mLayer, frame))
         return FReply::Unhandled();
@@ -217,7 +217,7 @@ FOdysseyAnimationTimelineSelectionTool::OnContiguousSelectionMouseButtonDown(con
 
     mShouldDeselect = false;
     mIsDragDetected = false;
-    mInitialSelection = TArray<UOdysseyAnimationCell*>();
+    mInitialSelection = TArray<UOdysseyLayerCell*>();
 
     float frame = GetFrameUnderCursor(iParams);
 
@@ -294,7 +294,7 @@ FOdysseyAnimationTimelineSelectionTool::OnNonContiguousSelectionMouseButtonDown(
 
     if (mShouldDeselect)
     {
-        UOdysseyAnimationCell* cell = iParams.mLayer->GetCellAtFrame(frame);
+        UOdysseyLayerCell* cell = iParams.mLayer->GetCellAtFrame(frame);
         if (!cell)
             return FReply::Unhandled();
 
@@ -370,36 +370,36 @@ FOdysseyAnimationTimelineSelectionTool::SelectFromCursorToFrame(UOdysseyAnimatio
 
     FInt32Range cursorCellFrameRange = mCellCursor->GetFrameRange();
 
-    TArray<UOdysseyAnimationCell*> affectedCells = {};
+    TArray<UOdysseyLayerCell*> affectedCells = {};
     affectedCells.AddUnique(mCellCursor);
 
     int currentFrame = cursorCellFrameRange.GetLowerBoundValue() - 1;
     while(currentFrame >= iFrame)
     {
-        UOdysseyAnimationCell* cell = iLayer->GetCellAtFrame(currentFrame);
+        UOdysseyLayerCell* cell = iLayer->GetCellAtFrame(currentFrame);
         if (!cell)
             break;
 
         affectedCells.AddUnique(cell);
-        currentFrame -= cell->Exposure;
+        currentFrame -= cell->GetExposure();
     }
 
     currentFrame = cursorCellFrameRange.GetUpperBoundValue() + 1;
     while(currentFrame <= iFrame)
     {
-        UOdysseyAnimationCell* cell = iLayer->GetCellAtFrame(currentFrame);
+        UOdysseyLayerCell* cell = iLayer->GetCellAtFrame(currentFrame);
         if (!cell)
             break;
 
         affectedCells.AddUnique(cell);
-        currentFrame += cell->Exposure;
+        currentFrame += cell->GetExposure();
     }
 
-    TArray<UOdysseyAnimationCell*> selectedCells = { mInitialSelection };
+    TArray<UOdysseyLayerCell*> selectedCells = { mInitialSelection };
     if (iDeselect)
     {
         selectedCells.RemoveAll(
-            [&affectedCells](UOdysseyAnimationCell* iCell)
+            [&affectedCells](UOdysseyLayerCell* iCell)
             {
                 return affectedCells.Contains(iCell);
             }
@@ -407,7 +407,7 @@ FOdysseyAnimationTimelineSelectionTool::SelectFromCursorToFrame(UOdysseyAnimatio
     }
     else
     {
-        for ( UOdysseyAnimationCell* affectedCell : affectedCells)
+        for ( UOdysseyLayerCell* affectedCell : affectedCells)
         {
             selectedCells.AddUnique(affectedCell);
         }
@@ -419,7 +419,7 @@ FOdysseyAnimationTimelineSelectionTool::SelectFromCursorToFrame(UOdysseyAnimatio
 bool
 FOdysseyAnimationTimelineSelectionTool::SetCellSelectionCursorAtFrame(UOdysseyAnimationLayer* iLayer, int iFrame)
 {
-    UOdysseyAnimationCell* cell = iLayer->GetCellAtFrame(iFrame);
+    UOdysseyLayerCell* cell = iLayer->GetCellAtFrame(iFrame);
     if (!cell)
         return false;
 
@@ -430,7 +430,7 @@ FOdysseyAnimationTimelineSelectionTool::SetCellSelectionCursorAtFrame(UOdysseyAn
 bool
 FOdysseyAnimationTimelineSelectionTool::IsFrameSelected(UOdysseyAnimationLayer* iLayer, int iFrame) const
 {
-    UOdysseyAnimationCell* cell = iLayer->GetCellAtFrame(iFrame);
+    UOdysseyLayerCell* cell = iLayer->GetCellAtFrame(iFrame);
     if (!cell)
         return false;
 

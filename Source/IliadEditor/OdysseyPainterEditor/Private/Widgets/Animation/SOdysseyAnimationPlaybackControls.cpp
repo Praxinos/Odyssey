@@ -8,7 +8,7 @@
 #include "OdysseyAnimationLayer.h"
 #include "OdysseyAnimationCell.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
-#include "OdysseyAnimationCellSelection.h"
+#include "OdysseyLayerCellSelection.h"
 
 void
 SOdysseyAnimationPlaybackControls::Construct(const FArguments& InArgs)
@@ -178,7 +178,7 @@ FReply
 SOdysseyAnimationPlaybackControls::OnPlayClicked()
 {
     UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(mAnimation->GetLayerStack());
-    TArray<UOdysseyAnimationCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
+    TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
     if (selectedCells.IsEmpty())
     {
         mPlayer->SetFrameRange(TOptional<TRange<FFrameTime>>());
@@ -186,7 +186,7 @@ SOdysseyAnimationPlaybackControls::OnPlayClicked()
     else
     {
         TArray<TRange<FFrameTime>> ranges;
-        for (UOdysseyAnimationCell* cell : selectedCells)
+        for (UOdysseyLayerCell* cell : selectedCells)
         {
             FInt32Range frameRange = cell->GetFrameRange();
             TRange<FFrameTime> frameTimeRange(frameRange.GetLowerBoundValue(), frameRange.GetLowerBoundValue() + 1);
@@ -204,7 +204,7 @@ FReply
 SOdysseyAnimationPlaybackControls::OnPlayBackwardClicked()
 {
     UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(mAnimation->GetLayerStack());
-    TArray<UOdysseyAnimationCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
+    TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
     if (selectedCells.IsEmpty())
     {
         mPlayer->SetFrameRange(TOptional<TRange<FFrameTime>>());
@@ -212,7 +212,7 @@ SOdysseyAnimationPlaybackControls::OnPlayBackwardClicked()
     else
     {
         TArray<TRange<FFrameTime>> ranges;
-        for (UOdysseyAnimationCell* cell : selectedCells)
+        for (UOdysseyLayerCell* cell : selectedCells)
         {
             FInt32Range frameRange = cell->GetFrameRange();
             TRange<FFrameTime> frameTimeRange(frameRange.GetLowerBoundValue(), frameRange.GetLowerBoundValue() + 1);
@@ -269,7 +269,7 @@ SOdysseyAnimationPlaybackControls::OnPreviousKeyClicked()
         return FReply::Handled();
 
     UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(animation->GetLayerStack());
-    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerStack->CurrentLayer);
+    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerStack->GetCurrentLayer());
 
     if (layer->GetCells().IsEmpty())
         return FReply::Handled();
@@ -286,16 +286,16 @@ SOdysseyAnimationPlaybackControls::OnPreviousKeyClicked()
     }
     else
     {
-        UOdysseyAnimationCell* cell = layer->GetCellAtFrame(mPlayer->GetCurrentFrame().FrameNumber.Value);
+        UOdysseyLayerCell* cell = layer->GetCellAtFrame(mPlayer->GetCurrentFrame().FrameNumber.Value);
         if (!cell)
             return FReply::Handled();
 
-        index = cell->IndexInLayer - 1;
+        index = cell->GetIndexInLayer() - 1;
         if (index < 0)
             return FReply::Handled();
     }
 
-    UOdysseyAnimationCell* cell = layer->GetCells()[index];
+    UOdysseyLayerCell* cell = layer->GetCells()[index];
     if (!cell)
         return FReply::Handled();
 
@@ -312,7 +312,7 @@ SOdysseyAnimationPlaybackControls::OnNextKeyClicked()
         return FReply::Handled();
 
     UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(animation->GetLayerStack());
-    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerStack->CurrentLayer);
+    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerStack->GetCurrentLayer());
 
     if (layer->GetCells().IsEmpty())
         return FReply::Handled();
@@ -329,16 +329,16 @@ SOdysseyAnimationPlaybackControls::OnNextKeyClicked()
     }
     else
     {
-        UOdysseyAnimationCell* cell = layer->GetCellAtFrame(mPlayer->GetCurrentFrame().FrameNumber.Value);
+        UOdysseyLayerCell* cell = layer->GetCellAtFrame(mPlayer->GetCurrentFrame().FrameNumber.Value);
         if (!cell)
             return FReply::Handled();
 
-        index = cell->IndexInLayer + 1;
+        index = cell->GetIndexInLayer() + 1;
         if (index == layer->GetCells().Num())
             return FReply::Handled();
     }
 
-    UOdysseyAnimationCell* cell = layer->GetCells()[index];
+    UOdysseyLayerCell* cell = layer->GetCells()[index];
     if (!cell)
         return FReply::Handled();
 

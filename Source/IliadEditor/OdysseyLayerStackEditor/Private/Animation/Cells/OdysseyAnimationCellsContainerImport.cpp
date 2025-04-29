@@ -48,7 +48,7 @@ FOdysseyAnimationCellsContainerImport::Read( UOdysseyAnimationLayer* iAnimationL
                                             , FArchive &Ar
                                             , uint64 iChunkEnd )
 {
-    iAnimationLayer->Cells.Empty();
+    iAnimationLayer->RemoveAllCells();
 
     FOdysseyFile::ReadChunks( iChunkEnd
                               , Ar
@@ -73,25 +73,22 @@ FOdysseyAnimationCellsContainerImport::Read( UOdysseyAnimationLayer* iAnimationL
 
                     if (cellType == TEXT("FOdysseyAnimationCellImageRaster"))
                     {
-                        UOdysseyAnimationCellImageRaster* cell = NewObject<UOdysseyAnimationCellImageRaster>(iAnimationLayer, UOdysseyAnimationCellImageRaster::StaticClass(), NAME_None, RF_Public | RF_Transactional);
-                        iAnimationLayer->Cells.Add(cell);
+                        iAnimationLayer->AddCell(UOdysseyAnimationCellImageRaster::StaticClass());
                     }
                     else if (cellType == TEXT("FOdysseyAnimationCellImageVector"))
                     {
-                        UOdysseyAnimationCellImageVector* cell = NewObject<UOdysseyAnimationCellImageVector>(iAnimationLayer, UOdysseyAnimationCellImageVector::StaticClass(), NAME_None, RF_Public | RF_Transactional);
-                        iAnimationLayer->Cells.Add(cell);
+                        iAnimationLayer->AddCell(UOdysseyAnimationCellImageVector::StaticClass());
                     }
                     else if (cellType == TEXT("FOdysseyAnimationCellImageStagger"))
                     {
-                        UOdysseyAnimationCellImageStagger* cell = NewObject<UOdysseyAnimationCellImageStagger>(iAnimationLayer, UOdysseyAnimationCellImageStagger::StaticClass(), NAME_None, RF_Public | RF_Transactional);
-                        iAnimationLayer->Cells.Add(cell);
+                        iAnimationLayer->AddCell(UOdysseyAnimationCellImageStagger::StaticClass());
                     }
                 }
                 break;
 
                 case FOdysseyFile::Animation::CHUNK_CELLSCONTAINER_CELL :
                 {
-                    iAnimationLayer->Cells.Last()->OldSerialize(Ar);
+                    iAnimationLayer->GetCells().Last()->OldSerialize(Ar);
                 }
                 break;
 

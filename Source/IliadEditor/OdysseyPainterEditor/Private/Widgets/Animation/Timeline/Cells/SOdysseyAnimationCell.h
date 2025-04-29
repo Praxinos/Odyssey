@@ -7,7 +7,7 @@
 
 struct FSlateBrush;
 class UOdysseyAnimationLayer;
-class UOdysseyAnimationCell;
+class UOdysseyLayerCell;
 
 class SOdysseyAnimationCell
     : public SCompoundWidget
@@ -23,7 +23,7 @@ public:
     void Construct(
         const FArguments& iArgs,
         UOdysseyAnimationLayer* iAnimationLayer,
-        UOdysseyAnimationCell* iCell
+        UOdysseyLayerCell* iCell
     );
 
 public:
@@ -43,5 +43,5 @@ private:
 
 private:
     UOdysseyAnimationLayer* mAnimationLayer;
-    UOdysseyAnimationCell* mCell;
+    UOdysseyLayerCell* mCell;
 };

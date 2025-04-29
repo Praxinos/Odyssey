@@ -35,7 +35,6 @@ public class OdysseyCoreEditor : ModuleRules
                 "CoreUObject",
                 "Slate",
                 "SlateCore",
-                "Engine",
                 "ToolMenus",
 
                 // [RUNTIME] plugin dependencies
@@ -64,6 +63,7 @@ public class OdysseyCoreEditor : ModuleRules
         (
             new string[]
             {
+                "Engine",
             }
         );
     }

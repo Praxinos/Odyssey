@@ -3,7 +3,6 @@
 
 #include "OdysseyAnimationCellImageVector.h"
 
-#include "OdysseyAnimationCellImageVectorImageRenderer.h"
 #include "OdysseyAnimationCellImageVectorExport.h"
 #include "OdysseyAnimationCellImageVectorImport.h"
 #include "OdysseyAnimationLayerImageVector.h"
@@ -232,29 +231,20 @@ UOdysseyAnimationCellImageVector::IsImageRenderingGameThreadOnly() const
     return !!mediaVector;
 }
 
-TSharedPtr<IOdysseyImageRenderer>
-UOdysseyAnimationCellImageVector::BuildImageRenderer(EOdysseyRenderingType iRenderType, int iFrame, FImageRendererFilter iFilter) const
-{
-    if (iFilter.IsBound() && !iFilter.Execute(this))
-        return nullptr;
-
-    return MakeShared<FOdysseyAnimationCellImageVectorImageRenderer>(this, iFrame, iRenderType, GetRenderingRects(), iFilter);
-}
-
 TArray<FGuid>
 UOdysseyAnimationCellImageVector::GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrameIndex) const
 {
     return { GetRenderingId() };
 }
 
-TArray<FIntRect>
-UOdysseyAnimationCellImageVector::GetRenderingRects() const
+FIntRect
+UOdysseyAnimationCellImageVector::GetDefaultRenderRect() const
 {
     UOdysseyAnimation* animation = GetAnimation();
     if (!animation)
-        return {};
+        return FIntRect(0, 0, 0, 0);
 
-    return { FIntRect(0, 0, animation->GetWidth(), animation->GetHeight()) };
+    return FIntRect(0, 0, animation->GetWidth(), animation->GetHeight());
 }
 
 FOdysseyMediaProvider
@@ -324,4 +314,10 @@ UOdysseyAnimationCellImageVector::OnVectorEngineNotify(FOdysseyVectorGroupPaint*
     {
         iScene->GetCell()->ResetHUD();
     }
+}
+
+void
+UOdysseyAnimationCellImageVector::RenderToTexture(FCanvas* iCanvas, FFrameNumber iFrame, const FIntRect& iSrcRect, const FIntRect& iDstRect) const
+{
+
 }

@@ -112,7 +112,7 @@ FOdysseyTextureConfiguration::CreateTexture(UObject* iParent, FName iName, EObje
 
         //Set the layer as Current Layer
         UOdysseyTextureLayerImageRaster* layer = Cast<UOdysseyTextureLayerImageRaster>(layerStack->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass(), nullptr, 1));
-        layer->Name = LOCTEXT("texture.default-background-layer.name", "Background");
+        layer->SetLayerName(LOCTEXT("texture.default-background-layer.name", "Background"));
 
         //Fill LayerImage with content of Texture
         TSharedPtr<FOdysseyRasterBlock> rasterBlock = layer->GetRasterBlock();

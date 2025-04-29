@@ -279,7 +279,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::Private_IsItemSelected( c
 {
     UOdysseyLayerStack* layerStack = mAnimationLayerImageVector->GetLayerStack();
 
-    return iItem.Get()->GetInbetweenerTag()->GetOwner()->IsSelected() && ( layerStack->CurrentLayer == mAnimationLayerImageVector );
+    return iItem.Get()->GetInbetweenerTag()->GetOwner()->IsSelected() && ( layerStack->GetCurrentLayer() == mAnimationLayerImageVector );
 }
 
 UOdysseyAnimationLayerImageVector*
@@ -356,11 +356,11 @@ void
 SOdysseyAnimationLayerImageVectorTimelineInbetweening::AddBreakdown()
 {
     int breakdownFrameIndex = MousePositionToFrame( mCursorPos.X );
-    UOdysseyAnimationCell* cell = mAnimationLayerImageVector->GetCellAtFrame( breakdownFrameIndex );
+    UOdysseyLayerCell* cell = mAnimationLayerImageVector->GetCellAtFrame( breakdownFrameIndex );
     if (!cell)
         return;
 
-    int breakdownCellIndex = cell->IndexInLayer;
+    int breakdownCellIndex = cell->GetIndexInLayer();
     std::list<FOdysseyVectorTagInbetweener*> selectedInbetweenerTagList;
     std::list<FOdysseyVectorEngine*> engineList;
     uint64 notificationFlags = FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
@@ -419,11 +419,11 @@ void
 SOdysseyAnimationLayerImageVectorTimelineInbetweening::RemoveBreakdown()
 {
     int breakdownFrameIndex = MousePositionToFrame( mCursorPos.X );
-    UOdysseyAnimationCell* cell = mAnimationLayerImageVector->GetCellAtFrame( breakdownFrameIndex );
+    UOdysseyLayerCell* cell = mAnimationLayerImageVector->GetCellAtFrame( breakdownFrameIndex );
     if (!cell)
         return;
 
-    int breakdownCellIndex = cell->IndexInLayer;
+    int breakdownCellIndex = cell->GetIndexInLayer();
     std::list<FOdysseyVectorTagInbetweener*> selectedInbetweenerTagList;
     uint64 notificationFlags = FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
@@ -480,11 +480,11 @@ void
 SOdysseyAnimationLayerImageVectorTimelineInbetweening::ShowHideTarget()
 {
     int breakdownFrameIndex = MousePositionToFrame( mCursorPos.X );
-    UOdysseyAnimationCell* cell = mAnimationLayerImageVector->GetCellAtFrame( breakdownFrameIndex );
+    UOdysseyLayerCell* cell = mAnimationLayerImageVector->GetCellAtFrame( breakdownFrameIndex );
     if (!cell)
         return;
 
-    int breakdownCellIndex = cell->IndexInLayer;
+    int breakdownCellIndex = cell->GetIndexInLayer();
     std::list<FOdysseyVectorTagInbetweener*> selectedInbetweenerTagList;
     std::list<FInbetweenerBreakdown*> breakdownList;
     uint64 notificationFlags = FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;

@@ -217,5 +217,5 @@ const FSlateBrush* SOdysseyLayerExpanderArrow::GetExpanderImage() const
 {
     const bool bIsItemExpanded = mLayerRow.Pin()->IsItemExpanded();
 
-    return bIsItemExpanded && mLayerRow.Pin()->GetLayer()->CanHaveChildren ? mExpanderImageOpened : mExpanderImageClosed;
+    return bIsItemExpanded && mLayerRow.Pin()->GetLayer()->CanHaveChildren() ? mExpanderImageOpened : mExpanderImageClosed;
 }

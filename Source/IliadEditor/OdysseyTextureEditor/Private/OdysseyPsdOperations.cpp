@@ -903,7 +903,7 @@ void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
     }
     //-----------------------------------------------------------
 
-    UOdysseyLayer* currentRoot = mLayerStack->LayerRoot;
+    UOdysseyLayer* currentRoot = mLayerStack->GetLayerRoot();
 
     for( int i = mLayersInfo.Num() - 1; i >= 0; i-- )
     {
@@ -1072,11 +1072,11 @@ void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
             }
 
             UOdysseyTextureLayerImageRaster* imageLayer = Cast<UOdysseyTextureLayerImageRaster>(mLayerStack->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass(), currentRoot, currentRoot->GetChildren().Num()));
-            imageLayer->Name = FText::FromName(layerName);
-            imageLayer->Opacity = (float)mLayersInfo[i].mOpacity / 255.0;
+            imageLayer->SetLayerName(FText::FromName(layerName));
+            imageLayer->SetOpacity((float)mLayersInfo[i].mOpacity / 255.0);
             imageLayer->IsAlphaLocked = mLayersInfo[i].mFlags & 0x01;
-            imageLayer->IsActivated = !(mLayersInfo[i].mFlags & 0x02);
-            imageLayer->BlendMode = (EOdysseyBlendingMode)GetBlendingModeFromPSD(mLayersInfo[i].mBlendModeKey);
+            imageLayer->SetIsActivated(!(mLayersInfo[i].mFlags & 0x02));
+            imageLayer->SetBlendMode((EOdysseyBlendingMode)GetBlendingModeFromPSD(mLayersInfo[i].mBlendModeKey));
 
             FOdysseyRasterBlockMutator mutator(imageLayer->GetRasterBlock());
             mutator.Copy(layerBlock, {});
@@ -1096,10 +1096,10 @@ void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
                 layerName = FName(mLayersInfo[i].mName);
 
             UOdysseyTextureLayerFolder* folderLayer = Cast<UOdysseyTextureLayerFolder>(mLayerStack->AddLayer(UOdysseyTextureLayerFolder::StaticClass(), currentRoot, currentRoot->GetChildren().Num()));
-            folderLayer->Name = FText::FromName(layerName);
-            folderLayer->Opacity = (float)mLayersInfo[i].mOpacity / 255.0;
-            folderLayer->IsActivated = !(mLayersInfo[i].mFlags & 0x02);
-            folderLayer->BlendMode = (EOdysseyBlendingMode)GetBlendingModeFromPSD(mLayersInfo[i].mBlendModeKey);
+            folderLayer->SetLayerName(FText::FromName(layerName));
+            folderLayer->SetOpacity((float)mLayersInfo[i].mOpacity / 255.0);
+            folderLayer->SetIsActivated(!(mLayersInfo[i].mFlags & 0x02));
+            folderLayer->SetBlendMode((EOdysseyBlendingMode)GetBlendingModeFromPSD(mLayersInfo[i].mBlendModeKey));
 
             currentRoot = folderLayer;
 

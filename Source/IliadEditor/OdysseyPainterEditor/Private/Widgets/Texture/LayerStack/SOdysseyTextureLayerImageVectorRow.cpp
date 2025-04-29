@@ -65,26 +65,26 @@ void
 SOdysseyTextureLayerImageVectorRow::OnIsWireframeCheckStateChanged( ECheckBoxState iState )
 {
     FScopedTransaction ScopedTransaction(LOCTEXT("layer-image-vector.transaction.set-wireframe", "Change Layer Wireframe status"));
-    FOdysseyObjectEditorUtils::SetPropertyValue(mTextureLayerImageVector, GET_MEMBER_NAME_CHECKED(UOdysseyTextureLayerImageVector, IsWireframe), iState == ECheckBoxState::Checked);
+    mTextureLayerImageVector->SetIsWireframe(iState == ECheckBoxState::Checked);
 }
 
 void
 SOdysseyTextureLayerImageVectorRow::OnIsColoredCheckStateChanged( ECheckBoxState iState )
 {
     FScopedTransaction ScopedTransaction(LOCTEXT("layer-image-vector.transaction.set-coloring", "Change Layer Coloring"));
-    FOdysseyObjectEditorUtils::SetPropertyValue(mTextureLayerImageVector, GET_MEMBER_NAME_CHECKED(UOdysseyTextureLayerImageVector, IsColored), iState == ECheckBoxState::Checked);
+    mTextureLayerImageVector->SetIsColored(iState == ECheckBoxState::Checked);
 }
 
 ECheckBoxState
 SOdysseyTextureLayerImageVectorRow::GetIsWireframeIsChecked() const
 {
-    return mTextureLayerImageVector->IsWireframe ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+    return mTextureLayerImageVector->IsWireframe() ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
 
 ECheckBoxState
 SOdysseyTextureLayerImageVectorRow::GetIsColoredIsChecked() const
 {
-    return mTextureLayerImageVector->IsColored ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+    return mTextureLayerImageVector->IsColored() ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
 
 #undef LOCTEXT_NAMESPACE

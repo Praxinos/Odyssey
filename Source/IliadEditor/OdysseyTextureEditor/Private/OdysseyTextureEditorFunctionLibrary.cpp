@@ -194,12 +194,8 @@ UOdysseyTextureEditorLayerFunctionLibrary::ExportAsImage(
         return TEXT("");
 
     UTexture2D* texture = Layer->GetTexture();
-    ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
-    //let's ensure the format has alpha, so add alpha channel of needed
-    format = static_cast< ::ULIS::eFormat >(format | ULIS_W_ALPHA( 1 ) );
-
     FIntRect rect(0, 0, texture->Source.GetSizeX(), texture->Source.GetSizeY());
-    return Odyssey::ExportAsImage(Layer, format, 0, Format, rect, Filename, Path );
+    return Odyssey::ExportAsImage(Layer, 0, Format, rect, Filename, Path, false );
 }
 
 UTexture2D*
@@ -214,5 +210,5 @@ UOdysseyTextureEditorLayerFunctionLibrary::ExportAsTexture(
 
     UTexture2D* texture = Layer->GetTexture();
     FIntRect rect (0, 0, texture->Source.GetSizeX(), texture->Source.GetSizeY());
-    return Odyssey::ExportAsTexture(Layer, 0, rect, texture->Source.GetFormat(), Filename, Path );
+    return Odyssey::ExportAsTexture(Layer, 0, rect, Filename, Path );
 }

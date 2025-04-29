@@ -194,7 +194,6 @@ FOdysseyAnimationImageSequenceExporter::GetSources()
             return
             {
                 {
-                    nullptr,
                     mAnimation,
                     TEXT(""),
                     mAnimation->GetFrameRange()
@@ -208,15 +207,14 @@ FOdysseyAnimationImageSequenceExporter::GetSources()
 
             for (UOdysseyLayer* layer : layers)
             {
-                if (layer->CanHaveChildren) //do not export folders here
+                if (layer->CanHaveChildren()) //do not export folders here
                     continue;
 
                 UOdysseyAnimationLayer* animationLayer = Cast<UOdysseyAnimationLayer>(layer);
                 animationLayers.Add(
                     {
                         animationLayer,
-                        nullptr,
-                        animationLayer->Name.ToString().Replace(TEXT(" "), TEXT("_")),
+                        animationLayer->GetLayerName().ToString().Replace(TEXT(" "), TEXT("_")),
                         animationLayer->GetFrameRange()
                     }
                 );
@@ -226,20 +224,19 @@ FOdysseyAnimationImageSequenceExporter::GetSources()
         }
         case EOdysseyAnimationExportImageSequenceSource::CurrentLayer:
         {
-            UOdysseyAnimationLayer* animationLayer = Cast<UOdysseyAnimationLayer>(layerStack->CurrentLayer.Get());
+            UOdysseyAnimationLayer* animationLayer = Cast<UOdysseyAnimationLayer>(layerStack->GetCurrentLayer());
             return
             {
                 {
                     animationLayer,
-                    nullptr,
-                    animationLayer->Name.ToString().Replace(TEXT(" "), TEXT("_")),
+                    animationLayer->GetLayerName().ToString().Replace(TEXT(" "), TEXT("_")),
                     animationLayer->GetFrameRange()
                 }
             };
         }
     }
 
-    return {{nullptr, nullptr, FString()}};
+    return {{nullptr, FString()}};
 }
 
 void
@@ -319,20 +316,11 @@ FOdysseyAnimationImageSequenceExporter::ExportSource(const FSource& iSource, con
         progressBar.EnterProgressFrame();
         if (mUniqueFramesOnly)
         {
+            IOdysseyTextureRenderingAbility* textureRenderingAbility = Cast<IOdysseyTextureRenderingAbility>(iSource.mTextureRenderingAbility);
+            if (!textureRenderingAbility)
+                continue;
 
-            TArray<FGuid> renderingComposition;
-            if (iSource.mImageRenderingAbility)
-            {
-                renderingComposition = iSource.mImageRenderingAbility->GetRenderingComposition(EOdysseyRenderingType::Render, i);
-            }
-            else if (iSource.mTextureRenderingAbility)
-            {
-                IOdysseyTextureRenderingAbility* textureRenderingAbility = Cast<IOdysseyTextureRenderingAbility>(iSource.mTextureRenderingAbility);
-                if (!textureRenderingAbility)
-                    continue;
-
-                renderingComposition = textureRenderingAbility->GetRenderingComposition(EOdysseyRenderingType::Render, i);
-            }
+            TArray<FGuid> renderingComposition = textureRenderingAbility->GetRenderingComposition(EOdysseyRenderingType::Render, i);
 
             if (renderingComposition == lastRenderingComposition)
                 continue;
@@ -347,15 +335,7 @@ FOdysseyAnimationImageSequenceExporter::ExportSource(const FSource& iSource, con
             imageName += TEXT("0");
         }
         imageName += FString::Printf(TEXT("%d."), i) + extension;
-
-        if (iSource.mImageRenderingAbility)
-        {
-            Odyssey::ExportAsImage(iSource.mImageRenderingAbility, format, i, mFormat, FIntRect(0, 0, mAnimation->GetWidth(), mAnimation->GetHeight()), imageName, folder);
-        }
-        else if (iSource.mTextureRenderingAbility)
-        {
-            Odyssey::ExportAsImage(iSource.mTextureRenderingAbility, i, mFormat, FIntRect(0, 0, mAnimation->GetWidth(), mAnimation->GetHeight()), imageName, folder, true);
-        }
+        Odyssey::ExportAsImage(iSource.mTextureRenderingAbility, i, mFormat, FIntRect(0, 0, mAnimation->GetWidth(), mAnimation->GetHeight()), imageName, folder, true);
     }
 }
 

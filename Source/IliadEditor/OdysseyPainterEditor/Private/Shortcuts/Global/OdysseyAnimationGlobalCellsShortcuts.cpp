@@ -9,7 +9,7 @@
 #include "OdysseyAnimationPlayer.h"
 #include "OdysseyAnimationCell.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
-#include "OdysseyAnimationCellSelection.h"
+#include "OdysseyLayerCellSelection.h"
 #include "ScopedTransaction.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyAnimationCurrentFrameMutator.h"
@@ -74,14 +74,14 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_BreakCell()
     if (!layerStack)
         return;
 
-    UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(layerStack->CurrentLayer.Get());
+    UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(layerStack->GetCurrentLayer());
     if (!currentLayer)
         return;
 
     if (currentLayer->IsLockedRecursively())
         return;
 
-    UOdysseyAnimationCell* cell = currentLayer->GetCellAtFrame(mCurrentFrame.Get());
+    UOdysseyLayerCell* cell = currentLayer->GetCellAtFrame(mCurrentFrame.Get());
     if (!cell)
         return;
 
@@ -92,13 +92,13 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_BreakCell()
 #ifdef WITH_EDITOR
         FScopedTransaction ScopedTransaction(LOCTEXT("global-cells-shortcuts.transaction.break-cell", "Break Cell"));
 #endif
-    UOdysseyAnimationCell* newCell = cell->Break(frame, false);
+    UOdysseyLayerCell* newCell = cell->Break(frame, false);
     if (!newCell)
         return;
 
     //Remove mark from the new cell, because we consider the new cell will be modified by the user and will not represent the original cell anymore
     //This is an arbitrary choice, you are free to change this behaviour whenever you want without any side effect
-    FOdysseyObjectEditorUtils::SetPropertyValue(newCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Mark), INDEX_NONE);
+    newCell->SetMark(INDEX_NONE);
 
     mOnTransactCurrentFrame.ExecuteIfBound(mCurrentFrame.Get());
 }
@@ -114,14 +114,14 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_BreakAndClearCell()
     if (!layerStack)
         return;
 
-    UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(layerStack->CurrentLayer.Get());
+    UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(layerStack->GetCurrentLayer());
     if (!currentLayer)
         return;
 
     if (currentLayer->IsLockedRecursively())
         return;
 
-    UOdysseyAnimationCell* cell = currentLayer->GetCellAtFrame(mCurrentFrame.Get());
+    UOdysseyLayerCell* cell = currentLayer->GetCellAtFrame(mCurrentFrame.Get());
     if (!cell)
         return;
 
@@ -132,7 +132,7 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_BreakAndClearCell()
 #ifdef WITH_EDITOR
         FScopedTransaction ScopedTransaction(LOCTEXT("global-cells-shortcuts.transaction.break-cell", "Break Cell"));
 #endif
-    UOdysseyAnimationCell* newCell = cell->Break(frame, true);
+    UOdysseyLayerCell* newCell = cell->Break(frame, true);
     if (!newCell)
         return;
 
@@ -150,17 +150,17 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_RemoveCellMark()
     if (!layerStack)
         return;
 
-    UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(layerStack->CurrentLayer.Get());
+    UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(layerStack->GetCurrentLayer());
     if (!currentLayer)
         return;
 
     if (currentLayer->IsLockedRecursively())
         return;
 
-    TArray<UOdysseyAnimationCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
+    TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
     if (selectedCells.IsEmpty())
     {
-        UOdysseyAnimationCell* cell = currentLayer->GetCellAtFrame(mCurrentFrame.Get());
+        UOdysseyLayerCell* cell = currentLayer->GetCellAtFrame(mCurrentFrame.Get());
         if (!cell)
             return;
 
@@ -170,9 +170,9 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_RemoveCellMark()
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("global-cells-shortcuts.transaction.remove-cell-mark", "Remove Cell Mark"));
 #endif
-    for (UOdysseyAnimationCell* cell : selectedCells)
+    for (UOdysseyLayerCell* cell : selectedCells)
     {
-        FOdysseyObjectEditorUtils::SetPropertyValue(cell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Mark), INDEX_NONE);
+        cell->SetMark(INDEX_NONE);
     }
 
     mOnTransactCurrentFrame.ExecuteIfBound(selectedCells[0]->GetFrameRange().GetLowerBoundValue());
@@ -189,17 +189,17 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_SetCellMark(int iMarkId)
     if (!layerStack)
         return;
 
-    UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(layerStack->CurrentLayer.Get());
+    UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(layerStack->GetCurrentLayer());
     if (!currentLayer)
         return;
 
     if (currentLayer->IsLockedRecursively())
         return;
 
-    TArray<UOdysseyAnimationCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
+    TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
     if (selectedCells.IsEmpty())
     {
-        UOdysseyAnimationCell* cell = currentLayer->GetCellAtFrame(mCurrentFrame.Get());
+        UOdysseyLayerCell* cell = currentLayer->GetCellAtFrame(mCurrentFrame.Get());
         if (!cell)
             return;
 
@@ -209,9 +209,9 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_SetCellMark(int iMarkId)
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("global-cells-shortcuts.transaction.remove-cell-mark", "Remove Cell Mark"));
 #endif
-    for (UOdysseyAnimationCell* cell : selectedCells)
+    for (UOdysseyLayerCell* cell : selectedCells)
     {
-        FOdysseyObjectEditorUtils::SetPropertyValue(cell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Mark), iMarkId);
+        cell->SetMark(iMarkId);
     }
 
     mOnTransactCurrentFrame.ExecuteIfBound(selectedCells[0]->GetFrameRange().GetLowerBoundValue());
@@ -240,17 +240,17 @@ FOdysseyAnimationGlobalCellsShortcuts::CanAction_RemoveCellMark()
     if (!layerStack)
         return false;
 
-    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerStack->CurrentLayer.Get());
+    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerStack->GetCurrentLayer());
     if (!layer)
         return false;
 
     if (layer->IsLockedRecursively())
         return false;
 
-    TArray<UOdysseyAnimationCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
+    TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
     if (selectedCells.IsEmpty())
     {
-        UOdysseyAnimationCell* cell = layer->GetCellAtFrame(mCurrentFrame.Get());
+        UOdysseyLayerCell* cell = layer->GetCellAtFrame(mCurrentFrame.Get());
         if (!cell)
             return false;
     }
@@ -269,17 +269,17 @@ FOdysseyAnimationGlobalCellsShortcuts::CanAction_SetCellMark(int iMarkId)
     if (!layerStack)
         return false;
 
-    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerStack->CurrentLayer.Get());
+    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerStack->GetCurrentLayer());
     if (!layer)
         return false;
 
     if (layer->IsLockedRecursively())
         return false;
 
-    TArray<UOdysseyAnimationCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
+    TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
     if (selectedCells.IsEmpty())
     {
-        UOdysseyAnimationCell* cell = layer->GetCellAtFrame(mCurrentFrame.Get());
+        UOdysseyLayerCell* cell = layer->GetCellAtFrame(mCurrentFrame.Get());
         if (!cell)
             return false;
     }

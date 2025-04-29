@@ -7,19 +7,14 @@
 #include "OdysseyAnimationLayerImageRaster.h"
 #include "OdysseyAnimationLayerImageVector.h"
 #include "OdysseyAnimation.h"
-#include "OdysseyAnimationCellSelection.h"
-#include "Misc/TransactionObjectEvent.h"
-#include "Misc/OdysseyUndoDelegates.h"
-#include "UObject/OdysseyObjectEditorUtils.h"
 
 //===============================================
 
 UOdysseyAnimationLayerStack::UOdysseyAnimationLayerStack()
-    : mCellSelection(MakeShared<FOdysseyAnimationCellSelection>(this))
 {
-    CompatibleLayers.Add(UOdysseyAnimationLayerFolder::StaticClass());
-    CompatibleLayers.Add(UOdysseyAnimationLayerImageRaster::StaticClass());
-    CompatibleLayers.Add(UOdysseyAnimationLayerImageVector::StaticClass());
+    SupportedLayerClasses.Add(UOdysseyAnimationLayerFolder::StaticClass());
+    SupportedLayerClasses.Add(UOdysseyAnimationLayerImageRaster::StaticClass());
+    SupportedLayerClasses.Add(UOdysseyAnimationLayerImageVector::StaticClass());
 
     LayerRootClass = UOdysseyAnimationLayerRoot::StaticClass();
 }
@@ -55,23 +50,6 @@ UOdysseyAnimationLayerStack::GetHeight() const
     return animation->GetHeight();
 }
 
-::ULIS::eFormat
-UOdysseyAnimationLayerStack::GetFormat() const
-{
-    UOdysseyAnimation* animation = GetAnimation();
-    if (!animation)
-        return Super::GetFormat();
-
-    ::ULIS::eFormat format = ::ULIS::Format_BGRA8;
-    switch(animation->GetFormat())
-    {
-        case EOdysseyAnimationFormat::BGRA8: format = ::ULIS::Format_BGRA8;
-        case EOdysseyAnimationFormat::RGBAF: format = ::ULIS::Format_RGBAF;
-    }
-
-    return format;
-}
-
 UOdysseyAnimation*
 UOdysseyAnimationLayerStack::GetAnimation() const
 {
@@ -87,26 +65,14 @@ UOdysseyAnimationLayerStack::GetAnimation() const
     return nullptr;
 }
 
-FInt32Range
-UOdysseyAnimationLayerStack::GetFrameRange() const
-{
-    return Cast<UOdysseyAnimationLayerRoot>(LayerRoot)->GetFrameRange();
-}
-
-TArray<FIntRect>
-UOdysseyAnimationLayerStack::GetRenderingRects() const
+FIntRect
+UOdysseyAnimationLayerStack::GetDefaultRenderRect() const
 {
     UOdysseyAnimation* animation = GetAnimation();
     if (!animation)
-        return {};
+        return FIntRect(0, 0, 0, 0);
 
-    return { FIntRect(0, 0, animation->GetWidth(), animation->GetHeight()) };
-}
-
-TSharedRef<FOdysseyAnimationCellSelection>
-UOdysseyAnimationLayerStack::GetCellSelection() const
-{
-    return mCellSelection;
+    return animation->GetDefaultRenderRect();
 }
 
 void

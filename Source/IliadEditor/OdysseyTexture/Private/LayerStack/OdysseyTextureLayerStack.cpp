@@ -14,7 +14,6 @@
 #include "ULISLoaderModule.h"
 #include "OdysseyPixelFormat.h"
 #include "UObject/Package.h"
-#include "OdysseyImageRenderer.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "ImageUtils.h"
 #include "ULISUtils.h"
@@ -50,8 +49,8 @@ UOdysseyTextureLayerStack::CreateFromTexture(UTexture2D* iTexture, UObject* iOut
     rasterBlockMutator.Commit();
 
     //Set the layer as Current Layer
-    layerStack->AddLayersToHierarchy({ layer }, layerStack->LayerRoot, 0);
-    layerStack->CurrentLayer = layer;
+    layerStack->GetLayerRoot()->AddChild(layer);
+    layerStack->SetCurrentLayer(layer);
 
     return layerStack;
 }
@@ -66,8 +65,8 @@ UOdysseyTextureLayerStack::CreateWithEmptyVectorLayer(UTexture2D* iTexture, UObj
     UOdysseyTextureLayerImageVector* layer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CreateLayer(UOdysseyTextureLayerImageVector::StaticClass()));
 
     //Set the layer as Current Layer
-    layerStack->AddLayersToHierarchy({ layer }, layerStack->LayerRoot, 0);
-    layerStack->CurrentLayer = layer;
+    layerStack->GetLayerRoot()->AddChild(layer);
+    layerStack->SetCurrentLayer(layer);
 
     return layerStack;
 }
@@ -79,12 +78,12 @@ UOdysseyTextureLayerStack::~UOdysseyTextureLayerStack()
 
 UOdysseyTextureLayerStack::UOdysseyTextureLayerStack()
 {
-    CompatibleLayers.Add(UOdysseyTextureLayerFolder::StaticClass());
-    CompatibleLayers.Add(UOdysseyTextureLayerImageRaster::StaticClass());
-    CompatibleLayers.Add(UOdysseyTextureLayerImageVector::StaticClass());
+    SupportedLayerClasses.Add(UOdysseyTextureLayerFolder::StaticClass());
+    SupportedLayerClasses.Add(UOdysseyTextureLayerImageRaster::StaticClass());
+    SupportedLayerClasses.Add(UOdysseyTextureLayerImageVector::StaticClass());
 
     LayerRootClass = UOdysseyTextureLayerRoot::StaticClass();
-    SRGB = false;
+    bIsSRGB = false;
 
     IOdysseyRenderingAbility::OnRenderingChangedDelegate().AddUObject(this, &UOdysseyTextureLayerStack::OnRenderingChanged);
     RenderTarget = CreateDefaultSubobject<UTextureRenderTarget2D>("RenderTarget");
@@ -128,16 +127,6 @@ UOdysseyTextureLayerStack::GetHeight() const
     return texture->GetSizeY();
 }
 
-::ULIS::eFormat
-UOdysseyTextureLayerStack::GetFormat() const
-{
-    UTexture2D* texture = GetTexture();
-    if (!texture)
-        return Super::GetFormat();
-
-    return ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
-}
-
 UTexture2D*
 UOdysseyTextureLayerStack::GetTexture() const
 {
@@ -153,14 +142,14 @@ UOdysseyTextureLayerStack::GetTexture() const
     return nullptr;
 }
 
-TArray<FIntRect>
-UOdysseyTextureLayerStack::GetRenderingRects() const
+FIntRect
+UOdysseyTextureLayerStack::GetDefaultRenderRect() const
 {
     UTexture2D* texture = GetTexture();
     if ( !texture )
-        return {};
+        return FIntRect(0, 0, 0, 0);
 
-    return { FIntRect(0, 0, texture->Source.GetSizeX(), texture->Source.GetSizeY()) };
+    return FIntRect(0, 0, texture->Source.GetSizeX(), texture->Source.GetSizeY());
 }
 
 void
@@ -223,8 +212,6 @@ UOdysseyTextureLayerStack::ActivateTextureFastUpdate()
     mTextureFastUpdateSurface = MakeShared<FOdysseySurfaceTexture2DEditable>(texture);
     UncompressTexture();
 
-    //mRenderer = BuildImageRenderer(EOdysseyRenderingType::Render);
-
     FCoreUObjectDelegates::OnPreObjectPropertyChanged.AddUObject(this, &UOdysseyTextureLayerStack::OnPreGlobalObjectPropertyChanged);
     UPackage::PreSavePackageWithContextEvent.AddUObject(this, &UOdysseyTextureLayerStack::OnPackagePreSave);
     UPackage::PackageSavedWithContextEvent.AddUObject(this, &UOdysseyTextureLayerStack::OnPackageSaved);
@@ -281,7 +268,10 @@ UOdysseyTextureLayerStack::FastUpdateTexture(const TArray<FIntRect>& iRects)
 
     RenderTarget->UpdateResourceImmediate();
 
-    IOdysseyTextureRenderingAbility::Execute_RenderRects(this, RenderTarget, FFrameNumber(0), iRects);
+    for (const FIntRect& rect : iRects)
+    {
+        IOdysseyTextureRenderingAbility::Execute_RenderRect(this, RenderTarget, FFrameNumber(0), rect);
+    }
 
     //Fence ?
     FRenderCommandFence fence;
@@ -401,7 +391,11 @@ UOdysseyTextureLayerStack::UpdateTexture(bool iForceRefresh)
         RenderTarget->UpdateResourceImmediate();
 
         TArray<FIntRect> invalidRects = mInvalidTileMap.InvalidRects();
-        IOdysseyTextureRenderingAbility::Execute_RenderRects(this, RenderTarget, FFrameNumber(0), invalidRects);
+
+        for (const FIntRect& rect : invalidRects)
+        {
+            IOdysseyTextureRenderingAbility::Execute_RenderRect(this, RenderTarget, FFrameNumber(0), rect);
+        }
 
         ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
         TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> dst = MakeShareable(NewBlockFromUTextureData(texture, format));

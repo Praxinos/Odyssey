@@ -70,7 +70,7 @@ SOdysseyAnimationLayerRow::GenerateMainRowHeaderOptionWidgets()
 {
     TArray<TSharedPtr<SWidget>> widgets;
 
-    if (mLayer->HasLighttable)
+    if (mLayer->HasLighttable())
     {
         const FCheckBoxStyle* lightTableToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("Animation.LightTableToggle");
 
@@ -90,15 +90,15 @@ SOdysseyAnimationLayerRow::GenerateMainRowHeaderOptionWidgets()
 ECheckBoxState
 SOdysseyAnimationLayerRow::GetLightTableIsChecked() const
 {
-    return mLayer->Lighttable.bIsActivated ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+    return mLayer->GetLighttable().bIsActivated ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
 
 void
 SOdysseyAnimationLayerRow::OnLightTableCheckStateChanged(ECheckBoxState iState)
 {
-    FOdysseyAnimationLightTable lighttable = mLayer->Lighttable;
+    FOdysseyAnimationLightTable lighttable = mLayer->GetLighttable();
     lighttable.bIsActivated = iState == ECheckBoxState::Checked;
-    FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable);
+    mLayer->SetLighttable(lighttable);
     GetTreeView()->RequestTreeRefresh(); //needed to display layers previously hidden
 }
 

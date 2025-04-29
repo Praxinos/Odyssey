@@ -34,6 +34,7 @@ public class OdysseyCore : ModuleRules
              new string[] {
                 "Core",
                 "CoreUObject",
+                "DerivedDataCache",
                 "Engine",
                 "InputCore",
                 "SlateCore",

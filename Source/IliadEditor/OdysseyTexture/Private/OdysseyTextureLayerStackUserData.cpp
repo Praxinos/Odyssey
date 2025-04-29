@@ -44,7 +44,7 @@ UOdysseyTextureLayerStackUserData::InitWithDuplicateLayerStack(UOdysseyTextureLa
         return;
 
     LayerStack = UOdysseyTextureLayerStack::CreateEmptyFromTexture(GetTexture(), this);
-    LayerStack->CopyLayers(iLayerStack->GetRootLayers(), LayerStack->LayerRoot);
+    LayerStack->CopyLayers(iLayerStack->GetRootLayers(), LayerStack->GetLayerRoot());
 }
 
 UOdysseyTextureLayerStack*

@@ -266,12 +266,12 @@ FOdysseyPainterEditorLayerStackTab::ExportLayersAsTextures()
 
     for( UOdysseyLayer* layer : layers )
     {
-        if ( layer->CanHaveChildren ) //avoid exporting folders
+        if ( layer->CanHaveChildren() ) //avoid exporting folders
             continue;
 
         FString assetPath = FPaths::GetPath(saveObjectPath) + "/";
-        FString textureName = FPaths::GetBaseFilename(saveObjectPath) + TEXT("_") + layer->Name.ToString().Replace(TEXT(" "), TEXT("_"));
-        ::Odyssey::ExportAsTexture(layer, 0, FIntRect(0, 0, texture->Source.GetSizeX(), texture->Source.GetSizeY()), texture->Source.GetFormat(), textureName, assetPath );
+        FString textureName = FPaths::GetBaseFilename(saveObjectPath) + TEXT("_") + layer->GetLayerName().ToString().Replace(TEXT(" "), TEXT("_"));
+        ::Odyssey::ExportAsTexture(layer, 0, FIntRect(0, 0, texture->Source.GetSizeX(), texture->Source.GetSizeY()), textureName, assetPath );
     }
 }
 
@@ -282,7 +282,7 @@ FOdysseyPainterEditorLayerStackTab::ExportCurrentLayerAsTexture()
     if ( !layerStack )
         return;
 
-    if ( !layerStack->CurrentLayer )
+    if ( !layerStack->GetCurrentLayer() )
         return;
 
     TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
@@ -305,8 +305,8 @@ FOdysseyPainterEditorLayerStackTab::ExportCurrentLayerAsTexture()
         return;
 
     FString assetPath = FPaths::GetPath(saveObjectPath) + "/";
-    FString textureName = FPaths::GetBaseFilename(saveObjectPath) + TEXT("_") + layerStack->CurrentLayer->Name.ToString().Replace(TEXT(" "), TEXT("_"));
-    ::Odyssey::ExportAsTexture(layerStack->CurrentLayer, 0, FIntRect(0, 0, texture->Source.GetSizeX(), texture->Source.GetSizeY()), texture->Source.GetFormat(), textureName, assetPath );
+    FString textureName = FPaths::GetBaseFilename(saveObjectPath) + TEXT("_") + layerStack->GetCurrentLayer()->GetLayerName().ToString().Replace(TEXT(" "), TEXT("_"));
+    ::Odyssey::ExportAsTexture(layerStack->GetCurrentLayer(), 0, FIntRect(0, 0, texture->Source.GetSizeX(), texture->Source.GetSizeY()), textureName, assetPath );
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -4,6 +4,9 @@
 #include "OdysseyLayerStackBrushEditorFunctionLibrary.h"
 
 #include "OdysseyBrushAssetBase.h"
+#include "Engine/TextureRenderTarget2D.h"
+#include "ImageUtils.h"
+#include "OdysseySurfaceTexture2DEditable.h"
 #include <ULIS>
 #include "ULISLoaderModule.h"
 #include "ULISUtils.h"
@@ -62,77 +65,57 @@ namespace
     FOdysseyBlockProxy
     GetBlockOfLayer( UOdysseyBrushAssetBase* BrushInstance, UOdysseyLayer* iLayer, FOdysseyBrushRect Area )
     {
-        UOdysseyTextureLayer* textureLayer = Cast<UOdysseyTextureLayer>(iLayer);
-        if( textureLayer )
+        FFrameNumber frame(0);
+
+        ::ULIS::FRectI rect;
+        if (Area.IsInitialized())
         {
-            UTexture2D* texture = Cast<UOdysseyTextureLayerStack>(textureLayer->GetLayerStack())->GetTexture();
-            if (!texture)
-                return FOdysseyBlockProxy::MakeNullProxy();
-
-            ::ULIS::FRectI textureRect = ::ULIS::FRectI::FromXYWH(0, 0, texture->GetSizeX(), texture->GetSizeY());
-            ::ULIS::FRectI given_rect = Area.IsInitialized() ? Area.GetValue() : textureRect;
-            //be sure we copy only the needed part
-            ::ULIS::FRectI src_rect = given_rect & textureRect;
-            ::ULIS::FVec2I dst_pos(src_rect.x - given_rect.x, src_rect.y - given_rect.y);
-            ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
-            TSharedPtr<::ULIS::FBlock> dst = MakeShareable(new ::ULIS::FBlock( given_rect.w, given_rect.h, format ));
-
-            ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
-            ::ULIS::FEvent eventClear;
-            ctx.Clear(*dst, ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventClear);
-
-            TSharedPtr<IOdysseyImageRenderer> imageRenderer = textureLayer->BuildImageRenderer(EOdysseyRenderingType::Render, 0);
-            imageRenderer->Init();
-
-            ::ULIS::FRectI dstRect = ::ULIS::FRectI::FromXYWH(dst_pos.x, dst_pos.y, given_rect.w - dst_pos.x, given_rect.h - dst_pos.y);
-            FOdysseyImageRendererCopyParams params(dst, { ::ULISUtils::ToIntRect(dstRect) }, src_rect.Position() - dst_pos);
-            TArray<::ULIS::FEvent> eventCopy = imageRenderer->Copy(params, { eventClear });
-            ctx.Flush();
-
-            return FOdysseyBlockProxy::MakeProxy(dst, eventCopy.Num(), eventCopy.GetData());
+            rect = Area.GetValue();
         }
-
-        UOdysseyAnimationLayer* animationLayer = Cast<UOdysseyAnimationLayer>(iLayer);
-        if (animationLayer)
+        else
         {
-            UOdysseyAnimation* animation = animationLayer->GetAnimation();
-            if (!animation)
-                return FOdysseyBlockProxy::MakeNullProxy();
-
-            UOdysseyAnimationPlayer* player = GetAnimationPlayer(BrushInstance);
-
-            ::ULIS::FRectI animationRect = ::ULIS::FRectI::FromXYWH(0, 0, animation->GetWidth(), animation->GetHeight());
-            ::ULIS::FRectI given_rect = Area.IsInitialized() ? Area.GetValue() : animationRect;
-            //be sure we copy only the needed part //TODO: Should be done directly in ULIS
-            ::ULIS::FRectI src_rect = given_rect & animationRect;
-            ::ULIS::FVec2I dst_pos(src_rect.x - given_rect.x, src_rect.y - given_rect.y);
-
-            ::ULIS::eFormat format = ::ULIS::Format_BGRA8;
-            switch(animation->GetFormat())
+            UOdysseyTextureLayer* textureLayer = Cast<UOdysseyTextureLayer>(iLayer);
+            if( textureLayer )
             {
-                case EOdysseyAnimationFormat::BGRA8: format = ::ULIS::Format_BGRA8;
-                case EOdysseyAnimationFormat::RGBAF: format = ::ULIS::Format_RGBAF;
+                UTexture2D* texture = Cast<UOdysseyTextureLayerStack>(textureLayer->GetLayerStack())->GetTexture();
+                if (!texture)
+                    return FOdysseyBlockProxy::MakeNullProxy();
+
+                rect = ::ULIS::FRectI::FromXYWH(0, 0, texture->GetSizeX(), texture->GetSizeY());
             }
-            TSharedPtr<::ULIS::FBlock> dst = MakeShareable(new ::ULIS::FBlock( given_rect.w, given_rect.h, format ));
 
-            ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
-            ::ULIS::FEvent eventClear;
-            ctx.Clear(*dst, ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventClear);
+            UOdysseyAnimationLayer* animationLayer = Cast<UOdysseyAnimationLayer>(iLayer);
+            if (animationLayer)
+            {
+                UOdysseyAnimation* animation = animationLayer->GetAnimation();
+                if (!animation)
+                    return FOdysseyBlockProxy::MakeNullProxy();
 
-            TSharedPtr<IOdysseyImageRenderer> imageRenderer = animationLayer->BuildImageRenderer(EOdysseyRenderingType::Render, player->GetCurrentFrame().FrameNumber.Value);
-            imageRenderer->Init();
+                UOdysseyAnimationPlayer* player = GetAnimationPlayer(BrushInstance);
+                if (!player)
+                    return FOdysseyBlockProxy::MakeNullProxy();
 
-            ::ULIS::FRectI dstRect = ::ULIS::FRectI::FromXYWH(dst_pos.x, dst_pos.y, given_rect.w - dst_pos.x, given_rect.h - dst_pos.y);
-            FOdysseyImageRendererCopyParams params(dst, { ULISUtils::ToIntRect(dstRect) }, src_rect.Position() - dst_pos);
-            TArray<::ULIS::FEvent> eventCopy = imageRenderer->Copy(params, { eventClear });
-            ctx.Flush();
-
-            return FOdysseyBlockProxy::MakeProxy(dst, eventCopy.Num(), eventCopy.GetData());
+                frame = player->GetCurrentFrame().FrameNumber;
+                rect = ::ULIS::FRectI::FromXYWH(0, 0, animation->GetWidth(), animation->GetHeight());
+            }
         }
 
-        //---
+        TStrongObjectPtr<UTextureRenderTarget2D> renderTarget(NewObject<UTextureRenderTarget2D>());
+        renderTarget->RenderTargetFormat = RTF_RGBA8_SRGB;
+        renderTarget->InitAutoFormat(rect.w, rect.h);
 
-        return FOdysseyBlockProxy::MakeNullProxy();
+        IOdysseyTextureRenderingAbility::Execute_RenderRectAtPosition(iLayer, renderTarget.Get(), frame, ::ULISUtils::ToIntRect(rect), FIntPoint(0, 0));
+
+        FImage OutImage;
+        if (!FImageUtils::GetRenderTargetImage(renderTarget.Get(), OutImage))
+            return FOdysseyBlockProxy::MakeNullProxy();
+
+        ::ULIS::eFormat format = ULISFormatForRawImageFormat(OutImage.Format);
+        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
+        TSharedPtr<::ULIS::FBlock> dst = MakeShareable(new ::ULIS::FBlock( rect.w, rect.h, format ));
+        CopyImageToBlock(OutImage, dst.Get());
+
+        return FOdysseyBlockProxy::MakeProxy(dst, 0, nullptr);
     }
 }
 
@@ -182,7 +165,7 @@ UOdysseyLayerStackBrushEditorFunctionLibrary::GetBlockOfLayerByName( UOdysseyBru
     TArray<UOdysseyLayer*> layers = layerstack->GetLayers();
     for (UOdysseyLayer* layer : layers)
     {
-        if( layer->Name.ToString() == iName )
+        if( layer->GetLayerName().ToString() == iName )
             return GetBlockOfLayer(BrushInstance, layer, Area);
     }
     return FOdysseyBlockProxy::MakeNullProxy();
@@ -205,7 +188,7 @@ UOdysseyLayerStackBrushEditorFunctionLibrary::GetBlockOfCurrentLayer( UOdysseyBr
     if( !layerstack )
         return FOdysseyBlockProxy::MakeNullProxy();
 
-    UOdysseyLayer* layer = layerstack->CurrentLayer.Get();
+    UOdysseyLayer* layer = layerstack->GetCurrentLayer();
     if (!layer)
         return FOdysseyBlockProxy::MakeNullProxy();
 

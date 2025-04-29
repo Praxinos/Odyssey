@@ -7,13 +7,12 @@
 #include "OdysseyTextureRenderingAbility.h"
 #include "Templates/SubclassOf.h"
 
-#include <ULIS>
-
 #include "OdysseyLayerStack.generated.h"
-class FOdysseySurfaceTexture2DEditable;
+
+class FOdysseyLayerCellSelection;
 
 UCLASS(Abstract, HideDropdown, BlueprintType, config=EditorPerProjectUserSettings, PerObjectConfig)
-class ODYSSEYLAYERSTACKEDITOR_API UOdysseyLayerStack
+class ODYSSEYLAYERSTACK_API UOdysseyLayerStack
     : public UObject
     , public IOdysseyTextureRenderingAbility
 {
@@ -41,17 +40,15 @@ public:
     static FOnHierarchyChanged& OnHierarchyChanged();
 
 public:
+    UOdysseyLayerStack();
+
+public:
     //Layer Class Support
     //UFUNCTION(BlueprintCallable, Category="Odyssey|LayerStack")
     //TArray<UClass*> FindSupportedCustomLayerClasses() const;
 
     UFUNCTION(BlueprintCallable, Category="Odyssey|LayerStack")
     bool SupportsLayerClass(UClass* Class) const;
-
-public:
-    //GETTER/SETTER
-    UFUNCTION(BlueprintSetter)
-    void CurrentLayerBlueprintSetter(UOdysseyLayer* Layer);
 
 public:
     //Layers management
@@ -217,29 +214,14 @@ public:
     UFUNCTION(BlueprintCallable, Category="Odyssey|LayerStack")
     void MoveLayers(TArray<UOdysseyLayer*> Layers, UOdysseyLayer* ParentLayer = nullptr, int IndexInParent = 0);
 
-protected:
-    //Property changed methods
-    void CurrentLayerChanged();
-    virtual void PropertyChanged(const FName& iPropertyName);
-    virtual void PostPropertyChanged(const FName& iPropertyName);
-
 public:
     virtual int GetWidth() const { return -1; };
     virtual int GetHeight() const { return -1; };
-    virtual ::ULIS::eFormat  GetFormat() const { return ::ULIS::Format_RGBA8; };
     //Called by layers when there Parent or Children changed
     void HierarchyChanged();
 
 public:
     // UObject overrides
-
-    /**
-     * Called when a property on this object has been modified
-     *
-     * @param PropertyThatChanged the property that was modified
-     */
-    virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
-
     /**
      * @brief Allows us to know which property changed on an undo/redo
      * PostEditChangeProperty does not inform us of that on undo/redo
@@ -255,30 +237,44 @@ public:
     UFUNCTION(BlueprintCallable, Category="Odyssey|LayerStack")
     virtual FInt32Range GetFrameRange() const override;
 
+    void SetTimelineSplitterPosition(float iValue);
+    float GetTimelineSplitterPosition() const;
+    TSharedRef<FOdysseyLayerCellSelection> GetCellSelection() const;
+    UOdysseyLayer* GetLayerRoot() const;
+    TSubclassOf<UOdysseyLayer> GetLayerRootClass() const;
+
 public:
     virtual TArray<FGuid> GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrameIndex) const override;
-
-protected:
-    virtual void RenderToTextureFromRects(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, const TArray<FIntRect>& iRects, const FIntPoint& iPos) const override;
+    virtual void RenderToTexture(FCanvas* iCanvas, FFrameNumber iFrame, const FIntRect& iSrcRect, const FIntRect& iDstRect) const override;
 
 protected:
     //Internal
     UOdysseyLayer* CreateLayer(UClass* iLayerType);
-
-    void AddLayersToHierarchy(TArray<UOdysseyLayer*> iLayers, UOdysseyLayer* iParent, int iIndexInParent);
-
-    void RemoveLayersFromHierarchy(TArray<UOdysseyLayer*> iLayers);
-
     UOdysseyLayer* CopyLayerInternal(UOdysseyLayer* iLayer, UOdysseyLayer* iParent, int iIndexInParent);
-
     void GetLayersUniqueParents(TArray<UOdysseyLayer*> iLayers, TArray<UOdysseyLayer*>& oParents);
 
 public:
+    UFUNCTION(BlueprintCallable, Category="Odyssey|LayerStack")
+    void SetCurrentLayer(UOdysseyLayer* Layer);
+
+    UFUNCTION(BlueprintPure, Category="Odyssey|LayerStack")
+    TArray<TSubclassOf<UOdysseyLayer>> GetSupportedLayerClasses() const;
+
+    UFUNCTION(BlueprintPure, Category="Odyssey|LayerStack")
+    UOdysseyLayer* GetCurrentLayer() const;
+
+    UFUNCTION(BlueprintPure, Category="Odyssey|LayerStack")
+    bool IsSRGB() const;
+
+    UFUNCTION(BlueprintCallable, Category="Odyssey|LayerStack")
+    void SetIsSRGB(bool Value);
+
+protected:
     //Default properties
     UPROPERTY(Transient)
-    TArray<TSubclassOf<UOdysseyLayer>> CompatibleLayers; //Contains compatible C++ layer types
+    TArray<TSubclassOf<UOdysseyLayer>> SupportedLayerClasses; //Contains compatible C++ layer types
 
-    UPROPERTY(BlueprintReadWrite, Category="Odyssey|LayerStack", BlueprintSetter=CurrentLayerBlueprintSetter)
+    UPROPERTY()
     TObjectPtr<UOdysseyLayer> CurrentLayer;
 
     UPROPERTY()
@@ -288,7 +284,11 @@ public:
     TObjectPtr<UClass> LayerRootClass;
 
     UPROPERTY(Transient)
-    bool SRGB = true;
+    bool bIsSRGB = true;
 
-    mutable TSharedPtr<FOdysseySurfaceTexture2DEditable> mSurface;
+    UPROPERTY(config)
+    float TimelineSplitterPosition = 0.2f; //TODO: Move To Editor Only class
+
+private:
+    TSharedRef<FOdysseyLayerCellSelection> mCellSelection;
 };

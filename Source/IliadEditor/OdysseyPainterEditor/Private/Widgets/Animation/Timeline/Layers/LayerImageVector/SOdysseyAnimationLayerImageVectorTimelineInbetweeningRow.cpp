@@ -82,7 +82,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonDown( con
     // for AddBreakdown / RemoveBreakdown functions in the context menu
     treeView.Get()->SetCursorPos( cursorPos );
 
-    if ( layerStack->CurrentLayer.Get() != layer )
+    if ( layerStack->GetCurrentLayer() != layer )
     {
         FOdysseyObjectEditorUtils::SetPropertyValue( layerStack
                                                     , "CurrentLayer"
@@ -151,7 +151,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseMove ( const FG
             FOdysseyVectorCell* tagCell = mInbetweenerTag->GetOwner()->GetCell();
             float frameWidth = timelinePosition->GetFrameSize();
 
-            UOdysseyAnimationCell* cell = listView.Get()->GetAnimationLayerImageVector()->GetCellAtFrame(frameIndex);
+            UOdysseyLayerCell* cell = listView.Get()->GetAnimationLayerImageVector()->GetCellAtFrame(frameIndex);
             if (!cell || !cell->IsA<UOdysseyAnimationCellImageVector>())
                 return FReply::Unhandled();
 
@@ -211,7 +211,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonUp( const
     TSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening> treeView = StaticCastSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening>(OwnerTablePtr.Pin());
     UOdysseyAnimationLayerImageVector* vectorLayer = treeView.Get()->GetAnimationLayerImageVector();
     int currentFrame = mCurrentFrame.Get();
-    UOdysseyAnimationCell* cell = vectorLayer->GetCellAtFrame( currentFrame );
+    UOdysseyLayerCell* cell = vectorLayer->GetCellAtFrame( currentFrame );
 
     // Call base method
     FReply reply = STableRow<TSharedPtr<FInbetweeningListViewItem>>::OnMouseButtonUp( MyGeometry, MouseEvent );
@@ -433,7 +433,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
     //static FSlateColorBrush layerSelected = FSlateColorBrush( FStyleColors::Select );
     TArray< FVector2D > framePointBuffer;
 
-    if( layerStack->CurrentLayer == layer )
+    if( layerStack->GetCurrentLayer() == layer )
     {
         if( mInbetweenerTag->GetOwner()->IsSelected() )
         {

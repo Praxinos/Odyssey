@@ -101,7 +101,7 @@ SOdysseyAnimationLayerStack::RebuildWidgets()
         .OnSplitterFinishedResizing_Lambda(
             [this, layerStack]()
             {
-                layerStack->TimelineSplitterPosition = mSplitter->SlotAt(0).GetSizeValue();
+                layerStack->SetTimelineSplitterPosition(mSplitter->SlotAt(0).GetSizeValue());
                 layerStack->SaveConfig();
             }
         )
@@ -109,13 +109,13 @@ SOdysseyAnimationLayerStack::RebuildWidgets()
         .Value_Lambda(
             [this, layerStack]()
             {
-                return layerStack->TimelineSplitterPosition;
+                return layerStack->GetTimelineSplitterPosition();
             }
         )
         .OnSlotResized_Lambda(
             [this, layerStack](float iSize)
             {
-                layerStack->TimelineSplitterPosition = iSize;
+                layerStack->SetTimelineSplitterPosition(iSize);
             }
         )
         [

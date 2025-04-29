@@ -131,7 +131,7 @@ FOdysseyPainterEditorGlobalTimelineShortcuts::Action_NavigateToNextCell()
     if (!layerStack)
         return;
 
-    UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(layerStack->CurrentLayer.Get());
+    UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(layerStack->GetCurrentLayer());
     if (!currentLayer)
         return;
 
@@ -167,7 +167,7 @@ FOdysseyPainterEditorGlobalTimelineShortcuts::Action_NavigateToNextCell()
     if (cellIndex >= currentLayer->GetCells().Num())
         return;
 
-    UOdysseyAnimationCell* nextCell = currentLayer->GetCells()[cellIndex];
+    UOdysseyLayerCell* nextCell = currentLayer->GetCells()[cellIndex];
     FFrameTime frame(nextCell->GetFrameRange().GetLowerBoundValue());
     player->SeekToFrame(frame);
 }
@@ -183,7 +183,7 @@ FOdysseyPainterEditorGlobalTimelineShortcuts::Action_NavigateToPreviousCell()
     if (!layerStack)
         return;
 
-    UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(layerStack->CurrentLayer.Get());
+    UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(layerStack->GetCurrentLayer());
     if (!currentLayer)
         return;
 
@@ -219,7 +219,7 @@ FOdysseyPainterEditorGlobalTimelineShortcuts::Action_NavigateToPreviousCell()
     if (cellIndex < 0)
         return;
 
-    UOdysseyAnimationCell* prevCell = currentLayer->GetCells()[cellIndex];
+    UOdysseyLayerCell* prevCell = currentLayer->GetCells()[cellIndex];
     FFrameTime frame(prevCell->GetFrameRange().GetLowerBoundValue());
     player->SeekToFrame(frame);
 }

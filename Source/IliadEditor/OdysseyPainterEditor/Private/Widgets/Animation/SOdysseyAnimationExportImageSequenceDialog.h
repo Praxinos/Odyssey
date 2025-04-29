@@ -39,7 +39,6 @@ public:
 public:
     struct FSource
     {
-        FOdysseyImageRenderingAbility* mImageRenderingAbility;
         UObject* mTextureRenderingAbility;
         FString mFilename;
         FInt32Range mRange;

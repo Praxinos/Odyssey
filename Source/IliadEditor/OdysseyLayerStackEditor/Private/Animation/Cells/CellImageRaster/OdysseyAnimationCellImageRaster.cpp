@@ -3,7 +3,6 @@
 
 #include "OdysseyAnimationCellImageRaster.h"
 
-#include "OdysseyAnimationCellImageRasterImageRenderer.h"
 #include "ULISLoaderModule.h"
 #include "OdysseyMediaRaster.h"
 #include "OdysseyAnimationCellImageRasterExport.h"
@@ -113,25 +112,16 @@ UOdysseyAnimationCellImageRaster::IsImageRenderingGameThreadOnly() const
     return !!mediaRaster;
 }
 
-TSharedPtr<IOdysseyImageRenderer>
-UOdysseyAnimationCellImageRaster::BuildImageRenderer(EOdysseyRenderingType iRenderType, int iFrame, FImageRendererFilter iFilter) const
-{
-    if (iFilter.IsBound() && !iFilter.Execute(this))
-        return nullptr;
-
-    return MakeShared<FOdysseyAnimationCellImageRasterImageRenderer>(this, iFrame, iRenderType, GetRenderingRects(), iFilter);
-}
-
 TArray<FGuid>
 UOdysseyAnimationCellImageRaster::GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrameIndex) const
 {
     return { GetRenderingId() };
 }
 
-TArray<FIntRect>
-UOdysseyAnimationCellImageRaster::GetRenderingRects() const
+FIntRect
+UOdysseyAnimationCellImageRaster::GetDefaultRenderRect() const
 {
-    return { FIntRect(0, 0, mRasterBlock->GetWidth(), mRasterBlock->GetHeight()) };
+    return FIntRect(0, 0, mRasterBlock->GetWidth(), mRasterBlock->GetHeight());
 }
 
 void
@@ -218,4 +208,10 @@ UOdysseyAnimationCellImageRaster::OldSerialize(FArchive& Ar)
             Ar << *mRasterBlock;
         }
     }
+}
+
+void
+UOdysseyAnimationCellImageRaster::RenderToTexture(FCanvas* iCanvas, FFrameNumber iFrame, const FIntRect& iSrcRect, const FIntRect& iDstRect) const
+{
+
 }

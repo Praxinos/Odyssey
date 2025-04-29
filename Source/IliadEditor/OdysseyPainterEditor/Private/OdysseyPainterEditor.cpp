@@ -12,7 +12,7 @@
 #include "OdysseyPainterEditorAnimationFlipSystem.h"
 #include "OdysseyPainterEditorAnimationTimelinePosition.h"
 #include "OdysseyBlockClipboardData.h"
-#include "OdysseyEditorModule.h"
+#include "OdysseyCoreEditorModule.h"
 #include "OdysseyPainterEditorSource.h"
 #include "OdysseyHUD.h"
 #include "OdysseyHUDElement.h"
@@ -1049,7 +1049,7 @@ FOdysseyPainterEditor::ActivateMainTool( UOdysseyPainterEditorTool* iTool )
 
     if (LayerStack())
     {
-        UOdysseyLayer* currentLayer = LayerStack()->CurrentLayer.Get();
+        UOdysseyLayer* currentLayer = LayerStack()->GetCurrentLayer();
         if (currentLayer)
         {
             UClass* layerClass = currentLayer->GetClass();
@@ -1117,7 +1117,7 @@ FOdysseyPainterEditor::SanitizeCurrentTool()
     if (!layerStack)
         return;
 
-    UOdysseyLayer* currentLayer = layerStack->CurrentLayer.Get();
+    UOdysseyLayer* currentLayer = layerStack->GetCurrentLayer();
     if (!currentLayer)
         return;
 
@@ -2792,9 +2792,9 @@ FOdysseyPainterEditor::AlterContourWidth( FOdysseyVectorGroupPaint* iScene
 
 bool FOdysseyPainterEditor::HasCopyBlockClipboard()
 {
-    FOdysseyEditorModule& odysseyEditorModule = FModuleManager::Get().LoadModuleChecked<FOdysseyEditorModule>(TEXT("OdysseyEditor"));
+    FOdysseyCoreEditorModule& odysseyCoreEditorModule = FModuleManager::Get().LoadModuleChecked<FOdysseyCoreEditorModule>(TEXT("OdysseyCoreEditor"));
 
-    return odysseyEditorModule.GetClipboard()->GetId() == FOdysseyBlockClipboardData::StaticId();
+    return odysseyCoreEditorModule.GetClipboard()->GetId() == FOdysseyBlockClipboardData::StaticId();
 }
 
 static void

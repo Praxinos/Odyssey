@@ -14,12 +14,15 @@
 #include "Misc/App.h"
 #include "ToolMenus.h"
 #include "Framework/Docking/TabManager.h"
+#include "OdysseyClipboard.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyCoreEditor"
 
 void
 FOdysseyCoreEditorModule::StartupModule()
 {
+    mClipboard = MakeShared<FOdysseyClipboard>();
+
     if (!IsRunningCommandlet())
         RegisterCommands();
 }
@@ -56,6 +59,12 @@ void
 FOdysseyCoreEditorModule::UnregisterCommands()
 {
     FOdysseyCommands::Unregister();
+}
+
+TSharedPtr<FOdysseyClipboard>
+FOdysseyCoreEditorModule::GetClipboard() const
+{
+    return mClipboard;
 }
 
 void

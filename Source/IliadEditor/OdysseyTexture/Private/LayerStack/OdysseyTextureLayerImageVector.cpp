@@ -9,7 +9,6 @@
 #include "OdysseyVectorBlock.h"
 #include "ULISLoaderModule.h"
 #include "ULISUtils.h"
-#include "OdysseyTextureLayerImageVectorImageRenderer.h"
 #include "OdysseyTextureLayerImageVectorImport.h"
 #include "OdysseyTextureLayerImageVectorExport.h"
 // from module OdysseyVector
@@ -224,48 +223,59 @@ UOdysseyTextureLayerImageVector::Serialize(FArchive& Ar)
     }
 }
 
-void
-UOdysseyTextureLayerImageVector::PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive)
-{
-    Super::PropertyChanged(iPropertyName, iMemberPropertyName, iIsInteractive);
-    if(iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyTextureLayerImageVector, IsWireframe))
-        IsWireframeChanged();
-    if(iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyTextureLayerImageVector, IsColored))
-        IsColoredChanged();
-}
+
 
 void
-UOdysseyTextureLayerImageVector::PostPropertyChanged(const FName& iPropertyName, bool iIsInteractive)
+UOdysseyTextureLayerImageVector::SetIsWireframe(bool Value)
 {
-    Super::PostPropertyChanged(iPropertyName, iIsInteractive);
-    if(iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyTextureLayerImageVector, IsWireframe))
-        RenderingChanged();
-    if(iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyTextureLayerImageVector, IsColored))
-        RenderingChanged();
-}
-
-void
-UOdysseyTextureLayerImageVector::IsWireframeChanged()
-{
+    bIsWireframe = Value;
     mVectorCell->GetLayer()->RequestRedraw( mVectorCell.Get(), 0 );
+    RenderingChanged();
 }
 
 void
-UOdysseyTextureLayerImageVector::IsColoredChanged()
+UOdysseyTextureLayerImageVector::SetIsColored(bool Value)
 {
+    bIsColored = Value;
     mVectorCell->GetLayer()->RequestRedraw( mVectorCell.Get(), 0 );
+    RenderingChanged();
 }
 
-TSharedPtr<IOdysseyImageRenderer>
-UOdysseyTextureLayerImageVector::BuildImageRenderer(EOdysseyRenderingType iRenderType, int iFrame, FImageRendererFilter iFilter) const
+bool
+UOdysseyTextureLayerImageVector::IsWireframe() const
 {
-    if (iFilter.IsBound() && !iFilter.Execute(this))
-        return nullptr;
+    return bIsWireframe;
+}
 
-    if (!mVectorBlock)
-        return nullptr;
+bool
+UOdysseyTextureLayerImageVector::IsColored() const
+{
+    return bIsColored;
+}
 
-    return MakeShared<FOdysseyTextureLayerImageVectorImageRenderer>(this, mVectorBlock, iRenderType, GetRenderingRects(), iFilter);
+
+
+void
+UOdysseyTextureLayerImageVector::PostTransacted(const FTransactionObjectEvent& iTransactionEvent)
+{
+    Super::PostTransacted(iTransactionEvent);
+
+    if ( iTransactionEvent.GetEventType() != ETransactionObjectEventType::UndoRedo )
+        return;
+
+    const TArray<FName>& changedPropertyNames = iTransactionEvent.GetChangedProperties();
+
+    if (changedPropertyNames.Contains(GET_MEMBER_NAME_CHECKED(UOdysseyTextureLayerImageVector, bIsColored)))
+    {
+        mVectorCell->GetLayer()->RequestRedraw( mVectorCell.Get(), 0 );
+        RenderingChanged();
+    }
+
+    if (changedPropertyNames.Contains(GET_MEMBER_NAME_CHECKED(UOdysseyTextureLayerImageVector, bIsWireframe)))
+    {
+        mVectorCell->GetLayer()->RequestRedraw( mVectorCell.Get(), 0 );
+        RenderingChanged();
+    }
 }
 
 TArray<FGuid>
@@ -308,18 +318,6 @@ UOdysseyTextureLayerImageVector::Merge(const TArray<UOdysseyLayer*>& iLayers)
     destinationScene->GetLayer()->RequestRedraw( destinationScene->GetCell(), 0 );
 
     FOdysseyVectorEngine::Notify( mVectorCell->GetScene(), FOdysseyVectorEngine::NOTIFY_ALL );
-}
-
-void
-UOdysseyTextureLayerImageVector::IsWireframeBlueprintSetter(bool Value)
-{
-    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyTextureLayerImageVector, IsWireframe), Value);
-}
-
-void
-UOdysseyTextureLayerImageVector::IsColoredBlueprintSetter(bool Value)
-{
-    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyTextureLayerImageVector, IsColored), Value);
 }
 
 // Implements Interface IOdysseyVectorLayer::GetWidth

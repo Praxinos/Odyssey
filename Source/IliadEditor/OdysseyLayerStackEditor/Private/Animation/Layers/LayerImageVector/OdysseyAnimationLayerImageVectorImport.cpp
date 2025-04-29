@@ -64,7 +64,7 @@ FOdysseyAnimationLayerImageVectorImport::Read( UOdysseyAnimationLayerImageVector
                         Ar << iAnimationLayerImageVector->CellsOffset;
 
                         //Empty Cells to prepare for loading
-                        iAnimationLayerImageVector->Cells.Empty();
+                        iAnimationLayerImageVector->RemoveAllCells();
 
                         //Load or Save number of cells
                         int32 numCells = 0;
@@ -78,14 +78,12 @@ FOdysseyAnimationLayerImageVectorImport::Read( UOdysseyAnimationLayerImageVector
 
                             if (cellType == TEXT("FOdysseyAnimationCellImageVector"))
                             {
-                                UOdysseyAnimationCellImageVector* cell = NewObject<UOdysseyAnimationCellImageVector>(iAnimationLayerImageVector, UOdysseyAnimationCellImageVector::StaticClass(), NAME_None, RF_Public | RF_Transactional);
-                                iAnimationLayerImageVector->Cells.Add(cell);
+                                UOdysseyLayerCell* cell = iAnimationLayerImageVector->AddCell(UOdysseyAnimationCellImageVector::StaticClass());
                                 cell->OldSerialize(Ar);
                             }
                             else if (cellType == TEXT("FOdysseyAnimationCellImageStagger"))
                             {
-                                UOdysseyAnimationCellImageStagger* cell = NewObject<UOdysseyAnimationCellImageStagger>(iAnimationLayerImageVector, UOdysseyAnimationCellImageStagger::StaticClass(), NAME_None, RF_Public | RF_Transactional);
-                                iAnimationLayerImageVector->Cells.Add(cell);
+                                UOdysseyLayerCell* cell = iAnimationLayerImageVector->AddCell(UOdysseyAnimationCellImageStagger::StaticClass());
                                 cell->OldSerialize(Ar);
                             }
                         }

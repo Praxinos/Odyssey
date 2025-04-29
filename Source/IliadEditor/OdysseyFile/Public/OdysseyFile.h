@@ -245,9 +245,9 @@ namespace FOdysseyFile
         // constants were initially computed from the CRC32 checksum of the constant's name, even though the constant's name may have changed over time
         // Just be sure the Chunk ID is unique and any ID will make it.
         // You can use website https://crc32.online/ to generate a code
-        static const uint32 CHUNK_CELL =  0xf93591b3; // container
-            static const uint32 CHUNK_CELL_LENGTH = 0x5dbe40b7; // uint32 (Length)
-            static const uint32 CHUNK_CELL_MARKID = 0x866d04a6; // FString (MarkId)
+        //static const uint32 CHUNK_CELL =  0xf93591b3; // container //Not used anymore, moved to OdysseyLayerCellImport to remove dependency to an Editor module while keeping retro compatibility
+            //static const uint32 CHUNK_CELL_LENGTH = 0x5dbe40b7; // uint32 (Length) //Not used anymore, moved to OdysseyLayerCellImport to remove dependency to an Editor module while keeping retro compatibility
+            //static const uint32 CHUNK_CELL_MARKID = 0x866d04a6; // FString (MarkId) //Not used anymore, moved to OdysseyLayerCellImport to remove dependency to an Editor module while keeping retro compatibility
 
         static const uint32 CHUNK_CELLIMAGEVECTOR =  0x60fdee3a; // container
             static const uint32 CHUNK_CELLIMAGEVECTOR_RESOLUTION = 0xc1bb48e1; // uint32(Width)-uint32(Height)
