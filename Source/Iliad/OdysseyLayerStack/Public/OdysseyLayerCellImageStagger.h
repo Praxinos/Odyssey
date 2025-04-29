@@ -22,9 +22,10 @@ class ODYSSEYLAYERSTACK_API UOdysseyLayerCellImageStagger
 
 public:
     //IOdysseyRenderingAbility overrides
-    virtual FOdysseyTextureRenderFunction BuildRenderPipeline(
+    virtual bool BuildRenderPipeline(
         FFrameNumber iFrame,
-        EOdysseyRenderingType iType
+        EOdysseyRenderingType iType,
+        FOdysseyTextureRenderFunction& oRenderFunction
     ) const override;
     virtual TArray<FGuid> GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrameIndex) const override;
     virtual FIntRect GetDefaultRenderRect() const override;

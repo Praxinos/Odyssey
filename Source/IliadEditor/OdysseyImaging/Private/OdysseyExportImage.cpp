@@ -56,6 +56,11 @@ GetFileFormatExtension(EOdysseyExportImageFormat iFormat)
 UTexture2D*
 ExportAsTexture(UObject* iObject, int iFrame, const FIntRect& iRect, FString iAssetName, FString iPath )
 {
+    if (!iObject->Implements<UOdysseyTextureRenderingAbility>())
+        return nullptr;
+
+    IOdysseyTextureRenderingAbility* ability = Cast<IOdysseyTextureRenderingAbility>(iObject);
+
     //TStrongObjectPtr ensures the render target is destroyed at the end of this function
     //instead of keeping it in memory waiting for the garbage collector to destroy it
     TStrongObjectPtr<UTextureRenderTarget2D> renderTarget(NewObject<UTextureRenderTarget2D>());
@@ -63,7 +68,7 @@ ExportAsTexture(UObject* iObject, int iFrame, const FIntRect& iRect, FString iAs
     renderTarget->bForceLinearGamma = true;
     renderTarget->InitAutoFormat(iRect.Width(), iRect.Height());
 
-    IOdysseyTextureRenderingAbility::Execute_RenderRect(iObject, renderTarget.Get(), FFrameNumber(iFrame), iRect);
+    ability->Render_GameThread(renderTarget.Get(), FFrameNumber(iFrame), EOdysseyRenderingType::Render, iRect);
 
     FString Name;
     FString PackageName;
@@ -84,6 +89,11 @@ ExportAsTexture(UObject* iObject, int iFrame, const FIntRect& iRect, FString iAs
 FString
 ExportAsImage(UObject* iObject, int iFrame, EOdysseyExportImageFormat iFormat, const FIntRect& iRect, FString iFilename, FString iPath, bool iSRGB)
 {
+    if (!iObject->Implements<UOdysseyTextureRenderingAbility>())
+        return "";
+
+    IOdysseyTextureRenderingAbility* ability = Cast<IOdysseyTextureRenderingAbility>(iObject);
+
     TStrongObjectPtr<UTextureRenderTarget2D> renderTarget(NewObject<UTextureRenderTarget2D>());
     if (iSRGB)
         renderTarget->RenderTargetFormat = RTF_RGBA8_SRGB;
@@ -91,7 +101,7 @@ ExportAsImage(UObject* iObject, int iFrame, EOdysseyExportImageFormat iFormat, c
         renderTarget->RenderTargetFormat = RTF_RGBA8;
     renderTarget->InitAutoFormat(iRect.Width(), iRect.Height());
 
-    IOdysseyTextureRenderingAbility::Execute_RenderRect(iObject, renderTarget.Get(), FFrameNumber(iFrame), iRect);
+    ability->Render_GameThread(renderTarget.Get(), FFrameNumber(iFrame), EOdysseyRenderingType::Render, iRect);
 
     FImage OutImage;
     if (!FImageUtils::GetRenderTargetImage(renderTarget.Get(), OutImage, iRect))

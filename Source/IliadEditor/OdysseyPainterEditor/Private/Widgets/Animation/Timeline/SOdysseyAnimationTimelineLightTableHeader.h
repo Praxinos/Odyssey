@@ -5,20 +5,20 @@
 
 #include "CoreMinimal.h"
 
-#include "OdysseyAnimationLightTable.h"
+#include "OdysseyLighttable.h"
 
 class SColorBlock;
 class UOdysseyAnimationLayer;
 
 //////////////////////////////////////////////////////////////////////////
-// SOdysseyAnimationTimelineLightTableHeader
-class SOdysseyAnimationTimelineLightTableHeader : public SCompoundWidget
+// SOdysseyAnimationTimelineLighttableHeader
+class SOdysseyAnimationTimelineLighttableHeader : public SCompoundWidget
 {
 public:
-    SOdysseyAnimationTimelineLightTableHeader();
+    SOdysseyAnimationTimelineLighttableHeader();
 
 public:
-    SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineLightTableHeader)
+    SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineLighttableHeader)
         : _Layer(nullptr)
         {}
         SLATE_ARGUMENT(UOdysseyAnimationLayer*, Layer)
@@ -27,11 +27,11 @@ public:
     void Construct(const FArguments& InArgs);
 
 private:
-    FLinearColor GetLightTablePreviousKeysColor() const;
-    FLinearColor GetLightTableNextKeysColor() const;
+    FLinearColor GetLighttablePreviousKeysColor() const;
+    FLinearColor GetLighttableNextKeysColor() const;
 
-    FReply OnLightTablePreviousKeysColorMouseButtonDown(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent) const;
-    FReply OnLightTableNextKeysColorMouseButtonDown(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent) const;
+    FReply OnLighttablePreviousKeysColorMouseButtonDown(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent) const;
+    FReply OnLighttableNextKeysColorMouseButtonDown(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent) const;
 
     TSharedRef< SWidget > OnOptionsGetMenuContent();
 
@@ -41,11 +41,11 @@ private:
     void OnNextKeysContrastValueCommitted(int iValue, ETextCommit::Type iType);
     void OnNextKeysContrastValueChanged(int iValue);
 
-    void SetDisplayPosition(EOdysseyLightTableDisplayPosition iPosition);
-    bool IsDisplayPositionSet(EOdysseyLightTableDisplayPosition iPosition) const;
+    void SetDisplayPosition(EOdysseyLighttableDisplayPosition iPosition);
+    bool IsDisplayPositionSet(EOdysseyLighttableDisplayPosition iPosition) const;
 
 private:
     UOdysseyAnimationLayer* mLayer;
-    TSharedPtr<SColorBlock> mLightTablePreviousKeysColorBlockWidget;
-    TSharedPtr<SColorBlock> mLightTableNextKeysColorBlockWidget;
+    TSharedPtr<SColorBlock> mLighttablePreviousKeysColorBlockWidget;
+    TSharedPtr<SColorBlock> mLighttableNextKeysColorBlockWidget;
 };

@@ -8,9 +8,8 @@
 #include "OdysseyImageAnchor.h"
 #include "ShaderParameterMacros.h"
 
-BEGIN_SHADER_PARAMETER_STRUCT(FOdysseyBlendShaderParameters, )
-    SHADER_PARAMETER_RDG_TEXTURE(Texture2D, SourceTexture)
-    SHADER_PARAMETER_SAMPLER(SamplerState, SourceTextureSampler)
+BEGIN_SHADER_PARAMETER_STRUCT(FOdysseyBlendColorShaderParameters, )
+    SHADER_PARAMETER(FVector4f, Color)
 
     SHADER_PARAMETER_RDG_TEXTURE(Texture2D, DestinationTexture)
     SHADER_PARAMETER_SAMPLER(SamplerState, DestinationTextureSampler)
@@ -22,10 +21,10 @@ BEGIN_SHADER_PARAMETER_STRUCT(FOdysseyBlendShaderParameters, )
     RENDER_TARGET_BINDING_SLOTS()
 END_SHADER_PARAMETER_STRUCT()
 
-class ODYSSEYRENDERING_API FOdysseyBlendShader : public FBatchedElementParameters
+class ODYSSEYRENDERING_API FOdysseyBlendColorShader : public FBatchedElementParameters
 {
 public:
-    FOdysseyBlendShader(FOdysseyBlendShaderParameters* iPixelShaderParams, EOdysseyBlendingMode iBlendMode);
+    FOdysseyBlendColorShader(FOdysseyBlendColorShaderParameters* iPixelShaderParams, EOdysseyBlendingMode iBlendMode);
 
 public:
     /** Binds vertex and pixel shaders for this element */
@@ -36,22 +35,16 @@ public:
         FRDGBuilder& iGraphBuilder,
         ERHIFeatureLevel::Type iFeatureLevel,
         FRDGTextureRef iBackgroundTexture,
-        FRDGTextureRef iForegroundTexture,
+        FLinearColor iForegroundColor,
         FRDGTextureRef iDestinationTexture,
-
-        const FIntRect& iSrcRect,
         const FIntRect& iDstRect,
-
-        const FMatrix& iTransform,
-
         EOdysseyBlendingMode iBlendMode,
         EOdysseyAlphaMode iAlphaMode,
-        float iOpacity,
-        EOdysseyAntiAliasing iAntiAliasing
+        float iOpacity
     );
 
 public:
     /** Shader parameters */
-    FOdysseyBlendShaderParameters* mPixelShaderParams;
+    FOdysseyBlendColorShaderParameters* mPixelShaderParams;
     EOdysseyBlendingMode mBlendMode;
 };

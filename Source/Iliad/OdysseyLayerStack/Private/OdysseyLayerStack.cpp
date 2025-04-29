@@ -674,13 +674,14 @@ UOdysseyLayerStack::SetIsSRGB(bool Value)
     RenderingChanged();
 }
 
-FOdysseyTextureRenderFunction
+bool
 UOdysseyLayerStack::BuildRenderPipeline(
     FFrameNumber iFrame,
-    EOdysseyRenderingType iType
+    EOdysseyRenderingType iType,
+    FOdysseyTextureRenderFunction& oRenderFunction
 ) const
 {
-    return GetLayerRoot()->BuildRenderPipeline(iFrame, iType);
+    return GetLayerRoot()->BuildRenderPipeline(iFrame, iType, oRenderFunction);
 }
 
 TArray<FGuid>

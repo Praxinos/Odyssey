@@ -180,13 +180,14 @@ UOdysseyLayerCell::IsThumbnailDirty() const
 }
 #endif
 
-FOdysseyTextureRenderFunction
+bool
 UOdysseyLayerCell::BuildRenderPipeline(
     FFrameNumber iFrame,
-    EOdysseyRenderingType iType
+    EOdysseyRenderingType iType,
+    FOdysseyTextureRenderFunction& oRenderFunction
 ) const
 {
-    return[this](
+    oRenderFunction = [this](
         FRDGBuilder& iGraphBuilder,
         ERHIFeatureLevel::Type iFeatureLevel,
         FRDGTextureRef iDestinationTexture,
@@ -210,4 +211,6 @@ UOdysseyLayerCell::BuildRenderPipeline(
             iDstRect.Size()
         );
     };
+
+    return true;
 }

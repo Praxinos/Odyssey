@@ -10,6 +10,10 @@
 #include "Textures/SlateIcon.h"
 #include "Layout/Margin.h"
 
+#if WITH_EDITOR
+#include "OdysseyLighttable.h"
+#endif
+
 #include "OdysseyLayer.generated.h"
 
 class UOdysseyLayerStack;
@@ -45,6 +49,7 @@ public:
     static FOnDisplayChildrenChanged& OnDisplayChildrenChanged();
     static FOnDisplayOptionsChanged& OnDisplayOptionsChanged();
     static FSimpleMulticastDelegate& OnMediaChanged();
+    FSimpleMulticastDelegate& OnLighttableChanged();
 #endif
 
     FSimpleMulticastDelegate& OnCellsChanged();
@@ -65,6 +70,15 @@ public:
 
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     bool ShouldDisplayOptions() const;
+
+    UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
+    FOdysseyLighttable GetLighttable() const;
+
+    UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
+    bool HasLighttable() const;
+
+    UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
+    void SetLighttable(FOdysseyLighttable Value);
 #endif
 
 public:
@@ -248,6 +262,7 @@ public:
     //Invalidate the frame ranges of all cells
     //Used for performance optimisation to avoid iterating over all cells each time we need a cell's frame range
 #if WITH_EDITOR
+    void SetLighttableInteractive(FOdysseyLighttable Value);
     const FSlateIcon& GetIcon() const;
     const FSlateIcon& GetIconExpanded() const;
     void SetDisplayChildren(bool Value);
@@ -271,25 +286,21 @@ public:
     virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const;
 #endif
 
+    virtual void PostInitProperties() override;
     virtual TArray<FGuid> GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrame) const override;
     virtual FIntRect GetDefaultRenderRect() const override;
     virtual FInt32Range GetFrameRange() const override;
 
-    virtual FOdysseyTextureRenderFunction BuildRenderPipeline(
-        FFrameNumber iFrame,
-        EOdysseyRenderingType iType
-    ) const override;
-
-    FOdysseyTextureRenderFunction BuildRenderChildrenPipeline(
-        FFrameNumber iFrame,
-        EOdysseyRenderingType iType
-    ) const;
+    virtual bool BuildRenderPipeline(FFrameNumber iFrame, EOdysseyRenderingType iType, FOdysseyTextureRenderFunction& oRenderFunction) const override;
+    bool BuildRenderChildrenPipeline(FFrameNumber iFrame, EOdysseyRenderingType iType, FOdysseyTextureRenderFunction& oRenderFunction) const;
+    bool BuildLighttableRenderPipeline(FFrameNumber iFrame, EOdysseyRenderingType iType, FOdysseyTextureRenderFunction& oRenderFunction) const;
 
 protected:
     //Property changed methods
     virtual void CellsChanged();
 
 #if WITH_EDITOR
+    TArray<FGuid> GetLighttableImageRenderingComposition(int iFrameIndex) const;
     // UObject overrides
     virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
 #endif
@@ -297,6 +308,7 @@ protected:
 protected:
     //Default properties
 #if WITH_EDITORONLY_DATA
+    FSimpleMulticastDelegate mOnLighttableChanged;
     FSlateIcon Icon;
     FSlateIcon IconExpanded;
 #endif
@@ -331,6 +343,12 @@ protected:
 
     UPROPERTY(NonTransactional)
     bool bDisplayOptions = true;
+
+    UPROPERTY(NonTransactional)
+    FOdysseyLighttable Lighttable;
+
+    UPROPERTY(NonTransactional)
+    bool bHasLighttable = true;
 #endif
 
     UPROPERTY()

@@ -1,14 +1,40 @@
 // IDDN.FR.001.060015.013.S.X.2019.000.00000
 // ODYSSEY is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
-#include "OdysseyAnimationLightTableKeyImport.h"
+#include "OdysseyLighttableKeyImport.h"
 
 #if WITH_EDITOR
-#include "OdysseyAnimationLightTable.h"
-#include "OdysseyFile.h"
+#include "OdysseyLighttable.h"
+
+static const uint32 CHUNK_LIGHTTABLE_KEY = 0x5b785423; //FOdysseyLighttableKey
+static const uint32 CHUNK_LIGHTTABLE_KEY_ISACTIVATED = 0xea8a5d86; //bool
+static const uint32 CHUNK_LIGHTTABLE_KEY_OPACITY = 0x21ab66; //float
+
+
+void
+ReadLighttableKeyChunks( uint64 iChunkEnd, FArchive &Ar, std::function<void(uint32, uint64, FArchive&)> iCallback )
+{
+    //UE_LOG( LogTemp, Warning, TEXT("ReadChunks") );
+
+    while( Ar.Tell() != iChunkEnd )
+    {
+        uint64 chunkLen;
+        uint32 chunkID;
+
+        Ar << chunkID;
+        Ar << chunkLen;
+
+        //UE_LOG( LogTemp, Warning, TEXT("Reading Chunk %X %d"), chunkID, chunkLen );
+
+        /*if ( chunkLen )
+        {*/
+            iCallback( chunkID, chunkLen, Ar );
+        /*}*/
+    }
+}
 
 bool
-FOdysseyAnimationLightTableKeyImport::Read( FOdysseyAnimationLightTableKey* iKey
+FOdysseyLighttableKeyImport::Read( FOdysseyLighttableKey* iKey
                                             , FArchive &Ar )
 {
     uint64 start = Ar.Tell();
@@ -17,7 +43,7 @@ FOdysseyAnimationLightTableKeyImport::Read( FOdysseyAnimationLightTableKey* iKey
     uint64 chunkLen;
     uint64 chunkEnd;
 
-    // Reads the first chunk (FOdysseyFile::Animation::CHUNK_LightTable)
+    // Reads the first chunk (CHUNK_LIGHTTABLE)
     Ar << chunkID;
     Ar << chunkLen;
 
@@ -25,8 +51,8 @@ FOdysseyAnimationLightTableKeyImport::Read( FOdysseyAnimationLightTableKey* iKey
 
     switch( chunkID )
     {
-        case FOdysseyFile::Animation::CHUNK_LIGHTTABLE_KEY :
-            FOdysseyAnimationLightTableKeyImport::Read( iKey, Ar, chunkEnd );
+        case CHUNK_LIGHTTABLE_KEY :
+            FOdysseyLighttableKeyImport::Read( iKey, Ar, chunkEnd );
         break;
 
         default:
@@ -38,23 +64,23 @@ FOdysseyAnimationLightTableKeyImport::Read( FOdysseyAnimationLightTableKey* iKey
 }
 
 void
-FOdysseyAnimationLightTableKeyImport::Read( FOdysseyAnimationLightTableKey* iKey
+FOdysseyLighttableKeyImport::Read( FOdysseyLighttableKey* iKey
                                             , FArchive &Ar
                                             , uint64 iChunkEnd )
 {
-    FOdysseyFile::ReadChunks( iChunkEnd
+    ReadLighttableKeyChunks( iChunkEnd
                               , Ar
                               , [iKey](uint32 iChunkID, uint64 iChunkLen, FArchive &Ar) -> void
         {
             switch ( iChunkID )
             {
-                case FOdysseyFile::Animation::CHUNK_LIGHTTABLE_KEY_ISACTIVATED:
+                case CHUNK_LIGHTTABLE_KEY_ISACTIVATED:
                 {
                     Ar << iKey->bIsActivated;
                 }
                 break;
 
-                case FOdysseyFile::Animation::CHUNK_LIGHTTABLE_KEY_OPACITY:
+                case CHUNK_LIGHTTABLE_KEY_OPACITY:
                 {
                     float opacity = 0.f;
                     Ar << opacity;

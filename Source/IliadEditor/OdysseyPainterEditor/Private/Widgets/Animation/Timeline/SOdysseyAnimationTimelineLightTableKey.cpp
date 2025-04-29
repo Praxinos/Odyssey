@@ -1,8 +1,8 @@
 // IDDN.FR.001.060015.013.S.X.2019.000.00000
 // ODYSSEY is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
 
-#include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineLightTableKey.h"
-#include "OdysseyAnimationLightTable.h"
+#include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineLighttableKey.h"
+#include "OdysseyLighttable.h"
 #include "OdysseyStyle.h"
 #include "OdysseyAnimationLayer.h"
 #include "OdysseyAnimationCell.h"
@@ -11,7 +11,7 @@
 #include "SOdysseyAnimationTimelineSection.h"
 
 void
-SOdysseyAnimationTimelineLightTableKey::Construct(const FArguments& InArgs)
+SOdysseyAnimationTimelineLighttableKey::Construct(const FArguments& InArgs)
 {
     mCell = InArgs._Cell;
     mKey = InArgs._Key;
@@ -25,7 +25,7 @@ SOdysseyAnimationTimelineLightTableKey::Construct(const FArguments& InArgs)
         .WidthInFrames(1)
         .HAlign(HAlign_Center)
         [
-            SNew(SOdysseyAnimationTimelineLightTableKeySlider)
+            SNew(SOdysseyAnimationTimelineLighttableKeySlider)
             .Key(mKey)
             .OnChanged(InArgs._OnChanged)
             .OnCommited(InArgs._OnCommited)
@@ -34,7 +34,7 @@ SOdysseyAnimationTimelineLightTableKey::Construct(const FArguments& InArgs)
 }
 
 void
-SOdysseyAnimationTimelineLightTableKeySlider::Construct(const FArguments& InArgs)
+SOdysseyAnimationTimelineLighttableKeySlider::Construct(const FArguments& InArgs)
 {
     mKey = InArgs._Key;
     mOnChanged = InArgs._OnChanged;
@@ -42,7 +42,7 @@ SOdysseyAnimationTimelineLightTableKeySlider::Construct(const FArguments& InArgs
 }
 
 int32
-SOdysseyAnimationTimelineLightTableKeySlider::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
+SOdysseyAnimationTimelineLighttableKeySlider::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
 {
     const FSlateBrush* GenericBrush = FCoreStyle::Get().GetBrush( "GenericWhiteBox" );
 
@@ -50,13 +50,13 @@ SOdysseyAnimationTimelineLightTableKeySlider::OnPaint(const FPaintArgs& Args, co
     const float width = AllottedGeometry.GetLocalSize().X;
 
     //Dragging Zone
-    const FSlateBrush* backBrush = FOdysseyStyle::GetBrush( "Animation.LightTableKey.Back" );
-    const FSlateBrush* frontBrush = FOdysseyStyle::GetBrush( "Animation.LightTableKey.Front" );
+    const FSlateBrush* backBrush = FOdysseyStyle::GetBrush( "Animation.LighttableKey.Back" );
+    const FSlateBrush* frontBrush = FOdysseyStyle::GetBrush( "Animation.LighttableKey.Front" );
     FSlateColor primary( FStyleColors::Primary );
     FSlateColor background( FStyleColors::Background );
-    FLinearColor backColor = FOdysseyStyle::GetColor( "Animation.LightTableKey.BackColor" );
-    FLinearColor frontColor = FOdysseyStyle::GetColor( "Animation.LightTableKey.FrontColor" );
-    FOdysseyAnimationLightTableKey key = mKey.Get();
+    FLinearColor backColor = FOdysseyStyle::GetColor( "Animation.LighttableKey.BackColor" );
+    FLinearColor frontColor = FOdysseyStyle::GetColor( "Animation.LighttableKey.FrontColor" );
+    FOdysseyLighttableKey key = mKey.Get();
 
     FSlateDrawElement::MakeBox(
         OutDrawElements,
@@ -81,7 +81,7 @@ SOdysseyAnimationTimelineLightTableKeySlider::OnPaint(const FPaintArgs& Args, co
 }
 
 FReply
-SOdysseyAnimationTimelineLightTableKeySlider::OnMouseButtonDown(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent)
+SOdysseyAnimationTimelineLighttableKeySlider::OnMouseButtonDown(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent)
 {
     if (iMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
     {
@@ -93,7 +93,7 @@ SOdysseyAnimationTimelineLightTableKeySlider::OnMouseButtonDown(const FGeometry&
 }
 
 FReply
-SOdysseyAnimationTimelineLightTableKeySlider::OnDragDetected(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent)
+SOdysseyAnimationTimelineLighttableKeySlider::OnDragDetected(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent)
 {
     mDraggingPosition = iMouseEvent.GetScreenSpacePosition().Y;
     mOldOpacity = mKey.Get().Opacity;
@@ -102,7 +102,7 @@ SOdysseyAnimationTimelineLightTableKeySlider::OnDragDetected(const FGeometry& iG
 }
 
 FReply
-SOdysseyAnimationTimelineLightTableKeySlider::OnMouseMove(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent)
+SOdysseyAnimationTimelineLighttableKeySlider::OnMouseMove(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent)
 {
     if (mDragging)
     {
@@ -110,7 +110,7 @@ SOdysseyAnimationTimelineLightTableKeySlider::OnMouseMove(const FGeometry& iGeom
         float delta = (position - mDraggingPosition) * -1;
         float sensitivity = 200.f;
 
-        FOdysseyAnimationLightTableKey key = mKey.Get();
+        FOdysseyLighttableKey key = mKey.Get();
         key.Opacity = FMath::Clamp(mOldOpacity + 100.f * delta / sensitivity, 0.f, 100.f);
         mOnChanged.ExecuteIfBound(key);
 
@@ -122,7 +122,7 @@ SOdysseyAnimationTimelineLightTableKeySlider::OnMouseMove(const FGeometry& iGeom
 }
 
 FReply
-SOdysseyAnimationTimelineLightTableKeySlider::OnMouseButtonUp(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent)
+SOdysseyAnimationTimelineLighttableKeySlider::OnMouseButtonUp(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent)
 {
     if (mDragging)
     {
@@ -134,7 +134,7 @@ SOdysseyAnimationTimelineLightTableKeySlider::OnMouseButtonUp(const FGeometry& i
 
     if (iMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
     {
-        FOdysseyAnimationLightTableKey key = mKey.Get();
+        FOdysseyLighttableKey key = mKey.Get();
         key.bIsActivated = !key.bIsActivated;
         mOnCommited.ExecuteIfBound(key);
 
@@ -146,7 +146,7 @@ SOdysseyAnimationTimelineLightTableKeySlider::OnMouseButtonUp(const FGeometry& i
 }
 
 FVector2D
-SOdysseyAnimationTimelineLightTableKeySlider::ComputeDesiredSize(float iLayoutScaleMultiplier) const
+SOdysseyAnimationTimelineLighttableKeySlider::ComputeDesiredSize(float iLayoutScaleMultiplier) const
 {
     return FVector2D(16.f, 40.f);
 }

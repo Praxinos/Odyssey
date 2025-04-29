@@ -51,7 +51,7 @@ namespace OdysseyScreenPaintRendering
     };
 
 
-    IMPLEMENT_SHADER_TYPE(, TOdysseyScreenPaintVertexShader, TEXT("/Plugins/Odyssey/Private/OdysseyScreenPaintShader.usf"), TEXT("MainVS"), SF_Vertex);
+    IMPLEMENT_SHADER_TYPE(, TOdysseyScreenPaintVertexShader, TEXT("/OdysseyShaders/Private/OdysseyScreenPaintShader.usf"), TEXT("MainVS"), SF_Vertex);
 
 
     /** Mesh paint pixel shader */
@@ -120,7 +120,7 @@ namespace OdysseyScreenPaintRendering
         LAYOUT_FIELD(FShaderParameter, yScreenAxisParameter);
     };
 
-    IMPLEMENT_SHADER_TYPE(, TOdysseyScreenPaintPixelShader, TEXT("/Plugins/Odyssey/Private/OdysseyScreenPaintShader.usf"), TEXT("MainPS"), SF_Pixel);
+    IMPLEMENT_SHADER_TYPE(, TOdysseyScreenPaintPixelShader, TEXT("/OdysseyShaders/Private/OdysseyScreenPaintShader.usf"), TEXT("MainPS"), SF_Pixel);
 
     typedef FSimpleElementVertexDeclaration FMeshPaintDilateVertexDeclaration;
     TGlobalResource< FMeshPaintDilateVertexDeclaration > GMeshPaintDilateVertexDeclaration;

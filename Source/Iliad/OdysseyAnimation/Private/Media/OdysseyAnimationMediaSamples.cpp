@@ -306,6 +306,7 @@ FOdysseyAnimationMediaSamples::Update(int iFrameIndex, int64 iSequenceIndex)
     mImageRenderingComposition = imageRenderingComposition;
 
     IOdysseyTextureRenderingAbility::Execute_Render(mAnimation, mRenderTarget.Get(), FFrameNumber(mCurrentFrameIndex));
+    mAnimation->Render_GameThread(mRenderTarget.Get(), FFrameNumber(mCurrentFrameIndex), EOdysseyRenderingType::Render);
 }
 
 void
@@ -350,7 +351,7 @@ FOdysseyAnimationMediaSamples::Render()
 
     for (const FIntRect& rect : mInvalidTileMap.InvalidRects())
     {
-        IOdysseyTextureRenderingAbility::Execute_RenderRect(mAnimation, mRenderTarget.Get(), FFrameNumber(mCurrentFrameIndex), rect);
+        mAnimation->Render_GameThread(mRenderTarget.Get(), FFrameNumber(mCurrentFrameIndex), EOdysseyRenderingType::Render, rect);
     }
 
     mInvalidTileMap.Clear();

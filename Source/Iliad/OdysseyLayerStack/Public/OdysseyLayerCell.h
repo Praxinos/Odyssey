@@ -50,9 +50,10 @@ public:
 #endif
 
 public:
-    virtual FOdysseyTextureRenderFunction BuildRenderPipeline(
+    virtual bool BuildRenderPipeline(
         FFrameNumber iFrame,
-        EOdysseyRenderingType iType
+        EOdysseyRenderingType iType,
+        FOdysseyTextureRenderFunction& oRenderFunction
     ) const override;
 
 #if WITH_EDITOR

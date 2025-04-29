@@ -52,8 +52,14 @@ public:
     void RenderRectAtRect_Implementation(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, const FIntRect& iSrcRect, const FIntRect& iDstRect) const;
 
 public:
-    virtual FOdysseyTextureRenderFunction BuildRenderPipeline(
+    void Render_GameThread(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, EOdysseyRenderingType iType) const;
+    void Render_GameThread(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, EOdysseyRenderingType iType, const FIntRect& iSrcRect) const;
+    void Render_GameThread(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, EOdysseyRenderingType iType, const FIntRect& iSrcRect, const FIntPoint& iPos) const;
+    void Render_GameThread(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, EOdysseyRenderingType iType, const FIntRect& iSrcRect, const FIntRect& iDstRect) const;
+
+    virtual bool BuildRenderPipeline(
         FFrameNumber iFrame,
-        EOdysseyRenderingType iType
+        EOdysseyRenderingType iType,
+        FOdysseyTextureRenderFunction& oRenderFunction
     ) const = 0;
 };

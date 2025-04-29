@@ -4,20 +4,20 @@
 #pragma once
 
 #if WITH_EDITOR
-#include <Core/Core.h>
+#include "Serialization/Archive.h"
 
-struct FOdysseyAnimationLightTable;
+struct FOdysseyLighttable;
 
-class FOdysseyAnimationLightTableImport
+class FOdysseyLighttableImport
 {
 public:
     /**
      * @brief Imports Data from the given archive into the given object
      *
-     * @param iAnimationLightTable
+     * @param iLighttable
      * @param Ar
      */
-    static bool ODYSSEYANIMATION_API Read( FOdysseyAnimationLightTable* iAnimationLightTable
+    static bool ODYSSEYLAYERSTACK_API Read( FOdysseyLighttable* iLighttable
                                   , FArchive &Ar );
 
 private:
@@ -25,7 +25,7 @@ private:
      * Private import functions
      */
 
-    static void Read( FOdysseyAnimationLightTable* iAnimationLightTable
+    static void Read( FOdysseyLighttable* iLighttable
                                   , FArchive &Ar
                                   , uint64 iChunkEnd );
 };

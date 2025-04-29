@@ -18,6 +18,7 @@ UOdysseyShadersBlueprintLibrary::Blend(
     FIntRect DestinationRect,
     FMatrix Transform,
     EOdysseyBlendingMode BlendMode,
+    EOdysseyAlphaMode AlphaMode,
     float Opacity,
     EOdysseyAntiAliasing AntiAliasing
 )
@@ -53,6 +54,7 @@ UOdysseyShadersBlueprintLibrary::Blend(
                 Transform,
 
                 BlendMode,
+                AlphaMode,
                 Opacity,
                 AntiAliasing
             );

@@ -270,7 +270,7 @@ UOdysseyTextureLayerStack::FastUpdateTexture(const TArray<FIntRect>& iRects)
 
     for (const FIntRect& rect : iRects)
     {
-        IOdysseyTextureRenderingAbility::Execute_RenderRect(this, RenderTarget, FFrameNumber(0), rect);
+        Render_GameThread(RenderTarget, FFrameNumber(0), EOdysseyRenderingType::Editor, rect);
     }
 
     //Fence ?
@@ -394,7 +394,7 @@ UOdysseyTextureLayerStack::UpdateTexture(bool iForceRefresh)
 
         for (const FIntRect& rect : invalidRects)
         {
-            IOdysseyTextureRenderingAbility::Execute_RenderRect(this, RenderTarget, FFrameNumber(0), rect);
+            Render_GameThread(RenderTarget, FFrameNumber(0), EOdysseyRenderingType::Render, rect);
         }
 
         ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());

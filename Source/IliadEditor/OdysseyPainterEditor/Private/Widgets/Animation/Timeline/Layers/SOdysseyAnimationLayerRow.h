@@ -33,10 +33,10 @@ protected:
     virtual TArray<TSharedPtr<SWidget>> GenerateMainRowHeaderOptionWidgets() override;
 
 private:
-    TSharedRef<SWidget> GenerateLightTableRowHeaderWidget();
+    TSharedRef<SWidget> GenerateLighttableRowHeaderWidget();
     TSharedRef<SWidget> GenerateOutOfPegsRowHeaderWidget();
-    void OnLightTableCheckStateChanged(ECheckBoxState iState);
-    ECheckBoxState GetLightTableIsChecked() const;
+    void OnLighttableCheckStateChanged(ECheckBoxState iState);
+    ECheckBoxState GetLighttableIsChecked() const;
 
 protected:
     UOdysseyAnimationLayer* mLayer;

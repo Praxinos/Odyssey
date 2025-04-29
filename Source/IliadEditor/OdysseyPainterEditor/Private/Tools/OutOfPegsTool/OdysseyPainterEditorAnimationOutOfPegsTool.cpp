@@ -194,14 +194,14 @@ UOdysseyPainterEditorAnimationOutOfPegsTool::SetCell(UOdysseyAnimationCell* iCel
         mCell->OnOutOfPegsChanged().RemoveAll(this);
 
     if (mLayer)
-        mLayer->OnLightTableChanged().RemoveAll(this);
+        mLayer->OnLighttableChanged().RemoveAll(this);
 
     mCell = iCell;
 
     if (mCell)
     {
         mLayer = Cast<UOdysseyAnimationLayer>(mCell->GetLayer());
-        mLayer->OnLightTableChanged().AddUObject(this, &UOdysseyPainterEditorAnimationOutOfPegsTool::OnLightTableChanged);
+        mLayer->OnLighttableChanged().AddUObject(this, &UOdysseyPainterEditorAnimationOutOfPegsTool::OnLighttableChanged);
 
         Pan = mCell->OutOfPegs.Pan;
         Rotation = mCell->OutOfPegs.Rotation;
@@ -224,7 +224,7 @@ UOdysseyPainterEditorAnimationOutOfPegsTool::OnCellOutOfPegsChanged(bool iIsInte
 }
 
 void
-UOdysseyPainterEditorAnimationOutOfPegsTool::OnLightTableChanged()
+UOdysseyPainterEditorAnimationOutOfPegsTool::OnLighttableChanged()
 {
     if (!mLayer->GetLighttable().bIsActivated)
     {

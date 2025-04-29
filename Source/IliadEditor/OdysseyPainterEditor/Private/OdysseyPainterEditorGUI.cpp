@@ -11,7 +11,7 @@
 #include "OdysseyMediaVector.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorAnimationTimelineTab.h"
-#include "OdysseyPainterEditorAnimationLightTableTab.h"
+#include "OdysseyPainterEditorAnimationLighttableTab.h"
 #include "OdysseyPainterEditorAnimationDetailsTab.h"
 #include "OdysseyPainterEditorColorSelectorTab.h"
 #include "OdysseyPainterEditorCommands.h"
@@ -102,7 +102,7 @@ FOdysseyPainterEditorGUI::CreateTabs()
     TSharedRef<FOdysseyPainterEditorTextureDetailsTab> textureDetailsTab = MakeShared<FOdysseyPainterEditorTextureDetailsTab>(mEditor);
     TSharedRef<FOdysseyPainterEditorFlipbookTimelineTab> flipbookTimelineTab = MakeShared<FOdysseyPainterEditorFlipbookTimelineTab>(mEditor);
     TSharedRef<FOdysseyPainterEditorAnimationTimelineTab> animationTimelineTab = MakeShared<FOdysseyPainterEditorAnimationTimelineTab>(mEditor);
-    TSharedRef<FOdysseyPainterEditorAnimationLightTableTab> animationLightTableTab = MakeShared<FOdysseyPainterEditorAnimationLightTableTab>(mEditor);
+    TSharedRef<FOdysseyPainterEditorAnimationLighttableTab> animationLighttableTab = MakeShared<FOdysseyPainterEditorAnimationLighttableTab>(mEditor);
     TSharedRef<FOdysseyPainterEditorAnimationDetailsTab> animationDetailsTab = MakeShared<FOdysseyPainterEditorAnimationDetailsTab>(mEditor);
 
     //Used for the viewport drawing editor to know which tab to open by default
@@ -122,7 +122,7 @@ FOdysseyPainterEditorGUI::CreateTabs()
     mEditor->AddTab(textureDetailsTab);
     mEditor->AddTab(flipbookTimelineTab);
     mEditor->AddTab(animationTimelineTab);
-    mEditor->AddTab(animationLightTableTab);
+    mEditor->AddTab(animationLighttableTab);
     mEditor->AddTab(animationDetailsTab);
 }
 

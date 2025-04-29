@@ -3,7 +3,7 @@
 
 #include "Widgets/Animation/Timeline/Layers/SOdysseyAnimationLayerImageTimeline.h"
 #include "OdysseyLayerCellImageStagger.h"
-#include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineLightTable.h"
+#include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineLighttable.h"
 #include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineOutOfPegs.h"
 #include "Widgets/Animation/Timeline/Cells/SOdysseyAnimationCells.h"
 #include "TimelineTools/OdysseyAnimationTimelineTool.h"
@@ -78,7 +78,7 @@ SOdysseyAnimationLayerImageTimeline::GenerateWidget( const FName& iRow, const FN
     }
     if (iRow == "Lighttable")
     {
-        return GenerateLightTableRowTimelineWidget();
+        return GenerateLighttableRowTimelineWidget();
     }
     if (iRow == "OutOfPegs")
     {
@@ -150,16 +150,18 @@ SOdysseyAnimationLayerImageTimeline::GenerateMainRowTimelineWidget()
 }
 
 TSharedRef<SWidget>
-SOdysseyAnimationLayerImageTimeline::GenerateLightTableRowTimelineWidget()
+SOdysseyAnimationLayerImageTimeline::GenerateLighttableRowTimelineWidget()
 {
-    return SNew(SOdysseyAnimationTimelineLightTable, mLayer)
-        .TimelinePosition(mTimelinePosition);
+    return SNew(SOdysseyAnimationTimelineLighttable, mLayer)
+        .TimelinePosition(mTimelinePosition)
+        .CurrentFrame(mCurrentFrame);
 }
 
 TSharedRef<SWidget>
 SOdysseyAnimationLayerImageTimeline::GenerateOutOfPegsRowTimelineWidget()
 {
     return SNew(SOdysseyAnimationTimelineOutOfPegs, mLayer)
+        .CurrentFrame(mCurrentFrame)
         .TimelinePosition(mTimelinePosition)
         .OnActivateOutOfPegs(mOnActivateOutOfPegs)
         .OnInactivateOutOfPegs(mOnInactivateOutOfPegs)
@@ -594,7 +596,7 @@ SOdysseyAnimationLayerImageTimeline::MapActions(TSharedPtr<FUICommandList> iComm
 }
 
 EVisibility
-SOdysseyAnimationLayerImageTimeline::GetLightTableVisibility() const
+SOdysseyAnimationLayerImageTimeline::GetLighttableVisibility() const
 {
     return mLayer->GetLighttable().bIsActivated && mLayer->ShouldDisplayOptions() ? EVisibility::Visible : EVisibility::Collapsed;
 }

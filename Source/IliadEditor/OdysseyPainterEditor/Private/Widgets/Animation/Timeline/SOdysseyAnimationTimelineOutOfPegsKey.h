@@ -4,7 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "OdysseyAnimationLightTable.h"
+#include "OdysseyLighttable.h"
 #include "Widgets/SCompoundWidget.h"
 
 class UOdysseyAnimationLayer;
@@ -15,7 +15,7 @@ class SOdysseyAnimationTimelineOutOfPegsKey
     : public SCompoundWidget
 {
 public:
-    DECLARE_DELEGATE_OneParam(FOnKeyChanged, FOdysseyAnimationLightTableKey)
+    DECLARE_DELEGATE_OneParam(FOnKeyChanged, FOdysseyLighttableKey)
     DECLARE_DELEGATE_OneParam(FOnActivateOutOfPegs, UOdysseyAnimationCell*)
     DECLARE_DELEGATE_RetVal_OneParam(ECheckBoxState, FOnIsOutOfPegsChecked, UOdysseyAnimationCell*)
 
@@ -24,7 +24,7 @@ public:
     {}
         SLATE_ARGUMENT(TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition>, TimelinePosition)
         SLATE_ATTRIBUTE(UOdysseyAnimationCell*, Cell)
-        SLATE_ATTRIBUTE(FOdysseyAnimationLightTableKey, Key)
+        SLATE_ATTRIBUTE(FOdysseyLighttableKey, Key)
         SLATE_EVENT(FOnActivateOutOfPegs, OnActivateOutOfPegs)
         SLATE_EVENT(FSimpleDelegate, OnInactivateOutOfPegs)
         SLATE_EVENT(FOnIsOutOfPegsChecked, OnIsOutOfPegsChecked)
@@ -40,7 +40,7 @@ private:
 
 private:
     TAttribute<UOdysseyAnimationCell*> mCell;
-    TAttribute<FOdysseyAnimationLightTableKey> mKey;
+    TAttribute<FOdysseyLighttableKey> mKey;
 
     FOnActivateOutOfPegs mOnActivateOutOfPegs;
     FSimpleDelegate mOnInactivateOutOfPegs;

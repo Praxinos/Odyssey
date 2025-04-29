@@ -54,6 +54,7 @@ private:
     void OnGetChildren(UOdysseyLayer* iParent, TArray<UOdysseyLayer*>& oChildren) const;
 
 private:
+    TAttribute<int> mCurrentFrame;
     UOdysseyAnimationLayerStack* mLayerStack;
     TSharedPtr<FOdysseyAnimationTimelineShortcuts> mTimelineShortcuts;
     TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition> mTimelinePosition;

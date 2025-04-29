@@ -46,6 +46,7 @@ public class OdysseyLayerStack : ModuleRules
 
         PublicDependencyModuleNames.AddRange(
             new string[] {
+                "Core",
                 "SlateCore",
                 "Engine"
             }
@@ -53,7 +54,6 @@ public class OdysseyLayerStack : ModuleRules
 
         PrivateDependencyModuleNames.AddRange(
             new string[] {
-                "Core",
                 "CoreUObject",
                 "RenderCore",
                 "Renderer",

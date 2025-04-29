@@ -768,20 +768,20 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set("Animation.Timeline.LeftBoundHandle", new IMAGE_BRUSH_SVG("OdysseyAnimation/Timeline/Header/AnimationLeftBoundHandle", mIcon16x16));
     Set("Animation.Timeline.RightBoundHandle", new IMAGE_BRUSH_SVG("OdysseyAnimation/Timeline/Header/AnimationRightBoundHandle", mIcon16x16));
 
-    Set("Animation.LightTable64", new IMAGE_BRUSH("OdysseyAnimation/LightTable_64", mIcon64x64));
-    Set("Animation.LightTable16", new IMAGE_BRUSH("OdysseyAnimation/LightTable_16", mIcon16x16));
+    Set("Animation.Lighttable64", new IMAGE_BRUSH("OdysseyAnimation/Lighttable_64", mIcon64x64));
+    Set("Animation.Lighttable16", new IMAGE_BRUSH("OdysseyAnimation/Lighttable_16", mIcon16x16));
 
-    Set("Animation.LightTableToggle", FCheckBoxStyle()
+    Set("Animation.LighttableToggle", FCheckBoxStyle()
         //.Padding(FMargin(0,0,0,0))
         .SetPadding(FMargin(8)) //8 because left+right = 16 and top+bottom = 16
         .SetForegroundColor(FLinearColor(0, 0, 0, 0))
         .SetCheckBoxType(ESlateCheckBoxType::ToggleButton)
-        .SetUncheckedImage(IMAGE_BRUSH("OdysseyAnimation/LightTableToggle_OFF_16", mIcon16x16))
-        .SetUncheckedHoveredImage(IMAGE_BRUSH("OdysseyAnimation/LightTableToggle_OFF_16", mIcon16x16))
-        .SetUncheckedPressedImage(IMAGE_BRUSH("OdysseyAnimation/LightTableToggle_OFF_16", mIcon16x16))
-        .SetCheckedImage(IMAGE_BRUSH("OdysseyAnimation/LightTableToggle_ON_16", mIcon16x16))
-        .SetCheckedHoveredImage(IMAGE_BRUSH("OdysseyAnimation/LightTableToggle_ON_16", mIcon16x16))
-        .SetCheckedPressedImage(IMAGE_BRUSH("OdysseyAnimation/LightTableToggle_ON_16", mIcon16x16))
+        .SetUncheckedImage(IMAGE_BRUSH("OdysseyAnimation/LighttableToggle_OFF_16", mIcon16x16))
+        .SetUncheckedHoveredImage(IMAGE_BRUSH("OdysseyAnimation/LighttableToggle_OFF_16", mIcon16x16))
+        .SetUncheckedPressedImage(IMAGE_BRUSH("OdysseyAnimation/LighttableToggle_OFF_16", mIcon16x16))
+        .SetCheckedImage(IMAGE_BRUSH("OdysseyAnimation/LighttableToggle_ON_16", mIcon16x16))
+        .SetCheckedHoveredImage(IMAGE_BRUSH("OdysseyAnimation/LighttableToggle_ON_16", mIcon16x16))
+        .SetCheckedPressedImage(IMAGE_BRUSH("OdysseyAnimation/LighttableToggle_ON_16", mIcon16x16))
     );
 
     Set("Animation.AlphaLockedToggle", FCheckBoxStyle()
@@ -797,19 +797,19 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
         .SetCheckedPressedImage(IMAGE_BRUSH("OdysseyLayerStack/alpha_locked_16", mIcon16x16))
     );
 
-    Set("Animation.LightTable.Options", FComboButtonStyle(mComboButton)
+    Set("Animation.Lighttable.Options", FComboButtonStyle(mComboButton)
         .SetShadowOffset(FVector2D(0))
         .SetButtonStyle( FButtonStyle(mButton)
             .SetNormalPadding(FMargin(8)) //8 because left+right = 16 and top+bottom = 16
             .SetPressedPadding(FMargin(8)) //8 because left+right = 16 and top+bottom = 16
-            .SetNormal(IMAGE_BRUSH_SVG("OdysseyAnimation/LightTable_Options_OFF", mIcon16x16))
-            .SetHovered(IMAGE_BRUSH_SVG("OdysseyFlipbook/LightTable_Options_OFF", mIcon16x16))
-            .SetPressed(IMAGE_BRUSH_SVG("OdysseyFlipbook/LightTable_Options_ON", mIcon16x16))
+            .SetNormal(IMAGE_BRUSH_SVG("OdysseyAnimation/Lighttable_Options_OFF", mIcon16x16))
+            .SetHovered(IMAGE_BRUSH_SVG("OdysseyFlipbook/Lighttable_Options_OFF", mIcon16x16))
+            .SetPressed(IMAGE_BRUSH_SVG("OdysseyFlipbook/Lighttable_Options_ON", mIcon16x16))
         )
     );
 
-    Set("Animation.LightTable.Options.DisplayPosition.AboveLayer", new IMAGE_BRUSH_SVG("OdysseyAnimation/LightTable_Options_DisplayPosition_AboveLayer", mIcon16x16));
-    Set("Animation.LightTable.Options.DisplayPosition.UnderLayer", new IMAGE_BRUSH_SVG("OdysseyAnimation/LightTable_Options_DisplayPosition_UnderLayer", mIcon16x16));
+    Set("Animation.Lighttable.Options.DisplayPosition.AboveLayer", new IMAGE_BRUSH_SVG("OdysseyAnimation/Lighttable_Options_DisplayPosition_AboveLayer", mIcon16x16));
+    Set("Animation.Lighttable.Options.DisplayPosition.UnderLayer", new IMAGE_BRUSH_SVG("OdysseyAnimation/Lighttable_Options_DisplayPosition_UnderLayer", mIcon16x16));
 
 
     Set("Animation.AddCellsHandleRight", new IMAGE_BRUSH_SVG("OdysseyAnimation/AddCellsHandleRight", mIcon16x16));
@@ -862,14 +862,14 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     FSlateColor background( FStyleColors::Background );
     FSlateColor input( FStyleColors::Input );
     FSlateColor inputOutline( FStyleColors::InputOutline );
-    Set("Animation.LightTableKey.Back", new FSlateRoundedBoxBrush( primary, FVector4( 8.0f, 8.0f, 8.0f, 8.0f ) ));
-    Set("Animation.LightTableKey.Front", new FSlateRoundedBoxBrush( background, FVector4( 8.0f, 8.0f, 8.0f, 8.0f ) ));
-    Set("Animation.LightTableKey.BackColor", primary);
-    Set("Animation.LightTableKey.FrontColor", background);
+    Set("Animation.LighttableKey.Back", new FSlateRoundedBoxBrush( primary, FVector4( 8.0f, 8.0f, 8.0f, 8.0f ) ));
+    Set("Animation.LighttableKey.Front", new FSlateRoundedBoxBrush( background, FVector4( 8.0f, 8.0f, 8.0f, 8.0f ) ));
+    Set("Animation.LighttableKey.BackColor", primary);
+    Set("Animation.LighttableKey.FrontColor", background);
 
-    Set("Animation.LightTable.OutOfPegs.Button.On", new IMAGE_BRUSH_SVG("OdysseyAnimation/out-of-pegs-on", mIcon16x16));
-    Set("Animation.LightTable.OutOfPegs.Button.Off", new IMAGE_BRUSH_SVG("OdysseyAnimation/out-of-pegs-off", mIcon16x16));
-    Set("Animation.LightTable.OutOfPegs.Button.Color", primary);
+    Set("Animation.Lighttable.OutOfPegs.Button.On", new IMAGE_BRUSH_SVG("OdysseyAnimation/out-of-pegs-on", mIcon16x16));
+    Set("Animation.Lighttable.OutOfPegs.Button.Off", new IMAGE_BRUSH_SVG("OdysseyAnimation/out-of-pegs-off", mIcon16x16));
+    Set("Animation.Lighttable.OutOfPegs.Button.Color", primary);
 
     // Inbetweening
     Set("Inbetweening.TableView", FTableViewStyle()

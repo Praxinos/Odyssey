@@ -33,7 +33,6 @@ public:
     UOdysseyAnimationLayerImageVector();
     //IOdysseyRenderingAbility overrides
     virtual void PostInitProperties() override;
-    virtual TArray<FGuid> GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrameIndex) const override;
 
 #if WITH_EDITOR
 public:

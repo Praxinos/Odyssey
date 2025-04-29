@@ -56,7 +56,7 @@ protected:
     virtual FMargin GetRowPadding(FName iRow) const override;
 
     TSharedRef<SWidget> GenerateMainRowTimelineWidget();
-    TSharedRef<SWidget> GenerateLightTableRowTimelineWidget();
+    TSharedRef<SWidget> GenerateLighttableRowTimelineWidget();
     TSharedRef<SWidget> GenerateOutOfPegsRowTimelineWidget();
 
 public:
@@ -83,10 +83,10 @@ protected:
     //TArray<TSharedPtr<FOdysseyAnimationCell>> GetSelectedCells() const;
     //FReply OnCellsSelectionDragged();
 
-    EVisibility GetLightTableVisibility() const;
+    EVisibility GetLighttableVisibility() const;
 
     FOptionalSize GetCellsHeight() const;
-    FOptionalSize GetLightTableHeight() const;
+    FOptionalSize GetLighttableHeight() const;
     bool DisplayOptions() const;
 
     bool GetShowCellsHandles() const;

@@ -4,11 +4,11 @@
 #pragma once
 
 #if WITH_EDITOR
-#include <Core/Core.h>
+#include "Serialization/Archive.h"
 
-struct FOdysseyAnimationLightTableKey;
+struct FOdysseyLighttableKey;
 
-class FOdysseyAnimationLightTableKeyImport
+class FOdysseyLighttableKeyImport
 {
 public:
     /**
@@ -17,7 +17,7 @@ public:
      * @param iAnimationCell
      * @param Ar
      */
-    static bool ODYSSEYANIMATION_API Read( FOdysseyAnimationLightTableKey* iKey
+    static bool ODYSSEYLAYERSTACK_API Read( FOdysseyLighttableKey* iKey
                                   , FArchive &Ar );
 
 private:
@@ -25,7 +25,7 @@ private:
      * Private import functions
      */
 
-    static void Read( FOdysseyAnimationLightTableKey* iKey
+    static void Read( FOdysseyLighttableKey* iKey
                                   , FArchive &Ar
                                   , uint64 iChunkEnd );
 };

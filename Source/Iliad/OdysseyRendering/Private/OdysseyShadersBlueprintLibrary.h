@@ -27,6 +27,7 @@ class UOdysseyShadersBlueprintLibrary : public UBlueprintFunctionLibrary
         FIntRect DestinationRect = FIntRect(),
         FMatrix Transform = FMatrix(),
         EOdysseyBlendingMode BlendMode = EOdysseyBlendingMode::kNormal,
+        EOdysseyAlphaMode AlphaMode = EOdysseyAlphaMode::kNormal,
         float Opacity = 1.f,
         EOdysseyAntiAliasing AntiAliasing = EOdysseyAntiAliasing::NearestNeighbor
     );

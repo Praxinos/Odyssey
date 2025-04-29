@@ -9,6 +9,7 @@
 #include "RenderGraphBuilder.h"
 #include "RenderGraphUtils.h"
 #include "OdysseyBlendShader.h"
+#include "OdysseyBlendColorShader.h"
 
 #if WITH_EDITOR
 UOdysseyLayer::FOnDisplayChildrenChanged&
@@ -40,6 +41,18 @@ UOdysseyLayer::OnCellsChanged()
 }
 
 void
+UOdysseyLayer::PostInitProperties()
+{
+    Super::PostInitProperties();
+
+#if WITH_EDITOR
+    //Activate first previous and first next keys in the lighttable by default
+    Lighttable.PreviousKeys[0].bIsActivated = true;
+    Lighttable.NextKeys[0].bIsActivated = true;
+#endif
+}
+
+void
 UOdysseyLayer::InvalidateCellsFrameRanges()
 {
     mCellsFrameRanges.Empty();
@@ -52,11 +65,7 @@ UOdysseyLayer::GetFrameRange() const
     const TArray<UOdysseyLayer*> layers = Children;
     for (UOdysseyLayer* layer : layers)
     {
-        UOdysseyLayer* animationLayer = Cast<UOdysseyLayer>(layer);
-        if (!animationLayer)
-            continue;
-
-        ranges.Add(animationLayer->GetFrameRange());
+        ranges.Add(layer->GetFrameRange());
     }
 
     if (!Cells.IsEmpty())
@@ -681,14 +690,48 @@ UOdysseyLayer::GetRenderingComposition(EOdysseyRenderingType iRenderType, int iF
 {
     TArray<FGuid> idComposition = { GetRenderingId() };
 
-    const TArray<UOdysseyLayer*>& children = GetChildren();
-    for (UOdysseyLayer* child : children)
-    {
-        if (!child->bIsActivated)
-            continue;
+#if WITH_EDITOR
+    bool showLighttable = iRenderType == EOdysseyRenderingType::Editor && Lighttable.bIsActivated;
+    if ( showLighttable && Lighttable.DisplayPosition == EOdysseyLighttableDisplayPosition::UnderLayer )
+        idComposition.Append(GetLighttableImageRenderingComposition(iFrame));
+#endif
 
-        idComposition.Append(child->GetRenderingComposition(iRenderType, iFrame));
+    if (bCanHaveChildren)
+    {
+        const TArray<UOdysseyLayer*>& children = GetChildren();
+        for (UOdysseyLayer* child : children)
+        {
+            if (!child->bIsActivated)
+                continue;
+
+            idComposition.Append(child->GetRenderingComposition(iRenderType, iFrame));
+        }
     }
+    else
+    {
+        int frame = iFrame;
+        FInt32Range frameRange = GetFrameRange();
+        if ( iFrame < frameRange.GetLowerBoundValue() )
+        {
+            frame = GetPreBehaviourFrame(PreBehaviour, iFrame);
+        }
+        else if ( iFrame > frameRange.GetUpperBoundValue() )
+        {
+            frame = GetPostBehaviourFrame(PostBehaviour, iFrame);
+        }
+
+        UOdysseyLayerCell* cell = GetCellAtFrame(frame);
+        if ( cell )
+        {
+            int cellFrame = frame - cell->GetFrameRange().GetLowerBoundValue();
+            idComposition.Append(cell->GetRenderingComposition(iRenderType, cellFrame));
+        }
+    }
+
+#if WITH_EDITOR
+    if ( showLighttable && Lighttable.DisplayPosition == EOdysseyLighttableDisplayPosition::AboveLayer )
+        idComposition.Append(GetLighttableImageRenderingComposition(iFrame));
+#endif
 
     return idComposition;
 }
@@ -886,18 +929,18 @@ UOdysseyLayer::SetCellsOffsetInteractive(float Value)
 }
 #endif
 
-FOdysseyTextureRenderFunction
+bool
 UOdysseyLayer::BuildRenderPipeline(
     FFrameNumber iFrame,
-    EOdysseyRenderingType iType
+    EOdysseyRenderingType iType,
+    FOdysseyTextureRenderFunction& oRenderFunction
 ) const
 {
+    FOdysseyTextureRenderFunction renderFunction;
     if ( bCanHaveChildren )
     {
-        return BuildRenderChildrenPipeline(
-            iFrame,
-            iType
-        );
+        if (!BuildRenderChildrenPipeline(iFrame,iType,renderFunction))
+            return false;
     }
     else
     {
@@ -913,25 +956,299 @@ UOdysseyLayer::BuildRenderPipeline(
         }
 
         if ( frame == INDEX_NONE )
-            return FOdysseyTextureRenderFunction();
+            return false;
 
         UOdysseyLayerCell* cell = GetCellAtFrame(iFrame.Value);
         if ( !cell )
-            return FOdysseyTextureRenderFunction();
+            return false;
 
         frame -= cell->GetFrameRange().GetLowerBoundValue();
 
-        return cell->BuildRenderPipeline(
-            frame,
-            iType
-        );
+        if(!cell->BuildRenderPipeline( frame, iType, renderFunction ))
+            return false;
     }
+
+#if WITH_EDITOR
+    bool showLighttable = iType == EOdysseyRenderingType::Editor && Lighttable.bIsActivated;
+    EOdysseyLighttableDisplayPosition lighttablePosition = Lighttable.DisplayPosition;
+
+    FOdysseyTextureRenderFunction lighttableRenderFunction;
+    if (showLighttable)
+        showLighttable = BuildLighttableRenderPipeline(iFrame, iType, lighttableRenderFunction);
+
+    oRenderFunction = [this, renderFunction, showLighttable, lighttablePosition, lighttableRenderFunction](
+            FRDGBuilder& iGraphBuilder,
+            ERHIFeatureLevel::Type iFeatureLevel,
+            FRDGTextureRef iDestinationTexture,
+            const FIntRect& iSrcRect,
+            const FIntRect& iDstRect,
+            const FMatrix& iSrcTransform
+        )
+        {
+            AddClearRenderTargetPass(iGraphBuilder, iDestinationTexture, FLinearColor::Transparent, iDstRect);
+
+            FRDGTextureDesc renderTextureDesc = FRDGTextureDesc::Create2D(
+                iDestinationTexture->Desc.Extent,
+                iDestinationTexture->Desc.Format,
+                FClearValueBinding::Transparent,
+                ETextureCreateFlags::ShaderResource | ETextureCreateFlags::RenderTargetable
+            );
+
+            FRDGTextureRef renderTexture = iGraphBuilder.CreateTexture(renderTextureDesc, TEXT("UOdysseyLayer::renderTexture"));
+
+            renderFunction(
+                iGraphBuilder,
+                iFeatureLevel,
+                renderTexture,
+                iSrcRect,
+                iDstRect,
+                iSrcTransform
+            );
+
+            FRDGTextureRef lighttableTexture = nullptr;
+            if ( showLighttable )
+            {
+                FRDGTextureDesc lighttableTextureDesc = FRDGTextureDesc::Create2D(
+                    iDestinationTexture->Desc.Extent,
+                    iDestinationTexture->Desc.Format,
+                    FClearValueBinding::Transparent,
+                    ETextureCreateFlags::ShaderResource | ETextureCreateFlags::RenderTargetable
+                );
+
+                lighttableTexture = iGraphBuilder.CreateTexture(lighttableTextureDesc, TEXT("UOdysseyLayer::LighttableTexture"));
+
+                lighttableRenderFunction(
+                    iGraphBuilder,
+                    iFeatureLevel,
+                    lighttableTexture,
+                    iSrcRect,
+                    iDstRect,
+                    iSrcTransform
+                );
+            }
+
+            if ( showLighttable && lighttablePosition == EOdysseyLighttableDisplayPosition::UnderLayer )
+            {
+                FOdysseyBlendShader::BlendRect(
+                    iGraphBuilder,
+                    iFeatureLevel,
+                    iDestinationTexture,
+                    lighttableTexture,
+                    iDestinationTexture,
+                    iDstRect,
+                    iDstRect,
+                    FMatrix::Identity,
+                    EOdysseyBlendingMode::kNormal,
+                    EOdysseyAlphaMode::kNormal,
+                    1.0f,
+                    EOdysseyAntiAliasing::AnisotropicLinear
+                );
+            }
+
+            FOdysseyBlendShader::BlendRect(
+                iGraphBuilder,
+                iFeatureLevel,
+                iDestinationTexture,
+                renderTexture,
+                iDestinationTexture,
+                iDstRect,
+                iDstRect,
+                FMatrix::Identity,
+                EOdysseyBlendingMode::kNormal,
+                EOdysseyAlphaMode::kNormal,
+                1.0f,
+                EOdysseyAntiAliasing::AnisotropicLinear
+            );
+
+            if ( showLighttable && lighttablePosition == EOdysseyLighttableDisplayPosition::AboveLayer )
+            {
+                FOdysseyBlendShader::BlendRect(
+                    iGraphBuilder,
+                    iFeatureLevel,
+                    iDestinationTexture,
+                    lighttableTexture,
+                    iDestinationTexture,
+                    iDstRect,
+                    iDstRect,
+                    FMatrix::Identity,
+                    EOdysseyBlendingMode::kNormal,
+                    EOdysseyAlphaMode::kNormal,
+                    1.0f,
+                    EOdysseyAntiAliasing::AnisotropicLinear
+                );
+            }
+        };
+    return true;
+#else
+    oRenderFunction = renderFunction;
+    return true;
+#endif
 }
 
-FOdysseyTextureRenderFunction
+bool
+UOdysseyLayer::BuildLighttableRenderPipeline(
+    FFrameNumber iFrame,
+    EOdysseyRenderingType iType,
+    FOdysseyTextureRenderFunction& oRenderFunction
+) const
+{
+    UOdysseyLayerCell* cell = GetCellAtFrame(iFrame.Value);
+    if (!cell)
+        return false;
+
+    struct FLighttableKeyRenderParams
+    {
+        FOdysseyTextureRenderFunction RenderFunction;
+        float Opacity;
+        FLinearColor Color;
+        float Contrast;
+    };
+
+    TArray<FLighttableKeyRenderParams> keysRenderParams;
+    for (int i = 9; i >= 0; i--)
+    {
+        if (Lighttable.PreviousKeys[i].bIsActivated)
+        {
+            int keyCellIndex = cell->GetIndexInLayer() - i - 1;
+            if (keyCellIndex >= 0 && keyCellIndex < Cells.Num())
+            {
+                UOdysseyLayerCell* keyCell = GetCells()[keyCellIndex];
+                if (keyCell)
+                {
+                    int frame = iFrame.Value;
+                    frame -= cell->GetFrameRange().GetLowerBoundValue();
+                    FOdysseyTextureRenderFunction renderFunction;
+                    if (keyCell->BuildRenderPipeline(frame, EOdysseyRenderingType::Render, renderFunction))
+                    {
+                        keysRenderParams.Add(
+                            {
+                                renderFunction,
+                                Lighttable.PreviousKeys[i].Opacity / 100.f,
+                                Lighttable.PreviousKeysColor,
+                                Lighttable.PreviousKeysContrast / 100.f
+                            }
+                        );
+                    }
+                }
+            }
+        }
+
+        if (Lighttable.NextKeys[i].bIsActivated)
+        {
+            int keyCellIndex = cell->GetIndexInLayer() + i + 1;
+            if (keyCellIndex >= 0 && keyCellIndex < Cells.Num())
+            {
+                UOdysseyLayerCell* keyCell = GetCells()[keyCellIndex];
+                if (keyCell)
+                {
+                    int frame = iFrame.Value;
+                    frame -= cell->GetFrameRange().GetLowerBoundValue();
+                    FOdysseyTextureRenderFunction renderFunction;
+                    if (keyCell->BuildRenderPipeline(frame, EOdysseyRenderingType::Render, renderFunction))
+                    {
+                        keysRenderParams.Add(
+                            {
+                                renderFunction,
+                                Lighttable.NextKeys[i].Opacity / 100.f,
+                                Lighttable.NextKeysColor,
+                                Lighttable.NextKeysContrast / 100.f
+                            }
+                        );
+                    }
+                }
+            }
+        }
+    }
+
+    if (keysRenderParams.IsEmpty())
+        return false;
+
+    oRenderFunction = [this, keysRenderParams](
+            FRDGBuilder& iGraphBuilder,
+            ERHIFeatureLevel::Type iFeatureLevel,
+            FRDGTextureRef iDestinationTexture,
+            const FIntRect& iSrcRect,
+            const FIntRect& iDstRect,
+            const FMatrix& iSrcTransform
+        )
+        {
+            AddClearRenderTargetPass(iGraphBuilder, iDestinationTexture, FLinearColor::Transparent, iDstRect);
+
+            for ( const FLighttableKeyRenderParams& keyRenderParams : keysRenderParams )
+            {
+                FRDGTextureDesc desc = FRDGTextureDesc::Create2D(
+                    iDestinationTexture->Desc.Extent,
+                    iDestinationTexture->Desc.Format,
+                    FClearValueBinding::Transparent,
+                    ETextureCreateFlags::ShaderResource | ETextureCreateFlags::RenderTargetable
+                );
+
+                FRDGTextureRef keyTexture = iGraphBuilder.CreateTexture(desc, TEXT("UOdysseyLayer::Lighttable::keyTexture"));
+                keyRenderParams.RenderFunction(iGraphBuilder, iFeatureLevel, keyTexture, iSrcRect, iDstRect, iSrcTransform);
+
+                //Turn to black and white
+                FOdysseyBlendColorShader::BlendRect(
+                    iGraphBuilder,
+                    iFeatureLevel,
+                    keyTexture,
+                    FLinearColor::Black,
+                    keyTexture,
+                    iDstRect,
+                    EOdysseyBlendingMode::kSaturation,
+                    EOdysseyAlphaMode::kBack,
+                    1.f
+                );
+
+                //Apply Contrast
+                FOdysseyBlendColorShader::BlendRect(
+                    iGraphBuilder,
+                    iFeatureLevel,
+                    keyTexture,
+                    FLinearColor::Black,
+                    keyTexture,
+                    iDstRect,
+                    EOdysseyBlendingMode::kLuminosity,
+                    EOdysseyAlphaMode::kBack,
+                    1.f - keyRenderParams.Contrast
+                );
+
+                FOdysseyBlendColorShader::BlendRect(
+                    iGraphBuilder,
+                    iFeatureLevel,
+                    keyTexture,
+                    keyRenderParams.Color,
+                    keyTexture,
+                    iDstRect,
+                    EOdysseyBlendingMode::kScreen,
+                    EOdysseyAlphaMode::kBack,
+                    1.f
+                );
+
+                FOdysseyBlendShader::BlendRect(
+                    iGraphBuilder,
+                    iFeatureLevel,
+                    iDestinationTexture,
+                    keyTexture,
+                    iDestinationTexture,
+                    iDstRect,
+                    iDstRect,
+                    FMatrix::Identity,
+                    EOdysseyBlendingMode::kNormal,
+                    EOdysseyAlphaMode::kNormal,
+                    keyRenderParams.Opacity,
+                    EOdysseyAntiAliasing::AnisotropicLinear
+                );
+            }
+        };
+
+    return true;
+}
+
+bool
 UOdysseyLayer::BuildRenderChildrenPipeline(
     FFrameNumber iFrame,
-    EOdysseyRenderingType iType
+    EOdysseyRenderingType iType,
+    FOdysseyTextureRenderFunction& oRenderFunction
 ) const
 {
     struct FChildRenderParams
@@ -948,22 +1265,23 @@ UOdysseyLayer::BuildRenderChildrenPipeline(
         if ( !child->IsActivated() )
             continue;
 
-        FOdysseyTextureRenderFunction childRenderFunction = child->BuildRenderPipeline(
-            iFrame,
-            iType
-        );
-
-        childrenRenderParams.Add(
-            {
-                childRenderFunction,
-                child->GetBlendMode(),
-                child->GetOpacity()
-            }
-        );
+        FOdysseyTextureRenderFunction childRenderFunction;
+        if (child->BuildRenderPipeline(iFrame, iType, childRenderFunction))
+        {
+            childrenRenderParams.Add(
+                {
+                    childRenderFunction,
+                    child->GetBlendMode(),
+                    child->GetOpacity()
+                }
+            );
+        }
     }
 
-    return
-        [childrenRenderParams](
+    if (childrenRenderParams.IsEmpty())
+        return false;
+
+    oRenderFunction = [childrenRenderParams](
             FRDGBuilder& iGraphBuilder,
             ERHIFeatureLevel::Type iFeatureLevel,
             FRDGTextureRef iDestinationTexture,
@@ -997,11 +1315,14 @@ UOdysseyLayer::BuildRenderChildrenPipeline(
                     iDstRect,
                     FMatrix::Identity,
                     childRenderParams.BlendMode,
+                    EOdysseyAlphaMode::kNormal,
                     childRenderParams.Opacity,
                     EOdysseyAntiAliasing::AnisotropicLinear
                 );
             }
         };
+
+    return true;
 }
 
 #if WITH_EDITOR
@@ -1011,7 +1332,9 @@ UOdysseyLayer::GetRows() const
 {
     return {
         "Main",
-        "Blend"
+        "Blend",
+        "Lighttable",
+        "OutOfPegs"
     };
 }
 
@@ -1022,6 +1345,12 @@ UOdysseyLayer::GetRowHeight(FName iSubRowName) const
         return 20;
 
     if (iSubRowName == "Blend")
+        return 20;
+
+    if (iSubRowName == "Lighttable")
+        return 40;
+
+    if (iSubRowName == "OutOfPegs")
         return 20;
 
     return 0;
@@ -1035,6 +1364,12 @@ UOdysseyLayer::IsRowVisible(FName iSubRowName) const
 
     if (iSubRowName == "Blend")
         return bDisplayOptions;
+
+    if (iSubRowName == "Lighttable")
+        return ShouldDisplayOptions() && bHasLighttable && Lighttable.bIsActivated;
+
+    if (iSubRowName == "OutOfPegs")
+        return ShouldDisplayOptions() && bHasLighttable && Lighttable.bIsActivated;
 
     return 0;
 }
@@ -1097,6 +1432,86 @@ UOdysseyLayer::PostTransacted(const FTransactionObjectEvent& iTransactionEvent)
     {
         RenderingChanged();
     }
+
+    if (changedPropertyNames.Contains(GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Lighttable)))
+    {
+        RenderingCompositionChanged(); //Composition could change if lighttable or a key is activated/inactivated
+        RenderingChanged(); //ImageRendering changes without a composition change when any other param is changed
+        mOnLighttableChanged.Broadcast();
+    }
+}
+
+
+FOdysseyLighttable
+UOdysseyLayer::GetLighttable() const
+{
+    return Lighttable;
+}
+
+bool
+UOdysseyLayer::HasLighttable() const
+{
+    return bHasLighttable;
+}
+
+void
+UOdysseyLayer::SetLighttable(FOdysseyLighttable Value)
+{
+    Lighttable = Value;
+    RenderingCompositionChanged(); //Composition could change if lighttable or a key is activated/inactivated
+    RenderingChanged(); //ImageRendering changes without a composition change when any other param is changed
+    mOnLighttableChanged.Broadcast();
+}
+
+void
+UOdysseyLayer::SetLighttableInteractive(FOdysseyLighttable Value)
+{
+    Lighttable = Value;
+    RenderingCompositionChanged(true); //Composition could change if lighttable or a key is activated/inactivated
+    RenderingChanged(true); //ImageRendering changes without a composition change when any other param is changed
+    mOnLighttableChanged.Broadcast();
+}
+
+FSimpleMulticastDelegate&
+UOdysseyLayer::OnLighttableChanged()
+{
+    return mOnLighttableChanged;
+}
+
+TArray<FGuid>
+UOdysseyLayer::GetLighttableImageRenderingComposition(int iFrameIndex) const
+{
+    UOdysseyLayerCell* cell = GetCellAtFrame(iFrameIndex);
+    if (!cell)
+        return {};
+
+    TArray<FGuid> idComposition = {};
+    for (int i = 9; i >= 0; i--)
+    {
+        if (Lighttable.PreviousKeys[i].bIsActivated)
+        {
+            int keyCellIndex = cell->GetIndexInLayer() - i - 1;
+            if (keyCellIndex >= 0 && keyCellIndex < Cells.Num())
+            {
+                UOdysseyLayerCell* keyCell = GetCells()[keyCellIndex];
+                if (keyCell)
+                    idComposition.Append(keyCell->GetRenderingComposition(EOdysseyRenderingType::Render, 0));
+            }
+        }
+
+        if (Lighttable.NextKeys[i].bIsActivated)
+        {
+            int keyCellIndex = cell->GetIndexInLayer() + i + 1;
+            if (keyCellIndex >= 0 && keyCellIndex < Cells.Num())
+            {
+                UOdysseyLayerCell* keyCell = GetCells()[keyCellIndex];
+                if (keyCell)
+                    idComposition.Append(keyCell->GetRenderingComposition(EOdysseyRenderingType::Render, 0));
+            }
+        }
+    }
+
+    return idComposition;
 }
 
 #endif

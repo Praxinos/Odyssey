@@ -12,7 +12,7 @@
 #include "ULISLoaderModule.h"
 #include "OdysseyStyle.h"
 #include "OdysseyAnimationCellsContainerImport.h"
-#include "OdysseyAnimationLightTable.h"
+#include "OdysseyLighttable.h"
 #include "OdysseyAnimationLayerImageVectorImport.h"
 #include "OdysseyAnimation.h"
 #include "OdysseyMediaVector.h"
@@ -52,43 +52,6 @@ UOdysseyAnimationLayerImageVector::PostInitProperties()
 
     SupportedCellTypes.Add(UOdysseyAnimationCellImageVector::StaticClass());
     SupportedCellTypes.Add(UOdysseyLayerCellImageStagger::StaticClass());
-}
-
-TArray<FGuid>
-UOdysseyAnimationLayerImageVector::GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrameIndex) const
-{
-    TArray<FGuid> idComposition = { GetRenderingId() };
-
-#if WITH_EDITOR
-    bool showLighttable = iRenderType == EOdysseyRenderingType::Editor && Lighttable.bIsActivated;
-    if ( showLighttable && Lighttable.DisplayPosition == EOdysseyLightTableDisplayPosition::UnderLayer )
-        idComposition.Append(GetLighttableImageRenderingComposition(iFrameIndex));
-#endif
-
-    int frame = iFrameIndex;
-    FInt32Range frameRange = GetFrameRange();
-    if ( iFrameIndex < frameRange.GetLowerBoundValue() )
-    {
-        frame = GetPreBehaviourFrame(PreBehaviour, iFrameIndex);
-    }
-    else if ( iFrameIndex > frameRange.GetUpperBoundValue() )
-    {
-        frame = GetPostBehaviourFrame(PostBehaviour, iFrameIndex);
-    }
-
-    UOdysseyLayerCell* cell = GetCellAtFrame(frame);
-    if ( cell )
-    {
-        int cellFrame = frame - cell->GetFrameRange().GetLowerBoundValue();
-        idComposition.Append(cell->GetRenderingComposition(iRenderType, cellFrame));
-    }
-
-#if WITH_EDITOR
-    if ( showLighttable && Lighttable.DisplayPosition == EOdysseyLightTableDisplayPosition::AboveLayer )
-        idComposition.Append(GetLighttableImageRenderingComposition(iFrameIndex));
-#endif
-
-    return idComposition;
 }
 
 #if WITH_EDITOR

@@ -174,20 +174,21 @@ UOdysseyLayerCellImageStagger::Break(int Frame, bool bClear)
 }
 #endif
 
-FOdysseyTextureRenderFunction
+bool
 UOdysseyLayerCellImageStagger::BuildRenderPipeline(
     FFrameNumber iFrame,
-    EOdysseyRenderingType iType
+    EOdysseyRenderingType iType,
+    FOdysseyTextureRenderFunction& oRenderFunction
 ) const
 {
     int staggerFrame = GetReferenceFrameAtFrame(iFrame.Value);
     if ( staggerFrame == INDEX_NONE )
-        return nullptr;
+        return false;
 
     UOdysseyLayerCell* cell = Cast<UOdysseyLayerCell>(GetLayer()->GetCellAtFrame(staggerFrame));
     if ( !cell )
-        return nullptr;
+        return false;
 
     int cellFrame = staggerFrame - cell->GetFrameRange().GetLowerBoundValue();
-    return cell->BuildRenderPipeline(cellFrame, iType);
+    return cell->BuildRenderPipeline(cellFrame, iType, oRenderFunction);
 }

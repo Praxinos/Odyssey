@@ -413,7 +413,7 @@ UOdysseyAnimationPlayer::UpdateTexture()
     {
         mImageRenderingComposition = imageRenderingComposition;
 
-        IOdysseyTextureRenderingAbility::Execute_Render(Animation, RenderTarget, frame.GetFrame());
+        Animation->Render_GameThread(RenderTarget, frame.GetFrame(), mRenderType);
         mInvalidTileMap.Clear();
         return;
     }
@@ -423,9 +423,8 @@ UOdysseyAnimationPlayer::UpdateTexture()
         TArray<FIntRect> invalidTiles = mInvalidTileMap.InvalidRects();
         for (const FIntRect& rect : invalidTiles)
         {
-            IOdysseyTextureRenderingAbility::Execute_RenderRect(Animation, RenderTarget, frame.GetFrame(), rect);
+            Animation->Render_GameThread(RenderTarget, frame.GetFrame(), mRenderType, rect);
         }
-        //IOdysseyTextureRenderingAbility::Execute_Render(Animation, RenderTarget, frame.GetFrame());
 
         mInvalidTileMap.Clear();
     }

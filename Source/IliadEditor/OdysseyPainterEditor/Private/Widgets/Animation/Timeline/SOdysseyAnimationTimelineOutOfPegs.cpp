@@ -3,7 +3,7 @@
 
 #include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineOutOfPegs.h"
 #include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineOutOfPegsKey.h"
-#include "OdysseyAnimationLightTable.h"
+#include "OdysseyLighttable.h"
 #include "Tools/OutOfPegsTool/OdysseyPainterEditorAnimationOutOfPegsTool.h"
 #include "OdysseyAnimation.h"
 #include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineSection.h"

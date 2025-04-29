@@ -5,7 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "Widgets/Animation/Timeline/Layers/SOdysseyAnimationLayerRow.h"
-#include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineLightTableKey.h"
+#include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineLighttableKey.h"
 
 class FOdysseyPainterEditorAnimationTimelinePosition;
 class FOdysseyPainterEditor;

@@ -71,7 +71,10 @@ UOdysseyAnimationCellThumbnailRenderer::Draw(UObject* Object, int32 X, int32 Y, 
 
     const ERHIFeatureLevel::Type featureLevel = Canvas->GetFeatureLevel();
 
-    FOdysseyTextureRenderFunction childRenderFunction = cell->BuildRenderPipeline(FFrameNumber(0), EOdysseyRenderingType::Render);
+    FOdysseyTextureRenderFunction childRenderFunction;
+    if (!cell->BuildRenderPipeline(FFrameNumber(0), EOdysseyRenderingType::Render, childRenderFunction))
+        return;
+
     FIntRect srcRect = cell->GetDefaultRenderRect();
     ENQUEUE_RENDER_COMMAND(UOdysseyAnimationCellThumbnailRenderer_Draw)(
         [Viewport, srcRect, X, Y, Width, Height, featureLevel, childRenderFunction](FRHICommandListImmediate& RHICmdList)

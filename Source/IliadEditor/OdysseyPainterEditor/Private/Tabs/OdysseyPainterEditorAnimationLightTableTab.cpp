@@ -1,9 +1,9 @@
 // IDDN.FR.001.060015.013.S.X.2019.000.00000
 // ODYSSEY is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
 
-#include "OdysseyPainterEditorAnimationLightTableTab.h"
+#include "OdysseyPainterEditorAnimationLighttableTab.h"
 
-#include "Widgets/Animation/SOdysseyAnimationLightTable.h"
+#include "Widgets/Animation/SOdysseyLighttable.h"
 #include "OdysseyAnimationLayerStack.h"
 #include "OdysseyPainterEditor.h"
 
@@ -11,42 +11,42 @@
 
 
 const FName&
-FOdysseyPainterEditorAnimationLightTableTab::StaticId()
+FOdysseyPainterEditorAnimationLighttableTab::StaticId()
 {
-    static FName Id = TEXT("OdysseyAnimationEditor_LightTable"); //Dont change, Old Id for retro compatibility
+    static FName Id = TEXT("OdysseyAnimationEditor_Lighttable"); //Dont change, Old Id for retro compatibility
     return Id;
 }
 
 /////////////////////////////////////////////////////
-// FOdysseyPainterEditorAnimationLightTableTab
+// FOdysseyPainterEditorAnimationLighttableTab
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
-FOdysseyPainterEditorAnimationLightTableTab::~FOdysseyPainterEditorAnimationLightTableTab()
+FOdysseyPainterEditorAnimationLighttableTab::~FOdysseyPainterEditorAnimationLighttableTab()
 {
 }
 
-FOdysseyPainterEditorAnimationLightTableTab::FOdysseyPainterEditorAnimationLightTableTab(FOdysseyPainterEditor* iEditor)
-    : FOdysseyEditorTab( LOCTEXT( "lighttable-tab.name", "LightTable" )
-    , FSlateIcon( "OdysseyStyle", "Animation.LightTable16" ))
+FOdysseyPainterEditorAnimationLighttableTab::FOdysseyPainterEditorAnimationLighttableTab(FOdysseyPainterEditor* iEditor)
+    : FOdysseyEditorTab( LOCTEXT( "lighttable-tab.name", "Lighttable" )
+    , FSlateIcon( "OdysseyStyle", "Animation.Lighttable16" ))
     , mEditor(iEditor)
 {
 }
 
 const FName&
-FOdysseyPainterEditorAnimationLightTableTab::GetId() const
+FOdysseyPainterEditorAnimationLighttableTab::GetId() const
 {
     return StaticId();
 }
 
 TSharedPtr<SWidget>
-FOdysseyPainterEditorAnimationLightTableTab::CreateWidget()
+FOdysseyPainterEditorAnimationLighttableTab::CreateWidget()
 {
-    return SNew(SOdysseyAnimationLightTable)
-        .LayerStack(this, &FOdysseyPainterEditorAnimationLightTableTab::LayerStack);
+    return SNew(SOdysseyLighttable)
+        .LayerStack(this, &FOdysseyPainterEditorAnimationLighttableTab::LayerStack);
 }
 
 UOdysseyAnimationLayerStack*
-FOdysseyPainterEditorAnimationLightTableTab::LayerStack() const
+FOdysseyPainterEditorAnimationLighttableTab::LayerStack() const
 {
     return Cast<UOdysseyAnimationLayerStack>(mEditor->LayerStack());
 }

@@ -115,24 +115,32 @@ TArray<FGuid>
 UOdysseyAnimation::GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrameIndex) const
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyAnimation::GetRenderingComposition);
+    TArray<FGuid> idComposition = { GetRenderingId() };
+
+#if WITH_EDITOR
+    if ( !mLayerStack )
+        return idComposition;
+
+    idComposition.Append(mLayerStack->GetRenderingComposition(iRenderType, iFrameIndex));
+#else
     if ( PreserveLayerStackAtRuntime )
     {
         if ( !mLayerStack )
-            return {};
+            return idComposition;
 
-        TArray<FGuid> idComposition;
         idComposition.Append(mLayerStack->GetRenderingComposition(iRenderType, iFrameIndex));
-
-        return idComposition;
     }
     else
     {
         int frameIndex = GetFrameIndexAtFrame(iFrameIndex);
         if ( frameIndex == INDEX_NONE )
-            return {};
+            return idComposition;
 
-        return Frames[frameIndex].RenderingComposition;
+        idComposition.Append(Frames[frameIndex].RenderingComposition);
     }
+#endif
+
+    return idComposition;
 }
 
 FIntRect
@@ -141,24 +149,25 @@ UOdysseyAnimation::GetDefaultRenderRect() const
     return FIntRect(0, 0, GetWidth(), GetHeight());
 }
 
-FOdysseyTextureRenderFunction
+bool
 UOdysseyAnimation::BuildRenderPipeline(
     FFrameNumber iFrame,
-    EOdysseyRenderingType iType
+    EOdysseyRenderingType iType,
+    FOdysseyTextureRenderFunction& oRenderFunction
 ) const
 {
 #if WITH_EDITOR
     if ( !mLayerStack )
-        return FOdysseyTextureRenderFunction();
+        return false;
 
-    return mLayerStack->BuildRenderPipeline(iFrame, iType);
+    return mLayerStack->BuildRenderPipeline(iFrame, iType, oRenderFunction);
 #else
     if ( PreserveLayerStackAtRuntime )
     {
         if ( !mLayerStack )
-            return FOdysseyTextureRenderFunction();
+            return false;
 
-        return mLayerStack->BuildRenderPipeline(iFrame, iType);
+        return mLayerStack->BuildRenderPipeline(iFrame, iType, oRenderFunction);
     }
 
     UTexture2D* srcTexture2D = nullptr;
@@ -170,9 +179,9 @@ UOdysseyAnimation::BuildRenderPipeline(
     }
 
     if (!srcTexture2D)
-        return FOdysseyTextureRenderFunction();
+        return false;
 
-    return[srcTexture2D](
+    oRenderFunction = [srcTexture2D](
         FRDGBuilder& iGraphBuilder,
         ERHIFeatureLevel::Type iFeatureLevel,
         FRDGTextureRef iDestinationTexture,
@@ -196,6 +205,8 @@ UOdysseyAnimation::BuildRenderPipeline(
             iDstRect.Size()
         );
     };
+
+    return true;
 #endif
 }
 
@@ -463,7 +474,7 @@ UOdysseyAnimation::PreSave(FObjectPreSaveContext SaveContext)
 
         lastRenderingComposition = renderingComposition;
 
-        Execute_Render(this, renderTarget.Get(), FFrameNumber(i));
+        Render_GameThread(renderTarget.Get(), FFrameNumber(i), EOdysseyRenderingType::Render);
 
         UTexture2D* texture = NewObject<UTexture2D>(this, NAME_None, RF_Public);
         renderTarget.Get()->UpdateTexture(texture);

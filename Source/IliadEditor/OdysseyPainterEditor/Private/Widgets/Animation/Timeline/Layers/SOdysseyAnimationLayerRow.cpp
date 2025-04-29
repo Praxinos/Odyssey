@@ -4,7 +4,7 @@
 #include "Widgets/Animation/Timeline/Layers/SOdysseyAnimationLayerRow.h"
 #include "Widgets/Animation/Timeline/SOdysseyAnimationLayerStack.h"
 #include "OdysseyAnimationLayer.h"
-#include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineLightTableHeader.h"
+#include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineLighttableHeader.h"
 #include "OdysseyStyle.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 
@@ -32,11 +32,11 @@ SOdysseyAnimationLayerRow::Construct(
 TSharedRef<SWidget>
 SOdysseyAnimationLayerRow::GenerateWidget( const FName& iRow, const FName& iColumn )
 {
-    if (iRow == "LightTable")
+    if (iRow == "Lighttable")
     {
         if (iColumn == "Header")
         {
-            return GenerateLightTableRowHeaderWidget();
+            return GenerateLighttableRowHeaderWidget();
         }
     }
 
@@ -52,9 +52,9 @@ SOdysseyAnimationLayerRow::GenerateWidget( const FName& iRow, const FName& iColu
 }
 
 TSharedRef<SWidget>
-SOdysseyAnimationLayerRow::GenerateLightTableRowHeaderWidget()
+SOdysseyAnimationLayerRow::GenerateLighttableRowHeaderWidget()
 {
-    return SNew(SOdysseyAnimationTimelineLightTableHeader)
+    return SNew(SOdysseyAnimationTimelineLighttableHeader)
         .Layer(mLayer);
 }
 
@@ -72,13 +72,13 @@ SOdysseyAnimationLayerRow::GenerateMainRowHeaderOptionWidgets()
 
     if (mLayer->HasLighttable())
     {
-        const FCheckBoxStyle* lightTableToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("Animation.LightTableToggle");
+        const FCheckBoxStyle* lighttableToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("Animation.LighttableToggle");
 
         widgets.Add(
             SNew(SCheckBox)
-            .Style(lightTableToggleStyle)
-            .OnCheckStateChanged(this, &SOdysseyAnimationLayerRow::OnLightTableCheckStateChanged)
-            .IsChecked(this, &SOdysseyAnimationLayerRow::GetLightTableIsChecked)
+            .Style(lighttableToggleStyle)
+            .OnCheckStateChanged(this, &SOdysseyAnimationLayerRow::OnLighttableCheckStateChanged)
+            .IsChecked(this, &SOdysseyAnimationLayerRow::GetLighttableIsChecked)
         );
     }
 
@@ -88,15 +88,15 @@ SOdysseyAnimationLayerRow::GenerateMainRowHeaderOptionWidgets()
 }
 
 ECheckBoxState
-SOdysseyAnimationLayerRow::GetLightTableIsChecked() const
+SOdysseyAnimationLayerRow::GetLighttableIsChecked() const
 {
     return mLayer->GetLighttable().bIsActivated ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
 
 void
-SOdysseyAnimationLayerRow::OnLightTableCheckStateChanged(ECheckBoxState iState)
+SOdysseyAnimationLayerRow::OnLighttableCheckStateChanged(ECheckBoxState iState)
 {
-    FOdysseyAnimationLightTable lighttable = mLayer->GetLighttable();
+    FOdysseyLighttable lighttable = mLayer->GetLighttable();
     lighttable.bIsActivated = iState == ECheckBoxState::Checked;
     mLayer->SetLighttable(lighttable);
     GetTreeView()->RequestTreeRefresh(); //needed to display layers previously hidden

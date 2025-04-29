@@ -5,18 +5,18 @@
 
 #include "CoreMinimal.h"
 #include "OdysseyRenderingAbility.h"
-#include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineLightTableKey.h"
+#include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineLighttableKey.h"
 
 class UOdysseyAnimationLayer;
 class UOdysseyAnimation;
 class UOdysseyAnimationCell;
 class FOdysseyPainterEditorAnimationTimelinePosition;
 
-class SOdysseyAnimationTimelineLightTable
+class SOdysseyAnimationTimelineLighttable
     : public SCompoundWidget
 {
 public:
-    SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineLightTable)
+    SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineLighttable)
     : _CurrentFrame(0)
     {}
         SLATE_ATTRIBUTE(int, CurrentFrame)

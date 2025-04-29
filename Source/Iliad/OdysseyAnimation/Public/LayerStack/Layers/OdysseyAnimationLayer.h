@@ -6,15 +6,7 @@
 #include "OdysseyLayer.h"
 #include "OdysseyAnimationLayerStack.h"
 
-#if WITH_EDITOR
-#include "OdysseyAnimationLightTable.h"
-#include "Templates/SubclassOf.h"
-#endif
-
 #include "OdysseyAnimationLayer.generated.h"
-
-class UOdysseyAnimation;
-class UOdysseyAnimationCell;
 
 UCLASS(Abstract, BlueprintType, HideDropdown)
 class ODYSSEYANIMATION_API UOdysseyAnimationLayer
@@ -23,7 +15,7 @@ class ODYSSEYANIMATION_API UOdysseyAnimationLayer
     GENERATED_BODY()
 
 public:
-    virtual void PostInitProperties() override;
+
     virtual UOdysseyAnimationLayerStack* GetLayerStack() const;
 
 public:
@@ -31,41 +23,7 @@ public:
     UOdysseyAnimation* GetAnimation() const;
 
 #if WITH_EDITOR
-public:
-    FSimpleMulticastDelegate& OnLightTableChanged();
-
-public:
-    UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
-    FOdysseyAnimationLightTable GetLighttable() const;
-
-    UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
-    bool HasLighttable() const;
-
-    UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
-    void SetLighttable(FOdysseyAnimationLightTable Value);
-
-public:
-    void SetLighttableInteractive(FOdysseyAnimationLightTable Value);
-    virtual TArray<FName> GetRows() const override;
-    virtual int GetRowHeight(FName iSubRowName) const override;
-    virtual bool IsRowVisible(FName iSubRowName) const override;
-    virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
-
-protected:
-    TArray<FGuid> GetLighttableImageRenderingComposition(int iFrameIndex) const;
-
 protected:
     friend class FOdysseyAnimationCellsContainerImport;
-
-    FSimpleMulticastDelegate mOnLightTableChanged;
-#endif
-
-#if WITH_EDITORONLY_DATA
-protected:
-    UPROPERTY(NonTransactional)
-    FOdysseyAnimationLightTable Lighttable;
-
-    UPROPERTY(NonTransactional)
-    bool bHasLighttable = true;
 #endif
 };

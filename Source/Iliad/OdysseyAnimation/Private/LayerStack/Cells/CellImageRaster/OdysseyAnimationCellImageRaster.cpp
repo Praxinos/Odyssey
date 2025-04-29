@@ -40,10 +40,11 @@ UOdysseyAnimationCellImageRaster::GetDefaultRenderRect() const
     return FIntRect(0, 0, GetAnimation()->GetWidth(), GetAnimation()->GetHeight());
 }
 
-FOdysseyTextureRenderFunction
+bool
 UOdysseyAnimationCellImageRaster::BuildRenderPipeline(
     FFrameNumber iFrame,
-    EOdysseyRenderingType iType
+    EOdysseyRenderingType iType,
+    FOdysseyTextureRenderFunction& oRenderFunction
 ) const
 {
 
@@ -52,7 +53,7 @@ UOdysseyAnimationCellImageRaster::BuildRenderPipeline(
         InitTexture();
 #endif
 
-    return Super::BuildRenderPipeline(iFrame, iType);
+    return Super::BuildRenderPipeline(iFrame, iType, oRenderFunction);
 }
 
 #if WITH_EDITOR

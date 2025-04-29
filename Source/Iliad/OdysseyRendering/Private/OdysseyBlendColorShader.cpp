@@ -1,7 +1,7 @@
 // IDDN.FR.001.060015.013.S.X.2019.000.00000
 // ODYSSEY is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
 
-#include "OdysseyBlendShader.h"
+#include "OdysseyBlendColorShader.h"
 
 #include "RHICommandList.h"
 #include "CanvasTypes.h"
@@ -13,13 +13,13 @@
 #include "ScreenPass.h"
 #include "MeshPassProcessor.h"
 
-class FOdysseyBlendShaderPS : public FGlobalShader
+class FOdysseyBlendColorShaderPS : public FGlobalShader
 {
 public:
-    DECLARE_SHADER_TYPE(FOdysseyBlendShaderPS, Global);
-    SHADER_USE_PARAMETER_STRUCT(FOdysseyBlendShaderPS, FGlobalShader);
+    DECLARE_SHADER_TYPE(FOdysseyBlendColorShaderPS, Global);
+    SHADER_USE_PARAMETER_STRUCT(FOdysseyBlendColorShaderPS, FGlobalShader);
 
-    using FParameters = FOdysseyBlendShaderParameters;
+    using FParameters = FOdysseyBlendColorShaderParameters;
 
 public:
     static bool ShouldCompilePermutation(const FGlobalShaderPermutationParameters& Parameters)
@@ -28,28 +28,21 @@ public:
     }
 };
 
-IMPLEMENT_SHADER_TYPE(, FOdysseyBlendShaderPS, TEXT("/OdysseyShaders/Private/OdysseyBlend.usf"), TEXT("MainPS"), SF_Pixel)
+IMPLEMENT_SHADER_TYPE(, FOdysseyBlendColorShaderPS, TEXT("/OdysseyShaders/Private/OdysseyBlendColor.usf"), TEXT("MainPS"), SF_Pixel)
 
-void FOdysseyBlendShader::BlendRect(
+void FOdysseyBlendColorShader::BlendRect(
     FRDGBuilder& iGraphBuilder,
     ERHIFeatureLevel::Type iFeatureLevel,
     FRDGTextureRef iBackgroundTexture,
-    FRDGTextureRef iForegroundTexture,
+    FLinearColor iForegroundColor,
     FRDGTextureRef iDestinationTexture,
-
-    const FIntRect& iSrcRect,
     const FIntRect& iDstRect,
-
-    const FMatrix& iTransform,
-
     EOdysseyBlendingMode iBlendMode,
     EOdysseyAlphaMode iAlphaMode,
-    float iOpacity,
-    EOdysseyAntiAliasing iAntiAliasing
+    float iOpacity
 )
 {
     FRDGTextureRef backgroundTexture = iBackgroundTexture;
-    FRDGTextureRef foregroundTexture = iForegroundTexture;
     FRDGTextureRef destinationTexture = iDestinationTexture;
 
     if ( iBackgroundTexture == iDestinationTexture )
@@ -60,7 +53,7 @@ void FOdysseyBlendShader::BlendRect(
             FClearValueBinding::Transparent,
             ETextureCreateFlags::ShaderResource | ETextureCreateFlags::RenderTargetable
         );
-        backgroundTexture = iGraphBuilder.CreateTexture(desc, TEXT("FOdysseyBlendShader::BackgroundTexture"));
+        backgroundTexture = iGraphBuilder.CreateTexture(desc, TEXT("FOdysseyBlendColorShader::BackgroundTexture"));
         AddClearRenderTargetPass(iGraphBuilder, backgroundTexture, FLinearColor::Transparent, iDstRect);
 
         //Copy Destination Texture to Background Texture
@@ -74,13 +67,12 @@ void FOdysseyBlendShader::BlendRect(
         );
     }
 
-    FSamplerStateRHIRef samplerStateRHI = Odyssey::GetSamplerStateForAntiAliasing(iAntiAliasing);
+    FSamplerStateRHIRef samplerStateRHI = Odyssey::GetSamplerStateForAntiAliasing(EOdysseyAntiAliasing::NearestNeighbor);
 
     //Alloc Shader Parameters
-    FOdysseyBlendShaderParameters* shaderParameters = iGraphBuilder.AllocParameters<FOdysseyBlendShaderParameters>();
+    FOdysseyBlendColorShaderParameters* shaderParameters = iGraphBuilder.AllocParameters<FOdysseyBlendColorShaderParameters>();
     shaderParameters->RenderTargets[0] = FRenderTargetBinding(destinationTexture, ERenderTargetLoadAction::ELoad);
-    shaderParameters->SourceTexture = foregroundTexture;
-    shaderParameters->SourceTextureSampler = samplerStateRHI;
+    shaderParameters->Color = FVector4f(iForegroundColor.R, iForegroundColor.G, iForegroundColor.B, iForegroundColor.A);
     shaderParameters->DestinationTexture = backgroundTexture;
     shaderParameters->DestinationTextureSampler = samplerStateRHI;
     shaderParameters->Opacity = FMath::Clamp(iOpacity, 0.f, 1.f);
@@ -88,16 +80,15 @@ void FOdysseyBlendShader::BlendRect(
     shaderParameters->AlphaMode = (uint32)iAlphaMode;
 
     //Create Shader
-    TRefCountPtr< FOdysseyBlendShader > blendShader(new FOdysseyBlendShader(shaderParameters, iBlendMode));
+    TRefCountPtr< FOdysseyBlendColorShader > blendColorShader(new FOdysseyBlendColorShader(shaderParameters, iBlendMode));
 
-    FIntPoint foregroundTextureSize = foregroundTexture->Desc.Extent;
     FIntPoint backgroundTextureSize = backgroundTexture->Desc.Extent;
 
     iGraphBuilder.AddPass(
-        RDG_EVENT_NAME("OdysseyBlendShader"),
+        RDG_EVENT_NAME("OdysseyBlendColorShader"),
         shaderParameters,
         ERDGPassFlags::Raster,
-        [iFeatureLevel, iDstRect, iSrcRect, foregroundTextureSize, backgroundTextureSize, blendShader](FRHICommandListImmediate& RHICmdList)
+        [iFeatureLevel, iDstRect, backgroundTextureSize, blendColorShader](FRHICommandListImmediate& RHICmdList)
         {
             FBatchedElements blendBatchedElements;
 
@@ -105,18 +96,18 @@ void FOdysseyBlendShader::BlendRect(
             double y = iDstRect.Min.Y;
             double w = iDstRect.Width();
             double h = iDstRect.Height();
-            float u0 = float(iSrcRect.Min.X) / foregroundTextureSize.X;
-            float v0 = float(iSrcRect.Min.Y) / foregroundTextureSize.Y;
-            float u1 = float(iSrcRect.Max.X) / foregroundTextureSize.X;
-            float v1 = float(iSrcRect.Max.Y) / foregroundTextureSize.Y;
+            float u0 = float(iDstRect.Min.X) / backgroundTextureSize.X;
+            float v0 = float(iDstRect.Min.Y) / backgroundTextureSize.Y;
+            float u1 = float(iDstRect.Max.X) / backgroundTextureSize.X;
+            float v1 = float(iDstRect.Max.Y) / backgroundTextureSize.Y;
 
             int32 topLeftVertex = blendBatchedElements.AddVertex(FVector4(x, y, 0, 1), FVector2D(u0, v0), FLinearColor::White, FHitProxyId());
             int32 topRightVertex = blendBatchedElements.AddVertex(FVector4(x + w, y, 0, 1), FVector2D(u1, v0), FLinearColor::White, FHitProxyId());
             int32 bottomLeftVertex = blendBatchedElements.AddVertex(FVector4(x, y + h, 0, 1), FVector2D(u0, v1), FLinearColor::White, FHitProxyId());
             int32 bottomRightVertex = blendBatchedElements.AddVertex(FVector4(x + w, y + h, 0, 1), FVector2D(u1, v1), FLinearColor::White, FHitProxyId());
 
-            blendBatchedElements.AddTriangle(topLeftVertex, topRightVertex, bottomRightVertex, blendShader.GetReference(), SE_BLEND_Opaque);
-            blendBatchedElements.AddTriangle(topLeftVertex, bottomRightVertex, bottomLeftVertex, blendShader.GetReference(), SE_BLEND_Opaque);
+            blendBatchedElements.AddTriangle(topLeftVertex, topRightVertex, bottomRightVertex, blendColorShader.GetReference(), SE_BLEND_Opaque);
+            blendBatchedElements.AddTriangle(topLeftVertex, bottomRightVertex, bottomLeftVertex, blendColorShader.GetReference(), SE_BLEND_Opaque);
 
             FMeshPassProcessorRenderState DrawRenderState;
             DrawRenderState.SetDepthStencilState(TStaticDepthStencilState<false, CF_Always>::GetRHI());
@@ -148,18 +139,18 @@ void FOdysseyBlendShader::BlendRect(
     );
 }
 
-FOdysseyBlendShader::FOdysseyBlendShader(FOdysseyBlendShaderParameters* iPixelShaderParams, EOdysseyBlendingMode iBlendMode)
+FOdysseyBlendColorShader::FOdysseyBlendColorShader(FOdysseyBlendColorShaderParameters* iPixelShaderParams, EOdysseyBlendingMode iBlendMode)
     : mPixelShaderParams(iPixelShaderParams)
     , mBlendMode(iBlendMode)
 {
 }
 
 void
-FOdysseyBlendShader::BindShaders(FRHICommandList& RHICmdList, FGraphicsPipelineStateInitializer& GraphicsPSOInit, ERHIFeatureLevel::Type InFeatureLevel, const FMatrix& InTransform, const float InGamma, const FMatrix& ColorWeights, const FTexture* Texture)
+FOdysseyBlendColorShader::BindShaders(FRHICommandList& RHICmdList, FGraphicsPipelineStateInitializer& GraphicsPSOInit, ERHIFeatureLevel::Type InFeatureLevel, const FMatrix& InTransform, const float InGamma, const FMatrix& ColorWeights, const FTexture* Texture)
 {
     static TGlobalResource< FSimpleElementVertexDeclaration > GBlendVertexDeclaration;
     TShaderMapRef< FSimpleElementVS > VertexShader(GetGlobalShaderMap(InFeatureLevel));
-    TShaderMapRef< FOdysseyBlendShaderPS > PixelShader(GetGlobalShaderMap(InFeatureLevel));
+    TShaderMapRef< FOdysseyBlendColorShaderPS > PixelShader(GetGlobalShaderMap(InFeatureLevel));
     GraphicsPSOInit.BoundShaderState.VertexDeclarationRHI = GBlendVertexDeclaration.VertexDeclarationRHI;
     GraphicsPSOInit.BoundShaderState.VertexShaderRHI = VertexShader.GetVertexShader();
     GraphicsPSOInit.BoundShaderState.PixelShaderRHI = PixelShader.GetPixelShader();

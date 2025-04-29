@@ -2,7 +2,7 @@
 // ODYSSEY is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineOutOfPegsKey.h"
-#include "OdysseyAnimationLightTable.h"
+#include "OdysseyLighttable.h"
 #include "OdysseyStyle.h"
 #include "OdysseyAnimationLayer.h"
 #include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineSection.h"
@@ -56,9 +56,9 @@ SOdysseyAnimationTimelineOutOfPegsKey::GetOutOfPegsButtonImage() const
         return nullptr;
 
     if (cell->IsOutOfPegs())
-        return FOdysseyStyle::GetBrush("Animation.LightTable.OutOfPegs.Button.On");
+        return FOdysseyStyle::GetBrush("Animation.Lighttable.OutOfPegs.Button.On");
 
-    return FOdysseyStyle::GetBrush("Animation.LightTable.OutOfPegs.Button.Off");
+    return FOdysseyStyle::GetBrush("Animation.Lighttable.OutOfPegs.Button.Off");
 }
 
 void

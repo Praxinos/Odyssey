@@ -19,6 +19,7 @@
 void
 SOdysseyAnimationTimelineTreeView::Construct(const FArguments& InArgs)
 {
+    mCurrentFrame = InArgs._CurrentFrame;
     mTimelinePosition = InArgs._TimelinePosition;
     mLayerStack = InArgs._LayerStack;
     mOnActivateOutOfPegs = InArgs._OnActivateOutOfPegs;
@@ -83,6 +84,7 @@ SOdysseyAnimationTimelineTreeView::OnGenerateRow(UOdysseyLayer* iLayer, const TS
     if (layerClass == UOdysseyAnimationLayerImageRaster::StaticClass())
     {
         return SNew(SOdysseyAnimationLayerImageRasterTimeline, SharedThis(this), Cast<UOdysseyAnimationLayerImageRaster>(iLayer))
+            .CurrentFrame(mCurrentFrame)
             .TimelinePosition(mTimelinePosition)
             .OnActivateOutOfPegs(mOnActivateOutOfPegs)
             .OnInactivateOutOfPegs(mOnInactivateOutOfPegs)
@@ -91,6 +93,7 @@ SOdysseyAnimationTimelineTreeView::OnGenerateRow(UOdysseyLayer* iLayer, const TS
     if (layerClass == UOdysseyAnimationLayerImageVector::StaticClass())
     {
         return SNew(SOdysseyAnimationLayerImageVectorTimeline, SharedThis(this), Cast<UOdysseyAnimationLayerImageVector>(iLayer))
+            .CurrentFrame(mCurrentFrame)
             .TimelinePosition(mTimelinePosition)
             .OnActivateOutOfPegs(mOnActivateOutOfPegs)
             .OnInactivateOutOfPegs(mOnInactivateOutOfPegs)

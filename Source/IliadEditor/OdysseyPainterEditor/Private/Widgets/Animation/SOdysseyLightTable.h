@@ -10,21 +10,21 @@ class UOdysseyLayerStack;
 class UOdysseyAnimationLayerStack;
 
 //////////////////////////////////////////////////////////////////////////
-// SOdysseyAnimationLightTable
-class SOdysseyAnimationLightTable : public SCompoundWidget
+// SOdysseyLighttable
+class SOdysseyLighttable : public SCompoundWidget
 {
-    SLATE_DECLARE_WIDGET(SOdysseyAnimationLightTable, SCompoundWidget)
+    SLATE_DECLARE_WIDGET(SOdysseyLighttable, SCompoundWidget)
 
 public:
-    SLATE_BEGIN_ARGS(SOdysseyAnimationLightTable)
+    SLATE_BEGIN_ARGS(SOdysseyLighttable)
         {}
         SLATE_ATTRIBUTE( UOdysseyAnimationLayerStack*, LayerStack )
     SLATE_END_ARGS()
 
     void Construct(const FArguments& InArgs);
 
-    SOdysseyAnimationLightTable();
-    ~SOdysseyAnimationLightTable();
+    SOdysseyLighttable();
+    ~SOdysseyLighttable();
 
 private:
     //SWidget overrides

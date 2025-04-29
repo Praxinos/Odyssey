@@ -1,9 +1,9 @@
 // IDDN.FR.001.060015.013.S.X.2019.000.00000
 // ODYSSEY is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
 
-#include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineLightTable.h"
-#include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineLightTableKey.h"
-#include "OdysseyAnimationLightTable.h"
+#include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineLighttable.h"
+#include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineLighttableKey.h"
+#include "OdysseyLighttable.h"
 #include "OdysseyAnimation.h"
 #include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineSection.h"
 #include "OdysseyAnimationLayer.h"
@@ -12,7 +12,7 @@
 #include "UObject/OdysseyObjectEditorUtils.h"
 
 void
-SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysseyAnimationLayer* iLayer)
+SOdysseyAnimationTimelineLighttable::Construct(const FArguments& InArgs, UOdysseyAnimationLayer* iLayer)
 {
     mCurrentFrame = InArgs._CurrentFrame;
     mLayer = iLayer;
@@ -71,7 +71,7 @@ SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysse
             )
             [
 
-                SNew(SOdysseyAnimationTimelineLightTableKey)
+                SNew(SOdysseyAnimationTimelineLighttableKey)
                 .Visibility_Lambda(
                     [this, i]()
                     {
@@ -103,19 +103,19 @@ SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysse
                     }
                 )
                 .OnChanged_Lambda(
-                    [this, i](FOdysseyAnimationLightTableKey iKey)
+                    [this, i](FOdysseyLighttableKey iKey)
                     {
-                        FOdysseyAnimationLightTable lighttable = mLayer->GetLighttable();
+                        FOdysseyLighttable lighttable = mLayer->GetLighttable();
                         lighttable.PreviousKeys[i] = iKey;
-                        FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable, EPropertyChangeType::Interactive);
+                        mLayer->SetLighttableInteractive(lighttable);
                     }
                 )
                 .OnCommited_Lambda(
-                    [this, i](FOdysseyAnimationLightTableKey iKey)
+                    [this, i](FOdysseyLighttableKey iKey)
                     {
-                        FOdysseyAnimationLightTable lighttable = mLayer->GetLighttable();
+                        FOdysseyLighttable lighttable = mLayer->GetLighttable();
                         lighttable.PreviousKeys[i] = iKey;
-                        FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable, EPropertyChangeType::ValueSet);
+                        mLayer->SetLighttable(lighttable);
                     }
                 )
                 .TimelinePosition(InArgs._TimelinePosition)
@@ -180,7 +180,7 @@ SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysse
             )
             [
 
-                SNew(SOdysseyAnimationTimelineLightTableKey)
+                SNew(SOdysseyAnimationTimelineLighttableKey)
                 .Visibility_Lambda(
                     [this, i]()
                     {
@@ -212,19 +212,19 @@ SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysse
                     }
                 )
                 .OnChanged_Lambda(
-                    [this, i](FOdysseyAnimationLightTableKey iKey)
+                    [this, i](FOdysseyLighttableKey iKey)
                     {
-                        FOdysseyAnimationLightTable lighttable = mLayer->GetLighttable();
+                        FOdysseyLighttable lighttable = mLayer->GetLighttable();
                         lighttable.NextKeys[i] = iKey;
-                        FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable, EPropertyChangeType::Interactive);
+                        mLayer->SetLighttableInteractive(lighttable);
                     }
                 )
                 .OnCommited_Lambda(
-                    [this, i](FOdysseyAnimationLightTableKey iKey)
+                    [this, i](FOdysseyLighttableKey iKey)
                     {
-                        FOdysseyAnimationLightTable lighttable = mLayer->GetLighttable();
+                        FOdysseyLighttable lighttable = mLayer->GetLighttable();
                         lighttable.NextKeys[i] = iKey;
-                        FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable, EPropertyChangeType::ValueSet);
+                        mLayer->SetLighttable(lighttable);
                     }
                 )
                 .TimelinePosition(InArgs._TimelinePosition)
@@ -239,7 +239,7 @@ SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysse
 }
 
 UOdysseyAnimationCell*
-SOdysseyAnimationTimelineLightTable::GetCurrentCell() const
+SOdysseyAnimationTimelineLighttable::GetCurrentCell() const
 {
     return Cast<UOdysseyAnimationCell>(mLayer->GetCellAtFrame(mCurrentFrame.Get()));
 }

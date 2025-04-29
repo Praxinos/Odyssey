@@ -6,9 +6,9 @@
 #if WITH_EDITOR
 #include "OdysseyAnimationLayerImageVector.h"
 #include "OdysseyAnimationCellImageVector.h"
-#include "OdysseyAnimationLightTable.h"
 #include "OdysseyAnimationCellsContainerImport.h"
-#include "OdysseyAnimationLightTableImport.h"
+#include "OdysseyLighttable.h"
+#include "OdysseyLighttableImport.h"
 #include "OdysseyFile.h"
 
 
@@ -92,10 +92,10 @@ FOdysseyAnimationLayerImageVectorImport::Read( UOdysseyAnimationLayerImageVector
                 }
                 break;
 
-                case FOdysseyFile::Animation::CHUNK_LAYERIMAGEVECTOR_LIGHTTABLE :
+                case FOdysseyFile::Animation::CHUNK_LAYERIMAGEVECTOR_Lighttable :
                 {
                     //DEPRECATED: Keep for compatibility with Odyssey 2.0 and prior
-                    FOdysseyAnimationLightTableImport::Read( &iAnimationLayerImageVector->Lighttable, Ar );
+                    FOdysseyLighttableImport::Read( &iAnimationLayerImageVector->Lighttable, Ar );
                 }
                 break;
 

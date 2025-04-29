@@ -4,8 +4,7 @@
 // Simple solid color pixel shader
 
 Texture2D DestinationTexture;
-Texture2D SourceTexture;
-SamplerState SourceTextureSampler;
+float4 Color;
 SamplerState DestinationTextureSampler;
 float Opacity;
 uint BlendMode;
@@ -19,6 +18,6 @@ void MainPS(
 )
 {
     float4 cb = DestinationTexture.Sample(DestinationTextureSampler, InTextureCoordinate);
-    float4 cs = SourceTexture.Sample(SourceTextureSampler, InTextureCoordinate);
+    float4 cs = Color;
     OutColor = Blend(cb, cs, Opacity, BlendMode, AlphaMode );
 }

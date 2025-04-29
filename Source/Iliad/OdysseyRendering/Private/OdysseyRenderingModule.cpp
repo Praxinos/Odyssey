@@ -22,7 +22,7 @@ void
 FOdysseyRenderingModule::RegisterShaders()
 {
     FString PluginShaderDir = FPaths::Combine(IPluginManager::Get().FindPlugin(TEXT("Odyssey"))->GetBaseDir(), TEXT("Shaders"));
-    AddShaderSourceDirectoryMapping(TEXT("/Plugins/Odyssey"), PluginShaderDir);
+    AddShaderSourceDirectoryMapping(TEXT("/OdysseyShaders"), PluginShaderDir);
 }
 
 void

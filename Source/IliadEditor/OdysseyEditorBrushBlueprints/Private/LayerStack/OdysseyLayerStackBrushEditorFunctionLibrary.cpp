@@ -104,7 +104,7 @@ namespace
         renderTarget->RenderTargetFormat = RTF_RGBA8_SRGB;
         renderTarget->InitAutoFormat(rect.w, rect.h);
 
-        IOdysseyTextureRenderingAbility::Execute_RenderRectAtPosition(iLayer, renderTarget.Get(), frame, ::ULISUtils::ToIntRect(rect), FIntPoint(0, 0));
+        iLayer->Render_GameThread(renderTarget.Get(), frame, EOdysseyRenderingType::Render, ::ULISUtils::ToIntRect(rect), FIntPoint(0, 0));
 
         FImage OutImage;
         if (!FImageUtils::GetRenderTargetImage(renderTarget.Get(), OutImage))
