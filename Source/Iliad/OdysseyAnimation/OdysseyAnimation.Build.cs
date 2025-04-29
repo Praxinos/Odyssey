@@ -28,6 +28,16 @@ namespace UnrealBuildTool.Rules
             PublicIncludePaths.AddRange(
                 new string[] {
                     // ... add public include paths required here ...
+                    Path.Combine(ModuleDirectory, "Public", "LayerStack"),
+                    Path.Combine(ModuleDirectory, "Public", "LayerStack", "Cells"),
+                    Path.Combine(ModuleDirectory, "Public", "LayerStack", "Cells", "CellImageRaster"),
+                    Path.Combine(ModuleDirectory, "Public", "LayerStack", "Cells", "CellImageVector"),
+                    Path.Combine(ModuleDirectory, "Public", "LayerStack", "Layers"),
+                    Path.Combine(ModuleDirectory, "Public", "LayerStack", "Layers", "LayerFolder"),
+                    Path.Combine(ModuleDirectory, "Public", "LayerStack", "Layers", "LayerImageRaster"),
+                    Path.Combine(ModuleDirectory, "Public", "LayerStack", "Layers", "LayerImageVector"),
+                    Path.Combine(ModuleDirectory, "Public", "LayerStack", "Layers", "LayerRoot"),
+                    Path.Combine(ModuleDirectory, "Public", "LayerStack", "LightTable"),
                     Path.Combine(ModuleDirectory, "Public", "Media"),
                 }
                 );
@@ -35,6 +45,16 @@ namespace UnrealBuildTool.Rules
             PrivateIncludePaths.AddRange(
                 new string[] {
                     // ... add other private include paths required here ...
+                    Path.Combine(ModuleDirectory, "Private", "LayerStack"),
+                    Path.Combine(ModuleDirectory, "Private", "LayerStack", "Cells"),
+                    Path.Combine(ModuleDirectory, "Private", "LayerStack", "Cells", "CellImageRaster"),
+                    Path.Combine(ModuleDirectory, "Private", "LayerStack", "Cells", "CellImageVector"),
+                    Path.Combine(ModuleDirectory, "Private", "LayerStack", "Layers"),
+                    Path.Combine(ModuleDirectory, "Private", "LayerStack", "Layers", "LayerFolder"),
+                    Path.Combine(ModuleDirectory, "Private", "LayerStack", "Layers", "LayerImageRaster"),
+                    Path.Combine(ModuleDirectory, "Private", "LayerStack", "Layers", "LayerImageVector"),
+                    Path.Combine(ModuleDirectory, "Private", "LayerStack", "Layers", "LayerRoot"),
+                    Path.Combine(ModuleDirectory, "Private", "LayerStack", "LightTable"),
                     Path.Combine(ModuleDirectory, "Private", "Media"),
                 }
                 );
@@ -71,6 +91,32 @@ namespace UnrealBuildTool.Rules
                     // ... add any modules that your module loads dynamically here ...
                 }
                 );
+
+            //--- Editor Only Dependencies
+            // This is here because Animation LayerStack depends on ULIS and OdysseyVector
+            // This can be removed once layers don't use ULIS anymore and OdysseyVector is Runtime Ready
+
+            if (Target.Type == TargetType.Editor)
+            {
+                PrivateDependencyModuleNames.AddRange(
+                    new string[] {
+                        "EditorStyle",
+                        "Renderer",
+                        "SlateCore",
+                        "UnrealEd",
+
+                        "OdysseyCoreEditor",
+                        "OdysseyImaging",
+                        "OdysseyFile",
+                        "OdysseyMedia",
+                        "OdysseyStyle",
+                        "OdysseyVector",
+
+                        "ULIS",
+                        "ULISLoader"
+                    }
+                );
+            }
 
             //--- WIBU
 

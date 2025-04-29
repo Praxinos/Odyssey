@@ -4,6 +4,7 @@
 #include "OdysseyTextureRenderingAbility.h"
 #include "CanvasTypes.h"
 #include "ScreenPass.h"
+#include "Engine/TextureRenderTarget2D.h"
 
 #define LOCTEXT_NAMESPACE "Imaging"
 

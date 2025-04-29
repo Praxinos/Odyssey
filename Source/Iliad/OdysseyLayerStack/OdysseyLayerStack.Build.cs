@@ -27,7 +27,7 @@ public class OdysseyLayerStack : ModuleRules
             }
         );
 
-        PrivateIncludePaths.AddRange(
+        PublicIncludePaths.AddRange(
             new string[] {
             }
         );

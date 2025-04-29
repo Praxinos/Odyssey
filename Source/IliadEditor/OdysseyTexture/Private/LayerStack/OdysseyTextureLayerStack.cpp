@@ -107,7 +107,7 @@ UOdysseyTextureLayerStack::PostLoad()
     }
 }
 
-int
+/* int
 UOdysseyTextureLayerStack::GetWidth() const
 {
     UTexture2D* texture = GetTexture();
@@ -125,7 +125,7 @@ UOdysseyTextureLayerStack::GetHeight() const
         return Super::GetHeight();
 
     return texture->GetSizeY();
-}
+} */
 
 UTexture2D*
 UOdysseyTextureLayerStack::GetTexture() const
@@ -263,8 +263,8 @@ UOdysseyTextureLayerStack::FastUpdateTexture(const TArray<FIntRect>& iRects)
 
     FTextureCompilingManager::Get().FinishCompilation({ texture });
 
-    if (RenderTarget->SizeX != GetWidth() || RenderTarget->SizeY != GetHeight())
-        RenderTarget->ResizeTarget(GetWidth(), GetHeight());
+    if (RenderTarget->SizeX != texture->GetSizeX() || RenderTarget->SizeY != texture->GetSizeY() )
+        RenderTarget->ResizeTarget(texture->GetSizeX(), texture->GetSizeY());
 
     RenderTarget->UpdateResourceImmediate();
 
@@ -385,8 +385,8 @@ UOdysseyTextureLayerStack::UpdateTexture(bool iForceRefresh)
     {
         FTextureCompilingManager::Get().FinishCompilation({ texture });
 
-        if (RenderTarget->SizeX != GetWidth() || RenderTarget->SizeY != GetHeight())
-            RenderTarget->ResizeTarget(GetWidth(), GetHeight());
+        if (RenderTarget->SizeX != texture->GetSizeX() || RenderTarget->SizeY != texture->GetSizeY() )
+            RenderTarget->ResizeTarget(texture->GetSizeX(), texture->GetSizeY());
 
         RenderTarget->UpdateResourceImmediate();
 

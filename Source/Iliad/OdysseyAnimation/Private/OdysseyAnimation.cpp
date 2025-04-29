@@ -48,6 +48,9 @@ UOdysseyAnimation::GetFrameRange() const
     #if WITH_EDITOR
     return FInt32Range::Inclusive(GetLeftBoundValue(), GetRightBoundValue());
     #else
+    if ( PreserveLayerStackAtRuntime )
+        return FInt32Range::Inclusive(GetLeftBoundValue(), GetRightBoundValue());
+
     int frameCount = 0;
     for (const FOdysseyAnimationFrame& frame : Frames)
     {
@@ -112,21 +115,24 @@ TArray<FGuid>
 UOdysseyAnimation::GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrameIndex) const
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyAnimation::GetRenderingComposition);
-#if WITH_EDITOR
-    if (!mLayerStack)
-        return {};
+    if ( PreserveLayerStackAtRuntime )
+    {
+        if ( !mLayerStack )
+            return {};
 
-    TArray<FGuid> idComposition;
-    idComposition.Append(mLayerStack->GetRenderingComposition(iRenderType, iFrameIndex));
+        TArray<FGuid> idComposition;
+        idComposition.Append(mLayerStack->GetRenderingComposition(iRenderType, iFrameIndex));
 
-    return idComposition;
-#else
-    int frameIndex = GetFrameIndexAtFrame(iFrameIndex);
-    if (frameIndex == INDEX_NONE)
-        return {};
+        return idComposition;
+    }
+    else
+    {
+        int frameIndex = GetFrameIndexAtFrame(iFrameIndex);
+        if ( frameIndex == INDEX_NONE )
+            return {};
 
-    return Frames[frameIndex].RenderingComposition;
-#endif
+        return Frames[frameIndex].RenderingComposition;
+    }
 }
 
 FIntRect
@@ -196,16 +202,6 @@ UOdysseyAnimation::BuildTextureRenderer(FFrameNumber iFrame, TMap<const IOdyssey
 #endif
 }
 
-#if WITH_EDITOR
-void
-UOdysseyAnimation::Init(int iWidth, int iHeight, EOdysseyAnimationFormat iFormat, float iFramesPerSecond)
-{
-    mWidth = iWidth;
-    mHeight = iHeight;
-    Format = iFormat;
-    FramesPerSecond = iFramesPerSecond;
-}
-
 EOdysseyAnimationBoundMode
 UOdysseyAnimation::GetLeftBoundMode() const
 {
@@ -221,11 +217,11 @@ UOdysseyAnimation::GetRightBoundMode() const
 int
 UOdysseyAnimation::GetLeftBoundValue() const
 {
-    switch(LeftBoundMode)
+    switch ( LeftBoundMode )
     {
         case EOdysseyAnimationBoundMode::Automatic:
         {
-            if (!mLayerStack)
+            if ( !mLayerStack )
                 return 0;
 
             FInt32Range frameRange = mLayerStack->GetFrameRange();
@@ -245,11 +241,11 @@ UOdysseyAnimation::GetLeftBoundValue() const
 int
 UOdysseyAnimation::GetRightBoundValue() const
 {
-    switch(RightBoundMode)
+    switch ( RightBoundMode )
     {
         case EOdysseyAnimationBoundMode::Automatic:
         {
-            if (!mLayerStack)
+            if ( !mLayerStack )
                 return 0;
 
             FInt32Range frameRange = mLayerStack->GetFrameRange();
@@ -271,7 +267,9 @@ UOdysseyAnimation::SetLeftBoundMode(EOdysseyAnimationBoundMode iMode)
 {
     LeftBoundMode = iMode;
 
+#if WITH_EDITOR
     OnLeftBoundModeChanged();
+#endif
 }
 
 void
@@ -279,7 +277,9 @@ UOdysseyAnimation::SetRightBoundMode(EOdysseyAnimationBoundMode iMode)
 {
     RightBoundMode = iMode;
 
+#if WITH_EDITOR
     OnRightBoundModeChanged();
+#endif
 }
 
 void
@@ -287,7 +287,9 @@ UOdysseyAnimation::SetLeftBoundValue(int iValue)
 {
     LeftBound = iValue;
 
+#if WITH_EDITOR
     OnLeftBoundChanged();
+#endif
 }
 
 void
@@ -295,7 +297,19 @@ UOdysseyAnimation::SetRightBoundValue(int iValue)
 {
     RightBound = iValue;
 
+#if WITH_EDITOR
     OnRightBoundChanged();
+#endif
+}
+
+#if WITH_EDITOR
+void
+UOdysseyAnimation::Init(int iWidth, int iHeight, EOdysseyAnimationFormat iFormat, float iFramesPerSecond)
+{
+    mWidth = iWidth;
+    mHeight = iHeight;
+    Format = iFormat;
+    FramesPerSecond = iFramesPerSecond;
 }
 
 void

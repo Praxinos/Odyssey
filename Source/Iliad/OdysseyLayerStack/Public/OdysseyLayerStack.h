@@ -10,6 +10,7 @@
 #include "OdysseyLayerStack.generated.h"
 
 class FOdysseyLayerCellSelection;
+class UOdysseyAnimation;
 
 UCLASS(Abstract, HideDropdown, BlueprintType, config=EditorPerProjectUserSettings, PerObjectConfig)
 class ODYSSEYLAYERSTACK_API UOdysseyLayerStack
@@ -212,8 +213,8 @@ public:
     void MoveLayers(TArray<UOdysseyLayer*> Layers, UOdysseyLayer* ParentLayer = nullptr, int IndexInParent = 0);
 
 public:
-    virtual int GetWidth() const { return -1; };
-    virtual int GetHeight() const { return -1; };
+    //virtual int GetWidth() const { return -1; };
+    //virtual int GetHeight() const { return -1; };
     //Called by layers when there Parent or Children changed
     void HierarchyChanged();
 
@@ -247,7 +248,6 @@ public:
 public:
     virtual TArray<FGuid> GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrameIndex) const override;
     virtual TSharedPtr<FOdysseyTextureRenderer> BuildTextureRenderer(FFrameNumber iFrame, TMap<const IOdysseyTextureRenderingAbility*, FGuid>* iIds = nullptr) const override;
-    //virtual void RenderToTexture_RenderThread(FRDGBuilder& iGraphBuilder, FRDGTextureRef iDestinationTexture, ERHIFeatureLevel::Type iFeatureLevel, FFrameNumber iFrame, const FMatrix& iSrcTransform, const FIntRect& iSrcRect, const FIntRect& iDstRect) const override;
 
 protected:
     //Internal

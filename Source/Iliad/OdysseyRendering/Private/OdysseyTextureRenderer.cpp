@@ -5,6 +5,7 @@
 #include "ScreenPass.h"
 #include "CanvasItem.h"
 #include "MeshPassProcessor.h"
+#include "OdysseyBlendShader.h"
 
 #define LOCTEXT_NAMESPACE "Imaging"
 

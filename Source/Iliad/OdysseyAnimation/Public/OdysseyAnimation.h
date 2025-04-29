@@ -82,6 +82,30 @@ public:
     //Time range of the frame at iFrameIndex
     TRange<FTimespan> GetFrameTimeRange(int iFrameIndex) const; //TODO: find a better way to have this function, only used by Media and ViewportDrawingEditor
 
+    UFUNCTION(BlueprintPure, Category = "Odyssey|Animation")
+    EOdysseyAnimationBoundMode GetLeftBoundMode() const;
+
+    UFUNCTION(BlueprintPure, Category = "Odyssey|Animation")
+    EOdysseyAnimationBoundMode GetRightBoundMode() const;
+
+    UFUNCTION(BlueprintPure, Category = "Odyssey|Animation")
+    int GetLeftBoundValue() const;
+
+    UFUNCTION(BlueprintPure, Category = "Odyssey|Animation")
+    int GetRightBoundValue() const;
+
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|Animation")
+    void SetLeftBoundMode(EOdysseyAnimationBoundMode iMode);
+
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|Animation")
+    void SetRightBoundMode(EOdysseyAnimationBoundMode iMode);
+
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|Animation")
+    void SetLeftBoundValue(int iValue);
+
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|Animation")
+    void SetRightBoundValue(int iValue);
+
 #if WITH_EDITOR
 public:
     void OnLeftBoundModeChanged();
@@ -95,16 +119,6 @@ public:
     //Getters
     void SetLayerStack(UOdysseyLayerStack* iLayerStack);
     UOdysseyLayerStack* GetLayerStack() const;
-
-    EOdysseyAnimationBoundMode GetLeftBoundMode() const;
-    EOdysseyAnimationBoundMode GetRightBoundMode() const;
-    int GetLeftBoundValue() const;
-    int GetRightBoundValue() const;
-
-    void SetLeftBoundMode(EOdysseyAnimationBoundMode iMode);
-    void SetRightBoundMode(EOdysseyAnimationBoundMode iMode);
-    void SetLeftBoundValue(int iValue);
-    void SetRightBoundValue(int iValue);
 #endif
 
 public:
@@ -136,17 +150,15 @@ protected:
     UPROPERTY(BlueprintReadOnly, Category = "Odyssey|Animation", meta = (DisplayName = "Layer Stack", LoadBehavior = "LazyOnDemand"))
     TObjectPtr<UOdysseyLayerStack> mLayerStack;
 
-#if WITH_EDITORONLY_DATA
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Odyssey|Animation")
+    UPROPERTY(EditAnywhere, Category="Odyssey|Animation")
     EOdysseyAnimationBoundMode LeftBoundMode = EOdysseyAnimationBoundMode::Automatic;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Odyssey|Animation", meta=(EditCondition="LeftBoundMode != EOdysseyAnimationBoundMode::Automatic", EditConditionHides))
+    UPROPERTY(EditAnywhere, Category="Odyssey|Animation", meta=(EditCondition="LeftBoundMode != EOdysseyAnimationBoundMode::Automatic", EditConditionHides))
     int LeftBound = 0;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Odyssey|Animation")
+    UPROPERTY(EditAnywhere, Category="Odyssey|Animation")
     EOdysseyAnimationBoundMode RightBoundMode = EOdysseyAnimationBoundMode::Automatic;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Odyssey|Animation", meta=(EditCondition="RightBoundMode != EOdysseyAnimationBoundMode::Automatic", EditConditionHides))
+    UPROPERTY(EditAnywhere, Category="Odyssey|Animation", meta=(EditCondition="RightBoundMode != EOdysseyAnimationBoundMode::Automatic", EditConditionHides))
     int RightBound = 0;
-#endif
 };

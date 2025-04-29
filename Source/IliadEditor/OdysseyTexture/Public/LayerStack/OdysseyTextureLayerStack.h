@@ -40,8 +40,8 @@ public:
     UOdysseyTextureLayerStack();
 
 public:
-    virtual int GetWidth() const override;
-    virtual int GetHeight() const override;
+    //virtual int GetWidth() const override;
+    //virtual int GetHeight() const override;
 
     virtual void PostInitProperties() override;
     virtual void PostLoad() override;

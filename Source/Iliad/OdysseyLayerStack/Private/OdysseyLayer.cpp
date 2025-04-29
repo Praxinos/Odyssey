@@ -4,6 +4,7 @@
 #include "OdysseyLayer.h"
 
 #include "OdysseyLayerStack.h"
+#include "OdysseyLayerCell.h"
 #include "Misc/TransactionObjectEvent.h"
 #include "RenderGraphBuilder.h"
 #include "RenderGraphUtils.h"

@@ -72,7 +72,9 @@ FOdysseyAnimationMediaTextureSample::GetStride() const
 FRHITexture*
 FOdysseyAnimationMediaTextureSample::GetTexture() const
 {
-    FTextureRenderTargetResource* resource = mRenderTarget->GameThread_GetRenderTargetResource();
+    check(IsInRenderingThread());
+
+    FTextureRenderTargetResource* resource = mRenderTarget->GetRenderTargetResource();
     if (!resource)
         return nullptr;
 

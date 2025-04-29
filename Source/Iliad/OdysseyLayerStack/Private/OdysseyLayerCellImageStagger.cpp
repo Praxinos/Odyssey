@@ -147,6 +147,7 @@ UOdysseyLayerCellImageStagger::GetDefaultRenderRect() const
     return GetLayer()->GetDefaultRenderRect();
 }
 
+#if WITH_EDITOR
 UOdysseyLayerCell*
 UOdysseyLayerCellImageStagger::Break(int Frame, bool bClear)
 {
@@ -171,6 +172,7 @@ UOdysseyLayerCellImageStagger::Break(int Frame, bool bClear)
 
     return newCell;
 }
+#endif
 
 TSharedPtr<FOdysseyTextureRenderer>
 UOdysseyLayerCellImageStagger::BuildTextureRenderer(FFrameNumber iFrame, TMap<const IOdysseyTextureRenderingAbility*, FGuid>* iIds) const

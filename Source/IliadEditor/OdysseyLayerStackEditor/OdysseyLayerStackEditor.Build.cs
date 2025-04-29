@@ -36,17 +36,6 @@ public class OdysseyLayerStackEditor : ModuleRules
 
         PublicIncludePaths.AddRange(
             new string[] {
-                Path.Combine(ModuleDirectory, "Public", "Animation"),
-                Path.Combine(ModuleDirectory, "Public", "Animation", "Cells"),
-                Path.Combine(ModuleDirectory, "Public", "Animation", "Cells", "CellImageRaster"),
-                Path.Combine(ModuleDirectory, "Public", "Animation", "Cells", "CellImageStagger"),
-                Path.Combine(ModuleDirectory, "Public", "Animation", "Cells", "CellImageVector"),
-                Path.Combine(ModuleDirectory, "Public", "Animation", "Layers"),
-                Path.Combine(ModuleDirectory, "Public", "Animation", "Layers", "LayerFolder"),
-                Path.Combine(ModuleDirectory, "Public", "Animation", "Layers", "LayerImageRaster"),
-                Path.Combine(ModuleDirectory, "Public", "Animation", "Layers", "LayerImageVector"),
-                Path.Combine(ModuleDirectory, "Public", "Animation", "Layers", "LayerRoot"),
-                Path.Combine(ModuleDirectory, "Public", "Animation", "LightTable"),
                 Path.Combine(ModuleDirectory, "Public", "Widgets"),
                 Path.Combine(ModuleDirectory, "Public", "Commands"),
                 Path.Combine(ModuleDirectory, "Public", "Controllers"),
@@ -58,17 +47,6 @@ public class OdysseyLayerStackEditor : ModuleRules
 
         PrivateIncludePaths.AddRange(
             new string[] {
-                Path.Combine(ModuleDirectory, "Private", "Animation"),
-                Path.Combine(ModuleDirectory, "Private", "Animation", "Cells"),
-                Path.Combine(ModuleDirectory, "Private", "Animation", "Cells", "CellImageRaster"),
-                Path.Combine(ModuleDirectory, "Private", "Animation", "Cells", "CellImageStagger"),
-                Path.Combine(ModuleDirectory, "Private", "Animation", "Cells", "CellImageVector"),
-                Path.Combine(ModuleDirectory, "Private", "Animation", "Layers"),
-                Path.Combine(ModuleDirectory, "Private", "Animation", "Layers", "LayerFolder"),
-                Path.Combine(ModuleDirectory, "Private", "Animation", "Layers", "LayerImageRaster"),
-                Path.Combine(ModuleDirectory, "Private", "Animation", "Layers", "LayerImageVector"),
-                Path.Combine(ModuleDirectory, "Private", "Animation", "Layers", "LayerRoot"),
-                Path.Combine(ModuleDirectory, "Private", "Animation", "LightTable"),
                 Path.Combine(ModuleDirectory, "Private", "Widgets"),
                 Path.Combine(ModuleDirectory, "Private", "Commands"),
                 Path.Combine(ModuleDirectory, "Private", "Controllers"),
