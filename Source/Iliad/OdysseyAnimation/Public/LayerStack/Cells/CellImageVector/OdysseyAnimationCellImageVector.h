@@ -86,8 +86,6 @@ private:
     void OnVectorEngineNotify(FOdysseyVectorGroupPaint* iScene, uint64 iSignalFlags);
     bool UpdateDrawingFlags() const;
     void InitTexture() const;
-    void UpdateTexture(bool iForce) const;
-    UTexture2D* GetTexture() const;
 
 private:
     //Import/Export

@@ -20,7 +20,9 @@ class FOdysseyVectorEngine;
 
 UCLASS(BlueprintType)
 class ODYSSEYTEXTURE_API UOdysseyTextureLayerImageVector
-    : public UOdysseyTextureLayer , public IOdysseyVectorLayer, public IOdysseyVectorCell
+    : public UOdysseyTextureLayer
+    , public IOdysseyVectorLayer
+    , public IOdysseyVectorCell
 {
     GENERATED_BODY()
 
@@ -53,6 +55,7 @@ public:
     virtual void PostLoad() override;
     virtual void PostDuplicate(bool bDuplicateForPIE) override;
     virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
+    virtual void PreSave(FObjectPreSaveContext SaveContext) override;
     virtual void Merge(const TArray<UOdysseyLayer*>& Layers) override;
 
     FOdysseyVectorCell* GetVectorCell();
@@ -64,9 +67,13 @@ public:
 
 public:
     //IOdysseyRenderingAbility overrides
+    virtual bool BuildRenderPipeline(FFrameNumber iFrame, uint64 iType, FOdysseyTextureRenderFunction& oRenderFunction) const override;
     virtual TArray<FGuid> GetRenderingComposition(uint64 iRenderType, int iFrame = 0) const override;
 
 private:
+    bool UpdateDrawingFlags() const;
+    void InitTexture() const;
+    void OnVectorEngineNotify(FOdysseyVectorGroupPaint* iScene, uint64 iSignalFlags);
     void OnVectorBlockInvalidated(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive);
 
 public:
@@ -111,5 +118,6 @@ protected:
     bool bIsColored = true;
 
 private:
+    mutable uint64 mDrawingFlags = 0;
     FOdysseyVectorImportV2 mImporterV2;
 };

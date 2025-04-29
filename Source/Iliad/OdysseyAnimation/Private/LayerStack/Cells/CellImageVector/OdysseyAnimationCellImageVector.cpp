@@ -75,7 +75,7 @@ UOdysseyAnimationCellImageVector::BuildRenderPipeline(
     {
         ::ULIS::FRectI rect = mVectorBlock->GetSanitizedRect();
         mVectorBlock->Render(mDrawingFlags);
-        FOdysseySurfaceTexture2DEditable surface(GetTexture(), GetVectorBlock()->GetBlock(mDrawingFlags));
+        FOdysseySurfaceTexture2DEditable surface(GetRenderTexture(), GetVectorBlock()->GetBlock(mDrawingFlags));
         surface.Invalidate({ rect });
     }
 #endif
@@ -112,15 +112,6 @@ UOdysseyAnimationCellImageVector::InitTexture() const
     FTextureCompilingManager::Get().FinishCompilation({ Texture });
 }
 
-UTexture2D*
-UOdysseyAnimationCellImageVector::GetTexture() const
-{
-    if ( !Texture )
-        InitTexture();
-
-    return Texture;
-}
-
 TSharedPtr<::ULIS::FBlock>
 UOdysseyAnimationCellImageVector::GetBlock() const
 {
@@ -144,15 +135,13 @@ UOdysseyAnimationCellImageVector::PostInitProperties()
     mVectorBlockId = FGuid::NewGuid();
     mVectorBlock = MakeShared<FOdysseyVectorBlock>();
     mVectorBlock->OnInvalidated().AddUObject(this, &UOdysseyAnimationCellImageVector::OnVectorBlockInvalidated);
-
     mVectorBlock->GetEngine().OnNotifyDelegate().AddUObject(this, &UOdysseyAnimationCellImageVector::OnVectorEngineNotify);
 
     UOdysseyAnimation* animation = GetAnimation();
     if (animation->GetWidth() < 0 || animation->GetHeight() < 0)
         return;
 
-    mVectorCell = MakeShared<FOdysseyVectorCell>( this
-                                                , new FOdysseyVectorGroupPaint( "Scene" ) );
+    mVectorCell = MakeShared<FOdysseyVectorCell>( this, new FOdysseyVectorGroupPaint( "Scene" ) );
     // The reading process needs a valid sharedenv as the top object.
     layerImageVector->GetVectorLayer()->AppendChild( mVectorCell.Get() );
 

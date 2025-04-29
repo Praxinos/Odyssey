@@ -79,6 +79,35 @@ UOdysseyTextureLayerImageVector::GetMediaProvider(uint32 iFrameIndex) const
     return mediaProvider;
 }
 
+
+#if WITH_EDITOR
+bool
+UOdysseyTextureLayerImageVector::UpdateDrawingFlags() const
+{
+    uint64 drawingFlags = !IsColored() ? FOdysseyVectorEngine::DRAWING_IGNORECOLOR : 0;
+    drawingFlags |= IsWireframe() ? FOdysseyVectorEngine::DRAWING_WIREFRAME : 0;
+    bool changed = drawingFlags != mDrawingFlags;
+    mDrawingFlags = drawingFlags;
+    return changed;
+}
+
+void
+UOdysseyTextureLayerImageVector::InitTexture() const
+{
+    if ( !Texture )
+    {
+        Texture = NewObject<UTexture2D>(const_cast<UOdysseyTextureLayerImageVector*>(this), TEXT("Texture"));
+        Texture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
+        Texture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
+        Texture->Filter = TextureFilter::TF_Nearest;
+    }
+
+    InitTextureWithBlockData(mVectorBlock->GetBlock(mDrawingFlags).Get(), Texture, TextureSourceFormatForULISFormat(mVectorBlock->GetFormat()));
+    Texture->UpdateResource();
+    FTextureCompilingManager::Get().FinishCompilation({ Texture });
+}
+#endif
+
 void
 UOdysseyTextureLayerImageVector::PostInitProperties()
 {
@@ -87,24 +116,50 @@ UOdysseyTextureLayerImageVector::PostInitProperties()
     if (GetFlags() & RF_ClassDefaultObject)
         return;
 
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
-    if(!layerStack)
+    mVectorBlockId = FGuid::NewGuid();
+    mVectorBlock = MakeShared<FOdysseyVectorBlock>();
+    mVectorBlock->OnInvalidated().AddUObject(this, &UOdysseyTextureLayerImageVector::OnVectorBlockInvalidated);
+    mVectorBlock->GetEngine().OnNotifyDelegate().AddUObject(this, &UOdysseyTextureLayerImageVector::OnVectorEngineNotify);
+
+    UTexture2D* texture = GetTexture();
+    if( !texture || texture->Source.GetFormat() == TSF_Invalid )
         return;
 
-    UTexture2D* texture = layerStack->GetTexture();
-    if( texture && texture->Source.GetFormat() != TSF_Invalid )
+    Width  = texture->Source.GetSizeX();
+    Height = texture->Source.GetSizeY();
+
+    mVectorCell = MakeShared<FOdysseyVectorCell>( this, new FOdysseyVectorGroupPaint( "Scene" ) );
+    mVectorLayer.AppendChild( mVectorCell.Get() );
+
+    ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
+    //let's ensure the format has alpha, so add alpha channel of needed
+    format = static_cast< ::ULIS::eFormat >(format | ULIS_W_ALPHA( 1 ) );
+    mVectorBlock->Init(mVectorBlockId, mVectorCell, Width, Height, format);
+}
+
+bool
+UOdysseyTextureLayerImageVector::BuildRenderPipeline(
+    FFrameNumber iFrame,
+    uint64 iType,
+    FOdysseyTextureRenderFunction& oRenderFunction
+) const
+{
+#if WITH_EDITOR
+    bool drawingFlagsChanged = UpdateDrawingFlags();
+    if ( !Texture || drawingFlagsChanged )
     {
-        Init( texture->Source.GetSizeX(), texture->Source.GetSizeY() );
-
-        ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
-        //let's ensure the format has alpha, so add alpha channel of needed
-        format = static_cast< ::ULIS::eFormat >(format | ULIS_W_ALPHA( 1 ) );
-
-        mVectorBlockId = FGuid::NewGuid();
-        mVectorBlock = MakeShared<FOdysseyVectorBlock>();
-        mVectorBlock->Init(mVectorBlockId, mVectorCell, Width, Height, format);
-        mVectorBlock->OnInvalidated().AddUObject(this, &UOdysseyTextureLayerImageVector::OnVectorBlockInvalidated);
+        InitTexture();
     }
+    else if ( mVectorBlock->NeedsRender() )
+    {
+        ::ULIS::FRectI rect = mVectorBlock->GetSanitizedRect();
+        mVectorBlock->Render(mDrawingFlags);
+        FOdysseySurfaceTexture2DEditable surface(GetRenderTexture(), mVectorBlock->GetBlock(mDrawingFlags));
+        surface.Invalidate({ rect });
+    }
+#endif
+
+    return Super::BuildRenderPipeline(iFrame, iType, oRenderFunction);
 }
 
 void
@@ -115,19 +170,18 @@ UOdysseyTextureLayerImageVector::PostLoad()
     if (GetFlags() & RF_ClassDefaultObject)
         return;
 
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
-    UTexture2D* texture = layerStack->GetTexture();
+    UTexture2D* texture = GetTexture();
+    if( !texture || texture->Source.GetFormat() == TSF_Invalid )
+        return;
 
-    if( texture && texture->Source.GetFormat() != TSF_Invalid )
-    {
-        ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
-        //let's ensure the format has alpha, so add alpha channel of needed
-        format = static_cast< ::ULIS::eFormat >(format | ULIS_W_ALPHA( 1 ) );
+    ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
+    //let's ensure the format has alpha, so add alpha channel of needed
+    format = static_cast< ::ULIS::eFormat >(format | ULIS_W_ALPHA( 1 ) );
 
-        mVectorBlock = MakeShared<FOdysseyVectorBlock>();
-        mVectorBlock->Init(mVectorBlockId, mVectorCell, Width, Height, format);
-        mVectorBlock->OnInvalidated().AddUObject(this, &UOdysseyTextureLayerImageVector::OnVectorBlockInvalidated);
-    }
+    mVectorBlock = MakeShared<FOdysseyVectorBlock>();
+    mVectorBlock->Init(mVectorBlockId, mVectorCell, Width, Height, format);
+    mVectorBlock->OnInvalidated().AddUObject(this, &UOdysseyTextureLayerImageVector::OnVectorBlockInvalidated);
+    FOdysseyVectorEngine::Notify( mVectorCell->GetScene(), FOdysseyVectorEngine::NOTIFY_ALL );
 
     // textures must be assigned to brushes in PostLoad and not in Serialize(), because the UAsset won't be fully loaded
     // and there dimensions would be 0 at that point.
@@ -145,14 +199,19 @@ UOdysseyTextureLayerImageVector::PostDuplicate(bool bDuplicateForPIE)
 {
     Super::PostDuplicate(bDuplicateForPIE);
 
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
-    UTexture2D* texture = layerStack->GetTexture();
-    if( texture && texture->Source.GetFormat() != TSF_Invalid )
-    {
-        Width = texture->Source.GetSizeX();
-        Height = texture->Source.GetSizeY();
-        mVectorBlockId = FGuid::NewGuid();
-    }
+    UTexture2D* texture = GetTexture();
+    if( !texture || texture->Source.GetFormat() == TSF_Invalid )
+        return;
+
+    ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
+    //let's ensure the format has alpha, so add alpha channel of needed
+    format = static_cast< ::ULIS::eFormat >(format | ULIS_W_ALPHA( 1 ) );
+
+    Width = texture->Source.GetSizeX();
+    Height = texture->Source.GetSizeY();
+    mVectorBlockId = FGuid::NewGuid();
+    mVectorBlock->Init(mVectorBlockId, mVectorCell, Width, Height, format);
+    InitTexture();
 }
 
 FOdysseyVectorImportV2*
@@ -387,6 +446,36 @@ uint32
 UOdysseyTextureLayerImageVector::GetFrame()
 {
     return 0;
+}
+
+void
+UOdysseyTextureLayerImageVector::OnVectorEngineNotify(FOdysseyVectorGroupPaint* iScene, uint64 iSignalFlags)
+{
+    if (!iScene || !iScene->GetCell() || iScene->GetCell()->GetCellInterface() != this)
+        return;
+
+    if (iSignalFlags & FOdysseyVectorEngine::NOTIFY_UPDATE_HUD)
+    {
+        iScene->GetCell()->ResetHUD();
+    }
+}
+
+void
+UOdysseyTextureLayerImageVector::PreSave(FObjectPreSaveContext SaveContext)
+{
+    Super::PreSave(SaveContext);
+
+    TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(mVectorBlock->GetWidth(), mVectorBlock->GetHeight(), mVectorBlock->GetFormat());
+
+    //Setting mDrawingFlags here ensures the Texture will update correctly on the next call to BuildTextureRenderer()
+    //If some drawing flags are needed
+    //As UpdateDrawingFlags() will return true and enforce Texture redraw.
+    mDrawingFlags = 0;
+
+    mVectorBlock->Render(*block, ::ULIS::FRectI::FromXYWH(0, 0, block->Width(), block->Height()), mDrawingFlags);
+    InitTextureWithBlockData(block.Get(), Texture, TextureSourceFormatForULISFormat(block->Format()));
+    Texture->UpdateResource();
+    FTextureCompilingManager::Get().FinishCompilation({ Texture });
 }
 
 #undef LOCTEXT_NAMESPACE
