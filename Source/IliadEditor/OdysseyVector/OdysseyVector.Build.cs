@@ -34,6 +34,7 @@ public class OdysseyVector : ModuleRules
                 "XmlParser",
                 "OdysseyFile",
                 "OdysseyCore",
+                "OdysseyCoreEditor",
                 "OdysseyStyle",
                 "OdysseyPalette"
             }

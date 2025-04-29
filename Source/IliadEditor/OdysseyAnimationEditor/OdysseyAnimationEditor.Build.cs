@@ -62,6 +62,7 @@ namespace UnrealBuildTool.Rules
                     "OdysseyAnimation",
                     "OdysseyBrush",
                     "OdysseyCore",
+                    "OdysseyCoreEditor",
                     "OdysseyEditor",
                     "OdysseyHUD",
                     "OdysseyImaging",

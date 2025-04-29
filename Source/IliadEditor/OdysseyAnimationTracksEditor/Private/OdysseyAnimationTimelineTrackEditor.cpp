@@ -12,6 +12,7 @@
 #include "OdysseyAnimation.h"
 #include "OdysseyAnimationActor.h"
 #include "OdysseyAnimationComponent.h"
+#include "OdysseyAnimationLayerStack.h"
 #include "OdysseyAnimationTimelineTrack.h"
 #include "OdysseyAnimationTimelineSection.h"
 #include "OdysseyAnimationTimelineSectionEditor.h"
@@ -299,7 +300,7 @@ FOdysseyAnimationTimelineTrackEditor::BuildOutlinerColumnWidget(const FBuildColu
                 ]
                 + SVerticalBox::Slot()
                 [
-                    SNew(SOdysseyAnimationTimelineTrack, component, track, iParams, SequencerPtr)
+                    SNew(SOdysseyAnimationTimelineTrack, track, iParams, SequencerPtr)
                         .Visibility_Lambda(
                             [track]()
                             {
@@ -307,6 +308,19 @@ FOdysseyAnimationTimelineTrackEditor::BuildOutlinerColumnWidget(const FBuildColu
                             }
                         )
                         .Clipping(EWidgetClipping::ClipToBoundsAlways)
+                        .LayerStack_Lambda(
+                            [component]() -> UOdysseyAnimationLayerStack*
+                            {
+                                if (!component)
+                                    return nullptr;
+
+                                UOdysseyAnimation* animation = component->GetActiveAnimation();
+                                if (!animation)
+                                    return nullptr;
+
+                                return Cast<UOdysseyAnimationLayerStack>(animation->GetLayerStack());
+                            }
+                        )
                 ]
             ];
     }

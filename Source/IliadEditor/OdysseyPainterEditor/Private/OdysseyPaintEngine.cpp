@@ -5,7 +5,6 @@
 
 #include "OdysseyBlendParameters.h"
 #include "OdysseyRasterBlock.h"
-#include "OdysseyRectUtils.h"
 #include "ULISLoaderModule.h"
 #include "Editor/TransBuffer.h"
 #include "UnrealEdGlobals.h"

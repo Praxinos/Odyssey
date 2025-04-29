@@ -5,7 +5,6 @@
 
 #include "OdysseyAnimation.h"
 #include "OdysseyAnimationPlayer.h"
-#include "UObject/OdysseyObjectEditorUtils.h"
 #include "OdysseyAnimationComponent.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(OdysseyAnimationTimelineTemplate)

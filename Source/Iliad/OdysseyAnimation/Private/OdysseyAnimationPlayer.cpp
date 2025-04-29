@@ -8,14 +8,7 @@
 #include "Engine/Texture2D.h"
 #include "TextureCompiler.h"
 #include "Misc/TransactionObjectEvent.h"
-#include "Misc/OdysseyUndoDelegates.h"
 #include "Engine/TextureRenderTarget2D.h"
-
-FSimpleMulticastDelegate&
-UOdysseyAnimationPlayer::OnAnimationChanged()
-{
-    return mOnAnimationChanged;
-}
 
 FSimpleMulticastDelegate&
 UOdysseyAnimationPlayer::OnCurrentFrameChanged()
@@ -307,6 +300,16 @@ UOdysseyAnimationPlayer::GetRenderType() const
 }
 
 void
+UOdysseyAnimationPlayer::SetAnimation(UOdysseyAnimation* iAnimation)
+{
+    if (iAnimation == Animation)
+        return;
+
+    Animation = iAnimation;
+    AnimationChanged();
+}
+
+void
 UOdysseyAnimationPlayer::Tick(float iDeltaTime)
 {
     if (GetFlags() & RF_ClassDefaultObject)
@@ -481,15 +484,6 @@ UOdysseyAnimationPlayer::PropertyChanged(const FName& iPropertyName)
 }
 
 void
-UOdysseyAnimationPlayer::PostPropertyChanged(const FName& iPropertyName)
-{
-    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationPlayer, Animation) )
-    {
-        mOnAnimationChanged.Broadcast();
-    }
-}
-
-void
 UOdysseyAnimationPlayer::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent)
 {
     Super::PostEditChangeProperty(PropertyChangedEvent);
@@ -501,7 +495,6 @@ UOdysseyAnimationPlayer::PostEditChangeProperty( FPropertyChangedEvent& Property
         return;
 
     PropertyChanged(PropertyChangedEvent.GetMemberPropertyName());
-    PostPropertyChanged(PropertyChangedEvent.GetMemberPropertyName());
 }
 
 void
@@ -516,12 +509,6 @@ UOdysseyAnimationPlayer::PostTransacted(const FTransactionObjectEvent& iTransact
     for ( const FName& propertyName : changedPropertyNames )
     {
         PropertyChanged(propertyName);
-        FOdysseyUndoDelegates::Get().OnAfterUndoRedo().AddLambda(
-            [this, propertyName](bool iIsRedo)
-            {
-                PostPropertyChanged(propertyName);
-            }
-        );
     }
 }
 

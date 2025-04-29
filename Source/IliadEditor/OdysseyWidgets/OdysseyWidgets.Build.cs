@@ -43,7 +43,6 @@ public class OdysseyWidgets : ModuleRules
                 "OdysseyBrush",
                 "OdysseyImaging",
                 "OdysseyLayerStackEditor",
-                "OdysseyMaths",
                 "OdysseyStyle",
                 "OdysseyStylusInput",
                 "OdysseyTexture",

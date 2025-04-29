@@ -5,7 +5,6 @@
 
 #include "CoreMinimal.h"
 #include "Image/OdysseyBlendingMode.h"
-#include "OdysseyPerformanceMode.h"
 #include "OdysseyMediaProvider.h"
 #include "OdysseyImageRenderingAbility.h"
 #include "Textures/SlateIcon.h"

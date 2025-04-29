@@ -144,18 +144,13 @@
             "LoadingPhase": "PostConfigInit"
         },
         {
-            "Name": "OdysseyMaths",
-            "Type": "Runtime",
-            "LoadingPhase": "Default"
-        },
-        {
             "Name": "OdysseyAnimationTracks",
             "Type": "Runtime",
             "LoadingPhase": "Default"
         },
         {
             "Name": "ULISLoader",
-            "Type": "Runtime",
+            "Type": "Editor",
             "LoadingPhase": "Default"
         },
         {
@@ -230,7 +225,7 @@
         },
         {
             "Name": "OdysseyAnimation",
-            "Type": "Editor",
+            "Type": "Runtime",
             "LoadingPhase": "Default"
         },
         {

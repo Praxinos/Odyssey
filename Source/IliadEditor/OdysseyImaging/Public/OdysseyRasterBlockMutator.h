@@ -4,7 +4,6 @@
 #pragma once
 
 #include "OdysseyRasterBlockUndo.h"
-#include "Misc/OdysseyHandle.h"
 #include "OdysseyInvalidTileMap.h"
 #include <ULIS>
 

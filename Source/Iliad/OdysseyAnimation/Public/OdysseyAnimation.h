@@ -39,7 +39,6 @@ public:
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent) override;
     virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
     virtual void PropertyChanged(const FName& iPropertyName);
-    virtual void PostPropertyChanged(const FName& iPropertyName);
 #endif
 
 public:
@@ -64,6 +63,11 @@ public:
 
     //Time range of the frame at iFrameIndex
     TRange<FTimespan> GetFrameTimeRange(int iFrameIndex) const; //TODO: find a better way to have this function, only used by Media and ViewportDrawingEditor
+
+    void OnLeftBoundModeChanged();
+    void OnRightBoundModeChanged();
+    void OnLeftBoundChanged();
+    void OnRightBoundChanged();
 
 public:
 #if WITH_EDITOR
@@ -91,12 +95,8 @@ protected:
     virtual void RenderToTextureFromRects(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, const TArray<FIntRect>& iRects, const FIntPoint& iPos) const override;
     virtual TArray<FIntRect> GetRenderingRects() const override;
 
-private:
-    UFUNCTION(BlueprintSetter)
-    void FramesPerSecondBlueprintSetter(float Value);
-
 public:
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Odyssey|Animation", BlueprintSetter=FramesPerSecondBlueprintSetter, meta=(ClampMin=1, UIMin=1))
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Odyssey|Animation", meta=(ClampMin=1, UIMin=1))
     float FramesPerSecond = 24.0f;
 
 protected:

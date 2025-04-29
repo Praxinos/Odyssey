@@ -19,19 +19,33 @@
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
+SLATE_IMPLEMENT_WIDGET(SOdysseyAnimationTimelineTrack)
 void
-SOdysseyAnimationTimelineTrack::Construct(const FArguments& iArgs, UOdysseyAnimationComponent* iComponent, UOdysseyAnimationTimelineTrack* iTrack, const FBuildColumnWidgetParams& iParams, TSharedPtr<ISequencer> iSequencer)
+SOdysseyAnimationTimelineTrack::PrivateRegisterAttributes(FSlateAttributeInitializer& AttributeInitializer)
 {
-    ensure(iComponent);
-    mComponent = iComponent;
+    SLATE_ADD_MEMBER_ATTRIBUTE_DEFINITION(AttributeInitializer, mLayerStack, EInvalidateWidgetReason::None)
+    .OnValueChanged(FSlateAttributeDescriptor::FAttributeValueChangedDelegate::CreateLambda(
+        [](SWidget& Widget)
+        {
+            static_cast<SOdysseyAnimationTimelineTrack&>(Widget).OnLayerStackChanged();
+        }
+    ));
+}
+
+SOdysseyAnimationTimelineTrack::SOdysseyAnimationTimelineTrack()
+    : mLayerStack(*this, nullptr)
+{
+
+}
+
+void
+SOdysseyAnimationTimelineTrack::Construct(const FArguments& iArgs, UOdysseyAnimationTimelineTrack* iTrack, const FBuildColumnWidgetParams& iParams, TSharedPtr<ISequencer> iSequencer)
+{
     mTrack = iTrack;
     mRow = iParams.TreeViewRow;
     mSequencer = iSequencer;
+    mLayerStack.Assign(*this, iArgs._LayerStack);
     RebuildWidgets();
-
-    mComponent->OnAnimationChanged().AddSP(this, &SOdysseyAnimationTimelineTrack::OnAnimationChanged);
-    mComponent->OnPlayerChanged().AddSP(this, &SOdysseyAnimationTimelineTrack::OnPlayerChanged);
-    mComponent->OnModeChanged().AddSP(this, &SOdysseyAnimationTimelineTrack::OnModeChanged);
 }
 
 FReply
@@ -66,11 +80,9 @@ SOdysseyAnimationTimelineTrack::RebuildWidgets()
 {
     this->ChildSlot.DetachWidget();
 
-    UOdysseyAnimation* animation = mComponent->GetActiveAnimation();
-    if (!animation)
+    UOdysseyAnimationLayerStack* layerStack = mLayerStack.Get();
+    if (!layerStack)
         return;
-
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(animation->GetLayerStack());
 
     TSharedPtr<SWidget> widget = SNew(SOdysseyAnimationLayerStackTreeView)
         .LayerStack(layerStack)
@@ -80,19 +92,7 @@ SOdysseyAnimationTimelineTrack::RebuildWidgets()
 }
 
 void
-SOdysseyAnimationTimelineTrack::OnAnimationChanged()
-{
-    RebuildWidgets();
-}
-
-void
-SOdysseyAnimationTimelineTrack::OnPlayerChanged()
-{
-    RebuildWidgets();
-}
-
-void
-SOdysseyAnimationTimelineTrack::OnModeChanged()
+SOdysseyAnimationTimelineTrack::OnLayerStackChanged()
 {
     RebuildWidgets();
 }

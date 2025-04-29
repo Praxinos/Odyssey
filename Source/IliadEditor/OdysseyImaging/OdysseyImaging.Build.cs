@@ -38,8 +38,8 @@ public class OdysseyImaging : ModuleRules
                 "UnrealEd",
 
                 "OdysseyCore",
-                "OdysseyFile",
-                "OdysseyMaths"
+                "OdysseyCoreEditor",
+                "OdysseyFile"
              }
         );
 

@@ -9,7 +9,7 @@
 
 class FTransactionObjectEvent;
 
-class ODYSSEYCORE_API FOdysseyUndoDelegates
+class ODYSSEYCOREEDITOR_API FOdysseyUndoDelegates
 {
 public:
     static FOdysseyUndoDelegates& Get();

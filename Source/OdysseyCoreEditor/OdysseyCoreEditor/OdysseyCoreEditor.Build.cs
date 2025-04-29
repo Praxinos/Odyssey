@@ -42,6 +42,7 @@ public class OdysseyCoreEditor : ModuleRules
 
                 // [EDITOR] engine dependencies
                 "EditorSubsystem",
+                "UnrealEd",
 
                 // [EDITOR] plugin dependencies
                 "OdysseyCommonWidgets",

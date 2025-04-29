@@ -5,7 +5,6 @@
 
 #include "CoreMinimal.h"
 
-#include "Misc/OdysseyHandle.h"
 #include "OdysseyInvalidTileMap.h"
 #include "OdysseyRasterBlockUndo.h"
 #include "OdysseyDiskCache.h"

@@ -3,17 +3,9 @@
 
 #include "OdysseyAnimation.h"
 
-#include "Misc/OdysseyUndoDelegates.h"
 #include "Misc/TransactionObjectEvent.h"
-#include "UObject/OdysseyObjectEditorUtils.h"
 
 #define LOCTEXT_NAMESPACE "Animation"
-
-void
-UOdysseyAnimation::FramesPerSecondBlueprintSetter(float Value)
-{
-    FObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, FramesPerSecond), Value);
-}
 
 int
 UOdysseyAnimation::GetWidth() const
@@ -146,31 +138,33 @@ UOdysseyAnimation::GetRightBoundValue() const
 void
 UOdysseyAnimation::SetLeftBoundMode(EOdysseyAnimationBoundMode iMode)
 {
-    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, LeftBoundMode), iMode);
+    LeftBoundMode = iMode;
+
+    OnLeftBoundModeChanged();
 }
 
 void
 UOdysseyAnimation::SetRightBoundMode(EOdysseyAnimationBoundMode iMode)
 {
-    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, RightBoundMode), iMode);
+    RightBoundMode = iMode;
+
+    OnRightBoundModeChanged();
 }
 
 void
 UOdysseyAnimation::SetLeftBoundValue(int iValue)
 {
-    if (LeftBoundMode != EOdysseyAnimationBoundMode::Manual)
-        return;
+    LeftBound = iValue;
 
-    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, LeftBound), iValue);
+    OnLeftBoundChanged();
 }
 
 void
 UOdysseyAnimation::SetRightBoundValue(int iValue)
 {
-    if (RightBoundMode != EOdysseyAnimationBoundMode::Manual)
-        return;
+    RightBound = iValue;
 
-    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, RightBound), iValue);
+    OnRightBoundChanged();
 }
 
 void
@@ -245,7 +239,6 @@ UOdysseyAnimation::PostEditChangeProperty( FPropertyChangedEvent& PropertyChange
         return;
 
     PropertyChanged(PropertyChangedEvent.GetPropertyName());
-    PostPropertyChanged(PropertyChangedEvent.GetPropertyName());
 }
 
 void
@@ -260,12 +253,50 @@ UOdysseyAnimation::PostTransacted(const FTransactionObjectEvent& iTransactionEve
     for ( const FName& propertyName : changedPropertyNames )
     {
         PropertyChanged(propertyName);
-        FOdysseyUndoDelegates::Get().OnAfterUndoRedo().AddLambda(
-            [this, propertyName](bool iIsRedo)
-            {
-                PostPropertyChanged(propertyName);
-            }
-        );
+    }
+}
+
+void
+UOdysseyAnimation::OnLeftBoundModeChanged()
+{
+    FInt32Range frameRange = GetFrameRange();
+    LeftBound = frameRange.GetLowerBoundValue();
+    RightBound = FMath::Max(GetLeftBoundValue(), RightBound);
+}
+
+void
+UOdysseyAnimation::OnRightBoundModeChanged()
+{
+    FInt32Range frameRange = GetFrameRange();
+    RightBound = frameRange.GetUpperBoundValue();
+    LeftBound = FMath::Min(LeftBound, GetRightBoundValue());
+}
+
+void
+UOdysseyAnimation::OnLeftBoundChanged()
+{
+    if (LeftBoundMode == EOdysseyAnimationBoundMode::Automatic)
+    {
+        FInt32Range frameRange = GetFrameRange();
+        LeftBound = frameRange.GetLowerBoundValue();
+    }
+    else
+    {
+        LeftBound = FMath::Clamp(LeftBound, 0, GetRightBoundValue());
+    }
+}
+
+void
+UOdysseyAnimation::OnRightBoundChanged()
+{
+    if (RightBoundMode == EOdysseyAnimationBoundMode::Automatic)
+    {
+        FInt32Range frameRange = GetFrameRange();
+        RightBound = frameRange.GetUpperBoundValue();
+    }
+    else
+    {
+        RightBound = FMath::Max( RightBound, GetLeftBoundValue() );
     }
 }
 
@@ -274,48 +305,23 @@ UOdysseyAnimation::PropertyChanged(const FName& iPropertyName)
 {
     if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, LeftBoundMode) )
     {
-        FInt32Range frameRange = GetFrameRange();
-        LeftBound = frameRange.GetLowerBoundValue();
-        RightBound = FMath::Max(GetLeftBoundValue(), RightBound);
+        OnLeftBoundModeChanged();
     }
 
     if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, RightBoundMode) )
     {
-        FInt32Range frameRange = GetFrameRange();
-        RightBound = frameRange.GetUpperBoundValue();
-        LeftBound = FMath::Min(LeftBound, GetRightBoundValue());
+        OnRightBoundModeChanged();
     }
 
     if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, LeftBound) )
     {
-        if (LeftBoundMode == EOdysseyAnimationBoundMode::Automatic)
-        {
-            FInt32Range frameRange = GetFrameRange();
-            LeftBound = frameRange.GetLowerBoundValue();
-        }
-        else
-        {
-            LeftBound = FMath::Clamp(LeftBound, 0, GetRightBoundValue());
-        }
+        OnLeftBoundChanged();
     }
 
     if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, RightBound) )
     {
-        if (RightBoundMode == EOdysseyAnimationBoundMode::Automatic)
-        {
-            FInt32Range frameRange = GetFrameRange();
-            RightBound = frameRange.GetUpperBoundValue();
-        }
-        else
-        {
-            RightBound = FMath::Max( RightBound, GetLeftBoundValue() );
-        }
+        OnRightBoundChanged();
     }
-}
-
-void
-UOdysseyAnimation::PostPropertyChanged(const FName& iPropertyName)
-{
 }
 
 

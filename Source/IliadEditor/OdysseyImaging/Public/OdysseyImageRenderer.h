@@ -4,7 +4,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Misc/OdysseyHandle.h"
 #include "OdysseyRenderingType.h"
 #include <ULIS>
 

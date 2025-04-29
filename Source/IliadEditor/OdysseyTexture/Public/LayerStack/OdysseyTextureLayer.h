@@ -5,7 +5,6 @@
 
 #include "OdysseyLayer.h"
 
-#include "Misc/OdysseyHandle.h"
 #include "OdysseyMediaProvider.h"
 
 #include "OdysseyTextureLayer.generated.h"

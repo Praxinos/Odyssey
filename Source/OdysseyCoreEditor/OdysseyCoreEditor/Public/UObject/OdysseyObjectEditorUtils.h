@@ -8,8 +8,8 @@
 
 namespace FOdysseyObjectEditorUtils
 {
-    void ODYSSEYCORE_API PreChangePropertyValue(UObject* Object, FName PropertyName);
-    void ODYSSEYCORE_API PostChangePropertyValue(UObject* Object, FName PropertyName, EPropertyChangeType::Type iChangeType = EPropertyChangeType::Unspecified);
+    void ODYSSEYCOREEDITOR_API PreChangePropertyValue(UObject* Object, FName PropertyName);
+    void ODYSSEYCOREEDITOR_API PostChangePropertyValue(UObject* Object, FName PropertyName, EPropertyChangeType::Type iChangeType = EPropertyChangeType::Unspecified);
 
     /**
      * Set the value on an UObject using reflection.
@@ -92,5 +92,5 @@ namespace FOdysseyObjectEditorUtils
      *
      * @return true if the poroperty exists within the given object
      */
-    bool ODYSSEYCORE_API HasProperty(UObject* Object, FName PropertyName);
+    bool ODYSSEYCOREEDITOR_API HasProperty(UObject* Object, FName PropertyName);
 };

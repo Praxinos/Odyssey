@@ -7,9 +7,7 @@
 #include "Materials/MaterialInstanceConstant.h"
 #include "Materials/Material.h"
 #include "Subsystems/UnrealEditorSubsystem.h"
-#include "UObject/OdysseyObjectEditorUtils.h"
 #include "Misc/TransactionObjectEvent.h"
-#include "Misc/OdysseyUndoDelegates.h"
 #include "Engine/TextureRenderTarget2D.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(OdysseyAnimationComponent)
@@ -64,7 +62,6 @@ UOdysseyAnimationComponent::SetAnimation(UOdysseyAnimation* iAnimation)
 
     Animation = iAnimation;
     AnimationChanged();
-    mOnAnimationChanged.Broadcast();
 }
 
 void
@@ -74,8 +71,6 @@ UOdysseyAnimationComponent::SetPlayer(UOdysseyAnimationPlayer* iPlayer)
         return;
 
     Player = iPlayer;
-    OnPlayerChanged();
-    mOnPlayerChanged.Broadcast();
 }
 
 void
@@ -85,26 +80,6 @@ UOdysseyAnimationComponent::SetMode(EOdysseyAnimationComponentMode iMode)
         return;
 
     Mode = iMode;
-    OnModeChanged();
-    mOnModeChanged.Broadcast();
-}
-
-FSimpleMulticastDelegate&
-UOdysseyAnimationComponent::OnAnimationChanged()
-{
-    return mOnAnimationChanged;
-}
-
-FSimpleMulticastDelegate&
-UOdysseyAnimationComponent::OnPlayerChanged()
-{
-    return mOnPlayerChanged;
-}
-
-FSimpleMulticastDelegate&
-UOdysseyAnimationComponent::OnModeChanged()
-{
-    return mOnModeChanged;
 }
 
 void
@@ -184,17 +159,6 @@ UOdysseyAnimationComponent::PropertyChanged(const FName& iPropertyName)
 }
 
 void
-UOdysseyAnimationComponent::PostPropertyChanged(const FName& iPropertyName)
-{
-    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationComponent, Mode) )
-        mOnModeChanged.Broadcast();
-    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationComponent, Animation) )
-        mOnAnimationChanged.Broadcast();
-    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationComponent, Player) )
-        mOnPlayerChanged.Broadcast();
-}
-
-void
 UOdysseyAnimationComponent::ModeChanged()
 {
     RefreshMaterialTexture();
@@ -205,7 +169,7 @@ UOdysseyAnimationComponent::AnimationChanged()
 {
     if (Mode == EOdysseyAnimationComponentMode::Animation)
     {
-        FOdysseyObjectEditorUtils::SetPropertyValue(DefaultPlayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationPlayer, Animation), Animation);
+        DefaultPlayer->SetAnimation(Animation);
         if (Animation)
         {
             float scaleW = (float)Animation->GetWidth() / (float)Animation->GetHeight();
@@ -250,7 +214,6 @@ UOdysseyAnimationComponent::PostEditChangeProperty( FPropertyChangedEvent& Prope
         return;
 
     PropertyChanged(PropertyChangedEvent.GetPropertyName());
-    PostPropertyChanged(PropertyChangedEvent.GetPropertyName());
 }
 
 void
@@ -265,12 +228,6 @@ UOdysseyAnimationComponent::PostTransacted(const FTransactionObjectEvent& iTrans
     for ( const FName& propertyName : changedPropertyNames )
     {
         PropertyChanged(propertyName);
-        FOdysseyUndoDelegates::Get().OnAfterUndoRedo().AddLambda(
-            [this, propertyName](bool iIsRedo)
-            {
-                PostPropertyChanged(propertyName);
-            }
-        );
     }
 }
 

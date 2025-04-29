@@ -106,10 +106,10 @@ public class OdysseyLayerStackEditor : ModuleRules
                 "ToolWidgets",
 
                 "OdysseyAnimation",
+                "OdysseyCoreEditor",
                 "OdysseyBrush",
                 "OdysseyFile",
                 "OdysseyEditor",
-                "OdysseyMaths",
                 "OdysseyStyle",
                 "OdysseyVector",
 

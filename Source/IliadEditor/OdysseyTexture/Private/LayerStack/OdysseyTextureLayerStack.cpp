@@ -8,7 +8,6 @@
 #include "TextureCompiler.h"
 #include "UObject/ObjectSaveContext.h"
 #include "OdysseyTextureLayerImageRaster.h"
-#include "OdysseyRectUtils.h"
 #include "OdysseyRasterBlockMutator.h"
 #include "OdysseyTextureLayer.h"
 #include "OdysseyTextureLayerImageVector.h"

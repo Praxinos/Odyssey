@@ -4,7 +4,6 @@
 #pragma once
 
 #include "OdysseyLayerStack.h"
-#include "Misc/OdysseyHandle.h"
 #include "OdysseyAnimationCellSelection.h"
 
 #include "OdysseyAnimationLayerStack.generated.h"

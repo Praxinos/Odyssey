@@ -40,10 +40,6 @@ public:
     void SetPlayer(UOdysseyAnimationPlayer* iPlayer);
     void SetMode(EOdysseyAnimationComponentMode iMode);
 
-    FSimpleMulticastDelegate& OnAnimationChanged();
-    FSimpleMulticastDelegate& OnPlayerChanged();
-    FSimpleMulticastDelegate& OnModeChanged();
-
 public:
     virtual void PostLoad() override;
     virtual void PostDuplicate(bool bDuplicateForPIE) override;
@@ -54,11 +50,11 @@ public:
 protected:
     //Property changed methods
     virtual void PropertyChanged(const FName& iPropertyName);
-    virtual void PostPropertyChanged(const FName& iPropertyName);
 
     virtual void ModeChanged();
     virtual void AnimationChanged();
     virtual void PlayerChanged();
+
     void MaterialChanged();
 
 private:
@@ -83,8 +79,4 @@ private:
 
     UPROPERTY()
     TObjectPtr<UMaterialInstanceConstant> MaterialInstance;
-
-    FSimpleMulticastDelegate mOnAnimationChanged;
-    FSimpleMulticastDelegate mOnPlayerChanged;
-    FSimpleMulticastDelegate mOnModeChanged;
 };

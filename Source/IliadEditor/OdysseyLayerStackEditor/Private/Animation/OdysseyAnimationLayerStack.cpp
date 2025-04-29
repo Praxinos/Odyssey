@@ -6,7 +6,6 @@
 #include "LayerFolder/OdysseyAnimationLayerFolder.h"
 #include "OdysseyAnimationLayerImageRaster.h"
 #include "OdysseyAnimationLayerImageVector.h"
-#include "OdysseyRectUtils.h"
 #include "OdysseyAnimation.h"
 #include "OdysseyAnimationCellSelection.h"
 #include "Misc/TransactionObjectEvent.h"

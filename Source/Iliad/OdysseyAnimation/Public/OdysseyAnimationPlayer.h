@@ -7,7 +7,6 @@
 #include "CoreMinimal.h"
 #include "TickableEditorObject.h"
 #include "OdysseyInvalidTileMap.h"
-#include "Misc/OdysseyHandle.h"
 #include "OdysseyRenderingAbility.h"
 
 #include "OdysseyAnimationPlayer.generated.h"
@@ -77,6 +76,8 @@ public:
     EOdysseyAnimationPlayerStatus GetStatus() const;
 
     FFrameTime GetCurrentFrame() const;
+
+    void SetAnimation(UOdysseyAnimation* iAnimation);
 
     bool GetDuration(FFrameTime& oTime) const;
 
@@ -154,7 +155,6 @@ private:
 
 private:
     //Events
-    FSimpleMulticastDelegate mOnAnimationChanged;
     FSimpleMulticastDelegate mOnCurrentFrameChanged;
     FSimpleMulticastDelegate mOnStatusChanged;
 };

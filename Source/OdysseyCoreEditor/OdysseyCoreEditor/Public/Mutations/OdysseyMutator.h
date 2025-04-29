@@ -5,7 +5,7 @@
 
 class FOdysseyRootMutation;
 
-class ODYSSEYCORE_API IOdysseyMutation
+class ODYSSEYCOREEDITOR_API IOdysseyMutation
 {
 public:
     virtual ~IOdysseyMutation() {}
@@ -24,7 +24,7 @@ public:
     virtual void Revert() = 0;
 };
 
-class ODYSSEYCORE_API FOdysseyMutator
+class ODYSSEYCOREEDITOR_API FOdysseyMutator
 {
 public:
     //Destructor
@@ -63,7 +63,7 @@ private:
     bool mGenerateUndo;
 };
 
-class ODYSSEYCORE_API FOdysseyRootMutation
+class ODYSSEYCOREEDITOR_API FOdysseyRootMutation
     : public IOdysseyMutation
 {
 public:
