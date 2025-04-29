@@ -36,7 +36,6 @@ namespace UnrealBuildTool.Rules
                     Path.Combine(ModuleDirectory, "Public", "LayerStack", "Layers", "LayerFolder"),
                     Path.Combine(ModuleDirectory, "Public", "LayerStack", "Layers", "LayerImageRaster"),
                     Path.Combine(ModuleDirectory, "Public", "LayerStack", "Layers", "LayerImageVector"),
-                    Path.Combine(ModuleDirectory, "Public", "LayerStack", "Layers", "LayerRoot"),
                     Path.Combine(ModuleDirectory, "Public", "Media"),
                 }
                 );
@@ -52,7 +51,6 @@ namespace UnrealBuildTool.Rules
                     Path.Combine(ModuleDirectory, "Private", "LayerStack", "Layers", "LayerFolder"),
                     Path.Combine(ModuleDirectory, "Private", "LayerStack", "Layers", "LayerImageRaster"),
                     Path.Combine(ModuleDirectory, "Private", "LayerStack", "Layers", "LayerImageVector"),
-                    Path.Combine(ModuleDirectory, "Private", "LayerStack", "Layers", "LayerRoot"),
                     Path.Combine(ModuleDirectory, "Private", "Media"),
                 }
                 );
