@@ -68,4 +68,5 @@ class SOdysseyAnimationTimelineInbetweeningHeaderRow
         FOnTransactCurrentFrame mOnTransactCurrentFrame;
         FOdysseyVectorTagInbetweener* mInbetweenerTag;
         TSharedPtr<STextBlock> mTextBlockWidget;
+        FOnTransactCurrentFrame mOnTransactCurrentFrame;
 };

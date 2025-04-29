@@ -50,6 +50,7 @@ SOdysseyAnimationTimelineInbetweeningHeader::Construct( const FArguments& InArgs
     static FTableViewStyle style = FOdysseyStyle::GetWidgetStyle<FTableViewStyle>("Inbetweening.TableView");
 
     mAnimationLayerImageVector = iAnimationLayerImageVector;
+    mOnTransactCurrentFrame = InArgs._OnTransactCurrentFrame;
 
     // bind refresh function to delegates on existing vector scenes at load. Needed to refresh necessary widgets.
     FOdysseyVectorEngine::OnNotifyDelegate().AddRaw( this, &SOdysseyAnimationTimelineInbetweeningHeader::OnVectorSceneNotify );
@@ -280,7 +281,8 @@ TSharedRef<ITableRow>
 SOdysseyAnimationTimelineInbetweeningHeader::OnGenerateRow( TSharedPtr<FInbetweeningListViewItem> iItem
                                                           , const TSharedRef<STableViewBase>& iOwnerTable )
 {
-    return SNew( SOdysseyAnimationTimelineInbetweeningHeaderRow, iOwnerTable, iItem );
+    return SNew( SOdysseyAnimationTimelineInbetweeningHeaderRow, iOwnerTable, iItem )
+        .OnTransactCurrentFrame(mOnTransactCurrentFrame);
 }
 
 TSharedPtr<SWidget>

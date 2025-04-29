@@ -9,8 +9,6 @@
 
 #include "Widgets/Text/SInlineEditableTextBlock.h"
 #include "OdysseyStyle.h"
-#include "OdysseyPainterEditor.h"
-#include "OdysseyPainterEditorSource.h"
 // from module OdysseyVector
 #include "OdysseyVector.h"
 #include "OdysseyVectorTagInbetweener.h"
@@ -108,8 +106,6 @@ SOdysseyAnimationTimelineInbetweeningHeaderRow::Construct( const FArguments& InA
     const FSlateBrush* inbetweenerTagIcon = FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Matching16" );
     FOdysseyVectorTagInbetweener* inbetweenerTag = iTem.Get()->GetInbetweenerTag();
     uint32 cellIndex = inbetweenerTag->GetOwner()->GetCell()->GetIndex();
-
-    mOnTransactCurrentFrame = InArgs._OnTransactCurrentFrame;
 
     mInbetweenerTag = inbetweenerTag;
 

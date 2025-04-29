@@ -11,6 +11,7 @@
 #include "OdysseyVectorObject.h"
 #include "OdysseyVectorTag.h"
 #include "OdysseyVectorTagInbetweener.h"
+#include "OdysseyStyle.h"
 #include "Undo/OdysseyVectorUndo.h"
 #include "Undo/OdysseyVectorUndoSelectObject.h"
 #include "Widgets/Tab/SOdysseyPainterEditorVectorSceneTreeViewRow.h"

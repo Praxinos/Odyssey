@@ -17,10 +17,14 @@ class SOdysseyAnimationLayerImageVectorRow
     : public SOdysseyAnimationLayerRow
 {
 public:
+    DECLARE_DELEGATE_OneParam(FOnTransactCurrentFrame, TOptional<int>)
+
+public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationLayerImageVectorRow)
         {}
         SLATE_ATTRIBUTE(int, CurrentFrame)
         SLATE_ARGUMENT( TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition>, TimelinePosition )
+        SLATE_EVENT(FOnTransactCurrentFrame, OnTransactCurrentFrame)
     SLATE_END_ARGS()
 
 public:

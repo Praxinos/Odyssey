@@ -72,7 +72,8 @@ FOdysseyPainterEditorVectorSceneTreeViewTab::CreateWidget()
             .Orientation( EOrientation::Orient_Vertical )
             +SSplitter::Slot()
             [
-                SNew( SOdysseyPainterEditorVectorSceneTreeView, mEditor )
+                SNew( SOdysseyPainterEditorVectorSceneTreeView )
+                .Editor(mEditor)
                 .Scene(this, &FOdysseyPainterEditorVectorSceneTreeViewTab::GetScene)
             ]
             +SSplitter::Slot()
