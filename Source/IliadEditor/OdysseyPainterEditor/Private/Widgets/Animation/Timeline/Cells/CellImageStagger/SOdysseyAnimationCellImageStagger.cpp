@@ -4,8 +4,7 @@
 #include "Widgets/Animation/Timeline/Cells/CellImageStagger/SOdysseyAnimationCellImageStagger.h"
 #include "Widgets/Input/SSpinBox.h"
 #include "OdysseyStyle.h"
-#include "LayerStack/Layers/OdysseyAnimationLayer.h"
-#include "OdysseyAnimationCurrentFrameMutator.h"
+#include "OdysseyAnimationLayer.h"
 #include "OdysseyPainterEditorAnimationTimelinePosition.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "ScopedTransaction.h"
@@ -20,6 +19,7 @@ SOdysseyAnimationCellImageStagger::Construct(const FArguments& iArgs, UOdysseyAn
     mCell = iCell;
     mShowContent = iArgs._ShowContent;
     mTimelinePosition = iArgs._TimelinePosition;
+    mOnTransactCurrentFrame = iArgs._OnTransactCurrentFrame;
 
     FSlateColor behaviourColor( FOdysseyStyle::GetColor( "Animation.CellImageStagger.BehaviourColor" ) );
 
@@ -177,9 +177,7 @@ SOdysseyAnimationCellImageStagger::OnReachValueCommited(int iReach, ETextCommit:
 #endif
     FOdysseyObjectEditorUtils::SetPropertyValue(mCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCellImageStagger, Reach), FMath::Max(0, iReach), EPropertyChangeType::ValueSet);
 
-    FOdysseyAnimationCurrentFrameMutator currentFrameMutator(mCell->GetAnimation());
-    currentFrameMutator.Set(mCell->GetFrameRange().GetLowerBoundValue());
-    currentFrameMutator.Commit();
+    mOnTransactCurrentFrame.ExecuteIfBound(mCell->GetFrameRange().GetLowerBoundValue());
 }
 
 void
@@ -256,9 +254,7 @@ SOdysseyAnimationCellImageStagger::SetBehaviour(EOdysseyAnimationCellImageStagge
 #endif
     FOdysseyObjectEditorUtils::SetPropertyValue(mCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCellImageStagger, Behaviour), iBehaviour);
 
-    FOdysseyAnimationCurrentFrameMutator currentFrameMutator(mCell->GetAnimation());
-    currentFrameMutator.Set(mCell->GetFrameRange().GetLowerBoundValue());
-    currentFrameMutator.Commit();
+    mOnTransactCurrentFrame.ExecuteIfBound(mCell->GetFrameRange().GetLowerBoundValue());
 }
 
 bool

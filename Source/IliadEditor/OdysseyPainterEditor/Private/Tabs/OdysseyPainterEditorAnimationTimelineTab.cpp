@@ -3,8 +3,8 @@
 
 #include "OdysseyPainterEditorAnimationTimelineTab.h"
 
-#include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
-#include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
+#include "OdysseyAnimationLayerImageRaster.h"
+#include "OdysseyAnimationCellImageRaster.h"
 #include "Widgets/Animation/Timeline/SOdysseyAnimationLayerStack.h"
 #include "ULISEventBuilder.h"
 #include "ULISLoaderModule.h"
@@ -25,7 +25,6 @@
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorAnimationSource.h"
 #include "OdysseyAnimation.h"
-#include "OdysseyAnimationCurrentFrameMutator.h"
 #include "OdysseyPainterEditorAnimationFunctionLibrary.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "Tools/OutOfPegsTool/OdysseyPainterEditorAnimationOutOfPegsTool.h"
@@ -76,10 +75,8 @@ FOdysseyPainterEditorAnimationTimelineTab::CreateWidget()
         +SWidgetSwitcher::Slot()
         [
             SNew(SOdysseyAnimationLayerStack)
-            .PainterEditor(mEditor)
             .Animation(this, &FOdysseyPainterEditorAnimationTimelineTab::Animation)
             .Player(this, &FOdysseyPainterEditorAnimationTimelineTab::Player)
-            .PlaybackFramesPerSecond(this, &FOdysseyPainterEditorAnimationTimelineTab::PlaybackFramesPerSecond)
             .TimelinePosition(this, &FOdysseyPainterEditorAnimationTimelineTab::GetTimelinePosition)
             .OnActivateOutOfPegs(this, &FOdysseyPainterEditorAnimationTimelineTab::OnActivateOutOfPegs)
             .OnInactivateOutOfPegs(this, &FOdysseyPainterEditorAnimationTimelineTab::OnInactivateOutOfPegs)
@@ -133,12 +130,6 @@ FOdysseyPainterEditorAnimationTimelineTab::Player() const
 
     TSharedPtr<FOdysseyPainterEditorAnimationSource> animSource = StaticCastSharedPtr<FOdysseyPainterEditorAnimationSource>(source);
     return animSource->GetAnimationPlayer();
-}
-
-float
-FOdysseyPainterEditorAnimationTimelineTab::PlaybackFramesPerSecond() const
-{
-    return mEditor->GetAnimationPlaybackFramesPerSecond();
 }
 
 TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition>
@@ -293,7 +284,7 @@ FOdysseyPainterEditorAnimationTimelineTab::ImportImageSequence()
     TSharedPtr<FOdysseyPainterEditorAnimationSource> animationSource = StaticCastSharedPtr<FOdysseyPainterEditorAnimationSource>(source);
 
     UOdysseyAnimation* animation = animationSource->GetAnimation();
-    UOdysseyAnimationLayerStack* layerStack = animation->GetLayerStack();
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(animation->GetLayerStack());
     IDesktopPlatform* desktopPlatformHandle = FDesktopPlatformModule::Get();
     TArray< FString > filenames;
     bool dialogValidated = desktopPlatformHandle->OpenFileDialog(

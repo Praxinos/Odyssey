@@ -4,7 +4,7 @@
 #include "Widgets/Texture/LayerStack/SOdysseyTextureLayerImageVectorRow.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "OdysseyStyle.h"
-#include "LayerStack/OdysseyTextureLayerImageVector.h"
+#include "OdysseyTextureLayerImageVector.h"
 #include "Widgets/Input/NumericTypeInterface.h"
 #include "Widgets/Input/NumericUnitTypeInterface.inl"
 #include "Widgets/Input/SNumericEntryBox.h"

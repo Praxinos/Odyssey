@@ -3,8 +3,8 @@
 
 #include "OdysseyAnimationCellClipboardData.h"
 
-#include "LayerStack/Cells/OdysseyAnimationCell.h"
-#include "LayerStack/Layers/OdysseyAnimationLayer.h"
+#include "OdysseyAnimationCell.h"
+#include "OdysseyAnimationLayer.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 
 FOdysseyAnimationCellClipboardData::FOdysseyAnimationCellClipboardData()

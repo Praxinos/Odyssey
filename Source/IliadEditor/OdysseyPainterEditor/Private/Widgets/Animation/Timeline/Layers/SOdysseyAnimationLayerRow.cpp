@@ -3,7 +3,7 @@
 
 #include "Widgets/Animation/Timeline/Layers/SOdysseyAnimationLayerRow.h"
 #include "Widgets/Animation/Timeline/SOdysseyAnimationLayerStack.h"
-#include "LayerStack/Layers/OdysseyAnimationLayer.h"
+#include "OdysseyAnimationLayer.h"
 #include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineLightTableHeader.h"
 #include "OdysseyStyle.h"
 #include "UObject/OdysseyObjectEditorUtils.h"

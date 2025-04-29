@@ -7,8 +7,8 @@
 #include "OdysseyPainterEditorAnimationProjectSettings.h"
 #include "DetailWidgetRow.h"
 #include "IDetailChildrenBuilder.h"
-#include "LayerStack/Cells/OdysseyAnimationCell.h"
-#include "LayerStack/Layers/OdysseyAnimationLayer.h"
+#include "OdysseyAnimationCell.h"
+#include "OdysseyAnimationLayer.h"
 #include "OdysseyAnimation.h"
 #include "OdysseyPainterEditorAnimationUserSettings.h"
 #include "OdysseyAnimationPlayer.h"
@@ -414,9 +414,9 @@ FOdysseyPainterEditorAnimationFlipSystem::StartFlipping(const FOdysseyAnimationF
 
     mFlipConfiguration = iFlipConfiguration;
     mIsFlipping = true;
-    mStartFrame = mAnimation->CurrentFrame;
+    mStartFrame = mEditor->GetCurrentFrame();
 
-    mEditor->GetAnimationPlayer()->Stop();
+    mEditor->GetAnimationPlayer()->BeginScrub();
     mInitialRenderType = mEditor->GetAnimationPlayer()->GetRenderType();
     mEditor->GetAnimationPlayer()->SeekToFrame(mStartFrame);
 }
@@ -430,17 +430,10 @@ FOdysseyPainterEditorAnimationFlipSystem::EndFlipping()
     mIsFlipping = false;
 
     if (mFlipConfiguration.Rollback)
-    {
-        mEditor->GetAnimationPlayer()->Stop();
-        mEditor->GetAnimationPlayer()->SetRenderType(mInitialRenderType);
         mEditor->GetAnimationPlayer()->SeekToFrame(mStartFrame);
-    }
-    else
-    {
-        mEditor->GetAnimationPlayer()->SetRenderType(mInitialRenderType);
-        int frame = mEditor->GetAnimationPlayer()->GetCurrentFrame().GetFrame().Value;
-        FOdysseyObjectEditorUtils::SetPropertyValue(mAnimation, GET_MEMBER_NAME_CHECKED( UOdysseyAnimation, CurrentFrame), frame);
-    }
+
+    mEditor->GetAnimationPlayer()->SetRenderType(mInitialRenderType);
+    mEditor->GetAnimationPlayer()->EndScrub();
 }
 
 void
@@ -554,7 +547,7 @@ FOdysseyPainterEditorAnimationFlipSystem::GetKeyFrame(int iDelta, int& oFrame)
 
         case EOdysseyAnimationFlipKeys::Cells:
         {
-            UOdysseyAnimationLayerStack* layerStack = mAnimation->GetLayerStack();
+            UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(mAnimation->GetLayerStack());
             UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerStack->CurrentLayer.Get());
             bool useLayerLeftLimit = layer->GetCells().Num() < 2;
             bool useLayerRightLimit = useLayerLeftLimit;
@@ -668,7 +661,7 @@ FOdysseyPainterEditorAnimationFlipSystem::GetKeyFrame(int iDelta, int& oFrame)
 
         case EOdysseyAnimationFlipKeys::CellMarks:
         {
-            UOdysseyAnimationLayerStack* layerStack = mAnimation->GetLayerStack();
+            UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(mAnimation->GetLayerStack());
             UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerStack->CurrentLayer.Get());
             const TArray<UOdysseyAnimationCell*>& cells = layer->GetCells();
             FInt32Range frameRange = layer->GetFrameRange();
@@ -795,7 +788,7 @@ FOdysseyPainterEditorAnimationFlipSystem::GetLimits(EOdysseyAnimationFlipLimits 
 
         case EOdysseyAnimationFlipLimits::Layer:
         {
-            UOdysseyAnimationLayerStack* layerStack = mAnimation->GetLayerStack();
+            UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(mAnimation->GetLayerStack());
             UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerStack->CurrentLayer.Get());
             FInt32Range frameRange = layer->GetFrameRange();
             oLeftLimit = frameRange.GetLowerBoundValue();
@@ -805,7 +798,7 @@ FOdysseyPainterEditorAnimationFlipSystem::GetLimits(EOdysseyAnimationFlipLimits 
 
         case EOdysseyAnimationFlipLimits::CellMarks:
         {
-            UOdysseyAnimationLayerStack* layerStack = mAnimation->GetLayerStack();
+            UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(mAnimation->GetLayerStack());
             UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerStack->CurrentLayer.Get());
 
             int startCellIndex = INDEX_NONE;

@@ -286,7 +286,7 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnMouseButtonUp( const FGeometry & 
     FOdysseyVectorEngine::Notify( nullptr,
                                   FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
                                 //| FOdysseyPainterEditor::UI_UPDATE_TIMELINE
-                                | FOdysseyPainterEditor::UI_UPDATE_HUD );
+                                | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD );
 
     // request redraw
     scene->GetLayer()->RequestRedraw( scene->GetCell(), 0 );
@@ -400,7 +400,7 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnMouseButtonDown( const FGeometry 
 
     FOdysseyVectorEngine::Notify( nullptr,
                                   FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                                | FOdysseyPainterEditor::UI_UPDATE_HUD );
+                                | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD );
 
     return reply;
 }

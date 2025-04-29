@@ -8,8 +8,8 @@
 #include "OdysseyRenderingType.h"
 #include <ULIS>
 
-class FOdysseyRenderingAbility;
-DECLARE_DELEGATE_RetVal_OneParam(bool, FImageRendererFilter, const FOdysseyRenderingAbility*);
+class IOdysseyRenderingAbility;
+DECLARE_DELEGATE_RetVal_OneParam(bool, FImageRendererFilter, const IOdysseyRenderingAbility*);
 
 struct FOdysseyImageRendererCopyParams
 {

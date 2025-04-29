@@ -1122,15 +1122,10 @@ FOdysseyViewportDrawingEditorExtension::SyncMediaPlayerWithAnimationPlayer()
 void
 FOdysseyViewportDrawingEditorExtension::SyncMediaPlayerWithAnimationCurrentFrame()
 {
-    if (!mCurrentSource || mCurrentSource->Id() != FOdysseyPainterEditorAnimationSource::StaticId())
+    UOdysseyAnimationPlayer* player = mEditor->GetAnimationPlayer();
+    if (!player)
         return;
-
-    TSharedPtr<FOdysseyPainterEditorAnimationSource> animationSource = StaticCastSharedPtr<FOdysseyPainterEditorAnimationSource>(mCurrentSource);
-    UOdysseyAnimation* animation = animationSource->GetAnimation();
-    if (!animation)
-        return;
-
-    SyncMediaPlayerWithAnimationFrame(animation->CurrentFrame);
+    SyncMediaPlayerWithAnimationFrame(player->GetCurrentFrame().FrameNumber.Value);
 }
 
 void
@@ -1150,7 +1145,7 @@ FOdysseyViewportDrawingEditorExtension::SyncAnimationCurrentFrameWithMediaPlayer
     UMediaTexture* texture = Cast<UMediaTexture>(mTexture);
     UMediaPlayer* mediaPlayer = texture->GetMediaPlayer();
     UOdysseyAnimationPlayer* animationPlayer = animationSource->GetAnimationPlayer();
-    if (!mediaPlayer || mediaPlayer->IsPlaying() || animationPlayer->GetStatus() == EOdysseyAnimationPlayerStatus::Playing)
+    if (!mediaPlayer || mediaPlayer->IsPlaying() || !animationPlayer || animationPlayer->GetStatus() == EOdysseyAnimationPlayerStatus::Playing)
         return;
 
     UMediaPlaylist& playlist = mediaPlayer->GetPlaylistRef();
@@ -1169,9 +1164,8 @@ FOdysseyViewportDrawingEditorExtension::SyncAnimationCurrentFrameWithMediaPlayer
     FTimespan timespan = animationMediaControls->GetTime() + FTimespan(1); //for precision purposes, otherwise "frame" can be the previous frame because of double imprecision
     double seconds = timespan.GetTotalSeconds();
     int frame = seconds * animation->GetFramesPerSecond() + animationMediaControls->GetFrameRange().GetLowerBoundValue();
-
-    if (frame != animation->CurrentFrame)
-        FOdysseyObjectEditorUtils::SetPropertyValue(animation, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), frame);
+    if (frame != animationPlayer->GetCurrentFrame().FrameNumber.Value)
+        animationPlayer->SeekToFrame(frame);
 }
 
 void

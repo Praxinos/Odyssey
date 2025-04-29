@@ -37,28 +37,28 @@ FOdysseyRenderingChangedEvent::GetRects() const
     return mRects;
 }
 
-FOdysseyRenderingAbility::FOnChanged&
-FOdysseyRenderingAbility::OnRenderingPreChangedDelegate()
+IOdysseyRenderingAbility::FOnChanged&
+IOdysseyRenderingAbility::OnRenderingPreChangedDelegate()
 {
     static FOnChanged onPreChanged;
     return onPreChanged;
 }
 
-FOdysseyRenderingAbility::FOnChanged&
-FOdysseyRenderingAbility::OnRenderingChangedDelegate()
+IOdysseyRenderingAbility::FOnChanged&
+IOdysseyRenderingAbility::OnRenderingChangedDelegate()
 {
     static FOnChanged onChanged;
     return onChanged;
 }
 
-FOdysseyRenderingAbility::FOdysseyRenderingAbility()
+IOdysseyRenderingAbility::IOdysseyRenderingAbility()
     : mRenderingId(FGuid::NewGuid())
 {
 
 }
 
 void
-FOdysseyRenderingAbility::RenderingChanged(bool iIsInteractive)
+IOdysseyRenderingAbility::RenderingChanged(bool iIsInteractive)
 {
     FOdysseyRenderingChangedEvent eventChanged(FOdysseyRenderingChangedEvent::eEventType::kValueChange, iIsInteractive, GetRenderingId(), GetRenderingRects());
     OnRenderingPreChangedDelegate().Broadcast(eventChanged);
@@ -66,7 +66,7 @@ FOdysseyRenderingAbility::RenderingChanged(bool iIsInteractive)
 }
 
 void
-FOdysseyRenderingAbility::RenderingChanged(const TArray<FIntRect>& iRects, bool iIsInteractive)
+IOdysseyRenderingAbility::RenderingChanged(const TArray<FIntRect>& iRects, bool iIsInteractive)
 {
     FOdysseyRenderingChangedEvent eventChanged(FOdysseyRenderingChangedEvent::eEventType::kValueChange, iIsInteractive, GetRenderingId(), iRects);
     OnRenderingPreChangedDelegate().Broadcast(eventChanged);
@@ -74,35 +74,35 @@ FOdysseyRenderingAbility::RenderingChanged(const TArray<FIntRect>& iRects, bool 
 }
 
 void
-FOdysseyRenderingAbility::RenderingCompositionChanged(bool iIsInteractive)
+IOdysseyRenderingAbility::RenderingCompositionChanged(bool iIsInteractive)
 {
     FOdysseyRenderingChangedEvent eventChanged(FOdysseyRenderingChangedEvent::eEventType::kCompositionChange, iIsInteractive, GetRenderingId(), {});
     {
-        TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyRenderingAbility::RenderingCompositionChanged::PreChange);
+        TRACE_CPUPROFILER_EVENT_SCOPE(IOdysseyRenderingAbility::RenderingCompositionChanged::PreChange);
         OnRenderingPreChangedDelegate().Broadcast(eventChanged);
     }
 
     {
-        TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyRenderingAbility::RenderingCompositionChanged::Change);
+        TRACE_CPUPROFILER_EVENT_SCOPE(IOdysseyRenderingAbility::RenderingCompositionChanged::Change);
         OnRenderingChangedDelegate().Broadcast(eventChanged);
     }
 }
 
 TArray<FIntRect>
-FOdysseyRenderingAbility::GetRenderingRects() const
+IOdysseyRenderingAbility::GetRenderingRects() const
 {
     check(false); //If you need it, override it in your class
     return {};
 }
 
 FGuid
-FOdysseyRenderingAbility::GetRenderingId() const
+IOdysseyRenderingAbility::GetRenderingId() const
 {
     return mRenderingId;
 }
 
 TArray<FGuid>
-FOdysseyRenderingAbility::GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrame) const
+IOdysseyRenderingAbility::GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrame) const
 {
     check(false); //If you need it, override it in your class
     return {};

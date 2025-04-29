@@ -337,7 +337,7 @@ ExportAsImageSequence(
 }
 
 UTexture2D*
-ExportAsTexture(FOdysseyTextureRenderingAbility* iObject, int iFrame, const FIntRect& iRect, FString iAssetName, FString iPath )
+ExportAsTexture(UObject* iObject, int iFrame, const FIntRect& iRect, FString iAssetName, FString iPath )
 {
     //TStrongObjectPtr ensures the render target is destroyed at the end of this function
     //instead of keeping it in memory waiting for the garbage collector to destroy it
@@ -346,7 +346,7 @@ ExportAsTexture(FOdysseyTextureRenderingAbility* iObject, int iFrame, const FInt
     renderTarget->bForceLinearGamma = true;
     renderTarget->InitAutoFormat(iRect.Width(), iRect.Height());
 
-    iObject->RenderToTexture(renderTarget.Get(), FFrameNumber(iFrame), {iRect});
+    IOdysseyTextureRenderingAbility::Execute_RenderRects(iObject, renderTarget.Get(), FFrameNumber(iFrame), {iRect});
 
     FString Name;
     FString PackageName;
@@ -365,7 +365,7 @@ ExportAsTexture(FOdysseyTextureRenderingAbility* iObject, int iFrame, const FInt
 }
 
 FString
-ExportAsImage(FOdysseyTextureRenderingAbility* iObject, int iFrame, EOdysseyExportImageFormat iFormat, const FIntRect& iRect, FString iFilename, FString iPath, bool iSRGB)
+ExportAsImage(UObject* iObject, int iFrame, EOdysseyExportImageFormat iFormat, const FIntRect& iRect, FString iFilename, FString iPath, bool iSRGB)
 {
     TStrongObjectPtr<UTextureRenderTarget2D> renderTarget(NewObject<UTextureRenderTarget2D>());
     if (iSRGB)
@@ -374,7 +374,7 @@ ExportAsImage(FOdysseyTextureRenderingAbility* iObject, int iFrame, EOdysseyExpo
         renderTarget->RenderTargetFormat = RTF_RGBA8;
     renderTarget->InitAutoFormat(iRect.Width(), iRect.Height());
 
-    iObject->RenderToTexture(renderTarget.Get(), FFrameNumber(iFrame), {iRect});
+    IOdysseyTextureRenderingAbility::Execute_RenderRects(iObject, renderTarget.Get(), FFrameNumber(iFrame), {iRect});
 
     FImage OutImage;
     if (!FImageUtils::GetRenderTargetImage(renderTarget.Get(), OutImage, iRect))
@@ -398,9 +398,13 @@ ExportAsImage(FOdysseyTextureRenderingAbility* iObject, int iFrame, EOdysseyExpo
 }
 
 UPaperFlipbook*
-ExportAsFlipbook(FOdysseyTextureRenderingAbility* iObject, const FInt32Range& iRange, const FIntRect& iRect, float iFramesPerSecond, FString AssetName, FString Path)
+ExportAsFlipbook(UObject* iObject, const FInt32Range& iRange, const FIntRect& iRect, float iFramesPerSecond, FString AssetName, FString Path)
 {
     if ( Path.IsEmpty())
+        return nullptr;
+
+    IOdysseyTextureRenderingAbility* textureRenderingAbility = Cast<IOdysseyTextureRenderingAbility>(iObject);
+    if (!textureRenderingAbility)
         return nullptr;
 
     int startFrame = iRange.GetLowerBoundValue();
@@ -441,7 +445,7 @@ ExportAsFlipbook(FOdysseyTextureRenderingAbility* iObject, const FInt32Range& iR
     {
         progressBar.EnterProgressFrame();
 
-        TArray<FGuid> renderingComposition = iObject->GetRenderingComposition(EOdysseyRenderingType::Render, i);
+        TArray<FGuid> renderingComposition = textureRenderingAbility->GetRenderingComposition(EOdysseyRenderingType::Render, i);
         if (renderingComposition == lastRenderingComposition)
             continue;
 
@@ -482,9 +486,13 @@ ExportAsFlipbook(FOdysseyTextureRenderingAbility* iObject, const FInt32Range& iR
 }
 
 TArray<UTexture2D*>
-ExportAsTextureSequence(FOdysseyTextureRenderingAbility* iObject, const FInt32Range& iRange, const FIntRect& iRect, FString AssetName, FString Path)
+ExportAsTextureSequence(UObject* iObject, const FInt32Range& iRange, const FIntRect& iRect, FString AssetName, FString Path)
 {
     if ( Path.IsEmpty())
+        return {};
+
+    IOdysseyTextureRenderingAbility* textureRenderingAbility = Cast<IOdysseyTextureRenderingAbility>(iObject);
+    if (!textureRenderingAbility)
         return {};
 
     int startFrame = iRange.GetLowerBoundValue();
@@ -502,7 +510,7 @@ ExportAsTextureSequence(FOdysseyTextureRenderingAbility* iObject, const FInt32Ra
     {
         progressBar.EnterProgressFrame();
 
-        TArray<FGuid> renderingComposition = iObject->GetRenderingComposition(EOdysseyRenderingType::Render, i);
+        TArray<FGuid> renderingComposition = textureRenderingAbility->GetRenderingComposition(EOdysseyRenderingType::Render, i);
         if (renderingComposition == lastRenderingComposition)
             continue;
 
@@ -520,7 +528,7 @@ ExportAsTextureSequence(FOdysseyTextureRenderingAbility* iObject, const FInt32Ra
 
 TArray<FString>
 ExportAsImageSequence(
-    FOdysseyTextureRenderingAbility* iObject,
+    UObject* iObject,
     const FInt32Range& iRange,
     const FIntRect& iRect,
     FString Filename,
@@ -530,6 +538,10 @@ ExportAsImageSequence(
 )
 {
     if ( Path.IsEmpty())
+        return {};
+
+    IOdysseyTextureRenderingAbility* textureRenderingAbility = Cast<IOdysseyTextureRenderingAbility>(iObject);
+    if (!textureRenderingAbility)
         return {};
 
     int startFrame = iRange.GetLowerBoundValue();
@@ -547,7 +559,7 @@ ExportAsImageSequence(
     {
         progressBar.EnterProgressFrame();
 
-        TArray<FGuid> renderingComposition = iObject->GetRenderingComposition(EOdysseyRenderingType::Render, i);
+        TArray<FGuid> renderingComposition = textureRenderingAbility->GetRenderingComposition(EOdysseyRenderingType::Render, i);
         if (renderingComposition == lastRenderingComposition)
             continue;
 

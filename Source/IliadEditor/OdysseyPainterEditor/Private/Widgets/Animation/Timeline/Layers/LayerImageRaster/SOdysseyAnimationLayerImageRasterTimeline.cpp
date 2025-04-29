@@ -4,10 +4,10 @@
 #include "Widgets/Animation/Timeline/Layers/LayerImageRaster/SOdysseyAnimationLayerImageRasterTimeline.h"
 #include "Widgets/Animation/Timeline/Cells/CellImageStagger/SOdysseyAnimationCellImageStagger.h"
 #include "Widgets/Animation/Timeline/Cells/CellImageRaster/SOdysseyAnimationCellImageRaster.h"
-#include "LayerStack/Cells/CellImageStagger/OdysseyAnimationCellImageStagger.h"
+#include "OdysseyAnimationCellImageStagger.h"
 #include "Shortcuts/AnimationTimeline/OdysseyAnimationTimelineCellImageRasterShortcuts.h"
-#include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
-#include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
+#include "OdysseyAnimationLayerImageRaster.h"
+#include "OdysseyAnimationCellImageRaster.h"
 #include "OdysseyAnimation.h"
 #include "OdysseyPainterEditorAnimationCommands.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
@@ -63,7 +63,7 @@ TSharedPtr<FExtender>
 SOdysseyAnimationLayerImageRasterTimeline::ExtendContextMenu()
 {
     TSharedRef<FUICommandList> commandList = MakeShared<FUICommandList>();
-    mAnimationTimelineCellImageRasterShortcuts = MakeShared<FOdysseyAnimationTimelineCellImageRasterShortcuts>(mLayer->GetLayerStack());
+    mAnimationTimelineCellImageRasterShortcuts = MakeShared<FOdysseyAnimationTimelineCellImageRasterShortcuts>(mLayer->GetAnimation());
     mAnimationTimelineCellImageRasterShortcuts->MapActionsToCommandList(commandList);
 
     TSharedRef<FExtender> extender = MakeShared<FExtender>();

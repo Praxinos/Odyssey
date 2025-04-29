@@ -11,7 +11,7 @@
 #include "IStructureDetailsView.h"
 #include "OdysseyPixelFormat.h"
 #include "ULISLoaderModule.h"
-#include "LayerStack/OdysseyTextureLayerImageRaster.h"
+#include "OdysseyTextureLayerImageRaster.h"
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "OdysseyTextureLayerStackUserData.h"
 #include "OdysseyRasterBlockMutator.h"

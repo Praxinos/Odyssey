@@ -4,7 +4,7 @@
 #include "Widgets/Animation/SOdysseyAnimationExportImageSequenceDialog.h"
 
 #include "Dialog/SCustomDialog.h"
-#include "LayerStack/Layers/OdysseyAnimationLayer.h"
+#include "OdysseyAnimationLayer.h"
 #include "OdysseyAnimation.h"
 #include "OdysseyExportImage.h"
 #include "SEnumCombo.h"
@@ -186,6 +186,7 @@ FOdysseyAnimationImageSequenceExporter::GetSourceRange(const FSource& iSource)
 TArray<FOdysseyAnimationImageSequenceExporter::FSource>
 FOdysseyAnimationImageSequenceExporter::GetSources()
 {
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(mAnimation->GetLayerStack());
     switch(mSource)
     {
         case EOdysseyAnimationExportImageSequenceSource::Animation:
@@ -202,7 +203,7 @@ FOdysseyAnimationImageSequenceExporter::GetSources()
         }
         case EOdysseyAnimationExportImageSequenceSource::AllLayers:
         {
-            TArray<UOdysseyLayer*> layers = mAnimation->GetLayerStack()->GetLayers();
+            TArray<UOdysseyLayer*> layers = layerStack->GetLayers();
             TArray<FSource> animationLayers;
 
             for (UOdysseyLayer* layer : layers)
@@ -225,7 +226,7 @@ FOdysseyAnimationImageSequenceExporter::GetSources()
         }
         case EOdysseyAnimationExportImageSequenceSource::CurrentLayer:
         {
-            UOdysseyAnimationLayer* animationLayer = Cast<UOdysseyAnimationLayer>(mAnimation->GetLayerStack()->CurrentLayer.Get());
+            UOdysseyAnimationLayer* animationLayer = Cast<UOdysseyAnimationLayer>(layerStack->CurrentLayer.Get());
             return
             {
                 {
@@ -326,7 +327,11 @@ FOdysseyAnimationImageSequenceExporter::ExportSource(const FSource& iSource, con
             }
             else if (iSource.mTextureRenderingAbility)
             {
-                renderingComposition = iSource.mTextureRenderingAbility->GetRenderingComposition(EOdysseyRenderingType::Render, i);
+                IOdysseyTextureRenderingAbility* textureRenderingAbility = Cast<IOdysseyTextureRenderingAbility>(iSource.mTextureRenderingAbility);
+                if (!textureRenderingAbility)
+                    continue;
+
+                renderingComposition = textureRenderingAbility->GetRenderingComposition(EOdysseyRenderingType::Render, i);
             }
 
             if (renderingComposition == lastRenderingComposition)

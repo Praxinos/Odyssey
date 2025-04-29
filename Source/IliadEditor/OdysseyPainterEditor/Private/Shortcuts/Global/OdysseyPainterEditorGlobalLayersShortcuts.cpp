@@ -3,6 +3,7 @@
 
 #include "Shortcuts/Global/OdysseyPainterEditorGlobalLayersShortcuts.h"
 #include "OdysseyAnimation.h"
+#include "OdysseyAnimationPlayer.h"
 #include "OdysseyAnimationLayerImageRaster.h"
 #include "OdysseyAnimationCellImageRaster.h"
 #include "OdysseyLayer.h"
@@ -85,11 +86,15 @@ FOdysseyPainterEditorGlobalLayersShortcuts::Action_CreateNewLayer()
             if (!animation)
                 return;
 
-            animLayer->AddCell(UOdysseyAnimationCellImageRaster::StaticClass());
-            FOdysseyObjectEditorUtils::SetPropertyValue(animLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, CellsOffset), animation->CurrentFrame);
+            UOdysseyAnimationPlayer* player = mEditor->GetAnimationPlayer();
+            if (!player)
+                return;
 
-            FOdysseyAnimationCurrentFrameMutator currentFrameMutator(animation);
-            currentFrameMutator.Set(animation->CurrentFrame);
+            animLayer->AddCell(UOdysseyAnimationCellImageRaster::StaticClass());
+            FOdysseyObjectEditorUtils::SetPropertyValue(animLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, CellsOffset), player->GetCurrentFrame().FrameNumber.Value);
+
+            FOdysseyAnimationCurrentFrameMutator currentFrameMutator(player);
+            currentFrameMutator.Set(player->GetCurrentFrame().FrameNumber.Value);
             currentFrameMutator.Commit();
         }
         else if (layerStack->IsA<UOdysseyTextureLayerStack>())

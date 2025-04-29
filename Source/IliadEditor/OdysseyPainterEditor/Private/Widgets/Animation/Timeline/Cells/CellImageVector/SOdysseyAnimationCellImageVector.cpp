@@ -2,7 +2,7 @@
 // ODYSSEY is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Widgets/Animation/Timeline/Cells/CellImageVector/SOdysseyAnimationCellImageVector.h"
-#include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVector.h"
+#include "OdysseyAnimationCellImageVector.h"
 #include "OdysseyAnimation.h"
 #include "ThumbnailRendering/ThumbnailManager.h"
 

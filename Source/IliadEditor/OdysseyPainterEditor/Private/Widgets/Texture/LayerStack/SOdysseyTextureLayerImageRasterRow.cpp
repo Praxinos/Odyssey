@@ -4,7 +4,7 @@
 #include "Widgets/Texture/LayerStack/SOdysseyTextureLayerImageRasterRow.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "OdysseyStyle.h"
-#include "LayerStack/OdysseyTextureLayerImageRaster.h"
+#include "OdysseyTextureLayerImageRaster.h"
 #include "Widgets/Input/NumericTypeInterface.h"
 #include "Widgets/Input/NumericUnitTypeInterface.inl"
 #include "Widgets/Input/SNumericEntryBox.h"

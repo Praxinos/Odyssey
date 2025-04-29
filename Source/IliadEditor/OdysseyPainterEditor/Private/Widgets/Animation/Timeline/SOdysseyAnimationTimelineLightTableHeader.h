@@ -5,7 +5,7 @@
 
 #include "CoreMinimal.h"
 
-#include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
+#include "OdysseyAnimationLightTable.h"
 
 class SColorBlock;
 class UOdysseyAnimationLayer;

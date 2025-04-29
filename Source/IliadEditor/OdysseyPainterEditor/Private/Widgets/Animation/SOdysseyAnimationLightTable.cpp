@@ -3,12 +3,12 @@
 
 #include "Widgets/Animation/SOdysseyAnimationLightTable.h"
 
-#include "LayerStack/Layers/OdysseyAnimationLayer.h"
-#include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
+#include "OdysseyAnimationLayer.h"
+#include "OdysseyAnimationLightTable.h"
 #include "Widgets/Input/SEditableTextBox.h"
 #include "Widgets/Input/SSlider.h"
 #include "OdysseyLayerStack.h"
-#include "LayerStack/OdysseyAnimationLayerStack.h"
+#include "OdysseyAnimationLayerStack.h"
 
 #include "UObject/OdysseyObjectEditorUtils.h"
 

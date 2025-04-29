@@ -2,7 +2,7 @@
 // ODYSSEY is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Widgets/Animation/Timeline/Layers/SOdysseyAnimationLayerImageTimeline.h"
-#include "LayerStack/Cells/CellImageStagger/OdysseyAnimationCellImageStagger.h"
+#include "OdysseyAnimationCellImageStagger.h"
 #include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineLightTable.h"
 #include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineOutOfPegs.h"
 #include "Widgets/Animation/Timeline/Cells/SOdysseyAnimationCells.h"
@@ -14,12 +14,11 @@
 #include "OdysseyStyle.h"
 #include "Shortcuts/AnimationTimeline/OdysseyAnimationTimelineCellsShortcuts.h"
 #include "Shortcuts/AnimationTimeline/OdysseyAnimationTimelineCellImageStaggerShortcuts.h"
-#include "OdysseyAnimationCurrentFrameMutator.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineScrollBox.h"
 #include "TimelineTools/OdysseyAnimationTimelineTools.h"
 #include "OdysseyPainterEditorAnimationTimelinePosition.h"
-#include "LayerStack/Cells/OdysseyAnimationCellSelection.h"
+#include "OdysseyAnimationCellSelection.h"
 #include "ScopedTransaction.h"
 #include "Widgets/Input/SButton.h"
 
@@ -46,11 +45,12 @@ SOdysseyAnimationLayerImageTimeline::Construct(
 {
     ensure(iLayer);
     mLayer = iLayer;
+    mCurrentFrame = iArgs._CurrentFrame;
     mTimelinePosition = iArgs._TimelinePosition;
     mOnActivateOutOfPegs = iArgs._OnActivateOutOfPegs;
     mOnInactivateOutOfPegs = iArgs._OnInactivateOutOfPegs;
     mOnIsOutOfPegsChecked = iArgs._OnIsOutOfPegsChecked;
-    mEditor = iArgs._PainterEditor;
+    mOnTransactCurrentFrame = iArgs._OnTransactCurrentFrame;
 
     SOdysseyAnimationLayerTimeline::Construct(SOdysseyAnimationLayerTimeline::FArguments(), iOwnerTableView, iLayer);
 }
@@ -586,10 +586,10 @@ SOdysseyAnimationLayerImageTimeline::BuildCellsMarksSubMenu(FMenuBuilder& iMenuB
 void
 SOdysseyAnimationLayerImageTimeline::MapActions(TSharedPtr<FUICommandList> iCommandList, int iFrame)
 {
-    mAnimationTimelineCellsShortcuts = MakeShared<FOdysseyAnimationTimelineCellsShortcuts>(mLayer->GetLayerStack());
+    mAnimationTimelineCellsShortcuts = MakeShared<FOdysseyAnimationTimelineCellsShortcuts>(mLayer->GetAnimation(), mCurrentFrame, mOnTransactCurrentFrame);
     mAnimationTimelineCellsShortcuts->MapActionsToCommandList(iCommandList.ToSharedRef());
 
-    mAnimationTimelineCellImageStaggerShortcuts = MakeShared<FOdysseyAnimationTimelineCellImageStaggerShortcuts>(mLayer->GetLayerStack());
+    mAnimationTimelineCellImageStaggerShortcuts = MakeShared<FOdysseyAnimationTimelineCellImageStaggerShortcuts>(mLayer->GetAnimation());
     mAnimationTimelineCellImageStaggerShortcuts->MapActionsToCommandList(iCommandList.ToSharedRef());
 }
 
@@ -635,10 +635,7 @@ SOdysseyAnimationLayerImageTimeline::RemoveCellMark()
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.set-mark", "Set cell mark"));
 #endif
-    FOdysseyAnimationCurrentFrameMutator currentFrameMutator(selectedCells[0]->GetAnimation());
-    currentFrameMutator.Set(selectedCells[0]->GetFrameRange().GetLowerBoundValue());
-    currentFrameMutator.Commit();
-
+    mOnTransactCurrentFrame.ExecuteIfBound(selectedCells[0]->GetFrameRange().GetLowerBoundValue());
     for (UOdysseyAnimationCell* selectedCell : selectedCells)
     {
         FOdysseyObjectEditorUtils::SetPropertyValue(selectedCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Mark), INDEX_NONE);
@@ -671,10 +668,7 @@ SOdysseyAnimationLayerImageTimeline::SetCellMark( int iMarkId )
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.set-mark", "Set cell mark"));
 #endif
-    FOdysseyAnimationCurrentFrameMutator currentFrameMutator(selectedCells[0]->GetAnimation());
-    currentFrameMutator.Set(selectedCells[0]->GetFrameRange().GetLowerBoundValue());
-    currentFrameMutator.Commit();
-
+    mOnTransactCurrentFrame.ExecuteIfBound(selectedCells[0]->GetFrameRange().GetLowerBoundValue());
     for (UOdysseyAnimationCell* selectedCell : selectedCells)
     {
         FOdysseyObjectEditorUtils::SetPropertyValue(selectedCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Mark), iMarkId);

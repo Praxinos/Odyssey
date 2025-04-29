@@ -2,10 +2,10 @@
 // ODYSSEY is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
 
 #include "OdysseyPainterEditorTextureSource.h"
-#include "LayerStack/OdysseyTextureLayerStack.h"
+#include "OdysseyTextureLayerStack.h"
 #include "OdysseyTextureLayerStackUserData.h"
-#include "LayerStack/OdysseyTextureLayerImageRaster.h"
-#include "LayerStack/OdysseyTextureLayerImageVector.h"
+#include "OdysseyTextureLayerImageRaster.h"
+#include "OdysseyTextureLayerImageVector.h"
 #include "OdysseyRasterBlockMutator.h"
 #include "ULISLoaderModule.h"
 #include "Undo/OdysseyVectorUndoSceneClear.h"
@@ -59,7 +59,7 @@ FOdysseyPainterEditorTextureSource::Height() const
 }
 
 void
-FOdysseyPainterEditorTextureSource::Activate()
+FOdysseyPainterEditorTextureSource::Activate(FOdysseyPainterEditor* iEditor)
 {
     AddEditedObject(mTexture);
 
@@ -69,7 +69,7 @@ FOdysseyPainterEditorTextureSource::Activate()
     if ( layerStack )
         layerStack->ActivateTextureFastUpdate();
 
-    FOdysseyPainterEditorSource::Activate();
+    FOdysseyPainterEditorSource::Activate(iEditor);
 }
 
 void

@@ -16,7 +16,7 @@ class FOdysseySurfaceTexture2DEditable;
 UCLASS(Abstract, HideDropdown, BlueprintType, config=EditorPerProjectUserSettings, PerObjectConfig)
 class ODYSSEYLAYERSTACKEDITOR_API UOdysseyLayerStack
     : public UObject
-    , public FOdysseyTextureRenderingAbility
+    , public IOdysseyTextureRenderingAbility
 {
     GENERATED_BODY()
 
@@ -251,6 +251,10 @@ public:
 
     virtual void PostInitProperties() override;
     virtual void PostLoad() override;
+
+public:
+    UFUNCTION(BlueprintCallable, Category="Odyssey|LayerStack")
+    virtual FInt32Range GetFrameRange() const override;
 
 public:
     virtual TArray<FGuid> GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrameIndex) const override;

@@ -133,6 +133,12 @@ UOdysseyLayer::GetIndexInParent() const
     return Parent->Children.Find(const_cast<UOdysseyLayer*>(this));
 }
 
+FInt32Range
+UOdysseyLayer::GetFrameRange() const
+{
+    return FInt32Range::Inclusive(0, 0);
+}
+
 bool
 UOdysseyLayer::IsChildOf(UOdysseyLayer* Layer) const
 {

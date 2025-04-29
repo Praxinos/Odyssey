@@ -198,6 +198,7 @@ public:
     virtual TArray<FIntRect> GetRenderingRects() const override;
     virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(EOdysseyRenderingType iRenderType, int iFrame, FImageRendererFilter iFilter = FImageRendererFilter()) const override;
     virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const;
+    virtual FInt32Range GetFrameRange() const override;
 
     public:
     #ifdef WITH_EDITOR

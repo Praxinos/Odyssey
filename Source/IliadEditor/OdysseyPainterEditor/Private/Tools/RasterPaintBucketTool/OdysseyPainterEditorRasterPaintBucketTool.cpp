@@ -579,9 +579,9 @@ UOdysseyPainterEditorRasterPaintBucketTool::GetForegroundLayersBlock() const
         return nullptr;
 
     TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(layerStack->GetWidth(), layerStack->GetHeight(), layerStack->GetFormat());
-    TArray<FOdysseyRenderingAbility*> layersToExclude = GetForegroundLayersToExclude(layerStack->CurrentLayer);
+    TArray<IOdysseyRenderingAbility*> layersToExclude = GetForegroundLayersToExclude(layerStack->CurrentLayer);
     FImageRendererFilter filter = FImageRendererFilter::CreateLambda(
-        [layersToExclude](const FOdysseyRenderingAbility* iRenderingAbility)
+        [layersToExclude](const IOdysseyRenderingAbility* iRenderingAbility)
         {
             return !layersToExclude.Contains(iRenderingAbility);
         }
@@ -610,9 +610,9 @@ UOdysseyPainterEditorRasterPaintBucketTool::GetBackgroundLayersBlock() const
         return nullptr;
 
     TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(layerStack->GetWidth(), layerStack->GetHeight(), layerStack->GetFormat());
-    TArray<FOdysseyRenderingAbility*> layersToExclude = GetBackgroundLayersToExclude(layerStack->CurrentLayer);
+    TArray<IOdysseyRenderingAbility*> layersToExclude = GetBackgroundLayersToExclude(layerStack->CurrentLayer);
     FImageRendererFilter filter = FImageRendererFilter::CreateLambda(
-        [layersToExclude](const FOdysseyRenderingAbility* iRenderingAbility) -> bool
+        [layersToExclude](const IOdysseyRenderingAbility* iRenderingAbility) -> bool
         {
             return !layersToExclude.Contains(iRenderingAbility);
         }
@@ -651,10 +651,10 @@ UOdysseyPainterEditorRasterPaintBucketTool::GetAllLayersBlock() const
     return block;
 }
 
-TArray<FOdysseyRenderingAbility*>
+TArray<IOdysseyRenderingAbility*>
 UOdysseyPainterEditorRasterPaintBucketTool::GetBackgroundLayersToExclude(UOdysseyLayer* iLayer) const
 {
-    TArray<FOdysseyRenderingAbility*> resultLayers;
+    TArray<IOdysseyRenderingAbility*> resultLayers;
 
     UOdysseyLayerStack* layerStack = GetEditor()->LayerStack();
     if (!layerStack)
@@ -678,10 +678,10 @@ UOdysseyPainterEditorRasterPaintBucketTool::GetBackgroundLayersToExclude(UOdysse
     return resultLayers;
 }
 
-TArray<FOdysseyRenderingAbility*>
+TArray<IOdysseyRenderingAbility*>
 UOdysseyPainterEditorRasterPaintBucketTool::GetForegroundLayersToExclude(UOdysseyLayer* iLayer) const
 {
-    TArray<FOdysseyRenderingAbility*> resultLayers;
+    TArray<IOdysseyRenderingAbility*> resultLayers;
 
     UOdysseyLayerStack* layerStack = GetEditor()->LayerStack();
     if (!layerStack)

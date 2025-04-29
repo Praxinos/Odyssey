@@ -67,6 +67,12 @@ UOdysseyLayerStack::SupportsLayerClass(UClass* iClass) const
     return false;
 }
 
+FInt32Range
+UOdysseyLayerStack::GetFrameRange() const
+{
+    return FInt32Range::Inclusive(0, 0);
+}
+
 //--- Layers management
 
 void

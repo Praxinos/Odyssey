@@ -17,7 +17,9 @@ class SOdysseyAnimationTimelineLightTable
 {
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineLightTable)
+    : _CurrentFrame(0)
     {}
+        SLATE_ATTRIBUTE(int, CurrentFrame)
         SLATE_ARGUMENT(TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition>, TimelinePosition)
     SLATE_END_ARGS()
 
@@ -27,11 +29,9 @@ public:
     );
 
 private:
-    void OnCurrentFrameChanged(UOdysseyAnimation* iAnimation);
-    void OnRenderingChanged(const FOdysseyRenderingChangedEvent& iEvent);
-    void Update();
+    UOdysseyAnimationCell* GetCurrentCell() const;
 
 private:
+    TAttribute<int> mCurrentFrame;
     UOdysseyAnimationLayer* mLayer = nullptr;
-    UOdysseyAnimationCell* mCurrentCell = nullptr;
 };

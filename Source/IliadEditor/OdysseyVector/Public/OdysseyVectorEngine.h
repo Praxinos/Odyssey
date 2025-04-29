@@ -61,8 +61,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
         static const uint64 DRAWING_IGNORECOLOR       = ( 1ULL <<  3 );
 
 
+
         // Notifications flags
         static const uint64 NOTIFY_ALL                = 0x0FFFFFFFFFFFFFFF;
+        static const uint64 NOTIFY_UPDATE_HUD         = ( 1ULL <<  0 );
         static const uint64 NOTIFY_RESERVED_SHIFT     = ( 15 );
 
         static FNotifyDelegate& OnNotifyDelegate();

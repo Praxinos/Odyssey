@@ -5,12 +5,13 @@
 
 #include "Framework/Commands/UICommandList.h"
 
-class UOdysseyLayerStack;
+class UOdysseyAnimation;
+class FOdysseyPainterEditor;
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyAnimationTimelineCellImageStaggerShortcuts
 {
 public:
-    FOdysseyAnimationTimelineCellImageStaggerShortcuts(UOdysseyLayerStack* iLayerStack);
+    FOdysseyAnimationTimelineCellImageStaggerShortcuts(const TAttribute<UOdysseyAnimation*>& iAnimation);
 
 public:
     //Shortcuts
@@ -22,5 +23,5 @@ public:
     bool CanAction_ConvertToReferenceCells();
 
 private:
-    UOdysseyLayerStack* mLayerStack;
+    TAttribute<UOdysseyAnimation*> mAnimation;
 };

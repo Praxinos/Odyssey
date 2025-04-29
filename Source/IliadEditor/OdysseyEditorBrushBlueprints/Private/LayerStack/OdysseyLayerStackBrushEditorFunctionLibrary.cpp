@@ -8,13 +8,15 @@
 #include "ULISLoaderModule.h"
 #include "ULISUtils.h"
 #include "OdysseyLayerStack.h"
-#include "LayerStack/Layers/OdysseyAnimationLayer.h"
-#include "LayerStack/OdysseyTextureLayer.h"
-#include "LayerStack/OdysseyTextureLayerStack.h"
+#include "OdysseyAnimationLayer.h"
+#include "OdysseyAnimationPlayer.h"
+#include "OdysseyTextureLayer.h"
+#include "OdysseyTextureLayerStack.h"
 #include "OdysseyPixelFormat.h"
 #include "OdysseyAnimation.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorBrushContext.h"
+#include "OdysseyPainterEditorAnimationSource.h"
 
 //---
 namespace
@@ -39,8 +41,26 @@ namespace
         return editor->LayerStack();
     }
 
+    static
+    UOdysseyAnimationPlayer*
+    GetAnimationPlayer( UOdysseyBrushAssetBase* BrushInstance )
+    {
+        if( !BrushInstance )
+            return nullptr;
+
+        FOdysseyPainterEditorBrushContext* context = BrushInstance->GetContext<FOdysseyPainterEditorBrushContext>("FOdysseyPainterEditorBrushContext");
+        if (!context)
+            return nullptr;
+
+        FOdysseyPainterEditor* editor = context->Editor();
+        if (!editor)
+            return nullptr;
+
+        return editor->GetAnimationPlayer();
+    }
+
     FOdysseyBlockProxy
-    GetBlockOfLayer( UOdysseyLayer* iLayer, FOdysseyBrushRect Area )
+    GetBlockOfLayer( UOdysseyBrushAssetBase* BrushInstance, UOdysseyLayer* iLayer, FOdysseyBrushRect Area )
     {
         UOdysseyTextureLayer* textureLayer = Cast<UOdysseyTextureLayer>(iLayer);
         if( textureLayer )
@@ -79,6 +99,8 @@ namespace
             if (!animation)
                 return FOdysseyBlockProxy::MakeNullProxy();
 
+            UOdysseyAnimationPlayer* player = GetAnimationPlayer(BrushInstance);
+
             ::ULIS::FRectI animationRect = ::ULIS::FRectI::FromXYWH(0, 0, animation->GetWidth(), animation->GetHeight());
             ::ULIS::FRectI given_rect = Area.IsInitialized() ? Area.GetValue() : animationRect;
             //be sure we copy only the needed part //TODO: Should be done directly in ULIS
@@ -97,7 +119,7 @@ namespace
             ::ULIS::FEvent eventClear;
             ctx.Clear(*dst, ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventClear);
 
-            TSharedPtr<IOdysseyImageRenderer> imageRenderer = animationLayer->BuildImageRenderer(EOdysseyRenderingType::Render, animation->CurrentFrame);
+            TSharedPtr<IOdysseyImageRenderer> imageRenderer = animationLayer->BuildImageRenderer(EOdysseyRenderingType::Render, player->GetCurrentFrame().FrameNumber.Value);
             imageRenderer->Init();
 
             ::ULIS::FRectI dstRect = ::ULIS::FRectI::FromXYWH(dst_pos.x, dst_pos.y, given_rect.w - dst_pos.x, given_rect.h - dst_pos.y);
@@ -138,7 +160,7 @@ UOdysseyLayerStackBrushEditorFunctionLibrary::GetBlockOfLayerByIndex( UOdysseyBr
     if( !layer )
         return FOdysseyBlockProxy::MakeNullProxy();
 
-    return GetBlockOfLayer(layer, Area);
+    return GetBlockOfLayer(BrushInstance, layer, Area);
 }
 
 //static
@@ -161,7 +183,7 @@ UOdysseyLayerStackBrushEditorFunctionLibrary::GetBlockOfLayerByName( UOdysseyBru
     for (UOdysseyLayer* layer : layers)
     {
         if( layer->Name.ToString() == iName )
-            return GetBlockOfLayer(layer, Area);
+            return GetBlockOfLayer(BrushInstance, layer, Area);
     }
     return FOdysseyBlockProxy::MakeNullProxy();
 }
@@ -187,5 +209,5 @@ UOdysseyLayerStackBrushEditorFunctionLibrary::GetBlockOfCurrentLayer( UOdysseyBr
     if (!layer)
         return FOdysseyBlockProxy::MakeNullProxy();
 
-    return GetBlockOfLayer(layer, Area);
+    return GetBlockOfLayer(BrushInstance, layer, Area);
 }

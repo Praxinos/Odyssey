@@ -6,7 +6,7 @@
 #include "SEnumCombo.h"
 #include "Widgets/Input/SNumericEntryBox.h"
 #include "OdysseyStyle.h"
-#include "LayerStack/Layers/LayerFolder/OdysseyAnimationLayerFolder.h"
+#include "LayerFolder/OdysseyAnimationLayerFolder.h"
 #include "Widgets/Animation/Timeline/SOdysseyAnimationLayerStack.h"
 #include "Widgets/Input/NumericTypeInterface.h"
 #include "Widgets/Input/NumericUnitTypeInterface.inl"
@@ -24,7 +24,6 @@ void SOdysseyAnimationLayerFolderRow::Construct(
 {
     ensure(iAnimationLayerFolder);
     mAnimationLayerFolder = iAnimationLayerFolder;
-    mEditor = iArgs._PainterEditor;
 
     SOdysseyAnimationLayerRow::Construct(
         SOdysseyAnimationLayerRow::FArguments()

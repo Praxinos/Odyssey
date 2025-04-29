@@ -4,7 +4,7 @@
 #include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineInbetweeningHeaderRow.h"
 #include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineInbetweeningHeader.h"
 
-#include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVector.h"
+#include "OdysseyAnimationCellImageVector.h"
 #include "OdysseyLayerStack.h"
 
 #include "Widgets/Text/SInlineEditableTextBlock.h"
@@ -19,8 +19,7 @@
 #include "OdysseyVectorLayer.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "Undo/OdysseyVectorUndoObjectParam.h"
-
-#include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
+#include "OdysseyAnimationLayerImageVector.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
@@ -76,10 +75,7 @@ SOdysseyAnimationTimelineInbetweeningHeaderRow::OnCheckBoxStateChanged( ECheckBo
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
-        const TSharedPtr< SOdysseyAnimationTimelineInbetweeningHeader > treeView = StaticCastSharedPtr<SOdysseyAnimationTimelineInbetweeningHeader>(OwnerTablePtr.Pin());
-        TSharedPtr<FOdysseyPainterEditorSource> source = treeView->GetEditor()->GetSource();
-        if (source)
-            source->RecordCurrentFrameUndo();
+        mOnTransactCurrentFrame.ExecuteIfBound(TOptional<int>());
     }
     GEditor->EndTransaction();
 
@@ -102,18 +98,18 @@ SOdysseyAnimationTimelineInbetweeningHeaderRow::OnCheckBoxStateChanged( ECheckBo
 }
 
 void
-SOdysseyAnimationTimelineInbetweeningHeaderRow::Construct( const typename STableRow<TSharedPtr<FInbetweeningListViewItem>>::FArguments& InArgs
+SOdysseyAnimationTimelineInbetweeningHeaderRow::Construct( const FArguments& InArgs
                                                          , const TSharedRef< STableViewBase >& InOwnerTableView
                                                          , const TSharedPtr<FInbetweeningListViewItem> iTem )
 {
-    static FTableRowStyle style = FOdysseyStyle::GetWidgetStyle<FTableRowStyle>("Inbetweening.TableRow");
     const FCheckBoxStyle* isActivatedToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("LayerStack.IsActivatedToggle");
-    STableRow<TSharedPtr<FInbetweeningListViewItem>>::Construct( InArgs, InOwnerTableView );
     TSharedPtr<SHorizontalBox> tagBox;
     const FSlateBrush* objectIcon = nullptr;
     const FSlateBrush* inbetweenerTagIcon = FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Matching16" );
     FOdysseyVectorTagInbetweener* inbetweenerTag = iTem.Get()->GetInbetweenerTag();
     uint32 cellIndex = inbetweenerTag->GetOwner()->GetCell()->GetIndex();
+
+    mOnTransactCurrentFrame = InArgs._OnTransactCurrentFrame;
 
     mInbetweenerTag = inbetweenerTag;
 
@@ -123,35 +119,38 @@ SOdysseyAnimationTimelineInbetweeningHeaderRow::Construct( const typename STable
 
     tagBox = SNew(SHorizontalBox);
 
-    SetContent( SNew(SHorizontalBox)
-                + SHorizontalBox::Slot()
-                .VAlign(EVerticalAlignment::VAlign_Center)
-                .Padding( 2, 0 )
-                .AutoWidth()
-                [
-                    SNew( SImage )
-                    .Image( inbetweenerTagIcon )
-                ]
-                + SHorizontalBox::Slot()
-                .VAlign(EVerticalAlignment::VAlign_Center)
-                .Padding( 2, 0 )
-                .AutoWidth()
-                [
-                    SNew( SCheckBox )
-                    .Style(isActivatedToggleStyle)
-                    .OnCheckStateChanged(this, &SOdysseyAnimationTimelineInbetweeningHeaderRow::OnCheckBoxStateChanged)
-                    .IsChecked(this, &SOdysseyAnimationTimelineInbetweeningHeaderRow::GetVisibility)
-                    .IsEnabled( this, &SOdysseyAnimationTimelineInbetweeningHeaderRow::IsVisibilityEnabled )
-                ]
-                + SHorizontalBox::Slot()
-                .VAlign(EVerticalAlignment::VAlign_Center)
-                .Padding( 2, 0 )
-                .AutoWidth()
-                [
-                    mTextBlockWidget.ToSharedRef()
-                ] );
-
-    Style = &style;
+    STableRow<TSharedPtr<FInbetweeningListViewItem>>::FArguments rowArgs;
+    rowArgs.Style(&FOdysseyStyle::GetWidgetStyle<FTableRowStyle>("Inbetweening.TableRow"))
+    [
+        SNew(SHorizontalBox)
+        + SHorizontalBox::Slot()
+        .VAlign(EVerticalAlignment::VAlign_Center)
+        .Padding( 2, 0 )
+        .AutoWidth()
+        [
+            SNew( SImage )
+            .Image( inbetweenerTagIcon )
+        ]
+        + SHorizontalBox::Slot()
+        .VAlign(EVerticalAlignment::VAlign_Center)
+        .Padding( 2, 0 )
+        .AutoWidth()
+        [
+            SNew( SCheckBox )
+            .Style(isActivatedToggleStyle)
+            .OnCheckStateChanged(this, &SOdysseyAnimationTimelineInbetweeningHeaderRow::OnCheckBoxStateChanged)
+            .IsChecked(this, &SOdysseyAnimationTimelineInbetweeningHeaderRow::GetVisibility)
+            .IsEnabled( this, &SOdysseyAnimationTimelineInbetweeningHeaderRow::IsVisibilityEnabled )
+        ]
+        + SHorizontalBox::Slot()
+        .VAlign(EVerticalAlignment::VAlign_Center)
+        .Padding( 2, 0 )
+        .AutoWidth()
+        [
+            mTextBlockWidget.ToSharedRef()
+        ]
+    ];
+    STableRow<TSharedPtr<FInbetweeningListViewItem>>::Construct( rowArgs, InOwnerTableView );
 }
 
 int32
@@ -198,8 +197,7 @@ SOdysseyAnimationTimelineInbetweeningHeaderRow::OnMouseButtonDown( const FGeomet
 {
     TSharedPtr<SOdysseyAnimationTimelineInbetweeningHeader> treeView = StaticCastSharedPtr<SOdysseyAnimationTimelineInbetweeningHeader>(OwnerTablePtr.Pin());
     UOdysseyAnimationLayerImageVector* layer = treeView.Get()->GetAnimationLayerImageVector();
-    FOdysseyPainterEditor* editor = treeView->GetEditor();
-    UOdysseyLayerStack* layerStack = editor->LayerStack();
+    UOdysseyLayerStack* layerStack = layer->GetLayerStack();
 
     if ( layerStack->CurrentLayer.Get() != layer )
     {

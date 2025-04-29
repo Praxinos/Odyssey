@@ -3,12 +3,18 @@
 
 #pragma once
 
-class UOdysseyAnimationLayerStack;
-
+class UOdysseyAnimation;
 class ODYSSEYPAINTEREDITOR_API FOdysseyAnimationTimelineCellsShortcuts
 {
 public:
-    FOdysseyAnimationTimelineCellsShortcuts(UOdysseyAnimationLayerStack* iLayerStack);
+    DECLARE_DELEGATE_OneParam(FOnTransactCurrentFrame, TOptional<int> /*iFrame*/)
+
+public:
+    FOdysseyAnimationTimelineCellsShortcuts(
+        const TAttribute<UOdysseyAnimation*>& iAnimation,
+        const TAttribute<int>& iCurrentFrame,
+        const FOnTransactCurrentFrame& iOnTransactCurrentFrame
+    );
 
 public:
     //Shortcuts
@@ -37,5 +43,7 @@ public:
     bool CanAction_SetCellExposure();
 
 private:
-    UOdysseyAnimationLayerStack* mLayerStack;
+    TAttribute<UOdysseyAnimation*> mAnimation;
+    TAttribute<int> mCurrentFrame;
+    FOnTransactCurrentFrame mOnTransactCurrentFrame;
 };

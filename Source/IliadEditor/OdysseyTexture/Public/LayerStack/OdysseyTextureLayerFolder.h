@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "LayerStack/OdysseyTextureLayer.h"
+#include "OdysseyTextureLayer.h"
 #include "OdysseyTextureLayerFolder.generated.h"
 
 UCLASS(BlueprintType)

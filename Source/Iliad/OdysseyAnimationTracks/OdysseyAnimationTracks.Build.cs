@@ -61,9 +61,6 @@ namespace UnrealBuildTool.Rules
                     "Slate",
                     "SlateCore",
                     "RHI", //To have access to GPixelFormats
-                    //"AppFramework", // For SColorPicker inside OdysseyAnimationFactory.cpp
-                    // "Core",
-                    // "MainFrame",
                     // ... add private dependencies that you statically link with here ...
 
                     "OdysseyAnimation", //TODO: MUST BE the future runtime version !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

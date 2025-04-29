@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "LayerStack/OdysseyTextureLayer.h"
+#include "OdysseyTextureLayer.h"
 
 #include <ULIS>
 
@@ -66,7 +66,7 @@ public:
     virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const override;
 
 public:
-    //FOdysseyRenderingAbility overrides
+    //IOdysseyRenderingAbility overrides
     virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(EOdysseyRenderingType iRenderType, int iFrame = 0, FImageRendererFilter iFilter = FImageRendererFilter()) const override;
     virtual TArray<FGuid> GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrame = 0) const override;
 

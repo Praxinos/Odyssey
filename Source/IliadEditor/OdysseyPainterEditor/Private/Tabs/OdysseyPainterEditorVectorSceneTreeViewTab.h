@@ -7,18 +7,12 @@
 #include <ULIS>
 
 class FOdysseyPainterEditor;
-class SOdysseyPainterEditorVectorSceneTreeView;
-class FVectorSceneTreeViewItem;
 class FOdysseyVectorGroupPaint;
-
-class UOdysseyPainterEditorVectorObjectView;
-class UOdysseyPainterEditorVectorPathView;
-class UOdysseyPainterEditorVectorGroupView;
-class UOdysseyPainterEditorVectorGroupPaintView;
-class UOdysseyPainterEditorVectorTagInbetweenerView;
+class SOdysseyPainterEditorVectorSceneTreeView;
+class SOdysseyPainterEditorVectorSceneDetailsView;
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorSceneTreeViewTab :
-    public FOdysseyEditorTab, public FGCObject
+    public FOdysseyEditorTab
 {
     public:
         static const FName& StaticId();
@@ -27,33 +21,21 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorSceneTreeViewTab :
         // Construction / Destruction
         virtual ~FOdysseyPainterEditorVectorSceneTreeViewTab();
         FOdysseyPainterEditorVectorSceneTreeViewTab( FOdysseyPainterEditor* iEditor );
-        void UpdateObjectPropertiesPanel( FOdysseyVectorGroupPaint* iScene );
-        void UpdateSceneTreeView( FOdysseyVectorGroupPaint* iScene );
 
     protected:
         // FOdysseyEditorTab interface
         virtual const FName& GetId() const override;
         virtual TSharedPtr<SWidget> CreateWidget() override;
-        TSharedPtr<IDetailsView> CreateObjectPropertiesPanel();
 
     public:
         // Event Listeners
-        void OnRefresh( FOdysseyVectorGroupPaint* iScene );
-        void Update( FOdysseyVectorGroupPaint* iScene );
-        virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
-        virtual FString GetReferencerName() const override;
         int WidgetIndex() const;
 
     private:
+        FOdysseyVectorGroupPaint* GetScene() const;
+        void OnTransactCurrentFrame(TOptional<int> iFrame) const;
+        uint64 GetVectorHUDFlags() const;
+
+    private:
         FOdysseyPainterEditor* mEditor;
-        TSharedPtr<SOdysseyPainterEditorVectorSceneTreeView> mVectorSceneTreeView;
-        TSharedPtr<IDetailsView> mDetailsView;
-
-        TObjectPtr<UOdysseyPainterEditorVectorObjectView> mObjectView;
-        TObjectPtr<UOdysseyPainterEditorVectorPathView> mPathView;
-        TObjectPtr<UOdysseyPainterEditorVectorGroupView> mGroupView;
-        TObjectPtr<UOdysseyPainterEditorVectorGroupPaintView> mGroupPaintView;
-        TObjectPtr<UOdysseyPainterEditorVectorTagInbetweenerView> mTagInbetweenerView;
-
-        FOdysseyVectorGroupPaint* mScene = nullptr;
 };

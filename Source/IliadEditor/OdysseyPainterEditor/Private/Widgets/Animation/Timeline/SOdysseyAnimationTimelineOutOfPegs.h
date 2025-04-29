@@ -19,7 +19,9 @@ public:
 
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineOutOfPegs)
+    : _CurrentFrame(0)
     {}
+        SLATE_ATTRIBUTE(int, CurrentFrame)
         SLATE_ARGUMENT(TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition>, TimelinePosition)
         SLATE_EVENT(SOdysseyAnimationTimelineOutOfPegsKey::FOnActivateOutOfPegs, OnActivateOutOfPegs)
         SLATE_EVENT(FSimpleDelegate, OnInactivateOutOfPegs)
@@ -32,11 +34,9 @@ public:
     );
 
 private:
-    void OnCurrentFrameChanged(UOdysseyAnimation* iAnimation);
-    void OnRenderingChanged(const FOdysseyRenderingChangedEvent& iEvent);
-    void Update();
+    UOdysseyAnimationCell* GetCurrentCell() const;
 
 private:
+    TAttribute<int> mCurrentFrame;
     UOdysseyAnimationLayer* mLayer = nullptr;
-    UOdysseyAnimationCell* mCurrentCell = nullptr;
 };

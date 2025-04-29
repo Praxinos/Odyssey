@@ -4,7 +4,7 @@
 #include "Widgets/Animation/Timeline/Layers/LayerImageRaster/SOdysseyAnimationLayerImageRasterRow.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "OdysseyStyle.h"
-#include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
+#include "OdysseyAnimationLayerImageRaster.h"
 #include "Widgets/Animation/Timeline/Layers/LayerImageRaster/SOdysseyAnimationLayerImageRasterTimeline.h"
 #include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineLightTableKey.h"
 #include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineLightTableHeader.h"
@@ -29,7 +29,6 @@ void SOdysseyAnimationLayerImageRasterRow::Construct(
 {
     ensure(iAnimationLayerImageRaster);
     mAnimationLayerImageRaster = iAnimationLayerImageRaster;
-    mEditor = InArgs._PainterEditor;
 
     SOdysseyAnimationLayerRow::Construct(
         SOdysseyAnimationLayerRow::FArguments()

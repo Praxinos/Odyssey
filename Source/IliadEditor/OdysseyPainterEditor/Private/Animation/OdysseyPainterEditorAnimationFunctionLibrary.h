@@ -14,9 +14,6 @@ class UOdysseyPainterEditorAnimationFunctionLibrary : public UBlueprintFunctionL
 
 public:
     UFUNCTION(BlueprintCallable, Category="Odyssey|Animation")
-    static UOdysseyAnimation* CreateAnimationAsset(FString AssetName="Animation", FString PackagePath="/Game/", int Width=1920, int Height=1080, EOdysseyAnimationFormat Format=EOdysseyAnimationFormat::BGRA8, float FramesPerSecond=24.f);
-
-    UFUNCTION(BlueprintCallable, Category="Odyssey|Animation")
     static UOdysseyAnimationLayerImageRaster* ImportTextureSequence(UOdysseyAnimation* Animation, TArray<UTexture2D*> Textures, UOdysseyAnimationLayer* ParentLayer = nullptr, int IndexInParent = 0);
 
     UFUNCTION(BlueprintCallable, Category="Odyssey|Animation")

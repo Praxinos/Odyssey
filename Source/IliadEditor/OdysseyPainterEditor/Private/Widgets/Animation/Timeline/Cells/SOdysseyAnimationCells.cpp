@@ -6,7 +6,7 @@
 #include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineSection.h"
 #include "Widgets/Layout/SMissingWidget.h"
 #include "OdysseyStyle.h"
-#include "LayerStack/Cells/OdysseyAnimationCell.h"
+#include "OdysseyAnimationCell.h"
 #include "SOdysseyHandle.h"
 #include "Widgets/Input/SComboButton.h"
 #include "TimelineTools/OdysseyAnimationTimelineTool.h"

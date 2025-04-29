@@ -4,27 +4,18 @@
 #include "Widgets/Texture/LayerStack/SOdysseyTextureLayerStackTreeView.h"
 
 #include "OdysseyPainterEditor.h"
-#include "LayerStack/OdysseyTextureLayerImageRaster.h"
-#include "LayerStack/OdysseyTextureLayerStack.h"
+#include "OdysseyTextureLayerImageRaster.h"
+#include "OdysseyTextureLayerStack.h"
 
 #define LOCTEXT_NAMESPACE "TextureEditor"
 
 SOdysseyTextureLayerStackTreeView::SOdysseyTextureLayerStackTreeView()
-    : mEditor(nullptr)
 {
-}
-
-FOdysseyPainterEditor*
-SOdysseyTextureLayerStackTreeView::GetEditor() const
-{
-    return mEditor;
 }
 
 void
-SOdysseyTextureLayerStackTreeView::Construct(const FArguments& InArgs, FOdysseyPainterEditor* iEditor)
+SOdysseyTextureLayerStackTreeView::Construct(const FArguments& InArgs)
 {
-    mEditor = iEditor;
-
     SOdysseyLayerStackTreeView::Construct(InArgs);
 }
 
@@ -45,7 +36,7 @@ SOdysseyTextureLayerStackTreeView::ExtendContextMenu()
 void
 SOdysseyTextureLayerStackTreeView::ExtendContextMenuLayerSection(FMenuBuilder& iMenuBuilder)
 {
-    UOdysseyLayerStack* layerStack = mEditor->LayerStack();
+    UOdysseyLayerStack* layerStack = GetLayerStack();
     if ( !layerStack )
         return;
 
@@ -79,7 +70,7 @@ SOdysseyTextureLayerStackTreeView::ExtendContextMenuLayerSection(FMenuBuilder& i
 void
 SOdysseyTextureLayerStackTreeView::Action_ConvertLayerToRasterLayer()
 {
-    UOdysseyLayerStack* layerStack = mEditor->LayerStack();
+    UOdysseyLayerStack* layerStack = GetLayerStack();
     if ( !layerStack )
         return;
 

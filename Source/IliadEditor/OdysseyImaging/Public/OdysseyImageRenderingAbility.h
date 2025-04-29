@@ -7,7 +7,7 @@
 #include "OdysseyImageRenderer.h"
 
 class ODYSSEYIMAGING_API FOdysseyImageRenderingAbility
-    : public FOdysseyRenderingAbility
+    : public IOdysseyRenderingAbility
 {
 public:
     /**

@@ -5,13 +5,30 @@
 
 #include "OdysseyRenderingAbility.h"
 
-class ODYSSEYCORE_API FOdysseyTextureRenderingAbility
-    : public FOdysseyRenderingAbility
+#include "OdysseyTextureRenderingAbility.generated.h"
+
+UINTERFACE(BlueprintType)
+class ODYSSEYCORE_API UOdysseyTextureRenderingAbility : public UOdysseyRenderingAbility
 {
+    GENERATED_BODY()
+};
+
+class ODYSSEYCORE_API IOdysseyTextureRenderingAbility : public IOdysseyRenderingAbility
+{
+    GENERATED_BODY()
+
 public:
-    void RenderToTexture(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame) const;
-    void RenderToTexture(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, const TArray<FIntRect>& iRects) const;
-    void RenderToTexture(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, const TArray<FIntRect>& iRects, const FIntPoint& iPos) const;
+    UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Odyssey|Rendering")
+    void Render(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame) const;
+    void Render_Implementation(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame) const;
+
+    UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Odyssey|Rendering")
+    void RenderRects(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, const TArray<FIntRect>& iRects) const;
+    void RenderRects_Implementation(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, const TArray<FIntRect>& iRects) const;
+
+    UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Odyssey|Rendering")
+    void RenderRectsAtPosition(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, const TArray<FIntRect>& iRects, const FIntPoint& iPos) const;
+    void RenderRectsAtPosition_Implementation(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, const TArray<FIntRect>& iRects, const FIntPoint& iPos) const;
 
 protected:
     virtual void RenderToTextureFromRects(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, const TArray<FIntRect>& iRects, const FIntPoint& iPos) const = 0;

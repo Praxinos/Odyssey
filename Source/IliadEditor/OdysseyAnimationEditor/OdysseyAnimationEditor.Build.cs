@@ -23,16 +23,6 @@ namespace UnrealBuildTool.Rules
                 OptimizeCode = CodeOptimization.Never;
             }
 
-            PublicIncludePaths.AddRange(
-                new string[] {
-                }
-                );
-
-            PrivateIncludePaths.AddRange(
-                new string[] {
-                }
-                );
-
             PublicDependencyModuleNames.AddRange(
                 new string[]
                 {
@@ -80,7 +70,9 @@ namespace UnrealBuildTool.Rules
                     "OdysseyPainterEditor",
                     "OdysseyStyle",
                     "OdysseyVector",
-                    "OdysseyWidgets",
+
+                    "ULIS",
+                    "ULISLoader",
                 }
                 );
 

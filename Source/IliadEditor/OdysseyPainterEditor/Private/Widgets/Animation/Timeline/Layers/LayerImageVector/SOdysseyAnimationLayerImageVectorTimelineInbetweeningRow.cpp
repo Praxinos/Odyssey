@@ -5,8 +5,8 @@
 #include "Widgets/Animation/Timeline/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorTimelineInbetweening.h"
 #include "Widgets/Animation/Timeline/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorTimeline.h"
 #include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineInbetweeningHeaderRow.h"
-#include "LayerStack/Cells/OdysseyAnimationCell.h"
-#include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVector.h"
+#include "OdysseyAnimationCell.h"
+#include "OdysseyAnimationCellImageVector.h"
 // From module OdysseyAnimation
 #include "OdysseyAnimation.h"
 // From module OdysseyLayerStack
@@ -24,7 +24,7 @@
 #include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyVectorCell.h"
 #include "Undo/OdysseyVectorUndoTagInbetweenerBreakdownAlter.h"
-#include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
+#include "OdysseyAnimationLayerImageVector.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "OdysseyPainterEditorAnimationTimelinePosition.h"
 
@@ -47,17 +47,17 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::SOdysseyAnimationLayer
 }
 
 void
-SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::Construct( const typename STableRow<TSharedPtr<FInbetweeningListViewItem>>::FArguments& InArgs
+SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::Construct( const FArguments& InArgs
                                                                    , const TSharedRef< STableViewBase >& InOwnerTableView
                                                                    , const TSharedPtr<FInbetweeningListViewItem> iITem )
 {
-    static FTableRowStyle style = FOdysseyStyle::GetWidgetStyle<FTableRowStyle>("Inbetweening.TableRow");
-
-    STableRow<TSharedPtr<FInbetweeningListViewItem>>::Construct( InArgs, InOwnerTableView );
-
-    Style = &style;
-
     mInbetweenerTag = iITem.Get()->GetInbetweenerTag();
+    mCurrentFrame = InArgs._CurrentFrame;
+    mOnTransactCurrentFrame = InArgs._OnTransactCurrentFrame;
+
+    STableRow<TSharedPtr<FInbetweeningListViewItem>>::FArguments rowArgs;
+    rowArgs.Style(&FOdysseyStyle::GetWidgetStyle<FTableRowStyle>("Inbetweening.TableRow"));
+    STableRow<TSharedPtr<FInbetweeningListViewItem>>::Construct( rowArgs, InOwnerTableView );
 }
 
 FReply
@@ -67,7 +67,6 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonDown( con
     TSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening> treeView = StaticCastSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening>(OwnerTablePtr.Pin());
     const FVector2D cursorPos = MyGeometry.AbsoluteToLocal( MouseEvent.GetScreenSpacePosition() );
     UOdysseyAnimationLayerImageVector* layer = treeView.Get()->GetAnimationLayerImageVector();
-    FOdysseyPainterEditor* editor = treeView->GetEditor();
     UOdysseyLayerStack* layerStack = layer->GetLayerStack();
     FOdysseyVectorObject* ownerObject = mInbetweenerTag->GetOwner();
     FOdysseyVectorLayer* sharedEnv = mInbetweenerTag->GetOwner()->GetLayer();
@@ -75,7 +74,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonDown( con
     FOdysseyVectorGroupPaint* scene = mInbetweenerTag->GetOwner()->GetScene();
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
                              | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                             | FOdysseyPainterEditor::UI_UPDATE_HUD;
+                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     // Call base method
     FReply reply = STableRow<TSharedPtr<FInbetweeningListViewItem>>::OnMouseButtonDown( MyGeometry, MouseEvent );
@@ -105,12 +104,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonDown( con
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
-            if (editor)
-            {
-                TSharedPtr<FOdysseyPainterEditorSource> source = editor->GetSource();
-                if (source)
-                    source->RecordCurrentFrameUndo();
-            }
+            mOnTransactCurrentFrame.ExecuteIfBound(TOptional<int>());
         }
         GEditor->EndTransaction();
 
@@ -216,7 +210,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonUp( const
 {
     TSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening> treeView = StaticCastSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening>(OwnerTablePtr.Pin());
     UOdysseyAnimationLayerImageVector* vectorLayer = treeView.Get()->GetAnimationLayerImageVector();
-    int currentFrame = vectorLayer->GetAnimation()->CurrentFrame;
+    int currentFrame = mCurrentFrame.Get();
     UOdysseyAnimationCell* cell = vectorLayer->GetCellAtFrame( currentFrame );
 
     // Call base method
@@ -229,7 +223,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonUp( const
         UOdysseyAnimationCellImageVector* vectorCell = Cast<UOdysseyAnimationCellImageVector>(cell);
         uint64 retFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
                         | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                        | FOdysseyPainterEditor::UI_UPDATE_HUD;
+                        | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
         //STableRow<TSharedPtr<FInbetweeningListViewItem>>::OnMouseButtonUp( MyGeometry, MouseEvent );
 

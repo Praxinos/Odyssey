@@ -6,18 +6,26 @@
 #include "OdysseyEditorShortcuts.h"
 
 class FUICommandList;
-class FOdysseyPainterEditor;
+class UOdysseyAnimation;
+class UOdysseyAnimationPlayer;
 class ODYSSEYPAINTEREDITOR_API FOdysseyAnimationGlobalShortcuts
     : public FOdysseyEditorShortcuts
 {
 public:
+    DECLARE_DELEGATE_OneParam(FOnTransactCurrentFrame, TOptional<int> /*iFrame*/)
+
+public:
     virtual ~FOdysseyAnimationGlobalShortcuts() {};
-    FOdysseyAnimationGlobalShortcuts(FOdysseyPainterEditor* iEditor);
+    FOdysseyAnimationGlobalShortcuts(
+        const TAttribute<UOdysseyAnimation*>& iAnimation,
+        const TAttribute<int>& iCurrentFrame,
+        const FOnTransactCurrentFrame& iOnTransactCurrentFrame
+    );
 
 public:
     //Shortcuts
     virtual void MapActionsToCommandList(TSharedRef<FUICommandList> iCommandList) override;
 
 private:
-    FOdysseyPainterEditor* mEditor;
+    TAttribute<UOdysseyAnimation*> mAnimation;
 };

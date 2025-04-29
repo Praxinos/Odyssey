@@ -15,7 +15,7 @@ FOdysseyPainterEditorSource::FOdysseyPainterEditorSource()
 }
 
 void
-FOdysseyPainterEditorSource::Activate()
+FOdysseyPainterEditorSource::Activate(FOdysseyPainterEditor* iEditor)
 {
     mIsActivated = true;
 }

@@ -3,15 +3,15 @@
 #include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineTreeView.h"
 
 #include "Shortcuts/AnimationTimeline/OdysseyAnimationTimelineShortcuts.h"
-#include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
-#include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
-#include "LayerStack/Layers/LayerFolder/OdysseyAnimationLayerFolder.h"
-#include "LayerStack/OdysseyAnimationLayerStack.h"
+#include "OdysseyAnimationLayerImageVector.h"
+#include "OdysseyAnimationLayerImageRaster.h"
+#include "LayerFolder/OdysseyAnimationLayerFolder.h"
+#include "OdysseyAnimationLayerStack.h"
 #include "SOdysseyAnimationTimelineHeader.h"
 #include "Widgets/Animation/Timeline/Layers/LayerFolder/SOdysseyAnimationLayerFolderTimeline.h"
 #include "Widgets/Animation/Timeline/Layers/LayerImageRaster/SOdysseyAnimationLayerImageRasterTimeline.h"
 #include "Widgets/Animation/Timeline/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorTimeline.h"
-#include "LayerStack/Layers/LayerFolder/OdysseyAnimationLayerFolder.h"
+#include "LayerFolder/OdysseyAnimationLayerFolder.h"
 #include "Framework/Commands/UICommandList.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
@@ -21,13 +21,14 @@ SOdysseyAnimationTimelineTreeView::Construct(const FArguments& InArgs)
 {
     mTimelinePosition = InArgs._TimelinePosition;
     mLayerStack = InArgs._LayerStack;
-    mPlayer = InArgs._Player;
     mOnActivateOutOfPegs = InArgs._OnActivateOutOfPegs;
     mOnInactivateOutOfPegs = InArgs._OnInactivateOutOfPegs;
     mOnIsOutOfPegsChecked = InArgs._OnIsOutOfPegsChecked;
-    mEditor = InArgs._PainterEditor;
 
-    mTimelineShortcuts = MakeShared<FOdysseyAnimationTimelineShortcuts>(mLayerStack);
+    if (!mLayerStack)
+        return;
+
+    mTimelineShortcuts = MakeShared<FOdysseyAnimationTimelineShortcuts>(mLayerStack->GetAnimation(), InArgs._CurrentFrame, InArgs._OnTransactCurrentFrame);
 
     TArray<SHeaderRow::FColumn::FArguments> columns = {
         SHeaderRow::Column("Timeline")
@@ -41,10 +42,11 @@ SOdysseyAnimationTimelineTreeView::Construct(const FArguments& InArgs)
             [
                 SNew(SOdysseyAnimationTimelineHeader)
                 .Animation(mLayerStack->GetAnimation())
-                .Player(mPlayer)
                 .TimelinePosition(mTimelinePosition)
                 .OnScrubStart(InArgs._OnScrubStart)
                 .OnScrubEnd(InArgs._OnScrubEnd)
+                .OnCurrentFrameChanged(InArgs._OnCurrentFrameChanged)
+                .OnCurrentFrameCommited(InArgs._OnCurrentFrameCommited)
             ]
         ]
     };
@@ -81,7 +83,6 @@ SOdysseyAnimationTimelineTreeView::OnGenerateRow(UOdysseyLayer* iLayer, const TS
     if (layerClass == UOdysseyAnimationLayerImageRaster::StaticClass())
     {
         return SNew(SOdysseyAnimationLayerImageRasterTimeline, SharedThis(this), Cast<UOdysseyAnimationLayerImageRaster>(iLayer))
-            .PainterEditor(mEditor)
             .TimelinePosition(mTimelinePosition)
             .OnActivateOutOfPegs(mOnActivateOutOfPegs)
             .OnInactivateOutOfPegs(mOnInactivateOutOfPegs)
@@ -90,7 +91,6 @@ SOdysseyAnimationTimelineTreeView::OnGenerateRow(UOdysseyLayer* iLayer, const TS
     if (layerClass == UOdysseyAnimationLayerImageVector::StaticClass())
     {
         return SNew(SOdysseyAnimationLayerImageVectorTimeline, SharedThis(this), Cast<UOdysseyAnimationLayerImageVector>(iLayer))
-            .PainterEditor(mEditor)
             .TimelinePosition(mTimelinePosition)
             .OnActivateOutOfPegs(mOnActivateOutOfPegs)
             .OnInactivateOutOfPegs(mOnInactivateOutOfPegs)

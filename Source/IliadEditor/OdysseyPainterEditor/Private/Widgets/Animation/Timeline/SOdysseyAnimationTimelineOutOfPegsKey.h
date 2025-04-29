@@ -4,7 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
+#include "OdysseyAnimationLightTable.h"
 #include "Widgets/SCompoundWidget.h"
 
 class UOdysseyAnimationLayer;

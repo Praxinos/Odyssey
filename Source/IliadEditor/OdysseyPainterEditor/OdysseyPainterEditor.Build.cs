@@ -120,6 +120,7 @@ public class OdysseyPainterEditor : ModuleRules
         PublicIncludePaths.AddRange(
             new string[] {
                 Path.Combine(ModuleDirectory, "Public", "Animation"),
+                Path.Combine(ModuleDirectory, "Public", "Sources"),
                 Path.Combine(ModuleDirectory, "Public", "Tools"),
                 Path.Combine(ModuleDirectory, "Public", "Tools", "OutOfPegsTool"),
                 Path.Combine(ModuleDirectory, "Public", "Widgets"),

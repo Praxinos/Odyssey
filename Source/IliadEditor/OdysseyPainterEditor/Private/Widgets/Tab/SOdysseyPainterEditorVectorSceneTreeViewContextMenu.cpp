@@ -6,10 +6,12 @@
 #include "OdysseyPainterEditor.h"
 // module OdysseyVector
 #include "HUD/OdysseyVectorHUD.h"
+#include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyVectorLayer.h"
 #include "OdysseyVectorCell.h"
 #include "Dialogs/Dialogs.h"
+#include "Widgets/Tab/SOdysseyPainterEditorVectorSceneTreeViewRow.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 

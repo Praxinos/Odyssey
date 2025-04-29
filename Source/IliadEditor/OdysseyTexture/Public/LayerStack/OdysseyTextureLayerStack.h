@@ -99,7 +99,7 @@ public:
     void UpdateTexture(bool iForceRefresh = false);
 
 public:
-    //FOdysseyRenderingAbility overrides
+    //IOdysseyRenderingAbility overrides
     virtual TArray<FIntRect> GetRenderingRects() const override;
 
 private:

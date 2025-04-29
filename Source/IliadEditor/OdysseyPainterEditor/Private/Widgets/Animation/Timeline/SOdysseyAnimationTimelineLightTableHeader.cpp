@@ -3,8 +3,8 @@
 
 #include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineLightTableHeader.h"
 
-#include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
-#include "LayerStack/Layers/OdysseyAnimationLayer.h"
+#include "OdysseyAnimationLightTable.h"
+#include "OdysseyAnimationLayer.h"
 #include "Math/UnitConversion.h"
 #include "OdysseyStyle.h"
 #include "Widgets/Input/NumericTypeInterface.h"

@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "LayerStack/OdysseyTextureLayer.h"
+#include "OdysseyTextureLayer.h"
 #include "Image/OdysseyBlendingMode.h"
 #include "Misc/TransactionObjectEvent.h"
 #include "Misc/ITransaction.h"
@@ -63,7 +63,7 @@ public:
     virtual void Serialize(FArchive& Ar) override;
 
 public:
-    //FOdysseyRenderingAbility overrides
+    //IOdysseyRenderingAbility overrides
     virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(EOdysseyRenderingType iRenderType, int iFrame = 0, FImageRendererFilter iFilter = FImageRendererFilter()) const override;
     virtual TArray<FGuid> GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrame = 0) const override;
 

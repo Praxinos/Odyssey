@@ -2,11 +2,11 @@
 // ODYSSEY is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Widgets/Animation/Timeline/Cells/SOdysseyAnimationCell.h"
-#include "LayerStack/Cells/OdysseyAnimationCell.h"
+#include "OdysseyAnimationCell.h"
 #include "OdysseyPainterEditorAnimationProjectSettings.h"
 #include "OdysseyStyle.h"
-#include "LayerStack/OdysseyAnimationLayerStack.h"
-#include "LayerStack/Cells/OdysseyAnimationCellSelection.h"
+#include "OdysseyAnimationLayerStack.h"
+#include "OdysseyAnimationCellSelection.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 

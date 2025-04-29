@@ -18,7 +18,7 @@
 #include "OdysseyRasterBlock.h"
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "OdysseyTextureLayerStack.h"
-#include "LayerStack/OdysseyTextureLayerImageRaster.h"
+#include "OdysseyTextureLayerImageRaster.h"
 #include "OdysseyPainterEditorCommands.h"
 #include "OdysseyPainterEditorTextureSource.h"
 #include "OdysseyPainterEditor.h"
@@ -61,7 +61,7 @@ FOdysseyPainterEditorLayerStackTab::GetId() const
 TSharedPtr<SWidget>
 FOdysseyPainterEditorLayerStackTab::CreateWidget()
 {
-    return SNew(SOdysseyTextureLayerStack, mEditor)
+    return SNew(SOdysseyTextureLayerStack)
             .LayerStack(this, &FOdysseyPainterEditorLayerStackTab::LayerStack);
 }
 

@@ -43,10 +43,21 @@ class SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow
     };
 
     public:
+        DECLARE_DELEGATE_OneParam(FOnTransactCurrentFrame, TOptional<int>)
+
+    public:
+        SLATE_BEGIN_ARGS(SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow)
+            : _CurrentFrame(0)
+            {}
+            SLATE_ATTRIBUTE(int, CurrentFrame)
+            SLATE_EVENT(FOnTransactCurrentFrame, OnTransactCurrentFrame)
+        SLATE_END_ARGS()
+
+    public:
         ~SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow();
         SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow();
 
-        void Construct( const typename STableRow<TSharedPtr<FInbetweeningListViewItem>>::FArguments& InArgs
+        void Construct( const FArguments& InArgs
                       , const TSharedRef< STableViewBase >& InOwnerTableView
                       , const TSharedPtr<FInbetweeningListViewItem> iTem );
         virtual FReply OnMouseButtonDown( const FGeometry & MyGeometry, const FPointerEvent & MouseEvent ) override;
@@ -71,6 +82,9 @@ class SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow
         float FrameToMousePosition(float iFrame) const;
 
     protected:
+        TAttribute<int> mCurrentFrame;
+        FOnTransactCurrentFrame mOnTransactCurrentFrame;
+
         FOdysseyVectorTagInbetweener* mInbetweenerTag;
         TArray<CellBox> mCellBoxBuffer;
         FVector2D mBoxPos;

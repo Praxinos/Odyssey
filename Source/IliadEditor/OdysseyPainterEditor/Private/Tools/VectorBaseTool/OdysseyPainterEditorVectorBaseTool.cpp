@@ -1065,7 +1065,7 @@ UOdysseyPainterEditorVectorBaseTool::SetVectorEditionFlags( uint64 iViewMode )
         FOdysseyVectorEngine::Notify( vectorScene, FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
                                                  | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
                                                  | FOdysseyPainterEditor::UI_UPDATE_TIMELINE
-                                                 | FOdysseyPainterEditor::UI_UPDATE_HUD );
+                                                 | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD );
 
         vectorScene->GetLayer()->RequestRedraw( vectorScene->GetCell(), 0 );
     }

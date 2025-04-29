@@ -5,6 +5,8 @@
 
 #include "OdysseyRenderingType.h"
 
+#include "OdysseyRenderingAbility.generated.h"
+
 class ODYSSEYCORE_API FOdysseyRenderingChangedEvent
 {
 public:
@@ -30,8 +32,16 @@ private:
     TArray<FIntRect> mRects;
 };
 
-class ODYSSEYCORE_API FOdysseyRenderingAbility
+UINTERFACE(Blueprintable)
+class ODYSSEYCORE_API UOdysseyRenderingAbility : public UInterface
 {
+    GENERATED_BODY()
+};
+
+class ODYSSEYCORE_API IOdysseyRenderingAbility
+{
+    GENERATED_BODY()
+
 public:
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnChanged, const FOdysseyRenderingChangedEvent&);
 
@@ -42,7 +52,7 @@ public:
     static FOnChanged& OnRenderingChangedDelegate();
 
 public:
-    FOdysseyRenderingAbility();
+    IOdysseyRenderingAbility();
 
 public:
     void RenderingChanged(bool iIsInteractive = false); //Changes the whole rect
@@ -71,6 +81,8 @@ public:
      * @return const FGuid&
      */
     virtual FGuid GetRenderingId() const;
+
+    virtual FInt32Range GetFrameRange() const = 0;
 
 private:
     FGuid mRenderingId;

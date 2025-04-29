@@ -246,7 +246,7 @@ UOdysseyPainterEditorVectorCutTool::OnMouseUpVectorObjectMode( FOdysseyVectorGro
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
                              | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
                              | FOdysseyPainterEditor::UI_UPDATE_TIMELINE
-                             | FOdysseyPainterEditor::UI_UPDATE_HUD;
+                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     // deselect all if control key is not pressed
     if( FSlateApplication::Get().GetModifierKeys().IsControlDown() == false )

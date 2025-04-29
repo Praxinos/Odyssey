@@ -2,10 +2,10 @@
 // ODYSSEY is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
 
 #include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineLightTableKey.h"
-#include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
+#include "OdysseyAnimationLightTable.h"
 #include "OdysseyStyle.h"
-#include "LayerStack/Layers/OdysseyAnimationLayer.h"
-#include "LayerStack/Cells/OdysseyAnimationCell.h"
+#include "OdysseyAnimationLayer.h"
+#include "OdysseyAnimationCell.h"
 #include "Tools/OutOfPegsTool/OdysseyPainterEditorAnimationOutOfPegsTool.h"
 #include "OdysseyPainterEditor.h"
 #include "SOdysseyAnimationTimelineSection.h"

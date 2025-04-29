@@ -10,6 +10,7 @@
 #include "OdysseyPainterEditor.h"
 #include "Shortcuts/Global/OdysseyPainterEditorGlobalToolsShortcuts.h"
 #include "Shortcuts/Global/OdysseyPainterEditorGlobalLayersShortcuts.h"
+#include "Shortcuts/Global/OdysseyPainterEditorGlobalTimelineShortcuts.h"
 #include "OdysseyPainterEditorSource.h"
 #include "OdysseyPainterEditorRasterSelection.h"
 #include "OdysseyRasterBlock.h"
@@ -20,6 +21,7 @@ FOdysseyPainterEditorGlobalShortcuts::FOdysseyPainterEditorGlobalShortcuts(FOdys
 {
     Add(MakeShared<FOdysseyPainterEditorGlobalToolsShortcuts>(iEditor));
     Add(MakeShared<FOdysseyPainterEditorGlobalLayersShortcuts>(iEditor));
+    Add(MakeShared<FOdysseyPainterEditorGlobalTimelineShortcuts>(iEditor));
 }
 
 void FOdysseyPainterEditorGlobalShortcuts::MapActionsToCommandList(TSharedRef<FUICommandList> iCommandList)

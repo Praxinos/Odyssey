@@ -6,7 +6,7 @@
 #include "CoreMinimal.h"
 #include <list>
 
-//#include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
+//#include "OdysseyAnimationLightTable.h"
 
 class FInbetweeningListViewItem;
 class UOdysseyAnimationLayerImageVector;
@@ -27,10 +27,8 @@ class SOdysseyAnimationLayerImageVectorTimelineInbetweening
 
     public:
         SLATE_BEGIN_ARGS(SOdysseyAnimationLayerImageVectorTimelineInbetweening)
-            : _PainterEditor(nullptr)
             {}
             SLATE_ARGUMENT( TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition>, TimelinePosition )
-            SLATE_ATTRIBUTE(FOdysseyPainterEditor*, PainterEditor)
         SLATE_END_ARGS()
 
         void Construct( const FArguments& InArgs
@@ -42,7 +40,6 @@ class SOdysseyAnimationLayerImageVectorTimelineInbetweening
         const FSlateBrush *GetForwardArrowBrush();
         const FSlateBrush *GetBackwardArrowBrush();
         virtual FReply OnKeyDown( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent ) override;
-        FOdysseyPainterEditor* GetEditor() const;
         TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition> GetTimelinePosition() const;
 
     protected:
@@ -79,6 +76,5 @@ class SOdysseyAnimationLayerImageVectorTimelineInbetweening
         const FSlateBrush *mForwardArrowBrush;
         const FSlateBrush *mBackwardArrowBrush;
         TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition> mTimelinePosition;
-        TAttribute<FOdysseyPainterEditor*> mEditor;
         TSharedRef<FUICommandList> mCommandList;
 };

@@ -9,7 +9,7 @@
 #include "OdysseyVectorBlock.h"
 #include "ULISLoaderModule.h"
 #include "ULISUtils.h"
-#include "LayerStack/OdysseyTextureLayerImageVectorImageRenderer.h"
+#include "OdysseyTextureLayerImageVectorImageRenderer.h"
 #include "OdysseyTextureLayerImageVectorImport.h"
 #include "OdysseyTextureLayerImageVectorExport.h"
 // from module OdysseyVector

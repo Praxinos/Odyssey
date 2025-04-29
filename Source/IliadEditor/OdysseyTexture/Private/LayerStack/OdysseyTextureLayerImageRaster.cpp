@@ -14,7 +14,7 @@
 #include "OdysseyRasterBlockUndo.h"
 #include "OdysseyTextureLayerImageRaster.h"
 #include "OdysseySurfaceTexture2DEditable.h"
-#include "LayerStack/OdysseyTextureLayerImageRasterImageRenderer.h"
+#include "OdysseyTextureLayerImageRasterImageRenderer.h"
 #include "OdysseyTextureLayerImageRasterImport.h"
 #include "OdysseyTextureLayerImageRasterExport.h"
 #include "OdysseyTextureLayerStack.h"

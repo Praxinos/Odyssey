@@ -5,24 +5,24 @@
 
 #include "Widgets/Animation/Timeline/Cells/CellImageStagger/SOdysseyAnimationCellImageStagger.h"
 #include "Widgets/Animation/Timeline/Cells/CellImageRaster/SOdysseyAnimationCellImageRaster.h"
-#include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
+#include "OdysseyAnimationLayerImageRaster.h"
 #include "OdysseyPainterEditorAnimationCommands.h"
-#include "LayerStack/Layers/OdysseyAnimationLayer.h"
+#include "OdysseyAnimationLayer.h"
 #include "OdysseyLayerStack.h"
 #include "OdysseyAnimation.h"
 #include "ULISLoaderModule.h"
 #include "ULISUtils.h"
-#include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
+#include "OdysseyAnimationCellImageRaster.h"
 #include "Shortcuts/AnimationTimeline/OdysseyAnimationTimelineCellImageStaggerShortcuts.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "OdysseyRasterBlockMutator.h"
-#include "LayerStack/Cells/OdysseyAnimationCellSelection.h"
+#include "OdysseyAnimationCellSelection.h"
 #include "ScopedTransaction.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
-FOdysseyAnimationTimelineCellImageRasterShortcuts::FOdysseyAnimationTimelineCellImageRasterShortcuts(UOdysseyLayerStack* iLayerStack)
-    : mLayerStack(iLayerStack)
+FOdysseyAnimationTimelineCellImageRasterShortcuts::FOdysseyAnimationTimelineCellImageRasterShortcuts(const TAttribute<UOdysseyAnimation*>& iAnimation)
+    : mAnimation(iAnimation)
 {
 }
 
@@ -39,7 +39,15 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::MapActionsToCommandList(TShar
 void
 FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
 {
-    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(mLayerStack->CurrentLayer.Get());
+    UOdysseyAnimation* animation = mAnimation.Get();
+    if (!animation)
+        return;
+
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(animation->GetLayerStack());
+    if (!layerStack)
+        return;
+
+    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerStack->CurrentLayer.Get());
     if (!layer || !layer->IsA(UOdysseyAnimationLayerImageRaster::StaticClass()))
         return;
 
@@ -61,8 +69,6 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
     if (!hasCellsToCrossFade)
         return;
 
-    UOdysseyAnimation* animation = layer->GetAnimation();
-
     ::ULIS::eFormat format = ::ULIS::Format_BGRA8;
     switch(animation->GetFormat())
     {
@@ -79,13 +85,13 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
     progressBar.EnterProgressFrame();
 
     //Convert Selected Stagger Cells to ImageRaster Cells
-    FOdysseyAnimationTimelineCellImageStaggerShortcuts staggerShortcuts(mLayerStack);
+    FOdysseyAnimationTimelineCellImageStaggerShortcuts staggerShortcuts(animation);
     staggerShortcuts.Action_ConvertToReferenceCells();
 
     progressBar.EnterProgressFrame();
 
     //Get the selected cells again to ensure having the converted cells
-    selectedCells = animation->GetLayerStack()->GetCellSelection()->GetSelectedCells();
+    selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
     TArray<UOdysseyAnimationCell*> cellsToSelect = selectedCells;
 
     //Cross Fade all selected cells
@@ -208,20 +214,28 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
             cellsToSelect.Append(rasterCells);
         }
     }
-    animation->GetLayerStack()->GetCellSelection()->SetSelectedCells(cellsToSelect);
+    layerStack->GetCellSelection()->SetSelectedCells(cellsToSelect);
 }
 
 bool
 FOdysseyAnimationTimelineCellImageRasterShortcuts::CanAction_CrossFade()
 {
-    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(mLayerStack->CurrentLayer.Get());
+    UOdysseyAnimation* animation = mAnimation.Get();
+    if (!animation)
+        return false;
+
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(animation->GetLayerStack());
+    if (!layerStack)
+        return false;
+
+    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerStack->CurrentLayer.Get());
     if (!layer || !layer->IsA(UOdysseyAnimationLayerImageRaster::StaticClass()))
         return false;
 
     if (layer->IsLockedRecursively())
         return false;
 
-    UOdysseyAnimationLayerImageRaster* layerImageRaster = Cast<UOdysseyAnimationLayerImageRaster>(mLayerStack->CurrentLayer.Get());
+    UOdysseyAnimationLayerImageRaster* layerImageRaster = Cast<UOdysseyAnimationLayerImageRaster>(layerStack->CurrentLayer.Get());
 
     const TArray<UOdysseyAnimationCell*> selectedCells = layerImageRaster->GetLayerStack()->GetCellSelection()->GetSelectedCells();
     if (selectedCells.IsEmpty())

@@ -9,6 +9,7 @@
 #include "OdysseyAnimationTimelineSectionEditor.h"
 #include "OdysseyAnimationComponent.h"
 #include "OdysseyAnimation.h"
+#include "OdysseyAnimationLayerStack.h"
 #include "OdysseyAnimationTimelineTrack.h"
 #include "OdysseyViewportDrawingEditorEdMode.h"
 #include "EditorModeManager.h"
@@ -69,34 +70,10 @@ SOdysseyAnimationTimelineTrack::RebuildWidgets()
     if (!animation)
         return;
 
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(animation->GetLayerStack());
+
     TSharedPtr<SWidget> widget = SNew(SOdysseyAnimationLayerStackTreeView)
-        .PainterEditor_Lambda(
-            [animation]() -> FOdysseyPainterEditor*
-            {
-                if (!animation)
-                    return nullptr;
-
-                if (!GLevelEditorModeTools().IsModeActive( FOdysseyViewportDrawingEditorEdMode::EM_OdysseyViewportDrawingEditorEdModeId ))
-                    return nullptr;
-
-                FEdMode* edMode = GLevelEditorModeTools().GetActiveMode( FOdysseyViewportDrawingEditorEdMode::EM_OdysseyViewportDrawingEditorEdModeId );
-                if (!edMode)
-                    return nullptr;
-
-                FOdysseyViewportDrawingEditorEdMode* odysseyEdMode = static_cast<FOdysseyViewportDrawingEditorEdMode*>(edMode);
-
-                TSharedPtr<FOdysseyViewportDrawingEditorToolkit> toolkit = odysseyEdMode->GetViewportDrawingEditorToolkit();
-                if(!toolkit)
-                    return nullptr;
-
-                FOdysseyPainterEditor* editor = odysseyEdMode->GetEditor();
-                if (!editor)
-                    return nullptr;
-
-                return editor;
-            }
-        )
-        .LayerStack(animation->GetLayerStack())
+        .LayerStack(layerStack)
         .ExternalScrollbar(SNew(SScrollBar));
 
     this->ChildSlot.AttachWidget(widget.ToSharedRef());

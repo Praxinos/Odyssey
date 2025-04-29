@@ -8,7 +8,7 @@
 #include "CanvasTypes.h"
 #include "HAL/RunnableThread.h"
 #include "ImageUtils.h"
-#include "LayerStack/Cells/OdysseyAnimationCell.h"
+#include "OdysseyAnimationCell.h"
 #include "OdysseyAnimation.h"
 #include "OdysseyPainterEditorSettings.h"
 #include "OdysseyImageRenderer.h"

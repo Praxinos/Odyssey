@@ -17,10 +17,8 @@ class SOdysseyAnimationLayerImageRasterRow
 {
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationLayerImageRasterRow)
-        : _PainterEditor(nullptr)
         {}
         SLATE_ARGUMENT( TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition>, TimelinePosition )
-        SLATE_ATTRIBUTE(FOdysseyPainterEditor*, PainterEditor)
     SLATE_END_ARGS()
 
 public:
@@ -40,5 +38,4 @@ private:
 
 private:
     class UOdysseyAnimationLayerImageRaster* mAnimationLayerImageRaster;
-    TAttribute<FOdysseyPainterEditor*> mEditor;
 };

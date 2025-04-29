@@ -6,7 +6,6 @@
 #include "Widgets/SOdysseyLayerStackTreeView.h"
 
 class UOdysseyAnimationLayerStack;
-class UOdysseyAnimationPlayer;
 class FOdysseyAnimationTimelineShortcuts;
 class FOdysseyPainterEditorAnimationTimelinePosition;
 class UOdysseyAnimationCell;
@@ -19,16 +18,16 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyAnimationTimelineTreeView
 public:
     DECLARE_DELEGATE_OneParam(FOnActivateOutOfPegs, UOdysseyAnimationCell*)
     DECLARE_DELEGATE_RetVal_OneParam(ECheckBoxState, FOnIsOutOfPegsChecked, UOdysseyAnimationCell*)
+    DECLARE_DELEGATE_OneParam(FOnTransactCurrentFrame, TOptional<int>)
+    DECLARE_DELEGATE_OneParam(FOnCurrentFrameChanged, int /*iFrame*/)
 
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineTreeView)
-        : _PainterEditor(nullptr)
-        , _Player(nullptr)
+        : _CurrentFrame(0)
         , _ExternalScrollbar(nullptr)
         {}
-        SLATE_ATTRIBUTE(FOdysseyPainterEditor*, PainterEditor)
         SLATE_ARGUMENT( UOdysseyAnimationLayerStack*, LayerStack )
-        SLATE_ARGUMENT( UOdysseyAnimationPlayer*, Player )
+        SLATE_ATTRIBUTE( int, CurrentFrame )
         SLATE_ARGUMENT( TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition>, TimelinePosition )
         SLATE_ARGUMENT( TSharedPtr<SScrollBar>, ExternalScrollbar )
         SLATE_EVENT(FOnActivateOutOfPegs, OnActivateOutOfPegs)
@@ -37,6 +36,9 @@ public:
         SLATE_EVENT( FOnTableViewScrolled, OnTreeViewScrolled )
         SLATE_EVENT(FSimpleDelegate, OnScrubStart)
         SLATE_EVENT(FSimpleDelegate, OnScrubEnd)
+        SLATE_EVENT(FOnTransactCurrentFrame, OnTransactCurrentFrame)
+        SLATE_EVENT(FOnCurrentFrameChanged, OnCurrentFrameChanged)
+        SLATE_EVENT(FOnCurrentFrameChanged, OnCurrentFrameCommited)
     SLATE_END_ARGS()
 
 public:
@@ -53,11 +55,9 @@ private:
 
 private:
     UOdysseyAnimationLayerStack* mLayerStack;
-    UOdysseyAnimationPlayer* mPlayer;
     TSharedPtr<FOdysseyAnimationTimelineShortcuts> mTimelineShortcuts;
     TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition> mTimelinePosition;
     FOnActivateOutOfPegs mOnActivateOutOfPegs;
     FSimpleDelegate mOnInactivateOutOfPegs;
     FOnIsOutOfPegsChecked mOnIsOutOfPegsChecked;
-    TAttribute<FOdysseyPainterEditor*> mEditor;
 };

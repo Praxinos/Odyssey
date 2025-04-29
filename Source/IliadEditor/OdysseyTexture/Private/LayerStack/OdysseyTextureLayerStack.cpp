@@ -10,7 +10,7 @@
 #include "OdysseyTextureLayerImageRaster.h"
 #include "OdysseyRectUtils.h"
 #include "OdysseyRasterBlockMutator.h"
-#include "LayerStack/OdysseyTextureLayer.h"
+#include "OdysseyTextureLayer.h"
 #include "OdysseyTextureLayerImageVector.h"
 #include "ULISLoaderModule.h"
 #include "OdysseyPixelFormat.h"
@@ -75,7 +75,7 @@ UOdysseyTextureLayerStack::CreateWithEmptyVectorLayer(UTexture2D* iTexture, UObj
 
 UOdysseyTextureLayerStack::~UOdysseyTextureLayerStack()
 {
-    FOdysseyRenderingAbility::OnRenderingChangedDelegate().RemoveAll(this);
+    IOdysseyRenderingAbility::OnRenderingChangedDelegate().RemoveAll(this);
 }
 
 UOdysseyTextureLayerStack::UOdysseyTextureLayerStack()
@@ -87,7 +87,7 @@ UOdysseyTextureLayerStack::UOdysseyTextureLayerStack()
     LayerRootClass = UOdysseyTextureLayerRoot::StaticClass();
     SRGB = false;
 
-    FOdysseyRenderingAbility::OnRenderingChangedDelegate().AddUObject(this, &UOdysseyTextureLayerStack::OnRenderingChanged);
+    IOdysseyRenderingAbility::OnRenderingChangedDelegate().AddUObject(this, &UOdysseyTextureLayerStack::OnRenderingChanged);
     RenderTarget = CreateDefaultSubobject<UTextureRenderTarget2D>("RenderTarget");
     RenderTarget->RenderTargetFormat = RTF_RGBA8;
 }
@@ -282,7 +282,7 @@ UOdysseyTextureLayerStack::FastUpdateTexture(const TArray<FIntRect>& iRects)
 
     RenderTarget->UpdateResourceImmediate();
 
-    RenderToTexture(RenderTarget, FFrameNumber(0), iRects);
+    IOdysseyTextureRenderingAbility::Execute_RenderRects(this, RenderTarget, FFrameNumber(0), iRects);
 
     //Fence ?
     FRenderCommandFence fence;
@@ -402,7 +402,7 @@ UOdysseyTextureLayerStack::UpdateTexture(bool iForceRefresh)
         RenderTarget->UpdateResourceImmediate();
 
         TArray<FIntRect> invalidRects = mInvalidTileMap.InvalidRects();
-        RenderToTexture(RenderTarget, FFrameNumber(0), invalidRects);
+        IOdysseyTextureRenderingAbility::Execute_RenderRects(this, RenderTarget, FFrameNumber(0), invalidRects);
 
         ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
         TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> dst = MakeShareable(NewBlockFromUTextureData(texture, format));

@@ -4,9 +4,9 @@
 #include "TimelineTools/OdysseyAnimationTimelineSelectionTool.h"
 #include "OdysseyPainterEditorAnimationTimelinePosition.h"
 #include "OdysseyAnimationCellsDragDropOperation.h"
-#include "LayerStack/Layers/OdysseyAnimationLayer.h"
-#include "LayerStack/Cells/OdysseyAnimationCell.h"
-#include "LayerStack/Cells/OdysseyAnimationCellSelection.h"
+#include "OdysseyAnimationLayer.h"
+#include "OdysseyAnimationCell.h"
+#include "OdysseyAnimationCellSelection.h"
 
 FOdysseyAnimationTimelineSelectionTool::~FOdysseyAnimationTimelineSelectionTool()
 {

@@ -5,17 +5,16 @@
 #include "OdysseyStyle.h"
 #include "OdysseyAnimationPlayer.h"
 #include "OdysseyAnimation.h"
-#include "LayerStack/Layers/OdysseyAnimationLayer.h"
-#include "LayerStack/Cells/OdysseyAnimationCell.h"
+#include "OdysseyAnimationLayer.h"
+#include "OdysseyAnimationCell.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
-#include "LayerStack/Cells/OdysseyAnimationCellSelection.h"
+#include "OdysseyAnimationCellSelection.h"
 
 void
 SOdysseyAnimationPlaybackControls::Construct(const FArguments& InArgs)
 {
     mAnimation = InArgs._Animation;
     mPlayer = InArgs._Player;
-    mPlaybackFramesPerSecond = InArgs._PlaybackFramesPerSecond;
 
     ChildSlot
     [
@@ -178,7 +177,8 @@ SOdysseyAnimationPlaybackControls::GetNotLoopingButtonVisibility() const
 FReply
 SOdysseyAnimationPlaybackControls::OnPlayClicked()
 {
-    TArray<UOdysseyAnimationCell*> selectedCells = mAnimation->GetLayerStack()->GetCellSelection()->GetSelectedCells();
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(mAnimation->GetLayerStack());
+    TArray<UOdysseyAnimationCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
     if (selectedCells.IsEmpty())
     {
         mPlayer->SetFrameRange(TOptional<TRange<FFrameTime>>());
@@ -203,7 +203,8 @@ SOdysseyAnimationPlaybackControls::OnPlayClicked()
 FReply
 SOdysseyAnimationPlaybackControls::OnPlayBackwardClicked()
 {
-    TArray<UOdysseyAnimationCell*> selectedCells = mAnimation->GetLayerStack()->GetCellSelection()->GetSelectedCells();
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(mAnimation->GetLayerStack());
+    TArray<UOdysseyAnimationCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
     if (selectedCells.IsEmpty())
     {
         mPlayer->SetFrameRange(TOptional<TRange<FFrameTime>>());
@@ -235,28 +236,28 @@ SOdysseyAnimationPlaybackControls::OnStopClicked()
 FReply
 SOdysseyAnimationPlaybackControls::OnBeginningClicked()
 {
-    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimation, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), mAnimation->GetFrameRange().GetLowerBoundValue());
+    mPlayer->SeekToFrame(mAnimation->GetFrameRange().GetLowerBoundValue());
     return FReply::Handled();
 }
 
 FReply
 SOdysseyAnimationPlaybackControls::OnEndClicked()
 {
-    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimation, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), mAnimation->GetFrameRange().GetUpperBoundValue());
+    mPlayer->SeekToFrame(mAnimation->GetFrameRange().GetUpperBoundValue());
     return FReply::Handled();
 }
 
 FReply
 SOdysseyAnimationPlaybackControls::OnPreviousClicked()
 {
-    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimation, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), mAnimation->CurrentFrame - 1);
+    mPlayer->SeekToFrame(mPlayer->GetCurrentFrame() - 1);
     return FReply::Handled();
 }
 
 FReply
 SOdysseyAnimationPlaybackControls::OnNextClicked()
 {
-    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimation, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), mAnimation->CurrentFrame + 1);
+    mPlayer->SeekToFrame(mPlayer->GetCurrentFrame() + 1);
     return FReply::Handled();
 }
 
@@ -267,7 +268,7 @@ SOdysseyAnimationPlaybackControls::OnPreviousKeyClicked()
     if (!animation)
         return FReply::Handled();
 
-    UOdysseyAnimationLayerStack* layerStack = animation->GetLayerStack();
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(animation->GetLayerStack());
     UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerStack->CurrentLayer);
 
     if (layer->GetCells().IsEmpty())
@@ -275,17 +276,17 @@ SOdysseyAnimationPlaybackControls::OnPreviousKeyClicked()
 
     FInt32Range range = layer->GetFrameRange();
     int index = INDEX_NONE;
-    if (animation->CurrentFrame > range.GetUpperBoundValue())
+    if (mPlayer->GetCurrentFrame().FrameNumber.Value > range.GetUpperBoundValue())
     {
         index = layer->GetCells().Num() - 1;
     }
-    else if (animation->CurrentFrame < range.GetLowerBoundValue())
+    else if (mPlayer->GetCurrentFrame().FrameNumber.Value < range.GetLowerBoundValue())
     {
         index = 0;
     }
     else
     {
-        UOdysseyAnimationCell* cell = layer->GetCellAtFrame(animation->CurrentFrame);
+        UOdysseyAnimationCell* cell = layer->GetCellAtFrame(mPlayer->GetCurrentFrame().FrameNumber.Value);
         if (!cell)
             return FReply::Handled();
 
@@ -299,7 +300,7 @@ SOdysseyAnimationPlaybackControls::OnPreviousKeyClicked()
         return FReply::Handled();
 
     range = cell->GetFrameRange();
-    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimation, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), range.GetLowerBoundValue());
+    mPlayer->SeekToFrame(range.GetLowerBoundValue());
     return FReply::Handled();
 }
 
@@ -310,7 +311,7 @@ SOdysseyAnimationPlaybackControls::OnNextKeyClicked()
     if (!animation)
         return FReply::Handled();
 
-    UOdysseyAnimationLayerStack* layerStack = animation->GetLayerStack();
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(animation->GetLayerStack());
     UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerStack->CurrentLayer);
 
     if (layer->GetCells().IsEmpty())
@@ -318,17 +319,17 @@ SOdysseyAnimationPlaybackControls::OnNextKeyClicked()
 
     int index = INDEX_NONE;
     FInt32Range range = layer->GetFrameRange();
-    if (animation->CurrentFrame > range.GetUpperBoundValue())
+    if (mPlayer->GetCurrentFrame().FrameNumber.Value > range.GetUpperBoundValue())
     {
         index = layer->GetCells().Num() - 1;
     }
-    else if (animation->CurrentFrame < range.GetLowerBoundValue())
+    else if (mPlayer->GetCurrentFrame().FrameNumber.Value < range.GetLowerBoundValue())
     {
         index = 0;
     }
     else
     {
-        UOdysseyAnimationCell* cell = layer->GetCellAtFrame(animation->CurrentFrame);
+        UOdysseyAnimationCell* cell = layer->GetCellAtFrame(mPlayer->GetCurrentFrame().FrameNumber.Value);
         if (!cell)
             return FReply::Handled();
 
@@ -342,7 +343,7 @@ SOdysseyAnimationPlaybackControls::OnNextKeyClicked()
         return FReply::Handled();
 
     range = cell->GetFrameRange();
-    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimation, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), range.GetLowerBoundValue());
+    mPlayer->SeekToFrame(range.GetLowerBoundValue());
     return FReply::Handled();
 }
 

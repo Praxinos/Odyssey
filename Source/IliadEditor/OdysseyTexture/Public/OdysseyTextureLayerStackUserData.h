@@ -6,7 +6,7 @@
 #include "CoreMinimal.h"
 #include "UObject/ObjectMacros.h"
 #include "UObject/ScriptMacros.h"
-#include "LayerStack/OdysseyTextureLayerStack.h"
+#include "OdysseyTextureLayerStack.h"
 #include "Engine/AssetUserData.h"
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "UObject/ObjectSaveContext.h"

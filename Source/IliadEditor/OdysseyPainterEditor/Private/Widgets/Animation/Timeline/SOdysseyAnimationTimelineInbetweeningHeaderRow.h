@@ -31,10 +31,19 @@ class SOdysseyAnimationTimelineInbetweeningHeaderRow
     : public STableRow<TSharedPtr<FInbetweeningListViewItem>>
 {
     public:
+        DECLARE_DELEGATE_OneParam(FOnTransactCurrentFrame, TOptional<int>)
+
+    public:
+        SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineInbetweeningHeaderRow)
+            {}
+            SLATE_EVENT(FOnTransactCurrentFrame, OnTransactCurrentFrame)
+        SLATE_END_ARGS()
+
+    public:
         ~SOdysseyAnimationTimelineInbetweeningHeaderRow();
         SOdysseyAnimationTimelineInbetweeningHeaderRow();
 
-        void Construct( const typename STableRow<TSharedPtr<FInbetweeningListViewItem>>::FArguments& InArgs
+        void Construct( const FArguments& InArgs
                       , const TSharedRef< STableViewBase >& InOwnerTableView
                       , const TSharedPtr<FInbetweeningListViewItem> iInbetweenerTag );
         // from STableRow::IsSelected
@@ -56,6 +65,7 @@ class SOdysseyAnimationTimelineInbetweeningHeaderRow
                      , bool bParentEnabled ) const override;
 
     protected:
+        FOnTransactCurrentFrame mOnTransactCurrentFrame;
         FOdysseyVectorTagInbetweener* mInbetweenerTag;
         TSharedPtr<STextBlock> mTextBlockWidget;
 };

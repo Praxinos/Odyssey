@@ -4,7 +4,9 @@
 #include "Widgets/Animation/Timeline/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorRow.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "OdysseyStyle.h"
-#include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
+#include "OdysseyAnimation.h"
+#include "OdysseyAnimationLayerImageVector.h"
+#include "OdysseyPainterEditorModule.h"
 #include "Widgets/Animation/Timeline/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorTimeline.h"
 #include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineLightTableKey.h"
 #include "Widgets/Animation/Timeline/SOdysseyAnimationLayerStack.h"
@@ -31,7 +33,6 @@ void SOdysseyAnimationLayerImageVectorRow::Construct(
 {
     ensure(iAnimationLayerImageVector);
     mAnimationLayerImageVector = iAnimationLayerImageVector;
-    mEditor = InArgs._PainterEditor;
 
     SOdysseyAnimationLayerRow::Construct(
         SOdysseyAnimationLayerRow::FArguments()
@@ -90,8 +91,7 @@ SOdysseyAnimationLayerImageVectorRow::GenerateMainRowHeaderOptionWidgets()
 TSharedRef<SWidget>
 SOdysseyAnimationLayerImageVectorRow::GenerateInbetweeningRowHeaderWidget()
 {
-    return SAssignNew( mInbetweeningHeader, SOdysseyAnimationTimelineInbetweeningHeader, mAnimationLayerImageVector)
-        .PainterEditor(mEditor);
+    return SAssignNew( mInbetweeningHeader, SOdysseyAnimationTimelineInbetweeningHeader, mAnimationLayerImageVector);
 }
 
 EVisibility
@@ -99,7 +99,8 @@ SOdysseyAnimationLayerImageVectorRow::GetRowVisibility(FName iRow) const
 {
     if (iRow == "Inbetweening")
     {
-        FOdysseyPainterEditor* editor = mEditor.Get();
+        FOdysseyPainterEditorModule& painterEditorModule = FModuleManager::GetModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
+        FOdysseyPainterEditor* editor = painterEditorModule.GetOpenedEditorForAsset(mAnimationLayerImageVector->GetAnimation());
         if (!editor)
             return EVisibility::Collapsed;
 

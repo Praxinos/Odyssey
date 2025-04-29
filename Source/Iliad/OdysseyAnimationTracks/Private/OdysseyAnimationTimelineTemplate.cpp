@@ -68,14 +68,6 @@ struct FOdysseyAnimationTimelineSectionExecutionToken
 
         FFrameNumber frame = FOdysseyAnimationTimelineTemplate::GetEvaluatedFrame(animation, iRange, iParams, iFrameRate);
         player->SeekToFrameImmediate(frame.Value);
-        if (frame != animation->CurrentFrame)
-        {
-            FFrameTime animationCurrentFrame;
-            if (!player->GetCurrentFrameInAnimationBounds(animationCurrentFrame))
-                return;
-
-            FObjectEditorUtils::SetPropertyValue(animation, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), animationCurrentFrame.GetFrame().Value);
-        }
     }
 
 private:
