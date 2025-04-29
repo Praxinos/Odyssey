@@ -6,6 +6,7 @@
 #include "OdysseyLayer.h"
 #include "Misc/TransactionObjectEvent.h"
 #include "ScreenPass.h"
+#include "TextureCompiler.h"
 
 UOdysseyLayer*
 UOdysseyLayerCell::GetLayer() const
@@ -262,6 +263,8 @@ UOdysseyLayerCell::BuildRenderPipeline(
 #if WITH_EDITOR
     if ( !Texture )
         const_cast<UOdysseyLayerCell*>(this)->InitTexture();
+
+    Texture->BlockOnAnyAsyncBuild();
 #endif
 
     oRenderFunction = [this, iType](

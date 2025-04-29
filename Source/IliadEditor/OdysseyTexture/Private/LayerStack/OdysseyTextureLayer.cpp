@@ -6,6 +6,7 @@
 #include "OdysseyTextureLayerStack.h"
 #include "ScreenPass.h"
 #include "OdysseyBlendShader.h"
+#include "TextureCompiler.h"
 
 UTexture2D*
 UOdysseyTextureLayer::GetTexture() const
@@ -52,6 +53,8 @@ UOdysseyTextureLayer::BuildRenderPipeline(
     if ( !Texture )
         const_cast<UOdysseyTextureLayer*>(this)->InitTexture();
 #endif
+
+    FTextureCompilingManager::Get().FinishCompilation({ Texture });
 
     oRenderFunction = [this, iType](
         FRDGBuilder& iGraphBuilder,
