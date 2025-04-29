@@ -22,6 +22,19 @@ public class OdysseyCore : ModuleRules
             OptimizeCode = CodeOptimization.Never;
         }
 
+        PublicIncludePaths.AddRange(
+            new string[] {
+                Path.Combine(ModuleDirectory, "Public", "Command"),
+                Path.Combine(ModuleDirectory, "Public", "Containers"),
+                Path.Combine(ModuleDirectory, "Public", "Image"),
+                Path.Combine(ModuleDirectory, "Public", "Input"),
+                Path.Combine(ModuleDirectory, "Public", "Math"),
+                Path.Combine(ModuleDirectory, "Public", "Misc"),
+                Path.Combine(ModuleDirectory, "Public", "Mutations"),
+                Path.Combine(ModuleDirectory, "Public", "UObject"),
+            }
+        );
+
         PrivateDependencyModuleNames.AddRange(
              new string[] {
                 "Core",

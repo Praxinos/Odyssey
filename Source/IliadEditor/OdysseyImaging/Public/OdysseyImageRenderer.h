@@ -5,14 +5,15 @@
 
 #include "CoreMinimal.h"
 #include "Misc/OdysseyHandle.h"
+#include "OdysseyRenderingType.h"
 #include <ULIS>
 
-class FOdysseyImageRenderingAbility;
-DECLARE_DELEGATE_RetVal_OneParam(bool, FImageRendererFilter, const FOdysseyImageRenderingAbility*);
+class FOdysseyRenderingAbility;
+DECLARE_DELEGATE_RetVal_OneParam(bool, FImageRendererFilter, const FOdysseyRenderingAbility*);
 
 struct FOdysseyImageRendererCopyParams
 {
-    FOdysseyImageRendererCopyParams(TSharedPtr<::ULIS::FBlock> iBlock, const TArray<::ULIS::FRectI>& iRects, ::ULIS::FVec2I iPos = ::ULIS::FVec2I(0))
+    FOdysseyImageRendererCopyParams(TSharedPtr<::ULIS::FBlock> iBlock, const TArray<FIntRect>& iRects, ::ULIS::FVec2I iPos = ::ULIS::FVec2I(0))
         : mBlock(iBlock)
         , mRects(iRects)
         , mPos(iPos)
@@ -20,7 +21,7 @@ struct FOdysseyImageRendererCopyParams
     }
 
     TSharedPtr<::ULIS::FBlock> mBlock;
-    TArray<::ULIS::FRectI> mRects; //The rects to render, in destination block coordinates
+    TArray<FIntRect> mRects; //The rects to render, in destination block coordinates
     ::ULIS::FVec2I mPos; //The offset of the destination block compared to the full size block (used when partially rendering in a small block)
 
     ::ULIS::FMat3F mTransform; //Transform to apply to the pixels before rendering them in the destination block
@@ -28,7 +29,7 @@ struct FOdysseyImageRendererCopyParams
 
 struct FOdysseyImageRendererBlendParams : public FOdysseyImageRendererCopyParams
 {
-    FOdysseyImageRendererBlendParams(TSharedPtr<::ULIS::FBlock> iBlock, const TArray<::ULIS::FRectI>& iRects, ::ULIS::FVec2I iPos = ::ULIS::FVec2I(0))
+    FOdysseyImageRendererBlendParams(TSharedPtr<::ULIS::FBlock> iBlock, const TArray<FIntRect>& iRects, ::ULIS::FVec2I iPos = ::ULIS::FVec2I(0))
         : FOdysseyImageRendererCopyParams(iBlock, iRects, iPos)
     {
     }
@@ -53,7 +54,7 @@ public:
     };
 
     virtual ~IOdysseyImageRenderer() {};
-    IOdysseyImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects);
+    IOdysseyImageRenderer(EOdysseyRenderingType iRenderType, const TArray<FIntRect>& iDefaultRects);
 
 public:
     /**
@@ -81,31 +82,18 @@ public:
     virtual void Unlock();
 
 public:
-
     virtual TArray<::ULIS::FEvent> Blend(const FOdysseyImageRendererBlendParams& iParams, const TArray<::ULIS::FEvent>& iWaitList) = 0;
-    /* TArray<::ULIS::FEvent> Blend(TSharedPtr<::ULIS::FBlock> ioBlock, ::ULIS::eBlendMode iBlendMode, float iOpacity, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FVec2I>& iPos, const TArray<::ULIS::FEvent>& iWaitList);
-    TArray<::ULIS::FEvent> Blend(TSharedPtr<::ULIS::FBlock> ioBlock, ::ULIS::eBlendMode iBlendMode, float iOpacity, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FEvent>& iWaitList);
-    TArray<::ULIS::FEvent> Blend(TSharedPtr<::ULIS::FBlock> ioBlock, ::ULIS::eBlendMode iBlendMode, float iOpacity, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList);
-    TArray<::ULIS::FEvent> Blend(TSharedPtr<::ULIS::FBlock> ioBlock, ::ULIS::eBlendMode iBlendMode, float iOpacity, const ::ULIS::FRectI& iRect, const TArray<::ULIS::FEvent>& iWaitList);
-    TArray<::ULIS::FEvent> Blend(TSharedPtr<::ULIS::FBlock> ioBlock, ::ULIS::eBlendMode iBlendMode, float iOpacity, const TArray<::ULIS::FEvent>& iWaitList); */
-
     virtual TArray<::ULIS::FEvent> Copy(const FOdysseyImageRendererCopyParams& iParams, const TArray<::ULIS::FEvent>& iWaitList) = 0;
-    /* TArray<::ULIS::FEvent> Copy(TSharedPtr<::ULIS::FBlock> ioBlock, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FEvent>& iWaitList);
-    TArray<::ULIS::FEvent> Copy(TSharedPtr<::ULIS::FBlock> ioBlock, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList);
-    TArray<::ULIS::FEvent> Copy(TSharedPtr<::ULIS::FBlock> ioBlock, const ::ULIS::FRectI& iRect, const TArray<::ULIS::FEvent>& iWaitList);
-    TArray<::ULIS::FEvent> Copy(TSharedPtr<::ULIS::FBlock> ioBlock, const TArray<::ULIS::FEvent>& iWaitList); */
-
-    //TSharedPtr<::ULIS::FBlock> CopyInNewBlock(::ULIS::eFormat iFormat, const ::ULIS::FRectI& iRect, TArray<::ULIS::FEvent>& oEvents);
 
 protected:
     TArray<::ULIS::FEvent> ConvertAndBlend(TSharedPtr<::ULIS::FBlock> iFront, const ::ULIS::FVec2I& iFrontOffset, const FOdysseyImageRendererBlendParams& iParams, const TArray<::ULIS::FEvent>& iWaitList);
     TArray<::ULIS::FEvent> ConvertAndCopy(TSharedPtr<::ULIS::FBlock> iSrc, const ::ULIS::FVec2I& iSrcOffset, const FOdysseyImageRendererCopyParams& iParams, const TArray<::ULIS::FEvent>& iWaitList);
-    TArray<::ULIS::FEvent> Clear(TSharedPtr<::ULIS::FBlock> ioBlock, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FEvent>& iWaitList);
+    TArray<::ULIS::FEvent> Clear(TSharedPtr<::ULIS::FBlock> ioBlock, const TArray<FIntRect>& iRects, const TArray<::ULIS::FEvent>& iWaitList);
 
 public:
-    IOdysseyImageRenderer::eRenderType GetRenderType() const;
+    EOdysseyRenderingType GetRenderType() const;
 
 private:
-    IOdysseyImageRenderer::eRenderType mRenderType;
-    TArray<::ULIS::FRectI> mDefaultRects;
+    EOdysseyRenderingType mRenderType;
+    TArray<FIntRect> mDefaultRects;
 };

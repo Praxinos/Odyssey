@@ -45,7 +45,6 @@ public:
     FSimpleMulticastDelegate& OnModeChanged();
 
 public:
-    virtual void PostInitProperties() override;
     virtual void PostLoad() override;
     virtual void PostDuplicate(bool bDuplicateForPIE) override;
 
@@ -66,9 +65,6 @@ private:
     void GenerateMaterialInstance();
     void RefreshMaterialTexture();
 
-    void OnDefaultPlayerTextureChanged();
-    void OnPlayerTextureChanged();
-
 protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Animation")
     EOdysseyAnimationComponentMode Mode = EOdysseyAnimationComponentMode::Animation;
@@ -85,9 +81,6 @@ protected:
 private:
     UPROPERTY()
     TObjectPtr<UOdysseyAnimationPlayer> DefaultPlayer;
-
-    UPROPERTY()
-    TObjectPtr<UOdysseyAnimationPlayer> PreviousPlayer;
 
     UPROPERTY()
     TObjectPtr<UMaterialInstanceConstant> MaterialInstance;

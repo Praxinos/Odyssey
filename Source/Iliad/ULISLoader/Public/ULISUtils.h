@@ -23,4 +23,10 @@ namespace ULISUtils
      * @return ::ULIS::FEvent
      */
     ULISLOADER_API TArray<::ULIS::FEvent> ConvertAndExecute(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ioDest, ::ULIS::eFormat iFormat, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList, tConvertAndExecuteFunction iFunction);
+
+    ULISLOADER_API ::ULIS::FRectI ToULISRectI(const FIntRect& iRect);
+    ULISLOADER_API FIntRect ToIntRect(const ::ULIS::FRectI& iRect);
+
+    ULISLOADER_API TArray<::ULIS::FRectI> ToULISRectIs(const TArray<FIntRect>& iRects);
+    ULISLOADER_API TArray<FIntRect> ToIntRects(const TArray<::ULIS::FRectI>& iRects);
 }

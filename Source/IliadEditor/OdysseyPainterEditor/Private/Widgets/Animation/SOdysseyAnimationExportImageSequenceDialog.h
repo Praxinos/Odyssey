@@ -4,14 +4,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "OdysseyExportImageFormat.h"
+#include "OdysseyExportImage.h"
 #include "Widgets/SCompoundWidget.h"
 #include <ULIS>
 
 #include "SOdysseyAnimationExportImageSequenceDialog.generated.h"
 
 class UOdysseyAnimation;
-class FOdysseyImageRenderingAbility;
+class FOdysseyRenderingAbility;
 
 UENUM()
 enum class EOdysseyAnimationExportImageSequenceSource : uint8
@@ -40,6 +40,7 @@ public:
     struct FSource
     {
         FOdysseyImageRenderingAbility* mImageRenderingAbility;
+        FOdysseyTextureRenderingAbility* mTextureRenderingAbility;
         FString mFilename;
         FInt32Range mRange;
     };

@@ -192,7 +192,7 @@ FOdysseyPainterEditorTextureSource::Clear()
             FOdysseyRasterBlockMutator mutator(rasterBlock);
             mutator.EditTilesFromRects(
                 { ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) },
-                [&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+                [&](TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
                 {
                     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
                     ::ULIS::FEvent eventClear;
@@ -261,7 +261,7 @@ FOdysseyPainterEditorTextureSource::ClearFromCopyBlock(TSharedPtr<::ULIS::FBlock
             FOdysseyRasterBlockMutator mutator(rasterBlock);
             mutator.EditTilesFromRects(
                 { ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) },
-                [&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+                [&](TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
                 {
                     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
                     ::ULIS::FEvent eventCut;
@@ -344,7 +344,7 @@ void FOdysseyPainterEditorTextureSource::PasteBlockToCurrentLayer(TSharedPtr<::U
             FOdysseyRasterBlockMutator mutator(rasterBlock);
             mutator.EditTilesFromRects(
                 { ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) },
-                [&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+                [&](TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
                 {
                     ::ULIS::FEvent eventPaste;
 

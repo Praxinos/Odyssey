@@ -129,12 +129,12 @@ UOdysseyAnimationCell::PostPropertyChanged(const FName& iPropertyName, bool iIsI
     if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, OutOfPegs))
     {
         mOnOutOfPegsChanged.Broadcast(iIsInteractive);
-        ImageRenderingChanged(iIsInteractive);
+        RenderingChanged(iIsInteractive);
     }
 
     if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure))
     {
-        ImageRenderingCompositionChanged(iIsInteractive);
+        RenderingCompositionChanged(iIsInteractive);
     }
 }
 

@@ -9,7 +9,7 @@
 #include "ULISUtils.h"
 #include "ULISEventBuilder.h"
 
-FOdysseyAnimationCellImageStaggerImageRenderer::FOdysseyAnimationCellImageStaggerImageRenderer( const UOdysseyAnimationCellImageStagger* iCell, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects, FImageRendererFilter iFilter)
+FOdysseyAnimationCellImageStaggerImageRenderer::FOdysseyAnimationCellImageStaggerImageRenderer( const UOdysseyAnimationCellImageStagger* iCell, int iFrame, EOdysseyRenderingType iRenderType, const TArray<FIntRect>& iDefaultRects, FImageRendererFilter iFilter)
     : IOdysseyImageRenderer(iRenderType, iDefaultRects)
     , mCellRenderer(nullptr)
 {
@@ -19,7 +19,7 @@ FOdysseyAnimationCellImageStaggerImageRenderer::FOdysseyAnimationCellImageStagge
     if (cell)
     {
         int cellFrame = iFrame - cell->GetFrameRange().GetLowerBoundValue();
-        mCellRenderer = cell->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, cellFrame, iFilter);
+        mCellRenderer = cell->BuildImageRenderer(EOdysseyRenderingType::Render, cellFrame, iFilter);
     }
 }
 

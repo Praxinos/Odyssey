@@ -10,7 +10,7 @@
 #include "OdysseyVectorEngine.h"
 #include "Proxies/OdysseyBrushColor.h"
 #include "OdysseyPainterEditorAnimationTimelinePosition.h"
-#include "OdysseyImageRenderingAbility.h"
+#include "OdysseyRenderingAbility.h"
 #include <ULIS>
 
 class IOdysseySurfaceEditable;
@@ -349,7 +349,7 @@ protected:
     //Callbacks
     virtual void OnApplyOverrides(const TMap<FName, UObject*>& iOverrides);
     void OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack);
-    void OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent);
+    void OnRenderingChanged(const FOdysseyRenderingChangedEvent& iEvent);
     void OnCurrentFrameChanged(UOdysseyAnimation* iAnimation);
     void OnMediaChanged();
 

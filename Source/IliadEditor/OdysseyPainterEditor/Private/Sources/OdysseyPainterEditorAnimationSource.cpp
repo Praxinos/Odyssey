@@ -20,6 +20,7 @@
 #include "OdysseyAnimationCurrentFrameMutator.h"
 #include "OdysseyAnimationPlayer.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
+#include "Engine/TextureRenderTarget2D.h"
 
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
@@ -83,7 +84,7 @@ FOdysseyPainterEditorAnimationSource::Activate()
 void
 FOdysseyPainterEditorAnimationSource::ActivatePlayer(UOdysseyAnimationPlayer* iPlayer)
 {
-    iPlayer->SetRenderType(IOdysseyImageRenderer::eRenderType::Editor);
+    iPlayer->SetRenderType(EOdysseyRenderingType::Editor);
     iPlayer->SeekToFrame(mAnimation->CurrentFrame);
     iPlayer->OnPlay().AddRaw(this, &FOdysseyPainterEditorAnimationSource::OnPlayerPlay);
     iPlayer->OnStop().AddRaw(this, &FOdysseyPainterEditorAnimationSource::OnPlayerStop);
@@ -106,7 +107,7 @@ FOdysseyPainterEditorAnimationSource::Inactivate()
 void
 FOdysseyPainterEditorAnimationSource::InactivatePlayer(UOdysseyAnimationPlayer* iPlayer)
 {
-    iPlayer->SetRenderType(IOdysseyImageRenderer::eRenderType::Render);
+    iPlayer->SetRenderType(EOdysseyRenderingType::Render);
     iPlayer->OnPlay().RemoveAll(this);
     iPlayer->OnStop().RemoveAll(this);
     iPlayer->Stop();
@@ -115,7 +116,7 @@ FOdysseyPainterEditorAnimationSource::InactivatePlayer(UOdysseyAnimationPlayer* 
 UTexture*
 FOdysseyPainterEditorAnimationSource::DisplayTexture() const
 {
-    return GetAnimationPlayer()->GetTexture();
+    return GetAnimationPlayer()->GetRenderTarget();
 }
 
 TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>
@@ -223,7 +224,7 @@ FOdysseyPainterEditorAnimationSource::OnPlayerPlay()
     if (!mAnimation)
         return;
 
-    GetAnimationPlayer()->SetRenderType(IOdysseyImageRenderer::eRenderType::Render);
+    GetAnimationPlayer()->SetRenderType(EOdysseyRenderingType::Render);
 }
 
 void
@@ -232,7 +233,7 @@ FOdysseyPainterEditorAnimationSource::OnPlayerStop()
     if (!mAnimation)
         return;
 
-    GetAnimationPlayer()->SetRenderType(IOdysseyImageRenderer::eRenderType::Editor);
+    GetAnimationPlayer()->SetRenderType(EOdysseyRenderingType::Editor);
     GetAnimationPlayer()->SeekToFrame(mAnimation->CurrentFrame);
 }
 
@@ -267,7 +268,7 @@ FOdysseyPainterEditorAnimationSource::Clear()
             FOdysseyRasterBlockMutator mutator(rasterBlock);
             mutator.EditTilesFromRects(
                 { ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) },
-                [&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+                [&](TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
                 {
                     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
                     ::ULIS::FEvent eventClear;
@@ -340,7 +341,7 @@ void FOdysseyPainterEditorAnimationSource::ClearFromCopyBlock(TSharedPtr<::ULIS:
             FOdysseyRasterBlockMutator mutator(rasterBlock);
             mutator.EditTilesFromRects(
                 { ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) },
-                [&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+                [&](TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
                 {
                     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
                     ::ULIS::FEvent eventCut;
@@ -397,7 +398,13 @@ void FOdysseyPainterEditorAnimationSource::PasteBlockToCurrentLayer(TSharedPtr<:
     {
         int width = GetLayerStack()->GetAnimation()->GetWidth();
         int height = GetLayerStack()->GetAnimation()->GetHeight();
-        ::ULIS::eFormat format = GetLayerStack()->GetAnimation()->GetFormat();
+
+        ::ULIS::eFormat format = ::ULIS::Format_BGRA8;
+        switch(GetLayerStack()->GetAnimation()->GetFormat())
+        {
+            case EOdysseyAnimationFormat::BGRA8: format = ::ULIS::Format_BGRA8;
+            case EOdysseyAnimationFormat::RGBAF: format = ::ULIS::Format_RGBAF;
+        }
 
         TSharedPtr<::ULIS::FBlock> copyBlock = MakeShared<::ULIS::FBlock>(width, height, format);
 
@@ -427,7 +434,7 @@ void FOdysseyPainterEditorAnimationSource::PasteBlockToCurrentLayer(TSharedPtr<:
             FOdysseyRasterBlockMutator mutator(rasterBlock);
             mutator.EditTilesFromRects(
                 { ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) },
-                [&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+                [&](TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
                 {
                     ::ULIS::FEvent eventPaste;
 
@@ -484,7 +491,7 @@ FOdysseyPainterEditorAnimationSource::PasteBlockToNewLayer( TSharedPtr<::ULIS::F
     FOdysseyRasterBlockMutator blockMutator(cell->GetRasterBlock(), false);
     blockMutator.EditTilesFromRects(
         { cell->GetRasterBlock()->GetRect() },
-        [&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+        [&](TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
         {
             ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(cell->GetRasterBlock()->GetFormat());
             ::ULIS::FEvent eventClear;

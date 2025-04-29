@@ -4,7 +4,7 @@
 #pragma once
 
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
-#include "ULISInvalidTileMap.h"
+#include "OdysseyInvalidTileMap.h"
 
 #include "OdysseyAnimationCellImageRaster.generated.h"
 
@@ -29,17 +29,17 @@ public:
     virtual void OldSerialize(FArchive& Ar) override; //DEPRECATED: Keep that for compatibility with early versions of Odyssey
 
 public:
-    //FOdysseyImageRenderingAbility overrides
-    virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter = FImageRendererFilter()) const override;
-    virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex) const override;
-    virtual TArray<::ULIS::FRectI> GetImageRenderingRects() const override;
+    //FOdysseyRenderingAbility overrides
+    virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(EOdysseyRenderingType iRenderType, int iFrame, FImageRendererFilter iFilter = FImageRendererFilter()) const override;
+    virtual TArray<FGuid> GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrameIndex) const override;
+    virtual TArray<FIntRect> GetRenderingRects() const override;
     FCriticalSection* GetImageRenderingMutex() const;
     bool IsImageRenderingGameThreadOnly() const;
 
 private:
     void InitFromFormat(int iWidth, int iHeight, ::ULIS::eFormat iFormat);
     void InitFromBlock(TSharedPtr<::ULIS::FBlock> iBlock);
-    TArray<::ULIS::FEvent> RasterBlockPostProcess(const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock>>& iOriginalBlocks, const FULISInvalidTileMap& iInvalidMap, const TArray<::ULIS::FEvent>& iWaitList);
+    TArray<::ULIS::FEvent> RasterBlockPostProcess(const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock>>& iOriginalBlocks, const FOdysseyInvalidTileMap& iInvalidMap, const TArray<::ULIS::FEvent>& iWaitList);
     void OnBlockChanged(const TArray<::ULIS::FRectI>& iRects);
     void OnBlockCommited(const TArray<::ULIS::FRectI>& iRects);
 

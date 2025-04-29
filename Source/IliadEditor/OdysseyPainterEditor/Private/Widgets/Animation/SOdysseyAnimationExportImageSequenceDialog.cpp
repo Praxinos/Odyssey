@@ -6,11 +6,14 @@
 #include "Dialog/SCustomDialog.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 #include "OdysseyAnimation.h"
+#include "OdysseyExportImage.h"
 #include "SEnumCombo.h"
 #include "Widgets/Input/SNumericEntryBox.h"
 #include "Widgets/Layout/SGridPanel.h"
 #include "DesktopPlatformModule.h"
 #include "ULISLoaderModule.h"
+#include "ULISUtils.h"
+
 #include "Misc/ScopedSlowTask.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
@@ -190,6 +193,7 @@ FOdysseyAnimationImageSequenceExporter::GetSources()
             return
             {
                 {
+                    nullptr,
                     mAnimation,
                     TEXT(""),
                     mAnimation->GetFrameRange()
@@ -210,6 +214,7 @@ FOdysseyAnimationImageSequenceExporter::GetSources()
                 animationLayers.Add(
                     {
                         animationLayer,
+                        nullptr,
                         animationLayer->Name.ToString().Replace(TEXT(" "), TEXT("_")),
                         animationLayer->GetFrameRange()
                     }
@@ -225,6 +230,7 @@ FOdysseyAnimationImageSequenceExporter::GetSources()
             {
                 {
                     animationLayer,
+                    nullptr,
                     animationLayer->Name.ToString().Replace(TEXT(" "), TEXT("_")),
                     animationLayer->GetFrameRange()
                 }
@@ -232,7 +238,7 @@ FOdysseyAnimationImageSequenceExporter::GetSources()
         }
     }
 
-    return {{nullptr, FString()}};
+    return {{nullptr, nullptr, FString()}};
 }
 
 void
@@ -289,15 +295,22 @@ FOdysseyAnimationImageSequenceExporter::ExportSource(const FSource& iSource, con
         filename += TEXT("_") + iSource.mFilename;
     FString extension = FPaths::GetExtension(path, false);
 
-    ::ULIS::eFileFormat exportImageFormat = FOdysseyExportImageFormat::GetFileFormat(mFormat);
+    ::ULIS::eFileFormat exportImageFormat = Odyssey::GetFileExportImageFormat(mFormat);
     FInt32Range frameRange = GetSourceRange(iSource);
     int startFrame = frameRange.GetLowerBoundValue();
     int endFrame = frameRange.GetUpperBoundValue();
 
     FScopedSlowTask progressBar(endFrame - startFrame + 1);
 
-    TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(mAnimation->GetWidth(), mAnimation->GetHeight(), mAnimation->GetFormat());
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( mAnimation->GetFormat() );
+    ::ULIS::eFormat format = ::ULIS::Format_BGRA8;
+    switch(mAnimation->GetFormat())
+    {
+        case EOdysseyAnimationFormat::BGRA8: format = ::ULIS::Format_BGRA8;
+        case EOdysseyAnimationFormat::RGBAF: format = ::ULIS::Format_RGBAF;
+    }
+
+    TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(mAnimation->GetWidth(), mAnimation->GetHeight(), format);
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( format );
     TArray<FGuid> lastRenderingComposition;
 
     for (int i = startFrame; i <= endFrame; i++)
@@ -305,16 +318,16 @@ FOdysseyAnimationImageSequenceExporter::ExportSource(const FSource& iSource, con
         progressBar.EnterProgressFrame();
         if (mUniqueFramesOnly)
         {
-            TArray<FGuid> renderingComposition = iSource.mImageRenderingAbility->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Render, i);
+            TArray<FGuid> renderingComposition = iSource.mImageRenderingAbility->GetRenderingComposition(EOdysseyRenderingType::Render, i);
             if (renderingComposition == lastRenderingComposition)
                 continue;
 
             lastRenderingComposition = renderingComposition;
         }
 
-        TSharedPtr<IOdysseyImageRenderer> renderer = iSource.mImageRenderingAbility->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, i);
+        TSharedPtr<IOdysseyImageRenderer> renderer = iSource.mImageRenderingAbility->BuildImageRenderer(EOdysseyRenderingType::Render, i);
         renderer->Init();
-        FOdysseyImageRendererCopyParams params(block, { block->Rect() });
+        FOdysseyImageRendererCopyParams params(block, { ::ULISUtils::ToIntRect(block->Rect()) });
         renderer->Copy(params, {});
 
         ctx.Finish();
@@ -345,13 +358,13 @@ FOdysseyAnimationImageSequenceExporter::ExportSource(const FSource& iSource, con
         }
         else
         {
-            ::ULIS::eFormat format = block->Model() == ::ULIS::ColorModel_GREY ? ::ULIS::Format_GA8 : ::ULIS::Format_RGBA8;
+            ::ULIS::eFormat newFormat = block->Model() == ::ULIS::ColorModel_GREY ? ::ULIS::Format_GA8 : ::ULIS::Format_RGBA8;
             if (exportImageFormat == ::ULIS::FileFormat_hdr)
             {
-                format = ::ULIS::Format_RGBAF;
+                newFormat = ::ULIS::Format_RGBAF;
             }
 
-            ::ULIS::FBlock blockProxy(block->Width(), block->Height(), format);
+            ::ULIS::FBlock blockProxy(block->Width(), block->Height(), newFormat);
 
             ::ULIS::FEvent eventConvert;
             ctx.ConvertFormat(

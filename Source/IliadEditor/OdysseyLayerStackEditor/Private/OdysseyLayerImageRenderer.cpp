@@ -3,8 +3,9 @@
 #include "OdysseyLayerImageRenderer.h"
 #include "OdysseyRectUtils.h"
 #include "OdysseyLayer.h"
+#include "ULISUtils.h"
 
-FOdysseyLayerImageRenderer::FOdysseyLayerImageRenderer(const UOdysseyLayer* iLayer, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects, FImageRendererFilter iFilter)
+FOdysseyLayerImageRenderer::FOdysseyLayerImageRenderer(const UOdysseyLayer* iLayer, int iFrame, EOdysseyRenderingType iRenderType, const TArray<FIntRect>& iDefaultRects, FImageRendererFilter iFilter)
     : IOdysseyImageRenderer(iRenderType, iDefaultRects)
 {
     const TArray<UOdysseyLayer*>& children = iLayer->GetChildren();
@@ -42,12 +43,13 @@ TArray<::ULIS::FEvent>
 FOdysseyLayerImageRenderer::Blend(const FOdysseyImageRendererBlendParams& iParams, const TArray<::ULIS::FEvent>& iWaitList)
 {
     TArray<::ULIS::FEvent> events;
-    for (const ::ULIS::FRectI& rect : iParams.mRects)
+    for (const FIntRect& intRect : iParams.mRects)
     {
+        ::ULIS::FRectI rect = ::ULISUtils::ToULISRectI(intRect);
         TSharedPtr<::ULIS::FBlock> childrenBlock = MakeShared<::ULIS::FBlock>(rect.w, rect.h, iParams.mBlock->Format());
         ::ULIS::FRectI childrenBlockRect = childrenBlock->Rect();
         ::ULIS::FVec2I childrenBlockPos(iParams.mPos.x + rect.x, iParams.mPos.y + rect.y);
-        TArray<::ULIS::FEvent> clearEvents = Clear(childrenBlock, { childrenBlockRect }, {});
+        TArray<::ULIS::FEvent> clearEvents = Clear(childrenBlock, { ::ULISUtils::ToIntRect(childrenBlockRect) }, {});
         clearEvents.Append(iWaitList);
 
         TArray<::ULIS::FEvent> lastEvent = clearEvents;
@@ -55,7 +57,7 @@ FOdysseyLayerImageRenderer::Blend(const FOdysseyImageRendererBlendParams& iParam
         {
             FOdysseyImageRendererBlendParams params(iParams);
             params.mBlock = childrenBlock;
-            params.mRects = { childrenBlockRect };
+            params.mRects = { ::ULISUtils::ToIntRect(childrenBlockRect) };
             params.mPos = childrenBlockPos;
             params.mBlendMode = childData.mBlendMode;
             params.mOpacity = childData.mOpacity;
@@ -64,7 +66,7 @@ FOdysseyLayerImageRenderer::Blend(const FOdysseyImageRendererBlendParams& iParam
         }
 
         FOdysseyImageRendererBlendParams params(iParams);
-        params.mRects = { rect };
+        params.mRects = { ::ULISUtils::ToIntRect(rect) };
         params.mTransform = ::ULIS::FMat3F();
         lastEvent = ConvertAndBlend(childrenBlock, childrenBlockPos, params, lastEvent);
 

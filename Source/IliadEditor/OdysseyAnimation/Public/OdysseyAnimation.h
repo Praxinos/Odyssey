@@ -6,12 +6,10 @@
 #include "CoreMinimal.h"
 
 #include "BaseMediaSource.h"
-#include "OdysseyImageRenderingAbility.h"
-#include <ULIS>
+#include "OdysseyTextureRenderingAbility.h"
 
 #include "OdysseyAnimation.generated.h"
 
-class FOdysseyAnimationProxy;
 class UOdysseyAnimationLayerStack;
 
 UENUM()
@@ -31,81 +29,16 @@ enum class EOdysseyAnimationBoundMode : uint8
 UCLASS(config=EditorPerProjectUserSettings, PerObjectConfig, HideCategories=(Platforms))
 class ODYSSEYANIMATION_API UOdysseyAnimation
     : public UBaseMediaSource
-    , public FOdysseyImageRenderingAbility
-    //, public FTickableEditorObject //Allows us to react to Tick events
+    , public FOdysseyTextureRenderingAbility
 {
     GENERATED_BODY()
 
 public:
-    /**
-     * @brief Delegate called when CurrentFrame changes
-     *
-     */
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnCurrentFrameChanged, UOdysseyAnimation*)
     static FOnCurrentFrameChanged& OnCurrentFrameChanged();
 
-    /**
-     * @brief Delegate called when FramesPerSecond changes
-     *
-     */
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnFramesPerSecondChanged, UOdysseyAnimation*)
-    static FOnFramesPerSecondChanged& OnFramesPerSecondChanged();
-
-public:
-
-    //~ UMediaSource interface
-    virtual FString GetUrl() const override;
-    virtual bool Validate() const override;
-
-public:
-    //Getters
-    UOdysseyAnimationLayerStack* GetLayerStack() const;
-    TSharedPtr<FOdysseyAnimationProxy> GetProxy() const;
-
-    //Size and Format
-    int GetWidth() const;
-    int GetHeight() const;
-    ::ULIS::eFormat GetFormat() const;
-
-    //Duration and speed
-    UFUNCTION(BlueprintPure, Category="Odyssey|Animation")
-    FTimespan GetDuration() const;
-
-    UFUNCTION(BlueprintPure, Category="Odyssey|Animation")
-    FInt32Range GetFrameRange() const;
-
-    UFUNCTION(BlueprintPure, Category="Odyssey|Animation")
-    int GetFrameCount() const;
-
-    double GetFramesPerSecond() const;
-
-    EOdysseyAnimationBoundMode GetLeftBoundMode() const;
-    EOdysseyAnimationBoundMode GetRightBoundMode() const;
-    int GetLeftBoundValue() const;
-    int GetRightBoundValue() const;
-
-    void SetLeftBoundMode(EOdysseyAnimationBoundMode iMode);
-    void SetRightBoundMode(EOdysseyAnimationBoundMode iMode);
-    void SetLeftBoundValue(int iValue);
-    void SetRightBoundValue(int iValue);
-
-    //Time
-    //Index to the frame at a given time
-    UFUNCTION(BlueprintPure, Category="Odyssey|Animation")
-    int GetFrameIndexAtTime(FTimespan Time) const;
-
-    //Time range of the frame at iFrameIndex
-    TRange<FTimespan> GetFrameTimeRange(int iFrameIndex) const;
-
-public:
-    //FOdysseyImageRenderingAbility overrides
-    virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter = FImageRendererFilter()) const override;
-    virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex) const override;
-    virtual TArray<::ULIS::FRectI> GetImageRenderingRects() const override;
-
 public:
     //UObject overrides
-
     /**
      * @brief Serialize this object
      *
@@ -120,8 +53,49 @@ public:
     virtual void PropertyChanged(const FName& iPropertyName);
     virtual void PostPropertyChanged(const FName& iPropertyName);
 
-private:
-    void OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent);
+public:
+    //~ UMediaSource interface
+    virtual FString GetUrl() const override;
+    virtual bool Validate() const override;
+
+public:
+    //Getters
+    UOdysseyAnimationLayerStack* GetLayerStack() const;
+
+    //Size and Format
+    int GetWidth() const;
+    int GetHeight() const;
+    EOdysseyAnimationFormat GetFormat() const;
+    double GetFramesPerSecond() const;
+
+public:
+    //Editor Only ?
+    EOdysseyAnimationBoundMode GetLeftBoundMode() const;
+    EOdysseyAnimationBoundMode GetRightBoundMode() const;
+    int GetLeftBoundValue() const;
+    int GetRightBoundValue() const;
+
+    void SetLeftBoundMode(EOdysseyAnimationBoundMode iMode);
+    void SetRightBoundMode(EOdysseyAnimationBoundMode iMode);
+    void SetLeftBoundValue(int iValue);
+    void SetRightBoundValue(int iValue);
+
+public:
+    UFUNCTION(BlueprintPure, Category="Odyssey|Animation")
+    FTimespan GetDuration() const;
+
+    UFUNCTION(BlueprintPure, Category="Odyssey|Animation")
+    FInt32Range GetFrameRange() const;
+
+    UFUNCTION(BlueprintPure, Category="Odyssey|Animation")
+    int GetFrameCount() const;
+
+    //Time range of the frame at iFrameIndex
+    TRange<FTimespan> GetFrameTimeRange(int iFrameIndex) const; //TODO: find a better way to have this function, only used by Media and ViewportDrawingEditor
+
+public:
+    virtual void RenderToTextureFromRects(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, const TArray<FIntRect>& iRects) const override;
+    virtual TArray<FGuid> GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrameIndex) const override;
 
 private:
     UFUNCTION(BlueprintSetter)
@@ -138,7 +112,7 @@ public:
     float FramesPerSecond = 24.0f;
 
     UPROPERTY(config)
-    float TimelineSplitterPosition = 0.2f;
+    float TimelineSplitterPosition = 0.2f; //TODO: Move To Editor Only class
 
 protected:
     friend class UOdysseyAnimationFactory;
@@ -150,8 +124,11 @@ protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(DisplayName="Height"), Category="Odyssey|Animation")
     int mHeight = -1;
 
+    UPROPERTY(BlueprintReadOnly, Category="Odyssey|Animation")
+    EOdysseyAnimationFormat Format = EOdysseyAnimationFormat::BGRA8;
+
     UPROPERTY()
-    int mFormat = ::ULIS::Format_BGRA8; //Deprecated: only present for compatibility, use Format instead
+    int mFormat = 0; //Deprecated: only present for compatibility, use Format instead
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Odyssey|Animation")
     EOdysseyAnimationBoundMode LeftBoundMode = EOdysseyAnimationBoundMode::Automatic;
@@ -165,11 +142,6 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Odyssey|Animation", meta=(EditCondition="RightBoundMode != EOdysseyAnimationBoundMode::Automatic", EditConditionHides))
     int RightBound = 0;
 
-    UPROPERTY(BlueprintReadOnly, Category="Odyssey|Animation")
-    EOdysseyAnimationFormat Format = EOdysseyAnimationFormat::BGRA8;
-
     UPROPERTY(BlueprintReadOnly, Category="Odyssey|Animation", meta=(DisplayName="Layer Stack", LoadBehavior = "LazyOnDemand"))
-    TObjectPtr<UOdysseyAnimationLayerStack> mLayerStack;
-
-    TSharedPtr<FOdysseyAnimationProxy> mProxy;
+    TObjectPtr<UOdysseyAnimationLayerStack> mLayerStack; //Editor Only
 };

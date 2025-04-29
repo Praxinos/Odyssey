@@ -119,7 +119,7 @@ FOdysseyTextureConfiguration::CreateTexture(UObject* iParent, FName iName, EObje
         FOdysseyRasterBlockMutator rasterBlockMutator(rasterBlock, false);
         rasterBlockMutator.EditTilesFromRects(
             { ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) },
-            [&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<ULIS::FEvent>
+            [&](TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyInvalidTileMap& iTileMap) -> TArray<ULIS::FEvent>
             {
                 FillOdysseyBlockFromUTextureData(iBlock.Get(), texture, iBlock->Format());
                 return {};

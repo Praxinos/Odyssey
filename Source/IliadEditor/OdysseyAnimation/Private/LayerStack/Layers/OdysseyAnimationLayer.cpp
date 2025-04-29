@@ -129,27 +129,27 @@ UOdysseyAnimationLayer::PostPropertyChanged(const FName& iPropertyName, bool iIs
 
     if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, PreBehaviour))
     {
-        ImageRenderingCompositionChanged();
+        RenderingCompositionChanged();
     }
     if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, PostBehaviour))
     {
-        ImageRenderingCompositionChanged();
+        RenderingCompositionChanged();
     }
     if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable))
     {
-        ImageRenderingCompositionChanged(iIsInteractive); //Composition could change if lighttable or a key is activated/inactivated
-        ImageRenderingChanged(iIsInteractive); //ImageRendering changes without a composition change when any other param is changed
+        RenderingCompositionChanged(iIsInteractive); //Composition could change if lighttable or a key is activated/inactivated
+        RenderingChanged(iIsInteractive); //ImageRendering changes without a composition change when any other param is changed
         OnLightTableChanged().Broadcast();
     }
     if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Cells))
     {
         mOnCellsChanged.Broadcast();
-        ImageRenderingCompositionChanged(iIsInteractive);
+        RenderingCompositionChanged(iIsInteractive);
         UOdysseyLayer::OnMediaChanged().Broadcast();
     }
     if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, CellsOffset))
     {
-        ImageRenderingCompositionChanged(iIsInteractive);
+        RenderingCompositionChanged(iIsInteractive);
         UOdysseyLayer::OnMediaChanged().Broadcast();
     }
 }
@@ -468,7 +468,7 @@ UOdysseyAnimationLayer::GetLighttableImageRenderingComposition(int iFrameIndex) 
             {
                 UOdysseyAnimationCell* keyCell = GetCells()[keyCellIndex];
                 if (keyCell)
-                    idComposition.Append(keyCell->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Render, 0));
+                    idComposition.Append(keyCell->GetRenderingComposition(EOdysseyRenderingType::Render, 0));
             }
         }
 
@@ -478,8 +478,8 @@ UOdysseyAnimationLayer::GetLighttableImageRenderingComposition(int iFrameIndex) 
             if (keyCellIndex >= 0 && keyCellIndex < Cells.Num())
             {
                 UOdysseyAnimationCell* keyCell = GetCells()[keyCellIndex];
-                if (keyCell)
-                    idComposition.Append(keyCell->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Render, 0));
+                if (!keyCell)
+                    idComposition.Append(keyCell->GetRenderingComposition(EOdysseyRenderingType::Render, 0));
             }
         }
     }

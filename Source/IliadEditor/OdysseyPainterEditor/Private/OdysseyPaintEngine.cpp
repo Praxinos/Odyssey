@@ -11,6 +11,7 @@
 #include "UnrealEdGlobals.h"
 #include "Editor/UnrealEdEngine.h"
 #include "ULISEventBuilder.h"
+#include "ULISUtils.h"
 
 #include <chrono>
 
@@ -94,7 +95,7 @@ FOdysseyPaintEngine::Update(const FOdysseyBlendParameters& iBlendParameters)
     //If blend parameters are different from the previous one used
     //Force refreshing all edited tiles, instead of just newly edited tiles
     if ( blendParameters != mPreviousBlendParameters )
-        mInvalidRects.Append(mRasterBlockMutator.GetInvalidTileMap().InvalidRects());
+        mInvalidRects.Append(::ULISUtils::ToULISRectIs(mRasterBlockMutator.GetInvalidTileMap().InvalidRects()));
 
     //Update the EditedBlock content
     if (!UpdateEditedBlock(blendParameters))
@@ -214,9 +215,9 @@ FOdysseyPaintEngine::UpdateEditedBlock(const FOdysseyBlendParameters& iBlendPara
     mRasterBlockMutator.ResetTilesFromRects(mInvalidRects);
     mRasterBlockMutator.EditTilesFromRects(
         mInvalidRects,
-        [&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap)
+        [&](TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyInvalidTileMap& iTileMap)
         {
-            TArray<::ULIS::FRectI> invalidRects = iTileMap.InvalidRects();
+            TArray<::ULIS::FRectI> invalidRects = ::ULISUtils::ToULISRectIs(iTileMap.InvalidRects());
 
             //Blend Paint Block over OriginalBlock
             TArray<::ULIS::FEvent> events;

@@ -4,13 +4,11 @@
 #include "OdysseyAnimation.h"
 
 #include "LayerStack/OdysseyAnimationLayerStack.h"
-#include "OdysseyAnimationProxyImageRenderer.h"
 #include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
 #include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVector.h"
 #include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
 #include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
 #include "OdysseyRasterBlockMutator.h"
-#include "OdysseyAnimationProxy.h"
 #include "Misc/OdysseyUndoDelegates.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 
@@ -27,13 +25,6 @@ UOdysseyAnimation::OnCurrentFrameChanged()
 {
     static FOnCurrentFrameChanged onCurrentFrameChanged;
     return onCurrentFrameChanged;
-}
-
-UOdysseyAnimation::FOnFramesPerSecondChanged&
-UOdysseyAnimation::OnFramesPerSecondChanged()
-{
-    static FOnFramesPerSecondChanged onFramesPerSecondChanged;
-    return onFramesPerSecondChanged;
 }
 
 void
@@ -60,16 +51,10 @@ UOdysseyAnimation::GetHeight() const
     return mHeight;
 }
 
-::ULIS::eFormat
+EOdysseyAnimationFormat
 UOdysseyAnimation::GetFormat() const
 {
-    switch(Format)
-    {
-        case EOdysseyAnimationFormat::BGRA8: return ::ULIS::Format_BGRA8;
-        case EOdysseyAnimationFormat::RGBAF: return ::ULIS::Format_RGBAF;
-    }
-    checkf(false, TEXT("Format not found"));
-    return ::ULIS::Format_BGRA8;
+    return Format;
 }
 
 FTimespan
@@ -194,15 +179,6 @@ UOdysseyAnimation::SetRightBoundValue(int iValue)
     FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, RightBound), iValue);
 }
 
-int
-UOdysseyAnimation::GetFrameIndexAtTime(FTimespan iTime) const
-{
-    TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyAnimation::GetFrameIndexAtTime);
-    //Add 1 tick to be sure to retrieve the right frame in case the frame starts between iTime and iTime + 1 tick
-    FTimespan time = iTime + FTimespan(1);
-    return int(time.GetTotalSeconds() * GetFramesPerSecond());
-}
-
 TRange<FTimespan>
 UOdysseyAnimation::GetFrameTimeRange(int iFrameIndex) const
 {
@@ -218,12 +194,6 @@ UOdysseyAnimationLayerStack*
 UOdysseyAnimation::GetLayerStack() const
 {
     return mLayerStack;
-}
-
-TSharedPtr<FOdysseyAnimationProxy>
-UOdysseyAnimation::GetProxy() const
-{
-    return mProxy;
 }
 
 void
@@ -268,31 +238,6 @@ UOdysseyAnimation::PostInitProperties()
         return;
 
     mLayerStack = NewObject<UOdysseyAnimationLayerStack>(this, "LayerStack", RF_Public | RF_Transactional);
-    mProxy = MakeShared<FOdysseyAnimationProxy>(this);
-
-    OnImageRenderingChangedDelegate().AddUObject(this, &UOdysseyAnimation::OnImageRenderingChanged);
-}
-
-void
-UOdysseyAnimation::OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent)
-{
-    TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyAnimation::OnImageRenderingChanged);
-    if (iEvent.IsInteractive())
-        return;
-
-    const FGuid& eventId = iEvent.GetId();
-    FInt32Range frameRange = GetFrameRange();
-    int startFrame = frameRange.GetUpperBound().IsInclusive() ? frameRange.GetLowerBoundValue() : frameRange.GetLowerBoundValue() + 1;
-    int endFrame = frameRange.GetUpperBound().IsInclusive() ? frameRange.GetUpperBoundValue() : frameRange.GetUpperBoundValue() - 1;
-    for (int i = startFrame; i <= endFrame; i++)
-    {
-        TArray<FGuid> composition = GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Editor, i);
-        if (composition.Contains(eventId))
-        {
-            MarkPackageDirty();
-            break;
-        }
-    }
 }
 
 void
@@ -300,7 +245,7 @@ UOdysseyAnimation::PostLoad()
 {
     Super::PostLoad();
 
-    if (mFormat == ::ULIS::Format_BGRA8)
+    if (mFormat == ::ULIS::Format_BGRA8 || mFormat == 0)
     {
         Format = EOdysseyAnimationFormat::BGRA8;
     }
@@ -308,8 +253,6 @@ UOdysseyAnimation::PostLoad()
     {
         Format = EOdysseyAnimationFormat::RGBAF;
     }
-
-    mProxy->PostLoad();
 }
 
 void
@@ -364,8 +307,6 @@ UOdysseyAnimation::PostPropertyChanged(const FName& iPropertyName)
 {
     if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame) )
         OnCurrentFrameChanged().Broadcast(this);
-    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, FramesPerSecond) )
-        OnFramesPerSecondChanged().Broadcast(this);
 }
 
 /* UMediaSource overrides
@@ -381,34 +322,36 @@ bool UOdysseyAnimation::Validate() const
     return true;
 }
 
-TSharedPtr<IOdysseyImageRenderer>
-UOdysseyAnimation::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter) const
+/* TSharedPtr<IOdysseyImageRenderer>
+UOdysseyAnimation::BuildImageRenderer(EOdysseyRenderingType iRenderType, int iFrame, FImageRendererFilter iFilter) const
 {
     if (iFilter.IsBound() && !iFilter.Execute(this))
         return nullptr;
 
     TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyAnimation::BuildImageRenderer);
-    return MakeShared<FOdysseyAnimationProxyImageRenderer>(this, iFrame, iRenderType, GetImageRenderingRects(), iFilter);
-}
+    return MakeShared<FOdysseyAnimationProxyImageRenderer>(this, iFrame, iRenderType, GetRenderingRects(), iFilter);
+} */
 
 TArray<FGuid>
-UOdysseyAnimation::GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex) const
+UOdysseyAnimation::GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrameIndex) const
 {
-    TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyAnimation::GetImageRenderingComposition);
-    TArray<FGuid> idComposition = { GetImageRenderingId() };
-
+    TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyAnimation::GetRenderingComposition);
     if (!mLayerStack)
-        return idComposition;
+        return {};
 
-    idComposition.Append(mLayerStack->GetImageRenderingComposition(iRenderType, iFrameIndex));
+    TArray<FGuid> idComposition;
+    idComposition.Append(mLayerStack->GetRenderingComposition(iRenderType, iFrameIndex));
 
     return idComposition;
 }
 
-TArray<::ULIS::FRectI>
-UOdysseyAnimation::GetImageRenderingRects() const
+void
+UOdysseyAnimation::RenderToTextureFromRects(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, const TArray<FIntRect>& iRects) const
 {
-    return { ::ULIS::FRectI::FromXYWH(0, 0, GetWidth(), GetHeight()) };
+    if (!mLayerStack)
+        return;
+
+    mLayerStack->RenderToTextureFromRects(iRenderTarget, iFrame, iRects);
 }
 
 #undef LOCTEXT_NAMESPACE

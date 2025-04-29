@@ -5,15 +5,17 @@
 
 #include "CoreMinimal.h"
 #include "OdysseyPerformanceMode.h"
-#include "OdysseyImageRenderingAbility.h"
+#include "OdysseyTextureRenderingAbility.h"
 #include "Templates/SubclassOf.h"
+
+#include <ULIS>
 
 #include "OdysseyLayerStack.generated.h"
 
 UCLASS(Abstract, HideDropdown, BlueprintType, config=EditorPerProjectUserSettings, PerObjectConfig)
 class ODYSSEYLAYERSTACKEDITOR_API UOdysseyLayerStack
     : public UObject
-    , public FOdysseyImageRenderingAbility
+    , public FOdysseyTextureRenderingAbility
 {
     GENERATED_BODY()
 
@@ -250,9 +252,9 @@ public:
     virtual void PostLoad() override;
 
 public:
-    //FOdysseyImageRenderingAbility overrides
-    virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter = FImageRendererFilter()) const override;
-    virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex) const override;
+    //FOdysseyRenderingAbility overrides
+    virtual void RenderToTextureFromRects(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, const TArray<FIntRect>& iRects) const override;
+    virtual TArray<FGuid> GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrameIndex) const override;
 
 protected:
     //Internal

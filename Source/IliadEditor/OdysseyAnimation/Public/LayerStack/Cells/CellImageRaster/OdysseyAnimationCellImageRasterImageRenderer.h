@@ -4,6 +4,7 @@
 #pragma once
 
 #include "OdysseyImageRenderer.h"
+#include "OdysseyRenderingType.h"
 #include <ULIS>
 
 class UOdysseyAnimationCellImageRaster;
@@ -13,7 +14,7 @@ class ODYSSEYANIMATION_API FOdysseyAnimationCellImageRasterImageRenderer
     , public FGCObject
 {
 public:
-    FOdysseyAnimationCellImageRasterImageRenderer(const UOdysseyAnimationCellImageRaster* iCell, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects, FImageRendererFilter iFilter);
+    FOdysseyAnimationCellImageRasterImageRenderer(const UOdysseyAnimationCellImageRaster* iCell, int iFrame, EOdysseyRenderingType iRenderType, const TArray<FIntRect>& iDefaultRects, FImageRendererFilter iFilter);
 
 public:
     virtual void Init() override;

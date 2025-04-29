@@ -4,7 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "OdysseyImageRenderingAbility.h"
+#include "OdysseyRenderingAbility.h"
 #include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineOutOfPegsKey.h"
 
 class UOdysseyAnimationLayer;
@@ -33,7 +33,7 @@ public:
 
 private:
     void OnCurrentFrameChanged(UOdysseyAnimation* iAnimation);
-    void OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent);
+    void OnRenderingChanged(const FOdysseyRenderingChangedEvent& iEvent);
     void Update();
 
 private:

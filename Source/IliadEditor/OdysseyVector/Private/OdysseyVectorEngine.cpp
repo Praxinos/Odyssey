@@ -51,7 +51,7 @@ FOdysseyVectorEngine::Invalidate( FOdysseyVectorGroupPaint* iScene, uint64 iExtr
 */
 
 /*
-FULISInvalidTileMap&
+FOdysseyInvalidTileMap&
 FOdysseyVectorEngine::GetInvalidTileMap()
 {
     return mInvalidTileMap;

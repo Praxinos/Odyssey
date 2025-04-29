@@ -5,7 +5,7 @@
 
 #include "CoreMinimal.h"
 
-#include "ULISInvalidTileMap.h"
+#include "OdysseyInvalidTileMap.h"
 #include "OdysseyBlendParameters.h"
 #include "OdysseyRasterBlockMutator.h"
 #include "Misc/ITransaction.h"
@@ -94,5 +94,5 @@ private:
     //Internal
     TArray<::ULIS::FRectI>              mInvalidRects;
     bool mIsBeforeUndoBound;
-    //FULISInvalidTileMap                 mInvalidMap;
+    //FOdysseyInvalidTileMap                 mInvalidMap;
 };

@@ -26,7 +26,9 @@ public class OdysseyMaths : ModuleRules
             new string[] {
                 "Core",
                 "Engine",
-                "ULIS"
+                "ULIS",
+
+                "OdysseyCore"
             }
         );
 

@@ -239,9 +239,9 @@ UOdysseyTextureLayerImageVector::PostPropertyChanged(const FName& iPropertyName,
 {
     Super::PostPropertyChanged(iPropertyName, iIsInteractive);
     if(iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyTextureLayerImageVector, IsWireframe))
-        ImageRenderingChanged();
+        RenderingChanged();
     if(iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyTextureLayerImageVector, IsColored))
-        ImageRenderingChanged();
+        RenderingChanged();
 }
 
 void
@@ -257,7 +257,7 @@ UOdysseyTextureLayerImageVector::IsColoredChanged()
 }
 
 TSharedPtr<IOdysseyImageRenderer>
-UOdysseyTextureLayerImageVector::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter) const
+UOdysseyTextureLayerImageVector::BuildImageRenderer(EOdysseyRenderingType iRenderType, int iFrame, FImageRendererFilter iFilter) const
 {
     if (iFilter.IsBound() && !iFilter.Execute(this))
         return nullptr;
@@ -265,19 +265,19 @@ UOdysseyTextureLayerImageVector::BuildImageRenderer(IOdysseyImageRenderer::eRend
     if (!mVectorBlock)
         return nullptr;
 
-    return MakeShared<FOdysseyTextureLayerImageVectorImageRenderer>(this, mVectorBlock, iRenderType, GetImageRenderingRects(), iFilter);
+    return MakeShared<FOdysseyTextureLayerImageVectorImageRenderer>(this, mVectorBlock, iRenderType, GetRenderingRects(), iFilter);
 }
 
 TArray<FGuid>
-UOdysseyTextureLayerImageVector::GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const
+UOdysseyTextureLayerImageVector::GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrame) const
 {
-    return { GetImageRenderingId() };
+    return { GetRenderingId() };
 }
 
 void
 UOdysseyTextureLayerImageVector::OnVectorBlockInvalidated( const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive)
 {
-    ImageRenderingChanged(iRects, iIsInteractive);
+    RenderingChanged(::ULISUtils::ToIntRects(iRects), iIsInteractive);
 }
 
 void

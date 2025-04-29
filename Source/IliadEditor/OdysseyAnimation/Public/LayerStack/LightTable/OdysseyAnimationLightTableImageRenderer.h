@@ -11,7 +11,7 @@ class ODYSSEYANIMATION_API FOdysseyAnimationLightTableImageRenderer
     : public IOdysseyImageRenderer
 {
 public:
-    FOdysseyAnimationLightTableImageRenderer(const UOdysseyAnimationLayer* iLayer, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects, FImageRendererFilter iFilter);
+    FOdysseyAnimationLightTableImageRenderer(const UOdysseyAnimationLayer* iLayer, int iFrame, EOdysseyRenderingType iRenderType, const TArray<FIntRect>& iDefaultRects, FImageRendererFilter iFilter);
 
 public:
     virtual void Init() override;

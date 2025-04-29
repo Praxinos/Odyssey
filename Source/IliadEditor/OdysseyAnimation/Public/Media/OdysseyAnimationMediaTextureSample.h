@@ -15,7 +15,7 @@ class ODYSSEYANIMATION_API FOdysseyAnimationMediaTextureSample
 public:
     //Constructor / Destructor
     virtual ~FOdysseyAnimationMediaTextureSample();
-    FOdysseyAnimationMediaTextureSample(int iWidth, int iHeight, UTexture2D* iTexture);
+    FOdysseyAnimationMediaTextureSample(int iWidth, int iHeight, UTextureRenderTarget2D* iRenderTarget);
 
 public:
     void SetTime(FMediaTimeStamp iTime);
@@ -136,8 +136,6 @@ private:
     FIntPoint mDimensions;
     FMediaTimeStamp mTime;
     FTimespan mDuration;
-    UTexture2D* mTexture;
-    //UTexture2D* mTexture2; //PATCH: Media Framework is shit when using a single texture that refreshes it self, I need 2 Textures....
-    //mutable bool mCurrentTexture; //PATCH: true => use mTexture1, false => use mTexture2
+    UTextureRenderTarget2D* mRenderTarget;
     FOdysseyAnimationMediaTextureSampleConverter mConverter;
 };

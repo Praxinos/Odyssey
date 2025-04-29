@@ -24,6 +24,7 @@
 #include "OdysseyPainterEditor.h"
 #include "AssetToolsModule.h"
 #include "ULISLoaderModule.h"
+#include "ULISUtils.h"
 #include "OdysseyRasterBlockMutator.h"
 
 #define LOCTEXT_NAMESPACE "TextureEditor"
@@ -286,7 +287,7 @@ FOdysseyPainterEditorLayerStackTab::ImportTexturesAsLayers()
         FOdysseyRasterBlockMutator rasterBlockMutator(layerImageRaster->GetRasterBlock(), false);
         rasterBlockMutator.EditTilesFromRects(
             { textureBlock->Rect() },
-            [&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<ULIS::FEvent>
+            [&](TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyInvalidTileMap& iTileMap) -> TArray<ULIS::FEvent>
             {
                 ctx.Copy(*textureBlock, *iBlock);
                 ctx.Finish();
@@ -339,10 +340,10 @@ FOdysseyPainterEditorLayerStackTab::ExportLayersAsTextures()
         if ( !textureLayer )
             continue;
 
-        TSharedPtr<IOdysseyImageRenderer> renderer = textureLayer->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, 0);
+        TSharedPtr<IOdysseyImageRenderer> renderer = textureLayer->BuildImageRenderer(EOdysseyRenderingType::Render, 0);
         renderer->Init();
 
-        FOdysseyImageRendererCopyParams params(block, { block->Rect() });
+        FOdysseyImageRendererCopyParams params(block, { ::ULISUtils::ToIntRect(block->Rect()) });
         renderer->Copy(params, {});
         ctx.Finish();
 
@@ -411,10 +412,10 @@ FOdysseyPainterEditorLayerStackTab::ExportCurrentLayerAsTexture()
     outTexture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
     outTexture->LODGroup = TextureGroup::TEXTUREGROUP_Pixels2D;
 
-    TSharedPtr<IOdysseyImageRenderer> renderer = textureLayer->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, 0);
+    TSharedPtr<IOdysseyImageRenderer> renderer = textureLayer->BuildImageRenderer(EOdysseyRenderingType::Render, 0);
     renderer->Init();
 
-    FOdysseyImageRendererCopyParams params(block, { block->Rect() });
+    FOdysseyImageRendererCopyParams params(block, { ::ULISUtils::ToIntRect(block->Rect()) });
     renderer->Copy(params, {});
     ctx.Finish();
 

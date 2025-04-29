@@ -160,7 +160,7 @@ FOdysseyPainterEditor::FOdysseyPainterEditor(TSharedRef<FBaseToolkit> iToolkit)
     UOdysseyLayer::OnMediaChanged().AddRaw(this, &FOdysseyPainterEditor::OnMediaChanged);
     UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw(this, &FOdysseyPainterEditor::OnCurrentLayerChanged);
     UOdysseyAnimation::OnCurrentFrameChanged().AddRaw(this, &FOdysseyPainterEditor::OnCurrentFrameChanged);
-    FOdysseyImageRenderingAbility::OnImageRenderingChangedDelegate().AddRaw(this, &FOdysseyPainterEditor::OnImageRenderingChanged);
+    FOdysseyRenderingAbility::OnRenderingChangedDelegate().AddRaw(this, &FOdysseyPainterEditor::OnRenderingChanged);
 
     mBrushContexts.Add(new FOdysseyPainterEditorBrushContext(this));
 }
@@ -659,7 +659,7 @@ FOdysseyPainterEditor::OnClose()
 
     UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
     UOdysseyAnimation::OnCurrentFrameChanged().RemoveAll(this);
-    FOdysseyImageRenderingAbility::OnImageRenderingChangedDelegate().RemoveAll(this);
+    FOdysseyRenderingAbility::OnRenderingChangedDelegate().RemoveAll(this);
     UOdysseyLayer::OnMediaChanged().RemoveAll(this);
     FSlateApplication::Get().UnregisterInputPreProcessor(mAnimationFlipSystem);
 
@@ -1204,7 +1204,7 @@ FOdysseyPainterEditor::SetSource(TSharedPtr<FOdysseyPainterEditorSource> iSource
     {
         TSharedPtr<FOdysseyPainterEditorAnimationSource> animSource = StaticCastSharedPtr<FOdysseyPainterEditorAnimationSource>(mSource);
         UOdysseyAnimation* animation = animSource->GetAnimation();
-        mImageRenderingComposition = animation->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Render, animation->CurrentFrame);
+        mImageRenderingComposition = animation->GetRenderingComposition(EOdysseyRenderingType::Render, animation->CurrentFrame);
         mAnimationPlaybackFramesPerSecond = animation->GetFramesPerSecond();
     }
 
@@ -3401,7 +3401,7 @@ FOdysseyPainterEditor::OnCurrentFrameChanged(UOdysseyAnimation* iAnimation)
         return;
 
     //Preload the new current frame for edition
-    TArray<FGuid> imageRenderingComposition = animation->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Render, animation->CurrentFrame);
+    TArray<FGuid> imageRenderingComposition = animation->GetRenderingComposition(EOdysseyRenderingType::Render, animation->CurrentFrame);
     if ( imageRenderingComposition == mImageRenderingComposition )
         return;
 
@@ -3416,17 +3416,17 @@ FOdysseyPainterEditor::OnMediaChanged()
 }
 
 void
-FOdysseyPainterEditor::OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent)
+FOdysseyPainterEditor::OnRenderingChanged(const FOdysseyRenderingChangedEvent& iEvent)
 {
-    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyPainterEditor::OnImageRenderingChanged);
-    if (iEvent.IsInteractive() || iEvent.GetType() != FOdysseyImageRenderingChangedEvent::eEventType::kCompositionChange)
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyPainterEditor::OnRenderingChanged);
+    if (iEvent.IsInteractive() || iEvent.GetType() != FOdysseyRenderingChangedEvent::eEventType::kCompositionChange)
         return;
 
     UOdysseyAnimation* animation = GetAnimation();
     if (!animation)
         return;
 
-    TArray<FGuid> imageRenderingComposition = animation->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Render, animation->CurrentFrame);
+    TArray<FGuid> imageRenderingComposition = animation->GetRenderingComposition(EOdysseyRenderingType::Render, animation->CurrentFrame);
     if ( imageRenderingComposition == mImageRenderingComposition )
         return;
 

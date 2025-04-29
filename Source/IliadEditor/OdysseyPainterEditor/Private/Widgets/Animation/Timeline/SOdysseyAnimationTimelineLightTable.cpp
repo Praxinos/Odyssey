@@ -15,7 +15,7 @@ void
 SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysseyAnimationLayer* iLayer)
 {
     UOdysseyAnimation::OnCurrentFrameChanged().AddSP(SharedThis(this), &SOdysseyAnimationTimelineLightTable::OnCurrentFrameChanged);
-    FOdysseyImageRenderingAbility::OnImageRenderingChangedDelegate().AddSP(this, &SOdysseyAnimationTimelineLightTable::OnImageRenderingChanged);
+    FOdysseyRenderingAbility::OnRenderingChangedDelegate().AddSP(this, &SOdysseyAnimationTimelineLightTable::OnRenderingChanged);
 
     mLayer = iLayer;
 
@@ -243,20 +243,20 @@ SOdysseyAnimationTimelineLightTable::OnCurrentFrameChanged(UOdysseyAnimation* iA
 }
 
 void
-SOdysseyAnimationTimelineLightTable::OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent)
+SOdysseyAnimationTimelineLightTable::OnRenderingChanged(const FOdysseyRenderingChangedEvent& iEvent)
 {
-    TRACE_CPUPROFILER_EVENT_SCOPE(SOdysseyAnimationTimelineLightTable::OnImageRenderingChanged);
+    TRACE_CPUPROFILER_EVENT_SCOPE(SOdysseyAnimationTimelineLightTable::OnRenderingChanged);
     if (iEvent.IsInteractive())
         return;
 
-    if (iEvent.GetType() != FOdysseyImageRenderingChangedEvent::eEventType::kCompositionChange)
+    if (iEvent.GetType() != FOdysseyRenderingChangedEvent::eEventType::kCompositionChange)
         return;
 
     UOdysseyAnimation* animation = mLayer->GetAnimation();
     if (!animation)
         return;
 
-    TArray<FGuid> composition = mLayer->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Editor, animation->CurrentFrame);
+    TArray<FGuid> composition = mLayer->GetRenderingComposition(EOdysseyRenderingType::Editor, animation->CurrentFrame);
     if (!composition.Contains(iEvent.GetId()))
         return;
 

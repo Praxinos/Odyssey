@@ -5,7 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "OdysseyImageRenderingAbility.h"
+#include "OdysseyRenderingAbility.h"
 
 #include "OdysseyAnimationLightTable.generated.h"
 

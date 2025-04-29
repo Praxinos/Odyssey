@@ -105,7 +105,7 @@ UOdysseyAnimationFactory::FactoryCreateNew( UClass* iClass, UObject* iParent, FN
         FOdysseyRasterBlockMutator rasterBlockMutator(backgroundRasterBlock);
         rasterBlockMutator.EditTilesFromRects(
             { backgroundRasterBlock->GetRect() },
-            [backgorundColor](TSharedPtr<::ULIS::FBlock> ioBlock, const FULISInvalidTileMap& iInvalidTileMap) -> TArray<::ULIS::FEvent>
+            [backgorundColor](TSharedPtr<::ULIS::FBlock> ioBlock, const FOdysseyInvalidTileMap& iInvalidTileMap) -> TArray<::ULIS::FEvent>
             {
                 ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(ioBlock->Format());
                 ::ULIS::FColor color( ::ULIS::FColor::FromRGBAF( backgorundColor.R, backgorundColor.G, backgorundColor.B, backgorundColor.A ) );

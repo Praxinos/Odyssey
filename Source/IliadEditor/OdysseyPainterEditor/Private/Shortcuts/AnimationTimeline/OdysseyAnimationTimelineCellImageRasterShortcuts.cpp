@@ -11,6 +11,7 @@
 #include "OdysseyLayerStack.h"
 #include "OdysseyAnimation.h"
 #include "ULISLoaderModule.h"
+#include "ULISUtils.h"
 #include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
 #include "Shortcuts/AnimationTimeline/OdysseyAnimationTimelineCellImageStaggerShortcuts.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
@@ -62,6 +63,13 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
 
     UOdysseyAnimation* animation = layer->GetAnimation();
 
+    ::ULIS::eFormat format = ::ULIS::Format_BGRA8;
+    switch(animation->GetFormat())
+    {
+        case EOdysseyAnimationFormat::BGRA8: format = ::ULIS::Format_BGRA8;
+        case EOdysseyAnimationFormat::RGBAF: format = ::ULIS::Format_RGBAF;
+    }
+
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("cell-image-raster.transaction.cross-fade", "Cross Fade"));
 #endif
@@ -81,19 +89,19 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
     TArray<UOdysseyAnimationCell*> cellsToSelect = selectedCells;
 
     //Cross Fade all selected cells
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(animation->GetFormat());
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
 
     FScopedSlowTask selectedCellsProgress(selectedCells.Num());
     for (UOdysseyAnimationCell* selectedCell : selectedCells)
     {
         selectedCellsProgress.EnterProgressFrame();
-        TSharedPtr<::ULIS::FBlock> startBlock = MakeShared<::ULIS::FBlock>(animation->GetWidth(), animation->GetHeight(), animation->GetFormat());
+        TSharedPtr<::ULIS::FBlock> startBlock = MakeShared<::ULIS::FBlock>(animation->GetWidth(), animation->GetHeight(), format);
         ctx.Clear(*startBlock);
         ctx.Finish();
-        TSharedPtr<IOdysseyImageRenderer> renderer = selectedCell->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, 0);
+        TSharedPtr<IOdysseyImageRenderer> renderer = selectedCell->BuildImageRenderer(EOdysseyRenderingType::Render, 0);
         renderer->Init();
 
-        FOdysseyImageRendererCopyParams startParams(startBlock, { startBlock->Rect() });
+        FOdysseyImageRendererCopyParams startParams(startBlock, { ::ULISUtils::ToIntRect(startBlock->Rect()) });
         renderer->Copy(startParams, {});
         ctx.Finish();
 
@@ -107,13 +115,13 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
         if (nextCellIndex < layer->GetCells().Num() || !layer->GetCells()[nextCellIndex])
         {
             UOdysseyAnimationCell* nextCell = layer->GetCells()[nextCellIndex];
-            TSharedPtr<::ULIS::FBlock> endBlock = MakeShared<::ULIS::FBlock>(animation->GetWidth(), animation->GetHeight(), animation->GetFormat());
+            TSharedPtr<::ULIS::FBlock> endBlock = MakeShared<::ULIS::FBlock>(animation->GetWidth(), animation->GetHeight(), format);
             ctx.Clear(*endBlock);
             ctx.Finish();
-            renderer = nextCell->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, 0);
+            renderer = nextCell->BuildImageRenderer(EOdysseyRenderingType::Render, 0);
             renderer->Init();
 
-            FOdysseyImageRendererCopyParams endParams(endBlock, { endBlock->Rect() });
+            FOdysseyImageRendererCopyParams endParams(endBlock, { ::ULISUtils::ToIntRect(endBlock->Rect()) });
             renderer->Copy(endParams, {});
             ctx.Finish();
 
@@ -129,7 +137,7 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
                 FOdysseyRasterBlockMutator mutator(rasterCell->GetRasterBlock(), false);
                 mutator.EditTilesFromRects(
                     { rasterCell->GetRasterBlock()->GetRect() },
-                    [&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+                    [&](TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
                     {
                         ctx.Clear(*iBlock);
                         ctx.Finish();
@@ -177,7 +185,7 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
                 FOdysseyRasterBlockMutator mutator(rasterCell->GetRasterBlock(), false);
                 mutator.EditTilesFromRects(
                     { rasterCell->GetRasterBlock()->GetRect() },
-                    [&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+                    [&](TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
                     {
                         ctx.Clear(*iBlock);
                         ctx.Finish();

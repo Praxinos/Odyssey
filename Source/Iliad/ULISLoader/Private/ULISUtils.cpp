@@ -51,4 +51,45 @@ ConvertAndExecute(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> ioDest, ::ULIS
     return {eventConvertToDestinationFormat};
 }
 
+::ULIS::FRectI
+ToULISRectI(const FIntRect& iRect)
+{
+    return ::ULIS::FRectI::FromXYWH(iRect.Min.X, iRect.Min.Y, iRect.Width(), iRect.Height());
+}
+
+TArray<::ULIS::FRectI>
+ToULISRectIs(const TArray<FIntRect>& iRects)
+{
+    TArray<::ULIS::FRectI> rects;
+    rects.Reserve(iRects.Num());
+    for (const FIntRect& rect : iRects )
+    {
+        rects.Add(ToULISRectI(rect));
+    }
+
+    return rects;
+}
+
+FIntRect
+ToIntRect(const ::ULIS::FRectI& iRect)
+{
+    return FIntRect(iRect.x, iRect.y, iRect.x + iRect.w, iRect.y + iRect.h);
+}
+
+TArray<FIntRect>
+ToIntRects(const TArray<::ULIS::FRectI>& iRects)
+{
+    TArray<FIntRect> intRects;
+    intRects.Reserve(iRects.Num());
+    for (const ::ULIS::FRectI& rect : iRects )
+    {
+        intRects.Add(ToIntRect(rect));
+    }
+
+    return intRects;
+}
+
+
+
+
 }

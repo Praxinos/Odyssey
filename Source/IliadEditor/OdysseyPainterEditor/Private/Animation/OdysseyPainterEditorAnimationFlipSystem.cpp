@@ -454,11 +454,11 @@ FOdysseyPainterEditorAnimationFlipSystem::FlipTo(int iDelta)
 
     if (frame == mStartFrame)
     {
-        mEditor->GetAnimationPlayer()->SetRenderType(IOdysseyImageRenderer::eRenderType::Render);
+        mEditor->GetAnimationPlayer()->SetRenderType(EOdysseyRenderingType::Render);
     }
     else
     {
-        mEditor->GetAnimationPlayer()->SetRenderType(mFlipConfiguration.OutOfPegs ? IOdysseyImageRenderer::eRenderType::RenderOutOfPegs : IOdysseyImageRenderer::eRenderType::Render);
+        mEditor->GetAnimationPlayer()->SetRenderType(mFlipConfiguration.OutOfPegs ? EOdysseyRenderingType::RenderOutOfPegs : EOdysseyRenderingType::Render);
     }
     mEditor->GetAnimationPlayer()->SeekToFrame(frame);
 }
@@ -572,7 +572,7 @@ FOdysseyPainterEditorAnimationFlipSystem::GetKeyFrame(int iDelta, int& oFrame)
             if (useLayerRightLimit && rightLimit == INDEX_NONE)
                 rightLimit = layerRightLimit;
 
-            TArray<FGuid> lastFrameComposition = layer->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Editor, mStartFrame);
+            TArray<FGuid> lastFrameComposition = layer->GetRenderingComposition(EOdysseyRenderingType::Editor, mStartFrame);
             oFrame = mStartFrame;
             while(iDelta > 0)
             {
@@ -598,7 +598,7 @@ FOdysseyPainterEditorAnimationFlipSystem::GetKeyFrame(int iDelta, int& oFrame)
                         }
                     }
 
-                    frameComposition = layer->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Editor, oFrame);
+                    frameComposition = layer->GetRenderingComposition(EOdysseyRenderingType::Editor, oFrame);
                 }
                 while(oFrame != initialFrame && frameComposition == lastFrameComposition);
 
@@ -614,7 +614,7 @@ FOdysseyPainterEditorAnimationFlipSystem::GetKeyFrame(int iDelta, int& oFrame)
                         break;
                     }
 
-                    frameComposition = layer->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Editor, frame + 1);
+                    frameComposition = layer->GetRenderingComposition(EOdysseyRenderingType::Editor, frame + 1);
                     if (frameComposition != lastFrameComposition)
                         break;
 
@@ -642,7 +642,7 @@ FOdysseyPainterEditorAnimationFlipSystem::GetKeyFrame(int iDelta, int& oFrame)
                             return;
                         }
                     }
-                    frameComposition = layer->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Editor, oFrame);
+                    frameComposition = layer->GetRenderingComposition(EOdysseyRenderingType::Editor, oFrame);
                 }
                 while(oFrame != initialFrame && frameComposition == lastFrameComposition);
 
@@ -654,7 +654,7 @@ FOdysseyPainterEditorAnimationFlipSystem::GetKeyFrame(int iDelta, int& oFrame)
                     if (oFrame == mStartFrame)
                         break;
 
-                    frameComposition = layer->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Editor, oFrame - 1);
+                    frameComposition = layer->GetRenderingComposition(EOdysseyRenderingType::Editor, oFrame - 1);
                     if (frameComposition != lastFrameComposition)
                         break;
 

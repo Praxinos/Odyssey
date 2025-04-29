@@ -2,7 +2,7 @@
 // ODYSSEY is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Media/OdysseyAnimationMediaTextureSample.h"
-#include "Engine/Texture2D.h"
+#include "Engine/TextureRenderTarget2D.h"
 #include "Rendering/Texture2DResource.h"
 #include "OdysseyRectUtils.h"
 
@@ -10,13 +10,11 @@ FOdysseyAnimationMediaTextureSample::~FOdysseyAnimationMediaTextureSample()
 {
 }
 
-FOdysseyAnimationMediaTextureSample::FOdysseyAnimationMediaTextureSample(int iWidth, int iHeight, UTexture2D* iTexture)
+FOdysseyAnimationMediaTextureSample::FOdysseyAnimationMediaTextureSample(int iWidth, int iHeight, UTextureRenderTarget2D* iRenderTarget)
     : mDimensions(iWidth, iHeight)
     , mTime(0)
     , mDuration(0)
-    , mTexture(iTexture)
-    //, mTexture2(iTexture2)
-    //, mCurrentTexture(false)
+    , mRenderTarget(iRenderTarget)
     , mConverter(this)
 {
 }
@@ -75,16 +73,11 @@ FOdysseyAnimationMediaTextureSample::GetStride() const
 FRHITexture*
 FOdysseyAnimationMediaTextureSample::GetTexture() const
 {
-    FTexture2DResource* resource = static_cast<FTexture2DResource*>(mTexture->GetResource());
+    FTextureRenderTargetResource* resource = mRenderTarget->GameThread_GetRenderTargetResource();
     if (!resource)
         return nullptr;
 
-    /* FTexture2DResource* resource2 = static_cast<FTexture2DResource*>(mTexture2->GetResource());
-    if (!resource2)
-        return nullptr; */
-
-    //mCurrentTexture = !mCurrentTexture;
-    return resource->GetTexture2DRHI();//mCurrentTexture ? resource1->GetTexture2DRHI() : resource2->GetTexture2DRHI();
+    return resource->GetTexture2DRHI();
 }
 
 #endif //WITH_ENGINE

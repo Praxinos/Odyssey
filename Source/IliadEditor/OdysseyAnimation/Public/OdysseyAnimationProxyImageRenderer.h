@@ -8,13 +8,13 @@
 #include <ULIS>
 
 class FOdysseyAnimationProxy;
-class UOdysseyAnimation;
+class UOdysseyAnimationLayerRoot;
 
 class ODYSSEYANIMATION_API FOdysseyAnimationProxyImageRenderer
     : public IOdysseyImageRenderer
 {
 public:
-    FOdysseyAnimationProxyImageRenderer(const UOdysseyAnimation* iAnimation, int iFrameIndex, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI> iDefaultRects, FImageRendererFilter iFilter);
+    FOdysseyAnimationProxyImageRenderer(const UOdysseyAnimationLayerRoot* iLayer, int iFrameIndex, EOdysseyRenderingType iRenderType, const TArray<FIntRect> iDefaultRects, FImageRendererFilter iFilter);
 
 public:
     virtual void Init() override;
@@ -27,7 +27,7 @@ public:
 public:
     TSharedPtr<FOdysseyAnimationProxy> mProxy;
     int mFrameIndex;
-    TSharedPtr<IOdysseyImageRenderer> mAnimationRenderer;
+    TSharedPtr<IOdysseyImageRenderer> mLayerRenderer;
     TSharedPtr<::ULIS::FBlock> mBlock;
     bool mForceRender;
 };

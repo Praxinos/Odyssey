@@ -5,6 +5,8 @@
 #include "Fonts/FontMeasure.h"
 
 #include "OdysseyAnimation.h"
+#include "OdysseyAnimationLayerStack.h"
+#include "OdysseyAnimationLayerRoot.h"
 #include "OdysseyAnimationPlayer.h"
 #include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineScrollBox.h"
 #include "OdysseyStyle.h"
@@ -146,7 +148,8 @@ int32 SOdysseyAnimationTimelineHeader::OnPaint(const FPaintArgs& Args, const FGe
     int32 endKey = FMath::Max(0, FGenericPlatformMath::CeilToInt(offset - padding + (width / frameSize)));
 
     UOdysseyAnimation* animation = mAnimation;
-    TSharedPtr<FOdysseyAnimationProxy> proxy = animation->GetProxy();
+    UOdysseyAnimationLayerRoot* layerRoot = Cast<UOdysseyAnimationLayerRoot>(animation->GetLayerStack()->LayerRoot);
+    TSharedPtr<FOdysseyAnimationProxy> proxy = layerRoot->GetProxy();
     FInt32Range animationRange = animation->GetFrameRange();
 
     for(int32 keyNum = startKey; keyNum <= endKey; keyNum++)
@@ -245,7 +248,7 @@ SOdysseyAnimationTimelineHeader::OnMouseButtonDown(const FGeometry& MyGeometry, 
         float posX = MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()).X;
         float frame = MousePositionToFrame(posX);
         mPlayer->Stop();
-        mPlayer->SetRenderType(IOdysseyImageRenderer::eRenderType::Render);
+        mPlayer->SetRenderType(EOdysseyRenderingType::Render);
         mPlayer->SeekToFrame(FFrameTime::FromDecimal(frame).GetFrame());
 
         // This has prevent throttling on so that viewports continue to run whilst dragging the slider
@@ -282,7 +285,7 @@ SOdysseyAnimationTimelineHeader::OnMouseButtonUp(const FGeometry& MyGeometry, co
         float posX = MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()).X;
         float frame = MousePositionToFrame(posX);
         FOdysseyObjectEditorUtils::SetPropertyValue(mAnimation, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), FMath::Max(0, (int)frame));
-        mPlayer->SetRenderType(IOdysseyImageRenderer::eRenderType::Editor);
+        mPlayer->SetRenderType(EOdysseyRenderingType::Editor);
         mIsScrubbing = false;
         return FReply::Handled().ReleaseMouseCapture();
     }

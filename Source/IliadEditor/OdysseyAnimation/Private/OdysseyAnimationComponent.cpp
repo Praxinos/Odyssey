@@ -10,6 +10,7 @@
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "Misc/TransactionObjectEvent.h"
 #include "Misc/OdysseyUndoDelegates.h"
+#include "Engine/TextureRenderTarget2D.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(OdysseyAnimationComponent)
 
@@ -166,30 +167,9 @@ UOdysseyAnimationComponent::GenerateMaterialInstance()
 }
 
 void
-UOdysseyAnimationComponent::PostInitProperties()
-{
-    Super::PostInitProperties();
-
-    if (HasAnyFlags(RF_ClassDefaultObject))
-        return;
-
-    DefaultPlayer->OnTextureChanged().AddUObject(this, &UOdysseyAnimationComponent::OnDefaultPlayerTextureChanged);
-}
-
-void
 UOdysseyAnimationComponent::PostLoad()
 {
     Super::PostLoad();
-
-    if (Player)
-    {
-        PreviousPlayer = Player;
-        Player->OnTextureChanged().AddUObject(this, &UOdysseyAnimationComponent::OnPlayerTextureChanged);
-    }
-
-    //Reset the callbacks in case DefaultPlayer pointer changed
-    DefaultPlayer->OnTextureChanged().RemoveAll(this);
-    DefaultPlayer->OnTextureChanged().AddUObject(this, &UOdysseyAnimationComponent::OnDefaultPlayerTextureChanged);
 
     SetMaterial(0, MaterialInstance);
 
@@ -246,15 +226,8 @@ UOdysseyAnimationComponent::PlayerChanged()
 {
     if (Mode == EOdysseyAnimationComponentMode::Player)
     {
-        if (PreviousPlayer)
-            PreviousPlayer->OnTextureChanged().RemoveAll(this);
-
-        PreviousPlayer = Player;
-
         if (Player)
         {
-            Player->OnTextureChanged().AddUObject(this, &UOdysseyAnimationComponent::OnPlayerTextureChanged);
-
             UOdysseyAnimation* animation = Player->Animation;
             if (animation)
             {
@@ -271,18 +244,6 @@ void
 UOdysseyAnimationComponent::MaterialChanged()
 {
     MaterialInstance->SetParentEditorOnly(Material);
-    RefreshMaterialTexture();
-}
-
-void
-UOdysseyAnimationComponent::OnDefaultPlayerTextureChanged()
-{
-    RefreshMaterialTexture();
-}
-
-void
-UOdysseyAnimationComponent::OnPlayerTextureChanged()
-{
     RefreshMaterialTexture();
 }
 
@@ -324,8 +285,6 @@ UOdysseyAnimationComponent::PostDuplicate(bool bDuplicateForPIE)
 {
     Super::PostDuplicate(bDuplicateForPIE);
 
-    DefaultPlayer->OnTextureChanged().AddUObject(this, &UOdysseyAnimationComponent::OnDefaultPlayerTextureChanged);
-
     RefreshMaterialTexture();
 }
 
@@ -339,10 +298,10 @@ UOdysseyAnimationComponent::RefreshMaterialTexture()
     if (!player)
         return;
 
-    UTexture* texture = player->GetTexture();
-    if (texture)
+    UTextureRenderTarget2D* renderTarget = player->GetRenderTarget();
+    if (renderTarget)
     {
-        MaterialInstance->SetTextureParameterValueEditorOnly(FMaterialParameterInfo("AnimationTexture"), texture);
+        MaterialInstance->SetTextureParameterValueEditorOnly(FMaterialParameterInfo("AnimationTexture"), renderTarget);
     }
     else
     {

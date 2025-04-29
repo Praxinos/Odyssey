@@ -10,19 +10,12 @@
 #include "TextureCompiler.h"
 #include "Misc/TransactionObjectEvent.h"
 #include "Misc/OdysseyUndoDelegates.h"
-
-#include "ULISLoaderModule.h"
+#include "Engine/TextureRenderTarget2D.h"
 
 FSimpleMulticastDelegate&
 UOdysseyAnimationPlayer::OnAnimationChanged()
 {
     return mOnAnimationChanged;
-}
-
-FSimpleMulticastDelegate&
-UOdysseyAnimationPlayer::OnTextureChanged()
-{
-    return mOnTextureChanged;
 }
 
 FSimpleMulticastDelegate&
@@ -45,6 +38,17 @@ UOdysseyAnimationPlayer::OnStop()
 
 UOdysseyAnimationPlayer::UOdysseyAnimationPlayer()
 {
+}
+
+void
+UOdysseyAnimationPlayer::PostInitProperties()
+{
+    Super::PostInitProperties();
+
+    if (HasAnyFlags(RF_ClassDefaultObject))
+        return;
+
+    RenderTarget = NewObject<UTextureRenderTarget2D>(this);
 }
 
 void
@@ -99,13 +103,10 @@ UOdysseyAnimationPlayer::SeekToFrameImmediate(FFrameTime iFrame)
     mOnCurrentFrameChanged.Broadcast();
 }
 
-UTexture2D*
-UOdysseyAnimationPlayer::GetTexture()
+UTextureRenderTarget2D*
+UOdysseyAnimationPlayer::GetRenderTarget()
 {
-    if( !Texture )
-        AnimationChanged();
-
-    return Texture;
+    return RenderTarget;
 }
 
 FFrameTime
@@ -134,38 +135,6 @@ UOdysseyAnimationPlayer::GetStatus() const
     return Status;
 }
 
-/* bool
-UOdysseyAnimationPlayer::GetTimeInPlayerBounds(FTimespan iTime, FTimespan& oTime) const
-{
-    FTimespan duration;
-    if (!GetDuration(duration))
-        return false;
-
-    if (mIgnoreAnimationBounds)
-    {
-        oTime = iTime;
-        return true;
-    }
-
-    if(iTime < 0)
-    {
-        return ApplyPreBehaviour(iTime, oTime);
-    }
-    else if (iTime >= duration)
-    {
-        return ApplyPostBehaviour(iTime, oTime);
-    }
-
-    oTime = iTime;
-    return true;
-} */
-
-/* bool
-UOdysseyAnimationPlayer::GetCurrentTimeInPlayerBounds(FTimespan& oTime) const
-{
-    return GetTimeInPlayerBounds(mCurrentTime, oTime);
-} */
-
 bool
 UOdysseyAnimationPlayer::GetFrameInAnimationBounds(FFrameTime iFrame, FFrameTime& oFrame) const
 {
@@ -193,8 +162,6 @@ UOdysseyAnimationPlayer::GetFrameInAnimationBounds(FFrameTime iFrame, FFrameTime
     {
         oFrame = iFrame;
     }
-
-    //oFrame += leftBound;
 
     return true;
 }
@@ -280,77 +247,6 @@ UOdysseyAnimationPlayer::ApplyPostBehaviour(FFrameTime iFrame, FFrameTime& oFram
     return true;
 }
 
-/* bool
-UOdysseyAnimationPlayer::ApplyPreBehaviour(FTimespan iTime, FTimespan& oTime) const
-{
-    if (!UsePreBehaviour)
-        return false;
-
-    switch(PreBehaviour)
-    {
-        case EOdysseyAnimationPlayerPostBehaviour::None:
-        {
-            return false;
-        }
-        break;
-
-        case EOdysseyAnimationPlayerPostBehaviour::Hold:
-        {
-            oTime = FTimespan(0);
-        }
-        break;
-
-        case EOdysseyAnimationPlayerPostBehaviour::Loop:
-        {
-            FTimespan duration;
-            if (!GetDuration(duration))
-                return false;
-
-            FTimespan positiveTime = (mCurrentTime * -1);
-            oTime = duration - (positiveTime % duration);
-        }
-        break;
-    }
-    return true;
-}
-
-bool
-UOdysseyAnimationPlayer::ApplyPostBehaviour(FTimespan iTime, FTimespan& oTime) const
-{
-    if (!UsePostBehaviour)
-        return false;
-
-    switch(PostBehaviour)
-    {
-        case EOdysseyAnimationPlayerPostBehaviour::None:
-        {
-            return false;
-        }
-        break;
-
-        case EOdysseyAnimationPlayerPostBehaviour::Hold:
-        {
-            FTimespan duration;
-            if (!GetDuration(duration))
-                return false;
-            oTime = FMath::Max(FTimespan(0), duration - FTimespan(1));
-        }
-        break;
-
-        case EOdysseyAnimationPlayerPostBehaviour::Loop:
-        {
-            FTimespan duration;
-            if (!GetDuration(duration))
-                return false;
-
-            oTime = mCurrentTime % duration;
-        }
-        break;
-    }
-
-    return true;
-} */
-
 bool
 UOdysseyAnimationPlayer::IsBackward() const
 {
@@ -358,12 +254,12 @@ UOdysseyAnimationPlayer::IsBackward() const
 }
 
 void
-UOdysseyAnimationPlayer::SetRenderType(IOdysseyImageRenderer::eRenderType iRenderType)
+UOdysseyAnimationPlayer::SetRenderType(EOdysseyRenderingType iRenderType)
 {
     mRenderType = iRenderType;
 }
 
-IOdysseyImageRenderer::eRenderType
+EOdysseyRenderingType
 UOdysseyAnimationPlayer::GetRenderType() const
 {
     return mRenderType;
@@ -375,7 +271,7 @@ UOdysseyAnimationPlayer::Tick(float iDeltaTime)
     if (GetFlags() & RF_ClassDefaultObject)
         return;
 
-    if (!Animation || !Texture)
+    if (!Animation || !RenderTarget)
         return;
 
     if (Status == EOdysseyAnimationPlayerStatus::Playing)
@@ -449,67 +345,31 @@ UOdysseyAnimationPlayer::UpdateTexture()
     if (!GetCurrentFrameInAnimationBounds(frame))
         return;
 
-    TArray<FGuid> imageRenderingComposition = Animation->GetImageRenderingComposition(mRenderType, frame.GetFrame().Value);
+    TArray<FGuid> imageRenderingComposition = Animation->GetRenderingComposition(mRenderType, frame.GetFrame().Value);
     if ( imageRenderingComposition != mImageRenderingComposition )
     {
         mImageRenderingComposition = imageRenderingComposition;
-        TSharedPtr<IOdysseyImageRenderer> renderer = Animation->BuildImageRenderer(mRenderType, frame.GetFrame().Value);
-        renderer->Init();
-        mRenderer = renderer; //Init Renderer before assigning mRenderer to avoid caching (raster / vector blocks) when unneeded
 
-        ::ULIS::FRectI rect = ::ULIS::FRectI::FromXYWH(0, 0, Animation->GetWidth(), Animation->GetHeight());
-        TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(Animation->GetWidth(), Animation->GetHeight(), Animation->GetFormat());
-
-        {
-            FOdysseyImageRendererCopyParams params(block, { block->Rect() });
-            mRenderer->Copy(params, {});
-
-            ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(Animation->GetFormat());
-            ctx.Finish();
-        }
-
-        CopyBlocksToTexture({ block }, { rect });
+        Animation->RenderToTexture(RenderTarget, frame.GetFrame());
         mInvalidTileMap.Clear();
         return;
     }
 
     if (!mInvalidTileMap.InvalidTiles().IsEmpty())
     {
-        TSharedPtr<IOdysseyImageRenderer> renderer = Animation->BuildImageRenderer(mRenderType, frame.GetFrame().Value);
-        renderer->Init();
-        mRenderer = renderer; //Init Renderer before assigning mRenderer to avoid caching (raster / vector blocks) when unneeded
-
-        TArray<TSharedPtr<::ULIS::FBlock>> blocks;
-        TArray<::ULIS::FRectI> invalidRects = mInvalidTileMap.InvalidRects();
-
-        {
-            TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyAnimationPlayer::UpdateTexture::Copy);
-            for ( const ::ULIS::FRectI& rect : invalidRects )
-            {
-                TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(rect.w, rect.h, Animation->GetFormat());
-                FOdysseyImageRendererCopyParams params(block, { block->Rect() }, rect.Position());
-                mRenderer->Copy(params, {});
-                blocks.Add(block);
-            }
-
-            ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(Animation->GetFormat());
-            ctx.Finish();
-        }
-
-        CopyBlocksToTexture(blocks, invalidRects);
-
+        Animation->RenderToTextureFromRects(RenderTarget, frame.GetFrame(), mInvalidTileMap.InvalidRects());
         mInvalidTileMap.Clear();
     }
 }
 
 void
-UOdysseyAnimationPlayer::OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent)
+UOdysseyAnimationPlayer::OnRenderingChanged(const FOdysseyRenderingChangedEvent& iEvent)
 {
-    TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyAnimationPlayer::OnImageRenderingChanged);
+    TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyAnimationPlayer::OnRenderingChanged);
     if ( !Animation )
         return;
 
-    if (iEvent.GetType() == FOdysseyImageRenderingChangedEvent::eEventType::kValueChange)
+    if (iEvent.GetType() == FOdysseyRenderingChangedEvent::eEventType::kValueChange)
     {
         if (mImageRenderingComposition.Contains(iEvent.GetId()))
         {
@@ -518,7 +378,7 @@ UOdysseyAnimationPlayer::OnImageRenderingChanged(const FOdysseyImageRenderingCha
         return;
     }
 
-    if (iEvent.GetType() == FOdysseyImageRenderingChangedEvent::eEventType::kCompositionChange)
+    if (iEvent.GetType() == FOdysseyRenderingChangedEvent::eEventType::kCompositionChange)
     {
         if ( !mImageRenderingComposition.Contains(iEvent.GetId()) )
             return;
@@ -527,109 +387,30 @@ UOdysseyAnimationPlayer::OnImageRenderingChanged(const FOdysseyImageRenderingCha
         if (!GetCurrentFrameInAnimationBounds(frame))
             return;
 
-        TArray<FGuid> imageRenderingComposition = Animation->GetImageRenderingComposition(mRenderType, frame.GetFrame().Value);
+        TArray<FGuid> imageRenderingComposition = Animation->GetRenderingComposition(mRenderType, frame.GetFrame().Value);
         if ( imageRenderingComposition == mImageRenderingComposition )
             return;
 
-        mInvalidTileMap.Invalidate(::ULIS::FRectI::FromXYWH(0, 0, Animation->GetWidth(), Animation->GetHeight()));
+        mInvalidTileMap.Invalidate(FIntRect(0, 0, Animation->GetWidth(), Animation->GetHeight()));
     }
-}
-
-void
-UOdysseyAnimationPlayer::CopyBlocksToTexture(const TArray<TSharedPtr<::ULIS::FBlock>>& iBlocks, const TArray<::ULIS::FRectI>& iRects)
-{
-    TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyAnimationPlayer::CopyBlocksToTexture);
-    if ( iBlocks.IsEmpty() )
-        return;
-
-    FTextureCompilingManager::Get().FinishCompilation({ Texture });
-
-    ::ULIS::eFormat format = iBlocks[0]->Format();
-
-    //convert block to BGRA8 if needed*
-    if ( format == ::ULIS::Format_BGRA8 )
-    {
-        TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyAnimationPlayer::CopyBlocks);
-        TArray<TSharedPtr<FUpdateTextureRegion2D>> regions; //Keeps region object alive until fence.Wait()
-        for ( int i = 0; i < iBlocks.Num(); i++ )
-        {
-            const TSharedPtr<::ULIS::FBlock>& block = iBlocks[i];
-            const ::ULIS::FRectI& rect = iRects[i];
-            regions.Add(MakeShared<FUpdateTextureRegion2D>(rect.x, rect.y, 0, 0, block->Rect().w, block->Rect().h));
-            Texture->UpdateTextureRegions(0, 1, regions.Last().Get(), block->BytesPerScanLine(), block->BytesPerPixel(), block->Bits());
-        }
-
-        FRenderCommandFence fence;
-        fence.BeginFence();
-        fence.Wait();
-
-        return;
-    }
-
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_BGRA8);
-    TArray<TSharedPtr<::ULIS::FBlock>> convBlocks;
-    TArray<TSharedPtr<FUpdateTextureRegion2D>> regions;
-    for ( int i = 0; i < iBlocks.Num(); i++ )
-    {
-        const TSharedPtr<::ULIS::FBlock>& block = iBlocks[i];
-        const ::ULIS::FRectI& rect = iRects[i];
-
-        TSharedPtr<::ULIS::FBlock> convBlock = MakeShared<::ULIS::FBlock>(rect.w, rect.h, ::ULIS::Format_BGRA8);
-        ctx.ConvertFormat(*block, *convBlock, block->Rect(), ::ULIS::FVec2I(0), ::ULIS::FSchedulePolicy::AsyncCacheEfficient);
-        convBlocks.Add(convBlock);
-        regions.Add(MakeShared<FUpdateTextureRegion2D>(rect.x, rect.y, 0, 0, rect.w, rect.h));
-    }
-
-    ctx.Finish();
-
-    for ( int i = 0; i < regions.Num(); i++ )
-    {
-        Texture->UpdateTextureRegions(
-            0,
-            1,
-            regions[i].Get(),
-            convBlocks[i]->BytesPerScanLine(),
-            convBlocks[i]->BytesPerPixel(),
-            convBlocks[i]->Bits()
-        );
-    }
-
-    FRenderCommandFence fence;
-    fence.BeginFence();
-    fence.Wait();
 }
 
 void
 UOdysseyAnimationPlayer::AnimationChanged()
 {
-    UOdysseyAnimation::OnImageRenderingChangedDelegate().RemoveAll(this);
+    FOdysseyRenderingAbility::OnRenderingChangedDelegate().RemoveAll(this);
     if (!Animation)
     {
-        Texture = nullptr;
+        RenderTarget->ResizeTarget(1, 1);
         mRenderer = nullptr;
         return;
     }
 
-    Texture = NewObject<UTexture2D>(this);
-    Texture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
+    RenderTarget->ResizeTarget(Animation->GetWidth(), Animation->GetHeight());
 
-    FTextureFormatSettings textureFormatSettings;
-    Texture->GetLayerFormatSettings(0, textureFormatSettings);
-    textureFormatSettings.CompressionNone = 1;
-    Texture->SetLayerFormatSettings(0, textureFormatSettings);
+    mInvalidTileMap = FOdysseyInvalidTileMap(64, Animation->GetWidth(), Animation->GetHeight());
 
-    Texture->Source.Init(Animation->GetWidth(), Animation->GetHeight(), 1, 1, TSF_BGRA8, nullptr);
-    Texture->UpdateResource();
-    FTextureCompilingManager::Get().FinishCompilation({ Texture });
-
-    mInvalidTileMap = FULISInvalidTileMap(64, Animation->GetWidth(), Animation->GetHeight());
-
-    UOdysseyAnimation::OnImageRenderingChangedDelegate().AddUObject(this, &UOdysseyAnimationPlayer::OnImageRenderingChanged);
-}
-
-void
-UOdysseyAnimationPlayer::TextureChanged()
-{
+    FOdysseyRenderingAbility::OnRenderingChangedDelegate().AddUObject(this, &UOdysseyAnimationPlayer::OnRenderingChanged);
 }
 
 void
@@ -649,9 +430,6 @@ UOdysseyAnimationPlayer::PropertyChanged(const FName& iPropertyName)
     if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationPlayer, Animation) )
         AnimationChanged();
 
-    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationPlayer, Texture) )
-        TextureChanged();
-
     if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationPlayer, Status) )
         StatusChanged();
 
@@ -665,12 +443,6 @@ UOdysseyAnimationPlayer::PostPropertyChanged(const FName& iPropertyName)
     if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationPlayer, Animation) )
     {
         mOnAnimationChanged.Broadcast();
-        mOnTextureChanged.Broadcast();
-    }
-
-    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationPlayer, Texture) )
-    {
-        mOnTextureChanged.Broadcast();
     }
 }
 
@@ -718,14 +490,13 @@ UOdysseyAnimationPlayer::PostLoad()
     if (GetFlags() & RF_ClassDefaultObject)
         return;
 
-    if( !Texture )
-        AnimationChanged();
+    AnimationChanged();
 
     //will create the texture if needed
     if (Animation)
     {
-        mInvalidTileMap = FULISInvalidTileMap(64, Animation->GetWidth(), Animation->GetHeight());
-        UOdysseyAnimation::OnImageRenderingChangedDelegate().AddUObject(this, &UOdysseyAnimationPlayer::OnImageRenderingChanged);
+        mInvalidTileMap = FOdysseyInvalidTileMap(64, Animation->GetWidth(), Animation->GetHeight());
+        FOdysseyRenderingAbility::OnRenderingChangedDelegate().AddUObject(this, &UOdysseyAnimationPlayer::OnRenderingChanged);
     }
 }
 

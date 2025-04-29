@@ -3,10 +3,10 @@
 
 #pragma once
 
+#include "Math/MathFwd.h"
 #include "Containers/OdysseyArray2D.h"
-#include <ULIS>
 
-class ULISLOADER_API FULISInvalidTileMap
+class ODYSSEYCORE_API FOdysseyInvalidTileMap
 {
 public:
     /** Constructor
@@ -17,7 +17,7 @@ public:
      * @param iWidth Image Width
      * @param iHeight Image Height
     */
-    FULISInvalidTileMap();
+    FOdysseyInvalidTileMap();
 
     /** Constructor
      *
@@ -27,7 +27,7 @@ public:
      * @param iWidth Image Width
      * @param iHeight Image Height
     */
-    FULISInvalidTileMap(int iTileSize, int iWidth, int iHeight);
+    FOdysseyInvalidTileMap(int iTileSize, int iWidth, int iHeight);
 
 public:
     /** Resize the underlying image size
@@ -57,13 +57,13 @@ public:
      *
      * @param iRect the rectangle to invalidate in the image coordinate system
      */
-    void Invalidate(const ::ULIS::FRectI& iRect);
+    void Invalidate(const FIntRect& iRect);
 
     /** Invalidates the tiles affected by iRects
      *
      * @param iRect the rectangles to invalidate in the image coordinate system
      */
-    void Invalidate(const TArray<::ULIS::FRectI>& iRects);
+    void Invalidate(const TArray<FIntRect>& iRects);
 
     /** Clear all the tiles (Makes all the tiles valid) */
     void Clear();
@@ -73,7 +73,7 @@ public:
      * @param iTileIndex the tileIndex (X, Y) of the tile to retrieve the rect from
      * @return The rect corresponding to the given tileindex
      */
-    ::ULIS::FRectI GetTileRect(const FIntPoint& iTileIndex) const;
+    FIntRect GetTileRect(const FIntPoint& iTileIndex) const;
 
     /** Wether the given tile index is valid
      *
@@ -92,7 +92,7 @@ public:
      *
      * @return an array of rects corresponding to all invalid tiles in image coordinates system
     */
-    TArray<::ULIS::FRectI> InvalidRects() const;
+    TArray<FIntRect> InvalidRects() const;
 
 public:
     // Getters

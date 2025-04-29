@@ -15,12 +15,13 @@
 #include "ULISLoaderModule.h"
 #include "OdysseyPixelFormat.h"
 #include "UObject/Package.h"
+#include "OdysseyImageRenderer.h"
 
 UOdysseyTextureLayerStack*
 UOdysseyTextureLayerStack::CreateEmptyFromTexture(UTexture2D* iTexture, UObject* iOuter)
 {
     UOdysseyTextureLayerStack* layerStack = NewObject<UOdysseyTextureLayerStack>(iOuter, "LayerStack", RF_Public | RF_Transactional);
-    layerStack->mInvalidTileMap = FULISInvalidTileMap(64, iTexture->Source.GetSizeX(), iTexture->Source.GetSizeY());
+    layerStack->mInvalidTileMap = FOdysseyInvalidTileMap(64, iTexture->Source.GetSizeX(), iTexture->Source.GetSizeY());
     return layerStack;
 }
 
@@ -28,7 +29,7 @@ UOdysseyTextureLayerStack*
 UOdysseyTextureLayerStack::CreateFromTexture(UTexture2D* iTexture, UObject* iOuter)
 {
     UOdysseyTextureLayerStack* layerStack = NewObject<UOdysseyTextureLayerStack>(iOuter, "LayerStack", RF_Public | RF_Transactional);
-    layerStack->mInvalidTileMap = FULISInvalidTileMap(64, iTexture->Source.GetSizeX(), iTexture->Source.GetSizeY());
+    layerStack->mInvalidTileMap = FOdysseyInvalidTileMap(64, iTexture->Source.GetSizeX(), iTexture->Source.GetSizeY());
 
     //Add first layer image
     UOdysseyTextureLayerImageRaster* layer = Cast<UOdysseyTextureLayerImageRaster>(layerStack->CreateLayer(UOdysseyTextureLayerImageRaster::StaticClass()));
@@ -38,7 +39,7 @@ UOdysseyTextureLayerStack::CreateFromTexture(UTexture2D* iTexture, UObject* iOut
     FOdysseyRasterBlockMutator rasterBlockMutator(rasterBlock, false);
     rasterBlockMutator.EditTilesFromRects(
         { ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) },
-        [&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<ULIS::FEvent>
+        [&](TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyInvalidTileMap& iTileMap) -> TArray<ULIS::FEvent>
         {
             FillOdysseyBlockFromUTextureData(iBlock.Get(), iTexture, iBlock->Format());
             return {};
@@ -57,7 +58,7 @@ UOdysseyTextureLayerStack*
 UOdysseyTextureLayerStack::CreateWithEmptyVectorLayer(UTexture2D* iTexture, UObject* iOuter)
 {
     UOdysseyTextureLayerStack* layerStack = NewObject<UOdysseyTextureLayerStack>(iOuter, "LayerStack", RF_Public | RF_Transactional);
-    layerStack->mInvalidTileMap = FULISInvalidTileMap(64, iTexture->Source.GetSizeX(), iTexture->Source.GetSizeY());
+    layerStack->mInvalidTileMap = FOdysseyInvalidTileMap(64, iTexture->Source.GetSizeX(), iTexture->Source.GetSizeY());
 
     //Add first layer image
     UOdysseyTextureLayerImageVector* layer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CreateLayer(UOdysseyTextureLayerImageVector::StaticClass()));
@@ -71,7 +72,7 @@ UOdysseyTextureLayerStack::CreateWithEmptyVectorLayer(UTexture2D* iTexture, UObj
 
 UOdysseyTextureLayerStack::~UOdysseyTextureLayerStack()
 {
-    FOdysseyImageRenderingAbility::OnImageRenderingChangedDelegate().RemoveAll(this);
+    FOdysseyRenderingAbility::OnRenderingChangedDelegate().RemoveAll(this);
 }
 
 UOdysseyTextureLayerStack::UOdysseyTextureLayerStack()
@@ -82,7 +83,7 @@ UOdysseyTextureLayerStack::UOdysseyTextureLayerStack()
 
     LayerRootClass = UOdysseyTextureLayerRoot::StaticClass();
 
-    FOdysseyImageRenderingAbility::OnImageRenderingChangedDelegate().AddUObject(this, &UOdysseyTextureLayerStack::OnImageRenderingChanged);
+    FOdysseyRenderingAbility::OnRenderingChangedDelegate().AddUObject(this, &UOdysseyTextureLayerStack::OnRenderingChanged);
 }
 
 void
@@ -91,7 +92,7 @@ UOdysseyTextureLayerStack::PostLoad()
     Super::PostLoad();
     UTexture2D* texture = GetTexture();
     if (texture)
-        mInvalidTileMap = FULISInvalidTileMap(64, texture->Source.GetSizeX(), texture->Source.GetSizeY());
+        mInvalidTileMap = FOdysseyInvalidTileMap(64, texture->Source.GetSizeX(), texture->Source.GetSizeY());
 }
 
 int
@@ -139,22 +140,22 @@ UOdysseyTextureLayerStack::GetTexture() const
     return nullptr;
 }
 
-TArray<::ULIS::FRectI>
-UOdysseyTextureLayerStack::GetImageRenderingRects() const
+TArray<FIntRect>
+UOdysseyTextureLayerStack::GetRenderingRects() const
 {
     UTexture2D* texture = GetTexture();
     if ( !texture )
         return {};
 
-    return { ::ULIS::FRectI::FromXYWH(0, 0, texture->Source.GetSizeX(), texture->Source.GetSizeY()) };
+    return { FIntRect(0, 0, texture->Source.GetSizeX(), texture->Source.GetSizeY()) };
 }
 
 void
-UOdysseyTextureLayerStack::OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent)
+UOdysseyTextureLayerStack::OnRenderingChanged(const FOdysseyRenderingChangedEvent& iEvent)
 {
-    TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyTextureLayerStack::OnImageRenderingChanged);
+    TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyTextureLayerStack::OnRenderingChanged);
     const FGuid& eventId =  iEvent.GetId();
-    TArray<FGuid> composition = GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Editor, 0);
+    TArray<FGuid> composition = GetRenderingComposition(EOdysseyRenderingType::Editor, 0);
     if (!composition.Contains(eventId))
         return;
 
@@ -165,11 +166,11 @@ UOdysseyTextureLayerStack::OnImageRenderingChanged(const FOdysseyImageRenderingC
         //PATCH END:
     }
 
-    if (iEvent.GetType() == FOdysseyImageRenderingChangedEvent::eEventType::kValueChange)
+    if (iEvent.GetType() == FOdysseyRenderingChangedEvent::eEventType::kValueChange)
     {
         mInvalidTileMap.Invalidate(iEvent.GetRects());
     }
-    else if (iEvent.GetType() == FOdysseyImageRenderingChangedEvent::eEventType::kCompositionChange)
+    else if (iEvent.GetType() == FOdysseyRenderingChangedEvent::eEventType::kCompositionChange)
     {
         mInvalidTileMap.Invalidate();
     }
@@ -210,7 +211,7 @@ UOdysseyTextureLayerStack::ActivateTextureFastUpdate()
     mTextureFastUpdateSurface = MakeShared<FOdysseySurfaceTexture2DEditable>(texture);
     UncompressTexture();
 
-    //mRenderer = BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render);
+    //mRenderer = BuildImageRenderer(EOdysseyRenderingType::Render);
 
     FCoreUObjectDelegates::OnPreObjectPropertyChanged.AddUObject(this, &UOdysseyTextureLayerStack::OnPreGlobalObjectPropertyChanged);
     UPackage::PreSavePackageWithContextEvent.AddUObject(this, &UOdysseyTextureLayerStack::OnPackagePreSave);
@@ -259,13 +260,14 @@ UOdysseyTextureLayerStack::CompressTexture()
 void
 UOdysseyTextureLayerStack::FastUpdateTexture(const TArray<::ULIS::FRectI>& iRects)
 {
-    UTexture2D* texture = GetTexture();
+    //TODO:
+    /* UTexture2D* texture = GetTexture();
     if ( !texture )
         return;
 
     FTextureCompilingManager::Get().FinishCompilation({ texture });
 
-    mRenderer = BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, 0); //TODO: should depend on a variable or something ?
+    mRenderer = BuildImageRenderer(EOdysseyRenderingType::Render, 0); //TODO: should depend on a variable or something ?
     mRenderer->Init();
 
     FOdysseyImageRendererCopyParams params(mTextureFastUpdateSurface->Block(), iRects);
@@ -274,7 +276,7 @@ UOdysseyTextureLayerStack::FastUpdateTexture(const TArray<::ULIS::FRectI>& iRect
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(mTextureFastUpdateSurface->Block()->Format());
     ctx.Finish();
 
-    mTextureFastUpdateSurface->Invalidate(iRects);
+    mTextureFastUpdateSurface->Invalidate(iRects); */
 }
 
 void
@@ -347,7 +349,8 @@ UOdysseyTextureLayerStack::GetTextureUpdateMode()
 void
 UOdysseyTextureLayerStack::UpdateTexture(bool iForceRefresh)
 {
-    if (iForceRefresh)
+    //TODO:
+    /* if (iForceRefresh)
         mInvalidTileMap.Invalidate();
 
     if (mInvalidTileMap.InvalidTiles().IsEmpty())
@@ -359,7 +362,7 @@ UOdysseyTextureLayerStack::UpdateTexture(bool iForceRefresh)
 
     if ( mTextureFastUpdateSurface.IsValid() )
     {
-        FastUpdateTexture(mInvalidTileMap.InvalidRects());
+        FastUpdateTexture(::ULISUtils::ToULISRectIs(mInvalidTileMap.InvalidRects()));
     }
     else
     {
@@ -368,8 +371,8 @@ UOdysseyTextureLayerStack::UpdateTexture(bool iForceRefresh)
         ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
         TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = MakeShareable(NewBlockFromUTextureData(texture, format));
 
-        TArray<::ULIS::FRectI> invalidRects = mInvalidTileMap.InvalidRects();
-        TSharedPtr<IOdysseyImageRenderer> renderer = BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, 0); //TODO: should depend on a variable or something ?
+        TArray<FIntRect> invalidRects = mInvalidTileMap.InvalidRects();
+        TSharedPtr<IOdysseyImageRenderer> renderer = BuildImageRenderer(EOdysseyRenderingType::Render, 0); //TODO: should depend on a variable or something ?
         renderer->Init();
 
         FOdysseyImageRendererCopyParams params(block, invalidRects);
@@ -384,6 +387,7 @@ UOdysseyTextureLayerStack::UpdateTexture(bool iForceRefresh)
     }
 
     mInvalidTileMap.Clear();
+     */
 }
 
 void

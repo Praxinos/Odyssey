@@ -149,5 +149,5 @@ private:
     bool mIsFlipping = false;
     int mStartFrame = 0;
     FOdysseyAnimationFlipConfiguration mFlipConfiguration;
-    IOdysseyImageRenderer::eRenderType mInitialRenderType = IOdysseyImageRenderer::eRenderType::Render;
+    EOdysseyRenderingType mInitialRenderType = EOdysseyRenderingType::Render;
 };

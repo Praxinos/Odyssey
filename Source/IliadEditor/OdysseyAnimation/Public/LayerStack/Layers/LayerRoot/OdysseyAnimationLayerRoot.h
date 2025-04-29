@@ -15,4 +15,14 @@ class ODYSSEYANIMATION_API UOdysseyAnimationLayerRoot
 
 public:
     UOdysseyAnimationLayerRoot();
+
+public:
+    virtual void PostInitProperties() override;
+    virtual void PostLoad() override;
+
+public:
+    TSharedPtr<FOdysseyAnimationProxy> GetProxy() const;
+
+private:
+    TSharedPtr<FOdysseyAnimationProxy> mProxy; //Move To LayerStack
 };

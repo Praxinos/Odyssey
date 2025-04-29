@@ -52,6 +52,7 @@ namespace UnrealBuildTool.Rules
                     "Kismet",
                     "SlateCore",
 
+                    "OdysseyCore",
                     "OdysseyFile",
                     "OdysseyImaging",
                     "OdysseyMaths",

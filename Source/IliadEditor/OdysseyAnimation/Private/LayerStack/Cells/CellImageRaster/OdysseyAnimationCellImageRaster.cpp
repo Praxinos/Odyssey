@@ -12,6 +12,7 @@
 #include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
 #include "OdysseyRasterBlock.h"
 #include "OdysseyAnimation.h"
+#include "ULISUtils.h"
 
 TSharedPtr<FOdysseyRasterBlock>
 UOdysseyAnimationCellImageRaster::GetRasterBlock() const
@@ -29,7 +30,13 @@ UOdysseyAnimationCellImageRaster::PostInitProperties()
 
     int width = GetAnimation()->GetWidth();
     int height = GetAnimation()->GetHeight();
-    ::ULIS::eFormat format = GetAnimation()->GetFormat();
+
+    ::ULIS::eFormat format = ::ULIS::Format_BGRA8;
+    switch(GetAnimation()->GetFormat())
+    {
+        case EOdysseyAnimationFormat::BGRA8: format = ::ULIS::Format_BGRA8;
+        case EOdysseyAnimationFormat::RGBAF: format = ::ULIS::Format_RGBAF;
+    }
 
     mRasterBlock = MakeShared<FOdysseyRasterBlock>(const_cast<UOdysseyAnimationCellImageRaster*>(this), width, height, format);
 
@@ -45,7 +52,13 @@ UOdysseyAnimationCellImageRaster::PostDuplicate(EDuplicateMode::Type iDuplicateM
 
     //The cell could be duplicated in a different animation with different parameters
     //Ensure the block uses those parameters
-    ::ULIS::eFormat format = GetAnimation()->GetFormat();
+    ::ULIS::eFormat format = ::ULIS::Format_BGRA8;
+    switch(GetAnimation()->GetFormat())
+    {
+        case EOdysseyAnimationFormat::BGRA8: format = ::ULIS::Format_BGRA8;
+        case EOdysseyAnimationFormat::RGBAF: format = ::ULIS::Format_RGBAF;
+    }
+
     int width = GetAnimation()->GetWidth();
     int height = GetAnimation()->GetHeight();
     mRasterBlock->PostDuplicate();
@@ -57,7 +70,7 @@ UOdysseyAnimationCellImageRaster::PostDuplicate(EDuplicateMode::Type iDuplicateM
 }
 
 TArray<::ULIS::FEvent>
-UOdysseyAnimationCellImageRaster::RasterBlockPostProcess(const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock>>& iOriginalBlocks, const FULISInvalidTileMap& iInvalidMap, const TArray<::ULIS::FEvent>& iWaitList)
+UOdysseyAnimationCellImageRaster::RasterBlockPostProcess(const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock>>& iOriginalBlocks, const FOdysseyInvalidTileMap& iInvalidMap, const TArray<::ULIS::FEvent>& iWaitList)
 {
     UOdysseyAnimationLayerImageRaster* layer = Cast<UOdysseyAnimationLayerImageRaster>(GetLayer());
     if (!layer || !layer->IsAlphaLocked)
@@ -73,7 +86,7 @@ UOdysseyAnimationCellImageRaster::RasterBlockPostProcess(const TMap<FIntPoint, T
     for (const FIntPoint& invalidTile : invalidTiles)
     {
         TSharedPtr<::ULIS::FBlock> originalBlock = iOriginalBlocks[invalidTile];
-        ::ULIS::FRectI rect = iInvalidMap.GetTileRect(invalidTile);
+        ::ULIS::FRectI rect = ::ULISUtils::ToULISRectI(iInvalidMap.GetTileRect(invalidTile));
         ::ULIS::FEvent eventBlend;
         ctx.Blend(
             *originalBlock
@@ -102,37 +115,52 @@ UOdysseyAnimationCellImageRaster::IsImageRenderingGameThreadOnly() const
 }
 
 TSharedPtr<IOdysseyImageRenderer>
-UOdysseyAnimationCellImageRaster::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter) const
+UOdysseyAnimationCellImageRaster::BuildImageRenderer(EOdysseyRenderingType iRenderType, int iFrame, FImageRendererFilter iFilter) const
 {
     if (iFilter.IsBound() && !iFilter.Execute(this))
         return nullptr;
 
-    return MakeShared<FOdysseyAnimationCellImageRasterImageRenderer>(this, iFrame, iRenderType, GetImageRenderingRects(), iFilter);
+    return MakeShared<FOdysseyAnimationCellImageRasterImageRenderer>(this, iFrame, iRenderType, GetRenderingRects(), iFilter);
 }
 
 TArray<FGuid>
-UOdysseyAnimationCellImageRaster::GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex) const
+UOdysseyAnimationCellImageRaster::GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrameIndex) const
 {
-    return { GetImageRenderingId() };
+    return { GetRenderingId() };
 }
 
-TArray<::ULIS::FRectI>
-UOdysseyAnimationCellImageRaster::GetImageRenderingRects() const
+TArray<FIntRect>
+UOdysseyAnimationCellImageRaster::GetRenderingRects() const
 {
-    return { ::ULIS::FRectI::FromXYWH(0, 0, mRasterBlock->GetWidth(), mRasterBlock->GetHeight()) };
+    return { FIntRect(0, 0, mRasterBlock->GetWidth(), mRasterBlock->GetHeight()) };
 }
 
 void
 UOdysseyAnimationCellImageRaster::OnBlockChanged(const TArray<::ULIS::FRectI>& iRects)
 {
-    ImageRenderingChanged(iRects, true);
+    TArray<FIntRect> intRects;
+    intRects.Reserve(iRects.Num());
+    for (const ::ULIS::FRectI& rect : iRects )
+    {
+        FIntRect intRect(rect.x, rect.y, rect.x + rect.w, rect.y + rect.h);
+        intRects.Add(intRect);
+    }
+    RenderingChanged(intRects, true);
 }
 
 void
 UOdysseyAnimationCellImageRaster::OnBlockCommited(const TArray<::ULIS::FRectI>& iRects)
 {
+    TArray<FIntRect> intRects;
+    intRects.Reserve(iRects.Num());
+    for (const ::ULIS::FRectI& rect : iRects )
+    {
+        FIntRect intRect(rect.x, rect.y, rect.x + rect.w, rect.y + rect.h);
+        intRects.Add(intRect);
+    }
+
     DirtyThumbnail();
-    ImageRenderingChanged(iRects);
+    RenderingChanged(intRects);
 }
 
 FOdysseyMediaProvider

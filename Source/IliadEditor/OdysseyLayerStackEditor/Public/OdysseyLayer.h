@@ -194,9 +194,9 @@ public:
     bool IsLockedRecursively() const;
 
 public:
-    virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const override;
-    virtual TArray<::ULIS::FRectI> GetImageRenderingRects() const override;
-    virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter = FImageRendererFilter()) const override;
+    virtual TArray<FGuid> GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrame) const override;
+    virtual TArray<FIntRect> GetRenderingRects() const override;
+    virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(EOdysseyRenderingType iRenderType, int iFrame, FImageRendererFilter iFilter = FImageRendererFilter()) const override;
     virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const;
 
     public:

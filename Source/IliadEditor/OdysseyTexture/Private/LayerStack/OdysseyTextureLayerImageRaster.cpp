@@ -6,6 +6,7 @@
 #include "OdysseyPixelFormat.h"
 #include "ULISEventBuilder.h"
 #include "ULISLoaderModule.h"
+#include "ULISUtils.h"
 #include "OdysseyStyle.h"
 #include "OdysseyMediaRaster.h"
 #include "OdysseyRasterBlock.h"
@@ -40,13 +41,13 @@ UOdysseyTextureLayerImageRaster::GetRasterBlock() const
 void
 UOdysseyTextureLayerImageRaster::OnBlockChanged(const TArray<::ULIS::FRectI>& iRects)
 {
-    ImageRenderingChanged(iRects, true);
+    RenderingChanged(::ULISUtils::ToIntRects(iRects), true);
 }
 
 void
 UOdysseyTextureLayerImageRaster::OnBlockCommited(const TArray<::ULIS::FRectI>& iRects)
 {
-    ImageRenderingChanged(iRects);
+    RenderingChanged(::ULISUtils::ToIntRects(iRects));
 }
 
 void
@@ -55,7 +56,7 @@ UOdysseyTextureLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
     FOdysseyRasterBlockMutator mutator(RasterBlock);
     mutator.EditTilesFromRects(
         { ::ULIS::FRectI::FromXYWH(0, 0, RasterBlock->GetWidth(), RasterBlock->GetHeight()) },
-        [&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+        [&](TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
         {
             ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(RasterBlock->GetFormat());
             TArray<::ULIS::FEvent> lastEvent = {};
@@ -65,10 +66,10 @@ UOdysseyTextureLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
                 if ( !textureLayer )
                     continue;
 
-                TSharedPtr<IOdysseyImageRenderer> renderer = textureLayer->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, 0);
+                TSharedPtr<IOdysseyImageRenderer> renderer = textureLayer->BuildImageRenderer(EOdysseyRenderingType::Render, 0);
                 renderer->Init();
 
-                FOdysseyImageRendererBlendParams params(iBlock, {iBlock->Rect()});
+                FOdysseyImageRendererBlendParams params(iBlock, {::ULISUtils::ToIntRect(iBlock->Rect())});
                 params.mBlendMode = (::ULIS::eBlendMode)textureLayer->BlendMode;
                 params.mOpacity = textureLayer->Opacity;
 
@@ -172,7 +173,7 @@ UOdysseyTextureLayerImageRaster::Serialize(FArchive& Ar)
 }
 
 TArray<::ULIS::FEvent>
-UOdysseyTextureLayerImageRaster::RasterBlockPostProcess(const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock>>& iOriginalBlocks, const FULISInvalidTileMap& iInvalidMap, const TArray<::ULIS::FEvent>& iWaitList)
+UOdysseyTextureLayerImageRaster::RasterBlockPostProcess(const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock>>& iOriginalBlocks, const FOdysseyInvalidTileMap& iInvalidMap, const TArray<::ULIS::FEvent>& iWaitList)
 {
     if (!IsAlphaLocked)
         return iWaitList;
@@ -185,7 +186,7 @@ UOdysseyTextureLayerImageRaster::RasterBlockPostProcess(const TMap<FIntPoint, TS
     for (const FIntPoint& invalidTile : invalidTiles)
     {
         TSharedPtr<::ULIS::FBlock> originalBlock = iOriginalBlocks[invalidTile];
-        ::ULIS::FRectI rect = iInvalidMap.GetTileRect(invalidTile);
+        ::ULIS::FRectI rect = ::ULISUtils::ToULISRectI(iInvalidMap.GetTileRect(invalidTile));
         ::ULIS::FEvent eventBlend;
         ctx.Blend(
             *originalBlock
@@ -207,18 +208,18 @@ UOdysseyTextureLayerImageRaster::RasterBlockPostProcess(const TMap<FIntPoint, TS
 }
 
 TSharedPtr<IOdysseyImageRenderer>
-UOdysseyTextureLayerImageRaster::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter) const
+UOdysseyTextureLayerImageRaster::BuildImageRenderer(EOdysseyRenderingType iRenderType, int iFrame, FImageRendererFilter iFilter) const
 {
     if (iFilter.IsBound() && !iFilter.Execute(this))
         return nullptr;
 
-    return MakeShared<FOdysseyTextureLayerImageRasterImageRenderer>(this, iRenderType, GetImageRenderingRects(), iFilter);
+    return MakeShared<FOdysseyTextureLayerImageRasterImageRenderer>(this, iRenderType, GetRenderingRects(), iFilter);
 }
 
 TArray<FGuid>
-UOdysseyTextureLayerImageRaster::GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const
+UOdysseyTextureLayerImageRaster::GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrame) const
 {
-    return { GetImageRenderingId() };
+    return { GetRenderingId() };
 }
 
 void

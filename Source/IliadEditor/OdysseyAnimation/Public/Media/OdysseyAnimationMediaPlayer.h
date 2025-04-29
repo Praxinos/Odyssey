@@ -42,8 +42,8 @@ public:
     /** Returns the player's event sink */
     IMediaEventSink& GetEventSink();
 
-    IOdysseyImageRenderer::eRenderType GetRenderType() const;
-    void SetRenderType(IOdysseyImageRenderer::eRenderType iRenderType);
+    EOdysseyRenderingType GetRenderType() const;
+    void SetRenderType(EOdysseyRenderingType iRenderType);
 
     void SetFrameToIncludeIntoDuration(int iFrame);
     void UnsetFrameToIncludeIntoDuration();

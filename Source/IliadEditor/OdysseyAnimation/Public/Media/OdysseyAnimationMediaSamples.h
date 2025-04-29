@@ -6,10 +6,10 @@
 #include "CoreMinimal.h"
 #include "IMediaSamples.h"
 #include "OdysseyImageRenderer.h"
-#include "OdysseyImageRenderingAbility.h"
+#include "OdysseyRenderingAbility.h"
 #include "TickableEditorObject.h"
 #include "UObject/StrongObjectPtr.h"
-#include "ULISInvalidTileMap.h"
+#include "OdysseyInvalidTileMap.h"
 
 class FOdysseyAnimationMediaPlayer;
 class FOdysseyAnimationMediaControls;
@@ -41,9 +41,8 @@ private:
 public:
     void Render();
     void Update(int iFrameIndex, int64 iSequenceIndex);
-    void CopyBlockToTexture(TSharedPtr<::ULIS::FBlock> iBlock, const TArray<::ULIS::FRectI>& iRects);
-    IOdysseyImageRenderer::eRenderType GetRenderType() const;
-    void SetRenderType(IOdysseyImageRenderer::eRenderType iRenderType);
+    EOdysseyRenderingType GetRenderType() const;
+    void SetRenderType(EOdysseyRenderingType iRenderType);
 
 protected:
     // FTickableEditorObject implementation
@@ -52,7 +51,8 @@ protected:
 
 private:
     //Events
-    void OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent);
+    void OnRenderingChanged(const FOdysseyRenderingChangedEvent& iEvent);
+    int GetFrameIndexAtTime(FTimespan iTime) const;
 
 private:
     UOdysseyAnimation* mAnimation;
@@ -61,7 +61,7 @@ private:
     TSharedPtr<class FOdysseyAnimationMediaTextureSample> mSample;
     int mCurrentFrameIndex;
     TArray<FGuid> mImageRenderingComposition;
-    TStrongObjectPtr<UTexture2D> mTexture; //PATCH: Needs to be in this class, otherwise gets destriyed on the wrong thread
-    FULISInvalidTileMap mInvalidTileMap;
-    IOdysseyImageRenderer::eRenderType mRenderType = IOdysseyImageRenderer::eRenderType::Render;
+    TStrongObjectPtr<UTextureRenderTarget2D> mRenderTarget; //PATCH: Needs to be in this class, otherwise gets destriyed on the wrong thread
+    FOdysseyInvalidTileMap mInvalidTileMap;
+    EOdysseyRenderingType mRenderType = EOdysseyRenderingType::Render;
 };

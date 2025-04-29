@@ -21,6 +21,7 @@
 #include "ScopedTransaction.h"
 #include "UObject/DevObjectVersion.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
+#include "ULISUtils.h"
 
 #define LOCTEXT_NAMESPACE "Animation"
 
@@ -116,20 +117,20 @@ UOdysseyAnimationLayerImageRaster::Serialize(FArchive& Ar)
 }
 
 TSharedPtr<IOdysseyImageRenderer>
-UOdysseyAnimationLayerImageRaster::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter) const
+UOdysseyAnimationLayerImageRaster::BuildImageRenderer(EOdysseyRenderingType iRenderType, int iFrame, FImageRendererFilter iFilter) const
 {
     if (iFilter.IsBound() && !iFilter.Execute(this))
         return nullptr;
 
-    return MakeShared<FOdysseyAnimationLayerImageRasterImageRenderer>(this, iFrame, iRenderType, GetImageRenderingRects(), iFilter);
+    return MakeShared<FOdysseyAnimationLayerImageRasterImageRenderer>(this, iFrame, iRenderType, GetRenderingRects(), iFilter);
 }
 
 TArray<FGuid>
-UOdysseyAnimationLayerImageRaster::GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex) const
+UOdysseyAnimationLayerImageRaster::GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrameIndex) const
 {
-    TArray<FGuid> idComposition = { GetImageRenderingId() };
+    TArray<FGuid> idComposition = { GetRenderingId() };
 
-    bool showLighttable = iRenderType == IOdysseyImageRenderer::eRenderType::Editor && Lighttable.bIsActivated;
+    bool showLighttable = iRenderType == EOdysseyRenderingType::Editor && Lighttable.bIsActivated;
     if (showLighttable && Lighttable.DisplayPosition == EOdysseyLightTableDisplayPosition::UnderLayer )
         idComposition.Append(GetLighttableImageRenderingComposition(iFrameIndex));
 
@@ -148,7 +149,7 @@ UOdysseyAnimationLayerImageRaster::GetImageRenderingComposition(IOdysseyImageRen
     if (cell)
     {
         int cellFrame = frame - cell->GetFrameRange().GetLowerBoundValue();
-        idComposition.Append(cell->GetImageRenderingComposition(iRenderType, cellFrame));
+        idComposition.Append(cell->GetRenderingComposition(iRenderType, cellFrame));
     }
 
     if (showLighttable && Lighttable.DisplayPosition == EOdysseyLightTableDisplayPosition::AboveLayer )
@@ -196,7 +197,7 @@ UOdysseyAnimationLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
             if ( !layer )
                 continue;
 
-            currentIds.Append(layer->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Render, frameIndex));
+            currentIds.Append(layer->GetRenderingComposition(EOdysseyRenderingType::Render, frameIndex));
         }
 
         //Do we need a new cell
@@ -231,7 +232,7 @@ UOdysseyAnimationLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
 
         blockMutator.EditTilesFromRects(
             { rect },
-            [&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+            [&](TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
             {
                 TArray<::ULIS::FEvent> lastEvent;
                 for (int layerIndex = 0; layerIndex < iLayers.Num(); layerIndex++)
@@ -240,10 +241,10 @@ UOdysseyAnimationLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
                     if ( !layer )
                         continue;
 
-                    TSharedPtr<IOdysseyImageRenderer> renderer = layer->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, frame);
+                    TSharedPtr<IOdysseyImageRenderer> renderer = layer->BuildImageRenderer(EOdysseyRenderingType::Render, frame);
                     renderer->Init();
 
-                    FOdysseyImageRendererBlendParams params(iBlock, { rect });
+                    FOdysseyImageRendererBlendParams params(iBlock, { ::ULISUtils::ToIntRect(rect) });
                     params.mBlendMode = (::ULIS::eBlendMode)layer->BlendMode;
                     params.mOpacity = layer->Opacity;
                     lastEvent = renderer->Blend(params, lastEvent);

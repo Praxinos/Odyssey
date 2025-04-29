@@ -6,13 +6,15 @@
 #include "Containers/Queue.h"
 #include "HAL/Runnable.h"
 #include "ThumbnailRendering/ThumbnailRenderer.h"
-#include "OdysseyImageRenderingAbility.h"
+#include "OdysseyRenderingAbility.h"
 #include "UObject/GCObject.h"
+#include <ULIS>
 
 #include "OdysseyAnimationCellThumbnailRenderer.generated.h"
 
 class UOdysseyAnimationCell;
 class UTexture2D;
+class IOdysseyImageRenderer;
 
 struct FOdysseyAnimationCellThumbnailTask
 {

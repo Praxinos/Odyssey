@@ -6,12 +6,10 @@
 //#include "OdysseyAnimation.h"
 #include "CoreMinimal.h"
 #include "TickableEditorObject.h"
-#include "ULISInvalidTileMap.h"
+#include "OdysseyInvalidTileMap.h"
 #include "Misc/OdysseyHandle.h"
 #include "OdysseyImageRenderer.h"
-#include "OdysseyImageRenderingAbility.h"
-
-#include <ULIS>
+#include "OdysseyRenderingAbility.h"
 
 #include "OdysseyAnimationPlayer.generated.h"
 
@@ -47,12 +45,12 @@ public:
 public:
     //Events
     FSimpleMulticastDelegate& OnAnimationChanged();
-    FSimpleMulticastDelegate& OnTextureChanged();
     FSimpleMulticastDelegate& OnCurrentFrameChanged();
     FSimpleMulticastDelegate& OnPlay();
     FSimpleMulticastDelegate& OnStop();
 
 protected:
+    virtual void PostInitProperties() override;
     virtual void PostLoad() override;
     virtual void PostDuplicate(EDuplicateMode::Type iDuplicateMode) override;
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent) override;
@@ -61,7 +59,6 @@ protected:
     void PostPropertyChanged(const FName& iPropertyName);
 
     void AnimationChanged();
-    void TextureChanged();
     void StatusChanged();
     void PlayRateChanged();
     void IsLoopingChanged();
@@ -74,7 +71,7 @@ public:
     void SeekToFrame(FFrameTime iFrame);
     void SeekToFrameImmediate(FFrameTime iFrame);
 
-    UTexture2D* GetTexture();
+    UTextureRenderTarget2D* GetRenderTarget();
     EOdysseyAnimationPlayerStatus GetStatus() const;
 
     FFrameTime GetCurrentFrame() const;
@@ -92,8 +89,8 @@ public:
 
     bool IsBackward() const;
 
-    void SetRenderType(IOdysseyImageRenderer::eRenderType iRenderType);
-    IOdysseyImageRenderer::eRenderType GetRenderType() const;
+    void SetRenderType(EOdysseyRenderingType iRenderType);
+    EOdysseyRenderingType GetRenderType() const;
 
     void SetFrameRange(const TOptional<TRange<FFrameTime>>& iRange);
 
@@ -109,8 +106,7 @@ protected:
 
 private:
     void UpdateTexture();
-    void CopyBlocksToTexture(const TArray<TSharedPtr<::ULIS::FBlock>>& iBlocks, const TArray<::ULIS::FRectI>& iRects);
-    void OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent);
+    void OnRenderingChanged(const FOdysseyRenderingChangedEvent& iEvent);
 
 public:
     UPROPERTY()
@@ -135,7 +131,7 @@ public:
     bool IsLooping = true;
 public:
     UPROPERTY(Transient, DuplicateTransient)
-    TObjectPtr<UTexture2D> Texture;
+    TObjectPtr<UTextureRenderTarget2D> RenderTarget;
 
 private:
 #if WITH_EDITOR
@@ -145,19 +141,18 @@ private:
     FFrameTime mCurrentFrame;
     TOptional<TRange<FFrameTime>> mRange;
     TArray<FGuid>   mImageRenderingComposition;
-    FULISInvalidTileMap mInvalidTileMap;
+    FOdysseyInvalidTileMap mInvalidTileMap;
     EOdysseyAnimationPlayerStatus Status = EOdysseyAnimationPlayerStatus::Stopped;
 
     /**
      * We keep the renderer in memory to ensure all blocks are loaded and ready to be used instead of being recached
      */
     TSharedPtr<IOdysseyImageRenderer> mRenderer;
-    IOdysseyImageRenderer::eRenderType mRenderType = IOdysseyImageRenderer::eRenderType::Render;
+    EOdysseyRenderingType mRenderType = EOdysseyRenderingType::Render;
 
 private:
     //Events
     FSimpleMulticastDelegate mOnAnimationChanged;
-    FSimpleMulticastDelegate mOnTextureChanged;
     FSimpleMulticastDelegate mOnCurrentFrameChanged;
     FSimpleMulticastDelegate mOnPlay;
     FSimpleMulticastDelegate mOnStop;

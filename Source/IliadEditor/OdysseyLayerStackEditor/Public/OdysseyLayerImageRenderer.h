@@ -4,16 +4,15 @@
 #pragma once
 
 #include "OdysseyImageRenderer.h"
-
 #include <ULIS>
 
-class UOdysseyLayerStack;
+class UOdysseyLayer;
 
-class FOdysseyLayerStackImageRenderer
+class ODYSSEYLAYERSTACKEDITOR_API FOdysseyLayerImageRenderer
     : public IOdysseyImageRenderer
 {
 public:
-    FOdysseyLayerStackImageRenderer(const UOdysseyLayerStack* iLayerStack, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI> iDefaultRects, FImageRendererFilter iFilter);
+    FOdysseyLayerImageRenderer(const UOdysseyLayer* iLayer, int iFrame, EOdysseyRenderingType iRenderType, const TArray<FIntRect>& iDefaultRects, FImageRendererFilter iFilter = FImageRendererFilter());
 
 public:
     virtual void Init() override;
@@ -22,5 +21,11 @@ public:
     virtual TArray<::ULIS::FEvent> Copy(const FOdysseyImageRendererCopyParams& iParams, const TArray<::ULIS::FEvent>& iWaitList) override;
 
 public:
-    TSharedPtr<IOdysseyImageRenderer> mLayerRootRenderer;
+    struct FChildData
+    {
+        TSharedPtr<IOdysseyImageRenderer> mRenderer;
+        ::ULIS::eBlendMode mBlendMode;
+        float mOpacity;
+    };
+    TArray<FChildData> mChildrenData;
 };

@@ -9,7 +9,7 @@
 #include "ULISUtils.h"
 #include "ULISEventBuilder.h"
 
-FOdysseyAnimationCellImageRasterImageRenderer::FOdysseyAnimationCellImageRasterImageRenderer(const UOdysseyAnimationCellImageRaster* iCell, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects, FImageRendererFilter iFilter)
+FOdysseyAnimationCellImageRasterImageRenderer::FOdysseyAnimationCellImageRasterImageRenderer(const UOdysseyAnimationCellImageRaster* iCell, int iFrame, EOdysseyRenderingType iRenderType, const TArray<FIntRect>& iDefaultRects, FImageRendererFilter iFilter)
     : IOdysseyImageRenderer(iRenderType, iDefaultRects)
     , mCell(iCell)
     , mBlock(nullptr)
@@ -64,7 +64,7 @@ FOdysseyAnimationCellImageRasterImageRenderer::Blend(const FOdysseyImageRenderer
         return iWaitList;
 
     FOdysseyImageRendererBlendParams params(iParams);
-    if (GetRenderType() == IOdysseyImageRenderer::eRenderType::RenderOutOfPegs)
+    if (GetRenderType() == EOdysseyRenderingType::RenderOutOfPegs)
         params.mTransform = mOutOfPegsTransform;
 
     return ConvertAndBlend(mBlock, ::ULIS::FVec2I(0), params, iWaitList);
@@ -78,7 +78,7 @@ FOdysseyAnimationCellImageRasterImageRenderer::Copy(const FOdysseyImageRendererC
         return iWaitList;
 
     FOdysseyImageRendererCopyParams params(iParams);
-    if (GetRenderType() == IOdysseyImageRenderer::eRenderType::RenderOutOfPegs)
+    if (GetRenderType() == EOdysseyRenderingType::RenderOutOfPegs)
         params.mTransform = mOutOfPegsTransform;
 
     return ConvertAndCopy(mBlock, ::ULIS::FVec2I(0), params, iWaitList);

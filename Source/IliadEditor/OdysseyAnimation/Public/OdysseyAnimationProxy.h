@@ -6,13 +6,13 @@
 #include "CoreMinimal.h"
 #include "Containers/Queue.h"
 #include "HAL/Runnable.h"
-#include "OdysseyImageRenderingAbility.h"
-#include "ULISInvalidTileMap.h"
+#include "OdysseyRenderingAbility.h"
+#include "OdysseyInvalidTileMap.h"
 
 #include <ULIS>
 
 class FBlockData;
-class UOdysseyAnimation;
+class UOdysseyAnimationLayer;
 class FOdysseyRasterBlock;
 class IOdysseyImageRenderer;
 
@@ -21,7 +21,7 @@ class ODYSSEYANIMATION_API FOdysseyAnimationProxy
 {
 public:
     virtual ~FOdysseyAnimationProxy();
-    FOdysseyAnimationProxy(UOdysseyAnimation* iAnimation);
+    FOdysseyAnimationProxy(UOdysseyAnimationLayer* iLayer);
 
 public:
     TSharedPtr<::ULIS::FBlock> GetBlock(int iFrameIndex);
@@ -39,11 +39,11 @@ public:
 
 private:
     TSharedPtr<FBlockData> GetBlockDataForComposition(const TArray<FGuid>& iComposition);
-    void OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent);
-    void OnImageRenderingPreChanged(const FOdysseyImageRenderingChangedEvent& iEvent);
+    void OnRenderingChanged(const FOdysseyRenderingChangedEvent& iEvent);
+    void OnImageRenderingPreChanged(const FOdysseyRenderingChangedEvent& iEvent);
 
 private:
-    UOdysseyAnimation* mAnimation;
+    UOdysseyAnimationLayer* mLayer;
 
     // Thread to run the worker FRunnable on
     FRunnableThread* mThread;
@@ -59,14 +59,14 @@ private:
     TArray<TSharedPtr<FBlockData>> mBlockData;
     TMap<int, TSharedPtr<FBlockData>> mFramesToBlockData;
     TQueue<TSharedPtr<FBlockData>, EQueueMode::Mpsc> mPendingBlockData;
-    FInt32Range mAnimationRange;
+    FInt32Range mLayerRange;
 };
 
 class FBlockData
 {
 public:
     ~FBlockData();
-    FBlockData(UOdysseyAnimation* iAnimation, const TArray<FGuid>& iComposition);
+    FBlockData(UOdysseyAnimationLayer* iLayer, const TArray<FGuid>& iComposition);
 
 public:
     TSharedPtr<::ULIS::FBlock> GetBlock();
@@ -77,7 +77,7 @@ public:
     void AddFrameIndex(int iFrameIndex);
     void RemoveFrameIndex(int iFrameIndex);
 
-    void PreChange(const FGuid& iId, const TArray<::ULIS::FRectI>& iInvalidRects);
+    void PreChange(const FGuid& iId, const TArray<FIntRect>& iInvalidRects);
     bool PostChange(const FGuid& iId);
 
     bool IsInvalid() const;
@@ -87,14 +87,14 @@ public:
     bool Render();
 
 private:
-    void Render(TSharedPtr<IOdysseyImageRenderer> iRenderer, TSharedPtr<FOdysseyRasterBlock> iRasterBlock, const TArray<::ULIS::FRectI>& iInvalidRects);
+    void Render(TSharedPtr<IOdysseyImageRenderer> iRenderer, TSharedPtr<FOdysseyRasterBlock> iRasterBlock, const TArray<FIntRect>& iInvalidRects);
 
 private:
-    UOdysseyAnimation* mAnimation;
+    UOdysseyAnimationLayer* mLayer;
     TArray<FGuid> mComposition;
     TArray<FGuid> mInvalidIds;
     TSharedPtr<FOdysseyRasterBlock> mRasterBlock;
-    FULISInvalidTileMap mInvalidTileMap;
+    FOdysseyInvalidTileMap mInvalidTileMap;
     TSet<int> mFrameIndexes;
     TSharedPtr<IOdysseyImageRenderer> mRenderer;
     bool mIsReadyToRender = false;

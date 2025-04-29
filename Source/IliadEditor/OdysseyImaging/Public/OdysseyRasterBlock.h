@@ -6,7 +6,7 @@
 #include "CoreMinimal.h"
 
 #include "Misc/OdysseyHandle.h"
-#include "ULISInvalidTileMap.h"
+#include "OdysseyInvalidTileMap.h"
 #include "OdysseyRasterBlockUndo.h"
 #include "OdysseyDiskCache.h"
 #include "Serialization/EditorBulkData.h"
@@ -55,7 +55,7 @@ public:
      * 3rd Argument : WaitList, contains ULIS Events on which to wait before applying any post process
      */
     typedef TMap<FIntPoint, TSharedPtr<::ULIS::FBlock>> tPostProcessOriginalBlocks;
-    DECLARE_DELEGATE_RetVal_ThreeParams(TArray<::ULIS::FEvent>, FPostProcess, const tPostProcessOriginalBlocks&, const FULISInvalidTileMap&, const TArray<::ULIS::FEvent>&)
+    DECLARE_DELEGATE_RetVal_ThreeParams(TArray<::ULIS::FEvent>, FPostProcess, const tPostProcessOriginalBlocks&, const FOdysseyInvalidTileMap&, const TArray<::ULIS::FEvent>&)
 
 public:
     // Construction / Destruction

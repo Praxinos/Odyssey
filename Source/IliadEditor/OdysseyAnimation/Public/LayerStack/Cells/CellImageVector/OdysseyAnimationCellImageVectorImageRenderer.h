@@ -4,7 +4,7 @@
 #pragma once
 
 #include "OdysseyImageRenderer.h"
-
+#include "OdysseyRenderingType.h"
 #include <ULIS>
 
 class UOdysseyAnimationCellImageVector;
@@ -14,7 +14,7 @@ class ODYSSEYANIMATION_API FOdysseyAnimationCellImageVectorImageRenderer
     , public FGCObject
 {
 public:
-    FOdysseyAnimationCellImageVectorImageRenderer(const UOdysseyAnimationCellImageVector* iCell, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects, FImageRendererFilter iFilter);
+    FOdysseyAnimationCellImageVectorImageRenderer(const UOdysseyAnimationCellImageVector* iCell, int iFrame, EOdysseyRenderingType iRenderType, const TArray<FIntRect>& iDefaultRects, FImageRendererFilter iFilter);
 
 public:
     virtual void Init() override;

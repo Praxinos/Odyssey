@@ -4,7 +4,6 @@
 #include "OdysseyLayerStack.h"
 
 #include "OdysseyLayer.h"
-#include "OdysseyLayerStackImageRenderer.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Misc/ScopedSlowTask.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
@@ -737,24 +736,30 @@ UOdysseyLayerStack::PostTransacted(const FTransactionObjectEvent& iTransactionEv
 }
 
 
-TSharedPtr<IOdysseyImageRenderer>
-UOdysseyLayerStack::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter) const
+/* TSharedPtr<IOdysseyImageRenderer>
+UOdysseyLayerStack::BuildImageRenderer(EOdysseyRenderingType iRenderType, int iFrame, FImageRendererFilter iFilter) const
 {
     if (iFilter.IsBound() && !iFilter.Execute(this))
         return nullptr;
 
-    return MakeShared<FOdysseyLayerStackImageRenderer>(this, iFrame, iRenderType, GetImageRenderingRects(), iFilter);
+    return MakeShared<FOdysseyLayerStackImageRenderer>(this, iFrame, iRenderType, GetRenderingRects(), iFilter);
+} */
+
+void
+UOdysseyLayerStack::RenderToTextureFromRects(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, const TArray<FIntRect>& iRects) const
+{
+    //TODO:
 }
 
 TArray<FGuid>
-UOdysseyLayerStack::GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex) const
+UOdysseyLayerStack::GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrameIndex) const
 {
-    TArray<FGuid> idComposition = { GetImageRenderingId() };
+    TArray<FGuid> idComposition = { GetRenderingId() };
 
     UOdysseyLayer* layerRoot = Cast<UOdysseyLayer>(LayerRoot);
     if ( !layerRoot )
         return idComposition;
 
-    idComposition.Append(layerRoot->GetImageRenderingComposition(iRenderType, iFrameIndex));
+    idComposition.Append(layerRoot->GetRenderingComposition(iRenderType, iFrameIndex));
     return idComposition;
 }

@@ -240,7 +240,7 @@ UOdysseyLayer::PostPropertyChanged(const FName& iPropertyName, bool iIsInteracti
     if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyLayer, IsActivated) )
     {
         if (Parent)
-            Parent->ImageRenderingCompositionChanged();
+            Parent->RenderingCompositionChanged();
 
         OnIsActivatedChanged().Broadcast(this);
     }
@@ -271,18 +271,18 @@ UOdysseyLayer::PostPropertyChanged(const FName& iPropertyName, bool iIsInteracti
         if ( !layerStack )
             return;
 
-        ImageRenderingCompositionChanged();
+        RenderingCompositionChanged();
         OnChildrenChanged().Broadcast(this);
         layerStack->HierarchyChanged();
     }
     if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyLayer, BlendMode) )
     {
-        ImageRenderingChanged();
+        RenderingChanged();
         OnBlendModeChanged().Broadcast(this);
     }
     if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Opacity) )
     {
-        ImageRenderingChanged(iIsInteractive);
+        RenderingChanged(iIsInteractive);
         OnOpacityChanged().Broadcast(this);
     }
 }
@@ -351,9 +351,9 @@ UOdysseyLayer::IsLockedRecursively() const
 }
 
 TArray<FGuid>
-UOdysseyLayer::GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const
+UOdysseyLayer::GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrame) const
 {
-    TArray<FGuid> idComposition = { GetImageRenderingId() };
+    TArray<FGuid> idComposition = { GetRenderingId() };
 
     const TArray<UOdysseyLayer*>& children = GetChildren();
     for (UOdysseyLayer* child : children)
@@ -361,29 +361,29 @@ UOdysseyLayer::GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType i
         if (!child->IsActivated)
             continue;
 
-        idComposition.Append(child->GetImageRenderingComposition(iRenderType, iFrame));
+        idComposition.Append(child->GetRenderingComposition(iRenderType, iFrame));
     }
 
     return idComposition;
 }
 
-TArray<::ULIS::FRectI>
-UOdysseyLayer::GetImageRenderingRects() const
+TArray<FIntRect>
+UOdysseyLayer::GetRenderingRects() const
 {
     UOdysseyLayerStack* layerStack = GetLayerStack();
     if(!layerStack)
         return {};
 
-    return layerStack->GetImageRenderingRects();
+    return layerStack->GetRenderingRects();
 }
 
 TSharedPtr<IOdysseyImageRenderer>
-UOdysseyLayer::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter) const
+UOdysseyLayer::BuildImageRenderer(EOdysseyRenderingType iRenderType, int iFrame, FImageRendererFilter iFilter) const
 {
     if (iFilter.IsBound() && !iFilter.Execute(this))
         return nullptr;
 
-    return MakeShared<FOdysseyLayerImageRenderer>(this, iFrame, iRenderType, GetImageRenderingRects(), iFilter);
+    return MakeShared<FOdysseyLayerImageRenderer>(this, iFrame, iRenderType, GetRenderingRects(), iFilter);
 }
 
 void

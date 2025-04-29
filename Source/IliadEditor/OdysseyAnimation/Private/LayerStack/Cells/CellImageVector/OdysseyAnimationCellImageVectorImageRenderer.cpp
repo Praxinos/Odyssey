@@ -14,7 +14,7 @@
 
 static FCriticalSection mEngineMutex;
 
-FOdysseyAnimationCellImageVectorImageRenderer::FOdysseyAnimationCellImageVectorImageRenderer(const UOdysseyAnimationCellImageVector* iCell, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects, FImageRendererFilter iFilter)
+FOdysseyAnimationCellImageVectorImageRenderer::FOdysseyAnimationCellImageVectorImageRenderer(const UOdysseyAnimationCellImageVector* iCell, int iFrame, EOdysseyRenderingType iRenderType, const TArray<FIntRect>& iDefaultRects, FImageRendererFilter iFilter)
     : IOdysseyImageRenderer(iRenderType, iDefaultRects)
     , mCell(iCell)
     , mBlock(nullptr)
@@ -37,7 +37,7 @@ FOdysseyAnimationCellImageVectorImageRenderer::FOdysseyAnimationCellImageVectorI
                 mRenderHUD = ( cell == mCell )
                         && ( frame == iFrame )
                         && ( layerStack->CurrentLayer.Get() == layer )
-                        && ( GetRenderType() == IOdysseyImageRenderer::eRenderType::Editor );
+                        && ( GetRenderType() == EOdysseyRenderingType::Editor );
             }
         }
 
@@ -87,7 +87,7 @@ FOdysseyAnimationCellImageVectorImageRenderer::Blend(const FOdysseyImageRenderer
         return iWaitList;
 
     FOdysseyImageRendererBlendParams params(iParams);
-    if (GetRenderType() == IOdysseyImageRenderer::eRenderType::RenderOutOfPegs)
+    if (GetRenderType() == EOdysseyRenderingType::RenderOutOfPegs)
         params.mTransform = mOutOfPegsTransform;
 
     TArray<::ULIS::FEvent> events = ConvertAndBlend(mBlock, ::ULIS::FVec2I(0), params, iWaitList);
@@ -109,7 +109,7 @@ FOdysseyAnimationCellImageVectorImageRenderer::Copy(const FOdysseyImageRendererC
         return iWaitList;
 
     FOdysseyImageRendererCopyParams params(iParams);
-    if (GetRenderType() == IOdysseyImageRenderer::eRenderType::RenderOutOfPegs)
+    if (GetRenderType() == EOdysseyRenderingType::RenderOutOfPegs)
         params.mTransform = mOutOfPegsTransform;
 
     return ConvertAndCopy(mBlock, ::ULIS::FVec2I(0), params, iWaitList);

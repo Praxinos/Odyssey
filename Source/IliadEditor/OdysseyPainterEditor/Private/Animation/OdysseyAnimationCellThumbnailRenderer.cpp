@@ -11,11 +11,13 @@
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
 #include "OdysseyAnimation.h"
 #include "OdysseyPainterEditorSettings.h"
+#include "OdysseyImageRenderer.h"
 #include "RHITypes.h"
 #include "TextureCompiler.h"
 #include "TextureResource.h"
 #include "ThumbnailRendering/ThumbnailManager.h"
 #include "ULISLoaderModule.h"
+#include "ULISUtils.h"
 #include "OdysseyRasterBlockMutator.h"
 
 #define THUMBNAIL_RENDER_SIZE 64
@@ -175,21 +177,28 @@ FOdysseyAnimationCellThumbnailProxy::InvalidateCell(UOdysseyAnimationCell* iCell
 {
     if(mRenderers.Contains(iCell))
     {
-        mRenderers[iCell] = iCell->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, 0);
+        mRenderers[iCell] = iCell->BuildImageRenderer(EOdysseyRenderingType::Render, 0);
     }
     else
     {
-        mRenderers.Add(iCell, iCell->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, 0));
+        mRenderers.Add(iCell, iCell->BuildImageRenderer(EOdysseyRenderingType::Render, 0));
     }
 
 
     UOdysseyAnimation* animation = iCell->GetAnimation();
 
+    ::ULIS::eFormat format = ::ULIS::Format_BGRA8;
+    switch(animation->GetFormat())
+    {
+        case EOdysseyAnimationFormat::BGRA8: format = ::ULIS::Format_BGRA8;
+        case EOdysseyAnimationFormat::RGBAF: format = ::ULIS::Format_RGBAF;
+    }
+
     FOdysseyAnimationCellThumbnailTask task;
     task.mCell = iCell;
     task.mCellWidth = animation->GetWidth();
     task.mCellHeight = animation->GetHeight();
-    task.mCellFormat = animation->GetFormat();
+    task.mCellFormat = format;
     mQueue.Enqueue(task);
 }
 
@@ -228,7 +237,7 @@ FOdysseyAnimationCellThumbnailProxy::Run()
         renderer->Lock();
         renderer->Init();
 
-        FOdysseyImageRendererCopyParams params(block,  {block->Rect()} );
+        FOdysseyImageRendererCopyParams params(block,  { ::ULISUtils::ToIntRect(block->Rect())} );
         renderer->Copy(params, {});
         ctx.Finish();
 
@@ -255,7 +264,7 @@ FOdysseyAnimationCellThumbnailProxy::Run()
         FOdysseyRasterBlockMutator mutator(task.mCell->mThumbnail, false);
         mutator.EditTilesFromRects(
             { task.mCell->mThumbnail->GetRect() },
-            [&block, &ctx](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+            [&block, &ctx](TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
             {
                 ctx.Resize(
                     *block,

@@ -211,30 +211,30 @@ UOdysseyAnimationLayerImageVector::PostPropertyChanged(const FName& iPropertyNam
     if(iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayerImageVector, IsColored))
     {
         OnIsColoredChanged().Broadcast(this);
-        ImageRenderingChanged();
+        RenderingChanged();
     }
     if(iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayerImageVector, IsWireframe))
     {
         OnIsWireframeChanged().Broadcast(this);
-        ImageRenderingChanged();
+        RenderingChanged();
     }
 }
 
 TSharedPtr<IOdysseyImageRenderer>
-UOdysseyAnimationLayerImageVector::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter) const
+UOdysseyAnimationLayerImageVector::BuildImageRenderer(EOdysseyRenderingType iRenderType, int iFrame, FImageRendererFilter iFilter) const
 {
     if (iFilter.IsBound() && !iFilter.Execute(this))
         return nullptr;
 
-    return MakeShared<FOdysseyAnimationLayerImageVectorImageRenderer>(this, iFrame, iRenderType, GetImageRenderingRects(), iFilter);
+    return MakeShared<FOdysseyAnimationLayerImageVectorImageRenderer>(this, iFrame, iRenderType, GetRenderingRects(), iFilter);
 }
 
 TArray<FGuid>
-UOdysseyAnimationLayerImageVector::GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex) const
+UOdysseyAnimationLayerImageVector::GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrameIndex) const
 {
-    TArray<FGuid> idComposition = { GetImageRenderingId() };
+    TArray<FGuid> idComposition = { GetRenderingId() };
 
-    bool showLighttable = iRenderType == IOdysseyImageRenderer::eRenderType::Editor && Lighttable.bIsActivated;
+    bool showLighttable = iRenderType == EOdysseyRenderingType::Editor && Lighttable.bIsActivated;
     if (showLighttable && Lighttable.DisplayPosition == EOdysseyLightTableDisplayPosition::UnderLayer )
         idComposition.Append(GetLighttableImageRenderingComposition(iFrameIndex));
 
@@ -253,7 +253,7 @@ UOdysseyAnimationLayerImageVector::GetImageRenderingComposition(IOdysseyImageRen
     if (cell)
     {
         int cellFrame = frame - cell->GetFrameRange().GetLowerBoundValue();
-        idComposition.Append(cell->GetImageRenderingComposition(iRenderType, cellFrame));
+        idComposition.Append(cell->GetRenderingComposition(iRenderType, cellFrame));
     }
 
     if (showLighttable && Lighttable.DisplayPosition == EOdysseyLightTableDisplayPosition::AboveLayer )
@@ -391,7 +391,7 @@ UOdysseyAnimationLayerImageVector::Merge(const TArray<UOdysseyLayer*>& iLayers)
             if ( !layer )
                 continue;
 
-            currentIds.Append(layer->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Render, frameIndex));
+            currentIds.Append(layer->GetRenderingComposition(EOdysseyRenderingType::Render, frameIndex));
         }
 
         //Do we need a new cell

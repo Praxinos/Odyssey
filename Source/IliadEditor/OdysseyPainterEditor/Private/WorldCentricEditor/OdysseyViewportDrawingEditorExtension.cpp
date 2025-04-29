@@ -432,7 +432,7 @@ FOdysseyViewportDrawingEditorExtension::SetTextureInternal(UTexture* iTexture)
                 {
                     TSharedRef<FMediaPlayerFacade> mediaPlayerFacade = mediaPlayer->GetPlayerFacade();
                     TSharedPtr<FOdysseyAnimationMediaPlayer> animationMediaPlayer = StaticCastSharedPtr<FOdysseyAnimationMediaPlayer>(mediaPlayerFacade->GetPlayer());
-                    animationMediaPlayer->SetRenderType(IOdysseyImageRenderer::eRenderType::Render);
+                    animationMediaPlayer->SetRenderType(EOdysseyRenderingType::Render);
                     animationMediaPlayer->UnsetFrameToIncludeIntoDuration();
                 }
             }
@@ -485,7 +485,7 @@ FOdysseyViewportDrawingEditorExtension::SetTextureInternal(UTexture* iTexture)
             {
                 TSharedRef<FMediaPlayerFacade> mediaPlayerFacade = mediaPlayer->GetPlayerFacade();
                 TSharedPtr<FOdysseyAnimationMediaPlayer> animationMediaPlayer = StaticCastSharedPtr<FOdysseyAnimationMediaPlayer>(mediaPlayerFacade->GetPlayer());
-                animationMediaPlayer->SetRenderType(IOdysseyImageRenderer::eRenderType::Editor);
+                animationMediaPlayer->SetRenderType(EOdysseyRenderingType::Editor);
 
                 UOdysseyAnimation* animation = Cast<UOdysseyAnimation>(mediaSource);
                 TSharedPtr<FOdysseyPainterEditorAnimationSource> animationSource = MakeShared<FOdysseyPainterEditorAnimationSource>(animation);
@@ -725,7 +725,7 @@ FOdysseyViewportDrawingEditorExtension::Tick(float iDeltaTime)
             {
                 TSharedRef<FMediaPlayerFacade> mediaPlayerFacade = mediaPlayer->GetPlayerFacade();
                 TSharedPtr<FOdysseyAnimationMediaPlayer> animationMediaPlayer = StaticCastSharedPtr<FOdysseyAnimationMediaPlayer>(mediaPlayerFacade->GetPlayer());
-                animationMediaPlayer->SetRenderType(IOdysseyImageRenderer::eRenderType::Editor);
+                animationMediaPlayer->SetRenderType(EOdysseyRenderingType::Editor);
 
                 if (!mCurrentSource)
                 {

@@ -5,7 +5,7 @@
 
 #include "Media/OdysseyAnimationMediaPlayer.h"
 #include "Media/OdysseyAnimationMediaTextureSample.h"
-#include "Engine/Texture2D.h"
+#include "Engine/TextureRenderTarget2D.h"
 #include "UObject/StrongObjectPtr.h"
 #include "ULISLoaderModule.h"
 
@@ -13,8 +13,7 @@ FOdysseyAnimationMediaSamples::FOdysseyAnimationMediaSamples()
     : mAnimation(nullptr)
     , mCurrentFrameIndex(INDEX_NONE)
     , mImageRenderingComposition()
-    , mTexture()
-    //, mTexture2()
+    , mRenderTarget()
 {
 }
 
@@ -29,33 +28,32 @@ void
 FOdysseyAnimationMediaSamples::OnOpen(UOdysseyAnimation* iAnimation)
 {
     mAnimation = iAnimation;
-    FOdysseyImageRenderingAbility::OnImageRenderingChangedDelegate().AddRaw(this, &FOdysseyAnimationMediaSamples::OnImageRenderingChanged);
-    //IOdysseyAnimationImageRenderingAbility::OnCompositionChanged().AddRaw(this, &FOdysseyAnimationMediaSamples::OnImageRenderingCompositionChanged);
-    mTexture = TStrongObjectPtr<UTexture2D>(UTexture2D::CreateTransient(mAnimation->GetWidth(), mAnimation->GetHeight(), PF_B8G8R8A8));
-    //mTexture2 = TStrongObjectPtr<UTexture2D>(UTexture2D::CreateTransient(mAnimation->Width(), mAnimation->Height(), PF_B8G8R8A8));
-    mSample = MakeShared<FOdysseyAnimationMediaTextureSample>(mAnimation->GetWidth(), mAnimation->GetHeight(), mTexture.Get());
+    FOdysseyRenderingAbility::OnRenderingChangedDelegate().AddRaw(this, &FOdysseyAnimationMediaSamples::OnRenderingChanged);
+    //IOdysseyAnimationImageRenderingAbility::OnCompositionChanged().AddRaw(this, &FOdysseyAnimationMediaSamples::OnRenderingCompositionChanged);
+    mRenderTarget = TStrongObjectPtr<UTextureRenderTarget2D>(NewObject<UTextureRenderTarget2D>());
+    mRenderTarget->InitAutoFormat(mAnimation->GetWidth(), mAnimation->GetHeight());
+
+    mSample = MakeShared<FOdysseyAnimationMediaTextureSample>(mAnimation->GetWidth(), mAnimation->GetHeight(), mRenderTarget.Get());
     mImageRenderingComposition.Empty();
 
-    mInvalidTileMap = FULISInvalidTileMap(64, mAnimation->GetWidth(), mAnimation->GetHeight());
-
-    mTexture->UpdateResource();
+    mInvalidTileMap = FOdysseyInvalidTileMap(64, mAnimation->GetWidth(), mAnimation->GetHeight());
 }
 
-IOdysseyImageRenderer::eRenderType
+EOdysseyRenderingType
 FOdysseyAnimationMediaSamples::GetRenderType() const
 {
     return mRenderType;
 }
 
 void
-FOdysseyAnimationMediaSamples::SetRenderType(IOdysseyImageRenderer::eRenderType iRenderType)
+FOdysseyAnimationMediaSamples::SetRenderType(EOdysseyRenderingType iRenderType)
 {
     if (!mAnimation)
         return;
 
     mRenderType = iRenderType;
 
-    TArray<FGuid> imageRenderingComposition = mAnimation->GetImageRenderingComposition(mRenderType, mCurrentFrameIndex);
+    TArray<FGuid> imageRenderingComposition = mAnimation->GetRenderingComposition(mRenderType, mCurrentFrameIndex);
     if ( imageRenderingComposition == mImageRenderingComposition )
         return;
 
@@ -66,15 +64,15 @@ FOdysseyAnimationMediaSamples::SetRenderType(IOdysseyImageRenderer::eRenderType 
 void
 FOdysseyAnimationMediaSamples::OnClose()
 {
-    SetRenderType(IOdysseyImageRenderer::eRenderType::Render);
+    SetRenderType(EOdysseyRenderingType::Render);
     Render();
-    FOdysseyImageRenderingAbility::OnImageRenderingChangedDelegate().RemoveAll(this);
+    FOdysseyRenderingAbility::OnRenderingChangedDelegate().RemoveAll(this);
 
     mInvalidTileMap.Clear();
 
     mAnimation = nullptr;
     mSample = nullptr;
-    mTexture = nullptr;
+    mRenderTarget = nullptr;
 
     mImageRenderingComposition.Empty();
 }
@@ -86,14 +84,22 @@ FOdysseyAnimationMediaSamples::FlushSamples()
     //But we don't have a sample queue, so we do nothing
 }
 
+int
+FOdysseyAnimationMediaSamples::GetFrameIndexAtTime(FTimespan iTime) const
+{
+    //Add 1 tick to be sure to retrieve the right frame in case the frame starts between iTime and iTime + 1 tick
+    FTimespan time = iTime + FTimespan(1);
+    return int(time.GetTotalSeconds() * mAnimation->GetFramesPerSecond());
+}
+
 FTimespan
 FOdysseyAnimationMediaSamples::FindMaxOverlapingFrame(FTimespan iStartTime, FTimespan iEndTime, int* oIndex)
 {
     if (!mAnimation)
         return FTimespan();
 
-    int startFrameIndex = mAnimation->GetFrameIndexAtTime(iStartTime);
-    int endFrameIndex = mAnimation->GetFrameIndexAtTime(iEndTime);
+    int startFrameIndex = GetFrameIndexAtTime(iStartTime);
+    int endFrameIndex = GetFrameIndexAtTime(iEndTime);
     FTimespan bestOverlap(-1);
     int bestFrameIndex = INDEX_NONE;
     for (int frameIndex = startFrameIndex; frameIndex <= endFrameIndex; frameIndex++)
@@ -193,8 +199,8 @@ FOdysseyAnimationMediaSamples::FetchBestVideoSampleForTimeRange(const TRange<FMe
     //Find which frame overlaps the timerange the most
     FTimespan startTime = timeRange.GetLowerBoundValue().Time;
     FTimespan endTime = timeRange.GetUpperBoundValue().Time;
-    int startFrameIndex = FMath::Clamp(mAnimation->GetFrameIndexAtTime(startTime), 0, controls->GetFrameCount());
-    int endFrameIndex = FMath::Clamp(mAnimation->GetFrameIndexAtTime(endTime), 0, controls->GetFrameCount());
+    int startFrameIndex = FMath::Clamp(GetFrameIndexAtTime(startTime), 0, controls->GetFrameCount());
+    int endFrameIndex = FMath::Clamp(GetFrameIndexAtTime(endTime), 0, controls->GetFrameCount());
     int64 startSequenceIndex = timeRange.GetLowerBoundValue().GetSequenceIndex();
     int64 endSequenceIndex = timeRange.GetUpperBoundValue().GetSequenceIndex();
 
@@ -297,83 +303,17 @@ FOdysseyAnimationMediaSamples::Update(int iFrameIndex, int64 iSequenceIndex)
 
     int controlsStartFrame = controls->GetFrameRange().GetLowerBoundValue();
     mCurrentFrameIndex = iFrameIndex + controlsStartFrame;
-    TArray<FGuid> imageRenderingComposition = mAnimation->GetImageRenderingComposition(mRenderType, mCurrentFrameIndex);
+    TArray<FGuid> imageRenderingComposition = mAnimation->GetRenderingComposition(mRenderType, mCurrentFrameIndex);
 
     if ( imageRenderingComposition == mImageRenderingComposition )
         return;
 
     mImageRenderingComposition = imageRenderingComposition;
-
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(mAnimation->GetFormat());
-    ::ULIS::FRectI rect = ::ULIS::FRectI::FromXYWH(0, 0, mAnimation->GetWidth(), mAnimation->GetHeight());
-    TArray<::ULIS::FEvent> events;
-    TSharedPtr<IOdysseyImageRenderer> renderer = mAnimation->BuildImageRenderer(mRenderType, mCurrentFrameIndex);
-    renderer->Init();
-
-    TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(mAnimation->GetWidth(), mAnimation->GetHeight(), mAnimation->GetFormat());
-    FOdysseyImageRendererBlendParams params(block, {block->Rect()});
-    renderer->Copy(params, {});
-    ctx.Finish();
-
-    CopyBlockToTexture(block, { rect });
+    mAnimation->RenderToTexture(mRenderTarget.Get(), FFrameNumber(mCurrentFrameIndex));
 }
 
 void
-FOdysseyAnimationMediaSamples::CopyBlockToTexture(TSharedPtr<::ULIS::FBlock> iBlock, const TArray<::ULIS::FRectI>& iRects)
-{
-    if ( !iBlock )
-        return;
-
-    //convert block to BGRA8 if needed
-    if ( iBlock->Format() == ::ULIS::Format_BGRA8 )
-    {
-        TArray<FUpdateTextureRegion2D> regions;
-        for (const ::ULIS::FRectI& rect : iRects)
-        {
-            regions.Emplace(rect.x, rect.y, rect.x, rect.y, rect.w, rect.h);
-        }
-        mTexture->UpdateTextureRegions(0, regions.Num(), regions.GetData(), iBlock->BytesPerScanLine(), iBlock->BytesPerPixel(), iBlock->Bits());
-
-        FRenderCommandFence fence;
-        fence.BeginFence();
-        fence.Wait();
-
-        return;
-    }
-
-    //Here block has not the expected format
-    //But instead of converting the whole block, we will convert only the parts of the block we need
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_BGRA8);
-    TArray<FUpdateTextureRegion2D> regions;
-    TArray<TSharedPtr<::ULIS::FBlock>> blocks;
-    for (const ::ULIS::FRectI& rect : iRects)
-    {
-        TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(rect.w, rect.h, ::ULIS::Format_BGRA8);
-        ctx.ConvertFormat(*iBlock, *block, rect, ::ULIS::FVec2I(0), ::ULIS::FSchedulePolicy::AsyncCacheEfficient);
-        regions.Emplace(rect.x, rect.y, 0, 0, rect.w, rect.h);
-        blocks.Add(block);
-    }
-    ctx.Finish();
-
-    for (int i = 0; i < regions.Num(); i++)
-    {
-        mTexture->UpdateTextureRegions(
-            0,
-            1,
-            &regions[i],
-            blocks[i]->BytesPerScanLine(),
-            blocks[i]->BytesPerPixel(),
-            blocks[i]->Bits()
-        );
-    }
-
-    FRenderCommandFence fence;
-    fence.BeginFence();
-    fence.Wait();
-}
-
-void
-FOdysseyAnimationMediaSamples::OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent)
+FOdysseyAnimationMediaSamples::OnRenderingChanged(const FOdysseyRenderingChangedEvent& iEvent)
 {
     if ( !mAnimation )
         return;
@@ -381,16 +321,16 @@ FOdysseyAnimationMediaSamples::OnImageRenderingChanged(const FOdysseyImageRender
     if (!mImageRenderingComposition.Contains(iEvent.GetId()) )
         return;
 
-    if (iEvent.GetType() == FOdysseyImageRenderingChangedEvent::eEventType::kCompositionChange)
+    if (iEvent.GetType() == FOdysseyRenderingChangedEvent::eEventType::kCompositionChange)
     {
-        TArray<FGuid> imageRenderingComposition = mAnimation->GetImageRenderingComposition(mRenderType, mCurrentFrameIndex);
+        TArray<FGuid> imageRenderingComposition = mAnimation->GetRenderingComposition(mRenderType, mCurrentFrameIndex);
         if ( imageRenderingComposition == mImageRenderingComposition )
             return;
 
         mInvalidTileMap.Invalidate();
         mImageRenderingComposition = imageRenderingComposition;
     }
-    else if (iEvent.GetType() == FOdysseyImageRenderingChangedEvent::eEventType::kValueChange)
+    else if (iEvent.GetType() == FOdysseyRenderingChangedEvent::eEventType::kValueChange)
     {
         //delay rects update to tick
         mInvalidTileMap.Invalidate(iEvent.GetRects());
@@ -412,16 +352,6 @@ FOdysseyAnimationMediaSamples::Render()
     if ( mInvalidTileMap.InvalidTiles().IsEmpty() )
         return;
 
-    TSharedPtr<IOdysseyImageRenderer> renderer = mAnimation->BuildImageRenderer(mRenderType, mCurrentFrameIndex);
-    renderer->Init();
-    TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(mAnimation->GetWidth(), mAnimation->GetHeight(), mAnimation->GetFormat());
-
-    FOdysseyImageRendererBlendParams params(block, mInvalidTileMap.InvalidRects());
-    renderer->Copy(params, {});
-
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(mAnimation->GetFormat());
-    ctx.Finish();
-
-    CopyBlockToTexture(block, mInvalidTileMap.InvalidRects());
+    mAnimation->RenderToTextureFromRects(mRenderTarget.Get(), FFrameNumber(mCurrentFrameIndex), mInvalidTileMap.InvalidRects());
     mInvalidTileMap.Clear();
 }

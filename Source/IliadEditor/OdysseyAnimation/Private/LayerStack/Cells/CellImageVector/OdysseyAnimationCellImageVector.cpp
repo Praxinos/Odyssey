@@ -58,7 +58,14 @@ UOdysseyAnimationCellImageVector::PostInitProperties()
     // The reading process needs a valid sharedenv as the top object.
     layerImageVector->GetVectorLayer()->AppendChild( mVectorCell.Get() );
 
-    mVectorBlock->Init(mVectorBlockId, mVectorCell, animation->GetWidth(), animation->GetHeight(), animation->GetFormat());
+    ::ULIS::eFormat format = ::ULIS::Format_BGRA8;
+    switch(animation->GetFormat())
+    {
+        case EOdysseyAnimationFormat::BGRA8: format = ::ULIS::Format_BGRA8;
+        case EOdysseyAnimationFormat::RGBAF: format = ::ULIS::Format_RGBAF;
+    }
+
+    mVectorBlock->Init(mVectorBlockId, mVectorCell, animation->GetWidth(), animation->GetHeight(), format);
 }
 
 void
@@ -67,7 +74,15 @@ UOdysseyAnimationCellImageVector::PostDuplicate(EDuplicateMode::Type iDuplicateM
     Super::PostDuplicate(iDuplicateMode);
     UOdysseyAnimation* animation = GetAnimation();
     mVectorBlockId = FGuid::NewGuid();
-    mVectorBlock->Init(mVectorBlockId, mVectorCell, animation->GetWidth(), animation->GetHeight(), animation->GetFormat());
+
+    ::ULIS::eFormat format = ::ULIS::Format_BGRA8;
+    switch(animation->GetFormat())
+    {
+        case EOdysseyAnimationFormat::BGRA8: format = ::ULIS::Format_BGRA8;
+        case EOdysseyAnimationFormat::RGBAF: format = ::ULIS::Format_RGBAF;
+    }
+
+    mVectorBlock->Init(mVectorBlockId, mVectorCell, animation->GetWidth(), animation->GetHeight(), format);
 }
 
 FOdysseyVectorImportV2*
@@ -174,7 +189,15 @@ UOdysseyAnimationCellImageVector::PostLoad()
         return;
 
     UOdysseyAnimation* animation = GetAnimation();
-    mVectorBlock->Init(mVectorBlockId, mVectorCell, animation->GetWidth(), animation->GetHeight(), animation->GetFormat());
+
+    ::ULIS::eFormat format = ::ULIS::Format_BGRA8;
+    switch(animation->GetFormat())
+    {
+        case EOdysseyAnimationFormat::BGRA8: format = ::ULIS::Format_BGRA8;
+        case EOdysseyAnimationFormat::RGBAF: format = ::ULIS::Format_RGBAF;
+    }
+
+    mVectorBlock->Init(mVectorBlockId, mVectorCell, animation->GetWidth(), animation->GetHeight(), format);
     //mVectorCell->GetLayer()->InvalidateCell( mVectorCell.Get() );
     FOdysseyVectorEngine::Notify( mVectorCell->GetScene(), FOdysseyVectorEngine::NOTIFY_ALL );
 
@@ -209,28 +232,28 @@ UOdysseyAnimationCellImageVector::IsImageRenderingGameThreadOnly() const
 }
 
 TSharedPtr<IOdysseyImageRenderer>
-UOdysseyAnimationCellImageVector::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter) const
+UOdysseyAnimationCellImageVector::BuildImageRenderer(EOdysseyRenderingType iRenderType, int iFrame, FImageRendererFilter iFilter) const
 {
     if (iFilter.IsBound() && !iFilter.Execute(this))
         return nullptr;
 
-    return MakeShared<FOdysseyAnimationCellImageVectorImageRenderer>(this, iFrame, iRenderType, GetImageRenderingRects(), iFilter);
+    return MakeShared<FOdysseyAnimationCellImageVectorImageRenderer>(this, iFrame, iRenderType, GetRenderingRects(), iFilter);
 }
 
 TArray<FGuid>
-UOdysseyAnimationCellImageVector::GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex) const
+UOdysseyAnimationCellImageVector::GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrameIndex) const
 {
-    return { GetImageRenderingId() };
+    return { GetRenderingId() };
 }
 
-TArray<::ULIS::FRectI>
-UOdysseyAnimationCellImageVector::GetImageRenderingRects() const
+TArray<FIntRect>
+UOdysseyAnimationCellImageVector::GetRenderingRects() const
 {
     UOdysseyAnimation* animation = GetAnimation();
     if (!animation)
         return {};
 
-    return { ::ULIS::FRectI::FromXYWH(0, 0, animation->GetWidth(), animation->GetHeight()) };
+    return { FIntRect(0, 0, animation->GetWidth(), animation->GetHeight()) };
 }
 
 FOdysseyMediaProvider
@@ -255,7 +278,15 @@ UOdysseyAnimationCellImageVector::GetImageRenderingMutex() const
 void
 UOdysseyAnimationCellImageVector::OnVectorBlockInvalidated( const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive)
 {
-    ImageRenderingChanged( iRects, iIsInteractive);
+    TArray<FIntRect> intRects;
+    intRects.Reserve(iRects.Num());
+    for (const ::ULIS::FRectI& rect : iRects )
+    {
+        FIntRect intRect(rect.x, rect.y, rect.x + rect.w, rect.y + rect.h);
+        intRects.Add(intRect);
+    }
+
+    RenderingChanged( intRects, iIsInteractive);
 
     if (!iIsInteractive)
         DirtyThumbnail();

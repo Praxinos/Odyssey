@@ -6,6 +6,7 @@
 #include "OdysseyBrushAssetBase.h"
 #include <ULIS>
 #include "ULISLoaderModule.h"
+#include "ULISUtils.h"
 #include "OdysseyLayerStack.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 #include "LayerStack/OdysseyTextureLayer.h"
@@ -60,11 +61,11 @@ namespace
             ::ULIS::FEvent eventClear;
             ctx.Clear(*dst, ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventClear);
 
-            TSharedPtr<IOdysseyImageRenderer> imageRenderer = textureLayer->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, 0);
+            TSharedPtr<IOdysseyImageRenderer> imageRenderer = textureLayer->BuildImageRenderer(EOdysseyRenderingType::Render, 0);
             imageRenderer->Init();
 
             ::ULIS::FRectI dstRect = ::ULIS::FRectI::FromXYWH(dst_pos.x, dst_pos.y, given_rect.w - dst_pos.x, given_rect.h - dst_pos.y);
-            FOdysseyImageRendererCopyParams params(dst, { dstRect }, src_rect.Position() - dst_pos);
+            FOdysseyImageRendererCopyParams params(dst, { ::ULISUtils::ToIntRect(dstRect) }, src_rect.Position() - dst_pos);
             TArray<::ULIS::FEvent> eventCopy = imageRenderer->Copy(params, { eventClear });
             ctx.Flush();
 
@@ -83,17 +84,24 @@ namespace
             //be sure we copy only the needed part //TODO: Should be done directly in ULIS
             ::ULIS::FRectI src_rect = given_rect & animationRect;
             ::ULIS::FVec2I dst_pos(src_rect.x - given_rect.x, src_rect.y - given_rect.y);
-            TSharedPtr<::ULIS::FBlock> dst = MakeShareable(new ::ULIS::FBlock( given_rect.w, given_rect.h, animation->GetFormat() ));
 
-            ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(animation->GetFormat());
+            ::ULIS::eFormat format = ::ULIS::Format_BGRA8;
+            switch(animation->GetFormat())
+            {
+                case EOdysseyAnimationFormat::BGRA8: format = ::ULIS::Format_BGRA8;
+                case EOdysseyAnimationFormat::RGBAF: format = ::ULIS::Format_RGBAF;
+            }
+            TSharedPtr<::ULIS::FBlock> dst = MakeShareable(new ::ULIS::FBlock( given_rect.w, given_rect.h, format ));
+
+            ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
             ::ULIS::FEvent eventClear;
             ctx.Clear(*dst, ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventClear);
 
-            TSharedPtr<IOdysseyImageRenderer> imageRenderer = animationLayer->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, animation->CurrentFrame);
+            TSharedPtr<IOdysseyImageRenderer> imageRenderer = animationLayer->BuildImageRenderer(EOdysseyRenderingType::Render, animation->CurrentFrame);
             imageRenderer->Init();
 
             ::ULIS::FRectI dstRect = ::ULIS::FRectI::FromXYWH(dst_pos.x, dst_pos.y, given_rect.w - dst_pos.x, given_rect.h - dst_pos.y);
-            FOdysseyImageRendererCopyParams params(dst, { dstRect }, src_rect.Position() - dst_pos);
+            FOdysseyImageRendererCopyParams params(dst, { ULISUtils::ToIntRect(dstRect) }, src_rect.Position() - dst_pos);
             TArray<::ULIS::FEvent> eventCopy = imageRenderer->Copy(params, { eventClear });
             ctx.Flush();
 

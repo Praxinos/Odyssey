@@ -7,8 +7,9 @@
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
 #include "ULISLoaderModule.h"
 #include "ULISEventBuilder.h"
+#include "ULISUtils.h"
 
-FOdysseyAnimationLightTableImageRenderer::FOdysseyAnimationLightTableImageRenderer(const UOdysseyAnimationLayer* iLayer, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects, FImageRendererFilter iFilter)
+FOdysseyAnimationLightTableImageRenderer::FOdysseyAnimationLightTableImageRenderer(const UOdysseyAnimationLayer* iLayer, int iFrame, EOdysseyRenderingType iRenderType, const TArray<FIntRect>& iDefaultRects, FImageRendererFilter iFilter)
     : IOdysseyImageRenderer(iRenderType, iDefaultRects)
 {
     UOdysseyAnimation* animation = iLayer->GetAnimation();
@@ -40,7 +41,7 @@ FOdysseyAnimationLightTableImageRenderer::FOdysseyAnimationLightTableImageRender
 
                 FFrameData data;
                 data.mOpacity = iLayer->Lighttable.PreviousKeys[i].Opacity / 100.f;
-                data.mRenderer = keyCell->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, 0, iFilter);
+                data.mRenderer = keyCell->BuildImageRenderer(EOdysseyRenderingType::Render, 0, iFilter);
                 data.mColor = ::ULIS::FColor::FromRGBAF(
                     iLayer->Lighttable.PreviousKeysColor.R,
                     iLayer->Lighttable.PreviousKeysColor.G,
@@ -74,7 +75,7 @@ FOdysseyAnimationLightTableImageRenderer::FOdysseyAnimationLightTableImageRender
 
                 FFrameData data;
                 data.mOpacity = iLayer->Lighttable.NextKeys[i].Opacity / 100.f;
-                data.mRenderer = keyCell->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, 0, iFilter);
+                data.mRenderer = keyCell->BuildImageRenderer(EOdysseyRenderingType::Render, 0, iFilter);
                 data.mColor = ::ULIS::FColor::FromRGBAF(
                     iLayer->Lighttable.NextKeysColor.R,
                     iLayer->Lighttable.NextKeysColor.G,
@@ -114,22 +115,22 @@ FOdysseyAnimationLightTableImageRenderer::Blend(const FOdysseyImageRendererBlend
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyAnimationLightTableImageRenderer::Blend);
     TArray<::ULIS::FEvent> events;
-    for (const ::ULIS::FRectI& rect : iParams.mRects)
+    for (const FIntRect& rect : iParams.mRects)
     {
-        TSharedPtr<::ULIS::FBlock> greyblock = MakeShared<::ULIS::FBlock>(rect.w, rect.h, ::ULIS::Format_GAF);
-        TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(rect.w, rect.h, iParams.mBlock->Format());
+        TSharedPtr<::ULIS::FBlock> greyblock = MakeShared<::ULIS::FBlock>(rect.Width(), rect.Height(), ::ULIS::Format_GAF);
+        TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(rect.Width(), rect.Height(), iParams.mBlock->Format());
         ::ULIS::FRectI blockRect = block->Rect();
-        ::ULIS::FVec2I blockPos(iParams.mPos.x + rect.x, iParams.mPos.y + rect.y);
+        ::ULIS::FVec2I blockPos(iParams.mPos.x + rect.Min.X, iParams.mPos.y + rect.Min.Y);
 
 
         TArray<::ULIS::FEvent> lastEvent = iWaitList;
         for (const FFrameData& frameData : mFramesData)
         {
-            TArray<::ULIS::FEvent> clearEvents = Clear(block, { blockRect }, lastEvent);
+            TArray<::ULIS::FEvent> clearEvents = Clear(block, { ::ULISUtils::ToIntRect(blockRect) }, lastEvent);
 
             FOdysseyImageRendererCopyParams frameParams(iParams);
             frameParams.mBlock = block;
-            frameParams.mRects = { block->Rect() };
+            frameParams.mRects = { ::ULISUtils::ToIntRect(block->Rect()) };
             frameParams.mPos = blockPos;
             frameParams.mTransform = frameData.mOutOfPegsTransform;
 

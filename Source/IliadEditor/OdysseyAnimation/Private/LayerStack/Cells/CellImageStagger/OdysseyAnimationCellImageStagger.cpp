@@ -21,12 +21,12 @@ UOdysseyAnimationCellImageStagger::OldSerialize(FArchive& Ar)
 }
 
 TSharedPtr<IOdysseyImageRenderer>
-UOdysseyAnimationCellImageStagger::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter) const
+UOdysseyAnimationCellImageStagger::BuildImageRenderer(EOdysseyRenderingType iRenderType, int iFrame, FImageRendererFilter iFilter) const
 {
     if (iFilter.IsBound() && !iFilter.Execute(this))
         return nullptr;
 
-    return MakeShared<FOdysseyAnimationCellImageStaggerImageRenderer>(this, iFrame, iRenderType, GetImageRenderingRects(), iFilter);
+    return MakeShared<FOdysseyAnimationCellImageStaggerImageRenderer>(this, iFrame, iRenderType, GetRenderingRects(), iFilter);
 }
 
 UOdysseyAnimationCell*
@@ -108,9 +108,9 @@ UOdysseyAnimationCellImageStagger::GetReferenceFrameAtFrame(int iFrameIndex) con
 }
 
 TArray<FGuid>
-UOdysseyAnimationCellImageStagger::GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex) const
+UOdysseyAnimationCellImageStagger::GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrameIndex) const
 {
-    TArray<FGuid> idComposition = { GetImageRenderingId() };
+    TArray<FGuid> idComposition = { GetRenderingId() };
 
     int staggerFrame = GetReferenceFrameAtFrame(iFrameIndex);
     if (staggerFrame == INDEX_NONE)
@@ -121,15 +121,15 @@ UOdysseyAnimationCellImageStagger::GetImageRenderingComposition(IOdysseyImageRen
         return idComposition;
 
     int cellFrame = staggerFrame - cell->GetFrameRange().GetLowerBoundValue();
-    idComposition.Append(cell->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Render, cellFrame));
+    idComposition.Append(cell->GetRenderingComposition(EOdysseyRenderingType::Render, cellFrame));
 
     return idComposition;
 }
 
-TArray<::ULIS::FRectI>
-UOdysseyAnimationCellImageStagger::GetImageRenderingRects() const
+TArray<FIntRect>
+UOdysseyAnimationCellImageStagger::GetRenderingRects() const
 {
-    return GetLayer()->GetImageRenderingRects();
+    return GetLayer()->GetRenderingRects();
 }
 
 UOdysseyAnimationCell*
@@ -190,12 +190,12 @@ UOdysseyAnimationCellImageStagger::PostPropertyChanged(const FName& iPropertyNam
 
     if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCellImageStagger, Behaviour))
     {
-        ImageRenderingCompositionChanged();
+        RenderingCompositionChanged();
     }
 
     if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCellImageStagger, Reach))
     {
-        ImageRenderingCompositionChanged(iIsInteractive);
+        RenderingCompositionChanged(iIsInteractive);
     }
 }
 

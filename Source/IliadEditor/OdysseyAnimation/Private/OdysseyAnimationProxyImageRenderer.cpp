@@ -3,33 +3,33 @@
 
 #include "OdysseyAnimationProxyImageRenderer.h"
 
-#include "OdysseyAnimation.h"
-#include "OdysseyAnimationImageRenderer.h"
+#include "OdysseyAnimationLayerRoot.h"
+#include "OdysseyLayerImageRenderer.h"
 #include "OdysseyAnimationProxy.h"
 
-FOdysseyAnimationProxyImageRenderer::FOdysseyAnimationProxyImageRenderer(const UOdysseyAnimation* iAnimation, int iFrameIndex, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI> iDefaultRects, FImageRendererFilter iFilter)
+FOdysseyAnimationProxyImageRenderer::FOdysseyAnimationProxyImageRenderer(const UOdysseyAnimationLayerRoot* iLayer, int iFrameIndex, EOdysseyRenderingType iRenderType, const TArray<FIntRect> iDefaultRects, FImageRendererFilter iFilter)
     : IOdysseyImageRenderer(iRenderType, iDefaultRects)
-    , mProxy(iAnimation->GetProxy())
+    , mProxy(iLayer->GetProxy())
     , mFrameIndex(iFrameIndex)
-    , mAnimationRenderer(nullptr)
+    , mLayerRenderer(nullptr)
     , mBlock(nullptr)
     , mForceRender(iFilter.IsBound())
 {
-    mAnimationRenderer = MakeShared<FOdysseyAnimationImageRenderer>(iAnimation, iFrameIndex, iRenderType, iDefaultRects, iFilter);
+    mLayerRenderer = MakeShared<FOdysseyLayerImageRenderer>(iLayer, iFrameIndex, iRenderType, iDefaultRects, iFilter);
 }
 
 void
 FOdysseyAnimationProxyImageRenderer::Init()
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyAnimationProxyImageRenderer::Init);
-    if ( GetRenderType() == IOdysseyImageRenderer::eRenderType::Editor || GetRenderType() == IOdysseyImageRenderer::eRenderType::RenderOutOfPegs || mForceRender )
-        mAnimationRenderer->Init();
+    if ( GetRenderType() == EOdysseyRenderingType::Editor || GetRenderType() == EOdysseyRenderingType::RenderOutOfPegs || mForceRender )
+        mLayerRenderer->Init();
 
-    if ( GetRenderType() == IOdysseyImageRenderer::eRenderType::Render )
+    if ( GetRenderType() == EOdysseyRenderingType::Render )
     {
         mBlock = mProxy->GetBlock(mFrameIndex);
         if (!mBlock)
-            mAnimationRenderer->Init();
+            mLayerRenderer->Init();
     }
 
 }
@@ -38,11 +38,11 @@ TArray<::ULIS::FEvent>
 FOdysseyAnimationProxyImageRenderer::Blend(const FOdysseyImageRendererBlendParams& iParams, const TArray<::ULIS::FEvent>& iWaitList)
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyAnimationProxyImageRenderer::Blend);
-    if (GetRenderType() != IOdysseyImageRenderer::eRenderType::Render || mForceRender)
-        return mAnimationRenderer->Blend(iParams, iWaitList);
+    if (GetRenderType() != EOdysseyRenderingType::Render || mForceRender)
+        return mLayerRenderer->Blend(iParams, iWaitList);
 
     if ( !mBlock )
-        return mAnimationRenderer->Blend(iParams, iWaitList);
+        return mLayerRenderer->Blend(iParams, iWaitList);
 
     return ConvertAndBlend(mBlock, ::ULIS::FVec2I(0), iParams, iWaitList);
 }
@@ -51,14 +51,14 @@ TArray<::ULIS::FEvent>
 FOdysseyAnimationProxyImageRenderer::Copy(const FOdysseyImageRendererCopyParams& iParams, const TArray<::ULIS::FEvent>& iWaitList)
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyAnimationProxyImageRenderer::Copy);
-    if (GetRenderType() != IOdysseyImageRenderer::eRenderType::Render || mForceRender)
-        return mAnimationRenderer->Copy(iParams, iWaitList);
+    if (GetRenderType() != EOdysseyRenderingType::Render || mForceRender)
+        return mLayerRenderer->Copy(iParams, iWaitList);
 
     /* if ( !mBlock )
         mBlock = mProxy->GetBlock(mFrameIndex); //Try to get the block in memory */
 
     if ( !mBlock )
-        return mAnimationRenderer->Copy(iParams, iWaitList);
+        return mLayerRenderer->Copy(iParams, iWaitList);
 
     return ConvertAndCopy(mBlock, ::ULIS::FVec2I(0), iParams, iWaitList);
 }

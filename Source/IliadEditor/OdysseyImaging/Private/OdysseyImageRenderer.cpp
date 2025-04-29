@@ -6,7 +6,7 @@
 #include "ULISLoaderModule.h"
 #include "ULISUtils.h"
 
-IOdysseyImageRenderer::IOdysseyImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects)
+IOdysseyImageRenderer::IOdysseyImageRenderer(EOdysseyRenderingType iRenderType, const TArray<FIntRect>& iDefaultRects)
     : mRenderType(iRenderType)
     , mDefaultRects(iDefaultRects)
 {
@@ -32,72 +32,8 @@ IOdysseyImageRenderer::IsGameThreadOnly()
 {
     return false;
 }
-/*
-TArray<::ULIS::FEvent>
-IOdysseyImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> ioBlock, ::ULIS::eBlendMode iBlendMode, float iOpacity, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FEvent>& iWaitList)
-{
-    TArray<::ULIS::FVec2I> pos;
-    for (const ::ULIS::FRectI& rect : iRects)
-        pos.Add(rect.Position());
 
-    return Blend(ioBlock, iBlendMode, iOpacity, iRects, pos, iWaitList);
-}
-
-TArray<::ULIS::FEvent>
-IOdysseyImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> ioBlock, ::ULIS::eBlendMode iBlendMode, float iOpacity, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList)
-{
-    TArray<::ULIS::FRectI> rects = { iRect };
-    TArray<::ULIS::FVec2I> pos = { iPos };
-    return Blend(ioBlock, iBlendMode, iOpacity, rects, pos, iWaitList);
-}
-
-TArray<::ULIS::FEvent>
-IOdysseyImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> ioBlock, ::ULIS::eBlendMode iBlendMode, float iOpacity, const ::ULIS::FRectI& iRect, const TArray<::ULIS::FEvent>& iWaitList)
-{
-    TArray<::ULIS::FRectI> rects = { iRect };
-    TArray<::ULIS::FVec2I> pos = { iRect.Position() };
-    return Blend(ioBlock, iBlendMode, iOpacity, rects, pos, iWaitList);
-}
-
-TArray<::ULIS::FEvent>
-IOdysseyImageRenderer::Blend(TSharedPtr<::ULIS::FBlock> ioBlock, ::ULIS::eBlendMode iBlendMode, float iOpacity, const TArray<::ULIS::FEvent>& iWaitList)
-{
-    return Blend(ioBlock, iBlendMode, iOpacity, mDefaultRects, iWaitList);
-}*/
-/*
-TArray<::ULIS::FEvent>
-IOdysseyImageRenderer::Copy(TSharedPtr<::ULIS::FBlock> ioBlock, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FEvent>& iWaitList)
-{
-    TArray<::ULIS::FVec2I> pos;
-    for (const ::ULIS::FRectI& rect : iRects)
-        pos.Add(rect.Position());
-
-    return Copy(ioBlock, iRects, pos, iWaitList);
-}
-
-TArray<::ULIS::FEvent>
-IOdysseyImageRenderer::Copy(TSharedPtr<::ULIS::FBlock> ioBlock, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList)
-{
-    TArray<::ULIS::FRectI> rects = { iRect };
-    TArray<::ULIS::FVec2I> pos = { iPos };
-    return Copy(ioBlock, rects, pos, iWaitList);
-}
-
-TArray<::ULIS::FEvent>
-IOdysseyImageRenderer::Copy(TSharedPtr<::ULIS::FBlock> ioBlock, const ::ULIS::FRectI& iRect, const TArray<::ULIS::FEvent>& iWaitList)
-{
-    TArray<::ULIS::FRectI> rects = { iRect };
-    TArray<::ULIS::FVec2I> pos = { iRect.Position() };
-    return Copy(ioBlock, rects, pos, iWaitList);
-}
-
-TArray<::ULIS::FEvent>
-IOdysseyImageRenderer::Copy(TSharedPtr<::ULIS::FBlock> ioBlock, const TArray<::ULIS::FEvent>& iWaitList)
-{
-    return Copy(ioBlock, mDefaultRects, iWaitList);
-} */
-
-IOdysseyImageRenderer::eRenderType
+EOdysseyRenderingType
 IOdysseyImageRenderer::GetRenderType() const
 {
     return mRenderType;
@@ -113,10 +49,11 @@ IOdysseyImageRenderer::ConvertAndBlend(TSharedPtr<::ULIS::FBlock> iFront, const 
     ::ULIS::FVec2I pos = iParams.mPos - iFrontOffset;
     for ( int i = 0; i < iParams.mRects.Num(); i++ )
     {
+        ::ULIS::FRectI paramRect = ::ULISUtils::ToULISRectI(iParams.mRects[i]);
         if (iParams.mTransform == ::ULIS::FMat3F())
         {
-            ::ULIS::FRectI srcRect = ::ULIS::FRectI::FromXYWH(iParams.mRects[i].x + pos.x, iParams.mRects[i].y + pos.y, iParams.mRects[i].w, iParams.mRects[i].h);
-            ::ULIS::FVec2I dstPos(iParams.mRects[i].x, iParams.mRects[i].y);
+            ::ULIS::FRectI srcRect = ::ULIS::FRectI::FromXYWH(paramRect.x + pos.x, paramRect.y + pos.y, paramRect.w, paramRect.h);
+            ::ULIS::FVec2I dstPos(paramRect.x, paramRect.y);
             TArray<::ULIS::FEvent> eventConvertAndExecute = ULISUtils::ConvertAndExecute(iParams.mBlock, iFront->Format(), srcRect, dstPos, iWaitList,
                 [&ctx, iFront, iParams](TSharedPtr<::ULIS::FBlock> ioDest, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList) -> TArray<::ULIS::FEvent>
                 {
@@ -142,11 +79,11 @@ IOdysseyImageRenderer::ConvertAndBlend(TSharedPtr<::ULIS::FBlock> iFront, const 
         }
         else
         {
-            TSharedPtr<::ULIS::FBlock> srcBlock = MakeShared<::ULIS::FBlock>(iParams.mRects[i].w, iParams.mRects[i].h, iFront->Format());
+            TSharedPtr<::ULIS::FBlock> srcBlock = MakeShared<::ULIS::FBlock>(paramRect.w, paramRect.h, iFront->Format());
             ::ULIS::FEvent eventClear = FULISEventBuilder().RetainBlock(srcBlock).Build();
             ctx.Clear(*srcBlock, ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, iWaitList.Num(), iWaitList.GetData(), &eventClear);
 
-            ::ULIS::FRectI dstRect = ::ULIS::FRectI::FromXYWH(iParams.mRects[i].x + pos.x, iParams.mRects[i].y + pos.y, iParams.mRects[i].w, iParams.mRects[i].h);
+            ::ULIS::FRectI dstRect = ::ULIS::FRectI::FromXYWH(paramRect.x + pos.x, paramRect.y + pos.y, paramRect.w, paramRect.h);
 
             ::ULIS::FEvent eventTransform = FULISEventBuilder().RetainBlock(iFront).RetainBlock(srcBlock).Build();
             ctx.TransformAffine(
@@ -163,7 +100,7 @@ IOdysseyImageRenderer::ConvertAndBlend(TSharedPtr<::ULIS::FBlock> iFront, const 
                 &eventTransform
             );
 
-            ::ULIS::FVec2I dstPos(iParams.mRects[i].x, iParams.mRects[i].y);
+            ::ULIS::FVec2I dstPos(paramRect.x, paramRect.y);
             TArray<::ULIS::FEvent> eventConvertAndExecute = ULISUtils::ConvertAndExecute(iParams.mBlock, iFront->Format(), ::ULIS::FRectI::Auto, dstPos, { eventTransform },
                 [&ctx, srcBlock, iParams](TSharedPtr<::ULIS::FBlock> ioDest, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList) -> TArray<::ULIS::FEvent>
                 {
@@ -201,11 +138,12 @@ IOdysseyImageRenderer::ConvertAndCopy(TSharedPtr<::ULIS::FBlock> iSrc, const ::U
     ::ULIS::FVec2I pos = iParams.mPos - iSrcOffset;
     for ( int i = 0; i < iParams.mRects.Num(); i++ )
     {
+        ::ULIS::FRectI paramRect = ::ULISUtils::ToULISRectI(iParams.mRects[i]);
         if (iParams.mTransform == ::ULIS::FMat3F())
         {
             ::ULIS::FEvent eventCopy = FULISEventBuilder().RetainBlock(iSrc).RetainBlock(iParams.mBlock).Build();
-            ::ULIS::FRectI srcRect = ::ULIS::FRectI::FromXYWH(iParams.mRects[i].x + pos.x, iParams.mRects[i].y + pos.y, iParams.mRects[i].w, iParams.mRects[i].h);
-            ::ULIS::FVec2I dstPos(iParams.mRects[i].x, iParams.mRects[i].y);
+            ::ULIS::FRectI srcRect = ::ULIS::FRectI::FromXYWH(paramRect.x + pos.x, paramRect.y + pos.y, paramRect.w, paramRect.h);
+            ::ULIS::FVec2I dstPos(paramRect.x, paramRect.y);
             ctx.ConvertFormat(
                 *iSrc,
                 *iParams.mBlock,
@@ -218,11 +156,11 @@ IOdysseyImageRenderer::ConvertAndCopy(TSharedPtr<::ULIS::FBlock> iSrc, const ::U
         }
         else
         {
-            TSharedPtr<::ULIS::FBlock> srcBlock = MakeShared<::ULIS::FBlock>(iParams.mRects[i].w, iParams.mRects[i].h, iSrc->Format());
+            TSharedPtr<::ULIS::FBlock> srcBlock = MakeShared<::ULIS::FBlock>(paramRect.w, paramRect.h, iSrc->Format());
             ::ULIS::FEvent eventClear = FULISEventBuilder().RetainBlock(srcBlock).Build();
             ctx.Clear(*srcBlock, ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, iWaitList.Num(), iWaitList.GetData(), &eventClear);
 
-            ::ULIS::FRectI dstRect = ::ULIS::FRectI::FromXYWH(iParams.mRects[i].x + pos.x, iParams.mRects[i].y + pos.y, iParams.mRects[i].w, iParams.mRects[i].h);
+            ::ULIS::FRectI dstRect = ::ULIS::FRectI::FromXYWH(paramRect.x + pos.x, paramRect.y + pos.y, paramRect.w, paramRect.h);
 
             ::ULIS::FEvent eventTransform = FULISEventBuilder().RetainBlock(iSrc).RetainBlock(srcBlock).Build();
             ctx.TransformAffine(
@@ -239,7 +177,7 @@ IOdysseyImageRenderer::ConvertAndCopy(TSharedPtr<::ULIS::FBlock> iSrc, const ::U
                 &eventTransform
             );
 
-            ::ULIS::FVec2I copyPos(iParams.mRects[i].x, iParams.mRects[i].y);
+            ::ULIS::FVec2I copyPos(paramRect.x, paramRect.y);
 
             ::ULIS::FEvent eventCopy = FULISEventBuilder().RetainBlock(srcBlock).RetainBlock(iParams.mBlock).Build();
             ctx.ConvertFormat(
@@ -260,7 +198,7 @@ IOdysseyImageRenderer::ConvertAndCopy(TSharedPtr<::ULIS::FBlock> iSrc, const ::U
 }
 
 TArray<::ULIS::FEvent>
-IOdysseyImageRenderer::Clear(TSharedPtr<::ULIS::FBlock> ioBlock, const TArray<::ULIS::FRectI>& iRects, const TArray<::ULIS::FEvent>& iWaitList)
+IOdysseyImageRenderer::Clear(TSharedPtr<::ULIS::FBlock> ioBlock, const TArray<FIntRect>& iRects, const TArray<::ULIS::FEvent>& iWaitList)
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(IOdysseyImageRenderer::Clear);
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(ioBlock->Format());
@@ -268,7 +206,7 @@ IOdysseyImageRenderer::Clear(TSharedPtr<::ULIS::FBlock> ioBlock, const TArray<::
     for ( int i = 0; i < iRects.Num(); i++ )
     {
         ::ULIS::FEvent eventClear = FULISEventBuilder().RetainBlock(ioBlock).Build();
-        ::ULIS::FRectI rect = iRects[i];
+        ::ULIS::FRectI rect = ::ULISUtils::ToULISRectI(iRects[i]);
         ctx.Clear(*ioBlock, rect, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, iWaitList.Num(), iWaitList.GetData(), &eventClear);
         events.Add(eventClear);
         ctx.Flush();

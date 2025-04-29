@@ -1,9 +1,9 @@
 // IDDN.FR.001.060015.013.S.X.2019.000.00000
 // ODYSSEY is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
 
-#include "ULISInvalidTileMap.h"
+#include "OdysseyInvalidTileMap.h"
 
-FULISInvalidTileMap::FULISInvalidTileMap()
+FOdysseyInvalidTileMap::FOdysseyInvalidTileMap()
     : mTileMap()
     , mTileSize(0)
     , mWidth(0)
@@ -12,7 +12,7 @@ FULISInvalidTileMap::FULISInvalidTileMap()
 {
 }
 
-FULISInvalidTileMap::FULISInvalidTileMap(int iTileSize, int iWidth, int iHeight)
+FOdysseyInvalidTileMap::FOdysseyInvalidTileMap(int iTileSize, int iWidth, int iHeight)
     : mTileMap()
     , mTileSize(iTileSize)
     , mWidth(0)
@@ -24,7 +24,7 @@ FULISInvalidTileMap::FULISInvalidTileMap(int iTileSize, int iWidth, int iHeight)
 }
 
 void
-FULISInvalidTileMap::Resize(int iWidth, int iHeight)
+FOdysseyInvalidTileMap::Resize(int iWidth, int iHeight)
 {
     mTileMap.Resize(ceil( (float)iWidth / mTileSize ), ceil( (float)iHeight / mTileSize ));
 
@@ -33,13 +33,13 @@ FULISInvalidTileMap::Resize(int iWidth, int iHeight)
 }
 
 void
-FULISInvalidTileMap::Invalidate()
+FOdysseyInvalidTileMap::Invalidate()
 {
     mIsFullyInvalidated = true;
 }
 
 void
-FULISInvalidTileMap::Invalidate(const FIntPoint& iTileIndex)
+FOdysseyInvalidTileMap::Invalidate(const FIntPoint& iTileIndex)
 {
     if (mIsFullyInvalidated)
         return;
@@ -53,7 +53,7 @@ FULISInvalidTileMap::Invalidate(const FIntPoint& iTileIndex)
 }
 
 void
-FULISInvalidTileMap::Invalidate(const TArray<FIntPoint>& iTileIndexes)
+FOdysseyInvalidTileMap::Invalidate(const TArray<FIntPoint>& iTileIndexes)
 {
     if (mIsFullyInvalidated)
         return;
@@ -75,32 +75,31 @@ FULISInvalidTileMap::Invalidate(const TArray<FIntPoint>& iTileIndexes)
 }
 
 void
-FULISInvalidTileMap::Invalidate(const ::ULIS::FRectI& iRect)
+FOdysseyInvalidTileMap::Invalidate(const FIntRect& iRect)
 {
     if (mIsFullyInvalidated)
         return;
 
-    if (iRect.x >= mWidth || iRect.x + iRect.w < 0 || iRect.y >= mHeight || iRect.y + iRect.h < 0)
+    if (iRect.Min.X >= mWidth || iRect.Max.X < 0 || iRect.Min.Y >= mHeight || iRect.Max.Y < 0)
         return;
 
-    if (iRect.x <= 0 && iRect.y <= 0 && iRect.x + iRect.w >= mWidth && iRect.y + iRect.h >= mHeight)
+    if (iRect.Min.X <= 0 && iRect.Min.Y <= 0 && iRect.Max.X >= mWidth && iRect.Max.Y >= mHeight)
     {
         mIsFullyInvalidated = true;
         return;
     }
 
-    float xf = float( iRect.x ) / mTileSize;
-    float yf = float( iRect.y ) / mTileSize;
-    float wf = float( iRect.w ) / mTileSize;
-    float hf = float( iRect.h ) / mTileSize;
+    float x1f = float( iRect.Min.X ) / mTileSize;
+    float y1f = float( iRect.Min.Y ) / mTileSize;
+    float x2f = float( iRect.Max.X ) / mTileSize;
+    float y2f = float( iRect.Max.Y ) / mTileSize;
 
     FIntPoint tileCount = mTileMap.Size();
 
-    int x = FMath::Max(0, xf);
-    int y = FMath::Max(0, yf);
-    int w = FMath::Min( tileCount.X, int( ceil( xf + wf ) ) ) - abs((int)xf);
-    int h = FMath::Min( tileCount.Y, int( ceil( yf + hf ) ) ) - abs((int)yf);
-
+    int x = FMath::Max(0, x1f);
+    int y = FMath::Max(0, y1f);
+    int w = FMath::Min( tileCount.X, int( ceil( x2f ) ) ) - abs((int)x1f);
+    int h = FMath::Min( tileCount.Y, int( ceil( y2f ) ) ) - abs((int)y2f);
 
     for( int i = 0; i < h; ++i ) //y
     {
@@ -112,7 +111,7 @@ FULISInvalidTileMap::Invalidate(const ::ULIS::FRectI& iRect)
 }
 
 void
-FULISInvalidTileMap::Invalidate(const TArray<::ULIS::FRectI>& iRects)
+FOdysseyInvalidTileMap::Invalidate(const TArray<FIntRect>& iRects)
 {
     if (mIsFullyInvalidated)
         return;
@@ -124,7 +123,7 @@ FULISInvalidTileMap::Invalidate(const TArray<::ULIS::FRectI>& iRects)
 }
 
 void
-FULISInvalidTileMap::Clear()
+FOdysseyInvalidTileMap::Clear()
 {
     mIsFullyInvalidated = false;
 
@@ -139,25 +138,25 @@ FULISInvalidTileMap::Clear()
     }
 }
 
-::ULIS::FRectI
-FULISInvalidTileMap::GetTileRect(const FIntPoint& iTileIndex) const
+FIntRect
+FOdysseyInvalidTileMap::GetTileRect(const FIntPoint& iTileIndex) const
 {
-    return ::ULIS::FRectI(
+    return FIntRect(
         iTileIndex.X * mTileSize,
         iTileIndex.Y * mTileSize,
-        FMath::Min( (iTileIndex.X + 1) * mTileSize, mWidth) - iTileIndex.X * mTileSize,
-        FMath::Min( (iTileIndex.Y + 1) * mTileSize, mHeight) - iTileIndex.Y * mTileSize
+        FMath::Min( (iTileIndex.X + 1) * mTileSize, mWidth),
+        FMath::Min( (iTileIndex.Y + 1) * mTileSize, mHeight)
     );
 }
 
 bool
-FULISInvalidTileMap::IsValidTile(const FIntPoint& iTileIndex) const
+FOdysseyInvalidTileMap::IsValidTile(const FIntPoint& iTileIndex) const
 {
     return !mIsFullyInvalidated && mTileMap.Get(iTileIndex.X, iTileIndex.Y);
 }
 
 TArray<FIntPoint>
-FULISInvalidTileMap::InvalidTiles() const
+FOdysseyInvalidTileMap::InvalidTiles() const
 {
     TArray<FIntPoint> invalidTiles;
     FIntPoint tileCount = mTileMap.Size();
@@ -176,29 +175,29 @@ FULISInvalidTileMap::InvalidTiles() const
     return invalidTiles;
 }
 
-TArray<::ULIS::FRectI>
-FULISInvalidTileMap::InvalidRects() const
+TArray<FIntRect>
+FOdysseyInvalidTileMap::InvalidRects() const
 {
     if (mIsFullyInvalidated)
-        return { ::ULIS::FRectI::FromXYWH(0, 0, mWidth, mHeight) };
+        return { FIntRect(0, 0, mWidth, mHeight) };
 
-    TArray<::ULIS::FRectI> invalidRects;
+    TArray<FIntRect> invalidRects;
     FIntPoint tileCount = mTileMap.Size();
 
     TArray<int> prevRectIndexes;
     for( int y = 0; y < tileCount.Y; ++y )
     {
-        TArray<::ULIS::FRectI> rects;
+        TArray<FIntRect> rects;
         bool wasInvalid = false;
         for( int x = 0; x < tileCount.X; ++x )
         {
             bool isInvalid = !mTileMap.Get(x, y);
             if (isInvalid)
             {
-                ::ULIS::FRectI rect = GetTileRect({x, y});
+                FIntRect rect = GetTileRect({x, y});
                 if (wasInvalid)
                 {
-                    rects.Last().w += rect.w;
+                    rects.Last().Max.X += rect.Width();
                 }
                 else
                 {
@@ -211,14 +210,14 @@ FULISInvalidTileMap::InvalidRects() const
         TArray<int> rectIndexes;
         for (int i = 0; i < rects.Num(); i++)
         {
-            const ::ULIS::FRectI& rect = rects[i];
+            const FIntRect& rect = rects[i];
             bool prevRectExtended = false;
             for (int prevIdx : prevRectIndexes)
             {
-                ::ULIS::FRectI& prevRect = invalidRects[prevIdx];
-                if (rect.x == prevRect.x && rect.w == prevRect.w )
+                FIntRect& prevRect = invalidRects[prevIdx];
+                if (rect.Min.X == prevRect.Min.X && rect.Width() == prevRect.Width() )
                 {
-                    prevRect.h += rect.h;
+                    prevRect.Max.Y += rect.Height();
                     rectIndexes.Add(prevIdx);
                     prevRectExtended = true;
                     break;
@@ -238,19 +237,19 @@ FULISInvalidTileMap::InvalidRects() const
 }
 
 int
-FULISInvalidTileMap::Width() const
+FOdysseyInvalidTileMap::Width() const
 {
     return mWidth;
 }
 
 int
-FULISInvalidTileMap::Height() const
+FOdysseyInvalidTileMap::Height() const
 {
     return mHeight;
 }
 
 int
-FULISInvalidTileMap::TileSize() const
+FOdysseyInvalidTileMap::TileSize() const
 {
     return mTileSize;
 }
