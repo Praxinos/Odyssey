@@ -8,7 +8,7 @@
 #include "ULISLoaderModule.h"
 #include "OdysseyStyle.h"
 #include "OdysseyAnimationCellImageVector.h"
-#include "OdysseyAnimationCellImageStagger.h"
+#include "OdysseyLayerCellImageStagger.h"
 #include "OdysseyAnimationCellsContainerImport.h"
 #include "OdysseyAnimationLightTable.h"
 #include "OdysseyAnimationLayerImageVectorImport.h"
@@ -64,7 +64,7 @@ UOdysseyAnimationLayerImageVector::PostInitProperties()
     DefaultCellClass = UOdysseyAnimationCellImageVector::StaticClass();
 
     SupportedCellTypes.Add(UOdysseyAnimationCellImageVector::StaticClass());
-    SupportedCellTypes.Add(UOdysseyAnimationCellImageStagger::StaticClass());
+    SupportedCellTypes.Add(UOdysseyLayerCellImageStagger::StaticClass());
 }
 
 void
@@ -169,7 +169,7 @@ UOdysseyAnimationLayerImageVector::Serialize(FArchive& Ar)
                     }
                     else if (cellType == TEXT("FOdysseyAnimationCellImageStagger"))
                     {
-                        UOdysseyAnimationCellImageStagger* cell = NewObject<UOdysseyAnimationCellImageStagger>(this, UOdysseyAnimationCellImageStagger::StaticClass(), NAME_None, RF_Public | RF_Transactional);
+                        UOdysseyLayerCellImageStagger* cell = NewObject<UOdysseyLayerCellImageStagger>(this, UOdysseyLayerCellImageStagger::StaticClass(), NAME_None, RF_Public | RF_Transactional);
                         Cells.Add(cell);
                         cell->OldSerialize(Ar);
                     }
@@ -425,12 +425,12 @@ UOdysseyAnimationLayerImageVector::Merge(const TArray<UOdysseyLayer*>& iLayers)
             if (!srcCell)
                 continue;
 
-            if (srcCell && srcCell->IsA<UOdysseyAnimationCellImageStagger>())
+            if (srcCell && srcCell->IsA<UOdysseyLayerCellImageStagger>())
             {
                 int staggerFrame = frame;
-                while(srcCell && srcCell->IsA<UOdysseyAnimationCellImageStagger>())
+                while(srcCell && srcCell->IsA<UOdysseyLayerCellImageStagger>())
                 {
-                    UOdysseyAnimationCellImageStagger* cellStagger = Cast<UOdysseyAnimationCellImageStagger>(srcCell);
+                    UOdysseyLayerCellImageStagger* cellStagger = Cast<UOdysseyLayerCellImageStagger>(srcCell);
                     int srcCellFrame = staggerFrame - srcCell->GetFrameRange().GetLowerBoundValue();
 
                     staggerFrame = cellStagger->GetReferenceFrameAtFrame(srcCellFrame);

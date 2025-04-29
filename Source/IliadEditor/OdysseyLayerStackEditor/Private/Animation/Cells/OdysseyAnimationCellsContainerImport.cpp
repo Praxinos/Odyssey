@@ -3,12 +3,7 @@
 
 #include "OdysseyAnimationCellsContainerImport.h"
 
-#include "OdysseyFile.h"
-#include "OdysseyAnimationCell.h"
-#include "OdysseyAnimationLayer.h"
-#include "OdysseyAnimationCellImageRaster.h"
-#include "OdysseyAnimationCellImageVector.h"
-#include "OdysseyAnimationCellImageStagger.h"
+#include "OdysseyLayerCellImageStagger.h"
 
 bool
 FOdysseyAnimationCellsContainerImport::Read( UOdysseyAnimationLayer* iAnimationLayer
@@ -81,7 +76,7 @@ FOdysseyAnimationCellsContainerImport::Read( UOdysseyAnimationLayer* iAnimationL
                     }
                     else if (cellType == TEXT("FOdysseyAnimationCellImageStagger"))
                     {
-                        iAnimationLayer->AddCell(UOdysseyAnimationCellImageStagger::StaticClass());
+                        iAnimationLayer->AddCell(UOdysseyLayerCellImageStagger::StaticClass());
                     }
                 }
                 break;

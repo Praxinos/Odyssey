@@ -35,6 +35,9 @@ public:
     UFUNCTION(BlueprintCallable, Category="Odyssey|Cell")
     void SetExposure(int Value);
 
+    UFUNCTION(BlueprintPure, Category="Odyssey|Cell")
+    UTexture2D* GetTexture() const;
+
 #if WITH_EDITOR
     UFUNCTION(BlueprintPure, Category="Odyssey|Cell")
     int GetMark() const;
@@ -55,9 +58,9 @@ public:
 
 public:
     // UObject overrides
+    virtual void OldSerialize(FArchive& Ar); //DEPRECATED: Keep that for compatibility with early versions of Odyssey
 #if WITH_EDITOR
     virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
-    virtual void OldSerialize(FArchive& Ar); //DEPRECATED: Keep that for compatibility with early versions of Odyssey
 #endif
 
 public:
@@ -83,6 +86,9 @@ protected:
 
     UPROPERTY()//TODO: meta (minvalue 1)
     int Exposure = 1;
+
+    UPROPERTY(NonTransactional)
+    mutable TObjectPtr<UTexture2D> Texture; //mutable is temporary, will be removed when layers will be 100% GPU based and there's no more dependency on ULIS
 
 #if WITH_EDITORONLY_DATA
     UPROPERTY()

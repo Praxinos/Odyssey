@@ -5,6 +5,7 @@
 #include "OdysseyLayerCellImport.h"
 #include "OdysseyLayer.h"
 #include "Misc/TransactionObjectEvent.h"
+#include "ScreenPass.h"
 
 UOdysseyLayer*
 UOdysseyLayerCell::GetLayer() const
@@ -12,7 +13,6 @@ UOdysseyLayerCell::GetLayer() const
     return Cast<UOdysseyLayer>(GetOuter());
 }
 
-#if WITH_EDITOR
 void
 UOdysseyLayerCell::OldSerialize(FArchive& Ar)
 {
@@ -25,7 +25,6 @@ UOdysseyLayerCell::OldSerialize(FArchive& Ar)
         Ar << Exposure;
     }
 }
-#endif
 
 UOdysseyLayerStack*
 UOdysseyLayerCell::GetLayerStack() const
@@ -97,6 +96,12 @@ UOdysseyLayerCell::SetExposure(int Value)
         GetLayer()->InvalidateCellsFrameRanges();
 
     RenderingCompositionChanged();
+}
+
+UTexture2D*
+UOdysseyLayerCell::GetTexture() const
+{
+    return Texture;
 }
 
 #if WITH_EDITOR
@@ -178,5 +183,37 @@ UOdysseyLayerCell::IsThumbnailDirty() const
 TSharedPtr<FOdysseyTextureRenderer>
 UOdysseyLayerCell::BuildTextureRenderer(FFrameNumber iFrame, TMap<const IOdysseyTextureRenderingAbility*, FGuid>* iIds) const
 {
-    return nullptr;
+    if (!Texture)
+        return nullptr;
+
+    TSharedPtr<FOdysseyTextureRenderer> renderer = MakeShared<FOdysseyTextureRenderer>();
+    FGuid id = renderer->AddChild(
+        renderer->GetRootPassId(),
+        EOdysseyBlendingMode::kNormal,
+        1.0f,
+        FMatrix::Identity,
+        FOdysseyTextureRenderer::FOnExecuteRenderPass::CreateLambda(
+            [this](FRDGBuilder& iGraphBuilder, const FOdysseyTextureRenderer::FRenderPassParameters& iParams)
+            {
+                FRDGTextureRef sourceTexture = iGraphBuilder.RegisterExternalTexture(CreateRenderTarget(Texture->GetResource()->TextureRHI, TEXT("UOdysseyLayerCellImage::Texture")));
+
+                //AddDrawTexturePass ensures format conversions
+                AddDrawTexturePass(
+                    iGraphBuilder,
+                    FScreenPassViewInfo(),
+                    sourceTexture,
+                    iParams.DestinationTexture,
+                    iParams.SrcRect.Min,
+                    iParams.SrcRect.Size(),
+                    iParams.DstRect.Min,
+                    iParams.DstRect.Size()
+                );
+            }
+        )
+    );
+
+    if (iIds)
+        iIds->Add(this, id);
+
+    return renderer;
 }

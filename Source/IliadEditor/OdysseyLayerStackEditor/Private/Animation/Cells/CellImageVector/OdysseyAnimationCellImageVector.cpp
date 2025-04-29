@@ -278,13 +278,6 @@ UOdysseyAnimationCellImageVector::OnIsWireframeChanged(UOdysseyAnimationLayerIma
     mVectorCell->GetLayer()->RequestRedraw( mVectorCell.Get(), 0 );
 }
 
-bool
-UOdysseyAnimationCellImageVector::IsImageRenderingGameThreadOnly() const
-{
-    TSharedPtr<FOdysseyMediaVector> mediaVector = mMediaVector.Pin();
-    return !!mediaVector;
-}
-
 TArray<FGuid>
 UOdysseyAnimationCellImageVector::GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrameIndex) const
 {

@@ -55,7 +55,7 @@ FOdysseyAnimationTimelineCellImageStaggerShortcuts::Action_ConvertToReferenceCel
     TArray<UOdysseyLayerCell*> staggerCells = selectedCells.FilterByPredicate(
         [](UOdysseyLayerCell* iCell)
         {
-            return iCell->IsA<UOdysseyAnimationCellImageStagger>();
+            return iCell->IsA<UOdysseyLayerCellImageStagger>();
         }
     );
 
@@ -89,7 +89,7 @@ FOdysseyAnimationTimelineCellImageStaggerShortcuts::Action_ConvertToReferenceCel
     {
         progressBar.EnterProgressFrame();
 
-        UOdysseyAnimationCellImageStagger* staggerCell = Cast<UOdysseyAnimationCellImageStagger>(cell);
+        UOdysseyLayerCellImageStagger* staggerCell = Cast<UOdysseyLayerCellImageStagger>(cell);
 
         UOdysseyLayerCell* referenceCell = staggerCell->GetReferenceCellAtFrame(0);
         if (!referenceCell)
@@ -176,7 +176,7 @@ FOdysseyAnimationTimelineCellImageStaggerShortcuts::CanAction_ConvertToReference
     TArray<UOdysseyLayerCell*> staggerCells = selectedCells.FilterByPredicate(
         [](UOdysseyLayerCell* iCell)
         {
-            return iCell->IsA<UOdysseyAnimationCellImageStagger>();
+            return iCell->IsA<UOdysseyLayerCellImageStagger>();
         }
     );
 

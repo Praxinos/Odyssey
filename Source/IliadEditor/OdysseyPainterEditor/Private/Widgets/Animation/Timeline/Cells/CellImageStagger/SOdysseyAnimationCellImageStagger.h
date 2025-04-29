@@ -4,7 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "OdysseyAnimationCellImageStagger.h"
+#include "OdysseyLayerCellImageStagger.h"
 #include "Widgets/Input/SSpinBox.h"
 
 class FOdysseyPainterEditorAnimationTimelinePosition;
@@ -23,7 +23,7 @@ public:
     SLATE_END_ARGS()
 
 public:
-    void Construct(const FArguments& iArgs, UOdysseyAnimationCellImageStagger* iCell);
+    void Construct(const FArguments& iArgs, UOdysseyLayerCellImageStagger* iCell);
     virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const;
 
 private:
@@ -44,12 +44,12 @@ private:
     void MapActions(TSharedPtr<FUICommandList> iCommandList);
     void BuildContextMenu(FMenuBuilder& iMenuBuilder);
 
-    void SetBehaviour(EOdysseyAnimationCellImageStaggerBehaviour iBehaviour);
-    bool CanSetBehaviour(EOdysseyAnimationCellImageStaggerBehaviour iBehaviour) const;
-    bool IsBehaviour(EOdysseyAnimationCellImageStaggerBehaviour iBehaviour) const;
+    void SetBehaviour(EOdysseyLayerCellImageStaggerBehaviour iBehaviour);
+    bool CanSetBehaviour(EOdysseyLayerCellImageStaggerBehaviour iBehaviour) const;
+    bool IsBehaviour(EOdysseyLayerCellImageStaggerBehaviour iBehaviour) const;
 
 private:
-    UOdysseyAnimationCellImageStagger* mCell;
+    UOdysseyLayerCellImageStagger* mCell;
     TAttribute<bool> mShowContent;
     TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition> mTimelinePosition;
     FText mSetReachTransactionName;

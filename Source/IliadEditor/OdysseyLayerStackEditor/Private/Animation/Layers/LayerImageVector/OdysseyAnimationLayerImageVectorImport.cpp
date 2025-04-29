@@ -4,7 +4,6 @@
 #include "OdysseyAnimationLayerImageVectorImport.h"
 #include "OdysseyAnimationLayerImageVector.h"
 #include "OdysseyAnimationCellImageVector.h"
-#include "OdysseyAnimationCellImageStagger.h"
 #include "OdysseyAnimationLightTable.h"
 #include "OdysseyAnimationCellsContainerImport.h"
 #include "OdysseyAnimationLightTableImport.h"
@@ -83,7 +82,7 @@ FOdysseyAnimationLayerImageVectorImport::Read( UOdysseyAnimationLayerImageVector
                             }
                             else if (cellType == TEXT("FOdysseyAnimationCellImageStagger"))
                             {
-                                UOdysseyLayerCell* cell = iAnimationLayerImageVector->AddCell(UOdysseyAnimationCellImageStagger::StaticClass());
+                                UOdysseyLayerCell* cell = iAnimationLayerImageVector->AddCell(UOdysseyLayerCellImageStagger::StaticClass());
                                 cell->OldSerialize(Ar);
                             }
                         }

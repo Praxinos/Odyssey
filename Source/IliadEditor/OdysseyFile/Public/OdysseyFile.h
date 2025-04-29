@@ -258,9 +258,9 @@ namespace FOdysseyFile
         static const uint32 CHUNK_CELLIMAGERASTER =  0xa37598ec; // container
             static const uint32 CHUNK_CELLIMAGERASTER_RASTERBLOCK = 0xf83974c6; // FOdysseyRasterBlock(Block)
 
-        static const uint32 CHUNK_CELLIMAGESTAGGER = 0x559ff069; // container
-            static const uint32 CHUNK_CELLIMAGESTAGGER_BEHAVIOUR = 0xdd0542e9; // uint32 (Behaviour)
-            static const uint32 CHUNK_CELLIMAGESTAGGER_REACH = 0x98930ed0; // uint32 (Reach)
+        //static const uint32 CHUNK_CELLIMAGESTAGGER = 0x559ff069; // container  //Not used anymore, moved to OdysseyLayerCellImageStaggerImport to remove dependency to an Editor module while keeping retro compatibility
+            //static const uint32 CHUNK_CELLIMAGESTAGGER_BEHAVIOUR = 0xdd0542e9; // uint32 (Behaviour)  //Not used anymore, moved to OdysseyLayerCellImageStaggerImport to remove dependency to an Editor module while keeping retro compatibility
+            //static const uint32 CHUNK_CELLIMAGESTAGGER_REACH = 0x98930ed0; // uint32 (Reach)  //Not used anymore, moved to OdysseyLayerCellImageStaggerImport to remove dependency to an Editor module while keeping retro compatibility
 
         static const uint32 CHUNK_CELLSCONTAINER =  0x5024f733; // container
             static const uint32 CHUNK_CELLSCONTAINER_OFFSET =  0x3e91fadd; // uint32 (offset)

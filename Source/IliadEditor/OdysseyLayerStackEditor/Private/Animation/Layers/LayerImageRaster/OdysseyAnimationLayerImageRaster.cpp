@@ -8,7 +8,7 @@
 #include "ULISLoaderModule.h"
 #include "OdysseyStyle.h"
 #include "OdysseyAnimationCellImageRaster.h"
-#include "OdysseyAnimationCellImageStagger.h"
+#include "OdysseyLayerCellImageStagger.h"
 #include "OdysseyAnimationCellsContainerImport.h"
 #include "OdysseyAnimationLayerImageRasterImport.h"
 #include "OdysseyAnimationLightTable.h"
@@ -35,7 +35,7 @@ UOdysseyAnimationLayerImageRaster::PostInitProperties()
     DefaultCellClass = UOdysseyAnimationCellImageRaster::StaticClass();
 
     SupportedCellTypes.Add(UOdysseyAnimationCellImageRaster::StaticClass());
-    SupportedCellTypes.Add(UOdysseyAnimationCellImageStagger::StaticClass());
+    SupportedCellTypes.Add(UOdysseyLayerCellImageStagger::StaticClass());
 }
 
 struct FOdysseyAnimationLayerImageRasterObjectVersion
@@ -103,7 +103,7 @@ UOdysseyAnimationLayerImageRaster::Serialize(FArchive& Ar)
                     }
                     else if (cellType == TEXT("FOdysseyAnimationCellImageStagger"))
                     {
-                        UOdysseyAnimationCellImageStagger* cell = NewObject<UOdysseyAnimationCellImageStagger>(this, UOdysseyAnimationCellImageStagger::StaticClass(), NAME_None, RF_Public | RF_Transactional);
+                        UOdysseyLayerCellImageStagger* cell = NewObject<UOdysseyLayerCellImageStagger>(this, UOdysseyLayerCellImageStagger::StaticClass(), NAME_None, RF_Public | RF_Transactional);
                         Cells.Add(cell);
                         cell->OldSerialize(Ar);
                     }

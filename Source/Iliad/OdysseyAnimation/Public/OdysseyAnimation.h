@@ -10,7 +10,7 @@
 
 #include "OdysseyAnimation.generated.h"
 
-class UOdysseyAnimationLayerStack;
+class UOdysseyLayerStack;
 
 UENUM()
 enum class EOdysseyAnimationFormat : uint8
@@ -93,8 +93,8 @@ public:
     void Init(int iWidth, int iHeight, EOdysseyAnimationFormat iFormat, float iFramesPerSecond);
 
     //Getters
-    void SetLayerStack(UObject* iLayerStack);
-    UObject* GetLayerStack() const;
+    void SetLayerStack(UOdysseyLayerStack* iLayerStack);
+    UOdysseyLayerStack* GetLayerStack() const;
 
     EOdysseyAnimationBoundMode GetLeftBoundMode() const;
     EOdysseyAnimationBoundMode GetRightBoundMode() const;
@@ -133,6 +133,9 @@ protected:
     UPROPERTY(EditAnywhere, Category = "Odyssey|Animation", NonTransactional)
     bool PreserveLayerStackAtRuntime = false;
 
+    UPROPERTY(BlueprintReadOnly, Category = "Odyssey|Animation", meta = (DisplayName = "Layer Stack", LoadBehavior = "LazyOnDemand"))
+    TObjectPtr<UOdysseyLayerStack> mLayerStack;
+
 #if WITH_EDITORONLY_DATA
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Odyssey|Animation")
     EOdysseyAnimationBoundMode LeftBoundMode = EOdysseyAnimationBoundMode::Automatic;
@@ -145,8 +148,5 @@ protected:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Odyssey|Animation", meta=(EditCondition="RightBoundMode != EOdysseyAnimationBoundMode::Automatic", EditConditionHides))
     int RightBound = 0;
-
-    UPROPERTY(BlueprintReadOnly, Category="Odyssey|Animation", meta=(DisplayName="Layer Stack", LoadBehavior = "LazyOnDemand"))
-    TObjectPtr<UObject> mLayerStack; //Editor Only
 #endif
 };

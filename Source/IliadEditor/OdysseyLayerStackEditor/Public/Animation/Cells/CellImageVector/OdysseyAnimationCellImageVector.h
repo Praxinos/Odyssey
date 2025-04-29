@@ -55,7 +55,6 @@ public:
     virtual TArray<FGuid> GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrameIndex) const override;
     virtual FIntRect GetDefaultRenderRect() const override;
     FCriticalSection* GetImageRenderingMutex() const;
-    bool IsImageRenderingGameThreadOnly() const;
 
 public:
     // Implements Interface IOdysseyVectorCell
@@ -83,9 +82,6 @@ private:
     mutable FCriticalSection mImageRenderingMutex;
     mutable TWeakPtr<FOdysseyMediaVector> mMediaVector;
     FOdysseyVectorImportV2 mImporterV2;
-
-    UPROPERTY(NonTransactional)
-    mutable TObjectPtr<UTexture2D> Texture;
 
     mutable uint64 mDrawingFlags = 0;
 };

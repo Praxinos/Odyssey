@@ -59,6 +59,7 @@ namespace UnrealBuildTool.Rules
 
                     "OdysseyCore",
                     "OdysseyRendering",
+                    "OdysseyLayerStack",
                     "RHI",
                     // ... add private dependencies that you statically link with here ...
                 }

@@ -3,28 +3,27 @@
 
 #pragma once
 
-#include <Core/Core.h>
+#include "Serialization/Archive.h"
 
-class UOdysseyAnimationCellImageStagger;
+class UOdysseyLayerCellImageStagger;
 
-class FOdysseyAnimationCellImageStaggerImport
+class FOdysseyLayerCellImageStaggerImport
 {
 public:
     /**
      * @brief Imports Data from the given archive into the given object
      *
-     * @param iAnimationCellImageStagger
+     * @param iLayerCellImageStagger
      * @param Ar
      */
-    static bool ODYSSEYLAYERSTACKEDITOR_API Read( UOdysseyAnimationCellImageStagger* iAnimationCellImageStagger
-                                  , FArchive &Ar );
+    static bool ODYSSEYLAYERSTACK_API Read( UOdysseyLayerCellImageStagger* iLayerCellImageStagger, FArchive& Ar );
 
 private:
     /**
      * Private import functions
      */
 
-    static void Read( UOdysseyAnimationCellImageStagger* iAnimationCellImageStagger
+    static void Read( UOdysseyLayerCellImageStagger* iLayerCellImageStagger
                                   , FArchive &Ar
                                   , uint64 iChunkEnd );
 };

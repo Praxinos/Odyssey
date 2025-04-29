@@ -7,7 +7,7 @@
 #include "OdysseyAnimationLayerImageVector.h"
 #include "Widgets/Animation/Timeline/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorTimelineInbetweening.h"
 #include "OdysseyAnimationCellImageVector.h"
-#include "OdysseyAnimationCellImageStagger.h"
+#include "OdysseyLayerCellImageStagger.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorModule.h"
 #include "OdysseyAnimation.h"
@@ -68,9 +68,9 @@ SOdysseyAnimationLayerImageVectorTimeline::OnGenerateCellWidget(UOdysseyLayerCel
         return SNew(SOdysseyAnimationCellImageVector, Cast<UOdysseyAnimationCellImageVector>(iCell))
             .Clipping(EWidgetClipping::ClipToBoundsAlways);
     }
-    else if (iCell->IsA<UOdysseyAnimationCellImageStagger>())
+    else if (iCell->IsA<UOdysseyLayerCellImageStagger>())
     {
-        return SNew(SOdysseyAnimationCellImageStagger, Cast<UOdysseyAnimationCellImageStagger>(iCell))
+        return SNew(SOdysseyAnimationCellImageStagger, Cast<UOdysseyLayerCellImageStagger>(iCell))
             .TimelinePosition(mTimelinePosition);
     }
 

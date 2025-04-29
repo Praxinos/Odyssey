@@ -9,6 +9,7 @@
 #include "Cooker/CookEvents.h"
 #include "RenderGraphBuilder.h"
 #include "ScreenPass.h"
+#include "OdysseyLayerStack.h"
 
 #define LOCTEXT_NAMESPACE "Animation"
 
@@ -112,13 +113,11 @@ UOdysseyAnimation::GetRenderingComposition(EOdysseyRenderingType iRenderType, in
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyAnimation::GetRenderingComposition);
 #if WITH_EDITOR
-    if (!mLayerStack || !mLayerStack->Implements<UOdysseyTextureRenderingAbility>())
+    if (!mLayerStack)
         return {};
 
-    IOdysseyTextureRenderingAbility* renderingInterface = Cast<IOdysseyTextureRenderingAbility>(mLayerStack);
-
     TArray<FGuid> idComposition;
-    idComposition.Append(renderingInterface->GetRenderingComposition(iRenderType, iFrameIndex));
+    idComposition.Append(mLayerStack->GetRenderingComposition(iRenderType, iFrameIndex));
 
     return idComposition;
 #else
@@ -140,19 +139,17 @@ TSharedPtr<FOdysseyTextureRenderer>
 UOdysseyAnimation::BuildTextureRenderer(FFrameNumber iFrame, TMap<const IOdysseyTextureRenderingAbility*, FGuid>* iIds) const
 {
 #if WITH_EDITOR
-    if (!mLayerStack || !mLayerStack->Implements<UOdysseyTextureRenderingAbility>())
+    if (!mLayerStack)
         return nullptr;
 
-    IOdysseyTextureRenderingAbility* renderingInterface = Cast<IOdysseyTextureRenderingAbility>(mLayerStack);
-    return renderingInterface->BuildTextureRenderer(iFrame, iIds);
+    return mLayerStack->BuildTextureRenderer(iFrame, iIds);
 #else
     if ( PreserveLayerStackAtRuntime )
     {
-        if ( !mLayerStack || !mLayerStack->Implements<UOdysseyTextureRenderingAbility>() )
+        if ( !mLayerStack )
             return nullptr;
 
-        IOdysseyTextureRenderingAbility* renderingInterface = Cast<IOdysseyTextureRenderingAbility>(mLayerStack);
-        return renderingInterface->BuildTextureRenderer(iFrame, iIds);
+        return mLayerStack->BuildTextureRenderer(iFrame, iIds);
     }
 
     UTexture2D* srcTexture2D = nullptr;
@@ -228,11 +225,10 @@ UOdysseyAnimation::GetLeftBoundValue() const
     {
         case EOdysseyAnimationBoundMode::Automatic:
         {
-            if (!mLayerStack || !mLayerStack->Implements<UOdysseyTextureRenderingAbility>())
+            if (!mLayerStack)
                 return 0;
 
-            IOdysseyTextureRenderingAbility* renderingInterface = Cast<IOdysseyTextureRenderingAbility>(mLayerStack);
-            FInt32Range frameRange = renderingInterface->GetFrameRange();
+            FInt32Range frameRange = mLayerStack->GetFrameRange();
             return frameRange.GetLowerBoundValue();
         }
         break;
@@ -253,11 +249,10 @@ UOdysseyAnimation::GetRightBoundValue() const
     {
         case EOdysseyAnimationBoundMode::Automatic:
         {
-            if (!mLayerStack || !mLayerStack->Implements<UOdysseyTextureRenderingAbility>())
+            if (!mLayerStack)
                 return 0;
 
-            IOdysseyTextureRenderingAbility* renderingInterface = Cast<IOdysseyTextureRenderingAbility>(mLayerStack);
-            FInt32Range frameRange = renderingInterface->GetFrameRange();
+            FInt32Range frameRange = mLayerStack->GetFrameRange();
             return frameRange.GetUpperBoundValue();
         }
         break;
@@ -304,7 +299,7 @@ UOdysseyAnimation::SetRightBoundValue(int iValue)
 }
 
 void
-UOdysseyAnimation::SetLayerStack(UObject* iLayerStack)
+UOdysseyAnimation::SetLayerStack(UOdysseyLayerStack* iLayerStack)
 {
     if (iLayerStack == mLayerStack)
         return;
@@ -313,7 +308,7 @@ UOdysseyAnimation::SetLayerStack(UObject* iLayerStack)
     RenderingCompositionChanged();
 }
 
-UObject*
+UOdysseyLayerStack*
 UOdysseyAnimation::GetLayerStack() const
 {
     return mLayerStack;
@@ -348,11 +343,10 @@ UOdysseyAnimation::PostTransacted(const FTransactionObjectEvent& iTransactionEve
 void
 UOdysseyAnimation::OnLeftBoundModeChanged()
 {
-    if (!mLayerStack || !mLayerStack->Implements<UOdysseyTextureRenderingAbility>())
+    if (!mLayerStack)
         return;
 
-    IOdysseyTextureRenderingAbility* renderingInterface = Cast<IOdysseyTextureRenderingAbility>(mLayerStack);
-    FInt32Range frameRange = renderingInterface->GetFrameRange();
+    FInt32Range frameRange = mLayerStack->GetFrameRange();
     LeftBound = frameRange.GetLowerBoundValue();
     RightBound = FMath::Max(GetLeftBoundValue(), RightBound);
 }
@@ -360,11 +354,10 @@ UOdysseyAnimation::OnLeftBoundModeChanged()
 void
 UOdysseyAnimation::OnRightBoundModeChanged()
 {
-    if (!mLayerStack || !mLayerStack->Implements<UOdysseyTextureRenderingAbility>())
+    if (!mLayerStack)
         return;
 
-    IOdysseyTextureRenderingAbility* renderingInterface = Cast<IOdysseyTextureRenderingAbility>(mLayerStack);
-    FInt32Range frameRange = renderingInterface->GetFrameRange();
+    FInt32Range frameRange = mLayerStack->GetFrameRange();
     RightBound = frameRange.GetUpperBoundValue();
     LeftBound = FMath::Min(LeftBound, GetRightBoundValue());
 }
@@ -374,11 +367,10 @@ UOdysseyAnimation::OnLeftBoundChanged()
 {
     if (LeftBoundMode == EOdysseyAnimationBoundMode::Automatic)
     {
-        if (!mLayerStack || !mLayerStack->Implements<UOdysseyTextureRenderingAbility>())
+        if (!mLayerStack)
             return;
 
-        IOdysseyTextureRenderingAbility* renderingInterface = Cast<IOdysseyTextureRenderingAbility>(mLayerStack);
-        FInt32Range frameRange = renderingInterface->GetFrameRange();
+        FInt32Range frameRange = mLayerStack->GetFrameRange();
         LeftBound = frameRange.GetLowerBoundValue();
     }
     else
@@ -392,11 +384,10 @@ UOdysseyAnimation::OnRightBoundChanged()
 {
     if (RightBoundMode == EOdysseyAnimationBoundMode::Automatic)
     {
-        if (!mLayerStack || !mLayerStack->Implements<UOdysseyTextureRenderingAbility>())
+        if (!mLayerStack)
             return;
 
-        IOdysseyTextureRenderingAbility* renderingInterface = Cast<IOdysseyTextureRenderingAbility>(mLayerStack);
-        FInt32Range frameRange = renderingInterface->GetFrameRange();
+        FInt32Range frameRange = mLayerStack->GetFrameRange();
         RightBound = frameRange.GetUpperBoundValue();
     }
     else

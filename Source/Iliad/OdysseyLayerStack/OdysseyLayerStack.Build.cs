@@ -56,6 +56,7 @@ public class OdysseyLayerStack : ModuleRules
                 "Core",
                 "CoreUObject",
                 "RenderCore",
+                "Renderer",
                 "RHI",
 
                 "OdysseyMedia",

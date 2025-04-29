@@ -122,6 +122,8 @@ private:
     int mHeight;
     ::ULIS::eFormat mFormat;
     ::ULIS::FRectI mSanitizedRect;
+    TSharedPtr<BLImage> mBLImage;
+    TSharedPtr<BLContext> mBLContext;
     //uint64 mRenderFlags; //See DRAWING_IGNORECOLOR for example
 
     //
@@ -134,8 +136,6 @@ private:
     {
         FGuid mId;
         ::ULIS::eFormat mFormat;
-        TSharedPtr<BLImage> mBLImage;
-        TSharedPtr<BLContext> mBLContext;
         FUniqueBuffer mBuffer;
         //eBlockState mState;
         bool mNeedsCache;

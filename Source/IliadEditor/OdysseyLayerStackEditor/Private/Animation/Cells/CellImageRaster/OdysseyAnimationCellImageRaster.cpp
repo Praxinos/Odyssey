@@ -163,13 +163,6 @@ UOdysseyAnimationCellImageRaster::RasterBlockPostProcess(const TMap<FIntPoint, T
     return events;
 }
 
-bool
-UOdysseyAnimationCellImageRaster::IsImageRenderingGameThreadOnly() const
-{
-    TSharedPtr<FOdysseyMediaRaster> mediaRaster = mMediaRaster.Pin();
-    return !!mediaRaster;
-}
-
 TArray<FGuid>
 UOdysseyAnimationCellImageRaster::GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrameIndex) const
 {

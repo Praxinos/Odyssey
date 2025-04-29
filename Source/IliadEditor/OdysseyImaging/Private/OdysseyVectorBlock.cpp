@@ -37,6 +37,8 @@ FOdysseyVectorBlock::Init(const FGuid& iId, TSharedPtr<FOdysseyVectorCell> iRoot
     mNeedsRender = false;
     mVectorCell = iRoot;
     mSanitizedRect = ::ULIS::FRectI( 0, 0, mWidth, mHeight );
+    mBLImage = MakeShared<BLImage>(mWidth, mHeight, BL_FORMAT_PRGB32);
+    mBLContext = MakeShared<BLContext>();
 
     mVectorCell.Get()->OnRequestRedrawDelegate().AddRaw( this, &FOdysseyVectorBlock::OnVectorRootRequestRedraw );
 }
@@ -84,14 +86,18 @@ FOdysseyVectorBlock::Render( ::ULIS::FBlock& ioBlock, const ::ULIS::FRectI& iRec
     if( mVectorCell.IsValid() )
     {
         //Render in a BLImage (also resets the internal invalidation rectangle)
-        mEngine.Render( mBlockData->mBLContext.Get(), iRect, mVectorCell->GetScene(), iDrawingFlags);
+        BLContextCreateInfo createInfo{};
+        createInfo.threadCount = FPlatformMisc::NumberOfCoresIncludingHyperthreads();
+        mBLContext->begin(*mBLImage, createInfo);
+        mEngine.Render( mBLContext.Get(), iRect, mVectorCell->GetScene(), iDrawingFlags);
+        mBLContext->end();
 
         if ( iRect.Area() )
         {
             TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorBlock::Render::ConvertBlock);
             //Get a ULIS block pointing to the BLImage
             BLImageData imgData;
-            mBlockData->mBLImage->getData(&imgData);
+            mBLImage->getData(&imgData);
             ::ULIS::FBlock renderBlock((uint8*)imgData.pixelData, mWidth, mHeight, ULIS::Format_BGRA8);
 
             //Unpremultiply the render block
@@ -166,7 +172,7 @@ FOdysseyVectorBlock::CleanupBlock(uint8* iData, void* iInfo)
     FBlockData* blockData = static_cast<FBlockData*>(iInfo);
 
     // End BLContext operations on the BLImage
-    blockData->mBLContext.Get()->end();
+    //blockData->mBLContext.Get()->end();
 
     if ( blockData->mNeedsCache )
     {
@@ -250,14 +256,6 @@ FOdysseyVectorBlock::GetBlock( uint64 iDrawingFlags)
     mBlockData = new FBlockData();
     mBlockData->mId = mId;
     mBlockData->mFormat = mFormat;
-
-    //Blend2D block : Used internally to render the Vector Scene into a pixel block
-    mBlockData->mBLImage = MakeShared<BLImage>(mWidth, mHeight, BL_FORMAT_PRGB32);
-    mBlockData->mBLContext = MakeShared<BLContext>();
-    // Starts BLContext operations on the BLImage
-    BLContextCreateInfo createInfo{};
-    createInfo.threadCount = FPlatformMisc::NumberOfCoresIncludingHyperthreads();
-    mBlockData->mBLContext.Get()->begin(*mBlockData->mBLImage.Get(), createInfo);
 
     //FUniqueBuffer buffer;
     FOdysseyDiskCache cache(FOdysseyVectorBlock_CACHE_NAME, FOdysseyVectorBlock_CACHE_VERSION);

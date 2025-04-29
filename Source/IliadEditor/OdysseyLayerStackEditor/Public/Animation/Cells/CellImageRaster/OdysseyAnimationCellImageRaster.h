@@ -38,7 +38,6 @@ public:
     virtual TArray<FGuid> GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrameIndex) const override;
     virtual FIntRect GetDefaultRenderRect() const override;
     FCriticalSection* GetImageRenderingMutex() const;
-    bool IsImageRenderingGameThreadOnly() const;
 
 private:
     void InitTexture() const;
@@ -56,7 +55,4 @@ private:
     mutable TSharedPtr<FOdysseyRasterBlock> mRasterBlock;
     mutable FCriticalSection mImageRenderingMutex;
     mutable TWeakPtr<FOdysseyMediaRaster> mMediaRaster;
-
-    UPROPERTY(NonTransactional)
-    mutable TObjectPtr<UTexture2D> Texture;
 };

@@ -6,7 +6,7 @@
 #include "OdysseyAnimationLayerStack.h"
 #include "OdysseyAnimationLayer.h"
 #include "OdysseyAnimationCellClipboardData.h"
-#include "OdysseyAnimationCellImageStagger.h"
+#include "OdysseyLayerCellImageStagger.h"
 #include "Framework/Commands/GenericCommands.h"
 #include "OdysseyCoreEditorModule.h"
 #include "OdysseyPainterEditorModule.h"
@@ -275,7 +275,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_ConvertToStaggerCell()
     selectedCells = selectedCells.FilterByPredicate(
         [](UOdysseyLayerCell* iCell)
         {
-            return !iCell->IsA<UOdysseyAnimationCellImageStagger>();
+            return !iCell->IsA<UOdysseyLayerCellImageStagger>();
         }
     );
 
@@ -289,7 +289,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_ConvertToStaggerCell()
     mOnTransactCurrentFrame.ExecuteIfBound(selectedCells[0]->GetFrameRange().GetLowerBoundValue());
     for (UOdysseyLayerCell* cell : selectedCells)
     {
-        UOdysseyLayerCell* staggerCell = layer->AddCell(UOdysseyAnimationCellImageStagger::StaticClass(), cell->GetIndexInLayer());
+        UOdysseyLayerCell* staggerCell = layer->AddCell(UOdysseyLayerCellImageStagger::StaticClass(), cell->GetIndexInLayer());
         staggerCell->SetExposure(cell->GetExposure());
         layer->RemoveCell(cell);
     }
@@ -616,7 +616,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_ConvertToStaggerCell()
     selectedCells = selectedCells.FilterByPredicate(
         [](UOdysseyLayerCell* iCell)
         {
-            return !iCell->IsA<UOdysseyAnimationCellImageStagger>();
+            return !iCell->IsA<UOdysseyLayerCellImageStagger>();
         }
     );
 

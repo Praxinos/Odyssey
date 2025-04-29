@@ -1,16 +1,16 @@
 // IDDN.FR.001.060015.013.S.X.2019.000.00000
 // ODYSSEY is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
-#include "OdysseyLayerCellImport.h"
-#include "OdysseyLayerCell.h"
+#include "OdysseyLayerCellImageStaggerImport.h"
+#include "OdysseyLayerCellImageStagger.h"
 #include <functional>
 
-static const uint32 CHUNK_CELL =  0xf93591b3; // container
-static const uint32 CHUNK_CELL_LENGTH = 0x5dbe40b7; // uint32 (Length)
-static const uint32 CHUNK_CELL_MARKID = 0x866d04a6; // FString (MarkId)
+static const uint32 CHUNK_CELLIMAGESTAGGER = 0x559ff069; // container
+static const uint32 CHUNK_CELLIMAGESTAGGER_BEHAVIOUR = 0xdd0542e9; // uint32 (Behaviour)
+static const uint32 CHUNK_CELLIMAGESTAGGER_REACH = 0x98930ed0; // uint32 (Reach)
 
 void
-ReadLayerCellChunks( uint64 iChunkEnd, FArchive &Ar, std::function<void(uint32, uint64, FArchive&)> iCallback )
+ReadLayerCellImageStaggerChunks( uint64 iChunkEnd, FArchive &Ar, std::function<void(uint32, uint64, FArchive&)> iCallback )
 {
     //UE_LOG( LogTemp, Warning, TEXT("ReadChunks") );
 
@@ -32,7 +32,7 @@ ReadLayerCellChunks( uint64 iChunkEnd, FArchive &Ar, std::function<void(uint32, 
 }
 
 bool
-FOdysseyLayerCellImport::Read( UOdysseyLayerCell* iCell
+FOdysseyLayerCellImageStaggerImport::Read( UOdysseyLayerCellImageStagger* iLayerCellImageStagger
                                             , FArchive &Ar )
 {
     uint64 start = Ar.Tell();
@@ -41,7 +41,7 @@ FOdysseyLayerCellImport::Read( UOdysseyLayerCell* iCell
     uint64 chunkLen;
     uint64 chunkEnd;
 
-    // Reads the first chunk (CHUNK_CELL)
+    // Reads the first chunk (CHUNK_CELLIMAGESTAGGER)
     Ar << chunkID;
     Ar << chunkLen;
 
@@ -49,10 +49,10 @@ FOdysseyLayerCellImport::Read( UOdysseyLayerCell* iCell
 
     switch( chunkID )
     {
-        case CHUNK_CELL :
-            //UE_LOG(LogTemp, Warning, TEXT("CHUNK_CELL") );
+        case CHUNK_CELLIMAGESTAGGER :
+            //UE_LOG(LogTemp, Warning, TEXT("CHUNK_CELLIMAGESTAGGER") );
 
-            FOdysseyLayerCellImport::Read( iCell, Ar, chunkEnd );
+            FOdysseyLayerCellImageStaggerImport::Read( iLayerCellImageStagger, Ar, chunkEnd );
         break;
 
         default:
@@ -64,27 +64,29 @@ FOdysseyLayerCellImport::Read( UOdysseyLayerCell* iCell
 }
 
 void
-FOdysseyLayerCellImport::Read( UOdysseyLayerCell* iCell
+FOdysseyLayerCellImageStaggerImport::Read( UOdysseyLayerCellImageStagger* iLayerCellImageStagger
                                             , FArchive &Ar
                                             , uint64 iChunkEnd )
 {
-    ReadLayerCellChunks( iChunkEnd
+    ReadLayerCellImageStaggerChunks( iChunkEnd
                               , Ar
-                              , [iCell](uint32 iChunkID, uint64 iChunkLen, FArchive &Ar) -> void
+                              , [iLayerCellImageStagger](uint32 iChunkID, uint64 iChunkLen, FArchive &Ar) -> void
         {
             switch ( iChunkID )
             {
-                case CHUNK_CELL_LENGTH :
+                case CHUNK_CELLIMAGESTAGGER_BEHAVIOUR :
                 {
-                    Ar << iCell->Exposure;
+                    uint32 behaviour;
+                    Ar << behaviour;
+
+                    behaviour = FMath::Max(uint32(0), behaviour - 1); //first value was "Invalid" which does not exist anymore
+                    iLayerCellImageStagger->Behaviour = (EOdysseyLayerCellImageStaggerBehaviour)behaviour;
                 }
                 break;
 
-                case CHUNK_CELL_MARKID :
+                case CHUNK_CELLIMAGESTAGGER_REACH :
                 {
-#if WITH_EDITOR
-                    Ar << iCell->Mark;
-#endif
+                    Ar << iLayerCellImageStagger->Reach;
                 }
                 break;
 

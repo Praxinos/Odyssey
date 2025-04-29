@@ -4,7 +4,7 @@
 #include "Widgets/Animation/Timeline/Layers/LayerImageRaster/SOdysseyAnimationLayerImageRasterTimeline.h"
 #include "Widgets/Animation/Timeline/Cells/CellImageStagger/SOdysseyAnimationCellImageStagger.h"
 #include "Widgets/Animation/Timeline/Cells/CellImageRaster/SOdysseyAnimationCellImageRaster.h"
-#include "OdysseyAnimationCellImageStagger.h"
+#include "OdysseyLayerCellImageStagger.h"
 #include "Shortcuts/AnimationTimeline/OdysseyAnimationTimelineCellImageRasterShortcuts.h"
 #include "OdysseyAnimationLayerImageRaster.h"
 #include "OdysseyAnimationCellImageRaster.h"
@@ -35,9 +35,9 @@ SOdysseyAnimationLayerImageRasterTimeline::OnGenerateCellWidget(UOdysseyLayerCel
         return SNew(SOdysseyAnimationCellImageRaster, Cast<UOdysseyAnimationCellImageRaster>(iCell))
             .Clipping(EWidgetClipping::ClipToBoundsAlways);
     }
-    else if (iCell->IsA<UOdysseyAnimationCellImageStagger>())
+    else if (iCell->IsA<UOdysseyLayerCellImageStagger>())
     {
-        return SNew(SOdysseyAnimationCellImageStagger, Cast<UOdysseyAnimationCellImageStagger>(iCell))
+        return SNew(SOdysseyAnimationCellImageStagger, Cast<UOdysseyLayerCellImageStagger>(iCell))
             .TimelinePosition(mTimelinePosition);
     }
 
