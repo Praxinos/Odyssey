@@ -958,7 +958,7 @@ UOdysseyLayer::BuildRenderPipeline(
         if ( frame == INDEX_NONE )
             return false;
 
-        UOdysseyLayerCell* cell = GetCellAtFrame(iFrame.Value);
+        UOdysseyLayerCell* cell = GetCellAtFrame(frame);
         if ( !cell )
             return false;
 
