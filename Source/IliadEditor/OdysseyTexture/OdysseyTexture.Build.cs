@@ -59,6 +59,7 @@ namespace UnrealBuildTool.Rules
                     "OdysseyFile",
                     "OdysseyImaging",
                     "OdysseyMedia",
+                    "OdysseyRendering",
                     "OdysseyStyle",
                     "OdysseyVector",
                     "ULIS",

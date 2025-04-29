@@ -36,7 +36,8 @@ public class OdysseyVector : ModuleRules
                 "OdysseyCore",
                 "OdysseyCoreEditor",
                 "OdysseyStyle",
-                "OdysseyPalette"
+                "OdysseyPalette",
+                "OdysseyRendering",
             }
         );
 

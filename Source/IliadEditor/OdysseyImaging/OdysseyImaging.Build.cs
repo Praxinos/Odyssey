@@ -39,7 +39,8 @@ public class OdysseyImaging : ModuleRules
 
                 "OdysseyCore",
                 "OdysseyCoreEditor",
-                "OdysseyFile"
+                "OdysseyFile",
+                "OdysseyRendering"
              }
         );
 

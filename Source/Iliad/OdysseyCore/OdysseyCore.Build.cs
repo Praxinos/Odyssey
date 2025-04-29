@@ -25,7 +25,6 @@ public class OdysseyCore : ModuleRules
         PublicIncludePaths.AddRange(
             new string[] {
                 Path.Combine(ModuleDirectory, "Public", "Containers"),
-                Path.Combine(ModuleDirectory, "Public", "Image"),
                 Path.Combine(ModuleDirectory, "Public", "Input"),
                 Path.Combine(ModuleDirectory, "Public", "Math"),
             }

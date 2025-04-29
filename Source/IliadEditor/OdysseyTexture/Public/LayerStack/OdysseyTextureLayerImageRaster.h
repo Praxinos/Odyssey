@@ -4,7 +4,7 @@
 #pragma once
 
 #include "OdysseyTextureLayer.h"
-#include "Image/OdysseyBlendingMode.h"
+#include "OdysseyBlendingMode.h"
 #include "Misc/TransactionObjectEvent.h"
 #include "Misc/ITransaction.h"
 #include "Misc/ITransactionObjectAnnotation.h"

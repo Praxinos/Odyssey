@@ -50,7 +50,7 @@ namespace OdysseySeamsPaintRendering
     };
 
 
-    IMPLEMENT_SHADER_TYPE(, TOdysseySeamsPaintVertexShader, TEXT("/Plugin/Odyssey/Private/OdysseySeamsPaintShader.usf"), TEXT("MainVS"), SF_Vertex);
+    IMPLEMENT_SHADER_TYPE(, TOdysseySeamsPaintVertexShader, TEXT("/Plugins/Odyssey/Private/OdysseySeamsPaintShader.usf"), TEXT("MainVS"), SF_Vertex);
 
 
     /** Mesh paint pixel shader */
@@ -115,7 +115,7 @@ namespace OdysseySeamsPaintRendering
         LAYOUT_FIELD(FShaderParameter, HeightPixelOffsetParameter);
     };
 
-    IMPLEMENT_SHADER_TYPE(, TOdysseySeamsPaintPixelShader, TEXT("/Plugin/Odyssey/Private/OdysseySeamsPaintShader.usf"), TEXT("MainPS"), SF_Pixel);
+    IMPLEMENT_SHADER_TYPE(, TOdysseySeamsPaintPixelShader, TEXT("/Plugins/Odyssey/Private/OdysseySeamsPaintShader.usf"), TEXT("MainPS"), SF_Pixel);
 
     typedef FSimpleElementVertexDeclaration FMeshPaintDilateVertexDeclaration;
     TGlobalResource< FMeshPaintDilateVertexDeclaration > GMeshPaintDilateVertexDeclaration;

@@ -86,6 +86,7 @@ public class OdysseyPainterEditor : ModuleRules
                 "OdysseyHUD",
                 "OdysseyMedia",
                 "OdysseyPalette",
+                "OdysseyRendering",
                 "OdysseyVector",
 
                 "ULIS",

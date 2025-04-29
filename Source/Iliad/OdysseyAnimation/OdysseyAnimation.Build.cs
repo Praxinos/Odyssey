@@ -43,6 +43,7 @@ namespace UnrealBuildTool.Rules
                 new string[]
                 {
                     "MediaAssets",
+                    "OdysseyRendering",
                     // ... add other public dependencies that you statically link with here ...
                 }
             );
@@ -57,6 +58,7 @@ namespace UnrealBuildTool.Rules
                     "RenderCore",
 
                     "OdysseyCore",
+                    "OdysseyRendering",
                     "RHI",
                     // ... add private dependencies that you statically link with here ...
                 }

@@ -20,14 +20,14 @@
 void
 FOdysseyCoreEditorModule::StartupModule()
 {
-	if (!IsRunningCommandlet())
-		RegisterCommands();
+    if (!IsRunningCommandlet())
+        RegisterCommands();
 }
 
 void
 FOdysseyCoreEditorModule::ShutdownModule()
 {
-	UnregisterCommands();
+    UnregisterCommands();
 }
 
 //---
@@ -37,19 +37,19 @@ FOdysseyCoreEditorModule::RegisterCommands()
 {
     FOdysseyCommands::Register();
 
-	TSharedRef<FUICommandList>& commandList = FModuleManager::LoadModuleChecked< IMainFrameModule >("MainFrame").GetMainFrameCommandBindings();
+    TSharedRef<FUICommandList>& commandList = FModuleManager::LoadModuleChecked< IMainFrameModule >("MainFrame").GetMainFrameCommandBindings();
 
-	commandList->MapAction(
-		FOdysseyCommands::Get().OpenOdysseyAboutWindow,
-		FUIAction(FExecuteAction::CreateRaw(this, &FOdysseyCoreEditorModule::OpenAboutWindow))
-	);
+    commandList->MapAction(
+        FOdysseyCommands::Get().OpenOdysseyAboutWindow,
+        FUIAction(FExecuteAction::CreateRaw(this, &FOdysseyCoreEditorModule::OpenAboutWindow))
+    );
 
-	commandList->MapAction(
-		FOdysseyCommands::Get().OpenOdysseyDocumentation,
-		FUIAction(FExecuteAction::CreateRaw(this, &FOdysseyCoreEditorModule::GotoUserDocumentation))
-	);
+    commandList->MapAction(
+        FOdysseyCommands::Get().OpenOdysseyDocumentation,
+        FUIAction(FExecuteAction::CreateRaw(this, &FOdysseyCoreEditorModule::GotoUserDocumentation))
+    );
 
-	ExtendHelpMenu();
+    ExtendHelpMenu();
 }
 
 void
@@ -61,16 +61,16 @@ FOdysseyCoreEditorModule::UnregisterCommands()
 void
 FOdysseyCoreEditorModule::ExtendHelpMenu()
 {
-	UToolMenu* HelpMenu = UToolMenus::Get()->ExtendMenu("MainFrame.MainMenu.Help");
-	FToolMenuSection& section = HelpMenu->AddSection("Odyssey", LOCTEXT("main-menu.help.odyssey-section", "Odyssey"));
-	section.AddMenuEntry(
+    UToolMenu* HelpMenu = UToolMenus::Get()->ExtendMenu("MainFrame.MainMenu.Help");
+    FToolMenuSection& section = HelpMenu->AddSection("Odyssey", LOCTEXT("main-menu.help.odyssey-section", "Odyssey"));
+    section.AddMenuEntry(
         FOdysseyCommands::Get().OpenOdysseyAboutWindow
         , LOCTEXT("main-menu.help.about-odyssey.name", "About Odyssey")
         , LOCTEXT("main-menu.help.about-odyssey.tooltip", "To get more information about Odyssey, the team that created it, etc.")
         /*, FSlateIcon(FAppStyle::Get().GetStyleSetName(), "OdysseyLogo.Odyssey16")
         , NAME_None*/);
     section.AddMenuEntry(
-		FOdysseyCommands::Get().OpenOdysseyDocumentation
+        FOdysseyCommands::Get().OpenOdysseyDocumentation
         , LOCTEXT("main-menu.help.odyssey-documentation.name", "Odyssey Documentation ...")
         , LOCTEXT("main-menu.help.odyssey-documentation.tooltip", "To access Odyssey's Documentationget.")
         /*, FSlateIcon(FAppStyle::Get().GetStyleSetName(), "About.Manual16")
@@ -81,7 +81,7 @@ void
 FOdysseyCoreEditorModule::OpenAboutWindow()
 {
     TSharedPtr<SWindow> parentWindow = FGlobalTabmanager::Get()->GetRootWindow();
-	SAboutWindow::Open(parentWindow);
+    SAboutWindow::Open(parentWindow);
 }
 
 void

@@ -30,6 +30,7 @@ public class OdysseyBrush : ModuleRules
                 "Engine",
                 "OdysseyCore",
                 "OdysseyImaging",
+                "OdysseyRendering",
             }
         );
 
@@ -37,6 +38,7 @@ public class OdysseyBrush : ModuleRules
             new string[] {
                 "InputCore",
                 "OdysseyCore",
+                "OdysseyRendering",
                 "Engine",
                 "ULIS"
             }

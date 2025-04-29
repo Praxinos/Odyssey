@@ -4,7 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Image/OdysseyBlendingMode.h"
+#include "OdysseyBlendingMode.h"
 #include "OdysseyMediaProvider.h"
 #include "OdysseyImageRenderingAbility.h"
 #include "Textures/SlateIcon.h"

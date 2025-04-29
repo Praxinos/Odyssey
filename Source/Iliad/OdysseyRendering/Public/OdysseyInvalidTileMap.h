@@ -6,7 +6,7 @@
 #include "Math/MathFwd.h"
 #include "Containers/OdysseyArray2D.h"
 
-class ODYSSEYCORE_API FOdysseyInvalidTileMap
+class ODYSSEYRENDERING_API FOdysseyInvalidTileMap
 {
 public:
     /** Constructor

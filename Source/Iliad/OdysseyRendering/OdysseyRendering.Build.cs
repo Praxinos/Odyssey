@@ -33,7 +33,9 @@ public class OdysseyRendering : ModuleRules
                 "RHI",
                 "RenderCore",
                 "SlateCore",
-                "Slate"
+                "Slate",
+
+                "OdysseyCore"
              }
         );
 

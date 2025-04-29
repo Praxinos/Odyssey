@@ -7,7 +7,7 @@
 
 #include "OdysseyRenderingAbility.generated.h"
 
-class ODYSSEYCORE_API FOdysseyRenderingChangedEvent
+class ODYSSEYRENDERING_API FOdysseyRenderingChangedEvent
 {
 public:
     enum eEventType
@@ -33,12 +33,12 @@ private:
 };
 
 UINTERFACE(Blueprintable)
-class ODYSSEYCORE_API UOdysseyRenderingAbility : public UInterface
+class ODYSSEYRENDERING_API UOdysseyRenderingAbility : public UInterface
 {
     GENERATED_BODY()
 };
 
-class ODYSSEYCORE_API IOdysseyRenderingAbility
+class ODYSSEYRENDERING_API IOdysseyRenderingAbility
 {
     GENERATED_BODY()
 

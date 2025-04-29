@@ -22,19 +22,17 @@ public class OdysseyLayerStackEditor : ModuleRules
             OptimizeCode = CodeOptimization.Never;
         }
 
+        PublicIncludePaths.AddRange(
+            new string[] {
+                // ... add public include paths required here ...
+            }
+            );
 
-
-            PublicIncludePaths.AddRange(
-                new string[] {
-                    // ... add public include paths required here ...
-                }
-                );
-
-            PrivateIncludePaths.AddRange(
-                new string[] {
-                    // ... add other private include paths required here ...
-                }
-                );
+        PrivateIncludePaths.AddRange(
+            new string[] {
+                // ... add other private include paths required here ...
+            }
+            );
 
         PublicIncludePaths.AddRange(
             new string[] {
@@ -85,6 +83,7 @@ public class OdysseyLayerStackEditor : ModuleRules
                 "OdysseyCore",
                 "OdysseyMedia",
                 "OdysseyImaging",
+                "OdysseyRendering",
             }
         );
 

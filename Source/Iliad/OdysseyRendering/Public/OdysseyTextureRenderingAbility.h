@@ -8,12 +8,12 @@
 #include "OdysseyTextureRenderingAbility.generated.h"
 
 UINTERFACE(BlueprintType)
-class ODYSSEYCORE_API UOdysseyTextureRenderingAbility : public UOdysseyRenderingAbility
+class ODYSSEYRENDERING_API UOdysseyTextureRenderingAbility : public UOdysseyRenderingAbility
 {
     GENERATED_BODY()
 };
 
-class ODYSSEYCORE_API IOdysseyTextureRenderingAbility : public IOdysseyRenderingAbility
+class ODYSSEYRENDERING_API IOdysseyTextureRenderingAbility : public IOdysseyRenderingAbility
 {
     GENERATED_BODY()
 

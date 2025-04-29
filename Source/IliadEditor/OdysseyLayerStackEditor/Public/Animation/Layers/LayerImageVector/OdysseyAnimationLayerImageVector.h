@@ -4,7 +4,7 @@
 #pragma once
 
 #include "OdysseyAnimationLayer.h"
-#include "Image/OdysseyBlendingMode.h"
+#include "OdysseyBlendingMode.h"
 
 #include <ULIS>
 

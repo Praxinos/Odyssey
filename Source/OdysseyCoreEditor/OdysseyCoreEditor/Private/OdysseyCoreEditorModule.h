@@ -10,17 +10,17 @@
 class FOdysseyCoreEditorModule : public IModuleInterface
 {
 public:
-	// IModuleInterface interface
-	virtual void StartupModule() override;
-	virtual void ShutdownModule() override;
+    // IModuleInterface interface
+    virtual void StartupModule() override;
+    virtual void ShutdownModule() override;
 
 private:
-	void RegisterCommands();
-	void UnregisterCommands();
+    void RegisterCommands();
+    void UnregisterCommands();
 
-	void ExtendHelpMenu();
+    void ExtendHelpMenu();
 
 private:
-	void OpenAboutWindow();
-	void GotoUserDocumentation();
+    void OpenAboutWindow();
+    void GotoUserDocumentation();
 };
