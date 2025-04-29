@@ -24,6 +24,7 @@ class ODYSSEYLAYERSTACKEDITOR_API UOdysseyAnimationCellImageVector
 
 public:
     virtual ~UOdysseyAnimationCellImageVector();
+    UOdysseyAnimationCellImageVector();
 
 public:
     virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const override;
@@ -61,6 +62,8 @@ public:
     virtual uint32 GetLength() override;
     virtual uint32 GetFrame() override;
 
+    virtual TSharedPtr<::ULIS::FBlock> GetBlock() const override;
+
 private:
     void OnVectorBlockInvalidated(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive);
     void OnVectorEngineNotify(FOdysseyVectorGroupPaint* iScene, uint64 iSignalFlags);
@@ -77,4 +80,7 @@ private:
     mutable FCriticalSection mImageRenderingMutex;
     mutable TWeakPtr<FOdysseyMediaVector> mMediaVector;
     FOdysseyVectorImportV2 mImporterV2;
+
+    UPROPERTY(NonTransactional)
+    UTexture2D* Texture = nullptr;
 };

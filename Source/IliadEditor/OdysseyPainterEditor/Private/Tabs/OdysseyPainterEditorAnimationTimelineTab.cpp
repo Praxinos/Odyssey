@@ -141,13 +141,21 @@ FOdysseyPainterEditorAnimationTimelineTab::GetTimelinePosition() const
 void
 FOdysseyPainterEditorAnimationTimelineTab::OnScrubStart()
 {
-    mEditor->SetAnimationTimelineIsScrubbing(true);
+    UOdysseyAnimationPlayer* player = Player();
+    if (!player)
+        return;
+
+    player->BeginScrub();
 }
 
 void
 FOdysseyPainterEditorAnimationTimelineTab::OnScrubEnd()
 {
-    mEditor->SetAnimationTimelineIsScrubbing(false);
+    UOdysseyAnimationPlayer* player = Player();
+    if (!player)
+        return;
+
+    player->EndScrub();
 }
 
 //--------------------------------------------------------------------------------------

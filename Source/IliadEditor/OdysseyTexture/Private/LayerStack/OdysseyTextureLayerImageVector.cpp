@@ -134,6 +134,12 @@ UOdysseyTextureLayerImageVector::PostLoad()
     mImporterV2.PostLoadTextures();
 }
 
+TSharedPtr<::ULIS::FBlock>
+UOdysseyTextureLayerImageVector::GetBlock() const
+{
+    return mVectorBlock->GetBlock(0);
+}
+
 void
 UOdysseyTextureLayerImageVector::PostDuplicate(bool bDuplicateForPIE)
 {

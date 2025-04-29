@@ -3,6 +3,9 @@
 
 #include "OdysseyAnimationCellImageVector.h"
 
+#include "TextureCompiler.h"
+#include "ScreenPass.h"
+
 #include "OdysseyAnimationCellImageVectorExport.h"
 #include "OdysseyAnimationCellImageVectorImport.h"
 #include "OdysseyAnimationLayerImageVector.h"
@@ -13,6 +16,7 @@
 #include "OdysseyAnimation.h"
 // from module OdysseyFile
 #include "OdysseyFile.h"
+#include "OdysseySurfaceTexture2DEditable.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorCell.h"
 #include "OdysseyVectorGroupPaint.h"
@@ -27,6 +31,14 @@ UOdysseyAnimationCellImageVector::~UOdysseyAnimationCellImageVector()
             mVectorCell->GetParent()->RemoveChild( mVectorCell.Get() );
         }
     }
+}
+
+UOdysseyAnimationCellImageVector::UOdysseyAnimationCellImageVector()
+{
+    Texture = CreateDefaultSubobject<UTexture2D>(TEXT("Texture"));
+    Texture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
+    Texture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
+    Texture->Filter = TextureFilter::TF_Nearest;
 }
 
 void
@@ -66,6 +78,10 @@ UOdysseyAnimationCellImageVector::PostInitProperties()
     }
 
     mVectorBlock->Init(mVectorBlockId, mVectorCell, animation->GetWidth(), animation->GetHeight(), format);
+
+    InitTextureWithBlockData( mVectorBlock->GetBlock(0).Get(), Texture, TextureSourceFormatForULISFormat(mVectorBlock->GetFormat()));
+    Texture->UpdateResource();
+    FTextureCompilingManager::Get().FinishCompilation({ Texture });
 }
 
 void
@@ -83,6 +99,11 @@ UOdysseyAnimationCellImageVector::PostDuplicate(EDuplicateMode::Type iDuplicateM
     }
 
     mVectorBlock->Init(mVectorBlockId, mVectorCell, animation->GetWidth(), animation->GetHeight(), format);
+
+    //Init Texture
+    InitTextureWithBlockData( mVectorBlock->GetBlock(0).Get(), Texture, TextureSourceFormatForULISFormat(mVectorBlock->GetFormat()));
+    Texture->UpdateResource();
+    FTextureCompilingManager::Get().FinishCompilation({ Texture });
 }
 
 FOdysseyVectorImportV2*
@@ -101,6 +122,12 @@ TSharedPtr<FOdysseyVectorBlock>
 UOdysseyAnimationCellImageVector::GetVectorBlock() const
 {
     return mVectorBlock;
+}
+
+TSharedPtr<::ULIS::FBlock>
+UOdysseyAnimationCellImageVector::GetBlock() const
+{
+    return mVectorBlock->GetBlock(0);
 }
 
 FGuid
@@ -198,6 +225,12 @@ UOdysseyAnimationCellImageVector::PostLoad()
     }
 
     mVectorBlock->Init(mVectorBlockId, mVectorCell, animation->GetWidth(), animation->GetHeight(), format);
+
+    //Init Texture
+    InitTextureWithBlockData( mVectorBlock->GetBlock(0).Get(), Texture, TextureSourceFormatForULISFormat(mVectorBlock->GetFormat()));
+    Texture->UpdateResource();
+    FTextureCompilingManager::Get().FinishCompilation({ Texture });
+
     //mVectorCell->GetLayer()->InvalidateCell( mVectorCell.Get() );
     FOdysseyVectorEngine::Notify( mVectorCell->GetScene(), FOdysseyVectorEngine::NOTIFY_ALL );
 
@@ -269,15 +302,7 @@ UOdysseyAnimationCellImageVector::GetImageRenderingMutex() const
 void
 UOdysseyAnimationCellImageVector::OnVectorBlockInvalidated( const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive)
 {
-    TArray<FIntRect> intRects;
-    intRects.Reserve(iRects.Num());
-    for (const ::ULIS::FRectI& rect : iRects )
-    {
-        FIntRect intRect(rect.x, rect.y, rect.x + rect.w, rect.y + rect.h);
-        intRects.Add(intRect);
-    }
-
-    RenderingChanged( intRects, iIsInteractive);
+    RenderingChanged( ::ULISUtils::ToIntRects(iRects), iIsInteractive);
 
     if (!iIsInteractive)
         DirtyThumbnail();
@@ -307,7 +332,7 @@ UOdysseyAnimationCellImageVector::GetFrame()
 void
 UOdysseyAnimationCellImageVector::OnVectorEngineNotify(FOdysseyVectorGroupPaint* iScene, uint64 iSignalFlags)
 {
-    if (iScene->GetCell()->GetCellInterface() != this)
+    if (!iScene || !iScene->GetCell() || iScene->GetCell()->GetCellInterface() != this)
         return;
 
     if (iSignalFlags & FOdysseyVectorEngine::NOTIFY_UPDATE_HUD)
@@ -319,5 +344,41 @@ UOdysseyAnimationCellImageVector::OnVectorEngineNotify(FOdysseyVectorGroupPaint*
 TSharedPtr<FOdysseyTextureRenderer>
 UOdysseyAnimationCellImageVector::BuildTextureRenderer(FFrameNumber iFrame, TMap<const IOdysseyTextureRenderingAbility*, FGuid>* iIds) const
 {
-    return nullptr;
+    TSharedPtr<FOdysseyTextureRenderer> renderer = MakeShared<FOdysseyTextureRenderer>();
+
+    if (mVectorBlock->NeedsRender())
+    {
+        TSharedPtr<::ULIS::FBlock> block = mVectorBlock->Render(0);
+        FOdysseySurfaceTexture2DEditable surface(Texture, block);
+        surface.Invalidate({mVectorBlock->GetSanitizedRect()});
+    }
+
+    FGuid id = renderer->AddChild(
+        renderer->GetRootPassId(),
+        EOdysseyBlendingMode::kNormal,
+        1.0f,
+        FMatrix::Identity,
+        FOdysseyTextureRenderer::FOnExecuteRenderPass::CreateLambda(
+            [this](FRDGBuilder& iGraphBuilder, const FOdysseyTextureRenderer::FRenderPassParameters& iParams)
+            {
+                FRDGTextureRef sourceTexture = iGraphBuilder.RegisterExternalTexture(CreateRenderTarget(Texture->GetResource()->TextureRHI, TEXT("UOdysseyAnimation::sourceTexture")));
+
+                AddDrawTexturePass(
+                    iGraphBuilder,
+                    FScreenPassViewInfo(),
+                    sourceTexture,
+                    iParams.DestinationTexture,
+                    iParams.SrcRect.Min,
+                    iParams.SrcRect.Size(),
+                    iParams.DstRect.Min,
+                    iParams.DstRect.Size()
+                );
+            }
+        )
+    );
+
+    if (iIds)
+        iIds->Add(this, id);
+
+    return renderer;
 }

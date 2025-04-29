@@ -44,6 +44,7 @@ public:
 public:
     //Events
     FSimpleMulticastDelegate& OnCurrentFrameChanged();
+    FSimpleMulticastDelegate& OnDisplayedFrameChanged();
     FSimpleMulticastDelegate& OnStatusChanged();
 
 protected:
@@ -82,6 +83,9 @@ public:
     UFUNCTION(BlueprintPure, Category = "Odyssey|AnimationPlayer")
     FFrameTime GetCurrentFrame() const;
 
+    UFUNCTION(BlueprintPure, Category = "Odyssey|AnimationPlayer")
+    FFrameTime GetDisplayedFrame() const;
+
     UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationPlayer")
     void SetAnimation(UOdysseyAnimation* iAnimation);
 
@@ -96,6 +100,9 @@ public:
 
     UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationPlayer")
     bool GetCurrentFrameInAnimationBounds(FFrameTime& oFrame) const;
+
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationPlayer")
+    bool GetDisplayedFrameInAnimationBounds(FFrameTime& oFrame) const;
 
     UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationPlayer")
     void SetPreBehaviour(EOdysseyAnimationPlayerPostBehaviour iValue);
@@ -166,7 +173,8 @@ private:
 
     EOdysseyRenderingType mRenderType = EOdysseyRenderingType::Render;
     bool mIsBackward = false;
-    FFrameTime mCurrentFrame;
+    FFrameTime mCurrentFrame; //Current frame when stopped
+    FFrameTime mDisplayedFrame; //Displayed frame when playing / Scrubbing / Paused
     TArray<FGuid>   mImageRenderingComposition;
     FOdysseyInvalidTileMap mInvalidTileMap;
     EOdysseyAnimationPlayerStatus Status = EOdysseyAnimationPlayerStatus::Stopped;
@@ -174,5 +182,6 @@ private:
 private:
     //Events
     FSimpleMulticastDelegate mOnCurrentFrameChanged;
+    FSimpleMulticastDelegate mOnDisplayedFrameChanged;
     FSimpleMulticastDelegate mOnStatusChanged;
 };

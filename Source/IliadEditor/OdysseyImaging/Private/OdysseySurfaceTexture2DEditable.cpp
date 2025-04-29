@@ -276,12 +276,11 @@ InvalidateTextureFromSourceDataUsingSortedRects( const ::ULIS::FBlock* iData, UT
      * This is clearly a big Patch and should be provided by Epic Games in the first place.
      */
 
-
     ////////////////////////////
+
     // Do nothing if there is no input rects
     if( ioSrcRects.Num() == 0 )
         return;
-
 
     ////////////////////////////
 #ifdef UE_BUILD_DEBUG
@@ -410,7 +409,7 @@ InvalidateTextureFromSourceDataUsingSortedRects( const ::ULIS::FBlock* iData, UT
             tileBlocks[i].Reserve( ioSrcRects[i].Num() );
             for( int32 j = 0; j < ioSrcRects[i].Num(); ++j ) {
 
-                EGammaSpace gammaSpace = iTexture->SRGB ? EGammaSpace::sRGB : EGammaSpace::Linear;
+                EGammaSpace gammaSpace = (fmt != ERawImageFormat::G8 && fmt != ERawImageFormat::BGRA8) || !iTexture->SRGB ? EGammaSpace::Linear : EGammaSpace::sRGB;
 
                 const int len = ioSrcRects[i][j].h;
                 tileImages[i].Emplace(
@@ -531,9 +530,19 @@ InvalidateTextureFromSourceDataUsingSortedRects( const ::ULIS::FBlock* iData, UT
 void
 InvalidateTextureFromSourceData( const ::ULIS::FBlock* iData, UTexture2D* iTexture, const ::ULIS::FRectI* iRects, const uint32 iNumRects )
 {
+    TArray< ::ULIS::FRectI > rects(iRects, iNumRects);
+    rects = rects.FilterByPredicate( [iTexture]( const ::ULIS::FRectI& iRect ) {
+        return iRect.w > 0 && iRect.h > 0 && iRect.x >= 0 && iRect.y >= 0 && iRect.x + iRect.w <= iTexture->GetSurfaceWidth() && iRect.y + iRect.h <= iTexture->GetSurfaceHeight();
+    } );
+
     TArray< TArray< ::ULIS::FRectI > > sortedRects;
-    SortRects( iRects, iNumRects, sortedRects );
+    SortRects( rects.GetData(), rects.Num(), sortedRects );
     InvalidateTextureFromSourceDataUsingSortedRects( iData, iTexture, sortedRects );
+
+
+    /*TArray< TArray< ::ULIS::FRectI > > sortedRects;
+    SortRects( iRects, iNumRects, sortedRects );
+    InvalidateTextureFromSourceDataUsingSortedRects( iData, iTexture, sortedRects );*/
 }
 
 void

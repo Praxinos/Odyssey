@@ -295,7 +295,7 @@ SOdysseyAnimationLayerStack::GetCurrentFrame() const
     if (!player)
         return 0;
 
-    return player->GetCurrentFrame().FrameNumber.Value;
+    return player->GetDisplayedFrame().FrameNumber.Value;
 }
 
 void

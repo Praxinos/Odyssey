@@ -218,9 +218,7 @@ bool
 UOdysseyPainterEditorTool::IsHUDVisible() const
 {
     UOdysseyAnimationPlayer* player = mEditor->GetAnimationPlayer();
-    if (player && player->GetStatus() == EOdysseyAnimationPlayerStatus::Playing)
-        return false;
-    return !mEditor->GetAnimationTimelineIsScrubbing();
+    return player && player->GetStatus() != EOdysseyAnimationPlayerStatus::Stopped;
 }
 
 EMouseCursor::Type UOdysseyPainterEditorTool::GetMouseCursor() const

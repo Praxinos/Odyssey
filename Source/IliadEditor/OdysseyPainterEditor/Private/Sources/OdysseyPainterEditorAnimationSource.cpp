@@ -209,9 +209,6 @@ FOdysseyPainterEditorAnimationSource::OnCurrentFrameChanged()
     if (!player)
         return;
 
-    if (player->GetStatus() != EOdysseyAnimationPlayerStatus::Stopped)
-        return;
-
     UOdysseyAnimation* animation = GetAnimation();
     if (!animation)
         return;

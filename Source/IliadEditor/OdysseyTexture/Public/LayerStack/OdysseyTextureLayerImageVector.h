@@ -83,6 +83,8 @@ public:
     virtual uint32 GetLength() override;
     virtual uint32 GetFrame() override;
 
+    virtual TSharedPtr<::ULIS::FBlock> GetBlock() const override;
+
 private:
     //Import/Export
     friend class FOdysseyTextureLayerImageVectorExport;

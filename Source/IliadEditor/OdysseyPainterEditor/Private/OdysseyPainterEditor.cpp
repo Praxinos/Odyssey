@@ -1249,17 +1249,6 @@ FOdysseyPainterEditor::GetAnimationTimelinePosition()
     return mAnimationTimelinePosition;
 }
 
-void
-FOdysseyPainterEditor::SetAnimationTimelineIsScrubbing(bool iIsScrubbing)
-{
-    mAnimationTimelineIsScrubbing = iIsScrubbing;
-}
-bool
-FOdysseyPainterEditor::GetAnimationTimelineIsScrubbing() const
-{
-    return mAnimationTimelineIsScrubbing;
-}
-
 UOdysseyPainterEditorTool*
 FOdysseyPainterEditor::FindDefaultToolForCurrentLayer()
 {

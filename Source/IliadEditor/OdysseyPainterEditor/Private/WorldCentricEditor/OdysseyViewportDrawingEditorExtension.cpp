@@ -1114,7 +1114,7 @@ FOdysseyViewportDrawingEditorExtension::SyncMediaPlayerWithAnimationPlayer()
     if (!animation || !player)
         return;
 
-    FFrameTime currentFrame = player->GetCurrentFrame();
+    FFrameTime currentFrame = player->GetDisplayedFrame();
 
     SyncMediaPlayerWithAnimationFrame(currentFrame.GetFrame().Value);
 }
@@ -1125,7 +1125,7 @@ FOdysseyViewportDrawingEditorExtension::SyncMediaPlayerWithAnimationCurrentFrame
     UOdysseyAnimationPlayer* player = mEditor->GetAnimationPlayer();
     if (!player)
         return;
-    SyncMediaPlayerWithAnimationFrame(player->GetCurrentFrame().FrameNumber.Value);
+    SyncMediaPlayerWithAnimationFrame(player->GetDisplayedFrame().FrameNumber.Value);
 }
 
 void

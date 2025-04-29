@@ -91,6 +91,9 @@ public:
 
     FOdysseyVectorEngine& GetEngine();
 
+    const ::ULIS::FRectI& GetSanitizedRect() const { return mSanitizedRect; }
+    bool NeedsRender() const { return mNeedsRender; }
+
 private:
     enum eBlockState
     {

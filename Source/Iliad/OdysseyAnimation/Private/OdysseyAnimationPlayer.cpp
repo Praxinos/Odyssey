@@ -17,6 +17,12 @@ UOdysseyAnimationPlayer::OnCurrentFrameChanged()
 }
 
 FSimpleMulticastDelegate&
+UOdysseyAnimationPlayer::OnDisplayedFrameChanged()
+{
+    return mOnDisplayedFrameChanged;
+}
+
+FSimpleMulticastDelegate&
 UOdysseyAnimationPlayer::OnStatusChanged()
 {
     return mOnStatusChanged;
@@ -53,7 +59,7 @@ UOdysseyAnimationPlayer::Play(bool iBackward)
 
 #if WITH_EDITOR
     if (mRange.IsSet())
-        mCurrentFrame = FMath::Clamp(mCurrentFrame, mRange->GetLowerBoundValue(), mRange->GetUpperBoundValue());
+        mDisplayedFrame = FMath::Clamp(mDisplayedFrame, mRange->GetLowerBoundValue(), mRange->GetUpperBoundValue());
 #endif
 
     mOnStatusChanged.Broadcast();
@@ -91,22 +97,34 @@ UOdysseyAnimationPlayer::Stop()
 void
 UOdysseyAnimationPlayer::SeekToFrame(FFrameTime iFrame)
 {
-    if (mCurrentFrame == iFrame)
-        return;
+    if (mDisplayedFrame != iFrame)
+    {
+        mDisplayedFrame = iFrame;
+        mOnDisplayedFrameChanged.Broadcast();
+    }
 
-    mCurrentFrame = iFrame;
-    mOnCurrentFrameChanged.Broadcast();
+    if (Status == EOdysseyAnimationPlayerStatus::Stopped && mCurrentFrame != iFrame)
+    {
+        mCurrentFrame = iFrame;
+        mOnCurrentFrameChanged.Broadcast();
+    }
 }
 
 void
 UOdysseyAnimationPlayer::SeekToFrameImmediate(FFrameTime iFrame)
 {
-    if (mCurrentFrame == iFrame)
-        return;
+    if (mDisplayedFrame != iFrame)
+    {
+        mDisplayedFrame = iFrame;
+        UpdateTexture();
+        mOnDisplayedFrameChanged.Broadcast();
+    }
 
-    mCurrentFrame = iFrame;
-    UpdateTexture();
-    mOnCurrentFrameChanged.Broadcast();
+    if (Status == EOdysseyAnimationPlayerStatus::Stopped && mCurrentFrame != iFrame)
+    {
+        mCurrentFrame = iFrame;
+        mOnCurrentFrameChanged.Broadcast();
+    }
 }
 
 UTextureRenderTarget2D*
@@ -119,6 +137,12 @@ FFrameTime
 UOdysseyAnimationPlayer::GetCurrentFrame() const
 {
     return mCurrentFrame;
+}
+
+FFrameTime
+UOdysseyAnimationPlayer::GetDisplayedFrame() const
+{
+    return mDisplayedFrame;
 }
 
 bool
@@ -175,6 +199,12 @@ bool
 UOdysseyAnimationPlayer::GetCurrentFrameInAnimationBounds(FFrameTime& oFrame) const
 {
     return GetFrameInAnimationBounds(mCurrentFrame, oFrame);
+}
+
+bool
+UOdysseyAnimationPlayer::GetDisplayedFrameInAnimationBounds(FFrameTime& oFrame) const
+{
+    return GetFrameInAnimationBounds(mDisplayedFrame, oFrame);
 }
 
 void
@@ -310,7 +340,7 @@ UOdysseyAnimationPlayer::Tick(float iDeltaTime)
         FFrameTime rightBound = FFrameTime(Animation->GetFrameRange().GetUpperBoundValue());
 
         bool bStop = false;
-        FFrameTime newFrame = mCurrentFrame;
+        FFrameTime newFrame = mDisplayedFrame;
         if ( mIsBackward )
         {
             newFrame -= FFrameTime::FromDecimal(iDeltaTime * PlayRate * Animation->GetFramesPerSecond());
@@ -375,7 +405,7 @@ UOdysseyAnimationPlayer::UpdateTexture()
         return;
 
     FFrameTime frame;
-    if (!GetCurrentFrameInAnimationBounds(frame))
+    if (!GetDisplayedFrameInAnimationBounds(frame))
         return;
 
     TArray<FGuid> imageRenderingComposition = Animation->GetRenderingComposition(mRenderType, frame.GetFrame().Value);
@@ -423,7 +453,7 @@ UOdysseyAnimationPlayer::OnRenderingChanged(const FOdysseyRenderingChangedEvent&
             return;
 
         FFrameTime frame;
-        if (!GetCurrentFrameInAnimationBounds(frame))
+        if (!GetDisplayedFrameInAnimationBounds(frame))
             return;
 
         TArray<FGuid> imageRenderingComposition = Animation->GetRenderingComposition(mRenderType, frame.GetFrame().Value);
@@ -472,6 +502,7 @@ UOdysseyAnimationPlayer::EndScrub()
         return;
 
     Status = EOdysseyAnimationPlayerStatus::Stopped;
+    SeekToFrame(mDisplayedFrame);
     mOnStatusChanged.Broadcast();
 }
 
