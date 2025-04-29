@@ -38,6 +38,7 @@
 #include "OdysseyAnimationTimelineSection.h"
 #include "OdysseyAnimationTimelineTemplate.h"
 #include "MovieScene.h"
+#include "Engine/TextureRenderTarget2D.h"
 
 #define LOCTEXT_NAMESPACE "ViewportDrawingEditor"
 
@@ -447,23 +448,21 @@ FOdysseyViewportDrawingEditorExtension::SetTextureInternal(UTexture* iTexture)
 
     if (mTexture->IsA(UTexture2D::StaticClass()))
     {
-        if (mComponent->IsA<UOdysseyAnimationComponent>())
-        {
-            UOdysseyAnimationComponent* animationComponent = Cast<UOdysseyAnimationComponent>(mComponent);
-            if (!animationComponent)
-            return;
+        UTexture2D* texture = Cast<UTexture2D>(mTexture);
 
-            TSharedPtr<FOdysseyPainterEditorAnimationSource> animationSource = MakeShared<FOdysseyPainterEditorAnimationSource>(animationComponent->GetAnimation());
-            animationSource->SetExternalPlayer(animationComponent->GetPlayer());
-            mEditor->SetSource(animationSource);
-        }
-        else
-        {
-            UTexture2D* texture = Cast<UTexture2D>(mTexture);
+        TSharedPtr<FOdysseyPainterEditorTextureSource> source = MakeShared<FOdysseyPainterEditorTextureSource>(texture);
+        mEditor->SetSource(source);
+    }
 
-            TSharedPtr<FOdysseyPainterEditorTextureSource> source = MakeShared<FOdysseyPainterEditorTextureSource>(texture);
-            mEditor->SetSource(source);
-        }
+    if (mTexture->IsA(UTextureRenderTarget2D::StaticClass()) && mComponent->IsA<UOdysseyAnimationComponent>())
+    {
+        UOdysseyAnimationComponent* animationComponent = Cast<UOdysseyAnimationComponent>(mComponent);
+        if (!animationComponent)
+        return;
+
+        TSharedPtr<FOdysseyPainterEditorAnimationSource> animationSource = MakeShared<FOdysseyPainterEditorAnimationSource>(animationComponent->GetAnimation());
+        animationSource->SetExternalPlayer(animationComponent->GetPlayer());
+        mEditor->SetSource(animationSource);
     }
 
     if (mTexture->IsA(UMediaTexture::StaticClass()))
