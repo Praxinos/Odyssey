@@ -118,10 +118,6 @@ SOdysseyAnimationLayerStackTreeView::OnFocusReceived(const FGeometry& MyGeometry
 TArray<TSharedPtr<FExtender>>
 SOdysseyAnimationLayerStackTreeView::ExtendContextMenu()
 {
-    //TODO:
-    // Create a Seperated File to manage Vector Specific options
-    // Include it here and call the extension
-
     TSharedPtr<FExtender> extender = MakeShared<FExtender>();
     extender->AddMenuExtension(
         "LayerSection"

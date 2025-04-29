@@ -51,6 +51,8 @@ namespace UnrealBuildTool.Rules
                     "Engine",
                     "Kismet",
                     "SlateCore",
+                    "RHI",
+                    "RenderCore",
 
                     "OdysseyCore",
                     "OdysseyFile",

@@ -21,6 +21,7 @@
 #include "OdysseyAnimationPlayer.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "Engine/TextureRenderTarget2D.h"
+#include "OdysseySurfaceTexture2DEditable.h"
 
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
@@ -116,16 +117,12 @@ FOdysseyPainterEditorAnimationSource::InactivatePlayer(UOdysseyAnimationPlayer* 
 UTexture*
 FOdysseyPainterEditorAnimationSource::DisplayTexture() const
 {
+
+    /*UOdysseyAnimationLayerStack* layerStack = GetLayerStack();
+    if (layerStack && layerStack->mSurface)
+        return layerStack->mSurface->Texture();*/
+
     return GetAnimationPlayer()->GetRenderTarget();
-}
-
-TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>
-FOdysseyPainterEditorAnimationSource::GetDisplayBlock()
-{
-    //TODO: this is used only for picking a color in PainterEditor's viewport tab
-    //Find a way to do it without having that method
-
-    return nullptr;
 }
 
 UOdysseyAnimation*

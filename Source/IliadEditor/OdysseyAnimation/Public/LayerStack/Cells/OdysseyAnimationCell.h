@@ -23,7 +23,7 @@ struct FOdysseyAnimationCellOutOfPegs
     float Rotation = 0.f;
 
     UPROPERTY(BlueprintReadWrite, Category="Odyssey|Cell")
-    float Zoom = 100.f; //TODO:
+    float Zoom = 100.f;
 };
 
 UCLASS(Abstract, BlueprintType, HideDropdown)
@@ -103,7 +103,7 @@ public:
     UPROPERTY(BlueprintReadWrite, Category="Odyssey|Cell", BlueprintSetter=ExposureBlueprintSetter)//TODO: meta (minvalue 1)
     int Exposure = 1;
 
-    UPROPERTY(BlueprintReadWrite, Category="Odyssey|Cell", BlueprintSetter=MarkBlueprintSetter) //TODO: GetOptions ? Is that possible ?
+    UPROPERTY(BlueprintReadWrite, Category="Odyssey|Cell", BlueprintSetter=MarkBlueprintSetter)
     int Mark = -1;
 
     UPROPERTY(BlueprintReadWrite, Category="Odyssey|Cell", BlueprintSetter=OutOfPegsBlueprintSetter, NonTransactional, DuplicateTransient)
@@ -112,7 +112,7 @@ public:
 private:
     friend class UOdysseyAnimationCellThumbnailRenderer;
     friend class FOdysseyAnimationCellThumbnailProxy;
-    TSharedPtr<FOdysseyRasterBlock> mThumbnail;  //TODO: save/load mThumbnail AND mThumbnailIsDirty with the cell
+    TSharedPtr<FOdysseyRasterBlock> mThumbnail;
 
     UPROPERTY(NonTransactional)
     bool ThumbnailIsDirty = false;

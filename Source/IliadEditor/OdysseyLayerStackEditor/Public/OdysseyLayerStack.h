@@ -11,6 +11,7 @@
 #include <ULIS>
 
 #include "OdysseyLayerStack.generated.h"
+class FOdysseySurfaceTexture2DEditable;
 
 UCLASS(Abstract, HideDropdown, BlueprintType, config=EditorPerProjectUserSettings, PerObjectConfig)
 class ODYSSEYLAYERSTACKEDITOR_API UOdysseyLayerStack
@@ -281,4 +282,6 @@ public:
 
     UPROPERTY(Transient)
     TObjectPtr<UClass> LayerRootClass;
+
+    mutable TSharedPtr<FOdysseySurfaceTexture2DEditable> mSurface;
 };

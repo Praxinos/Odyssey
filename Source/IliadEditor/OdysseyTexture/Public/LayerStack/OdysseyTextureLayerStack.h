@@ -16,6 +16,7 @@
 
 class UOdysseyTextureLayer;
 class IOdysseyImageRenderer;
+class UTextureRenderTarget2D;
 
 UENUM()
 enum class EOdysseyTextureLayerStackTextureUpdateMode
@@ -44,6 +45,7 @@ public:
     virtual int GetHeight() const override;
     virtual ::ULIS::eFormat  GetFormat() const override;
 
+    virtual void PostInitProperties() override;
     virtual void PostLoad() override;
 
 public:
@@ -108,7 +110,7 @@ private:
 private:
     void CompressTexture();
     void UncompressTexture();
-    void FastUpdateTexture(const TArray<::ULIS::FRectI>& iRects);
+    void FastUpdateTexture(const TArray<FIntRect>& iRects);
     void UpdateTextureSource();
 
     //React to Texture property changes, updating texture source if we are in fast update
@@ -123,5 +125,8 @@ private:
 
     EOdysseyTextureLayerStackTextureUpdateMode mTextureUpdateMode = EOdysseyTextureLayerStackTextureUpdateMode::OnTick;
     FOdysseyInvalidTileMap mInvalidTileMap;
-    TSharedPtr<IOdysseyImageRenderer> mRenderer; //Used for FastUpdateTexture to keep the LayerStack Ready to render
+
+public:
+    UPROPERTY(Transient)
+    TObjectPtr<UTextureRenderTarget2D> RenderTarget;
 };

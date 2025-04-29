@@ -135,7 +135,6 @@ UOdysseyPainterEditorRasterPaintBucketTool::OnMouseUp( const FOdysseyPoint& iPoi
     if (iPointInTexture.x >= paintBlock->Width() || iPointInTexture.y >= paintBlock->Height())
         return false;
 
-    //TODO: define SourceBlock from the mSource value
     TSharedPtr<::ULIS::FBlock> sourceBlock = GetSourceBlock();
     if (!sourceBlock)
         return false;

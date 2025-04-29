@@ -171,8 +171,6 @@ FOdysseyAnimationMediaSamples::SanitizeTimeRange(TRange<FMediaTimeStamp>* oTimeR
 IMediaSamples::EFetchBestSampleResult
 FOdysseyAnimationMediaSamples::FetchBestVideoSampleForTimeRange(const TRange<FMediaTimeStamp>& iTimeRange, TSharedPtr<IMediaTextureSample, ESPMode::ThreadSafe>& OutSample, bool bReverse, bool bConsistentResult)
 {
-    //TODO: DOes anyone understand what should the bConsistentResult parameter do ?
-
     if (!mAnimation)
         return EFetchBestSampleResult::NoSample;
 
@@ -257,8 +255,6 @@ FOdysseyAnimationMediaSamples::FetchBestVideoSampleForTimeRange(const TRange<FMe
     if (isAtEnd)
     {
         // Stop the player.
-        //TODO:This should not happen here ? Check this, it is so weird !
-        //ES: I checked, I have no other place to do this...
         //So in the future, translate all this system in our own system with tracks, animated textures, players and everything
         player->GetEventSink().ReceiveMediaEvent(EMediaEvent::PlaybackEndReached);
         controls->Pause();

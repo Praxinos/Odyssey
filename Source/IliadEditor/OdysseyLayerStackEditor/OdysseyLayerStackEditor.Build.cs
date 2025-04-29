@@ -58,6 +58,8 @@ public class OdysseyLayerStackEditor : ModuleRules
                 "EditorWidgets",
                 "Engine",
                 "InputCore",
+                "RHI",
+                "RenderCore",
                 "Slate",
                 "SlateCore",
                 "UMG",

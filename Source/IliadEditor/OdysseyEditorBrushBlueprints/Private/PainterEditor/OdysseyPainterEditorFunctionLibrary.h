@@ -19,8 +19,6 @@ class UOdysseyPainterEditorFunctionLibrary
     GENERATED_BODY()
 
 public:
-    //TODO: make a GetEditorFromBrush() and
-
     //Gets zoom value from viewport.
     UFUNCTION( BlueprintPure, Category="Odyssey|Canvas", meta = (HidePin="BrushInstance", DefaultToSelf="BrushInstance") )
     static float GetViewportZoom( UOdysseyBrushAssetBase* BrushInstance );

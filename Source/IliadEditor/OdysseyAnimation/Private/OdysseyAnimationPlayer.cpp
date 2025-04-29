@@ -407,6 +407,7 @@ UOdysseyAnimationPlayer::AnimationChanged()
     }
 
     RenderTarget->ResizeTarget(Animation->GetWidth(), Animation->GetHeight());
+    RenderTarget->UpdateResourceImmediate();
 
     mInvalidTileMap = FOdysseyInvalidTileMap(64, Animation->GetWidth(), Animation->GetHeight());
 

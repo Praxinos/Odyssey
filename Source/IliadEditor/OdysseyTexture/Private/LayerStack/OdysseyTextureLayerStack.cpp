@@ -16,6 +16,9 @@
 #include "OdysseyPixelFormat.h"
 #include "UObject/Package.h"
 #include "OdysseyImageRenderer.h"
+#include "Engine/TextureRenderTarget2D.h"
+#include "ImageUtils.h"
+#include "ULISUtils.h"
 
 UOdysseyTextureLayerStack*
 UOdysseyTextureLayerStack::CreateEmptyFromTexture(UTexture2D* iTexture, UObject* iOuter)
@@ -84,6 +87,13 @@ UOdysseyTextureLayerStack::UOdysseyTextureLayerStack()
     LayerRootClass = UOdysseyTextureLayerRoot::StaticClass();
 
     FOdysseyRenderingAbility::OnRenderingChangedDelegate().AddUObject(this, &UOdysseyTextureLayerStack::OnRenderingChanged);
+    RenderTarget = CreateDefaultSubobject<UTextureRenderTarget2D>("RenderTarget");
+}
+
+void
+UOdysseyTextureLayerStack::PostInitProperties()
+{
+    Super::PostInitProperties();
 }
 
 void
@@ -92,7 +102,9 @@ UOdysseyTextureLayerStack::PostLoad()
     Super::PostLoad();
     UTexture2D* texture = GetTexture();
     if (texture)
+    {
         mInvalidTileMap = FOdysseyInvalidTileMap(64, texture->Source.GetSizeX(), texture->Source.GetSizeY());
+    }
 }
 
 int
@@ -198,7 +210,6 @@ UOdysseyTextureLayerStack::InactivateTextureFastUpdate()
     CompressTexture();
     texture->UpdateResource();
     mTextureFastUpdateSurface = nullptr;
-    mRenderer = nullptr;
 }
 
 void
@@ -253,30 +264,46 @@ UOdysseyTextureLayerStack::CompressTexture()
     textureFormatSettings.CompressionNone = mTextureCompressionNone;
     texture->SetLayerFormatSettings(0, textureFormatSettings);
     UpdateTextureSource();
-    //texture->UpdateResource();
-    //FTextureCompilingManager::Get().FinishCompilation({ texture });
 }
 
 void
-UOdysseyTextureLayerStack::FastUpdateTexture(const TArray<::ULIS::FRectI>& iRects)
+UOdysseyTextureLayerStack::FastUpdateTexture(const TArray<FIntRect>& iRects)
 {
-    //TODO:
-    /* UTexture2D* texture = GetTexture();
+     UTexture2D* texture = GetTexture();
     if ( !texture )
         return;
 
     FTextureCompilingManager::Get().FinishCompilation({ texture });
 
-    mRenderer = BuildImageRenderer(EOdysseyRenderingType::Render, 0); //TODO: should depend on a variable or something ?
-    mRenderer->Init();
+    if (RenderTarget->SizeX != GetWidth() || RenderTarget->SizeY != GetHeight())
+        RenderTarget->ResizeTarget(GetWidth(), GetHeight());
 
-    FOdysseyImageRendererCopyParams params(mTextureFastUpdateSurface->Block(), iRects);
-    mRenderer->Copy(params, {});
+    RenderTarget->UpdateResourceImmediate();
 
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(mTextureFastUpdateSurface->Block()->Format());
-    ctx.Finish();
+    RenderToTextureFromRects(RenderTarget, FFrameNumber(0), iRects);
 
-    mTextureFastUpdateSurface->Invalidate(iRects); */
+    //Fence ?
+    FRenderCommandFence fence;
+    fence.BeginFence();
+    fence.Wait();
+
+    TSharedPtr<::ULIS::FBlock> dst = mTextureFastUpdateSurface->Block();
+    for (const FIntRect& rect : iRects)
+    {
+        FImage OutImage;
+        if (!FImageUtils::GetRenderTargetImage(RenderTarget, OutImage, rect))
+            continue;
+
+        ::ULIS::eFormat srcFormat = ULISFormatForRawImageFormat( OutImage.Format );
+        ::ULIS::FBlock src(OutImage.GetWidth(), OutImage.GetHeight(), srcFormat);
+        CopyImageToBlock(OutImage, &src);
+
+        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(dst->Format());
+        ctx.ConvertFormat(src, *dst, src.Rect(), ::ULIS::FVec2I(rect.Min.X, rect.Min.Y));
+        ctx.Finish();
+    }
+
+    mTextureFastUpdateSurface->Invalidate(::ULISUtils::ToULISRectIs(iRects));
 }
 
 void
@@ -349,8 +376,7 @@ UOdysseyTextureLayerStack::GetTextureUpdateMode()
 void
 UOdysseyTextureLayerStack::UpdateTexture(bool iForceRefresh)
 {
-    //TODO:
-    /* if (iForceRefresh)
+    if (iForceRefresh)
         mInvalidTileMap.Invalidate();
 
     if (mInvalidTileMap.InvalidTiles().IsEmpty())
@@ -362,32 +388,40 @@ UOdysseyTextureLayerStack::UpdateTexture(bool iForceRefresh)
 
     if ( mTextureFastUpdateSurface.IsValid() )
     {
-        FastUpdateTexture(::ULISUtils::ToULISRectIs(mInvalidTileMap.InvalidRects()));
+        FastUpdateTexture(mInvalidTileMap.InvalidRects());
     }
     else
     {
         FTextureCompilingManager::Get().FinishCompilation({ texture });
 
-        ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
-        TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = MakeShareable(NewBlockFromUTextureData(texture, format));
-
         TArray<FIntRect> invalidRects = mInvalidTileMap.InvalidRects();
-        TSharedPtr<IOdysseyImageRenderer> renderer = BuildImageRenderer(EOdysseyRenderingType::Render, 0); //TODO: should depend on a variable or something ?
-        renderer->Init();
+        RenderToTextureFromRects(RenderTarget, FFrameNumber(0), invalidRects);
 
-        FOdysseyImageRendererCopyParams params(block, invalidRects);
-        renderer->Copy(params, {});
+        ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
+        TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> dst = MakeShareable(NewBlockFromUTextureData(texture, format));
 
-        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(block->Format());
-        ctx.Finish();
+        //Fence ?
+        for (const FIntRect& rect : invalidRects)
+        {
+            FImage OutImage;
+            if (!FImageUtils::GetRenderTargetImage(RenderTarget, OutImage, rect))
+                continue;
 
-        CopyBlockDataIntoUTexture(block.Get(), texture);
+            ::ULIS::eFormat srcFormat = ULISFormatForRawImageFormat( OutImage.Format );
+            ::ULIS::FBlock src(OutImage.GetWidth(), OutImage.GetHeight(), srcFormat);
+            CopyImageToBlock(OutImage, &src);
+
+            ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(dst->Format());
+            ctx.ConvertFormat(src, *dst, src.Rect(), ::ULIS::FVec2I(rect.Min.X, rect.Min.Y));
+            ctx.Finish();
+        }
+
+        CopyBlockDataIntoUTexture(dst.Get(), texture);
 
         texture->UpdateResource();
     }
 
     mInvalidTileMap.Clear();
-     */
 }
 
 void

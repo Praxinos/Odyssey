@@ -392,9 +392,7 @@ SOdysseyViewportDrawingEditorMasterTab::OnMeshComponentChanged(const FString iNa
         }
     }
 
-    //TODO: use the right max size from current adapter
     mExtension->GetEditor()->GetRasterDrawingTool()->SetBaseSize(mExtension->GetMeshComponentMaxSize());
-    //mExtension->GetGUI()->GetTopTab()->SetMeshMaxSize( mExtension->GetMeshComponentMaxSize() );
 
     return FReply::Handled();
 }

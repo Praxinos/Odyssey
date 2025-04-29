@@ -322,16 +322,6 @@ bool UOdysseyAnimation::Validate() const
     return true;
 }
 
-/* TSharedPtr<IOdysseyImageRenderer>
-UOdysseyAnimation::BuildImageRenderer(EOdysseyRenderingType iRenderType, int iFrame, FImageRendererFilter iFilter) const
-{
-    if (iFilter.IsBound() && !iFilter.Execute(this))
-        return nullptr;
-
-    TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyAnimation::BuildImageRenderer);
-    return MakeShared<FOdysseyAnimationProxyImageRenderer>(this, iFrame, iRenderType, GetRenderingRects(), iFilter);
-} */
-
 TArray<FGuid>
 UOdysseyAnimation::GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrameIndex) const
 {
@@ -343,6 +333,12 @@ UOdysseyAnimation::GetRenderingComposition(EOdysseyRenderingType iRenderType, in
     idComposition.Append(mLayerStack->GetRenderingComposition(iRenderType, iFrameIndex));
 
     return idComposition;
+}
+
+TArray<FIntRect>
+UOdysseyAnimation::GetRenderingRects() const
+{
+    return { FIntRect(0, 0, GetWidth(), GetHeight()) };
 }
 
 void

@@ -106,6 +106,9 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
     if (!texture)
         return;
 
+    if (!texture->GetResource())
+        return;
+
     mNearestNeighbourTexture.TextureRHI = texture->GetResource()->TextureRHI;
     mBilinearTexture.TextureRHI = texture->GetResource()->TextureRHI;
 

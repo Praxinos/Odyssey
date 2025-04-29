@@ -31,10 +31,6 @@ SOdysseyTextureLayerStackTreeView::Construct(const FArguments& InArgs, FOdysseyP
 TArray<TSharedPtr<FExtender>>
 SOdysseyTextureLayerStackTreeView::ExtendContextMenu()
 {
-    //TODO:
-    // Create a Seperated File to manage Vector Specific options
-    // Include it here and call the extension
-
     TSharedPtr<FExtender> extender = MakeShared<FExtender>();
     extender->AddMenuExtension(
         "LayerSection"

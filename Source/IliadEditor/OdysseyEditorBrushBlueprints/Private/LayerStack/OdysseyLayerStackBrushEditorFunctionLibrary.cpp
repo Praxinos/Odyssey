@@ -51,7 +51,7 @@ namespace
 
             ::ULIS::FRectI textureRect = ::ULIS::FRectI::FromXYWH(0, 0, texture->GetSizeX(), texture->GetSizeY());
             ::ULIS::FRectI given_rect = Area.IsInitialized() ? Area.GetValue() : textureRect;
-            //be sure we copy only the needed part //TODO: Should be done directly in ULIS
+            //be sure we copy only the needed part
             ::ULIS::FRectI src_rect = given_rect & textureRect;
             ::ULIS::FVec2I dst_pos(src_rect.x - given_rect.x, src_rect.y - given_rect.y);
             ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());

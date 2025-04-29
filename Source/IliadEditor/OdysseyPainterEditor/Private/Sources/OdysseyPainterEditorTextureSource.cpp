@@ -19,6 +19,7 @@
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorCell.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
+#include "Engine/TextureRenderTarget2D.h"
 
 #define LOCTEXT_NAMESPACE "TextureEditor"
 
@@ -87,16 +88,6 @@ UTexture*
 FOdysseyPainterEditorTextureSource::DisplayTexture() const
 {
     return mTexture;
-}
-
-TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>
-FOdysseyPainterEditorTextureSource::GetDisplayBlock()
-{
-    UOdysseyTextureLayerStack* layerStack = GetLayerStack();
-    if (!layerStack)
-        return nullptr;
-
-    return layerStack->GetSurface()->Block();
 }
 
 UTexture2D*

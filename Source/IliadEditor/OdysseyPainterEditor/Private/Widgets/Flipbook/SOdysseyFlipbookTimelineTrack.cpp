@@ -196,13 +196,6 @@ SOdysseyFlipbookTimelineTrack::DuplicateFrame(int32 iIndex)
     if (!OdysseyPainterEditorFlipbookUtils::DuplicateKeyFrame(mFlipbook, iIndex, &createdTexture, &createdSprite))
         return;
 
-    //TODO: Instead of duplicating a keyframe directly, follow this:
-    // - Create empty keyframe
-    // - Move to the new keyframe
-    // - Copy the previous keyframe content (layers and everything)
-    //
-    // This will ensure that any modifications on the source keyframe will be done before copying it.
-
     FPaperFlipbookKeyFrame keyframe = mFlipbook->GetKeyFrameChecked(iIndex + 1);
     InsertFrame(iIndex + 1, createdTexture, keyframe.FrameRun);
 
@@ -352,8 +345,6 @@ SOdysseyFlipbookTimelineTrack::OnAssetSelected(const FAssetData& AssetData, int3
 {
     UPaperSprite* sprite = Cast<UPaperSprite>(AssetData.GetAsset());
     OdysseyPainterEditorFlipbookUtils::SetKeyframeSprite(mFlipbook, iFrameIndex, sprite);
-
-    //TODO: Call an equivalent to SpriteCreated or TextureCreated
 }
 
 void

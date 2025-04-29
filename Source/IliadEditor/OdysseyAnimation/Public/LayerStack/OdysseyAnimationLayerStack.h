@@ -47,9 +47,6 @@ public:
     virtual TArray<FIntRect> GetRenderingRects() const override;
     TSharedRef<FOdysseyAnimationCellSelection> GetCellSelection() const;
 
-public:
-    virtual void RenderToTextureFromRects(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, const TArray<FIntRect>& iRects) const override;
-
 private:
     void OnRenderingChanged(const FOdysseyRenderingChangedEvent& iEvent);
 

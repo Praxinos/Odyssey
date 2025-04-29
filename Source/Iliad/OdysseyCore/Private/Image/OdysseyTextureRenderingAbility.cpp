@@ -8,7 +8,7 @@
 void
 FOdysseyTextureRenderingAbility::RenderToTexture(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame) const
 {
-    //TODO:
+    RenderToTextureFromRects(iRenderTarget, iFrame, GetRenderingRects());
 }
 
 #undef LOCTEXT_NAMESPACE

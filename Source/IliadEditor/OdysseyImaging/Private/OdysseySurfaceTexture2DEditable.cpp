@@ -28,6 +28,25 @@
 
 /////////////////////////////////////////////////////
 // Utlity
+
+void
+CopyImageToBlock(const FImage& iImage, ::ULIS::FBlock* iBlock)
+{
+    checkf(iBlock->Width() == iImage.GetWidth() &&
+           iBlock->Height() == iImage.GetHeight()
+           ,TEXT("Sizes do not match"));
+
+    void* ptr = iImage.GetPixelPointer(0, 0);
+    if (RawImageFormatNeedsConversionToULISFormat(iImage.Format))
+    {
+        ConvertRawImageFormatToULISFormat((uint8*)ptr, iBlock->Bits(), iBlock->Width(), iBlock->Height(), iImage.Format);
+    }
+    else
+    {
+        FMemory::Memcpy(iBlock->Bits(), (uint8*)ptr, iBlock->BytesTotal());
+    }
+}
+
 void
 CopyUTextureSourceDataIntoBlock(::ULIS::FBlock* iBlock,UTexture* iTexture)
 {

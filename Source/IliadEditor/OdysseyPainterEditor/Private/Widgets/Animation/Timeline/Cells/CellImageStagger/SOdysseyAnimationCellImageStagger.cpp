@@ -246,8 +246,6 @@ SOdysseyAnimationCellImageStagger::BuildContextMenu(FMenuBuilder& iMenuBuilder)
             EUserInterfaceActionType::RadioButton
         );
     iMenuBuilder.EndSection();
-
-    //TODO: Reach
 }
 
 void

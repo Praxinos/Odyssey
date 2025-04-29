@@ -30,7 +30,6 @@ public:
     virtual void Activate() override;
     virtual void Inactivate() override;
     virtual UTexture* DisplayTexture() const override;
-    virtual TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetDisplayBlock() override;
     virtual FOdysseyMediaProvider GetCurrentMediaProvider() override;
 
     virtual void Clear() override;

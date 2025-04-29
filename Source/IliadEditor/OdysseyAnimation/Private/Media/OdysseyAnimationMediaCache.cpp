@@ -35,7 +35,6 @@ FOdysseyAnimationMediaCache::QueryCacheState(EMediaCacheState iState, TRangeSet<
     if (!mAnimation)
         return false;
 
-    //TODO:
     if (iState == EMediaCacheState::Loaded)
     {
         uint32 frameCount = mAnimation->GetFrameCount();
@@ -54,6 +53,5 @@ FOdysseyAnimationMediaCache::GetSampleCount(EMediaCacheState State) const
 {
     if (!mAnimation)
         return 0;
-    //TODO:
     return 0;
 }

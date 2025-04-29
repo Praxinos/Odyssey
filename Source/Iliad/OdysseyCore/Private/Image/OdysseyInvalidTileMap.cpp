@@ -99,7 +99,7 @@ FOdysseyInvalidTileMap::Invalidate(const FIntRect& iRect)
     int x = FMath::Max(0, x1f);
     int y = FMath::Max(0, y1f);
     int w = FMath::Min( tileCount.X, int( ceil( x2f ) ) ) - abs((int)x1f);
-    int h = FMath::Min( tileCount.Y, int( ceil( y2f ) ) ) - abs((int)y2f);
+    int h = FMath::Min( tileCount.Y, int( ceil( y2f ) ) ) - abs((int)y1f);
 
     for( int i = 0; i < h; ++i ) //y
     {

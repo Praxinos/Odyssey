@@ -248,7 +248,6 @@ EOdysseyViewportDrawingPaintingAdapterMethod FOdysseyViewportDrawingEditorExtens
     return mPaintingAdapterMethod;
 }
 
-//TODO: Move to adapter
 int32 FOdysseyViewportDrawingEditorExtension::GetUVIndexUsedByCurrentTexture()
 {
     if (mMaterial != NULL && mMaterial->GetMaterial() != NULL)
@@ -279,7 +278,6 @@ int32 FOdysseyViewportDrawingEditorExtension::GetUVIndexUsedByCurrentTexture()
     return 0;
 }
 
-//TODO: Move to adapter
 float FOdysseyViewportDrawingEditorExtension::GetMeshComponentMaxSize() const
 {
     if (mComponent)
@@ -462,8 +460,6 @@ FOdysseyViewportDrawingEditorExtension::SetTextureInternal(UTexture* iTexture)
         else
         {
             UTexture2D* texture = Cast<UTexture2D>(mTexture);
-
-            //TODO: change the texture for display
 
             TSharedPtr<FOdysseyPainterEditorTextureSource> source = MakeShared<FOdysseyPainterEditorTextureSource>(texture);
             mEditor->SetSource(source);

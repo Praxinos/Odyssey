@@ -10,6 +10,11 @@
 #include "OdysseyLayerStackFunctionLibrary.h"
 #include "Misc/TransactionObjectEvent.h"
 #include "Misc/OdysseyUndoDelegates.h"
+#include "OdysseySurfaceTexture2DEditable.h"
+#include "ULISLoaderModule.h"
+#include "ULISUtils.h"
+#include "Engine/TextureRenderTarget2D.h"
+#include "CanvasTypes.h"
 
 void
 UOdysseyLayerStack::PostInitProperties()
@@ -735,20 +740,30 @@ UOdysseyLayerStack::PostTransacted(const FTransactionObjectEvent& iTransactionEv
     }
 }
 
-
-/* TSharedPtr<IOdysseyImageRenderer>
-UOdysseyLayerStack::BuildImageRenderer(EOdysseyRenderingType iRenderType, int iFrame, FImageRendererFilter iFilter) const
-{
-    if (iFilter.IsBound() && !iFilter.Execute(this))
-        return nullptr;
-
-    return MakeShared<FOdysseyLayerStackImageRenderer>(this, iFrame, iRenderType, GetRenderingRects(), iFilter);
-} */
-
 void
 UOdysseyLayerStack::RenderToTextureFromRects(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, const TArray<FIntRect>& iRects) const
 {
-    //TODO:
+    if (!mSurface)
+        mSurface = MakeShared<FOdysseySurfaceTexture2DEditable>( GetWidth(), GetHeight(), ::ULIS::Format_BGRA8 );
+
+    TSharedPtr<IOdysseyImageRenderer> renderer = LayerRoot->BuildImageRenderer(EOdysseyRenderingType::Render, iFrame.Value);
+    renderer->Init();
+
+    FOdysseyImageRendererCopyParams params(mSurface->Block(), iRects);
+    renderer->Copy(params, {});
+
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(mSurface->Block()->Format());
+    ctx.Finish();
+
+    mSurface->Invalidate(::ULISUtils::ToULISRectIs(iRects));
+
+    FTextureResource* srcResource = mSurface->Texture()->GetResource();
+    FTextureRenderTargetResource* dstResource = iRenderTarget->GameThread_GetRenderTargetResource();
+
+    FCanvas Canvas(dstResource, nullptr, FGameTime(), GEditor->GetEditorWorldContext().World()->GetFeatureLevel());
+    Canvas.Clear(FLinearColor::Transparent);
+    Canvas.DrawTile(0, 0, GetWidth(), GetHeight(), 0, 0, 1, 1, FLinearColor::White, srcResource, SE_BLEND_AlphaBlend);
+    Canvas.Flush_GameThread(true);
 }
 
 TArray<FGuid>

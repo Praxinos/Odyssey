@@ -96,6 +96,7 @@ public:
 public:
     virtual void RenderToTextureFromRects(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, const TArray<FIntRect>& iRects) const override;
     virtual TArray<FGuid> GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrameIndex) const override;
+    virtual TArray<FIntRect> GetRenderingRects() const override;
 
 private:
     UFUNCTION(BlueprintSetter)

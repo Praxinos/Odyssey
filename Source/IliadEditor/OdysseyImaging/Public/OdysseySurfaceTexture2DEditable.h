@@ -11,7 +11,7 @@ class UTextureRenderTarget2D;
 /////////////////////////////////////////////////////
 // Utlity
 
-//TODO: Convert to / Duplicate to UTexture* for each function here
+ODYSSEYIMAGING_API void CopyImageToBlock(const FImage& iImage, ::ULIS::FBlock* iBlock);
 ODYSSEYIMAGING_API void CopyUTextureSourceDataIntoBlock( ::ULIS::FBlock* iBlock,UTexture* iTexture );
 ODYSSEYIMAGING_API void CopyURenderTargetPixelDataIntoBlock( ::ULIS::FBlock* iBlock,UTextureRenderTarget2D* iRenderTarget );
 ODYSSEYIMAGING_API void CopyBlockDataIntoUTexture( const ::ULIS::FBlock* iBlock,UTexture2D* iTexture );
