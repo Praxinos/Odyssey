@@ -13,6 +13,9 @@
 #include "PaperFlipbookFactory.h"
 #include "PaperSpriteFactory.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
+#include "ImageUtils.h"
+#include "Engine/TextureRenderTarget2D.h"
+#include "AssetRegistry/AssetRegistryModule.h"
 
 #include "Factories/Texture2dFactoryNew.h"
 
@@ -334,31 +337,185 @@ ExportAsImageSequence(
 }
 
 UTexture2D*
-ExportAsTexture(FOdysseyTextureRenderingAbility* iObject, int iFrame, const FIntRect& iRect, ETextureSourceFormat iFormat, FString iAssetName, FString iPath )
+ExportAsTexture(FOdysseyTextureRenderingAbility* iObject, int iFrame, const FIntRect& iRect, FString iAssetName, FString iPath )
 {
-    //TODO:
-    return nullptr;
+    //TStrongObjectPtr ensures the render target is destroyed at the end of this function
+    //instead of keeping it in memory waiting for the garbage collector to destroy it
+    TStrongObjectPtr<UTextureRenderTarget2D> renderTarget(NewObject<UTextureRenderTarget2D>());
+    renderTarget->RenderTargetFormat = RTF_RGBA8_SRGB;
+    renderTarget->bForceLinearGamma = true;
+    renderTarget->InitAutoFormat(iRect.Width(), iRect.Height());
+
+    iObject->RenderToTexture(renderTarget.Get(), FFrameNumber(iFrame), {iRect});
+
+    FString Name;
+    FString PackageName;
+
+    IAssetTools& AssetTools = FModuleManager::Get().LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
+    AssetTools.CreateUniqueAssetName(iPath, iAssetName, PackageName, Name);
+
+    FText ErrorMessage;
+    UObject* object = renderTarget->ConstructTexture(CreatePackage(*PackageName), Name, renderTarget->GetMaskedFlags() | RF_Public | RF_Standalone,
+        static_cast<EConstructTextureFlags>(CTF_Compress | CTF_AllowMips), /*InAlphaOverride = */nullptr, &ErrorMessage);
+
+    UTexture2D* texture = Cast<UTexture2D>(object);
+    texture->SRGB = true;
+    texture->PostEditChange();
+    return texture;
 }
 
 FString
-ExportAsImage(FOdysseyTextureRenderingAbility* iObject, int iFrame, EOdysseyExportImageFormat iFormat, const FIntRect& iRect, FString iFilename, FString iPath)
+ExportAsImage(FOdysseyTextureRenderingAbility* iObject, int iFrame, EOdysseyExportImageFormat iFormat, const FIntRect& iRect, FString iFilename, FString iPath, bool iSRGB)
 {
-    //TODO:
-    return "";
+    TStrongObjectPtr<UTextureRenderTarget2D> renderTarget(NewObject<UTextureRenderTarget2D>());
+    if (iSRGB)
+        renderTarget->RenderTargetFormat = RTF_RGBA8_SRGB;
+    else
+        renderTarget->RenderTargetFormat = RTF_RGBA8;
+    renderTarget->InitAutoFormat(iRect.Width(), iRect.Height());
+
+    iObject->RenderToTexture(renderTarget.Get(), FFrameNumber(iFrame), {iRect});
+
+    FImage OutImage;
+    if (!FImageUtils::GetRenderTargetImage(renderTarget.Get(), OutImage, iRect))
+        return "";
+
+    FString extension = GetFileFormatExtension(iFormat);
+
+    IPlatformFile& platformFile = FPlatformFileManager::Get().GetPlatformFile();
+
+    // Ensure Directory Exists
+    if (!platformFile.DirectoryExists(*iPath))
+        platformFile.CreateDirectory(*iPath);
+
+    //Path
+    FString imagePath = iPath / FPaths::GetBaseFilename(iFilename) + TEXT(".") + extension;
+
+    if (!FImageUtils::SaveImageByExtension(*imagePath, OutImage))
+        return "";
+
+    return imagePath;
 }
 
 UPaperFlipbook*
 ExportAsFlipbook(FOdysseyTextureRenderingAbility* iObject, const FInt32Range& iRange, const FIntRect& iRect, float iFramesPerSecond, FString AssetName, FString Path)
 {
-    //TODO:
-    return nullptr;
+    if ( Path.IsEmpty())
+        return nullptr;
+
+    int startFrame = iRange.GetLowerBoundValue();
+    int endFrame = iRange.GetUpperBoundValue();
+    FString endFrameStr = FString::FromInt(endFrame);
+
+    FScopedSlowTask progressBar(endFrame - startFrame + 1, LOCTEXT("image-rendering-ability.export-as-flipbook.progress-bar.title", "Export As Flipbook"));
+    progressBar.MakeDialog();
+
+    // Create flipbook asset
+    FString flipbookAssetName = AssetName;
+    FString flipbookPackagePath = Path;
+
+    IAssetTools& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
+    UPaperFlipbook* flipbook = Cast<UPaperFlipbook>(AssetTools.CreateAsset(
+        flipbookAssetName,
+        flipbookPackagePath,
+        UPaperFlipbook::StaticClass(),
+        UPaperFlipbookFactory::StaticClass()->GetDefaultObject<UFactory>()
+    ));
+
+    //sprite factory is not easily accessible because not exported through PAPER2D_API
+    UFactory* spriteFactory = *AssetTools.GetNewAssetFactories().FindByPredicate(
+        [](UFactory* iFactory)
+        {
+            return iFactory->DoesSupportClass(UPaperSprite::StaticClass());
+        }
+    );
+
+    FScopedFlipbookMutator flipbookMutator(flipbook);
+    flipbookMutator.FramesPerSecond = iFramesPerSecond;
+
+    TArray<FGuid> lastRenderingComposition;
+
+    int lastKeyFrameIndex = -1;
+    int lastKeyFrameFirstFrame = -1;
+    for (int i = startFrame; i <= endFrame; i++)
+    {
+        progressBar.EnterProgressFrame();
+
+        TArray<FGuid> renderingComposition = iObject->GetRenderingComposition(EOdysseyRenderingType::Render, i);
+        if (renderingComposition == lastRenderingComposition)
+            continue;
+
+        lastRenderingComposition = renderingComposition;
+
+        if (!flipbookMutator.KeyFrames.IsEmpty())
+            flipbookMutator.KeyFrames.Last().FrameRun = i - lastKeyFrameFirstFrame;
+
+        FString numStr = FString::Format(TEXT("{0}"), {i});
+        FString textureName = flipbookAssetName + TEXT("_Texture_") + numStr;
+        FString spriteName = flipbookAssetName + TEXT("_Sprite_") + numStr;
+
+        lastKeyFrameFirstFrame = i;
+
+        UPaperSprite* sprite = Cast<UPaperSprite>(AssetTools.CreateAsset(
+            spriteName,
+            flipbookPackagePath,
+            UPaperSprite::StaticClass(),
+            spriteFactory
+        ));
+
+        UTexture2D* texture = ExportAsTexture(iObject, i, iRect, textureName, flipbookPackagePath);
+        FOdysseyObjectEditorUtils::SetPropertyValue(sprite, "SourceTexture", TSoftObjectPtr<UTexture2D>(texture));
+
+        FPaperFlipbookKeyFrame keyframe;
+        keyframe.Sprite = sprite;
+        flipbookMutator.KeyFrames.Add(keyframe);
+    }
+
+    if (!flipbookMutator.KeyFrames.IsEmpty())
+            flipbookMutator.KeyFrames.Last().FrameRun = endFrame - lastKeyFrameFirstFrame + 1;
+
+    //Configure flipbook asset
+    UMaterialInterface* material = LoadObject<UMaterialInterface>(nullptr, TEXT("/Odyssey/Animation2D/DefaultFlipbookMaterialInstance.DefaultFlipbookMaterialInstance"));
+    FOdysseyObjectEditorUtils::SetPropertyValue(flipbook, "DefaultMaterial", material);
+
+    return flipbook;
 }
 
 TArray<UTexture2D*>
 ExportAsTextureSequence(FOdysseyTextureRenderingAbility* iObject, const FInt32Range& iRange, const FIntRect& iRect, FString AssetName, FString Path)
 {
-    //TODO:
-    return {};
+    if ( Path.IsEmpty())
+        return {};
+
+    int startFrame = iRange.GetLowerBoundValue();
+    int endFrame = iRange.GetUpperBoundValue();
+    FString endFrameStr = FString::FromInt(endFrame);
+
+    FScopedSlowTask progressBar(endFrame - startFrame + 1, LOCTEXT("image-rendering-ability.export-as-texture-sequence.progress-bar.title", "Export As Texture Sequence"));
+    progressBar.MakeDialog();
+
+    TArray<FGuid> lastRenderingComposition;
+
+    TArray<UTexture2D*> textures;
+
+    for (int i = startFrame; i <= endFrame; i++)
+    {
+        progressBar.EnterProgressFrame();
+
+        TArray<FGuid> renderingComposition = iObject->GetRenderingComposition(EOdysseyRenderingType::Render, i);
+        if (renderingComposition == lastRenderingComposition)
+            continue;
+
+        lastRenderingComposition = renderingComposition;
+        FString numStr = FString::Format(TEXT("{0}"), {i});
+        FString textureName = AssetName + TEXT("_") + numStr;
+
+        UTexture2D* texture = ExportAsTexture(iObject, i, iRect, textureName, Path);
+
+        textures.Add(texture);
+    }
+
+    return textures;
 }
 
 TArray<FString>
@@ -368,11 +525,48 @@ ExportAsImageSequence(
     const FIntRect& iRect,
     FString Filename,
     FString Path,
-    EOdysseyExportImageFormat Format
+    EOdysseyExportImageFormat Format,
+    bool iSRGB
 )
 {
-    //TODO:
-    return {};
+    if ( Path.IsEmpty())
+        return {};
+
+    int startFrame = iRange.GetLowerBoundValue();
+    int endFrame = iRange.GetUpperBoundValue();
+
+    FScopedSlowTask progressBar(endFrame - startFrame + 1, LOCTEXT("image-rendering-ability.export-as-texture-sequence.progress-bar.title", "Export As Texture Sequence"));
+    progressBar.MakeDialog();
+
+    TArray<FGuid> lastRenderingComposition;
+
+    FString endFrameStr = FString::FromInt(endFrame);
+    TArray<FString> paths;
+
+    for (int i = startFrame; i <= endFrame; i++)
+    {
+        progressBar.EnterProgressFrame();
+
+        TArray<FGuid> renderingComposition = iObject->GetRenderingComposition(EOdysseyRenderingType::Render, i);
+        if (renderingComposition == lastRenderingComposition)
+            continue;
+
+        lastRenderingComposition = renderingComposition;
+
+        FString frameStr = FString::FromInt(i);
+        FString filename = Filename + TEXT("_");
+         for (int j = 0; j < endFrameStr.Len() - frameStr.Len(); j++)
+        {
+            filename += TEXT("0");
+        }
+        filename += FString::Printf(TEXT("%d"), i);
+
+        FString fullpath = ExportAsImage(iObject, i, Format, iRect, filename, Path, iSRGB );
+
+        paths.Add(fullpath);
+    }
+
+    return paths;
 }
 
 }

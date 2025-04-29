@@ -10,5 +10,9 @@ class ODYSSEYCORE_API FOdysseyTextureRenderingAbility
 {
 public:
     void RenderToTexture(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame) const;
-    virtual void RenderToTextureFromRects(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, const TArray<FIntRect>& iRects) const = 0;
+    void RenderToTexture(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, const TArray<FIntRect>& iRects) const;
+    void RenderToTexture(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, const TArray<FIntRect>& iRects, const FIntPoint& iPos) const;
+
+protected:
+    virtual void RenderToTextureFromRects(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, const TArray<FIntRect>& iRects, const FIntPoint& iPos) const = 0;
 };

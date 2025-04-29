@@ -348,6 +348,6 @@ FOdysseyAnimationMediaSamples::Render()
     if ( mInvalidTileMap.InvalidTiles().IsEmpty() )
         return;
 
-    mAnimation->RenderToTextureFromRects(mRenderTarget.Get(), FFrameNumber(mCurrentFrameIndex), mInvalidTileMap.InvalidRects());
+    mAnimation->RenderToTexture(mRenderTarget.Get(), FFrameNumber(mCurrentFrameIndex), mInvalidTileMap.InvalidRects());
     mInvalidTileMap.Clear();
 }

@@ -253,9 +253,10 @@ public:
     virtual void PostLoad() override;
 
 public:
-    //FOdysseyRenderingAbility overrides
-    virtual void RenderToTextureFromRects(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, const TArray<FIntRect>& iRects) const override;
     virtual TArray<FGuid> GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrameIndex) const override;
+
+protected:
+    virtual void RenderToTextureFromRects(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, const TArray<FIntRect>& iRects, const FIntPoint& iPos) const override;
 
 protected:
     //Internal
@@ -282,6 +283,9 @@ public:
 
     UPROPERTY(Transient)
     TObjectPtr<UClass> LayerRootClass;
+
+    UPROPERTY(Transient)
+    bool SRGB = true;
 
     mutable TSharedPtr<FOdysseySurfaceTexture2DEditable> mSurface;
 };

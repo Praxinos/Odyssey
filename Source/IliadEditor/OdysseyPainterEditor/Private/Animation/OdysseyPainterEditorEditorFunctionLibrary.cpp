@@ -116,7 +116,7 @@ UOdysseyPainterEditorAnimationFunctionLibrary::ExportAsImageSequence(
         return {};
 
     FIntRect rect(0, 0, Animation->GetWidth(), Animation->GetHeight());
-    return Odyssey::ExportAsImageSequence(Animation, FrameRange, rect, Filename, Path, Format );
+    return Odyssey::ExportAsImageSequence(Animation, FrameRange, rect, Filename, Path, Format, true );
 }
 
 FString
@@ -132,7 +132,7 @@ UOdysseyPainterEditorAnimationFunctionLibrary::ExportFrameAsImage(
         return TEXT("");
 
     FIntRect rect(0, 0, Animation->GetWidth(), Animation->GetHeight());
-    return Odyssey::ExportAsImage(Animation, Frame, Format, rect, Filename, Path );
+    return Odyssey::ExportAsImage(Animation, Frame, Format, rect, Filename, Path, true );
 }
 
 UTexture2D*
@@ -154,8 +154,7 @@ UOdysseyPainterEditorAnimationFunctionLibrary::ExportFrameAsTexture(
     }
 
     FIntRect rect(0, 0, Animation->GetWidth(), Animation->GetHeight());
-    ETextureSourceFormat textureSourceFormat = TextureSourceFormatForULISFormat(format);
-    return Odyssey::ExportAsTexture(Animation, Frame, rect, textureSourceFormat, Filename, Path );
+    return Odyssey::ExportAsTexture(Animation, Frame, rect, Filename, Path );
 }
 
 TArray<UTexture2D*>

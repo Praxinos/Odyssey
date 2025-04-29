@@ -342,12 +342,12 @@ UOdysseyAnimation::GetRenderingRects() const
 }
 
 void
-UOdysseyAnimation::RenderToTextureFromRects(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, const TArray<FIntRect>& iRects) const
+UOdysseyAnimation::RenderToTextureFromRects(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, const TArray<FIntRect>& iRects, const FIntPoint& iPos) const
 {
     if (!mLayerStack)
         return;
 
-    mLayerStack->RenderToTextureFromRects(iRenderTarget, iFrame, iRects);
+    mLayerStack->RenderToTexture(iRenderTarget, iFrame, iRects, iPos);
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -741,15 +741,18 @@ UOdysseyLayerStack::PostTransacted(const FTransactionObjectEvent& iTransactionEv
 }
 
 void
-UOdysseyLayerStack::RenderToTextureFromRects(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, const TArray<FIntRect>& iRects) const
+UOdysseyLayerStack::RenderToTextureFromRects(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, const TArray<FIntRect>& iRects, const FIntPoint& iPos) const
 {
+    if (!iRenderTarget)
+        return;
+
     if (!mSurface)
-        mSurface = MakeShared<FOdysseySurfaceTexture2DEditable>( GetWidth(), GetHeight(), ::ULIS::Format_BGRA8 );
+        mSurface = MakeShared<FOdysseySurfaceTexture2DEditable>( GetWidth(), GetHeight(), ::ULIS::Format_BGRA8, SRGB ); //layerstack data are considered as SRGB
 
     TSharedPtr<IOdysseyImageRenderer> renderer = LayerRoot->BuildImageRenderer(EOdysseyRenderingType::Render, iFrame.Value);
     renderer->Init();
 
-    FOdysseyImageRendererCopyParams params(mSurface->Block(), iRects);
+    FOdysseyImageRendererCopyParams params(mSurface->Block(), iRects, ::ULIS::FVec2I(iPos.X, iPos.Y));
     renderer->Copy(params, {});
 
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(mSurface->Block()->Format());
@@ -761,9 +764,24 @@ UOdysseyLayerStack::RenderToTextureFromRects(UTextureRenderTarget2D* iRenderTarg
     FTextureRenderTargetResource* dstResource = iRenderTarget->GameThread_GetRenderTargetResource();
 
     FCanvas Canvas(dstResource, nullptr, FGameTime(), GEditor->GetEditorWorldContext().World()->GetFeatureLevel());
-    Canvas.Clear(FLinearColor::Transparent);
-    Canvas.DrawTile(0, 0, GetWidth(), GetHeight(), 0, 0, 1, 1, FLinearColor::White, srcResource, SE_BLEND_AlphaBlend);
-    Canvas.Flush_GameThread(true);
+    //Canvas.Clear(FLinearColor::Transparent);
+    for (int i = 0; i < iRects.Num(); i++)
+    {
+        const FIntRect& rect = iRects[i];
+        FIntPoint pos = rect.Min - iPos;
+
+        double x = pos.X;
+        double y = pos.Y;
+        double w = rect.Width();
+        double h = rect.Height();
+        float u = float(rect.Min.X) / GetWidth();
+        float v = float(rect.Min.Y) / GetHeight();
+        float sizeU = float(rect.Max.X) / GetWidth();
+        float sizeV = float(rect.Max.Y) / GetHeight();
+        Canvas.DrawTile(x, y, w, h, u, v, sizeU, sizeV, FLinearColor::Transparent, srcResource, SE_BLEND_Opaque);
+        Canvas.DrawTile(x, y, w, h, u, v, sizeU, sizeV, FLinearColor::White, srcResource, SE_BLEND_AlphaBlend);
+        Canvas.Flush_GameThread(true);
+    }
 }
 
 TArray<FGuid>

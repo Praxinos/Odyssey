@@ -179,7 +179,7 @@ UOdysseyTextureEditorTextureFunctionLibrary::ExportAsImage(
 
     FIntRect rect(0, 0, Texture->Source.GetSizeX(), Texture->Source.GetSizeY());
 
-    return Odyssey::ExportAsImage(layerStack, 0, Format, rect, Filename, Path );
+    return Odyssey::ExportAsImage(layerStack, 0, Format, rect, Filename, Path, false );
 }
 
 FString

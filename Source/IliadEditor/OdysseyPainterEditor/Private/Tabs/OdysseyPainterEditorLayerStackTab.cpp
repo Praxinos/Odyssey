@@ -26,6 +26,7 @@
 #include "ULISLoaderModule.h"
 #include "ULISUtils.h"
 #include "OdysseyRasterBlockMutator.h"
+#include "OdysseyExportImage.h"
 
 #define LOCTEXT_NAMESPACE "TextureEditor"
 
@@ -143,6 +144,10 @@ FOdysseyPainterEditorLayerStackTab::ExtendMenuFile( TSharedRef<FExtender> iExten
 void
 FOdysseyPainterEditorLayerStackTab::ExportTextureToOperatingSystem()
 {
+    UOdysseyLayerStack* layerStack = LayerStack();
+    if ( !layerStack )
+        return;
+
     TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
     if (!source || source->Id() != FOdysseyPainterEditorTextureSource::StaticId())
         return;
@@ -162,83 +167,14 @@ FOdysseyPainterEditorLayerStackTab::ExportTextureToOperatingSystem()
         , filenames
     );
 
-    if( filenames.Num() > 0 )
-    {
+    if (filenames.IsEmpty())
+        return;
 
-        FString path( FPaths::ConvertRelativePathToFull( filenames[0] ) );
-        std::string str = std::string( TCHAR_TO_UTF8( *path ) );
-        std::string extension = std::string( TCHAR_TO_UTF8( *( FPaths::GetExtension( path, false ) ) ) );
-        ::ULIS::eFileFormat exportImageFormat = ::ULIS::FileFormat_png;
-        bool extensionFound = false;
-        for( int i = 0; i <= ::ULIS::FileFormat_hdr; ++i )
-        {
-            if( extension == ::ULIS::kwImageFormat[i] )
-            {
-                exportImageFormat = static_cast< ::ULIS::eFileFormat >( i );
-                extensionFound = true;
-                break;
-            }
-        }
+    FString path = FPaths::GetPath(filenames[0] );
+    FString filename = FPaths::GetBaseFilename(path);
+    path = FPaths::ConvertRelativePathToFull( path );
 
-        if( !extensionFound )
-        {
-            FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("export-texture-to-os.invalid-extension-dialog.message", "The file extension or the file format is not supported"), LOCTEXT("export-texture-to-os.invalid-extension-dialog.title", "Invalid extension"));
-        }
-        else
-        {
-            FTexturePlatformData* platformData = *currentTexture->GetRunningPlatformData();
-            ::ULIS::FBlock* odysseyBlockToSave = new ::ULIS::FBlock( platformData->SizeX, platformData->SizeY, ULISFormatForTextureSourceFormat( currentTexture->Source.GetFormat() ) );
-            CopyUTextureSourceDataIntoBlock( odysseyBlockToSave, currentTexture );
-            ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( odysseyBlockToSave->Format() );
-
-            bool canSaveDirectly = false;
-            ::ULIS::FContext::SaveBlockToDiskMetrics( *odysseyBlockToSave, exportImageFormat, &canSaveDirectly );
-            if (canSaveDirectly)
-            {
-                ctx.SaveBlockToDisk(
-                    *odysseyBlockToSave
-                    , str
-                    , exportImageFormat
-                    , 100
-                );
-
-                ctx.Finish();
-            }
-            else
-            {
-                ::ULIS::eFormat format = odysseyBlockToSave->Model() == ::ULIS::ColorModel_GREY ? ::ULIS::Format_GA8 : ::ULIS::Format_RGBA8;
-                if (exportImageFormat == ::ULIS::FileFormat_hdr)
-                {
-                    format = ::ULIS::Format_RGBAF;
-                }
-
-                ::ULIS::FBlock blockProxy(odysseyBlockToSave->Width(), odysseyBlockToSave->Height(), format);
-
-                ::ULIS::FEvent eventConvert;
-                ctx.ConvertFormat(
-                    *odysseyBlockToSave
-                    , blockProxy
-                    , ::ULIS::FRectI::Auto
-                    , ::ULIS::FVec2I( 0 )
-                    , ULIS::FSchedulePolicy::CacheEfficient
-                    , 0
-                    , nullptr
-                    , &eventConvert
-                );
-
-                ctx.SaveBlockToDisk(
-                    blockProxy
-                    , str
-                    , exportImageFormat
-                    , 100
-                );
-
-                ctx.Finish();
-            }
-
-            delete odysseyBlockToSave;
-        }
-    }
+    Odyssey::ExportAsImage(layerStack, 0, EOdysseyExportImageFormat::PNG, FIntRect(0, 0, currentTexture->Source.GetSizeX(), currentTexture->Source.GetSizeY()), filename, path, false);
 }
 
 
@@ -327,51 +263,15 @@ FOdysseyPainterEditorLayerStackTab::ExportLayersAsTextures()
         return;
 
     TArray<UOdysseyLayer*> layers = layerStack->GetLayers();
-    ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = MakeShared<::ULIS::FBlock>(texture->Source.GetSizeX(), texture->Source.GetSizeY(), format);
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
 
     for( UOdysseyLayer* layer : layers )
     {
         if ( layer->CanHaveChildren ) //avoid exporting folders
             continue;
 
-        UOdysseyTextureLayer* textureLayer = Cast<UOdysseyTextureLayer>(layer);
-        if ( !textureLayer )
-            continue;
-
-        TSharedPtr<IOdysseyImageRenderer> renderer = textureLayer->BuildImageRenderer(EOdysseyRenderingType::Render, 0);
-        renderer->Init();
-
-        FOdysseyImageRendererCopyParams params(block, { ::ULISUtils::ToIntRect(block->Rect()) });
-        renderer->Copy(params, {});
-        ctx.Finish();
-
-        // Create texture asset
         FString assetPath = FPaths::GetPath(saveObjectPath) + "/";
-        FString packagePath = (assetPath + layer->Name.ToString().Replace(TEXT(" "), TEXT("_")));
-        UPackage* package = CreatePackage(*packagePath);
-
-        FName textureName(*(FPaths::GetBaseFilename(saveObjectPath) + TEXT("_") + layer->Name.ToString().Replace(TEXT(" "), TEXT("_"))));
-        UTexture2D* outTexture = NewObject<UTexture2D>(package, UTexture2D::StaticClass(), textureName, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone);
-        outTexture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
-        outTexture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
-        outTexture->LODGroup = TextureGroup::TEXTUREGROUP_Pixels2D;
-
-        //can be false on a FX Layer for example
-        InitTextureWithBlockData(block.Get(), outTexture, texture->Source.GetFormat());
-
-        outTexture->PostEditChange();
-        outTexture->UpdateResource();
-
-        FAssetRegistryModule::AssetCreated(outTexture);
-
-        FSavePackageArgs packageArgs;
-        packageArgs.SaveFlags = EObjectFlags::RF_Public | EObjectFlags::RF_Standalone;
-        UPackage::SavePackage( package, outTexture, *( layer->Name.ToString() ), packageArgs );
-
-        package->MarkAsFullyLoaded();
-        outTexture->MarkPackageDirty();
+        FString textureName = FPaths::GetBaseFilename(saveObjectPath) + TEXT("_") + layer->Name.ToString().Replace(TEXT(" "), TEXT("_"));
+        ::Odyssey::ExportAsTexture(layer, 0, FIntRect(0, 0, texture->Source.GetSizeX(), texture->Source.GetSizeY()), texture->Source.GetFormat(), textureName, assetPath );
     }
 }
 
@@ -385,16 +285,6 @@ FOdysseyPainterEditorLayerStackTab::ExportCurrentLayerAsTexture()
     if ( !layerStack->CurrentLayer )
         return;
 
-    UOdysseyTextureLayer* textureLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
-    if ( !textureLayer )
-        return;
-
-    IAssetTools& AssetTools = FModuleManager::LoadModuleChecked< FAssetToolsModule >("AssetTools").Get();
-    UObject* object = AssetTools.CreateAssetWithDialog(UTexture2D::StaticClass(), UTexture2DFactoryNew::StaticClass()->GetDefaultObject<UFactory>());
-
-    if (!object)
-        return;
-
     TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
     if (!source || source->Id() != FOdysseyPainterEditorTextureSource::StaticId())
         return;
@@ -402,28 +292,21 @@ FOdysseyPainterEditorLayerStackTab::ExportCurrentLayerAsTexture()
     TSharedPtr<FOdysseyPainterEditorTextureSource> textureSource = StaticCastSharedPtr<FOdysseyPainterEditorTextureSource>(source);
     UTexture* texture = textureSource->GetTexture();
 
-    TArray<UOdysseyLayer*> layers = layerStack->GetLayers();
-    ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = MakeShared<::ULIS::FBlock>(texture->Source.GetSizeX(), texture->Source.GetSizeY(), format);
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
+    FSaveAssetDialogConfig saveAssetDialogConfig;
+    saveAssetDialogConfig.DialogTitleOverride = LOCTEXT( "export-current-layer-as-texture.save-asset-dialog.title", "Export Current Layer As Texture" );
+    saveAssetDialogConfig.DefaultPath = FPaths::GetPath(texture->GetPathName() );
+    saveAssetDialogConfig.DefaultAssetName = texture->GetName();
+    saveAssetDialogConfig.AssetClassNames.Add( UTexture2D::StaticClass()->GetClassPathName() );
+    saveAssetDialogConfig.ExistingAssetPolicy = ESaveAssetDialogExistingAssetPolicy::AllowButWarn;
 
-    UTexture2D* outTexture = Cast<UTexture2D>(object);
-    outTexture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
-    outTexture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
-    outTexture->LODGroup = TextureGroup::TEXTUREGROUP_Pixels2D;
+    FContentBrowserModule& contentBrowserModule = FModuleManager::LoadModuleChecked<FContentBrowserModule>( "ContentBrowser" );
+    FString saveObjectPath = contentBrowserModule.Get().CreateModalSaveAssetDialog( saveAssetDialogConfig );
+    if ( saveObjectPath == "" )
+        return;
 
-    TSharedPtr<IOdysseyImageRenderer> renderer = textureLayer->BuildImageRenderer(EOdysseyRenderingType::Render, 0);
-    renderer->Init();
-
-    FOdysseyImageRendererCopyParams params(block, { ::ULISUtils::ToIntRect(block->Rect()) });
-    renderer->Copy(params, {});
-    ctx.Finish();
-
-    InitTextureWithBlockData(block.Get(), outTexture, texture->Source.GetFormat());
-
-    outTexture->PostEditChange();
-    outTexture->UpdateResource();
-    outTexture->MarkPackageDirty();
+    FString assetPath = FPaths::GetPath(saveObjectPath) + "/";
+    FString textureName = FPaths::GetBaseFilename(saveObjectPath) + TEXT("_") + layerStack->CurrentLayer->Name.ToString().Replace(TEXT(" "), TEXT("_"));
+    ::Odyssey::ExportAsTexture(layerStack->CurrentLayer, 0, FIntRect(0, 0, texture->Source.GetSizeX(), texture->Source.GetSizeY()), texture->Source.GetFormat(), textureName, assetPath );
 }
 
 #undef LOCTEXT_NAMESPACE

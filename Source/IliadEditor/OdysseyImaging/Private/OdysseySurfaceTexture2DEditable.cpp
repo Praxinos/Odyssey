@@ -410,7 +410,7 @@ InvalidateTextureFromSourceDataUsingSortedRects( const ::ULIS::FBlock* iData, UT
             tileBlocks[i].Reserve( ioSrcRects[i].Num() );
             for( int32 j = 0; j < ioSrcRects[i].Num(); ++j ) {
 
-                EGammaSpace gammaSpace = ERawImageFormat::GetDefaultGammaSpace(fmt);
+                EGammaSpace gammaSpace = iTexture->SRGB ? EGammaSpace::sRGB : EGammaSpace::Linear;
 
                 const int len = ioSrcRects[i][j].h;
                 tileImages[i].Emplace(
@@ -584,7 +584,7 @@ FOdysseySurfaceTexture2DEditable::~FOdysseySurfaceTexture2DEditable()
     }
 }
 
-FOdysseySurfaceTexture2DEditable::FOdysseySurfaceTexture2DEditable(int iWidth,int iHeight, ::ULIS::eFormat iFormat)
+FOdysseySurfaceTexture2DEditable::FOdysseySurfaceTexture2DEditable(int iWidth,int iHeight, ::ULIS::eFormat iFormat, bool iSRGB)
     : mIsBorrowedTexture(false)
 {
     EPixelFormat pixelFormat = PixelFormatForULISFormat(iFormat);
@@ -595,7 +595,11 @@ FOdysseySurfaceTexture2DEditable::FOdysseySurfaceTexture2DEditable(int iWidth,in
     mTexture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
 
     //IsImageInfoValid() in ImageCore.h allows use of sRGB only on G8 and BGRA8 textures
-    mTexture->SRGB = pixelFormat == EPixelFormat::PF_G8 || pixelFormat == EPixelFormat::PF_B8G8R8A8;
+    if (iSRGB)
+        mTexture->SRGB = pixelFormat == EPixelFormat::PF_G8 || pixelFormat == EPixelFormat::PF_B8G8R8A8;
+    else
+        mTexture->SRGB = false;
+
     mTexture->Filter = TextureFilter::TF_Nearest;
     mTexture->UpdateResource();
     FTextureCompilingManager::Get().FinishCompilation({mTexture.Get()});
@@ -644,7 +648,7 @@ FOdysseySurfaceTexture2DEditable::FOdysseySurfaceTexture2DEditable(UTexture2D* i
     CopyUTextureSourceDataIntoBlock( mBlock.Get(), mTexture.Get());
 }
 
-FOdysseySurfaceTexture2DEditable::FOdysseySurfaceTexture2DEditable(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock)
+FOdysseySurfaceTexture2DEditable::FOdysseySurfaceTexture2DEditable(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock, bool iSRGB)
     : mIsBorrowedTexture(false)
 {
     checkf(iBlock,TEXT("Cannot Initialize with Null borrowed block"));
@@ -659,7 +663,10 @@ FOdysseySurfaceTexture2DEditable::FOdysseySurfaceTexture2DEditable(TSharedPtr<::
     mTexture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
 
     //IsImageInfoValid() in ImageCore.h allows use of sRGB only on G8 and BGRA8 textures
-    mTexture->SRGB = pixelFormat == EPixelFormat::PF_G8 || pixelFormat == EPixelFormat::PF_B8G8R8A8;
+    if (iSRGB)
+        mTexture->SRGB = pixelFormat == EPixelFormat::PF_G8 || pixelFormat == EPixelFormat::PF_B8G8R8A8;
+    else
+        mTexture->SRGB = false;
     mTexture->Filter = TextureFilter::TF_Nearest;
     mTexture->UpdateResource();
     FTextureCompilingManager::Get().FinishCompilation({ mTexture.Get() });

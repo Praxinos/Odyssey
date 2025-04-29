@@ -29,11 +29,11 @@ namespace Odyssey
     ODYSSEYIMAGING_API TArray<UTexture2D*> ExportAsTextureSequence(FOdysseyImageRenderingAbility* iObject, ::ULIS::eFormat iULISFormat, const FInt32Range& iRange, const FIntRect& iRect, FString AssetName, FString Path);
     ODYSSEYIMAGING_API TArray<FString> ExportAsImageSequence(FOdysseyImageRenderingAbility* iObject, ::ULIS::eFormat iULISFormat, const FInt32Range& iRange, const FIntRect& iRect, FString Filename, FString Path, EOdysseyExportImageFormat Format);
 
-    ODYSSEYIMAGING_API UTexture2D* ExportAsTexture(FOdysseyTextureRenderingAbility* iObject, int iFrame, const FIntRect& iRect, ETextureSourceFormat iFormat, FString iAssetName, FString iPath);
-    ODYSSEYIMAGING_API FString ExportAsImage(FOdysseyTextureRenderingAbility* iObject, int iFrame, EOdysseyExportImageFormat iFormat, const FIntRect& iRect, FString iFilename, FString iPath);
+    ODYSSEYIMAGING_API UTexture2D* ExportAsTexture(FOdysseyTextureRenderingAbility* iObject, int iFrame, const FIntRect& iRect, FString iAssetName, FString iPath);
+    ODYSSEYIMAGING_API FString ExportAsImage(FOdysseyTextureRenderingAbility* iObject, int iFrame, EOdysseyExportImageFormat iFormat, const FIntRect& iRect, FString iFilename, FString iPath, bool iSRGB);
     ODYSSEYIMAGING_API UPaperFlipbook* ExportAsFlipbook(FOdysseyTextureRenderingAbility* iObject, const FInt32Range& iRange, const FIntRect& iRect, float iFramesPerSecond, FString AssetName, FString Path);
     ODYSSEYIMAGING_API TArray<UTexture2D*> ExportAsTextureSequence(FOdysseyTextureRenderingAbility* iObject, const FInt32Range& iRange, const FIntRect& iRect, FString AssetName, FString Path);
-    ODYSSEYIMAGING_API TArray<FString> ExportAsImageSequence(FOdysseyTextureRenderingAbility* iObject, const FInt32Range& iRange, const FIntRect& iRect, FString Filename, FString Path, EOdysseyExportImageFormat Format);
+    ODYSSEYIMAGING_API TArray<FString> ExportAsImageSequence(FOdysseyTextureRenderingAbility* iObject, const FInt32Range& iRange, const FIntRect& iRect, FString Filename, FString Path, EOdysseyExportImageFormat Format, bool iSRGB);
 
     ODYSSEYIMAGING_API ::ULIS::eFileFormat GetFileExportImageFormat(EOdysseyExportImageFormat iFormat);
     ODYSSEYIMAGING_API FString GetFileFormatExtension(EOdysseyExportImageFormat iFormat);

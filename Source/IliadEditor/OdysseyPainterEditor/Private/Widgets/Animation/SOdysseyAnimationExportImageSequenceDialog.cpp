@@ -318,74 +318,38 @@ FOdysseyAnimationImageSequenceExporter::ExportSource(const FSource& iSource, con
         progressBar.EnterProgressFrame();
         if (mUniqueFramesOnly)
         {
-            TArray<FGuid> renderingComposition = iSource.mImageRenderingAbility->GetRenderingComposition(EOdysseyRenderingType::Render, i);
+
+            TArray<FGuid> renderingComposition;
+            if (iSource.mImageRenderingAbility)
+            {
+                renderingComposition = iSource.mImageRenderingAbility->GetRenderingComposition(EOdysseyRenderingType::Render, i);
+            }
+            else if (iSource.mTextureRenderingAbility)
+            {
+                renderingComposition = iSource.mTextureRenderingAbility->GetRenderingComposition(EOdysseyRenderingType::Render, i);
+            }
+
             if (renderingComposition == lastRenderingComposition)
                 continue;
 
             lastRenderingComposition = renderingComposition;
         }
 
-        TSharedPtr<IOdysseyImageRenderer> renderer = iSource.mImageRenderingAbility->BuildImageRenderer(EOdysseyRenderingType::Render, i);
-        renderer->Init();
-        FOdysseyImageRendererCopyParams params(block, { ::ULISUtils::ToIntRect(block->Rect()) });
-        renderer->Copy(params, {});
-
-        ctx.Finish();
-
-        //Path
-
         FString frameStr = FString::FromInt(i);
-        FString imagePath = folder / filename + TEXT("_");
+        FString imageName = filename + TEXT("_");
          for (int j = 0; j < iNumZero - frameStr.Len(); j++)
         {
-            imagePath += TEXT("0");
+            imageName += TEXT("0");
         }
-        imagePath += FString::Printf(TEXT("%d."), i) + extension;
-        std::string str = std::string( TCHAR_TO_UTF8( *imagePath ) );
+        imageName += FString::Printf(TEXT("%d."), i) + extension;
 
-        bool canSaveDirectly = false;
-        ::ULIS::FContext::SaveBlockToDiskMetrics( *block, exportImageFormat, &canSaveDirectly );
-        if (canSaveDirectly)
+        if (iSource.mImageRenderingAbility)
         {
-            ctx.SaveBlockToDisk(
-                *block
-                , str
-                , exportImageFormat
-                , 100
-            );
-
-            ctx.Finish();
+            Odyssey::ExportAsImage(iSource.mImageRenderingAbility, format, i, mFormat, FIntRect(0, 0, mAnimation->GetWidth(), mAnimation->GetHeight()), imageName, folder);
         }
-        else
+        else if (iSource.mTextureRenderingAbility)
         {
-            ::ULIS::eFormat newFormat = block->Model() == ::ULIS::ColorModel_GREY ? ::ULIS::Format_GA8 : ::ULIS::Format_RGBA8;
-            if (exportImageFormat == ::ULIS::FileFormat_hdr)
-            {
-                newFormat = ::ULIS::Format_RGBAF;
-            }
-
-            ::ULIS::FBlock blockProxy(block->Width(), block->Height(), newFormat);
-
-            ::ULIS::FEvent eventConvert;
-            ctx.ConvertFormat(
-                *block
-                , blockProxy
-                , ::ULIS::FRectI::Auto
-                , ::ULIS::FVec2I( 0 )
-                , ULIS::FSchedulePolicy::CacheEfficient
-                , 0
-                , nullptr
-                , &eventConvert
-            );
-
-            ctx.SaveBlockToDisk(
-                blockProxy
-                , str
-                , exportImageFormat
-                , 100
-            );
-
-            ctx.Finish();
+            Odyssey::ExportAsImage(iSource.mTextureRenderingAbility, i, mFormat, FIntRect(0, 0, mAnimation->GetWidth(), mAnimation->GetHeight()), imageName, folder, true);
         }
     }
 }

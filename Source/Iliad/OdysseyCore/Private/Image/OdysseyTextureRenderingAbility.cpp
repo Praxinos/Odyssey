@@ -8,7 +8,19 @@
 void
 FOdysseyTextureRenderingAbility::RenderToTexture(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame) const
 {
-    RenderToTextureFromRects(iRenderTarget, iFrame, GetRenderingRects());
+    RenderToTextureFromRects(iRenderTarget, iFrame, GetRenderingRects(), FIntPoint(0, 0));
+}
+
+void
+FOdysseyTextureRenderingAbility::RenderToTexture(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, const TArray<FIntRect>& iRects) const
+{
+    RenderToTextureFromRects(iRenderTarget, iFrame, iRects, FIntPoint(0, 0));
+}
+
+void
+FOdysseyTextureRenderingAbility::RenderToTexture(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, const TArray<FIntRect>& iRects, const FIntPoint& iPos) const
+{
+    RenderToTextureFromRects(iRenderTarget, iFrame, iRects, iPos);
 }
 
 #undef LOCTEXT_NAMESPACE
