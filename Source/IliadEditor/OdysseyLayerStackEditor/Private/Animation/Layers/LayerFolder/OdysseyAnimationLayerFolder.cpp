@@ -46,10 +46,4 @@ UOdysseyAnimationLayerFolder::GetMergeLayerTypesFromTypes(TSet<UClass*> iLayerTy
     return types;
 }
 
-void
-UOdysseyAnimationLayerFolder::RenderToTexture(FCanvas* iCanvas, FFrameNumber iFrame, const FIntRect& iSrcRect, const FIntRect& iDstRect) const
-{
-
-}
-
 #undef LOCTEXT_NAMESPACE

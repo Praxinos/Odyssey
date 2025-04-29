@@ -7,8 +7,6 @@
 
 #include "OdysseyTextureRenderingAbility.generated.h"
 
-class FCanvas;
-
 UINTERFACE(BlueprintType)
 class ODYSSEYRENDERING_API UOdysseyTextureRenderingAbility : public UOdysseyRenderingAbility
 {
@@ -37,5 +35,8 @@ public:
     void RenderRectAtRect_Implementation(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, const FIntRect& iSrcRect, const FIntRect& iDstRect) const;
 
 public:
-    virtual void RenderToTexture(FCanvas* iCanvas, FFrameNumber iFrame, const FIntRect& iSrcRect, const FIntRect& iDstRect) const = 0;
+    virtual void RenderToTexture_RenderThread(FRDGBuilder& iGraphBuilder, FRDGTextureRef iDestinationTexture, ERHIFeatureLevel::Type iFeatureLevel, FFrameNumber iFrame, const FIntRect& iSrcRect, const FIntRect& iDstRect) const = 0;
+
+private:
+    mutable FRenderCommandFence mPixelFence;
 };

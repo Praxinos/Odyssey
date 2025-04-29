@@ -5,6 +5,9 @@
 
 #include "OdysseyLayerStack.h"
 #include "Misc/TransactionObjectEvent.h"
+#include "RenderGraphBuilder.h"
+#include "RenderGraphUtils.h"
+#include "OdysseyBlendShader.h"
 
 UOdysseyLayer::FOnDisplayChildrenChanged&
 UOdysseyLayer::OnDisplayChildrenChanged()
@@ -865,10 +868,116 @@ UOdysseyLayer::SetCellsOffsetInteractive(float Value)
 }
 
 void
-UOdysseyLayer::RenderToTexture(FCanvas* iCanvas, FFrameNumber iFrame, const FIntRect& iSrcRect, const FIntRect& iDstRect) const
+UOdysseyLayer::RenderToTexture_RenderThread(FRDGBuilder& iGraphBuilder, FRDGTextureRef iDestinationTexture, ERHIFeatureLevel::Type iFeatureLevel, FFrameNumber iFrame, const FIntRect& iSrcRect, const FIntRect& iDstRect) const
 {
+    FRDGTextureClearInfo clearInfo;
+    clearInfo.Viewport = iDstRect;
+    clearInfo.ClearColor = FLinearColor::Transparent;
 
+    AddClearRenderTargetPass(iGraphBuilder, iDestinationTexture, clearInfo);
+
+    //AddClearRenderTargetPass(iGraphBuilder, iDestinationTexture);
+
+    if (bCanHaveChildren)
+    {
+        for (int i = GetChildren().Num() - 1; i >= 0; i--)
+        {
+            UOdysseyLayer* child = GetChildren()[i];
+            if (!child->IsActivated())
+                continue;
+
+            child->BlendToTexture_RenderThread(iGraphBuilder, iDestinationTexture, iFeatureLevel, iFrame, iSrcRect, iDstRect, child->GetBlendMode(), child->GetOpacity());
+            //child->RenderToTexture_RenderThread(iGraphBuilder, iDestinationTexture, iFeatureLevel, iFrame, iSrcRect, iDstRect);
+        }
+    }
+    else
+    {
+        FInt32Range frameRange = GetFrameRange();
+        int frame = iFrame.Value;
+        if (frame < frameRange.GetLowerBoundValue())
+        {
+            frame = GetPreBehaviourFrame(PreBehaviour, frame);
+        }
+        else if (frame > frameRange.GetUpperBoundValue())
+        {
+            frame = GetPostBehaviourFrame(PostBehaviour, frame);
+        }
+
+        if (frame == INDEX_NONE)
+            return;
+
+        UOdysseyLayerCell* cell = GetCellAtFrame(iFrame.Value);
+        if (cell)
+            cell->RenderToTexture_RenderThread(iGraphBuilder, iDestinationTexture, iFeatureLevel, iFrame, iSrcRect, iDstRect);
+    }
 }
+
+void
+UOdysseyLayer::BlendToTexture_RenderThread(FRDGBuilder& iGraphBuilder, FRDGTextureRef iDestinationTexture, ERHIFeatureLevel::Type iFeatureLevel, FFrameNumber iFrame, const FIntRect& iSrcRect, const FIntRect& iDstRect, EOdysseyBlendingMode iBlendMode, float iOpacity) const
+{
+    if (bCanHaveChildren)
+    {
+        for (int i = GetChildren().Num() - 1; i >= 0; i--)
+        {
+            UOdysseyLayer* child = GetChildren()[i];
+            if (!child->IsActivated())
+                continue;
+
+            child->BlendToTexture_RenderThread(iGraphBuilder, iDestinationTexture, iFeatureLevel, iFrame, iSrcRect, iDstRect, child->GetBlendMode(), child->GetOpacity());
+            //child->RenderToTexture_RenderThread(iGraphBuilder, iDestinationTexture, iFeatureLevel, iFrame, iSrcRect, iDstRect);
+        }
+
+        /* FRDGTextureDesc desc = FRDGTextureDesc::Create2D(
+            iDestinationTexture->Desc.Extent,
+            PF_FloatRGBA,
+            FClearValueBinding::Transparent,
+            ETextureCreateFlags::ShaderResource | ETextureCreateFlags::RenderTargetable | ETextureCreateFlags::ResolveTargetable | ETextureCreateFlags::UAV
+        );
+
+        FRDGTextureRef renderTarget = iGraphBuilder.CreateTexture(desc, TEXT("UOdysseyLayer::RenderTarget"));
+
+        RenderToTexture_RenderThread(iGraphBuilder, renderTarget, iFeatureLevel, iFrame, iSrcRect, iDstRect);
+
+        FOdysseyBlendShader::Execute(
+            iGraphBuilder,
+            iFeatureLevel,
+            renderTarget,
+            iDestinationTexture,
+
+            FVector2D(iDstRect.Min.X, iDstRect.Min.Y),
+            FVector2D(iSrcRect.Min.X, iSrcRect.Min.Y),
+            FVector2D(iSrcRect.Width(), iSrcRect.Height()),
+            FOdysseyImageAnchor(),
+
+            FVector2D (1.f, 1.f),
+            0.f,
+
+            BlendMode,
+            Opacity,
+            EOdysseyAntiAliasing::AnisotropicLinear
+        ); */
+    }
+    else
+    {
+        FInt32Range frameRange = GetFrameRange();
+        int frame = iFrame.Value;
+        if (frame < frameRange.GetLowerBoundValue())
+        {
+            frame = GetPreBehaviourFrame(PreBehaviour, frame);
+        }
+        else if (frame > frameRange.GetUpperBoundValue())
+        {
+            frame = GetPostBehaviourFrame(PostBehaviour, frame);
+        }
+
+        if (frame == INDEX_NONE)
+            return;
+
+        UOdysseyLayerCell* cell = GetCellAtFrame(iFrame.Value);
+        if (cell)
+            cell->BlendToTexture_RenderThread(iGraphBuilder, iDestinationTexture, iFeatureLevel, iFrame, iSrcRect, iDstRect, BlendMode, Opacity);
+    }
+};
 
 #if WITH_EDITOR
 

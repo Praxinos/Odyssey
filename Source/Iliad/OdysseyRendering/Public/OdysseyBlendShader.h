@@ -39,8 +39,8 @@ public:
     static void Execute(
         FRDGBuilder& iGraphBuilder,
         ERHIFeatureLevel::Type iFeatureLevel,
-        FTexture* iSourceTexture,
-        FTexture* iDestinationTexture,
+        FRDGTextureRef iSourceTexture,
+        FRDGTextureRef iDestinationTexture,
 
         FVector2D iPositionInDestination,
         FVector2D iPositionInSource,

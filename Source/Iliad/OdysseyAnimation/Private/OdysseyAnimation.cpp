@@ -135,14 +135,14 @@ UOdysseyAnimation::GetDefaultRenderRect() const
 }
 
 void
-UOdysseyAnimation::RenderToTexture(FCanvas* iCanvas, FFrameNumber iFrame, const FIntRect& iSrcRect, const FIntRect& iDstRect) const
+UOdysseyAnimation::RenderToTexture_RenderThread(FRDGBuilder& iGraphBuilder, FRDGTextureRef iDestinationTexture, ERHIFeatureLevel::Type iFeatureLevel, FFrameNumber iFrame, const FIntRect& iSrcRect, const FIntRect& iDstRect) const
 {
 #if WITH_EDITOR
     if (!mLayerStack || !mLayerStack->Implements<UOdysseyTextureRenderingAbility>())
         return;
 
     IOdysseyTextureRenderingAbility* renderingInterface = Cast<IOdysseyTextureRenderingAbility>(mLayerStack);
-    renderingInterface->RenderToTexture(iCanvas, iFrame, iSrcRect, iDstRect);
+    renderingInterface->RenderToTexture_RenderThread(iGraphBuilder, iDestinationTexture, iFeatureLevel, iFrame, iSrcRect, iDstRect);
 #else
     FTextureResource* srcResource = nullptr;
     int frameIndex = GetFrameIndexAtFrame(iFrame.Value);
@@ -162,6 +162,9 @@ UOdysseyAnimation::RenderToTexture(FCanvas* iCanvas, FFrameNumber iFrame, const 
     float v = float(iSrcRect.Min.Y) / GetHeight();
     float sizeU = float(iSrcRect.Max.X) / GetWidth();
     float sizeV = float(iSrcRect.Max.Y) / GetHeight();
+
+    //Create a Canvas to draw with the shader
+    FCanvas* canvas = FCanvas::Create(iGraphBuilder, iDestinationTexture, nullptr, FGameTime(), iFeatureLevel);
     iCanvas->DrawTile(x, y, w, h, u, v, sizeU, sizeV, FLinearColor::Transparent, GWhiteTexture, SE_BLEND_Opaque);
 
     if (srcResource)

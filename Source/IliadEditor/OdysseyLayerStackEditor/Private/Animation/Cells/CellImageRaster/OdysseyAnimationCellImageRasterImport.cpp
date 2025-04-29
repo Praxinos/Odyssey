@@ -51,7 +51,8 @@ FOdysseyAnimationCellImageRasterImport::Read( UOdysseyAnimationCellImageRaster* 
             {
                 case FOdysseyFile::Animation::CHUNK_CELLIMAGERASTER_RASTERBLOCK :
                 {
-                    Ar << *iAnimationCellImageRaster->GetRasterBlock();
+                    iAnimationCellImageRaster->mRasterBlock = MakeShared<FOdysseyRasterBlock>(iAnimationCellImageRaster);
+                    Ar << *iAnimationCellImageRaster->mRasterBlock;
                 }
                 break;
 

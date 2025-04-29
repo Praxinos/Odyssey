@@ -59,7 +59,6 @@ public:
 public:
     //IOdysseyRenderingAbility overrides
     virtual TArray<FGuid> GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrameIndex) const override;
-    virtual void RenderToTexture(FCanvas* iCanvas, FFrameNumber iFrame, const FIntRect& iSrcRect, const FIntRect& iDstRect) const override;
 
 public:
     // Implements Interface IOdysseyVectorLayer

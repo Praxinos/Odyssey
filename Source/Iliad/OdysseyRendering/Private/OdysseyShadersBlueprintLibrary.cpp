@@ -27,22 +27,32 @@ UOdysseyShadersBlueprintLibrary::Blend(
     if (!SourceTexture || !DestinationTexture)
         return;
 
-    const ERHIFeatureLevel::Type featureLevel = WorldContextObject->GetWorld()->GetFeatureLevel();
+    const ERHIFeatureLevel::Type featureLevel = WorldContextObject->GetWorld() ? WorldContextObject->GetWorld()->GetFeatureLevel() : GMaxRHIFeatureLevel;
 
     ENQUEUE_RENDER_COMMAND(UpdateOdysseyScreenPaintRTCommandSeams)(
         [=](FRHICommandListImmediate& RHICmdList)
         {
             FRDGBuilder graphBuilder(RHICmdList);
 
+            //Register Textures in iGraphBuilder
+            FRDGTextureRef sourceTexture = graphBuilder.RegisterExternalTexture(CreateRenderTarget(SourceTexture->GetResource()->TextureRHI, TEXT("Odyssey::Blend::SourceTexture")));
+            FRDGTextureRef destinationTexture = graphBuilder.RegisterExternalTexture(CreateRenderTarget(DestinationTexture->GetRenderTargetResource()->GetRenderTargetTexture(), TEXT("Odyssey::Blend::DestinationTexture")));
+
+            //Ensure Source Texture Coordinates will stay in Source Texture Boundaries
+            FVector2D sourceSize(
+                FMath::Clamp(SourceSize.X, 0.f, FMath::Max(0.f, SourceTexture->GetResource()->GetSizeX() - SourcePosition.X)),
+                FMath::Clamp(SourceSize.Y, 0.f, FMath::Max(0.f, SourceTexture->GetResource()->GetSizeY() - SourcePosition.Y))
+            );
+
             FOdysseyBlendShader::Execute(
                 graphBuilder,
                 featureLevel,
-                SourceTexture->GetResource(),
-                DestinationTexture->GetRenderTargetResource(),
+                sourceTexture,
+                destinationTexture,
 
                 Position,
                 SourcePosition,
-                SourceSize,
+                sourceSize,
                 SourceAnchor,
 
                 Scale,

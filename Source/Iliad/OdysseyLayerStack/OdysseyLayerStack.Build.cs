@@ -55,6 +55,8 @@ public class OdysseyLayerStack : ModuleRules
             new string[] {
                 "Core",
                 "CoreUObject",
+                "RenderCore",
+                "RHI",
 
                 "OdysseyMedia",
                 "OdysseyRendering",

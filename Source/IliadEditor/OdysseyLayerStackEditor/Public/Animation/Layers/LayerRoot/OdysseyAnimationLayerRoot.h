@@ -19,7 +19,6 @@ public:
 public:
     virtual void PostInitProperties() override;
     virtual void PostLoad() override;
-    virtual void RenderToTexture(FCanvas* iCanvas, FFrameNumber iFrame, const FIntRect& iSrcRect, const FIntRect& iDstRect) const override;
 
 public:
     //TSharedPtr<FOdysseyAnimationProxy> GetProxy() const;

@@ -18,6 +18,7 @@
 #include "ULISLoaderModule.h"
 #include "ULISUtils.h"
 #include "OdysseyRasterBlockMutator.h"
+#include "RenderGraphBuilder.h"
 
 #define THUMBNAIL_RENDER_SIZE 64
 
@@ -67,6 +68,16 @@ UOdysseyAnimationCellThumbnailRenderer::Draw(UObject* Object, int32 X, int32 Y, 
     if (!cell)
         return;
 
-    cell->RenderToTexture( Canvas, FFrameNumber(0), cell->GetDefaultRenderRect(), FIntRect(X, Y, Width, Height) );
-    //TODO: Store the thumbnail texture in the cell and use it instead of rendering it every time
+    const ERHIFeatureLevel::Type featureLevel = Canvas->GetFeatureLevel();
+
+    ENQUEUE_RENDER_COMMAND(UOdysseyAnimationCellThumbnailRenderer_Draw)(
+        [cell, Viewport, X, Y, Width, Height, featureLevel](FRHICommandListImmediate& RHICmdList)
+        {
+            FRDGBuilder graphBuilder(RHICmdList);
+
+            FRDGTextureRef destinationTexture = graphBuilder.RegisterExternalTexture(CreateRenderTarget(Viewport->GetRenderTargetTexture(), TEXT("UOdysseyAnimationCellThumbnailRenderer::Draw")));
+            cell->RenderToTexture_RenderThread(graphBuilder, destinationTexture, featureLevel, FFrameNumber(0), cell->GetDefaultRenderRect(), FIntRect(X, Y, Width, Height));
+            graphBuilder.Execute();
+        }
+    );
 }

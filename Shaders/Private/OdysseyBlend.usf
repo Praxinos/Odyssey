@@ -78,26 +78,7 @@ void GetSourcePixel(
     out float4 oFG
 )
 {
-    float2 destinationSize = float2(0.f, 0.f);
-    float2 sourceSize = float2(0.f, 0.f);
-    float destinationLODCount = 0;
-    float sourceLODCount = 0;
-
-    float2 positionInDestination = DestinationPosition;
-    float2 sizeInDestination = DestinationSize;
-
-    float2 positionInSource = SourcePosition;
-    float2 sizeInSource = SourceSize;
-
-    DestinationTexture.GetDimensions(0, destinationSize.x, destinationSize.y, destinationLODCount);
-    SourceTexture.GetDimensions(0, sourceSize.x, sourceSize.y, sourceLODCount);
-
-    float2 positionInDestinationNormalized = positionInDestination / destinationSize;
-    float2 positionInSourceNormalized = positionInSource / sourceSize;
-
-    float2 coordinatesInSource = (TextureCoordinate - positionInDestinationNormalized) * (destinationSize / sourceSize) * (sizeInSource / sizeInDestination);
-
-    oFG = SourceTexture.Sample(SourceTextureSampler, coordinatesInSource + positionInSourceNormalized);
+    oFG = SourceTexture.Sample(SourceTextureSampler, TextureCoordinate);
 }
 
 float Union(float iCb, float iCs)
@@ -301,16 +282,16 @@ float3 BlendLuminosity(float3 iCb, float3 iCs)
 }
 
 void BlendNormalPS(
-    float4 InPosition : SV_Position,
-	float2 SourceTextureCoordinate : TEXCOORD0,
-    float2 DestinationTextureCoordinate : TEXCOORD1,
+	in float2 TextureCoordinate : TEXCOORD0,
+	in float4 Color : TEXCOORD1,
+	in float4 HitProxyId : TEXCOORD2,
 	out float4 OutColor : SV_Target0
 )
 {
-    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, DestinationTextureCoordinate);
-    float4 cs;
-    GetSourcePixel(SourceTextureCoordinate, cs);
+    //ReplicateChannel(BaseColor, TextureComponentReplicate, TextureComponentReplicateAlpha);
 
+    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, TextureCoordinate);
+    float4 cs = SourceTexture.Sample(SourceTextureSampler, TextureCoordinate);
     float3 blendComponents = float3(
         BlendNormal(cb.x, cs.x),
         BlendNormal(cb.y, cs.y),
@@ -320,16 +301,14 @@ void BlendNormalPS(
 }
 
 void BlendTopPS(
-    float4 InPosition : SV_Position,
-	float2 SourceTextureCoordinate : TEXCOORD0,
-    float2 DestinationTextureCoordinate : TEXCOORD1,
+	in float2 TextureCoordinate : TEXCOORD0,
+	in float4 Color : TEXCOORD1,
+	in float4 HitProxyId : TEXCOORD2,
 	out float4 OutColor : SV_Target0
 )
 {
-    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, DestinationTextureCoordinate);
-    float4 cs;
-    GetSourcePixel(SourceTextureCoordinate, cs);
-
+    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, TextureCoordinate);
+    float4 cs = SourceTexture.Sample(SourceTextureSampler, TextureCoordinate);
     float3 blendComponents = float3(
         BlendTop(cb.x, cs.x),
         BlendTop(cb.y, cs.y),
@@ -339,16 +318,14 @@ void BlendTopPS(
 }
 
 void BlendBackPS(
-    float4 InPosition : SV_Position,
-	float2 SourceTextureCoordinate : TEXCOORD0,
-    float2 DestinationTextureCoordinate : TEXCOORD1,
+	in float2 TextureCoordinate : TEXCOORD0,
+	in float4 Color : TEXCOORD1,
+	in float4 HitProxyId : TEXCOORD2,
 	out float4 OutColor : SV_Target0
 )
 {
-    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, DestinationTextureCoordinate);
-    float4 cs;
-    GetSourcePixel(SourceTextureCoordinate, cs);
-
+    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, TextureCoordinate);
+    float4 cs = SourceTexture.Sample(SourceTextureSampler, TextureCoordinate);
     float3 blendComponents = float3(
         BlendBack(cb.x, cs.x),
         BlendBack(cb.y, cs.y),
@@ -358,16 +335,14 @@ void BlendBackPS(
 }
 
 void BlendBehindPS(
-    float4 InPosition : SV_Position,
-	float2 SourceTextureCoordinate : TEXCOORD0,
-    float2 DestinationTextureCoordinate : TEXCOORD1,
+	in float2 TextureCoordinate : TEXCOORD0,
+	in float4 Color : TEXCOORD1,
+	in float4 HitProxyId : TEXCOORD2,
 	out float4 OutColor : SV_Target0
 )
 {
-    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, DestinationTextureCoordinate);
-    float4 cs;
-    GetSourcePixel(SourceTextureCoordinate, cs);
-
+    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, TextureCoordinate);
+    float4 cs = SourceTexture.Sample(SourceTextureSampler, TextureCoordinate);
     float3 blendComponents = float3(
         BlendBehind(cb.x, cs.x),
         BlendBehind(cb.y, cs.y),
@@ -377,16 +352,14 @@ void BlendBehindPS(
 }
 
 void BlendDarkenPS(
-    float4 InPosition : SV_Position,
-	float2 SourceTextureCoordinate : TEXCOORD0,
-    float2 DestinationTextureCoordinate : TEXCOORD1,
+	in float2 TextureCoordinate : TEXCOORD0,
+	in float4 Color : TEXCOORD1,
+	in float4 HitProxyId : TEXCOORD2,
 	out float4 OutColor : SV_Target0
 )
 {
-    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, DestinationTextureCoordinate);
-    float4 cs;
-    GetSourcePixel(SourceTextureCoordinate, cs);
-
+    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, TextureCoordinate);
+    float4 cs = SourceTexture.Sample(SourceTextureSampler, TextureCoordinate);
     float3 blendComponents = float3(
         BlendDarken(cb.x, cs.x),
         BlendDarken(cb.y, cs.y),
@@ -396,16 +369,14 @@ void BlendDarkenPS(
 }
 
 void BlendMultiplyPS(
-    float4 InPosition : SV_Position,
-	float2 SourceTextureCoordinate : TEXCOORD0,
-    float2 DestinationTextureCoordinate : TEXCOORD1,
+	in float2 TextureCoordinate : TEXCOORD0,
+	in float4 Color : TEXCOORD1,
+	in float4 HitProxyId : TEXCOORD2,
 	out float4 OutColor : SV_Target0
 )
 {
-    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, DestinationTextureCoordinate);
-    float4 cs;
-    GetSourcePixel(SourceTextureCoordinate, cs);
-
+    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, TextureCoordinate);
+    float4 cs = SourceTexture.Sample(SourceTextureSampler, TextureCoordinate);
     float3 blendComponents = float3(
         BlendMultiply(cb.x, cs.x),
         BlendMultiply(cb.y, cs.y),
@@ -415,16 +386,14 @@ void BlendMultiplyPS(
 }
 
 void BlendColorBurnPS(
-    float4 InPosition : SV_Position,
-	float2 SourceTextureCoordinate : TEXCOORD0,
-    float2 DestinationTextureCoordinate : TEXCOORD1,
+	in float2 TextureCoordinate : TEXCOORD0,
+	in float4 Color : TEXCOORD1,
+	in float4 HitProxyId : TEXCOORD2,
 	out float4 OutColor : SV_Target0
 )
 {
-    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, DestinationTextureCoordinate);
-    float4 cs;
-    GetSourcePixel(SourceTextureCoordinate, cs);
-
+    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, TextureCoordinate);
+    float4 cs = SourceTexture.Sample(SourceTextureSampler, TextureCoordinate);
     float3 blendComponents = float3(
         BlendColorBurn(cb.x, cs.x),
         BlendColorBurn(cb.y, cs.y),
@@ -434,16 +403,14 @@ void BlendColorBurnPS(
 }
 
 void BlendLightenPS(
-    float4 InPosition : SV_Position,
-	float2 SourceTextureCoordinate : TEXCOORD0,
-    float2 DestinationTextureCoordinate : TEXCOORD1,
+	in float2 TextureCoordinate : TEXCOORD0,
+	in float4 Color : TEXCOORD1,
+	in float4 HitProxyId : TEXCOORD2,
 	out float4 OutColor : SV_Target0
 )
 {
-    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, DestinationTextureCoordinate);
-    float4 cs;
-    GetSourcePixel(SourceTextureCoordinate, cs);
-
+    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, TextureCoordinate);
+    float4 cs = SourceTexture.Sample(SourceTextureSampler, TextureCoordinate);
     float3 blendComponents = float3(
         BlendLighten(cb.x, cs.x),
         BlendLighten(cb.y, cs.y),
@@ -453,16 +420,14 @@ void BlendLightenPS(
 }
 
 void BlendAveragePS(
-    float4 InPosition : SV_Position,
-	float2 SourceTextureCoordinate : TEXCOORD0,
-    float2 DestinationTextureCoordinate : TEXCOORD1,
+	in float2 TextureCoordinate : TEXCOORD0,
+	in float4 Color : TEXCOORD1,
+	in float4 HitProxyId : TEXCOORD2,
 	out float4 OutColor : SV_Target0
 )
 {
-    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, DestinationTextureCoordinate);
-    float4 cs;
-    GetSourcePixel(SourceTextureCoordinate, cs);
-
+    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, TextureCoordinate);
+    float4 cs = SourceTexture.Sample(SourceTextureSampler, TextureCoordinate);
     float3 blendComponents = float3(
         BlendAverage(cb.x, cs.x),
         BlendAverage(cb.y, cs.y),
@@ -472,16 +437,14 @@ void BlendAveragePS(
 }
 
 void BlendNegationPS(
-    float4 InPosition : SV_Position,
-	float2 SourceTextureCoordinate : TEXCOORD0,
-    float2 DestinationTextureCoordinate : TEXCOORD1,
+	in float2 TextureCoordinate : TEXCOORD0,
+	in float4 Color : TEXCOORD1,
+	in float4 HitProxyId : TEXCOORD2,
 	out float4 OutColor : SV_Target0
 )
 {
-    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, DestinationTextureCoordinate);
-    float4 cs;
-    GetSourcePixel(SourceTextureCoordinate, cs);
-
+    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, TextureCoordinate);
+    float4 cs = SourceTexture.Sample(SourceTextureSampler, TextureCoordinate);
     float3 blendComponents = float3(
         BlendNegation(cb.x, cs.x),
         BlendNegation(cb.y, cs.y),
@@ -491,16 +454,14 @@ void BlendNegationPS(
 }
 
 void BlendScreenPS(
-    float4 InPosition : SV_Position,
-	float2 SourceTextureCoordinate : TEXCOORD0,
-    float2 DestinationTextureCoordinate : TEXCOORD1,
+	in float2 TextureCoordinate : TEXCOORD0,
+	in float4 Color : TEXCOORD1,
+	in float4 HitProxyId : TEXCOORD2,
 	out float4 OutColor : SV_Target0
 )
 {
-    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, DestinationTextureCoordinate);
-    float4 cs;
-    GetSourcePixel(SourceTextureCoordinate, cs);
-
+    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, TextureCoordinate);
+    float4 cs = SourceTexture.Sample(SourceTextureSampler, TextureCoordinate);
     float3 blendComponents = float3(
         BlendScreen(cb.x, cs.x),
         BlendScreen(cb.y, cs.y),
@@ -510,16 +471,14 @@ void BlendScreenPS(
 }
 
 void BlendColorDodgePS(
-    float4 InPosition : SV_Position,
-	float2 SourceTextureCoordinate : TEXCOORD0,
-    float2 DestinationTextureCoordinate : TEXCOORD1,
+	in float2 TextureCoordinate : TEXCOORD0,
+	in float4 Color : TEXCOORD1,
+	in float4 HitProxyId : TEXCOORD2,
 	out float4 OutColor : SV_Target0
 )
 {
-    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, DestinationTextureCoordinate);
-    float4 cs;
-    GetSourcePixel(SourceTextureCoordinate, cs);
-
+    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, TextureCoordinate);
+    float4 cs = SourceTexture.Sample(SourceTextureSampler, TextureCoordinate);
     float3 blendComponents = float3(
         BlendColorDodge(cb.x, cs.x),
         BlendColorDodge(cb.y, cs.y),
@@ -529,16 +488,14 @@ void BlendColorDodgePS(
 }
 
 void BlendAddPS(
-    float4 InPosition : SV_Position,
-	float2 SourceTextureCoordinate : TEXCOORD0,
-    float2 DestinationTextureCoordinate : TEXCOORD1,
+	in float2 TextureCoordinate : TEXCOORD0,
+	in float4 Color : TEXCOORD1,
+	in float4 HitProxyId : TEXCOORD2,
 	out float4 OutColor : SV_Target0
 )
 {
-    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, DestinationTextureCoordinate);
-    float4 cs;
-    GetSourcePixel(SourceTextureCoordinate, cs);
-
+    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, TextureCoordinate);
+    float4 cs = SourceTexture.Sample(SourceTextureSampler, TextureCoordinate);
     float3 blendComponents = float3(
         BlendAdd(cb.x, cs.x),
         BlendAdd(cb.y, cs.y),
@@ -548,16 +505,14 @@ void BlendAddPS(
 }
 
 void BlendLinearDodgePS(
-    float4 InPosition : SV_Position,
-	float2 SourceTextureCoordinate : TEXCOORD0,
-    float2 DestinationTextureCoordinate : TEXCOORD1,
+	in float2 TextureCoordinate : TEXCOORD0,
+	in float4 Color : TEXCOORD1,
+	in float4 HitProxyId : TEXCOORD2,
 	out float4 OutColor : SV_Target0
 )
 {
-    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, DestinationTextureCoordinate);
-    float4 cs;
-    GetSourcePixel(SourceTextureCoordinate, cs);
-
+    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, TextureCoordinate);
+    float4 cs = SourceTexture.Sample(SourceTextureSampler, TextureCoordinate);
     float3 blendComponents = float3(
         BlendLinearDodge(cb.x, cs.x),
         BlendLinearDodge(cb.y, cs.y),
@@ -567,16 +522,14 @@ void BlendLinearDodgePS(
 }
 
 void BlendSoftLightPS(
-    float4 InPosition : SV_Position,
-	float2 SourceTextureCoordinate : TEXCOORD0,
-    float2 DestinationTextureCoordinate : TEXCOORD1,
+	in float2 TextureCoordinate : TEXCOORD0,
+	in float4 Color : TEXCOORD1,
+	in float4 HitProxyId : TEXCOORD2,
 	out float4 OutColor : SV_Target0
 )
 {
-    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, DestinationTextureCoordinate);
-    float4 cs;
-    GetSourcePixel(SourceTextureCoordinate, cs);
-
+    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, TextureCoordinate);
+    float4 cs = SourceTexture.Sample(SourceTextureSampler, TextureCoordinate);
     float3 blendComponents = float3(
         BlendSoftLight(cb.x, cs.x),
         BlendSoftLight(cb.y, cs.y),
@@ -586,16 +539,14 @@ void BlendSoftLightPS(
 }
 
 void BlendLinearBurnPS(
-    float4 InPosition : SV_Position,
-	float2 SourceTextureCoordinate : TEXCOORD0,
-    float2 DestinationTextureCoordinate : TEXCOORD1,
+	in float2 TextureCoordinate : TEXCOORD0,
+	in float4 Color : TEXCOORD1,
+	in float4 HitProxyId : TEXCOORD2,
 	out float4 OutColor : SV_Target0
 )
 {
-    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, DestinationTextureCoordinate);
-    float4 cs;
-    GetSourcePixel(SourceTextureCoordinate, cs);
-
+    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, TextureCoordinate);
+    float4 cs = SourceTexture.Sample(SourceTextureSampler, TextureCoordinate);
     float3 blendComponents = float3(
         BlendLinearBurn(cb.x, cs.x),
         BlendLinearBurn(cb.y, cs.y),
@@ -605,16 +556,14 @@ void BlendLinearBurnPS(
 }
 
 void BlendHardLightPS(
-    float4 InPosition : SV_Position,
-	float2 SourceTextureCoordinate : TEXCOORD0,
-    float2 DestinationTextureCoordinate : TEXCOORD1,
+	in float2 TextureCoordinate : TEXCOORD0,
+	in float4 Color : TEXCOORD1,
+	in float4 HitProxyId : TEXCOORD2,
 	out float4 OutColor : SV_Target0
 )
 {
-    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, DestinationTextureCoordinate);
-    float4 cs;
-    GetSourcePixel(SourceTextureCoordinate, cs);
-
+    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, TextureCoordinate);
+    float4 cs = SourceTexture.Sample(SourceTextureSampler, TextureCoordinate);
     float3 blendComponents = float3(
         BlendHardLight(cb.x, cs.x),
         BlendHardLight(cb.y, cs.y),
@@ -624,16 +573,14 @@ void BlendHardLightPS(
 }
 
 void BlendOverlayPS(
-    float4 InPosition : SV_Position,
-	float2 SourceTextureCoordinate : TEXCOORD0,
-    float2 DestinationTextureCoordinate : TEXCOORD1,
+	in float2 TextureCoordinate : TEXCOORD0,
+	in float4 Color : TEXCOORD1,
+	in float4 HitProxyId : TEXCOORD2,
 	out float4 OutColor : SV_Target0
 )
 {
-    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, DestinationTextureCoordinate);
-    float4 cs;
-    GetSourcePixel(SourceTextureCoordinate, cs);
-
+    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, TextureCoordinate);
+    float4 cs = SourceTexture.Sample(SourceTextureSampler, TextureCoordinate);
     float3 blendComponents = float3(
         BlendOverlay(cb.x, cs.x),
         BlendOverlay(cb.y, cs.y),
@@ -643,16 +590,14 @@ void BlendOverlayPS(
 }
 
 void BlendVividLightPS(
-    float4 InPosition : SV_Position,
-	float2 SourceTextureCoordinate : TEXCOORD0,
-    float2 DestinationTextureCoordinate : TEXCOORD1,
+	in float2 TextureCoordinate : TEXCOORD0,
+	in float4 Color : TEXCOORD1,
+	in float4 HitProxyId : TEXCOORD2,
 	out float4 OutColor : SV_Target0
 )
 {
-    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, DestinationTextureCoordinate);
-    float4 cs;
-    GetSourcePixel(SourceTextureCoordinate, cs);
-
+    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, TextureCoordinate);
+    float4 cs = SourceTexture.Sample(SourceTextureSampler, TextureCoordinate);
     float3 blendComponents = float3(
         BlendVividLight(cb.x, cs.x),
         BlendVividLight(cb.y, cs.y),
@@ -662,16 +607,14 @@ void BlendVividLightPS(
 }
 
 void BlendLinearLightPS(
-    float4 InPosition : SV_Position,
-	float2 SourceTextureCoordinate : TEXCOORD0,
-    float2 DestinationTextureCoordinate : TEXCOORD1,
+	in float2 TextureCoordinate : TEXCOORD0,
+	in float4 Color : TEXCOORD1,
+	in float4 HitProxyId : TEXCOORD2,
 	out float4 OutColor : SV_Target0
 )
 {
-    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, DestinationTextureCoordinate);
-    float4 cs;
-    GetSourcePixel(SourceTextureCoordinate, cs);
-
+    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, TextureCoordinate);
+    float4 cs = SourceTexture.Sample(SourceTextureSampler, TextureCoordinate);
     float3 blendComponents = float3(
         BlendLinearLight(cb.x, cs.x),
         BlendLinearLight(cb.y, cs.y),
@@ -681,16 +624,14 @@ void BlendLinearLightPS(
 }
 
 void BlendPinLightPS(
-    float4 InPosition : SV_Position,
-	float2 SourceTextureCoordinate : TEXCOORD0,
-    float2 DestinationTextureCoordinate : TEXCOORD1,
+	in float2 TextureCoordinate : TEXCOORD0,
+	in float4 Color : TEXCOORD1,
+	in float4 HitProxyId : TEXCOORD2,
 	out float4 OutColor : SV_Target0
 )
 {
-    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, DestinationTextureCoordinate);
-    float4 cs;
-    GetSourcePixel(SourceTextureCoordinate, cs);
-
+    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, TextureCoordinate);
+    float4 cs = SourceTexture.Sample(SourceTextureSampler, TextureCoordinate);
     float3 blendComponents = float3(
         BlendPinLight(cb.x, cs.x),
         BlendPinLight(cb.y, cs.y),
@@ -700,16 +641,14 @@ void BlendPinLightPS(
 }
 
 void BlendHardMixPS(
-    float4 InPosition : SV_Position,
-	float2 SourceTextureCoordinate : TEXCOORD0,
-    float2 DestinationTextureCoordinate : TEXCOORD1,
+	in float2 TextureCoordinate : TEXCOORD0,
+	in float4 Color : TEXCOORD1,
+	in float4 HitProxyId : TEXCOORD2,
 	out float4 OutColor : SV_Target0
 )
 {
-    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, DestinationTextureCoordinate);
-    float4 cs;
-    GetSourcePixel(SourceTextureCoordinate, cs);
-
+    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, TextureCoordinate);
+    float4 cs = SourceTexture.Sample(SourceTextureSampler, TextureCoordinate);
     float3 blendComponents = float3(
         BlendHardMix(cb.x, cs.x),
         BlendHardMix(cb.y, cs.y),
@@ -719,16 +658,14 @@ void BlendHardMixPS(
 }
 
 void BlendDifferencePS(
-    float4 InPosition : SV_Position,
-	float2 SourceTextureCoordinate : TEXCOORD0,
-    float2 DestinationTextureCoordinate : TEXCOORD1,
+	in float2 TextureCoordinate : TEXCOORD0,
+	in float4 Color : TEXCOORD1,
+	in float4 HitProxyId : TEXCOORD2,
 	out float4 OutColor : SV_Target0
 )
 {
-    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, DestinationTextureCoordinate);
-    float4 cs;
-    GetSourcePixel(SourceTextureCoordinate, cs);
-
+    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, TextureCoordinate);
+    float4 cs = SourceTexture.Sample(SourceTextureSampler, TextureCoordinate);
     float3 blendComponents = float3(
         BlendDifference(cb.x, cs.x),
         BlendDifference(cb.y, cs.y),
@@ -738,16 +675,14 @@ void BlendDifferencePS(
 }
 
 void BlendExclusionPS(
-    float4 InPosition : SV_Position,
-	float2 SourceTextureCoordinate : TEXCOORD0,
-    float2 DestinationTextureCoordinate : TEXCOORD1,
+	in float2 TextureCoordinate : TEXCOORD0,
+	in float4 Color : TEXCOORD1,
+	in float4 HitProxyId : TEXCOORD2,
 	out float4 OutColor : SV_Target0
 )
 {
-    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, DestinationTextureCoordinate);
-    float4 cs;
-    GetSourcePixel(SourceTextureCoordinate, cs);
-
+    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, TextureCoordinate);
+    float4 cs = SourceTexture.Sample(SourceTextureSampler, TextureCoordinate);
     float3 blendComponents = float3(
         BlendExclusion(cb.x, cs.x),
         BlendExclusion(cb.y, cs.y),
@@ -757,16 +692,14 @@ void BlendExclusionPS(
 }
 
 void BlendSubstractPS(
-    float4 InPosition : SV_Position,
-	float2 SourceTextureCoordinate : TEXCOORD0,
-    float2 DestinationTextureCoordinate : TEXCOORD1,
+	in float2 TextureCoordinate : TEXCOORD0,
+	in float4 Color : TEXCOORD1,
+	in float4 HitProxyId : TEXCOORD2,
 	out float4 OutColor : SV_Target0
 )
 {
-    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, DestinationTextureCoordinate);
-    float4 cs;
-    GetSourcePixel(SourceTextureCoordinate, cs);
-
+    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, TextureCoordinate);
+    float4 cs = SourceTexture.Sample(SourceTextureSampler, TextureCoordinate);
     float3 blendComponents = float3(
         BlendSubstract(cb.x, cs.x),
         BlendSubstract(cb.y, cs.y),
@@ -776,16 +709,14 @@ void BlendSubstractPS(
 }
 
 void BlendDividePS(
-    float4 InPosition : SV_Position,
-	float2 SourceTextureCoordinate : TEXCOORD0,
-    float2 DestinationTextureCoordinate : TEXCOORD1,
+	in float2 TextureCoordinate : TEXCOORD0,
+	in float4 Color : TEXCOORD1,
+	in float4 HitProxyId : TEXCOORD2,
 	out float4 OutColor : SV_Target0
 )
 {
-    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, DestinationTextureCoordinate);
-    float4 cs;
-    GetSourcePixel(SourceTextureCoordinate, cs);
-
+    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, TextureCoordinate);
+    float4 cs = SourceTexture.Sample(SourceTextureSampler, TextureCoordinate);
     float3 blendComponents = float3(
         BlendDivide(cb.x, cs.x),
         BlendDivide(cb.y, cs.y),
@@ -795,16 +726,14 @@ void BlendDividePS(
 }
 
 void BlendPhoenixPS(
-    float4 InPosition : SV_Position,
-	float2 SourceTextureCoordinate : TEXCOORD0,
-    float2 DestinationTextureCoordinate : TEXCOORD1,
+	in float2 TextureCoordinate : TEXCOORD0,
+	in float4 Color : TEXCOORD1,
+	in float4 HitProxyId : TEXCOORD2,
 	out float4 OutColor : SV_Target0
 )
 {
-    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, DestinationTextureCoordinate);
-    float4 cs;
-    GetSourcePixel(SourceTextureCoordinate, cs);
-
+    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, TextureCoordinate);
+    float4 cs = SourceTexture.Sample(SourceTextureSampler, TextureCoordinate);
     float3 blendComponents = float3(
         BlendPhoenix(cb.x, cs.x),
         BlendPhoenix(cb.y, cs.y),
@@ -814,16 +743,14 @@ void BlendPhoenixPS(
 }
 
 void BlendReflectPS(
-    float4 InPosition : SV_Position,
-	float2 SourceTextureCoordinate : TEXCOORD0,
-    float2 DestinationTextureCoordinate : TEXCOORD1,
+	in float2 TextureCoordinate : TEXCOORD0,
+	in float4 Color : TEXCOORD1,
+	in float4 HitProxyId : TEXCOORD2,
 	out float4 OutColor : SV_Target0
 )
 {
-    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, DestinationTextureCoordinate);
-    float4 cs;
-    GetSourcePixel(SourceTextureCoordinate, cs);
-
+    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, TextureCoordinate);
+    float4 cs = SourceTexture.Sample(SourceTextureSampler, TextureCoordinate);
     float3 blendComponents = float3(
         BlendReflect(cb.x, cs.x),
         BlendReflect(cb.y, cs.y),
@@ -833,16 +760,14 @@ void BlendReflectPS(
 }
 
 void BlendGlowPS(
-    float4 InPosition : SV_Position,
-	float2 SourceTextureCoordinate : TEXCOORD0,
-    float2 DestinationTextureCoordinate : TEXCOORD1,
+	in float2 TextureCoordinate : TEXCOORD0,
+	in float4 Color : TEXCOORD1,
+	in float4 HitProxyId : TEXCOORD2,
 	out float4 OutColor : SV_Target0
 )
 {
-    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, DestinationTextureCoordinate);
-    float4 cs;
-    GetSourcePixel(SourceTextureCoordinate, cs);
-
+    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, TextureCoordinate);
+    float4 cs = SourceTexture.Sample(SourceTextureSampler, TextureCoordinate);
     float3 blendComponents = float3(
         BlendGlow(cb.x, cs.x),
         BlendGlow(cb.y, cs.y),
@@ -852,74 +777,71 @@ void BlendGlowPS(
 }
 
 void BlendHuePS(
-    float4 InPosition : SV_Position,
-	float2 SourceTextureCoordinate : TEXCOORD0,
-    float2 DestinationTextureCoordinate : TEXCOORD1,
+	in float2 TextureCoordinate : TEXCOORD0,
+	in float4 Color : TEXCOORD1,
+	in float4 HitProxyId : TEXCOORD2,
 	out float4 OutColor : SV_Target0
 )
 {
-    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, DestinationTextureCoordinate);
-    float4 cs;
-    GetSourcePixel(SourceTextureCoordinate, cs);
+    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, TextureCoordinate);
+    float4 cs = SourceTexture.Sample(SourceTextureSampler, TextureCoordinate);
     float3 cb3 = float3(cb.x, cb.y, cb.z);
     float3 cs3 = float3(cs.x, cs.y, cs.z);
     OutColor = Blend(cb, cs, BlendHue(cb3, cs3));
 }
 
 void BlendSaturationPS(
-    float4 InPosition : SV_Position,
-	float2 SourceTextureCoordinate : TEXCOORD0,
-    float2 DestinationTextureCoordinate : TEXCOORD1,
+	in float2 TextureCoordinate : TEXCOORD0,
+	in float4 Color : TEXCOORD1,
+	in float4 HitProxyId : TEXCOORD2,
 	out float4 OutColor : SV_Target0
 )
 {
-    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, DestinationTextureCoordinate);
-    float4 cs;
-    GetSourcePixel(SourceTextureCoordinate, cs);
+    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, TextureCoordinate);
+    float4 cs = SourceTexture.Sample(SourceTextureSampler, TextureCoordinate);
     float3 cb3 = float3(cb.x, cb.y, cb.z);
     float3 cs3 = float3(cs.x, cs.y, cs.z);
     OutColor = Blend(cb, cs, BlendSaturation(cb3, cs3));
 }
 
 void BlendColorPS(
-    float4 InPosition : SV_Position,
-	float2 SourceTextureCoordinate : TEXCOORD0,
-    float2 DestinationTextureCoordinate : TEXCOORD1,
+	in float2 TextureCoordinate : TEXCOORD0,
+	in float4 Color : TEXCOORD1,
+	in float4 HitProxyId : TEXCOORD2,
 	out float4 OutColor : SV_Target0
 )
 {
-    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, DestinationTextureCoordinate);
-    float4 cs;
-    GetSourcePixel(SourceTextureCoordinate, cs);
+    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, TextureCoordinate);
+    float4 cs = SourceTexture.Sample(SourceTextureSampler, TextureCoordinate);
     float3 cb3 = float3(cb.x, cb.y, cb.z);
     float3 cs3 = float3(cs.x, cs.y, cs.z);
     OutColor = Blend(cb, cs, BlendColor(cb3, cs3));
 }
 
 void BlendLuminosityPS(
-    float4 InPosition : SV_Position,
-	float2 SourceTextureCoordinate : TEXCOORD0,
-    float2 DestinationTextureCoordinate : TEXCOORD1,
+	in float2 TextureCoordinate : TEXCOORD0,
+	in float4 Color : TEXCOORD1,
+	in float4 HitProxyId : TEXCOORD2,
 	out float4 OutColor : SV_Target0
 )
 {
-    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, DestinationTextureCoordinate);
-    float4 cs;
-    GetSourcePixel(SourceTextureCoordinate, cs);
+    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, TextureCoordinate);
+    float4 cs = SourceTexture.Sample(SourceTextureSampler, TextureCoordinate);
     float3 cb3 = float3(cb.x, cb.y, cb.z);
     float3 cs3 = float3(cs.x, cs.y, cs.z);
     OutColor = Blend(cb, cs, BlendLuminosity(cb3, cs3));
 }
 
-void MainVS(
-	float4 InVertexPosition : ATTRIBUTE0,
-	float2 InSourceTextureCoordinates : ATTRIBUTE2,
-	out float4 OutVertexPosition : SV_POSITION,
-	out float2 OutSourceTextureCoordinate: TEXCOORD0,
-	out float2 OutDestinationTextureCoordinate : TEXCOORD1
+/* void MainVS(
+    float4 InLargeWorldCoordinatesHigh: ATTRIBUTE0,
+    float4 InLargeWorldCoordinatesLow: ATTRIBUTE1,
+    float2 InTextureCoordinate: ATTRIBUTE2,
+    float4 InColor: ATTRIBUTE3,
+    //float4 InHitProxyIdColor: ATTRIBUTE4,
+    out float4 OutVertexCoord: SV_POSITION,
+    out float2 OutTexCoord : TEXCOORD0
 )
 {
-    OutVertexPosition = InVertexPosition;
-    OutSourceTextureCoordinate = InSourceTextureCoordinates;
-    OutDestinationTextureCoordinate = float2((InVertexPosition.x + 1.f) / 2.f, 1.0f - (InVertexPosition.y + 1.f) / 2.f );
-}
+    OutVertexCoord = float4(InLargeWorldCoordinatesHigh.x * 2.f - 1.0f, (1.0f - InLargeWorldCoordinatesHigh.y) * 2.f - 1.0f, InLargeWorldCoordinatesHigh.z, InLargeWorldCoordinatesHigh.w);
+    OutTexCoord = InTextureCoordinate;
+} */

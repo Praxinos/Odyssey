@@ -9,8 +9,9 @@
 #include "RenderGraphBuilder.h"
 #include "OdysseyCanvasUtils.h"
 #include "TextureCompiler.h"
+#include "SimpleElementShaders.h"
 
-class FOdysseyBlendShaderVS : public FGlobalShader
+/* class FOdysseyBlendShaderVS : public FGlobalShader
 {
     DECLARE_SHADER_TYPE(FOdysseyBlendShaderVS, Global);
 public:
@@ -20,10 +21,8 @@ public:
         return IsFeatureLevelSupported(Parameters.Platform, ERHIFeatureLevel::SM5) && !IsConsolePlatform(Parameters.Platform);
     }
 
-    /** Default constructor. */
     FOdysseyBlendShaderVS() {}
 
-    /** Initialization constructor. */
     FOdysseyBlendShaderVS(const ShaderMetaType::CompiledShaderInitializerType& Initializer)
         : FGlobalShader(Initializer)
     {
@@ -32,7 +31,7 @@ public:
     void SetParameters(FRHIBatchedShaderParameters& BatchedParameters)
     {
     }
-};
+}; */
 
 
 template<EOdysseyBlendingMode tBlendMode>
@@ -51,7 +50,7 @@ public:
     }
 };
 
-IMPLEMENT_SHADER_TYPE(, FOdysseyBlendShaderVS, TEXT("/Plugins/Odyssey/Private/OdysseyBlend.usf"), TEXT("MainVS"), SF_Vertex)
+//IMPLEMENT_SHADER_TYPE(, FOdysseyBlendShaderVS, TEXT("/Plugins/Odyssey/Private/OdysseyBlend.usf"), TEXT("MainVS"), SF_Vertex)
 
 IMPLEMENT_SHADER_TYPE(, TOdysseyBlendShaderPS<EOdysseyBlendingMode::kNormal>, TEXT("/Plugins/Odyssey/Private/OdysseyBlend.usf"), TEXT("BlendNormalPS"), SF_Pixel)
 IMPLEMENT_SHADER_TYPE(, TOdysseyBlendShaderPS<EOdysseyBlendingMode::kTop>, TEXT("/Plugins/Odyssey/Private/OdysseyBlend.usf"), TEXT("BlendTopPS"), SF_Pixel)
@@ -92,8 +91,8 @@ TGlobalResource< FSimpleElementVertexDeclaration > GBlendVertexDeclaration;
 void FOdysseyBlendShader::Execute(
     FRDGBuilder& iGraphBuilder,
     ERHIFeatureLevel::Type iFeatureLevel,
-    FTexture* iSourceTexture,
-    FTexture* iDestinationTexture,
+    FRDGTextureRef iSourceTexture,
+    FRDGTextureRef iDestinationTexture,
 
     FVector2D iPositionInDestination,
     FVector2D iPositionInSource,
@@ -108,31 +107,21 @@ void FOdysseyBlendShader::Execute(
     EOdysseyAntiAliasing iAntiAliasing
 )
 {
-    //Register Textures in iGraphBuilder
-    FRDGTextureRef sourceTexture = iGraphBuilder.RegisterExternalTexture(CreateRenderTarget(iSourceTexture->TextureRHI, TEXT("Odyssey::Blend::SourceTexture")));
-    FRDGTextureRef destinationTexture = iGraphBuilder.RegisterExternalTexture(CreateRenderTarget(iDestinationTexture->TextureRHI, TEXT("Odyssey::Blend::DestinationTexture")));
-
     //Retrieve Anti Aliasing Sampler State
     FSamplerStateRHIRef samplerStateRHI = Odyssey::GetSamplerStateForAntiAliasing(iAntiAliasing);
-
-    //Ensure Source Texture Coordinates will stay in Source Texture Boundaries
-    FVector2D sourceSize(
-        FMath::Clamp(iSizeInSource.X, 0.f, FMath::Max(0.f, iSourceTexture->GetSizeX() - iPositionInSource.X)),
-        FMath::Clamp(iSizeInSource.Y, 0.f, FMath::Max(0.f, iSourceTexture->GetSizeY() - iPositionInSource.Y))
-    );
 
     FVector2D scaledSourceSize = iSizeInSource * iScale;
 
     //Alloc Shader Parameters
     FOdysseyBlendShaderParameters* shaderParameters = iGraphBuilder.AllocParameters<FOdysseyBlendShaderParameters>();
 
-    shaderParameters->SourceTexture = sourceTexture;
+    shaderParameters->SourceTexture = iSourceTexture;
     shaderParameters->SourceTextureSampler = samplerStateRHI;
-    shaderParameters->DestinationTexture = destinationTexture;
+    shaderParameters->DestinationTexture = iDestinationTexture;
     shaderParameters->DestinationTextureSampler = samplerStateRHI;
 
     shaderParameters->SourcePosition = FVector2f(iPositionInSource.X, iPositionInSource.Y);
-    shaderParameters->SourceSize = FVector2f(sourceSize.X, sourceSize.Y);
+    shaderParameters->SourceSize = FVector2f(iSizeInSource.X, iSizeInSource.Y);
     shaderParameters->DestinationPosition = FVector2f(iPositionInDestination.X, iPositionInDestination.Y);
     shaderParameters->DestinationSize = FVector2f(scaledSourceSize.X, scaledSourceSize.Y);
 
@@ -142,22 +131,22 @@ void FOdysseyBlendShader::Execute(
     TRefCountPtr< FOdysseyBlendShader > blendShader(new FOdysseyBlendShader(shaderParameters, iBlendMode));
 
     //Create a Canvas to draw with the shader
-    FCanvas* canvas = FCanvas::Create(iGraphBuilder, destinationTexture, nullptr, FGameTime(), iFeatureLevel);
+    FCanvas* canvas = FCanvas::Create(iGraphBuilder, iDestinationTexture, nullptr, FGameTime(), iFeatureLevel);
 
     //Draw a Quad
-    Odyssey::CanvasUtils::DrawTransformedQuad(
+    /*Odyssey::CanvasUtils::DrawTransformedQuad(
         canvas,
         blendShader,
         iPositionInDestination,
-        sourceSize,
+        iSizeInSource,
         iSourceHandlePosition,
         iScale,
         iRotationInDegrees,
-        FVector2D(iDestinationTexture->GetSizeX(), iDestinationTexture->GetSizeY())
+        FVector2D(iDestinationTexture->Desc.GetSize().X, iDestinationTexture->Desc.GetSize().Y)
     );
 
     //Ask the canvas to initiate rendering of the quad
-    canvas->Flush_RenderThread(iGraphBuilder);
+    canvas->Flush_RenderThread(iGraphBuilder, true); */
 }
 
 FOdysseyBlendShader::FOdysseyBlendShader(FOdysseyBlendShaderParameters* iPixelShaderParams, EOdysseyBlendingMode iBlendMode)
@@ -169,28 +158,17 @@ FOdysseyBlendShader::FOdysseyBlendShader(FOdysseyBlendShaderParameters* iPixelSh
 void
 FOdysseyBlendShader::BindShaders(FRHICommandList& RHICmdList, FGraphicsPipelineStateInitializer& GraphicsPSOInit, ERHIFeatureLevel::Type InFeatureLevel, const FMatrix& InTransform, const float InGamma, const FMatrix& ColorWeights, const FTexture* Texture)
 {
-    FRHIBlendState* BlendState = TStaticBlendState<>::GetRHI();
-    FRHIDepthStencilState* DepthStencilState = TStaticDepthStencilState<false, CF_Always>::GetRHI();
-    FRHIRasterizerState* RasterizerState = TStaticRasterizerState<FM_Solid, CM_None>::GetRHI();
-
 #define BINDSHADERS_BLENDMODE(BLENDMODE)                                                                                    \
-    TShaderMapRef< FOdysseyBlendShaderVS > VertexShader(GetGlobalShaderMap(InFeatureLevel));                                \
+    TShaderMapRef< FSimpleElementVS > VertexShader(GetGlobalShaderMap(InFeatureLevel));                                     \
     TShaderMapRef< TOdysseyBlendShaderPS< BLENDMODE > > PixelShader(GetGlobalShaderMap(InFeatureLevel));                    \
-                                                                                                                            \
-    GraphicsPSOInit.BlendState = BlendState;                                                                                \
-    GraphicsPSOInit.RasterizerState = RasterizerState;                                                                      \
-    GraphicsPSOInit.DepthStencilState = DepthStencilState;                                                                  \
     GraphicsPSOInit.BoundShaderState.VertexDeclarationRHI = GBlendVertexDeclaration.VertexDeclarationRHI;                   \
     GraphicsPSOInit.BoundShaderState.VertexShaderRHI = VertexShader.GetVertexShader();                                      \
     GraphicsPSOInit.BoundShaderState.PixelShaderRHI = PixelShader.GetPixelShader();                                         \
     GraphicsPSOInit.PrimitiveType = PT_TriangleList;                                                                        \
-                                                                                                                            \
-    SetGraphicsPipelineState(RHICmdList, GraphicsPSOInit, 0, EApplyRendertargetOption::ForceApply);                         \
-                                                                                                                            \
-    SetShaderParametersLegacyVS(RHICmdList, VertexShader );                                                                 \
+    GraphicsPSOInit.BlendState = TStaticBlendState<>::GetRHI();                                                             \
+    SetGraphicsPipelineState(RHICmdList, GraphicsPSOInit, 0, EApplyRendertargetOption::CheckApply);                         \
+    SetShaderParametersLegacyVS(RHICmdList, VertexShader, InTransform );                                                    \
     SetShaderParameters(RHICmdList, PixelShader, PixelShader.GetPixelShader(), *mPixelShaderParams);
-
-    //SetShaderParametersLegacyPS(RHICmdList, PixelShader );
 
     switch (mBlendMode)
     {

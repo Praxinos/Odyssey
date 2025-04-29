@@ -27,12 +27,6 @@ UOdysseyAnimationLayerRoot::PostLoad()
     //mProxy->PostLoad();
 }
 
-void
-UOdysseyAnimationLayerRoot::RenderToTexture(FCanvas* iCanvas, FFrameNumber iFrame, const FIntRect& iSrcRect, const FIntRect& iDstRect) const
-{
-
-}
-
 /* TSharedPtr<FOdysseyAnimationProxy>
 UOdysseyAnimationLayerRoot::GetProxy() const
 {

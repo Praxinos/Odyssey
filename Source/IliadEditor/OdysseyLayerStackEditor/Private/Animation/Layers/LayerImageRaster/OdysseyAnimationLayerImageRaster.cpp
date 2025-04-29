@@ -353,11 +353,4 @@ UOdysseyAnimationLayerImageRaster::IsAlphaLockedBlueprintSetter(bool Value)
     FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayerImageRaster, IsAlphaLocked), Value);
 }
 
-void
-UOdysseyAnimationLayerImageRaster::RenderToTexture(FCanvas* iCanvas, FFrameNumber iFrame, const FIntRect& iSrcRect, const FIntRect& iDstRect) const
-{
-
-}
-
-
 #undef LOCTEXT_NAMESPACE

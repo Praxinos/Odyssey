@@ -35,7 +35,7 @@ UOdysseyAnimationPlayer::PostInitProperties()
         return;
 
     RenderTarget = NewObject<UTextureRenderTarget2D>(this, NAME_None, RF_Public | RF_Transient);
-    RenderTarget->RenderTargetFormat = RTF_RGBA8;
+    RenderTarget->RenderTargetFormat = RTF_RGBA16f;
     RenderTarget->UpdateResource();
 }
 
@@ -390,10 +390,12 @@ UOdysseyAnimationPlayer::UpdateTexture()
 
     if (!mInvalidTileMap.InvalidTiles().IsEmpty())
     {
-        for (const FIntRect& rect : mInvalidTileMap.InvalidRects())
+        TArray<FIntRect> invalidTiles = mInvalidTileMap.InvalidRects();
+        for (const FIntRect& rect : invalidTiles)
         {
             IOdysseyTextureRenderingAbility::Execute_RenderRect(Animation, RenderTarget, frame.GetFrame(), rect);
         }
+        //IOdysseyTextureRenderingAbility::Execute_Render(Animation, RenderTarget, frame.GetFrame());
 
         mInvalidTileMap.Clear();
     }
