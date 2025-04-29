@@ -26,6 +26,8 @@ FOdysseyPainterEditorGlobalShortcuts::FOdysseyPainterEditorGlobalShortcuts(FOdys
 
 void FOdysseyPainterEditorGlobalShortcuts::MapActionsToCommandList(TSharedRef<FUICommandList> iCommandList)
 {
+    FOdysseyEditorShortcuts::MapActionsToCommandList(iCommandList);
+
     if (!mEditor)
         return;
 

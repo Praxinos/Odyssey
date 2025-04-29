@@ -257,15 +257,19 @@ UOdysseyLayerCell::BuildRenderPipeline(
 
         FRDGTextureRef sourceTexture = iGraphBuilder.RegisterExternalTexture(CreateRenderTarget(Texture->GetResource()->TextureRHI, TEXT("UOdysseyLayerCell::sourceTexture")));
 
-        AddDrawTexturePass(
+        FOdysseyBlendShader::BlendRect(
             iGraphBuilder,
-            FScreenPassViewInfo(),
+            iFeatureLevel,
+            iDestinationTexture,
             sourceTexture,
             iDestinationTexture,
-            iSrcRect.Min,
-            iSrcRect.Size(),
-            iDstRect.Min,
-            iDstRect.Size()
+            iSrcRect,
+            iDstRect,
+            iType == EOdysseyRenderingType::RenderOutOfPegs ? OutOfPegsTransform() * iSrcTransform : iSrcTransform,
+            EOdysseyBlendingMode::kNormal,
+            EOdysseyAlphaMode::kNormal,
+            1.f,
+            EOdysseyAntiAliasing::AnisotropicLinear
         );
     };
 
