@@ -7,6 +7,7 @@
 #include "Misc/TransactionObjectEvent.h"
 #include "ScreenPass.h"
 #include "TextureCompiler.h"
+#include "OdysseyBlendShader.h"
 
 UOdysseyLayer*
 UOdysseyLayerCell::GetLayer() const
@@ -104,12 +105,15 @@ UOdysseyLayerCell::SetExposure(int Value)
 UTexture2D*
 UOdysseyLayerCell::GetRenderTexture() const
 {
+#if WITH_EDITOR
     if (!Texture)
         const_cast<UOdysseyLayerCell*>(this)->InitTexture();
+#endif
 
     return Texture;
 }
 
+#if WITH_EDITOR
 void
 UOdysseyLayerCell::InitTexture()
 {
@@ -122,7 +126,6 @@ UOdysseyLayerCell::InitTexture()
     }
 }
 
-#if WITH_EDITOR
 void
 UOdysseyLayerCell::SetExposureInteractive(int Value)
 {
@@ -290,6 +293,12 @@ UOdysseyLayerCell::BuildRenderPipelineInternal(
 
         FRDGTextureRef sourceTexture = iGraphBuilder.RegisterExternalTexture(CreateRenderTarget(Texture->GetResource()->TextureRHI, TEXT("UOdysseyLayerCell::sourceTexture")));
 
+        FMatrix transform = iSrcTransform;
+#if WITH_EDITOR
+        if ( iType & EOdysseyRenderingType::OutOfPegs )
+            transform = OutOfPegsTransform() * iSrcTransform;
+#endif
+
         FOdysseyBlendShader::BlendRect(
             iGraphBuilder,
             iFeatureLevel,
@@ -298,7 +307,7 @@ UOdysseyLayerCell::BuildRenderPipelineInternal(
             iDestinationTexture,
             iSrcRect,
             iDstRect,
-            iType & EOdysseyRenderingType::OutOfPegs ? OutOfPegsTransform() * iSrcTransform : iSrcTransform,
+            transform,
             EOdysseyBlendingMode::kNormal,
             EOdysseyAlphaMode::kNormal,
             1.f,

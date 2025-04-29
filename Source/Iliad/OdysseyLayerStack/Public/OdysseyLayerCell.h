@@ -79,7 +79,6 @@ public:
 #endif
 
 public:
-    virtual void InitTexture();
     virtual bool BuildRenderPipelineInternal(
         FFrameNumber iFrame,
         uint64 iType,
@@ -89,6 +88,7 @@ public:
     ) const override;
 
 #if WITH_EDITOR
+    virtual void InitTexture();
     virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const;
 #endif
 

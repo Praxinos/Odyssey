@@ -6,6 +6,7 @@
 #include "RenderGraphBuilder.h"
 #include "RenderGraphUtils.h"
 #include "ScreenPass.h"
+#include "OdysseyAnimation.h"
 
 #if WITH_EDITOR
 #include "ULISLoaderModule.h"
@@ -14,7 +15,6 @@
 #include "OdysseyAnimationCellImageRasterImport.h"
 #include "OdysseyAnimationLayerImageRaster.h"
 #include "OdysseyRasterBlock.h"
-#include "OdysseyAnimation.h"
 #include "ULISUtils.h"
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "CanvasTypes.h"

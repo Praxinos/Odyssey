@@ -1116,6 +1116,7 @@ UOdysseyLayer::BuildRenderPipelineInternal(
 #endif
 }
 
+#if WITH_EDITOR
 bool
 UOdysseyLayer::BuildLighttableRenderPipeline(
     FFrameNumber iFrame,
@@ -1279,6 +1280,7 @@ UOdysseyLayer::BuildLighttableRenderPipeline(
 
     return true;
 }
+#endif
 
 bool
 UOdysseyLayer::BuildRenderChildrenPipeline(

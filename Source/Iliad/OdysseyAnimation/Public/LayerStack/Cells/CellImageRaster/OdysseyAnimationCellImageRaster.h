@@ -28,7 +28,9 @@ public:
 
 public:
     //IOdysseyRenderingAbility overrides
+#if WITH_EDITOR
     virtual void InitTexture() override;
+#endif
     virtual bool BuildRenderPipelineInternal(
         FFrameNumber iFrame,
         uint64 iType,

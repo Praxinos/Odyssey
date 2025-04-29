@@ -3,6 +3,7 @@
 
 #include "OdysseyAnimationCellImageVector.h"
 
+#include "OdysseyAnimation.h"
 #include "ScreenPass.h"
 
 #if WITH_EDITOR
@@ -15,7 +16,6 @@
 #include "OdysseyVector.h"
 #include "OdysseyMediaVector.h"
 #include "OdysseyVectorBlock.h"
-#include "OdysseyAnimation.h"
 // from module OdysseyFile
 #include "OdysseyFile.h"
 #include "OdysseySurfaceTexture2DEditable.h"
