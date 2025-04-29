@@ -413,7 +413,7 @@ UOdysseyAnimationPlayer::UpdateTexture()
     {
         mImageRenderingComposition = imageRenderingComposition;
 
-        Animation->Render_GameThread(RenderTarget, frame.GetFrame(), mRenderType);
+        Animation->Render_GameThread(RenderTarget, frame.GetFrame(), mRenderType );
         mInvalidTileMap.Clear();
         return;
     }
@@ -550,12 +550,12 @@ UOdysseyAnimationPlayer::SetIsLooping(bool iIsLooping)
 }
 
 void
-UOdysseyAnimationPlayer::SetRenderType(EOdysseyRenderingType iRenderType)
+UOdysseyAnimationPlayer::SetRenderType(uint64 iRenderType)
 {
     mRenderType = iRenderType;
 }
 
-EOdysseyRenderingType
+uint64
 UOdysseyAnimationPlayer::GetRenderType() const
 {
     return mRenderType;

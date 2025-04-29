@@ -122,10 +122,10 @@ public:
 #endif
 
 public:
-    virtual TArray<FGuid> GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrameIndex) const override;
+    virtual TArray<FGuid> GetRenderingComposition(uint64 iRenderType, int iFrameIndex) const override;
     virtual bool BuildRenderPipeline(
         FFrameNumber iFrame,
-        EOdysseyRenderingType iType,
+        uint64 iType,
         FOdysseyTextureRenderFunction& oRenderFunction
     ) const override;
     virtual FIntRect GetDefaultRenderRect() const override;

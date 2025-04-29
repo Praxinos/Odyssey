@@ -31,10 +31,10 @@ public:
 
     virtual bool BuildRenderPipeline(
         FFrameNumber iFrame,
-        EOdysseyRenderingType iType,
+        uint64 iType,
         FOdysseyTextureRenderFunction& oRenderFunction
     ) const override;
-    virtual TArray<FGuid> GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrameIndex) const override;
+    virtual TArray<FGuid> GetRenderingComposition(uint64 iRenderType, int iFrameIndex) const override;
     virtual FIntRect GetDefaultRenderRect() const override;
 
 #if WITH_EDITORONLY_DATA

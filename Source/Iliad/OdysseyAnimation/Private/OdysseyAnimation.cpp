@@ -112,7 +112,7 @@ UOdysseyAnimation::GetFrameIndexAtFrame(int iFrameIndex) const
 }
 
 TArray<FGuid>
-UOdysseyAnimation::GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrameIndex) const
+UOdysseyAnimation::GetRenderingComposition(uint64 iRenderType, int iFrameIndex) const
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyAnimation::GetRenderingComposition);
     TArray<FGuid> idComposition = { GetRenderingId() };
@@ -152,7 +152,7 @@ UOdysseyAnimation::GetDefaultRenderRect() const
 bool
 UOdysseyAnimation::BuildRenderPipeline(
     FFrameNumber iFrame,
-    EOdysseyRenderingType iType,
+    uint64 iType,
     FOdysseyTextureRenderFunction& oRenderFunction
 ) const
 {

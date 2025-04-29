@@ -3,9 +3,12 @@
 
 #pragma once
 
-enum class EOdysseyRenderingType
+namespace EOdysseyRenderingType
 {
-    Render, //renders only the expected final render result
-    RenderOutOfPegs,
-    Editor, //renders what is expected in an editor (can render the animation lighttable for example)
-};
+    enum Type
+    {
+        Render = 0, //renders only the expected final render result
+        Editor = 1 << 0, //renders what is expected in an editor (can render the animation lighttable for example)
+        OutOfPegs = 1 << 1, //explicitly asks to render the cells using their out of pegs transform
+    };
+}

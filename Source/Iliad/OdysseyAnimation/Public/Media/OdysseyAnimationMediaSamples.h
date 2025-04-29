@@ -40,8 +40,8 @@ private:
 public:
     void Render();
     void Update(int iFrameIndex, int64 iSequenceIndex);
-    EOdysseyRenderingType GetRenderType() const;
-    void SetRenderType(EOdysseyRenderingType iRenderType);
+    uint64 GetRenderType() const;
+    void SetRenderType(uint64 iRenderType);
 
 protected:
     // FTickableGameObject implementation
@@ -63,5 +63,5 @@ private:
     TArray<FGuid> mImageRenderingComposition;
     TStrongObjectPtr<UTextureRenderTarget2D> mRenderTarget; //PATCH: Needs to be in this class, otherwise gets destriyed on the wrong thread
     FOdysseyInvalidTileMap mInvalidTileMap;
-    EOdysseyRenderingType mRenderType = EOdysseyRenderingType::Render;
+    uint64 mRenderType = EOdysseyRenderingType::Render;
 };

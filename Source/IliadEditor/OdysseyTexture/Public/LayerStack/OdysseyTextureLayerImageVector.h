@@ -64,7 +64,7 @@ public:
 
 public:
     //IOdysseyRenderingAbility overrides
-    virtual TArray<FGuid> GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrame = 0) const override;
+    virtual TArray<FGuid> GetRenderingComposition(uint64 iRenderType, int iFrame = 0) const override;
 
 private:
     void OnVectorBlockInvalidated(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive);

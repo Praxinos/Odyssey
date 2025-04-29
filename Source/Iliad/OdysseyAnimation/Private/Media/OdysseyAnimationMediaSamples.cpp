@@ -38,14 +38,14 @@ FOdysseyAnimationMediaSamples::OnOpen(UOdysseyAnimation* iAnimation)
     mInvalidTileMap = FOdysseyInvalidTileMap(64, mAnimation->GetWidth(), mAnimation->GetHeight());
 }
 
-EOdysseyRenderingType
+uint64
 FOdysseyAnimationMediaSamples::GetRenderType() const
 {
     return mRenderType;
 }
 
 void
-FOdysseyAnimationMediaSamples::SetRenderType(EOdysseyRenderingType iRenderType)
+FOdysseyAnimationMediaSamples::SetRenderType(uint64 iRenderType)
 {
     if (!mAnimation)
         return;

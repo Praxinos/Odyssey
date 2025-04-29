@@ -52,14 +52,14 @@ public:
     void RenderRectAtRect_Implementation(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, const FIntRect& iSrcRect, const FIntRect& iDstRect) const;
 
 public:
-    void Render_GameThread(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, EOdysseyRenderingType iType) const;
-    void Render_GameThread(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, EOdysseyRenderingType iType, const FIntRect& iSrcRect) const;
-    void Render_GameThread(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, EOdysseyRenderingType iType, const FIntRect& iSrcRect, const FIntPoint& iPos) const;
-    void Render_GameThread(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, EOdysseyRenderingType iType, const FIntRect& iSrcRect, const FIntRect& iDstRect) const;
+    void Render_GameThread(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, uint64 iType) const;
+    void Render_GameThread(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, uint64 iType, const FIntRect& iSrcRect) const;
+    void Render_GameThread(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, uint64 iType, const FIntRect& iSrcRect, const FIntPoint& iPos) const;
+    void Render_GameThread(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, uint64 iType, const FIntRect& iSrcRect, const FIntRect& iDstRect) const;
 
     virtual bool BuildRenderPipeline(
         FFrameNumber iFrame,
-        EOdysseyRenderingType iType,
+        uint64 iType,
         FOdysseyTextureRenderFunction& oRenderFunction
     ) const = 0;
 };

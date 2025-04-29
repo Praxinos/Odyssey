@@ -123,7 +123,7 @@ UOdysseyLayerCellImageStagger::SetReach(int Value, bool IsInteractive)
 }
 
 TArray<FGuid>
-UOdysseyLayerCellImageStagger::GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrameIndex) const
+UOdysseyLayerCellImageStagger::GetRenderingComposition(uint64 iRenderType, int iFrameIndex) const
 {
     TArray<FGuid> idComposition = { GetRenderingId() };
 
@@ -177,7 +177,7 @@ UOdysseyLayerCellImageStagger::Break(int Frame, bool bClear)
 bool
 UOdysseyLayerCellImageStagger::BuildRenderPipeline(
     FFrameNumber iFrame,
-    EOdysseyRenderingType iType,
+    uint64 iType,
     FOdysseyTextureRenderFunction& oRenderFunction
 ) const
 {

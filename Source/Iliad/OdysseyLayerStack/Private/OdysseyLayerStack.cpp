@@ -677,7 +677,7 @@ UOdysseyLayerStack::SetIsSRGB(bool Value)
 bool
 UOdysseyLayerStack::BuildRenderPipeline(
     FFrameNumber iFrame,
-    EOdysseyRenderingType iType,
+    uint64 iType,
     FOdysseyTextureRenderFunction& oRenderFunction
 ) const
 {
@@ -685,7 +685,7 @@ UOdysseyLayerStack::BuildRenderPipeline(
 }
 
 TArray<FGuid>
-UOdysseyLayerStack::GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrameIndex) const
+UOdysseyLayerStack::GetRenderingComposition(uint64 iRenderType, int iFrameIndex) const
 {
     TArray<FGuid> idComposition = { GetRenderingId() };
 

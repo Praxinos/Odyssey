@@ -287,13 +287,13 @@ public:
 #endif
 
     virtual void PostInitProperties() override;
-    virtual TArray<FGuid> GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrame) const override;
+    virtual TArray<FGuid> GetRenderingComposition(uint64 iRenderType, int iFrame) const override;
     virtual FIntRect GetDefaultRenderRect() const override;
     virtual FInt32Range GetFrameRange() const override;
 
-    virtual bool BuildRenderPipeline(FFrameNumber iFrame, EOdysseyRenderingType iType, FOdysseyTextureRenderFunction& oRenderFunction) const override;
-    bool BuildRenderChildrenPipeline(FFrameNumber iFrame, EOdysseyRenderingType iType, FOdysseyTextureRenderFunction& oRenderFunction) const;
-    bool BuildLighttableRenderPipeline(FFrameNumber iFrame, EOdysseyRenderingType iType, FOdysseyTextureRenderFunction& oRenderFunction) const;
+    virtual bool BuildRenderPipeline(FFrameNumber iFrame, uint64 iType, FOdysseyTextureRenderFunction& oRenderFunction) const override;
+    bool BuildRenderChildrenPipeline(FFrameNumber iFrame, uint64 iType, FOdysseyTextureRenderFunction& oRenderFunction) const;
+    bool BuildLighttableRenderPipeline(FFrameNumber iFrame, uint64 iType, FOdysseyTextureRenderFunction& oRenderFunction) const;
 
 protected:
     //Property changed methods

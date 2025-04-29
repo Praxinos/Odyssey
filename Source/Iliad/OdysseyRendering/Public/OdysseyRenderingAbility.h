@@ -63,7 +63,7 @@ public:
      *
      * @return const FGuid&
      */
-    virtual TArray<FGuid> GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrameIndex = 0) const;
+    virtual TArray<FGuid> GetRenderingComposition(uint64 iRenderType, int iFrameIndex = 0) const;
 
     /**
      * @brief Returns the full rect that can be rendered

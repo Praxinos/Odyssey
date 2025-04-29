@@ -43,7 +43,7 @@ UOdysseyAnimationCellImageVector::UOdysseyAnimationCellImageVector()
 }
 
 TArray<FGuid>
-UOdysseyAnimationCellImageVector::GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrameIndex) const
+UOdysseyAnimationCellImageVector::GetRenderingComposition(uint64 iRenderType, int iFrameIndex) const
 {
     return { GetRenderingId() };
 }
@@ -61,7 +61,7 @@ UOdysseyAnimationCellImageVector::GetDefaultRenderRect() const
 bool
 UOdysseyAnimationCellImageVector::BuildRenderPipeline(
     FFrameNumber iFrame,
-    EOdysseyRenderingType iType,
+    uint64 iType,
     FOdysseyTextureRenderFunction& oRenderFunction
 ) const
 {

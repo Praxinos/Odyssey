@@ -45,14 +45,14 @@ FOdysseyAnimationMediaPlayer::GetEventSink()
     return mEventSink;
 }
 
-EOdysseyRenderingType
+uint64
 FOdysseyAnimationMediaPlayer::GetRenderType() const
 {
     return mSamples->GetRenderType();
 }
 
 void
-FOdysseyAnimationMediaPlayer::SetRenderType(EOdysseyRenderingType iRenderType)
+FOdysseyAnimationMediaPlayer::SetRenderType(uint64 iRenderType)
 {
     return mSamples->SetRenderType(iRenderType);
 }

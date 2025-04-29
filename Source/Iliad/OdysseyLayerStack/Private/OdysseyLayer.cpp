@@ -686,12 +686,12 @@ UOdysseyLayer::GetSupportedCellTypes() const
 
 
 TArray<FGuid>
-UOdysseyLayer::GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrame) const
+UOdysseyLayer::GetRenderingComposition(uint64 iRenderType, int iFrame) const
 {
     TArray<FGuid> idComposition = { GetRenderingId() };
 
 #if WITH_EDITOR
-    bool showLighttable = iRenderType == EOdysseyRenderingType::Editor && Lighttable.bIsActivated;
+    bool showLighttable = iRenderType & EOdysseyRenderingType::Editor && Lighttable.bIsActivated;
     if ( showLighttable && Lighttable.DisplayPosition == EOdysseyLighttableDisplayPosition::UnderLayer )
         idComposition.Append(GetLighttableImageRenderingComposition(iFrame));
 #endif
@@ -932,7 +932,7 @@ UOdysseyLayer::SetCellsOffsetInteractive(float Value)
 bool
 UOdysseyLayer::BuildRenderPipeline(
     FFrameNumber iFrame,
-    EOdysseyRenderingType iType,
+    uint64 iType,
     FOdysseyTextureRenderFunction& oRenderFunction
 ) const
 {
@@ -969,7 +969,7 @@ UOdysseyLayer::BuildRenderPipeline(
     }
 
 #if WITH_EDITOR
-    bool showLighttable = iType == EOdysseyRenderingType::Editor && Lighttable.bIsActivated;
+    bool showLighttable = iType & EOdysseyRenderingType::Editor && Lighttable.bIsActivated;
     EOdysseyLighttableDisplayPosition lighttablePosition = Lighttable.DisplayPosition;
 
     FOdysseyTextureRenderFunction lighttableRenderFunction;
@@ -1088,7 +1088,7 @@ UOdysseyLayer::BuildRenderPipeline(
 bool
 UOdysseyLayer::BuildLighttableRenderPipeline(
     FFrameNumber iFrame,
-    EOdysseyRenderingType iType,
+    uint64 iType,
     FOdysseyTextureRenderFunction& oRenderFunction
 ) const
 {
@@ -1250,7 +1250,7 @@ UOdysseyLayer::BuildLighttableRenderPipeline(
 bool
 UOdysseyLayer::BuildRenderChildrenPipeline(
     FFrameNumber iFrame,
-    EOdysseyRenderingType iType,
+    uint64 iType,
     FOdysseyTextureRenderFunction& oRenderFunction
 ) const
 {

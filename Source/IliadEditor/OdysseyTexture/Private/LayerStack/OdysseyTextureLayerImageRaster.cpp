@@ -207,7 +207,7 @@ UOdysseyTextureLayerImageRaster::RasterBlockPostProcess(const TMap<FIntPoint, TS
 }
 
 TArray<FGuid>
-UOdysseyTextureLayerImageRaster::GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrame) const
+UOdysseyTextureLayerImageRaster::GetRenderingComposition(uint64 iRenderType, int iFrame) const
 {
     return { GetRenderingId() };
 }

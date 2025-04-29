@@ -102,7 +102,7 @@ IOdysseyRenderingAbility::GetRenderingId() const
 }
 
 TArray<FGuid>
-IOdysseyRenderingAbility::GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrame) const
+IOdysseyRenderingAbility::GetRenderingComposition(uint64 iRenderType, int iFrame) const
 {
     check(false); //If you need it, override it in your class
     return {};

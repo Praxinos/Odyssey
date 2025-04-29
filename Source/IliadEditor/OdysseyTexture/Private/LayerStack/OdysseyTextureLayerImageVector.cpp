@@ -285,7 +285,7 @@ UOdysseyTextureLayerImageVector::PostTransacted(const FTransactionObjectEvent& i
 }
 
 TArray<FGuid>
-UOdysseyTextureLayerImageVector::GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrame) const
+UOdysseyTextureLayerImageVector::GetRenderingComposition(uint64 iRenderType, int iFrame) const
 {
     return { GetRenderingId() };
 }

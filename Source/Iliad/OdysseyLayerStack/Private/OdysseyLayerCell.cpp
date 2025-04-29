@@ -240,7 +240,7 @@ UOdysseyLayerCell::OnOutOfPegsChanged()
 bool
 UOdysseyLayerCell::BuildRenderPipeline(
     FFrameNumber iFrame,
-    EOdysseyRenderingType iType,
+    uint64 iType,
     FOdysseyTextureRenderFunction& oRenderFunction
 ) const
 {
@@ -265,7 +265,7 @@ UOdysseyLayerCell::BuildRenderPipeline(
             iDestinationTexture,
             iSrcRect,
             iDstRect,
-            iType == EOdysseyRenderingType::RenderOutOfPegs ? OutOfPegsTransform() * iSrcTransform : iSrcTransform,
+            iType & EOdysseyRenderingType::OutOfPegs ? OutOfPegsTransform() * iSrcTransform : iSrcTransform,
             EOdysseyBlendingMode::kNormal,
             EOdysseyAlphaMode::kNormal,
             1.f,

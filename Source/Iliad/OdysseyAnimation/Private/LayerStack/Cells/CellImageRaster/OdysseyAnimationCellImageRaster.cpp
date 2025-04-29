@@ -29,7 +29,7 @@ UOdysseyAnimationCellImageRaster::UOdysseyAnimationCellImageRaster()
 }
 
 TArray<FGuid>
-UOdysseyAnimationCellImageRaster::GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrameIndex) const
+UOdysseyAnimationCellImageRaster::GetRenderingComposition(uint64 iRenderType, int iFrameIndex) const
 {
     return { GetRenderingId() };
 }
@@ -43,7 +43,7 @@ UOdysseyAnimationCellImageRaster::GetDefaultRenderRect() const
 bool
 UOdysseyAnimationCellImageRaster::BuildRenderPipeline(
     FFrameNumber iFrame,
-    EOdysseyRenderingType iType,
+    uint64 iType,
     FOdysseyTextureRenderFunction& oRenderFunction
 ) const
 {
@@ -91,7 +91,7 @@ UOdysseyAnimationCellImageRaster::InitTexture() const
         Texture = NewObject<UTexture2D>(const_cast<UOdysseyAnimationCellImageRaster*>(this), TEXT("Texture"));
         Texture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
         Texture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
-        Texture->Filter = TextureFilter::TF_Nearest;
+        Texture->Filter = TextureFilter::TF_Trilinear;
     }
 
     TSharedPtr<FOdysseyRasterBlock> rasterBlock = GetRasterBlock(); //ensures mRasterBlock exists
