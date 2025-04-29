@@ -14,10 +14,14 @@ void MainPS(
     in float2 InTextureCoordinate: TEXCOORD0,
     in float4 InColor: TEXCOORD1,
     in float4 InHitProxyId: TEXCOORD2,
+    in float4 InVertexPosition: SV_POSITION,
     out float4 OutColor: SV_Target0
 )
 {
-    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, InTextureCoordinate);
+    float2 destinationSize = float2(0.f, 0.f);
+    float destinationLODCount = 0;
+    DestinationTexture.GetDimensions(0, destinationSize.x, destinationSize.y, destinationLODCount);
+    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, float2(InVertexPosition.x / destinationSize.x, InVertexPosition.y / destinationSize.y));
     float4 cs = Color;
     OutColor = Blend(cb, cs, Opacity, BlendMode, AlphaMode );
 }

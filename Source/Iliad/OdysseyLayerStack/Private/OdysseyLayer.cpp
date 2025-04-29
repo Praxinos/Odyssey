@@ -1102,7 +1102,7 @@ UOdysseyLayer::BuildLighttableRenderPipeline(
         float Opacity;
         FLinearColor Color;
         float Contrast;
-        FMatrix transform;
+        FMatrix Transform;
     };
 
     TArray<FLighttableKeyRenderParams> keysRenderParams;
@@ -1235,7 +1235,7 @@ UOdysseyLayer::BuildLighttableRenderPipeline(
                     iDestinationTexture,
                     iDstRect,
                     iDstRect,
-                    keyRenderParams.transform,
+                    keyRenderParams.Transform,
                     EOdysseyBlendingMode::kNormal,
                     EOdysseyAlphaMode::kNormal,
                     keyRenderParams.Opacity,

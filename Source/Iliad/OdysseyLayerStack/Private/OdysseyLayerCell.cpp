@@ -244,7 +244,7 @@ UOdysseyLayerCell::BuildRenderPipeline(
     FOdysseyTextureRenderFunction& oRenderFunction
 ) const
 {
-    oRenderFunction = [this](
+    oRenderFunction = [this, iType](
         FRDGBuilder& iGraphBuilder,
         ERHIFeatureLevel::Type iFeatureLevel,
         FRDGTextureRef iDestinationTexture,
