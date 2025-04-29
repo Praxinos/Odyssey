@@ -19,6 +19,9 @@
 #include "OdysseyTextureLayerStack.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "TextureCompiler.h"
+#include "Engine/TextureRenderTarget2D.h"
+#include "ImageUtils.h"
+#include "OdysseyBlendShader.h"
 
 #define LOCTEXT_NAMESPACE "Texture"
 
@@ -108,32 +111,74 @@ UOdysseyTextureLayerImageRaster::OnBlockCommited(const TArray<::ULIS::FRectI>& i
 void
 UOdysseyTextureLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
 {
-    /* FOdysseyRasterBlockMutator mutator(RasterBlock);
-    mutator.EditTilesFromRects(
-        { ::ULIS::FRectI::FromXYWH(0, 0, RasterBlock->GetWidth(), RasterBlock->GetHeight()) },
-        [&](TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+    FIntRect rect = GetDefaultRenderRect();
+    TStrongObjectPtr<UTextureRenderTarget2D> layerRenderTarget(NewObject<UTextureRenderTarget2D>());
+    TStrongObjectPtr<UTextureRenderTarget2D> destinationRenderTarget(NewObject<UTextureRenderTarget2D>());
+    layerRenderTarget->InitAutoFormat(rect.Width(), rect.Height());
+    destinationRenderTarget->InitAutoFormat(rect.Width(), rect.Height());
+
+    //Clear the destination rendertarget before blending on it
+    ENQUEUE_RENDER_COMMAND(IOdysseyTextureRenderingAbility_RenderRectAtRect)(
+        [destinationRenderTarget, rect](FRHICommandListImmediate& RHICmdList)
         {
-            ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(RasterBlock->GetFormat());
-            TArray<::ULIS::FEvent> lastEvent = {};
-            for ( UOdysseyLayer* layer : iLayers )
-            {
-                UOdysseyTextureLayer* textureLayer = Cast<UOdysseyTextureLayer>(layer);
-                if ( !textureLayer )
-                    continue;
-
-                TSharedPtr<IOdysseyImageRenderer> renderer = textureLayer->BuildImageRenderer(EOdysseyRenderingType::Render, 0);
-                renderer->Init();
-
-                FOdysseyImageRendererBlendParams params(iBlock, {::ULISUtils::ToIntRect(iBlock->Rect())});
-                params.mBlendMode = (::ULIS::eBlendMode)textureLayer->BlendMode;
-                params.mOpacity = textureLayer->Opacity;
-
-                lastEvent = renderer->Blend(params, lastEvent);
-            }
-            return { lastEvent };
+            FRDGBuilder graphBuilder(RHICmdList);
+            FRDGTextureRef destinationTexture = destinationRenderTarget->GetRenderTargetResource()->GetRenderTargetTexture( graphBuilder );
+            AddClearRenderTargetPass(graphBuilder, destinationTexture, FLinearColor::Transparent, rect);
+            graphBuilder.Execute();
         }
     );
-    mutator.Commit(); */
+
+    for ( UOdysseyLayer* layer : iLayers )
+    {
+        layer->Render_GameThread(
+            layerRenderTarget.Get(),
+            FFrameNumber(0),
+            EOdysseyRenderingType::Render
+        );
+
+        const ERHIFeatureLevel::Type featureLevel = GMaxRHIFeatureLevel;
+
+        ENQUEUE_RENDER_COMMAND(IOdysseyTextureRenderingAbility_RenderRectAtRect)(
+            [layerRenderTarget, destinationRenderTarget, featureLevel, rect, layer](FRHICommandListImmediate& RHICmdList)
+            {
+                FRDGBuilder graphBuilder(RHICmdList);
+
+                FRDGTextureRef layerTexture = layerRenderTarget->GetRenderTargetResource()->GetRenderTargetTexture( graphBuilder );
+                FRDGTextureRef destinationTexture = destinationRenderTarget->GetRenderTargetResource()->GetRenderTargetTexture( graphBuilder );
+
+                FOdysseyBlendShader::BlendRect(
+                    graphBuilder,
+                    featureLevel,
+                    destinationTexture,
+                    layerTexture,
+                    destinationTexture,
+                    rect,
+                    rect,
+                    FMatrix::Identity,
+                    layer->GetBlendMode(),
+                    EOdysseyAlphaMode::kNormal,
+                    layer->GetOpacity(),
+                    EOdysseyAntiAliasing::NearestNeighbor
+                );
+
+                graphBuilder.Execute();
+            }
+        );
+    }
+
+    FImage OutImage;
+    if (!FImageUtils::GetRenderTargetImage(destinationRenderTarget.Get(), OutImage))
+        return;
+
+    ::ULIS::eFormat format = ULISFormatForRawImageFormat(OutImage.Format);
+
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
+    TSharedPtr<::ULIS::FBlock> block = MakeShareable(new ::ULIS::FBlock( rect.Width(), rect.Height(), format ));
+    CopyImageToBlock(OutImage, block.Get());
+
+    FOdysseyRasterBlockMutator mutator(RasterBlock);
+    mutator.Copy(block, {::ULISUtils::ToULISRectI(rect)});
+    mutator.Commit();
 }
 
 void
