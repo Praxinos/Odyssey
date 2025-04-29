@@ -78,7 +78,7 @@ UOdysseyPainterEditorAnimationFunctionLibrary::ExportAsImageSequence(
         return {};
 
     FIntRect rect(0, 0, Animation->GetWidth(), Animation->GetHeight());
-    return Odyssey::ExportAsImageSequence(Animation, FrameRange, rect, Filename, Path, Format, true );
+    return Odyssey::ExportAsImageSequence(Animation, FrameRange, rect, Filename, Path, Format );
 }
 
 FString
@@ -94,7 +94,7 @@ UOdysseyPainterEditorAnimationFunctionLibrary::ExportFrameAsImage(
         return TEXT("");
 
     FIntRect rect(0, 0, Animation->GetWidth(), Animation->GetHeight());
-    return Odyssey::ExportAsImage(Animation, Frame, Format, rect, Filename, Path, true );
+    return Odyssey::ExportAsImage(Animation, Frame, Format, rect, Filename, Path );
 }
 
 UTexture2D*
@@ -321,7 +321,7 @@ UOdysseyPainterEditorAnimationLayerFunctionLibrary::ExportAsImageSequence(
 
     UOdysseyAnimation* animation = Layer->GetAnimation();
     FIntRect rect(0, 0, animation->GetWidth(), animation->GetHeight());
-    return Odyssey::ExportAsImageSequence(Layer, FrameRange, rect, Filename, Path, Format, true );
+    return Odyssey::ExportAsImageSequence(Layer, FrameRange, rect, Filename, Path, Format );
 }
 
 FString
@@ -338,7 +338,7 @@ UOdysseyPainterEditorAnimationLayerFunctionLibrary::ExportFrameAsImage(
 
     UOdysseyAnimation* animation = Layer->GetAnimation();
     FIntRect rect(0, 0, animation->GetWidth(), animation->GetHeight());
-    return Odyssey::ExportAsImage(Layer, Frame, Format, rect, Filename, Path, true );
+    return Odyssey::ExportAsImage(Layer, Frame, Format, rect, Filename, Path );
 }
 
 UTexture2D*

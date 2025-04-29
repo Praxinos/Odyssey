@@ -85,7 +85,7 @@ ExportAsTexture(UObject* iObject, int iFrame, const FIntRect& iRect, FString iAs
 }
 
 FString
-ExportAsImage(UObject* iObject, int iFrame, EOdysseyExportImageFormat iFormat, const FIntRect& iRect, FString iFilename, FString iPath, bool iSRGB)
+ExportAsImage(UObject* iObject, int iFrame, EOdysseyExportImageFormat iFormat, const FIntRect& iRect, FString iFilename, FString iPath)
 {
     if (!iObject->Implements<UOdysseyTextureRenderingAbility>())
         return "";
@@ -93,10 +93,12 @@ ExportAsImage(UObject* iObject, int iFrame, EOdysseyExportImageFormat iFormat, c
     IOdysseyTextureRenderingAbility* ability = Cast<IOdysseyTextureRenderingAbility>(iObject);
 
     TStrongObjectPtr<UTextureRenderTarget2D> renderTarget(NewObject<UTextureRenderTarget2D>());
-    if (iSRGB)
+    //if (iSRGB)
         renderTarget->RenderTargetFormat = RTF_RGBA8_SRGB;
-    else
-        renderTarget->RenderTargetFormat = RTF_RGBA8;
+        renderTarget->bForceLinearGamma = false;
+        renderTarget->SRGB = renderTarget->IsSRGB();
+    //else
+        //renderTarget->RenderTargetFormat = RTF_RGBA8;
     renderTarget->InitAutoFormat(iRect.Width(), iRect.Height());
 
     ability->Render_GameThread(renderTarget.Get(), FFrameNumber(iFrame), EOdysseyRenderingType::Render, iRect);
@@ -258,8 +260,7 @@ ExportAsImageSequence(
     const FIntRect& iRect,
     FString Filename,
     FString Path,
-    EOdysseyExportImageFormat Format,
-    bool iSRGB
+    EOdysseyExportImageFormat Format
 )
 {
     if ( Path.IsEmpty())
@@ -298,7 +299,7 @@ ExportAsImageSequence(
         }
         filename += FString::Printf(TEXT("%d"), i);
 
-        FString fullpath = ExportAsImage(iObject, i, Format, iRect, filename, Path, iSRGB );
+        FString fullpath = ExportAsImage(iObject, i, Format, iRect, filename, Path );
 
         paths.Add(fullpath);
     }

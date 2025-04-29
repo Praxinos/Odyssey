@@ -179,7 +179,7 @@ UOdysseyTextureEditorTextureFunctionLibrary::ExportAsImage(
 
     FIntRect rect(0, 0, Texture->Source.GetSizeX(), Texture->Source.GetSizeY());
 
-    return Odyssey::ExportAsImage(layerStack, 0, Format, rect, Filename, Path, false );
+    return Odyssey::ExportAsImage(layerStack, 0, Format, rect, Filename, Path );
 }
 
 FString
@@ -195,7 +195,7 @@ UOdysseyTextureEditorLayerFunctionLibrary::ExportAsImage(
 
     UTexture2D* texture = Layer->GetTexture();
     FIntRect rect(0, 0, texture->Source.GetSizeX(), texture->Source.GetSizeY());
-    return Odyssey::ExportAsImage(Layer, 0, Format, rect, Filename, Path, false );
+    return Odyssey::ExportAsImage(Layer, 0, Format, rect, Filename, Path );
 }
 
 UTexture2D*

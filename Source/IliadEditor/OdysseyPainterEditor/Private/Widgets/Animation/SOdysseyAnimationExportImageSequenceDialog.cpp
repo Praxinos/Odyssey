@@ -335,7 +335,7 @@ FOdysseyAnimationImageSequenceExporter::ExportSource(const FSource& iSource, con
             imageName += TEXT("0");
         }
         imageName += FString::Printf(TEXT("%d."), i) + extension;
-        Odyssey::ExportAsImage(iSource.mTextureRenderingAbility, i, mFormat, FIntRect(0, 0, mAnimation->GetWidth(), mAnimation->GetHeight()), imageName, folder, true);
+        Odyssey::ExportAsImage(iSource.mTextureRenderingAbility, i, mFormat, FIntRect(0, 0, mAnimation->GetWidth(), mAnimation->GetHeight()), imageName, folder);
     }
 }
 

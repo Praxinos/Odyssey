@@ -174,7 +174,7 @@ FOdysseyPainterEditorLayerStackTab::ExportTextureToOperatingSystem()
     FString filename = FPaths::GetBaseFilename(path);
     path = FPaths::ConvertRelativePathToFull( path );
 
-    Odyssey::ExportAsImage(layerStack, 0, EOdysseyExportImageFormat::PNG, FIntRect(0, 0, currentTexture->Source.GetSizeX(), currentTexture->Source.GetSizeY()), filename, path, false);
+    Odyssey::ExportAsImage(layerStack, 0, EOdysseyExportImageFormat::PNG, FIntRect(0, 0, currentTexture->Source.GetSizeX(), currentTexture->Source.GetSizeY()), filename, path);
 }
 
 
