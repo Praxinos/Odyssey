@@ -51,6 +51,7 @@ public class OdysseyPainterEditor : ModuleRules
                 "Projects",
                 "RHI",
                 "RenderCore",
+                "Renderer",
                 "RawMesh",
                 "Slate",
                 "SlateCore",

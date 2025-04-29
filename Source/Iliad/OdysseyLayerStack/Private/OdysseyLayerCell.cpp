@@ -269,7 +269,7 @@ UOdysseyLayerCell::BuildRenderPipeline(
             EOdysseyBlendingMode::kNormal,
             EOdysseyAlphaMode::kNormal,
             1.f,
-            EOdysseyAntiAliasing::AnisotropicLinear
+            EOdysseyAntiAliasing::Anisotropic
         );
     };
 

@@ -19,6 +19,8 @@
 #include "ULISUtils.h"
 #include "OdysseyRasterBlockMutator.h"
 #include "RenderGraphBuilder.h"
+#include "OdysseyBlendShader.h"
+#include "ScreenPass.h"
 
 #define THUMBNAIL_RENDER_SIZE 64
 
@@ -53,18 +55,6 @@ UOdysseyAnimationCellThumbnailRenderer::GetThumbnailSize(UObject* Object, float 
 void
 UOdysseyAnimationCellThumbnailRenderer::Draw(UObject* Object, int32 X, int32 Y, uint32 Width, uint32 Height, FRenderTarget* Viewport, FCanvas* Canvas, bool bAdditionalViewFamily)
 {
-    FCanvasTileItem checkboardTileItem(
-        FVector2D(X, Y),
-        mCheckerboardTexture->GetResource(),
-        FVector2D( Width, Height ),
-        FVector2D( 0.f, 0.f ),
-        FVector2D( Width / mCheckerboardTexture->GetSizeX(), Height / mCheckerboardTexture->GetSizeY() ),
-        FLinearColor::White
-    );
-    checkboardTileItem.BlendMode = SE_BLEND_Opaque;
-    Canvas->DrawItem( checkboardTileItem );
-    Canvas->Flush_GameThread();
-
     UOdysseyAnimationCell* cell = Cast<UOdysseyAnimationCell>(Object);
     if (!cell)
         return;
@@ -77,18 +67,55 @@ UOdysseyAnimationCellThumbnailRenderer::Draw(UObject* Object, int32 X, int32 Y, 
 
     FIntRect srcRect = cell->GetDefaultRenderRect();
     ENQUEUE_RENDER_COMMAND(UOdysseyAnimationCellThumbnailRenderer_Draw)(
-        [Viewport, srcRect, X, Y, Width, Height, featureLevel, childRenderFunction](FRHICommandListImmediate& RHICmdList)
+        [this, Viewport, srcRect, X, Y, Width, Height, featureLevel, childRenderFunction](FRHICommandListImmediate& RHICmdList)
         {
             FRDGBuilder graphBuilder(RHICmdList);
-            FRDGTextureRef destinationTexture = graphBuilder.RegisterExternalTexture(CreateRenderTarget(Viewport->GetRenderTargetTexture(), TEXT("UOdysseyAnimationCellThumbnailRenderer::Draw")));
+            FRDGTextureRef destinationTexture = graphBuilder.RegisterExternalTexture(CreateRenderTarget(Viewport->GetRenderTargetTexture(), TEXT("UOdysseyAnimationCellThumbnailRenderer::destinationTexture")));
+            FRDGTextureDesc renderTextureDesc = FRDGTextureDesc::Create2D(
+                srcRect.Size(),
+                destinationTexture->Desc.Format,
+                FClearValueBinding::Transparent,
+                ETextureCreateFlags::ShaderResource | ETextureCreateFlags::RenderTargetable
+            );
+
+            FCanvasTileItem checkboardTileItem(
+                FVector2D(X, Y),
+                mCheckerboardTexture->GetResource(),
+                FVector2D( Width, Height ),
+                FVector2D( 0.f, 0.f ),
+                FVector2D( Width / mCheckerboardTexture->GetSizeX(), Height / mCheckerboardTexture->GetSizeY() ),
+                FLinearColor::White
+            );
+
+            FCanvas* canvas = FCanvas::Create(graphBuilder, destinationTexture, nullptr, FGameTime(), featureLevel);
+            checkboardTileItem.BlendMode = SE_BLEND_Opaque;
+            canvas->DrawItem( checkboardTileItem );
+            canvas->Flush_RenderThread(graphBuilder);
+
+            FRDGTextureRef renderTexture = graphBuilder.CreateTexture(renderTextureDesc, TEXT("UOdysseyLayer::renderTexture"));
 
             childRenderFunction(
                 graphBuilder,
                 featureLevel,
+                renderTexture,
+                srcRect,
+                srcRect,
+                FMatrix::Identity
+            );
+
+            FOdysseyBlendShader::BlendRect(
+                graphBuilder,
+                featureLevel,
+                destinationTexture,
+                renderTexture,
                 destinationTexture,
                 srcRect,
                 FIntRect(X, Y, Width, Height),
-                FMatrix::Identity
+                FMatrix::Identity,
+                EOdysseyBlendingMode::kNormal,
+                EOdysseyAlphaMode::kNormal,
+                1.0f,
+                EOdysseyAntiAliasing::Anisotropic
             );
 
             graphBuilder.Execute();

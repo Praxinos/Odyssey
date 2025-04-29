@@ -82,13 +82,13 @@ void FOdysseyBlendColorShader::BlendRect(
     //Create Shader
     TRefCountPtr< FOdysseyBlendColorShader > blendColorShader(new FOdysseyBlendColorShader(shaderParameters, iBlendMode));
 
-    FIntPoint backgroundTextureSize = backgroundTexture->Desc.Extent;
+    FIntPoint destinationTextureSize = destinationTexture->Desc.Extent;
 
     iGraphBuilder.AddPass(
         RDG_EVENT_NAME("OdysseyBlendColorShader"),
         shaderParameters,
         ERDGPassFlags::Raster,
-        [iFeatureLevel, iDstRect, backgroundTextureSize, blendColorShader](FRHICommandListImmediate& RHICmdList)
+        [iFeatureLevel, iDstRect, destinationTextureSize, blendColorShader](FRHICommandListImmediate& RHICmdList)
         {
             FBatchedElements blendBatchedElements;
 
@@ -96,10 +96,10 @@ void FOdysseyBlendColorShader::BlendRect(
             double y = iDstRect.Min.Y;
             double w = iDstRect.Width();
             double h = iDstRect.Height();
-            float u0 = float(iDstRect.Min.X) / backgroundTextureSize.X;
-            float v0 = float(iDstRect.Min.Y) / backgroundTextureSize.Y;
-            float u1 = float(iDstRect.Max.X) / backgroundTextureSize.X;
-            float v1 = float(iDstRect.Max.Y) / backgroundTextureSize.Y;
+            float u0 = float(iDstRect.Min.X) / destinationTextureSize.X;
+            float v0 = float(iDstRect.Min.Y) / destinationTextureSize.Y;
+            float u1 = float(iDstRect.Max.X) / destinationTextureSize.X;
+            float v1 = float(iDstRect.Max.Y) / destinationTextureSize.Y;
 
             int32 topLeftVertex = blendBatchedElements.AddVertex(FVector4(x, y, 0, 1), FVector2D(u0, v0), FLinearColor::White, FHitProxyId());
             int32 topRightVertex = blendBatchedElements.AddVertex(FVector4(x + w, y, 0, 1), FVector2D(u1, v0), FLinearColor::White, FHitProxyId());
@@ -113,8 +113,8 @@ void FOdysseyBlendColorShader::BlendRect(
             DrawRenderState.SetDepthStencilState(TStaticDepthStencilState<false, CF_Always>::GetRHI());
 
             // Guard against division by zero.
-            uint32 ViewSizeX = FMath::Max<uint32>(backgroundTextureSize.X, 1.f);
-            uint32 ViewSizeY = FMath::Max<uint32>(backgroundTextureSize.Y, 1.f);
+            uint32 ViewSizeX = FMath::Max<uint32>(destinationTextureSize.X, 1.f);
+            uint32 ViewSizeY = FMath::Max<uint32>(destinationTextureSize.Y, 1.f);
 
             FMatrix transform = AdjustProjectionMatrixForRHI(
                 FTranslationMatrix(FVector(0, 0, 0)) *
@@ -126,7 +126,7 @@ void FOdysseyBlendColorShader::BlendRect(
             )
             );
 
-            FSceneView proxySceneView = FBatchedElements::CreateProxySceneView(transform, FIntRect(0, 0, backgroundTextureSize.X, backgroundTextureSize.Y));
+            FSceneView proxySceneView = FBatchedElements::CreateProxySceneView(transform, FIntRect(0, 0, destinationTextureSize.X, destinationTextureSize.Y));
 
             blendBatchedElements.Draw(
                 RHICmdList,

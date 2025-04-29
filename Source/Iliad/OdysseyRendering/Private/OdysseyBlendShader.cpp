@@ -91,13 +91,13 @@ void FOdysseyBlendShader::BlendRect(
     TRefCountPtr< FOdysseyBlendShader > blendShader(new FOdysseyBlendShader(shaderParameters, iBlendMode));
 
     FIntPoint foregroundTextureSize = foregroundTexture->Desc.Extent;
-    FIntPoint backgroundTextureSize = backgroundTexture->Desc.Extent;
+    FIntPoint destinationTextureSize = destinationTexture->Desc.Extent;
 
     iGraphBuilder.AddPass(
         RDG_EVENT_NAME("OdysseyBlendShader"),
         shaderParameters,
         ERDGPassFlags::Raster,
-        [iFeatureLevel, iDstRect, iSrcRect, foregroundTextureSize, backgroundTextureSize, blendShader, iTransform](FRHICommandListImmediate& RHICmdList)
+        [iFeatureLevel, iDstRect, iSrcRect, foregroundTextureSize, destinationTextureSize, blendShader, iTransform](FRHICommandListImmediate& RHICmdList)
         {
             FBatchedElements blendBatchedElements;
 
@@ -111,15 +111,15 @@ void FOdysseyBlendShader::BlendRect(
             FVector dstBottomLeft(float(iDstRect.Min.X), float(iDstRect.Max.Y), 0.f);
             FVector dstBottomRight(float(iDstRect.Max.X), float(iDstRect.Max.Y), 0.f);
 
-            dstTopLeft = iTransform.TransformPosition(dstTopLeft);
-            dstTopRight = iTransform.TransformPosition(dstTopRight);
-            dstBottomLeft = iTransform.TransformPosition(dstBottomLeft);
-            dstBottomRight = iTransform.TransformPosition(dstBottomRight);
+            //dstTopLeft = iTransform.TransformPosition(dstTopLeft);
+            //dstTopRight = iTransform.TransformPosition(dstTopRight);
+            //dstBottomLeft = iTransform.TransformPosition(dstBottomLeft);
+            //dstBottomRight = iTransform.TransformPosition(dstBottomRight);
 
-            //srcTopLeft = iTransform.Inverse().TransformPosition(srcTopLeft);
-            //srcTopRight = iTransform.Inverse().TransformPosition(srcTopRight);
-            //srcBottomLeft = iTransform.Inverse().TransformPosition(srcBottomLeft);
-            //srcBottomRight = iTransform.Inverse().TransformPosition(srcBottomRight);
+            srcTopLeft = iTransform.Inverse().TransformPosition(srcTopLeft);
+            srcTopRight = iTransform.Inverse().TransformPosition(srcTopRight);
+            srcBottomLeft = iTransform.Inverse().TransformPosition(srcBottomLeft);
+            srcBottomRight = iTransform.Inverse().TransformPosition(srcBottomRight);
 
             srcTopLeft /= FVector(foregroundTextureSize.X, foregroundTextureSize.Y, 1.f);
             srcTopRight /= FVector(foregroundTextureSize.X, foregroundTextureSize.Y, 1.f);
@@ -139,8 +139,8 @@ void FOdysseyBlendShader::BlendRect(
             DrawRenderState.SetDepthStencilState(TStaticDepthStencilState<false, CF_Always>::GetRHI());
 
             // Guard against division by zero.
-            uint32 ViewSizeX = FMath::Max<uint32>(backgroundTextureSize.X, 1.f);
-            uint32 ViewSizeY = FMath::Max<uint32>(backgroundTextureSize.Y, 1.f);
+            uint32 ViewSizeX = FMath::Max<uint32>(destinationTextureSize.X, 1.f);
+            uint32 ViewSizeY = FMath::Max<uint32>(destinationTextureSize.Y, 1.f);
 
             FMatrix transform = AdjustProjectionMatrixForRHI(
                 FTranslationMatrix(FVector(0, 0, 0)) *
@@ -152,7 +152,7 @@ void FOdysseyBlendShader::BlendRect(
             )
             );
 
-            FSceneView proxySceneView = FBatchedElements::CreateProxySceneView(transform, FIntRect(0, 0, backgroundTextureSize.X, backgroundTextureSize.Y));
+            FSceneView proxySceneView = FBatchedElements::CreateProxySceneView(transform, FIntRect(0, 0, destinationTextureSize.X, destinationTextureSize.Y));
 
             blendBatchedElements.Draw(
                 RHICmdList,
