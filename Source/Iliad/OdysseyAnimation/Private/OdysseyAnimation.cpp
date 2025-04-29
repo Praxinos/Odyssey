@@ -5,6 +5,8 @@
 
 #include "Misc/TransactionObjectEvent.h"
 #include "CanvasTypes.h"
+#include "Engine/TextureRenderTarget2D.h"
+#include "Cooker/CookEvents.h"
 
 #define LOCTEXT_NAMESPACE "Animation"
 
@@ -403,6 +405,48 @@ UOdysseyAnimation::PropertyChanged(const FName& iPropertyName)
     if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, RightBound) )
     {
         OnRightBoundChanged();
+    }
+}
+
+void
+UOdysseyAnimation::PreSave(FObjectPreSaveContext SaveContext)
+{
+    Super::PreSave(SaveContext);
+
+    if ( SaveContext.IsCooking() )
+        return;
+
+    Frames.Empty();
+
+    TStrongObjectPtr<UTextureRenderTarget2D> renderTarget(NewObject<UTextureRenderTarget2D>());
+    renderTarget->RenderTargetFormat = RTF_RGBA8_SRGB;
+    renderTarget->bForceLinearGamma = true;
+    renderTarget->InitAutoFormat(GetWidth(), GetHeight());
+    renderTarget->UpdateResourceImmediate();
+
+    FInt32Range range = GetFrameRange();
+    TArray<FGuid> lastRenderingComposition;
+    for ( int i = range.GetLowerBoundValue(); i <= range.GetUpperBoundValue(); i++ )
+    {
+        TArray<FGuid> renderingComposition = GetRenderingComposition(EOdysseyRenderingType::Render, i);
+        if ( renderingComposition == lastRenderingComposition )
+        {
+            Frames.Last().Exposure++;
+            continue;
+        }
+
+        lastRenderingComposition = renderingComposition;
+
+        Execute_RenderRects(this, renderTarget.Get(), FFrameNumber(i), { FIntRect(0, 0, GetWidth(), GetHeight()) });
+
+        UTexture2D* texture = NewObject<UTexture2D>(this, NAME_None, RF_Public);
+        renderTarget.Get()->UpdateTexture(texture);
+
+        FOdysseyAnimationFrame frame;
+        frame.Texture = texture;
+        frame.Exposure = 1;
+        frame.RenderingComposition = renderingComposition;
+        Frames.Add(frame);
     }
 }
 #endif

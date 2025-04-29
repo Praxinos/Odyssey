@@ -102,17 +102,8 @@ UOdysseyAnimationComponent::UOdysseyAnimationComponent(const FObjectInitializer&
 void
 UOdysseyAnimationComponent::Initialize()
 {
-    static constexpr const TCHAR* DefaultStaticMeshPath = TEXT("/Engine/BasicShapes/Plane.Plane");
-    static ConstructorHelpers::FObjectFinderOptional<UStaticMesh> DefaultStaticMesh(DefaultStaticMeshPath);
-
-    if ( DefaultStaticMesh.Succeeded() )
-        SetStaticMesh(DefaultStaticMesh.Get());
-
-    static constexpr const TCHAR* DefaultMaterialPath = TEXT("/Odyssey/Animation2D/DefaultAnimationMaterial.DefaultAnimationMaterial");
-    static ConstructorHelpers::FObjectFinderOptional<UMaterial> DefaultMaterial(DefaultMaterialPath);
-
-    if ( DefaultMaterial.Succeeded() )
-        SetAnimationMaterial(DefaultMaterial.Get());
+    SetStaticMesh(LoadObject<UStaticMesh>(this, TEXT("/Engine/BasicShapes/Plane.Plane")));
+    SetAnimationMaterial(LoadObject<UMaterial>(this, TEXT("/Odyssey/Animation2D/DefaultAnimationMaterial.DefaultAnimationMaterial")));
 }
 
 void
