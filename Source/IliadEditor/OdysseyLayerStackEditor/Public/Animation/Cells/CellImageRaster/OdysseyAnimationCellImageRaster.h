@@ -22,14 +22,15 @@ public:
     UOdysseyAnimationCellImageRaster();
 
     TSharedPtr<FOdysseyRasterBlock> GetRasterBlock() const;
+    UTexture2D* GetTexture() const;
     virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const override;
 
 public:
-    virtual void PostInitProperties() override;
     virtual void PostLoad() override;
     virtual void PostDuplicate(EDuplicateMode::Type iDuplicateMode) override;
     virtual void Serialize(FArchive& Ar) override;
     virtual void OldSerialize(FArchive& Ar) override; //DEPRECATED: Keep that for compatibility with early versions of Odyssey
+    virtual void PreSave(FObjectPreSaveContext SaveContext) override;
 
 public:
     //IOdysseyRenderingAbility overrides
@@ -40,8 +41,8 @@ public:
     bool IsImageRenderingGameThreadOnly() const;
 
 private:
-    void InitFromFormat(int iWidth, int iHeight, ::ULIS::eFormat iFormat);
-    void InitFromBlock(TSharedPtr<::ULIS::FBlock> iBlock);
+    void InitTexture() const;
+    void InitRasterBlock() const;
     TArray<::ULIS::FEvent> RasterBlockPostProcess(const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock>>& iOriginalBlocks, const FOdysseyInvalidTileMap& iInvalidMap, const TArray<::ULIS::FEvent>& iWaitList);
     void OnBlockChanged(const TArray<::ULIS::FRectI>& iRects);
     void OnBlockCommited(const TArray<::ULIS::FRectI>& iRects);
@@ -57,5 +58,5 @@ private:
     mutable TWeakPtr<FOdysseyMediaRaster> mMediaRaster;
 
     UPROPERTY(NonTransactional)
-    TObjectPtr<UTexture2D> Texture;
+    mutable TObjectPtr<UTexture2D> Texture;
 };

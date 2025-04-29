@@ -220,6 +220,7 @@ GetRawImageFormatFromTextureSourceFormat(ETextureSourceFormat iFormat)
         case TSF_BGRE8:     return ERawImageFormat::BGRE8;
         case TSF_RGBA16:    return ERawImageFormat::RGBA16;
         case TSF_RGBA16F:   return ERawImageFormat::RGBA16F;
+        case TSF_RGBA32F:   return ERawImageFormat::RGBA32F;
         default: break;
     }
     return ERawImageFormat::BGRA8;
@@ -498,6 +499,9 @@ InvalidateTextureFromSourceDataUsingSortedRects( const ::ULIS::FBlock* iData, UT
     // before on this texture or if someone from outside disabled it.
     iTexture->TemporarilyDisableStreaming();
 
+    //TemporarilyDisableStreaming() can call UpdateResource()
+    //And UpdateTextureRegions needs any compilation of the texture to be finished
+    FTextureCompilingManager::Get().FinishCompilation({ iTexture });
 
     ////////////////////////////
     // Send the image data to the graphics card and wait for it to finish

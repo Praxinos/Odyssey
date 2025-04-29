@@ -54,6 +54,32 @@ float Sat(float3 iC)
     return max3(iC.x, iC.y, iC.z) - min3(iC.x, iC.y, iC.z);
 }
 
+float3 SetSatComponent(float3 iC, int iIndex, float iValue)
+{
+    if (iIndex == 0)
+    {
+        iC.x = iValue;
+    }
+    else if (iIndex == 1)
+    {
+        iC.y = iValue;
+    }
+    else
+    {
+        iC.z = iValue;
+    }
+
+    return iC;
+}
+
+float3 SetSatMid(float3 iC, float iS)
+{
+}
+
+float3 SetSatMax(float3 iC, float iS)
+{
+}
+
 float3 SetSat(float3 iC, float iS)
 {
     int minIndex = (iC.x < iC.y) ? ((iC.x < iC.z) ? 0 : 2) : ((iC.y < iC.z) ? 1 : 2);
@@ -61,15 +87,17 @@ float3 SetSat(float3 iC, float iS)
     int midIndex = 3 - minIndex - maxIndex;
     if (iC[maxIndex] > iC[minIndex])
     {
-        iC[midIndex] = (((iC[midIndex] - iC[minIndex]) * iS) / (iC[maxIndex] - iC[minIndex]));
-        iC[maxIndex] = iS;
+        float midValue = (((iC[midIndex] - iC[minIndex]) * iS) / (iC[maxIndex] - iC[minIndex]));
+        float maxValue = iS;
+        iC = SetSatComponent(iC, midIndex, midValue);
+        iC = SetSatComponent(iC, maxIndex, maxValue);
     }
     else
     {
-        iC[midIndex] = 0.f;
-        iC[maxIndex] = 0.f;
+        iC = SetSatComponent(iC, midIndex, 0.f);
+        iC = SetSatComponent(iC, maxIndex, 0.f);
     }
-    iC[minIndex] = 0.f;
+    iC = SetSatComponent(iC, minIndex, 0.f);
     return iC;
 }
 

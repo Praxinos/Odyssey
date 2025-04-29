@@ -130,6 +130,9 @@ protected:
     UPROPERTY()
     TArray<FOdysseyAnimationFrame> Frames;
 
+    UPROPERTY(EditAnywhere, Category = "Odyssey|Animation", NonTransactional)
+    bool PreserveLayerStackAtRuntime = false;
+
 #if WITH_EDITORONLY_DATA
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Odyssey|Animation")
     EOdysseyAnimationBoundMode LeftBoundMode = EOdysseyAnimationBoundMode::Automatic;

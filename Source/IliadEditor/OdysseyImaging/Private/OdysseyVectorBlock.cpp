@@ -75,34 +75,33 @@ FOdysseyVectorBlock::GetRenderFlags() const
     return mRenderFlags;
 }
 */
+
 void
-FOdysseyVectorBlock::Render( ::ULIS::FBlock& ioBlock, uint64 iDrawingFlags )
+FOdysseyVectorBlock::Render( ::ULIS::FBlock& ioBlock, const ::ULIS::FRectI& iRect, uint64 iDrawingFlags )
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorBlock::Render);
 
     if( mVectorCell.IsValid() )
     {
         //Render in a BLImage (also resets the internal invalidation rectangle)
-        mEngine.Render( mBlockData->mBLContext.Get(), mSanitizedRect, mVectorCell->GetScene(), iDrawingFlags );
+        mEngine.Render( mBlockData->mBLContext.Get(), iRect, mVectorCell->GetScene(), iDrawingFlags);
 
-        if( mSanitizedRect.Area() )
+        if ( iRect.Area() )
         {
-            {
-                TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorBlock::Render::ConvertBlock);
-                //Get a ULIS block pointing to the BLImage
-                BLImageData imgData;
-                mBlockData->mBLImage->getData(&imgData);
-                ::ULIS::FBlock renderBlock((uint8*)imgData.pixelData, mWidth, mHeight, ULIS::Format_BGRA8);
+            TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorBlock::Render::ConvertBlock);
+            //Get a ULIS block pointing to the BLImage
+            BLImageData imgData;
+            mBlockData->mBLImage->getData(&imgData);
+            ::ULIS::FBlock renderBlock((uint8*)imgData.pixelData, mWidth, mHeight, ULIS::Format_BGRA8);
 
-                //Unpremultiply the render block
-                ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(ULIS::Format_BGRA8);
-                ctx.Unpremultiply(renderBlock, mSanitizedRect );
-                ctx.Finish();
+            //Unpremultiply the render block
+            ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(ULIS::Format_BGRA8);
+            ctx.Unpremultiply(renderBlock, iRect);
+            ctx.Finish();
 
-                //Convert the right ULIS block in the expected ULIS Format
-                ctx.ConvertFormat(renderBlock, ioBlock, mSanitizedRect, ::ULIS::FVec2I( mSanitizedRect.x, mSanitizedRect.y ) );
-                ctx.Finish();
-            }
+            //Convert the right ULIS block in the expected ULIS Format
+            ctx.ConvertFormat(renderBlock, ioBlock, iRect, ::ULIS::FVec2I(iRect.x, iRect.y ) );
+            ctx.Finish();
         }
     }
 }
@@ -148,7 +147,7 @@ FOdysseyVectorBlock::Render( uint64 iDrawingFlags )
 
     if (mNeedsRender)
     {
-        Render(*block, iDrawingFlags );
+        Render(*block, mSanitizedRect, iDrawingFlags );
 
         TSharedPtr<::ULIS::FBlock> hudBlock = mHUDBlock.Pin();
         if ( hudBlock )
@@ -272,7 +271,7 @@ FOdysseyVectorBlock::GetBlock( uint64 iDrawingFlags)
     {
         block = MakeShared<::ULIS::FBlock>(mWidth, mHeight, mFormat);
         mBlockData->mBuffer = FUniqueBuffer::MakeView(block->Bits(), block->BytesTotal());
-        Render(*block, iDrawingFlags);
+        Render(*block, mSanitizedRect, iDrawingFlags);
         mBlockData->mNeedsCache = true;
         mNeedsRender = false;
     }

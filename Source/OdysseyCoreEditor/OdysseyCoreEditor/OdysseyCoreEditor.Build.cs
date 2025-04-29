@@ -46,6 +46,9 @@ public class OdysseyCoreEditor : ModuleRules
                 // [EDITOR] plugin dependencies
                 "OdysseyCommonWidgets",
                 "OdysseyStyle",
+
+                // [DEVELOPER] engine dependencies
+                "DerivedDataCache",
             }
         );
 

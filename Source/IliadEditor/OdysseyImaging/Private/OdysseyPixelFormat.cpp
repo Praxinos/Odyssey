@@ -15,6 +15,7 @@ int TextureSourceFormatBytesPerPixel(ETextureSourceFormat iFormat)
         case TSF_BGRE8:     return 4;
         case TSF_RGBA16:    return 8;
         case TSF_RGBA16F:   return 8;
+        case TSF_RGBA32F:   return 16;
         case TSF_Invalid:
         case TSF_MAX:
         default: break;
@@ -153,6 +154,7 @@ ConvertULISFormatToTextureSourceFormat( const uint8* iSrc, uint8* oDst, int iWid
         case TSF_BGRE8:     ret = ::ULIS::Format_RGBF;      break;
         case TSF_RGBA16:    ret = ::ULIS::Format_RGBA16;    break;
         case TSF_RGBA16F:   ret = ::ULIS::Format_RGBAF;     break;
+        case TSF_RGBA32F:   ret = ::ULIS::Format_RGBAF;     break;
         case TSF_MAX:       ret = 0;                        break;
         default:            ret = 0;                        break;
     }
@@ -210,7 +212,7 @@ ETextureSourceFormat TextureSourceFormatForULISFormat( ::ULIS::eFormat iFormat )
         case ::ULIS::Format_G16:    ret = TSF_G16;      break;
         case ::ULIS::Format_BGRA8:  ret = TSF_BGRA8;    break;
         case ::ULIS::Format_RGBA16: ret = TSF_RGBA16;   break;
-        case ::ULIS::Format_RGBAF:  ret = TSF_RGBA16F;  break;
+        case ::ULIS::Format_RGBAF:  ret = TSF_RGBA32F;  break;
         default:                    ret = TSF_Invalid;  break;
     }
     checkf(ret,TEXT("Error, bad format !")); // Crash

@@ -26,6 +26,7 @@ public class OdysseyImaging : ModuleRules
              new string[] {
                 "Core",
                 "CoreUObject",
+                "DerivedDataCache",
                 "ImageCore",
                 "Paper2D",
                 "Paper2DEditor",
@@ -37,7 +38,6 @@ public class OdysseyImaging : ModuleRules
                 "UnrealEd",
 
                 "OdysseyCore",
-                "OdysseyCoreEditor",
                 "OdysseyFile",
                 "OdysseyRendering"
              }
@@ -50,6 +50,7 @@ public class OdysseyImaging : ModuleRules
                 "ULIS",
                 "ULISLoader",
 
+                "OdysseyCoreEditor",
                 "OdysseyVector",
              }
         );

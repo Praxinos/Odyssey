@@ -35,6 +35,8 @@ public:
     virtual void PostDuplicate(EDuplicateMode::Type iDuplicateMode) override;
     virtual void Serialize(FArchive& Ar) override;
     virtual void OldSerialize(FArchive& Ar) override; //DEPRECATED: Keep that for compatibility with early versions of Odyssey
+    virtual void PreSave(FObjectPreSaveContext SaveContext) override;
+    virtual TSharedPtr<::ULIS::FBlock> GetBlock() const override;
 
     FOdysseyVectorCell* GetVectorCell() const;
     FOdysseyVectorImportV2* GetImporterV2();
@@ -44,7 +46,6 @@ public:
 
 public:
     // Event Listeners
-    void OnVectorSceneSignal( FOdysseyVectorGroupPaint* iScene, uint64 iSignalFlags );
     void OnIsColoredChanged(UOdysseyAnimationLayerImageVector* iLayer);
     void OnIsWireframeChanged(UOdysseyAnimationLayerImageVector* iLayer);
 
@@ -62,11 +63,13 @@ public:
     virtual uint32 GetLength() override;
     virtual uint32 GetFrame() override;
 
-    virtual TSharedPtr<::ULIS::FBlock> GetBlock() const override;
-
 private:
     void OnVectorBlockInvalidated(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive);
     void OnVectorEngineNotify(FOdysseyVectorGroupPaint* iScene, uint64 iSignalFlags);
+    bool UpdateDrawingFlags() const;
+    void InitTexture() const;
+    void UpdateTexture(bool iForce) const;
+    UTexture2D* GetTexture() const;
 
 private:
     //Import/Export
@@ -82,7 +85,7 @@ private:
     FOdysseyVectorImportV2 mImporterV2;
 
     UPROPERTY(NonTransactional)
-    TObjectPtr<UTexture2D> Texture;
+    mutable TObjectPtr<UTexture2D> Texture;
 
     mutable uint64 mDrawingFlags = 0;
 };
