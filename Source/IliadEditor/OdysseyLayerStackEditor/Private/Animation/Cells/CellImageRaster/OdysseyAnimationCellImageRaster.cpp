@@ -22,7 +22,17 @@
 
 UOdysseyAnimationCellImageRaster::UOdysseyAnimationCellImageRaster()
 {
-    Texture = CreateDefaultSubobject<UTexture2D>(TEXT("Texture"));
+}
+
+void
+UOdysseyAnimationCellImageRaster::PostInitProperties()
+{
+    Super::PostInitProperties();
+
+    if (GetFlags() & RF_ClassDefaultObject)
+        return;
+
+    Texture = NewObject<UTexture2D>(this, TEXT("Texture"), RF_Public);
     Texture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
     Texture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
     Texture->Filter = TextureFilter::TF_Nearest;

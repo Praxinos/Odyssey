@@ -25,6 +25,7 @@ public:
     virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const override;
 
 public:
+    virtual void PostInitProperties() override;
     virtual void PostLoad() override;
     virtual void PostDuplicate(EDuplicateMode::Type iDuplicateMode) override;
     virtual void Serialize(FArchive& Ar) override;
@@ -56,5 +57,5 @@ private:
     mutable TWeakPtr<FOdysseyMediaRaster> mMediaRaster;
 
     UPROPERTY(NonTransactional)
-    UTexture2D* Texture = nullptr;
+    TObjectPtr<UTexture2D> Texture;
 };

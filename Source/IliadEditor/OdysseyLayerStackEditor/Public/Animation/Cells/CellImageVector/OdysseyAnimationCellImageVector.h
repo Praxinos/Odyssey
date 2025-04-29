@@ -82,7 +82,7 @@ private:
     FOdysseyVectorImportV2 mImporterV2;
 
     UPROPERTY(NonTransactional)
-    UTexture2D* Texture = nullptr;
+    TObjectPtr<UTexture2D> Texture;
 
     mutable uint64 mDrawingFlags = 0;
 };

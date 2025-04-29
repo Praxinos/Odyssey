@@ -35,10 +35,6 @@ UOdysseyAnimationCellImageVector::~UOdysseyAnimationCellImageVector()
 
 UOdysseyAnimationCellImageVector::UOdysseyAnimationCellImageVector()
 {
-    Texture = CreateDefaultSubobject<UTexture2D>(TEXT("Texture"));
-    Texture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
-    Texture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
-    Texture->Filter = TextureFilter::TF_Nearest;
 }
 
 void
@@ -50,6 +46,11 @@ UOdysseyAnimationCellImageVector::PostInitProperties()
 
     if (GetFlags() & RF_ClassDefaultObject)
         return;
+
+    Texture = NewObject<UTexture2D>(this, TEXT("Texture"), RF_Public);
+    Texture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
+    Texture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
+    Texture->Filter = TextureFilter::TF_Nearest;
 
     // bind refresh function to delegates on existing vector scenes at load. Needed to refresh necessary widgets.
     UOdysseyAnimationLayerImageVector::OnIsColoredChanged().AddUObject( this, &UOdysseyAnimationCellImageVector::OnIsColoredChanged );
