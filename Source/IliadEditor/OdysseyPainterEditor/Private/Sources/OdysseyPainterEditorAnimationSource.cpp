@@ -88,7 +88,6 @@ FOdysseyPainterEditorAnimationSource::ActivatePlayer(UOdysseyAnimationPlayer* iP
 {
     iPlayer->SetRenderType(EOdysseyRenderingType::Editor);
     iPlayer->SeekToFrame(0);
-    iPlayer->OnStatusChanged().AddRaw(this, &FOdysseyPainterEditorAnimationSource::OnPlayerStatusChanged);
     iPlayer->OnCurrentFrameChanged().AddRaw(this, &FOdysseyPainterEditorAnimationSource::OnCurrentFrameChanged);
 }
 
@@ -220,18 +219,6 @@ FOdysseyPainterEditorAnimationSource::OnCurrentFrameChanged()
 
     mImageRenderingComposition = imageRenderingComposition;
     mEditor->SanitizeCurrentTool();
-}
-
-void
-FOdysseyPainterEditorAnimationSource::OnPlayerStatusChanged()
-{
-    UOdysseyAnimationPlayer* player = GetAnimationPlayer();
-
-    if (player->GetStatus() == EOdysseyAnimationPlayerStatus::Playing || player->GetStatus() == EOdysseyAnimationPlayerStatus::Scrubbing)
-        player->SetRenderType(EOdysseyRenderingType::Render);
-
-    if (player->GetStatus() == EOdysseyAnimationPlayerStatus::Stopped)
-        player->SetRenderType(EOdysseyRenderingType::Editor);
 }
 
 //--------------------------------------------------------------------------------------

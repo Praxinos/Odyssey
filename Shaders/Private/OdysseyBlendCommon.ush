@@ -1,5 +1,15 @@
 #include "/Engine/Private/common.ush"
 
+#define SMALL_NUMBER 1e-8
+
+float ensureNonZero( float iValue )
+{
+    if (iValue == 0.f)
+        return SMALL_NUMBER;
+
+    return iValue;
+}
+
 // BlendMode Seperarable
 #define ODYSSEY_BLENDINGMODE_Normal 0
 #define ODYSSEY_BLENDINGMODE_Top 1
@@ -117,17 +127,23 @@ float3 ClipColor(float3 iC)
     float l = Lum(iC);
     float n = min3(iC.x, iC.y, iC.z);
     float x = max3(iC.x, iC.y, iC.z);
+
+    //
+
     if (n < 0.f)
     {
-        c.x = l + (((c.x - l) * l) / (l - n));
-        c.y = l + (((c.y - l) * l) / (l - n));
-        c.z = l + (((c.z - l) * l) / (l - n));
+        float ln = ensureNonZero(l - n);
+        c.x = l + (((c.x - l) * l) / ln);
+        c.y = l + (((c.y - l) * l) / ln);
+        c.z = l + (((c.z - l) * l) / ln);
     }
     else if (x > 1.f)
     {
-        c.x = l + (((c.x - l) * (1.f - l)) / (x - l));
-        c.y = l + (((c.y - l) * (1.f - l)) / (x - l));
-        c.z = l + (((c.z - l) * (1.f - l)) / (x - l));
+        float xl = ensureNonZero(x - l);
+
+        c.x = l + (((c.x - l) * (1.f - l)) / xl);
+        c.y = l + (((c.y - l) * (1.f - l)) / xl);
+        c.z = l + (((c.z - l) * (1.f - l)) / xl);
     }
 
     return c;
@@ -166,32 +182,40 @@ float3 SetSatComponent(float3 iC, int iIndex, float iValue)
     return iC;
 }
 
-float3 SetSatMid(float3 iC, float iS)
-{
-}
-
-float3 SetSatMax(float3 iC, float iS)
-{
-}
-
 float3 SetSat(float3 iC, float iS)
 {
-    int minIndex = (iC.x < iC.y) ? ((iC.x < iC.z) ? 0 : 2) : ((iC.y < iC.z) ? 1 : 2);
     int maxIndex = (iC.x > iC.y) ? ((iC.x > iC.z) ? 0 : 2) : ((iC.y > iC.z) ? 1 : 2);
-    int midIndex = 3 - minIndex - maxIndex;
-    if (iC[maxIndex] > iC[minIndex])
+    int minIndex = (iC.x < iC.y) ? ((iC.x < iC.z) ? 0 : 2) : ((iC.y < iC.z) ? 1 : 2);
+    int midIndex = (maxIndex == minIndex) ? minIndex : 3 - minIndex - maxIndex;
+    float Cmax = iC[maxIndex];
+    float Cmin = iC[minIndex];
+    float Cmid = iC[midIndex];
+
+    if (Cmax > Cmin)
     {
-        float midValue = (((iC[midIndex] - iC[minIndex]) * iS) / (iC[maxIndex] - iC[minIndex]));
-        float maxValue = iS;
-        iC = SetSatComponent(iC, midIndex, midValue);
-        iC = SetSatComponent(iC, maxIndex, maxValue);
+        Cmid = (((Cmid - Cmin) * iS) / ensureNonZero(Cmax - Cmin));
+        Cmax = iS;
+
     }
     else
     {
-        iC = SetSatComponent(iC, midIndex, 0.f);
-        iC = SetSatComponent(iC, maxIndex, 0.f);
+        Cmid = 0.f;
+        Cmax = 0.f;
     }
-    iC = SetSatComponent(iC, minIndex, 0.f);
+
+    Cmin = 0.f;
+
+    if (maxIndex == minIndex)
+    {
+        minIndex = 0;
+        midIndex = 1;
+        maxIndex = 2;
+    }
+
+    iC = SetSatComponent(iC, minIndex, Cmin);
+    iC = SetSatComponent(iC, midIndex, Cmid);
+    iC = SetSatComponent(iC, maxIndex, Cmax);
+
     return iC;
 }
 
@@ -227,7 +251,7 @@ float BlendMultiply(float iCb, float iCs)
 
 float BlendColorBurn(float iCb, float iCs)
 {
-    return iCs > 0.f ? (1.f - min(1.f, (1.f - iCb) / iCs)) : 0.f;
+    return iCs > 0.f ? (1.f - min(1.f, (1.f - iCb) / ensureNonZero(iCs))) : 0.f;
 }
 
 float BlendLighten(float iCb, float iCs)
@@ -252,7 +276,7 @@ float BlendScreen(float iCb, float iCs)
 
 float BlendColorDodge(float iCb, float iCs)
 {
-    return iCs == 1.0f ? 1.f : min(1.f, iCb / (1.f - iCs));
+    return iCs == 1.0f ? 1.f : min(1.f, iCb / ensureNonZero(1.f - iCs));
 }
 
 float BlendAdd(float iCb, float iCs)
@@ -328,7 +352,7 @@ float BlendSubstract(float iCb, float iCs)
 
 float BlendDivide(float iCb, float iCs)
 {
-    return iCs == 0.f && iCb == 0.f ? 0.f : iCs == 0.f && iCb != 0.f ? 1.f : clamp(iCb / iCs, 0.f, 1.f);
+    return iCs == 0.f && iCb == 0.f ? 0.f : iCs == 0.f && iCb != 0.f ? 1.f : clamp(iCb / ensureNonZero(iCs), 0.f, 1.f);
 }
 
 float BlendPhoenix(float iCb, float iCs)
@@ -338,7 +362,7 @@ float BlendPhoenix(float iCb, float iCs)
 
 float BlendReflect(float iCb, float iCs)
 {
-    return iCb == 1.f ? 1.f : min(1.f, iCs * iCs / (1.f - iCb));
+    return iCb == 1.f ? 1.f : min(1.f, iCs * iCs / ensureNonZero(1.f - iCb));
 }
 
 float BlendGlow(float iCb, float iCs)
@@ -389,9 +413,9 @@ float3 Normalize(float3 iValue)
         return float3(0, 0, 0);
 
     return float3(
-        iValue.x / distance,
-        iValue.y / distance,
-        iValue.z / distance
+        iValue.x / ensureNonZero(distance),
+        iValue.y / ensureNonZero(distance),
+        iValue.z / ensureNonZero(distance)
     );
 }
 
@@ -625,35 +649,35 @@ float AlphaNormal(float iCb, float iCs)
     return iCb + iCs - (iCb * iCs);
 }
 
-float AlphaErase(float iCs, float iCb) {
+float AlphaErase(float iCb, float iCs) {
     return (1.f - iCs) * iCb;
 }
 
-float AlphaBack(float iCs, float iCb) {
+float AlphaBack(float iCb, float iCs) {
     return iCb;
 }
 
-float AlphaTop(float iCs, float iCb) {
+float AlphaTop(float iCb, float iCs) {
     return iCs;
 }
 
-float AlphaSub(float iCs, float iCb) {
+float AlphaSub(float iCb, float iCs) {
     return iCb > iCs ? iCb - iCs : 0;
 }
 
-float AlphaAdd(float iCs, float iCb) {
+float AlphaAdd(float iCb, float iCs) {
     return (1.f - iCb) > iCs ? iCb + iCs : 1.f;
 }
 
-float AlphaMul(float iCs, float iCb) {
+float AlphaMul(float iCb, float iCs) {
     return iCb * iCs;
 }
 
-float AlphaMin(float iCs, float iCb) {
+float AlphaMin(float iCb, float iCs) {
     return min(iCs, iCb);
 }
 
-float AlphaMax(float iCs, float iCb) {
+float AlphaMax(float iCb, float iCs) {
     return max(iCs, iCb);
 }
 
@@ -663,55 +687,55 @@ float AlphaBlend(float iCb, float iCs, uint iAlphaBlend)
     {
         case ODYSSEY_ALPHAMODE_Normal:
         {
-            return AlphaNormal(iCs, iCb);
+            return AlphaNormal(iCb, iCs);
         }
         break;
 
         case ODYSSEY_ALPHAMODE_Erase:
         {
-            return AlphaErase(iCs, iCb);
+            return AlphaErase(iCb, iCs);
         }
         break;
 
         case ODYSSEY_ALPHAMODE_Top:
         {
-            return AlphaTop(iCs, iCb);
+            return AlphaTop(iCb, iCs);
         }
         break;
 
         case ODYSSEY_ALPHAMODE_Back:
         {
-            return AlphaBack(iCs, iCb);
+            return AlphaBack(iCb, iCs);
         }
         break;
 
         case ODYSSEY_ALPHAMODE_Sub:
         {
-            return AlphaSub(iCs, iCb);
+            return AlphaSub(iCb, iCs);
         }
         break;
 
         case ODYSSEY_ALPHAMODE_Add:
         {
-            return AlphaAdd(iCs, iCb);
+            return AlphaAdd(iCb, iCs);
         }
         break;
 
         case ODYSSEY_ALPHAMODE_Mul:
         {
-            return AlphaMul(iCs, iCb);
+            return AlphaMul(iCb, iCs);
         }
         break;
 
         case ODYSSEY_ALPHAMODE_Min:
         {
-            return AlphaMin(iCs, iCb);
+            return AlphaMin(iCb, iCs);
         }
         break;
 
         case ODYSSEY_ALPHAMODE_Max:
         {
-            return AlphaMax(iCs, iCb);
+            return AlphaMax(iCb, iCs);
         }
         break;
     }
@@ -731,13 +755,13 @@ float4 BlendSeparable(float4 iCb, float4 iCs, float iOpacity, uint iBlendMode, u
     float cbB = iCb.z;
     float csA = iCs.w * iOpacity;
     float cbA = iCb.w;
-    if (csA == 0.f)
-        return iCb;
 
     float comp = AlphaNormal(cbA, csA);
-    outColor.x = (1.0f - (csA / comp)) * cbR + (csA / comp) * ((1.0f - cbA) * csR + cbA * BlendComponent(cbR, csR, iBlendMode));
-    outColor.y = (1.0f - (csA / comp)) * cbG + (csA / comp) * ((1.0f - cbA) * csG + cbA * BlendComponent(cbG, csG, iBlendMode));
-    outColor.z = (1.0f - (csA / comp)) * cbB + (csA / comp) * ((1.0f - cbA) * csB + cbA * BlendComponent(cbB, csB, iBlendMode));
+    comp = comp == 0.f ? 0.f : csA / comp;
+
+    outColor.x = (1.0f - comp ) * cbR + comp  * ((1.0f - cbA) * csR + cbA * BlendComponent(cbR, csR, iBlendMode));
+    outColor.y = (1.0f - comp ) * cbG + comp  * ((1.0f - cbA) * csG + cbA * BlendComponent(cbG, csG, iBlendMode));
+    outColor.z = (1.0f - comp ) * cbB + comp  * ((1.0f - cbA) * csB + cbA * BlendComponent(cbB, csB, iBlendMode));
 
     outColor.w = AlphaBlend(cbA, csA, iAlphaMode);
 
@@ -817,19 +841,17 @@ float4 BlendNonSeparable(float4 iCb, float4 iCs, float iOpacity, uint iBlendMode
     float cbB = iCb.z;
     float csA = iCs.w * iOpacity;
     float cbA = iCb.w;
-    if (csA == 0.f)
-        return iCb;
 
     float comp = AlphaNormal(cbA, csA);
+    comp = comp == 0.f ? 0.f : csA / comp;
 
     float3 cb3 = float3(iCb.x, iCb.y, iCb.z);
     float3 cs3 = float3(iCs.x, iCs.y, iCs.z);
     float3 components = BlendNonSeparableComponents(cb3, cs3, iBlendMode);
 
-    outColor.x = (1.0f - (csA / comp)) * cbR + (csA / comp) * ((1.0f - cbA) * csR + cbA * components.x);
-    outColor.y = (1.0f - (csA / comp)) * cbG + (csA / comp) * ((1.0f - cbA) * csG + cbA * components.y);
-    outColor.z = (1.0f - (csA / comp)) * cbB + (csA / comp) * ((1.0f - cbA) * csB + cbA * components.z);
-
+    outColor.x = (1.0f - comp) * cbR + comp * ((1.0f - cbA) * csR + cbA * components.x);
+    outColor.y = (1.0f - comp) * cbG + comp * ((1.0f - cbA) * csG + cbA * components.y);
+    outColor.z = (1.0f - comp) * cbB + comp * ((1.0f - cbA) * csB + cbA * components.z);
     outColor.w = AlphaBlend(cbA, csA, iAlphaMode);
 
     return outColor;

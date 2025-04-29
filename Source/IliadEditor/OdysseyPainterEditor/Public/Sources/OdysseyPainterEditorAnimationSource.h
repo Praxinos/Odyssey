@@ -58,8 +58,6 @@ private:
     void OnCurrentFrameChanged();
     void OnRenderingChanged(const FOdysseyRenderingChangedEvent& iEvent);
 
-    void OnPlayerStatusChanged();
-
 public:
     UOdysseyAnimation* mAnimation;
     //TObjectPtr<UOdysseyAnimationTexture> mTexture;
