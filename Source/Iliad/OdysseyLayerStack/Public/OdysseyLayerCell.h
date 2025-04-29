@@ -56,7 +56,7 @@ public:
     void SetExposure(int Value);
 
     UFUNCTION(BlueprintPure, Category="Odyssey|Cell")
-    UTexture2D* GetTexture() const;
+    UTexture2D* GetRenderTexture() const;
 
 #if WITH_EDITOR
     UFUNCTION(BlueprintPure, Category="Odyssey|Cell")

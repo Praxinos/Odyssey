@@ -18,4 +18,38 @@ class ODYSSEYTEXTURE_API UOdysseyTextureLayer
 public:
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     UTexture2D* GetTexture() const;
+
+    UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
+    UTexture2D* GetRenderTexture() const;
+
+public:
+    virtual bool BuildRenderPipeline( FFrameNumber iFrame, uint64 iType, FOdysseyTextureRenderFunction& oRenderFunction ) const override;
+
+public:
+#if WITH_EDITOR
+    FSimpleMulticastDelegate& OnThumbnailChanged();
+    FSimpleMulticastDelegate& OnThumbnailDirtied();
+#endif
+
+protected:
+#if WITH_EDITOR
+    void DirtyThumbnail();
+    void UndirtyThumbnail();
+    bool IsThumbnailDirty() const;
+#endif
+
+protected:
+    UPROPERTY(NonTransactional)
+    mutable TObjectPtr<UTexture2D> Texture; //mutable is temporary, will be removed when layers will be 100% GPU based and there's no more dependency on ULIS
+
+#if WITH_EDITORONLY_DATA
+    UPROPERTY(NonTransactional)
+    bool ThumbnailIsDirty = false;
+#endif
+
+private:
+#if WITH_EDITOR
+    FSimpleMulticastDelegate mOnThumbnailChanged;
+    FSimpleMulticastDelegate mOnThumbnailDirtied;
+#endif
 };

@@ -99,7 +99,7 @@ UOdysseyLayerCell::SetExposure(int Value)
 }
 
 UTexture2D*
-UOdysseyLayerCell::GetTexture() const
+UOdysseyLayerCell::GetRenderTexture() const
 {
     return Texture;
 }

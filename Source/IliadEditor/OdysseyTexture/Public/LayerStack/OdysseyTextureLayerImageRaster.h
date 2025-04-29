@@ -50,7 +50,9 @@ protected:
 public:
     // UObject overrides
     virtual void PostInitProperties() override;
-    virtual void PostDuplicate(bool bDuplicateForPIE) override;
+    virtual void PostLoad() override;
+    virtual void PostDuplicate(EDuplicateMode::Type iDuplicateMode) override;
+    virtual void PreSave(FObjectPreSaveContext SaveContext) override;
 
 public:
     //UObject overrides
@@ -64,9 +66,13 @@ public:
 
 public:
     //IOdysseyRenderingAbility overrides
+    virtual bool BuildRenderPipeline( FFrameNumber iFrame, uint64 iType, FOdysseyTextureRenderFunction& oRenderFunction ) const override;
     virtual TArray<FGuid> GetRenderingComposition(uint64 iRenderType, int iFrame = 0) const override;
 
 private:
+    void InitTexture() const;
+    void InitRasterBlock() const;
+
     TArray<::ULIS::FEvent> RasterBlockPostProcess(const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock>>& iOriginalBlocks, const FOdysseyInvalidTileMap& iInvalidMap, const TArray<::ULIS::FEvent>& iWaitList);
 
 private:
@@ -75,7 +81,7 @@ private:
     friend class FOdysseyTextureLayerImageRasterImport;
 
 private:
-    TSharedPtr<FOdysseyRasterBlock> RasterBlock;
+    mutable TSharedPtr<FOdysseyRasterBlock> RasterBlock;
 
 private:
     UFUNCTION(BlueprintSetter)

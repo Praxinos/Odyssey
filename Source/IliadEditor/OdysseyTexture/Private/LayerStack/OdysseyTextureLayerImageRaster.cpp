@@ -18,6 +18,7 @@
 #include "OdysseyTextureLayerImageRasterExport.h"
 #include "OdysseyTextureLayerStack.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
+#include "TextureCompiler.h"
 
 #define LOCTEXT_NAMESPACE "Texture"
 
@@ -31,21 +32,85 @@ UOdysseyTextureLayerImageRaster::UOdysseyTextureLayerImageRaster()
     Icon = FSlateIcon("OdysseyStyle", "OdysseyLayerStack.LayerBitmap16");
 }
 
+void
+UOdysseyTextureLayerImageRaster::PostLoad()
+{
+    Super::PostLoad();
+
+    if (RasterBlock)
+    {
+        InitRasterBlock();
+        InitTexture();
+    }
+}
+
+void
+UOdysseyTextureLayerImageRaster::InitRasterBlock() const
+{
+    if ( !RasterBlock )
+    {
+        UTexture2D* texture = GetTexture();
+        if (!texture)
+            return;
+
+        //The layer a different texture with different parameters
+        //Ensure the block uses those parameters
+        ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
+        //let's ensure the format has alpha, so add alpha channel of needed
+        format = static_cast< ::ULIS::eFormat >(format | ULIS_W_ALPHA( 1 ) );
+        int width = texture->Source.GetSizeX();
+        int height = texture->Source.GetSizeY();
+
+        RasterBlock = MakeShared<FOdysseyRasterBlock>(const_cast<UOdysseyTextureLayerImageRaster*>(this), width, height, format);
+    }
+
+    RasterBlock->OnBlockChanged().RemoveAll(this);
+    RasterBlock->OnBlockCommited().RemoveAll(this);
+
+    RasterBlock->OnBlockChanged().AddUObject(const_cast<UOdysseyTextureLayerImageRaster*>(this), &UOdysseyTextureLayerImageRaster::OnBlockChanged);
+    RasterBlock->OnBlockCommited().AddUObject(const_cast<UOdysseyTextureLayerImageRaster*>(this), &UOdysseyTextureLayerImageRaster::OnBlockCommited);
+    RasterBlock->PostProcess().BindUObject(const_cast<UOdysseyTextureLayerImageRaster*>(this), &UOdysseyTextureLayerImageRaster::RasterBlockPostProcess);
+}
+
+void
+UOdysseyTextureLayerImageRaster::InitTexture() const
+{
+    if ( !Texture )
+    {
+        Texture = NewObject<UTexture2D>(const_cast<UOdysseyTextureLayerImageRaster*>(this), TEXT("Texture"));
+        Texture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
+        Texture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
+        Texture->Filter = TextureFilter::TF_Trilinear;
+    }
+
+    TSharedPtr<FOdysseyRasterBlock> rasterBlock = GetRasterBlock(); //ensures mRasterBlock exists
+    InitTextureWithBlockData(rasterBlock->GetBlock().Get(), Texture, TextureSourceFormatForULISFormat(rasterBlock->GetFormat()));
+    Texture->UpdateResource();
+    FTextureCompilingManager::Get().FinishCompilation({ Texture });
+}
+
 TSharedPtr<FOdysseyRasterBlock>
 UOdysseyTextureLayerImageRaster::GetRasterBlock() const
 {
+    if (!RasterBlock)
+        InitRasterBlock();
+
     return RasterBlock;
 }
 
 void
 UOdysseyTextureLayerImageRaster::OnBlockChanged(const TArray<::ULIS::FRectI>& iRects)
 {
+    FOdysseySurfaceTexture2DEditable surface(Texture, GetRasterBlock()->GetBlock());
+    surface.Invalidate(iRects);
     RenderingChanged(::ULISUtils::ToIntRects(iRects), true);
 }
 
 void
 UOdysseyTextureLayerImageRaster::OnBlockCommited(const TArray<::ULIS::FRectI>& iRects)
 {
+    FOdysseySurfaceTexture2DEditable surface(Texture, GetRasterBlock()->GetBlock());
+    surface.Invalidate(iRects);
     RenderingChanged(::ULISUtils::ToIntRects(iRects));
 }
 
@@ -110,16 +175,14 @@ UOdysseyTextureLayerImageRaster::PostInitProperties()
     }
 }
 
+
+
 void
-UOdysseyTextureLayerImageRaster::PostDuplicate(bool bDuplicateForPIE)
+UOdysseyTextureLayerImageRaster::PostDuplicate(EDuplicateMode::Type iDuplicateMode)
 {
-    Super::PostDuplicate(bDuplicateForPIE);
+    Super::PostDuplicate(iDuplicateMode);
 
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
-    if (!layerStack)
-        return;
-
-    UTexture2D* texture = layerStack->GetTexture();
+    UTexture2D* texture = GetTexture();
     if (!texture)
         return;
 
@@ -130,8 +193,15 @@ UOdysseyTextureLayerImageRaster::PostDuplicate(bool bDuplicateForPIE)
     format = static_cast< ::ULIS::eFormat >(format | ULIS_W_ALPHA( 1 ) );
     int width = texture->Source.GetSizeX();
     int height = texture->Source.GetSizeY();
-    RasterBlock->PostDuplicate();
-    RasterBlock->ConvertTo(width, height, format);
+
+    if (RasterBlock)
+    {
+        RasterBlock->PostDuplicate();
+        RasterBlock->ConvertTo(width, height, format);
+
+        InitRasterBlock();
+        InitTexture();
+    }
 }
 
 FOdysseyMediaProvider
@@ -212,10 +282,37 @@ UOdysseyTextureLayerImageRaster::GetRenderingComposition(uint64 iRenderType, int
     return { GetRenderingId() };
 }
 
+bool
+UOdysseyTextureLayerImageRaster::BuildRenderPipeline(
+    FFrameNumber iFrame,
+    uint64 iType,
+    FOdysseyTextureRenderFunction& oRenderFunction
+) const
+{
+
+#if WITH_EDITOR
+    if ( !Texture )
+        InitTexture();
+#endif
+
+    return Super::BuildRenderPipeline(iFrame, iType, oRenderFunction);
+}
+
 void
 UOdysseyTextureLayerImageRaster::IsAlphaLockedBlueprintSetter(bool Value)
 {
     FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyTextureLayerImageRaster, IsAlphaLocked), Value);
+}
+
+void
+UOdysseyTextureLayerImageRaster::PreSave(FObjectPreSaveContext SaveContext)
+{
+    Super::PreSave(SaveContext);
+
+    TSharedPtr<FOdysseyRasterBlock> rasterBlock = GetRasterBlock(); //ensures mRasterBlock exists
+    InitTextureWithBlockData(rasterBlock->GetBlock().Get(), Texture, TextureSourceFormatForULISFormat(rasterBlock->GetFormat()));
+    Texture->UpdateResource();
+    FTextureCompilingManager::Get().FinishCompilation({ Texture });
 }
 
 #undef LOCTEXT_NAMESPACE
