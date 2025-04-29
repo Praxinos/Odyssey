@@ -241,7 +241,7 @@ UOdysseyAnimationCellImageRaster::OldSerialize(FArchive& Ar)
 }
 
 void
-UOdysseyAnimationCellImageRaster::RenderToTexture_RenderThread(FRDGBuilder& iGraphBuilder, FRDGTextureRef iDestinationTexture, ERHIFeatureLevel::Type iFeatureLevel, FFrameNumber iFrame, const FIntRect& iSrcRect, const FIntRect& iDstRect) const
+UOdysseyAnimationCellImageRaster::RenderToTexture_RenderThread(FRDGBuilder& iGraphBuilder, FRDGTextureRef iDestinationTexture, ERHIFeatureLevel::Type iFeatureLevel, FFrameNumber iFrame, const FMatrix& iSrcTransform, const FIntRect& iSrcRect, const FIntRect& iDstRect) const
 {
     FCanvas* canvas = FCanvas::Create(iGraphBuilder, iDestinationTexture, nullptr, FGameTime(), iFeatureLevel);
     double x = iDstRect.Min.X;
@@ -259,7 +259,7 @@ UOdysseyAnimationCellImageRaster::RenderToTexture_RenderThread(FRDGBuilder& iGra
 }
 
 void
-UOdysseyAnimationCellImageRaster::BlendToTexture_RenderThread(FRDGBuilder& iGraphBuilder, FRDGTextureRef iDestinationTexture, ERHIFeatureLevel::Type iFeatureLevel, FFrameNumber iFrame, const FIntRect& iSrcRect, const FIntRect& iDstRect, EOdysseyBlendingMode iBlendMode, float iOpacity) const
+UOdysseyAnimationCellImageRaster::BlendToTexture_RenderThread(FRDGBuilder& iGraphBuilder, FRDGTextureRef iDestinationTexture, ERHIFeatureLevel::Type iFeatureLevel, FFrameNumber iFrame, const FMatrix& iSrcTransform, const FIntRect& iSrcRect, const FIntRect& iDstRect, EOdysseyBlendingMode iBlendMode, float iOpacity) const
 {
     //TODO: Add a FMatrix Transform parameter
     //In Order :

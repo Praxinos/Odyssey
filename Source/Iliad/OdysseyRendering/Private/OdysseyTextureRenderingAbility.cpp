@@ -37,7 +37,7 @@ IOdysseyTextureRenderingAbility::RenderRectAtRect_Implementation(UTextureRenderT
             FRDGBuilder graphBuilder(RHICmdList);
             FRDGTextureRef destinationTexture = graphBuilder.RegisterExternalTexture(CreateRenderTarget(iRenderTarget->GetRenderTargetResource()->GetRenderTargetTexture(), TEXT("Odyssey::Blend::DestinationTexture")));
 
-            RenderToTexture_RenderThread(graphBuilder, destinationTexture, featureLevel, iFrame, iSrcRect, iDstRect);
+            RenderToTexture_RenderThread(graphBuilder, destinationTexture, featureLevel, iFrame, FMatrix::Identity, iSrcRect, iDstRect);
 
             graphBuilder.Execute();
         }

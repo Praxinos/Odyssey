@@ -3,7 +3,7 @@
 
 #pragma once
 
-class FOdysseyTextureRenderer
+class ODYSSEYRENDERING_API FOdysseyTextureRenderer
 {
 public:
     FOdysseyTextureRenderer();

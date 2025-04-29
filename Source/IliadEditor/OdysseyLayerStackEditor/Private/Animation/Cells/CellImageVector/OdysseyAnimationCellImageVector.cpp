@@ -317,7 +317,7 @@ UOdysseyAnimationCellImageVector::OnVectorEngineNotify(FOdysseyVectorGroupPaint*
 }
 
 void
-UOdysseyAnimationCellImageVector::RenderToTexture_RenderThread(FRDGBuilder& iGraphBuilder, FRDGTextureRef iDestinationTexture, ERHIFeatureLevel::Type iFeatureLevel, FFrameNumber iFrame, const FIntRect& iSrcRect, const FIntRect& iDstRect) const
+UOdysseyAnimationCellImageVector::RenderToTexture_RenderThread(FRDGBuilder& iGraphBuilder, FRDGTextureRef iDestinationTexture, ERHIFeatureLevel::Type iFeatureLevel, FFrameNumber iFrame, const FMatrix& iSrcTransform, const FIntRect& iSrcRect, const FIntRect& iDstRect) const
 {
 
 }

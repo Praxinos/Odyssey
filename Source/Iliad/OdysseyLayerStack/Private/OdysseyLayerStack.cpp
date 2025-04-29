@@ -661,12 +661,12 @@ UOdysseyLayerStack::SetIsSRGB(bool Value)
 }
 
 void
-UOdysseyLayerStack::RenderToTexture_RenderThread(FRDGBuilder& iGraphBuilder, FRDGTextureRef iDestinationTexture, ERHIFeatureLevel::Type iFeatureLevel, FFrameNumber iFrame, const FIntRect& iSrcRect, const FIntRect& iDstRect) const
+UOdysseyLayerStack::RenderToTexture_RenderThread(FRDGBuilder& iGraphBuilder, FRDGTextureRef iDestinationTexture, ERHIFeatureLevel::Type iFeatureLevel, FFrameNumber iFrame, const FMatrix& iSrcTransform, const FIntRect& iSrcRect, const FIntRect& iDstRect) const
 {
     //FRDGTextureDesc desc = FRDGTextureDesc::Create2D(iDestinationTexture->Desc.Extent, PF_FloatRGBA, FClearValueBinding::Transparent, TexCreate_ShaderResource | TexCreate_RenderTargetable | NoTiling);
     //FRDGTextureRef renderTarget = graphBuilder.CreateTexture(desc, TEXT("OdysseyLayerStack::RenderTarget"));
 
-    GetLayerRoot()->RenderToTexture_RenderThread(iGraphBuilder, iDestinationTexture, iFeatureLevel, iFrame, iSrcRect, iDstRect);
+    GetLayerRoot()->RenderToTexture_RenderThread(iGraphBuilder, iDestinationTexture, iFeatureLevel, iFrame, FMatrix::Identity, iSrcRect, iDstRect);
 
     /* if (!iRenderTarget)
         return;

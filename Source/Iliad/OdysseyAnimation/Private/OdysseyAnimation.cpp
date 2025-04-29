@@ -135,14 +135,22 @@ UOdysseyAnimation::GetDefaultRenderRect() const
 }
 
 void
-UOdysseyAnimation::RenderToTexture_RenderThread(FRDGBuilder& iGraphBuilder, FRDGTextureRef iDestinationTexture, ERHIFeatureLevel::Type iFeatureLevel, FFrameNumber iFrame, const FIntRect& iSrcRect, const FIntRect& iDstRect) const
+UOdysseyAnimation::RenderToTexture_RenderThread(
+    FRDGBuilder& iGraphBuilder,
+    FRDGTextureRef iDestinationTexture,
+    ERHIFeatureLevel::Type iFeatureLevel,
+    FFrameNumber iFrame,
+    const FMatrix& iSrcTransform,
+    const FIntRect& iSrcRect,
+    const FIntRect& iDstRect
+) const
 {
 #if WITH_EDITOR
     if (!mLayerStack || !mLayerStack->Implements<UOdysseyTextureRenderingAbility>())
         return;
 
     IOdysseyTextureRenderingAbility* renderingInterface = Cast<IOdysseyTextureRenderingAbility>(mLayerStack);
-    renderingInterface->RenderToTexture_RenderThread(iGraphBuilder, iDestinationTexture, iFeatureLevel, iFrame, iSrcRect, iDstRect);
+    renderingInterface->RenderToTexture_RenderThread(iGraphBuilder, iDestinationTexture, iFeatureLevel, iFrame, FMatrix::Identity, iSrcRect, iDstRect);
 #else
     FTextureResource* srcResource = nullptr;
     int frameIndex = GetFrameIndexAtFrame(iFrame.Value);

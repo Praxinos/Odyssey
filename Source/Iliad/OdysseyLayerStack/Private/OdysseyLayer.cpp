@@ -868,7 +868,7 @@ UOdysseyLayer::SetCellsOffsetInteractive(float Value)
 }
 
 void
-UOdysseyLayer::RenderToTexture_RenderThread(FRDGBuilder& iGraphBuilder, FRDGTextureRef iDestinationTexture, ERHIFeatureLevel::Type iFeatureLevel, FFrameNumber iFrame, const FIntRect& iSrcRect, const FIntRect& iDstRect) const
+UOdysseyLayer::RenderToTexture_RenderThread(FRDGBuilder& iGraphBuilder, FRDGTextureRef iDestinationTexture, ERHIFeatureLevel::Type iFeatureLevel, FFrameNumber iFrame, const FMatrix& iSrcTransform, const FIntRect& iSrcRect, const FIntRect& iDstRect) const
 {
     FRDGTextureClearInfo clearInfo;
     clearInfo.Viewport = iDstRect;
@@ -886,7 +886,7 @@ UOdysseyLayer::RenderToTexture_RenderThread(FRDGBuilder& iGraphBuilder, FRDGText
             if (!child->IsActivated())
                 continue;
 
-            child->BlendToTexture_RenderThread(iGraphBuilder, iDestinationTexture, iFeatureLevel, iFrame, iSrcRect, iDstRect, child->GetBlendMode(), child->GetOpacity());
+            child->BlendToTexture_RenderThread(iGraphBuilder, iDestinationTexture, iFeatureLevel, iFrame, FMatrix::Identity, iSrcRect, iDstRect, child->GetBlendMode(), child->GetOpacity());
             //child->RenderToTexture_RenderThread(iGraphBuilder, iDestinationTexture, iFeatureLevel, iFrame, iSrcRect, iDstRect);
         }
     }
@@ -908,12 +908,12 @@ UOdysseyLayer::RenderToTexture_RenderThread(FRDGBuilder& iGraphBuilder, FRDGText
 
         UOdysseyLayerCell* cell = GetCellAtFrame(iFrame.Value);
         if (cell)
-            cell->RenderToTexture_RenderThread(iGraphBuilder, iDestinationTexture, iFeatureLevel, iFrame, iSrcRect, iDstRect);
+            cell->RenderToTexture_RenderThread(iGraphBuilder, iDestinationTexture, iFeatureLevel, iFrame, FMatrix::Identity, iSrcRect, iDstRect);
     }
 }
 
 void
-UOdysseyLayer::BlendToTexture_RenderThread(FRDGBuilder& iGraphBuilder, FRDGTextureRef iDestinationTexture, ERHIFeatureLevel::Type iFeatureLevel, FFrameNumber iFrame, const FIntRect& iSrcRect, const FIntRect& iDstRect, EOdysseyBlendingMode iBlendMode, float iOpacity) const
+UOdysseyLayer::BlendToTexture_RenderThread(FRDGBuilder& iGraphBuilder, FRDGTextureRef iDestinationTexture, ERHIFeatureLevel::Type iFeatureLevel, FFrameNumber iFrame, const FMatrix& iSrcTransform, const FIntRect& iSrcRect, const FIntRect& iDstRect, EOdysseyBlendingMode iBlendMode, float iOpacity) const
 {
     if (bCanHaveChildren)
     {
@@ -923,7 +923,7 @@ UOdysseyLayer::BlendToTexture_RenderThread(FRDGBuilder& iGraphBuilder, FRDGTextu
             if (!child->IsActivated())
                 continue;
 
-            child->BlendToTexture_RenderThread(iGraphBuilder, iDestinationTexture, iFeatureLevel, iFrame, iSrcRect, iDstRect, child->GetBlendMode(), child->GetOpacity());
+            child->BlendToTexture_RenderThread(iGraphBuilder, iDestinationTexture, iFeatureLevel, iFrame, FMatrix::Identity, iSrcRect, iDstRect, child->GetBlendMode(), child->GetOpacity());
             //child->RenderToTexture_RenderThread(iGraphBuilder, iDestinationTexture, iFeatureLevel, iFrame, iSrcRect, iDstRect);
         }
 
@@ -975,7 +975,7 @@ UOdysseyLayer::BlendToTexture_RenderThread(FRDGBuilder& iGraphBuilder, FRDGTextu
 
         UOdysseyLayerCell* cell = GetCellAtFrame(iFrame.Value);
         if (cell)
-            cell->BlendToTexture_RenderThread(iGraphBuilder, iDestinationTexture, iFeatureLevel, iFrame, iSrcRect, iDstRect, BlendMode, Opacity);
+            cell->BlendToTexture_RenderThread(iGraphBuilder, iDestinationTexture, iFeatureLevel, iFrame, FMatrix::Identity, iSrcRect, iDstRect, BlendMode, Opacity);
     }
 };
 
