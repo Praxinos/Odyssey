@@ -15,7 +15,4 @@ class UOdysseyLayerRoot
 
 public:
     UOdysseyLayerRoot();
-
-public:
-    TSharedPtr<FOdysseyTextureRenderer> BuildTextureRenderer(FFrameNumber iFrame, TMap<const IOdysseyTextureRenderingAbility*, FGuid>* iIds = nullptr) const override;
 };

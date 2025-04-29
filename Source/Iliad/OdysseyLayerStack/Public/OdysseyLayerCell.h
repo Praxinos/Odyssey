@@ -50,7 +50,10 @@ public:
 #endif
 
 public:
-    virtual TSharedPtr<FOdysseyTextureRenderer> BuildTextureRenderer(FFrameNumber iFrame, TMap<const IOdysseyTextureRenderingAbility*, FGuid>* iIds = nullptr) const override;
+    virtual FOdysseyTextureRenderFunction BuildRenderPipeline(
+        FFrameNumber iFrame,
+        EOdysseyRenderingType iType
+    ) const override;
 
 #if WITH_EDITOR
     virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const;

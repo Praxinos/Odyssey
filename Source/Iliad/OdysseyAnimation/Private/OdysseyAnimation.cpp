@@ -141,21 +141,24 @@ UOdysseyAnimation::GetDefaultRenderRect() const
     return FIntRect(0, 0, GetWidth(), GetHeight());
 }
 
-TSharedPtr<FOdysseyTextureRenderer>
-UOdysseyAnimation::BuildTextureRenderer(FFrameNumber iFrame, TMap<const IOdysseyTextureRenderingAbility*, FGuid>* iIds) const
+FOdysseyTextureRenderFunction
+UOdysseyAnimation::BuildRenderPipeline(
+    FFrameNumber iFrame,
+    EOdysseyRenderingType iType
+) const
 {
 #if WITH_EDITOR
-    if (!mLayerStack)
-        return nullptr;
+    if ( !mLayerStack )
+        return FOdysseyTextureRenderFunction();
 
-    return mLayerStack->BuildTextureRenderer(iFrame, iIds);
+    return mLayerStack->BuildRenderPipeline(iFrame, iType);
 #else
     if ( PreserveLayerStackAtRuntime )
     {
         if ( !mLayerStack )
-            return nullptr;
+            return FOdysseyTextureRenderFunction();
 
-        return mLayerStack->BuildTextureRenderer(iFrame, iIds);
+        return mLayerStack->BuildRenderPipeline(iFrame, iType);
     }
 
     UTexture2D* srcTexture2D = nullptr;
@@ -167,38 +170,32 @@ UOdysseyAnimation::BuildTextureRenderer(FFrameNumber iFrame, TMap<const IOdyssey
     }
 
     if (!srcTexture2D)
-        return nullptr;
+        return FOdysseyTextureRenderFunction();
 
-    TSharedPtr<FOdysseyTextureRenderer> renderer = MakeShared<FOdysseyTextureRenderer>();
-    FGuid id = renderer->AddChild(
-        renderer->GetRootPassId(),
-        EOdysseyBlendingMode::kNormal,
-        1.0f,
-        FMatrix::Identity,
-        FOdysseyTextureRenderer::FOnExecuteRenderPass::CreateLambda(
-            [this, srcTexture2D](FRDGBuilder& iGraphBuilder, const FOdysseyTextureRenderer::FRenderPassParameters& iParams)
-            {
-                FRDGTextureRef sourceTexture = iGraphBuilder.RegisterExternalTexture(CreateRenderTarget(srcTexture2D->GetResource()->TextureRHI, TEXT("UOdysseyAnimation::sourceTexture")));
-
-                //AddDrawTexturePass ensures format conversions
-                AddDrawTexturePass(
-                    iGraphBuilder,
-                    FScreenPassViewInfo(),
-                    sourceTexture,
-                    iParams.DestinationTexture,
-                    iParams.SrcRect.Min,
-                    iParams.SrcRect.Size(),
-                    iParams.DstRect.Min,
-                    iParams.DstRect.Size()
-                );
-            }
+    return[srcTexture2D](
+        FRDGBuilder& iGraphBuilder,
+        ERHIFeatureLevel::Type iFeatureLevel,
+        FRDGTextureRef iDestinationTexture,
+        const FIntRect& iSrcRect,
+        const FIntRect& iDstRect,
+        const FMatrix& iSrcTransform
         )
-    );
+    {
+        AddClearRenderTargetPass(iGraphBuilder, iDestinationTexture, FLinearColor::Transparent, iDstRect);
 
-    if (iIds)
-        iIds->Add(this, id);
+        FRDGTextureRef sourceTexture = iGraphBuilder.RegisterExternalTexture(CreateRenderTarget(srcTexture2D->GetResource()->TextureRHI, TEXT("UOdysseyAnimation::sourceTexture")));
 
-    return renderer;
+        AddDrawTexturePass(
+            iGraphBuilder,
+            FScreenPassViewInfo(),
+            sourceTexture,
+            iDestinationTexture,
+            iSrcRect.Min,
+            iSrcRect.Size(),
+            iDstRect.Min,
+            iDstRect.Size()
+        );
+    };
 #endif
 }
 

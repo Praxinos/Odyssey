@@ -63,6 +63,7 @@ UOdysseyAnimationCellThumbnailRenderer::Draw(UObject* Object, int32 X, int32 Y, 
     );
     checkboardTileItem.BlendMode = SE_BLEND_Opaque;
     Canvas->DrawItem( checkboardTileItem );
+    Canvas->Flush_GameThread();
 
     UOdysseyAnimationCell* cell = Cast<UOdysseyAnimationCell>(Object);
     if (!cell)
@@ -70,20 +71,21 @@ UOdysseyAnimationCellThumbnailRenderer::Draw(UObject* Object, int32 X, int32 Y, 
 
     const ERHIFeatureLevel::Type featureLevel = Canvas->GetFeatureLevel();
 
-    TSharedPtr<FOdysseyTextureRenderer> renderer = cell->BuildTextureRenderer(FFrameNumber(0));
-
+    FOdysseyTextureRenderFunction childRenderFunction = cell->BuildRenderPipeline(FFrameNumber(0), EOdysseyRenderingType::Render);
+    FIntRect srcRect = cell->GetDefaultRenderRect();
     ENQUEUE_RENDER_COMMAND(UOdysseyAnimationCellThumbnailRenderer_Draw)(
-        [cell, renderer, Viewport, X, Y, Width, Height, featureLevel](FRHICommandListImmediate& RHICmdList)
+        [Viewport, srcRect, X, Y, Width, Height, featureLevel, childRenderFunction](FRHICommandListImmediate& RHICmdList)
         {
             FRDGBuilder graphBuilder(RHICmdList);
             FRDGTextureRef destinationTexture = graphBuilder.RegisterExternalTexture(CreateRenderTarget(Viewport->GetRenderTargetTexture(), TEXT("UOdysseyAnimationCellThumbnailRenderer::Draw")));
 
-            renderer->Render(
+            childRenderFunction(
                 graphBuilder,
-                destinationTexture,
                 featureLevel,
-                cell->GetDefaultRenderRect(),
-                FIntRect(X, Y, Width, Height)
+                destinationTexture,
+                srcRect,
+                FIntRect(X, Y, Width, Height),
+                FMatrix::Identity
             );
 
             graphBuilder.Execute();

@@ -36,19 +36,17 @@ public:
     virtual void BindShaders(FRHICommandList& RHICmdList, FGraphicsPipelineStateInitializer& GraphicsPSOInit, ERHIFeatureLevel::Type InFeatureLevel, const FMatrix& InTransform, const float InGamma, const FMatrix& ColorWeights, const FTexture* Texture) override;
 
 public:
-    static void Execute(
+    static void BlendRect(
         FRDGBuilder& iGraphBuilder,
         ERHIFeatureLevel::Type iFeatureLevel,
-        FRDGTextureRef iSourceTexture,
+        FRDGTextureRef iBackgroundTexture,
+        FRDGTextureRef iForegroundTexture,
         FRDGTextureRef iDestinationTexture,
 
-        FVector2D iPositionInDestination,
-        FVector2D iPositionInSource,
-        FVector2D iSizeInSource,
-        FOdysseyImageAnchor iSourceHandlePosition,
+        const FIntRect& iSrcRect,
+        const FIntRect& iDstRect,
 
-        FVector2D iScale,
-        float iRotationInDegrees,
+        const FMatrix& iTransform,
 
         EOdysseyBlendingMode iBlendMode,
         float iOpacity,

@@ -11,20 +11,18 @@
 void
 UOdysseyShadersBlueprintLibrary::Blend(
     const UObject* WorldContextObject,
-    UTexture* SourceTexture,
+    UTexture* BackgroundTexture,
+    UTexture* ForegroundTexture,
     UTextureRenderTarget2D* DestinationTexture,
-    FVector2D SourcePosition,
-    FVector2D SourceSize,
-    FOdysseyImageAnchor SourceAnchor,
-    FVector2D Position,
-    FVector2D Scale,
-    float RotationInDegrees,
+    FIntRect SourceRect,
+    FIntRect DestinationRect,
+    FMatrix Transform,
     EOdysseyBlendingMode BlendMode,
     float Opacity,
     EOdysseyAntiAliasing AntiAliasing
 )
 {
-    if (!SourceTexture || !DestinationTexture)
+    if (!BackgroundTexture || !ForegroundTexture || !DestinationTexture)
         return;
 
     const ERHIFeatureLevel::Type featureLevel = WorldContextObject->GetWorld() ? WorldContextObject->GetWorld()->GetFeatureLevel() : GMaxRHIFeatureLevel;
@@ -35,28 +33,24 @@ UOdysseyShadersBlueprintLibrary::Blend(
             FRDGBuilder graphBuilder(RHICmdList);
 
             //Register Textures in iGraphBuilder
-            FRDGTextureRef sourceTexture = graphBuilder.RegisterExternalTexture(CreateRenderTarget(SourceTexture->GetResource()->TextureRHI, TEXT("Odyssey::Blend::SourceTexture")));
+            FRDGTextureRef backgroundTexture = graphBuilder.RegisterExternalTexture(CreateRenderTarget(BackgroundTexture->GetResource()->TextureRHI, TEXT("Odyssey::Blend::BackgroundTexture")));
+            FRDGTextureRef foregroundTexture = graphBuilder.RegisterExternalTexture(CreateRenderTarget(ForegroundTexture->GetResource()->TextureRHI, TEXT("Odyssey::Blend::ForegroundTexture")));
             FRDGTextureRef destinationTexture = graphBuilder.RegisterExternalTexture(CreateRenderTarget(DestinationTexture->GetRenderTargetResource()->GetRenderTargetTexture(), TEXT("Odyssey::Blend::DestinationTexture")));
 
-            //Ensure Source Texture Coordinates will stay in Source Texture Boundaries
-            FVector2D sourceSize(
-                FMath::Clamp(SourceSize.X, 0.f, FMath::Max(0.f, SourceTexture->GetResource()->GetSizeX() - SourcePosition.X)),
-                FMath::Clamp(SourceSize.Y, 0.f, FMath::Max(0.f, SourceTexture->GetResource()->GetSizeY() - SourcePosition.Y))
-            );
+            FIntRect sourceRect = SourceRect;
+            sourceRect.Clip(FIntRect(0, 0, BackgroundTexture->GetResource()->GetSizeX(), BackgroundTexture->GetResource()->GetSizeY()));
 
-            FOdysseyBlendShader::Execute(
+            FOdysseyBlendShader::BlendRect(
                 graphBuilder,
                 featureLevel,
-                sourceTexture,
+                backgroundTexture,
+                foregroundTexture,
                 destinationTexture,
 
-                Position,
-                SourcePosition,
-                sourceSize,
-                SourceAnchor,
+                SourceRect,
+                DestinationRect,
 
-                Scale,
-                RotationInDegrees,
+                Transform,
 
                 BlendMode,
                 Opacity,

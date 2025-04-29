@@ -20,16 +20,13 @@ class UOdysseyShadersBlueprintLibrary : public UBlueprintFunctionLibrary
     UFUNCTION(BlueprintCallable, Category = "Odyssey | Shaders")
     static void Blend(
         const UObject* WorldContextObject,
-        UTexture* SourceTexture = nullptr,
+        UTexture* BackgroundTexture = nullptr,
+        UTexture* ForegroundTexture = nullptr,
         UTextureRenderTarget2D* DestinationTexture = nullptr,
-        FVector2D SourcePosition = FVector2D(0.f, 0.f),
-        FVector2D SourceSize = FVector2D(1.f, 1.f),
-        FOdysseyImageAnchor SourceAnchor = FOdysseyImageAnchor(),
-        FVector2D Position = FVector2D(0.f, 0.f),
-        FVector2D Scale = FVector2D(1.f, 1.f),
-        float RotationInDegrees = 0.f,
+        FIntRect SourceRect = FIntRect(),
+        FIntRect DestinationRect = FIntRect(),
+        FMatrix Transform = FMatrix(),
         EOdysseyBlendingMode BlendMode = EOdysseyBlendingMode::kNormal,
-        //TODO: AlphaMode
         float Opacity = 1.f,
         EOdysseyAntiAliasing AntiAliasing = EOdysseyAntiAliasing::NearestNeighbor
     );

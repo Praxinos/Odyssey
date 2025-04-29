@@ -27,7 +27,11 @@ public:
 
 public:
     //IOdysseyRenderingAbility overrides
-    TSharedPtr<FOdysseyTextureRenderer> BuildTextureRenderer(FFrameNumber iFrame, TMap<const IOdysseyTextureRenderingAbility*, FGuid>* iIds = nullptr) const;
+
+    virtual FOdysseyTextureRenderFunction BuildRenderPipeline(
+        FFrameNumber iFrame,
+        EOdysseyRenderingType iType
+    ) const override;
     virtual TArray<FGuid> GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrameIndex) const override;
     virtual FIntRect GetDefaultRenderRect() const override;
 

@@ -174,25 +174,20 @@ UOdysseyLayerCellImageStagger::Break(int Frame, bool bClear)
 }
 #endif
 
-TSharedPtr<FOdysseyTextureRenderer>
-UOdysseyLayerCellImageStagger::BuildTextureRenderer(FFrameNumber iFrame, TMap<const IOdysseyTextureRenderingAbility*, FGuid>* iIds) const
+FOdysseyTextureRenderFunction
+UOdysseyLayerCellImageStagger::BuildRenderPipeline(
+    FFrameNumber iFrame,
+    EOdysseyRenderingType iType
+) const
 {
     int staggerFrame = GetReferenceFrameAtFrame(iFrame.Value);
-    if (staggerFrame == INDEX_NONE)
+    if ( staggerFrame == INDEX_NONE )
         return nullptr;
 
     UOdysseyLayerCell* cell = Cast<UOdysseyLayerCell>(GetLayer()->GetCellAtFrame(staggerFrame));
-    if (!cell)
+    if ( !cell )
         return nullptr;
 
     int cellFrame = staggerFrame - cell->GetFrameRange().GetLowerBoundValue();
-    TMap<const IOdysseyTextureRenderingAbility*, FGuid> ids;
-    TSharedPtr<FOdysseyTextureRenderer> renderer = cell->BuildTextureRenderer(cellFrame, &ids);
-    if (!renderer)
-        return nullptr;
-
-    if (iIds)
-        iIds->Add(this, ids[cell]);
-
-    return renderer;
+    return cell->BuildRenderPipeline(cellFrame, iType);
 }

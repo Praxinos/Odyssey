@@ -180,40 +180,34 @@ UOdysseyLayerCell::IsThumbnailDirty() const
 }
 #endif
 
-TSharedPtr<FOdysseyTextureRenderer>
-UOdysseyLayerCell::BuildTextureRenderer(FFrameNumber iFrame, TMap<const IOdysseyTextureRenderingAbility*, FGuid>* iIds) const
+FOdysseyTextureRenderFunction
+UOdysseyLayerCell::BuildRenderPipeline(
+    FFrameNumber iFrame,
+    EOdysseyRenderingType iType
+) const
 {
-    if (!Texture)
-        return nullptr;
-
-    TSharedPtr<FOdysseyTextureRenderer> renderer = MakeShared<FOdysseyTextureRenderer>();
-    FGuid id = renderer->AddChild(
-        renderer->GetRootPassId(),
-        EOdysseyBlendingMode::kNormal,
-        1.0f,
-        FMatrix::Identity,
-        FOdysseyTextureRenderer::FOnExecuteRenderPass::CreateLambda(
-            [this](FRDGBuilder& iGraphBuilder, const FOdysseyTextureRenderer::FRenderPassParameters& iParams)
-            {
-                FRDGTextureRef sourceTexture = iGraphBuilder.RegisterExternalTexture(CreateRenderTarget(Texture->GetResource()->TextureRHI, TEXT("UOdysseyLayerCellImage::Texture")));
-
-                //AddDrawTexturePass ensures format conversions
-                AddDrawTexturePass(
-                    iGraphBuilder,
-                    FScreenPassViewInfo(),
-                    sourceTexture,
-                    iParams.DestinationTexture,
-                    iParams.SrcRect.Min,
-                    iParams.SrcRect.Size(),
-                    iParams.DstRect.Min,
-                    iParams.DstRect.Size()
-                );
-            }
+    return[this](
+        FRDGBuilder& iGraphBuilder,
+        ERHIFeatureLevel::Type iFeatureLevel,
+        FRDGTextureRef iDestinationTexture,
+        const FIntRect& iSrcRect,
+        const FIntRect& iDstRect,
+        const FMatrix& iSrcTransform
         )
-    );
+    {
+        AddClearRenderTargetPass(iGraphBuilder, iDestinationTexture, FLinearColor::Transparent, iDstRect);
 
-    if (iIds)
-        iIds->Add(this, id);
+        FRDGTextureRef sourceTexture = iGraphBuilder.RegisterExternalTexture(CreateRenderTarget(Texture->GetResource()->TextureRHI, TEXT("UOdysseyLayerCell::sourceTexture")));
 
-    return renderer;
+        AddDrawTexturePass(
+            iGraphBuilder,
+            FScreenPassViewInfo(),
+            sourceTexture,
+            iDestinationTexture,
+            iSrcRect.Min,
+            iSrcRect.Size(),
+            iDstRect.Min,
+            iDstRect.Size()
+        );
+    };
 }

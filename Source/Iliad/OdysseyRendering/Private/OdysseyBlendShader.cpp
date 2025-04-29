@@ -10,29 +10,8 @@
 #include "OdysseyCanvasUtils.h"
 #include "TextureCompiler.h"
 #include "SimpleElementShaders.h"
-
-/* class FOdysseyBlendShaderVS : public FGlobalShader
-{
-    DECLARE_SHADER_TYPE(FOdysseyBlendShaderVS, Global);
-public:
-
-    static bool ShouldCompilePermutation(const FGlobalShaderPermutationParameters& Parameters)
-    {
-        return IsFeatureLevelSupported(Parameters.Platform, ERHIFeatureLevel::SM5) && !IsConsolePlatform(Parameters.Platform);
-    }
-
-    FOdysseyBlendShaderVS() {}
-
-    FOdysseyBlendShaderVS(const ShaderMetaType::CompiledShaderInitializerType& Initializer)
-        : FGlobalShader(Initializer)
-    {
-    }
-
-    void SetParameters(FRHIBatchedShaderParameters& BatchedParameters)
-    {
-    }
-}; */
-
+#include "ScreenPass.h"
+#include "MeshPassProcessor.h"
 
 template<EOdysseyBlendingMode tBlendMode>
 class TOdysseyBlendShaderPS : public FGlobalShader
@@ -49,8 +28,6 @@ public:
         return IsFeatureLevelSupported(Parameters.Platform, ERHIFeatureLevel::SM5) && !IsConsolePlatform(Parameters.Platform);
     }
 };
-
-//IMPLEMENT_SHADER_TYPE(, FOdysseyBlendShaderVS, TEXT("/Plugins/Odyssey/Private/OdysseyBlend.usf"), TEXT("MainVS"), SF_Vertex)
 
 IMPLEMENT_SHADER_TYPE(, TOdysseyBlendShaderPS<EOdysseyBlendingMode::kNormal>, TEXT("/Plugins/Odyssey/Private/OdysseyBlend.usf"), TEXT("BlendNormalPS"), SF_Pixel)
 IMPLEMENT_SHADER_TYPE(, TOdysseyBlendShaderPS<EOdysseyBlendingMode::kTop>, TEXT("/Plugins/Odyssey/Private/OdysseyBlend.usf"), TEXT("BlendTopPS"), SF_Pixel)
@@ -88,65 +65,131 @@ IMPLEMENT_SHADER_TYPE(, TOdysseyBlendShaderPS<EOdysseyBlendingMode::kLuminosity>
 
 TGlobalResource< FSimpleElementVertexDeclaration > GBlendVertexDeclaration;
 
-void FOdysseyBlendShader::Execute(
+void FOdysseyBlendShader::BlendRect(
     FRDGBuilder& iGraphBuilder,
     ERHIFeatureLevel::Type iFeatureLevel,
-    FRDGTextureRef iSourceTexture,
+    FRDGTextureRef iBackgroundTexture,
+    FRDGTextureRef iForegroundTexture,
     FRDGTextureRef iDestinationTexture,
 
-    FVector2D iPositionInDestination,
-    FVector2D iPositionInSource,
-    FVector2D iSizeInSource,
-    FOdysseyImageAnchor iSourceHandlePosition,
+    const FIntRect& iSrcRect,
+    const FIntRect& iDstRect,
 
-    FVector2D iScale,
-    float iRotationInDegrees,
+    const FMatrix& iTransform,
 
     EOdysseyBlendingMode iBlendMode,
     float iOpacity,
     EOdysseyAntiAliasing iAntiAliasing
 )
 {
-    //Retrieve Anti Aliasing Sampler State
-    /* FSamplerStateRHIRef samplerStateRHI = Odyssey::GetSamplerStateForAntiAliasing(iAntiAliasing);
+    FRDGTextureRef backgroundTexture = iBackgroundTexture;
+    FRDGTextureRef foregroundTexture = iForegroundTexture;
+    FRDGTextureRef destinationTexture = iDestinationTexture;
 
-    FVector2D scaledSourceSize = iSizeInSource * iScale;
+    if ( iBackgroundTexture == iDestinationTexture )
+    {
+        FRDGTextureDesc desc = FRDGTextureDesc::Create2D(
+            destinationTexture->Desc.Extent,
+            destinationTexture->Desc.Format,
+            FClearValueBinding::Transparent,
+            ETextureCreateFlags::ShaderResource | ETextureCreateFlags::RenderTargetable
+        );
+        backgroundTexture = iGraphBuilder.CreateTexture(desc, TEXT("FOdysseyBlendShader::BackgroundTexture"));
+        AddClearRenderTargetPass(iGraphBuilder, backgroundTexture, FLinearColor::Transparent, iDstRect);
+
+        //Copy Destination Texture to Background Texture
+        AddCopyTexturePass(
+            iGraphBuilder,
+            destinationTexture,
+            backgroundTexture,
+            iDstRect.Min,
+            iDstRect.Min,
+            iDstRect.Size()
+        );
+    }
+
+    FSamplerStateRHIRef samplerStateRHI = Odyssey::GetSamplerStateForAntiAliasing(iAntiAliasing);
 
     //Alloc Shader Parameters
     FOdysseyBlendShaderParameters* shaderParameters = iGraphBuilder.AllocParameters<FOdysseyBlendShaderParameters>();
-
-    shaderParameters->SourceTexture = iSourceTexture;
+    shaderParameters->RenderTargets[0] = FRenderTargetBinding(backgroundTexture, ERenderTargetLoadAction::ELoad);
+    shaderParameters->SourceTexture = foregroundTexture;
     shaderParameters->SourceTextureSampler = samplerStateRHI;
-    shaderParameters->DestinationTexture = iDestinationTexture;
+    shaderParameters->DestinationTexture = backgroundTexture;
     shaderParameters->DestinationTextureSampler = samplerStateRHI;
-
-    shaderParameters->SourcePosition = FVector2f(iPositionInSource.X, iPositionInSource.Y);
-    shaderParameters->SourceSize = FVector2f(iSizeInSource.X, iSizeInSource.Y);
-    shaderParameters->DestinationPosition = FVector2f(iPositionInDestination.X, iPositionInDestination.Y);
-    shaderParameters->DestinationSize = FVector2f(scaledSourceSize.X, scaledSourceSize.Y);
-
     shaderParameters->Opacity = FMath::Clamp(iOpacity, 0.f, 1.f);
 
     //Create Shader
     TRefCountPtr< FOdysseyBlendShader > blendShader(new FOdysseyBlendShader(shaderParameters, iBlendMode));
 
-    //Create a Canvas to draw with the shader
-    FCanvas* canvas = FCanvas::Create(iGraphBuilder, iDestinationTexture, nullptr, FGameTime(), iFeatureLevel);
+    FIntPoint foregroundTextureSize = foregroundTexture->Desc.Extent;
+    FIntPoint backgroundTextureSize = backgroundTexture->Desc.Extent;
 
-    //Draw a Quad
-    /*Odyssey::CanvasUtils::DrawTransformedQuad(
-        canvas,
-        blendShader,
-        iPositionInDestination,
-        iSizeInSource,
-        iSourceHandlePosition,
-        iScale,
-        iRotationInDegrees,
-        FVector2D(iDestinationTexture->Desc.GetSize().X, iDestinationTexture->Desc.GetSize().Y)
+    iGraphBuilder.AddPass(
+        RDG_EVENT_NAME("OdysseyBlendShader"),
+        shaderParameters,
+        ERDGPassFlags::Raster,
+        [iFeatureLevel, iDstRect, iSrcRect, foregroundTextureSize, backgroundTextureSize, blendShader](FRHICommandListImmediate& RHICmdList)
+        {
+            FBatchedElements blendBatchedElements;
+
+            double x = iDstRect.Min.X;
+            double y = iDstRect.Min.Y;
+            double w = iDstRect.Width();
+            double h = iDstRect.Height();
+            float u0 = float(iSrcRect.Min.X) / foregroundTextureSize.X;
+            float v0 = float(iSrcRect.Min.Y) / foregroundTextureSize.Y;
+            float u1 = float(iSrcRect.Max.X) / foregroundTextureSize.X;
+            float v1 = float(iSrcRect.Max.Y) / foregroundTextureSize.Y;
+
+            int32 topLeftVertex = blendBatchedElements.AddVertex(FVector4(x, y, 0, 1), FVector2D(u0, v0), FLinearColor::White, FHitProxyId());
+            int32 topRightVertex = blendBatchedElements.AddVertex(FVector4(x + w, y, 0, 1), FVector2D(u1, v0), FLinearColor::White, FHitProxyId());
+            int32 bottomLeftVertex = blendBatchedElements.AddVertex(FVector4(x, y + h, 0, 1), FVector2D(u0, v1), FLinearColor::White, FHitProxyId());
+            int32 bottomRightVertex = blendBatchedElements.AddVertex(FVector4(x + w, y + h, 0, 1), FVector2D(u1, v1), FLinearColor::White, FHitProxyId());
+
+            blendBatchedElements.AddTriangle(topLeftVertex, topRightVertex, bottomRightVertex, blendShader.GetReference(), SE_BLEND_Opaque);
+            blendBatchedElements.AddTriangle(topLeftVertex, bottomRightVertex, bottomLeftVertex, blendShader.GetReference(), SE_BLEND_Opaque);
+
+            FMeshPassProcessorRenderState DrawRenderState;
+            DrawRenderState.SetDepthStencilState(TStaticDepthStencilState<false, CF_Always>::GetRHI());
+
+            // Guard against division by zero.
+            uint32 ViewSizeX = FMath::Max<uint32>(backgroundTextureSize.X, 1.f);
+            uint32 ViewSizeY = FMath::Max<uint32>(backgroundTextureSize.Y, 1.f);
+
+            FMatrix transform = AdjustProjectionMatrixForRHI(
+                FTranslationMatrix(FVector(0, 0, 0)) *
+                FMatrix(
+                FPlane(1.0f / (ViewSizeX / 2.0f), 0.0, 0.0f, 0.0f),
+                FPlane(0.0f, -1.0f / (ViewSizeY / 2.0f), 0.0f, 0.0f),
+                FPlane(0.0f, 0.0f, 1.0f, 0.0f),
+                FPlane(-1.0f, 1.0f, 0.0f, 1.0f)
+            )
+            );
+
+            FSceneView proxySceneView = FBatchedElements::CreateProxySceneView(transform, FIntRect(0, 0, backgroundTextureSize.X, backgroundTextureSize.Y));
+
+            blendBatchedElements.Draw(
+                RHICmdList,
+                DrawRenderState,
+                iFeatureLevel,
+                proxySceneView,
+                false
+            );
+        }
     );
 
-    //Ask the canvas to initiate rendering of the quad
-    canvas->Flush_RenderThread(iGraphBuilder, true); */
+    if ( iBackgroundTexture == iDestinationTexture )
+    {
+        AddCopyTexturePass(
+            iGraphBuilder,
+            backgroundTexture,
+            destinationTexture,
+            iDstRect.Min,
+            iDstRect.Min,
+            iDstRect.Size()
+        );
+    }
 }
 
 FOdysseyBlendShader::FOdysseyBlendShader(FOdysseyBlendShaderParameters* iPixelShaderParams, EOdysseyBlendingMode iBlendMode)

@@ -674,10 +674,13 @@ UOdysseyLayerStack::SetIsSRGB(bool Value)
     RenderingChanged();
 }
 
-TSharedPtr<FOdysseyTextureRenderer>
-UOdysseyLayerStack::BuildTextureRenderer(FFrameNumber iFrame, TMap<const IOdysseyTextureRenderingAbility*, FGuid>* iIds) const
+FOdysseyTextureRenderFunction
+UOdysseyLayerStack::BuildRenderPipeline(
+    FFrameNumber iFrame,
+    EOdysseyRenderingType iType
+) const
 {
-    return GetLayerRoot()->BuildTextureRenderer(iFrame, iIds);
+    return GetLayerRoot()->BuildRenderPipeline(iFrame, iType);
 }
 
 TArray<FGuid>

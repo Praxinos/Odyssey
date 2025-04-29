@@ -58,12 +58,12 @@ UOdysseyAnimationCellImageVector::GetDefaultRenderRect() const
     return FIntRect(0, 0, animation->GetWidth(), animation->GetHeight());
 }
 
-
-TSharedPtr<FOdysseyTextureRenderer>
-UOdysseyAnimationCellImageVector::BuildTextureRenderer(FFrameNumber iFrame, TMap<const IOdysseyTextureRenderingAbility*, FGuid>* iIds) const
+FOdysseyTextureRenderFunction
+UOdysseyAnimationCellImageVector::BuildRenderPipeline(
+    FFrameNumber iFrame,
+    EOdysseyRenderingType iType
+) const
 {
-    TSharedPtr<FOdysseyTextureRenderer> renderer = MakeShared<FOdysseyTextureRenderer>();
-
 #if WITH_EDITOR
     bool drawingFlagsChanged = UpdateDrawingFlags();
     if ( !Texture || drawingFlagsChanged )
@@ -79,34 +79,7 @@ UOdysseyAnimationCellImageVector::BuildTextureRenderer(FFrameNumber iFrame, TMap
     }
 #endif
 
-    FGuid id = renderer->AddChild(
-        renderer->GetRootPassId(),
-        EOdysseyBlendingMode::kNormal,
-        1.0f,
-        FMatrix::Identity,
-        FOdysseyTextureRenderer::FOnExecuteRenderPass::CreateLambda(
-        [this](FRDGBuilder& iGraphBuilder, const FOdysseyTextureRenderer::FRenderPassParameters& iParams)
-    {
-        FRDGTextureRef sourceTexture = iGraphBuilder.RegisterExternalTexture(CreateRenderTarget(Texture->GetResource()->TextureRHI, TEXT("UOdysseyAnimation::sourceTexture")));
-
-        AddDrawTexturePass(
-            iGraphBuilder,
-            FScreenPassViewInfo(),
-            sourceTexture,
-            iParams.DestinationTexture,
-            iParams.SrcRect.Min,
-            iParams.SrcRect.Size(),
-            iParams.DstRect.Min,
-            iParams.DstRect.Size()
-        );
-    }
-    )
-    );
-
-    if ( iIds )
-        iIds->Add(this, id);
-
-    return renderer;
+    return Super::BuildRenderPipeline(iFrame, iType);
 }
 
 #if WITH_EDITOR

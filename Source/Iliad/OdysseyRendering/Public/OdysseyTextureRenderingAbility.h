@@ -8,6 +8,22 @@
 
 #include "OdysseyTextureRenderingAbility.generated.h"
 
+UENUM()
+enum class EOdysseyTextureRenderingMode
+{
+    Runtime,
+    Editor,
+
+};
+
+typedef TFunction< void(
+    FRDGBuilder& /*iGraphBuilder*/,
+    ERHIFeatureLevel::Type /*iFeatureLevel*/,
+    FRDGTextureRef /*iDestinationTexture*/,
+    const FIntRect& /*iSrcRect*/,
+    const FIntRect& /*iDstRect*/,
+    const FMatrix& /*iSrcTransform*/) > FOdysseyTextureRenderFunction;
+
 UINTERFACE(BlueprintType)
 class ODYSSEYRENDERING_API UOdysseyTextureRenderingAbility : public UOdysseyRenderingAbility
 {
@@ -36,28 +52,8 @@ public:
     void RenderRectAtRect_Implementation(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, const FIntRect& iSrcRect, const FIntRect& iDstRect) const;
 
 public:
-    virtual TSharedPtr<FOdysseyTextureRenderer> BuildTextureRenderer(FFrameNumber iFrame, TMap<const IOdysseyTextureRenderingAbility*, FGuid>* iIds = nullptr) const = 0;
-
-protected:
-    /* virtual void RenderToTexture_RenderThread(
-        FRDGBuilder& iGraphBuilder,
-        FRDGTextureRef iDestinationTexture,
-        FRDGTextureRef iChildrenTexture,
-        ERHIFeatureLevel::Type iFeatureLevel,
+    virtual FOdysseyTextureRenderFunction BuildRenderPipeline(
         FFrameNumber iFrame,
-        const FMatrix& iSrcTransform,
-        const FIntRect& iSrcRect,
-        const FIntRect& iDstRect
-    ) const = 0; */
-/*
-    virtual void RenderToTexture_RenderThread(
-        FRDGBuilder& iGraphBuilder,
-        FRDGTextureRef iDestinationTexture,
-        ERHIFeatureLevel::Type iFeatureLevel,
-        FFrameNumber iFrame,
-        const FMatrix& iSrcTransform,
-        const FIntRect& iSrcRect,
-        const FIntRect& iDstRect
+        EOdysseyRenderingType iType
     ) const = 0;
-*/
 };

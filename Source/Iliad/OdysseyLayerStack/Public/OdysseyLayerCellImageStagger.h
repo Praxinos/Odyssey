@@ -22,7 +22,10 @@ class ODYSSEYLAYERSTACK_API UOdysseyLayerCellImageStagger
 
 public:
     //IOdysseyRenderingAbility overrides
-    virtual TSharedPtr<FOdysseyTextureRenderer> BuildTextureRenderer(FFrameNumber iFrame, TMap<const IOdysseyTextureRenderingAbility*, FGuid>* iIds = nullptr) const override;
+    virtual FOdysseyTextureRenderFunction BuildRenderPipeline(
+        FFrameNumber iFrame,
+        EOdysseyRenderingType iType
+    ) const override;
     virtual TArray<FGuid> GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrameIndex) const override;
     virtual FIntRect GetDefaultRenderRect() const override;
     virtual void OldSerialize(FArchive& Ar) override; //DEPRECATED: Keep that for compatibility with early versions of Odyssey
