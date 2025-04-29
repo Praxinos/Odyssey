@@ -35,9 +35,26 @@ IOdysseyTextureRenderingAbility::RenderRectAtRect_Implementation(UTextureRenderT
         [this, iRenderTarget, iFrame, iSrcRect, iDstRect, featureLevel](FRHICommandListImmediate& RHICmdList)
         {
             FRDGBuilder graphBuilder(RHICmdList);
-            FRDGTextureRef destinationTexture = graphBuilder.RegisterExternalTexture(CreateRenderTarget(iRenderTarget->GetRenderTargetResource()->GetRenderTargetTexture(), TEXT("Odyssey::Blend::DestinationTexture")));
 
-            RenderToTexture_RenderThread(graphBuilder, destinationTexture, featureLevel, iFrame, FMatrix::Identity, iSrcRect, iDstRect);
+            FRDGTextureRef destinationTexture = iRenderTarget->GetRenderTargetResource()->GetRenderTargetTexture( graphBuilder );
+            FRDGTextureDesc desc = FRDGTextureDesc::Create2D(
+                destinationTexture->Desc.Extent,
+                destinationTexture->Desc.Format,
+                FClearValueBinding::Transparent,
+                ETextureCreateFlags::ShaderResource | ETextureCreateFlags::RenderTargetable
+            );
+
+            FRDGTextureRef outputTexture = graphBuilder.CreateTexture(desc, TEXT("IOdysseyTextureRenderingAbility::outputTexture"));
+            RenderToTexture_RenderThread(graphBuilder, outputTexture, featureLevel, iFrame, FMatrix::Identity, iSrcRect, iDstRect);
+
+            AddCopyTexturePass(
+                graphBuilder,
+                outputTexture,
+                destinationTexture,
+                iSrcRect.Min,
+                iDstRect.Min,
+                iDstRect.Size()
+            );
 
             graphBuilder.Execute();
         }

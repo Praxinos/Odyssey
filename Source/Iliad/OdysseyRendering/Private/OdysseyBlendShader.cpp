@@ -108,7 +108,7 @@ void FOdysseyBlendShader::Execute(
 )
 {
     //Retrieve Anti Aliasing Sampler State
-    FSamplerStateRHIRef samplerStateRHI = Odyssey::GetSamplerStateForAntiAliasing(iAntiAliasing);
+    /* FSamplerStateRHIRef samplerStateRHI = Odyssey::GetSamplerStateForAntiAliasing(iAntiAliasing);
 
     FVector2D scaledSourceSize = iSizeInSource * iScale;
 

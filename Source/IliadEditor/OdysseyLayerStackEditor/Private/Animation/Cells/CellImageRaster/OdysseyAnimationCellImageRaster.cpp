@@ -15,6 +15,7 @@
 #include "CanvasTypes.h"
 #include "CanvasItem.h"
 #include "RenderGraphBuilder.h"
+#include "RenderGraphUtils.h"
 #include "OdysseyBlendShader.h"
 #include "OdysseyPixelFormat.h"
 #include "TextureCompiler.h"
@@ -269,21 +270,19 @@ UOdysseyAnimationCellImageRaster::BlendToTexture_RenderThread(FRDGBuilder& iGrap
     //===================================
     FRDGTextureDesc desc = FRDGTextureDesc::Create2D(
         iDestinationTexture->Desc.Extent,
-        //iSrcRect.Size(),
-        PF_FloatRGBA,
+        iDestinationTexture->Desc.Format,
         FClearValueBinding::Transparent,
         ETextureCreateFlags::ShaderResource | ETextureCreateFlags::RenderTargetable
     );
+
     FRDGTextureRef backgroundTexture = iGraphBuilder.CreateTexture(desc, TEXT("UOdysseyAnimationCellImageRaster::BackgroundTexture"));
 
     //Copy Destination Texture to Background Texture
-    AddDrawTexturePass(
+    AddCopyTexturePass(
         iGraphBuilder,
-        FScreenPassViewInfo(),
         iDestinationTexture,
         backgroundTexture,
         iSrcRect.Min,
-        iSrcRect.Size(),
         iSrcRect.Min,
         iSrcRect.Size()
     );
@@ -298,6 +297,7 @@ UOdysseyAnimationCellImageRaster::BlendToTexture_RenderThread(FRDGBuilder& iGrap
     shaderParameters->SourceTexture = sourceTexture;
     shaderParameters->SourceTextureSampler = samplerStateRHI;
     shaderParameters->DestinationTexture = backgroundTexture;
+    //shaderParameters->DestinationTexture = destinationTextureSRV;
     shaderParameters->DestinationTextureSampler = samplerStateRHI;
     shaderParameters->Opacity = FMath::Clamp(iOpacity, 0.f, 1.f);
 
@@ -323,14 +323,23 @@ UOdysseyAnimationCellImageRaster::BlendToTexture_RenderThread(FRDGBuilder& iGrap
     float sizeU = float(iSrcRect.Max.X) / GetAnimation()->GetWidth();
     float sizeV = float(iSrcRect.Max.Y) / GetAnimation()->GetHeight();
 
-    FCanvasTileItem TileItem(FVector2D(x, y), Texture->GetResource(), FVector2D(w, h), FVector2D(u, v), FVector2D(sizeU, sizeV), FLinearColor::White);
+    FCanvasTileItem TileItem(FVector2D(x, y), GWhiteTexture, FVector2D(w, h), FVector2D(u, v), FVector2D(sizeU, sizeV), FLinearColor::White);
     //TileItem.BlendMode = SE_BLEND_Opaque;
     TileItem.BatchedElementParameters = blendShader;
     canvas->DrawItem(TileItem);
     //canvas->DrawTile(x, y, w, h, u, v, sizeU, sizeV, FLinearColor::White, Texture->GetResource(), SE_BLEND_AlphaBlend);
     canvas->Flush_RenderThread(iGraphBuilder, true);
 
-    AddDrawTexturePass(
+    AddCopyTexturePass(
+        iGraphBuilder,
+        backgroundTexture,
+        iDestinationTexture,
+        iDstRect.Min,
+        iDstRect.Min,
+        iDstRect.Size()
+    );
+
+    /* AddDrawTexturePass(
         iGraphBuilder,
         FScreenPassViewInfo(),
         backgroundTexture,
@@ -339,5 +348,5 @@ UOdysseyAnimationCellImageRaster::BlendToTexture_RenderThread(FRDGBuilder& iGrap
         iDstRect.Size(),
         iDstRect.Min,
         iDstRect.Size()
-    );
+    ); */
 }
