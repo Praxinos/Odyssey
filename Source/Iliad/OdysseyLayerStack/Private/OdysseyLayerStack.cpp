@@ -660,44 +660,17 @@ UOdysseyLayerStack::SetIsSRGB(bool Value)
     RenderingChanged();
 }
 
-void
+TSharedPtr<FOdysseyTextureRenderer>
+UOdysseyLayerStack::BuildTextureRenderer(FFrameNumber iFrame, TMap<const IOdysseyTextureRenderingAbility*, FGuid>* iIds) const
+{
+    return GetLayerRoot()->BuildTextureRenderer(iFrame, iIds);
+}
+
+/* void
 UOdysseyLayerStack::RenderToTexture_RenderThread(FRDGBuilder& iGraphBuilder, FRDGTextureRef iDestinationTexture, ERHIFeatureLevel::Type iFeatureLevel, FFrameNumber iFrame, const FMatrix& iSrcTransform, const FIntRect& iSrcRect, const FIntRect& iDstRect) const
 {
-    //FRDGTextureDesc desc = FRDGTextureDesc::Create2D(iDestinationTexture->Desc.Extent, PF_FloatRGBA, FClearValueBinding::Transparent, TexCreate_ShaderResource | TexCreate_RenderTargetable | NoTiling);
-    //FRDGTextureRef renderTarget = graphBuilder.CreateTexture(desc, TEXT("OdysseyLayerStack::RenderTarget"));
-
     GetLayerRoot()->RenderToTexture_RenderThread(iGraphBuilder, iDestinationTexture, iFeatureLevel, iFrame, FMatrix::Identity, iSrcRect, iDstRect);
-
-    /* if (!iRenderTarget)
-        return;
-
-    if (!mSurface)
-        mSurface = MakeShared<FOdysseySurfaceTexture2DEditable>( GetWidth(), GetHeight(), ::ULIS::Format_BGRA8, SRGB ); //layerstack data are considered as SRGB
-
-    TSharedPtr<IOdysseyImageRenderer> renderer = LayerRoot->BuildImageRenderer(EOdysseyRenderingType::Render, iFrame.Value);
-    renderer->Init();
-
-    FOdysseyImageRendererCopyParams params(mSurface->Block(), {iSrcRect}, ::ULIS::FVec2I(iPos.X, iPos.Y));
-    renderer->Copy(params, {});
-
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(mSurface->Block()->Format());
-    ctx.Finish();
-
-    mSurface->Invalidate(::ULISUtils::ToULISRectIs({iSrcRect}));
-
-    FTextureResource* srcResource = mSurface->Texture()->GetResource();
-    double x = iDstRect.Min.X;
-    double y = iDstRect.Min.Y;
-    double w = iDstRect.Width();
-    double h = iDstRect.Height();
-    float u = float(iSrcRect.Min.X) / GetWidth();
-    float v = float(iSrcRect.Min.Y) / GetHeight();
-    float sizeU = float(iSrcRect.Max.X) / GetWidth();
-    float sizeV = float(iSrcRect.Max.Y) / GetHeight();
-    iCanvas->DrawTile(x, y, w, h, u, v, sizeU, sizeV, FLinearColor::Transparent, srcResource, SE_BLEND_Opaque);
-    iCanvas->DrawTile(x, y, w, h, u, v, sizeU, sizeV, FLinearColor::White, srcResource, SE_BLEND_AlphaBlend);
-    iCanvas->Flush_GameThread(true); */
-}
+} */
 
 TArray<FGuid>
 UOdysseyLayerStack::GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrameIndex) const

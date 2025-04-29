@@ -241,112 +241,37 @@ UOdysseyAnimationCellImageRaster::OldSerialize(FArchive& Ar)
     }
 }
 
-void
-UOdysseyAnimationCellImageRaster::RenderToTexture_RenderThread(FRDGBuilder& iGraphBuilder, FRDGTextureRef iDestinationTexture, ERHIFeatureLevel::Type iFeatureLevel, FFrameNumber iFrame, const FMatrix& iSrcTransform, const FIntRect& iSrcRect, const FIntRect& iDstRect) const
+TSharedPtr<FOdysseyTextureRenderer>
+UOdysseyAnimationCellImageRaster::BuildTextureRenderer(FFrameNumber iFrame, TMap<const IOdysseyTextureRenderingAbility*, FGuid>* iIds) const
 {
-    FCanvas* canvas = FCanvas::Create(iGraphBuilder, iDestinationTexture, nullptr, FGameTime(), iFeatureLevel);
-    double x = iDstRect.Min.X;
-    double y = iDstRect.Min.Y;
-    double w = iDstRect.Width();
-    double h = iDstRect.Height();
-    float u = float(iSrcRect.Min.X) / GetAnimation()->GetWidth();
-    float v = float(iSrcRect.Min.Y) / GetAnimation()->GetHeight();
-    float sizeU = float(iSrcRect.Max.X) / GetAnimation()->GetWidth();
-    float sizeV = float(iSrcRect.Max.Y) / GetAnimation()->GetHeight();
+    TSharedPtr<FOdysseyTextureRenderer> renderer = MakeShared<FOdysseyTextureRenderer>();
 
-    canvas->DrawTile(x, y, w, h, u, v, sizeU, sizeV, FLinearColor::Transparent, Texture->GetResource(), SE_BLEND_Opaque);
-    canvas->DrawTile(x, y, w, h, u, v, sizeU, sizeV, FLinearColor::White, Texture->GetResource(), SE_BLEND_AlphaBlend);
-    canvas->Flush_RenderThread(iGraphBuilder, true);
-}
+    FGuid id = renderer->AddChild(
+        renderer->GetRootPassId(),
+        EOdysseyBlendingMode::kNormal,
+        1.0f,
+        FMatrix::Identity,
+        FOdysseyTextureRenderer::FOnExecuteRenderPass::CreateLambda(
+            [this](FRDGBuilder& iGraphBuilder, const FOdysseyTextureRenderer::FRenderPassParameters& iParams)
+            {
+                FRDGTextureRef sourceTexture = iGraphBuilder.RegisterExternalTexture(CreateRenderTarget(Texture->GetResource()->TextureRHI, TEXT("UOdysseyAnimation::sourceTexture")));
 
-void
-UOdysseyAnimationCellImageRaster::BlendToTexture_RenderThread(FRDGBuilder& iGraphBuilder, FRDGTextureRef iDestinationTexture, ERHIFeatureLevel::Type iFeatureLevel, FFrameNumber iFrame, const FMatrix& iSrcTransform, const FIntRect& iSrcRect, const FIntRect& iDstRect, EOdysseyBlendingMode iBlendMode, float iOpacity) const
-{
-    //TODO: Add a FMatrix Transform parameter
-    //In Order :
-    // - Apply Transform to Src Texture
-    // - Copy iSrcRect from Src Texture to iDstRect in Destination Texture
-
-    //===================================
-    FRDGTextureDesc desc = FRDGTextureDesc::Create2D(
-        iDestinationTexture->Desc.Extent,
-        iDestinationTexture->Desc.Format,
-        FClearValueBinding::Transparent,
-        ETextureCreateFlags::ShaderResource | ETextureCreateFlags::RenderTargetable
+                AddDrawTexturePass(
+                    iGraphBuilder,
+                    FScreenPassViewInfo(),
+                    sourceTexture,
+                    iParams.DestinationTexture,
+                    iParams.SrcRect.Min,
+                    iParams.SrcRect.Size(),
+                    iParams.DstRect.Min,
+                    iParams.DstRect.Size()
+                );
+            }
+        )
     );
 
-    FRDGTextureRef backgroundTexture = iGraphBuilder.CreateTexture(desc, TEXT("UOdysseyAnimationCellImageRaster::BackgroundTexture"));
+    if (iIds)
+        iIds->Add(this, id);
 
-    //Copy Destination Texture to Background Texture
-    AddCopyTexturePass(
-        iGraphBuilder,
-        iDestinationTexture,
-        backgroundTexture,
-        iSrcRect.Min,
-        iSrcRect.Min,
-        iSrcRect.Size()
-    );
-
-    FRDGTextureRef sourceTexture = iGraphBuilder.RegisterExternalTexture(CreateRenderTarget(Texture->GetResource()->TextureRHI, TEXT("UOdysseyAnimationCellImageRaster::sourceTexture")));
-
-    FSamplerStateRHIRef samplerStateRHI = Odyssey::GetSamplerStateForAntiAliasing(EOdysseyAntiAliasing::AnisotropicLinear);
-
-    //Alloc Shader Parameters
-    FOdysseyBlendShaderParameters* shaderParameters = iGraphBuilder.AllocParameters<FOdysseyBlendShaderParameters>();
-
-    shaderParameters->SourceTexture = sourceTexture;
-    shaderParameters->SourceTextureSampler = samplerStateRHI;
-    shaderParameters->DestinationTexture = backgroundTexture;
-    //shaderParameters->DestinationTexture = destinationTextureSRV;
-    shaderParameters->DestinationTextureSampler = samplerStateRHI;
-    shaderParameters->Opacity = FMath::Clamp(iOpacity, 0.f, 1.f);
-
-    /* shaderParameters->SourcePosition = FVector2f(iSrcRect.Min.X, iSrcRect.Min.Y);
-    shaderParameters->SourceSize = FVector2f(iSrcRect.Width(), iSrcRect.Height());
-    shaderParameters->DestinationPosition = FVector2f(0, 0);
-    shaderParameters->DestinationSize = FVector2f(iSrcRect.Width(), iSrcRect.Height()); */
-
-    //Create Shader
-    TRefCountPtr< FOdysseyBlendShader > blendShader(new FOdysseyBlendShader(shaderParameters, iBlendMode));
-
-    FCanvas* canvas = FCanvas::Create(iGraphBuilder, backgroundTexture, nullptr, FGameTime(), iFeatureLevel);
-    /*double x = float(iDstRect.Min.X) / GetAnimation()->GetWidth();
-    double y = float(iDstRect.Min.Y) / GetAnimation()->GetHeight();
-    double w = float(iDstRect.Width()) / GetAnimation()->GetWidth();
-    double h = float(iDstRect.Height()) / GetAnimation()->GetHeight();*/
-    double x = iDstRect.Min.X;
-    double y = iDstRect.Min.Y;
-    double w = iDstRect.Width();
-    double h = iDstRect.Height();
-    float u = float(iSrcRect.Min.X) / GetAnimation()->GetWidth();
-    float v = float(iSrcRect.Min.Y) / GetAnimation()->GetHeight();
-    float sizeU = float(iSrcRect.Max.X) / GetAnimation()->GetWidth();
-    float sizeV = float(iSrcRect.Max.Y) / GetAnimation()->GetHeight();
-
-    FCanvasTileItem TileItem(FVector2D(x, y), GWhiteTexture, FVector2D(w, h), FVector2D(u, v), FVector2D(sizeU, sizeV), FLinearColor::White);
-    //TileItem.BlendMode = SE_BLEND_Opaque;
-    TileItem.BatchedElementParameters = blendShader;
-    canvas->DrawItem(TileItem);
-    //canvas->DrawTile(x, y, w, h, u, v, sizeU, sizeV, FLinearColor::White, Texture->GetResource(), SE_BLEND_AlphaBlend);
-    canvas->Flush_RenderThread(iGraphBuilder, true);
-
-    AddCopyTexturePass(
-        iGraphBuilder,
-        backgroundTexture,
-        iDestinationTexture,
-        iDstRect.Min,
-        iDstRect.Min,
-        iDstRect.Size()
-    );
-
-    /* AddDrawTexturePass(
-        iGraphBuilder,
-        FScreenPassViewInfo(),
-        backgroundTexture,
-        iDestinationTexture,
-        iDstRect.Min,
-        iDstRect.Size(),
-        iDstRect.Min,
-        iDstRect.Size()
-    ); */
+    return renderer;
 }

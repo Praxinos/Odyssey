@@ -166,6 +166,7 @@ FOdysseyBlendShader::BindShaders(FRHICommandList& RHICmdList, FGraphicsPipelineS
     GraphicsPSOInit.BoundShaderState.PixelShaderRHI = PixelShader.GetPixelShader();                                         \
     GraphicsPSOInit.PrimitiveType = PT_TriangleList;                                                                        \
     GraphicsPSOInit.BlendState = TStaticBlendState<>::GetRHI();                                                             \
+    RHICmdList.ApplyCachedRenderTargets(GraphicsPSOInit);                                                                   \
     SetGraphicsPipelineState(RHICmdList, GraphicsPSOInit, 0, EApplyRendertargetOption::CheckApply);                         \
     SetShaderParametersLegacyVS(RHICmdList, VertexShader, InTransform );                                                    \
     SetShaderParameters(RHICmdList, PixelShader, PixelShader.GetPixelShader(), *mPixelShaderParams);

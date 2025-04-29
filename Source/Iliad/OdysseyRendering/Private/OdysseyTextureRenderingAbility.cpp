@@ -31,27 +31,51 @@ IOdysseyTextureRenderingAbility::RenderRectAtRect_Implementation(UTextureRenderT
 {
     const ERHIFeatureLevel::Type featureLevel = iRenderTarget->GetWorld() ? iRenderTarget->GetWorld()->GetFeatureLevel() : GMaxRHIFeatureLevel;
 
+    TSharedPtr<FOdysseyTextureRenderer> renderer = BuildTextureRenderer(iFrame);
+    if (!renderer)
+        return;
+
     ENQUEUE_RENDER_COMMAND(IOdysseyTextureRenderingAbility_RenderRectAtRect)(
-        [this, iRenderTarget, iFrame, iSrcRect, iDstRect, featureLevel](FRHICommandListImmediate& RHICmdList)
+        [this, renderer, iRenderTarget, iSrcRect, iDstRect, featureLevel](FRHICommandListImmediate& RHICmdList)
         {
             FRDGBuilder graphBuilder(RHICmdList);
 
             FRDGTextureRef destinationTexture = iRenderTarget->GetRenderTargetResource()->GetRenderTargetTexture( graphBuilder );
             FRDGTextureDesc desc = FRDGTextureDesc::Create2D(
                 destinationTexture->Desc.Extent,
-                destinationTexture->Desc.Format,
+                PF_FloatRGBA,
                 FClearValueBinding::Transparent,
                 ETextureCreateFlags::ShaderResource | ETextureCreateFlags::RenderTargetable
             );
 
             FRDGTextureRef outputTexture = graphBuilder.CreateTexture(desc, TEXT("IOdysseyTextureRenderingAbility::outputTexture"));
-            RenderToTexture_RenderThread(graphBuilder, outputTexture, featureLevel, iFrame, FMatrix::Identity, iSrcRect, iDstRect);
 
-            AddCopyTexturePass(
+            AddClearRenderTargetPass(graphBuilder, outputTexture, FLinearColor::Transparent, iDstRect );
+
+            renderer->Render(
                 graphBuilder,
+                outputTexture,
+                featureLevel,
+                iSrcRect,
+                iDstRect
+            );
+
+            const FGlobalShaderMap* GlobalShaderMap = GetGlobalShaderMap(GMaxRHIFeatureLevel);
+            FRDGDrawTextureInfo infos;
+            infos.SourcePosition = iSrcRect.Min;
+            infos.DestPosition = iDstRect.Min;
+            infos.Size = iDstRect.Size();
+
+            //AddDrawTexturePass ensures format conversions
+            AddDrawTexturePass(graphBuilder, GlobalShaderMap, outputTexture, destinationTexture, infos);
+
+            AddDrawTexturePass(
+                graphBuilder,
+                FScreenPassViewInfo(),
                 outputTexture,
                 destinationTexture,
                 iSrcRect.Min,
+                iSrcRect.Size(),
                 iDstRect.Min,
                 iDstRect.Size()
             );

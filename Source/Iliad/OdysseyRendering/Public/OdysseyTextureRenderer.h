@@ -3,6 +3,9 @@
 
 #pragma once
 
+#include "OdysseyBlendingMode.h"
+#include "OdysseyAntiAliasing.h"
+
 class ODYSSEYRENDERING_API FOdysseyTextureRenderer
 {
 public:
@@ -11,36 +14,74 @@ public:
 public:
     struct FRenderPassParameters
     {
-        FRDGBuilder& GraphBuilder;
         FRDGTextureRef DestinationTexture;
+        FRDGTextureRef ChildrenTexture;
         ERHIFeatureLevel::Type FeatureLevel;
-        FFrameNumber Frame;
         FMatrix SrcTransform;
         FIntRect SrcRect;
         FIntRect DstRect;
     };
 
-    DECLARE_DELEGATE_OneParam(FOnExecuteRenderPass, const FRenderPassParameters&);
-    struct FRenderPass
+    DECLARE_DELEGATE_TwoParams(FOnExecuteRenderPass, FRDGBuilder&, const FRenderPassParameters&);
+    class FRenderPass
     {
-        FOnExecuteRenderPass OnExecuteRenderPass;
-        TArray<FGuid> mChildren;
+        friend class FOdysseyTextureRenderer;
+
+        public:
+            const TArray<FGuid>& GetChildren() const { return Children; }
+            FOnExecuteRenderPass GetOnExecuteRenderPass() const { return OnExecuteRenderPass; }
+
+            void Render(
+                FRDGBuilder& GraphBuilder,
+                FRDGTextureRef DestinationTexture,
+                FRDGTextureRef ChildrenTexture,
+                ERHIFeatureLevel::Type FeatureLevel,
+                FIntRect SrcRect,
+                FIntRect DstRect
+            ) const;
+
+        public:
+            EOdysseyBlendingMode BlendingMode = EOdysseyBlendingMode::kNormal;
+            float Opacity = 1.0f;
+            FMatrix Transform;
+            EOdysseyAntiAliasing AntiAliasing = EOdysseyAntiAliasing::AnisotropicLinear;
+
+        private:
+            TArray<FGuid> Children;
+            FOnExecuteRenderPass OnExecuteRenderPass;
     };
 
-    const FGuid& GetRootPassId();
+    const FGuid& GetRootPassId() const;
     const FRenderPass& GetPass(const FGuid& iId) const;
+    FRenderPass& GetPass(const FGuid& iId);
 
-    FGuid AddChild(const FGuid& iParent, const FOnExecuteRenderPass& iOnExecuteRenderPass);
-    FGuid InsertChildBefore(const FGuid& iParent, const FGuid& iReferenceChild, const FOnExecuteRenderPass& iOnExecuteRenderPass);
-    FGuid InsertChildAfter(const FGuid& iParent, const FGuid& iReferenceChild, const FOnExecuteRenderPass& iOnExecuteRenderPass);
+    void Append(const FGuid& iParent, const FOdysseyTextureRenderer& iRenderer);
+    FGuid AddChild(const FGuid& iParent, EOdysseyBlendingMode iBlendingMode, float iOpacity, const FMatrix& iTransform, const FOnExecuteRenderPass& iOnExecuteRenderPass = FOnExecuteRenderPass());
+    FGuid InsertChildBefore(const FGuid& iParent, const FGuid& iReferenceChild, EOdysseyBlendingMode iBlendingMode, float iOpacity, const FMatrix& iTransform, const FOnExecuteRenderPass& iOnExecuteRenderPass = FOnExecuteRenderPass());
+    FGuid InsertChildAfter(const FGuid& iParent, const FGuid& iReferenceChild, EOdysseyBlendingMode iBlendingMode, float iOpacity, const FMatrix& iTransform, const FOnExecuteRenderPass& iOnExecuteRenderPass = FOnExecuteRenderPass());
     void RemoveChild(const FGuid& iParent, const FGuid& iChild);
 
     void Clear();
 
-    void Render(const FRenderPassParameters& iParameters) const;
+    void Render(
+        FRDGBuilder& GraphBuilder,
+        FRDGTextureRef DestinationTexture,
+        ERHIFeatureLevel::Type FeatureLevel,
+        FIntRect SrcRect,
+        FIntRect DstRect
+    ) const;
 
 private:
+    void RenderPass_Recursive(
+        const FRenderPass& iRenderPass,
+        FRDGBuilder& GraphBuilder,
+        FRDGTextureRef DestinationTexture,
+        ERHIFeatureLevel::Type FeatureLevel,
+        FIntRect SrcRect,
+        FIntRect DstRect
+    ) const;
 
+private:
     FGuid RootRenderPassId;
     TMap<FGuid, FRenderPass> RenderPasses;
 };

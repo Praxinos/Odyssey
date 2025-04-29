@@ -59,6 +59,7 @@ public class OdysseyRendering : ModuleRules
                 "InputCore",
                 "Projects",
                 "RawMesh",
+                "Renderer",
                 "RHI",
                 "RenderCore",
                 "SlateCore",

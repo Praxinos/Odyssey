@@ -4,6 +4,7 @@
 #pragma once
 
 #include "OdysseyRenderingAbility.h"
+#include "OdysseyTextureRenderer.h"
 
 #include "OdysseyTextureRenderingAbility.generated.h"
 
@@ -35,6 +36,20 @@ public:
     void RenderRectAtRect_Implementation(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, const FIntRect& iSrcRect, const FIntRect& iDstRect) const;
 
 public:
+    virtual TSharedPtr<FOdysseyTextureRenderer> BuildTextureRenderer(FFrameNumber iFrame, TMap<const IOdysseyTextureRenderingAbility*, FGuid>* iIds = nullptr) const = 0;
+
+protected:
+    /* virtual void RenderToTexture_RenderThread(
+        FRDGBuilder& iGraphBuilder,
+        FRDGTextureRef iDestinationTexture,
+        FRDGTextureRef iChildrenTexture,
+        ERHIFeatureLevel::Type iFeatureLevel,
+        FFrameNumber iFrame,
+        const FMatrix& iSrcTransform,
+        const FIntRect& iSrcRect,
+        const FIntRect& iDstRect
+    ) const = 0; */
+/*
     virtual void RenderToTexture_RenderThread(
         FRDGBuilder& iGraphBuilder,
         FRDGTextureRef iDestinationTexture,
@@ -44,7 +59,5 @@ public:
         const FIntRect& iSrcRect,
         const FIntRect& iDstRect
     ) const = 0;
-
-private:
-    mutable FRenderCommandFence mPixelFence;
+*/
 };

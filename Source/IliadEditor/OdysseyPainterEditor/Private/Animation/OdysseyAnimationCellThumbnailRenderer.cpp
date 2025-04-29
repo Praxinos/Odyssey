@@ -70,13 +70,22 @@ UOdysseyAnimationCellThumbnailRenderer::Draw(UObject* Object, int32 X, int32 Y, 
 
     const ERHIFeatureLevel::Type featureLevel = Canvas->GetFeatureLevel();
 
+    TSharedPtr<FOdysseyTextureRenderer> renderer = cell->BuildTextureRenderer(FFrameNumber(0));
+
     ENQUEUE_RENDER_COMMAND(UOdysseyAnimationCellThumbnailRenderer_Draw)(
-        [cell, Viewport, X, Y, Width, Height, featureLevel](FRHICommandListImmediate& RHICmdList)
+        [cell, renderer, Viewport, X, Y, Width, Height, featureLevel](FRHICommandListImmediate& RHICmdList)
         {
             FRDGBuilder graphBuilder(RHICmdList);
-
             FRDGTextureRef destinationTexture = graphBuilder.RegisterExternalTexture(CreateRenderTarget(Viewport->GetRenderTargetTexture(), TEXT("UOdysseyAnimationCellThumbnailRenderer::Draw")));
-            cell->RenderToTexture_RenderThread(graphBuilder, destinationTexture, featureLevel, FFrameNumber(0), FMatrix::Identity, cell->GetDefaultRenderRect(), FIntRect(X, Y, Width, Height));
+
+            renderer->Render(
+                graphBuilder,
+                destinationTexture,
+                featureLevel,
+                cell->GetDefaultRenderRect(),
+                FIntRect(X, Y, Width, Height)
+            );
+
             graphBuilder.Execute();
         }
     );

@@ -134,7 +134,62 @@ UOdysseyAnimation::GetDefaultRenderRect() const
     return FIntRect(0, 0, GetWidth(), GetHeight());
 }
 
-void
+TSharedPtr<FOdysseyTextureRenderer>
+UOdysseyAnimation::BuildTextureRenderer(FFrameNumber iFrame, TMap<const IOdysseyTextureRenderingAbility*, FGuid>* iIds) const
+{
+#if WITH_EDITOR
+    if (!mLayerStack || !mLayerStack->Implements<UOdysseyTextureRenderingAbility>())
+        return nullptr;
+
+    IOdysseyTextureRenderingAbility* renderingInterface = Cast<IOdysseyTextureRenderingAbility>(mLayerStack);
+    return renderingInterface->BuildTextureRenderer(iFrame, iIds);
+#else
+
+    UTexture2D* srcTexture2D = nullptr;
+    int frameIndex = GetFrameIndexAtFrame(iFrame.Value);
+    if (frameIndex != INDEX_NONE)
+    {
+        if (Frames[frameIndex].Texture)
+            srcTexture2D = Frames[frameIndex].Texture;
+    }
+
+    if (!srcTexture2D)
+        return nullptr;
+
+    TSharedPtr<FOdysseyTextureRenderer> renderer = MakeShared<FOdysseyTextureRenderer>();
+    FGuid id = renderer->AddChild(
+        iRenderer.GetRootPassId(),
+        EOdysseyBlendingMode::kNormal,
+        1.0f,
+        FMatrix::Identity,
+        FOdysseyTextureRenderer::FOnExecuteRenderPass::CreateLambda(
+            [this, srcTexture2D](FRDGBuilder& iGraphBuilder, const FOdysseyTextureRenderer::FRenderPassParameters& iParams)
+            {
+                FRDGTextureRef sourceTexture = iGraphBuilder.RegisterExternalTexture(CreateRenderTarget(srcTexture2D->GetResource()->TextureRHI, TEXT("UOdysseyAnimation::sourceTexture")));
+
+                //AddDrawTexturePass ensures format conversions
+                AddDrawTexturePass(
+                    iGraphBuilder,
+                    FScreenPassViewInfo(),
+                    sourceTexture,
+                    iParams.DestinationTexture,
+                    iParams.SrcRect.Min,
+                    iParams.SrcRect.Size(),
+                    iParams.DstRect.Min,
+                    iParams.DstRect.Size()
+                );
+            }
+        )
+    );
+
+    if (iIds)
+        iIds->Add(this, id);
+
+    return renderer;
+#endif
+}
+
+/* void
 UOdysseyAnimation::RenderToTexture_RenderThread(
     FRDGBuilder& iGraphBuilder,
     FRDGTextureRef iDestinationTexture,
@@ -180,7 +235,7 @@ UOdysseyAnimation::RenderToTexture_RenderThread(
 
     iCanvas->Flush_GameThread(true);
 #endif
-}
+} */
 
 #if WITH_EDITOR
 void
