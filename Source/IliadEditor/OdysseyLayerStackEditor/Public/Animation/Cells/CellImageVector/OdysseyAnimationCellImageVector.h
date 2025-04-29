@@ -83,4 +83,6 @@ private:
 
     UPROPERTY(NonTransactional)
     UTexture2D* Texture = nullptr;
+
+    mutable uint64 mDrawingFlags = 0;
 };

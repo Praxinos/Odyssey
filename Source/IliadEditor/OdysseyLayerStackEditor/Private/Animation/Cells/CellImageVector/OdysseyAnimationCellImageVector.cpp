@@ -100,8 +100,12 @@ UOdysseyAnimationCellImageVector::PostDuplicate(EDuplicateMode::Type iDuplicateM
 
     mVectorBlock->Init(mVectorBlockId, mVectorCell, animation->GetWidth(), animation->GetHeight(), format);
 
+    UOdysseyAnimationLayerImageVector* layer = Cast<UOdysseyAnimationLayerImageVector>(GetLayer());
+    mDrawingFlags  = layer->IsColored() ? FOdysseyVectorEngine::DRAWING_IGNORECOLOR : 0;
+    mDrawingFlags |= layer->IsWireframe() ? FOdysseyVectorEngine::DRAWING_WIREFRAME : 0;
+
     //Init Texture
-    InitTextureWithBlockData( mVectorBlock->GetBlock(0).Get(), Texture, TextureSourceFormatForULISFormat(mVectorBlock->GetFormat()));
+    InitTextureWithBlockData( mVectorBlock->GetBlock(mDrawingFlags).Get(), Texture, TextureSourceFormatForULISFormat(mVectorBlock->GetFormat()));
     Texture->UpdateResource();
     FTextureCompilingManager::Get().FinishCompilation({ Texture });
 }
@@ -127,7 +131,11 @@ UOdysseyAnimationCellImageVector::GetVectorBlock() const
 TSharedPtr<::ULIS::FBlock>
 UOdysseyAnimationCellImageVector::GetBlock() const
 {
-    return mVectorBlock->GetBlock(0);
+    UOdysseyAnimationLayerImageVector* layer = Cast<UOdysseyAnimationLayerImageVector>(GetLayer());
+    mDrawingFlags  = layer->IsColored() ? FOdysseyVectorEngine::DRAWING_IGNORECOLOR : 0;
+    mDrawingFlags |= layer->IsWireframe() ? FOdysseyVectorEngine::DRAWING_WIREFRAME : 0;
+
+    return mVectorBlock->GetBlock(mDrawingFlags);
 }
 
 FGuid
@@ -226,8 +234,12 @@ UOdysseyAnimationCellImageVector::PostLoad()
 
     mVectorBlock->Init(mVectorBlockId, mVectorCell, animation->GetWidth(), animation->GetHeight(), format);
 
+    UOdysseyAnimationLayerImageVector* layer = Cast<UOdysseyAnimationLayerImageVector>(GetLayer());
+    mDrawingFlags  = layer->IsColored() ? FOdysseyVectorEngine::DRAWING_IGNORECOLOR : 0;
+    mDrawingFlags |= layer->IsWireframe() ? FOdysseyVectorEngine::DRAWING_WIREFRAME : 0;
+
     //Init Texture
-    InitTextureWithBlockData( mVectorBlock->GetBlock(0).Get(), Texture, TextureSourceFormatForULISFormat(mVectorBlock->GetFormat()));
+    InitTextureWithBlockData( mVectorBlock->GetBlock(mDrawingFlags).Get(), Texture, TextureSourceFormatForULISFormat(mVectorBlock->GetFormat()));
     Texture->UpdateResource();
     FTextureCompilingManager::Get().FinishCompilation({ Texture });
 
@@ -346,9 +358,14 @@ UOdysseyAnimationCellImageVector::BuildTextureRenderer(FFrameNumber iFrame, TMap
 {
     TSharedPtr<FOdysseyTextureRenderer> renderer = MakeShared<FOdysseyTextureRenderer>();
 
-    if (mVectorBlock->NeedsRender())
+    UOdysseyAnimationLayerImageVector* layer = Cast<UOdysseyAnimationLayerImageVector>(GetLayer());
+    uint64 drawingFlags  = layer->IsColored() ? FOdysseyVectorEngine::DRAWING_IGNORECOLOR : 0;
+    drawingFlags |= layer->IsWireframe() ? FOdysseyVectorEngine::DRAWING_WIREFRAME : 0;
+
+    if (mVectorBlock->NeedsRender() || drawingFlags != mDrawingFlags)
     {
-        TSharedPtr<::ULIS::FBlock> block = mVectorBlock->Render(0);
+        mDrawingFlags = drawingFlags;
+        TSharedPtr<::ULIS::FBlock> block = mVectorBlock->Render(mDrawingFlags);
         FOdysseySurfaceTexture2DEditable surface(Texture, block);
         surface.Invalidate({mVectorBlock->GetSanitizedRect()});
     }
