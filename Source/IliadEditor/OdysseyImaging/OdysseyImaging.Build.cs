@@ -26,7 +26,6 @@ public class OdysseyImaging : ModuleRules
              new string[] {
                 "Core",
                 "CoreUObject",
-                "DerivedDataCache",
                 "ImageCore",
                 "Paper2D",
                 "Paper2DEditor",

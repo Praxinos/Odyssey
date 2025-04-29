@@ -13,7 +13,9 @@
 
 
 UOdysseyLayerStack::UOdysseyLayerStack()
+#if WITH_EDITOR
     : mCellSelection(MakeShared<FOdysseyLayerCellSelection>(this))
+#endif
 {
 }
 
@@ -34,6 +36,7 @@ UOdysseyLayerStack::PostLoad()
 {
     Super::PostLoad();
 
+#if WITH_EDITOR
     const TArray<UOdysseyLayer*>& rootLayers = GetRootLayers();
     bool hasLayers = !rootLayers.IsEmpty();
     bool currentLayerIsInvalid = !CurrentLayer || !GetLayers().Contains(CurrentLayer);
@@ -41,6 +44,7 @@ UOdysseyLayerStack::PostLoad()
     {
         CurrentLayer = rootLayers[0];
     }
+#endif
 }
 
 //--- Delegates
@@ -52,12 +56,15 @@ UOdysseyLayerStack::OnHierarchyChanged()
     return onHierarchyChanged;
 }
 
+
+#if WITH_EDITOR
 UOdysseyLayerStack::FOnCurrentLayerChanged&
 UOdysseyLayerStack::OnCurrentLayerChanged()
 {
     static FOnCurrentLayerChanged onCurrentLayerChanged;
     return onCurrentLayerChanged;
 }
+#endif
 
 bool
 UOdysseyLayerStack::SupportsLayerClass(UClass* iClass) const
@@ -74,11 +81,14 @@ UOdysseyLayerStack::GetFrameRange() const
     return LayerRoot->GetFrameRange();
 }
 
+
+#if WITH_EDITOR
 TSharedRef<FOdysseyLayerCellSelection>
 UOdysseyLayerStack::GetCellSelection() const
 {
     return mCellSelection;
 }
+#endif
 
 //--- Layers management
 
@@ -220,8 +230,10 @@ UOdysseyLayerStack::DuplicateLayers(TArray<UOdysseyLayer*> Layers)
         layersDuplicates.Add(layerCopy);
     }
 
+#if WITH_EDITOR
     if (layersDuplicates.Num() != 0)
         SetCurrentLayer(layersDuplicates[0]);
+#endif
 
     return layersDuplicates;
 }
@@ -591,6 +603,7 @@ UOdysseyLayerStack::HierarchyChanged()
     OnHierarchyChanged().Broadcast(this);
 }
 
+#if WITH_EDITOR
 void
 UOdysseyLayerStack::PostTransacted(const FTransactionObjectEvent& iTransactionEvent)
 {
@@ -611,6 +624,12 @@ UOdysseyLayerStack::SetCurrentLayer(UOdysseyLayer* Layer)
     OnCurrentLayerChanged().Broadcast(this);
 }
 
+UOdysseyLayer*
+UOdysseyLayerStack::GetCurrentLayer() const
+{
+    return CurrentLayer;
+}
+
 void
 UOdysseyLayerStack::SetTimelineSplitterPosition(float iValue)
 {
@@ -622,17 +641,12 @@ UOdysseyLayerStack::GetTimelineSplitterPosition() const
 {
     return TimelineSplitterPosition;
 }
+#endif
 
 TArray<TSubclassOf<UOdysseyLayer>>
 UOdysseyLayerStack::GetSupportedLayerClasses() const
 {
     return SupportedLayerClasses;
-}
-
-UOdysseyLayer*
-UOdysseyLayerStack::GetCurrentLayer() const
-{
-    return CurrentLayer;
 }
 
 UOdysseyLayer*
@@ -665,12 +679,6 @@ UOdysseyLayerStack::BuildTextureRenderer(FFrameNumber iFrame, TMap<const IOdysse
 {
     return GetLayerRoot()->BuildTextureRenderer(iFrame, iIds);
 }
-
-/* void
-UOdysseyLayerStack::RenderToTexture_RenderThread(FRDGBuilder& iGraphBuilder, FRDGTextureRef iDestinationTexture, ERHIFeatureLevel::Type iFeatureLevel, FFrameNumber iFrame, const FMatrix& iSrcTransform, const FIntRect& iSrcRect, const FIntRect& iDstRect) const
-{
-    GetLayerRoot()->RenderToTexture_RenderThread(iGraphBuilder, iDestinationTexture, iFeatureLevel, iFrame, FMatrix::Identity, iSrcRect, iDstRect);
-} */
 
 TArray<FGuid>
 UOdysseyLayerStack::GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrameIndex) const

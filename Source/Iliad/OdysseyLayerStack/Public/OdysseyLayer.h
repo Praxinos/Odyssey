@@ -39,25 +39,18 @@ class ODYSSEYLAYERSTACK_API UOdysseyLayer
 
 public:
 #if WITH_EDITOR
-    /* DisplayChildrenChanged
-     * - concerned Child
-     */
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnDisplayChildrenChanged, UOdysseyLayer*);
-
-    /* DisplayOptionsChanged
-     * - concerned Child
-     */
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnDisplayOptionsChanged, UOdysseyLayer*);
+
     static FOnDisplayChildrenChanged& OnDisplayChildrenChanged();
     static FOnDisplayOptionsChanged& OnDisplayOptionsChanged();
+    static FSimpleMulticastDelegate& OnMediaChanged();
 #endif
 
-public:
-    static FSimpleMulticastDelegate& OnMediaChanged();
     FSimpleMulticastDelegate& OnCellsChanged();
 
 public:
-#if WITH_EDITORONLY_DATA
+#if WITH_EDITOR
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     void SetIsLocked(bool Value);
 
@@ -275,36 +268,34 @@ public:
     virtual int GetRowHeight(FName iSubRowName) const;
     virtual bool IsRowVisible(FName iSubRowName) const;
     virtual FMargin GetRowPadding(FName iSubRowName) const;
+    virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const;
 #endif
 
     virtual TArray<FGuid> GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrame) const override;
     virtual FIntRect GetDefaultRenderRect() const override;
-    virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const;
     virtual FInt32Range GetFrameRange() const override;
     virtual TSharedPtr<FOdysseyTextureRenderer> BuildTextureRenderer(FFrameNumber iFrame, TMap<const IOdysseyTextureRenderingAbility*, FGuid>* iIds = nullptr) const override;
-    //virtual void RenderToTexture_RenderThread(FRDGBuilder& iGraphBuilder, FRDGTextureRef iDestinationTexture, ERHIFeatureLevel::Type iFeatureLevel, FFrameNumber iFrame, const FMatrix& iSrcTransform, const FIntRect& iSrcRect, const FIntRect& iDstRect) const override;
-    //virtual void BlendToTexture_RenderThread(FRDGBuilder& iGraphBuilder, FRDGTextureRef iDestinationTexture, ERHIFeatureLevel::Type iFeatureLevel, FFrameNumber iFrame, const FMatrix& iSrcTransform, const FIntRect& iSrcRect, const FIntRect& iDstRect, EOdysseyBlendingMode iBlendMode, float iOpacity) const;
 
 protected:
     //Property changed methods
     virtual void CellsChanged();
 
-public:
+#if WITH_EDITOR
     // UObject overrides
     virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
+#endif
 
 protected:
     //Default properties
 #if WITH_EDITORONLY_DATA
+    FSlateIcon Icon;
+    FSlateIcon IconExpanded;
+#endif
     UPROPERTY()
     FText LayerTypeName = FText::FromString(TEXT("Unnamed Layer Type"));
 
     UPROPERTY()
     FText Description = FText::FromString(TEXT(""));
-
-    FSlateIcon Icon;
-    FSlateIcon IconExpanded;
-#endif
 
     UPROPERTY()
     FText DefaultName = FText::FromString(TEXT("Layer"));

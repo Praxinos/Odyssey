@@ -24,13 +24,11 @@ public class OdysseyRendering : ModuleRules
 
         PublicIncludePaths.AddRange(
             new string[] {
-                Path.Combine(ModuleDirectory, "Public", "CPU"),
             }
         );
 
         PrivateIncludePaths.AddRange(
             new string[] {
-                Path.Combine(ModuleDirectory, "Private", "CPU"),
             }
         );
 
@@ -54,7 +52,6 @@ public class OdysseyRendering : ModuleRules
              new string[] {
                 "Core",
                 "CoreUObject",
-                "DerivedDataCache",
                 "Engine",
                 "InputCore",
                 "Projects",

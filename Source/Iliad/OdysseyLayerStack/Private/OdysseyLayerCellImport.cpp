@@ -82,7 +82,9 @@ FOdysseyLayerCellImport::Read( UOdysseyLayerCell* iCell
 
                 case CHUNK_CELL_MARKID :
                 {
+#if WITH_EDITOR
                     Ar << iCell->Mark;
+#endif
                 }
                 break;
 

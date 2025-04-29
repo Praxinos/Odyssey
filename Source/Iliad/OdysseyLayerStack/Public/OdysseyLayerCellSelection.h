@@ -4,6 +4,9 @@
 
 #include "CoreMinimal.h"
 
+//TODO: Should belong to an editor module
+#if WITH_EDITOR
+
 class UOdysseyLayerStack;
 class UOdysseyLayer;
 class UOdysseyLayerCell;
@@ -38,3 +41,5 @@ private:
     UOdysseyLayerCell* mCellSelectionCursor;
     UOdysseyLayer* mLayer = nullptr;
 };
+
+#endif

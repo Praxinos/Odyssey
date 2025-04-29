@@ -3,6 +3,9 @@
 
 #include "OdysseyLayerCellSelection.h"
 
+//TODO: Should belong to an editor module
+#if WITH_EDITOR
+
 #include "OdysseyLayerStack.h"
 #include "OdysseyLayerCell.h"
 
@@ -192,3 +195,5 @@ FOdysseyLayerCellSelection::GetCellSelectionCursor() const
     self->CleanCellSelectionCursor();
     return mCellSelectionCursor;
 }
+
+#endif

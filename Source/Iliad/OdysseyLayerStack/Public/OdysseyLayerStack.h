@@ -19,9 +19,10 @@ class ODYSSEYLAYERSTACK_API UOdysseyLayerStack
     GENERATED_BODY()
 
 public:
-
+#if WITH_EDITOR
     /* Called when the current layer changed */
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnCurrentLayerChanged, UOdysseyLayerStack*)
+#endif
 
     /* Called when the Layer hierarchy changed at some point */
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnHierarchyChanged, UOdysseyLayerStack*);
@@ -29,10 +30,12 @@ public:
 public:
     //Delegates
 
+#if WITH_EDITOR
     /**
      * @brief Returns the CurrentLayerChanged delegate
      */
     static FOnCurrentLayerChanged& OnCurrentLayerChanged();
+#endif
 
     /**
      * @brief Returns the HierarchyChanged delegate
@@ -43,15 +46,9 @@ public:
     UOdysseyLayerStack();
 
 public:
-    //Layer Class Support
-    //UFUNCTION(BlueprintCallable, Category="Odyssey|LayerStack")
-    //TArray<UClass*> FindSupportedCustomLayerClasses() const;
-
+    //Layers management
     UFUNCTION(BlueprintCallable, Category="Odyssey|LayerStack")
     bool SupportsLayerClass(UClass* Class) const;
-
-public:
-    //Layers management
 
     /**
      * @brief Adds a Layer of LayerType to the LayerStack as child of ParentLayer at IndexInParent
@@ -228,7 +225,9 @@ public:
      *
      * @param TransactionEvent
      */
+#if WITH_EDITOR
     virtual void PostTransacted(const FTransactionObjectEvent& TransactionEvent) override;
+#endif
 
     virtual void PostInitProperties() override;
     virtual void PostLoad() override;
@@ -237,9 +236,11 @@ public:
     UFUNCTION(BlueprintCallable, Category="Odyssey|LayerStack")
     virtual FInt32Range GetFrameRange() const override;
 
+#if WITH_EDITOR
     void SetTimelineSplitterPosition(float iValue);
     float GetTimelineSplitterPosition() const;
     TSharedRef<FOdysseyLayerCellSelection> GetCellSelection() const;
+#endif
     UOdysseyLayer* GetLayerRoot() const;
     TSubclassOf<UOdysseyLayer> GetLayerRootClass() const;
 
@@ -255,14 +256,16 @@ protected:
     void GetLayersUniqueParents(TArray<UOdysseyLayer*> iLayers, TArray<UOdysseyLayer*>& oParents);
 
 public:
+#if WITH_EDITOR
     UFUNCTION(BlueprintCallable, Category="Odyssey|LayerStack")
     void SetCurrentLayer(UOdysseyLayer* Layer);
 
     UFUNCTION(BlueprintPure, Category="Odyssey|LayerStack")
-    TArray<TSubclassOf<UOdysseyLayer>> GetSupportedLayerClasses() const;
+    UOdysseyLayer* GetCurrentLayer() const;
+#endif
 
     UFUNCTION(BlueprintPure, Category="Odyssey|LayerStack")
-    UOdysseyLayer* GetCurrentLayer() const;
+    TArray<TSubclassOf<UOdysseyLayer>> GetSupportedLayerClasses() const;
 
     UFUNCTION(BlueprintPure, Category="Odyssey|LayerStack")
     bool IsSRGB() const;
@@ -275,8 +278,10 @@ protected:
     UPROPERTY(Transient)
     TArray<TSubclassOf<UOdysseyLayer>> SupportedLayerClasses; //Contains compatible C++ layer types
 
+#if WITH_EDITORONLY_DATA
     UPROPERTY()
     TObjectPtr<UOdysseyLayer> CurrentLayer;
+#endif
 
     UPROPERTY()
     TObjectPtr<UOdysseyLayer> LayerRoot;
@@ -287,9 +292,13 @@ protected:
     UPROPERTY(Transient)
     bool bIsSRGB = true;
 
+#if WITH_EDITORONLY_DATA
     UPROPERTY(config)
     float TimelineSplitterPosition = 0.2f; //TODO: Move To Editor Only class
+#endif
 
 private:
+#if WITH_EDITOR
     TSharedRef<FOdysseyLayerCellSelection> mCellSelection;
+#endif
 };

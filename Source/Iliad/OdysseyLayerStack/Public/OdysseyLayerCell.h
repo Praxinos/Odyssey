@@ -32,38 +32,47 @@ public:
     UFUNCTION(BlueprintPure, Category="Odyssey|Cell")
     int GetExposure() const;
 
-    UFUNCTION(BlueprintPure, Category="Odyssey|Cell")
-    int GetMark() const;
-
     UFUNCTION(BlueprintCallable, Category="Odyssey|Cell")
     void SetExposure(int Value);
+
+#if WITH_EDITOR
+    UFUNCTION(BlueprintPure, Category="Odyssey|Cell")
+    int GetMark() const;
 
     UFUNCTION(BlueprintCallable, Category="Odyssey|Cell")
     void SetMark(int Value);
 
     UFUNCTION(BlueprintCallable, Category="Odyssey|Cell")
     virtual UOdysseyLayerCell* Break(int Frame, bool bClear);
+#endif
 
 public:
     virtual TSharedPtr<FOdysseyTextureRenderer> BuildTextureRenderer(FFrameNumber iFrame, TMap<const IOdysseyTextureRenderingAbility*, FGuid>* iIds = nullptr) const override;
+
+#if WITH_EDITOR
     virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const;
+#endif
 
 public:
     // UObject overrides
+#if WITH_EDITOR
     virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
     virtual void OldSerialize(FArchive& Ar); //DEPRECATED: Keep that for compatibility with early versions of Odyssey
+#endif
 
 public:
 #if WITH_EDITOR
     void SetExposureInteractive(int Value);
-#endif
     FSimpleMulticastDelegate& OnThumbnailChanged();
     FSimpleMulticastDelegate& OnThumbnailDirtied();
+#endif
 
 protected:
+#if WITH_EDITOR
     void DirtyThumbnail();
     void UndirtyThumbnail();
     bool IsThumbnailDirty() const;
+#endif
 
 protected:
     friend class UOdysseyLayer;
@@ -75,14 +84,17 @@ protected:
     UPROPERTY()//TODO: meta (minvalue 1)
     int Exposure = 1;
 
+#if WITH_EDITORONLY_DATA
     UPROPERTY()
     int Mark = -1;
 
-private:
     UPROPERTY(NonTransactional)
     bool ThumbnailIsDirty = false;
+#endif
 
 private:
+#if WITH_EDITOR
     FSimpleMulticastDelegate mOnThumbnailChanged;
     FSimpleMulticastDelegate mOnThumbnailDirtied;
+#endif
 };

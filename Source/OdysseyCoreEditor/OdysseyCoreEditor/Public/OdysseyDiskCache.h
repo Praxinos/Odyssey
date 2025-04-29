@@ -6,7 +6,7 @@
 #include "CoreMinimal.h"
 #include "Memory/SharedBuffer.h"
 
-class ODYSSEYCORE_API FOdysseyDiskCache
+class ODYSSEYCOREEDITOR_API FOdysseyDiskCache
 {
 public:
     // Construction / Destruction

@@ -12,6 +12,7 @@ UOdysseyLayerCell::GetLayer() const
     return Cast<UOdysseyLayer>(GetOuter());
 }
 
+#if WITH_EDITOR
 void
 UOdysseyLayerCell::OldSerialize(FArchive& Ar)
 {
@@ -24,6 +25,7 @@ UOdysseyLayerCell::OldSerialize(FArchive& Ar)
         Ar << Exposure;
     }
 }
+#endif
 
 UOdysseyLayerStack*
 UOdysseyLayerCell::GetLayerStack() const
@@ -31,11 +33,13 @@ UOdysseyLayerCell::GetLayerStack() const
     return GetLayer() ? GetLayer()->GetLayerStack() : nullptr;
 }
 
+#if WITH_EDITOR
 FOdysseyMediaProvider
 UOdysseyLayerCell::GetMediaProvider(uint32 iFrameIndex) const
 {
     return FOdysseyMediaProvider();
 }
+#endif
 
 FInt32Range
 UOdysseyLayerCell::GetFrameRange() const
@@ -50,6 +54,7 @@ UOdysseyLayerCell::GetFrameRange() const
     return GetLayer()->GetCellsFrameRanges()[IndexInLayer];
 }
 
+#if WITH_EDITOR
 FSimpleMulticastDelegate&
 UOdysseyLayerCell::OnThumbnailChanged()
 {
@@ -61,6 +66,7 @@ UOdysseyLayerCell::OnThumbnailDirtied()
 {
     return mOnThumbnailDirtied;
 }
+#endif
 
 int
 UOdysseyLayerCell::GetIndexInLayer() const
@@ -74,11 +80,13 @@ UOdysseyLayerCell::GetExposure() const
     return Exposure;
 }
 
+#if WITH_EDITOR
 int
 UOdysseyLayerCell::GetMark() const
 {
     return Mark;
 }
+#endif
 
 void
 UOdysseyLayerCell::SetExposure(int Value)
@@ -91,6 +99,7 @@ UOdysseyLayerCell::SetExposure(int Value)
     RenderingCompositionChanged();
 }
 
+#if WITH_EDITOR
 void
 UOdysseyLayerCell::SetExposureInteractive(int Value)
 {
@@ -164,6 +173,7 @@ UOdysseyLayerCell::IsThumbnailDirty() const
 {
     return ThumbnailIsDirty;
 }
+#endif
 
 TSharedPtr<FOdysseyTextureRenderer>
 UOdysseyLayerCell::BuildTextureRenderer(FFrameNumber iFrame, TMap<const IOdysseyTextureRenderingAbility*, FGuid>* iIds) const

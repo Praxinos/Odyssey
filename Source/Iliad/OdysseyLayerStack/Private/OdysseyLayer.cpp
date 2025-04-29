@@ -9,6 +9,7 @@
 #include "RenderGraphUtils.h"
 #include "OdysseyBlendShader.h"
 
+#if WITH_EDITOR
 UOdysseyLayer::FOnDisplayChildrenChanged&
 UOdysseyLayer::OnDisplayChildrenChanged()
 {
@@ -29,6 +30,7 @@ UOdysseyLayer::OnMediaChanged()
     static FSimpleMulticastDelegate onMediaChanged;
     return onMediaChanged;
 }
+#endif
 
 FSimpleMulticastDelegate&
 UOdysseyLayer::OnCellsChanged()
@@ -186,14 +188,18 @@ UOdysseyLayer::CellsChanged()
     InvalidateCellsFrameRanges();
     mOnCellsChanged.Broadcast();
     RenderingCompositionChanged();
+#if WITH_EDITOR
     OnMediaChanged().Broadcast();
+#endif
 }
 
+#if WITH_EDITOR
 FOdysseyMediaProvider
 UOdysseyLayer::GetMediaProvider(uint32 iFrameIndex) const
 {
     return FOdysseyMediaProvider();
 }
+#endif
 
 int
 UOdysseyLayer::GetPreBehaviourFrame(EOdysseyLayerImagePostBehaviour iBehaviour, int iFrame) const
@@ -364,6 +370,7 @@ UOdysseyLayer::GetCellsFrameRanges() const
     return mCellsFrameRanges;
 }
 
+#if WITH_EDITOR
 void
 UOdysseyLayer::AddNullCell(int Index)
 {
@@ -392,6 +399,7 @@ UOdysseyLayer::AddNullCells(int Index, int Count)
     Cells.Insert(cells, Index);
     CellsChanged();
 }
+#endif
 
 UOdysseyLayerCell*
 UOdysseyLayer::AddCell(TSubclassOf<UOdysseyLayerCell> CellType, int Index)
@@ -595,6 +603,8 @@ UOdysseyLayer::IsActivatedRecursively() const
     return true;
 }
 
+#if WITH_EDITOR
+
 bool
 UOdysseyLayer::IsLocked() const
 {
@@ -626,6 +636,7 @@ UOdysseyLayer::ShouldDisplayOptions() const
 {
     return bDisplayOptions;
 }
+#endif
 
 EOdysseyBlendingMode
 UOdysseyLayer::GetBlendMode() const
@@ -697,7 +708,10 @@ UOdysseyLayer::SetCellsOffset(int Value)
     CellsOffset = Value;
     InvalidateCellsFrameRanges();
     RenderingCompositionChanged();
+
+#if WITH_EDITOR
     OnMediaChanged().Broadcast();
+#endif
 }
 
 void
@@ -805,6 +819,7 @@ UOdysseyLayer::SetIsActivated(bool Value)
         Parent->RenderingCompositionChanged();
 }
 
+#if WITH_EDITOR
 void
 UOdysseyLayer::SetIsLocked(bool Value)
 {
@@ -836,6 +851,7 @@ UOdysseyLayer::SetDisplayOptions(bool Value)
     bDisplayOptions = Value;
     OnDisplayOptionsChanged().Broadcast(this);
 }
+#endif
 
 void
 UOdysseyLayer::SetBlendMode(EOdysseyBlendingMode Value)
@@ -851,6 +867,7 @@ UOdysseyLayer::SetOpacity(float Value)
     RenderingChanged();
 }
 
+#if WITH_EDITOR
 void
 UOdysseyLayer::SetOpacityInteractive(float Value)
 {
@@ -866,7 +883,7 @@ UOdysseyLayer::SetCellsOffsetInteractive(float Value)
     RenderingCompositionChanged(true);
     OnMediaChanged().Broadcast();
 }
-
+#endif
 
 TSharedPtr<FOdysseyTextureRenderer>
 UOdysseyLayer::BuildTextureRenderer(FFrameNumber iFrame, TMap<const IOdysseyTextureRenderingAbility*, FGuid>* iIds) const
@@ -920,83 +937,6 @@ UOdysseyLayer::BuildTextureRenderer(FFrameNumber iFrame, TMap<const IOdysseyText
 
     return renderer;
 }
-
-
-
-/*
-void
-UOdysseyLayer::RenderToTexture_RenderThread(FRDGBuilder& iGraphBuilder, FRDGTextureRef iDestinationTexture, ERHIFeatureLevel::Type iFeatureLevel, FFrameNumber iFrame, const FMatrix& iSrcTransform, const FIntRect& iSrcRect, const FIntRect& iDstRect) const
-{
-    if (bCanHaveChildren)
-    {
-        for (int i = GetChildren().Num() - 1; i >= 0; i--)
-        {
-            UOdysseyLayer* child = GetChildren()[i];
-            if (!child->IsActivated())
-                continue;
-
-            child->BlendToTexture_RenderThread(iGraphBuilder, iDestinationTexture, iFeatureLevel, iFrame, FMatrix::Identity, iSrcRect, iDstRect, child->GetBlendMode(), child->GetOpacity());
-            //child->RenderToTexture_RenderThread(iGraphBuilder, iDestinationTexture, iFeatureLevel, iFrame, iSrcRect, iDstRect);
-        }
-    }
-    else
-    {
-        FInt32Range frameRange = GetFrameRange();
-        int frame = iFrame.Value;
-        if (frame < frameRange.GetLowerBoundValue())
-        {
-            frame = GetPreBehaviourFrame(PreBehaviour, frame);
-        }
-        else if (frame > frameRange.GetUpperBoundValue())
-        {
-            frame = GetPostBehaviourFrame(PostBehaviour, frame);
-        }
-
-        if (frame == INDEX_NONE)
-            return;
-
-        UOdysseyLayerCell* cell = GetCellAtFrame(iFrame.Value);
-        if (cell)
-            cell->RenderToTexture_RenderThread(iGraphBuilder, iDestinationTexture, iFeatureLevel, iFrame, FMatrix::Identity, iSrcRect, iDstRect);
-    }
-}
-
-void
-UOdysseyLayer::BlendToTexture_RenderThread(FRDGBuilder& iGraphBuilder, FRDGTextureRef iDestinationTexture, ERHIFeatureLevel::Type iFeatureLevel, FFrameNumber iFrame, const FMatrix& iSrcTransform, const FIntRect& iSrcRect, const FIntRect& iDstRect, EOdysseyBlendingMode iBlendMode, float iOpacity) const
-{
-    if (bCanHaveChildren)
-    {
-        for (int i = GetChildren().Num() - 1; i >= 0; i--)
-        {
-            UOdysseyLayer* child = GetChildren()[i];
-            if (!child->IsActivated())
-                continue;
-
-            child->BlendToTexture_RenderThread(iGraphBuilder, iDestinationTexture, iFeatureLevel, iFrame, FMatrix::Identity, iSrcRect, iDstRect, child->GetBlendMode(), child->GetOpacity());
-            //child->RenderToTexture_RenderThread(iGraphBuilder, iDestinationTexture, iFeatureLevel, iFrame, iSrcRect, iDstRect);
-        }
-    }
-    else
-    {
-        FInt32Range frameRange = GetFrameRange();
-        int frame = iFrame.Value;
-        if (frame < frameRange.GetLowerBoundValue())
-        {
-            frame = GetPreBehaviourFrame(PreBehaviour, frame);
-        }
-        else if (frame > frameRange.GetUpperBoundValue())
-        {
-            frame = GetPostBehaviourFrame(PostBehaviour, frame);
-        }
-
-        if (frame == INDEX_NONE)
-            return;
-
-        UOdysseyLayerCell* cell = GetCellAtFrame(iFrame.Value);
-        if (cell)
-            cell->BlendToTexture_RenderThread(iGraphBuilder, iDestinationTexture, iFeatureLevel, iFrame, FMatrix::Identity, iSrcRect, iDstRect, BlendMode, Opacity);
-    }
-};*/
 
 #if WITH_EDITOR
 

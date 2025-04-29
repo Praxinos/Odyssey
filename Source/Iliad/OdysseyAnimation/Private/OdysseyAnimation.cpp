@@ -7,6 +7,8 @@
 #include "CanvasTypes.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "Cooker/CookEvents.h"
+#include "RenderGraphBuilder.h"
+#include "ScreenPass.h"
 
 #define LOCTEXT_NAMESPACE "Animation"
 
@@ -158,7 +160,7 @@ UOdysseyAnimation::BuildTextureRenderer(FFrameNumber iFrame, TMap<const IOdyssey
 
     TSharedPtr<FOdysseyTextureRenderer> renderer = MakeShared<FOdysseyTextureRenderer>();
     FGuid id = renderer->AddChild(
-        iRenderer.GetRootPassId(),
+        renderer->GetRootPassId(),
         EOdysseyBlendingMode::kNormal,
         1.0f,
         FMatrix::Identity,
