@@ -261,10 +261,10 @@ UOdysseyAnimationCellImageRaster::RenderToTexture_RenderThread(FRDGBuilder& iGra
 void
 UOdysseyAnimationCellImageRaster::BlendToTexture_RenderThread(FRDGBuilder& iGraphBuilder, FRDGTextureRef iDestinationTexture, ERHIFeatureLevel::Type iFeatureLevel, FFrameNumber iFrame, const FIntRect& iSrcRect, const FIntRect& iDstRect, EOdysseyBlendingMode iBlendMode, float iOpacity) const
 {
-    //TODO: replace iDstRect with iDstPos
-    // replace iSrcRect with iRect
-    // iRect represents the rectangle to render (after the transform)
-    // and iDstPos represents where to render in the destination
+    //TODO: Add a FMatrix Transform parameter
+    //In Order :
+    // - Apply Transform to Src Texture
+    // - Copy iSrcRect from Src Texture to iDstRect in Destination Texture
 
     //===================================
     FRDGTextureDesc desc = FRDGTextureDesc::Create2D(

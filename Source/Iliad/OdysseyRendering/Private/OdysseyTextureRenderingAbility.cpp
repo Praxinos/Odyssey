@@ -31,47 +31,17 @@ IOdysseyTextureRenderingAbility::RenderRectAtRect_Implementation(UTextureRenderT
 {
     const ERHIFeatureLevel::Type featureLevel = iRenderTarget->GetWorld() ? iRenderTarget->GetWorld()->GetFeatureLevel() : GMaxRHIFeatureLevel;
 
-    mPixelFence.BeginFence();
-    mPixelFence.Wait();
-
     ENQUEUE_RENDER_COMMAND(IOdysseyTextureRenderingAbility_RenderRectAtRect)(
         [this, iRenderTarget, iFrame, iSrcRect, iDstRect, featureLevel](FRHICommandListImmediate& RHICmdList)
         {
             FRDGBuilder graphBuilder(RHICmdList);
             FRDGTextureRef destinationTexture = graphBuilder.RegisterExternalTexture(CreateRenderTarget(iRenderTarget->GetRenderTargetResource()->GetRenderTargetTexture(), TEXT("Odyssey::Blend::DestinationTexture")));
 
-            /*FRDGTextureDesc desc = FRDGTextureDesc::Create2D(
-                destinationTexture->Desc.Extent,
-                PF_FloatRGBA,
-                FClearValueBinding::Transparent,
-                ETextureCreateFlags::ShaderResource | ETextureCreateFlags::RenderTargetable
-            );
-            FRDGTextureRef backdropTexture = graphBuilder.CreateTexture(desc, TEXT("UOdysseyAnimationCellImageRaster::RenderTarget"));
-
-            AddDrawTexturePass(
-                graphBuilder,
-                GetGlobalShaderMap(GMaxRHIFeatureLevel),
-                destinationTexture,
-                backdropTexture,
-                FRDGDrawTextureInfo()
-            ); */
-
             RenderToTexture_RenderThread(graphBuilder, destinationTexture, featureLevel, iFrame, iSrcRect, iDstRect);
-
-            /* AddDrawTexturePass(
-                graphBuilder,
-                GetGlobalShaderMap(GMaxRHIFeatureLevel),
-                backdropTexture,
-                destinationTexture,
-                FRDGDrawTextureInfo()
-            ); */
 
             graphBuilder.Execute();
         }
     );
-
-    mPixelFence.BeginFence();
-    mPixelFence.Wait();
 }
 
 #undef LOCTEXT_NAMESPACE
