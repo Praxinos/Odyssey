@@ -141,7 +141,7 @@ TArray<::ULIS::FEvent>
 UOdysseyAnimationCellImageRaster::RasterBlockPostProcess(const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock>>& iOriginalBlocks, const FOdysseyInvalidTileMap& iInvalidMap, const TArray<::ULIS::FEvent>& iWaitList)
 {
     UOdysseyAnimationLayerImageRaster* layer = Cast<UOdysseyAnimationLayerImageRaster>(GetLayer());
-    if (!layer || !layer->IsAlphaLocked)
+    if (!layer || !layer->IsAlphaLocked())
         return iWaitList;
 
     //Apply AlphaLock

@@ -4,7 +4,6 @@
 #pragma once
 
 #include "OdysseyRenderingAbility.h"
-#include "OdysseyTextureRenderer.h"
 
 #include "OdysseyTextureRenderingAbility.generated.h"
 

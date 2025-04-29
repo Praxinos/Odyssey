@@ -61,13 +61,13 @@ SOdysseyAnimationLayerImageRasterRow::GenerateMainRowHeaderOptionWidgets()
 void
 SOdysseyAnimationLayerImageRasterRow::OnIsAlphaLockedCheckStateChanged(ECheckBoxState iState)
 {
-    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageRaster, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayerImageRaster,  IsAlphaLocked), iState == ECheckBoxState::Checked);
+    mAnimationLayerImageRaster->SetIsAlphaLocked(iState == ECheckBoxState::Checked);
 }
 
 ECheckBoxState
 SOdysseyAnimationLayerImageRasterRow::GetIsAlphaLockedIsChecked() const
 {
-    return mAnimationLayerImageRaster->IsAlphaLocked ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+    return mAnimationLayerImageRaster->IsAlphaLocked() ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
 
 #undef LOCTEXT_NAMESPACE

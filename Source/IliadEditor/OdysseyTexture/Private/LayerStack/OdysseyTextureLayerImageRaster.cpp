@@ -280,7 +280,7 @@ UOdysseyTextureLayerImageRaster::Serialize(FArchive& Ar)
 TArray<::ULIS::FEvent>
 UOdysseyTextureLayerImageRaster::RasterBlockPostProcess(const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock>>& iOriginalBlocks, const FOdysseyInvalidTileMap& iInvalidMap, const TArray<::ULIS::FEvent>& iWaitList)
 {
-    if (!IsAlphaLocked)
+    if (!IsAlphaLocked())
         return iWaitList;
 
     //Apply AlphaLock
@@ -319,9 +319,15 @@ UOdysseyTextureLayerImageRaster::GetRenderingComposition(uint64 iRenderType, int
 }
 
 void
-UOdysseyTextureLayerImageRaster::IsAlphaLockedBlueprintSetter(bool Value)
+UOdysseyTextureLayerImageRaster::SetIsAlphaLocked(bool Value)
 {
-    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyTextureLayerImageRaster, IsAlphaLocked), Value);
+    bIsAlphaLocked = Value;
+}
+
+bool
+UOdysseyTextureLayerImageRaster::IsAlphaLocked() const
+{
+    return bIsAlphaLocked;
 }
 
 void

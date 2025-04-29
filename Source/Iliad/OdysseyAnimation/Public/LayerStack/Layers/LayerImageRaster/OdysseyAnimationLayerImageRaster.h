@@ -18,6 +18,13 @@ public:
 
 #if WITH_EDITOR
 public:
+    UFUNCTION(BlueprintCallable, Category="Odyssey|Cell")
+    void SetIsAlphaLocked(bool Value);
+
+    UFUNCTION(BlueprintPure, Category="Odyssey|Cell")
+    bool IsAlphaLocked() const;
+
+public:
     //UOdysseyLayer overrides
     virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const override;
 
@@ -39,18 +46,15 @@ private:
 
 private:
     friend class FOdysseyAnimationLayerImageRasterImport;
-
-    UFUNCTION(BlueprintSetter)
-    void IsAlphaLockedBlueprintSetter(bool Value);
 #endif
 
 #if WITH_EDITORONLY_DATA
 public:
-    UPROPERTY(BlueprintReadWrite, Category = "Odyssey|Layer", BlueprintSetter = IsAlphaLockedBlueprintSetter, NonTransactional)
-    bool IsAlphaLocked = false;
-
-public:
     // UObject overrides
     virtual void Serialize(FArchive& Ar) override;
+
+private:
+    UPROPERTY(NonTransactional)
+    bool bIsAlphaLocked = false;
 #endif
 };

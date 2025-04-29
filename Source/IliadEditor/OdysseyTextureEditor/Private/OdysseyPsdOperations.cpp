@@ -1074,7 +1074,7 @@ void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
             UOdysseyTextureLayerImageRaster* imageLayer = Cast<UOdysseyTextureLayerImageRaster>(mLayerStack->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass(), currentRoot, currentRoot->GetChildren().Num()));
             imageLayer->SetLayerName(FText::FromName(layerName));
             imageLayer->SetOpacity((float)mLayersInfo[i].mOpacity / 255.0);
-            imageLayer->IsAlphaLocked = mLayersInfo[i].mFlags & 0x01;
+            imageLayer->SetIsAlphaLocked(mLayersInfo[i].mFlags & 0x01);
             imageLayer->SetIsActivated(!(mLayersInfo[i].mFlags & 0x02));
             imageLayer->SetBlendMode((EOdysseyBlendingMode)GetBlendingModeFromPSD(mLayersInfo[i].mBlendModeKey));
 

@@ -33,6 +33,13 @@ public:
     TSharedPtr<FOdysseyRasterBlock> GetRasterBlock() const;
 
 public:
+    UFUNCTION(BlueprintCallable, Category="Odyssey|Cell")
+    void SetIsAlphaLocked(bool Value);
+
+    UFUNCTION(BlueprintPure, Category="Odyssey|Cell")
+    bool IsAlphaLocked() const;
+
+public:
     // UOdysseyLayer Overrides
 
     /**
@@ -83,10 +90,6 @@ private:
     mutable TSharedPtr<FOdysseyRasterBlock> RasterBlock;
 
 private:
-    UFUNCTION(BlueprintSetter)
-    void IsAlphaLockedBlueprintSetter(bool Value);
-
-public:
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, NonTransactional, Category="Odyssey|Layer")
-    bool IsAlphaLocked = false;
+    UPROPERTY(NonTransactional)
+    bool bIsAlphaLocked = false;
 };
