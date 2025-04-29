@@ -133,6 +133,12 @@ UOdysseyLayerCell::PostTransacted(const FTransactionObjectEvent& iTransactionEve
     const TArray<FName>& changedPropertyNames = iTransactionEvent.GetChangedProperties();
     if (changedPropertyNames.Contains(GET_MEMBER_NAME_CHECKED(UOdysseyLayerCell, Exposure)))
         RenderingCompositionChanged();
+
+    if (changedPropertyNames.Contains(GET_MEMBER_NAME_CHECKED(UOdysseyLayerCell, OutOfPegs)))
+    {
+        mOnOutOfPegsChanged.Broadcast(false);
+        RenderingChanged(false);
+    }
 }
 
 UOdysseyLayerCell*
@@ -178,6 +184,57 @@ UOdysseyLayerCell::IsThumbnailDirty() const
 {
     return ThumbnailIsDirty;
 }
+
+bool
+UOdysseyLayerCell::IsOutOfPegs() const
+{
+    return OutOfPegs.Pan != FVector2D(0, 0) || OutOfPegs.Rotation != 0.f || OutOfPegs.Zoom != 100.f;
+}
+
+FOdysseyLayerCellOutOfPegs
+UOdysseyLayerCell::GetOutOfPegs() const
+{
+    return OutOfPegs;
+}
+
+void
+UOdysseyLayerCell::SetOutOfPegs(FOdysseyLayerCellOutOfPegs Value)
+{
+    OutOfPegs = Value;
+    mOnOutOfPegsChanged.Broadcast(false);
+    RenderingChanged(false);
+}
+
+void
+UOdysseyLayerCell::SetOutOfPegsInteractive(FOdysseyLayerCellOutOfPegs Value)
+{
+    OutOfPegs = Value;
+    mOnOutOfPegsChanged.Broadcast(true);
+    RenderingChanged(true);
+}
+
+FMatrix
+UOdysseyLayerCell::OutOfPegsTransform() const
+{
+    FIntRect rect = GetDefaultRenderRect();
+
+    FMatrix matrix = FMatrix::Identity;
+
+    matrix *= FTranslationMatrix::Make(FVector(rect.Width() / -2.f, rect.Height() / -2.f, 0));
+    matrix *= FRotationMatrix::Make(FRotator(0, OutOfPegs.Rotation, 0));
+    matrix *= FScaleMatrix::Make(FVector(OutOfPegs.Zoom / 100.f, OutOfPegs.Zoom / 100.f, 1.f));
+    matrix *= FTranslationMatrix::Make(FVector(OutOfPegs.Pan.X, OutOfPegs.Pan.Y, 0));
+    matrix *= FTranslationMatrix::Make(FVector(rect.Width() / 2.f, rect.Height() / 2.f, 0));
+
+    return matrix;
+}
+
+UOdysseyLayerCell::FOnOutOfPegsChanged&
+UOdysseyLayerCell::OnOutOfPegsChanged()
+{
+    return mOnOutOfPegsChanged;
+}
+
 #endif
 
 bool

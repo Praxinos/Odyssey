@@ -9,12 +9,32 @@
 
 #include "OdysseyLayerCell.generated.h"
 
+USTRUCT(BlueprintType)
+struct FOdysseyLayerCellOutOfPegs
+{
+    GENERATED_BODY()
+
+    UPROPERTY(BlueprintReadWrite, Category="Odyssey|Cell")
+    FVector2D Pan = FVector2D(0, 0);
+
+    UPROPERTY(BlueprintReadWrite, Category="Odyssey|Cell")
+    float Rotation = 0.f;
+
+    UPROPERTY(BlueprintReadWrite, Category="Odyssey|Cell")
+    float Zoom = 100.f;
+};
+
 UCLASS(Abstract, BlueprintType, HideDropdown)
 class ODYSSEYLAYERSTACK_API UOdysseyLayerCell
     : public UObject
     , public IOdysseyTextureRenderingAbility
 {
     GENERATED_BODY()
+
+#if WITH_EDITOR
+public:
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnOutOfPegsChanged, bool /*iIsInteractive*/)
+#endif
 
 public:
     UFUNCTION(BlueprintPure, Category="Odyssey|Cell")
@@ -47,6 +67,15 @@ public:
 
     UFUNCTION(BlueprintCallable, Category="Odyssey|Cell")
     virtual UOdysseyLayerCell* Break(int Frame, bool bClear);
+
+    UFUNCTION(BlueprintPure, Category="Odyssey|Cell")
+    bool IsOutOfPegs() const;
+
+    UFUNCTION(BlueprintPure, Category="Odyssey|Cell")
+    FOdysseyLayerCellOutOfPegs GetOutOfPegs() const;
+
+    UFUNCTION(BlueprintCallable, Category="Odyssey|Cell")
+    void SetOutOfPegs(FOdysseyLayerCellOutOfPegs Value);
 #endif
 
 public:
@@ -64,11 +93,17 @@ public:
     // UObject overrides
     virtual void OldSerialize(FArchive& Ar); //DEPRECATED: Keep that for compatibility with early versions of Odyssey
 #if WITH_EDITOR
+    //Properties modifications
+    void OutOfPegsChanged(bool iIsInteractive);
+
     virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
 #endif
 
 public:
 #if WITH_EDITOR
+    FMatrix OutOfPegsTransform() const;
+    FOnOutOfPegsChanged& OnOutOfPegsChanged();
+    void SetOutOfPegsInteractive(FOdysseyLayerCellOutOfPegs Value);
     void SetExposureInteractive(int Value);
     FSimpleMulticastDelegate& OnThumbnailChanged();
     FSimpleMulticastDelegate& OnThumbnailDirtied();
@@ -100,11 +135,16 @@ protected:
 
     UPROPERTY(NonTransactional)
     bool ThumbnailIsDirty = false;
+
+    UPROPERTY(NonTransactional, DuplicateTransient)
+    FOdysseyLayerCellOutOfPegs OutOfPegs;
 #endif
 
 private:
 #if WITH_EDITOR
     FSimpleMulticastDelegate mOnThumbnailChanged;
     FSimpleMulticastDelegate mOnThumbnailDirtied;
+
+    FOnOutOfPegsChanged mOnOutOfPegsChanged;
 #endif
 };

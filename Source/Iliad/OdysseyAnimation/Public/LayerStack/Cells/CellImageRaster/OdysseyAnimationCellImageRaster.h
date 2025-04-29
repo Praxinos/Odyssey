@@ -7,6 +7,7 @@
 
 #if WITH_EDITOR
 #include "OdysseyInvalidTileMap.h"
+#include <ULIS>
 #endif
 
 #include "OdysseyAnimationCellImageRaster.generated.h"

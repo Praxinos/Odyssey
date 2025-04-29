@@ -97,7 +97,7 @@ void FOdysseyBlendShader::BlendRect(
         RDG_EVENT_NAME("OdysseyBlendShader"),
         shaderParameters,
         ERDGPassFlags::Raster,
-        [iFeatureLevel, iDstRect, iSrcRect, foregroundTextureSize, backgroundTextureSize, blendShader](FRHICommandListImmediate& RHICmdList)
+        [iFeatureLevel, iDstRect, iSrcRect, foregroundTextureSize, backgroundTextureSize, blendShader, iTransform](FRHICommandListImmediate& RHICmdList)
         {
             FBatchedElements blendBatchedElements;
 
@@ -105,6 +105,7 @@ void FOdysseyBlendShader::BlendRect(
             double y = iDstRect.Min.Y;
             double w = iDstRect.Width();
             double h = iDstRect.Height();
+            /*
             float u0 = float(iSrcRect.Min.X) / foregroundTextureSize.X;
             float v0 = float(iSrcRect.Min.Y) / foregroundTextureSize.Y;
             float u1 = float(iSrcRect.Max.X) / foregroundTextureSize.X;
@@ -114,6 +115,29 @@ void FOdysseyBlendShader::BlendRect(
             int32 topRightVertex = blendBatchedElements.AddVertex(FVector4(x + w, y, 0, 1), FVector2D(u1, v0), FLinearColor::White, FHitProxyId());
             int32 bottomLeftVertex = blendBatchedElements.AddVertex(FVector4(x, y + h, 0, 1), FVector2D(u0, v1), FLinearColor::White, FHitProxyId());
             int32 bottomRightVertex = blendBatchedElements.AddVertex(FVector4(x + w, y + h, 0, 1), FVector2D(u1, v1), FLinearColor::White, FHitProxyId());
+            */
+
+
+            FVector srcTopLeft(float(iSrcRect.Min.X), float(iSrcRect.Min.Y), 0.f);
+            FVector srcTopRight(float(iSrcRect.Max.X), float(iSrcRect.Min.Y), 0.f);
+            FVector srcBottomLeft(float(iSrcRect.Min.X), float(iSrcRect.Max.Y), 0.f);
+            FVector srcBottomRight(float(iSrcRect.Max.X), float(iSrcRect.Max.Y), 0.f);
+
+            srcTopLeft = iTransform.Inverse().TransformPosition(srcTopLeft);
+            srcTopRight = iTransform.Inverse().TransformPosition(srcTopRight);
+            srcBottomLeft = iTransform.Inverse().TransformPosition(srcBottomLeft);
+            srcBottomRight = iTransform.Inverse().TransformPosition(srcBottomRight);
+
+            srcTopLeft /= FVector(foregroundTextureSize.X, foregroundTextureSize.Y, 1.f);
+            srcTopRight /= FVector(foregroundTextureSize.X, foregroundTextureSize.Y, 1.f);
+            srcBottomLeft /= FVector(foregroundTextureSize.X, foregroundTextureSize.Y, 1.f);
+            srcBottomRight /= FVector(foregroundTextureSize.X, foregroundTextureSize.Y, 1.f);
+
+            int32 topLeftVertex = blendBatchedElements.AddVertex(FVector4(x, y, 0, 1), FVector2D(srcTopLeft.X, srcTopLeft.Y), FLinearColor::White, FHitProxyId());
+            int32 topRightVertex = blendBatchedElements.AddVertex(FVector4(x + w, y, 0, 1), FVector2D(srcTopRight.X, srcTopRight.Y), FLinearColor::White, FHitProxyId());
+            int32 bottomLeftVertex = blendBatchedElements.AddVertex(FVector4(x, y + h, 0, 1), FVector2D(srcBottomLeft.X, srcBottomLeft.Y), FLinearColor::White, FHitProxyId());
+            int32 bottomRightVertex = blendBatchedElements.AddVertex(FVector4(x + w, y + h, 0, 1), FVector2D(srcBottomRight.X, srcBottomRight.Y), FLinearColor::White, FHitProxyId());
+
 
             blendBatchedElements.AddTriangle(topLeftVertex, topRightVertex, bottomRightVertex, blendShader.GetReference(), SE_BLEND_Opaque);
             blendBatchedElements.AddTriangle(topLeftVertex, bottomRightVertex, bottomLeftVertex, blendShader.GetReference(), SE_BLEND_Opaque);

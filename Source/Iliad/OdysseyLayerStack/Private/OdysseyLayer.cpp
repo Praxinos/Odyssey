@@ -1102,6 +1102,7 @@ UOdysseyLayer::BuildLighttableRenderPipeline(
         float Opacity;
         FLinearColor Color;
         float Contrast;
+        FMatrix transform;
     };
 
     TArray<FLighttableKeyRenderParams> keysRenderParams;
@@ -1125,7 +1126,8 @@ UOdysseyLayer::BuildLighttableRenderPipeline(
                                 renderFunction,
                                 Lighttable.PreviousKeys[i].Opacity / 100.f,
                                 Lighttable.PreviousKeysColor,
-                                Lighttable.PreviousKeysContrast / 100.f
+                                Lighttable.PreviousKeysContrast / 100.f,
+                                keyCell->OutOfPegsTransform()
                             }
                         );
                     }
@@ -1151,7 +1153,8 @@ UOdysseyLayer::BuildLighttableRenderPipeline(
                                 renderFunction,
                                 Lighttable.NextKeys[i].Opacity / 100.f,
                                 Lighttable.NextKeysColor,
-                                Lighttable.NextKeysContrast / 100.f
+                                Lighttable.NextKeysContrast / 100.f,
+                                keyCell->OutOfPegsTransform()
                             }
                         );
                     }
@@ -1232,7 +1235,7 @@ UOdysseyLayer::BuildLighttableRenderPipeline(
                     iDestinationTexture,
                     iDstRect,
                     iDstRect,
-                    FMatrix::Identity,
+                    keyRenderParams.transform,
                     EOdysseyBlendingMode::kNormal,
                     EOdysseyAlphaMode::kNormal,
                     keyRenderParams.Opacity,
