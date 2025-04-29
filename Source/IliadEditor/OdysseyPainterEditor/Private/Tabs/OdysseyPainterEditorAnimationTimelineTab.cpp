@@ -268,7 +268,7 @@ FOdysseyPainterEditorAnimationTimelineTab::ImportTextureSequence()
     TArray<UTexture2D*> textures;
     for(FAssetData& assetData : assetsData)
     {
-        textures.Add(Cast<UTexture2D>(assetsData[0].GetAsset()));
+        textures.Add(Cast<UTexture2D>(assetData.GetAsset()));
     }
 
     UOdysseyPainterEditorAnimationFunctionLibrary::ImportTextureSequence(animation, textures);

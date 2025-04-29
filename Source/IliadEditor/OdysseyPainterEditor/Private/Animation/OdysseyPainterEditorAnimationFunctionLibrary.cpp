@@ -173,8 +173,6 @@ UOdysseyPainterEditorAnimationLayerFunctionLibrary::ImportTextureSequence(UOdyss
     FScopedSlowTask progressBar(Textures.Num(), LOCTEXT("animation-editor.import-texture-dialog.progress-bar.title", "Importing Texture Sequence"));
     progressBar.MakeDialog();
 
-    UTexture2D* openedTexture = Cast<UTexture2D>(Textures[0]);
-    TSharedPtr<::ULIS::FBlock> textureBlock = MakeShareable(NewBlockFromUTextureData(openedTexture, format));
 
     TArray<UOdysseyAnimationCell*> cells = Layer->AddCells(UOdysseyAnimationCellImageRaster::StaticClass(), iCellIndex, Textures.Num());
     TArray<UOdysseyAnimationCellImageRaster*> rasterCells;
@@ -184,6 +182,7 @@ UOdysseyPainterEditorAnimationLayerFunctionLibrary::ImportTextureSequence(UOdyss
 
         UOdysseyAnimationCellImageRaster* cell = Cast<UOdysseyAnimationCellImageRaster>(cells[i]);
         UTexture2D* texture = Textures[i];
+        TSharedPtr<::ULIS::FBlock> textureBlock = MakeShareable(NewBlockFromUTextureData(texture, format));
 
         rasterCells.Add(cell);
 
