@@ -453,8 +453,8 @@ FOdysseyViewportDrawingEditorExtension::SetTextureInternal(UTexture* iTexture)
             if (!animationComponent)
             return;
 
-            TSharedPtr<FOdysseyPainterEditorAnimationSource> animationSource = MakeShared<FOdysseyPainterEditorAnimationSource>(animationComponent->GetActiveAnimation());
-            animationSource->SetExternalPlayer(animationComponent->GetActivePlayer());
+            TSharedPtr<FOdysseyPainterEditorAnimationSource> animationSource = MakeShared<FOdysseyPainterEditorAnimationSource>(animationComponent->GetAnimation());
+            animationSource->SetExternalPlayer(animationComponent->GetPlayer());
             mEditor->SetSource(animationSource);
         }
         else
@@ -508,11 +508,11 @@ FOdysseyViewportDrawingEditorExtension::SyncSequencerWithAnimationPlayer()
     if (!animationComponent)
         return;
 
-    UOdysseyAnimation* animation = animationComponent->GetActiveAnimation();
+    UOdysseyAnimation* animation = animationComponent->GetAnimation();
     if (!animation)
         return;
 
-    UOdysseyAnimationPlayer* player = animationComponent->GetActivePlayer();
+    UOdysseyAnimationPlayer* player = animationComponent->GetPlayer();
     if (!player)
         return;
 

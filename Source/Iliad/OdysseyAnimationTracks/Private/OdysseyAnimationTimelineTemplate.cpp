@@ -56,7 +56,7 @@ struct FOdysseyAnimationTimelineSectionExecutionToken
         if (!animation)
             return;
 
-        UOdysseyAnimationPlayer* player = iComponent->GetActivePlayer();
+        UOdysseyAnimationPlayer* player = iComponent->GetPlayer();
         if (!player)
             return;
 

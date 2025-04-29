@@ -44,8 +44,8 @@ FOdysseyPainterEditorAnimationSource::FOdysseyPainterEditorAnimationSource(UOdys
     , mPlayer ( NewObject<UOdysseyAnimationPlayer>() )
     , mEditor( nullptr )
 {
-    mPlayer->UsePreBehaviour = false;
-    mPlayer->UsePostBehaviour = true;
+    mPlayer->SetUsePreBehaviour(false);
+    mPlayer->SetUsePostBehaviour(false);
     mPlayer->SetIgnoreAnimationBounds(true);
 }
 
@@ -74,9 +74,7 @@ FOdysseyPainterEditorAnimationSource::Activate(FOdysseyPainterEditor* iEditor)
 
     AddEditedObject(mAnimation);
 
-    FOdysseyObjectEditorUtils::SetPropertyValue(mPlayer, GET_MEMBER_NAME_CHECKED( UOdysseyAnimationPlayer, Animation), mAnimation);
-    //FOdysseyObjectEditorUtils::SetPropertyValue(mTexture, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationTexture, Player), mPlayer);
-    //mTexture->UpdateResource();
+    mPlayer->SetAnimation(mAnimation);
 
     //Seek at current frame
     ActivatePlayer(GetAnimationPlayer());
@@ -100,8 +98,7 @@ FOdysseyPainterEditorAnimationSource::Inactivate()
     RemoveEditedObject(mAnimation);
 
     InactivatePlayer(GetAnimationPlayer());
-
-    FOdysseyObjectEditorUtils::SetPropertyValue(mPlayer, GET_MEMBER_NAME_CHECKED( UOdysseyAnimationPlayer, Animation), nullptr);
+    mPlayer->SetAnimation(nullptr);
     IOdysseyRenderingAbility::OnRenderingChangedDelegate().RemoveAll(this);
 
     FOdysseyPainterEditorSource::Inactivate();

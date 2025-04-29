@@ -28,7 +28,6 @@ public class OdysseyCore : ModuleRules
                 Path.Combine(ModuleDirectory, "Public", "Image"),
                 Path.Combine(ModuleDirectory, "Public", "Input"),
                 Path.Combine(ModuleDirectory, "Public", "Math"),
-                Path.Combine(ModuleDirectory, "Public", "Misc"),
             }
         );
 

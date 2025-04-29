@@ -301,7 +301,7 @@ FOdysseyPainterEditorGlobalTimelineShortcuts::Action_ActivateLooping()
     UOdysseyAnimationPlayer* player = mEditor->GetAnimationPlayer();
     if (!player)
         return;
-    FOdysseyObjectEditorUtils::SetPropertyValue(player, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationPlayer, IsLooping), true);
+    player->SetIsLooping(true);
 }
 
 void
@@ -310,7 +310,7 @@ FOdysseyPainterEditorGlobalTimelineShortcuts::Action_InactivateLooping()
     UOdysseyAnimationPlayer* player = mEditor->GetAnimationPlayer();
     if (!player)
         return;
-    FOdysseyObjectEditorUtils::SetPropertyValue(player, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationPlayer, IsLooping), false);
+    player->SetIsLooping(false);
 }
 
 void
@@ -319,7 +319,8 @@ FOdysseyPainterEditorGlobalTimelineShortcuts::Action_ToggleLooping()
     UOdysseyAnimationPlayer* player = mEditor->GetAnimationPlayer();
     if (!player)
         return;
-    FOdysseyObjectEditorUtils::SetPropertyValue(player, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationPlayer, IsLooping), !player->IsLooping);
+
+    player->SetIsLooping(!player->IsLooping());
 }
 
 void

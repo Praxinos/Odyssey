@@ -4,9 +4,8 @@
 #include "OdysseyAnimationComponent.h"
 #include "OdysseyAnimation.h"
 #include "OdysseyAnimationPlayer.h"
-#include "Materials/MaterialInstanceConstant.h"
+#include "Materials/MaterialInstanceDynamic.h"
 #include "Materials/Material.h"
-#include "Subsystems/UnrealEditorSubsystem.h"
 #include "Misc/TransactionObjectEvent.h"
 #include "Engine/TextureRenderTarget2D.h"
 
@@ -16,7 +15,7 @@
 // UOdysseyAnimationComponent
 
 UOdysseyAnimation*
-UOdysseyAnimationComponent::GetActiveAnimation() const
+UOdysseyAnimationComponent::GetAnimation() const
 {
     if (Mode == EOdysseyAnimationComponentMode::Animation)
     {
@@ -26,14 +25,14 @@ UOdysseyAnimationComponent::GetActiveAnimation() const
     if (Mode == EOdysseyAnimationComponentMode::Player)
     {
         if (Player)
-            return Player->Animation;
+            return Player->GetAnimation();
     }
 
     return nullptr;
 }
 
 UOdysseyAnimationPlayer*
-UOdysseyAnimationComponent::GetActivePlayer() const
+UOdysseyAnimationComponent::GetPlayer() const
 {
     if (Mode == EOdysseyAnimationComponentMode::Animation)
     {
@@ -82,34 +81,6 @@ UOdysseyAnimationComponent::SetMode(EOdysseyAnimationComponentMode iMode)
     Mode = iMode;
 }
 
-void
-UOdysseyAnimationComponent::Play()
-{
-    if (Mode == EOdysseyAnimationComponentMode::Animation)
-    {
-        DefaultPlayer->Play();
-    }
-
-    if (Mode == EOdysseyAnimationComponentMode::Player && Player)
-    {
-        Player->Play();
-    }
-}
-
-void
-UOdysseyAnimationComponent::Stop()
-{
-    if (Mode == EOdysseyAnimationComponentMode::Animation)
-    {
-        DefaultPlayer->Stop();
-    }
-
-    if (Mode == EOdysseyAnimationComponentMode::Player && Player)
-    {
-        Player->Stop();
-    }
-}
-
 UOdysseyAnimationComponent::UOdysseyAnimationComponent(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer)
 {
@@ -117,7 +88,6 @@ UOdysseyAnimationComponent::UOdysseyAnimationComponent(const FObjectInitializer&
     Mobility = EComponentMobility::Movable;
     SetGenerateOverlapEvents(false);
     bUseDefaultCollision = false;
-    SetStaticMesh(LoadObject<UStaticMesh>(this, TEXT("/Engine/BasicShapes/Plane.Plane")));
 
 #if WITH_EDITOR
     bAlwaysAllowTranslucentSelect = true;
@@ -126,36 +96,67 @@ UOdysseyAnimationComponent::UOdysseyAnimationComponent(const FObjectInitializer&
     bCastStaticShadow = false;
     bCastDynamicShadow = true;
     bSelectable = true;
-
-    Material = LoadObject<UMaterial>(this, TEXT("/Odyssey/Animation2D/DefaultAnimationMaterial.DefaultAnimationMaterial"));
     DefaultPlayer = CreateDefaultSubobject<UOdysseyAnimationPlayer>(TEXT("DefaultPlayer"));
+}
 
-    MaterialInstance = CreateDefaultSubobject<UMaterialInstanceConstant>(TEXT("MaterialInstance"));
-    MaterialInstance->SetParentEditorOnly(Material);
-    SetMaterial(0, MaterialInstance);
-    RefreshMaterialTexture();
+void
+UOdysseyAnimationComponent::Initialize()
+{
+    static constexpr const TCHAR* DefaultStaticMeshPath = TEXT("/Engine/BasicShapes/Plane.Plane");
+    static ConstructorHelpers::FObjectFinderOptional<UStaticMesh> DefaultStaticMesh(DefaultStaticMeshPath);
+
+    if ( DefaultStaticMesh.Succeeded() )
+        SetStaticMesh(DefaultStaticMesh.Get());
+
+    static constexpr const TCHAR* DefaultMaterialPath = TEXT("/Odyssey/Animation2D/DefaultAnimationMaterial.DefaultAnimationMaterial");
+    static ConstructorHelpers::FObjectFinderOptional<UMaterial> DefaultMaterial(DefaultMaterialPath);
+
+    if ( DefaultMaterial.Succeeded() )
+        SetAnimationMaterial(DefaultMaterial.Get());
+}
+
+void
+UOdysseyAnimationComponent::InitializeFromAnimation(UOdysseyAnimation* iAnimation)
+{
+    Initialize();
+    SetMode(EOdysseyAnimationComponentMode::Animation);
+    SetAnimation(iAnimation);
+    SetPlayer(nullptr);
+}
+
+
+void
+UOdysseyAnimationComponent::InitializeFromPlayer(UOdysseyAnimationPlayer* iPlayer)
+{
+    Initialize();
+    SetMode(EOdysseyAnimationComponentMode::Animation);
+    SetAnimation(nullptr);
+    SetPlayer(iPlayer);
 }
 
 void
 UOdysseyAnimationComponent::PostLoad()
 {
     Super::PostLoad();
-
-    SetMaterial(0, MaterialInstance);
-    RefreshMaterialTexture();
+    if ( GetFlags() & RF_ClassDefaultObject )
+        return;
+    CreateMaterialInstance();
 }
 
 void
-UOdysseyAnimationComponent::PropertyChanged(const FName& iPropertyName)
+UOdysseyAnimationComponent::PostDuplicate(bool bDuplicateForPIE)
 {
-    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationComponent, Mode) )
-        ModeChanged();
-    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationComponent, Animation) )
-        AnimationChanged();
-    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationComponent, Player) )
-        PlayerChanged();
-    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationComponent, Material) )
-        MaterialChanged();
+    Super::PostDuplicate(bDuplicateForPIE);
+    CreateMaterialInstance();
+}
+
+void
+UOdysseyAnimationComponent::CreateMaterialInstance()
+{
+    MaterialInstance = UMaterialInstanceDynamic::Create(Material, GetTransientPackage());
+    MaterialInstance->SetFlags(MaterialInstance->GetFlags() | RF_Public);
+    UStaticMeshComponent::SetMaterial(0, MaterialInstance);
+    RefreshMaterialTexture();
 }
 
 void
@@ -186,9 +187,10 @@ UOdysseyAnimationComponent::PlayerChanged()
     {
         if (Player)
         {
-            UOdysseyAnimation* animation = Player->Animation;
+            UOdysseyAnimation* animation = Player->GetAnimation();
             if (animation)
             {
+                UFUNCTION(Category = "Actions", CallInEditor)
                 float scaleW = (float)animation->GetWidth() / (float)animation->GetHeight();
                 SetRelativeScale3D(FVector(scaleW, 1, 1));
             }
@@ -198,11 +200,37 @@ UOdysseyAnimationComponent::PlayerChanged()
     }
 }
 
+UMaterialInterface*
+UOdysseyAnimationComponent::GetAnimationMaterial() const
+{
+    return Material;
+}
+
+void
+UOdysseyAnimationComponent::SetAnimationMaterial(UMaterialInterface* iMaterial)
+{
+    Material = iMaterial;
+    MaterialChanged();
+}
+
 void
 UOdysseyAnimationComponent::MaterialChanged()
 {
-    MaterialInstance->SetParentEditorOnly(Material);
-    RefreshMaterialTexture();
+    CreateMaterialInstance();
+}
+
+#if WITH_EDITOR
+void
+UOdysseyAnimationComponent::PropertyChanged(const FName& iPropertyName)
+{
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationComponent, Mode) )
+        ModeChanged();
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationComponent, Animation) )
+        AnimationChanged();
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationComponent, Player) )
+        PlayerChanged();
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationComponent, Material) )
+        MaterialChanged();
 }
 
 void
@@ -230,14 +258,7 @@ UOdysseyAnimationComponent::PostTransacted(const FTransactionObjectEvent& iTrans
         PropertyChanged(propertyName);
     }
 }
-
-void
-UOdysseyAnimationComponent::PostDuplicate(bool bDuplicateForPIE)
-{
-    Super::PostDuplicate(bDuplicateForPIE);
-
-    RefreshMaterialTexture();
-}
+#endif
 
 void
 UOdysseyAnimationComponent::RefreshMaterialTexture()
@@ -245,24 +266,30 @@ UOdysseyAnimationComponent::RefreshMaterialTexture()
     if (!MaterialInstance)
         return;
 
-    UOdysseyAnimationPlayer* player = GetActivePlayer();
+    UOdysseyAnimationPlayer* player = GetPlayer();
     if (!player)
         return;
 
     UTextureRenderTarget2D* renderTarget = player->GetRenderTarget();
     if (renderTarget)
     {
-        MaterialInstance->SetTextureParameterValueEditorOnly(FMaterialParameterInfo("AnimationTexture"), renderTarget);
+        MaterialInstance->SetTextureParameterValue("AnimationTexture", renderTarget);
     }
     else
     {
-        //Needed because SetTextureParameterValueEditorOnly does nothing if texture is nullptr
-        MaterialInstance->ClearParameterValuesEditorOnly();
+        //Needed because SetTextureParameterValue does nothing if texture is nullptr
+        MaterialInstance->ClearParameterValues();
     }
 
+#if WITH_EDITOR
     MaterialInstance->PostEditChange();
+#endif
 
     FMaterialUpdateContext UpdateContext(FMaterialUpdateContext::EOptions::Default, GMaxRHIShaderPlatform);
     UpdateContext.AddMaterialInstance(MaterialInstance);
+
+#if WITH_EDITOR
     MaterialInstance->MarkPackageDirty();
+#endif
+
 }

@@ -4,6 +4,7 @@
 #include "OdysseyAnimation.h"
 
 #include "Misc/TransactionObjectEvent.h"
+#include "CanvasTypes.h"
 
 #define LOCTEXT_NAMESPACE "Animation"
 
@@ -39,12 +40,16 @@ FInt32Range
 UOdysseyAnimation::GetFrameRange() const
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyAnimation::GetFrameRange);
-
-    if (!mLayerStack || !mLayerStack->Implements<UOdysseyTextureRenderingAbility>())
-        return FInt32Range::Empty();
-
-    IOdysseyTextureRenderingAbility* renderingInterface = Cast<IOdysseyTextureRenderingAbility>(mLayerStack);
-    return renderingInterface->GetFrameRange();
+    #if WITH_EDITOR
+    return FInt32Range::Inclusive(GetLeftBoundValue(), GetRightBoundValue());
+    #else
+    int frameCount = 0;
+    for (const FOdysseyAnimationFrame& frame : Frames)
+    {
+        frameCount += frame.Exposure;
+    }
+    return FInt32Range::Inclusive(0, frameCount - 1);
+    #endif
 }
 
 int
@@ -69,6 +74,106 @@ UOdysseyAnimation::GetFrameTimeRange(int iFrameIndex) const
     //That way we never have two frame with overlapping timeranges
     FTimespan end = FTimespan::FromSeconds((iFrameIndex + 1) / GetFramesPerSecond()) - FTimespan(1);
     return TRange<FTimespan>(start, end);
+}
+
+/* UMediaSource overrides
+ *****************************************************************************/
+
+FString UOdysseyAnimation::GetUrl() const
+{
+    return FString(TEXT("odysseyanimation://")) + GetPathName();
+}
+
+bool UOdysseyAnimation::Validate() const
+{
+    return true;
+}
+
+int
+UOdysseyAnimation::GetFrameIndexAtFrame(int iFrameIndex) const
+{
+    int frameIndex = 0;
+    for (const FOdysseyAnimationFrame& frame : Frames)
+    {
+        if (iFrameIndex >= frameIndex && iFrameIndex < frameIndex + frame.Exposure)
+            return frameIndex;
+
+        frameIndex += frame.Exposure;
+    }
+    return INDEX_NONE;
+}
+
+TArray<FGuid>
+UOdysseyAnimation::GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrameIndex) const
+{
+    TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyAnimation::GetRenderingComposition);
+#if WITH_EDITOR
+    if (!mLayerStack || !mLayerStack->Implements<UOdysseyTextureRenderingAbility>())
+        return {};
+
+    IOdysseyTextureRenderingAbility* renderingInterface = Cast<IOdysseyTextureRenderingAbility>(mLayerStack);
+
+    TArray<FGuid> idComposition;
+    idComposition.Append(renderingInterface->GetRenderingComposition(iRenderType, iFrameIndex));
+
+    return idComposition;
+#else
+    int frameIndex = GetFrameIndexAtFrame(iFrameIndex);
+    if (frameIndex == INDEX_NONE)
+        return {};
+
+    return Frames[frameIndex].RenderingComposition;
+#endif
+}
+
+TArray<FIntRect>
+UOdysseyAnimation::GetRenderingRects() const
+{
+    return { FIntRect(0, 0, GetWidth(), GetHeight()) };
+}
+
+void
+UOdysseyAnimation::RenderToTextureFromRects(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, const TArray<FIntRect>& iRects, const FIntPoint& iPos) const
+{
+#if WITH_EDITOR
+    if (!mLayerStack || !mLayerStack->Implements<UOdysseyTextureRenderingAbility>())
+        return;
+
+    IOdysseyTextureRenderingAbility::Execute_RenderRectsAtPosition(mLayerStack, iRenderTarget, iFrame, iRects, iPos);
+#else
+    FTextureRenderTargetResource* dstResource = iRenderTarget->GameThread_GetRenderTargetResource();
+    FCanvas Canvas(dstResource, nullptr, FGameTime(), iRenderTarget->GetWorld()->GetFeatureLevel());
+
+    FTextureResource* srcResource = nullptr;
+    int frameIndex = GetFrameIndexAtFrame(iFrame.Value);
+    if (frameIndex != INDEX_NONE)
+    {
+        if (Frames[frameIndex].Texture)
+            srcResource = Frames[frameIndex].Texture->GetResource();
+    }
+
+    //Canvas.Clear(FLinearColor::Transparent);
+    for (int i = 0; i < iRects.Num(); i++)
+    {
+        const FIntRect& rect = iRects[i];
+        FIntPoint pos = rect.Min - iPos;
+
+        double x = pos.X;
+        double y = pos.Y;
+        double w = rect.Width();
+        double h = rect.Height();
+        float u = float(rect.Min.X) / GetWidth();
+        float v = float(rect.Min.Y) / GetHeight();
+        float sizeU = float(rect.Max.X) / GetWidth();
+        float sizeV = float(rect.Max.Y) / GetHeight();
+        Canvas.DrawTile(x, y, w, h, u, v, sizeU, sizeV, FLinearColor::Transparent, GWhiteTexture, SE_BLEND_Opaque);
+
+        if (srcResource)
+            Canvas.DrawTile(x, y, w, h, u, v, sizeU, sizeV, FLinearColor::White, srcResource, SE_BLEND_AlphaBlend);
+
+        Canvas.Flush_GameThread(true);
+    }
+#endif
 }
 
 #if WITH_EDITOR
@@ -100,7 +205,11 @@ UOdysseyAnimation::GetLeftBoundValue() const
     {
         case EOdysseyAnimationBoundMode::Automatic:
         {
-            FInt32Range frameRange = GetFrameRange();
+            if (!mLayerStack || !mLayerStack->Implements<UOdysseyTextureRenderingAbility>())
+                return 0;
+
+            IOdysseyTextureRenderingAbility* renderingInterface = Cast<IOdysseyTextureRenderingAbility>(mLayerStack);
+            FInt32Range frameRange = renderingInterface->GetFrameRange();
             return frameRange.GetLowerBoundValue();
         }
         break;
@@ -121,7 +230,11 @@ UOdysseyAnimation::GetRightBoundValue() const
     {
         case EOdysseyAnimationBoundMode::Automatic:
         {
-            FInt32Range frameRange = GetFrameRange();
+            if (!mLayerStack || !mLayerStack->Implements<UOdysseyTextureRenderingAbility>())
+                return 0;
+
+            IOdysseyTextureRenderingAbility* renderingInterface = Cast<IOdysseyTextureRenderingAbility>(mLayerStack);
+            FInt32Range frameRange = renderingInterface->GetFrameRange();
             return frameRange.GetUpperBoundValue();
         }
         break;
@@ -182,53 +295,6 @@ UOdysseyAnimation::GetLayerStack() const
 {
     return mLayerStack;
 }
-#endif
-
-/* UMediaSource overrides
- *****************************************************************************/
-
-FString UOdysseyAnimation::GetUrl() const
-{
-    return FString(TEXT("odysseyanimation://")) + GetPathName();
-}
-
-bool UOdysseyAnimation::Validate() const
-{
-    return true;
-}
-
-TArray<FGuid>
-UOdysseyAnimation::GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrameIndex) const
-{
-    TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyAnimation::GetRenderingComposition);
-
-    if (!mLayerStack || !mLayerStack->Implements<UOdysseyTextureRenderingAbility>())
-        return {};
-
-    IOdysseyTextureRenderingAbility* renderingInterface = Cast<IOdysseyTextureRenderingAbility>(mLayerStack);
-
-    TArray<FGuid> idComposition;
-    idComposition.Append(renderingInterface->GetRenderingComposition(iRenderType, iFrameIndex));
-
-    return idComposition;
-}
-
-TArray<FIntRect>
-UOdysseyAnimation::GetRenderingRects() const
-{
-    return { FIntRect(0, 0, GetWidth(), GetHeight()) };
-}
-
-void
-UOdysseyAnimation::RenderToTextureFromRects(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, const TArray<FIntRect>& iRects, const FIntPoint& iPos) const
-{
-    if (!mLayerStack || !mLayerStack->Implements<UOdysseyTextureRenderingAbility>())
-        return;
-
-    IOdysseyTextureRenderingAbility::Execute_RenderRectsAtPosition(mLayerStack, iRenderTarget, iFrame, iRects, iPos);
-}
-
-
 
 void
 UOdysseyAnimation::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent)
@@ -259,7 +325,11 @@ UOdysseyAnimation::PostTransacted(const FTransactionObjectEvent& iTransactionEve
 void
 UOdysseyAnimation::OnLeftBoundModeChanged()
 {
-    FInt32Range frameRange = GetFrameRange();
+    if (!mLayerStack || !mLayerStack->Implements<UOdysseyTextureRenderingAbility>())
+        return;
+
+    IOdysseyTextureRenderingAbility* renderingInterface = Cast<IOdysseyTextureRenderingAbility>(mLayerStack);
+    FInt32Range frameRange = renderingInterface->GetFrameRange();
     LeftBound = frameRange.GetLowerBoundValue();
     RightBound = FMath::Max(GetLeftBoundValue(), RightBound);
 }
@@ -267,7 +337,11 @@ UOdysseyAnimation::OnLeftBoundModeChanged()
 void
 UOdysseyAnimation::OnRightBoundModeChanged()
 {
-    FInt32Range frameRange = GetFrameRange();
+    if (!mLayerStack || !mLayerStack->Implements<UOdysseyTextureRenderingAbility>())
+        return;
+
+    IOdysseyTextureRenderingAbility* renderingInterface = Cast<IOdysseyTextureRenderingAbility>(mLayerStack);
+    FInt32Range frameRange = renderingInterface->GetFrameRange();
     RightBound = frameRange.GetUpperBoundValue();
     LeftBound = FMath::Min(LeftBound, GetRightBoundValue());
 }
@@ -277,7 +351,11 @@ UOdysseyAnimation::OnLeftBoundChanged()
 {
     if (LeftBoundMode == EOdysseyAnimationBoundMode::Automatic)
     {
-        FInt32Range frameRange = GetFrameRange();
+        if (!mLayerStack || !mLayerStack->Implements<UOdysseyTextureRenderingAbility>())
+            return;
+
+        IOdysseyTextureRenderingAbility* renderingInterface = Cast<IOdysseyTextureRenderingAbility>(mLayerStack);
+        FInt32Range frameRange = renderingInterface->GetFrameRange();
         LeftBound = frameRange.GetLowerBoundValue();
     }
     else
@@ -291,7 +369,11 @@ UOdysseyAnimation::OnRightBoundChanged()
 {
     if (RightBoundMode == EOdysseyAnimationBoundMode::Automatic)
     {
-        FInt32Range frameRange = GetFrameRange();
+        if (!mLayerStack || !mLayerStack->Implements<UOdysseyTextureRenderingAbility>())
+            return;
+
+        IOdysseyTextureRenderingAbility* renderingInterface = Cast<IOdysseyTextureRenderingAbility>(mLayerStack);
+        FInt32Range frameRange = renderingInterface->GetFrameRange();
         RightBound = frameRange.GetUpperBoundValue();
     }
     else
@@ -323,6 +405,7 @@ UOdysseyAnimation::PropertyChanged(const FName& iPropertyName)
         OnRightBoundChanged();
     }
 }
+#endif
 
 
 #undef LOCTEXT_NAMESPACE

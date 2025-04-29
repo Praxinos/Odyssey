@@ -32,7 +32,8 @@ UOdysseyAnimationTimelineTrack::AddNewSection(FFrameNumber KeyTime, UOdysseyAnim
     int32 animationDuration = UE::MovieScene::DiscreteSize(defaultRange);
 
     FFrameRate animationFrameRate(iAnimation->GetFramesPerSecond() * 100, 100);
-    FFrameNumber animationLeftBoundFrame(iAnimation->GetLeftBoundValue());
+    FInt32Range frameRange = iAnimation->GetFrameRange();
+    FFrameNumber animationLeftBoundFrame(frameRange.GetLowerBoundValue());
 
     NewSection->SetStartFrameOffset(FFrameRate::TransformTime(animationLeftBoundFrame, animationFrameRate, movieScene->GetDisplayRate()).GetFrame());
     NewSection->InitialPlacement(Sections, KeyTime, animationDuration, false);

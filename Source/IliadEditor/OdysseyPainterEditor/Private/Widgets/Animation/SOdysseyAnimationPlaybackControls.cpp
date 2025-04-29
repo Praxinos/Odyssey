@@ -162,7 +162,7 @@ SOdysseyAnimationPlaybackControls::GetLoopingButtonVisibility() const
     if (!mPlayer)
         return EVisibility::Collapsed;
 
-    return mPlayer->IsLooping ? EVisibility::Visible : EVisibility::Collapsed;
+    return mPlayer->IsLooping() ? EVisibility::Visible : EVisibility::Collapsed;
 }
 
 EVisibility
@@ -171,7 +171,7 @@ SOdysseyAnimationPlaybackControls::GetNotLoopingButtonVisibility() const
     if (!mPlayer)
         return EVisibility::Collapsed;
 
-    return mPlayer->IsLooping ? EVisibility::Collapsed : EVisibility::Visible;
+    return mPlayer->IsLooping() ? EVisibility::Collapsed : EVisibility::Visible;
 }
 
 FReply
@@ -350,6 +350,6 @@ SOdysseyAnimationPlaybackControls::OnNextKeyClicked()
 FReply
 SOdysseyAnimationPlaybackControls::OnLoopClicked()
 {
-    FOdysseyObjectEditorUtils::SetPropertyValue(mPlayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationPlayer, IsLooping), !mPlayer->IsLooping);
+    mPlayer->SetIsLooping(!mPlayer->IsLooping());
     return FReply::Handled();
 }

@@ -70,7 +70,7 @@ FOdysseyAnimationMediaControls::GetFrameCount() const
 FInt32Range
 FOdysseyAnimationMediaControls::GetFrameRange() const
 {
-    FInt32Range frameRange = FInt32Range::Inclusive(mAnimation->GetLeftBoundValue(), mAnimation->GetRightBoundValue());
+    FInt32Range frameRange = mAnimation->GetFrameRange();
     if (mFrameToIncludeIntoDuration.IsSet())
     {
         frameRange.SetLowerBoundValue(FMath::Min(frameRange.GetLowerBoundValue(), mFrameToIncludeIntoDuration.GetValue()));

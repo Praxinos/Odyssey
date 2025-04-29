@@ -6,66 +6,8 @@
 #include "OdysseyAnimationComponent.h"
 #include "OdysseyAnimationPlayer.h"
 #include "Materials/MaterialInstanceConstant.h"
-#include "Subsystems/UnrealEditorSubsystem.h"
-#include "Editor.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(OdysseyAnimationActor)
-
-//////////////////////////////////////////////////////////////////////////
-// AOdysseyAnimationActor
-
-/* void
-AOdysseyAnimationActor::Play()
-{
-    if (AnimationComponent)
-        AnimationComponent->Play();
-}
-
-void
-AOdysseyAnimationActor::Stop()
-{
-    if (AnimationComponent)
-        AnimationComponent->Stop();
-}
-
-void
-AOdysseyAnimationActor::FaceCamera()
-{
-    UUnrealEditorSubsystem* UnrealEditorSubsystem = GEditor->GetEditorSubsystem<UUnrealEditorSubsystem>();
-    FVector cameraLocation;
-    FRotator cameraRotation;
-    if (!UnrealEditorSubsystem->GetLevelViewportCameraInfo(cameraLocation, cameraRotation))
-        return;
-
-    //-
-
-    FRotator plane_rotator = cameraRotation;
-
-    //---
-
-    SetActorRotation( plane_rotator );
-}
-
-void
-AOdysseyAnimationActor::MoveInFrontOfCamera()
-{
-    UUnrealEditorSubsystem* UnrealEditorSubsystem = GEditor->GetEditorSubsystem<UUnrealEditorSubsystem>();
-    FVector cameraLocation;
-    FRotator cameraRotation;
-    if (!UnrealEditorSubsystem->GetLevelViewportCameraInfo(cameraLocation, cameraRotation))
-        return;
-
-    //-
-
-    float FocusDistance = 200;
-    FVector plane_location = cameraLocation + cameraRotation.Vector() * FocusDistance;
-    FRotator plane_rotator = cameraRotation;
-
-    //---
-
-    SetActorLocation( plane_location );
-    SetActorRotation( plane_rotator );
-} */
 
 FName AOdysseyAnimationActor::AnimationComponentName(TEXT("AnimationComponent"));
 
@@ -86,8 +28,8 @@ bool AOdysseyAnimationActor::GetReferencedContentObjects(TArray<UObject*>& Objec
 
     switch(AnimationComponent->GetMode())
     {
-        case EOdysseyAnimationComponentMode::Animation : Objects.Add(AnimationComponent->GetActiveAnimation()); break;
-        case EOdysseyAnimationComponentMode::Player : Objects.Add(AnimationComponent->GetActivePlayer()); break;
+        case EOdysseyAnimationComponentMode::Animation : Objects.Add(AnimationComponent->GetAnimation()); break;
+        case EOdysseyAnimationComponentMode::Player : Objects.Add(AnimationComponent->GetPlayer()); break;
     }
     return true;
 }

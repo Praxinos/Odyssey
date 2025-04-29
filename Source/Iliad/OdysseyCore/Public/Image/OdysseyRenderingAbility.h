@@ -58,8 +58,6 @@ public:
     void RenderingChanged(bool iIsInteractive = false); //Changes the whole rect
     void RenderingChanged(const TArray<FIntRect>& iRects, bool iIsInteractive = false);
     void RenderingCompositionChanged(bool iIsInteractive = false);
-
-public:
     /**
      * @brief Returns the full Render Image Id, eventually composed of underlying ids
      *
@@ -67,7 +65,6 @@ public:
      */
     virtual TArray<FGuid> GetRenderingComposition(EOdysseyRenderingType iRenderType, int iFrameIndex = 0) const;
 
-public:
     /**
      * @brief Returns the full rect that can be rendered
      *

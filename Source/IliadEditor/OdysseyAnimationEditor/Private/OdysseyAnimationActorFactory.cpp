@@ -37,7 +37,7 @@ void UOdysseyAnimationActorFactory::PostSpawnActor(UObject* iAsset, AActor* iAct
     if (animationActor->AnimationComponent)
     {
         animationActor->AnimationComponent->UnregisterComponent();
-        animationActor->AnimationComponent->SetAnimation(animation);
+        animationActor->AnimationComponent->InitializeFromAnimation(animation);
         // Init Component
         animationActor->AnimationComponent->RegisterComponent();
     }

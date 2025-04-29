@@ -26,6 +26,21 @@ enum class EOdysseyAnimationBoundMode : uint8
     Manual
 };
 
+USTRUCT()
+struct FOdysseyAnimationFrame
+{
+    GENERATED_BODY()
+
+    UPROPERTY()
+    UTexture2D* Texture = nullptr;
+
+    UPROPERTY()
+    int Exposure = 0;
+
+    UPROPERTY()
+    TArray<FGuid> RenderingComposition;
+};
+
 UCLASS(HideCategories=(Platforms))
 class ODYSSEYANIMATION_API UOdysseyAnimation
     : public UBaseMediaSource
@@ -61,16 +76,19 @@ public:
     UFUNCTION(BlueprintPure, Category="Odyssey|Animation")
     int GetFrameCount() const;
 
+    int GetFrameIndexAtFrame(int iFrameIndex) const;
+
     //Time range of the frame at iFrameIndex
     TRange<FTimespan> GetFrameTimeRange(int iFrameIndex) const; //TODO: find a better way to have this function, only used by Media and ViewportDrawingEditor
 
+#if WITH_EDITOR
+public:
     void OnLeftBoundModeChanged();
     void OnRightBoundModeChanged();
     void OnLeftBoundChanged();
     void OnRightBoundChanged();
 
 public:
-#if WITH_EDITOR
     void Init(int iWidth, int iHeight, EOdysseyAnimationFormat iFormat, float iFramesPerSecond);
 
     //Getters
@@ -106,8 +124,11 @@ protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(DisplayName="Height"), Category="Odyssey|Animation")
     int mHeight = -1;
 
-    UPROPERTY(BlueprintReadOnly, Category="Odyssey|Animation")
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Odyssey|Animation")
     EOdysseyAnimationFormat Format = EOdysseyAnimationFormat::BGRA8;
+
+    UPROPERTY()
+    TArray<FOdysseyAnimationFrame> Frames;
 
 #if WITH_EDITORONLY_DATA
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Odyssey|Animation")

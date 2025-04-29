@@ -8,6 +8,7 @@
 
 class UOdysseyAnimation;
 class UOdysseyAnimationPlayer;
+class UMaterialInstanceDynamic;
 
 UENUM()
 enum class EOdysseyAnimationComponentMode
@@ -25,58 +26,75 @@ class ODYSSEYANIMATION_API UOdysseyAnimationComponent : public UStaticMeshCompon
     GENERATED_UCLASS_BODY()
 
 public:
-    UFUNCTION(Category="Actions", CallInEditor)
-    void Play();
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationComponent")
+    void InitializeFromAnimation(UOdysseyAnimation* iAnimation);
 
-    UFUNCTION(Category="Actions", CallInEditor)
-    void Stop();
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationComponent")
+    void InitializeFromPlayer(UOdysseyAnimationPlayer* iPlayer);
 
-public:
-    UOdysseyAnimation* GetActiveAnimation() const;
-    UOdysseyAnimationPlayer* GetActivePlayer() const;
+    UFUNCTION(BlueprintPure, Category="Odyssey|AnimationComponent")
+    UOdysseyAnimation* GetAnimation() const;
+
+    UFUNCTION(BlueprintPure, Category = "Odyssey|AnimationComponent")
+    UOdysseyAnimationPlayer* GetPlayer() const;
+
+    UFUNCTION(BlueprintPure, Category = "Odyssey|AnimationComponent")
     EOdysseyAnimationComponentMode GetMode() const;
 
+    UFUNCTION(BlueprintPure, Category = "Odyssey|AnimationComponent")
+    UMaterialInterface* GetAnimationMaterial() const;
+
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationComponent")
     void SetAnimation(UOdysseyAnimation* iAnimation);
+
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationComponent")
     void SetPlayer(UOdysseyAnimationPlayer* iPlayer);
+
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationComponent")
     void SetMode(EOdysseyAnimationComponentMode iMode);
+
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationComponent")
+    void SetAnimationMaterial(UMaterialInterface* iMaterial);
 
 public:
     virtual void PostLoad() override;
     virtual void PostDuplicate(bool bDuplicateForPIE) override;
 
+#if WITH_EDITOR
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent) override;
     virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
+    virtual void PropertyChanged(const FName& iPropertyName);
+#endif
 
 protected:
     //Property changed methods
-    virtual void PropertyChanged(const FName& iPropertyName);
-
+    void Initialize();
     virtual void ModeChanged();
     virtual void AnimationChanged();
     virtual void PlayerChanged();
-
     void MaterialChanged();
+    void CreateMaterialInstance();
 
 private:
     void RefreshMaterialTexture();
 
 protected:
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Animation")
+    UPROPERTY(EditAnywhere, Category="Animation")
     EOdysseyAnimationComponentMode Mode = EOdysseyAnimationComponentMode::Animation;
 
-    UPROPERTY( EditAnywhere, BlueprintReadWrite, Category="Animation", meta=(EditCondition = "Mode==EOdysseyAnimationComponentMode::Animation", EditConditionHides))
+    UPROPERTY( EditAnywhere, Category="Animation", meta=(EditCondition = "Mode==EOdysseyAnimationComponentMode::Animation", EditConditionHides))
     TObjectPtr<UOdysseyAnimation> Animation;
 
-    UPROPERTY( EditAnywhere, BlueprintReadWrite, Category="Animation", meta=(EditCondition = "Mode==EOdysseyAnimationComponentMode::Player", EditConditionHides))
+    UPROPERTY( EditAnywhere, Category="Animation", meta=(EditCondition = "Mode==EOdysseyAnimationComponentMode::Player", EditConditionHides))
     TObjectPtr<UOdysseyAnimationPlayer> Player;
 
-    UPROPERTY( EditAnywhere, BlueprintReadWrite, Category="Animation")
+    UPROPERTY( EditAnywhere, Category="Animation")
     TObjectPtr<UMaterialInterface> Material;
 
 private:
     UPROPERTY()
     TObjectPtr<UOdysseyAnimationPlayer> DefaultPlayer;
 
-    UPROPERTY()
-    TObjectPtr<UMaterialInstanceConstant> MaterialInstance;
+    UPROPERTY(Transient, DuplicateTransient)
+    TObjectPtr<UMaterialInstanceDynamic> MaterialInstance;
 };

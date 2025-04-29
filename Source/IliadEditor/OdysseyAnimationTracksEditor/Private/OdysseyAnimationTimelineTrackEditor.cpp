@@ -75,7 +75,7 @@ FOdysseyAnimationTimelineTrackEditor::OnNewActorTrackAdded(const AActor& iActor,
 
     animationTrack->Modify();
 
-    UMovieSceneSection* section = animationTrack->AddNewSection(iSequencer->GetLocalTime().Time.FrameNumber, animationComponent->GetActiveAnimation());
+    UMovieSceneSection* section = animationTrack->AddNewSection(iSequencer->GetLocalTime().Time.FrameNumber, animationComponent->GetAnimation());
     section->Modify();
 
     iSequencer->EmptySelection();
@@ -159,7 +159,7 @@ FOdysseyAnimationTimelineTrackEditor::AddAnimationTrackKeyInternal(FFrameNumber 
                     if (component)
                     {
                         animationTrack->Modify();
-                        UMovieSceneSection* NewSection = animationTrack->AddNewSection(KeyTime, component->GetActiveAnimation());
+                        UMovieSceneSection* NewSection = animationTrack->AddNewSection(KeyTime, component->GetAnimation());
                         NewSection->Modify();
                         KeyPropertyResult.bTrackModified = true;
                         KeyPropertyResult.SectionsCreated.Add(NewSection);
@@ -314,7 +314,7 @@ FOdysseyAnimationTimelineTrackEditor::BuildOutlinerColumnWidget(const FBuildColu
                                 if (!component)
                                     return nullptr;
 
-                                UOdysseyAnimation* animation = component->GetActiveAnimation();
+                                UOdysseyAnimation* animation = component->GetAnimation();
                                 if (!animation)
                                     return nullptr;
 

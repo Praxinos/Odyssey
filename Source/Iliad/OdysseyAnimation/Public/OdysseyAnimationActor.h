@@ -26,20 +26,6 @@ public:
 #endif
     // End of AActor interface
 
-/* public:
-    UFUNCTION(Category="Actions", CallInEditor)
-    void Play();
-
-    UFUNCTION(Category="Actions", CallInEditor)
-    void Stop();
-
-    UFUNCTION(Category="Actions", CallInEditor)
-    void FaceCamera();
-
-    UFUNCTION(Category="Actions", CallInEditor)
-    void MoveInFrontOfCamera();
-*/
-
 public:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Animation")
     TObjectPtr<UOdysseyAnimationComponent> AnimationComponent;
