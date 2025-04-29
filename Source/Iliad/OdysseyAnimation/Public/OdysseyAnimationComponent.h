@@ -62,7 +62,6 @@ protected:
     void MaterialChanged();
 
 private:
-    void GenerateMaterialInstance();
     void RefreshMaterialTexture();
 
 protected:

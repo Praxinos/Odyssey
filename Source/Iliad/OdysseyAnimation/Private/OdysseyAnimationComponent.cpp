@@ -155,15 +155,10 @@ UOdysseyAnimationComponent::UOdysseyAnimationComponent(const FObjectInitializer&
     Material = LoadObject<UMaterial>(this, TEXT("/Odyssey/Animation2D/DefaultAnimationMaterial.DefaultAnimationMaterial"));
     DefaultPlayer = CreateDefaultSubobject<UOdysseyAnimationPlayer>(TEXT("DefaultPlayer"));
 
-    GenerateMaterialInstance();
-}
-
-void
-UOdysseyAnimationComponent::GenerateMaterialInstance()
-{
     MaterialInstance = CreateDefaultSubobject<UMaterialInstanceConstant>(TEXT("MaterialInstance"));
     MaterialInstance->SetParentEditorOnly(Material);
     SetMaterial(0, MaterialInstance);
+    RefreshMaterialTexture();
 }
 
 void
@@ -172,7 +167,6 @@ UOdysseyAnimationComponent::PostLoad()
     Super::PostLoad();
 
     SetMaterial(0, MaterialInstance);
-
     RefreshMaterialTexture();
 }
 
