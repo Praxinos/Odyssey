@@ -65,7 +65,8 @@ ExportAsTexture(UObject* iObject, int iFrame, const FIntRect& iRect, FString iAs
     //instead of keeping it in memory waiting for the garbage collector to destroy it
     TStrongObjectPtr<UTextureRenderTarget2D> renderTarget(NewObject<UTextureRenderTarget2D>());
     renderTarget->RenderTargetFormat = RTF_RGBA8_SRGB;
-    renderTarget->bForceLinearGamma = true;
+    renderTarget->bForceLinearGamma = false;
+    renderTarget->SRGB = renderTarget->IsSRGB();
     renderTarget->InitAutoFormat(iRect.Width(), iRect.Height());
 
     ability->Render_GameThread(renderTarget.Get(), FFrameNumber(iFrame), EOdysseyRenderingType::Render, iRect);
@@ -78,12 +79,9 @@ ExportAsTexture(UObject* iObject, int iFrame, const FIntRect& iRect, FString iAs
 
     FText ErrorMessage;
     UObject* object = renderTarget->ConstructTexture(CreatePackage(*PackageName), Name, renderTarget->GetMaskedFlags() | RF_Public | RF_Standalone,
-        static_cast<EConstructTextureFlags>(CTF_Compress | CTF_AllowMips), /*InAlphaOverride = */nullptr, &ErrorMessage);
+        static_cast<EConstructTextureFlags>(CTF_Compress | CTF_SRGB | CTF_AllowMips), /*InAlphaOverride = */nullptr, &ErrorMessage);
 
-    UTexture2D* texture = Cast<UTexture2D>(object);
-    texture->SRGB = true;
-    texture->PostEditChange();
-    return texture;
+    return Cast<UTexture2D>(object);
 }
 
 FString

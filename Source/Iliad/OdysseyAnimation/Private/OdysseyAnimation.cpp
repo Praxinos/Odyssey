@@ -457,7 +457,7 @@ UOdysseyAnimation::PreSave(FObjectPreSaveContext SaveContext)
 
     TStrongObjectPtr<UTextureRenderTarget2D> renderTarget(NewObject<UTextureRenderTarget2D>());
     renderTarget->RenderTargetFormat = RTF_RGBA8_SRGB;
-    renderTarget->bForceLinearGamma = true;
+    renderTarget->bForceLinearGamma = false;
     renderTarget->InitAutoFormat(GetWidth(), GetHeight());
     renderTarget->UpdateResourceImmediate();
 

@@ -72,7 +72,7 @@ public:
 
 private:
     bool UpdateDrawingFlags() const;
-    void InitTexture() const;
+    void InitTexture();
     void OnVectorEngineNotify(FOdysseyVectorGroupPaint* iScene, uint64 iSignalFlags);
     void OnVectorBlockInvalidated(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive);
 

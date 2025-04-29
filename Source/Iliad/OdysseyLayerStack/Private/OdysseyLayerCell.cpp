@@ -101,7 +101,22 @@ UOdysseyLayerCell::SetExposure(int Value)
 UTexture2D*
 UOdysseyLayerCell::GetRenderTexture() const
 {
+    if (!Texture)
+        const_cast<UOdysseyLayerCell*>(this)->InitTexture();
+
     return Texture;
+}
+
+void
+UOdysseyLayerCell::InitTexture()
+{
+    if ( !Texture )
+    {
+        Texture = NewObject<UTexture2D>(this, TEXT("Texture"));
+        Texture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
+        Texture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
+        Texture->Filter = TextureFilter::TF_Trilinear;
+    }
 }
 
 #if WITH_EDITOR
@@ -244,6 +259,11 @@ UOdysseyLayerCell::BuildRenderPipeline(
     FOdysseyTextureRenderFunction& oRenderFunction
 ) const
 {
+#if WITH_EDITOR
+    if ( !Texture )
+        const_cast<UOdysseyLayerCell*>(this)->InitTexture();
+#endif
+
     oRenderFunction = [this, iType](
         FRDGBuilder& iGraphBuilder,
         ERHIFeatureLevel::Type iFeatureLevel,

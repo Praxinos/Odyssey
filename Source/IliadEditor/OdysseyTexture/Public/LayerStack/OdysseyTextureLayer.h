@@ -23,6 +23,7 @@ public:
     UTexture2D* GetRenderTexture() const;
 
 public:
+    virtual void InitTexture();
     virtual bool BuildRenderPipeline( FFrameNumber iFrame, uint64 iType, FOdysseyTextureRenderFunction& oRenderFunction ) const override;
 
 public:
@@ -38,7 +39,7 @@ protected:
     bool IsThumbnailDirty() const;
 #endif
 
-protected:
+private:
     UPROPERTY(NonTransactional)
     mutable TObjectPtr<UTexture2D> Texture; //mutable is temporary, will be removed when layers will be 100% GPU based and there's no more dependency on ULIS
 

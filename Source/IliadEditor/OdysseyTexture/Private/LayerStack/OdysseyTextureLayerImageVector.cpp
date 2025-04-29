@@ -92,19 +92,14 @@ UOdysseyTextureLayerImageVector::UpdateDrawingFlags() const
 }
 
 void
-UOdysseyTextureLayerImageVector::InitTexture() const
+UOdysseyTextureLayerImageVector::InitTexture()
 {
-    if ( !Texture )
-    {
-        Texture = NewObject<UTexture2D>(const_cast<UOdysseyTextureLayerImageVector*>(this), TEXT("Texture"));
-        Texture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
-        Texture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
-        Texture->Filter = TextureFilter::TF_Nearest;
-    }
+    Super::InitTexture();
 
-    InitTextureWithBlockData(mVectorBlock->GetBlock(mDrawingFlags).Get(), Texture, TextureSourceFormatForULISFormat(mVectorBlock->GetFormat()));
-    Texture->UpdateResource();
-    FTextureCompilingManager::Get().FinishCompilation({ Texture });
+    UTexture2D* texture = GetRenderTexture();
+    InitTextureWithBlockData(mVectorBlock->GetBlock(mDrawingFlags).Get(), texture, TextureSourceFormatForULISFormat(mVectorBlock->GetFormat()));
+    texture->UpdateResource();
+    FTextureCompilingManager::Get().FinishCompilation({ texture });
 }
 #endif
 
@@ -146,9 +141,9 @@ UOdysseyTextureLayerImageVector::BuildRenderPipeline(
 {
 #if WITH_EDITOR
     bool drawingFlagsChanged = UpdateDrawingFlags();
-    if ( !Texture || drawingFlagsChanged )
+    if ( drawingFlagsChanged )
     {
-        InitTexture();
+        const_cast<UOdysseyTextureLayerImageVector*>(this)->InitTexture();
     }
     else if ( mVectorBlock->NeedsRender() )
     {
@@ -211,7 +206,6 @@ UOdysseyTextureLayerImageVector::PostDuplicate(bool bDuplicateForPIE)
     Height = texture->Source.GetSizeY();
     mVectorBlockId = FGuid::NewGuid();
     mVectorBlock->Init(mVectorBlockId, mVectorCell, Width, Height, format);
-    InitTexture();
 }
 
 FOdysseyVectorImportV2*
@@ -471,11 +465,7 @@ UOdysseyTextureLayerImageVector::PreSave(FObjectPreSaveContext SaveContext)
     //If some drawing flags are needed
     //As UpdateDrawingFlags() will return true and enforce Texture redraw.
     mDrawingFlags = 0;
-
-    mVectorBlock->Render(*block, ::ULIS::FRectI::FromXYWH(0, 0, block->Width(), block->Height()), mDrawingFlags);
-    InitTextureWithBlockData(block.Get(), Texture, TextureSourceFormatForULISFormat(block->Format()));
-    Texture->UpdateResource();
-    FTextureCompilingManager::Get().FinishCompilation({ Texture });
+    InitTexture();
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -28,7 +28,7 @@ public:
 
 public:
     //IOdysseyRenderingAbility overrides
-
+    virtual void InitTexture() override;
     virtual bool BuildRenderPipeline(
         FFrameNumber iFrame,
         uint64 iType,
@@ -46,7 +46,6 @@ public:
 #if WITH_EDITOR
 public:
     TSharedPtr<FOdysseyRasterBlock> GetRasterBlock() const;
-    UTexture2D* GetTexture() const;
     virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const override;
 
 public:

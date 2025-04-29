@@ -36,12 +36,7 @@ void
 UOdysseyTextureLayerImageRaster::PostLoad()
 {
     Super::PostLoad();
-
-    if (RasterBlock)
-    {
-        InitRasterBlock();
-        InitTexture();
-    }
+    InitRasterBlock();
 }
 
 void
@@ -73,20 +68,16 @@ UOdysseyTextureLayerImageRaster::InitRasterBlock() const
 }
 
 void
-UOdysseyTextureLayerImageRaster::InitTexture() const
+UOdysseyTextureLayerImageRaster::InitTexture()
 {
-    if ( !Texture )
-    {
-        Texture = NewObject<UTexture2D>(const_cast<UOdysseyTextureLayerImageRaster*>(this), TEXT("Texture"));
-        Texture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
-        Texture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
-        Texture->Filter = TextureFilter::TF_Trilinear;
-    }
+    Super::InitTexture();
+
+    UTexture2D* texture = GetRenderTexture();
 
     TSharedPtr<FOdysseyRasterBlock> rasterBlock = GetRasterBlock(); //ensures mRasterBlock exists
-    InitTextureWithBlockData(rasterBlock->GetBlock().Get(), Texture, TextureSourceFormatForULISFormat(rasterBlock->GetFormat()));
-    Texture->UpdateResource();
-    FTextureCompilingManager::Get().FinishCompilation({ Texture });
+    InitTextureWithBlockData(rasterBlock->GetBlock().Get(), texture, TextureSourceFormatForULISFormat(rasterBlock->GetFormat()));
+    texture->UpdateResource();
+    FTextureCompilingManager::Get().FinishCompilation({ texture });
 }
 
 TSharedPtr<FOdysseyRasterBlock>
@@ -101,7 +92,7 @@ UOdysseyTextureLayerImageRaster::GetRasterBlock() const
 void
 UOdysseyTextureLayerImageRaster::OnBlockChanged(const TArray<::ULIS::FRectI>& iRects)
 {
-    FOdysseySurfaceTexture2DEditable surface(Texture, GetRasterBlock()->GetBlock());
+    FOdysseySurfaceTexture2DEditable surface(GetRenderTexture(), GetRasterBlock()->GetBlock());
     surface.Invalidate(iRects);
     RenderingChanged(::ULISUtils::ToIntRects(iRects), true);
 }
@@ -109,7 +100,7 @@ UOdysseyTextureLayerImageRaster::OnBlockChanged(const TArray<::ULIS::FRectI>& iR
 void
 UOdysseyTextureLayerImageRaster::OnBlockCommited(const TArray<::ULIS::FRectI>& iRects)
 {
-    FOdysseySurfaceTexture2DEditable surface(Texture, GetRasterBlock()->GetBlock());
+    FOdysseySurfaceTexture2DEditable surface(GetRenderTexture(), GetRasterBlock()->GetBlock());
     surface.Invalidate(iRects);
     RenderingChanged(::ULISUtils::ToIntRects(iRects));
 }
@@ -282,22 +273,6 @@ UOdysseyTextureLayerImageRaster::GetRenderingComposition(uint64 iRenderType, int
     return { GetRenderingId() };
 }
 
-bool
-UOdysseyTextureLayerImageRaster::BuildRenderPipeline(
-    FFrameNumber iFrame,
-    uint64 iType,
-    FOdysseyTextureRenderFunction& oRenderFunction
-) const
-{
-
-#if WITH_EDITOR
-    if ( !Texture )
-        InitTexture();
-#endif
-
-    return Super::BuildRenderPipeline(iFrame, iType, oRenderFunction);
-}
-
 void
 UOdysseyTextureLayerImageRaster::IsAlphaLockedBlueprintSetter(bool Value)
 {
@@ -308,11 +283,7 @@ void
 UOdysseyTextureLayerImageRaster::PreSave(FObjectPreSaveContext SaveContext)
 {
     Super::PreSave(SaveContext);
-
-    TSharedPtr<FOdysseyRasterBlock> rasterBlock = GetRasterBlock(); //ensures mRasterBlock exists
-    InitTextureWithBlockData(rasterBlock->GetBlock().Get(), Texture, TextureSourceFormatForULISFormat(rasterBlock->GetFormat()));
-    Texture->UpdateResource();
-    FTextureCompilingManager::Get().FinishCompilation({ Texture });
+    InitTexture();
 }
 
 #undef LOCTEXT_NAMESPACE

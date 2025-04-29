@@ -79,6 +79,7 @@ public:
 #endif
 
 public:
+    virtual void InitTexture();
     virtual bool BuildRenderPipeline(
         FFrameNumber iFrame,
         uint64 iType,
@@ -126,9 +127,6 @@ protected:
     UPROPERTY()//TODO: meta (minvalue 1)
     int Exposure = 1;
 
-    UPROPERTY(NonTransactional)
-    mutable TObjectPtr<UTexture2D> Texture; //mutable is temporary, will be removed when layers will be 100% GPU based and there's no more dependency on ULIS
-
 #if WITH_EDITORONLY_DATA
     UPROPERTY()
     int Mark = -1;
@@ -141,7 +139,11 @@ protected:
 #endif
 
 private:
+    UPROPERTY(NonTransactional)
+    mutable TObjectPtr<UTexture2D> Texture; //mutable is temporary, will be removed when layers will be 100% GPU based and there's no more dependency on ULIS
+
 #if WITH_EDITOR
+private:
     FSimpleMulticastDelegate mOnThumbnailChanged;
     FSimpleMulticastDelegate mOnThumbnailDirtied;
 

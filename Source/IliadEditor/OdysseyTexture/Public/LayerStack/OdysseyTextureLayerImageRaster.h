@@ -66,11 +66,10 @@ public:
 
 public:
     //IOdysseyRenderingAbility overrides
-    virtual bool BuildRenderPipeline( FFrameNumber iFrame, uint64 iType, FOdysseyTextureRenderFunction& oRenderFunction ) const override;
     virtual TArray<FGuid> GetRenderingComposition(uint64 iRenderType, int iFrame = 0) const override;
 
 private:
-    void InitTexture() const;
+    void InitTexture();
     void InitRasterBlock() const;
 
     TArray<::ULIS::FEvent> RasterBlockPostProcess(const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock>>& iOriginalBlocks, const FOdysseyInvalidTileMap& iInvalidMap, const TArray<::ULIS::FEvent>& iWaitList);

@@ -20,7 +20,22 @@ UOdysseyTextureLayer::GetTexture() const
 UTexture2D*
 UOdysseyTextureLayer::GetRenderTexture() const
 {
+    if (!Texture)
+        const_cast<UOdysseyTextureLayer*>(this)->InitTexture();
+
     return Texture;
+}
+
+void
+UOdysseyTextureLayer::InitTexture()
+{
+    if ( !Texture )
+    {
+        Texture = NewObject<UTexture2D>(this, TEXT("Texture"));
+        Texture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
+        Texture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
+        Texture->Filter = TextureFilter::TF_Nearest;
+    }
 }
 
 bool
@@ -32,6 +47,11 @@ UOdysseyTextureLayer::BuildRenderPipeline(
 {
     if (bCanHaveChildren)
         return Super::BuildRenderPipeline(iFrame, iType, oRenderFunction);
+
+#if WITH_EDITOR
+    if ( !Texture )
+        const_cast<UOdysseyTextureLayer*>(this)->InitTexture();
+#endif
 
     oRenderFunction = [this, iType](
         FRDGBuilder& iGraphBuilder,

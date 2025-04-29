@@ -35,6 +35,10 @@ UOdysseyTextureLayerStack::CreateFromTexture(UTexture2D* iTexture, UObject* iOut
     //Add first layer image
     UOdysseyTextureLayerImageRaster* layer = Cast<UOdysseyTextureLayerImageRaster>(layerStack->CreateLayer(UOdysseyTextureLayerImageRaster::StaticClass()));
 
+    //Set the layer as Current Layer
+    layerStack->GetLayerRoot()->AddChild(layer);
+    layerStack->SetCurrentLayer(layer);
+
     //Fill LayerImage with content of Texture
     TSharedPtr<FOdysseyRasterBlock> rasterBlock = layer->GetRasterBlock();
     FOdysseyRasterBlockMutator rasterBlockMutator(rasterBlock, false);
@@ -47,10 +51,6 @@ UOdysseyTextureLayerStack::CreateFromTexture(UTexture2D* iTexture, UObject* iOut
         }
     );
     rasterBlockMutator.Commit();
-
-    //Set the layer as Current Layer
-    layerStack->GetLayerRoot()->AddChild(layer);
-    layerStack->SetCurrentLayer(layer);
 
     return layerStack;
 }
@@ -87,7 +87,9 @@ UOdysseyTextureLayerStack::UOdysseyTextureLayerStack()
 
     IOdysseyRenderingAbility::OnRenderingChangedDelegate().AddUObject(this, &UOdysseyTextureLayerStack::OnRenderingChanged);
     RenderTarget = CreateDefaultSubobject<UTextureRenderTarget2D>("RenderTarget");
-    RenderTarget->RenderTargetFormat = RTF_RGBA8;
+    RenderTarget->RenderTargetFormat = RTF_RGBA8_SRGB;
+    RenderTarget->bForceLinearGamma = false;
+    RenderTarget->SRGB = RenderTarget->IsSRGB();
 }
 
 void

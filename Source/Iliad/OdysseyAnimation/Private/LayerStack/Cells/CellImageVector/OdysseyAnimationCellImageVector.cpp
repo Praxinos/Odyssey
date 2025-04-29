@@ -67,9 +67,9 @@ UOdysseyAnimationCellImageVector::BuildRenderPipeline(
 {
 #if WITH_EDITOR
     bool drawingFlagsChanged = UpdateDrawingFlags();
-    if ( !Texture || drawingFlagsChanged )
+    if ( drawingFlagsChanged )
     {
-        InitTexture();
+        const_cast<UOdysseyAnimationCellImageVector*>(this)->InitTexture();
     }
     else if ( mVectorBlock->NeedsRender() )
     {
@@ -97,19 +97,14 @@ UOdysseyAnimationCellImageVector::UpdateDrawingFlags() const
 }
 
 void
-UOdysseyAnimationCellImageVector::InitTexture() const
+UOdysseyAnimationCellImageVector::InitTexture()
 {
-    if ( !Texture )
-    {
-        Texture = NewObject<UTexture2D>(const_cast<UOdysseyAnimationCellImageVector*>(this), TEXT("Texture"));
-        Texture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
-        Texture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
-        Texture->Filter = TextureFilter::TF_Nearest;
-    }
+    Super::InitTexture();
 
-    InitTextureWithBlockData(mVectorBlock->GetBlock(mDrawingFlags).Get(), Texture, TextureSourceFormatForULISFormat(mVectorBlock->GetFormat()));
-    Texture->UpdateResource();
-    FTextureCompilingManager::Get().FinishCompilation({ Texture });
+    UTexture2D* texture = GetRenderTexture();
+    InitTextureWithBlockData(mVectorBlock->GetBlock(mDrawingFlags).Get(), texture, TextureSourceFormatForULISFormat(mVectorBlock->GetFormat()));
+    texture->UpdateResource();
+    FTextureCompilingManager::Get().FinishCompilation({ texture });
 }
 
 TSharedPtr<::ULIS::FBlock>
@@ -386,10 +381,6 @@ UOdysseyAnimationCellImageVector::PreSave(FObjectPreSaveContext SaveContext)
     //If some drawing flags are needed
     //As UpdateDrawingFlags() will return true and enforce Texture redraw.
     mDrawingFlags = 0;
-
-    mVectorBlock->Render(*block, ::ULIS::FRectI::FromXYWH(0, 0, block->Width(), block->Height()), mDrawingFlags);
-    InitTextureWithBlockData(block.Get(), Texture, TextureSourceFormatForULISFormat(block->Format()));
-    Texture->UpdateResource();
-    FTextureCompilingManager::Get().FinishCompilation({ Texture });
+    InitTexture();
 }
 #endif
