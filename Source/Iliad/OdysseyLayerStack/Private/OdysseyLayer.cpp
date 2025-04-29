@@ -930,16 +930,18 @@ UOdysseyLayer::SetCellsOffsetInteractive(float Value)
 #endif
 
 bool
-UOdysseyLayer::BuildRenderPipeline(
+UOdysseyLayer::BuildRenderPipelineInternal(
     FFrameNumber iFrame,
     uint64 iType,
-    FOdysseyTextureRenderFunction& oRenderFunction
+    IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction,
+    const IOdysseyTextureRenderingAbility::FCanRenderFunction& iCanRenderFunction,
+    const TArray<const IOdysseyTextureRenderingAbility*>& iParents
 ) const
 {
-    FOdysseyTextureRenderFunction renderFunction;
+    IOdysseyTextureRenderingAbility::FRenderFunction renderFunction;
     if ( bCanHaveChildren )
     {
-        if (!BuildRenderChildrenPipeline(iFrame,iType,renderFunction))
+        if (!BuildRenderChildrenPipeline(iFrame,iType,renderFunction, iCanRenderFunction, iParents))
             return false;
     }
     else
@@ -964,7 +966,7 @@ UOdysseyLayer::BuildRenderPipeline(
 
         frame -= cell->GetFrameRange().GetLowerBoundValue();
 
-        if(!cell->BuildRenderPipeline( frame, iType, renderFunction ))
+        if(!cell->BuildRenderPipeline( frame, iType, renderFunction, iCanRenderFunction, iParents ))
             return false;
     }
 
@@ -972,9 +974,9 @@ UOdysseyLayer::BuildRenderPipeline(
     bool showLighttable = iType & EOdysseyRenderingType::Editor && Lighttable.bIsActivated;
     EOdysseyLighttableDisplayPosition lighttablePosition = Lighttable.DisplayPosition;
 
-    FOdysseyTextureRenderFunction lighttableRenderFunction;
+    IOdysseyTextureRenderingAbility::FRenderFunction lighttableRenderFunction;
     if (showLighttable)
-        showLighttable = BuildLighttableRenderPipeline(iFrame, iType, lighttableRenderFunction);
+        showLighttable = BuildLighttableRenderPipeline(iFrame, iType, lighttableRenderFunction, iCanRenderFunction, iParents);
 
     oRenderFunction = [this, renderFunction, showLighttable, lighttablePosition, lighttableRenderFunction](
             FRDGBuilder& iGraphBuilder,
@@ -1089,7 +1091,9 @@ bool
 UOdysseyLayer::BuildLighttableRenderPipeline(
     FFrameNumber iFrame,
     uint64 iType,
-    FOdysseyTextureRenderFunction& oRenderFunction
+    IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction,
+    const IOdysseyTextureRenderingAbility::FCanRenderFunction& iCanRenderFunction,
+    const TArray<const IOdysseyTextureRenderingAbility*>& iParents
 ) const
 {
     UOdysseyLayerCell* cell = GetCellAtFrame(iFrame.Value);
@@ -1098,7 +1102,7 @@ UOdysseyLayer::BuildLighttableRenderPipeline(
 
     struct FLighttableKeyRenderParams
     {
-        FOdysseyTextureRenderFunction RenderFunction;
+        IOdysseyTextureRenderingAbility::FRenderFunction RenderFunction;
         float Opacity;
         FLinearColor Color;
         float Contrast;
@@ -1118,8 +1122,8 @@ UOdysseyLayer::BuildLighttableRenderPipeline(
                 {
                     int frame = iFrame.Value;
                     frame -= cell->GetFrameRange().GetLowerBoundValue();
-                    FOdysseyTextureRenderFunction renderFunction;
-                    if (keyCell->BuildRenderPipeline(frame, EOdysseyRenderingType::Render, renderFunction))
+                    IOdysseyTextureRenderingAbility::FRenderFunction renderFunction;
+                    if (keyCell->BuildRenderPipeline(frame, EOdysseyRenderingType::Render, renderFunction, iCanRenderFunction, iParents))
                     {
                         keysRenderParams.Add(
                             {
@@ -1145,8 +1149,8 @@ UOdysseyLayer::BuildLighttableRenderPipeline(
                 {
                     int frame = iFrame.Value;
                     frame -= cell->GetFrameRange().GetLowerBoundValue();
-                    FOdysseyTextureRenderFunction renderFunction;
-                    if (keyCell->BuildRenderPipeline(frame, EOdysseyRenderingType::Render, renderFunction))
+                    IOdysseyTextureRenderingAbility::FRenderFunction renderFunction;
+                    if (keyCell->BuildRenderPipeline(frame, EOdysseyRenderingType::Render, renderFunction, iCanRenderFunction, iParents))
                     {
                         keysRenderParams.Add(
                             {
@@ -1251,12 +1255,14 @@ bool
 UOdysseyLayer::BuildRenderChildrenPipeline(
     FFrameNumber iFrame,
     uint64 iType,
-    FOdysseyTextureRenderFunction& oRenderFunction
+    IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction,
+    const IOdysseyTextureRenderingAbility::FCanRenderFunction& iCanRenderFunction,
+    const TArray<const IOdysseyTextureRenderingAbility*>& iParents
 ) const
 {
     struct FChildRenderParams
     {
-        FOdysseyTextureRenderFunction RenderFunction;
+        IOdysseyTextureRenderingAbility::FRenderFunction RenderFunction;
         EOdysseyBlendingMode BlendMode;
         float Opacity;
     };
@@ -1268,8 +1274,8 @@ UOdysseyLayer::BuildRenderChildrenPipeline(
         if ( !child->IsActivated() )
             continue;
 
-        FOdysseyTextureRenderFunction childRenderFunction;
-        if (child->BuildRenderPipeline(iFrame, iType, childRenderFunction))
+        IOdysseyTextureRenderingAbility::FRenderFunction childRenderFunction;
+        if (child->BuildRenderPipeline(iFrame, iType, childRenderFunction, iCanRenderFunction, iParents))
         {
             childrenRenderParams.Add(
                 {

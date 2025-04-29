@@ -34,31 +34,31 @@ IOdysseyTextureRenderingAbility::RenderRectAtRect_Implementation(UTextureRenderT
 }
 
 void
-IOdysseyTextureRenderingAbility::Render_GameThread(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, uint64 iType) const
+IOdysseyTextureRenderingAbility::Render_GameThread(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, uint64 iType, FCanRenderFunction iCanRenderFunction) const
 {
     FIntRect defaultRect = GetDefaultRenderRect();
-    Render_GameThread(iRenderTarget, iFrame, iType, defaultRect, defaultRect);
+    Render_GameThread(iRenderTarget, iFrame, iType, defaultRect, defaultRect, iCanRenderFunction);
 }
 
 void
-IOdysseyTextureRenderingAbility::Render_GameThread(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, uint64 iType, const FIntRect& iSrcRect, const FIntPoint& iPos) const
+IOdysseyTextureRenderingAbility::Render_GameThread(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, uint64 iType, const FIntRect& iSrcRect, const FIntPoint& iPos, FCanRenderFunction iCanRenderFunction) const
 {
-    Render_GameThread(iRenderTarget, iFrame, iType, iSrcRect, FIntRect(iPos.X, iPos.Y, iPos.X + iSrcRect.Width(), iPos.Y + iSrcRect.Height()));
+    Render_GameThread(iRenderTarget, iFrame, iType, iSrcRect, FIntRect(iPos.X, iPos.Y, iPos.X + iSrcRect.Width(), iPos.Y + iSrcRect.Height()), iCanRenderFunction);
 }
 
 void
-IOdysseyTextureRenderingAbility::Render_GameThread(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, uint64 iType, const FIntRect& iSrcRect) const
+IOdysseyTextureRenderingAbility::Render_GameThread(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, uint64 iType, const FIntRect& iSrcRect, FCanRenderFunction iCanRenderFunction) const
 {
-    Render_GameThread(iRenderTarget, iFrame, iType, iSrcRect, iSrcRect);
+    Render_GameThread(iRenderTarget, iFrame, iType, iSrcRect, iSrcRect, iCanRenderFunction);
 }
 
 void
-IOdysseyTextureRenderingAbility::Render_GameThread(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, uint64 iType, const FIntRect& iSrcRect, const FIntRect& iDstRect) const
+IOdysseyTextureRenderingAbility::Render_GameThread(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, uint64 iType, const FIntRect& iSrcRect, const FIntRect& iDstRect, FCanRenderFunction iCanRenderFunction) const
 {
     const ERHIFeatureLevel::Type featureLevel = iRenderTarget->GetWorld() ? iRenderTarget->GetWorld()->GetFeatureLevel() : GMaxRHIFeatureLevel;
 
-    FOdysseyTextureRenderFunction renderFunction;
-    if (!BuildRenderPipeline(iFrame, iType, renderFunction))
+    IOdysseyTextureRenderingAbility::FRenderFunction renderFunction;
+    if (!BuildRenderPipeline(iFrame, iType, renderFunction, iCanRenderFunction, {}))
     {
         ENQUEUE_RENDER_COMMAND(IOdysseyTextureRenderingAbility_RenderRectAtRect)(
             [this, iRenderTarget, iDstRect](FRHICommandListImmediate& RHICmdList)

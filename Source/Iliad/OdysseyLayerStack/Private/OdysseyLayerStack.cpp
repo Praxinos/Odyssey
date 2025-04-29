@@ -675,13 +675,15 @@ UOdysseyLayerStack::SetIsSRGB(bool Value)
 }
 
 bool
-UOdysseyLayerStack::BuildRenderPipeline(
+UOdysseyLayerStack::BuildRenderPipelineInternal(
     FFrameNumber iFrame,
     uint64 iType,
-    FOdysseyTextureRenderFunction& oRenderFunction
+    IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction,
+    const IOdysseyTextureRenderingAbility::FCanRenderFunction& iCanRenderFunction,
+    const TArray<const IOdysseyTextureRenderingAbility*>& iParents
 ) const
 {
-    return GetLayerRoot()->BuildRenderPipeline(iFrame, iType, oRenderFunction);
+    return GetLayerRoot()->BuildRenderPipeline(iFrame, iType, oRenderFunction, iCanRenderFunction, iParents);
 }
 
 TArray<FGuid>

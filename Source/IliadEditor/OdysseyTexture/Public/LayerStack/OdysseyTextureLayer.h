@@ -24,7 +24,7 @@ public:
 
 public:
     virtual void InitTexture();
-    virtual bool BuildRenderPipeline( FFrameNumber iFrame, uint64 iType, FOdysseyTextureRenderFunction& oRenderFunction ) const override;
+    virtual bool BuildRenderPipelineInternal( FFrameNumber iFrame, uint64 iType, IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction, const IOdysseyTextureRenderingAbility::FCanRenderFunction& iCanRenderFunction, const TArray<const IOdysseyTextureRenderingAbility*>& iParents ) const override;
 
 public:
 #if WITH_EDITOR

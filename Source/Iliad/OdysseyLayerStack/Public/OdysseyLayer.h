@@ -291,11 +291,11 @@ public:
     virtual FIntRect GetDefaultRenderRect() const override;
     virtual FInt32Range GetFrameRange() const override;
 
-    virtual bool BuildRenderPipeline(FFrameNumber iFrame, uint64 iType, FOdysseyTextureRenderFunction& oRenderFunction) const override;
-    bool BuildRenderChildrenPipeline(FFrameNumber iFrame, uint64 iType, FOdysseyTextureRenderFunction& oRenderFunction) const;
-    bool BuildLighttableRenderPipeline(FFrameNumber iFrame, uint64 iType, FOdysseyTextureRenderFunction& oRenderFunction) const;
+    virtual bool BuildRenderPipelineInternal(FFrameNumber iFrame, uint64 iType, IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction, const IOdysseyTextureRenderingAbility::FCanRenderFunction& iCanRenderFunction, const TArray<const IOdysseyTextureRenderingAbility*>& iParents) const override;
 
 protected:
+    bool BuildRenderChildrenPipeline(FFrameNumber iFrame, uint64 iType, IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction, const IOdysseyTextureRenderingAbility::FCanRenderFunction& iCanRenderFunction, const TArray<const IOdysseyTextureRenderingAbility*>& iParents) const;
+    bool BuildLighttableRenderPipeline(FFrameNumber iFrame, uint64 iType, IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction, const IOdysseyTextureRenderingAbility::FCanRenderFunction& iCanRenderFunction, const TArray<const IOdysseyTextureRenderingAbility*>& iParents) const;
     //Property changed methods
     virtual void CellsChanged();
 

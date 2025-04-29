@@ -150,24 +150,26 @@ UOdysseyAnimation::GetDefaultRenderRect() const
 }
 
 bool
-UOdysseyAnimation::BuildRenderPipeline(
+UOdysseyAnimation::BuildRenderPipelineInternal(
     FFrameNumber iFrame,
     uint64 iType,
-    FOdysseyTextureRenderFunction& oRenderFunction
+    IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction,
+    const IOdysseyTextureRenderingAbility::FCanRenderFunction& iCanRenderFunction,
+    const TArray<const IOdysseyTextureRenderingAbility*>& iParents
 ) const
 {
 #if WITH_EDITOR
     if ( !mLayerStack )
         return false;
 
-    return mLayerStack->BuildRenderPipeline(iFrame, iType, oRenderFunction);
+    return mLayerStack->BuildRenderPipeline(iFrame, iType, oRenderFunction, iCanRenderFunction, iParents);
 #else
     if ( PreserveLayerStackAtRuntime )
     {
         if ( !mLayerStack )
             return false;
 
-        return mLayerStack->BuildRenderPipeline(iFrame, iType, oRenderFunction);
+        return mLayerStack->BuildRenderPipeline(iFrame, iType, oRenderFunction, iCanRenderFunction, iParents);
     }
 
     UTexture2D* srcTexture2D = nullptr;

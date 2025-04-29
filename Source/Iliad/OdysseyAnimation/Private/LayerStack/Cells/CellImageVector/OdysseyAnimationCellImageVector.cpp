@@ -59,10 +59,12 @@ UOdysseyAnimationCellImageVector::GetDefaultRenderRect() const
 }
 
 bool
-UOdysseyAnimationCellImageVector::BuildRenderPipeline(
+UOdysseyAnimationCellImageVector::BuildRenderPipelineInternal(
     FFrameNumber iFrame,
     uint64 iType,
-    FOdysseyTextureRenderFunction& oRenderFunction
+    IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction,
+    const IOdysseyTextureRenderingAbility::FCanRenderFunction& iCanRenderFunction,
+    const TArray<const IOdysseyTextureRenderingAbility*>& iParents
 ) const
 {
 #if WITH_EDITOR
@@ -80,7 +82,7 @@ UOdysseyAnimationCellImageVector::BuildRenderPipeline(
     }
 #endif
 
-    return Super::BuildRenderPipeline(iFrame, iType, oRenderFunction);
+    return Super::BuildRenderPipelineInternal(iFrame, iType, oRenderFunction, iCanRenderFunction, iParents);
 }
 
 #if WITH_EDITOR

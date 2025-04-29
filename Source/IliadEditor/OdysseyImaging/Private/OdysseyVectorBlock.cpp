@@ -18,7 +18,8 @@ FOdysseyVectorBlock::OnInvalidated()
 
 FOdysseyVectorBlock::~FOdysseyVectorBlock()
 {
-    mVectorCell.Get()->OnRequestRedrawDelegate().RemoveAll( this );
+    if (mVectorCell)
+        mVectorCell->OnRequestRedrawDelegate().RemoveAll( this );
 }
 
 FOdysseyVectorBlock::FOdysseyVectorBlock()
@@ -40,7 +41,7 @@ FOdysseyVectorBlock::Init(const FGuid& iId, TSharedPtr<FOdysseyVectorCell> iRoot
     mBLImage = MakeShared<BLImage>(mWidth, mHeight, BL_FORMAT_PRGB32);
     mBLContext = MakeShared<BLContext>();
 
-    mVectorCell.Get()->OnRequestRedrawDelegate().AddRaw( this, &FOdysseyVectorBlock::OnVectorRootRequestRedraw );
+    mVectorCell->OnRequestRedrawDelegate().AddRaw( this, &FOdysseyVectorBlock::OnVectorRootRequestRedraw );
 }
 
 int

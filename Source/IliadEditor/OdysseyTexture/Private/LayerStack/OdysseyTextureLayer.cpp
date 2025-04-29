@@ -40,14 +40,16 @@ UOdysseyTextureLayer::InitTexture()
 }
 
 bool
-UOdysseyTextureLayer::BuildRenderPipeline(
+UOdysseyTextureLayer::BuildRenderPipelineInternal(
     FFrameNumber iFrame,
     uint64 iType,
-    FOdysseyTextureRenderFunction& oRenderFunction
+    IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction,
+    const IOdysseyTextureRenderingAbility::FCanRenderFunction& iCanRenderFunction,
+    const TArray<const IOdysseyTextureRenderingAbility*>& iParents
 ) const
 {
     if (bCanHaveChildren)
-        return Super::BuildRenderPipeline(iFrame, iType, oRenderFunction);
+        return Super::BuildRenderPipelineInternal(iFrame, iType, oRenderFunction, iCanRenderFunction, iParents);
 
 #if WITH_EDITOR
     if ( !Texture )

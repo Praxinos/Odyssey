@@ -8,22 +8,6 @@
 
 #include "OdysseyTextureRenderingAbility.generated.h"
 
-UENUM()
-enum class EOdysseyTextureRenderingMode
-{
-    Runtime,
-    Editor,
-
-};
-
-typedef TFunction< void(
-    FRDGBuilder& /*iGraphBuilder*/,
-    ERHIFeatureLevel::Type /*iFeatureLevel*/,
-    FRDGTextureRef /*iDestinationTexture*/,
-    const FIntRect& /*iSrcRect*/,
-    const FIntRect& /*iDstRect*/,
-    const FMatrix& /*iSrcTransform*/) > FOdysseyTextureRenderFunction;
-
 UINTERFACE(BlueprintType)
 class ODYSSEYRENDERING_API UOdysseyTextureRenderingAbility : public UOdysseyRenderingAbility
 {
@@ -33,6 +17,17 @@ class ODYSSEYRENDERING_API UOdysseyTextureRenderingAbility : public UOdysseyRend
 class ODYSSEYRENDERING_API IOdysseyTextureRenderingAbility : public IOdysseyRenderingAbility
 {
     GENERATED_BODY()
+
+public:
+    DECLARE_DELEGATE_RetVal_TwoParams(bool, FCanRenderFunction, const IOdysseyTextureRenderingAbility* /*iAbility*/, TArray<const IOdysseyTextureRenderingAbility*> /* iParents (from highest to lowest) */);
+
+    typedef TFunction< void(
+        FRDGBuilder& /*iGraphBuilder*/,
+        ERHIFeatureLevel::Type /*iFeatureLevel*/,
+        FRDGTextureRef /*iDestinationTexture*/,
+        const FIntRect& /*iSrcRect*/,
+        const FIntRect& /*iDstRect*/,
+        const FMatrix& /*iSrcTransform*/) > FRenderFunction;
 
 public:
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Odyssey|Rendering")
@@ -52,14 +47,32 @@ public:
     void RenderRectAtRect_Implementation(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, const FIntRect& iSrcRect, const FIntRect& iDstRect) const;
 
 public:
-    void Render_GameThread(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, uint64 iType) const;
-    void Render_GameThread(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, uint64 iType, const FIntRect& iSrcRect) const;
-    void Render_GameThread(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, uint64 iType, const FIntRect& iSrcRect, const FIntPoint& iPos) const;
-    void Render_GameThread(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, uint64 iType, const FIntRect& iSrcRect, const FIntRect& iDstRect) const;
+    void Render_GameThread(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, uint64 iType, FCanRenderFunction iCanRenderFunction = FCanRenderFunction()) const;
+    void Render_GameThread(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, uint64 iType, const FIntRect& iSrcRect, FCanRenderFunction iCanRenderFunction = FCanRenderFunction()) const;
+    void Render_GameThread(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, uint64 iType, const FIntRect& iSrcRect, const FIntPoint& iPos, FCanRenderFunction iCanRenderFunction = FCanRenderFunction()) const;
+    void Render_GameThread(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame, uint64 iType, const FIntRect& iSrcRect, const FIntRect& iDstRect, FCanRenderFunction iCanRenderFunction = FCanRenderFunction()) const;
 
-    virtual bool BuildRenderPipeline(
+    bool BuildRenderPipeline(
         FFrameNumber iFrame,
         uint64 iType,
-        FOdysseyTextureRenderFunction& oRenderFunction
+        FRenderFunction& oRenderFunction,
+        const FCanRenderFunction& iCanRenderFunction = FCanRenderFunction(),
+        TArray<const IOdysseyTextureRenderingAbility*> iParents = {}
+    ) const
+    {
+        if (iCanRenderFunction.IsBound() && !iCanRenderFunction.Execute(this, iParents))
+            return false;
+
+        iParents.Add(this);
+        return BuildRenderPipelineInternal(iFrame, iType, oRenderFunction, iCanRenderFunction, iParents);
+    }
+
+protected:
+    virtual bool BuildRenderPipelineInternal(
+        FFrameNumber iFrame,
+        uint64 iType,
+        FRenderFunction& oRenderFunction,
+        const FCanRenderFunction& iCanRenderFunction,
+        const TArray<const IOdysseyTextureRenderingAbility*>& iParents
     ) const = 0;
 };

@@ -175,10 +175,12 @@ UOdysseyLayerCellImageStagger::Break(int Frame, bool bClear)
 #endif
 
 bool
-UOdysseyLayerCellImageStagger::BuildRenderPipeline(
+UOdysseyLayerCellImageStagger::BuildRenderPipelineInternal(
     FFrameNumber iFrame,
     uint64 iType,
-    FOdysseyTextureRenderFunction& oRenderFunction
+    IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction,
+    const IOdysseyTextureRenderingAbility::FCanRenderFunction& iCanRenderFunction,
+    const TArray<const IOdysseyTextureRenderingAbility*>& iParents
 ) const
 {
     int staggerFrame = GetReferenceFrameAtFrame(iFrame.Value);
@@ -190,5 +192,5 @@ UOdysseyLayerCellImageStagger::BuildRenderPipeline(
         return false;
 
     int cellFrame = staggerFrame - cell->GetFrameRange().GetLowerBoundValue();
-    return cell->BuildRenderPipeline(cellFrame, iType, oRenderFunction);
+    return cell->BuildRenderPipeline(cellFrame, iType, oRenderFunction, iCanRenderFunction, iParents);
 }

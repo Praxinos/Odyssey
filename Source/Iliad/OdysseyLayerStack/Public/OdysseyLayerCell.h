@@ -80,10 +80,12 @@ public:
 
 public:
     virtual void InitTexture();
-    virtual bool BuildRenderPipeline(
+    virtual bool BuildRenderPipelineInternal(
         FFrameNumber iFrame,
         uint64 iType,
-        FOdysseyTextureRenderFunction& oRenderFunction
+        IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction,
+        const IOdysseyTextureRenderingAbility::FCanRenderFunction& iCanRenderFunction,
+        const TArray<const IOdysseyTextureRenderingAbility*>& iParents
     ) const override;
 
 #if WITH_EDITOR
