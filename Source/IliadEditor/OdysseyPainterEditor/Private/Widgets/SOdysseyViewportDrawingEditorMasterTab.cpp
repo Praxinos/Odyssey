@@ -155,38 +155,37 @@ SOdysseyViewportDrawingEditorMasterTab::Construct(const FArguments& InArgs, FOdy
                                 .ThumbnailSizeOverride(FIntPoint(70, 70))
                                 .ThumbnailPool( mThumbnailPool )
                         ]
-
-                        + SVerticalBox::Slot()
-                        .Padding(2)
-                        .AutoHeight()
-                        [
-                            SNew(SSeparator)
-                        ]
-                        //Select painting method (texture based, mesh based...) ----
-                        + SVerticalBox::Slot()
-                        .Padding(2)
-                        .AutoHeight()
+                    ]
+                    + SVerticalBox::Slot()
+                    .Padding(2)
+                    .AutoHeight()
+                    [
+                        SNew(SSeparator)
+                    ]
+                    //Select painting method (texture based, mesh based...) ----
+                    + SVerticalBox::Slot()
+                    .Padding(2)
+                    .AutoHeight()
+                    [
+                        SNew(STextBlock)
+                        .Text(FText::FromString("Stamp alignment"))
+                    ]
+                    + SVerticalBox::Slot()
+                    .Padding(2)
+                    .AutoHeight()
+                    [
+                        SNew(SComboBox<TSharedPtr<EOdysseyViewportDrawingPaintingAdapterMethod>>)
+                        .ButtonStyle(FAppStyle::Get(), "PropertyEditor.AssetComboStyle")
+                        .ForegroundColor(FAppStyle::GetColor("PropertyEditor.AssetName.ColorAndOpacity"))
+                        .ContentPadding(2.0f)
+                        .OptionsSource(&mOptions)
+                        .OnGenerateWidget(this, &SOdysseyViewportDrawingEditorMasterTab::GeneratePaintingMethodComboBoxItem)
+                        .OnSelectionChanged(this, &SOdysseyViewportDrawingEditorMasterTab::ChangeSelectionPaintingMethodComboBoxItem)
                         [
                             SNew(STextBlock)
-                            .Text(FText::FromString("Stamp alignment"))
-                        ]
-                        + SVerticalBox::Slot()
-                        .Padding(2)
-                        .AutoHeight()
-                        [
-                            SNew(SComboBox<TSharedPtr<EOdysseyViewportDrawingPaintingAdapterMethod>>)
-                            .ButtonStyle(FAppStyle::Get(), "PropertyEditor.AssetComboStyle")
-                            .ForegroundColor(FAppStyle::GetColor("PropertyEditor.AssetName.ColorAndOpacity"))
-                            .ContentPadding(2.0f)
-                            .OptionsSource(&mOptions)
-                            .OnGenerateWidget(this, &SOdysseyViewportDrawingEditorMasterTab::GeneratePaintingMethodComboBoxItem)
-                            .OnSelectionChanged(this, &SOdysseyViewportDrawingEditorMasterTab::ChangeSelectionPaintingMethodComboBoxItem)
-                            [
-                                SNew(STextBlock)
-                                .TextStyle(FAppStyle::Get(), "PropertyEditor.AssetClass")
-                                .Font(FAppStyle::GetFontStyle("PropertyWindow.NormalFont"))
-                                .Text_Lambda([this] { return SOdysseyViewportDrawingEditorMasterTab::GetMethodAsText(mExtension->PaintingAdapterMethod());})
-                            ]
+                            .TextStyle(FAppStyle::Get(), "PropertyEditor.AssetClass")
+                            .Font(FAppStyle::GetFontStyle("PropertyWindow.NormalFont"))
+                            .Text_Lambda([this] { return SOdysseyViewportDrawingEditorMasterTab::GetMethodAsText(mExtension->PaintingAdapterMethod());})
                         ]
                     ]
                 ]
