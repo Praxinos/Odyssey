@@ -1,4 +1,5 @@
 #include "/Engine/Private/common.ush"
+#include "/Engine/Private/Random.ush"
 
 #define SMALL_NUMBER 1e-8
 
@@ -476,20 +477,6 @@ float BlendComponent(float iCb, float iCs, uint iBlendingMode)
         }
         break;
 
-        /* TODO: See ULIS
-        case ODYSSEY_BLENDINGMODE_Dissolve:
-        {
-            return BlendDissolve(iCb, iCs);
-        }
-        break; */
-
-        /* TODO: See ULIS
-        case ODYSSEY_BLENDINGMODE_BayerDither8x8:
-        {
-            return BlendBayerDither8x8(iCb, iCs);
-        }
-        break; */
-
         case ODYSSEY_BLENDINGMODE_Darken:
         {
             return BlendDarken(iCb, iCs);
@@ -857,10 +844,52 @@ float4 BlendNonSeparable(float4 iCb, float4 iCs, float iOpacity, uint iBlendMode
     return outColor;
 }
 
-float4 Blend(float4 iCb, float4 iCs, float iOpacity, uint iBlendMode, uint iAlphaMode)
+float4 Blend(float4 iCb, float4 iCs, float iOpacity, uint iBlendMode, uint iAlphaMode, uint2 iDstPos)
 {
-    // TODO: ODYSSEY_BLENDINGMODE_Dissolve Misc blend
-    // TODO: ODYSSEY_BLENDINGMODE_BayerDither8x8 Misc blend
+    if (iBlendMode == ODYSSEY_BLENDINGMODE_Dissolve)
+    {
+        float4 outColor = iCb;
+
+        float csA = iCs.w * iOpacity;
+        float cbA = iCb.w;
+
+        float randomAlpha = RandFast(iDstPos);
+        if (randomAlpha < csA) {
+            outColor = iCs;
+            outColor.w = AlphaBlend(cbA, csA, iAlphaMode);
+        }
+        return outColor;
+    }
+
+    if (iBlendMode == ODYSSEY_BLENDINGMODE_BayerDither8x8)
+    {
+        float gBayer8x8Matrix[64] = {
+            0.015625f, 0.765625f, 0.203125f, 0.953125f, 0.0625f, 0.8125f, 0.25f, 1.0f,
+            0.515625f, 0.265625f, 0.703125f, 0.453125f, 0.5625f, 0.3125f, 0.75f, 0.5f,
+            0.140625f, 0.890625f, 0.078125f, 0.828125f, 0.1875f, 0.9375f, 0.125f, 0.875f,
+            0.640625f, 0.390625f, 0.578125f, 0.328125f, 0.6875f, 0.4375f, 0.625f, 0.375f,
+            0.046875f, 0.796875f, 0.234375f, 0.984375f, 0.03125f, 0.78125f, 0.21875f, 0.96875f,
+            0.546875f, 0.296875f, 0.734375f, 0.484375f, 0.53125f, 0.28125f, 0.71875f, 0.46875f,
+            0.171875f, 0.921875f, 0.109375f, 0.859375f, 0.15625f, 0.90625f, 0.09375f, 0.84375f,
+            0.671875f, 0.421875f, 0.609375f, 0.359375f, 0.65625f, 0.40625f, 0.59375f, 0.34375f
+        };
+
+        float4 outColor = iCb;
+
+        float csA = iCs.w * iOpacity;
+        float cbA = iCb.w;
+
+        uint bayerX = iDstPos.x % 8;
+        uint bayerY = iDstPos.y % 8;
+        float bayerEl = gBayer8x8Matrix[bayerY * 8 + bayerX];
+        if (csA >= bayerEl) {
+
+            outColor = iCs;
+            outColor.w = AlphaBlend(cbA, csA, iAlphaMode);
+        }
+
+        return outColor;
+    }
 
     if (IsBlendSeparable(iBlendMode))
         return BlendSeparable(iCb, iCs, iOpacity, iBlendMode, iAlphaMode);

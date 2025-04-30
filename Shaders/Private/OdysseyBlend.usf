@@ -22,7 +22,8 @@ void MainPS(
     float2 destinationSize = float2(0.f, 0.f);
     float destinationLODCount = 0;
     DestinationTexture.GetDimensions(0, destinationSize.x, destinationSize.y, destinationLODCount);
-    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, float2(InVertexPosition.x / destinationSize.x, InVertexPosition.y / destinationSize.y));
+    float2 dstCoordinate = float2(InVertexPosition.x / destinationSize.x, InVertexPosition.y / destinationSize.y);
+    float4 cb = DestinationTexture.Sample(DestinationTextureSampler, dstCoordinate);
     float4 cs = SourceTexture.Sample(SourceTextureSampler, InTextureCoordinate);
-    OutColor = Blend(cb, cs, Opacity, BlendMode, AlphaMode );
+    OutColor = Blend(cb, cs, Opacity, BlendMode, AlphaMode, uint2(int(floor(InVertexPosition.x)), int(floor(InVertexPosition.y))));
 }
