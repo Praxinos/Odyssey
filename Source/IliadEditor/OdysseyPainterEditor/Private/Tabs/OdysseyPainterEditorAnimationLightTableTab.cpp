@@ -45,6 +45,13 @@ FOdysseyPainterEditorAnimationLighttableTab::CreateWidget()
         .LayerStack(this, &FOdysseyPainterEditorAnimationLighttableTab::LayerStack);
 }
 
+bool
+FOdysseyPainterEditorAnimationLighttableTab::CanOpen() const
+{
+    TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
+    return source && source->Id() == FOdysseyPainterEditorAnimationSource::StaticId();
+}
+
 UOdysseyAnimationLayerStack*
 FOdysseyPainterEditorAnimationLighttableTab::LayerStack() const
 {

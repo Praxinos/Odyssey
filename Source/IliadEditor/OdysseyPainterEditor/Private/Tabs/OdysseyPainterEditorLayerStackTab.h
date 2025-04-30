@@ -24,6 +24,7 @@ protected:
     virtual TSharedPtr<SWidget> CreateWidget() override;
     virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
     virtual void ExtendMenu( TSharedRef<FExtender> iExtender ) override;
+    virtual bool CanOpen() const override;
 
 protected:
     // Widget Getters

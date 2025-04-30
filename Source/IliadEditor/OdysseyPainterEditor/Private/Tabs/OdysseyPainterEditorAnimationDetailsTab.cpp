@@ -45,6 +45,13 @@ FOdysseyPainterEditorAnimationDetailsTab::CreateWidget()
         .Animation( this, &FOdysseyPainterEditorAnimationDetailsTab::Animation );
 }
 
+bool
+FOdysseyPainterEditorAnimationDetailsTab::CanOpen() const
+{
+    TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
+    return source && source->Id() == FOdysseyPainterEditorAnimationSource::StaticId();
+}
+
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------- Widget Getters
 

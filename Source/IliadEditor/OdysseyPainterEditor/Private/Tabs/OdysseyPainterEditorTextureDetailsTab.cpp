@@ -43,6 +43,13 @@ FOdysseyPainterEditorTextureDetailsTab::CreateWidget()
         .Texture( this, &FOdysseyPainterEditorTextureDetailsTab::Texture );
 }
 
+bool
+FOdysseyPainterEditorTextureDetailsTab::CanOpen() const
+{
+    TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
+    return source && source->Id() == FOdysseyPainterEditorTextureSource::StaticId();
+}
+
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------- Widget Getters
 

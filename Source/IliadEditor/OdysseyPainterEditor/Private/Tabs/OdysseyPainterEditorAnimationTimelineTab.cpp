@@ -112,6 +112,13 @@ FOdysseyPainterEditorAnimationTimelineTab::ExtendMenu(TSharedRef<FExtender> iExt
     ExtendMenuFile(iExtender);
 }
 
+bool
+FOdysseyPainterEditorAnimationTimelineTab::CanOpen() const
+{
+    TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
+    return source && source->Id() == FOdysseyPainterEditorAnimationSource::StaticId();
+}
+
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------- Widget Getters
 

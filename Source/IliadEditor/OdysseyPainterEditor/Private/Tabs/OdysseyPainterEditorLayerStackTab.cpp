@@ -78,6 +78,13 @@ FOdysseyPainterEditorLayerStackTab::ExtendMenu( TSharedRef<FExtender> iExtender 
     ExtendMenuFile(iExtender);
 }
 
+bool
+FOdysseyPainterEditorLayerStackTab::CanOpen() const
+{
+    TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
+    return source && source->Id() == FOdysseyPainterEditorTextureSource::StaticId();
+}
+
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------- Widget Getters
 

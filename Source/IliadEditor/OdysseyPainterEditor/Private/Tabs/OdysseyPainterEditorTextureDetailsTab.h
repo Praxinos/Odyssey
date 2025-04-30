@@ -22,6 +22,7 @@ public:
 protected:
     virtual const FName& GetId() const override;
     virtual TSharedPtr<SWidget> CreateWidget() override;
+    virtual bool CanOpen() const override;
 
 protected:
     // Widget Getters
