@@ -746,19 +746,22 @@ double SOdysseyViewport::GetRotation() const
     return mRotation;
 }
 
-void SOdysseyViewport::SetRotation(double RotationValue, const FVector2D& iPivotPoint)
+void SOdysseyViewport::SetRotation(double RotationValue)
 {
+    FTransform2D rotationTransform = FTransform2D(FQuat2D(RotationValue - mRotation));
 
+    FTransform2D translationDiff = mTransform.Concatenate(rotationTransform);
+
+    mPan = translationDiff.GetTranslation();
     mRotation = fmod( 2 * PI + fmod(RotationValue, 2 * PI), 2 * PI); //Positive modulo;
+
     UpdateTransform();
     UpdateScrollBars();
-    //SetFitToViewport(false);
 }
 
-void SOdysseyViewport::Rotate(double RotationValue, const FVector2D& iPivotPoint)
+void SOdysseyViewport::Rotate(double RotationValue)
 {
-    mRotation = fmod( 2 * PI + fmod(mRotation + RotationValue, 2 * PI), 2 * PI); //Positive modulo
-    UpdateTransform();
+    SetRotation(mRotation + RotationValue);
 }
 
 FVector2D SOdysseyViewport::GetPan() const
@@ -798,7 +801,6 @@ void SOdysseyViewport::ResetPan()
     UpdateScrollBars();
     SetFitToViewport(false);
 }
-
 
 void SOdysseyViewport::RotateLeft()
 {

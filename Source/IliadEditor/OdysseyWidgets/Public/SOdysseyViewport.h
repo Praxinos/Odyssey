@@ -78,10 +78,8 @@ public:
     */
     void            SetZoom(double ZoomValue, const FVector2D& iZoomPosition = FVector2D(0.0f, 0.0f));
 
-    /* Set the rotation value in Radians, rotating according to the given PivotPoint
-        PivotPoint is the offset of the pivot point from the center of the Viewport
-    */
-    void            SetRotation(double RotationValue, const FVector2D& PivotPoint = FVector2D(0.0f, 0.0f));
+    /* Set the rotation value in Radians, rotating according to the given PivotPoint */
+    void            SetRotation(double RotationValue);
 
     /* Set the Fit To Viewport option state */
     void            SetFitToViewport(bool bFitToViewport);
@@ -139,10 +137,8 @@ private:
     */
     void            Zoom(double ZoomValue, const FVector2D& iZoomPosition = FVector2D(0.0f, 0.0f));
 
-    /* Rotate to the given Rotation value
-        PivotPoint is the offset of the pivot point from the center of the Viewport
-    */
-    void            Rotate(double RotationValue, const FVector2D& PivotPoint = FVector2D(0.0f, 0.0f));
+    /* Rotate to the given Rotation value */
+    void            Rotate(double RotationValue);
 
     /* Fits the displayed texture to the viewport */
     void            FitToViewport();
