@@ -157,14 +157,6 @@ UOdysseyPainterEditorAnimationLayerFunctionLibrary::ImportTextureSequence(UOdyss
         return {};
 
     UOdysseyAnimation* animation = Layer->GetAnimation();
-
-    ::ULIS::eFormat format = ::ULIS::Format_BGRA8;
-    switch(animation->GetFormat())
-    {
-        case EOdysseyAnimationFormat::BGRA8: format = ::ULIS::Format_BGRA8;
-        case EOdysseyAnimationFormat::RGBAF: format = ::ULIS::Format_RGBAF;
-    }
-
     if (iCellIndex != INDEX_NONE)
         iCellIndex = FMath::Clamp(iCellIndex, 0, Layer->GetCells().Num());
 
@@ -176,22 +168,61 @@ UOdysseyPainterEditorAnimationLayerFunctionLibrary::ImportTextureSequence(UOdyss
 
     TArray<UOdysseyLayerCell*> cells = Layer->AddCells(UOdysseyAnimationCellImageRaster::StaticClass(), iCellIndex, Textures.Num());
     TArray<UOdysseyAnimationCellImageRaster*> rasterCells;
+
+    TStrongObjectPtr<UTextureRenderTarget2D> renderTarget(NewObject<UTextureRenderTarget2D>());
+    FIntRect dstRect = Layer->GetDefaultRenderRect();
+    renderTarget->InitAutoFormat(dstRect.Width(), dstRect.Height());
+
     for( int i = 0; i < cells.Num(); i++ )
     {
         progressBar.EnterProgressFrame();
 
         UOdysseyAnimationCellImageRaster* cell = Cast<UOdysseyAnimationCellImageRaster>(cells[i]);
         UTexture2D* texture = Textures[i];
-        TSharedPtr<::ULIS::FBlock> textureBlock = MakeShareable(NewBlockFromUTextureData(texture, format));
+        FIntRect srcRect(0, 0, texture->GetSurfaceWidth(), texture->GetSurfaceHeight());
+
+        const ERHIFeatureLevel::Type featureLevel = GMaxRHIFeatureLevel;
+
+        ENQUEUE_RENDER_COMMAND(ImportTextureSequence)(
+            [renderTarget, texture, dstRect, srcRect, featureLevel](FRHICommandListImmediate& RHICmdList)
+            {
+                FRDGBuilder graphBuilder(RHICmdList);
+
+                FRDGTextureRef renderTargetTexture = renderTarget->GetRenderTargetResource()->GetRenderTargetTexture( graphBuilder );
+                FRDGTextureRef externalTexture = graphBuilder.RegisterExternalTexture(CreateRenderTarget(texture->GetResource()->TextureRHI, TEXT("UOdysseyPainterEditorAnimationLayerFunctionLibrary::ImportTextureSequence::texture")));
+
+                AddClearRenderTargetPass(graphBuilder, renderTargetTexture, FLinearColor::Transparent, dstRect);
+                AddDrawTexturePass(
+                    graphBuilder,
+                    FScreenPassViewInfo(),
+                    externalTexture,
+                    renderTargetTexture,
+                    srcRect.Min,
+                    srcRect.Size(),
+                    dstRect.Min,
+                    srcRect.Size()
+                );
+
+                //execution du graph
+                graphBuilder.Execute();
+            }
+        );
+
+        FImage OutImage;
+        if (!FImageUtils::GetRenderTargetImage(renderTarget.Get(), OutImage))
+            continue;
+
+        ::ULIS::eFormat format = ULISFormatForRawImageFormat(OutImage.Format);
+        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
+        TSharedPtr<::ULIS::FBlock> block = MakeShareable(new ::ULIS::FBlock( dstRect.Width(), dstRect.Height(), format ));
+        CopyImageToBlock(OutImage, block.Get());
 
         rasterCells.Add(cell);
-
-        FillOdysseyBlockFromUTextureData(textureBlock.Get(), texture, format);
 
         TSharedPtr<FOdysseyRasterBlock> rasterBlock = cell->GetRasterBlock();
         FOdysseyRasterBlockMutator rasterBlockMutator(rasterBlock, false);
         ::ULIS::FRectI invalidRect = ::ULIS::FRectI::FromXYWH(0, 0, animation->GetWidth(), animation->GetHeight());
-        rasterBlockMutator.Copy(textureBlock, { invalidRect });
+        rasterBlockMutator.Copy(block, { invalidRect });
         rasterBlockMutator.Commit();
     }
 
