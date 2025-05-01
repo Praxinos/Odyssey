@@ -6,6 +6,7 @@
 #if WITH_EDITOR
 #include "OdysseyLighttable.h"
 #include "OdysseyLighttableKeyImport.h"
+#include <functional>
 
 static const uint32 CHUNK_LIGHTTABLE = 0x5240eec2; //container
 static const uint32 CHUNK_LIGHTTABLE_DISPLAY_POSITION = 0x472555c; //EOdysseyLighttableDisplayPosition

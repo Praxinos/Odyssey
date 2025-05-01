@@ -6,6 +6,7 @@
 #if WITH_EDITOR
 #include "OdysseyAnimationLayerImageRaster.h"
 #include "OdysseyAnimationCellImageRaster.h"
+#include "OdysseyLayerCellImageStagger.h"
 #include "OdysseyLighttable.h"
 #include "OdysseyLighttableImport.h"
 #include "OdysseyAnimationCellsContainerImport.h"

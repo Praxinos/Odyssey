@@ -22,6 +22,8 @@
 #include "Engine/TextureRenderTarget2D.h"
 #include "ImageUtils.h"
 #include "OdysseyBlendShader.h"
+#include "ScreenPass.h"
+#include "UObject/ObjectSaveContext.h"
 
 #define LOCTEXT_NAMESPACE "Texture"
 

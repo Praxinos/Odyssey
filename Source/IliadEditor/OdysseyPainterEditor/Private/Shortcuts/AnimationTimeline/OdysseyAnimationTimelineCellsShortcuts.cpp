@@ -5,6 +5,7 @@
 
 #include "OdysseyAnimationLayerStack.h"
 #include "OdysseyAnimationLayer.h"
+#include "OdysseyAnimationCell.h"
 #include "OdysseyAnimationCellClipboardData.h"
 #include "OdysseyLayerCellImageStagger.h"
 #include "Framework/Commands/GenericCommands.h"

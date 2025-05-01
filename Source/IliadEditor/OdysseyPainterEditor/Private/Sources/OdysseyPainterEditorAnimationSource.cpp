@@ -23,6 +23,8 @@
 #include "Engine/TextureRenderTarget2D.h"
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "OdysseyAnimationCurrentFrameMutator.h"
+#include "OdysseyRasterBlock.h"
+#include <ULIS>
 
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"

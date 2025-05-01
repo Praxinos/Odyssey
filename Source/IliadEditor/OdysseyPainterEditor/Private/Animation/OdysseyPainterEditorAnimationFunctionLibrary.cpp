@@ -18,6 +18,9 @@
 #include "OdysseyRasterBlockMutator.h"
 #include "ULISLoaderModule.h"
 #include "OdysseyExportImage.h"
+#include "ScreenPass.h"
+#include "ImageUtils.h"
+#include "Engine/TextureRenderTarget2D.h"
 
 #define LOCTEXT_NAMESPACE "UOdysseyPainterEditorAnimationFunctionLibrary"
 

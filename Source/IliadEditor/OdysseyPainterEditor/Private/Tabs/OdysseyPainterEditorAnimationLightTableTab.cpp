@@ -6,6 +6,7 @@
 #include "Widgets/Animation/SOdysseyLighttable.h"
 #include "OdysseyAnimationLayerStack.h"
 #include "OdysseyPainterEditor.h"
+#include "OdysseyPainterEditorAnimationSource.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 

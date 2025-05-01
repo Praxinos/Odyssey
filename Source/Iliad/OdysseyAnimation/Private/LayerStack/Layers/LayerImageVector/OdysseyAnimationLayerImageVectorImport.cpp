@@ -7,6 +7,7 @@
 #include "OdysseyAnimationLayerImageVector.h"
 #include "OdysseyAnimationCellImageVector.h"
 #include "OdysseyAnimationCellsContainerImport.h"
+#include "OdysseyLayerCellImageStagger.h"
 #include "OdysseyLighttable.h"
 #include "OdysseyLighttableImport.h"
 #include "OdysseyFile.h"

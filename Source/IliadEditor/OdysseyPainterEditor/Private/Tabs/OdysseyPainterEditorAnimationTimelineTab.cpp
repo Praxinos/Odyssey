@@ -25,6 +25,7 @@
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorAnimationSource.h"
 #include "OdysseyAnimation.h"
+#include "OdysseyAnimationPlayer.h"
 #include "OdysseyPainterEditorAnimationFunctionLibrary.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "Tools/OutOfPegsTool/OdysseyPainterEditorAnimationOutOfPegsTool.h"

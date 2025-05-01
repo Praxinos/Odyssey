@@ -7,6 +7,7 @@
 #if WITH_EDITOR
 
 #include "OdysseyLayerStack.h"
+#include "OdysseyLayer.h"
 #include "OdysseyLayerCell.h"
 
 FOdysseyLayerCellSelection::~FOdysseyLayerCellSelection()

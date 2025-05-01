@@ -7,9 +7,12 @@
 #include "OdysseyTextureRenderingAbility.h"
 #include "Templates/SubclassOf.h"
 
+#if WITH_EDITOR
+#include "OdysseyLayerCellSelection.h"
+#endif
+
 #include "OdysseyLayerStack.generated.h"
 
-class FOdysseyLayerCellSelection;
 class UOdysseyAnimation;
 
 UCLASS(Abstract, HideDropdown, BlueprintType, config=EditorPerProjectUserSettings, PerObjectConfig)

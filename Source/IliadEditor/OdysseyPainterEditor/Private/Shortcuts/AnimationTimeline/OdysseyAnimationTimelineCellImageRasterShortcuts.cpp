@@ -22,6 +22,9 @@
 #include "ScreenPass.h"
 #include "OdysseyBlendShader.h"
 #include "OdysseyPixelFormat.h"
+#include "OdysseySurfaceTexture2DEditable.h"
+#include "ImageUtils.h"
+#include "Engine/TextureRenderTarget2D.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 

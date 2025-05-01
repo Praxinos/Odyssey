@@ -23,6 +23,9 @@
 #include "OdysseyVectorCell.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorTagInbetweener.h"
+#include "OdysseyPixelFormat.h"
+#include "ULISUtils.h"
+#include "UObject/ObjectSaveContext.h"
 #endif
 
 UOdysseyAnimationCellImageVector::~UOdysseyAnimationCellImageVector()

@@ -5,6 +5,7 @@
 
 #if WITH_EDITOR
 #include "OdysseyLighttable.h"
+#include <functional>
 
 static const uint32 CHUNK_LIGHTTABLE_KEY = 0x5b785423; //FOdysseyLighttableKey
 static const uint32 CHUNK_LIGHTTABLE_KEY_ISACTIVATED = 0xea8a5d86; //bool

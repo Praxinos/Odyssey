@@ -25,6 +25,8 @@
 #include "Engine/TextureRenderTarget2D.h"
 #include "ImageUtils.h"
 #include "OdysseyBlendShader.h"
+#include "ScreenPass.h"
+#include "OdysseySurfaceTexture2DEditable.h"
 #endif
 
 #define LOCTEXT_NAMESPACE "Animation"

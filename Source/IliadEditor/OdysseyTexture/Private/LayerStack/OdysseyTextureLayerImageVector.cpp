@@ -20,6 +20,9 @@
 #include "OdysseyVectorCell.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
+#include "Misc/TransactionObjectEvent.h"
+#include "TextureCompiler.h"
+#include "UObject/ObjectSaveContext.h"
 
 #include "blend2d.h"
 

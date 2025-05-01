@@ -5,6 +5,10 @@
 
 #if WITH_EDITOR
 #include "OdysseyLayerCellImageStagger.h"
+#include "OdysseyAnimationLayer.h"
+#include "OdysseyAnimationCellImageRaster.h"
+#include "OdysseyAnimationCellImageVector.h"
+#include "OdysseyFile.h"
 
 bool
 FOdysseyAnimationCellsContainerImport::Read( UOdysseyAnimationLayer* iAnimationLayer
