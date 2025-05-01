@@ -11,6 +11,7 @@
 #include "OdysseyPainterEditorRasterSelection.h"
 #include "Shortcuts/Global/OdysseyPainterEditorGlobalShortcuts.h"
 #include "PropertyHandle.h"
+#include <chrono>
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 

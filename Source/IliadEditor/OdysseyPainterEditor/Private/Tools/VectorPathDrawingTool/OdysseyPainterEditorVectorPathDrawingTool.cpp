@@ -18,6 +18,7 @@
 #include "Toolkits/BaseToolkit.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "SOdysseySinglePropertyView.h"
+#include <chrono>
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 

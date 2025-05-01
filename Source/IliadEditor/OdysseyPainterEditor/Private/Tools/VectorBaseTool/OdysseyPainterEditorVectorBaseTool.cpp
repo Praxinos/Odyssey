@@ -19,6 +19,7 @@
 #include "OdysseyVectorLayer.h"
 #include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyVectorEllipse.h"
+#include <chrono>
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
