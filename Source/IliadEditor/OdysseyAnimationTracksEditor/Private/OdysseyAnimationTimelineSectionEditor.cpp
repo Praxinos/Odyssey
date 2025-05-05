@@ -45,7 +45,8 @@ float
 FOdysseyAnimationTimelineSectionEditor::GetSectionHeight( const UE::Sequencer::FViewDensityInfo& ViewDensity ) const
 {
     UOdysseyAnimationTimelineTrack* track = mSection->GetTypedOuter<UOdysseyAnimationTimelineTrack>();
-    track->SetRowHeight( mSectionWidget ? mSectionWidget->GetDesiredSize().Y : 0.f ); // Arbitrary value which should only be used for one (or some) tick(s) waiting the creation of the layout widget in the section
+    TSharedPtr<SWidget> sectionWidget = mSectionWidget.Pin();
+    track->SetRowHeight( sectionWidget ? sectionWidget->GetDesiredSize().Y : 0.f ); // Arbitrary value which should only be used for one (or some) tick(s) waiting the creation of the layout widget in the section
     return track->GetRowHeight();
 }
 
@@ -72,7 +73,7 @@ FOdysseyAnimationTimelineSectionEditor::GenerateSectionWidget()
 {
     TSharedPtr<ISequencer> sequencer = GetSequencer();
 
-    mSectionWidget = SNew(SVerticalBox)
+    TSharedRef widget = SNew(SVerticalBox)
         + SVerticalBox::Slot()
         .AutoHeight()
         [
@@ -94,7 +95,8 @@ FOdysseyAnimationTimelineSectionEditor::GenerateSectionWidget()
             .OnPostBehaviourChanged(this, &FOdysseyAnimationTimelineSectionEditor::OnPostBehaviourChanged)
         ];
 
-    return mSectionWidget.ToSharedRef();
+    mSectionWidget = widget;
+    return widget;
 }
 
 

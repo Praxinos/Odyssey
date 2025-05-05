@@ -955,6 +955,8 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
         .SetCheckedPressedImage(*FAppStyle::Get().GetBrush("TreeArrow_Expanded_Hovered"))
     );
 
+    Set("Sequencer.AnimationTimelineTrack.PrePostBehaviourOverlay", new IMAGE_BRUSH("OdysseyAnimation/Sequencer/PrePostBehaviourOverlay", FVector2D(16.f, 16.f), FLinearColor::White, ESlateBrushTileType::Both));
+
     Set("Shapes.None", new IMAGE_BRUSH_SVG("OdysseyShapes/none", mIcon16x16));
     Set("Shapes.Freehand", new IMAGE_BRUSH_SVG("OdysseyShapes/freehand", mIcon16x16));
     Set("Shapes.Line", new IMAGE_BRUSH_SVG("OdysseyShapes/line", mIcon16x16));

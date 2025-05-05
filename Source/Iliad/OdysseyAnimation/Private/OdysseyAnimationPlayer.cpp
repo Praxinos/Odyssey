@@ -250,8 +250,10 @@ UOdysseyAnimationPlayer::ApplyPreBehaviour(FFrameTime iFrame, FFrameTime& oFrame
             FInt32Range frameRange = Animation->GetFrameRange();
             FFrameTime leftBound = FFrameTime(frameRange.GetLowerBoundValue());
             FFrameTime rightBound = FFrameTime(frameRange.GetUpperBoundValue());
-            FFrameTime positiveFrame = (iFrame - leftBound + 1) * -1;
-            oFrame = rightBound - (positiveFrame % duration) + leftBound;
+            /*FFrameTime positiveFrame = (iFrame - leftBound + 1) * -1;
+            oFrame = rightBound - (positiveFrame % duration) + leftBound; */
+
+            oFrame = rightBound - ((leftBound - iFrame) % duration);
         }
         break;
     }

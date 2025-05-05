@@ -205,7 +205,7 @@ SOdysseyAnimationTimelineControl::OnMouseMove(const FGeometry& MyGeometry, const
         const float minOffset = 0.0f;
         float mouseOffset = MouseEvent.GetScreenSpacePosition().X - mOffsetMousePosition.X;
         //mOffsetMousePosition.Y contains the starting offset instead of the Y position
-        mTimelinePosition->SetOffset(mOffsetMousePosition.Y - (mouseOffset / mTimelinePosition->GetFrameSize()));
+        mTimelinePosition->SetOffset(FMath::Max(0, mOffsetMousePosition.Y - (mouseOffset / mTimelinePosition->GetFrameSize())));
         return FReply::Handled();
     }
 
@@ -220,8 +220,7 @@ SOdysseyAnimationTimelineControl::OnMouseMove(const FGeometry& MyGeometry, const
         sliderPos += mouseOffset / 200.f;
         double newZoom = FMath::Exp(sliderPos);
         mTimelinePosition->SetZoom(newZoom);
-
-        mTimelinePosition->SetOffset(offset - mousePosition / mTimelinePosition->GetFrameSize());
+        mTimelinePosition->SetOffset(FMath::Max(0, offset - mousePosition / mTimelinePosition->GetFrameSize()));
 
         return FReply::Handled();
     }

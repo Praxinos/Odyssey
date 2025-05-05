@@ -219,7 +219,7 @@ SOdysseyAnimationLayerStack::OnTimelineScrollBarHScrolled(float iOffset)
     float scrollbarOffset = FMath::Clamp(iOffset, 0.f, 1.f - visiblePercent);
     float offsetPercent = (scrollbarOffset / (1.f - visiblePercent));
     float offsetAmount = FMath::Max(lastFrameIndex, columnWidth / frameWidth - 1.f);
-    timelinePosition->SetOffset( offsetPercent * offsetAmount );
+    timelinePosition->SetOffset( FMath::Max(0, offsetPercent * offsetAmount) );
 }
 
 void

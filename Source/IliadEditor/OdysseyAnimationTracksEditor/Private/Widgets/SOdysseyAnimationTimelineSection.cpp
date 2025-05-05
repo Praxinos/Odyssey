@@ -10,6 +10,7 @@
 #include "MVVM/ViewModels/SequencerEditorViewModel.h"
 #include "MVVM/ViewModels/TrackAreaViewModel.h"
 #include "SEnumCombo.h"
+#include "Widgets/Colors/SColorBlock.h"
 
 #include "OdysseyAnimation.h"
 #include "OdysseyAnimationCell.h"
@@ -188,123 +189,135 @@ SOdysseyAnimationTimelineSection::RebuildWidgets()
 
     UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(animation->GetLayerStack());
 
-    TSharedPtr<SWidget> widget = SNew(SHorizontalBox)
-        .Visibility(this, &SOdysseyAnimationTimelineSection::GetLayersVisibility)
-        + SHorizontalBox::Slot()
-        .AutoWidth()
+    TSharedRef<SEnumComboBox> preBehaviourComboBoxWidget = SNew(SEnumComboBox, StaticEnum<EOdysseyAnimationPlayerPostBehaviour>())
+        .Clipping(EWidgetClipping::ClipToBounds)
+        .CurrentValue_Lambda(
+            [this]() -> int32
+            {
+                return int32(mPreBehaviour.Get());
+            }
+        )
+        .ContentPadding(FMargin(0))
+        .OnEnumSelectionChanged(this, &SOdysseyAnimationTimelineSection::OnPrebehaviourComboBoxChanged);
+
+    TSharedRef<SEnumComboBox> postBehaviourComboBoxWidget = SNew(SEnumComboBox, StaticEnum<EOdysseyAnimationPlayerPostBehaviour>())
+        .Clipping(EWidgetClipping::ClipToBounds)
+        .CurrentValue_Lambda(
+            [this]()
+            {
+                return int32(mPostBehaviour.Get());
+            }
+        )
+        .ContentPadding(FMargin(0))
+        .OnEnumSelectionChanged(this, &SOdysseyAnimationTimelineSection::OnPostbehaviourComboBoxChanged);
+
+    preBehaviourComboBoxWidget->SetMenuPlacement(MenuPlacement_MenuRight);
+    postBehaviourComboBoxWidget->SetMenuPlacement(MenuPlacement_MenuRight);
+
+    TSharedRef<SWidget> preBehaviourWidget = SNew(SBox)
+        .Clipping(EWidgetClipping::ClipToBounds)
+        .WidthOverride(this, &SOdysseyAnimationTimelineSection::GetPreBehaviourWidth)
         [
-            SNew(SBox)
-            .WidthOverride_Lambda(
-                [this, animation]()
-                {
-                    TSharedPtr<ISequencer> sequencer = mSequencer.Pin();
-                    if (!sequencer)
-                        return 0.f;
-
-                    TSharedPtr<UE::Sequencer::FSequencerEditorViewModel> editor_model = sequencer->GetViewModel();
-                    TSharedPtr<UE::Sequencer::FTrackAreaViewModel> track_model = editor_model->GetTrackArea();
-                    FGeometry geometry( sequencer->GetTopTimeSliderWidget()->GetTickSpaceGeometry() );
-                    FVector2f local_size = geometry.GetLocalSize();
-                    FTimeToPixel timeToPixel = track_model->GetTimeToPixel( local_size.X );
-
-                    FFrameRate animationFrameRate(animation->GetFramesPerSecond() * 100, 100);
-                    FFrameTime animationLeftBound = FFrameRate::TransformTime(animation->GetLeftBoundValue(), animationFrameRate, sequencer->GetFocusedTickResolution());
-
-                    return timeToPixel.FrameDeltaToPixel(animationLeftBound - mStartFrameOffset.Get());
-                }
-            )
+            SNew(SVerticalBox)
+            + SVerticalBox::Slot()
+            .AutoHeight()
             [
-                SNew(SVerticalBox)
-                + SVerticalBox::Slot()
-                .VAlign(VAlign_Top)
+                SNew(SHorizontalBox)
+                + SHorizontalBox::Slot()
                 [
-                    SNew(SEnumComboBox, StaticEnum<EOdysseyAnimationPlayerPostBehaviour>())
-                    .CurrentValue_Lambda(
-                        [this]() -> int32
-                        {
-                            return int32(mPreBehaviour.Get());
-                        }
-                    )
-                    .ContentPadding(FMargin(0))
-                    .OnEnumSelectionChanged(this, &SOdysseyAnimationTimelineSection::OnPrebehaviourComboBoxChanged)
+                    SNew(SImage)
+                    .Image(this, &SOdysseyAnimationTimelineSection::GetPrePostBehaviourBrush)
+                    .ColorAndOpacity(FLinearColor(0.25f, 0.25f, 0.25f, 1.f))
                 ]
-                + SVerticalBox::Slot()
+                + SHorizontalBox::Slot()
+                .AutoWidth()
                 [
-                    SNullWidget::NullWidget
+                    preBehaviourComboBoxWidget
                 ]
             ]
-        ]
-        + SHorizontalBox::Slot()
-        .AutoWidth()
-        [
-            SNew(SBox)
-            .WidthOverride_Lambda(
-                [this]()
-                {
-                    TSharedPtr<ISequencer> sequencer = mSequencer.Pin();
-                    if (!sequencer)
-                        return 0.f;
-
-                    UOdysseyAnimation* animation = mAnimation.Get();
-                    if (!animation)
-                        return 0.f;
-
-                    TSharedPtr<UE::Sequencer::FSequencerEditorViewModel> editor_model = sequencer->GetViewModel();
-                    TSharedPtr<UE::Sequencer::FTrackAreaViewModel> track_model = editor_model->GetTrackArea();
-                    FGeometry geometry( sequencer->GetTopTimeSliderWidget()->GetTickSpaceGeometry() );
-                    FVector2f local_size = geometry.GetLocalSize();
-                    FTimeToPixel timeToPixel = track_model->GetTimeToPixel( local_size.X );
-
-                    FFrameRate animationFrameRate(animation->GetFramesPerSecond() * 100, 100);
-                    FFrameTime animationStartFrame(animation->GetLeftBoundValue());
-                    FFrameTime animationEndFrame(animation->GetRightBoundValue() + 1);
-                    FFrameTime sectionDuration = mSection->GetRange().GetUpperBoundValue() - mSection->GetRange().GetLowerBoundValue();
-                    animationStartFrame = FFrameRate::TransformTime(animationStartFrame, animationFrameRate, sequencer->GetFocusedTickResolution());
-                    animationEndFrame = FFrameRate::TransformTime(animationEndFrame, animationFrameRate, sequencer->GetFocusedTickResolution());
-
-                    animationStartFrame = FMath::Max(animationStartFrame, FFrameTime(mStartFrameOffset.Get()));
-                    animationEndFrame = FMath::Min(animationEndFrame, sectionDuration + mStartFrameOffset.Get());
-
-                    FFrameTime animationDuration = FMath::Max(FFrameTime(0), animationEndFrame - animationStartFrame);
-                    return timeToPixel.FrameDeltaToPixel(animationDuration);
-                }
-            )
+            + SVerticalBox::Slot()
             [
-                SNew( SOdysseyAnimationTimelineTreeView )
-                .LayerStack(layerStack)
-                .TimelinePosition(mTimelinePosition)
-                .OnActivateOutOfPegs(this, &SOdysseyAnimationTimelineSection::OnActivateOutOfPegs)
-                .OnInactivateOutOfPegs(this, &SOdysseyAnimationTimelineSection::OnInactivateOutOfPegs)
-                .OnIsOutOfPegsChecked(this, &SOdysseyAnimationTimelineSection::OnIsOutOfPegsChecked)
-                .ExternalScrollbar( SNew(SScrollBar) )
-            ]
-        ]
-        + SHorizontalBox::Slot()
-        [
-            SNew(SBox)
-            [
-                SNew(SVerticalBox)
-                + SVerticalBox::Slot()
-                .VAlign(VAlign_Top)
-                [
-                    SNew(SEnumComboBox, StaticEnum<EOdysseyAnimationPlayerPostBehaviour>())
-                    .CurrentValue_Lambda(
-                        [this]()
-                        {
-                            return int32(mPostBehaviour.Get());
-                        }
-                    )
-                    .ContentPadding(FMargin(0))
-                    .OnEnumSelectionChanged(this, &SOdysseyAnimationTimelineSection::OnPostbehaviourComboBoxChanged)
-                ]
-                + SVerticalBox::Slot()
-                [
-                    SNullWidget::NullWidget
-                ]
+                SNew(SColorBlock)
+                .Color(FLinearColor(0, 0, 0, 0.75f))
             ]
         ];
 
-    this->ChildSlot.AttachWidget(widget.ToSharedRef());
+    TSharedRef<SWidget> postBehaviourWidget = SNew(SBox)
+        .Clipping(EWidgetClipping::ClipToBounds)
+        .WidthOverride(this, &SOdysseyAnimationTimelineSection::GetPostBehaviourWidth)
+        [
+            SNew(SVerticalBox)
+            + SVerticalBox::Slot()
+            .AutoHeight()
+            [
+                SNew(SHorizontalBox)
+                + SHorizontalBox::Slot()
+                .AutoWidth()
+                [
+                    postBehaviourComboBoxWidget
+                ]
+                + SHorizontalBox::Slot()
+                [
+                    SNew(SImage)
+                    .Image(this, &SOdysseyAnimationTimelineSection::GetPrePostBehaviourBrush)
+                    .ColorAndOpacity(FLinearColor(0.25f, 0.25f, 0.25f, 1.f))
+                ]
+            ]
+            + SVerticalBox::Slot()
+            [
+                SNew(SColorBlock)
+                .Color(FLinearColor(0, 0, 0, 0.75f))
+            ]
+        ];
+
+    TSharedRef<SWidget> timelineWidget = SNew( SOdysseyAnimationTimelineTreeView )
+            .LayerStack(layerStack)
+            .TimelinePosition(mTimelinePosition)
+            .OnActivateOutOfPegs(this, &SOdysseyAnimationTimelineSection::OnActivateOutOfPegs)
+            .OnInactivateOutOfPegs(this, &SOdysseyAnimationTimelineSection::OnInactivateOutOfPegs)
+            .OnIsOutOfPegsChecked(this, &SOdysseyAnimationTimelineSection::OnIsOutOfPegsChecked)
+            .ExternalScrollbar( SNew(SScrollBar) );
+
+    TSharedRef<SWidget> widget = SNew(SOverlay)
+        .Visibility(this, &SOdysseyAnimationTimelineSection::GetLayersVisibility)
+        + SOverlay::Slot()
+        [
+            timelineWidget
+        ]
+        + SOverlay::Slot()
+        .HAlign(HAlign_Left)
+        [
+            preBehaviourWidget
+        ]
+        + SOverlay::Slot()
+        .HAlign(HAlign_Right)
+        [
+            postBehaviourWidget
+        ];
+
+
+
+    /*
+    TSharedRef<SWidget> widget = SNew(SHorizontalBox)
+        .Visibility(this, &SOdysseyAnimationTimelineSection::GetLayersVisibility)
+        .Clipping(EWidgetClipping::ClipToBounds)
+        + SHorizontalBox::Slot()
+        .AutoWidth()
+        [
+            preBehaviourWidget
+        ]
+        + SHorizontalBox::Slot()
+        .AutoWidth()
+        [
+            timelineWidget
+        ]
+        + SHorizontalBox::Slot()
+        [
+            postBehaviourWidget
+        ];
+    */
+
+    this->ChildSlot.AttachWidget(widget);
 }
 
 void
@@ -354,9 +367,10 @@ SOdysseyAnimationTimelineSection::Tick(const FGeometry& AllottedGeometry, const 
     mTimelinePosition->SetZoom(zoom);
 
     FFrameRate animationFrameRate(animation->GetFramesPerSecond() * 100, 100);
-    FFrameTime startOffset = FMath::Max(FFrameTime(0), FFrameTime(mStartFrameOffset.Get()));
+    FFrameTime animationLeftBound = FFrameRate::TransformTime(animation->GetLeftBoundValue(), animationFrameRate, movieScene->GetTickResolution());
+    FFrameTime startOffset = FFrameTime(mStartFrameOffset.Get());
     startOffset = FFrameRate::TransformTime(startOffset, movieScene->GetTickResolution(), animationFrameRate);
-    float offset = FMath::Max(animation->GetLeftBoundValue(), startOffset.GetFrame().Value + startOffset.GetSubFrame());
+    float offset = startOffset.GetFrame().Value + startOffset.GetSubFrame();
 
     mTimelinePosition->SetOffset( offset );
 }
@@ -369,6 +383,68 @@ SOdysseyAnimationTimelineSection::GetLayersVisibility() const
         return EVisibility::Collapsed;
 
     return track->DisplayLayers ? EVisibility::Visible : EVisibility::Collapsed;
+}
+
+FOptionalSize
+SOdysseyAnimationTimelineSection::GetPreBehaviourWidth() const
+{
+    TSharedPtr<ISequencer> sequencer = mSequencer.Pin();
+    if (!sequencer)
+        return 0.f;
+
+    UOdysseyAnimation* animation = mAnimation.Get();
+    if (!animation)
+        return 0.f;
+
+    TSharedPtr<UE::Sequencer::FSequencerEditorViewModel> editor_model = sequencer->GetViewModel();
+    TSharedPtr<UE::Sequencer::FTrackAreaViewModel> track_model = editor_model->GetTrackArea();
+    FGeometry geometry( sequencer->GetTopTimeSliderWidget()->GetTickSpaceGeometry() );
+    FVector2f local_size = geometry.GetLocalSize();
+    FTimeToPixel timeToPixel = track_model->GetTimeToPixel( local_size.X );
+
+    FFrameRate animationFrameRate(animation->GetFramesPerSecond() * 100, 100);
+    FFrameTime animationLeftBound = FFrameRate::TransformTime(animation->GetLeftBoundValue(), animationFrameRate, sequencer->GetFocusedTickResolution());
+
+    return timeToPixel.FrameDeltaToPixel(animationLeftBound - mStartFrameOffset.Get());
+}
+
+FOptionalSize
+SOdysseyAnimationTimelineSection::GetPostBehaviourWidth() const
+{
+    TSharedPtr<ISequencer> sequencer = mSequencer.Pin();
+    if (!sequencer)
+        return 0.f;
+
+    UOdysseyAnimation* animation = mAnimation.Get();
+    if (!animation)
+        return 0.f;
+
+    TSharedPtr<UE::Sequencer::FSequencerEditorViewModel> editor_model = sequencer->GetViewModel();
+    TSharedPtr<UE::Sequencer::FTrackAreaViewModel> track_model = editor_model->GetTrackArea();
+    FGeometry geometry( sequencer->GetTopTimeSliderWidget()->GetTickSpaceGeometry() );
+    FVector2f local_size = geometry.GetLocalSize();
+    FTimeToPixel timeToPixel = track_model->GetTimeToPixel( local_size.X );
+
+    FFrameRate animationFrameRate(animation->GetFramesPerSecond() * 100, 100);
+    FFrameTime animationStartFrame(animation->GetLeftBoundValue());
+    FFrameTime animationEndFrame(animation->GetRightBoundValue() + 1);
+    FFrameTime sectionDuration = mSection->GetRange().GetUpperBoundValue() - mSection->GetRange().GetLowerBoundValue();
+
+    animationStartFrame = FFrameRate::TransformTime(animationStartFrame, animationFrameRate, sequencer->GetFocusedTickResolution());
+    animationEndFrame = FFrameRate::TransformTime(animationEndFrame, animationFrameRate, sequencer->GetFocusedTickResolution());
+
+    //FFrameTime postBehaviourDuration = sectionDuration - animationDuration - FFrameTime(mStartFrameOffset.Get());
+    FFrameTime postBehaviourDuration = sectionDuration - animationEndFrame + FFrameTime(mStartFrameOffset.Get());
+    postBehaviourDuration = FMath::Max(FFrameTime(0), postBehaviourDuration);
+    return timeToPixel.FrameDeltaToPixel(postBehaviourDuration);
+}
+
+
+
+const FSlateBrush*
+SOdysseyAnimationTimelineSection::GetPrePostBehaviourBrush() const
+{
+    return FOdysseyStyle::GetBrush("Sequencer.AnimationTimelineTrack.PrePostBehaviourOverlay");
 }
 
 #undef LOCTEXT_NAMESPACE

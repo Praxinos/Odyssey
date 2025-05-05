@@ -57,6 +57,11 @@ private:
     void OnInactivateOutOfPegs();
     ECheckBoxState OnIsOutOfPegsChecked(UOdysseyAnimationCell* iCell);
 
+    FOptionalSize GetPreBehaviourWidth() const;
+    FOptionalSize GetPostBehaviourWidth() const;
+
+    const FSlateBrush* GetPrePostBehaviourBrush() const;
+
     void OnPrebehaviourComboBoxChanged(int32 iValue, ESelectInfo::Type iSelectInfo);
     void OnPostbehaviourComboBoxChanged(int32 iValue, ESelectInfo::Type iSelectInfo);
 

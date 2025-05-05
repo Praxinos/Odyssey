@@ -50,7 +50,7 @@ private:
 private:
     TWeakPtr<ISequencer> mSequencer;
     UOdysseyAnimationComponent* mComponent; //used to remove callbacks
-    TSharedPtr<SWidget> mSectionWidget;
+    TWeakPtr<SWidget> mSectionWidget;
     UOdysseyAnimationTimelineSection* mSection;
 
     FFrameNumber mInitialStartOffsetDuringResize;

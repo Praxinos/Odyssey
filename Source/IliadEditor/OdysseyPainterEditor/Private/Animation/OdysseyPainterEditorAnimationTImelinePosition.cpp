@@ -120,7 +120,8 @@ FOdysseyPainterEditorAnimationTimelinePosition::GetZoomStep() const
 void
 FOdysseyPainterEditorAnimationTimelinePosition::SetOffset(float iOffset)
 {
-    mOffset = FMath::Max(0, iOffset);
+    mOffset = iOffset;
+    //mOffset = FMath::Max(0, iOffset);
 }
 
 float

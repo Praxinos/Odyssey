@@ -189,7 +189,6 @@ FOdysseyAnimationTimelineTrackEditor::BuildOutlinerColumnWidget(const FBuildColu
     UOdysseyAnimationTimelineTrack* track = Cast<UOdysseyAnimationTimelineTrack>(iParams.TrackModel->GetTrack());
     ::UE::Sequencer::TViewModelPtr< ::UE::Sequencer::FSequencerEditorViewModel > editorViewModel = iParams.Editor->CastThisShared< ::UE::Sequencer::FSequencerEditorViewModel >();
     ::UE::Sequencer::TViewModelPtr<::UE::Sequencer::IOutlinerExtension> outlinerExtension = iParams.ViewModel.ImplicitCast();
-    TSharedRef<UE::Sequencer::ISequencerTreeViewRow> row = iParams.TreeViewRow;
     if (!track || !editorViewModel || !outlinerExtension)
         return nullptr;
 
@@ -223,23 +222,14 @@ FOdysseyAnimationTimelineTrackEditor::BuildOutlinerColumnWidget(const FBuildColu
     if (iColumnName == ::UE::Sequencer::FCommonOutlinerNames::Add)
     {
         FGuid objectBinding = track->FindObjectBindingGuid();
-        return /*SNew(SBox)
-            .HeightOverride(FOdysseyAnimationTimelineSectionEditor::GetUncollapsedSectionHeight(component))
-            .VAlign(VAlign_Top)
-            [
-                SNew(SBox)
-                .HeightOverride(FOdysseyAnimationTimelineSectionEditor::GetCollapsedSectionHeight())
-                .VAlign(VAlign_Center)
-                .HAlign(HAlign_Center)
-                [*/
-                    UE::Sequencer::MakeAddButton(LOCTEXT("sequencer.animation-timeline-track.add-button.tooltip", "Add Section"), FOnClicked::CreateRaw(this, &FOdysseyAnimationTimelineTrackEditor::OnAddButtonClicked, objectBinding), iParams.ViewModel);
-                /*]
-            ];*/
+        return UE::Sequencer::MakeAddButton(LOCTEXT("sequencer.animation-timeline-track.add-button.tooltip", "Add Section"), FOnClicked::CreateRaw(this, &FOdysseyAnimationTimelineTrackEditor::OnAddButtonClicked, objectBinding), iParams.ViewModel);
     }
 
     if (iColumnName == ::UE::Sequencer::FCommonOutlinerNames::Label)
     {
         const FCheckBoxStyle* displayLayersToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("Sequencer.AnimationTimelineTrack.DisplayLayersToggle");
+
+        TWeakPtr<UE::Sequencer::ISequencerTreeViewRow> weakRow = iParams.TreeViewRow;
 
         return SNew(SBox)
             .HeightOverride_Lambda(
@@ -263,8 +253,12 @@ FOdysseyAnimationTimelineTrackEditor::BuildOutlinerColumnWidget(const FBuildColu
                         + SHorizontalBox::Slot()
                         .Padding(
                             MakeAttributeLambda(
-                                [row]() -> FMargin
+                                [weakRow]() -> FMargin
                                 {
+                                    TSharedPtr<UE::Sequencer::ISequencerTreeViewRow> row = weakRow.Pin();
+                                    if (!row)
+                                        return FMargin(0);
+
                                     const int32 NestingDepth = FMath::Max(0, row->GetIndentLevel());
                                     const float Indent = 10.f;
                                     return FMargin( NestingDepth * Indent, 0.f, 2.f, 0.f );
