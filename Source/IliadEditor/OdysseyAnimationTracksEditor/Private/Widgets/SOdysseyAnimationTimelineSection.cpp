@@ -211,9 +211,6 @@ SOdysseyAnimationTimelineSection::RebuildWidgets()
         .ContentPadding(FMargin(0))
         .OnEnumSelectionChanged(this, &SOdysseyAnimationTimelineSection::OnPostbehaviourComboBoxChanged);
 
-    preBehaviourComboBoxWidget->SetMenuPlacement(MenuPlacement_MenuRight);
-    postBehaviourComboBoxWidget->SetMenuPlacement(MenuPlacement_MenuRight);
-
     TSharedRef<SWidget> preBehaviourWidget = SNew(SBox)
         .Clipping(EWidgetClipping::ClipToBounds)
         .WidthOverride(this, &SOdysseyAnimationTimelineSection::GetPreBehaviourWidth)
