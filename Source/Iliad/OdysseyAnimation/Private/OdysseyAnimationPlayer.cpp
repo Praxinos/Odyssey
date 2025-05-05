@@ -22,12 +22,6 @@ UOdysseyAnimationPlayer::OnDisplayedFrameChanged()
     return mOnDisplayedFrameChanged;
 }
 
-FSimpleMulticastDelegate&
-UOdysseyAnimationPlayer::OnStatusChanged()
-{
-    return mOnStatusChanged;
-}
-
 UOdysseyAnimationPlayer::UOdysseyAnimationPlayer()
 {
 }
@@ -61,8 +55,6 @@ UOdysseyAnimationPlayer::Play(bool iBackward)
     if (mRange.IsSet())
         mDisplayedFrame = FMath::Clamp(mDisplayedFrame, mRange->GetLowerBoundValue(), mRange->GetUpperBoundValue());
 #endif
-
-    mOnStatusChanged.Broadcast();
 }
 
 void
@@ -75,7 +67,6 @@ UOdysseyAnimationPlayer::Pause()
         EndScrub();
 
     Status = EOdysseyAnimationPlayerStatus::Paused;
-    mOnStatusChanged.Broadcast();
 }
 
 void
@@ -91,7 +82,7 @@ UOdysseyAnimationPlayer::Stop()
     }
 
     Status = EOdysseyAnimationPlayerStatus::Stopped;
-    mOnStatusChanged.Broadcast();
+    SeekToFrame(mCurrentFrame);
 }
 
 void
@@ -493,7 +484,6 @@ UOdysseyAnimationPlayer::BeginScrub()
         Stop();
 
     Status = EOdysseyAnimationPlayerStatus::Scrubbing;
-    mOnStatusChanged.Broadcast();
 }
 
 void
@@ -504,7 +494,6 @@ UOdysseyAnimationPlayer::EndScrub()
 
     Status = EOdysseyAnimationPlayerStatus::Stopped;
     SeekToFrame(mDisplayedFrame);
-    mOnStatusChanged.Broadcast();
 }
 
 #if WITH_EDITOR

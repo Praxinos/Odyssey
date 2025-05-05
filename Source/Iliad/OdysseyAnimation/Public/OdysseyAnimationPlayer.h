@@ -45,7 +45,6 @@ public:
     //Events
     FSimpleMulticastDelegate& OnCurrentFrameChanged();
     FSimpleMulticastDelegate& OnDisplayedFrameChanged();
-    FSimpleMulticastDelegate& OnStatusChanged();
 
 protected:
     virtual void PostInitProperties() override;
@@ -184,5 +183,4 @@ private:
     //Events
     FSimpleMulticastDelegate mOnCurrentFrameChanged;
     FSimpleMulticastDelegate mOnDisplayedFrameChanged;
-    FSimpleMulticastDelegate mOnStatusChanged;
 };

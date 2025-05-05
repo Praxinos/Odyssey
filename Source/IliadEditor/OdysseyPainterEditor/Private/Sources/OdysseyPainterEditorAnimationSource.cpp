@@ -112,7 +112,6 @@ FOdysseyPainterEditorAnimationSource::InactivatePlayer(UOdysseyAnimationPlayer* 
 {
     iPlayer->OnCurrentFrameChanged().RemoveAll(this);
     iPlayer->SetRenderType(EOdysseyRenderingType::Render);
-    iPlayer->OnStatusChanged().RemoveAll(this);
     iPlayer->Stop();
 }
 
