@@ -55,20 +55,6 @@ UOdysseyLayerCell::GetFrameRange() const
     return GetLayer()->GetCellsFrameRanges()[IndexInLayer];
 }
 
-#if WITH_EDITOR
-FSimpleMulticastDelegate&
-UOdysseyLayerCell::OnThumbnailChanged()
-{
-    return mOnThumbnailChanged;
-}
-
-FSimpleMulticastDelegate&
-UOdysseyLayerCell::OnThumbnailDirtied()
-{
-    return mOnThumbnailDirtied;
-}
-#endif
-
 int
 UOdysseyLayerCell::GetIndexInLayer() const
 {
@@ -188,28 +174,6 @@ UOdysseyLayerCell::Break(int Frame, bool bClear)
     SetExposure(Frame);
 
     return newCell;
-}
-
-void
-UOdysseyLayerCell::DirtyThumbnail()
-{
-    if (ThumbnailIsDirty)
-        return;
-
-    ThumbnailIsDirty = true;
-    mOnThumbnailDirtied.Broadcast();
-}
-
-void
-UOdysseyLayerCell::UndirtyThumbnail()
-{
-    ThumbnailIsDirty = false;
-}
-
-bool
-UOdysseyLayerCell::IsThumbnailDirty() const
-{
-    return ThumbnailIsDirty;
 }
 
 bool

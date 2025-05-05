@@ -108,15 +108,6 @@ public:
     FOnOutOfPegsChanged& OnOutOfPegsChanged();
     void SetOutOfPegsInteractive(FOdysseyLayerCellOutOfPegs Value);
     void SetExposureInteractive(int Value);
-    FSimpleMulticastDelegate& OnThumbnailChanged();
-    FSimpleMulticastDelegate& OnThumbnailDirtied();
-#endif
-
-protected:
-#if WITH_EDITOR
-    void DirtyThumbnail();
-    void UndirtyThumbnail();
-    bool IsThumbnailDirty() const;
 #endif
 
 protected:
@@ -133,9 +124,6 @@ protected:
     UPROPERTY()
     int Mark = -1;
 
-    UPROPERTY(NonTransactional)
-    bool ThumbnailIsDirty = false;
-
     UPROPERTY(NonTransactional, DuplicateTransient)
     FOdysseyLayerCellOutOfPegs OutOfPegs;
 #endif
@@ -146,9 +134,6 @@ private:
 
 #if WITH_EDITOR
 private:
-    FSimpleMulticastDelegate mOnThumbnailChanged;
-    FSimpleMulticastDelegate mOnThumbnailDirtied;
-
     FOnOutOfPegsChanged mOnOutOfPegsChanged;
 #endif
 };

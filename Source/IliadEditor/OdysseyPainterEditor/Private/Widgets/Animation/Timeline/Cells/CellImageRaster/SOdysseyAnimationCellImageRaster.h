@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "OdysseyRenderingAbility.h"
 
 class UOdysseyAnimationCellImageRaster;
 
@@ -18,12 +19,11 @@ public:
     SLATE_END_ARGS()
 
 public:
+    ~SOdysseyAnimationCellImageRaster();
     void Construct(const FArguments& iArgs, UOdysseyAnimationCellImageRaster* iCell);
 
 private:
-    void OnThumbnailDirtied();
-    void OnThumbnailChanged();
-
+    void OnRenderingChanged(const FOdysseyRenderingChangedEvent& iEvent);
     EVisibility GetContentVisibility() const;
 
 private:

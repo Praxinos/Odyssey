@@ -104,26 +104,4 @@ UOdysseyTextureLayer::OnThumbnailDirtied()
     return mOnThumbnailDirtied;
 }
 
-void
-UOdysseyTextureLayer::DirtyThumbnail()
-{
-    if (ThumbnailIsDirty)
-        return;
-
-    ThumbnailIsDirty = true;
-    mOnThumbnailDirtied.Broadcast();
-}
-
-void
-UOdysseyTextureLayer::UndirtyThumbnail()
-{
-    ThumbnailIsDirty = false;
-}
-
-bool
-UOdysseyTextureLayer::IsThumbnailDirty() const
-{
-    return ThumbnailIsDirty;
-}
-
 #endif

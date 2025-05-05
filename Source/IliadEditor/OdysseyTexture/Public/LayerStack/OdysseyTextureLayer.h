@@ -32,13 +32,6 @@ public:
     FSimpleMulticastDelegate& OnThumbnailDirtied();
 #endif
 
-protected:
-#if WITH_EDITOR
-    void DirtyThumbnail();
-    void UndirtyThumbnail();
-    bool IsThumbnailDirty() const;
-#endif
-
 private:
     UPROPERTY(NonTransactional)
     mutable TObjectPtr<UTexture2D> Texture; //mutable is temporary, will be removed when layers will be 100% GPU based and there's no more dependency on ULIS

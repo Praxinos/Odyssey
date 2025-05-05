@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "OdysseyRenderingAbility.h"
 
 class UOdysseyAnimationCellImageVector;
 
@@ -18,12 +19,11 @@ public:
     SLATE_END_ARGS()
 
 public:
+    ~SOdysseyAnimationCellImageVector();
     void Construct(const FArguments& iArgs, UOdysseyAnimationCellImageVector* iCell);
 
 private:
-    void OnThumbnailDirtied();
-    void OnThumbnailChanged();
-
+    void OnRenderingChanged(const FOdysseyRenderingChangedEvent& iEvent);
     EVisibility GetContentVisibility() const;
 
 private:

@@ -8,6 +8,11 @@
 
 #define THUMBNAIL_SIZE 32
 
+SOdysseyAnimationCellImageVector::~SOdysseyAnimationCellImageVector()
+{
+    IOdysseyRenderingAbility::OnRenderingChangedDelegate().RemoveAll(this);
+}
+
 void
 SOdysseyAnimationCellImageVector::Construct(const FArguments& iArgs, UOdysseyAnimationCellImageVector* iCell)
 {
@@ -17,8 +22,7 @@ SOdysseyAnimationCellImageVector::Construct(const FArguments& iArgs, UOdysseyAni
         return;
 
     mCell = iCell;
-    mCell->OnThumbnailDirtied().AddSP(this, &SOdysseyAnimationCellImageVector::OnThumbnailDirtied);
-    mCell->OnThumbnailChanged().AddSP(this, &SOdysseyAnimationCellImageVector::OnThumbnailChanged);
+    IOdysseyRenderingAbility::OnRenderingChangedDelegate().AddSP(this, &SOdysseyAnimationCellImageVector::OnRenderingChanged);
 
     UOdysseyAnimation* animation = mCell->GetAnimation();
     float ratio = (float)animation->GetWidth() / (float)animation->GetHeight();
@@ -52,15 +56,17 @@ SOdysseyAnimationCellImageVector::Construct(const FArguments& iArgs, UOdysseyAni
 }
 
 void
-SOdysseyAnimationCellImageVector::OnThumbnailDirtied()
+SOdysseyAnimationCellImageVector::OnRenderingChanged(const FOdysseyRenderingChangedEvent& iEvent)
 {
-    mAssetThumbnail->RefreshThumbnail();
-}
+    if (!mCell)
+        return;
 
-void
-SOdysseyAnimationCellImageVector::OnThumbnailChanged()
-{
-    mAssetThumbnail->RefreshThumbnail();
+    if (iEvent.IsInteractive())
+        return;
+
+    TArray<FGuid> composition = mCell->GetRenderingComposition(EOdysseyRenderingType::Render, 0);
+    if (composition.Contains(iEvent.GetId()))
+        mAssetThumbnail->RefreshThumbnail();
 }
 
 EVisibility

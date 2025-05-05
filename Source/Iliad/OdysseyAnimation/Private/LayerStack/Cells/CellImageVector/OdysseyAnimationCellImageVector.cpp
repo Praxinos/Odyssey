@@ -337,9 +337,6 @@ void
 UOdysseyAnimationCellImageVector::OnVectorBlockInvalidated( const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive)
 {
     RenderingChanged( ::ULISUtils::ToIntRects(iRects), iIsInteractive);
-
-    if (!iIsInteractive)
-        DirtyThumbnail();
 }
 
 // Implements Interface IOdysseyVectorCell::GetIndex

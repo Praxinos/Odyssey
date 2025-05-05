@@ -189,7 +189,6 @@ UOdysseyAnimationCellImageRaster::OnBlockCommited(const TArray<::ULIS::FRectI>& 
 {
     FOdysseySurfaceTexture2DEditable surface(GetRenderTexture(), GetRasterBlock()->GetBlock());
     surface.Invalidate(iRects);
-    DirtyThumbnail();
     RenderingChanged(::ULISUtils::ToIntRects(iRects));
 }
 
