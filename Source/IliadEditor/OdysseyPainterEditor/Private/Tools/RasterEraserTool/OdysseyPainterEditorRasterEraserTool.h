@@ -61,7 +61,6 @@ public:
     //Properties changes
     void SizeChanged();
     void OpacityChanged();
-    void ActiveShapeChanged();
 
     virtual void PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive) override;
     virtual void PostPropertyChanged(const FName& iPropertyName, bool iIsInteractive) override;

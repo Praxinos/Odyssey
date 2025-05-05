@@ -396,18 +396,9 @@ UOdysseyPainterEditorRasterEraserTool::OpacityChanged()
     mBlendParameters.Opacity = Opacity;
 }
 
-void UOdysseyPainterEditorRasterEraserTool::ActiveShapeChanged()
-{
-    Shapes.GetActiveShape()->Abort();
-}
-
 void UOdysseyPainterEditorRasterEraserTool::PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive)
 {
     Super::PropertyChanged(iPropertyName, iMemberPropertyName, iIsInteractive);
-
-    if (iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterEraserTool, Shapes)
-        && iPropertyName == GET_MEMBER_NAME_CHECKED(FOdysseyShapes, ActiveShapeType))
-        ActiveShapeChanged();
 
     if (iIsInteractive)
         return;

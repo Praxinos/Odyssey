@@ -131,6 +131,14 @@ FOdysseyShapesDetailCustomization::OnShapeSelected(EOdysseyShapeType iShape, ECh
     if (!activeShapeTypeHandle)
         return;
 
+    FOdysseyShapes* shapes = GetEditStruct( shapesPropertyHandle.ToSharedRef() );
+    if (shapes)
+    {
+        UOdysseyShape* activeshape = shapes->GetActiveShape();
+        if (activeshape)
+            activeshape->Abort();
+    }
+
     activeShapeTypeHandle->SetValue((uint8)iShape, EPropertyValueSetFlags::NotTransactable);
 }
 

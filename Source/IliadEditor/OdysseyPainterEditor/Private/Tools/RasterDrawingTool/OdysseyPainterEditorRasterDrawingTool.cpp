@@ -879,18 +879,9 @@ UOdysseyPainterEditorRasterDrawingTool::OnBlueprintReinstanced(const FCoreUObjec
     }
 }
 
-void UOdysseyPainterEditorRasterDrawingTool::ActiveShapeChanged()
-{
-    Shapes.GetActiveShape()->Abort();
-}
-
 void UOdysseyPainterEditorRasterDrawingTool::PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive)
 {
     Super::PropertyChanged(iPropertyName);
-
-    if (iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterDrawingTool, Shapes)
-        && iPropertyName == GET_MEMBER_NAME_CHECKED(FOdysseyShapes, ActiveShapeType))
-        ActiveShapeChanged();
 
     if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterDrawingTool, Brush))
         BrushChanged();

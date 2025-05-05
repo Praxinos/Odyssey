@@ -164,17 +164,4 @@ UOdysseyPainterEditorRasterSelectionTool::OnShapeCommit(const TArray<FOdysseyPoi
     }
 }
 
-void UOdysseyPainterEditorRasterSelectionTool::ActiveShapeChanged()
-{
-    Shapes.GetActiveShape()->Abort();
-}
-
-void
-UOdysseyPainterEditorRasterSelectionTool::PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive)
-{
-    if (iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterSelectionTool, Shapes)
-        && iPropertyName == GET_MEMBER_NAME_CHECKED(FOdysseyShapes, ActiveShapeType))
-        ActiveShapeChanged();
-}
-
 #undef LOCTEXT_NAMESPACE
