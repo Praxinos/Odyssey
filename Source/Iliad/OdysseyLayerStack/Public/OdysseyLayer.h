@@ -123,7 +123,7 @@ public:
     virtual UOdysseyLayerStack* GetLayerStack() const;
 
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
-    UClass* GetDefaultCellClass() const;
+    TSubclassOf<UOdysseyLayerCell> GetDefaultCellClass() const;
 
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     FText GetLayerTypeName() const;

@@ -155,7 +155,7 @@ UOdysseyLayer::GetLayerStack() const
     return Cast<UOdysseyLayerStack>(GetOuter());
 }
 
-UClass*
+TSubclassOf<UOdysseyLayerCell>
 UOdysseyLayer::GetDefaultCellClass() const
 {
     return DefaultCellClass;
