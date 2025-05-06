@@ -110,15 +110,16 @@ public:
     void SetExposureInteractive(int Value);
 #endif
 
+public: //Public needed for the shortcuts
+    UPROPERTY()//TODO: meta (minvalue 1)
+    int Exposure = 1;
+    
 protected:
     friend class UOdysseyLayer;
     friend class FOdysseyLayerCellImport;
 
     UPROPERTY()
     int IndexInLayer = -1;
-
-    UPROPERTY()//TODO: meta (minvalue 1)
-    int Exposure = 1;
 
 #if WITH_EDITORONLY_DATA
     UPROPERTY()
