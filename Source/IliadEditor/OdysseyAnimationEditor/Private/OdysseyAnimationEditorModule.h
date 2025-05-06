@@ -23,6 +23,9 @@ private:
     void UnregisterPlacementFactories();
     void ReorderFactories();
 
+    void RegisterPropertyCustomizations();
+    void UnregisterPropertyCustomizations();
+
 private:
     /** All created asset type actions. Cached here so that we can unregister them during shutdown. */
     TSharedPtr<IAssetTypeActions> mOdysseyTypeActions;

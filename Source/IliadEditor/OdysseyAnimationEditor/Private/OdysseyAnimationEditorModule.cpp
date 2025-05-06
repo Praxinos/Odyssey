@@ -4,10 +4,13 @@
 #include "OdysseyAnimationEditorModule.h"
 
 #include "AssetToolsModule.h"
+#include "Subsystems/PlacementSubsystem.h"
+
 #include "OdysseyAnimation.h"
 #include "OdysseyAnimationActorFactory.h"
 #include "OdysseyAnimationAssetTypeActions.h"
-#include "Subsystems/PlacementSubsystem.h"
+#include "OdysseyAnimationSettings.h"
+#include "OdysseyAnimationSettingsCustomization.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -21,15 +24,19 @@ FOdysseyAnimationEditorModule::StartupModule()
     RegisterAssetTypeActions();
 
     RegisterPlacementFactories();
+
+    RegisterPropertyCustomizations();
 }
 
 void
 FOdysseyAnimationEditorModule::ShutdownModule()
 {
     // Unregister Assets Type Actions
-    UnregisterAssetTypeActions();
+    UnregisterPropertyCustomizations();
 
     UnregisterPlacementFactories();
+
+    UnregisterAssetTypeActions();
 }
 
 void
@@ -72,6 +79,33 @@ FOdysseyAnimationEditorModule::UnregisterPlacementFactories()
     //check( GEditor );
     //UPlacementSubsystem* placementSubsystem = GEditor->GetEditorSubsystem<UPlacementSubsystem>();
     //placementSubsystem->OnPlacementFactoriesRegistered().RemoveAll( this );
+}
+
+void
+FOdysseyAnimationEditorModule::RegisterPropertyCustomizations()
+{
+    // import the PropertyEditor module...
+    FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>( "PropertyEditor" );
+
+    // to register our custom property
+    PropertyModule.RegisterCustomPropertyTypeLayout(
+        // This is the name of the Struct
+        // this tells the property editor which is the struct property our customization will applied on.
+        FOdysseyAnimationSettings::StaticStruct()->GetFName(),
+        // this is where our MakeInstance() method is usefull
+        FOnGetPropertyTypeCustomizationInstance::CreateStatic( &FOdysseyAnimationSettingsCustomization::MakeInstance ) );
+}
+
+void
+FOdysseyAnimationEditorModule::UnregisterPropertyCustomizations()
+{
+    if( FModuleManager::Get().IsModuleLoaded( "PropertyEditor" ) )
+    {
+        FPropertyEditorModule& PropertyModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>( "PropertyEditor" );
+        PropertyModule.UnregisterCustomPropertyTypeLayout( FOdysseyAnimationSettings::StaticStruct()->GetFName() );
+
+        PropertyModule.NotifyCustomizationModuleChanged();
+    }
 }
 
 void

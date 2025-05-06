@@ -20,6 +20,7 @@ public:
     virtual void ShutdownModule() override;
     // End of IModuleInterface interface
 
+private:
     void RegisterMedia();
     void UnregisterMedia();
 
