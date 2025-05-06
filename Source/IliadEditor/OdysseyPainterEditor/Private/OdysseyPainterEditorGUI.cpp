@@ -45,26 +45,11 @@
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyPainterEditorGUI::~FOdysseyPainterEditorGUI()
 {
-    //UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
-    //UOdysseyAnimationLayerStack::OnCurrentFrameChanged().RemoveAll( this );
-    //FOdysseyVectorEngine::OnNotifyDelegate().RemoveAll(this);
-    //UOdysseyLayer::OnMediaChanged().RemoveAll( this );
 }
 
 FOdysseyPainterEditorGUI::FOdysseyPainterEditorGUI(FOdysseyPainterEditor* iEditor)
     : mEditor(iEditor)
 {
-    // Get sure the binding is set up everytime we add or remove a layer in the layer stack.
-    //UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw( this, &FOdysseyPainterEditorGUI::OnCurrentLayerChanged );
-
-    //UOdysseyAnimationLayerStack::OnCurrentFrameChanged().AddRaw( this, &FOdysseyPainterEditorGUI::OnCurrentFrameChanged );
-
-    // bind refresh function to delegates on existing vector scenes at load. Needed to refresh necessary widgets.
-    //FOdysseyVectorEngine::OnNotifyDelegate().AddRaw( this, &FOdysseyPainterEditorGUI::OnVectorSceneNotify );
-    // bind refresh function to delegates on existing vector scenes when the source changes. Needed to refresh necessary widgets.
-    //mEditor->OnSourceChanged().AddRaw( this, &FOdysseyPainterEditorGUI::OnSourceChanged );
-
-    //UOdysseyLayer::OnMediaChanged().AddRaw( this, &FOdysseyPainterEditorGUI::OnMediaChanged );
 }
 
 //--------------------------------------------------------------------------------------

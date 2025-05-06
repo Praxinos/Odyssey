@@ -1057,10 +1057,10 @@ SOdysseyAnimationCells::OnAddCellsHandleDragged(const FGeometry& iGeometry, cons
     }
 
     if (numTempCellsToPrepend > 0)
-        mAnimationLayer->AddNullCells(0, numTempCellsToPrepend);
+        mAnimationLayer->AddCellsInteractive(0, numTempCellsToPrepend);
 
     if (numTempCellsToAppend > 0)
-        mAnimationLayer->AddNullCells(INDEX_NONE, numTempCellsToAppend);
+        mAnimationLayer->AddCellsInteractive(INDEX_NONE, numTempCellsToAppend);
 }
 
 void

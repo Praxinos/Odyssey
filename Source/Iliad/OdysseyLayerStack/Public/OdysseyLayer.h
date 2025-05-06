@@ -48,7 +48,6 @@ public:
 
     static FOnDisplayChildrenChanged& OnDisplayChildrenChanged();
     static FOnDisplayOptionsChanged& OnDisplayOptionsChanged();
-    static FSimpleMulticastDelegate& OnMediaChanged();
     FSimpleMulticastDelegate& OnLighttableChanged();
 #endif
 
@@ -267,10 +266,11 @@ public:
     const FSlateIcon& GetIconExpanded() const;
     void SetDisplayChildren(bool Value);
     void SetDisplayOptions(bool Value);
-    void AddNullCell(int Index = -1 );
-    void AddNullCells(int Index = -1, int Count = 1 );
+    void AddCellInteractive(int Index = -1 );
+    void AddCellsInteractive(int Index = -1, int Count = 1 );
     void SetOpacityInteractive(float Value);
     void SetCellsOffsetInteractive(float Value);
+    void CellsChangedInteractive();
 #endif
 
     void InvalidateCellsFrameRanges();

@@ -25,13 +25,6 @@ UOdysseyLayer::OnDisplayOptionsChanged()
     static FOnDisplayOptionsChanged onDisplayOptionsChanged;
     return onDisplayOptionsChanged;
 }
-
-FSimpleMulticastDelegate&
-UOdysseyLayer::OnMediaChanged()
-{
-    static FSimpleMulticastDelegate onMediaChanged;
-    return onMediaChanged;
-}
 #endif
 
 FSimpleMulticastDelegate&
@@ -198,9 +191,15 @@ UOdysseyLayer::CellsChanged()
     InvalidateCellsFrameRanges();
     mOnCellsChanged.Broadcast();
     RenderingCompositionChanged();
-#if WITH_EDITOR
-    OnMediaChanged().Broadcast();
-#endif
+}
+
+void
+UOdysseyLayer::CellsChangedInteractive()
+{
+    UpdateCellsIndexInLayer();
+    InvalidateCellsFrameRanges();
+    mOnCellsChanged.Broadcast();
+    RenderingCompositionChanged(true);
 }
 
 #if WITH_EDITOR
@@ -382,13 +381,13 @@ UOdysseyLayer::GetCellsFrameRanges() const
 
 #if WITH_EDITOR
 void
-UOdysseyLayer::AddNullCell(int Index)
+UOdysseyLayer::AddCellInteractive(int Index)
 {
-    AddNullCells(Index);
+    AddCellsInteractive(Index);
 }
 
 void
-UOdysseyLayer::AddNullCells(int Index, int Count)
+UOdysseyLayer::AddCellsInteractive(int Index, int Count)
 {
     if (Index < 0 )
     {
@@ -407,7 +406,7 @@ UOdysseyLayer::AddNullCells(int Index, int Count)
     }
 
     Cells.Insert(cells, Index);
-    CellsChanged();
+    CellsChangedInteractive();
 }
 #endif
 
@@ -766,10 +765,6 @@ UOdysseyLayer::SetCellsOffset(int Value)
     CellsOffset = Value;
     InvalidateCellsFrameRanges();
     RenderingCompositionChanged();
-
-#if WITH_EDITOR
-    OnMediaChanged().Broadcast();
-#endif
 }
 
 void
@@ -954,7 +949,6 @@ UOdysseyLayer::SetCellsOffsetInteractive(float Value)
     CellsOffset = Value;
     InvalidateCellsFrameRanges();
     RenderingCompositionChanged(true);
-    OnMediaChanged().Broadcast();
 }
 #endif
 
@@ -1434,13 +1428,11 @@ UOdysseyLayer::PostTransacted(const FTransactionObjectEvent& iTransactionEvent)
     {
         CellsChanged();
         mOnCellsChanged.Broadcast();
-        OnMediaChanged().Broadcast();
     }
 
     if ( changedPropertyNames.Contains(GET_MEMBER_NAME_CHECKED(UOdysseyLayer, CellsOffset) ) )
     {
         InvalidateCellsFrameRanges();
-        OnMediaChanged().Broadcast();
     }
 
     if ( changedPropertyNames.Contains(GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Children)))

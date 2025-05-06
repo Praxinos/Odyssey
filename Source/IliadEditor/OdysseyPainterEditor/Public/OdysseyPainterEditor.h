@@ -346,8 +346,6 @@ protected:
     virtual void OnApplyOverrides(const TMap<FName, UObject*>& iOverrides);
     void OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack);
     void OnRenderingChanged(const FOdysseyRenderingChangedEvent& iEvent);
-    void OnCurrentFrameChanged(UOdysseyAnimation* iAnimation);
-    void OnMediaChanged();
 
 private:
     void InitTools();

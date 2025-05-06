@@ -63,7 +63,6 @@ private:
     void OnVectorSceneNotify( FOdysseyVectorGroupPaint* iScene, uint64 iSignalFlags );
     void OnCurrentFrameChanged( UOdysseyAnimation* iAnimation );
     void ParseVectorNotifications( FOdysseyVectorGroupPaint* iScene, uint64 iSignalFlags );
-    void OnMediaChanged();
 
 private:
     FOdysseyPainterEditor*                          mEditor;

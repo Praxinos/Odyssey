@@ -159,8 +159,11 @@ FOdysseyPainterEditor::FOdysseyPainterEditor(TSharedRef<FBaseToolkit> iToolkit)
     , mOutOfPegsTool(nullptr)
     , mAnimationFlipSystem(MakeShared<FOdysseyPainterEditorAnimationFlipSystem>(this))
 {
-    UOdysseyLayer::OnMediaChanged().AddRaw(this, &FOdysseyPainterEditor::OnMediaChanged);
     UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw(this, &FOdysseyPainterEditor::OnCurrentLayerChanged);
+
+    //OnCurrentLayerChanged
+    //OnCurrentFrameChanged
+    //OnRenderingChanged
 
     mBrushContexts.Add(new FOdysseyPainterEditorBrushContext(this));
 }
@@ -682,7 +685,6 @@ FOdysseyPainterEditor::OnClose()
     mGUI->Finalize();
 
     UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
-    UOdysseyLayer::OnMediaChanged().RemoveAll(this);
     FSlateApplication::Get().UnregisterInputPreProcessor(mAnimationFlipSystem);
 
     delete mHUDSystem;
@@ -3400,12 +3402,6 @@ FOdysseyPainterEditor::SetCurrentPaletteColorEntry(UOdysseyPaletteEntryColor* iE
     }
     mCurrentPaletteEntryColor = iEntry;
     mCurrentPaletteSet = iSet;
-}
-
-void
-FOdysseyPainterEditor::OnMediaChanged()
-{
-    SanitizeCurrentTool(); //Refresh the current tool
 }
 
 #undef LOCTEXT_NAMESPACE
