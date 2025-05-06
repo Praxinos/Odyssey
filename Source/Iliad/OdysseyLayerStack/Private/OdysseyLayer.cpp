@@ -1405,10 +1405,10 @@ UOdysseyLayer::IsRowVisible(FName iSubRowName) const
         return bDisplayOptions;
 
     if (iSubRowName == "Lighttable")
-        return ShouldDisplayOptions() && bHasLighttable && Lighttable.bIsActivated;
+        return IsActivatedRecursively() && ShouldDisplayOptions() && bHasLighttable && Lighttable.bIsActivated;
 
     if (iSubRowName == "OutOfPegs")
-        return ShouldDisplayOptions() && bHasLighttable && Lighttable.bIsActivated;
+        return IsActivatedRecursively() && ShouldDisplayOptions() && bHasLighttable && Lighttable.bIsActivated;
 
     return 0;
 }
@@ -1416,7 +1416,7 @@ UOdysseyLayer::IsRowVisible(FName iSubRowName) const
 FMargin
 UOdysseyLayer::GetRowPadding(FName iSubRowName) const
 {
-    return FMargin(0.f, 0.f, 0.f, 2.f);
+    return FMargin(0.f, 2.f, 0.f, 2.f);
 }
 
 void

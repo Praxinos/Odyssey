@@ -49,9 +49,9 @@ public:
     );
 
 protected:
-    virtual TSharedRef<SWidget> GenerateWidgetForColumn( const FName& InColumnName ) override;
+    virtual TSharedRef<SWidget> GenerateWidgetForRow( const FName& iRow, const FName& iColumn ) override;
     virtual TSharedRef<SWidget> GenerateWidget( const FName& iRow, const FName& iColumn ) override;
-    virtual FOptionalSize GetRowHeight(FName iRow) const override;
+    virtual float GetRowHeight(FName iRow) const override;
     virtual EVisibility GetRowVisibility(FName iRow) const override;
     virtual FMargin GetRowPadding(FName iRow) const override;
 

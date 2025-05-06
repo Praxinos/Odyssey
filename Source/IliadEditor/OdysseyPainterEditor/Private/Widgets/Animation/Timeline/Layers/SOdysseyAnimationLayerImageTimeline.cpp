@@ -57,15 +57,46 @@ SOdysseyAnimationLayerImageTimeline::Construct(
 }
 
 TSharedRef<SWidget>
-SOdysseyAnimationLayerImageTimeline::GenerateWidgetForColumn( const FName& InColumnName )
+SOdysseyAnimationLayerImageTimeline::GenerateWidgetForRow( const FName& iRow, const FName& iColumn )
 {
-    TSharedPtr<SWidget> widget = SOdysseyLayerRowBase::GenerateWidgetForColumn( InColumnName );
-    return SNew(SOdysseyAnimationTimelineScrollBox)
+    TSharedPtr<SWidget> widget = SOdysseyLayerRowBase::GenerateWidgetForRow( iRow, iColumn );
+
+    widget = SNew(SOdysseyAnimationTimelineScrollBox)
         .TimelinePosition(mTimelinePosition)
         + SOdysseyAnimationTimelineScrollBox::Slot()
         [
             widget.ToSharedRef()
         ];
+
+    if (iRow == "Main")
+    {
+        widget = SNew(SOverlay)
+            + SOverlay::Slot()
+            [
+                SNew(SEnableBox)
+                [
+                    widget.ToSharedRef()
+                ]
+            ]
+            + SOverlay::Slot()
+            [
+                SNew(SColorBlock)
+                .Color_Lambda(
+                    [this]()
+                    {
+                        if (!mLayer)
+                            return FLinearColor(0, 0, 0, 0);
+
+                        if (mLayer->IsActivatedRecursively())
+                            return FLinearColor(0, 0, 0, 0);
+
+                        return FLinearColor(0, 0, 0, 0.75f);
+                    }
+                )
+            ];
+    }
+
+    return widget.ToSharedRef();
 }
 
 TSharedRef<SWidget>
@@ -89,7 +120,7 @@ SOdysseyAnimationLayerImageTimeline::GenerateWidget( const FName& iRow, const FN
     return SOdysseyAnimationLayerTimeline::GenerateWidget( iRow, iColumn );
 }
 
-FOptionalSize
+float
 SOdysseyAnimationLayerImageTimeline::GetRowHeight(FName iRow) const
 {
     if (iRow == "Main")
@@ -132,49 +163,9 @@ SOdysseyAnimationLayerImageTimeline::GetRowPadding(FName iRow) const
     return SOdysseyAnimationLayerTimeline::GetRowPadding(iRow);
 }
 
-
-
 TSharedRef<SWidget>
 SOdysseyAnimationLayerImageTimeline::GenerateMainRowTimelineWidget()
 {
-    /*return SNew(SOverlay)
-        + SOverlay::Slot()
-        [
-            SNew(SEnableBox)
-            [
-                SNew(SOdysseyAnimationCells, mLayer)
-                .Cells_Lambda(
-                    [this]() -> TArray<UOdysseyLayerCell*>
-                    {
-                        return mLayer->GetCells();
-                    }
-                )
-                .CurrentFrame(mCurrentFrame)
-                .OnTransactCurrentFrame(mOnTransactCurrentFrame)
-                .ContextMenuExtender(CreateCellsContextMenuExtender())
-                .TimelinePosition(mTimelinePosition)
-                .IsEnabled_Lambda([this](){ return !mLayer->IsLockedRecursively();})
-                .OnCreateCellWidget(this, &SOdysseyAnimationLayerImageTimeline::OnGenerateCellWidget)
-                .ShowHandles(this, &SOdysseyAnimationLayerImageTimeline::GetShowCellsHandles)
-            ]
-        ]
-        + SOverlay::Slot()
-        [
-            SNew(SColorBlock)
-            .Color_Lambda(
-                [this]()
-                {
-                    UOdysseyLayer* layer = GetLayer();
-                    if (!layer)
-                        return FLinearColor(0, 0, 0, 0);
-
-                    if (layer->IsActivatedRecursively())
-                        return FLinearColor(0, 0, 0, 0);
-
-                    return FLinearColor(0, 0, 0, 0.25f);
-                }
-            )
-        ];*/
     return SNew(SOdysseyAnimationCells, mLayer)
         .Cells_Lambda(
             [this]() -> TArray<UOdysseyLayerCell*>

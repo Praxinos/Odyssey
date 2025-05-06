@@ -35,35 +35,47 @@ SOdysseyLayerRowBase::GenerateWidgetForColumn( const FName& InColumnName )
 {
     TSharedRef<SVerticalBox> verticalBox = SNew(SVerticalBox);
     TArray<FName> rows = GetLayer()->GetRows();
-    FMargin columnPadding = GetColumnPadding(InColumnName);
     for (const FName& row : rows)
     {
-        FMargin padding = GetRowPadding(row);
-        padding.Left += columnPadding.Left;
-        padding.Right += columnPadding.Right;
-        if (row == rows[0])
-        {
-            padding.Top += columnPadding.Top;
-        }
-        if (row == rows.Last())
-        {
-            padding.Bottom += columnPadding.Bottom;
-        }
-
         verticalBox->AddSlot()
         .AutoHeight()
-        .Padding(padding)
         [
-            SNew(SBox)
-            .HeightOverride(this, &SOdysseyLayerRowBase::GetRowHeight, row)
-            .Visibility(this, &SOdysseyLayerRowBase::GetRowVisibility, row)
-            [
-                GenerateWidget(row, InColumnName)
-            ]
+            GenerateWidgetForRow( row, InColumnName )
         ];
     }
 
     return verticalBox;
+}
+
+TSharedRef<SWidget>
+SOdysseyLayerRowBase::GenerateWidgetForRow( const FName& iRow, const FName& iColumn )
+{
+    TArray<FName> rows = GetLayer()->GetRows();
+    FMargin columnPadding = GetColumnPadding(iColumn);
+    FMargin padding = GetRowPadding(iRow);
+    padding.Left += columnPadding.Left;
+    padding.Right += columnPadding.Right;
+    if (iRow == rows[0])
+    {
+        padding.Top += columnPadding.Top;
+    }
+    if (iRow == rows.Last())
+    {
+        padding.Bottom += columnPadding.Bottom;
+    }
+
+    return SNew(SBox)
+        .Padding(padding)
+        .HeightOverride_Lambda(
+            [this, padding, iRow]() -> FOptionalSize
+            {
+                return GetRowHeight(iRow) + padding.Top + padding.Bottom;
+            }
+        )
+        .Visibility(this, &SOdysseyLayerRowBase::GetRowVisibility, iRow)
+        [
+            GenerateWidget(iRow, iColumn)
+        ];
 }
 
 TSharedRef<SWidget>
@@ -72,7 +84,7 @@ SOdysseyLayerRowBase::GenerateWidget( const FName& iRow, const FName& iColumn )
     return SNullWidget::NullWidget;
 }
 
-FOptionalSize
+float
 SOdysseyLayerRowBase::GetRowHeight(FName iRow) const
 {
     return GetLayer()->GetRowHeight(iRow);
