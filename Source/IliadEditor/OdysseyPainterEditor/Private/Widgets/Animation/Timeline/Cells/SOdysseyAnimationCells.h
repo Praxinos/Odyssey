@@ -9,6 +9,8 @@
 class FOdysseyAnimationCellsMutator;
 class FOdysseyAnimationTimelineTool;
 class FOdysseyPainterEditorAnimationTimelinePosition;
+class FOdysseyAnimationTimelineCellsShortcuts;
+class FOdysseyAnimationTimelineCellImageStaggerShortcuts;
 
 /**
  * Implements a layer row widget
@@ -18,16 +20,22 @@ class SOdysseyAnimationCells
 {
     SLATE_DECLARE_WIDGET(SOdysseyAnimationCells, SCompoundWidget)
 
+public:
+    DECLARE_DELEGATE_OneParam(FOnTransactCurrentFrame, TOptional<int>)
     DECLARE_DELEGATE_RetVal_OneParam(TSharedRef<SWidget>, FOnCreateCellWidget, UOdysseyLayerCell*)
 
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationCells)
-        : _ShowHandles(false)
+        : _CurrentFrame(0)
+        , _ShowHandles(false)
         {}
-        SLATE_ATTRIBUTE(TArray<UOdysseyLayerCell*>, Cells)
         SLATE_ARGUMENT(TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition>, TimelinePosition)
-        SLATE_EVENT(FOnCreateCellWidget, OnCreateCellWidget)
+        SLATE_ARGUMENT(TSharedPtr<FExtender>, ContextMenuExtender)
+        SLATE_ATTRIBUTE(TArray<UOdysseyLayerCell*>, Cells)
+        SLATE_ATTRIBUTE(int, CurrentFrame)
         SLATE_ATTRIBUTE(bool, ShowHandles)
+        SLATE_EVENT(FOnTransactCurrentFrame, OnTransactCurrentFrame)
+        SLATE_EVENT(FOnCreateCellWidget, OnCreateCellWidget)
     SLATE_END_ARGS()
 
 public:
@@ -48,6 +56,23 @@ public:
     virtual FReply OnDragDetected(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent) override;
     //virtual void Tick( const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime ) override;
 
+protected:
+    //Context Menu
+    TSharedPtr<SWidget> OnContextMenuOpening();
+    void MapActions(TSharedPtr<FUICommandList> iCommandList);
+
+private:
+    void RemoveCellMark();
+    bool CanRemoveCellMark() const;
+    void SetCellMark( int iMarkId );
+    bool CanSetCellMark() const;
+    bool IsCellMarkChecked( int iMarkId ) const;
+
+    TSharedRef<SWidget> CreateCellMarkMenuWidget(int iMarkId);
+    void BuildCellsMarksSubMenu(FMenuBuilder& iMenuBuilder);
+
+    FReply OnContextMenuMinusButtonClicked();
+    FReply OnContextMenuPlusButtonClicked();
 
 private:
     struct FCellItem
@@ -192,4 +217,10 @@ private:
         int mInitialOffset;
         TMap<UOdysseyLayerCell*, int> mAffectedCells;
     } mAddCellsHandleDragData;
+
+    TSharedPtr<FOdysseyAnimationTimelineCellsShortcuts> mAnimationTimelineCellsShortcuts;
+    TSharedPtr<FOdysseyAnimationTimelineCellImageStaggerShortcuts> mAnimationTimelineCellImageStaggerShortcuts;
+    TAttribute<int> mCurrentFrame;
+    FOnTransactCurrentFrame mOnTransactCurrentFrame;
+    TSharedPtr<FExtender> mContextMenuExtender;
 };

@@ -60,7 +60,7 @@ SOdysseyAnimationLayerImageRasterTimeline::OnPreviewMouseButtonDown(const FGeome
 }
 
 TSharedPtr<FExtender>
-SOdysseyAnimationLayerImageRasterTimeline::ExtendContextMenu()
+SOdysseyAnimationLayerImageRasterTimeline::CreateCellsContextMenuExtender()
 {
     TSharedRef<FUICommandList> commandList = MakeShared<FUICommandList>();
     mAnimationTimelineCellImageRasterShortcuts = MakeShared<FOdysseyAnimationTimelineCellImageRasterShortcuts>(mLayer->GetAnimation());

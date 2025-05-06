@@ -78,6 +78,7 @@ public:
 
 protected:
     virtual TSharedRef<SWidget> OnGenerateCellWidget(UOdysseyLayerCell* iCell) = 0;
+    virtual TSharedPtr<FExtender> CreateCellsContextMenuExtender();
 
 protected:
     //TArray<TSharedPtr<FOdysseyAnimationCell>> GetSelectedCells() const;
@@ -95,32 +96,13 @@ protected:
     float FrameToMousePosition(float iFrame) const;
 
 protected:
-    //Context Menu
-    virtual void BuildContextMenu(FMenuBuilder& iMenuBuilder);
-    virtual TSharedPtr<FExtender> ExtendContextMenu();
-    virtual void MapActions(TSharedPtr<FUICommandList> iCommandList, int iFrame);
-
-private:
-    void RemoveCellMark();
-    bool CanRemoveCellMark() const;
-    void SetCellMark( int iMarkId );
-    bool CanSetCellMark() const;
-    bool IsCellMarkChecked( int iMarkId ) const;
-
-    TSharedRef<SWidget> CreateCellMarkMenuWidget(int iMarkId);
-    void BuildCellsMarksSubMenu(FMenuBuilder& iMenuBuilder);
-
-    FReply OnContextMenuMinusButtonClicked();
-    FReply OnContextMenuPlusButtonClicked();
-
-protected:
     UOdysseyAnimationLayer* mLayer;
     TAttribute<int> mCurrentFrame;
+    FOnTransactCurrentFrame mOnTransactCurrentFrame;
     TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition> mTimelinePosition;
     SOdysseyAnimationTimelineOutOfPegsKey::FOnActivateOutOfPegs mOnActivateOutOfPegs;
     FSimpleDelegate mOnInactivateOutOfPegs;
     SOdysseyAnimationTimelineOutOfPegsKey::FOnIsOutOfPegsChecked mOnIsOutOfPegsChecked;
-    FOnTransactCurrentFrame mOnTransactCurrentFrame;
 
     TSharedPtr<FOdysseyAnimationTimelineTool> mTool;
 
@@ -135,7 +117,4 @@ protected:
     eDragState mDragState;
     int mDragPosition;
     TAttribute<bool> mDisplayOptions;
-
-    TSharedPtr<FOdysseyAnimationTimelineCellsShortcuts> mAnimationTimelineCellsShortcuts;
-    TSharedPtr<FOdysseyAnimationTimelineCellImageStaggerShortcuts> mAnimationTimelineCellImageStaggerShortcuts;
 };
