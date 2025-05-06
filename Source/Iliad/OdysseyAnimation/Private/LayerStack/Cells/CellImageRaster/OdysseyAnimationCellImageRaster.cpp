@@ -22,6 +22,7 @@
 #include "OdysseyPixelFormat.h"
 #include "TextureCompiler.h"
 #include "UObject/ObjectSaveContext.h"
+#include "OdysseyRasterBlockMutator.h"
 #endif
 
 UOdysseyAnimationCellImageRaster::UOdysseyAnimationCellImageRaster()
@@ -69,6 +70,13 @@ UOdysseyAnimationCellImageRaster::InitRasterBlock() const
         }
 
         mRasterBlock = MakeShared<FOdysseyRasterBlock>(const_cast<UOdysseyAnimationCellImageRaster*>(this), width, height, format);
+        if (GetRenderTexture())
+        {
+            TSharedPtr<::ULIS::FBlock> textureBlock = MakeShareable(NewBlockFromUTextureData(GetRenderTexture(), mRasterBlock->GetFormat()));
+            FOdysseyRasterBlockMutator rasterBlockMutator(mRasterBlock, false);
+            rasterBlockMutator.Copy(textureBlock, { textureBlock->Rect() });
+            rasterBlockMutator.Commit();
+        }
     }
 
     mRasterBlock->OnBlockChanged().RemoveAll(this);
@@ -219,7 +227,7 @@ UOdysseyAnimationCellImageRaster::Serialize(FArchive& Ar)
 
     if( Ar.IsSaving() && !Ar.IsTransacting() && !Ar.IsCooking())
     {
-        FOdysseyAnimationCellImageRasterExport::Write( this, Ar );
+        //FOdysseyAnimationCellImageRasterExport::Write( this, Ar );
     }
 
     if( Ar.IsLoading() && !Ar.IsTransacting() )
@@ -234,11 +242,6 @@ void
 UOdysseyAnimationCellImageRaster::OldSerialize(FArchive& Ar)
 {
     Super::OldSerialize(Ar);
-
-    if( Ar.IsSaving() )
-    {
-        FOdysseyAnimationCellImageRasterExport::Write( this, Ar );
-    }
 
     if( Ar.IsLoading() )
     {

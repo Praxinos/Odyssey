@@ -449,6 +449,30 @@ UOdysseyAnimation::PropertyChanged(const FName& iPropertyName)
 }
 
 void
+UOdysseyAnimation::CollectSaveOverrides(FObjectCollectSaveOverridesContext SaveContext)
+{
+    Super::CollectSaveOverrides(SaveContext);
+
+    if (SaveContext.IsCooking()
+        && !HasAnyFlags(RF_ArchetypeObject | RF_ClassDefaultObject)
+        && !PreserveLayerStackAtRuntime)
+    {
+        FObjectSaveOverride ObjSaveOverride;
+
+        // Add path to the conditions within the main definition
+        FProperty* OverrideProperty = FindFProperty<FProperty>(GetClass(), GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, mLayerStack));
+        check(OverrideProperty);
+        FPropertySaveOverride PropOverride;
+        PropOverride.PropertyPath = FFieldPath(OverrideProperty);
+        PropOverride.bMarkTransient = true;
+
+        ObjSaveOverride.PropOverrides.Add(PropOverride);
+
+        SaveContext.AddSaveOverride(this, ObjSaveOverride);
+    }
+}
+
+void
 UOdysseyAnimation::PreSave(FObjectPreSaveContext SaveContext)
 {
     Super::PreSave(SaveContext);
@@ -482,8 +506,11 @@ UOdysseyAnimation::PreSave(FObjectPreSaveContext SaveContext)
 
         Render_GameThread(renderTarget.Get(), FFrameNumber(i), EOdysseyRenderingType::Render);
 
-        UTexture2D* texture = NewObject<UTexture2D>(this, NAME_None, RF_Public);
-        renderTarget.Get()->UpdateTexture(texture);
+
+        FString Name = FString::Printf(TEXT("OdysseyAnimationFrameTexture%d"), i);
+
+        UTexture2D* texture = Cast<UTexture2D>(renderTarget->ConstructTexture(this, Name, RF_Public, CTF_Default));
+        texture->PreSave(SaveContext);
 
         FOdysseyAnimationFrame frame;
         frame.Texture = texture;

@@ -55,6 +55,7 @@ public:
     virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
     virtual void PropertyChanged(const FName& iPropertyName);
     virtual void PreSave(FObjectPreSaveContext SaveContext) override;
+    virtual void CollectSaveOverrides(FObjectCollectSaveOverridesContext SaveContext) override;
 #endif
 
 public:
