@@ -3,6 +3,7 @@
 
 #include "OdysseyAnimationTimelineSection.h"
 
+#include "Channels/MovieSceneChannelProxy.h"
 #include "MovieScene.h"
 #include "MovieSceneSequence.h"
 
@@ -13,15 +14,7 @@
 #include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
 #include "OdysseyAnimation.h"
 #include "OdysseyAnimationComponent.h"
-
-#include "Channels/MovieSceneChannelData.h"
-#include "Channels/MovieSceneChannelProxy.h"
-#include "Channels/MovieSceneObjectPathChannel.h"
-#include "EntitySystem/BuiltInComponentTypes.h"
-#include "EntitySystem/MovieSceneEntityBuilder.h"
-#include "Evaluation/MovieSceneRootOverridePath.h"
-#include "EntitySystem/MovieSceneEntitySystemLinker.h"
-#include "EntitySystem/MovieSceneInstanceRegistry.h"
+#include "OdysseyAnimationCut.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(OdysseyAnimationTimelineSection)
 
@@ -29,29 +22,49 @@
 
 UOdysseyAnimationTimelineSection::UOdysseyAnimationTimelineSection(const FObjectInitializer& ObjInitializer)
     : Super(ObjInitializer)
+    , AnimationCutChannel( this )
 {
 }
 
 //---
 
-void
-UOdysseyAnimationTimelineSection::RebuildAnimationCuts()
+void UOdysseyAnimationTimelineSection::PostLoad()
 {
-    CacheChannelProxy();
+    Super::PostLoad();
+
+    if( Animation )
+    {
+        Animation->OnImageRenderingChangedDelegate().AddUObject( this, &UOdysseyAnimationTimelineSection::OnAnimationChanged );
+    }
 }
+
+UOdysseyAnimationTimelineSection::FOnAnimationCutChannelChanged&
+UOdysseyAnimationTimelineSection::OnAnimationCutChannelChanged()
+{
+    return mOnAnimationCutChannelChanged;
+}
+
+//---
 
 EMovieSceneChannelProxyType
 UOdysseyAnimationTimelineSection::CacheChannelProxy()
 {
-    BuildAnimationCuts();
-
     // This function will still not create a real ChannelProxy
     // Because in this case, keys will appears in the timeline section
-    // This function is only used to update when needed our internal animation cut channel
 
     FMovieSceneChannelProxyData Channels;
     ChannelProxy = MakeShared<FMovieSceneChannelProxy>(MoveTemp(Channels));
     return EMovieSceneChannelProxyType::Dynamic;
+}
+
+void
+UOdysseyAnimationTimelineSection::OnAnimationChanged( const FOdysseyImageRenderingChangedEvent& iEvent )
+{
+    if( iEvent.IsInteractive() )
+        return;
+
+    if( !LockChannelRebuild )
+        RebuildAnimationCutChannel();
 }
 
 FOdysseyAnimationCutChannel&
@@ -92,8 +105,11 @@ UOdysseyAnimationTimelineSection::GetStartFrameOffset() const
 void
 UOdysseyAnimationTimelineSection::SetAnimation(UOdysseyAnimation* iAnimation)
 {
+    Animation->OnImageRenderingChangedDelegate().RemoveAll( this );
+
     Animation = iAnimation;
-    MarkAsChanged();
+    Animation->OnImageRenderingChangedDelegate().AddUObject( this, &UOdysseyAnimationTimelineSection::OnAnimationChanged );
+    RebuildAnimationCutChannel();
 }
 
 void
@@ -118,7 +134,19 @@ UOdysseyAnimationTimelineSection::SetStartFrameOffset(FFrameNumber iOffset)
 }
 
 void
-UOdysseyAnimationTimelineSection::BuildAnimationCuts()
+UOdysseyAnimationTimelineSection::UpdateAnimationCutChannel( const TArray<FKeyHandle>& iKeyHandles, EPropertyChangeType::Type iChangeType )
+{
+    // When 'offseting' each animation cut (in Update()), the animation will be modified, which leads to call the delegate
+    // As the section is bind to this delegate, it will rebuild its channel which will modify all key handles
+    // Once done, all of the key handles here (during the second loop inside Update()) will be invalid
+    // So when this function Update() is called, don't rebuild the channel (as it is what this function does)
+    LockChannelRebuild = true;
+    AnimationCutChannel.Update( iKeyHandles, iChangeType );
+    LockChannelRebuild = false;
+}
+
+void
+UOdysseyAnimationTimelineSection::RebuildAnimationCutChannel()
 {
     AnimationCutChannel.Reset();
 
@@ -183,6 +211,10 @@ UOdysseyAnimationTimelineSection::BuildAnimationCuts()
             }
         }
     }
+
+    MarkAsChanged();
+    //BroadcastChanged();
+    mOnAnimationCutChannelChanged.Broadcast();
 }
 
 void

@@ -25,6 +25,7 @@
 
 #include "OdysseyAnimationCutChannel.generated.h"
 
+class UOdysseyAnimationTimelineSection;
 struct FFrameRate;
 struct FKeyHandle;
 struct FPropertyTag;
@@ -53,6 +54,9 @@ struct FOdysseyAnimationCutChannel : public FMovieSceneChannel
     GENERATED_BODY()
 
     typedef FOdysseyAnimationCutValue CurveValueType;
+
+    FOdysseyAnimationCutChannel();
+    FOdysseyAnimationCutChannel( UOdysseyAnimationTimelineSection* iTimelineSection );
 
     /**
      * Access a mutable interface for this channel's data
@@ -107,15 +111,15 @@ struct FOdysseyAnimationCutChannel : public FMovieSceneChannel
      */
     ODYSSEYANIMATIONTRACKS_API bool Evaluate( FFrameTime InTime, FOdysseyAnimationCutValue& OutValue ) const;
 
-    ODYSSEYANIMATIONTRACKS_API void Offset( TArrayView<const FKeyHandle> InHandles, FFrameNumber DeltaPosition );
-
     ODYSSEYANIMATIONTRACKS_API FKeyHandle FindPreviousKey( const TArray<FKeyHandle>& iKeyHandles );
     ODYSSEYANIMATIONTRACKS_API FKeyHandle FindNextKey( const TArray<FKeyHandle>& iKeyHandles );
 
-    ODYSSEYANIMATIONTRACKS_API void MoveTo( const TArray<FKeyHandle>& iKeyHandles, const TArray<FFrameNumber>& iNewFrames );
+protected:
+    friend class UOdysseyAnimationTimelineSection;
+
+    ODYSSEYANIMATIONTRACKS_API void Update( const TArray<FKeyHandle>& iKeyHandles, EPropertyChangeType::Type iChangeType );
 
 public:
-
     // ~ FMovieSceneChannel Interface
     virtual void GetKeys(const TRange<FFrameNumber>& WithinRange, TArray<FFrameNumber>* OutKeyTimes, TArray<FKeyHandle>* OutKeyHandles) override;
     virtual void GetKeyTimes(TArrayView<const FKeyHandle> InHandles, TArrayView<FFrameNumber> OutKeyTimes) override;
@@ -133,6 +137,7 @@ public:
     virtual int32 GetIndex(FKeyHandle Handle) override;
 
 private:
+    TWeakObjectPtr<UOdysseyAnimationTimelineSection> TimelineSection;
 
     UPROPERTY(meta=(KeyTimes))
     TArray<FFrameNumber> Times;

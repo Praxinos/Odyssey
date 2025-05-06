@@ -26,6 +26,7 @@ struct FInnerSequenceData;
  */
 class FCinematicBoardSection
     : public TSubSectionMixin<FKeyThumbnailSection>
+    , public FGCObject
 {
 public:
 
@@ -34,6 +35,10 @@ public:
 
     /** Virtual destructor. */
     virtual ~FCinematicBoardSection();
+
+public:
+    virtual void AddReferencedObjects( FReferenceCollector& Collector ) override;
+    virtual FString GetReferencerName() const override;
 
 public:
 
@@ -109,11 +114,22 @@ public:
     virtual FChannelProxyBySectionMap GetAnimationTimelineChannelProxy( FMovieScenePossessable iPossessable ) const;
     virtual void ReBuildAnimationsTimelineMetaChannel();
     virtual TSharedPtr<FMetaChannel> GetAnimationTimelineMetaChannel( FMovieScenePossessable iPossessable ) const;
+    struct FThumbnailData
+    {
+        FQualifiedFrameTime QTime;
+        FIntVector2 Size;
+        UTexture2D* Texture;
+        FSlateBrush* Brush;
+    };
+    virtual const TArray<FThumbnailData>& GetAnimationTimelineThumbnails( FMovieScenePossessable iPossessable ) const;
 
     virtual void BuildAnimationsOpacityChannelProxy();
     virtual FChannelProxyBySectionMap GetAnimationOpacityChannelProxy( FMovieScenePossessable iPossessable ) const;
     virtual void ReBuildAnimationsOpacityMetaChannel();
     virtual TSharedPtr<FMetaChannel> GetAnimationOpacityMetaChannel( FMovieScenePossessable iPossessable ) const;
+
+private:
+    virtual void RebuildAnimationThumbnails();
 
 private:
     TArray<double> mThumbnailKeys;
@@ -129,6 +145,7 @@ private:
     TMap<FGuid, TSharedPtr<FMetaChannel>>   mAnimationsTransformMetaChannel;
     TMap<FGuid, FChannelProxyBySectionMap>  mAnimationsTimelineChannelProxies;
     TMap<FGuid, TSharedPtr<FMetaChannel>>   mAnimationsTimelineMetaChannel;
+    TMap<FGuid, TArray<FThumbnailData>>     mAnimationsTimelineThumbnails;
     TMap<FGuid, FChannelProxyBySectionMap>  mAnimationsOpacityChannelProxies;
     TMap<FGuid, TSharedPtr<FMetaChannel>>   mAnimationsOpacityMetaChannel;
 

@@ -25,7 +25,7 @@ public:
 
     TRange<FFrameNumber> GetRangeLimit() const;
 
-    void SetFrame( FFrameNumber iNewFrame );
+    void SetFrame( FFrameNumber iNewFrame, EPropertyChangeType::Type iChangeType );
 
 private:
     UPROPERTY()
@@ -48,7 +48,8 @@ public:
     TArray<UOdysseyAnimationCell*> GetCellsReference() const;
     TRange<FFrameNumber> GetRangeLimit() const;
 
-    void Offset( int32 iOffset );
+    void Offset( int32 iOffset, EPropertyChangeType::Type iChangeType );
+    int32 AdjustOffset( int32 iOffset ) const;
 
     void AddNewEntry( const FAnimationCutEntry& iAnimationCutEntry );
 

@@ -2153,21 +2153,13 @@ ShotSequenceHelpers::BuildAnimationsTimelineChannelProxy( IMovieScenePlayer& iPl
         {
             FMovieSceneChannelProxyData ChannelIndirection;
 
-            animation_timeline_section->GetChannelProxy(); // To build the underlying channel if needed
-            animation_timeline_section->RebuildAnimationCuts();
-
             //const FMovieSceneChannelEntry* ObjectPathChannelEntry = animation_timeline_section->GetChannelProxy().FindEntry( FMovieSceneObjectPathChannel::StaticStruct()->GetFName() );
             //if( ObjectPathChannelEntry )
             //{
 #if WITH_EDITOR
                 ChannelIndirection.Add( animation_timeline_section->GetAnimationCutChannel(), FMovieSceneChannelMetaData() );
 #else
-                TArrayView<FMovieSceneChannel* const>                   ObjectPathChannels = ObjectPathChannelEntry->GetChannels();
-
-                for( int32 Index = 0; Index < ObjectPathChannels.Num(); ++Index )
-                {
-                    ChannelIndirection.Add( *static_cast<FMovieSceneObjectPathChannel*>( ObjectPathChannels[Index] ) );
-                }
+                ChannelIndirection.Add( animation_timeline_section->GetAnimationCutChannel(), FMovieSceneChannelMetaData() );
 #endif
             //}
 

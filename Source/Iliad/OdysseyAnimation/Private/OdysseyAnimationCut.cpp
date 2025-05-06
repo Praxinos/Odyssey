@@ -73,7 +73,7 @@ FAnimationCutEntry::GetRangeLimit() const
 }
 
 void
-FAnimationCutEntry::SetFrame( FFrameNumber iNewFrame )
+FAnimationCutEntry::SetFrame( FFrameNumber iNewFrame, EPropertyChangeType::Type iChangeType )
 {
     FFrameNumber reference_frame = GetFrameReference();
     int32 offset = FMath::Abs( reference_frame - iNewFrame ).Value;
@@ -82,42 +82,54 @@ FAnimationCutEntry::SetFrame( FFrameNumber iNewFrame )
     {
         if( !mCellBefore && mCellAfter )
         {
-            FOdysseyObjectEditorUtils::SetPropertyValue( mCellAfter, GET_MEMBER_NAME_CHECKED( UOdysseyAnimationCell, Exposure ), mCellAfter->Exposure + offset );
+            FOdysseyObjectEditorUtils::SetPropertyValue( mCellAfter, GET_MEMBER_NAME_CHECKED( UOdysseyAnimationCell, Exposure ), mCellAfter->Exposure + offset, iChangeType );
 
-            FOdysseyObjectEditorUtils::SetPropertyValue( mCellAfter->GetLayer(), GET_MEMBER_NAME_CHECKED( UOdysseyAnimationLayer, CellsOffset ), mCellAfter->GetLayer()->CellsOffset - offset );
+            FOdysseyObjectEditorUtils::SetPropertyValue( mCellAfter->GetLayer(), GET_MEMBER_NAME_CHECKED( UOdysseyAnimationLayer, CellsOffset ), mCellAfter->GetLayer()->CellsOffset - offset, iChangeType );
         }
 
         if( mCellBefore && mCellAfter )
         {
-            FOdysseyObjectEditorUtils::SetPropertyValue( mCellBefore, GET_MEMBER_NAME_CHECKED( UOdysseyAnimationCell, Exposure ), mCellBefore->Exposure - offset );
+            FOdysseyObjectEditorUtils::SetPropertyValue( mCellBefore, GET_MEMBER_NAME_CHECKED( UOdysseyAnimationCell, Exposure ), mCellBefore->Exposure - offset, iChangeType );
 
-            FOdysseyObjectEditorUtils::SetPropertyValue( mCellAfter, GET_MEMBER_NAME_CHECKED( UOdysseyAnimationCell, Exposure ), mCellAfter->Exposure + offset );
+            FOdysseyObjectEditorUtils::SetPropertyValue( mCellAfter, GET_MEMBER_NAME_CHECKED( UOdysseyAnimationCell, Exposure ), mCellAfter->Exposure + offset, iChangeType );
         }
 
         if( mCellBefore && !mCellAfter )
         {
-            FOdysseyObjectEditorUtils::SetPropertyValue( mCellBefore, GET_MEMBER_NAME_CHECKED( UOdysseyAnimationCell, Exposure ), mCellBefore->Exposure - offset );
+            FOdysseyObjectEditorUtils::SetPropertyValue( mCellBefore, GET_MEMBER_NAME_CHECKED( UOdysseyAnimationCell, Exposure ), mCellBefore->Exposure - offset, iChangeType );
+        }
+    }
+    else if( iNewFrame > reference_frame )
+    {
+        if( !mCellBefore && mCellAfter )
+        {
+            FOdysseyObjectEditorUtils::SetPropertyValue( mCellAfter, GET_MEMBER_NAME_CHECKED( UOdysseyAnimationCell, Exposure ), mCellAfter->Exposure - offset, iChangeType );
+
+            FOdysseyObjectEditorUtils::SetPropertyValue( mCellAfter->GetLayer(), GET_MEMBER_NAME_CHECKED( UOdysseyAnimationLayer, CellsOffset ), mCellAfter->GetLayer()->CellsOffset + offset, iChangeType );
+        }
+
+        if( mCellBefore && mCellAfter )
+        {
+            FOdysseyObjectEditorUtils::SetPropertyValue( mCellBefore, GET_MEMBER_NAME_CHECKED( UOdysseyAnimationCell, Exposure ), mCellBefore->Exposure + offset, iChangeType );
+
+            FOdysseyObjectEditorUtils::SetPropertyValue( mCellAfter, GET_MEMBER_NAME_CHECKED( UOdysseyAnimationCell, Exposure ), mCellAfter->Exposure - offset, iChangeType );
+        }
+
+        if( mCellBefore && !mCellAfter )
+        {
+            FOdysseyObjectEditorUtils::SetPropertyValue( mCellBefore, GET_MEMBER_NAME_CHECKED( UOdysseyAnimationCell, Exposure ), mCellBefore->Exposure + offset, iChangeType );
         }
     }
     else
     {
-        if( !mCellBefore && mCellAfter )
+        if( mCellAfter )
         {
-            FOdysseyObjectEditorUtils::SetPropertyValue( mCellAfter, GET_MEMBER_NAME_CHECKED( UOdysseyAnimationCell, Exposure ), mCellAfter->Exposure - offset );
-
-            FOdysseyObjectEditorUtils::SetPropertyValue( mCellAfter->GetLayer(), GET_MEMBER_NAME_CHECKED( UOdysseyAnimationLayer, CellsOffset ), mCellAfter->GetLayer()->CellsOffset + offset );
+            FOdysseyObjectEditorUtils::SetPropertyValue( mCellAfter, GET_MEMBER_NAME_CHECKED( UOdysseyAnimationCell, Exposure ), mCellAfter->Exposure, iChangeType );
         }
 
-        if( mCellBefore && mCellAfter )
+        if( mCellBefore )
         {
-            FOdysseyObjectEditorUtils::SetPropertyValue( mCellBefore, GET_MEMBER_NAME_CHECKED( UOdysseyAnimationCell, Exposure ), mCellBefore->Exposure + offset );
-
-            FOdysseyObjectEditorUtils::SetPropertyValue( mCellAfter, GET_MEMBER_NAME_CHECKED( UOdysseyAnimationCell, Exposure ), mCellAfter->Exposure - offset );
-        }
-
-        if( mCellBefore && !mCellAfter )
-        {
-            FOdysseyObjectEditorUtils::SetPropertyValue( mCellBefore, GET_MEMBER_NAME_CHECKED( UOdysseyAnimationCell, Exposure ), mCellBefore->Exposure + offset );
+            FOdysseyObjectEditorUtils::SetPropertyValue( mCellBefore, GET_MEMBER_NAME_CHECKED( UOdysseyAnimationCell, Exposure ), mCellBefore->Exposure, iChangeType );
         }
     }
 }
@@ -179,8 +191,60 @@ FAnimationCut::GetRangeLimit() const
     return range;
 }
 
+//void
+//FAnimationCut::Update( FFrameNumber iNewFrame, EPropertyChangeType::Type iChangeType )
+//{
+//    TRange<FFrameNumber> range_limit = GetRangeLimit();
+//    FFrameNumber frame_reference = GetFrameReference();
+//    FFrameNumber new_frame = frame_reference + iOffset;
+//
+//    int32 clamped_offset = iOffset;
+//    if( iOffset < 0 )
+//    {
+//        if( range_limit.GetLowerBound().IsClosed() )
+//        {
+//            FFrameNumber lower_frame_limit = range_limit.GetLowerBoundValue(); // Always inclusive
+//            if( new_frame < lower_frame_limit )
+//            {
+//                clamped_offset = ( lower_frame_limit - frame_reference ).Value;
+//                new_frame = frame_reference + clamped_offset;
+//            }
+//        }
+//    }
+//    else if( iOffset > 0 )
+//    {
+//        if( range_limit.GetUpperBound().IsClosed() )
+//        {
+//            FFrameNumber upper_frame_limit = range_limit.GetUpperBoundValue(); // Always inclusive
+//            if( new_frame > upper_frame_limit )
+//            {
+//                clamped_offset = ( upper_frame_limit - frame_reference ).Value;
+//                new_frame = frame_reference + clamped_offset;
+//            }
+//        }
+//    }
+//
+//    for( FAnimationCutEntry& entry : mAnimationCutEntries )
+//    {
+//        entry.Update( new_frame, iChangeType );
+//    }
+//}
+
 void
-FAnimationCut::Offset( int32 iOffset )
+FAnimationCut::Offset( int32 iOffset, EPropertyChangeType::Type iChangeType )
+{
+    int32 adjusted_offset = AdjustOffset( iOffset );
+
+    FFrameNumber new_frame = GetFrameReference() + adjusted_offset;
+
+    for( FAnimationCutEntry& entry : mAnimationCutEntries )
+    {
+        entry.SetFrame( new_frame, iChangeType );
+    }
+}
+
+int32
+FAnimationCut::AdjustOffset( int32 iOffset ) const
 {
     TRange<FFrameNumber> range_limit = GetRangeLimit();
     FFrameNumber frame_reference = GetFrameReference();
@@ -212,10 +276,7 @@ FAnimationCut::Offset( int32 iOffset )
         }
     }
 
-    for( FAnimationCutEntry& entry : mAnimationCutEntries )
-    {
-        entry.SetFrame( new_frame );
-    }
+    return clamped_offset;
 }
 
 void

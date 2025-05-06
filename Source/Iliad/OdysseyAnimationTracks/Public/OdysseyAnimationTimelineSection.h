@@ -7,7 +7,6 @@
 #include "OdysseyAnimationComponent.h"
 #include "OdysseyAnimationPlayer.h"
 
-#include "OdysseyAnimationCut.h"
 #include "OdysseyAnimationCutChannel.h"
 
 #include "OdysseyAnimationTimelineSection.generated.h"
@@ -48,13 +47,20 @@ public:
     FOdysseyAnimationCutChannel& GetAnimationCutChannel();
     const FOdysseyAnimationCutChannel& GetAnimationCutChannel() const;
 
-    virtual void RebuildAnimationCuts();
+    DECLARE_MULTICAST_DELEGATE( FOnAnimationCutChannelChanged );
+    FOnAnimationCutChannelChanged& OnAnimationCutChannelChanged();
+
+    void UpdateAnimationCutChannel( const TArray<FKeyHandle>& iKeyHandles, EPropertyChangeType::Type iChangeType );
 
 protected:
+    void PostLoad();
+
     virtual EMovieSceneChannelProxyType CacheChannelProxy() override;
     virtual void MigrateFrameTimes(FFrameRate SourceRate, FFrameRate DestinationRate) override;
 
-    virtual void BuildAnimationCuts();
+    virtual void RebuildAnimationCutChannel();
+
+    virtual void OnAnimationChanged( const FOdysseyImageRenderingChangedEvent& iEvent );
 
 protected:
     UPROPERTY( EditAnywhere, BlueprintReadWrite, Category="Animation")
@@ -71,4 +77,8 @@ protected:
 
     UPROPERTY()
     FOdysseyAnimationCutChannel AnimationCutChannel;
+
+    FOnAnimationCutChannelChanged mOnAnimationCutChannelChanged;
+
+    bool LockChannelRebuild = false;
 };
