@@ -24,7 +24,7 @@ struct FOdysseyLighttableKey
                 , UIMax    = "100"
                 , Delta = "1"
                 , Units = "Percent"))
-    float Opacity = 100.f;
+    float Opacity = 0.f;
 };
 
 UENUM(BlueprintType)

@@ -113,7 +113,7 @@ public:
 public: //Public needed for the shortcuts
     UPROPERTY()//TODO: meta (minvalue 1)
     int Exposure = 1;
-    
+
 protected:
     friend class UOdysseyLayer;
     friend class FOdysseyLayerCellImport;

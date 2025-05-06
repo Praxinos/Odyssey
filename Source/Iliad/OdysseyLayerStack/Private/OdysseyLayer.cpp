@@ -42,6 +42,12 @@ UOdysseyLayer::PostInitProperties()
     //Activate first previous and first next keys in the lighttable by default
     Lighttable.PreviousKeys[0].bIsActivated = true;
     Lighttable.NextKeys[0].bIsActivated = true;
+
+    for (int i = 0; i < 5; i++)
+    {
+        Lighttable.PreviousKeys[i].Opacity = (5 - i) * 10.f;
+        Lighttable.NextKeys[i].Opacity = (5 - i) * 10.f;
+    }
 #endif
 }
 
