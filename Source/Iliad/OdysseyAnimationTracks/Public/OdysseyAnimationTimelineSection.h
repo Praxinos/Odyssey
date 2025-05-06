@@ -7,6 +7,8 @@
 #include "OdysseyAnimationComponent.h"
 #include "OdysseyAnimationPlayer.h"
 
+#include "OdysseyAnimationCutChannel.h"
+
 #include "OdysseyAnimationTimelineSection.generated.h"
 
 enum class EMovieSceneChannelProxyType : uint8;
@@ -39,9 +41,26 @@ public:
     void SetPostBehaviour(EOdysseyAnimationPlayerPostBehaviour iValue);
     void SetStartFrameOffset(FFrameNumber iOffset);
 
+    FFrameNumber ConvertFrameFromTimelineToSequence( FFrameNumber iFrameInTimeline );
+    FFrameNumber ConvertFrameFromSequenceToTimeline( FFrameNumber iFrameInSequence );
+
+    FOdysseyAnimationCutChannel& GetAnimationCutChannel();
+    const FOdysseyAnimationCutChannel& GetAnimationCutChannel() const;
+
+    DECLARE_MULTICAST_DELEGATE( FOnAnimationCutChannelChanged );
+    FOnAnimationCutChannelChanged& OnAnimationCutChannelChanged();
+
+    void UpdateAnimationCutChannel( const TArray<FKeyHandle>& iKeyHandles, EPropertyChangeType::Type iChangeType );
+
 protected:
+    void PostLoad();
+
     virtual EMovieSceneChannelProxyType CacheChannelProxy() override;
     virtual void MigrateFrameTimes(FFrameRate SourceRate, FFrameRate DestinationRate) override;
+
+    virtual void RebuildAnimationCutChannel();
+
+    virtual void OnAnimationChanged( const FOdysseyImageRenderingChangedEvent& iEvent );
 
 protected:
     UPROPERTY( EditAnywhere, BlueprintReadWrite, Category="Animation")
@@ -55,4 +74,11 @@ protected:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Animation")
     FFrameNumber StartFrameOffset = 0;
+
+    UPROPERTY()
+    FOdysseyAnimationCutChannel AnimationCutChannel;
+
+    FOnAnimationCutChannelChanged mOnAnimationCutChannelChanged;
+
+    bool LockChannelRebuild = false;
 };

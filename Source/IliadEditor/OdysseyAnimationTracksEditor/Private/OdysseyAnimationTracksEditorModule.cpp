@@ -6,7 +6,9 @@
 #include "EposSequenceModule.h"
 #include "ILevelSequenceModule.h"
 #include "ISequencerModule.h"
+#include "OdysseyAnimationCutChannel.h"
 #include "OdysseyAnimationTimelineTrackEditor.h"
+#include "SequencerChannelInterface.h"
 
 #define LOCTEXT_NAMESPACE "AnimationTrack"
 
@@ -36,6 +38,8 @@ FOdysseyAnimationTracksEditorModule::RegisterSequencerTracks()
     mOnNewActorTrackAddedHandle = LevelSequenceModule.OnNewActorTrackAdded().AddStatic( FOdysseyAnimationTimelineTrackEditor::OnNewActorTrackAdded );
     FEposSequenceModule& eposSequenceModule = FModuleManager::LoadModuleChecked<FEposSequenceModule>( "EposSequence" );
     mOnNewActorTrackAddedOnEposHandle = eposSequenceModule.OnNewActorTrackAdded().AddStatic( FOdysseyAnimationTimelineTrackEditor::OnNewActorTrackAdded );
+
+    SequencerModule.RegisterChannelInterface<FOdysseyAnimationCutChannel>();
 }
 
 void

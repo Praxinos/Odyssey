@@ -36,14 +36,24 @@
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "NoteTrack/MovieSceneNoteTrack.h"
 #include "NoteTrack/MovieSceneNoteSection.h"
+#include "OdysseyAnimation.h"
 #include "OdysseyAnimationActor.h"
 #include "OdysseyAnimationComponent.h"
+#include "OdysseyAnimationCut.h"
 #include "OdysseyAnimationTimelineSection.h"
 #include "OdysseyAnimationTimelineTrack.h"
 #include "PlaneActor.h"
 #include "Shot/ShotSequence.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"
 #include "StoryNote.h"
+
+#if WITH_EDITOR
+    #include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
+    #include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVector.h"
+    #include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
+    #include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
+    #include "LayerStack/OdysseyAnimationLayerStack.h"
+#endif
 
 #define LOCTEXT_NAMESPACE "EposSequenceHelpers"
 
@@ -2131,7 +2141,7 @@ ShotSequenceHelpers::BuildAnimationsTimelineChannelProxy( IMovieScenePlayer& iPl
     TArray<FGuid> bindings;
     /*int animation_count =*/ ShotSequenceHelpers::GetAllAnimations( iPlayer, iSequence, iSequenceID, EGetAnimation::kAll, &animations, &bindings );
 
-    for( auto binding : bindings )
+    for( FGuid binding : bindings )
     {
         FChannelProxyBySectionMap map;
 
@@ -2139,31 +2149,19 @@ ShotSequenceHelpers::BuildAnimationsTimelineChannelProxy( IMovieScenePlayer& iPl
 
         FFindOrCreateTimelineResult result = FindTimelineTrackAndSections( iPlayer, iSequence, iSequenceID, binding );
 
-        for( auto animation_timeline_section : result.mSections )
+        for( TWeakObjectPtr<UOdysseyAnimationTimelineSection> animation_timeline_section : result.mSections )
         {
             FMovieSceneChannelProxyData ChannelIndirection;
 
-            const FMovieSceneChannelEntry* ObjectPathChannelEntry = animation_timeline_section->GetChannelProxy().FindEntry( FMovieSceneObjectPathChannel::StaticStruct()->GetFName() );
-            if( ObjectPathChannelEntry )
-            {
+            //const FMovieSceneChannelEntry* ObjectPathChannelEntry = animation_timeline_section->GetChannelProxy().FindEntry( FMovieSceneObjectPathChannel::StaticStruct()->GetFName() );
+            //if( ObjectPathChannelEntry )
+            //{
 #if WITH_EDITOR
-                TArrayView<FMovieSceneChannel* const>                   ObjectPathChannels = ObjectPathChannelEntry->GetChannels();
-                TArrayView<const FMovieSceneChannelMetaData>            MetaData = ObjectPathChannelEntry->GetMetaData();
-                TArrayView<const TMovieSceneExternalValue<UObject*>>    MetaDataExt = ObjectPathChannelEntry->GetAllExtendedEditorData<FMovieSceneObjectPathChannel>();
-
-                for( int32 Index = 0; Index < ObjectPathChannels.Num(); ++Index )
-                {
-                    ChannelIndirection.Add( *static_cast<FMovieSceneObjectPathChannel*>( ObjectPathChannels[Index] ), MetaData[Index], MetaDataExt[Index] );
-                }
+                ChannelIndirection.Add( animation_timeline_section->GetAnimationCutChannel(), FMovieSceneChannelMetaData() );
 #else
-                TArrayView<FMovieSceneChannel* const>                   ObjectPathChannels = ObjectPathChannelEntry->GetChannels();
-
-                for( int32 Index = 0; Index < ObjectPathChannels.Num(); ++Index )
-                {
-                    ChannelIndirection.Add( *static_cast<FMovieSceneObjectPathChannel*>( ObjectPathChannels[Index] ) );
-                }
+                ChannelIndirection.Add( animation_timeline_section->GetAnimationCutChannel(), FMovieSceneChannelMetaData() );
 #endif
-            }
+            //}
 
             TSharedPtr<FMovieSceneChannelProxy> ChannelProxy = MakeShared<FMovieSceneChannelProxy>( MoveTemp( ChannelIndirection ) );
 

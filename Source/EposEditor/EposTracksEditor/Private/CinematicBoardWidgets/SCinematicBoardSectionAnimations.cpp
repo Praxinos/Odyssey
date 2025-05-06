@@ -7,6 +7,7 @@
 #include "Channels/MovieSceneChannelProxy.h"
 #include "Channels/MovieSceneObjectPathChannel.h"
 #include "Engine/Texture2D.h"
+#include "ImageUtils.h"
 #include "Materials/MaterialInstanceConstant.h"
 #include "Sections/MovieScene3DTransformSection.h"
 #include "Sections/MovieSceneBoolSection.h"
@@ -25,14 +26,26 @@
 #include "CinematicBoardTrack/MetaChannelProxy.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 #include "CinematicBoardWidgets/SMetaKeysArea.h"
+#include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
+#include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVector.h"
+#include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
+#include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
+#include "LayerStack/OdysseyAnimationLayerStack.h"
 #include "NamingConvention.h"
 #include "OdysseyAnimationActor.h"
+#include "OdysseyAnimationCell.h"
+#include "OdysseyAnimationCut.h"
+#include "OdysseyAnimationCutChannel.h"
+#include "OdysseyAnimationTimelineSection.h"
+//#include "OdysseyPainterEditorSettings.h"
 #include "Tools/LighttableTools.h"
 #include "Tools/ResourceAssetTools.h"
 #include "Settings/EposTracksEditorSettings.h"
 #include "Shot/ShotSequence.h"
 #include "Styles/EposTracksEditorStyle.h"
 #include "Tools/EposSequenceTools.h"
+#include "ULISLoaderModule.h"
+#include "UObject/OdysseyObjectEditorUtils.h"
 
 #define LOCTEXT_NAMESPACE "SCinematicBoardSectionAnimations"
 
@@ -885,6 +898,7 @@ SCinematicBoardSectionAnimationTransformKeys::OnPaint( const FPaintArgs& Args, c
 
 class SCinematicBoardSectionAnimationTimelineKeys
     : public SMetaKeysArea
+    , public FGCObject
 {
 public:
     SLATE_BEGIN_ARGS( SCinematicBoardSectionAnimationTimelineKeys )
@@ -895,6 +909,11 @@ public:
     // Construct the widget
     void Construct( const FArguments& InArgs, TSharedRef<FCinematicBoardSection> iBoardSection );
 
+public:
+    virtual void AddReferencedObjects( FReferenceCollector& Collector ) override;
+    virtual FString GetReferencerName() const override;
+
+public:
     // SWidget overrides
     virtual FVector2D ComputeDesiredSize( float ) const override;
     virtual int32 OnPaint( const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled ) const override;
@@ -904,6 +923,8 @@ public:
     virtual FReply OnMouseMove( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) override;
 
     virtual FCursorReply OnCursorQuery( const FGeometry& MyGeometry, const FPointerEvent& CursorEvent ) const override;
+
+    virtual void Tick( const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime ) override;
 
 protected:
     // SMetaKeysArea overrides
@@ -918,8 +939,44 @@ protected:
 
     virtual const FSlateBrush* GetBackgroundBrush() const override;
 
+    virtual int32 DrawThumbnails( const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled ) const;
+
+    virtual void ComputeClampRangePreMoveDuringDrag( TSharedPtr<FMetaChannel> iKeys, TRange<FFrameNumber>& oClampRangeInSubsequence ) const override;
+
+    virtual void OnStartDragKeys( TSharedPtr<FMetaChannel> iKeys ) override;
+    virtual void OnDragKeys( TSharedPtr<FMetaChannel> iKeys ) override;
+    virtual void OnStopDragKeys( TSharedPtr<FMetaChannel> iKeys ) override;
+
+    virtual void OnClickKeys( TSharedPtr<FMetaChannel> iKeys ) override;
+
+private:
+    //TArray<FGuid> BuildThumbnailCache( UOdysseyAnimation* iAnimation, FFrameNumber iFrameTimeline, bool iForce ) const;
+
+    //struct FThumbnailData
+    //{
+    //    FQualifiedFrameTime QTime;
+    //    FIntVector2 Size;
+    //    UTexture2D* Texture;
+    //    FSlateBrush* Brush;
+    //};
+    //TArray<FThumbnailData> mThumbnails;
+    //bool mNeedRebuildThumbnails = true;
+    //void RebuildThumbnails();
+
+    void SetDelegates();
+    void OnAnimationCutChannelChanged();
+    //void OnAnimationChanged( const FOdysseyImageRenderingChangedEvent& iEvent );
+
 private:
     FMovieScenePossessable              mBinding;
+
+    //mutable TMap<TArray<FGuid>, TSharedPtr<::ULIS::FBlock>> mBlocks;
+    //mutable TMap<TArray<FGuid>, UTexture2D*>                mTextures;
+    //mutable TMap<TArray<FGuid>, FSlateBrush*>               mBrushes;
+    //mutable TMap<TArray<FGuid>, TSet<int32>>                      mImages;
+
+    UTexture2D* mCheckboardTexture = nullptr;
+    FSlateBrush* mCheckboardBrush = nullptr;
 };
 
 void
@@ -928,6 +985,16 @@ SCinematicBoardSectionAnimationTimelineKeys::Construct( const FArguments& InArgs
     SMetaKeysArea::Construct( SMetaKeysArea::FArguments(), iBoardSection );
 
     mBinding = InArgs._Binding;
+
+    //const UOdysseyPainterEditorSettings& settings = *GetDefault<UOdysseyPainterEditorSettings>();
+    //mCheckboardTexture = FImageUtils::CreateCheckerboardTexture( settings.CheckerColorOne, settings.CheckerColorTwo, 16 );
+    mCheckboardTexture = FImageUtils::CreateCheckerboardTexture( FColor::White, FColor( 224, 224, 224 ), 16 );
+
+    mCheckboardBrush = new FSlateBrush();
+    mCheckboardBrush->Tiling = ESlateBrushTileType::Both;
+    mCheckboardBrush->SetResourceObject( mCheckboardTexture );
+
+    SetDelegates();
 
     ChildSlot
     [
@@ -942,6 +1009,28 @@ SCinematicBoardSectionAnimationTimelineKeys::ComputeDesiredSize( float ) const /
     size.Y = SequencerSectionConstants::DefaultSectionHeight * 3 + 5.f;
 
     return size;
+}
+
+//---
+
+void
+SCinematicBoardSectionAnimationTimelineKeys::AddReferencedObjects( FReferenceCollector& Collector ) //override
+{
+    Collector.AddReferencedObject( mCheckboardTexture );
+
+    //TArray<UTexture2D*> textures;
+    //mTextures.GenerateValueArray( textures );
+    //for( UTexture2D* texture : textures )
+    //    Collector.AddReferencedObject( texture );
+
+    //for( FThumbnailData& thumbnail : mThumbnails )
+    //    Collector.AddReferencedObject( thumbnail.Texture );
+}
+
+FString
+SCinematicBoardSectionAnimationTimelineKeys::GetReferencerName() const //override
+{
+    return "SCinematicBoardSectionAnimationTimelineKeys";
 }
 
 //---
@@ -964,100 +1053,574 @@ SCinematicBoardSectionAnimationTimelineKeys::RebuildMetaChannel() //override
     mBoardSection.Pin()->ReBuildAnimationsTimelineMetaChannel();
 }
 
+void
+SCinematicBoardSectionAnimationTimelineKeys::SetDelegates()
+{
+    FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+    const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
+    ISequencer* sequencer = board_section->GetSequencer().Get();
+
+    BoardSequenceHelpers::FInnerSequenceResult result_inner = BoardSequenceHelpers::GetInnerSequence( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
+    ShotSequenceHelpers::FFindOrCreateTimelineResult result = ShotSequenceHelpers::FindTimelineTrackAndSections( *sequencer, result_inner.mInnerSequence, result_inner.mInnerSequenceId, mBinding.GetGuid() );
+
+    TMultiMap<UOdysseyAnimation*, FFrameNumber> map;
+    for( TWeakObjectPtr<UOdysseyAnimationTimelineSection> animation_timeline_section : result.mSections )
+    {
+        animation_timeline_section->OnAnimationCutChannelChanged().AddSP( this, &SCinematicBoardSectionAnimationTimelineKeys::OnAnimationCutChannelChanged );
+    }
+
+    //TSet<UOdysseyAnimation*> animations;
+
+        //animations.Add( animation_timeline_section->GetAnimation() );
+
+    //for( auto pair : GetMetaChannel()->GetMetaKeys() )
+    //{
+    //    for( const auto& subkey : pair.Value.mSubKeys )
+    //    {
+    //        TMovieSceneChannelHandle<FOdysseyAnimationCutChannel> channel_handle = subkey.mChannelHandle.Cast<FOdysseyAnimationCutChannel>();
+    //        FOdysseyAnimationCutChannel* object_channel = channel_handle.Get();
+
+    //        FOdysseyAnimationCutValue value;
+    //        UE::MovieScene::GetKeyValue( object_channel, subkey.mKeyHandle, value );
+    //        FAnimationCut animationcut = value.Value;
+
+    //        animations.Add( animationcut.GetAnimation() );
+    //    }
+    //}
+
+    //for( UOdysseyAnimation* animation : animations )
+    //    animation->OnImageRenderingChangedDelegate().AddSP( this, &SCinematicBoardSectionAnimationTimelineKeys::OnSectionChanged );
+}
+
+void
+SCinematicBoardSectionAnimationTimelineKeys::OnAnimationCutChannelChanged()
+{
+    FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+    const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
+    ISequencer* sequencer = board_section->GetSequencer().Get();
+
+    //TODO: this should be done somewhere inside FCinematicBoardSection (?) and this delegate should be linked to a FCinematicBoardSection one ?
+    board_section->BuildAnimationsTimelineChannelProxy();
+    //RebuildMetaChannel();
+
+    //mBrushes.Empty();
+    //mTextures.Empty();
+    //mBlocks.Empty();
+    //mImages.Empty();
+
+    //mNeedRebuildThumbnails = true;
+
+    //UE_LOG( LogTemp, Warning, TEXT( "mNeedRebuildThumbnails: %d" ), mNeedRebuildThumbnails );
+
+    //---
+
+    //BoardSequenceHelpers::FInnerSequenceResult result_inner = BoardSequenceHelpers::GetInnerSequence( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
+    //ShotSequenceHelpers::FFindOrCreateTimelineResult result = ShotSequenceHelpers::FindTimelineTrackAndSections( *sequencer, result_inner.mInnerSequence, result_inner.mInnerSequenceId, mBinding.GetGuid() );
+
+    //TMultiMap<UOdysseyAnimation*, FFrameNumber> map;
+    //for( TWeakObjectPtr<UOdysseyAnimationTimelineSection> animation_timeline_section : result.mSections )
+    //{
+    //    const FOdysseyAnimationCutChannel& object_channel = animation_timeline_section->GetAnimationCutChannel();
+
+    //    for( FFrameNumber frame_in_sequence : object_channel.GetTimes() )
+    //    {
+    //        FFrameNumber frame_in_timeline = animation_timeline_section->ConvertFrameFromSequenceToTimeline( frame_in_sequence );
+
+    //        UOdysseyAnimation* animation = animation_timeline_section->GetAnimation();
+
+    //        UE_LOG( LogTemp, Warning, TEXT( "animation: %p - frame in timeline: %d" ), animation, frame_in_timeline.Value );
+
+    //        map.Add( animation, frame_in_timeline );
+    //    }
+    //}
+
+    //---
+
+    //TArray<UOdysseyAnimation*> animations;
+    //map.GetKeys( animations );
+    //for( UOdysseyAnimation* animation : animations )
+    //{
+    //    UE_LOG( LogTemp, Warning, TEXT( "animation2: %p" ), animation );
+
+    //    TArray<FFrameNumber> frames;
+    //    map.MultiFind( animation, frames );
+    //    for( FFrameNumber frame : frames )
+    //    {
+    //        UE_LOG( LogTemp, Warning, TEXT( "animation2: %d" ), frame.Value );
+
+    //        BuildThumbnailCache( animation, frame, true );
+    //    }
+    //}
+
+    //---
+
+    //typedef TArray<FGuid> FRenderingComposition;
+
+    //if( !GetMetaChannel().IsValid() )
+    //    return;
+
+    //TArray<FRenderingComposition> new_rendering_composition;
+
+    //for( const auto& pair : GetMetaChannel()->GetMetaKeys() )
+    //{
+    //    //FFrameNumber time = pair.Key;
+    //    FMetaKey meta_key = pair.Value;
+    //    FKeyDrawParams key_draw_param = meta_key.mMetaKeyDrawParam;
+
+    //    for( const auto& subkey : pair.Value.mSubKeys )
+    //    {
+    //        UOdysseyAnimationTimelineSection* animation_timeline_section = Cast<UOdysseyAnimationTimelineSection>( subkey.mSection );
+    //        if( !animation_timeline_section )
+    //            continue;
+
+    //        TMovieSceneChannelHandle<FOdysseyAnimationCutChannel> channel_handle = subkey.mChannelHandle.Cast<FOdysseyAnimationCutChannel>();
+    //        FOdysseyAnimationCutChannel* object_channel = channel_handle.Get();
+
+    //        FFrameNumber frame_in_sequence;
+    //        object_channel->GetKeyTime( subkey.mKeyHandle, frame_in_sequence );
+
+    //        //-
+
+    //        FFrameNumber frame_in_timeline = animation_timeline_section->ConvertFrameFromSequenceToTimeline( frame_in_sequence );
+
+    //        FRenderingComposition rendering_compositions = BuildThumbnailCache( animation_timeline_section->GetAnimation(), frame_in_timeline, true );..................................................
+    //        //FRenderingComposition rendering_compositions = BuildThumbnailCache( animation_timeline_section->GetAnimation(), frame_in_timeline, false );
+    //        new_rendering_composition.Add( rendering_compositions );
+    //    }
+    //}
+
+    //TArray<FRenderingComposition> rendering_compositions_to_remove;
+
+    //for( const auto& pair : mBlocks )
+    //{
+    //    const FRenderingComposition& rendering_composition = pair.Key;
+    //    if( !new_rendering_composition.Contains( rendering_composition ) )
+    //        rendering_compositions_to_remove.Add( rendering_composition );
+    //}
+
+    //for( const FRenderingComposition& rendering_composition_to_remove : rendering_compositions_to_remove )
+    //{
+    //    mBrushes.Remove( rendering_composition_to_remove );
+    //    mTextures.Remove( rendering_composition_to_remove );
+    //    mBlocks.Remove( rendering_composition_to_remove );
+    //    mImages.Remove( rendering_composition_to_remove );
+    //}
+
+    //UE_LOG( LogTemp, Warning, TEXT( "num of brushes: %d" ), mBrushes.Num() );
+}
+
+//void
+//SCinematicBoardSectionAnimationTimelineKeys::OnAnimationChanged( const FOdysseyImageRenderingChangedEvent& iEvent )
+//{
+//    if( iEvent.IsInteractive() || mState == EState::kDragging )
+//        return;
+//
+//    UE_LOG( LogTemp, Warning, TEXT( "OnAnimationChanged" ) );
+//
+//    FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+//    const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
+//    ISequencer* sequencer = board_section->GetSequencer().Get();
+//
+//    BoardSequenceHelpers::FInnerSequenceResult result_inner = BoardSequenceHelpers::GetInnerSequence( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
+//    ShotSequenceHelpers::FFindOrCreateTimelineResult result = ShotSequenceHelpers::FindTimelineTrackAndSections( *sequencer, result_inner.mInnerSequence, result_inner.mInnerSequenceId, mBinding.GetGuid() );
+//
+//    TMultiMap<UOdysseyAnimation*, FFrameNumber> map;
+//    for( TWeakObjectPtr<UOdysseyAnimationTimelineSection> animation_timeline_section : result.mSections )
+//    {
+//        //animation_timeline_section->RebuildAnimationCuts();
+//        board_section->BuildAnimationsTimelineChannelProxy();
+//        RebuildMetaChannel();
+//
+//        const FOdysseyAnimationCutChannel& object_channel = animation_timeline_section->GetAnimationCutChannel();
+//
+//        for( FFrameNumber frame_in_sequence : object_channel.GetTimes() )
+//        {
+//            FFrameNumber frame_in_timeline = animation_timeline_section->ConvertFrameFromSequenceToTimeline( frame_in_sequence );
+//
+//            UOdysseyAnimation* animation = animation_timeline_section->GetAnimation();
+//
+//            UE_LOG( LogTemp, Warning, TEXT( "animation: %p - frame in timeline: %d" ), animation, frame_in_timeline.Value );
+//
+//            map.Add( animation, frame_in_timeline );
+//        }
+//    }
+//
+//    //TMultiMap<UOdysseyAnimation*, FFrameNumber> map;
+//    //for( auto pair : GetMetaChannel()->GetMetaKeys() )
+//    //{
+//    //    for( const auto& subkey : pair.Value.mSubKeys )
+//    //    {
+//    //        UOdysseyAnimationTimelineSection* animation_timeline_section = Cast<UOdysseyAnimationTimelineSection>( subkey.mSection );
+//    //        if( !animation_timeline_section )
+//    //            continue;
+//
+//    //        TMovieSceneChannelHandle<FOdysseyAnimationCutChannel> channel_handle = subkey.mChannelHandle.Cast<FOdysseyAnimationCutChannel>();
+//    //        FOdysseyAnimationCutChannel* object_channel = channel_handle.Get();
+//
+//    //        FFrameNumber frame_in_sequence;
+//    //        object_channel->GetKeyTime( subkey.mKeyHandle, frame_in_sequence );
+//
+//    //        FOdysseyAnimationCutValue value;
+//    //        UE::MovieScene::GetKeyValue( object_channel, subkey.mKeyHandle, value );
+//    //        FAnimationCut animationcut = value.Value;
+//
+//    //        FFrameNumber frame_in_timeline = animation_timeline_section->ConvertFrameFromSequenceToTimeline( frame_in_sequence );
+//
+//    //        UOdysseyAnimation* animation = animationcut.GetAnimation();
+//
+//    //        UE_LOG( LogTemp, Warning, TEXT( "animation: %p" ), animation );
+//
+//    //        map.Add( animation, frame_in_timeline );
+//    //    }
+//    //}
+//
+//    //---
+//
+//    {
+//        typedef TArray<FGuid> FRenderingComposition;
+//
+//        TArray<TPair<FFrameNumber, FRenderingComposition>> new_renderingCompositions;
+//        TArray<UOdysseyAnimation*> animations;
+//        map.GetKeys( animations );
+//        for( UOdysseyAnimation* animation : animations )
+//        {
+//            TArray<FFrameNumber> frames;
+//            map.MultiFind( animation, frames );
+//            for( FFrameNumber frame : frames )
+//            {
+//                TPair<FFrameNumber, FRenderingComposition> pair( frame, animation->GetImageRenderingComposition( IOdysseyImageRenderer::eRenderType::Render, frame.Value ) );
+//                new_renderingCompositions.Add( pair );
+//            }
+//        }
+//
+//        // Remove all old rendering compositions
+//        auto RemoveOldRenderingCompositions = []<typename T>( T& iMap, const TArray<TPair<FFrameNumber, FRenderingComposition>>& iNewRenderingCompositions )
+//        {
+//            TArray<FRenderingComposition> old_renderingCompositions;
+//            iMap.GetKeys( old_renderingCompositions );
+//            for( const FRenderingComposition& old_renderingComposition : old_renderingCompositions )
+//            {
+//                if( !iNewRenderingCompositions.ContainsByPredicate( [&old_renderingComposition]( const TPair<FFrameNumber, FRenderingComposition>& iElement )
+//                                                                    {
+//                                                                        return iElement.Value == old_renderingComposition;
+//                                                                    } ) )
+//                    iMap.Remove( old_renderingComposition );
+//            }
+//        };
+//        RemoveOldRenderingCompositions( mBrushes, new_renderingCompositions );
+//        RemoveOldRenderingCompositions( mTextures, new_renderingCompositions );
+//        RemoveOldRenderingCompositions( mBlocks, new_renderingCompositions );
+//        RemoveOldRenderingCompositions( mImages, new_renderingCompositions );
+//
+//        // Remove all rendering compositions which contains the updated rendering composition
+//        auto RemoveContainingRenderingCompositions = []<typename T>( T& iMap, const FGuid& iNewId )
+//        {
+//            TArray<FRenderingComposition> old_renderingCompositions;
+//            iMap.GetKeys( old_renderingCompositions );
+//            for( const FRenderingComposition& old_renderingComposition : old_renderingCompositions )
+//            {
+//                if( old_renderingComposition.Contains( iNewId ) )
+//                    iMap.Remove( old_renderingComposition );
+//            }
+//        };
+//        RemoveContainingRenderingCompositions( mBrushes, iEvent.GetId() );
+//        RemoveContainingRenderingCompositions( mTextures, iEvent.GetId() );
+//        RemoveContainingRenderingCompositions( mBlocks, iEvent.GetId() );
+//        RemoveContainingRenderingCompositions( mImages, iEvent.GetId() );
+//    }
+//
+//    mBrushes.Empty();
+//    mTextures.Empty();
+//    mBlocks.Empty();
+//    mImages.Empty();
+//
+//    //---
+//
+//    //TArray<UOdysseyAnimation*> animations;
+//    //map.GetKeys( animations );
+//    //for( UOdysseyAnimation* animation : animations )
+//    //{
+//    //    UE_LOG( LogTemp, Warning, TEXT( "animation2: %p" ), animation );
+//
+//    //    TArray<FFrameNumber> frames;
+//    //    map.MultiFind( animation, frames );
+//    //    for( FFrameNumber frame : frames )
+//    //    {
+//    //        UE_LOG( LogTemp, Warning, TEXT( "animation2: %d" ), frame.Value );
+//
+//    //        BuildThumbnailCache( animation, frame, true );
+//    //    }
+//    //}
+//
+//    UE_LOG( LogTemp, Warning, TEXT( "%s --- num: %d" ), *iEvent.GetId().ToString(), mBrushes.Num() );
+//}
+
+//void
+//SCinematicBoardSectionAnimationTimelineKeys::RebuildThumbnails()
+//{
+//    if( 1 )
+//        return;
+//
+//
+//
+//
+//
+//
+//    mThumbnails.Empty();
+//
+//    TSharedPtr<const FMetaChannel> meta_channel = GetMetaChannel();
+//    if( !meta_channel.IsValid() )
+//        return;
+//
+//    //---
+//
+//    if( !mBoardSection.IsValid() )
+//        return;
+//
+//    FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+//    const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
+//
+//    FMovieSceneInverseSequenceTransform inner_to_outer_transform = subsection_object->OuterToInnerTransform().Inverse();
+//    const UMovieScene* movie_scene = subsection_object->GetTypedOuter<UMovieScene>();
+//    check( movie_scene );
+//
+//    for( const auto& pair : meta_channel->GetMetaKeys() )
+//    {
+//        FFrameNumber meta_frame = pair.Key;
+//        //FMetaKey meta_key = pair.Value;
+//        //FKeyDrawParams key_draw_param = meta_key.mMetaKeyDrawParam;
+//
+//        for( const auto& subkey : pair.Value.mSubKeys )
+//        {
+//            UOdysseyAnimationTimelineSection* animation_timeline_section = Cast<UOdysseyAnimationTimelineSection>( subkey.mSection );
+//            if( !animation_timeline_section )
+//                continue;
+//
+//            //TMovieSceneChannelHandle<FOdysseyAnimationCutChannel> channel_handle = subkey.mChannelHandle.Cast<FOdysseyAnimationCutChannel>();
+//            //FOdysseyAnimationCutChannel* object_channel = channel_handle.Get();
+//
+//            //FFrameNumber frame_in_sequence;
+//            //object_channel->GetKeyTime( subkey.mKeyHandle, frame_in_sequence );
+//
+//            //-
+//
+//            FFrameNumber frame_in_timeline = animation_timeline_section->ConvertFrameFromSequenceToTimeline( meta_frame );
+//            //FFrameNumber frame_in_timeline = animation_timeline_section->ConvertFrameFromSequenceToTimeline( frame_in_sequence );
+//            if( frame_in_timeline < 0 )
+//            {
+//                FFrameNumber debug = 2; debug = frame_in_timeline;
+//            }
+//
+//            TOptional<FFrameTime> outer_time = inner_to_outer_transform.TryTransformTime( meta_frame );
+//            //TOptional<FFrameTime> outer_time = inner_to_outer_transform.TryTransformTime( frame_in_sequence );
+//            if( !outer_time )
+//                continue;
+//
+//            UE_LOG( LogTemp, Warning, TEXT( "frame_in_timeline.Value: %d" ), frame_in_timeline.Value );
+//
+//            //---
+//
+//            UOdysseyAnimation* animation = animation_timeline_section->GetAnimation();
+//
+//            TSharedPtr<::ULIS::FBlock> block_full = MakeShared<::ULIS::FBlock>( animation->GetWidth(), animation->GetHeight(), animation->GetFormat() );
+//
+//            ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( animation->GetFormat() );
+//
+//            TSharedPtr<IOdysseyImageRenderer> renderer = animation->BuildImageRenderer( IOdysseyImageRenderer::eRenderType::Render, frame_in_timeline.Value );
+//            renderer->Init();
+//            FOdysseyImageRendererCopyParams params( block_full, { block_full->Rect() } );
+//            renderer->Copy( params, {} );
+//
+//            float ratio = animation->GetWidth() / float( animation->GetHeight() );
+//            const FIntVector2 thumbnail_size( 200 * ratio, 200 );
+//            TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>( thumbnail_size.X, thumbnail_size.Y, animation->GetFormat() );
+//            ctx.Resize( *block_full, *block );
+//
+//            ctx.Finish();
+//
+//            //-
+//
+//            TConstArrayView64<uint8> data( block->Bits(), block->BytesTotal() );
+//            UTexture2D* texture = UTexture2D::CreateTransient(
+//                block->Width(),
+//                block->Height(),
+//                EPixelFormat::PF_B8G8R8A8,
+//                NAME_None,
+//                data
+//            );
+//
+//            FUpdateTextureRegion2D* region = new FUpdateTextureRegion2D( 0, 0, 0, 0, block->Width(), block->Height() );
+//            int blockBytes = GPixelFormats[EPixelFormat::PF_B8G8R8A8].BlockBytes;
+//            texture->UpdateTextureRegions(
+//                0
+//                , 1
+//                , region
+//                , block->Width() * blockBytes
+//                , blockBytes
+//                , block->Bits()
+//                , []( uint8*, const FUpdateTextureRegion2D* iRegions )
+//                {
+//                    delete iRegions;
+//                }
+//            );
+//
+//            ////////////////////////////
+//            // Fence now to ensure the update is processed on the GPU by the end of this function
+//            FRenderCommandFence fence;
+//            fence.BeginFence();
+//            fence.Wait();
+//
+//            //-
+//
+//            FSlateBrush* brush = new FSlateBrush();
+//
+//            brush->SetResourceObject( texture );
+//
+//            //---
+//
+//            FThumbnailData thumbnail;
+//            thumbnail.QTime = FQualifiedFrameTime( *outer_time, movie_scene->GetTickResolution() );
+//            thumbnail.Texture = texture;
+//            thumbnail.Brush = brush;
+//            thumbnail.Size = thumbnail_size;
+//
+//            mThumbnails.Add( thumbnail );
+//
+//            break; // only the first subkey is used
+//        }
+//    }
+//}
+
+//TArray<FGuid>
+//SCinematicBoardSectionAnimationTimelineKeys::BuildThumbnailCache( UOdysseyAnimation* iAnimation, FFrameNumber iFrameTimeline, bool iForce ) const
+//{
+//    TArray<FGuid> renderingComposition = iAnimation->GetImageRenderingComposition( IOdysseyImageRenderer::eRenderType::Render, iFrameTimeline.Value );
+//
+//    if( !mImages.Contains( renderingComposition ) || iForce )
+//    {
+//        TSet<int32> image;
+//        image.Add( iFrameTimeline.Value );
+//        mImages.Add( renderingComposition, image );
+//    }
+//    else
+//    {
+//        TSet<int32>& image = mImages.FindChecked( renderingComposition );
+//        image.Add( iFrameTimeline.Value );
+//    }
+//
+//    //---
+//
+//    TSharedPtr<::ULIS::FBlock> block;
+//    if( !mBlocks.Contains( renderingComposition ) || iForce )
+//    {
+//        TSharedPtr<::ULIS::FBlock> block_full = MakeShared<::ULIS::FBlock>( iAnimation->GetWidth(), iAnimation->GetHeight(), iAnimation->GetFormat() );
+//
+//        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( iAnimation->GetFormat() );
+//
+//        TSharedPtr<IOdysseyImageRenderer> renderer = iAnimation->BuildImageRenderer( IOdysseyImageRenderer::eRenderType::Render, iFrameTimeline.Value );
+//        renderer->Init();
+//        FOdysseyImageRendererCopyParams params( block_full, { block_full->Rect() } );
+//        renderer->Copy( params, {} );
+//
+//        float ratio = iAnimation->GetWidth() / float( iAnimation->GetHeight() );
+//        const FIntVector2 thumbnail_size( 200 * ratio, 200 );
+//        block = MakeShared<::ULIS::FBlock>( thumbnail_size.X, thumbnail_size.Y, iAnimation->GetFormat() );
+//        ctx.Resize( *block_full, *block );
+//
+//        ctx.Finish();
+//
+//        mBlocks.Add( renderingComposition, block );
+//    }
+//    else
+//    {
+//        block = mBlocks.FindChecked( renderingComposition );
+//    }
+//
+//    //---
+//
+//    UTexture2D* texture = nullptr;
+//    if( !mTextures.Contains( renderingComposition ) || iForce )
+//    {
+//        TConstArrayView64<uint8> data( block->Bits(), block->BytesTotal() );
+//        texture = UTexture2D::CreateTransient(
+//            block->Width(),
+//            block->Height(),
+//            EPixelFormat::PF_B8G8R8A8,
+//            NAME_None,
+//            data
+//        );
+//
+//        mTextures.Add( renderingComposition, texture );
+//
+//        FUpdateTextureRegion2D* region = new FUpdateTextureRegion2D( 0, 0, 0, 0, block->Width(), block->Height() );
+//        int blockBytes = GPixelFormats[EPixelFormat::PF_B8G8R8A8].BlockBytes;
+//        texture->UpdateTextureRegions(
+//            0
+//            , 1
+//            , region
+//            , block->Width() * blockBytes
+//            , blockBytes
+//            , block->Bits()
+//            , []( uint8*, const FUpdateTextureRegion2D* iRegions )
+//            {
+//                delete iRegions;
+//            }
+//        );
+//
+//        ////////////////////////////
+//        // Fence now to ensure the update is processed on the GPU by the end of this function
+//        FRenderCommandFence fence;
+//        fence.BeginFence();
+//        fence.Wait();
+//    }
+//    else
+//    {
+//        texture = mTextures.FindChecked( renderingComposition );
+//    }
+//
+//    //---
+//
+//    FSlateBrush* brush = nullptr;
+//    if( !mBrushes.Contains( renderingComposition ) || iForce )
+//    {
+//        brush = new FSlateBrush();
+//
+//        mBrushes.Add( renderingComposition, brush );
+//    }
+//    else
+//    {
+//        brush = mBrushes.FindChecked( renderingComposition );
+//    }
+//
+//    if( brush->GetResourceObject() != texture )
+//        brush->SetResourceObject( texture );
+//
+//    //---
+//
+//    return renderingComposition;
+//}
+
 //---
 
 bool
 SCinematicBoardSectionAnimationTimelineKeys::BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder, TSharedPtr<FMetaChannel> iKeys ) //override
 {
-    auto CloneKey = [this]( TSharedPtr<FMetaChannel> iKeys )
+    auto EditAnimation = [=]( UOdysseyAnimation* iAnimation )
     {
-        if( iKeys->NumMetaKeys() != 1 ) // For the moment, only 1 metakey can be cloned
-            return;
-
-        auto it = iKeys->GetMetaKeys().CreateConstIterator();
-        if( it.Value().mSubKeys.Num() != 1 ) // For the moment, only 1 subkey can be cloned
-            return;
-
-        FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
-        const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
-        ISequencer* sequencer = board_section->GetSequencer().Get();
-        FFrameNumber local_frame = sequencer->GetLocalTime().Time.FrameNumber;
-
-        for( auto pair : iKeys->GetMetaKeys() )
-        {
-            for( const auto& subkey : pair.Value.mSubKeys )
-            {
-                BoardSequenceTools::CloneDrawing( sequencer, *subsection_object, subkey.mSection.Get(), subkey.mChannelHandle, subkey.mKeyHandle, local_frame );
-
-                break; // Only 1 key for the moment, and otherwise, CloneDrawing should take 3 arrays like DeleteDrawing
-            }
-        }
-    };
-
-    auto CanCloneKey = [this]( TSharedPtr<FMetaChannel> iKeys ) -> bool
-    {
-        if( iKeys->NumMetaKeys() != 1 ) // For the moment, only 1 metakey can be cloned
-            return false;
-
-        auto it = iKeys->GetMetaKeys().CreateConstIterator();
-        if( it.Value().mSubKeys.Num() != 1 ) // For the moment, only 1 subkey can be cloned
-            return false;
-
-        ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
-        const UMovieSceneSubSection& subsection_object = mBoardSection.Pin()->GetSubSectionObject();
-        FFrameNumber local_frame = sequencer->GetLocalTime().Time.FrameNumber;
-
-        return BoardSequenceTools::CanCloneDrawing( sequencer, subsection_object, local_frame, mBinding.GetGuid() );
-    };
-
-    //-
-
-    auto DeleteKey = [this]( TSharedPtr<FMetaChannel> iKeys )
-    {
-        FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
-        const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
-        ISequencer* sequencer = board_section->GetSequencer().Get();
-
-        TArray<TWeakObjectPtr<UMovieSceneSection>> sections;
-        TArray<FMovieSceneChannelHandle> channelHandles;
-        TArray<FKeyHandle> keyHandles;
-
-        for( auto pair : iKeys->GetMetaKeys() )
-        {
-            for( const auto& subkey : pair.Value.mSubKeys )
-            {
-                sections.Add( subkey.mSection );
-                channelHandles.Add( subkey.mChannelHandle );
-                keyHandles.Add( subkey.mKeyHandle );
-            }
-        }
-
-        BoardSequenceTools::DeleteDrawing( sequencer, *subsection_object, sections, channelHandles, keyHandles );
-    };
-
-    auto CanDeleteKey = [=]( TSharedPtr<FMetaChannel> iKeys ) -> bool
-    {
-        return true;
-    };
-
-    //-
-
-    auto EditKeyMaterial = [=]( UMaterialInstance* iMaterialInstance )
-    {
-        if( !iMaterialInstance )
+        if( !iAnimation )
             return;
 
         UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
-        check( !AssetEditorSubsystem->FindEditorsForAsset( iMaterialInstance ).Num() );
+        check( !AssetEditorSubsystem->FindEditorsForAsset( iAnimation ).Num() );
 
-        AssetEditorSubsystem->OpenEditorForAsset( iMaterialInstance );
+        AssetEditorSubsystem->OpenEditorForAsset( iAnimation );
     };
 
-    auto CanEditKeyMaterial = [=]( UMaterialInstance* iMaterialInstance ) -> bool
+    auto CanEditAnimation = [=]( UOdysseyAnimation* iAnimation ) -> bool
     {
         UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
 
-        TArray<IAssetEditorInstance*> opened_editors = AssetEditorSubsystem->FindEditorsForAsset( iMaterialInstance );
+        TArray<IAssetEditorInstance*> opened_editors = AssetEditorSubsystem->FindEditorsForAsset( iAnimation );
         //FName name = opened_editors.Num() ? opened_editors[0]->GetEditorName() : NAME_None;
 
         return !opened_editors.Num();
@@ -1065,17 +1628,22 @@ SCinematicBoardSectionAnimationTimelineKeys::BuildKeyContextMenu( FMenuBuilder& 
 
     //-
 
-    TArray<UMaterialInstance*> materials;
+    UOdysseyAnimation* animation = nullptr;
     for( auto pair : iKeys->GetMetaKeys() )
     {
         for( const auto& subkey : pair.Value.mSubKeys )
         {
-            FDrawing drawing = ShotSequenceHelpers::ConvertToDrawing( subkey.mSection, subkey.mChannelHandle, subkey.mKeyHandle );
+            TMovieSceneChannelHandle<FOdysseyAnimationCutChannel> channel_handle = subkey.mChannelHandle.Cast<FOdysseyAnimationCutChannel>();
+            FOdysseyAnimationCutChannel* object_channel = channel_handle.Get();
 
-            UMaterialInstance* material = drawing.GetMaterial();
+            FFrameNumber frame_in_sequence;
+            object_channel->GetKeyTime( subkey.mKeyHandle, frame_in_sequence );
 
-            if( material )
-                materials.Add( material );
+            FOdysseyAnimationCutValue value;
+            UE::MovieScene::GetKeyValue( object_channel, subkey.mKeyHandle, value );
+            FAnimationCut animationcut = value.Value;
+
+            animation = animationcut.GetAnimation();
         }
     }
 
@@ -1084,45 +1652,16 @@ SCinematicBoardSectionAnimationTimelineKeys::BuildKeyContextMenu( FMenuBuilder& 
     FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
     ISequencer* sequencer = board_section->GetSequencer().Get();
 
-    ioMenuBuilder.BeginSection( NAME_None, LOCTEXT( "material-key-section-label", "Material" ) );
+    ioMenuBuilder.BeginSection( NAME_None, LOCTEXT( "animationcut-key-section-label", "Animation" ) );
 
-    if( materials.Num() > 1 )
+    if( animation )
     {
-        for( auto material : materials )
-        {
-            ioMenuBuilder.AddMenuEntry( FText::Format( LOCTEXT( "edit-material-multi-key-label", "Edit {0}..." ), FText::FromString( material->GetName() ) ),
-                                        LOCTEXT( "edit-material-multi-key-tooltip", "Edit the material of the current key with its default editor\n(If it's not possible, the material is already opened)" ),
-                                        FSlateIcon(),
-                                        FUIAction( FExecuteAction::CreateLambda( EditKeyMaterial, material ),
-                                                   FCanExecuteAction::CreateLambda( CanEditKeyMaterial, material ) ) );
-        }
-    }
-    else if( materials.Num() == 1 )
-    {
-        ioMenuBuilder.AddMenuEntry( LOCTEXT( "edit-material-key-label", "Edit..." ),
-                                    LOCTEXT( "edit-material-key-tooltip", "Edit the material of the current key with its default editor\n(If it's not possible, the material is already opened)" ),
+        ioMenuBuilder.AddMenuEntry( LOCTEXT( "edit-animationcut-key-label", "Edit..." ),
+                                    LOCTEXT( "edit-animationcut-key-tooltip", "Edit the animation of the current key with its default editor\n(If it's not possible, the animation is already opened)" ),
                                     FSlateIcon(),
-                                    FUIAction( FExecuteAction::CreateLambda( EditKeyMaterial, materials[0] ),
-                                               FCanExecuteAction::CreateLambda( CanEditKeyMaterial, materials[0] ) ) );
+                                    FUIAction( FExecuteAction::CreateLambda( EditAnimation, animation ),
+                                               FCanExecuteAction::CreateLambda( CanEditAnimation, animation ) ) );
     }
-
-    ioMenuBuilder.AddMenuEntry( LOCTEXT( "edit-material-master-label", "Edit Master..." ),
-                                LOCTEXT( "edit-material-master-tooltip", "Edit the master material of all keys with its default editor\n(If it's not possible, the material is already opened)" ),
-                                FSlateIcon(),
-                                FUIAction( FExecuteAction::CreateLambda( EditKeyMaterial, MasterAssetTools::GetMasterMaterial( *sequencer, sequencer->GetFocusedMovieSceneSequence(), sequencer->GetFocusedTemplateID() ) ),
-                                           FCanExecuteAction::CreateLambda( CanEditKeyMaterial, MasterAssetTools::GetMasterMaterial( *sequencer, sequencer->GetFocusedMovieSceneSequence(), sequencer->GetFocusedTemplateID() ) ) ) );
-
-    ioMenuBuilder.AddMenuEntry( FText::Format( LOCTEXT( "clone-material-key-label", "Clone at {0}" ), FText::FromString( sequencer->GetNumericTypeInterface()->ToString( sequencer->GetLocalTime().Time.AsDecimal() ) ) ),
-                                LOCTEXT( "clone-material-key-tooltip", "Clone the current key (material and texture) at the current frame" ),
-                                FSlateIcon( FAppStyle::Get().GetStyleSetName(), "GenericCommands.Duplicate" ),
-                                FUIAction( FExecuteAction::CreateLambda( CloneKey, iKeys ),
-                                           FCanExecuteAction::CreateLambda( CanCloneKey, iKeys ) ) );
-
-    ioMenuBuilder.AddMenuEntry( LOCTEXT( "delete-material-key-label", "Delete" ), //TODO: find a way to know the number of "symbolic" keys deleted, 1 symbolic key should represent a key at the same time for all the channels -> see camera key delete
-                                LOCTEXT( "delete-material-key-tooltip", "Delete the current key" ),
-                                FSlateIcon( FAppStyle::Get().GetStyleSetName(), "GenericCommands.Delete" ),
-                                FUIAction( FExecuteAction::CreateLambda( DeleteKey, iKeys ),
-                                           FCanExecuteAction::CreateLambda( CanDeleteKey, iKeys ) ) );
 
     ioMenuBuilder.EndSection();
 
@@ -1139,29 +1678,45 @@ SCinematicBoardSectionAnimationTimelineKeys::GetKeyTooltipText( TSharedPtr<FMeta
 
     FText animation_track_text = inner_moviescene ? inner_moviescene->GetObjectDisplayName( mBinding.GetGuid() ) : FText::GetEmpty();
 
-    TMap<FString, FString> map; // Maybe use a TMultiMap if we want to display multiple textures inside 1 material
+    UOdysseyAnimation* animation = nullptr;
+    TMultiMap<FFrameNumber, FText> map;
     for( auto pair : iKeys->GetMetaKeys() )
     {
         for( const auto& subkey : pair.Value.mSubKeys )
         {
-            FDrawing drawing = ShotSequenceHelpers::ConvertToDrawing( subkey.mSection, subkey.mChannelHandle, subkey.mKeyHandle );
+            TMovieSceneChannelHandle<FOdysseyAnimationCutChannel> channel_handle = subkey.mChannelHandle.Cast<FOdysseyAnimationCutChannel>();
+            FOdysseyAnimationCutChannel* object_channel = channel_handle.Get();
 
-            UMaterialInstance* material = drawing.GetMaterial();
-            UTexture2D* texture = ProjectAssetTools::GetTexture2D( nullptr, material );
+            FFrameNumber frame_in_sequence;
+            object_channel->GetKeyTime( subkey.mKeyHandle, frame_in_sequence );
 
-            if( material )
+            FOdysseyAnimationCutValue value;
+            UE::MovieScene::GetKeyValue( object_channel, subkey.mKeyHandle, value );
+            FAnimationCut animationcut = value.Value;
+            animation = animationcut.GetAnimation();
+
+            TArray<UOdysseyAnimationCell*> cells = animationcut.GetCellsReference();
+            for( UOdysseyAnimationCell* cell : cells )
             {
-                map.Add( material->GetName(), texture ? texture->GetName() : TEXT( "" ) );
+                map.Add( frame_in_sequence, cell->GetLayer()->GetLayerName() );
             }
         }
     }
 
     TArray<FText> lines;
     lines.Add( FText::Format( LOCTEXT( "tooltip-animation-timeline-key-animation-name", "Animation: {0}" ), animation_track_text ) );
-    for( const auto& pair : map )
+
+    TArray<FFrameNumber> keys;
+    map.GetKeys( keys );
+    for( FFrameNumber key : keys )
     {
-        lines.Add( FText::Format( LOCTEXT( "tooltip-animation-timeline-key-value-material", "xxxMaterial: {0}" ), FText::FromString( pair.Key ) ) );
-        lines.Add( FText::Format( LOCTEXT( "tooltip-animation-timeline-key-value-texture", "xxxTexture: {0}" ), FText::FromString( pair.Value ) ) );
+        FFrameTime frametime = FFrameRate::TransformTime( key, inner_moviescene->GetTickResolution(), inner_moviescene->GetDisplayRate() );
+        lines.Add( FText::Format( LOCTEXT( "tooltip-animation-timeline-key-value-frame", "Frame: {0}" ), FText::AsNumber( frametime.GetFrame().Value ) ) );
+
+        TArray<FText> values;
+        map.MultiFind( key, values );
+        for( FText value : values )
+            lines.Add( FText::Format( LOCTEXT( "tooltip-animation-timeline-key-value-layer-name", "Layer: {0}" ), value ) );
     }
 
     return FText::Join( FText::FromString( TEXT( "\n" ) ), lines );
@@ -1182,6 +1737,283 @@ SCinematicBoardSectionAnimationTimelineKeys::GetAreaTooltipText() const //overri
 
     return FText::Join( FText::FromString( TEXT( "\n" ) ), animation_text, num_keys_text );
 }
+
+//---
+
+void
+SCinematicBoardSectionAnimationTimelineKeys::OnStartDragKeys( TSharedPtr<FMetaChannel> iKeys ) //override
+{
+}
+
+static
+void
+GetKeyHandlesAndNewFrames( TSharedPtr<FMetaChannel> iKeys, TMultiMap<UOdysseyAnimationTimelineSection*, FKeyHandle>& oKeyHandlesBySectionMap, TMultiMap<UOdysseyAnimationTimelineSection*, FFrameNumber>& oNewFramesBySectionMap )
+{
+    oKeyHandlesBySectionMap.Empty();
+    oNewFramesBySectionMap.Empty();
+
+    struct FKeyHandleAndFrames
+    {
+        FKeyHandle KeyHandle;
+        FFrameNumber NewFrameInTimeline;
+        FAnimationCut AnimationCut;
+    };
+
+    TMap<UOdysseyAnimationTimelineSection*, TArray<FKeyHandleAndFrames>> dragged_animationcuts_map;
+    for( auto pair : iKeys->GetMetaKeys() )
+    {
+        for( const auto& subkey : pair.Value.mSubKeys )
+        {
+            UOdysseyAnimationTimelineSection* animation_timeline_section = Cast<UOdysseyAnimationTimelineSection>( subkey.mSection );
+            if( !animation_timeline_section )
+                continue;
+
+            TMovieSceneChannelHandle<FOdysseyAnimationCutChannel> channel_handle = subkey.mChannelHandle.Cast<FOdysseyAnimationCutChannel>();
+            FOdysseyAnimationCutChannel* object_channel = channel_handle.Get();
+
+            FFrameNumber frame_in_sequence;
+            object_channel->GetKeyTime( subkey.mKeyHandle, frame_in_sequence );
+
+            FFrameNumber frame_in_timeline = animation_timeline_section->ConvertFrameFromSequenceToTimeline( frame_in_sequence );
+
+            FOdysseyAnimationCutValue value;
+            UE::MovieScene::GetKeyValue( object_channel, subkey.mKeyHandle, value );
+            FAnimationCut animationcut = value.Value;
+
+            FKeyHandleAndFrames new_key_handle = { subkey.mKeyHandle, frame_in_timeline, animationcut };
+            TArray<FKeyHandleAndFrames>* key_handles = dragged_animationcuts_map.Find( animation_timeline_section );
+            if( !key_handles )
+            {
+                TArray<FKeyHandleAndFrames> new_key_handles;
+                new_key_handles.Add( new_key_handle );
+
+                dragged_animationcuts_map.Add( animation_timeline_section, new_key_handles );
+            }
+            else
+            {
+                key_handles->Add( new_key_handle );
+            }
+        }
+    }
+
+    if( dragged_animationcuts_map.IsEmpty() )
+        return;
+
+    for( auto pair : dragged_animationcuts_map )
+    {
+        UOdysseyAnimationTimelineSection* animation_timeline_section = pair.Key;
+        TArray<FKeyHandleAndFrames> dragged_key_handles = pair.Value;
+
+        for( const FKeyHandleAndFrames& handles_and_frames : dragged_key_handles )
+        {
+            oKeyHandlesBySectionMap.Add( animation_timeline_section, handles_and_frames.KeyHandle );
+            oNewFramesBySectionMap.Add( animation_timeline_section, handles_and_frames.NewFrameInTimeline );
+        }
+    }
+}
+
+void
+SCinematicBoardSectionAnimationTimelineKeys::OnDragKeys( TSharedPtr<FMetaChannel> iKeys ) //override
+{
+    TMultiMap<UOdysseyAnimationTimelineSection*, FKeyHandle> key_handles_map;
+    TMultiMap<UOdysseyAnimationTimelineSection*, FFrameNumber> new_frames_in_timeline_map;
+    GetKeyHandlesAndNewFrames( iKeys, key_handles_map, new_frames_in_timeline_map );
+
+    TArray<UOdysseyAnimationTimelineSection*> sections;
+    key_handles_map.GetKeys( sections );
+    for( int i = 0; i < sections.Num(); i++ )
+    {
+        UOdysseyAnimationTimelineSection* section = sections[i];
+
+        TArray<FKeyHandle> key_handles;
+        key_handles_map.MultiFind( section, key_handles );
+        //TArray<FFrameNumber> new_frames_in_timeline;
+        //new_frames_in_timeline_map.MultiFind( section, new_frames_in_timeline );
+
+        section->UpdateAnimationCutChannel( key_handles, EPropertyChangeType::Interactive );
+    }
+
+    //mNeedRebuildThumbnails = true;
+    //RebuildMetaChannel();
+}
+
+void
+SCinematicBoardSectionAnimationTimelineKeys::OnStopDragKeys( TSharedPtr<FMetaChannel> iKeys ) //override
+{
+    TMultiMap<UOdysseyAnimationTimelineSection*, FKeyHandle> key_handles_map;
+    TMultiMap<UOdysseyAnimationTimelineSection*, FFrameNumber> new_frames_in_timeline_map;
+    GetKeyHandlesAndNewFrames( iKeys, key_handles_map, new_frames_in_timeline_map );
+
+    TArray<UOdysseyAnimationTimelineSection*> sections;
+    key_handles_map.GetKeys( sections );
+    for( int i = 0; i < sections.Num(); i++ )
+    {
+        UOdysseyAnimationTimelineSection* section = sections[i];
+
+        TArray<FKeyHandle> key_handles;
+        key_handles_map.MultiFind( section, key_handles );
+        //TArray<FFrameNumber> new_frames_in_timeline;
+        //new_frames_in_timeline_map.MultiFind( section, new_frames_in_timeline );
+
+        section->UpdateAnimationCutChannel( key_handles, EPropertyChangeType::ValueSet );
+    }
+
+    //mNeedRebuildThumbnails = true;
+    //RebuildMetaChannel();
+}
+
+void
+SCinematicBoardSectionAnimationTimelineKeys::OnClickKeys( TSharedPtr<FMetaChannel> iKeys ) //override
+{
+}
+
+void
+SCinematicBoardSectionAnimationTimelineKeys::ComputeClampRangePreMoveDuringDrag( TSharedPtr<FMetaChannel> iKeys, TRange<FFrameNumber>& oClampRangeInSubsequence ) const //override
+{
+    TRange<FFrameNumber> board_section_clamp_range_in_subsequence;
+    SMetaKeysArea::ComputeClampRangePreMoveDuringDrag( mDraggedKeys, board_section_clamp_range_in_subsequence ); // Always call the default clamp range to get min/max boundary of the whole board section in the board track
+
+    //-
+
+    FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+    const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
+    ISequencer* sequencer = board_section->GetSequencer().Get();
+
+    FFrameNumber clamp_max2 = UE::MovieScene::DiscreteExclusiveUpper( board_section_clamp_range_in_subsequence.GetUpperBound() ) - 1;
+
+    BoardSequenceHelpers::FInnerSequenceResult result_inner = BoardSequenceHelpers::GetInnerSequence( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
+    ShotSequenceHelpers::FFindOrCreateTimelineResult result = ShotSequenceHelpers::FindTimelineTrackAndSections( *sequencer, result_inner.mInnerSequence, result_inner.mInnerSequenceId, mBinding.GetGuid(), clamp_max2 );
+    if( result.mSections.Num() )
+    {
+        //TODO: certainly make a loop over all sections (?)
+        FFrameNumber frame_in_timeline = result.mSections[0]->ConvertFrameFromSequenceToTimeline( clamp_max2 );
+        FFrameNumber frame_in_sequence = result.mSections[0]->ConvertFrameFromTimelineToSequence( frame_in_timeline );
+
+        clamp_max2 = frame_in_sequence;
+    }
+
+    board_section_clamp_range_in_subsequence.SetUpperBound( TRangeBound<FFrameNumber>::Inclusive( clamp_max2 ) );
+
+    //---
+
+    // Get all key handles for each section
+    TMultiMap<UOdysseyAnimationTimelineSection*, FKeyHandle> dragged_keys_map;
+    for( auto pair : iKeys->GetMetaKeys() )
+    {
+        for( const auto& subkey : pair.Value.mSubKeys )
+        {
+            UOdysseyAnimationTimelineSection* animation_timeline_section = Cast<UOdysseyAnimationTimelineSection>( subkey.mSection );
+            if( !animation_timeline_section )
+                continue;
+
+            TMovieSceneChannelHandle<FOdysseyAnimationCutChannel> channel_handle = subkey.mChannelHandle.Cast<FOdysseyAnimationCutChannel>();
+            FOdysseyAnimationCutChannel* object_channel = channel_handle.Get();
+            check( object_channel == &animation_timeline_section->GetAnimationCutChannel() );
+
+            dragged_keys_map.Add( animation_timeline_section, subkey.mKeyHandle );
+        }
+    }
+
+    // Get the key handle limits combining all sections
+    TPair<UOdysseyAnimationTimelineSection*, FKeyHandle> first_limit_handle;
+    TPair<UOdysseyAnimationTimelineSection*, FKeyHandle> last_limit_handle;
+
+    TSet<UOdysseyAnimationTimelineSection*> sections;
+    dragged_keys_map.GetKeys( sections );
+    for( UOdysseyAnimationTimelineSection* section : sections )
+    {
+        TArray<FKeyHandle> handles;
+        dragged_keys_map.MultiFind( section, handles );
+
+        FKeyHandle previous_handle_in_section = section->GetAnimationCutChannel().FindPreviousKey( handles );
+        FKeyHandle next_handle_in_section = section->GetAnimationCutChannel().FindNextKey( handles );
+
+        if( previous_handle_in_section.IsValid() )
+        {
+            FFrameNumber previous_frame_in_section;
+            section->GetAnimationCutChannel().GetKeyTime( previous_handle_in_section, previous_frame_in_section );
+
+            if( !first_limit_handle.Key )
+            {
+                first_limit_handle.Key = section;
+                first_limit_handle.Value = previous_handle_in_section;
+            }
+            else
+            {
+                FFrameNumber previous_frame;
+                first_limit_handle.Key->GetAnimationCutChannel().GetKeyTime( first_limit_handle.Value, previous_frame );
+
+                if( previous_frame_in_section < previous_frame )
+                {
+                    first_limit_handle.Key = section;
+                    first_limit_handle.Value = previous_handle_in_section;
+                }
+            }
+        }
+        if( next_handle_in_section.IsValid() )
+        {
+            FFrameNumber next_frame_in_section;
+            section->GetAnimationCutChannel().GetKeyTime( next_handle_in_section, next_frame_in_section );
+
+            if( !last_limit_handle.Key )
+            {
+                last_limit_handle.Key = section;
+                last_limit_handle.Value = next_handle_in_section;
+            }
+            else
+            {
+                FFrameNumber next_frame;
+                last_limit_handle.Key->GetAnimationCutChannel().GetKeyTime( last_limit_handle.Value, next_frame );
+
+                if( next_frame_in_section > next_frame )
+                {
+                    last_limit_handle.Key = section;
+                    last_limit_handle.Value = next_handle_in_section;
+                }
+            }
+        }
+    }
+
+    // Compute the limit range of both key handle limits
+    TRange<FFrameNumber> prev_last_cell_clamp_range_in_subsequence = TRange<FFrameNumber>::All();
+    if( first_limit_handle.Key )
+    {
+        FFrameNumber frame_in_sequence;
+        first_limit_handle.Key->GetAnimationCutChannel().GetKeyTime( first_limit_handle.Value, frame_in_sequence );
+        FFrameNumber frame_in_timeline = first_limit_handle.Key->ConvertFrameFromSequenceToTimeline( frame_in_sequence );
+        frame_in_sequence = first_limit_handle.Key->ConvertFrameFromTimelineToSequence( frame_in_timeline + 1 );
+
+        prev_last_cell_clamp_range_in_subsequence.SetLowerBound( TRangeBound<FFrameNumber>::Inclusive( frame_in_sequence ) );
+    }
+    else
+    {
+        FFrameNumber frame_in_sequence_min_0 = TNumericLimits<FFrameNumber>::Max();
+        for( UOdysseyAnimationTimelineSection* section : sections )
+        {
+            FFrameNumber frame_in_sequence_0 = section->ConvertFrameFromTimelineToSequence( 0 ); // If no previous animationcut, the timeline can't never be before frame 0
+            if( frame_in_sequence_min_0 > frame_in_sequence_0 )
+                frame_in_sequence_min_0 = frame_in_sequence_0;
+        }
+
+        if( sections.Num() )
+            prev_last_cell_clamp_range_in_subsequence.SetLowerBound( TRangeBound<FFrameNumber>::Inclusive( frame_in_sequence_min_0 ) );
+    }
+    if( last_limit_handle.Key )
+    {
+        FFrameNumber frame_in_sequence;
+        last_limit_handle.Key->GetAnimationCutChannel().GetKeyTime( last_limit_handle.Value, frame_in_sequence );
+        FFrameNumber frame_in_timeline = last_limit_handle.Key->ConvertFrameFromSequenceToTimeline( frame_in_sequence );
+        frame_in_sequence = last_limit_handle.Key->ConvertFrameFromTimelineToSequence( frame_in_timeline - 1 );
+
+        prev_last_cell_clamp_range_in_subsequence.SetUpperBound( TRangeBound<FFrameNumber>::Inclusive( frame_in_sequence ) );
+    }
+
+    //---
+
+    oClampRangeInSubsequence = TRange<FFrameNumber>::Intersection( board_section_clamp_range_in_subsequence, prev_last_cell_clamp_range_in_subsequence );
+}
+
+//---
 
 FCursorReply
 SCinematicBoardSectionAnimationTimelineKeys::OnCursorQuery( const FGeometry& MyGeometry, const FPointerEvent& CursorEvent ) const //override
@@ -1207,6 +2039,18 @@ SCinematicBoardSectionAnimationTimelineKeys::OnMouseMove( const FGeometry& MyGeo
     return SMetaKeysArea::OnMouseMove( MyGeometry, MouseEvent );
 }
 
+void
+SCinematicBoardSectionAnimationTimelineKeys::Tick( const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime ) //override
+{
+    //if( mNeedRebuildThumbnails )
+    //{
+    //    mNeedRebuildThumbnails = false;
+    //    RebuildThumbnails();
+    //}
+
+    return SMetaKeysArea::Tick( AllottedGeometry, InCurrentTime, InDeltaTime );
+}
+
 const FSlateBrush*
 SCinematicBoardSectionAnimationTimelineKeys::GetBackgroundBrush() const //override
 {
@@ -1216,12 +2060,194 @@ SCinematicBoardSectionAnimationTimelineKeys::GetBackgroundBrush() const //overri
 }
 
 int32
+SCinematicBoardSectionAnimationTimelineKeys::DrawThumbnails( const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled ) const
+{
+    if( !mBoardSection.IsValid() )
+        return LayerId;
+
+    FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+    const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
+
+    FTimeToPixel converter = board_section->ConstructConverterForSection( AllottedGeometry );
+
+    //UE_LOG( LogTemp, Warning, TEXT( "mThumbnails count: %d" ), mThumbnails.Num() );
+
+    for( const FCinematicBoardSection::FThumbnailData& thumbnail : board_section->GetAnimationTimelineThumbnails( mBinding ) )
+    //for( const FThumbnailData& thumbnail : mThumbnails )
+    {
+            FIntVector2 thumbnail_size;
+            thumbnail_size.Y = AllottedGeometry.GetLocalSize().Y * .9f;
+            thumbnail_size.X = thumbnail_size.Y * ( thumbnail.Size.X / float( thumbnail.Size.Y ) );
+
+            const float KeyPositionPx = converter.SecondsToPixel( thumbnail.QTime.AsSeconds() );
+            const FVector2D KeyTranslation( KeyPositionPx, ( ( AllottedGeometry.GetLocalSize().Y / 2.0f ) - ( thumbnail_size.Y / 2.0f ) ) );
+
+            FLinearColor borderTint = FLinearColor( 0.5f, 0.5f, 0.5f, 1.0f );
+
+            FSlateDrawElement::MakeBox(
+                OutDrawElements,
+                LayerId,
+                AllottedGeometry.ToPaintGeometry( FVector2D( thumbnail_size.X, thumbnail_size.Y ), FSlateLayoutTransform( KeyTranslation ) ),
+                mCheckboardBrush,
+                ESlateDrawEffect::None,
+                borderTint
+            );
+
+            FSlateDrawElement::MakeBox(
+                OutDrawElements,
+                LayerId,
+                AllottedGeometry.ToPaintGeometry( FVector2D( thumbnail_size.X, thumbnail_size.Y ), FSlateLayoutTransform( KeyTranslation ) ),
+                thumbnail.Brush,
+                ESlateDrawEffect::None,
+                borderTint
+            );
+
+            static const FSlateBrush* SepBrush = new FSlateColorBrush( FColor::Black );
+            const FVector2D SepSize( 3, AllottedGeometry.GetLocalSize().Y - 2 );
+            const FVector2D SepTranslation( KeyPositionPx - FMath::CeilToFloat( SepSize.X / 2.0f ), ( ( AllottedGeometry.GetLocalSize().Y / 2.0f ) - ( SepSize.Y / 2.0f ) ) );
+
+            FSlateDrawElement::MakeBox(
+                OutDrawElements,
+                LayerId,
+                AllottedGeometry.ToPaintGeometry( SepSize, FSlateLayoutTransform( SepTranslation ) ),
+                SepBrush,
+                ESlateDrawEffect::None,
+                borderTint
+            );
+
+        LayerId++;
+    }
+
+    return LayerId;
+}
+
+//int32
+//SCinematicBoardSectionAnimationTimelineKeys::DrawThumbnails( const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled ) const
+//{
+//    TSharedPtr<const FMetaChannel> meta_channel = GetMetaChannel();
+//
+//    if( !meta_channel.IsValid() )
+//        return LayerId;
+//
+//    //---
+//
+//    if( !mBoardSection.IsValid() )
+//        return LayerId;
+//
+//    FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+//    const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
+//
+//    FVector2D localSectionSize = AllottedGeometry.GetLocalSize();
+//    FTimeToPixel converter = board_section->ConstructConverterForSection( AllottedGeometry );
+//    FMovieSceneInverseSequenceTransform inner_to_outer_transform = subsection_object->OuterToInnerTransform().Inverse();
+//    const UMovieScene* movie_scene = subsection_object->GetTypedOuter<UMovieScene>();
+//    check( movie_scene );
+//
+//    for( const auto& pair : meta_channel->GetMetaKeys() )
+//    {
+//        //FFrameNumber time = pair.Key;
+//        FMetaKey meta_key = pair.Value;
+//        FKeyDrawParams key_draw_param = meta_key.mMetaKeyDrawParam;
+//
+//        for( const auto& subkey : pair.Value.mSubKeys )
+//        {
+//            UOdysseyAnimationTimelineSection* animation_timeline_section = Cast<UOdysseyAnimationTimelineSection>( subkey.mSection );
+//            if( !animation_timeline_section )
+//                continue;
+//
+//            TMovieSceneChannelHandle<FOdysseyAnimationCutChannel> channel_handle = subkey.mChannelHandle.Cast<FOdysseyAnimationCutChannel>();
+//            FOdysseyAnimationCutChannel* object_channel = channel_handle.Get();
+//
+//            FFrameNumber frame_in_sequence;
+//            object_channel->GetKeyTime( subkey.mKeyHandle, frame_in_sequence );
+//
+//            //-
+//
+//            FFrameNumber frame_in_timeline = animation_timeline_section->ConvertFrameFromSequenceToTimeline( frame_in_sequence );
+//            if( frame_in_timeline < 0 )
+//            {
+//                FFrameNumber debug = 2; debug = frame_in_timeline;
+//            }
+//
+//            TOptional<FFrameTime> outer_time = inner_to_outer_transform.TryTransformTime( frame_in_sequence );
+//            if( !outer_time )
+//                continue;
+//
+//            double outer_second = FQualifiedFrameTime( *outer_time, movie_scene->GetTickResolution() ).AsSeconds();
+//
+//            //-
+//
+//            TArray<FGuid> rendering_compositions = BuildThumbnailCache( animation_timeline_section->GetAnimation(), frame_in_timeline, false );
+//
+//            TSharedPtr<::ULIS::FBlock> block = mBlocks.FindChecked( rendering_compositions );
+//            FSlateBrush* thumbnail_brush = mBrushes.FindChecked( rendering_compositions );
+//
+//            //-
+//
+//            FIntVector2 thumbnail_size;
+//            thumbnail_size.Y = AllottedGeometry.GetLocalSize().Y * .9f;
+//            thumbnail_size.X = thumbnail_size.Y * ( block->Width() / float( block->Height() ) );
+//
+//            const float KeyPositionPx = converter.SecondsToPixel( outer_second );
+//            const FVector2D KeyTranslation( KeyPositionPx, ( ( AllottedGeometry.GetLocalSize().Y / 2.0f ) - ( thumbnail_size.Y / 2.0f ) ) );
+//
+//            key_draw_param.BorderTint = FLinearColor( 0.5f, 0.5f, 0.5f, 1.0f );
+//
+//            FSlateDrawElement::MakeBox(
+//                OutDrawElements,
+//                LayerId,
+//                AllottedGeometry.ToPaintGeometry( FVector2D( thumbnail_size.X, thumbnail_size.Y ), FSlateLayoutTransform( KeyTranslation ) ),
+//                mCheckboardBrush,
+//                ESlateDrawEffect::None,
+//                key_draw_param.BorderTint
+//            );
+//
+//            FSlateDrawElement::MakeBox(
+//                OutDrawElements,
+//                LayerId,
+//                AllottedGeometry.ToPaintGeometry( FVector2D( thumbnail_size.X, thumbnail_size.Y ), FSlateLayoutTransform( KeyTranslation ) ),
+//                thumbnail_brush,
+//                ESlateDrawEffect::None,
+//                key_draw_param.BorderTint
+//            );
+//
+//            static const FSlateBrush* SepBrush = new FSlateColorBrush( FColor::Black );
+//            const FVector2D SepSize( 3, AllottedGeometry.GetLocalSize().Y - 2 );
+//            const FVector2D SepTranslation( KeyPositionPx - FMath::CeilToFloat( SepSize.X / 2.0f ), ( ( AllottedGeometry.GetLocalSize().Y / 2.0f ) - ( SepSize.Y / 2.0f ) ) );
+//
+//            FSlateDrawElement::MakeBox(
+//                OutDrawElements,
+//                LayerId,
+//                AllottedGeometry.ToPaintGeometry( SepSize, FSlateLayoutTransform( SepTranslation ) ),
+//                SepBrush,
+//                ESlateDrawEffect::None,
+//                key_draw_param.BorderTint
+//            );
+//
+//            break; // Draw only the first subkey
+//        }
+//
+//        LayerId++;
+//    }
+//
+//    return LayerId;
+//}
+
+int32
 SCinematicBoardSectionAnimationTimelineKeys::OnPaint( const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled ) const //override
 {
     if( !mBinding.GetGuid().IsValid() )
         return SCompoundWidget::OnPaint( Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled );
 
-    return SMetaKeysArea::OnPaint( Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled );
+    //SMetaKeysArea::OnPaint( Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled );
+
+    LayerId = DrawBackground( Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled );
+
+    LayerId = DrawThumbnails( Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled );
+
+    LayerId = DrawKeys( Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled );
+
+    return SCompoundWidget::OnPaint( Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled );
 }
 
 //---

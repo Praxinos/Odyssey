@@ -32,6 +32,7 @@ class UMovieSceneSequence;
 class UMovieSceneSubSection;
 class UMovieSceneTrack;
 class UMovieSceneVisibilityTrack;
+class UOdysseyAnimation;
 class UOdysseyAnimationTimelineTrack;
 class UOdysseyAnimationTimelineSection;
 class UStoryNote;

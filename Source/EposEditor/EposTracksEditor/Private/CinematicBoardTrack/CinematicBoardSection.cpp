@@ -48,6 +48,10 @@
 #include "Styles/EposTracksEditorStyle.h"
 #include "Tools/EposSequenceTools.h"
 #include "CinematicBoardWidgets/SCinematicBoardSectionContent.h"
+#include "OdysseyAnimationActor.h"
+#include "OdysseyAnimationComponent.h"
+#include "OdysseyAnimationTimelineSection.h"
+#include "ULISLoaderModule.h"
 
 #define LOCTEXT_NAMESPACE "FCinematicBoardSection"
 
@@ -224,6 +228,33 @@ FCinematicBoardSection::~FCinematicBoardSection()
     // In this order, the next line will reset the attribute of the UMovieSceneCinematicBoardSection after it has been set in the constructor for the new ones
     //Cast<UMovieSceneCinematicBoardSection>( Section )->SetWidgetHeight( 0 );
 }
+
+//---
+
+void
+FCinematicBoardSection::AddReferencedObjects( FReferenceCollector& Collector ) //override
+{
+    for( const auto& pair1 : mAnimationsTimelineMetaChannel )
+    {
+        FGuid guid = pair1.Key;
+
+        if( !mAnimationsTimelineThumbnails.Contains( guid ) )
+            continue;
+
+        for( FThumbnailData& thumbnail_data : mAnimationsTimelineThumbnails[guid] )
+        {
+            Collector.AddReferencedObject( thumbnail_data.Texture );
+        }
+    }
+}
+
+FString
+FCinematicBoardSection::GetReferencerName() const //override
+{
+    return "FCinematicBoardSection";
+}
+
+//---
 
 FText
 FCinematicBoardSection::GetSectionTitle() const
@@ -829,6 +860,8 @@ FCinematicBoardSection::ReBuildAnimationsTimelineMetaChannel()
 
         mAnimationsTimelineMetaChannel.Add( guid, meta_channel );
     }
+
+    RebuildAnimationThumbnails();
 }
 
 TSharedPtr<FMetaChannel>
@@ -838,6 +871,204 @@ FCinematicBoardSection::GetAnimationTimelineMetaChannel( FMovieScenePossessable 
         return nullptr;
 
     return mAnimationsTimelineMetaChannel[iPossessable.GetGuid()];
+}
+
+const TArray<FCinematicBoardSection::FThumbnailData>&
+FCinematicBoardSection::GetAnimationTimelineThumbnails( FMovieScenePossessable iPossessable ) const
+{
+    if( !mAnimationsTimelineThumbnails.Contains( iPossessable.GetGuid() ) )
+    {
+        static TArray<FThumbnailData> sEmpty;
+        return sEmpty;
+    }
+
+    return mAnimationsTimelineThumbnails[iPossessable.GetGuid()];
+}
+
+void
+FCinematicBoardSection::RebuildAnimationThumbnails()
+{
+    TArray<UTexture2D*> texture_pool;
+    for( const auto& pair1 : mAnimationsTimelineMetaChannel )
+    {
+        FGuid guid = pair1.Key;
+        TSharedPtr<FMetaChannel> meta_channel = pair1.Value;
+
+        if( !mAnimationsTimelineThumbnails.Contains( guid ) )
+            continue;
+
+        for( const FThumbnailData& thumbnail_data : mAnimationsTimelineThumbnails[guid] )
+        {
+            texture_pool.Add( thumbnail_data.Texture );
+        }
+    }
+
+    auto FindOrCreateTexture = [&texture_pool]( int32 InSizeX, int32 InSizeY, EPixelFormat InFormat ) -> UTexture2D*
+        {
+            for( UTexture2D* texture : texture_pool )
+            {
+                if( texture->GetSizeX() == InSizeX
+                    && texture->GetSizeY() == InSizeY
+                    && texture->GetPixelFormat() == InFormat )
+                {
+                    texture_pool.Remove( texture );
+                    return texture;
+                }
+            }
+
+            UTexture2D* texture = UTexture2D::CreateTransient(
+                InSizeX,
+                InSizeY,
+                InFormat,
+                NAME_None
+            );
+            texture->UpdateResource();
+
+            return texture;
+        };
+
+
+    mAnimationsTimelineThumbnails.Empty();
+
+    for( const auto& pair1 : mAnimationsTimelineMetaChannel )
+    {
+        FGuid guid = pair1.Key;
+        TSharedPtr<FMetaChannel> meta_channel = pair1.Value;
+
+        TArray<FThumbnailData> thumbnails;
+
+        //---
+
+        const UMovieSceneSubSection* subsection_object = &GetSubSectionObject();
+
+        FMovieSceneInverseSequenceTransform inner_to_outer_transform = subsection_object->OuterToInnerTransform().Inverse();
+        const UMovieScene* movie_scene = subsection_object->GetTypedOuter<UMovieScene>();
+        check( movie_scene );
+
+        for( const auto& pair : meta_channel->GetMetaKeys() )
+        {
+            FFrameNumber meta_frame = pair.Key;
+            //FMetaKey meta_key = pair.Value;
+            //FKeyDrawParams key_draw_param = meta_key.mMetaKeyDrawParam;
+
+            for( const auto& subkey : pair.Value.mSubKeys )
+            {
+                UOdysseyAnimationTimelineSection* animation_timeline_section = Cast<UOdysseyAnimationTimelineSection>( subkey.mSection );
+                if( !animation_timeline_section )
+                    continue;
+
+                //TMovieSceneChannelHandle<FOdysseyAnimationCutChannel> channel_handle = subkey.mChannelHandle.Cast<FOdysseyAnimationCutChannel>();
+                //FOdysseyAnimationCutChannel* object_channel = channel_handle.Get();
+
+                //FFrameNumber frame_in_sequence;
+                //object_channel->GetKeyTime( subkey.mKeyHandle, frame_in_sequence );
+
+                //-
+
+                FFrameNumber frame_in_timeline = animation_timeline_section->ConvertFrameFromSequenceToTimeline( meta_frame );
+                //FFrameNumber frame_in_timeline = animation_timeline_section->ConvertFrameFromSequenceToTimeline( frame_in_sequence );
+                if( frame_in_timeline < 0 )
+                {
+                    FFrameNumber debug = 2; debug = frame_in_timeline;
+                }
+
+                TOptional<FFrameTime> outer_time = inner_to_outer_transform.TryTransformTime( meta_frame );
+                //TOptional<FFrameTime> outer_time = inner_to_outer_transform.TryTransformTime( frame_in_sequence );
+                if( !outer_time )
+                    continue;
+
+                //UE_LOG( LogTemp, Warning, TEXT( "frame_in_timeline.Value: %d" ), frame_in_timeline.Value );
+
+                //---
+
+                UOdysseyAnimation* animation = animation_timeline_section->GetAnimation();
+
+                static TSharedPtr<::ULIS::FBlock> block_full;
+                if( !block_full
+                    || block_full->Width() != animation->GetWidth()
+                    || block_full->Height() != animation->GetHeight()
+                    || block_full->Format() != animation->GetFormat() )
+                {
+                    block_full = MakeShared<::ULIS::FBlock>( animation->GetWidth(), animation->GetHeight(), animation->GetFormat() );
+                }
+
+                ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( animation->GetFormat() );
+
+                TSharedPtr<IOdysseyImageRenderer> renderer = animation->BuildImageRenderer( IOdysseyImageRenderer::eRenderType::Render, frame_in_timeline.Value );
+                renderer->Init();
+                FOdysseyImageRendererCopyParams params( block_full, { block_full->Rect() } );
+                renderer->Copy( params, {} );
+
+                float ratio = animation->GetWidth() / float( animation->GetHeight() );
+                const FIntVector2 thumbnail_size( 200 * ratio, 200 );
+                static TSharedPtr<::ULIS::FBlock> block;
+                if( !block
+                    || block->Width() != thumbnail_size.X
+                    || block->Height() != thumbnail_size.Y
+                    || block->Format() != animation->GetFormat() )
+                {
+                    block = MakeShared<::ULIS::FBlock>( thumbnail_size.X, thumbnail_size.Y, animation->GetFormat() );
+                }
+                ctx.Resize( *block_full, *block );
+
+                ctx.Finish();
+
+                //-
+
+                //TConstArrayView64<uint8> data( block->Bits(), block->BytesTotal() );
+                //UTexture2D* texture = UTexture2D::CreateTransient(
+                //    block->Width(),
+                //    block->Height(),
+                //    EPixelFormat::PF_B8G8R8A8,
+                //    NAME_None,
+                //    data
+                //);
+                UTexture2D* texture = FindOrCreateTexture( block->Width(), block->Height(), EPixelFormat::PF_B8G8R8A8 );
+
+                FUpdateTextureRegion2D* region = new FUpdateTextureRegion2D( 0, 0, 0, 0, block->Width(), block->Height() );
+                int blockBytes = GPixelFormats[EPixelFormat::PF_B8G8R8A8].BlockBytes;
+                texture->UpdateTextureRegions(
+                    0
+                    , 1
+                    , region
+                    , block->Width() * blockBytes
+                    , blockBytes
+                    , block->Bits()
+                    , []( uint8*, const FUpdateTextureRegion2D* iRegions )
+                    {
+                        delete iRegions;
+                    }
+                );
+
+                ////////////////////////////
+                // Fence now to ensure the update is processed on the GPU by the end of this function
+                FRenderCommandFence fence;
+                fence.BeginFence();
+                fence.Wait();
+
+                //-
+
+                FSlateBrush* brush = new FSlateBrush();
+
+                brush->SetResourceObject( texture );
+
+                //---
+
+                FThumbnailData thumbnail;
+                thumbnail.QTime = FQualifiedFrameTime( *outer_time, movie_scene->GetTickResolution() );
+                thumbnail.Texture = texture;
+                thumbnail.Brush = brush;
+                thumbnail.Size = thumbnail_size;
+
+                //mThumbnails.Add( thumbnail );
+                thumbnails.Add( thumbnail );
+
+                break; // only the first subkey is used
+            }
+        }
+
+        mAnimationsTimelineThumbnails.Add( guid, thumbnails );
+    }
 }
 
 //-
