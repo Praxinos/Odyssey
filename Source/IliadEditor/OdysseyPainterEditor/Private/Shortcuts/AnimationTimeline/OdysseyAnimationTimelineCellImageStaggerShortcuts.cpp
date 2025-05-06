@@ -45,7 +45,7 @@ FOdysseyAnimationTimelineCellImageStaggerShortcuts::Action_ConvertToReferenceCel
     if (!layer)
         return;
 
-    if (layer->IsLockedRecursively())
+    if (!layer->IsEditable())
         return;
 
     TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
@@ -166,7 +166,7 @@ FOdysseyAnimationTimelineCellImageStaggerShortcuts::CanAction_ConvertToReference
     if (!layer)
         return false;
 
-    if (layer->IsLockedRecursively())
+    if (!layer->IsEditable())
         return false;
 
     TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();

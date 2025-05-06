@@ -127,7 +127,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_Cut()
     if (!layer)
         return;
 
-    if (layer->IsLockedRecursively())
+    if (!layer->IsEditable())
     {
         Action_Copy();
         return;
@@ -162,7 +162,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_Paste()
     if (!layer)
         return;
 
-    if (layer->IsLockedRecursively())
+    if (!layer->IsEditable())
         return;
 
     FOdysseyCoreEditorModule& odysseyCoreEditorModule = FModuleManager::Get().LoadModuleChecked<FOdysseyCoreEditorModule>(TEXT("OdysseyCoreEditor"));
@@ -217,7 +217,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_Delete()
     if (!layer)
         return;
 
-    if (layer->IsLockedRecursively())
+    if (!layer->IsEditable())
         return;
 
     const TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
@@ -255,7 +255,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_ConvertToStaggerCell()
     if (!layer)
         return;
 
-    if (layer->IsLockedRecursively())
+    if (!layer->IsEditable())
         return;
 
     FOdysseyPainterEditorModule& painterEditorModule = FModuleManager::GetModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
@@ -311,7 +311,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_IncreaseCellExposure()
     if (!layer)
         return;
 
-    if (layer->IsLockedRecursively())
+    if (!layer->IsEditable())
         return;
 
     FOdysseyPainterEditorModule& painterEditorModule = FModuleManager::GetModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
@@ -355,7 +355,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_DecreaseCellExposure()
     if (!layer)
         return;
 
-    if (layer->IsLockedRecursively())
+    if (!layer->IsEditable())
         return;
 
     FOdysseyPainterEditorModule& painterEditorModule = FModuleManager::GetModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
@@ -398,7 +398,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_SetCellExposure()
     if (!layer)
         return;
 
-    if (layer->IsLockedRecursively())
+    if (!layer->IsEditable())
         return;
 
     FOdysseyPainterEditorModule& painterEditorModule = FModuleManager::GetModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
@@ -498,7 +498,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_Cut()
     if (!layer)
         return false;
 
-    if (layer->IsLockedRecursively())
+    if (!layer->IsEditable())
         return false;
 
     const TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
@@ -523,7 +523,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_Paste()
     if (!layer)
         return false;
 
-    if (layer->IsLockedRecursively())
+    if (!layer->IsEditable())
         return false;
 
     FOdysseyCoreEditorModule& odysseyCoreEditorModule = FModuleManager::Get().LoadModuleChecked<FOdysseyCoreEditorModule>(TEXT("OdysseyCoreEditor"));
@@ -572,7 +572,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_Delete()
     if (!layer)
         return false;
 
-    if (layer->IsLockedRecursively())
+    if (!layer->IsEditable())
         return false;
 
     const TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
@@ -597,7 +597,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_ConvertToStaggerCell()
     if (!layer)
         return false;
 
-    if (layer->IsLockedRecursively())
+    if (!layer->IsEditable())
         return false;
 
     FOdysseyPainterEditorModule& painterEditorModule = FModuleManager::GetModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
@@ -642,7 +642,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_IncreaseCellExposure()
     if (!layer)
         return false;
 
-    if (layer->IsLockedRecursively())
+    if (!layer->IsEditable())
         return false;
 
     FOdysseyPainterEditorModule& painterEditorModule = FModuleManager::GetModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
@@ -676,7 +676,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_DecreaseCellExposure()
     if (!layer)
         return false;
 
-    if (layer->IsLockedRecursively())
+    if (!layer->IsEditable())
         return false;
 
     FOdysseyPainterEditorModule& painterEditorModule = FModuleManager::GetModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
@@ -710,7 +710,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_SetCellExposure()
     if (!layer)
         return false;
 
-    if (layer->IsLockedRecursively())
+    if (!layer->IsEditable())
         return false;
 
     FOdysseyPainterEditorModule& painterEditorModule = FModuleManager::GetModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");

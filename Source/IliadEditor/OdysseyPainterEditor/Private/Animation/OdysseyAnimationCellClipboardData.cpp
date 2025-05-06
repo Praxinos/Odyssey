@@ -75,7 +75,7 @@ FOdysseyAnimationCellClipboardData::Paste(UOdysseyAnimationLayer* iLayer, int iF
 bool
 FOdysseyAnimationCellClipboardData::CanPaste(UOdysseyAnimationLayer* iLayer) const
 {
-    if (iLayer->IsLockedRecursively())
+    if (!iLayer->IsEditable())
         return false;
 
     for (const FCellCopy& cellCopy : mCellCopies)

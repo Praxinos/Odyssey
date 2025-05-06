@@ -56,6 +56,9 @@ public:
 public:
 #if WITH_EDITOR
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
+    bool IsEditable() const;
+
+    UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     void SetIsLocked(bool Value);
 
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")

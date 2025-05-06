@@ -78,7 +78,7 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_BreakCell()
     if (!currentLayer)
         return;
 
-    if (currentLayer->IsLockedRecursively())
+    if (!currentLayer->IsEditable())
         return;
 
     UOdysseyLayerCell* cell = currentLayer->GetCellAtFrame(mCurrentFrame.Get());
@@ -118,7 +118,7 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_BreakAndClearCell()
     if (!currentLayer)
         return;
 
-    if (currentLayer->IsLockedRecursively())
+    if (!currentLayer->IsEditable())
         return;
 
     UOdysseyLayerCell* cell = currentLayer->GetCellAtFrame(mCurrentFrame.Get());
@@ -154,7 +154,7 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_RemoveCellMark()
     if (!currentLayer)
         return;
 
-    if (currentLayer->IsLockedRecursively())
+    if (!currentLayer->IsEditable())
         return;
 
     TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
@@ -193,7 +193,7 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_SetCellMark(int iMarkId)
     if (!currentLayer)
         return;
 
-    if (currentLayer->IsLockedRecursively())
+    if (!currentLayer->IsEditable())
         return;
 
     TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
@@ -244,7 +244,7 @@ FOdysseyAnimationGlobalCellsShortcuts::CanAction_RemoveCellMark()
     if (!layer)
         return false;
 
-    if (layer->IsLockedRecursively())
+    if (!layer->IsEditable())
         return false;
 
     TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
@@ -273,7 +273,7 @@ FOdysseyAnimationGlobalCellsShortcuts::CanAction_SetCellMark(int iMarkId)
     if (!layer)
         return false;
 
-    if (layer->IsLockedRecursively())
+    if (!layer->IsEditable())
         return false;
 
     TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();

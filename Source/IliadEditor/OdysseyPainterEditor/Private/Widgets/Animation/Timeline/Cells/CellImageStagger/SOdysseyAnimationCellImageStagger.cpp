@@ -259,7 +259,7 @@ SOdysseyAnimationCellImageStagger::SetBehaviour(EOdysseyLayerCellImageStaggerBeh
 bool
 SOdysseyAnimationCellImageStagger::CanSetBehaviour(EOdysseyLayerCellImageStaggerBehaviour iBehaviour) const
 {
-    return !mCell->GetLayer()->IsLockedRecursively();
+    return mCell->GetLayer()->IsEditable();
 }
 
 bool

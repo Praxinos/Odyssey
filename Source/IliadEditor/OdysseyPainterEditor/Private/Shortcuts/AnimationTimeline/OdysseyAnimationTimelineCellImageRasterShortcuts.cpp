@@ -58,7 +58,7 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
     if (!layer)
         return;
 
-    if (layer->IsLockedRecursively())
+    if (!layer->IsEditable())
         return;
 
     TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
@@ -287,7 +287,7 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::CanAction_CrossFade()
     if (!layer || !layer->IsA(UOdysseyAnimationLayerImageRaster::StaticClass()))
         return false;
 
-    if (layer->IsLockedRecursively())
+    if (!layer->IsEditable())
         return false;
 
     UOdysseyAnimationLayerImageRaster* layerImageRaster = Cast<UOdysseyAnimationLayerImageRaster>(layerStack->GetCurrentLayer());

@@ -24,7 +24,7 @@ FOdysseyAnimationTimelineCutTool::OnMouseButtonUp(const FMouseEventParams& iPara
     if (iParams.mMouseEvent.GetEffectingButton() != EKeys::LeftMouseButton)
         return FReply::Unhandled();
 
-    if (iParams.mLayer->IsLockedRecursively())
+    if (!iParams.mLayer->IsEditable())
         return FReply::Unhandled();
 
     if (iParams.mOrigin != EMouseEventOrigin::CellsTimeline)

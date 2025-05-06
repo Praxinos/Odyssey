@@ -660,7 +660,7 @@ SOdysseyAnimationCells::GetCellBreakIndicatorWidth() const
 EVisibility
 SOdysseyAnimationCells::GetCellBreakIndicatorVisibility() const
 {
-    if (mAnimationLayer->IsLockedRecursively())
+    if (!mAnimationLayer->IsEditable())
         return EVisibility::Hidden;
 
     if (FOdysseyAnimationTimelineTools::Get().GetCurrentTool() != EOdysseyTimelineTool::Cut)
@@ -1281,7 +1281,7 @@ SOdysseyAnimationCells::SetPreBehaviour(EOdysseyLayerImagePostBehaviour iBehavio
 bool
 SOdysseyAnimationCells::CanSetPreBehaviour(EOdysseyLayerImagePostBehaviour iBehaviour) const
 {
-    return !mAnimationLayer->IsLockedRecursively();
+    return mAnimationLayer->IsEditable();
 }
 
 bool
@@ -1302,7 +1302,7 @@ SOdysseyAnimationCells::SetPostBehaviour(EOdysseyLayerImagePostBehaviour iBehavi
 bool
 SOdysseyAnimationCells::CanSetPostBehaviour(EOdysseyLayerImagePostBehaviour iBehaviour) const
 {
-    return !mAnimationLayer->IsLockedRecursively();
+    return mAnimationLayer->IsEditable();
 }
 
 bool
@@ -1489,7 +1489,7 @@ SOdysseyAnimationCells::OnContextMenuPlusButtonClicked()
 void
 SOdysseyAnimationCells::RemoveCellMark()
 {
-    if (mAnimationLayer->IsLockedRecursively())
+    if (!mAnimationLayer->IsEditable())
         return;
 
     TArray<UOdysseyLayerCell*> selectedCells = mAnimationLayer->GetLayerStack()->GetCellSelection()->GetSelectedCells();
@@ -1509,7 +1509,7 @@ SOdysseyAnimationCells::RemoveCellMark()
 bool
 SOdysseyAnimationCells::CanRemoveCellMark() const
 {
-    if (mAnimationLayer->IsLockedRecursively())
+    if (!mAnimationLayer->IsEditable())
         return false;
 
     TArray<UOdysseyLayerCell*> selectedCells = mAnimationLayer->GetLayerStack()->GetCellSelection()->GetSelectedCells();
@@ -1522,7 +1522,7 @@ SOdysseyAnimationCells::CanRemoveCellMark() const
 void
 SOdysseyAnimationCells::SetCellMark( int iMarkId )
 {
-    if (mAnimationLayer->IsLockedRecursively())
+    if (!mAnimationLayer->IsEditable())
         return;
 
     TArray<UOdysseyLayerCell*> selectedCells = mAnimationLayer->GetLayerStack()->GetCellSelection()->GetSelectedCells();
@@ -1542,7 +1542,7 @@ SOdysseyAnimationCells::SetCellMark( int iMarkId )
 bool
 SOdysseyAnimationCells::CanSetCellMark() const
 {
-    if (mAnimationLayer->IsLockedRecursively())
+    if (!mAnimationLayer->IsEditable())
         return false;
 
     TArray<UOdysseyLayerCell*> selectedCells = mAnimationLayer->GetLayerStack()->GetCellSelection()->GetSelectedCells();
@@ -1555,9 +1555,6 @@ SOdysseyAnimationCells::CanSetCellMark() const
 bool
 SOdysseyAnimationCells::IsCellMarkChecked(int iMarkId) const
 {
-    if (mAnimationLayer->IsLockedRecursively())
-        return false;
-
     TArray<UOdysseyLayerCell*> selectedCells = mAnimationLayer->GetLayerStack()->GetCellSelection()->GetSelectedCells();
     if (selectedCells.IsEmpty())
         return false;

@@ -156,7 +156,7 @@ SOdysseyLayerRow::GenerateBlendRowHeaderWidget()
         .Padding(FMargin(0, 0, 1.f, 0))
         [
             SNew(SNumericEntryBox<int>)
-            .IsEnabled_Lambda([this](){ return !GetLayer()->IsLockedRecursively();})
+            .IsEnabled_Lambda([this](){ return GetLayer()->IsEditable();})
             .Value_Lambda([this]() { return (int)(GetLayer()->GetOpacity() * 100.f + 0.5f);})
             .TypeInterface(MakeShareable( new TNumericUnitTypeInterface<int32>( EUnit::Percentage ) ))
             .AllowSpin(true)
@@ -177,7 +177,7 @@ SOdysseyLayerRow::GenerateBlendRowHeaderWidget()
         .VAlign(VAlign_Center)
         [
             SNew(SEnumComboBox, StaticEnum<EOdysseyBlendingMode>())
-            .IsEnabled_Lambda([this](){ return !GetLayer()->IsLockedRecursively();})
+            .IsEnabled_Lambda([this](){ return GetLayer()->IsEditable();})
             .CurrentValue_Lambda([this](){ return (int32)GetLayer()->GetBlendMode();})
             .ContentPadding(FMargin(0))
             .OnEnumSelectionChanged(this, &SOdysseyLayerRow::OnBlendModeComboBoxChanged)
@@ -330,7 +330,7 @@ SOdysseyLayerRow::GetDisplayOptionsCheckBoxState() const
 void
 SOdysseyLayerRow::OnBlendModeComboBoxChanged(int32 iValue, ESelectInfo::Type iSelectInfo)
 {
-    if ( GetLayer()->IsLockedRecursively() )
+    if ( !GetLayer()->IsEditable() )
         return;
 
     //Creating a transaction here manages entering a value using keyboard
@@ -341,7 +341,7 @@ SOdysseyLayerRow::OnBlendModeComboBoxChanged(int32 iValue, ESelectInfo::Type iSe
 void
 SOdysseyLayerRow::OnOpacityValueCommitted(int iValue, ETextCommit::Type iType)
 {
-    if ( GetLayer()->IsLockedRecursively() )
+    if ( !GetLayer()->IsEditable() )
         return;
 
     //Creating a transaction here manages entering a value using keyboard
@@ -352,7 +352,7 @@ SOdysseyLayerRow::OnOpacityValueCommitted(int iValue, ETextCommit::Type iType)
 void
 SOdysseyLayerRow::OnOpacityValueChanged(int iValue)
 {
-    if ( GetLayer()->IsLockedRecursively() )
+    if ( !GetLayer()->IsEditable() )
         return;
 
     GetLayer()->SetOpacityInteractive(iValue / 100.f);

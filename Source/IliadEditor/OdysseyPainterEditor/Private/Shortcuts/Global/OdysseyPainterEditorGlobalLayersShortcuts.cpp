@@ -116,7 +116,7 @@ FOdysseyPainterEditorGlobalLayersShortcuts::Action_ChangeLayerOpacity(float iOpa
     if ( !layerStack->GetCurrentLayer() )
         return;
 
-    if ( layerStack->GetCurrentLayer()->IsLockedRecursively() )
+    if ( !layerStack->GetCurrentLayer()->IsEditable() )
         return;
 
 
@@ -146,7 +146,7 @@ FOdysseyPainterEditorGlobalLayersShortcuts::CanAction_ChangeLayerOpacity()
     if ( !layerStack->GetCurrentLayer() )
         return false;
 
-    if ( layerStack->GetCurrentLayer()->IsLockedRecursively() )
+    if ( !layerStack->GetCurrentLayer()->IsEditable() )
         return false;
 
     return true;

@@ -625,6 +625,11 @@ UOdysseyLayer::IsActivatedRecursively() const
 }
 
 #if WITH_EDITOR
+bool
+UOdysseyLayer::IsEditable() const
+{
+    return !IsLockedRecursively() && IsActivatedRecursively();
+}
 
 bool
 UOdysseyLayer::IsLocked() const

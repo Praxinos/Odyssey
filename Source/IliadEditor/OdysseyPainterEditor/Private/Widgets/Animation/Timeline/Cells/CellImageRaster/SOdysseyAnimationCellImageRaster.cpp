@@ -29,15 +29,15 @@ SOdysseyAnimationCellImageRaster::Construct(const FArguments& iArgs, UOdysseyAni
 
     mAssetThumbnail = MakeShareable(new FAssetThumbnail(mCell, (int)(ratio * THUMBNAIL_SIZE), THUMBNAIL_SIZE, UThumbnailManager::Get().GetSharedThumbnailPool()));
     FAssetThumbnailConfig thumbnailConfig;
-    thumbnailConfig.bAllowFadeIn = false;
+    thumbnailConfig.bAllowFadeIn = true;
     thumbnailConfig.bAllowHintText = false;
     thumbnailConfig.bAllowRealTimeOnHovered = false;
     thumbnailConfig.bForceGenericThumbnail = false;
     thumbnailConfig.bAllowAssetSpecificThumbnailOverlay = false;
     thumbnailConfig.ThumbnailLabel = EThumbnailLabel::NoLabel;
     thumbnailConfig.HighlightedText = FText::FromString("");
-    thumbnailConfig.HintColorAndOpacity = FLinearColor( 1.0, 1.0, 1.0, 1.0 );
-    thumbnailConfig.AssetTypeColorOverride = FLinearColor(1.0, 1.0, 1.0, 1.0);
+    thumbnailConfig.HintColorAndOpacity = FLinearColor( 0.f, 0.f, 0.f, 0.f);
+    thumbnailConfig.AssetTypeColorOverride = FLinearColor(0.f, 0.f, 0.f, 0.f);
     TSharedRef<SWidget> thumbnailWidget = mAssetThumbnail->MakeThumbnailWidget(thumbnailConfig);
 
     ChildSlot

@@ -21,6 +21,8 @@
 #include "OdysseyLayerCellSelection.h"
 #include "ScopedTransaction.h"
 #include "Widgets/Input/SButton.h"
+#include "Widgets/Colors/SColorBlock.h"
+#include "Widgets/Layout/SEnableBox.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -135,6 +137,44 @@ SOdysseyAnimationLayerImageTimeline::GetRowPadding(FName iRow) const
 TSharedRef<SWidget>
 SOdysseyAnimationLayerImageTimeline::GenerateMainRowTimelineWidget()
 {
+    /*return SNew(SOverlay)
+        + SOverlay::Slot()
+        [
+            SNew(SEnableBox)
+            [
+                SNew(SOdysseyAnimationCells, mLayer)
+                .Cells_Lambda(
+                    [this]() -> TArray<UOdysseyLayerCell*>
+                    {
+                        return mLayer->GetCells();
+                    }
+                )
+                .CurrentFrame(mCurrentFrame)
+                .OnTransactCurrentFrame(mOnTransactCurrentFrame)
+                .ContextMenuExtender(CreateCellsContextMenuExtender())
+                .TimelinePosition(mTimelinePosition)
+                .IsEnabled_Lambda([this](){ return !mLayer->IsLockedRecursively();})
+                .OnCreateCellWidget(this, &SOdysseyAnimationLayerImageTimeline::OnGenerateCellWidget)
+                .ShowHandles(this, &SOdysseyAnimationLayerImageTimeline::GetShowCellsHandles)
+            ]
+        ]
+        + SOverlay::Slot()
+        [
+            SNew(SColorBlock)
+            .Color_Lambda(
+                [this]()
+                {
+                    UOdysseyLayer* layer = GetLayer();
+                    if (!layer)
+                        return FLinearColor(0, 0, 0, 0);
+
+                    if (layer->IsActivatedRecursively())
+                        return FLinearColor(0, 0, 0, 0);
+
+                    return FLinearColor(0, 0, 0, 0.25f);
+                }
+            )
+        ];*/
     return SNew(SOdysseyAnimationCells, mLayer)
         .Cells_Lambda(
             [this]() -> TArray<UOdysseyLayerCell*>
@@ -459,9 +499,6 @@ SOdysseyAnimationLayerImageTimeline::GetLighttableVisibility() const
 bool
 SOdysseyAnimationLayerImageTimeline::GetShowCellsHandles() const
 {
-    if (mLayer->IsLockedRecursively())
-        return false;
-
     return mLayer->ShouldDisplayOptions();
 }
 
