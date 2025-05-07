@@ -80,6 +80,9 @@ public class EposSequenceEditor : ModuleRules
                 "EposActors",
                 "EposNote",
                 "EposPattern",
+                "OdysseyAnimationTracks",
+                "OdysseyAnimation",
+                "OdysseyLayerStack",
 
                 // [EDITOR]
                 // [EDITOR] custom engine dependencies
@@ -112,11 +115,7 @@ public class EposSequenceEditor : ModuleRules
                 "EposTracksEditor",
                 "EposNamingConvention",
                 "libharu",
-                "OdysseyAnimationTracks",
-                "OdysseyAnimation", //TODO: move to runtime part above
-                "OdysseyImaging", //TODO: remove once OdysseyAnimation is runtime
-                "MediaAssets", //TODO: remove once OdysseyAnimation is runtime
-                "OdysseyLayerStackEditor", //TODO: remove it ? ot keep it ? (will be layer stack full editor ?)
+                "OdysseyAnimationEditor",
                 "OdysseyPainterEditor", // import image sequence
             }
             );

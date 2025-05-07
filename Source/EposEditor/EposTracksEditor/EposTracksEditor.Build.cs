@@ -60,7 +60,6 @@ public class EposTracksEditor : ModuleRules
                 "AppFramework",
                 "DeveloperSettings",
                 "LevelSequence",
-                "MediaAssets", //TODO: remove once OdysseyAnimation is runtime
                 // [RUNTIME] custom plugin dependencies
                 "EposMovieScene",
                 "EposSequence",
@@ -68,9 +67,10 @@ public class EposTracksEditor : ModuleRules
                 "EposTracks",
                 "EposActors",
                 "EposPattern",
+                "OdysseyAnimation",
                 "OdysseyAnimationTracks",
-                "ULIS",
-                "ULISLoader",
+                "OdysseyLayerStack",
+                "OdysseyRendering",
 
                 // [EDITOR]
                 // [EDITOR] custom engine dependencies
@@ -86,9 +86,7 @@ public class EposTracksEditor : ModuleRules
                 "LevelEditor",
                 // [EDITOR] custom plugin dependencies
                 "EposNamingConvention",
-                "OdysseyAnimation", //TODO: move to runtime part above
-                "OdysseyImaging", //TODO: remove once OdysseyAnimation is runtime
-                "OdysseyLayerStackEditor", //TODO: remove it ? ot keep it ? (will be layer stack full editor ?)
+                "OdysseyAnimationEditor",
             }
             );
 

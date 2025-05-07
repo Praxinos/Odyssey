@@ -7,14 +7,13 @@
 #include "MovieScene.h"
 #include "MovieSceneSequence.h"
 
-#include "LayerStack/OdysseyAnimationLayerStack.h"
-#include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
-#include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVector.h"
-#include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
-#include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
 #include "OdysseyAnimation.h"
+#include "OdysseyAnimationCell.h"
 #include "OdysseyAnimationComponent.h"
 #include "OdysseyAnimationCut.h"
+#include "OdysseyAnimationLayer.h"
+#include "OdysseyLayer.h"
+#include "OdysseyLayerStack.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(OdysseyAnimationTimelineSection)
 
@@ -34,7 +33,7 @@ void UOdysseyAnimationTimelineSection::PostLoad()
 
     if( Animation )
     {
-        Animation->OnImageRenderingChangedDelegate().AddUObject( this, &UOdysseyAnimationTimelineSection::OnAnimationChanged );
+        Animation->OnRenderingChangedDelegate().AddUObject( this, &UOdysseyAnimationTimelineSection::OnAnimationChanged );
     }
 }
 
@@ -58,7 +57,7 @@ UOdysseyAnimationTimelineSection::CacheChannelProxy()
 }
 
 void
-UOdysseyAnimationTimelineSection::OnAnimationChanged( const FOdysseyImageRenderingChangedEvent& iEvent )
+UOdysseyAnimationTimelineSection::OnAnimationChanged( const FOdysseyRenderingChangedEvent& iEvent )
 {
     if( iEvent.IsInteractive() )
         return;
@@ -105,10 +104,10 @@ UOdysseyAnimationTimelineSection::GetStartFrameOffset() const
 void
 UOdysseyAnimationTimelineSection::SetAnimation(UOdysseyAnimation* iAnimation)
 {
-    Animation->OnImageRenderingChangedDelegate().RemoveAll( this );
+    Animation->OnRenderingChangedDelegate().RemoveAll( this );
 
     Animation = iAnimation;
-    Animation->OnImageRenderingChangedDelegate().AddUObject( this, &UOdysseyAnimationTimelineSection::OnAnimationChanged );
+    Animation->OnRenderingChangedDelegate().AddUObject( this, &UOdysseyAnimationTimelineSection::OnAnimationChanged );
     RebuildAnimationCutChannel();
 }
 
@@ -150,7 +149,7 @@ UOdysseyAnimationTimelineSection::RebuildAnimationCutChannel()
 {
     AnimationCutChannel.Reset();
 
-    UOdysseyAnimationLayerStack* layer_stack = GetAnimation() ? GetAnimation()->GetLayerStack() : nullptr;
+    UOdysseyLayerStack* layer_stack = GetAnimation() ? GetAnimation()->GetLayerStack() : nullptr;
     TArray<UOdysseyLayer*> layers = layer_stack ? layer_stack->GetLayers() : TArray<UOdysseyLayer*>();
     TSet<UOdysseyAnimationLayer*> animation_layers;
     for( UOdysseyLayer* layer : layers )
@@ -160,11 +159,12 @@ UOdysseyAnimationTimelineSection::RebuildAnimationCutChannel()
     for( UOdysseyAnimationLayer* layer : animation_layers )
     {
         UOdysseyAnimationCell* previous_cell = nullptr;
-        TArray<UOdysseyAnimationCell*> cells = layer->GetCells();
-        for( UOdysseyAnimationCell* cell : cells )
+        TArray<UOdysseyLayerCell*> cells = layer->GetCells();
+        for( UOdysseyLayerCell* cell : cells )
         {
+            UOdysseyAnimationCell* animation_cell = CastChecked<UOdysseyAnimationCell>( cell );
             {
-                FAnimationCutEntry animationcutentry( previous_cell, cell );
+                FAnimationCutEntry animationcutentry( previous_cell, animation_cell );
                 FFrameNumber frame_in_timeline = animationcutentry.GetFrameReference();
                 FFrameNumber frame_in_sequence = ConvertFrameFromTimelineToSequence( frame_in_timeline );
 
@@ -185,9 +185,9 @@ UOdysseyAnimationTimelineSection::RebuildAnimationCutChannel()
                 }
             }
 
-            previous_cell = cell;
+            previous_cell = animation_cell;
 
-            if( cell == cells.Last() )
+            if( animation_cell == cells.Last() )
             {
                 FAnimationCutEntry animationcutentry( previous_cell, nullptr );
                 FFrameNumber frame_in_timeline = animationcutentry.GetFrameReference();

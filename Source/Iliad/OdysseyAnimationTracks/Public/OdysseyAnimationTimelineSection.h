@@ -60,7 +60,7 @@ protected:
 
     virtual void RebuildAnimationCutChannel();
 
-    virtual void OnAnimationChanged( const FOdysseyImageRenderingChangedEvent& iEvent );
+    virtual void OnAnimationChanged( const FOdysseyRenderingChangedEvent& iEvent );
 
 protected:
     UPROPERTY( EditAnywhere, BlueprintReadWrite, Category="Animation")

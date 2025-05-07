@@ -119,6 +119,7 @@ public:
         FQualifiedFrameTime QTime;
         FIntVector2 Size;
         UTexture2D* Texture;
+        UTextureRenderTarget2D* RenderTarget;
         FSlateBrush* Brush;
     };
     virtual const TArray<FThumbnailData>& GetAnimationTimelineThumbnails( FMovieScenePossessable iPossessable ) const;

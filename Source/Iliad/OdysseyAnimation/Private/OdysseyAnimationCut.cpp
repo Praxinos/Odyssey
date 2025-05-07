@@ -5,14 +5,9 @@
 
 #include "MovieSceneTimeHelpers.h"
 
-#include "LayerStack/OdysseyAnimationLayerStack.h"
-#include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
-#include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVector.h"
-#include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
-#include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
 #include "OdysseyAnimation.h"
-
-#include "UObject/OdysseyObjectEditorUtils.h"
+#include "OdysseyAnimationCell.h"
+#include "OdysseyLayer.h"
 
 #define LOCTEXT_NAMESPACE "AnimationCut"
 
@@ -82,54 +77,126 @@ FAnimationCutEntry::SetFrame( FFrameNumber iNewFrame, EPropertyChangeType::Type 
     {
         if( !mCellBefore && mCellAfter )
         {
-            FOdysseyObjectEditorUtils::SetPropertyValue( mCellAfter, GET_MEMBER_NAME_CHECKED( UOdysseyAnimationCell, Exposure ), mCellAfter->Exposure + offset, iChangeType );
-
-            FOdysseyObjectEditorUtils::SetPropertyValue( mCellAfter->GetLayer(), GET_MEMBER_NAME_CHECKED( UOdysseyAnimationLayer, CellsOffset ), mCellAfter->GetLayer()->CellsOffset - offset, iChangeType );
+#if WITH_EDITOR
+            if( iChangeType == EPropertyChangeType::Interactive )
+            {
+                mCellAfter->SetExposureInteractive( mCellAfter->GetExposure() + offset );
+                mCellAfter->GetLayer()->SetCellsOffsetInteractive( mCellAfter->GetLayer()->GetCellsOffset() - offset );
+            }
+            else
+#endif
+            {
+                mCellAfter->SetExposure( mCellAfter->GetExposure() + offset );
+                mCellAfter->GetLayer()->SetCellsOffset( mCellAfter->GetLayer()->GetCellsOffset() - offset );
+            }
         }
 
         if( mCellBefore && mCellAfter )
         {
-            FOdysseyObjectEditorUtils::SetPropertyValue( mCellBefore, GET_MEMBER_NAME_CHECKED( UOdysseyAnimationCell, Exposure ), mCellBefore->Exposure - offset, iChangeType );
-
-            FOdysseyObjectEditorUtils::SetPropertyValue( mCellAfter, GET_MEMBER_NAME_CHECKED( UOdysseyAnimationCell, Exposure ), mCellAfter->Exposure + offset, iChangeType );
+#if WITH_EDITOR
+            if( iChangeType == EPropertyChangeType::Interactive )
+            {
+                mCellBefore->SetExposureInteractive( mCellBefore->GetExposure() - offset );
+                mCellAfter->SetExposureInteractive( mCellAfter->GetExposure() + offset );
+            }
+            else
+#endif
+            {
+                mCellBefore->SetExposure( mCellBefore->GetExposure() - offset );
+                mCellAfter->SetExposure( mCellAfter->GetExposure() + offset );
+            }
         }
 
         if( mCellBefore && !mCellAfter )
         {
-            FOdysseyObjectEditorUtils::SetPropertyValue( mCellBefore, GET_MEMBER_NAME_CHECKED( UOdysseyAnimationCell, Exposure ), mCellBefore->Exposure - offset, iChangeType );
+#if WITH_EDITOR
+            if( iChangeType == EPropertyChangeType::Interactive )
+            {
+                mCellBefore->SetExposureInteractive( mCellBefore->GetExposure() - offset );
+            }
+            else
+#endif
+            {
+                mCellBefore->SetExposure( mCellBefore->GetExposure() - offset );
+            }
         }
     }
     else if( iNewFrame > reference_frame )
     {
         if( !mCellBefore && mCellAfter )
         {
-            FOdysseyObjectEditorUtils::SetPropertyValue( mCellAfter, GET_MEMBER_NAME_CHECKED( UOdysseyAnimationCell, Exposure ), mCellAfter->Exposure - offset, iChangeType );
-
-            FOdysseyObjectEditorUtils::SetPropertyValue( mCellAfter->GetLayer(), GET_MEMBER_NAME_CHECKED( UOdysseyAnimationLayer, CellsOffset ), mCellAfter->GetLayer()->CellsOffset + offset, iChangeType );
+#if WITH_EDITOR
+            if( iChangeType == EPropertyChangeType::Interactive )
+            {
+                mCellAfter->SetExposureInteractive( mCellAfter->GetExposure() - offset );
+                mCellAfter->GetLayer()->SetCellsOffsetInteractive( mCellAfter->GetLayer()->GetCellsOffset() + offset );
+            }
+            else
+#endif
+            {
+                mCellAfter->SetExposure( mCellAfter->GetExposure() - offset );
+                mCellAfter->GetLayer()->SetCellsOffset( mCellAfter->GetLayer()->GetCellsOffset() + offset );
+            }
         }
 
         if( mCellBefore && mCellAfter )
         {
-            FOdysseyObjectEditorUtils::SetPropertyValue( mCellBefore, GET_MEMBER_NAME_CHECKED( UOdysseyAnimationCell, Exposure ), mCellBefore->Exposure + offset, iChangeType );
-
-            FOdysseyObjectEditorUtils::SetPropertyValue( mCellAfter, GET_MEMBER_NAME_CHECKED( UOdysseyAnimationCell, Exposure ), mCellAfter->Exposure - offset, iChangeType );
+#if WITH_EDITOR
+            if( iChangeType == EPropertyChangeType::Interactive )
+            {
+                mCellBefore->SetExposureInteractive( mCellBefore->GetExposure() + offset );
+                mCellAfter->SetExposureInteractive( mCellAfter->GetExposure() - offset );
+            }
+            else
+#endif
+            {
+                mCellBefore->SetExposure( mCellBefore->GetExposure() + offset );
+                mCellAfter->SetExposure( mCellAfter->GetExposure() - offset );
+            }
         }
 
         if( mCellBefore && !mCellAfter )
         {
-            FOdysseyObjectEditorUtils::SetPropertyValue( mCellBefore, GET_MEMBER_NAME_CHECKED( UOdysseyAnimationCell, Exposure ), mCellBefore->Exposure + offset, iChangeType );
+#if WITH_EDITOR
+            if( iChangeType == EPropertyChangeType::Interactive )
+            {
+                mCellBefore->SetExposureInteractive( mCellBefore->GetExposure() + offset );
+            }
+            else
+#endif
+            {
+                mCellBefore->SetExposure( mCellBefore->GetExposure() + offset );
+            }
         }
     }
     else
     {
         if( mCellAfter )
         {
-            FOdysseyObjectEditorUtils::SetPropertyValue( mCellAfter, GET_MEMBER_NAME_CHECKED( UOdysseyAnimationCell, Exposure ), mCellAfter->Exposure, iChangeType );
+#if WITH_EDITOR
+            if( iChangeType == EPropertyChangeType::Interactive )
+            {
+                mCellAfter->SetExposureInteractive( mCellAfter->GetExposure() );
+            }
+            else
+#endif
+            {
+                mCellAfter->SetExposure( mCellAfter->GetExposure() );
+            }
         }
 
         if( mCellBefore )
         {
-            FOdysseyObjectEditorUtils::SetPropertyValue( mCellBefore, GET_MEMBER_NAME_CHECKED( UOdysseyAnimationCell, Exposure ), mCellBefore->Exposure, iChangeType );
+#if WITH_EDITOR
+            if( iChangeType == EPropertyChangeType::Interactive )
+            {
+                mCellBefore->SetExposureInteractive( mCellBefore->GetExposure() );
+            }
+            else
+#endif
+            {
+                mCellBefore->SetExposure( mCellBefore->GetExposure() );
+            }
         }
     }
 }
