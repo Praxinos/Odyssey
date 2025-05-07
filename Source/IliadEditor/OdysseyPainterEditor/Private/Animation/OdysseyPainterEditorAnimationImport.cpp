@@ -11,7 +11,6 @@
 #include "OdysseyLayerStack.h"
 #include "AssetToolsModule.h"
 #include "IAssetTools.h"
-#include "OdysseyAnimationFactory.h"
 #include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
 #include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
 #include "Widgets/Animation/Timeline/SOdysseyAnimationLayerStack.h"

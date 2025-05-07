@@ -39,21 +39,12 @@
 #include "OdysseyAnimation.h"
 #include "OdysseyAnimationActor.h"
 #include "OdysseyAnimationComponent.h"
-#include "OdysseyAnimationCut.h"
 #include "OdysseyAnimationTimelineSection.h"
 #include "OdysseyAnimationTimelineTrack.h"
 #include "PlaneActor.h"
 #include "Shot/ShotSequence.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"
 #include "StoryNote.h"
-
-#if WITH_EDITOR
-    #include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
-    #include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVector.h"
-    #include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
-    #include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
-    #include "LayerStack/OdysseyAnimationLayerStack.h"
-#endif
 
 #define LOCTEXT_NAMESPACE "EposSequenceHelpers"
 

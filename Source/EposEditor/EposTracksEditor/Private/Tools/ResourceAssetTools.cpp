@@ -26,7 +26,6 @@
 #include "PlaneActor.h"
 #include "StoryNote.h"
 #include "Tools/EposSequenceTools.h"
-#include "Widgets/SOdysseyAnimationConfigureWindow.h"
 
 #define LOCTEXT_NAMESPACE "ResourceAssetTools"
 

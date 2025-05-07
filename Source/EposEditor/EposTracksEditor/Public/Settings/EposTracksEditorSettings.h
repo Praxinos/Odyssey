@@ -8,7 +8,6 @@
 #include "Engine/DeveloperSettings.h"
 #include "UObject/Object.h"
 
-#include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
 #include "OdysseyAnimationSettings.h"
 
 #include "EposTracksEditorSettings.generated.h"

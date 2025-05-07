@@ -26,10 +26,6 @@
 #include "CinematicBoardTrack/MetaChannelProxy.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
 #include "CinematicBoardWidgets/SMetaKeysArea.h"
-#include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
-#include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVector.h"
-#include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
-#include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
 #include "LayerStack/OdysseyAnimationLayerStack.h"
 #include "NamingConvention.h"
 #include "OdysseyAnimationActor.h"
@@ -44,8 +40,7 @@
 #include "Shot/ShotSequence.h"
 #include "Styles/EposTracksEditorStyle.h"
 #include "Tools/EposSequenceTools.h"
-#include "ULISLoaderModule.h"
-#include "UObject/OdysseyObjectEditorUtils.h"
+//#include "ULISLoaderModule.h"
 
 #define LOCTEXT_NAMESPACE "SCinematicBoardSectionAnimations"
 
