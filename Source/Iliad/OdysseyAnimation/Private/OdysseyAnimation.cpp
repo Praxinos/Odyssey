@@ -9,7 +9,7 @@
 #include "Cooker/CookEvents.h"
 #include "RenderGraphBuilder.h"
 #include "ScreenPass.h"
-#include "OdysseyLayerStack.h"
+#include "OdysseyAnimationLayerStack.h"
 
 #define LOCTEXT_NAMESPACE "Animation"
 
@@ -324,6 +324,9 @@ UOdysseyAnimation::Init(int iWidth, int iHeight, EOdysseyAnimationFormat iFormat
     mHeight = iHeight;
     Format = iFormat;
     FramesPerSecond = iFramesPerSecond;
+
+    UOdysseyAnimationLayerStack* layerStack = NewObject<UOdysseyAnimationLayerStack>(this, "LayerStack", RF_Public | RF_Transactional);
+    SetLayerStack(layerStack);
 }
 
 void

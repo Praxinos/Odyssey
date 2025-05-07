@@ -63,9 +63,7 @@ UOdysseyAnimationFactory::FactoryCreateNew( UClass* iClass, UObject* iParent, FN
     mConfigured = false;
 
     animation->Init(mConfiguration.Width, mConfiguration.Height, mConfiguration.Format, mConfiguration.FramesPerSecond);
-
-    UOdysseyAnimationLayerStack* layerStack = NewObject<UOdysseyAnimationLayerStack>(animation, "LayerStack", RF_Public | RF_Transactional);
-    animation->SetLayerStack(layerStack);
+    UOdysseyLayerStack* layerStack = animation->GetLayerStack();
 
     switch (mConfiguration.LayerType)
     {
