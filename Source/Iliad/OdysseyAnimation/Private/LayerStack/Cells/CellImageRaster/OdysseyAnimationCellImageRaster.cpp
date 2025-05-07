@@ -70,9 +70,10 @@ UOdysseyAnimationCellImageRaster::InitRasterBlock() const
         }
 
         mRasterBlock = MakeShared<FOdysseyRasterBlock>(const_cast<UOdysseyAnimationCellImageRaster*>(this), width, height, format);
-        if (GetRenderTexture())
+        UTexture2D* texture = GetRenderTexture();
+        if (texture && texture->Source.GetFormat() != TSF_Invalid)
         {
-            TSharedPtr<::ULIS::FBlock> textureBlock = MakeShareable(NewBlockFromUTextureData(GetRenderTexture(), mRasterBlock->GetFormat()));
+            TSharedPtr<::ULIS::FBlock> textureBlock = MakeShareable(NewBlockFromUTextureData(texture, mRasterBlock->GetFormat()));
             FOdysseyRasterBlockMutator rasterBlockMutator(mRasterBlock, false);
             rasterBlockMutator.Copy(textureBlock, { textureBlock->Rect() });
             rasterBlockMutator.Commit();
