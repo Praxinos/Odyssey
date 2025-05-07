@@ -204,6 +204,22 @@ ConvertULISFormatToTextureSourceFormat( const uint8* iSrc, uint8* oDst, int iWid
     return  static_cast< ::ULIS::eFormat >( 0 );
 }
 
+ERawImageFormat::Type
+RawImageFormatForULISFormat( ::ULIS::eFormat iFormat )
+{
+    ERawImageFormat::Type ret = ERawImageFormat::Invalid;
+    switch( iFormat )
+    {
+        case ::ULIS::Format_G8: ret = ERawImageFormat::G8;
+        case ::ULIS::Format_BGRA8: ret = ERawImageFormat::BGRA8;
+        case ::ULIS::Format_RGBA16: ret = ERawImageFormat::RGBA16;
+        case ::ULIS::Format_RGBAF: ret = ERawImageFormat::RGBA32F;
+        case ::ULIS::Format_G16: ret = ERawImageFormat::G16;
+    }
+    checkf(ret,TEXT("Error, bad format !")); // Crash
+    return ret;
+}
+
 ETextureSourceFormat TextureSourceFormatForULISFormat( ::ULIS::eFormat iFormat )
 {
     ETextureSourceFormat ret = TSF_Invalid;

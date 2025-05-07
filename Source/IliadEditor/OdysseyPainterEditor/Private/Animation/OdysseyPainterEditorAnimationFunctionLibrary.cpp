@@ -173,6 +173,8 @@ UOdysseyPainterEditorAnimationLayerFunctionLibrary::ImportTextureSequence(UOdyss
     TArray<UOdysseyAnimationCellImageRaster*> rasterCells;
 
     TStrongObjectPtr<UTextureRenderTarget2D> renderTarget(NewObject<UTextureRenderTarget2D>());
+    renderTarget->RenderTargetFormat = RTF_RGBA8_SRGB;
+    renderTarget->bForceLinearGamma = false;
     FIntRect dstRect = Layer->GetDefaultRenderRect();
     renderTarget->InitAutoFormat(dstRect.Width(), dstRect.Height());
 
@@ -182,6 +184,7 @@ UOdysseyPainterEditorAnimationLayerFunctionLibrary::ImportTextureSequence(UOdyss
 
         UOdysseyAnimationCellImageRaster* cell = Cast<UOdysseyAnimationCellImageRaster>(cells[i]);
         UTexture2D* texture = Textures[i];
+        texture->BlockOnAnyAsyncBuild();
         FIntRect srcRect(0, 0, texture->GetSurfaceWidth(), texture->GetSurfaceHeight());
 
         const ERHIFeatureLevel::Type featureLevel = GMaxRHIFeatureLevel;

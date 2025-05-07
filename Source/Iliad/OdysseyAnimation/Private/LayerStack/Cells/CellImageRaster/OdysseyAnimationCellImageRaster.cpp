@@ -65,8 +65,8 @@ UOdysseyAnimationCellImageRaster::InitRasterBlock() const
         ::ULIS::eFormat format = ::ULIS::Format_BGRA8;
         switch ( GetAnimation()->GetFormat() )
         {
-            case EOdysseyAnimationFormat::BGRA8: format = ::ULIS::Format_BGRA8;
-            case EOdysseyAnimationFormat::RGBAF: format = ::ULIS::Format_RGBAF;
+            case EOdysseyAnimationFormat::BGRA8: format = ::ULIS::Format_BGRA8; break;
+            case EOdysseyAnimationFormat::RGBAF: format = ::ULIS::Format_RGBAF; break;
         }
 
         mRasterBlock = MakeShared<FOdysseyRasterBlock>(const_cast<UOdysseyAnimationCellImageRaster*>(this), width, height, format);
@@ -119,8 +119,8 @@ UOdysseyAnimationCellImageRaster::PostDuplicate(EDuplicateMode::Type iDuplicateM
     ::ULIS::eFormat format = ::ULIS::Format_BGRA8;
     switch(GetAnimation()->GetFormat())
     {
-        case EOdysseyAnimationFormat::BGRA8: format = ::ULIS::Format_BGRA8;
-        case EOdysseyAnimationFormat::RGBAF: format = ::ULIS::Format_RGBAF;
+        case EOdysseyAnimationFormat::BGRA8: format = ::ULIS::Format_BGRA8; break;
+        case EOdysseyAnimationFormat::RGBAF: format = ::ULIS::Format_RGBAF; break;
     }
 
     int width = GetAnimation()->GetWidth();

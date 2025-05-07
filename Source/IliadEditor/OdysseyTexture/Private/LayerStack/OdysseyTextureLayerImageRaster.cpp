@@ -78,7 +78,6 @@ UOdysseyTextureLayerImageRaster::InitTexture()
     Super::InitTexture();
 
     UTexture2D* texture = GetRenderTexture();
-
     TSharedPtr<FOdysseyRasterBlock> rasterBlock = GetRasterBlock(); //ensures mRasterBlock exists
     InitTextureWithBlockData(rasterBlock->GetBlock().Get(), texture, TextureSourceFormatForULISFormat(rasterBlock->GetFormat()));
     texture->UpdateResource();

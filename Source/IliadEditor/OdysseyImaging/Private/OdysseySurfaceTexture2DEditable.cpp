@@ -20,6 +20,7 @@
 #include "Async/ParallelFor.h"
 #include "TextureCompiler.h"
 #include "OdysseyPixelFormat.h"
+#include "ColorManagement/TransferFunctions.h"
 #include <ULIS>
 
 #ifdef UE_BUILD_DEBUG
@@ -83,13 +84,19 @@ InitTextureWithBlockData(const ::ULIS::FBlock* iBlock, UTexture2D* iTexture, ETe
 {
     ::ULIS::eFormat targetFormat = ULISFormatForTextureSourceFormat(iFormat);
     const ::ULIS::FBlock* block = iBlock;
-    if (iBlock->Format() != targetFormat)
+    if (iBlock->Format() != targetFormat || (iFormat != TSF_BGRA8 && iFormat != TSF_G8))
     {
         ::ULIS::FBlock* convblock = new ::ULIS::FBlock(iBlock->Width(), iBlock->Height(), targetFormat);
 
         ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iBlock->Format());
         ctx.ConvertFormat( *iBlock, *convblock );
         ctx.Finish();
+
+        if (iFormat != TSF_BGRA8 && iFormat != TSF_G8)
+        {
+            FImageView imageView(convblock->Bits(), iBlock->Width(), iBlock->Height(), 1, RawImageFormatForULISFormat(targetFormat), EGammaSpace::Linear);
+            ImageSRGBToLinear(imageView);
+        }
 
         block = convblock;
     }
@@ -207,6 +214,40 @@ NewRGBAFTextureFromBlockData(::ULIS::FBlock* iBlock)
     NewTexture2D->UpdateResource();
     return NewTexture2D;
     */
+}
+
+void
+ImageLinearToSRGB(const FImageView& iImage)
+{
+    FImage rgba32FImage(iImage.SizeX, iImage.SizeY, ERawImageFormat::RGBA32F, EGammaSpace::Linear);
+    FImageCore::CopyImage(iImage, rgba32FImage);
+
+    TArrayView64<FLinearColor> colors = rgba32FImage.AsRGBA32F();
+    for (FLinearColor& color : colors)
+    {
+        color.R = UE::Color::EncodeSRGB(color.R);
+        color.G = UE::Color::EncodeSRGB(color.G);
+        color.B = UE::Color::EncodeSRGB(color.B);
+    }
+
+    FImageCore::CopyImage(rgba32FImage, iImage);
+}
+
+void
+ImageSRGBToLinear(const FImageView& iImage)
+{
+    FImage rgba32FImage(iImage.SizeX, iImage.SizeY, ERawImageFormat::RGBA32F, EGammaSpace::Linear);
+    FImageCore::CopyImage(iImage, rgba32FImage);
+
+    TArrayView64<FLinearColor> colors = rgba32FImage.AsRGBA32F();
+    for (FLinearColor& color : colors)
+    {
+        color.R = UE::Color::DecodeSRGB(color.R);
+        color.G = UE::Color::DecodeSRGB(color.G);
+        color.B = UE::Color::DecodeSRGB(color.B);
+    }
+
+    FImageCore::CopyImage(rgba32FImage, iImage);
 }
 
 ERawImageFormat::Type
@@ -410,7 +451,7 @@ InvalidateTextureFromSourceDataUsingSortedRects( const ::ULIS::FBlock* iData, UT
             tileBlocks[i].Reserve( ioSrcRects[i].Num() );
             for( int32 j = 0; j < ioSrcRects[i].Num(); ++j ) {
 
-                EGammaSpace gammaSpace = (fmt != ERawImageFormat::G8 && fmt != ERawImageFormat::BGRA8) || !iTexture->SRGB ? EGammaSpace::Linear : EGammaSpace::sRGB;
+                EGammaSpace gammaSpace = ((fmt != ERawImageFormat::G8 && fmt != ERawImageFormat::BGRA8) || !iTexture->SRGB) ? EGammaSpace::Linear : EGammaSpace::sRGB;
 
                 const int len = ioSrcRects[i][j].h;
                 tileImages[i].Emplace(
@@ -431,7 +472,7 @@ InvalidateTextureFromSourceDataUsingSortedRects( const ::ULIS::FBlock* iData, UT
                 tileImages[i][j][0].RawData.SetNumUninitialized( rowSize * len );
                 tileBlocks[i].Emplace( tileImages[i][j][0].RawData.GetData(), ioSrcRects[i][j].w, ioSrcRects[i][j].h, iData->Format() );
                 if( bPred ) {
-                    // TODO: This part can be optimized and multithreaded
+                    // TODO: This part can be  optimizedand multithreaded
                     for( int k = 0; k < len; k++ ) {
                         //checkf( false, TEXT( "Not implemented properly yet" ) );
                         ConvertULISFormatToTextureSourceFormat(
@@ -444,7 +485,11 @@ InvalidateTextureFromSourceDataUsingSortedRects( const ::ULIS::FBlock* iData, UT
                     }
                 } else {
                     ctx.Copy( *iData, tileBlocks[i][j], ioSrcRects[i][j], ::ULIS::FVec2I( 0 ), ::ULIS::FSchedulePolicy::AsyncCacheEfficient );
+                    ctx.Finish();
                 }
+
+                if (gammaSpace == EGammaSpace::Linear)
+                    ImageSRGBToLinear(tileImages[i][j][0]);
             }
         }
         ctx.Finish();

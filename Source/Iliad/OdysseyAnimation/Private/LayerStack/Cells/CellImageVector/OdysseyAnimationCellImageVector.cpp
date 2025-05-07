@@ -148,8 +148,8 @@ UOdysseyAnimationCellImageVector::PostInitProperties()
     ::ULIS::eFormat format = ::ULIS::Format_BGRA8;
     switch(animation->GetFormat())
     {
-        case EOdysseyAnimationFormat::BGRA8: format = ::ULIS::Format_BGRA8;
-        case EOdysseyAnimationFormat::RGBAF: format = ::ULIS::Format_RGBAF;
+        case EOdysseyAnimationFormat::BGRA8: format = ::ULIS::Format_BGRA8; break;
+        case EOdysseyAnimationFormat::RGBAF: format = ::ULIS::Format_RGBAF; break;
     }
 
     mVectorBlock->Init(mVectorBlockId, mVectorCell, animation->GetWidth(), animation->GetHeight(), format);
@@ -165,8 +165,8 @@ UOdysseyAnimationCellImageVector::PostDuplicate(EDuplicateMode::Type iDuplicateM
     ::ULIS::eFormat format = ::ULIS::Format_BGRA8;
     switch(animation->GetFormat())
     {
-        case EOdysseyAnimationFormat::BGRA8: format = ::ULIS::Format_BGRA8;
-        case EOdysseyAnimationFormat::RGBAF: format = ::ULIS::Format_RGBAF;
+        case EOdysseyAnimationFormat::BGRA8: format = ::ULIS::Format_BGRA8; break;
+        case EOdysseyAnimationFormat::RGBAF: format = ::ULIS::Format_RGBAF; break;
     }
 
     mVectorBlock->Init(mVectorBlockId, mVectorCell, animation->GetWidth(), animation->GetHeight(), format);
@@ -282,8 +282,8 @@ UOdysseyAnimationCellImageVector::PostLoad()
     ::ULIS::eFormat format = ::ULIS::Format_BGRA8;
     switch(animation->GetFormat())
     {
-        case EOdysseyAnimationFormat::BGRA8: format = ::ULIS::Format_BGRA8;
-        case EOdysseyAnimationFormat::RGBAF: format = ::ULIS::Format_RGBAF;
+        case EOdysseyAnimationFormat::BGRA8: format = ::ULIS::Format_BGRA8; break;
+        case EOdysseyAnimationFormat::RGBAF: format = ::ULIS::Format_RGBAF; break;
     }
 
     mVectorBlock->Init(mVectorBlockId, mVectorCell, animation->GetWidth(), animation->GetHeight(), format);
