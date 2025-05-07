@@ -635,6 +635,8 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVector( FOdysseyVectorGroup
         mPickedBucket = nullptr;
 
         iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+
+        iScene->GetCell()->InvalidateRect();
         iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
     }
 
