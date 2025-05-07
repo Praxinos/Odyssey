@@ -328,7 +328,7 @@ protected:
     UPROPERTY()
     bool bCanHaveChildren = false;
 
-    UPROPERTY()
+    UPROPERTY(DuplicateTransient)
     UOdysseyLayer* Parent;
 
     UPROPERTY()
