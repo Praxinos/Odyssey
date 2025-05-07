@@ -74,6 +74,18 @@ SOdysseyAnimationLayerImageTimeline::GenerateWidgetForRow( const FName& iRow, co
             + SOverlay::Slot()
             [
                 SNew(SEnableBox)
+                .IsEnabled_Lambda(
+                    [this]()
+                    {
+                        if (!mLayer)
+                            return false;
+
+                        if (!mLayer->IsEditable())
+                            return false;
+
+                        return true;
+                    }
+                )
                 [
                     widget.ToSharedRef()
                 ]
@@ -81,6 +93,7 @@ SOdysseyAnimationLayerImageTimeline::GenerateWidgetForRow( const FName& iRow, co
             + SOverlay::Slot()
             [
                 SNew(SColorBlock)
+                .Visibility(EVisibility::SelfHitTestInvisible)
                 .Color_Lambda(
                     [this]()
                     {
