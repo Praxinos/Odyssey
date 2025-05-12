@@ -464,9 +464,6 @@ SOdysseyPainterEditorVectorSceneTreeView::MapActionsToCommandList()
 void
 SOdysseyPainterEditorVectorSceneTreeView::OnVectorSceneNotify( FOdysseyVectorGroupPaint* iScene, uint64 iSignalFlags )
 {
-    if (iScene != mScene.Get())
-        return;
-
     ParseVectorNotifications( iSignalFlags );
 }
 

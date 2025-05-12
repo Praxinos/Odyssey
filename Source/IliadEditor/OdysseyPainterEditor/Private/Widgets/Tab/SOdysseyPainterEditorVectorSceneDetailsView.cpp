@@ -136,12 +136,8 @@ SOdysseyPainterEditorVectorSceneDetailsView::Update()
 void
 SOdysseyPainterEditorVectorSceneDetailsView::OnVectorSceneNotify( FOdysseyVectorGroupPaint* iScene, uint64 iSignalFlags )
 {
-    if (iScene != mScene.Get())
-        return;
-
     ParseVectorNotifications( iSignalFlags );
 }
-
 
 void
 SOdysseyPainterEditorVectorSceneDetailsView::ParseVectorNotifications( uint64 iSignalFlags )

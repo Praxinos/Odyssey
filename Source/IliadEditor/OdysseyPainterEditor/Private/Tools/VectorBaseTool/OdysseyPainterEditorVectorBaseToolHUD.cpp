@@ -168,6 +168,7 @@ struct HOdysseyHUDDummyCursorHitProxy : public HOdysseyHUDElementHitProxy
                                   , TOptional<EMouseCursor::Type> iMouseCursor = TOptional<EMouseCursor::Type>() )
         : HOdysseyHUDElementHitProxy( iToolHUD, iMouseCursor )
     {
+
     }
 };
 
@@ -2052,40 +2053,45 @@ FOdysseyPainterEditorVectorBaseToolHUD::OnMouseDrag(const FOdysseyPoint& iPointI
 void
 FOdysseyPainterEditorVectorBaseToolHUD::DrawDummyPlane( const FOdysseyHUD::FDrawHUDParams& iParams )
 {
-    FBatchedElements* batchedElements = iParams.mCanvas->GetBatchedElements( FCanvas::ET_Triangle );
-    FVector4 vertex[4] = { FVector4( 0
-                                   , 0
-                                   , 0.0f
-                                   , 1.0f )
-                         , FVector4( iParams.mTextureWidth
-                                   , 0
-                                   , 0.0f
-                                   , 1.0f )
-                         , FVector4( iParams.mTextureWidth
-                                   , iParams.mTextureHeight
-                                   , 0.0f
-                                   , 1.0f )
-                         , FVector4( 0
-                                   , iParams.mTextureHeight
-                                   , 0.0f
-                                   , 1.0f ) };
-
-    const FLinearColor color( 1.f, 0.f, 0.f, 0.0f );
-    int32 idx0, idx1, idx2, idx3;
-
     if( iParams.mCanvas->IsHitTesting() )
+    {
+        FBatchedElements* batchedElements = iParams.mCanvas->GetBatchedElements( FCanvas::ET_Triangle );
+        // Note: when HITProxy is testing, mCanvas->ViewRect is 0. so we use GetRenderTarget() instead of GetViewRect().
+        int32 width= iParams.mCanvas->GetRenderTarget()->GetSizeXY().X;
+        int32 height = iParams.mCanvas->GetRenderTarget()->GetSizeXY().Y;
+
+        FVector4 vertex[4] = { FVector4( 0
+                                       , 0
+                                       , 0.0f
+                                       , 1.0f )
+                             , FVector4( width
+                                       , 0
+                                       , 0.0f
+                                       , 1.0f )
+                             , FVector4( width
+                                       , height
+                                       , 0.0f
+                                       , 1.0f )
+                             , FVector4( 0
+                                       , height
+                                       , 0.0f
+                                       , 1.0f ) };
+
+        const FLinearColor color( 0.f, 1.f, 0.f, 0.15f );
+        int32 idx0, idx1, idx2, idx3;
+
         iParams.mCanvas->SetHitProxy( new HOdysseyHUDDummyCursorHitProxy( SharedThis ( this ) ) );
 
-    idx0 = batchedElements->AddVertex( vertex[0], FVector2D(0, 0), color, iParams.mCanvas->GetHitProxyId() );
-    idx1 = batchedElements->AddVertex( vertex[1], FVector2D(1, 0), color, iParams.mCanvas->GetHitProxyId() );
-    idx2 = batchedElements->AddVertex( vertex[2], FVector2D(1, 1), color, iParams.mCanvas->GetHitProxyId() );
-    idx3 = batchedElements->AddVertex( vertex[3], FVector2D(0, 1), color, iParams.mCanvas->GetHitProxyId() );
+        idx0 = batchedElements->AddVertex( vertex[0], FVector2D(0, 0), color, iParams.mCanvas->GetHitProxyId() );
+        idx1 = batchedElements->AddVertex( vertex[1], FVector2D(1, 0), color, iParams.mCanvas->GetHitProxyId() );
+        idx2 = batchedElements->AddVertex( vertex[2], FVector2D(1, 1), color, iParams.mCanvas->GetHitProxyId() );
+        idx3 = batchedElements->AddVertex( vertex[3], FVector2D(0, 1), color, iParams.mCanvas->GetHitProxyId() );
 
-    batchedElements->AddTriangle( idx0, idx1, idx2, mLineOutlinedTexture->GetResource(), BLEND_Translucent );
-    batchedElements->AddTriangle( idx2, idx3, idx0, mLineOutlinedTexture->GetResource(), BLEND_Translucent );
+        batchedElements->AddTriangle( idx0, idx1, idx2, GWhiteTexture, BLEND_Translucent );
+        batchedElements->AddTriangle( idx2, idx3, idx0, GWhiteTexture, BLEND_Translucent );
 
-    if( iParams.mCanvas->IsHitTesting() )
         iParams.mCanvas->SetHitProxy( nullptr );
+    }
 
     FOdysseyHUDElement::DrawHUD(iParams);
 }
