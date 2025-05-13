@@ -180,7 +180,7 @@ ShotSequenceTools::SpawnAndBindAnimation( ISequencer& iSequencer, UMovieSceneSeq
         return nullptr;
 
     FTransform transform = animation->GetTransform();
-    animation->GetAnimationComponent()->SetAnimation( new_animation );
+    animation->GetAnimationComponent()->InitializeFromAnimation( new_animation );
     animation->SetActorTransform( transform );
 
     //-
@@ -218,6 +218,7 @@ ShotSequenceTools::SpawnAndBindAnimation( ISequencer& iSequencer, UMovieSceneSeq
     for( TWeakObjectPtr<UOdysseyAnimationTimelineSection> section : result.mSections )
     {
         section->SetRange( iSequence->GetMovieScene()->GetPlaybackRange() );
+        section->SetAnimation( section->GetAnimation() ); // To rebuild the channel (as the section is created at the current frame by default)
     }
 
     if( oGuid )

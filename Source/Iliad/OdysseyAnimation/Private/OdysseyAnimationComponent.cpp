@@ -134,6 +134,12 @@ UOdysseyAnimationComponent::PostLoad()
 {
     Super::PostLoad();
 
+
+    if( !GetStaticMesh() ) //TODO: see with Eric ???
+    {
+        InitializeFromAnimation( Animation );
+    }
+
     if( GetStaticMesh()->GetPathName() == TEXT( "/Engine/BasicShapes/Plane.Plane" ) ) // Old mesh (deprecated) used for animation actor component
     {
         SetStaticMesh( LoadObject<UStaticMesh>( this, TEXT( "/Odyssey/S_1_Unit_Plane.S_1_Unit_Plane" ) ) );
