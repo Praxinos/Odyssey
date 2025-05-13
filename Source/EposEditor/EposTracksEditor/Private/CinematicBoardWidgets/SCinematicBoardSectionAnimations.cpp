@@ -177,7 +177,7 @@ SKeysOverviewBox2::OnPaint( const FPaintArgs& Args, const FGeometry& AllottedGeo
 
 static
 void
-ToggleKeysAreaVisibility( UMovieSceneCinematicBoardSection* iBoardSection, TArray<FGuid> iAnimationBindings, FGuid iAnimationReference )
+ToggleKeysAreaVisibility5( UMovieSceneCinematicBoardSection* iBoardSection, TArray<FGuid> iAnimationBindings, FGuid iAnimationReference )
 {
     // This is the current animation which is the reference state
     bool is_reference_visible = iBoardSection->IsAnimationKeysAreaVisible( iAnimationReference );
@@ -317,7 +317,7 @@ SCinematicBoardSectionAnimationTitle::Construct( const FArguments& InArgs, TShar
         ShotSequenceHelpers::GetAllAnimations( *sequencer, result.mInnerSequence, result.mInnerSequenceId, EGetAnimation::kSelectedOnly, nullptr, &animation_bindings );
 
         if( animation_bindings.Contains( mBinding.GetGuid() ) )
-            ::ToggleKeysAreaVisibility( section_object, animation_bindings, mBinding.GetGuid() );
+            ::ToggleKeysAreaVisibility5( section_object, animation_bindings, mBinding.GetGuid() );
         else
             section_object->ToggleAnimationKeysAreaVisibility( mBinding.GetGuid() );
     };
@@ -2743,7 +2743,7 @@ SCinematicBoardSectionAnimation::BuildContextMenu( FMenuBuilder& ioMenuBuilder )
         tooltip_text,
         FSlateIcon(),
         FUIAction(
-            FExecuteAction::CreateStatic( ToggleKeysAreaVisibility, board_section_object, animation_bindings, mBinding.GetGuid() )
+            FExecuteAction::CreateStatic( ToggleKeysAreaVisibility5, board_section_object, animation_bindings, mBinding.GetGuid() )
         ) );
 
     //-
