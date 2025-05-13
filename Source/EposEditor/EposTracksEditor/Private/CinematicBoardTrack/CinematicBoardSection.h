@@ -118,11 +118,12 @@ public:
     {
         FQualifiedFrameTime QTime;
         FIntVector2 Size;
-        UTexture2D* Texture;
-        UTextureRenderTarget2D* RenderTarget;
-        FSlateBrush* Brush;
+        UTexture2D* Texture = nullptr;
+        UTextureRenderTarget2D* RenderTarget = nullptr;
+        FSlateBrush* Brush = nullptr;
     };
     virtual const TArray<FThumbnailData>& GetAnimationTimelineThumbnails( FMovieScenePossessable iPossessable ) const;
+    virtual void ReBuildAnimationsTimelineThumbnails( FMovieScenePossessable iPossessable, TOptional<FGuid> iFrameId = TOptional<FGuid>() );
 
     virtual void BuildAnimationsOpacityChannelProxy();
     virtual FChannelProxyBySectionMap GetAnimationOpacityChannelProxy( FMovieScenePossessable iPossessable ) const;
@@ -130,7 +131,8 @@ public:
     virtual TSharedPtr<FMetaChannel> GetAnimationOpacityMetaChannel( FMovieScenePossessable iPossessable ) const;
 
 private:
-    virtual void RebuildAnimationThumbnails();
+    virtual void ReBuildAnimationsTimelineThumbnails( FGuid iGuid, TOptional<FGuid> iFrameId = TOptional<FGuid>() );
+    virtual FThumbnailData RebuildAnimationThumbnailDataInternal( UOdysseyAnimationTimelineSection* iSection, FFrameNumber iFrameInSequence, TOptional<FGuid> iFrameId = TOptional<FGuid>() );
 
 private:
     TArray<double> mThumbnailKeys;
@@ -149,6 +151,14 @@ private:
     TMap<FGuid, TArray<FThumbnailData>>     mAnimationsTimelineThumbnails;
     TMap<FGuid, FChannelProxyBySectionMap>  mAnimationsOpacityChannelProxies;
     TMap<FGuid, TSharedPtr<FMetaChannel>>   mAnimationsOpacityMetaChannel;
+
+    struct FPoolData
+    {
+        UTexture2D* Texture = nullptr;
+        UTextureRenderTarget2D* RenderTarget = nullptr;
+    };
+    typedef TArray<FGuid> FRenderingComposition;
+    TMap<FRenderingComposition, FPoolData>  mAnimationsTimelineThumbnailPool;
 
 private:
     /** Add board takes menu */

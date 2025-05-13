@@ -960,7 +960,7 @@ private:
 
     void SetDelegates();
     void OnAnimationCutChannelChanged();
-    //void OnAnimationChanged( const FOdysseyImageRenderingChangedEvent& iEvent );
+    void OnAnimationChanged( const FOdysseyRenderingChangedEvent& iEvent );
 
 private:
     FMovieScenePossessable              mBinding;
@@ -1062,6 +1062,7 @@ SCinematicBoardSectionAnimationTimelineKeys::SetDelegates()
     for( TWeakObjectPtr<UOdysseyAnimationTimelineSection> animation_timeline_section : result.mSections )
     {
         animation_timeline_section->OnAnimationCutChannelChanged().AddSP( this, &SCinematicBoardSectionAnimationTimelineKeys::OnAnimationCutChannelChanged );
+        animation_timeline_section->GetAnimation()->OnRenderingChangedDelegate().AddSP( this, &SCinematicBoardSectionAnimationTimelineKeys::OnAnimationChanged );
     }
 
     //TSet<UOdysseyAnimation*> animations;
@@ -1088,11 +1089,27 @@ SCinematicBoardSectionAnimationTimelineKeys::SetDelegates()
 }
 
 void
+SCinematicBoardSectionAnimationTimelineKeys::OnAnimationChanged( const FOdysseyRenderingChangedEvent& iEvent )
+{
+    if( iEvent.IsInteractive() )
+        return;
+
+    if( iEvent.GetType() == FOdysseyRenderingChangedEvent::kValueChange )
+    {
+        FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+        const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
+        ISequencer* sequencer = board_section->GetSequencer().Get();
+
+        board_section->ReBuildAnimationsTimelineThumbnails( mBinding, iEvent.GetId() );
+    }
+}
+
+void
 SCinematicBoardSectionAnimationTimelineKeys::OnAnimationCutChannelChanged()
 {
     FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
     const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
-    ISequencer* sequencer = board_section->GetSequencer().Get();
+    //ISequencer* sequencer = board_section->GetSequencer().Get();
 
     //TODO: this should be done somewhere inside FCinematicBoardSection (?) and this delegate should be linked to a FCinematicBoardSection one ?
     board_section->BuildAnimationsTimelineChannelProxy();

@@ -62,6 +62,9 @@ UOdysseyAnimationTimelineSection::OnAnimationChanged( const FOdysseyRenderingCha
     if( iEvent.IsInteractive() )
         return;
 
+    if( iEvent.GetType() != FOdysseyRenderingChangedEvent::kCompositionChange )
+        return;
+
     if( !LockChannelRebuild )
         RebuildAnimationCutChannel();
 }
