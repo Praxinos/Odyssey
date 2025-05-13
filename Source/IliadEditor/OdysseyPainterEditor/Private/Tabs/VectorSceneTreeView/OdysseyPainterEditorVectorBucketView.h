@@ -9,7 +9,7 @@
 #include <Core/Core.h>
 #include <Image/Block.h>
 #include "OdysseyVectorBucket.h"
-
+#include "OdysseyPainterEditorVectorObjectView.h" // for FPaletteEntrySelection
 #include "OdysseyPainterEditorVectorBucketView.generated.h"
 
 class FOdysseyPainterEditor;
@@ -43,6 +43,12 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBucketView : public UO
                  , Category = "Bucket"
                  , meta = ( ToolTip  = "Color Mode" ) )
         eBucketColorMode ColorMode;
+
+        UPROPERTY( EditAnywhere,
+                   Category = "Bucket",
+                   meta = ( EditCondition = "(ColorMode == eBucketColorMode::Palette )"
+                          , EditConditionHides ) )
+        FPaletteEntrySelection PaletteSelection;
 
         UPROPERTY( EditAnywhere
                  , Category = "Bucket"

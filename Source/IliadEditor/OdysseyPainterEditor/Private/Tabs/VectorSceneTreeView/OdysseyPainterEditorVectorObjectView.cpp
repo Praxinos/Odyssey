@@ -193,8 +193,7 @@ UOdysseyPainterEditorVectorObjectView::PostEditChangeProperty( FPropertyChangedE
 
     if( mScene )
     {
-        uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                                 | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW;
+        uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW;
 
         // needed for valid GUndo pointer
         GEditor->BeginTransaction(LOCTEXT("vector-object.transaction.property-changed","Property Changed"));

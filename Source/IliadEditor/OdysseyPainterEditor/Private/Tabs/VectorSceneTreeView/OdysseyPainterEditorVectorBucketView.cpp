@@ -35,6 +35,8 @@ UOdysseyPainterEditorVectorBucketView::ImportParam()
     GradientColor0 = mBucket->GetGradientColor0();
     GradientColor1 = mBucket->GetGradientColor1();
     RadialRadius = mBucket->GetRadialRadius();
+    PaletteSelection.OdysseyPaletteEntryColor = Cast<UOdysseyPaletteEntryColor>(mBucket->GetPaletteEntry());
+    PaletteSelection.OdysseyPaletteSet = mBucket->GetPaletteSet();
 }
 
 void
@@ -68,6 +70,12 @@ UOdysseyPainterEditorVectorBucketView::PropertyChanged( const FName& iPropertyNa
         // and we can edit individual struct members RGBA
         if( ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorBucketView, GradientColor0) ) || ( iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorBucketView, GradientColor0) ) )
             mBucket->SetGradientColor0( GradientColor0 );
+
+        if ( (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorBucketView, PaletteSelection)) || ( iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorBucketView, PaletteSelection) ) )
+        {
+            mBucket->SetPaletteEntry( PaletteSelection.OdysseyPaletteEntryColor );
+            mBucket->SetPaletteSet( PaletteSelection.OdysseyPaletteSet );
+        }
 
         // note: iMemberPropertyName because FColor is a struct
         // and we can edit individual struct members RGBA
