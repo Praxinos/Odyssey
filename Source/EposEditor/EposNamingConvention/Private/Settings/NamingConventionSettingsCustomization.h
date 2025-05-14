@@ -12,14 +12,14 @@ class FDetailWidgetRow;
 class IDetailChildrenBuilder;
 class IPropertyHandle;
 class IPropertyTypeCustomizationUtils;
-struct FNamingConventionPlane;
+struct FNamingConventionAnimation;
 struct FNamingConventionCamera;
 struct FNamingConventionShot;
 struct FNamingConventionBoard;
 
 //---
 
-struct FNamingConventionPlaneCustomization
+struct FNamingConventionAnimationCustomization
     : public IPropertyTypeCustomization
 {
 public:
@@ -32,10 +32,10 @@ public:
 private:
     FText GetTooltipText() const;
 
-    FNamingConventionPlane* GetEditStruct( TSharedRef<IPropertyHandle> iStructPropertyHandle ) const;
+    FNamingConventionAnimation* GetEditStruct( TSharedRef<IPropertyHandle> iStructPropertyHandle ) const;
 
 private:
-    FNamingConventionPlane* mSettings;
+    FNamingConventionAnimation* mSettings;
 
     /** Property handles of the properties we're editing */
     TSharedPtr<IPropertyHandle> mPatternHandle;

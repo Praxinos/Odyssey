@@ -60,33 +60,6 @@ public:
     FNamingConventionNumberFormat IndexFormat { 10, 10, 4 };
 };
 
-enum class ENamingConventionPlanePatternKeyword : uint32
-{
-    ENUM_UNIQUE_ID( PlaneIndex ),
-};
-
-EPOSNAMINGCONVENTION_API const FPatternKeywordList& GetNamingConventionPlanePatternKeywordList();
-
-USTRUCT( BlueprintType )
-struct FNamingConventionPlane
-{
-    GENERATED_BODY()
-
-public:
-    FNamingConventionPlane();
-
-public:
-    /** The plane pattern. */
-    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="Plane")
-    FString Pattern;
-
-    FPatternKeywordLists mPatternKeywordLists;
-
-    /** The plane number format. */
-    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="Plane", meta=(ShowOnlyInnerProperties))
-    FNamingConventionNumberFormat IndexFormat { 10, 10, 4 };
-};
-
 enum class ENamingConventionCameraPatternKeyword : uint32
 {
     ENUM_UNIQUE_ID( CameraIndex ),
@@ -300,10 +273,6 @@ public:
     /** The naming convention for animations. */
     UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="AnimationNamingConvention", meta=(ShowOnlyInnerProperties) )
     FNamingConventionAnimation AnimationNaming;
-
-    /** The naming convention for planes. */
-    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="PlaneNamingConvention", meta=(ShowOnlyInnerProperties) )
-    FNamingConventionPlane PlaneNaming;
 
     /** The naming convention for cameras. */
     UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="CameraNamingConvention", meta=(ShowOnlyInnerProperties) )
