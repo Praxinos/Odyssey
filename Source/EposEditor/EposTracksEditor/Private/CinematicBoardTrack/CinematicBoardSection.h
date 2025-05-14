@@ -119,7 +119,6 @@ public:
         FQualifiedFrameTime QTime;
         FIntVector2 Size;
         UTexture2D* Texture = nullptr;
-        UTextureRenderTarget2D* RenderTarget = nullptr;
         FSlateBrush* Brush = nullptr;
     };
     virtual const TArray<FThumbnailData>& GetAnimationTimelineThumbnails( FMovieScenePossessable iPossessable ) const;
@@ -155,7 +154,6 @@ private:
     struct FPoolData
     {
         UTexture2D* Texture = nullptr;
-        UTextureRenderTarget2D* RenderTarget = nullptr;
     };
     typedef TArray<FGuid> FRenderingComposition;
     TMap<FRenderingComposition, FPoolData>  mAnimationsTimelineThumbnailPool;

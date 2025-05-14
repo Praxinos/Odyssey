@@ -60,6 +60,7 @@ public class EposTracksEditor : ModuleRules
                 "AppFramework",
                 "DeveloperSettings",
                 "LevelSequence",
+                "ImageCore",
                 // [RUNTIME] custom plugin dependencies
                 "EposMovieScene",
                 "EposSequence",

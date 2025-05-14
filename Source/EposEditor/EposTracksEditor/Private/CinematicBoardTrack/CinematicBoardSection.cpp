@@ -33,6 +33,8 @@
 #include "ITimeSlider.h"
 #include "MVVM/ViewModels/SequencerEditorViewModel.h"
 #include "Engine/TextureRenderTarget2D.h"
+#include "ImageUtils.h"
+#include "ImageCoreUtils.h"
 
 #include "Board/BoardSequence.h"
 #include "CinematicBoardTrack/CinematicBoardTrackEditor.h"
@@ -245,7 +247,6 @@ FCinematicBoardSection::AddReferencedObjects( FReferenceCollector& Collector ) /
         for( FThumbnailData& thumbnail_data : mAnimationsTimelineThumbnails[guid] )
         {
             Collector.AddReferencedObject( thumbnail_data.Texture );
-            Collector.AddReferencedObject( thumbnail_data.RenderTarget );
         }
     }
 }
@@ -909,16 +910,252 @@ FCinematicBoardSection::RebuildAnimationThumbnailDataInternal( UOdysseyAnimation
             return texture;
         };
 
-    auto CreateRenderTarget = []( int32 InSizeX, int32 InSizeY, ETextureRenderTargetFormat InFormat ) -> UTextureRenderTarget2D*
+    // From FImageUtils::GetRenderTargetImage(...) which always allocate a new FImage
+    auto GetRenderTargetImage = []( UTextureRenderTarget* iTextureRenderTarget, FImage*& oImage, FImage*& oImageSmall, int32 iSizeSmallX, int32 iSizeSmallY )
         {
-            UTextureRenderTarget2D* renderTarget = NewObject<UTextureRenderTarget2D>( GetTransientPackage(), NAME_None, RF_Public | RF_Transient );
-            renderTarget->RenderTargetFormat = InFormat;
-            //renderTarget->ClearColor = FLinearColor( frame_in_timeline.Value / float( 50 ), frame_in_timeline.Value / float( 50 ), frame_in_timeline.Value / float( 50 ) );
-            renderTarget->ResizeTarget( InSizeX, InSizeY );
-            //renderTarget->InitAutoFormat(
-            renderTarget->UpdateResource();
+            FIntRect InRectOrZero = FIntRect( 0, 0, 0, 0 );
+            // From UTextureRenderTarget::GetReadPixelsFormat(...) which is not exported *_API
+            // there are three different RHI APIs to read pixels from render targets
+            // they correspond to FColor, FLinearColor, and FFloat16
+            // choose which of the three to use for this RT
+            auto GetReadPixelsFormat = []( EPixelFormat PF, bool bIsVolume ) -> ERawImageFormat::Type
+                {
+                    if( bIsVolume )
+                    {
+                        // volumes are different, must always use 16F path
+                        return ERawImageFormat::RGBA16F;
+                    }
+                    else if( PF == PF_FloatRGBA )
+                    {
+                        // for non-volumes, only exact match 16F is supported
+                        return ERawImageFormat::RGBA16F;
+                    }
+                    else
+                    {
+                        // either 8-bit FColor or 32F FLinearColor path
 
-            return renderTarget;
+                        ERawImageFormat::Type RF = FImageCoreUtils::GetRawImageFormatForPixelFormat( PF );
+
+                        if( RF == ERawImageFormat::BGRA8 || RF == ERawImageFormat::G8 )
+                        {
+                            return ERawImageFormat::BGRA8; // use FColor
+                        }
+                        else
+                        {
+                            return ERawImageFormat::RGBA32F; // use FLinearColor
+                        }
+                    }
+                };
+
+            FRenderTarget* RenderTarget = iTextureRenderTarget->GameThread_GetRenderTargetResource();
+            EPixelFormat RTFormat = iTextureRenderTarget->GetFormat();
+
+            ERawImageFormat::Type ReadFormat = GetReadPixelsFormat( RTFormat, false );
+            //ERawImageFormat::Type ReadFormat = UTextureRenderTarget::GetReadPixelsFormat( RTFormat, false );
+
+            // we have to identify cubes because they are treated differently
+            ETextureClass TexRTClass = iTextureRenderTarget->GetRenderTargetTextureClass();
+            check( TexRTClass != ETextureClass::Invalid && TexRTClass != ETextureClass::RenderTarget );
+            bool bIsCube = TexRTClass == ETextureClass::Cube || TexRTClass == ETextureClass::CubeArray;
+
+            int64 TexRT_SizeX = FMath::RoundToInt64( iTextureRenderTarget->GetSurfaceWidth() ); // GetSurfaceWidth returns SizeX but as float
+            int64 TexRT_SizeY = FMath::RoundToInt64( iTextureRenderTarget->GetSurfaceHeight() );
+            int64 TexRT_SizeZ = FMath::RoundToInt64( iTextureRenderTarget->GetSurfaceDepth() );
+            int64 TexRT_ArraySize = iTextureRenderTarget->GetSurfaceArraySize();
+
+            if( TexRT_SizeX <= 0 || TexRT_SizeY <= 0 )
+            {
+                return;
+            }
+
+            int64 NumSlices;
+            if( bIsCube )
+            {
+                check( TexRT_SizeZ == 0 );
+                check( TexRT_ArraySize == 6 );
+                NumSlices = 6;
+            }
+            else if( TexRT_SizeZ != 0 )
+            {
+                check( TexRT_ArraySize == 0 );
+                NumSlices = TexRT_SizeZ;
+            }
+            else if( TexRT_ArraySize != 0 )
+            {
+                check( TexRT_SizeZ == 0 );
+                NumSlices = TexRT_ArraySize;
+            }
+            else
+            {
+                // 2D
+                NumSlices = 1;
+            }
+
+            // UTextureRenderTarget2D returns 0 for Depth and ArraySize, not 1
+
+            // RCM_MinMax means don't renormalize, just read the pixels as they are
+            //  default RCM_UNorm does funny scalings
+            FReadSurfaceDataFlags ReadFlags( RCM_MinMax, CubeFace_MAX );
+
+            FIntRect Rect = InRectOrZero;
+            if( InRectOrZero == FIntRect( 0, 0, 0, 0 ) )
+            {
+                Rect = FIntRect( 0, 0, TexRT_SizeX, TexRT_SizeY );
+            }
+
+            int64 RectSizeX = Rect.Width();
+            int64 RectSizeY = Rect.Height();
+            if( !ensure( Rect.Min.X >= 0 && Rect.Min.Y >= 0 &&
+                         Rect.Max.X <= TexRT_SizeX && Rect.Max.Y <= TexRT_SizeY &&
+                         RectSizeX >= 0 && RectSizeY >= 0 ) )
+            {
+                return;
+            }
+            if( RectSizeX == 0 || RectSizeY == 0 )
+            {
+                return; // or is that a success to grab zero pixels?
+            }
+
+            if( ReadFormat == ERawImageFormat::RGBA16F )
+            {
+                // ReadFloat16Pixels does no conversions
+                //  must be used only exactly with FloatRGBA type
+
+                if( !oImage )
+                {
+                    oImage = new FImage();
+                    oImage->Init( RectSizeX, RectSizeY, NumSlices, ERawImageFormat::RGBA16F, EGammaSpace::Linear );
+
+                    check( !oImageSmall );
+                    oImageSmall = new FImage();
+                    oImageSmall->Init( iSizeSmallX, iSizeSmallY, NumSlices, ERawImageFormat::RGBA16F, EGammaSpace::Linear );
+                }
+                else
+                {
+                    TArray<FFloat16Color> Colors;
+
+                    for( int32 SliceIndex = 0; SliceIndex < NumSlices; ++SliceIndex )
+                    {
+                        ReadFlags.SetCubeFace( bIsCube ? (ECubeFace)( SliceIndex % 6 ) : CubeFace_MAX );
+                        ReadFlags.SetArrayIndex( bIsCube ? ( SliceIndex / 6 ) : SliceIndex );
+
+                        if( !RenderTarget->ReadFloat16Pixels( Colors, ReadFlags, Rect ) )
+                        {
+                            return;
+                        }
+
+                        FImageView ImageSlice = oImage->GetSlice( SliceIndex );
+                        check( ImageSlice.GetImageSizeBytes() == Colors.Num() * sizeof( Colors[0] ) );
+                        memcpy( ImageSlice.RawData, Colors.GetData(), ImageSlice.GetImageSizeBytes() );
+                    }
+                }
+            }
+            else if( ReadFormat == ERawImageFormat::BGRA8 )
+            {
+                // ?? not clear renderTarget->IsSRGB is right , see other notes on various issues there
+                //  mainly we are trying to catch the check for whether the _SRGB or non _SRGB BGRA8 format as chosen
+                EGammaSpace GammaSpace = iTextureRenderTarget->IsSRGB() ? EGammaSpace::sRGB : EGammaSpace::Linear;
+
+                if( !oImage )
+                {
+                    oImage = new FImage();
+                    oImage->Init( RectSizeX, RectSizeY, NumSlices, ERawImageFormat::BGRA8, GammaSpace );
+
+                    check( !oImageSmall );
+                    oImageSmall = new FImage();
+                    oImageSmall->Init( iSizeSmallX, iSizeSmallY, NumSlices, ERawImageFormat::BGRA8, GammaSpace );
+                }
+                else
+                {
+                    // "LinearToGamma" is basically moot; that would only be used if we were reading float pixels to FColor
+                    //  but in that case the ReadFormat should have been float, so we won't be here
+                    //  gamma conversion will be handled by FImage after the pixel read, not inside RHI
+                    ReadFlags.SetLinearToGamma( GammaSpace == EGammaSpace::sRGB );
+
+                    TArray<FColor> Colors;
+
+                    for( int32 SliceIndex = 0; SliceIndex < NumSlices; ++SliceIndex )
+                    {
+                        ReadFlags.SetCubeFace( bIsCube ? (ECubeFace)( SliceIndex % 6 ) : CubeFace_MAX );
+                        ReadFlags.SetArrayIndex( bIsCube ? ( SliceIndex / 6 ) : SliceIndex );
+
+                        if( !RenderTarget->ReadPixels( Colors, ReadFlags, Rect ) )
+                        {
+                            return;
+                        }
+
+                        FImageView ImageSlice = oImage->GetSlice( SliceIndex );
+                        check( ImageSlice.GetImageSizeBytes() == Colors.Num() * sizeof( Colors[0] ) );
+                        memcpy( ImageSlice.RawData, Colors.GetData(), ImageSlice.GetImageSizeBytes() );
+                    }
+                }
+            }
+            else if( ReadFormat == ERawImageFormat::RGBA32F )
+            {
+                if( !oImage )
+                {
+                    oImage = new FImage();
+                    oImage->Init( RectSizeX, RectSizeY, NumSlices, ERawImageFormat::RGBA32F, EGammaSpace::Linear );
+
+                    check( !oImageSmall );
+                    oImageSmall = new FImage();
+                    oImageSmall->Init( iSizeSmallX, iSizeSmallY, NumSlices, ERawImageFormat::RGBA32F, EGammaSpace::Linear );
+                }
+                else
+                {
+                    TArray<FLinearColor> Colors;
+
+                    for( int32 SliceIndex = 0; SliceIndex < NumSlices; ++SliceIndex )
+                    {
+                        ReadFlags.SetCubeFace( bIsCube ? (ECubeFace)( SliceIndex % 6 ) : CubeFace_MAX );
+                        ReadFlags.SetArrayIndex( bIsCube ? ( SliceIndex / 6 ) : SliceIndex );
+
+                        if( !RenderTarget->ReadLinearColorPixels( Colors, ReadFlags, Rect ) )
+                        {
+                            return;
+                        }
+
+                        FImageView ImageSlice = oImage->GetSlice( SliceIndex );
+                        check( ImageSlice.GetImageSizeBytes() == Colors.Num() * sizeof( Colors[0] ) );
+                        memcpy( ImageSlice.RawData, Colors.GetData(), ImageSlice.GetImageSizeBytes() );
+                    }
+                }
+            }
+            else
+            {
+                check( 0 ); // unexpected ReadFormat
+            }
+
+        };
+
+    auto CreateRenderTargetAndImage = [GetRenderTargetImage=GetRenderTargetImage]( int32 InSizeX, int32 InSizeY, ETextureRenderTargetFormat InFormat, UTextureRenderTarget2D*& oRenderTarget, FImage*& oImage, FImage*& oImageSmall, int32 InSizeSmallX, int32 InSizeSmallY ) -> void
+        {
+            static UTextureRenderTarget2D* renderTarget = nullptr;
+            static FImage* img = nullptr;
+            static FImage* img_small = nullptr;
+            if( !renderTarget
+                || renderTarget->SizeX != InSizeX
+                || renderTarget->SizeY != InSizeY
+                || renderTarget->RenderTargetFormat != InFormat )
+            {
+                renderTarget = NewObject<UTextureRenderTarget2D>( GetTransientPackage(), NAME_None, RF_Public | RF_Transient );
+                renderTarget->RenderTargetFormat = InFormat;
+                //renderTarget->ClearColor = FLinearColor( frame_in_timeline.Value / float( 50 ), frame_in_timeline.Value / float( 50 ), frame_in_timeline.Value / float( 50 ) );
+                renderTarget->ResizeTarget( InSizeX, InSizeY );
+                //renderTarget->InitAutoFormat(
+                renderTarget->UpdateResource();
+
+                delete img;
+                img = nullptr;
+                delete img_small;
+                img_small = nullptr;
+
+                GetRenderTargetImage( renderTarget, img, img_small, InSizeSmallX, InSizeSmallY );
+            }
+
+            oRenderTarget = renderTarget;
+            oImage = img;
+            oImageSmall = img_small;
         };
 
     //---
@@ -937,48 +1174,46 @@ FCinematicBoardSection::RebuildAnimationThumbnailDataInternal( UOdysseyAnimation
     if( !outer_time )
         return FThumbnailData();
 
-    //UE_LOG( LogTemp, Warning, TEXT( "frame_in_timeline.Value: %d" ), frame_in_timeline.Value );
-
     //---
 
     UOdysseyAnimation* animation = iSection->GetAnimation();
 
+    float ratio = animation->GetWidth() / float( animation->GetHeight() );
+    const FIntVector2 thumbnail_size( 200 * ratio, 200 );
+
     UTexture2D* texture = nullptr;
-    UTextureRenderTarget2D* renderTarget = nullptr;
 
     FRenderingComposition rendering_composition = animation->GetRenderingComposition( EOdysseyRenderingType::Render, frame_in_timeline.Value ); // THIS DOESN'T MANAGE IMAGE CHANGES !!!
 
-    //FString s;
-    //s.Empty();
-    //s += FString::Printf( TEXT( "%d: " ), frame_in_timeline.Value );
-    //for( FGuid id : rendering_composition )
-    //{
-    //    s += FString::Printf( TEXT( "%s - " ), *id.ToString() );
-    //}
-    //UE_LOG( LogTemp, Warning, TEXT( "%s" ), *s );
-
     if( !mAnimationsTimelineThumbnailPool.Contains( rendering_composition ) || ( iFrameId.IsSet() && rendering_composition.Contains( *iFrameId ) ) )
     {
-        renderTarget = CreateRenderTarget( animation->GetWidth(), animation->GetHeight(), RTF_RGBA16f );
+        UTextureRenderTarget2D* renderTarget;
+        FImage* img;
+        FImage* img_small;
+        CreateRenderTargetAndImage( animation->GetWidth(), animation->GetHeight(), RTF_RGBA16f, renderTarget, img, img_small, thumbnail_size.X, thumbnail_size.Y );
+        //UTextureRenderTarget2D* renderTarget = CreateRenderTarget( animation->GetWidth(), animation->GetHeight(), RTF_RGBA16f );
 
         animation->Render_GameThread( renderTarget, frame_in_timeline.Value, EOdysseyRenderingType::Render );
 
-        texture = CreateTexture( animation->GetWidth(), animation->GetHeight(), PF_B8G8R8A8 );
+        //texture = CreateTexture( thumbnail_size.X, thumbnail_size.Y, PF_B8G8R8A8 );
+        //texture = CreateTexture( animation->GetWidth(), animation->GetHeight(), PF_B8G8R8A8 );
 
-        renderTarget->UpdateTexture( texture );
+        //renderTarget->UpdateTexture( texture );
 
-        mAnimationsTimelineThumbnailPool.Add( rendering_composition, FPoolData{ texture, renderTarget } );
+        GetRenderTargetImage( renderTarget, img, img_small, 0, 0 );
+
+        FImageCore::ResizeImage( *img, *img_small );
+
+        texture = FImageUtils::CreateTexture2DFromImage( *img_small );
+
+        mAnimationsTimelineThumbnailPool.Add( rendering_composition, FPoolData{ texture } );
     }
     else
     {
         FPoolData p = mAnimationsTimelineThumbnailPool.FindChecked( rendering_composition );
         texture = p.Texture;
-        renderTarget = p.RenderTarget;
     }
 
-
-    float ratio = animation->GetWidth() / float( animation->GetHeight() );
-    const FIntVector2 thumbnail_size( 200 * ratio, 200 );
 
 
     //////////////////////////////
@@ -991,14 +1226,12 @@ FCinematicBoardSection::RebuildAnimationThumbnailDataInternal( UOdysseyAnimation
 
     FSlateBrush* brush = new FSlateBrush();
 
-    //brush->SetResourceObject( renderTarget );
-    brush->SetResourceObject( texture );
+    brush->SetResourceObject( texture ); // There are problems when using a render target (the brush seems to not update its resource once Render_GameThread())
 
     //---
 
     FThumbnailData thumbnail;
     thumbnail.QTime = FQualifiedFrameTime( *outer_time, movie_scene->GetTickResolution() );
-    thumbnail.RenderTarget = renderTarget;
     thumbnail.Texture = texture;
     thumbnail.Brush = brush;
     thumbnail.Size = thumbnail_size;
@@ -1046,7 +1279,7 @@ FCinematicBoardSection::ReBuildAnimationsTimelineThumbnails( FGuid iGuid, TOptio
                 continue;
 
             FThumbnailData thumbnail = RebuildAnimationThumbnailDataInternal( animation_timeline_section, meta_frame, iFrameId );
-            if( !thumbnail.RenderTarget )
+            if( !thumbnail.Texture )
                 continue;
 
             thumbnails.Add( thumbnail );
