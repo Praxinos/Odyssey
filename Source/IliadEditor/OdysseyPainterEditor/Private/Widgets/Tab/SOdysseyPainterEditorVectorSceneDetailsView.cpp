@@ -136,7 +136,16 @@ SOdysseyPainterEditorVectorSceneDetailsView::Update()
 void
 SOdysseyPainterEditorVectorSceneDetailsView::OnVectorSceneNotify( FOdysseyVectorGroupPaint* iScene, uint64 iSignalFlags )
 {
-    ParseVectorNotifications( iSignalFlags );
+    FOdysseyVectorGroupPaint* currentScene = mScene.Get();
+
+    // update the cached Value by calling the getter. Hence it will call OnSceneChanged()
+    mScene.UpdateNow( *this );
+
+    // if the attributes value does not changes, we force the update of the tree
+    if( currentScene == mScene.Get() )
+    {
+        ParseVectorNotifications( iSignalFlags );
+    }
 }
 
 void

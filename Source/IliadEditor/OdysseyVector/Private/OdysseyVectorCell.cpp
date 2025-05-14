@@ -358,6 +358,8 @@ FOdysseyVectorCell::SetScene( FOdysseyVectorGroupPaint* iScene )
 
     AppendChild( iScene );
 
+    ClearObjectSelection();
+
     //mEngine.ResetHUD();
 
     mScene = iScene;

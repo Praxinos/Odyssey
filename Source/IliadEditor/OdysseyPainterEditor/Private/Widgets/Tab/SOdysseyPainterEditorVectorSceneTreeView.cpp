@@ -464,9 +464,18 @@ SOdysseyPainterEditorVectorSceneTreeView::MapActionsToCommandList()
 void
 SOdysseyPainterEditorVectorSceneTreeView::OnVectorSceneNotify( FOdysseyVectorGroupPaint* iScene, uint64 iSignalFlags )
 {
-    ParseVectorNotifications( iSignalFlags );
-}
+    FOdysseyVectorGroupPaint* currentScene = mScene.Get();
 
+    // update the cached Value by calling the getter.
+    mScene.UpdateNow( *this );
+
+    // if the attributes value changes, it will automatically trigger Update().
+    // Otherwise, like here, we force the update of the tree
+    if( currentScene == mScene.Get() )
+    {
+        ParseVectorNotifications( iSignalFlags );
+    }
+}
 
 void
 SOdysseyPainterEditorVectorSceneTreeView::ParseVectorNotifications( uint64 iSignalFlags )
