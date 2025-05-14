@@ -162,7 +162,7 @@ static void FinalizeBuildSettingsForLayer(
             const ITextureFormat* TextureFormat = TPM->FindTextureFormat(OutSettings.TextureFormatName);
             if (TextureFormat)
             {
-                bSupportsEncodeSpeed = TextureFormat->SupportsEncodeSpeed(OutSettings.TextureFormatName);
+                bSupportsEncodeSpeed = TextureFormat->SupportsEncodeSpeed(OutSettings.TextureFormatName, TargetPlatform->GetTargetPlatformSettings());
                 const FChildTextureFormat* ChildTextureFormat = TextureFormat->GetChildFormat();
 
                 if (ChildTextureFormat)
