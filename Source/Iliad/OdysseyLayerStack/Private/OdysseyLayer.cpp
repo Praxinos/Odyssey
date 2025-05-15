@@ -199,6 +199,7 @@ UOdysseyLayer::CellsChanged()
     RenderingCompositionChanged();
 }
 
+#if WITH_EDITOR
 void
 UOdysseyLayer::CellsChangedInteractive()
 {
@@ -208,7 +209,6 @@ UOdysseyLayer::CellsChangedInteractive()
     RenderingCompositionChanged(true);
 }
 
-#if WITH_EDITOR
 FOdysseyMediaProvider
 UOdysseyLayer::GetMediaProvider(uint32 iFrameIndex) const
 {
