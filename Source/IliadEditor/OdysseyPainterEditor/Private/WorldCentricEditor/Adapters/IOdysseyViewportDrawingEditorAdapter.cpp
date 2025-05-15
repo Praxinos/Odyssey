@@ -6,7 +6,6 @@
 #include "OdysseyPainterEditorSource.h"
 #include "OdysseyPainterEditorTextureSource.h"
 #include "OdysseyBrushAssetBase.h"
-#include "OdysseyViewportDrawingEditorViewportClient.h"
 #include "IOdysseyStylusInputModule.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Framework/Application/SlateApplication.h"
@@ -367,19 +366,6 @@ bool IOdysseyViewportDrawingEditorAdapter::InputKey(FEditorViewportClient* iView
 {
     if (mLastKnownViewport != iViewport)
         mLastKnownViewport = iViewport;
-
-#if PLATFORM_MAC
-    {
-        //No need to destroy it, it auto destroys itself
-        //This is only acceptable because it is a HUGE patch
-        //PATCH: Temporary viewportClient created for overriding highPrecision mouse events (useful for mac)
-        //TODO: remove this when we have a solution. It hurts to see it here
-        FOdysseyViewportDrawingEditorViewportClient* viewportClient = new FOdysseyViewportDrawingEditorViewportClient();
-        viewportClient->SetViewport(mLastKnownViewport);
-        viewportClient->SetViewportClient(mLastKnownViewport->GetClient());
-        mLastKnownViewport->SetViewportClient(viewportClient);
-    }
-#endif
 
     if( iEvent == EInputEvent::IE_Pressed )
     {

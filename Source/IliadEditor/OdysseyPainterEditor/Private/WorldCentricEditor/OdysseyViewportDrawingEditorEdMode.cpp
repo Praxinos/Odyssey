@@ -123,7 +123,7 @@ bool FOdysseyViewportDrawingEditorEdMode::InputKey(FEditorViewportClient* iViewp
 {
     if (!IsEditingEnabled())
         return false;
-
+        
     IOdysseyViewportDrawingEditorAdapter* adapter = mViewportDrawingEditorExtension->GetOdysseyViewportDrawingEditorAdapter();
     if (!adapter)
         return false;
@@ -133,6 +133,12 @@ bool FOdysseyViewportDrawingEditorEdMode::InputKey(FEditorViewportClient* iViewp
 
 bool FOdysseyViewportDrawingEditorEdMode::CapturedMouseMove(FEditorViewportClient* iViewportClient, FViewport* iViewport, int32 iMouseX, int32 iMouseY)
 {
+#if PLATFORM_MAC
+    // Fix an issue where the captured and non captured cursor are in conflict, resulting in two cursors that teleport to each other
+    // No need to put it back on true, it already does so automatically at each event, from the FReply in viewports CapturedMouseMove()
+    FSlateApplication::Get().GetPlatformApplication()->SetHighPrecisionMouseMode(false, nullptr);
+#endif
+    
     IOdysseyViewportDrawingEditorAdapter* adapter = mViewportDrawingEditorExtension->GetOdysseyViewportDrawingEditorAdapter();
     if (!adapter)
         return false;
