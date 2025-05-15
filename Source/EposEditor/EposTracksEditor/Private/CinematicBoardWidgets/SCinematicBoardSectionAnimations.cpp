@@ -970,7 +970,7 @@ private:
     //mutable TMap<TArray<FGuid>, FSlateBrush*>               mBrushes;
     //mutable TMap<TArray<FGuid>, TSet<int32>>                      mImages;
 
-    UTexture2D* mCheckboardTexture = nullptr;
+    TObjectPtr<UTexture2D> mCheckboardTexture = nullptr;
     FSlateBrush* mCheckboardBrush = nullptr;
 };
 

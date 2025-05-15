@@ -118,7 +118,7 @@ public:
     {
         FQualifiedFrameTime QTime;
         FIntVector2 Size;
-        UTexture2D* Texture = nullptr;
+        TObjectPtr<UTexture2D> Texture;
         FSlateBrush* Brush = nullptr;
     };
     virtual const TArray<FThumbnailData>& GetAnimationTimelineThumbnails( FMovieScenePossessable iPossessable ) const;
