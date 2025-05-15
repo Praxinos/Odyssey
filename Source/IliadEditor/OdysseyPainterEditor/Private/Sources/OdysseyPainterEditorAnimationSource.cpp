@@ -399,8 +399,8 @@ void FOdysseyPainterEditorAnimationSource::PasteBlockToCurrentLayer(TSharedPtr<:
         ::ULIS::eFormat format = ::ULIS::Format_BGRA8;
         switch(GetLayerStack()->GetAnimation()->GetFormat())
         {
-            case EOdysseyAnimationFormat::BGRA8: format = ::ULIS::Format_BGRA8;
-            case EOdysseyAnimationFormat::RGBAF: format = ::ULIS::Format_RGBAF;
+            case EOdysseyAnimationFormat::BGRA8: format = ::ULIS::Format_BGRA8; break;
+            case EOdysseyAnimationFormat::RGBAF: format = ::ULIS::Format_RGBAF; break;
         }
 
         TSharedPtr<::ULIS::FBlock> copyBlock = MakeShared<::ULIS::FBlock>(width, height, format);
@@ -474,7 +474,7 @@ FOdysseyPainterEditorAnimationSource::PasteBlockToNewLayer( TSharedPtr<::ULIS::F
         return;
 
 #ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("actions.paste", "Paste"));
+    FScopedTransaction ScopedTransaction(LOCTEXT("actions.pasteInNewLayer", "Paste In New Layer"));
 #endif
     GetLayerStack()->Modify();
 
@@ -486,24 +486,72 @@ FOdysseyPainterEditorAnimationSource::PasteBlockToNewLayer( TSharedPtr<::ULIS::F
     UOdysseyAnimationCellImageRaster* cell = Cast<UOdysseyAnimationCellImageRaster>(layer->AddCell(UOdysseyAnimationCellImageRaster::StaticClass(), player->GetCurrentFrame().FrameNumber.Value));
     cell->Modify();
 
-    FOdysseyRasterBlockMutator blockMutator(cell->GetRasterBlock(), false);
-    blockMutator.EditTilesFromRects(
-        { cell->GetRasterBlock()->GetRect() },
-        [&](TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+    FOdysseyMediaProvider mediaProvider = GetLayerStack()->GetCurrentLayer()->GetMediaProvider(player->GetCurrentFrame().FrameNumber.Value);
+
+    if (mediaProvider.HasMedia<FOdysseyMediaRaster>())
+    {
+        int width = GetLayerStack()->GetAnimation()->GetWidth();
+        int height = GetLayerStack()->GetAnimation()->GetHeight();
+
+        ::ULIS::eFormat format = ::ULIS::Format_BGRA8;
+        switch (GetLayerStack()->GetAnimation()->GetFormat())
         {
-            ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(cell->GetRasterBlock()->GetFormat());
-            ::ULIS::FEvent eventClear;
-            ctx.Clear(*iBlock, ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventClear);
-            ctx.Finish();
-            ctx.Copy(
-                *iBlock,
-                *cell->GetRasterBlock()->GetBlock()
-            );
-            ctx.Finish();
-            return {};
+        case EOdysseyAnimationFormat::BGRA8: format = ::ULIS::Format_BGRA8; break;
+        case EOdysseyAnimationFormat::RGBAF: format = ::ULIS::Format_RGBAF; break;
         }
-    );
-    blockMutator.Commit();
+
+        TSharedPtr<::ULIS::FBlock> copyBlock = MakeShared<::ULIS::FBlock>(width, height, format);
+
+        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
+        ctx.Clear(*copyBlock);
+        ctx.Finish();
+
+        ctx.ConvertFormat(
+            *iBlock,
+            *copyBlock,
+            iBlock->Rect(),
+            ::ULIS::FVec2I(0, 0),
+            ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
+            0,
+            nullptr,
+            nullptr);
+
+        ctx.Finish();
+
+        TArray<TSharedPtr<FOdysseyMediaRaster>> mediasRaster = mediaProvider.GetOrCreateMedias<FOdysseyMediaRaster>();
+        for (TSharedPtr<FOdysseyMediaRaster> mediaRaster : mediasRaster)
+        {
+            TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRaster->GetRasterBlock();
+            if (!rasterBlock)
+                continue;
+
+            FOdysseyRasterBlockMutator mutator(rasterBlock);
+            mutator.EditTilesFromRects(
+                { ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) },
+                [&](TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+                {
+                    ::ULIS::FEvent eventPaste;
+
+                    ctx.Blend(
+                        *copyBlock,
+                        *iBlock,
+                        copyBlock->Rect(),
+                        ::ULIS::FVec2I(0, 0),
+                        ::ULIS::Blend_Normal,
+                        ::ULIS::Alpha_Normal,
+                        1.f,
+                        ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
+                        0,
+                        nullptr,
+                        &eventPaste);
+
+                    return { eventPaste };
+
+                }
+            );
+            mutator.Commit();
+        }
+    }
 
     FOdysseyAnimationCurrentFrameMutator currentFrameMutator(player);
     currentFrameMutator.Set(player->GetCurrentFrame().FrameNumber.Value);
