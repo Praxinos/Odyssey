@@ -375,7 +375,6 @@ FOdysseyPainterEditorViewportClient::InputKey( const FInputKeyEventArgs& iEventA
 
                 FVector2D hudPoint = viewportWidget->ToLocal(viewportPoint) +  FVector2D(textureFullWidth / 2.f, textureFullHeight / 2.f);
                 mCurrentHUDPoint = FOdysseyPoint(hudPoint.X, hudPoint.Y);
-                mCurrentHUDPoint = FOdysseyPoint(hudPoint.X, hudPoint.Y);
 
                 if (bNoMouseMovement)
                     mCurrentHUDElement->OnMouseClick(mCurrentHUDPoint, iEventArgs.Key );

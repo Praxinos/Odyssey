@@ -143,6 +143,7 @@ protected:
 
     FOdysseyPoint mCurrentHUDPoint;
     FOdysseyPoint mLastHUDPoint;
+    FVector2D     mHUDMouseDownReference;
     TSharedPtr<FOdysseyHUDElement> mCurrentHUDElement;
     TSharedPtr<FOdysseyHUDElement> mHoveredHUDElement;
 };

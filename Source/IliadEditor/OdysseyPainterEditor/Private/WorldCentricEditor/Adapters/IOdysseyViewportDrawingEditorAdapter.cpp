@@ -11,6 +11,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Framework/Application/SlateApplication.h"
 #include "SceneView.h"
+#include "MouseDeltaTracker.h"
 
 #include "IMeshPaintGeometryAdapter.h"
 #include "Tools/OdysseyPainterEditorTool.h"
@@ -440,6 +441,9 @@ bool IOdysseyViewportDrawingEditorAdapter::InputKey(FEditorViewportClient* iView
             {
                 FVector2D viewportPoint(iViewport->GetMouseX(), iViewport->GetMouseY());
                 FVector2D hudPoint;
+
+                mHUDMouseDownReference = viewportPoint;
+
                 if (mExtension->ViewportToHUD(iViewportClient, viewportPoint, hudPoint))
                 {
                     mLastHUDPoint = mCurrentHUDPoint;
@@ -459,9 +463,17 @@ bool IOdysseyViewportDrawingEditorAdapter::InputKey(FEditorViewportClient* iView
                 FVector2D hudPoint;
                 if (mExtension->ViewportToHUD(iViewportClient, viewportPoint, hudPoint))
                 {
+                    float deltaX = viewportPoint.X - mHUDMouseDownReference.X;
+                    float deltaY = viewportPoint.Y - mHUDMouseDownReference.Y;
+                    float deltaSquared = deltaX * deltaX + deltaY * deltaY;
+                    bool bNoMouseMovement = deltaSquared < MOUSE_CLICK_DRAG_DELTA;
+
                     mLastHUDPoint = mCurrentHUDPoint;
                     mCurrentHUDPoint.x = hudPoint.X;
                     mCurrentHUDPoint.y = hudPoint.Y;
+
+                    if (bNoMouseMovement)
+                        mCurrentHUDElement->OnMouseClick(mCurrentHUDPoint, iKey );
                     mCurrentHUDElement->OnMouseUp(mCurrentHUDPoint, iKey);
                     mCurrentHUDElement = nullptr;
                 }
