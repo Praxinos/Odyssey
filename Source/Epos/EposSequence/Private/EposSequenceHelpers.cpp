@@ -2150,7 +2150,7 @@ ShotSequenceHelpers::BuildAnimationsTimelineChannelProxy( IMovieScenePlayer& iPl
 #if WITH_EDITOR
                 ChannelIndirection.Add( animation_timeline_section->GetAnimationCutChannel(), FMovieSceneChannelMetaData() );
 #else
-                ChannelIndirection.Add( animation_timeline_section->GetAnimationCutChannel(), FMovieSceneChannelMetaData() );
+                ChannelIndirection.Add( animation_timeline_section->GetAnimationCutChannel() );
 #endif
             //}
 

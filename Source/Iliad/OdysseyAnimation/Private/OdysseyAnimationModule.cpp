@@ -4,7 +4,6 @@
 #include "OdysseyAnimationModule.h"
 
 #include "IMediaModule.h"
-#include "PropertyEditorModule.h"
 
 #include "Media/OdysseyAnimationMediaPlayerFactory.h"
 

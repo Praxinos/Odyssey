@@ -72,6 +72,7 @@ namespace UnrealBuildTool.Rules
                     "Engine",
                     "Media",
                     "RenderCore",
+                    "MovieScene",
 
                     "OdysseyCore",
                     "OdysseyRendering",

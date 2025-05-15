@@ -30,6 +30,7 @@ struct FFrameRate;
 struct FKeyHandle;
 struct FPropertyTag;
 
+#if WITH_EDITOR
 namespace MovieSceneClipboard
 {
     template<> inline FName GetKeyTypeName<FOdysseyAnimationCutValue>()
@@ -37,6 +38,7 @@ namespace MovieSceneClipboard
         return "FOdysseyAnimationCutValue";
     }
 }
+#endif
 
 /** Defines data for keys in this emitter section. */
 USTRUCT()
