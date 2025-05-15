@@ -8,6 +8,7 @@
 #include "Tickable.h"
 #include "OdysseyInvalidTileMap.h"
 #include "OdysseyRenderingAbility.h"
+#include "Misc/FrameTime.h"
 
 #include "OdysseyAnimationPlayer.generated.h"
 

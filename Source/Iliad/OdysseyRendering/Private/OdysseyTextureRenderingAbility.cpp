@@ -5,6 +5,8 @@
 #include "CanvasTypes.h"
 #include "ScreenPass.h"
 #include "Engine/TextureRenderTarget2D.h"
+#include "Engine/World.h"
+#include "TextureResource.h"
 
 #define LOCTEXT_NAMESPACE "Imaging"
 

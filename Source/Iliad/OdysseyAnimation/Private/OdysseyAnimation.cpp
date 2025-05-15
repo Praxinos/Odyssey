@@ -5,10 +5,12 @@
 
 #include "Misc/TransactionObjectEvent.h"
 #include "CanvasTypes.h"
+#include "Engine/Texture2D.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "Cooker/CookEvents.h"
 #include "RenderGraphBuilder.h"
 #include "ScreenPass.h"
+#include "TextureResource.h"
 #include "OdysseyAnimationLayerStack.h"
 
 #define LOCTEXT_NAMESPACE "Animation"

@@ -8,6 +8,9 @@
 #include "Materials/Material.h"
 #include "Misc/TransactionObjectEvent.h"
 #include "Engine/TextureRenderTarget2D.h"
+#include "Engine/CollisionProfile.h"
+#include "Engine/StaticMesh.h"
+#include "MaterialShared.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(OdysseyAnimationComponent)
 

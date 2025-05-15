@@ -3,7 +3,8 @@
 
 #pragma once
 
-#include "Math/MathFwd.h"
+#include "Math/IntRect.h"
+#include "Math/IntPoint.h"
 #include "Containers/OdysseyArray2D.h"
 
 class ODYSSEYCORE_API FOdysseyInvalidTileMap

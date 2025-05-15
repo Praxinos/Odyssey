@@ -2,7 +2,10 @@
 // ODYSSEY is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
 
 #include "OdysseyCanvasUtils.h"
+
+#include "BatchedElements.h"
 #include "CanvasTypes.h"
+#include "Math/TransformCalculus2D.h"
 
 class FCanvas;
 class FBatchedElementParameters;

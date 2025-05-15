@@ -4,6 +4,7 @@
 #pragma once
 
 #include "OdysseyRenderingType.h"
+#include "UObject/Interface.h"
 
 #include "OdysseyRenderingAbility.generated.h"
 

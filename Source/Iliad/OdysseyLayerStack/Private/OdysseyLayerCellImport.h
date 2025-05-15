@@ -3,7 +3,11 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
+
+class FArchive;
 class UOdysseyLayerCell;
+
 class FOdysseyLayerCellImport
 {
 public:

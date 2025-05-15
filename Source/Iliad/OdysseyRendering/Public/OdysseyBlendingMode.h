@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/ObjectMacros.h"
+#include "Misc/EnumRange.h"
 #include "OdysseyBlendingMode.generated.h"
 
 UENUM( BlueprintType )

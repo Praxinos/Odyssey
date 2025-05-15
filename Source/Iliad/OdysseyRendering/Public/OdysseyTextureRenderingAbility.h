@@ -4,8 +4,13 @@
 #pragma once
 
 #include "OdysseyRenderingAbility.h"
+#include "RenderGraphFwd.h"
+#include "RHI.h"
 
 #include "OdysseyTextureRenderingAbility.generated.h"
+
+class FRDGBuilder;
+class UTextureRenderTarget2D;
 
 UINTERFACE(BlueprintType)
 class ODYSSEYRENDERING_API UOdysseyTextureRenderingAbility : public UOdysseyRenderingAbility

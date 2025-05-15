@@ -3,6 +3,12 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
+
+#include "RHI.h"
+
+#include "OdysseyAntiAliasing.generated.h"
+
 UENUM(BlueprintType)
 enum class EOdysseyAntiAliasing : uint8
 {

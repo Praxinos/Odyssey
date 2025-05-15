@@ -4,7 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "RHIDefinitions.h"
+#include "RHI.h"
 
 class FRHICommandList;
 class UTextureRenderTarget2D;

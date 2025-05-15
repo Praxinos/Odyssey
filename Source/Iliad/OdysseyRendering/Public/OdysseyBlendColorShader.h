@@ -6,7 +6,13 @@
 #include "OdysseyBlendingMode.h"
 #include "OdysseyAntiAliasing.h"
 #include "OdysseyImageAnchor.h"
+#include "BatchedElements.h"
+#include "RHI.h"
+#include "RenderGraphFwd.h"
 #include "ShaderParameterMacros.h"
+
+class FRDGBuilder;
+class FTexture;
 
 BEGIN_SHADER_PARAMETER_STRUCT(FOdysseyBlendColorShaderParameters, )
     SHADER_PARAMETER(FVector4f, Color)

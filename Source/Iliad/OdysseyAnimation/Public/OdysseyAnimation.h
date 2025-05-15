@@ -11,6 +11,7 @@
 #include "OdysseyAnimation.generated.h"
 
 class UOdysseyLayerStack;
+class UTexture2D;
 
 UENUM()
 enum class EOdysseyAnimationFormat : uint8

@@ -5,8 +5,10 @@
 
 #include "CoreMinimal.h"
 #include "RHIDefinitions.h"
+#include "RHI.h"
 
 class FRHICommandList;
+class UTexture2D;
 class UTextureRenderTarget2D;
 class FGraphicsPipelineStateInitializer;
 

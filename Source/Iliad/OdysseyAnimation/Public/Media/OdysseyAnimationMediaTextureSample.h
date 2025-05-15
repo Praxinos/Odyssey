@@ -7,6 +7,7 @@
 #include "Media/OdysseyAnimationMediaTextureSampleConverter.h"
 
 class FOdysseyAnimationMediaTextureSampleConverter;
+class UTextureRenderTarget2D;
 
 class ODYSSEYANIMATION_API FOdysseyAnimationMediaTextureSample
     : public IMediaTextureSample

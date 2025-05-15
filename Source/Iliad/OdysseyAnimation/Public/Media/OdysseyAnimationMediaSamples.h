@@ -13,6 +13,7 @@
 class FOdysseyAnimationMediaPlayer;
 class FOdysseyAnimationMediaControls;
 class UOdysseyAnimation;
+class UTextureRenderTarget2D;
 
 class ODYSSEYANIMATION_API FOdysseyAnimationMediaSamples
     : public IMediaSamples

@@ -6,7 +6,10 @@
 #include "OdysseyBlendShader.h"
 
 #include "Engine/TextureRenderTarget2D.h"
+#include "Engine/World.h"
 #include "RenderGraphBuilder.h"
+#include "RHI.h"
+#include "TextureResource.h"
 
 void
 UOdysseyShadersBlueprintLibrary::Blend(

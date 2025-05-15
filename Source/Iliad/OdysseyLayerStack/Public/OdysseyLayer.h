@@ -9,6 +9,7 @@
 #include "OdysseyTextureRenderingAbility.h"
 #include "Textures/SlateIcon.h"
 #include "Layout/Margin.h"
+#include "Templates/SubclassOf.h"
 
 #if WITH_EDITOR
 #include "OdysseyLighttable.h"
@@ -16,6 +17,7 @@
 
 #include "OdysseyLayer.generated.h"
 
+class UOdysseyLayerCell;
 class UOdysseyLayerStack;
 
 UENUM(BlueprintType)

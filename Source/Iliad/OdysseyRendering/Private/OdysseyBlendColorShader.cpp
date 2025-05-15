@@ -12,6 +12,7 @@
 #include "SimpleElementShaders.h"
 #include "ScreenPass.h"
 #include "MeshPassProcessor.h"
+#include "BatchedElements.h"
 
 class FOdysseyBlendColorShaderPS : public FGlobalShader
 {

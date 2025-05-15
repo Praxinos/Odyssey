@@ -9,6 +9,10 @@
 
 #include "OdysseyLayerCell.generated.h"
 
+class UOdysseyLayer;
+class UOdysseyLayerStack;
+class UTexture2D;
+
 USTRUCT(BlueprintType)
 struct FOdysseyLayerCellOutOfPegs
 {

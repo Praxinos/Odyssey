@@ -7,6 +7,8 @@
 #include "Misc/TransactionObjectEvent.h"
 #include "ScreenPass.h"
 #include "TextureCompiler.h"
+#include "TextureResource.h"
+#include "Engine/Texture2D.h"
 #include "OdysseyBlendShader.h"
 
 UOdysseyLayer*

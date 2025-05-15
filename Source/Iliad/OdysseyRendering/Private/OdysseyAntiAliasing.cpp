@@ -3,6 +3,8 @@
 
 #include "OdysseyAntiAliasing.h"
 
+#include "RHIStaticStates.h"
+
 namespace Odyssey
 {
 

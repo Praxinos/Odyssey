@@ -5,7 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "IMediaPlayerFactory.h"
-#include "Modules/ModuleInterface.h"
+#include "Modules/ModuleManager.h"
 #include "Media/OdysseyAnimationMediaPlayerFactory.h"
 
 /**

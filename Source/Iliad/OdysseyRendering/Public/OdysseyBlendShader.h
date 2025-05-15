@@ -3,10 +3,14 @@
 
 #pragma once
 
+#include "BatchedElements.h"
+#include "RenderGraphFwd.h"
 #include "OdysseyBlendingMode.h"
 #include "OdysseyAntiAliasing.h"
 #include "OdysseyImageAnchor.h"
 #include "ShaderParameterMacros.h"
+
+class FRDGBuilder;
 
 BEGIN_SHADER_PARAMETER_STRUCT(FOdysseyBlendShaderParameters, )
     SHADER_PARAMETER_RDG_TEXTURE(Texture2D, SourceTexture)
