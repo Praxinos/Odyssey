@@ -469,6 +469,14 @@ public:
     static int32 GetAttachedAnimations( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<AOdysseyAnimationActor*>* oAnimations = nullptr, TArray<FGuid>* oAnimationBindings = nullptr );
 
     /**
+    *  Get all animations (actor & track bindings) attached to the camera in the board section
+    *
+    * @param ISequencer     iSequencer to get animations.
+    * @param UMovieSceneSubSection  iSubSection to check all animations.
+    */
+    static bool IsAnimationInEditionMode( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection );
+
+    /**
     *  Get a animation visiblity of the camera in the board section
     *
     * @param ISequencer     iSequencer to detach a animation.
@@ -798,6 +806,8 @@ public:
     static bool CanDetachAnimation( ISequencer* iSequencer, FGuid iAnimationBinding );
 
     static int32 GetAttachedAnimations( ISequencer* iSequencer, TArray<AOdysseyAnimationActor*>* oAnimations = nullptr, TArray<FGuid>* oAnimationBindings = nullptr );
+
+    static bool IsAnimationInEditionMode( ISequencer* iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, UOdysseyAnimation* iAnimation );
 
     static bool IsAnimationVisible( ISequencer* iSequencer, FGuid iAnimationBinding );
     static void ToggleAnimationVisibility( ISequencer* iSequencer, TArray<FGuid> iAnimationBindings, TOptional<FGuid> iAnimationReference = TOptional<FGuid>() );

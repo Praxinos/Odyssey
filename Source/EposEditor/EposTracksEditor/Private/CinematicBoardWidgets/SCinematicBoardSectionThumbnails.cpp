@@ -52,7 +52,7 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
     auto GetSwitchTakeTooltip = [this]() -> FText
     {
         FText take_tooltip = LOCTEXT( "switch-take-tooltip", "Switch take" );
-        if( BoardSequenceTools::IsDrawingInEditionMode( mBoardSection.Pin()->GetSequencer().Get(), mBoardSection.Pin()->GetSubSectionObject() ) )
+        if( BoardSequenceTools::IsAnimationInEditionMode( mBoardSection.Pin()->GetSequencer().Get(), mBoardSection.Pin()->GetSubSectionObject() ) )
             take_tooltip = LOCTEXT( "switch-take-with-warning-tooltip", "Switch take\n\nDrawing(s) must not be in edition mode" );
 
         return take_tooltip;
@@ -61,7 +61,7 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
     TopToolbarBuilder.AddComboButton(
         FUIAction(
             FExecuteAction(),
-            FCanExecuteAction::CreateLambda( [this]() { return !BoardSequenceTools::IsDrawingInEditionMode( mBoardSection.Pin()->GetSequencer().Get(), mBoardSection.Pin()->GetSubSectionObject() ); } )
+            FCanExecuteAction::CreateLambda( [this]() { return !BoardSequenceTools::IsAnimationInEditionMode( mBoardSection.Pin()->GetSequencer().Get(), mBoardSection.Pin()->GetSubSectionObject() ); } )
         ),
         FOnGetContent::CreateRaw( this, &SCinematicBoardSectionThumbnails::MakeTakeMenu ),
         FText::GetEmpty(),

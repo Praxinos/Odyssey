@@ -1440,13 +1440,13 @@ FCinematicBoardSection::BuildSectionContextMenu( FMenuBuilder& ioMenuBuilder, co
                 FNewMenuDelegate::CreateSP( this, &FCinematicBoardSection::AddTakesMenu ),
                 FUIAction(
                     FExecuteAction(),
-                    FCanExecuteAction::CreateLambda( [this, &sectionObject]() { return !BoardSequenceTools::IsDrawingInEditionMode( GetSequencer().Get(), sectionObject ); } )
+                    FCanExecuteAction::CreateLambda( [this, &sectionObject]() { return !BoardSequenceTools::IsAnimationInEditionMode( GetSequencer().Get(), sectionObject ); } )
                 ),
                 NAME_None,
                 EUserInterfaceActionType::Button );
 
             FText take_tooltip = FText::Format( LOCTEXT( "NewTakeTooltip", "Create a new take for {0}" ), FText::FromString( sectionObject.GetBoardDisplayName() ) );
-            if( BoardSequenceTools::IsDrawingInEditionMode( GetSequencer().Get(), sectionObject ) )
+            if( BoardSequenceTools::IsAnimationInEditionMode( GetSequencer().Get(), sectionObject ) )
                 take_tooltip = FText::Format( LOCTEXT( "NewTakeWithWarningTooltip", "Create a new take for {0}\n\nDrawing(s) must not be in edition mode" ), FText::FromString( sectionObject.GetBoardDisplayName() ) );
 
             ioMenuBuilder.AddMenuEntry(
@@ -1455,7 +1455,7 @@ FCinematicBoardSection::BuildSectionContextMenu( FMenuBuilder& ioMenuBuilder, co
                 FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "Take" ),
                 FUIAction(
                     FExecuteAction::CreateLambda( [this, &sectionObject]() { BoardSequenceTools::CreateTake( GetSequencer().Get(), sectionObject ); } ),
-                    FCanExecuteAction::CreateLambda( [this, &sectionObject]() { return !BoardSequenceTools::IsDrawingInEditionMode( GetSequencer().Get(), sectionObject ); } )
+                    FCanExecuteAction::CreateLambda( [this, &sectionObject]() { return !BoardSequenceTools::IsAnimationInEditionMode( GetSequencer().Get(), sectionObject ); } )
                 )
             );
         }
@@ -1566,7 +1566,7 @@ FCinematicBoardSection::AddTakesMenu( FMenuBuilder& MenuBuilder )
             take_sequence->GetPathName() == sectionObject.GetSequence()->GetPathName() ? FSlateIcon( FAppStyle::Get().GetStyleSetName(), "Sequencer.Star" ) : FSlateIcon( FAppStyle::Get().GetStyleSetName(), "Sequencer.Empty" ),
             FUIAction(
                 FExecuteAction::CreateLambda( [this, &sectionObject, take]() { BoardSequenceTools::SwitchTake( GetSequencer().Get(), sectionObject, sectionObject.FindTake( take ) ); } ),
-                FCanExecuteAction::CreateLambda( [this, &sectionObject]() { return !BoardSequenceTools::IsDrawingInEditionMode( GetSequencer().Get(), sectionObject ); } )
+                FCanExecuteAction::CreateLambda( [this, &sectionObject]() { return !BoardSequenceTools::IsAnimationInEditionMode( GetSequencer().Get(), sectionObject ); } )
             )
         );
     }

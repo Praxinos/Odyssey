@@ -665,6 +665,50 @@ ShotSequenceTools::DeleteAnimation( ISequencer& iSequencer, UMovieSceneSequence*
 
 //static
 bool
+BoardSequenceTools::IsAnimationInEditionMode( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection )
+{
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSubSection, iSequencer->GetFocusedTemplateID() );
+    if( !result.mInnerSequence )
+        return false;
+
+    if( result.mInnerSequence->IsA<UBoardSequence>() )
+        return false;
+
+    //---
+
+    bool is_edited = false;
+
+    TArray<FGuid> animation_bindings;
+    ShotSequenceHelpers::GetAllAnimations( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, EGetAnimation::kAll, nullptr, &animation_bindings );
+
+    for( FGuid animation_binding : animation_bindings )
+    {
+        ShotSequenceHelpers::FFindOrCreateTimelineResult result_shot = ShotSequenceHelpers::FindTimelineTrackAndSections( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, animation_binding );
+        for( TWeakObjectPtr<UOdysseyAnimationTimelineSection> section : result_shot.mSections )
+        {
+            is_edited |= ShotSequenceTools::IsAnimationInEditionMode( iSequencer, result.mInnerSequence, result.mInnerSequenceId, section->GetAnimation() );
+        }
+    }
+
+    return is_edited;
+}
+
+//static
+bool
+ShotSequenceTools::IsAnimationInEditionMode( ISequencer* iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, UOdysseyAnimation* iAnimation )
+{
+    UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
+
+    TArray<IAssetEditorInstance*> opened_editors = AssetEditorSubsystem->FindEditorsForAsset( iAnimation );
+    //FName name = opened_editors.Num() ? opened_editors[0]->GetEditorName() : NAME_None;
+
+    return !!opened_editors.Num();
+}
+
+//---
+
+//static
+bool
 BoardSequenceTools::IsAnimationVisible( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iAnimationBinding )
 {
     BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
