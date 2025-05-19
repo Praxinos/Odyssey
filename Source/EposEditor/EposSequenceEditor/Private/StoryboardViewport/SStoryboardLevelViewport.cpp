@@ -46,6 +46,7 @@
 #include "ToolMenu.h"
 #include "ToolMenus.h"
 #include "ViewportToolbar/UnrealEdViewportToolbar.h"
+#include "Engine/StaticMeshActor.h"
 
 
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"

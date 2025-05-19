@@ -109,84 +109,8 @@ public:
     /**
      * Create a camera in a subsection at the given frame
      */
-    UE_DEPRECATED( 5.6, "Use CreateCameraWithPlane" )
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board" )
-    static void CreateCamera( UMovieSceneSubSection* SubSection );
-
-    /**
-     * Create a camera in a subsection at the given frame
-     */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board" )
-    static void CreateCameraWithPlane( UMovieSceneSubSection* SubSection );
-
-    /**
-     * Create a camera in a subsection at the given frame
-     */
     UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board" )
     static void CreateCameraWithAnimation( UMovieSceneSubSection* SubSection );
-
-public:
-
-    /**
-     * Create a plane in a subsection at the given frame
-     */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board" )
-    static void CreatePlane( UMovieSceneSubSection* SubSection );
-
-    /**
-     * Collapse plane's keys area
-     */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board" )
-    static void CollapsePlane( UMovieSceneSubSection* SubSection, const FMovieSceneBindingProxy& Binding );
-
-    /**
-     * Expand plane's keys area
-     */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board" )
-    static void ExpandPlane( UMovieSceneSubSection* SubSection, const FMovieSceneBindingProxy& Binding );
-
-    /**
-     * Get plane's keys area state
-     */
-    UFUNCTION( BlueprintPure, Category = "Epos Sequence Editor|Board" )
-    static bool IsPlaneCollapsed( UMovieSceneSubSection* SubSection, const FMovieSceneBindingProxy& Binding );
-
-    /**
-     * Get plane's keys area state
-     */
-    UFUNCTION( BlueprintPure, Category = "Epos Sequence Editor|Board" )
-    static bool IsPlaneExpanded( UMovieSceneSubSection* SubSection, const FMovieSceneBindingProxy& Binding );
-
-    /**
-     * Activate the lighttable on the plane
-     */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board|Lighttable" )
-    static void ActivateLighttable( UMovieSceneSubSection* SubSection, const FMovieSceneBindingProxy& Binding );
-
-    /**
-     * Deactivate the lighttable on the plane
-     */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board|Lighttable" )
-    static void DeactivateLighttable( UMovieSceneSubSection* SubSection, const FMovieSceneBindingProxy& Binding );
-
-    /**
-     * Get the state of the lighttable for the plane
-     * It returns:
-     *   1: lighttable on all drawings is on
-     *   0: lighttable on all drawings is off
-     *   -1: undetermined (mix of on and off, not enough drawings)
-     * @return 1 | 0 | -1 -> on | off | undetermined
-     */
-    UFUNCTION( BlueprintPure, Category = "Epos Sequence Editor|Board|Lighttable" )
-    static int32 GetLighttableState( UMovieSceneSubSection* SubSection, const FMovieSceneBindingProxy& Binding );
-
-public:
-
-    /**
-     * Create a drawing in a plane at the given frame
-     */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board" )
-    static void CreateDrawing( UMovieSceneSubSection* SubSection, const FMovieSceneBindingProxy& Binding, int32 Frame );
 
 public:
 
@@ -280,60 +204,8 @@ public:
     /**
      * Create a camera in a shot at the given frame
      */
-    UE_DEPRECATED( 5.6, "Use CreateCameraWithPlane" )
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Shot" )
-    static void CreateCamera();
-
-    /**
-     * Create a camera in a shot at the given frame
-     */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Shot" )
-    static void CreateCameraWithPlane();
-
-    /**
-     * Create a camera in a shot at the given frame
-     */
     UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Shot" )
     static void CreateCameraWithAnimation();
-
-public:
-
-    /**
-     * Create a plane in a shot at the given frame
-     */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Shot" )
-    static void CreatePlane();
-
-    /**
-     * Activate the lighttable on the plane
-     */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Shot|Lighttable" )
-    static void ActivateLighttable( const FMovieSceneBindingProxy& Binding );
-
-    /**
-     * Deactivate the lighttable on the plane
-     */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Shot|Lighttable" )
-    static void DeactivateLighttable( const FMovieSceneBindingProxy& Binding );
-
-    /**
-     * Get the state of the lighttable for the plane
-     * It returns:
-     *   1: lighttable on all drawings is on
-     *   0: lighttable on all drawings is off
-     *   -1: undetermined (mix of on and off, not enough drawings)
-     * @return 1 | 0 | -1 -> on | off | undetermined
-     */
-    UFUNCTION( BlueprintPure, Category = "Epos Sequence Editor|Shot|Lighttable" )
-    static int32 GetLighttableState( const FMovieSceneBindingProxy& Binding );
-
-public:
-
-    /**
-     * Create a drawing in a plane at the given frame
-     */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Shot" )
-    static void CreateDrawing( const FMovieSceneBindingProxy& Binding, int32 Frame );
 
 public:
 
@@ -405,24 +277,6 @@ public:
     static void CloseEposSequence();
 
 public:
-
-    /**
-     * Move and scale a plane from the camera
-     */
-    UE_DEPRECATED( 5.6, "Use MoveAndScaleActor that takes a EScaleActor" )
-    PRAGMA_DISABLE_DEPRECATION_WARNINGS // To only have the deprecation warning (about EScalePlane enum) in BP and not during c++ build
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor" )
-    static void MoveAndScalePlane( APlaneActor* Plane, const ACineCameraActor* Camera, float NewDistance, EScalePlane ScaleType );
-    PRAGMA_ENABLE_DEPRECATION_WARNINGS
-
-    /**
-     * Move and scale a plane from the camera
-     */
-    UE_DEPRECATED( 5.6, "Use SetCameraFocalLengthAndScaleActor that takes a EScaleActor" )
-    PRAGMA_DISABLE_DEPRECATION_WARNINGS // To only have the deprecation warning (about EScalePlane enum) in BP and not during c++ build
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor" )
-    static void SetCameraFocalLengthAndScalePlane( TArray<APlaneActor*> Planes, ACineCameraActor* Camera, float NewFocalLength, EScalePlane ScaleType );
-    PRAGMA_ENABLE_DEPRECATION_WARNINGS
 
     /**
      * Move and scale a plane or animation from the camera

@@ -72,7 +72,7 @@ BoardSequenceTools::CreateCameraWithAnimation( ISequencer* iSequencer, FFrameNum
     if( !result.mInnerSequence )
         return;
 
-    return ShotSequenceTools::CreateCamera( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iCameraArgs, nullptr, &iAnimationArgs );
+    return ShotSequenceTools::CreateCamera( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iCameraArgs, &iAnimationArgs );
 }
 
 //static
@@ -90,7 +90,7 @@ BoardSequenceTools::CreateCameraWithAnimation( ISequencer* iSequencer, const UMo
         return;
 
     FFrameTime inner_frame = iFrameNumber * iSubSection.OuterToInnerTransform();
-    ShotSequenceTools::CreateCamera( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iCameraArgs, nullptr, &iAnimationArgs );
+    ShotSequenceTools::CreateCamera( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iCameraArgs, &iAnimationArgs );
 }
 
 //static
@@ -115,7 +115,7 @@ BoardSequenceTools::CanCreateCamera( ISequencer* iSequencer, FFrameNumber iFrame
 void
 ShotSequenceTools::CreateCameraWithAnimation( ISequencer* iSequencer, const FCameraArgs& iCameraArgs, const FAnimationArgs& iAnimationArgs )
 {
-    CreateCamera( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iCameraArgs, nullptr, &iAnimationArgs );
+    CreateCamera( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iCameraArgs, &iAnimationArgs );
 }
 
 //static
