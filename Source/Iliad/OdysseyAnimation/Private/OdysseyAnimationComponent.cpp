@@ -134,8 +134,7 @@ UOdysseyAnimationComponent::PostLoad()
 {
     Super::PostLoad();
 
-
-    if( !GetStaticMesh() ) //TODO: see with Eric ???
+    if( !GetStaticMesh() )
     {
         InitializeFromAnimation( Animation );
     }

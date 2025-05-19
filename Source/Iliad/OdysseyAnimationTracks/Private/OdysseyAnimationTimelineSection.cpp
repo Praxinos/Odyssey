@@ -162,7 +162,11 @@ UOdysseyAnimationTimelineSection::RebuildAnimationCutChannel()
     for( UOdysseyAnimationLayer* layer : animation_layers )
     {
         UOdysseyAnimationCell* previous_cell = nullptr;
-        TArray<UOdysseyLayerCell*> cells = layer->GetCells();
+        TArray<UOdysseyLayerCell*> cells_unsafe = layer->GetCells();
+        TArray<UOdysseyLayerCell*> cells = cells_unsafe.FilterByPredicate( []( const UOdysseyLayerCell* iCell )
+                                                                           {
+                                                                               return !!iCell;
+                                                                           } );
         for( UOdysseyLayerCell* cell : cells )
         {
             UOdysseyAnimationCell* animation_cell = CastChecked<UOdysseyAnimationCell>( cell );
