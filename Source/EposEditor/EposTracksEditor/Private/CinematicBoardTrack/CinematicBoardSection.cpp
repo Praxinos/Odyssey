@@ -1447,7 +1447,7 @@ FCinematicBoardSection::BuildSectionContextMenu( FMenuBuilder& ioMenuBuilder, co
 
             FText take_tooltip = FText::Format( LOCTEXT( "NewTakeTooltip", "Create a new take for {0}" ), FText::FromString( sectionObject.GetBoardDisplayName() ) );
             if( BoardSequenceTools::IsAnimationInEditionMode( GetSequencer().Get(), sectionObject ) )
-                take_tooltip = FText::Format( LOCTEXT( "NewTakeWithWarningTooltip", "Create a new take for {0}\n\nDrawing(s) must not be in edition mode" ), FText::FromString( sectionObject.GetBoardDisplayName() ) );
+                take_tooltip = FText::Format( LOCTEXT( "NewTakeWithWarningTooltip", "Create a new take for {0}\n\nAnimation(s) must not be in edition mode" ), FText::FromString( sectionObject.GetBoardDisplayName() ) );
 
             ioMenuBuilder.AddMenuEntry(
                 LOCTEXT( "NewTake", "New Take" ),

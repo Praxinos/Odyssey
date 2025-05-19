@@ -30,57 +30,6 @@
 
 //---
 
-////static
-//void
-//MasterAssetTools::CopyPluginToMasterAssets( UMovieSceneSequence* iRootSequence )
-//{
-//    FAssetToolsModule& assetToolsModule = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" );
-//    FAssetRegistryModule& assetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>( TEXT( "AssetRegistry" ) );
-//
-//    UObject* root_asset = iRootSequence->GetMovieScene()->GetOuter();
-//    UPackage* root_package = root_asset->GetPackage();
-//    FString master_folder = root_package->GetName() / "Master"; // ie. /Game/MyStoryboard2/Master
-//
-//    TArray<FAssetData> asset_datas;
-//    assetRegistryModule.Get().GetAssetsByPackageName( *( master_folder / "BP_Plane" ), asset_datas );
-//    if( asset_datas.Num() )
-//        return;
-//
-//    TArray<FName> sources;
-//    sources.Add( "/Odyssey/BP_Plane" );
-//    //for( auto source : sources )
-//    //{
-//    //    FString SrcFilename;
-//    //    UObject* ExistingObject = nullptr;
-//    //    if( FPackageName::DoesPackageExist( *source.ToString(), nullptr, &SrcFilename ) )
-//    //    {
-//    //        UPackage* Pkg = LoadPackage( nullptr, *source.ToString(), LOAD_None ); // To find all the dependencies
-//    //        if( Pkg )
-//    //        {
-//    //            FString Name = ObjectTools::SanitizeObjectName( FPaths::GetBaseFilename( SrcFilename ) );
-//    //            ExistingObject = StaticFindObject( UObject::StaticClass(), Pkg, *Name );
-//    //        }
-//    //    }
-//    //}
-//
-//    //FAdvancedCopyParams copy_params = FAdvancedCopyParams( sources, master_folder );
-//    //copy_params.bShouldSuppressUI = true;
-//    //copy_params.AddCustomization( UAdvancedCopyCustomization::StaticClass()->GetDefaultObject<UAdvancedCopyCustomization>() );
-//
-//    //assetToolsModule.Get().InitAdvancedCopyFromCopyParams( copy_params );
-//
-//    //const bool bPromptUserToSave = true;
-//    //const bool bSaveMapPackages = true;
-//    //const bool bSaveContentPackages = true;
-//    //FEditorFileUtils::SaveDirtyPackages( bPromptUserToSave, bSaveMapPackages, bSaveContentPackages );
-//
-//    assetToolsModule.Get().BeginAdvancedCopyPackages( sources, master_folder );
-//}
-
-//---
-//---
-//---
-
 //static
 UOdysseyAnimation*
 ProjectAssetTools::CreateAnimation( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FIntPoint iSize, EOdysseyAnimationFormat iFormat, FFrameRate iFrameRate, TSubclassOf<class UOdysseyAnimationLayer> iDefaultLayerClass, TOptional<FLinearColor> iLayerBackgroundColor )

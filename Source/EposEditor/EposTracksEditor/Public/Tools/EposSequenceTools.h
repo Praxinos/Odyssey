@@ -628,18 +628,6 @@ public:
 
 
 UENUM( BlueprintType )
-enum class UE_DEPRECATED( 5.6, "Use EScaleActor" ) EScalePlane : uint8
-{
-    // The plane won't scale
-    kNo                 UMETA( DisplayName = "No Scale" ),
-    // The plane will scale relatively to its original size
-    // If the plane is already 100% camera FOV, it will act as the option "100% Camera"
-    kRelativeScale      UMETA( DisplayName = "Relative Scale" ),
-    // The plane will auto-scale to match the 100% camera FOV
-    kFitToCamera        UMETA( DisplayName = "Scale 100% Camera" ),
-};
-
-UENUM( BlueprintType )
 enum class EScaleActor : uint8
 {
     // The animation won't scale

@@ -53,7 +53,7 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
     {
         FText take_tooltip = LOCTEXT( "switch-take-tooltip", "Switch take" );
         if( BoardSequenceTools::IsAnimationInEditionMode( mBoardSection.Pin()->GetSequencer().Get(), mBoardSection.Pin()->GetSubSectionObject() ) )
-            take_tooltip = LOCTEXT( "switch-take-with-warning-tooltip", "Switch take\n\nDrawing(s) must not be in edition mode" );
+            take_tooltip = LOCTEXT( "switch-take-with-warning-tooltip", "Switch take\n\nAnimation(s) must not be in edition mode" );
 
         return take_tooltip;
     };
@@ -429,13 +429,13 @@ SCinematicBoardSectionThumbnails::HandleAddBoardBeforeComboButtonGetMenuContent(
 
     //-
 
-    auto CloneSection = [this]( bool iEmptyDrawings )
+    auto CloneSection = [this]()
     {
         ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
         UMovieSceneSubSection* subsection_object = &mBoardSection.Pin()->GetSubSectionObject();
         UMovieSceneCinematicBoardSection* board_section = CastChecked<UMovieSceneCinematicBoardSection>( subsection_object );
 
-        CinematicBoardTrackTools::CloneSection( sequencer, board_section, subsection_object->GetInclusiveStartFrame(), iEmptyDrawings );
+        CinematicBoardTrackTools::CloneSection( sequencer, board_section, subsection_object->GetInclusiveStartFrame(), false );
     };
 
     auto CanCloneSection = [this]()
@@ -448,15 +448,9 @@ SCinematicBoardSectionThumbnails::HandleAddBoardBeforeComboButtonGetMenuContent(
     };
 
     menuBuilder.AddMenuEntry( LOCTEXT( "section.clone-section-before-label", "Clone Shot" ),
-                              LOCTEXT( "section.clone-section-before-tooltip", "Clone this shot before (actors and drawing assets will be cloned as well)" ),
+                              LOCTEXT( "section.clone-section-before-tooltip", "Clone this shot before (actors and animation assets will be cloned as well)" ),
                               FSlateIcon(),
-                              FUIAction( FExecuteAction::CreateLambda( CloneSection, false ),
-                                         FCanExecuteAction::CreateLambda( CanCloneSection ) ) );
-
-    menuBuilder.AddMenuEntry( LOCTEXT( "section.clone-section-before-and-empty-drawings-label", "Clone Shot (with empty drawings)" ),
-                              LOCTEXT( "section.clone-section-before-and-empty-drawings-tooltip", "Clone this shot before (actors and empty drawing assets will be cloned as well)" ),
-                              FSlateIcon(),
-                              FUIAction( FExecuteAction::CreateLambda( CloneSection, true ),
+                              FUIAction( FExecuteAction::CreateLambda( CloneSection ),
                                          FCanExecuteAction::CreateLambda( CanCloneSection ) ) );
 
     return menuBuilder.MakeWidget();
@@ -549,13 +543,13 @@ SCinematicBoardSectionThumbnails::HandleAddBoardAfterComboButtonGetMenuContent()
 
     //-
 
-    auto CloneSection = [this]( bool iEmptyDrawings )
+    auto CloneSection = [this]()
     {
         ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
         UMovieSceneSubSection* subsection_object = &mBoardSection.Pin()->GetSubSectionObject();
         UMovieSceneCinematicBoardSection* board_section = CastChecked<UMovieSceneCinematicBoardSection>( subsection_object );
 
-        CinematicBoardTrackTools::CloneSection( sequencer, board_section, subsection_object->GetExclusiveEndFrame() - 1, iEmptyDrawings );
+        CinematicBoardTrackTools::CloneSection( sequencer, board_section, subsection_object->GetExclusiveEndFrame() - 1, false );
     };
 
     auto CanCloneSection = [this]()
@@ -568,15 +562,9 @@ SCinematicBoardSectionThumbnails::HandleAddBoardAfterComboButtonGetMenuContent()
     };
 
     menuBuilder.AddMenuEntry( LOCTEXT( "section.clone-section-after-label", "Clone Shot" ),
-                              LOCTEXT( "section.clone-section-after-tooltip", "Clone this shot after (actors and drawing assets will be cloned as well)" ),
+                              LOCTEXT( "section.clone-section-after-tooltip", "Clone this shot after (actors and animation assets will be cloned as well)" ),
                               FSlateIcon(),
-                              FUIAction( FExecuteAction::CreateLambda( CloneSection, false ),
-                                         FCanExecuteAction::CreateLambda( CanCloneSection ) ) );
-
-    menuBuilder.AddMenuEntry( LOCTEXT( "section.clone-section-after-and-empty-drawings-label", "Clone Shot (with empty drawings)" ),
-                              LOCTEXT( "section.clone-section-after-and-empty-drawings-tooltip", "Clone this shot after (actors and empty drawing assets will be cloned as well)" ),
-                              FSlateIcon(),
-                              FUIAction( FExecuteAction::CreateLambda( CloneSection, true ),
+                              FUIAction( FExecuteAction::CreateLambda( CloneSection ),
                                          FCanExecuteAction::CreateLambda( CanCloneSection ) ) );
 
     return menuBuilder.MakeWidget();

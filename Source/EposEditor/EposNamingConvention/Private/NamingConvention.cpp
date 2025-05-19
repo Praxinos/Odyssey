@@ -412,19 +412,19 @@ NamingConvention::GenerateCameraActorPathName( const IMovieScenePlayer& iPlayer,
 
     list_of_camera_index.Sort( TGreater<int32>() );
 
-    //--- Try to find the new plane name depending of the max existing index
+    //--- Try to find the new camera name depending of the max existing index
 
-    int32 max_plane_index = list_of_camera_index.Num() ? list_of_camera_index[0] : camera_settings.IndexFormat.StartNumber;
+    int32 max_camera_index = list_of_camera_index.Num() ? list_of_camera_index[0] : camera_settings.IndexFormat.StartNumber;
 
     FStringFormatNamedArguments args;
-    args.Add( TEXT( "camera_index_formated" ), FString::Printf( TEXT( "%0*d" ), camera_settings.IndexFormat.NumDigits, max_plane_index ) );
+    args.Add( TEXT( "camera_index_formated" ), FString::Printf( TEXT( "%0*d" ), camera_settings.IndexFormat.NumDigits, max_camera_index ) );
     FString camera_name = FString::Format( *camera_pattern_display, args );
 
     while( camera_names.Contains( camera_name ) )
     {
-        max_plane_index += camera_settings.IndexFormat.Increment;
+        max_camera_index += camera_settings.IndexFormat.Increment;
 
-        args.FindChecked( TEXT( "camera_index_formated" ) ) = FString::Printf( TEXT( "%0*d" ), camera_settings.IndexFormat.NumDigits, max_plane_index );
+        args.FindChecked( TEXT( "camera_index_formated" ) ) = FString::Printf( TEXT( "%0*d" ), camera_settings.IndexFormat.NumDigits, max_camera_index );
         camera_name = FString::Format( *camera_pattern_display, args );
     }
 
@@ -544,7 +544,7 @@ NamingConvention::GenerateAnimationActorPathName( const IMovieScenePlayer& iPlay
 FString
 NamingConvention::GenerateCameraTrackName( const IMovieScenePlayer& iPlayer, const UEposMovieSceneSequence& iSequence, FMovieSceneSequenceIDRef iSequenceID, ACineCameraActor* iCamera )
 {
-    // See comment in GeneratePlaneTrackName()
+    // See comment in GenerateAnimationTrackName()
     return iCamera->GetActorLabel();
 }
 
@@ -552,7 +552,7 @@ NamingConvention::GenerateCameraTrackName( const IMovieScenePlayer& iPlayer, con
 FString
 NamingConvention::GenerateAnimationTrackName( const IMovieScenePlayer& iPlayer, const UEposMovieSceneSequence& iSequence, FMovieSceneSequenceIDRef iSequenceID, AOdysseyAnimationActor* iAnimation )
 {
-    // For the moment, it's ok, but it will change, double-check (for example) the clone plane function...
+    // For the moment, it's ok, but it will change, double-check (for example) the clone animation function...
     // Or maybe name this function GenerateAnimationTrackNameFROMACTOR() et add another one which will really compute a new track name from the existing ones ?
     return iAnimation->GetActorLabel();
 }

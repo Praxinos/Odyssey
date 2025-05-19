@@ -483,7 +483,7 @@ ShotSequenceTools::DetachAnimation( ISequencer& iSequencer, UMovieSceneSequence*
     //---
 
     GEditor->SelectNone( true, true );
-    // It's certainly safe to not check if CanDetachAnimation() is ok (like CreateOpacity()/CreateDrawing)
+    // It's certainly safe to not check if CanDetachAnimation() is ok (like CreateOpacity()/CreateAnimation)
     // as DetachSelectedActors() does the check
     for( auto animation : animations )
         GEditor->SelectActor( animation, true /* bInSelected */, true /* bNotify */, true /* bSelectEvenIfHidden */ );

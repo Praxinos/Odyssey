@@ -115,7 +115,7 @@ public:
 public:
 
     /**
-     * Rename a plane/camera binding and its actor
+     * Rename a animation/camera binding and its actor
      */
     UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board" )
     static void RenameBinding( UMovieSceneSubSection* SubSection, const FMovieSceneBindingProxy& Binding, FString NewLabel );
@@ -210,7 +210,7 @@ public:
 public:
 
     /**
-     * Rename a plane/camera binding and its actor
+     * Rename a animation/camera binding and its actor
      */
     UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Shot" )
     static void RenameBinding( const FMovieSceneBindingProxy& Binding, FString NewLabel );
@@ -279,13 +279,13 @@ public:
 public:
 
     /**
-     * Move and scale a plane or animation from the camera
+     * Move and scale an animation from the camera
      */
     UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor" )
     static void MoveAndScaleActor( AActor* Actor, const ACineCameraActor* Camera, float NewDistance, EScaleActor ScaleType );
 
     /**
-     * Modify camera focal length and scale a plane or animation accordingly
+     * Modify camera focal length and scale an animation accordingly
      */
     UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor" )
     static void SetCameraFocalLengthAndScaleActor( TArray<AActor*> Actors, ACineCameraActor* Camera, float NewFocalLength, EScaleActor ScaleType );

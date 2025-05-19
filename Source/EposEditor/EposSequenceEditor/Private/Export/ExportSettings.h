@@ -21,10 +21,6 @@ public:
     UPROPERTY(config, BlueprintReadWrite, EditAnywhere, Category="Mark")
     bool AnimationCuts { true };
 
-    /** Make a panel when a drawing exists. */
-    UPROPERTY(config, BlueprintReadWrite, EditAnywhere, Category="Mark")
-    bool Drawings { true };
-
     /** Make a panel when a sequencer mark exists. */
     UPROPERTY(config, BlueprintReadWrite, EditAnywhere, Category="Mark")
     bool Marks { false };
