@@ -81,10 +81,11 @@ SOdysseyAnimationTimelineSection::OnPreviewMouseButtonDown(const FGeometry& MyGe
 
     TArray<UMovieSceneTrack*> selectedTracks;
     sequencer->GetSelectedTracks(selectedTracks);
-    if ((selectedTracks.Num() == 1 && selectedTracks.Contains(track)) || (selectedSections.Num() == 1 && selectedSections.Contains(mSection)))
+    if (selectedTracks.Num() == 1 && selectedTracks.Contains(track))
         return SCompoundWidget::OnPreviewMouseButtonDown(MyGeometry, MouseEvent);
 
     sequencer->EmptySelection();
+    sequencer->SelectTrack(track);
     sequencer->SelectSection(mSection);
     return SCompoundWidget::OnPreviewMouseButtonDown(MyGeometry, MouseEvent);
 }
