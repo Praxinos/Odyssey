@@ -89,7 +89,6 @@ void
 FOdysseyPainterEditorAnimationSource::ActivatePlayer(UOdysseyAnimationPlayer* iPlayer)
 {
     iPlayer->SetRenderType(EOdysseyRenderingType::Editor);
-    iPlayer->SeekToFrame(0);
     iPlayer->OnCurrentFrameChanged().AddRaw(this, &FOdysseyPainterEditorAnimationSource::OnCurrentFrameChanged);
 }
 
