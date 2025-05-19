@@ -53,9 +53,7 @@ public:
     TSharedPtr<FUICommandInfo> GotoPreviousCameraPosition;
     TSharedPtr<FUICommandInfo> GotoNextCameraPosition;
 
-    TSharedPtr<FUICommandInfo> CreatePlaneAtCurrentTime;
     TSharedPtr<FUICommandInfo> CreateAnimationAtCurrentTime;
-    TSharedPtr<FUICommandInfo> DetachPlaneAtCurrentTime;
     TSharedPtr<FUICommandInfo> DetachAnimationAtCurrentTime;
 
     TSharedPtr<FUICommandInfo> CreateDrawingAtCurrentTime;

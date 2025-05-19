@@ -28,7 +28,6 @@ private:
 
     void ProcessSequencerMarks( UShotSequence& iShotSequence, FMovieSceneSequenceIDRef iSequenceId, const FMovieSceneSequenceTransform& iRootToSequenceTransform, TArray<FExportPanel>& ioPanels ) const;
     void ProcessAnimationCuts( UShotSequence& iShotSequence, FMovieSceneSequenceIDRef iSequenceId, const FMovieSceneSequenceTransform& iRootToSequenceTransform, TArray<FExportPanel>& ioPanels ) const;
-    void ProcessDrawings( UShotSequence& iShotSequence, FMovieSceneSequenceIDRef iSequenceId, const FMovieSceneSequenceTransform& iRootToSequenceTransform, TArray<FExportPanel>& ioPanels ) const;
     void ProcessFirstShotFrame( UShotSequence& iShotSequence, FMovieSceneSequenceIDRef iSequenceId, const FMovieSceneSequenceTransform& iRootToSequenceTransform, TArray<FExportPanel>& ioPanels ) const;
 
 private:

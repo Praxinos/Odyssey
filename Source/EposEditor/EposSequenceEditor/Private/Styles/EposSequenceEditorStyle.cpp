@@ -124,11 +124,6 @@ FEposSequenceEditorStyle::InitCommands()
     Set( "EposSequenceCommands.DetachAnimationAtCurrentTime", new IMAGE_BRUSH_SVG( "animation-detach", Icon20x20 ) );
     Set( "EposSequenceCommands.DetachAnimationAtCurrentTime.Small", new IMAGE_BRUSH_SVG( "animation-detach", Icon20x20 ) );
 
-    Set( "EposSequenceCommands.CreatePlaneAtCurrentTime", new IMAGE_BRUSH_SVG( "plane-create", Icon20x20 ) );
-    Set( "EposSequenceCommands.CreatePlaneAtCurrentTime.Small", new IMAGE_BRUSH_SVG( "plane-create", Icon20x20 ) );
-    Set( "EposSequenceCommands.DetachPlaneAtCurrentTime", new IMAGE_BRUSH_SVG( "plane-detach", Icon20x20 ) );
-    Set( "EposSequenceCommands.DetachPlaneAtCurrentTime.Small", new IMAGE_BRUSH_SVG( "plane-detach", Icon20x20 ) );
-
     Set( "EposSequenceCommands.CreateDrawingAtCurrentTime", new IMAGE_BRUSH_SVG( "drawing-create", Icon20x20 ) );
     Set( "EposSequenceCommands.CreateDrawingAtCurrentTime.Small", new IMAGE_BRUSH_SVG( "drawing-create", Icon20x20 ) );
     Set( "EposSequenceCommands.GotoPreviousDrawing", new IMAGE_BRUSH_SVG( "drawing-previous", Icon20x20 ) );

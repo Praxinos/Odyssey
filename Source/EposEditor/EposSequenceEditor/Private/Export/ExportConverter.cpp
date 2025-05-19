@@ -157,60 +157,6 @@ FExportConverter::ProcessAnimationCuts( UShotSequence& iShotSequence, FMovieScen
 }
 
 void
-FExportConverter::ProcessDrawings( UShotSequence& iShotSequence, FMovieSceneSequenceIDRef iSequenceId, const FMovieSceneSequenceTransform& iRootToSequenceTransform, TArray<FExportPanel>& ioPanels ) const
-{
-    ISequencer* sequencer = mSequencer.Pin().Get();
-
-    TArray<APlaneActor*> planes;
-    TArray<FGuid> plane_bindings;
-    /*int32 num_planes =*/ ShotSequenceHelpers::GetAllPlanes( *sequencer, &iShotSequence, iSequenceId, EGetPlane::kAll, &planes, &plane_bindings );
-
-    for( auto plane_binding : plane_bindings )
-    {
-        TArray<FDrawing> drawings = ShotSequenceHelpers::GetAllDrawings( *sequencer, &iShotSequence, iSequenceId, plane_binding );
-        for( auto drawing : drawings )
-        {
-            FFrameNumber frame;
-            drawing.mChannel->GetKeyTimes( TArrayView<const FKeyHandle>( &drawing.mKeyHandle, 1 ), TArrayView<FFrameNumber>( &frame, 1 ) );
-
-            FMovieSceneInverseSequenceTransform localToRootTransform = iRootToSequenceTransform.Inverse();
-            TOptional<FFrameTime> time_in_root = localToRootTransform.TryTransformTime( frame );
-            if( !time_in_root )
-                continue;
-
-            FFrameNumber frame_in_root = time_in_root->GetFrame();
-
-            FExportPanel* existing_panel = ioPanels.FindByPredicate( [frame_in_root]( const FExportPanel& iElement )
-                                                                    {
-                                                                        return iElement.GlobalFrame == frame_in_root;
-                                                                    } );
-            if( existing_panel )
-            {
-                check( existing_panel->mSequence == &iShotSequence );
-
-                if( !existing_panel->mSourceDrawing.IsSet() )
-                    existing_panel->mSourceDrawing = FExportPanelSourceDrawing();
-
-                existing_panel->mSourceDrawing.GetValue().mDrawings.Add( { drawing, plane_binding } );
-            }
-            else
-            {
-                FExportPanel panel;
-                panel.GlobalFrame = frame_in_root;
-                panel.mSequence = &iShotSequence;
-                panel.mSequenceId = iSequenceId;
-                FExportPanelSourceDrawing source_drawing;
-                source_drawing.mDrawings.Add( { drawing, plane_binding } );
-                panel.mSourceDrawing = source_drawing;
-
-                ioPanels.Add( panel );
-            }
-        }
-    }
-
-}
-
-void
 FExportConverter::ProcessFirstShotFrame( UShotSequence& iShotSequence, FMovieSceneSequenceIDRef iSequenceId, const FMovieSceneSequenceTransform& iRootToSequenceTransform, TArray<FExportPanel>& ioPanels ) const
 {
     TRange<FFrameNumber> playback_range = iShotSequence.GetMovieScene()->GetPlaybackRange();
@@ -271,9 +217,6 @@ FExportConverter::Convert()
             if( mMarkSettings->AnimationCuts )
                 mConverter->ProcessAnimationCuts( *shot_sequence, iLocalSpace.SequenceID, iLocalSpace.RootToSequenceTransform, mPanels );
 
-            if( mMarkSettings->Drawings )
-                mConverter->ProcessDrawings( *shot_sequence, iLocalSpace.SequenceID, iLocalSpace.RootToSequenceTransform, mPanels );
-
             if( mMarkSettings->FirstFrameOfShot )
                 mConverter->ProcessFirstShotFrame( *shot_sequence, iLocalSpace.SequenceID, iLocalSpace.RootToSequenceTransform, mPanels );
         }
@@ -307,9 +250,6 @@ FExportConverter::Convert()
 
         if( mMarkSettings->AnimationCuts )
             ProcessAnimationCuts( *root_shot_sequence, sequencer->GetRootTemplateID(), transform, shot_visitor.mPanels );
-
-        if( mMarkSettings->Drawings )
-            ProcessDrawings( *root_shot_sequence, sequencer->GetRootTemplateID(), transform, shot_visitor.mPanels );
 
         if( mMarkSettings->FirstFrameOfShot )
             ProcessFirstShotFrame( *root_shot_sequence, sequencer->GetRootTemplateID(), transform, shot_visitor.mPanels );
