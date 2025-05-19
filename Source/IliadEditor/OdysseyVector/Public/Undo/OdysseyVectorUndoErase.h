@@ -41,4 +41,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoErase : public FOdysseyVectorUndo
         std::vector<FOdysseyVectorObject*> mRemovedObjectArray;
         std::vector<FOdysseyVectorVertex*> mRemovedVertexArray;
         std::vector<FOdysseyVectorSegment*> mRemovedSegmentArray;
+        FSnapshotCell mCellSnapshot;
 };

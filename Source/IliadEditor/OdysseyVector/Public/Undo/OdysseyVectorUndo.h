@@ -583,6 +583,31 @@ class ODYSSEYVECTOR_API FSnapshotGroupPaint : public FSnapshotGroup
         FColor mWireframeColor;
 };
 
+class ODYSSEYVECTOR_API FSnapshotCell : public FSnapshotObject
+{
+    struct State
+    {
+        std::vector<FOdysseyVectorObject*> selectedObjectArray;
+        bool inited;
+
+        State() { inited = false; }
+    };
+
+    public:
+        virtual ~FSnapshotCell();
+        FSnapshotCell( FOdysseyVectorCell* iCell );
+        FSnapshotCell( FOdysseyVectorCell* iCell, uint64 iSnapshotFlags, eSnapshotState iStateType );
+
+        void RecordState( eSnapshotState iStateType );
+        bool LoadState( eSnapshotState iStateType );
+
+        FOdysseyVectorCell* GetCell();
+
+    private:
+        uint64 mSnapshotFlags;
+        State mInitialState;
+        State mAlteredState;
+};
 
 class ODYSSEYVECTOR_API FOdysseyVectorUndo : public FCommandChange
 {

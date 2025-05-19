@@ -1817,3 +1817,90 @@ FSnapshotGroupPaint::Restore()
 
     return false;
 }
+
+void
+FSnapshotCell::RecordState( eSnapshotState iStateType )
+{
+    FOdysseyVectorCell* cell = static_cast<FOdysseyVectorCell*>(mObject);
+    FSnapshotCell::State *requestedState = nullptr;
+
+    switch( iStateType )
+    {
+        case eSnapshotState::Initial :
+            requestedState = &mInitialState;
+        break;
+
+        case eSnapshotState::Altered :
+            requestedState = &mAlteredState;
+        break;
+
+        default :
+        break;
+    }
+
+    if( requestedState->inited == false )
+    {
+        requestedState->selectedObjectArray.reserve( cell->GetSelectedObjectList().size() );
+
+        for( FOdysseyVectorObject* selectedObject : cell->GetSelectedObjectList() )
+        {
+            requestedState->selectedObjectArray.push_back( selectedObject );
+        }
+
+        requestedState->inited = true;
+    }
+}
+
+bool
+FSnapshotCell::LoadState( eSnapshotState iStateType )
+{
+    FOdysseyVectorCell* cell = static_cast<FOdysseyVectorCell*>(mObject);
+    FSnapshotCell::State *requestedState = nullptr;
+
+    switch( iStateType )
+    {
+        case eSnapshotState::Initial :
+            requestedState = &mInitialState;
+        break;
+
+        case eSnapshotState::Altered :
+            requestedState = &mAlteredState;
+        break;
+
+        default :
+        break;
+    }
+
+    cell->ClearObjectSelection();
+
+    for( FOdysseyVectorObject* selectedObject : requestedState->selectedObjectArray )
+    {
+        cell->SelectObject( selectedObject );
+    }
+
+    return true; // restore succeeded
+}
+
+FSnapshotCell::~FSnapshotCell()
+{
+}
+
+FSnapshotCell::FSnapshotCell( FOdysseyVectorCell* iCell )
+    : FSnapshotObject( iCell, 0 )
+{
+}
+
+FSnapshotCell::FSnapshotCell( FOdysseyVectorCell* iCell
+                            , uint64 iSnapshotFlags
+                            , eSnapshotState iStateType )
+    : FSnapshotObject ( iCell, iSnapshotFlags )
+    , mSnapshotFlags( iSnapshotFlags )
+{
+    RecordState( iStateType );
+}
+
+FOdysseyVectorCell*
+FSnapshotCell::GetCell()
+{
+    return static_cast<FOdysseyVectorCell*>(mObject);
+}

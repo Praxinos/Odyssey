@@ -4,6 +4,7 @@
 #include "Undo/OdysseyVectorUndoErase.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorLayer.h"
+#include "OdysseyVectorCell.h"
 
 FOdysseyVectorUndoErase::~FOdysseyVectorUndoErase()
 {
@@ -65,6 +66,8 @@ FOdysseyVectorUndoErase::FOdysseyVectorUndoErase( FOdysseyVectorGroupPaint* iSce
                                                 , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray
                                                 , uint64 iReturnFlags )
     : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
+    // to restore the selection (we dont record the initial state, it is already altered at that point anyways)
+    , mCellSnapshot( iScene->GetCell() )
 {
     mAddedObjectArray = iAddedObjectArray;
     mAddedVertexArray = iAddedVertexArray;
@@ -118,6 +121,8 @@ FOdysseyVectorUndoErase::Apply( UObject* iIgnored )
         //mAddedSegmentArray[i]->Invalidate();
     }
 
+    mCellSnapshot.LoadState( eSnapshotState::Altered );
+
     // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
     Update();
 }
@@ -127,6 +132,8 @@ FOdysseyVectorUndoErase::Revert( UObject* iIgnored )
 {
     // call method from base class
     FOdysseyVectorUndo::Revert( iIgnored );
+
+    mCellSnapshot.RecordState( eSnapshotState::Altered );
 
     for( int i = 0; i < mAddedSegmentArray.size(); i++ )
     {
@@ -143,6 +150,7 @@ FOdysseyVectorUndoErase::Revert( UObject* iIgnored )
     for( int i = 0; i < mAddedObjectArray.size(); i++ )
     {
         //mAddedObjectArray[i]->Invalidate();
+        mAddedObjectArray[i]->GetParent()->GetCell()->UnselectObject( mAddedObjectArray[i] );
         mAddedObjectArray[i]->GetParent()->RemoveChild( mAddedObjectArray[i] );
     }
 
@@ -165,6 +173,9 @@ FOdysseyVectorUndoErase::Revert( UObject* iIgnored )
         mRemovedSegmentArray[i]->GetOwnerAsPath()->AddSegment( mRemovedSegmentArray[i] );
         //mRemovedSegmentArray[i]->Invalidate();
     }
+
+    //mCellSnapshot.LoadState( eSnapshotState::Initial );
+    mCellSnapshot.GetCell()->ClearObjectSelection();
 
     // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
     Update();
