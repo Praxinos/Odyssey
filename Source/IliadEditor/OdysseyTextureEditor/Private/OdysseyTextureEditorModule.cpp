@@ -13,47 +13,6 @@
 
 #define LOCTEXT_NAMESPACE "TextureEditor"
 
-/*-----------------------------------------------------------------------------
-   FOdysseyTextureEditorModule
------------------------------------------------------------------------------*/
-
-/*void
-FOdysseyTextureEditorModule::CreateOdysseyTextureEditor( TArray<UTexture2D*> iTextures )
-{
-    UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem< UAssetEditorSubsystem >();
-    bool warningDisplayed = false;
-    for( UTexture2D* texture : iTextures )
-    {
-        //PATCH: To avoid opening Odyssey when another editor for this asset is opened
-        // To make it right, we should use AssetEditorSubsystem->OpenEditorForAsset, but for now it would call the default editor instead of Odyssey
-        if (AssetEditorSubsystem->FindEditorForAsset(texture, true) != nullptr)
-        {
-            if (!warningDisplayed)
-            {
-                FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("content-browser-extension.texture-already-opened-dialog.message", "The texture is already opened in an other editor. Please close the editor before opening the texture with Odyssey."), LOCTEXT("content-browser-extension.edit-texture.texture-already-opened-dialog.title", "Texture Already Opened"));
-                warningDisplayed = true;
-            }
-            continue;
-        }
-
-        TSharedPtr<FOdysseyPainterEditor> editor = MakeShared<FOdysseyPainterEditor>(
-            TEXT("OdysseyTextureEditor"),
-            LOCTEXT("main-menu.category", "Odyssey Texture2D Editor"),
-            texture,
-            "OdysseyTextureEditor_Layout"
-        );
-
-        TSharedRef<FOdysseyTextureEditorExtension> textureExtension = MakeShared<FOdysseyTextureEditorExtension>(editor.Get());
-        editor->AddExtension(textureExtension);
-
-        TSharedPtr<FOdysseyTextureEditorToolkit> toolkit = MakeShared<FOdysseyTextureEditorToolkit>();
-        toolkit->Initialize(texture, editor);
-
-        TSharedPtr<FOdysseyPainterEditorTextureSource> source = MakeShared<FOdysseyPainterEditorTextureSource>(texture);
-        editor->SetSource(source);
-    }
-}-*/
-
 void
 FOdysseyTextureEditorModule::StartupModule()
 {

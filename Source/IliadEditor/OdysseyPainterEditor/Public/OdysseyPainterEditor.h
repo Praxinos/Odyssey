@@ -218,6 +218,7 @@ public:
     FSimpleMulticastDelegate& OnCurrentMainToolChanged();
     FSimpleMulticastDelegate& OnCurrentTemporaryToolChanged();
 
+    TSharedPtr<FBaseToolkit> GetToolkit() const;
     TSharedPtr<FOdysseyPainterEditorSource>              GetSource() const;
     template<class T> TSharedPtr<T> GetSourceTyped() const;
     virtual FOdysseyPainterEditorGUI*                    GetGUI();

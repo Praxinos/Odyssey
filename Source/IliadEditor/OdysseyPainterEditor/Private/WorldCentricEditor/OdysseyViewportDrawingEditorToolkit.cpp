@@ -47,9 +47,7 @@ FOdysseyViewportDrawingEditorToolkit::Initialize(
     mEditor = MakeShared<FOdysseyPainterEditor>(SharedThis(this));
 
     mViewportDrawingExtension = MakeShared<FOdysseyViewportDrawingEditorExtension>(mEditor.Get());
-
     mEditor->AddExtension(mViewportDrawingExtension.ToSharedRef());
-
     mEditor->Initialize();
 
     TArray<UObject*> objects = mEditor->GetAdditionalEditedObjects();

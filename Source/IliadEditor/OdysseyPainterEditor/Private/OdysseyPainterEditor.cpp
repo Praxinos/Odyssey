@@ -759,6 +759,12 @@ FOdysseyPainterEditor::GetSource() const
     return mSource;
 }
 
+TSharedPtr<FBaseToolkit>
+FOdysseyPainterEditor::GetToolkit() const
+{
+    return mToolkit.Pin();
+}
+
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Getters
 

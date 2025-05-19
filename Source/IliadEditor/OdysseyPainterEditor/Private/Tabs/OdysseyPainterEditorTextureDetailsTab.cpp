@@ -46,6 +46,10 @@ FOdysseyPainterEditorTextureDetailsTab::CreateWidget()
 bool
 FOdysseyPainterEditorTextureDetailsTab::CanOpen() const
 {
+    //Always display this tab if we use the Odyssey Ed Mode
+    if (!mEditor->GetToolkit()->IsAssetEditor())
+        return true;
+
     TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
     return source && source->Id() == FOdysseyPainterEditorTextureSource::StaticId();
 }
