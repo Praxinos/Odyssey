@@ -24,20 +24,27 @@ UOdysseyBezierShape::UOdysseyBezierShape(const FObjectInitializer& iObjectInitia
 bool
 UOdysseyBezierShape::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
-    if( mEventState != eEventState::Idle )
-        return false;
+    if( mEventState == eEventState::Idle)
+    {
+        mEventState = eEventState::EndPoint;
 
-    mEventState = eEventState::EndPoint;
+        //Bezier Shape does not manage stylus params, so we create a new OdysseyPoint from scratch
+        FOdysseyPoint point = FOdysseyPoint(iPointInTexture.x, iPointInTexture.y);
+        mStartPoint = point;
+        mControlPoint = point;
+        mEndPoint = point;
 
-    //Bezier Shape does not manage stylus params, so we create a new OdysseyPoint from scratch
-    FOdysseyPoint point = FOdysseyPoint(iPointInTexture.x, iPointInTexture.y);
-    mStartPoint = point;
-    mControlPoint = point;
-    mEndPoint = point;
+        CreateHUD();
+        return true;
+    }
 
-    CreateHUD();
+    if( mEventState == eEventState::ControlPoint)
+    {
+        //ensures the tools keeps focus on the pointer (avoids the viewport to take control of the pointer)
+        return true;
+    }
 
-    return true;
+    return false;
 }
 
 void
