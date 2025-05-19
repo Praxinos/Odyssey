@@ -318,6 +318,12 @@ UOdysseyAnimation::SetRightBoundValue(int iValue)
 #endif
 }
 
+UOdysseyLayerStack*
+UOdysseyAnimation::GetLayerStack() const
+{
+    return mLayerStack;
+}
+
 #if WITH_EDITOR
 void
 UOdysseyAnimation::Init(int iWidth, int iHeight, EOdysseyAnimationFormat iFormat, float iFramesPerSecond)
@@ -339,12 +345,6 @@ UOdysseyAnimation::SetLayerStack(UOdysseyLayerStack* iLayerStack)
 
     mLayerStack = iLayerStack;
     RenderingCompositionChanged();
-}
-
-UOdysseyLayerStack*
-UOdysseyAnimation::GetLayerStack() const
-{
-    return mLayerStack;
 }
 
 void

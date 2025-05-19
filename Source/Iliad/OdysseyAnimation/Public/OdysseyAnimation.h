@@ -120,8 +120,8 @@ public:
 
     //Getters
     void SetLayerStack(UOdysseyLayerStack* iLayerStack);
-    UOdysseyLayerStack* GetLayerStack() const;
 #endif
+    UOdysseyLayerStack* GetLayerStack() const;
 
 public:
     virtual TArray<FGuid> GetRenderingComposition(uint64 iRenderType, int iFrameIndex) const override;
