@@ -173,11 +173,6 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_Paste()
     if (!clipboardData->CanPaste(layer))
         return;
 
-    FOdysseyPainterEditorModule& painterEditorModule = FModuleManager::GetModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
-    FOdysseyPainterEditor* editor = painterEditorModule.GetOpenedEditorForAsset(layer->GetAnimation());
-    if (!editor)
-        return;
-
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("timeline.shortcuts.paste-frame", "Paste Frames"));
 #endif
@@ -224,11 +219,6 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_Delete()
     if (selectedCells.IsEmpty())
         return;
 
-    FOdysseyPainterEditorModule& painterEditorModule = FModuleManager::GetModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
-    FOdysseyPainterEditor* editor = painterEditorModule.GetOpenedEditorForAsset(layer->GetAnimation());
-    if (!editor)
-        return;
-
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("timeline.shortcuts.remove-frame", "Remove Frames"));
 #endif
@@ -256,11 +246,6 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_ConvertToStaggerCell()
         return;
 
     if (!layer->IsEditable())
-        return;
-
-    FOdysseyPainterEditorModule& painterEditorModule = FModuleManager::GetModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
-    FOdysseyPainterEditor* editor = painterEditorModule.GetOpenedEditorForAsset(layer->GetAnimation());
-    if (!editor)
         return;
 
     TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
@@ -314,11 +299,6 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_IncreaseCellExposure()
     if (!layer->IsEditable())
         return;
 
-    FOdysseyPainterEditorModule& painterEditorModule = FModuleManager::GetModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
-    FOdysseyPainterEditor* editor = painterEditorModule.GetOpenedEditorForAsset(layer->GetAnimation());
-    if (!editor)
-        return;
-
     TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
     if (selectedCells.IsEmpty())
     {
@@ -358,11 +338,6 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_DecreaseCellExposure()
     if (!layer->IsEditable())
         return;
 
-    FOdysseyPainterEditorModule& painterEditorModule = FModuleManager::GetModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
-    FOdysseyPainterEditor* editor = painterEditorModule.GetOpenedEditorForAsset(layer->GetAnimation());
-    if (!editor)
-        return;
-
     TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
     if (selectedCells.IsEmpty())
     {
@@ -399,11 +374,6 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_SetCellExposure()
         return;
 
     if (!layer->IsEditable())
-        return;
-
-    FOdysseyPainterEditorModule& painterEditorModule = FModuleManager::GetModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
-    FOdysseyPainterEditor* editor = painterEditorModule.GetOpenedEditorForAsset(layer->GetAnimation());
-    if (!editor)
         return;
 
     TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
@@ -600,11 +570,6 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_ConvertToStaggerCell()
     if (!layer->IsEditable())
         return false;
 
-    FOdysseyPainterEditorModule& painterEditorModule = FModuleManager::GetModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
-    FOdysseyPainterEditor* editor = painterEditorModule.GetOpenedEditorForAsset(layer->GetAnimation());
-    if (!editor)
-        return false;
-
     TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
     if (selectedCells.IsEmpty())
     {
@@ -645,11 +610,6 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_IncreaseCellExposure()
     if (!layer->IsEditable())
         return false;
 
-    FOdysseyPainterEditorModule& painterEditorModule = FModuleManager::GetModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
-    FOdysseyPainterEditor* editor = painterEditorModule.GetOpenedEditorForAsset(layer->GetAnimation());
-    if (!editor)
-        return false;
-
     TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
     if (selectedCells.IsEmpty())
     {
@@ -679,11 +639,6 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_DecreaseCellExposure()
     if (!layer->IsEditable())
         return false;
 
-    FOdysseyPainterEditorModule& painterEditorModule = FModuleManager::GetModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
-    FOdysseyPainterEditor* editor = painterEditorModule.GetOpenedEditorForAsset(layer->GetAnimation());
-    if (!editor)
-        return false;
-
     TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
     if (selectedCells.IsEmpty())
     {
@@ -711,11 +666,6 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_SetCellExposure()
         return false;
 
     if (!layer->IsEditable())
-        return false;
-
-    FOdysseyPainterEditorModule& painterEditorModule = FModuleManager::GetModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
-    FOdysseyPainterEditor* editor = painterEditorModule.GetOpenedEditorForAsset(layer->GetAnimation());
-    if (!editor)
         return false;
 
     TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
