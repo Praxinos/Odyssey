@@ -103,7 +103,6 @@ FEposSequenceEditorCommands::RegisterCommands()
     UI_COMMAND( CreateAnimationAtCurrentTime,       "Create Animation", "Create a new animation in front of the current camera", EUserInterfaceActionType::Button, FInputChord() );
     UI_COMMAND( DetachAnimationAtCurrentTime,       "Detach Animation", "Detach the animation of the current camera", EUserInterfaceActionType::Button, FInputChord() );
 
-    UI_COMMAND( CreateDrawingAtCurrentTime,         "Create Drawing", "Create a new drawing", EUserInterfaceActionType::Button, FInputChord() );
     UI_COMMAND( GotoPreviousDrawing,                "Go to Previous Drawing", "Go to the previous drawing", EUserInterfaceActionType::Button, FInputChord() );
     UI_COMMAND( GotoNextDrawing,                    "Go to Next Drawing", "Go to the next drawing", EUserInterfaceActionType::Button, FInputChord() );
 

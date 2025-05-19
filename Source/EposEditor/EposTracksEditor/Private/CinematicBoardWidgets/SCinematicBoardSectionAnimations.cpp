@@ -398,42 +398,6 @@ SCinematicBoardSectionAnimationTitle::Construct( const FArguments& InArgs, TShar
 
     //-
 
-    //auto CreateDrawing = [this]()
-    //{
-    //    ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
-    //    const UMovieSceneSubSection& subsection_object = mBoardSection.Pin()->GetSubSectionObject();
-    //    FFrameNumber local_frame = sequencer->GetLocalTime().Time.FrameNumber;
-
-    //    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, subsection_object, sequencer->GetFocusedTemplateID() );
-    //    TArray<FGuid> plane_bindings;
-    //    ShotSequenceHelpers::GetAllPlanes( *sequencer, result.mInnerSequence, result.mInnerSequenceId, EGetPlane::kSelectedOnly, nullptr, &plane_bindings );
-
-    //    if( plane_bindings.Contains( mBinding.GetGuid() ) )
-    //        BoardSequenceTools::CreateDrawing( sequencer, subsection_object, local_frame, plane_bindings );
-    //    else
-    //        BoardSequenceTools::CreateDrawing( sequencer, subsection_object, local_frame, mBinding.GetGuid() );
-    //};
-
-    //auto CanCreateDrawing = [this]() -> bool
-    //{
-    //    ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
-    //    const UMovieSceneSubSection& subsection_object = mBoardSection.Pin()->GetSubSectionObject();
-    //    FFrameNumber local_frame = sequencer->GetLocalTime().Time.FrameNumber;
-    //    return BoardSequenceTools::CanCreateDrawing( sequencer, subsection_object, local_frame, mBinding.GetGuid() );
-    //};
-
-    //LeftToolbarBuilder.AddToolBarButton(
-    //    FUIAction(
-    //        FExecuteAction::CreateLambda( CreateDrawing ),
-    //        FCanExecuteAction::CreateLambda( CanCreateDrawing )
-    //    ),
-    //    NAME_None,
-    //    FText::GetEmpty(),
-    //    LOCTEXT( "create-drawing", "Create a drawing (set the current frame where to create the drawing keyframe)" ),
-    //    FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "CreateDrawing" ) );
-
-    //-
-
     TSharedRef< SWidget > left_toolbar = LeftToolbarBuilder.MakeWidget();
     left_toolbar->SetVisibility( mOptionalWidgetsVisibility );
 
