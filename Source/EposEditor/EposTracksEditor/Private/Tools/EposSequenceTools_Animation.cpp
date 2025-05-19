@@ -88,8 +88,8 @@ ShotSequenceTools::SpawnAnimation( UWorld* iWorld, ACineCameraActor* iCamera, fl
         material->SetScalarParameterValueEditorOnly( FMaterialParameterInfo( "Overlay" ), 1 );
 #endif
 
-    // Using this will delete the component once the actor is renamed at the end of SpawnAndBindPlane() -_-
-    //UActorComponent* actor_component = plane->AddComponentByClass( UScalingComponent::StaticClass(), false, FTransform::Identity, false );
+    // Using this will delete the component once the actor is renamed at the end of SpawnAndBindAnimation() -_-
+    //UActorComponent* actor_component = animation->AddComponentByClass( UScalingComponent::StaticClass(), false, FTransform::Identity, false );
     // So create and attach/register it to the actor in 2 steps
     UScalingComponent* actor_component = NewObject<UScalingComponent>( animation, UScalingComponent::StaticClass() );
     animation->FinishAddComponent( actor_component, false, FTransform::Identity );

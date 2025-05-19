@@ -240,7 +240,7 @@ SCinematicBoardSectionCameraTitle::OnMouseButtonDown( const FGeometry& MyGeometr
     // (For example, the cursor won't update to crosshair after the up on the empty zone of the SSequencerTrackArea)
     //return FReply::Handled();
 
-    // To be able to move the section through a title plane, otherwise (Handled) it's no more possible
+    // To be able to move the section through a title animation, otherwise (Handled) it's no more possible
     // Let's see if it's a problem to not handled now (see the comment above)
     // (Or maybe process the Up here ? to avoid this problem ? but in this case, it should also be unhandled to allow SSequencerTrackArea to manage the drag section)
     return FReply::Unhandled();

@@ -18,7 +18,6 @@
 #include "EposSequenceHelpers.h"
 #include "NamingConvention.h"
 #include "NoteTrack/MovieSceneNoteSection.h"
-#include "PlaneActor.h"
 #include "Settings/EposTracksSettings.h"
 #include "Settings/NamingConventionSettings.h"
 #include "Shot/ShotSequence.h"

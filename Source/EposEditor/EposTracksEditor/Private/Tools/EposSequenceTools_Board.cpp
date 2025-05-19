@@ -22,7 +22,6 @@
 #include "EposSequenceHelpers.h"
 #include "NamingConvention.h"
 #include "NoteTrack/MovieSceneNoteSection.h"
-#include "PlaneActor.h"
 #include "Settings/EposTracksSettings.h"
 #include "Settings/NamingConventionSettings.h"
 #include "Shot/ShotSequence.h"
@@ -910,7 +909,7 @@ ShotSequenceTools::CloneInnerContent( ISequencer* iSequencer, UMovieSceneSequenc
     FString cloned_camera_path;
     FString cloned_camera_name;
     NamingConvention::GenerateCameraActorPathName( *iSequencer, *epos_sequence, iSequenceID, cloned_camera_path, cloned_camera_name );
-    // We don't keep the same name as the original camera (like plane), to be able to increment the (global) index or to use the new shot name
+    // We don't keep the same name as the original camera (like animation), to be able to increment the (global) index or to use the new shot name
 
     cloned_camera->SetFolderPath( *cloned_camera_path );
     FActorLabelUtilities::RenameExistingActor( cloned_camera, cloned_camera_name, false ); // The shot name is displayed in another column in the world outliner
@@ -945,22 +944,22 @@ ShotSequenceTools::CloneInnerContent( ISequencer* iSequencer, UMovieSceneSequenc
 
     //---
 
-    TArray<APlaneActor*> planes;
-    TArray<FGuid> plane_bindings;
-    int32 plane_count = ShotSequenceHelpers::GetAllPlanes( *iSequencer, iSequence, iSequenceID, EGetPlane::kAll, &planes, &plane_bindings );
+    //TArray<APlaneActor*> planes;
+    //TArray<FGuid> plane_bindings;
+    //int32 plane_count = ShotSequenceHelpers::GetAllPlanes( *iSequencer, iSequence, iSequenceID, EGetPlane::kAll, &planes, &plane_bindings );
 
-    for( int i = 0; i < plane_count; i++ )
-    {
-        bool attachPlaneToCamera = false;
-        USceneComponent* RootComp = planes[i]->GetRootComponent();
-        if( RootComp && RootComp->GetAttachParent() )
-        {
-            AActor* ParentActor = RootComp->GetAttachParent()->GetOwner();
-            attachPlaneToCamera = ( ParentActor == camera );
-        }
+    //for( int i = 0; i < plane_count; i++ )
+    //{
+    //    bool attachPlaneToCamera = false;
+    //    USceneComponent* RootComp = planes[i]->GetRootComponent();
+    //    if( RootComp && RootComp->GetAttachParent() )
+    //    {
+    //        AActor* ParentActor = RootComp->GetAttachParent()->GetOwner();
+    //        attachPlaneToCamera = ( ParentActor == camera );
+    //    }
 
-        CloneInnerPlane( iSequencer, iSequence, iSequenceID, iSequence->GetMovieScene(), iEmptyDrawings, planes[i], plane_bindings[i], cloned_camera, attachPlaneToCamera );
-    }
+    //    CloneInnerPlane( iSequencer, iSequence, iSequenceID, iSequence->GetMovieScene(), iEmptyDrawings, planes[i], plane_bindings[i], cloned_camera, attachPlaneToCamera );
+    //}
 
     //---
 
@@ -979,80 +978,80 @@ ShotSequenceTools::CloneInnerContent( ISequencer* iSequencer, UMovieSceneSequenc
 
     iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::RefreshAllImmediately ); // Otherwise, some internal stuff may not be up-to-date, and new bindings/moviescenesequenceID/... are not available in cache
 }
-
-//static
-void
-ShotSequenceTools::CloneInnerPlane( ISequencer* iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, UMovieScene* iMovieScene, bool iEmptyDrawings, APlaneActor* iPlaneToClone, FGuid iPlaneBinding, ACineCameraActor* iClonedCamera, bool iAttachPlaneToCamera )
-{
-    FActorSpawnParameters planeSpawnParams;
-    planeSpawnParams.Template = iPlaneToClone;
-    APlaneActor* cloned_plane = iPlaneToClone->GetWorld()->SpawnActor<APlaneActor>( planeSpawnParams );
-    if( !cloned_plane )
-        return;
-
-    UEposMovieSceneSequence* epos_sequence = Cast<UEposMovieSceneSequence>( iSequence );
-    check( epos_sequence );
-
-    FString cloned_plane_path;
-    FString cloned_plane_name;
-    NamingConvention::GeneratePlaneActorPathName( *iSequencer, *epos_sequence, iSequenceID, cloned_plane_path, cloned_plane_name );
-    cloned_plane_name = iPlaneToClone->GetActorLabel(); // As the plane actor is cloned, just keep the same name (let see when shot/camera name are a part of the plane name...)
-
-    cloned_plane->SetFolderPath( *cloned_plane_path );
-    FActorLabelUtilities::RenameExistingActor( cloned_plane, cloned_plane_name, false ); // The shot name is displayed in another column in the world outliner
-
-    cloned_plane->SetActorTransform( iPlaneToClone->GetTransform() ); // Should be done, because for attached plane, its new transform are totally weird
-    cloned_plane->SetActorHiddenInGame( true ); // As it was created with the class constructor which set it to true, otherwise the actor to clone is certainly displayed, then the cloned actor will have false by default
-
-    //-
-
-    if( iAttachPlaneToCamera )
-        GEditor->ParentActors( iClonedCamera, cloned_plane, NAME_None );
-
-    //-
-
-    cloned_plane_name = NamingConvention::GeneratePlaneTrackName( *iSequencer, *epos_sequence, iSequenceID, cloned_plane );
-
-    iSequence->UnbindPossessableObjects( iPlaneBinding );
-    iSequence->BindPossessableObject( iPlaneBinding, *cloned_plane, iSequencer->GetPlaybackContext() );
-    iMovieScene->FindPossessable( iPlaneBinding )->SetName( cloned_plane_name );
-
-    iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemsChanged );
-
-    //---
-
-    TArray<FDrawing> drawings = ShotSequenceHelpers::GetAllDrawings( *iSequencer, iSequence, iSequenceID, iPlaneBinding );
-
-    for( auto& drawing : drawings )
-    {
-        UMaterialInstance* material = drawing.GetMaterial();
-        if( !material )
-            continue;
-
-        UMaterialInstanceConstant* new_material = iEmptyDrawings
-                                                  ? ProjectAssetTools::CreateMaterialAndTexture( *iSequencer, iSequence, iSequenceID, material )
-                                                  : ProjectAssetTools::CloneMaterialAndTexture( *iSequencer, iSequence, iSequenceID, material );
-        if( !new_material )
-            continue;
-
-        drawing.SetMaterial( new_material );
-    }
-
-    // To have no (hidden) dependency with a material (and as it should always be at least one key)
-    if( drawings.Num() )
-        UE::MovieScene::SetChannelDefault( drawings[0].mChannel, nullptr );
-
-    //-
-
-    // To change the initial material of the actor (which is always overrided by the sequencer when it's opened)
-    if( drawings.Num() )
-    {
-        UMaterialInstance* material = drawings[0].GetMaterial();
-
-        cloned_plane->GetStaticMeshComponent()->SetMaterial( 0, material );
-    }
-
-    iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemsChanged );
-}
+//
+////static
+//void
+//ShotSequenceTools::CloneInnerPlane( ISequencer* iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, UMovieScene* iMovieScene, bool iEmptyDrawings, APlaneActor* iPlaneToClone, FGuid iPlaneBinding, ACineCameraActor* iClonedCamera, bool iAttachPlaneToCamera )
+//{
+//    FActorSpawnParameters planeSpawnParams;
+//    planeSpawnParams.Template = iPlaneToClone;
+//    APlaneActor* cloned_plane = iPlaneToClone->GetWorld()->SpawnActor<APlaneActor>( planeSpawnParams );
+//    if( !cloned_plane )
+//        return;
+//
+//    UEposMovieSceneSequence* epos_sequence = Cast<UEposMovieSceneSequence>( iSequence );
+//    check( epos_sequence );
+//
+//    FString cloned_plane_path;
+//    FString cloned_plane_name;
+//    NamingConvention::GeneratePlaneActorPathName( *iSequencer, *epos_sequence, iSequenceID, cloned_plane_path, cloned_plane_name );
+//    cloned_plane_name = iPlaneToClone->GetActorLabel(); // As the plane actor is cloned, just keep the same name (let see when shot/camera name are a part of the plane name...)
+//
+//    cloned_plane->SetFolderPath( *cloned_plane_path );
+//    FActorLabelUtilities::RenameExistingActor( cloned_plane, cloned_plane_name, false ); // The shot name is displayed in another column in the world outliner
+//
+//    cloned_plane->SetActorTransform( iPlaneToClone->GetTransform() ); // Should be done, because for attached plane, its new transform are totally weird
+//    cloned_plane->SetActorHiddenInGame( true ); // As it was created with the class constructor which set it to true, otherwise the actor to clone is certainly displayed, then the cloned actor will have false by default
+//
+//    //-
+//
+//    if( iAttachPlaneToCamera )
+//        GEditor->ParentActors( iClonedCamera, cloned_plane, NAME_None );
+//
+//    //-
+//
+//    cloned_plane_name = NamingConvention::GeneratePlaneTrackName( *iSequencer, *epos_sequence, iSequenceID, cloned_plane );
+//
+//    iSequence->UnbindPossessableObjects( iPlaneBinding );
+//    iSequence->BindPossessableObject( iPlaneBinding, *cloned_plane, iSequencer->GetPlaybackContext() );
+//    iMovieScene->FindPossessable( iPlaneBinding )->SetName( cloned_plane_name );
+//
+//    iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemsChanged );
+//
+//    //---
+//
+//    TArray<FDrawing> drawings = ShotSequenceHelpers::GetAllDrawings( *iSequencer, iSequence, iSequenceID, iPlaneBinding );
+//
+//    for( auto& drawing : drawings )
+//    {
+//        UMaterialInstance* material = drawing.GetMaterial();
+//        if( !material )
+//            continue;
+//
+//        UMaterialInstanceConstant* new_material = iEmptyDrawings
+//                                                  ? ProjectAssetTools::CreateMaterialAndTexture( *iSequencer, iSequence, iSequenceID, material )
+//                                                  : ProjectAssetTools::CloneMaterialAndTexture( *iSequencer, iSequence, iSequenceID, material );
+//        if( !new_material )
+//            continue;
+//
+//        drawing.SetMaterial( new_material );
+//    }
+//
+//    // To have no (hidden) dependency with a material (and as it should always be at least one key)
+//    if( drawings.Num() )
+//        UE::MovieScene::SetChannelDefault( drawings[0].mChannel, nullptr );
+//
+//    //-
+//
+//    // To change the initial material of the actor (which is always overrided by the sequencer when it's opened)
+//    if( drawings.Num() )
+//    {
+//        UMaterialInstance* material = drawings[0].GetMaterial();
+//
+//        cloned_plane->GetStaticMeshComponent()->SetMaterial( 0, material );
+//    }
+//
+//    iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemsChanged );
+//}
 
 #undef LOCTEXT_NAMESPACE

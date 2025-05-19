@@ -90,21 +90,6 @@ public:
     virtual void ReBuildCameraTransformMetaChannel();
     virtual TSharedPtr<FMetaChannel> GetCameraTransformMetaChannel() const;
 
-    virtual void BuildPlanesTransformChannelProxy();
-    virtual FChannelProxyBySectionMap GetPlaneTransformChannelProxy( FMovieScenePossessable iPossessable ) const;
-    virtual void ReBuildPlanesTransformMetaChannel();
-    virtual TSharedPtr<FMetaChannel> GetPlaneTransformMetaChannel( FMovieScenePossessable iPossessable ) const;
-
-    virtual void BuildPlanesMaterialChannelProxy();
-    virtual FChannelProxyBySectionMap GetPlaneMaterialChannelProxy( FMovieScenePossessable iPossessable ) const;
-    virtual void ReBuildPlanesMaterialMetaChannel();
-    virtual TSharedPtr<FMetaChannel> GetPlaneMaterialMetaChannel( FMovieScenePossessable iPossessable ) const;
-
-    virtual void BuildPlanesOpacityChannelProxy();
-    virtual FChannelProxyBySectionMap GetPlaneOpacityChannelProxy( FMovieScenePossessable iPossessable ) const;
-    virtual void ReBuildPlanesOpacityMetaChannel();
-    virtual TSharedPtr<FMetaChannel> GetPlaneOpacityMetaChannel( FMovieScenePossessable iPossessable ) const;
-
     virtual void BuildAnimationsTransformChannelProxy();
     virtual FChannelProxyBySectionMap GetAnimationTransformChannelProxy( FMovieScenePossessable iPossessable ) const;
     virtual void ReBuildAnimationsTransformMetaChannel();
@@ -137,12 +122,6 @@ private:
     TArray<double> mThumbnailKeys;
     FChannelProxyBySectionMap   mCameraTransformChannelProxies;
     TSharedPtr<FMetaChannel>    mCameraTransformMetaChannel;
-    TMap<FGuid, FChannelProxyBySectionMap>  mPlanesTransformChannelProxies;
-    TMap<FGuid, TSharedPtr<FMetaChannel>>   mPlanesTransformMetaChannel;
-    TMap<FGuid, FChannelProxyBySectionMap>  mPlanesMaterialChannelProxies;
-    TMap<FGuid, TSharedPtr<FMetaChannel>>   mPlanesMaterialMetaChannel;
-    TMap<FGuid, FChannelProxyBySectionMap>  mPlanesOpacityChannelProxies;
-    TMap<FGuid, TSharedPtr<FMetaChannel>>   mPlanesOpacityMetaChannel;
     TMap<FGuid, FChannelProxyBySectionMap>  mAnimationsTransformChannelProxies;
     TMap<FGuid, TSharedPtr<FMetaChannel>>   mAnimationsTransformMetaChannel;
     TMap<FGuid, FChannelProxyBySectionMap>  mAnimationsTimelineChannelProxies;
