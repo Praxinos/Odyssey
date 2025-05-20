@@ -40,7 +40,7 @@ private:
 
 public:
     void Render();
-    void Update(int iFrameIndex, int64 iSequenceIndex);
+    void Update(int iFrameIndex, int64 iSequenceIndex, int64 iLoopIndex);
     uint64 GetRenderType() const;
     void SetRenderType(uint64 iRenderType);
 

@@ -31,6 +31,7 @@ FOdysseyAnimationMediaSamples::OnOpen(UOdysseyAnimation* iAnimation)
     //IOdysseyAnimationImageRenderingAbility::OnCompositionChanged().AddRaw(this, &FOdysseyAnimationMediaSamples::OnRenderingCompositionChanged);
     mRenderTarget = TStrongObjectPtr<UTextureRenderTarget2D>(NewObject<UTextureRenderTarget2D>());
     mRenderTarget->InitAutoFormat(mAnimation->GetWidth(), mAnimation->GetHeight());
+    mRenderTarget->UpdateResourceImmediate();
 
     mSample = MakeShared<FOdysseyAnimationMediaTextureSample>(mAnimation->GetWidth(), mAnimation->GetHeight(), mRenderTarget.Get());
     mImageRenderingComposition.Empty();
@@ -200,26 +201,29 @@ FOdysseyAnimationMediaSamples::FetchBestVideoSampleForTimeRange(const TRange<FMe
     int endFrameIndex = FMath::Clamp(GetFrameIndexAtTime(endTime), 0, controls->GetFrameCount());
     int64 startSequenceIndex = timeRange.GetLowerBoundValue().GetSequenceIndex();
     int64 endSequenceIndex = timeRange.GetUpperBoundValue().GetSequenceIndex();
+    int64 startLoopIndex = timeRange.GetLowerBoundValue().GetLoopIndex();
+    int64 endLoopIndex = timeRange.GetUpperBoundValue().GetLoopIndex();
 
     //Check if range is valid
-    if ( startSequenceIndex > endSequenceIndex )
+    if ( startLoopIndex > endLoopIndex )
         return EFetchBestSampleResult::NoSample;
 
-    if (startSequenceIndex == endSequenceIndex && startTime > endTime)
+    if (startLoopIndex == endLoopIndex && startTime > endTime)
         return EFetchBestSampleResult::NoSample;
 
     //range is valid
     //check overlap of each frame with the time range
 
+    int64 resultingLoopIndex = startLoopIndex;
     int64 resultingSequenceIndex = startSequenceIndex;
     int frameIndex = 0;
     //Only a single frame overlaps the range
-    if (startSequenceIndex == endSequenceIndex && startFrameIndex == endFrameIndex)
+    if (startLoopIndex == endLoopIndex && startFrameIndex == endFrameIndex)
     {
         frameIndex = startFrameIndex;
     }
     //The time range is not looping, so we have a single range to check
-    else if (startSequenceIndex == endSequenceIndex)
+    else if (startLoopIndex == endLoopIndex)
     {
         //search in [startFrame, endFrame]
         frameIndex = INDEX_NONE;
@@ -227,7 +231,7 @@ FOdysseyAnimationMediaSamples::FetchBestVideoSampleForTimeRange(const TRange<FMe
     }
     //The time range is looping enough to cover the whole animation duration,
     //so check a single time range covering the whole animation duration.
-    else if ( startTime <= endTime || endSequenceIndex - startSequenceIndex >= 2 )
+    else if ( startTime <= endTime || endLoopIndex - startLoopIndex >= 2 )
     {
         frameIndex = INDEX_NONE;
         FindMaxOverlapingFrame(FTimespan(0), controls->GetDuration(), &frameIndex);
@@ -243,11 +247,12 @@ FOdysseyAnimationMediaSamples::FetchBestVideoSampleForTimeRange(const TRange<FMe
         FTimespan overlap1 = FindMaxOverlapingFrame(0, endTime, &frameIndex1);
         FTimespan overlap2 = FindMaxOverlapingFrame(startTime, controls->GetDuration(), &frameIndex2);
         frameIndex = overlap1 > overlap2 ? frameIndex1 : frameIndex2;
+        resultingLoopIndex = overlap1 > overlap2 ? endLoopIndex : startLoopIndex;
         resultingSequenceIndex = overlap1 > overlap2 ? endSequenceIndex : startSequenceIndex;
     }
 
-    Update(frameIndex, resultingSequenceIndex);
     OutSample = mSample;
+    Update(frameIndex, resultingSequenceIndex, resultingLoopIndex);
     controls->SetTime(mAnimation->GetFrameTimeRange(frameIndex).GetLowerBoundValue());
 
     //It can sound weird, but this is also the place where we detect that the play needs to stop
@@ -283,14 +288,14 @@ FOdysseyAnimationMediaSamples::PeekVideoSampleTime(FMediaTimeStamp & TimeStamp)
 }
 
 void
-FOdysseyAnimationMediaSamples::Update(int iFrameIndex, int64 iSequenceIndex)
+FOdysseyAnimationMediaSamples::Update(int iFrameIndex, int64 iSequenceIndex, int64 iLoopIndex)
 {
     TSharedPtr<FOdysseyAnimationMediaControls> controls = mControls.Pin();
     if (!controls)
         return;
 
     TRange<FTimespan> timeRange = mAnimation->GetFrameTimeRange(iFrameIndex);
-    FMediaTimeStamp frameTime = FMediaTimeStamp(timeRange.GetLowerBoundValue(), iSequenceIndex);
+    FMediaTimeStamp frameTime = FMediaTimeStamp(timeRange.GetLowerBoundValue(), iSequenceIndex, iLoopIndex);
     FTimespan frameDuration = timeRange.Size<FTimespan>();
 
     mSample->SetTime(frameTime);
@@ -305,7 +310,6 @@ FOdysseyAnimationMediaSamples::Update(int iFrameIndex, int64 iSequenceIndex)
 
     mImageRenderingComposition = imageRenderingComposition;
 
-    IOdysseyTextureRenderingAbility::Execute_Render(mAnimation, mRenderTarget.Get(), FFrameNumber(mCurrentFrameIndex));
     mAnimation->Render_GameThread(mRenderTarget.Get(), FFrameNumber(mCurrentFrameIndex), EOdysseyRenderingType::Render);
 }
 
