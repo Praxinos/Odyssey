@@ -70,8 +70,10 @@ SOdysseyAnimationTimelineTrack::OnPreviewMouseButtonDown(const FGeometry& MyGeom
     if ((selectedTracks.Num() == 1 && selectedTracks.Contains(mTrack)) || (selectedSections.Num() == 1 && sectionSelected))
         return SCompoundWidget::OnPreviewMouseButtonDown(MyGeometry, MouseEvent);
 
+    FScopedTransaction Transaction(LOCTEXT("timeline-track.transaction.select-track", "Select Actors/Components"));
     sequencer->EmptySelection();
     sequencer->SelectTrack(mTrack);
+
     return SCompoundWidget::OnPreviewMouseButtonDown(MyGeometry, MouseEvent);
 }
 
