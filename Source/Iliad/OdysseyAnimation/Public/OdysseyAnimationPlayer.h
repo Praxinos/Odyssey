@@ -159,7 +159,7 @@ public:
     UPROPERTY()
     float PlayRate = 1.0f; //1.0f means 100% of the animation framepersecond
 
-    UPROPERTY(Transient, DuplicateTransient)
+    UPROPERTY()
     TObjectPtr<UTextureRenderTarget2D> RenderTarget;
 
 private:

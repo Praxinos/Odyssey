@@ -609,14 +609,16 @@ UOdysseyAnimationPlayer::PostLoad()
     if (GetFlags() & RF_ClassDefaultObject)
         return;
 
-    AnimationChanged();
+    RenderTarget->UpdateResource();
 
     //will create the texture if needed
-    if (Animation)
-    {
-        mInvalidTileMap = FOdysseyInvalidTileMap(64, Animation->GetWidth(), Animation->GetHeight());
-        IOdysseyRenderingAbility::OnRenderingChangedDelegate().AddUObject(this, &UOdysseyAnimationPlayer::OnRenderingChanged);
-    }
+    IOdysseyRenderingAbility::OnRenderingChangedDelegate().RemoveAll(this);
+    if (!Animation)
+        return;
+
+    mInvalidTileMap = FOdysseyInvalidTileMap(64, Animation->GetWidth(), Animation->GetHeight());
+
+    IOdysseyRenderingAbility::OnRenderingChangedDelegate().AddUObject(this, &UOdysseyAnimationPlayer::OnRenderingChanged);
 }
 
 void
@@ -627,7 +629,14 @@ UOdysseyAnimationPlayer::PostDuplicate(EDuplicateMode::Type iDuplicateMode)
     if (GetFlags() & RF_ClassDefaultObject)
         return;
 
-    //will create the texture if needed
-    AnimationChanged();
+    RenderTarget->UpdateResource();
+
+    IOdysseyRenderingAbility::OnRenderingChangedDelegate().RemoveAll(this);
+    if (!Animation)
+        return;
+
+    mInvalidTileMap = FOdysseyInvalidTileMap(64, Animation->GetWidth(), Animation->GetHeight());
+
+    IOdysseyRenderingAbility::OnRenderingChangedDelegate().AddUObject(this, &UOdysseyAnimationPlayer::OnRenderingChanged);
     mImageRenderingComposition.Empty();
 }

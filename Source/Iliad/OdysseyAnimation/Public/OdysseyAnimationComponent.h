@@ -57,8 +57,8 @@ public:
     void SetAnimationMaterial(UMaterialInterface* iMaterial);
 
 public:
-    virtual void PostLoad() override;
-    virtual void PostDuplicate(bool bDuplicateForPIE) override;
+    virtual void OnRegister() override;
+    virtual void OnUnregister() override;
 
 #if WITH_EDITOR
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent) override;

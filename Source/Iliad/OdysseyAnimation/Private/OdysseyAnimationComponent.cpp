@@ -129,19 +129,16 @@ UOdysseyAnimationComponent::InitializeFromPlayer(UOdysseyAnimationPlayer* iPlaye
 }
 
 void
-UOdysseyAnimationComponent::PostLoad()
+UOdysseyAnimationComponent::OnRegister()
 {
-    Super::PostLoad();
-    if ( GetFlags() & RF_ClassDefaultObject )
-        return;
+    Super::OnRegister();
     CreateMaterialInstance();
 }
 
 void
-UOdysseyAnimationComponent::PostDuplicate(bool bDuplicateForPIE)
+UOdysseyAnimationComponent::OnUnregister()
 {
-    Super::PostDuplicate(bDuplicateForPIE);
-    CreateMaterialInstance();
+    Super::OnUnregister();
 }
 
 void

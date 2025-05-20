@@ -14,7 +14,9 @@ FName AOdysseyAnimationActor::AnimationComponentName(TEXT("AnimationComponent"))
 AOdysseyAnimationActor::AOdysseyAnimationActor(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer)
 {
-    RootComponent = AnimationComponent = CreateDefaultSubobject<UOdysseyAnimationComponent>(AnimationComponentName);
+    AnimationComponent = CreateDefaultSubobject<UOdysseyAnimationComponent>(AnimationComponentName);
+    RootComponent = AnimationComponent;
+
     AnimationComponent->SetRelativeRotation(FRotator(0, 90, 90));
 }
 
