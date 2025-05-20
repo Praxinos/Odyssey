@@ -22,6 +22,7 @@
 #include "Tracks/MovieSceneSkeletalAnimationTrack.h"
 #include "SubObjectLocator.h"
 #include "UniversalObjectLocators/ActorLocatorFragment.h"
+#include "Sequencer/MovieSceneControlRigParameterTrack.h"
 
 #include "Board/BoardHelpers.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
@@ -179,6 +180,7 @@ UBoardSequence::IsTrackSupportedImpl( TSubclassOf<class UMovieSceneTrack> InTrac
         InTrackClass == UMovieSceneFadeTrack::StaticClass() ||
         InTrackClass == UMovieSceneMediaTrack::StaticClass() ||
         InTrackClass == UMovieSceneLevelVisibilityTrack::StaticClass() ||
+        InTrackClass == UMovieSceneControlRigParameterTrack::StaticClass() ||
         InTrackClass == UMovieSceneSkeletalAnimationTrack::StaticClass() )
     {
         return ETrackSupport::Supported;
