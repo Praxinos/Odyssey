@@ -340,7 +340,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::CacheDesiredSize ( flo
     }
 
     // the whole bounding box
-    xmin =  DBL_MAX;
+    xmin =  0;
     xmax = -DBL_MAX;
 
     for( int32 i = 0; i < mCellBoxBuffer.Num(); i++ )
@@ -360,8 +360,17 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::CacheDesiredSize ( flo
 FVector2D
 SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::ComputeDesiredSize ( float LayoutScaleMultiplier ) const
 {
+    double xmax = mBoxSize.X;
+    double ymax = mBoxSize.Y;
+
+    if( mCandidateTargetCellBox.type )
+    {
+        xmax = fmax( xmax, mCandidateTargetCellBox.x + mCandidateTargetCellBox.w );
+        ymax = fmax( ymax, mCandidateTargetCellBox.y + mCandidateTargetCellBox.h );
+    }
+
     // Note: dimensions are already scaled in CacheDesiredSize()
-    return FVector2D( mBoxSize.X, mBoxSize.Y );
+    return FVector2D( xmax, ymax );
 }
 
 FCursorReply

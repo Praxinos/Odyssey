@@ -2270,6 +2270,11 @@ FOdysseyPainterEditor::AddInbetweenerTag( FOdysseyPainterEditor* iEditor
             {
                 inbetweenerTag->SetInterpolationDirection( eInbetweenerInterpolationDirection::Backward );
             }
+            // turn again if there is no target cell (i.e there is a signle cell). Hence, default is forward.
+            if( inbetweenerTag->GetTargetCell() == nullptr )
+            {
+                inbetweenerTag->SetInterpolationDirection( eInbetweenerInterpolationDirection::Forward );
+            }
 
             addedTagArray.push_back( inbetweenerTag );
         }

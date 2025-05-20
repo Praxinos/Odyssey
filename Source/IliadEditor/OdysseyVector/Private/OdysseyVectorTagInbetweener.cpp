@@ -1573,11 +1573,12 @@ FOdysseyVectorTagInbetweener::Draw( FOdysseyVectorGroupPaint* iDisplayedScene
         // if th eobject hasn't been removed from the scene
         if( displayedCell && tagCell )
         {
-            uint32 sourceCellIndex = tagCell->GetIndex();
-            uint32 targetCellIndex = sourceCellIndex + ( ( GetLength() - 1 ) * (int)mInterpolationDirection );
-            uint32 displayedCellIndex = displayedCell->GetIndex();
-            uint32 fromCellIndex = std::min( sourceCellIndex, targetCellIndex );
-            uint32   toCellIndex = std::max( sourceCellIndex, targetCellIndex );
+            int32 sourceCellIndex = tagCell->GetIndex();
+            // Note: target can be negative
+            int32 targetCellIndex = sourceCellIndex + ( ( GetLength() - 1 ) * (int)mInterpolationDirection );
+            int32 displayedCellIndex = displayedCell->GetIndex();
+            int32 fromCellIndex = std::min( sourceCellIndex, targetCellIndex );
+            int32   toCellIndex = std::max( sourceCellIndex, targetCellIndex );
 
             if ( ( displayedCellIndex > fromCellIndex )
               && ( displayedCellIndex <= toCellIndex   ) )
