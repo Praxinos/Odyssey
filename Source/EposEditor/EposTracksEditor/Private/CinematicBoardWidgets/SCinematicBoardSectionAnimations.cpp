@@ -238,8 +238,6 @@ private:
 
     /** Delegate binding handle for ISequencer::OnMovieSceneDataChanged */
     FDelegateHandle mMovieSceneDataChangedHandle;
-
-    TArray<FDrawing> mCachedDrawings;
 };
 
 //---

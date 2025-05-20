@@ -33,7 +33,6 @@ class UTexture2D;
 class IMovieScenePlayer;
 class ISequencer;
 struct FBoardSectionTake;
-struct FDrawing; // but only as private functions
 struct FMovieSceneChannelHandle;
 
 void EjectAnyActor();

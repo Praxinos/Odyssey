@@ -46,10 +46,11 @@ BoardSequenceTools::HasPreviousDrawing( ISequencer* iSequencer, FFrameNumber iFr
     if( !result.mInnerSequence )
         return false;
 
-    TArray<FFrameNumber> times = ShotSequenceHelpers::GetAllDrawingTimes( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, EGetPlane::kSelectedOrAll );
-    int32 index = times.FindLastByPredicate( [result]( FFrameNumber iCurrentFrame ) { return iCurrentFrame < result.mInnerTime.GetFrame(); } );
+    //TArray<FFrameNumber> times = ShotSequenceHelpers::GetAllDrawingTimes( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, EGetPlane::kSelectedOrAll );
+    //int32 index = times.FindLastByPredicate( [result]( FFrameNumber iCurrentFrame ) { return iCurrentFrame < result.mInnerTime.GetFrame(); } );
 
-    return index != INDEX_NONE;
+    //return index != INDEX_NONE;
+    return false;
 }
 
 //static
@@ -63,33 +64,34 @@ ShotSequenceTools::GotoPreviousDrawing( ISequencer* iSequencer, FFrameNumber iFr
 bool
 ShotSequenceTools::HasPreviousDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber )
 {
-    TArray<FFrameNumber> times = ShotSequenceHelpers::GetAllDrawingTimes( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), EGetPlane::kSelectedOrAll );
-    int32 index = times.FindLastByPredicate( [iFrameNumber]( FFrameNumber iCurrentFrame ) { return iCurrentFrame < iFrameNumber; } );
+    //TArray<FFrameNumber> times = ShotSequenceHelpers::GetAllDrawingTimes( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), EGetPlane::kSelectedOrAll );
+    //int32 index = times.FindLastByPredicate( [iFrameNumber]( FFrameNumber iCurrentFrame ) { return iCurrentFrame < iFrameNumber; } );
 
-    return index != INDEX_NONE;
+    //return index != INDEX_NONE;
+    return false;
 }
 
 //static
 void
 ShotSequenceTools::GotoPreviousDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber )
 {
-    TArray<FFrameNumber> times = ShotSequenceHelpers::GetAllDrawingTimes( iSequencer, iSequence, iSequenceID, EGetPlane::kSelectedOrAll );
+    //TArray<FFrameNumber> times = ShotSequenceHelpers::GetAllDrawingTimes( iSequencer, iSequence, iSequenceID, EGetPlane::kSelectedOrAll );
 
-    int32 index = times.FindLastByPredicate( [iFrameNumber]( FFrameNumber iCurrentFrame ) { return iCurrentFrame < iFrameNumber; } );
-    if( index == INDEX_NONE )
-        return;
+    //int32 index = times.FindLastByPredicate( [iFrameNumber]( FFrameNumber iCurrentFrame ) { return iCurrentFrame < iFrameNumber; } );
+    //if( index == INDEX_NONE )
+    //    return;
 
-    FFrameNumber previous_time = times[index];
+    //FFrameNumber previous_time = times[index];
 
-    const FMovieSceneSequenceHierarchy* hierarchy = iSequencer.GetSharedPlaybackState()->GetHierarchy();
-    const FMovieSceneSubSequenceData* subdata = hierarchy->FindSubData( iSequenceID );
+    //const FMovieSceneSequenceHierarchy* hierarchy = iSequencer.GetSharedPlaybackState()->GetHierarchy();
+    //const FMovieSceneSubSequenceData* subdata = hierarchy->FindSubData( iSequenceID );
 
-    FMovieSceneInverseSequenceTransform localToRootTransform = subdata->RootToSequenceTransform.Inverse();
-    TOptional<FFrameTime> previous_time_in_root = localToRootTransform.TryTransformTime( previous_time );
-    if( !previous_time_in_root )
-        return;
+    //FMovieSceneInverseSequenceTransform localToRootTransform = subdata->RootToSequenceTransform.Inverse();
+    //TOptional<FFrameTime> previous_time_in_root = localToRootTransform.TryTransformTime( previous_time );
+    //if( !previous_time_in_root )
+    //    return;
 
-    iSequencer.SetGlobalTime( *previous_time_in_root );
+    //iSequencer.SetGlobalTime( *previous_time_in_root );
 }
 
 //---
@@ -113,10 +115,11 @@ BoardSequenceTools::HasNextDrawing( ISequencer* iSequencer, FFrameNumber iFrameN
     if( !result.mInnerSequence )
         return false;
 
-    TArray<FFrameNumber> times = ShotSequenceHelpers::GetAllDrawingTimes( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, EGetPlane::kSelectedOrAll );
-    FFrameNumber* next_time = times.FindByPredicate( [result]( FFrameNumber iCurrentFrame ) { return iCurrentFrame > result.mInnerTime.GetFrame(); } );
+    //TArray<FFrameNumber> times = ShotSequenceHelpers::GetAllDrawingTimes( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, EGetPlane::kSelectedOrAll );
+    //FFrameNumber* next_time = times.FindByPredicate( [result]( FFrameNumber iCurrentFrame ) { return iCurrentFrame > result.mInnerTime.GetFrame(); } );
 
-    return !!next_time;
+    //return !!next_time;
+    return false;
 }
 
 //static
@@ -130,31 +133,32 @@ ShotSequenceTools::GotoNextDrawing( ISequencer* iSequencer, FFrameNumber iFrameN
 bool
 ShotSequenceTools::HasNextDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber )
 {
-    TArray<FFrameNumber> times = ShotSequenceHelpers::GetAllDrawingTimes( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), EGetPlane::kSelectedOrAll );
-    FFrameNumber* next_time = times.FindByPredicate( [iFrameNumber]( FFrameNumber iCurrentFrame ) { return iCurrentFrame > iFrameNumber; } );
+    //TArray<FFrameNumber> times = ShotSequenceHelpers::GetAllDrawingTimes( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), EGetPlane::kSelectedOrAll );
+    //FFrameNumber* next_time = times.FindByPredicate( [iFrameNumber]( FFrameNumber iCurrentFrame ) { return iCurrentFrame > iFrameNumber; } );
 
-    return !!next_time;
+    //return !!next_time;
+    return false;
 }
 
 //static
 void
 ShotSequenceTools::GotoNextDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber )
 {
-    TArray<FFrameNumber> times = ShotSequenceHelpers::GetAllDrawingTimes( iSequencer, iSequence, iSequenceID, EGetPlane::kSelectedOrAll );
+    //TArray<FFrameNumber> times = ShotSequenceHelpers::GetAllDrawingTimes( iSequencer, iSequence, iSequenceID, EGetPlane::kSelectedOrAll );
 
-    FFrameNumber* next_time = times.FindByPredicate( [iFrameNumber]( FFrameNumber iCurrentFrame ) { return iCurrentFrame > iFrameNumber; } );
-    if( !next_time )
-        return;
+    //FFrameNumber* next_time = times.FindByPredicate( [iFrameNumber]( FFrameNumber iCurrentFrame ) { return iCurrentFrame > iFrameNumber; } );
+    //if( !next_time )
+    //    return;
 
-    const FMovieSceneSequenceHierarchy* hierarchy = iSequencer.GetSharedPlaybackState()->GetHierarchy();
-    const FMovieSceneSubSequenceData* subdata = hierarchy->FindSubData( iSequenceID );
+    //const FMovieSceneSequenceHierarchy* hierarchy = iSequencer.GetSharedPlaybackState()->GetHierarchy();
+    //const FMovieSceneSubSequenceData* subdata = hierarchy->FindSubData( iSequenceID );
 
-    FMovieSceneInverseSequenceTransform localToRootTransform = subdata->RootToSequenceTransform.Inverse();
-    TOptional<FFrameTime> next_time_in_root = localToRootTransform.TryTransformTime( *next_time );
-    if( !next_time_in_root )
-        return;
+    //FMovieSceneInverseSequenceTransform localToRootTransform = subdata->RootToSequenceTransform.Inverse();
+    //TOptional<FFrameTime> next_time_in_root = localToRootTransform.TryTransformTime( *next_time );
+    //if( !next_time_in_root )
+    //    return;
 
-    iSequencer.SetGlobalTime( *next_time_in_root );
+    //iSequencer.SetGlobalTime( *next_time_in_root );
 }
 
 #undef LOCTEXT_NAMESPACE

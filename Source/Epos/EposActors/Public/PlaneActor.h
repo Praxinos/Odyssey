@@ -27,18 +27,6 @@ public:
 private:
     virtual void PostLoad() override;
 
-//public:
-//    virtual FVector ComputePlaneScaleOfCameraView( const ACineCameraActor* iCamera, float iDistance ) const; // From FDrawFrustumSceneProxy::GetDynamicMeshElements()
-//    virtual FVector ComputePlaneScaleWithScaleAndMargin( const ACineCameraActor* iCamera, float iDistance ) const;
-//
-//    virtual FIntPoint ComputeTextureSize( const ACineCameraActor* iCamera, int32 iTextureHeight ) const;
-//
-//public:
-//    /** Get the margin as percent (0.1 for 10%) */
-//    virtual float GetSafeMargin() const;
-//    /** Get the relative scaling as percent (1. for 100%) */
-//    virtual FVector2D GetRelativeScaling() const;
-
 public:
     /** This will make the plane bigger than the original size viewed by the camera by adding a margin to the plane */
     UPROPERTY()
