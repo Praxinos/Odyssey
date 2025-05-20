@@ -218,30 +218,29 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonUp( const
 
     if ( MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton )
     {
-        if( cell && cell->IsA<UOdysseyAnimationCellImageVector>())
-        {
-        UOdysseyAnimationCellImageVector* vectorCell = Cast<UOdysseyAnimationCellImageVector>(cell);
         uint64 retFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
                         | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
                         | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
-        //STableRow<TSharedPtr<FInbetweeningListViewItem>>::OnMouseButtonUp( MyGeometry, MouseEvent );
-
-
-            if( mPickedBreakdown )
+        if( mPickedBreakdown )
+        {
+            if( mCandidateTargetCellBox.type & CellBox::TYPE_TARGET )
             {
-                if( mCandidateTargetCellBox.type & CellBox::TYPE_TARGET )
-                {
-                    mPickedBreakdown->SetTargetDrawingIndex( mCandidateTargetCellBox.index );
-                }
+                mPickedBreakdown->SetTargetDrawingIndex( mCandidateTargetCellBox.index );
             }
+        }
+
+        vectorLayer->GetVectorLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+
+        if( cell && cell->IsA<UOdysseyAnimationCellImageVector>())
+        {
+            UOdysseyAnimationCellImageVector* vectorCell = Cast<UOdysseyAnimationCellImageVector>(cell);
 
             // request for redrawing of the current displayed cell
-            vectorCell->GetVectorCell()->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-            vectorCell->GetVectorCell()->GetLayer()->RequestRedraw( vectorCell->GetVectorCell(), 0 );
-
-            FOdysseyVectorEngine::Notify( nullptr, retFlags );
+            vectorLayer->GetVectorLayer()->RequestRedraw( vectorCell->GetVectorCell(), 0 );
         }
+
+        FOdysseyVectorEngine::Notify( nullptr, retFlags );
 
         reply.ReleaseMouseCapture();
     }
