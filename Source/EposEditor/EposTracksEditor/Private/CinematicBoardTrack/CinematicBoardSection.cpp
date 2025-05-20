@@ -1134,6 +1134,7 @@ FCinematicBoardSection::RebuildAnimationThumbnailDataInternal( UOdysseyAnimation
             static FImage* img = nullptr;
             static FImage* img_small = nullptr;
             if( !renderTarget
+                || !IsValid( renderTarget )
                 || renderTarget->SizeX != InSizeX
                 || renderTarget->SizeY != InSizeY
                 || renderTarget->RenderTargetFormat != InFormat )
