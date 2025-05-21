@@ -252,6 +252,7 @@ UOdysseyAnimationCellImageRaster::OldSerialize(FArchive& Ar)
             mRasterBlock = MakeShared<FOdysseyRasterBlock>(this);
             Ar << *mRasterBlock;
         }
+        InitRasterBlock(); //PostLoad is not called after OldSerialize, so we need to initialize the rasterblock here
     }
 }
 
