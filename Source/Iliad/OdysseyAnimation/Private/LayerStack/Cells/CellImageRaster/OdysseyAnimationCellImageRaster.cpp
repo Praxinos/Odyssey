@@ -62,21 +62,27 @@ UOdysseyAnimationCellImageRaster::InitRasterBlock() const
         int width = GetAnimation()->GetWidth();
         int height = GetAnimation()->GetHeight();
 
-        ::ULIS::eFormat format = ::ULIS::Format_BGRA8;
-        switch ( GetAnimation()->GetFormat() )
-        {
-            case EOdysseyAnimationFormat::BGRA8: format = ::ULIS::Format_BGRA8; break;
-            case EOdysseyAnimationFormat::RGBAF: format = ::ULIS::Format_RGBAF; break;
-        }
-
-        mRasterBlock = MakeShared<FOdysseyRasterBlock>(const_cast<UOdysseyAnimationCellImageRaster*>(this), width, height, format);
         UTexture2D* texture = GetRenderTexture();
-        if (texture && texture->Source.GetFormat() != TSF_Invalid)
+        if ( texture && texture->Source.GetFormat() != TSF_Invalid )
         {
-            TSharedPtr<::ULIS::FBlock> textureBlock = MakeShareable(NewBlockFromUTextureData(texture, mRasterBlock->GetFormat()));
+            ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
+            mRasterBlock = MakeShared<FOdysseyRasterBlock>(const_cast<UOdysseyAnimationCellImageRaster*>(this), width, height, format);
+
+            TSharedPtr<::ULIS::FBlock> textureBlock = MakeShareable(NewBlockFromUTextureData(texture, format));
             FOdysseyRasterBlockMutator rasterBlockMutator(mRasterBlock, false);
             rasterBlockMutator.Copy(textureBlock, { textureBlock->Rect() });
             rasterBlockMutator.Commit();
+        }
+        else
+        {
+            ::ULIS::eFormat format = ::ULIS::Format_BGRA8;
+            switch ( GetAnimation()->GetFormat() )
+            {
+                case EOdysseyAnimationFormat::BGRA8: format = ::ULIS::Format_BGRA8; break;
+                case EOdysseyAnimationFormat::RGBAF: format = ::ULIS::Format_RGBAF; break;
+            }
+
+            mRasterBlock = MakeShared<FOdysseyRasterBlock>(const_cast<UOdysseyAnimationCellImageRaster*>(this), width, height, format);
         }
     }
 

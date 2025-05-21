@@ -609,7 +609,8 @@ UOdysseyAnimationPlayer::PostLoad()
     if (GetFlags() & RF_ClassDefaultObject)
         return;
 
-    RenderTarget->UpdateResource();
+    RenderTarget->ResizeTarget(Animation->GetWidth(), Animation->GetHeight());
+    RenderTarget->UpdateResourceImmediate();
 
     //will create the texture if needed
     IOdysseyRenderingAbility::OnRenderingChangedDelegate().RemoveAll(this);
