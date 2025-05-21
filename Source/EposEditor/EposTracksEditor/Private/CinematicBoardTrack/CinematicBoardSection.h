@@ -103,6 +103,7 @@ public:
     {
         FQualifiedFrameTime QTime;
         FIntVector2 Size;
+        //TObjectPtr<UTextureRenderTarget2D> RenderTarget;
         TObjectPtr<UTexture2D> Texture;
         FSlateBrush* Brush = nullptr;
     };
@@ -132,6 +133,7 @@ private:
 
     struct FPoolData
     {
+        //UTextureRenderTarget2D* RenderTarget = nullptr;
         UTexture2D* Texture = nullptr;
     };
     typedef TArray<FGuid> FRenderingComposition;
