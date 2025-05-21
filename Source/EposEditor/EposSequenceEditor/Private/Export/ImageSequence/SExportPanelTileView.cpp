@@ -68,28 +68,6 @@ SPanelTileView::Construct( const FArguments& InArgs, const TSharedRef<STableView
         panel_source = FText::Format( LOCTEXT( "panel-item.source.mark", "Mark: {0}" ), FText::FromString( source_mark.mMark.Label ) );
     }
 
-    if( mPanelItem->mPanel.mSourceDrawing.IsSet() )
-    {
-        const FExportPanelSourceDrawing& source_drawing = mPanelItem->mPanel.mSourceDrawing.GetValue();
-
-        if( source_drawing.mDrawings.Num() == 1 )
-        {
-            //const FDrawing& drawing = source_drawing.mDrawings[0].mDrawing;
-            FGuid binding = source_drawing.mDrawings[0].mBindingId;
-
-            //FMovieSceneObjectPathChannel* channel = drawing.mChannel;
-            //int32 index = channel->GetIndex( drawing.mKeyHandle );
-
-            FText track_name = mPanelItem->mPanel.mSequence->GetMovieScene()->GetObjectDisplayName( binding );
-
-            panel_source = FText::Format( LOCTEXT( "panel-item.source.drawing-1", "{0}" ), track_name );
-        }
-        else if( source_drawing.mDrawings.Num() > 1 )
-        {
-            panel_source = LOCTEXT( "panel-item.source.drawing-n", "multiple planes" );
-        }
-    }
-
     if( mPanelItem->mPanel.mSourceAnimationCut.IsSet() )
     {
         const FExportPanelSourceAnimationCut& source_animationcut = mPanelItem->mPanel.mSourceAnimationCut.GetValue();
@@ -265,26 +243,6 @@ SPanelTileView::GetTooltipText() const
 
         FText line = FText::Format( LOCTEXT( "item.source-mark.tooltip", "Mark: {0}" ), FText::FromString( source_mark.mMark.Label ) );
         tooltip_texts.Add( line );
-    }
-
-    if( mPanelItem->mPanel.mSourceDrawing.IsSet() && mPanelItem->mPanel.mSourceDrawing.GetValue().mDrawings.Num() )
-    {
-        FText line = FText::Format( LOCTEXT( "item.source-drawing-list.tooltip", "Drawing appearing in {0}|plural(one=plane,other=planes):" ), mPanelItem->mPanel.mSourceDrawing.GetValue().mDrawings.Num() );
-        tooltip_texts.Add( line );
-
-        const FExportPanelSourceDrawing& source_drawing = mPanelItem->mPanel.mSourceDrawing.GetValue();
-
-        for( auto drawing_and_binding : source_drawing.mDrawings )
-        {
-            //const FDrawing& drawing = drawing_and_binding.mDrawing;
-            FGuid binding = drawing_and_binding.mBindingId;
-
-            //FMovieSceneObjectPathChannel* channel = drawing.mChannel;
-            //int32 index = channel->GetIndex( drawing.mKeyHandle );
-
-            line = FText::Format( LOCTEXT( "item.source-drawing-entry.tooltip", "- {0}" ), mPanelItem->mPanel.mSequence->GetMovieScene()->GetObjectDisplayName( binding ) );
-            tooltip_texts.Add( line );
-        }
     }
 
     if( mPanelItem->mPanel.mSourceAnimationCut.IsSet() && mPanelItem->mPanel.mSourceAnimationCut.GetValue().mAnimationCuts.Num() )

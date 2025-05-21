@@ -32,7 +32,6 @@ private:
 
     TSharedRef<SWidget> MakeCreateCameraMenu();
     TSharedRef<SWidget> MakeTakeMenu();
-    void CreateCameraWithPlane( TSharedRef<FString> iCameraName, TSharedRef<FString> iPlaneName );
     void CreateCameraWithAnimation( TSharedRef<FString> iCameraName, TSharedRef<FString> iAnimationName );
 
 protected:

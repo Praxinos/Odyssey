@@ -27,7 +27,6 @@
 #include "EposSequenceToolbarHelpers.h"
 #include "EposTracksModule.h"
 #include "Misc/EposSequenceFBXInterop.h"
-#include "PlaneActor.h"
 #include "OdysseyAnimationActor.h"
 #include "Settings/EposSequenceEditorSettings.h"
 #include "Shot/ShotSequence.h"
@@ -35,7 +34,6 @@
 #include "Styles/EposTracksEditorStyle.h"
 #include "ToolkitHelpers.h"
 #include "Tools/EposSequenceTools.h"
-#include "Tools/LighttableTools.h"
 #include "Widgets/SInfoBar.h"
 
 #define LOCTEXT_NAMESPACE "BoardSequenceCustomization"
@@ -258,24 +256,6 @@ FBoardSequenceCustomization::BindCommands( TSharedPtr<FUICommandList> ioCommandL
     //---
 
     ioCommandList->MapAction(
-        FEposSequenceEditorCommands::Get().CreatePlaneAtCurrentTime,
-        FExecuteAction::CreateLambda( [this]()
-                                      {
-                                          TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
-                                          if( !sequencer )
-                                              return;
-                                          BoardSequenceTools::CreatePlane( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
-                                      } ),
-        FCanExecuteAction::CreateLambda( [this]()
-                                         {
-                                             TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
-                                             if( !sequencer )
-                                                 return false;
-                                             return BoardSequenceTools::CanCreatePlane( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
-                                         } )
-    );
-
-    ioCommandList->MapAction(
         FEposSequenceEditorCommands::Get().CreateAnimationAtCurrentTime,
         FExecuteAction::CreateLambda( [this]()
                                       {
@@ -291,45 +271,6 @@ FBoardSequenceCustomization::BindCommands( TSharedPtr<FUICommandList> ioCommandL
                                                  return false;
                                              return BoardSequenceTools::CanCreateAnimation( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
                                          } )
-    );
-
-    ioCommandList->MapAction(
-        FEposSequenceEditorCommands::Get().DetachPlaneAtCurrentTime,
-        FExecuteAction::CreateLambda( [this]()
-                                      {
-                                          TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
-                                          if( !sequencer )
-                                              return;
-                                          TArray<FGuid> plane_bindings;
-                                          int32 plane_count = BoardSequenceTools::GetAttachedPlanes( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, nullptr, &plane_bindings );
-                                          if( plane_count != 1 )
-                                              return;
-                                          BoardSequenceTools::DetachPlane( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, plane_bindings[0] );
-                                      } ),
-        FCanExecuteAction::CreateLambda( [this]()
-                                         {
-                                             TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
-                                             if( !sequencer )
-                                                 return false;
-                                             int32 plane_count = BoardSequenceTools::GetAttachedPlanes( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
-                                             if( plane_count > 1 )
-                                             {
-                                                 FNotificationInfo Info( LOCTEXT( "multiple-planes", "There are multiple planes. Select one of them." ) );
-                                                 Info.ExpireDuration = 5.0f;
-                                                 FSlateNotificationManager::Get().AddNotification( Info )->SetCompletionState( SNotificationItem::CS_Fail );
-                                             }
-                                             if( plane_count != 1 )
-                                                 return false;
-                                             return true;
-                                         } ),
-        FIsActionChecked(),
-        FIsActionButtonVisible::CreateLambda( [this]()
-                                              {
-                                                  TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
-                                                  if( !sequencer )
-                                                      return false;
-                                                  return BoardSequenceTools::GetAttachedPlanes( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber ) <= 1;
-                                              } )
     );
 
     ioCommandList->MapAction(
@@ -374,46 +315,6 @@ FBoardSequenceCustomization::BindCommands( TSharedPtr<FUICommandList> ioCommandL
     //---
 
     ioCommandList->MapAction(
-        FEposSequenceEditorCommands::Get().CreateDrawingAtCurrentTime,
-        FExecuteAction::CreateLambda( [this]()
-                                      {
-                                          TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
-                                          if( !sequencer )
-                                              return;
-                                          TArray<FGuid> plane_bindings;
-                                          int32 plane_count = BoardSequenceTools::GetAllPlanes( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, nullptr, &plane_bindings );
-                                          if( plane_count != 1 )
-                                              return;
-                                          BoardSequenceTools::CreateDrawing( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, plane_bindings[0] );
-                                      } ),
-        FCanExecuteAction::CreateLambda( [this]()
-                                         {
-                                             TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
-                                             if( !sequencer )
-                                                 return false;
-                                             TArray<FGuid> plane_bindings;
-                                             int32 plane_count = BoardSequenceTools::GetAllPlanes( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, nullptr, &plane_bindings );
-                                             if( plane_count > 1 )
-                                             {
-                                                 FNotificationInfo Info( LOCTEXT( "multiple-planes", "There are multiple planes. Select one of them." ) );
-                                                 Info.ExpireDuration = 5.0f;
-                                                 FSlateNotificationManager::Get().AddNotification( Info )->SetCompletionState( SNotificationItem::CS_Fail );
-                                             }
-                                             if( plane_count != 1 )
-                                                 return false;
-                                             return BoardSequenceTools::CanCreateDrawing( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, plane_bindings[0] );
-                                         } ),
-        FIsActionChecked(),
-        FIsActionButtonVisible::CreateLambda( [this]()
-                                              {
-                                                  TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
-                                                  if( !sequencer )
-                                                      return false;
-                                                  return BoardSequenceTools::GetAllPlanes( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber ) <= 1;
-                                              } )
-    );
-
-    ioCommandList->MapAction(
         FEposSequenceEditorCommands::Get().GotoPreviousDrawing,
         FExecuteAction::CreateLambda( [this]()
                                       {
@@ -447,17 +348,6 @@ FBoardSequenceCustomization::BindCommands( TSharedPtr<FUICommandList> ioCommandL
                                                  return false;
                                              return BoardSequenceTools::HasNextDrawing( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
                                          } )
-    );
-
-    ioCommandList->MapAction(
-        FEposSequenceEditorCommands::Get().DeactivateAllLighttables,
-        FExecuteAction::CreateLambda( [this]()
-                                      {
-                                          TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
-                                          if( !sequencer )
-                                              return;
-                                          LighttableTools::Deactivate( sequencer.Get() );
-                                      } )
     );
 }
 
@@ -698,14 +588,6 @@ FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBui
 
     ToolbarBuilder.AddSeparator();
 
-    ToolbarBuilder.AddToolBarButton( FEposSequenceEditorCommands::Get().CreatePlaneAtCurrentTime );
-    ToolbarBuilder.AddComboButton(
-        FUIAction(),
-        FOnGetContent::CreateRaw( this, &FBoardSequenceCustomization::MakeTextureMenu ),
-        LOCTEXT( "TextureOptions", "Options" ),
-        LOCTEXT( "TextureOptionsToolTip", "Texture Options" ),
-        TAttribute<FSlateIcon>(),
-        true );
     ToolbarBuilder.AddToolBarButton( FEposSequenceEditorCommands::Get().CreateAnimationAtCurrentTime );
     ToolbarBuilder.AddComboButton(
         FUIAction(),
@@ -714,27 +596,6 @@ FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBui
         LOCTEXT( "AnimationOptionsToolTip", "Animation Options" ),
         TAttribute<FSlateIcon>(),
         true );
-    // The 2 following buttons should be exclusive visible:
-    // - the first button is displayed when there is only 1 plane (or 0) available
-    // - the second button is displayed when there are more than 2 planes available
-    ToolbarBuilder.AddToolBarButton( FEposSequenceEditorCommands::Get().DetachPlaneAtCurrentTime );
-    ToolbarBuilder.AddComboButton(
-        FUIAction(
-            FExecuteAction(),
-            FCanExecuteAction(),
-            FGetActionCheckState(),
-            FIsActionButtonVisible::CreateLambda( [this]()
-                                                  {
-                                                      TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
-                                                      if( !sequencer )
-                                                          return false;
-                                                      return BoardSequenceTools::GetAttachedPlanes( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber ) > 1;
-                                                  } )
-        ),
-        FOnGetContent::CreateRaw( this, &FBoardSequenceCustomization::MakePlaneMenu ),
-        FEposSequenceEditorCommands::Get().DetachPlaneAtCurrentTime->GetLabel(),
-        FEposSequenceEditorCommands::Get().DetachPlaneAtCurrentTime->GetDescription(),
-        FEposSequenceEditorCommands::Get().DetachPlaneAtCurrentTime->GetIcon() );
     // The 2 following buttons should be exclusive visible:
     // - the first button is displayed when there is only 1 animation (or 0) available
     // - the second button is displayed when there are more than 2 animations available
@@ -757,155 +618,12 @@ FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBui
         FEposSequenceEditorCommands::Get().DetachAnimationAtCurrentTime->GetDescription(),
         FEposSequenceEditorCommands::Get().DetachAnimationAtCurrentTime->GetIcon() );
 
-    auto GetLighttableTooltip = [this]() -> FText
-        {
-            TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
-            if( !sequencer )
-                return LOCTEXT( "enable-lighttable-tooltip", "Enable the lighttable" );
-
-            TArray<FGuid> plane_bindings;
-            int32 plane_count = BoardSequenceTools::GetAllPlanes( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, nullptr, &plane_bindings );
-            //check( plane_count == 1 );
-            if( plane_count != 1 )
-                return LOCTEXT( "enable-lighttable-tooltip", "Enable the lighttable" );
-
-            BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, sequencer->GetFocusedMovieSceneSequence(), sequencer->GetFocusedTemplateID(), sequencer->GetLocalTime().Time.FrameNumber );
-            if( !result.mInnerSequence )
-                return LOCTEXT( "enable-lighttable-tooltip", "Enable the lighttable" );
-
-            UMovieSceneSubSection* subsection = sequencer->FindSubSection( result.mInnerSequenceId );
-            if( !subsection )
-                return LOCTEXT( "enable-lighttable-tooltip", "Enable the lighttable" );
-
-            if( LighttableTools::GetState( sequencer.Get(), *subsection, plane_bindings[0] ) != 0 )
-                return LOCTEXT( "disable-lighttable-tooltip", "Disable the lighttable" );
-            else
-                return LOCTEXT( "enable-lighttable-tooltip", "Enable the lighttable" );
-        };
-
-    auto GetLighttableIcon = [this]() -> FSlateIcon
-        {
-            TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
-            if( !sequencer )
-                return FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "LighttableOff" );
-
-            TArray<FGuid> plane_bindings;
-            int32 plane_count = BoardSequenceTools::GetAllPlanes( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, nullptr, &plane_bindings );
-            //check( plane_count == 1 );
-            if( plane_count != 1 )
-                return FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "LighttableOff" );
-
-            BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, sequencer->GetFocusedMovieSceneSequence(), sequencer->GetFocusedTemplateID(), sequencer->GetLocalTime().Time.FrameNumber );
-            if( !result.mInnerSequence )
-                return FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "LighttableOff" );
-
-            UMovieSceneSubSection* subsection = sequencer->FindSubSection( result.mInnerSequenceId );
-            if( !subsection )
-                return FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "LighttableOff" );
-
-            if( LighttableTools::GetState( sequencer.Get(), *subsection, plane_bindings[0] ) != 0 )
-                return FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "LighttableOn" );
-            else
-                return FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "LighttableOff" );
-        };
-
-    // The 2 following buttons should be exclusive visible:
-    // - the first button is displayed when there is only 1 plane (or 0) available
-    // - the second button is displayed when there are more than 2 planes available
-    ToolbarBuilder.AddToolBarButton( FUIAction(
-        FExecuteAction::CreateLambda( [this]()
-                                      {
-                                          TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
-                                          if( !sequencer )
-                                              return;
-
-                                          TArray<FGuid> plane_bindings;
-                                          int32 plane_count = BoardSequenceTools::GetAllPlanes( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, nullptr, &plane_bindings );
-                                          if( plane_count != 1 )
-                                              return;
-
-                                          BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, sequencer->GetFocusedMovieSceneSequence(), sequencer->GetFocusedTemplateID(), sequencer->GetLocalTime().Time.FrameNumber );
-                                          if( !result.mInnerSequence )
-                                              return;
-
-                                          UMovieSceneSubSection* subsection = sequencer->FindSubSection( result.mInnerSequenceId );
-                                          if( !subsection )
-                                              return;
-
-                                          if( LighttableTools::GetState( sequencer.Get(), *subsection, plane_bindings[0] ) != 0 )
-                                              LighttableTools::Deactivate( sequencer.Get(), *subsection, plane_bindings[0] );
-                                          else
-                                              LighttableTools::Activate( sequencer.Get(), *subsection, plane_bindings[0] );
-                                      } ),
-        FCanExecuteAction::CreateLambda( [this]()
-                                         {
-                                             TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
-                                             if( !sequencer )
-                                                 return false;
-
-                                             return BoardSequenceTools::GetAllPlanes( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber ) == 1;
-                                         } ),
-        FIsActionChecked(),
-        FIsActionButtonVisible::CreateLambda( [this]()
-                                              {
-                                                  TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
-                                                  if( !sequencer )
-                                                      return false;
-
-                                                  return BoardSequenceTools::GetAllPlanes( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber ) <= 1;
-                                              } ) ),
-        NAME_None,
-        FText::GetEmpty(),
-        MakeAttributeLambda( GetLighttableTooltip ),
-        MakeAttributeLambda( GetLighttableIcon )
-    );
-    ToolbarBuilder.AddComboButton(
-        FUIAction(
-            FExecuteAction(),
-            FCanExecuteAction(),
-            FGetActionCheckState(),
-            FIsActionButtonVisible::CreateLambda( [this]()
-                                                  {
-                                                      TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
-                                                      if( !sequencer )
-                                                          return false;
-
-                                                      return BoardSequenceTools::GetAllPlanes( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber ) > 1;
-                                                  } )
-        ),
-        FOnGetContent::CreateRaw( this, &FBoardSequenceCustomization::MakeLighttableMenu ),
-        FText::GetEmpty(),
-        LOCTEXT( "LighttableOptionsTooltip", "Activate/Deactivate lighttable on planes" ),
-        FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "LighttableOff" ) );
-
     ToolbarBuilder.AddToolBarButton( FEposSequenceEditorCommands::Get().GotoPreviousCameraPosition );
     ToolbarBuilder.AddToolBarButton( FEposSequenceEditorCommands::Get().GotoNextCameraPosition );
 
     ToolbarBuilder.AddSeparator();
 
     ToolbarBuilder.AddToolBarButton( FEposSequenceEditorCommands::Get().GotoPreviousDrawing );
-    // The 2 following buttons should be exclusive visible:
-    // - the first button is displayed when there is only 1 plane (or 0) available
-    // - the second button is displayed when there are more than 2 planes available
-    ToolbarBuilder.AddToolBarButton( FEposSequenceEditorCommands::Get().CreateDrawingAtCurrentTime );
-    ToolbarBuilder.AddComboButton(
-        FUIAction(
-            FExecuteAction(),
-            FCanExecuteAction(),
-            FGetActionCheckState(),
-            FIsActionButtonVisible::CreateLambda( [this]()
-                                                  {
-                                                      TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
-                                                      if( !sequencer )
-                                                          return false;
-
-                                                      return BoardSequenceTools::GetAllPlanes( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber ) > 1;
-                                                  } )
-        ),
-        FOnGetContent::CreateRaw( this, &FBoardSequenceCustomization::MakeDrawingMenu ),
-        FEposSequenceEditorCommands::Get().CreateDrawingAtCurrentTime->GetLabel(),
-        FEposSequenceEditorCommands::Get().CreateDrawingAtCurrentTime->GetDescription(),
-        FEposSequenceEditorCommands::Get().CreateDrawingAtCurrentTime->GetIcon() );
     ToolbarBuilder.AddToolBarButton( FEposSequenceEditorCommands::Get().GotoNextDrawing );
 
     ToolbarBuilder.AddSeparator();
@@ -937,44 +655,6 @@ FBoardSequenceCustomization::MakeCameraMenu()
     FMenuBuilder MenuBuilder( true, sequencer ? sequencer->GetCommandBindings() : nullptr );
 
     EposSequenceToolbarHelpers::MakeCameraSettingsEntries( MenuBuilder );
-
-    return MenuBuilder.MakeWidget();
-}
-
-TSharedRef<SWidget>
-FBoardSequenceCustomization::MakePlaneMenu()
-{
-    TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
-
-    FMenuBuilder MenuBuilder( true, sequencer ? sequencer->GetCommandBindings() : nullptr );
-
-    TArray<APlaneActor*> planes;
-    TArray<FGuid> plane_bindings;
-    int32 plane_count = BoardSequenceTools::GetAttachedPlanes( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, &planes, &plane_bindings );
-    if( !plane_count )
-        return SNullWidget::NullWidget;
-
-    for( int i = 0; i < plane_count; i++ )
-    {
-        APlaneActor* plane = planes[i];
-        FGuid plane_binding = plane_bindings[i];
-
-        MenuBuilder.AddMenuEntry(
-            FText::FromString( plane->GetActorLabel() ),
-            FText::GetEmpty(),
-            FSlateIcon(),
-            FUIAction(
-                FExecuteAction::CreateLambda( [this, plane_binding]()
-                                              {
-                                                  TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
-                                                  if( !sequencer )
-                                                      return;
-
-                                                  BoardSequenceTools::DetachPlane( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, plane_binding );
-                                              } )
-            )
-        );
-    }
 
     return MenuBuilder.MakeWidget();
 }
@@ -1018,124 +698,6 @@ FBoardSequenceCustomization::MakeAnimationMenu()
 }
 
 TSharedRef<SWidget>
-FBoardSequenceCustomization::MakeLighttableMenu()
-{
-    TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
-
-    FMenuBuilder MenuBuilder( true, sequencer ? sequencer->GetCommandBindings() : nullptr );
-
-    TArray<APlaneActor*> planes;
-    TArray<FGuid> plane_bindings;
-    int32 plane_count = BoardSequenceTools::GetAllPlanes( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, &planes, &plane_bindings );
-    if( !plane_count )
-        return SNullWidget::NullWidget;
-
-    for( int i = 0; i < plane_count; i++ )
-    {
-        APlaneActor* plane = planes[i];
-        FGuid plane_binding = plane_bindings[i];
-
-        BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, sequencer->GetFocusedMovieSceneSequence(), sequencer->GetFocusedTemplateID(), sequencer->GetLocalTime().Time.FrameNumber );
-        if( !result.mInnerSequence )
-            continue;
-
-        UMovieSceneSubSection* subsection = sequencer->FindSubSection( result.mInnerSequenceId );
-        if( !subsection )
-            continue;
-
-        FText tooltip;
-        if( LighttableTools::GetState( sequencer.Get(), *subsection, plane_binding ) != 0 )
-            tooltip = LOCTEXT( "disable-lighttable-tooltip", "Disable the lighttable" );
-        else
-            tooltip = LOCTEXT( "enable-lighttable-tooltip", "Enable the lighttable" );
-
-        FSlateIcon icon;
-        if( LighttableTools::GetState( sequencer.Get(), *subsection, plane_binding ) != 0 )
-            icon = FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "LighttableOn" );
-        else
-            icon = FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "LighttableOff" );
-
-        MenuBuilder.AddMenuEntry(
-            FText::FromString( plane->GetActorLabel() ),
-            tooltip,
-            icon,
-            FUIAction(
-                FExecuteAction::CreateLambda( [this, plane_binding]()
-                                              {
-                                                  TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
-                                                  if( !sequencer )
-                                                      return;
-
-                                                  BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, sequencer->GetFocusedMovieSceneSequence(), sequencer->GetFocusedTemplateID(), sequencer->GetLocalTime().Time.FrameNumber );
-                                                  if( !result.mInnerSequence )
-                                                      return;
-
-                                                  UMovieSceneSubSection* subsection = sequencer->FindSubSection( result.mInnerSequenceId );
-                                                  if( !subsection )
-                                                      return;
-
-                                                  if( LighttableTools::GetState( sequencer.Get(), *subsection, plane_binding ) != 0 )
-                                                      LighttableTools::Deactivate( sequencer.Get(), *subsection, plane_binding );
-                                                  else
-                                                      LighttableTools::Activate( sequencer.Get(), *subsection, plane_binding );
-                                              } )
-            )
-        );
-    }
-
-    return MenuBuilder.MakeWidget();
-}
-
-TSharedRef<SWidget>
-FBoardSequenceCustomization::MakeDrawingMenu()
-{
-    TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
-
-    FMenuBuilder MenuBuilder( true, sequencer ? sequencer->GetCommandBindings() : nullptr );
-
-    TArray<APlaneActor*> planes;
-    TArray<FGuid> plane_bindings;
-    int32 plane_count = BoardSequenceTools::GetAllPlanes( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber , &planes, &plane_bindings );
-    if( !plane_count )
-        return SNullWidget::NullWidget;
-
-    for( int i = 0; i < plane_count; i++ )
-    {
-        APlaneActor* plane = planes[i];
-        FGuid plane_binding = plane_bindings[i];
-
-        MenuBuilder.AddMenuEntry(
-            FText::FromString( plane->GetActorLabel() ),
-            FText::GetEmpty(),
-            //LOCTEXT( "LockPlayback_Description", "When enabled, causes all runtime evaluation and the engine FPS to be locked to the current display frame rate" ),
-            FSlateIcon(),
-            FUIAction(
-                FExecuteAction::CreateLambda( [this, plane_binding]()
-                                              {
-                                                  TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
-                                                  if( !sequencer )
-                                                      return;
-
-                                                  BoardSequenceTools::CreateDrawing( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, plane_binding );
-                                              } ),
-                FCanExecuteAction::CreateLambda( [this, plane_binding]()
-                                                 {
-                                                     TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
-                                                     if( !sequencer )
-                                                         return false;
-
-                                                     return BoardSequenceTools::CanCreateDrawing( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, plane_binding );
-                                                 } )
-            )/*,
-            NAME_None,
-            EUserInterfaceActionType::ToggleButton*/ //TODO: I don't know how, but there should be something to multi-select planes and create plane on them
-        );
-    }
-
-    return MenuBuilder.MakeWidget();
-}
-
-TSharedRef<SWidget>
 FBoardSequenceCustomization::MakeSettingsMenu()
 {
     TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
@@ -1143,18 +705,6 @@ FBoardSequenceCustomization::MakeSettingsMenu()
     FMenuBuilder MenuBuilder( true, sequencer ? sequencer->GetCommandBindings() : nullptr );
 
     EposSequenceToolbarHelpers::MakeSettingsEntries( MenuBuilder, sequencer.Get() );
-
-    return MenuBuilder.MakeWidget();
-}
-
-TSharedRef<SWidget>
-FBoardSequenceCustomization::MakeTextureMenu()
-{
-    TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
-
-    FMenuBuilder MenuBuilder( true, sequencer ? sequencer->GetCommandBindings() : nullptr );
-
-    EposSequenceToolbarHelpers::MakeTextureSettingsEntries( MenuBuilder );
 
     return MenuBuilder.MakeWidget();
 }

@@ -92,7 +92,7 @@ const FMovieSceneBindingReferences* UBoardSequence::GetBindingReferences() const
     // as CreateGenericBinding() will be called instead of CreateImplementationDefinedBinding()
     //
     // and when CreateGenericBinding() is used, FMovieSceneBindingReferences::AddBinding() is called directly (without BindPossessableObject())
-    // so the check of possible possessables object (Camera/Plane/...) must be done there
+    // so the check of possible possessables object (Camera/Animation/...) must be done there
     // (No, because FMovieSceneBindingReferences::AddBinding() is not virtual...)
     //
     // (If GetBindingReferences() is not used (aka return nullptr), LocateBoundObjects() is required)

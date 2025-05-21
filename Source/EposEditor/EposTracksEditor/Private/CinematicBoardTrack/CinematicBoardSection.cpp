@@ -557,9 +557,6 @@ void
 FCinematicBoardSection::RebuildChannelProxies()
 {
     BuildCameraTransformChannelProxy();
-    BuildPlanesTransformChannelProxy();
-    BuildPlanesMaterialChannelProxy();
-    BuildPlanesOpacityChannelProxy();
     BuildAnimationsTransformChannelProxy();
     BuildAnimationsTimelineChannelProxy();
     BuildAnimationsOpacityChannelProxy();
@@ -569,9 +566,6 @@ void
 FCinematicBoardSection::RebuildMetaChannels()
 {
     ReBuildCameraTransformMetaChannel();
-    ReBuildPlanesTransformMetaChannel();
-    ReBuildPlanesMaterialMetaChannel();
-    ReBuildPlanesOpacityMetaChannel();
     ReBuildAnimationsTransformMetaChannel();
     ReBuildAnimationsTimelineMetaChannel();
     ReBuildAnimationsOpacityMetaChannel();
@@ -612,162 +606,6 @@ TSharedPtr<FMetaChannel>
 FCinematicBoardSection::GetCameraTransformMetaChannel() const
 {
     return mCameraTransformMetaChannel;
-}
-
-//-
-
-void
-FCinematicBoardSection::BuildPlanesTransformChannelProxy()
-{
-    mPlanesTransformChannelProxies = BoardSequenceHelpers::BuildPlanesTransformChannelProxy( *GetSequencer(), GetSubSectionObject(), GetSequencer()->GetFocusedTemplateID() );
-
-    ReBuildPlanesTransformMetaChannel();
-}
-
-FChannelProxyBySectionMap
-FCinematicBoardSection::GetPlaneTransformChannelProxy( FMovieScenePossessable iPossessable ) const
-{
-    if( !mPlanesTransformChannelProxies.Contains( iPossessable.GetGuid() ) )
-        return FChannelProxyBySectionMap();
-
-    return mPlanesTransformChannelProxies[iPossessable.GetGuid()];
-}
-
-void
-FCinematicBoardSection::ReBuildPlanesTransformMetaChannel()
-{
-    FTimeToPixel converter( ConstructConverterForViewRange() );
-
-    const FFrameTime HalfKeySizeFrames = converter.PixelDeltaToFrame( SequencerSectionConstants::KeySize.X * .5f );
-    const FMovieSceneSequenceTransform OuterToInnerTransform = GetSubSectionObject().OuterToInnerTransform();
-    FFrameTime clicked_frame = 0; // As if we are on frame 0
-    TRange<FFrameNumber> inner_range_tolerance( ( ( clicked_frame - HalfKeySizeFrames ) * OuterToInnerTransform ).FloorToFrame(), ( ( clicked_frame + HalfKeySizeFrames ) * OuterToInnerTransform ).CeilToFrame() );
-    FFrameNumber inner_tolerance = inner_range_tolerance.Size<FFrameNumber>() / 2;
-
-    mPlanesTransformMetaChannel.Empty();
-    for( const auto& pair : mPlanesTransformChannelProxies )
-    {
-        FGuid guid = pair.Key;
-        FChannelProxyBySectionMap map = pair.Value;
-
-        TSharedPtr<FMetaChannel> meta_channel = MakeShared<FMetaChannel>( inner_tolerance );
-        meta_channel->Build( map );
-
-        mPlanesTransformMetaChannel.Add( guid, meta_channel );
-    }
-}
-
-TSharedPtr<FMetaChannel>
-FCinematicBoardSection::GetPlaneTransformMetaChannel( FMovieScenePossessable iPossessable ) const
-{
-    if( !mPlanesTransformMetaChannel.Contains( iPossessable.GetGuid() ) )
-        return nullptr;
-
-    return mPlanesTransformMetaChannel[iPossessable.GetGuid()];
-}
-
-//-
-
-void
-FCinematicBoardSection::BuildPlanesMaterialChannelProxy()
-{
-    mPlanesMaterialChannelProxies = BoardSequenceHelpers::BuildPlanesMaterialChannelProxy( *GetSequencer(), GetSubSectionObject(), GetSequencer()->GetFocusedTemplateID() );
-
-    ReBuildPlanesMaterialMetaChannel();
-}
-
-FChannelProxyBySectionMap
-FCinematicBoardSection::GetPlaneMaterialChannelProxy( FMovieScenePossessable iPossessable ) const
-{
-    if( !mPlanesMaterialChannelProxies.Contains( iPossessable.GetGuid() ) )
-        return FChannelProxyBySectionMap();
-
-    return mPlanesMaterialChannelProxies[iPossessable.GetGuid()];
-}
-
-void
-FCinematicBoardSection::ReBuildPlanesMaterialMetaChannel()
-{
-    FTimeToPixel converter( ConstructConverterForViewRange() );
-
-    const FFrameTime HalfKeySizeFrames = converter.PixelDeltaToFrame( SequencerSectionConstants::KeySize.X * .5f );
-    const FMovieSceneSequenceTransform OuterToInnerTransform = GetSubSectionObject().OuterToInnerTransform();
-    FFrameTime clicked_frame = 0; // As if we are on frame 0
-    TRange<FFrameNumber> inner_range_tolerance( ( ( clicked_frame - HalfKeySizeFrames ) * OuterToInnerTransform ).FloorToFrame(), ( ( clicked_frame + HalfKeySizeFrames ) * OuterToInnerTransform ).CeilToFrame() );
-    FFrameNumber inner_tolerance = inner_range_tolerance.Size<FFrameNumber>() / 2;
-
-    mPlanesMaterialMetaChannel.Empty();
-    for( const auto& pair : mPlanesMaterialChannelProxies )
-    {
-        FGuid guid = pair.Key;
-        FChannelProxyBySectionMap map = pair.Value;
-
-        TSharedPtr<FMetaChannel> meta_channel = MakeShared<FMetaChannel>( inner_tolerance );
-        meta_channel->Build( map );
-
-        mPlanesMaterialMetaChannel.Add( guid, meta_channel );
-    }
-}
-
-TSharedPtr<FMetaChannel>
-FCinematicBoardSection::GetPlaneMaterialMetaChannel( FMovieScenePossessable iPossessable ) const
-{
-    if( !mPlanesMaterialMetaChannel.Contains( iPossessable.GetGuid() ) )
-        return nullptr;
-
-    return mPlanesMaterialMetaChannel[iPossessable.GetGuid()];
-}
-
-//-
-
-void
-FCinematicBoardSection::BuildPlanesOpacityChannelProxy()
-{
-    mPlanesOpacityChannelProxies = BoardSequenceHelpers::BuildPlanesOpacityChannelProxy( *GetSequencer(), GetSubSectionObject(), GetSequencer()->GetFocusedTemplateID() );
-
-    ReBuildPlanesOpacityMetaChannel();
-}
-
-FChannelProxyBySectionMap
-FCinematicBoardSection::GetPlaneOpacityChannelProxy( FMovieScenePossessable iPossessable ) const
-{
-    if( !mPlanesOpacityChannelProxies.Contains( iPossessable.GetGuid() ) )
-        return FChannelProxyBySectionMap();
-
-    return mPlanesOpacityChannelProxies[iPossessable.GetGuid()];
-}
-
-void
-FCinematicBoardSection::ReBuildPlanesOpacityMetaChannel()
-{
-    FTimeToPixel converter( ConstructConverterForViewRange() );
-
-    const FFrameTime HalfKeySizeFrames = converter.PixelDeltaToFrame( SequencerSectionConstants::KeySize.X * .5f );
-    const FMovieSceneSequenceTransform OuterToInnerTransform = GetSubSectionObject().OuterToInnerTransform();
-    FFrameTime clicked_frame = 0; // As if we are on frame 0
-    TRange<FFrameNumber> inner_range_tolerance( ( ( clicked_frame - HalfKeySizeFrames ) * OuterToInnerTransform ).FloorToFrame(), ( ( clicked_frame + HalfKeySizeFrames ) * OuterToInnerTransform ).CeilToFrame() );
-    FFrameNumber inner_tolerance = inner_range_tolerance.Size<FFrameNumber>() / 2;
-
-    mPlanesOpacityMetaChannel.Empty();
-    for( const auto& pair : mPlanesOpacityChannelProxies )
-    {
-        FGuid guid = pair.Key;
-        FChannelProxyBySectionMap map = pair.Value;
-
-        TSharedPtr<FMetaChannel> meta_channel = MakeShared<FMetaChannel>( inner_tolerance );
-        meta_channel->Build( map );
-
-        mPlanesOpacityMetaChannel.Add( guid, meta_channel );
-    }
-}
-
-TSharedPtr<FMetaChannel>
-FCinematicBoardSection::GetPlaneOpacityMetaChannel( FMovieScenePossessable iPossessable ) const
-{
-    if( !mPlanesOpacityMetaChannel.Contains( iPossessable.GetGuid() ) )
-        return nullptr;
-
-    return mPlanesOpacityMetaChannel[iPossessable.GetGuid()];
 }
 
 //-
@@ -1602,14 +1440,14 @@ FCinematicBoardSection::BuildSectionContextMenu( FMenuBuilder& ioMenuBuilder, co
                 FNewMenuDelegate::CreateSP( this, &FCinematicBoardSection::AddTakesMenu ),
                 FUIAction(
                     FExecuteAction(),
-                    FCanExecuteAction::CreateLambda( [this, &sectionObject]() { return !BoardSequenceTools::IsDrawingInEditionMode( GetSequencer().Get(), sectionObject ); } )
+                    FCanExecuteAction::CreateLambda( [this, &sectionObject]() { return !BoardSequenceTools::IsAnimationInEditionMode( GetSequencer().Get(), sectionObject ); } )
                 ),
                 NAME_None,
                 EUserInterfaceActionType::Button );
 
             FText take_tooltip = FText::Format( LOCTEXT( "NewTakeTooltip", "Create a new take for {0}" ), FText::FromString( sectionObject.GetBoardDisplayName() ) );
-            if( BoardSequenceTools::IsDrawingInEditionMode( GetSequencer().Get(), sectionObject ) )
-                take_tooltip = FText::Format( LOCTEXT( "NewTakeWithWarningTooltip", "Create a new take for {0}\n\nDrawing(s) must not be in edition mode" ), FText::FromString( sectionObject.GetBoardDisplayName() ) );
+            if( BoardSequenceTools::IsAnimationInEditionMode( GetSequencer().Get(), sectionObject ) )
+                take_tooltip = FText::Format( LOCTEXT( "NewTakeWithWarningTooltip", "Create a new take for {0}\n\nAnimation(s) must not be in edition mode" ), FText::FromString( sectionObject.GetBoardDisplayName() ) );
 
             ioMenuBuilder.AddMenuEntry(
                 LOCTEXT( "NewTake", "New Take" ),
@@ -1617,7 +1455,7 @@ FCinematicBoardSection::BuildSectionContextMenu( FMenuBuilder& ioMenuBuilder, co
                 FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "Take" ),
                 FUIAction(
                     FExecuteAction::CreateLambda( [this, &sectionObject]() { BoardSequenceTools::CreateTake( GetSequencer().Get(), sectionObject ); } ),
-                    FCanExecuteAction::CreateLambda( [this, &sectionObject]() { return !BoardSequenceTools::IsDrawingInEditionMode( GetSequencer().Get(), sectionObject ); } )
+                    FCanExecuteAction::CreateLambda( [this, &sectionObject]() { return !BoardSequenceTools::IsAnimationInEditionMode( GetSequencer().Get(), sectionObject ); } )
                 )
             );
         }
@@ -1728,7 +1566,7 @@ FCinematicBoardSection::AddTakesMenu( FMenuBuilder& MenuBuilder )
             take_sequence->GetPathName() == sectionObject.GetSequence()->GetPathName() ? FSlateIcon( FAppStyle::Get().GetStyleSetName(), "Sequencer.Star" ) : FSlateIcon( FAppStyle::Get().GetStyleSetName(), "Sequencer.Empty" ),
             FUIAction(
                 FExecuteAction::CreateLambda( [this, &sectionObject, take]() { BoardSequenceTools::SwitchTake( GetSequencer().Get(), sectionObject, sectionObject.FindTake( take ) ); } ),
-                FCanExecuteAction::CreateLambda( [this, &sectionObject]() { return !BoardSequenceTools::IsDrawingInEditionMode( GetSequencer().Get(), sectionObject ); } )
+                FCanExecuteAction::CreateLambda( [this, &sectionObject]() { return !BoardSequenceTools::IsAnimationInEditionMode( GetSequencer().Get(), sectionObject ); } )
             )
         );
     }

@@ -132,7 +132,6 @@ FImportImageSequenceConverter::CreateShotsRecursive( const TArray<FImportImageSe
         FImportImageSequenceShot shot = iShots[i];
         UMovieSceneSubSection* subsection = CastChecked<UMovieSceneSubSection>( sections[i] );
 
-        //CreateDrawings( shot.Panels, subsection ); //TODO: how to select between them ?
         CreateAnimation( shot.Panels, subsection );
     }
 }
@@ -158,85 +157,6 @@ FImportImageSequenceConverter::CreateShot( const FImportImageSequenceShot& iShot
 
     CinematicBoardTrackTools::InsertShot( sequencer, end_frame, duration_in_tick );
     sequencer->ForceEvaluate();
-}
-
-void
-FImportImageSequenceConverter::CreateDrawings( const TArray<FImportImageSequencePanel>& iPanels, UMovieSceneSubSection* iSubSection )
-{
-    ISequencer* sequencer = mSequencer.Pin().Get();
-
-    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, *iSubSection, sequencer->GetFocusedTemplateID() );
-    check( result.mInnerSequence )
-
-    FString path;
-    FString name;
-    NamingConvention::GenerateTextureAssetPathName( *sequencer, *CastChecked<UEposMovieSceneSequence>( result.mInnerSequence ), result.mInnerSequenceId, nullptr, path, name );
-    FString destination_path = path;
-
-    check( iPanels.Num() );
-
-    FAssetToolsModule& AssetToolsModule = FModuleManager::Get().LoadModuleChecked<FAssetToolsModule>( "AssetTools" );
-
-    //TArray<FString> pathfiles { panel.Pathfile.FilePath };
-    //TArray<TPair<FString, FString>> FilesAndDestinations;
-    //AssetToolsModule.Get().ExpandDirectories( pathfiles, destination_path, FilesAndDestinations );
-    //AssetToolsModule.Get().ImportAssets( pathfiles, destination_path, nullptr, true, &FilesAndDestinations, false );
-
-    {
-        TArray<FString> pathfiles { iPanels[0].Pathfile.FilePath };
-        TArray<UObject*> assets = AssetToolsModule.Get().ImportAssets( pathfiles, destination_path, UTextureFactory::StaticClass()->GetDefaultObject<UFactory>() ); // Or UTexture2DFactoryNew* Texture2DFactory = NewObject<UTexture2DFactoryNew>(); ?
-        UTexture2D* texture = nullptr;
-        if( assets.Num() )
-        {
-            texture = Cast<UTexture2D>( assets[0] );
-            check( texture );
-        }
-
-        FCameraArgs camera_args;
-        FPlaneArgs plane_args;
-        plane_args.mMargin = 0.f;
-        plane_args.mTexture = texture;
-        BoardSequenceTools::CreateCameraWithPlane( sequencer, iSubSection->GetTrueRange().GetLowerBoundValue(), camera_args, plane_args );
-    }
-
-    //sequencer->ForceEvaluate();
-
-    TArray<FGuid> plane_bindings;
-    ShotSequenceHelpers::GetAllPlanes( *sequencer, result.mInnerSequence, result.mInnerSequenceId, EGetPlane::kAll, nullptr, &plane_bindings );
-    check( plane_bindings.Num() );
-
-    FGuid plane_binding = plane_bindings[0];
-
-    //---
-
-    int32 duration_in_tick = ConvertFromDisplayRateToTickResolution( iPanels[0].Duration );
-    FFrameNumber next_frame_number = iSubSection->GetTrueRange().GetLowerBoundValue() + duration_in_tick;
-
-    // Start at 1 because the first texture is already used when creating the camera
-    for( int i = 1; i < iPanels.Num(); i++ )
-    {
-        FImportImageSequencePanel panel = iPanels[i];
-
-        TArray<FString> pathfiles { panel.Pathfile.FilePath };
-        TArray<UObject*> assets = AssetToolsModule.Get().ImportAssets( pathfiles, destination_path, UTextureFactory::StaticClass()->GetDefaultObject<UFactory>() ); // Or UTexture2DFactoryNew* Texture2DFactory = NewObject<UTexture2DFactoryNew>(); ?
-        UTexture2D* texture = nullptr;
-        if( assets.Num() )
-        {
-            texture = Cast<UTexture2D>( assets[0] );
-            check( texture );
-        }
-
-        //---
-
-        FDrawingArgs drawing_args;
-        drawing_args.mTexture = texture;
-        BoardSequenceTools::CreateDrawing( sequencer, next_frame_number, plane_binding, drawing_args );
-
-        //---
-
-        duration_in_tick = ConvertFromDisplayRateToTickResolution( panel.Duration );
-        next_frame_number += duration_in_tick;
-    }
 }
 
 void

@@ -88,8 +88,8 @@ ShotSequenceTools::SpawnAnimation( UWorld* iWorld, ACineCameraActor* iCamera, fl
         material->SetScalarParameterValueEditorOnly( FMaterialParameterInfo( "Overlay" ), 1 );
 #endif
 
-    // Using this will delete the component once the actor is renamed at the end of SpawnAndBindPlane() -_-
-    //UActorComponent* actor_component = plane->AddComponentByClass( UScalingComponent::StaticClass(), false, FTransform::Identity, false );
+    // Using this will delete the component once the actor is renamed at the end of SpawnAndBindAnimation() -_-
+    //UActorComponent* actor_component = animation->AddComponentByClass( UScalingComponent::StaticClass(), false, FTransform::Identity, false );
     // So create and attach/register it to the actor in 2 steps
     UScalingComponent* actor_component = NewObject<UScalingComponent>( animation, UScalingComponent::StaticClass() );
     animation->FinishAddComponent( actor_component, false, FTransform::Identity );
@@ -483,7 +483,7 @@ ShotSequenceTools::DetachAnimation( ISequencer& iSequencer, UMovieSceneSequence*
     //---
 
     GEditor->SelectNone( true, true );
-    // It's certainly safe to not check if CanDetachAnimation() is ok (like CreateOpacity()/CreateDrawing)
+    // It's certainly safe to not check if CanDetachAnimation() is ok (like CreateOpacity()/CreateAnimation)
     // as DetachSelectedActors() does the check
     for( auto animation : animations )
         GEditor->SelectActor( animation, true /* bInSelected */, true /* bNotify */, true /* bSelectEvenIfHidden */ );
@@ -659,6 +659,50 @@ ShotSequenceTools::DeleteAnimation( ISequencer& iSequencer, UMovieSceneSequence*
     //---
 
     iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemRemoved );
+}
+
+//---
+
+//static
+bool
+BoardSequenceTools::IsAnimationInEditionMode( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection )
+{
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSubSection, iSequencer->GetFocusedTemplateID() );
+    if( !result.mInnerSequence )
+        return false;
+
+    if( result.mInnerSequence->IsA<UBoardSequence>() )
+        return false;
+
+    //---
+
+    bool is_edited = false;
+
+    TArray<FGuid> animation_bindings;
+    ShotSequenceHelpers::GetAllAnimations( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, EGetAnimation::kAll, nullptr, &animation_bindings );
+
+    for( FGuid animation_binding : animation_bindings )
+    {
+        ShotSequenceHelpers::FFindOrCreateTimelineResult result_shot = ShotSequenceHelpers::FindTimelineTrackAndSections( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, animation_binding );
+        for( TWeakObjectPtr<UOdysseyAnimationTimelineSection> section : result_shot.mSections )
+        {
+            is_edited |= ShotSequenceTools::IsAnimationInEditionMode( iSequencer, result.mInnerSequence, result.mInnerSequenceId, section->GetAnimation() );
+        }
+    }
+
+    return is_edited;
+}
+
+//static
+bool
+ShotSequenceTools::IsAnimationInEditionMode( ISequencer* iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, UOdysseyAnimation* iAnimation )
+{
+    UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
+
+    TArray<IAssetEditorInstance*> opened_editors = AssetEditorSubsystem->FindEditorsForAsset( iAnimation );
+    //FName name = opened_editors.Num() ? opened_editors[0]->GetEditorName() : NAME_None;
+
+    return !!opened_editors.Num();
 }
 
 //---

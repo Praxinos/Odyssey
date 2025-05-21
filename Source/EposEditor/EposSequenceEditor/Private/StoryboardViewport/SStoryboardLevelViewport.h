@@ -104,8 +104,6 @@ struct FUIData
     /** The text that represents the master end frame */
     FText MasterEndText;
 
-    /** The text that represents the selected planes */
-    TArray<FText> SelectedPlanes;
     /** The text that represents the selected animations */
     TArray<FText> SelectedAnimations;
 

@@ -77,7 +77,7 @@ ShotSequenceTools::CreateNote( ISequencer& iSequencer, UMovieSceneSequence* iSeq
     // All other not-immediate notifications won't work, as they will set flags but once they will be process,
     // it will be after this function, and so after the switch_to have set the 'real' current sequence
     //
-    //TODO: check why it's not the case for the planes ...
+    //TODO: check why it's not the case for the animations ...
     iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::RefreshAllImmediately );
 }
 

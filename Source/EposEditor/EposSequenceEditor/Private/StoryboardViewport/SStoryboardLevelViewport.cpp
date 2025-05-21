@@ -46,6 +46,7 @@
 #include "ToolMenu.h"
 #include "ToolMenus.h"
 #include "ViewportToolbar/UnrealEdViewportToolbar.h"
+#include "Engine/StaticMeshActor.h"
 
 
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
@@ -54,7 +55,6 @@
 #include "EposSequenceEditorToolkit.h"
 #include "EposSequenceHelpers.h"
 #include "NoteTrack/MovieSceneNoteSection.h"
-#include "PlaneActor.h"
 #include "OdysseyAnimationActor.h"
 #include "ScalingComponent.h"
 #include "StoryNote.h"
@@ -1115,17 +1115,6 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                                 [
                                     SNew(STextBlock)
                                     .ColorAndOpacity(Gray)
-                                    .Text_Lambda([this] { return FText::Join( FText::FromString( TEXT(", ") ), UIData.SelectedPlanes ); })
-                                    .ToolTipText(LOCTEXT("SelectedPlanes", "The name of all selected planes."))
-                                ]
-
-                                + SHorizontalBox::Slot()
-                                .HAlign(HAlign_Right)
-                                .AutoWidth()
-                                .Padding(FMargin(5.f, 0.f, 0.f, 0.f))
-                                [
-                                    SNew(STextBlock)
-                                    .ColorAndOpacity(Gray)
                                     .Text_Lambda([this] { return FText::Join( FText::FromString( TEXT(", ") ), UIData.SelectedAnimations ); })
                                     .ToolTipText(LOCTEXT("SelectedAnimations", "The name of all selected animations."))
                                 ]
@@ -2069,12 +2058,10 @@ SStoryboardLevelViewport::OnPickEditorModeChanged( const FEditorModeID& iMode, b
 
     if( bIsEntering )
     {
-        HideAllActors<APlaneActor>();
         HideAllActors<AOdysseyAnimationActor>();
     }
     else
     {
-        ShowAllActors<APlaneActor>();
         ShowAllActors<AOdysseyAnimationActor>();
         mStartStoryboardActorPicking = false;
     }
@@ -2087,13 +2074,13 @@ SStoryboardLevelViewport::HideAllActors()
     UWorld* world = ViewportClient->GetWorld();
     for( TActorIterator<T> it( world ); it; ++it )
     {
-        T* plane_actor = *it;
+        T* actor = *it;
 
-        if( plane_actor->IsHiddenEd() )
+        if( actor->IsHiddenEd() )
             continue;
 
-        plane_actor->SetIsTemporarilyHiddenInEditor( true );
-        mActorsTemporaryHidden.Add( plane_actor );
+        actor->SetIsTemporarilyHiddenInEditor( true );
+        mActorsTemporaryHidden.Add( actor );
     }
 }
 
@@ -2120,7 +2107,7 @@ SStoryboardLevelViewport::OnGetAllowedClassesForActorDistance( TArray<const UCla
 bool
 SStoryboardLevelViewport::OnShouldFilterActorForActorDistance( const AActor* const iActor )
 {
-    ////if( iActor->IsA<APlaneActor>() )
+    ////if( iActor->IsA<A****Actor>() )
     //    return false;
 
     return true;
@@ -2267,7 +2254,7 @@ SStoryboardLevelViewport::OnActorPickerListMenuContent()
 
             auto is_invalid_class = []( const AActor* iActor )
                 {
-                    return iActor->IsA<APlaneActor>()
+                    return iActor->IsA<AOdysseyAnimationActor>()
                         || iActor->IsA<ACameraActor>();
                 };
 
@@ -2291,10 +2278,10 @@ SStoryboardLevelViewport::OnActorPickerListMenuContent()
                 && !is_invalid_property( iActor )
                 && is_in_frustum( iActor );
 
-            // if( !mPlaneToMove.IsValid() )
+            // if( !mActorToMove.IsValid() )
             //     return;
             //
-            // ACineCameraActor* camera = Cast<ACineCameraActor>( mPlaneToMove->GetAttachParentActor() );
+            // ACineCameraActor* camera = Cast<ACineCameraActor>( mActorToMove->GetAttachParentActor() );
             // if( !camera )
             //     return;
             //
@@ -2724,19 +2711,13 @@ void SStoryboardLevelViewport::Tick(const FGeometry& AllottedGeometry, const dou
 
     //-
 
-    UIData.SelectedPlanes.Empty();
     UIData.SelectedAnimations.Empty();
 
     USelection* SelectedActors = GEditor->GetSelectedActors();
-    TArray<APlaneActor*> selected_planes;
     TArray<AOdysseyAnimationActor*> selected_animations;
     TArray<ACineCameraActor*> selected_cameras;
-    SelectedActors->GetSelectedObjects( selected_planes );
     SelectedActors->GetSelectedObjects( selected_animations );
     SelectedActors->GetSelectedObjects( selected_cameras );
-
-    for( auto selected_plane : selected_planes )
-        UIData.SelectedPlanes.Add( FText::FromString( selected_plane->GetActorNameOrLabel() ) );
 
     for( auto selected_animation : selected_animations )
         UIData.SelectedAnimations.Add( FText::FromString( selected_animation->GetActorNameOrLabel() ) );
@@ -2744,8 +2725,6 @@ void SStoryboardLevelViewport::Tick(const FGeometry& AllottedGeometry, const dou
     //-
 
     mActorToMove = nullptr;
-    if( selected_planes.Num() == 1 )
-        mActorToMove = selected_planes[0];
     if( selected_animations.Num() == 1 )
         mActorToMove = selected_animations[0];
 

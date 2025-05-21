@@ -31,17 +31,6 @@ struct FExportPanelSourceAnimationCut
     TArray<FAnimationCutAndBindingId>  mAnimationCuts;
 };
 
-struct FExportPanelSourceDrawing
-{
-    struct FDrawingAndBindingId
-    {
-        FDrawing    mDrawing;
-        FGuid       mBindingId;
-    };
-
-    TArray<FDrawingAndBindingId>    mDrawings;
-};
-
 struct FExportPanel
 {
     FFrameNumber GlobalFrame;
@@ -51,7 +40,6 @@ struct FExportPanel
 
     TOptional<FExportPanelSourceMark>           mSourceMark;
     TOptional<FExportPanelSourceAnimationCut>   mSourceAnimationCut;
-    TOptional<FExportPanelSourceDrawing>        mSourceDrawing;
 };
 
 //---

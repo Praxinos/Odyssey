@@ -105,21 +105,6 @@ private:
     FLinearColor mBackgroundColor { FLinearColor::Transparent };
 
 public:
-    /** @return The visibility of a plane's keys area */
-    bool IsPlaneKeysAreaVisible( FGuid iPlaneBinding ) const;
-
-    /** Set the visibility of a plane's keys area */
-    void SetPlaneKeysAreaVisibility( FGuid iPlaneBinding, bool iVisible );
-
-    /** Toggle the visibility of a plane's keys area */
-    void TogglePlaneKeysAreaVisibility( FGuid iPlaneBinding );
-
-private:
-    /** The visibility of keys area for each plane */
-    UPROPERTY()
-    TMap<FGuid, bool> mPlaneKeysAreaVisibility; //TODO: find a place to sometimes clean this map, a binding can be no more referenced with: create a plane -> collapse/uncollapse/... -> delete the plane
-
-public:
     /** @return The visibility of a animation's keys area */
     bool IsAnimationKeysAreaVisible( FGuid iAnimationBinding ) const;
 

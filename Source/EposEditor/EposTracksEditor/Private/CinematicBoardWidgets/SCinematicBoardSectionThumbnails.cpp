@@ -52,8 +52,8 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
     auto GetSwitchTakeTooltip = [this]() -> FText
     {
         FText take_tooltip = LOCTEXT( "switch-take-tooltip", "Switch take" );
-        if( BoardSequenceTools::IsDrawingInEditionMode( mBoardSection.Pin()->GetSequencer().Get(), mBoardSection.Pin()->GetSubSectionObject() ) )
-            take_tooltip = LOCTEXT( "switch-take-with-warning-tooltip", "Switch take\n\nDrawing(s) must not be in edition mode" );
+        if( BoardSequenceTools::IsAnimationInEditionMode( mBoardSection.Pin()->GetSequencer().Get(), mBoardSection.Pin()->GetSubSectionObject() ) )
+            take_tooltip = LOCTEXT( "switch-take-with-warning-tooltip", "Switch take\n\nAnimation(s) must not be in edition mode" );
 
         return take_tooltip;
     };
@@ -61,7 +61,7 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
     TopToolbarBuilder.AddComboButton(
         FUIAction(
             FExecuteAction(),
-            FCanExecuteAction::CreateLambda( [this]() { return !BoardSequenceTools::IsDrawingInEditionMode( mBoardSection.Pin()->GetSequencer().Get(), mBoardSection.Pin()->GetSubSectionObject() ); } )
+            FCanExecuteAction::CreateLambda( [this]() { return !BoardSequenceTools::IsAnimationInEditionMode( mBoardSection.Pin()->GetSequencer().Get(), mBoardSection.Pin()->GetSubSectionObject() ); } )
         ),
         FOnGetContent::CreateRaw( this, &SCinematicBoardSectionThumbnails::MakeTakeMenu ),
         FText::GetEmpty(),
@@ -192,21 +192,6 @@ SCinematicBoardSectionThumbnails::Construct( const FArguments& InArgs, TSharedRe
 }
 
 void
-SCinematicBoardSectionThumbnails::CreateCameraWithPlane( TSharedRef<FString> iCameraName, TSharedRef<FString> iPlaneName )
-{
-    if( !mBoardSection.IsValid() )
-        return;
-
-    ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
-    UMovieSceneSection* section_object = mBoardSection.Pin()->GetSectionObject();
-    FCameraArgs camera_args;
-    camera_args.mName = *iCameraName;
-    FPlaneArgs plane_args;
-    plane_args.mName = *iPlaneName;
-    BoardSequenceTools::CreateCameraWithPlane( sequencer, section_object->GetInclusiveStartFrame(), camera_args, plane_args );
-}
-
-void
 SCinematicBoardSectionThumbnails::CreateCameraWithAnimation( TSharedRef<FString> iCameraName, TSharedRef<FString> iAnimationName )
 {
     if( !mBoardSection.IsValid() )
@@ -238,10 +223,6 @@ SCinematicBoardSectionThumbnails::MakeCreateCameraMenu()
     FString camera_path;
     TSharedRef<FString> camera_name = MakeShared<FString>();
     NamingConvention::GenerateCameraActorPathName( *sequencer, *inner_epos_sequence, result.mInnerSequenceId, camera_path, *camera_name );
-
-    FString plane_path;
-    TSharedRef<FString> plane_name = MakeShared<FString>();
-    NamingConvention::GeneratePlaneActorPathName( *sequencer, *inner_epos_sequence, result.mInnerSequenceId, plane_path, *plane_name );
 
     FString animation_path;
     TSharedRef<FString> animation_name = MakeShared<FString>();
@@ -310,53 +291,6 @@ SCinematicBoardSectionThumbnails::MakeCreateCameraMenu()
                                                        {
                                                            return !GCurrentLevelEditingViewportClient ? EVisibility::Visible : EVisibility::Collapsed;
                                                        } )
-                           ],
-                           //PATCH
-                           FText::GetEmpty(),
-                           true /* NoIndent */ );
-
-    //---
-
-    EposTracksToolbarHelpers::MakePlaneEntries( MenuBuilder, plane_name, FSimpleDelegate::CreateRaw( this, &SCinematicBoardSectionThumbnails::CreateCameraWithPlane, camera_name, plane_name ), false /* iFocus */ );
-    EposTracksToolbarHelpers::MakePlaneSettingsEntries( MenuBuilder );
-    EposTracksToolbarHelpers::MakeTextureSettingsEntries( MenuBuilder );
-
-    //---
-
-    auto CreateCameraWithPlaneOnClick = [this, camera_name, plane_name]() -> FReply
-    {
-        if( !mBoardSection.IsValid() )
-            return FReply::Unhandled();
-
-        CreateCameraWithPlane( camera_name, plane_name );
-
-        return FReply::Handled();
-    };
-
-    MenuBuilder.AddWidget( SNew( SVerticalBox )
-                           + SVerticalBox::Slot()
-                           .AutoHeight()
-                           [
-                               SNew( SHorizontalBox )
-                               + SHorizontalBox::Slot()
-                               .HAlign( HAlign_Center )
-                               [
-                                   SNew( SButton )
-                                   .Text( LOCTEXT( "create-camera-and-plane-label", "Create a new camera and its plane" ) )
-                                   .ToolTipText( LOCTEXT( "create-camera-and-plane-tooltip", "Create a new camera and its plane with those settings" ) )
-                                   .OnClicked_Lambda( CreateCameraWithPlaneOnClick )
-                                   .IsEnabled_Lambda( CanCreateCamera )
-                               ]
-                           ]
-                           //PATCH
-                           + SVerticalBox::Slot()
-                           .AutoHeight()
-                           .HAlign( HAlign_Center )
-                           [
-                                SNew( STextBlock )
-                                .Text( FText::FromString( TEXT( "/!\\ Select an actor in the viewport first /!\\" ) ) )
-                                .ColorAndOpacity( FLinearColor::Yellow )
-                                .Visibility_Lambda( []() -> EVisibility { return !GCurrentLevelEditingViewportClient ? EVisibility::Visible : EVisibility::Collapsed; } )
                            ],
                            //PATCH
                            FText::GetEmpty(),
@@ -495,13 +429,13 @@ SCinematicBoardSectionThumbnails::HandleAddBoardBeforeComboButtonGetMenuContent(
 
     //-
 
-    auto CloneSection = [this]( bool iEmptyDrawings )
+    auto CloneSection = [this]()
     {
         ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
         UMovieSceneSubSection* subsection_object = &mBoardSection.Pin()->GetSubSectionObject();
         UMovieSceneCinematicBoardSection* board_section = CastChecked<UMovieSceneCinematicBoardSection>( subsection_object );
 
-        CinematicBoardTrackTools::CloneSection( sequencer, board_section, subsection_object->GetInclusiveStartFrame(), iEmptyDrawings );
+        CinematicBoardTrackTools::CloneSection( sequencer, board_section, subsection_object->GetInclusiveStartFrame(), false );
     };
 
     auto CanCloneSection = [this]()
@@ -514,15 +448,9 @@ SCinematicBoardSectionThumbnails::HandleAddBoardBeforeComboButtonGetMenuContent(
     };
 
     menuBuilder.AddMenuEntry( LOCTEXT( "section.clone-section-before-label", "Clone Shot" ),
-                              LOCTEXT( "section.clone-section-before-tooltip", "Clone this shot before (actors and drawing assets will be cloned as well)" ),
+                              LOCTEXT( "section.clone-section-before-tooltip", "Clone this shot before (actors and animation assets will be cloned as well)" ),
                               FSlateIcon(),
-                              FUIAction( FExecuteAction::CreateLambda( CloneSection, false ),
-                                         FCanExecuteAction::CreateLambda( CanCloneSection ) ) );
-
-    menuBuilder.AddMenuEntry( LOCTEXT( "section.clone-section-before-and-empty-drawings-label", "Clone Shot (with empty drawings)" ),
-                              LOCTEXT( "section.clone-section-before-and-empty-drawings-tooltip", "Clone this shot before (actors and empty drawing assets will be cloned as well)" ),
-                              FSlateIcon(),
-                              FUIAction( FExecuteAction::CreateLambda( CloneSection, true ),
+                              FUIAction( FExecuteAction::CreateLambda( CloneSection ),
                                          FCanExecuteAction::CreateLambda( CanCloneSection ) ) );
 
     return menuBuilder.MakeWidget();
@@ -615,13 +543,13 @@ SCinematicBoardSectionThumbnails::HandleAddBoardAfterComboButtonGetMenuContent()
 
     //-
 
-    auto CloneSection = [this]( bool iEmptyDrawings )
+    auto CloneSection = [this]()
     {
         ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
         UMovieSceneSubSection* subsection_object = &mBoardSection.Pin()->GetSubSectionObject();
         UMovieSceneCinematicBoardSection* board_section = CastChecked<UMovieSceneCinematicBoardSection>( subsection_object );
 
-        CinematicBoardTrackTools::CloneSection( sequencer, board_section, subsection_object->GetExclusiveEndFrame() - 1, iEmptyDrawings );
+        CinematicBoardTrackTools::CloneSection( sequencer, board_section, subsection_object->GetExclusiveEndFrame() - 1, false );
     };
 
     auto CanCloneSection = [this]()
@@ -634,15 +562,9 @@ SCinematicBoardSectionThumbnails::HandleAddBoardAfterComboButtonGetMenuContent()
     };
 
     menuBuilder.AddMenuEntry( LOCTEXT( "section.clone-section-after-label", "Clone Shot" ),
-                              LOCTEXT( "section.clone-section-after-tooltip", "Clone this shot after (actors and drawing assets will be cloned as well)" ),
+                              LOCTEXT( "section.clone-section-after-tooltip", "Clone this shot after (actors and animation assets will be cloned as well)" ),
                               FSlateIcon(),
-                              FUIAction( FExecuteAction::CreateLambda( CloneSection, false ),
-                                         FCanExecuteAction::CreateLambda( CanCloneSection ) ) );
-
-    menuBuilder.AddMenuEntry( LOCTEXT( "section.clone-section-after-and-empty-drawings-label", "Clone Shot (with empty drawings)" ),
-                              LOCTEXT( "section.clone-section-after-and-empty-drawings-tooltip", "Clone this shot after (actors and empty drawing assets will be cloned as well)" ),
-                              FSlateIcon(),
-                              FUIAction( FExecuteAction::CreateLambda( CloneSection, true ),
+                              FUIAction( FExecuteAction::CreateLambda( CloneSection ),
                                          FCanExecuteAction::CreateLambda( CanCloneSection ) ) );
 
     return menuBuilder.MakeWidget();

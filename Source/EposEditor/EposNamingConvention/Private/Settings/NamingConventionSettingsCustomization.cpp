@@ -18,21 +18,21 @@
 
 //static
 TSharedRef<IPropertyTypeCustomization>
-FNamingConventionPlaneCustomization::MakeInstance()
+FNamingConventionAnimationCustomization::MakeInstance()
 {
-    return MakeShareable( new FNamingConventionPlaneCustomization() );
+    return MakeShareable( new FNamingConventionAnimationCustomization() );
 }
 
 FText
-FNamingConventionPlaneCustomization::GetTooltipText() const
+FNamingConventionAnimationCustomization::GetTooltipText() const
 {
-    return FText::Format( LOCTEXT( "plane-pattern-tooltip", "Some examples:\n\n- plane_{0} ->\n    plane_10\n    plane_20\n    plane_30\n    ...\n\n(Click on a keyword to Copy it)")
-        , FText::FromString( mSettings->mPatternKeywordLists.GetKeyword( ENamingConventionPlanePatternKeyword::PlaneIndex ).mKeywordWithBraces )
+    return FText::Format( LOCTEXT( "animation-pattern-tooltip", "Some examples:\n\n- animation_{0} ->\n    animation_10\n    animation_20\n    animation_30\n    ...\n\n(Click on a keyword to Copy it)")
+        , FText::FromString( mSettings->mPatternKeywordLists.GetKeyword( ENamingConventionAnimationPatternKeyword::AnimationIndex ).mKeywordWithBraces )
     );
 }
 
 void
-FNamingConventionPlaneCustomization::CustomizeHeader( TSharedRef<IPropertyHandle> iStructPropertyHandle, FDetailWidgetRow& ioHeaderRow, IPropertyTypeCustomizationUtils& ioStructCustomizationUtils ) //override
+FNamingConventionAnimationCustomization::CustomizeHeader( TSharedRef<IPropertyHandle> iStructPropertyHandle, FDetailWidgetRow& ioHeaderRow, IPropertyTypeCustomizationUtils& ioStructCustomizationUtils ) //override
 {
     // No header needed (to avoid the collapsing)
 
@@ -44,7 +44,7 @@ FNamingConventionPlaneCustomization::CustomizeHeader( TSharedRef<IPropertyHandle
 }
 
 void
-FNamingConventionPlaneCustomization::CustomizeChildren( TSharedRef<IPropertyHandle> iStructPropertyHandle, IDetailChildrenBuilder& ioChildBuilder, IPropertyTypeCustomizationUtils& ioStructCustomizationUtils ) //override
+FNamingConventionAnimationCustomization::CustomizeChildren( TSharedRef<IPropertyHandle> iStructPropertyHandle, IDetailChildrenBuilder& ioChildBuilder, IPropertyTypeCustomizationUtils& ioStructCustomizationUtils ) //override
 {
     mSettings = GetEditStruct( iStructPropertyHandle );
     check( mSettings );
@@ -58,7 +58,7 @@ FNamingConventionPlaneCustomization::CustomizeChildren( TSharedRef<IPropertyHand
         if( !handle.IsValid() )
             continue;
 
-        if( handle->GetProperty() && handle->GetProperty()->GetFName() == GET_MEMBER_NAME_CHECKED( FNamingConventionPlane, Pattern ) )
+        if( handle->GetProperty() && handle->GetProperty()->GetFName() == GET_MEMBER_NAME_CHECKED( FNamingConventionAnimation, Pattern ) )
         {
             mPatternHandle = handle;
 
@@ -109,10 +109,10 @@ FNamingConventionPlaneCustomization::CustomizeChildren( TSharedRef<IPropertyHand
     }
 }
 
-FNamingConventionPlane*
-FNamingConventionPlaneCustomization::GetEditStruct( TSharedRef<IPropertyHandle> iStructPropertyHandle ) const
+FNamingConventionAnimation*
+FNamingConventionAnimationCustomization::GetEditStruct( TSharedRef<IPropertyHandle> iStructPropertyHandle ) const
 {
-    TArray<FNamingConventionPlane*> settings;
+    TArray<FNamingConventionAnimation*> settings;
 
     if( iStructPropertyHandle->IsValidHandle() )
         iStructPropertyHandle->AccessRawData( reinterpret_cast<TArray<void*>&>( settings ) );

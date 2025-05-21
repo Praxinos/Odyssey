@@ -33,13 +33,11 @@
 #include "Import/ImportImageSequenceConverter.h"
 #include "Import/ImportImageSequenceImporter.h"
 #include "Import/ImportImageSequenceStruct.h"
-#include "PlaneActor.h"
 #include "OdysseyAnimationActor.h"
 #include "Settings/EposSequenceEditorSettings.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrackInstance.h"
 #include "Shot/ShotSequence.h"
 #include "Tools/EposSequenceTools.h"
-#include "Tools/LighttableTools.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(EposSequenceEditorBlueprintLibrary)
 
@@ -172,32 +170,6 @@ UBoardSequenceEditorBlueprintLibrary::ImportImageSequence( const FString& iBoard
 
 //static
 void
-UBoardSequenceEditorBlueprintLibrary::CreateCamera( UMovieSceneSubSection* iSubSection )
-{
-    CreateCameraWithPlane( iSubSection );
-}
-
-//static
-void
-UBoardSequenceEditorBlueprintLibrary::CreateCameraWithPlane( UMovieSceneSubSection* iSubSection )
-{
-    UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( iSubSection );
-
-    if( !CurrentSequencer.IsValid() )
-        return;
-
-    if( !board_section )
-        return;
-
-    ISequencer* sequencer = CurrentSequencer.Pin().Get();
-
-    FCameraArgs camera_args;
-    FPlaneArgs plane_args;
-    BoardSequenceTools::CreateCameraWithPlane( sequencer, *board_section, board_section->GetTrueRange().GetLowerBoundValue() );
-}
-
-//static
-void
 UBoardSequenceEditorBlueprintLibrary::CreateCameraWithAnimation( UMovieSceneSubSection* iSubSection )
 {
     UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( iSubSection );
@@ -213,155 +185,6 @@ UBoardSequenceEditorBlueprintLibrary::CreateCameraWithAnimation( UMovieSceneSubS
     FCameraArgs camera_args;
     FAnimationArgs animation_args;
     BoardSequenceTools::CreateCameraWithAnimation( sequencer, *board_section, board_section->GetTrueRange().GetLowerBoundValue() );
-}
-
-//static
-void
-UBoardSequenceEditorBlueprintLibrary::CreatePlane( UMovieSceneSubSection* iSubSection )
-{
-    UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( iSubSection );
-
-    if( !CurrentSequencer.IsValid() )
-        return;
-
-    if( !board_section )
-        return;
-
-    ISequencer* sequencer = CurrentSequencer.Pin().Get();
-
-    FPlaneArgs plane_args;
-    BoardSequenceTools::CreatePlane( sequencer, *board_section, board_section->GetTrueRange().GetLowerBoundValue() );
-}
-
-//static
-void
-UBoardSequenceEditorBlueprintLibrary::CollapsePlane( UMovieSceneSubSection* iSubSection, const FMovieSceneBindingProxy& iBinding )
-{
-    UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( iSubSection );
-
-    if( !CurrentSequencer.IsValid() )
-        return;
-
-    if( !board_section )
-        return;
-
-    ISequencer* sequencer = CurrentSequencer.Pin().Get();
-
-    board_section->SetPlaneKeysAreaVisibility( iBinding.BindingID, false );
-}
-
-//static
-void
-UBoardSequenceEditorBlueprintLibrary::ExpandPlane( UMovieSceneSubSection* iSubSection, const FMovieSceneBindingProxy& iBinding )
-{
-    UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( iSubSection );
-
-    if( !CurrentSequencer.IsValid() )
-        return;
-
-    if( !board_section )
-        return;
-
-    ISequencer* sequencer = CurrentSequencer.Pin().Get();
-
-    board_section->SetPlaneKeysAreaVisibility( iBinding.BindingID, true );
-}
-
-//static
-bool
-UBoardSequenceEditorBlueprintLibrary::IsPlaneCollapsed( UMovieSceneSubSection* iSubSection, const FMovieSceneBindingProxy& iBinding )
-{
-    return !IsPlaneExpanded( iSubSection, iBinding );
-}
-
-//static
-bool
-UBoardSequenceEditorBlueprintLibrary::IsPlaneExpanded( UMovieSceneSubSection* iSubSection, const FMovieSceneBindingProxy& iBinding )
-{
-    UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( iSubSection );
-
-    if( !CurrentSequencer.IsValid() )
-        return false;
-
-    if( !board_section )
-        return false;
-
-    ISequencer* sequencer = CurrentSequencer.Pin().Get();
-
-    return board_section->IsPlaneKeysAreaVisible( iBinding.BindingID );
-}
-
-//static
-void
-UBoardSequenceEditorBlueprintLibrary::ActivateLighttable( UMovieSceneSubSection* iSubSection, const FMovieSceneBindingProxy& iBinding )
-{
-    UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( iSubSection );
-
-    if( !CurrentSequencer.IsValid() )
-        return;
-
-    if( !board_section )
-        return;
-
-    ISequencer* sequencer = CurrentSequencer.Pin().Get();
-
-    LighttableTools::Activate( sequencer, *board_section, iBinding.BindingID );
-}
-
-//static
-void
-UBoardSequenceEditorBlueprintLibrary::DeactivateLighttable( UMovieSceneSubSection* iSubSection, const FMovieSceneBindingProxy& iBinding )
-{
-    UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( iSubSection );
-
-    if( !CurrentSequencer.IsValid() )
-        return;
-
-    if( !board_section )
-        return;
-
-    ISequencer* sequencer = CurrentSequencer.Pin().Get();
-
-    LighttableTools::Deactivate( sequencer, *board_section, iBinding.BindingID );
-}
-
-//static
-int32
-UBoardSequenceEditorBlueprintLibrary::GetLighttableState( UMovieSceneSubSection* iSubSection, const FMovieSceneBindingProxy& iBinding )
-{
-    UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( iSubSection );
-
-    if( !CurrentSequencer.IsValid() )
-        return -1;
-
-    if( !board_section )
-        return -1;
-
-    ISequencer* sequencer = CurrentSequencer.Pin().Get();
-
-    return LighttableTools::GetState( sequencer, *board_section, iBinding.BindingID );
-}
-
-//static
-void
-UBoardSequenceEditorBlueprintLibrary::CreateDrawing( UMovieSceneSubSection* iSubSection, const FMovieSceneBindingProxy& iBinding, int32 iFrame )
-{
-    UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( iSubSection );
-
-    if( !CurrentSequencer.IsValid() )
-        return;
-
-    if( !board_section )
-        return;
-
-    ISequencer* sequencer = CurrentSequencer.Pin().Get();
-
-    FFrameRate DisplayRate = sequencer->GetFocusedDisplayRate();
-    FFrameRate TickResolution = sequencer->GetFocusedTickResolution();
-    FFrameNumber frame_in_tick = ConvertFrameTime( iFrame, DisplayRate, TickResolution ).GetFrame();
-
-    FPlaneArgs plane_args;
-    BoardSequenceTools::CreateDrawing( sequencer, *board_section, frame_in_tick, iBinding.BindingID );
 }
 
 //static
@@ -521,27 +344,6 @@ UShotSequenceEditorBlueprintLibrary::StepToPreviousShot()
 
 //static
 void
-UShotSequenceEditorBlueprintLibrary::CreateCamera()
-{
-    CreateCameraWithPlane();
-}
-
-//static
-void
-UShotSequenceEditorBlueprintLibrary::CreateCameraWithPlane()
-{
-    if( !CurrentSequencer.IsValid() )
-        return;
-
-    ISequencer* sequencer = CurrentSequencer.Pin().Get();
-
-    FCameraArgs camera_args;
-    FPlaneArgs plane_args;
-    ShotSequenceTools::CreateCameraWithPlane( sequencer );
-}
-
-//static
-void
 UShotSequenceEditorBlueprintLibrary::CreateCameraWithAnimation()
 {
     if( !CurrentSequencer.IsValid() )
@@ -552,72 +354,6 @@ UShotSequenceEditorBlueprintLibrary::CreateCameraWithAnimation()
     FCameraArgs camera_args;
     FAnimationArgs animation_args;
     ShotSequenceTools::CreateCameraWithAnimation( sequencer );
-}
-
-//static
-void
-UShotSequenceEditorBlueprintLibrary::CreatePlane()
-{
-    if( !CurrentSequencer.IsValid() )
-        return;
-
-    ISequencer* sequencer = CurrentSequencer.Pin().Get();
-
-    FPlaneArgs plane_args;
-    ShotSequenceTools::CreatePlane( sequencer, 0 );
-}
-
-//static
-void
-UShotSequenceEditorBlueprintLibrary::ActivateLighttable( const FMovieSceneBindingProxy& iBinding )
-{
-    if( !CurrentSequencer.IsValid() )
-        return;
-
-    ISequencer* sequencer = CurrentSequencer.Pin().Get();
-
-    LighttableTools::Activate( sequencer, iBinding.BindingID );
-}
-
-//static
-void
-UShotSequenceEditorBlueprintLibrary::DeactivateLighttable( const FMovieSceneBindingProxy& iBinding )
-{
-    if( !CurrentSequencer.IsValid() )
-        return;
-
-    ISequencer* sequencer = CurrentSequencer.Pin().Get();
-
-    LighttableTools::Deactivate( sequencer, iBinding.BindingID );
-}
-
-//static
-int32
-UShotSequenceEditorBlueprintLibrary::GetLighttableState( const FMovieSceneBindingProxy& iBinding )
-{
-    if( !CurrentSequencer.IsValid() )
-        return -1;
-
-    ISequencer* sequencer = CurrentSequencer.Pin().Get();
-
-    return LighttableTools::GetState( sequencer, iBinding.BindingID );
-}
-
-//static
-void
-UShotSequenceEditorBlueprintLibrary::CreateDrawing( const FMovieSceneBindingProxy& iBinding, int32 iFrame )
-{
-    if( !CurrentSequencer.IsValid() )
-        return;
-
-    ISequencer* sequencer = CurrentSequencer.Pin().Get();
-
-    FFrameRate DisplayRate = sequencer->GetFocusedDisplayRate();
-    FFrameRate TickResolution = sequencer->GetFocusedTickResolution();
-    FFrameNumber frame_in_tick = ConvertFrameTime( iFrame, DisplayRate, TickResolution ).GetFrame();
-
-    FPlaneArgs plane_args;
-    ShotSequenceTools::CreateDrawing( sequencer, frame_in_tick, iBinding.BindingID );
 }
 
 //static
@@ -749,34 +485,6 @@ void UEposSequenceEditorBlueprintLibrary::CloseEposSequence()
 }
 
 //---
-
-PRAGMA_DISABLE_DEPRECATION_WARNINGS // To only have the deprecation warning (about EScalePlane enum) in BP and not during c++ build
-
-//DEPRECATED
-//static
-void
-UEposSequenceEditorBlueprintLibrary::MoveAndScalePlane( APlaneActor* ioPlane, const ACineCameraActor* iCamera, float iNewDistance, EScalePlane iScaleType )
-{
-    if( !ioPlane || !iCamera )
-        return;
-
-    ShotSequenceTools::MoveAndScaleActor( ioPlane, iCamera, iNewDistance, static_cast<EScaleActor>( iScaleType ) );
-}
-
-//DEPRECATED
-//static
-void
-UEposSequenceEditorBlueprintLibrary::SetCameraFocalLengthAndScalePlane( TArray<APlaneActor*> ioPlanes, ACineCameraActor* ioCamera, float iNewFocalLength, EScalePlane iScaleType )
-{
-    if( !ioCamera )
-        return;
-
-    TArray<TWeakObjectPtr<AActor>> planes( ioPlanes );
-
-    ShotSequenceTools::SetCameraFocalLengthAndScaleActor( planes, ioCamera, iNewFocalLength, static_cast<EScaleActor>( iScaleType ) );
-}
-
-PRAGMA_ENABLE_DEPRECATION_WARNINGS
 
 //static
 void
