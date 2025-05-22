@@ -96,12 +96,15 @@ def DownloadAndUnzip_CMakeSources( iIntermediatePath: Path ) -> list[str]:
 
     if shutil.which( cmake_cmd[0] ) is not None:
         return cmake_cmd
+    else:
+        if IsMacOSX():
+            raise FileNotFoundError( Fore.RED + 'cmake on MacOSX is not natively available, please install it wia homebrew and it must be available in command line as: $ cmake' )
 
-    cmake_version = '3.23.2'
+    cmake_version = '4.0.2'
     if IsWindows():
         cmake_zip_file = f'cmake-{cmake_version}-windows-x86_64.zip'
     elif IsMacOSX():
-        cmake_zip_file = f'cmake-{cmake_version}-macos10.10-universal.tar.gz'
+        cmake_zip_file = f'cmake-{cmake_version}-macos-universal.tar.gz'
 
     # Download cmake source files
     cmake_zip_pathfile = iIntermediatePath / cmake_zip_file
@@ -126,11 +129,11 @@ def DownloadAndUnzip_CMakeSources( iIntermediatePath: Path ) -> list[str]:
     # Check the cmake binary exists
     if IsWindows():
         cmake_pathfile = cmake_path / 'bin' / 'cmake.exe'
-    elif IsMacOSX:
-        cmake_pathfile = cmake_path / 'bin' / 'cmake'
+    elif IsMacOSX():
+        cmake_pathfile = cmake_path / 'CMake.app' / 'Contents' / 'bin' / 'cmake'
 
     if not cmake_pathfile.exists():
-        raise FileNotFoundError( Fore.RED + 'cmake file doesn\'t exist, add it to the current directory or install it' )
+        raise FileNotFoundError( Fore.RED + f'cmake file doesn\'t exist, add it to the current directory or install it\n{cmake_pathfile}' )
 
     cmake_cmd = [ str( cmake_pathfile ) ]
 
@@ -275,6 +278,7 @@ if IsMacOSX():
 cmake_args += [
     '-DCMAKE_INSTALL_PREFIX=' + str( install_path ),
     '-DLIBHPDF_SHARED=' + 'OFF',
+    '-DCMAKE_POLICY_VERSION_MINIMUM=' + '3.10',
     # Use as_posix to keep slash on windows, otherwise there will be warning with cmake during the install ...
     '-DZLIB_INCLUDE_DIR=' + zlib['include'].as_posix(),
     '-DZLIB_LIBRARY=' + zlib['lib'].as_posix(),
