@@ -24,28 +24,19 @@ public:
 
     virtual void Tick( float iDeltaSeconds ) override;
 
-public:
-    virtual FVector ComputePlaneScaleOfCameraView( const ACineCameraActor* iCamera, float iDistance ) const; // From FDrawFrustumSceneProxy::GetDynamicMeshElements()
-    virtual FVector ComputePlaneScaleWithScaleAndMargin( const ACineCameraActor* iCamera, float iDistance ) const;
-
-    virtual FIntPoint ComputeTextureSize( const ACineCameraActor* iCamera, int32 iTextureHeight ) const;
-
-public:
-    /** Get the margin as percent (0.1 for 10%) */
-    virtual float GetSafeMargin() const;
-    /** Get the relative scaling as percent (1. for 100%) */
-    virtual FVector2D GetRelativeScaling() const;
+private:
+    virtual void PostLoad() override;
 
 public:
     /** This will make the plane bigger than the original size viewed by the camera by adding a margin to the plane */
-    UPROPERTY( EditAnywhere, Category="Plane Actor", meta=(UIMin = "0", ClampMin = "0", UIMax = "200", ClampMax = "200", Units=Percent) )
-    float SafeMargin { 0.f };
+    UPROPERTY()
+    float SafeMargin_DEPRECATED { 0.f };
 
     /** This will rescale the original size of the plane
       * The original size is the one viewed by the camera
       * The scale is applied before safe margin
       * The default value (which means no rescale) is (100%, 100%)
       */
-    UPROPERTY( EditAnywhere, Category="Plane Actor", meta=(AllowPreserveRatio) )
-    FVector2D RelativeScaling { 100.f, 100.f };
+    UPROPERTY()
+    FVector2D RelativeScaling_DEPRECATED { 100.f, 100.f };
 };

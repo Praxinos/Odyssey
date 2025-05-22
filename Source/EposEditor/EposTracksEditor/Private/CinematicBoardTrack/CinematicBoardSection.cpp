@@ -32,6 +32,9 @@
 #include "AnimatedRange.h"
 #include "ITimeSlider.h"
 #include "MVVM/ViewModels/SequencerEditorViewModel.h"
+#include "Engine/TextureRenderTarget2D.h"
+#include "ImageUtils.h"
+#include "ImageCoreUtils.h"
 
 #include "Board/BoardSequence.h"
 #include "CinematicBoardTrack/CinematicBoardTrackEditor.h"
@@ -48,6 +51,10 @@
 #include "Styles/EposTracksEditorStyle.h"
 #include "Tools/EposSequenceTools.h"
 #include "CinematicBoardWidgets/SCinematicBoardSectionContent.h"
+#include "OdysseyAnimation.h"
+#include "OdysseyAnimationActor.h"
+#include "OdysseyAnimationComponent.h"
+#include "OdysseyAnimationTimelineSection.h"
 
 #define LOCTEXT_NAMESPACE "FCinematicBoardSection"
 
@@ -224,6 +231,34 @@ FCinematicBoardSection::~FCinematicBoardSection()
     // In this order, the next line will reset the attribute of the UMovieSceneCinematicBoardSection after it has been set in the constructor for the new ones
     //Cast<UMovieSceneCinematicBoardSection>( Section )->SetWidgetHeight( 0 );
 }
+
+//---
+
+void
+FCinematicBoardSection::AddReferencedObjects( FReferenceCollector& Collector ) //override
+{
+    for( const auto& pair1 : mAnimationsTimelineMetaChannel )
+    {
+        FGuid guid = pair1.Key;
+
+        if( !mAnimationsTimelineThumbnails.Contains( guid ) )
+            continue;
+
+        for( FThumbnailData& thumbnail_data : mAnimationsTimelineThumbnails[guid] )
+        {
+            //Collector.AddReferencedObject( thumbnail_data.RenderTarget );
+            Collector.AddReferencedObject( thumbnail_data.Texture );
+        }
+    }
+}
+
+FString
+FCinematicBoardSection::GetReferencerName() const //override
+{
+    return "FCinematicBoardSection";
+}
+
+//---
 
 FText
 FCinematicBoardSection::GetSectionTitle() const
@@ -523,18 +558,18 @@ void
 FCinematicBoardSection::RebuildChannelProxies()
 {
     BuildCameraTransformChannelProxy();
-    BuildPlanesTransformChannelProxy();
-    BuildPlanesMaterialChannelProxy();
-    BuildPlanesOpacityChannelProxy();
+    BuildAnimationsTransformChannelProxy();
+    BuildAnimationsTimelineChannelProxy();
+    BuildAnimationsOpacityChannelProxy();
 }
 
 void
 FCinematicBoardSection::RebuildMetaChannels()
 {
     ReBuildCameraTransformMetaChannel();
-    ReBuildPlanesTransformMetaChannel();
-    ReBuildPlanesMaterialMetaChannel();
-    ReBuildPlanesOpacityMetaChannel();
+    ReBuildAnimationsTransformMetaChannel();
+    ReBuildAnimationsTimelineMetaChannel();
+    ReBuildAnimationsOpacityMetaChannel();
 }
 
 void
@@ -577,24 +612,24 @@ FCinematicBoardSection::GetCameraTransformMetaChannel() const
 //-
 
 void
-FCinematicBoardSection::BuildPlanesTransformChannelProxy()
+FCinematicBoardSection::BuildAnimationsTransformChannelProxy()
 {
-    mPlanesTransformChannelProxies = BoardSequenceHelpers::BuildPlanesTransformChannelProxy( *GetSequencer(), GetSubSectionObject(), GetSequencer()->GetFocusedTemplateID() );
+    mAnimationsTransformChannelProxies = BoardSequenceHelpers::BuildAnimationsTransformChannelProxy( *GetSequencer(), GetSubSectionObject(), GetSequencer()->GetFocusedTemplateID() );
 
-    ReBuildPlanesTransformMetaChannel();
+    ReBuildAnimationsTransformMetaChannel();
 }
 
 FChannelProxyBySectionMap
-FCinematicBoardSection::GetPlaneTransformChannelProxy( FMovieScenePossessable iPossessable ) const
+FCinematicBoardSection::GetAnimationTransformChannelProxy( FMovieScenePossessable iPossessable ) const
 {
-    if( !mPlanesTransformChannelProxies.Contains( iPossessable.GetGuid() ) )
+    if( !mAnimationsTransformChannelProxies.Contains( iPossessable.GetGuid() ) )
         return FChannelProxyBySectionMap();
 
-    return mPlanesTransformChannelProxies[iPossessable.GetGuid()];
+    return mAnimationsTransformChannelProxies[iPossessable.GetGuid()];
 }
 
 void
-FCinematicBoardSection::ReBuildPlanesTransformMetaChannel()
+FCinematicBoardSection::ReBuildAnimationsTransformMetaChannel()
 {
     FTimeToPixel converter( ConstructConverterForViewRange() );
 
@@ -604,8 +639,8 @@ FCinematicBoardSection::ReBuildPlanesTransformMetaChannel()
     TRange<FFrameNumber> inner_range_tolerance( ( ( clicked_frame - HalfKeySizeFrames ) * OuterToInnerTransform ).FloorToFrame(), ( ( clicked_frame + HalfKeySizeFrames ) * OuterToInnerTransform ).CeilToFrame() );
     FFrameNumber inner_tolerance = inner_range_tolerance.Size<FFrameNumber>() / 2;
 
-    mPlanesTransformMetaChannel.Empty();
-    for( const auto& pair : mPlanesTransformChannelProxies )
+    mAnimationsTransformMetaChannel.Empty();
+    for( const auto& pair : mAnimationsTransformChannelProxies )
     {
         FGuid guid = pair.Key;
         FChannelProxyBySectionMap map = pair.Value;
@@ -613,40 +648,40 @@ FCinematicBoardSection::ReBuildPlanesTransformMetaChannel()
         TSharedPtr<FMetaChannel> meta_channel = MakeShared<FMetaChannel>( inner_tolerance );
         meta_channel->Build( map );
 
-        mPlanesTransformMetaChannel.Add( guid, meta_channel );
+        mAnimationsTransformMetaChannel.Add( guid, meta_channel );
     }
 }
 
 TSharedPtr<FMetaChannel>
-FCinematicBoardSection::GetPlaneTransformMetaChannel( FMovieScenePossessable iPossessable ) const
+FCinematicBoardSection::GetAnimationTransformMetaChannel( FMovieScenePossessable iPossessable ) const
 {
-    if( !mPlanesTransformMetaChannel.Contains( iPossessable.GetGuid() ) )
+    if( !mAnimationsTransformMetaChannel.Contains( iPossessable.GetGuid() ) )
         return nullptr;
 
-    return mPlanesTransformMetaChannel[iPossessable.GetGuid()];
+    return mAnimationsTransformMetaChannel[iPossessable.GetGuid()];
 }
 
 //-
 
 void
-FCinematicBoardSection::BuildPlanesMaterialChannelProxy()
+FCinematicBoardSection::BuildAnimationsTimelineChannelProxy()
 {
-    mPlanesMaterialChannelProxies = BoardSequenceHelpers::BuildPlanesMaterialChannelProxy( *GetSequencer(), GetSubSectionObject(), GetSequencer()->GetFocusedTemplateID() );
+    mAnimationsTimelineChannelProxies = BoardSequenceHelpers::BuildAnimationsTimelineChannelProxy( *GetSequencer(), GetSubSectionObject(), GetSequencer()->GetFocusedTemplateID() );
 
-    ReBuildPlanesMaterialMetaChannel();
+    ReBuildAnimationsTimelineMetaChannel();
 }
 
 FChannelProxyBySectionMap
-FCinematicBoardSection::GetPlaneMaterialChannelProxy( FMovieScenePossessable iPossessable ) const
+FCinematicBoardSection::GetAnimationTimelineChannelProxy( FMovieScenePossessable iPossessable ) const
 {
-    if( !mPlanesMaterialChannelProxies.Contains( iPossessable.GetGuid() ) )
+    if( !mAnimationsTimelineChannelProxies.Contains( iPossessable.GetGuid() ) )
         return FChannelProxyBySectionMap();
 
-    return mPlanesMaterialChannelProxies[iPossessable.GetGuid()];
+    return mAnimationsTimelineChannelProxies[iPossessable.GetGuid()];
 }
 
 void
-FCinematicBoardSection::ReBuildPlanesMaterialMetaChannel()
+FCinematicBoardSection::ReBuildAnimationsTimelineMetaChannel()
 {
     FTimeToPixel converter( ConstructConverterForViewRange() );
 
@@ -656,8 +691,8 @@ FCinematicBoardSection::ReBuildPlanesMaterialMetaChannel()
     TRange<FFrameNumber> inner_range_tolerance( ( ( clicked_frame - HalfKeySizeFrames ) * OuterToInnerTransform ).FloorToFrame(), ( ( clicked_frame + HalfKeySizeFrames ) * OuterToInnerTransform ).CeilToFrame() );
     FFrameNumber inner_tolerance = inner_range_tolerance.Size<FFrameNumber>() / 2;
 
-    mPlanesMaterialMetaChannel.Empty();
-    for( const auto& pair : mPlanesMaterialChannelProxies )
+    mAnimationsTimelineMetaChannel.Empty();
+    for( const auto& pair : mAnimationsTimelineChannelProxies )
     {
         FGuid guid = pair.Key;
         FChannelProxyBySectionMap map = pair.Value;
@@ -665,40 +700,210 @@ FCinematicBoardSection::ReBuildPlanesMaterialMetaChannel()
         TSharedPtr<FMetaChannel> meta_channel = MakeShared<FMetaChannel>( inner_tolerance );
         meta_channel->Build( map );
 
-        mPlanesMaterialMetaChannel.Add( guid, meta_channel );
+        mAnimationsTimelineMetaChannel.Add( guid, meta_channel );
+    }
+
+    mAnimationsTimelineThumbnails.Empty();
+    for( const auto& pair1 : mAnimationsTimelineMetaChannel )
+    {
+        FGuid guid = pair1.Key;
+
+        ReBuildAnimationsTimelineThumbnails( guid );
     }
 }
 
 TSharedPtr<FMetaChannel>
-FCinematicBoardSection::GetPlaneMaterialMetaChannel( FMovieScenePossessable iPossessable ) const
+FCinematicBoardSection::GetAnimationTimelineMetaChannel( FMovieScenePossessable iPossessable ) const
 {
-    if( !mPlanesMaterialMetaChannel.Contains( iPossessable.GetGuid() ) )
+    if( !mAnimationsTimelineMetaChannel.Contains( iPossessable.GetGuid() ) )
         return nullptr;
 
-    return mPlanesMaterialMetaChannel[iPossessable.GetGuid()];
+    return mAnimationsTimelineMetaChannel[iPossessable.GetGuid()];
+}
+
+const TArray<FCinematicBoardSection::FThumbnailData>&
+FCinematicBoardSection::GetAnimationTimelineThumbnails( FMovieScenePossessable iPossessable ) const
+{
+    if( !mAnimationsTimelineThumbnails.Contains( iPossessable.GetGuid() ) )
+    {
+        static TArray<FThumbnailData> sEmpty;
+        return sEmpty;
+    }
+
+    return mAnimationsTimelineThumbnails[iPossessable.GetGuid()];
+}
+
+FCinematicBoardSection::FThumbnailData
+FCinematicBoardSection::RebuildAnimationThumbnailDataInternal( UOdysseyAnimationTimelineSection* iSection, FFrameNumber iFrameInSequence, TOptional<FGuid> iFrameId )
+{
+    auto CreateRenderTargetAndImage2 = []( int32 InSizeX, int32 InSizeY, ETextureRenderTargetFormat InFormat, UTextureRenderTarget2D*& oRenderTarget ) -> void
+        {
+            static UTextureRenderTarget2D* renderTarget = nullptr;
+            if( !renderTarget
+                || !IsValid( renderTarget )
+                || renderTarget->SizeX != InSizeX
+                || renderTarget->SizeY != InSizeY
+                || renderTarget->RenderTargetFormat != InFormat )
+            {
+                renderTarget = NewObject<UTextureRenderTarget2D>( GetTransientPackage(), NAME_None, RF_Public | RF_Transient );
+                renderTarget->RenderTargetFormat = InFormat;
+                //renderTarget->ClearColor = FLinearColor( frame_in_timeline.Value / float( 50 ), frame_in_timeline.Value / float( 50 ), frame_in_timeline.Value / float( 50 ) );
+                renderTarget->ResizeTarget( InSizeX, InSizeY );
+                //renderTarget->InitAutoFormat(
+                renderTarget->UpdateResource();
+            }
+
+            oRenderTarget = renderTarget;
+        };
+
+    //---
+
+    const UMovieSceneSubSection* subsection_object = &GetSubSectionObject();
+
+    FMovieSceneInverseSequenceTransform inner_to_outer_transform = subsection_object->OuterToInnerTransform().Inverse();
+    const UMovieScene* movie_scene = subsection_object->GetTypedOuter<UMovieScene>();
+    check( movie_scene );
+
+    //---
+
+    FFrameNumber frame_in_timeline = iSection->ConvertFrameFromSequenceToTimeline( iFrameInSequence );
+
+    TOptional<FFrameTime> outer_time = inner_to_outer_transform.TryTransformTime( iFrameInSequence );
+    if( !outer_time )
+        return FThumbnailData();
+
+    //---
+
+    UOdysseyAnimation* animation = iSection->GetAnimation();
+
+    float ratio = animation->GetWidth() / float( animation->GetHeight() );
+    const FIntVector2 thumbnail_size( 200 * ratio, 200 );
+
+    UTexture2D* texture = nullptr;
+    UTextureRenderTarget2D* renderTarget = nullptr;
+
+    FRenderingComposition rendering_composition = animation->GetRenderingComposition( EOdysseyRenderingType::Render, frame_in_timeline.Value ); // THIS DOESN'T MANAGE IMAGE CHANGES !!!
+
+    if( !mAnimationsTimelineThumbnailPool.Contains( rendering_composition ) || ( iFrameId.IsSet() && rendering_composition.Contains( *iFrameId ) ) )
+    {
+        CreateRenderTargetAndImage2( thumbnail_size.X, thumbnail_size.Y, RTF_RGBA16f, renderTarget );
+
+        animation->RenderAndResize_GameThread( renderTarget, frame_in_timeline.Value, EOdysseyRenderingType::Render );
+
+        texture = renderTarget->ConstructTexture2D( GetTransientPackage(), FString::Printf( TEXT( "textureThumbnail-%s" ), *FGuid::NewGuid().ToString() ), RF_Public | RF_Transient );
+
+        //mAnimationsTimelineThumbnailPool.Add( rendering_composition, FPoolData{ renderTarget } );
+        mAnimationsTimelineThumbnailPool.Add( rendering_composition, FPoolData{ texture } );
+    }
+    else
+    {
+        FPoolData p = mAnimationsTimelineThumbnailPool.FindChecked( rendering_composition );
+        //renderTarget = p.RenderTarget;
+        texture = p.Texture;
+    }
+
+    //// Fence now to ensure the update is processed on the GPU by the end of this function
+    //FRenderCommandFence fence;
+    //fence.BeginFence();
+    //fence.Wait();
+
+    //-
+
+    //FSlateBrush* brush = new FSlateBrush();
+    //FSlateImageBrush* brush = new FSlateImageBrush( renderTarget, FVector2f( renderTarget->SizeX, renderTarget->SizeY ) ); // There are problems when using a render target (the brush seems to not update its resource once Render_GameThread())
+    FSlateImageBrush* brush = new FSlateImageBrush( texture, FVector2f( texture->GetSizeX(), texture->GetSizeY() ) );
+
+    //brush->SetResourceObject( renderTarget ); // There are problems when using a render target (the brush seems to not update its resource once Render_GameThread())
+    //brush->SetResourceObject( texture ); // There are problems when using a render target (the brush seems to not update its resource once Render_GameThread())
+
+    //---
+
+    FThumbnailData thumbnail;
+    thumbnail.QTime = FQualifiedFrameTime( *outer_time, movie_scene->GetTickResolution() );
+    //thumbnail.RenderTarget = renderTarget;
+    thumbnail.Texture = texture;
+    thumbnail.Brush = brush;
+    thumbnail.Size = thumbnail_size;
+
+    return thumbnail;
+}
+
+void
+FCinematicBoardSection::ReBuildAnimationsTimelineThumbnails( FMovieScenePossessable iPossessable, TOptional<FGuid> iFrameId )
+{
+    ReBuildAnimationsTimelineThumbnails( iPossessable.GetGuid(), iFrameId );
+}
+
+void
+FCinematicBoardSection::ReBuildAnimationsTimelineThumbnails( FGuid iGuid, TOptional<FGuid> iFrameId )
+{
+    if( mAnimationsTimelineThumbnails.Contains( iGuid ) )
+        mAnimationsTimelineThumbnails.Remove( iGuid );
+
+    if( !mAnimationsTimelineMetaChannel.Contains( iGuid ) )
+        return;
+
+    TSharedPtr<FMetaChannel> meta_channel = mAnimationsTimelineMetaChannel[iGuid];
+
+    //---
+
+    const UMovieSceneSubSection* subsection_object = &GetSubSectionObject();
+
+    FMovieSceneInverseSequenceTransform inner_to_outer_transform = subsection_object->OuterToInnerTransform().Inverse();
+    const UMovieScene* movie_scene = subsection_object->GetTypedOuter<UMovieScene>();
+    check( movie_scene );
+
+    TArray<FThumbnailData> thumbnails;
+
+    for( const auto& pair : meta_channel->GetMetaKeys() )
+    {
+        FFrameNumber meta_frame = pair.Key;
+        //FMetaKey meta_key = pair.Value;
+        //FKeyDrawParams key_draw_param = meta_key.mMetaKeyDrawParam;
+
+        for( const auto& subkey : pair.Value.mSubKeys )
+        {
+            UOdysseyAnimationTimelineSection* animation_timeline_section = Cast<UOdysseyAnimationTimelineSection>( subkey.mSection );
+            if( !animation_timeline_section )
+                continue;
+
+            FThumbnailData thumbnail = RebuildAnimationThumbnailDataInternal( animation_timeline_section, meta_frame, iFrameId );
+            //if( !thumbnail.RenderTarget )
+            if( !thumbnail.Texture )
+                continue;
+
+            thumbnails.Add( thumbnail );
+
+            break; // only the first subkey (of the metakey) is used
+        }
+    }
+
+    //---
+
+    mAnimationsTimelineThumbnails.Add( iGuid, thumbnails );
 }
 
 //-
 
 void
-FCinematicBoardSection::BuildPlanesOpacityChannelProxy()
+FCinematicBoardSection::BuildAnimationsOpacityChannelProxy()
 {
-    mPlanesOpacityChannelProxies = BoardSequenceHelpers::BuildPlanesOpacityChannelProxy( *GetSequencer(), GetSubSectionObject(), GetSequencer()->GetFocusedTemplateID() );
+    mAnimationsOpacityChannelProxies = BoardSequenceHelpers::BuildAnimationsOpacityChannelProxy( *GetSequencer(), GetSubSectionObject(), GetSequencer()->GetFocusedTemplateID() );
 
-    ReBuildPlanesOpacityMetaChannel();
+    ReBuildAnimationsOpacityMetaChannel();
 }
 
 FChannelProxyBySectionMap
-FCinematicBoardSection::GetPlaneOpacityChannelProxy( FMovieScenePossessable iPossessable ) const
+FCinematicBoardSection::GetAnimationOpacityChannelProxy( FMovieScenePossessable iPossessable ) const
 {
-    if( !mPlanesOpacityChannelProxies.Contains( iPossessable.GetGuid() ) )
+    if( !mAnimationsOpacityChannelProxies.Contains( iPossessable.GetGuid() ) )
         return FChannelProxyBySectionMap();
 
-    return mPlanesOpacityChannelProxies[iPossessable.GetGuid()];
+    return mAnimationsOpacityChannelProxies[iPossessable.GetGuid()];
 }
 
 void
-FCinematicBoardSection::ReBuildPlanesOpacityMetaChannel()
+FCinematicBoardSection::ReBuildAnimationsOpacityMetaChannel()
 {
     FTimeToPixel converter( ConstructConverterForViewRange() );
 
@@ -708,8 +913,8 @@ FCinematicBoardSection::ReBuildPlanesOpacityMetaChannel()
     TRange<FFrameNumber> inner_range_tolerance( ( ( clicked_frame - HalfKeySizeFrames ) * OuterToInnerTransform ).FloorToFrame(), ( ( clicked_frame + HalfKeySizeFrames ) * OuterToInnerTransform ).CeilToFrame() );
     FFrameNumber inner_tolerance = inner_range_tolerance.Size<FFrameNumber>() / 2;
 
-    mPlanesOpacityMetaChannel.Empty();
-    for( const auto& pair : mPlanesOpacityChannelProxies )
+    mAnimationsOpacityMetaChannel.Empty();
+    for( const auto& pair : mAnimationsOpacityChannelProxies )
     {
         FGuid guid = pair.Key;
         FChannelProxyBySectionMap map = pair.Value;
@@ -717,17 +922,17 @@ FCinematicBoardSection::ReBuildPlanesOpacityMetaChannel()
         TSharedPtr<FMetaChannel> meta_channel = MakeShared<FMetaChannel>( inner_tolerance );
         meta_channel->Build( map );
 
-        mPlanesOpacityMetaChannel.Add( guid, meta_channel );
+        mAnimationsOpacityMetaChannel.Add( guid, meta_channel );
     }
 }
 
 TSharedPtr<FMetaChannel>
-FCinematicBoardSection::GetPlaneOpacityMetaChannel( FMovieScenePossessable iPossessable ) const
+FCinematicBoardSection::GetAnimationOpacityMetaChannel( FMovieScenePossessable iPossessable ) const
 {
-    if( !mPlanesOpacityMetaChannel.Contains( iPossessable.GetGuid() ) )
+    if( !mAnimationsOpacityMetaChannel.Contains( iPossessable.GetGuid() ) )
         return nullptr;
 
-    return mPlanesOpacityMetaChannel[iPossessable.GetGuid()];
+    return mAnimationsOpacityMetaChannel[iPossessable.GetGuid()];
 }
 
 //---
@@ -986,14 +1191,14 @@ FCinematicBoardSection::BuildSectionContextMenu( FMenuBuilder& ioMenuBuilder, co
                 FNewMenuDelegate::CreateSP( this, &FCinematicBoardSection::AddTakesMenu ),
                 FUIAction(
                     FExecuteAction(),
-                    FCanExecuteAction::CreateLambda( [this, &sectionObject]() { return !BoardSequenceTools::IsDrawingInEditionMode( GetSequencer().Get(), sectionObject ); } )
+                    FCanExecuteAction::CreateLambda( [this, &sectionObject]() { return !BoardSequenceTools::IsAnimationInEditionMode( GetSequencer().Get(), sectionObject ); } )
                 ),
                 NAME_None,
                 EUserInterfaceActionType::Button );
 
             FText take_tooltip = FText::Format( LOCTEXT( "NewTakeTooltip", "Create a new take for {0}" ), FText::FromString( sectionObject.GetBoardDisplayName() ) );
-            if( BoardSequenceTools::IsDrawingInEditionMode( GetSequencer().Get(), sectionObject ) )
-                take_tooltip = FText::Format( LOCTEXT( "NewTakeWithWarningTooltip", "Create a new take for {0}\n\nDrawing(s) must not be in edition mode" ), FText::FromString( sectionObject.GetBoardDisplayName() ) );
+            if( BoardSequenceTools::IsAnimationInEditionMode( GetSequencer().Get(), sectionObject ) )
+                take_tooltip = FText::Format( LOCTEXT( "NewTakeWithWarningTooltip", "Create a new take for {0}\n\nAnimation(s) must not be in edition mode" ), FText::FromString( sectionObject.GetBoardDisplayName() ) );
 
             ioMenuBuilder.AddMenuEntry(
                 LOCTEXT( "NewTake", "New Take" ),
@@ -1001,7 +1206,7 @@ FCinematicBoardSection::BuildSectionContextMenu( FMenuBuilder& ioMenuBuilder, co
                 FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "Take" ),
                 FUIAction(
                     FExecuteAction::CreateLambda( [this, &sectionObject]() { BoardSequenceTools::CreateTake( GetSequencer().Get(), sectionObject ); } ),
-                    FCanExecuteAction::CreateLambda( [this, &sectionObject]() { return !BoardSequenceTools::IsDrawingInEditionMode( GetSequencer().Get(), sectionObject ); } )
+                    FCanExecuteAction::CreateLambda( [this, &sectionObject]() { return !BoardSequenceTools::IsAnimationInEditionMode( GetSequencer().Get(), sectionObject ); } )
                 )
             );
         }
@@ -1112,7 +1317,7 @@ FCinematicBoardSection::AddTakesMenu( FMenuBuilder& MenuBuilder )
             take_sequence->GetPathName() == sectionObject.GetSequence()->GetPathName() ? FSlateIcon( FAppStyle::Get().GetStyleSetName(), "Sequencer.Star" ) : FSlateIcon( FAppStyle::Get().GetStyleSetName(), "Sequencer.Empty" ),
             FUIAction(
                 FExecuteAction::CreateLambda( [this, &sectionObject, take]() { BoardSequenceTools::SwitchTake( GetSequencer().Get(), sectionObject, sectionObject.FindTake( take ) ); } ),
-                FCanExecuteAction::CreateLambda( [this, &sectionObject]() { return !BoardSequenceTools::IsDrawingInEditionMode( GetSequencer().Get(), sectionObject ); } )
+                FCanExecuteAction::CreateLambda( [this, &sectionObject]() { return !BoardSequenceTools::IsAnimationInEditionMode( GetSequencer().Get(), sectionObject ); } )
             )
         );
     }

@@ -14,7 +14,7 @@
 #include "IContentBrowserSingleton.h"
 
 /**
- * Class for audio sections, handles drawing of all waveform previews.
+ * Class for note sections, handles displaying of all notes.
  */
 class FNoteSection
     : public ISequencerSection

@@ -35,17 +35,33 @@ bool UOdysseyAnimationFactory::ConfigureProperties()
     //If return false, we don't create the object, if true, we create it
     TSharedPtr<SOdysseyAnimationConfigureWindow> configurationWindow = SNew( SOdysseyAnimationConfigureWindow );
     GEditor->EditorAddModalWindow( configurationWindow.ToSharedRef() );
-    mConfiguration = configurationWindow->GetConfiguration();
 
-    mConfigured = configurationWindow->GetWindowAnswer();
+    if( !configurationWindow->GetWindowAnswer() )
+        return false;
 
-    return configurationWindow->GetWindowAnswer();
+    //---
+
+    FOdysseyAnimationConfiguration configuration = configurationWindow->GetConfiguration();
+
+    DefaultName = configuration.Name;
+    Width = configuration.Settings.Width;
+    Height = configuration.Settings.Height;
+    Format = configuration.Settings.Format;
+    FrameRate = configuration.Settings.FrameRate;
+    DefaultLayerClass = configuration.Settings.DefaultLayerClass;
+    LayerBackgroundColor.Reset();
+    if( configuration.Settings.AddLayerBackground )
+    {
+        LayerBackgroundColor = configuration.Settings.LayerBackgroundColor;
+    }
+
+    return true;
 }
 
 FString
 UOdysseyAnimationFactory::GetDefaultNewAssetName() const
 {
-    return !mConfiguration.Name.ToString().IsEmpty() ? mConfiguration.Name.ToString() : Super::GetDefaultNewAssetName();
+    return DefaultName.Len() ? DefaultName : Super::GetDefaultNewAssetName();
 }
 
 UObject*
@@ -55,40 +71,15 @@ UOdysseyAnimationFactory::FactoryCreateNew( UClass* iClass, UObject* iParent, FN
 
     UOdysseyAnimation* animation = NewObject<UOdysseyAnimation>( iParent, iName, iFlags | RF_Transactional );
 
-    //happens when ConfigureProperties is not called
-    //Example : In the CreateAnimationAsset blueprint node
-    if (!mConfigured)
-        return animation;
-
-    mConfigured = false;
-
-    animation->Init(mConfiguration.Width, mConfiguration.Height, mConfiguration.Format, mConfiguration.FramesPerSecond);
+    animation->Init( Width, Height, Format, FrameRate.AsDecimal() );
     UOdysseyLayerStack* layerStack = animation->GetLayerStack();
 
-    switch (mConfiguration.LayerType)
-    {
-        case EOdysseyAnimationDefaultLayerType::Raster:
-        {
-            UOdysseyAnimationLayerImageRaster* layer = Cast<UOdysseyAnimationLayerImageRaster>(layerStack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass()));
-            layerStack->SetCurrentLayer(layer);
-            layer->AddCell(UOdysseyAnimationCellImageRaster::StaticClass());
-        }
-        break;
-
-        case EOdysseyAnimationDefaultLayerType::Vector:
-        {
-            UOdysseyAnimationLayerImageVector* layer = Cast<UOdysseyAnimationLayerImageVector>(layerStack->AddLayer(UOdysseyAnimationLayerImageVector::StaticClass()));
-            layerStack->SetCurrentLayer(layer);
-            layer->AddCell(UOdysseyAnimationCellImageVector::StaticClass());
-        }
-        break;
-
-        default:
-            check(false); //should not be called
-    }
+    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>( layerStack->AddLayer( *DefaultLayerClass ) );
+    layerStack->SetCurrentLayer( layer );
+    layer->AddCell( layer->GetDefaultCellClass() );
 
     //Background Layer
-    if (mConfiguration.BackgroundColor != EOdysseyAnimationBackgroundColor::Transparent)
+    if( LayerBackgroundColor.IsSet() )
     {
         UOdysseyAnimationLayerImageRaster* backgroundLayer = Cast<UOdysseyAnimationLayerImageRaster>(layerStack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass(), nullptr, 1));
         backgroundLayer->SetPostBehaviour(EOdysseyLayerImagePostBehaviour::Hold);
@@ -97,7 +88,7 @@ UOdysseyAnimationFactory::FactoryCreateNew( UClass* iClass, UObject* iParent, FN
         UOdysseyAnimationCellImageRaster* backgroundCell = Cast<UOdysseyAnimationCellImageRaster>(backgroundLayer->AddCell(UOdysseyAnimationCellImageRaster::StaticClass()));
         TSharedPtr<FOdysseyRasterBlock> backgroundRasterBlock = backgroundCell->GetRasterBlock();
 
-        FLinearColor backgorundColor = mConfiguration.GetBackgroundColor();
+        FLinearColor backgorundColor = *LayerBackgroundColor;
 
         FOdysseyRasterBlockMutator rasterBlockMutator(backgroundRasterBlock);
         rasterBlockMutator.EditTilesFromRects(

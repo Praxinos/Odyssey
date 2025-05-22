@@ -461,24 +461,24 @@ UMovieSceneCinematicBoardSection::SetBackgroundColor( FLinearColor iColor )
 }
 
 bool
-UMovieSceneCinematicBoardSection::IsPlaneKeysAreaVisible( FGuid iPlaneBinding ) const
+UMovieSceneCinematicBoardSection::IsAnimationKeysAreaVisible( FGuid iAnimationBinding ) const
 {
-    const bool* state = mPlaneKeysAreaVisibility.Find( iPlaneBinding );
+    const bool* state = mAnimationKeysAreaVisibility.Find( iAnimationBinding );
 
     return state ? *state : true;
 }
 
 void
-UMovieSceneCinematicBoardSection::SetPlaneKeysAreaVisibility( FGuid iPlaneBinding, bool iVisibility )
+UMovieSceneCinematicBoardSection::SetAnimationKeysAreaVisibility( FGuid iAnimationBinding, bool iVisibility )
 {
     TryModify();
-    mPlaneKeysAreaVisibility.Add( iPlaneBinding, iVisibility );
+    mAnimationKeysAreaVisibility.Add( iAnimationBinding, iVisibility );
 }
 
 void
-UMovieSceneCinematicBoardSection::TogglePlaneKeysAreaVisibility( FGuid iPlaneBinding )
+UMovieSceneCinematicBoardSection::ToggleAnimationKeysAreaVisibility( FGuid iAnimationBinding )
 {
-    SetPlaneKeysAreaVisibility( iPlaneBinding, !IsPlaneKeysAreaVisible( iPlaneBinding ) );
+    SetAnimationKeysAreaVisibility( iAnimationBinding, !IsAnimationKeysAreaVisible( iAnimationBinding ) );
 }
 
 float

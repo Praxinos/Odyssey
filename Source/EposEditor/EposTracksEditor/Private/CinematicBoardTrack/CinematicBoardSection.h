@@ -26,6 +26,7 @@ struct FInnerSequenceData;
  */
 class FCinematicBoardSection
     : public TSubSectionMixin<FKeyThumbnailSection>
+    , public FGCObject
 {
 public:
 
@@ -34,6 +35,10 @@ public:
 
     /** Virtual destructor. */
     virtual ~FCinematicBoardSection();
+
+public:
+    virtual void AddReferencedObjects( FReferenceCollector& Collector ) override;
+    virtual FString GetReferencerName() const override;
 
 public:
 
@@ -85,31 +90,54 @@ public:
     virtual void ReBuildCameraTransformMetaChannel();
     virtual TSharedPtr<FMetaChannel> GetCameraTransformMetaChannel() const;
 
-    virtual void BuildPlanesTransformChannelProxy();
-    virtual FChannelProxyBySectionMap GetPlaneTransformChannelProxy( FMovieScenePossessable iPossessable ) const;
-    virtual void ReBuildPlanesTransformMetaChannel();
-    virtual TSharedPtr<FMetaChannel> GetPlaneTransformMetaChannel( FMovieScenePossessable iPossessable ) const;
+    virtual void BuildAnimationsTransformChannelProxy();
+    virtual FChannelProxyBySectionMap GetAnimationTransformChannelProxy( FMovieScenePossessable iPossessable ) const;
+    virtual void ReBuildAnimationsTransformMetaChannel();
+    virtual TSharedPtr<FMetaChannel> GetAnimationTransformMetaChannel( FMovieScenePossessable iPossessable ) const;
 
-    virtual void BuildPlanesMaterialChannelProxy();
-    virtual FChannelProxyBySectionMap GetPlaneMaterialChannelProxy( FMovieScenePossessable iPossessable ) const;
-    virtual void ReBuildPlanesMaterialMetaChannel();
-    virtual TSharedPtr<FMetaChannel> GetPlaneMaterialMetaChannel( FMovieScenePossessable iPossessable ) const;
+    virtual void BuildAnimationsTimelineChannelProxy();
+    virtual FChannelProxyBySectionMap GetAnimationTimelineChannelProxy( FMovieScenePossessable iPossessable ) const;
+    virtual void ReBuildAnimationsTimelineMetaChannel();
+    virtual TSharedPtr<FMetaChannel> GetAnimationTimelineMetaChannel( FMovieScenePossessable iPossessable ) const;
+    struct FThumbnailData
+    {
+        FQualifiedFrameTime QTime;
+        FIntVector2 Size;
+        //TObjectPtr<UTextureRenderTarget2D> RenderTarget;
+        TObjectPtr<UTexture2D> Texture;
+        FSlateBrush* Brush = nullptr;
+    };
+    virtual const TArray<FThumbnailData>& GetAnimationTimelineThumbnails( FMovieScenePossessable iPossessable ) const;
+    virtual void ReBuildAnimationsTimelineThumbnails( FMovieScenePossessable iPossessable, TOptional<FGuid> iFrameId = TOptional<FGuid>() );
 
-    virtual void BuildPlanesOpacityChannelProxy();
-    virtual FChannelProxyBySectionMap GetPlaneOpacityChannelProxy( FMovieScenePossessable iPossessable ) const;
-    virtual void ReBuildPlanesOpacityMetaChannel();
-    virtual TSharedPtr<FMetaChannel> GetPlaneOpacityMetaChannel( FMovieScenePossessable iPossessable ) const;
+    virtual void BuildAnimationsOpacityChannelProxy();
+    virtual FChannelProxyBySectionMap GetAnimationOpacityChannelProxy( FMovieScenePossessable iPossessable ) const;
+    virtual void ReBuildAnimationsOpacityMetaChannel();
+    virtual TSharedPtr<FMetaChannel> GetAnimationOpacityMetaChannel( FMovieScenePossessable iPossessable ) const;
+
+private:
+    virtual void ReBuildAnimationsTimelineThumbnails( FGuid iGuid, TOptional<FGuid> iFrameId = TOptional<FGuid>() );
+    virtual FThumbnailData RebuildAnimationThumbnailDataInternal( UOdysseyAnimationTimelineSection* iSection, FFrameNumber iFrameInSequence, TOptional<FGuid> iFrameId = TOptional<FGuid>() );
 
 private:
     TArray<double> mThumbnailKeys;
     FChannelProxyBySectionMap   mCameraTransformChannelProxies;
     TSharedPtr<FMetaChannel>    mCameraTransformMetaChannel;
-    TMap<FGuid, FChannelProxyBySectionMap>  mPlanesTransformChannelProxies;
-    TMap<FGuid, TSharedPtr<FMetaChannel>>   mPlanesTransformMetaChannel;
-    TMap<FGuid, FChannelProxyBySectionMap>  mPlanesMaterialChannelProxies;
-    TMap<FGuid, TSharedPtr<FMetaChannel>>   mPlanesMaterialMetaChannel;
-    TMap<FGuid, FChannelProxyBySectionMap>  mPlanesOpacityChannelProxies;
-    TMap<FGuid, TSharedPtr<FMetaChannel>>   mPlanesOpacityMetaChannel;
+    TMap<FGuid, FChannelProxyBySectionMap>  mAnimationsTransformChannelProxies;
+    TMap<FGuid, TSharedPtr<FMetaChannel>>   mAnimationsTransformMetaChannel;
+    TMap<FGuid, FChannelProxyBySectionMap>  mAnimationsTimelineChannelProxies;
+    TMap<FGuid, TSharedPtr<FMetaChannel>>   mAnimationsTimelineMetaChannel;
+    TMap<FGuid, TArray<FThumbnailData>>     mAnimationsTimelineThumbnails;
+    TMap<FGuid, FChannelProxyBySectionMap>  mAnimationsOpacityChannelProxies;
+    TMap<FGuid, TSharedPtr<FMetaChannel>>   mAnimationsOpacityMetaChannel;
+
+    struct FPoolData
+    {
+        //UTextureRenderTarget2D* RenderTarget = nullptr;
+        UTexture2D* Texture = nullptr;
+    };
+    typedef TArray<FGuid> FRenderingComposition;
+    TMap<FRenderingComposition, FPoolData>  mAnimationsTimelineThumbnailPool;
 
 private:
     /** Add board takes menu */

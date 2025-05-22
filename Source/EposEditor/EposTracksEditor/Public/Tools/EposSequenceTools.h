@@ -15,7 +15,7 @@
 
 class AActor;
 class ACineCameraActor;
-class APlaneActor;
+class AOdysseyAnimationActor;
 class UBoardSequence;
 class UMaterialInstanceConstant;
 class UMaterialInterface;
@@ -27,12 +27,12 @@ class UMovieSceneSection;
 class UMovieSceneSequence;
 class UMovieSceneSubSection;
 class UMovieSceneTrack;
+class UOdysseyAnimation;
 class UShotSequence;
 class UTexture2D;
 class IMovieScenePlayer;
 class ISequencer;
 struct FBoardSectionTake;
-struct FDrawing; // but only as private functions
 struct FMovieSceneChannelHandle;
 
 void EjectAnyActor();
@@ -42,11 +42,11 @@ struct FCameraArgs
     FString mName;
 };
 
-struct FPlaneArgs
+struct FAnimationArgs
 {
     FString mName;
     TOptional<float> mMargin;
-    TWeakObjectPtr<UTexture2D> mTexture;
+    TWeakObjectPtr<UOdysseyAnimation> mAnimation;
 };
 
 struct FDrawingArgs
@@ -201,7 +201,7 @@ public:
     * @param ISequencer     iSequencer to add a new camera.
     * @param FFrameNumber   iFrameNumber to get the board section.
     */
-    static void CreateCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber, const FCameraArgs& iCameraArgs = FCameraArgs(), const FPlaneArgs& iPlaneArgs = FPlaneArgs() );
+    static void CreateCameraWithAnimation( ISequencer* iSequencer, FFrameNumber iFrameNumber, const FCameraArgs& iCameraArgs = FCameraArgs(), const FAnimationArgs& iAnimationArgs = FAnimationArgs() );
 
     /**
     *  Create a new camera (actor & track & cameracut track) in the board section
@@ -210,7 +210,7 @@ public:
     * @param UMovieSceneSubSection  iSubSection to add a new camera.
     * @param FFrameNumber           iFrameNumber to get the board section.
     */
-    static void CreateCamera( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, const FCameraArgs& iCameraArgs = FCameraArgs(), const FPlaneArgs& iPlaneArgs = FPlaneArgs() );
+    static void CreateCameraWithAnimation( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, const FCameraArgs& iCameraArgs = FCameraArgs(), const FAnimationArgs& iAnimationArgs = FAnimationArgs() );
 
 public:
     /**
@@ -389,213 +389,168 @@ public:
     */
     static bool HasNextCameraPosition( ISequencer* iSequencer, FFrameNumber iFrameNumber );
 
-// Inside EposSequenceTools_Plane
+// Inside EposSequenceTools_Animation
 public:
     /**
-    *  Create a new plane (actor & track) in the board section
+    *  Create a new animation (actor & track) in the board section
     *
-    * @param ISequencer     iSequencer to add a new plane.
+    * @param ISequencer     iSequencer to add a new animation.
     * @param FFrameNumber   iFrameNumber to get the board section.
     */
-    static void CreatePlane( ISequencer* iSequencer, FFrameNumber iFrameNumber, const FPlaneArgs& iPlaneArgs = FPlaneArgs() );
+    static void CreateAnimation( ISequencer* iSequencer, FFrameNumber iFrameNumber, const FAnimationArgs& iAnimationArgs = FAnimationArgs() );
 
     /**
-    *  Create a new plane (actor & track) in the board section
+    *  Create a new animation (actor & track) in the board section
     *
-    * @param ISequencer             iSequencer to add a new plane.
-    * @param UMovieSceneSubSection  iSubSection to add a new plane.
+    * @param ISequencer             iSequencer to add a new animation.
+    * @param UMovieSceneSubSection  iSubSection to add a new animation.
     * @param FFrameNumber           iFrameNumber to get the board section.
     */
-    static void CreatePlane( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, const FPlaneArgs& iPlaneArgs = FPlaneArgs() );
+    static void CreateAnimation( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, const FAnimationArgs& iAnimationArgs = FAnimationArgs() );
 
     /**
-    *  Can a plane be created in the board section ?
+    *  Can a animation be created in the board section ?
     *
     * @param ISequencer         iSequencer to get the camera.
     * @param FFrameNumber       iFrameNumber to get the board section.
     * @return bool
     */
-    static bool CanCreatePlane( ISequencer* iSequencer, FFrameNumber iFrameNumber );
+    static bool CanCreateAnimation( ISequencer* iSequencer, FFrameNumber iFrameNumber );
 
     /**
-    *  Get all planes (actor & track bindings) in the board section
+    *  Get all animations (actor & track bindings) in the board section
     *
-    * @param ISequencer     iSequencer to get planes.
+    * @param ISequencer     iSequencer to get animations.
     * @param FFrameNumber   iFrameNumber to get the board section.
-    * @param TArray<APlaneActor*>* oPlanes to get all plane actors.
-    * @param TArray<FGuid>*        oPlaneBindings to get all plane bindings.
+    * @param TArray<AOdysseyAnimationActor*>*   oAnimations to get all animation actors.
+    * @param TArray<FGuid>*                     oAnimationBindings to get all animation bindings.
     */
-    static int32 GetAllPlanes( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<APlaneActor*>* oPlanes = nullptr, TArray<FGuid>* oPlaneBindings = nullptr );
+    static int32 GetAllAnimations( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<AOdysseyAnimationActor*>* oAnimations = nullptr, TArray<FGuid>* oAnimationBindings = nullptr );
 
     /**
-    *  Detach a plane of the camera in the board section
+    *  Detach a animation of the camera in the board section
     *
-    * @param ISequencer     iSequencer to detach a plane.
+    * @param ISequencer     iSequencer to detach a animation.
     * @param FFrameNumber   iFrameNumber to get the board section.
-    * @param FGuid          iPlaneBinding to detach.
+    * @param FGuid          iAnimationBinding to detach.
     */
-    static void DetachPlane( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<FGuid> iPlaneBindings );
-    static void DetachPlane( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding );
+    static void DetachAnimation( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<FGuid> iAnimationBindings );
+    static void DetachAnimation( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iAnimationBinding );
 
     /**
-    *  Detach a plane of the camera in the board section
+    *  Detach a animation of the camera in the board section
     *
-    * @param ISequencer             iSequencer to detach a plane.
-    * @param UMovieSceneSubSection  iSubSection to detach a plane.
-    * @param FGuid                  iPlaneBinding to detach.
+    * @param ISequencer             iSequencer to detach a animation.
+    * @param UMovieSceneSubSection  iSubSection to detach a animation.
+    * @param FGuid                  iAnimationBinding to detach.
     */
-    static void DetachPlane( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, TArray<FGuid> iPlaneBindings );
-    static void DetachPlane( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FGuid iPlaneBinding );
+    static void DetachAnimation( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, TArray<FGuid> iAnimationBindings );
+    static void DetachAnimation( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FGuid iAnimationBinding );
 
     /**
-    *  Detach a plane of the camera in the board section
+    *  Detach a animation of the camera in the board section
     *
-    * @param ISequencer             iSequencer to detach a plane.
-    * @param UMovieSceneSubSection  iSubSection to detach a plane.
-    * @param FGuid                  iPlaneBinding to detach.
+    * @param ISequencer             iSequencer to detach a animation.
+    * @param UMovieSceneSubSection  iSubSection to detach a animation.
+    * @param FGuid                  iAnimationBinding to detach.
     */
-    static bool CanDetachPlane( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, TArray<FGuid> iPlaneBindings );
-    static bool CanDetachPlane( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FGuid iPlaneBinding );
+    static bool CanDetachAnimation( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, TArray<FGuid> iAnimationBindings );
+    static bool CanDetachAnimation( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FGuid iAnimationBinding );
 
     /**
-    *  Get all planes (actor & track bindings) attached to the camera in the board section
+    *  Get all animations (actor & track bindings) attached to the camera in the board section
     *
-    * @param ISequencer     iSequencer to get planes.
+    * @param ISequencer     iSequencer to get animations.
     * @param FFrameNumber   iFrameNumber to get the board section.
-    * @param TArray<APlaneActor*>* oPlanes to get all plane actors.
-    * @param TArray<FGuid>*        oPlaneBindings to get all plane bindings.
+    * @param TArray<AOdysseyAnimationActor*>*   oAnimations to get all animation actors.
+    * @param TArray<FGuid>*                     oAnimationBindings to get all animation bindings.
     */
-    static int32 GetAttachedPlanes( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<APlaneActor*>* oPlanes = nullptr, TArray<FGuid>* oPlaneBindings = nullptr );
+    static int32 GetAttachedAnimations( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<AOdysseyAnimationActor*>* oAnimations = nullptr, TArray<FGuid>* oAnimationBindings = nullptr );
 
     /**
-    *  Get a plane visiblity of the camera in the board section
+    *  Get all animations (actor & track bindings) attached to the camera in the board section
     *
-    * @param ISequencer     iSequencer to detach a plane.
+    * @param ISequencer     iSequencer to get animations.
+    * @param UMovieSceneSubSection  iSubSection to check all animations.
+    */
+    static bool IsAnimationInEditionMode( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection );
+
+    /**
+    *  Get a animation visiblity of the camera in the board section
+    *
+    * @param ISequencer     iSequencer to detach a animation.
     * @param FFrameNumber   iFrameNumber to get the board section.
-    * @param FGuid          iPlaneBinding to get visibility.
+    * @param FGuid          iAnimationBinding to get visibility.
     */
-    static bool IsPlaneVisible( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding );
+    static bool IsAnimationVisible( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iAnimationBinding );
 
     /**
-    *  Get a plane visiblity of the camera in the board section
+    *  Get a animation visiblity of the camera in the board section
     *
-    * @param ISequencer             iSequencer to detach a plane.
-    * @param UMovieSceneSubSection  iSubSection to detach a plane.
-    * @param FGuid                  iPlaneBinding to get visibility.
+    * @param ISequencer             iSequencer to detach a animation.
+    * @param UMovieSceneSubSection  iSubSection to detach a animation.
+    * @param FGuid                  iAnimationBinding to get visibility.
     */
-    static bool IsPlaneVisible( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FGuid iPlaneBinding );
+    static bool IsAnimationVisible( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FGuid iAnimationBinding );
 
     /**
-    *  Toggle a plane visiblity of the camera in the board section
+    *  Toggle a animation visiblity of the camera in the board section
     *
-    * @param ISequencer     iSequencer to detach a plane.
+    * @param ISequencer     iSequencer to detach a animation.
     * @param FFrameNumber   iFrameNumber to get the board section.
-    * @param FGuid          iPlaneBinding to toggle visibility.
+    * @param FGuid          iAnimationBinding to toggle visibility.
     */
-    static void TogglePlaneVisibility( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding );
+    static void ToggleAnimationVisibility( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iAnimationBinding );
 
     /**
-    *  Toggle a plane visiblity of the camera in the board section
+    *  Toggle a animation visiblity of the camera in the board section
     *
-    * @param ISequencer             iSequencer to detach a plane.
-    * @param UMovieSceneSubSection  iSubSection to detach a plane.
-    * @param FGuid                  iPlaneBinding to toggle visibility.
+    * @param ISequencer             iSequencer to detach a animation.
+    * @param UMovieSceneSubSection  iSubSection to detach a animation.
+    * @param FGuid                  iAnimationBinding to toggle visibility.
     */
-    static void TogglePlaneVisibility( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, TArray<FGuid> iPlaneBindings, TOptional<FGuid> iPlaneReference = TOptional<FGuid>() );
-    static void TogglePlaneVisibility( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FGuid iPlaneBinding );
+    static void ToggleAnimationVisibility( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, TArray<FGuid> iAnimationBindings, TOptional<FGuid> iAnimationReference = TOptional<FGuid>() );
+    static void ToggleAnimationVisibility( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FGuid iAnimationBinding );
 
     /**
-    *  Delete a plane (with its actor) of the camera in the board section
+    *  Delete a animation (with its actor) of the camera in the board section
     *
-    * @param ISequencer     iSequencer to delete a plane.
+    * @param ISequencer     iSequencer to delete a animation.
     * @param FFrameNumber   iFrameNumber to get the board section.
-    * @param FGuid          iPlaneBinding to detach.
+    * @param FGuid          iAnimationBinding to detach.
     */
-    static void DeletePlane( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<FGuid> iPlaneBindings );
-    static void DeletePlane( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding );
+    static void DeleteAnimation( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<FGuid> iAnimationBindings );
+    static void DeleteAnimation( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iAnimationBinding );
 
     /**
-    *  Delete a plane (with its actor) of the camera in the board section
+    *  Delete a animation (with its actor) of the camera in the board section
     *
-    * @param ISequencer             iSequencer to delete a plane.
-    * @param UMovieSceneSubSection  iSubSection to delete a plane.
-    * @param FGuid                  iPlaneBinding to delete.
+    * @param ISequencer             iSequencer to delete a animation.
+    * @param UMovieSceneSubSection  iSubSection to delete a animation.
+    * @param FGuid                  iAnimationBinding to delete.
     */
-    static void DeletePlane( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, TArray<FGuid> iPlaneBindings );
-    static void DeletePlane( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FGuid iPlaneBinding );
+    static void DeleteAnimation( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, TArray<FGuid> iAnimationBindings );
+    static void DeleteAnimation( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FGuid iAnimationBinding );
 
     /**
-    *  Select a plane in the board section (and unselect all other planes)
+    *  Select a animation in the board section (and unselect all other animations)
     *
-    * @param ISequencer             iSequencer to select a plane.
-    * @param UMovieSceneSubSection  iSubSection to select a plane.
-    * @param FGuid                  iPlaneBinding to select.
+    * @param ISequencer             iSequencer to select a animation.
+    * @param UMovieSceneSubSection  iSubSection to select a animation.
+    * @param FGuid                  iAnimationBinding to select.
     */
-    static void SelectSinglePlane( ISequencer* iSequencer, UMovieSceneSubSection* iSubSection, FGuid iPlaneBinding );
+    static void SelectSingleAnimation( ISequencer* iSequencer, UMovieSceneSubSection* iSubSection, FGuid iAnimationBinding );
 
     /**
-    *  Select a plane in the board section (and keep already selected all other planes)
+    *  Select a animation in the board section (and keep already selected all other animations)
     *
-    * @param ISequencer             iSequencer to select a plane.
-    * @param UMovieSceneSubSection  iSubSection to select a plane.
-    * @param FGuid                  iPlaneBinding to select.
+    * @param ISequencer             iSequencer to select a animation.
+    * @param UMovieSceneSubSection  iSubSection to select a animation.
+    * @param FGuid                  iAnimationBinding to select.
     */
-    static void SelectMultiPlane( ISequencer* iSequencer, UMovieSceneSubSection* iSubSection, FGuid iPlaneBinding );
+    static void SelectMultiAnimation( ISequencer* iSequencer, UMovieSceneSubSection* iSubSection, FGuid iAnimationBinding );
 
 // Inside EposSequenceTools_Drawing
-public:
-    /**
-    *  Create a new drawing (material & texture) in a plane in the board section
-    *
-    * @param ISequencer     iSequencer to add a new drawing.
-    * @param FFrameNumber   iFrameNumber to get the board section.
-    * @param FGuid          iPlaneBinding to get the plane track.
-    */
-    static void CreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<FGuid> iPlaneBindings, const FDrawingArgs& iDrawingArgs = FDrawingArgs() );
-    static void CreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding, const FDrawingArgs& iDrawingArgs = FDrawingArgs() );
-
-    /**
-    *  Create a new drawing (material & texture) in a plane in the board section
-    *
-    * @param ISequencer     iSequencer to add a new drawing.
-    * @param UMovieSceneSubSection  iSubSection to get the plane.
-    * @param FFrameNumber   iFrameNumber to get the board section.
-    * @param FGuid          iPlaneBinding to get the plane track.
-    */
-    static void CreateDrawing( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, TArray<FGuid> iPlaneBindings, const FDrawingArgs& iDrawingArgs = FDrawingArgs() );
-    static void CreateDrawing( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, FGuid iPlaneBinding, const FDrawingArgs& iDrawingArgs = FDrawingArgs() );
-
-    /**
-    *  Can a drawing be created in the board section ?
-    *
-    * @param ISequencer     iSequencer to get the plane.
-    * @param FFrameNumber   iFrameNumber to get the board section.
-    * @param FGuid          iPlaneBinding to get the plane track.
-    * @return bool
-    */
-    static bool CanCreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding );
-
-    /**
-    *  Can a drawing be created in the board section ?
-    *
-    * @param ISequencer             iSequencer to get the plane.
-    * @param UMovieSceneSubSection  iSubSection to get the plane.
-    * @param FFrameNumber           iFrameNumber to get the board section.
-    * @param FGuid                  iPlaneBinding to get the plane track.
-    * @return bool
-    */
-    static bool CanCreateDrawing( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, TArray<FGuid> iPlaneBindings );
-    static bool CanCreateDrawing( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, FGuid iPlaneBinding );
-
-    static bool IsDrawingInEditionMode( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection );
-
-    static void CloneDrawing( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, UMovieSceneSection* iSection, const FMovieSceneChannelHandle& iChannelHandle, FKeyHandle iKeyHandle, FFrameNumber iFrameNumber );
-
-    static bool CanCloneDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding );
-    static bool CanCloneDrawing( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, FGuid iPlaneBinding );
-
-    static void DeleteDrawing( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, TArrayView<TWeakObjectPtr<UMovieSceneSection>> iSections, TArrayView<FMovieSceneChannelHandle> iChannelHandles, TArrayView<FKeyHandle> iKeyHandles );
-
 public:
     /**
     *  Go to the previous drawing in the board section
@@ -631,14 +586,14 @@ public:
 
 // Inside EposSequenceTools_Opacity
 public:
-    static bool CanCreateOpacity( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding );
-    static bool CanCreateOpacity( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, TArray<FGuid> iPlaneBindings );
-    static bool CanCreateOpacity( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, FGuid iPlaneBinding );
+    static bool CanCreateOpacity( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iActorBinding );
+    static bool CanCreateOpacity( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, TArray<FGuid> iActorBindings );
+    static bool CanCreateOpacity( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, FGuid iActorBinding );
 
-    static void CreateOpacity( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<FGuid> iPlaneBindings, float iOpacity );
-    static void CreateOpacity( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding, float iOpacity );
-    static void CreateOpacity( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, TArray<FGuid> iPlaneBindings, float iOpacity );
-    static void CreateOpacity( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, FGuid iPlaneBinding, float iOpacity );
+    static void CreateOpacity( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<FGuid> iActorBindings, float iOpacity );
+    static void CreateOpacity( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iActorBinding, float iOpacity );
+    static void CreateOpacity( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, TArray<FGuid> iActorBindings, float iOpacity );
+    static void CreateOpacity( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, FGuid iActorBinding, float iOpacity );
 
     static void DeleteOpacity( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, TArrayView<TWeakObjectPtr<UMovieSceneSection>> iSections, TArrayView<FMovieSceneChannelHandle> iChannelHandles, TArrayView<FKeyHandle> iKeyHandles );
 
@@ -670,15 +625,16 @@ public:
 
 //---
 
+
 UENUM( BlueprintType )
-enum class EScalePlane : uint8
+enum class EScaleActor : uint8
 {
-    // The plane won't scale
+    // The animation won't scale
     kNo                 UMETA( DisplayName = "No Scale" ),
-    // The plane will scale relatively to its original size
-    // If the plane is already 100% camera FOV, it will act as the option "100% Camera"
+    // The animation will scale relatively to its original size
+    // If the animation is already 100% camera FOV, it will act as the option "100% Camera"
     kRelativeScale      UMETA( DisplayName = "Relative Scale" ),
-    // The plane will auto-scale to match the 100% camera FOV
+    // The animation will auto-scale to match the 100% camera FOV
     kFitToCamera        UMETA( DisplayName = "Scale 100% Camera" ),
 };
 
@@ -697,9 +653,6 @@ public:
     * @param UMovieSceneSubSection* iSection   the section to clone.
     */
     static void CloneInnerContent( ISequencer* iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, bool iEmptyDrawings );
-
-private:
-    static void CloneInnerPlane( ISequencer* iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, UMovieScene* iMovieScene, bool iEmptyDrawings, APlaneActor* iPlaneToClone, FGuid iPlaneBinding, ACineCameraActor* iClonedCamera, bool iAttachPlaneToCamera );
 
 public:
     static void StepToNextShot( ISequencer* iSequencer );
@@ -732,6 +685,10 @@ public:
 private:
     static void RenameBinding( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iBinding, FString iNewLabel );
 
+public:
+    static bool MoveAndScaleActor( AActor* ioActor, const ACineCameraActor* iCamera, float iNewDistance, EScaleActor iScaleType );
+    static bool CanMoveAndScaleActor( const AActor* iActor, const ACineCameraActor* iCamera );
+
 // Inside EposSequenceTools_Camera
 public:
     /**
@@ -746,7 +703,7 @@ public:
     *
     * @param ISequencer iSequencer to add Camera track and CameraCut track.
     */
-    static void CreateCamera( ISequencer* iSequencer, const FCameraArgs& iCameraArgs = FCameraArgs(), const FPlaneArgs& iPlaneArgs = FPlaneArgs() );
+    static void CreateCameraWithAnimation( ISequencer* iSequencer, const FCameraArgs& iCameraArgs = FCameraArgs(), const FAnimationArgs& iAnimationArgs = FAnimationArgs() );
 
     static bool CanCreateCamera( ISequencer* iSequencer );
 
@@ -779,11 +736,11 @@ public:
     static void StopPilotingCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber, ACineCameraActor* iCamera, const TOptional<FTransformData>& iPreviousTransform, const FTransformData& iNewTransform );
 
 private:
-    static void CreateCamera( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FCameraArgs& iCameraArgs, const FPlaneArgs& iPlaneArgs );
+    static void CreateCamera( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FCameraArgs& iCameraArgs, const FAnimationArgs* iAnimationArgs );
 
     static ACineCameraActor* SpawnCamera( UWorld* iWorld, const FTransform& iTransform );
-    static ACineCameraActor* SpawnAndBindCamera( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FCameraArgs& iCameraArgs, const FPlaneArgs& iPlaneArgs, FGuid* oGuid );
-    static void CameraAdded( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid CameraGuid, ACineCameraActor* iCamera, FFrameNumber FrameNumber, const FPlaneArgs& iPlaneArgs );
+    static ACineCameraActor* SpawnAndBindCamera( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FCameraArgs& iCameraArgs, FGuid* oGuid );
+    static void CameraAdded( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid CameraGuid, ACineCameraActor* iCamera, FFrameNumber FrameNumber, const FAnimationArgs* iAnimationArgs );
     static void CreateCameraCut( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FGuid iCameraGuid, FFrameNumber iFrameNumber );
 
     static bool SnapCameraToViewport( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, ACineCameraActor* ioCamera, FGuid iCameraGuid, FFrameNumber iFrameNumber, const FTransform& iNewTransform, EMovieSceneKeyInterpolation iInterpolation );
@@ -820,76 +777,46 @@ private:
     static void GotoNextCameraPosition( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber );
 
 public:
-    static bool SetCameraFocalLengthAndScalePlane( TArray<TWeakObjectPtr<APlaneActor>> ioPlanes, ACineCameraActor* ioCamera, float iNewFocalLength, EScalePlane iScaleType );
+    static bool SetCameraFocalLengthAndScaleActor( TArray<TWeakObjectPtr<AActor>> ioActors, ACineCameraActor* ioCamera, float iNewFocalLength, EScaleActor iScaleType );
 
-// Inside EposSequenceTools_Plane
+// Inside EposSequenceTools_Animation
 public:
-    /**
-    *  Add a Camera track
-    *
-    * @param ISequencer iSequencer to add a plane.
-    */
-    static void CreatePlane( ISequencer* iSequencer, FFrameNumber iFrameNumber, const FPlaneArgs& iPlaneArgs = FPlaneArgs() );
+    static void CreateAnimation( ISequencer* iSequencer, FFrameNumber iFrameNumber, const FAnimationArgs& iAnimationArgs = FAnimationArgs() );
 
-    static bool CanCreatePlane( ISequencer* iSequencer, FFrameNumber iFrameNumber );
+    static bool CanCreateAnimation( ISequencer* iSequencer, FFrameNumber iFrameNumber );
 
-    static int32 GetAllPlanes( ISequencer* iSequencer, TArray<APlaneActor*>* oPlanes = nullptr, TArray<FGuid>* oPlaneBindings = nullptr );
+    static int32 GetAllAnimations( ISequencer* iSequencer, TArray<AOdysseyAnimationActor*>* oAnimations = nullptr, TArray<FGuid>* oAnimationBindings = nullptr );
 
-    static void DetachPlane( ISequencer* iSequencer, TArray<FGuid> iPlaneBindings );
-    static void DetachPlane( ISequencer* iSequencer, FGuid iPlaneBinding );
+    static void DetachAnimation( ISequencer* iSequencer, TArray<FGuid> iAnimationBindings );
+    static void DetachAnimation( ISequencer* iSequencer, FGuid iAnimationBinding );
 
-    static bool CanDetachPlane( ISequencer* iSequencer, FGuid iPlaneBinding );
+    static bool CanDetachAnimation( ISequencer* iSequencer, FGuid iAnimationBinding );
 
-    static int32 GetAttachedPlanes( ISequencer* iSequencer, TArray<APlaneActor*>* oPlanes = nullptr, TArray<FGuid>* oPlaneBindings = nullptr );
+    static int32 GetAttachedAnimations( ISequencer* iSequencer, TArray<AOdysseyAnimationActor*>* oAnimations = nullptr, TArray<FGuid>* oAnimationBindings = nullptr );
 
-    static bool IsPlaneVisible( ISequencer* iSequencer, FGuid iPlaneBinding );
-    static void TogglePlaneVisibility( ISequencer* iSequencer, TArray<FGuid> iPlaneBindings, TOptional<FGuid> iPlaneReference = TOptional<FGuid>() );
-    static void TogglePlaneVisibility( ISequencer* iSequencer, FGuid iPlaneBinding );
+    static bool IsAnimationInEditionMode( ISequencer* iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, UOdysseyAnimation* iAnimation );
 
-    static void DeletePlane( ISequencer* iSequencer, TArray<FGuid> iPlaneBindings );
-    static void DeletePlane( ISequencer* iSequencer, FGuid iPlaneBinding );
+    static bool IsAnimationVisible( ISequencer* iSequencer, FGuid iAnimationBinding );
+    static void ToggleAnimationVisibility( ISequencer* iSequencer, TArray<FGuid> iAnimationBindings, TOptional<FGuid> iAnimationReference = TOptional<FGuid>() );
+    static void ToggleAnimationVisibility( ISequencer* iSequencer, FGuid iAnimationBinding );
 
-    static bool MoveAndScalePlane( APlaneActor* ioPlane, const ACineCameraActor* iCamera, float iNewDistance, EScalePlane iScaleType );
-    static bool CanMoveAndScalePlane( const APlaneActor* iPlane, const ACineCameraActor* iCamera );
+    static void DeleteAnimation( ISequencer* iSequencer, TArray<FGuid> iAnimationBindings );
+    static void DeleteAnimation( ISequencer* iSequencer, FGuid iAnimationBinding );
 
 private:
-    static void CreatePlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, const FPlaneArgs& iPlaneArgs );
-    static void DetachPlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TArray<FGuid> iPlaneBinding );
-    static bool CanDetachPlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TArray<FGuid> iPlaneBindings );
-    static bool IsPlaneVisible( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding );
-    static void TogglePlaneVisibility( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TArray<FGuid> iPlaneBindings, TOptional<FGuid> iPlaneReference = TOptional<FGuid>() );
-    static void DeletePlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TArray<FGuid> iPlaneBindings );
-    static void SelectSinglePlane( ISequencer& iSequencer, UMovieSceneSubSection* iSubSection, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding );
-    static void SelectMultiPlane( ISequencer& iSequencer, UMovieSceneSubSection* iSubSection, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding );
+    static void CreateAnimation( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, const FAnimationArgs& iAnimationArgs );
+    static void DetachAnimation( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TArray<FGuid> iAnimationBinding );
+    static bool CanDetachAnimation( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TArray<FGuid> iAnimationBindings );
+    static bool IsAnimationVisible( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iAnimationBinding );
+    static void ToggleAnimationVisibility( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TArray<FGuid> iAnimationBindings, TOptional<FGuid> iAnimationReference = TOptional<FGuid>() );
+    static void DeleteAnimation( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TArray<FGuid> iAnimationBindings );
+    static void SelectSingleAnimation( ISequencer& iSequencer, UMovieSceneSubSection* iSubSection, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iAnimationBinding );
+    static void SelectMultiAnimation( ISequencer& iSequencer, UMovieSceneSubSection* iSubSection, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iAnimationBinding );
 
-    static APlaneActor* SpawnPlane( UWorld* iWorld, ACineCameraActor* iCamera, float iSafeMargin, FVector2D iRelativeScaling );
-    static APlaneActor* SpawnAndBindPlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iCameraGuid, ACineCameraActor* iCamera, FFrameNumber iFrameNumber, const FPlaneArgs& iPlaneArgs, FGuid* oGuid );
+    static AOdysseyAnimationActor* SpawnAnimation( UWorld* iWorld, ACineCameraActor* iCamera, float iFocusDistance, float iSafeMargin, FVector2D iRelativeScaling );
+    static AOdysseyAnimationActor* SpawnAndBindAnimation( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iCameraGuid, ACineCameraActor* iCamera, FFrameNumber iFrameNumber, const FAnimationArgs& iAnimationArgs, FGuid* oGuid );
 
 // Inside EposSequenceTools_Drawing
-public:
-    /**
-    *  Add a drawing (material/texture)
-    *
-    * @param ISequencer iSequencer to add a drawing.
-    */
-    static void CreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<FGuid> iPlaneBindings, const FDrawingArgs& iDrawingArgs = FDrawingArgs() );
-    static void CreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding, const FDrawingArgs& iDrawingArgs = FDrawingArgs() );
-
-    static bool CanCreateDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding );
-
-    static void CloneDrawing( ISequencer* iSequencer, UMovieSceneSection* iSection, const FMovieSceneChannelHandle& iChannelHandle, FKeyHandle iKeyHandle, FFrameNumber iFrameNumber );
-
-    static bool CanCloneDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding );
-
-    static void DeleteDrawing( ISequencer* iSequencer, TArrayView<TWeakObjectPtr<UMovieSceneSection>> iSections, TArrayView<FMovieSceneChannelHandle> iChannelHandles, TArrayView<FKeyHandle> iKeyHandles );
-
-private:
-    static void CreateDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, TArray<FGuid> iPlaneBindings, const FDrawingArgs& iDrawingArgs );
-    // FDrawing is used as parameter but only because the function is private, otherwise it should be UMovieSceneSection/FMovieSceneChannelHandle/FKeyHandle
-    static bool IsDrawingInEditionMode( ISequencer* iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FDrawing& iDrawing );
-    static void CloneDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, UMovieSceneSection* iSection, const FMovieSceneChannelHandle& iChannelHandle, FKeyHandle iKeyHandle, FFrameNumber iFrameNumber );
-    static void DeleteDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TArrayView<TWeakObjectPtr<UMovieSceneSection>> iSections, TArrayView<FMovieSceneChannelHandle> iChannelHandles, TArrayView<FKeyHandle> iKeyHandles );
-
 public:
     /**
     *  Go to the previous drawing
@@ -915,17 +842,17 @@ private:
 
 // Inside EposSequenceTools_Opacity
 public:
-    static bool CanCreateOpacity( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding );
+    static bool CanCreateOpacity( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iActorBinding );
 
-    static void CreateOpacity( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<FGuid> iPlaneBindings, float iOpacity );
-    static void CreateOpacity( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iPlaneBinding, float iOpacity );
+    static void CreateOpacity( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<FGuid> iActorBindings, float iOpacity );
+    static void CreateOpacity( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iActorBinding, float iOpacity );
 
     static void DeleteOpacity( ISequencer* iSequencer, TArrayView<TWeakObjectPtr<UMovieSceneSection>> iSections, TArrayView<FMovieSceneChannelHandle> iChannelHandles, TArrayView<FKeyHandle> iKeyHandles );
 
     static void SetOpacity( ISequencer* iSequencer, TArrayView<TWeakObjectPtr<UMovieSceneSection>> iSections, TArrayView<FMovieSceneChannelHandle> iChannelHandles, TArrayView<FKeyHandle> iKeyHandles, float iOpacity );
 
 private:
-    static void CreateOpacity( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, TArray<FGuid> iPlaneBindings, float iOpacity );
+    static void CreateOpacity( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, TArray<FGuid> iActorBindings, float iOpacity );
     static void DeleteOpacity( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TArrayView<TWeakObjectPtr<UMovieSceneSection>> iSections, TArrayView<FMovieSceneChannelHandle> iChannelHandles, TArrayView<FKeyHandle> iKeyHandles );
     static void SetOpacity( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TArrayView<TWeakObjectPtr<UMovieSceneSection>> iSections, TArrayView<FMovieSceneChannelHandle> iChannelHandles, TArrayView<FKeyHandle> iKeyHandles, float iOpacity );
 

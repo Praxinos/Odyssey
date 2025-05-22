@@ -68,7 +68,9 @@ public:
     UPROPERTY()
     FShotSequenceBindingReferences CameraBindingReferences;
     UPROPERTY()
-    FShotSequenceBindingReferences PlanesBindingReferences;
+    FShotSequenceBindingReferences PlanesBindingReferences_DEPRECATED;
+    UPROPERTY()
+    FShotSequenceBindingReferences AnimationsBindingReferences;
     UPROPERTY()
     FShotSequenceBindingReferences ActorsBindingReferences;
 

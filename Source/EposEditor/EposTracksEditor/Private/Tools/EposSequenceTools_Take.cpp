@@ -18,7 +18,6 @@
 #include "EposSequenceHelpers.h"
 #include "NamingConvention.h"
 #include "NoteTrack/MovieSceneNoteSection.h"
-#include "PlaneActor.h"
 #include "Settings/EposTracksSettings.h"
 #include "Settings/NamingConventionSettings.h"
 #include "Shot/ShotSequence.h"
@@ -39,7 +38,7 @@ BoardSequenceTools::CreateTake( ISequencer* iSequencer, UMovieSceneSubSection& i
     if( subsequence->IsA<UBoardSequence>() )
         return nullptr;
 
-    if( BoardSequenceTools::IsDrawingInEditionMode( iSequencer, iSubSection ) )
+    if( BoardSequenceTools::IsAnimationInEditionMode( iSequencer, iSubSection ) )
         return nullptr;
 
     FMovieSceneSequenceID epos_sequence_id;
@@ -118,7 +117,7 @@ BoardSequenceTools::SwitchTake( ISequencer* iSequencer, UMovieSceneSubSection& i
     if( !board_section->FindTake( *iTake ) )
         return nullptr;
 
-    if( BoardSequenceTools::IsDrawingInEditionMode( iSequencer, iSubSection ) )
+    if( BoardSequenceTools::IsAnimationInEditionMode( iSequencer, iSubSection ) )
         return nullptr;
 
     bool was_piloting_camera = BoardSequenceTools::IsPilotingCamera( iSequencer, iSubSection );

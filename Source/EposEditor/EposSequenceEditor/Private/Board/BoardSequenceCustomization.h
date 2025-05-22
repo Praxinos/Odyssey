@@ -32,11 +32,9 @@ public:
 private:
     void ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuilder );
     TSharedRef<SWidget> MakeCameraMenu();
-    TSharedRef<SWidget> MakePlaneMenu();
-    TSharedRef<SWidget> MakeLighttableMenu();
-    TSharedRef<SWidget> MakeDrawingMenu();
+    TSharedRef<SWidget> MakeAnimationMenu();
     TSharedRef<SWidget> MakeSettingsMenu();
-    TSharedRef<SWidget> MakeTextureMenu();
+    TSharedRef<SWidget> MakeAnimationSettingsMenu();
 
     void BindCommands( TSharedPtr<FUICommandList> CommandList );
 

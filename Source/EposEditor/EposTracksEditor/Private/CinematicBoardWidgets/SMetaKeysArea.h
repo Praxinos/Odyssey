@@ -41,6 +41,9 @@ protected:
 
     virtual const FSlateBrush* GetBackgroundBrush() const = 0;
 
+    virtual int32 DrawBackground( const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled ) const;
+    virtual int32 DrawKeys( const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled ) const;
+
 protected:
     virtual TSharedPtr<FMetaChannel> CreateKeysUnderMouse( const FPointerEvent& MouseEvent ) const;
 
@@ -54,6 +57,14 @@ protected:
     virtual TSharedPtr<const FMetaChannel>  GetMetaChannel() const = 0;
 
     virtual void RebuildMetaChannel() = 0;
+
+    virtual void ComputeClampRangePreMoveDuringDrag( TSharedPtr<FMetaChannel> iKeys, TRange<FFrameNumber>& oClampRangeInSubsequence ) const;
+
+    virtual void OnStartDragKeys( TSharedPtr<FMetaChannel> iKeys );
+    virtual void OnDragKeys( TSharedPtr<FMetaChannel> iKeys );
+    virtual void OnStopDragKeys( TSharedPtr<FMetaChannel> iKeys );
+
+    virtual void OnClickKeys( TSharedPtr<FMetaChannel> iKeys );
 
 private:
     /** Start a transaction at mouse down */
@@ -70,7 +81,8 @@ private:
 protected:
     TWeakPtr<FCinematicBoardSection>    mBoardSection;
 
-private:
+protected:
+//private:
     enum class EState
     {
         kIdle,

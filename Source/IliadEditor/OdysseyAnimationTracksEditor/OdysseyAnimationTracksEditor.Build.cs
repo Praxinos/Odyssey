@@ -53,6 +53,7 @@ namespace UnrealBuildTool.Rules
                     "OdysseyLayerStackEditor",
                     "OdysseyPainterEditor",
                     "OdysseyStyle",
+                    "EposSequence",
 
                     "Core",
                     "CoreUObject",

@@ -340,7 +340,7 @@ SCinematicBoardSectionNotes::Construct( const FArguments& InArgs, TSharedRef<FCi
 
     //---
 
-    // It's needed for notes (unlike for planes) as there is a SBorder widget as parent with a colored background
+    // It's needed for notes (unlike for animations) as there is a SBorder widget as parent with a colored background
     // It's not wished for board section as everything available for board should be done directly on it)
     auto IsNotesVisible = [this]() -> EVisibility
     {
@@ -447,7 +447,7 @@ SCinematicBoardSectionNotes::RebuildNoteList()
     //    if( iBindings.Num() != mNotes.Num() )
     //        return true;
 
-    //    if( !iBindings.Num() ) // Rebuild when no possessables, otherwise list view will be empty and not containing max_planes rows (with invalid guid)
+    //    if( !iBindings.Num() ) // Rebuild when no possessables, otherwise list view will be empty and not containing max_animations rows (with invalid guid)
     //        return true;
 
     //    for( int i = 0; i < iBindings.Num(); i++ )
@@ -456,7 +456,7 @@ SCinematicBoardSectionNotes::RebuildNoteList()
 
     //    return false;
     //};
-    //if( !need_rebuild( ordered_plane_bindings ) ) //TOCHECK: check if it's really ok
+    //if( !need_rebuild( ordered_animation_bindings ) ) //TOCHECK: check if it's really ok
     //    return;
 
     mNotes.Empty();

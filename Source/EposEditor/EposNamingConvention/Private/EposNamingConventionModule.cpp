@@ -55,13 +55,13 @@ FEposNamingConventionModule::RegisterPropertyCustomizations()
     PropertyModule.RegisterCustomPropertyTypeLayout(
         // This is the name of the Struct
         // this tells the property editor which is the struct property our customization will applied on.
-        FNamingConventionPlane::StaticStruct()->GetFName(),
+        FNamingConventionCamera::StaticStruct()->GetFName(),
         // this is where our MakeInstance() method is usefull
-        FOnGetPropertyTypeCustomizationInstance::CreateStatic( &FNamingConventionPlaneCustomization::MakeInstance ) );
+        FOnGetPropertyTypeCustomizationInstance::CreateStatic( &FNamingConventionCameraCustomization::MakeInstance ) );
 
     PropertyModule.RegisterCustomPropertyTypeLayout(
-        FNamingConventionCamera::StaticStruct()->GetFName(),
-        FOnGetPropertyTypeCustomizationInstance::CreateStatic( &FNamingConventionCameraCustomization::MakeInstance ) );
+        FNamingConventionAnimation::StaticStruct()->GetFName(),
+        FOnGetPropertyTypeCustomizationInstance::CreateStatic( &FNamingConventionAnimationCustomization::MakeInstance ) );
 
     PropertyModule.RegisterCustomPropertyTypeLayout(
         FNamingConventionShot::StaticStruct()->GetFName(),
@@ -80,7 +80,6 @@ FEposNamingConventionModule::UnregisterPropertyCustomizations()
     if( FModuleManager::Get().IsModuleLoaded( "PropertyEditor" ) )
     {
         FPropertyEditorModule& PropertyModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>( "PropertyEditor" );
-        PropertyModule.UnregisterCustomPropertyTypeLayout( FNamingConventionPlane::StaticStruct()->GetFName() );
         PropertyModule.UnregisterCustomPropertyTypeLayout( FNamingConventionCamera::StaticStruct()->GetFName() );
         PropertyModule.UnregisterCustomPropertyTypeLayout( FNamingConventionShot::StaticStruct()->GetFName() );
         PropertyModule.UnregisterCustomPropertyTypeLayout( FNamingConventionBoard::StaticStruct()->GetFName() );

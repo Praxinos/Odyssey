@@ -20,15 +20,15 @@ struct FExportPanelSourceMark
     FMovieSceneMarkedFrame  mMark;
 };
 
-struct FExportPanelSourceDrawing
+struct FExportPanelSourceAnimationCut
 {
-    struct FDrawingAndBindingId
+    struct FAnimationCutAndBindingId
     {
-        FDrawing    mDrawing;
-        FGuid       mBindingId;
+        FFrameNumber    mCut;
+        FGuid           mBindingId;
     };
 
-    TArray<FDrawingAndBindingId>    mDrawings;
+    TArray<FAnimationCutAndBindingId>  mAnimationCuts;
 };
 
 struct FExportPanel
@@ -38,8 +38,8 @@ struct FExportPanel
     UMovieSceneSequence* mSequence;
     FMovieSceneSequenceID mSequenceId;
 
-    TOptional<FExportPanelSourceMark>      mSourceMark;
-    TOptional<FExportPanelSourceDrawing>   mSourceDrawing;
+    TOptional<FExportPanelSourceMark>           mSourceMark;
+    TOptional<FExportPanelSourceAnimationCut>   mSourceAnimationCut;
 };
 
 //---

@@ -21,7 +21,7 @@
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "EposSequenceHelpers.h"
 #include "NamingConvention.h"
-#include "PlaneActor.h"
+#include "ScalingComponent.h"
 #include "Settings/EposTracksEditorSettings.h"
 #include "Shot/ShotSequence.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
@@ -66,18 +66,18 @@ ShotSequenceTools::GetCamera( ISequencer* iSequencer, FGuid* oCameraBinding )
 
 //static
 void
-BoardSequenceTools::CreateCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber, const FCameraArgs& iCameraArgs, const FPlaneArgs& iPlaneArgs )
+BoardSequenceTools::CreateCameraWithAnimation( ISequencer* iSequencer, FFrameNumber iFrameNumber, const FCameraArgs& iCameraArgs, const FAnimationArgs& iAnimationArgs )
 {
     BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
     if( !result.mInnerSequence )
         return;
 
-    return ShotSequenceTools::CreateCamera( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iCameraArgs, iPlaneArgs );
+    return ShotSequenceTools::CreateCamera( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iCameraArgs, &iAnimationArgs );
 }
 
 //static
 void
-BoardSequenceTools::CreateCamera( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, const FCameraArgs& iCameraArgs, const FPlaneArgs& iPlaneArgs )
+BoardSequenceTools::CreateCameraWithAnimation( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, const FCameraArgs& iCameraArgs, const FAnimationArgs& iAnimationArgs )
 {
     BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSubSection, iSequencer->GetFocusedTemplateID() );
     if( !result.mInnerSequence )
@@ -90,7 +90,7 @@ BoardSequenceTools::CreateCamera( ISequencer* iSequencer, const UMovieSceneSubSe
         return;
 
     FFrameTime inner_frame = iFrameNumber * iSubSection.OuterToInnerTransform();
-    ShotSequenceTools::CreateCamera( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iCameraArgs, iPlaneArgs );
+    ShotSequenceTools::CreateCamera( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, iCameraArgs, &iAnimationArgs );
 }
 
 //static
@@ -113,9 +113,9 @@ BoardSequenceTools::CanCreateCamera( ISequencer* iSequencer, FFrameNumber iFrame
 
 //static
 void
-ShotSequenceTools::CreateCamera( ISequencer* iSequencer, const FCameraArgs& iCameraArgs, const FPlaneArgs& iPlaneArgs )
+ShotSequenceTools::CreateCameraWithAnimation( ISequencer* iSequencer, const FCameraArgs& iCameraArgs, const FAnimationArgs& iAnimationArgs )
 {
-    CreateCamera( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iCameraArgs, iPlaneArgs );
+    CreateCamera( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iCameraArgs, &iAnimationArgs );
 }
 
 //static
@@ -136,7 +136,7 @@ ShotSequenceTools::CanCreateCamera( ISequencer* iSequencer )
 
 //static
 void
-ShotSequenceTools::CreateCamera( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FCameraArgs& iCameraArgs, const FPlaneArgs& iPlaneArgs )
+ShotSequenceTools::CreateCamera( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FCameraArgs& iCameraArgs, const FAnimationArgs* iAnimationArgs )
 {
     UMovieScene* movieScene = iSequence ? iSequence->GetMovieScene() : nullptr;
     if( !movieScene )
@@ -161,11 +161,11 @@ ShotSequenceTools::CreateCamera( ISequencer& iSequencer, UMovieSceneSequence* iS
     //---
 
     FGuid camera_guid;
-    ACineCameraActor* camera = ShotSequenceTools::SpawnAndBindCamera( iSequencer, iSequence, iSequenceID, iCameraArgs, iPlaneArgs, &camera_guid );
+    ACineCameraActor* camera = ShotSequenceTools::SpawnAndBindCamera( iSequencer, iSequence, iSequenceID, iCameraArgs, &camera_guid );
     if( !camera )
         return;
 
-    ShotSequenceTools::CameraAdded( iSequencer, iSequence, iSequenceID, camera_guid, camera, iSequencer.GetLocalTime().Time.FloorToFrame(), iPlaneArgs );
+    ShotSequenceTools::CameraAdded( iSequencer, iSequence, iSequenceID, camera_guid, camera, iSequencer.GetLocalTime().Time.FloorToFrame(), iAnimationArgs );
 
     //---
 
@@ -219,7 +219,7 @@ ShotSequenceTools::SpawnCamera( UWorld* iWorld, const FTransform& iTransform )
 
 //static
 ACineCameraActor*
-ShotSequenceTools::SpawnAndBindCamera( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FCameraArgs& iCameraArgs, const FPlaneArgs& iPlaneArgs, FGuid* oGuid ) // From FSequencer::CreateCamera()
+ShotSequenceTools::SpawnAndBindCamera( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FCameraArgs& iCameraArgs, FGuid* oGuid ) // From FSequencer::CreateCamera()
 {
     if( !GCurrentLevelEditingViewportClient )
         return nullptr;
@@ -262,11 +262,12 @@ ShotSequenceTools::SpawnAndBindCamera( ISequencer& iSequencer, UMovieSceneSequen
 
 //static
 void
-ShotSequenceTools::CameraAdded( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid CameraGuid, ACineCameraActor* iCamera, FFrameNumber FrameNumber, const FPlaneArgs& iPlaneArgs )
+ShotSequenceTools::CameraAdded( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid CameraGuid, ACineCameraActor* iCamera, FFrameNumber FrameNumber, const FAnimationArgs* iAnimationArgs )
 {
     CreateCameraCut( iSequencer, iSequence, CameraGuid, FrameNumber );
 
-    SpawnAndBindPlane( iSequencer, iSequence, iSequenceID, CameraGuid, iCamera, FrameNumber, iPlaneArgs, nullptr );
+    if( iAnimationArgs )
+        SpawnAndBindAnimation( iSequencer, iSequence, iSequenceID, CameraGuid, iCamera, FrameNumber, *iAnimationArgs, nullptr );
 }
 
 //static
@@ -480,7 +481,7 @@ ShotSequenceTools::SnapCameraToViewport( IMovieScenePlayer& iPlayer, UMovieScene
 
     ioCamera->SetActorTransform( iNewTransform );
 
-//TODO: set all (?) planes ?
+//TODO: set all (?) animations ?
 
     //---
 
@@ -520,7 +521,7 @@ ShotSequenceTools::SnapCameraToViewport( IMovieScenePlayer& iPlayer, UMovieScene
     //DoubleChannels[7]->SetDefault( Scale.Y );
     //DoubleChannels[8]->SetDefault( Scale.Z );
 
-//TODO: set all (?) key planes ?
+//TODO: set all (?) key animations ?
 
     return true;
 }
@@ -1167,13 +1168,13 @@ ShotSequenceTools::StopPilotingCamera( ISequencer& iSequencer, UMovieSceneSequen
 
     //---
 
-//TODO: set all (?) planes ?
+//TODO: set all (?) animations ?
 
     //---
 
     bool key_created = AddKeysToSection( iSequencer, section, iFrameNumber, generated_keys, ESequencerKeyMode::AutoKey );
 
-//TODO: set all (?) key planes ?
+//TODO: set all (?) key animations ?
 
     //---
 
@@ -1347,53 +1348,64 @@ ShotSequenceTools::GotoNextCameraPosition( ISequencer& iSequencer, UMovieSceneSe
 
 //static
 bool
-ShotSequenceTools::SetCameraFocalLengthAndScalePlane( TArray<TWeakObjectPtr<APlaneActor>> ioPlanes, ACineCameraActor* ioCamera, float iNewFocalLength, EScalePlane iScaleType )
+ShotSequenceTools::SetCameraFocalLengthAndScaleActor( TArray<TWeakObjectPtr<AActor>> ioActors, ACineCameraActor* ioCamera, float iNewFocalLength, EScaleActor iScaleType )
 {
-    TArray<TWeakObjectPtr<APlaneActor>> planes;
+    TArray<TWeakObjectPtr<AActor>> actors;
     TArray<float> current_distances;
     TArray<FVector> old_scales;
     TArray<FVector> old_scales_camera100;
-    for( auto plane : ioPlanes )
+    for( auto actor : ioActors )
     {
-        if( !plane.IsValid() || !ShotSequenceTools::CanMoveAndScalePlane( plane.Get(), ioCamera ) )
+        if( !actor.IsValid() || !ShotSequenceTools::CanMoveAndScaleActor( actor.Get(), ioCamera ) )
             continue;
 
-        planes.Add( plane );
-        current_distances.Add( FVector::Distance( ioCamera->GetActorLocation(), plane->GetActorLocation() ) );
-        old_scales.Add( plane->GetActorScale3D() );
-        old_scales_camera100.Add( plane->ComputePlaneScaleWithScaleAndMargin( ioCamera, current_distances.Last() ) );
+        UScalingComponent* scaling_component = actor->FindComponentByClass<UScalingComponent>();
+        if( !scaling_component )
+            continue;
+
+        actors.Add( actor );
+        current_distances.Add( FVector::Distance( ioCamera->GetActorLocation(), actor->GetActorLocation() ) );
+        old_scales.Add( actor->GetActorScale3D() );
+        FVector camera_view_size = scaling_component->ComputeSizeOfCameraView( ioCamera, current_distances.Last() );
+        old_scales_camera100.Add( scaling_component->ComputeScaleWithScaleAndMargin( camera_view_size ) );
     }
 
     ioCamera->GetCineCameraComponent()->SetCurrentFocalLength( iNewFocalLength );
 
-    for( int i = 0; i < planes.Num(); i++ )
+    for( int i = 0; i < actors.Num(); i++ )
     {
-        APlaneActor* plane = planes[i].Get();
-        check( plane );
+        AActor* actor = actors[i].Get();
+        check( actor );
         float current_distance = current_distances[i];
         FVector old_scale = old_scales[i];
         FVector old_scale_camera100 = old_scales_camera100[i];
 
+        UScalingComponent* scaling_component = actor->FindComponentByClass<UScalingComponent>();
+        if( !scaling_component )
+            continue;
+
+        FVector camera_view_size = scaling_component->ComputeSizeOfCameraView( ioCamera, current_distance );
+
         switch( iScaleType )
         {
-            case EScalePlane::kFitToCamera:
+            case EScaleActor::kFitToCamera:
             {
-                FVector scale = plane->ComputePlaneScaleWithScaleAndMargin( ioCamera, current_distance );
-                plane->SetActorScale3D( scale );
+                FVector scale = scaling_component->ComputeScaleWithScaleAndMargin( camera_view_size );
+                actor->SetActorScale3D( scale );
             }
             break;
 
-            case EScalePlane::kRelativeScale:
+            case EScaleActor::kRelativeScale:
             {
-                FVector new_scale_camera100 = plane->ComputePlaneScaleWithScaleAndMargin( ioCamera, current_distance );
+                FVector new_scale_camera100 = scaling_component->ComputeScaleWithScaleAndMargin( camera_view_size );
                 FVector ratio = new_scale_camera100 / old_scale_camera100;
                 FVector new_scale = old_scale * ratio;
 
-                plane->SetActorScale3D( new_scale );
+                actor->SetActorScale3D( new_scale );
             }
             break;
 
-            case EScalePlane::kNo:
+            case EScaleActor::kNo:
                 // nothing to do
                 break;
 

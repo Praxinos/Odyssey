@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "OdysseyAnimationActor.generated.h"
 
+class ACineCameraActor;
 class UOdysseyAnimationComponent;
 
 /**
@@ -27,6 +28,10 @@ public:
     // End of AActor interface
 
 public:
+    UOdysseyAnimationComponent*         GetAnimationComponent();
+    const UOdysseyAnimationComponent*   GetAnimationComponent() const;
+
+protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Animation")
     TObjectPtr<UOdysseyAnimationComponent> AnimationComponent;
 

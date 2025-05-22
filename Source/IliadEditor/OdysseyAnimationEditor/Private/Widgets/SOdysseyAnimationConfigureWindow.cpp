@@ -20,51 +20,7 @@
 #define MAX_CANVAS_SIZE 8192
 #define MIN_CANVAS_SIZE 1
 
-::ULIS::eFormat
-FOdysseyAnimationConfiguration::ULISFormat() const
-{
-    switch(Format)
-    {
-        case EOdysseyAnimationFormat::BGRA8:
-        {
-            return ::ULIS::Format_BGRA8;
-        }
-        break;
-
-        case EOdysseyAnimationFormat::RGBAF:
-        {
-            return ::ULIS::Format_RGBAF;
-        }
-        break;
-    }
-
-    check(false); //should not be called
-    return ::ULIS::Format_BGRA8;
-}
-
-FLinearColor
-FOdysseyAnimationConfiguration::GetBackgroundColor() const
-{
-    switch(BackgroundColor)
-    {
-        case EOdysseyAnimationBackgroundColor::Transparent:  return FLinearColor( 0.f, 0.f, 0.f, 0.f );
-        case EOdysseyAnimationBackgroundColor::White:        return FLinearColor( 1.f, 1.f, 1.f );
-        case EOdysseyAnimationBackgroundColor::Normal:       return FLinearColor( .5f, .5f, 1.f );
-        default: break;
-    }
-
-    check(false); //should not be called
-    return FLinearColor();
-}
-
 //---
-
-void
-SOdysseyAnimationConfigureWindow::Construct(const FArguments& iArgs, const FOdysseyAnimationConfiguration& iDefaultConfiguration)
-{
-    mConfiguration = iDefaultConfiguration;
-    Construct(iArgs);
-}
 
 void
 SOdysseyAnimationConfigureWindow::Construct( const FArguments& iArgs)
@@ -77,7 +33,7 @@ SOdysseyAnimationConfigureWindow::Construct( const FArguments& iArgs)
     detailsViewArgs.bShowScrollBar = false;
 
     FPropertyEditorModule& propertyEditor = FModuleManager::Get().LoadModuleChecked<FPropertyEditorModule>(TEXT("PropertyEditor"));
-    TSharedRef<FStructOnScope> structOnScope = MakeShared<FStructOnScope>(FOdysseyAnimationConfiguration::StaticStruct(), reinterpret_cast<uint8*>(&mConfiguration));
+    TSharedRef<FStructOnScope> structOnScope = MakeShared<FStructOnScope>( FOdysseyAnimationConfiguration::StaticStruct(), reinterpret_cast<uint8*>(&mConfiguration ));
     TSharedPtr<IStructureDetailsView> configurationDetailsView = propertyEditor.CreateStructureDetailView(detailsViewArgs, structureDetailsViewArgs, structOnScope);
 
     //---

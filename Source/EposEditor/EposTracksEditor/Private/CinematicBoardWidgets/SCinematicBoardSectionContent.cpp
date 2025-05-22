@@ -6,9 +6,9 @@
 #include "Brushes/SlateColorBrush.h"
 
 #include "CinematicBoardTrack/CinematicBoardSection.h"
+#include "CinematicBoardWidgets/SCinematicBoardSectionAnimations.h"
 #include "CinematicBoardWidgets/SCinematicBoardSectionCamera.h"
 #include "CinematicBoardWidgets/SCinematicBoardSectionNotes.h"
-#include "CinematicBoardWidgets/SCinematicBoardSectionPlanes.h"
 #include "CinematicBoardWidgets/SCinematicBoardSectionThumbnails.h"
 #include "CinematicBoardWidgets/SCinematicBoardSectionTitle.h"
 
@@ -23,7 +23,7 @@ SCinematicBoardSectionContent::Construct( const FArguments& InArgs, TSharedRef<F
 
     ChildSlot
     // Because in ...\Sequencer\Private\DisplayNodes\SequencerTrackNode.cpp - FSequencerTrackNode::GetNodeHeight(), there is an additional padding 2 * SequencerNodeConstants::CommonPadding for the 'mother' section
-    // and VAlign can't be used, because f.e., one shot section with planes and one board section without, the content of the board section won't be at the same level as in shot section
+    // and VAlign can't be used, because f.e., one shot section with animations and one board section without, the content of the board section won't be at the same level as in shot section
     //.Padding( 0.f, 4.f )
     [
         SNew(SVerticalBox)
@@ -54,7 +54,7 @@ SCinematicBoardSectionContent::Construct( const FArguments& InArgs, TSharedRef<F
         + SVerticalBox::Slot()
         .AutoHeight()
         [
-            SNew( SCinematicBoardSectionPlanes, iBoardSection )
+            SNew( SCinematicBoardSectionAnimations, iBoardSection )
             .OptionalWidgetsVisibility( this, &SCinematicBoardSectionContent::OptionalWidgetsVisibility )
         ]
     ];

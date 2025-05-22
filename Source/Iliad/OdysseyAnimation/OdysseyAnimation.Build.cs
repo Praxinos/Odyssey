@@ -72,11 +72,13 @@ namespace UnrealBuildTool.Rules
                     "Engine",
                     "Media",
                     "RenderCore",
+                    "MovieScene",
 
                     "OdysseyCore",
                     "OdysseyRendering",
                     "OdysseyLayerStack",
                     "RHI",
+                    "CinematicCamera",
                     // ... add private dependencies that you statically link with here ...
                 }
                 );

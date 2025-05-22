@@ -1,5 +1,5 @@
 // IDDN.FR.001.060015.013.S.X.2019.000.00000
-// ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
+// ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2025
 
 #pragma once
 
@@ -11,16 +11,16 @@
 
 class FCinematicBoardSection;
 
-class EPOSTRACKSEDITOR_API SCinematicBoardSectionPlanes
+class EPOSTRACKSEDITOR_API SCinematicBoardSectionAnimations
     : public SCompoundWidget
 {
 public:
-    SLATE_BEGIN_ARGS( SCinematicBoardSectionPlanes )
+    SLATE_BEGIN_ARGS( SCinematicBoardSectionAnimations )
         {}
         SLATE_ATTRIBUTE( EVisibility, OptionalWidgetsVisibility )
     SLATE_END_ARGS()
 
-    virtual ~SCinematicBoardSectionPlanes();
+    virtual ~SCinematicBoardSectionAnimations();
 
     // Construct the widget
     void Construct( const FArguments& InArgs, TSharedRef<FCinematicBoardSection> iBoardSection );
@@ -30,15 +30,15 @@ public:
 
 public:
     /** Called when our sequencer has changed moviescene data */
-    void RebuildPlaneList( EMovieSceneDataChangeType iType );
+    void RebuildAnimationList( EMovieSceneDataChangeType iType );
 
 protected:
-    TSharedRef<ITableRow> MakePlaneRow( TSharedRef<FMovieScenePossessable> iItem, const TSharedRef<STableViewBase>& iOwnerTable );
+    TSharedRef<ITableRow> MakeAnimationRow( TSharedRef<FMovieScenePossessable> iItem, const TSharedRef<STableViewBase>& iOwnerTable );
 
-    TSharedRef<SWidget> MakeCreatePlaneMenu();
-    void CreatePlane( TSharedRef<FString> iPlaneName );
+    TSharedRef<SWidget> MakeCreateAnimationMenu();
+    void CreateAnimation( TSharedRef<FString> iAnimationName );
 
-    void RebuildPlaneList();
+    void RebuildAnimationList();
 
 private:
     TWeakPtr<FCinematicBoardSection>    mBoardSection;
@@ -48,10 +48,10 @@ private:
 
 private:
     TArray<TSharedRef<FMovieScenePossessable>> mPossessables;
-    TSharedPtr<SListView<TSharedRef<FMovieScenePossessable>>> mWidgetPlaneList;
+    TSharedPtr<SListView<TSharedRef<FMovieScenePossessable>>> mWidgetAnimationList;
 
-    bool mNeedRebuildPlaneList { true };
+    bool mNeedRebuildAnimationList { true };
 
     /** Delegate binding handle for ISequencer::OnMovieSceneDataChanged */
-    FDelegateHandle mRebuildPlaneListHandle;
+    FDelegateHandle mRebuildAnimationListHandle;
 };

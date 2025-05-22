@@ -133,6 +133,28 @@ SMetaKeysArea::BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder, TSharedPtr<FMet
 
 //---
 
+void
+SMetaKeysArea::OnStartDragKeys( TSharedPtr<FMetaChannel> iKeys )
+{
+}
+
+void
+SMetaKeysArea::OnDragKeys( TSharedPtr<FMetaChannel> iKeys )
+{
+}
+
+void
+SMetaKeysArea::OnStopDragKeys( TSharedPtr<FMetaChannel> iKeys )
+{
+}
+
+void
+SMetaKeysArea::OnClickKeys( TSharedPtr<FMetaChannel> iKeys )
+{
+}
+
+//---
+
 FCursorReply
 SMetaKeysArea::OnCursorQuery( const FGeometry& MyGeometry, const FPointerEvent& CursorEvent ) const //override
 {
@@ -193,6 +215,8 @@ SMetaKeysArea::OnMouseButtonUp( const FGeometry& MyGeometry, const FPointerEvent
             check( HasMouseCapture() );
             check( mDraggedKeys.IsValid() && mDraggedKeys->NumMetaKeys() );
 
+            OnStopDragKeys( mDraggedKeys );
+
             //-
 
             mState = EState::kIdle;
@@ -210,6 +234,8 @@ SMetaKeysArea::OnMouseButtonUp( const FGeometry& MyGeometry, const FPointerEvent
         {
             check( HasMouseCapture() );
             check( mDraggedKeys.IsValid() && mDraggedKeys->NumMetaKeys() );
+
+            OnClickKeys( mDraggedKeys );
 
             //-
 
@@ -264,6 +290,21 @@ SMetaKeysArea::OnMouseButtonUp( const FGeometry& MyGeometry, const FPointerEvent
     return SCompoundWidget::OnMouseButtonUp( MyGeometry, MouseEvent );
 }
 
+void
+SMetaKeysArea::ComputeClampRangePreMoveDuringDrag( TSharedPtr<FMetaChannel> iKeys, TRange<FFrameNumber>& oClampRangeInSubsequence ) const
+{
+    FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+    const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
+
+    const FMovieSceneSequenceTransform OuterToInnerTransform = subsection_object->OuterToInnerTransform();
+
+    TRange<FFrameNumber> outerClampRange = subsection_object->GetTrueRange();
+    oClampRangeInSubsequence = TRange<FFrameNumber>( ( outerClampRange.GetLowerBoundValue() * OuterToInnerTransform ).FloorToFrame(), ( outerClampRange.GetUpperBoundValue() * OuterToInnerTransform ).FloorToFrame() ); // Let's see if FloorToFrame() of the upper bound value is ok, as (as a true range) it is exclusive
+
+    //UE_LOG( LogTemp, Warning, TEXT( "compute clamp: all: oClampRangeInSubsequence in sequence: %d" ), oClampRangeInSubsequence.GetUpperBoundValue().Value );
+
+}
+
 FReply
 SMetaKeysArea::OnMouseMove( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) //override
 {
@@ -276,6 +317,8 @@ SMetaKeysArea::OnMouseMove( const FGeometry& MyGeometry, const FPointerEvent& Mo
         {
             BeginTransaction( LOCTEXT( "MoveMetaKeyTransaction", "Move Meta Keys" ) );
             mState = EState::kDragging;
+
+            OnStartDragKeys( mDraggedKeys );
         }
 
         //-
@@ -300,12 +343,22 @@ SMetaKeysArea::OnMouseMove( const FGeometry& MyGeometry, const FPointerEvent& Mo
         const FFrameRate inner_tick_resolution = subsection_object->GetSequence()->GetMovieScene()->GetTickResolution();
         const FFrameRate inner_display_rate = subsection_object->GetSequence()->GetMovieScene()->GetDisplayRate();
 
-        TRange<FFrameNumber> subsection_range = subsection_object->GetTrueRange();
-        TRange<FFrameNumber> inner_clamp_range( ( subsection_range.GetLowerBoundValue() * OuterToInnerTransform ).FloorToFrame(), ( subsection_range.GetUpperBoundValue() * OuterToInnerTransform ).FloorToFrame() ); // Let's see if FloorToFrame() of the upper bound value is ok, as (as a true range) it is exclusive
+        //TRange<FFrameNumber> inner_clamp_range;
+        //SMetaKeysArea::ComputeClampRangePreMoveDuringDrag( mDraggedKeys, inner_clamp_range ); // Always call the default clamp range to get min/max boundary of the whole board section in the board track
+        //TRange<FFrameNumber> inner_clamp_range2;
+        //ComputeClampRangePreMoveDuringDrag( mDraggedKeys, inner_clamp_range2 );
+        //inner_clamp_range = TRange<FFrameNumber>::Intersection( inner_clamp_range, inner_clamp_range2 );
+        TRange<FFrameNumber> inner_clamp_range;
+        ComputeClampRangePreMoveDuringDrag( mDraggedKeys, inner_clamp_range );
+
+        //UE_LOG( LogTemp, Warning, TEXT( "OnMouseMove: inner_clamp_range in sequence: %d" ), inner_clamp_range.GetUpperBoundValue().Value );
 
         FFrameTime local_inner_time = mDraggedKeys->Move( inner_moved_frame, snap, inner_tick_resolution, inner_display_rate, inner_clamp_range );
+
         FMovieSceneInverseSequenceTransform localToRootTransform = OuterToInnerTransform.Inverse();
         TOptional<FFrameTime> local_time = localToRootTransform.TryTransformTime( local_inner_time );
+
+        OnDragKeys( mDraggedKeys );
 
         //---
 
@@ -366,7 +419,7 @@ SMetaKeysArea::OnMouseLeave( const FPointerEvent& MouseEvent ) //override
 }
 
 int32
-SMetaKeysArea::OnPaint( const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled ) const //override
+SMetaKeysArea::DrawBackground( const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled ) const
 {
     FSlateDrawElement::MakeBox(
         OutDrawElements,
@@ -377,20 +430,23 @@ SMetaKeysArea::OnPaint( const FPaintArgs& Args, const FGeometry& AllottedGeometr
         GetBackgroundBrush()->GetTint( InWidgetStyle )
     );
 
-    if( !mBoardSection.IsValid() )
-        return SCompoundWidget::OnPaint( Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled );
+    return LayerId;
+}
 
-    //---
-
-    FCinematicBoardSection*         board_section = mBoardSection.Pin().Get();
-    const UMovieSceneSubSection*    subsection_object = &board_section->GetSubSectionObject();
-
+int32
+SMetaKeysArea::DrawKeys( const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled ) const
+{
     TSharedPtr<const FMetaChannel> meta_channel = GetMetaChannel();
-
     if( !meta_channel.IsValid() )
-        return SCompoundWidget::OnPaint( Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled );
+        return LayerId;
 
     //---
+
+    if( !mBoardSection.IsValid() )
+        return LayerId;
+
+    FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+    const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
 
     FVector2D localSectionSize = AllottedGeometry.GetLocalSize();
     FTimeToPixel converter = board_section->ConstructConverterForSection( AllottedGeometry );
@@ -439,6 +495,16 @@ SMetaKeysArea::OnPaint( const FPaintArgs& Args, const FGeometry& AllottedGeometr
     }
 
     LayerId++;
+
+    return LayerId;
+}
+
+int32
+SMetaKeysArea::OnPaint( const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled ) const //override
+{
+    LayerId = DrawBackground( Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled );
+
+    LayerId = DrawKeys( Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled );
 
     return SCompoundWidget::OnPaint( Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled );
 }

@@ -33,30 +33,30 @@ public:
 
 //---
 
-enum class ENamingConventionPlanePatternKeyword : uint32
+enum class ENamingConventionAnimationPatternKeyword : uint32
 {
-    ENUM_UNIQUE_ID( PlaneIndex ),
+    ENUM_UNIQUE_ID( AnimationIndex ),
 };
 
-EPOSNAMINGCONVENTION_API const FPatternKeywordList& GetNamingConventionPlanePatternKeywordList();
+EPOSNAMINGCONVENTION_API const FPatternKeywordList& GetNamingConventionAnimationPatternKeywordList();
 
 USTRUCT( BlueprintType )
-struct FNamingConventionPlane
+struct FNamingConventionAnimation
 {
     GENERATED_BODY()
 
 public:
-    FNamingConventionPlane();
+    FNamingConventionAnimation();
 
 public:
-    /** The plane pattern. */
-    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="Plane")
+    /** The animation pattern. */
+    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="Animation")
     FString Pattern;
 
     FPatternKeywordLists mPatternKeywordLists;
 
-    /** The plane number format. */
-    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="Plane", meta=(ShowOnlyInnerProperties))
+    /** The animation number format. */
+    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="Animation", meta=(ShowOnlyInnerProperties))
     FNamingConventionNumberFormat IndexFormat { 10, 10, 4 };
 };
 
@@ -270,9 +270,9 @@ public:
     UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="ShotNamingConvention", meta=(ShowOnlyInnerProperties) )
     FNamingConventionShot ShotNaming;
 
-    /** The naming convention for planes. */
-    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="PlaneNamingConvention", meta=(ShowOnlyInnerProperties) )
-    FNamingConventionPlane PlaneNaming;
+    /** The naming convention for animations. */
+    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="AnimationNamingConvention", meta=(ShowOnlyInnerProperties) )
+    FNamingConventionAnimation AnimationNaming;
 
     /** The naming convention for cameras. */
     UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="CameraNamingConvention", meta=(ShowOnlyInnerProperties) )

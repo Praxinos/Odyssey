@@ -5,14 +5,26 @@
 
 #include "AssetToolsModule.h"
 #include "Factories/TextureFactory.h"
+#include "ImageUtils.h"
 #include "ISequencer.h"
 #include "Sections/MovieSceneSubSection.h"
 
+#include "Animation/OdysseyPainterEditorAnimationImport.h"
 #include "Board/BoardSequence.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "EposSequenceHelpers.h"
+#include "LayerStack/Cells/OdysseyAnimationCell.h"
+#include "LayerStack/Layers/OdysseyAnimationLayer.h"
+#include "LayerStack/OdysseyAnimationLayerStack.h"
 #include "NamingConvention.h"
+#include "OdysseyAnimation.h"
+#include "OdysseyAnimationActor.h"
+#include "OdysseyAnimationComponent.h"
+#include "OdysseyLayer.h"
+#include "OdysseyLayerStack.h"
+#include "Settings/EposTracksEditorSettings.h"
 #include "Tools/EposSequenceTools.h"
+#include "Tools/ResourceAssetTools.h"
 
 #define LOCTEXT_NAMESPACE "ImportImageSequenceConverter"
 
@@ -120,7 +132,7 @@ FImportImageSequenceConverter::CreateShotsRecursive( const TArray<FImportImageSe
         FImportImageSequenceShot shot = iShots[i];
         UMovieSceneSubSection* subsection = CastChecked<UMovieSceneSubSection>( sections[i] );
 
-        CreateDrawings( shot.Panels, subsection );
+        CreateAnimation( shot.Panels, subsection );
     }
 }
 
@@ -148,82 +160,91 @@ FImportImageSequenceConverter::CreateShot( const FImportImageSequenceShot& iShot
 }
 
 void
-FImportImageSequenceConverter::CreateDrawings( const TArray<FImportImageSequencePanel>& iPanels, UMovieSceneSubSection* iSubSection )
+FImportImageSequenceConverter::CreateAnimation( const TArray<FImportImageSequencePanel>& iPanels, UMovieSceneSubSection* iSubSection )
 {
+    check( iPanels.Num() );
+
     ISequencer* sequencer = mSequencer.Pin().Get();
 
     BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, *iSubSection, sequencer->GetFocusedTemplateID() );
     check( result.mInnerSequence )
 
-    FString path;
-    FString name;
-    NamingConvention::GenerateTextureAssetPathName( *sequencer, *CastChecked<UEposMovieSceneSequence>( result.mInnerSequence ), result.mInnerSequenceId, nullptr, path, name );
-    FString destination_path = path;
+    //---
 
-    check( iPanels.Num() );
-
-    FAssetToolsModule& AssetToolsModule = FModuleManager::Get().LoadModuleChecked<FAssetToolsModule>( "AssetTools" );
-
-    //TArray<FString> pathfiles { panel.Pathfile.FilePath };
-    //TArray<TPair<FString, FString>> FilesAndDestinations;
-    //AssetToolsModule.Get().ExpandDirectories( pathfiles, destination_path, FilesAndDestinations );
-    //AssetToolsModule.Get().ImportAssets( pathfiles, destination_path, nullptr, true, &FilesAndDestinations, false );
-
+    TArray<UTexture2D*> textures;
+    TArray<int32> durations;
+    for( int i = 0; i < iPanels.Num(); i++ )
     {
-        TArray<FString> pathfiles { iPanels[0].Pathfile.FilePath };
-        TArray<UObject*> assets = AssetToolsModule.Get().ImportAssets( pathfiles, destination_path, UTextureFactory::StaticClass()->GetDefaultObject<UFactory>() ); // Or UTexture2DFactoryNew* Texture2DFactory = NewObject<UTexture2DFactoryNew>(); ?
-        UTexture2D* texture = nullptr;
-        if( assets.Num() )
-        {
-            texture = Cast<UTexture2D>( assets[0] );
-            check( texture );
-        }
+        FImage image;
+        FImageUtils::LoadImage( *iPanels[i].Pathfile.FilePath, image );
+        UTexture2D* texture = Cast<UTexture2D>( FImageUtils::CreateTexture( ETextureClass::TwoD, image, GetTransientPackage(), FGuid::NewGuid().ToString() ) );
 
-        FCameraArgs camera_args;
-        FPlaneArgs plane_args;
-        plane_args.mMargin = 0.f;
-        plane_args.mTexture = texture;
-        BoardSequenceTools::CreateCamera( sequencer, iSubSection->GetTrueRange().GetLowerBoundValue(), camera_args, plane_args );
+        textures.Add( texture );
+
+        durations.Add( iPanels[i].Duration );
     }
 
-    //sequencer->ForceEvaluate();
-
-    TArray<FGuid> plane_bindings;
-    ShotSequenceHelpers::GetAllPlanes( *sequencer, result.mInnerSequence, result.mInnerSequenceId, EGetPlane::kAll, nullptr, &plane_bindings );
-    check( plane_bindings.Num() );
-
-    FGuid plane_binding = plane_bindings[0];
+    check( textures.Num() == durations.Num() );
 
     //---
 
-    int32 duration_in_tick = ConvertFromDisplayRateToTickResolution( iPanels[0].Duration );
-    FFrameNumber next_frame_number = iSubSection->GetTrueRange().GetLowerBoundValue() + duration_in_tick;
-
-    // Start at 1 because the first texture is already used when creating the camera
-    for( int i = 1; i < iPanels.Num(); i++ )
+    UOdysseyAnimation* new_animation = nullptr;
+    if( textures.Num() )
     {
-        FImportImageSequencePanel panel = iPanels[i];
+        const UEposTracksEditorSettings* settings = GetDefault<UEposTracksEditorSettings>();
+        TOptional<FLinearColor> background_layer_color;
+        FIntPoint texture_size( textures[0]->Source.GetSizeX(), textures[0]->Source.GetSizeY() );
 
-        TArray<FString> pathfiles { panel.Pathfile.FilePath };
-        TArray<UObject*> assets = AssetToolsModule.Get().ImportAssets( pathfiles, destination_path, UTextureFactory::StaticClass()->GetDefaultObject<UFactory>() ); // Or UTexture2DFactoryNew* Texture2DFactory = NewObject<UTexture2DFactoryNew>(); ?
-        UTexture2D* texture = nullptr;
-        if( assets.Num() )
+        new_animation = ProjectAssetTools::CreateAnimation( *sequencer, result.mInnerSequence, result.mInnerSequenceId, texture_size, settings->AnimationSettings.Format, settings->AnimationSettings.FrameRate, UOdysseyAnimationLayerImageRaster::StaticClass(), background_layer_color );
+
+        if( new_animation )
         {
-            texture = Cast<UTexture2D>( assets[0] );
-            check( texture );
+            // Remove all existing layers
+            UOdysseyLayerStack* layer_stack = new_animation->GetLayerStack();
+            layer_stack->RemoveLayers( layer_stack->GetLayers() );
+
+            //---
+
+            // Import the textures (create layer, cells, ...)
+            FOdysseyPainterEditorAnimationImport import_sequence;
+            UOdysseyAnimationLayerImageRaster* animation_layer = import_sequence.ImportTextureSequence( new_animation, textures, nullptr, 0 );
+
+            //---
+
+            TArray<UOdysseyLayerCell*> cells = animation_layer->GetCells();
+            // To have at least durations as long as cells
+            if( !ensure( durations.Num() >= cells.Num() ) )
+            {
+                int32 diff = cells.Num() - durations.Num();
+                TArray<int32> padding;
+                while( padding.Num() != diff )
+                    padding.Add( 48 ); // Arbitrary
+                durations.Append( padding );
+
+                check( durations.Num() == cells.Num() );
+            }
+
+            // Set the exposure of all cells
+            for( int i = 0; i < cells.Num(); i++ )
+            {
+                //int32 duration_in_tick = ConvertFromDisplayRateToTickResolution( iPanels[0].Duration );
+
+                cells[i]->SetExposure( durations[i] );
+            }
         }
-
-        //---
-
-        FDrawingArgs drawing_args;
-        drawing_args.mTexture = texture;
-        BoardSequenceTools::CreateDrawing( sequencer, next_frame_number, plane_binding, drawing_args );
-
-        //---
-
-        duration_in_tick = ConvertFromDisplayRateToTickResolution( panel.Duration );
-        next_frame_number += duration_in_tick;
     }
+
+    //---
+
+    {
+        FCameraArgs camera_args;
+        FAnimationArgs animation_args;
+        animation_args.mMargin = 0.f;
+        animation_args.mAnimation = new_animation;
+        BoardSequenceTools::CreateCameraWithAnimation( sequencer, iSubSection->GetTrueRange().GetLowerBoundValue(), camera_args, animation_args );
+    }
+
+    //sequencer->ForceEvaluate();
 }
 
 //---

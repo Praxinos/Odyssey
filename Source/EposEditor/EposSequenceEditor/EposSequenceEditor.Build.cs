@@ -80,6 +80,9 @@ public class EposSequenceEditor : ModuleRules
                 "EposActors",
                 "EposNote",
                 "EposPattern",
+                "OdysseyAnimationTracks",
+                "OdysseyAnimation",
+                "OdysseyLayerStack",
 
                 // [EDITOR]
                 // [EDITOR] custom engine dependencies
@@ -112,6 +115,8 @@ public class EposSequenceEditor : ModuleRules
                 "EposTracksEditor",
                 "EposNamingConvention",
                 "libharu",
+                "OdysseyAnimationEditor",
+                "OdysseyPainterEditor", // import image sequence
             }
             );
 

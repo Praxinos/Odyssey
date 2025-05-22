@@ -22,6 +22,13 @@ FEposSequenceModule::ShutdownModule()
 
 //---
 
+FEposSequenceModule::FOnNewActorTrackAdded& FEposSequenceModule::OnNewActorTrackAdded()
+{
+    return mNewActorTrackAdded;
+}
+
+//---
+
 void
 FEposSequenceModule::RegisterNamingFormatter( UNamingFormatter* iFormatter )
 {

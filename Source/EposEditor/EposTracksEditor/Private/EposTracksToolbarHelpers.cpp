@@ -5,10 +5,12 @@
 
 #include "Framework/MultiBox/MultiBoxBuilder.h"
 #include "IDetailsView.h"
+#include "IStructureDetailsView.h"
 #include "PropertyEditorModule.h"
 #include "Widgets/Input/SEditableTextBox.h"
 
 #include "Settings/EposTracksEditorSettings.h"
+#include "Widgets/SOdysseyAnimationConfigureWindow.h"
 
 #define LOCTEXT_NAMESPACE "EposTracksToolbarHelpers"
 
@@ -16,9 +18,9 @@
 
 //static
 void
-EposTracksToolbarHelpers::MakePlaneSettingsEntries( FMenuBuilder& iMenuBuilder )
+EposTracksToolbarHelpers::MakeAnimationSettingsEntries( FMenuBuilder& iMenuBuilder )
 {
-    iMenuBuilder.BeginSection( NAME_None, LOCTEXT( "plane-settings.section-title", "Default Plane Settings" ) );
+    iMenuBuilder.BeginSection( NAME_None, LOCTEXT( "animation-settings.section-title", "Default Animation Settings" ) );
     {
         FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>( "PropertyEditor" );
 
@@ -32,8 +34,15 @@ EposTracksToolbarHelpers::MakePlaneSettingsEntries( FMenuBuilder& iMenuBuilder )
         // Filter properties to only get CameraSettings ones
         auto visible_property = []( const FPropertyAndParent& iPropertyChain )
         {
-            FName root_name = iPropertyChain.ParentProperties.Num() ? iPropertyChain.ParentProperties.Last()->GetFName() : iPropertyChain.Property.GetFName();
-            return root_name == GET_MEMBER_NAME_CHECKED( UEposTracksEditorSettings, PlaneSettings );
+            FName root_name = iPropertyChain.ParentProperties.Num() ? iPropertyChain.ParentProperties[0]->GetFName() : iPropertyChain.Property.GetFName();
+            if( root_name == GET_MEMBER_NAME_CHECKED( UEposTracksEditorSettings, AnimationSettings ) )
+            {
+                // Don't display Width as it is auto-computed later
+                if( iPropertyChain.Property.GetFName() == GET_MEMBER_NAME_CHECKED( FOdysseyAnimationSettings, Width ) )
+                    return false;
+                return true;
+            }
+            return false;
         };
         DetailView->SetIsPropertyVisibleDelegate( FIsPropertyVisible::CreateLambda( visible_property ) );
         // Set the object to view
@@ -46,9 +55,9 @@ EposTracksToolbarHelpers::MakePlaneSettingsEntries( FMenuBuilder& iMenuBuilder )
 
 //static
 void
-EposTracksToolbarHelpers::MakeTextureSettingsEntries( FMenuBuilder& iMenuBuilder )
+EposTracksToolbarHelpers::MakeAnimationActorSettingsEntries( FMenuBuilder& iMenuBuilder )
 {
-    iMenuBuilder.BeginSection( NAME_None, LOCTEXT( "texture-settings.section-title", "Default Texture Settings" ) );
+    iMenuBuilder.BeginSection( NAME_None, LOCTEXT( "animation-actor-settings.section-title", "Default Animation Actor Settings" ) );
     {
         FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>( "PropertyEditor" );
 
@@ -62,8 +71,12 @@ EposTracksToolbarHelpers::MakeTextureSettingsEntries( FMenuBuilder& iMenuBuilder
         // Filter properties to only get CameraSettings ones
         auto visible_property = []( const FPropertyAndParent& iPropertyChain )
         {
-            FName root_name = iPropertyChain.ParentProperties.Num() ? iPropertyChain.ParentProperties.Last()->GetFName() : iPropertyChain.Property.GetFName();
-            return root_name == GET_MEMBER_NAME_CHECKED( UEposTracksEditorSettings, TextureSettings );
+            FName root_name = iPropertyChain.ParentProperties.Num() ? iPropertyChain.ParentProperties[0]->GetFName() : iPropertyChain.Property.GetFName();
+            if( root_name == GET_MEMBER_NAME_CHECKED( UEposTracksEditorSettings, AnimationActorSettings ) )
+            {
+                return true;
+            }
+            return false;
         };
         DetailView->SetIsPropertyVisibleDelegate( FIsPropertyVisible::CreateLambda( visible_property ) );
         // Set the object to view
@@ -178,11 +191,11 @@ EposTracksToolbarHelpers::MakeCameraEntries( FMenuBuilder& iMenuBuilder, TShared
 
 //static
 void
-EposTracksToolbarHelpers::MakePlaneEntries( FMenuBuilder& iMenuBuilder, TSharedRef<FString> ioPlaneName, FSimpleDelegate iOnTextCommit, bool iFocus )
+EposTracksToolbarHelpers::MakeAnimationEntries( FMenuBuilder& iMenuBuilder, TSharedRef<FString> ioAnimationName, FSimpleDelegate iOnTextCommit, bool iFocus )
 {
     TSharedPtr<SEditableTextBox> text_widget;
 
-    iMenuBuilder.BeginSection( NAME_None, LOCTEXT( "plane-options.section-title", "Plane" ) );
+    iMenuBuilder.BeginSection( NAME_None, LOCTEXT( "animation-options.section-title", "Animation" ) );
     {
         //MenuBuilder.AddEditableText( ... ); // This won't display the section ... so use the classic widget ...
 
@@ -194,16 +207,16 @@ EposTracksToolbarHelpers::MakePlaneEntries( FMenuBuilder& iMenuBuilder, TSharedR
                                     .FillWidth( 1.f )
                                     [
                                         SNew( STextBlock )
-                                        .Text( LOCTEXT( "plane-set-name-label", "Name" ) )
-                                        .ToolTipText( LOCTEXT( "plane-set-name-tooltip", "Set the plane name" ) )
+                                        .Text( LOCTEXT( "animation-set-name-label", "Name" ) )
+                                        .ToolTipText( LOCTEXT( "animation-set-name-tooltip", "Set the animation name" ) )
                                     ]
                                     + SHorizontalBox::Slot()
                                     .FillWidth( 5.f )
                                     [
                                         SAssignNew( text_widget, SEditableTextBox )
-                                        .Text( FText::FromString( *ioPlaneName ) )
-                                        .ToolTipText( LOCTEXT( "plane-set-name-tooltip", "Set the plane name" ) )
-                                        .OnTextCommitted( FOnTextCommitted::CreateStatic( TextCommited, ioPlaneName, iOnTextCommit ) )
+                                        .Text( FText::FromString( *ioAnimationName ) )
+                                        .ToolTipText( LOCTEXT( "animation-set-name-tooltip", "Set the animation name" ) )
+                                        .OnTextCommitted( FOnTextCommitted::CreateStatic( TextCommited, ioAnimationName, iOnTextCommit ) )
                                         .SelectAllTextWhenFocused( true )
                                     ]
                                ],

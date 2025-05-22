@@ -48,7 +48,11 @@ FOdysseyAnimationTimelineTrackEditor::OnNewActorTrackAdded(const AActor& iActor,
     if (!animationActor)
         return;
 
-    UOdysseyAnimationComponent* animationComponent = animationActor->AnimationComponent;
+    // "const AActor& iActor" cannot be changed (as a delegate signature)
+    // but FSequencerUtilities::CreateBinding() takes a non const object
+    // so use const_cast
+    //TODO: is there another way ?
+    UOdysseyAnimationComponent* animationComponent = const_cast<UOdysseyAnimationComponent*>( animationActor->GetAnimationComponent() );
     if (!animationComponent)
         return;
 

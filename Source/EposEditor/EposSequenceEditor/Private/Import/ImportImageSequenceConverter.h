@@ -26,7 +26,7 @@ private:
     void CreateBoard( const FImportImageSequenceBoard& iBoard, UBoardSequence* ioParentBoardSequence );
     void CreateShotsRecursive( const TArray<FImportImageSequenceShot>& iShots, UBoardSequence* ioParentBoardSequence );
     void CreateShot( const FImportImageSequenceShot& iShot, UBoardSequence* ioParentBoardSequence );
-    void CreateDrawings( const TArray<FImportImageSequencePanel>& iPanels, UMovieSceneSubSection* iSubSection );
+    void CreateAnimation( const TArray<FImportImageSequencePanel>& iPanels, UMovieSceneSubSection* iSubSection );
 
     int32 GetDuration( const FImportImageSequenceBoard& iBoard ) const;
     int32 GetDuration( const FImportImageSequenceShot& iShot ) const;

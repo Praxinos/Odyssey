@@ -60,6 +60,7 @@ public class EposTracksEditor : ModuleRules
                 "AppFramework",
                 "DeveloperSettings",
                 "LevelSequence",
+                "ImageCore",
                 // [RUNTIME] custom plugin dependencies
                 "EposMovieScene",
                 "EposSequence",
@@ -67,6 +68,10 @@ public class EposTracksEditor : ModuleRules
                 "EposTracks",
                 "EposActors",
                 "EposPattern",
+                "OdysseyAnimation",
+                "OdysseyAnimationTracks",
+                "OdysseyLayerStack",
+                "OdysseyRendering",
 
                 // [EDITOR]
                 // [EDITOR] custom engine dependencies
@@ -81,7 +86,8 @@ public class EposTracksEditor : ModuleRules
                 "EditorScriptingUtilities",
                 "LevelEditor",
                 // [EDITOR] custom plugin dependencies
-                "EposNamingConvention"
+                "EposNamingConvention",
+                "OdysseyAnimationEditor",
             }
             );
 

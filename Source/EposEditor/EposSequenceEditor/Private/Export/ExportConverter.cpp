@@ -5,6 +5,7 @@
 
 #include "AssetToolsModule.h"
 #include "Channels/MovieSceneObjectPathChannel.h"
+#include "CommonFrameRates.h"
 #include "Compilation/MovieSceneCompiledDataManager.h"
 #include "Evaluation/MovieSceneEvaluationTemplateInstance.h"
 #include "Evaluation/MovieSceneRootOverridePath.h"
@@ -15,7 +16,15 @@
 #include "Board/BoardSequence.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "EposSequenceHelpers.h"
+#include "LayerStack/Cells/OdysseyAnimationCell.h"
+#include "LayerStack/Layers/OdysseyAnimationLayer.h"
+#include "LayerStack/OdysseyAnimationLayerStack.h"
 #include "NamingConvention.h"
+#include "OdysseyAnimation.h"
+#include "OdysseyAnimationActor.h"
+#include "OdysseyAnimationComponent.h"
+#include "OdysseyAnimationTimelineSection.h"
+#include "OdysseyLayerStack.h"
 #include "Shot/ShotSequence.h"
 #include "Tools/EposSequenceTools.h"
 
@@ -69,57 +78,67 @@ FExportConverter::ProcessSequencerMarks( UShotSequence& iShotSequence, FMovieSce
 }
 
 void
-FExportConverter::ProcessDrawings( UShotSequence& iShotSequence, FMovieSceneSequenceIDRef iSequenceId, const FMovieSceneSequenceTransform& iRootToSequenceTransform, TArray<FExportPanel>& ioPanels ) const
+FExportConverter::ProcessAnimationCuts( UShotSequence& iShotSequence, FMovieSceneSequenceIDRef iSequenceId, const FMovieSceneSequenceTransform& iRootToSequenceTransform, TArray<FExportPanel>& ioPanels ) const
 {
     ISequencer* sequencer = mSequencer.Pin().Get();
 
-    TArray<APlaneActor*> planes;
-    TArray<FGuid> plane_bindings;
-    /*int32 num_planes =*/ ShotSequenceHelpers::GetAllPlanes( *sequencer, &iShotSequence, iSequenceId, EGetPlane::kAll, &planes, &plane_bindings );
+    TArray<AOdysseyAnimationActor*> animation_actors;
+    TArray<FGuid> animation_bindings;
+    /*int32 num_animations =*/ ShotSequenceHelpers::GetAllAnimations( *sequencer, &iShotSequence, iSequenceId, EGetAnimation::kAll, &animation_actors, &animation_bindings );
 
-    for( auto plane_binding : plane_bindings )
+    for( FGuid animation_binding : animation_bindings )
     {
-        TArray<FDrawing> drawings = ShotSequenceHelpers::GetAllDrawings( *sequencer, &iShotSequence, iSequenceId, plane_binding );
-        for( auto drawing : drawings )
+        AOdysseyAnimationActor* animation_actor = animation_actors[animation_bindings.IndexOfByKey( animation_binding )];
+        check( animation_actor );
+        ShotSequenceHelpers::FFindOrCreateTimelineResult result = ShotSequenceHelpers::FindTimelineTrackAndSections( *sequencer, &iShotSequence, iSequenceId, animation_binding );
+        check( animation_actors.Contains( result.mAnimationActor.Get() ) );
+
+        for( TWeakObjectPtr<UOdysseyAnimationTimelineSection> section : result.mSections )
         {
-            FFrameNumber frame;
-            drawing.mChannel->GetKeyTimes( TArrayView<const FKeyHandle>( &drawing.mKeyHandle, 1 ), TArrayView<FFrameNumber>( &frame, 1 ) );
-
-            FMovieSceneInverseSequenceTransform localToRootTransform = iRootToSequenceTransform.Inverse();
-            TOptional<FFrameTime> time_in_root = localToRootTransform.TryTransformTime( frame );
-            if( !time_in_root )
-                continue;
-
-            FFrameNumber frame_in_root = time_in_root->GetFrame();
-
-            FExportPanel* existing_panel = ioPanels.FindByPredicate( [frame_in_root]( const FExportPanel& iElement )
-                                                                    {
-                                                                        return iElement.GlobalFrame == frame_in_root;
-                                                                    } );
-            if( existing_panel )
+            const FOdysseyAnimationCutChannel& channel = section->GetAnimationCutChannel();
+            TMovieSceneChannelData<const FOdysseyAnimationCutValue> data = channel.GetData();
+            TArrayView<const FFrameNumber> times = data.GetTimes();
+            TArrayView<const FOdysseyAnimationCutValue> values = data.GetValues();
+            for( int i = 0; i < times.Num(); i++ )
             {
-                check( existing_panel->mSequence == &iShotSequence );
+                const FFrameNumber& frame_in_sequence = times[i];
+                const FOdysseyAnimationCutValue& value = values[i];
 
-                if( !existing_panel->mSourceDrawing.IsSet() )
-                    existing_panel->mSourceDrawing = FExportPanelSourceDrawing();
+                FMovieSceneInverseSequenceTransform localToRootTransform = iRootToSequenceTransform.Inverse();
+                TOptional<FFrameTime> time_in_root = localToRootTransform.TryTransformTime( frame_in_sequence );
+                if( !time_in_root )
+                    continue;
 
-                existing_panel->mSourceDrawing.GetValue().mDrawings.Add( { drawing, plane_binding } );
-            }
-            else
-            {
-                FExportPanel panel;
-                panel.GlobalFrame = frame_in_root;
-                panel.mSequence = &iShotSequence;
-                panel.mSequenceId = iSequenceId;
-                FExportPanelSourceDrawing source_drawing;
-                source_drawing.mDrawings.Add( { drawing, plane_binding } );
-                panel.mSourceDrawing = source_drawing;
+                FFrameNumber frame_in_root = time_in_root->GetFrame();
 
-                ioPanels.Add( panel );
+                FExportPanel* existing_panel = ioPanels.FindByPredicate( [frame_in_root]( const FExportPanel& iElement )
+                                                                         {
+                                                                             return iElement.GlobalFrame == frame_in_root;
+                                                                         } );
+                if( existing_panel )
+                {
+                    check( existing_panel->mSequence == &iShotSequence );
+
+                    if( !existing_panel->mSourceAnimationCut.IsSet() )
+                        existing_panel->mSourceAnimationCut = FExportPanelSourceAnimationCut();
+
+                    existing_panel->mSourceAnimationCut.GetValue().mAnimationCuts.Add( { frame_in_sequence, animation_binding } );
+                }
+                else
+                {
+                    FExportPanel panel;
+                    panel.GlobalFrame = frame_in_root;
+                    panel.mSequence = &iShotSequence;
+                    panel.mSequenceId = iSequenceId;
+                    FExportPanelSourceAnimationCut source_animationcut;
+                    source_animationcut.mAnimationCuts.Add( { frame_in_sequence, animation_binding } );
+                    panel.mSourceAnimationCut = source_animationcut;
+
+                    ioPanels.Add( panel );
+                }
             }
         }
     }
-
 }
 
 void
@@ -180,8 +199,8 @@ FExportConverter::Convert()
             if( mMarkSettings->Marks )
                 mConverter->ProcessSequencerMarks( *shot_sequence, iLocalSpace.SequenceID, iLocalSpace.RootToSequenceTransform, mPanels );
 
-            if( mMarkSettings->Drawings )
-                mConverter->ProcessDrawings( *shot_sequence, iLocalSpace.SequenceID, iLocalSpace.RootToSequenceTransform, mPanels );
+            if( mMarkSettings->AnimationCuts )
+                mConverter->ProcessAnimationCuts( *shot_sequence, iLocalSpace.SequenceID, iLocalSpace.RootToSequenceTransform, mPanels );
 
             if( mMarkSettings->FirstFrameOfShot )
                 mConverter->ProcessFirstShotFrame( *shot_sequence, iLocalSpace.SequenceID, iLocalSpace.RootToSequenceTransform, mPanels );
@@ -214,8 +233,8 @@ FExportConverter::Convert()
         if( mMarkSettings->Marks )
             ProcessSequencerMarks( *root_shot_sequence, sequencer->GetRootTemplateID(), transform, shot_visitor.mPanels );
 
-        if( mMarkSettings->Drawings )
-            ProcessDrawings( *root_shot_sequence, sequencer->GetRootTemplateID(), transform, shot_visitor.mPanels );
+        if( mMarkSettings->AnimationCuts )
+            ProcessAnimationCuts( *root_shot_sequence, sequencer->GetRootTemplateID(), transform, shot_visitor.mPanels );
 
         if( mMarkSettings->FirstFrameOfShot )
             ProcessFirstShotFrame( *root_shot_sequence, sequencer->GetRootTemplateID(), transform, shot_visitor.mPanels );

@@ -33,7 +33,8 @@
 
 #include "EposSequenceEditorCommands.h"
 #include "EposSequenceHelpers.h"
-#include "PlaneActor.h"
+#include "EposSequenceModule.h"
+#include "OdysseyAnimationActor.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"
 #include "Tools/EposSequenceTools.h"
@@ -162,13 +163,15 @@ ToolkitHelpers::CreateTrack( ISequencer* iSequencer, AActor* iActor, const FGuid
 
             //---
 
-            APlaneActor* actor = Cast< APlaneActor >( iActor );
+            checkNoEntry(); //TODO: check if the primitive material track condition
+
+            //APlaneActor* actor = Cast< APlaneActor >( iActor );
             FMovieSceneObjectPathChannelKeyValue material_objectpath;
-            if( actor )
-            {
-                UMaterialInterface* material = actor->GetStaticMeshComponent()->GetMaterial( material_track->GetMaterialInfo().MaterialSlotIndex );
-                material_objectpath = material;
-            }
+            //if( actor )
+            //{
+            //    UMaterialInterface* material = actor->GetStaticMeshComponent()->GetMaterial( material_track->GetMaterialInfo().MaterialSlotIndex );
+            //    material_objectpath = material;
+            //}
 
             TArrayView<FMovieSceneObjectPathChannel*> MaterialChannels = material_section->GetChannelProxy().GetChannels<FMovieSceneObjectPathChannel>();
             check( MaterialChannels.Num() == 1 );
@@ -393,39 +396,9 @@ ToolkitHelpers::CreateDefaultTracksForActor( ISequencer* iSequencer, AActor* iAc
 
         return;
     }
-    // For planes (static mesh actor)
-    // - ('3DTransform' track)
-    // - 'Visibility' track
-    // - 'StaticMeshComponent' binding
-    //     - 'Material Switcher' track
-    else if( iActor->IsA<APlaneActor>() )
+    else if( iActor->IsA<AOdysseyAnimationActor>() )
     {
-        //CreateTrack( iSequencer, iActor, iBinding, UMovieScene3DTransformTrack::StaticClass() );
-
         CreatePropertyTrack( iSequencer, iActor, iBinding, UMovieSceneVisibilityTrack::StaticClass(), "", "bHidden" );
-
-        FGuid component_binding = CreateComponentTrack( iSequencer, iActor, iActor->GetRootComponent() );
-
-        //---
-
-        // From D:\work\UnrealEngine\Engine\Source\Editor\MovieSceneTools\Private\TrackEditors\PrimitiveMaterialTrackEditor.cpp
-        UObject* object = iSequencer->FindSpawnedObjectOrTemplate( component_binding );
-        USceneComponent* sceneComponent = Cast<USceneComponent>( object );
-        UPrimitiveComponent* primitiveComponent = Cast<UPrimitiveComponent>( sceneComponent );
-
-        if( primitiveComponent )
-        {
-            int32 numMaterials = primitiveComponent->GetNumMaterials();
-            TArray<FName> materialSlotNames = primitiveComponent->GetMaterialSlotNames();
-
-            for( int32 materialIndex = 0; materialIndex < numMaterials; materialIndex++ )
-            {
-                FName materialSlotName = materialSlotNames.IsValidIndex( materialIndex ) ? materialSlotNames[materialIndex] : FName();
-                FComponentMaterialInfo materialInfo{ materialSlotName, materialIndex, EComponentMaterialType::IndexedMaterial };
-
-                CreateTrack( iSequencer, iActor, component_binding, UMovieScenePrimitiveMaterialTrack::StaticClass(), materialInfo );
-            }
-        }
     }
     // For skeletal mesh actor
     // - '3DTransform' track
@@ -451,6 +424,10 @@ ToolkitHelpers::CreateDefaultTracksForActor( ISequencer* iSequencer, AActor* iAc
     else if( ExactCast<AActor>( iActor ) )
     {
     }
+
+    // callback to set up default tracks via code
+    FEposSequenceModule& eposSequenceModule = FModuleManager::LoadModuleChecked<FEposSequenceModule>( "EposSequence" );
+    eposSequenceModule.OnNewActorTrackAdded().Broadcast( *iActor, iBinding, iSequencer->AsShared() );
 }
 
 void

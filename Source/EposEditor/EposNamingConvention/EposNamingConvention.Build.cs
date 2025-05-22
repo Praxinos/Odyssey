@@ -62,6 +62,7 @@ public class EposNamingConvention : ModuleRules
                 "EposTracks",
                 "EposNote",
                 "EposPattern",
+                "OdysseyAnimation",
 
                 // [EDITOR]
                 // [EDITOR] custom engine dependencies
@@ -69,7 +70,6 @@ public class EposNamingConvention : ModuleRules
                 "EditorScriptingUtilities",
                 "PropertyEditor",
                 "EditorStyle",
-                // [EDITOR] custom plugin dependencies
             }
             );
 

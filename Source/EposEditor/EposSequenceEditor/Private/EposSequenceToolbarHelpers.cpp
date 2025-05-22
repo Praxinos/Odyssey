@@ -20,9 +20,9 @@
 
 //static
 void
-EposSequenceToolbarHelpers::MakeTextureSettingsEntries( FMenuBuilder& iMenuBuilder )
+EposSequenceToolbarHelpers::MakeAnimationSettingsEntries( FMenuBuilder& iMenuBuilder )
 {
-    EposTracksToolbarHelpers::MakeTextureSettingsEntries( iMenuBuilder );
+    EposTracksToolbarHelpers::MakeAnimationSettingsEntries( iMenuBuilder );
 }
 
 //static
@@ -132,126 +132,6 @@ EposSequenceToolbarHelpers::MakeSettingsEntries( FMenuBuilder& iMenuBuilder, ISe
 {
     UMovieSceneSequence* sequence = iSequencer->GetFocusedMovieSceneSequence();
     FMovieSceneSequenceID sequence_id = iSequencer->GetFocusedTemplateID();
-
-    iMenuBuilder.BeginSection( NAME_None, LOCTEXT( "settings.drawing-material.section-label", "Material" ) );
-
-    //-
-
-    iMenuBuilder.AddMenuEntry( FUIAction(
-                                   FExecuteAction::CreateLambda( [iSequencer, sequence, sequence_id]() { MasterAssetTools::ToggleBackgroundVisibility( *iSequencer, sequence, sequence_id ); } ),
-                                   FCanExecuteAction(),
-                                   FGetActionCheckState::CreateLambda( [iSequencer, sequence, sequence_id]() { return MasterAssetTools::GetBackgroundVisibility( *iSequencer, sequence, sequence_id ) ? ECheckBoxState::Checked : ECheckBoxState::Unchecked; } )
-                               ),
-                               SNew( SColorPickerEntry )
-                                   .Text( LOCTEXT( "settings.drawing-material.background-label", "Background" ) )
-                                   .Color( MasterAssetTools::GetBackgroundColor( *iSequencer, sequence, sequence_id ) )
-                                   .UseAlpha( true )
-                                   .OnColorCommitted_Lambda( [iSequencer, sequence, sequence_id]( FLinearColor iColor ) { MasterAssetTools::SetBackgroundColor( *iSequencer, sequence, sequence_id, iColor ); } ),
-                               NAME_None,
-                               LOCTEXT( "settings.drawing-material.background-tooltip", "Display background and select its color for the drawing materials" ),
-                               EUserInterfaceActionType::ToggleButton );
-
-    //-
-
-    iMenuBuilder.AddMenuEntry( FUIAction(
-                                   FExecuteAction::CreateLambda( [iSequencer, sequence, sequence_id]() { MasterAssetTools::ToggleGridVisibility( *iSequencer, sequence, sequence_id ); } ),
-                                   FCanExecuteAction(),
-                                   FGetActionCheckState::CreateLambda( [iSequencer, sequence, sequence_id]() { return MasterAssetTools::GetGridVisibility( *iSequencer, sequence, sequence_id ) ? ECheckBoxState::Checked : ECheckBoxState::Unchecked; } )
-                               ),
-                               SNew( SColorPickerEntry )
-                                   .Text( LOCTEXT( "settings.drawing-material.grid-label", "Grid" ) )
-                                   .Color( MasterAssetTools::GetGridColor( *iSequencer, sequence, sequence_id ) )
-                                   .UseAlpha( false )
-                                   .OnColorCommitted_Lambda( [iSequencer, sequence, sequence_id]( FLinearColor iColor ) { MasterAssetTools::SetGridColor( *iSequencer, sequence, sequence_id, iColor ); } ),
-                               NAME_None,
-                               LOCTEXT( "settings.drawing-material.grid-tooltip", "Display grid and select its color for the drawing materials" ),
-                               EUserInterfaceActionType::ToggleButton );
-
-    //-
-
-    auto grid_submenu = [iSequencer, sequence, sequence_id]( FMenuBuilder& iMenuBuilder )
-    {
-        auto CreateEntry = [iSequencer, sequence, sequence_id]( FMenuBuilder& iMenuBuilder, EGridType iGridType, FName iBrushName, FText iToolTip )
-        {
-            iMenuBuilder.AddMenuEntry( FUIAction(
-                                           FExecuteAction::CreateLambda( [iSequencer, sequence, sequence_id, iGridType]() { MasterAssetTools::SetGridType( *iSequencer, sequence, sequence_id, iGridType ); } ),
-                                           FCanExecuteAction(),
-                                           FGetActionCheckState::CreateLambda( [iSequencer, sequence, sequence_id, iGridType]() { return MasterAssetTools::GetGridType( *iSequencer, sequence, sequence_id ) == iGridType ? ECheckBoxState::Checked : ECheckBoxState::Unchecked; } )
-                                       ),
-                                       SNew( SHorizontalBox )
-                                       + SHorizontalBox::Slot()
-                                       .AutoWidth()
-                                       [
-                                           SNew( SImage )
-                                           .Image( FEposSequenceEditorStyle::Get().GetBrush( iBrushName ) )
-                                       ],
-                                       NAME_None,
-                                       iToolTip,
-                                       EUserInterfaceActionType::RadioButton );
-        };
-
-        CreateEntry( iMenuBuilder, EGridType::kNone, "FilmOverlay.Disabled", LOCTEXT( "settings.drawing-material.grid-type-none-tooltip", "No grid" ) );
-        CreateEntry( iMenuBuilder, EGridType::k2x2, "FilmOverlay.2x2Grid", LOCTEXT( "settings.drawing-material.grid-type-2x2-tooltip", "2x2" ) );
-        CreateEntry( iMenuBuilder, EGridType::k3x3, "FilmOverlay.3x3Grid", LOCTEXT( "settings.drawing-material.grid-type-3x3-tooltip", "3x3" ) );
-        CreateEntry( iMenuBuilder, EGridType::kCrosshair, "FilmOverlay.Crosshair", LOCTEXT( "settings.drawing-material.grid-type-crosshair-tooltip", "Crosshair" ) );
-        CreateEntry( iMenuBuilder, EGridType::kAbatment, "FilmOverlay.Rabatment", LOCTEXT( "settings.drawing-material.grid-type-rabatment-tooltip", "Rabatment" ) );
-    };
-
-    iMenuBuilder.AddSubMenu( LOCTEXT( "settings.drawing-material.grid-type-label", "Grid Type" ), LOCTEXT( "settings.drawing-material.grid-type-tooltip", "Select the inner grid type" ), FNewMenuDelegate::CreateLambda( grid_submenu ) );
-
-    iMenuBuilder.EndSection();
-
-    //---
-
-    iMenuBuilder.BeginSection( NAME_None, LOCTEXT( "settings.lighttable.section-label", "Lighttable" ) );
-
-    auto OnGetPreviousColor = [iSequencer, sequence, sequence_id]() -> FLinearColor
-    {
-        FLinearColor color = MasterAssetTools::GetPreviousDrawingColor( *iSequencer, sequence, sequence_id );
-        color.A = MasterAssetTools::GetPreviousDrawingOpacity( *iSequencer, sequence, sequence_id );
-
-        return color;
-    };
-
-    auto OnPreviousColorCommited = [iSequencer, sequence, sequence_id]( FLinearColor iColor )
-    {
-        MasterAssetTools::SetPreviousDrawingColor( *iSequencer, sequence, sequence_id, iColor );
-        MasterAssetTools::SetPreviousDrawingOpacity( *iSequencer, sequence, sequence_id, iColor.A );
-    };
-
-    iMenuBuilder.AddWidget( SNew( SColorPickerEntry )
-                                .ToolTipText( LOCTEXT( "settings.lighttable.previous-drawing-color-tooltip", "Select the color of the previous drawing when the lighttable is enabled" ) )
-                                .Color( OnGetPreviousColor() )
-                                .UseAlpha( true )
-                                .OnColorCommitted_Lambda( OnPreviousColorCommited ),
-                            LOCTEXT( "settings.lighttable.previous-drawing-color-label", "Previous Drawing Color" ) );
-
-    //-
-
-    auto OnGetNextColor = [iSequencer, sequence, sequence_id]() -> FLinearColor
-    {
-        FLinearColor color = MasterAssetTools::GetNextDrawingColor( *iSequencer, sequence, sequence_id );
-        color.A = MasterAssetTools::GetNextDrawingOpacity( *iSequencer, sequence, sequence_id );
-
-        return color;
-    };
-
-    auto OnNextColorCommited = [iSequencer, sequence, sequence_id]( FLinearColor iColor )
-    {
-        MasterAssetTools::SetNextDrawingColor( *iSequencer, sequence, sequence_id, iColor );
-        MasterAssetTools::SetNextDrawingOpacity( *iSequencer, sequence, sequence_id, iColor.A );
-    };
-
-    iMenuBuilder.AddWidget( SNew( SColorPickerEntry )
-                                .ToolTipText( LOCTEXT( "settings.lighttable.next-drawing-color-tooltip", "Select the color of the next drawing when the lighttable is enabled" ) )
-                                .Color( OnGetNextColor() )
-                                .UseAlpha( true )
-                                .OnColorCommitted_Lambda( OnNextColorCommited ),
-                            LOCTEXT( "settings.lighttable.next-drawing-color-label", "Next Drawing Color" ) );
-
-    iMenuBuilder.AddMenuEntry( FEposSequenceEditorCommands::Get().DeactivateAllLighttables );
-
-    iMenuBuilder.EndSection();
 
     //---
 

@@ -8,6 +8,8 @@
 #include "Engine/DeveloperSettings.h"
 #include "UObject/Object.h"
 
+#include "OdysseyAnimationSettings.h"
+
 #include "EposTracksEditorSettings.generated.h"
 
 //---
@@ -48,33 +50,21 @@ public:
 //---
 
 USTRUCT( BlueprintType )
-struct FPlaneSettings
+struct FOdysseyAnimationActorSettings
 {
     GENERATED_BODY()
 
-    /** This will make the plane bigger than the original size viewed by the camera by adding a margin to the plane */
-    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="Plane", meta=(UIMin = "0", ClampMin = "0", UIMax = "200", ClampMax = "200", Units=Percent))
+    /** This will make the animation bigger than the original size viewed by the camera by adding a margin to the animation */
+    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="Animation Actor", meta=(UIMin = "0", ClampMin = "0", UIMax = "200", ClampMax = "200", Units=Percent))
     float SafeMargin { 0.f };
 
-    /** This will rescale the original size of the plane
+    /** This will rescale the original size of the animation
       * The original size is the one viewed by the camera
       * The scale is applied before safe margin
       * The default value (which means no rescale) is (100%, 100%)
       */
-    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="Plane", meta=(AllowPreserveRatio, DisplayName="Relative Scaling (%)"))
+    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="Animation Actor", meta=(AllowPreserveRatio, DisplayName="Relative Scaling (%)"))
     FVector2D RelativeScaling { 100.f, 100.f };
-};
-
-//---
-
-USTRUCT( BlueprintType )
-struct FTextureSettings
-{
-    GENERATED_BODY()
-
-    /** Controls the height (a multiple of 4) of the texture (drawing). (Its width is computed from the plane ratio) */
-    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="Texture", meta=(ClampMin="16", ClampMax="4096", Multiple="4", DisplayName="Height (px)"))
-    int32 Height { 1080 };
 };
 
 //---
@@ -130,13 +120,13 @@ public:
     UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category=Settings, meta=(ShowOnlyInnerProperties))
     FCameraSettings CameraSettings;
 
-    /** Specifies Plane stuff. */
+    /** Specifies Animation stuff. */
     UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category=Settings, meta=(ShowOnlyInnerProperties))
-    FPlaneSettings PlaneSettings;
+    FOdysseyAnimationActorSettings AnimationActorSettings;
 
-    /** Specifies Texture stuff. */
+    /** Specifies Animation stuff. */
     UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category=Settings, meta=(ShowOnlyInnerProperties))
-    FTextureSettings TextureSettings;
+    FOdysseyAnimationSettings AnimationSettings;
 
     /** The default duration for new section in seconds. */
     UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category=BoardTrack, meta=(ClampMin=0.1f, Units=s))
