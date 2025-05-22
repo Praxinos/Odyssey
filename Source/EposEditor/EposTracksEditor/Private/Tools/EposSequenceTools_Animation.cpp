@@ -217,6 +217,8 @@ ShotSequenceTools::SpawnAndBindAnimation( ISequencer& iSequencer, UMovieSceneSeq
     ShotSequenceHelpers::FFindOrCreateTimelineResult result = ShotSequenceHelpers::FindTimelineTrackAndSections( iSequencer, iSequence, iSequenceID, animationGuid );
     for( TWeakObjectPtr<UOdysseyAnimationTimelineSection> section : result.mSections )
     {
+        section->SetPreBehaviour( EOdysseyAnimationPlayerPostBehaviour::Hold );
+        section->SetPostBehaviour( EOdysseyAnimationPlayerPostBehaviour::Hold );
         section->SetRange( iSequence->GetMovieScene()->GetPlaybackRange() );
         section->SetAnimation( section->GetAnimation() ); // To rebuild the channel (as the section is created at the current frame by default)
     }
