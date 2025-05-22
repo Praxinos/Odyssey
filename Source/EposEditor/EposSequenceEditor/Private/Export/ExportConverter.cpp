@@ -95,61 +95,46 @@ FExportConverter::ProcessAnimationCuts( UShotSequence& iShotSequence, FMovieScen
 
         for( TWeakObjectPtr<UOdysseyAnimationTimelineSection> section : result.mSections )
         {
-            const UOdysseyAnimation* animation = result.mAnimationActor->GetAnimationComponent()->GetAnimation();
-            UOdysseyLayerStack* layer_stack = animation->GetLayerStack();
-            TArray<UOdysseyLayer*> layers = layer_stack->GetLayers();
-            for( UOdysseyLayer* layer : layers )
+            const FOdysseyAnimationCutChannel& channel = section->GetAnimationCutChannel();
+            TMovieSceneChannelData<const FOdysseyAnimationCutValue> data = channel.GetData();
+            TArrayView<const FFrameNumber> times = data.GetTimes();
+            TArrayView<const FOdysseyAnimationCutValue> values = data.GetValues();
+            for( int i = 0; i < times.Num(); i++ )
             {
-                UOdysseyAnimationLayer* animation_layer = Cast<UOdysseyAnimationLayer>( layer );
-                if( !animation_layer )
+                const FFrameNumber& frame_in_sequence = times[i];
+                const FOdysseyAnimationCutValue& value = values[i];
+
+                FMovieSceneInverseSequenceTransform localToRootTransform = iRootToSequenceTransform.Inverse();
+                TOptional<FFrameTime> time_in_root = localToRootTransform.TryTransformTime( frame_in_sequence );
+                if( !time_in_root )
                     continue;
 
-                TArray<UOdysseyLayerCell*> cells = animation_layer->GetCells();
-                for( UOdysseyLayerCell* cell : cells )
+                FFrameNumber frame_in_root = time_in_root->GetFrame();
+
+                FExportPanel* existing_panel = ioPanels.FindByPredicate( [frame_in_root]( const FExportPanel& iElement )
+                                                                         {
+                                                                             return iElement.GlobalFrame == frame_in_root;
+                                                                         } );
+                if( existing_panel )
                 {
-                    FInt32Range range = cell->GetFrameRange(); // Always inclusive-inclusive
-                    TRange<FFrameNumber> cell_range = TRange<FFrameNumber>::Inclusive( range.GetLowerBoundValue(), range.GetUpperBoundValue() );
+                    check( existing_panel->mSequence == &iShotSequence );
 
-                    FFrameTime frametime = FFrameRate::TransformTime( FFrameTime( cell_range.GetLowerBoundValue() ), FFrameRate( animation->GetFramesPerSecond() * 1000, 1000 ) /* to manage fps with 3 number after the decimal */, iShotSequence.GetMovieScene()->GetTickResolution() );
-                    FFrameNumber frame = frametime.GetFrame();
+                    if( !existing_panel->mSourceAnimationCut.IsSet() )
+                        existing_panel->mSourceAnimationCut = FExportPanelSourceAnimationCut();
 
-                    TRange<FFrameNumber> frame_as_range = TRange<FFrameNumber>( frame );
-                    TRange<FFrameNumber> new_frame_as_range = UE::MovieScene::TranslateRange( frame_as_range, section->GetTrueRange().GetLowerBoundValue() );
+                    existing_panel->mSourceAnimationCut.GetValue().mAnimationCuts.Add( { frame_in_sequence, animation_binding } );
+                }
+                else
+                {
+                    FExportPanel panel;
+                    panel.GlobalFrame = frame_in_root;
+                    panel.mSequence = &iShotSequence;
+                    panel.mSequenceId = iSequenceId;
+                    FExportPanelSourceAnimationCut source_animationcut;
+                    source_animationcut.mAnimationCuts.Add( { frame_in_sequence, animation_binding } );
+                    panel.mSourceAnimationCut = source_animationcut;
 
-                    frame = new_frame_as_range.GetLowerBoundValue();
-
-                    FMovieSceneInverseSequenceTransform localToRootTransform = iRootToSequenceTransform.Inverse();
-                    TOptional<FFrameTime> time_in_root = localToRootTransform.TryTransformTime( frame );
-                    if( !time_in_root )
-                        continue;
-
-                    FFrameNumber frame_in_root = time_in_root->GetFrame();
-
-                    FExportPanel* existing_panel = ioPanels.FindByPredicate( [frame_in_root]( const FExportPanel& iElement )
-                                                                             {
-                                                                                 return iElement.GlobalFrame == frame_in_root;
-                                                                             } );
-                    if( existing_panel )
-                    {
-                        check( existing_panel->mSequence == &iShotSequence );
-
-                        if( !existing_panel->mSourceAnimationCut.IsSet() )
-                            existing_panel->mSourceAnimationCut = FExportPanelSourceAnimationCut();
-
-                        existing_panel->mSourceAnimationCut.GetValue().mAnimationCuts.Add( { frame, animation_binding } );
-                    }
-                    else
-                    {
-                        FExportPanel panel;
-                        panel.GlobalFrame = frame_in_root;
-                        panel.mSequence = &iShotSequence;
-                        panel.mSequenceId = iSequenceId;
-                        FExportPanelSourceAnimationCut source_animationcut;
-                        source_animationcut.mAnimationCuts.Add( { frame, animation_binding } );
-                        panel.mSourceAnimationCut = source_animationcut;
-
-                        ioPanels.Add( panel );
-                    }
+                    ioPanels.Add( panel );
                 }
             }
         }
