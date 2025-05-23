@@ -609,6 +609,11 @@ UOdysseyAnimationPlayer::PostLoad()
     if (GetFlags() & RF_ClassDefaultObject)
         return;
 
+    if (!RenderTarget)
+    {
+        RenderTarget = NewObject<UTextureRenderTarget2D>(this, NAME_None, RF_Public | RF_Transient);
+        RenderTarget->RenderTargetFormat = RTF_RGBA16f;
+    }
     RenderTarget->ResizeTarget(Animation->GetWidth(), Animation->GetHeight());
     RenderTarget->UpdateResourceImmediate();
 
