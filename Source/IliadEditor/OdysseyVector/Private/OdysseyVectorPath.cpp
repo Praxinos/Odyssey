@@ -2156,9 +2156,17 @@ FOdysseyVectorPath::ApplyMatrix( BLMatrix2D& iMatrix )
             ::ULIS::FVec2D& ctrlPoint1 = cubicSegment->GetHandle(1)->GetCoords();
             BLPoint localPt0 = iMatrix.mapPoint( ctrlPoint0.x, ctrlPoint0.y );
             BLPoint localPt1 = iMatrix.mapPoint( ctrlPoint1.x, ctrlPoint1.y );
+            bool isAligned0 = cubicSegment->GetVertex(0)->IsHandleAligned();
+            bool isAligned1 = cubicSegment->GetVertex(1)->IsHandleAligned();
+
+            cubicSegment->GetVertex(0)->SetHandleAligned( false, false );
+            cubicSegment->GetVertex(1)->SetHandleAligned( false, false );
 
             cubicSegment->GetHandle(0)->Set( localPt0.x, localPt0.y );
             cubicSegment->GetHandle(1)->Set( localPt1.x, localPt1.y );
+
+            cubicSegment->GetVertex(0)->SetHandleAligned( isAligned0, false );
+            cubicSegment->GetVertex(1)->SetHandleAligned( isAligned1, false );
         }
 
         InvalidateSegment( segment );

@@ -2404,7 +2404,7 @@ FOdysseyVectorTagInbetweener::Commit( std::list<FOdysseyVectorTag*>& oRemovedTag
                                                                      , preProcess
                                                                      , postProcess );
                     BLMatrix2D conversionMatrix = inbetweenScene->GetInverseWorldMatrix();
-                    BLMatrix2D copiedObjectWorldMatrix = mOwner->GetWorldMatrix();
+                    BLMatrix2D copiedObjectWorldMatrix = copiedObject->GetWorldMatrix();
                     double translationX, translationY, rotation, scalingX, scalingY;
 
                     oAddedObjectList.push_back( copiedObject );

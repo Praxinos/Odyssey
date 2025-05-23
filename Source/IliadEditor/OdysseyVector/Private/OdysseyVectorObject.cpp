@@ -643,44 +643,39 @@ FOdysseyVectorObject::GetTranslationY()
 void
 FOdysseyVectorObject::UpdateMatrix()
 {
-    FOdysseyVectorGroupPaint* scene = GetScene();
+    mLocalMatrix.reset();
+    mLocalMatrix.translate( mTranslationX, mTranslationY );
+    mLocalMatrix.rotate( mRotation * M_PI / 180.0f );
+    mLocalMatrix.scale( mScalingX, mScalingY );
 
-    if( scene )
+    BLMatrix2D::invert( mInverseLocalMatrix, mLocalMatrix );
+
+    if( mParent)
     {
-        mLocalMatrix.reset();
-        mLocalMatrix.translate( mTranslationX, mTranslationY );
-        mLocalMatrix.rotate( mRotation * M_PI / 180.0f );
-        mLocalMatrix.scale( mScalingX, mScalingY );
+        mWorldMatrix = mParent->mWorldMatrix;
+        mWorldMatrix.transform( mLocalMatrix );
 
-        BLMatrix2D::invert( mInverseLocalMatrix, mLocalMatrix );
-
-        if( mParent)
-        {
-            mWorldMatrix = mParent->mWorldMatrix;
-            mWorldMatrix.transform( mLocalMatrix );
-
-            BLMatrix2D::invert( mInverseWorldMatrix, mWorldMatrix );
-        }
-         else
-        {
-            memcpy( &mWorldMatrix       , &mLocalMatrix       , sizeof ( mLocalMatrix        ) );
-            memcpy( &mInverseWorldMatrix, &mInverseLocalMatrix, sizeof ( mInverseLocalMatrix ) );
-        }
-
-        // recurse
-        for( FOdysseyVectorObject *child : mChildrenList )
-        {
-            child->UpdateMatrix();
-        }
-
-        //update tags
-        for( FOdysseyVectorTag* tag : mTagList )
-        {
-            tag->UpdateMatrix();
-        }
-
-        mInvalidationFlags &= (~INVALIDATE_MATRIX);
+        BLMatrix2D::invert( mInverseWorldMatrix, mWorldMatrix );
     }
+        else
+    {
+        memcpy( &mWorldMatrix       , &mLocalMatrix       , sizeof ( mLocalMatrix        ) );
+        memcpy( &mInverseWorldMatrix, &mInverseLocalMatrix, sizeof ( mInverseLocalMatrix ) );
+    }
+
+    // recurse
+    for( FOdysseyVectorObject *child : mChildrenList )
+    {
+        child->UpdateMatrix();
+    }
+
+    //update tags
+    for( FOdysseyVectorTag* tag : mTagList )
+    {
+        tag->UpdateMatrix();
+    }
+
+    mInvalidationFlags &= (~INVALIDATE_MATRIX);
 }
 
 //static

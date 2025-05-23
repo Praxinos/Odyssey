@@ -390,9 +390,10 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionInbetweenMode( bool iOnTa
 
                 for( FInbetweenerBreakdown* breakdown : inbetweenerTag->GetBreakdownList() )
                 {
+                    int32 drawingIndex = ( cellIndex - breakdown->GetSourceCellIndex() ) * static_cast<int8>(breakdown->GetInbetweenerTag()->GetInterpolationDirection());
 
-                    if( ( ( cellIndex >  breakdown->GetSourceCellIndex() ) && ( cellIndex <= breakdown->GetTargetCellIndex() ) )
-                     || ( ( cellIndex == breakdown->GetSourceCellIndex() ) && ( breakdown->GetPrevBreakdown() == nullptr     ) ) )
+                    if( ( ( drawingIndex >  static_cast<int32>(breakdown->GetSourceDrawingIndex()) ) && ( drawingIndex <= static_cast<int32>(breakdown->GetTargetDrawingIndex()) ) )
+                     || ( ( drawingIndex == static_cast<int32>(breakdown->GetSourceDrawingIndex()) ) && ( breakdown->GetPrevBreakdown() == nullptr     ) ) )
                     {
                         if( iOnTargetCellOnly == false )
                         {
@@ -400,7 +401,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionInbetweenMode( bool iOnTa
                         }
                         else
                         {
-                            if ( cellIndex == breakdown->GetTargetCellIndex() )
+                            if ( drawingIndex == breakdown->GetTargetDrawingIndex() )
                             {
                                 mSelectedBreakdownList.push_back( breakdown );
                             }
