@@ -378,9 +378,12 @@ FOdysseyPainterEditorViewportClient::InputKey( const FInputKeyEventArgs& iEventA
 
                 if (bNoMouseMovement)
                     mCurrentHUDElement->OnMouseClick(mCurrentHUDPoint, iEventArgs.Key );
-                mCurrentHUDElement->OnMouseUp(mCurrentHUDPoint, iEventArgs.Key );
+
+                bool handled = mCurrentHUDElement->OnMouseUp(mCurrentHUDPoint, iEventArgs.Key );
                 mCurrentHUDElement = nullptr;
-                return true;
+
+                if( handled )
+                    return true;
             }
         }
     }

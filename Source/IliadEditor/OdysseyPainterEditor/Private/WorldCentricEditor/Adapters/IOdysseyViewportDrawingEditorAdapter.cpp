@@ -460,10 +460,12 @@ bool IOdysseyViewportDrawingEditorAdapter::InputKey(FEditorViewportClient* iView
 
                     if (bNoMouseMovement)
                         mCurrentHUDElement->OnMouseClick(mCurrentHUDPoint, iKey );
-                    mCurrentHUDElement->OnMouseUp(mCurrentHUDPoint, iKey);
+                    bool handled = mCurrentHUDElement->OnMouseUp(mCurrentHUDPoint, iKey);
                     mCurrentHUDElement = nullptr;
+
+                    if( handled )
+                        return true;
                 }
-                return true;
             }
         }
     }
