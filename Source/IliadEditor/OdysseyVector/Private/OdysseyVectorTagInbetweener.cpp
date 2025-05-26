@@ -2203,7 +2203,7 @@ FOdysseyVectorTagInbetweener::Commit( std::list<FOdysseyVectorTag*>& oRemovedTag
                     std::list<FOdysseyVectorObject*> newObjectList;
 
                     // change vertices coords before copying the object
-                    std::function<uint64(FOdysseyVectorObject*,uint64)> preProcess = [ drawingIndex ]( FOdysseyVectorObject* vectorObject, uint64 copyFlags ) -> uint64
+                    std::function<uint64(FOdysseyVectorObject*,uint64)> preProcess = [ this, drawingIndex ]( FOdysseyVectorObject* vectorObject, uint64 copyFlags ) -> uint64
                     {
                         FOdysseyVectorTag* tag = vectorObject->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
 
@@ -2404,8 +2404,10 @@ FOdysseyVectorTagInbetweener::Commit( std::list<FOdysseyVectorTag*>& oRemovedTag
                                                                      , preProcess
                                                                      , postProcess );
                     BLMatrix2D conversionMatrix = inbetweenScene->GetInverseWorldMatrix();
-                    BLMatrix2D copiedObjectWorldMatrix = copiedObject->GetWorldMatrix();
+                    BLMatrix2D copiedObjectWorldMatrix;
                     double translationX, translationY, rotation, scalingX, scalingY;
+
+                    FOdysseyVector::MatrixMultiply( mOwner->GetParent()->GetWorldMatrix(), copiedObject->GetLocalMatrix(), copiedObjectWorldMatrix );
 
                     oAddedObjectList.push_back( copiedObject );
 
