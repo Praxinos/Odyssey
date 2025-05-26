@@ -390,7 +390,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionInbetweenMode( bool iOnTa
 
                 for( FInbetweenerBreakdown* breakdown : inbetweenerTag->GetBreakdownList() )
                 {
-                    int32 drawingIndex = ( cellIndex - breakdown->GetSourceCellIndex() ) * static_cast<int8>(breakdown->GetInbetweenerTag()->GetInterpolationDirection());
+                    int32 drawingIndex = ( cellIndex - breakdown->GetInbetweenerTag()->GetSourceCellIndex() ) * static_cast<int8>(breakdown->GetInbetweenerTag()->GetInterpolationDirection());
 
                     if( ( ( drawingIndex >  static_cast<int32>(breakdown->GetSourceDrawingIndex()) ) && ( drawingIndex <= static_cast<int32>(breakdown->GetTargetDrawingIndex()) ) )
                      || ( ( drawingIndex == static_cast<int32>(breakdown->GetSourceDrawingIndex()) ) && ( breakdown->GetPrevBreakdown() == nullptr     ) ) )
