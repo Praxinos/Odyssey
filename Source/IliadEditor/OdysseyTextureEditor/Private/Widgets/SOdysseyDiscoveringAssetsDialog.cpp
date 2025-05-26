@@ -1,5 +1,5 @@
 // IDDN.FR.001.060015.013.S.X.2019.000.00000
-// ODYSSEY is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
+// ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 // This a copy of SDiscoveringAssetsDialog.cpp private in the source code of UE4
 // see: https://udn.unrealengine.com/s/question/0D54z0000775oOGCAY/spackagereportdialog-and-sdiscoveringassetsdialog-are-private

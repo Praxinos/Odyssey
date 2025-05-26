@@ -1,5 +1,5 @@
 // IDDN.FR.001.060015.013.S.X.2019.000.00000
-// ODYSSEY is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
+// ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "SOdysseyAboutWindow.h"
 
@@ -141,7 +141,7 @@ SOdysseyAboutWindow::Construct( const FArguments& iArgs )
                 .Padding( FMargin( 0.f ) )
                 [
                     SNew( STextBlock )
-                    .Text( LOCTEXT( "about-window.copyright.copyright", "Odyssey is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc" ) )
+                    .Text( LOCTEXT( "about-window.copyright.copyright", "Odyssey is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc" ) )
                     .TextStyle( FOdysseyStyle::Get(), "About.SmallText" )
                 ]
                 +SVerticalBox::Slot()

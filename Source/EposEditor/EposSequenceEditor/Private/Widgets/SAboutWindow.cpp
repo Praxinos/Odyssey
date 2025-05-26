@@ -1,5 +1,5 @@
 // IDDN.FR.001.060015.013.S.X.2019.000.00000
-// ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
+// ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "Widgets/SAboutWindow.h"
 
@@ -143,7 +143,7 @@ SAboutWindow::Construct( const FArguments& iArgs )
                 .Padding( FMargin( 0.f ) )
                 [
                     SNew( STextBlock )
-                    .Text( LOCTEXT( "copyright.copyright", "EPOS is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc" ) )
+                    .Text( LOCTEXT( "copyright.copyright", "EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc" ) )
                     .TextStyle( FEposSequenceEditorStyle::Get(), "About.SmallText" )
                 ]
                 +SVerticalBox::Slot()

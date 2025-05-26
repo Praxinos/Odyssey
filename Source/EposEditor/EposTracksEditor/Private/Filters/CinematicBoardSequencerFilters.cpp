@@ -1,5 +1,5 @@
 // IDDN.FR.000.000000.000.S.X.0000.000.00000
-// ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2025
+// ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "CinematicBoardSequencerFilters.h"
 
