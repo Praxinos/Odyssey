@@ -51,7 +51,7 @@ SOdysseyAnimationTimelineSection::SOdysseyAnimationTimelineSection()
 }
 
 void
-SOdysseyAnimationTimelineSection::Construct(const FArguments& iArgs, TSharedPtr<ISequencer> iSequencer, UOdysseyAnimationTimelineSection* iSection)
+SOdysseyAnimationTimelineSection::Construct(const FArguments& iArgs, TSharedPtr<ISequencer> iSequencer, UOdysseyAnimationComponent* iComponent, UOdysseyAnimationTimelineSection* iSection)
 {
     mAnimation.Assign(*this, iArgs._Animation);
     mPreBehaviour = iArgs._PreBehaviour;
@@ -60,8 +60,9 @@ SOdysseyAnimationTimelineSection::Construct(const FArguments& iArgs, TSharedPtr<
     mOnPostBehaviourChanged = iArgs._OnPostBehaviourChanged;
     mStartFrameOffset = iArgs._StartFrameOffset;
 
-    mSection = iSection;
     mSequencer = iSequencer;
+    mComponent = iComponent;
+    mSection = iSection;
     RebuildWidgets();
 }
 
@@ -271,6 +272,7 @@ SOdysseyAnimationTimelineSection::RebuildWidgets()
         ];
 
     TSharedRef<SWidget> timelineWidget = SNew( SOdysseyAnimationTimelineTreeView )
+            .CurrentFrame(this, &SOdysseyAnimationTimelineSection::GetCurrentFrame)
             .LayerStack(layerStack)
             .TimelinePosition(mTimelinePosition)
             .OnActivateOutOfPegs(this, &SOdysseyAnimationTimelineSection::OnActivateOutOfPegs)
@@ -445,6 +447,22 @@ const FSlateBrush*
 SOdysseyAnimationTimelineSection::GetPrePostBehaviourBrush() const
 {
     return FOdysseyStyle::GetBrush("Sequencer.AnimationTimelineTrack.PrePostBehaviourOverlay");
+}
+
+int
+SOdysseyAnimationTimelineSection::GetCurrentFrame() const
+{
+    if (!mComponent)
+        return INDEX_NONE;
+
+    if (mComponent->GetAnimation() != mAnimation.Get())
+        return INDEX_NONE;
+
+    UOdysseyAnimationPlayer* player = mComponent->GetPlayer();
+    if (!player)
+        return INDEX_NONE;
+
+    return player->GetCurrentFrame().FrameNumber.Value;
 }
 
 #undef LOCTEXT_NAMESPACE

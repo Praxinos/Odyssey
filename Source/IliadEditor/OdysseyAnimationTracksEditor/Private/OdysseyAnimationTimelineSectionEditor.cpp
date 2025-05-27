@@ -72,6 +72,23 @@ TSharedRef<SWidget>
 FOdysseyAnimationTimelineSectionEditor::GenerateSectionWidget()
 {
     TSharedPtr<ISequencer> sequencer = GetSequencer();
+    UOdysseyAnimationTimelineTrack* track = mSection->GetTypedOuter<UOdysseyAnimationTimelineTrack>();
+
+    UOdysseyAnimationComponent* component = nullptr;
+    TArrayView<TWeakObjectPtr<>> boundObjects = sequencer->FindObjectsInCurrentSequence(track->FindObjectBindingGuid());
+    for (TWeakObjectPtr<>& boundObjectPtr : boundObjects)
+    {
+        UObject* boundObject = boundObjectPtr.Get();
+        if (!boundObject)
+            continue;
+
+        if (!boundObject->IsA<UOdysseyAnimationComponent>())
+            continue;
+
+        component = Cast<UOdysseyAnimationComponent>(boundObject);
+        if (!component)
+            continue;
+    }
 
     TSharedRef widget = SNew(SVerticalBox)
         + SVerticalBox::Slot()
@@ -86,7 +103,7 @@ FOdysseyAnimationTimelineSectionEditor::GenerateSectionWidget()
         + SVerticalBox::Slot()
         .AutoHeight()
         [
-            SNew(SOdysseyAnimationTimelineSection, sequencer, mSection)
+            SNew(SOdysseyAnimationTimelineSection, sequencer, component, mSection)
             .Animation(this, &FOdysseyAnimationTimelineSectionEditor::GetAnimation)
             .PreBehaviour(this, &FOdysseyAnimationTimelineSectionEditor::GetPreBehaviour)
             .PostBehaviour(this, &FOdysseyAnimationTimelineSectionEditor::GetPostBehaviour)

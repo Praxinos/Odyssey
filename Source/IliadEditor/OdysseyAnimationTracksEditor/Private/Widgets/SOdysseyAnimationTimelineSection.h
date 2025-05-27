@@ -41,7 +41,7 @@ public:
     SLATE_END_ARGS()
 
 public:
-    void Construct(const FArguments& iArgs, TSharedPtr<ISequencer> iSequencer, UOdysseyAnimationTimelineSection* iSection);
+    void Construct(const FArguments& iArgs, TSharedPtr<ISequencer> iSequencer, UOdysseyAnimationComponent* iComponent, UOdysseyAnimationTimelineSection* iSection);
 
 protected:
     virtual FReply OnPreviewMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
@@ -62,6 +62,8 @@ private:
 
     const FSlateBrush* GetPrePostBehaviourBrush() const;
 
+    int GetCurrentFrame() const;
+
     void OnPrebehaviourComboBoxChanged(int32 iValue, ESelectInfo::Type iSelectInfo);
     void OnPostbehaviourComboBoxChanged(int32 iValue, ESelectInfo::Type iSelectInfo);
 
@@ -75,6 +77,7 @@ private:
     FOnBehaviourChanged mOnPostBehaviourChanged;
 
     TWeakPtr<ISequencer> mSequencer;
+    UOdysseyAnimationComponent* mComponent;
     UOdysseyAnimationTimelineSection* mSection;
     TSharedRef<FOdysseyPainterEditorAnimationTimelinePosition> mTimelinePosition;
 };
