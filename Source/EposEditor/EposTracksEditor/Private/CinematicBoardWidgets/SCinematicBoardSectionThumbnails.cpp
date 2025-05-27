@@ -455,7 +455,8 @@ SCinematicBoardSectionThumbnails::HandleAddBoardBeforeComboButtonGetMenuContent(
                               LOCTEXT( "section.clone-section-before-tooltip", "Clone this shot before (actors and animation assets will be cloned as well)" ),
                               FSlateIcon(),
                               FUIAction( FExecuteAction::CreateLambda( CloneSection ),
-                                         FCanExecuteAction::CreateLambda( CanCloneSection ) ) );
+                                         FCanExecuteAction::CreateLambda( [this]() { return false; } ) ) );
+                                         //FCanExecuteAction::CreateLambda( CanCloneSection ) ) );
 
     return menuBuilder.MakeWidget();
 }
@@ -569,7 +570,8 @@ SCinematicBoardSectionThumbnails::HandleAddBoardAfterComboButtonGetMenuContent()
                               LOCTEXT( "section.clone-section-after-tooltip", "Clone this shot after (actors and animation assets will be cloned as well)" ),
                               FSlateIcon(),
                               FUIAction( FExecuteAction::CreateLambda( CloneSection ),
-                                         FCanExecuteAction::CreateLambda( CanCloneSection ) ) );
+                                         FCanExecuteAction::CreateLambda( [this]() { return false; } ) ) );
+                                         //FCanExecuteAction::CreateLambda( CanCloneSection ) ) );
 
     return menuBuilder.MakeWidget();
 }
