@@ -1,129 +1,58 @@
-# Iliad
-
-[![License](https://img.shields.io/badge/License-CC_Attribution_NoDerivatives_4.0_International-steelblue?style=flat)](https://creativecommons.org/licenses/by-nd/4.0/legalcode)
+[![License: CC BY-ND 4.0](https://img.shields.io/badge/License-CC_BY--ND_4.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nd/4.0/)
+[![UE5](https://img.shields.io/badge/UE5-5.6+-orange)](www.fab.com/fr/listings/******************)
 [![Discord](https://img.shields.io/discord/639891086369882112?label=Discord&style=flat&logo=Discord&logoColor=whitesmoke&color=mediumslateblue)](https://discordapp.com/invite/gEd6pj7)
-[![Patreon](https://img.shields.io/badge/Patreon-Donate-tomato.svg?style=flat&logo=Patreon)](https://www.patreon.com/praxinos)
-[![UE4](https://img.shields.io/badge/UE4-4.25+-orange)](https://www.unrealengine.com/marketplace/en-US/product/iliad-intelligent-layered-imaging-architecture-for-drawing-beta-version)
-[![Release](https://img.shields.io/github/release/Praxinos/Iliad.svg)](https://github.com/Praxinos/Iliad/releases)
+<!-- [![Release](https://img.shields.io/github/release/Praxinos/Odyssey-Plugin.svg)](https://github.com/Praxinos/Odyssey-Plugin/releases) -->
+
+# Odyssey
 
 <p align="center">
-    <img src="Meta/git/logo.png">
+    <img src="https://praxinos.coop/images/odyssey-logo.png" alt="Odyssey">
 </p>
 
 <!-- -->
 
 # Overview
 
-**Iliad** is a digital-painting plugin for Unreal Engine 5.
-It comes with a dedicated interface to create and edit textures directly within the engine, eliminating the need for a workflow with multiple software.
+**Odyssey** is a digital-painting + storyboard manager plugin for Unreal Engine 5.
+
+**Odyssey**  comes with a dedicated interface to create and edit animations and textures directly within the engine, eliminating the need for a workflow with multiple software.
 Express your art and experience new creative possibilities with a powerful blueprint-based nodal brush engine.
 Create brushes to make traditional tools ( crayons, paintbrushes, pencils... ).
 
-**Iliad** can be used for many purposes, including:
+**Odyssey** can be used for many purposes, including:
+- Creating 2D animations and drop them in the viewport
 - Editing 2D textures used in materials ( as diffuse, specular, normal, etc. ) and see the result in real-time on 3D assets in the viewport.
 - Creating 2D images like tile sets or sprites for 2D video games.
 - Drawing sketches for storyboard, design or illustration.
 
-<!-- -->
-
-# Links
-
-[Official Repository](https://github.com/Praxinos/Iliad)
-[Marketplace](https://www.unrealengine.com/marketplace/en-US/product/iliad-intelligent-layered-imaging-architecture-for-drawing-beta-version)
-[Developer Documentation](https://praxinos.coop/Documentation/Iliad/Developer/version/v0.6.426/html/)
-[User Documentation](https://praxinos.coop/Documentation/Iliad/User/html/)
-[Praxinos Website](https://praxinos.coop)
-[Iliad on Discord](https://discordapp.com/invite/gEd6pj7)
-[Praxinos on Patreon](https://www.patreon.com/praxinos)
-
-<!-- -->
-
-# Making a Package
-
-See the [README](https://github.com/Praxinos/Installers#iliad--epos) of [Installers](https://github.com/Praxinos/Installers) repository
-
-# Epos
-
-[![UE4](https://img.shields.io/badge/UE-5.0+-lightgrey?style=flat&logo=unrealengine&logoColor=whitesmoke)](https://www.unrealengine.com/marketplace/en-US/product/iliad-intelligent-layered-imaging-architecture-for-drawing-beta-version)
-[![Release](https://img.shields.io/github/release/Praxinos/Epos)](https://github.com/Praxinos/Epos/releases)
-[![License](https://img.shields.io/badge/License-CC_Attribution_NoDerivatives_4.0_International-steelblue?style=flat)](https://creativecommons.org/licenses/by-nd/4.0/legalcode)
-[![Discord](https://img.shields.io/discord/639891086369882112?label=Discord&color=mediumslateblue&style=flat&logo=Discord&logoColor=whitesmoke)](https://discordapp.com/invite/gEd6pj7)
-[![Patreon](https://img.shields.io/badge/Patreon-Donate-tomato.svg?style=flat&logo=Patreon)](https://www.patreon.com/praxinos)
-
-<br>
-<p align="center">
-    <img src="https://praxinos.coop/images/epos-logo.png" alt="Epos">
-</p>
-
-<!-- -->
-
-# Overview
-
-**Extended Production Of Storyboard** - or **EPOS** - is a storyboard manager plugin in Unreal Engine Editor.
-
-**EPOS** is designed for **2D storyboard artists** ; its use is simple and intuitive, yet powerful and complete:
-- use 3D environment and create shots, cameras and planes in a few clicks directly from the Sequencer
+**Odyssey** is also designed for **2D storyboard artists** ; its use is simple and intuitive, yet powerful and complete:
+- use 3D environment and create shots, cameras and animations in a few clicks directly from the Sequencer
 - adjust the angle and the perspective
-- install and enable the [plugin ILIAD](https://www.unrealengine.com/marketplace/en-US/product/iliad-intelligent-layered-imaging-architecture-for-drawing-beta-version)
-- and ... **start drawing**! :writing_hand:
+- and ... **start drawing and animating**! :writing_hand:
 
-**EPOS** is **source-control and multi-user compatible**: storyboard artists, previz artists, background artists, film directors and all other people involved in preproduction can work together in real-time to share and enhance their vision of the art.
+**Odyssey** is **source-control and multi-user compatible**: storyboard artists, previz artists, background artists, film directors and all other people involved in preproduction can work together in real-time to share and enhance their vision of the art.
 
 <!-- -->
 
 # Installation
 
-Install the plugin directly to your Unreal Engine 5 via the [EpicGames Marketplace](https://www.unrealengine.com/marketplace/en-US/product/epos-2d-storyboard-animatic-plugin-for-unreal-engine) ... **it's free !** :heart_eyes::+1:
+Install the plugin directly to your Unreal Engine 5 via [Fab](www.fab.com/fr/listings/******************) ... **it's free !** :heart_eyes::+1:
 
 <!-- -->
 
 # Documentation
 
-Read the [:blue_book:User Documentation](https://praxinos.coop/epos-user-doc) to learn how to use the plugin
+Read the [:blue_book:User Documentation](https://praxinos.coop/odyssey-user-doc) to learn how to use the plugin
 
 <!-- -->
 
 # Links
 
-[Sample Projects](https://praxinos.coop/epos-projects): Charpy, Bear (Parallax), ...
-[Official Repository](https://github.com/Praxinos/Epos)
-[Official Homepage :house:](https://praxinos.coop/epos)
+[Official Repository](https://github.com/Praxinos/Odyssey-Plugin)
+[Official Homepage :house:](https://praxinos.coop/odyssey)
 [Praxinos Website](https://praxinos.coop)
-
-<!-- -->
-
-# Module hierarchy
-
-```
-    ┌──────────────────┐   ┌────────────────────┐  ┌──────────────┐                 ╮
-    │  EposMovieScene  │   │      EposNote      │  │  EposActors  │                 │
-    └────────┬─────────┘   └─────────┬──────────┘  └────┬─────────┘                 │
-             │                       │                  │                           │
-    ┌────────┴───────────────────────┴──────────┐       │                           │
-    │                EposTracks                 │       │                           │  Runtime
-    └─────────────────────┬─────────────────────┘       │                           │
-                          │                             │                           │
-             ┌────────────┴─────────────────────────────┴───┐                       │
-             │                 EposSequence                 │                       │
-             └─────────────────────────┬────────────────────┘                       ╯
-                                       │
-                                       │    ┌───────────────┐                       ╮
-                                       │    │  EposPattern  │                       │
-                                       │    └──────┬────────┘                       │
-                                       │           |                                │
-                                       │           |                                │
-                ┌──────────────────────┴───────────┴─────┐                          │
-                │            EposNamingConvention        │                          │
-                └──────────────────────┬─────────────────┘                          │  Editor
-                                       │                                            │
-                ┌──────────────────────┴─────────────────┐                          │
-                │            EposTracksEditor            │                          │
-                └──────────────────────┬─────────────────┘                          │
-                                       │                                            │
-                ┌──────────────────────┴─────────────────┐                          │
-                │            EposSequenceEditor          │                          │
-                └────────────────────────────────────────┘                          ╯
-```
+[Odyssey on Discord](https://discordapp.com/invite/gEd6pj7)
+[Fab](www.fab.com/fr/listings/******************)
 
 <!-- -->
 
@@ -140,7 +69,7 @@ Read the [:blue_book:User Documentation](https://praxinos.coop/epos-user-doc) to
 
 # Making a Package
 
-See the [README](https://github.com/Praxinos/Installers#iliad--epos) of [Installers](https://github.com/Praxinos/Installers) repository
+See the [README](https://github.com/Praxinos/Installers#plugins-odyssey-iliad--epos) of [Installers](https://github.com/Praxinos/Installers) repository
 
 <!-- -->
 

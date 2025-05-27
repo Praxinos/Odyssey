@@ -1,19 +1,22 @@
-#EPOS
+###  ODYSSEY © 2019 by Praxinos is licensed under [CC BY-ND 4.0](https://creativecommons.org/licenses/by-nd/4.0/) <img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg" style="max-width:1em;max-height:1em;"><img src="https://mirrors.creativecommons.org/presskit/icons/by.svg" style="max-width:1em;max-height:1em;"><img src="https://mirrors.creativecommons.org/presskit/icons/nd.svg" style="max-width:1em;max-height:1em;">
 
 IDDN.FR.001.060015.013.S.X.2019.000.00000
-ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc
 
-Licensed under the Creative Commons Attribution – NoDerivatives 4.0 International Public License (the "Public License");
-You may not use this file except in compliance with the Public License.
-You may obtain a copy of the Public License at
+<hr>
 
-#ILIAD
-Copyright 2019-2020 PRAXINOS
+# CC BY-ND 4.0
 
-Licensed under the Creative Commons Attribution – NoDerivatives 4.0 International Public License (the "Public License");
+## Creative Commons Attribution-NoDerivatives 4.0 International
 
-You may not use this file except in compliance with the Public License.
+### You are free to:
 
-You may obtain a copy of the Public License at
+- **Share** — copy and redistribute the material in any medium or format for any purpose, even commercially.  
+- The licensor cannot revoke these freedoms as long as you follow the license terms.
 
-https://creativecommons.org/licenses/by-nd/4.0/legalcode
+### Under the following terms:
+
+- <img src="https://mirrors.creativecommons.org/presskit/icons/by.svg" style="max-width: 1.2em;max-height:1.2em;margin-right: .2em;">**Attribution** — You must give appropriate credit , provide a link to the license, and indicate if changes were made . You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or your use.
+- <img src="https://mirrors.creativecommons.org/presskit/icons/nd.svg" style="max-width: 1.2em;max-height:1.2em;margin-right: .2em;">**NoDerivatives** — If you remix, transform, or build upon the material, you may not distribute the modified material.
+- **No additional restrictions** — You may not apply legal terms or technological measures that legally restrict others from doing anything the license permits.
+
+[See the License Deed](https://creativecommons.org/licenses/by-nd/4.0/)
