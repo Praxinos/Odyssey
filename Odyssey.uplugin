@@ -1,7 +1,9 @@
 {
     "FileVersion": 3,
-    "Version": 1,
-    "VersionName": "1.0.56",
+    "VersionComment":  "the format of the version is: major + minor-on-2-digits + major-ue-version + minor-ue-version-on-2-digits",
+    "VersionComment2": "e.g.: 3.0.56 => 3+00+5+06",
+    "Version": 300506,
+    "VersionName": "3.0.56",
     "FriendlyName": "Odyssey",
     "Description": "2D Animation, Storyboard & Animatic plugin for Unreal Engine",
     "Category": "2D",
@@ -17,8 +19,8 @@
     "EnabledByDefault": true,
     "LocalizationTargets": [
         {
-        "Name": "Epos",
-        "LoadingPolicy": "Editor"
+            "Name": "Epos",
+            "LoadingPolicy": "Editor"
         },
         {
             "Name": "Iliad",
