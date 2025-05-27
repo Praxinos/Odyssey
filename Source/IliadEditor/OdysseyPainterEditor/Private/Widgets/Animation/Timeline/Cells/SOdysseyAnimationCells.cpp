@@ -147,20 +147,20 @@ SOdysseyAnimationCells::Construct(
                 CreateCellBreakIndicatorWidget()
             ]
 
-            + SOverlay::Slot()
-            .HAlign(HAlign_Left)
-            .VAlign(VAlign_Fill)
-            [
-                //Add Cells Handle
-                CreateAddCellsHandleWidget()
-            ]
-
             + SOverlay::Slot() //Timing Handle Top Left
             .Padding(0.f, 0.f, -mExposureHandleBrush->ImageSize.X, 0.f)
             .HAlign(HAlign_Left)
             .VAlign(VAlign_Fill)
             [
                 CreateTimingHandleWidget()
+            ]
+
+            + SOverlay::Slot()
+            .HAlign(HAlign_Left)
+            .VAlign(VAlign_Fill)
+            [
+                //Add Cells Handle
+                CreateAddCellsHandleWidget()
             ]
         ]
         + SHorizontalBox::Slot()
