@@ -493,6 +493,7 @@ FOdysseyPainterEditorAnimationSource::PasteBlockToNewLayer( TSharedPtr<::ULIS::F
 
     UOdysseyAnimationLayerImageRaster* layer = Cast< UOdysseyAnimationLayerImageRaster >(GetLayerStack()->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass()));
     layer->Modify();
+    layer->SetCellsOffset(player->GetCurrentFrame().FrameNumber.Value);
 
     GetLayerStack()->SetCurrentLayer(layer);
 

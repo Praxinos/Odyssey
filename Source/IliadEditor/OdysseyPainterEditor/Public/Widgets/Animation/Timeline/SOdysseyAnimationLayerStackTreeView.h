@@ -49,6 +49,7 @@ private:
 private:
     TSharedPtr<FOdysseyAnimationTimelineShortcuts> mTimelineShortcuts;
     TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition> mTimelinePosition;
+    TAttribute<int> mCurrentFrame;
 
     UOdysseyAnimationLayerStack* mLayerStack;
 };

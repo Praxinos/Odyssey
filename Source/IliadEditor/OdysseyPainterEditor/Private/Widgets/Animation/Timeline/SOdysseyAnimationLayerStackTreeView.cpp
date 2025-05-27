@@ -29,7 +29,7 @@ void
 SOdysseyAnimationLayerStackTreeView::Construct(const FArguments& InArgs)
 {
     mTimelinePosition = InArgs._TimelinePosition;
-
+    mCurrentFrame = InArgs._CurrentFrame;
     mLayerStack = InArgs._LayerStack;
     if (!mLayerStack)
         return;
@@ -200,11 +200,13 @@ SOdysseyAnimationLayerStackTreeView::OnLayerAdded(UOdysseyLayer* iLayer)
     {
         UOdysseyAnimationLayerImageRaster* layer = Cast<UOdysseyAnimationLayerImageRaster>(iLayer);
         layer->AddCell(UOdysseyAnimationCellImageRaster::StaticClass());
+        layer->SetCellsOffset(mCurrentFrame.Get());
     }
     else if (iLayer->GetClass() == UOdysseyAnimationLayerImageVector::StaticClass())
     {
         UOdysseyAnimationLayerImageVector* layer = Cast<UOdysseyAnimationLayerImageVector>(iLayer);
         layer->AddCell(UOdysseyAnimationCellImageVector::StaticClass());
+        layer->SetCellsOffset(mCurrentFrame.Get());
     }
 }
 
