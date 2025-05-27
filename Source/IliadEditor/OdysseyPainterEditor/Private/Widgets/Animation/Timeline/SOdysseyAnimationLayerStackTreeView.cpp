@@ -182,15 +182,22 @@ SOdysseyAnimationLayerStackTreeView::Action_ConvertLayerToRasterLayer()
     FScopedTransaction ScopedTransaction(LOCTEXT("animation.layer.transaction.convert-to-raster", "Convert Layer To Raster Layer"));
 #endif
 
+    UOdysseyLayer* currentLayer = layerStack->GetCurrentLayer();
+
     for (UOdysseyLayer* layer : selectedLayers)
     {
         UOdysseyLayer* parent = layer->GetParent();
         int indexInParent = layer->GetIndexInParent();
 
         UOdysseyLayer* layerRaster = layerStack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass(), parent, indexInParent);
+        if (layer == currentLayer)
+            currentLayer = layerRaster;
+
         layerRaster->Merge({layer});
         layerStack->RemoveLayer(layer);
     }
+
+    layerStack->SetCurrentLayer(currentLayer);
 }
 
 void

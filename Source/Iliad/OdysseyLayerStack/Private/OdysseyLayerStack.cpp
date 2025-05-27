@@ -620,6 +620,7 @@ UOdysseyLayerStack::PostTransacted(const FTransactionObjectEvent& iTransactionEv
 void
 UOdysseyLayerStack::SetCurrentLayer(UOdysseyLayer* Layer)
 {
+    Modify();
     CurrentLayer = Layer;
     OnCurrentLayerChanged().Broadcast(this);
 }
