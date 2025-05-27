@@ -24,6 +24,7 @@
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "OdysseyAnimationCurrentFrameMutator.h"
 #include "OdysseyRasterBlock.h"
+#include "OdysseyPainterEditorAnimationFlipSystem.h"
 #include <ULIS>
 
 
@@ -88,7 +89,20 @@ FOdysseyPainterEditorAnimationSource::Activate(FOdysseyPainterEditor* iEditor)
 void
 FOdysseyPainterEditorAnimationSource::ActivatePlayer(UOdysseyAnimationPlayer* iPlayer)
 {
-    iPlayer->SetRenderType(EOdysseyRenderingType::Editor);
+    TAttribute<uint64> renderType = MakeAttributeLambda(
+        [this, iPlayer]() -> uint64
+        {
+            if (iPlayer->GetStatus() == EOdysseyAnimationPlayerStatus::Playing || iPlayer->GetStatus() == EOdysseyAnimationPlayerStatus::Paused )
+                return EOdysseyRenderingType::Render;
+
+            if (mEditor->GetAnimationFlipSystem()->IsFlipping() )
+                return mEditor->GetAnimationFlipSystem()->GetRenderType();
+
+            return EOdysseyRenderingType::Editor;
+        }
+    );
+
+    iPlayer->SetRenderType(renderType);
     iPlayer->OnCurrentFrameChanged().AddRaw(this, &FOdysseyPainterEditorAnimationSource::OnCurrentFrameChanged);
 }
 

@@ -120,6 +120,8 @@ public:
     FOdysseyPainterEditorAnimationFlipSystem(FOdysseyPainterEditor* iEditor);
 
     void StartFlipping(const FOdysseyAnimationFlipConfiguration& iFlipConfiguration);
+    bool IsFlipping() const;
+    uint64 GetRenderType() const;
 
 private:
     void EndFlipping();

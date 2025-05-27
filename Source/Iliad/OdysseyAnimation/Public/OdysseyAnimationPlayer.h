@@ -126,7 +126,7 @@ public:
     bool UsePostBehaviour() const;
     bool IsLooping() const;
     void SetIsLooping(bool iIsLooping);
-    void SetRenderType(uint64 iRenderType);
+    void SetRenderType(TAttribute<uint64> iRenderType);
     uint64 GetRenderType() const;
     void SetFrameRange(const TOptional<TRange<FFrameTime>>& iRange);
     void SetIgnoreAnimationBounds(bool iValue);
@@ -171,8 +171,7 @@ private:
     bool mIsLooping = true;
 #endif
 
-    uint64 mRenderType = EOdysseyRenderingType::Render;
-    uint64 mScrubInitialRenderType = EOdysseyRenderingType::Render;
+    TAttribute<uint64> mRenderType = EOdysseyRenderingType::Render;
     bool mIsBackward = false;
     FFrameTime mCurrentFrame; //Current frame when stopped
     FFrameTime mDisplayedFrame; //Displayed frame when playing / Scrubbing / Paused

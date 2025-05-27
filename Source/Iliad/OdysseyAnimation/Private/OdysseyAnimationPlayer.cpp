@@ -401,12 +401,14 @@ UOdysseyAnimationPlayer::UpdateTexture()
     if (!GetDisplayedFrameInAnimationBounds(frame))
         return;
 
-    TArray<FGuid> imageRenderingComposition = Animation->GetRenderingComposition(mRenderType, frame.GetFrame().Value);
+    uint64 renderType = mRenderType.Get();
+
+    TArray<FGuid> imageRenderingComposition = Animation->GetRenderingComposition(renderType, frame.GetFrame().Value);
     if ( imageRenderingComposition != mImageRenderingComposition )
     {
         mImageRenderingComposition = imageRenderingComposition;
 
-        Animation->Render_GameThread(RenderTarget, frame.GetFrame(), mRenderType );
+        Animation->Render_GameThread(RenderTarget, frame.GetFrame(), renderType );
         mInvalidTileMap.Clear();
         return;
     }
@@ -416,7 +418,7 @@ UOdysseyAnimationPlayer::UpdateTexture()
         TArray<FIntRect> invalidTiles = mInvalidTileMap.InvalidRects();
         for (const FIntRect& rect : invalidTiles)
         {
-            Animation->Render_GameThread(RenderTarget, frame.GetFrame(), mRenderType, rect);
+            Animation->Render_GameThread(RenderTarget, frame.GetFrame(), renderType, rect);
         }
 
         mInvalidTileMap.Clear();
@@ -448,7 +450,7 @@ UOdysseyAnimationPlayer::OnRenderingChanged(const FOdysseyRenderingChangedEvent&
         if (!GetDisplayedFrameInAnimationBounds(frame))
             return;
 
-        TArray<FGuid> imageRenderingComposition = Animation->GetRenderingComposition(mRenderType, frame.GetFrame().Value);
+        TArray<FGuid> imageRenderingComposition = Animation->GetRenderingComposition(mRenderType.Get(), frame.GetFrame().Value);
         if ( imageRenderingComposition == mImageRenderingComposition )
             return;
 
@@ -541,7 +543,7 @@ UOdysseyAnimationPlayer::SetIsLooping(bool iIsLooping)
 }
 
 void
-UOdysseyAnimationPlayer::SetRenderType(uint64 iRenderType)
+UOdysseyAnimationPlayer::SetRenderType(TAttribute<uint64> iRenderType)
 {
     mRenderType = iRenderType;
 }
@@ -549,7 +551,7 @@ UOdysseyAnimationPlayer::SetRenderType(uint64 iRenderType)
 uint64
 UOdysseyAnimationPlayer::GetRenderType() const
 {
-    return mRenderType;
+    return mRenderType.Get();
 }
 
 void

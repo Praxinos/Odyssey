@@ -432,8 +432,23 @@ FOdysseyPainterEditorAnimationFlipSystem::EndFlipping()
     if (mFlipConfiguration.Rollback)
         mEditor->GetAnimationPlayer()->SeekToFrame(mStartFrame);
 
-    mEditor->GetAnimationPlayer()->SetRenderType(mInitialRenderType);
     mEditor->GetAnimationPlayer()->EndScrub();
+}
+
+bool
+FOdysseyPainterEditorAnimationFlipSystem::IsFlipping() const
+{
+    return mIsFlipping;
+}
+
+uint64
+FOdysseyPainterEditorAnimationFlipSystem::GetRenderType() const
+{
+    uint64 renderType = EOdysseyRenderingType::Render;
+    if (mEditor->GetAnimationPlayer()->GetDisplayedFrame().FrameNumber.Value != mStartFrame && mFlipConfiguration.OutOfPegs)
+        renderType |= EOdysseyRenderingType::OutOfPegs;
+
+    return renderType;
 }
 
 void
@@ -445,17 +460,6 @@ FOdysseyPainterEditorAnimationFlipSystem::FlipTo(int iDelta)
     if (frame == INDEX_NONE)
         return;
 
-    if (frame == mStartFrame)
-    {
-        mEditor->GetAnimationPlayer()->SetRenderType(EOdysseyRenderingType::Render);
-    }
-    else
-    {
-        uint64 renderType = EOdysseyRenderingType::Render;
-        if (mFlipConfiguration.OutOfPegs)
-            renderType |= EOdysseyRenderingType::OutOfPegs;
-        mEditor->GetAnimationPlayer()->SetRenderType(renderType);
-    }
     mEditor->GetAnimationPlayer()->SeekToFrame(frame);
 }
 
