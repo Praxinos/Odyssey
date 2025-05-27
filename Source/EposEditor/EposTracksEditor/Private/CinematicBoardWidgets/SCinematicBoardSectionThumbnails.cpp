@@ -336,7 +336,11 @@ SCinematicBoardSectionThumbnails::MakeTakeMenu()
         FUIAction( FExecuteAction::CreateLambda( [this, sequencer, board_section]()
                                                  {
                                                      BoardSequenceTools::CreateTake( sequencer.Get(), *board_section );
-                                                 } ) )
+                                                 } ),
+                   FCanExecuteAction::CreateLambda( [this, sequencer, board_section]()
+                                                    {
+                                                        return false;
+                                                    } ) )
     );
 
     return MenuBuilder.MakeWidget();

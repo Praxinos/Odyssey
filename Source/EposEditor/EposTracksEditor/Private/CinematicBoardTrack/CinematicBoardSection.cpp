@@ -1206,7 +1206,8 @@ FCinematicBoardSection::BuildSectionContextMenu( FMenuBuilder& ioMenuBuilder, co
                 FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "Take" ),
                 FUIAction(
                     FExecuteAction::CreateLambda( [this, &sectionObject]() { BoardSequenceTools::CreateTake( GetSequencer().Get(), sectionObject ); } ),
-                    FCanExecuteAction::CreateLambda( [this, &sectionObject]() { return !BoardSequenceTools::IsAnimationInEditionMode( GetSequencer().Get(), sectionObject ); } )
+                    FCanExecuteAction::CreateLambda( [this, &sectionObject]() { return false; } )
+                    //FCanExecuteAction::CreateLambda( [this, &sectionObject]() { return !BoardSequenceTools::IsAnimationInEditionMode( GetSequencer().Get(), sectionObject ); } )
                 )
             );
         }
