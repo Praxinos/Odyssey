@@ -9,6 +9,7 @@
 #include "OdysseyMediaRaster.h"
 #include "OdysseyPainterEditor.h"
 #include "Palette/OdysseyPaletteEntryColor.h"
+#include "OdysseyAnimationPlayer.h"
 #include "OdysseyPainterEditorSource.h"
 #include "OdysseyPainterEditorViewportTab.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
@@ -566,10 +567,15 @@ UOdysseyPainterEditorRasterPaintBucketTool::GetCurrentLayerBlock() const
     if (!layer)
         return nullptr;
 
+    FFrameNumber currentFrame(0);
+    UOdysseyAnimationPlayer* player = GetEditor()->GetAnimationPlayer();
+    if (player)
+        currentFrame = player->GetCurrentFrame().FrameNumber;
+
     TStrongObjectPtr<UTextureRenderTarget2D> renderTarget(NewObject<UTextureRenderTarget2D>());
     FIntRect rect = layer->GetDefaultRenderRect();
     renderTarget->InitAutoFormat(rect.Width(), rect.Height());
-    layer->Render_GameThread(renderTarget.Get(), FFrameNumber(0), EOdysseyRenderingType::Render);
+    layer->Render_GameThread(renderTarget.Get(), currentFrame, EOdysseyRenderingType::Render);
 
     FImage OutImage;
     if (!FImageUtils::GetRenderTargetImage(renderTarget.Get(), OutImage))
@@ -594,6 +600,11 @@ UOdysseyPainterEditorRasterPaintBucketTool::GetForegroundLayersBlock() const
     if (!layer)
         return nullptr;
 
+    FFrameNumber currentFrame(0);
+    UOdysseyAnimationPlayer* player = GetEditor()->GetAnimationPlayer();
+    if (player)
+        currentFrame = player->GetCurrentFrame().FrameNumber;
+
     TArray<IOdysseyRenderingAbility*> layersToExclude = GetForegroundLayersToExclude(layer);
 
     TStrongObjectPtr<UTextureRenderTarget2D> renderTarget(NewObject<UTextureRenderTarget2D>());
@@ -602,7 +613,7 @@ UOdysseyPainterEditorRasterPaintBucketTool::GetForegroundLayersBlock() const
 
     layerStack->Render_GameThread(
         renderTarget.Get(),
-        FFrameNumber(0),
+        currentFrame,
         EOdysseyRenderingType::Render,
         IOdysseyTextureRenderingAbility::FCanRenderFunction::CreateLambda(
             [layersToExclude](const IOdysseyTextureRenderingAbility* iAbility, TArray<const IOdysseyTextureRenderingAbility*> iParents)
@@ -635,6 +646,11 @@ UOdysseyPainterEditorRasterPaintBucketTool::GetBackgroundLayersBlock() const
     if (!layer)
         return nullptr;
 
+    FFrameNumber currentFrame(0);
+    UOdysseyAnimationPlayer* player = GetEditor()->GetAnimationPlayer();
+    if (player)
+        currentFrame = player->GetCurrentFrame().FrameNumber;
+
     TArray<IOdysseyRenderingAbility*> layersToExclude = GetBackgroundLayersToExclude(layer);
 
     TStrongObjectPtr<UTextureRenderTarget2D> renderTarget(NewObject<UTextureRenderTarget2D>());
@@ -643,7 +659,7 @@ UOdysseyPainterEditorRasterPaintBucketTool::GetBackgroundLayersBlock() const
 
     layerStack->Render_GameThread(
         renderTarget.Get(),
-        FFrameNumber(0),
+        currentFrame,
         EOdysseyRenderingType::Render,
         IOdysseyTextureRenderingAbility::FCanRenderFunction::CreateLambda(
             [layersToExclude](const IOdysseyTextureRenderingAbility* iAbility, TArray<const IOdysseyTextureRenderingAbility*> iParents)
@@ -672,10 +688,15 @@ UOdysseyPainterEditorRasterPaintBucketTool::GetAllLayersBlock() const
     if (!layerStack)
         return nullptr;
 
+    FFrameNumber currentFrame(0);
+    UOdysseyAnimationPlayer* player = GetEditor()->GetAnimationPlayer();
+    if (player)
+        currentFrame = player->GetCurrentFrame().FrameNumber;
+
     TStrongObjectPtr<UTextureRenderTarget2D> renderTarget(NewObject<UTextureRenderTarget2D>());
     FIntRect rect = layerStack->GetDefaultRenderRect();
     renderTarget->InitAutoFormat(rect.Width(), rect.Height());
-    layerStack->Render_GameThread(renderTarget.Get(), FFrameNumber(0), EOdysseyRenderingType::Render);
+    layerStack->Render_GameThread(renderTarget.Get(), currentFrame, EOdysseyRenderingType::Render);
 
     FImage OutImage;
     if (!FImageUtils::GetRenderTargetImage(renderTarget.Get(), OutImage))
