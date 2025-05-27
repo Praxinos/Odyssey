@@ -829,7 +829,10 @@ UOdysseyLayer::AddChildren(TArray<UOdysseyLayer*> Layers, int IndexInParent)
     }
 
     for (UOdysseyLayer* layer : Layers)
+    {
+        layer->Modify();
         layer->Parent = this;
+    }
 
     RenderingCompositionChanged();
 
@@ -865,6 +868,7 @@ UOdysseyLayer::RemoveChildren(TArray<UOdysseyLayer*> Layers)
 
     for (UOdysseyLayer* layer : Layers)
     {
+        layer->Modify();
         layer->Parent = nullptr;
         Children.Remove(layer);
     }
