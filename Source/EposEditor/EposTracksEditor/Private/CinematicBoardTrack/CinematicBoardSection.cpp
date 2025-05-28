@@ -250,6 +250,8 @@ FCinematicBoardSection::AddReferencedObjects( FReferenceCollector& Collector ) /
             Collector.AddReferencedObject( thumbnail_data.Texture );
         }
     }
+
+    Collector.AddReferencedObject( mBuildRenderTargetTmp );
 }
 
 FString
@@ -736,29 +738,6 @@ FCinematicBoardSection::GetAnimationTimelineThumbnails( FMovieScenePossessable i
 FCinematicBoardSection::FThumbnailData
 FCinematicBoardSection::RebuildAnimationThumbnailDataInternal( UOdysseyAnimationTimelineSection* iSection, FFrameNumber iFrameInSequence, TOptional<FGuid> iFrameId )
 {
-    auto CreateRenderTargetAndImage2 = []( int32 InSizeX, int32 InSizeY, ETextureRenderTargetFormat InFormat, UTextureRenderTarget2D*& oRenderTarget ) -> void
-        {
-            static UTextureRenderTarget2D* renderTarget = nullptr;
-            if( !renderTarget
-                || !IsValid( renderTarget )
-                || renderTarget->HasAnyFlags( RF_BeginDestroyed | RF_FinishDestroyed ) // IsValid() seems to not be enough. After an auto-save, the uobject is not RF_MirroredGarbage but RF_BeginDestroyed | RF_FinishDestroyed, so check them.
-                || renderTarget->SizeX != InSizeX
-                || renderTarget->SizeY != InSizeY
-                || renderTarget->RenderTargetFormat != InFormat )
-            {
-                renderTarget = NewObject<UTextureRenderTarget2D>( GetTransientPackage(), NAME_None, RF_Public | RF_Transient );
-                renderTarget->RenderTargetFormat = InFormat;
-                //renderTarget->ClearColor = FLinearColor( frame_in_timeline.Value / float( 50 ), frame_in_timeline.Value / float( 50 ), frame_in_timeline.Value / float( 50 ) );
-                renderTarget->ResizeTarget( InSizeX, InSizeY );
-                //renderTarget->InitAutoFormat(
-                renderTarget->UpdateResource();
-            }
-
-            oRenderTarget = renderTarget;
-        };
-
-    //---
-
     const UMovieSceneSubSection* subsection_object = &GetSubSectionObject();
 
     FMovieSceneInverseSequenceTransform inner_to_outer_transform = subsection_object->OuterToInnerTransform().Inverse();
@@ -781,19 +760,31 @@ FCinematicBoardSection::RebuildAnimationThumbnailDataInternal( UOdysseyAnimation
     const FIntVector2 thumbnail_size( 200 * ratio, 200 );
 
     UTexture2D* texture = nullptr;
-    UTextureRenderTarget2D* renderTarget = nullptr;
+    //UTextureRenderTarget2D* renderTarget = nullptr;
 
     FRenderingComposition rendering_composition = animation->GetRenderingComposition( EOdysseyRenderingType::Render, frame_in_timeline.Value ); // THIS DOESN'T MANAGE IMAGE CHANGES !!!
 
     if( !mAnimationsTimelineThumbnailPool.Contains( rendering_composition ) || ( iFrameId.IsSet() && rendering_composition.Contains( *iFrameId ) ) )
     {
-        CreateRenderTargetAndImage2( thumbnail_size.X, thumbnail_size.Y, RTF_RGBA16f, renderTarget );
+        if( !IsValid( mBuildRenderTargetTmp )
+            || mBuildRenderTargetTmp->HasAnyFlags( RF_BeginDestroyed | RF_FinishDestroyed ) // IsValid() seems to not be enough. After an auto-save, the uobject is not RF_MirroredGarbage but RF_BeginDestroyed | RF_FinishDestroyed, so check them.
+            || mBuildRenderTargetTmp->SizeX != thumbnail_size.X
+            || mBuildRenderTargetTmp->SizeY != thumbnail_size.Y
+            || mBuildRenderTargetTmp->RenderTargetFormat != RTF_RGBA16f )
+        {
+            mBuildRenderTargetTmp = NewObject<UTextureRenderTarget2D>( GetTransientPackage(), NAME_None, RF_Public | RF_Transient );
+            mBuildRenderTargetTmp->RenderTargetFormat = RTF_RGBA16f;
+            //mBuildRenderTargetTmp->ClearColor = FLinearColor( frame_in_timeline.Value / float( 50 ), frame_in_timeline.Value / float( 50 ), frame_in_timeline.Value / float( 50 ) );
+            mBuildRenderTargetTmp->ResizeTarget( thumbnail_size.X, thumbnail_size.Y );
+            //mBuildRenderTargetTmp->InitAutoFormat(
+            mBuildRenderTargetTmp->UpdateResource();
+        }
 
-        animation->RenderAndResize_GameThread( renderTarget, frame_in_timeline.Value, EOdysseyRenderingType::Render );
+        animation->RenderAndResize_GameThread( mBuildRenderTargetTmp, frame_in_timeline.Value, EOdysseyRenderingType::Render );
 
-        texture = renderTarget->ConstructTexture2D( GetTransientPackage(), FString::Printf( TEXT( "textureThumbnail-%s" ), *FGuid::NewGuid().ToString() ), RF_Public | RF_Transient );
+        texture = mBuildRenderTargetTmp->ConstructTexture2D( GetTransientPackage(), FString::Printf( TEXT( "textureThumbnail-%s" ), *FGuid::NewGuid().ToString() ), RF_Public | RF_Transient );
 
-        //mAnimationsTimelineThumbnailPool.Add( rendering_composition, FPoolData{ renderTarget } );
+        //mAnimationsTimelineThumbnailPool.Add( rendering_composition, FPoolData{ mBuildRenderTargetTmp } );
         mAnimationsTimelineThumbnailPool.Add( rendering_composition, FPoolData{ texture } );
     }
     else

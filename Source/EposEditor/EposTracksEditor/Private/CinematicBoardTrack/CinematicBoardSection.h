@@ -138,6 +138,7 @@ private:
     };
     typedef TArray<FGuid> FRenderingComposition;
     TMap<FRenderingComposition, FPoolData>  mAnimationsTimelineThumbnailPool;
+    TObjectPtr<UTextureRenderTarget2D> mBuildRenderTargetTmp;
 
 private:
     /** Add board takes menu */
