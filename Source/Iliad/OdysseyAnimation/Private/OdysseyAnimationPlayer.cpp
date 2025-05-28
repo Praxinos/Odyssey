@@ -616,13 +616,14 @@ UOdysseyAnimationPlayer::PostLoad()
         RenderTarget = NewObject<UTextureRenderTarget2D>(this, NAME_None, RF_Public | RF_Transient);
         RenderTarget->RenderTargetFormat = RTF_RGBA16f;
     }
-    RenderTarget->ResizeTarget(Animation->GetWidth(), Animation->GetHeight());
-    RenderTarget->UpdateResourceImmediate();
 
     //will create the texture if needed
     IOdysseyRenderingAbility::OnRenderingChangedDelegate().RemoveAll(this);
     if (!Animation)
         return;
+
+    RenderTarget->ResizeTarget(Animation->GetWidth(), Animation->GetHeight());
+    RenderTarget->UpdateResourceImmediate();
 
     mInvalidTileMap = FOdysseyInvalidTileMap(64, Animation->GetWidth(), Animation->GetHeight());
 
