@@ -741,6 +741,7 @@ FCinematicBoardSection::RebuildAnimationThumbnailDataInternal( UOdysseyAnimation
             static UTextureRenderTarget2D* renderTarget = nullptr;
             if( !renderTarget
                 || !IsValid( renderTarget )
+                || renderTarget->HasAnyFlags( RF_BeginDestroyed | RF_FinishDestroyed ) // IsValid() seems to not be enough. After an auto-save, the uobject is not RF_MirroredGarbage but RF_BeginDestroyed | RF_FinishDestroyed, so check them.
                 || renderTarget->SizeX != InSizeX
                 || renderTarget->SizeY != InSizeY
                 || renderTarget->RenderTargetFormat != InFormat )
