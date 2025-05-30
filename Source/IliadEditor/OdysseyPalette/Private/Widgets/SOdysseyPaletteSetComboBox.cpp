@@ -5,6 +5,7 @@
 
 #include "OdysseyPalette.h"
 #include "Dialogs/Dialogs.h"
+#include "UObject/OdysseyObjectEditorUtils.h"
 
 #define LOCTEXT_NAMESPACE "Palette"
 
@@ -95,8 +96,10 @@ SOdysseyPaletteSetComboBox::BuildMenu(FMenuBuilder& iMenuBuilder, UOdysseyPalett
                             [iPalette, iCurrentSet, &setName, iOnCurrentSetSelected]()
                             {
                                 const FScopedTransaction transaction(LOCTEXT("palette-set-combobox.add-set.transaction", "Add Palette Set"));
+                                FOdysseyObjectEditorUtils::PreChangePropertyValue(iPalette, "Sets");
                                 iPalette->DuplicateSet(iCurrentSet, FName(*setName.ToString()));
                                 iOnCurrentSetSelected.ExecuteIfBound(iPalette->GetSets().Num() - 1);
+                                FOdysseyObjectEditorUtils::PostChangePropertyValue(iPalette, "Sets", EPropertyChangeType::ArrayAdd);
                             }
                         ),
                         true
@@ -113,8 +116,10 @@ SOdysseyPaletteSetComboBox::BuildMenu(FMenuBuilder& iMenuBuilder, UOdysseyPalett
                 [iOnCurrentSetSelected, iPalette, iCurrentSet]()
                 {
                     const FScopedTransaction transaction(LOCTEXT("palette-set-combobox.remove-set.transaction", "Remove Palette Set"));
+                    FOdysseyObjectEditorUtils::PreChangePropertyValue(iPalette, "Sets");
                     iPalette->RemoveSet(iCurrentSet);
                     iOnCurrentSetSelected.ExecuteIfBound(FMath::Max(0, iCurrentSet - 1));
+                    FOdysseyObjectEditorUtils::PostChangePropertyValue(iPalette, "Sets", EPropertyChangeType::ArrayRemove);
                 }
             );
 
@@ -147,7 +152,9 @@ SOdysseyPaletteSetComboBox::BuildMenu(FMenuBuilder& iMenuBuilder, UOdysseyPalett
                             [iPalette, iCurrentSet, &setName]()
                             {
                                 const FScopedTransaction transaction(LOCTEXT("palette-set-combobox.rename-set.transaction", "Rename Palette Set"));
+                                FOdysseyObjectEditorUtils::PreChangePropertyValue(iPalette, "Sets");
                                 iPalette->RenameSet(iCurrentSet, FName(*setName.ToString()));
+                                FOdysseyObjectEditorUtils::PostChangePropertyValue(iPalette, "Sets", EPropertyChangeType::ValueSet);
                             }
                         ),
                         true

@@ -42,47 +42,26 @@ FColor& UOdysseyPaletteEntryColor::GetColor(int iSet)
 
 void UOdysseyPaletteEntryColor::SetColor(FColor iColor, int iSet)
 {
-    const FScopedTransaction transaction(NSLOCTEXT("Palette", "ChangeColorEntry_Transaction", "Change color entry"));
-
-    FOdysseyObjectEditorUtils::PreChangePropertyValue(this, "EntryColors");
-
     EntryColors[iSet] = iColor;
-
-    FOdysseyObjectEditorUtils::PostChangePropertyValue(this, "EntryColors", EPropertyChangeType::ValueSet);
 }
 
 void UOdysseyPaletteEntryColor::AddSet()
 {
-    //The transaction is in OdysseyPalette, since we're adding a set for all entries, and we want only one transaction to handle all the additions
-    FOdysseyObjectEditorUtils::PreChangePropertyValue(this, "EntryColors");
-
     EntryColors.Add( FColor::Black );
-
-    FOdysseyObjectEditorUtils::PostChangePropertyValue(this, "EntryColors", EPropertyChangeType::ArrayAdd);
 }
 
 void UOdysseyPaletteEntryColor::DuplicateSetAt(int iIndex /*= -1 */)
 {
     if (iIndex >= 0 && iIndex < EntryColors.Num())
     {
-        //The transaction is in OdysseyPalette, since we're adding a set for all entries, and we want only one transaction to handle all the additions
-        FOdysseyObjectEditorUtils::PreChangePropertyValue(this, "EntryColors");
-
         FColor color = EntryColors[iIndex];
         EntryColors.Add( color );
-
-        FOdysseyObjectEditorUtils::PostChangePropertyValue(this, "EntryColors", EPropertyChangeType::ArrayAdd);
     }
 }
 
 void UOdysseyPaletteEntryColor::RemoveSet(int iIndex /*= -1*/)
 {
-    //The transaction is in OdysseyPalette, since we're adding a set for all entries, and we want only one transaction to handle all the additions
-    FOdysseyObjectEditorUtils::PreChangePropertyValue(this, "EntryColors");
-
     EntryColors.RemoveAt( iIndex );
-
-    FOdysseyObjectEditorUtils::PostChangePropertyValue(this, "EntryColors", EPropertyChangeType::ArrayRemove);
 }
 
 void UOdysseyPaletteEntryColor::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)

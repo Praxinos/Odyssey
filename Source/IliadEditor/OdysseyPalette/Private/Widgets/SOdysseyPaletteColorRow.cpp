@@ -81,7 +81,13 @@ void SOdysseyPaletteColorRow::OnSetColorFromColorPicker(FLinearColor iNewColor)
     if (mIsReadOnly)
         return;
 
+    const FScopedTransaction transaction(NSLOCTEXT("Palette", "ChangeColorEntry_Transaction", "Change color entry"));
+
+    FOdysseyObjectEditorUtils::PreChangePropertyValue(mColorEntry, "EntryColors");
+
     mColorEntry->SetColor( iNewColor.ToFColorSRGB(), mSet.Get() );
+
+    FOdysseyObjectEditorUtils::PostChangePropertyValue(mColorEntry, "EntryColors", EPropertyChangeType::ValueSet);
 }
 
 FLinearColor SOdysseyPaletteColorRow::GetEntryColorAsLinear() const

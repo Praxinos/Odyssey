@@ -260,29 +260,114 @@ SOdysseyPaletteEntryRow::OnRowAcceptDrop(const FDragDropEvent& iEvent, EItemDrop
             //do nothing
             if ( operationPalette == palette ) //dropped from same Palette, do a move of topmost dropped entries
             {
+                #ifdef WITH_EDITOR
+                    for (UOdysseyPaletteEntry* entry : entries)
+                    {
+                        bool bChangeParent = entry->Parent != parent;
+
+                        if (bChangeParent)
+                        {
+                            FOdysseyObjectEditorUtils::PreChangePropertyValue(entry, "Parent");
+                            FOdysseyObjectEditorUtils::PreChangePropertyValue(entry->Parent, "Children");
+                        }
+                        FOdysseyObjectEditorUtils::PreChangePropertyValue(parent, "Children");
+                    }
+                #endif
+
                 palette->MoveEntries(entries, parent, index);
+
+                #ifdef WITH_EDITOR
+                    for (UOdysseyPaletteEntry* entry : entries)
+                    {
+                        bool bChangeParent = entry->Parent != parent;
+
+                        if (bChangeParent)
+                        {
+                            FOdysseyObjectEditorUtils::PostChangePropertyValue(entry, "Parent", EPropertyChangeType::ValueSet);
+                            FOdysseyObjectEditorUtils::PostChangePropertyValue(entry, "Children", EPropertyChangeType::ArrayRemove);
+                        }
+                        FOdysseyObjectEditorUtils::PostChangePropertyValue(parent, "Children", EPropertyChangeType::ArrayAdd);
+                    }
+                #endif
             }
             else
             {
-                palette->MoveEntries(entries, parent, index);
+                palette->CopyEntries(entries, parent, index);
             }
         }
         break;
 
         case EItemDropZone::OntoItem:
         {
-            if ( operationPalette == palette ) //droped from same palette, do a move of topmost dropped entries
+            if ( operationPalette == palette ) //dropped from same palette, do a move of topmost dropped entries
             {
                 #ifdef WITH_EDITOR
                     FScopedTransaction ScopedTransaction(moveEntriesTransactionName);
                 #endif
+
                 if (mEntry->CanHaveChildren)
                 {
+                    #ifdef WITH_EDITOR
+                        for (UOdysseyPaletteEntry* entry : entries)
+                        {
+                            bool bChangeParent = entry->Parent != mEntry;
+
+                            if (bChangeParent)
+                            {
+                                FOdysseyObjectEditorUtils::PreChangePropertyValue(entry, "Parent");
+                                FOdysseyObjectEditorUtils::PreChangePropertyValue(entry->Parent, "Children");
+                            }
+                            FOdysseyObjectEditorUtils::PreChangePropertyValue(mEntry, "Children");
+                        }
+                    #endif
+
                     palette->MoveEntries(entries, mEntry, 0);
+
+                    #ifdef WITH_EDITOR
+                        for (UOdysseyPaletteEntry* entry : entries)
+                        {
+                            bool bChangeParent = entry->Parent != mEntry;
+
+                            if (bChangeParent)
+                            {
+                                FOdysseyObjectEditorUtils::PostChangePropertyValue(entry, "Parent", EPropertyChangeType::ValueSet);
+                                FOdysseyObjectEditorUtils::PostChangePropertyValue(entry, "Children", EPropertyChangeType::ArrayRemove);
+                            }
+                            FOdysseyObjectEditorUtils::PostChangePropertyValue(mEntry, "Children", EPropertyChangeType::ArrayAdd);
+                        }
+                    #endif
                 }
                 else
                 {
+                    #ifdef WITH_EDITOR
+                        for (UOdysseyPaletteEntry* entry : entries)
+                        {
+                            bool bChangeParent = entry->Parent != parent;
+
+                            if (bChangeParent)
+                            {
+                                FOdysseyObjectEditorUtils::PreChangePropertyValue(entry, "Parent");
+                                FOdysseyObjectEditorUtils::PreChangePropertyValue(entry->Parent, "Children");
+                            }
+                            FOdysseyObjectEditorUtils::PreChangePropertyValue(parent, "Children");
+                        }
+                    #endif
+
                     palette->MoveEntries(entries, parent, index);
+
+                    #ifdef WITH_EDITOR
+                        for (UOdysseyPaletteEntry* entry : entries)
+                        {
+                            bool bChangeParent = entry->Parent != parent;
+
+                            if (bChangeParent)
+                            {
+                                FOdysseyObjectEditorUtils::PostChangePropertyValue(entry, "Parent", EPropertyChangeType::ValueSet);
+                                FOdysseyObjectEditorUtils::PostChangePropertyValue(entry, "Children", EPropertyChangeType::ArrayRemove);
+                            }
+                            FOdysseyObjectEditorUtils::PostChangePropertyValue(parent, "Children", EPropertyChangeType::ArrayAdd);
+                        }
+                    #endif
                 }
             }
             else
@@ -309,7 +394,36 @@ SOdysseyPaletteEntryRow::OnRowAcceptDrop(const FDragDropEvent& iEvent, EItemDrop
                 #ifdef WITH_EDITOR
                     FScopedTransaction ScopedTransaction(moveEntriesTransactionName);
                 #endif
+
+                #ifdef WITH_EDITOR
+                    for (UOdysseyPaletteEntry* entry : entries)
+                    {
+                        bool bChangeParent = entry->Parent != parent;
+
+                        if (bChangeParent)
+                        {
+                            FOdysseyObjectEditorUtils::PreChangePropertyValue(entry, "Parent");
+                            FOdysseyObjectEditorUtils::PreChangePropertyValue(entry->Parent, "Children");
+                        }
+                        FOdysseyObjectEditorUtils::PreChangePropertyValue(parent, "Children");
+                    }
+                #endif
+
                 palette->MoveEntries(entries, parent, index + 1);
+
+                #ifdef WITH_EDITOR
+                    for (UOdysseyPaletteEntry* entry : entries)
+                    {
+                        bool bChangeParent = entry->Parent != parent;
+
+                        if (bChangeParent)
+                        {
+                            FOdysseyObjectEditorUtils::PostChangePropertyValue(entry, "Parent", EPropertyChangeType::ValueSet);
+                            FOdysseyObjectEditorUtils::PostChangePropertyValue(entry, "Children", EPropertyChangeType::ArrayRemove);
+                        }
+                        FOdysseyObjectEditorUtils::PostChangePropertyValue(parent, "Children", EPropertyChangeType::ArrayAdd);
+                    }
+                #endif
             }
             else
             {
