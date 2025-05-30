@@ -4,7 +4,6 @@
 #include "OdysseyPaletteEntry.h"
 #include "OdysseyPalette.h"
 #include "Misc/TransactionObjectEvent.h"
-#include "Misc/OdysseyUndoDelegates.h"
 
 UOdysseyPaletteEntry::FOnNameChanged&
 UOdysseyPaletteEntry::OnNameChanged()
@@ -212,11 +211,6 @@ void UOdysseyPaletteEntry::PostTransacted(const FTransactionObjectEvent& iTransa
     for (const FName& propertyName : changedPropertyNames)
     {
         PropertyChanged(propertyName);
-        FOdysseyUndoDelegates::Get().OnAfterUndoRedo().AddLambda(
-            [this, propertyName](bool iIsRedo)
-            {
-                PostPropertyChanged(propertyName);
-            }
-        );
+        PostPropertyChanged(propertyName);
     }
 }

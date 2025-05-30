@@ -204,6 +204,11 @@
         },
         {
             "Name": "OdysseyPalette",
+            "Type": "Runtime",
+            "LoadingPhase": "Default"
+        },
+        {
+            "Name": "OdysseyPaletteEditor",
             "Type": "Editor",
             "LoadingPhase": "Default"
         },

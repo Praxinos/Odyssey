@@ -15,7 +15,7 @@ class UOdysseyPaletteEntryColor;
 /**
  * Implements the Palette widget
  */
-class ODYSSEYPALETTE_API SOdysseyPaletteTreeView
+class ODYSSEYPALETTEEDITOR_API SOdysseyPaletteTreeView
     : public STreeView<UOdysseyPaletteEntry*>
 {
     SLATE_DECLARE_WIDGET(SOdysseyPaletteTreeView, STreeView<UOdysseyPaletteEntry*>)

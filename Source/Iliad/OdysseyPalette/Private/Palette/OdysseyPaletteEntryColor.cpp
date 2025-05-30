@@ -5,9 +5,7 @@
 #include "OdysseyStyle.h"
 #include "OdysseyPalette.h"
 #include "Misc/TransactionObjectEvent.h"
-#include "UObject/OdysseyObjectEditorUtils.h"
 #include "ScopedTransaction.h"
-#include "Misc/OdysseyUndoDelegates.h"
 
 #define LOCTEXT_NAMESPACE "Palette"
 
@@ -86,12 +84,7 @@ void UOdysseyPaletteEntryColor::PostTransacted(const FTransactionObjectEvent& iT
     for (const FName& propertyName : changedPropertyNames)
     {
         PropertyChanged(propertyName);
-        FOdysseyUndoDelegates::Get().OnAfterUndoRedo().AddLambda(
-            [this, propertyName](bool iIsRedo)
-            {
-                PostPropertyChanged(propertyName);
-            }
-        );
+        PostPropertyChanged(propertyName);
     }
 }
 

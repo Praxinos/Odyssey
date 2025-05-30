@@ -7,7 +7,7 @@
 class UOdysseyPaletteEntry;
 class UOdysseyPalette;
 
-class ODYSSEYPALETTE_API FOdysseyPaletteDragDropOperation : public FDragDropOperation
+class ODYSSEYPALETTEEDITOR_API FOdysseyPaletteDragDropOperation : public FDragDropOperation
 {
 public:
     FOdysseyPaletteDragDropOperation(UOdysseyPalette* iLayerStack, TArray<UOdysseyPaletteEntry*> iLayers);

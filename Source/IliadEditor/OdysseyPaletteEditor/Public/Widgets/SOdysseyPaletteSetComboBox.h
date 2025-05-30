@@ -10,7 +10,7 @@ class UOdysseyPalette;
 /**
  * Implements the Palette widget
  */
-class ODYSSEYPALETTE_API SOdysseyPaletteSetComboBox
+class ODYSSEYPALETTEEDITOR_API SOdysseyPaletteSetComboBox
     : public SComboButton
 {
     SLATE_DECLARE_WIDGET(SOdysseyPaletteSetComboBox, SComboButton)

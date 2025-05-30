@@ -2,12 +2,10 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "OdysseyPalette.h"
-#include "UObject/OdysseyObjectEditorUtils.h"
-#include "Misc/TransactionObjectEvent.h"
 #include "OdysseyPaletteEntryFolder.h"
 #include "ScopedTransaction.h"
 #include "Widgets/Colors/SColorBlock.h"
-#include "Misc/OdysseyUndoDelegates.h"
+#include "Misc/TransactionObjectEvent.h"
 
 UOdysseyPalette::UOdysseyPalette()
 {
@@ -455,12 +453,7 @@ void UOdysseyPalette::PostTransacted(const FTransactionObjectEvent& iTransaction
     for (const FName& propertyName : changedPropertyNames)
     {
         PropertyChanged(propertyName);
-        FOdysseyUndoDelegates::Get().OnAfterUndoRedo().AddLambda(
-            [this, propertyName](bool iIsRedo)
-            {
-                PostPropertyChanged(propertyName);
-            }
-        );
+        PostPropertyChanged( propertyName );
     }
 }
 
