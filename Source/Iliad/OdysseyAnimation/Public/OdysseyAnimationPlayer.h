@@ -163,6 +163,8 @@ public:
     UPROPERTY()
     TObjectPtr<UTextureRenderTarget2D> RenderTarget;
 
+    int mPatchDelayFirstRender = 0;
+
 private:
 #if WITH_EDITOR
     bool mUsePreBehaviour = true;

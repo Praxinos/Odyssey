@@ -406,6 +406,13 @@ UOdysseyAnimationPlayer::UpdateTexture()
     TArray<FGuid> imageRenderingComposition = Animation->GetRenderingComposition(renderType, frame.GetFrame().Value);
     if ( imageRenderingComposition != mImageRenderingComposition )
     {
+        //PATCH:
+        if ( mPatchDelayFirstRender < 1 )
+        {
+            mPatchDelayFirstRender++;
+            return;
+        }
+
         mImageRenderingComposition = imageRenderingComposition;
 
         RenderTarget->WaitForPendingInitOrStreaming();
