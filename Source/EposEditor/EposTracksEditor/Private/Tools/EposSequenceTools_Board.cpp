@@ -29,6 +29,7 @@
 #include "NoteTrack/MovieSceneNoteSection.h"
 #include "OdysseyAnimationActor.h"
 #include "OdysseyAnimationComponent.h"
+#include "OdysseyAnimationTimelineSection.h"
 #include "Settings/EposTracksSettings.h"
 #include "Settings/NamingConventionSettings.h"
 #include "Shot/ShotSequence.h"
@@ -1129,13 +1130,40 @@ ShotSequenceTools::CloneInnerAnimation( ISequencer* iSequencer, UMovieSceneSeque
 
     //---
 
+    TMap<UOdysseyAnimation*, UOdysseyAnimation*> original_to_new_animation_map;
+
+    //---
+
     UOdysseyAnimation* new_animation = ProjectAssetTools::CloneAnimation( *iSequencer, iSequence, iSequenceID, iAnimationToClone->GetAnimationComponent()->GetAnimation() );
     if( !new_animation )
         return;
 
+    original_to_new_animation_map.Add( cloned_animation->GetAnimationComponent()->GetAnimation(), new_animation );
+
     FTransform transform = cloned_animation->GetTransform();
     cloned_animation->GetAnimationComponent()->InitializeFromAnimation( new_animation );
     cloned_animation->SetActorTransform( transform );
+
+    ShotSequenceHelpers::FFindOrCreateTimelineResult result = ShotSequenceHelpers::FindTimelineTrackAndSections( *iSequencer, epos_sequence, iSequenceID, iAnimationBinding );
+    for( TWeakObjectPtr<UOdysseyAnimationTimelineSection> section : result.mSections )
+    {
+        UOdysseyAnimation** animation_exist = original_to_new_animation_map.Find( section->GetAnimation() );
+        if( animation_exist )
+        {
+            section->SetAnimation( *animation_exist );
+        }
+        else
+        {
+            UOdysseyAnimation* new_animation_in_section = ProjectAssetTools::CloneAnimation( *iSequencer, iSequence, iSequenceID, section->GetAnimation() );
+            if( !new_animation_in_section )
+                continue;
+
+            original_to_new_animation_map.Add( cloned_animation->GetAnimationComponent()->GetAnimation(), new_animation_in_section );
+
+            section->SetAnimation( new_animation_in_section );
+        }
+
+    }
 
     iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemsChanged );
 }
