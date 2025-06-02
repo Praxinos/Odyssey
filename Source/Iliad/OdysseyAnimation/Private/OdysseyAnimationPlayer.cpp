@@ -408,6 +408,7 @@ UOdysseyAnimationPlayer::UpdateTexture()
     {
         mImageRenderingComposition = imageRenderingComposition;
 
+        RenderTarget->WaitForPendingInitOrStreaming();
         Animation->Render_GameThread(RenderTarget, frame.GetFrame(), renderType );
         mInvalidTileMap.Clear();
         return;
@@ -415,6 +416,8 @@ UOdysseyAnimationPlayer::UpdateTexture()
 
     if (!mInvalidTileMap.InvalidTiles().IsEmpty())
     {
+        RenderTarget->WaitForPendingInitOrStreaming();
+
         TArray<FIntRect> invalidTiles = mInvalidTileMap.InvalidRects();
         for (const FIntRect& rect : invalidTiles)
         {
@@ -623,6 +626,7 @@ UOdysseyAnimationPlayer::PostLoad()
         return;
 
     RenderTarget->ResizeTarget(Animation->GetWidth(), Animation->GetHeight());
+    RenderTarget->UpdateResource();
     RenderTarget->UpdateResourceImmediate();
 
     mInvalidTileMap = FOdysseyInvalidTileMap(64, Animation->GetWidth(), Animation->GetHeight());
@@ -638,11 +642,20 @@ UOdysseyAnimationPlayer::PostDuplicate(EDuplicateMode::Type iDuplicateMode)
     if (GetFlags() & RF_ClassDefaultObject)
         return;
 
-    RenderTarget->UpdateResource();
+    if ( !RenderTarget )
+    {
+        RenderTarget = NewObject<UTextureRenderTarget2D>(this, NAME_None, RF_Public | RF_Transient);
+        RenderTarget->RenderTargetFormat = RTF_RGBA16f;
+    }
 
+    //will create the texture if needed
     IOdysseyRenderingAbility::OnRenderingChangedDelegate().RemoveAll(this);
-    if (!Animation)
+    if ( !Animation )
         return;
+
+    RenderTarget->ResizeTarget(Animation->GetWidth(), Animation->GetHeight());
+    RenderTarget->UpdateResource();
+    RenderTarget->UpdateResourceImmediate();
 
     mInvalidTileMap = FOdysseyInvalidTileMap(64, Animation->GetWidth(), Animation->GetHeight());
 

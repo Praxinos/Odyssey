@@ -244,6 +244,7 @@ UOdysseyLayerCell::BuildRenderPipelineInternal(
         const_cast<UOdysseyLayerCell*>(this)->InitTexture();
 
     Texture->BlockOnAnyAsyncBuild();
+    Texture->WaitForPendingInitOrStreaming();
 #endif
 
     oRenderFunction = [this, iType](

@@ -287,6 +287,7 @@ UOdysseyAnimationCellImageVector::PostLoad()
     }
 
     mVectorBlock->Init(mVectorBlockId, mVectorCell, animation->GetWidth(), animation->GetHeight(), format);
+    InitTexture();
 
     //mVectorCell->GetLayer()->InvalidateCell( mVectorCell.Get() );
     FOdysseyVectorEngine::Notify( mVectorCell->GetScene(), FOdysseyVectorEngine::NOTIFY_ALL );
