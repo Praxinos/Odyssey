@@ -263,51 +263,19 @@ SOdysseyPaletteTreeView::OnDrop(const FGeometry& MyGeometry, const FDragDropEven
     if (localPointerPos.Y <= widgetSize.Y)
         return FReply::Unhandled();
 
-    //do nothing
     FText copyEntriesTransactionName = LOCTEXT("tree-view.drag-drop.transaction.copy-entries", "Copy Entries");
     FText moveEntriesTransactionName = LOCTEXT("tree-view.drag-drop.transaction.move-entries", "Move Entries");
     TArray<UOdysseyPaletteEntry*> entries = operation->GetPaletteEntries();
     if ( operationPalette == mPalette ) //dropped from same Palette, do a move of topmost dropped entries
     {
-        #ifdef WITH_EDITOR
-            FScopedTransaction ScopedTransaction(moveEntriesTransactionName);
-
-            int index = FMath::Clamp(mPalette->GetRootEntries().Num(), 0, mPalette->PaletteRoot->Children.Num());
-            for (UOdysseyPaletteEntry* entry : entries)
-            {
-                bool bChangeParent = entry->Parent != mPalette->PaletteRoot;
-
-                if (bChangeParent)
-                {
-                    FOdysseyObjectEditorUtils::PreChangePropertyValue(entry, "Parent");
-                    FOdysseyObjectEditorUtils::PreChangePropertyValue(entry->Parent, "Children");
-                }
-                FOdysseyObjectEditorUtils::PreChangePropertyValue(mPalette->PaletteRoot, "Children");
-            }
-        #endif
+        FScopedTransaction ScopedTransaction(moveEntriesTransactionName);
 
         mPalette->MoveEntries(entries, nullptr, mPalette->GetRootEntries().Num());
-
-        #ifdef WITH_EDITOR
-            index = FMath::Clamp(mPalette->GetRootEntries().Num(), 0, mPalette->PaletteRoot->Children.Num());
-            for (UOdysseyPaletteEntry* entry : entries)
-            {
-                bool bChangeParent = entry->Parent != mPalette->PaletteRoot;
-
-                if (bChangeParent)
-                {
-                    FOdysseyObjectEditorUtils::PostChangePropertyValue(entry, "Parent", EPropertyChangeType::ValueSet);
-                    FOdysseyObjectEditorUtils::PostChangePropertyValue(entry, "Children", EPropertyChangeType::ArrayRemove);
-                }
-                FOdysseyObjectEditorUtils::PostChangePropertyValue(mPalette->PaletteRoot, "Children", EPropertyChangeType::ArrayAdd);
-            }
-        #endif
     }
     else
     {
-        #ifdef WITH_EDITOR
-            FScopedTransaction ScopedTransaction(copyEntriesTransactionName);
-        #endif
+        FScopedTransaction ScopedTransaction(copyEntriesTransactionName);
+
         mPalette->CopyEntries(entries, nullptr, mPalette->GetRootEntries().Num());
     }
     return FReply::Handled();

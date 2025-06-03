@@ -360,6 +360,15 @@ void UOdysseyPalette::MoveEntries(TArray<UOdysseyPaletteEntry*> iEntries, UOdyss
     {
         UOdysseyPaletteEntry* parent = entry->Parent;
 
+        bool bChangeParent = entry->Parent != parent;
+
+        if (bChangeParent)
+        {
+            entry->Modify();
+            entry->Parent->Modify();
+        }
+        parent->Modify();
+
         int oldIndex = parent->Children.Find(entry);
         parent->Children.Remove(entry);
         iParentEntry->Children.Insert(entry, (parent == iParentEntry && oldIndex < index) ? index - 1 : index);
@@ -368,6 +377,8 @@ void UOdysseyPalette::MoveEntries(TArray<UOdysseyPaletteEntry*> iEntries, UOdyss
         if (parent == iParentEntry && oldIndex > index)
             index++;
     }
+
+    HierarchyChanged();
 }
 
 const TArray<FName>&
@@ -489,34 +500,11 @@ UOdysseyPaletteEntry* UOdysseyPalette::CreateEntry(UClass* iEntryType)
 
 void UOdysseyPalette::AddEntriesToHierarchy(TArray<UOdysseyPaletteEntry*> iEntries, UOdysseyPaletteEntry* iParent, int iIndexInParent)
 {
-    //Todo: clean up transaction process
-    #if WITH_EDITOR
-        // Get the property addresses for the source and destination objects.
-        FProperty* Property = FindFieldChecked<FProperty>(iParent->GetClass(), "Children");
-
-        if (!iParent->HasAnyFlags(RF_ClassDefaultObject))
-        {
-            FEditPropertyChain PropertyChain;
-            PropertyChain.AddHead(Property);
-
-            iParent->Modify();
-            iParent->PreEditChange(PropertyChain);
-        }
-        for ( UOdysseyPaletteEntry* entry : iEntries)
-        {
-            // Get the property addresses for the source and destination objects.
-            Property = FindFieldChecked<FProperty>(entry->GetClass(), "Parent");
-
-            if (!entry->HasAnyFlags(RF_ClassDefaultObject))
-            {
-                FEditPropertyChain PropertyChain;
-                PropertyChain.AddHead(Property);
-
-                entry->Modify();
-                entry->PreEditChange(PropertyChain);
-            }
-        }
-    #endif
+    iParent->Modify();
+    for ( UOdysseyPaletteEntry* entry : iEntries)
+    {
+        entry->Modify();
+    }
 
     for (UOdysseyPaletteEntry* entry : iEntries)
     {
@@ -532,28 +520,7 @@ void UOdysseyPalette::AddEntriesToHierarchy(TArray<UOdysseyPaletteEntry*> iEntri
         entry->Parent = iParent;
     }
 
-    //Todo: clean up transaction process
-    #if WITH_EDITOR
-    // Get the property addresses for the source and destination objects.
-        Property = FindFieldChecked<FProperty>(iParent->GetClass(), "Children");
-
-        if (!iParent->HasAnyFlags(RF_ClassDefaultObject))
-        {
-            FPropertyChangedEvent PropertyEvent(Property, EPropertyChangeType::ArrayAdd);
-            iParent->PostEditChangeProperty(PropertyEvent);
-        }
-        for (UOdysseyPaletteEntry* entry : iEntries)
-        {
-            // Get the property addresses for the source and destination objects.
-            Property = FindFieldChecked<FProperty>(entry->GetClass(), "Parent");
-
-            if (!entry->HasAnyFlags(RF_ClassDefaultObject))
-            {
-                FPropertyChangedEvent PropertyEvent(Property, EPropertyChangeType::ValueSet);
-                entry->PostEditChangeProperty(PropertyEvent);
-            }
-        }
-    #endif
+    HierarchyChanged();
 }
 
 void UOdysseyPalette::RemoveEntriesFromHierarchy(TArray<UOdysseyPaletteEntry*> iEntries)
