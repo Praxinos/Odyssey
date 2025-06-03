@@ -10,7 +10,8 @@
 #include "OdysseyPainterEditorVectorPathView.h"
 #include "OdysseyPainterEditorVectorGroupPaintView.h"
 #include "OdysseyPainterEditorVectorTagInbetweenerView.h"
-
+#include "OdysseyLayerStack.h"
+#include "OdysseyAnimationLayerImageVector.h"
 #include "HUD/OdysseyVectorHUD.h"
 
 
@@ -31,7 +32,10 @@ SOdysseyPainterEditorVectorSceneDetailsView::PrivateRegisterAttributes(FSlateAtt
 
 SOdysseyPainterEditorVectorSceneDetailsView::~SOdysseyPainterEditorVectorSceneDetailsView()
 {
-    FOdysseyVectorEngine::OnNotifyDelegate().RemoveAll(this);
+    if( mVectorLayer.IsValid() )
+    {
+        mVectorLayer->OnNotifyDelegate().RemoveAll( this );
+    }
 }
 
 SOdysseyPainterEditorVectorSceneDetailsView::SOdysseyPainterEditorVectorSceneDetailsView()
@@ -44,7 +48,7 @@ SOdysseyPainterEditorVectorSceneDetailsView::SOdysseyPainterEditorVectorSceneDet
     mGroupPaintView = NewObject<UOdysseyPainterEditorVectorGroupPaintView>();
     mTagInbetweenerView = NewObject<UOdysseyPainterEditorVectorTagInbetweenerView>();
 
-    FOdysseyVectorEngine::OnNotifyDelegate().AddRaw( this, &SOdysseyPainterEditorVectorSceneDetailsView::OnVectorSceneNotify );
+    UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw(this, &SOdysseyPainterEditorVectorSceneDetailsView::OnCurrentLayerChanged);
 }
 
 void
@@ -134,7 +138,7 @@ SOdysseyPainterEditorVectorSceneDetailsView::Update()
 }
 
 void
-SOdysseyPainterEditorVectorSceneDetailsView::OnVectorSceneNotify( FOdysseyVectorGroupPaint* iScene, uint64 iSignalFlags )
+SOdysseyPainterEditorVectorSceneDetailsView::OnVectorLayerNotify( FOdysseyVectorLayer* iLayer, uint64 iSignalFlags )
 {
     FOdysseyVectorGroupPaint* currentScene = mScene.Get();
 
@@ -152,13 +156,34 @@ void
 SOdysseyPainterEditorVectorSceneDetailsView::ParseVectorNotifications( uint64 iSignalFlags )
 {
     if( iSignalFlags & FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS )
+    {
         Update();
+    }
+}
+
+void
+SOdysseyPainterEditorVectorSceneDetailsView::OnCurrentLayerChanged( UOdysseyLayerStack* iLayerStack )
+{
+    UOdysseyAnimationLayerImageVector* imageVectorLayer = Cast<UOdysseyAnimationLayerImageVector>(iLayerStack->GetCurrentLayer());
+
+    if( imageVectorLayer )
+    {
+        if( mOldVectorLayer.IsValid() )
+        {
+            mOldVectorLayer->OnNotifyDelegate().RemoveAll( this );
+        }
+
+        mOldVectorLayer = mVectorLayer;
+        mVectorLayer = imageVectorLayer->GetVectorLayer();
+
+        mVectorLayer->OnNotifyDelegate().AddSP( this, &SOdysseyPainterEditorVectorSceneDetailsView::OnVectorLayerNotify );
+    }
 }
 
 void
 SOdysseyPainterEditorVectorSceneDetailsView::OnSceneChanged()
 {
-    ParseVectorNotifications(FOdysseyVectorEngine::NOTIFY_ALL);
+    ParseVectorNotifications( FOdysseyVectorEngine::NOTIFY_ALL );
 }
 
 FString

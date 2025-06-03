@@ -45,7 +45,7 @@ class SOdysseyAnimationTimelineInbetweeningHeader
         void RemoveInbetweenerTag();
         void ResetSpacingCharts();
         void Commit();
-        void OnVectorSceneNotify( FOdysseyVectorGroupPaint* iScene, uint64 iNotificationFlags );
+        void OnVectorSceneNotify( FOdysseyVectorLayer* iLayer, uint64 iNotificationFlags );
         void MapActionsToCommandList();
 
     private :

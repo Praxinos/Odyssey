@@ -141,6 +141,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
 
         void PopupContextMenu();
         TSharedPtr<SWidget> CreateContextMenu();
+        void OnVectorLayerNotify( FOdysseyVectorLayer* iLayer, uint64 iNotificationFlags );
 
     private:
         void Copy();
@@ -209,7 +210,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         // we need the focus on the viewport for keyboard
         // and some tools need to know the viewport size
         TWeakPtr<SOdysseyViewport> mViewport;
-        FOdysseyVectorCell* mHUDCell;
+        FOdysseyVectorLayer* mHUDLayer;
 
         TSharedPtr<::ULIS::FBlock> mVectorBlock;
 

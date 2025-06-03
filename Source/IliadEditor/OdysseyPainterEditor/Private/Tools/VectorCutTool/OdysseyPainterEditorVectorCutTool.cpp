@@ -438,7 +438,7 @@ UOdysseyPainterEditorVectorCutTool::OnMouseUpVector( FOdysseyVectorGroupPaint* i
 
     // force redraw
     iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    iScene->GetCell()->ResetHUD();
+    iScene->GetLayer()->ResetHUD( iScene );
 
     //iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 

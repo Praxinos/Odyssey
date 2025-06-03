@@ -196,6 +196,7 @@ FOdysseyPainterEditorTextureSource::Clear()
     }
     else if (mediaProvider.HasMedia<FOdysseyMediaVector>())
     {
+        UOdysseyTextureLayerImageVector* imageVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
         TArray<TSharedPtr<FOdysseyMediaVector>> mediasVector = mediaProvider.GetOrCreateMedias<FOdysseyMediaVector>();
         uint64 notificationFlags = FOdysseyVectorEngine::NOTIFY_ALL;
 
@@ -214,7 +215,10 @@ FOdysseyPainterEditorTextureSource::Clear()
             vectorCell->SetScene(new FOdysseyVectorGroupPaint("Scene") );
         }
 
-        FOdysseyVectorEngine::Notify( nullptr, notificationFlags );
+        if( imageVectorLayer )
+        {
+            imageVectorLayer->GetVectorLayer()->Notify( notificationFlags );
+        }
     }
 }
 

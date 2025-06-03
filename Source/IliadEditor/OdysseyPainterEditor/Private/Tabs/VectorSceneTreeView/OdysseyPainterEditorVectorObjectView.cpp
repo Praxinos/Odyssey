@@ -224,7 +224,7 @@ UOdysseyPainterEditorVectorObjectView::PostEditChangeProperty( FPropertyChangedE
         mScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
         mScene->GetLayer()->RequestRedraw( mScene->GetCell(), 0 );
 
-        FOdysseyVectorEngine::Notify( mScene, notificationFlags );
+        mScene->GetLayer()->Notify( notificationFlags );
     }
 }
 
