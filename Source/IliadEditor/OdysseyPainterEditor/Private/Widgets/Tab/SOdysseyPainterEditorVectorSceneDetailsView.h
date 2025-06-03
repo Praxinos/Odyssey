@@ -47,7 +47,9 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorSceneDetailsView
         void OnVectorLayerNotify( FOdysseyVectorLayer* iLayer, uint64 iSignalFlags );
         void ParseVectorNotifications( uint64 iSignalFlags );
         void OnSceneChanged();
+        void OnSourceChanged();
         void OnCurrentLayerChanged( UOdysseyLayerStack* iLayerStack );
+        void BindLayerDelegates( UOdysseyLayerStack* iLayerStack );
 
     protected:
         FOdysseyPainterEditor* mEditor;

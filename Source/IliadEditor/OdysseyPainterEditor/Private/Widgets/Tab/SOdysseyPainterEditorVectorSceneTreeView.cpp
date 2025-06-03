@@ -91,6 +91,8 @@ SOdysseyPainterEditorVectorSceneTreeView::Construct( const FArguments& InArgs )
         //.SelectionMode( ESelectionMode::Multi )
         .HeaderRow(headerRow)
     );
+
+    mEditor->OnSourceChanged().AddSP( this, &SOdysseyPainterEditorVectorSceneTreeView::OnSourceChanged );
 }
 
 void
@@ -411,7 +413,7 @@ SOdysseyPainterEditorVectorSceneTreeView::OnSceneChanged()
 }
 
 void
-SOdysseyPainterEditorVectorSceneTreeView::OnCurrentLayerChanged( UOdysseyLayerStack* iLayerStack )
+SOdysseyPainterEditorVectorSceneTreeView::BindLayerDelegates( UOdysseyLayerStack* iLayerStack )
 {
     UOdysseyAnimationLayerImageVector* imageVectorLayer = Cast<UOdysseyAnimationLayerImageVector>(iLayerStack->GetCurrentLayer());
 
@@ -427,6 +429,26 @@ SOdysseyPainterEditorVectorSceneTreeView::OnCurrentLayerChanged( UOdysseyLayerSt
 
         mVectorLayer->OnNotifyDelegate().AddSP( this, &SOdysseyPainterEditorVectorSceneTreeView::OnVectorLayerNotify );
     }
+}
+
+void
+SOdysseyPainterEditorVectorSceneTreeView::OnSourceChanged()
+{
+    if( mEditor->GetSource() )
+    {
+        UOdysseyLayerStack* layerStack = mEditor->GetSource()->GetLayerStack();
+
+        if( layerStack )
+        {
+            BindLayerDelegates( layerStack );
+        }
+    }
+}
+
+void
+SOdysseyPainterEditorVectorSceneTreeView::OnCurrentLayerChanged( UOdysseyLayerStack* iLayerStack )
+{
+    BindLayerDelegates( iLayerStack );
 }
 
 #undef LOCTEXT_NAMESPACE

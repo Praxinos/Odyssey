@@ -83,8 +83,8 @@ SOdysseyPainterEditorVectorSceneTreeViewContextMenu::CreateWidget( SOdysseyPaint
           , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::DeleteObjects, iTreeView->GetEditor(), vectorScene)));
 
         menu.AddMenuEntry(
-            LOCTEXT("vector-tool.inbetween-context-menu.groupadd-inbetweener-tag.name", "Group and Add Inbetweener Grid")
-          , LOCTEXT("vector-tool.inbetween-context-menu.groupadd-inbetweener-tag.tooltip", "Group and Add Inbetweener Grid")
+            LOCTEXT("vector-tool.inbetween-context-menu.groupadd-inbetweener-tag.name", "Group and Add Inbetweener Tag")
+          , LOCTEXT("vector-tool.inbetween-context-menu.groupadd-inbetweener-tag.tooltip", "Group and Add Inbetweener Tag")
           , FSlateIcon()
           , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::GroupAndAddInbetweenerTag, editor, vectorScene )
                     , FCanExecuteAction::CreateStatic( &SOdysseyPainterEditorVectorSceneTreeViewContextMenu::CanAddInbetweener, vectorScene )));

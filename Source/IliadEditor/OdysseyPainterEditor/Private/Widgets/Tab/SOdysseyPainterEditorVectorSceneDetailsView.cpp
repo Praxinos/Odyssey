@@ -61,6 +61,8 @@ SOdysseyPainterEditorVectorSceneDetailsView::Construct( const FArguments& InArgs
     [
         mDetailsView.ToSharedRef()
     ];
+
+    mEditor->OnSourceChanged().AddSP( this, &SOdysseyPainterEditorVectorSceneDetailsView::OnSourceChanged );
 }
 
 TSharedPtr<IDetailsView>
@@ -162,7 +164,7 @@ SOdysseyPainterEditorVectorSceneDetailsView::ParseVectorNotifications( uint64 iS
 }
 
 void
-SOdysseyPainterEditorVectorSceneDetailsView::OnCurrentLayerChanged( UOdysseyLayerStack* iLayerStack )
+SOdysseyPainterEditorVectorSceneDetailsView::BindLayerDelegates( UOdysseyLayerStack* iLayerStack )
 {
     UOdysseyAnimationLayerImageVector* imageVectorLayer = Cast<UOdysseyAnimationLayerImageVector>(iLayerStack->GetCurrentLayer());
 
@@ -178,6 +180,26 @@ SOdysseyPainterEditorVectorSceneDetailsView::OnCurrentLayerChanged( UOdysseyLaye
 
         mVectorLayer->OnNotifyDelegate().AddSP( this, &SOdysseyPainterEditorVectorSceneDetailsView::OnVectorLayerNotify );
     }
+}
+
+void
+SOdysseyPainterEditorVectorSceneDetailsView::OnSourceChanged()
+{
+    if( mEditor->GetSource() )
+    {
+        UOdysseyLayerStack* layerStack = mEditor->GetSource()->GetLayerStack();
+
+        if( layerStack )
+        {
+            BindLayerDelegates( layerStack );
+        }
+    }
+}
+
+void
+SOdysseyPainterEditorVectorSceneDetailsView::OnCurrentLayerChanged( UOdysseyLayerStack* iLayerStack )
+{
+    BindLayerDelegates( iLayerStack );
 }
 
 void
