@@ -376,7 +376,7 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
                                   | FOdysseyVectorObject::UPDATE_NOINBETWEENING );
 
         // update the selection box with the newly modified matrices
-        iScene->GetCell()->ResetHUD();
+        iScene->GetLayer()->ResetHUD( iScene );
 
         // replace pivot correctly.
         pivot.x += translateBy.x;
@@ -455,7 +455,7 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
                                   | FOdysseyVectorObject::UPDATE_NOINBETWEENING );
 
         // update the selection box with the newly modified matrices
-        iScene->GetCell()->ResetHUD();
+        iScene->GetLayer()->ResetHUD( iScene );
 
         // replace pivot correctly.
         pivot.x = selectionBox.rect.x + spacePivot.x;
@@ -513,7 +513,7 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
         iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
 
         // update the selection box with the newly modified matrices
-        iScene->GetCell()->ResetHUD();
+        iScene->GetLayer()->ResetHUD( iScene );
 
         // replace pivot correctly.
         pivot.x = selectionBox.rect.x + spacePivot.x;
@@ -714,7 +714,7 @@ UOdysseyPainterEditorVectorTransformTool::RotateObjectSelection( FOdysseyVectorG
     }
 
     // update the selection box with the newly modified matrices
-    iScene->GetCell()->ResetHUD();
+    iScene->GetLayer()->ResetHUD( iScene );
 
     // replace pivot correctly.
     BLPoint spacePivot = selectionBox.inverseWorldMatrix.mapPoint( worldPivot.x, worldPivot.y );
@@ -994,7 +994,7 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorGr
     }
 
     // update the selection box with the newly modified matrices
-    iScene->GetCell()->ResetHUD();
+    iScene->GetLayer()->ResetHUD( iScene );
 }
 
 void
@@ -1134,7 +1134,7 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseUpVector( FOdysseyVectorGroupPa
             BLPoint worldGizmo = selectionBox.worldMatrix.mapPoint( gizmo.x, gizmo.y );
             // endof quickfix
 
-            iScene->GetCell()->ResetHUD();
+            iScene->GetLayer()->ResetHUD( iScene );
 
             // quick fix to place the gizmo at the right place
             BLPoint localGizmo = selectionBox.inverseWorldMatrix.mapPoint( worldGizmo );
@@ -1162,7 +1162,7 @@ UOdysseyPainterEditorVectorTransformTool::PropertyChangedVector( FOdysseyVectorG
 
     if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorTransformTool, World) )
     {
-        iScene->GetCell()->ResetHUD();
+        iScene->GetLayer()->ResetHUD( iScene );
 
         mTransformHUD->CenterGizmo();
     }

@@ -36,7 +36,7 @@
 
 UOdysseyAnimationLayerImageVector::UOdysseyAnimationLayerImageVector()
 #if WITH_EDITOR
-    : mVectorLayer(this)
+    : mVectorLayer( MakeShared<FOdysseyVectorLayer>(this) )
 #endif
 {}
 
@@ -72,7 +72,7 @@ UOdysseyAnimationLayerImageVector::OnIsWireframeChanged()
 
 UOdysseyAnimationLayerImageVector::~UOdysseyAnimationLayerImageVector()
 {
-    mVectorLayer.RemoveAllChildren();
+    mVectorLayer->RemoveAllChildren();
 }
 
 void
@@ -92,7 +92,7 @@ UOdysseyAnimationLayerImageVector::PostDuplicate(EDuplicateMode::Type iDuplicate
 void
 UOdysseyAnimationLayerImageVector::UpdateSharedEnv()
 {
-    mVectorLayer.RemoveAllChildren();
+    mVectorLayer->RemoveAllChildren();
 
     for (UOdysseyLayerCell* cell : Cells)
     {
@@ -104,12 +104,12 @@ UOdysseyAnimationLayerImageVector::UpdateSharedEnv()
 
         if( cellVector )
         {
-            mVectorLayer.AppendChild( cellVector->GetVectorCell() );
+            mVectorLayer->AppendChild( cellVector->GetVectorCell() );
         }
     }
 
-    mVectorLayer.Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    mVectorLayer.RequestRedraw( nullptr, 0 );
+    mVectorLayer->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    mVectorLayer->RequestRedraw( nullptr, 0 );
 }
 
 struct FOdysseyAnimationLayerImageVectorObjectVersion
@@ -440,9 +440,9 @@ UOdysseyAnimationLayerImageVector::Merge(const TArray<UOdysseyLayer*>& iLayers)
         scene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
     }
 
-    mVectorLayer.RequestRedraw( nullptr, 0 );
+    mVectorLayer->RequestRedraw( nullptr, 0 );
 
-    FOdysseyVectorEngine::Notify( nullptr, FOdysseyVectorEngine::NOTIFY_ALL );
+    mVectorLayer->Notify( FOdysseyVectorEngine::NOTIFY_ALL );
 }
 
 //static
@@ -452,10 +452,10 @@ UOdysseyAnimationLayerImageVector::GetInbetweeningRowHeight()
     return 20UL;
 }
 
-FOdysseyVectorLayer*
+TSharedPtr<FOdysseyVectorLayer>
 UOdysseyAnimationLayerImageVector::GetVectorLayer()
 {
-    return &mVectorLayer;
+    return mVectorLayer;
 }
 
 // Implements Interface IOdysseyVectorLayer::GetWidth
@@ -551,7 +551,7 @@ UOdysseyAnimationLayerImageVector::GetRowHeight(FName iSubRowName) const
 {
     if (iSubRowName == "Inbetweening")
     {
-        const std::list<FOdysseyVectorTag*>& tagList = mVectorLayer.GetSharedTagList();
+        const std::list<FOdysseyVectorTag*>& tagList = mVectorLayer->GetSharedTagList();
         int numTags = 0;
         for (FOdysseyVectorTag* tag : tagList)
         {
@@ -582,7 +582,7 @@ UOdysseyAnimationLayerImageVector::MakeBreakdownTargetMap()
     uint64 notificationFlags = 0xFFFFFFFFFFFFFFFF;
 
     // Make breakdown lookup for adapting the length of the inbetweener tags
-    for( FOdysseyVectorTag* sharedTag : mVectorLayer.GetSharedTagList() )
+    for( FOdysseyVectorTag* sharedTag : mVectorLayer->GetSharedTagList() )
     {
         if( sharedTag->GetClass() == FOdysseyVectorTagInbetweener::StaticClass() )
         {
@@ -604,7 +604,7 @@ UOdysseyAnimationLayerImageVector::MakeBreakdownTargetMap()
         // needed for valid GUndo pointer
         if( GUndo )
         {
-            FOdysseyVectorUndo *undo = new FOdysseyVectorUndoTagInbetweenerBreakdownAlter( &mVectorLayer
+            FOdysseyVectorUndo *undo = new FOdysseyVectorUndoTagInbetweenerBreakdownAlter( mVectorLayer.Get()
                                                                                          , inbetweenerTagList
                                                                                          , notificationFlags );
 
@@ -664,10 +664,10 @@ UOdysseyAnimationLayerImageVector::CheckBreakdownTargetMap()
         }
     }
 
-    mVectorLayer.Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    mVectorLayer.RequestRedraw( nullptr, 0 );
+    mVectorLayer->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    mVectorLayer->RequestRedraw( nullptr, 0 );
 
-    FOdysseyVectorEngine::Notify( nullptr, 0xFFFFFFFFFFFFFFFF );
+    mVectorLayer->Notify( FOdysseyVectorEngine::NOTIFY_ALL );
 
 
     mBreakdownTargetMap.Empty();

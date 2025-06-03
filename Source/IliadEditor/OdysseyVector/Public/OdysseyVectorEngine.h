@@ -53,9 +53,6 @@ FHorizontalLine;
 class ODYSSEYVECTOR_API FOdysseyVectorEngine
 {
     public:
-        DECLARE_MULTICAST_DELEGATE_TwoParams( FNotifyDelegate, FOdysseyVectorGroupPaint*, uint64 iDelegateFlags )
-
-    public:
         // drawing flags
         static const uint64 DRAWING_WIREFRAME         = ( 1ULL <<  2 );
         static const uint64 DRAWING_IGNORECOLOR       = ( 1ULL <<  3 );
@@ -66,9 +63,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
         static const uint64 NOTIFY_ALL                = 0x0FFFFFFFFFFFFFFF;
         static const uint64 NOTIFY_UPDATE_HUD         = ( 1ULL <<  0 );
         static const uint64 NOTIFY_RESERVED_SHIFT     = ( 15 );
-
-        static FNotifyDelegate& OnNotifyDelegate();
-        //       FInvalidateDelegate& OnInvalidateDelegate();
 
         /**
          * @brief Destructor
@@ -97,12 +91,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
          */
         void RenderHUD( BLContext* iBLContext
                       , FOdysseyVectorGroupPaint* iScene );
-
-        /**
-         * @brief Send a signal to methods registered to this delegate.
-         * @param iSignalFlags SIGNAL_* flags that can be interpreted by the receiver of the signal.
-         */
-        static void Notify( FOdysseyVectorGroupPaint* iScene, uint64 iNotifyFlags );
 
         ::ULIS::FRectD Render( BLContext* iBLContext
                              , const ::ULIS::FRectD& iRedrawRect

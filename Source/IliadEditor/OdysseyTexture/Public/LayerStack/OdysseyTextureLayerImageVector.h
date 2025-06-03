@@ -43,7 +43,7 @@ protected:
 private:
     // handle to a callback to refresh the layer when a property of an object's details view is changed
     TSharedPtr<FOdysseyVectorCell> mVectorCell;
-    FOdysseyVectorLayer mVectorLayer;
+    TSharedPtr<FOdysseyVectorLayer> mVectorLayer;
     TSharedPtr<FOdysseyVectorBlock> mVectorBlock; //A automatically cached block containing the render of mEngine
 
     UPROPERTY()
@@ -58,7 +58,8 @@ public:
     virtual void PreSave(FObjectPreSaveContext SaveContext) override;
     virtual void Merge(const TArray<UOdysseyLayer*>& Layers) override;
 
-    FOdysseyVectorCell* GetVectorCell();
+    TSharedPtr<FOdysseyVectorCell> GetVectorCell();
+    TSharedPtr<FOdysseyVectorLayer> GetVectorLayer();
     FOdysseyVectorImportV2* GetImporterV2();
 
     void Serialize(FArchive& Ar);
@@ -73,7 +74,6 @@ public:
 private:
     bool UpdateDrawingFlags() const;
     void InitTexture();
-    void OnVectorEngineNotify(FOdysseyVectorGroupPaint* iScene, uint64 iSignalFlags);
     void OnVectorBlockInvalidated(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive);
 
 public:

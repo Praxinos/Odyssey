@@ -135,7 +135,6 @@ UOdysseyAnimationCellImageVector::PostInitProperties()
     mVectorBlockId = FGuid::NewGuid();
     mVectorBlock = MakeShared<FOdysseyVectorBlock>();
     mVectorBlock->OnInvalidated().AddUObject(this, &UOdysseyAnimationCellImageVector::OnVectorBlockInvalidated);
-    mVectorBlock->GetEngine().OnNotifyDelegate().AddUObject(this, &UOdysseyAnimationCellImageVector::OnVectorEngineNotify);
 
     UOdysseyAnimation* animation = GetAnimation();
     if (animation->GetWidth() < 0 || animation->GetHeight() < 0)
@@ -290,7 +289,7 @@ UOdysseyAnimationCellImageVector::PostLoad()
     InitTexture();
 
     //mVectorCell->GetLayer()->InvalidateCell( mVectorCell.Get() );
-    FOdysseyVectorEngine::Notify( mVectorCell->GetScene(), FOdysseyVectorEngine::NOTIFY_ALL );
+    mVectorCell->GetLayer()->Notify( FOdysseyVectorEngine::NOTIFY_ALL );
 
     // textures must be assigned to brushes in PostLoad and not in Serialize(), because the UAsset won't be fully loaded
     // and there dimensions would be 0 at that point.
@@ -359,18 +358,6 @@ uint32
 UOdysseyAnimationCellImageVector::GetFrame()
 {
     return GetFrameRange().GetLowerBoundValue();
-}
-
-void
-UOdysseyAnimationCellImageVector::OnVectorEngineNotify(FOdysseyVectorGroupPaint* iScene, uint64 iSignalFlags)
-{
-    if (!iScene || !iScene->GetCell() || iScene->GetCell()->GetCellInterface() != this)
-        return;
-
-    if (iSignalFlags & FOdysseyVectorEngine::NOTIFY_UPDATE_HUD)
-    {
-        iScene->GetCell()->ResetHUD();
-    }
 }
 
 void

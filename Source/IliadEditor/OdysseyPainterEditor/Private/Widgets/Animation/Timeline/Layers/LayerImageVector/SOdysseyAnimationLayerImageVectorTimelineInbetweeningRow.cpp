@@ -128,7 +128,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonDown( con
     }
 
     // update UI
-    FOdysseyVectorEngine::Notify( nullptr, notificationFlags );
+    layer->GetVectorLayer()->Notify( notificationFlags );
 
     return reply;
 }
@@ -240,7 +240,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonUp( const
             vectorLayer->GetVectorLayer()->RequestRedraw( vectorCell->GetVectorCell(), 0 );
         }
 
-        FOdysseyVectorEngine::Notify( nullptr, retFlags );
+        vectorLayer->GetVectorLayer()->Notify( retFlags );
 
         reply.ReleaseMouseCapture();
     }

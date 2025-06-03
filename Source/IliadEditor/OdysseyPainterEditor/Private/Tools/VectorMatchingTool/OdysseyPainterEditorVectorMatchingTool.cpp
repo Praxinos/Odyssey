@@ -223,7 +223,7 @@ uint64
 UOdysseyPainterEditorVectorMatchingTool::PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
                                                               , const FName& iPropertyName )
 {
-    iScene->GetCell()->ResetHUD();
+    iScene->GetLayer()->ResetHUD( iScene );
 
     // redraw
     iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );

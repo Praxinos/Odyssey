@@ -65,7 +65,7 @@ public:
     static uint32 GetInbetweeningRowHeight();
 
     // vector data shared between all cells
-    FOdysseyVectorLayer* GetVectorLayer();
+    TSharedPtr<FOdysseyVectorLayer> GetVectorLayer();
     void UpdateSharedEnv();
 
 public:
@@ -110,8 +110,7 @@ public:
 
 private:
     friend class FOdysseyAnimationLayerImageVectorImport;
-    // mSharedEnv MUST be before mCellsContainer because of the destruction order
-    FOdysseyVectorLayer mVectorLayer;
+    TSharedPtr<FOdysseyVectorLayer> mVectorLayer;
     TMap<FInbetweenerBreakdown*, FOdysseyVectorCell*> mBreakdownTargetMap;
 #endif
 

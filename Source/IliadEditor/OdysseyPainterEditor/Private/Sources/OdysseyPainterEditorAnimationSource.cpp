@@ -6,6 +6,7 @@
 //#include "OdysseyAnimationTexture.h"
 #include "OdysseyAnimationLayer.h"
 #include "OdysseyAnimationLayerImageRaster.h"
+#include "OdysseyAnimationLayerImageVector.h"
 #include "OdysseyAnimationLayerStack.h"
 #include "OdysseyAnimationCellImageRaster.h"
 #include "OdysseyRasterBlockMutator.h"
@@ -287,6 +288,7 @@ FOdysseyPainterEditorAnimationSource::Clear()
     }
     else if (mediaProvider.HasMedia<FOdysseyMediaVector>())
     {
+        UOdysseyAnimationLayerImageVector* imageVectorLayer = Cast<UOdysseyAnimationLayerImageVector>(currentLayer);
         TArray<TSharedPtr<FOdysseyMediaVector>> mediasVector = mediaProvider.GetOrCreateMedias<FOdysseyMediaVector>();
         uint64 notificationFlags = FOdysseyVectorEngine::NOTIFY_ALL;
 
@@ -312,7 +314,10 @@ FOdysseyPainterEditorAnimationSource::Clear()
             vectorCell->GetLayer()->RequestRedraw( vectorCell, 0 );
         }
 
-        FOdysseyVectorEngine::Notify( nullptr, notificationFlags );
+        if( imageVectorLayer )
+        {
+            imageVectorLayer->GetVectorLayer()->Notify( notificationFlags );
+        }
     }
 }
 

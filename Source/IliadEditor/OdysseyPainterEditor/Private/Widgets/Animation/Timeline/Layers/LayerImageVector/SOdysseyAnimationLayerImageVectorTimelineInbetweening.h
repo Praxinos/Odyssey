@@ -15,6 +15,7 @@ class FOdysseyVectorEngine;
 class FOdysseyPainterEditorAnimationTimelinePosition;
 class FOdysseyPainterEditor;
 class FOdysseyVectorGroupPaint;
+class FOdysseyVectorLayer;
 
 //////////////////////////////////////////////////////////////////////////
 // SOdysseyAnimationLayerImageVectorTimelineInbetweening
@@ -53,7 +54,7 @@ class SOdysseyAnimationLayerImageVectorTimelineInbetweening
         void ShowHideTarget();
         void GetSelectedInbetweenerTags( std::list<FOdysseyVectorTagInbetweener*>& oSelectedInbetweenerTagList );
         void MapActionsToCommandList();
-        void OnVectorSceneNotify( FOdysseyVectorGroupPaint* iScene, uint64 iNotificationFlags );
+        void OnVectorSceneNotify( FOdysseyVectorLayer* iLayer, uint64 iNotificationFlags );
         void RemoveInbetweenerTag();
 
         float MousePositionToFrame(float iX) const;

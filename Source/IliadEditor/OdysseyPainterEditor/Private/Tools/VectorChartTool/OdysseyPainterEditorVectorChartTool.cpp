@@ -429,7 +429,7 @@ uint64
 UOdysseyPainterEditorVectorChartTool::PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
                                                            , const FName& iPropertyName )
 {
-    iScene->GetCell()->ResetHUD();
+    iScene->GetLayer()->ResetHUD( iScene );
 
     iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
     iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );

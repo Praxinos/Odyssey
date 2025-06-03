@@ -15,7 +15,7 @@ FOdysseyTextureLayerImageVectorExport::Write( UOdysseyTextureLayerImageVector* i
                             , Ar
                             , [iTextureLayerImageVector](FArchive &Ar) -> void
     {
-        FOdysseyVectorCell* vectorCell = iTextureLayerImageVector->GetVectorCell();
+        FOdysseyVectorCell* vectorCell = iTextureLayerImageVector->GetVectorCell().Get();
         // engine might be NULL because this function is sometimes called even before loading anything
         // so we have to check the validity of the pointer
         if( vectorCell )

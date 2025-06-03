@@ -13,6 +13,8 @@
 
 #include "OdysseyVectorLayer.generated.h"
 
+
+class IOdysseyVectorHUD;
 class IOdysseyVectorCell;
 class FOdysseyVectorTag;
 
@@ -39,6 +41,9 @@ class IOdysseyVectorLayer
 
 class ODYSSEYVECTOR_API FOdysseyVectorLayer : public FOdysseyVectorObject
 {
+    public:
+        DECLARE_MULTICAST_DELEGATE_TwoParams( FNotifyDelegate, FOdysseyVectorLayer* iLayer, uint64 iDelegateFlags )
+
     private:
         static const uint32 mStaticClass = 0x442744a7; // value is crc32 FOdysseyVectorLayer
 
@@ -76,6 +81,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorLayer : public FOdysseyVectorObject
         void InvalidateCell( FOdysseyVectorCell* iCell );
         virtual uint32 RemoveChild( FOdysseyVectorObject* iChild ) override;
         std::list<FOdysseyVectorCell*>& GetInvalidateCellList();
+        FNotifyDelegate& OnNotifyDelegate();
+        void Notify( uint64 iNotifyFlags );
+        std::list<IOdysseyVectorHUD*>& GetHUDList();
+        void AddHUD( IOdysseyVectorHUD* iHUDObject );
+        void RemoveHUD( IOdysseyVectorHUD* iHUDObject );
+        void ClearHUD();
+        void ResetHUD( FOdysseyVectorGroupPaint* iScene );
 
     private:
         std::list<FOdysseyVectorCell*> mInvalidatedCellList;
@@ -83,4 +95,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorLayer : public FOdysseyVectorObject
         std::list<FOdysseyVectorTag*> mSharedTagList;
         std::mutex mSharedTagMutex;
         IOdysseyVectorLayer* mLayerInterface;
+        FNotifyDelegate mOnNotifyDelegate;
+        std::list<IOdysseyVectorHUD*> mHUDList;
 };

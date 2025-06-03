@@ -251,12 +251,12 @@ FOdysseyVectorEngine::Render( BLContext* iBLContext
         }
 
         // redraw HUDs that need to be fused with the render.
-        scene->GetCell()->LockDrawing();
-        for( IOdysseyVectorHUD *hud : scene->GetCell()->GetHUDList() )
+        scene->GetLayer()->LockDrawing();
+        for( IOdysseyVectorHUD *hud : scene->GetLayer()->GetHUDList() )
         {
             hud->Draw( iBLContext );
         }
-        scene->GetCell()->UnlockDrawing();
+        scene->GetLayer()->UnlockDrawing();
 
         iBLContext->flush(BL_CONTEXT_FLUSH_SYNC);
     }
@@ -282,21 +282,6 @@ FOdysseyVectorEngine::Render( BLContext* iBLContext
     mDrawingMutex.unlock();
 
     return sanitizedRect;
-}
-
-FOdysseyVectorEngine::FNotifyDelegate&
-FOdysseyVectorEngine::OnNotifyDelegate()
-{
-    static FNotifyDelegate OnNotifyDelegate;
-
-    return OnNotifyDelegate;
-}
-
-// static
-void
-FOdysseyVectorEngine::Notify( FOdysseyVectorGroupPaint* iScene, uint64 iNotifyFlags )
-{
-    OnNotifyDelegate().Broadcast( iScene, iNotifyFlags );
 }
 
 void

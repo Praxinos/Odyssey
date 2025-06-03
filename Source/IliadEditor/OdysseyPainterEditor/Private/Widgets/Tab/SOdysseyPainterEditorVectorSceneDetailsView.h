@@ -12,6 +12,8 @@ class UOdysseyPainterEditorVectorGroupPaintView;
 class UOdysseyPainterEditorVectorTagInbetweenerView;
 class FOdysseyVectorGroupPaint;
 class FOdysseyPainterEditor;
+class FOdysseyVectorLayer;
+class UOdysseyLayerStack;
 
 /**
  * Implements the Scene Tree View Widget
@@ -42,13 +44,18 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorSceneDetailsView
 
     protected:
         TSharedPtr<IDetailsView> CreateObjectPropertiesPanel();
-        void OnVectorSceneNotify( FOdysseyVectorGroupPaint* iScene, uint64 iSignalFlags );
+        void OnVectorLayerNotify( FOdysseyVectorLayer* iLayer, uint64 iSignalFlags );
         void ParseVectorNotifications( uint64 iSignalFlags );
         void OnSceneChanged();
+        void OnSourceChanged();
+        void OnCurrentLayerChanged( UOdysseyLayerStack* iLayerStack );
+        void BindLayerDelegates( UOdysseyLayerStack* iLayerStack );
 
     protected:
         FOdysseyPainterEditor* mEditor;
         TSlateAttribute<FOdysseyVectorGroupPaint*> mScene;
+        TSharedPtr<FOdysseyVectorLayer> mOldVectorLayer;
+        TSharedPtr<FOdysseyVectorLayer> mVectorLayer;
 
         TSharedPtr<IDetailsView> mDetailsView;
         TObjectPtr<UOdysseyPainterEditorVectorObjectView> mObjectView;

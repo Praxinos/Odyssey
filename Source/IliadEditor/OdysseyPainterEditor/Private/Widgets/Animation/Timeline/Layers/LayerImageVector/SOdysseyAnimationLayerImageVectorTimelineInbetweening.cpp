@@ -39,7 +39,7 @@
 
 SOdysseyAnimationLayerImageVectorTimelineInbetweening::~SOdysseyAnimationLayerImageVectorTimelineInbetweening()
 {
-    FOdysseyVectorEngine::OnNotifyDelegate().RemoveAll( this );
+    mAnimationLayerImageVector->GetVectorLayer()->OnNotifyDelegate().RemoveAll( this );
 }
 
 SOdysseyAnimationLayerImageVectorTimelineInbetweening::SOdysseyAnimationLayerImageVectorTimelineInbetweening()
@@ -60,7 +60,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::Construct( const FArgumen
     mTimelinePosition = InArgs._TimelinePosition;
 
     // bind refresh function to delegates on existing vector scenes at load. Needed to refresh necessary widgets.
-    FOdysseyVectorEngine::OnNotifyDelegate().AddRaw( this, &SOdysseyAnimationLayerImageVectorTimelineInbetweening::OnVectorSceneNotify );
+    mAnimationLayerImageVector->GetVectorLayer()->OnNotifyDelegate().AddRaw( this, &SOdysseyAnimationLayerImageVectorTimelineInbetweening::OnVectorSceneNotify );
 
     SListView<TSharedPtr<FInbetweeningListViewItem>>::Construct(
         SListView<TSharedPtr<FInbetweeningListViewItem>>::FArguments()
@@ -82,7 +82,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::Construct( const FArgumen
 }
 
 void
-SOdysseyAnimationLayerImageVectorTimelineInbetweening::OnVectorSceneNotify( FOdysseyVectorGroupPaint* iScene, uint64 iNotificationFlags )
+SOdysseyAnimationLayerImageVectorTimelineInbetweening::OnVectorSceneNotify( FOdysseyVectorLayer* iLayer, uint64 iNotificationFlags )
 {
     if( iNotificationFlags & FOdysseyPainterEditor::UI_UPDATE_TIMELINE )
     {
@@ -128,90 +128,6 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::Update()
     RequestListRefresh();
 }
 
-/*
-void
-SOdysseyAnimationLayerImageVectorTimelineInbetweening::Private_SelectRangeFromCurrentTo ( TSharedPtr<FInbetweeningListViewItem> iItem )
-{
-    if( RangeSelectionStart )
-    {
-        FOdysseyVectorObject* fromObject = RangeSelectionStart.Get()->GetInbetweenerTag()->GetOwner();
-        FOdysseyVectorObject* toObject = iItem.Get()->GetInbetweenerTag()->GetOwner();
-        FOdysseyVectorObject* vectorObject = mItemsSource[0].Get()->GetInbetweenerTag()->GetOwner();
-        FOdysseyVectorCell* vectorCell = fromObject->GetCell();
-        bool doSelect = false;
-
-        for( const TSharedPtr<FInbetweeningListViewItem>& rangeItem : GetItems() )
-        {
-            FOdysseyVectorObject* rangeItemObject = rangeItem.Get()->GetInbetweenerTag()->GetOwner();
-
-            if( ( rangeItemObject == fromObject ) || ( rangeItemObject == toObject ) )
-            {
-                if( rangeItemObject->IsSelected() == false )
-                {
-                    vectorCell->SelectObject( rangeItemObject );
-                    // Keep internal array consistent for use by other methods
-                    SelectedItems.Add( rangeItem );
-                }
-
-                doSelect = !doSelect;
-            }
-            else
-            {
-                if( doSelect )
-                {
-                    if( rangeItemObject->IsSelected() == false )
-                    {
-                        vectorCell->SelectObject( rangeItemObject );
-                        // Keep internal array consistent for use by other methods
-                        SelectedItems.Add( rangeItem );
-                    }
-                }
-            }
-        }
-    }
-}
-
-void
-SOdysseyAnimationLayerImageVectorTimelineInbetweening::Private_SetItemSelection ( TSharedPtr<FInbetweeningListViewItem> iItem
-                                                                                , bool bShouldBeSelected
-                                                                                , bool bWasUserDirected )
-{
-    FOdysseyVectorObject* vectorObject = iItem.Get()->GetInbetweenerTag()->GetOwner();
-    FOdysseyVectorCell* vectorRoot = vectorObject->GetCell();
-
-    if( bShouldBeSelected )
-    {
-        vectorRoot->SelectObject( vectorObject );
-        // Keep internal array consistent for use by other methods
-        SelectedItems.Add( iItem );
-
-        RangeSelectionStart = iItem;
-    }
-    else
-    {
-        vectorRoot->UnselectObject( vectorObject );
-        // Keep internal array consistent for use by other methods
-        SelectedItems.Remove( iItem );
-    }
-}
-
-void
-SOdysseyAnimationLayerImageVectorTimelineInbetweening::Private_ClearSelection()
-{
-    if( mItemsSource.Num() )
-    {
-        // the scene
-        FOdysseyVectorObject* vectorObject = mItemsSource[0].Get()->GetInbetweenerTag()->GetOwner();
-        FOdysseyVectorCell* vectorRoot = vectorObject->GetCell();
-
-        vectorRoot->ClearObjectSelection();
-    }
-
-    // Keep internal array consistent for use by other methods
-    SelectedItems.Empty();
-}
-*/
-
 void
 SOdysseyAnimationLayerImageVectorTimelineInbetweening::OnSelectionChanged( TSharedPtr<FInbetweeningListViewItem> iItem
                                                                          , ESelectInfo::Type SelectInfo )
@@ -236,7 +152,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::OnSelectionChanged( TShar
         GEditor->BeginTransaction(LOCTEXT("vector-scene-tree-view.transaction.selection-changed","Selection Changed"));
         if( GUndo )
         {
-            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectObject( mAnimationLayerImageVector->GetVectorLayer()
+            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectObject( mAnimationLayerImageVector->GetVectorLayer().Get()
                                                                          , cellList
                                                                          , retFlags );
 
@@ -270,7 +186,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::OnSelectionChanged( TShar
 
         mAnimationLayerImageVector->GetVectorLayer()->RequestRedraw( nullptr, 0 );
 
-        FOdysseyVectorEngine::Notify( nullptr, retFlags );
+        mAnimationLayerImageVector->GetVectorLayer()->Notify( retFlags );
     }
 }
 
@@ -333,7 +249,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::OnContextMenuOpening()
 void
 SOdysseyAnimationLayerImageVectorTimelineInbetweening::GetSelectedInbetweenerTags( std::list<FOdysseyVectorTagInbetweener*>& oSelectedInbetweenerTagList )
 {
-    FOdysseyVectorLayer* vectorLayer = mAnimationLayerImageVector->GetVectorLayer();
+    FOdysseyVectorLayer* vectorLayer = mAnimationLayerImageVector->GetVectorLayer().Get();
 
     oSelectedInbetweenerTagList.clear();
 
@@ -373,7 +289,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::AddBreakdown()
         GEditor->BeginTransaction(LOCTEXT("vector-timeline.transaction.add-breakdown", "Add Breakdown"));
         if( GUndo )
         {
-            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerBreakdownAdd( mAnimationLayerImageVector->GetVectorLayer()
+            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerBreakdownAdd( mAnimationLayerImageVector->GetVectorLayer().Get()
                                                                                        , selectedInbetweenerTagList
                                                                                        , notificationFlags );
 
@@ -412,7 +328,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::AddBreakdown()
         mAnimationLayerImageVector->GetVectorLayer()->RequestRedraw( nullptr, 0 );
     }
 
-    FOdysseyVectorEngine::Notify( nullptr, notificationFlags );
+    mAnimationLayerImageVector->GetVectorLayer()->Notify( notificationFlags );
 }
 
 void
@@ -435,7 +351,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::RemoveBreakdown()
         GEditor->BeginTransaction(LOCTEXT("vector-timeline.transaction.remove-breakdown", "Remove Breakdown"));
         if( GUndo )
         {
-            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerBreakdownRemove( mAnimationLayerImageVector->GetVectorLayer()
+            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerBreakdownRemove( mAnimationLayerImageVector->GetVectorLayer().Get()
                                                                                           , selectedInbetweenerTagList
                                                                                           , notificationFlags );
 
@@ -473,7 +389,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::RemoveBreakdown()
     }
 
     // static call
-    FOdysseyVectorEngine::Notify( nullptr, notificationFlags );
+    mAnimationLayerImageVector->GetVectorLayer()->Notify( notificationFlags );
 }
 
 void
@@ -509,7 +425,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::ShowHideTarget()
         GEditor->BeginTransaction(LOCTEXT("vector-timeline.transaction.remove-breakdown", "Remove Breakdown"));
         if( GUndo )
         {
-            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerBreakdownTargetVisibility( mAnimationLayerImageVector->GetVectorLayer()
+            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerBreakdownTargetVisibility( mAnimationLayerImageVector->GetVectorLayer().Get()
                                                                                                     , breakdownList
                                                                                                     , notificationFlags );
 
@@ -539,7 +455,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::ShowHideTarget()
     }
 
     // static call
-    FOdysseyVectorEngine::Notify( nullptr, notificationFlags );
+    mAnimationLayerImageVector->GetVectorLayer()->Notify( notificationFlags );
 }
 
 const FSlateBrush *
@@ -604,7 +520,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::ChangeDirection()
     mAnimationLayerImageVector->GetVectorLayer()->RequestRedraw( nullptr, 0 );
 
     // static call
-    FOdysseyVectorEngine::Notify( nullptr, notificationFlags );
+    mAnimationLayerImageVector->GetVectorLayer()->Notify( notificationFlags );
 }
 
 void
@@ -623,7 +539,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::RemoveInbetweenerTag()
     FOdysseyPainterEditor* editor = painterEditorModule.GetOpenedEditorForAsset(mAnimationLayerImageVector->GetAnimation());
 
     // note: editor is NULL in the Sequencer
-    FOdysseyPainterEditor::RemoveInbetweenerTag( editor, mAnimationLayerImageVector->GetVectorLayer() );
+    FOdysseyPainterEditor::RemoveInbetweenerTag( editor, mAnimationLayerImageVector->GetVectorLayer().Get() );
 }
 
 float

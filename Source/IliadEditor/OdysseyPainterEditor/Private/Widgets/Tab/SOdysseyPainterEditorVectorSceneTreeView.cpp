@@ -16,6 +16,8 @@
 #include "Undo/OdysseyVectorUndoSelectObject.h"
 #include "Widgets/Tab/SOdysseyPainterEditorVectorSceneTreeViewRow.h"
 #include "Widgets/Tab/SOdysseyPainterEditorVectorSceneTreeViewContextMenu.h"
+#include "OdysseyLayerStack.h"
+#include "OdysseyAnimationLayerImageVector.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -34,7 +36,10 @@ SOdysseyPainterEditorVectorSceneTreeView::PrivateRegisterAttributes(FSlateAttrib
 
 SOdysseyPainterEditorVectorSceneTreeView::~SOdysseyPainterEditorVectorSceneTreeView()
 {
-    FOdysseyVectorEngine::OnNotifyDelegate().RemoveAll(this);
+    if( mVectorLayer.IsValid() )
+    {
+        mVectorLayer->OnNotifyDelegate().RemoveAll( this );
+    }
 }
 
 SOdysseyPainterEditorVectorSceneTreeView::SOdysseyPainterEditorVectorSceneTreeView()
@@ -42,7 +47,8 @@ SOdysseyPainterEditorVectorSceneTreeView::SOdysseyPainterEditorVectorSceneTreeVi
     , mCommandList(MakeShared<FUICommandList>())
 {
     MapActionsToCommandList();
-    FOdysseyVectorEngine::OnNotifyDelegate().AddRaw( this, &SOdysseyPainterEditorVectorSceneTreeView::OnVectorSceneNotify );
+
+    UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw(this, &SOdysseyPainterEditorVectorSceneTreeView::OnCurrentLayerChanged);
 }
 
 void
@@ -85,6 +91,8 @@ SOdysseyPainterEditorVectorSceneTreeView::Construct( const FArguments& InArgs )
         //.SelectionMode( ESelectionMode::Multi )
         .HeaderRow(headerRow)
     );
+
+    mEditor->OnSourceChanged().AddSP( this, &SOdysseyPainterEditorVectorSceneTreeView::OnSourceChanged );
 }
 
 void
@@ -163,91 +171,6 @@ SOdysseyPainterEditorVectorSceneTreeView::ExpandTree( const TSharedPtr<FVectorSc
         }
     }
 }
-
-/*
-void
-SOdysseyPainterEditorVectorSceneTreeView::Private_SelectRangeFromCurrentTo ( TSharedPtr<FVectorSceneTreeViewItem> iItem )
-{
-    if( RangeSelectionStart )
-    {
-        FOdysseyVectorObject* fromObject = RangeSelectionStart.Get()->GetVectorObject();
-        FOdysseyVectorObject* toObject = iItem.Get()->GetVectorObject();
-        FOdysseyVectorObject* vectorObject = mRootItem.Get()->GetVectorObject();
-        FOdysseyVectorCell* vectorCell = vectorObject->GetCell();
-        bool doSelect = false;
-
-        for( const TSharedPtr<FVectorSceneTreeViewItem>& rangeItem : GetItems() )
-        {
-            FOdysseyVectorObject* rangeItemObject = rangeItem.Get()->GetVectorObject();
-
-            if( ( rangeItemObject == fromObject ) || ( rangeItemObject == toObject ) )
-            {
-                if( rangeItemObject->IsSelected() == false )
-                {
-                    vectorCell->SelectObject( rangeItemObject );
-                    // Keep internal array consistent for use by other methods
-                    SelectedItems.Add( rangeItem );
-                }
-
-                doSelect = !doSelect;
-            }
-            else
-            {
-                if( doSelect )
-                {
-                    if( rangeItemObject->IsSelected() == false )
-                    {
-                        vectorCell->SelectObject( rangeItemObject );
-                        // Keep internal array consistent for use by other methods
-                        SelectedItems.Add( rangeItem );
-                    }
-                }
-            }
-        }
-    }
-}
-
-void
-SOdysseyPainterEditorVectorSceneTreeView::Private_SetItemSelection ( TSharedPtr<FVectorSceneTreeViewItem> iItem
-                                                                   , bool bShouldBeSelected
-                                                                   , bool bWasUserDirected )
-{
-    FOdysseyVectorObject* vectorObject = iItem.Get()->GetVectorObject();
-    FOdysseyVectorCell* vectorCell = vectorObject->GetCell();
-
-    if( bShouldBeSelected )
-    {
-        vectorCell->SelectObject( vectorObject );
-        // Keep internal array consistent for use by other methods
-        SelectedItems.Add( iItem );
-
-        RangeSelectionStart = iItem;
-        SelectorItem = iItem;
-    }
-    else
-    {
-        vectorCell->UnselectObject( vectorObject );
-        // Keep internal array consistent for use by other methods
-        SelectedItems.Remove( iItem );
-    }
-}
-
-void
-SOdysseyPainterEditorVectorSceneTreeView::Private_ClearSelection()
-{
-    if( mRootItem )
-    {
-        // the scene
-        FOdysseyVectorObject* vectorObject = mRootItem.Get()->GetVectorObject();
-        FOdysseyVectorCell* vectorCell = vectorObject->GetCell();
-
-        vectorCell->ClearObjectSelection();
-    }
-
-    // Keep internal array consistent for use by other methods
-    SelectedItems.Empty();
-}
-*/
 
 bool
 SOdysseyPainterEditorVectorSceneTreeView::Private_IsItemSelected( const TSharedPtr<FVectorSceneTreeViewItem>& iItem )  const
@@ -373,11 +296,8 @@ SOdysseyPainterEditorVectorSceneTreeView::OnSelectionChanged( TSharedPtr<FVector
             }
         }
 
-        scene->GetCell()->ResetHUD();
-
         scene->GetLayer()->RequestRedraw( scene->GetCell(), 0 );
-
-        FOdysseyVectorEngine::Notify( scene, retFlags );
+        scene->GetLayer()->Notify( retFlags );
     }
 }
 
@@ -462,7 +382,7 @@ SOdysseyPainterEditorVectorSceneTreeView::MapActionsToCommandList()
 }
 
 void
-SOdysseyPainterEditorVectorSceneTreeView::OnVectorSceneNotify( FOdysseyVectorGroupPaint* iScene, uint64 iSignalFlags )
+SOdysseyPainterEditorVectorSceneTreeView::OnVectorLayerNotify( FOdysseyVectorLayer* iLayer, uint64 iSignalFlags )
 {
     FOdysseyVectorGroupPaint* currentScene = mScene.Get();
 
@@ -481,13 +401,54 @@ void
 SOdysseyPainterEditorVectorSceneTreeView::ParseVectorNotifications( uint64 iSignalFlags )
 {
     if( iSignalFlags & FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW )
+    {
         Update();
+    }
 }
 
 void
 SOdysseyPainterEditorVectorSceneTreeView::OnSceneChanged()
 {
     ParseVectorNotifications(FOdysseyVectorEngine::NOTIFY_ALL);
+}
+
+void
+SOdysseyPainterEditorVectorSceneTreeView::BindLayerDelegates( UOdysseyLayerStack* iLayerStack )
+{
+    UOdysseyAnimationLayerImageVector* imageVectorLayer = Cast<UOdysseyAnimationLayerImageVector>(iLayerStack->GetCurrentLayer());
+
+    if( imageVectorLayer )
+    {
+        if( mOldVectorLayer.IsValid() )
+        {
+            mOldVectorLayer->OnNotifyDelegate().RemoveAll( this );
+        }
+
+        mOldVectorLayer = mVectorLayer;
+        mVectorLayer = imageVectorLayer->GetVectorLayer();
+
+        mVectorLayer->OnNotifyDelegate().AddSP( this, &SOdysseyPainterEditorVectorSceneTreeView::OnVectorLayerNotify );
+    }
+}
+
+void
+SOdysseyPainterEditorVectorSceneTreeView::OnSourceChanged()
+{
+    if( mEditor->GetSource() )
+    {
+        UOdysseyLayerStack* layerStack = mEditor->GetSource()->GetLayerStack();
+
+        if( layerStack )
+        {
+            BindLayerDelegates( layerStack );
+        }
+    }
+}
+
+void
+SOdysseyPainterEditorVectorSceneTreeView::OnCurrentLayerChanged( UOdysseyLayerStack* iLayerStack )
+{
+    BindLayerDelegates( iLayerStack );
 }
 
 #undef LOCTEXT_NAMESPACE

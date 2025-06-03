@@ -5,6 +5,7 @@
 #include "OdysseyVectorTag.h"
 #include "OdysseyVectorObject.h"
 #include "OdysseyVectorCell.h"
+#include "HUD/OdysseyVectorHUD.h"
 
 FOdysseyVectorLayer::~FOdysseyVectorLayer()
 {
@@ -84,6 +85,69 @@ uint32
 FOdysseyVectorLayer::GetHeight()
 {
     return mLayerInterface->GetHeight();
+}
+
+FOdysseyVectorLayer::FNotifyDelegate&
+FOdysseyVectorLayer::OnNotifyDelegate()
+{
+    return mOnNotifyDelegate;
+}
+
+std::list<IOdysseyVectorHUD*>&
+FOdysseyVectorLayer::GetHUDList()
+{
+    return mHUDList;
+}
+
+void
+FOdysseyVectorLayer::AddHUD( IOdysseyVectorHUD* iHUDObject )
+{
+    LockDrawing();
+
+    GetHUDList().push_back( iHUDObject );
+
+    UnlockDrawing();
+}
+
+void
+FOdysseyVectorLayer::RemoveHUD( IOdysseyVectorHUD* iHUDObject )
+{
+    LockDrawing();
+
+    GetHUDList().remove( iHUDObject );
+
+    UnlockDrawing();
+}
+
+void
+FOdysseyVectorLayer::ClearHUD()
+{
+    LockDrawing();
+
+    GetHUDList().clear();
+
+    UnlockDrawing();
+}
+
+void
+FOdysseyVectorLayer::ResetHUD( FOdysseyVectorGroupPaint* iScene )
+{
+    LockDrawing();
+
+    for( IOdysseyVectorHUD *hud : GetHUDList() )
+    {
+        hud->SetScene( iScene );
+        hud->Reset();
+    }
+
+    UnlockDrawing();
+}
+
+// static
+void
+FOdysseyVectorLayer::Notify( uint64 iNotifyFlags )
+{
+    OnNotifyDelegate().Broadcast( this, iNotifyFlags );
 }
 
 void

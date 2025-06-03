@@ -304,7 +304,7 @@ uint64
 UOdysseyPainterEditorVectorGridTool::PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
                                                           , const FName& iPropertyName )
 {
-    iScene->GetCell()->ResetHUD();
+    iScene->GetLayer()->ResetHUD( iScene );
 
     // redraw
     iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );

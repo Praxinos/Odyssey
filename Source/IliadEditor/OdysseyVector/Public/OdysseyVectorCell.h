@@ -97,11 +97,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorCell : public FOdysseyVectorObject
                            , uint64 iTraversalFlags );
         void GetFocusedInbetweenerTagList( std::list<FOdysseyVectorTagInbetweener*>& oFocusedInbetweenerTagList );
         void GetSelectedInbetweenerTagList( std::list<FOdysseyVectorTagInbetweener*>& oSelectedInbetweenerTagList );
-        std::list<IOdysseyVectorHUD*>& GetHUDList();
-        void AddHUD( IOdysseyVectorHUD* iHUDObject );
-        void RemoveHUD( IOdysseyVectorHUD* iHUDObject );
-        void ClearHUD();
-        void ResetHUD();
         void InvalidateRect( const ::ULIS::FRectD& iRect );
         void InvalidateRect();
         void GetSelectedVerticesFromFocusedObjects( std::vector<FOdysseyVectorVertex*>& oVertexArray );
@@ -197,7 +192,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorCell : public FOdysseyVectorObject
         FOdysseyVectorGroup* mSelectionSpace;
         std::list<FOdysseyVectorObject*> mSelectedObjectList;
         ::ULIS::FRectD mInvalidatedRect;
-        std::list<IOdysseyVectorHUD*> mHUDList;
         BLImage* mBLMask;
         bool bPendingRedraw;
 };

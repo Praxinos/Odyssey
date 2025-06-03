@@ -283,10 +283,9 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnMouseButtonUp( const FGeometry & 
 
     reply = STableRow::OnMouseButtonUp( MyGeometry, MouseEvent );
 
-    FOdysseyVectorEngine::Notify( nullptr,
-                                  FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                                //| FOdysseyPainterEditor::UI_UPDATE_TIMELINE
-                                | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD );
+    scene->GetLayer()->Notify( FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
+                            //| FOdysseyPainterEditor::UI_UPDATE_TIMELINE
+                              | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD );
 
     // request redraw
     scene->GetLayer()->RequestRedraw( scene->GetCell(), 0 );
@@ -437,9 +436,8 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnTextChanged( const FText& InText
 
     mTextBlockWidget.Get()->SetText( FText::FromString( mItem.Get()->GetVectorObject()->GetName() ) );
 
-    FOdysseyVectorEngine::Notify( itemScene,
-                                  FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                                | FOdysseyPainterEditor::UI_UPDATE_TIMELINE );
+    itemScene->GetLayer()->Notify( FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
+                                 | FOdysseyPainterEditor::UI_UPDATE_TIMELINE );
 }
 
 FReply
@@ -535,7 +533,7 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
     itemScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
     itemScene->GetLayer()->RequestRedraw( itemScene->GetCell(), 0 );
 
-    FOdysseyVectorEngine::Notify( itemScene, notificationFlags );
+    itemScene->GetLayer()->Notify( notificationFlags );
 
     return FReply::Handled();
 }
