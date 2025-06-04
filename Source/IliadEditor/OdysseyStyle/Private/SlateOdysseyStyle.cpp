@@ -155,7 +155,6 @@ FOdysseyStyleDefault::SetupGeneralStyles()
 void
 FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
 {
-#if WITH_EDITOR
     // Generic Button styles
     Set( "Button.NoPadding", FButtonStyle(FAppStyle::Get().GetWidgetStyle< FButtonStyle >( "Button" ))
         .SetNormalPadding( FMargin(0,0) )
@@ -969,8 +968,6 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set("ViewportDrawingEditor.MainTab.ModeTool.Paint", new IMAGE_BRUSH_SVG("OdysseyViewportDrawing/PaintModeTool", mIcon16x16));
 
     Set( "PaletteEditor.Tab.Colors", new IMAGE_BRUSH_SVG( "PaletteEditor/tab_colors", mIcon16x16 ) );
-
-#endif
 }
 
 
