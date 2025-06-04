@@ -33,7 +33,7 @@ UAssetDefinition_BoardSequence::GetAssetClass() const //override
 TConstArrayView<FAssetCategoryPath>
 UAssetDefinition_BoardSequence::GetAssetCategories() const //override
 {
-    static const auto Categories = { EAssetCategoryPaths::Cinematics, FAssetCategoryPath( LOCTEXT( "EPOS", "EPOS" ) ) };
+    static const auto Categories = { EAssetCategoryPaths::Cinematics, FAssetCategoryPath( LOCTEXT( "Odyssey", "Odyssey" ) ) };
     return Categories;
 }
 

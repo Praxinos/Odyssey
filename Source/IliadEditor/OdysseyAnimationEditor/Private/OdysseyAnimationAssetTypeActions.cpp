@@ -38,6 +38,8 @@ FOdysseyAnimationAssetTypeActions::GetSupportedClass() const
 uint32
 FOdysseyAnimationAssetTypeActions::GetCategories()
 {
+    //TODO: use UAssetDefinition_*** for animation asset (F***AssetTypeActions is deprecated)
+    // Then try to use the of in board/shot sequence category path (maybe store the category path in Core module for both ?)
     return mMyAssetCategory;
 }
 
