@@ -4,12 +4,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Templates/SharedPointer.h"
 #include "UObject/ObjectMacros.h"
 #include "UObject/ScriptMacros.h"
 #include "OdysseyTextureLayerStack.h"
 #include "Engine/AssetUserData.h"
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "UObject/ObjectSaveContext.h"
+#include "Palette/OdysseyPalette.h"
 
 #include "OdysseyTextureLayerStackUserData.generated.h"
 
@@ -37,4 +39,7 @@ public:
 public:
     UPROPERTY(BlueprintReadOnly, Category="Odyssey|LayerStack")
     TObjectPtr<UOdysseyTextureLayerStack> LayerStack;
+
+    UPROPERTY()
+    TArray<FOdysseyPaletteSet> Palettes;
 };

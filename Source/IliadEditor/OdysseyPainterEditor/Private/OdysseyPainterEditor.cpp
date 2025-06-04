@@ -24,6 +24,7 @@
 #include "OdysseyLayer.h"
 #include "OdysseyLayerStack.h"
 #include "OdysseyEditorLayoutBuilder.h"
+#include "OdysseyTextureLayerStackUserData.h"
 #include "OdysseyPainterEditorBrushContext.h"
 #include "OdysseyPainterEditorCommands.h"
 #include "OdysseyPainterEditorModule.h"
@@ -104,7 +105,7 @@
 #include "Framework/Commands/GenericCommands.h"
 #include "OdysseyPainterEditorToolMenuContext.h"
 #include "FileHelpers.h"
-#include "OdysseyPainterEditorPaletteSet.h"
+#include "Palette/OdysseyPalette.h"
 #include "Toolkits/AssetEditorModeUILayer.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
@@ -922,6 +923,16 @@ FOdysseyPainterEditor::GetAnimation() const
 
     TSharedPtr<FOdysseyPainterEditorAnimationSource> animationSource = StaticCastSharedPtr<FOdysseyPainterEditorAnimationSource>(mSource);
     return animationSource->GetAnimation();
+}
+
+UOdysseyTextureLayerStackUserData*
+FOdysseyPainterEditor::GetTextureUserData() const
+{
+    if (!mSource || mSource->Id() != FOdysseyPainterEditorTextureSource::StaticId())
+        return nullptr;
+
+    TSharedPtr<FOdysseyPainterEditorTextureSource> textureSource = StaticCastSharedPtr<FOdysseyPainterEditorTextureSource>(mSource);
+    return textureSource->TextureUserData();
 }
 
 UOdysseyAnimationPlayer*
@@ -3319,19 +3330,39 @@ FOdysseyPainterEditor::AddReferencedObjects(FReferenceCollector& Collector)
         Collector.AddReferencedObject(tool);
     }
 
-    for (TSharedPtr<FOdysseyPainterEditorPaletteSet> paletteSet : mPaletteSets)
+    for (TSharedPtr<FOdysseyPaletteSet> paletteSet : mPaletteSets)
     {
-        UOdysseyPalette* palette = paletteSet->GetPalette();
-        Collector.AddReferencedObject(palette);
+        Collector.AddReferencedObject(paletteSet->mPalette);
     }
 
     Collector.AddReferencedObject(mCurrentPaletteEntryColor);
 }
 
-const TArray<TSharedPtr<FOdysseyPainterEditorPaletteSet>>&
+const TArray<FOdysseyPaletteSet>
 FOdysseyPainterEditor::GetPaletteSets() const
 {
-    return mPaletteSets;
+    TArray<FOdysseyPaletteSet> paletteSets;
+    UOdysseyAnimation* animation = GetAnimation();
+    UOdysseyTextureLayerStackUserData* textureUserData = GetTextureUserData();
+    if (animation)
+    {
+    }
+    else if (textureUserData)
+    {
+        paletteSets = textureUserData->Palettes;
+    }
+
+    //Fail safe in case the user force delete a used palette while in the editor
+    for( int i = 0; i < paletteSets.Num(); i++ )
+    {
+        if( !paletteSets[i].mPalette || !paletteSets[i].mPalette->IsValidLowLevel() )
+        {
+            paletteSets.RemoveAt(i);
+            i--;
+        }
+    }
+
+    return paletteSets;
 }
 
 UOdysseyPaletteEntryColor*
@@ -3347,20 +3378,41 @@ FOdysseyPainterEditor::GetCurrentPaletteSet() const
 }
 
 void
-FOdysseyPainterEditor::AddPaletteSet(TSharedPtr<FOdysseyPainterEditorPaletteSet> iPaletteSet)
+FOdysseyPainterEditor::AddPaletteSet(FOdysseyPaletteSet& iPaletteSet)
 {
-    mPaletteSets.Add(iPaletteSet);
+    TSharedPtr<FOdysseyPainterEditorSource> source = GetSource();
+    if (!source)
+        return;
+
+    UOdysseyAnimation* animation = GetAnimation();
+    UOdysseyTextureLayerStackUserData* textureUserData = GetTextureUserData();
+    if (animation)
+    {
+    }
+    else if (textureUserData)
+    {
+        textureUserData->Palettes.Add(iPaletteSet);
+    }
 }
 
 void
-FOdysseyPainterEditor::RemovePaletteSet(TSharedPtr<FOdysseyPainterEditorPaletteSet> iPaletteSet)
+FOdysseyPainterEditor::RemovePaletteSet(FOdysseyPaletteSet& iPaletteSet)
 {
-    mPaletteSets.Remove(iPaletteSet);
+    UOdysseyAnimation* animation = GetAnimation();
+    UOdysseyTextureLayerStackUserData* textureUserData = GetTextureUserData();
+    if (animation)
+    {
+    }
+    else if (textureUserData)
+    {
+        textureUserData->Palettes.Remove(iPaletteSet);
+    }
 
+    /*
     if (mCurrentPaletteEntryColor)
     {
         bool shouldReset = !mPaletteSets.ContainsByPredicate(
-            [this](TSharedPtr<FOdysseyPainterEditorPaletteSet> iPaletteSet)
+            [this](TSharedPtr<FOdysseyPaletteSet> iPaletteSet)
             {
                 return iPaletteSet->GetPalette() == mCurrentPaletteEntryColor->GetPalette() && iPaletteSet->GetSet() == mCurrentPaletteSet;
             }
@@ -3370,11 +3422,11 @@ FOdysseyPainterEditor::RemovePaletteSet(TSharedPtr<FOdysseyPainterEditorPaletteS
             mCurrentPaletteEntryColor = nullptr;
             mCurrentPaletteSet = 0;
         }
-    }
+    }*/
 }
 
 /* void
-FOdysseyPainterEditor::SetPaletteSet(int iIndex, const FOdysseyPainterEditorPaletteSet& iPaletteSet)
+FOdysseyPainterEditor::SetPaletteSet(int iIndex, const FOdysseyPaletteSet& iPaletteSet)
 {
     if (iIndex < 0 || iIndex >= mPaletteSets.Num())
         return;

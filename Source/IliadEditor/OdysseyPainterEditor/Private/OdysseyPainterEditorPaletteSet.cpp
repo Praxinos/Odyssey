@@ -4,56 +4,56 @@
 #include "OdysseyPainterEditorPaletteSet.h"
 
 #include "Palette/OdysseyPaletteEntryColor.h"
-
-FOdysseyPainterEditorPaletteSet::FOdysseyPainterEditorPaletteSet()
+/*
+FOdysseyPaletteSet::FOdysseyPaletteSet()
     : mPalette(nullptr)
     , mSet(0)
 {
 }
 
-FOdysseyPainterEditorPaletteSet::FOdysseyPainterEditorPaletteSet(UOdysseyPalette* iPalette, int iSet)
+FOdysseyPaletteSet::FOdysseyPaletteSet(UOdysseyPalette* iPalette, int iSet)
     : mPalette(iPalette)
     , mSet(iSet)
 {
 }
 
 void
-FOdysseyPainterEditorPaletteSet::Reset()
+FOdysseyPaletteSet::Reset()
 {
     mPalette = nullptr;
     mSet = 0;
 }
 
 UOdysseyPalette*
-FOdysseyPainterEditorPaletteSet::GetPalette() const
+FOdysseyPaletteSet::GetPalette() const
 {
     return mPalette;
 }
 
 int
-FOdysseyPainterEditorPaletteSet::GetSet() const
+FOdysseyPaletteSet::GetSet() const
 {
     return mSet;
 }
 
 void
-FOdysseyPainterEditorPaletteSet::SetPalette(UOdysseyPalette* iPalette)
+FOdysseyPaletteSet::SetPalette(UOdysseyPalette* iPalette)
 {
     mPalette = iPalette;
 }
 
 void
-FOdysseyPainterEditorPaletteSet::SetSet(int iSet)
+FOdysseyPaletteSet::SetSet(int iSet)
 {
     mSet = iSet;
 }
 
 bool
-FOdysseyPainterEditorPaletteSet::operator==( const FOdysseyPainterEditorPaletteSet& iRhs ) const
+FOdysseyPaletteSet::operator==( const FOdysseyPaletteSet& iRhs ) const
 {
     return mPalette == iRhs.mPalette && mSet == iRhs.mSet;
 }
-
+*/
 /*
 
 
@@ -102,10 +102,10 @@ FOdysseyPainterEditorPaletteEntryColor::Reset()
     mSet = 0;
 }
 
-FOdysseyPainterEditorPaletteSet
+FOdysseyPaletteSet
 FOdysseyPainterEditorPaletteEntryColor::GetPaletteSet() const
 {
-    return FOdysseyPainterEditorPaletteSet(mEntry ? mEntry->GetPalette() : nullptr, mSet);
+    return FOdysseyPaletteSet(mEntry ? mEntry->GetPalette() : nullptr, mSet);
 }
 
 bool

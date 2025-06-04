@@ -20,11 +20,12 @@ class FOdysseyBrushContext;
 class FOdysseyPainterEditorExtension;
 class UOdysseyLayerStack;
 class FOdysseyMeshSelector;
+class UOdysseyTextureLayerStackUserData;
 class FOdysseyPainterEditorRasterSelection;
 class FOdysseyVectorGroupPaint;
 class FOdysseyVectorSegment;
 class FOdysseyVectorPath;
-class FOdysseyPainterEditorPaletteSet;
+struct FOdysseyPaletteSet;
 class UOdysseyPaletteEntryColor;
 class FOdysseyPainterEditorGUI;
 class FOdysseyPainterEditorFlipbookListener;
@@ -227,7 +228,8 @@ public:
     virtual const FOdysseyBrushColor&                        PaintColor() const;
 
     UOdysseyAnimation*                                       GetAnimation() const;
-    UOdysseyAnimationPlayer*                                 GetAnimationPlayer() const;
+    UOdysseyTextureLayerStackUserData*                       GetTextureUserData() const;
+    UOdysseyAnimationPlayer* GetAnimationPlayer() const;
     TSharedPtr<FOdysseyPainterEditorAnimationFlipSystem>            GetAnimationFlipSystem() const;
     TSharedRef<FOdysseyPainterEditorAnimationTimelinePosition>      GetAnimationTimelinePosition();
     EOdysseyPainterEditorColorType                           GetColorType() const;
@@ -236,13 +238,13 @@ public:
     virtual TSharedPtr<FOdysseyPainterEditorRasterSelection> RasterSelection();
     int GetCurrentFrame() const;
 
-    const TArray<TSharedPtr<FOdysseyPainterEditorPaletteSet>>& GetPaletteSets() const;
+    const TArray<FOdysseyPaletteSet> GetPaletteSets() const;
     //const FOdysseyPainterEditorPaletteEntryColor& GetPaletteCurrentColorEntry() const;
     UOdysseyPaletteEntryColor* GetCurrentPaletteColorEntry() const;
     int GetCurrentPaletteSet() const;
 
-    void AddPaletteSet(TSharedPtr<FOdysseyPainterEditorPaletteSet> iPaletteSet);
-    void RemovePaletteSet(TSharedPtr<FOdysseyPainterEditorPaletteSet> iPaletteSet);
+    void AddPaletteSet(FOdysseyPaletteSet& iPaletteSet);
+    void RemovePaletteSet(FOdysseyPaletteSet& iPaletteSet);
 
     void SetCurrentPaletteColorEntry(UOdysseyPaletteEntryColor* iEntry, int iSet);
 
@@ -426,7 +428,7 @@ protected:
 
     FName mToolbarMenuName;
 
-    TArray<TSharedPtr<FOdysseyPainterEditorPaletteSet>> mPaletteSets;
+    TArray<TSharedPtr<FOdysseyPaletteSet>> mPaletteSets;
     UOdysseyPaletteEntryColor* mCurrentPaletteEntryColor = nullptr;
     int mCurrentPaletteSet = 0;
     TSharedPtr<FOdysseyPainterEditorAnimationFlipSystem> mAnimationFlipSystem;

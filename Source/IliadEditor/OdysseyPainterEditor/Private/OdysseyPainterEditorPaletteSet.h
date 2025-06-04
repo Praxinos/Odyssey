@@ -8,28 +8,6 @@
 class UOdysseyPalette;
 class UOdysseyPaletteEntryColor;
 
-class FOdysseyPainterEditorPaletteSet
-{
-public:
-    FOdysseyPainterEditorPaletteSet();
-    FOdysseyPainterEditorPaletteSet(UOdysseyPalette* iPalette, int iSet);
-
-public:
-    bool operator==( const FOdysseyPainterEditorPaletteSet& iRhs ) const;
-
-public:
-    void Reset();
-
-    UOdysseyPalette* GetPalette() const;
-    int GetSet() const;
-
-    void SetPalette(UOdysseyPalette* iPalette);
-    void SetSet(int iSet);
-
-private:
-    UOdysseyPalette* mPalette = nullptr;
-    int mSet = 0;
-};
 
 /* class FOdysseyPainterEditorPaletteEntryColor
 {
@@ -49,7 +27,7 @@ public:
     void SetEntry(UOdysseyPaletteEntryColor* iEntry);
     void SetSet(int iSet);
 
-    FOdysseyPainterEditorPaletteSet GetPaletteSet() const;
+    FOdysseyPaletteSet GetPaletteSet() const;
 
 private:
     UOdysseyPaletteEntryColor* mEntry;
