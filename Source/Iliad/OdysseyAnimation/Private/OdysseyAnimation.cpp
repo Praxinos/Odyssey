@@ -100,15 +100,17 @@ bool UOdysseyAnimation::Validate() const
 }
 
 int
-UOdysseyAnimation::GetFrameIndexAtFrame(int iFrameIndex) const
+UOdysseyAnimation::GetFrameIndexAtFrame(int iFrame) const
 {
     int frameIndex = 0;
+    int framePos = 0;
     for (const FOdysseyAnimationFrame& frame : Frames)
     {
-        if (iFrameIndex >= frameIndex && iFrameIndex < frameIndex + frame.Exposure)
+        if ( iFrame >= framePos && iFrame < framePos + frame.Exposure)
             return frameIndex;
 
-        frameIndex += frame.Exposure;
+        framePos += frame.Exposure;
+        frameIndex++;
     }
     return INDEX_NONE;
 }
