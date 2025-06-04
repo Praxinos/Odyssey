@@ -205,6 +205,102 @@ SAboutWindow::Construct( const FArguments& iArgs )
                     .Justification( ETextJustify::Center )
                     .TextStyle(FOdysseyStyle::Get(), "Odyssey.About.SmallSubduedText" )
                 ]
+                + SVerticalBox::Slot()
+                .AutoHeight()
+                .Padding( FMargin( 0.f, 5.f ) )
+                [
+                    SNew( STextBlock )
+                    .Text( LOCTEXT( "copyright.thirdparty-label", "ThirdParty libraries: " ) )
+                    .Justification( ETextJustify::Center )
+                    .TextStyle(FOdysseyStyle::Get(), "Odyssey.About.UnderlineText" )
+                ]
+                + SVerticalBox::Slot()
+                .AutoHeight()
+                .HAlign( HAlign_Center )
+                .Padding( FMargin( 0.f, 1.f ) )
+                [
+                    SNew( SHorizontalBox )
+
+                    + SHorizontalBox::Slot()
+                    .AutoWidth()
+                    [
+                        SNew( SButton )
+                        .ButtonStyle( FAppStyle::Get(), "NoBorder" )
+                        .HAlign( HAlign_Center )
+                        .Cursor( EMouseCursor::Hand )
+                        .OnClicked_Lambda( []()
+                                            {
+                                                FPlatformProcess::LaunchURL( TEXT( "https://github.com/blend2d/blend2d" ), nullptr, nullptr );
+                                                return FReply::Handled();
+                                            } )
+                        [
+                            SNew( STextBlock )
+                            .Text( LOCTEXT( "copyright.thirdparty-blend2d", "blend2d" ) )
+                            .Justification( ETextJustify::Center )
+                            .TextStyle(FOdysseyStyle::Get(), "Odyssey.About.SmallText" )
+                        ]
+                    ]
+
+                    + SHorizontalBox::Slot()
+                    .AutoWidth()
+                    [
+                        SNew( SButton )
+                        .ButtonStyle( FAppStyle::Get(), "NoBorder" )
+                        .HAlign( HAlign_Center )
+                        .Cursor( EMouseCursor::Hand )
+                        .OnClicked_Lambda( []()
+                                           {
+                                               FPlatformProcess::LaunchURL( TEXT( "https://github.com/libharu/libharu" ), nullptr, nullptr );
+                                               return FReply::Handled();
+                                           } )
+                        [
+                            SNew( STextBlock )
+                            .Text( LOCTEXT( "copyright.thirdparty-libharu", "libharu" ) )
+                            .Justification( ETextJustify::Center )
+                            .TextStyle(FOdysseyStyle::Get(), "Odyssey.About.SmallText" )
+                        ]
+                    ]
+
+                    + SHorizontalBox::Slot()
+                    .AutoWidth()
+                    [
+                        SNew( SButton )
+                        .ButtonStyle( FAppStyle::Get(), "NoBorder" )
+                        .HAlign( HAlign_Center )
+                        .Cursor( EMouseCursor::Hand )
+                        .OnClicked_Lambda( []()
+                                           {
+                                               FPlatformProcess::LaunchURL( TEXT( "https://gitlab.com/libeigen/eigen" ), nullptr, nullptr );
+                                               return FReply::Handled();
+                                           } )
+                        [
+                            SNew( STextBlock )
+                            .Text( LOCTEXT( "copyright.thirdparty-libeigen", "libeigen" ) )
+                            .Justification( ETextJustify::Center )
+                            .TextStyle(FOdysseyStyle::Get(), "Odyssey.About.SmallText" )
+                        ]
+                    ]
+
+                    + SHorizontalBox::Slot()
+                    .AutoWidth()
+                    [
+                        SNew( SButton )
+                        .ButtonStyle( FAppStyle::Get(), "NoBorder" )
+                        .HAlign( HAlign_Center )
+                        .Cursor( EMouseCursor::Hand )
+                        .OnClicked_Lambda( []()
+                                           {
+                                               FPlatformProcess::LaunchURL( TEXT( "https://developer-support.wacom.com" ), nullptr, nullptr );
+                                               return FReply::Handled();
+                                           } )
+                        [
+                            SNew( STextBlock )
+                            .Text( LOCTEXT( "copyright.thirdparty-wintab", "Wintab" ) )
+                            .Justification( ETextJustify::Center )
+                            .TextStyle(FOdysseyStyle::Get(), "Odyssey.About.SmallText" )
+                        ]
+                    ]
+                ]
             ]
             +SVerticalBox::Slot()
             .AutoHeight()
