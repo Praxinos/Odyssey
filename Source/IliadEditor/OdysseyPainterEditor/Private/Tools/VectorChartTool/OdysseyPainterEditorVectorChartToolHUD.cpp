@@ -21,7 +21,7 @@
 
 #define INBETWEENER_INDICATOR_RADIUS 10.0f
 #define BREAKDOWN_INDICATOR_RADIUS   20.0f
-#define FONT_SIZE                    16.0f
+#define FONT_SIZE                    9.0f
 #define DEFAULT_SURFACE              (1920*1080)
 
 FOdysseyPainterEditorVectorChartToolHUD::~FOdysseyPainterEditorVectorChartToolHUD()
@@ -35,7 +35,9 @@ FOdysseyPainterEditorVectorChartToolHUD::FOdysseyPainterEditorVectorChartToolHUD
 {
     //FString fontPath = IPluginManager::Get().FindPlugin( "Odyssey" )->GetBaseDir() / TEXT( "Resources/OdysseyAssetResources/Font/LoveStruck.ttf" );
 
-    mChartFontInfo = FSlateFontInfo( LoadObject<UFont>( nullptr, TEXT("/Odyssey/Fonts/LoveStruck_Font") ), FONT_SIZE );
+    if (GEngine)
+        mChartFontInfo = FSlateFontInfo( GEngine->GetSmallFont(), FONT_SIZE );
+    /*mChartFontInfo = FSlateFontInfo( LoadObject<UFont>( nullptr, TEXT("/Odyssey/Fonts/LoveStruck_Font") ), FONT_SIZE );*/
 }
 
 void

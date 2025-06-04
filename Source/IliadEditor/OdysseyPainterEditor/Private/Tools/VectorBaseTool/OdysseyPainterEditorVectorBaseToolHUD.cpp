@@ -330,7 +330,9 @@ FOdysseyPainterEditorVectorBaseToolHUD::FOdysseyPainterEditorVectorBaseToolHUD( 
     , mY( 0.0f )
     , mPointQuadTree( nullptr )
 {
-    mFontInfo = FSlateFontInfo( LoadObject<UFont>( nullptr, TEXT("/Odyssey/Fonts/Lucida_Console_Font") ), 9 );
+    /*mFontInfo = FSlateFontInfo( LoadObject<UFont>( nullptr, TEXT("/Odyssey/Fonts/Lucida_Console_Font") ), 9 );*/
+    if (GEngine)
+        mFontInfo = FSlateFontInfo( GEngine->GetSmallFont(), 9 );
 }
 
 void
