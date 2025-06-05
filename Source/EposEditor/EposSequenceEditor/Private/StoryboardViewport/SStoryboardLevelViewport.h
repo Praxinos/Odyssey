@@ -67,7 +67,8 @@ public:
     void SetViewportWidget(const TSharedPtr<SEditorViewport>& InViewportWidget) { EditorViewportWidget = InViewportWidget; }
     void SetStoryboardLevelViewport(TSharedPtr<class SStoryboardLevelViewport> iStoryboardViewport) { StoryboardViewportWidget = iStoryboardViewport; };
 
-    virtual FMatrix CalcViewRotationMatrixForControllingActorView(const FRotator& InViewRotation) const { return CalcViewRotationMatrix( InViewRotation ); };
+    virtual FMatrix CalcViewRotationMatrixForControllingActorView(const FRotator& InViewRotation) const override;
+    virtual FMatrix CalcViewRotationMatrix(const FRotator& InViewRotation) const override;
 
     FVector2D GetNormalizedOffset() const;
     void UpdateCameraBounds();

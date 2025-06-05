@@ -512,10 +512,26 @@ FStoryboardLevelViewportClient::CalcSceneView(FSceneViewFamily* ViewFamily, cons
 
     SceneView->FOV = ViewFOV;
     SceneView->DesiredFOV = ViewFOV;
-    SceneView->ViewRotation = SceneView->ViewRotation - FRotator(0, 0, mZoomController.GetRotation());
-    //SceneView->UpdateViewMatrix(); //TODO FIX TO BE ENABLE TO ROTATE VIEWPORT
 
     return SceneView;
+}
+
+FMatrix
+FStoryboardLevelViewportClient::CalcViewRotationMatrixForControllingActorView(const FRotator& InViewRotation) const
+{
+    return CalcViewRotationMatrix( InViewRotation - FRotator(0, 0, mZoomController.GetRotation()) );
+}
+
+FMatrix
+FStoryboardLevelViewportClient::CalcViewRotationMatrix(const FRotator& InViewRotation) const
+{
+    const FViewportCameraTransform& ViewTransform = GetViewTransform();
+    if (bUsingOrbitCamera)
+    {
+        return FTranslationMatrix(ViewTransform.GetLocation()) * ViewTransform.ComputeOrbitMatrix() * FInverseRotationMatrix(FRotator(0, 0, -mZoomController.GetRotation()));
+    }
+
+    return FEditorViewportClient::CalcViewRotationMatrix(InViewRotation);
 }
 
 const FKey&
