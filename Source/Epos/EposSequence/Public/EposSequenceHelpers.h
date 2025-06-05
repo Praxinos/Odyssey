@@ -166,6 +166,8 @@ public:
     };
     static FFindOrCreateTimelineResult                  FindTimelineTrackAndSections( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iAnimationBinding, TOptional<FFrameNumber> iFrameNumber = TOptional<FFrameNumber>() );
 
+    static TArray<FFrameNumber>                         GetAllAnimationCutTimes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, EGetAnimation iAnimationSelection );
+
 public:
     struct FFindOrCreateMaterialParameterResult
     {

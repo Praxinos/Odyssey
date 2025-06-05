@@ -315,38 +315,38 @@ FBoardSequenceCustomization::BindCommands( TSharedPtr<FUICommandList> ioCommandL
     //---
 
     ioCommandList->MapAction(
-        FEposSequenceEditorCommands::Get().GotoPreviousDrawing,
+        FEposSequenceEditorCommands::Get().GotoPreviousAnimationCut,
         FExecuteAction::CreateLambda( [this]()
                                       {
                                           TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
                                           if( !sequencer )
                                               return;
-                                          BoardSequenceTools::GotoPreviousDrawing( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
+                                          BoardSequenceTools::GotoPreviousAnimationCut( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
                                       } ),
         FCanExecuteAction::CreateLambda( [this]()
                                          {
                                              TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
                                              if( !sequencer )
                                                  return false;
-                                             return BoardSequenceTools::HasPreviousDrawing( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
+                                             return BoardSequenceTools::HasPreviousAnimationCut( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
                                          } )
     );
 
     ioCommandList->MapAction(
-        FEposSequenceEditorCommands::Get().GotoNextDrawing,
+        FEposSequenceEditorCommands::Get().GotoNextAnimationCut,
         FExecuteAction::CreateLambda( [this]()
                                       {
                                           TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
                                           if( !sequencer )
                                               return;
-                                          BoardSequenceTools::GotoNextDrawing( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
+                                          BoardSequenceTools::GotoNextAnimationCut( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
                                       } ),
         FCanExecuteAction::CreateLambda( [this]()
                                          {
                                              TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
                                              if( !sequencer )
                                                  return false;
-                                             return BoardSequenceTools::HasNextDrawing( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
+                                             return BoardSequenceTools::HasNextAnimationCut( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
                                          } )
     );
 }
@@ -623,8 +623,8 @@ FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBui
 
     ToolbarBuilder.AddSeparator();
 
-    ToolbarBuilder.AddToolBarButton( FEposSequenceEditorCommands::Get().GotoPreviousDrawing );
-    ToolbarBuilder.AddToolBarButton( FEposSequenceEditorCommands::Get().GotoNextDrawing );
+    ToolbarBuilder.AddToolBarButton( FEposSequenceEditorCommands::Get().GotoPreviousAnimationCut );
+    ToolbarBuilder.AddToolBarButton( FEposSequenceEditorCommands::Get().GotoNextAnimationCut );
 
     ToolbarBuilder.AddSeparator();
 

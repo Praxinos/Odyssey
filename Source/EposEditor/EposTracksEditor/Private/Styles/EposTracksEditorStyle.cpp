@@ -87,7 +87,7 @@ FEposTracksEditorStyle::InitTracks()
     Set( "EjectCamera", new IMAGE_BRUSH_SVG( "camera-eject", Icon16x16 ) );
     Set( "SnapCameraToViewport", new IMAGE_BRUSH_SVG( "camera-snap-to-viewport", Icon16x16 ) );
 
-    Set( "CreateDrawing", new IMAGE_BRUSH_SVG( "drawing-create", Icon16x16 ) );
+    Set( "CreateAnimationCut", new IMAGE_BRUSH_SVG( "animationcut-create", Icon16x16 ) );
 
     Set( "CreateAnimation", new IMAGE_BRUSH_SVG( "animation-create.large", Icon24x16 ) );
     Set( "DetachAnimation", new IMAGE_BRUSH_SVG( "animation-detach", Icon16x16 ) );

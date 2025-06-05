@@ -752,6 +752,52 @@ ShotSequenceHelpers::FindTimelineTrackAndSections( IMovieScenePlayer& iPlayer, U
     return result;
 }
 
+//static
+TArray<FFrameNumber>
+ShotSequenceHelpers::GetAllAnimationCutTimes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, EGetAnimation iAnimationSelection )
+{
+    TArray<FFrameNumber> times;
+
+    UMovieScene* moviescene = iSequence ? iSequence->GetMovieScene() : nullptr;
+    if( !moviescene )
+        return times;
+
+    TArray<AOdysseyAnimationActor*> animations;
+    TArray<FGuid> guids;
+    int32 nb_animation = GetAllAnimations( iPlayer, iSequence, iSequenceID, iAnimationSelection, &animations, &guids );
+    if( !nb_animation )
+        return times;
+
+    for( int i = 0; i < animations.Num(); i++ )
+    {
+        AOdysseyAnimationActor* animation = animations[i];
+        FGuid guid = guids[i];
+
+        FGuid animation_component = iPlayer.FindCachedObjectId( *animation->GetRootComponent(), iSequenceID );
+        if( !animation_component.IsValid() )
+            continue;
+
+        UOdysseyAnimationTimelineTrack* track = moviescene->FindTrack<UOdysseyAnimationTimelineTrack>( animation_component );
+        if( !track )
+            continue;
+
+        for( auto section : track->GetAllSections() )
+        {
+            UOdysseyAnimationTimelineSection* section_timeline = Cast<UOdysseyAnimationTimelineSection>( section );
+            if( !section_timeline )
+                continue;
+
+            const FOdysseyAnimationCutChannel& channel = section_timeline->GetAnimationCutChannel();
+            for( auto time : channel.GetData().GetTimes() )
+                times.Add( time );
+        }
+    }
+
+    times.Sort();
+
+    return times;
+}
+
 
 bool
 FKeyOpacity::Exists()

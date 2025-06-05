@@ -303,38 +303,38 @@ FShotSequenceCustomization::BindCommands( TSharedPtr<FUICommandList> ioCommandLi
     //---
 
     ioCommandList->MapAction(
-        FEposSequenceEditorCommands::Get().GotoPreviousDrawing,
+        FEposSequenceEditorCommands::Get().GotoPreviousAnimationCut,
         FExecuteAction::CreateLambda( [this]()
                                       {
                                           TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
                                           if( !sequencer )
                                               return;
-                                          ShotSequenceTools::GotoPreviousDrawing( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
+                                          ShotSequenceTools::GotoPreviousAnimationCut( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
                                       } ),
         FCanExecuteAction::CreateLambda( [this]()
                                          {
                                              TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
                                              if( !sequencer )
                                                  return false;
-                                             return ShotSequenceTools::HasPreviousDrawing( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
+                                             return ShotSequenceTools::HasPreviousAnimationCut( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
                                          } )
     );
 
     ioCommandList->MapAction(
-        FEposSequenceEditorCommands::Get().GotoNextDrawing,
+        FEposSequenceEditorCommands::Get().GotoNextAnimationCut,
         FExecuteAction::CreateLambda( [this]()
                                       {
                                           TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
                                           if( !sequencer )
                                               return;
-                                          ShotSequenceTools::GotoNextDrawing( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
+                                          ShotSequenceTools::GotoNextAnimationCut( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
                                       } ),
         FCanExecuteAction::CreateLambda( [this]()
                                          {
                                              TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
                                              if( !sequencer )
                                                  return false;
-                                             return ShotSequenceTools::HasNextDrawing( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
+                                             return ShotSequenceTools::HasNextAnimationCut( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
                                          } )
     );
 }
@@ -397,8 +397,8 @@ FShotSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuil
 
     ToolbarBuilder.AddSeparator();
 
-    ToolbarBuilder.AddToolBarButton( FEposSequenceEditorCommands::Get().GotoPreviousDrawing );
-    ToolbarBuilder.AddToolBarButton( FEposSequenceEditorCommands::Get().GotoNextDrawing );
+    ToolbarBuilder.AddToolBarButton( FEposSequenceEditorCommands::Get().GotoPreviousAnimationCut );
+    ToolbarBuilder.AddToolBarButton( FEposSequenceEditorCommands::Get().GotoNextAnimationCut );
 
     ToolbarBuilder.AddSeparator();
 

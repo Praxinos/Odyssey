@@ -360,7 +360,7 @@ public:
     /**
     *  Go to the previous camera position in the board section
     *
-    * @param ISequencer     iSequencer to find the previous drawing.
+    * @param ISequencer     iSequencer to find the previous camera position.
     * @param FFrameNumber   iFrameNumber to get the board section.
     */
     static void GotoPreviousCameraPosition( ISequencer* iSequencer, FFrameNumber iFrameNumber );
@@ -368,7 +368,7 @@ public:
     /**
     *  Is there a previous camera position in the board section ?
     *
-    * @param ISequencer     iSequencer to find the previous drawing.
+    * @param ISequencer     iSequencer to find the previous camera position.
     * @param FFrameNumber   iFrameNumber to get the board section.
     */
     static bool HasPreviousCameraPosition( ISequencer* iSequencer, FFrameNumber iFrameNumber );
@@ -376,7 +376,7 @@ public:
     /**
     *  Go to the next camera position in the board section
     *
-    * @param ISequencer     iSequencer to find the next drawing.
+    * @param ISequencer     iSequencer to find the next camera position.
     * @param FFrameNumber   iFrameNumber to get the board section.
     */
     static void GotoNextCameraPosition( ISequencer* iSequencer, FFrameNumber iFrameNumber );
@@ -384,7 +384,7 @@ public:
     /**
     *  Is there a next camera position in the board section ?
     *
-    * @param ISequencer     iSequencer to find the next drawing.
+    * @param ISequencer     iSequencer to find the next camera position.
     * @param FFrameNumber   iFrameNumber to get the board section.
     */
     static bool HasNextCameraPosition( ISequencer* iSequencer, FFrameNumber iFrameNumber );
@@ -550,39 +550,39 @@ public:
     */
     static void SelectMultiAnimation( ISequencer* iSequencer, UMovieSceneSubSection* iSubSection, FGuid iAnimationBinding );
 
-// Inside EposSequenceTools_Drawing
+// Inside EposSequenceTools_AnimationCut
 public:
     /**
-    *  Go to the previous drawing in the board section
+    *  Go to the previous animation cut in the board section
     *
-    * @param ISequencer     iSequencer to find the previous drawing.
+    * @param ISequencer     iSequencer to find the previous animation cut.
     * @param FFrameNumber   iFrameNumber to get the board section.
     */
-    static void GotoPreviousDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber );
+    static void GotoPreviousAnimationCut( ISequencer* iSequencer, FFrameNumber iFrameNumber );
 
     /**
-    *  Is there a previous drawing in the board section ?
+    *  Is there a previous animation cut in the board section ?
     *
-    * @param ISequencer     iSequencer to find the previous drawing.
+    * @param ISequencer     iSequencer to find the previous animation cut.
     * @param FFrameNumber   iFrameNumber to get the board section.
     */
-    static bool HasPreviousDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber );
+    static bool HasPreviousAnimationCut( ISequencer* iSequencer, FFrameNumber iFrameNumber );
 
     /**
-    *  Go to the next drawing in the board section
+    *  Go to the next animation cut in the board section
     *
-    * @param ISequencer     iSequencer to find the next drawing.
+    * @param ISequencer     iSequencer to find the next animation cut.
     * @param FFrameNumber   iFrameNumber to get the board section.
     */
-    static void GotoNextDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber );
+    static void GotoNextAnimationCut( ISequencer* iSequencer, FFrameNumber iFrameNumber );
 
     /**
-    *  Is there a next drawing in the board section ?
+    *  Is there a next animation cut in the board section ?
     *
-    * @param ISequencer     iSequencer to find the next drawing.
+    * @param ISequencer     iSequencer to find the next animation cut.
     * @param FFrameNumber   iFrameNumber to get the board section.
     */
-    static bool HasNextDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber );
+    static bool HasNextAnimationCut( ISequencer* iSequencer, FFrameNumber iFrameNumber );
 
 // Inside EposSequenceTools_Opacity
 public:
@@ -816,29 +816,29 @@ private:
     static AOdysseyAnimationActor* SpawnAnimation( UWorld* iWorld, ACineCameraActor* iCamera, float iFocusDistance, float iSafeMargin, FVector2D iRelativeScaling );
     static AOdysseyAnimationActor* SpawnAndBindAnimation( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iCameraGuid, ACineCameraActor* iCamera, FFrameNumber iFrameNumber, const FAnimationArgs& iAnimationArgs, FGuid* oGuid );
 
-// Inside EposSequenceTools_Drawing
+// Inside EposSequenceTools_AnimationCut
 public:
     /**
-    *  Go to the previous drawing
+    *  Go to the previous animation cut
     *
-    * @param ISequencer iSequencer to add a drawing.
+    * @param ISequencer iSequencer to add a animation cut.
     */
-    static void GotoPreviousDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber );
+    static void GotoPreviousAnimationCut( ISequencer* iSequencer, FFrameNumber iFrameNumber );
 
-    static bool HasPreviousDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber );
+    static bool HasPreviousAnimationCut( ISequencer* iSequencer, FFrameNumber iFrameNumber );
 
     /**
-    *  Go to the next drawing
+    *  Go to the next animation cut
     *
-    * @param ISequencer iSequencer to add a drawing.
+    * @param ISequencer iSequencer to add a animation cut.
     */
-    static void GotoNextDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber );
+    static void GotoNextAnimationCut( ISequencer* iSequencer, FFrameNumber iFrameNumber );
 
-    static bool HasNextDrawing( ISequencer* iSequencer, FFrameNumber iFrameNumber );
+    static bool HasNextAnimationCut( ISequencer* iSequencer, FFrameNumber iFrameNumber );
 
 private:
-    static void GotoPreviousDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber );
-    static void GotoNextDrawing( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber );
+    static void GotoPreviousAnimationCut( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber );
+    static void GotoNextAnimationCut( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber );
 
 // Inside EposSequenceTools_Opacity
 public:
