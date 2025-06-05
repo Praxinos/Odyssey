@@ -52,6 +52,16 @@ UOdysseyLayer::PostInitProperties()
 }
 
 void
+UOdysseyLayer::PostDuplicate(EDuplicateMode::Type iDuplicateMode)
+{
+    Super::PostDuplicate(iDuplicateMode);
+    for (UOdysseyLayer* child : Children)
+    {
+        child->Parent = this;
+    }
+}
+
+void
 UOdysseyLayer::InvalidateCellsFrameRanges()
 {
     mCellsFrameRanges.Empty();

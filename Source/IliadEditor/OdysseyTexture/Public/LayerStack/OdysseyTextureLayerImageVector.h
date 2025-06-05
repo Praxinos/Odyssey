@@ -53,7 +53,7 @@ public:
     //UOdysseyLayer overrides
     virtual void PostInitProperties() override;
     virtual void PostLoad() override;
-    virtual void PostDuplicate(bool bDuplicateForPIE) override;
+    virtual void PostDuplicate(EDuplicateMode::Type iDuplicateMode) override;
     virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
     virtual void PreSave(FObjectPreSaveContext SaveContext) override;
     virtual void Merge(const TArray<UOdysseyLayer*>& Layers) override;

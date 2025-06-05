@@ -292,6 +292,7 @@ public:
 #endif
 
     virtual void PostInitProperties() override;
+    virtual void PostDuplicate(EDuplicateMode::Type iDuplicateMode) override;
     virtual TArray<FGuid> GetRenderingComposition(uint64 iRenderType, int iFrame) const override;
     virtual FIntRect GetDefaultRenderRect() const override;
     virtual FInt32Range GetFrameRange() const override;

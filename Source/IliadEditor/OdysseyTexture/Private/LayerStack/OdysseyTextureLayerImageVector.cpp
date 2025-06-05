@@ -201,9 +201,9 @@ UOdysseyTextureLayerImageVector::GetBlock() const
 }
 
 void
-UOdysseyTextureLayerImageVector::PostDuplicate(bool bDuplicateForPIE)
+UOdysseyTextureLayerImageVector::PostDuplicate(EDuplicateMode::Type iDuplicateMode)
 {
-    Super::PostDuplicate(bDuplicateForPIE);
+    Super::PostDuplicate(iDuplicateMode);
 
     UTexture2D* texture = GetTexture();
     if( !texture || texture->Source.GetFormat() == TSF_Invalid )
