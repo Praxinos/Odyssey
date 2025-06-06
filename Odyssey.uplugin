@@ -10,13 +10,13 @@
     "CreatedBy": "Praxinos",
     "CreatedByURL": "https://praxinos.coop",
     "DocsURL": "https://praxinos.coop/odyssey-user-doc",
-    "MarketplaceURL": "",
     "SupportURL": "https://praxinos.coop/contact",
     "CanContainContent": true,
     "IsBetaVersion": false,
     "IsExperimentalVersion": false,
     "Installed": false,
     "EnabledByDefault": true,
+    "FabURL": "com.epicgames.launcher://ue/Fab/product/c2a71aa9-998c-4286- 9d5b-df91d9cc4034",
     "LocalizationTargets": [
         {
             "Name": "Epos",
