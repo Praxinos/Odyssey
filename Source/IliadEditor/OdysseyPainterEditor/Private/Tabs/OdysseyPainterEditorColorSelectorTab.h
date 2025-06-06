@@ -32,7 +32,7 @@ protected:
     // Widget Getters
     ::ULIS::FColor GetRawColor() const;
 
-    TArray<FOdysseyPaletteSet> GetPaletteSets() const;
+    TArray<UOdysseyPaletteSet*> GetPaletteSets() const;
     UOdysseyPaletteEntryColor* GetCurrentPaletteColorEntry() const;
     int GetCurrentPaletteSet() const;
 
@@ -56,9 +56,9 @@ protected:
     // Event Listeners
     void OnColorChanged( eOdysseyEventState::Type iEventState, const ::ULIS::FColor& iColor );
 
-    //void OnPaletteSetChanged(int iIndex, FOdysseyPaletteSet iPaletteSet);
-    void OnAddPaletteSet(FOdysseyPaletteSet& iPaletteSet);
-    void OnRemovePaletteSet(FOdysseyPaletteSet& iPaletteSet);
+    void OnPaletteSetChanged(int iIndex, UOdysseyPaletteSet* iPaletteSet);
+    void OnAddPaletteSet(UOdysseyPalette* iPalette);
+    void OnRemovePaletteSet(UOdysseyPaletteSet* iPaletteSet);
     void OnPaletteCurrentColorEntryChanged(UOdysseyPaletteEntryColor* iEntry, int iSet);
 
     FReply OnColorWheelExpanderArrowClicked();

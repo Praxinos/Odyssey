@@ -10,25 +10,13 @@
 
 #include "OdysseyPalette.generated.h"
 
-USTRUCT()
-struct ODYSSEYPALETTE_API FOdysseyPaletteSet
+UCLASS()
+class ODYSSEYPALETTE_API UOdysseyPaletteSet : public UObject
 {
     GENERATED_BODY()
 
-    FOdysseyPaletteSet()
-    {
-        mPalette = nullptr;
-        mSet = 0;
-    }
-
-    FOdysseyPaletteSet(TObjectPtr<UOdysseyPalette> iPalette, int iSet)
-    {
-        mPalette = iPalette;
-        mSet = iSet;
-    }
-
     bool
-    operator==(const FOdysseyPaletteSet& iRhs) const
+    operator==(const UOdysseyPaletteSet& iRhs) const
     {
         return mPalette == iRhs.mPalette && mSet == iRhs.mSet;
     }

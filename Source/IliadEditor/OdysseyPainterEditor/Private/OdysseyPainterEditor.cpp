@@ -3330,22 +3330,23 @@ FOdysseyPainterEditor::AddReferencedObjects(FReferenceCollector& Collector)
         Collector.AddReferencedObject(tool);
     }
 
-    for (TSharedPtr<FOdysseyPaletteSet> paletteSet : mPaletteSets)
+    /*for (TSharedPtr<FOdysseyPaletteSet> paletteSet : mPaletteSets)
     {
         Collector.AddReferencedObject(paletteSet->mPalette);
-    }
+    }*/
 
     Collector.AddReferencedObject(mCurrentPaletteEntryColor);
 }
 
-const TArray<FOdysseyPaletteSet>
+const TArray<UOdysseyPaletteSet*>
 FOdysseyPainterEditor::GetPaletteSets() const
 {
-    TArray<FOdysseyPaletteSet> paletteSets;
+    TArray<UOdysseyPaletteSet*> paletteSets;
     UOdysseyAnimation* animation = GetAnimation();
     UOdysseyTextureLayerStackUserData* textureUserData = GetTextureUserData();
     if (animation)
     {
+        paletteSets = animation->Palettes;
     }
     else if (textureUserData)
     {
@@ -3355,7 +3356,7 @@ FOdysseyPainterEditor::GetPaletteSets() const
     //Fail safe in case the user force delete a used palette while in the editor
     for( int i = 0; i < paletteSets.Num(); i++ )
     {
-        if( !paletteSets[i].mPalette || !paletteSets[i].mPalette->IsValidLowLevel() )
+        if( !paletteSets[i]->mPalette || !paletteSets[i]->mPalette->IsValidLowLevel() )
         {
             paletteSets.RemoveAt(i);
             i--;
@@ -3378,7 +3379,7 @@ FOdysseyPainterEditor::GetCurrentPaletteSet() const
 }
 
 void
-FOdysseyPainterEditor::AddPaletteSet(FOdysseyPaletteSet& iPaletteSet)
+FOdysseyPainterEditor::AddPaletteSet(UOdysseyPalette* iPalette)
 {
     TSharedPtr<FOdysseyPainterEditorSource> source = GetSource();
     if (!source)
@@ -3388,33 +3389,43 @@ FOdysseyPainterEditor::AddPaletteSet(FOdysseyPaletteSet& iPaletteSet)
     UOdysseyTextureLayerStackUserData* textureUserData = GetTextureUserData();
     if (animation)
     {
+        UOdysseyPaletteSet* paletteSet = NewObject<UOdysseyPaletteSet>(animation);
+        paletteSet->mPalette = iPalette;
+        paletteSet->mSet = 0;
+        animation->Palettes.Add(paletteSet);
     }
     else if (textureUserData)
     {
-        textureUserData->Palettes.Add(iPaletteSet);
+        UOdysseyPaletteSet* paletteSet = NewObject<UOdysseyPaletteSet>(textureUserData);
+        paletteSet->mPalette = iPalette;
+        paletteSet->mSet = 0;
+        textureUserData->Palettes.Add(paletteSet);
     }
 }
 
 void
-FOdysseyPainterEditor::RemovePaletteSet(FOdysseyPaletteSet& iPaletteSet)
+FOdysseyPainterEditor::RemovePaletteSet(UOdysseyPaletteSet* iPaletteSet)
 {
     UOdysseyAnimation* animation = GetAnimation();
     UOdysseyTextureLayerStackUserData* textureUserData = GetTextureUserData();
+    TArray<UOdysseyPaletteSet*> paletteSets;
     if (animation)
     {
+        animation->Palettes.Remove(iPaletteSet);
+        paletteSets = animation->Palettes;
     }
     else if (textureUserData)
     {
         textureUserData->Palettes.Remove(iPaletteSet);
+        paletteSets = textureUserData->Palettes;
     }
 
-    /*
     if (mCurrentPaletteEntryColor)
     {
-        bool shouldReset = !mPaletteSets.ContainsByPredicate(
-            [this](TSharedPtr<FOdysseyPaletteSet> iPaletteSet)
+        bool shouldReset = !paletteSets.ContainsByPredicate(
+            [this](const UOdysseyPaletteSet* iPaletteSet)
             {
-                return iPaletteSet->GetPalette() == mCurrentPaletteEntryColor->GetPalette() && iPaletteSet->GetSet() == mCurrentPaletteSet;
+                return iPaletteSet->mPalette == mCurrentPaletteEntryColor->GetPalette() && iPaletteSet->mSet == mCurrentPaletteSet;
             }
         );
         if (shouldReset)
@@ -3422,30 +3433,8 @@ FOdysseyPainterEditor::RemovePaletteSet(FOdysseyPaletteSet& iPaletteSet)
             mCurrentPaletteEntryColor = nullptr;
             mCurrentPaletteSet = 0;
         }
-    }*/
-}
-
-/* void
-FOdysseyPainterEditor::SetPaletteSet(int iIndex, const FOdysseyPaletteSet& iPaletteSet)
-{
-    if (iIndex < 0 || iIndex >= mPaletteSets.Num())
-        return;
-
-    mPaletteSets[iIndex] = iPaletteSet;
-
-    if (mPaletteCurrentEntryColor.GetEntry() && !mPaletteSets.Contains(mPaletteCurrentEntryColor.GetPaletteSet()))
-    {
-        UOdysseyPalette* palette = mPaletteSets[iIndex].GetPalette();
-        if (palette->ContainsEntry(mPaletteCurrentEntryColor.GetEntry()))
-        {
-            SetPaletteCurrentColorEntry(FOdysseyPainterEditorPaletteEntryColor(mPaletteCurrentEntryColor.GetEntry(), mPaletteSets[iIndex].GetSet()));
-        }
-        else
-        {
-            mPaletteCurrentEntryColor.Reset();
-        }
     }
-} */
+}
 
 void
 FOdysseyPainterEditor::SetCurrentPaletteColorEntry(UOdysseyPaletteEntryColor* iEntry, int iSet)
@@ -3468,8 +3457,28 @@ FOdysseyPainterEditor::SetCurrentPaletteColorEntry(UOdysseyPaletteEntryColor* iE
         //PATCH: should be automatic in the new drawing Tool, fix it asap
         FOdysseyObjectEditorUtils::SetPropertyValue(GetRasterDrawingTool()->GetBrushOptions(), GET_MEMBER_NAME_CHECKED(UOdysseyBrushOptions, Color), mPaintColor);
     }
+
     mCurrentPaletteEntryColor = iEntry;
     mCurrentPaletteSet = iSet;
+
+    UOdysseyAnimation* animation = GetAnimation();
+    UOdysseyTextureLayerStackUserData* textureUserData = GetTextureUserData();
+    TArray<UOdysseyPaletteSet*> paletteSets;
+    if (animation)
+    {
+        paletteSets = animation->Palettes;
+    }
+    else if (textureUserData)
+    {
+        paletteSets = textureUserData->Palettes;
+    }
+
+    for( int i = 0; i < paletteSets.Num(); i++)
+    {
+        if (paletteSets[i]->mPalette == palette)
+            paletteSets[i]->mSet = iSet;
+    }
+
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -25,7 +25,8 @@ class FOdysseyPainterEditorRasterSelection;
 class FOdysseyVectorGroupPaint;
 class FOdysseyVectorSegment;
 class FOdysseyVectorPath;
-struct FOdysseyPaletteSet;
+class UOdysseyPalette;
+class UOdysseyPaletteSet;
 class UOdysseyPaletteEntryColor;
 class FOdysseyPainterEditorGUI;
 class FOdysseyPainterEditorFlipbookListener;
@@ -238,13 +239,13 @@ public:
     virtual TSharedPtr<FOdysseyPainterEditorRasterSelection> RasterSelection();
     int GetCurrentFrame() const;
 
-    const TArray<FOdysseyPaletteSet> GetPaletteSets() const;
+    const TArray<UOdysseyPaletteSet*> GetPaletteSets() const;
     //const FOdysseyPainterEditorPaletteEntryColor& GetPaletteCurrentColorEntry() const;
     UOdysseyPaletteEntryColor* GetCurrentPaletteColorEntry() const;
     int GetCurrentPaletteSet() const;
 
-    void AddPaletteSet(FOdysseyPaletteSet& iPaletteSet);
-    void RemovePaletteSet(FOdysseyPaletteSet& iPaletteSet);
+    void AddPaletteSet(UOdysseyPalette* iPalette);
+    void RemovePaletteSet(UOdysseyPaletteSet* iPaletteSet);
 
     void SetCurrentPaletteColorEntry(UOdysseyPaletteEntryColor* iEntry, int iSet);
 
@@ -428,7 +429,6 @@ protected:
 
     FName mToolbarMenuName;
 
-    TArray<TSharedPtr<FOdysseyPaletteSet>> mPaletteSets;
     UOdysseyPaletteEntryColor* mCurrentPaletteEntryColor = nullptr;
     int mCurrentPaletteSet = 0;
     TSharedPtr<FOdysseyPainterEditorAnimationFlipSystem> mAnimationFlipSystem;

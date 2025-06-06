@@ -110,12 +110,12 @@ void SOdysseyPainterEditorPaletteSetList::Construct(const FArguments& InArgs)
 void
 SOdysseyPainterEditorPaletteSetList::OnPaletteHierarchyChanged(UOdysseyPalette* iPalette)
 {
-    TArray<FOdysseyPaletteSet> paletteSets = mPaletteSets.Get();
+    TArray<UOdysseyPaletteSet*> paletteSets = mPaletteSets.Get();
 
     bool needRebuild = paletteSets.ContainsByPredicate(
-        [iPalette](const FOdysseyPaletteSet& iPaletteSet)
+        [iPalette](const UOdysseyPaletteSet* iPaletteSet)
         {
-            return iPaletteSet.mPalette == iPalette;
+            return iPaletteSet->mPalette == iPalette;
         }
     );
 
@@ -140,8 +140,7 @@ SOdysseyPainterEditorPaletteSetList::OnGetAddPaletteMenuContent()
             [this](const FAssetData& AssetData)
             {
                 UOdysseyPalette* palette = Cast<UOdysseyPalette>(AssetData.GetAsset());
-                FOdysseyPaletteSet paletteSet = FOdysseyPaletteSet(palette, 0);
-                mOnAddPaletteSet.ExecuteIfBound(paletteSet);
+                mOnAddPaletteSet.ExecuteIfBound(palette);
             }
         ),
         FSimpleDelegate::CreateLambda(
@@ -189,22 +188,22 @@ SOdysseyPainterEditorPaletteSetList::OnGenerateRow( TSharedPtr<FOdysseyPainterEd
             .Palette_Lambda(
                 [this, iItem]()
                 {
-                    return iItem->mPaletteSet.mPalette;
+                    return iItem->mPaletteSet->mPalette;
                 }
             )
             .Set_Lambda(
                 [this, iItem]()
                 {
-                    return iItem->mPaletteSet.mSet;
+                    return iItem->mPaletteSet->mSet;
                 }
             )
             .OnSetChanged_Lambda(
                 [this, iItem](int iSet)
                 {
-                    iItem->mPaletteSet.mSet = iSet;
+                    iItem->mPaletteSet->mSet = iSet;
 
                     UOdysseyPaletteEntryColor* entryColor = mCurrentColorEntry.Get();
-                    if (entryColor && entryColor->GetPalette() == iItem->mPaletteSet.mPalette)
+                    if (entryColor && entryColor->GetPalette() == iItem->mPaletteSet->mPalette)
                         mOnCurrentColorEntryChanged.ExecuteIfBound(entryColor, iSet);
                 }
             )
@@ -231,7 +230,7 @@ SOdysseyPainterEditorPaletteSetList::OnGenerateRow( TSharedPtr<FOdysseyPainterEd
                 .Set_Lambda(
                     [this, iItem]()
                     {
-                        return iItem->mPaletteSet.mSet;
+                        return iItem->mPaletteSet->mSet;
                     }
                 )
                 .IsCurrent_Lambda(
@@ -242,7 +241,7 @@ SOdysseyPainterEditorPaletteSetList::OnGenerateRow( TSharedPtr<FOdysseyPainterEd
                             return false;
 
                         int currentEntrySet = mCurrentSet.Get();
-                        int entrySet = iItem->mPaletteSet.mSet;
+                        int entrySet = iItem->mPaletteSet->mSet;
                         return currentEntryColor == iItem->mEntry && currentEntrySet == entrySet;
                     }
                 );
@@ -314,11 +313,11 @@ SOdysseyPainterEditorPaletteSetList::FindEntryItem(UOdysseyPaletteEntry* iEntry,
 void
 SOdysseyPainterEditorPaletteSetList::RebuildItems()
 {
-    TArray<FOdysseyPaletteSet> paletteSets = mPaletteSets.Get();
+    TArray<UOdysseyPaletteSet*> paletteSets = mPaletteSets.Get();
     TArray<TSharedPtr<FOdysseyPainterEditorPaletteTreeViewItem>> rootItems;
     for (int i = 0; i < paletteSets.Num(); i++)
     {
-        FOdysseyPaletteSet paletteSet = mPaletteSets.Get()[i];
+        UOdysseyPaletteSet* paletteSet = mPaletteSets.Get()[i];
         bool setFound = false;
         for (int j = 0; j < mItemsSource->Num(); j++)
         {
@@ -344,7 +343,7 @@ SOdysseyPainterEditorPaletteSetList::RebuildItems()
     for (int i = 0; i < rootItems.Num(); i++)
     {
         TSharedPtr<FOdysseyPainterEditorPaletteTreeViewItem> rootItem = rootItems[i];
-        UOdysseyPalette* palette = rootItem->mPaletteSet.mPalette;
+        UOdysseyPalette* palette = rootItem->mPaletteSet->mPalette;
         TArray<UOdysseyPaletteEntry*> rootEntries = palette->GetRootEntries();
         TArray<TSharedPtr<FOdysseyPainterEditorPaletteTreeViewItem>> children;
         for (int j = 0; j < rootEntries.Num(); j++)
@@ -388,7 +387,7 @@ SOdysseyPainterEditorPaletteSetList::OnCurrentColorEntryChanged()
     bool isAlreadySelected = mTreeView->GetSelectedItems().ContainsByPredicate(
         [this, entry](TSharedPtr<FOdysseyPainterEditorPaletteTreeViewItem> iItem)
         {
-            return iItem->mEntry == entry && iItem->mPaletteSet.mSet == mCurrentSet.Get();
+            return iItem->mEntry == entry && iItem->mPaletteSet->mSet == mCurrentSet.Get();
         }
     );
 
@@ -398,7 +397,7 @@ SOdysseyPainterEditorPaletteSetList::OnCurrentColorEntryChanged()
     for (TSharedPtr<FOdysseyPainterEditorPaletteTreeViewItem> item : *mItemsSource)
     {
         TSharedPtr<FOdysseyPainterEditorPaletteTreeViewItem> entryItem = FindEntryItem(entry, item->mChildren);
-        if (entryItem && mCurrentSet.Get() == entryItem->mPaletteSet.mSet)
+        if (entryItem && mCurrentSet.Get() == entryItem->mPaletteSet->mSet)
         {
             mTreeView->SetItemSelection({entryItem}, true);
             return;
@@ -427,11 +426,11 @@ SOdysseyPainterEditorPaletteSetList::OnSelectionChanged(TSharedPtr<FOdysseyPaint
             return;
         }
 
-        if (iItem->mEntry == entry && iItem->mPaletteSet.mSet == mCurrentSet.Get())
+        if (iItem->mEntry == entry && iItem->mPaletteSet->mSet == mCurrentSet.Get())
             return;
 
         UOdysseyPaletteEntryColor* entryColor = Cast<UOdysseyPaletteEntryColor>(iItem->mEntry);
-        int set = iItem->mPaletteSet.mSet;
+        int set = iItem->mPaletteSet->mSet;
         mOnCurrentColorEntryChanged.ExecuteIfBound(entryColor, set);
     }
     else
@@ -446,7 +445,7 @@ SOdysseyPainterEditorPaletteSetList::OnSelectionChanged(TSharedPtr<FOdysseyPaint
         }
 
         UOdysseyPaletteEntryColor* entryColor = Cast<UOdysseyPaletteEntryColor>(iItem->mEntry);
-        int set = iItem->mPaletteSet.mSet;
+        int set = iItem->mPaletteSet->mSet;
         mOnCurrentColorEntryChanged.ExecuteIfBound(entryColor, set);
     }
 }

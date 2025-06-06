@@ -12,7 +12,7 @@ class UOdysseyPaletteEntry;
 struct FOdysseyPainterEditorPaletteTreeViewItem
 {
     bool mIsPalette;
-    FOdysseyPaletteSet mPaletteSet;
+    UOdysseyPaletteSet* mPaletteSet;
     UOdysseyPaletteEntry* mEntry = nullptr;
     TArray<TSharedPtr<FOdysseyPainterEditorPaletteTreeViewItem>> mChildren;
 };
@@ -26,9 +26,9 @@ class SOdysseyPainterEditorPaletteSetList : public SCompoundWidget
 
 public:
     DECLARE_DELEGATE_TwoParams(FOnCurrentColorEntryChanged, UOdysseyPaletteEntryColor*, int)
-    DECLARE_DELEGATE_OneParam(FOnAddPaletteSet, FOdysseyPaletteSet&)
-    DECLARE_DELEGATE_OneParam(FOnRemovePaletteSet, FOdysseyPaletteSet&)
-    //DECLARE_DELEGATE_TwoParams(FOnPaletteSetChanged, int, FOdysseyPaletteSet )
+    DECLARE_DELEGATE_OneParam(FOnAddPaletteSet, UOdysseyPalette*)
+    DECLARE_DELEGATE_OneParam(FOnRemovePaletteSet, UOdysseyPaletteSet*)
+    DECLARE_DELEGATE_TwoParams(FOnPaletteSetChanged, int, UOdysseyPaletteSet* )
 
 public:
     ~SOdysseyPainterEditorPaletteSetList();
@@ -36,12 +36,12 @@ public:
 
     SLATE_BEGIN_ARGS(SOdysseyPainterEditorPaletteSetList)
         {}
-        SLATE_ATTRIBUTE(TArray<FOdysseyPaletteSet>, PaletteSets)
+        SLATE_ATTRIBUTE(TArray<UOdysseyPaletteSet*>, PaletteSets)
         SLATE_ATTRIBUTE(UOdysseyPaletteEntryColor*, CurrentColorEntry)
         SLATE_ATTRIBUTE(int, CurrentSet)
         SLATE_EVENT(FOnAddPaletteSet, OnAddPaletteSet)
         SLATE_EVENT(FOnRemovePaletteSet, OnRemovePaletteSet)
-        //SLATE_EVENT(FOnPaletteSetChanged, OnPaletteSetChanged)
+        SLATE_EVENT(FOnPaletteSetChanged, OnPaletteSetChanged)
         SLATE_EVENT(FOnCurrentColorEntryChanged, OnCurrentColorEntryChanged)
     SLATE_END_ARGS()
 
@@ -67,7 +67,7 @@ private:
 
 private:
     // Private data
-    TSlateAttribute<TArray<FOdysseyPaletteSet>> mPaletteSets;
+    TSlateAttribute<TArray<UOdysseyPaletteSet*>> mPaletteSets;
     TSlateAttribute<UOdysseyPaletteEntryColor*> mCurrentColorEntry;
     TAttribute<int> mCurrentSet;
     TSharedPtr<UE::Slate::Containers::TObservableArray<TSharedPtr<FOdysseyPainterEditorPaletteTreeViewItem>>> mItemsSource;

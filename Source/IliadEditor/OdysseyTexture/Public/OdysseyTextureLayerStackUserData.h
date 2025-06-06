@@ -41,5 +41,5 @@ public:
     TObjectPtr<UOdysseyTextureLayerStack> LayerStack;
 
     UPROPERTY()
-    TArray<FOdysseyPaletteSet> Palettes;
+    TArray<UOdysseyPaletteSet*> Palettes;
 };

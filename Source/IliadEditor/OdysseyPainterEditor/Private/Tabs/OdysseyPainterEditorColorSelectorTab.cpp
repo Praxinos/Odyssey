@@ -244,7 +244,7 @@ FOdysseyPainterEditorColorSelectorTab::CreateWidget()
                     .PaletteSets(this, &FOdysseyPainterEditorColorSelectorTab::GetPaletteSets)
                     .CurrentColorEntry(this, &FOdysseyPainterEditorColorSelectorTab::GetCurrentPaletteColorEntry)
                     .CurrentSet(this, &FOdysseyPainterEditorColorSelectorTab::GetCurrentPaletteSet)
-                    //.OnPaletteSetChanged(this, &FOdysseyPainterEditorColorSelectorTab::OnPaletteSetChanged)
+                    .OnPaletteSetChanged(this, &FOdysseyPainterEditorColorSelectorTab::OnPaletteSetChanged)
                     .OnAddPaletteSet(this, &FOdysseyPainterEditorColorSelectorTab::OnAddPaletteSet)
                     .OnRemovePaletteSet(this, &FOdysseyPainterEditorColorSelectorTab::OnRemovePaletteSet)
                     .OnCurrentColorEntryChanged(this, &FOdysseyPainterEditorColorSelectorTab::OnPaletteCurrentColorEntryChanged)
@@ -378,7 +378,7 @@ FOdysseyPainterEditorColorSelectorTab::GetColorPaletteVisibility() const
 }
 
 
-TArray<FOdysseyPaletteSet>
+TArray<UOdysseyPaletteSet*>
 FOdysseyPainterEditorColorSelectorTab::GetPaletteSets() const
 {
     return mEditor->GetPaletteSets();
@@ -441,23 +441,24 @@ FOdysseyPainterEditorColorSelectorTab::OnColorTypeChanged(EOdysseyPainterEditorC
 }
 
 void
-FOdysseyPainterEditorColorSelectorTab::OnAddPaletteSet(FOdysseyPaletteSet& iPaletteSet)
+FOdysseyPainterEditorColorSelectorTab::OnAddPaletteSet(UOdysseyPalette* iPalette)
 {
-    mEditor->AddPaletteSet(iPaletteSet);
+    mEditor->AddPaletteSet(iPalette);
 }
 
 void
-FOdysseyPainterEditorColorSelectorTab::OnRemovePaletteSet(FOdysseyPaletteSet& iPaletteSet)
+FOdysseyPainterEditorColorSelectorTab::OnRemovePaletteSet(UOdysseyPaletteSet* iPaletteSet)
 {
     mEditor->RemovePaletteSet(iPaletteSet);
 }
 
-/* void
-FOdysseyPainterEditorColorSelectorTab::OnPaletteSetChanged(int iIndex, TSharedPtr<FOdysseyPaletteSet> iPaletteSet)
+void
+FOdysseyPainterEditorColorSelectorTab::OnPaletteSetChanged(int iIndex, UOdysseyPaletteSet* iPaletteSet)
 {
-    mEditor->SetPaletteSet(iIndex, iPaletteSet);
+    UE_LOG(LogTemp, Display, TEXT("SetChanged"));
+    //mEditor->SetPaletteSet(iIndex, iPaletteSet);
 }
-*/
+
 
 void
 FOdysseyPainterEditorColorSelectorTab::OnPaletteCurrentColorEntryChanged(UOdysseyPaletteEntryColor* iEntry, int iSet)
