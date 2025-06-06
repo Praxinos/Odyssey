@@ -396,6 +396,42 @@ SCinematicBoardSectionAnimationTitle::Construct( const FArguments& InArgs, TShar
 
     //-
 
+    auto CreateAnimationCut = [this]()
+    {
+        ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
+        const UMovieSceneSubSection& subsection_object = mBoardSection.Pin()->GetSubSectionObject();
+        FFrameNumber local_frame = sequencer->GetLocalTime().Time.FrameNumber;
+
+        BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, subsection_object, sequencer->GetFocusedTemplateID() );
+        TArray<FGuid> animation_bindings;
+        ShotSequenceHelpers::GetAllAnimations( *sequencer, result.mInnerSequence, result.mInnerSequenceId, EGetAnimation::kSelectedOnly, nullptr, &animation_bindings );
+
+        if( animation_bindings.Contains( mBinding.GetGuid() ) )
+            BoardSequenceTools::CreateAnimationCut( sequencer, subsection_object, local_frame, animation_bindings );
+        else
+            BoardSequenceTools::CreateAnimationCut( sequencer, subsection_object, local_frame, mBinding.GetGuid() );
+    };
+
+    auto CanCreateAnimationCut = [this]() -> bool
+    {
+        ISequencer* sequencer = mBoardSection.Pin()->GetSequencer().Get();
+        const UMovieSceneSubSection& subsection_object = mBoardSection.Pin()->GetSubSectionObject();
+        FFrameNumber local_frame = sequencer->GetLocalTime().Time.FrameNumber;
+        return BoardSequenceTools::CanCreateAnimationCut( sequencer, subsection_object, local_frame, mBinding.GetGuid() );
+    };
+
+    LeftToolbarBuilder.AddToolBarButton(
+        FUIAction(
+            FExecuteAction::CreateLambda( CreateAnimationCut ),
+            FCanExecuteAction::CreateLambda( CanCreateAnimationCut )
+        ),
+        NAME_None,
+        FText::GetEmpty(),
+        LOCTEXT( "create-animationcut", "Create a animation cut (set the current frame where to create the animation cut)" ),
+        FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "CreateAnimationCut" ) );
+
+    //-
+
     TSharedRef< SWidget > left_toolbar = LeftToolbarBuilder.MakeWidget();
     left_toolbar->SetVisibility( mOptionalWidgetsVisibility );
 

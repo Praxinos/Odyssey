@@ -49,9 +49,8 @@ struct FAnimationArgs
     TWeakObjectPtr<UOdysseyAnimation> mAnimation;
 };
 
-struct FDrawingArgs
+struct FAnimationCutArgs
 {
-    TWeakObjectPtr<UTexture2D> mTexture;
 };
 
 class EPOSTRACKSEDITOR_API CinematicBoardTrackTools
@@ -553,6 +552,50 @@ public:
 // Inside EposSequenceTools_AnimationCut
 public:
     /**
+    *  Create a new animation cut (material & texture) in an animation in the board section
+    *
+    * @param ISequencer     iSequencer to add a new animation cut.
+    * @param FFrameNumber   iFrameNumber to get the board section.
+    * @param FGuid          iAnimationBinding to get the animation track.
+    */
+    static void CreateAnimationCut( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<FGuid> iAnimationBindings, const FAnimationCutArgs& iAnimationCutArgs = FAnimationCutArgs() );
+    static void CreateAnimationCut( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iAnimationBinding, const FAnimationCutArgs& iAnimationCutArgs = FAnimationCutArgs() );
+
+    /**
+    *  Create a new animation cut (material & texture) in an animation in the board section
+    *
+    * @param ISequencer     iSequencer to add a new animation cut.
+    * @param UMovieSceneSubSection  iSubSection to get the animation.
+    * @param FFrameNumber   iFrameNumber to get the board section.
+    * @param FGuid          iAnimationBinding to get the animation track.
+    */
+    static void CreateAnimationCut( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, TArray<FGuid> iAnimationBindings, const FAnimationCutArgs& iAnimationCutArgs = FAnimationCutArgs() );
+    static void CreateAnimationCut( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, FGuid iAnimationBinding, const FAnimationCutArgs& iAnimationCutArgs = FAnimationCutArgs() );
+
+    /**
+    *  Can a animation cut be created in the board section ?
+    *
+    * @param ISequencer     iSequencer to get the animation.
+    * @param FFrameNumber   iFrameNumber to get the board section.
+    * @param FGuid          iAnimationBinding to get the animation track.
+    * @return bool
+    */
+    static bool CanCreateAnimationCut( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iAnimationBinding );
+
+    /**
+    *  Can a animation cut be created in the board section ?
+    *
+    * @param ISequencer             iSequencer to get the animation.
+    * @param UMovieSceneSubSection  iSubSection to get the animation.
+    * @param FFrameNumber           iFrameNumber to get the board section.
+    * @param FGuid                  iAnimationBinding to get the animation track.
+    * @return bool
+    */
+    static bool CanCreateAnimationCut( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, TArray<FGuid> iAnimationBindings );
+    static bool CanCreateAnimationCut( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, FGuid iAnimationBinding );
+
+public:
+    /**
     *  Go to the previous animation cut in the board section
     *
     * @param ISequencer     iSequencer to find the previous animation cut.
@@ -817,6 +860,20 @@ private:
     static AOdysseyAnimationActor* SpawnAndBindAnimation( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iCameraGuid, ACineCameraActor* iCamera, FFrameNumber iFrameNumber, const FAnimationArgs& iAnimationArgs, FGuid* oGuid );
 
 // Inside EposSequenceTools_AnimationCut
+public:
+    /**
+    *  Add a animation cut
+    *
+    * @param ISequencer iSequencer to add a animation cut.
+    */
+    static void CreateAnimationCut( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<FGuid> iAnimationBindings, const FAnimationCutArgs& iAnimationCutArgs = FAnimationCutArgs() );
+    static void CreateAnimationCut( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iAnimationBinding, const FAnimationCutArgs& iAnimationCutArgs = FAnimationCutArgs() );
+
+    static bool CanCreateAnimationCut( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iAnimationBinding );
+
+private:
+    static void CreateAnimationCut( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, TArray<FGuid> iAnimationBindings, const FAnimationCutArgs& iAnimationCutArgs );
+
 public:
     /**
     *  Go to the previous animation cut
