@@ -124,10 +124,10 @@ FEposSequenceEditorStyle::InitCommands()
     Set( "EposSequenceCommands.DetachAnimationAtCurrentTime", new IMAGE_BRUSH_SVG( "animation-detach", Icon20x20 ) );
     Set( "EposSequenceCommands.DetachAnimationAtCurrentTime.Small", new IMAGE_BRUSH_SVG( "animation-detach", Icon20x20 ) );
 
-    Set( "EposSequenceCommands.GotoPreviousDrawing", new IMAGE_BRUSH_SVG( "drawing-previous", Icon20x20 ) );
-    Set( "EposSequenceCommands.GotoPreviousDrawing.Small", new IMAGE_BRUSH_SVG( "drawing-previous", Icon20x20 ) );
-    Set( "EposSequenceCommands.GotoNextDrawing", new IMAGE_BRUSH_SVG( "drawing-next", Icon20x20 ) );
-    Set( "EposSequenceCommands.GotoNextDrawing.Small", new IMAGE_BRUSH_SVG( "drawing-next", Icon20x20 ) );
+    Set( "EposSequenceCommands.GotoPreviousAnimationCut", new IMAGE_BRUSH_SVG( "animationcut-previous", Icon20x20 ) );
+    Set( "EposSequenceCommands.GotoPreviousAnimationCut.Small", new IMAGE_BRUSH_SVG( "animationcut-previous", Icon20x20 ) );
+    Set( "EposSequenceCommands.GotoNextAnimationCut", new IMAGE_BRUSH_SVG( "animationcut-next", Icon20x20 ) );
+    Set( "EposSequenceCommands.GotoNextAnimationCut.Small", new IMAGE_BRUSH_SVG( "animationcut-next", Icon20x20 ) );
 
     Set( "EposSequenceCommands.OpenSequenceEditorSettings", new IMAGE_BRUSH_SVG( "epos-settings", Icon20x20 ) );
     Set( "EposSequenceCommands.OpenSequenceEditorSettings.Small", new IMAGE_BRUSH_SVG( "epos-settings", Icon20x20 ) );

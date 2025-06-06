@@ -56,8 +56,8 @@ public:
     TSharedPtr<FUICommandInfo> CreateAnimationAtCurrentTime;
     TSharedPtr<FUICommandInfo> DetachAnimationAtCurrentTime;
 
-    TSharedPtr<FUICommandInfo> GotoPreviousDrawing;
-    TSharedPtr<FUICommandInfo> GotoNextDrawing;
+    TSharedPtr<FUICommandInfo> GotoPreviousAnimationCut;
+    TSharedPtr<FUICommandInfo> GotoNextAnimationCut;
 
     //---
 
