@@ -315,6 +315,46 @@ FBoardSequenceCustomization::BindCommands( TSharedPtr<FUICommandList> ioCommandL
     //---
 
     ioCommandList->MapAction(
+        FEposSequenceEditorCommands::Get().CreateAnimationCutAtCurrentTime,
+        FExecuteAction::CreateLambda( [this]()
+                                      {
+                                          TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                          if( !sequencer )
+                                              return;
+                                          TArray<FGuid> animation_bindings;
+                                          int32 animation_count = BoardSequenceTools::GetAllAnimations( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, nullptr, &animation_bindings );
+                                          if( animation_count != 1 )
+                                              return;
+                                          BoardSequenceTools::CreateAnimationCut( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, animation_bindings[0] );
+                                      } ),
+        FCanExecuteAction::CreateLambda( [this]()
+                                         {
+                                             TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                             if( !sequencer )
+                                                 return false;
+                                             TArray<FGuid> animation_bindings;
+                                             int32 animation_count = BoardSequenceTools::GetAllAnimations( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, nullptr, &animation_bindings );
+                                             if( animation_count > 1 )
+                                             {
+                                                 FNotificationInfo Info( LOCTEXT( "multiple-animations", "There are multiple animations. Select one of them." ) );
+                                                 Info.ExpireDuration = 5.0f;
+                                                 FSlateNotificationManager::Get().AddNotification( Info )->SetCompletionState( SNotificationItem::CS_Fail );
+                                             }
+                                             if( animation_count != 1 )
+                                                 return false;
+                                             return BoardSequenceTools::CanCreateAnimationCut( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, animation_bindings[0] );
+                                         } ),
+        FIsActionChecked(),
+        FIsActionButtonVisible::CreateLambda( [this]()
+                                              {
+                                                  TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                                  if( !sequencer )
+                                                      return false;
+                                                  return BoardSequenceTools::GetAllAnimations( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber ) <= 1;
+                                              } )
+    );
+
+    ioCommandList->MapAction(
         FEposSequenceEditorCommands::Get().GotoPreviousAnimationCut,
         FExecuteAction::CreateLambda( [this]()
                                       {
@@ -624,6 +664,28 @@ FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBui
     ToolbarBuilder.AddSeparator();
 
     ToolbarBuilder.AddToolBarButton( FEposSequenceEditorCommands::Get().GotoPreviousAnimationCut );
+    // The 2 following buttons should be exclusive visible:
+    // - the first button is displayed when there is only 1 plane (or 0) available
+    // - the second button is displayed when there are more than 2 planes available
+    ToolbarBuilder.AddToolBarButton( FEposSequenceEditorCommands::Get().CreateAnimationCutAtCurrentTime );
+    ToolbarBuilder.AddComboButton(
+        FUIAction(
+            FExecuteAction(),
+            FCanExecuteAction(),
+            FGetActionCheckState(),
+            FIsActionButtonVisible::CreateLambda( [this]()
+                                                  {
+                                                      TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                                      if( !sequencer )
+                                                          return false;
+
+                                                      return BoardSequenceTools::GetAllAnimations( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber ) > 1;
+                                                  } )
+        ),
+        FOnGetContent::CreateRaw( this, &FBoardSequenceCustomization::MakeAnimationCutMenu ),
+        FEposSequenceEditorCommands::Get().CreateAnimationCutAtCurrentTime->GetLabel(),
+        FEposSequenceEditorCommands::Get().CreateAnimationCutAtCurrentTime->GetDescription(),
+        FEposSequenceEditorCommands::Get().CreateAnimationCutAtCurrentTime->GetIcon() );
     ToolbarBuilder.AddToolBarButton( FEposSequenceEditorCommands::Get().GotoNextAnimationCut );
 
     ToolbarBuilder.AddSeparator();
@@ -691,6 +753,55 @@ FBoardSequenceCustomization::MakeAnimationMenu()
                                                   BoardSequenceTools::DetachAnimation( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, animation_binding );
                                               } )
             )
+        );
+    }
+
+    return MenuBuilder.MakeWidget();
+}
+
+TSharedRef<SWidget>
+FBoardSequenceCustomization::MakeAnimationCutMenu()
+{
+    TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+
+    FMenuBuilder MenuBuilder( true, sequencer ? sequencer->GetCommandBindings() : nullptr );
+
+    TArray<AOdysseyAnimationActor*> animations;
+    TArray<FGuid> animation_bindings;
+    int32 animation_count = BoardSequenceTools::GetAllAnimations( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, &animations, &animation_bindings );
+    if( !animation_count )
+        return SNullWidget::NullWidget;
+
+    for( int i = 0; i < animation_count; i++ )
+    {
+        AOdysseyAnimationActor* animation = animations[i];
+        FGuid animation_binding = animation_bindings[i];
+
+        MenuBuilder.AddMenuEntry(
+            FText::FromString( animation->GetActorLabel() ),
+            FText::GetEmpty(),
+            //LOCTEXT( "LockPlayback_Description", "When enabled, causes all runtime evaluation and the engine FPS to be locked to the current display frame rate" ),
+            FSlateIcon(),
+            FUIAction(
+                FExecuteAction::CreateLambda( [this, animation_binding]()
+                                              {
+                                                  TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                                  if( !sequencer )
+                                                      return;
+
+                                                  BoardSequenceTools::CreateAnimationCut( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, animation_binding );
+                                              } ),
+                FCanExecuteAction::CreateLambda( [this, animation_binding]()
+                                                 {
+                                                     TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                                     if( !sequencer )
+                                                         return false;
+
+                                                     return BoardSequenceTools::CanCreateAnimationCut( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, animation_binding );
+                                                 } )
+            )/*,
+            NAME_None,
+            EUserInterfaceActionType::ToggleButton*/ //TODO: I don't know how, but there should be something to multi-select animations and create animation on them
         );
     }
 

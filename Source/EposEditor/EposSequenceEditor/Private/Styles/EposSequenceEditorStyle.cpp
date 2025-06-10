@@ -124,6 +124,8 @@ FEposSequenceEditorStyle::InitCommands()
     Set( "EposSequenceCommands.DetachAnimationAtCurrentTime", new IMAGE_BRUSH_SVG( "animation-detach", Icon20x20 ) );
     Set( "EposSequenceCommands.DetachAnimationAtCurrentTime.Small", new IMAGE_BRUSH_SVG( "animation-detach", Icon20x20 ) );
 
+    Set( "EposSequenceCommands.CreateAnimationCutAtCurrentTime", new IMAGE_BRUSH_SVG( "animationcut-create", Icon20x20 ) );
+    Set( "EposSequenceCommands.CreateAnimationCutAtCurrentTime.Small", new IMAGE_BRUSH_SVG( "animationcut-create", Icon20x20 ) );
     Set( "EposSequenceCommands.GotoPreviousAnimationCut", new IMAGE_BRUSH_SVG( "animationcut-previous", Icon20x20 ) );
     Set( "EposSequenceCommands.GotoPreviousAnimationCut.Small", new IMAGE_BRUSH_SVG( "animationcut-previous", Icon20x20 ) );
     Set( "EposSequenceCommands.GotoNextAnimationCut", new IMAGE_BRUSH_SVG( "animationcut-next", Icon20x20 ) );

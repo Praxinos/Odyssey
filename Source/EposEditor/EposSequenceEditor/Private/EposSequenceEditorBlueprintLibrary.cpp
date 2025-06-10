@@ -189,6 +189,104 @@ UBoardSequenceEditorBlueprintLibrary::CreateCameraWithAnimation( UMovieSceneSubS
 
 //static
 void
+UBoardSequenceEditorBlueprintLibrary::CreateAnimation( UMovieSceneSubSection* iSubSection )
+{
+    UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( iSubSection );
+
+    if( !CurrentSequencer.IsValid() )
+        return;
+
+    if( !board_section )
+        return;
+
+    ISequencer* sequencer = CurrentSequencer.Pin().Get();
+
+    //FAnimationArgs plane_args;
+    BoardSequenceTools::CreateAnimation( sequencer, *board_section, board_section->GetTrueRange().GetLowerBoundValue() );
+}
+
+//static
+void
+UBoardSequenceEditorBlueprintLibrary::CollapseAnimation( UMovieSceneSubSection* iSubSection, const FMovieSceneBindingProxy& iBinding )
+{
+    UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( iSubSection );
+
+    if( !CurrentSequencer.IsValid() )
+        return;
+
+    if( !board_section )
+        return;
+
+    ISequencer* sequencer = CurrentSequencer.Pin().Get();
+
+    board_section->SetAnimationKeysAreaVisibility( iBinding.BindingID, false );
+}
+
+//static
+void
+UBoardSequenceEditorBlueprintLibrary::ExpandAnimation( UMovieSceneSubSection* iSubSection, const FMovieSceneBindingProxy& iBinding )
+{
+    UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( iSubSection );
+
+    if( !CurrentSequencer.IsValid() )
+        return;
+
+    if( !board_section )
+        return;
+
+    ISequencer* sequencer = CurrentSequencer.Pin().Get();
+
+    board_section->SetAnimationKeysAreaVisibility( iBinding.BindingID, true );
+}
+
+//static
+bool
+UBoardSequenceEditorBlueprintLibrary::IsAnimationCollapsed( UMovieSceneSubSection* iSubSection, const FMovieSceneBindingProxy& iBinding )
+{
+    return !IsAnimationExpanded( iSubSection, iBinding );
+}
+
+//static
+bool
+UBoardSequenceEditorBlueprintLibrary::IsAnimationExpanded( UMovieSceneSubSection* iSubSection, const FMovieSceneBindingProxy& iBinding )
+{
+    UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( iSubSection );
+
+    if( !CurrentSequencer.IsValid() )
+        return false;
+
+    if( !board_section )
+        return false;
+
+    ISequencer* sequencer = CurrentSequencer.Pin().Get();
+
+    return board_section->IsAnimationKeysAreaVisible( iBinding.BindingID );
+}
+
+//static
+void
+UBoardSequenceEditorBlueprintLibrary::CreateAnimationCut( UMovieSceneSubSection* iSubSection, const FMovieSceneBindingProxy& iBinding, int32 iFrame )
+{
+    UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( iSubSection );
+
+    if( !CurrentSequencer.IsValid() )
+        return;
+
+    if( !board_section )
+        return;
+
+    ISequencer* sequencer = CurrentSequencer.Pin().Get();
+
+    FFrameRate DisplayRate = sequencer->GetFocusedDisplayRate();
+    FFrameRate TickResolution = sequencer->GetFocusedTickResolution();
+    FFrameNumber frame_in_tick = ConvertFrameTime( iFrame, DisplayRate, TickResolution ).GetFrame();
+
+    //FAnimationCutArgs animationcut_args;
+    BoardSequenceTools::CreateAnimationCut( sequencer, *board_section, frame_in_tick, iBinding.BindingID );
+}
+
+//static
+void
 UBoardSequenceEditorBlueprintLibrary::RenameBinding( UMovieSceneSubSection* iSubSection, const FMovieSceneBindingProxy& iBinding, FString iNewLabel )
 {
     UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( iSubSection );
@@ -354,6 +452,36 @@ UShotSequenceEditorBlueprintLibrary::CreateCameraWithAnimation()
     FCameraArgs camera_args;
     FAnimationArgs animation_args;
     ShotSequenceTools::CreateCameraWithAnimation( sequencer );
+}
+
+//static
+void
+UShotSequenceEditorBlueprintLibrary::CreateAnimation()
+{
+    if( !CurrentSequencer.IsValid() )
+        return;
+
+    ISequencer* sequencer = CurrentSequencer.Pin().Get();
+
+    //FAnimationArgs plane_args;
+    ShotSequenceTools::CreateAnimation( sequencer, 0 );
+}
+
+//static
+void
+UShotSequenceEditorBlueprintLibrary::CreateAnimationCut( const FMovieSceneBindingProxy& iBinding, int32 iFrame )
+{
+    if( !CurrentSequencer.IsValid() )
+        return;
+
+    ISequencer* sequencer = CurrentSequencer.Pin().Get();
+
+    FFrameRate DisplayRate = sequencer->GetFocusedDisplayRate();
+    FFrameRate TickResolution = sequencer->GetFocusedTickResolution();
+    FFrameNumber frame_in_tick = ConvertFrameTime( iFrame, DisplayRate, TickResolution ).GetFrame();
+
+    //FAnimationCutArgs animation_args;
+    ShotSequenceTools::CreateAnimationCut( sequencer, frame_in_tick, iBinding.BindingID );
 }
 
 //static

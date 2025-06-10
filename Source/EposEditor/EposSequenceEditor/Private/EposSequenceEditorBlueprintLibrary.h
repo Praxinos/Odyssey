@@ -115,6 +115,46 @@ public:
 public:
 
     /**
+     * Create a animation in a subsection at the given frame
+     */
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board" )
+    static void CreateAnimation( UMovieSceneSubSection* SubSection );
+
+    /**
+     * Collapse animation's keys area
+     */
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board" )
+    static void CollapseAnimation( UMovieSceneSubSection* SubSection, const FMovieSceneBindingProxy& Binding );
+
+    /**
+     * Expand animation's keys area
+     */
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board" )
+    static void ExpandAnimation( UMovieSceneSubSection* SubSection, const FMovieSceneBindingProxy& Binding );
+
+    /**
+     * Get animation's keys area state
+     */
+    UFUNCTION( BlueprintPure, Category = "Epos Sequence Editor|Board" )
+    static bool IsAnimationCollapsed( UMovieSceneSubSection* SubSection, const FMovieSceneBindingProxy& Binding );
+
+    /**
+     * Get animation's keys area state
+     */
+    UFUNCTION( BlueprintPure, Category = "Epos Sequence Editor|Board" )
+    static bool IsAnimationExpanded( UMovieSceneSubSection* SubSection, const FMovieSceneBindingProxy& Binding );
+
+public:
+
+    /**
+     * Create an animationcut in a animation at the given frame
+     */
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board" )
+    static void CreateAnimationCut( UMovieSceneSubSection* SubSection, const FMovieSceneBindingProxy& Binding, int32 Frame );
+
+public:
+
+    /**
      * Rename a animation/camera binding and its actor
      */
     UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board" )
@@ -206,6 +246,22 @@ public:
      */
     UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Shot" )
     static void CreateCameraWithAnimation();
+
+public:
+
+    /**
+     * Create a animation in a shot at the given frame
+     */
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Shot" )
+    static void CreateAnimation();
+
+public:
+
+    /**
+     * Create an naimationcut in a animation at the given frame
+     */
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Shot" )
+    static void CreateAnimationCut( const FMovieSceneBindingProxy& Binding, int32 Frame );
 
 public:
 

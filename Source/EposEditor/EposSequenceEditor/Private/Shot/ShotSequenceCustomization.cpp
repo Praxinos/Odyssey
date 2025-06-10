@@ -303,6 +303,40 @@ FShotSequenceCustomization::BindCommands( TSharedPtr<FUICommandList> ioCommandLi
     //---
 
     ioCommandList->MapAction(
+        FEposSequenceEditorCommands::Get().CreateAnimationCutAtCurrentTime,
+        FExecuteAction::CreateLambda( [this]()
+                                      {
+                                          TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                          if( !sequencer )
+                                              return;
+                                          TArray<FGuid> animation_bindings;
+                                          int32 animation_count = ShotSequenceTools::GetAllAnimations( sequencer.Get(), nullptr, &animation_bindings );
+                                          if( animation_count != 1 )
+                                              return;
+                                          ShotSequenceTools::CreateAnimationCut( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, animation_bindings[0] );
+                                      } ),
+        FCanExecuteAction::CreateLambda( [this]()
+                                         {
+                                             TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                             if( !sequencer )
+                                                 return false;
+                                             TArray<FGuid> animation_bindings;
+                                             int32 animation_count = ShotSequenceTools::GetAllAnimations( sequencer.Get(), nullptr, &animation_bindings );
+                                             if( animation_count != 1 )
+                                                 return false;
+                                             return ShotSequenceTools::CanCreateAnimationCut( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, animation_bindings[0] );
+                                         } ),
+        FIsActionChecked(),
+        FIsActionButtonVisible::CreateLambda( [this]()
+                                              {
+                                                  TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                                  if( !sequencer )
+                                                      return false;
+                                                  return ShotSequenceTools::GetAllAnimations( sequencer.Get() ) <= 1;
+                                              } )
+    );
+
+    ioCommandList->MapAction(
         FEposSequenceEditorCommands::Get().GotoPreviousAnimationCut,
         FExecuteAction::CreateLambda( [this]()
                                       {
@@ -398,6 +432,28 @@ FShotSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuil
     ToolbarBuilder.AddSeparator();
 
     ToolbarBuilder.AddToolBarButton( FEposSequenceEditorCommands::Get().GotoPreviousAnimationCut );
+    // The 2 following buttons should be exclusive visible:
+    // - the first button is displayed when there is only 1 animation (or 0) available
+    // - the second button is displayed when there are more than 2 animations available
+    ToolbarBuilder.AddToolBarButton( FEposSequenceEditorCommands::Get().CreateAnimationCutAtCurrentTime );
+    ToolbarBuilder.AddComboButton(
+        FUIAction(
+            FExecuteAction(),
+            FCanExecuteAction(),
+            FGetActionCheckState(),
+            FIsActionButtonVisible::CreateLambda( [this]()
+                                                  {
+                                                      TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                                      if( !sequencer )
+                                                          return false;
+
+                                                      return ShotSequenceTools::GetAllAnimations( sequencer.Get() ) > 1;
+                                                  } )
+        ),
+        FOnGetContent::CreateRaw( this, &FShotSequenceCustomization::MakeAnimationCutMenu ),
+        FEposSequenceEditorCommands::Get().CreateAnimationCutAtCurrentTime->GetLabel(),
+        FEposSequenceEditorCommands::Get().CreateAnimationCutAtCurrentTime->GetDescription(),
+        FEposSequenceEditorCommands::Get().CreateAnimationCutAtCurrentTime->GetIcon() );
     ToolbarBuilder.AddToolBarButton( FEposSequenceEditorCommands::Get().GotoNextAnimationCut );
 
     ToolbarBuilder.AddSeparator();
@@ -456,6 +512,56 @@ FShotSequenceCustomization::MakeAnimationMenu()
                                                   ShotSequenceTools::DetachAnimation( sequencer.Get(), animation_binding );
                                               } )
             )
+        );
+    }
+
+    return MenuBuilder.MakeWidget();
+}
+
+TSharedRef<SWidget>
+FShotSequenceCustomization::MakeAnimationCutMenu()
+{
+    TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+
+    FMenuBuilder MenuBuilder( true, sequencer ? sequencer->GetCommandBindings() : nullptr );
+
+    TArray<AOdysseyAnimationActor*> animations;
+    TArray<FGuid> animation_bindings;
+    int32 animation_count = ShotSequenceTools::GetAllAnimations( sequencer.Get(), &animations, &animation_bindings );
+    if( !animation_count )
+        return SNullWidget::NullWidget;
+
+    for( int i = 0; i < animation_count; i++ )
+    {
+        AOdysseyAnimationActor* animation = animations[i];
+        FGuid animation_binding = animation_bindings[i];
+
+        MenuBuilder.AddMenuEntry(
+            FText::FromString( animation->GetActorLabel() ),
+            //LOCTEXT( "LockPlayback", "Lock to Display Rate at Runtime" ),
+            FText::GetEmpty(),
+            //LOCTEXT( "LockPlayback_Description", "When enabled, causes all runtime evaluation and the engine FPS to be locked to the current display frame rate" ),
+            FSlateIcon(),
+            FUIAction(
+                FExecuteAction::CreateLambda( [this, animation_binding]()
+                                              {
+                                                  TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                                  if( !sequencer )
+                                                      return;
+
+                                                  ShotSequenceTools::CreateAnimationCut( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, animation_binding );
+                                              } ),
+                FCanExecuteAction::CreateLambda( [this, animation_binding]()
+                                                 {
+                                                     TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                                     if( !sequencer )
+                                                         return false;
+
+                                                     return ShotSequenceTools::CanCreateAnimationCut( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, animation_binding );
+                                                 } )
+            )/*,
+            NAME_None,
+            EUserInterfaceActionType::ToggleButton*/ //TODO: I don't know how, but there should be something to multi-select animations and create animation on them
         );
     }
 
