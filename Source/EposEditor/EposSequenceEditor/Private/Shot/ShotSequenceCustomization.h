@@ -31,6 +31,7 @@ private:
     void ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuilder );
     TSharedRef<SWidget> MakeCameraMenu();
     TSharedRef<SWidget> MakeAnimationMenu();
+    TSharedRef<SWidget> MakeLighttableMenu();
     TSharedRef<SWidget> MakeAnimationCutMenu();
     TSharedRef<SWidget> MakeSettingsMenu();
     TSharedRef<SWidget> MakeAnimationSettingsMenu();

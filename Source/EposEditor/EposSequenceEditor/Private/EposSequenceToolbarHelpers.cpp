@@ -135,6 +135,14 @@ EposSequenceToolbarHelpers::MakeSettingsEntries( FMenuBuilder& iMenuBuilder, ISe
 
     //---
 
+    iMenuBuilder.BeginSection( NAME_None, LOCTEXT( "settings.lighttable-settings.section-label", "Lighttable" ) );
+
+    iMenuBuilder.AddMenuEntry( FEposSequenceEditorCommands::Get().DeactivateAllLighttables );
+
+    iMenuBuilder.EndSection();
+
+    //---
+
     iMenuBuilder.BeginSection( NAME_None, LOCTEXT( "settings.advanced-settings.section-label", "Advanced Settings" ) );
 
     iMenuBuilder.AddMenuEntry( FEposSequenceEditorCommands::Get().OpenSequenceEditorSettings );

@@ -144,6 +144,29 @@ public:
     UFUNCTION( BlueprintPure, Category = "Epos Sequence Editor|Board" )
     static bool IsAnimationExpanded( UMovieSceneSubSection* SubSection, const FMovieSceneBindingProxy& Binding );
 
+    /**
+     * Activate the lighttable on the plane
+     */
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board|Lighttable" )
+    static void ActivateLighttable( UMovieSceneSubSection* SubSection, const FMovieSceneBindingProxy& Binding );
+
+    /**
+     * Deactivate the lighttable on the plane
+     */
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board|Lighttable" )
+    static void DeactivateLighttable( UMovieSceneSubSection* SubSection, const FMovieSceneBindingProxy& Binding );
+
+    /**
+     * Get the state of the lighttable for the plane
+     * It returns:
+     *   1: lighttable on all animation layers is on
+     *   0: lighttable on all animation layers is off
+     *   -1: undetermined (mix of on and off, not enough animation layers)
+     * @return 1 | 0 | -1 -> on | off | undetermined
+     */
+    UFUNCTION( BlueprintPure, Category = "Epos Sequence Editor|Board|Lighttable" )
+    static int32 GetLighttableState( UMovieSceneSubSection* SubSection, const FMovieSceneBindingProxy& Binding );
+
 public:
 
     /**
@@ -254,6 +277,29 @@ public:
      */
     UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Shot" )
     static void CreateAnimation();
+
+    /**
+     * Activate the lighttable on the plane
+     */
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Shot|Lighttable" )
+    static void ActivateLighttable( const FMovieSceneBindingProxy& Binding );
+
+    /**
+     * Deactivate the lighttable on the plane
+     */
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Shot|Lighttable" )
+    static void DeactivateLighttable( const FMovieSceneBindingProxy& Binding );
+
+    /**
+     * Get the state of the lighttable for the plane
+     * It returns:
+     *   1: lighttable on all animation layers is on
+     *   0: lighttable on all animation layers is off
+     *   -1: undetermined (mix of on and off, not enough animation layers)
+     * @return 1 | 0 | -1 -> on | off | undetermined
+     */
+    UFUNCTION( BlueprintPure, Category = "Epos Sequence Editor|Shot|Lighttable" )
+    static int32 GetLighttableState( const FMovieSceneBindingProxy& Binding );
 
 public:
 

@@ -15,12 +15,17 @@
 #include "EposSequenceHelpers.h"
 #include "EposSequenceToolbarHelpers.h"
 #include "Misc/EposSequenceFBXInterop.h"
+#include "OdysseyAnimation.h"
 #include "OdysseyAnimationActor.h"
+#include "OdysseyAnimationTimelineSection.h"
+#include "OdysseyLayer.h"
+#include "OdysseyLayerStack.h"
 #include "Shot/ShotSequence.h"
 #include "Styles/EposSequenceEditorStyle.h"
 #include "Styles/EposTracksEditorStyle.h"
 #include "ToolkitHelpers.h"
 #include "Tools/EposSequenceTools.h"
+#include "Tools/LighttableTools.h"
 
 #define LOCTEXT_NAMESPACE "ShotSequenceCustomization"
 
@@ -371,6 +376,17 @@ FShotSequenceCustomization::BindCommands( TSharedPtr<FUICommandList> ioCommandLi
                                              return ShotSequenceTools::HasNextAnimationCut( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
                                          } )
     );
+
+    ioCommandList->MapAction(
+        FEposSequenceEditorCommands::Get().DeactivateAllLighttables,
+        FExecuteAction::CreateLambda( [this]()
+                                      {
+                                          TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                          if( !sequencer )
+                                              return;
+                                          LighttableTools::Deactivate( sequencer.Get() );
+                                      } )
+    );
 }
 
 //---
@@ -426,6 +442,103 @@ FShotSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuil
         FEposSequenceEditorCommands::Get().DetachAnimationAtCurrentTime->GetDescription(),
         FEposSequenceEditorCommands::Get().DetachAnimationAtCurrentTime->GetIcon() );
 
+    auto GetLighttableTooltip = [this]() -> FText
+        {
+            TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+            if( !sequencer )
+                return LOCTEXT( "enable-lighttable-tooltip", "Enable the lighttable" );
+
+            TArray<FGuid> animation_bindings;
+            int32 animation_count = ShotSequenceTools::GetAllAnimations( sequencer.Get(), nullptr, &animation_bindings );
+            //check( animation_count == 1 );
+            if( animation_count != 1 )
+                return LOCTEXT( "enable-lighttable-tooltip", "Enable the lighttable" );
+
+            if( LighttableTools::IsOn( *sequencer, sequencer->GetFocusedMovieSceneSequence(), sequencer->GetFocusedTemplateID(), animation_bindings[0] ) )
+                return LOCTEXT( "disable-lighttable-tooltip", "Disable the lighttable" );
+            else
+                return LOCTEXT( "enable-lighttable-tooltip", "Enable the lighttable" );
+        };
+
+    auto GetLighttableIcon = [this]() -> FSlateIcon
+        {
+            TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+            if( !sequencer )
+                return FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "LighttableOff" );
+
+            TArray<FGuid> animation_bindings;
+            int32 animation_count = ShotSequenceTools::GetAllAnimations( sequencer.Get(), nullptr, &animation_bindings );
+            //check( animation_count == 1 );
+            if( animation_count != 1 )
+                return FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "LighttableOff" );
+
+            if( LighttableTools::IsOn( *sequencer, sequencer->GetFocusedMovieSceneSequence(), sequencer->GetFocusedTemplateID(), animation_bindings[0] ) )
+                return FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "LighttableOn" );
+            else
+                return FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "LighttableOff" );
+        };
+
+    // The 2 following buttons should be exclusive visible:
+    // - the first button is displayed when there is only 1 animation (or 0) available
+    // - the second button is displayed when there are more than 2 animations available
+    ToolbarBuilder.AddToolBarButton( FUIAction(
+        FExecuteAction::CreateLambda( [this]()
+                                      {
+                                          TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                          if( !sequencer )
+                                              return;
+
+                                          TArray<FGuid> animation_bindings;
+                                          int32 animation_count = ShotSequenceTools::GetAllAnimations( sequencer.Get(), nullptr, &animation_bindings );
+                                          if( animation_count != 1 )
+                                              return;
+
+                                          if( LighttableTools::IsOn( *sequencer, sequencer->GetFocusedMovieSceneSequence(), sequencer->GetFocusedTemplateID(), animation_bindings[0] ) )
+                                              LighttableTools::Deactivate( *sequencer, sequencer->GetFocusedMovieSceneSequence(), sequencer->GetFocusedTemplateID(), animation_bindings[0] );
+                                          else
+                                              LighttableTools::Activate( *sequencer, sequencer->GetFocusedMovieSceneSequence(), sequencer->GetFocusedTemplateID(), animation_bindings[0] );
+                                      } ),
+        FCanExecuteAction::CreateLambda( [this]()
+                                         {
+                                             TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                             if( !sequencer )
+                                                 return false;
+
+                                             return ShotSequenceTools::GetAllAnimations( sequencer.Get() ) == 1;
+                                         } ),
+        FIsActionChecked(),
+        FIsActionButtonVisible::CreateLambda( [this]()
+                                              {
+                                                  TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                                  if( !sequencer )
+                                                      return false;
+
+                                                  return ShotSequenceTools::GetAllAnimations( sequencer.Get() ) <= 1;
+                                              } ) ),
+        NAME_None,
+        FText::GetEmpty(),
+        MakeAttributeLambda( GetLighttableTooltip ),
+        MakeAttributeLambda( GetLighttableIcon )
+    );
+    ToolbarBuilder.AddComboButton(
+        FUIAction(
+            FExecuteAction(),
+            FCanExecuteAction(),
+            FGetActionCheckState(),
+            FIsActionButtonVisible::CreateLambda( [this]()
+                                                  {
+                                                      TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                                      if( !sequencer )
+                                                          return false;
+
+                                                      return ShotSequenceTools::GetAllAnimations( sequencer.Get() ) > 1;
+                                                  } )
+        ),
+        FOnGetContent::CreateRaw( this, &FShotSequenceCustomization::MakeLighttableMenu ),
+        FText::GetEmpty(),
+        LOCTEXT( "LighttableOptionsTooltip", "Activate/Deactivate lighttable on animations" ),
+        FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "LighttableOff" ) );
+
     ToolbarBuilder.AddToolBarButton( FEposSequenceEditorCommands::Get().GotoPreviousCameraPosition );
     ToolbarBuilder.AddToolBarButton( FEposSequenceEditorCommands::Get().GotoNextCameraPosition );
 
@@ -476,6 +589,59 @@ FShotSequenceCustomization::MakeCameraMenu()
     FMenuBuilder MenuBuilder( true, sequencer ? sequencer->GetCommandBindings() : nullptr );
 
     EposSequenceToolbarHelpers::MakeCameraSettingsEntries( MenuBuilder );
+
+    return MenuBuilder.MakeWidget();
+}
+
+TSharedRef<SWidget>
+FShotSequenceCustomization::MakeLighttableMenu()
+{
+    TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+
+    FMenuBuilder MenuBuilder( true, sequencer ? sequencer->GetCommandBindings() : nullptr );
+
+    TArray<AOdysseyAnimationActor*> animations;
+    TArray<FGuid> animation_bindings;
+    int32 animation_count = ShotSequenceTools::GetAllAnimations( sequencer.Get(), &animations, &animation_bindings );
+    if( !animation_count )
+        return SNullWidget::NullWidget;
+
+    for( int i = 0; i < animation_count; i++ )
+    {
+        AOdysseyAnimationActor* animation = animations[i];
+        FGuid animation_binding = animation_bindings[i];
+
+        FText tooltip;
+        if( LighttableTools::IsOn( *sequencer, sequencer->GetFocusedMovieSceneSequence(), sequencer->GetFocusedTemplateID(), animation_binding ) )
+            tooltip = LOCTEXT( "disable-lighttable-tooltip", "Disable the lighttable" );
+        else
+            tooltip = LOCTEXT( "enable-lighttable-tooltip", "Enable the lighttable" );
+
+        FSlateIcon icon;
+        if( LighttableTools::IsOn( *sequencer, sequencer->GetFocusedMovieSceneSequence(), sequencer->GetFocusedTemplateID(), animation_binding ) )
+            icon = FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "LighttableOn" );
+        else
+            icon = FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "LighttableOff" );
+
+        MenuBuilder.AddMenuEntry(
+            FText::FromString( animation->GetActorLabel() ),
+            tooltip,
+            icon,
+            FUIAction(
+                FExecuteAction::CreateLambda( [this, animation_binding]()
+                                              {
+                                                  TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                                  if( !sequencer )
+                                                      return;
+
+                                                  if( LighttableTools::IsOn( *sequencer, sequencer->GetFocusedMovieSceneSequence(), sequencer->GetFocusedTemplateID(), animation_binding ) )
+                                                      LighttableTools::Deactivate( *sequencer, sequencer->GetFocusedMovieSceneSequence(), sequencer->GetFocusedTemplateID(), animation_binding );
+                                                  else
+                                                      LighttableTools::Activate( *sequencer, sequencer->GetFocusedMovieSceneSequence(), sequencer->GetFocusedTemplateID(), animation_binding );
+                                              } )
+            )
+        );
+    }
 
     return MenuBuilder.MakeWidget();
 }

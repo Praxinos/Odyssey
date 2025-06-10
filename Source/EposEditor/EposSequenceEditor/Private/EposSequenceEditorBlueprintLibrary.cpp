@@ -38,6 +38,7 @@
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrackInstance.h"
 #include "Shot/ShotSequence.h"
 #include "Tools/EposSequenceTools.h"
+#include "Tools/LighttableTools.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(EposSequenceEditorBlueprintLibrary)
 
@@ -265,6 +266,57 @@ UBoardSequenceEditorBlueprintLibrary::IsAnimationExpanded( UMovieSceneSubSection
 
 //static
 void
+UBoardSequenceEditorBlueprintLibrary::ActivateLighttable( UMovieSceneSubSection* iSubSection, const FMovieSceneBindingProxy& iBinding )
+{
+    UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( iSubSection );
+
+    if( !CurrentSequencer.IsValid() )
+        return;
+
+    if( !board_section )
+        return;
+
+    ISequencer* sequencer = CurrentSequencer.Pin().Get();
+
+    LighttableTools::Activate( sequencer, *board_section, iBinding.BindingID );
+}
+
+//static
+void
+UBoardSequenceEditorBlueprintLibrary::DeactivateLighttable( UMovieSceneSubSection* iSubSection, const FMovieSceneBindingProxy& iBinding )
+{
+    UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( iSubSection );
+
+    if( !CurrentSequencer.IsValid() )
+        return;
+
+    if( !board_section )
+        return;
+
+    ISequencer* sequencer = CurrentSequencer.Pin().Get();
+
+    LighttableTools::Deactivate( sequencer, *board_section, iBinding.BindingID );
+}
+
+//static
+int32
+UBoardSequenceEditorBlueprintLibrary::GetLighttableState( UMovieSceneSubSection* iSubSection, const FMovieSceneBindingProxy& iBinding )
+{
+    UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( iSubSection );
+
+    if( !CurrentSequencer.IsValid() )
+        return -1;
+
+    if( !board_section )
+        return -1;
+
+    ISequencer* sequencer = CurrentSequencer.Pin().Get();
+
+    return LighttableTools::GetState( sequencer, *board_section, iBinding.BindingID );
+}
+
+//static
+void
 UBoardSequenceEditorBlueprintLibrary::CreateAnimationCut( UMovieSceneSubSection* iSubSection, const FMovieSceneBindingProxy& iBinding, int32 iFrame )
 {
     UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( iSubSection );
@@ -465,6 +517,42 @@ UShotSequenceEditorBlueprintLibrary::CreateAnimation()
 
     //FAnimationArgs plane_args;
     ShotSequenceTools::CreateAnimation( sequencer, 0 );
+}
+
+//static
+void
+UShotSequenceEditorBlueprintLibrary::ActivateLighttable( const FMovieSceneBindingProxy& iBinding )
+{
+    if( !CurrentSequencer.IsValid() )
+        return;
+
+    ISequencer* sequencer = CurrentSequencer.Pin().Get();
+
+    LighttableTools::Activate( sequencer, iBinding.BindingID );
+}
+
+//static
+void
+UShotSequenceEditorBlueprintLibrary::DeactivateLighttable( const FMovieSceneBindingProxy& iBinding )
+{
+    if( !CurrentSequencer.IsValid() )
+        return;
+
+    ISequencer* sequencer = CurrentSequencer.Pin().Get();
+
+    LighttableTools::Deactivate( sequencer, iBinding.BindingID );
+}
+
+//static
+int32
+UShotSequenceEditorBlueprintLibrary::GetLighttableState( const FMovieSceneBindingProxy& iBinding )
+{
+    if( !CurrentSequencer.IsValid() )
+        return -1;
+
+    ISequencer* sequencer = CurrentSequencer.Pin().Get();
+
+    return LighttableTools::GetState( sequencer, iBinding.BindingID );
 }
 
 //static

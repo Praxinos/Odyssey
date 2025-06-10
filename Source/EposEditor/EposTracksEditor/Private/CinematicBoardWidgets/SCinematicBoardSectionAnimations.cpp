@@ -39,13 +39,14 @@
 #include "Shot/ShotSequence.h"
 #include "Styles/EposTracksEditorStyle.h"
 #include "Tools/EposSequenceTools.h"
+#include "Tools/LighttableTools.h"
 //#include "ULISLoaderModule.h"
 
 #define LOCTEXT_NAMESPACE "SCinematicBoardSectionAnimations"
 
 //---
 
-class SInlineEditableTextBlockOnDoubleClick4 //TODO: use the same as in plane widget
+class SInlineEditableTextBlockOnDoubleClick4 //TODO: use the same as in other widget
     : public SInlineEditableTextBlock
 {
     virtual FReply OnMouseButtonDoubleClick( const FGeometry& InMyGeometry, const FPointerEvent& InMouseEvent ) override;
@@ -225,6 +226,9 @@ private:
 
     void                ToggleAnimationVisibility();
     bool                IsAnimationVisible() const;
+
+    void                ToggleLighttable();
+    bool                IsLighttableOn() const;
 
     FSlateColor         GetBackgroundTint() const;
 
@@ -429,6 +433,33 @@ SCinematicBoardSectionAnimationTitle::Construct( const FArguments& InArgs, TShar
         FText::GetEmpty(),
         LOCTEXT( "create-animationcut", "Create a animation cut (set the current frame where to create the animation cut)" ),
         FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "CreateAnimationCut" ) );
+
+    //-
+
+    auto GetLighttableTooltip = [this]() -> FText
+        {
+            if( IsLighttableOn() )
+                return LOCTEXT( "disable-lighttable-tooltip", "Disable the lighttable" );
+            else
+                return LOCTEXT( "enable-lighttable-tooltip", "Enable the lighttable" );
+        };
+
+    auto GetLighttableIcon = [this]() -> FSlateIcon
+        {
+            if( IsLighttableOn() )
+                return FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "LighttableOn" );
+            else
+                return FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "LighttableOff" );
+        };
+
+    LeftToolbarBuilder.AddToolBarButton(
+        FUIAction(
+            FExecuteAction::CreateRaw( this, &SCinematicBoardSectionAnimationTitle::ToggleLighttable )
+        ),
+        NAME_None,
+        FText::GetEmpty(),
+        MakeAttributeLambda( GetLighttableTooltip ),
+        MakeAttributeLambda( GetLighttableIcon ) );
 
     //-
 
@@ -648,6 +679,58 @@ SCinematicBoardSectionAnimationTitle::IsAnimationVisible() const
     ISequencer* sequencer = board_section->GetSequencer().Get();
 
     return BoardSequenceTools::IsAnimationVisible( sequencer, *subsection_object, mBinding.GetGuid() );
+}
+
+//---
+
+void
+SCinematicBoardSectionAnimationTitle::ToggleLighttable()
+{
+    FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+    const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
+    ISequencer* sequencer = board_section->GetSequencer().Get();
+
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
+    TArray<FGuid> animation_bindings;
+    ShotSequenceHelpers::GetAllAnimations( *sequencer, result.mInnerSequence, result.mInnerSequenceId, EGetAnimation::kSelectedOnly, nullptr, &animation_bindings );
+
+    // This is the current animation which is the reference state
+    bool is_reference_on = LighttableTools::IsOn( *sequencer, result.mInnerSequence, result.mInnerSequenceId, mBinding.GetGuid() );
+
+    if( animation_bindings.Contains( mBinding.GetGuid() ) )
+    {
+        for( auto animation_binding : animation_bindings )
+        {
+            if( is_reference_on )
+                LighttableTools::Deactivate( *sequencer, result.mInnerSequence, result.mInnerSequenceId, animation_binding );
+            else
+                LighttableTools::Activate( *sequencer, result.mInnerSequence, result.mInnerSequenceId, animation_binding );
+        }
+    }
+    else
+    {
+        if( is_reference_on )
+            LighttableTools::Deactivate( *sequencer, result.mInnerSequence, result.mInnerSequenceId, mBinding.GetGuid() );
+        else
+            LighttableTools::Activate( *sequencer, result.mInnerSequence, result.mInnerSequenceId, mBinding.GetGuid() );
+    }
+}
+
+bool
+SCinematicBoardSectionAnimationTitle::IsLighttableOn() const
+{
+    FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+    const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
+    ISequencer* sequencer = board_section->GetSequencer().Get();
+
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
+
+    //---
+
+    // IsLighttableOn() is not called every ticks
+    // The button (which calls IsLighttableOn()) is only displayed when the mouse hovers the corresponding section
+    // So it 's not a real problem while IsLighttableOn() is only called on buttons which are not displayed all the time
+    return LighttableTools::IsOn( *sequencer, result.mInnerSequence, result.mInnerSequenceId, mBinding.GetGuid() );
 }
 
 //---
