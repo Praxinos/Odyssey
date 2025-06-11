@@ -63,7 +63,20 @@ SCinematicBoardSectionContent::Construct( const FArguments& InArgs, TSharedRef<F
 int32
 SCinematicBoardSectionContent::OnPaint( const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled ) const //override
 {
-    return SCompoundWidget::OnPaint( Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled );
+    LayerId = SCompoundWidget::OnPaint( Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled );
+
+    // The thin line at the left border of the widget
+    FSlateDrawElement::MakeBox(
+        OutDrawElements,
+        LayerId++,
+        AllottedGeometry.ToPaintGeometry( FVector2D( 1.f, AllottedGeometry.GetLocalSize().Y ), FSlateLayoutTransform() ),
+        FAppStyle::GetBrush( "WhiteBrush" ),
+        ESlateDrawEffect::None,
+        FAppStyle::GetBrush( "WhiteBrush" )->GetTint( InWidgetStyle )
+        //FLinearColor::Black.CopyWithNewOpacity( 0.5f )
+    );
+
+    return LayerId;
 }
 
 void
