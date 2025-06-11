@@ -88,6 +88,7 @@ public class EposTracksEditor : ModuleRules
                 // [EDITOR] custom plugin dependencies
                 "EposNamingConvention",
                 "OdysseyAnimationEditor",
+                "OdysseyPainterEditor",
             }
             );
 

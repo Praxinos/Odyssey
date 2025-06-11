@@ -6,6 +6,7 @@
 #include "Brushes/SlateColorBrush.h"
 #include "Channels/MovieSceneChannelProxy.h"
 #include "Channels/MovieSceneObjectPathChannel.h"
+#include "EditorModeManager.h"
 #include "Engine/Texture2D.h"
 #include "ImageUtils.h"
 #include "Materials/MaterialInstanceConstant.h"
@@ -34,13 +35,13 @@
 #include "OdysseyAnimationCutChannel.h"
 #include "OdysseyAnimationTimelineSection.h"
 //#include "OdysseyPainterEditorSettings.h"
+#include "OdysseyViewportDrawingEditorEdMode.h"
 #include "Tools/ResourceAssetTools.h"
 #include "Settings/EposTracksEditorSettings.h"
 #include "Shot/ShotSequence.h"
 #include "Styles/EposTracksEditorStyle.h"
 #include "Tools/EposSequenceTools.h"
 #include "Tools/LighttableTools.h"
-//#include "ULISLoaderModule.h"
 
 #define LOCTEXT_NAMESPACE "SCinematicBoardSectionAnimations"
 
@@ -438,10 +439,14 @@ SCinematicBoardSectionAnimationTitle::Construct( const FArguments& InArgs, TShar
 
     auto GetLighttableTooltip = [this]() -> FText
         {
+            FText warning;
+            if( !GLevelEditorModeTools().IsModeActive( FOdysseyViewportDrawingEditorEdMode::EM_OdysseyViewportDrawingEditorEdModeId ) )
+                warning = LOCTEXT( "warning-no-odyssey-edmode-tooltip", "\n\nWarning: Lighttable is only visible when Odyssey Mode is active" );
+
             if( IsLighttableOn() )
-                return LOCTEXT( "disable-lighttable-tooltip", "Disable the lighttable" );
+                return FText::Format( LOCTEXT( "disable-lighttable-tooltip", "Disable the lighttable{0}" ), warning );
             else
-                return LOCTEXT( "enable-lighttable-tooltip", "Enable the lighttable" );
+                return FText::Format( LOCTEXT( "enable-lighttable-tooltip", "Enable the lighttable{0}" ), warning );
         };
 
     auto GetLighttableIcon = [this]() -> FSlateIcon
@@ -454,7 +459,15 @@ SCinematicBoardSectionAnimationTitle::Construct( const FArguments& InArgs, TShar
 
     LeftToolbarBuilder.AddToolBarButton(
         FUIAction(
-            FExecuteAction::CreateRaw( this, &SCinematicBoardSectionAnimationTitle::ToggleLighttable )
+            FExecuteAction::CreateRaw( this, &SCinematicBoardSectionAnimationTitle::ToggleLighttable ),
+            FCanExecuteAction::CreateLambda( [this]()
+                                             {
+                                                 if( !GLevelEditorModeTools().IsModeActive( FOdysseyViewportDrawingEditorEdMode::EM_OdysseyViewportDrawingEditorEdModeId ) )
+                                                     return false;
+
+                                                 return true;
+                                             } )
+
         ),
         NAME_None,
         FText::GetEmpty(),
