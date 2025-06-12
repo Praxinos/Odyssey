@@ -47,6 +47,8 @@ FOdysseyAnimationEditorModule::RegisterAssetTypeActions()
     // Create Asset Categories
     EAssetTypeCategories::Type category = assetTools.RegisterAdvancedAssetCategory(FName(TEXT("Odyssey")), LOCTEXT("asset-category.name", "Odyssey"));
 
+    category = EAssetTypeCategories::Type( EAssetTypeCategories::Animation | category );
+
     //Create Asset Types Actions
     mOdysseyTypeActions = MakeShareable(new FOdysseyAnimationAssetTypeActions(category));
 
