@@ -17,36 +17,14 @@
 <path stroke="white" stroke-width="8" d="
     M50,30L110,10v100L50,90
     z"/>
-
+    
 <!-- Inner plane plus -->
-<path stroke="#ffffff" stroke-width="8" d="
-    M50,45l15,-3
-    z
-    M50,60h15
-    z
-    M50,75l15,3
-    z
-    M65,25v70
-    z
-
-    M90,15v90
-    z
-    M90,35l20,-4
-    z
-    M90,60h20
-    z
-    M90,85l20,4
-    z"/>
-</g>
-
-<!-- Inner plane plus -->
-<!--
-<path stroke="#ff0000" stroke-width="8" d="
+<path stroke="white" stroke-width="8" d="
     M65,60h30
     z
     M80,40v40
     z"/>
-</g> -->
+</g>
 
 <!-- Plus -->
 <path stroke="white" stroke-width="8" d="
