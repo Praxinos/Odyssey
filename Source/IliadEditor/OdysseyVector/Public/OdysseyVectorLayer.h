@@ -37,6 +37,8 @@ class IOdysseyVectorLayer
         virtual bool Contains( FOdysseyVectorCell* iCell ) = 0;
         virtual uint32 GetWidth() = 0;
         virtual uint32 GetHeight() = 0;
+        virtual FOdysseyVectorCell* GetMaxCellFrom( uint32 iIndex ) = 0;
+        virtual FOdysseyVectorCell* GetMinCellFrom( uint32 iIndex ) = 0;
 };
 
 class ODYSSEYVECTOR_API FOdysseyVectorLayer : public FOdysseyVectorObject

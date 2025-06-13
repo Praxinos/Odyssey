@@ -18,6 +18,7 @@
 #include "Widgets/Tab/SOdysseyPainterEditorVectorSceneTreeViewContextMenu.h"
 #include "OdysseyLayerStack.h"
 #include "OdysseyAnimationLayerImageVector.h"
+#include "OdysseyTextureLayerImageVector.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -415,9 +416,10 @@ SOdysseyPainterEditorVectorSceneTreeView::OnSceneChanged()
 void
 SOdysseyPainterEditorVectorSceneTreeView::BindLayerDelegates( UOdysseyLayerStack* iLayerStack )
 {
-    UOdysseyAnimationLayerImageVector* imageVectorLayer = Cast<UOdysseyAnimationLayerImageVector>(iLayerStack->GetCurrentLayer());
+    UOdysseyAnimationLayerImageVector* animationVectorLayer = Cast<UOdysseyAnimationLayerImageVector>(iLayerStack->GetCurrentLayer());
+    UOdysseyTextureLayerImageVector* textureVectorLayer = Cast<UOdysseyTextureLayerImageVector>(iLayerStack->GetCurrentLayer());
 
-    if( imageVectorLayer )
+    if( animationVectorLayer )
     {
         if( mOldVectorLayer.IsValid() )
         {
@@ -425,7 +427,21 @@ SOdysseyPainterEditorVectorSceneTreeView::BindLayerDelegates( UOdysseyLayerStack
         }
 
         mOldVectorLayer = mVectorLayer;
-        mVectorLayer = imageVectorLayer->GetVectorLayer();
+        mVectorLayer = animationVectorLayer->GetVectorLayer();
+
+        mVectorLayer->OnNotifyDelegate().AddSP( this, &SOdysseyPainterEditorVectorSceneTreeView::OnVectorLayerNotify );
+    }
+
+
+    if( textureVectorLayer )
+    {
+        if( mOldVectorLayer.IsValid() )
+        {
+            mOldVectorLayer->OnNotifyDelegate().RemoveAll( this );
+        }
+
+        mOldVectorLayer = mVectorLayer;
+        mVectorLayer = textureVectorLayer->GetVectorLayer();
 
         mVectorLayer->OnNotifyDelegate().AddSP( this, &SOdysseyPainterEditorVectorSceneTreeView::OnVectorLayerNotify );
     }

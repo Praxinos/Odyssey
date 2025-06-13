@@ -109,7 +109,7 @@ UOdysseyAnimationLayerImageVector::UpdateSharedEnv()
     }
 
     mVectorLayer->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    mVectorLayer->RequestRedraw( nullptr, 0 );
+//    mVectorLayer->RequestRedraw( nullptr, 0 );
 }
 
 struct FOdysseyAnimationLayerImageVectorObjectVersion
@@ -535,6 +535,44 @@ UOdysseyAnimationLayerImageVector::GetFirstCell()
     return Cast<UOdysseyAnimationCellImageVector>(firstCell)->GetVectorCell();
 }
 
+// Implements Interface IOdysseyVectorLayer::GetMaxCellFrom
+FOdysseyVectorCell*
+UOdysseyAnimationLayerImageVector::GetMaxCellFrom( uint32 iIndex )
+{
+    UOdysseyAnimationCellImageVector* maxLayerCell = nullptr;
+
+    for( int32 i = iIndex; i < GetCells().Num(); i++ )
+    {
+        UOdysseyLayerCell* candidateCell = GetCells()[i];
+
+        if( candidateCell->GetClass() == UOdysseyAnimationCellImageVector::StaticClass() )
+        {
+            maxLayerCell = Cast<UOdysseyAnimationCellImageVector>(candidateCell);
+        }
+    }
+
+    return maxLayerCell ? maxLayerCell->GetVectorCell() : nullptr;
+}
+
+// Implements Interface IOdysseyVectorLayer::GetMinCellFrom
+FOdysseyVectorCell*
+UOdysseyAnimationLayerImageVector::GetMinCellFrom( uint32 iIndex )
+{
+    UOdysseyAnimationCellImageVector* maxLayerCell = nullptr;
+
+    for ( int32 i = iIndex; i >= 0; i-- )
+    {
+        UOdysseyLayerCell* candidateCell = GetCells()[i];
+
+        if( candidateCell->GetClass() == UOdysseyAnimationCellImageVector::StaticClass() )
+        {
+            maxLayerCell = Cast<UOdysseyAnimationCellImageVector>(candidateCell);
+        }
+    }
+
+    return maxLayerCell ? maxLayerCell->GetVectorCell() : nullptr;
+}
+
 #ifdef WITH_EDITOR
 
 TArray<FName>
@@ -680,7 +718,7 @@ UOdysseyAnimationLayerImageVector::PreEditChange( FProperty* PropertyAboutToChan
 
     if( PropertyAboutToChange->GetName() == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayerImageVector, Cells ) )
     {
-        MakeBreakdownTargetMap();
+        //MakeBreakdownTargetMap();
     }
 }
 
@@ -691,16 +729,21 @@ UOdysseyAnimationLayerImageVector::PostEditChangeProperty( FPropertyChangedEvent
 
     if( PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayerImageVector, Cells ) )
     {
-        CheckBreakdownTargetMap();
+        //CheckBreakdownTargetMap();
     }
 }
 
 void
 UOdysseyAnimationLayerImageVector::CellsChanged()
 {
+    MakeBreakdownTargetMap();
+
     // Put this before calling Super::CellsChanged because the HUD might be refreshed by Super::CellsChanged
     // When reloading the current tool and it needs the vector object hierarchy to be correctly set.
     UpdateSharedEnv();
+
+    CheckBreakdownTargetMap();
+
     Super::CellsChanged();
 }
 #endif

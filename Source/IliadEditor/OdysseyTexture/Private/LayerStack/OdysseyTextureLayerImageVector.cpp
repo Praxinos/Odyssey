@@ -432,6 +432,20 @@ UOdysseyTextureLayerImageVector::GetFirstCell()
     return mVectorCell.Get();
 }
 
+// Implements Interface IOdysseyVectorLayer::GetMaxCellFrom
+FOdysseyVectorCell*
+UOdysseyTextureLayerImageVector::GetMaxCellFrom( uint32 iIndex )
+{
+    return mVectorCell.Get();
+}
+
+// Implements Interface IOdysseyVectorLayer::GetMinCellFrom
+FOdysseyVectorCell*
+UOdysseyTextureLayerImageVector::GetMinCellFrom( uint32 iIndex )
+{
+    return mVectorCell.Get();
+}
+
 // Implements Interface IOdysseyVectorCell::GetIndex
 int32
 UOdysseyTextureLayerImageVector::GetIndex()

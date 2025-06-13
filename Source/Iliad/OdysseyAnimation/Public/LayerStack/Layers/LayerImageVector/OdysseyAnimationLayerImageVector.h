@@ -76,6 +76,8 @@ public:
     virtual bool Contains( FOdysseyVectorCell* iCandidateCell )override;
     virtual uint32 GetWidth() override;
     virtual uint32 GetHeight() override;
+    virtual FOdysseyVectorCell* GetMaxCellFrom( uint32 iIndex ) override;
+    virtual FOdysseyVectorCell* GetMinCellFrom( uint32 iIndex ) override;
 
 protected:
     void IsColoredChanged();

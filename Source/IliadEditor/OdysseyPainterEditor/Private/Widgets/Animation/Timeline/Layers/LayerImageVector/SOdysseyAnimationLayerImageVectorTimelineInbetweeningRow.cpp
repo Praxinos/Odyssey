@@ -180,8 +180,8 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseMove ( const FG
                     }
                 }
 
-                uint32 maxCellIndex = ( mInbetweenerTag->GetInterpolationDirection() == eInbetweenerInterpolationDirection::Forward ) ? listView->GetAnimationLayerImageVector()->GetLastCell()->GetIndex()
-                                                                                                                                      : listView->GetAnimationLayerImageVector()->GetFirstCell()->GetIndex();
+                uint32 maxCellIndex = ( mInbetweenerTag->GetInterpolationDirection() == eInbetweenerInterpolationDirection::Forward ) ? listView->GetAnimationLayerImageVector()->GetMaxCellFrom( tagCellIndex )->GetIndex()
+                                                                                                                                      : listView->GetAnimationLayerImageVector()->GetMinCellFrom( tagCellIndex )->GetIndex();
                 uint32 maxDrawingIndex = abs( (int)(maxCellIndex - tagCellIndex) );
                 uint32 prevDrawingIndex = prevBreakdown ? prevBreakdown->GetTargetDrawingIndex() : 0;
                 uint32 nextDrawingIndex = nextBreakdown ? nextBreakdown->GetTargetDrawingIndex() : maxDrawingIndex + 1;

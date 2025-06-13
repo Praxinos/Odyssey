@@ -151,6 +151,11 @@ FOdysseyVectorEngine::Render( BLContext* iBLContext
                             , FOdysseyVectorGroupPaint* iScene
                             , uint64 iDrawingFlags )
 {
+    // The thumbnail generator sometimes tries to render on cells that were removed from the layer.
+    // this is a quickfix.
+    if( iScene->GetLayer() == nullptr )
+        return ::ULIS::FRectD( 0.0f, 0.0f, 0.0f, 0.0F );
+
     TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorEngine::Render);
     BLImage* image = iBLContext->targetImage();
     ::ULIS::FRectD sanitizedRect;

@@ -35,8 +35,8 @@ void
 FOdysseyVectorLayer::InvalidateCell( FOdysseyVectorCell* iCell )
 {
     if( std::find( mInvalidatedCellList.begin()
-                 , mInvalidatedCellList.end()
-                 , iCell ) == mInvalidatedCellList.end() )
+                    , mInvalidatedCellList.end()
+                    , iCell ) == mInvalidatedCellList.end() )
     {
         mInvalidatedCellList.push_back( iCell );
     }

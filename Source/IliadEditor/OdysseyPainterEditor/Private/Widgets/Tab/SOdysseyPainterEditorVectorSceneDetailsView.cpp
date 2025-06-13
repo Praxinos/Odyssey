@@ -12,6 +12,8 @@
 #include "OdysseyPainterEditorVectorTagInbetweenerView.h"
 #include "OdysseyLayerStack.h"
 #include "OdysseyAnimationLayerImageVector.h"
+#include "OdysseyTextureLayerImageVector.h"
+
 #include "HUD/OdysseyVectorHUD.h"
 
 
@@ -167,6 +169,7 @@ void
 SOdysseyPainterEditorVectorSceneDetailsView::BindLayerDelegates( UOdysseyLayerStack* iLayerStack )
 {
     UOdysseyAnimationLayerImageVector* imageVectorLayer = Cast<UOdysseyAnimationLayerImageVector>(iLayerStack->GetCurrentLayer());
+    UOdysseyTextureLayerImageVector* textureVectorLayer = Cast<UOdysseyTextureLayerImageVector>(iLayerStack->GetCurrentLayer());
 
     if( imageVectorLayer )
     {
@@ -177,6 +180,20 @@ SOdysseyPainterEditorVectorSceneDetailsView::BindLayerDelegates( UOdysseyLayerSt
 
         mOldVectorLayer = mVectorLayer;
         mVectorLayer = imageVectorLayer->GetVectorLayer();
+
+        mVectorLayer->OnNotifyDelegate().AddSP( this, &SOdysseyPainterEditorVectorSceneDetailsView::OnVectorLayerNotify );
+    }
+
+
+    if( textureVectorLayer )
+    {
+        if( mOldVectorLayer.IsValid() )
+        {
+            mOldVectorLayer->OnNotifyDelegate().RemoveAll( this );
+        }
+
+        mOldVectorLayer = mVectorLayer;
+        mVectorLayer = textureVectorLayer->GetVectorLayer();
 
         mVectorLayer->OnNotifyDelegate().AddSP( this, &SOdysseyPainterEditorVectorSceneDetailsView::OnVectorLayerNotify );
     }
