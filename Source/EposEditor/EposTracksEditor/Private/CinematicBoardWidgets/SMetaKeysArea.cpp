@@ -84,9 +84,16 @@ SMetaKeysArea::CreateKeysUnderMouse( const FPointerEvent& MouseEvent ) const
 
     //---
 
+    mDragMode = EDragMode::kMoveSingleKey;
+    if( FSlateApplication::Get().GetModifierKeys().IsControlDown() )
+        mDragMode = EDragMode::kShiftFromKey;
+
     TSharedPtr<const FMetaChannel> meta_channel = GetMetaChannel();
     if( !meta_channel )
         return nullptr;
+
+    if( mDragMode == EDragMode::kShiftFromKey )
+        return meta_channel->CreateFromTimeAndBeyond( inner_clicked_frame, inner_tolerance );
 
     return meta_channel->CreateFromTime( inner_clicked_frame, inner_tolerance );
 }
@@ -161,7 +168,14 @@ SMetaKeysArea::OnCursorQuery( const FGeometry& MyGeometry, const FPointerEvent& 
     TSharedPtr<FMetaChannel> meta_channel = CreateKeysUnderMouse( CursorEvent );
 
     if( meta_channel.IsValid() && meta_channel->NumMetaKeys() )
-        return FCursorReply::Cursor( EMouseCursor::CardinalCross );
+    {
+        if( mDragMode == EDragMode::kShiftFromKey )
+        {
+            return FCursorReply::Cursor( EMouseCursor::GrabHand );
+        }
+
+        return FCursorReply::Cursor( EMouseCursor::ResizeLeftRight );
+    }
 
     return FCursorReply::Cursor( EMouseCursor::Default );
 }
@@ -303,6 +317,12 @@ SMetaKeysArea::ComputeClampRangePreMoveDuringDrag( TSharedPtr<FMetaChannel> iKey
 
     //UE_LOG( LogTemp, Warning, TEXT( "compute clamp: all: oClampRangeInSubsequence in sequence: %d" ), oClampRangeInSubsequence.GetUpperBoundValue().Value );
 
+    // Must be done after default behavior to set the lower bound
+    if( mDragMode == EDragMode::kShiftFromKey )
+    {
+        oClampRangeInSubsequence.SetUpperBound( TRangeBound<FFrameNumber>::Open() );
+        return;
+    }
 }
 
 FReply
@@ -335,9 +355,6 @@ SMetaKeysArea::OnMouseMove( const FGeometry& MyGeometry, const FPointerEvent& Mo
 
         const FMovieSceneSequenceTransform OuterToInnerTransform = subsection_object->OuterToInnerTransform();
         FFrameTime inner_moved_frame = moved_frame * OuterToInnerTransform;
-
-        // For the moment, this should always be the case (until meta keys selection)
-        check( mDraggedKeys->NumMetaKeys() == 1 );
 
         const bool snap = sequencer->GetSequencerSettings()->GetIsSnapEnabled() && sequencer->GetSequencerSettings()->GetForceWholeFrames();
         const FFrameRate inner_tick_resolution = subsection_object->GetSequence()->GetMovieScene()->GetTickResolution();

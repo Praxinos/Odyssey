@@ -81,8 +81,14 @@ private:
 protected:
     TWeakPtr<FCinematicBoardSection>    mBoardSection;
 
-protected:
-//private:
+    enum class EDragMode
+    {
+        kMoveSingleKey,
+        kShiftFromKey,
+    };
+    mutable EDragMode mDragMode = EDragMode::kMoveSingleKey; // mutable because modified in const CreateKeysUnderMouse()
+
+private:
     enum class EState
     {
         kIdle,

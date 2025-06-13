@@ -1887,24 +1887,27 @@ SCinematicBoardSectionAnimationTimelineKeys::ComputeClampRangePreMoveDuringDrag(
 
     //-
 
-    FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
-    const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
-    ISequencer* sequencer = board_section->GetSequencer().Get();
-
-    FFrameNumber clamp_max2 = UE::MovieScene::DiscreteExclusiveUpper( board_section_clamp_range_in_subsequence.GetUpperBound() ) - 1;
-
-    BoardSequenceHelpers::FInnerSequenceResult result_inner = BoardSequenceHelpers::GetInnerSequence( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
-    ShotSequenceHelpers::FFindOrCreateTimelineResult result = ShotSequenceHelpers::FindTimelineTrackAndSections( *sequencer, result_inner.mInnerSequence, result_inner.mInnerSequenceId, mBinding.GetGuid(), clamp_max2 );
-    if( result.mSections.Num() )
+    if( mDragMode == EDragMode::kMoveSingleKey )
     {
-        //TODO: certainly make a loop over all sections (?)
-        FFrameNumber frame_in_timeline = result.mSections[0]->ConvertFrameFromSequenceToTimeline( clamp_max2 );
-        FFrameNumber frame_in_sequence = result.mSections[0]->ConvertFrameFromTimelineToSequence( frame_in_timeline );
+        FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+        const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
+        ISequencer* sequencer = board_section->GetSequencer().Get();
 
-        clamp_max2 = frame_in_sequence;
+        FFrameNumber clamp_max2 = UE::MovieScene::DiscreteExclusiveUpper( board_section_clamp_range_in_subsequence.GetUpperBound() ) - 1;
+
+        BoardSequenceHelpers::FInnerSequenceResult result_inner = BoardSequenceHelpers::GetInnerSequence( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
+        ShotSequenceHelpers::FFindOrCreateTimelineResult result = ShotSequenceHelpers::FindTimelineTrackAndSections( *sequencer, result_inner.mInnerSequence, result_inner.mInnerSequenceId, mBinding.GetGuid(), clamp_max2 );
+        if( result.mSections.Num() )
+        {
+            //TODO: certainly make a loop over all sections (?)
+            FFrameNumber frame_in_timeline = result.mSections[0]->ConvertFrameFromSequenceToTimeline( clamp_max2 );
+            FFrameNumber frame_in_sequence = result.mSections[0]->ConvertFrameFromTimelineToSequence( frame_in_timeline );
+
+            clamp_max2 = frame_in_sequence;
+        }
+
+        board_section_clamp_range_in_subsequence.SetUpperBound( TRangeBound<FFrameNumber>::Inclusive( clamp_max2 ) );
     }
-
-    board_section_clamp_range_in_subsequence.SetUpperBound( TRangeBound<FFrameNumber>::Inclusive( clamp_max2 ) );
 
     //---
 
@@ -1962,25 +1965,28 @@ SCinematicBoardSectionAnimationTimelineKeys::ComputeClampRangePreMoveDuringDrag(
                 }
             }
         }
-        if( next_handle_in_section.IsValid() )
+        if( mDragMode == EDragMode::kMoveSingleKey )
         {
-            FFrameNumber next_frame_in_section;
-            section->GetAnimationCutChannel().GetKeyTime( next_handle_in_section, next_frame_in_section );
-
-            if( !last_limit_handle.Key )
+            if( next_handle_in_section.IsValid() )
             {
-                last_limit_handle.Key = section;
-                last_limit_handle.Value = next_handle_in_section;
-            }
-            else
-            {
-                FFrameNumber next_frame;
-                last_limit_handle.Key->GetAnimationCutChannel().GetKeyTime( last_limit_handle.Value, next_frame );
+                FFrameNumber next_frame_in_section;
+                section->GetAnimationCutChannel().GetKeyTime( next_handle_in_section, next_frame_in_section );
 
-                if( next_frame_in_section > next_frame )
+                if( !last_limit_handle.Key )
                 {
                     last_limit_handle.Key = section;
                     last_limit_handle.Value = next_handle_in_section;
+                }
+                else
+                {
+                    FFrameNumber next_frame;
+                    last_limit_handle.Key->GetAnimationCutChannel().GetKeyTime( last_limit_handle.Value, next_frame );
+
+                    if( next_frame_in_section > next_frame )
+                    {
+                        last_limit_handle.Key = section;
+                        last_limit_handle.Value = next_handle_in_section;
+                    }
                 }
             }
         }
@@ -2010,14 +2016,17 @@ SCinematicBoardSectionAnimationTimelineKeys::ComputeClampRangePreMoveDuringDrag(
         if( sections.Num() )
             prev_last_cell_clamp_range_in_subsequence.SetLowerBound( TRangeBound<FFrameNumber>::Inclusive( frame_in_sequence_min_0 ) );
     }
-    if( last_limit_handle.Key )
+    if( mDragMode == EDragMode::kMoveSingleKey )
     {
-        FFrameNumber frame_in_sequence;
-        last_limit_handle.Key->GetAnimationCutChannel().GetKeyTime( last_limit_handle.Value, frame_in_sequence );
-        FFrameNumber frame_in_timeline = last_limit_handle.Key->ConvertFrameFromSequenceToTimeline( frame_in_sequence );
-        frame_in_sequence = last_limit_handle.Key->ConvertFrameFromTimelineToSequence( frame_in_timeline - 1 );
+        if( last_limit_handle.Key )
+        {
+            FFrameNumber frame_in_sequence;
+            last_limit_handle.Key->GetAnimationCutChannel().GetKeyTime( last_limit_handle.Value, frame_in_sequence );
+            FFrameNumber frame_in_timeline = last_limit_handle.Key->ConvertFrameFromSequenceToTimeline( frame_in_sequence );
+            frame_in_sequence = last_limit_handle.Key->ConvertFrameFromTimelineToSequence( frame_in_timeline - 1 );
 
-        prev_last_cell_clamp_range_in_subsequence.SetUpperBound( TRangeBound<FFrameNumber>::Inclusive( frame_in_sequence ) );
+            prev_last_cell_clamp_range_in_subsequence.SetUpperBound( TRangeBound<FFrameNumber>::Inclusive( frame_in_sequence ) );
+        }
     }
 
     //---

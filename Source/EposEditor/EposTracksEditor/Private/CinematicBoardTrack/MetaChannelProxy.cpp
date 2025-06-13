@@ -43,6 +43,16 @@ FMetaChannel::CreateFromTime( const FFrameTime& iTime, const FFrameNumber& iTole
     return new_meta_channel;
 }
 
+TSharedPtr<FMetaChannel>
+FMetaChannel::CreateFromTimeAndBeyond( const FFrameTime& iTime, const FFrameNumber& iTolerance ) const
+{
+    TSharedPtr<FMetaChannel> new_meta_channel = MakeShared<FMetaChannel>( mMergeTolerance );
+
+    FillWithTimeAndBeyond( iTime, iTolerance, new_meta_channel );
+
+    return new_meta_channel;
+}
+
 //---
 
 void
@@ -277,6 +287,40 @@ FMetaChannel::FillWithTime( const FFrameTime& iTime, const FFrameNumber& iTolera
     }
 }
 
+void
+FMetaChannel::FillWithTimeAndBeyond( const FFrameTime& iTime, const FFrameNumber& iTolerance, TSharedPtr<FMetaChannel> ioMetaChannel ) const
+{
+    FillWithTime( iTime, iTolerance, ioMetaChannel );
+
+    if( ioMetaChannel->mMetaKeys.IsEmpty() )
+        return;
+
+    check( ioMetaChannel->mMetaKeys.Num() == 1 );
+    FFrameNumber reference_meta_frame = ioMetaChannel->mMetaKeys.Array()[0].Key;
+
+    for( const auto& pair : mMetaKeys )
+    {
+        FFrameNumber meta_frame = pair.Key;
+        const FMetaKey& meta_key = pair.Value;
+
+        if( meta_frame <= reference_meta_frame )
+            continue;
+
+        TPair<FFrameNumber, FMetaKey> new_pair( pair );
+
+        for( auto& sub_key : new_pair.Value.mSubKeys )
+        {
+            FFrameNumber key_frame;
+            sub_key.mChannelHandle.Get()->GetKeyTime( sub_key.mKeyHandle, key_frame );
+            // positive offset = offset to left
+            // negative offset = offset to right
+            sub_key.mOffset = iTime - key_frame;
+        }
+
+        ioMetaChannel->mMetaKeys.Add( new_pair );
+    }
+}
+
 //---
 
 FFrameTime
@@ -305,18 +349,28 @@ FMetaChannel::Move( const FFrameTime& iTime, bool iSnap, const FFrameRate& iTick
 
     if( iTrueRangeToClamp.IsSet() && !iTrueRangeToClamp->IsEmpty() )
     {
-        //UE_LOG( LogTemp, Warning, TEXT( "iTrueRangeToClamp: [%d %d[" ), iTrueRangeToClamp->GetLowerBoundValue().Value, iTrueRangeToClamp->GetUpperBoundValue().Value );
+        if( iTrueRangeToClamp->GetUpperBound().IsOpen() )
+        {
+            FFrameNumber lower_value = ( iTrueRangeToClamp->GetLowerBoundValue() + max_offset ).CeilToFrame();
+            TRange<FFrameNumber> new_clamped_true_range = TRange<FFrameNumber>::AtLeast( lower_value );
 
-        FFrameNumber lower_value = ( iTrueRangeToClamp->GetLowerBoundValue() + max_offset ).CeilToFrame();
-        FFrameNumber upper_value = ( iTrueRangeToClamp->GetUpperBoundValue() + min_offset ).CeilToFrame(); // Is it really correct ?
-        //FFrameNumber upper_value = ( iTrueRangeToClamp->GetUpperBoundValue() + min_offset ).FloorToFrame();
-        TRange<FFrameNumber> new_clamped_true_range = TRange<FFrameNumber>( lower_value, upper_value );
+            clamped_time = UE::MovieScene::ClampToDiscreteRange( clamped_time, new_clamped_true_range );
+        }
+        else
+        {
+            //UE_LOG( LogTemp, Warning, TEXT( "iTrueRangeToClamp: [%d %d[" ), iTrueRangeToClamp->GetLowerBoundValue().Value, iTrueRangeToClamp->GetUpperBoundValue().Value );
 
-        //UE_LOG( LogTemp, Warning, TEXT( "new_clamped_true_range: [%d %d[" ), new_clamped_true_range.GetLowerBoundValue().Value, new_clamped_true_range.GetUpperBoundValue().Value );
+            FFrameNumber lower_value = ( iTrueRangeToClamp->GetLowerBoundValue() + max_offset ).CeilToFrame();
+            FFrameNumber upper_value = ( iTrueRangeToClamp->GetUpperBoundValue() + min_offset ).CeilToFrame(); // Is it really correct ?
+            //FFrameNumber upper_value = ( iTrueRangeToClamp->GetUpperBoundValue() + min_offset ).FloorToFrame();
+            TRange<FFrameNumber> new_clamped_true_range = TRange<FFrameNumber>( lower_value, upper_value );
 
-        //UE_LOG( LogTemp, Warning, TEXT( "iTime: %d %f" ), clamped_time.GetFrame().Value, clamped_time.GetSubFrame() );
-        clamped_time = UE::MovieScene::ClampToDiscreteRange( clamped_time, new_clamped_true_range );
-        //UE_LOG( LogTemp, Warning, TEXT( "clamped_time: %d %f" ), clamped_time.GetFrame().Value, clamped_time.GetSubFrame() );
+            //UE_LOG( LogTemp, Warning, TEXT( "new_clamped_true_range: [%d %d[" ), new_clamped_true_range.GetLowerBoundValue().Value, new_clamped_true_range.GetUpperBoundValue().Value );
+
+            //UE_LOG( LogTemp, Warning, TEXT( "iTime: %d %f" ), clamped_time.GetFrame().Value, clamped_time.GetSubFrame() );
+            clamped_time = UE::MovieScene::ClampToDiscreteRange( clamped_time, new_clamped_true_range );
+            //UE_LOG( LogTemp, Warning, TEXT( "clamped_time: %d %f" ), clamped_time.GetFrame().Value, clamped_time.GetSubFrame() );
+        }
     }
 
 #if 1

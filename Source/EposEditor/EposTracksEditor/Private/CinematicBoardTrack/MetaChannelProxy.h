@@ -63,6 +63,9 @@ public:
     /** Create a new meta channel with all meta keys at the given time of the current meta channel */
     virtual TSharedPtr<FMetaChannel> CreateFromTime( const FFrameTime& iTime, const FFrameNumber& iTolerance ) const;
 
+    /** Create a new meta channel with all meta keys at the given time and beyond of the current meta channel */
+    virtual TSharedPtr<FMetaChannel> CreateFromTimeAndBeyond( const FFrameTime& iTime, const FFrameNumber& iTolerance ) const;
+
 protected:
     /** Build all the sub keys */
     virtual void BuildSubKeys( const FChannelProxyBySectionMap& iChannelProxyMap );
@@ -75,6 +78,11 @@ protected:
         This function must be used inside CreateFromTime(...) which returns the 'real' meta channel type
     */
     virtual void FillWithTime( const FFrameTime& iTime, const FFrameNumber& iTolerance, TSharedPtr<FMetaChannel> ioMetaChannel ) const;
+
+    /** Get all meta keys at the given time and beyond of the current meta channel and copy them inside the new (empty) meta channel
+        This function must be used inside CreateFromTime(...) which returns the 'real' meta channel type
+    */
+    virtual void FillWithTimeAndBeyond( const FFrameTime& iTime, const FFrameNumber& iTolerance, TSharedPtr<FMetaChannel> ioMetaChannel ) const;
 
     /** Find the first sequencer channel interface for subkeys
     *   (Assume every subkeys have the same channel type)
