@@ -34,7 +34,7 @@
 #include "OdysseyAnimationCut.h"
 #include "OdysseyAnimationCutChannel.h"
 #include "OdysseyAnimationTimelineSection.h"
-//#include "OdysseyPainterEditorSettings.h"
+#include "OdysseyPainterEditorSettings.h"
 #include "OdysseyViewportDrawingEditorEdMode.h"
 #include "Tools/ResourceAssetTools.h"
 #include "Settings/EposTracksEditorSettings.h"
@@ -982,9 +982,8 @@ SCinematicBoardSectionAnimationTimelineKeys::Construct( const FArguments& InArgs
 
     mBinding = InArgs._Binding;
 
-    //const UOdysseyPainterEditorSettings& settings = *GetDefault<UOdysseyPainterEditorSettings>();
-    //mCheckboardTexture = FImageUtils::CreateCheckerboardTexture( settings.CheckerColorOne, settings.CheckerColorTwo, 16 );
-    mCheckboardTexture = FImageUtils::CreateCheckerboardTexture( FColor::White, FColor( 224, 224, 224 ), 16 );
+    const UOdysseyPainterEditorSettings& settings = *GetDefault<UOdysseyPainterEditorSettings>();
+    mCheckboardTexture = FImageUtils::CreateCheckerboardTexture( settings.CheckerColorOne, settings.CheckerColorTwo, settings.CheckerSize );
 
     mCheckboardBrush = new FSlateBrush();
     mCheckboardBrush->Tiling = ESlateBrushTileType::Both;
