@@ -1883,7 +1883,7 @@ void
 SCinematicBoardSectionAnimationTimelineKeys::ComputeClampRangePreMoveDuringDrag( TSharedPtr<FMetaChannel> iKeys, TRange<FFrameNumber>& oClampRangeInSubsequence ) const //override
 {
     TRange<FFrameNumber> board_section_clamp_range_in_subsequence;
-    SMetaKeysArea::ComputeClampRangePreMoveDuringDrag( mDraggedKeys, board_section_clamp_range_in_subsequence ); // Always call the default clamp range to get min/max boundary of the whole board section in the board track
+    SMetaKeysArea::ComputeClampRangePreMoveDuringDrag( iKeys, board_section_clamp_range_in_subsequence ); // Always call the default clamp range to get min/max boundary of the whole board section in the board track
 
     //-
 

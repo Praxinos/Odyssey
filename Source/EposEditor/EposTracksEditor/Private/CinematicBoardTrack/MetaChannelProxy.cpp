@@ -282,7 +282,7 @@ FMetaChannel::FillWithTime( const FFrameTime& iTime, const FFrameNumber& iTolera
 FFrameTime
 FMetaChannel::Move( const FFrameTime& iTime, bool iSnap, const FFrameRate& iTickResolution, const FFrameRate& iDisplayRate, TOptional<TRange<FFrameNumber>> iTrueRangeToClamp )
 {
-    FFrameNumber last_inner_sub_key_frame; // This is the last sub key in the last meta key moved (at this moment, there is always only one), mainly to set the current frame in the sequencer
+    TOptional<FFrameNumber> last_inner_sub_key_frame; // This is the last sub key in the last meta key moved (at this moment, there is always only one), mainly to set the current frame in the sequencer
 
     FFrameTime clamped_time = iTime;
 
@@ -374,15 +374,13 @@ FMetaChannel::Move( const FFrameTime& iTime, bool iSnap, const FFrameRate& iTick
                 //    inner_moved_key_time = FMath::Min( inner_moved_key_time, FFrameTime( iTrueRangeToClamp->GetUpperBoundValue() - 1 ) );
             }
 
-            last_inner_sub_key_frame = inner_moved_key_time.FloorToFrame();
-            //UE_LOG( LogTemp, Warning, TEXT( "last_inner_sub_key_frame: %d" ), last_inner_sub_key_frame.Value );
-
-            //channel->SetKeyTime( sub_key.mKeyHandle, last_inner_sub_key_frame );
-
             FKeyHandleAndFrame key_and_frame;
             key_and_frame.KeyHandle = sub_key.mKeyHandle;
-            key_and_frame.NewFrame = last_inner_sub_key_frame;
+            key_and_frame.NewFrame = inner_moved_key_time.FloorToFrame();
             //channel->GetKeyTime( sub_key.mKeyHandle, key_and_frame.OldFrame );
+
+            if( !last_inner_sub_key_frame )
+                last_inner_sub_key_frame = key_and_frame.NewFrame;
 
             new_map.Add( channel, key_and_frame );
         }
@@ -466,5 +464,6 @@ FMetaChannel::Move( const FFrameTime& iTime, bool iSnap, const FFrameRate& iTick
 
 #endif
 
-    return last_inner_sub_key_frame;
+    check( last_inner_sub_key_frame );
+    return *last_inner_sub_key_frame;
 }
