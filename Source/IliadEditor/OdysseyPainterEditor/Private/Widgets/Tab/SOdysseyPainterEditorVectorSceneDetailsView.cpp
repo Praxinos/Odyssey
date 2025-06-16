@@ -38,6 +38,8 @@ SOdysseyPainterEditorVectorSceneDetailsView::~SOdysseyPainterEditorVectorSceneDe
     {
         mVectorLayer->OnNotifyDelegate().RemoveAll( this );
     }
+
+    UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
 }
 
 SOdysseyPainterEditorVectorSceneDetailsView::SOdysseyPainterEditorVectorSceneDetailsView()
