@@ -354,15 +354,20 @@ UOdysseyPainterEditorVectorBaseTool::Load()
 void
 UOdysseyPainterEditorVectorBaseTool::OnVectorLayerNotify( FOdysseyVectorLayer* iLayer, uint64 iNotificationFlags )
 {
-    if( iNotificationFlags & FOdysseyVectorEngine::NOTIFY_UPDATE_HUD )
+    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+
+    if ( hasVector )
     {
-        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
-
-        if( mediaVectors.Num() > 0 )
+        if( iNotificationFlags & FOdysseyVectorEngine::NOTIFY_UPDATE_HUD )
         {
-            FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
+            TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
 
-            iLayer->ResetHUD( vectorScene );
+            if( mediaVectors.Num() > 0 )
+            {
+                FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
+
+                iLayer->ResetHUD( vectorScene );
+            }
         }
     }
 }

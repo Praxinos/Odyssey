@@ -42,6 +42,9 @@ SOdysseyPainterEditorVectorSceneTreeView::~SOdysseyPainterEditorVectorSceneTreeV
         mVectorLayer->OnNotifyDelegate().RemoveAll( this );
     }
 
+    // Keep commented-out until we convert mEditor to a sharedptr
+    //mEditor->OnSourceChanged().RemoveAll( this );
+
     UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
 }
 

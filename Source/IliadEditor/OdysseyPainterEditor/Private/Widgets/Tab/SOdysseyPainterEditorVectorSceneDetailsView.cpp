@@ -39,12 +39,17 @@ SOdysseyPainterEditorVectorSceneDetailsView::~SOdysseyPainterEditorVectorSceneDe
         mVectorLayer->OnNotifyDelegate().RemoveAll( this );
     }
 
-    UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
+    // Keep commented-out until we convert mEditor to a sharedptr
+    //mEditor->OnSourceChanged().RemoveAll( this );
+
+    UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll( this );
 }
 
 SOdysseyPainterEditorVectorSceneDetailsView::SOdysseyPainterEditorVectorSceneDetailsView()
     : mEditor(nullptr)
     , mScene(*this, nullptr)
+    , mOldVectorLayer ( nullptr )
+    , mVectorLayer ( nullptr )
 {
     mObjectView = NewObject<UOdysseyPainterEditorVectorObjectView>();
     mGroupView = NewObject<UOdysseyPainterEditorVectorGroupView>();
