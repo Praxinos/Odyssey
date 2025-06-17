@@ -74,6 +74,32 @@ ProjectAssetTools::CreateAnimation( const IMovieScenePlayer& iPlayer, UMovieScen
 UStoryNote*
 ProjectAssetTools::CreateNote( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID )
 {
+    IAssetTools& assetTools = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" ).Get();
+
+    auto FindNoteFactory = []() -> UFactory*
+        {
+            for( TObjectIterator<UClass> it; it; ++it )
+            {
+                UClass* currentClass = *it;
+                if( currentClass->IsChildOf( UFactory::StaticClass() ) && !( currentClass->HasAnyClassFlags( CLASS_Abstract ) ) )
+                {
+                    UFactory* factory = Cast<UFactory>( currentClass->GetDefaultObject() );
+                    if( factory->CanCreateNew() && factory->ImportPriority >= 0 && factory->SupportedClass == UStoryNote::StaticClass() )
+                    {
+                        return factory;
+                    }
+                }
+            }
+
+            return nullptr;
+        };
+
+    UFactory* factory = FindNoteFactory();
+    if( !factory )
+        return nullptr;
+
+    //---
+
     if( UEposMovieSceneSequence* epos_sequence = Cast<UEposMovieSceneSequence>( iSequence ) )
     {
         FString note_path;
@@ -82,19 +108,20 @@ ProjectAssetTools::CreateNote( ISequencer& iSequencer, UMovieSceneSequence* iSeq
 
         //---
 
-        FAssetToolsModule& assetToolsModule = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" );
-        UObject* new_object = assetToolsModule.Get().CreateAsset( note_name, note_path, UStoryNote::StaticClass(), nullptr );
+        UObject* new_object = assetTools.CreateAsset( note_name, note_path, UStoryNote::StaticClass(), factory );
         UStoryNote* new_note = Cast<UStoryNote>( new_object );
         check( new_note );
-
-        new_note->Text = TEXT( "Write a note here" ); // default text
 
         return new_note;
     }
 
-    checkf( false, TEXT( "iSequence is certainly a LevelSequence, manage it" ) );
+    //---
 
-    return nullptr;
+    UObject* new_object = assetTools.CreateAssetWithDialog( UStoryNote::StaticClass(), factory );
+    UStoryNote* new_note = Cast<UStoryNote>( new_object );
+    check( new_note );
+
+    return new_note;
 }
 
 //static
