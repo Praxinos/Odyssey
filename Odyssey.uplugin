@@ -19,11 +19,7 @@
     "FabURL": "com.epicgames.launcher://ue/Fab/product/c2a71aa9-998c-4286- 9d5b-df91d9cc4034",
     "LocalizationTargets": [
         {
-            "Name": "Epos",
-            "LoadingPolicy": "Editor"
-        },
-        {
-            "Name": "Iliad",
+            "Name": "Odyssey",
             "LoadingPolicy": "Editor"
         }
     ],
