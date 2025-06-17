@@ -32,6 +32,7 @@
 #include "OdysseyAnimationComponent.h"
 #include "OdysseyAnimationTimelineSection.h"
 #include "OdysseyLayer.h"
+#include "OdysseyLayerCell.h"
 #include "OdysseyLayerStack.h"
 #include "ScalingComponent.h"
 #include "Settings/EposTracksEditorSettings.h"
@@ -211,6 +212,17 @@ ShotSequenceTools::SpawnAndBindAnimation( ISequencer& iSequencer, UMovieSceneSeq
     for( UOdysseyLayer* layer : layer_stack->GetLayers() )
     {
         layer->SetPostBehaviour( EOdysseyLayerImagePostBehaviour::Hold );
+
+        TArray<UOdysseyLayerCell*> cells = layer->GetCells();
+        for( UOdysseyLayerCell* cell : cells )
+        {
+            // (Let's see if directly transforming a duration is ok, otherwise create a new transformed range and get its size)
+            // Convert a sequence frame to a real timeline frame (change framerate from sequence framerate (aka tickresolution) to animation framerate)
+            FFrameTime frametime_in_timeline = FFrameRate::TransformTime( UE::MovieScene::DiscreteSize( iSequence->GetMovieScene()->GetPlaybackRange() ), iSequence->GetMovieScene()->GetTickResolution(), FFrameRate( new_animation->GetFramesPerSecond() * 1000, 1000 ) );
+            FFrameNumber frame_in_timeline = frametime_in_timeline.GetFrame(); // It should be ok (?)
+
+            cell->SetExposure( frame_in_timeline.Value );
+        }
     }
 
     // Set the size of the new section to playbackrange by default
