@@ -762,7 +762,11 @@ public:
     virtual TSharedPtr<SWidget> MakeViewportToolbar() { return nullptr; }
     virtual TSharedPtr<SWidget> BuildViewportToolbar() override
     {
-        return nullptr;
+        //Build our own toolbar
+        //Calling this here creates the toolbar before the end of SLevelViewport::Construct to ensure DPIScale is set correctly
+        //see last line of SLevelViewport::Construct
+        MakeExternalViewportToolbar();
+        return nullptr; //return nullptr to hide the default toolbar and let us place it like we want
     }
 
     // Used to add StoryboardViewportContext to LevelViewport
@@ -799,32 +803,9 @@ public:
         }
     }
 
-    TSharedPtr<SWidget> MakeExternalViewportToolbar()
+    TSharedPtr<SWidget> GetExternalViewportToolbar()
     {
-        // Adding Film Overlay Options widget to new toolbars
-        ExtendLevelToolbar();
-
-        // clang-format off
-        TSharedRef<SVerticalBox> ToolbarsWidget =
-            SNew(SVerticalBox)
-            + SVerticalBox::Slot()
-            .AutoHeight()
-            [
-                SNew(SBox)
-                [
-                    SLevelViewport::BuildViewportToolbar().ToSharedRef()
-                ]
-            ]
-            + SVerticalBox::Slot()
-            .MaxHeight(1.0f)
-            [
-                CreateViewportIndicatorWidget(
-                    TAttribute<EVisibility>::CreateSP(this, &SStoryboardPreviewViewport::OnGetStoryboardViewportIndicatorVisibility)
-                    ).ToSharedRef()
-            ];
-        // clang-format on
-
-        return ToolbarsWidget;
+        return ExternalViewportToolbar;
     }
 
     FSlateColor GetBorderColorAndOpacity() const
@@ -854,9 +835,38 @@ public:
     }
 
 private:
+    void MakeExternalViewportToolbar()
+    {
+
+        // Adding Film Overlay Options widget to new toolbars
+        ExtendLevelToolbar();
+
+        // clang-format off
+        ExternalViewportToolbar =
+            SNew(SVerticalBox)
+            + SVerticalBox::Slot()
+            .AutoHeight()
+            [
+                SNew(SBox)
+                [
+                    SLevelViewport::BuildViewportToolbar().ToSharedRef()
+                ]
+            ]
+            + SVerticalBox::Slot()
+            .MaxHeight(1.0f)
+            [
+                CreateViewportIndicatorWidget(
+                    TAttribute<EVisibility>::CreateSP(this, &SStoryboardPreviewViewport::OnGetStoryboardViewportIndicatorVisibility)
+                    ).ToSharedRef()
+            ];
+        // clang-format on
+    }
+
+private:
     bool bShowToolbar;
     TSharedPtr<SStoryboardLevelViewportCameraBounds> CameraBounds;
     TWeakPtr<SStoryboardLevelViewport> StoryboardLevelViewport;
+    TSharedPtr<SWidget> ExternalViewportToolbar;
 };
 
 
@@ -1319,7 +1329,7 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
         .Visibility_Lambda([] { return GLevelEditorModeTools().IsViewportUIHidden() ? EVisibility::Hidden : EVisibility::SelfHitTestInvisible; })
         + SHorizontalBox::Slot()
         [
-            ViewportWidget->MakeExternalViewportToolbar().ToSharedRef()
+            ViewportWidget->GetExternalViewportToolbar().ToSharedRef()
         ];
 
     TSharedRef<SWidget> ViewportAndToolBar = SNew(SWidgetSwitcher)
