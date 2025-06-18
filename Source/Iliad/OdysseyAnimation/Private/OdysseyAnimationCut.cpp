@@ -6,8 +6,9 @@
 #include "MovieSceneTimeHelpers.h"
 
 #include "OdysseyAnimation.h"
-#include "OdysseyAnimationCell.h"
+#include "OdysseyAnimationUtils.h"
 #include "OdysseyLayer.h"
+#include "OdysseyLayerCell.h"
 
 #define LOCTEXT_NAMESPACE "AnimationCut"
 
@@ -17,7 +18,7 @@ FAnimationCutEntry::FAnimationCutEntry()
 {
 }
 
-FAnimationCutEntry::FAnimationCutEntry( UOdysseyAnimationCell* iCellBefore, UOdysseyAnimationCell* iCellAfter )
+FAnimationCutEntry::FAnimationCutEntry( UOdysseyLayerCell* iCellBefore, UOdysseyLayerCell* iCellAfter )
     : mCellBefore( iCellBefore )
     , mCellAfter( iCellAfter )
 {
@@ -39,7 +40,7 @@ FAnimationCutEntry::GetFrameReference() const
     return FFrameNumber();
 }
 
-UOdysseyAnimationCell*
+UOdysseyLayerCell*
 FAnimationCutEntry::GetCellReference()
 {
     if( !mCellBefore && mCellAfter )
@@ -212,8 +213,12 @@ FAnimationCut::GetAnimation()
 {
     for( FAnimationCutEntry entry : mAnimationCutEntries )
     {
-        if( entry.GetCellReference() && entry.GetCellReference()->GetAnimation() )
-            return entry.GetCellReference()->GetAnimation();
+        if( !entry.GetCellReference() )
+            continue;
+
+        UOdysseyAnimation* animation = ::Odyssey::AnimationUtils::GetCellAnimation(entry.GetCellReference());
+        if (animation)
+            return animation;
     }
 
     return nullptr;
@@ -230,10 +235,10 @@ FAnimationCut::GetFrameReference() const
     return frames.Array()[0];
 }
 
-TArray<UOdysseyAnimationCell*>
+TArray<UOdysseyLayerCell*>
 FAnimationCut::GetCellsReference() const
 {
-    TArray<UOdysseyAnimationCell*> cells;
+    TArray<UOdysseyLayerCell*> cells;
     for( FAnimationCutEntry entry : mAnimationCutEntries )
         cells.Add( entry.GetCellReference() );
 
