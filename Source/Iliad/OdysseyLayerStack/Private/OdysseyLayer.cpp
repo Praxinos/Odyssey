@@ -1250,7 +1250,7 @@ UOdysseyLayer::BuildLighttableRenderPipeline(
                 );
 
                 FRDGTextureRef keyTexture = iGraphBuilder.CreateTexture(desc, TEXT("UOdysseyLayer::Lighttable::keyTexture"));
-                keyRenderParams.RenderFunction(iGraphBuilder, iFeatureLevel, keyTexture, iSrcRect, iDstRect, iSrcTransform);
+                keyRenderParams.RenderFunction(iGraphBuilder, iFeatureLevel, keyTexture, iSrcRect, iDstRect, iSrcTransform * keyRenderParams.Transform);
 
                 //Turn to black and white
                 FOdysseyBlendColorShader::BlendRect(
@@ -1298,7 +1298,7 @@ UOdysseyLayer::BuildLighttableRenderPipeline(
                     iDestinationTexture,
                     iDstRect,
                     iDstRect,
-                    keyRenderParams.Transform,
+                    FMatrix::Identity,
                     EOdysseyBlendingMode::kNormal,
                     EOdysseyAlphaMode::kNormal,
                     keyRenderParams.Opacity,
