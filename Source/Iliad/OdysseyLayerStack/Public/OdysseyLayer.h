@@ -292,6 +292,7 @@ public:
 #endif
 
     virtual void PostInitProperties() override;
+    virtual void PostLoad() override;
     virtual void PostDuplicate(EDuplicateMode::Type iDuplicateMode) override;
     virtual TArray<FGuid> GetRenderingComposition(uint64 iRenderType, int iFrame) const override;
     virtual FIntRect GetDefaultRenderRect() const override;
@@ -331,8 +332,8 @@ protected:
     UPROPERTY()
     bool bCanHaveChildren = false;
 
-    UPROPERTY(DuplicateTransient)
-    UOdysseyLayer* Parent;
+    UPROPERTY(Transient, DuplicateTransient)
+    UOdysseyLayer* Parent = nullptr;
 
     UPROPERTY()
     TArray<UOdysseyLayer*> Children;

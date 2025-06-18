@@ -52,6 +52,16 @@ UOdysseyLayer::PostInitProperties()
 }
 
 void
+UOdysseyLayer::PostLoad()
+{
+    Super::PostLoad();
+    for (UOdysseyLayer* child : Children)
+    {
+        child->Parent = this;
+    }
+}
+
+void
 UOdysseyLayer::PostDuplicate(EDuplicateMode::Type iDuplicateMode)
 {
     Super::PostDuplicate(iDuplicateMode);
