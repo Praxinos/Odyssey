@@ -53,7 +53,7 @@ public:
     void UpdateAnimationCutChannel( const TArray<FKeyHandle>& iKeyHandles, EPropertyChangeType::Type iChangeType );
 
 protected:
-    void PostLoad();
+    virtual void PostLoad() override;
 
     virtual EMovieSceneChannelProxyType CacheChannelProxy() override;
     virtual void MigrateFrameTimes(FFrameRate SourceRate, FFrameRate DestinationRate) override;

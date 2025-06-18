@@ -48,7 +48,7 @@ public:
     UOdysseyLayerStack* GetLayerStack() const;
 
     UFUNCTION(BlueprintCallable, Category="Odyssey|Cell")
-    FInt32Range GetFrameRange() const;
+    virtual FInt32Range GetFrameRange() const override;
 
     UFUNCTION(BlueprintPure, Category="Odyssey|Cell")
     int GetIndexInLayer() const;
