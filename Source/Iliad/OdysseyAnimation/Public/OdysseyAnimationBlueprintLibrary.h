@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "Kismet/BlueprintFunctionLibrary.h"
 #include "OdysseyAnimationBlueprintLibrary.generated.h"
 
 class UOdysseyAnimation;
