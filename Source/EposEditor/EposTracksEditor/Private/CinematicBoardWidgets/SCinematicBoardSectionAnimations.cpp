@@ -240,38 +240,12 @@ private:
     TWeakPtr<FCinematicBoardSection>    mBoardSection;
     FMovieScenePossessable              mBinding;
     TAttribute<EVisibility>             mOptionalWidgetsVisibility;
-
-    /** Delegate binding handle for ISequencer::OnMovieSceneDataChanged */
-    FDelegateHandle mMovieSceneDataChangedHandle;
 };
 
 //---
 
 SCinematicBoardSectionAnimationTitle::~SCinematicBoardSectionAnimationTitle()
 {
-    if( mBoardSection.IsValid() && mBoardSection.Pin()->GetSequencer().IsValid() )
-        mBoardSection.Pin()->GetSequencer()->OnMovieSceneDataChanged().Remove( mMovieSceneDataChangedHandle );
-}
-
-void
-SCinematicBoardSectionAnimationTitle::MovieSceneDataChanged( EMovieSceneDataChangeType iType )
-{
-    TSharedPtr<ISequencer> sequencer = mBoardSection.Pin()->GetSequencer();
-    UMovieSceneSubSection& subsection = mBoardSection.Pin()->GetSubSectionObject();
-
-    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, subsection, sequencer->GetFocusedTemplateID() );
-
-    //---
-
-    ShotSequenceHelpers::FFindOrCreateAnimationVisibilityResult animation_visibility_result = ShotSequenceHelpers::FindAnimationVisibilityTrackAndSections( *sequencer, result.mInnerSequence, result.mInnerSequenceId, mBinding.GetGuid() );
-
-    if( animation_visibility_result.mTrack.IsValid() && animation_visibility_result.mSections.Num() == 1 )
-    {
-        if( animation_visibility_result.mSections[0]->GetTrueRange() != result.mInnerMovieScene->GetPlaybackRange() )
-        {
-            animation_visibility_result.mSections[0]->SetRange( result.mInnerMovieScene->GetPlaybackRange() );
-        }
-    }
 }
 
 //---
@@ -284,8 +258,6 @@ SCinematicBoardSectionAnimationTitle::Construct( const FArguments& InArgs, TShar
     mBinding = InArgs._Binding;
     check( mBinding.GetGuid().IsValid() );
     mOptionalWidgetsVisibility = InArgs._OptionalWidgetsVisibility;
-
-    mMovieSceneDataChangedHandle = mBoardSection.Pin()->GetSequencer()->OnMovieSceneDataChanged().AddSP( this, &SCinematicBoardSectionAnimationTitle::MovieSceneDataChanged ); //TODO: or do it elsewhere ? in the USection/UTrack/... ?
 
     //---
 

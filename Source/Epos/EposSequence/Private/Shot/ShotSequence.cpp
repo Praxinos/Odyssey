@@ -22,6 +22,7 @@
 #include "Tracks/MovieSceneLevelVisibilityTrack.h"
 #include "Tracks/MovieSceneAudioTrack.h"
 #include "Tracks/MovieSceneSkeletalAnimationTrack.h"
+#include "Tracks/MovieSceneVisibilityTrack.h"
 #include "UObject/AssetRegistryTagsContext.h"
 #include "SubObjectLocator.h"
 #include "UniversalObjectLocators/ActorLocatorFragment.h"
@@ -32,6 +33,8 @@
 #include "INamingFormatter.h"
 #include "PlaneActor.h"
 #include "OdysseyAnimationActor.h"
+#include "OdysseyAnimationTimelineSection.h"
+#include "OdysseyAnimationTimelineTrack.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
 #include "NoteTrack/MovieSceneNoteTrack.h"
 
@@ -488,6 +491,42 @@ UShotSequence::Resize( int32 iNewDuration ) //override
     if( !movie_scene )
         return;
 
+    //---
+
+    TArray<UMovieSceneSection*> sections_to_stretch;
+    TArray<UMovieSceneTrack*> filtered_tracks;
+
+    // "Master" tracks if needed
+    //TArray<UMovieSceneTrack*> tracks = movie_scene->GetTracks();
+
+    TArray<FMovieSceneBinding> bindings = movie_scene->GetBindings();
+    for( FMovieSceneBinding binding : bindings )
+    {
+        TArray<UMovieSceneTrack*> tracks = binding.GetTracks();
+        for( UMovieSceneTrack* track : tracks )
+        {
+            UOdysseyAnimationTimelineTrack* timeline_track = Cast<UOdysseyAnimationTimelineTrack>( track );
+            if( timeline_track )
+                filtered_tracks.Add( timeline_track );
+
+            UMovieSceneVisibilityTrack* visibility_track = Cast<UMovieSceneVisibilityTrack>( track );
+            if( visibility_track )
+                filtered_tracks.Add( visibility_track );
+        }
+    }
+
+    for( UMovieSceneTrack* track : filtered_tracks )
+    {
+        TArray<UMovieSceneSection*> sections = track->GetAllSections();
+        for( UMovieSceneSection* section : sections )
+        {
+            if( movie_scene->GetPlaybackRange() == section->GetTrueRange() )
+                sections_to_stretch.Add( section );
+        }
+    }
+
+    //---
+
     movie_scene->SetPlaybackRange( new_range );
 
     UMovieSceneTrack* track = movie_scene->GetCameraCutTrack();
@@ -501,6 +540,13 @@ UShotSequence::Resize( int32 iNewDuration ) //override
             UMovieSceneSection* section = sections[0];
             section->SetRange( new_range );
         }
+    }
+
+    //---
+
+    for( UMovieSceneSection* section_to_stretch : sections_to_stretch )
+    {
+        section_to_stretch->SetRange( new_range );
     }
 }
 
