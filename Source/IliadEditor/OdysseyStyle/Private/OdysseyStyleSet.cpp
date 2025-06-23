@@ -53,6 +53,11 @@ FOdysseyStyle::SetStyle( const TSharedRef< ISlateStyle >& iNewStyle )
 const FName&
 FOdysseyStyle::GetStyleSetName()
 {
+    if( !smInstance )
+    {
+        static FName defaultStyleName("");
+        return defaultStyleName;
+    }
     return smInstance->GetStyleSetName();
 }
 
@@ -60,6 +65,8 @@ FOdysseyStyle::GetStyleSetName()
 float
 FOdysseyStyle::GetFloat( FName PropertyName, const ANSICHAR* Specifier )
 {
+    if( !smInstance )
+        return 0.0f; // or some default value
     return smInstance->GetFloat( PropertyName, Specifier );
 }
 
@@ -67,6 +74,8 @@ FOdysseyStyle::GetFloat( FName PropertyName, const ANSICHAR* Specifier )
 FVector2D
 FOdysseyStyle::GetVector( FName PropertyName, const ANSICHAR* Specifier )
 {
+    if( !smInstance )
+        return FVector2D::ZeroVector; // or some default value
     return smInstance->GetVector( PropertyName, Specifier );
 }
 
@@ -74,6 +83,8 @@ FOdysseyStyle::GetVector( FName PropertyName, const ANSICHAR* Specifier )
 const FLinearColor&
 FOdysseyStyle::GetColor( FName PropertyName, const ANSICHAR* Specifier )
 {
+    if( !smInstance )
+        return FLinearColor::Black; // or some default value
     return smInstance->GetColor( PropertyName, Specifier );
 }
 
@@ -81,6 +92,8 @@ FOdysseyStyle::GetColor( FName PropertyName, const ANSICHAR* Specifier )
 const FSlateColor
 FOdysseyStyle::GetSlateColor( FName PropertyName, const ANSICHAR* Specifier )
 {
+    if( !smInstance )
+        return FSlateColor::UseForeground(); // or some default value
     return smInstance->GetSlateColor( PropertyName, Specifier );
 }
 
@@ -88,6 +101,8 @@ FOdysseyStyle::GetSlateColor( FName PropertyName, const ANSICHAR* Specifier )
 const FMargin&
 FOdysseyStyle::GetMargin( FName PropertyName, const ANSICHAR* Specifier )
 {
+    if( !smInstance )
+        return FStyleDefaults::GetMargin(); // or some default value
     return smInstance->GetMargin( PropertyName, Specifier );
 }
 
@@ -95,6 +110,8 @@ FOdysseyStyle::GetMargin( FName PropertyName, const ANSICHAR* Specifier )
 const FSlateBrush*
 FOdysseyStyle::GetBrush( FName PropertyName, const ANSICHAR* Specifier )
 {
+    if( !smInstance )
+        return FStyleDefaults::GetNoBrush();
     return smInstance->GetBrush( PropertyName, Specifier );
 }
 
@@ -102,6 +119,8 @@ FOdysseyStyle::GetBrush( FName PropertyName, const ANSICHAR* Specifier )
 const TSharedPtr< FSlateDynamicImageBrush >
 FOdysseyStyle::GetDynamicImageBrush( FName BrushTemplate, FName TextureName, const ANSICHAR* Specifier )
 {
+    if( !smInstance )
+        return nullptr;
     return smInstance->GetDynamicImageBrush( BrushTemplate, TextureName, Specifier );
 }
 
@@ -109,6 +128,8 @@ FOdysseyStyle::GetDynamicImageBrush( FName BrushTemplate, FName TextureName, con
 const TSharedPtr< FSlateDynamicImageBrush >
 FOdysseyStyle::GetDynamicImageBrush( FName BrushTemplate, const ANSICHAR* Specifier, class UTexture2D* TextureResource, FName TextureName )
 {
+    if( !smInstance )
+        return nullptr;
     return smInstance->GetDynamicImageBrush( BrushTemplate, Specifier, TextureResource, TextureName );
 }
 
@@ -116,6 +137,8 @@ FOdysseyStyle::GetDynamicImageBrush( FName BrushTemplate, const ANSICHAR* Specif
 const TSharedPtr< FSlateDynamicImageBrush >
 FOdysseyStyle::GetDynamicImageBrush( FName BrushTemplate, class UTexture2D* TextureResource, FName TextureName )
 {
+    if( !smInstance )
+        return nullptr;
     return smInstance->GetDynamicImageBrush( BrushTemplate, TextureResource, TextureName );
 }
 
@@ -123,6 +146,8 @@ FOdysseyStyle::GetDynamicImageBrush( FName BrushTemplate, class UTexture2D* Text
 const FSlateSound&
 FOdysseyStyle::GetSound( FName PropertyName, const ANSICHAR* Specifier )
 {
+    if( !smInstance )
+        return FStyleDefaults::GetSound(); // or some default value
     return smInstance->GetSound( PropertyName, Specifier );
 }
 
@@ -130,6 +155,8 @@ FOdysseyStyle::GetSound( FName PropertyName, const ANSICHAR* Specifier )
 FSlateFontInfo
 FOdysseyStyle::GetFontStyle( FName PropertyName, const ANSICHAR* Specifier )
 {
+    if( !smInstance )
+        return FStyleDefaults::GetFontInfo(); // or some default value
     return smInstance->GetFontStyle( PropertyName, Specifier );
 }
 
@@ -137,6 +164,8 @@ FOdysseyStyle::GetFontStyle( FName PropertyName, const ANSICHAR* Specifier )
 const FSlateBrush*
 FOdysseyStyle::GetDefaultBrush()
 {
+    if( !smInstance )
+        return FStyleDefaults::GetNoBrush();
     return smInstance->GetDefaultBrush();
 }
 
@@ -151,6 +180,8 @@ FOdysseyStyle::GetNoBrush()
 const FSlateBrush*
 FOdysseyStyle::GetOptionalBrush( FName PropertyName, const ANSICHAR* Specifier, const FSlateBrush* const DefaultBrush )
 {
+    if( !smInstance )
+        return FStyleDefaults::GetNoBrush();
     return smInstance->GetOptionalBrush( PropertyName, Specifier, DefaultBrush );
 }
 
@@ -158,5 +189,7 @@ FOdysseyStyle::GetOptionalBrush( FName PropertyName, const ANSICHAR* Specifier, 
 void
 FOdysseyStyle::GetResources( TArray< const FSlateBrush* >& OutResources )
 {
-    return smInstance->GetResources( OutResources );
+    if( !smInstance )
+        return;
+    smInstance->GetResources( OutResources );
 }
