@@ -50,7 +50,7 @@ private:
     TArray<TSharedRef<FMovieScenePossessable>> mPossessables;
     TSharedPtr<SListView<TSharedRef<FMovieScenePossessable>>> mWidgetAnimationList;
 
-    bool mNeedRebuildAnimationList { true };
+    bool mNeedRebuildAnimationList = true;
 
     /** Delegate binding handle for ISequencer::OnMovieSceneDataChanged */
     FDelegateHandle mRebuildAnimationListHandle;

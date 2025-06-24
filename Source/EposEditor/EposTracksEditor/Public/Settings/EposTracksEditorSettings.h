@@ -82,6 +82,10 @@ public:
     /** Select the background color of shot sections. */
     UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category=BoardTrack)
     FLinearColor ShotSectionColor { .6f, .39f, .94f, .25f };
+
+    /** Select the background color of shot sections. */
+    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category=BoardTrack)
+    bool GoToSectionStartFrameAfterCreationState = true;
 };
 
 //---
