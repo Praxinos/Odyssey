@@ -247,6 +247,7 @@ public:
     void AddPaletteSet(UOdysseyPalette* iPalette);
     void RemovePaletteSet(UOdysseyPaletteSet* iPaletteSet);
 
+    void SetPaletteSet(int iIndex, UOdysseyPaletteSet* iPaletteSet);
     void SetCurrentPaletteColorEntry(UOdysseyPaletteEntryColor* iEntry, int iSet);
 
     void SetColorType(EOdysseyPainterEditorColorType iType);
@@ -429,8 +430,10 @@ protected:
 
     FName mToolbarMenuName;
 
+    //Local editor data, for convenience. Palettes and sets are stored in TextureData and Animation. Colors are stored in vector objects.
     UOdysseyPaletteEntryColor* mCurrentPaletteEntryColor = nullptr;
     int mCurrentPaletteSet = 0;
+
     TSharedPtr<FOdysseyPainterEditorAnimationFlipSystem> mAnimationFlipSystem;
     TArray<FGuid> mImageRenderingComposition;
     bool mAnimationTimelineIsScrubbing = false;

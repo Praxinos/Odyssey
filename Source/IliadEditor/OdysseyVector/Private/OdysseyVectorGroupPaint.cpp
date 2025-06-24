@@ -851,6 +851,12 @@ FOdysseyVectorGroupPaint::HasBaseClass( uint32 iBaseClassID )
     return FOdysseyVectorGroup::HasBaseClass( iBaseClassID );
 }
 
+std::list<FOdysseyVectorPath*>&
+FOdysseyVectorGroupPaint::GetPathList()
+{
+    return mPathList;
+}
+
 std::list<FOdysseyVectorBucket*>&
 FOdysseyVectorGroupPaint::GetBucketList()
 {

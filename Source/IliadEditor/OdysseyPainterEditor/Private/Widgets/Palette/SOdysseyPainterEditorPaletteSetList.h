@@ -73,6 +73,7 @@ private:
     TSharedPtr<UE::Slate::Containers::TObservableArray<TSharedPtr<FOdysseyPainterEditorPaletteTreeViewItem>>> mItemsSource;
     FOnAddPaletteSet mOnAddPaletteSet;
     FOnRemovePaletteSet mOnRemovePaletteSet;
+    FOnPaletteSetChanged mOnPaletteSetChanged;
     FOnCurrentColorEntryChanged mOnCurrentColorEntryChanged;
 
     TSharedPtr<STreeView<TSharedPtr<FOdysseyPainterEditorPaletteTreeViewItem>>> mTreeView;

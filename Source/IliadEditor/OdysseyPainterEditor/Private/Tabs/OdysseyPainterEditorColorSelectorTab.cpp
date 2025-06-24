@@ -455,8 +455,7 @@ FOdysseyPainterEditorColorSelectorTab::OnRemovePaletteSet(UOdysseyPaletteSet* iP
 void
 FOdysseyPainterEditorColorSelectorTab::OnPaletteSetChanged(int iIndex, UOdysseyPaletteSet* iPaletteSet)
 {
-    UE_LOG(LogTemp, Display, TEXT("SetChanged"));
-    //mEditor->SetPaletteSet(iIndex, iPaletteSet);
+    mEditor->SetPaletteSet(iIndex, iPaletteSet);
 }
 
 
