@@ -240,38 +240,12 @@ private:
     TWeakPtr<FCinematicBoardSection>    mBoardSection;
     FMovieScenePossessable              mBinding;
     TAttribute<EVisibility>             mOptionalWidgetsVisibility;
-
-    /** Delegate binding handle for ISequencer::OnMovieSceneDataChanged */
-    FDelegateHandle mMovieSceneDataChangedHandle;
 };
 
 //---
 
 SCinematicBoardSectionAnimationTitle::~SCinematicBoardSectionAnimationTitle()
 {
-    if( mBoardSection.IsValid() && mBoardSection.Pin()->GetSequencer().IsValid() )
-        mBoardSection.Pin()->GetSequencer()->OnMovieSceneDataChanged().Remove( mMovieSceneDataChangedHandle );
-}
-
-void
-SCinematicBoardSectionAnimationTitle::MovieSceneDataChanged( EMovieSceneDataChangeType iType )
-{
-    TSharedPtr<ISequencer> sequencer = mBoardSection.Pin()->GetSequencer();
-    UMovieSceneSubSection& subsection = mBoardSection.Pin()->GetSubSectionObject();
-
-    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, subsection, sequencer->GetFocusedTemplateID() );
-
-    //---
-
-    ShotSequenceHelpers::FFindOrCreateAnimationVisibilityResult animation_visibility_result = ShotSequenceHelpers::FindAnimationVisibilityTrackAndSections( *sequencer, result.mInnerSequence, result.mInnerSequenceId, mBinding.GetGuid() );
-
-    if( animation_visibility_result.mTrack.IsValid() && animation_visibility_result.mSections.Num() == 1 )
-    {
-        if( animation_visibility_result.mSections[0]->GetTrueRange() != result.mInnerMovieScene->GetPlaybackRange() )
-        {
-            animation_visibility_result.mSections[0]->SetRange( result.mInnerMovieScene->GetPlaybackRange() );
-        }
-    }
 }
 
 //---
@@ -284,8 +258,6 @@ SCinematicBoardSectionAnimationTitle::Construct( const FArguments& InArgs, TShar
     mBinding = InArgs._Binding;
     check( mBinding.GetGuid().IsValid() );
     mOptionalWidgetsVisibility = InArgs._OptionalWidgetsVisibility;
-
-    mMovieSceneDataChangedHandle = mBoardSection.Pin()->GetSequencer()->OnMovieSceneDataChanged().AddSP( this, &SCinematicBoardSectionAnimationTitle::MovieSceneDataChanged ); //TODO: or do it elsewhere ? in the USection/UTrack/... ?
 
     //---
 
@@ -3001,6 +2973,13 @@ SCinematicBoardSectionAnimations::MakeCreateAnimationMenu()
 
         CreateAnimation( animation_name );
 
+        const UEposTracksEditorSettings& settings = *GetDefault<UEposTracksEditorSettings>();
+        if( settings.BoardTrackSettings.GoToSectionStartFrameAfterCreationState == true )
+        {
+            FFrameNumber start_frame = UE::MovieScene::DiscreteInclusiveLower( mBoardSection.Pin()->GetSectionObject()->GetTrueRange() );
+            mSequencer.Pin()->SetLocalTime( start_frame, ESnapTimeMode::STM_All, true );
+        }
+
         return FReply::Handled();
     };
 
@@ -3019,34 +2998,65 @@ SCinematicBoardSectionAnimations::MakeCreateAnimationMenu()
         return BoardSequenceTools::CanCreateAnimation( sequencer, section_object->GetInclusiveStartFrame() );
     };
 
-    MenuBuilder.AddWidget( SNew( SVerticalBox )
-                           + SVerticalBox::Slot()
-                           .AutoHeight()
-                           [
-                               SNew( SHorizontalBox )
-                               + SHorizontalBox::Slot()
-                               .HAlign( HAlign_Center )
-                               [
-                                   SNew( SButton )
-                                   .Text( LOCTEXT( "create-animation-label", "Create a new animation" ) )
-                                   .ToolTipText( LOCTEXT( "create-animation-tooltip", "Create a new animation with those settings" ) )
-                                   .OnClicked_Lambda( CreateAnimationOnClick )
-                                   .IsEnabled_Lambda( CanCreateAnimation )
-                               ]
-                           ]
-                           //PATCH
-                           + SVerticalBox::Slot()
-                           .AutoHeight()
-                           .HAlign( HAlign_Center )
-                           [
-                                SNew( STextBlock )
-                                .Text( FText::FromString( TEXT( "/!\\ Select an actor in the viewport first /!\\" ) ) )
-                                .ColorAndOpacity( FLinearColor::Yellow )
-                                .Visibility_Lambda( []() -> EVisibility { return !GCurrentLevelEditingViewportClient ? EVisibility::Visible : EVisibility::Collapsed; } )
-                           ],
-                           //PATCH
-                           FText::GetEmpty(),
-                           true /* NoIndent */ );
+    MenuBuilder.AddWidget(
+        SNew( SVerticalBox )
+        + SVerticalBox::Slot()
+        .AutoHeight()
+        [
+            SNew( SHorizontalBox )
+            + SHorizontalBox::Slot()
+            .HAlign( HAlign_Center )
+            [
+                SNew( SCheckBox )
+                    .IsChecked_Lambda( [this]()
+                                       {
+                                           const UEposTracksEditorSettings& settings = *GetDefault<UEposTracksEditorSettings>();
+                                           return settings.BoardTrackSettings.GoToSectionStartFrameAfterCreationState ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+                                       } )
+                    .OnCheckStateChanged_Lambda( [this]( ECheckBoxState iState )
+                                                 {
+                                                     UEposTracksEditorSettings* settings = GetMutableDefault<UEposTracksEditorSettings>();
+                                                     settings->BoardTrackSettings.GoToSectionStartFrameAfterCreationState = ( iState == ECheckBoxState::Checked );
+                                                     settings->SaveConfig();
+                                                 } )
+                .ToolTipText( LOCTEXT( "reset-to-section-start-frame-tooltip", "Go to start frame of the section after creating a new animation.\nOtherwise keep the current frame." ) )
+                [
+                    SNew( STextBlock )
+                    .Text( LOCTEXT( "reset-to-section-start-frame-label", "Go to section start frame" ) )
+                ]
+            ]
+        ]
+        + SVerticalBox::Slot()
+        .AutoHeight()
+        .Padding( 0, 10, 0, 0 )
+        [
+            SNew( SHorizontalBox )
+            + SHorizontalBox::Slot()
+            .HAlign( HAlign_Center )
+            [
+                SNew( SButton )
+                .Text( LOCTEXT( "create-animation-label", "Create a new animation" ) )
+                .ToolTipText( LOCTEXT( "create-animation-tooltip", "Create a new animation with those settings" ) )
+                .OnClicked_Lambda( CreateAnimationOnClick )
+                .IsEnabled_Lambda( CanCreateAnimation )
+            ]
+        ]
+        //PATCH
+        + SVerticalBox::Slot()
+        .AutoHeight()
+        .HAlign( HAlign_Center )
+        [
+            SNew( STextBlock )
+            .Text( FText::FromString( TEXT( "/!\\ Select an actor in the viewport first /!\\" ) ) )
+            .ColorAndOpacity( FLinearColor::Yellow )
+            .Visibility_Lambda( []() -> EVisibility
+                                {
+                                    return !GCurrentLevelEditingViewportClient ? EVisibility::Visible : EVisibility::Collapsed;
+                                } )
+        ],
+        //PATCH
+        FText::GetEmpty(),
+        true /* NoIndent */ );
 
     return MenuBuilder.MakeWidget();
 }

@@ -175,20 +175,17 @@ UOdysseyAnimationTimelineSection::RebuildAnimationCutChannel()
                 FFrameNumber frame_in_timeline = animationcutentry.GetFrameReference();
                 FFrameNumber frame_in_sequence = ConvertFrameFromTimelineToSequence( frame_in_timeline );
 
-                if( GetRange().Contains( frame_in_sequence ) )
+                int32 index = AnimationCutChannel.GetData().FindKey( frame_in_sequence );
+                if( index != INDEX_NONE )
                 {
-                    int32 index = AnimationCutChannel.GetData().FindKey( frame_in_sequence );
-                    if( index != INDEX_NONE )
-                    {
-                        AnimationCutChannel.GetData().GetValues()[index].Value.AddNewEntry( animationcutentry );
-                    }
-                    else
-                    {
-                        FAnimationCut new_animationcut;
-                        new_animationcut.AddNewEntry( animationcutentry );
+                    AnimationCutChannel.GetData().GetValues()[index].Value.AddNewEntry( animationcutentry );
+                }
+                else
+                {
+                    FAnimationCut new_animationcut;
+                    new_animationcut.AddNewEntry( animationcutentry );
 
-                        AnimationCutChannel.GetData().AddKey( frame_in_sequence, FOdysseyAnimationCutValue{ new_animationcut } );
-                    }
+                    AnimationCutChannel.GetData().AddKey( frame_in_sequence, FOdysseyAnimationCutValue{ new_animationcut } );
                 }
             }
 
@@ -200,20 +197,17 @@ UOdysseyAnimationTimelineSection::RebuildAnimationCutChannel()
                 FFrameNumber frame_in_timeline = animationcutentry.GetFrameReference();
                 FFrameNumber frame_in_sequence = ConvertFrameFromTimelineToSequence( frame_in_timeline );
 
-                if( GetRange().Contains( frame_in_sequence ) )
+                int32 index = AnimationCutChannel.GetData().FindKey( frame_in_sequence );
+                if( index != INDEX_NONE )
                 {
-                    int32 index = AnimationCutChannel.GetData().FindKey( frame_in_sequence );
-                    if( index != INDEX_NONE )
-                    {
-                        AnimationCutChannel.GetData().GetValues()[index].Value.AddNewEntry( animationcutentry );
-                    }
-                    else
-                    {
-                        FAnimationCut new_animationcut;
-                        new_animationcut.AddNewEntry( animationcutentry );
+                    AnimationCutChannel.GetData().GetValues()[index].Value.AddNewEntry( animationcutentry );
+                }
+                else
+                {
+                    FAnimationCut new_animationcut;
+                    new_animationcut.AddNewEntry( animationcutentry );
 
-                        AnimationCutChannel.GetData().AddKey( frame_in_sequence, FOdysseyAnimationCutValue{ new_animationcut } );
-                    }
+                    AnimationCutChannel.GetData().AddKey( frame_in_sequence, FOdysseyAnimationCutValue{ new_animationcut } );
                 }
             }
         }
