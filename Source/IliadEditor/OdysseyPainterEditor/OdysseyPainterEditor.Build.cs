@@ -100,6 +100,7 @@ public class OdysseyPainterEditor : ModuleRules
             new string[] {
                 Path.Combine(ModuleDirectory, "Private", "Animation"),
                 Path.Combine(ModuleDirectory, "Private", "Flipbook"),
+                Path.Combine(ModuleDirectory, "Private", "Layouts"),
                 Path.Combine(ModuleDirectory, "Private", "Shapes"),
                 Path.Combine(ModuleDirectory, "Private", "Shortcuts"),
                 Path.Combine(ModuleDirectory, "Private", "Sources"),

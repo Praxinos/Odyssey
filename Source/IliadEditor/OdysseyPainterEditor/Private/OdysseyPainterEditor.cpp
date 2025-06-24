@@ -452,18 +452,6 @@ FOdysseyPainterEditor::RemoveEditedObject(UObject* iObject)
     mOnRemoveEditedObject.Broadcast(iObject);
 }
 
-TSharedRef<FTabManager::FLayout>
-FOdysseyPainterEditor::CreateLayout(const FName& iLayoutName)
-{
-    FOdysseyEditorLayoutBuilder builder(iLayoutName);
-    mGUI->BuildLayout(builder);
-
-    for (TSharedPtr<FOdysseyPainterEditorExtension> extension : mExtensions)
-        extension->BuildLayout(builder);
-
-    return builder.GetLayout();
-}
-
 void
 FOdysseyPainterEditor::BindShortcuts(FBaseToolkit* iToolkit)
 {

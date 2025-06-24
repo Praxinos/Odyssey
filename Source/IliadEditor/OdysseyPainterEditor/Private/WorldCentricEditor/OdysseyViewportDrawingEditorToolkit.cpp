@@ -10,6 +10,13 @@
 #include "Interfaces/IMainFrameModule.h"
 #include "OdysseyViewportDrawingEditorExtension.h"
 #include "Toolkits/AssetEditorModeUILayer.h"
+#include "OdysseyPainterEditorToolsTab.h"
+#include "OdysseyPainterEditorVectorSceneTreeViewTab.h"
+#include "OdysseyPainterEditorAnimationDetailsTab.h"
+#include "OdysseyPainterEditorTextureDetailsTab.h"
+#include "OdysseyPainterEditorAnimationTimelineTab.h"
+#include "OdysseyPainterEditorColorSelectorTab.h"
+#include "OdysseyPainterEditorLayerStackTab.h"
 
 #define LOCTEXT_NAMESPACE "ViewportDrawingEditor"
 
@@ -61,8 +68,6 @@ FOdysseyViewportDrawingEditorToolkit::Initialize(
     Init(iInitToolkitHost);
 
     FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>(TEXT("LevelEditor"));
-    //mEditor->RegisterTabSpawners(LevelEditorModule.GetLevelEditorTabManager()->AsShared());
-    //mEditor->LoadOpenedTabs();
 
     mEditor->InitTabs();
 
@@ -223,13 +228,17 @@ FOdysseyViewportDrawingEditorToolkit::SaveOpenedTabs()
 void
 FOdysseyViewportDrawingEditorToolkit::LoadOpenedTabs()
 {
-    TArray<FName> defaultOpenedTabIds;
+    TArray<FName> defaultOpenedTabIds = {
+        FOdysseyPainterEditorToolsTab::StaticId(),
+        FOdysseyPainterEditorVectorSceneTreeViewTab::StaticId(),
+        FOdysseyPainterEditorAnimationDetailsTab::StaticId(),
+        FOdysseyPainterEditorTextureDetailsTab::StaticId(),
+        FOdysseyPainterEditorAnimationTimelineTab::StaticId(),
+        FOdysseyPainterEditorColorSelectorTab::StaticId(),
+        FOdysseyPainterEditorLayerStackTab::StaticId(),
+    };
+
     const TArray<TSharedPtr<FOdysseyEditorTab>>& tabs = mEditor->GetTabs();
-    for (TSharedPtr<FOdysseyEditorTab> tab : tabs)
-    {
-        if (tab->ShouldOpenByDefault())
-            defaultOpenedTabIds.Add(tab->GetId());
-    }
 
     FOdysseyPainterEditorModule& odysseyEditorModule = FModuleManager::LoadModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
     const TArray<FName>& tabIds = odysseyEditorModule.GetOpenedTabIds(mEditor->GetId(), defaultOpenedTabIds);
@@ -274,7 +283,6 @@ FOdysseyViewportDrawingEditorToolkit::ShutdownUI()
 {
     FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>(TEXT("LevelEditor"));
 
-    /* Save Opened Tabs Ids */
     SaveOpenedTabs();
 
     mEditor->CloseAllTabs();
@@ -284,12 +292,6 @@ FOdysseyViewportDrawingEditorToolkit::ShutdownUI()
     mLevelEditorMenuExtender = nullptr;
     RebuildLevelEditorMenu();
 }
-
-/* void
-FOdysseyViewportDrawingEditorToolkit::GetToolPaletteNames( TArray<FName>& ioPaletteNames ) const
-{
-    ioPaletteNames.Add( FName( "Odyssey Panels Manager" ));
-} */
 
 TSharedPtr<SWidget>
 FOdysseyViewportDrawingEditorToolkit::GetInlineContent() const

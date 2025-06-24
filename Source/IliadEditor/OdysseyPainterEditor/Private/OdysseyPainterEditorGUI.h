@@ -31,19 +31,11 @@ public:
 public:
     void Initialize();
     void Finalize();
-    void BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder);
 
 public:
     // Tabs
     void CreateTabs();
     void BindShortcuts(FBaseToolkit* iToolkit);
-
-protected:
-    // Layout
-    void    CreateLeftSection(FOdysseyEditorLayoutBuilder& iBuilder);
-    void    CreateRightSection(FOdysseyEditorLayoutBuilder& iBuilder);
-    void    CreateCenterSection(FOdysseyEditorLayoutBuilder& iBuilder);
-    void    CreateBottomSection(FOdysseyEditorLayoutBuilder& iBuilder);
 
 protected:
     // Shortcuts

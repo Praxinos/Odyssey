@@ -16,7 +16,6 @@ FOdysseyEditorTab::~FOdysseyEditorTab()
 FOdysseyEditorTab::FOdysseyEditorTab(FText iDisplayName, FSlateIcon iIcon)
     : mDisplayName(iDisplayName)
     , mIcon(iIcon)
-    , mShouldOpenByDefault(false)
     , mWidget(nullptr)
 {
 }
@@ -110,18 +109,6 @@ TSharedPtr< FTabManager >
 FOdysseyEditorTab::GetTabManager() const
 {
     return mTabManager.Pin();
-}
-
-bool
-FOdysseyEditorTab::ShouldOpenByDefault() const
-{
-    return mShouldOpenByDefault;
-}
-
-void
-FOdysseyEditorTab::ShouldOpenByDefault(bool iShouldOpenByDefault)
-{
-    mShouldOpenByDefault = iShouldOpenByDefault;
 }
 
 void

@@ -8,6 +8,20 @@
 #include "OdysseyPainterEditorModule.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorTextureSource.h"
+#include "OdysseyPainterEditorAnimationTimelineTab.h"
+#include "OdysseyPainterEditorAnimationLighttableTab.h"
+#include "OdysseyPainterEditorAnimationDetailsTab.h"
+#include "OdysseyPainterEditorColorSelectorTab.h"
+#include "OdysseyPainterEditorFlipbookTimelineTab.h"
+#include "OdysseyPainterEditorLayerStackTab.h"
+#include "OdysseyPainterEditorMeshSelectorTab.h"
+#include "OdysseyPainterEditorTextureDetailsTab.h"
+#include "OdysseyPainterEditorToolsTab.h"
+#include "OdysseyPainterEditorViewportTab.h"
+#include "OdysseyPainterEditorVectorSceneTreeViewTab.h"
+#include "OdysseyPainterEditorAnimationLayout.h"
+#include "OdysseyPainterEditorTextureLayout.h"
+#include "OdysseyPainterEditorFlipbookLayout.h"
 
 #include "Engine/Texture2D.h"
 #include "PaperFlipbook.h"
@@ -31,21 +45,18 @@ FOdysseyPainterEditorStandaloneToolkit::FOdysseyPainterEditorStandaloneToolkit(U
     {
         mAppIdentifier = TEXT("OdysseyAnimationEditor");
         mTitle = LOCTEXT("2D-animation-painting-editor.name", "2D Animation Painting Editor");
-        mLayoutName = "OdysseyAnimationEditor_Layout";
         mWorldCentricTabPrefix = LOCTEXT( "2D-animation-painting-editor.world-centric-tab-prefix", "2D Animation " ).ToString();
     }
     else if (mEditedObject->IsA<UTexture2D>())
     {
         mAppIdentifier = TEXT("OdysseyTextureEditor");
         mTitle = LOCTEXT("texture-painting-editor.name", "Texture Painting Editor");
-        mLayoutName = "OdysseyTextureEditor_Layout";
         mWorldCentricTabPrefix = LOCTEXT( "texture-painting-editor.world-centric-tab-prefix", "Texture " ).ToString();
     }
     else if (mEditedObject->IsA<UPaperFlipbook>())
     {
         mAppIdentifier = TEXT("OdysseyFlipbookEditor");
         mTitle = LOCTEXT("flipbook-painting-editor.name", "Flipbook Painting Editor");
-        mLayoutName = "OdysseyFlipbookEditor_Layout";
         mWorldCentricTabPrefix = LOCTEXT( "flipbook-painting-editor.world-centric-tab-prefix", "Flipbook " ).ToString();
     }
 }
@@ -72,7 +83,21 @@ FOdysseyPainterEditorStandaloneToolkit::Open()
         mEditor->ExtendAssetEditorToolbar( UToolMenus::Get()->ExtendMenu(MenuName) );
     }
 
-    FAssetEditorToolkit::InitAssetEditor( EToolkitMode::Standalone, NULL, mAppIdentifier, mEditor->CreateLayout(mLayoutName), true, true, editedObjects);
+    TSharedPtr<FTabManager::FLayout> layout;
+    if (mEditedObject->IsA<UOdysseyAnimation>())
+    {
+        layout = FOdysseyPainterEditorAnimationLayout::Create();
+    }
+    else if (mEditedObject->IsA<UTexture2D>())
+    {
+        layout = FOdysseyPainterEditorTextureLayout::Create();
+    }
+    else if (mEditedObject->IsA<UPaperFlipbook>())
+    {
+        layout = FOdysseyPainterEditorFlipbookLayout::Create();
+    }
+
+    FAssetEditorToolkit::InitAssetEditor( EToolkitMode::Standalone, NULL, mAppIdentifier, layout.ToSharedRef(), true, true, editedObjects);
 
     //Add Odyssey Specific section to the main menu to add entries at the right place easier
     UToolMenu* fileMenu = UToolMenus::Get()->ExtendMenu(*(GetToolMenuName().ToString() + FString(".File")));

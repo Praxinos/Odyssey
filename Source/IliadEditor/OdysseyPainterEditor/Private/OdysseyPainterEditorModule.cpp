@@ -28,7 +28,7 @@
 
 #include "OdysseyAnimationCell.h"
 #include "OdysseyAnimationCellThumbnailRenderer.h"
-#include "OdysseyPainterEditorGUI.h"
+#include "OdysseyPainterEditorLevelEditorLayout.h"
 #include "OdysseyAnimation.h"
 #include "OdysseyPainterEditorAnimationProjectSettings.h"
 #include "OdysseyPainterEditorAnimationUserSettings.h"
@@ -243,7 +243,7 @@ void
 FOdysseyPainterEditorModule::RegisterLevelEditorLayoutExtensions()
 {
     FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor");
-    mExtendLevelEditorLayout = LevelEditorModule.OnRegisterLayoutExtensions().AddStatic(&FOdysseyPainterEditorGUI::ExtendLevelEditorLayout);
+    mExtendLevelEditorLayout = LevelEditorModule.OnRegisterLayoutExtensions().AddStatic(&FOdysseyPainterEditorLevelEditorLayout::ExtendLevelEditorLayout);
 }
 
 void
