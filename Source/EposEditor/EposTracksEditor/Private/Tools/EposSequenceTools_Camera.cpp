@@ -21,6 +21,7 @@
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "EposSequenceHelpers.h"
 #include "NamingConvention.h"
+#include "OdysseyAnimationActor.h"
 #include "ScalingComponent.h"
 #include "Settings/EposTracksEditorSettings.h"
 #include "Shot/ShotSequence.h"
@@ -156,20 +157,30 @@ ShotSequenceTools::CreateCamera( ISequencer& iSequencer, UMovieSceneSequence* iS
 
     const FScopedTransaction transaction( LOCTEXT( "transaction.create-storycamera-here", "Create Storyboard Camera Here" ) );
 
-    cTemporarySwitchInner switch_to( iSequencer, iSequenceID );
+    TArray<AActor*> actors;
 
-    //---
+    {
+        cTemporarySwitchInner switch_to( iSequencer, iSequenceID );
 
-    FGuid camera_guid;
-    ACineCameraActor* camera = ShotSequenceTools::SpawnAndBindCamera( iSequencer, iSequence, iSequenceID, iCameraArgs, &camera_guid );
-    if( !camera )
-        return;
+        //---
 
-    ShotSequenceTools::CameraAdded( iSequencer, iSequence, iSequenceID, camera_guid, camera, iSequencer.GetLocalTime().Time.FloorToFrame(), iAnimationArgs );
+        FGuid camera_guid;
+        ACineCameraActor* camera = ShotSequenceTools::SpawnAndBindCamera( iSequencer, iSequence, iSequenceID, iCameraArgs, &camera_guid );
+        if( !camera )
+            return;
 
-    //---
+        actors = ShotSequenceTools::CameraAdded( iSequencer, iSequence, iSequenceID, camera_guid, camera, iSequencer.GetLocalTime().Time.FloorToFrame(), iAnimationArgs );
 
-    iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::RefreshAllImmediately );
+        //---
+
+        iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::RefreshAllImmediately );
+    }
+
+    // Must be done after the inner/outer sequence switch (that's why it is in its own block)
+    // Otherwise it resets the selection if GEditor->SelectActor() is called inside CameraAdded()
+    // Furthermore the hidden flag must also be set to true now
+    if( actors.Num() )
+        GEditor->SelectActor( actors[0], true /*bInSelected*/, true /*bNotify*/, true /*bSelectEvenIfHidden*/ );
 }
 
 
@@ -261,13 +272,22 @@ ShotSequenceTools::SpawnAndBindCamera( ISequencer& iSequencer, UMovieSceneSequen
 }
 
 //static
-void
+TArray<AActor*>
 ShotSequenceTools::CameraAdded( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid CameraGuid, ACineCameraActor* iCamera, FFrameNumber FrameNumber, const FAnimationArgs* iAnimationArgs )
 {
+    TArray<AActor*> actors;
+
     CreateCameraCut( iSequencer, iSequence, CameraGuid, FrameNumber );
 
     if( iAnimationArgs )
-        SpawnAndBindAnimation( iSequencer, iSequence, iSequenceID, CameraGuid, iCamera, FrameNumber, *iAnimationArgs, nullptr );
+    {
+        AOdysseyAnimationActor* animation_actor = SpawnAndBindAnimation( iSequencer, iSequence, iSequenceID, CameraGuid, iCamera, FrameNumber, *iAnimationArgs, nullptr );
+
+        actors.Add( animation_actor );
+        // This actor can't be selected here because we still are in a cTemporarySwitchInner, so just return it
+    }
+
+    return actors;
 }
 
 //static
