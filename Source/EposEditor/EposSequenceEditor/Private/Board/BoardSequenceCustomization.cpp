@@ -621,6 +621,19 @@ FBoardSequenceCustomization::CreateInfoText() const
     ////return FText::Format( LOCTEXT( "info-bar", "Duration: {0} - Board Sections: {1} - Selected Planes: [{2}]" ), FText::FromString( duration ), number_of_sections, FText::FromString( planes_list ) );
 }
 
+static
+const FText&
+GetLighttableWarning()
+{
+    static FText warning;
+    warning = FText::GetEmpty();
+
+    if( !GLevelEditorModeTools().IsModeActive( FOdysseyViewportDrawingEditorEdMode::EM_OdysseyViewportDrawingEditorEdModeId ) )
+        warning = LOCTEXT( "warning-no-odyssey-edmode-tooltip", "\n\nWarning: Lighttable is only visible when Odyssey Mode is active" );
+
+    return warning;
+}
+
 void
 FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuilder )
 {
@@ -674,32 +687,28 @@ FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBui
 
     auto GetLighttableTooltip = [this]() -> FText
         {
-            FText warning;
-            if( !GLevelEditorModeTools().IsModeActive( FOdysseyViewportDrawingEditorEdMode::EM_OdysseyViewportDrawingEditorEdModeId ) )
-                warning = LOCTEXT( "warning-no-odyssey-edmode-tooltip", "\n\nWarning: Lighttable is only visible when Odyssey Mode is active" );
-
             TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
             if( !sequencer )
-                return FText::Format( LOCTEXT( "enable-lighttable-tooltip", "Enable the lighttable{0}" ), warning );
+                return FText::Format( LOCTEXT( "enable-lighttable-tooltip", "Enable the lighttable{0}" ), GetLighttableWarning() );
 
             TArray<FGuid> animation_bindings;
             int32 animation_count = BoardSequenceTools::GetAllAnimations( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, nullptr, &animation_bindings );
             //check( animation_count == 1 );
             if( animation_count != 1 )
-                return FText::Format( LOCTEXT( "enable-lighttable-tooltip", "Enable the lighttable{0}" ), warning );
+                return FText::Format( LOCTEXT( "enable-lighttable-tooltip", "Enable the lighttable{0}" ), GetLighttableWarning() );
 
             BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, sequencer->GetFocusedMovieSceneSequence(), sequencer->GetFocusedTemplateID(), sequencer->GetLocalTime().Time.FrameNumber );
             if( !result.mInnerSequence )
-                return FText::Format( LOCTEXT( "enable-lighttable-tooltip", "Enable the lighttable{0}" ), warning );
+                return FText::Format( LOCTEXT( "enable-lighttable-tooltip", "Enable the lighttable{0}" ), GetLighttableWarning() );
 
             UMovieSceneSubSection* subsection = sequencer->FindSubSection( result.mInnerSequenceId );
             if( !subsection )
-                return FText::Format( LOCTEXT( "enable-lighttable-tooltip", "Enable the lighttable{0}" ), warning );
+                return FText::Format( LOCTEXT( "enable-lighttable-tooltip", "Enable the lighttable{0}" ), GetLighttableWarning() );
 
             if( LighttableTools::GetState( sequencer.Get(), *subsection, animation_bindings[0] ) != 0 )
-                return FText::Format( LOCTEXT( "disable-lighttable-tooltip", "Disable the lighttable{0}" ), warning );
+                return FText::Format( LOCTEXT( "disable-lighttable-tooltip", "Disable the lighttable{0}" ), GetLighttableWarning() );
             else
-                return FText::Format( LOCTEXT( "enable-lighttable-tooltip", "Enable the lighttable{0}" ), warning );
+                return FText::Format( LOCTEXT( "enable-lighttable-tooltip", "Enable the lighttable{0}" ), GetLighttableWarning() );
         };
 
     auto GetLighttableIcon = [this]() -> FSlateIcon
@@ -783,11 +792,7 @@ FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBui
     );
     auto GetLighttableMultiTooltip = [this]() -> FText
         {
-            FText warning;
-            if( !GLevelEditorModeTools().IsModeActive( FOdysseyViewportDrawingEditorEdMode::EM_OdysseyViewportDrawingEditorEdModeId ) )
-                warning = LOCTEXT( "warning-no-odyssey-edmode-tooltip", "\n\nWarning: Lighttable is only visible when Odyssey Mode is active" );
-
-            return FText::Format( LOCTEXT( "LighttableOptionsTooltip", "Activate/Deactivate lighttable on animations{0}" ), warning );
+            return FText::Format( LOCTEXT( "LighttableOptionsTooltip", "Activate/Deactivate lighttable on animations{0}" ), GetLighttableWarning() );
         };
 
     ToolbarBuilder.AddComboButton(
@@ -944,9 +949,9 @@ FBoardSequenceCustomization::MakeLighttableMenu()
 
         FText tooltip;
         if( LighttableTools::GetState( sequencer.Get(), *subsection, animation_binding ) != 0 )
-            tooltip = LOCTEXT( "disable-lighttable-tooltip", "Disable the lighttable" );
+            tooltip = FText::Format( LOCTEXT( "disable-lighttable-tooltip", "Disable the lighttable{0}" ), GetLighttableWarning() );
         else
-            tooltip = LOCTEXT( "enable-lighttable-tooltip", "Enable the lighttable" );
+            tooltip = FText::Format( LOCTEXT( "enable-lighttable-tooltip", "Enable the lighttable{0}" ), GetLighttableWarning() );
 
         FSlateIcon icon;
         if( LighttableTools::GetState( sequencer.Get(), *subsection, animation_binding ) != 0 )
