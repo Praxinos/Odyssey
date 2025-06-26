@@ -11,6 +11,10 @@
 			"TargetAllowList": [
 				"Editor"
 			]
+		},
+		{
+			"Name": "Odyssey",
+			"Enabled": true
 		}
 	]
 }
