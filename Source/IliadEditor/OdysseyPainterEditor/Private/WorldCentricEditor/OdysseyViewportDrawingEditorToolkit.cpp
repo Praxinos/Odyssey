@@ -17,6 +17,7 @@
 #include "OdysseyPainterEditorAnimationTimelineTab.h"
 #include "OdysseyPainterEditorColorSelectorTab.h"
 #include "OdysseyPainterEditorLayerStackTab.h"
+#include "Serialization/JsonSerializer.h"
 
 #define LOCTEXT_NAMESPACE "ViewportDrawingEditor"
 
@@ -221,14 +222,36 @@ FOdysseyViewportDrawingEditorToolkit::SaveOpenedTabs()
             tabIds.Add(tab->GetId());
     }
 
-    FOdysseyPainterEditorModule& odysseyEditorModule = FModuleManager::LoadModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
-    odysseyEditorModule.SetOpenedTabIds(mEditor->GetId(), tabIds);
+    FString savedPath = GetOpenedTabIdsSavedPath();
+    if (savedPath.IsEmpty())
+        return;
+
+    TArray<TSharedPtr<FJsonValue>> tabStringIds;
+    for ( const FName& tabId : tabIds )
+    {
+        tabStringIds.Add(MakeShared<FJsonValueString>(tabId.ToString()));
+    }
+
+    TSharedRef<FJsonObject> jsonObject = MakeShared<FJsonObject>();
+    jsonObject->SetArrayField(TEXT("OpenedTabs"), tabStringIds);
+
+    FString FileContents;
+	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&FileContents);
+	if (!FJsonSerializer::Serialize(jsonObject, Writer))
+        return;
+
+	if (!FFileHelper::SaveStringToFile(FileContents, *savedPath))
+        return;
 }
 
 void
 FOdysseyViewportDrawingEditorToolkit::LoadOpenedTabs()
 {
-    TArray<FName> defaultOpenedTabIds = {
+    FString savedPath = GetOpenedTabIdsSavedPath();
+    if (savedPath.IsEmpty())
+        return;
+
+    TArray<FName> tabIds = {
         FOdysseyPainterEditorToolsTab::StaticId(),
         FOdysseyPainterEditorVectorSceneTreeViewTab::StaticId(),
         FOdysseyPainterEditorAnimationDetailsTab::StaticId(),
@@ -238,10 +261,32 @@ FOdysseyViewportDrawingEditorToolkit::LoadOpenedTabs()
         FOdysseyPainterEditorLayerStackTab::StaticId(),
     };
 
-    const TArray<TSharedPtr<FOdysseyEditorTab>>& tabs = mEditor->GetTabs();
+    FString FileContents;
+    if (FFileHelper::LoadFileToString(FileContents, *savedPath))
+    {
+        TSharedPtr<FJsonObject> jsonObject;
+        TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(FileContents);
+        if (FJsonSerializer::Deserialize(Reader, jsonObject) && jsonObject.IsValid())
+        {
+            if (jsonObject->HasField(TEXT("OpenedTabs")))
+            {
+                tabIds.Empty();
+                TArray<TSharedPtr<FJsonValue>> tabStringIds = jsonObject->GetArrayField(TEXT("OpenedTabs"));
+                for (const TSharedPtr<FJsonValue>& tabStringId : tabStringIds)
+                {
+                    FString tabIdStr = tabStringId->AsString();
+                    if (!tabIdStr.IsEmpty())
+                    {
+                        FName tabId(*tabIdStr);
+                        if (!tabIds.Contains(tabId))
+                            tabIds.Add(tabId);
+                    }
+                }
+            }
+        }
+    }
 
-    FOdysseyPainterEditorModule& odysseyEditorModule = FModuleManager::LoadModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
-    const TArray<FName>& tabIds = odysseyEditorModule.GetOpenedTabIds(mEditor->GetId(), defaultOpenedTabIds);
+    const TArray<TSharedPtr<FOdysseyEditorTab>>& tabs = mEditor->GetTabs();
     for (TSharedPtr<FOdysseyEditorTab> tab : tabs)
     {
         if (!tabIds.Contains(tab->GetId()))
@@ -269,6 +314,9 @@ FOdysseyViewportDrawingEditorToolkit::InvokeUI()
     FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>(TEXT("LevelEditor"));
     mEditor->RegisterTabSpawners(LevelEditorModule.GetLevelEditorTabManager()->AsShared());
 
+    if (GEditor)
+        GEditor->OnEditorClose().AddRaw(this, &FOdysseyViewportDrawingEditorToolkit::OnEditorClose);
+
     FModeToolkit::InvokeUI();
     LoadOpenedTabs();
 
@@ -283,7 +331,13 @@ FOdysseyViewportDrawingEditorToolkit::ShutdownUI()
 {
     FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>(TEXT("LevelEditor"));
 
+    //ensure the editor layout is saved, so that SaveOpenedTabs is synchronized with the editor layout
+	FGlobalTabmanager::Get()->SaveAllVisualState();
+
     SaveOpenedTabs();
+
+    if (GEditor)
+        GEditor->OnEditorClose().RemoveAll(this);
 
     mEditor->CloseAllTabs();
     mEditor->UnregisterTabSpawners(LevelEditorModule.GetLevelEditorTabManager()->AsShared());
@@ -291,6 +345,12 @@ FOdysseyViewportDrawingEditorToolkit::ShutdownUI()
     LevelEditorModule.GetMenuExtensibilityManager()->RemoveExtender(mLevelEditorMenuExtender);
     mLevelEditorMenuExtender = nullptr;
     RebuildLevelEditorMenu();
+}
+
+void
+FOdysseyViewportDrawingEditorToolkit::OnEditorClose()
+{
+    SaveOpenedTabs();
 }
 
 TSharedPtr<SWidget>
@@ -309,6 +369,13 @@ TSharedPtr<FOdysseyViewportDrawingEditorExtension>
 FOdysseyViewportDrawingEditorToolkit::GetViewportDrawingExtension() const
 {
     return mViewportDrawingExtension;
+}
+
+FString
+FOdysseyViewportDrawingEditorToolkit::GetOpenedTabIdsSavedPath() const
+{
+    FString filename = FString("OdysseyLayout.json");
+    return FPaths::Combine(FPlatformProcess::UserSettingsDir(), FApp::GetEpicProductIdentifier(), TEXT("Editor"), TEXT("Odyssey"), filename);
 }
 
 /* void

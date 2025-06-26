@@ -47,7 +47,7 @@ FOdysseyViewportDrawingEditorEdMode::~FOdysseyViewportDrawingEditorEdMode()
 FOdysseyViewportDrawingEditorEdMode::FOdysseyViewportDrawingEditorEdMode()
     : FEdMode()
 {
-    GEditor->OnEditorClose().AddRaw(this, &FOdysseyViewportDrawingEditorEdMode::OnResetViewMode);
+    GEditor->OnEditorClose().AddRaw(this, &FOdysseyViewportDrawingEditorEdMode::OnEditorClose);
 }
 
 void FOdysseyViewportDrawingEditorEdMode::Initialize()
@@ -171,7 +171,7 @@ bool FOdysseyViewportDrawingEditorEdMode::IsEditingEnabled() const
     return GetWorld() ? GetWorld()->GetFeatureLevel() >= ERHIFeatureLevel::SM5 : false;
 }
 
-void FOdysseyViewportDrawingEditorEdMode::OnResetViewMode()
+void FOdysseyViewportDrawingEditorEdMode::OnEditorClose()
 {
     // Reset viewport color mode for all active viewports
     for (FEditorViewportClient* ViewportClient : GEditor->GetAllViewportClients())

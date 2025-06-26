@@ -61,7 +61,7 @@ public:
     TSharedPtr<FOdysseyViewportDrawingEditorToolkit> GetViewportDrawingEditorToolkit() const;
 
 private:
-    void OnResetViewMode();
+    void OnEditorClose();
 
 private:
     TSharedPtr<FOdysseyViewportDrawingEditorToolkit> mViewportDrawingEditorToolkit;

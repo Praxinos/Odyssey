@@ -60,19 +60,7 @@ private:
     void RegisterFactoryDelayed();
     void ReorderFactories();
 
-public:
-    //Tabs State Loading / Saving
-    void SetOpenedTabIds(const FName& iEditorName, const TArray<FName>& iTabIds);
-    const TArray<FName>& GetOpenedTabIds(const FName& iEditorName, const TArray<FName>& iDefaultOpenedTabIds);
-
 private:
-    FString GetOpenedTabIdsProjectPath() const;
-    FString GetOpenedTabIdsSavedPath() const;
-    void LoadOpenedTabIds(const FName& iEditorName, const TArray<FName>& iDefaultOpenedTabIds);
-    void SaveOpenedTabIds(const FName& iEditorName);
-
-private:
-    TMap<FName, TArray<FName>> mOpenedTabIds; //Ids of tabs that should be opened when activating a Mode Editor
     FDelegateHandle mExtendLevelEditorLayout;
     TArray<FOdysseyPainterEditor*> mOpenedEditors;
 };

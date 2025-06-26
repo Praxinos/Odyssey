@@ -60,8 +60,10 @@ public:
 
     void RebuildLevelEditorMenu() const;
 
-    void SaveOpenedTabs();
+    FString GetOpenedTabIdsSavedPath() const;
     void LoadOpenedTabs();
+    void SaveOpenedTabs();
+    void OnEditorClose();
 
 private:
     TSharedPtr<FOdysseyPainterEditor> mEditor;
