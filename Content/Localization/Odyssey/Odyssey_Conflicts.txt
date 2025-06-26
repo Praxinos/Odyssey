@@ -1,0 +1,85 @@
+BoardSequenceCustomization - disable-lighttable-tooltip 
+	/Engine/Binaries/Win64/Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(947) - "Disable the lighttable" 
+	/Engine/Binaries/Win64/Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(700) - "Disable the lighttable{0}" 
+
+BoardSequenceCustomization - enable-lighttable-tooltip 
+	/Engine/Binaries/Win64/Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(949) - "Enable the lighttable" 
+	/Engine/Binaries/Win64/Plugins/Odyssey/Source/EposEditor/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(683) - "Enable the lighttable{0}" 
+
+PainterEditor - vector-scene.transaction.reset-chart 
+	/Engine/Binaries/Win64/Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/OdysseyPainterEditor.cpp(2495) - "Reset Spacing Chart" 
+	/Engine/Binaries/Win64/Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/OdysseyPainterEditor.cpp(2434) - "Reset Inbetweener Grid" 
+	/Engine/Binaries/Win64/Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/OdysseyPainterEditor.cpp(2554) - "Reset Spacing Chart" 
+
+PainterEditor - vector-scene.transaction.delete-tags 
+	/Engine/Binaries/Win64/Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/OdysseyPainterEditor.cpp(3189) - "Remove Tags" 
+	/Engine/Binaries/Win64/Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/OdysseyPainterEditor.cpp(2163) - "Delete Tags" 
+
+PainterEditor - settings.name 
+	/Engine/Binaries/Win64/Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/OdysseyPainterEditorModule.cpp(174) - "2D Animation Editor" 
+	/Engine/Binaries/Win64/Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/OdysseyPainterEditorModule.cpp(169) - "Odyssey Painter Editor" 
+	/Engine/Binaries/Win64/Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/OdysseyPainterEditorModule.cpp(179) - "2D Animation Editor" 
+
+PainterEditor - settings.tooltip 
+	/Engine/Binaries/Win64/Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/OdysseyPainterEditorModule.cpp(175) - "Configure the look and feel of the 2D Animation Editor." 
+	/Engine/Binaries/Win64/Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/OdysseyPainterEditorModule.cpp(170) - "Configure the look and feel of the Odyssey Editor." 
+	/Engine/Binaries/Win64/Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/OdysseyPainterEditorModule.cpp(180) - "Configure the look and feel of the 2D Animation Editor." 
+
+PainterEditor - vector-tool.vertex-context-menu.delete-selection.name 
+	/Engine/Binaries/Win64/Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1385) - "Delete Selection" 
+	/Engine/Binaries/Win64/Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1380) - "Subdivide segments" 
+
+PainterEditor - vector-tool.vertex-context-menu.delete-selection.tooltip 
+	/Engine/Binaries/Win64/Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1386) - "Delete Selection" 
+	/Engine/Binaries/Win64/Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1381) - "Subdivide segments" 
+
+PainterEditor - vector-chart-tool.edition-mode.alt.name 
+	/Engine/Binaries/Win64/Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/VectorChartTool/OdysseyPainterEditorVectorChartTool.cpp(527) - "Reshape (CTRL + SHIFT)" 
+	/Engine/Binaries/Win64/Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/VectorChartTool/OdysseyPainterEditorVectorChartTool.cpp(514) - "Magnet (ALT)" 
+	/Engine/Binaries/Win64/Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/VectorChartTool/OdysseyPainterEditorVectorChartTool.cpp(530) - "Reshape (CMD + SHIFT)" 
+
+PainterEditor - vector-eraser-tool-hud-info 
+	/Engine/Binaries/Win64/Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/VectorEraserTool/OdysseyPainterEditorVectorEraserToolHUD.cpp(28) - "erase whole path" 
+	/Engine/Binaries/Win64/Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/VectorEraserTool/OdysseyPainterEditorVectorEraserToolHUD.cpp(27) - "erase to intersection" 
+
+PainterEditor - vector-matching-tool.tooltip 
+	/Engine/Binaries/Win64/Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/VectorMatchingTool/OdysseyPainterEditorVectorMatchingTool.cpp(286) - "Matching Tool" 
+	/Engine/Binaries/Win64/Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/VectorChartTool/OdysseyPainterEditorVectorChartTool.cpp(569) - "Chart Tool" 
+	/Engine/Binaries/Win64/Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/VectorTrajectoryTool/OdysseyPainterEditorVectorTrajectoryTool.cpp(737) - "Trajectory Tool" 
+
+PainterEditor - vector-paint-bucket-tool.edition-mode.ctrl.name 
+	/Engine/Binaries/Win64/Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(840) - "Erase to intersection (CMD)" 
+	/Engine/Binaries/Win64/Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(837) - "Control radial/linear gradient settings (CTRL)" 
+
+PainterEditor - vector-tool.object-context-menu.reset-view.name 
+	/Engine/Binaries/Win64/Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/VectorPathEditTool/OdysseyPainterEditorVectorPathEditTool.cpp(1062) - "Subdivide segments" 
+	/Engine/Binaries/Win64/Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1295) - "Reset View" 
+
+PainterEditor - vector-tool.object-context-menu.reset-view.tooltip 
+	/Engine/Binaries/Win64/Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/VectorPathEditTool/OdysseyPainterEditorVectorPathEditTool.cpp(1063) - "Subdivide segments" 
+	/Engine/Binaries/Win64/Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1296) - "Reset View" 
+
+PainterEditor - vector-paint-bucket-tool.context-menu.delete-bucket.name 
+	/Engine/Binaries/Win64/Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/VectorTrajectoryTool/OdysseyPainterEditorVectorTrajectoryTool.cpp(558) - "Delete Trajectory" 
+	/Engine/Binaries/Win64/Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(654) - "Delete Bucket" 
+
+PainterEditor - vector-paint-bucket-tool.context-menu.delete-bucket.tooltip 
+	/Engine/Binaries/Win64/Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/VectorTrajectoryTool/OdysseyPainterEditorVectorTrajectoryTool.cpp(559) - "Delete Trajectory" 
+	/Engine/Binaries/Win64/Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.cpp(655) - "Delete Bucket" 
+
+AnimationEditor - vector-tool.inbetweening-context-menu.remove-breakdown.name 
+	/Engine/Binaries/Win64/Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Animation/Timeline/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorTimelineInbetweening.cpp(240) - "Change direction" 
+	/Engine/Binaries/Win64/Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Animation/Timeline/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorTimelineInbetweening.cpp(230) - "Remove Breakdown" 
+
+AnimationEditor - vector-tool.inbetweening-context-menu.remove-breakdown.tooltip 
+	/Engine/Binaries/Win64/Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Animation/Timeline/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorTimelineInbetweening.cpp(241) - "Change direction" 
+	/Engine/Binaries/Win64/Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Animation/Timeline/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorTimelineInbetweening.cpp(231) - "Remove Breakdown" 
+
+AnimationEditor - vector-tool.inbetweening-context-menu.add-breakdown.name 
+	/Engine/Binaries/Win64/Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Animation/Timeline/SOdysseyAnimationTimelineInbetweeningHeader.cpp(298) - "Commit" 
+	/Engine/Binaries/Win64/Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Animation/Timeline/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorTimelineInbetweening.cpp(225) - "Add Breakdown" 
+
+AnimationEditor - vector-tool.inbetweening-context-menu.add-breakdown.tooltip 
+	/Engine/Binaries/Win64/Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Animation/Timeline/SOdysseyAnimationTimelineInbetweeningHeader.cpp(299) - "Commit" 
+	/Engine/Binaries/Win64/Plugins/Odyssey/Source/IliadEditor/OdysseyPainterEditor/Private/Widgets/Animation/Timeline/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorTimelineInbetweening.cpp(226) - "Add Breakdown" 
+
