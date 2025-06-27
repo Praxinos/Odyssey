@@ -140,6 +140,7 @@ FEposTracksEditorStyle::InitToolbar()
         SectionToolBarStyle.SetBackground( FAppStyle::Get().GetWidgetStyle< FComboButtonStyle >( "ComboButton" ).ButtonStyle.Normal ); // To have the same background as the '+' button on each side
         SectionToolBarStyle.SetBackgroundPadding( 0 );
         SectionToolBarStyle.SetIconSize( Icon14x14 );
+        //TODO: maybe replace SetSettingsComboButtonStyle() by SetWrapButtonStyle() like below (?)
         SectionToolBarStyle.SetSettingsComboButtonStyle( SectionToolBarStyle.SettingsComboButton.SetDownArrowImage( CORE_IMAGE_BRUSH_SVG( "Starship/Common/ellipsis-vertical-narrow", FVector2D( 4, 16 ) ) ) );
         SectionToolBarStyle.SetShowLabels( false );
         Set( "SectionFloatingToolBar", SectionToolBarStyle );
@@ -155,8 +156,16 @@ FEposTracksEditorStyle::InitToolbar()
         SectionTitleToolBarStyle.SetButtonPadding( FMargin( 2, 0 ) );
         SectionTitleToolBarStyle.SetBackgroundPadding( 0 );
         SectionTitleToolBarStyle.SetIconSize( Icon16x16 );
-        SectionTitleToolBarStyle.SetButtonStyle( SectionTitleToolBarStyle.ButtonStyle.SetNormalPadding( FMargin( 5, 2 ) ).SetPressedPadding( FMargin( 5, 3, 5, 1 ) ) );
-        SectionTitleToolBarStyle.SetSettingsComboButtonStyle( SectionTitleToolBarStyle.SettingsComboButton.SetDownArrowImage( CORE_IMAGE_BRUSH_SVG( "Starship/Common/ellipsis-vertical-narrow", FVector2D( 4, 16 ) ) ) );
+        SectionTitleToolBarStyle.SetButtonStyle( SectionTitleToolBarStyle.ButtonStyle
+                                                 .SetNormalPadding( FMargin( 5, 2 ) )
+                                                 .SetPressedPadding( FMargin( 5, 3, 5, 1 ) )
+        );
+        SectionTitleToolBarStyle.SetWrapButtonStyle( SectionTitleToolBarStyle.WrapButtonStyle
+                                                     .SetWrapButtonPadding( FMargin( 0.0 ) )
+                                                     .SetComboButtonStyle( SectionTitleToolBarStyle.ComboButtonStyle
+                                                                           .SetButtonStyle( SectionTitleToolBarStyle.ComboButtonStyle.ButtonStyle
+                                                                                            .SetNormal( FSlateNoResource() ) ) )
+        );
         SectionTitleToolBarStyle.SetShowLabels( false );
         Set( "SectionTitleToolBar", SectionTitleToolBarStyle );
     }
