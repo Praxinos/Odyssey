@@ -9,12 +9,16 @@
 #include "CineCameraActor.h"
 #include "Components/StaticMeshComponent.h"
 #include "Factories/Factory.h"
+#include "Framework/Notifications/NotificationManager.h"
 #include "IAssetTools.h"
+#include "LevelEditorSubsystem.h"
+#include "LevelUtils.h"
 #include "Materials/MaterialInstanceConstant.h"
 #include "MovieSceneTimeHelpers.h"
 #include "MovieSceneToolHelpers.h"
 #include "MovieSceneToolsProjectSettings.h"
 #include "UObject/UObjectIterator.h"
+#include "Widgets/Notifications/SNotificationList.h"
 
 #include "Board/BoardSequence.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
@@ -835,6 +839,15 @@ CinematicBoardTrackTools::CloneSection( ISequencer* iSequencer, UMovieSceneCinem
     if( !epos_sequence )
         return nullptr;
 
+    ULevelEditorSubsystem* levelEditorSubsystem = GEditor->GetEditorSubsystem<ULevelEditorSubsystem>();
+    if( FLevelUtils::IsLevelLocked( levelEditorSubsystem->GetCurrentLevel() ) )
+    {
+        FNotificationInfo Info( LOCTEXT( "cant-clone-in-locked-level", "The requested operation could not be completed because the level is locked." ) );
+        Info.ExpireDuration = 5.0f;
+        FSlateNotificationManager::Get().AddNotification( Info )->SetCompletionState( SNotificationItem::CS_Fail );
+        return nullptr;
+    }
+
     EjectAnyActor();
 
     //---
@@ -887,15 +900,19 @@ CinematicBoardTrackTools::CloneSection( ISequencer* iSequencer, UMovieSceneCinem
 void
 ShotSequenceTools::CloneInnerContent( ISequencer* iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, bool iEmptyDrawings )
 {
-    iSequence->Modify();
-    iSequence->GetMovieScene()->Modify();
-
-    //---
-
     FGuid camera_guid;
     ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( *iSequencer, iSequence, iSequenceID, &camera_guid );
     if( !camera )
         return;
+
+    //---
+
+    check( !FLevelUtils::IsLevelLocked( camera->GetWorld()->GetCurrentLevel() ) );
+
+    iSequence->Modify();
+    iSequence->GetMovieScene()->Modify();
+
+    //---
 
     FActorSpawnParameters cameraSpawnParams;
     cameraSpawnParams.Template = camera;

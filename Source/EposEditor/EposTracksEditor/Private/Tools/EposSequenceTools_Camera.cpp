@@ -8,14 +8,18 @@
 #include "CineCameraActor.h"
 #include "CineCameraComponent.h"
 #include "Compilation/MovieSceneCompiledDataManager.h"
+#include "Framework/Notifications/NotificationManager.h"
 #include "ISequencer.h"
 #include "KeyframeTrackEditor.h"
+#include "LevelEditorSubsystem.h"
 #include "LevelEditorViewport.h"
+#include "LevelUtils.h"
 #include "MovieScene.h"
 #include "MovieSceneSection.h"
 #include "MovieSceneSequence.h"
 #include "MovieSceneToolHelpers.h"
 #include "Tracks/MovieScene3DTransformTrack.h"
+#include "Widgets/Notifications/SNotificationList.h"
 
 #include "Board/BoardSequence.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
@@ -153,6 +157,15 @@ ShotSequenceTools::CreateCamera( ISequencer& iSequencer, UMovieSceneSequence* iS
     if( ExistingCamera )
         return;
 
+    ULevelEditorSubsystem* levelEditorSubsystem = GEditor->GetEditorSubsystem<ULevelEditorSubsystem>();
+    if( FLevelUtils::IsLevelLocked( levelEditorSubsystem->GetCurrentLevel() ) )
+    {
+        FNotificationInfo Info( LOCTEXT( "cant-spawn-camera-in-locked-level", "The requested operation could not be completed because the level is locked." ) );
+        Info.ExpireDuration = 5.0f;
+        FSlateNotificationManager::Get().AddNotification( Info )->SetCompletionState( SNotificationItem::CS_Fail );
+        return;
+    }
+
     //---
 
     const FScopedTransaction transaction( LOCTEXT( "transaction.create-storycamera-here", "Create Storyboard Camera Here" ) );
@@ -188,6 +201,8 @@ ShotSequenceTools::CreateCamera( ISequencer& iSequencer, UMovieSceneSequence* iS
 ACineCameraActor*
 ShotSequenceTools::SpawnCamera( UWorld* iWorld, const FTransform& iTransform )
 {
+    check( !FLevelUtils::IsLevelLocked( iWorld->GetCurrentLevel() ) );
+
     // Set new camera to match viewport
     FActorSpawnParameters SpawnParams;
     ACineCameraActor* camera = iWorld->SpawnActor<ACineCameraActor>( SpawnParams );
@@ -237,6 +252,8 @@ ShotSequenceTools::SpawnAndBindCamera( ISequencer& iSequencer, UMovieSceneSequen
 
     UWorld* world = GCurrentLevelEditingViewportClient->GetWorld();
     FTransform transform( GCurrentLevelEditingViewportClient->GetViewTransform().GetRotation(), GCurrentLevelEditingViewportClient->GetViewTransform().GetLocation() );
+
+    check( !FLevelUtils::IsLevelLocked( world->GetCurrentLevel() ) );
 
     ACineCameraActor* camera = SpawnCamera( world, transform );
 

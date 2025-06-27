@@ -685,10 +685,11 @@ class EPOSTRACKSEDITOR_API ShotSequenceTools
 {
 private:
     friend class BoardSequenceTools;
+    friend class CinematicBoardTrackTools;
     friend class ToolkitHelpers;
 
 // Inside EposSequenceTools_Board
-public:
+private:
     /**
     *  Clone the content of the section
     *

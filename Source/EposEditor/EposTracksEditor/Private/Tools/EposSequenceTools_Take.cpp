@@ -6,11 +6,15 @@
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "AssetToolsModule.h"
 #include "CineCameraActor.h"
+#include "Framework/Notifications/NotificationManager.h"
 #include "IAssetTools.h"
+#include "LevelEditorSubsystem.h"
+#include "LevelUtils.h"
 #include "Materials/MaterialInstanceConstant.h"
 #include "MovieSceneTimeHelpers.h"
 #include "MovieSceneToolHelpers.h"
 #include "MovieSceneToolsProjectSettings.h"
+#include "Widgets/Notifications/SNotificationList.h"
 
 #include "Board/BoardSequence.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
@@ -45,6 +49,15 @@ BoardSequenceTools::CreateTake( ISequencer* iSequencer, UMovieSceneSubSection& i
     UEposMovieSceneSequence* epos_sequence = Cast<UEposMovieSceneSequence>( BoardSequenceHelpers::FindSequenceOfSubSection( *iSequencer, iSubSection, epos_sequence_id ) );
     if( !epos_sequence )
         return nullptr;
+
+    ULevelEditorSubsystem* levelEditorSubsystem = GEditor->GetEditorSubsystem<ULevelEditorSubsystem>();
+    if( FLevelUtils::IsLevelLocked( levelEditorSubsystem->GetCurrentLevel() ) )
+    {
+        FNotificationInfo Info( LOCTEXT( "cant-create-take-in-locked-level", "The requested operation could not be completed because the level is locked." ) );
+        Info.ExpireDuration = 5.0f;
+        FSlateNotificationManager::Get().AddNotification( Info )->SetCompletionState( SNotificationItem::CS_Fail );
+        return nullptr;
+    }
 
     const FScopedTransaction transaction( LOCTEXT( "transaction.create-take", "Create Take" ) );
 
