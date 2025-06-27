@@ -161,7 +161,7 @@ UOdysseyAnimationTimelineSection::RebuildAnimationCutChannel()
 
     for( UOdysseyAnimationLayer* layer : animation_layers )
     {
-        UOdysseyAnimationCell* previous_cell = nullptr;
+        UOdysseyLayerCell* previous_cell = nullptr;
         TArray<UOdysseyLayerCell*> cells_unsafe = layer->GetCells();
         TArray<UOdysseyLayerCell*> cells = cells_unsafe.FilterByPredicate( []( const UOdysseyLayerCell* iCell )
                                                                            {
@@ -169,9 +169,8 @@ UOdysseyAnimationTimelineSection::RebuildAnimationCutChannel()
                                                                            } );
         for( UOdysseyLayerCell* cell : cells )
         {
-            UOdysseyAnimationCell* animation_cell = CastChecked<UOdysseyAnimationCell>( cell );
             {
-                FAnimationCutEntry animationcutentry( previous_cell, animation_cell );
+                FAnimationCutEntry animationcutentry( previous_cell, cell );
                 FFrameNumber frame_in_timeline = animationcutentry.GetFrameReference();
                 FFrameNumber frame_in_sequence = ConvertFrameFromTimelineToSequence( frame_in_timeline );
 
@@ -189,9 +188,9 @@ UOdysseyAnimationTimelineSection::RebuildAnimationCutChannel()
                 }
             }
 
-            previous_cell = animation_cell;
+            previous_cell = cell;
 
-            if( animation_cell == cells.Last() )
+            if( cell == cells.Last() )
             {
                 FAnimationCutEntry animationcutentry( previous_cell, nullptr );
                 FFrameNumber frame_in_timeline = animationcutentry.GetFrameReference();
