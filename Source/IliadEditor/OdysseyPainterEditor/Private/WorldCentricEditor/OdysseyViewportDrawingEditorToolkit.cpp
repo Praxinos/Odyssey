@@ -236,11 +236,11 @@ FOdysseyViewportDrawingEditorToolkit::SaveOpenedTabs()
     jsonObject->SetArrayField(TEXT("OpenedTabs"), tabStringIds);
 
     FString FileContents;
-	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&FileContents);
-	if (!FJsonSerializer::Serialize(jsonObject, Writer))
+    TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&FileContents);
+    if (!FJsonSerializer::Serialize(jsonObject, Writer))
         return;
 
-	if (!FFileHelper::SaveStringToFile(FileContents, *savedPath))
+    if (!FFileHelper::SaveStringToFile(FileContents, *savedPath))
         return;
 }
 
@@ -332,7 +332,7 @@ FOdysseyViewportDrawingEditorToolkit::ShutdownUI()
     FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>(TEXT("LevelEditor"));
 
     //ensure the editor layout is saved, so that SaveOpenedTabs is synchronized with the editor layout
-	FGlobalTabmanager::Get()->SaveAllVisualState();
+    FGlobalTabmanager::Get()->SaveAllVisualState();
 
     SaveOpenedTabs();
 
