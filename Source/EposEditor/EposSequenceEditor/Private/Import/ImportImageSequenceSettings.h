@@ -41,6 +41,14 @@ public:
     FString FilePattern;
 
     FPatternKeywordLists mPatternKeywordLists;
+
+    /** Override the duration of all panels. */
+    UPROPERTY( EditAnywhere, BlueprintReadWrite, Category=ImportImageSequenceOptions, meta=(InlineEditConditionToggle) )
+    bool bOverrideDuration;
+
+    /** The duration to override all panels. */
+    UPROPERTY( EditAnywhere, BlueprintReadWrite, Category=ImportImageSequenceOptions, meta=(EditCondition=bOverrideDuration) )
+    int32 OverrideDuration = 64;
 };
 
 //---

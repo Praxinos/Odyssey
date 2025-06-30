@@ -25,6 +25,7 @@ private:
 private:
     FString mImageSequencePath;
     FString mImageSequenceFilePattern;
+    TOptional<int32> mDurationOverride;
 
     FImportImageSequenceStruct    mImageSequenceStruct;
 };

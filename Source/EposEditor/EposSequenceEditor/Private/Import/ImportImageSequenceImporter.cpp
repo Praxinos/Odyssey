@@ -14,6 +14,8 @@ FImportImageSequenceImporter::FImportImageSequenceImporter( const FImportImageSe
 {
     mImageSequencePath = iOptions.ImageSequencePath.Path;
     mImageSequenceFilePattern = iOptions.FilePattern;
+    if( iOptions.bOverrideDuration )
+        mDurationOverride = iOptions.OverrideDuration;
 
     Build( iOptions.mPatternKeywordLists, oErrorMessage );
 }
@@ -218,7 +220,9 @@ FImportImageSequenceImporter::Build( const FPatternKeywordLists& iPatternKeyword
 
         panel->Pathfile.FilePath = mImageSequencePath / file;
 
-        if( frame_duration > 0 )
+        if( mDurationOverride.IsSet() )
+            panel->Duration = *mDurationOverride;
+        else if( frame_duration > 0 )
             panel->Duration = frame_duration;
     }
 
