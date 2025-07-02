@@ -424,27 +424,21 @@ SOdysseyPainterEditorVectorSceneTreeView::BindLayerDelegates( UOdysseyLayerStack
     UOdysseyAnimationLayerImageVector* animationVectorLayer = Cast<UOdysseyAnimationLayerImageVector>(iLayerStack->GetCurrentLayer());
     UOdysseyTextureLayerImageVector* textureVectorLayer = Cast<UOdysseyTextureLayerImageVector>(iLayerStack->GetCurrentLayer());
 
+    if( mOldVectorLayer.IsValid() )
+    {
+        mOldVectorLayer->OnNotifyDelegate().RemoveAll( this );
+    }
+
     if( animationVectorLayer )
     {
-        if( mOldVectorLayer.IsValid() )
-        {
-            mOldVectorLayer->OnNotifyDelegate().RemoveAll( this );
-        }
-
         mOldVectorLayer = mVectorLayer;
         mVectorLayer = animationVectorLayer->GetVectorLayer();
 
         mVectorLayer->OnNotifyDelegate().AddSP( this, &SOdysseyPainterEditorVectorSceneTreeView::OnVectorLayerNotify );
     }
 
-
     if( textureVectorLayer )
     {
-        if( mOldVectorLayer.IsValid() )
-        {
-            mOldVectorLayer->OnNotifyDelegate().RemoveAll( this );
-        }
-
         mOldVectorLayer = mVectorLayer;
         mVectorLayer = textureVectorLayer->GetVectorLayer();
 

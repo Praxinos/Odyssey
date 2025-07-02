@@ -66,7 +66,6 @@ FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorObject
     , bMapAsPolyline( true )
     , bWithThickness( true )
     , bContiguous( true )
-    , bARAPPrecomputeSucceded( false )
     , mInterpolationDirection( eInbetweenerInterpolationDirection::Forward )
     , bSquare ( iNumQuadX == iNumQuadY )
     , mInbetweenColor ( INBETWEEN_DEFAULT_RED_UINT8
@@ -1104,7 +1103,9 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
             // map object to the first grid
             Map();
 
-            mInvalidationFlags |= INVALIDATE_BUFFERS;
+            mInvalidationFlags |= FOdysseyVectorTagInbetweener::INVALIDATE_BUFFERS;
+            // if the map is invalidated, we'll need to run ARAP precompute
+            mInvalidationFlags |= FOdysseyVectorTagInbetweener::INVALIDATE_MAP;
         }
 
         // will update grids' BBoxes (needed for transform HUD and discarding of unused quads in ARAP grids)
@@ -1136,14 +1137,8 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
             {
                 if( breakdown->GetInbetweenerTag()->GetInterpolationType() == eInbetweenerInterpolationType::ARAP )
                 {
-                     breakdown->GetGrid()->UpdateCenterOfMass( iUpdateFlags, mInvalidationFlags );
-
-                    bARAPPrecomputeSucceded = breakdown->GetGrid()->PrecomputeARAPInterpolation();
-
-                    if( bARAPPrecomputeSucceded  == false )
-                    {
-                        UE_LOG( LogTemp, Error, TEXT("ERROR DURING ARAP PRECOMPUTE"));
-                    }
+                    breakdown->GetGrid()->UpdateCenterOfMass( iUpdateFlags, mInvalidationFlags );
+                    breakdown->GetGrid()->PrecomputeARAPInterpolation();
                 }
 
                 // altering breakdown range alters buffers. We then have to deform target anew.
@@ -1171,9 +1166,10 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
             route->Update( iUpdateFlags, iOwnerInvalidationFlags, mInvalidationFlags );
         }
 
-        // TODO: separate Transform interpolation from shape interpolation. Transform interpolation
-        // should then react to a specific flag, as well as shape interpolation
-        Interpolate();
+        // TODO: Transform interpolation
+        // should react to a specific flag, as well as shape interpolation
+        InterpolateTransform();
+        InterpolateDeform();
 
         if( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_INTERACTIVE ) == 0 )
         {
@@ -1396,10 +1392,7 @@ FOdysseyVectorTagInbetweener::DeformGridAtInbetween( FInbetweenerChart::Inbetwee
 
     if( mInterpolationType == eInbetweenerInterpolationType::ARAP )
     {
-        if( bARAPPrecomputeSucceded )
-        {
-            iInbetween->GetChart()->GetBreakdown()->GetGrid()->ComputeARAPInterpolation( iInbetween, false );
-        }
+        iInbetween->GetChart()->GetBreakdown()->GetGrid()->ComputeARAPInterpolation( iInbetween, false );
     }
 }
 
@@ -1479,13 +1472,17 @@ FOdysseyVectorTagInbetweener::RedrawCells( uint32 iDrawingCount )
 }
 
 void
-FOdysseyVectorTagInbetweener::Interpolate()
+FOdysseyVectorTagInbetweener::InterpolateTransform()
 {
     for( FInbetweenerBreakdown* breakdown : mBreakdownList )
     {
         breakdown->InterpolateTransform();
     }
+}
 
+void
+FOdysseyVectorTagInbetweener::InterpolateDeform()
+{
     for( FInbetweenerBreakdown* breakdown : mBreakdownList )
     {
         uint32 sourceDrawingIndex = breakdown->GetSourceDrawingIndex();

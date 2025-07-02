@@ -210,7 +210,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         // we need the focus on the viewport for keyboard
         // and some tools need to know the viewport size
         TWeakPtr<SOdysseyViewport> mViewport;
-        FOdysseyVectorLayer* mHUDLayer;
+        FOdysseyVectorGroupPaint* mWorkingScene;
 
         TSharedPtr<::ULIS::FBlock> mVectorBlock;
 

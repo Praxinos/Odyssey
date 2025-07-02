@@ -285,7 +285,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         /**
          * @brief Compute interpolations for all the mapped paths
          */
-        void Interpolate();
+        void InterpolateTransform();
+
+        void InterpolateDeform();
 
         void DrawMotionGrid( uint32 iDrawingIndex
                            , BLContext* iBLContext
@@ -296,7 +298,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void UpdateBBox( ::ULIS::FRectD& iBBox
                        , eInbetweenerPointPositionType iPositionType );
         void InterpolateGeometry( uint32 iDrawingIndex );
-        void InterpolateTransform( uint32 iDrawingIndex );
+        //void InterpolateTransform( uint32 iDrawingIndex );
         void Reset( bool iResetGridShape );
         void AllocBuffers();
 
@@ -363,7 +365,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         bool bContiguous;
         uint32 mUsedQuadCount;
         uint32 mUsedPointCount;
-        bool bARAPPrecomputeSucceded;
         eInbetweenerInterpolationDirection mInterpolationDirection;
         bool bSquare;
         FColor mInbetweenColor;

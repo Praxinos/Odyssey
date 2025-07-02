@@ -21,6 +21,7 @@ FInbetweenerGrid::~FInbetweenerGrid()
 FInbetweenerGrid::FInbetweenerGrid( FInbetweenerBreakdown* iBreakdown )
     : mBreakdown( iBreakdown )
     , mInvalidationFlags ( 0 )
+    , bARAPPrecomputeSucceded ( false )
 {
     //Make();
 }
@@ -470,7 +471,7 @@ FInbetweenerGrid::GetValidRouteArray( std::vector<FInbetweenerRoute*>& oValidRou
  * Precompute the sparse matrices P^T and prefactor P^T*P for later computations
  * See Baxter et al. 2008
  */
-bool
+void
 FInbetweenerGrid::PrecomputeARAPInterpolation()
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(FInbetweenerGrid::PrecomputeARAPInterpolation);
@@ -585,10 +586,10 @@ FInbetweenerGrid::PrecomputeARAPInterpolation()
     {
         UE_LOG(LogTemp, Warning, TEXT("ERROR DURING FACTORIZATION"));
 
-        return false;
+        bARAPPrecomputeSucceded = false;
     }
 
-    return true;
+    bARAPPrecomputeSucceded = true;
 }
 
 
@@ -714,6 +715,11 @@ FInbetweenerGrid::ComputeARAPInterpolation( FInbetweenerChart::Inbetween* iInbet
                                           , bool useRigidTransform )
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(FInbetweenerGrid::ComputeARAPInterpolation);
+
+    if( bARAPPrecomputeSucceded == false )
+    {
+        return false;
+    }
 
     uint32 usedQuadCount = mBreakdown->GetInbetweenerTag()->GetUsedQuadCount();
     uint32 usedPointCount = mBreakdown->GetInbetweenerTag()->GetUsedPointCount();

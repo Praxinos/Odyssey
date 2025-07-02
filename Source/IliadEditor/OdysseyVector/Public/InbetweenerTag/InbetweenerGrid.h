@@ -118,7 +118,7 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
 
         bool ComputeARAPInterpolation( FInbetweenerChart::Inbetween* iInbetween
                                      , bool useRigidTransform );
-        bool PrecomputeARAPInterpolation();
+        void PrecomputeARAPInterpolation();
         void Invalidate( uint32 iInvalidationFlags );
 
     protected:
@@ -174,4 +174,5 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
         ::ULIS::FRectD mSourceBBox;
         ::ULIS::FRectD mTargetBBox;
         ::ULIS::FRectD mGridBBox;
+        bool bARAPPrecomputeSucceded;
 };

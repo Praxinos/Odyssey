@@ -175,30 +175,24 @@ SOdysseyPainterEditorVectorSceneDetailsView::ParseVectorNotifications( uint64 iS
 void
 SOdysseyPainterEditorVectorSceneDetailsView::BindLayerDelegates( UOdysseyLayerStack* iLayerStack )
 {
-    UOdysseyAnimationLayerImageVector* imageVectorLayer = Cast<UOdysseyAnimationLayerImageVector>(iLayerStack->GetCurrentLayer());
+    UOdysseyAnimationLayerImageVector* animationVectorLayer = Cast<UOdysseyAnimationLayerImageVector>(iLayerStack->GetCurrentLayer());
     UOdysseyTextureLayerImageVector* textureVectorLayer = Cast<UOdysseyTextureLayerImageVector>(iLayerStack->GetCurrentLayer());
 
-    if( imageVectorLayer )
+    if( mOldVectorLayer.IsValid() )
     {
-        if( mOldVectorLayer.IsValid() )
-        {
-            mOldVectorLayer->OnNotifyDelegate().RemoveAll( this );
-        }
+        mOldVectorLayer->OnNotifyDelegate().RemoveAll( this );
+    }
 
+    if( animationVectorLayer )
+    {
         mOldVectorLayer = mVectorLayer;
-        mVectorLayer = imageVectorLayer->GetVectorLayer();
+        mVectorLayer = animationVectorLayer->GetVectorLayer();
 
         mVectorLayer->OnNotifyDelegate().AddSP( this, &SOdysseyPainterEditorVectorSceneDetailsView::OnVectorLayerNotify );
     }
 
-
     if( textureVectorLayer )
     {
-        if( mOldVectorLayer.IsValid() )
-        {
-            mOldVectorLayer->OnNotifyDelegate().RemoveAll( this );
-        }
-
         mOldVectorLayer = mVectorLayer;
         mVectorLayer = textureVectorLayer->GetVectorLayer();
 

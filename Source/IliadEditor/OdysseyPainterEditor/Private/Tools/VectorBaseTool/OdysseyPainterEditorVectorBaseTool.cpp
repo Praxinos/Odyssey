@@ -47,7 +47,7 @@ UOdysseyPainterEditorVectorBaseTool::UOdysseyPainterEditorVectorBaseTool( TShare
     , mHasContextMenu(true)
     , mAutoCreateMedia( iAutoCreateMedia )
     , bMouseEventViaHUD( iMouseEventViaHUD )
-    , mHUDLayer( nullptr )
+    , mWorkingScene( nullptr )
 {
 }
 
@@ -243,48 +243,34 @@ UOdysseyPainterEditorVectorBaseTool::GetSegmentHandlesFromVertices( const std::v
 void
 UOdysseyPainterEditorVectorBaseTool::Unload()
 {
-    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-
     UOdysseyPainterEditorTool::Unload();
 
-    if( hasVector )
+    if( mWorkingScene )
     {
-        //Should be done in UnloadVector directly
-        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
+        uint64 notificationFlags = 0;
 
+        notificationFlags = UnloadVector( mWorkingScene );
 
-        if( mediaVectors.Num() > 0 )
+        /**
+            * ERIC PATCH
+            * See LoadVector() comment for explanations
+            */
+        mVectorBlock = nullptr;
+        //END PATCH
+
+        mWorkingScene->GetLayer()->Notify( notificationFlags );
+
+        mWorkingScene->GetLayer()->OnNotifyDelegate().RemoveAll( this );
+UE_LOG(LogTemp, Warning, TEXT("BaseTool::Unload() %X %X"), mWorkingScene, this );
+
+        if( mBaseHUD )
         {
-            FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
-            uint64 notificationFlags = 0;
-
-            notificationFlags = UnloadVector( vectorScene );
-
-            /**
-             * ERIC PATCH
-             * See LoadVector() comment for explanations
-             */
-            mVectorBlock = nullptr;
-            //END PATCH
-
-            vectorScene->GetLayer()->Notify( notificationFlags );
-
-            vectorScene->GetLayer()->OnNotifyDelegate().RemoveAll( this );
+            mBaseHUD->Unload();
+            // 2D HUD
+            mWorkingScene->GetLayer()->RemoveHUD( mBaseHUD.Get() );
+            // 3D HUD
+            mHUD->RemoveElement( mBaseHUD );
         }
-    }
-
-    if( mBaseHUD )
-    {
-        mBaseHUD->Unload();
-        // 2D HUD
-        // Note: Unload() might be call on a frame without a cell, thus vectorScene would be NULL
-        // and we would not be able to unload the HUD from FOdysseyVectorCell:mHUDList
-        if( mHUDLayer )
-        {
-            mHUDLayer->RemoveHUD( mBaseHUD.Get() );
-        }
-        // 3D HUD
-        mHUD->RemoveElement( mBaseHUD );
     }
 }
 
@@ -294,6 +280,7 @@ UOdysseyPainterEditorVectorBaseTool::Load()
     TSharedPtr<FOdysseyPainterEditorViewportTab> viewportTab = GetEditor()->FindTab<FOdysseyPainterEditorViewportTab>();
 
     UOdysseyPainterEditorTool::Load();
+
     bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
 
     // we need the focus on the viewport for keyboard
@@ -304,7 +291,7 @@ UOdysseyPainterEditorVectorBaseTool::Load()
 
     UOdysseyPainterEditorTool::Load();
 
-    mHUDLayer = nullptr;
+    mWorkingScene = nullptr;
 
     if( hasVector )
     {
@@ -313,26 +300,22 @@ UOdysseyPainterEditorVectorBaseTool::Load()
 
         if( mediaVectors.Num() > 0 )
         {
-            FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
             uint64 notificationFlags;
 
-            vectorScene->GetLayer()->ClearHUD();
+            mWorkingScene = mediaVectors[0]->GetScene();
+
+            mWorkingScene->GetLayer()->ClearHUD();
 
             if( mBaseHUD )
             {
-                mBaseHUD->SetScene( vectorScene );
+                mBaseHUD->SetScene( mWorkingScene );
                 mBaseHUD->Load();
                 // 2D HUD
-                // Note: Unload() might be call on a frame without a cell, thus vectorScene would be NULL
-                // and we would not be able to unload the HUD from FOdysseyVectorCell:mHUDList
-                mHUDLayer = vectorScene->GetLayer();
-                mHUDLayer->AddHUD( mBaseHUD.Get() );
+                mWorkingScene->GetLayer()->AddHUD( mBaseHUD.Get() );
                 // 3D HUD
                 mHUD->AddElement( mBaseHUD );
 
-                vectorScene->GetLayer()->ResetHUD( vectorScene );
-
-                vectorScene->GetLayer()->OnNotifyDelegate().AddUObject( this, &UOdysseyPainterEditorVectorBaseTool::OnVectorLayerNotify );
+                mWorkingScene->GetLayer()->GetLayer()->ResetHUD( mWorkingScene );
             }
 
             /**
@@ -341,12 +324,16 @@ UOdysseyPainterEditorVectorBaseTool::Load()
              * Keeps the vectorBlock in memory to avoid reloading it each time we need to redraw
              * This fixes a huge performance issue when using the vector tool.
              */
-            mVectorBlock = vectorScene->GetCell()->GetCellInterface()->GetBlock();
+            mVectorBlock = mWorkingScene->GetCell()->GetCellInterface()->GetBlock();
             //END PATCH
 
-            notificationFlags = LoadVector( vectorScene );
+            notificationFlags = LoadVector( mWorkingScene );
 
-            vectorScene->GetLayer()->Notify( notificationFlags );
+            mWorkingScene->GetLayer()->OnNotifyDelegate().AddUObject( this, &UOdysseyPainterEditorVectorBaseTool::OnVectorLayerNotify );
+
+            mWorkingScene->GetLayer()->Notify( notificationFlags );
+
+ UE_LOG(LogTemp, Warning, TEXT("BaseTool::Load() %X %X"), mWorkingScene, this );
         }
     }
 }
@@ -354,20 +341,11 @@ UOdysseyPainterEditorVectorBaseTool::Load()
 void
 UOdysseyPainterEditorVectorBaseTool::OnVectorLayerNotify( FOdysseyVectorLayer* iLayer, uint64 iNotificationFlags )
 {
-    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-
-    if ( hasVector )
+    if ( mWorkingScene )
     {
         if( iNotificationFlags & FOdysseyVectorEngine::NOTIFY_UPDATE_HUD )
         {
-            TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
-
-            if( mediaVectors.Num() > 0 )
-            {
-                FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
-
-                iLayer->ResetHUD( vectorScene );
-            }
+            iLayer->ResetHUD( mWorkingScene );
         }
     }
 }
@@ -384,24 +362,17 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyDownGlobalVector( FOdysseyVectorGroupP
 bool
 UOdysseyPainterEditorVectorBaseTool::OnKeyDownGlobal( const FKeyEvent& InKeyEvent )
 {
-    FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
-    if (mediaProvider.IsLocked())
-        return false;
+    if( mWorkingScene )
+    {
+        uint64 notificationFlags = 0;
+        bool handled = OnKeyDownGlobalVector ( mWorkingScene, InKeyEvent, notificationFlags );
 
-    if( !mediaProvider.HasMedia<FOdysseyMediaVector>() )
-        return false;
+        mWorkingScene->GetLayer()->Notify( notificationFlags );
 
-    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = mediaProvider.GetMedias<FOdysseyMediaVector>();
-    if( mediaVectors.IsEmpty() )
-        return false;
+        return handled;
+    }
 
-    FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
-    uint64 notificationFlags = 0;
-    bool handled = OnKeyDownGlobalVector(vectorScene, InKeyEvent, notificationFlags);
-
-    vectorScene->GetLayer()->Notify( notificationFlags );
-
-    return handled;
+    return false;
 }
 
 bool
@@ -450,25 +421,18 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyDownVector( FOdysseyVectorGroupPaint* 
 bool
 UOdysseyPainterEditorVectorBaseTool::OnKeyDown( const FKey& iKey )
 {
-    FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
-    if (mediaProvider.IsLocked())
-        return false;
+    if( mWorkingScene )
+    {
+        uint64 notificationFlags = 0;
 
-    if( !mediaProvider.HasMedia<FOdysseyMediaVector>() )
-        return false;
+        bool handled = OnKeyDownVector( mWorkingScene, iKey, notificationFlags );
 
-    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = mediaProvider.GetMedias<FOdysseyMediaVector>();
-    if( mediaVectors.IsEmpty() )
-        return false;
+        mWorkingScene->GetLayer()->Notify( notificationFlags );
 
-    FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
-    uint64 notificationFlags = 0;
+        return handled;
+    }
 
-    bool handled = OnKeyDownVector( vectorScene, iKey, notificationFlags );
-
-    vectorScene->GetLayer()->Notify( notificationFlags );
-
-    return handled;
+    return false;
 }
 
 bool
@@ -483,24 +447,17 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyUpGlobalVector( FOdysseyVectorGroupPai
 bool
 UOdysseyPainterEditorVectorBaseTool::OnKeyUpGlobal( const FKeyEvent& InKeyEvent )
 {
-    FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
-    if (mediaProvider.IsLocked())
-        return false;
+    if( mWorkingScene )
+    {
+        uint64 notificationFlags = 0;
+        bool handled = OnKeyUpGlobalVector( mWorkingScene, InKeyEvent, notificationFlags );
 
-    if( !mediaProvider.HasMedia<FOdysseyMediaVector>() )
-        return false;
+        mWorkingScene->GetLayer()->Notify( notificationFlags );
 
-    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = mediaProvider.GetMedias<FOdysseyMediaVector>();
-    if( mediaVectors.IsEmpty() )
-        return false;
+        return handled;
+    }
 
-    FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
-    uint64 notificationFlags = 0;
-    bool handled = OnKeyUpGlobalVector(vectorScene, InKeyEvent, notificationFlags);
-
-    vectorScene->GetLayer()->Notify( notificationFlags );
-
-    return handled;
+    return false;
 }
 
 bool
@@ -515,25 +472,18 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyUpVector( FOdysseyVectorGroupPaint* iS
 bool
 UOdysseyPainterEditorVectorBaseTool::OnKeyUp( const FKey& iKey )
 {
-    FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
-    if (mediaProvider.IsLocked())
-        return false;
+    if( mWorkingScene )
+    {
+        uint64 notificationFlags = 0;
 
-    if( !mediaProvider.HasMedia<FOdysseyMediaVector>() )
-        return false;
+        bool handled = OnKeyUpVector( mWorkingScene, iKey, notificationFlags );
 
-    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = mediaProvider.GetMedias<FOdysseyMediaVector>();
-    if( mediaVectors.IsEmpty() )
-        return false;
+        mWorkingScene->GetLayer()->Notify( notificationFlags );
 
-    FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
-    uint64 notificationFlags = 0;
+        return handled;
+    }
 
-    bool handled = OnKeyUpVector(vectorScene,iKey, notificationFlags);
-
-    vectorScene->GetLayer()->Notify( notificationFlags );
-
-    return handled;
+    return false;
 }
 
 bool
@@ -556,32 +506,35 @@ bool
 UOdysseyPainterEditorVectorBaseTool::OnMouseDownViaHUD( const FOdysseyPoint& iPointInTexture
                                                       , const FKey& iKey )
 {
-    // workaround for buggy stylus drivers
-    if( FilterMouseEvent( eMouseEventName::MouseDown ) == false )
-        return false;
-
     FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
     if (mediaProvider.IsLocked())
         return false;
 
+    // workaround for buggy stylus drivers
+    //if( FilterMouseEvent( eMouseEventName::MouseDown ) == false )
+        //return false;
+
     mDragging = false;
 
-    if( !mediaProvider.HasMedia<FOdysseyMediaVector>() )
-        return false;
+    if( mAutoCreateMedia )
+    {
+        mediaProvider.GetOrCreateMedias<FOdysseyMediaVector>();
+    }
 
-    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = mAutoCreateMedia ? mediaProvider.GetOrCreateMedias<FOdysseyMediaVector>()
-                                                                            : mediaProvider.GetMedias<FOdysseyMediaVector>();
-    if( mediaVectors.IsEmpty() )
-        return false;
+    // Load() will be called automatically if media is created, initializing mworkingScene
 
-    FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
-    uint64 notificationFlags = 0;
+    if( mWorkingScene )
+    {
+        uint64 notificationFlags = 0;
 
-    bool handled = OnMouseDownVector( vectorScene, iPointInTexture, iKey, notificationFlags );
+        bool handled = OnMouseDownVector( mWorkingScene, iPointInTexture, iKey, notificationFlags );
 
-    vectorScene->GetLayer()->Notify( notificationFlags );
+        mWorkingScene->GetLayer()->Notify( notificationFlags );
 
-    return handled;
+        return handled;
+    }
+
+    return false;
 }
 
 void
@@ -601,31 +554,22 @@ void
 UOdysseyPainterEditorVectorBaseTool::OnMouseHoverViaHUD( const FOdysseyPoint& iPointInTexture )
 {
     // workaround for buggy stylus drivers
-    if( FilterMouseEvent( eMouseEventName::MouseHover ) == false )
-        return;
-
-    FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
-    if (mediaProvider.IsLocked())
-        return;
+    //if( FilterMouseEvent( eMouseEventName::MouseHover ) == false )
+    //    return;
 
     // we need the focus on the viewport for keyboard
     //FSlateApplication::Get().SetKeyboardFocus( mViewportWidget );
 
-    if( !mediaProvider.HasMedia<FOdysseyMediaVector>() )
-        return;
-
-    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = mediaProvider.GetMedias<FOdysseyMediaVector>();
-    if( mediaVectors.IsEmpty() )
-        return;
-
-    FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
-    uint64 notificationFlags = 0;
-
-    OnMouseHoverVector( vectorScene, iPointInTexture, notificationFlags );
-
-    if( notificationFlags )
+    if( mWorkingScene )
     {
-        vectorScene->GetLayer()->Notify( notificationFlags );
+        uint64 notificationFlags = 0;
+
+        OnMouseHoverVector( mWorkingScene, iPointInTexture, notificationFlags );
+
+        if( notificationFlags )
+        {
+            mWorkingScene->GetLayer()->Notify( notificationFlags );
+        }
     }
 }
 
@@ -694,30 +638,21 @@ void
 UOdysseyPainterEditorVectorBaseTool::OnMouseDragViaHUD( const FOdysseyPoint& iPointInTexture )
 {
     // workaround for buggy stylus drivers
-    if( FilterMouseEvent( eMouseEventName::MouseDrag ) == false )
-        return;
-
-    FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
-    if (mediaProvider.IsLocked())
-        return;;
+    //if( FilterMouseEvent( eMouseEventName::MouseDrag ) == false )
+    //    return;
 
     mDragging = true;
 
-    if( !mediaProvider.HasMedia<FOdysseyMediaVector>() )
-        return;
-
-    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = mediaProvider.GetMedias<FOdysseyMediaVector>();
-    if( mediaVectors.IsEmpty())
-        return;
-
-    FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
-    uint64 notificationFlags = 0;
-
-    OnMouseDragVector( vectorScene, iPointInTexture, notificationFlags );
-
-    if( notificationFlags )
+    if( mWorkingScene )
     {
-        vectorScene->GetLayer()->Notify( notificationFlags );
+        uint64 notificationFlags = 0;
+
+        OnMouseDragVector( mWorkingScene, iPointInTexture, notificationFlags );
+
+        if( notificationFlags )
+        {
+            mWorkingScene->GetLayer()->Notify( notificationFlags );
+        }
     }
 }
 
@@ -739,38 +674,31 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseClick( const FOdysseyPoint& iPointIn
 bool
 UOdysseyPainterEditorVectorBaseTool::OnMouseClickViaHUD( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
 {
-    FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
-    if (mediaProvider.IsLocked())
-        return false;
-
-    if( !mediaProvider.HasMedia<FOdysseyMediaVector>() )
-        return false;
-
-    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = mediaProvider.GetMedias<FOdysseyMediaVector>();
-    if( mediaVectors.IsEmpty() )
-        return false;
-
-    FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
-
-    uint64 notificationFlags = 0;
-
-    bool handled = OnMouseClickVector( vectorScene, iPointInTexture, iKey, notificationFlags );
-
-    vectorScene->GetLayer()->Notify( notificationFlags );
-
-    if (!handled)
+    if( mWorkingScene )
     {
-        if( iKey == EKeys::RightMouseButton )
+        uint64 notificationFlags = 0;
+
+        bool handled = OnMouseClickVector( mWorkingScene, iPointInTexture, iKey, notificationFlags );
+
+        mWorkingScene->GetLayer()->Notify( notificationFlags );
+
+        if (!handled)
         {
-            if( mHasContextMenu )
+            if( iKey == EKeys::RightMouseButton )
             {
-                PopupContextMenu();
-                return true;
+                if( mHasContextMenu )
+                {
+                    PopupContextMenu();
+
+                    return true;
+                }
             }
         }
+
+        return handled;
     }
 
-    return handled;
+    return false;
 }
 
 bool
@@ -803,30 +731,23 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseUpViaHUD( const FOdysseyPoint& iPoin
                                                     , const FKey& iKey )
 {
     // workaround for buggy stylus drivers
-    if( FilterMouseEvent( eMouseEventName::MouseUp ) == false )
-        return false;
-
-    FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
-    if (mediaProvider.IsLocked())
-        return false;
+    //if( FilterMouseEvent( eMouseEventName::MouseUp ) == false )
+    //    return false;
 
     mDragging = false;
 
-    if( !mediaProvider.HasMedia<FOdysseyMediaVector>() )
-        return false;
+    if( mWorkingScene )
+    {
+        uint64 notificationFlags = 0;
 
-    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = mediaProvider.GetMedias<FOdysseyMediaVector>();
-    if( mediaVectors.IsEmpty() )
-        return false;
+        bool handled = OnMouseUpVector( mWorkingScene, iPointInTexture, iKey, notificationFlags );
 
-    FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
-    uint64 notificationFlags = 0;
+        mWorkingScene->GetLayer()->Notify( notificationFlags );
 
-    bool handled = OnMouseUpVector( vectorScene, iPointInTexture, iKey, notificationFlags );
+        return handled;
+    }
 
-    vectorScene->GetLayer()->Notify( notificationFlags );
-
-    return handled;
+    return false;
 }
 
 uint64
@@ -849,21 +770,13 @@ UOdysseyPainterEditorVectorBaseTool::PostEditChangeProperty( FPropertyChangedEve
         return;
 
     // redraw
-    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-
-    if (hasVector)
+    if ( mWorkingScene )
     {
-        //Should be done in OnKeyUpVector directly
-        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
-        if( mediaVectors.Num() > 0 )
-        {
-            FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
-            uint64 notificationFlags;
+        uint64 notificationFlags;
 
-            notificationFlags = PropertyChangedVector( vectorScene, PropertyChangedEvent.GetPropertyName() );
+        notificationFlags = PropertyChangedVector( mWorkingScene, PropertyChangedEvent.GetPropertyName() );
 
-            vectorScene->GetLayer()->Notify( notificationFlags );
-        }
+        mWorkingScene->GetLayer()->Notify( notificationFlags );
     }
 }
 
@@ -909,21 +822,11 @@ UOdysseyPainterEditorVectorBaseTool::BindShortcuts(FBaseToolkit* iToolkit)
 void
 UOdysseyPainterEditorVectorBaseTool::Copy()
 {
-    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-
-    if( hasVector )
+    if( mWorkingScene )
     {
-        // It would be better if this is done in OnMouseDown()
-        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
-
-        if( mediaVectors.Num() > 0 )
+        if( GetEditor()->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_OBJECT )
         {
-            FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
-
-            if( GetEditor()->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_OBJECT )
-            {
-                FOdysseyPainterEditor::CopyObjects( vectorScene );
-            }
+            FOdysseyPainterEditor::CopyObjects( mWorkingScene );
         }
     }
 }
@@ -931,21 +834,11 @@ UOdysseyPainterEditorVectorBaseTool::Copy()
 void
 UOdysseyPainterEditorVectorBaseTool::Paste()
 {
-    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-
-    if( hasVector )
+    if( mWorkingScene )
     {
-        // It would be better if this is done in OnMouseDown()
-        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
-
-        if( mediaVectors.Num() > 0 )
+        if( GetEditor()->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_OBJECT )
         {
-            FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
-
-            if( GetEditor()->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_OBJECT )
-            {
-                FOdysseyPainterEditor::PasteObjects( GetEditor(), vectorScene );
-            }
+            FOdysseyPainterEditor::PasteObjects( GetEditor(), mWorkingScene );
         }
     }
 }
@@ -953,26 +846,16 @@ UOdysseyPainterEditorVectorBaseTool::Paste()
 void
 UOdysseyPainterEditorVectorBaseTool::SelectAll()
 {
-    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-
-    if( hasVector )
+    if( mWorkingScene )
     {
-        // It would be better if this is done in OnMouseDown()
-        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
-
-        if( mediaVectors.Num() > 0 )
+        if( GetEditor()->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_OBJECT )
         {
-            FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
+            FOdysseyPainterEditor::SelectAllObjects( GetEditor(), mWorkingScene );
+        }
 
-            if( GetEditor()->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_OBJECT )
-            {
-                FOdysseyPainterEditor::SelectAllObjects( GetEditor(), vectorScene );
-            }
-
-            if( GetEditor()->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_VERTEX )
-            {
-                FOdysseyPainterEditor::SelectAllPoints( GetEditor(), vectorScene );
-            }
+        if( GetEditor()->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_VERTEX )
+        {
+            FOdysseyPainterEditor::SelectAllPoints( GetEditor(), mWorkingScene );
         }
     }
 }
@@ -980,38 +863,18 @@ UOdysseyPainterEditorVectorBaseTool::SelectAll()
 void
 UOdysseyPainterEditorVectorBaseTool::IncreaseContourWidth()
 {
-    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-
-    if( hasVector )
+    if( mWorkingScene )
     {
-        // It would be better if this is done in OnMouseDown()
-        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
-
-        if( mediaVectors.Num() > 0 )
-        {
-            FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
-
-            FOdysseyPainterEditor::AlterContourWidth( vectorScene, 1.1f, false );
-        }
+        FOdysseyPainterEditor::AlterContourWidth( mWorkingScene, 1.1f, false );
     }
 }
 
 void
 UOdysseyPainterEditorVectorBaseTool::DecreaseContourWidth()
 {
-    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-
-    if( hasVector )
+    if( mWorkingScene )
     {
-        // It would be better if this is done in OnMouseDown()
-        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
-
-        if( mediaVectors.Num() > 0 )
-        {
-            FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
-
-            FOdysseyPainterEditor::AlterContourWidth( vectorScene, 0.9f, false );
-        }
+        FOdysseyPainterEditor::AlterContourWidth( mWorkingScene, 0.9f, false );
     }
 }
 
@@ -1025,26 +888,16 @@ UOdysseyPainterEditorVectorBaseTool::Cut()
 void
 UOdysseyPainterEditorVectorBaseTool::Delete()
 {
-    bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
-
-    if( hasVector )
+    if( mWorkingScene )
     {
-        // It would be better if this is done in OnMouseDown()
-        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
-
-        if( mediaVectors.Num() > 0 )
+        if( GetEditor()->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_OBJECT )
         {
-            FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
+            FOdysseyPainterEditor::DeleteObjects( GetEditor(), mWorkingScene );
+        }
 
-            if( GetEditor()->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_OBJECT )
-            {
-                FOdysseyPainterEditor::DeleteObjects( GetEditor(), vectorScene );
-            }
-
-            if( GetEditor()->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_VERTEX )
-            {
-                FOdysseyPainterEditor::DeletePointSelection( GetEditor(), vectorScene );
-            }
+        if( GetEditor()->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_VERTEX )
+        {
+            FOdysseyPainterEditor::DeletePointSelection( GetEditor(), mWorkingScene );
         }
     }
 }
@@ -1083,26 +936,22 @@ UOdysseyPainterEditorVectorBaseTool::CreatePropertyWidget( TSharedPtr<class IPro
 void
 UOdysseyPainterEditorVectorBaseTool::SetVectorEditionFlags( uint64 iViewMode )
 {
-    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = mEditor->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
-
     mEditor->SetVectorHUDFlags( ( mEditor->GetVectorHUDFlags() & (~FOdysseyVectorHUD::HUD_MODE_ALL) ) | iViewMode );
 
     mEditor->SanitizeCurrentTool();
 
-    if( mediaVectors.Num() )
+    if( mWorkingScene )
     {
-        FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
-
         // select a object with an inbetweener tag if none are selected
         if( iViewMode & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
         {
-            FOdysseyVectorTag* selectedTag = vectorScene->GetLayer()->GetSelectedTagByClassType( FOdysseyVectorTagInbetweener::StaticClass() );
+            FOdysseyVectorTag* selectedTag = mWorkingScene->GetLayer()->GetSelectedTagByClassType( FOdysseyVectorTagInbetweener::StaticClass() );
 
             if ( selectedTag == nullptr )
             {
                 FOdysseyVectorTag* lastTag = nullptr;
 
-                for( FOdysseyVectorTag* tag : vectorScene->GetLayer()->GetSharedTagList() )
+                for( FOdysseyVectorTag* tag : mWorkingScene->GetLayer()->GetSharedTagList() )
                 {
                     if( tag->GetClass() == FOdysseyVectorTagInbetweener::StaticClass() )
                     {
@@ -1117,12 +966,12 @@ UOdysseyPainterEditorVectorBaseTool::SetVectorEditionFlags( uint64 iViewMode )
             }
         }
 
-        vectorScene->GetLayer()->Notify( FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                                       | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                                       | FOdysseyPainterEditor::UI_UPDATE_TIMELINE
-                                       | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD );
+        mWorkingScene->GetLayer()->Notify( FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
+                                         | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
+                                         | FOdysseyPainterEditor::UI_UPDATE_TIMELINE
+                                         | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD );
 
-        vectorScene->GetLayer()->RequestRedraw( vectorScene->GetCell(), 0 );
+        mWorkingScene->GetLayer()->RequestRedraw( mWorkingScene->GetCell(), 0 );
     }
 }
 
@@ -1252,35 +1101,21 @@ UOdysseyPainterEditorVectorBaseTool::CreateContextMenu()
 void
 UOdysseyPainterEditorVectorBaseTool::ExtendContextMenu( FMenuBuilder& menu )
 {
-    //FMenuBuilder menu( true, nullptr );
-    FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
-    if (mediaProvider.IsLocked())
-        return;
-
-    bool hasVector = mediaProvider.HasMedia<FOdysseyMediaVector>();
-
-    if( hasVector )
+    if( mWorkingScene )
     {
-        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = mediaProvider.GetOrCreateMedias<FOdysseyMediaVector>();
-
-        if( mediaVectors.Num() )
+        if( GetEditor()->GetVectorHUDFlags() &  FOdysseyVectorHUD::HUD_MODE_OBJECT )
         {
-            FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
+            ExtendContextMenuObject( mWorkingScene, menu, 0 );
+        }
 
-            if( GetEditor()->GetVectorHUDFlags() &  FOdysseyVectorHUD::HUD_MODE_OBJECT )
-            {
-                ExtendContextMenuObject( vectorScene, menu, 0 );
-            }
+        if( GetEditor()->GetVectorHUDFlags() &  FOdysseyVectorHUD::HUD_MODE_VERTEX )
+        {
+            ExtendContextMenuVertex( mWorkingScene, menu, 0 );
+        }
 
-            if( GetEditor()->GetVectorHUDFlags() &  FOdysseyVectorHUD::HUD_MODE_VERTEX )
-            {
-                ExtendContextMenuVertex( vectorScene, menu, 0 );
-            }
-
-            if( GetEditor()->GetVectorHUDFlags() &  FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
-            {
-                ExtendContextMenuInbetween( vectorScene, menu, 0 );
-            }
+        if( GetEditor()->GetVectorHUDFlags() &  FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
+        {
+            ExtendContextMenuInbetween( mWorkingScene, menu, 0 );
         }
     }
 }
