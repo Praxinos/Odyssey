@@ -116,8 +116,6 @@ FOdysseyPainterEditorVectorPathEditToolHUD::DrawHUD( const FOdysseyHUD::FDrawHUD
 
     //char infoText[255] = "CTRL: deform segment      SHIFT: widen vertex        ALT: add/remove vertex";
 
-UE_LOG(LogTemp, Warning, TEXT("DrawHUD %d %d"), vertexHandleFlag, segmentHandleFlag );
-
     // Draw default
     // -> nothing in object mode.
     // -> vertices and segments in vertex mode.

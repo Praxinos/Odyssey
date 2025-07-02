@@ -149,9 +149,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
                        , const FColor& iColor );
 
         uint64 GetInvalidationFlags();
-        ::ULIS::FRectD SanitizeRect( const ::ULIS::FRectD& iRenderRect
-                                   , double iScreenWidth
-                                   , double iScreenHeight );
+        ::ULIS::FRectI SanitizeRect( const ::ULIS::FRectD& iRenderRect
+                                   , uint32 iScreenWidth
+                                   , uint32 iScreenHeight );
 
     protected:
         void TracePolygon( const  ::ULIS::FVec2I* iPoint

@@ -64,16 +64,20 @@ FOdysseyVectorEngine::GetRenderData()
     return mRenderData;
 }
 
-::ULIS::FRectD
+::ULIS::FRectI
 FOdysseyVectorEngine::SanitizeRect( const ::ULIS::FRectD& iRenderRect
-                                  , double iScreenWidth
-                                  , double iScreenHeight )
+                                  , uint32 iScreenWidth
+                                  , uint32 iScreenHeight )
 {
-    ::ULIS::FRectD screen = ::ULIS::FRectD( 0, 0, iScreenWidth, iScreenHeight );
-    ::ULIS::FRectD sanitizedRect;
-    ::ULIS::FRectD retRect;
+    ::ULIS::FRectI screen = ::ULIS::FRectI( 0, 0, iScreenWidth, iScreenHeight );
+    ::ULIS::FRectI sanitizedRect;
+    ::ULIS::FRectI retRect;
+    ::ULIS::FRectI renderRectI = ::ULIS::FRectI::FromXYWH( iRenderRect.x
+                                                         , iRenderRect.y
+                                                         , ceil ( iRenderRect.w )
+                                                         , ceil ( iRenderRect.y ) );
 
-    FOdysseyVector::IntersectRegions( iRenderRect
+    FOdysseyVector::IntersectRegions( renderRectI
                                     , screen
                                     , &sanitizedRect );
 
@@ -227,8 +231,8 @@ FOdysseyVectorEngine::Render( BLContext* iBLContext
         //iBLContext->setStrokeStyle( BLRgba32( 0, 255, 0, 255 ) );
         //iBLContext->strokeRect( BLRect( sanitizedRect.x
         //                              , sanitizedRect.y
-        //                              , sanitizedRect.w - 1
-        //                              , sanitizedRect.h - 1 ) );
+        //                              , sanitizedRect.w
+        //                              , sanitizedRect.h ) );
         //------------------------------------------------------//
 
         iBLContext->restore();

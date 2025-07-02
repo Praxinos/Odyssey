@@ -305,7 +305,7 @@ FOdysseyVectorBlock::SetState(eBlockState iState)
 void
 FOdysseyVectorBlock::Invalidate( const ::ULIS::FRectD& iRect, bool iIsInteractive)
 {
-    mSanitizedRect = mEngine.SanitizeRect( iRect, mWidth, mHeight );
+    ::ULIS::FRectD sanitizedRectD = mEngine.SanitizeRect( iRect, mWidth, mHeight );
 
     if (!mNeedsRender)
     {
