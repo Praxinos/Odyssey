@@ -864,6 +864,8 @@ FCinematicBoardSection::ReBuildAnimationsTimelineThumbnails( FGuid iGuid, TOptio
             if( !thumbnail.Texture )
                 continue;
 
+            thumbnail.MultipleSubkey = pair.Value.mSubKeys.Num() > 1;
+
             thumbnails.Add( thumbnail );
 
             break; // only the first subkey (of the metakey) is used

@@ -917,6 +917,11 @@ protected:
 
     virtual void OnClickKeys( TSharedPtr<FMetaChannel> iKeys ) override;
 
+    virtual EDragMode InitDragMode() const;
+
+    virtual bool ExcludeKey( FFrameNumber iFrameNumber ) const;
+    virtual bool ExcludeThumbnail( FFrameTime iTime ) const;
+
 private:
     //TArray<FGuid> BuildThumbnailCache( UOdysseyAnimation* iAnimation, FFrameNumber iFrameTimeline, bool iForce ) const;
 
@@ -1018,6 +1023,15 @@ void
 SCinematicBoardSectionAnimationTimelineKeys::RebuildMetaChannel() //override
 {
     mBoardSection.Pin()->ReBuildAnimationsTimelineMetaChannel();
+}
+
+SMetaKeysArea::EDragMode
+SCinematicBoardSectionAnimationTimelineKeys::InitDragMode() const
+{
+    if( FSlateApplication::Get().GetModifierKeys().IsControlDown() )
+        return EDragMode::kMoveSingleKey;
+
+    return EDragMode::kShiftFromKey;
 }
 
 void
@@ -2052,6 +2066,33 @@ SCinematicBoardSectionAnimationTimelineKeys::GetBackgroundBrush() const //overri
     return &background_brush;
 }
 
+bool
+SCinematicBoardSectionAnimationTimelineKeys::ExcludeThumbnail( FFrameTime iTime ) const
+{
+    if( !mBoardSection.IsValid() )
+        return false;
+
+    FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+
+    TArray<const FCinematicBoardSection::FThumbnailData*> thumbnail_data;
+    for( const FCinematicBoardSection::FThumbnailData& thumbnail : board_section->GetAnimationTimelineThumbnails( mBinding ) )
+        thumbnail_data.Add( &thumbnail );
+    thumbnail_data.Sort( []( const FCinematicBoardSection::FThumbnailData& iData1, const FCinematicBoardSection::FThumbnailData& iData2 )
+                         {
+                             return iData1.QTime.Time < iData2.QTime.Time;
+                         } );
+
+    bool is_last_key = ( thumbnail_data.Last()->QTime.Time == iTime );
+    if( !is_last_key )
+        return false;
+
+    bool is_multi = thumbnail_data.Last()->MultipleSubkey;
+    if( is_multi )
+        return false;
+
+    return true;
+}
+
 int32
 SCinematicBoardSectionAnimationTimelineKeys::DrawThumbnails( const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled ) const
 {
@@ -2068,15 +2109,29 @@ SCinematicBoardSectionAnimationTimelineKeys::DrawThumbnails( const FPaintArgs& A
     for( const FCinematicBoardSection::FThumbnailData& thumbnail : board_section->GetAnimationTimelineThumbnails( mBinding ) )
     //for( const FThumbnailData& thumbnail : mThumbnails )
     {
-            FIntVector2 thumbnail_size;
-            thumbnail_size.Y = AllottedGeometry.GetLocalSize().Y * .9f;
-            thumbnail_size.X = thumbnail_size.Y * ( thumbnail.Size.X / float( thumbnail.Size.Y ) );
 
-            const float KeyPositionPx = converter.SecondsToPixel( thumbnail.QTime.AsSeconds() );
-            const FVector2D KeyTranslation( KeyPositionPx, ( ( AllottedGeometry.GetLocalSize().Y / 2.0f ) - ( thumbnail_size.Y / 2.0f ) ) );
+        FIntVector2 thumbnail_size;
+        thumbnail_size.Y = AllottedGeometry.GetLocalSize().Y * .9f;
+        thumbnail_size.X = thumbnail_size.Y * ( thumbnail.Size.X / float( thumbnail.Size.Y ) );
 
-            FLinearColor borderTint = FLinearColor( 0.5f, 0.5f, 0.5f, 1.0f );
+        const float KeyPositionPx = converter.SecondsToPixel( thumbnail.QTime.AsSeconds() );
+        const FVector2D KeyTranslation( KeyPositionPx, ( ( AllottedGeometry.GetLocalSize().Y / 2.0f ) - ( thumbnail_size.Y / 2.0f ) ) );
 
+        //-
+
+        static const FSlateBrush* SepBrush = new FSlateColorBrush( FColor::Black );
+        const FVector2D SepSize( 3, AllottedGeometry.GetLocalSize().Y - 2 );
+        const FVector2D SepTranslation( KeyPositionPx - FMath::CeilToFloat( SepSize.X / 2.0f ), ( ( AllottedGeometry.GetLocalSize().Y / 2.0f ) - ( SepSize.Y / 2.0f ) ) );
+
+        //-
+
+        FLinearColor borderTint = FLinearColor( 0.5f, 0.5f, 0.5f, 1.0f );
+        FLinearColor endTint = FLinearColor( 0.75f, 0.25f, 0.25f, 1.0f );
+
+        //-
+
+        if( !ExcludeThumbnail( thumbnail.QTime.Time ) )
+        {
             FSlateDrawElement::MakeBox(
                 OutDrawElements,
                 LayerId,
@@ -2095,10 +2150,6 @@ SCinematicBoardSectionAnimationTimelineKeys::DrawThumbnails( const FPaintArgs& A
                 borderTint
             );
 
-            static const FSlateBrush* SepBrush = new FSlateColorBrush( FColor::Black );
-            const FVector2D SepSize( 3, AllottedGeometry.GetLocalSize().Y - 2 );
-            const FVector2D SepTranslation( KeyPositionPx - FMath::CeilToFloat( SepSize.X / 2.0f ), ( ( AllottedGeometry.GetLocalSize().Y / 2.0f ) - ( SepSize.Y / 2.0f ) ) );
-
             FSlateDrawElement::MakeBox(
                 OutDrawElements,
                 LayerId,
@@ -2107,6 +2158,25 @@ SCinematicBoardSectionAnimationTimelineKeys::DrawThumbnails( const FPaintArgs& A
                 ESlateDrawEffect::None,
                 borderTint
             );
+        }
+        else
+        {
+            TArray<FVector2f> points;
+            points.Add( FVector2f( SepSize.X / 2, 0.f ) );
+            points.Add( FVector2f( SepSize.X / 2, SepSize.Y ) );
+
+            FSlateDrawElement::MakeDashedLines(
+                OutDrawElements,
+                LayerId,
+                AllottedGeometry.ToPaintGeometry( SepSize, FSlateLayoutTransform( SepTranslation ) ),
+                MoveTemp( points ),
+                ESlateDrawEffect::None,
+                endTint,
+                2,      // Thickness
+                4       // DashLengthPix
+                //0     // DashScreenOffset
+            );
+        }
 
         LayerId++;
     }
@@ -2225,6 +2295,28 @@ SCinematicBoardSectionAnimationTimelineKeys::DrawThumbnails( const FPaintArgs& A
 //
 //    return LayerId;
 //}
+
+bool
+SCinematicBoardSectionAnimationTimelineKeys::ExcludeKey( FFrameNumber iFrameNumber ) const
+{
+    TSharedPtr<const FMetaChannel> meta_channel = GetMetaChannel();
+    if( !meta_channel.IsValid() )
+        return false;
+
+    TArray<FFrameNumber> keys;
+    meta_channel->GetMetaKeys().GetKeys( keys );
+    keys.Sort();
+
+    bool is_last_key = ( keys.Last() == iFrameNumber );
+    if( !is_last_key )
+        return false;
+
+    bool is_multi = meta_channel->GetMetaKeys().FindChecked( keys.Last() ).mSubKeys.Num() > 1;
+    if( is_multi )
+        return false;
+
+    return true;
+}
 
 int32
 SCinematicBoardSectionAnimationTimelineKeys::OnPaint( const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled ) const //override

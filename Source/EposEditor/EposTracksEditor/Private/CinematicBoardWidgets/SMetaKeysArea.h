@@ -45,6 +45,13 @@ protected:
     virtual int32 DrawKeys( const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled ) const;
 
 protected:
+    enum class EDragMode
+    {
+        kMoveSingleKey,
+        kShiftFromKey,
+    };
+
+protected:
     virtual TSharedPtr<FMetaChannel> CreateKeysUnderMouse( const FPointerEvent& MouseEvent ) const;
 
     virtual bool BuildKeyContextMenu( FMenuBuilder& ioMenuBuilder, TSharedPtr<FMetaChannel> iKeys );
@@ -66,6 +73,10 @@ protected:
 
     virtual void OnClickKeys( TSharedPtr<FMetaChannel> iKeys );
 
+    virtual EDragMode InitDragMode() const;
+
+    virtual bool ExcludeKey( FFrameNumber iFrameNumber ) const;
+
 private:
     /** Start a transaction at mouse down */
     void BeginTransaction( const FText& iTransactionDesc );
@@ -81,12 +92,7 @@ private:
 protected:
     TWeakPtr<FCinematicBoardSection>    mBoardSection;
 
-    enum class EDragMode
-    {
-        kMoveSingleKey,
-        kShiftFromKey,
-    };
-    mutable EDragMode mDragMode = EDragMode::kMoveSingleKey; // mutable because modified in const CreateKeysUnderMouse()
+    mutable EDragMode mDragMode = EDragMode::kMoveSingleKey; // mutable because modified in const InitDragMode()
 
 private:
     enum class EState
