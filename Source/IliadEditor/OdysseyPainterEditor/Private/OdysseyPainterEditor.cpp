@@ -2148,7 +2148,7 @@ FOdysseyPainterEditor::RemoveInbetweenerTag( FOdysseyPainterEditor* iEditor
     }
 
     // needed for undos
-    GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.delete-tags", "Delete Tags"));
+    GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.delete-tags", "Remove Tags"));
     if( GUndo )
     {
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagRemove( iScene
@@ -2419,7 +2419,7 @@ FOdysseyPainterEditor::ResetInbetweenerGrid( FOdysseyPainterEditor* iEditor
     if( selectedInbetweenerTagList.size() )
     {
         // needed for valid GUndo pointer
-        GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.reset-chart","Reset Inbetweener Grid"));
+        GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.reset-grid","Reset Inbetweener Grid"));
         if( GUndo )
         {
             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerReset( iScene

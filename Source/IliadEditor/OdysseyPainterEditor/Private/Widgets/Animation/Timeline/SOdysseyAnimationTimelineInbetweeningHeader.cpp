@@ -295,8 +295,8 @@ SOdysseyAnimationTimelineInbetweeningHeader::OnContextMenuOpening()
                      , FSlateIcon()
                      , FUIAction(FExecuteAction::CreateSP( this, &SOdysseyAnimationTimelineInbetweeningHeader::RemoveInbetweenerTag )));
 
-    menu.AddMenuEntry( LOCTEXT("vector-tool.inbetweening-context-menu.add-breakdown.name", "Commit")
-                     , LOCTEXT("vector-tool.inbetweening-context-menu.add-breakdown.tooltip", "Commit")
+    menu.AddMenuEntry( LOCTEXT("vector-tool.inbetweening-context-menu.commit.name", "Commit")
+                     , LOCTEXT("vector-tool.inbetweening-context-menu.commit.tooltip", "Commit")
                      , FSlateIcon()
                      , FUIAction(FExecuteAction::CreateSP( this, &SOdysseyAnimationTimelineInbetweeningHeader::Commit )));
 

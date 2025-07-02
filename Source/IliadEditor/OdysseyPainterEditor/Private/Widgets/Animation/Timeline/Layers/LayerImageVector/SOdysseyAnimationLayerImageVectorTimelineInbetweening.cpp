@@ -237,8 +237,8 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::OnContextMenuOpening()
                      , FSlateIcon()
                      , FUIAction(FExecuteAction::CreateSP( this, &SOdysseyAnimationLayerImageVectorTimelineInbetweening::ShowHideTarget )));
 
-    menu.AddMenuEntry( LOCTEXT("vector-tool.inbetweening-context-menu.remove-breakdown.name", "Change direction")
-                     , LOCTEXT("vector-tool.inbetweening-context-menu.remove-breakdown.tooltip", "Change direction")
+    menu.AddMenuEntry( LOCTEXT("vector-tool.inbetweening-context-menu.change-direction.name", "Change direction")
+                     , LOCTEXT("vector-tool.inbetweening-context-menu.change-direction.tooltip", "Change direction")
                      , FSlateIcon()
                      , FUIAction(FExecuteAction::CreateSP( this, &SOdysseyAnimationLayerImageVectorTimelineInbetweening::ChangeDirection )));
 

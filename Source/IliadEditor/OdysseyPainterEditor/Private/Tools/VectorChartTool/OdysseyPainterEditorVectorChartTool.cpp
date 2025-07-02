@@ -524,7 +524,7 @@ UOdysseyPainterEditorVectorChartTool::CreateModifierSegmentControl()
            + SSegmentedControl<eVectorChartEditionMode>::Slot( eVectorChartEditionMode::Reshape )
            //.Icon( FOdysseyStyle::GetBrush( "PainterEditor.ToolsShortcuts.ChartReshape20") )
 #if PLATFORM_WINDOWS
-           .ToolTip( LOCTEXT("vector-chart-tool.edition-mode.alt.name", "Reshape (CTRL + SHIFT)") )
+           .ToolTip( LOCTEXT("vector-chart-tool.edition-mode.ctrlshift.name", "Reshape (CTRL + SHIFT)") )
 #endif
 #if PLATFORM_MAC
            .ToolTip( LOCTEXT("vector-chart-tool.edition-mode.alt.name", "Reshape (CMD + SHIFT)") )

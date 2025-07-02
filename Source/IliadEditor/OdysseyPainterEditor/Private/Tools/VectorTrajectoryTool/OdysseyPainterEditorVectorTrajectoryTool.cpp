@@ -555,8 +555,8 @@ UOdysseyPainterEditorVectorTrajectoryTool::ExtendContextMenuInbetween( FOdysseyV
             , FSlateIcon()
             , FUIAction(FExecuteAction::CreateUObject(this, &UOdysseyPainterEditorVectorTrajectoryTool::ResetRoute )));
         iMenu.AddMenuEntry(
-              LOCTEXT("vector-paint-bucket-tool.context-menu.delete-bucket.name", "Delete Trajectory")
-            , LOCTEXT("vector-paint-bucket-tool.context-menu.delete-bucket.tooltip", "Delete Trajectory")
+              LOCTEXT("vector-paint-bucket-tool.context-menu.delete-trajectory.name", "Delete Trajectory")
+            , LOCTEXT("vector-paint-bucket-tool.context-menu.delete-trajectory.tooltip", "Delete Trajectory")
             , FSlateIcon()
             , FUIAction(FExecuteAction::CreateUObject(this, &UOdysseyPainterEditorVectorTrajectoryTool::DeleteRoute )));
     }

@@ -1059,8 +1059,8 @@ UOdysseyPainterEditorVectorPathEditTool::ExtendContextMenuObject( FOdysseyVector
     menu.BeginSection("Tool specific", TAttribute(FText::FromString("Tool/Specific")));
     {
     menu.AddMenuEntry(
-          LOCTEXT("vector-tool.object-context-menu.reset-view.name", "Subdivide segments")
-        , LOCTEXT("vector-tool.object-context-menu.reset-view.tooltip", "Subdivide segments")
+          LOCTEXT("vector-tool.object-context-menu.subdivide-segments.name", "Subdivide segments")
+        , LOCTEXT("vector-tool.object-context-menu.subdivide-segments.tooltip", "Subdivide segments")
         , FSlateIcon()
         , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::Subdivide, GetEditor(), iScene )));
     }

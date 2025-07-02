@@ -369,7 +369,8 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyDownGlobal( const FKeyEvent& InKeyEven
 
         mWorkingScene->GetLayer()->Notify( notificationFlags );
 
-        return handled;
+        // we always return false because other tools might need the signal
+        //return handled;
     }
 
     return false;
@@ -454,7 +455,8 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyUpGlobal( const FKeyEvent& InKeyEvent 
 
         mWorkingScene->GetLayer()->Notify( notificationFlags );
 
-        return handled;
+        // we always return false because other tools might need the signal
+        //return handled;
     }
 
     return false;
@@ -1212,8 +1214,8 @@ UOdysseyPainterEditorVectorBaseTool::ExtendContextMenuVertex( FOdysseyVectorGrou
 //     menu.BeginSection("Context");
 //     {
     menu.AddMenuEntry(
-          LOCTEXT("vector-tool.vertex-context-menu.delete-selection.name", "Subdivide segments")
-        , LOCTEXT("vector-tool.vertex-context-menu.delete-selection.tooltip", "Subdivide segments")
+          LOCTEXT("vector-tool.vertex-context-menu.subdivide-segments.name", "Subdivide segments")
+        , LOCTEXT("vector-tool.vertex-context-menu.subdivide-segments.tooltip", "Subdivide segments")
         , FSlateIcon()
         , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::Subdivide, GetEditor(), iScene )));
     menu.AddMenuEntry(
