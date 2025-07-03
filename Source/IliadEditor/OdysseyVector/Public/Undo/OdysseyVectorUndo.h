@@ -244,18 +244,30 @@ class ODYSSEYVECTOR_API FSnapshotBucket : public FSnapshotPoint
 
 class ODYSSEYVECTOR_API FSnapshotSegmentCubic
 {
+    struct State
+    {
+        bool inited;
+        ULIS::FVec2D handleCoords[2];
+
+        State() { inited = false; }
+    };
+
     public:
         ~FSnapshotSegmentCubic();
-        FSnapshotSegmentCubic( FOdysseyVectorSegmentCubic* iCubicSegment, uint64 iSnapshotFlags );
+        FSnapshotSegmentCubic( FOdysseyVectorSegmentCubic* iCubicSegment
+                             , uint64 iSnapshotFlags
+                             , eSnapshotState iSnapshotState );
 
-        void Restore();
+        void RecordState( eSnapshotState iState );
+        bool LoadState( eSnapshotState iState );
 
         FOdysseyVectorSegmentCubic* GetCubicSegment();
 
     private:
         uint32 mSnapshotFlags;
         FOdysseyVectorSegmentCubic* mCubicSegment;
-        ULIS::FVec2D mHandleCoords[2];
+        State mInitialState;
+        State mAlteredState;
 };
 
 class ODYSSEYVECTOR_API FSnapshotTrajectory

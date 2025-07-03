@@ -1411,16 +1411,13 @@ FSnapshotSegmentCubic::~FSnapshotSegmentCubic()
 {
 }
 
-FSnapshotSegmentCubic::FSnapshotSegmentCubic( FOdysseyVectorSegmentCubic *iCubicSegment
-                                            , uint64 iSnapshotFlags )
+FSnapshotSegmentCubic::FSnapshotSegmentCubic( FOdysseyVectorSegmentCubic* iCubicSegment
+                                            , uint64 iSnapshotFlags
+                                            , eSnapshotState iSnapshotState )
     : mSnapshotFlags( iSnapshotFlags )
     , mCubicSegment( iCubicSegment )
 {
-    if( iSnapshotFlags & FSnapshotFlags::Segment::Cubic::HANDLES )
-    {
-        mHandleCoords[0] = iCubicSegment->GetHandle(0)->GetCoords();
-        mHandleCoords[1] = iCubicSegment->GetHandle(1)->GetCoords();
-    }
+    RecordState( iSnapshotState );
 }
 
 FOdysseyVectorSegmentCubic*
@@ -1430,19 +1427,62 @@ FSnapshotSegmentCubic::GetCubicSegment()
 }
 
 void
-FSnapshotSegmentCubic::Restore()
+FSnapshotSegmentCubic::RecordState( eSnapshotState iStateType )
 {
+    FSnapshotSegmentCubic::State* requestedState = nullptr;
+
+    switch( iStateType )
+    {
+        case eSnapshotState::Initial :
+            requestedState = &mInitialState;
+        break;
+
+        case eSnapshotState::Altered :
+            requestedState = &mAlteredState;
+        break;
+
+        default :
+        break;
+    }
+
+    if( requestedState->inited == false )
+    {
+        if( mSnapshotFlags & FSnapshotFlags::Segment::Cubic::HANDLES )
+        {
+            requestedState->handleCoords[0] = mCubicSegment->GetHandle(0)->GetCoords();
+            requestedState->handleCoords[1] = mCubicSegment->GetHandle(1)->GetCoords();
+        }
+
+        requestedState->inited = true;
+    }
+}
+
+bool
+FSnapshotSegmentCubic::LoadState( eSnapshotState iStateType )
+{
+    FSnapshotSegmentCubic::State *requestedState = nullptr;
+
+    switch( iStateType )
+    {
+        case eSnapshotState::Initial :
+            requestedState = &mInitialState;
+        break;
+
+        case eSnapshotState::Altered :
+            requestedState = &mAlteredState;
+        break;
+
+        default :
+        break;
+    }
+
     if( mSnapshotFlags & FSnapshotFlags::Segment::Cubic::HANDLES )
     {
-        ::ULIS::FVec2D swapCoords[2] = { mCubicSegment->GetHandle(0)->GetCoords()
-                                       , mCubicSegment->GetHandle(1)->GetCoords() };
-
-        mCubicSegment->GetHandle(0)->Set( mHandleCoords[0].x, mHandleCoords[0].y );
-        mCubicSegment->GetHandle(1)->Set( mHandleCoords[1].x, mHandleCoords[1].y );
-
-        mHandleCoords[0] = swapCoords[0];
-        mHandleCoords[1] = swapCoords[1];
+        mCubicSegment->GetHandle(0)->Set( requestedState->handleCoords[0].x, requestedState->handleCoords[0].y );
+        mCubicSegment->GetHandle(1)->Set( requestedState->handleCoords[1].x, requestedState->handleCoords[1].y );
     }
+
+    return true;
 }
 
 FSnapshotPath::~FSnapshotPath()
@@ -1507,7 +1547,7 @@ FSnapshotPath::FSnapshotPath( FOdysseyVectorPath* iPath, uint64 iSnapshotFlags )
             {
                 FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segment);
 
-                mCubicSegmentSnapshotArray.push_back( FSnapshotSegmentCubic( cubicSegment, FSnapshotFlags::ALL ) );
+                mCubicSegmentSnapshotArray.push_back( FSnapshotSegmentCubic( cubicSegment, FSnapshotFlags::ALL, eSnapshotState::Initial ) );
             }
         }
     }
@@ -1574,7 +1614,7 @@ FSnapshotPath::Restore()
         {
             for( int i = 0; i < mCubicSegmentSnapshotArray.size(); i++ )
             {
-                mCubicSegmentSnapshotArray[i].Restore();
+                mCubicSegmentSnapshotArray[i].LoadState( eSnapshotState::Initial );
             }
         }
 

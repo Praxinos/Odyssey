@@ -261,7 +261,6 @@ UOdysseyPainterEditorVectorBaseTool::Unload()
         mWorkingScene->GetLayer()->Notify( notificationFlags );
 
         mWorkingScene->GetLayer()->OnNotifyDelegate().RemoveAll( this );
-UE_LOG(LogTemp, Warning, TEXT("BaseTool::Unload() %X %X"), mWorkingScene, this );
 
         if( mBaseHUD )
         {
@@ -332,8 +331,6 @@ UOdysseyPainterEditorVectorBaseTool::Load()
             mWorkingScene->GetLayer()->OnNotifyDelegate().AddUObject( this, &UOdysseyPainterEditorVectorBaseTool::OnVectorLayerNotify );
 
             mWorkingScene->GetLayer()->Notify( notificationFlags );
-
- UE_LOG(LogTemp, Warning, TEXT("BaseTool::Load() %X %X"), mWorkingScene, this );
         }
     }
 }

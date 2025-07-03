@@ -217,7 +217,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUpCutPaths( FOdysseyVectorGroupP
     std::vector<FOdysseyVectorVertex*> addedVertexArray;
     std::vector<FOdysseyVectorSegment*> addedSegmentArray;
     std::vector<FOdysseyVectorSegment*> removedSegmentArray;
-    uint64 notificationFlags = 0;
+    uint64 notificationFlags = FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     // crashes if I don't reserve. Why that ?
     removedSegmentArray.reserve(50);
@@ -300,7 +300,8 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUpDeletePoint( FOdysseyVectorGro
     std::vector<FAlteredPathRecord> alteredPathRecordArray;
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_TIMELINE
                              | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                             | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS;
+                             | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
+                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
     bool hasHit = false;
 
     alteredPathRecordArray.reserve( 10 );
@@ -388,7 +389,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUpAddPoint( FOdysseyVectorGroupP
     std::vector<FOdysseyVectorPath*> addedPathArray; // not filled, here just for the undo record
     std::vector<FOdysseyVectorVertex*> addedVertexArray;
     std::vector<FOdysseyVectorSegment*> addedSegmentArray;
-    uint64 notificationFlags = 0;
+    uint64 notificationFlags = FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     for( FOdysseyVectorSegment* pickedSegment : iPickedSegmentArray )
     {
@@ -499,7 +500,8 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorGro
 {
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
                              | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                             | FOdysseyPainterEditor::UI_UPDATE_TIMELINE;
+                             | FOdysseyPainterEditor::UI_UPDATE_TIMELINE
+                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     mSelectedPathArray.clear();
     mPickedVertexArray.clear();
@@ -922,7 +924,8 @@ UOdysseyPainterEditorVectorPathEditTool::PickObjects( FOdysseyVectorGroupPaint* 
     ::ULIS::FRectD roi;
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
                              | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                             | FOdysseyPainterEditor::UI_UPDATE_TIMELINE;
+                             | FOdysseyPainterEditor::UI_UPDATE_TIMELINE
+                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     // needed for valid GUndo pointer
     GEditor->BeginTransaction(LOCTEXT("vector-path-edit-tool.transaction.select-object","Vector Path Edit Tool"));

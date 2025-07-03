@@ -85,7 +85,9 @@ FOdysseyVectorUndoSegmentReshape::RecordSegment( const std::vector<FOdysseyVecto
         {
             FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(iSegmentArray[i]);
 
-            mCubicSegmentSnapshotArray.push_back( FSnapshotSegmentCubic( cubicSegment, FSnapshotFlags::ALL ));
+            mCubicSegmentSnapshotArray.push_back( FSnapshotSegmentCubic( cubicSegment
+                                                                       , FSnapshotFlags::ALL
+                                                                       , eSnapshotState::Initial ) );
         }
     }
 }
@@ -97,7 +99,9 @@ FOdysseyVectorUndoSegmentReshape::RecordSegment( FOdysseyVectorSegment* iSegment
     {
         FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(iSegment);
 
-        mCubicSegmentSnapshotArray.push_back( FSnapshotSegmentCubic( cubicSegment, FSnapshotFlags::ALL ));
+        mCubicSegmentSnapshotArray.push_back( FSnapshotSegmentCubic( cubicSegment
+                                                                   , FSnapshotFlags::ALL
+                                                                   , eSnapshotState::Initial ) );
     }
 }
 
@@ -142,7 +146,7 @@ FOdysseyVectorUndoSegmentReshape::Apply( UObject* iIgnored )
 
     for( int i = 0; i < mCubicSegmentSnapshotArray.size(); i++ )
     {
-        mCubicSegmentSnapshotArray[i].Restore();
+        mCubicSegmentSnapshotArray[i].LoadState( eSnapshotState::Altered );
     }
 
     // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
@@ -155,6 +159,12 @@ FOdysseyVectorUndoSegmentReshape::Revert( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Revert( iIgnored );
 
+    // remember altered state
+    for( int i = 0; i < mCubicSegmentSnapshotArray.size(); i++ )
+    {
+        mCubicSegmentSnapshotArray[i].RecordState( eSnapshotState::Altered );
+    }
+
     for( int i = 0; i < mVertexSnapshotArray.size(); i++ )
     {
         mVertexSnapshotArray[i].Restore();
@@ -162,7 +172,7 @@ FOdysseyVectorUndoSegmentReshape::Revert( UObject* iIgnored )
 
     for( int i = 0; i < mCubicSegmentSnapshotArray.size(); i++ )
     {
-        mCubicSegmentSnapshotArray[i].Restore();
+        mCubicSegmentSnapshotArray[i].LoadState( eSnapshotState::Initial );
     }
 
     // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
