@@ -106,8 +106,14 @@ FOdysseyLayerStackShortcuts::Action_Copy()
     if (!treeView)
         return;
 
+    TArray<UOdysseyLayer*> layersToCopy = treeView->GetSelectedItems();
+    if (layersToCopy.IsEmpty())
+    {
+        layersToCopy.Add(mLayerStack->GetCurrentLayer());
+    }
+
     FOdysseyCoreEditorModule& odysseyCoreEditorModule = FModuleManager::Get().LoadModuleChecked<FOdysseyCoreEditorModule>(TEXT("OdysseyCoreEditor"));
-    TSharedPtr<FOdysseyLayerStackClipboardData> clipboardData = MakeShared<FOdysseyLayerStackClipboardData>(treeView->GetSelectedItems());
+    TSharedPtr<FOdysseyLayerStackClipboardData> clipboardData = MakeShared<FOdysseyLayerStackClipboardData>(layersToCopy);
     odysseyCoreEditorModule.GetClipboard()->SetData(clipboardData);
 }
 
@@ -118,8 +124,14 @@ FOdysseyLayerStackShortcuts::Action_Cut()
     if (!treeView)
         return;
 
+    TArray<UOdysseyLayer*> layersToCopy = treeView->GetSelectedItems();
+    if (layersToCopy.IsEmpty())
+    {
+        layersToCopy.Add(mLayerStack->GetCurrentLayer());
+    }
+
     FOdysseyCoreEditorModule& odysseyCoreEditorModule = FModuleManager::Get().LoadModuleChecked<FOdysseyCoreEditorModule>(TEXT("OdysseyCoreEditor"));
-    TSharedPtr<FOdysseyLayerStackClipboardData> clipboardData = MakeShared<FOdysseyLayerStackClipboardData>(treeView->GetSelectedItems());
+    TSharedPtr<FOdysseyLayerStackClipboardData> clipboardData = MakeShared<FOdysseyLayerStackClipboardData>(layersToCopy);
     odysseyCoreEditorModule.GetClipboard()->SetData(clipboardData);
 
 #ifdef WITH_EDITOR
