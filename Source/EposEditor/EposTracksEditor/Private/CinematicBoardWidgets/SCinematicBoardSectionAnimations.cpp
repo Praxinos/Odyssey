@@ -3242,8 +3242,17 @@ SCinematicBoardSectionAnimations::RebuildAnimationList()
         ordered_scene_bindings.Add( inner_moviescene->FindBinding( unordered_animation_binding ) );
     }
 
-    // Sort scene bindings by their sorting order
-    Algo::Sort( ordered_scene_bindings, []( FMovieSceneBinding* iA, FMovieSceneBinding* iB ) { return iA->GetSortingOrder() < iB->GetSortingOrder(); } );
+    // Sort scene bindings by their sorting order/name
+    // (This should match the native sorting of tracks inside shot)
+    Algo::StableSort( ordered_scene_bindings, []( FMovieSceneBinding* iA, FMovieSceneBinding* iB )
+                      {
+                          // If at least one of the binding was not already sorted (by drag'n drop in shot), use the name to sort both
+                          if( iA->GetSortingOrder() == -1 || iB->GetSortingOrder() == -1 )
+                              return iA->GetName() < iB->GetName();
+                          // Otherwise just use the set sorting order
+                          else
+                              return iA->GetSortingOrder() < iB->GetSortingOrder();
+                      } );
 
     // Get all animations in the gui order
     TArray<FGuid> ordered_animation_bindings;
