@@ -192,6 +192,8 @@ LighttableTools::GetState( ISequencer& iSequencer, UMovieSceneSequence* iSequenc
     for( TWeakObjectPtr<UOdysseyAnimationTimelineSection> section : result.mSections )
     {
         UOdysseyAnimation* animation = section->GetAnimation();
+        if( !animation )
+            return false;
 
         UOdysseyLayerStack* layer_stack = animation->GetLayerStack();
         TArray<UOdysseyLayer*> layers = layer_stack->GetLayers();
@@ -230,6 +232,8 @@ LighttableTools::IsOn( ISequencer& iSequencer, UMovieSceneSequence* iSequence, F
     for( TWeakObjectPtr<UOdysseyAnimationTimelineSection> section : result.mSections )
     {
         UOdysseyAnimation* animation = section->GetAnimation();
+        if( !animation )
+            return false;
 
         UOdysseyLayerStack* layer_stack = animation->GetLayerStack();
         TArray<UOdysseyLayer*> layers = layer_stack->GetLayers();

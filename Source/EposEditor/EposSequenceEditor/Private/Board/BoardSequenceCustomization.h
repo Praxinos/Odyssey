@@ -50,6 +50,7 @@ private:
     FText CreateInfoText() const;
 
 private:
+    void OnObjectSelectedMulti( const TArray<UObject*>& iObjects, bool bForceRefresh );
     void OnGlobalTimeChanged();
 
     void OnBeginScrubbing();
@@ -104,6 +105,7 @@ private:
     FDelegateHandle mSequencerBeginScrubbingDelegates;
     FDelegateHandle mSequencerEndScrubbingDelegates;
     FDelegateHandle mSequencerGlobalTimeChangedDelegates;
+    FDelegateHandle mSelectionChangedDelegates;
     UBoardSequence* mBoardSequence;
 
     TSharedPtr<FUICommandList> mBoardCommandList;

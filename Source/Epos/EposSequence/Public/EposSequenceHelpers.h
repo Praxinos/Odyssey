@@ -75,6 +75,13 @@ public:
     static TArray<TWeakObjectPtr<UMovieSceneNoteSection>>   GetNotes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TOptional<FFrameNumber> iFrameNumber = TOptional<FFrameNumber>() );
 };
 
+enum class EGetAnimation
+{
+    kAll,
+    kSelectedOnly,
+    kSelectedOrAll,
+};
+
 class EPOSSEQUENCE_API BoardSequenceHelpers
 {
 public:
@@ -93,6 +100,8 @@ public:
 public:
     static ACineCameraActor*    GetCamera( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID, FGuid* oCameraBinding = nullptr );
 
+    static ACineCameraActor*    GetCameraRecursive( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FFrameNumber& iFrameNumber, FGuid* oCameraBinding, UMovieSceneSequence** oSequence, FMovieSceneSequenceID* oSequenceID );
+
     /** Get all transform keys of all cameras recursively.
       * @param UMovieSceneSubSection    iSubSection to gather all camera transform keys.
       * @param TArray<FFrameTime>&      oDefaultFrameTimes will be filled only for shots where its camera transform has no keys.
@@ -101,17 +110,13 @@ public:
     static TArray<FFrameTime>   GetCameraTransformTimesRecursive( const UMovieSceneSubSection& iSubSection, TArray<FFrameTime>& oDefaultFrameTimes );
 
 public:
+    static int32                GetAllAnimationsRecursive( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, EGetAnimation iAnimationSelection, const FFrameNumber& iFrameNumber, TArray<AOdysseyAnimationActor*>* oAnimations, TArray<FGuid>* oAnimationBindings, UMovieSceneSequence** oSequence, FMovieSceneSequenceID* oSequenceID );
+
+public:
     static FChannelProxyBySectionMap                BuildCameraTransformChannelProxy( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID );
     static TMap<FGuid, FChannelProxyBySectionMap>   BuildAnimationsTransformChannelProxy( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID );
     static TMap<FGuid, FChannelProxyBySectionMap>   BuildAnimationsTimelineChannelProxy( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID );
     static TMap<FGuid, FChannelProxyBySectionMap>   BuildAnimationsOpacityChannelProxy( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID );
-};
-
-enum class EGetAnimation
-{
-    kAll,
-    kSelectedOnly,
-    kSelectedOrAll,
 };
 
 struct EPOSSEQUENCE_API FKeyOpacity
