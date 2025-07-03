@@ -106,6 +106,7 @@ public:
         //TObjectPtr<UTextureRenderTarget2D> RenderTarget;
         TObjectPtr<UTexture2D> Texture;
         FSlateBrush* Brush = nullptr;
+        bool MultipleSubkey = false;
     };
     virtual const TArray<FThumbnailData>& GetAnimationTimelineThumbnails( FMovieScenePossessable iPossessable ) const;
     virtual void ReBuildAnimationsTimelineThumbnails( FMovieScenePossessable iPossessable, TOptional<FGuid> iFrameId = TOptional<FGuid>() );

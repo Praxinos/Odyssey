@@ -62,6 +62,15 @@ SMetaKeysArea::GetAreaTooltipText() const
     return FText::GetEmpty();
 }
 
+SMetaKeysArea::EDragMode
+SMetaKeysArea::InitDragMode() const
+{
+    if( FSlateApplication::Get().GetModifierKeys().IsControlDown() )
+        return EDragMode::kShiftFromKey;
+
+    return EDragMode::kMoveSingleKey;
+}
+
 TSharedPtr<FMetaChannel>
 SMetaKeysArea::CreateKeysUnderMouse( const FPointerEvent& MouseEvent ) const
 {
@@ -84,9 +93,7 @@ SMetaKeysArea::CreateKeysUnderMouse( const FPointerEvent& MouseEvent ) const
 
     //---
 
-    mDragMode = EDragMode::kMoveSingleKey;
-    if( FSlateApplication::Get().GetModifierKeys().IsControlDown() )
-        mDragMode = EDragMode::kShiftFromKey;
+    mDragMode = InitDragMode();
 
     TSharedPtr<const FMetaChannel> meta_channel = GetMetaChannel();
     if( !meta_channel )
@@ -207,7 +214,8 @@ SMetaKeysArea::OnMouseButtonDown( const FGeometry& MyGeometry, const FPointerEve
     }
     else if( mState == EState::kDragging )
     {
-        checkNoEntry();
+        // It may happen when right-clicking during a current dragging
+        //checkNoEntry();
     }
     else
     {
@@ -450,6 +458,12 @@ SMetaKeysArea::DrawBackground( const FPaintArgs& Args, const FGeometry& Allotted
     return LayerId;
 }
 
+bool
+SMetaKeysArea::ExcludeKey( FFrameNumber iFrameNumber ) const
+{
+    return false;
+}
+
 int32
 SMetaKeysArea::DrawKeys( const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled ) const
 {
@@ -476,6 +490,9 @@ SMetaKeysArea::DrawKeys( const FPaintArgs& Args, const FGeometry& AllottedGeomet
         FFrameNumber time = pair.Key;
         FMetaKey meta_key = pair.Value;
         FKeyDrawParams key_draw_param = meta_key.mMetaKeyDrawParam;
+
+        if( ExcludeKey( time ) )
+            continue;
 
         TOptional<FFrameTime> outer_time = inner_to_outer_transform.TryTransformTime( time );
         if( !outer_time )
