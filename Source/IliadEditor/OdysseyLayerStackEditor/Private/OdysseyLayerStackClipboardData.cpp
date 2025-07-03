@@ -42,7 +42,7 @@ FOdysseyLayerStackClipboardData::CanPaste(UOdysseyLayerStack* iLayerStack) const
 {
     if (mLayers.IsEmpty())
         return false;
-        
+
     bool notSupported = mLayers.ContainsByPredicate(
         [iLayerStack](UOdysseyLayer* iLayer)
         {
