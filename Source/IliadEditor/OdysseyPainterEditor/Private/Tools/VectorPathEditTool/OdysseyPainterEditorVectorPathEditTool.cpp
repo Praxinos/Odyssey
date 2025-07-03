@@ -217,7 +217,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUpCutPaths( FOdysseyVectorGroupP
     std::vector<FOdysseyVectorVertex*> addedVertexArray;
     std::vector<FOdysseyVectorSegment*> addedSegmentArray;
     std::vector<FOdysseyVectorSegment*> removedSegmentArray;
-    uint64 notificationFlags = FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
+    uint64 notificationFlags = 0;
 
     // crashes if I don't reserve. Why that ?
     removedSegmentArray.reserve(50);
@@ -264,13 +264,14 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUpCutPaths( FOdysseyVectorGroupP
         std::vector<FOdysseyVectorPath*> addedPathArray; // empty on purpose.
 
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoPathAlter( iScene
-                                                                    , removedPathArray
-                                                                    , removedVertexArray
-                                                                    , removedSegmentArray
-                                                                    , addedPathArray
-                                                                    , addedVertexArray
-                                                                    , addedSegmentArray
-                                                                    , notificationFlags );
+                                                                  , removedPathArray
+                                                                  , removedVertexArray
+                                                                  , removedSegmentArray
+                                                                  , addedPathArray
+                                                                  , addedVertexArray
+                                                                  , addedSegmentArray
+                                                                  , notificationFlags
+                                                                  | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -300,8 +301,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUpDeletePoint( FOdysseyVectorGro
     std::vector<FAlteredPathRecord> alteredPathRecordArray;
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_TIMELINE
                              | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                             | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
+                             | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS;
     bool hasHit = false;
 
     alteredPathRecordArray.reserve( 10 );
@@ -364,7 +364,8 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUpDeletePoint( FOdysseyVectorGro
                                                                       , addedPathArray
                                                                       , addedVertexArray
                                                                       , addedSegmentArray
-                                                                      , notificationFlags );
+                                                                      , notificationFlags
+                                                                      | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -389,7 +390,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUpAddPoint( FOdysseyVectorGroupP
     std::vector<FOdysseyVectorPath*> addedPathArray; // not filled, here just for the undo record
     std::vector<FOdysseyVectorVertex*> addedVertexArray;
     std::vector<FOdysseyVectorSegment*> addedSegmentArray;
-    uint64 notificationFlags = FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
+    uint64 notificationFlags = 0;
 
     for( FOdysseyVectorSegment* pickedSegment : iPickedSegmentArray )
     {
@@ -441,7 +442,8 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUpAddPoint( FOdysseyVectorGroupP
                                                                   , addedPathArray
                                                                   , addedVertexArray
                                                                   , addedSegmentArray
-                                                                  , notificationFlags );
+                                                                  , notificationFlags
+                                                                  | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -500,8 +502,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorGro
 {
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
                              | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                             | FOdysseyPainterEditor::UI_UPDATE_TIMELINE
-                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
+                             | FOdysseyPainterEditor::UI_UPDATE_TIMELINE;
 
     mSelectedPathArray.clear();
     mPickedVertexArray.clear();
@@ -548,8 +549,9 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorGro
         if( GUndo )
         {
             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoVertexAlignment( iScene
-                                                                             , mPickedVertexArray
-                                                                             , notificationFlags );
+                                                                            , mPickedVertexArray
+                                                                            , notificationFlags
+                                                                            | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -578,11 +580,17 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorGro
                     {
                         GetPathsFromSelection( iScene, mSelectedPathArray );
 
-                        undo = new FOdysseyVectorUndoVertexRadius( iScene, mSelectedPathArray, notificationFlags );
+                        undo = new FOdysseyVectorUndoVertexRadius( iScene
+                                                                 , mSelectedPathArray
+                                                                 , notificationFlags
+                                                                 | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD );
                     }
                     else
                     {
-                        undo = new FOdysseyVectorUndoVertexRadius( iScene, mPickedVertexArray, notificationFlags );
+                        undo = new FOdysseyVectorUndoVertexRadius( iScene
+                                                                 , mPickedVertexArray
+                                                                 , notificationFlags
+                                                                 | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD );
                     }
 
                     GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
@@ -624,7 +632,8 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorGro
                     FOdysseyVectorUndo* undo = new FOdysseyVectorUndoPathEdit( iScene
                                                                              , mPickedVertexArray
                                                                              , alteredSegmentArray
-                                                                             , notificationFlags );
+                                                                             , notificationFlags
+                                                                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD );
 
                     GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -654,7 +663,8 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorGro
                     FOdysseyVectorUndo* undo = new FOdysseyVectorUndoPathEdit( iScene
                                                                              , mPickedVertexArray // empty
                                                                              , alteredSegmentArray
-                                                                             , notificationFlags );
+                                                                             , notificationFlags
+                                                                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD );
 
                     GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -924,8 +934,7 @@ UOdysseyPainterEditorVectorPathEditTool::PickObjects( FOdysseyVectorGroupPaint* 
     ::ULIS::FRectD roi;
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
                              | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                             | FOdysseyPainterEditor::UI_UPDATE_TIMELINE
-                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
+                             | FOdysseyPainterEditor::UI_UPDATE_TIMELINE;
 
     // needed for valid GUndo pointer
     GEditor->BeginTransaction(LOCTEXT("vector-path-edit-tool.transaction.select-object","Vector Path Edit Tool"));
@@ -933,7 +942,8 @@ UOdysseyPainterEditorVectorPathEditTool::PickObjects( FOdysseyVectorGroupPaint* 
     {
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectObject( vectorCell->GetLayer()
                                                                      , vectorCell
-                                                                     , notificationFlags );
+                                                                     , notificationFlags
+                                                                     | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
