@@ -230,7 +230,7 @@ UOdysseyPainterEditorVectorEraserTool::EraseSections( FOdysseyVectorGroupPaint* 
     // proceed
     for( FOdysseyVectorGroupPaint* paintGroup : oPaintGroupArray )
     {
-        ::ULIS::FRectD paintGroupWorldBBox = paintGroup->GetBBox( false, true );
+        ::ULIS::FRectD paintGroupWorldBBox = paintGroup->GetBBox( true, true );
 
         if( FOdysseyVector::IntersectRegions<double>( paintGroupWorldBBox
                                                     , iErasureArea
@@ -445,7 +445,8 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorGroupPaint
                                                                   , removedObjectArray
                                                                   , removedVertexArray
                                                                   , removedSegmentArray
-                                                                  , notificationFlags );
+                                                                  , notificationFlags
+                                                                  | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 

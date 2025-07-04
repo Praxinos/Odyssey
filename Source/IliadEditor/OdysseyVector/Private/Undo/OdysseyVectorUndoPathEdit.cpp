@@ -21,9 +21,9 @@ FOdysseyVectorUndoPathEdit::~FOdysseyVectorUndoPathEdit()
 bool
 FOdysseyVectorUndoPathEdit::HasRecordedVertex( FOdysseyVectorVertex* iVertex )
 {
-    for( int i = 0; i < mVertexSnapshotArray.size(); i++ )
+    for( int i = 0; i < mVertexSnapshotBuffer.size(); i++ )
     {
-        if( mVertexSnapshotArray[i].GetVertex() == iVertex )
+        if( mVertexSnapshotBuffer[i].GetVertex() == iVertex )
         {
             return true;
         }
@@ -37,9 +37,9 @@ FOdysseyVectorUndoPathEdit::HasRecordedSegment( FOdysseyVectorSegment* iSegment 
 {
     if( iSegment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
     {
-        for( int i = 0; i < mCubicSegmentSnapshotArray.size(); i++ )
+        for( int i = 0; i < mCubicSegmentSnapshotBuffer.size(); i++ )
         {
-            if( mCubicSegmentSnapshotArray[i].GetCubicSegment() == iSegment )
+            if( mCubicSegmentSnapshotBuffer[i].GetCubicSegment() == iSegment )
             {
                 return true;
             }
@@ -55,16 +55,16 @@ FOdysseyVectorUndoPathEdit::FOdysseyVectorUndoPathEdit( FOdysseyVectorGroupPaint
                                                       , uint64 iReturnFlags )
     : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
 {
-    mVertexSnapshotArray.reserve( iEditedVertexArray.size() );
-    mCubicSegmentSnapshotArray.reserve( iEditedSegmentArray.size() );
+    mVertexSnapshotBuffer.reserve( iEditedVertexArray.size() );
+    mCubicSegmentSnapshotBuffer.reserve( iEditedSegmentArray.size() );
 
     for( FOdysseyVectorVertex* vertex : iEditedVertexArray )
     {
-        mVertexSnapshotArray.push_back( FSnapshotVertex( vertex
-                                                        , FSnapshotFlags::Point::POSITION
-                                                        | FSnapshotFlags::Point::Vertex::RADIUS
-                                                        | FSnapshotFlags::Point::Vertex::ALIGNMENT
-                                                        , eSnapshotState::Initial ) );
+        mVertexSnapshotBuffer.emplace_back( vertex
+                                          , FSnapshotFlags::Point::POSITION
+                                          | FSnapshotFlags::Point::Vertex::RADIUS
+                                          | FSnapshotFlags::Point::Vertex::ALIGNMENT
+                                          , eSnapshotState::Initial );
     }
 
     for( FOdysseyVectorSegment* segment : iEditedSegmentArray )
@@ -73,9 +73,9 @@ FOdysseyVectorUndoPathEdit::FOdysseyVectorUndoPathEdit( FOdysseyVectorGroupPaint
         {
             FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segment);
 
-            mCubicSegmentSnapshotArray.push_back( FSnapshotSegmentCubic( cubicSegment
-                                                                       , FSnapshotFlags::Segment::Cubic::HANDLES
-                                                                       , eSnapshotState::Initial ) );
+            mCubicSegmentSnapshotBuffer.emplace_back( cubicSegment
+                                                    , FSnapshotFlags::Segment::Cubic::HANDLES
+                                                    , eSnapshotState::Initial );
         }
     }
 }
@@ -86,14 +86,14 @@ FOdysseyVectorUndoPathEdit::Apply( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Apply( iIgnored );
 
-    for( int i = 0; i < mVertexSnapshotArray.size(); i++ )
+    for( int i = 0; i < mVertexSnapshotBuffer.size(); i++ )
     {
-        mVertexSnapshotArray[i].LoadState( eSnapshotState::Altered );
+        mVertexSnapshotBuffer[i].LoadState( eSnapshotState::Altered );
     }
 
-    for( int i = 0; i < mCubicSegmentSnapshotArray.size(); i++ )
+    for( int i = 0; i < mCubicSegmentSnapshotBuffer.size(); i++ )
     {
-        mCubicSegmentSnapshotArray[i].LoadState( eSnapshotState::Altered );
+        mCubicSegmentSnapshotBuffer[i].LoadState( eSnapshotState::Altered );
     }
 
     // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
@@ -107,26 +107,26 @@ FOdysseyVectorUndoPathEdit::Revert( UObject* iIgnored )
     FOdysseyVectorUndo::Revert( iIgnored );
 
     // remember altered state
-    for( FSnapshotVertex& vertexSnapshot : mVertexSnapshotArray )
+    for( FSnapshotVertex& vertexSnapshot : mVertexSnapshotBuffer )
     {
         vertexSnapshot.RecordState( eSnapshotState::Altered );
     }
 
-    for( FSnapshotSegmentCubic& cubicSegmentSnapshot : mCubicSegmentSnapshotArray )
+    for( FSnapshotSegmentCubic& cubicSegmentSnapshot : mCubicSegmentSnapshotBuffer )
     {
         cubicSegmentSnapshot.RecordState( eSnapshotState::Altered );
     }
 
 
     // restore initial state
-    for( int i = 0; i < mVertexSnapshotArray.size(); i++ )
+    for( int i = 0; i < mVertexSnapshotBuffer.size(); i++ )
     {
-        mVertexSnapshotArray[i].LoadState( eSnapshotState::Initial );
+        mVertexSnapshotBuffer[i].LoadState( eSnapshotState::Initial );
     }
 
-    for( int i = 0; i < mCubicSegmentSnapshotArray.size(); i++ )
+    for( int i = 0; i < mCubicSegmentSnapshotBuffer.size(); i++ )
     {
-        mCubicSegmentSnapshotArray[i].LoadState( eSnapshotState::Initial );
+        mCubicSegmentSnapshotBuffer[i].LoadState( eSnapshotState::Initial );
     }
 
     // Update vector scenes and call callbacks if any (for refreshing GUI e.g)

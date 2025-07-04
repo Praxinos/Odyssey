@@ -236,7 +236,8 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorObjectMode( FOdysseyVec
         {
             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectObject( iScene->GetLayer()
                                                                          , iScene->GetCell()
-                                                                         , notificationFlags );
+                                                                         , notificationFlags
+                                                                         | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -336,7 +337,10 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorVertexMode( FOdysseyVec
     GEditor->BeginTransaction(LOCTEXT("vector-object-selection-tool.transaction.select-vertex","Vector Vertex Pick Tool"));
     if( GUndo )
     {
-        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectVertex( iScene, objectList, notificationFlags );
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectVertex( iScene
+                                                                     , objectList
+                                                                     , notificationFlags
+                                                                     | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 

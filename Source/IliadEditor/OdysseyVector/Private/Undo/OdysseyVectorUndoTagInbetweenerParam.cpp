@@ -233,6 +233,11 @@ FOdysseyVectorUndoTagInbetweenerParam::Revert( UObject* iIgnored )
     for( FSnapshotTagInbetweener& inbetweenerTagSnapshot : mInbetweenerTagSnapshotArray )
     {
         inbetweenerTagSnapshot.RecordState( eSnapshotState::Altered );
+    }
+
+
+    for( FSnapshotTagInbetweener& inbetweenerTagSnapshot : mInbetweenerTagSnapshotArray )
+    {
         inbetweenerTagSnapshot.LoadState( eSnapshotState::Initial );
     }
 

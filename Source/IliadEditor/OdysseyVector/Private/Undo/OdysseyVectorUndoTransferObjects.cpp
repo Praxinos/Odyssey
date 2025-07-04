@@ -26,7 +26,9 @@ FOdysseyVectorUndoTransferObjects::FOdysseyVectorUndoTransferObjects( FOdysseyVe
     : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
     , mScene( iScene )
 {
-    mTransferredObjectSnapshotArray.emplace_back( iTransferredObject, FSnapshotFlags::Object::HIERARCHY );
+    mTransferredObjectSnapshotBuffer.emplace_back( iTransferredObject
+                                                 , FSnapshotFlags::Object::HIERARCHY
+                                                 , eSnapshotState::Initial );
 }
 
 FOdysseyVectorUndoTransferObjects::FOdysseyVectorUndoTransferObjects( FOdysseyVectorGroupPaint* iScene
@@ -37,7 +39,9 @@ FOdysseyVectorUndoTransferObjects::FOdysseyVectorUndoTransferObjects( FOdysseyVe
 {
     for( FOdysseyVectorObject* transferredObject : iTransferredObjectList )
     {
-        mTransferredObjectSnapshotArray.emplace_back( transferredObject, FSnapshotFlags::Object::HIERARCHY );
+        mTransferredObjectSnapshotBuffer.emplace_back( transferredObject
+                                                     , FSnapshotFlags::Object::HIERARCHY
+                                                     , eSnapshotState::Initial );
     }
 }
 
@@ -55,9 +59,9 @@ FOdysseyVectorUndoTransferObjects::Apply( UObject* iIgnored )
     {
         allRestored = true;
 
-        for( FSnapshotObject& transferredObjectSnapshot : mTransferredObjectSnapshotArray )
+        for( FSnapshotObject& transferredObjectSnapshot : mTransferredObjectSnapshotBuffer )
         {
-            if( transferredObjectSnapshot.Restore() == false )
+            if( transferredObjectSnapshot.LoadState( eSnapshotState::Altered ) == false )
             {
                 // will tell the loop to continue until the hierarchy can be restored
                 allRestored = false;
@@ -79,13 +83,18 @@ FOdysseyVectorUndoTransferObjects::Revert( UObject* iIgnored )
 
     mScene->GetCell()->ClearObjectSelection();
 
+    for( FSnapshotObject& transferredObjectSnapshot : mTransferredObjectSnapshotBuffer )
+    {
+        transferredObjectSnapshot.RecordState( eSnapshotState::Altered );
+    }
+
     while( allRestored == false )
     {
         allRestored = true;
 
-        for( FSnapshotObject& transferredObjectSnapshot : mTransferredObjectSnapshotArray )
+        for( FSnapshotObject& transferredObjectSnapshot : mTransferredObjectSnapshotBuffer )
         {
-            if( transferredObjectSnapshot.Restore() == false )
+            if( transferredObjectSnapshot.LoadState( eSnapshotState::Initial ) == false )
             {
                 // will tell the loop to continue until the hierarchy can be restored
                 allRestored = false;

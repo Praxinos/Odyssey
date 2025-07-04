@@ -26,7 +26,9 @@ FOdysseyVectorUndoBucketParam::FOdysseyVectorUndoBucketParam( FOdysseyVectorGrou
                                                             , uint64 iReturnFlags )
     : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
 {
-    mBucketSnapshotArray.push_back( FSnapshotBucket( iBucket, FSnapshotFlags::Point::Bucket::PARAM ));
+    mBucketSnapshotBuffer.emplace_back( iBucket
+                                      , FSnapshotFlags::Point::Bucket::PARAM
+                                      , eSnapshotState::Initial );
 }
 
 // Backup bucket params in the constructor
@@ -38,13 +40,15 @@ FOdysseyVectorUndoBucketParam::FOdysseyVectorUndoBucketParam( FOdysseyVectorGrou
 {
     mAddedBucketArray = iAddedBucketArray;
 
-    mBucketSnapshotArray.reserve( iBucketArray.size() );
+    mBucketSnapshotBuffer.reserve( iBucketArray.size() );
 
     for( int i = 0; i < iBucketArray.size(); i++ )
     {
         // Note: setting the owner does not make sense per se, as the bucket is only
         // temporary, but is mandatory in the ctor
-        mBucketSnapshotArray.push_back( FSnapshotBucket( iBucketArray[i], FSnapshotFlags::Point::Bucket::PARAM ));
+        mBucketSnapshotBuffer.emplace_back( iBucketArray[i]
+                                          , FSnapshotFlags::Point::Bucket::PARAM
+                                          , eSnapshotState::Initial );
     }
 }
 
@@ -54,9 +58,9 @@ FOdysseyVectorUndoBucketParam::Apply( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Apply( iIgnored );
 
-    for( int i = 0; i < mBucketSnapshotArray.size(); i++ )
+    for( FSnapshotBucket& bucketSnapshot : mBucketSnapshotBuffer )
     {
-        mBucketSnapshotArray[i].Restore();
+        bucketSnapshot.LoadState( eSnapshotState::Altered );
     }
 
     for( int i = 0; i < mAddedBucketArray.size(); i++ )
@@ -81,9 +85,15 @@ FOdysseyVectorUndoBucketParam::Revert( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Revert( iIgnored );
 
-    for( int i = 0; i < mBucketSnapshotArray.size(); i++ )
+    for( FSnapshotBucket& bucketSnapshot : mBucketSnapshotBuffer )
     {
-        mBucketSnapshotArray[i].Restore();
+        bucketSnapshot.RecordState( eSnapshotState::Altered );
+    }
+
+
+    for( FSnapshotBucket& bucketSnapshot : mBucketSnapshotBuffer )
+    {
+        bucketSnapshot.LoadState( eSnapshotState::Initial );
     }
 
     for( int i = 0; i < mAddedBucketArray.size(); i++ )

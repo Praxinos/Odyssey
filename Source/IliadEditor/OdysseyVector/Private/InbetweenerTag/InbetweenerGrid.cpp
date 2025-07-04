@@ -587,6 +587,8 @@ FInbetweenerGrid::PrecomputeARAPInterpolation()
         UE_LOG(LogTemp, Warning, TEXT("ERROR DURING FACTORIZATION"));
 
         bARAPPrecomputeSucceded = false;
+
+        return;
     }
 
     bARAPPrecomputeSucceded = true;

@@ -34,24 +34,24 @@ FOdysseyVectorUndoObjectParam::CreateObjectSnapshot( FOdysseyVectorObject* iObje
     {
         FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iObject);
 
-        return new FSnapshotPath( path, iObjectParamFlags );
+        return new FSnapshotPath( path, iObjectParamFlags, eSnapshotState::Initial );
     }
 
     if( iObject->GetClass() == FOdysseyVectorGroup::StaticClass() )
     {
         FOdysseyVectorGroup* group = static_cast<FOdysseyVectorGroup*>(iObject);
 
-        return new FSnapshotGroup( group, iObjectParamFlags );
+        return new FSnapshotGroup( group, iObjectParamFlags, eSnapshotState::Initial );
     }
 
     if( iObject->GetClass() == FOdysseyVectorGroupPaint::StaticClass() )
     {
         FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(iObject);
 
-        return new FSnapshotGroupPaint( paintGroup, iObjectParamFlags );
+        return new FSnapshotGroupPaint( paintGroup, iObjectParamFlags, eSnapshotState::Initial );
     }
 
-    return new FSnapshotObject( iObject, iObjectParamFlags );
+    return new FSnapshotObject( iObject, iObjectParamFlags, eSnapshotState::Initial );
 }
 
 FSnapshotObject*
@@ -183,7 +183,7 @@ FOdysseyVectorUndoObjectParam::Apply( UObject* iIgnored )
 
     for( int i = 0; i < mObjectSnapshotArray.size(); i++ )
     {
-        mObjectSnapshotArray[i]->Restore();
+        mObjectSnapshotArray[i]->LoadState( eSnapshotState::Altered );
     }
 
     // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
@@ -198,7 +198,13 @@ FOdysseyVectorUndoObjectParam::Revert( UObject* iIgnored )
 
     for( int i = 0; i < mObjectSnapshotArray.size(); i++ )
     {
-        mObjectSnapshotArray[i]->Restore();
+        mObjectSnapshotArray[i]->RecordState( eSnapshotState::Altered );
+    }
+
+
+    for( int i = 0; i < mObjectSnapshotArray.size(); i++ )
+    {
+        mObjectSnapshotArray[i]->LoadState( eSnapshotState::Initial );
     }
 
     // Update vector scenes and call callbacks if any (for refreshing GUI e.g)

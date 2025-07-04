@@ -14,6 +14,7 @@
 
 #include "OdysseyVectorBrush.h"
 #include "OdysseyVectorPath.h"
+#include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorTagInbetweener.h"
 
 
@@ -61,7 +62,6 @@ namespace FSnapshotFlags
             static const uint64 RADIALRADIUS    = ( 1ULL <<  8 );
             static const uint64 RADIALOFFSET    = ( 1ULL <<  9 );
             static const uint64 PALETTEENTRY    = ( 1ULL << 10 );
-            static const uint64 PALETTESET      = ( 1ULL << 11 );
             static const uint64 LINEARP0        = ( 1ULL << 12 );
             static const uint64 LINEARP1        = ( 1ULL << 13 );
             static const uint64 PARAM = ( COLORMODE
@@ -74,7 +74,6 @@ namespace FSnapshotFlags
                                         | RADIALRADIUS
                                         | RADIALOFFSET
                                         | PALETTEENTRY
-                                        | PALETTESET
                                         | LINEARP0
                                         | LINEARP1 );
         }
@@ -150,7 +149,7 @@ namespace FSnapshotFlags
         static const uint64 VISIBILITY                = ( 1ULL <<  3 );
         static const uint64 NAME                      = ( 1ULL <<  4 );
         static const uint64 HIERARCHY                 = ( 1ULL <<  5 );
-        static const uint64 CHILDREN_TRANSFORMATIONS  = ( 1ULL <<  6 );
+        //static const uint64 CHILDREN_TRANSFORMATIONS  = ( 1ULL <<  6 );
 
         namespace Path
         {
@@ -192,6 +191,7 @@ class ODYSSEYVECTOR_API FSnapshotPoint
     struct State
     {
         bool inited;
+
         ULIS::FVec2D coords;
 
         State() { inited = false; }
@@ -209,8 +209,8 @@ class ODYSSEYVECTOR_API FSnapshotPoint
     protected:
         uint64 mSnapshotFlags;
         FOdysseyVectorPoint* mPoint;
-        State mPointInitialState;
-        State mPointAlteredState;
+        State* mPointInitialState;
+        State* mPointAlteredState;
 };
 
 class ODYSSEYVECTOR_API FSnapshotVertex : public FSnapshotPoint
@@ -238,34 +238,46 @@ class ODYSSEYVECTOR_API FSnapshotVertex : public FSnapshotPoint
 
     protected:
         FOdysseyVectorVertex* mVertex;
-        State mVertexInitialState;
-        State mVertexAlteredState;
+        State* mVertexInitialState;
+        State* mVertexAlteredState;
 };
 
 class ODYSSEYVECTOR_API FSnapshotBucket : public FSnapshotPoint
 {
+    struct State
+    {
+        bool inited;
+
+        eBucketColorMode colorMode;
+        FColor solidColor;
+        double rotation;
+        bool propagated;
+        FColor gradientColor0;
+        FColor gradientColor1;
+        double radialRadius;
+        ::ULIS::FVec2D radialOffset;
+        ::ULIS::FVec2D linearP0;
+        ::ULIS::FVec2D linearP1;
+        UOdysseyPaletteEntry* paletteEntry;
+
+        State() { inited = false; }
+    };
+
     public:
         ~FSnapshotBucket();
-        //FSnapshotBucket();
-        FSnapshotBucket( FOdysseyVectorBucket* iBucket, uint64 iSnapshotFlags );
+        FSnapshotBucket( FOdysseyVectorBucket* iBucket
+                       , uint64 iSnapshotFlags
+                       , eSnapshotState iStateType );
 
-        void Restore();
+        virtual void RecordState( eSnapshotState iState ) override;
+        virtual bool LoadState( eSnapshotState iState ) override;
 
         FOdysseyVectorBucket* GetBucket();
 
     private:
-        eBucketColorMode mColorMode;
-        FColor mSolidColor;
-        double mRotation;
-        bool mPropagated;
-        FColor mGradientColor0;
-        FColor mGradientColor1;
-        double mRadialRadius;
-        ::ULIS::FVec2D mRadialOffset;
-        ::ULIS::FVec2D mLinearP0;
-        ::ULIS::FVec2D mLinearP1;
-        UOdysseyPaletteEntry* mPaletteEntry;
-        int mPaletteSet;
+        FOdysseyVectorBucket* mBucket;
+        State* mBucketInitialState;
+        State* mBucketAlteredState;
 };
 
 class ODYSSEYVECTOR_API FSnapshotSegmentCubic
@@ -292,8 +304,8 @@ class ODYSSEYVECTOR_API FSnapshotSegmentCubic
     private:
         uint32 mSnapshotFlags;
         FOdysseyVectorSegmentCubic* mCubicSegment;
-        State mInitialState;
-        State mAlteredState;
+        State* mInitialState;
+        State* mAlteredState;
 };
 
 class ODYSSEYVECTOR_API FSnapshotTrajectory
@@ -324,8 +336,8 @@ class ODYSSEYVECTOR_API FSnapshotTrajectory
         uint64 mSnapshotFlags;
         FInbetweenerRoute* mRoute;
         uint32 mIndex;
-        State mInitialState;
-        State mAlteredState;
+        State* mInitialState;
+        State* mAlteredState;
 };
 
 class ODYSSEYVECTOR_API FSnapshotStep
@@ -349,8 +361,8 @@ class ODYSSEYVECTOR_API FSnapshotStep
     protected:
         FInbetweenerRoute* mRoute;
         uint32 mIndex;
-        State mInitialState;
-        State mAlteredState;
+        State* mInitialState;
+        State* mAlteredState;
 };
 
 class ODYSSEYVECTOR_API FSnapshotRoute
@@ -378,8 +390,8 @@ class ODYSSEYVECTOR_API FSnapshotRoute
         FInbetweenerRoute* mRoute;
         uint64 mSnapshotFlags;
         uint64 mTrajectorySnapshotFlags;
-        State mInitialState;
-        State mAlteredState;
+        State* mInitialState;
+        State* mAlteredState;
 };
 
 class ODYSSEYVECTOR_API FSnapshotLayout
@@ -404,8 +416,8 @@ class ODYSSEYVECTOR_API FSnapshotLayout
 
     protected:
         FOdysseyVectorTagInbetweener* mInbetweenerTag;
-        State mInitialState;
-        State mAlteredState;
+        State* mInitialState;
+        State* mAlteredState;
 };
 
 class ODYSSEYVECTOR_API FSnapshotDynamics
@@ -429,8 +441,8 @@ class ODYSSEYVECTOR_API FSnapshotDynamics
 
     protected:
         FOdysseyVectorTagInbetweener* mInbetweenerTag;
-        State mInitialState;
-        State mAlteredState;
+        State* mInitialState;
+        State* mAlteredState;
 };
 
 class ODYSSEYVECTOR_API FSnapshotInbetweenerChart
@@ -446,7 +458,6 @@ class ODYSSEYVECTOR_API FSnapshotInbetweenerChart
 
     public:
         ~FSnapshotInbetweenerChart();
-        FSnapshotInbetweenerChart();
         FSnapshotInbetweenerChart( FInbetweenerChart* iChart
                                  , uint64 iSnapshotFlags
                                  , eSnapshotState iState );
@@ -457,8 +468,8 @@ class ODYSSEYVECTOR_API FSnapshotInbetweenerChart
     protected:
         FInbetweenerChart* mChart;
         uint64 mSnapshotFlags;
-        State mInitialState;
-        State mAlteredState;
+        State* mInitialState;
+        State* mAlteredState;
 };
 
 class ODYSSEYVECTOR_API FSnapshotInbetweenerBreakdown
@@ -490,8 +501,8 @@ class ODYSSEYVECTOR_API FSnapshotInbetweenerBreakdown
     protected:
         FInbetweenerBreakdown* mBreakdown;
         uint64 mSnapshotFlags;
-        State mInitialState;
-        State mAlteredState;
+        State* mInitialState;
+        State* mAlteredState;
 };
 
 class ODYSSEYVECTOR_API FSnapshotTagInbetweener
@@ -499,6 +510,7 @@ class ODYSSEYVECTOR_API FSnapshotTagInbetweener
     struct State
     {
         bool inited;
+
         uint32 drawingCount;
         eInbetweenerGridType gridType;
         eInbetweenerInterpolationType interpolationType;
@@ -540,85 +552,154 @@ class ODYSSEYVECTOR_API FSnapshotTagInbetweener
         uint64 mRouteSnapshotFlags;
         uint64 mTrajectorySnapshotFlags;
         FOdysseyVectorTagInbetweener* mInbetweenerTag;
-        State mInitialState;
-        State mAlteredState;
+        State* mInitialState;
+        State* mAlteredState;
 };
 
 class ODYSSEYVECTOR_API FSnapshotObject
 {
+    struct State
+    {
+        bool inited;
+
+        FOdysseyVectorObject* parent;
+        FOdysseyVectorObject* previousChild;
+        double translationX;
+        double translationY;
+        double rotation;
+        double scalingX;
+        double scalingY;
+        FString name;
+        double opacity;
+        bool visibility;
+        FSnapshotBucket foregroundBucketSnapshot;
+        FSnapshotBucket backgroundBucketSnapshot;
+
+        State( FOdysseyVectorObject* iObject
+             , uint64 iSnapshotFlags
+             , eSnapshotState iStateType )
+        : foregroundBucketSnapshot( &iObject->GetForegroundBucket()
+                                 , ( iSnapshotFlags & FSnapshotFlags::Object::COLORING ) ? FSnapshotFlags::Point::Bucket::PARAM : 0
+                                 , iStateType )
+        , backgroundBucketSnapshot( &iObject->GetBackgroundBucket()
+                                 , ( iSnapshotFlags & FSnapshotFlags::Object::COLORING ) ? FSnapshotFlags::Point::Bucket::PARAM : 0
+                                 , iStateType )
+        {
+            inited = false;
+        }
+    };
+
     public:
         virtual ~FSnapshotObject();
-        FSnapshotObject( FOdysseyVectorObject* iObject, uint64 iSnapshotFlags );
+        FSnapshotObject( FOdysseyVectorObject* iObject
+                       , uint64 iSnapshotFlags
+                       , eSnapshotState iStateType );
 
-        virtual bool Restore();
+        virtual void RecordState( eSnapshotState iStateType );
+        virtual bool LoadState( eSnapshotState iStateType );
 
     protected:
         uint64 mSnapshotFlags;
         FOdysseyVectorObject* mObject;
-        FOdysseyVectorObject* mParent;
-        FOdysseyVectorObject* mPreviousChild;
-        FSnapshotBucket mForegroundBucketSnapshot;
-        FSnapshotBucket mBackgroundBucketSnapshot;
-        std::vector<FSnapshotObject*> mChildrenSnapshotArray;
-        double mTranslationX;
-        double mTranslationY;
-        double mRotation;
-        double mScalingX;
-        double mScalingY;
-        FString mName;
-        double mOpacity;
-        bool bVisibility;
+        State* mObjectInitialState;
+        State* mObjectAlteredState;
 };
 
 class ODYSSEYVECTOR_API FSnapshotPath : public FSnapshotObject
 {
+    struct State
+    {
+        bool inited;
+
+        std::vector<FSnapshotVertex> vertexSnapshotBuffer;
+        std::vector<FSnapshotSegmentCubic> cubicSegmentSnapshotBuffer;
+        std::list<FOdysseyVectorVertex*> selectedVertexList;
+        std::list<FOdysseyVectorVertex*> topologyVertexList;
+        std::list<FOdysseyVectorSegment*> topologySegmentList;
+        FOdysseyVectorBrush brush;
+        eJointType jointType;
+        double miterLimit;
+
+        State() : brush( nullptr ) { inited = false; }
+    };
+
     public:
         virtual ~FSnapshotPath();
-        FSnapshotPath( FOdysseyVectorPath* iPath, uint64 iSnapshotFlags );
+        FSnapshotPath( FOdysseyVectorPath* iPath
+                     , uint64 iSnapshotFlags
+                     , eSnapshotState iStateType );
 
-        virtual bool Restore() override;
+        virtual void RecordState( eSnapshotState iStateType );
+        virtual bool LoadState( eSnapshotState iStateType );
 
     private:
-        std::vector<FSnapshotVertex> mVertexSnapshotArray;
-        std::vector<FSnapshotSegmentCubic> mCubicSegmentSnapshotArray;
-        std::list<FOdysseyVectorVertex*> mSelectedVertexList;
-        std::list<FOdysseyVectorVertex*> mTopologyVertexList;
-        std::list<FOdysseyVectorSegment*> mTopologySegmentList;
-        FOdysseyVectorBrush mBrush;
-        eJointType mJointType;
-        double mMiterLimit;
+        FOdysseyVectorPath* mPath;
+        State* mPathInitialState;
+        State* mPathAlteredState;
 };
 
 class ODYSSEYVECTOR_API FSnapshotGroup : public FSnapshotObject
 {
+    struct State
+    {
+        bool inited;
+
+        FColor HUDColor;
+
+        State() { inited = false; }
+    };
+
     public:
         virtual ~FSnapshotGroup();
-        FSnapshotGroup( FOdysseyVectorGroup* iGroup, uint64 iSnapshotFlags );
+        FSnapshotGroup( FOdysseyVectorGroup* iGroup
+                      , uint64 iSnapshotFlags
+                      , eSnapshotState iStateType );
 
-        virtual bool Restore() override;
+        virtual void RecordState( eSnapshotState iStateType ) override;
+        virtual bool LoadState( eSnapshotState iStateType ) override;
 
     private:
-        FColor mHUDColor;
+        FOdysseyVectorGroup* mGroup;
+        State* mGroupInitialState;
+        State* mGroupAlteredState;
 };
 
 class ODYSSEYVECTOR_API FSnapshotGroupPaint : public FSnapshotGroup
 {
+    struct State
+    {
+        bool inited;
+
+        std::list<FOdysseyVectorBucket*> selectedBucketList;
+        bool painted;
+        bool monochrome;
+        FColor monochromeColor;
+        bool realtime;
+        double gapTolerance;
+        bool wireframe;
+        FColor wireframeColor;
+        eSegmentExtensionScheme segmentExtensionScheme;
+        eGapDetectionScheme gapDetectionScheme;
+        bool segmentExtensionSimplified;
+        std::vector<FSnapshotBucket> bucketSnapshotBuffer;
+        bool intersectsCanvas;
+
+        State() { inited = false; }
+    };
+
     public:
         virtual ~FSnapshotGroupPaint();
-        FSnapshotGroupPaint( FOdysseyVectorGroupPaint* iPaintGroup, uint64 iSnapshotFlags );
+        FSnapshotGroupPaint( FOdysseyVectorGroupPaint* iPaintGroup
+                           , uint64 iSnapshotFlags
+                           , eSnapshotState iStateType );
 
-        virtual bool Restore() override;
+        virtual void RecordState( eSnapshotState iStateType ) override;
+        virtual bool LoadState( eSnapshotState iStateType ) override;
 
     private:
-        std::vector<FSnapshotBucket> mBucketSnapshotArray;
-        std::list<FOdysseyVectorBucket*> mSelectedBucketList;
-        bool bPainted;
-        bool bMonochrome;
-        FColor mMonochromeColor;
-        bool bRealtime;
-        double mGapTolerance;
-        bool bWireframe;
-        FColor mWireframeColor;
+        FOdysseyVectorGroupPaint* mPaintgroup;
+        State* mPaintgroupInitialState;
+        State* mPaintgroupAlteredState;
 };
 
 class ODYSSEYVECTOR_API FSnapshotCell : public FSnapshotObject
@@ -633,7 +714,6 @@ class ODYSSEYVECTOR_API FSnapshotCell : public FSnapshotObject
 
     public:
         virtual ~FSnapshotCell();
-        FSnapshotCell( FOdysseyVectorCell* iCell );
         FSnapshotCell( FOdysseyVectorCell* iCell, uint64 iSnapshotFlags, eSnapshotState iStateType );
 
         void RecordState( eSnapshotState iStateType );
@@ -643,8 +723,8 @@ class ODYSSEYVECTOR_API FSnapshotCell : public FSnapshotObject
 
     private:
         uint64 mSnapshotFlags;
-        State mInitialState;
-        State mAlteredState;
+        State* mInitialState;
+        State* mAlteredState;
 };
 
 class ODYSSEYVECTOR_API FOdysseyVectorUndo : public FCommandChange

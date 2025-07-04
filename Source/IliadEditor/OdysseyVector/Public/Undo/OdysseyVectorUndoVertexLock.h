@@ -33,6 +33,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoVertexLock : public FOdysseyVectorUndo
         virtual FString ToString() const override;
 
     private:
-        std::vector<FSnapshotVertex> mVertexSnapshotArray;
-        std::vector<FSnapshotSegmentCubic> mCubicSegmentSnapshotArray;
+        std::vector<FSnapshotVertex> mVertexSnapshotBuffer;
 };

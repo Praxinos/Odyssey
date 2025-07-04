@@ -24,11 +24,13 @@ FOdysseyVectorUndoVertexRadius::FOdysseyVectorUndoVertexRadius( FOdysseyVectorGr
                                                               , uint64 iReturnFlags )
     : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
 {
-    mPathSnapshotArray.reserve( iPathArray.size() );
+    mPathSnapshotBuffer.reserve( iPathArray.size() );
 
     for( int i = 0; i < iPathArray.size(); i++ )
     {
-        mPathSnapshotArray.push_back( FSnapshotPath( iPathArray[i], FSnapshotFlags::Object::Path::VERTICES ));
+        mPathSnapshotBuffer.emplace_back( iPathArray[i]
+                                        , FSnapshotFlags::Object::Path::VERTICES
+                                        , eSnapshotState::Initial );
     }
 }
 
@@ -37,13 +39,13 @@ FOdysseyVectorUndoVertexRadius::FOdysseyVectorUndoVertexRadius( FOdysseyVectorGr
                                                               , uint64 iReturnFlags )
     : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
 {
-    mVertexSnapshotArray.reserve( iVertexArray.size() );
+    mVertexSnapshotBuffer.reserve( iVertexArray.size() );
 
     for( FOdysseyVectorVertex* vertex : iVertexArray )
     {
-        mVertexSnapshotArray.push_back( FSnapshotVertex( vertex
-                                                       , FSnapshotFlags::Point::Vertex::RADIUS
-                                                       , eSnapshotState::Initial ) );
+        mVertexSnapshotBuffer.emplace_back( vertex
+                                          , FSnapshotFlags::Point::Vertex::RADIUS
+                                          , eSnapshotState::Initial );
     }
 }
 
@@ -53,14 +55,14 @@ FOdysseyVectorUndoVertexRadius::Apply( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Apply( iIgnored );
 
-    for( int i = 0; i < mVertexSnapshotArray.size(); i++ )
+    for( int i = 0; i < mVertexSnapshotBuffer.size(); i++ )
     {
-        mVertexSnapshotArray[i].LoadState( eSnapshotState::Altered );
+        mVertexSnapshotBuffer[i].LoadState( eSnapshotState::Altered );
     }
 
-    for( int i = 0; i < mPathSnapshotArray.size(); i++ )
+    for( int i = 0; i < mPathSnapshotBuffer.size(); i++ )
     {
-        mPathSnapshotArray[i].Restore();
+        mPathSnapshotBuffer[i].LoadState( eSnapshotState::Altered );
     }
 
     // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
@@ -73,19 +75,25 @@ FOdysseyVectorUndoVertexRadius::Revert( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Revert( iIgnored );
 
-    for( int i = 0; i < mVertexSnapshotArray.size(); i++ )
+    for( int i = 0; i < mVertexSnapshotBuffer.size(); i++ )
     {
-        mVertexSnapshotArray[i].RecordState( eSnapshotState::Altered );
+        mVertexSnapshotBuffer[i].RecordState( eSnapshotState::Altered );
     }
 
-    for( int i = 0; i < mVertexSnapshotArray.size(); i++ )
+    for( int i = 0; i < mPathSnapshotBuffer.size(); i++ )
     {
-        mVertexSnapshotArray[i].LoadState( eSnapshotState::Initial );
+        mPathSnapshotBuffer[i].RecordState( eSnapshotState::Altered );
     }
 
-    for( int i = 0; i < mPathSnapshotArray.size(); i++ )
+
+    for( int i = 0; i < mVertexSnapshotBuffer.size(); i++ )
     {
-        mPathSnapshotArray[i].Restore();
+        mVertexSnapshotBuffer[i].LoadState( eSnapshotState::Initial );
+    }
+
+    for( int i = 0; i < mPathSnapshotBuffer.size(); i++ )
+    {
+        mPathSnapshotBuffer[i].LoadState( eSnapshotState::Initial );
     }
 
     // Update vector scenes and call callbacks if any (for refreshing GUI e.g)

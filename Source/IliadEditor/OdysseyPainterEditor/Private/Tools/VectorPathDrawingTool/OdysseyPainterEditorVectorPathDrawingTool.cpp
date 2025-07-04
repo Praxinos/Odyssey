@@ -209,29 +209,48 @@ UOdysseyPainterEditorVectorPathDrawingTool::RecordUndoPathAdd( FOdysseyVectorGro
 }
 
 bool
-UOdysseyPainterEditorVectorPathDrawingTool::OnKeyDownVector( FOdysseyVectorGroupPaint* iScene
-                                                           , const FKey& iKey
-                                                           , uint64& oSignalFlags )
+UOdysseyPainterEditorVectorPathDrawingTool::OnKeyDownGlobalVector( FOdysseyVectorGroupPaint* iScene
+                                                                 , const FKeyEvent& InKeyEvent
+                                                                 , uint64& oSignalFlags )
 {
-    StitchAtKeyDown = Stitch;
-
-    if ( FSlateApplication::Get().GetModifierKeys().IsShiftDown() )
+    if( InKeyEvent.IsRepeat() == false )
     {
-        Stitch = !Stitch; // flip the value
-        return true;
+        FKey key = InKeyEvent.GetKey();
+
+        StitchAtKeyDown = Stitch;
+
+        if ( ( key == EKeys::LeftShift ) || ( key == EKeys::RightShift ) )
+        {
+            Stitch = !Stitch; // flip the value
+
+            return true;
+        }
     }
 
-    return UOdysseyPainterEditorVectorBaseTool::OnKeyDownVector( iScene, iKey, oSignalFlags );
+    return UOdysseyPainterEditorVectorBaseTool::OnKeyDownGlobalVector( iScene, InKeyEvent, oSignalFlags );
 }
 
 bool
-UOdysseyPainterEditorVectorPathDrawingTool::OnKeyUpVector( FOdysseyVectorGroupPaint* iScene
-                                                         , const FKey& iKey
-                                                         , uint64& oSignalFlags )
+UOdysseyPainterEditorVectorPathDrawingTool::OnKeyUpGlobalVector( FOdysseyVectorGroupPaint* iScene
+                                                               , const FKeyEvent& InKeyEvent
+                                                               , uint64& oSignalFlags )
 {
-    Stitch = StitchAtKeyDown;
+    FKey key = InKeyEvent.GetKey();
 
-    return UOdysseyPainterEditorVectorBaseTool::OnKeyUpVector( iScene, iKey, oSignalFlags );
+    // note, we cannot use FSlateApplication::Get().GetModifierKeys()
+    // because the keys are already released. For consistency we do
+    // the same in the KeyDown event even though we could use
+    // FSlateApplication::Get().GetModifierKeys()
+    if ( ( key == EKeys::LeftShift   ) || ( key == EKeys::RightShift   ) )
+    {
+        iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
+
+        Stitch = StitchAtKeyDown;
+
+        return true;
+    }
+
+    return UOdysseyPainterEditorVectorBaseTool::OnKeyUpGlobalVector( iScene, InKeyEvent, oSignalFlags );
 }
 
 FOdysseyVectorObject*

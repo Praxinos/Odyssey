@@ -34,5 +34,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoObjectTransform : public FOdysseyVecto
         virtual FString ToString() const override;
 
     private:
-        std::vector<FSnapshotObject> mObjectSnapshotArray;
+        std::vector<FSnapshotObject> mObjectSnapshotBuffer;
 };

@@ -156,7 +156,8 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseDownVector( FOdysseyVectorGrou
                                                                                , addedSegmentArray
                                                                                , mergedVertexArray
                                                                                , mergedSegmentArray
-                                                                               , notificationFlags );
+                                                                               , notificationFlags
+                                                                               | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD );
 
                     GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 

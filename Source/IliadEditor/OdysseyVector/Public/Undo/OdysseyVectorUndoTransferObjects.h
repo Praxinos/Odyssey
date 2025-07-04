@@ -33,6 +33,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoTransferObjects : public FOdysseyVecto
         virtual FString ToString() const override;
 
     private:
-        std::vector<FSnapshotObject> mTransferredObjectSnapshotArray;
+        std::vector<FSnapshotObject> mTransferredObjectSnapshotBuffer;
         FOdysseyVectorGroupPaint* mScene;
 };

@@ -84,6 +84,11 @@ FOdysseyVectorUndoTagInbetweenerMatching::Revert( UObject* iIgnored )
     for( FSnapshotInbetweenerBreakdown& breakdownSnapshot : mBreakdownSnapshotBuffer )
     {
         breakdownSnapshot.RecordState( eSnapshotState::Altered );
+    }
+
+
+    for( FSnapshotInbetweenerBreakdown& breakdownSnapshot : mBreakdownSnapshotBuffer )
+    {
         breakdownSnapshot.LoadState( eSnapshotState::Initial );
     }
 

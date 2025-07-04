@@ -82,7 +82,10 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseDownVector( FOdysseyVectorGroupP
     if( GUndo )
     {
         // save selected object translation/rotation/scaling before transform
-        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoObjectTransform( iScene, iScene, notificationFlags );
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoObjectTransform( iScene
+                                                                        , iScene
+                                                                        , notificationFlags
+                                                                        | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 

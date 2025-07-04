@@ -37,5 +37,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoPointPosition : public FOdysseyVectorU
         virtual FString ToString() const override;
 
     private:
-        std::vector<FSnapshotPoint> mPointSnapshotArray;
+        std::vector<FSnapshotPoint> mPointSnapshotBuffer;
 };

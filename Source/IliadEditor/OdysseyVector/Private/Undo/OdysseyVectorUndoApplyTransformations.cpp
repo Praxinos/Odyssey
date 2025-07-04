@@ -33,7 +33,8 @@ FOdysseyVectorUndoApplyTransformations::FOdysseyVectorUndoApplyTransformations( 
             mObjectSnapshotArray.push_back( new FSnapshotPath( path
                                                              , FSnapshotFlags::Object::TRANSFORMATIONS
                                                              | FSnapshotFlags::Object::Path::VERTICES
-                                                             | FSnapshotFlags::Object::Path::SEGMENTS ) );
+                                                             | FSnapshotFlags::Object::Path::SEGMENTS
+                                                             , eSnapshotState::Initial ) );
         }
         else
         if( object->GetClass() == FOdysseyVectorGroupPaint::StaticClass() )
@@ -43,12 +44,14 @@ FOdysseyVectorUndoApplyTransformations::FOdysseyVectorUndoApplyTransformations( 
             mObjectSnapshotArray.push_back( new FSnapshotGroupPaint( paintGroup
                                                                    , FSnapshotFlags::Object::TRANSFORMATIONS
                                                                    //| FSnapshotFlags::Object::CHILDREN_TRANSFORMATIONS
-                                                                   | FSnapshotFlags::Object::Group::Paint::BUCKETS ) );
+                                                                   | FSnapshotFlags::Object::Group::Paint::BUCKETS
+                                                                   , eSnapshotState::Initial ) );
         }
         else
         {
             mObjectSnapshotArray.push_back( new FSnapshotObject( object
-                                                               , FSnapshotFlags::Object::TRANSFORMATIONS ) );
+                                                               , FSnapshotFlags::Object::TRANSFORMATIONS
+                                                               , eSnapshotState::Initial ) );
         }
     }
 }
@@ -61,7 +64,7 @@ FOdysseyVectorUndoApplyTransformations::Apply( UObject* iIgnored )
 
     for( int i = 0; i < mObjectSnapshotArray.size(); i++ )
     {
-        mObjectSnapshotArray[i]->Restore();
+        mObjectSnapshotArray[i]->LoadState( eSnapshotState::Altered );
     }
 
     // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
@@ -76,7 +79,13 @@ FOdysseyVectorUndoApplyTransformations::Revert( UObject* iIgnored )
 
     for( int i = 0; i < mObjectSnapshotArray.size(); i++ )
     {
-        mObjectSnapshotArray[i]->Restore();
+        mObjectSnapshotArray[i]->RecordState( eSnapshotState::Altered );
+    }
+
+
+    for( int i = 0; i < mObjectSnapshotArray.size(); i++ )
+    {
+        mObjectSnapshotArray[i]->LoadState( eSnapshotState::Initial );
     }
 
     // Update vector scenes and call callbacks if any (for refreshing GUI e.g)

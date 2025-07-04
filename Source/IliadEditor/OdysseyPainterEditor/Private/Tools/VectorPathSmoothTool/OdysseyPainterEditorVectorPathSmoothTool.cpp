@@ -118,7 +118,9 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDownVector( FOdysseyVectorGrou
         GEditor->BeginTransaction(LOCTEXT("vector-path-smooth-tool.transaction.smooth-path","Vector Path Smooth Tool"));
         if( GUndo )
         {
-            mUndoSegmentReshape = new FOdysseyVectorUndoSegmentReshape( iScene, notificationFlags );
+            mUndoSegmentReshape = new FOdysseyVectorUndoSegmentReshape( iScene
+                                                                      , notificationFlags
+                                                                      | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>( mUndoSegmentReshape ) );
 

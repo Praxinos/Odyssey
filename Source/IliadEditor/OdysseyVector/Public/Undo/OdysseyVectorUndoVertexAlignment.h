@@ -33,6 +33,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoVertexAlignment : public FOdysseyVecto
         virtual FString ToString() const override;
 
     private:
-        std::vector<FSnapshotVertex> mVertexSnapshotArray;
-        std::vector<FSnapshotSegmentCubic> mCubicSegmentSnapshotArray;
+        std::vector<FSnapshotVertex> mVertexSnapshotBuffer;
+        std::vector<FSnapshotSegmentCubic> mCubicSegmentSnapshotBuffer;
 };

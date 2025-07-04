@@ -34,6 +34,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoPathEdit : public FOdysseyVectorUndo
         bool HasRecordedSegment( FOdysseyVectorSegment* iSegment );
 
     protected:
-        std::vector<FSnapshotVertex> mVertexSnapshotArray;
-        std::vector<FSnapshotSegmentCubic> mCubicSegmentSnapshotArray;
+        std::vector<FSnapshotVertex> mVertexSnapshotBuffer;
+        std::vector<FSnapshotSegmentCubic> mCubicSegmentSnapshotBuffer;
 };

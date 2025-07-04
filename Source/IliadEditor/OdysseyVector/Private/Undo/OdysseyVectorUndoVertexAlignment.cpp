@@ -27,20 +27,20 @@ FOdysseyVectorUndoVertexAlignment::FOdysseyVectorUndoVertexAlignment( FOdysseyVe
 
     //------ Backup vertex alignment flag part ---------//
 
-    mVertexSnapshotArray.reserve( iAlignedVertexArray.size() );
+    mVertexSnapshotBuffer.reserve( iAlignedVertexArray.size() );
 
     for( FOdysseyVectorVertex* vertex : iAlignedVertexArray )
     {
-        mVertexSnapshotArray.push_back( FSnapshotVertex( vertex
-                                                       , FSnapshotFlags::Point::Vertex::ALIGNMENT
-                                                       , eSnapshotState::Initial ) );
+        mVertexSnapshotBuffer.emplace_back( vertex
+                                          , FSnapshotFlags::Point::Vertex::ALIGNMENT
+                                          , eSnapshotState::Initial );
     }
 
     //------ Backup segment handles part ---------//
 
     FOdysseyVectorVertex::ArrayToSegmentArray( iAlignedVertexArray, segmentArray );
 
-    mCubicSegmentSnapshotArray.reserve( segmentArray.size() );
+    mCubicSegmentSnapshotBuffer.reserve( segmentArray.size() );
 
     for( FOdysseyVectorSegment* segment : segmentArray )
     {
@@ -48,9 +48,9 @@ FOdysseyVectorUndoVertexAlignment::FOdysseyVectorUndoVertexAlignment( FOdysseyVe
         {
             FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segment);
 
-            mCubicSegmentSnapshotArray.push_back( FSnapshotSegmentCubic( cubicSegment
-                                                                       , FSnapshotFlags::Segment::Cubic::HANDLES
-                                                                       , eSnapshotState::Initial ) );
+            mCubicSegmentSnapshotBuffer.emplace_back( cubicSegment
+                                                    , FSnapshotFlags::Segment::Cubic::HANDLES
+                                                    , eSnapshotState::Initial );
         }
     }
 }
@@ -61,12 +61,12 @@ FOdysseyVectorUndoVertexAlignment::Apply( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Apply( iIgnored );
 
-    for( FSnapshotVertex& vertexSnapshot : mVertexSnapshotArray )
+    for( FSnapshotVertex& vertexSnapshot : mVertexSnapshotBuffer )
     {
         vertexSnapshot.LoadState( eSnapshotState::Altered );
     }
 
-    for( FSnapshotSegmentCubic& cubicSegmentsnapshot : mCubicSegmentSnapshotArray )
+    for( FSnapshotSegmentCubic& cubicSegmentsnapshot : mCubicSegmentSnapshotBuffer )
     {
         cubicSegmentsnapshot.LoadState( eSnapshotState::Altered );
     }
@@ -82,24 +82,24 @@ FOdysseyVectorUndoVertexAlignment::Revert( UObject* iIgnored )
     FOdysseyVectorUndo::Revert( iIgnored );
 
     // remember altered state
-    for( FSnapshotVertex& vertexSnapshot : mVertexSnapshotArray )
+    for( FSnapshotVertex& vertexSnapshot : mVertexSnapshotBuffer )
     {
         vertexSnapshot.RecordState( eSnapshotState::Altered );
     }
 
-    for( FSnapshotSegmentCubic& cubicSegmentSnapshot : mCubicSegmentSnapshotArray )
+    for( FSnapshotSegmentCubic& cubicSegmentSnapshot : mCubicSegmentSnapshotBuffer )
     {
         cubicSegmentSnapshot.RecordState( eSnapshotState::Altered );
     }
 
 
     // restore initial state
-    for( FSnapshotVertex& vertexSnapshot : mVertexSnapshotArray )
+    for( FSnapshotVertex& vertexSnapshot : mVertexSnapshotBuffer )
     {
         vertexSnapshot.LoadState( eSnapshotState::Initial );
     }
 
-    for( FSnapshotSegmentCubic& cubicSegmentSnapshot : mCubicSegmentSnapshotArray )
+    for( FSnapshotSegmentCubic& cubicSegmentSnapshot : mCubicSegmentSnapshotBuffer )
     {
         cubicSegmentSnapshot.LoadState( eSnapshotState::Initial );
     }

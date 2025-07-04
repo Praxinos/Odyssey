@@ -16,7 +16,9 @@ FOdysseyVectorUndoObjectTransform::FOdysseyVectorUndoObjectTransform( FOdysseyVe
                                                                     , uint64 iReturnFlags )
     : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
 {
-    mObjectSnapshotArray.push_back( FSnapshotObject( iObject, FSnapshotFlags::Object::TRANSFORMATIONS ) );
+    mObjectSnapshotBuffer.emplace_back( iObject
+                                      , FSnapshotFlags::Object::TRANSFORMATIONS
+                                      , eSnapshotState::Initial );
 }
 
 FOdysseyVectorUndoObjectTransform::FOdysseyVectorUndoObjectTransform( FOdysseyVectorGroupPaint* iScene
@@ -24,11 +26,13 @@ FOdysseyVectorUndoObjectTransform::FOdysseyVectorUndoObjectTransform( FOdysseyVe
                                                                     , uint64 iReturnFlags )
     : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
 {
-    mObjectSnapshotArray.reserve( iObjectList.size() );
+    mObjectSnapshotBuffer.reserve( iObjectList.size() );
 
     for( FOdysseyVectorObject* vectorObject : iObjectList )
     {
-        mObjectSnapshotArray.push_back( FSnapshotObject( vectorObject, FSnapshotFlags::Object::TRANSFORMATIONS ) );
+        mObjectSnapshotBuffer.emplace_back( vectorObject
+                                          , FSnapshotFlags::Object::TRANSFORMATIONS
+                                          , eSnapshotState::Initial );
     }
 }
 
@@ -38,9 +42,9 @@ FOdysseyVectorUndoObjectTransform::Apply( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Apply( iIgnored );
 
-    for( FSnapshotObject& objectSnapshot : mObjectSnapshotArray )
+    for( FSnapshotObject& objectSnapshot : mObjectSnapshotBuffer )
     {
-        objectSnapshot.Restore();
+        objectSnapshot.LoadState( eSnapshotState::Altered );
     }
 
     // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
@@ -53,9 +57,15 @@ FOdysseyVectorUndoObjectTransform::Revert( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Revert( iIgnored );
 
-    for( FSnapshotObject& objectSnapshot : mObjectSnapshotArray )
+    for( FSnapshotObject& objectSnapshot : mObjectSnapshotBuffer )
     {
-        objectSnapshot.Restore();
+        objectSnapshot.RecordState( eSnapshotState::Altered );
+    }
+
+
+    for( FSnapshotObject& objectSnapshot : mObjectSnapshotBuffer )
+    {
+        objectSnapshot.LoadState( eSnapshotState::Initial );
     }
 
     // Update vector scenes and call callbacks if any (for refreshing GUI e.g)

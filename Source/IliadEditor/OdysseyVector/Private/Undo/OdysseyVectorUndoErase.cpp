@@ -67,7 +67,7 @@ FOdysseyVectorUndoErase::FOdysseyVectorUndoErase( FOdysseyVectorGroupPaint* iSce
                                                 , uint64 iReturnFlags )
     : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
     // to restore the selection (we dont record the initial state, it is already altered at that point anyways)
-    , mCellSnapshot( iScene->GetCell() )
+    , mCellSnapshot( iScene->GetCell(), 0, eSnapshotState::None ) // unused anyways
 {
     mAddedObjectArray = iAddedObjectArray;
     mAddedVertexArray = iAddedVertexArray;

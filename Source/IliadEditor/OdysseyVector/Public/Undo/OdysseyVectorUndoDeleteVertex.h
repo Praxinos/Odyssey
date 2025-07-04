@@ -28,5 +28,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoDeleteVertex : public FOdysseyVectorUn
         virtual FString ToString() const override;
 
     private:
-        std::vector<FSnapshotPath> mPathSnapshotArray;
+        std::vector<FSnapshotPath> mPathSnapshotBuffer;
 };

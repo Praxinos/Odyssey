@@ -34,6 +34,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoVertexRadius : public FOdysseyVectorUn
         virtual FString ToString() const override;
 
     private:
-        std::vector<FSnapshotPath> mPathSnapshotArray;
-        std::vector<FSnapshotVertex> mVertexSnapshotArray;
+        std::vector<FSnapshotPath> mPathSnapshotBuffer;
+        std::vector<FSnapshotVertex> mVertexSnapshotBuffer;
 };

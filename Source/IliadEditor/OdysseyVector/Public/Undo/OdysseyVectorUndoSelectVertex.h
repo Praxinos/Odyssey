@@ -28,6 +28,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoSelectVertex : public FOdysseyVectorUn
         virtual FString ToString() const override;
 
     private:
-        std::vector<FSnapshotPath> mPathSnapshotArray;
-        std::vector<FSnapshotGroupPaint> mPaintgroupSnapshotArray;
+        std::vector<FSnapshotPath> mPathSnapshotBuffer;
+        std::vector<FSnapshotGroupPaint> mPaintgroupSnapshotBuffer;
 };

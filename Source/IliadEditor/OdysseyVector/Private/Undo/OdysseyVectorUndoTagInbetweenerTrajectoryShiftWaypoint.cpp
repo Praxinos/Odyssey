@@ -53,6 +53,11 @@ FOdysseyVectorUndoTagInbetweenerTrajectoryShiftWaypoint::Revert( UObject* iIgnor
     for( FSnapshotTrajectory& trajectorySnapshot : mTrajectorySnapshotBuffer )
     {
         trajectorySnapshot.RecordState( eSnapshotState::Altered );
+    }
+
+
+    for( FSnapshotTrajectory& trajectorySnapshot : mTrajectorySnapshotBuffer )
+    {
         trajectorySnapshot.LoadState( eSnapshotState::Initial );
     }
 

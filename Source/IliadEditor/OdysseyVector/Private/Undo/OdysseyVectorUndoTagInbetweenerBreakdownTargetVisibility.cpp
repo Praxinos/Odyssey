@@ -68,6 +68,11 @@ FOdysseyVectorUndoTagInbetweenerBreakdownTargetVisibility::Revert( UObject* iIgn
     for( FSnapshotInbetweenerBreakdown& breakdownSnapshot : mBreakdownSnapshotBuffer )
     {
         breakdownSnapshot.RecordState( eSnapshotState::Altered ); // will run once
+    }
+
+
+    for( FSnapshotInbetweenerBreakdown& breakdownSnapshot : mBreakdownSnapshotBuffer )
+    {
         breakdownSnapshot.LoadState( eSnapshotState::Initial );
     }
 

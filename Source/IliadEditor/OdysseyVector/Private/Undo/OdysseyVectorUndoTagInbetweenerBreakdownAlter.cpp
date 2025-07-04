@@ -101,6 +101,11 @@ FOdysseyVectorUndoTagInbetweenerBreakdownAlter::Revert( UObject* iIgnored )
     for( FSnapshotTagInbetweener& inbetweenerTagsnapshot : mInbetweenerTagSnapshotArray )
     {
         inbetweenerTagsnapshot.RecordState( eSnapshotState::Altered );
+    }
+
+
+    for( FSnapshotTagInbetweener& inbetweenerTagsnapshot : mInbetweenerTagSnapshotArray )
+    {
         inbetweenerTagsnapshot.LoadState( eSnapshotState::Initial );
     }
 

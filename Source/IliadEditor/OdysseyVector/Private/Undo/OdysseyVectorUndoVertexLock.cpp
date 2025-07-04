@@ -25,13 +25,13 @@ FOdysseyVectorUndoVertexLock::FOdysseyVectorUndoVertexLock( FOdysseyVectorGroupP
 {
     //------ Backup vertex lock flag part ---------//
 
-    mVertexSnapshotArray.reserve( iAlignedVertexArray.size() );
+    mVertexSnapshotBuffer.reserve( iAlignedVertexArray.size() );
 
     for( FOdysseyVectorVertex* vertex : iAlignedVertexArray )
     {
-        mVertexSnapshotArray.push_back( FSnapshotVertex( vertex
-                                                       , FSnapshotFlags::Point::Vertex::LOCK
-                                                       , eSnapshotState::Initial ) );
+        mVertexSnapshotBuffer.emplace_back( vertex
+                                          , FSnapshotFlags::Point::Vertex::LOCK
+                                          , eSnapshotState::Initial );
     }
 }
 
@@ -42,7 +42,7 @@ FOdysseyVectorUndoVertexLock::Apply( UObject* iIgnored )
     FOdysseyVectorUndo::Apply( iIgnored );
 
     // restore altered state
-    for( FSnapshotVertex& vertexSnapshot : mVertexSnapshotArray )
+    for( FSnapshotVertex& vertexSnapshot : mVertexSnapshotBuffer )
     {
         vertexSnapshot.LoadState( eSnapshotState::Altered );
     }
@@ -58,14 +58,14 @@ FOdysseyVectorUndoVertexLock::Revert( UObject* iIgnored )
     FOdysseyVectorUndo::Revert( iIgnored );
 
     // record altered state
-    for( FSnapshotVertex& vertexSnapshot : mVertexSnapshotArray )
+    for( FSnapshotVertex& vertexSnapshot : mVertexSnapshotBuffer )
     {
         vertexSnapshot.RecordState( eSnapshotState::Altered );
     }
 
 
     // restore initial state
-    for( FSnapshotVertex& vertexSnapshot : mVertexSnapshotArray )
+    for( FSnapshotVertex& vertexSnapshot : mVertexSnapshotBuffer )
     {
         vertexSnapshot.LoadState( eSnapshotState::Initial );
     }
