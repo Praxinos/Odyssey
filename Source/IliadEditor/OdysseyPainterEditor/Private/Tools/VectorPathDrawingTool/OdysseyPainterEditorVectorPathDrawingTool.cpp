@@ -169,7 +169,8 @@ UOdysseyPainterEditorVectorPathDrawingTool::RecordUndoPathAlter( FOdysseyVectorG
                                                                   , addedObjectArray
                                                                   , iAddedVertexArray
                                                                   , iAddedSegmentArray
-                                                                  , notificationFlags );
+                                                                  , notificationFlags
+                                                                  | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -195,7 +196,8 @@ UOdysseyPainterEditorVectorPathDrawingTool::RecordUndoPathAdd( FOdysseyVectorGro
     {
         FOdysseyVectorUndo* undo = static_cast<FOdysseyVectorUndo*>( new FOdysseyVectorUndoObjectAdd( iScene
                                                                                                     , iPath
-                                                                                                    , notificationFlags ) );
+                                                                                                    , notificationFlags
+                                                                                                    | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD ) );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 

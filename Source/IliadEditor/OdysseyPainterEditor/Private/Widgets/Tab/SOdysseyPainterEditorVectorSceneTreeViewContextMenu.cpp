@@ -82,31 +82,42 @@ SOdysseyPainterEditorVectorSceneTreeViewContextMenu::CreateWidget( SOdysseyPaint
           , FSlateIcon()
           , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::DeleteObjects, iTreeView->GetEditor(), vectorScene)));
 
-        menu.AddMenuEntry(
-            LOCTEXT("vector-tool.inbetween-context-menu.groupadd-inbetweener-tag.name", "Group and Add Inbetweener Tag")
-          , LOCTEXT("vector-tool.inbetween-context-menu.groupadd-inbetweener-tag.tooltip", "Group and Add Inbetweener Tag")
-          , FSlateIcon()
-          , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::GroupAndAddInbetweenerTag, editor, vectorScene )
-                    , FCanExecuteAction::CreateStatic( &SOdysseyPainterEditorVectorSceneTreeViewContextMenu::CanAddInbetweener, vectorScene )));
+        if( editor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_INBETWEEN_ALLOWED )
+        {
+            menu.AddMenuEntry(
+                LOCTEXT("vector-tool.inbetween-context-menu.groupadd-inbetweener-tag.name", "Group and Add Inbetweener Tag")
+              , LOCTEXT("vector-tool.inbetween-context-menu.groupadd-inbetweener-tag.tooltip", "Group and Add Inbetweener Tag")
+              , FSlateIcon()
+              , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::GroupAndAddInbetweenerTag, editor, vectorScene )
+                        , FCanExecuteAction::CreateStatic( &SOdysseyPainterEditorVectorSceneTreeViewContextMenu::CanAddInbetweener, vectorScene )));
+
+            menu.AddMenuEntry(
+                LOCTEXT("vector-tool.inbetween-context-menu.add-inbetweener-tag.name", "Add Inbetweener Tag")
+              , LOCTEXT("vector-tool.inbetween-context-menu.add-inbetweener-tag.tooltip", "Add Inbetweener Tag")
+              , FSlateIcon()
+              , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::AddInbetweenerTag, editor, vectorScene )
+                        , FCanExecuteAction::CreateStatic( &SOdysseyPainterEditorVectorSceneTreeViewContextMenu::CanAddInbetweener, vectorScene )));
+
+            menu.AddMenuEntry(
+                LOCTEXT("vector-tool.inbetween-context-menu.remove-inbetweener-tag.name", "Remove Inbetweener Tag")
+              , LOCTEXT("vector-tool.inbetween-context-menu.remove-inbetweener-tag.tooltip", "Remove Inbetweener Tag")
+              , FSlateIcon()
+              , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::RemoveInbetweenerTag, editor, vectorScene)
+                        , FCanExecuteAction::CreateStatic( &SOdysseyPainterEditorVectorSceneTreeViewContextMenu::CanAlterInbetweener, vectorScene )));
+
+            menu.AddMenuEntry(
+                LOCTEXT("vector-tool.inbetween-context-menu.commit-inbetweener-tag.name", "Commit Inbetweener Tag")
+              , LOCTEXT("vector-tool.inbetween-context-menu.commit-inbetweener-tag.tooltip", "Commit Inbetweener Tag")
+              , FSlateIcon()
+              , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::CommitSelectedInbetweenerTag, editor, vectorScene->GetLayer() )
+                        , FCanExecuteAction::CreateStatic( &SOdysseyPainterEditorVectorSceneTreeViewContextMenu::CanAlterInbetweener, vectorScene )));
+        }
 
         menu.AddMenuEntry(
-            LOCTEXT("vector-tool.inbetween-context-menu.add-inbetweener-tag.name", "Add Inbetweener Tag")
-          , LOCTEXT("vector-tool.inbetween-context-menu.add-inbetweener-tag.tooltip", "Add Inbetweener Tag")
-          , FSlateIcon()
-          , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::AddInbetweenerTag, editor, vectorScene )
-                    , FCanExecuteAction::CreateStatic( &SOdysseyPainterEditorVectorSceneTreeViewContextMenu::CanAddInbetweener, vectorScene )));
-
-        menu.AddMenuEntry(
-            LOCTEXT("vector-tool.inbetween-context-menu.remove-inbetweener-tag.name", "Remove Inbetweener Tag")
-          , LOCTEXT("vector-tool.inbetween-context-menu.remove-inbetweener-tag.tooltip", "Remove Inbetweener Tag")
-          , FSlateIcon()
-          , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::RemoveInbetweenerTag, editor, vectorScene )));
-
-        menu.AddMenuEntry(
-            LOCTEXT("vector-tool.inbetween-context-menu.commit-inbetweener-tag.name", "Commit Inbetweener Tag")
-          , LOCTEXT("vector-tool.inbetween-context-menu.commit-inbetweener-tag.tooltip", "Commit Inbetweener Tag")
-          , FSlateIcon()
-          , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::CommitSelectedInbetweenerTag, editor, vectorScene->GetLayer() )));
+              LOCTEXT("vector-tool.object-context-menu.apply-transformations.name", "Apply Transformations")
+            , LOCTEXT("vector-tool.object-context-menu.apply-transformations.tooltip", "Apply Transformations")
+            , FSlateIcon()
+            , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::ApplyTransformations, editor, vectorScene )));
     }
     menu.EndSection();
 

@@ -44,7 +44,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::UOdysseyPainterEditorVectorPaintBuck
     , Opacity( 1.0f )
     , Color1( 255, 255, 255, 255 )
     , Color2( 255, 255, 255, 255 )
-    , PickingRadius( 20.0f )
+    , PickingRadius( 6.0f )
     , mPickedBucket( nullptr )
     , mEditionMode( eVectorPaintBucketEditionMode::Default )
 {
@@ -655,16 +655,25 @@ UOdysseyPainterEditorVectorPaintBucketTool::ExtendContextMenu( FMenuBuilder& iMe
             , LOCTEXT("vector-paint-bucket-tool.context-menu.delete-bucket.tooltip", "Delete Bucket")
             , FSlateIcon()
             , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::DeleteBucket, GetEditor(), mPickedBucket )));
-        iMenu.AddMenuEntry(
-              LOCTEXT("vector-paint-bucket-tool.context-menu.propagate-bucket.name", "Propagate Bucket")
-            , LOCTEXT("vector-paint-bucket-tool.context-menu.propagate-bucket.tooltip", "Propagate Bucket")
-            , FSlateIcon()
-            , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::PropagateBucket, GetEditor(), mPickedBucket )));
-        iMenu.AddMenuEntry(
-              LOCTEXT("vector-paint-bucket-tool.context-menu.unpropagate-bucket.name", "Unpropagate Bucket")
-            , LOCTEXT("vector-paint-bucket-tool.context-menu.unpropagate-bucket.tooltip", "Unpropagate Bucket")
-            , FSlateIcon()
-            , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::UnpropagateBucket, GetEditor(), mPickedBucket )));
+
+        if( mPickedBucket->IsPropagated() == false )
+        {
+            iMenu.AddMenuEntry(
+                  LOCTEXT("vector-paint-bucket-tool.context-menu.propagate-bucket.name", "Propagate Bucket")
+                , LOCTEXT("vector-paint-bucket-tool.context-menu.propagate-bucket.tooltip", "Propagate Bucket")
+                , FSlateIcon()
+                , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::PropagateBucket, GetEditor(), mPickedBucket )));
+        }
+
+        if( mPickedBucket->IsPropagated() )
+        {
+            iMenu.AddMenuEntry(
+                  LOCTEXT("vector-paint-bucket-tool.context-menu.unpropagate-bucket.name", "Unpropagate Bucket")
+                , LOCTEXT("vector-paint-bucket-tool.context-menu.unpropagate-bucket.tooltip", "Unpropagate Bucket")
+                , FSlateIcon()
+                , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::UnpropagateBucket, GetEditor(), mPickedBucket )));
+        }
+
         iMenu.AddMenuEntry(
               LOCTEXT("vector-paint-bucket-tool.context-menu.copy-bucket-param.name", "Copy Bucket Param")
             , LOCTEXT("vector-paint-bucket-tool.context-menu.copy-bucket-param.tooltip", "Copy Bucket Param")

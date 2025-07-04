@@ -220,11 +220,6 @@ FOdysseyPainterEditor::Initialize()
     GetShortcuts().Add(MakeShared<FOdysseyPainterEditorGlobalShortcuts>(this));
     GetShortcuts().Add(MakeShared<FOdysseyAnimationGlobalShortcuts>(animation, currentFrame, onTransactCurrentFrame));
 
-    SetVectorHUDFlags( FOdysseyVectorHUD::HUD_MODE_OBJECT
-        | FOdysseyVectorHUD::HUD_MODE_OBJECT_ALLOWED
-        | FOdysseyVectorHUD::HUD_MODE_VERTEX_ALLOWED
-        | FOdysseyVectorHUD::HUD_MODE_INBETWEEN_ALLOWED );
-
     FSlateApplication::Get().RegisterInputPreProcessor(mAnimationFlipSystem);
 
     //Init the extensions
@@ -1221,6 +1216,28 @@ FOdysseyPainterEditor::SetSource(TSharedPtr<FOdysseyPainterEditorSource> iSource
         {
             //select the best tool
             SanitizeCurrentTool();
+        }
+
+        if ( mSource->Id() == FOdysseyPainterEditorAnimationSource::StaticId() )
+        {
+            uint64 allowedFlags = FOdysseyVectorHUD::HUD_MODE_OBJECT_ALLOWED
+                                | FOdysseyVectorHUD::HUD_MODE_VERTEX_ALLOWED
+                                | FOdysseyVectorHUD::HUD_MODE_INBETWEEN_ALLOWED;
+            uint64 editionFlags = GetVectorHUDFlags() & ( FOdysseyVectorHUD::HUD_MODE_OBJECT
+                                                        | FOdysseyVectorHUD::HUD_MODE_VERTEX
+                                                        | FOdysseyVectorHUD::HUD_MODE_INBETWEEN );
+
+            SetVectorHUDFlags( editionFlags | allowedFlags );
+        }
+
+        if ( mSource->Id() == FOdysseyPainterEditorTextureSource::StaticId() )
+        {
+            uint64 allowedFlags = FOdysseyVectorHUD::HUD_MODE_OBJECT_ALLOWED
+                                | FOdysseyVectorHUD::HUD_MODE_VERTEX_ALLOWED;
+            uint64 editionFlags = GetVectorHUDFlags() & ( FOdysseyVectorHUD::HUD_MODE_OBJECT
+                                                        | FOdysseyVectorHUD::HUD_MODE_VERTEX );
+
+            SetVectorHUDFlags( editionFlags | allowedFlags );
         }
     }
 

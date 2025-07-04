@@ -303,7 +303,8 @@ FOdysseyVectorObject::Update( uint32 iUpdateFlags )
         if( ( mInvalidationFlags & INVALIDATE_SHAPE        )
          || ( mInvalidationFlags & INVALIDATE_MATRIX       )
          || ( mInvalidationFlags & INVALIDATE_CHILD_SHAPE  )
-         || ( mInvalidationFlags & INVALIDATE_CHILD_MATRIX ) )
+         || ( mInvalidationFlags & INVALIDATE_CHILD_MATRIX )
+         || ( mInvalidationFlags & INVALIDATE_HIERARCHY    ) )
         {
             MakeInDepthBBox();
         }

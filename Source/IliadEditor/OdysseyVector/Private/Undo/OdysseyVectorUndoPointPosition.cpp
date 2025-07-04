@@ -27,7 +27,9 @@ FOdysseyVectorUndoPointPosition::FOdysseyVectorUndoPointPosition( FOdysseyVector
 
     for( int i = 0; i < iPointArray.size(); i++ )
     {
-        mPointSnapshotArray.push_back( FSnapshotPoint( iPointArray[i], FSnapshotFlags::ALL ) );
+        mPointSnapshotArray.push_back( FSnapshotPoint( iPointArray[i]
+                                                     , FSnapshotFlags::ALL
+                                                     , eSnapshotState::Initial ) );
     }
 }
 
@@ -41,12 +43,16 @@ FOdysseyVectorUndoPointPosition::FOdysseyVectorUndoPointPosition( FOdysseyVector
 
     for( int i = 0; i < iVertexArray.size(); i++ )
     {
-        mPointSnapshotArray.push_back( FSnapshotPoint( iVertexArray[i], FSnapshotFlags::ALL ) );
+        mPointSnapshotArray.push_back( FSnapshotPoint( iVertexArray[i]
+                                                     , FSnapshotFlags::ALL
+                                                     , eSnapshotState::Initial ) );
     }
 
     for( int i = 0; i < iHandleArray.size(); i++ )
     {
-        mPointSnapshotArray.push_back( FSnapshotPoint( iHandleArray[i], FSnapshotFlags::ALL ) );
+        mPointSnapshotArray.push_back( FSnapshotPoint( iHandleArray[i]
+                                                     , FSnapshotFlags::ALL
+                                                     , eSnapshotState::Initial ) );
     }
 }
 
@@ -55,7 +61,9 @@ FOdysseyVectorUndoPointPosition::FOdysseyVectorUndoPointPosition( FOdysseyVector
                                                                 , uint64 iReturnFlags )
     : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
 {
-    mPointSnapshotArray.push_back( FSnapshotPoint( iPoint, FSnapshotFlags::ALL ) );
+    mPointSnapshotArray.push_back( FSnapshotPoint( iPoint
+                                                 , FSnapshotFlags::ALL
+                                                 , eSnapshotState::Initial ) );
 }
 
 void
@@ -66,7 +74,7 @@ FOdysseyVectorUndoPointPosition::Apply( UObject* iIgnored )
 
     for( int i = 0; i < mPointSnapshotArray.size(); i++ )
     {
-        mPointSnapshotArray[i].Restore();
+        mPointSnapshotArray[i].LoadState( eSnapshotState::Altered );
     }
 
     // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
@@ -81,7 +89,12 @@ FOdysseyVectorUndoPointPosition::Revert( UObject* iIgnored )
 
     for( int i = 0; i < mPointSnapshotArray.size(); i++ )
     {
-        mPointSnapshotArray[i].Restore();
+        mPointSnapshotArray[i].RecordState( eSnapshotState::Altered );
+    }
+
+    for( int i = 0; i < mPointSnapshotArray.size(); i++ )
+    {
+        mPointSnapshotArray[i].LoadState( eSnapshotState::Initial );
     }
 
     // Update vector scenes and call callbacks if any (for refreshing GUI e.g)

@@ -151,7 +151,8 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDownVector( FOdysseyVectorGroupPaint
         {
             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoPointPosition( iScene
                                                                           , mPointArray
-                                                                          , notificationFlags );
+                                                                          , notificationFlags
+                                                                          | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 

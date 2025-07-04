@@ -29,7 +29,9 @@ FOdysseyVectorUndoVertexLock::FOdysseyVectorUndoVertexLock( FOdysseyVectorGroupP
 
     for( FOdysseyVectorVertex* vertex : iAlignedVertexArray )
     {
-        mVertexSnapshotArray.push_back( FSnapshotVertex( vertex, FSnapshotFlags::Point::Vertex::LOCK ));
+        mVertexSnapshotArray.push_back( FSnapshotVertex( vertex
+                                                       , FSnapshotFlags::Point::Vertex::LOCK
+                                                       , eSnapshotState::Initial ) );
     }
 }
 
@@ -39,9 +41,10 @@ FOdysseyVectorUndoVertexLock::Apply( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Apply( iIgnored );
 
+    // restore altered state
     for( FSnapshotVertex& vertexSnapshot : mVertexSnapshotArray )
     {
-        vertexSnapshot.Restore();
+        vertexSnapshot.LoadState( eSnapshotState::Altered );
     }
 
     // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
@@ -54,9 +57,17 @@ FOdysseyVectorUndoVertexLock::Revert( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Revert( iIgnored );
 
+    // record altered state
     for( FSnapshotVertex& vertexSnapshot : mVertexSnapshotArray )
     {
-        vertexSnapshot.Restore();
+        vertexSnapshot.RecordState( eSnapshotState::Altered );
+    }
+
+
+    // restore initial state
+    for( FSnapshotVertex& vertexSnapshot : mVertexSnapshotArray )
+    {
+        vertexSnapshot.LoadState( eSnapshotState::Initial );
     }
 
     // Update vector scenes and call callbacks if any (for refreshing GUI e.g)

@@ -63,7 +63,8 @@ FOdysseyVectorUndoPathEdit::FOdysseyVectorUndoPathEdit( FOdysseyVectorGroupPaint
         mVertexSnapshotArray.push_back( FSnapshotVertex( vertex
                                                         , FSnapshotFlags::Point::POSITION
                                                         | FSnapshotFlags::Point::Vertex::RADIUS
-                                                        | FSnapshotFlags::Point::Vertex::ALIGNMENT ) );
+                                                        | FSnapshotFlags::Point::Vertex::ALIGNMENT
+                                                        , eSnapshotState::Initial ) );
     }
 
     for( FOdysseyVectorSegment* segment : iEditedSegmentArray )
@@ -72,7 +73,9 @@ FOdysseyVectorUndoPathEdit::FOdysseyVectorUndoPathEdit( FOdysseyVectorGroupPaint
         {
             FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segment);
 
-            mCubicSegmentSnapshotArray.push_back( FSnapshotSegmentCubic( cubicSegment, FSnapshotFlags::Segment::Cubic::HANDLES, eSnapshotState::Initial ) );
+            mCubicSegmentSnapshotArray.push_back( FSnapshotSegmentCubic( cubicSegment
+                                                                       , FSnapshotFlags::Segment::Cubic::HANDLES
+                                                                       , eSnapshotState::Initial ) );
         }
     }
 }
@@ -85,7 +88,7 @@ FOdysseyVectorUndoPathEdit::Apply( UObject* iIgnored )
 
     for( int i = 0; i < mVertexSnapshotArray.size(); i++ )
     {
-        mVertexSnapshotArray[i].Restore();
+        mVertexSnapshotArray[i].LoadState( eSnapshotState::Altered );
     }
 
     for( int i = 0; i < mCubicSegmentSnapshotArray.size(); i++ )
@@ -104,15 +107,21 @@ FOdysseyVectorUndoPathEdit::Revert( UObject* iIgnored )
     FOdysseyVectorUndo::Revert( iIgnored );
 
     // remember altered state
-    for( int i = 0; i < mCubicSegmentSnapshotArray.size(); i++ )
+    for( FSnapshotVertex& vertexSnapshot : mVertexSnapshotArray )
     {
-        mCubicSegmentSnapshotArray[i].RecordState( eSnapshotState::Altered );
+        vertexSnapshot.RecordState( eSnapshotState::Altered );
     }
+
+    for( FSnapshotSegmentCubic& cubicSegmentSnapshot : mCubicSegmentSnapshotArray )
+    {
+        cubicSegmentSnapshot.RecordState( eSnapshotState::Altered );
+    }
+
 
     // restore initial state
     for( int i = 0; i < mVertexSnapshotArray.size(); i++ )
     {
-        mVertexSnapshotArray[i].Restore();
+        mVertexSnapshotArray[i].LoadState( eSnapshotState::Initial );
     }
 
     for( int i = 0; i < mCubicSegmentSnapshotArray.size(); i++ )

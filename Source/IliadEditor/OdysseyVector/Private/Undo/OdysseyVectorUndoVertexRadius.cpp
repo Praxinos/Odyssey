@@ -41,7 +41,9 @@ FOdysseyVectorUndoVertexRadius::FOdysseyVectorUndoVertexRadius( FOdysseyVectorGr
 
     for( FOdysseyVectorVertex* vertex : iVertexArray )
     {
-        mVertexSnapshotArray.push_back( FSnapshotVertex( vertex, FSnapshotFlags::Point::Vertex::RADIUS ));
+        mVertexSnapshotArray.push_back( FSnapshotVertex( vertex
+                                                       , FSnapshotFlags::Point::Vertex::RADIUS
+                                                       , eSnapshotState::Initial ) );
     }
 }
 
@@ -53,7 +55,7 @@ FOdysseyVectorUndoVertexRadius::Apply( UObject* iIgnored )
 
     for( int i = 0; i < mVertexSnapshotArray.size(); i++ )
     {
-        mVertexSnapshotArray[i].Restore();
+        mVertexSnapshotArray[i].LoadState( eSnapshotState::Altered );
     }
 
     for( int i = 0; i < mPathSnapshotArray.size(); i++ )
@@ -73,7 +75,12 @@ FOdysseyVectorUndoVertexRadius::Revert( UObject* iIgnored )
 
     for( int i = 0; i < mVertexSnapshotArray.size(); i++ )
     {
-        mVertexSnapshotArray[i].Restore();
+        mVertexSnapshotArray[i].RecordState( eSnapshotState::Altered );
+    }
+
+    for( int i = 0; i < mVertexSnapshotArray.size(); i++ )
+    {
+        mVertexSnapshotArray[i].LoadState( eSnapshotState::Initial );
     }
 
     for( int i = 0; i < mPathSnapshotArray.size(); i++ )

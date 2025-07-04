@@ -960,6 +960,17 @@ FOdysseyVectorGroupPaint::UpdateBBox()
     ::ULIS::FRectD worldBBox = ::ULIS::FRectD( 0, 0, 0, 0 );
     ::ULIS::FVec2D p0, p1, p2, p3;
 
+    for( FOdysseyVectorCycle* cycle : mCycleList )
+    {
+        ::ULIS::FRectD cycleBBox = cycle->GetBBox( true );
+
+        if( cycleBBox.Area() )
+        {
+            worldBBox = worldBBox.Area() ? ( worldBBox | cycleBBox ) : cycleBBox;
+        }
+    }
+
+/*
     for( FOdysseyVectorPath* path : mPathList )
     {
         if( path != &mCanvasPath )
@@ -972,6 +983,7 @@ FOdysseyVectorGroupPaint::UpdateBBox()
             }
         }
     }
+*/
 
     p0 = FOdysseyVector::MapPoint( mInverseWorldMatrix, ::ULIS::FVec2D( worldBBox.x              , worldBBox.y               ) );
     p1 = FOdysseyVector::MapPoint( mInverseWorldMatrix, ::ULIS::FVec2D( worldBBox.x + worldBBox.w, worldBBox.y               ) );

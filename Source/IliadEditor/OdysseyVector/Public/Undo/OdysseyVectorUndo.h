@@ -28,8 +28,9 @@ class FOdysseyVectorCell;
 
 enum class eSnapshotState : uint8
 {
-    Initial = 0,
-    Altered = 1
+    None = 0,
+    Initial = 1,
+    Altered = 2
 };
 
 namespace FSnapshotFlags
@@ -188,32 +189,57 @@ namespace FSnapshotFlags
 
 class ODYSSEYVECTOR_API FSnapshotPoint
 {
+    struct State
+    {
+        bool inited;
+        ULIS::FVec2D coords;
+
+        State() { inited = false; }
+    };
+
     public:
         virtual ~FSnapshotPoint();
-        FSnapshotPoint( FOdysseyVectorPoint* iPoint, uint64 iSnapshotFlags );
+        FSnapshotPoint( FOdysseyVectorPoint* iPoint
+                      , uint64 iSnapshotFlags
+                      , eSnapshotState iStateType );
 
-        virtual void Restore();
+        virtual void RecordState( eSnapshotState iState );
+        virtual bool LoadState( eSnapshotState iState );
 
     protected:
         uint64 mSnapshotFlags;
         FOdysseyVectorPoint* mPoint;
-        ULIS::FVec2D mCoords;
-        double mRadius;
+        State mPointInitialState;
+        State mPointAlteredState;
 };
 
 class ODYSSEYVECTOR_API FSnapshotVertex : public FSnapshotPoint
 {
+    struct State
+    {
+        bool inited;
+        bool alignment;
+        bool locked;
+        double radius;
+
+        State() { inited = false; }
+    };
+
     public:
         virtual ~FSnapshotVertex();
-        FSnapshotVertex( FOdysseyVectorVertex* iVertex, uint64 iSnapshotFlags );
+        FSnapshotVertex( FOdysseyVectorVertex* iVertex
+                       , uint64 iSnapshotFlags
+                       , eSnapshotState iStateType );
+
+        virtual void RecordState( eSnapshotState iState ) override;
+        virtual bool LoadState( eSnapshotState iState ) override;
 
         FOdysseyVectorVertex* GetVertex();
 
-        virtual void Restore() override;
-
     protected:
-        bool mAlignment;
-        bool mLocked;
+        FOdysseyVectorVertex* mVertex;
+        State mVertexInitialState;
+        State mVertexAlteredState;
 };
 
 class ODYSSEYVECTOR_API FSnapshotBucket : public FSnapshotPoint

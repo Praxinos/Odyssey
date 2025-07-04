@@ -1116,114 +1116,177 @@ FSnapshotPoint::~FSnapshotPoint()
 {
 }
 
-FSnapshotPoint::FSnapshotPoint( FOdysseyVectorPoint* iPoint, uint64 iSnapshotFlags )
+FSnapshotPoint::FSnapshotPoint( FOdysseyVectorPoint* iPoint, uint64 iSnapshotFlags, eSnapshotState iStateType )
     : mSnapshotFlags( iSnapshotFlags )
     , mPoint( iPoint )
 {
-    if( iSnapshotFlags & FSnapshotFlags::Point::POSITION )
-    {
-        mCoords = iPoint->GetCoords();
-    }
+    RecordState( iStateType );
 }
 
 void
-FSnapshotPoint::Restore()
+FSnapshotPoint::RecordState( eSnapshotState iStateType )
 {
-    if( mSnapshotFlags & FSnapshotFlags::Point::POSITION )
+    FSnapshotPoint::State* requestedState = nullptr;
+
+    switch( iStateType )
     {
-        ::ULIS::FVec2D swapCoords = mPoint->GetCoords();
+        case eSnapshotState::Initial :
+            requestedState = &mPointInitialState;
+        break;
 
-        if( mPoint->GetClass() == FOdysseyVectorHandleSegment::StaticClass() )
-        {
-            FOdysseyVectorHandleSegment* handle = static_cast<FOdysseyVectorHandleSegment*>( mPoint );
-            bool alignStatus = handle->GetAttachedVertex()->IsHandleAligned();
+        case eSnapshotState::Altered :
+            requestedState = &mPointAlteredState;
+        break;
 
-            if( alignStatus )
-            {
-                handle->GetAttachedVertex()->SetHandleAligned( false );
-            }
-
-            mPoint->Set( mCoords.x, mCoords.y );
-
-            if( alignStatus )
-            {
-                // second parameter is false to prevent immediate alignment
-                handle->GetAttachedVertex()->SetHandleAligned( true, false );
-            }
-        }
-        else
-        {
-            mPoint->Set( mCoords.x, mCoords.y );
-        }
-
-        mCoords = swapCoords;
+        default :
+        break;
     }
+
+    if( requestedState )
+    {
+        if( requestedState->inited == false )
+        {
+            if( mSnapshotFlags & FSnapshotFlags::Point::POSITION )
+            {
+                requestedState->coords = mPoint->GetCoords();
+            }
+
+            requestedState->inited = true;
+        }
+    }
+}
+
+bool
+FSnapshotPoint::LoadState( eSnapshotState iStateType )
+{
+    FSnapshotPoint::State* requestedState = nullptr;
+
+    switch( iStateType )
+    {
+        case eSnapshotState::Initial :
+            requestedState = &mPointInitialState;
+        break;
+
+        case eSnapshotState::Altered :
+            requestedState = &mPointAlteredState;
+        break;
+
+        default :
+        break;
+    }
+
+    if( requestedState )
+    {
+        if( mSnapshotFlags & FSnapshotFlags::Point::POSITION )
+        {
+            mPoint->Set( requestedState->coords.x, requestedState->coords.y );
+        }
+    }
+
+    return true;
 }
 
 FSnapshotVertex::~FSnapshotVertex()
 {
 }
 
-FSnapshotVertex::FSnapshotVertex( FOdysseyVectorVertex* iVertex, uint64 iSnapshotFlags )
-    : FSnapshotPoint( iVertex, iSnapshotFlags )
+FSnapshotVertex::FSnapshotVertex( FOdysseyVectorVertex* iVertex
+                                , uint64 iSnapshotFlags
+                                , eSnapshotState iStateType )
+    : FSnapshotPoint( iVertex, iSnapshotFlags, eSnapshotState::None )
+    , mVertex ( iVertex )
 {
-    if( iSnapshotFlags & FSnapshotFlags::Point::Vertex::ALIGNMENT )
+    // Note: even though the ctor for the base class FSnapshotPoint calls RecordState, it will not call the overriden
+    // method because vtable don't exist at construction time. So we call it here, knowing that
+    // FSnapshotPoint::Recordstate will receive eSnapshotState::None so we don't do thing twice.
+    RecordState( iStateType );
+}
+
+void
+FSnapshotVertex::RecordState( eSnapshotState iStateType )
+{
+    FSnapshotVertex::State* requestedState = nullptr;
+
+    FSnapshotPoint::RecordState( iStateType );
+
+    switch( iStateType )
     {
-        mAlignment = iVertex->IsHandleAligned();
+        case eSnapshotState::Initial :
+            requestedState = &mVertexInitialState;
+        break;
+
+        case eSnapshotState::Altered :
+            requestedState = &mVertexAlteredState;
+        break;
+
+        default :
+        break;
     }
 
-    if( iSnapshotFlags & FSnapshotFlags::Point::Vertex::LOCK )
+    if( requestedState->inited == false )
     {
-        mLocked = iVertex->IsLocked();
-    }
+        if( mSnapshotFlags & FSnapshotFlags::Point::Vertex::ALIGNMENT )
+        {
+            requestedState->alignment = mVertex->IsHandleAligned();
+        }
 
-    if( iSnapshotFlags & FSnapshotFlags::Point::Vertex::RADIUS )
-    {
-        mRadius = iVertex->GetRadius();
+        if( mSnapshotFlags & FSnapshotFlags::Point::Vertex::LOCK )
+        {
+            requestedState->locked = mVertex->IsLocked();
+        }
+
+        if( mSnapshotFlags & FSnapshotFlags::Point::Vertex::RADIUS )
+        {
+            requestedState->radius = mVertex->GetRadius();
+        }
+
+        requestedState->inited = true;
     }
 }
 
 FOdysseyVectorVertex*
 FSnapshotVertex::GetVertex()
 {
-    return static_cast<FOdysseyVectorVertex*>(mPoint);
+    return mVertex;
 }
 
-void
-FSnapshotVertex::Restore()
+bool
+FSnapshotVertex::LoadState( eSnapshotState iStateType )
 {
-    FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>(mPoint);
+    FSnapshotVertex::State* requestedState = nullptr;
 
-    FSnapshotPoint::Restore();
+    FSnapshotPoint::LoadState( iStateType );
+
+    switch( iStateType )
+    {
+        case eSnapshotState::Initial :
+            requestedState = &mVertexInitialState;
+        break;
+
+        case eSnapshotState::Altered :
+            requestedState = &mVertexAlteredState;
+        break;
+
+        default :
+        break;
+    }
 
     if( mSnapshotFlags & FSnapshotFlags::Point::Vertex::ALIGNMENT )
     {
-        bool alignment = vertex->IsHandleAligned();
-
-        vertex->SetHandleAligned( mAlignment );
-
-        // swap for redo
-        mAlignment = alignment;
+        mVertex->SetHandleAligned( requestedState->alignment );
     }
 
     if( mSnapshotFlags & FSnapshotFlags::Point::Vertex::LOCK )
     {
-        bool locked = vertex->IsLocked();
-
-        vertex->SetLocked( mLocked );
-
-        // swap for redo
-        mLocked = locked;
+        mVertex->SetLocked( requestedState->locked );
     }
 
     if( mSnapshotFlags & FSnapshotFlags::Point::Vertex::RADIUS )
     {
-        double swapRadius = vertex->GetRadius();
-
-        vertex->SetRadius( mRadius );
-
-        mRadius = swapRadius;
+        mVertex->SetRadius( requestedState->radius );
     }
+
+    return true;
 }
 
 FSnapshotBucket::~FSnapshotBucket()
@@ -1231,7 +1294,7 @@ FSnapshotBucket::~FSnapshotBucket()
 }
 
 FSnapshotBucket::FSnapshotBucket( FOdysseyVectorBucket* iBucket, uint64 iSnapshotFlags )
-    : FSnapshotPoint( iBucket, iSnapshotFlags )
+    : FSnapshotPoint( iBucket, iSnapshotFlags, eSnapshotState::Initial )
 {
     if( iSnapshotFlags & FSnapshotFlags::Point::Bucket::COLORMODE )
     {
@@ -1305,7 +1368,7 @@ FSnapshotBucket::Restore()
 {
     FOdysseyVectorBucket* bucket = static_cast<FOdysseyVectorBucket*>(mPoint);
 
-    FSnapshotPoint::Restore();
+    FSnapshotPoint::LoadState( eSnapshotState::Initial );
 
     if( mSnapshotFlags & FSnapshotFlags::Point::Bucket::COLORMODE )
     {
@@ -1530,7 +1593,9 @@ FSnapshotPath::FSnapshotPath( FOdysseyVectorPath* iPath, uint64 iSnapshotFlags )
 
         for( FOdysseyVectorVertex* vertex : vertexList )
         {
-            mVertexSnapshotArray.push_back( FSnapshotVertex( vertex, FSnapshotFlags::ALL ) );
+            mVertexSnapshotArray.push_back( FSnapshotVertex( vertex
+                                                           , FSnapshotFlags::ALL
+                                                           , eSnapshotState::Initial ) );
         }
     }
 
@@ -1606,7 +1671,7 @@ FSnapshotPath::Restore()
         {
             for( int i = 0; i < mVertexSnapshotArray.size(); i++ )
             {
-                mVertexSnapshotArray[i].Restore();
+                mVertexSnapshotArray[i].LoadState( eSnapshotState::Initial );
             }
         }
 

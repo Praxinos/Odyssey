@@ -39,7 +39,8 @@ FOdysseyVectorUndoSegmentReshape::FOdysseyVectorUndoSegmentReshape( FOdysseyVect
     for( int i = 0; i < iVertexArray.size(); i++ )
     {
         mVertexSnapshotArray.push_back( FSnapshotVertex( iVertexArray[i]
-                                                        , FSnapshotFlags::ALL ) );
+                                                        , FSnapshotFlags::ALL
+                                                        , eSnapshotState::Initial ) );
     }
 
     RecordSegment( segmentArray );
@@ -60,7 +61,9 @@ FOdysseyVectorUndoSegmentReshape::RecordVertex( FOdysseyVectorVertex* iVertex )
     FOdysseyVectorSegment* segment[2] = { iVertex->GetFirstSegment()
                                         , iVertex->GetLastSegment() };
 
-    mVertexSnapshotArray.push_back( FSnapshotVertex( iVertex, FSnapshotFlags::ALL ) );
+    mVertexSnapshotArray.push_back( FSnapshotVertex( iVertex
+                                                   , FSnapshotFlags::ALL
+                                                   , eSnapshotState::Initial ) );
 
     // record segment for undos first
     if( segment[0] && HasSegment( segment[0] ) == false )
@@ -139,14 +142,14 @@ FOdysseyVectorUndoSegmentReshape::Apply( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Apply( iIgnored );
 
-    for( int i = 0; i < mVertexSnapshotArray.size(); i++ )
+    for( FSnapshotVertex& vertexSnapshot : mVertexSnapshotArray )
     {
-        mVertexSnapshotArray[i].Restore();
+        vertexSnapshot.LoadState( eSnapshotState::Altered );
     }
 
-    for( int i = 0; i < mCubicSegmentSnapshotArray.size(); i++ )
+    for( FSnapshotSegmentCubic& cubicSegmentSnapshot : mCubicSegmentSnapshotArray )
     {
-        mCubicSegmentSnapshotArray[i].LoadState( eSnapshotState::Altered );
+        cubicSegmentSnapshot.LoadState( eSnapshotState::Altered );
     }
 
     // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
@@ -160,14 +163,21 @@ FOdysseyVectorUndoSegmentReshape::Revert( UObject* iIgnored )
     FOdysseyVectorUndo::Revert( iIgnored );
 
     // remember altered state
-    for( int i = 0; i < mCubicSegmentSnapshotArray.size(); i++ )
+    for( FSnapshotVertex& vertexSnapshot : mVertexSnapshotArray )
     {
-        mCubicSegmentSnapshotArray[i].RecordState( eSnapshotState::Altered );
+        vertexSnapshot.RecordState( eSnapshotState::Altered );
     }
 
+    for( FSnapshotSegmentCubic& cubicSegmentSnapshot : mCubicSegmentSnapshotArray )
+    {
+        cubicSegmentSnapshot.RecordState( eSnapshotState::Altered );
+    }
+
+
+    // restore initial state
     for( int i = 0; i < mVertexSnapshotArray.size(); i++ )
     {
-        mVertexSnapshotArray[i].Restore();
+        mVertexSnapshotArray[i].LoadState( eSnapshotState::Initial );
     }
 
     for( int i = 0; i < mCubicSegmentSnapshotArray.size(); i++ )
