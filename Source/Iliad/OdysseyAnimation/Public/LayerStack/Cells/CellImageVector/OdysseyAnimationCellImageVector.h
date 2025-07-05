@@ -56,7 +56,7 @@ public:
 
 #if WITH_EDITOR
 public:
-    virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const override;
+    virtual FOdysseyMediaProvider GetMediaProvider() const override;
 
 public:
     virtual void PostInitProperties() override;

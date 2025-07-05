@@ -27,7 +27,7 @@ struct FPaletteEntrySelection
     UPROPERTY(EditAnywhere, Category=Appearance, meta = (EditCondition = "OdysseyPalette != nullptr", EditConditionHides))
     UOdysseyPaletteEntryColor* OdysseyPaletteEntryColor = nullptr;
 
-    UPROPERTY(EditAnywhere, Category=Appearance, meta = (EditCondition = "OdysseyPalette != nullptr", EditConditionHides))
+    UPROPERTY(EditAnywhere, Category = Appearance, meta = (EditCondition = "false", EditConditionHides))
     int OdysseyPaletteSet = 0;
 };
 

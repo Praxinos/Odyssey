@@ -420,12 +420,6 @@ void UOdysseyPalette::RemoveSet(int iIndex /*= -1 */)
         entries[i]->RemoveSet( iIndex );
 
     Sets.RemoveAt( iIndex );
-
-    for (int i = 0; i < Sets.Num(); i++)
-    {
-        FString text = FString("Set") + FString::FromInt(i);
-        Sets[i] = (FName(text));
-    }
 }
 
 void UOdysseyPalette::HierarchyChanged()

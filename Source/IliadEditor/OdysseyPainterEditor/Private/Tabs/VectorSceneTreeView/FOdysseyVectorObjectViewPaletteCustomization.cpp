@@ -137,6 +137,7 @@ FOdysseyVectorObjectViewPaletteCustomization::GetPaletteEntryMenuContent()
             SNew(SOdysseyPaletteTreeView)
             .Visibility(this, &FOdysseyVectorObjectViewPaletteCustomization::GetTreeViewVisibility)
             .Palette(this, &FOdysseyVectorObjectViewPaletteCustomization::GetPalette)
+            .Set(this, &FOdysseyVectorObjectViewPaletteCustomization::GetCurrentSet)
             .CurrentColorEntry(this, &FOdysseyVectorObjectViewPaletteCustomization::GetCurrentEntryColor)
             .OnCurrentColorEntryChanged(this, &FOdysseyVectorObjectViewPaletteCustomization::OnPaletteCurrentColorEntryChanged)
         ];

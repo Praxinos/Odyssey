@@ -38,7 +38,7 @@ UOdysseyLayerCell::GetLayerStack() const
 
 #if WITH_EDITOR
 FOdysseyMediaProvider
-UOdysseyLayerCell::GetMediaProvider(uint32 iFrameIndex) const
+UOdysseyLayerCell::GetMediaProvider() const
 {
     return FOdysseyMediaProvider();
 }

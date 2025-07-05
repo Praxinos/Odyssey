@@ -35,11 +35,17 @@ UOdysseyPaletteEntryColor::FOnEntryColorChanged& UOdysseyPaletteEntryColor::OnEn
 
 FColor& UOdysseyPaletteEntryColor::GetColor(int iSet)
 {
+    if( EntryColors.Num() <= iSet )
+        return EntryColors[0];
+
     return EntryColors[ iSet ];
 }
 
 void UOdysseyPaletteEntryColor::SetColor(FColor iColor, int iSet)
 {
+    if (EntryColors.Num() <= iSet)
+        return;
+
     EntryColors[iSet] = iColor;
 }
 

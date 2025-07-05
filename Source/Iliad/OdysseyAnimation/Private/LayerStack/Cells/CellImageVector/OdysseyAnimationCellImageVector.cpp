@@ -315,7 +315,7 @@ UOdysseyAnimationCellImageVector::OnIsWireframeChanged(UOdysseyAnimationLayerIma
 }
 
 FOdysseyMediaProvider
-UOdysseyAnimationCellImageVector::GetMediaProvider(uint32 iFrameIndex) const
+UOdysseyAnimationCellImageVector::GetMediaProvider() const
 {
     //Don't create a mediaRaster if there is an image render in use
     FScopeLock lock(&mImageRenderingMutex);

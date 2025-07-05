@@ -51,8 +51,4 @@ private:
     TSharedPtr<IPropertyHandle> mPaletteEntryHandle;
     TSharedPtr<IPropertyHandle> mPaletteSetHandle;
     TSharedPtr<IPropertyHandle> mPaletteHandle;
-
-    //TArray< UOdysseyPaletteEntry* > mPaletteEntries;
-
-    //TSharedPtr<SComboBox<UOdysseyPaletteEntry*>> mComboBoxWidget;
 };
