@@ -129,6 +129,21 @@ SOdysseyPainterEditorPaletteSetList::OnPaletteHierarchyChanged(UOdysseyPalette* 
 TSharedRef<SWidget>
 SOdysseyPainterEditorPaletteSetList::OnGetAddPaletteMenuContent()
 {
+    TArray<UOdysseyPalette*> palettesAlreadyLoaded;
+    for( UOdysseyPaletteSet* set : mPaletteSets.Get() )
+    {
+        palettesAlreadyLoaded.Add( set->mPalette );
+    }
+
+    FOnShouldFilterAsset filterPalette = FOnShouldFilterAsset::CreateLambda(
+        [palettesAlreadyLoaded](const FAssetData& AssetData)
+        {
+            return palettesAlreadyLoaded.ContainsByPredicate([&](const FAssetData& PickedAsset)
+                {
+                    return PickedAsset.GetSoftObjectPath() == AssetData.GetSoftObjectPath();
+                });
+        });
+
     return PropertyCustomizationHelpers::MakeAssetPickerWithMenu(
         nullptr,
         false,
@@ -136,7 +151,7 @@ SOdysseyPainterEditorPaletteSetList::OnGetAddPaletteMenuContent()
         { UOdysseyPalette::StaticClass() },
         {},
         PropertyCustomizationHelpers::GetNewAssetFactoriesForClasses({ UOdysseyPalette::StaticClass() }),
-        FOnShouldFilterAsset(),
+        filterPalette,
         FOnAssetSelected::CreateLambda(
             [this](const FAssetData& AssetData)
             {
