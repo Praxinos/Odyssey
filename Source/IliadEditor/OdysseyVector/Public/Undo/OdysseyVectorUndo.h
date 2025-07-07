@@ -206,6 +206,22 @@ class ODYSSEYVECTOR_API FSnapshotPoint
         virtual void RecordState( eSnapshotState iState );
         virtual bool LoadState( eSnapshotState iState );
 
+        // copy operator for safe copies, as we delete states on destruction
+        // each copy need its own allocated pointers to those states.
+        FSnapshotPoint& operator=( const FSnapshotPoint& iOther )
+        {
+            mSnapshotFlags = iOther.mSnapshotFlags;
+            mPoint = iOther.mPoint;
+
+            mPointInitialState = new State();
+            mPointAlteredState = new State();
+
+            *mPointInitialState = *iOther.mPointInitialState;
+            *mPointAlteredState = *iOther.mPointAlteredState;
+
+            return *this;
+        }
+
     protected:
         uint64 mSnapshotFlags;
         FOdysseyVectorPoint* mPoint;
@@ -236,8 +252,22 @@ class ODYSSEYVECTOR_API FSnapshotVertex : public FSnapshotPoint
 
         FOdysseyVectorVertex* GetVertex();
 
+        // copy operator for safe copies, as we delete states on destruction
+        // each copy need its own allocated pointers to those states.
+        FSnapshotVertex& operator=( const FSnapshotVertex& iOther )
+        {
+            FSnapshotPoint::operator=(iOther);
+
+            mVertexInitialState = new State();
+            mVertexAlteredState = new State();
+
+            *mVertexInitialState = *iOther.mVertexInitialState;
+            *mVertexAlteredState = *iOther.mVertexAlteredState;
+
+            return *this;
+        }
+
     protected:
-        FOdysseyVectorVertex* mVertex;
         State* mVertexInitialState;
         State* mVertexAlteredState;
 };
@@ -274,8 +304,22 @@ class ODYSSEYVECTOR_API FSnapshotBucket : public FSnapshotPoint
 
         FOdysseyVectorBucket* GetBucket();
 
+        // copy operator for safe copies, as we delete states on destruction
+        // each copy need its own allocated pointers to those states.
+        FSnapshotBucket& operator=( const FSnapshotBucket& iOther )
+        {
+            FSnapshotPoint::operator=(iOther);
+
+            mBucketInitialState = new State();
+            mBucketAlteredState = new State();
+
+            *mBucketInitialState = *iOther.mBucketInitialState;
+            *mBucketAlteredState = *iOther.mBucketAlteredState;
+
+            return *this;
+        }
+
     private:
-        FOdysseyVectorBucket* mBucket;
         State* mBucketInitialState;
         State* mBucketAlteredState;
 };
@@ -300,6 +344,22 @@ class ODYSSEYVECTOR_API FSnapshotSegmentCubic
         bool LoadState( eSnapshotState iState );
 
         FOdysseyVectorSegmentCubic* GetCubicSegment();
+
+        // copy operator for safe copies, as we delete states on destruction
+        // each copy need its own allocated pointers to those states.
+        FSnapshotSegmentCubic& operator=( const FSnapshotSegmentCubic& iOther )
+        {
+            mSnapshotFlags = iOther.mSnapshotFlags;
+            mCubicSegment = iOther.mCubicSegment;
+
+            mInitialState = new State();
+            mAlteredState = new State();
+
+            *mInitialState = *iOther.mInitialState;
+            *mAlteredState = *iOther.mAlteredState;
+
+            return *this;
+        }
 
     private:
         uint32 mSnapshotFlags;
@@ -332,6 +392,23 @@ class ODYSSEYVECTOR_API FSnapshotTrajectory
         static void WaypointSpacingToArray( FInbetweenerTrajectory* iTrajectory
                                           , std::vector<float>& oSpacingBuffer );
 
+        // copy operator for safe copies, as we delete states on destruction
+        // each copy need its own allocated pointers to those states.
+        FSnapshotTrajectory& operator=( const FSnapshotTrajectory& iOther )
+        {
+            mSnapshotFlags = iOther.mSnapshotFlags;
+            mRoute = iOther.mRoute;
+            mIndex = iOther.mIndex;
+
+            mInitialState = new State();
+            mAlteredState = new State();
+
+            *mInitialState = *iOther.mInitialState;
+            *mAlteredState = *iOther.mAlteredState;
+
+            return *this;
+        }
+
     protected:
         uint64 mSnapshotFlags;
         FInbetweenerRoute* mRoute;
@@ -357,6 +434,23 @@ class ODYSSEYVECTOR_API FSnapshotStep
 
         void RecordState( eSnapshotState iStateType );
         bool LoadState( eSnapshotState iStateType );
+
+        // copy operator for safe copies, as we delete states on destruction
+        // each copy need its own allocated pointers to those states.
+        FSnapshotStep& operator=( const FSnapshotStep& iOther )
+        {
+            //mSnapshotFlags = iOther.mSnapshotFlags;
+            mRoute = iOther.mRoute;
+            mIndex = iOther.mIndex;
+
+            mInitialState = new State();
+            mAlteredState = new State();
+
+            *mInitialState = *iOther.mInitialState;
+            *mAlteredState = *iOther.mAlteredState;
+
+            return *this;
+        }
 
     protected:
         FInbetweenerRoute* mRoute;
@@ -386,6 +480,23 @@ class ODYSSEYVECTOR_API FSnapshotRoute
         bool LoadState( eSnapshotState iStateType );
         void RecordState( eSnapshotState iStateType );
 
+        // copy operator for safe copies, as we delete states on destruction
+        // each copy need its own allocated pointers to those states.
+        FSnapshotRoute& operator=( const FSnapshotRoute& iOther )
+        {
+            mRoute = iOther.mRoute;
+            mSnapshotFlags = iOther.mSnapshotFlags;
+            mTrajectorySnapshotFlags = iOther.mTrajectorySnapshotFlags;
+
+            mInitialState = new State();
+            mAlteredState = new State();
+
+            *mInitialState = *iOther.mInitialState;
+            *mAlteredState = *iOther.mAlteredState;
+
+            return *this;
+        }
+
     protected:
         FInbetweenerRoute* mRoute;
         uint64 mSnapshotFlags;
@@ -414,6 +525,21 @@ class ODYSSEYVECTOR_API FSnapshotLayout
         void RecordState( eSnapshotState iStateType );
         bool LoadState( eSnapshotState iStateType );
 
+        // copy operator for safe copies, as we delete states on destruction
+        // each copy need its own allocated pointers to those states.
+        FSnapshotLayout& operator=( const FSnapshotLayout& iOther )
+        {
+            mInbetweenerTag = iOther.mInbetweenerTag;
+
+            mInitialState = new State();
+            mAlteredState = new State();
+
+            *mInitialState = *iOther.mInitialState;
+            *mAlteredState = *iOther.mAlteredState;
+
+            return *this;
+        }
+
     protected:
         FOdysseyVectorTagInbetweener* mInbetweenerTag;
         State* mInitialState;
@@ -438,6 +564,21 @@ class ODYSSEYVECTOR_API FSnapshotDynamics
 
         void RecordState( eSnapshotState iStateType );
         bool LoadState( eSnapshotState iStateType );
+
+        // copy operator for safe copies, as we delete states on destruction
+        // each copy need its own allocated pointers to those states.
+        FSnapshotDynamics& operator=( const FSnapshotDynamics& iOther )
+        {
+            mInbetweenerTag = iOther.mInbetweenerTag;
+
+            mInitialState = new State();
+            mAlteredState = new State();
+
+            *mInitialState = *iOther.mInitialState;
+            *mAlteredState = *iOther.mAlteredState;
+
+            return *this;
+        }
 
     protected:
         FOdysseyVectorTagInbetweener* mInbetweenerTag;
@@ -464,6 +605,22 @@ class ODYSSEYVECTOR_API FSnapshotInbetweenerChart
 
         void RecordState( eSnapshotState iStateType );
         bool LoadState( eSnapshotState iStateType );
+
+        // copy operator for safe copies, as we delete states on destruction
+        // each copy need its own allocated pointers to those states.
+        FSnapshotInbetweenerChart& operator=( const FSnapshotInbetweenerChart& iOther )
+        {
+            mChart = iOther.mChart;
+            mSnapshotFlags = iOther.mSnapshotFlags;
+
+            mInitialState = new State();
+            mAlteredState = new State();
+
+            *mInitialState = *iOther.mInitialState;
+            *mAlteredState = *iOther.mAlteredState;
+
+            return *this;
+        }
 
     protected:
         FInbetweenerChart* mChart;
@@ -497,6 +654,22 @@ class ODYSSEYVECTOR_API FSnapshotInbetweenerBreakdown
 
         void RecordState( eSnapshotState iStateType );
         bool LoadState( eSnapshotState iStateType );
+
+        // copy operator for safe copies, as we delete states on destruction
+        // each copy need its own allocated pointers to those states.
+        FSnapshotInbetweenerBreakdown& operator=( const FSnapshotInbetweenerBreakdown& iOther )
+        {
+            mBreakdown = iOther.mBreakdown;
+            mSnapshotFlags = iOther.mSnapshotFlags;
+
+            mInitialState = new State();
+            mAlteredState = new State();
+
+            *mInitialState = *iOther.mInitialState;
+            *mAlteredState = *iOther.mAlteredState;
+
+            return *this;
+        }
 
     protected:
         FInbetweenerBreakdown* mBreakdown;
@@ -598,9 +771,25 @@ class ODYSSEYVECTOR_API FSnapshotObject
         virtual void RecordState( eSnapshotState iStateType );
         virtual bool LoadState( eSnapshotState iStateType );
 
+        // copy operator for safe copies, as we delete states on destruction
+        // each copy need its own allocated pointers to those states.
+        FSnapshotObject& operator=( const FSnapshotObject& iOther )
+        {
+            mObject = iOther.mObject;
+            mSnapshotFlags = iOther.mSnapshotFlags;
+
+            mObjectInitialState = new State( mObject, mSnapshotFlags, eSnapshotState::None );
+            mObjectAlteredState = new State( mObject, mSnapshotFlags, eSnapshotState::None );
+
+            *mObjectInitialState = *iOther.mObjectInitialState;
+            *mObjectAlteredState = *iOther.mObjectAlteredState;
+
+            return *this;
+        }
+
     protected:
-        uint64 mSnapshotFlags;
         FOdysseyVectorObject* mObject;
+        uint64 mSnapshotFlags;
         State* mObjectInitialState;
         State* mObjectAlteredState;
 };
@@ -632,8 +821,22 @@ class ODYSSEYVECTOR_API FSnapshotPath : public FSnapshotObject
         virtual void RecordState( eSnapshotState iStateType );
         virtual bool LoadState( eSnapshotState iStateType );
 
+        FOdysseyVectorPath* GetPath();
+
+        // copy operator for safe copies, as we delete states on destruction
+        // each copy need its own allocated pointers to those states.
+        FSnapshotPath& operator=( const FSnapshotPath& iOther )
+        {
+            mPathInitialState = new State();
+            mPathAlteredState = new State();
+
+            *mPathInitialState = *iOther.mPathInitialState;
+            *mPathAlteredState = *iOther.mPathAlteredState;
+
+            return *this;
+        }
+
     private:
-        FOdysseyVectorPath* mPath;
         State* mPathInitialState;
         State* mPathAlteredState;
 };
@@ -658,8 +861,22 @@ class ODYSSEYVECTOR_API FSnapshotGroup : public FSnapshotObject
         virtual void RecordState( eSnapshotState iStateType ) override;
         virtual bool LoadState( eSnapshotState iStateType ) override;
 
+        FOdysseyVectorGroup* GetGroup();
+
+        // copy operator for safe copies, as we delete states on destruction
+        // each copy need its own allocated pointers to those states.
+        FSnapshotGroup& operator=( const FSnapshotGroup& iOther )
+        {
+            mGroupInitialState = new State();
+            mGroupAlteredState = new State();
+
+            *mGroupInitialState = *iOther.mGroupInitialState;
+            *mGroupAlteredState = *iOther.mGroupAlteredState;
+
+            return *this;
+        }
+
     private:
-        FOdysseyVectorGroup* mGroup;
         State* mGroupInitialState;
         State* mGroupAlteredState;
 };
@@ -696,8 +913,22 @@ class ODYSSEYVECTOR_API FSnapshotGroupPaint : public FSnapshotGroup
         virtual void RecordState( eSnapshotState iStateType ) override;
         virtual bool LoadState( eSnapshotState iStateType ) override;
 
+        FOdysseyVectorGroupPaint* GetPaintGroup();
+
+        // copy operator for safe copies, as we delete states on destruction
+        // each copy need its own allocated pointers to those states.
+        FSnapshotGroupPaint& operator=( const FSnapshotGroupPaint& iOther )
+        {
+            mPaintgroupInitialState = new State();
+            mPaintgroupAlteredState = new State();
+
+            *mPaintgroupInitialState = *iOther.mPaintgroupInitialState;
+            *mPaintgroupAlteredState = *iOther.mPaintgroupAlteredState;
+
+            return *this;
+        }
+
     private:
-        FOdysseyVectorGroupPaint* mPaintgroup;
         State* mPaintgroupInitialState;
         State* mPaintgroupAlteredState;
 };

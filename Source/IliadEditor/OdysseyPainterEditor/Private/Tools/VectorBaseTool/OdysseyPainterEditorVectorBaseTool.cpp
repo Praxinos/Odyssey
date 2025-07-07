@@ -47,7 +47,7 @@ UOdysseyPainterEditorVectorBaseTool::UOdysseyPainterEditorVectorBaseTool( TShare
     , mHasContextMenu(true)
     , mAutoCreateMedia( iAutoCreateMedia )
     , bMouseEventViaHUD( iMouseEventViaHUD )
-    , mWorkingScene( nullptr )
+    , mWorkingCell( nullptr )
 {
 }
 
@@ -245,11 +245,11 @@ UOdysseyPainterEditorVectorBaseTool::Unload()
 {
     UOdysseyPainterEditorTool::Unload();
 
-    if( mWorkingScene )
+    if( mWorkingCell )
     {
         uint64 notificationFlags = 0;
 
-        notificationFlags = UnloadVector( mWorkingScene );
+        notificationFlags = UnloadVector( mWorkingCell->GetScene() );
 
         /**
             * ERIC PATCH
@@ -258,15 +258,15 @@ UOdysseyPainterEditorVectorBaseTool::Unload()
         mVectorBlock = nullptr;
         //END PATCH
 
-        mWorkingScene->GetLayer()->Notify( notificationFlags );
+        mWorkingCell->GetLayer()->Notify( notificationFlags );
 
-        mWorkingScene->GetLayer()->OnNotifyDelegate().RemoveAll( this );
+        mWorkingCell->GetLayer()->OnNotifyDelegate().RemoveAll( this );
 
         if( mBaseHUD )
         {
             mBaseHUD->Unload();
             // 2D HUD
-            mWorkingScene->GetLayer()->RemoveHUD( mBaseHUD.Get() );
+            mWorkingCell->GetLayer()->RemoveHUD( mBaseHUD.Get() );
             // 3D HUD
             mHUD->RemoveElement( mBaseHUD );
         }
@@ -290,7 +290,7 @@ UOdysseyPainterEditorVectorBaseTool::Load()
 
     UOdysseyPainterEditorTool::Load();
 
-    mWorkingScene = nullptr;
+    mWorkingCell = nullptr;
 
     if( hasVector )
     {
@@ -301,20 +301,20 @@ UOdysseyPainterEditorVectorBaseTool::Load()
         {
             uint64 notificationFlags;
 
-            mWorkingScene = mediaVectors[0]->GetScene();
+            mWorkingCell = mediaVectors[0]->GetScene()->GetCell();
 
-            mWorkingScene->GetLayer()->ClearHUD();
+            mWorkingCell->GetLayer()->ClearHUD();
 
             if( mBaseHUD )
             {
-                mBaseHUD->SetScene( mWorkingScene );
+                mBaseHUD->SetScene( mWorkingCell->GetScene() );
                 mBaseHUD->Load();
                 // 2D HUD
-                mWorkingScene->GetLayer()->AddHUD( mBaseHUD.Get() );
+                mWorkingCell->GetLayer()->AddHUD( mBaseHUD.Get() );
                 // 3D HUD
                 mHUD->AddElement( mBaseHUD );
 
-                mWorkingScene->GetLayer()->GetLayer()->ResetHUD( mWorkingScene );
+                mWorkingCell->GetLayer()->GetLayer()->ResetHUD( mWorkingCell->GetScene() );
             }
 
             /**
@@ -323,14 +323,14 @@ UOdysseyPainterEditorVectorBaseTool::Load()
              * Keeps the vectorBlock in memory to avoid reloading it each time we need to redraw
              * This fixes a huge performance issue when using the vector tool.
              */
-            mVectorBlock = mWorkingScene->GetCell()->GetCellInterface()->GetBlock();
+            mVectorBlock = mWorkingCell->GetScene()->GetCell()->GetCellInterface()->GetBlock();
             //END PATCH
 
-            notificationFlags = LoadVector( mWorkingScene );
+            notificationFlags = LoadVector( mWorkingCell->GetScene() );
 
-            mWorkingScene->GetLayer()->OnNotifyDelegate().AddUObject( this, &UOdysseyPainterEditorVectorBaseTool::OnVectorLayerNotify );
+            mWorkingCell->GetLayer()->OnNotifyDelegate().AddUObject( this, &UOdysseyPainterEditorVectorBaseTool::OnVectorLayerNotify );
 
-            mWorkingScene->GetLayer()->Notify( notificationFlags );
+            mWorkingCell->GetLayer()->Notify( notificationFlags );
         }
     }
 }
@@ -338,11 +338,11 @@ UOdysseyPainterEditorVectorBaseTool::Load()
 void
 UOdysseyPainterEditorVectorBaseTool::OnVectorLayerNotify( FOdysseyVectorLayer* iLayer, uint64 iNotificationFlags )
 {
-    if ( mWorkingScene )
+    if ( mWorkingCell )
     {
         if( iNotificationFlags & FOdysseyVectorEngine::NOTIFY_UPDATE_HUD )
         {
-            iLayer->ResetHUD( mWorkingScene );
+            iLayer->ResetHUD( mWorkingCell->GetScene() );
         }
     }
 }
@@ -359,12 +359,12 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyDownGlobalVector( FOdysseyVectorGroupP
 bool
 UOdysseyPainterEditorVectorBaseTool::OnKeyDownGlobal( const FKeyEvent& InKeyEvent )
 {
-    if( mWorkingScene )
+    if( mWorkingCell )
     {
         uint64 notificationFlags = 0;
-        bool handled = OnKeyDownGlobalVector ( mWorkingScene, InKeyEvent, notificationFlags );
+        bool handled = OnKeyDownGlobalVector ( mWorkingCell->GetScene(), InKeyEvent, notificationFlags );
 
-        mWorkingScene->GetLayer()->Notify( notificationFlags );
+        mWorkingCell->GetLayer()->Notify( notificationFlags );
 
         // we always return false because other tools might need the signal
         //return handled;
@@ -419,13 +419,13 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyDownVector( FOdysseyVectorGroupPaint* 
 bool
 UOdysseyPainterEditorVectorBaseTool::OnKeyDown( const FKey& iKey )
 {
-    if( mWorkingScene )
+    if( mWorkingCell )
     {
         uint64 notificationFlags = 0;
 
-        bool handled = OnKeyDownVector( mWorkingScene, iKey, notificationFlags );
+        bool handled = OnKeyDownVector( mWorkingCell->GetScene(), iKey, notificationFlags );
 
-        mWorkingScene->GetLayer()->Notify( notificationFlags );
+        mWorkingCell->GetLayer()->Notify( notificationFlags );
 
         return handled;
     }
@@ -445,12 +445,12 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyUpGlobalVector( FOdysseyVectorGroupPai
 bool
 UOdysseyPainterEditorVectorBaseTool::OnKeyUpGlobal( const FKeyEvent& InKeyEvent )
 {
-    if( mWorkingScene )
+    if( mWorkingCell )
     {
         uint64 notificationFlags = 0;
-        bool handled = OnKeyUpGlobalVector( mWorkingScene, InKeyEvent, notificationFlags );
+        bool handled = OnKeyUpGlobalVector( mWorkingCell->GetScene(), InKeyEvent, notificationFlags );
 
-        mWorkingScene->GetLayer()->Notify( notificationFlags );
+        mWorkingCell->GetLayer()->Notify( notificationFlags );
 
         // we always return false because other tools might need the signal
         //return handled;
@@ -471,13 +471,13 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyUpVector( FOdysseyVectorGroupPaint* iS
 bool
 UOdysseyPainterEditorVectorBaseTool::OnKeyUp( const FKey& iKey )
 {
-    if( mWorkingScene )
+    if( mWorkingCell )
     {
         uint64 notificationFlags = 0;
 
-        bool handled = OnKeyUpVector( mWorkingScene, iKey, notificationFlags );
+        bool handled = OnKeyUpVector( mWorkingCell->GetScene(), iKey, notificationFlags );
 
-        mWorkingScene->GetLayer()->Notify( notificationFlags );
+        mWorkingCell->GetLayer()->Notify( notificationFlags );
 
         return handled;
     }
@@ -522,13 +522,13 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseDownViaHUD( const FOdysseyPoint& iPo
 
     // Load() will be called automatically if media is created, initializing mworkingScene
 
-    if( mWorkingScene )
+    if( mWorkingCell )
     {
         uint64 notificationFlags = 0;
 
-        bool handled = OnMouseDownVector( mWorkingScene, iPointInTexture, iKey, notificationFlags );
+        bool handled = OnMouseDownVector( mWorkingCell->GetScene(), iPointInTexture, iKey, notificationFlags );
 
-        mWorkingScene->GetLayer()->Notify( notificationFlags );
+        mWorkingCell->GetLayer()->Notify( notificationFlags );
 
         return handled;
     }
@@ -559,15 +559,15 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseHoverViaHUD( const FOdysseyPoint& iP
     // we need the focus on the viewport for keyboard
     //FSlateApplication::Get().SetKeyboardFocus( mViewportWidget );
 
-    if( mWorkingScene )
+    if( mWorkingCell )
     {
         uint64 notificationFlags = 0;
 
-        OnMouseHoverVector( mWorkingScene, iPointInTexture, notificationFlags );
+        OnMouseHoverVector( mWorkingCell->GetScene(), iPointInTexture, notificationFlags );
 
         if( notificationFlags )
         {
-            mWorkingScene->GetLayer()->Notify( notificationFlags );
+            mWorkingCell->GetLayer()->Notify( notificationFlags );
         }
     }
 }
@@ -642,15 +642,15 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseDragViaHUD( const FOdysseyPoint& iPo
 
     mDragging = true;
 
-    if( mWorkingScene )
+    if( mWorkingCell )
     {
         uint64 notificationFlags = 0;
 
-        OnMouseDragVector( mWorkingScene, iPointInTexture, notificationFlags );
+        OnMouseDragVector( mWorkingCell->GetScene(), iPointInTexture, notificationFlags );
 
         if( notificationFlags )
         {
-            mWorkingScene->GetLayer()->Notify( notificationFlags );
+            mWorkingCell->GetLayer()->Notify( notificationFlags );
         }
     }
 }
@@ -673,13 +673,13 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseClick( const FOdysseyPoint& iPointIn
 bool
 UOdysseyPainterEditorVectorBaseTool::OnMouseClickViaHUD( const FOdysseyPoint& iPointInTexture, const FKey& iKey )
 {
-    if( mWorkingScene )
+    if( mWorkingCell )
     {
         uint64 notificationFlags = 0;
 
-        bool handled = OnMouseClickVector( mWorkingScene, iPointInTexture, iKey, notificationFlags );
+        bool handled = OnMouseClickVector( mWorkingCell->GetScene(), iPointInTexture, iKey, notificationFlags );
 
-        mWorkingScene->GetLayer()->Notify( notificationFlags );
+        mWorkingCell->GetLayer()->Notify( notificationFlags );
 
         if (!handled)
         {
@@ -735,13 +735,13 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseUpViaHUD( const FOdysseyPoint& iPoin
 
     mDragging = false;
 
-    if( mWorkingScene )
+    if( mWorkingCell )
     {
         uint64 notificationFlags = 0;
 
-        bool handled = OnMouseUpVector( mWorkingScene, iPointInTexture, iKey, notificationFlags );
+        bool handled = OnMouseUpVector( mWorkingCell->GetScene(), iPointInTexture, iKey, notificationFlags );
 
-        mWorkingScene->GetLayer()->Notify( notificationFlags );
+        mWorkingCell->GetLayer()->Notify( notificationFlags );
 
         return handled;
     }
@@ -769,13 +769,13 @@ UOdysseyPainterEditorVectorBaseTool::PostEditChangeProperty( FPropertyChangedEve
         return;
 
     // redraw
-    if ( mWorkingScene )
+    if ( mWorkingCell )
     {
         uint64 notificationFlags;
 
-        notificationFlags = PropertyChangedVector( mWorkingScene, PropertyChangedEvent.GetPropertyName() );
+        notificationFlags = PropertyChangedVector( mWorkingCell->GetScene(), PropertyChangedEvent.GetPropertyName() );
 
-        mWorkingScene->GetLayer()->Notify( notificationFlags );
+        mWorkingCell->GetLayer()->Notify( notificationFlags );
     }
 }
 
@@ -821,11 +821,11 @@ UOdysseyPainterEditorVectorBaseTool::BindShortcuts(FBaseToolkit* iToolkit)
 void
 UOdysseyPainterEditorVectorBaseTool::Copy()
 {
-    if( mWorkingScene )
+    if( mWorkingCell )
     {
         if( GetEditor()->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_OBJECT )
         {
-            FOdysseyPainterEditor::CopyObjects( mWorkingScene );
+            FOdysseyPainterEditor::CopyObjects( mWorkingCell->GetScene() );
         }
     }
 }
@@ -833,11 +833,11 @@ UOdysseyPainterEditorVectorBaseTool::Copy()
 void
 UOdysseyPainterEditorVectorBaseTool::Paste()
 {
-    if( mWorkingScene )
+    if( mWorkingCell )
     {
         if( GetEditor()->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_OBJECT )
         {
-            FOdysseyPainterEditor::PasteObjects( GetEditor(), mWorkingScene );
+            FOdysseyPainterEditor::PasteObjects( GetEditor(), mWorkingCell->GetScene() );
         }
     }
 }
@@ -845,16 +845,16 @@ UOdysseyPainterEditorVectorBaseTool::Paste()
 void
 UOdysseyPainterEditorVectorBaseTool::SelectAll()
 {
-    if( mWorkingScene )
+    if( mWorkingCell )
     {
         if( GetEditor()->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_OBJECT )
         {
-            FOdysseyPainterEditor::SelectAllObjects( GetEditor(), mWorkingScene );
+            FOdysseyPainterEditor::SelectAllObjects( GetEditor(), mWorkingCell->GetScene() );
         }
 
         if( GetEditor()->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_VERTEX )
         {
-            FOdysseyPainterEditor::SelectAllPoints( GetEditor(), mWorkingScene );
+            FOdysseyPainterEditor::SelectAllPoints( GetEditor(), mWorkingCell->GetScene() );
         }
     }
 }
@@ -862,18 +862,18 @@ UOdysseyPainterEditorVectorBaseTool::SelectAll()
 void
 UOdysseyPainterEditorVectorBaseTool::IncreaseContourWidth()
 {
-    if( mWorkingScene )
+    if( mWorkingCell )
     {
-        FOdysseyPainterEditor::AlterContourWidth( mWorkingScene, 1.1f, false );
+        FOdysseyPainterEditor::AlterContourWidth( mWorkingCell->GetScene(), 1.1f, false );
     }
 }
 
 void
 UOdysseyPainterEditorVectorBaseTool::DecreaseContourWidth()
 {
-    if( mWorkingScene )
+    if( mWorkingCell )
     {
-        FOdysseyPainterEditor::AlterContourWidth( mWorkingScene, 0.9f, false );
+        FOdysseyPainterEditor::AlterContourWidth( mWorkingCell->GetScene(), 0.9f, false );
     }
 }
 
@@ -887,16 +887,16 @@ UOdysseyPainterEditorVectorBaseTool::Cut()
 void
 UOdysseyPainterEditorVectorBaseTool::Delete()
 {
-    if( mWorkingScene )
+    if( mWorkingCell )
     {
         if( GetEditor()->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_OBJECT )
         {
-            FOdysseyPainterEditor::DeleteObjects( GetEditor(), mWorkingScene );
+            FOdysseyPainterEditor::DeleteObjects( GetEditor(), mWorkingCell->GetScene() );
         }
 
         if( GetEditor()->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_VERTEX )
         {
-            FOdysseyPainterEditor::DeletePointSelection( GetEditor(), mWorkingScene );
+            FOdysseyPainterEditor::DeletePointSelection( GetEditor(), mWorkingCell->GetScene() );
         }
     }
 }
@@ -939,18 +939,18 @@ UOdysseyPainterEditorVectorBaseTool::SetVectorEditionFlags( uint64 iViewMode )
 
     mEditor->SanitizeCurrentTool();
 
-    if( mWorkingScene )
+    if( mWorkingCell )
     {
         // select a object with an inbetweener tag if none are selected
         if( iViewMode & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
         {
-            FOdysseyVectorTag* selectedTag = mWorkingScene->GetLayer()->GetSelectedTagByClassType( FOdysseyVectorTagInbetweener::StaticClass() );
+            FOdysseyVectorTag* selectedTag = mWorkingCell->GetLayer()->GetSelectedTagByClassType( FOdysseyVectorTagInbetweener::StaticClass() );
 
             if ( selectedTag == nullptr )
             {
                 FOdysseyVectorTag* lastTag = nullptr;
 
-                for( FOdysseyVectorTag* tag : mWorkingScene->GetLayer()->GetSharedTagList() )
+                for( FOdysseyVectorTag* tag : mWorkingCell->GetLayer()->GetSharedTagList() )
                 {
                     if( tag->GetClass() == FOdysseyVectorTagInbetweener::StaticClass() )
                     {
@@ -965,12 +965,12 @@ UOdysseyPainterEditorVectorBaseTool::SetVectorEditionFlags( uint64 iViewMode )
             }
         }
 
-        mWorkingScene->GetLayer()->Notify( FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
+        mWorkingCell->GetLayer()->Notify( FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
                                          | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
                                          | FOdysseyPainterEditor::UI_UPDATE_TIMELINE
                                          | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD );
 
-        mWorkingScene->GetLayer()->RequestRedraw( mWorkingScene->GetCell(), 0 );
+        mWorkingCell->GetLayer()->RequestRedraw( mWorkingCell, 0 );
     }
 }
 
@@ -1100,21 +1100,21 @@ UOdysseyPainterEditorVectorBaseTool::CreateContextMenu()
 void
 UOdysseyPainterEditorVectorBaseTool::ExtendContextMenu( FMenuBuilder& menu )
 {
-    if( mWorkingScene )
+    if( mWorkingCell )
     {
         if( GetEditor()->GetVectorHUDFlags() &  FOdysseyVectorHUD::HUD_MODE_OBJECT )
         {
-            ExtendContextMenuObject( mWorkingScene, menu, 0 );
+            ExtendContextMenuObject( mWorkingCell->GetScene(), menu, 0 );
         }
 
         if( GetEditor()->GetVectorHUDFlags() &  FOdysseyVectorHUD::HUD_MODE_VERTEX )
         {
-            ExtendContextMenuVertex( mWorkingScene, menu, 0 );
+            ExtendContextMenuVertex( mWorkingCell->GetScene(), menu, 0 );
         }
 
         if( GetEditor()->GetVectorHUDFlags() &  FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
         {
-            ExtendContextMenuInbetween( mWorkingScene, menu, 0 );
+            ExtendContextMenuInbetween( mWorkingCell->GetScene(), menu, 0 );
         }
     }
 }

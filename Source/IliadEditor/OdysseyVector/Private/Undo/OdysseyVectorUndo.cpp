@@ -1369,7 +1369,6 @@ FSnapshotVertex::FSnapshotVertex( FOdysseyVectorVertex* iVertex
                                 , uint64 iSnapshotFlags
                                 , eSnapshotState iStateType )
     : FSnapshotPoint( iVertex, iSnapshotFlags, eSnapshotState::None )
-    , mVertex ( iVertex )
     , mVertexInitialState ( nullptr )
     , mVertexAlteredState ( nullptr )
 {
@@ -1412,17 +1411,17 @@ FSnapshotVertex::RecordState( eSnapshotState iStateType )
         {
             if( mSnapshotFlags & FSnapshotFlags::Point::Vertex::ALIGNMENT )
             {
-                requestedState->alignment = mVertex->IsHandleAligned();
+                requestedState->alignment = GetVertex()->IsHandleAligned();
             }
 
             if( mSnapshotFlags & FSnapshotFlags::Point::Vertex::LOCK )
             {
-                requestedState->locked = mVertex->IsLocked();
+                requestedState->locked = GetVertex()->IsLocked();
             }
 
             if( mSnapshotFlags & FSnapshotFlags::Point::Vertex::RADIUS )
             {
-                requestedState->radius = mVertex->GetRadius();
+                requestedState->radius = GetVertex()->GetRadius();
             }
 
             requestedState->inited = true;
@@ -1433,7 +1432,7 @@ FSnapshotVertex::RecordState( eSnapshotState iStateType )
 FOdysseyVectorVertex*
 FSnapshotVertex::GetVertex()
 {
-    return mVertex;
+    return static_cast<FOdysseyVectorVertex*>(mPoint);
 }
 
 bool
@@ -1461,17 +1460,17 @@ FSnapshotVertex::LoadState( eSnapshotState iStateType )
     {
         if( mSnapshotFlags & FSnapshotFlags::Point::Vertex::ALIGNMENT )
         {
-            mVertex->SetHandleAligned( requestedState->alignment );
+            GetVertex()->SetHandleAligned( requestedState->alignment );
         }
 
         if( mSnapshotFlags & FSnapshotFlags::Point::Vertex::LOCK )
         {
-            mVertex->SetLocked( requestedState->locked );
+            GetVertex()->SetLocked( requestedState->locked );
         }
 
         if( mSnapshotFlags & FSnapshotFlags::Point::Vertex::RADIUS )
         {
-            mVertex->SetRadius( requestedState->radius );
+            GetVertex()->SetRadius( requestedState->radius );
         }
 
         return true;
@@ -1493,7 +1492,6 @@ FSnapshotBucket::FSnapshotBucket( FOdysseyVectorBucket* iBucket
                                 , uint64 iSnapshotFlags
                                 , eSnapshotState iStateType )
     : FSnapshotPoint( iBucket, iSnapshotFlags, eSnapshotState::None )
-    , mBucket( iBucket )
     , mBucketInitialState ( nullptr )
     , mBucketAlteredState ( nullptr )
 {
@@ -1533,57 +1531,57 @@ FSnapshotBucket::RecordState( eSnapshotState iStateType )
         {
             if( mSnapshotFlags & FSnapshotFlags::Point::Bucket::COLORMODE )
             {
-                requestedState->colorMode = mBucket->GetColorMode();
+                requestedState->colorMode = GetBucket()->GetColorMode();
             }
 
             if( mSnapshotFlags & FSnapshotFlags::Point::Bucket::SOLIDCOLOR )
             {
-                requestedState->solidColor = mBucket->GetSolidColor();
+                requestedState->solidColor = GetBucket()->GetSolidColor();
             }
 
             if( mSnapshotFlags & FSnapshotFlags::Point::Bucket::ROTATION )
             {
-                requestedState->rotation = mBucket->GetRotation();
+                requestedState->rotation = GetBucket()->GetRotation();
             }
 
             if( mSnapshotFlags & FSnapshotFlags::Point::Bucket::PROPAGATION )
             {
-                requestedState->propagated = mBucket->IsPropagated();
+                requestedState->propagated = GetBucket()->IsPropagated();
             }
 
             if( mSnapshotFlags & FSnapshotFlags::Point::Bucket::GRADIENTCOLOR0 )
             {
-                requestedState->gradientColor0 = mBucket->GetGradientColor0();
+                requestedState->gradientColor0 = GetBucket()->GetGradientColor0();
             }
 
             if( mSnapshotFlags & FSnapshotFlags::Point::Bucket::GRADIENTCOLOR1 )
             {
-                requestedState->gradientColor1 = mBucket->GetGradientColor1();
+                requestedState->gradientColor1 = GetBucket()->GetGradientColor1();
             }
 
             if( mSnapshotFlags & FSnapshotFlags::Point::Bucket::RADIALRADIUS )
             {
-                requestedState->radialRadius = mBucket->GetRadialRadius();
+                requestedState->radialRadius = GetBucket()->GetRadialRadius();
             }
 
             if( mSnapshotFlags & FSnapshotFlags::Point::Bucket::RADIALOFFSET )
             {
-                requestedState->radialOffset = mBucket->GetRadialOffset();
+                requestedState->radialOffset = GetBucket()->GetRadialOffset();
             }
 
             if( mSnapshotFlags & FSnapshotFlags::Point::Bucket::LINEARP0 )
             {
-                requestedState->linearP0 = mBucket->GetLinearP0();
+                requestedState->linearP0 = GetBucket()->GetLinearP0();
             }
 
             if( mSnapshotFlags & FSnapshotFlags::Point::Bucket::LINEARP1 )
             {
-                requestedState->linearP1 = mBucket->GetLinearP1();
+                requestedState->linearP1 = GetBucket()->GetLinearP1();
             }
 
             if( mSnapshotFlags & FSnapshotFlags::Point::Bucket::PALETTEENTRY )
             {
-                requestedState->paletteEntry = mBucket->GetPaletteEntry();
+                requestedState->paletteEntry = GetBucket()->GetPaletteEntry();
             }
 
             requestedState->inited = true;
@@ -1594,7 +1592,7 @@ FSnapshotBucket::RecordState( eSnapshotState iStateType )
 FOdysseyVectorBucket*
 FSnapshotBucket::GetBucket()
 {
-    return mBucket;
+    return static_cast<FOdysseyVectorBucket*>(mPoint);
 }
 
 bool
@@ -1622,52 +1620,52 @@ FSnapshotBucket::LoadState( eSnapshotState iStateType )
     {
         if( mSnapshotFlags & FSnapshotFlags::Point::Bucket::COLORMODE )
         {
-            mBucket->SetColorMode( requestedState->colorMode );
+            GetBucket()->SetColorMode( requestedState->colorMode );
         }
 
         if( mSnapshotFlags & FSnapshotFlags::Point::Bucket::SOLIDCOLOR )
         {
-            mBucket->SetSolidColor( requestedState->solidColor );
+            GetBucket()->SetSolidColor( requestedState->solidColor );
         }
 
         if( mSnapshotFlags & FSnapshotFlags::Point::Bucket::LINEARP0 )
         {
-            mBucket->SetLinearP0( requestedState->linearP0 );
+            GetBucket()->SetLinearP0( requestedState->linearP0 );
         }
 
         if( mSnapshotFlags & FSnapshotFlags::Point::Bucket::LINEARP1 )
         {
-            mBucket->SetLinearP1( requestedState->linearP1 );
+            GetBucket()->SetLinearP1( requestedState->linearP1 );
         }
 
         if( mSnapshotFlags & FSnapshotFlags::Point::Bucket::PROPAGATION )
         {
-            mBucket->SetPropagated( requestedState->propagated );
+            GetBucket()->SetPropagated( requestedState->propagated );
         }
 
         if( mSnapshotFlags & FSnapshotFlags::Point::Bucket::GRADIENTCOLOR0 )
         {
-            mBucket->SetGradientColor0( requestedState->gradientColor0 );
+            GetBucket()->SetGradientColor0( requestedState->gradientColor0 );
         }
 
         if( mSnapshotFlags & FSnapshotFlags::Point::Bucket::GRADIENTCOLOR1 )
         {
-            mBucket->SetGradientColor1( requestedState->gradientColor1 );
+            GetBucket()->SetGradientColor1( requestedState->gradientColor1 );
         }
 
         if( mSnapshotFlags & FSnapshotFlags::Point::Bucket::RADIALRADIUS )
         {
-            mBucket->SetRadialRadius( requestedState->radialRadius );
+            GetBucket()->SetRadialRadius( requestedState->radialRadius );
         }
 
         if( mSnapshotFlags & FSnapshotFlags::Point::Bucket::RADIALOFFSET )
         {
-            mBucket->SetRadialOffset( requestedState->radialOffset );
+            GetBucket()->SetRadialOffset( requestedState->radialOffset );
         }
 
         if( mSnapshotFlags & FSnapshotFlags::Point::Bucket::PALETTEENTRY )
         {
-            mBucket->SetPaletteEntry( requestedState->paletteEntry );
+            GetBucket()->SetPaletteEntry( requestedState->paletteEntry );
         }
 
         return true;
@@ -1821,11 +1819,16 @@ FSnapshotPath::~FSnapshotPath()
         delete mPathAlteredState;
 }
 
+FOdysseyVectorPath*
+FSnapshotPath::GetPath()
+{
+    return static_cast<FOdysseyVectorPath*>(mObject);
+}
+
 FSnapshotPath::FSnapshotPath( FOdysseyVectorPath* iPath
                             , uint64 iSnapshotFlags
                             , eSnapshotState iStateType )
     : FSnapshotObject( iPath, iSnapshotFlags, eSnapshotState::None )
-    , mPath( iPath )
     , mPathInitialState ( nullptr )
     , mPathAlteredState ( nullptr )
 {
@@ -1869,14 +1872,14 @@ FSnapshotPath::RecordState( eSnapshotState iStateType )
             // snapshot vertex and segment list
             if( mSnapshotFlags & FSnapshotFlags::Object::Path::TOPOLOGY )
             {
-                requestedState->topologyVertexList = mPath->GetVertexList();
-                requestedState->topologySegmentList = mPath->GetSegmentList();
+                requestedState->topologyVertexList = GetPath()->GetVertexList();
+                requestedState->topologySegmentList = GetPath()->GetSegmentList();
             }
 
              // Snapshot vertices position & radius
             if( mSnapshotFlags & FSnapshotFlags::Object::Path::VERTICES )
             {
-                std::list<FOdysseyVectorVertex*>& vertexList = mPath->GetVertexList();
+                std::list<FOdysseyVectorVertex*>& vertexList = GetPath()->GetVertexList();
 
                 requestedState->vertexSnapshotBuffer.reserve( vertexList.size() );
 
@@ -1891,7 +1894,7 @@ FSnapshotPath::RecordState( eSnapshotState iStateType )
              // Snapshot segments' handles position
             if( mSnapshotFlags & FSnapshotFlags::Object::Path::SEGMENTS )
             {
-                std::list<FOdysseyVectorSegment*>& segmentList = mPath->GetSegmentList();
+                std::list<FOdysseyVectorSegment*>& segmentList = GetPath()->GetSegmentList();
 
                 requestedState->cubicSegmentSnapshotBuffer.reserve( segmentList.size() );
 
@@ -1910,22 +1913,22 @@ FSnapshotPath::RecordState( eSnapshotState iStateType )
 
             if( mSnapshotFlags & FSnapshotFlags::Object::Path::SELECTED_VERTICES )
             {
-                requestedState->selectedVertexList = mPath->GetSelectedVertexList();
+                requestedState->selectedVertexList = GetPath()->GetSelectedVertexList();
             }
 
             if( mSnapshotFlags & FSnapshotFlags::Object::Path::JOINTTYPE )
             {
-                requestedState->jointType = mPath->GetJointType();
+                requestedState->jointType = GetPath()->GetJointType();
             }
 
             if( mSnapshotFlags & FSnapshotFlags::Object::Path::MITERLIMIT )
             {
-                requestedState->miterLimit = mPath->GetMiterLimit();
+                requestedState->miterLimit = GetPath()->GetMiterLimit();
             }
 
             if( mSnapshotFlags & FSnapshotFlags::Object::Path::BRUSH )
             {
-                requestedState->brush = mPath->GetBrush();
+                requestedState->brush = GetPath()->GetBrush();
             }
 
             requestedState->inited = true;
@@ -1958,17 +1961,17 @@ FSnapshotPath::LoadState( eSnapshotState iStateType )
         {
             if( mSnapshotFlags & FSnapshotFlags::Object::Path::TOPOLOGY )
             {
-                mPath->RemoveAllSegments();
-                mPath->RemoveAllVertices();
+                GetPath()->RemoveAllSegments();
+                GetPath()->RemoveAllVertices();
 
                 for( FOdysseyVectorVertex* vertex : requestedState->topologyVertexList )
                 {
-                    mPath->AddVertex( vertex );
+                    GetPath()->AddVertex( vertex );
                 }
 
                 for( FOdysseyVectorSegment* segment : requestedState->topologySegmentList )
                 {
-                    mPath->AddSegment( segment );
+                    GetPath()->AddSegment( segment );
                 }
             }
 
@@ -1990,27 +1993,27 @@ FSnapshotPath::LoadState( eSnapshotState iStateType )
 
             if( mSnapshotFlags & FSnapshotFlags::Object::Path::SELECTED_VERTICES )
             {
-                mPath->UnselectAllVertices();
+                GetPath()->UnselectAllVertices();
 
                 for( FOdysseyVectorVertex* vertex : requestedState->selectedVertexList )
                 {
-                    mPath->SelectVertex( vertex );
+                    GetPath()->SelectVertex( vertex );
                 }
             }
 
             if( mSnapshotFlags & FSnapshotFlags::Object::Path::JOINTTYPE )
             {
-                mPath->SetJointType( requestedState->jointType, true );
+                GetPath()->SetJointType( requestedState->jointType, true );
             }
 
             if( mSnapshotFlags & FSnapshotFlags::Object::Path::MITERLIMIT )
             {
-                mPath->SetMiterLimit( requestedState->miterLimit, true );
+                GetPath()->SetMiterLimit( requestedState->miterLimit, true );
             }
 
             if( mSnapshotFlags & FSnapshotFlags::Object::Path::BRUSH )
             {
-                mPath->SetBrush( requestedState->brush );
+                GetPath()->SetBrush( requestedState->brush );
             }
 
             return true;
@@ -2033,7 +2036,6 @@ FSnapshotGroup::FSnapshotGroup( FOdysseyVectorGroup* iGroup
                               , uint64 iSnapshotFlags
                               , eSnapshotState iStateType )
     : FSnapshotObject( iGroup, iSnapshotFlags, eSnapshotState::None )
-    , mGroup ( iGroup )
     , mGroupInitialState( nullptr )
     , mGroupAlteredState( nullptr )
 {
@@ -2041,6 +2043,12 @@ FSnapshotGroup::FSnapshotGroup( FOdysseyVectorGroup* iGroup
     // method because vtable don't exist at construction time. So we call it here, knowing that
     // FSnapshotObject::Recordstate will receive eSnapshotState::None so we don't do thing twice.
     RecordState( iStateType );
+}
+
+FOdysseyVectorGroup*
+FSnapshotGroup::GetGroup()
+{
+    return static_cast<FOdysseyVectorGroup*>(mObject);
 }
 
 void
@@ -2077,7 +2085,7 @@ FSnapshotGroup::RecordState( eSnapshotState iStateType )
 
             if( mSnapshotFlags & FSnapshotFlags::Object::Group::HUDCOLOR )
             {
-                requestedState->HUDColor = mGroup->GetHUDColor();
+                requestedState->HUDColor = GetGroup()->GetHUDColor();
             }
 
             requestedState->inited = true;
@@ -2110,7 +2118,7 @@ FSnapshotGroup::LoadState( eSnapshotState iStateType )
         {
             if( mSnapshotFlags & FSnapshotFlags::Object::Group::HUDCOLOR )
             {
-                mGroup->SetHUDColor( requestedState->HUDColor );
+                GetGroup()->SetHUDColor( requestedState->HUDColor );
             }
 
             return true;
@@ -2133,7 +2141,6 @@ FSnapshotGroupPaint::FSnapshotGroupPaint( FOdysseyVectorGroupPaint* iPaintGroup
                                         , uint64 iSnapshotFlags
                                         , eSnapshotState iStateType )
     : FSnapshotGroup( iPaintGroup, iSnapshotFlags, eSnapshotState::None )
-    , mPaintgroup ( iPaintGroup )
     , mPaintgroupInitialState( nullptr )
     , mPaintgroupAlteredState( nullptr )
 {
@@ -2141,6 +2148,12 @@ FSnapshotGroupPaint::FSnapshotGroupPaint( FOdysseyVectorGroupPaint* iPaintGroup
     // method because vtable don't exist at construction time. So we call it here, knowing that
     // FSnapshotGroup::Recordstate will receive eSnapshotState::None so we don't do thing twice.
     RecordState( iStateType );
+}
+
+FOdysseyVectorGroupPaint*
+FSnapshotGroupPaint::GetPaintGroup()
+{
+    return static_cast<FOdysseyVectorGroupPaint*>(mObject);
 }
 
 void
@@ -2176,7 +2189,7 @@ FSnapshotGroupPaint::RecordState( eSnapshotState iStateType )
         {
             if( mSnapshotFlags & FSnapshotFlags::Object::Group::Paint::BUCKETS )
             {
-                std::list<FOdysseyVectorBucket*>& bucketList = mPaintgroup->GetBucketList();
+                std::list<FOdysseyVectorBucket*>& bucketList = GetPaintGroup()->GetBucketList();
 
                 requestedState->bucketSnapshotBuffer.reserve( bucketList.size() );
 
@@ -2190,61 +2203,61 @@ FSnapshotGroupPaint::RecordState( eSnapshotState iStateType )
 
             if( mSnapshotFlags & FSnapshotFlags::Object::Group::Paint::SELECTED_BUCKETS )
             {
-                requestedState->selectedBucketList = mPaintgroup->GetSelectedBucketList();
+                requestedState->selectedBucketList = GetPaintGroup()->GetSelectedBucketList();
             }
 
             if( mSnapshotFlags & FSnapshotFlags::Object::Group::Paint::PAINTED )
             {
-                requestedState->painted = mPaintgroup->IsPainted();
+                requestedState->painted = GetPaintGroup()->IsPainted();
             }
 
             if( mSnapshotFlags & FSnapshotFlags::Object::Group::Paint::INTERSECTSCANVAS )
             {
-                requestedState->intersectsCanvas = mPaintgroup->IntersectsCanvas();
+                requestedState->intersectsCanvas = GetPaintGroup()->IntersectsCanvas();
             }
 
             if( mSnapshotFlags & FSnapshotFlags::Object::Group::Paint::MONOCHROME )
             {
-                requestedState->monochrome = mPaintgroup->IsMonochrome();
+                requestedState->monochrome = GetPaintGroup()->IsMonochrome();
             }
 
             if( mSnapshotFlags & FSnapshotFlags::Object::Group::Paint::MONOCHROMECOLOR )
             {
-                requestedState->monochromeColor = mPaintgroup->GetMonochromeColor();
+                requestedState->monochromeColor = GetPaintGroup()->GetMonochromeColor();
             }
             if( mSnapshotFlags & FSnapshotFlags::Object::Group::Paint::REALTIME )
             {
-                requestedState->realtime = mPaintgroup->IsRealtime();
+                requestedState->realtime = GetPaintGroup()->IsRealtime();
             }
 
             if( mSnapshotFlags & FSnapshotFlags::Object::Group::Paint::GAPTOLERANCE )
             {
-                requestedState->gapTolerance = mPaintgroup->GetGapTolerance();
+                requestedState->gapTolerance = GetPaintGroup()->GetGapTolerance();
             }
 
             if( mSnapshotFlags & FSnapshotFlags::Object::Group::Paint::SEGMENTEXTENSIONSCHEME )
             {
-                requestedState->segmentExtensionScheme = mPaintgroup->GetSegmentExtensionScheme();
+                requestedState->segmentExtensionScheme = GetPaintGroup()->GetSegmentExtensionScheme();
             }
 
             if( mSnapshotFlags & FSnapshotFlags::Object::Group::Paint::GAPDETECTIONSCHEME )
             {
-                requestedState->gapDetectionScheme = mPaintgroup->GetGapDetectionScheme();
+                requestedState->gapDetectionScheme = GetPaintGroup()->GetGapDetectionScheme();
             }
 
             if( mSnapshotFlags & FSnapshotFlags::Object::Group::Paint::SEGMENTEXTENSIONSIMPLIFIED )
             {
-                requestedState->segmentExtensionSimplified = mPaintgroup->IsSegmentExtensionSimplified();
+                requestedState->segmentExtensionSimplified = GetPaintGroup()->IsSegmentExtensionSimplified();
             }
 
             if( mSnapshotFlags & FSnapshotFlags::Object::Group::Paint::WIREFRAME )
             {
-                requestedState->wireframe = mPaintgroup->IsWireframe();
+                requestedState->wireframe = GetPaintGroup()->IsWireframe();
             }
 
             if( mSnapshotFlags & FSnapshotFlags::Object::Group::Paint::WIREFRAMECOLOR )
             {
-                requestedState->wireframeColor = mPaintgroup->GetWireframeColor();
+                requestedState->wireframeColor = GetPaintGroup()->GetWireframeColor();
             }
 
             requestedState->inited = true;
@@ -2285,66 +2298,66 @@ FSnapshotGroupPaint::LoadState( eSnapshotState iStateType )
 
             if( mSnapshotFlags & FSnapshotFlags::Object::Group::Paint::SELECTED_BUCKETS )
             {
-                mPaintgroup->UnselectAllBuckets();
+                GetPaintGroup()->UnselectAllBuckets();
 
                 for( FOdysseyVectorBucket* bucket : requestedState->selectedBucketList )
                 {
-                    mPaintgroup->SelectBucket( bucket );
+                    GetPaintGroup()->SelectBucket( bucket );
                 }
             }
 
             if( mSnapshotFlags & FSnapshotFlags::Object::Group::Paint::PAINTED )
             {
-                mPaintgroup->SetPainted( requestedState->painted );
+                GetPaintGroup()->SetPainted( requestedState->painted );
             }
 
             if( mSnapshotFlags & FSnapshotFlags::Object::Group::Paint::INTERSECTSCANVAS )
             {
-                mPaintgroup->SetIntersectsCanvas( requestedState->intersectsCanvas );
+                GetPaintGroup()->SetIntersectsCanvas( requestedState->intersectsCanvas );
             }
 
             if( mSnapshotFlags & FSnapshotFlags::Object::Group::Paint::MONOCHROME )
             {
-                mPaintgroup->SetMonochrome( requestedState->monochrome );
+                GetPaintGroup()->SetMonochrome( requestedState->monochrome );
             }
 
             if( mSnapshotFlags & FSnapshotFlags::Object::Group::Paint::MONOCHROMECOLOR )
             {
-                mPaintgroup->SetMonochromeColor( requestedState->monochromeColor );
+                GetPaintGroup()->SetMonochromeColor( requestedState->monochromeColor );
             }
             if( mSnapshotFlags & FSnapshotFlags::Object::Group::Paint::REALTIME )
             {
-                mPaintgroup->SetRealtime( requestedState->realtime );
+                GetPaintGroup()->SetRealtime( requestedState->realtime );
             }
 
             if( mSnapshotFlags & FSnapshotFlags::Object::Group::Paint::GAPTOLERANCE )
             {
-                mPaintgroup->SetGapTolerance( requestedState->gapTolerance );
+                GetPaintGroup()->SetGapTolerance( requestedState->gapTolerance );
             }
 
             if( mSnapshotFlags & FSnapshotFlags::Object::Group::Paint::SEGMENTEXTENSIONSCHEME )
             {
-                mPaintgroup->SetSegmentExtensionScheme( requestedState->segmentExtensionScheme );
+                GetPaintGroup()->SetSegmentExtensionScheme( requestedState->segmentExtensionScheme );
             }
 
             if( mSnapshotFlags & FSnapshotFlags::Object::Group::Paint::GAPDETECTIONSCHEME )
             {
-                mPaintgroup->SetGapDetectionScheme( requestedState->gapDetectionScheme );
+                GetPaintGroup()->SetGapDetectionScheme( requestedState->gapDetectionScheme );
             }
 
             if( mSnapshotFlags & FSnapshotFlags::Object::Group::Paint::SEGMENTEXTENSIONSIMPLIFIED )
             {
-                mPaintgroup->SetSegmentExtensionSimplified( requestedState->segmentExtensionSimplified );
+                GetPaintGroup()->SetSegmentExtensionSimplified( requestedState->segmentExtensionSimplified );
             }
 
             if( mSnapshotFlags & FSnapshotFlags::Object::Group::Paint::WIREFRAME )
             {
-                mPaintgroup->SetWireframe( requestedState->wireframe );
+                GetPaintGroup()->SetWireframe( requestedState->wireframe );
             }
 
             if( mSnapshotFlags & FSnapshotFlags::Object::Group::Paint::WIREFRAMECOLOR )
             {
-                mPaintgroup->SetWireframeColor( requestedState->wireframeColor );
+                GetPaintGroup()->SetWireframeColor( requestedState->wireframeColor );
             }
 
             return true;

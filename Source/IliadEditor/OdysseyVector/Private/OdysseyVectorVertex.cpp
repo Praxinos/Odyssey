@@ -1198,6 +1198,7 @@ FOdysseyVectorVertex::DrawJoint( BLContext* iBLContext
 
             iBLContext->save();
             iBLContext->resetMatrix();
+            iBLContext->setStrokeWidth( 3.0f ); // 1 pixel is not enough due to antialiasing. Lets go with 3
             iBLContext->strokeLine( worldHandlePosition[0], worldHandlePosition[1] );
             iBLContext->restore();
         }

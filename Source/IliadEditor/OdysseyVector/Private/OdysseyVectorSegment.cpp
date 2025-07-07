@@ -5,6 +5,7 @@
 #include "OdysseyVectorPath.h"
 #include "OdysseyVectorIntersection.h"
 #include "OdysseyVector.h"
+#include "OdysseyVectorEngine.h"
 
 FOdysseyVectorSegment::~FOdysseyVectorSegment()
 {
@@ -110,17 +111,21 @@ FOdysseyVectorSegment::DrawFractionCache( BLContext* iBLContext )
     }
 
     // we draw lines between the polygons to correct the artefacts, otherwise there is a thin line between the polygons
-    // line stroking is done in world coordinates because we need a 1 pixel width
+    // line stroking is done in world coordinates because we need a 1-3 pixel width
 
     iBLContext->save();
     iBLContext->resetMatrix();
-    iBLContext->setStrokeWidth( 1.2f );
+    iBLContext->setStrokeWidth( 3.0f ); // 1 pixel is not enough due to antialiasing. Lets go with 3
+
     for ( int i = 1; i < mFractionCache.size(); i++ )
     {
-        iBLContext->strokeLine( worldMatrix.mapPoint( mFractionCache[i].polygon.point[0].x, mFractionCache[i].polygon.point[0].y )
-                              , worldMatrix.mapPoint( mFractionCache[i].polygon.point[1].x, mFractionCache[i].polygon.point[1].y ) );
-        iBLContext->strokeLine( worldMatrix.mapPoint( mFractionCache[i].polygon.point[5].x, mFractionCache[i].polygon.point[5].y )
-                              , worldMatrix.mapPoint( mFractionCache[i].polygon.point[0].x, mFractionCache[i].polygon.point[0].y ) );
+        BLPath thinLine;
+
+        thinLine.moveTo( worldMatrix.mapPoint( mFractionCache[i].polygon.point[5].x, mFractionCache[i].polygon.point[5].y ) );
+        thinLine.lineTo( worldMatrix.mapPoint( mFractionCache[i].polygon.point[0].x, mFractionCache[i].polygon.point[0].y ) );
+        thinLine.lineTo( worldMatrix.mapPoint( mFractionCache[i].polygon.point[1].x, mFractionCache[i].polygon.point[1].y ) );
+
+        iBLContext->strokePath( thinLine );
     }
     iBLContext->restore();
 

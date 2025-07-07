@@ -1568,8 +1568,6 @@ FOdysseyVectorPath::AlterRadius( double iRatioRadius )
 
 void
 FOdysseyVectorPath::DrawSegment( BLContext* iBLContext
-                                // the engine that draws may not be the parent engine
-                                // so we use the on epassed as parameter
                                , FOdysseyVectorEngine* iVectorEngine
                                , FOdysseyVectorSegment* iSegment
                                , double iStartU

@@ -120,10 +120,10 @@ FOdysseyVectorJoint::Draw( BLContext* iBLContext
             BLPoint vertexWorldCoords = worldMatrix.mapPoint( vertexCoords.x, vertexCoords.y );
 
             // this is to prevent a thin line between polygons because BLend2D draw them at sub-pixel level and this
-            // might create a thin line between the polygons. So we draw a one-pixel line at the edges.
+            // might create a thin line between the polygons. So we draw a 1-3 pixel line at the edges.
             iBLContext->save();
             iBLContext->resetMatrix();
-            iBLContext->setStrokeWidth( 1.2f );
+            iBLContext->setStrokeWidth( 3.0f );  // 1 pixel is not enough due to antialiasing. Lets go with 3
             iBLContext->strokeLine( BLPoint( vertexWorldCoords.x, vertexWorldCoords.y )
                                   , worldMatrix.mapPoint( mNextEdgePoint[0].x, mNextEdgePoint[0].y ) );
             iBLContext->strokeLine( BLPoint( vertexWorldCoords.x, vertexWorldCoords.y )
@@ -142,14 +142,19 @@ FOdysseyVectorJoint::Draw( BLContext* iBLContext
             }
 
             // this is to prevent a thin line between polygons because BLend2D draw them at sub-pixel level and this
-            // might create a thin line between the polygons. So we draw a one-pixel line at the edges.
+            // might create a thin line between the polygons. So we draw a 1-3 pixel line at the edges.
             iBLContext->save();
             iBLContext->resetMatrix();
-            iBLContext->setStrokeWidth( 1.2f );
+            iBLContext->setStrokeWidth( 3.0f ); // 1 pixel is not enough due to antialiasing. Lets go with 3
+
             for ( int i = 0; i < mPolygonCache.size(); i++ )
             {
-                iBLContext->strokeLine( worldMatrix.mapPoint( mPolygonCache[i].point[0].x, mPolygonCache[i].point[0].y )
-                                      , worldMatrix.mapPoint( mPolygonCache[i].point[1].x, mPolygonCache[i].point[1].y ) );
+                if( i == 0 )
+                {
+                    iBLContext->strokeLine( worldMatrix.mapPoint( mPolygonCache[i].point[0].x, mPolygonCache[i].point[0].y )
+                                          , worldMatrix.mapPoint( mPolygonCache[i].point[1].x, mPolygonCache[i].point[1].y ) );
+                }
+
                 iBLContext->strokeLine( worldMatrix.mapPoint( mPolygonCache[i].point[2].x, mPolygonCache[i].point[2].y )
                                       , worldMatrix.mapPoint( mPolygonCache[i].point[0].x, mPolygonCache[i].point[0].y ) );
             }

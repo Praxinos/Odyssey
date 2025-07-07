@@ -20,6 +20,7 @@ class FOdysseyVectorPath;
 class FOdysseyVectorHandleSegment;
 class FOdysseyVectorVertex;
 class FOdysseyVectorHandleSegment;
+class FOdysseyVectorCell;
 
 enum class eMouseEventName : uint8
 {
@@ -210,7 +211,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         // we need the focus on the viewport for keyboard
         // and some tools need to know the viewport size
         TWeakPtr<SOdysseyViewport> mViewport;
-        FOdysseyVectorGroupPaint* mWorkingScene;
+        FOdysseyVectorCell* mWorkingCell;
 
         TSharedPtr<::ULIS::FBlock> mVectorBlock;
 
