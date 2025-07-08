@@ -76,7 +76,7 @@ UOdysseyAnimationCellImageVector::BuildRenderPipelineInternal(
     {
         const_cast<UOdysseyAnimationCellImageVector*>(this)->InitTexture();
     }
-    else if ( mVectorBlock->NeedsRender() )
+    if ( mVectorBlock->NeedsRender() )
     {
         ::ULIS::FRectI rect = mVectorBlock->GetSanitizedRect();
         mVectorBlock->Render(mDrawingFlags);

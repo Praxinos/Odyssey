@@ -22,7 +22,15 @@ FOdysseyVectorUndoApplyTransformations::FOdysseyVectorUndoApplyTransformations( 
                                                                               , uint64 iReturnFlags )
     : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
 {
-    mObjectSnapshotArray.reserve( iObjectList.size() );
+    uint32 childrenCount = 0;
+
+    // children transformations will also be affected. We need to save them
+    for( FOdysseyVectorObject* object : iObjectList )
+    {
+        childrenCount += object->GetChildrenList().size();
+    }
+
+    mObjectSnapshotArray.reserve( iObjectList.size() + childrenCount );
 
     for( FOdysseyVectorObject* object : iObjectList )
     {
@@ -43,13 +51,19 @@ FOdysseyVectorUndoApplyTransformations::FOdysseyVectorUndoApplyTransformations( 
 
             mObjectSnapshotArray.push_back( new FSnapshotGroupPaint( paintGroup
                                                                    , FSnapshotFlags::Object::TRANSFORMATIONS
-                                                                   //| FSnapshotFlags::Object::CHILDREN_TRANSFORMATIONS
                                                                    | FSnapshotFlags::Object::Group::Paint::BUCKETS
                                                                    , eSnapshotState::Initial ) );
         }
         else
         {
             mObjectSnapshotArray.push_back( new FSnapshotObject( object
+                                                               , FSnapshotFlags::Object::TRANSFORMATIONS
+                                                               , eSnapshotState::Initial ) );
+        }
+
+        for( FOdysseyVectorObject* child :  object->GetChildrenList() )
+        {
+            mObjectSnapshotArray.push_back( new FSnapshotObject( child
                                                                , FSnapshotFlags::Object::TRANSFORMATIONS
                                                                , eSnapshotState::Initial ) );
         }

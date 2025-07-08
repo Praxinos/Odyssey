@@ -211,6 +211,10 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         // we need the focus on the viewport for keyboard
         // and some tools need to know the viewport size
         TWeakPtr<SOdysseyViewport> mViewport;
+        // Note: we use FOdysseyVectorCell and not FOdysseyVectorGroupPaint (the scene) because the cell
+        // never changes, unlike the scene that is attached to it that can change for example when a cell
+        // is cleaned (a new scene is then assigned to this cell) and there is a risk to work with an
+        // orphaned scene.
         FOdysseyVectorCell* mWorkingCell;
 
         TSharedPtr<::ULIS::FBlock> mVectorBlock;

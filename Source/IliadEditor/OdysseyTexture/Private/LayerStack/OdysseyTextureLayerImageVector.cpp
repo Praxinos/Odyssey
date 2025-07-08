@@ -155,7 +155,7 @@ UOdysseyTextureLayerImageVector::BuildRenderPipelineInternal(
     {
         const_cast<UOdysseyTextureLayerImageVector*>(this)->InitTexture();
     }
-    else if ( mVectorBlock->NeedsRender() )
+    if ( mVectorBlock->NeedsRender() )
     {
         ::ULIS::FRectI rect = mVectorBlock->GetSanitizedRect();
         mVectorBlock->Render(mDrawingFlags);
@@ -197,7 +197,7 @@ UOdysseyTextureLayerImageVector::PostLoad()
 TSharedPtr<::ULIS::FBlock>
 UOdysseyTextureLayerImageVector::GetBlock() const
 {
-    return mVectorBlock->GetBlock(0);
+    return mVectorBlock->GetBlock(mDrawingFlags);
 }
 
 void
@@ -300,7 +300,7 @@ UOdysseyTextureLayerImageVector::SetIsWireframe(bool Value)
 {
     bIsWireframe = Value;
     mVectorCell->GetLayer()->RequestRedraw( mVectorCell.Get(), 0 );
-    RenderingChanged();
+    //RenderingChanged();
 }
 
 void
@@ -308,7 +308,7 @@ UOdysseyTextureLayerImageVector::SetIsColored(bool Value)
 {
     bIsColored = Value;
     mVectorCell->GetLayer()->RequestRedraw( mVectorCell.Get(), 0 );
-    RenderingChanged();
+    //RenderingChanged();
 }
 
 bool
