@@ -785,34 +785,31 @@ UOdysseyPainterEditorVectorBaseTool::Commit()
 
 }
 
-void
-UOdysseyPainterEditorVectorBaseTool::BindShortcuts(FBaseToolkit* iToolkit)
+void UOdysseyPainterEditorVectorBaseTool::BindShortcuts(TSharedPtr<FUICommandList> iCommandList)
 {
-    const TSharedRef<FUICommandList>& toolkitCommands = iToolkit->GetToolkitCommands();
+    Super::BindShortcuts(iCommandList);
 
-    Super::BindShortcuts(iToolkit);
-
-    toolkitCommands->MapAction(
+    iCommandList->MapAction(
         FGenericCommands::Get().SelectAll,
         FExecuteAction::CreateUObject( this, &UOdysseyPainterEditorVectorBaseTool::SelectAll )
     );
 
-    toolkitCommands->MapAction(
+    iCommandList->MapAction(
         FGenericCommands::Get().Delete,
         FExecuteAction::CreateUObject( this, &UOdysseyPainterEditorVectorBaseTool::Delete )
     );
 
-    toolkitCommands->MapAction(
+    iCommandList->MapAction(
         FGenericCommands::Get().Cut,
         FExecuteAction::CreateUObject( this, &UOdysseyPainterEditorVectorBaseTool::Cut )
     );
 
-    toolkitCommands->MapAction(
+    iCommandList->MapAction(
         FGenericCommands::Get().Copy,
         FExecuteAction::CreateUObject( this, &UOdysseyPainterEditorVectorBaseTool::Copy )
     );
 
-    toolkitCommands->MapAction(
+    iCommandList->MapAction(
         FGenericCommands::Get().Paste,
         FExecuteAction::CreateUObject( this, &UOdysseyPainterEditorVectorBaseTool::Paste )
     );

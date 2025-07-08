@@ -37,16 +37,22 @@ public:
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
     virtual void ExtendMenu(TSharedRef<FExtender> iExtender) override;
     virtual void ExtendContextMenu( FMenuBuilder& menu, const FOdysseyPoint& iPointInTexture, const FKey& iKey );
-    virtual void BindShortcuts( FBaseToolkit* iToolkit ) override;
+    virtual void BindShortcuts( TSharedPtr<FUICommandList> iCommandList ) override;
 
 protected:
     void SelectAll();
-    void CopySelection();
-    void CutSelection();
-    void PasteSelection();
-    void PasteSelectionInNewLayer();
     void ClearSelection();
     void InvertSelection();
+
+    void CopyCurrentSelection();
+    void CutCurrentSelection();
+    void PasteCurrentSelection();
+    void PasteCurrentSelectionInNewLayer();
+
+    bool CanCopyCurrentSelection();
+    bool CanCutCurrentSelection();
+    bool CanPasteCurrentSelection();
+    bool CanPasteCurrentSelectionInNewLayer();
 
 private:
     void BuildSelectionMenu(FMenuBuilder& iMenu);

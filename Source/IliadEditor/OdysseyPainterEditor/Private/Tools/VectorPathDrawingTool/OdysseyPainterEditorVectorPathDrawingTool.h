@@ -55,7 +55,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
         FOdysseyVectorPathTracer& GetPathTracer();
 
         virtual FText GetTooltip() const override;
-        virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
+        virtual void BindShortcuts(TSharedPtr<FUICommandList> iCommandList) override;
 
     protected:
         //OdysseyPainterVectorBaseEditorTool overrides

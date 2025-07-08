@@ -78,7 +78,7 @@ public:
 
 public:
     // Interface
-    virtual void BindShortcuts(class FBaseToolkit* iToolkit);
+    virtual void BindShortcuts(TSharedPtr<FUICommandList> iCommandList);
     virtual void ExtendMenu( TSharedRef<FExtender> iExtender );
     virtual void ExtendToolbar( FToolBarBuilder& iBuilder );
     virtual TSharedPtr<FOdysseyHUDElement> GetHUD();
@@ -108,6 +108,8 @@ protected:
     TSharedPtr<FOdysseyPainterEditorToolInputProcessor> mInputProcessor;
     FOdysseyPainterEditor*              mEditor;
     TSharedPtr<FOdysseyHUDElement>      mHUD;
+
+    TSharedPtr<FUICommandList>          mCommandList;
 
 public:
     UPROPERTY(EditDefaultsOnly, Category="Tool")

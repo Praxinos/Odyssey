@@ -18,17 +18,6 @@ public:
     //Shortcuts
     virtual void MapActionsToCommandList(TSharedRef<FUICommandList> iCommandList) override;
 
-public:
-    void Action_CopyCurrentSelection();
-    void Action_CutCurrentSelection();
-    void Action_PasteCurrentSelection();
-    void Action_PasteCurrentSelectionInNewLayer();
-
-    bool CanAction_CopyCurrentSelection();
-    bool CanAction_CutCurrentSelection();
-    bool CanAction_PasteCurrentSelection();
-    bool CanAction_PasteCurrentSelectionInNewLayer();
-
 private:
     FOdysseyPainterEditor* mEditor;
 };

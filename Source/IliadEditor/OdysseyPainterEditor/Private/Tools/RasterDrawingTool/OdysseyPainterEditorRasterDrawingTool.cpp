@@ -364,15 +364,13 @@ UOdysseyPainterEditorRasterDrawingTool::Commit()
         source->RecordCurrentFrameUndo();
 }
 
-void
-UOdysseyPainterEditorRasterDrawingTool::BindShortcuts(FBaseToolkit* iToolkit)
+void UOdysseyPainterEditorRasterDrawingTool::BindShortcuts(TSharedPtr<FUICommandList> iCommandList)
 {
-    Super::BindShortcuts(iToolkit);
+    Super::BindShortcuts(iCommandList);
 
-    const TSharedRef<FUICommandList>& toolkitCommands = iToolkit->GetToolkitCommands();
     const FOdysseyPainterEditorCommands& painterEditorToolCommands = FOdysseyPainterEditorCommands::Get();
 
-    #define MAP_ACTION(action, ...) toolkitCommands->MapAction( action, FExecuteAction::CreateUObject( this, &UOdysseyPainterEditorRasterDrawingTool::__VA_ARGS__ ), FCanExecuteAction() );
+    #define MAP_ACTION(action, ...) iCommandList->MapAction( action, FExecuteAction::CreateUObject( this, &UOdysseyPainterEditorRasterDrawingTool::__VA_ARGS__ ), FCanExecuteAction() );
 
     MAP_ACTION(painterEditorToolCommands.RefreshBrush, RefreshBrushInstance)
     MAP_ACTION(painterEditorToolCommands.IncreaseBrushSize, AddSize, 1)

@@ -461,10 +461,10 @@ FOdysseyPainterEditor::BindShortcuts(FBaseToolkit* iToolkit)
 
     GetGUI()->BindShortcuts(iToolkit);
 
-    for (UOdysseyPainterEditorTool* tool : mTools)
+    /*for (UOdysseyPainterEditorTool* tool : mTools)
     {
         tool->BindShortcuts(iToolkit);
-    }
+    }*/
 
     //---
 

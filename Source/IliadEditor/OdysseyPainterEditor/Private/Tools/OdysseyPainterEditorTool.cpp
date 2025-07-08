@@ -74,6 +74,13 @@ UOdysseyPainterEditorTool::Activate()
 
     //mToolContext->OnChanged().AddUObject(this, &UOdysseyPainterEditorTool::OnToolContextChanged );
     mIsActivated = true;
+
+    mCommandList = MakeShared<FUICommandList>();
+    BindShortcuts(mCommandList);
+
+    const TSharedRef<FUICommandList> toolkitCommandList = GetEditor()->GetToolkit()->GetToolkitCommands();
+    toolkitCommandList->Append(mCommandList.ToSharedRef());
+
     Load();
 }
 
@@ -85,6 +92,9 @@ UOdysseyPainterEditorTool::Inactivate()
 
     //mToolContext->OnChanged().RemoveAll(this);
     Flush(); //Finish everything
+
+    mCommandList = nullptr;
+
     Unload();
     mIsActivated = false;
 }
@@ -183,8 +193,7 @@ UOdysseyPainterEditorTool::Commit()
 
 }
 
-void
-UOdysseyPainterEditorTool::BindShortcuts(FBaseToolkit* iToolkit)
+void UOdysseyPainterEditorTool::BindShortcuts(TSharedPtr<FUICommandList> iCommandList)
 {
 
 }

@@ -65,7 +65,7 @@ public:
     virtual void Flush() override;
     virtual void Commit() override;
 
-    virtual void BindShortcuts(class FBaseToolkit* iToolkit) override;
+    virtual void BindShortcuts(TSharedPtr<FUICommandList> iCommandList) override;
     virtual void ExtendMenu( TSharedRef<FExtender> iExtender) override;
     virtual void ExtendToolbar( FToolBarBuilder& iBuilder ) override;
 

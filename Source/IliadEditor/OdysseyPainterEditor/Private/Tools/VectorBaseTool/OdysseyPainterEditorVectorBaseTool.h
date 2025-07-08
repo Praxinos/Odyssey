@@ -91,7 +91,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
         virtual void ExtendMenu( TSharedRef<FExtender> iExtender ) override;
         virtual void ExtendContextMenu( FMenuBuilder& menu );
-        virtual void BindShortcuts( FBaseToolkit* iToolkit );
+        virtual void BindShortcuts( TSharedPtr<FUICommandList> iCommandList );
         virtual EMouseCursor::Type GetMouseCursor() const override;
         virtual void ExtendToolbar( FToolBarBuilder& iBuilder ) override;
 
