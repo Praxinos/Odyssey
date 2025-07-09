@@ -15,7 +15,14 @@ FOdysseyLayerCellSelection::~FOdysseyLayerCellSelection()
     if (mLayerStack)
     {
         UnbindCurrentLayerChanged();
-        UnbindOnCellsChanged();
+
+        //PATCH: do not call UnbindOnCellsChanged()
+        //Because it creates freezes when deleting animation we just created
+        //The reason is mLayer is an invalid pointer
+        //It's okay for now to not call UnbindOnCellsChanged() as FOdysseyLayerCellSelection only exist in a single layerstack
+        //which means, if we get here, mLayer is always already destroyed
+        //UnbindOnCellsChanged();
+
     }
 }
 
