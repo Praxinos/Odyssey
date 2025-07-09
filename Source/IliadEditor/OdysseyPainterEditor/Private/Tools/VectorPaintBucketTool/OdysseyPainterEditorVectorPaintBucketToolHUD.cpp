@@ -136,7 +136,7 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::PickBucketArea( FOdysseyVectorBuc
                 return PICK_RADIAL_HANDLE;
             }
 
-            if ( radialDif.Distance() < FOdysseyVectorHUD::RADIAL_AREA_RADIUS )
+            if ( radialDif.Distance() < mPaintBucketTool->PickingRadius )
             {
                 return PICK_RADIAL_AREA;
             }

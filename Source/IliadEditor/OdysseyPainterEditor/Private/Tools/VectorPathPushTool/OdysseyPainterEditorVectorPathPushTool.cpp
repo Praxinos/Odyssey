@@ -212,7 +212,10 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDownVector( FOdysseyVectorGroupP
         GEditor->BeginTransaction(LOCTEXT("vector-path-push-tool.transaction.push-path","Vector Path Push Tool"));
         if( GUndo )
         {
-            FOdysseyVectorUndo *undo = new FOdysseyVectorUndoSegmentReshape( iScene, vertexArray, notificationFlags );
+            FOdysseyVectorUndo *undo = new FOdysseyVectorUndoSegmentReshape( iScene
+                                                                           , vertexArray
+                                                                           , notificationFlags
+                                                                           | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 

@@ -750,7 +750,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawBucket( const FOdysseyHUD::FDrawHUDP
             FVector2D radialHUDCoords = iParams.mTextureToHUD.Execute( FVector2D( radialWorldCoords.x, radialWorldCoords.y ) );
             ::ULIS::FVec2D radialHandleWorldCoords = FOdysseyVectorHUD::GetBucketRadialHandlePosition( iBucket, true );
             FVector2D radialHandleHUDCoords = iParams.mTextureToHUD.Execute( FVector2D( radialHandleWorldCoords.x, radialHandleWorldCoords.y ) );
-            double radialRadius = ( radialHandleWorldCoords - radialWorldCoords ).Distance();
+            double radialRadius = ( radialHandleHUDCoords - radialHUDCoords ).Length();
 
             // Bucket-to-radial line
             DrawPrimitiveLineOutlined( iParams, bucketHUDCoords, radialHUDCoords, greyColor, 1.0f );

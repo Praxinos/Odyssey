@@ -59,7 +59,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
         static constexpr  double HANDLE_RADIUS      = 4;
         static constexpr  double HANDLE_DISTANCE    = 40;
         static constexpr  double PELLET_RADIUS      = 8;
-        static constexpr  double RADIAL_AREA_RADIUS = 40;
+        static constexpr  double RADIAL_AREA_RADIUS = 20;
 
         // HUD Drawing Flags
         static const uint64 HUD_MODE_OBJECT              = ( 1ULL <<  0 );

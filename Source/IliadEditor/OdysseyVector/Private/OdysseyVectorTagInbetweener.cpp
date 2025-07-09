@@ -1789,7 +1789,7 @@ FOdysseyVectorTagInbetweener::DrawPathAt( FOdysseyVectorGroupPaint* iDisplayedSc
                         // we draw lines between the polygons to correct the artefacts,
                         // otherwise there is a thin line between the polygons
                         // line stroking is done in world coordinates because we need a 1 pixel width
-                        iBLContext->setStrokeWidth( 1.2f * scaling );
+                        iBLContext->setStrokeWidth( 3.0f );
                         iBLContext->strokeLine( pt[0], pt[1] );
                         iBLContext->strokeLine( pt[5], pt[0] );
 
