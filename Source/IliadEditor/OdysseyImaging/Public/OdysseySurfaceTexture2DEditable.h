@@ -15,6 +15,7 @@ ODYSSEYIMAGING_API void CopyImageToBlock(const FImage& iImage, ::ULIS::FBlock* i
 ODYSSEYIMAGING_API void CopyUTextureSourceDataIntoBlock( ::ULIS::FBlock* iBlock,UTexture* iTexture );
 ODYSSEYIMAGING_API void CopyURenderTargetPixelDataIntoBlock( ::ULIS::FBlock* iBlock,UTextureRenderTarget2D* iRenderTarget );
 ODYSSEYIMAGING_API void CopyBlockDataIntoUTexture( const ::ULIS::FBlock* iBlock,UTexture2D* iTexture );
+ODYSSEYIMAGING_API void CopyBlockDataToTextureSource(const ::ULIS::FBlock* iBlock, UTexture2D* iTexture, const FIntRect& SrcRect, const FIntPoint& iDstPos);
 ODYSSEYIMAGING_API void InitTextureWithBlockData( const ::ULIS::FBlock* iBlock, UTexture2D* iTexture, ETextureSourceFormat iFormat );
 ODYSSEYIMAGING_API ::ULIS::FBlock* NewBlockFromUTextureData( UTexture2D* iTexture, ::ULIS::eFormat iFormat );
 ODYSSEYIMAGING_API void FillOdysseyBlockFromUTextureData( ::ULIS::FBlock* ioBlock, UTexture2D* iTexture, ::ULIS::eFormat iFormat );

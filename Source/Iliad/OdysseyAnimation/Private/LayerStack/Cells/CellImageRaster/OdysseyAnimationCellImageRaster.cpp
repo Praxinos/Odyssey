@@ -202,9 +202,16 @@ UOdysseyAnimationCellImageRaster::OnBlockChanged(const TArray<::ULIS::FRectI>& i
 void
 UOdysseyAnimationCellImageRaster::OnBlockCommited(const TArray<::ULIS::FRectI>& iRects)
 {
-    FOdysseySurfaceTexture2DEditable surface(GetRenderTexture(), GetRasterBlock()->GetBlock());
+    TSharedPtr<::ULIS::FBlock> block =  GetRasterBlock()->GetBlock();
+    FOdysseySurfaceTexture2DEditable surface(GetRenderTexture(), block);
     surface.Invalidate(iRects);
-    RenderingChanged(::ULISUtils::ToIntRects(iRects));
+
+    TArray<FIntRect> intRects = ::ULISUtils::ToIntRects(iRects);
+    for (const FIntRect& rect : intRects)
+    {
+        CopyBlockDataToTextureSource(block.Get(), GetRenderTexture(), rect, rect.Min);
+    }
+    RenderingChanged();
 }
 
 FOdysseyMediaProvider
@@ -267,6 +274,6 @@ UOdysseyAnimationCellImageRaster::PreSave(FObjectPreSaveContext SaveContext)
 {
     Super::PreSave(SaveContext);
 
-    InitTexture();
+    //InitTexture();
 }
 #endif
