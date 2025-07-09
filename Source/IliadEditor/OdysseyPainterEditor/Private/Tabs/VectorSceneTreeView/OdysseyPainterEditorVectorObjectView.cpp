@@ -229,4 +229,9 @@ UOdysseyPainterEditorVectorObjectView::PostEditChangeProperty( FPropertyChangedE
     }
 }
 
+FOdysseyPainterEditor* UOdysseyPainterEditorVectorObjectView::GetEditor()
+{
+    return mEditor;
+}
+
 #undef LOCTEXT_NAMESPACE

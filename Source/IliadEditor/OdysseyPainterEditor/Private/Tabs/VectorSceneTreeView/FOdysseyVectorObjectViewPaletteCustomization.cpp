@@ -3,6 +3,7 @@
 
 #include "FOdysseyVectorObjectViewPaletteCustomization.h"
 
+#include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorVectorObjectView.h"
 #include "DetailWidgetRow.h"
 #include "DetailLayoutBuilder.h"
@@ -78,6 +79,45 @@ void FOdysseyVectorObjectViewPaletteCustomization::CustomizeChildren(TSharedRef<
     mPaletteSetHandle = StructPropertyHandle->GetChildHandle( GET_MEMBER_NAME_CHECKED(FPaletteEntrySelection, OdysseyPaletteSet) );
     mPaletteEntryHandle = StructPropertyHandle->GetChildHandle( GET_MEMBER_NAME_CHECKED(FPaletteEntrySelection, OdysseyPaletteEntryColor) );
 
+    //Not the best, but we need to know which palettes are loaded by the editor to filter the assets in the SObjectPropertyEntryBox below
+    TArray<UObject*> OuterObjects;
+    UOdysseyPainterEditorVectorObjectView* view = nullptr;
+    FOdysseyPainterEditor* editor = nullptr;
+    FOnShouldFilterAsset filterPalette;
+
+    StructPropertyHandle->GetOuterObjects(OuterObjects);
+    if( OuterObjects.Num() > 0 && OuterObjects[0]->IsA(UOdysseyPainterEditorVectorObjectView::StaticClass()) )
+    {
+        view = Cast<UOdysseyPainterEditorVectorObjectView>(OuterObjects[0]);
+        editor = view->GetEditor();
+    }
+
+    if( editor )
+    {
+
+        TArray<UOdysseyPalette*> palettesAlreadyLoaded;
+        for (UOdysseyPaletteSet* set : editor->GetPaletteSets())
+        {
+            palettesAlreadyLoaded.Add(set->mPalette);
+        }
+
+        filterPalette = FOnShouldFilterAsset::CreateLambda(
+            [palettesAlreadyLoaded](const FAssetData& AssetData)
+            {
+                for (UObject* palette : palettesAlreadyLoaded)
+                {
+                    if (!palette)
+                        continue;
+
+                    if ( FAssetData(palette).GetSoftObjectPath() == AssetData.GetSoftObjectPath())
+                        return false;
+                }
+
+                return true;
+            });
+    }
+    // ---
+
     StructBuilder.AddProperty(mPaletteHandle->AsShared())
     .CustomWidget()
     .NameContent()
@@ -89,6 +129,7 @@ void FOdysseyVectorObjectViewPaletteCustomization::CustomizeChildren(TSharedRef<
         SNew(SObjectPropertyEntryBox)
             .PropertyHandle(mPaletteHandle)
             .AllowedClass(UOdysseyPalette::StaticClass())
+            .OnShouldFilterAsset(filterPalette)
             .OnObjectChanged(this, &FOdysseyVectorObjectViewPaletteCustomization::OnPaletteChanged)
     ];
 

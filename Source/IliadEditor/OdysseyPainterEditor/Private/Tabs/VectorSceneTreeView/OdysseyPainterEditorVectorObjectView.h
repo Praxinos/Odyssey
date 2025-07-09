@@ -44,6 +44,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectView : public UO
         void Update( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene, std::list<FOdysseyVectorObject*>& iFocusedObjectList );
         void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
 
+        FOdysseyPainterEditor* GetEditor();
+
     protected:
         virtual void ImportParam();
         virtual void PropertyChanged( const FName& iPropertyName
