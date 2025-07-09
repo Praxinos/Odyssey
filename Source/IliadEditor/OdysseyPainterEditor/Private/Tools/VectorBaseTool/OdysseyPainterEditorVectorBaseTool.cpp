@@ -1171,7 +1171,8 @@ UOdysseyPainterEditorVectorBaseTool::ExtendContextMenuObject( FOdysseyVectorGrou
           LOCTEXT("vector-tool.object-context-menu.clear-coloring.name", "Clear Coloring")
         , LOCTEXT("vector-tool.object-context-menu.clear-coloring.tooltip", "Clear Coloring")
         , FSlateIcon()
-        , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::ClearColoring, GetEditor(), iScene )));
+        , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::ClearColoring, GetEditor(), iScene )
+                  , FCanExecuteAction::CreateUObject( this, &UOdysseyPainterEditorVectorBaseTool::CanBePainted, iScene )));
     menu.AddMenuEntry(
           LOCTEXT("vector-tool.object-context-menu.apply-transformations.name", "Apply Transformations")
         , LOCTEXT("vector-tool.object-context-menu.apply-transformations.tooltip", "Apply Transformations")
@@ -1332,6 +1333,20 @@ UOdysseyPainterEditorVectorBaseTool::ExtendContextMenuInbetween( FOdysseyVectorG
 
 //    }
 //    menu.EndSection();
+}
+
+bool
+UOdysseyPainterEditorVectorBaseTool::CanBePainted( FOdysseyVectorGroupPaint* iScene )
+{
+    for( FOdysseyVectorObject* selectedObject : iScene->GetCell()->GetSelectedObjectList() )
+    {
+        if( selectedObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+        {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 bool

@@ -328,8 +328,10 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorBaseToolHUD : public F
         std::list<FOdysseyVectorTagInbetweener*> mSelectedInbetweenerTagList;
         FOdysseyVectorGroupPaint* mScene;
         TObjectPtr<UTexture> mVertexTexture;
+        TObjectPtr<UTexture> mVertexContourTexture;
         TObjectPtr<UTexture> mHandleTexture;
-        TObjectPtr<UTexture> mBucketTexture;
+        TObjectPtr<UTexture> mBucketInnerTexture;
+        TObjectPtr<UTexture> mBucketOuterTexture;
         TObjectPtr<UTexture> mBucketPropagateTexture;
         TObjectPtr<UTexture> mInfoBorderLeftTexture;
         TObjectPtr<UTexture> mInfoBorderTexture;

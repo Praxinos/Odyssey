@@ -319,8 +319,10 @@ FOdysseyPainterEditorVectorBaseToolHUD::~FOdysseyPainterEditorVectorBaseToolHUD(
 FOdysseyPainterEditorVectorBaseToolHUD::FOdysseyPainterEditorVectorBaseToolHUD( UOdysseyPainterEditorVectorBaseTool* iBaseTool )
     : mBaseTool ( iBaseTool )
     , mVertexTexture( LoadObject<UTexture>( nullptr, TEXT("/Odyssey/HUD/T_HUD_Vector_Vertex_Full") ) )
+    , mVertexContourTexture( LoadObject<UTexture>( nullptr, TEXT("/Odyssey/HUD/T_HUD_Vector_Vertex_Contour") ) )
     , mHandleTexture( LoadObject<UTexture>( nullptr, TEXT("/Odyssey/HUD/T_HUD_Vector_Handle_Full") ) )
-    , mBucketTexture( LoadObject<UTexture>( nullptr, TEXT("/Odyssey/HUD/T_HUD_Vector_Vertex_Full") ) )
+    , mBucketInnerTexture( LoadObject<UTexture>( nullptr, TEXT("/Odyssey/HUD/T_HUD_Vector_Bucket_Inner") ) )
+    , mBucketOuterTexture( LoadObject<UTexture>( nullptr, TEXT("/Odyssey/HUD/T_HUD_Vector_Bucket_Outer") ) )
     , mBucketPropagateTexture( LoadObject<UTexture>( nullptr, TEXT("/Odyssey/HUD/T_HUD_Vector_Bucket_Propagate") ) )
     , mInfoBorderLeftTexture( LoadObject<UTexture>( nullptr, TEXT("/Odyssey/HUD/T_HUD_Vector_Info_Border_Left") ) )
     , mInfoBorderTexture( LoadObject<UTexture>( nullptr, TEXT("/Odyssey/HUD/T_HUD_Vector_Info_Border") ) )
@@ -330,7 +332,8 @@ FOdysseyPainterEditorVectorBaseToolHUD::FOdysseyPainterEditorVectorBaseToolHUD( 
     , mY( 0.0f )
     , mPointQuadTree( nullptr )
 {
-    /*mFontInfo = FSlateFontInfo( LoadObject<UFont>( nullptr, TEXT("/Odyssey/Fonts/Lucida_Console_Font") ), 9 );*/
+//    mFontInfo = FSlateFontInfo( LoadObject<UFont>( nullptr, TEXT("/Odyssey/Fonts/Inconsolata-Regular_Font") ), 9 );
+
     if (GEngine)
         mFontInfo = FSlateFontInfo( GEngine->GetSmallFont(), 9 );
 }
@@ -780,8 +783,20 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawBucket( const FOdysseyHUD::FDrawHUDP
                              , 1.0f
                              , 1.0f
                              , fillColor
-                             , mBucketTexture->GetResource()
+                             , mBucketInnerTexture->GetResource()
                              , ESimpleElementBlendMode::SE_BLEND_Masked );
+
+    iParams.mCanvas->DrawTile( bucketHUDCoords.X - FOdysseyVectorHUD::PELLET_RADIUS
+                             , bucketHUDCoords.Y - FOdysseyVectorHUD::PELLET_RADIUS
+                             , FOdysseyVectorHUD::PELLET_RADIUS * 2.0f
+                             , FOdysseyVectorHUD::PELLET_RADIUS * 2.0f
+                             , 0.0f
+                             , 0.0f
+                             , 1.0f
+                             , 1.0f
+                             , ( fillColor.GetLuminance() > 0.5f ) ? blackColor : whiteColor
+                             , mBucketOuterTexture->GetResource()
+                             , ESimpleElementBlendMode::SE_BLEND_AlphaBlend );
 
     if( iBucket->IsPropagated() )
     {
