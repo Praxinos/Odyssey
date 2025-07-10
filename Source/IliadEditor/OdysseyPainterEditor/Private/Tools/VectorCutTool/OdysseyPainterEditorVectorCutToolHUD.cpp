@@ -72,6 +72,8 @@ FOdysseyPainterEditorVectorCutToolHUD::GetMask()
 void
 FOdysseyPainterEditorVectorCutToolHUD::DrawHUD( const FOdysseyHUD::FDrawHUDParams& iParams )
 {
+    mCurrentHUDParams = iParams;
+
     FLinearColor fgColor = FLinearColor( FOdysseyVectorHUD::GetForegroundColor() );
     FLinearColor bgColor = FLinearColor( FOdysseyVectorHUD::GetBackgroundColor() );
     FLinearColor hcColor = FLinearColor( FOdysseyVectorHUD::GetHighlightColor() );
@@ -169,10 +171,10 @@ FOdysseyPainterEditorVectorCutToolHUD::DrawPickingArea( const FOdysseyHUD::FDraw
                 double ymax = ::ULIS::FMath::Max( pointArray[0].y, pointArray[1].y );
                 //::ULIS::FRectD rect = ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax );
 
-                FVector2D p[4] = { iParams.mTextureToHUD.Execute( FVector2D( xmin, ymin ) )
-                                 , iParams.mTextureToHUD.Execute( FVector2D( xmax, ymin ) )
-                                 , iParams.mTextureToHUD.Execute( FVector2D( xmax, ymax ) )
-                                 , iParams.mTextureToHUD.Execute( FVector2D( xmin, ymax ) ) };
+                FVector2D p[4] = { TextureToHUD( FVector2D( xmin, ymin ) )
+                                 , TextureToHUD( FVector2D( xmax, ymin ) )
+                                 , TextureToHUD( FVector2D( xmax, ymax ) )
+                                 , TextureToHUD( FVector2D( xmin, ymax ) ) };
 
                 for( uint32 i = 0; i < 4; i++ )
                 {
@@ -198,8 +200,8 @@ FOdysseyPainterEditorVectorCutToolHUD::DrawPickingArea( const FOdysseyHUD::FDraw
                 for( uint32 i = 1; i < points.Size(); i++ )
                 {
                     uint32 n = ( i - 1 );
-                    FVector2D p0 = iParams.mTextureToHUD.Execute( FVector2D( points[n].x, points[n].y ) );
-                    FVector2D p1 = iParams.mTextureToHUD.Execute( FVector2D( points[i].x, points[i].y ) );
+                    FVector2D p0 = TextureToHUD( FVector2D( points[n].x, points[n].y ) );
+                    FVector2D p1 = TextureToHUD( FVector2D( points[i].x, points[i].y ) );
 
                     DrawPrimitiveLine( iParams, p0, p1, hcColor, 1.0f );
                 }
@@ -208,8 +210,8 @@ FOdysseyPainterEditorVectorCutToolHUD::DrawPickingArea( const FOdysseyHUD::FDraw
 
             case EOdysseyShapeType::kLine :
             {
-                FVector2D p0 = iParams.mTextureToHUD.Execute( FVector2D( pointArray[0].x, pointArray[0].y ) );
-                FVector2D p1 = iParams.mTextureToHUD.Execute( FVector2D( pointArray[1].x, pointArray[1].y ) );
+                FVector2D p0 = TextureToHUD( FVector2D( pointArray[0].x, pointArray[0].y ) );
+                FVector2D p1 = TextureToHUD( FVector2D( pointArray[1].x, pointArray[1].y ) );
 
                 DrawPrimitiveLine( iParams, p0, p1, hcColor, 1.0f );
             }
@@ -219,8 +221,8 @@ FOdysseyPainterEditorVectorCutToolHUD::DrawPickingArea( const FOdysseyHUD::FDraw
                 for( int i = 0; i < pointArray.size(); i++ )
                 {
                     int n = ( i + 1 ) % pointArray.size();
-                    FVector2D p0 = iParams.mTextureToHUD.Execute( FVector2D( pointArray[n].x, pointArray[n].y ) );
-                    FVector2D p1 = iParams.mTextureToHUD.Execute( FVector2D( pointArray[i].x, pointArray[i].y ) );
+                    FVector2D p0 = TextureToHUD( FVector2D( pointArray[n].x, pointArray[n].y ) );
+                    FVector2D p1 = TextureToHUD( FVector2D( pointArray[i].x, pointArray[i].y ) );
 
                     DrawPrimitiveLine( iParams, p0, p1, hcColor, 1.0f );
                 }

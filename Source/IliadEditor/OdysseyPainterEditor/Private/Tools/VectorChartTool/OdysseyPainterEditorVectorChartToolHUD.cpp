@@ -143,9 +143,9 @@ FOdysseyPainterEditorVectorChartToolHUD::DrawBreakdownChart( const FOdysseyHUD::
     ::ULIS::FVec2D texCoords[3] = { iHUDBezier->GetPoints()[0].GetPosition()
                                   , iHUDBezier->GetPoints()[1].GetPosition()
                                   , iHUDBezier->GetPoints()[2].GetPosition() };
-    FVector2D hudCoords[3] = { iParams.mTextureToHUD.Execute( FVector2D( texCoords[0].x, texCoords[0].y ) )
-                             , iParams.mTextureToHUD.Execute( FVector2D( texCoords[1].x, texCoords[1].y ) )
-                             , iParams.mTextureToHUD.Execute( FVector2D( texCoords[2].x, texCoords[2].y ) ) };
+    FVector2D hudCoords[3] = { TextureToHUD( FVector2D( texCoords[0].x, texCoords[0].y ) )
+                             , TextureToHUD( FVector2D( texCoords[1].x, texCoords[1].y ) )
+                             , TextureToHUD( FVector2D( texCoords[2].x, texCoords[2].y ) ) };
     const UFont* font = Cast<UFont>(mChartFontInfo.FontObject);
 
     // force inbetween opacity
@@ -183,8 +183,8 @@ FOdysseyPainterEditorVectorChartToolHUD::DrawBreakdownChart( const FOdysseyHUD::
             ::ULIS::FVec2D texIndicatorPerpendicular = ::ULIS::FVec2D( -texIndicatorTangent.y, texIndicatorTangent.x );
 
             float lengthFactor = ( ( inbetween->GetSpacing() == 0.0f ) || ( inbetween->GetSpacing() == 1.0f ) ) ? 1.0f : 0.6f;
-            ::ULIS::FVec2D hudIndicatorPosition = WorldPointToHUD( iParams, texIndicatorPosition );
-            ::ULIS::FVec2D hudIndicatorTangent = WorldVectorToHUD( iParams, texIndicatorPosition, texIndicatorTangent );
+            ::ULIS::FVec2D hudIndicatorPosition = WorldPointToHUD( texIndicatorPosition );
+            ::ULIS::FVec2D hudIndicatorTangent = WorldVectorToHUD( texIndicatorPosition, texIndicatorTangent );
             ::ULIS::FVec2D hudIndicatorPerpendicular = ::ULIS::FVec2D( -hudIndicatorTangent.y, hudIndicatorTangent.x );
             bool hovered = ( inbetween == mChartTool->GetHoveredInbetween() );
             bool current = ( inbetween->GetCellIndex() == iRenderedCellIndex );
@@ -296,6 +296,8 @@ FOdysseyPainterEditorVectorChartToolHUD::DrawBreakdownChart( const FOdysseyHUD::
 void
 FOdysseyPainterEditorVectorChartToolHUD::DrawHUD( const FOdysseyHUD::FDrawHUDParams& iParams )
 {
+    mCurrentHUDParams = iParams;
+
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
     FColor& hc = FOdysseyVectorHUD::GetHighlightColor();

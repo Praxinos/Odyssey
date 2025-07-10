@@ -94,6 +94,8 @@ FOdysseyPainterEditorVectorPathStitchToolHUD::SetCursorPosition( double iWorldX
 void
 FOdysseyPainterEditorVectorPathStitchToolHUD::DrawHUD( const FOdysseyHUD::FDrawHUDParams& iParams )
 {
+    mCurrentHUDParams = iParams;
+
     FLinearColor fgColor = FLinearColor( FOdysseyVectorHUD::GetForegroundColor() );
     FLinearColor bgColor = FLinearColor( FOdysseyVectorHUD::GetBackgroundColor() );
     FLinearColor hcColor = FLinearColor( FOdysseyVectorHUD::GetHighlightColor() );
@@ -130,8 +132,7 @@ FOdysseyPainterEditorVectorPathStitchToolHUD::DrawHUD( const FOdysseyHUD::FDrawH
     // cursor
     DrawPrimitiveCircle( iParams
                        , hudCursor
-                       , WorldVectorToHUD( iParams
-                                         , ::ULIS::FVec2D( mX, mY )
+                       , WorldVectorToHUD( ::ULIS::FVec2D( mX, mY )
                                          , ::ULIS::FVec2D( mPathStitchTool->PickingRadius, 0 ) ).Distance()
                        , hcColor
                        , 1.0f );

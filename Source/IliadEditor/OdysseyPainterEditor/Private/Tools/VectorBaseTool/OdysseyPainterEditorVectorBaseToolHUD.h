@@ -308,18 +308,14 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorBaseToolHUD : public F
                                , const FText* iShiftText
                                , const FText* iAltText );
         void DrawModifierInfo( const FOdysseyHUD::FDrawHUDParams& iParams );
-        FVector2D WorldPointToHUD( const FOdysseyHUD::FDrawHUDParams& iParams
-                                 , const FVector2D& iWorldCoords );
-        FVector2D WorldVectorToHUD( const FOdysseyHUD::FDrawHUDParams& iParams
-                                  , const FVector2D& iWorldOriginCoords
+        FVector2D WorldPointToHUD( const FVector2D& iWorldCoords );
+        FVector2D WorldVectorToHUD( const FVector2D& iWorldOriginCoords
                                   , const FVector2D& iWorldVectorCoords );
-        ::ULIS::FVec2D WorldPointToHUD( const FOdysseyHUD::FDrawHUDParams& iParams
-                                      , const ::ULIS::FVec2D& iWorldCoords );
-        ::ULIS::FVec2D WorldVectorToHUD( const FOdysseyHUD::FDrawHUDParams& iParams
-                                       , const ::ULIS::FVec2D& iWorldOriginCoords
+        ::ULIS::FVec2D WorldPointToHUD( const ::ULIS::FVec2D& iWorldCoords );
+        ::ULIS::FVec2D WorldVectorToHUD( const ::ULIS::FVec2D& iWorldOriginCoords
                                        , const ::ULIS::FVec2D& iWorldVectorCoords );
-        ::ULIS::FRectD WorldRectToHUD( const FOdysseyHUD::FDrawHUDParams& iParams
-                                     , const ::ULIS::FRectD& iWorldRect );
+        ::ULIS::FRectD WorldRectToHUD( const ::ULIS::FRectD& iWorldRect );
+        FVector2D TextureToHUD( const FVector2D& iPosition );
 
     protected:
         UOdysseyPainterEditorVectorBaseTool* mBaseTool;
@@ -339,6 +335,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorBaseToolHUD : public F
         TObjectPtr<UTexture> mLineOutlinedTexture;
         double mX;
         double mY;
+        FOdysseyHUD::FDrawHUDParams mCurrentHUDParams;
 
     protected:
         FPointQuadTree* mPointQuadTree;

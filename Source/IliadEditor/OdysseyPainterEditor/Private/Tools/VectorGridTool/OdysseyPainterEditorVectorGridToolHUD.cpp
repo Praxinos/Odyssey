@@ -247,6 +247,8 @@ FOdysseyPainterEditorVectorGridToolHUD::Draw( BLContext* iBLContext )
 void
 FOdysseyPainterEditorVectorGridToolHUD::DrawHUD( const FOdysseyHUD::FDrawHUDParams& iParams )
 {
+    mCurrentHUDParams = iParams;
+
     FLinearColor fgColor = FLinearColor( FOdysseyVectorHUD::GetForegroundColor() );
     FLinearColor bgColor = FLinearColor( FOdysseyVectorHUD::GetBackgroundColor() );
     FLinearColor hcColor = FLinearColor( FOdysseyVectorHUD::GetHighlightColor() );

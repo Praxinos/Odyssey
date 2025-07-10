@@ -10,6 +10,8 @@
 #include "OdysseyVectorLayer.h"
 #include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyVectorCell.h"
+#include "SOdysseyViewport.h"
+#include "FOdysseySceneViewport.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -75,15 +77,17 @@ GetWorldGizmo( FSelectionBox& iSelectionBox
     if( XAxis.DistanceSquared() )
     {
         XAxis.Normalize();
-        oWorldXAxisStart  = ::ULIS::FVec2D( worldGizmo.x, worldGizmo.y ) + ( XAxis * FOdysseyPainterEditorVectorTransformToolHUD::GIZMO_RADIUS );
-        oWorldXAxisLength = XAxis * FOdysseyPainterEditorVectorTransformToolHUD::AXIS_LENGTH;
+        oWorldXAxisStart  = ::ULIS::FVec2D( worldGizmo.x, worldGizmo.y )/* + ( XAxis * FOdysseyPainterEditorVectorTransformToolHUD::GIZMO_RADIUS )*/;
+        //oWorldXAxisLength = XAxis * FOdysseyPainterEditorVectorTransformToolHUD::AXIS_LENGTH;
+        oWorldXAxisLength = XAxis;
     }
 
     if( YAxis.DistanceSquared() )
     {
         YAxis.Normalize();
-        oWorldYAxisStart  = ::ULIS::FVec2D( worldGizmo.x, worldGizmo.y ) + ( YAxis * FOdysseyPainterEditorVectorTransformToolHUD::GIZMO_RADIUS );
-        oWorldYAxisLength = YAxis * FOdysseyPainterEditorVectorTransformToolHUD::AXIS_LENGTH;
+        oWorldYAxisStart  = ::ULIS::FVec2D( worldGizmo.x, worldGizmo.y )/* + ( YAxis * FOdysseyPainterEditorVectorTransformToolHUD::GIZMO_RADIUS )*/;
+        //oWorldYAxisLength = YAxis * FOdysseyPainterEditorVectorTransformToolHUD::AXIS_LENGTH;
+        oWorldYAxisLength = YAxis;
     }
 }
 
@@ -159,16 +163,22 @@ FOdysseyPainterEditorVectorTransformToolHUD::DrawGizmo( const FOdysseyHUD::FDraw
                  , worldXAxisVector
                  , worldYAxisVector );
 
-    hudXAxisStart = WorldPointToHUD( iParams, FVector2D( worldXAxisStart.x, worldXAxisStart.y ) );
-    hudYAxisStart = WorldPointToHUD( iParams, FVector2D( worldYAxisStart.x, worldYAxisStart.y ) );
-    hudXAxisVector = WorldVectorToHUD( iParams
-                                     , hudXAxisStart
+    hudXAxisStart = WorldPointToHUD( FVector2D( worldXAxisStart.x, worldXAxisStart.y ) );
+    hudYAxisStart = WorldPointToHUD( FVector2D( worldYAxisStart.x, worldYAxisStart.y ) );
+    hudXAxisVector = WorldVectorToHUD( hudXAxisStart
                                      , FVector2D( worldXAxisVector.x
                                                 , worldXAxisVector.y ) );
-    hudYAxisVector = WorldVectorToHUD( iParams
-                                     , hudYAxisStart
+    hudYAxisVector = WorldVectorToHUD( hudYAxisStart
                                      , FVector2D( worldYAxisVector.x
                                                 , worldYAxisVector.y ) );
+
+    hudXAxisVector.Normalize();
+    hudXAxisStart  += ( hudXAxisVector *FOdysseyPainterEditorVectorTransformToolHUD::GIZMO_RADIUS );
+    hudXAxisVector *= FOdysseyPainterEditorVectorTransformToolHUD::AXIS_LENGTH;
+
+    hudYAxisVector.Normalize();
+    hudYAxisStart  += ( hudYAxisVector *FOdysseyPainterEditorVectorTransformToolHUD::GIZMO_RADIUS );
+    hudYAxisVector *= FOdysseyPainterEditorVectorTransformToolHUD::AXIS_LENGTH;
 
     // Central circle
 /*
@@ -262,22 +272,48 @@ FOdysseyPainterEditorVectorTransformToolHUD::PickGizmo( double iWorldX, double i
     ::ULIS::FVec2D worldGizmo;
     ::ULIS::FVec2D worldXAxisStart;
     ::ULIS::FVec2D worldYAxisStart;
-    ::ULIS::FVec2D worldXAxisLength;
-    ::ULIS::FVec2D worldYAxisLength;
+    ::ULIS::FVec2D worldXAxisVector;
+    ::ULIS::FVec2D worldYAxisVector;
     double distToXAxis = DBL_MAX;
     double distToYAxis = DBL_MAX;
     ::ULIS::FVec2D toPivot;
     uint32 newFlags = 0;
+    FVector2D hudMouse;
+    FVector2D hudGizmo;
+    FVector2D hudXAxisStart;
+    FVector2D hudYAxisStart;
+    FVector2D hudXAxisVector;
+    FVector2D hudYAxisVector;
 
     GetWorldGizmo( mSelectionBox
                  , mGizmo
                  , worldGizmo
                  , worldXAxisStart
                  , worldYAxisStart
-                 , worldXAxisLength
-                 , worldYAxisLength );
+                 , worldXAxisVector
+                 , worldYAxisVector );
 
-    toPivot = ::ULIS::FVec2D( worldGizmo.x - iWorldX, worldGizmo.y - iWorldY );
+    hudMouse = WorldPointToHUD( FVector2D( iWorldX, iWorldY ) );
+    hudGizmo = WorldPointToHUD( FVector2D( worldGizmo.x, worldGizmo.y ) );
+    hudXAxisStart = WorldPointToHUD( FVector2D( worldXAxisStart.x, worldXAxisStart.y ) );
+    hudYAxisStart = WorldPointToHUD( FVector2D( worldYAxisStart.x, worldYAxisStart.y ) );
+    hudXAxisVector = WorldVectorToHUD( hudXAxisStart
+                                     , FVector2D( worldXAxisVector.x
+                                                , worldXAxisVector.y ) );
+    hudYAxisVector = WorldVectorToHUD( hudYAxisStart
+                                     , FVector2D( worldYAxisVector.x
+                                                , worldYAxisVector.y ) );
+
+    hudXAxisVector.Normalize();
+    hudXAxisStart  += ( hudXAxisVector *FOdysseyPainterEditorVectorTransformToolHUD::GIZMO_RADIUS );
+    hudXAxisVector *= FOdysseyPainterEditorVectorTransformToolHUD::AXIS_LENGTH;
+
+    hudYAxisVector.Normalize();
+    hudYAxisStart  += ( hudYAxisVector *FOdysseyPainterEditorVectorTransformToolHUD::GIZMO_RADIUS );
+    hudYAxisVector *= FOdysseyPainterEditorVectorTransformToolHUD::AXIS_LENGTH;
+
+
+    toPivot = ::ULIS::FVec2D( hudGizmo.X - hudMouse.X, hudGizmo.Y - hudMouse.Y );
 
     if( toPivot.Distance() < mTransformTool->PickingRadius )
     {
@@ -285,11 +321,11 @@ FOdysseyPainterEditorVectorTransformToolHUD::PickGizmo( double iWorldX, double i
     }
     else
     {
-        FOdysseyVector::DistanceToSegment( ::ULIS::FVec2D( iWorldX, iWorldY )
-                                         , ::ULIS::FVec2D( worldXAxisStart.x
-                                                         , worldXAxisStart.y )
-                                         , ::ULIS::FVec2D( worldXAxisStart.x + worldXAxisLength.x
-                                                         , worldXAxisStart.y + worldXAxisLength.y )
+        FOdysseyVector::DistanceToSegment( ::ULIS::FVec2D( hudMouse.X, hudMouse.Y )
+                                         , ::ULIS::FVec2D( hudXAxisStart.X
+                                                         , hudXAxisStart.Y )
+                                         , ::ULIS::FVec2D( hudXAxisStart.X + hudXAxisVector.X
+                                                         , hudXAxisStart.Y + hudXAxisVector.Y )
                                          , distToXAxis );
 
         if( distToXAxis < mTransformTool->PickingRadius )
@@ -297,11 +333,11 @@ FOdysseyPainterEditorVectorTransformToolHUD::PickGizmo( double iWorldX, double i
             newFlags = PICK_XAXIS;
         }
 
-        FOdysseyVector::DistanceToSegment( ::ULIS::FVec2D( iWorldX, iWorldY )
-                                         , ::ULIS::FVec2D( worldYAxisStart.x
-                                                         , worldYAxisStart.y )
-                                         , ::ULIS::FVec2D( worldYAxisStart.x + worldYAxisLength.x
-                                                         , worldYAxisStart.y + worldYAxisLength.y )
+        FOdysseyVector::DistanceToSegment( ::ULIS::FVec2D( hudMouse.X, hudMouse.Y )
+                                         , ::ULIS::FVec2D( hudYAxisStart.X
+                                                         , hudYAxisStart.Y )
+                                         , ::ULIS::FVec2D( hudYAxisStart.X + hudYAxisVector.X
+                                                         , hudYAxisStart.Y + hudYAxisVector.Y )
                                          , distToYAxis );
 
         if( distToYAxis < mTransformTool->PickingRadius )
@@ -354,6 +390,8 @@ FOdysseyPainterEditorVectorTransformToolHUD::Reset( )
 void
 FOdysseyPainterEditorVectorTransformToolHUD::DrawHUD( const FOdysseyHUD::FDrawHUDParams& iParams )
 {
+    mCurrentHUDParams = iParams;
+
     FLinearColor fgColor = FLinearColor( FOdysseyVectorHUD::GetForegroundColor() );
     FLinearColor bgColor = FLinearColor( FOdysseyVectorHUD::GetBackgroundColor() );
     FLinearColor hcColor = FLinearColor( FOdysseyVectorHUD::GetHighlightColor() );

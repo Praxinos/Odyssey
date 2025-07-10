@@ -47,6 +47,8 @@ FOdysseyPainterEditorVectorPathSmoothToolHUD::Unload()
 void
 FOdysseyPainterEditorVectorPathSmoothToolHUD::DrawHUD( const FOdysseyHUD::FDrawHUDParams& iParams )
 {
+    mCurrentHUDParams = iParams;
+
     FLinearColor fgColor = FLinearColor( FOdysseyVectorHUD::GetForegroundColor() );
     FLinearColor bgColor = FLinearColor( FOdysseyVectorHUD::GetBackgroundColor() );
     FLinearColor hcColor = FLinearColor( FOdysseyVectorHUD::GetHighlightColor() );
@@ -61,8 +63,7 @@ FOdysseyPainterEditorVectorPathSmoothToolHUD::DrawHUD( const FOdysseyHUD::FDrawH
 
     DrawPrimitiveCircle( iParams
                        , hudCursor
-                       , WorldVectorToHUD( iParams
-                                         , ::ULIS::FVec2D( mX, mY )
+                       , WorldVectorToHUD( ::ULIS::FVec2D( mX, mY )
                                          , ::ULIS::FVec2D( mPathSmoothTool->PickingRadius, 0 ) ).Distance()
                        , hcColor
                        , 1.0f );

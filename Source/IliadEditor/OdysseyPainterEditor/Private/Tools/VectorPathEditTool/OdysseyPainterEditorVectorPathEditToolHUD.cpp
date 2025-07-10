@@ -101,6 +101,8 @@ FOdysseyPainterEditorVectorPathEditToolHUD::GenerateMask( double iX
 void
 FOdysseyPainterEditorVectorPathEditToolHUD::DrawHUD( const FOdysseyHUD::FDrawHUDParams& iParams )
 {
+    mCurrentHUDParams = iParams;
+
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
     FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
@@ -173,8 +175,7 @@ FOdysseyPainterEditorVectorPathEditToolHUD::DrawHUD( const FOdysseyHUD::FDrawHUD
         // cursor
         DrawPrimitiveCircle( iParams
                            , hudCursor
-                           , WorldVectorToHUD( iParams
-                                             , ::ULIS::FVec2D( mX, mY )
+                           , WorldVectorToHUD( ::ULIS::FVec2D( mX, mY )
                                              , ::ULIS::FVec2D( mPathEditTool->PickingRadius, 0 ) ).Distance()
                            , hcColor
                            , 1.0f );

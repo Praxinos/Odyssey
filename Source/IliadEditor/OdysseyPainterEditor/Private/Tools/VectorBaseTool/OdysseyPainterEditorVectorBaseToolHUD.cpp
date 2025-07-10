@@ -656,10 +656,10 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawSelectionBox( const FOdysseyHUD::FDr
                         , worldMatrix.mapPoint( mSelectionBox.rect.x                       , mSelectionBox.rect.y + mSelectionBox.rect.h ) };
         BLPath path;
         // HUD space
-        FVector2D scr[4] = { iParams.mTextureToHUD.Execute( FVector2D( pt[0].x, pt[0].y ) )
-                           , iParams.mTextureToHUD.Execute( FVector2D( pt[1].x, pt[1].y ) )
-                           , iParams.mTextureToHUD.Execute( FVector2D( pt[2].x, pt[2].y ) )
-                           , iParams.mTextureToHUD.Execute( FVector2D( pt[3].x, pt[3].y ) ) };
+        FVector2D scr[4] = { TextureToHUD( FVector2D( pt[0].x, pt[0].y ) )
+                           , TextureToHUD( FVector2D( pt[1].x, pt[1].y ) )
+                           , TextureToHUD( FVector2D( pt[2].x, pt[2].y ) )
+                           , TextureToHUD( FVector2D( pt[3].x, pt[3].y ) ) };
 
         FCanvasLineItem line[4] = { FCanvasLineItem ( FVector2D( scr[0].X, scr[0].Y ), FVector2D( scr[1].X, scr[1].Y ) )
                                   , FCanvasLineItem ( FVector2D( scr[1].X, scr[1].Y ), FVector2D( scr[2].X, scr[2].Y ) )
@@ -698,7 +698,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawBucket( const FOdysseyHUD::FDrawHUDP
                                                   , uint64 iHUDFlags )
 {
     ::ULIS::FVec2D bucketWorldCoords = FOdysseyVectorHUD::GetBucketPosition( iBucket, true );
-    FVector2D bucketHUDCoords = iParams.mTextureToHUD.Execute( FVector2D( bucketWorldCoords.x, bucketWorldCoords.y ) );
+    FVector2D bucketHUDCoords = TextureToHUD( FVector2D( bucketWorldCoords.x, bucketWorldCoords.y ) );
     FColor bucketColor = iBucket->GetColor();
     FLinearColor fillColor = FLinearColor( bucketColor );
     FLinearColor propColor = iBucket->IsPropagated() ? FLinearColor( 0.0f, 1.0f, 0.0f, 1.0f ) : fgColor;
@@ -717,8 +717,8 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawBucket( const FOdysseyHUD::FDrawHUDP
             ::ULIS::FVec2D localP1 = iBucket->GetLinearP1();
             ::ULIS::FVec2D worldHandle[2] = { FOdysseyVector::MapPoint( worldMatrix, localP0 )
                                             , FOdysseyVector::MapPoint( worldMatrix, localP1 ) };
-            FVector2D hudHandle[2] = { WorldPointToHUD ( iParams, FVector2D( worldHandle[0].x,  worldHandle[0].y ) )
-                                     , WorldPointToHUD ( iParams, FVector2D( worldHandle[1].x,  worldHandle[1].y ) ) };
+            FVector2D hudHandle[2] = { WorldPointToHUD ( FVector2D( worldHandle[0].x,  worldHandle[0].y ) )
+                                     , WorldPointToHUD ( FVector2D( worldHandle[1].x,  worldHandle[1].y ) ) };
             FLinearColor linearColor0 = FLinearColor( iBucket->GetGradientColor0() );
             FLinearColor linearColor1 = FLinearColor( iBucket->GetGradientColor1() );
 
@@ -750,9 +750,9 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawBucket( const FOdysseyHUD::FDrawHUDP
         if( iBucket->GetColorMode() == eBucketColorMode::RadialGradient )
         {
             ::ULIS::FVec2D radialWorldCoords = FOdysseyVectorHUD::GetBucketRadialPosition( iBucket, true );
-            FVector2D radialHUDCoords = iParams.mTextureToHUD.Execute( FVector2D( radialWorldCoords.x, radialWorldCoords.y ) );
+            FVector2D radialHUDCoords = TextureToHUD( FVector2D( radialWorldCoords.x, radialWorldCoords.y ) );
             ::ULIS::FVec2D radialHandleWorldCoords = FOdysseyVectorHUD::GetBucketRadialHandlePosition( iBucket, true );
-            FVector2D radialHandleHUDCoords = iParams.mTextureToHUD.Execute( FVector2D( radialHandleWorldCoords.x, radialHandleWorldCoords.y ) );
+            FVector2D radialHandleHUDCoords = TextureToHUD( FVector2D( radialHandleWorldCoords.x, radialHandleWorldCoords.y ) );
             double radialRadius = ( radialHandleHUDCoords - radialHUDCoords ).Length();
 
             // Bucket-to-radial line
@@ -963,7 +963,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawVertex( const FOdysseyHUD::FDrawHUDP
     BLMatrix2D& worldMatrix = path->GetWorldMatrix();
     // TODO: compute that once and pass it as parameter for all vertices
     BLPoint worldPoint = worldMatrix.mapPoint( iVertex->GetX(), iVertex->GetY() );
-    FVector2D hudPoint = iParams.mTextureToHUD.Execute( FVector2D( worldPoint.x, worldPoint.y ) );
+    FVector2D hudPoint = TextureToHUD( FVector2D( worldPoint.x, worldPoint.y ) );
     static FLinearColor greenColor  = FLinearColor(  0.0f,  1.0f,  0.0f, 1.0f );
     static FLinearColor ltgrayColor = FLinearColor(  0.5f,  0.5f,  0.5f, 1.0f );
     static FLinearColor dkgrayColor = FLinearColor( 0.25f, 0.25f, 0.25f, 1.0f );
@@ -989,8 +989,8 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawVertex( const FOdysseyHUD::FDrawHUDP
         texHandleCoords[0] = worldMatrix.mapPoint( localHandleCoords[0].x, localHandleCoords[0].y );
         texHandleCoords[1] = worldMatrix.mapPoint( localHandleCoords[1].x, localHandleCoords[1].y );
 
-        hudHandleCoords[0] = iParams.mTextureToHUD.Execute( FVector2D( texHandleCoords[0].x, texHandleCoords[0].y ) );
-        hudHandleCoords[1] = iParams.mTextureToHUD.Execute( FVector2D( texHandleCoords[1].x, texHandleCoords[1].y ) );
+        hudHandleCoords[0] = TextureToHUD( FVector2D( texHandleCoords[0].x, texHandleCoords[0].y ) );
+        hudHandleCoords[1] = TextureToHUD( FVector2D( texHandleCoords[1].x, texHandleCoords[1].y ) );
 
         hudHandleLine[0] = FCanvasLineItem( hudPoint, hudHandleCoords[0] );
         hudHandleLine[1] = FCanvasLineItem( hudPoint, hudHandleCoords[1] );
@@ -1098,6 +1098,19 @@ FOdysseyPainterEditorVectorBaseToolHUD::FormatModifierInfo( const FText* iCtrlTe
     mModifierInfoText = FText::FromString( modifierInfoString );
 }
 
+FVector2D
+FOdysseyPainterEditorVectorBaseToolHUD::TextureToHUD( const FVector2D& iPosition )
+{
+/*
+    uint32 textureWidth = mBaseTool->GetWorkingCell()->GetLayer()->GetWidth();
+    uint32 textureHeight = mBaseTool->GetWorkingCell()->GetLayer()->GetHeight();
+
+    return mBaseTool->GetViewport()->ToWorld( iPosition - FVector2D( textureWidth  * 0.5f
+                                                                   , textureHeight * 0.5f ) );
+*/
+    return mCurrentHUDParams.mTextureToHUD.Execute( iPosition );
+}
+
 void
 FOdysseyPainterEditorVectorBaseToolHUD::DrawModifierInfo( const FOdysseyHUD::FDrawHUDParams& iParams )
 {
@@ -1105,32 +1118,29 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawModifierInfo( const FOdysseyHUD::FDr
 }
 
 FVector2D
-FOdysseyPainterEditorVectorBaseToolHUD::WorldPointToHUD( const FOdysseyHUD::FDrawHUDParams& iParams
-                                                       , const FVector2D& iWorldCoords )
+FOdysseyPainterEditorVectorBaseToolHUD::WorldPointToHUD( const FVector2D& iWorldCoords )
 {
-    FVector2D point = iParams.mTextureToHUD.Execute( iWorldCoords );
+    FVector2D point = TextureToHUD( iWorldCoords );
 
     return point;
 }
 
 FVector2D
-FOdysseyPainterEditorVectorBaseToolHUD::WorldVectorToHUD( const FOdysseyHUD::FDrawHUDParams& iParams
-                                                        , const FVector2D& iWorldOriginCoords
+FOdysseyPainterEditorVectorBaseToolHUD::WorldVectorToHUD( const FVector2D& iWorldOriginCoords
                                                         , const FVector2D& iWorldVectorCoords )
 {
-    FVector2D origin = iParams.mTextureToHUD.Execute( iWorldOriginCoords );
-    FVector2D point = iParams.mTextureToHUD.Execute( iWorldOriginCoords + iWorldVectorCoords );
+    FVector2D origin = TextureToHUD( iWorldOriginCoords );
+    FVector2D point = TextureToHUD( iWorldOriginCoords + iWorldVectorCoords );
 
     return FVector2D ( point.X - origin.X, point.Y - origin.Y );
 }
 
 ::ULIS::FRectD
-FOdysseyPainterEditorVectorBaseToolHUD::WorldRectToHUD( const FOdysseyHUD::FDrawHUDParams& iParams
-                                                      , const ::ULIS::FRectD& iWorldRect )
+FOdysseyPainterEditorVectorBaseToolHUD::WorldRectToHUD( const ::ULIS::FRectD& iWorldRect )
 {
-    FVector2D p0 = iParams.mTextureToHUD.Execute( FVector2D( iWorldRect.x, iWorldRect.y ) );
-    FVector2D p1 = iParams.mTextureToHUD.Execute( FVector2D( iWorldRect.x + iWorldRect.w
-                                                           , iWorldRect.y + iWorldRect.h ) );
+    FVector2D p0 = TextureToHUD( FVector2D( iWorldRect.x, iWorldRect.y ) );
+    FVector2D p1 = TextureToHUD( FVector2D( iWorldRect.x + iWorldRect.w
+                                          , iWorldRect.y + iWorldRect.h ) );
 
     return ::ULIS::FRectD::FromMinMax( ::ULIS::FMath::Min( p0.X, p1.X )
                                      , ::ULIS::FMath::Min( p0.Y, p1.Y )
@@ -1139,21 +1149,18 @@ FOdysseyPainterEditorVectorBaseToolHUD::WorldRectToHUD( const FOdysseyHUD::FDraw
 }
 
 ::ULIS::FVec2D
-FOdysseyPainterEditorVectorBaseToolHUD::WorldPointToHUD( const FOdysseyHUD::FDrawHUDParams& iParams
-                                                       , const ::ULIS::FVec2D& iWorldCoords )
+FOdysseyPainterEditorVectorBaseToolHUD::WorldPointToHUD( const ::ULIS::FVec2D& iWorldCoords )
 {
-    FVector2D point = WorldPointToHUD( iParams, FVector2D( iWorldCoords.x, iWorldCoords.y ) );
+    FVector2D point = WorldPointToHUD( FVector2D( iWorldCoords.x, iWorldCoords.y ) );
 
     return ::ULIS::FVec2D( point.X, point.Y );
 }
 
 ::ULIS::FVec2D
-FOdysseyPainterEditorVectorBaseToolHUD::WorldVectorToHUD( const FOdysseyHUD::FDrawHUDParams& iParams
-                                                        , const ::ULIS::FVec2D& iWorldOriginCoords
+FOdysseyPainterEditorVectorBaseToolHUD::WorldVectorToHUD( const ::ULIS::FVec2D& iWorldOriginCoords
                                                         , const ::ULIS::FVec2D& iWorldVectorCoords )
 {
-    FVector2D vector = WorldVectorToHUD( iParams
-                                       , FVector2D( iWorldOriginCoords.x, iWorldOriginCoords.y )
+    FVector2D vector = WorldVectorToHUD( FVector2D( iWorldOriginCoords.x, iWorldOriginCoords.y )
                                        , FVector2D( iWorldVectorCoords.x, iWorldVectorCoords.y ) );
 
     return ::ULIS::FVec2D ( vector.X, vector.Y );
@@ -1618,7 +1625,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawCubicSegment( const FOdysseyHUD::FDr
                                                         , uint64 iHUDFlags )
 {
     ::ULIS::FRectD screen = ::ULIS::FRectD::FromXYWH( 0, 0, iParams.mTextureWidth, iParams.mTextureHeight );
-    ::ULIS::FRectD segmentBBox = WorldRectToHUD( iParams, iCubicSegment->GetBoundingBox( true ) );
+    ::ULIS::FRectD segmentBBox = WorldRectToHUD( iCubicSegment->GetBoundingBox( true ) );
 
     if( ( segmentBBox & screen ).Area() )
     {
@@ -1630,12 +1637,12 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawCubicSegment( const FOdysseyHUD::FDr
                                                  , iCubicSegment->GetHandle(1) };
         ::ULIS::FVec2D texVertex[2] = { FOdysseyVector::MapPoint( worldMatrix, vertex[0]->GetCoords() )
                                       , FOdysseyVector::MapPoint( worldMatrix, vertex[1]->GetCoords() ) };
-        FVector2D hudVertex[2] = { iParams.mTextureToHUD.Execute( FVector2D( texVertex[0].x, texVertex[0].y ) )
-                                 , iParams.mTextureToHUD.Execute( FVector2D( texVertex[1].x, texVertex[1].y ) ) };
+        FVector2D hudVertex[2] = { TextureToHUD( FVector2D( texVertex[0].x, texVertex[0].y ) )
+                                 , TextureToHUD( FVector2D( texVertex[1].x, texVertex[1].y ) ) };
         ::ULIS::FVec2D texHandle[2] = { FOdysseyVector::MapPoint( worldMatrix, handle[0]->GetCoords() )
                                       , FOdysseyVector::MapPoint( worldMatrix, handle[1]->GetCoords() ) };
-        FVector2D hudHandle[2] = { iParams.mTextureToHUD.Execute( FVector2D( texHandle[0].x, texHandle[0].y ) )
-                                 , iParams.mTextureToHUD.Execute( FVector2D( texHandle[1].x, texHandle[1].y ) ) };
+        FVector2D hudHandle[2] = { TextureToHUD( FVector2D( texHandle[0].x, texHandle[0].y ) )
+                                 , TextureToHUD( FVector2D( texHandle[1].x, texHandle[1].y ) ) };
         FVector2D hudFractionP0 = hudVertex[0];
 
         DrawPrimitiveBezierCubic( iParams
@@ -1708,10 +1715,10 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawSectionArray( const FOdysseyHUD::FDr
                                       , FOdysseyVector::MapPoint( worldMatrix, bezier[1] )
                                       , FOdysseyVector::MapPoint( worldMatrix, bezier[2] )
                                       , FOdysseyVector::MapPoint( worldMatrix, bezier[3] ) };
-        FVector2D hudbezier[4] = { iParams.mTextureToHUD.Execute( FVector2D( texBezier[0].x, texBezier[0].y ) )
-                                 , iParams.mTextureToHUD.Execute( FVector2D( texBezier[1].x, texBezier[1].y ) )
-                                 , iParams.mTextureToHUD.Execute( FVector2D( texBezier[2].x, texBezier[2].y ) )
-                                 , iParams.mTextureToHUD.Execute( FVector2D( texBezier[3].x, texBezier[3].y ) ) };
+        FVector2D hudbezier[4] = { TextureToHUD( FVector2D( texBezier[0].x, texBezier[0].y ) )
+                                 , TextureToHUD( FVector2D( texBezier[1].x, texBezier[1].y ) )
+                                 , TextureToHUD( FVector2D( texBezier[2].x, texBezier[2].y ) )
+                                 , TextureToHUD( FVector2D( texBezier[3].x, texBezier[3].y ) ) };
 
         HUDBezierCubicBuffer.emplace_back( hudbezier, section->GetSegment()->GetFractionCache().size() );
     }
@@ -1759,8 +1766,8 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawCycle( const FOdysseyHUD::FDrawHUDPa
 FOdysseyPainterEditorVectorBaseToolHUD::BBoxToHUD( const FOdysseyHUD::FDrawHUDParams& iParams
                                                  , const ::ULIS::FRectD& iBBox )
 {
-    FVector2D origin = WorldPointToHUD( iParams, FVector2D( iBBox.x, iBBox.y ) );
-    FVector2D size = WorldVectorToHUD( iParams, origin, FVector2D( iBBox.w, iBBox.h ) );
+    FVector2D origin = WorldPointToHUD( FVector2D( iBBox.x, iBBox.y ) );
+    FVector2D size = WorldVectorToHUD( origin, FVector2D( iBBox.w, iBBox.h ) );
 
     return ::ULIS::FRectD::FromXYWH( origin.X, origin.Y, size.X, size.Y );
 }
@@ -1838,7 +1845,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawGrid( const FOdysseyHUD::FDrawHUDPar
             FInbetweenerPoint& point = pointBuffer[pointIndex];
             ::ULIS::FVec2D position = point.GetPosition( iPositionType );
             ::ULIS::FVec2D texCoords = FOdysseyVector::MapPoint( worldMatrix, position );
-            FVector2D hudCoords = iParams.mTextureToHUD.Execute( FVector2D( texCoords.x, texCoords.y ) );
+            FVector2D hudCoords = TextureToHUD( FVector2D( texCoords.x, texCoords.y ) );
 
             DrawPrimitiveVertex( iParams, hudCoords, 2.0f, iColor, iColor );
         }
@@ -1856,10 +1863,10 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawGrid( const FOdysseyHUD::FDrawHUDPar
                                                , FOdysseyVector::MapPoint( worldMatrix, position[1] )
                                                , FOdysseyVector::MapPoint( worldMatrix, position[2] )
                                                , FOdysseyVector::MapPoint( worldMatrix, position[3] ) };
-            FVector2D pointHUDCoords[4] = { iParams.mTextureToHUD.Execute( FVector2D( pointTexCoords[0].x, pointTexCoords[0].y ) )
-                                          , iParams.mTextureToHUD.Execute( FVector2D( pointTexCoords[1].x, pointTexCoords[1].y ) )
-                                          , iParams.mTextureToHUD.Execute( FVector2D( pointTexCoords[2].x, pointTexCoords[2].y ) )
-                                          , iParams.mTextureToHUD.Execute( FVector2D( pointTexCoords[3].x, pointTexCoords[3].y ) ) };
+            FVector2D pointHUDCoords[4] = { TextureToHUD( FVector2D( pointTexCoords[0].x, pointTexCoords[0].y ) )
+                                          , TextureToHUD( FVector2D( pointTexCoords[1].x, pointTexCoords[1].y ) )
+                                          , TextureToHUD( FVector2D( pointTexCoords[2].x, pointTexCoords[2].y ) )
+                                          , TextureToHUD( FVector2D( pointTexCoords[3].x, pointTexCoords[3].y ) ) };
 
             DrawPrimitiveLine( iParams, pointHUDCoords[0], pointHUDCoords[1], iColor, 1.0f );
             DrawPrimitiveLine( iParams, pointHUDCoords[1], pointHUDCoords[2], iColor, 1.0f );
@@ -1898,7 +1905,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawInbetweenerInterpolatedPathAt( const
             FInterpolatedPoint* point0 = interpolatedPointArray[0];
             ::ULIS::FVec2D* localPointPosition0 = &interpolatedPointGeometryBuffer[point0->GetIndex()].position;
             ::ULIS::FVec2D texCoords0 = FOdysseyVector::MapPoint( worldMatrix, *localPointPosition0 );
-            FVector2D hudCoords0 = iParams.mTextureToHUD.Execute( FVector2D( texCoords0.x, texCoords0.y ) );
+            FVector2D hudCoords0 = TextureToHUD( FVector2D( texCoords0.x, texCoords0.y ) );
             std::vector<FVector2D> pointBuffer;
             std::vector<BatchedLine> lineBuffer;
 
@@ -1913,7 +1920,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawInbetweenerInterpolatedPathAt( const
                 FInterpolatedPoint* point1 = interpolatedPointArray[n];
                 ::ULIS::FVec2D* localPointPosition1 = &interpolatedPointGeometryBuffer[point1->GetIndex()].position;
                 ::ULIS::FVec2D texCoords1 = FOdysseyVector::MapPoint( worldMatrix, *localPointPosition1 );
-                FVector2D hudCoords1 = iParams.mTextureToHUD.Execute( FVector2D( texCoords1.x, texCoords1.y ) );
+                FVector2D hudCoords1 = TextureToHUD( FVector2D( texCoords1.x, texCoords1.y ) );
 
                 pointBuffer.push_back( hudCoords1 );
                 lineBuffer.emplace_back( &pointBuffer[i], &pointBuffer[n] );
@@ -1933,10 +1940,10 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawInbetweenerInterpolatedPathAt( const
                                               , FOdysseyVector::MapPoint( worldMatrix, interpolatedPointGeometryBuffer[interpolatedPoint[1]->GetIndex()].position )
                                               , FOdysseyVector::MapPoint( worldMatrix, interpolatedPointGeometryBuffer[interpolatedPoint[2]->GetIndex()].position )
                                               , FOdysseyVector::MapPoint( worldMatrix, interpolatedPointGeometryBuffer[interpolatedPoint[3]->GetIndex()].position ) };
-                FVector2D hudCoords[4] = { iParams.mTextureToHUD.Execute( FVector2D( texCoords[0].x, texCoords[0].y ) )
-                                         , iParams.mTextureToHUD.Execute( FVector2D( texCoords[1].x, texCoords[1].y ) )
-                                         , iParams.mTextureToHUD.Execute( FVector2D( texCoords[2].x, texCoords[2].y ) )
-                                         , iParams.mTextureToHUD.Execute( FVector2D( texCoords[3].x, texCoords[3].y ) ) };
+                FVector2D hudCoords[4] = { TextureToHUD( FVector2D( texCoords[0].x, texCoords[0].y ) )
+                                         , TextureToHUD( FVector2D( texCoords[1].x, texCoords[1].y ) )
+                                         , TextureToHUD( FVector2D( texCoords[2].x, texCoords[2].y ) )
+                                         , TextureToHUD( FVector2D( texCoords[3].x, texCoords[3].y ) ) };
 
                 DrawPrimitiveBezierCubic( iParams
                                         , hudCoords[0]

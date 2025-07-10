@@ -100,6 +100,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         bool IsDragging();
 
         TSharedPtr<SOdysseyViewport> GetViewport();
+        FOdysseyVectorCell* GetWorkingCell();
 
     protected:
         virtual uint64 LoadVector( FOdysseyVectorGroupPaint* iScene ){ return 0; };

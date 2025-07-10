@@ -222,6 +222,12 @@ UOdysseyPainterEditorVectorBaseTool::IsDragging()
     return mDragging;
 }
 
+FOdysseyVectorCell*
+UOdysseyPainterEditorVectorBaseTool::GetWorkingCell()
+{
+    return mWorkingCell;
+}
+
 void
 UOdysseyPainterEditorVectorBaseTool::GetSegmentHandlesFromVertices( const std::vector<FOdysseyVectorVertex*>& iVertexArray
                                                                   , std::vector<FOdysseyVectorHandleSegment*>& oSegmentHandleArray )
