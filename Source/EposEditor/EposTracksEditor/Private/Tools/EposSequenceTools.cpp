@@ -222,13 +222,13 @@ BoardSequenceTools::GuessActorToSelect( ISequencer* iSequencer, UMovieSceneSeque
         FMovieSceneSequenceID sequenceId = MovieSceneSequenceID::Invalid;
         BoardSequenceHelpers::GetAllAnimationsRecursive( *iSequencer, iSequence, iSequenceId, EGetAnimation::kAll, iFrameNumber, &animations, &unordered_bindings, &sequence, &sequenceId );
 
-        TArray<AOdysseyAnimationActor*> ordered_animations;
-        TArray<FGuid> ordered_bindings;
-        ShotSequenceTools::SortBindings( animations, unordered_bindings, sequence->GetMovieScene(), &ordered_animations, &ordered_bindings );
-
         // Animation not found AND no sequence (shot) found, so nothing can be guess
         if( !sequence )
             return nullptr;
+
+        TArray<AOdysseyAnimationActor*> ordered_animations;
+        TArray<FGuid> ordered_bindings;
+        ShotSequenceTools::SortBindings( animations, unordered_bindings, sequence->GetMovieScene(), &ordered_animations, &ordered_bindings );
 
         if( ordered_animations.Num() )
         {
