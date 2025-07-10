@@ -265,8 +265,6 @@ UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapeCommit(const TArray<FOdy
 {
     mPath = iPoints;
 
-    GEditor->BeginTransaction(LOCTEXT("raster-primitive-drawing-tool.transaction.draw-shape", "Draw Primitive Shape"));
-
     int w = mPaintEngine.PaintBlock()->Width();
     int h = mPaintEngine.PaintBlock()->Height();
     ::ULIS::eFormat format = mPaintEngine.PaintBlock()->Format();
@@ -376,6 +374,8 @@ UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapeCommit(const TArray<FOdy
     mPaintEngine.PaintBlock()->Dirty();
     mPaintEngine.Update(BlendParameters);
 
+    FScopedTransaction Transaction(LOCTEXT("raster-primitive-drawing-tool.transaction.draw-shape", "Draw Primitive Shape"));
+
     Flush();
     Commit();
 
@@ -384,7 +384,6 @@ UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapeCommit(const TArray<FOdy
     if (source)
         source->RecordCurrentFrameUndo();
 
-    GEditor->EndTransaction();
     mShapeHUD->EmptyElements();
 }
 
