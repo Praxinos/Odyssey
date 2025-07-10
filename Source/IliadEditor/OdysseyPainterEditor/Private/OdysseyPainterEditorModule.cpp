@@ -159,18 +159,18 @@ FOdysseyPainterEditorModule::RegisterSettings()
         return;
 
     settingsModule->RegisterSettings( "Editor", "Plugins", "OdysseyPainterEditor"
-        , LOCTEXT( "settings.name", "Odyssey Painter Editor" )
-        , LOCTEXT( "settings.tooltip", "Configure the look and feel of the Odyssey Editor." )
+        , LOCTEXT( "user-settings.painter-editor.name", "Odyssey Painter Editor" )
+        , LOCTEXT( "user-settings.painter-editor.tooltip", "Configure the look and feel of the Odyssey Editor." )
         , GetMutableDefault<UOdysseyPainterEditorSettings>() );
 
     settingsModule->RegisterSettings( "Project", "Plugins", "OdysseyAnimationEditor"
-        , LOCTEXT( "settings.name", "2D Animation Editor" )
-        , LOCTEXT( "settings.tooltip", "Configure the look and feel of the 2D Animation Editor." )
+        , LOCTEXT( "project-settings.2d-animation-editor.name", "2D Animation Editor" )
+        , LOCTEXT( "project-settings.2d-animation-editor.tooltip", "Configure the look and feel of the 2D Animation Editor." )
         , GetMutableDefault<UOdysseyPainterEditorAnimationProjectSettings>() );
 
     settingsModule->RegisterSettings( "Editor", "Plugins", "OdysseyPainterEditorAnimationUserSettings"
-        , LOCTEXT( "settings.name", "2D Animation Editor" )
-        , LOCTEXT( "settings.tooltip", "Configure the look and feel of the 2D Animation Editor." )
+        , LOCTEXT( "user-settings.2d-animation-editor.name", "2D Animation Editor" )
+        , LOCTEXT( "user-settings.2d-animation-editor.tooltip", "Configure the look and feel of the 2D Animation Editor." )
         , GetMutableDefault<UOdysseyPainterEditorAnimationUserSettings>() );
 }
 
