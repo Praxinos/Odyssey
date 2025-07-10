@@ -41,7 +41,11 @@ void
 UOdysseyTextureLayerImageRaster::PostLoad()
 {
     Super::PostLoad();
-    InitRasterBlock();
+
+    if (RasterBlock)
+    {
+        InitRasterBlock();
+    }
 }
 
 void
@@ -53,15 +57,30 @@ UOdysseyTextureLayerImageRaster::InitRasterBlock() const
         if (!texture)
             return;
 
-        //The layer a different texture with different parameters
-        //Ensure the block uses those parameters
-        ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
-        //let's ensure the format has alpha, so add alpha channel of needed
-        format = static_cast< ::ULIS::eFormat >(format | ULIS_W_ALPHA( 1 ) );
         int width = texture->Source.GetSizeX();
         int height = texture->Source.GetSizeY();
 
-        RasterBlock = MakeShared<FOdysseyRasterBlock>(const_cast<UOdysseyTextureLayerImageRaster*>(this), width, height, format);
+        UTexture2D* renderTexture = GetRenderTexture();
+        if ( renderTexture && renderTexture->Source.GetFormat() != TSF_Invalid )
+        {
+            ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(renderTexture->Source.GetFormat());
+            RasterBlock = MakeShared<FOdysseyRasterBlock>(const_cast<UOdysseyTextureLayerImageRaster*>(this), width, height, format);
+
+            TSharedPtr<::ULIS::FBlock> textureBlock = MakeShareable(NewBlockFromUTextureData(renderTexture, format));
+            FOdysseyRasterBlockMutator rasterBlockMutator(RasterBlock, false);
+            rasterBlockMutator.Copy(textureBlock, { textureBlock->Rect() });
+            rasterBlockMutator.Commit();
+        }
+        else
+        {
+            //The layer a different texture with different parameters
+            //Ensure the block uses those parameters
+            ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
+            //let's ensure the format has alpha, so add alpha channel of needed
+            format = static_cast< ::ULIS::eFormat >(format | ULIS_W_ALPHA( 1 ) );
+
+            RasterBlock = MakeShared<FOdysseyRasterBlock>(const_cast<UOdysseyTextureLayerImageRaster*>(this), width, height, format);
+        }
     }
 
     RasterBlock->OnBlockChanged().RemoveAll(this);
@@ -78,7 +97,7 @@ UOdysseyTextureLayerImageRaster::InitTexture()
     Super::InitTexture();
 
     UTexture2D* texture = GetRenderTexture();
-    TSharedPtr<FOdysseyRasterBlock> rasterBlock = GetRasterBlock(); //ensures mRasterBlock exists
+    TSharedPtr<FOdysseyRasterBlock> rasterBlock = GetRasterBlock(); //ensures RasterBlock exists
     InitTextureWithBlockData(rasterBlock->GetBlock().Get(), texture, TextureSourceFormatForULISFormat(rasterBlock->GetFormat()));
     texture->UpdateResource();
     FTextureCompilingManager::Get().FinishCompilation({ texture });
@@ -113,7 +132,6 @@ UOdysseyTextureLayerImageRaster::OnBlockCommited(const TArray<::ULIS::FRectI>& i
     {
         CopyBlockDataToTextureSource(block.Get(), GetRenderTexture(), rect, rect.Min);
     }
-    RenderingChanged();
 }
 
 void
@@ -193,33 +211,7 @@ void
 UOdysseyTextureLayerImageRaster::PostInitProperties()
 {
     Super::PostInitProperties();
-
-    if (GetFlags() & RF_ClassDefaultObject)
-        return;
-
-    UTexture2D* texture = GetTexture();
-    if (texture->Source.GetFormat() != TSF_Invalid)
-    {
-        ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
-        //let's ensure the format has alpha, so add alpha channel of needed
-        format = static_cast< ::ULIS::eFormat >(format | ULIS_W_ALPHA( 1 ) );
-
-        //Caches the tiles on disk
-        RasterBlock = MakeShared<FOdysseyRasterBlock>(this, texture->Source.GetSizeX(), texture->Source.GetSizeY(), format);
-        RasterBlock->OnBlockChanged().AddUObject(this, &::UOdysseyTextureLayerImageRaster::OnBlockChanged);
-        RasterBlock->OnBlockCommited().AddUObject(this, &::UOdysseyTextureLayerImageRaster::OnBlockCommited);
-        RasterBlock->PostProcess().BindUObject(this, &UOdysseyTextureLayerImageRaster::RasterBlockPostProcess);
-    }
-    else
-    {
-        RasterBlock = MakeShared<FOdysseyRasterBlock>(this);
-        RasterBlock->OnBlockChanged().AddUObject(this, &::UOdysseyTextureLayerImageRaster::OnBlockChanged);
-        RasterBlock->OnBlockCommited().AddUObject(this, &::UOdysseyTextureLayerImageRaster::OnBlockCommited);
-        RasterBlock->PostProcess().BindUObject(this, &UOdysseyTextureLayerImageRaster::RasterBlockPostProcess);
-    }
 }
-
-
 
 void
 UOdysseyTextureLayerImageRaster::PostDuplicate(EDuplicateMode::Type iDuplicateMode)
@@ -244,7 +236,6 @@ UOdysseyTextureLayerImageRaster::PostDuplicate(EDuplicateMode::Type iDuplicateMo
         RasterBlock->ConvertTo(width, height, format);
 
         InitRasterBlock();
-        InitTexture();
     }
 }
 
@@ -257,7 +248,7 @@ UOdysseyTextureLayerImageRaster::GetMediaProvider(uint32 iFrameIndex) const
     FOdysseyMediaProvider mediaProvider;
     mediaProvider.IsLocked(!isActive || isLocked);
 
-    TSharedPtr<FOdysseyMediaRaster> mediaRaster = MakeShared<FOdysseyMediaRaster>(RasterBlock);
+    TSharedPtr<FOdysseyMediaRaster> mediaRaster = MakeShared<FOdysseyMediaRaster>(GetRasterBlock());
     mediaProvider.Add(mediaRaster);
     return mediaProvider;
 }
@@ -272,7 +263,7 @@ UOdysseyTextureLayerImageRaster::Serialize(FArchive& Ar)
 
     if( Ar.IsSaving() )
     {
-        FOdysseyTextureLayerImageRasterExport::Write( this, Ar );
+        //FOdysseyTextureLayerImageRasterExport::Write( this, Ar );
     }
 
     if( Ar.IsLoading() )
@@ -280,7 +271,7 @@ UOdysseyTextureLayerImageRaster::Serialize(FArchive& Ar)
         if (!FOdysseyTextureLayerImageRasterImport::Read( this, Ar ))
         {
             //Old Style No Chunk Loading
-            Ar << *RasterBlock;
+            //Ar << *RasterBlock;
         }
     }
 }
@@ -291,11 +282,13 @@ UOdysseyTextureLayerImageRaster::RasterBlockPostProcess(const TMap<FIntPoint, TS
     if (!IsAlphaLocked())
         return iWaitList;
 
+    TSharedPtr<FOdysseyRasterBlock> rasterBlock = GetRasterBlock();
+
     //Apply AlphaLock
     TArray<::ULIS::FEvent> events;
-    TSharedPtr<::ULIS::FBlock> block = RasterBlock->GetBlock();
+    TSharedPtr<::ULIS::FBlock> block = rasterBlock->GetBlock();
     TArray<FIntPoint> invalidTiles = iInvalidMap.InvalidTiles();
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(RasterBlock->GetFormat());
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
     for (const FIntPoint& invalidTile : invalidTiles)
     {
         TSharedPtr<::ULIS::FBlock> originalBlock = iOriginalBlocks[invalidTile];

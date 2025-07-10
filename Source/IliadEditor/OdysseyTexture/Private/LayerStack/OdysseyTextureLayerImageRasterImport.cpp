@@ -50,6 +50,7 @@ FOdysseyTextureLayerImageRasterImport::Read( UOdysseyTextureLayerImageRaster* iT
             {
                 case FOdysseyFile::Texture::CHUNK_TEXTURELAYERIMAGERASTER_RASTERBLOCK :
                 {
+                    iTextureLayerImageRaster->RasterBlock = MakeShared<FOdysseyRasterBlock>(iTextureLayerImageRaster);
                     Ar << *iTextureLayerImageRaster->RasterBlock;
                 }
                 break;
