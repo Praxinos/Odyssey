@@ -21,7 +21,7 @@ public:
 
 protected:
     //Context Menu
-    virtual TSharedPtr<FExtender> CreateCellsContextMenuExtender() override;
+    virtual void BuildContextMenu(TSharedRef<FUICommandList> CommandList, FMenuBuilder& MenuBuilder) override;
 
 private:
     virtual TSharedRef<SWidget> OnGenerateCellWidget(UOdysseyLayerCell* iCell) override;

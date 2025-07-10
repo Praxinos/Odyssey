@@ -59,32 +59,19 @@ SOdysseyAnimationLayerImageRasterTimeline::OnPreviewMouseButtonDown(const FGeome
     return SOdysseyAnimationLayerImageTimeline::OnPreviewMouseButtonDown(MyGeometry, MouseEvent);
 }
 
-TSharedPtr<FExtender>
-SOdysseyAnimationLayerImageRasterTimeline::CreateCellsContextMenuExtender()
+void
+SOdysseyAnimationLayerImageRasterTimeline::BuildContextMenu(TSharedRef<FUICommandList> CommandList, FMenuBuilder& MenuBuilder)
 {
-    TSharedRef<FUICommandList> commandList = MakeShared<FUICommandList>();
+    SOdysseyAnimationLayerImageTimeline::BuildContextMenu(CommandList, MenuBuilder);
+
     mAnimationTimelineCellImageRasterShortcuts = MakeShared<FOdysseyAnimationTimelineCellImageRasterShortcuts>(mLayer->GetAnimation());
-    mAnimationTimelineCellImageRasterShortcuts->MapActionsToCommandList(commandList);
+    mAnimationTimelineCellImageRasterShortcuts->MapActionsToCommandList(CommandList);
 
-    TSharedRef<FExtender> extender = MakeShared<FExtender>();
-    extender->AddMenuExtension
-    (
-        TEXT("Cells"),
-        EExtensionHook::After,
-        commandList,
-        FMenuExtensionDelegate::CreateLambda(
-            [](FMenuBuilder& iMenuBuilder)
-            {
-                iMenuBuilder.AddMenuEntry(
-                    FOdysseyPainterEditorAnimationCommands::Get().CrossFade,
-                    NAME_None,
-                    LOCTEXT("timeline-cells.context-menu.cross-fade.name", "Cross Fade")
-                );
-            }
-        )
+    MenuBuilder.AddMenuEntry(
+        FOdysseyPainterEditorAnimationCommands::Get().CrossFade,
+        NAME_None,
+        LOCTEXT("timeline-cells.context-menu.cross-fade.name", "Cross Fade")
     );
-
-    return extender;
 }
 
 #undef LOCTEXT_NAMESPACE

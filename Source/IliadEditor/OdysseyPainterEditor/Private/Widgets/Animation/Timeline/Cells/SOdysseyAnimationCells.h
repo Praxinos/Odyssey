@@ -30,7 +30,6 @@ public:
         , _ShowHandles(false)
         {}
         SLATE_ARGUMENT(TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition>, TimelinePosition)
-        SLATE_ARGUMENT(TSharedPtr<FExtender>, ContextMenuExtender)
         SLATE_ATTRIBUTE(TArray<UOdysseyLayerCell*>, Cells)
         SLATE_ATTRIBUTE(int, CurrentFrame)
         SLATE_ATTRIBUTE(bool, ShowHandles)
@@ -55,24 +54,6 @@ public:
     virtual FReply OnMouseButtonUp(const FGeometry& iGeometry, const FPointerEvent& iEvent) override;
     virtual FReply OnDragDetected(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent) override;
     //virtual void Tick( const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime ) override;
-
-protected:
-    //Context Menu
-    TSharedPtr<SWidget> OnContextMenuOpening();
-    void MapActions(TSharedPtr<FUICommandList> iCommandList);
-
-private:
-    void RemoveCellMark();
-    bool CanRemoveCellMark() const;
-    void SetCellMark( int iMarkId );
-    bool CanSetCellMark() const;
-    bool IsCellMarkChecked( int iMarkId ) const;
-
-    TSharedRef<SWidget> CreateCellMarkMenuWidget(int iMarkId);
-    void BuildCellsMarksSubMenu(FMenuBuilder& iMenuBuilder);
-
-    FReply OnContextMenuMinusButtonClicked();
-    FReply OnContextMenuPlusButtonClicked();
 
 private:
     struct FCellItem
@@ -218,9 +199,6 @@ private:
         TMap<UOdysseyLayerCell*, int> mAffectedCells;
     } mAddCellsHandleDragData;
 
-    TSharedPtr<FOdysseyAnimationTimelineCellsShortcuts> mAnimationTimelineCellsShortcuts;
-    TSharedPtr<FOdysseyAnimationTimelineCellImageStaggerShortcuts> mAnimationTimelineCellImageStaggerShortcuts;
     TAttribute<int> mCurrentFrame;
     FOnTransactCurrentFrame mOnTransactCurrentFrame;
-    TSharedPtr<FExtender> mContextMenuExtender;
 };

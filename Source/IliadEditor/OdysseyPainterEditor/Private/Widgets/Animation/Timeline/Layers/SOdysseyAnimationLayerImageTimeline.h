@@ -78,7 +78,7 @@ public:
 
 protected:
     virtual TSharedRef<SWidget> OnGenerateCellWidget(UOdysseyLayerCell* iCell) = 0;
-    virtual TSharedPtr<FExtender> CreateCellsContextMenuExtender();
+    virtual void BuildContextMenu(TSharedRef<FUICommandList> CommandList, FMenuBuilder& MenuBuilder);
 
 protected:
     //TArray<TSharedPtr<FOdysseyAnimationCell>> GetSelectedCells() const;
@@ -94,6 +94,19 @@ protected:
 
     float MousePositionToFrame(float iX) const;
     float FrameToMousePosition(float iFrame) const;
+
+private:
+    void RemoveCellMark();
+    bool CanRemoveCellMark() const;
+    void SetCellMark( int iMarkId );
+    bool CanSetCellMark() const;
+    bool IsCellMarkChecked( int iMarkId ) const;
+
+    TSharedRef<SWidget> CreateCellMarkMenuWidget(int iMarkId);
+    void BuildCellsMarksSubMenu(FMenuBuilder& iMenuBuilder);
+
+    FReply OnContextMenuMinusButtonClicked();
+    FReply OnContextMenuPlusButtonClicked();
 
 protected:
     UOdysseyAnimationLayer* mLayer;
@@ -117,4 +130,7 @@ protected:
     eDragState mDragState;
     int mDragPosition;
     TAttribute<bool> mDisplayOptions;
+
+    TSharedPtr<FOdysseyAnimationTimelineCellsShortcuts> mAnimationTimelineCellsShortcuts;
+    TSharedPtr<FOdysseyAnimationTimelineCellImageStaggerShortcuts> mAnimationTimelineCellImageStaggerShortcuts;
 };
