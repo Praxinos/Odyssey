@@ -6,7 +6,6 @@
 #include "CineCameraActor.h"
 #include "Compilation/MovieSceneCompiledDataManager.h"
 #include "EditorModeManager.h"
-#include "Engine/Selection.h"
 #include "Evaluation/MovieSceneEvaluationTemplateInstance.h"
 #include "Framework/Docking/TabManager.h"
 #include "Framework/Notifications/NotificationManager.h"
@@ -103,6 +102,10 @@ FBoardSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomiza
     mSequencerBeginScrubbingDelegates = mWeakSequencer.Pin()->OnBeginScrubbingEvent().AddRaw( this, &FBoardSequenceCustomization::OnBeginScrubbing );
     mSequencerEndScrubbingDelegates = mWeakSequencer.Pin()->OnEndScrubbingEvent().AddRaw( this, &FBoardSequenceCustomization::OnEndScrubbing );
     mSequencerGlobalTimeChangedDelegates = mWeakSequencer.Pin()->OnGlobalTimeChanged().AddRaw( this, &FBoardSequenceCustomization::OnGlobalTimeChanged );
+
+    FLevelEditorModule& levelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>( "LevelEditor" );
+    mSelectionChangedDelegates = levelEditorModule.OnActorSelectionChanged().AddRaw( this, &FBoardSequenceCustomization::OnObjectSelectedMulti );
+    //ULevelEditorSubsystem& subsystem = GEditor->GetSubsystem<ULevelEditorSubsystem>();
 }
 
 void
@@ -126,6 +129,9 @@ FBoardSequenceCustomization::UnregisterSequencerCustomization()
         mWeakSequencer.Pin()->OnBeginScrubbingEvent().Remove( mSequencerEndScrubbingDelegates );
         mWeakSequencer.Pin()->OnGlobalTimeChanged().Remove( mSequencerGlobalTimeChangedDelegates );
     }
+
+    FLevelEditorModule& levelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>( "LevelEditor" );
+    levelEditorModule.OnActorSelectionChanged().Remove( mSelectionChangedDelegates );
 
     mWeakSequencer = nullptr;
     mBoardSequence = nullptr;
@@ -1194,61 +1200,79 @@ FBoardSequenceCustomization::ExtendObjectBindingContextMenu(FMenuBuilder& MenuBu
 //
 
 void
+FBoardSequenceCustomization::OnObjectSelectedMulti( const TArray<UObject*>& iObjects, bool bForceRefresh )
+{
+    // Store an history of selected actors to know later (when scrubbing) which actor best fit the auto-selection
+    for( UObject* object : iObjects )
+    {
+        ACineCameraActor* camera = Cast<ACineCameraActor>( object );
+        if( camera )
+            BoardSequenceTools::AddSelectedActorToHistory( camera );
+
+        AOdysseyAnimationActor* animation = Cast<AOdysseyAnimationActor>( object );
+        if( animation )
+            BoardSequenceTools::AddSelectedActorToHistory( animation );
+    }
+}
+
+void
 FBoardSequenceCustomization::OnGlobalTimeChanged()
 {
     TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
 
     //FString prefix = TEXT( "global time changed" );
-    //FQualifiedFrameTime frame_time = mSequencer->GetLocalTime();
-    //EMovieScenePlayerStatus::Type state = mSequencer->GetPlaybackStatus();
+    //FQualifiedFrameTime frame_time = sequencer->GetLocalTime();
+    EMovieScenePlayerStatus::Type playback_state = sequencer->GetPlaybackStatus();
 
-    //UE_LOG( LogTemp, Warning, TEXT( "%s: frame=%d state=%d" ), *prefix, frame_time.Time.GetFrame().Value, state );
+    //UE_LOG( LogTemp, Warning, TEXT( "%s: frame=%d state=%d" ), *prefix, frame_time.Time.GetFrame().Value, playback_state );
 
-    //---
-
-    if( !GCurrentLevelEditingViewportClient  )
-        return;
-
-    if( !GCurrentLevelEditingViewportClient->IsAnyActorLocked() )
-        return;
-
-    //---
-
-    //FLevelViewportActorLock& lock = GCurrentLevelEditingViewportClient->GetCinematicActorLock();
-    //AActor* current_piloted_actor = lock.GetLockedActor(); // return nullptr
-    AActor* current_piloted_actor = GCurrentLevelEditingViewportClient->GetActiveActorLock().Get();
-    if( !current_piloted_actor )
-        return;
-
-    //---
-
-    FFrameNumber current_frame = sequencer->GetLocalTime().Time.GetFrame();
-
-    ACineCameraActor* camera_at_current_frame = BoardSequenceTools::GetCamera( sequencer.Get(), current_frame );
-
-    if( !camera_at_current_frame )
+    // Don't auto-select an actor if currently play or scrub because changing the actor in Odyssey mode is not instant
+    // So just change the actor at the end of play/scrub
+    if( playback_state != EMovieScenePlayerStatus::Playing && playback_state != EMovieScenePlayerStatus::Scrubbing )
     {
-        //TODO: maybe eject the current piloted actor ?
-        // (as at the current frame, now, there is no camera)
-        return;
+        AActor* actor_to_select = BoardSequenceTools::GuessActorToSelect( sequencer.Get(), sequencer->GetLocalTime().Time.FloorToFrame() );
+        if( actor_to_select )
+        {
+            GEditor->SelectNone( true /*bNoteSelectionChange*/, true /*bDeselectBSPSurfs*/ );
+            // Do not notify, otherwise it lags
+            // But as we filter on NOT scrubbing and NOT playing, we can enable notification
+            GEditor->SelectActor( actor_to_select, true /*bInSelected*/, true /*bNotify*/, true /*bSelectEvenIfHidden*/ );
+        }
     }
 
     //---
 
-    if( current_piloted_actor == camera_at_current_frame )
-        return;
+    if( GCurrentLevelEditingViewportClient && GCurrentLevelEditingViewportClient->IsAnyActorLocked() )
+    {
+        //FLevelViewportActorLock& lock = GCurrentLevelEditingViewportClient->GetCinematicActorLock();
+        //AActor* current_piloted_actor = lock.GetLockedActor(); // return nullptr
+        AActor* current_piloted_actor = GCurrentLevelEditingViewportClient->GetActiveActorLock().Get();
+        if( current_piloted_actor )
+        {
+            FFrameNumber current_frame = sequencer->GetLocalTime().Time.GetFrame();
 
-    //---
+            ACineCameraActor* camera_at_current_frame = BoardSequenceTools::GetCamera( sequencer.Get(), current_frame );
 
-    BoardSequenceTools::PilotCamera( sequencer.Get(), current_frame );
+            if( camera_at_current_frame )
+            {
+                if( current_piloted_actor != camera_at_current_frame )
+                    BoardSequenceTools::PilotCamera( sequencer.Get(), current_frame );
+            }
+            else
+            {
+                //TODO: maybe eject the current piloted actor ?
+                // (as at the current frame, now, there is no camera)
+            }
+        }
+    }
 }
 
 void
 FBoardSequenceCustomization::OnBeginScrubbing()
 {
     //FString prefix = TEXT( "scrub begin" );
-    //FQualifiedFrameTime frame_time = mSequencer->GetLocalTime();
-    //EMovieScenePlayerStatus::Type state = mSequencer->GetPlaybackStatus();
+    //FQualifiedFrameTime frame_time = mWeakSequencer.Pin()->GetLocalTime();
+    //EMovieScenePlayerStatus::Type state = mWeakSequencer.Pin()->GetPlaybackStatus();
 
     //UE_LOG( LogTemp, Warning, TEXT( "%s: frame=%d state=%d" ), *prefix, frame_time.Time.GetFrame().Value, state ); // 2=Scrubbing 0=Stopped
 }
@@ -1257,8 +1281,8 @@ void
 FBoardSequenceCustomization::OnEndScrubbing()
 {
     //FString prefix = TEXT( "scrub end" );
-    //FQualifiedFrameTime frame_time = mSequencer->GetLocalTime();
-    //EMovieScenePlayerStatus::Type state = mSequencer->GetPlaybackStatus();
+    //FQualifiedFrameTime frame_time = mWeakSequencer.Pin()->GetLocalTime();
+    //EMovieScenePlayerStatus::Type state = mWeakSequencer.Pin()->GetPlaybackStatus();
 
     //UE_LOG( LogTemp, Warning, TEXT( "%s: frame=%d state=%d" ), *prefix, frame_time.Time.GetFrame().Value, state );
 }

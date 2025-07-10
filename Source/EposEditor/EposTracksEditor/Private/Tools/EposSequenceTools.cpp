@@ -5,6 +5,7 @@
 
 #include "AnimatedRange.h"
 #include "CineCameraActor.h"
+#include "Engine/Selection.h"
 #include "ISequencer.h"
 #include "MovieScene.h"
 #include "MovieSceneSection.h"
@@ -14,6 +15,7 @@
 
 #include "Board/BoardSequence.h"
 #include "EposSequenceHelpers.h"
+#include "OdysseyAnimationActor.h"
 #include "ScalingComponent.h"
 #include "Shot/ShotSequence.h"
 
@@ -155,6 +157,150 @@ ShotSequenceTools::RenameBinding( ISequencer& iSequencer, UMovieSceneSequence* i
         FActorLabelUtilities::RenameExistingActor( actor, new_possessable.GetName() );
 
     iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::RefreshAllImmediately );
+}
+
+//---
+
+TArray<AActor*> BoardSequenceTools::mDirectActorsSelectedHistory;
+
+//static
+void
+BoardSequenceTools::AddSelectedActorToHistory( AActor* iActor )
+{
+    if( !iActor )
+        return;
+
+    mDirectActorsSelectedHistory.Remove( iActor );
+    mDirectActorsSelectedHistory.Add( iActor );
+}
+
+//static
+AActor*
+BoardSequenceTools::GuessActorToSelect( ISequencer* iSequencer, const FFrameNumber& iFrameNumber )
+{
+    // Store the currently selected actor to guess the type of actor (camera or animation) to auto-select
+    USelection* selection = GEditor->GetSelectedActors();
+    TArray<AActor*> actor_selected;
+    selection->GetSelectedObjects<AActor>( actor_selected );
+
+    AActor* actor_to_select = BoardSequenceTools::GuessActorToSelect( iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber, actor_selected );
+    // If already selected, nothing to do
+    if( actor_selected.Contains( actor_to_select ) )
+        return nullptr;
+
+    return actor_to_select;
+}
+
+//static
+AActor*
+BoardSequenceTools::GuessActorToSelect( ISequencer* iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceId, const FFrameNumber& iFrameNumber, const TArray<AActor*>& iLastSelectedActors )
+{
+    TArray<AActor*> actors = iLastSelectedActors.FilterByPredicate( []( const AActor* iActor )
+                                                                    {
+                                                                        return iActor->IsA<ACineCameraActor>();
+                                                                    } );
+    if( actors.Num() )
+    {
+        UMovieSceneSequence* sequence = nullptr;
+        FMovieSceneSequenceID sequenceId = MovieSceneSequenceID::Invalid;
+        ACineCameraActor* camera = BoardSequenceHelpers::GetCameraRecursive( *iSequencer, iSequence, iSequenceId, iFrameNumber, nullptr, &sequence, &sequenceId );
+
+        return camera;
+    }
+
+    //---
+
+    actors = iLastSelectedActors.FilterByPredicate( []( const AActor* iActor )
+                                                    {
+                                                        return iActor->IsA<AOdysseyAnimationActor>();
+                                                    } );
+    if( actors.Num() )
+    {
+        TArray<AOdysseyAnimationActor*> animations;
+        TArray<FGuid> unordered_bindings;
+        UMovieSceneSequence* sequence = nullptr;
+        FMovieSceneSequenceID sequenceId = MovieSceneSequenceID::Invalid;
+        BoardSequenceHelpers::GetAllAnimationsRecursive( *iSequencer, iSequence, iSequenceId, EGetAnimation::kAll, iFrameNumber, &animations, &unordered_bindings, &sequence, &sequenceId );
+
+        TArray<AOdysseyAnimationActor*> ordered_animations;
+        TArray<FGuid> ordered_bindings;
+        ShotSequenceTools::SortBindings( animations, unordered_bindings, sequence->GetMovieScene(), &ordered_animations, &ordered_bindings );
+
+        // Animation not found AND no sequence (shot) found, so nothing can be guess
+        if( !sequence )
+            return nullptr;
+
+        if( ordered_animations.Num() )
+        {
+            int32 max_preferred_index = INDEX_NONE;
+            for( AActor* animation : ordered_animations )
+            {
+                int32 current_index;
+                if( mDirectActorsSelectedHistory.FindLast( animation, current_index ) )
+                {
+                    if( current_index > max_preferred_index )
+                        max_preferred_index = current_index;
+                }
+            }
+
+            AActor* preferred_animation = nullptr;
+            if( mDirectActorsSelectedHistory.IsValidIndex( max_preferred_index ) )
+                preferred_animation = mDirectActorsSelectedHistory[max_preferred_index];
+
+            if( !preferred_animation )
+            {
+                preferred_animation = ordered_animations[0];
+                mDirectActorsSelectedHistory.Add( preferred_animation );
+            }
+
+            return preferred_animation;
+        }
+    }
+
+    //---
+
+    return nullptr;
+}
+
+//---
+
+//static
+void
+ShotSequenceTools::SortBindings( TArray<AOdysseyAnimationActor*> iAnimationActors, TArray<FGuid> iBindings, UMovieScene* iMovieScene, TArray<AOdysseyAnimationActor*>* oOrderedAnimationActors, TArray<FGuid>* oOrderedBindings )
+{
+    check( iAnimationActors.Num() == iBindings.Num() );
+
+    struct FBindingAndAnimationActor
+    {
+        FMovieSceneBinding* Binding;
+        AOdysseyAnimationActor* AnimationActor;
+    };
+
+    // Find their corresponding scene binding
+    TArray<FBindingAndAnimationActor> binding_and_animation_actors;
+    for( int i = 0; i < iBindings.Num(); i++ )
+    {
+        binding_and_animation_actors.Add( { iMovieScene->FindBinding( iBindings[i] ), iAnimationActors[i] } );
+    }
+
+    // Sort scene bindings by their sorting order/name
+    // (This should match the native sorting of tracks inside shot)
+    Algo::StableSort( binding_and_animation_actors, []( const FBindingAndAnimationActor& iA, const FBindingAndAnimationActor& iB )
+                      {
+                          // If at least one of the binding was not already sorted (by drag'n drop in shot), use the name to sort both
+                          if( iA.Binding->GetSortingOrder() == -1 || iB.Binding->GetSortingOrder() == -1 )
+                              return iA.Binding->GetName() < iB.Binding->GetName();
+                          // Otherwise just use the set sorting order
+                          else
+                              return iA.Binding->GetSortingOrder() < iB.Binding->GetSortingOrder();
+                      } );
+
+    // Get all animations in the gui order
+    for( auto ordered_binding_and_animation_actor : binding_and_animation_actors )
+    {
+        oOrderedBindings->Add( ordered_binding_and_animation_actor.Binding->GetObjectGuid() );
+        oOrderedAnimationActors->Add( ordered_binding_and_animation_actor.AnimationActor );
+    }
 }
 
 //---

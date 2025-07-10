@@ -152,6 +152,37 @@ BoardSequenceHelpers::GetCamera( IMovieScenePlayer& iPlayer, const UMovieSceneSu
 
 //static
 ACineCameraActor*
+BoardSequenceHelpers::GetCameraRecursive( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FFrameNumber& iFrameNumber, FGuid* oCameraBinding, UMovieSceneSequence** oSequence, FMovieSceneSequenceID* oSequenceID )
+{
+    FInnerSequenceResult result = GetInnerSequence( iPlayer, iSequence, iSequenceID, iFrameNumber );
+
+    if( !result.mInnerSequence )
+        return nullptr;
+
+    // if we are on a shot subsequence
+    if( result.mInnerSequence->IsA<UShotSequence>() )
+    {
+        *oSequence = result.mInnerSequence;
+        *oSequenceID = result.mInnerSequenceId;
+
+        ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( iPlayer, result.mInnerSequence, result.mInnerSequenceId, oCameraBinding );
+
+        return camera;
+    }
+
+    // if we are on a board subsequence
+    if( result.mInnerSequence->IsA<UBoardSequence>() )
+    {
+        ACineCameraActor* camera = BoardSequenceHelpers::GetCameraRecursive( iPlayer, result.mInnerSequence, result.mInnerSequenceId, result.mInnerTime.FloorToFrame(), oCameraBinding, oSequence, oSequenceID );
+
+        return camera;
+    }
+
+    return nullptr;
+}
+
+//static
+ACineCameraActor*
 ShotSequenceHelpers::GetCamera( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid* oCameraBinding )
 {
     UMovieScene* movieScene = iSequence ? iSequence->GetMovieScene() : nullptr;
@@ -178,6 +209,38 @@ ShotSequenceHelpers::GetCamera( IMovieScenePlayer& iPlayer, UMovieSceneSequence*
     }
 
     return nullptr;
+}
+
+
+//static
+int32
+BoardSequenceHelpers::GetAllAnimationsRecursive( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, EGetAnimation iAnimationSelection, const FFrameNumber& iFrameNumber, TArray<AOdysseyAnimationActor*>* oAnimations, TArray<FGuid>* oAnimationBindings, UMovieSceneSequence** oSequence, FMovieSceneSequenceID* oSequenceID )
+{
+    FInnerSequenceResult result = GetInnerSequence( iPlayer, iSequence, iSequenceID, iFrameNumber );
+
+    if( !result.mInnerSequence )
+        return 0;
+
+    // if we are on a shot subsequence
+    if( result.mInnerSequence->IsA<UShotSequence>() )
+    {
+        *oSequence = result.mInnerSequence;
+        *oSequenceID = result.mInnerSequenceId;
+
+        int animation_count = ShotSequenceHelpers::GetAllAnimations( iPlayer, result.mInnerSequence, result.mInnerSequenceId, iAnimationSelection, oAnimations, oAnimationBindings );
+
+        return animation_count;
+    }
+
+    // if we are on a board subsequence
+    if( result.mInnerSequence->IsA<UBoardSequence>() )
+    {
+        int animation_count = BoardSequenceHelpers::GetAllAnimationsRecursive( iPlayer, result.mInnerSequence, result.mInnerSequenceId, iAnimationSelection, result.mInnerTime.FloorToFrame(), oAnimations, oAnimationBindings, oSequence, oSequenceID );
+
+        return animation_count;
+    }
+
+    return 0;
 }
 
 //static
