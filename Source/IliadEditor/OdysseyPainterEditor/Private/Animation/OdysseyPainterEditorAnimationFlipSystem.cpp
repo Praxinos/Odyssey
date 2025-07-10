@@ -445,7 +445,7 @@ uint64
 FOdysseyPainterEditorAnimationFlipSystem::GetRenderType() const
 {
     uint64 renderType = EOdysseyRenderingType::Render;
-    if (mEditor->GetAnimationPlayer()->GetDisplayedFrame().FrameNumber.Value != mStartFrame && mFlipConfiguration.OutOfPegs)
+    if (mEditor->GetAnimationPlayer()->GetCursorFrame().FrameNumber.Value != mStartFrame && mFlipConfiguration.OutOfPegs)
         renderType |= EOdysseyRenderingType::OutOfPegs;
 
     return renderType;

@@ -45,6 +45,7 @@ public:
 
 public:
     //Events
+    FSimpleMulticastDelegate& OnCursorFrameChanged();
     FSimpleMulticastDelegate& OnCurrentFrameChanged();
     FSimpleMulticastDelegate& OnDisplayedFrameChanged();
 
@@ -82,6 +83,9 @@ public:
     EOdysseyAnimationPlayerStatus GetStatus() const;
 
     UFUNCTION(BlueprintPure, Category = "Odyssey|AnimationPlayer")
+    FFrameTime GetCursorFrame() const;
+
+    UFUNCTION(BlueprintPure, Category = "Odyssey|AnimationPlayer")
     FFrameTime GetCurrentFrame() const;
 
     UFUNCTION(BlueprintPure, Category = "Odyssey|AnimationPlayer")
@@ -97,13 +101,7 @@ public:
     bool GetDuration(FFrameTime& oTime) const;
 
     UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationPlayer")
-    bool GetFrameInAnimationBounds(FFrameTime iFrame, FFrameTime& oFrame) const;
-
-    UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationPlayer")
-    bool GetCurrentFrameInAnimationBounds(FFrameTime& oFrame) const;
-
-    UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationPlayer")
-    bool GetDisplayedFrameInAnimationBounds(FFrameTime& oFrame) const;
+    FFrameTime GetFrameInAnimationBounds(FFrameTime iFrame) const;
 
     UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationPlayer")
     void SetPreBehaviour(EOdysseyAnimationPlayerPostBehaviour iValue);
@@ -141,8 +139,8 @@ protected:
     virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT(UOdysseyAnimation, STATGROUP_Tickables); }
 
 private:
-    bool ApplyPreBehaviour(FFrameTime iFrame, FFrameTime& oFrame) const;
-    bool ApplyPostBehaviour(FFrameTime iFrame, FFrameTime& oFrame) const;
+    FFrameTime ApplyPreBehaviour(FFrameTime iFrame) const;
+    FFrameTime ApplyPostBehaviour(FFrameTime iFrame) const;
     void UpdateTexture();
     void OnRenderingChanged(const FOdysseyRenderingChangedEvent& iEvent);
 
@@ -176,8 +174,9 @@ private:
 
     TAttribute<uint64> mRenderType = EOdysseyRenderingType::Render;
     bool mIsBackward = false;
-    FFrameTime mCurrentFrame; //Current frame when stopped
-    FFrameTime mDisplayedFrame; //Displayed frame when playing / Scrubbing / Paused
+    FFrameTime mCursorFrame; //The frame on which the player cursor is (does not correspond to timeline cursor when cursorframe is in Pre/PostBehaviour range)
+    FFrameTime mCurrentFrame; //Current frame when stopped (also the frame currently edited by the editor)
+    FFrameTime mDisplayedFrame; //Displayed frame when playing / Scrubbing / Paused (always in animation bounds)
     TArray<FGuid>   mImageRenderingComposition;
     FOdysseyInvalidTileMap mInvalidTileMap;
     EOdysseyAnimationPlayerStatus Status = EOdysseyAnimationPlayerStatus::Stopped;
@@ -186,4 +185,5 @@ private:
     //Events
     FSimpleMulticastDelegate mOnCurrentFrameChanged;
     FSimpleMulticastDelegate mOnDisplayedFrameChanged;
+    FSimpleMulticastDelegate mOnCursorFrameChanged;
 };

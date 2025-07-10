@@ -243,7 +243,7 @@ SOdysseyAnimationTimelineHeader::OnMouseButtonDown(const FGeometry& MyGeometry, 
 
         const float minScrub = 0.0f;
         float posX = MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()).X;
-        float frame = MousePositionToFrame(posX);
+        float frame = FMath::Max(0.f, MousePositionToFrame(posX));
 
         mOnCurrentFrameChanged.ExecuteIfBound((int)frame);
 
@@ -261,7 +261,7 @@ SOdysseyAnimationTimelineHeader::OnMouseMove(const FGeometry& MyGeometry, const 
     {
         const float minScrub = 0.0f;
         float posX = MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()).X;
-        float frame = MousePositionToFrame(posX);
+        float frame = FMath::Max(0.f, MousePositionToFrame(posX));
         mOnCurrentFrameChanged.ExecuteIfBound((int)frame);
         return FReply::Handled();
     }

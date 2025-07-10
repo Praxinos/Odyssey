@@ -171,7 +171,7 @@ FOdysseyViewportDrawingEditorExtension::OnSourceChanged()
         UOdysseyAnimationPlayer* player = animationSource->GetAnimationPlayer();
         if (player)
         {
-            player->OnCurrentFrameChanged().AddRaw(this, &FOdysseyViewportDrawingEditorExtension::OnAnimationPlayerCurrentFrameChanged);
+            player->OnCursorFrameChanged().AddRaw(this, &FOdysseyViewportDrawingEditorExtension::OnAnimationPlayerCursorFrameChanged);
         }
     }
 
@@ -500,6 +500,9 @@ FOdysseyViewportDrawingEditorExtension::SetTextureInternal(UTexture* iTexture)
 void
 FOdysseyViewportDrawingEditorExtension::SyncSequencerWithAnimationPlayer()
 {
+    if (!mComponent)
+        return;
+
     if (!mComponent->IsA<UOdysseyAnimationComponent>())
         return;
 
@@ -561,17 +564,17 @@ FOdysseyViewportDrawingEditorExtension::SyncSequencerWithAnimationPlayer()
         if (!section)
             continue;
 
-        FFrameTime animationCurrentFrame = 0;
-        if (!player->GetCurrentFrameInAnimationBounds(animationCurrentFrame))
-            continue;
-
+        FFrameTime animationCursorFrame = player->GetCursorFrame();
         FFrameRate tickResolution = movieScene->GetTickResolution();
         FFrameRate displayRate = sequencer->GetFocusedDisplayRate();
         TRange<FFrameNumber> sectionRange = section->GetTrueRange();
 
-        FFrameTime currentFrame = FFrameRate::TransformTime(sequencer->GetLocalTime().Time.FrameNumber, tickResolution, displayRate);
-        currentFrame = currentFrame.FloorToFrame();
-        currentFrame = FFrameRate::TransformTime(currentFrame, displayRate, tickResolution);
+        FFrameTime cursorFrame = sequencer->GetLocalTime().Time;
+        /*
+        cursorFrame = FFrameRate::TransformTime(cursorFrame, tickResolution, displayRate);
+        cursorFrame = cursorFrame.FloorToFrame();
+        cursorFrame = FFrameRate::TransformTime(cursorFrame, displayRate, tickResolution);
+        */
 
         FOdysseyAnimationTimelineSectionParams params;
         params.SectionStartFrame = sectionRange.GetLowerBoundValue();
@@ -580,22 +583,28 @@ FOdysseyViewportDrawingEditorExtension::SyncSequencerWithAnimationPlayer()
         params.Animation = section->GetAnimation();
         params.PreBehaviour = section->GetPreBehaviour();
         params.PostBehaviour = section->GetPostBehaviour();
-        TRange<FFrameTime> range(currentFrame, currentFrame);
+        TRange<FFrameTime> range(cursorFrame, cursorFrame);
         FFrameTime evaluatedFrame = FOdysseyAnimationTimelineTemplate::GetEvaluatedFrame(animation, range, params, tickResolution);
-        if (!player->GetFrameInAnimationBounds(evaluatedFrame, evaluatedFrame))
-            continue;
+        //evaluatedFrame = player->GetFrameInAnimationBounds(evaluatedFrame);
 
-        if (evaluatedFrame.GetFrame() == animationCurrentFrame.GetFrame())
+        if (evaluatedFrame.GetFrame() == animationCursorFrame.GetFrame())
             continue;
 
         FFrameRate animationFrameRate(animation->GetFramesPerSecond() * 100, 100);
-        FFrameTime newTime = FFrameRate::TransformTime(animationCurrentFrame.GetFrame(), animationFrameRate, tickResolution);
+
+        FFrameTime newTime = FFrameRate::TransformTime(animationCursorFrame.GetFrame(), animationFrameRate, tickResolution);
         newTime += sectionRange.GetLowerBoundValue();
         newTime -= section->GetStartFrameOffset();
         newTime = FFrameRate::TransformTime(newTime, tickResolution, displayRate);
         newTime = newTime.CeilToFrame();
-        newTime = FFrameRate::TransformTime(newTime, displayRate, tickResolution);
 
+        FFrameTime minTime = FFrameRate::TransformTime(sectionRange.GetLowerBoundValue(), tickResolution, displayRate);
+        minTime = minTime.CeilToFrame();
+        FFrameTime maxTime = FFrameRate::TransformTime(sectionRange.GetUpperBoundValue(), tickResolution, displayRate);
+        maxTime -= FFrameTime(1);
+        maxTime = maxTime.FloorToFrame();
+        newTime = FMath::Clamp(newTime, minTime, maxTime);
+        newTime = FFrameRate::TransformTime(newTime, displayRate, tickResolution);
         sequencer->SetLocalTime(newTime, STM_Interval);
     }
 }
@@ -981,7 +990,7 @@ void FOdysseyViewportDrawingEditorExtension::EnableDelegatesSequencer()
 }
 
 void
-FOdysseyViewportDrawingEditorExtension::OnAnimationPlayerCurrentFrameChanged()
+FOdysseyViewportDrawingEditorExtension::OnAnimationPlayerCursorFrameChanged()
 {
     SyncMediaPlayerWithAnimationPlayer();
     SyncSequencerWithAnimationPlayer();

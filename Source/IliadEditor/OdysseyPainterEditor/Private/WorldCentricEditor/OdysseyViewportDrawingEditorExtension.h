@@ -119,7 +119,7 @@ private:
     void ClearAllDelegatesSequencers();
 
 private:
-    void OnAnimationPlayerCurrentFrameChanged();
+    void OnAnimationPlayerCursorFrameChanged();
 
     void SyncMediaPlayerWithAnimationFrame(int iFrame);
     void SyncMediaPlayerWithAnimationPlayer();
