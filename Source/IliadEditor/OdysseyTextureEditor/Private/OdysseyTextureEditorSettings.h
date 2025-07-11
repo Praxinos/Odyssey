@@ -7,6 +7,13 @@
 
 #include "OdysseyTextureEditorSettings.generated.h"
 
+UENUM()
+enum class EOdysseyDefaultTextureEditor
+{
+    OdysseyPainterEditor UMETA( DisplayName = "Odyssey Texture Editor" ),
+    UnrealDefaultEditor UMETA( DisplayName = "Default Texture Editor" )
+};
+
 /**
  * Implements the Editor's user settings.
  */
@@ -14,13 +21,13 @@ UCLASS(config=EditorPerProjectUserSettings)
 class UOdysseyTextureEditorSettings
     : public UObject
 {
-    GENERATED_UCLASS_BODY()
+    GENERATED_BODY()
 
 public:
     static UOdysseyTextureEditorSettings* Get();
 
 public:
     /** If true, set Odyssey as default editor when double-click on a Texture. */
-    UPROPERTY(config, EditAnywhere, Category=Defaults, DisplayName = "Set Odyssey as default editor for textures")
-    bool OdysseyDefaultEditorEnabled;
+    UPROPERTY(config, EditAnywhere, Category=Defaults, DisplayName = "Texture Editor to use when opening a Texture Asset")
+    EOdysseyDefaultTextureEditor DefaultTextureEditor = EOdysseyDefaultTextureEditor::OdysseyPainterEditor;
 };

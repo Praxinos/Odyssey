@@ -3,12 +3,6 @@
 
 #include "OdysseyTextureEditorSettings.h"
 
-UOdysseyTextureEditorSettings::UOdysseyTextureEditorSettings( const FObjectInitializer& iObjectInitializer )
-    : Super( iObjectInitializer )
-    , OdysseyDefaultEditorEnabled( true )
-{
-}
-
 //Static
 UOdysseyTextureEditorSettings* UOdysseyTextureEditorSettings::Get()
 {

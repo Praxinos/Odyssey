@@ -13,6 +13,7 @@
 #include "Framework/Commands/UIAction.h"
 #include "Framework/MultiBox/MultiBoxBuilder.h"
 #include "Framework/MultiBox/MultiBoxExtender.h"
+#include "Interfaces/ITextureEditorModule.h"
 #include "IAssetTools.h"
 #include "IContentBrowserSingleton.h"
 #include "IDesktopPlatform.h"
@@ -34,261 +35,214 @@
 static FContentBrowserMenuExtender_SelectedAssets sgContentBrowserExtenderDelegate;
 static FDelegateHandle sgContentBrowserExtenderDelegateHandle;
 
-//////////////////////////////////////////////////////////////////////////
-// FContentBrowserSelectedAssetExtensionBase
-class FContentBrowserSelectedAssetExtensionBase
+//---
+
+TArray<UTexture2D*>
+GetOnlyTextureAssets(TArray<FAssetData> iSelectedAssets)
 {
-public:
-    virtual ~FContentBrowserSelectedAssetExtensionBase()
-    {}
-
-    FContentBrowserSelectedAssetExtensionBase( const TArray< FAssetData >& iSelectedAssets )
-        : mSelectedAssets( iSelectedAssets )
-    {}
-
-    void Execute()
+    TArray<UTexture2D*> textures;
+    for( auto assetIt = iSelectedAssets.CreateConstIterator(); assetIt; ++assetIt )
     {
-        TArray<UTexture2D*> textures;
-        for( auto assetIt = mSelectedAssets.CreateConstIterator(); assetIt; ++assetIt )
+        const FAssetData& assetData = *assetIt;
+        if( UTexture2D* texture = Cast<UTexture2D>( assetData.GetAsset() ) )
         {
-            const FAssetData& assetData = *assetIt;
-            if( UTexture2D* texture = Cast<UTexture2D>( assetData.GetAsset() ) )
+            textures.Add( texture );
+        }
+    }
+    return textures;
+}
+
+void
+ExecuteExportTexture( TArray<UTexture2D*> iTextures )
+{
+    IDesktopPlatform* desktopPlatformHandle = FDesktopPlatformModule::Get();
+    for( auto textureIt = iTextures.CreateConstIterator(); textureIt; ++textureIt )
+    {
+        TArray< FString > filenames;
+        UTexture2D* currentTexture = *textureIt;
+        bool saveSuccess = desktopPlatformHandle->SaveFileDialog(
+            FSlateApplication::Get().FindBestParentWindowHandleForDialogs(nullptr)
+            , LOCTEXT("content-browser-extension.export-texture.save-dialog.title", "Select Export Path & Name").ToString()
+            , FPaths::ProjectDir()
+            , currentTexture->GetName()
+            , TEXT("PNG Image (.png)|*.png|BMP Image (.bmp)|*.bmp|TGA Image (.tga)|*.tga|JPG Image (.jpg)|*.jpg")
+            , EFileDialogFlags::None
+            , filenames
+        );
+
+
+        if( ( textureIt.GetIndex() != ( iTextures.Num() - 1 ) ) && ( !saveSuccess ) )
+        {
+            EAppReturnType::Type answer = FMessageDialog::Open(EAppMsgType::YesNo, LOCTEXT("content-browser-extension.export-texture.cancel-dialog.message", "Continue the remaing files export ?"), LOCTEXT("content-browser-extension.export-texture.cancel-dialog.title", "Save cancelled"));
+            if( answer == EAppReturnType::Yes )
             {
-                textures.Add( texture );
+                continue;
+            }
+            else
+            {
+                break;
             }
         }
 
-        ActionTextures( textures );
-    }
-
-    virtual void ActionTextures( TArray< UTexture2D* >& iTextures ) = 0;
-
-protected:
-    TArray< FAssetData > mSelectedAssets;
-};
-
-//////////////////////////////////////////////////////////////////////////
-// FEditTextureExtension
-class FEditTextureExtension
-    : public FContentBrowserSelectedAssetExtensionBase
-{
-public:
-    ~FEditTextureExtension() override
-    {}
-
-    FEditTextureExtension( const TArray< FAssetData >& iSelectedAssets )
-        : FContentBrowserSelectedAssetExtensionBase( iSelectedAssets )
-    {}
-
-    void ActionTextures( TArray< UTexture2D* >& iTextures ) override
-    {
-        for (UTexture2D* texture : iTextures)
+        if( filenames.Num() > 0 )
         {
-            if (!texture)
-                continue;
-
-            FOdysseyPainterEditorModule* painterEditorModule = &FModuleManager::GetModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
-            painterEditorModule->OpenStandaloneEditorForAsset(texture);
-        }
-    }
-};
-
-//////////////////////////////////////////////////////////////////////////
-// FExportTextureExtension
-
-class FExportTextureExtension
-    : public FContentBrowserSelectedAssetExtensionBase
-{
-public:
-    ~FExportTextureExtension() override
-    {}
-
-    FExportTextureExtension( const TArray< FAssetData >& iSelectedAssets )
-        : FContentBrowserSelectedAssetExtensionBase( iSelectedAssets )
-    {}
-
-    void ActionTextures( TArray<UTexture2D*>& iTextures ) override
-    {
-        IDesktopPlatform* desktopPlatformHandle = FDesktopPlatformModule::Get();
-        for( auto textureIt = iTextures.CreateConstIterator(); textureIt; ++textureIt )
-        {
-            TArray< FString > filenames;
-            UTexture2D* currentTexture = *textureIt;
-            bool saveSuccess = desktopPlatformHandle->SaveFileDialog(
-                  FSlateApplication::Get().FindBestParentWindowHandleForDialogs(nullptr)
-                , LOCTEXT("content-browser-extension.export-texture.save-dialog.title", "Select Export Path & Name").ToString()
-                , FPaths::ProjectDir()
-                , currentTexture->GetName()
-                , TEXT("PNG Image (.png)|*.png|BMP Image (.bmp)|*.bmp|TGA Image (.tga)|*.tga|JPG Image (.jpg)|*.jpg")
-                , EFileDialogFlags::None
-                , filenames
-            );
-
-
-            if( ( textureIt.GetIndex() != ( iTextures.Num() - 1 ) ) && ( !saveSuccess ) )
+            FString path( FPaths::ConvertRelativePathToFull( filenames[0] ) );
+            std::string str = std::string( TCHAR_TO_UTF8( *path ) );
+            std::string extension = std::string( TCHAR_TO_UTF8( *( FPaths::GetExtension( path, false ) ) ) );
+            ::ULIS::eFileFormat exportImageFormat = ::ULIS::FileFormat_png;
+            bool extensionFound = false;
+            for( int i = 0; i <= ::ULIS::FileFormat_hdr; ++i )
             {
-                EAppReturnType::Type answer = FMessageDialog::Open(EAppMsgType::YesNo, LOCTEXT("content-browser-extension.export-texture.cancel-dialog.message", "Continue the remaing files export ?"), LOCTEXT("content-browser-extension.export-texture.cancel-dialog.title", "Save cancelled"));
-                if( answer == EAppReturnType::Yes )
+                if( extension == ::ULIS::kwImageFormat[i] )
                 {
-                    continue;
-                }
-                else
-                {
+                    exportImageFormat = static_cast< ::ULIS::eFileFormat >( i );
+                    extensionFound = true;
                     break;
                 }
             }
 
-            if( filenames.Num() > 0 )
+            if( !extensionFound )
             {
-                FString path( FPaths::ConvertRelativePathToFull( filenames[0] ) );
-                std::string str = std::string( TCHAR_TO_UTF8( *path ) );
-                std::string extension = std::string( TCHAR_TO_UTF8( *( FPaths::GetExtension( path, false ) ) ) );
-                ::ULIS::eFileFormat exportImageFormat = ::ULIS::FileFormat_png;
-                bool extensionFound = false;
-                for( int i = 0; i <= ::ULIS::FileFormat_hdr; ++i )
-                {
-                    if( extension == ::ULIS::kwImageFormat[i] )
-                    {
-                        exportImageFormat = static_cast< ::ULIS::eFileFormat >( i );
-                        extensionFound = true;
-                        break;
-                    }
-                }
-
-                if( !extensionFound )
-                {
-                    FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("content-browser-extension.export-texture.invalid-extension-dialog.message", "The file extension or the file format is not supported"), LOCTEXT("content-browser-extension.export-texture.invalid-extension-dialog.title", "Invalid extension"));
-                    continue;
-                }
-
-                FTexturePlatformData* platformData = currentTexture->GetPlatformData();
-                ::ULIS::FBlock* odysseyBlockToSave = new ::ULIS::FBlock( platformData->SizeX, platformData->SizeY, ULISFormatForTextureSourceFormat( currentTexture->Source.GetFormat() ) );
-                FOdysseyScopedTextureSettings settingsGuard = FOdysseyScopedTextureSettings::MakeUncompressedNoMipMaps( currentTexture );
-                CopyUTextureSourceDataIntoBlock( odysseyBlockToSave, currentTexture );
-                ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( odysseyBlockToSave->Format() );
-
-                bool canSaveDirectly = false;
-                ::ULIS::FContext::SaveBlockToDiskMetrics(*odysseyBlockToSave, exportImageFormat, &canSaveDirectly);
-                if (canSaveDirectly)
-                {
-                    ctx.SaveBlockToDisk(
-                        *odysseyBlockToSave
-                        , str
-                        , exportImageFormat
-                        , 100
-                    );
-
-                    ctx.Finish();
-                }
-                else
-                {
-                    ::ULIS::eFormat format = odysseyBlockToSave->Model() == ::ULIS::ColorModel_GREY ? ::ULIS::Format_GA8 : ::ULIS::Format_RGBA8;
-                    if (exportImageFormat == ::ULIS::FileFormat_hdr)
-                    {
-                        format = ::ULIS::Format_RGBAF;
-                    }
-
-                    ::ULIS::FBlock blockProxy(odysseyBlockToSave->Width(), odysseyBlockToSave->Height(), format);
-
-                    ::ULIS::FEvent eventConvert;
-                    ctx.ConvertFormat(
-                        *odysseyBlockToSave
-                        , blockProxy
-                        , ULIS::FRectI::Auto
-                        , ULIS::FVec2I(0)
-                        , ULIS::FSchedulePolicy::CacheEfficient
-                        , 0
-                        , nullptr
-                        , &eventConvert
-                    );
-
-                    ctx.SaveBlockToDisk(
-                        blockProxy
-                        , str
-                        , exportImageFormat
-                        , 100
-                    );
-
-                    ctx.Finish();
-                }
-
-                delete odysseyBlockToSave;
+                FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("content-browser-extension.export-texture.invalid-extension-dialog.message", "The file extension or the file format is not supported"), LOCTEXT("content-browser-extension.export-texture.invalid-extension-dialog.title", "Invalid extension"));
+                continue;
             }
+
+            FTexturePlatformData* platformData = currentTexture->GetPlatformData();
+            ::ULIS::FBlock* odysseyBlockToSave = new ::ULIS::FBlock( platformData->SizeX, platformData->SizeY, ULISFormatForTextureSourceFormat( currentTexture->Source.GetFormat() ) );
+            FOdysseyScopedTextureSettings settingsGuard = FOdysseyScopedTextureSettings::MakeUncompressedNoMipMaps( currentTexture );
+            CopyUTextureSourceDataIntoBlock( odysseyBlockToSave, currentTexture );
+            ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( odysseyBlockToSave->Format() );
+
+            bool canSaveDirectly = false;
+            ::ULIS::FContext::SaveBlockToDiskMetrics(*odysseyBlockToSave, exportImageFormat, &canSaveDirectly);
+            if (canSaveDirectly)
+            {
+                ctx.SaveBlockToDisk(
+                    *odysseyBlockToSave
+                    , str
+                    , exportImageFormat
+                    , 100
+                );
+
+                ctx.Finish();
+            }
+            else
+            {
+                ::ULIS::eFormat format = odysseyBlockToSave->Model() == ::ULIS::ColorModel_GREY ? ::ULIS::Format_GA8 : ::ULIS::Format_RGBA8;
+                if (exportImageFormat == ::ULIS::FileFormat_hdr)
+                {
+                    format = ::ULIS::Format_RGBAF;
+                }
+
+                ::ULIS::FBlock blockProxy(odysseyBlockToSave->Width(), odysseyBlockToSave->Height(), format);
+
+                ::ULIS::FEvent eventConvert;
+                ctx.ConvertFormat(
+                    *odysseyBlockToSave
+                    , blockProxy
+                    , ULIS::FRectI::Auto
+                    , ULIS::FVec2I(0)
+                    , ULIS::FSchedulePolicy::CacheEfficient
+                    , 0
+                    , nullptr
+                    , &eventConvert
+                );
+
+                ctx.SaveBlockToDisk(
+                    blockProxy
+                    , str
+                    , exportImageFormat
+                    , 100
+                );
+
+                ctx.Finish();
+            }
+
+            delete odysseyBlockToSave;
         }
     }
-
-};
-
-//////////////////////////////////////////////////////////////////////////
-// FOdysseyTextureContentBrowserExtensions_Impl
-class FOdysseyTextureContentBrowserExtensions_Impl
-{
-public:
-    static void ExecuteSelectedContentFunctor( TSharedPtr<FContentBrowserSelectedAssetExtensionBase> iSelectedAssetFunctor );
-
-    // we keep the iSelectedAssets type without ref and const, because CreateStatic discards qualifiers
-    static void PopulateTextureActionsMenu( FMenuBuilder& ioMenuBuilder, TArray<FAssetData> iSelectedAssets );
-    static void PopulateTextureActionsSubMenu( FMenuBuilder& ioMenuBuilder, TArray<FAssetData> iSelectedAssets );
-
-    static TSharedRef<FExtender> OnExtendContentBrowserAssetSelectionMenu( const TArray<FAssetData>& iSelectedAssets );
-
-    static TArray<FContentBrowserMenuExtender_SelectedAssets>& GetExtenderDelegates();
-};
-
-//---
-
-//static
-void
-FOdysseyTextureContentBrowserExtensions_Impl::ExecuteSelectedContentFunctor( TSharedPtr<FContentBrowserSelectedAssetExtensionBase> iSelectedAssetFunctor )
-{
-    iSelectedAssetFunctor->Execute();
 }
 
-//static
 void
-FOdysseyTextureContentBrowserExtensions_Impl::PopulateTextureActionsMenu( FMenuBuilder& ioMenuBuilder, TArray<FAssetData> iSelectedAssets )
+ExecuteEditWithOdysseyTextureEditor(TArray<UTexture2D*> iTextures)
 {
-    ioMenuBuilder.AddSubMenu(
-          LOCTEXT( "content-browser-extension.texture-action-menu.odyssey-submenu.name", "Odyssey Actions" )
-        , LOCTEXT( "content-browser-extension.texture-action-menu.odyssey-submenu.tooltip", "All actions related to Odyssey" )
-        , FNewMenuDelegate::CreateStatic( &FOdysseyTextureContentBrowserExtensions_Impl::PopulateTextureActionsSubMenu, iSelectedAssets )
-        , false
-        , FSlateIcon( "OdysseyStyle", "OdysseyLogo.Odyssey16" )
-    );
+    for (UTexture2D* texture : iTextures)
+    {
+        if (!texture)
+            continue;
+
+        FOdysseyPainterEditorModule* painterEditorModule = &FModuleManager::GetModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
+        painterEditorModule->OpenStandaloneEditorForAsset(texture);
+    }
 }
 
-//static
 void
-FOdysseyTextureContentBrowserExtensions_Impl::PopulateTextureActionsSubMenu( FMenuBuilder& ioMenuBuilder, TArray<FAssetData> iSelectedAssets )
+ExecuteEditWithDefaultTextureEditor(TArray<UTexture2D*> iTextures)
 {
-    TSharedPtr<FEditTextureExtension> editTextureFunctor = MakeShared< FEditTextureExtension >( iSelectedAssets );
-    TSharedPtr<FExportTextureExtension> exportTextureFunctor = MakeShared< FExportTextureExtension >( iSelectedAssets );
+    for (UTexture2D* texture : iTextures)
+    {
+        if (!texture)
+            continue;
 
-    FUIAction action_EditTexture(
-        FExecuteAction::CreateStatic( &FOdysseyTextureContentBrowserExtensions_Impl::ExecuteSelectedContentFunctor, StaticCastSharedPtr<FContentBrowserSelectedAssetExtensionBase>( editTextureFunctor ) ) );
-    FUIAction action_ExportTexture(
-        FExecuteAction::CreateStatic( &FOdysseyTextureContentBrowserExtensions_Impl::ExecuteSelectedContentFunctor, StaticCastSharedPtr<FContentBrowserSelectedAssetExtensionBase>( exportTextureFunctor ) ) );
+        ITextureEditorModule* TextureEditorModule = &FModuleManager::LoadModuleChecked<ITextureEditorModule>("TextureEditor");
+        TextureEditorModule->CreateTextureEditor(EToolkitMode::Standalone, nullptr, texture);
+    }
+}
+
+void
+BuildEditWithSubMenu( FMenuBuilder& ioMenuBuilder, TArray<FAssetData> iSelectedAssets )
+{
+    TArray<UTexture2D*> textures = GetOnlyTextureAssets(iSelectedAssets);
+    if (textures.IsEmpty())
+        return;
 
     ioMenuBuilder.AddMenuEntry(
-          LOCTEXT( "content-browser-extension.texture-action-menu.odyssey.edit-texture.name", "Edit Texture" )
-        , LOCTEXT( "content-browser-extension.texture-action-menu.odyssey.edit-texture.tooltip", "Open Odyssey paint editor for the selected Texture" )
-        , FSlateIcon( "OdysseyStyle", "PainterEditor.OpenPaintEditor16" )
-        , action_EditTexture
+          LOCTEXT( "content-browser-extension.texture-action-menu.edit-with.odyssey-texture-editor.name", "Odyssey Texture Editor" )
+        , LOCTEXT( "content-browser-extension.texture-action-menu.edit-with.odyssey-texture-editor.tooltip", "Edit Selected Textures with Odyssey Texture Editor" )
+        , FSlateIcon()
+        , FUIAction(FExecuteAction::CreateStatic(&ExecuteEditWithOdysseyTextureEditor, textures))
         , NAME_None
         , EUserInterfaceActionType::Button );
+
+    ioMenuBuilder.AddMenuEntry(
+          LOCTEXT( "content-browser-extension.texture-action-menu.edit-with.default-texture-editor.name", "Default Texture Editor" )
+        , LOCTEXT( "content-browser-extension.texture-action-menu.edit-with.default-texture-editor.tooltip", "Edit Selected Textures with Default Texture Editor" )
+        , FSlateIcon()
+        , FUIAction(FExecuteAction::CreateStatic(&ExecuteEditWithDefaultTextureEditor, textures))
+        , NAME_None
+        , EUserInterfaceActionType::Button );
+}
+
+void
+BuildTextureActionsSection( FMenuBuilder& ioMenuBuilder, TArray<FAssetData> iSelectedAssets )
+{
+    TArray<UTexture2D*> textures = GetOnlyTextureAssets(iSelectedAssets);
+    if (textures.IsEmpty())
+        return;
 
     ioMenuBuilder.AddMenuEntry(
           LOCTEXT( "content-browser-extension.texture-action-menu.odyssey.export-texture.name", "Export Texture" )
         , LOCTEXT( "content-browser-extension.texture-action-menu.odyssey.export-texture.tooltip", "Export Texture with Odyssey" )
         , FSlateIcon( "OdysseyStyle", "OdysseyTexture.ExportTexture_16" )
-        , action_ExportTexture
+        , FUIAction(FExecuteAction::CreateStatic(&ExecuteExportTexture, textures))
         , NAME_None
         , EUserInterfaceActionType::Button );
 }
 
-//static
+void
+BuildCommonSection( FMenuBuilder& ioMenuBuilder, TArray<FAssetData> iSelectedAssets )
+{
+    ioMenuBuilder.AddSubMenu(
+          LOCTEXT( "content-browser-extension.texture-action-menu.edit-with-submenu.name", "Edit With" )
+        , LOCTEXT( "content-browser-extension.texture-action-menu.edit-with-submenu.tooltip", "Edit selected textures using the editor of your choice" )
+        , FNewMenuDelegate::CreateStatic( &BuildEditWithSubMenu, iSelectedAssets )
+        , false
+        , FSlateIcon(FAppStyle::GetAppStyleSetName(), TEXT("Icons.Edit"))
+    );
+}
+
 TSharedRef<FExtender>
-FOdysseyTextureContentBrowserExtensions_Impl::OnExtendContentBrowserAssetSelectionMenu( const TArray<FAssetData>& iSelectedAssets )
+OnExtendContentBrowserAssetSelectionMenu( const TArray<FAssetData>& iSelectedAssets )
 {
     TSharedRef<FExtender> extender( new FExtender() );
 
@@ -306,30 +260,35 @@ FOdysseyTextureContentBrowserExtensions_Impl::OnExtendContentBrowserAssetSelecti
               "GetAssetActions"
             , EExtensionHook::After
             , nullptr
-            , FMenuExtensionDelegate::CreateStatic( &FOdysseyTextureContentBrowserExtensions_Impl::PopulateTextureActionsMenu, iSelectedAssets ) );
+            , FMenuExtensionDelegate::CreateStatic( &BuildTextureActionsSection, iSelectedAssets ) );
+
+        extender->AddMenuExtension(
+              "CommonAssetActions"
+            , EExtensionHook::First
+            , nullptr
+            , FMenuExtensionDelegate::CreateStatic( &BuildCommonSection, iSelectedAssets ) );
     }
 
     return extender;
 }
 
-//static
+//////////////////////////////////////////////////////////////////////////
+// FOdysseyTextureContentBrowserExtensions
+
 TArray<FContentBrowserMenuExtender_SelectedAssets>&
-FOdysseyTextureContentBrowserExtensions_Impl::GetExtenderDelegates()
+GetExtenderDelegates()
 {
     FContentBrowserModule& contentBrowserModule = FModuleManager::LoadModuleChecked<FContentBrowserModule>( TEXT( "ContentBrowser" ) );
-
     return contentBrowserModule.GetAllAssetViewContextMenuExtenders();
 }
 
-//////////////////////////////////////////////////////////////////////////
-// FOdysseyTextureContentBrowserExtensions
 //static
 void
 FOdysseyTextureContentBrowserExtensions::InstallHooks()
 {
-    sgContentBrowserExtenderDelegate = FContentBrowserMenuExtender_SelectedAssets::CreateStatic( &FOdysseyTextureContentBrowserExtensions_Impl::OnExtendContentBrowserAssetSelectionMenu );
+    sgContentBrowserExtenderDelegate = FContentBrowserMenuExtender_SelectedAssets::CreateStatic( &OnExtendContentBrowserAssetSelectionMenu );
 
-    TArray<FContentBrowserMenuExtender_SelectedAssets>& cbMenuExtenderDelegates = FOdysseyTextureContentBrowserExtensions_Impl::GetExtenderDelegates();
+    TArray<FContentBrowserMenuExtender_SelectedAssets>& cbMenuExtenderDelegates = GetExtenderDelegates();
     cbMenuExtenderDelegates.Add( sgContentBrowserExtenderDelegate );
     sgContentBrowserExtenderDelegateHandle = cbMenuExtenderDelegates.Last().GetHandle();
 }
@@ -338,7 +297,7 @@ FOdysseyTextureContentBrowserExtensions::InstallHooks()
 void
 FOdysseyTextureContentBrowserExtensions::RemoveHooks()
 {
-    TArray<FContentBrowserMenuExtender_SelectedAssets>& cbMenuExtenderDelegates = FOdysseyTextureContentBrowserExtensions_Impl::GetExtenderDelegates();
+    TArray<FContentBrowserMenuExtender_SelectedAssets>& cbMenuExtenderDelegates = GetExtenderDelegates();
     cbMenuExtenderDelegates.RemoveAll( []( const FContentBrowserMenuExtender_SelectedAssets& Delegate ) { return Delegate.GetHandle() == sgContentBrowserExtenderDelegateHandle; } );
 }
 

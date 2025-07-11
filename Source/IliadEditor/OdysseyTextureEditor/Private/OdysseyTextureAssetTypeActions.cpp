@@ -60,12 +60,12 @@ void FOdysseyTextureAssetTypeActions::OpenAssetEditor(const TArray<UObject*>& In
         if (!texture)
             continue;
 
-        if( UOdysseyTextureEditorSettings::Get()->OdysseyDefaultEditorEnabled )
+        if( UOdysseyTextureEditorSettings::Get()->DefaultTextureEditor == EOdysseyDefaultTextureEditor::OdysseyPainterEditor)
         {
             FOdysseyPainterEditorModule* painterEditorModule = &FModuleManager::GetModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
             painterEditorModule->OpenStandaloneEditorForAsset(texture);
         }
-        else
+        else if (UOdysseyTextureEditorSettings::Get()->DefaultTextureEditor == EOdysseyDefaultTextureEditor::UnrealDefaultEditor)
         {
             ITextureEditorModule* TextureEditorModule = &FModuleManager::LoadModuleChecked<ITextureEditorModule>("TextureEditor");
             TextureEditorModule->CreateTextureEditor(Mode, EditWithinLevelEditor, texture);
