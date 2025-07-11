@@ -81,52 +81,53 @@ CopyURenderTargetPixelDataIntoBlock(::ULIS::FBlock* iBlock, UTextureRenderTarget
 }
 
 void
-CopyBlockDataToTextureSource(const ::ULIS::FBlock* iBlock, UTexture2D* iTexture, const FIntRect& SrcRect, const FIntPoint& iDstPos)
+CopyBlockDataToTextureSource(const ::ULIS::FBlock* iBlock, UTexture2D* iTexture, const TArray<FIntRect>& SrcRects)
 {
-    ETextureSourceFormat textureSourceFormat = iTexture->Source.GetFormat();
+    uint8* dst = iTexture->Source.LockMip(0);
 
-    ::ULIS::eFormat targetFormat = ULISFormatForTextureSourceFormat(textureSourceFormat);
-    ::ULIS::FBlock block(SrcRect.Width(), SrcRect.Height(), targetFormat);
-
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iBlock->Format());
-    ctx.ConvertFormat( *iBlock, block, ULISUtils::ToULISRectI(SrcRect));
-    ctx.Finish();
-
-    if (textureSourceFormat != TSF_BGRA8 && textureSourceFormat != TSF_G8)
+    for (const FIntRect& SrcRect : SrcRects)
     {
-        FImageView imageView(block.Bits(), SrcRect.Width(), SrcRect.Height(), 1, RawImageFormatForULISFormat(targetFormat), EGammaSpace::Linear);
-        ImageSRGBToLinear(imageView);
-    }
+        ETextureSourceFormat textureSourceFormat = iTexture->Source.GetFormat();
+        ::ULIS::eFormat targetFormat = ULISFormatForTextureSourceFormat(textureSourceFormat);
+        ::ULIS::FBlock block(SrcRect.Width(), SrcRect.Height(), targetFormat);
 
-    if (TextureSourceFormatNeedsConversionToULISFormat(textureSourceFormat))
-    {
-        TArray64<uint8> converted;
-        converted.SetNumUninitialized(SrcRect.Width() * SrcRect.Height() * TextureSourceFormatBytesPerPixel(textureSourceFormat));
-        ConvertULISFormatToTextureSourceFormat(block.Bits(), converted.GetData(), SrcRect.Width(), SrcRect.Height(), textureSourceFormat);
+        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iBlock->Format());
+        ctx.ConvertFormat( *iBlock, block, ULISUtils::ToULISRectI(SrcRect));
+        ctx.Finish();
 
-        uint8* dst = iTexture->Source.LockMip(0);
-        int32 bpp = GTextureSourceFormats[textureSourceFormat].BytesPerPixel;
-        for (int y = 0; y < SrcRect.Height(); y++)
+        if (textureSourceFormat != TSF_BGRA8 && textureSourceFormat != TSF_G8)
         {
-            uint8* srcLine = converted.GetData() + y * SrcRect.Width() * bpp;
-            uint8* dstLine = dst + ((iDstPos.Y + y) * iTexture->Source.GetSizeX() + iDstPos.X) * bpp;
-            FMemory::Memcpy(dstLine, srcLine, SrcRect.Width() * bpp);
+            FImageView imageView(block.Bits(), SrcRect.Width(), SrcRect.Height(), 1, RawImageFormatForULISFormat(targetFormat), EGammaSpace::Linear);
+            ImageSRGBToLinear(imageView);
         }
-        iTexture->Source.UnlockMip(0);
-    }
-    else
-    {
 
-        uint8* dst = iTexture->Source.LockMip(0);
-        int32 bpp = GTextureSourceFormats[textureSourceFormat].BytesPerPixel;
-        for (int y = 0; y < SrcRect.Height(); y++)
+        if (TextureSourceFormatNeedsConversionToULISFormat(textureSourceFormat))
         {
-            uint8* srcLine = block.Bits() + y * block.Width() * bpp;
-            uint8* dstLine = dst + ((iDstPos.Y + y) * iTexture->Source.GetSizeX() + iDstPos.X) * bpp;
-            FMemory::Memcpy(dstLine, srcLine, SrcRect.Width() * bpp);
+            TArray64<uint8> converted;
+            converted.SetNumUninitialized(SrcRect.Width() * SrcRect.Height() * TextureSourceFormatBytesPerPixel(textureSourceFormat));
+            ConvertULISFormatToTextureSourceFormat(block.Bits(), converted.GetData(), SrcRect.Width(), SrcRect.Height(), textureSourceFormat);
+
+            int32 bpp = GTextureSourceFormats[textureSourceFormat].BytesPerPixel;
+            for (int y = 0; y < SrcRect.Height(); y++)
+            {
+                uint8* srcLine = converted.GetData() + y * SrcRect.Width() * bpp;
+                uint8* dstLine = dst + ((SrcRect.Min.Y + y) * iTexture->Source.GetSizeX() + SrcRect.Min.X) * bpp;
+                FMemory::Memcpy(dstLine, srcLine, SrcRect.Width() * bpp);
+            }
         }
-        iTexture->Source.UnlockMip(0);
+        else
+        {
+            int32 bpp = GTextureSourceFormats[textureSourceFormat].BytesPerPixel;
+            for (int y = 0; y < SrcRect.Height(); y++)
+            {
+                uint8* srcLine = block.Bits() + y * block.Width() * bpp;
+                uint8* dstLine = dst + ((SrcRect.Min.Y + y) * iTexture->Source.GetSizeX() + SrcRect.Min.X) * bpp;
+                FMemory::Memcpy(dstLine, srcLine, SrcRect.Width() * bpp);
+            }
+        }
     }
+
+    iTexture->Source.UnlockMip(0);
 }
 
 void

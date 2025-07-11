@@ -128,10 +128,7 @@ UOdysseyTextureLayerImageRaster::OnBlockCommited(const TArray<::ULIS::FRectI>& i
     surface.Invalidate(iRects);
 
     TArray<FIntRect> intRects = ::ULISUtils::ToIntRects(iRects);
-    for (const FIntRect& rect : intRects)
-    {
-        CopyBlockDataToTextureSource(block.Get(), GetRenderTexture(), rect, rect.Min);
-    }
+    CopyBlockDataToTextureSource(block.Get(), GetRenderTexture(), intRects);
 }
 
 void

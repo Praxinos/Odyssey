@@ -447,6 +447,7 @@ UOdysseyAnimationPlayer::UpdateTexture()
 
         RenderTarget->WaitForPendingInitOrStreaming();
         Animation->Render_GameThread(RenderTarget, frame.GetFrame(), renderType );
+
         mInvalidTileMap.Clear();
         return;
     }
