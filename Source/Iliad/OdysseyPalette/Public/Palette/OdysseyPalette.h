@@ -26,7 +26,7 @@ public:
     TObjectPtr<UOdysseyPalette> mPalette = nullptr;
 
     UPROPERTY()
-    int mSet = 0;
+    FString mSet = FString();
 };
 
 /////////////////////////////////////////////////////
@@ -198,9 +198,11 @@ public:
 public:
     //Sets
     const TArray<FName>& GetSets() const;
-    void RenameSet(int iSet, const FName& iName);
-    void DuplicateSet( int iSet, const FName& iName );
-    void RemoveSet(int iIndex);
+    const TMap<FString, FName>& GetSetsIDs() const;
+    void RenameSet(FString iSetId, const FName& iName);
+    FString DuplicateSet(FString iSetId, const FName& iName );
+    void RemoveSet(FString iSetId);
+    FString GetDefaultSetID(); //Returns the first ID we find in the TMap
 
 public:
     //Called by layers when there Parent or Children changed
@@ -210,6 +212,7 @@ public:
 protected:
     virtual void PropertyChanged(const FName& iPropertyName);
     virtual void PostPropertyChanged(const FName& iPropertyName);
+    virtual void PostLoad() override;
 
 public:
     // UObject overrides
@@ -244,10 +247,20 @@ protected:
     void GetEntriesUniqueParents(TArray<UOdysseyPaletteEntry*> iEntries, TArray<UOdysseyPaletteEntry*>& oParents);
 
 private:
+    // Legacy, to delete next version
     UPROPERTY()
     TArray<FName> Sets;
+    //---
+
+    UPROPERTY()
+    TMap<FString, FName> SetsIDs;
 
 public:
+    // Legacy, to delete next version
+    UPROPERTY()
+    bool NeedsSavingAfterUpgrade = false; //If it is true, it means we changed the storage of the sets from the previous version (Sets) to the actual version (SetsIDs), and the asset needs to be saved because of it
+    //---
+
     UPROPERTY()
     TObjectPtr<UOdysseyPaletteEntry> PaletteRoot;
 

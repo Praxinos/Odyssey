@@ -390,7 +390,7 @@ FOdysseyPainterEditorColorSelectorTab::GetCurrentPaletteColorEntry() const
     return mEditor->GetCurrentPaletteColorEntry();
 }
 
-int
+FString
 FOdysseyPainterEditorColorSelectorTab::GetCurrentPaletteSet() const
 {
     return mEditor->GetCurrentPaletteSet();
@@ -453,14 +453,14 @@ FOdysseyPainterEditorColorSelectorTab::OnRemovePaletteSet(UOdysseyPaletteSet* iP
 }
 
 void
-FOdysseyPainterEditorColorSelectorTab::OnPaletteSetChanged(int iIndex, UOdysseyPaletteSet* iPaletteSet)
+FOdysseyPainterEditorColorSelectorTab::OnPaletteSetChanged(FString iIndex, UOdysseyPaletteSet* iPaletteSet)
 {
     mEditor->SetPaletteSet(iIndex, iPaletteSet);
 }
 
 
 void
-FOdysseyPainterEditorColorSelectorTab::OnPaletteCurrentColorEntryChanged(UOdysseyPaletteEntryColor* iEntry, int iSet)
+FOdysseyPainterEditorColorSelectorTab::OnPaletteCurrentColorEntryChanged(UOdysseyPaletteEntryColor* iEntry, FString iSet)
 {
     mEditor->SetCurrentPaletteColorEntry(iEntry, iSet);
 }

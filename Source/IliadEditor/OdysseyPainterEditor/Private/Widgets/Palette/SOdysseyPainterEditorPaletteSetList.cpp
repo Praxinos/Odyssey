@@ -214,7 +214,7 @@ SOdysseyPainterEditorPaletteSetList::OnGenerateRow( TSharedPtr<FOdysseyPainterEd
                 }
             )
             .OnSetChanged_Lambda(
-                [this, iItem](int iSet)
+                [this, iItem](FString iSet)
                 {
                     if( iItem->mPaletteSet->mSet != iSet )
                     {
@@ -260,8 +260,8 @@ SOdysseyPainterEditorPaletteSetList::OnGenerateRow( TSharedPtr<FOdysseyPainterEd
                         if (!currentEntryColor)
                             return false;
 
-                        int currentEntrySet = mCurrentSet.Get();
-                        int entrySet = iItem->mPaletteSet->mSet;
+                        FString currentEntrySet = mCurrentSet.Get();
+                        FString entrySet = iItem->mPaletteSet->mSet;
                         return currentEntryColor == iItem->mEntry && currentEntrySet == entrySet;
                     }
                 );
@@ -442,7 +442,7 @@ SOdysseyPainterEditorPaletteSetList::OnSelectionChanged(TSharedPtr<FOdysseyPaint
                     return;
                 }
             }
-            mOnCurrentColorEntryChanged.ExecuteIfBound(nullptr, 0);
+            mOnCurrentColorEntryChanged.ExecuteIfBound(nullptr, FString());
             return;
         }
 
@@ -450,7 +450,7 @@ SOdysseyPainterEditorPaletteSetList::OnSelectionChanged(TSharedPtr<FOdysseyPaint
             return;
 
         UOdysseyPaletteEntryColor* entryColor = Cast<UOdysseyPaletteEntryColor>(iItem->mEntry);
-        int set = iItem->mPaletteSet->mSet;
+        FString set = iItem->mPaletteSet->mSet;
         mOnCurrentColorEntryChanged.ExecuteIfBound(entryColor, set);
     }
     else
@@ -465,7 +465,7 @@ SOdysseyPainterEditorPaletteSetList::OnSelectionChanged(TSharedPtr<FOdysseyPaint
         }
 
         UOdysseyPaletteEntryColor* entryColor = Cast<UOdysseyPaletteEntryColor>(iItem->mEntry);
-        int set = iItem->mPaletteSet->mSet;
+        FString set = iItem->mPaletteSet->mSet;
         mOnCurrentColorEntryChanged.ExecuteIfBound(entryColor, set);
     }
 }

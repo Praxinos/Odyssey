@@ -28,7 +28,7 @@ struct FPaletteEntrySelection
     UOdysseyPaletteEntryColor* OdysseyPaletteEntryColor = nullptr;
 
     UPROPERTY(EditAnywhere, Category = Appearance, meta = (EditCondition = "false", EditConditionHides))
-    int OdysseyPaletteSet = 0;
+    FString OdysseyPaletteSet = FString();
 };
 
 UCLASS( meta = ( HideCategories = Hidden ) )

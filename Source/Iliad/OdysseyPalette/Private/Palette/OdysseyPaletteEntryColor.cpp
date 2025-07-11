@@ -20,10 +20,10 @@ void
 UOdysseyPaletteEntryColor::PostInitProperties()
 {
     Super::PostInitProperties();
-    if( GetPalette() )
+    if (GetPalette())
     {
-        for (int i = 0; i < GetPalette()->GetSets().Num(); i++)
-            AddSet();
+        for( auto pair: GetPalette()->GetSetsIDs() )
+            AddSet( pair.Key );
     }
 }
 
@@ -33,39 +33,38 @@ UOdysseyPaletteEntryColor::FOnEntryColorChanged& UOdysseyPaletteEntryColor::OnEn
     return onEntryColorChanged;
 }
 
-FColor& UOdysseyPaletteEntryColor::GetColor(int iSet)
+FColor& UOdysseyPaletteEntryColor::GetColor(FString iSet)
 {
-    if( EntryColors.Num() <= iSet )
-        return EntryColors[0];
-
-    return EntryColors[ iSet ];
+    if( !EntryColorsIDs.Contains(iSet) )
+    {
+        static FColor InvalidColor(0, 0, 0, 0);
+        return InvalidColor;
+    }
+    return EntryColorsIDs[iSet];
 }
 
-void UOdysseyPaletteEntryColor::SetColor(FColor iColor, int iSet)
+void UOdysseyPaletteEntryColor::SetColor(FColor iColor, FString iSet)
 {
-    if (EntryColors.Num() <= iSet)
+    if (!EntryColorsIDs.Contains(iSet))
         return;
 
-    EntryColors[iSet] = iColor;
+    EntryColorsIDs[iSet] = iColor;
 }
 
-void UOdysseyPaletteEntryColor::AddSet()
+void UOdysseyPaletteEntryColor::AddSet(FString iNewId)
 {
-    EntryColors.Add( FColor::Black );
+    EntryColorsIDs.Add( iNewId, FColor::Black );
 }
 
-void UOdysseyPaletteEntryColor::DuplicateSetAt(int iIndex /*= -1 */)
+void UOdysseyPaletteEntryColor::DuplicateSetAt(FString iIndexToCopy, FString iNewId)
 {
-    if (iIndex >= 0 && iIndex < EntryColors.Num())
-    {
-        FColor color = EntryColors[iIndex];
-        EntryColors.Add( color );
-    }
+    FColor color = EntryColorsIDs[iIndexToCopy];
+    EntryColorsIDs.Add(iNewId, color);
 }
 
-void UOdysseyPaletteEntryColor::RemoveSet(int iIndex /*= -1*/)
+void UOdysseyPaletteEntryColor::RemoveSet(FString iIndex)
 {
-    EntryColors.RemoveAt( iIndex );
+    EntryColorsIDs.Remove( iIndex );
 }
 
 void UOdysseyPaletteEntryColor::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
@@ -92,6 +91,38 @@ void UOdysseyPaletteEntryColor::PostTransacted(const FTransactionObjectEvent& iT
         PropertyChanged(propertyName);
         PostPropertyChanged(propertyName);
     }
+}
+
+void UOdysseyPaletteEntryColor::PostLoad()
+{
+    Super::PostLoad();
+    // Legacy, to delete next version
+    TArray<FName> setsNames = GetPalette()->GetSets();
+    for (int i = 0; i < setsNames.Num(); i++)
+    {
+        // We have to be careful, because we could have a palette with multiple sets with the same name.
+        // Colors may be mismatched in that case, but at least the TMap will be consistent with the IDs stored in the UOdysseyPalette
+        TArray<FString> ids;
+
+        for (const auto& Pair : GetPalette()->GetSetsIDs())
+        {
+            if (Pair.Value == setsNames[i])
+            {
+                ids.Add(Pair.Key);
+            }
+        }
+
+        for( int j = 0; j < ids.Num(); j++ )
+        {
+            if( EntryColorsIDs.Contains(ids[j]))
+                continue;
+
+            EntryColorsIDs.Add(ids[j], EntryColors[i]);
+        }
+    }
+
+    EntryColors.Empty();
+    //---
 }
 
 void UOdysseyPaletteEntryColor::EntryColorChanged()

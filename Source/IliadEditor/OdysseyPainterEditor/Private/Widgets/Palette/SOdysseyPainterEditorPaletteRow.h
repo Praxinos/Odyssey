@@ -13,13 +13,13 @@ class SOdysseyPainterEditorPaletteRow
     : public STableRow<TSharedPtr<FOdysseyPainterEditorPaletteTreeViewItem>>
 {
 public:
-    DECLARE_DELEGATE_OneParam(FOnSetChanged, int)
+    DECLARE_DELEGATE_OneParam(FOnSetChanged, FString)
 
 public:
     SLATE_BEGIN_ARGS(SOdysseyPainterEditorPaletteRow)
         {}
         SLATE_ATTRIBUTE(UOdysseyPalette*, Palette)
-        SLATE_ATTRIBUTE(int, Set)
+        SLATE_ATTRIBUTE(FString, Set)
         SLATE_EVENT(FOnSetChanged, OnSetChanged)
         SLATE_EVENT(FOnClicked, OnDeleteButtonClicked)
     SLATE_END_ARGS()
@@ -40,7 +40,7 @@ private:
 
 protected:
     TAttribute<UOdysseyPalette*> mPalette;
-    TAttribute<int> mSet;
+    TAttribute<FString> mSet;
     FOnSetChanged mOnSetChanged;
     FOnClicked mOnDeleteButtonClicked;
 };

@@ -27,8 +27,19 @@ FOdysseyPaletteEditorToolkit::~FOdysseyPaletteEditorToolkit()
 FOdysseyPaletteEditorToolkit::FOdysseyPaletteEditorToolkit(UOdysseyPalette* iPalette)
     : mColorsTabId("OdysseyPaletteEditor_Colors")
     , mPalette(iPalette)
-    , mCurrentSet(0)
 {
+    if( mPalette )
+        mCurrentSet = mPalette->GetDefaultSetID();
+    else
+        mCurrentSet = FString();
+
+    // Legacy, to remove next version, ensure that the Palettes are going to be saved with the upgraded data
+    if (mPalette && mPalette->NeedsSavingAfterUpgrade)
+    {
+        mPalette->MarkPackageDirty();
+        mPalette->NeedsSavingAfterUpgrade = false;
+    }
+    //---
 }
 
 void
@@ -254,14 +265,14 @@ FOdysseyPaletteEditorToolkit::InitToolMenuContext(FToolMenuContext& MenuContext)
     MenuContext.AddObject(Context);
 }
 
-int
+FString
 FOdysseyPaletteEditorToolkit::GetCurrentSet() const
 {
     return mCurrentSet;
 }
 
 void
-FOdysseyPaletteEditorToolkit::OnCurrentSetSelected(int iSet)
+FOdysseyPaletteEditorToolkit::OnCurrentSetSelected(FString iSet)
 {
     mCurrentSet = iSet;
 }

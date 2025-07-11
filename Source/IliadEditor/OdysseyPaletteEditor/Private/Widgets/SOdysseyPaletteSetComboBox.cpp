@@ -37,8 +37,8 @@ SOdysseyPaletteSetComboBox::~SOdysseyPaletteSetComboBox()
 SOdysseyPaletteSetComboBox::SOdysseyPaletteSetComboBox()
     : mPaletteAttribute(*this, nullptr)
     , mPalette(nullptr)
-    , mCurrentSetAttribute(*this, 0)
-    , mCurrentSet(0)
+    , mCurrentSetAttribute(*this, FString())
+    , mCurrentSet(FString())
 {
 }
 
@@ -64,7 +64,7 @@ void SOdysseyPaletteSetComboBox::Construct(const FArguments& InArgs)
 }
 
 void
-SOdysseyPaletteSetComboBox::BuildMenu(FMenuBuilder& iMenuBuilder, UOdysseyPalette* iPalette, int iCurrentSet, bool iIsReadOnly, FOnCurrentSetSelected iOnCurrentSetSelected)
+SOdysseyPaletteSetComboBox::BuildMenu(FMenuBuilder& iMenuBuilder, UOdysseyPalette* iPalette, FString iCurrentSet, bool iIsReadOnly, FOnCurrentSetSelected iOnCurrentSetSelected)
 {
     if (!iIsReadOnly)
     {
@@ -97,8 +97,8 @@ SOdysseyPaletteSetComboBox::BuildMenu(FMenuBuilder& iMenuBuilder, UOdysseyPalett
                             {
                                 const FScopedTransaction transaction(LOCTEXT("palette-set-combobox.add-set.transaction", "Add Palette Set"));
                                 FOdysseyObjectEditorUtils::PreChangePropertyValue(iPalette, "Sets");
-                                iPalette->DuplicateSet(iCurrentSet, FName(*setName.ToString()));
-                                iOnCurrentSetSelected.ExecuteIfBound(iPalette->GetSets().Num() - 1);
+                                FString newId = iPalette->DuplicateSet(iCurrentSet, FName(*setName.ToString()));
+                                iOnCurrentSetSelected.ExecuteIfBound(newId);
                                 FOdysseyObjectEditorUtils::PostChangePropertyValue(iPalette, "Sets", EPropertyChangeType::ArrayAdd);
                             }
                         ),
@@ -118,8 +118,14 @@ SOdysseyPaletteSetComboBox::BuildMenu(FMenuBuilder& iMenuBuilder, UOdysseyPalett
                     const FScopedTransaction transaction(LOCTEXT("palette-set-combobox.remove-set.transaction", "Remove Palette Set"));
                     FOdysseyObjectEditorUtils::PreChangePropertyValue(iPalette, "Sets");
                     iPalette->RemoveSet(iCurrentSet);
-                    iOnCurrentSetSelected.ExecuteIfBound(FMath::Max(0, iCurrentSet - 1));
+                    iOnCurrentSetSelected.ExecuteIfBound(iCurrentSet);
                     FOdysseyObjectEditorUtils::PostChangePropertyValue(iPalette, "Sets", EPropertyChangeType::ArrayRemove);
+                }
+            );
+            removeSetParams.DirectActions.CanExecuteAction = FCanExecuteAction::CreateLambda(
+                [iPalette]()
+                {
+                    return iPalette->GetSetsIDs().Num() > 1;
                 }
             );
 
@@ -131,7 +137,7 @@ SOdysseyPaletteSetComboBox::BuildMenu(FMenuBuilder& iMenuBuilder, UOdysseyPalett
             renameSetParams.DirectActions.ExecuteAction = FExecuteAction::CreateLambda(
                 [iOnCurrentSetSelected, iPalette, iCurrentSet]()
                 {
-                    FText setName = FText::FromName(iPalette->GetSets()[iCurrentSet]);
+                    FText setName = FText::FromName(iPalette->GetSetsIDs()[iCurrentSet]);
                     SGenericDialogWidget::OpenDialog(
                         LOCTEXT("palette-set-combobox.rename-set.dialog.title", "Rename Current Set"),
                         SNew(SEditableTextBox)
@@ -167,23 +173,23 @@ SOdysseyPaletteSetComboBox::BuildMenu(FMenuBuilder& iMenuBuilder, UOdysseyPalett
     }
 
     iMenuBuilder.BeginSection("Sets", LOCTEXT("palette-set-combobox.section.sets", "Sets"));
-    for (int i = 0; i < iPalette->GetSets().Num(); i++)
+    for ( auto pair : iPalette->GetSetsIDs())
     {
-        FName set = iPalette->GetSets()[i];
+        FName setName = pair.Value;
 
         FMenuEntryParams params;
-        params.LabelOverride = FText::FromName(set);
+        params.LabelOverride = FText::FromName(setName);
         params.UserInterfaceActionType = EUserInterfaceActionType::Check;
         params.DirectActions.ExecuteAction = FExecuteAction::CreateLambda(
-            [i, iOnCurrentSetSelected]()
+            [pair, iOnCurrentSetSelected]()
             {
-                iOnCurrentSetSelected.ExecuteIfBound(i);
+                iOnCurrentSetSelected.ExecuteIfBound(pair.Key);
             }
         );
         params.DirectActions.GetActionCheckState = FGetActionCheckState::CreateLambda(
-            [i, iCurrentSet]()
+            [pair, iCurrentSet]()
             {
-                return iCurrentSet == i ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+                return iCurrentSet == pair.Key ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
             }
         );
 
@@ -211,10 +217,12 @@ SOdysseyPaletteSetComboBox::GetCurrentSetName() const
     if (!mPalette)
         return FText::GetEmpty();
 
-    if (mCurrentSet < 0 || mCurrentSet >= mPalette->GetSets().Num())
+    if (!mPalette->GetSetsIDs().Contains(mCurrentSet))
         return FText::GetEmpty();
 
-    return FText::FromName(mPalette->GetSets()[mCurrentSet]);
+    const FName* currentSetName = mPalette->GetSetsIDs().Find(mCurrentSet);
+
+    return FText::FromName(*currentSetName);
 }
 void
 SOdysseyPaletteSetComboBox::OnPaletteChanged()

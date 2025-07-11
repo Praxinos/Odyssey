@@ -267,12 +267,12 @@ FOdysseyVectorBucket::GetColor()
         if( mPaletteEntry && mPaletteEntry->IsValidLowLevel() )
         {
             UOdysseyPalette* palette = mPaletteEntry->GetPalette();
-            return Cast< UOdysseyPaletteEntryColor >(mPaletteEntry)->GetColor(mPaletteSet);
+            return Cast< UOdysseyPaletteEntryColor >(mPaletteEntry)->GetColor(mPaletteSetID);
         }
         else
         {
             mPaletteEntry = nullptr;
-            mPaletteSet = 0;
+            mPaletteSetID = FString();
             return mSolidColor;
         }
         case eBucketColorMode::SolidColor:
@@ -327,8 +327,20 @@ FOdysseyVectorBucket::SetPaletteSet( int iPaletteSet )
     mPaletteSet = iPaletteSet;
 }
 
+void
+FOdysseyVectorBucket::SetPaletteSetID(FString iPaletteSetID)
+{
+    mPaletteSetID = iPaletteSetID;
+}
+
 int
 FOdysseyVectorBucket::GetPaletteSet()
 {
     return mPaletteSet;
+}
+
+FString
+FOdysseyVectorBucket::GetPaletteSetID()
+{
+    return mPaletteSetID;
 }

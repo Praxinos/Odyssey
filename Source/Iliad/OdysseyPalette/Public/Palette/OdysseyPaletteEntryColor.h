@@ -30,19 +30,20 @@ public:
     static FOnEntryColorChanged& OnEntryColorChanged();
 
 public:
-    FColor& GetColor(int iSet);
-    void SetColor( FColor iColor, int iSet );
+    FColor& GetColor( FString iSet);
+    void SetColor( FColor iColor, FString iSet );
 
-    virtual void AddSet() override;
-    virtual void DuplicateSetAt( int iIndex = -1 ) override;
+    virtual void AddSet( FString iNewId ) override;
+    virtual void DuplicateSetAt( FString iIndexToCopy, FString iNewId ) override;
 
-    virtual void RemoveSet(int iIndex = -1) override;
+    virtual void RemoveSet( FString iIndex ) override;
 
 public:
     // UObject overrides
     virtual void PostInitProperties() override;
     virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
     virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
+    virtual void PostLoad() override;
 
 protected:
     //Property changed methods
@@ -52,6 +53,11 @@ protected:
     virtual void PostPropertyChanged(const FName& iPropertyName);
 
 public:
-    UPROPERTY(EditAnywhere, Category=Palette)
+    // Legacy, to delete next version
+    UPROPERTY()
     TArray<FColor> EntryColors;
+    //--
+
+    UPROPERTY(EditAnywhere, Category = Palette)
+    TMap<FString, FColor> EntryColorsIDs;
 };

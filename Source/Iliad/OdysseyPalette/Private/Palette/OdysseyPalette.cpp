@@ -9,7 +9,6 @@
 
 UOdysseyPalette::UOdysseyPalette()
 {
-    Sets.Add("Default Set");
 }
 
 UOdysseyPalette::FOnHierarchyChanged& UOdysseyPalette::OnHierarchyChanged()
@@ -387,39 +386,59 @@ UOdysseyPalette::GetSets() const
     return Sets;
 }
 
-void
-UOdysseyPalette::RenameSet(int iSet, const FName& iName)
+const TMap<FString, FName>&
+UOdysseyPalette::GetSetsIDs() const
 {
-    if (iSet < 0 || iSet >= Sets.Num())
-        return;
-
-    Sets[iSet] = iName;
+    return SetsIDs;
 }
 
-void UOdysseyPalette::DuplicateSet(int iSet, const FName& iName)
+void
+UOdysseyPalette::RenameSet(FString iSetId, const FName& iName)
 {
+    if( !SetsIDs.Contains(iSetId) )
+        return;
+
+    SetsIDs[iSetId] = iName;
+}
+
+FString UOdysseyPalette::DuplicateSet(FString iSetId, const FName& iName)
+{
+    if (!SetsIDs.Contains(iSetId))
+        return FString();
+
+    FString newId = FGuid::NewGuid().ToString();
+
     TArray<UOdysseyPaletteEntry*> entries = GetEntries();
     for (int i = 0; i < entries.Num(); i++)
     {
-        entries[i]->DuplicateSetAt(iSet);
+        entries[i]->DuplicateSetAt(iSetId, newId);
     }
 
-    Sets.Add(iName);
+    SetsIDs.Add(newId, iName);
+
+    return newId;
 }
 
-void UOdysseyPalette::RemoveSet(int iIndex /*= -1 */)
+void UOdysseyPalette::RemoveSet(FString iSetId)
 {
-    if (Sets.Num() <= 1)
-        return;
-
-    if (iIndex >= Sets.Num())
+    if (!SetsIDs.Contains(iSetId))
         return;
 
     TArray<UOdysseyPaletteEntry*> entries = GetEntries();
     for (int i = 0; i < entries.Num(); i++)
-        entries[i]->RemoveSet( iIndex );
+        entries[i]->RemoveSet(iSetId);
 
-    Sets.RemoveAt( iIndex );
+    SetsIDs.Remove(iSetId);
+}
+
+FString UOdysseyPalette::GetDefaultSetID()
+{
+    if (SetsIDs.Num() > 0)
+    {
+        TMap<FString, FName>::TIterator It(SetsIDs);
+        return It.Key();
+    }
+    return FString();
 }
 
 void UOdysseyPalette::HierarchyChanged()
@@ -436,6 +455,31 @@ void UOdysseyPalette::PostPropertyChanged(const FName& iPropertyName)
 {
     if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPalette, Sets))
         OnSetsChanged().Broadcast(this);
+}
+
+void UOdysseyPalette::PostLoad()
+{
+    Super::PostLoad();
+
+    // Legacy, to delete next version
+
+    //We can't dirty the asset in the PostLoad, because it's part of the serialization (loading) of the asset, therefore, Unreal ignore Modify() and MarkPackageDirty() in it.
+    //This is why we use a boolean that is checked when this asset is loaded in a texture/animation or palette editor, and dirty the package there if needed
+
+    //We don't delete Sets the first time, because we need it to keep the ordering correct for the entries in the palette.
+    //The second time this palette is loaded, though, we delete sets, and don't do anything more. And even if Sets is empty and SetsIDs is not, the loop after isn't triggered
+    if(SetsIDs.Num() > 0 && Sets.Num() > 0)
+    {
+        Sets.Empty();
+        NeedsSavingAfterUpgrade = true;
+    }
+
+    for (int i = 0; i < Sets.Num(); i++)
+    {
+        SetsIDs.Add(FGuid::NewGuid().ToString(), Sets[i]);
+        NeedsSavingAfterUpgrade = true;
+    }
+    //---
 }
 
 void UOdysseyPalette::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
@@ -469,6 +513,11 @@ void UOdysseyPalette::PostInitProperties()
     if (HasAnyFlags(RF_ClassDefaultObject))
         return;
 
+    if (!HasAnyFlags( RF_NeedLoad | RF_WasLoaded))
+    {
+        SetsIDs.Add(FGuid::NewGuid().ToString(), "Default Set"); //Only add a default set if it's a newly created asset
+    }
+
     PaletteRoot = NewObject<UOdysseyPaletteEntry>(this, UOdysseyPaletteEntryFolder::StaticClass(), NAME_None, RF_Public | RF_Transactional);
     PaletteRoot->OnCreated();
 
@@ -477,12 +526,12 @@ void UOdysseyPalette::PostInitProperties()
 
 UOdysseyPaletteEntry* UOdysseyPalette::CreateEntry(UClass* iEntryType)
 {
-    //Create the Layer
+    //Create the entry
     UOdysseyPaletteEntry* entry = NewObject<UOdysseyPaletteEntry>(this, iEntryType, NAME_None, RF_Public | RF_Transactional);
     if (!entry)
         return nullptr;
 
-    //Name the layer
+    //Name the entry
     FString name = entry->DefaultName.ToString() + TEXT(" ") + FString::FromInt(GetEntries().Num() + 1);
     entry->EntryName = FText::FromString(name);
 

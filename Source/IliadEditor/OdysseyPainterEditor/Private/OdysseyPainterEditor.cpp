@@ -1266,7 +1266,7 @@ FOdysseyPainterEditor::PaintColor(const FOdysseyBrushColor& iColor, bool iIsComm
 {
     mPaintColor = iColor;
     mCurrentPaletteEntryColor = nullptr;
-    mCurrentPaletteSet = 0;
+    mCurrentPaletteSet = FString();
 
     //PATCH: should be automatic in the new drawing Tool, fix it asap
     if (iIsCommit)
@@ -3369,6 +3369,17 @@ FOdysseyPainterEditor::GetPaletteSets() const
         }
     }
 
+    // Legacy, to remove next version, ensure that the Palettes are going to be saved with the upgraded data
+    for(int i = 0; i < paletteSets.Num(); i++)
+    {
+        if(paletteSets[i]->mPalette->NeedsSavingAfterUpgrade)
+        {
+            paletteSets[i]->mPalette->MarkPackageDirty();
+            paletteSets[i]->mPalette->NeedsSavingAfterUpgrade = false;
+        }
+    }
+    //---
+
     return paletteSets;
 }
 
@@ -3378,7 +3389,7 @@ FOdysseyPainterEditor::GetCurrentPaletteColorEntry() const
     return mCurrentPaletteEntryColor;
 }
 
-int
+FString
 FOdysseyPainterEditor::GetCurrentPaletteSet() const
 {
     return mCurrentPaletteSet;
@@ -3397,14 +3408,14 @@ FOdysseyPainterEditor::AddPaletteSet(UOdysseyPalette* iPalette)
     {
         UOdysseyPaletteSet* paletteSet = NewObject<UOdysseyPaletteSet>(animation);
         paletteSet->mPalette = iPalette;
-        paletteSet->mSet = 0;
+        paletteSet->mSet = iPalette->GetDefaultSetID();
         animation->Palettes.Add(paletteSet);
     }
     else if (textureUserData)
     {
         UOdysseyPaletteSet* paletteSet = NewObject<UOdysseyPaletteSet>(textureUserData);
         paletteSet->mPalette = iPalette;
-        paletteSet->mSet = 0;
+        paletteSet->mSet = iPalette->GetDefaultSetID();
         textureUserData->Palettes.Add(paletteSet);
     }
 }
@@ -3437,12 +3448,12 @@ FOdysseyPainterEditor::RemovePaletteSet(UOdysseyPaletteSet* iPaletteSet)
         if (shouldReset)
         {
             mCurrentPaletteEntryColor = nullptr;
-            mCurrentPaletteSet = 0;
+            mCurrentPaletteSet = FString();
         }
     }
 }
 
-void FOdysseyPainterEditor::SetPaletteSet(int iIndex, UOdysseyPaletteSet* iPaletteSet)
+void FOdysseyPainterEditor::SetPaletteSet(FString iIndex, UOdysseyPaletteSet* iPaletteSet)
 {
     iPaletteSet->mSet = iIndex;
 
@@ -3475,14 +3486,14 @@ void FOdysseyPainterEditor::SetPaletteSet(int iIndex, UOdysseyPaletteSet* iPalet
                         for (FOdysseyVectorBucket* bucket : bucketList)
                         {
                             if (bucket->GetPaletteEntry() && bucket->GetPaletteEntry()->GetPalette() == iPaletteSet->mPalette)
-                                bucket->SetPaletteSet(iIndex);
+                                bucket->SetPaletteSetID(iIndex);
                         }
                         for (FOdysseyVectorPath* path : pathList)
                         {
                             if (path->GetBackgroundBucket().GetPaletteEntry() && path->GetBackgroundBucket().GetPaletteEntry()->GetPalette() == iPaletteSet->mPalette)
-                                path->GetBackgroundBucket().SetPaletteSet(iIndex);
+                                path->GetBackgroundBucket().SetPaletteSetID(iIndex);
                             if (path->GetForegroundBucket().GetPaletteEntry() && path->GetForegroundBucket().GetPaletteEntry()->GetPalette() == iPaletteSet->mPalette)
-                                path->GetForegroundBucket().SetPaletteSet(iIndex);
+                                path->GetForegroundBucket().SetPaletteSetID(iIndex);
                         }
                         FOdysseyVectorCell* vectorCell = mediaVectors[i]->GetScene()->GetCell();
                         vectorCell->GetLayer()->RequestRedraw(vectorCell, 0);
@@ -3513,14 +3524,14 @@ void FOdysseyPainterEditor::SetPaletteSet(int iIndex, UOdysseyPaletteSet* iPalet
                     for (FOdysseyVectorBucket* bucket : bucketList)
                     {
                         if (bucket->GetPaletteEntry() && bucket->GetPaletteEntry()->GetPalette() == iPaletteSet->mPalette)
-                            bucket->SetPaletteSet(iIndex);
+                            bucket->SetPaletteSetID(iIndex);
                     }
                     for (FOdysseyVectorPath* path : pathList)
                     {
                         if (path->GetBackgroundBucket().GetPaletteEntry() && path->GetBackgroundBucket().GetPaletteEntry()->GetPalette() == iPaletteSet->mPalette)
-                            path->GetBackgroundBucket().SetPaletteSet(iIndex);
+                            path->GetBackgroundBucket().SetPaletteSetID(iIndex);
                         if (path->GetForegroundBucket().GetPaletteEntry() && path->GetForegroundBucket().GetPaletteEntry()->GetPalette() == iPaletteSet->mPalette)
-                            path->GetForegroundBucket().SetPaletteSet(iIndex);
+                            path->GetForegroundBucket().SetPaletteSetID(iIndex);
                     }
                     FOdysseyVectorCell* vectorCell = mediaVectors[i]->GetScene()->GetCell();
                     vectorCell->GetLayer()->RequestRedraw(vectorCell, 0);
@@ -3531,17 +3542,17 @@ void FOdysseyPainterEditor::SetPaletteSet(int iIndex, UOdysseyPaletteSet* iPalet
 }
 
 void
-FOdysseyPainterEditor::SetCurrentPaletteColorEntry(UOdysseyPaletteEntryColor* iEntry, int iSet)
+FOdysseyPainterEditor::SetCurrentPaletteColorEntry(UOdysseyPaletteEntryColor* iEntry, FString iSet)
 {
     if (!iEntry)
     {
         mCurrentPaletteEntryColor = nullptr;
-        mCurrentPaletteSet = 0;
+        mCurrentPaletteSet = FString();
         return;
     }
 
     UOdysseyPalette* palette = iEntry->GetPalette();
-    if(palette && iSet >= 0 && iSet < palette->GetSets().Num())
+    if(palette && palette->GetSetsIDs().Contains(iSet))
     {
         FColor color = iEntry->GetColor(iSet);
         ::ULIS::FColor ulisColor = ::ULIS::FColor::FromRGBA8(color.R, color.G, color.B, color.A);
@@ -3599,14 +3610,14 @@ FOdysseyPainterEditor::SetCurrentPaletteColorEntry(UOdysseyPaletteEntryColor* iE
                         for (FOdysseyVectorBucket* bucket : bucketList)
                         {
                             if (bucket->GetPaletteEntry() && bucket->GetPaletteEntry()->GetPalette() == iEntry->GetPalette())
-                                bucket->SetPaletteSet(iSet);
+                                bucket->SetPaletteSetID(iSet);
                         }
                         for (FOdysseyVectorPath* path : pathList)
                         {
                             if (path->GetBackgroundBucket().GetPaletteEntry() && path->GetBackgroundBucket().GetPaletteEntry()->GetPalette() == iEntry->GetPalette())
-                                path->GetBackgroundBucket().SetPaletteSet(iSet);
+                                path->GetBackgroundBucket().SetPaletteSetID(iSet);
                             if (path->GetForegroundBucket().GetPaletteEntry() && path->GetForegroundBucket().GetPaletteEntry()->GetPalette() == iEntry->GetPalette())
-                                path->GetForegroundBucket().SetPaletteSet(iSet);
+                                path->GetForegroundBucket().SetPaletteSetID(iSet);
                         }
                         FOdysseyVectorCell* vectorCell = mediaVectors[i]->GetScene()->GetCell();
                         vectorCell->GetLayer()->RequestRedraw(vectorCell, 0);
@@ -3637,14 +3648,14 @@ FOdysseyPainterEditor::SetCurrentPaletteColorEntry(UOdysseyPaletteEntryColor* iE
                     for (FOdysseyVectorBucket* bucket : bucketList)
                     {
                         if (bucket->GetPaletteEntry() && bucket->GetPaletteEntry()->GetPalette() == iEntry->GetPalette())
-                            bucket->SetPaletteSet(iSet);
+                            bucket->SetPaletteSetID(iSet);
                     }
                     for (FOdysseyVectorPath* path : pathList)
                     {
                         if (path->GetBackgroundBucket().GetPaletteEntry() && path->GetBackgroundBucket().GetPaletteEntry()->GetPalette() == iEntry->GetPalette())
-                            path->GetBackgroundBucket().SetPaletteSet(iSet);
+                            path->GetBackgroundBucket().SetPaletteSetID(iSet);
                         if (path->GetForegroundBucket().GetPaletteEntry() && path->GetForegroundBucket().GetPaletteEntry()->GetPalette() == iEntry->GetPalette())
-                            path->GetForegroundBucket().SetPaletteSet(iSet);
+                            path->GetForegroundBucket().SetPaletteSetID(iSet);
                     }
                     FOdysseyVectorCell* vectorCell = mediaVectors[i]->GetScene()->GetCell();
                     vectorCell->GetLayer()->RequestRedraw(vectorCell, 0);
