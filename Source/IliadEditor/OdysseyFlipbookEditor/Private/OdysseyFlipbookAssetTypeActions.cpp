@@ -5,6 +5,7 @@
 
 #include "PaperFlipbook.h"
 #include "OdysseyPainterEditorModule.h"
+#include "OdysseyFlipbookEditorSettings.h"
 
 #define LOCTEXT_NAMESPACE "FlipbookEditor"
 
@@ -48,21 +49,33 @@ FOdysseyFlipbookAssetTypeActions::BuildBackendFilter( FARFilter & InFilter )
 
 void FOdysseyFlipbookAssetTypeActions::OpenAssetEditor(const TArray<UObject*>& InObjects, TSharedPtr<class IToolkitHost> EditWithinLevelEditor )
 {
-    TArray<UObject*> objects;
-
-    for (auto ObjIt = InObjects.CreateConstIterator(); ObjIt; ++ObjIt)
+    for (UObject* object : InObjects)
     {
-        auto odysseyFlipbook = Cast<UPaperFlipbook>(*ObjIt);
+        auto flipbook = Cast<UPaperFlipbook>(object);
+        if (!flipbook)
+            continue;
 
-        if (odysseyFlipbook != NULL)
+        if( UOdysseyFlipbookEditorSettings::Get()->DefaultFlipbookEditor == EOdysseyDefaultFlipbookEditor::OdysseyPainterEditor)
         {
             FOdysseyPainterEditorModule* painterEditorModule = &FModuleManager::GetModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
-            painterEditorModule->OpenStandaloneEditorForAsset(odysseyFlipbook);
+            painterEditorModule->OpenStandaloneEditorForAsset(flipbook);
+        }
+        else if (UOdysseyFlipbookEditorSettings::Get()->DefaultFlipbookEditor == EOdysseyDefaultFlipbookEditor::UnrealDefaultEditor)
+        {
+            FAssetToolsModule& AssetToolsModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>(TEXT("AssetTools"));
+            TArray<TWeakPtr<IAssetTypeActions>> assetTypeActions = AssetToolsModule.Get().GetAssetTypeActionsListForClass(UPaperFlipbook::StaticClass());
+            assetTypeActions.Remove(AsShared());
+
+            if (assetTypeActions.IsEmpty())
+                continue;
+
+            TSharedPtr<IAssetTypeActions> paper2DAssetTypeAction = assetTypeActions[0].Pin();
+            if (!paper2DAssetTypeAction)
+                continue;
+
+            paper2DAssetTypeAction->OpenAssetEditor(InObjects, EditWithinLevelEditor );
         }
     }
-
-    if( objects.Num() != 0 )
-        FAssetTypeActions_Base::OpenAssetEditor( objects, EditWithinLevelEditor );
 }
 
 #undef LOCTEXT_NAMESPACE

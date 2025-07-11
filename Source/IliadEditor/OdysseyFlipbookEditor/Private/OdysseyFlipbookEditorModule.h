@@ -26,6 +26,4 @@ private:
 private:
     /** All created asset type actions. Cached here so that we can unregister them during shutdown. */
     TSharedPtr<IAssetTypeActions> mOdysseyTypeActions;
-    // AssetTypeActions that don't belong to us, we keep track of them to be able to (un)register them, based on Odyssey preferences
-    TSharedPtr<IAssetTypeActions> mUETypeActions;
 };

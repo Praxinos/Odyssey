@@ -44,42 +44,22 @@ FOdysseyFlipbookEditorModule::ShutdownModule()
 
     // Unregister Assets Type Actions
     UnregisterAssetTypeActions();
-
     UnregisterSettings();
-
-    mOdysseyTypeActions = nullptr;
-    mUETypeActions = nullptr;
 }
 
 void
 FOdysseyFlipbookEditorModule::RegisterAssetTypeActions()
 {
     IAssetTools& assetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
+
     // Create Asset Categories
     EAssetTypeCategories::Type category = assetTools.RegisterAdvancedAssetCategory(FName(TEXT("Odyssey")), LOCTEXT("asset-category.name", "Odyssey"));
 
-    if( !mUETypeActions )
-        mUETypeActions = assetTools.GetAssetTypeActionsForClass(UPaperFlipbook::StaticClass() ).Pin();
-    if( !mOdysseyTypeActions )
-        mOdysseyTypeActions = MakeShareable(new FOdysseyFlipbookAssetTypeActions(category));
+    //Create Asset Types Actions
+    mOdysseyTypeActions = MakeShareable(new FOdysseyFlipbookAssetTypeActions(category));
 
-    if( UOdysseyFlipbookEditorSettings::Get()->OdysseyDefaultEditorEnabled )
-    {
-        // Remove old AssetTypeAction from UE
-        assetTools.UnregisterAssetTypeActions(mUETypeActions.ToSharedRef());
-
-        //Register created Asset Type Actions
-        assetTools.RegisterAssetTypeActions(mOdysseyTypeActions.ToSharedRef());
-
-    }
-    else
-    {
-        // Remove old AssetTypeAction
-        assetTools.UnregisterAssetTypeActions(mOdysseyTypeActions.ToSharedRef());
-
-        //Register created Asset Type Actions from UE
-        assetTools.RegisterAssetTypeActions(mUETypeActions.ToSharedRef());
-    }
+    //Register created Asset Type Actions
+    assetTools.RegisterAssetTypeActions(mOdysseyTypeActions.ToSharedRef());
 }
 
 void
@@ -90,7 +70,6 @@ FOdysseyFlipbookEditorModule::UnregisterAssetTypeActions()
 
     IAssetTools& assetTools = FModuleManager::GetModuleChecked<FAssetToolsModule>("AssetTools").Get();
     assetTools.UnregisterAssetTypeActions(mOdysseyTypeActions.ToSharedRef());
-    assetTools.UnregisterAssetTypeActions(mUETypeActions.ToSharedRef());
 }
 
 void
