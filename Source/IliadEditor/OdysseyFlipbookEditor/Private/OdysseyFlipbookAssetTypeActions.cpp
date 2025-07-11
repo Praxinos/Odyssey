@@ -14,6 +14,8 @@
 FOdysseyFlipbookAssetTypeActions::FOdysseyFlipbookAssetTypeActions( EAssetTypeCategories::Type iAssetCategory )
     : mMyAssetCategory( iAssetCategory )
 {
+    FAssetToolsModule& AssetToolsModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>(TEXT("AssetTools"));
+    mPaper2DTypeAction = AssetToolsModule.Get().GetAssetTypeActionsForClass(UPaperFlipbook::StaticClass() ).Pin();
 }
 
 FText
@@ -47,7 +49,21 @@ FOdysseyFlipbookAssetTypeActions::BuildBackendFilter( FARFilter & InFilter )
 }
 
 
-void FOdysseyFlipbookAssetTypeActions::OpenAssetEditor(const TArray<UObject*>& InObjects, TSharedPtr<class IToolkitHost> EditWithinLevelEditor )
+void
+FOdysseyFlipbookAssetTypeActions::OpenAssetEditor(const TArray<UObject*>& InObjects, TSharedPtr<class IToolkitHost> EditWithinLevelEditor )
+{
+    if( UOdysseyFlipbookEditorSettings::Get()->DefaultFlipbookEditor == EOdysseyDefaultFlipbookEditor::OdysseyPainterEditor)
+    {
+        OpenOdysseyAssetEditor(InObjects);
+    }
+    else if (UOdysseyFlipbookEditorSettings::Get()->DefaultFlipbookEditor == EOdysseyDefaultFlipbookEditor::UnrealDefaultEditor)
+    {
+        OpenPaper2DAssetEditor(InObjects);
+    }
+}
+
+void
+FOdysseyFlipbookAssetTypeActions::OpenOdysseyAssetEditor(const TArray<UObject*>& InObjects)
 {
     for (UObject* object : InObjects)
     {
@@ -55,27 +71,15 @@ void FOdysseyFlipbookAssetTypeActions::OpenAssetEditor(const TArray<UObject*>& I
         if (!flipbook)
             continue;
 
-        if( UOdysseyFlipbookEditorSettings::Get()->DefaultFlipbookEditor == EOdysseyDefaultFlipbookEditor::OdysseyPainterEditor)
-        {
-            FOdysseyPainterEditorModule* painterEditorModule = &FModuleManager::GetModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
-            painterEditorModule->OpenStandaloneEditorForAsset(flipbook);
-        }
-        else if (UOdysseyFlipbookEditorSettings::Get()->DefaultFlipbookEditor == EOdysseyDefaultFlipbookEditor::UnrealDefaultEditor)
-        {
-            FAssetToolsModule& AssetToolsModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>(TEXT("AssetTools"));
-            TArray<TWeakPtr<IAssetTypeActions>> assetTypeActions = AssetToolsModule.Get().GetAssetTypeActionsListForClass(UPaperFlipbook::StaticClass());
-            assetTypeActions.Remove(AsShared());
-
-            if (assetTypeActions.IsEmpty())
-                continue;
-
-            TSharedPtr<IAssetTypeActions> paper2DAssetTypeAction = assetTypeActions[0].Pin();
-            if (!paper2DAssetTypeAction)
-                continue;
-
-            paper2DAssetTypeAction->OpenAssetEditor(InObjects, EditWithinLevelEditor );
-        }
+        FOdysseyPainterEditorModule* painterEditorModule = &FModuleManager::GetModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
+        painterEditorModule->OpenStandaloneEditorForAsset(flipbook);
     }
+}
+
+void
+FOdysseyFlipbookAssetTypeActions::OpenPaper2DAssetEditor(const TArray<UObject*>& InObjects)
+{
+    mPaper2DTypeAction->OpenAssetEditor(InObjects, nullptr);
 }
 
 #undef LOCTEXT_NAMESPACE

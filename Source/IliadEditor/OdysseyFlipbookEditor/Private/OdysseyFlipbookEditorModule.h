@@ -4,7 +4,7 @@
 
 #include "Modules/ModuleManager.h"
 
-class IAssetTypeActions;
+class FOdysseyFlipbookAssetTypeActions;
 
 class FOdysseyFlipbookEditorModule
     : public IModuleInterface
@@ -14,16 +14,18 @@ public:
     virtual void StartupModule() override;
     virtual void ShutdownModule() override;
 
-    // AssetTypeActions
-    void RegisterAssetTypeActions();
-    void UnregisterAssetTypeActions();
+    TSharedPtr<FOdysseyFlipbookAssetTypeActions> GetFlipbookTypeActions() const;
 
 private:
     // Settings
     void RegisterSettings();
     void UnregisterSettings();
 
+    // AssetTypeActions
+    void RegisterAssetTypeActions();
+    void UnregisterAssetTypeActions();
+
 private:
     /** All created asset type actions. Cached here so that we can unregister them during shutdown. */
-    TSharedPtr<IAssetTypeActions> mOdysseyTypeActions;
+    TSharedPtr<FOdysseyFlipbookAssetTypeActions> mFlipbookTypeActions;
 };

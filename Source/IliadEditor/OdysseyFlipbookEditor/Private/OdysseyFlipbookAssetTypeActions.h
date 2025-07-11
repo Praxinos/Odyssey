@@ -22,6 +22,10 @@ public:
     virtual void OpenAssetEditor(const TArray<UObject*>& InObjects, TSharedPtr<class IToolkitHost> EditWithinLevelEditor = TSharedPtr<IToolkitHost>()) override;
     // End of IAssetTypeActions interface
 
+    void OpenOdysseyAssetEditor(const TArray<UObject*>& InObjects);
+    void OpenPaper2DAssetEditor(const TArray<UObject*>& InObjects);
+
 private:
     EAssetTypeCategories::Type mMyAssetCategory;
+    TSharedPtr<IAssetTypeActions> mPaper2DTypeAction;
 };

@@ -3,10 +3,12 @@
 
 #include "OdysseyFlipbookContentBrowserExtensions.h"
 
+#include "AssetToolsModule.h"
 #include "ContentBrowserDelegates.h"
 #include "ContentBrowserModule.h"
 #include "PaperFlipbook.h"
-#include "OdysseyPainterEditorModule.h"
+#include "OdysseyFlipbookAssetTypeActions.h"
+#include "OdysseyFlipbookEditorModule.h"
 
 #define LOCTEXT_NAMESPACE "FlipbookEditor"
 
@@ -15,136 +17,80 @@
 static FContentBrowserMenuExtender_SelectedAssets sgContentBrowserExtenderDelegate;
 static FDelegateHandle sgContentBrowserExtenderDelegateHandle;
 
-//////////////////////////////////////////////////////////////////////////
-// FContentBrowserSelectedAssetExtensionBase
-struct FContentBrowserSelectedAssetExtensionBase
-{
-public:
-    virtual ~FContentBrowserSelectedAssetExtensionBase();
-
-    virtual void Execute();
-
-public:
-    TArray<struct FAssetData> mSelectedAssets;
-};
-
 //---
 
-FContentBrowserSelectedAssetExtensionBase::~FContentBrowserSelectedAssetExtensionBase()
+TArray<UObject*>
+GetOnlyFlipbookAssets(TArray<FAssetData> iSelectedAssets)
 {
-}
-
-void
-FContentBrowserSelectedAssetExtensionBase::Execute()
-{
-}
-
-//////////////////////////////////////////////////////////////////////////
-// FEditFlipbookExtension
-struct FEditFlipbookExtension
-    : public FContentBrowserSelectedAssetExtensionBase
-{
-public:
-    FEditFlipbookExtension();
-
-public:
-    virtual void Execute() override;
-
-    void EditFlipbooks( TArray<UPaperFlipbook*>& Flipbooks );
-};
-
-//---
-
-FEditFlipbookExtension::FEditFlipbookExtension()
-    : FContentBrowserSelectedAssetExtensionBase()
-{
-}
-
-void
-FEditFlipbookExtension::Execute()
-{
-    TArray<UPaperFlipbook*> Flipbooks;
-    for( auto assetIt = mSelectedAssets.CreateConstIterator(); assetIt; ++assetIt )
+    TArray<UObject*> flipbooks;
+    for( auto assetIt = iSelectedAssets.CreateConstIterator(); assetIt; ++assetIt )
     {
         const FAssetData& assetData = *assetIt;
-        if( UPaperFlipbook* Flipbook = Cast<UPaperFlipbook>( assetData.GetAsset() ) )
+        UObject* object = assetData.GetAsset();
+        if( object->IsA<UPaperFlipbook>())
         {
-            Flipbooks.Add( Flipbook );
+            flipbooks.Add( object );
         }
     }
-
-    EditFlipbooks( Flipbooks );
+    return flipbooks;
 }
 
 void
-FOdysseyFlipbookContentBrowserExtensions::EditFlipbooksWarning()
+ExecuteEditWithOdysseyFlipbookEditor(TArray<UObject*> iFlipbooks)
 {
-    FMessageDialog::Open(
-        EAppMsgType::Ok,
-        LOCTEXT("content-browser-extension.flipbook-already-opened.message", "The flipbook or one of its sprite or textures is already opened in an other editor. Please close the editor before opening the flipbook with Odyssey."),
-        LOCTEXT("content-browser-extension.flipbook-already-opened.title", "Flipbook Already Opened"));
+    FOdysseyFlipbookEditorModule& odysseyFlipbookEditorModule = FModuleManager::LoadModuleChecked<FOdysseyFlipbookEditorModule>(TEXT("OdysseyFlipbookEditor"));
+    TSharedPtr<FOdysseyFlipbookAssetTypeActions> typeActions = odysseyFlipbookEditorModule.GetFlipbookTypeActions();
+    typeActions->OpenOdysseyAssetEditor(iFlipbooks);
 }
 
 void
-FEditFlipbookExtension::EditFlipbooks( TArray<UPaperFlipbook*>& iFlipbooks )
+ExecuteEditWithDefaultFlipbookEditor(TArray<UObject*> iFlipbooks)
 {
-    for (auto ObjIt = iFlipbooks.CreateConstIterator(); ObjIt; ++ObjIt)
-    {
-        auto odysseyFlipbook = Cast<UPaperFlipbook>(*ObjIt);
-
-        if (odysseyFlipbook != NULL)
-        {
-            FOdysseyPainterEditorModule* painterEditorModule = &FModuleManager::GetModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
-            painterEditorModule->OpenStandaloneEditorForAsset(odysseyFlipbook);
-        }
-    }
+    FOdysseyFlipbookEditorModule& odysseyFlipbookEditorModule = FModuleManager::LoadModuleChecked<FOdysseyFlipbookEditorModule>(TEXT("OdysseyFlipbookEditor"));
+    TSharedPtr<FOdysseyFlipbookAssetTypeActions> typeActions = odysseyFlipbookEditorModule.GetFlipbookTypeActions();
+    typeActions->OpenPaper2DAssetEditor(iFlipbooks);
 }
-
-//////////////////////////////////////////////////////////////////////////
-// FOdysseyFlipbookContentBrowserExtensions_Impl
-class FOdysseyFlipbookContentBrowserExtensions_Impl
-{
-public:
-    static void ExecuteSelectedContentFunctor( TSharedPtr<FContentBrowserSelectedAssetExtensionBase> iSelectedAssetFunctor );
-
-    static void PopulateFlipbookActionsMenu( FMenuBuilder& ioMenuBuilder, TArray<FAssetData> iSelectedAssets );
-
-    static TSharedRef<FExtender> OnExtendContentBrowserAssetSelectionMenu( const TArray<FAssetData>& iSelectedAssets );
-
-    static TArray<FContentBrowserMenuExtender_SelectedAssets>& GetExtenderDelegates();
-};
 
 //---
 
-//static
 void
-FOdysseyFlipbookContentBrowserExtensions_Impl::ExecuteSelectedContentFunctor( TSharedPtr<FContentBrowserSelectedAssetExtensionBase> iSelectedAssetFunctor )
+BuildEditWithSubMenu( FMenuBuilder& ioMenuBuilder, TArray<FAssetData> iSelectedAssets )
 {
-    iSelectedAssetFunctor->Execute();
-}
-
-//static
-void
-FOdysseyFlipbookContentBrowserExtensions_Impl::PopulateFlipbookActionsMenu( FMenuBuilder& ioMenuBuilder, TArray<FAssetData> iSelectedAssets )
-{
-    TSharedPtr<FEditFlipbookExtension> editFlipbookFunctor = MakeShareable( new FEditFlipbookExtension() );
-    editFlipbookFunctor->mSelectedAssets = iSelectedAssets;
-
-    FUIAction action_EditFlipbook(
-        FExecuteAction::CreateStatic( &FOdysseyFlipbookContentBrowserExtensions_Impl::ExecuteSelectedContentFunctor, StaticCastSharedPtr<FContentBrowserSelectedAssetExtensionBase>( editFlipbookFunctor ) ) );
+    TArray<UObject*> flipbooks = GetOnlyFlipbookAssets(iSelectedAssets);
+    if (flipbooks.IsEmpty())
+        return;
 
     ioMenuBuilder.AddMenuEntry(
-          LOCTEXT( "content-browser-extension.action-menu.edit-flipbook.name", "Edit Flipbook with Odyssey" )
-        , LOCTEXT( "content-browser-extension.action-menu.edit-flipbook.tooltip", "Open Odyssey paint editor for the selected Flipbook" )
-        , FSlateIcon( "OdysseyStyle", "PainterEditor.OpenPaintEditor16" )
-        , action_EditFlipbook
+          LOCTEXT( "content-browser-extension.flipbook-action-menu.edit-with.odyssey-flipbook-editor.name", "Odyssey Flipbook Editor" )
+        , LOCTEXT( "content-browser-extension.flipbook-action-menu.edit-with.odyssey-flipbook-editor.tooltip", "Edit Selected Flipbooks with Odyssey Flipbook Editor" )
+        , FSlateIcon()
+        , FUIAction(FExecuteAction::CreateStatic(&ExecuteEditWithOdysseyFlipbookEditor, flipbooks))
+        , NAME_None
+        , EUserInterfaceActionType::Button );
+
+    ioMenuBuilder.AddMenuEntry(
+          LOCTEXT( "content-browser-extension.flipbook-action-menu.edit-with.default-flipbook-editor.name", "Default Flipbook Editor" )
+        , LOCTEXT( "content-browser-extension.flipbook-action-menu.edit-with.default-flipbook-editor.tooltip", "Edit Selected Flipbooks with Default Flipbook Editor" )
+        , FSlateIcon()
+        , FUIAction(FExecuteAction::CreateStatic(&ExecuteEditWithDefaultFlipbookEditor, flipbooks))
         , NAME_None
         , EUserInterfaceActionType::Button );
 }
 
-//static
+void
+BuildCommonSection( FMenuBuilder& ioMenuBuilder, TArray<FAssetData> iSelectedAssets )
+{
+    ioMenuBuilder.AddSubMenu(
+          LOCTEXT( "content-browser-extension.flipbook-action-menu.edit-with-submenu.name", "Edit With" )
+        , LOCTEXT( "content-browser-extension.flipbook-action-menu.edit-with-submenu.tooltip", "Edit selected flipbooks using the editor of your choice" )
+        , FNewMenuDelegate::CreateStatic( &BuildEditWithSubMenu, iSelectedAssets )
+        , false
+        , FSlateIcon(FAppStyle::GetAppStyleSetName(), TEXT("Icons.Edit"))
+    );
+}
+
 TSharedRef<FExtender>
-FOdysseyFlipbookContentBrowserExtensions_Impl::OnExtendContentBrowserAssetSelectionMenu( const TArray<FAssetData>& iSelectedAssets )
+OnExtendContentBrowserAssetSelectionMenu( const TArray<FAssetData>& iSelectedAssets )
 {
     TSharedRef<FExtender> extender( new FExtender() );
 
@@ -157,35 +103,35 @@ FOdysseyFlipbookContentBrowserExtensions_Impl::OnExtendContentBrowserAssetSelect
 
     if( isAnyFlipbooks )
     {
-        // Add the edit Flipbook action to the menu
+        // Add the edit flipbook action to the menu
+
         extender->AddMenuExtension(
-              "GetAssetActions"
-            , EExtensionHook::After
+              "CommonAssetActions"
+            , EExtensionHook::First
             , nullptr
-            , FMenuExtensionDelegate::CreateStatic( &FOdysseyFlipbookContentBrowserExtensions_Impl::PopulateFlipbookActionsMenu, iSelectedAssets ) );
+            , FMenuExtensionDelegate::CreateStatic( &BuildCommonSection, iSelectedAssets ) );
     }
 
     return extender;
 }
 
-//static
+//////////////////////////////////////////////////////////////////////////
+// FOdysseyFlipbookContentBrowserExtensions
+
 TArray<FContentBrowserMenuExtender_SelectedAssets>&
-FOdysseyFlipbookContentBrowserExtensions_Impl::GetExtenderDelegates()
+GetExtenderDelegates()
 {
     FContentBrowserModule& contentBrowserModule = FModuleManager::LoadModuleChecked<FContentBrowserModule>( TEXT( "ContentBrowser" ) );
-
     return contentBrowserModule.GetAllAssetViewContextMenuExtenders();
 }
 
-//////////////////////////////////////////////////////////////////////////
-// FOdysseyFlipbookContentBrowserExtensions
 //static
 void
 FOdysseyFlipbookContentBrowserExtensions::InstallHooks()
 {
-    sgContentBrowserExtenderDelegate = FContentBrowserMenuExtender_SelectedAssets::CreateStatic( &FOdysseyFlipbookContentBrowserExtensions_Impl::OnExtendContentBrowserAssetSelectionMenu );
+    sgContentBrowserExtenderDelegate = FContentBrowserMenuExtender_SelectedAssets::CreateStatic( &OnExtendContentBrowserAssetSelectionMenu );
 
-    TArray<FContentBrowserMenuExtender_SelectedAssets>& cbMenuExtenderDelegates = FOdysseyFlipbookContentBrowserExtensions_Impl::GetExtenderDelegates();
+    TArray<FContentBrowserMenuExtender_SelectedAssets>& cbMenuExtenderDelegates = GetExtenderDelegates();
     cbMenuExtenderDelegates.Add( sgContentBrowserExtenderDelegate );
     sgContentBrowserExtenderDelegateHandle = cbMenuExtenderDelegates.Last().GetHandle();
 }
@@ -194,7 +140,7 @@ FOdysseyFlipbookContentBrowserExtensions::InstallHooks()
 void
 FOdysseyFlipbookContentBrowserExtensions::RemoveHooks()
 {
-    TArray<FContentBrowserMenuExtender_SelectedAssets>& cbMenuExtenderDelegates = FOdysseyFlipbookContentBrowserExtensions_Impl::GetExtenderDelegates();
+    TArray<FContentBrowserMenuExtender_SelectedAssets>& cbMenuExtenderDelegates = GetExtenderDelegates();
     cbMenuExtenderDelegates.RemoveAll( []( const FContentBrowserMenuExtender_SelectedAssets& Delegate ) { return Delegate.GetHandle() == sgContentBrowserExtenderDelegateHandle; } );
 }
 

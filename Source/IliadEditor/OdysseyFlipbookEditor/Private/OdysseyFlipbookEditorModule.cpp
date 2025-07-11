@@ -47,6 +47,12 @@ FOdysseyFlipbookEditorModule::ShutdownModule()
     UnregisterSettings();
 }
 
+TSharedPtr<FOdysseyFlipbookAssetTypeActions>
+FOdysseyFlipbookEditorModule::GetFlipbookTypeActions() const
+{
+    return mFlipbookTypeActions;
+}
+
 void
 FOdysseyFlipbookEditorModule::RegisterAssetTypeActions()
 {
@@ -56,10 +62,10 @@ FOdysseyFlipbookEditorModule::RegisterAssetTypeActions()
     EAssetTypeCategories::Type category = assetTools.RegisterAdvancedAssetCategory(FName(TEXT("Odyssey")), LOCTEXT("asset-category.name", "Odyssey"));
 
     //Create Asset Types Actions
-    mOdysseyTypeActions = MakeShareable(new FOdysseyFlipbookAssetTypeActions(category));
+    mFlipbookTypeActions = MakeShareable(new FOdysseyFlipbookAssetTypeActions(category));
 
     //Register created Asset Type Actions
-    assetTools.RegisterAssetTypeActions(mOdysseyTypeActions.ToSharedRef());
+    assetTools.RegisterAssetTypeActions(mFlipbookTypeActions.ToSharedRef());
 }
 
 void
@@ -69,7 +75,7 @@ FOdysseyFlipbookEditorModule::UnregisterAssetTypeActions()
         return;
 
     IAssetTools& assetTools = FModuleManager::GetModuleChecked<FAssetToolsModule>("AssetTools").Get();
-    assetTools.UnregisterAssetTypeActions(mOdysseyTypeActions.ToSharedRef());
+    assetTools.UnregisterAssetTypeActions(mFlipbookTypeActions.ToSharedRef());
 }
 
 void
