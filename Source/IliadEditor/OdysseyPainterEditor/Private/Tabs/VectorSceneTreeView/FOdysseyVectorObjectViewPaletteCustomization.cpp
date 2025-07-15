@@ -82,26 +82,26 @@ void FOdysseyVectorObjectViewPaletteCustomization::CustomizeChildren(TSharedRef<
 
     //Not the best, but we need to know which palettes are loaded by the editor to filter the assets in the SObjectPropertyEntryBox below
     TArray<UObject*> OuterObjects;
-    FOdysseyPainterEditor* editor = nullptr;
+    mEditor = nullptr;
     FOnShouldFilterAsset filterPalette;
 
     StructPropertyHandle->GetOuterObjects(OuterObjects);
     if( OuterObjects.Num() > 0 && OuterObjects[0]->IsA(UOdysseyPainterEditorVectorObjectView::StaticClass() ) )
     {
         UOdysseyPainterEditorVectorObjectView* view = Cast<UOdysseyPainterEditorVectorObjectView>(OuterObjects[0]);
-        editor = view->GetEditor();
+        mEditor = view->GetEditor();
     }
     else if( OuterObjects.Num() > 0 && OuterObjects[0]->IsA(UOdysseyPainterEditorVectorBucketView::StaticClass()))
     {
         UOdysseyPainterEditorVectorBucketView* view = Cast<UOdysseyPainterEditorVectorBucketView>(OuterObjects[0]);
-        editor = view->GetEditor();
+        mEditor = view->GetEditor();
     }
 
-    if( editor )
+    if(mEditor)
     {
 
         TArray<UOdysseyPalette*> palettesAlreadyLoaded;
-        for (UOdysseyPaletteSet* set : editor->GetPaletteSets())
+        for (UOdysseyPaletteSet* set : mEditor->GetPaletteSets())
         {
             palettesAlreadyLoaded.Add(set->mPalette);
         }
@@ -244,7 +244,21 @@ void FOdysseyVectorObjectViewPaletteCustomization::OnPaletteChanged(const FAsset
     UOdysseyPalette* palette = Cast<UOdysseyPalette>(AssetData.GetAsset());
     mPaletteHandle->SetValue(palette);
     mPaletteEntryHandle->SetValue((UObject*)nullptr);
-    mPaletteSetHandle->SetValue(FString());
+
+    if( mEditor )
+    {
+        for(UOdysseyPaletteSet* set : mEditor->GetPaletteSets())
+        {
+            if( set->mPalette == palette )
+            {
+                mPaletteSetHandle->SetValue(set->mSet);
+            }
+        }
+    }
+    else
+    {
+        mPaletteSetHandle->SetValue(FString());
+    }
 }
 
 void

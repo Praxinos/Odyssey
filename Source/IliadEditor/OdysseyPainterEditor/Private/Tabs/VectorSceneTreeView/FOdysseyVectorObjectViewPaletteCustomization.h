@@ -10,6 +10,7 @@
 #include "Widgets/Input/SComboBox.h"
 
 class UOdysseyPaletteEntryColor;
+class FOdysseyPainterEditor;
 
 class FOdysseyVectorObjectViewPaletteCustomization : public IPropertyTypeCustomization
 {
@@ -51,4 +52,7 @@ private:
     TSharedPtr<IPropertyHandle> mPaletteEntryHandle;
     TSharedPtr<IPropertyHandle> mPaletteSetHandle;
     TSharedPtr<IPropertyHandle> mPaletteHandle;
+
+private:
+    FOdysseyPainterEditor* mEditor;
 };

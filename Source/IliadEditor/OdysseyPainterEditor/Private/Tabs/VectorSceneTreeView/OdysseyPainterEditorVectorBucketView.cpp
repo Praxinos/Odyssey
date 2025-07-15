@@ -35,9 +35,19 @@ UOdysseyPainterEditorVectorBucketView::ImportParam()
     GradientColor0 = mBucket->GetGradientColor0();
     GradientColor1 = mBucket->GetGradientColor1();
     RadialRadius = mBucket->GetRadialRadius();
-    PaletteSelection.OdysseyPalette = mBucket->GetPaletteEntry()->GetPalette();
-    PaletteSelection.OdysseyPaletteEntryColor = Cast<UOdysseyPaletteEntryColor>(mBucket->GetPaletteEntry());
-    PaletteSelection.OdysseyPaletteSet = mBucket->GetPaletteSetID();
+
+    if (mBucket->GetPaletteEntry())
+    {
+        PaletteSelection.OdysseyPalette = mBucket->GetPaletteEntry()->GetPalette();
+        PaletteSelection.OdysseyPaletteEntryColor = Cast<UOdysseyPaletteEntryColor>(mBucket->GetPaletteEntry());
+        PaletteSelection.OdysseyPaletteSet = mBucket->GetPaletteSetID();
+    }
+    else
+    {
+        PaletteSelection.OdysseyPalette = nullptr;
+        PaletteSelection.OdysseyPaletteEntryColor = nullptr;
+        PaletteSelection.OdysseyPaletteSet = FString();
+    }
 }
 
 void
