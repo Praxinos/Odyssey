@@ -101,11 +101,11 @@ CopyBlockDataToTextureSource(const ::ULIS::FBlock* iBlock, UTexture2D* iTexture,
             converted.SetNumUninitialized(SrcRect.Width() * SrcRect.Height() * TextureSourceFormatBytesPerPixel(textureSourceFormat));
             ConvertULISFormatToTextureSourceFormat(block.Bits(), converted.GetData(), SrcRect.Width(), SrcRect.Height(), textureSourceFormat);
 
-            if (textureSourceFormat != TSF_BGRA8 && textureSourceFormat != TSF_G8)
+            /* if (textureSourceFormat != TSF_BGRA8 && textureSourceFormat != TSF_G8)
             {
                 FImageView imageView(converted.GetData(), SrcRect.Width(), SrcRect.Height(), 1, FImageCoreUtils::ConvertToRawImageFormat(textureSourceFormat), EGammaSpace::Linear);
                 ImageSRGBToLinear(imageView);
-            }
+            } */
 
             int32 bpp = GTextureSourceFormats[textureSourceFormat].BytesPerPixel;
             for (int y = 0; y < SrcRect.Height(); y++)
@@ -117,11 +117,11 @@ CopyBlockDataToTextureSource(const ::ULIS::FBlock* iBlock, UTexture2D* iTexture,
         }
         else
         {
-            if (textureSourceFormat != TSF_BGRA8 && textureSourceFormat != TSF_G8)
+            /* if (textureSourceFormat != TSF_BGRA8 && textureSourceFormat != TSF_G8)
             {
                 FImageView imageView(block.Bits(), SrcRect.Width(), SrcRect.Height(), 1, FImageCoreUtils::ConvertToRawImageFormat(textureSourceFormat), EGammaSpace::Linear);
                 ImageSRGBToLinear(imageView);
-            }
+            } */
 
             int32 bpp = GTextureSourceFormats[textureSourceFormat].BytesPerPixel;
             for (int y = 0; y < SrcRect.Height(); y++)
@@ -152,21 +152,21 @@ InitTextureWithBlockData(const ::ULIS::FBlock* iBlock, UTexture2D* iTexture, ETe
         dst.SetNumUninitialized(block.Width() * block.Height() * TextureSourceFormatBytesPerPixel(iFormat));
         ConvertULISFormatToTextureSourceFormat(block.Bits(), dst.GetData(), block.Width(), block.Height(), iFormat);
 
-        if (iFormat != TSF_BGRA8 && iFormat != TSF_G8)
+        /* if (iFormat != TSF_BGRA8 && iFormat != TSF_G8)
         {
             FImageView imageView(dst.GetData(), block.Width(), block.Height(), 1, FImageCoreUtils::ConvertToRawImageFormat(iFormat), EGammaSpace::Linear);
             ImageSRGBToLinear(imageView);
-        }
+        } */
 
         iTexture->Source.Init(block.Width(), block.Height(), 1, 1, iFormat, dst.GetData());
     }
     else
     {
-        if (iFormat != TSF_BGRA8 && iFormat != TSF_G8)
+        /*if (iFormat != TSF_BGRA8 && iFormat != TSF_G8)
         {
             FImageView imageView(block.Bits(), block.Width(), block.Height(), 1, FImageCoreUtils::ConvertToRawImageFormat(iFormat), EGammaSpace::Linear);
             ImageSRGBToLinear(imageView);
-        }
+        }*/
 
         iTexture->Source.Init(block.Width(), block.Height(), 1, 1, iFormat, block.Bits());
     }
@@ -269,7 +269,7 @@ NewRGBAFTextureFromBlockData(::ULIS::FBlock* iBlock)
     */
 }
 
-void
+/* void
 ImageLinearToSRGB(const FImageView& iImage)
 {
     FImage rgba32FImage(iImage.SizeX, iImage.SizeY, ERawImageFormat::RGBA32F, EGammaSpace::Linear);
@@ -284,7 +284,7 @@ ImageLinearToSRGB(const FImageView& iImage)
     }
 
     FImageCore::CopyImage(rgba32FImage, iImage);
-}
+}*/
 
 void
 ImageSRGBToLinear(const FImageView& iImage)
@@ -505,6 +505,7 @@ InvalidateTextureFromSourceDataUsingSortedRects( const ::ULIS::FBlock* iData, UT
             for( int32 j = 0; j < ioSrcRects[i].Num(); ++j ) {
 
                 EGammaSpace gammaSpace = ((fmt != ERawImageFormat::G8 && fmt != ERawImageFormat::BGRA8) || !iTexture->SRGB) ? EGammaSpace::Linear : EGammaSpace::sRGB;
+                //EGammaSpace gammaSpace = !iTexture->SRGB ? EGammaSpace::Linear : EGammaSpace::sRGB;
 
                 const int len = ioSrcRects[i][j].h;
                 tileImages[i].Emplace(

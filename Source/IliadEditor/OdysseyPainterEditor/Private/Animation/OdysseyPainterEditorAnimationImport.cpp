@@ -24,6 +24,8 @@
 #include "ScopedTransaction.h"
 #include "OdysseyRasterBlockMutator.h"
 #include "ULISLoaderModule.h"
+#include "Factories/TextureFactory.h"
+#include "Factories/Factory.h"
 
 #define LOCTEXT_NAMESPACE "FOdysseyPainterEditorAnimationImport"
 
@@ -184,93 +186,34 @@ FOdysseyPainterEditorAnimationLayerImport::ImportImageSequence(UOdysseyAnimation
     FScopedSlowTask progressBar(Paths.Num(), LOCTEXT("animation-editor.import-image-sequence.progress-bar.title", "Importing Image Sequence"));
     progressBar.MakeDialog();
 
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( format );
-    TArray<TSharedPtr<::ULIS::FBlock>> blocks;
+    TStrongObjectPtr<UTextureFactory> TextureFactory(NewObject<UTextureFactory>());
+    TArray<TStrongObjectPtr<UTexture2D>> importedTextures;
+    importedTextures.Reserve(Paths.Num());
     for (const FString& filename : Paths)
     {
         progressBar.EnterProgressFrame();
-        FString path( FPaths::ConvertRelativePathToFull( filename ) );
-        FString extension = FPaths::GetExtension(path, false);
-        ::ULIS::eFileFormat exportImageFormat = ::ULIS::FileFormat_png;
-        bool extensionFound = false;
-        for( int i = 0; i <= ::ULIS::FileFormat_hdr; ++i )
-        {
-            if( extension == ::ULIS::kwImageFormat[i] )
-            {
-                exportImageFormat = static_cast< ::ULIS::eFileFormat >( i );
-                extensionFound = true;
-                break;
-            }
-        }
 
-        if( !extensionFound )
+        UObject* importedObject = UFactory::StaticImportObject(UTexture2D::StaticClass(), GetTransientPackage(), NAME_None, EObjectFlags::RF_NoFlags, *filename, nullptr, TextureFactory.Get());
+        UTexture2D* importedTexture = Cast<UTexture2D>(importedObject);
+        if (!importedTexture)
             continue;
 
-        TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>();
-        std::string stdPath( TCHAR_TO_UTF8(*path) );
-        ::ULIS::ulError error = ctx.XLoadBlockFromDisk(
-              *block
-            , stdPath
-        );
-
-        if (error != ULIS_NO_ERROR)
-            continue;
-
-        ctx.Finish();
-
-        if (block->IsHollow())
-            continue;
-
-        if (block->Width() == animation->GetWidth() && block->Height() == animation->GetHeight() && block->Format() == format)
-        {
-            blocks.Add(block);
-            continue;
-        }
-
-        //Need to convert the block before adding it to the layer
-        TSharedPtr<::ULIS::FBlock> blockProxy = MakeShared<::ULIS::FBlock>(animation->GetWidth(), animation->GetHeight(), format);
-
-        ::ULIS::FEvent eventConvert;
-        ctx.ConvertFormat(
-            *block
-            , *blockProxy
-            , ::ULIS::FRectI::Auto
-            , ::ULIS::FVec2I( 0 )
-            , ULIS::FSchedulePolicy::CacheEfficient
-            , 0
-            , nullptr
-            , &eventConvert
-        );
-
-        ctx.Finish();
-
-        blocks.Add(blockProxy);
+        importedTextures.Emplace(importedTexture);
     }
-
-    if (blocks.IsEmpty())
-        return {};
 
     #ifdef WITH_EDITOR
         FScopedTransaction ScopedTransaction(LOCTEXT("animation-editor.transaction.import-image-sequence", "Import Image Sequence"));
     #endif
 
-    TArray<UOdysseyLayerCell*> cells = Layer->AddCells(UOdysseyAnimationCellImageRaster::StaticClass(), iCellIndex, blocks.Num());
+    TArray<UTexture2D*> textures;
 
-    TArray<UOdysseyAnimationCellImageRaster*> rasterCells;
-    for (int i = 0; i < cells.Num(); i++)
+    for (int i = 0; i < importedTextures.Num(); i++)
     {
-        TSharedPtr<::ULIS::FBlock> block = blocks[i];
-        UOdysseyAnimationCellImageRaster* cell = Cast<UOdysseyAnimationCellImageRaster>(cells[i]);
-        rasterCells.Add(cell);
-
-        TSharedPtr<FOdysseyRasterBlock> rasterBlock = cell->GetRasterBlock();
-        FOdysseyRasterBlockMutator rasterBlockMutator(rasterBlock, false);
-        ::ULIS::FRectI invalidRect = ::ULIS::FRectI::FromXYWH(0, 0, animation->GetWidth(), animation->GetHeight());
-        rasterBlockMutator.Copy(block,{ invalidRect });
-        rasterBlockMutator.Commit();
+        textures.Add(importedTextures[i].Get());
     }
 
-    return rasterCells;
+    FOdysseyPainterEditorAnimationLayerImport import_layer;
+    return import_layer.ImportTextureSequence(Layer, textures, 0);
 }
 
 #undef LOCTEXT_NAMESPACE

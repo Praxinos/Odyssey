@@ -24,7 +24,7 @@ ODYSSEYIMAGING_API void InvalidateTextureFromData( const ::ULIS::FBlock* iData, 
 ODYSSEYIMAGING_API void InvalidateSurfaceFromData( const ::ULIS::FBlock* iData, FOdysseySurfaceTexture2DEditable* iSurface, const ::ULIS::FRectI* iRects, const uint32 iNumRects );
 ODYSSEYIMAGING_API void InvalidateSurfaceCallback( const ::ULIS::FBlock* iBlock, const ::ULIS::FRectI* iRects, const uint32 iNumRects, void* iInfo );
 
-ODYSSEYIMAGING_API void ImageLinearToSRGB(const FImageView& iImage);
+//ODYSSEYIMAGING_API void ImageLinearToSRGB(const FImageView& iImage);
 ODYSSEYIMAGING_API void ImageSRGBToLinear(const FImageView& iImage);
 
 /////////////////////////////////////////////////////
