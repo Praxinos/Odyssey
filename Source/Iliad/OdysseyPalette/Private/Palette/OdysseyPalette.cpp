@@ -2,16 +2,13 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "OdysseyPalette.h"
-#include "UObject/OdysseyObjectEditorUtils.h"
-#include "Misc/TransactionObjectEvent.h"
 #include "OdysseyPaletteEntryFolder.h"
 #include "ScopedTransaction.h"
 #include "Widgets/Colors/SColorBlock.h"
-#include "Misc/OdysseyUndoDelegates.h"
+#include "Misc/TransactionObjectEvent.h"
 
 UOdysseyPalette::UOdysseyPalette()
 {
-    Sets.Add("Default Set");
 }
 
 UOdysseyPalette::FOnHierarchyChanged& UOdysseyPalette::OnHierarchyChanged()
@@ -302,24 +299,10 @@ void UOdysseyPalette::MoveEntry(UOdysseyPaletteEntry* iEntry, UOdysseyPaletteEnt
 
     bool bChangeParent = iEntry->Parent != iParentEntry;
 
-    if (bChangeParent)
-    {
-        FOdysseyObjectEditorUtils::PreChangePropertyValue(iEntry, "Parent");
-        FOdysseyObjectEditorUtils::PreChangePropertyValue(iEntry->Parent, "Children");
-    }
-    FOdysseyObjectEditorUtils::PreChangePropertyValue(iParentEntry, "Children");
-
     int index = FMath::Clamp(iIndexInParent, 0, iParentEntry->Children.Num());
     iEntry->Parent->Children.Remove(iEntry);
     iParentEntry->Children.Insert(iEntry, (iEntry->Parent == iParentEntry && oldIndex < index) ? index - 1 : index);
     iEntry->Parent = iParentEntry;
-
-    if (bChangeParent)
-    {
-        FOdysseyObjectEditorUtils::PostChangePropertyValue(iEntry, "Parent", EPropertyChangeType::ValueSet);
-        FOdysseyObjectEditorUtils::PostChangePropertyValue(iEntry, "Children", EPropertyChangeType::ArrayRemove);
-    }
-    FOdysseyObjectEditorUtils::PostChangePropertyValue(iParentEntry, "Children", EPropertyChangeType::ArrayAdd);
 }
 
 void UOdysseyPalette::MoveEntries(TArray<UOdysseyPaletteEntry*> iEntries, UOdysseyPaletteEntry* iParentEntry /*= nullptr*/, int iIndexInParent /*= 0*/)
@@ -374,16 +357,16 @@ void UOdysseyPalette::MoveEntries(TArray<UOdysseyPaletteEntry*> iEntries, UOdyss
     int index = FMath::Clamp(iIndexInParent, 0, iParentEntry->Children.Num());
     for (UOdysseyPaletteEntry* entry : iEntries)
     {
-        bool bChangeParent = entry->Parent != iParentEntry;
+        UOdysseyPaletteEntry* parent = entry->Parent;
+
+        bool bChangeParent = entry->Parent != parent;
 
         if (bChangeParent)
         {
-            FOdysseyObjectEditorUtils::PreChangePropertyValue(entry, "Parent");
-            FOdysseyObjectEditorUtils::PreChangePropertyValue(entry->Parent, "Children");
+            entry->Modify();
+            entry->Parent->Modify();
         }
-        FOdysseyObjectEditorUtils::PreChangePropertyValue(iParentEntry, "Children");
-
-        UOdysseyPaletteEntry* parent = entry->Parent;
+        parent->Modify();
 
         int oldIndex = parent->Children.Find(entry);
         parent->Children.Remove(entry);
@@ -392,14 +375,9 @@ void UOdysseyPalette::MoveEntries(TArray<UOdysseyPaletteEntry*> iEntries, UOdyss
 
         if (parent == iParentEntry && oldIndex > index)
             index++;
-
-        if (bChangeParent)
-        {
-            FOdysseyObjectEditorUtils::PostChangePropertyValue(entry, "Parent", EPropertyChangeType::ValueSet);
-            FOdysseyObjectEditorUtils::PostChangePropertyValue(entry, "Children", EPropertyChangeType::ArrayRemove);
-        }
-        FOdysseyObjectEditorUtils::PostChangePropertyValue(iParentEntry, "Children", EPropertyChangeType::ArrayAdd);
     }
+
+    HierarchyChanged();
 }
 
 const TArray<FName>&
@@ -408,55 +386,59 @@ UOdysseyPalette::GetSets() const
     return Sets;
 }
 
+const TMap<FString, FName>&
+UOdysseyPalette::GetSetsIDs() const
+{
+    return SetsIDs;
+}
+
 void
-UOdysseyPalette::RenameSet(int iSet, const FName& iName)
+UOdysseyPalette::RenameSet(FString iSetId, const FName& iName)
 {
-    if (iSet < 0 || iSet >= Sets.Num())
+    if( !SetsIDs.Contains(iSetId) )
         return;
 
-    FOdysseyObjectEditorUtils::PreChangePropertyValue(this, "Sets");
-    Sets[iSet] = iName;
-    FOdysseyObjectEditorUtils::PostChangePropertyValue(this, "Sets", EPropertyChangeType::ValueSet);
+    SetsIDs[iSetId] = iName;
 }
 
-void UOdysseyPalette::DuplicateSet(int iSet, const FName& iName)
+FString UOdysseyPalette::DuplicateSet(FString iSetId, const FName& iName)
 {
-    FOdysseyObjectEditorUtils::PreChangePropertyValue(this, "Sets");
+    if (!SetsIDs.Contains(iSetId))
+        return FString();
+
+    FString newId = FGuid::NewGuid().ToString();
 
     TArray<UOdysseyPaletteEntry*> entries = GetEntries();
     for (int i = 0; i < entries.Num(); i++)
     {
-        entries[i]->DuplicateSetAt(iSet);
+        entries[i]->DuplicateSetAt(iSetId, newId);
     }
 
-    Sets.Add(iName);
+    SetsIDs.Add(newId, iName);
 
-    FOdysseyObjectEditorUtils::PostChangePropertyValue(this, "Sets", EPropertyChangeType::ArrayAdd);
+    return newId;
 }
 
-void UOdysseyPalette::RemoveSet(int iIndex /*= -1 */)
+void UOdysseyPalette::RemoveSet(FString iSetId)
 {
-    if (Sets.Num() <= 1)
+    if (!SetsIDs.Contains(iSetId))
         return;
-
-    if (iIndex >= Sets.Num())
-        return;
-
-    FOdysseyObjectEditorUtils::PreChangePropertyValue(this, "Sets");
 
     TArray<UOdysseyPaletteEntry*> entries = GetEntries();
     for (int i = 0; i < entries.Num(); i++)
-        entries[i]->RemoveSet( iIndex );
+        entries[i]->RemoveSet(iSetId);
 
-    Sets.RemoveAt( iIndex );
+    SetsIDs.Remove(iSetId);
+}
 
-    for (int i = 0; i < Sets.Num(); i++)
+FString UOdysseyPalette::GetDefaultSetID()
+{
+    if (SetsIDs.Num() > 0)
     {
-        FString text = FString("Set") + FString::FromInt(i);
-        Sets[i] = (FName(text));
+        TMap<FString, FName>::TIterator It(SetsIDs);
+        return It.Key();
     }
-
-    FOdysseyObjectEditorUtils::PostChangePropertyValue(this, "Sets", EPropertyChangeType::ArrayRemove);
+    return FString();
 }
 
 void UOdysseyPalette::HierarchyChanged()
@@ -473,6 +455,31 @@ void UOdysseyPalette::PostPropertyChanged(const FName& iPropertyName)
 {
     if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPalette, Sets))
         OnSetsChanged().Broadcast(this);
+}
+
+void UOdysseyPalette::PostLoad()
+{
+    Super::PostLoad();
+
+    // Legacy, to delete next version
+
+    //We can't dirty the asset in the PostLoad, because it's part of the serialization (loading) of the asset, therefore, Unreal ignore Modify() and MarkPackageDirty() in it.
+    //This is why we use a boolean that is checked when this asset is loaded in a texture/animation or palette editor, and dirty the package there if needed
+
+    //We don't delete Sets the first time, because we need it to keep the ordering correct for the entries in the palette.
+    //The second time this palette is loaded, though, we delete sets, and don't do anything more. And even if Sets is empty and SetsIDs is not, the loop after isn't triggered
+    if(SetsIDs.Num() > 0 && Sets.Num() > 0)
+    {
+        Sets.Empty();
+        NeedsSavingAfterUpgrade = true;
+    }
+
+    for (int i = 0; i < Sets.Num(); i++)
+    {
+        SetsIDs.Add(FGuid::NewGuid().ToString(), Sets[i]);
+        NeedsSavingAfterUpgrade = true;
+    }
+    //---
 }
 
 void UOdysseyPalette::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
@@ -495,12 +502,7 @@ void UOdysseyPalette::PostTransacted(const FTransactionObjectEvent& iTransaction
     for (const FName& propertyName : changedPropertyNames)
     {
         PropertyChanged(propertyName);
-        FOdysseyUndoDelegates::Get().OnAfterUndoRedo().AddLambda(
-            [this, propertyName](bool iIsRedo)
-            {
-                PostPropertyChanged(propertyName);
-            }
-        );
+        PostPropertyChanged( propertyName );
     }
 }
 
@@ -511,6 +513,11 @@ void UOdysseyPalette::PostInitProperties()
     if (HasAnyFlags(RF_ClassDefaultObject))
         return;
 
+    if (!HasAnyFlags( RF_NeedLoad | RF_WasLoaded))
+    {
+        SetsIDs.Add(FGuid::NewGuid().ToString(), "Default Set"); //Only add a default set if it's a newly created asset
+    }
+
     PaletteRoot = NewObject<UOdysseyPaletteEntry>(this, UOdysseyPaletteEntryFolder::StaticClass(), NAME_None, RF_Public | RF_Transactional);
     PaletteRoot->OnCreated();
 
@@ -519,12 +526,12 @@ void UOdysseyPalette::PostInitProperties()
 
 UOdysseyPaletteEntry* UOdysseyPalette::CreateEntry(UClass* iEntryType)
 {
-    //Create the Layer
+    //Create the entry
     UOdysseyPaletteEntry* entry = NewObject<UOdysseyPaletteEntry>(this, iEntryType, NAME_None, RF_Public | RF_Transactional);
     if (!entry)
         return nullptr;
 
-    //Name the layer
+    //Name the entry
     FString name = entry->DefaultName.ToString() + TEXT(" ") + FString::FromInt(GetEntries().Num() + 1);
     entry->EntryName = FText::FromString(name);
 
@@ -536,11 +543,10 @@ UOdysseyPaletteEntry* UOdysseyPalette::CreateEntry(UClass* iEntryType)
 
 void UOdysseyPalette::AddEntriesToHierarchy(TArray<UOdysseyPaletteEntry*> iEntries, UOdysseyPaletteEntry* iParent, int iIndexInParent)
 {
-    //Call propertyPreChange in a stable state of the palette
-    FOdysseyObjectEditorUtils::PreChangePropertyValue(iParent, "Children");
+    iParent->Modify();
     for ( UOdysseyPaletteEntry* entry : iEntries)
     {
-        FOdysseyObjectEditorUtils::PreChangePropertyValue(entry, "Parent");
+        entry->Modify();
     }
 
     for (UOdysseyPaletteEntry* entry : iEntries)
@@ -557,26 +563,18 @@ void UOdysseyPalette::AddEntriesToHierarchy(TArray<UOdysseyPaletteEntry*> iEntri
         entry->Parent = iParent;
     }
 
-    //Call propertyPostChange in a stable state of the palette
-    FOdysseyObjectEditorUtils::PostChangePropertyValue(iParent, "Children", EPropertyChangeType::ArrayAdd);
-    for (UOdysseyPaletteEntry* entry : iEntries)
-    {
-        FOdysseyObjectEditorUtils::PostChangePropertyValue(entry, "Parent", EPropertyChangeType::ValueSet);
-    }
+    HierarchyChanged();
 }
 
 void UOdysseyPalette::RemoveEntriesFromHierarchy(TArray<UOdysseyPaletteEntry*> iEntries)
 {
     TArray<UOdysseyPaletteEntry*> parents;
     TArray<UOdysseyPaletteEntry*> entriesToRemove = iEntries;// UOdysseyLayerStackFunctionLibrary::FilterTopmostLayers(iEntries);
-    GetEntriesUniqueParents(entriesToRemove, parents);
 
-    //Call propertyPreChange in a stable state of the palette
-    for (UOdysseyPaletteEntry* entry : entriesToRemove )
-        FOdysseyObjectEditorUtils::PreChangePropertyValue(entry, "Parent");
-
-    for (UOdysseyPaletteEntry* parent : parents)
-        FOdysseyObjectEditorUtils::PreChangePropertyValue(parent, "Children");
+    for (UOdysseyPaletteEntry* entry : entriesToRemove)
+    {
+        parents.AddUnique(entry->Parent);
+    }
 
     for (UOdysseyPaletteEntry* entry : entriesToRemove )
         entry->Parent = nullptr;
@@ -584,13 +582,6 @@ void UOdysseyPalette::RemoveEntriesFromHierarchy(TArray<UOdysseyPaletteEntry*> i
     for (UOdysseyPaletteEntry* parent : parents )
         for (UOdysseyPaletteEntry* entry : entriesToRemove )
             parent->Children.Remove(entry);
-
-    //Call propertyPostChange in a stable state of the palette
-    for (UOdysseyPaletteEntry* entry : entriesToRemove )
-        FOdysseyObjectEditorUtils::PostChangePropertyValue(entry, "Parent", EPropertyChangeType::ValueSet);
-
-    for (UOdysseyPaletteEntry* parent : parents )
-        FOdysseyObjectEditorUtils::PostChangePropertyValue(parent, "Children", EPropertyChangeType::ArrayRemove);
 }
 
 UOdysseyPaletteEntry* UOdysseyPalette::CopyEntryInternal(UOdysseyPaletteEntry* iEntry, UOdysseyPaletteEntry* iParent, int iIndexInParent)
@@ -608,12 +599,4 @@ UOdysseyPaletteEntry* UOdysseyPalette::CopyEntryInternal(UOdysseyPaletteEntry* i
     }
 
     return duplicatedEntry;
-}
-
-void UOdysseyPalette::GetEntriesUniqueParents(TArray<UOdysseyPaletteEntry*> iEntries, TArray<UOdysseyPaletteEntry*>& oParents)
-{
-    for (UOdysseyPaletteEntry* entry : iEntries)
-    {
-        oParents.AddUnique(entry->Parent);
-    }
 }

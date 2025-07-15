@@ -93,7 +93,7 @@ public:
 
 #if WITH_EDITOR
     virtual void InitTexture();
-    virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const;
+    virtual FOdysseyMediaProvider GetMediaProvider() const;
 #endif
 
 public:

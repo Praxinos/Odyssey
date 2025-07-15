@@ -5,9 +5,7 @@
 #include "OdysseyStyle.h"
 #include "OdysseyPalette.h"
 #include "Misc/TransactionObjectEvent.h"
-#include "UObject/OdysseyObjectEditorUtils.h"
 #include "ScopedTransaction.h"
-#include "Misc/OdysseyUndoDelegates.h"
 
 #define LOCTEXT_NAMESPACE "Palette"
 
@@ -22,10 +20,10 @@ void
 UOdysseyPaletteEntryColor::PostInitProperties()
 {
     Super::PostInitProperties();
-    if( GetPalette() )
+    if (GetPalette())
     {
-        for (int i = 0; i < GetPalette()->GetSets().Num(); i++)
-            AddSet();
+        for( auto pair: GetPalette()->GetSetsIDs() )
+            AddSet( pair.Key );
     }
 }
 
@@ -35,54 +33,38 @@ UOdysseyPaletteEntryColor::FOnEntryColorChanged& UOdysseyPaletteEntryColor::OnEn
     return onEntryColorChanged;
 }
 
-FColor& UOdysseyPaletteEntryColor::GetColor(int iSet)
+FColor& UOdysseyPaletteEntryColor::GetColor(FString iSet)
 {
-    return EntryColors[ iSet ];
-}
-
-void UOdysseyPaletteEntryColor::SetColor(FColor iColor, int iSet)
-{
-    const FScopedTransaction transaction(NSLOCTEXT("Palette", "ChangeColorEntry_Transaction", "Change color entry"));
-
-    FOdysseyObjectEditorUtils::PreChangePropertyValue(this, "EntryColors");
-
-    EntryColors[iSet] = iColor;
-
-    FOdysseyObjectEditorUtils::PostChangePropertyValue(this, "EntryColors", EPropertyChangeType::ValueSet);
-}
-
-void UOdysseyPaletteEntryColor::AddSet()
-{
-    //The transaction is in OdysseyPalette, since we're adding a set for all entries, and we want only one transaction to handle all the additions
-    FOdysseyObjectEditorUtils::PreChangePropertyValue(this, "EntryColors");
-
-    EntryColors.Add( FColor::Black );
-
-    FOdysseyObjectEditorUtils::PostChangePropertyValue(this, "EntryColors", EPropertyChangeType::ArrayAdd);
-}
-
-void UOdysseyPaletteEntryColor::DuplicateSetAt(int iIndex /*= -1 */)
-{
-    if (iIndex >= 0 && iIndex < EntryColors.Num())
+    if( !EntryColorsIDs.Contains(iSet) )
     {
-        //The transaction is in OdysseyPalette, since we're adding a set for all entries, and we want only one transaction to handle all the additions
-        FOdysseyObjectEditorUtils::PreChangePropertyValue(this, "EntryColors");
-
-        FColor color = EntryColors[iIndex];
-        EntryColors.Add( color );
-
-        FOdysseyObjectEditorUtils::PostChangePropertyValue(this, "EntryColors", EPropertyChangeType::ArrayAdd);
+        static FColor InvalidColor(0, 0, 0, 0);
+        return InvalidColor;
     }
+    return EntryColorsIDs[iSet];
 }
 
-void UOdysseyPaletteEntryColor::RemoveSet(int iIndex /*= -1*/)
+void UOdysseyPaletteEntryColor::SetColor(FColor iColor, FString iSet)
 {
-    //The transaction is in OdysseyPalette, since we're adding a set for all entries, and we want only one transaction to handle all the additions
-    FOdysseyObjectEditorUtils::PreChangePropertyValue(this, "EntryColors");
+    if (!EntryColorsIDs.Contains(iSet))
+        return;
 
-    EntryColors.RemoveAt( iIndex );
+    EntryColorsIDs[iSet] = iColor;
+}
 
-    FOdysseyObjectEditorUtils::PostChangePropertyValue(this, "EntryColors", EPropertyChangeType::ArrayRemove);
+void UOdysseyPaletteEntryColor::AddSet(FString iNewId)
+{
+    EntryColorsIDs.Add( iNewId, FColor::Black );
+}
+
+void UOdysseyPaletteEntryColor::DuplicateSetAt(FString iIndexToCopy, FString iNewId)
+{
+    FColor color = EntryColorsIDs[iIndexToCopy];
+    EntryColorsIDs.Add(iNewId, color);
+}
+
+void UOdysseyPaletteEntryColor::RemoveSet(FString iIndex)
+{
+    EntryColorsIDs.Remove( iIndex );
 }
 
 void UOdysseyPaletteEntryColor::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
@@ -107,13 +89,40 @@ void UOdysseyPaletteEntryColor::PostTransacted(const FTransactionObjectEvent& iT
     for (const FName& propertyName : changedPropertyNames)
     {
         PropertyChanged(propertyName);
-        FOdysseyUndoDelegates::Get().OnAfterUndoRedo().AddLambda(
-            [this, propertyName](bool iIsRedo)
-            {
-                PostPropertyChanged(propertyName);
-            }
-        );
+        PostPropertyChanged(propertyName);
     }
+}
+
+void UOdysseyPaletteEntryColor::PostLoad()
+{
+    Super::PostLoad();
+    // Legacy, to delete next version
+    TArray<FName> setsNames = GetPalette()->GetSets();
+    for (int i = 0; i < setsNames.Num(); i++)
+    {
+        // We have to be careful, because we could have a palette with multiple sets with the same name.
+        // Colors may be mismatched in that case, but at least the TMap will be consistent with the IDs stored in the UOdysseyPalette
+        TArray<FString> ids;
+
+        for (const auto& Pair : GetPalette()->GetSetsIDs())
+        {
+            if (Pair.Value == setsNames[i])
+            {
+                ids.Add(Pair.Key);
+            }
+        }
+
+        for( int j = 0; j < ids.Num(); j++ )
+        {
+            if( EntryColorsIDs.Contains(ids[j]))
+                continue;
+
+            EntryColorsIDs.Add(ids[j], EntryColors[i]);
+        }
+    }
+
+    EntryColors.Empty();
+    //---
 }
 
 void UOdysseyPaletteEntryColor::EntryColorChanged()

@@ -248,8 +248,7 @@ UOdysseyAnimationLayerImageVector::GetCellMediaVector(uint32 iFrameIndex) const
     if (!cell)
         return nullptr;
 
-    int cellFrame = iFrameIndex - cell->GetFrameRange().GetLowerBoundValue();
-    FOdysseyMediaProvider provider = cell->GetMediaProvider(cellFrame);
+    FOdysseyMediaProvider provider = cell->GetMediaProvider();
     if (!provider.HasMedia<FOdysseyMediaVector>())
         return nullptr;
 

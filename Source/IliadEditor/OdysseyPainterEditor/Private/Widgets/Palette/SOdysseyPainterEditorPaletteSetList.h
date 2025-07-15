@@ -4,14 +4,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "OdysseyPainterEditorPaletteSet.h"
+#include "Palette/OdysseyPalette.h"
+#include "Palette/OdysseyPaletteEntryColor.h"
 
 class UOdysseyPaletteEntry;
 
 struct FOdysseyPainterEditorPaletteTreeViewItem
 {
     bool mIsPalette;
-    TSharedPtr<FOdysseyPainterEditorPaletteSet> mPaletteSet;
+    UOdysseyPaletteSet* mPaletteSet;
     UOdysseyPaletteEntry* mEntry = nullptr;
     TArray<TSharedPtr<FOdysseyPainterEditorPaletteTreeViewItem>> mChildren;
 };
@@ -24,10 +25,10 @@ class SOdysseyPainterEditorPaletteSetList : public SCompoundWidget
     SLATE_DECLARE_WIDGET(SOdysseyPainterEditorPaletteSetList, SCompoundWidget)
 
 public:
-    DECLARE_DELEGATE_TwoParams(FOnCurrentColorEntryChanged, UOdysseyPaletteEntryColor*, int)
-    DECLARE_DELEGATE_OneParam(FOnAddPaletteSet, TSharedPtr<FOdysseyPainterEditorPaletteSet>)
-    DECLARE_DELEGATE_OneParam(FOnRemovePaletteSet, TSharedPtr<FOdysseyPainterEditorPaletteSet>)
-    //DECLARE_DELEGATE_TwoParams(FOnPaletteSetChanged, int, FOdysseyPainterEditorPaletteSet )
+    DECLARE_DELEGATE_TwoParams(FOnCurrentColorEntryChanged, UOdysseyPaletteEntryColor*, FString)
+    DECLARE_DELEGATE_OneParam(FOnAddPaletteSet, UOdysseyPalette*)
+    DECLARE_DELEGATE_OneParam(FOnRemovePaletteSet, UOdysseyPaletteSet*)
+    DECLARE_DELEGATE_TwoParams(FOnPaletteSetChanged, FString, UOdysseyPaletteSet* )
 
 public:
     ~SOdysseyPainterEditorPaletteSetList();
@@ -35,12 +36,12 @@ public:
 
     SLATE_BEGIN_ARGS(SOdysseyPainterEditorPaletteSetList)
         {}
-        SLATE_ATTRIBUTE(TArray<TSharedPtr<FOdysseyPainterEditorPaletteSet>>, PaletteSets)
+        SLATE_ATTRIBUTE(TArray<UOdysseyPaletteSet*>, PaletteSets)
         SLATE_ATTRIBUTE(UOdysseyPaletteEntryColor*, CurrentColorEntry)
-        SLATE_ATTRIBUTE(int, CurrentSet)
+        SLATE_ATTRIBUTE(FString, CurrentSet)
         SLATE_EVENT(FOnAddPaletteSet, OnAddPaletteSet)
         SLATE_EVENT(FOnRemovePaletteSet, OnRemovePaletteSet)
-        //SLATE_EVENT(FOnPaletteSetChanged, OnPaletteSetChanged)
+        SLATE_EVENT(FOnPaletteSetChanged, OnPaletteSetChanged)
         SLATE_EVENT(FOnCurrentColorEntryChanged, OnCurrentColorEntryChanged)
     SLATE_END_ARGS()
 
@@ -66,12 +67,13 @@ private:
 
 private:
     // Private data
-    TSlateAttribute<TArray<TSharedPtr<FOdysseyPainterEditorPaletteSet>>> mPaletteSets;
+    TSlateAttribute<TArray<UOdysseyPaletteSet*>> mPaletteSets;
     TSlateAttribute<UOdysseyPaletteEntryColor*> mCurrentColorEntry;
-    TAttribute<int> mCurrentSet;
+    TAttribute<FString> mCurrentSet;
     TSharedPtr<UE::Slate::Containers::TObservableArray<TSharedPtr<FOdysseyPainterEditorPaletteTreeViewItem>>> mItemsSource;
     FOnAddPaletteSet mOnAddPaletteSet;
     FOnRemovePaletteSet mOnRemovePaletteSet;
+    FOnPaletteSetChanged mOnPaletteSetChanged;
     FOnCurrentColorEntryChanged mOnCurrentColorEntryChanged;
 
     TSharedPtr<STreeView<TSharedPtr<FOdysseyPainterEditorPaletteTreeViewItem>>> mTreeView;

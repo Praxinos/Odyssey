@@ -27,8 +27,8 @@ struct FPaletteEntrySelection
     UPROPERTY(EditAnywhere, Category=Appearance, meta = (EditCondition = "OdysseyPalette != nullptr", EditConditionHides))
     UOdysseyPaletteEntryColor* OdysseyPaletteEntryColor = nullptr;
 
-    UPROPERTY(EditAnywhere, Category=Appearance, meta = (EditCondition = "OdysseyPalette != nullptr", EditConditionHides))
-    int OdysseyPaletteSet = 0;
+    UPROPERTY(EditAnywhere, Category = Appearance, meta = (EditCondition = "false", EditConditionHides))
+    FString OdysseyPaletteSet = FString();
 };
 
 UCLASS( meta = ( HideCategories = Hidden ) )
@@ -43,6 +43,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectView : public UO
 
         void Update( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene, std::list<FOdysseyVectorObject*>& iFocusedObjectList );
         void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
+
+        FOdysseyPainterEditor* GetEditor();
 
     protected:
         virtual void ImportParam();

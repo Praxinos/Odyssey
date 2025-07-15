@@ -12,6 +12,7 @@
 
 class UOdysseyLayerStack;
 class UTexture2D;
+class UOdysseyPaletteSet;
 
 UENUM()
 enum class EOdysseyAnimationFormat : uint8
@@ -168,4 +169,8 @@ protected:
 
     UPROPERTY(EditAnywhere, Category="Odyssey|Animation", meta=(EditCondition="RightBoundMode != EOdysseyAnimationBoundMode::Automatic", EditConditionHides))
     int RightBound = 0;
+
+public:
+    UPROPERTY()
+    TArray<UOdysseyPaletteSet*> Palettes;
 };

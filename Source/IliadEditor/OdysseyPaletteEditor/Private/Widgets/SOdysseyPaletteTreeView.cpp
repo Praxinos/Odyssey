@@ -16,6 +16,7 @@
 #include "ToolMenus.h"
 #include "Framework/Commands/GenericCommands.h"
 #include "ToolMenuContext.h"
+#include "UObject/OdysseyObjectEditorUtils.h"
 #include "UObject/SavePackage.h"
 #include "ISinglePropertyView.h"
 
@@ -262,22 +263,19 @@ SOdysseyPaletteTreeView::OnDrop(const FGeometry& MyGeometry, const FDragDropEven
     if (localPointerPos.Y <= widgetSize.Y)
         return FReply::Unhandled();
 
-    //do nothing
     FText copyEntriesTransactionName = LOCTEXT("tree-view.drag-drop.transaction.copy-entries", "Copy Entries");
     FText moveEntriesTransactionName = LOCTEXT("tree-view.drag-drop.transaction.move-entries", "Move Entries");
     TArray<UOdysseyPaletteEntry*> entries = operation->GetPaletteEntries();
     if ( operationPalette == mPalette ) //dropped from same Palette, do a move of topmost dropped entries
     {
-        #ifdef WITH_EDITOR
-            FScopedTransaction ScopedTransaction(moveEntriesTransactionName);
-        #endif
+        FScopedTransaction ScopedTransaction(moveEntriesTransactionName);
+
         mPalette->MoveEntries(entries, nullptr, mPalette->GetRootEntries().Num());
     }
     else
     {
-        #ifdef WITH_EDITOR
-            FScopedTransaction ScopedTransaction(copyEntriesTransactionName);
-        #endif
+        FScopedTransaction ScopedTransaction(copyEntriesTransactionName);
+
         mPalette->CopyEntries(entries, nullptr, mPalette->GetRootEntries().Num());
     }
     return FReply::Handled();
@@ -434,8 +432,28 @@ SOdysseyPaletteTreeView::DeleteSelectedEntries()
     FScopedTransaction ScopedTransaction(LOCTEXT("tree-view.transaction.remove-selected-entries", "Remove Entries"));
 #endif
 
-    TArray<UOdysseyPaletteEntry*> selectedEntries = GetSelectedItems();
-    mPalette->RemoveEntries(selectedEntries);
+    TArray<UOdysseyPaletteEntry*> parents;
+    TArray<UOdysseyPaletteEntry*> entriesToRemove = GetSelectedItems();
+    for (UOdysseyPaletteEntry* entry : entriesToRemove)
+    {
+        parents.AddUnique(entry->Parent);
+    }
+
+    //Call propertyPreChange in a stable state of the palette
+    for (UOdysseyPaletteEntry* entry : entriesToRemove)
+        FOdysseyObjectEditorUtils::PreChangePropertyValue(entry, "Parent");
+
+    for (UOdysseyPaletteEntry* parent : parents)
+        FOdysseyObjectEditorUtils::PreChangePropertyValue(parent, "Children");
+
+    mPalette->RemoveEntries(entriesToRemove);
+
+    //Call propertyPostChange in a stable state of the palette
+    for (UOdysseyPaletteEntry* entry : entriesToRemove)
+        FOdysseyObjectEditorUtils::PostChangePropertyValue(entry, "Parent", EPropertyChangeType::ValueSet);
+
+    for (UOdysseyPaletteEntry* parent : parents)
+        FOdysseyObjectEditorUtils::PostChangePropertyValue(parent, "Children", EPropertyChangeType::ArrayRemove);
 }
 
 bool

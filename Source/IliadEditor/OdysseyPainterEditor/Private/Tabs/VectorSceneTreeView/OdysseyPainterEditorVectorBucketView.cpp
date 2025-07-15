@@ -35,8 +35,19 @@ UOdysseyPainterEditorVectorBucketView::ImportParam()
     GradientColor0 = mBucket->GetGradientColor0();
     GradientColor1 = mBucket->GetGradientColor1();
     RadialRadius = mBucket->GetRadialRadius();
-    PaletteSelection.OdysseyPaletteEntryColor = Cast<UOdysseyPaletteEntryColor>(mBucket->GetPaletteEntry());
-    PaletteSelection.OdysseyPaletteSet = mBucket->GetPaletteSet();
+
+    if (mBucket->GetPaletteEntry())
+    {
+        PaletteSelection.OdysseyPalette = mBucket->GetPaletteEntry()->GetPalette();
+        PaletteSelection.OdysseyPaletteEntryColor = Cast<UOdysseyPaletteEntryColor>(mBucket->GetPaletteEntry());
+        PaletteSelection.OdysseyPaletteSet = mBucket->GetPaletteSetID();
+    }
+    else
+    {
+        PaletteSelection.OdysseyPalette = nullptr;
+        PaletteSelection.OdysseyPaletteEntryColor = nullptr;
+        PaletteSelection.OdysseyPaletteSet = FString();
+    }
 }
 
 void
@@ -74,7 +85,7 @@ UOdysseyPainterEditorVectorBucketView::PropertyChanged( const FName& iPropertyNa
         if ( (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorBucketView, PaletteSelection)) || ( iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorBucketView, PaletteSelection) ) )
         {
             mBucket->SetPaletteEntry( PaletteSelection.OdysseyPaletteEntryColor );
-            mBucket->SetPaletteSet( PaletteSelection.OdysseyPaletteSet );
+            mBucket->SetPaletteSetID( PaletteSelection.OdysseyPaletteSet );
         }
 
         // note: iMemberPropertyName because FColor is a struct
@@ -126,6 +137,11 @@ UOdysseyPainterEditorVectorBucketView::PostEditChangeProperty( FPropertyChangedE
         vectorScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
         vectorScene->GetLayer()->RequestRedraw( vectorScene->GetCell(), 0 );
     }
+}
+
+FOdysseyPainterEditor* UOdysseyPainterEditorVectorBucketView::GetEditor()
+{
+    return mEditor;
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -15,7 +15,7 @@ class SOdysseyPaletteColorRow
     SLATE_BEGIN_ARGS(SOdysseyPaletteColorRow)
         {}
         SLATE_ARGUMENT(bool, IsReadOnly)
-        SLATE_ATTRIBUTE(int, Set)
+        SLATE_ATTRIBUTE(FString, Set)
     SLATE_END_ARGS()
 
 public:
@@ -35,5 +35,5 @@ private:
 private:
     class UOdysseyPaletteEntryColor* mColorEntry;
     TSharedPtr<SWidget> mColorWidget;
-    TAttribute<int> mSet;
+    TAttribute<FString> mSet;
 };

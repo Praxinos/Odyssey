@@ -39,6 +39,16 @@ FOdysseyVectorImportV2::ReadBucket( FOdysseyVectorBucket& iBucket, uint64 iChunk
                 }
                 break;
 
+                case FOdysseyFile::VectorV2::CHUNK_BUCKET_PALETTESETID:
+                {
+                    FString paletteSetID;
+
+                    Ar << paletteSetID;
+
+                    iBucket.SetPaletteSetID(paletteSetID);
+                }
+                break;
+
                 case FOdysseyFile::VectorV2::CHUNK_BUCKET_PALETTEENTRY_MK2:
                 {
                     FString fullpath;

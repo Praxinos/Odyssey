@@ -8,6 +8,8 @@
 #include "ObjectEditorUtils.h"
 
 #include "OdysseyAnimation.h"
+#include "OdysseyAnimationCellImageVector.h"
+#include "OdysseyAnimationCurrentFrameMutator.h"
 #include "OdysseyAnimationPlayer.h"
 #include "OdysseyPainterEditorAnimationFlipSystem.h"
 #include "OdysseyPainterEditorAnimationTimelinePosition.h"
@@ -17,26 +19,31 @@
 #include "OdysseyHUD.h"
 #include "OdysseyHUDElement.h"
 #include "OdysseyMediaRaster.h"
+#include "OdysseyMediaVector.h"
 #include "ULISLoaderModule.h"
 #include "OdysseyPainterEditorGUI.h"
 #include "OdysseyPainterEditorExtension.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "OdysseyLayer.h"
+#include "OdysseyLayerCell.h"
 #include "OdysseyLayerStack.h"
 #include "OdysseyEditorLayoutBuilder.h"
+#include "OdysseyTextureLayerImageVector.h"
+#include "OdysseyTextureLayerStackUserData.h"
 #include "OdysseyPainterEditorBrushContext.h"
 #include "OdysseyPainterEditorCommands.h"
-#include "OdysseyPainterEditorModule.h"
-#include "OdysseyPalette.h"
-#include "OdysseyPaletteEntryColor.h"
-#include "Proxies/OdysseyBrushColor.h"
-#include "PaperFlipbook.h"
-#include "PaperSprite.h"
 #include "OdysseyPainterEditorFlipbookUtils.h"
 #include "OdysseyPainterEditorFlipbookListener.h"
 #include "OdysseyPainterEditorFlipbookTimelineTab.h"
+#include "OdysseyPainterEditorModule.h"
+#include "OdysseyPalette.h"
+#include "OdysseyPaletteEntryColor.h"
+
+#include "Proxies/OdysseyBrushColor.h"
+#include "PaperFlipbook.h"
+#include "PaperSprite.h"
+
 #include "SOdysseyFlipbookTimelineView.h"
-#include "OdysseyAnimationCurrentFrameMutator.h"
 
 #include "OdysseyVector.h"
 #include "OdysseyVectorCell.h"
@@ -104,7 +111,7 @@
 #include "Framework/Commands/GenericCommands.h"
 #include "OdysseyPainterEditorToolMenuContext.h"
 #include "FileHelpers.h"
-#include "OdysseyPainterEditorPaletteSet.h"
+#include "Palette/OdysseyPalette.h"
 #include "Toolkits/AssetEditorModeUILayer.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
@@ -924,6 +931,16 @@ FOdysseyPainterEditor::GetAnimation() const
     return animationSource->GetAnimation();
 }
 
+UOdysseyTextureLayerStackUserData*
+FOdysseyPainterEditor::GetTextureUserData() const
+{
+    if (!mSource || mSource->Id() != FOdysseyPainterEditorTextureSource::StaticId())
+        return nullptr;
+
+    TSharedPtr<FOdysseyPainterEditorTextureSource> textureSource = StaticCastSharedPtr<FOdysseyPainterEditorTextureSource>(mSource);
+    return textureSource->TextureUserData();
+}
+
 UOdysseyAnimationPlayer*
 FOdysseyPainterEditor::GetAnimationPlayer() const
 {
@@ -1249,7 +1266,7 @@ FOdysseyPainterEditor::PaintColor(const FOdysseyBrushColor& iColor, bool iIsComm
 {
     mPaintColor = iColor;
     mCurrentPaletteEntryColor = nullptr;
-    mCurrentPaletteSet = 0;
+    mCurrentPaletteSet = FString();
 
     //PATCH: should be automatic in the new drawing Tool, fix it asap
     if (iIsCommit)
@@ -3319,19 +3336,51 @@ FOdysseyPainterEditor::AddReferencedObjects(FReferenceCollector& Collector)
         Collector.AddReferencedObject(tool);
     }
 
-    for (TSharedPtr<FOdysseyPainterEditorPaletteSet> paletteSet : mPaletteSets)
+    /*for (TSharedPtr<FOdysseyPaletteSet> paletteSet : mPaletteSets)
     {
-        UOdysseyPalette* palette = paletteSet->GetPalette();
-        Collector.AddReferencedObject(palette);
-    }
+        Collector.AddReferencedObject(paletteSet->mPalette);
+    }*/
 
     Collector.AddReferencedObject(mCurrentPaletteEntryColor);
 }
 
-const TArray<TSharedPtr<FOdysseyPainterEditorPaletteSet>>&
+const TArray<UOdysseyPaletteSet*>
 FOdysseyPainterEditor::GetPaletteSets() const
 {
-    return mPaletteSets;
+    TArray<UOdysseyPaletteSet*> paletteSets;
+    UOdysseyAnimation* animation = GetAnimation();
+    UOdysseyTextureLayerStackUserData* textureUserData = GetTextureUserData();
+    if (animation)
+    {
+        paletteSets = animation->Palettes;
+    }
+    else if (textureUserData)
+    {
+        paletteSets = textureUserData->Palettes;
+    }
+
+    //Fail safe in case the user force delete a used palette while in the editor
+    for( int i = 0; i < paletteSets.Num(); i++ )
+    {
+        if( !paletteSets[i]->mPalette || !paletteSets[i]->mPalette->IsValidLowLevel() )
+        {
+            paletteSets.RemoveAt(i);
+            i--;
+        }
+    }
+
+    // Legacy, to remove next version, ensure that the Palettes are going to be saved with the upgraded data
+    for(int i = 0; i < paletteSets.Num(); i++)
+    {
+        if(paletteSets[i]->mPalette->NeedsSavingAfterUpgrade)
+        {
+            paletteSets[i]->mPalette->MarkPackageDirty();
+            paletteSets[i]->mPalette->NeedsSavingAfterUpgrade = false;
+        }
+    }
+    //---
+
+    return paletteSets;
 }
 
 UOdysseyPaletteEntryColor*
@@ -3340,73 +3389,170 @@ FOdysseyPainterEditor::GetCurrentPaletteColorEntry() const
     return mCurrentPaletteEntryColor;
 }
 
-int
+FString
 FOdysseyPainterEditor::GetCurrentPaletteSet() const
 {
     return mCurrentPaletteSet;
 }
 
 void
-FOdysseyPainterEditor::AddPaletteSet(TSharedPtr<FOdysseyPainterEditorPaletteSet> iPaletteSet)
+FOdysseyPainterEditor::AddPaletteSet(UOdysseyPalette* iPalette)
 {
-    mPaletteSets.Add(iPaletteSet);
+    TSharedPtr<FOdysseyPainterEditorSource> source = GetSource();
+    if (!source)
+        return;
+
+    UOdysseyAnimation* animation = GetAnimation();
+    UOdysseyTextureLayerStackUserData* textureUserData = GetTextureUserData();
+    if (animation)
+    {
+        UOdysseyPaletteSet* paletteSet = NewObject<UOdysseyPaletteSet>(animation);
+        paletteSet->mPalette = iPalette;
+        paletteSet->mSet = iPalette->GetDefaultSetID();
+        animation->Palettes.Add(paletteSet);
+    }
+    else if (textureUserData)
+    {
+        UOdysseyPaletteSet* paletteSet = NewObject<UOdysseyPaletteSet>(textureUserData);
+        paletteSet->mPalette = iPalette;
+        paletteSet->mSet = iPalette->GetDefaultSetID();
+        textureUserData->Palettes.Add(paletteSet);
+    }
 }
 
 void
-FOdysseyPainterEditor::RemovePaletteSet(TSharedPtr<FOdysseyPainterEditorPaletteSet> iPaletteSet)
+FOdysseyPainterEditor::RemovePaletteSet(UOdysseyPaletteSet* iPaletteSet)
 {
-    mPaletteSets.Remove(iPaletteSet);
+    UOdysseyAnimation* animation = GetAnimation();
+    UOdysseyTextureLayerStackUserData* textureUserData = GetTextureUserData();
+    TArray<UOdysseyPaletteSet*> paletteSets;
+    if (animation)
+    {
+        animation->Palettes.Remove(iPaletteSet);
+        paletteSets = animation->Palettes;
+    }
+    else if (textureUserData)
+    {
+        textureUserData->Palettes.Remove(iPaletteSet);
+        paletteSets = textureUserData->Palettes;
+    }
 
     if (mCurrentPaletteEntryColor)
     {
-        bool shouldReset = !mPaletteSets.ContainsByPredicate(
-            [this](TSharedPtr<FOdysseyPainterEditorPaletteSet> iPaletteSet)
+        bool shouldReset = !paletteSets.ContainsByPredicate(
+            [this](const UOdysseyPaletteSet* iPaletteSet)
             {
-                return iPaletteSet->GetPalette() == mCurrentPaletteEntryColor->GetPalette() && iPaletteSet->GetSet() == mCurrentPaletteSet;
+                return iPaletteSet->mPalette == mCurrentPaletteEntryColor->GetPalette() && iPaletteSet->mSet == mCurrentPaletteSet;
             }
         );
         if (shouldReset)
         {
             mCurrentPaletteEntryColor = nullptr;
-            mCurrentPaletteSet = 0;
+            mCurrentPaletteSet = FString();
         }
     }
 }
 
-/* void
-FOdysseyPainterEditor::SetPaletteSet(int iIndex, const FOdysseyPainterEditorPaletteSet& iPaletteSet)
+void FOdysseyPainterEditor::SetPaletteSet(FString iIndex, UOdysseyPaletteSet* iPaletteSet)
 {
-    if (iIndex < 0 || iIndex >= mPaletteSets.Num())
-        return;
+    iPaletteSet->mSet = iIndex;
 
-    mPaletteSets[iIndex] = iPaletteSet;
+    //Update all vector objects
+    UOdysseyAnimation* animation = GetAnimation();
+    UOdysseyTextureLayerStackUserData* textureUserData = GetTextureUserData();
 
-    if (mPaletteCurrentEntryColor.GetEntry() && !mPaletteSets.Contains(mPaletteCurrentEntryColor.GetPaletteSet()))
+    if( animation )
     {
-        UOdysseyPalette* palette = mPaletteSets[iIndex].GetPalette();
-        if (palette->ContainsEntry(mPaletteCurrentEntryColor.GetEntry()))
+        TArray<UOdysseyLayer*> layers = LayerStack()->GetLayers();
+        for (UOdysseyLayer* layer : layers)
         {
-            SetPaletteCurrentColorEntry(FOdysseyPainterEditorPaletteEntryColor(mPaletteCurrentEntryColor.GetEntry(), mPaletteSets[iIndex].GetSet()));
-        }
-        else
-        {
-            mPaletteCurrentEntryColor.Reset();
+            for (UOdysseyLayerCell* cell : layer->GetCells())
+            {
+                UOdysseyAnimationCellImageVector* animationVectorCell;
+                if (cell->IsA(UOdysseyAnimationCellImageVector::StaticClass()))
+                    animationVectorCell = Cast<UOdysseyAnimationCellImageVector>(cell);
+                else
+                    continue;
+
+                TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = animationVectorCell->GetMediaProvider().GetMedias<FOdysseyMediaVector>();
+
+                if (mediaVectors.Num() > 0)
+                {
+                    for (int i = 0; i < mediaVectors.Num(); i++)
+                    {
+                        FOdysseyVectorGroupPaint* vectorScene = mediaVectors[i]->GetScene();
+                        std::list<FOdysseyVectorBucket*>& bucketList = vectorScene->GetBucketList();
+                        std::list<FOdysseyVectorPath*>& pathList = vectorScene->GetPathList();
+                        for (FOdysseyVectorBucket* bucket : bucketList)
+                        {
+                            if (bucket->GetPaletteEntry() && bucket->GetPaletteEntry()->GetPalette() == iPaletteSet->mPalette)
+                                bucket->SetPaletteSetID(iIndex);
+                        }
+                        for (FOdysseyVectorPath* path : pathList)
+                        {
+                            if (path->GetBackgroundBucket().GetPaletteEntry() && path->GetBackgroundBucket().GetPaletteEntry()->GetPalette() == iPaletteSet->mPalette)
+                                path->GetBackgroundBucket().SetPaletteSetID(iIndex);
+                            if (path->GetForegroundBucket().GetPaletteEntry() && path->GetForegroundBucket().GetPaletteEntry()->GetPalette() == iPaletteSet->mPalette)
+                                path->GetForegroundBucket().SetPaletteSetID(iIndex);
+                        }
+                        FOdysseyVectorCell* vectorCell = mediaVectors[i]->GetScene()->GetCell();
+                        vectorCell->GetLayer()->RequestRedraw(vectorCell, 0);
+                    }
+                }
+            }
         }
     }
-} */
+    else if (textureUserData)
+    {
+        TArray<UOdysseyLayer*> layers = LayerStack()->GetLayers();
+        for (UOdysseyLayer* layer : layers)
+        {
+            if (!layer->IsA(UOdysseyTextureLayerImageVector::StaticClass()))
+                continue;
+
+            UOdysseyTextureLayerImageVector* vectorLayer = Cast<UOdysseyTextureLayerImageVector>(layer);
+
+            TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = vectorLayer->GetMediaProvider(0).GetMedias<FOdysseyMediaVector>();
+
+            if (mediaVectors.Num() > 0)
+            {
+                for (int i = 0; i < mediaVectors.Num(); i++)
+                {
+                    FOdysseyVectorGroupPaint* vectorScene = mediaVectors[i]->GetScene();
+                    std::list<FOdysseyVectorBucket*>& bucketList = vectorScene->GetBucketList();
+                    std::list<FOdysseyVectorPath*>& pathList = vectorScene->GetPathList();
+                    for (FOdysseyVectorBucket* bucket : bucketList)
+                    {
+                        if (bucket->GetPaletteEntry() && bucket->GetPaletteEntry()->GetPalette() == iPaletteSet->mPalette)
+                            bucket->SetPaletteSetID(iIndex);
+                    }
+                    for (FOdysseyVectorPath* path : pathList)
+                    {
+                        if (path->GetBackgroundBucket().GetPaletteEntry() && path->GetBackgroundBucket().GetPaletteEntry()->GetPalette() == iPaletteSet->mPalette)
+                            path->GetBackgroundBucket().SetPaletteSetID(iIndex);
+                        if (path->GetForegroundBucket().GetPaletteEntry() && path->GetForegroundBucket().GetPaletteEntry()->GetPalette() == iPaletteSet->mPalette)
+                            path->GetForegroundBucket().SetPaletteSetID(iIndex);
+                    }
+                    FOdysseyVectorCell* vectorCell = mediaVectors[i]->GetScene()->GetCell();
+                    vectorCell->GetLayer()->RequestRedraw(vectorCell, 0);
+                }
+            }
+        }
+    }
+}
 
 void
-FOdysseyPainterEditor::SetCurrentPaletteColorEntry(UOdysseyPaletteEntryColor* iEntry, int iSet)
+FOdysseyPainterEditor::SetCurrentPaletteColorEntry(UOdysseyPaletteEntryColor* iEntry, FString iSet)
 {
     if (!iEntry)
     {
         mCurrentPaletteEntryColor = nullptr;
-        mCurrentPaletteSet = 0;
+        mCurrentPaletteSet = FString();
         return;
     }
 
     UOdysseyPalette* palette = iEntry->GetPalette();
-    if(palette && iSet >= 0 && iSet < palette->GetSets().Num())
+    if(palette && palette->GetSetsIDs().Contains(iSet))
     {
         FColor color = iEntry->GetColor(iSet);
         ::ULIS::FColor ulisColor = ::ULIS::FColor::FromRGBA8(color.R, color.G, color.B, color.A);
@@ -3416,8 +3562,107 @@ FOdysseyPainterEditor::SetCurrentPaletteColorEntry(UOdysseyPaletteEntryColor* iE
         //PATCH: should be automatic in the new drawing Tool, fix it asap
         FOdysseyObjectEditorUtils::SetPropertyValue(GetRasterDrawingTool()->GetBrushOptions(), GET_MEMBER_NAME_CHECKED(UOdysseyBrushOptions, Color), mPaintColor);
     }
+
     mCurrentPaletteEntryColor = iEntry;
     mCurrentPaletteSet = iSet;
+
+    UOdysseyAnimation* animation = GetAnimation();
+    UOdysseyTextureLayerStackUserData* textureUserData = GetTextureUserData();
+    TArray<UOdysseyPaletteSet*> paletteSets;
+    if (animation)
+    {
+        paletteSets = animation->Palettes;
+    }
+    else if (textureUserData)
+    {
+        paletteSets = textureUserData->Palettes;
+    }
+
+    for( int i = 0; i < paletteSets.Num(); i++)
+    {
+        if (paletteSets[i]->mPalette == palette)
+            paletteSets[i]->mSet = iSet;
+    }
+
+    //Update all vector objects
+    if (animation)
+    {
+        TArray<UOdysseyLayer*> layers = LayerStack()->GetLayers();
+        for (UOdysseyLayer* layer : layers)
+        {
+            for (UOdysseyLayerCell* cell : layer->GetCells())
+            {
+                UOdysseyAnimationCellImageVector* animationVectorCell;
+                if (cell->IsA(UOdysseyAnimationCellImageVector::StaticClass()))
+                    animationVectorCell = Cast<UOdysseyAnimationCellImageVector>(cell);
+                else
+                    continue;
+
+                TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = animationVectorCell->GetMediaProvider().GetMedias<FOdysseyMediaVector>();
+
+                if (mediaVectors.Num() > 0)
+                {
+                    for (int i = 0; i < mediaVectors.Num(); i++)
+                    {
+                        FOdysseyVectorGroupPaint* vectorScene = mediaVectors[i]->GetScene();
+                        std::list<FOdysseyVectorBucket*>& bucketList = vectorScene->GetBucketList();
+                        std::list<FOdysseyVectorPath*>& pathList = vectorScene->GetPathList();
+                        for (FOdysseyVectorBucket* bucket : bucketList)
+                        {
+                            if (bucket->GetPaletteEntry() && bucket->GetPaletteEntry()->GetPalette() == iEntry->GetPalette())
+                                bucket->SetPaletteSetID(iSet);
+                        }
+                        for (FOdysseyVectorPath* path : pathList)
+                        {
+                            if (path->GetBackgroundBucket().GetPaletteEntry() && path->GetBackgroundBucket().GetPaletteEntry()->GetPalette() == iEntry->GetPalette())
+                                path->GetBackgroundBucket().SetPaletteSetID(iSet);
+                            if (path->GetForegroundBucket().GetPaletteEntry() && path->GetForegroundBucket().GetPaletteEntry()->GetPalette() == iEntry->GetPalette())
+                                path->GetForegroundBucket().SetPaletteSetID(iSet);
+                        }
+                        FOdysseyVectorCell* vectorCell = mediaVectors[i]->GetScene()->GetCell();
+                        vectorCell->GetLayer()->RequestRedraw(vectorCell, 0);
+                    }
+                }
+            }
+        }
+    }
+    else if (textureUserData)
+    {
+        TArray<UOdysseyLayer*> layers = LayerStack()->GetLayers();
+        for (UOdysseyLayer* layer : layers)
+        {
+            if( !layer->IsA(UOdysseyTextureLayerImageVector::StaticClass()) )
+                continue;
+
+            UOdysseyTextureLayerImageVector* vectorLayer = Cast<UOdysseyTextureLayerImageVector>(layer);
+
+            TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = vectorLayer->GetMediaProvider(0).GetMedias<FOdysseyMediaVector>();
+
+            if (mediaVectors.Num() > 0)
+            {
+                for (int i = 0; i < mediaVectors.Num(); i++)
+                {
+                    FOdysseyVectorGroupPaint* vectorScene = mediaVectors[i]->GetScene();
+                    std::list<FOdysseyVectorBucket*>& bucketList = vectorScene->GetBucketList();
+                    std::list<FOdysseyVectorPath*>& pathList = vectorScene->GetPathList();
+                    for (FOdysseyVectorBucket* bucket : bucketList)
+                    {
+                        if (bucket->GetPaletteEntry() && bucket->GetPaletteEntry()->GetPalette() == iEntry->GetPalette())
+                            bucket->SetPaletteSetID(iSet);
+                    }
+                    for (FOdysseyVectorPath* path : pathList)
+                    {
+                        if (path->GetBackgroundBucket().GetPaletteEntry() && path->GetBackgroundBucket().GetPaletteEntry()->GetPalette() == iEntry->GetPalette())
+                            path->GetBackgroundBucket().SetPaletteSetID(iSet);
+                        if (path->GetForegroundBucket().GetPaletteEntry() && path->GetForegroundBucket().GetPaletteEntry()->GetPalette() == iEntry->GetPalette())
+                            path->GetForegroundBucket().SetPaletteSetID(iSet);
+                    }
+                    FOdysseyVectorCell* vectorCell = mediaVectors[i]->GetScene()->GetCell();
+                    vectorCell->GetLayer()->RequestRedraw(vectorCell, 0);
+                }
+            }
+        }
+    }
 }
 
 #undef LOCTEXT_NAMESPACE

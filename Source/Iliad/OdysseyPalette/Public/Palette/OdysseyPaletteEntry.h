@@ -17,18 +17,8 @@ enum  class  EGetEntryChildrenMethod : uint8
     BreadthFirst
 };
 
-//Used for serialization in vector objects
-USTRUCT()
-struct FPaletteEntryDescription
-{
-    GENERATED_BODY()
-
-    FName EntryId = FName(TEXT(""));
-    uint8 UsedSet = 0;
-};
-
 /////////////////////////////////////////////////////
-// OdysseyColorPaletteEntry
+// UOdysseyPaletteEntry
 UCLASS(Abstract, HideDropdown, BlueprintType, config = EditorPerProjectUserSettings, PerObjectConfig)
 class ODYSSEYPALETTE_API UOdysseyPaletteEntry : public UObject
 {
@@ -134,10 +124,10 @@ public:
     UFUNCTION(BlueprintPure, Category="Palette")
     const TArray<UOdysseyPaletteEntry*>& GetChildren() const;
 
-    virtual void AddSet();
-    virtual void DuplicateSetAt( int iIndex = -1 );
+    virtual void AddSet( FString iIndex );
+    virtual void DuplicateSetAt( FString iIndexToCopy, FString iNewId );
 
-    virtual void RemoveSet( int iIndex = -1 );
+    virtual void RemoveSet( FString iIndex );
 
 protected:
     //Property changed methods

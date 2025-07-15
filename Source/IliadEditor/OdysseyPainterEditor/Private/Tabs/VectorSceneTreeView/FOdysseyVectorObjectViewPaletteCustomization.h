@@ -10,6 +10,7 @@
 #include "Widgets/Input/SComboBox.h"
 
 class UOdysseyPaletteEntryColor;
+class FOdysseyPainterEditor;
 
 class FOdysseyVectorObjectViewPaletteCustomization : public IPropertyTypeCustomization
 {
@@ -36,13 +37,13 @@ private:
     TSharedRef<SWidget> GetPaletteEntryMenuContent();
 
     UOdysseyPalette* GetPalette() const;
-    int GetCurrentSet() const;
+    FString GetCurrentSet() const;
     UOdysseyPaletteEntryColor* GetCurrentEntryColor() const;
     FLinearColor GetCurrentEntryColorAsLinear() const;
 
     EVisibility GetTreeViewVisibility() const;
 
-    void OnPaletteCurrentSetSelected(int iSet);
+    void OnPaletteCurrentSetSelected(FString iSet);
     void OnPaletteCurrentColorEntryChanged(UOdysseyPaletteEntryColor* iEntry);
 
     TSharedRef<SWidget> MakeCurrentColorEntryWidget();
@@ -52,7 +53,6 @@ private:
     TSharedPtr<IPropertyHandle> mPaletteSetHandle;
     TSharedPtr<IPropertyHandle> mPaletteHandle;
 
-    //TArray< UOdysseyPaletteEntry* > mPaletteEntries;
-
-    //TSharedPtr<SComboBox<UOdysseyPaletteEntry*>> mComboBoxWidget;
+private:
+    FOdysseyPainterEditor* mEditor;
 };

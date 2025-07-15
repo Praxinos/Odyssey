@@ -50,7 +50,7 @@ public:
 #if WITH_EDITOR
 public:
     TSharedPtr<FOdysseyRasterBlock> GetRasterBlock() const;
-    virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const override;
+    virtual FOdysseyMediaProvider GetMediaProvider() const override;
 
 public:
     virtual void PostLoad() override;

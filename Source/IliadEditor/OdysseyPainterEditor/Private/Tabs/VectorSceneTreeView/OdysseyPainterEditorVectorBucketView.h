@@ -28,6 +28,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBucketView : public UO
         void Update( FOdysseyPainterEditor* iEditor, FOdysseyVectorBucket* iBucket );
         void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
 
+        FOdysseyPainterEditor* GetEditor();
+
     protected:
         virtual void ImportParam();
         virtual void PropertyChanged( const FName& iPropertyName

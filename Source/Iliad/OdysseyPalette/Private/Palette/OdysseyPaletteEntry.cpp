@@ -4,7 +4,6 @@
 #include "OdysseyPaletteEntry.h"
 #include "OdysseyPalette.h"
 #include "Misc/TransactionObjectEvent.h"
-#include "Misc/OdysseyUndoDelegates.h"
 
 UOdysseyPaletteEntry::FOnNameChanged&
 UOdysseyPaletteEntry::OnNameChanged()
@@ -102,17 +101,17 @@ TArray<UOdysseyPaletteEntry*> UOdysseyPaletteEntry::GetParents() const
     return parents;
 }
 
-void UOdysseyPaletteEntry::AddSet()
+void UOdysseyPaletteEntry::AddSet(FString iNewId)
 {
 
 }
 
-void UOdysseyPaletteEntry::DuplicateSetAt(int iIndex /*= -1 */)
+void UOdysseyPaletteEntry::DuplicateSetAt(FString iIndexToCopy, FString iNewId)
 {
 
 }
 
-void UOdysseyPaletteEntry::RemoveSet(int iIndex /*= -1 */)
+void UOdysseyPaletteEntry::RemoveSet(FString iIndex)
 {
 
 }
@@ -212,11 +211,6 @@ void UOdysseyPaletteEntry::PostTransacted(const FTransactionObjectEvent& iTransa
     for (const FName& propertyName : changedPropertyNames)
     {
         PropertyChanged(propertyName);
-        FOdysseyUndoDelegates::Get().OnAfterUndoRedo().AddLambda(
-            [this, propertyName](bool iIsRedo)
-            {
-                PostPropertyChanged(propertyName);
-            }
-        );
+        PostPropertyChanged(propertyName);
     }
 }

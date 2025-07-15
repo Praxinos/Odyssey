@@ -276,7 +276,7 @@ UOdysseyAnimationLayerImageRaster::GetCellMediaRaster(uint32 iFrameIndex) const
     FInt32Range frameRange = cell->GetFrameRange();
     int cellFrame = frameRange.GetLowerBoundValue();
 
-    FOdysseyMediaProvider provider = cell->GetMediaProvider(cellFrame);
+    FOdysseyMediaProvider provider = cell->GetMediaProvider();
     if (!provider.HasMedia<FOdysseyMediaRaster>())
         return nullptr;
 

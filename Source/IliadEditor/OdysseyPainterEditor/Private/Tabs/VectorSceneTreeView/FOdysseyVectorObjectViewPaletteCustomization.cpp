@@ -3,6 +3,8 @@
 
 #include "FOdysseyVectorObjectViewPaletteCustomization.h"
 
+#include "OdysseyPainterEditor.h"
+#include "OdysseyPainterEditorVectorBucketView.h"
 #include "OdysseyPainterEditorVectorObjectView.h"
 #include "DetailWidgetRow.h"
 #include "DetailLayoutBuilder.h"
@@ -78,6 +80,49 @@ void FOdysseyVectorObjectViewPaletteCustomization::CustomizeChildren(TSharedRef<
     mPaletteSetHandle = StructPropertyHandle->GetChildHandle( GET_MEMBER_NAME_CHECKED(FPaletteEntrySelection, OdysseyPaletteSet) );
     mPaletteEntryHandle = StructPropertyHandle->GetChildHandle( GET_MEMBER_NAME_CHECKED(FPaletteEntrySelection, OdysseyPaletteEntryColor) );
 
+    //Not the best, but we need to know which palettes are loaded by the editor to filter the assets in the SObjectPropertyEntryBox below
+    TArray<UObject*> OuterObjects;
+    mEditor = nullptr;
+    FOnShouldFilterAsset filterPalette;
+
+    StructPropertyHandle->GetOuterObjects(OuterObjects);
+    if( OuterObjects.Num() > 0 && OuterObjects[0]->IsA(UOdysseyPainterEditorVectorObjectView::StaticClass() ) )
+    {
+        UOdysseyPainterEditorVectorObjectView* view = Cast<UOdysseyPainterEditorVectorObjectView>(OuterObjects[0]);
+        mEditor = view->GetEditor();
+    }
+    else if( OuterObjects.Num() > 0 && OuterObjects[0]->IsA(UOdysseyPainterEditorVectorBucketView::StaticClass()))
+    {
+        UOdysseyPainterEditorVectorBucketView* view = Cast<UOdysseyPainterEditorVectorBucketView>(OuterObjects[0]);
+        mEditor = view->GetEditor();
+    }
+
+    if(mEditor)
+    {
+
+        TArray<UOdysseyPalette*> palettesAlreadyLoaded;
+        for (UOdysseyPaletteSet* set : mEditor->GetPaletteSets())
+        {
+            palettesAlreadyLoaded.Add(set->mPalette);
+        }
+
+        filterPalette = FOnShouldFilterAsset::CreateLambda(
+            [palettesAlreadyLoaded](const FAssetData& AssetData)
+            {
+                for (UObject* palette : palettesAlreadyLoaded)
+                {
+                    if (!palette)
+                        continue;
+
+                    if ( FAssetData(palette).GetSoftObjectPath() == AssetData.GetSoftObjectPath())
+                        return false;
+                }
+
+                return true;
+            });
+    }
+    // ---
+
     StructBuilder.AddProperty(mPaletteHandle->AsShared())
     .CustomWidget()
     .NameContent()
@@ -89,6 +134,7 @@ void FOdysseyVectorObjectViewPaletteCustomization::CustomizeChildren(TSharedRef<
         SNew(SObjectPropertyEntryBox)
             .PropertyHandle(mPaletteHandle)
             .AllowedClass(UOdysseyPalette::StaticClass())
+            .OnShouldFilterAsset(filterPalette)
             .OnObjectChanged(this, &FOdysseyVectorObjectViewPaletteCustomization::OnPaletteChanged)
     ];
 
@@ -137,6 +183,7 @@ FOdysseyVectorObjectViewPaletteCustomization::GetPaletteEntryMenuContent()
             SNew(SOdysseyPaletteTreeView)
             .Visibility(this, &FOdysseyVectorObjectViewPaletteCustomization::GetTreeViewVisibility)
             .Palette(this, &FOdysseyVectorObjectViewPaletteCustomization::GetPalette)
+            .Set(this, &FOdysseyVectorObjectViewPaletteCustomization::GetCurrentSet)
             .CurrentColorEntry(this, &FOdysseyVectorObjectViewPaletteCustomization::GetCurrentEntryColor)
             .OnCurrentColorEntryChanged(this, &FOdysseyVectorObjectViewPaletteCustomization::OnPaletteCurrentColorEntryChanged)
         ];
@@ -156,12 +203,12 @@ FOdysseyVectorObjectViewPaletteCustomization::GetPalette() const
     return Cast<UOdysseyPalette>(palette);
 }
 
-int
+FString
 FOdysseyVectorObjectViewPaletteCustomization::GetCurrentSet() const
 {
-    int set;
-    mPaletteSetHandle->GetValue(set);
-    return set;
+    FString setId;
+    mPaletteSetHandle->GetValue(setId);
+    return setId;
 }
 
 UOdysseyPaletteEntryColor*
@@ -181,7 +228,7 @@ FOdysseyVectorObjectViewPaletteCustomization::GetCurrentEntryColorAsLinear() con
     return FLinearColor( entry->GetColor(GetCurrentSet()) );
 }
 void
-FOdysseyVectorObjectViewPaletteCustomization::OnPaletteCurrentSetSelected(int iSet)
+FOdysseyVectorObjectViewPaletteCustomization::OnPaletteCurrentSetSelected(FString iSet)
 {
     mPaletteSetHandle->SetValue(iSet);
 }
@@ -197,7 +244,21 @@ void FOdysseyVectorObjectViewPaletteCustomization::OnPaletteChanged(const FAsset
     UOdysseyPalette* palette = Cast<UOdysseyPalette>(AssetData.GetAsset());
     mPaletteHandle->SetValue(palette);
     mPaletteEntryHandle->SetValue((UObject*)nullptr);
-    mPaletteSetHandle->SetValue(0);
+
+    if( mEditor )
+    {
+        for(UOdysseyPaletteSet* set : mEditor->GetPaletteSets())
+        {
+            if( set->mPalette == palette )
+            {
+                mPaletteSetHandle->SetValue(set->mSet);
+            }
+        }
+    }
+    else
+    {
+        mPaletteSetHandle->SetValue(FString());
+    }
 }
 
 void

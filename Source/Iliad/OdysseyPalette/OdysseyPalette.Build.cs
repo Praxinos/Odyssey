@@ -6,9 +6,9 @@ using System.IO;
 
 namespace UnrealBuildTool.Rules
 {
-    public class OdysseyTexture : ModuleRules
+    public class OdysseyPalette : ModuleRules
     {
-        public OdysseyTexture(ReadOnlyTargetRules Target) : base(Target)
+        public OdysseyPalette(ReadOnlyTargetRules Target) : base(Target)
         {
             PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
@@ -25,47 +25,47 @@ namespace UnrealBuildTool.Rules
 
             PublicIncludePaths.AddRange(
                 new string[] {
-                    Path.Combine(ModuleDirectory, "Public", "LayerStack")
+                Path.Combine(ModuleDirectory, "Public", "Palette"),
+
                 }
-                );
+            );
 
             PrivateIncludePaths.AddRange(
                 new string[] {
-                    Path.Combine(ModuleDirectory, "Private", "LayerStack")
+                    // ... add other private include paths required here ...
+                    Path.Combine(ModuleDirectory, "Private", "Palette"),
                 }
                 );
 
             PublicDependencyModuleNames.AddRange(
                 new string[]
                 {
+                    "ULIS",
+                    "ULISLoader",
                     // ... add other public dependencies that you statically link with here ...
-                    "OdysseyLayerStack",
-                    "OdysseyLayerStackEditor",
-                    "OdysseyPalette",
                 }
                 );
 
             PrivateDependencyModuleNames.AddRange(
                 new string[]
                 {
+                    "AppFramework",
+                    "AssetTools",
                     "Core",
                     "CoreUObject",
+                    "EditorStyle",
+                    "EditorWidgets",
                     "Engine",
-                    "Kismet",
-                    "SlateCore",
-                    "RHI",
-                    "RenderCore",
-
+                    "InputCore",
+                    "ToolMenus",
                     "OdysseyCore",
-                    "OdysseyCoreEditor",
-                    "OdysseyFile",
-                    "OdysseyImaging",
-                    "OdysseyMedia",
-                    "OdysseyRendering",
+                    "Slate",
+                    "SlateCore",
+                    "UnrealEd",
                     "OdysseyStyle",
-                    "OdysseyVector",
-                    "ULIS",
-                    "ULISLoader",
+                    "PropertyEditor",
+                    "ToolWidgets",
+                    // ... add private dependencies that you statically link with here ...
                 }
                 );
 

@@ -7,7 +7,7 @@
 #include "OdysseyEditorTab.h"
 #include "OdysseyEventState.h"
 #include "OdysseyPainterEditor.h"
-#include "OdysseyPainterEditorPaletteSet.h"
+#include "Palette/OdysseyPalette.h"
 
 class FOdysseyPainterEditor;
 class UOdysseyPalette;
@@ -32,9 +32,9 @@ protected:
     // Widget Getters
     ::ULIS::FColor GetRawColor() const;
 
-    TArray<TSharedPtr<FOdysseyPainterEditorPaletteSet>> GetPaletteSets() const;
+    TArray<UOdysseyPaletteSet*> GetPaletteSets() const;
     UOdysseyPaletteEntryColor* GetCurrentPaletteColorEntry() const;
-    int GetCurrentPaletteSet() const;
+    FString GetCurrentPaletteSet() const;
 
     EOdysseyPainterEditorColorType GetColorType() const;
     void OnColorTypeChanged(EOdysseyPainterEditorColorType iType, ECheckBoxState iState);
@@ -56,10 +56,10 @@ protected:
     // Event Listeners
     void OnColorChanged( eOdysseyEventState::Type iEventState, const ::ULIS::FColor& iColor );
 
-    //void OnPaletteSetChanged(int iIndex, FOdysseyPainterEditorPaletteSet iPaletteSet);
-    void OnAddPaletteSet(TSharedPtr<FOdysseyPainterEditorPaletteSet> iPaletteSet);
-    void OnRemovePaletteSet(TSharedPtr<FOdysseyPainterEditorPaletteSet> iPaletteSet);
-    void OnPaletteCurrentColorEntryChanged(UOdysseyPaletteEntryColor* iEntry, int iSet);
+    void OnPaletteSetChanged(FString iIndex, UOdysseyPaletteSet* iPaletteSet);
+    void OnAddPaletteSet(UOdysseyPalette* iPalette);
+    void OnRemovePaletteSet(UOdysseyPaletteSet* iPaletteSet);
+    void OnPaletteCurrentColorEntryChanged(UOdysseyPaletteEntryColor* iEntry, FString iSet);
 
     FReply OnColorWheelExpanderArrowClicked();
     FReply OnColorSlidersExpanderArrowClicked();

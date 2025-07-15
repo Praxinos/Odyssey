@@ -101,6 +101,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
          */
         void CopyBuckets( FOdysseyVectorGroupPaint* iDestination, bool iSwitchSpace );
 
+        std::list<FOdysseyVectorPath*>& GetPathList();
         std::list<FOdysseyVectorBucket*>& GetBucketList();
         std::list<FOdysseyVectorCycle*>& GetCycleList();
         void AddBucket( FOdysseyVectorBucket* iBucket );

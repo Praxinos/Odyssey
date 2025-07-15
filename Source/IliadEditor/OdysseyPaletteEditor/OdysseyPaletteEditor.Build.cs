@@ -6,9 +6,9 @@ using System.IO;
 
 namespace UnrealBuildTool.Rules
 {
-    public class OdysseyPalette : ModuleRules
+    public class OdysseyPaletteEditor : ModuleRules
     {
-        public OdysseyPalette(ReadOnlyTargetRules Target) : base(Target)
+        public OdysseyPaletteEditor(ReadOnlyTargetRules Target) : base(Target)
         {
             PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
@@ -25,7 +25,6 @@ namespace UnrealBuildTool.Rules
 
             PublicIncludePaths.AddRange(
                 new string[] {
-                Path.Combine(ModuleDirectory, "Public", "Palette"),
                 Path.Combine(ModuleDirectory, "Public", "Widgets"),
                 Path.Combine(ModuleDirectory, "Public", "DragDropOperations"),
 
@@ -35,7 +34,6 @@ namespace UnrealBuildTool.Rules
             PrivateIncludePaths.AddRange(
                 new string[] {
                     // ... add other private include paths required here ...
-                    Path.Combine(ModuleDirectory, "Private", "Palette"),
                     Path.Combine(ModuleDirectory, "Private", "Widgets"),
                     Path.Combine(ModuleDirectory, "Private", "DragDropOperations"),
                 }
@@ -68,6 +66,7 @@ namespace UnrealBuildTool.Rules
                     "SlateCore",
                     "UnrealEd",
                     "OdysseyStyle",
+                    "OdysseyPalette",
                     "PropertyEditor",
                     "ToolWidgets",
                     // ... add private dependencies that you statically link with here ...

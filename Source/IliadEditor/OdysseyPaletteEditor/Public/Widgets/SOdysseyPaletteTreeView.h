@@ -15,7 +15,7 @@ class UOdysseyPaletteEntryColor;
 /**
  * Implements the Palette widget
  */
-class ODYSSEYPALETTE_API SOdysseyPaletteTreeView
+class ODYSSEYPALETTEEDITOR_API SOdysseyPaletteTreeView
     : public STreeView<UOdysseyPaletteEntry*>
 {
     SLATE_DECLARE_WIDGET(SOdysseyPaletteTreeView, STreeView<UOdysseyPaletteEntry*>)
@@ -27,11 +27,11 @@ public:
     SLATE_BEGIN_ARGS(SOdysseyPaletteTreeView)
         : _IsReadOnly(true)
         , _Palette(nullptr)
-        , _Set(0)
+        , _Set(FString())
         {}
         SLATE_ARGUMENT(bool, IsReadOnly)
         SLATE_ATTRIBUTE(UOdysseyPalette*, Palette)
-        SLATE_ATTRIBUTE(int, Set)
+        SLATE_ATTRIBUTE(FString, Set)
         SLATE_ATTRIBUTE(UOdysseyPaletteEntryColor*, CurrentColorEntry)
         SLATE_EVENT(FOnCurrentColorEntryChanged, OnCurrentColorEntryChanged)
     SLATE_END_ARGS()
@@ -156,11 +156,6 @@ public:
      */
     void ResetDropZone();
 
-    /**
-     * @brief Saves palette
-     */
-    FReply SavePalette();
-
 private:
     void OnPaletteChanged();
     void OnCurrentColorEntryChanged();
@@ -175,7 +170,7 @@ protected:
     UOdysseyPalette* mPalette;
     TSlateAttribute<UOdysseyPaletteEntryColor*> mCurrentColorEntryAttribute;
     UOdysseyPaletteEntryColor* mCurrentColorEntry;
-    TAttribute<int> mSet;
+    TAttribute<FString> mSet;
     UOdysseyPaletteEntry* mSelectedEntry;
     FOnCurrentColorEntryChanged mOnCurrentColorEntryChanged;
     TSharedPtr<UE::Slate::Containers::TObservableArray<UOdysseyPaletteEntry*>> mItemsSource;

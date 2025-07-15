@@ -20,11 +20,13 @@ class FOdysseyBrushContext;
 class FOdysseyPainterEditorExtension;
 class UOdysseyLayerStack;
 class FOdysseyMeshSelector;
+class UOdysseyTextureLayerStackUserData;
 class FOdysseyPainterEditorRasterSelection;
 class FOdysseyVectorGroupPaint;
 class FOdysseyVectorSegment;
 class FOdysseyVectorPath;
-class FOdysseyPainterEditorPaletteSet;
+class UOdysseyPalette;
+class UOdysseyPaletteSet;
 class UOdysseyPaletteEntryColor;
 class FOdysseyPainterEditorGUI;
 class FOdysseyPainterEditorFlipbookListener;
@@ -227,7 +229,8 @@ public:
     virtual const FOdysseyBrushColor&                        PaintColor() const;
 
     UOdysseyAnimation*                                       GetAnimation() const;
-    UOdysseyAnimationPlayer*                                 GetAnimationPlayer() const;
+    UOdysseyTextureLayerStackUserData*                       GetTextureUserData() const;
+    UOdysseyAnimationPlayer* GetAnimationPlayer() const;
     TSharedPtr<FOdysseyPainterEditorAnimationFlipSystem>            GetAnimationFlipSystem() const;
     TSharedRef<FOdysseyPainterEditorAnimationTimelinePosition>      GetAnimationTimelinePosition();
     EOdysseyPainterEditorColorType                           GetColorType() const;
@@ -236,15 +239,16 @@ public:
     virtual TSharedPtr<FOdysseyPainterEditorRasterSelection> RasterSelection();
     int GetCurrentFrame() const;
 
-    const TArray<TSharedPtr<FOdysseyPainterEditorPaletteSet>>& GetPaletteSets() const;
+    const TArray<UOdysseyPaletteSet*> GetPaletteSets() const;
     //const FOdysseyPainterEditorPaletteEntryColor& GetPaletteCurrentColorEntry() const;
     UOdysseyPaletteEntryColor* GetCurrentPaletteColorEntry() const;
-    int GetCurrentPaletteSet() const;
+    FString GetCurrentPaletteSet() const;
 
-    void AddPaletteSet(TSharedPtr<FOdysseyPainterEditorPaletteSet> iPaletteSet);
-    void RemovePaletteSet(TSharedPtr<FOdysseyPainterEditorPaletteSet> iPaletteSet);
+    void AddPaletteSet(UOdysseyPalette* iPalette);
+    void RemovePaletteSet(UOdysseyPaletteSet* iPaletteSet);
 
-    void SetCurrentPaletteColorEntry(UOdysseyPaletteEntryColor* iEntry, int iSet);
+    void SetPaletteSet(FString iIndex, UOdysseyPaletteSet* iPaletteSet);
+    void SetCurrentPaletteColorEntry(UOdysseyPaletteEntryColor* iEntry, FString iSet);
 
     void SetColorType(EOdysseyPainterEditorColorType iType);
 
@@ -426,9 +430,10 @@ protected:
 
     FName mToolbarMenuName;
 
-    TArray<TSharedPtr<FOdysseyPainterEditorPaletteSet>> mPaletteSets;
+    //Local editor data, for convenience. Palettes and sets are stored in TextureData and Animation. Colors are stored in vector objects.
     UOdysseyPaletteEntryColor* mCurrentPaletteEntryColor = nullptr;
-    int mCurrentPaletteSet = 0;
+    FString mCurrentPaletteSet = FString();
+
     TSharedPtr<FOdysseyPainterEditorAnimationFlipSystem> mAnimationFlipSystem;
     TArray<FGuid> mImageRenderingComposition;
     bool mAnimationTimelineIsScrubbing = false;
