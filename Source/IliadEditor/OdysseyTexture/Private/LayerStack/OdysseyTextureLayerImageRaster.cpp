@@ -44,45 +44,64 @@ UOdysseyTextureLayerImageRaster::PostLoad()
 
     if (RasterBlock)
     {
-        InitRasterBlock();
+        ConvertRasterBlock();
+        SanitizeRasterBlock({RasterBlock->GetRect()}); //ensure the RasterBlock contains the right data
+        BindRasterBlockDelegates();
+
+        //Copy the rasterblock data into the texture
+        UTexture2D* renderTexture = GetRenderTexture();
+        InitTextureWithBlockData(RasterBlock->GetBlock().Get(), renderTexture, renderTexture->Source.GetFormat());
+        renderTexture->UpdateResource();
+        FTextureCompilingManager::Get().FinishCompilation({ renderTexture });
     }
 }
 
 void
-UOdysseyTextureLayerImageRaster::InitRasterBlock() const
+UOdysseyTextureLayerImageRaster::ConvertRasterBlock()
 {
-    if ( !RasterBlock )
+    UTexture2D* renderTexture = GetRenderTexture();
+    ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(renderTexture->Source.GetFormat());
+    RasterBlock->ConvertTo(RasterBlock->GetWidth(), RasterBlock->GetHeight(), format);
+}
+
+void
+UOdysseyTextureLayerImageRaster::InitRasterBlock()
+{
+    UTexture2D* texture = GetTexture();
+    if (!texture)
+        return;
+
+    int width = texture->Source.GetSizeX();
+    int height = texture->Source.GetSizeY();
+
+    UTexture2D* renderTexture = GetRenderTexture();
+    if ( renderTexture && renderTexture->Source.GetFormat() != TSF_Invalid )
     {
-        UTexture2D* texture = GetTexture();
-        if (!texture)
-            return;
+        ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(renderTexture->Source.GetFormat());
+        RasterBlock = MakeShared<FOdysseyRasterBlock>(const_cast<UOdysseyTextureLayerImageRaster*>(this), width, height, format);
 
-        int width = texture->Source.GetSizeX();
-        int height = texture->Source.GetSizeY();
+        TSharedPtr<::ULIS::FBlock> textureBlock = MakeShareable(NewBlockFromUTextureData(renderTexture, format));
+        FOdysseyRasterBlockMutator rasterBlockMutator(RasterBlock, false);
+        rasterBlockMutator.Copy(textureBlock, { textureBlock->Rect() });
+        rasterBlockMutator.Commit();
+    }
+    else
+    {
+        //The layer a different texture with different parameters
+        //Ensure the block uses those parameters
+        ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
+        //let's ensure the format has alpha, so add alpha channel of needed
+        format = static_cast< ::ULIS::eFormat >(format | ULIS_W_ALPHA( 1 ) );
 
-        UTexture2D* renderTexture = GetRenderTexture();
-        if ( renderTexture && renderTexture->Source.GetFormat() != TSF_Invalid )
-        {
-            ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(renderTexture->Source.GetFormat());
-            RasterBlock = MakeShared<FOdysseyRasterBlock>(const_cast<UOdysseyTextureLayerImageRaster*>(this), width, height, format);
-
-            TSharedPtr<::ULIS::FBlock> textureBlock = MakeShareable(NewBlockFromUTextureData(renderTexture, format));
-            FOdysseyRasterBlockMutator rasterBlockMutator(RasterBlock, false);
-            rasterBlockMutator.Copy(textureBlock, { textureBlock->Rect() });
-            rasterBlockMutator.Commit();
-        }
-        else
-        {
-            //The layer a different texture with different parameters
-            //Ensure the block uses those parameters
-            ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
-            //let's ensure the format has alpha, so add alpha channel of needed
-            format = static_cast< ::ULIS::eFormat >(format | ULIS_W_ALPHA( 1 ) );
-
-            RasterBlock = MakeShared<FOdysseyRasterBlock>(const_cast<UOdysseyTextureLayerImageRaster*>(this), width, height, format);
-        }
+        RasterBlock = MakeShared<FOdysseyRasterBlock>(const_cast<UOdysseyTextureLayerImageRaster*>(this), width, height, format);
     }
 
+    BindRasterBlockDelegates();
+}
+
+void
+UOdysseyTextureLayerImageRaster::BindRasterBlockDelegates()
+{
     RasterBlock->OnBlockChanged().RemoveAll(this);
     RasterBlock->OnBlockCommited().RemoveAll(this);
 
@@ -95,26 +114,60 @@ void
 UOdysseyTextureLayerImageRaster::InitTexture()
 {
     Super::InitTexture();
-
-    UTexture2D* texture = GetRenderTexture();
-    TSharedPtr<FOdysseyRasterBlock> rasterBlock = GetRasterBlock(); //ensures RasterBlock exists
-    InitTextureWithBlockData(rasterBlock->GetBlock().Get(), texture, TextureSourceFormatForULISFormat(rasterBlock->GetFormat()));
-    texture->UpdateResource();
-    FTextureCompilingManager::Get().FinishCompilation({ texture });
 }
 
 TSharedPtr<FOdysseyRasterBlock>
 UOdysseyTextureLayerImageRaster::GetRasterBlock() const
 {
     if (!RasterBlock)
-        InitRasterBlock();
+        const_cast<UOdysseyTextureLayerImageRaster*>(this)->InitRasterBlock();
 
     return RasterBlock;
 }
 
 void
+UOdysseyTextureLayerImageRaster::SanitizeRasterBlock(const TArray<::ULIS::FRectI>& iRects)
+{
+    UTexture2D* texture = GetTexture();
+    if (!texture)
+        return;
+    ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
+    //let's ensure the format has alpha, so add alpha channel of needed
+    format = static_cast< ::ULIS::eFormat >(format | ULIS_W_ALPHA( 1 ) );
+
+    TSharedPtr<::ULIS::FBlock> block = GetRasterBlock()->GetBlock();
+    if (block->Format() != format)
+    {
+        for (const ::ULIS::FRectI& rect : iRects)
+        {
+            TSharedPtr<::ULIS::FBlock> convBlock = MakeShared<::ULIS::FBlock>(rect.w, rect.h, format);
+
+            ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
+            ctx.ConvertFormat(
+                *block.Get(),
+                *convBlock.Get(),
+                rect,
+                ::ULIS::FVec2I(0),
+                ::ULIS::FSchedulePolicy::AsyncCacheEfficient
+            );
+            ctx.Finish();
+
+            ctx.ConvertFormat(
+                *convBlock.Get(),
+                *block.Get(),
+                ::ULIS::FRectI::Auto,
+                rect.Position(),
+                ::ULIS::FSchedulePolicy::AsyncCacheEfficient
+            );
+            ctx.Finish();
+        }
+    }
+}
+
+void
 UOdysseyTextureLayerImageRaster::OnBlockChanged(const TArray<::ULIS::FRectI>& iRects)
 {
+    SanitizeRasterBlock(iRects);
     FOdysseySurfaceTexture2DEditable surface(GetRenderTexture(), GetRasterBlock()->GetBlock());
     surface.Invalidate(iRects);
     RenderingChanged(::ULISUtils::ToIntRects(iRects), true);
@@ -202,38 +255,6 @@ UOdysseyTextureLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
     FOdysseyRasterBlockMutator mutator(RasterBlock);
     mutator.Copy(block, {::ULISUtils::ToULISRectI(rect)});
     mutator.Commit();
-}
-
-void
-UOdysseyTextureLayerImageRaster::PostInitProperties()
-{
-    Super::PostInitProperties();
-}
-
-void
-UOdysseyTextureLayerImageRaster::PostDuplicate(EDuplicateMode::Type iDuplicateMode)
-{
-    Super::PostDuplicate(iDuplicateMode);
-
-    UTexture2D* texture = GetTexture();
-    if (!texture)
-        return;
-
-    //The layer a different texture with different parameters
-    //Ensure the block uses those parameters
-    ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
-    //let's ensure the format has alpha, so add alpha channel of needed
-    format = static_cast< ::ULIS::eFormat >(format | ULIS_W_ALPHA( 1 ) );
-    int width = texture->Source.GetSizeX();
-    int height = texture->Source.GetSizeY();
-
-    if (RasterBlock)
-    {
-        RasterBlock->PostDuplicate();
-        RasterBlock->ConvertTo(width, height, format);
-
-        InitRasterBlock();
-    }
 }
 
 FOdysseyMediaProvider
@@ -326,13 +347,6 @@ bool
 UOdysseyTextureLayerImageRaster::IsAlphaLocked() const
 {
     return bIsAlphaLocked;
-}
-
-void
-UOdysseyTextureLayerImageRaster::PreSave(FObjectPreSaveContext SaveContext)
-{
-    Super::PreSave(SaveContext);
-    //InitTexture();
 }
 
 #undef LOCTEXT_NAMESPACE

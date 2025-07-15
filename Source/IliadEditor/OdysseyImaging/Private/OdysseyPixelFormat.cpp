@@ -216,7 +216,7 @@ RawImageFormatForULISFormat( ::ULIS::eFormat iFormat )
         case ::ULIS::Format_RGBAF: ret = ERawImageFormat::RGBA32F;
         case ::ULIS::Format_G16: ret = ERawImageFormat::G16;
     }
-    checkf(ret,TEXT("Error, bad format !")); // Crash
+    checkf(ret != ERawImageFormat::Invalid, TEXT("Error, bad format !")); // Crash
     return ret;
 }
 
@@ -231,7 +231,7 @@ ETextureSourceFormat TextureSourceFormatForULISFormat( ::ULIS::eFormat iFormat )
         case ::ULIS::Format_RGBAF:  ret = TSF_RGBA32F;  break;
         default:                    ret = TSF_Invalid;  break;
     }
-    checkf(ret,TEXT("Error, bad format !")); // Crash
+    checkf(ret != TSF_Invalid, TEXT("Error, bad format !")); // Crash
     return ret;
 }
 

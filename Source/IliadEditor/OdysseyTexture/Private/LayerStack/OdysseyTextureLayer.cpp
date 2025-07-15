@@ -22,7 +22,11 @@ UTexture2D*
 UOdysseyTextureLayer::GetRenderTexture() const
 {
     if (!Texture)
+    {
         const_cast<UOdysseyTextureLayer*>(this)->InitTexture();
+        Texture->UpdateResource();
+        FTextureCompilingManager::Get().FinishCompilation({ Texture });
+    }
 
     return Texture;
 }
@@ -32,10 +36,54 @@ UOdysseyTextureLayer::InitTexture()
 {
     if ( !Texture )
     {
+        UTexture2D* OwnerTexture = GetTexture();
+        if (!OwnerTexture)
+            return;
+
+        ETextureSourceFormat ownerTextureFormat = OwnerTexture->Source.GetFormat();
+        ETextureSourceFormat layerTextureFormat = TSF_BGRA8;
+        switch(ownerTextureFormat)
+        {
+            case TSF_Invalid: checkf(false, TEXT("Invalid Texture Format")); break;
+
+            case TSF_G8:
+            case TSF_BGRA8:
+            case TSF_BGRE8:
+            case TSF_RGBA8_DEPRECATED:
+            case TSF_RGBE8_DEPRECATED:
+            {
+                layerTextureFormat = TSF_BGRA8;
+            }
+            break;
+
+            case TSF_G16:
+            case TSF_RGBA16:
+            {
+                layerTextureFormat = TSF_RGBA16;
+            }
+            break;
+
+            case TSF_RGBA16F:
+            case TSF_RGBA32F:
+            case TSF_R16F:
+            case TSF_R32F:
+            {
+                layerTextureFormat = TSF_RGBA32F;
+            }
+            break;
+        };
+
         Texture = NewObject<UTexture2D>(this, TEXT("Texture"));
         Texture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
         Texture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
         Texture->Filter = TextureFilter::TF_Nearest;
+        Texture->Source.Init(
+            OwnerTexture->Source.GetSizeX(),
+            OwnerTexture->Source.GetSizeY(),
+            1,
+            1,
+            layerTextureFormat
+        );
     }
 }
 
@@ -53,7 +101,10 @@ UOdysseyTextureLayer::BuildRenderPipelineInternal(
 
 #if WITH_EDITOR
     if ( !Texture )
+    {
         const_cast<UOdysseyTextureLayer*>(this)->InitTexture();
+        Texture->UpdateResource();
+    }
 #endif
 
     FTextureCompilingManager::Get().FinishCompilation({ Texture });

@@ -95,17 +95,17 @@ CopyBlockDataToTextureSource(const ::ULIS::FBlock* iBlock, UTexture2D* iTexture,
         ctx.ConvertFormat( *iBlock, block, ULISUtils::ToULISRectI(SrcRect));
         ctx.Finish();
 
-        if (textureSourceFormat != TSF_BGRA8 && textureSourceFormat != TSF_G8)
-        {
-            FImageView imageView(block.Bits(), SrcRect.Width(), SrcRect.Height(), 1, RawImageFormatForULISFormat(targetFormat), EGammaSpace::Linear);
-            ImageSRGBToLinear(imageView);
-        }
-
         if (TextureSourceFormatNeedsConversionToULISFormat(textureSourceFormat))
         {
             TArray64<uint8> converted;
             converted.SetNumUninitialized(SrcRect.Width() * SrcRect.Height() * TextureSourceFormatBytesPerPixel(textureSourceFormat));
             ConvertULISFormatToTextureSourceFormat(block.Bits(), converted.GetData(), SrcRect.Width(), SrcRect.Height(), textureSourceFormat);
+
+            if (textureSourceFormat != TSF_BGRA8 && textureSourceFormat != TSF_G8)
+            {
+                FImageView imageView(converted.GetData(), SrcRect.Width(), SrcRect.Height(), 1, FImageCoreUtils::ConvertToRawImageFormat(textureSourceFormat), EGammaSpace::Linear);
+                ImageSRGBToLinear(imageView);
+            }
 
             int32 bpp = GTextureSourceFormats[textureSourceFormat].BytesPerPixel;
             for (int y = 0; y < SrcRect.Height(); y++)
@@ -117,6 +117,12 @@ CopyBlockDataToTextureSource(const ::ULIS::FBlock* iBlock, UTexture2D* iTexture,
         }
         else
         {
+            if (textureSourceFormat != TSF_BGRA8 && textureSourceFormat != TSF_G8)
+            {
+                FImageView imageView(block.Bits(), SrcRect.Width(), SrcRect.Height(), 1, FImageCoreUtils::ConvertToRawImageFormat(textureSourceFormat), EGammaSpace::Linear);
+                ImageSRGBToLinear(imageView);
+            }
+
             int32 bpp = GTextureSourceFormats[textureSourceFormat].BytesPerPixel;
             for (int y = 0; y < SrcRect.Height(); y++)
             {
@@ -134,39 +140,35 @@ void
 InitTextureWithBlockData(const ::ULIS::FBlock* iBlock, UTexture2D* iTexture, ETextureSourceFormat iFormat)
 {
     ::ULIS::eFormat targetFormat = ULISFormatForTextureSourceFormat(iFormat);
-    const ::ULIS::FBlock* block = iBlock;
-    if (iBlock->Format() != targetFormat || (iFormat != TSF_BGRA8 && iFormat != TSF_G8))
-    {
-        ::ULIS::FBlock* convblock = new ::ULIS::FBlock(iBlock->Width(), iBlock->Height(), targetFormat);
+    ::ULIS::FBlock block(iBlock->Width(), iBlock->Height(), targetFormat);
 
-        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iBlock->Format());
-        ctx.ConvertFormat( *iBlock, *convblock );
-        ctx.Finish();
-
-        if (iFormat != TSF_BGRA8 && iFormat != TSF_G8)
-        {
-            FImageView imageView(convblock->Bits(), iBlock->Width(), iBlock->Height(), 1, RawImageFormatForULISFormat(targetFormat), EGammaSpace::Linear);
-            ImageSRGBToLinear(imageView);
-        }
-
-        block = convblock;
-    }
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(block.Format());
+    ctx.ConvertFormat( *iBlock, block );
+    ctx.Finish();
 
     if (TextureSourceFormatNeedsConversionToULISFormat(iFormat))
     {
         TArray64<uint8> dst;
-        dst.SetNumUninitialized(iBlock->Width() * iBlock->Height() * TextureSourceFormatBytesPerPixel(iFormat));
-        ConvertULISFormatToTextureSourceFormat(block->Bits(), dst.GetData(), iBlock->Width(), iBlock->Height(), iFormat);
-        iTexture->Source.Init(iBlock->Width(), iBlock->Height(), 1, 1, iFormat, dst.GetData());
+        dst.SetNumUninitialized(block.Width() * block.Height() * TextureSourceFormatBytesPerPixel(iFormat));
+        ConvertULISFormatToTextureSourceFormat(block.Bits(), dst.GetData(), block.Width(), block.Height(), iFormat);
+
+        if (iFormat != TSF_BGRA8 && iFormat != TSF_G8)
+        {
+            FImageView imageView(dst.GetData(), block.Width(), block.Height(), 1, FImageCoreUtils::ConvertToRawImageFormat(iFormat), EGammaSpace::Linear);
+            ImageSRGBToLinear(imageView);
+        }
+
+        iTexture->Source.Init(block.Width(), block.Height(), 1, 1, iFormat, dst.GetData());
     }
     else
     {
-        iTexture->Source.Init(block->Width(), block->Height(), 1, 1, iFormat, block->Bits());
-    }
+        if (iFormat != TSF_BGRA8 && iFormat != TSF_G8)
+        {
+            FImageView imageView(block.Bits(), block.Width(), block.Height(), 1, FImageCoreUtils::ConvertToRawImageFormat(iFormat), EGammaSpace::Linear);
+            ImageSRGBToLinear(imageView);
+        }
 
-    if (block != iBlock)
-    {
-        delete block;
+        iTexture->Source.Init(block.Width(), block.Height(), 1, 1, iFormat, block.Bits());
     }
 }
 

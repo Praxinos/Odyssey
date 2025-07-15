@@ -56,10 +56,7 @@ protected:
 
 public:
     // UObject overrides
-    virtual void PostInitProperties() override;
     virtual void PostLoad() override;
-    virtual void PostDuplicate(EDuplicateMode::Type iDuplicateMode) override;
-    virtual void PreSave(FObjectPreSaveContext SaveContext) override;
 
 public:
     //UObject overrides
@@ -77,7 +74,10 @@ public:
 
 private:
     void InitTexture();
-    void InitRasterBlock() const;
+    void InitRasterBlock();
+    void ConvertRasterBlock();
+    void BindRasterBlockDelegates();
+    void SanitizeRasterBlock(const TArray<::ULIS::FRectI>& iRects);
 
     TArray<::ULIS::FEvent> RasterBlockPostProcess(const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock>>& iOriginalBlocks, const FOdysseyInvalidTileMap& iInvalidMap, const TArray<::ULIS::FEvent>& iWaitList);
 
