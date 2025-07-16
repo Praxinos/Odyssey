@@ -193,7 +193,8 @@ UOdysseyPainterEditorVectorObjectView::PostEditChangeProperty( FPropertyChangedE
 
     if( mScene )
     {
-        uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW;
+        uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
+                                 | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
         // needed for valid GUndo pointer
         GEditor->BeginTransaction(LOCTEXT("vector-object.transaction.property-changed","Property Changed"));
@@ -203,7 +204,8 @@ UOdysseyPainterEditorVectorObjectView::PostEditChangeProperty( FPropertyChangedE
                                                                         , mFocusedObjectList
                                                                         , FName(PropertyChangedEvent.Property->GetMetaData(TEXT("Category")))
                                                                         , notificationFlags
-                                                                        | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS );
+                                                                        | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
+                                                                        | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD );
             // We use GEditor as the UObject, otherwise if we use "this", at each UNDO, PostEditChangeProperty() will be called
             // which will again call StoreUndo + this will lead to a crash. I don't know however what will be the consequences
             // of a call to GEditor::PostEditChangeProperty()
