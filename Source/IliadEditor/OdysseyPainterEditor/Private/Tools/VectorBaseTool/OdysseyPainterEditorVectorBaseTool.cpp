@@ -1064,6 +1064,81 @@ UOdysseyPainterEditorVectorBaseTool::ExtendToolbar( FToolBarBuilder& iBuilder )
     iBuilder.EndSection();
 }
 
+TSharedPtr<SWidget>
+UOdysseyPainterEditorVectorBaseTool::ObjectProperties()
+{
+    FPropertyEditorModule& PropertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
+    TSharedPtr<IDetailsView> detailsView;
+    FDetailsViewArgs DetailsViewArgs;
+    SOdysseyPainterEditorVectorSceneDetailsView* ojectView = NewObject<SOdysseyPainterEditorVectorSceneDetailsView>();
+
+    bucketView->Update( iEditor, iBucket );
+
+    DetailsViewArgs.bUpdatesFromSelection = false;
+    DetailsViewArgs.bLockable = false;
+    DetailsViewArgs.bAllowSearch = false;
+    DetailsViewArgs.NameAreaSettings = FDetailsViewArgs::HideNameArea;
+
+    detailsView = PropertyEditorModule.CreateDetailView(DetailsViewArgs);
+    detailsView->SetObject(bucketView);
+
+    TSharedRef<SWindow> BucketWindow = SNew(SWindow)
+    .Title(FText::FromString(TEXT("Bucket Properties")))
+    //.ClientSize(FVector2D(800, 400))
+    .SizingRule(ESizingRule::Autosized)
+    .SupportsMaximize(false)
+    .SupportsMinimize(false)
+    [
+        detailsView.ToSharedRef()
+      /*SNew(SVerticalBox)
+      +SVerticalBox::Slot()
+      .HAlign(HAlign_Center)
+      .VAlign(VAlign_Center)
+      [
+        SNew(STextBlock)
+        .Text(FText::FromString(TEXT("Hello from Slate")))
+      ]*/
+    ];
+
+    TSharedPtr<FOdysseyPainterEditorViewportTab> viewportTab = iEditor->FindTab<FOdysseyPainterEditorViewportTab>();
+
+    FSlateApplication::Get().AddModalWindow
+    (
+        BucketWindow,
+        viewportTab->Widget(),
+        false
+    );
+
+    bucketView->ConditionalBeginDestroy();
+
+
+    return SNew(SWidgetSwitcher)
+        .WidgetIndex(this, &FOdysseyPainterEditorVectorSceneTreeViewTab::WidgetIndex)
+        +SWidgetSwitcher::Slot()
+        [
+            SNew(STextBlock)
+            .Text(LOCTEXT("vector-scene-tree-view-tab.no-scene-text", "This tab is only available when editing a vector scene."))
+            .AutoWrapText(true)
+        ]
+        +SWidgetSwitcher::Slot()
+        [
+            SNew(SSplitter)
+            .Orientation( EOrientation::Orient_Vertical )
+            +SSplitter::Slot()
+            [
+                SNew( SOdysseyPainterEditorVectorSceneTreeView )
+                .Editor(mEditor)
+                .Scene(this, &FOdysseyPainterEditorVectorSceneTreeViewTab::GetScene)
+            ]
+            +SSplitter::Slot()
+            [
+                SNew( SOdysseyPainterEditorVectorSceneDetailsView, mEditor )
+                .Scene(this, &FOdysseyPainterEditorVectorSceneTreeViewTab::GetScene)
+            ]
+        ];
+
+}
+
 bool
 UOdysseyPainterEditorVectorBaseTool::SupportsColorType(EOdysseyPainterEditorColorType iType)
 {

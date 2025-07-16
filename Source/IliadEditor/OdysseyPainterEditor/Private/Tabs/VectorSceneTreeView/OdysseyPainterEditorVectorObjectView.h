@@ -34,6 +34,24 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectView : public UO
     public:
         GENERATED_BODY()
 
+    typedef struct _PropertyBits
+    {
+        uint32 Name : 1;
+        uint32 TranslationX : 1;
+        uint32 TranslationY : 1;
+        uint32 Rotation : 1;
+        uint32 ScalingX : 1;
+        uint32 ScalingY : 1;
+        uint32 Opacity : 1;
+        uint32 Visible : 1;
+        uint32 ForegroundColorMode : 1;
+        uint32 ForegroundColor : 1;
+        uint32 ForegroundPaletteSelection : 1;
+        uint32 BackgroundColorMode : 1;
+        uint32 BackgroundColor : 1;
+        uint32 BackgroundPaletteSelection : 1;
+    } PropertyBits;
+
     public:
         ~UOdysseyPainterEditorVectorObjectView();
         UOdysseyPainterEditorVectorObjectView();
@@ -44,6 +62,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectView : public UO
         FOdysseyPainterEditor* GetEditor();
 
     protected:
+        void ParseBits( const PropertyBits& iBits );
         virtual void ImportParam();
         virtual void PropertyChanged( const FName& iPropertyName
                                       , const FName& iMemberPropertyName

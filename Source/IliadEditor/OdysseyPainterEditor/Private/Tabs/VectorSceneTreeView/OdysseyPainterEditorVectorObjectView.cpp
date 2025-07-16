@@ -108,73 +108,130 @@ UOdysseyPainterEditorVectorObjectView::Update( FOdysseyPainterEditor* iEditor
 }
 
 void
-UOdysseyPainterEditorVectorObjectView::PropertyChanged( const FName& iPropertyName
-                                                      , const FName& iMemberPropertyName
-                                                      , const FName& iCategory )
+UOdysseyPainterEditorVectorObjectView::ParseBits( const PropertyBits& iBits )
 {
     for( FOdysseyVectorObject* selectedObject : mFocusedObjectList )
     {
-        // We have to change properties one by one especially in case of multiple selection.
-        // We just cannot copy the whole block of properties.
-
         // Category "Identity"
-        if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, Name) )
+        if( iBits.Name )
         {
             selectedObject->SetName( Name );
         }
 
         // Category "Transform"
-        if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, TranslationX) )
+        if( iBits.TranslationX )
             selectedObject->Translate( TranslationX, selectedObject->GetTranslationY() );
 
-        if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, TranslationY) )
+        if( iBits.TranslationY )
             selectedObject->Translate( selectedObject->GetTranslationX(), TranslationY );
 
-        if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, Rotation) )
+        if( iBits.Rotation )
             selectedObject->Rotate( Rotation );
 
-        if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, ScalingX) )
+        if( iBits.ScalingX )
             selectedObject->Scale( ScalingX, selectedObject->GetScalingY() );
 
-        if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, ScalingY) )
+        if( iBits.ScalingY )
             selectedObject->Scale( selectedObject->GetScalingX(), ScalingY );
 
-        if( iCategory == "Transform" )
+        if( iBits.TranslationX
+         || iBits.TranslationY
+         || iBits.Rotation
+         || iBits.ScalingX
+         || iBits.ScalingY )
             selectedObject->UpdateMatrix();
 
         // Category "Appearance"
-        if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, Opacity) )
+        if( iBits.Opacity )
             selectedObject->SetOpacity( Opacity );
 
-        if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, Visible) )
+        if( iBits.Visible )
             selectedObject->SetVisible( Visible );
 
-        if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, ForegroundColorMode) )
+        if( iBits.ForegroundColorMode )
             selectedObject->GetForegroundBucket().SetColorMode( static_cast<eBucketColorMode>(ForegroundColorMode) );
 
-        // note: iMemberPropertyName because FColor is a struct
-        // and we can edit individual struct members RGBA
-        if( ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, ForegroundColor) ) || ( iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, ForegroundColor) ) )
+        if( iBits.ForegroundColor )
             selectedObject->GetForegroundBucket().SetSolidColor( ForegroundColor );
 
-        if ( (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, ForegroundPaletteSelection)) || (iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, ForegroundPaletteSelection)) )
+        if ( iBits.ForegroundPaletteSelection )
         {
             selectedObject->GetForegroundBucket().SetPaletteEntry( ForegroundPaletteSelection.OdysseyPaletteEntryColor );
         }
 
-        if ((iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, BackgroundPaletteSelection)) || (iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, BackgroundPaletteSelection)))
+        if( iBits.BackgroundColorMode )
+            selectedObject->GetBackgroundBucket().SetColorMode( static_cast<eBucketColorMode>(BackgroundColorMode) );
+
+        if( iBits.BackgroundColor )
+            selectedObject->GetBackgroundBucket().SetSolidColor( BackgroundColor );
+
+        if ( iBits.BackgroundPaletteSelection )
         {
             selectedObject->GetBackgroundBucket().SetPaletteEntry( BackgroundPaletteSelection.OdysseyPaletteEntryColor );
         }
-
-        if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, BackgroundColorMode) )
-            selectedObject->GetBackgroundBucket().SetColorMode( static_cast<eBucketColorMode>(BackgroundColorMode) );
-
-        // note: iMemberPropertyName because FColor is a struct
-        // and we can edit individual struct members RGBA
-        if( ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, BackgroundColor) ) || ( iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, BackgroundColor) ) )
-            selectedObject->GetBackgroundBucket().SetSolidColor( BackgroundColor );
     }
+}
+
+void
+UOdysseyPainterEditorVectorObjectView::PropertyChanged( const FName& iPropertyName
+                                                      , const FName& iMemberPropertyName
+                                                      , const FName& iCategory )
+{
+    PropertyBits bits = {0};
+
+    // Category "Identity"
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, Name) )
+        bits.Name = 1;
+
+    // Category "Transform"
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, TranslationX) )
+        bits.TranslationX = 1;
+
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, TranslationY) )
+        bits.TranslationY = 1;
+
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, Rotation) )
+        bits.Rotation = 1;
+
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, ScalingX) )
+        bits.ScalingX = 1;
+
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, ScalingY) )
+        bits.ScalingY = 1;
+
+    // Category "Appearance"
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, Opacity) )
+        bits.Opacity = 1;
+
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, Visible) )
+        bits.Visible = 1;
+
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, ForegroundColorMode) )
+        bits.ForegroundColorMode = 1;
+
+    // note: iMemberPropertyName because FColor is a struct
+    // and we can edit individual struct members RGBA
+    if( ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, ForegroundColor) ) || ( iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, ForegroundColor) ) )
+        bits.ForegroundColor = 1;
+
+    if ( (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, ForegroundPaletteSelection)) || (iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, ForegroundPaletteSelection)) )
+        bits.ForegroundPaletteSelection = 1;
+
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, BackgroundColorMode) )
+        bits.BackgroundColorMode = 1;
+
+    // note: iMemberPropertyName because FColor is a struct
+    // and we can edit individual struct members RGBA
+    if( ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, BackgroundColor) ) || ( iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, BackgroundColor) ) )
+        bits.BackgroundColor = 1;
+
+    if ((iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, BackgroundPaletteSelection)) || (iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, BackgroundPaletteSelection)))
+        bits.BackgroundPaletteSelection = 1;
+
+
+
+
+    ParseBits( bits );
 }
 
 void
