@@ -41,7 +41,7 @@ public:
 
 protected:
     void SelectAll();
-    void ClearSelection();
+    void ClearCurrentSelection();
     void InvertSelection();
 
     void CopyCurrentSelection();

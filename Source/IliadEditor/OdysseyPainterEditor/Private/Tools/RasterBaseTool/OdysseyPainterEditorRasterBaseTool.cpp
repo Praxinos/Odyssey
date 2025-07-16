@@ -223,7 +223,7 @@ UOdysseyPainterEditorRasterBaseTool::BuildSelectionMenu(FMenuBuilder& iMenu)
         , LOCTEXT("raster-tool.object-context-menu.clear-selection.tooltip", "Clear Selection")
         , FSlateIcon()
         , FUIAction(
-            FExecuteAction::CreateUObject(this, &UOdysseyPainterEditorRasterBaseTool::ClearSelection)
+            FExecuteAction::CreateUObject(this, &UOdysseyPainterEditorRasterBaseTool::ClearCurrentSelection)
             , FCanExecuteAction::CreateLambda([this]() { return (mEditor && !mEditor->RasterSelection()->IsEmpty()); }))
     );
 
@@ -313,6 +313,22 @@ void UOdysseyPainterEditorRasterBaseTool::BindShortcuts(TSharedPtr<FUICommandLis
         FOdysseyPainterEditorCommands::Get().PasteCurrentSelectionInNewLayer,
         FExecuteAction::CreateUObject(this, &UOdysseyPainterEditorRasterBaseTool::PasteCurrentSelectionInNewLayer),
         FCanExecuteAction::CreateUObject(this, &UOdysseyPainterEditorRasterBaseTool::CanPasteCurrentSelectionInNewLayer)
+    );
+
+    iCommandList->MapAction(
+        FOdysseyPainterEditorCommands::Get().SelectAll,
+        FExecuteAction::CreateUObject(this, &UOdysseyPainterEditorRasterBaseTool::SelectAll)
+    );
+
+
+    iCommandList->MapAction(
+        FOdysseyPainterEditorCommands::Get().ClearCurrentSelection,
+        FExecuteAction::CreateUObject(this, &UOdysseyPainterEditorRasterBaseTool::ClearCurrentSelection)
+    );
+
+    iCommandList->MapAction(
+        FOdysseyPainterEditorCommands::Get().InvertSelection,
+        FExecuteAction::CreateUObject(this, &UOdysseyPainterEditorRasterBaseTool::InvertSelection)
     );
 }
 
@@ -559,7 +575,7 @@ void UOdysseyPainterEditorRasterBaseTool::PasteCurrentSelectionInNewLayer()
     mEditor->GetSource()->PasteBlockToNewLayer(clipboardData->GetBlock());
 }
 
-void UOdysseyPainterEditorRasterBaseTool::ClearSelection()
+void UOdysseyPainterEditorRasterBaseTool::ClearCurrentSelection()
 {
     if (mEditor)
         mEditor->RasterSelection()->Clear();

@@ -108,9 +108,6 @@ FOdysseyPainterEditorGUI::BindShortcuts(FBaseToolkit* iToolkit)
 
     //Need to rethink the commands and shortcuts to put them in the right place and not in GUI
     MAP_ACTION(painterEditorCommands.ClearCurrentLayer, ClearCurrentLayer)
-    MAP_ACTION(painterEditorCommands.SelectAll, SelectAll)
-    MAP_ACTION(painterEditorCommands.ClearCurrentSelection, ClearCurrentSelection)
-    MAP_ACTION(painterEditorCommands.InvertSelection, InvertSelection)
 
     MAP_ACTION(painterEditorCommands.ToggleEraserButton, ToggleEraserButton)
 
@@ -141,29 +138,6 @@ void FOdysseyPainterEditorGUI::ToggleEraserButton()
             Cast< UOdysseyPainterEditorRasterDrawingTool>(mEditor->GetCurrentTool())->BlendParameters.bEraserMode = !Cast< UOdysseyPainterEditorRasterDrawingTool>(mEditor->GetCurrentTool())->BlendParameters.bEraserMode;
         }
     }
-}
-
-void
-FOdysseyPainterEditorGUI::SelectAll()
-{
-    TArray<FVector2D> polyPoints;
-    polyPoints.Add(FVector2D(0, 0));
-    polyPoints.Add(FVector2D(mEditor->RasterSelection()->GetBlock()->Width(), 0));
-    polyPoints.Add(FVector2D(mEditor->RasterSelection()->GetBlock()->Width(), mEditor->RasterSelection()->GetBlock()->Height()));
-    polyPoints.Add(FVector2D(0, mEditor->RasterSelection()->GetBlock()->Height()));
-
-    mEditor->RasterSelection()->Add(polyPoints);
-}
-
-void
-FOdysseyPainterEditorGUI::ClearCurrentSelection()
-{
-    mEditor->RasterSelection()->Clear();
-}
-
-void FOdysseyPainterEditorGUI::InvertSelection()
-{
-    mEditor->RasterSelection()->Invert();
 }
 
 #undef LOCTEXT_NAMESPACE
