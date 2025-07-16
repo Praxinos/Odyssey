@@ -213,6 +213,7 @@ FOdysseyPainterEditorTextureSource::Clear()
             }
 
             vectorCell->SetScene(new FOdysseyVectorGroupPaint("Scene") );
+            vectorCell->GetLayer()->RequestRedraw( vectorCell, 0 );
         }
 
         if( imageVectorLayer )

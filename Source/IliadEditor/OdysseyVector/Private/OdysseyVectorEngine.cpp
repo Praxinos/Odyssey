@@ -64,6 +64,14 @@ FOdysseyVectorEngine::GetRenderData()
     return mRenderData;
 }
 
+std::vector<BLPoint>&
+FOdysseyVectorEngine::GetBLPointPool( uint32 iSize )
+{
+    mBLPointPool.resize( iSize );
+
+    return mBLPointPool;
+}
+
 ::ULIS::FRectI
 FOdysseyVectorEngine::SanitizeRect( const ::ULIS::FRectD& iRenderRect
                                   , uint32 iScreenWidth
@@ -75,7 +83,7 @@ FOdysseyVectorEngine::SanitizeRect( const ::ULIS::FRectD& iRenderRect
     ::ULIS::FRectI renderRectI = ::ULIS::FRectI::FromXYWH( iRenderRect.x
                                                          , iRenderRect.y
                                                          , ceil ( iRenderRect.w )
-                                                         , ceil ( iRenderRect.y ) );
+                                                         , ceil ( iRenderRect.h ) );
 
     FOdysseyVector::IntersectRegions( renderRectI
                                     , screen

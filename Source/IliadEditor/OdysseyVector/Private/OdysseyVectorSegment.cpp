@@ -83,12 +83,44 @@ FOdysseyVectorSegment::GetClosestIntersection( FOdysseyVectorVertex* iVertex )
 }
 
 void
-FOdysseyVectorSegment::DrawFractionCache( BLContext* iBLContext )
+FOdysseyVectorSegment::DrawFractionCache( BLContext* iBLContext
+                                        , FOdysseyVectorEngine* iVectorEngine )
 {
     const BLMatrix2D worldMatrix = iBLContext->userMatrix();
+    std::vector<BLPoint>& pointPool = iVectorEngine->GetBLPointPool( ( mFractionCache.size() * 2 ) + 2 );
+    uint32 j = 0;
 
     iBLContext->setStrokeWidth( 1.0f );
+    // for filled overlaps
+    iBLContext->setFillRule( BL_FILL_RULE_NON_ZERO );
 
+    for ( std::vector<FOdysseyVectorFraction>::iterator it = mFractionCache.begin(); it != mFractionCache.end(); ++it, j++ )
+    {
+        FOdysseyVectorFraction& fraction = *it;
+
+        pointPool[j].x = fraction.polygon.point[1].x;
+        pointPool[j].y = fraction.polygon.point[1].y;
+    }
+
+    pointPool[j].x = mFractionCache.back().polygon.point[2].x;
+    pointPool[j].y = mFractionCache.back().polygon.point[2].y;
+
+    j++;
+
+    for ( std::vector<FOdysseyVectorFraction>::reverse_iterator it = mFractionCache.rbegin(); it != mFractionCache.rend(); ++it, j++ )
+    {
+        FOdysseyVectorFraction& fraction = *it;
+
+        pointPool[j].x = fraction.polygon.point[4].x;
+        pointPool[j].y = fraction.polygon.point[4].y;
+    }
+
+    pointPool.back().x = mFractionCache.front().polygon.point[5].x;
+    pointPool.back().y = mFractionCache.front().polygon.point[5].y;
+
+    iBLContext->fillPolygon( &pointPool[0], pointPool.size() );
+
+#ifdef UNUSED
     for ( int i = 0; i < mFractionCache.size(); i++ )
     {
         BLPoint pt[6] = { { mFractionCache[i].polygon.point[0].x, mFractionCache[i].polygon.point[0].y }
@@ -98,7 +130,6 @@ FOdysseyVectorSegment::DrawFractionCache( BLContext* iBLContext )
                         , { mFractionCache[i].polygon.point[4].x, mFractionCache[i].polygon.point[4].y }
                         , { mFractionCache[i].polygon.point[5].x, mFractionCache[i].polygon.point[5].y } };
 
-
         // the stroke thing is very slow and slows the all thing, we have to find something better
         //iBLContext.strokePolygon( mFractionCache[i].vertex, 4 );
 /*
@@ -107,9 +138,10 @@ FOdysseyVectorSegment::DrawFractionCache( BLContext* iBLContext )
                         , { mFractionCache[i].polygon.point[2].x, mFractionCache[i].polygon.point[2].y }
                         , { mFractionCache[i].polygon.point[3].x, mFractionCache[i].polygon.point[3].y } };
 */
-        iBLContext->fillPolygon( pt, 6 );
+        iBLContext->strokePolygon( pt, 6 );
     }
-
+#endif
+#ifdef UNUSED
     // we draw lines between the polygons to correct the artefacts, otherwise there is a thin line between the polygons
     // line stroking is done in world coordinates because we need a 1-3 pixel width
 
@@ -128,7 +160,7 @@ FOdysseyVectorSegment::DrawFractionCache( BLContext* iBLContext )
         iBLContext->strokePath( thinLine );
     }
     iBLContext->restore();
-
+#endif
 }
 
 void
@@ -520,7 +552,7 @@ FOdysseyVectorSegment::GetHandleVector( FOdysseyVectorVertex* iVertex, bool iNor
 }
 
 void
-FOdysseyVectorSegment::Draw( BLContext* iBLContext )
+FOdysseyVectorSegment::Draw( BLContext* iBLContext, FOdysseyVectorEngine* iVectorEngine )
 {
 
 }

@@ -132,6 +132,9 @@ FOdysseyVectorJoint::Draw( BLContext* iBLContext
         }
         else
         {
+            // for filled overlaps
+            iBLContext->setFillRule( BL_FILL_RULE_NON_ZERO );
+
             for( int i = 0; i < mPolygonCache.size(); i++ )
             {
                 BLPoint pt[3] = { { mPolygonCache[i].point[0].x, mPolygonCache[i].point[0].y }

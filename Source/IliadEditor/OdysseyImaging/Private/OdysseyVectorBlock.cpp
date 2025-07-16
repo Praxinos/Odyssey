@@ -307,6 +307,8 @@ FOdysseyVectorBlock::Invalidate( const ::ULIS::FRectD& iRect, bool iIsInteractiv
 {
     ::ULIS::FRectD sanitizedRectD = mEngine.SanitizeRect( iRect, mWidth, mHeight );
 
+    mSanitizedRect = sanitizedRectD;
+
     if (!mNeedsRender)
     {
         //Remove block from cache and invalidate cache

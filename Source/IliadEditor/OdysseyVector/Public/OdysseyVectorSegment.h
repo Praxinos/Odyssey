@@ -98,7 +98,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
          * @brief Draw the segment
          * @param iRoi the region-of-interest
          */
-        virtual void Draw( BLContext* iBLContext );
+        virtual void Draw( BLContext* iBLContext, FOdysseyVectorEngine* iVectorEngine );
 
         virtual void DrawStructure( BLContext* iBLContext, FOdysseyVectorObject* iParentObject, bool iWorld ){};
 
@@ -247,7 +247,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
                            , std::vector<FOdysseyVectorSection*>* iShortSectionArray );
 
     protected:
-        void DrawFractionCache( BLContext* iBLContext );
+        void DrawFractionCache( BLContext* iBLContext
+                              , FOdysseyVectorEngine* iVectorEngine );
 
     protected:
         // here we use C-style allocation to avoir unnecessary constructor calls

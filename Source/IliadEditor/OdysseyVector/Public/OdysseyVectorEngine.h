@@ -153,6 +153,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
                                    , uint32 iScreenWidth
                                    , uint32 iScreenHeight );
 
+        std::vector<BLPoint>& GetBLPointPool( uint32 iSize );
+
     protected:
         void TracePolygon( const  ::ULIS::FVec2I* iPoint
                          , const  double* iU
@@ -178,4 +180,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
         // mutex to prevent drawing whil update isn't complete. this is necessary due to the Proxy renderer
         // which runs in a different thread
         std::mutex mDrawingMutex;
+        std::vector<BLPoint> mBLPointPool;
 };

@@ -1680,7 +1680,7 @@ FOdysseyVectorPath::DrawSegment( BLContext* iBLContext
         }
         else // otherwise use Blend2D's
         {
-            iSegment->Draw( iBLContext );
+            iSegment->Draw( iBLContext, iVectorEngine );
         }
     }
 }

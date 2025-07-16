@@ -686,7 +686,7 @@ FOdysseyVectorSegmentCubic::DrawStructure( BLContext* iBLContext
 }
 
 void
-FOdysseyVectorSegmentCubic::Draw( BLContext* iBLContext )
+FOdysseyVectorSegmentCubic::Draw( BLContext* iBLContext, FOdysseyVectorEngine* iVectorEngine )
 {
     std::vector<FOdysseyVectorBezierFragment>& offsetCurve0FragmentArray = mOffsetCurve[0].GetBezierFragmentArray();
     std::vector<FOdysseyVectorBezierFragment>& offsetCurve1FragmentArray = mOffsetCurve[1].GetBezierFragmentArray();
@@ -695,7 +695,7 @@ FOdysseyVectorSegmentCubic::Draw( BLContext* iBLContext )
     blctx->fillPath( mBLPath );
 */
 
-    DrawFractionCache( iBLContext );
+    DrawFractionCache( iBLContext, iVectorEngine );
 /*
     for( int i = 0; i < offsetCurve0FragmentArray.size(); i++ )
     {

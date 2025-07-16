@@ -95,8 +95,9 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::PickBucketArea( FOdysseyVectorBuc
                                                              , double iWorldY )
 {
     ::ULIS::FVec2D bucketWorldCoords = FOdysseyVectorHUD::GetBucketPosition( iBucket, true );
-    ::ULIS::FVec2D pickDif = ::ULIS::FVec2D( iWorldX - bucketWorldCoords.x
-                                           , iWorldY - bucketWorldCoords.y );
+    FVector2D bucketHUDCoords = TextureToHUD( FVector2D( bucketWorldCoords.x, bucketWorldCoords.y ) );
+    FVector2D mouseHUDCoords = TextureToHUD( FVector2D( iWorldX, iWorldY ) );
+    FVector2D pickHUDDif = mouseHUDCoords - bucketHUDCoords;
 
     if( mPaintBucketTool->GetEditionMode() == eVectorPaintBucketEditionMode::Control )
     {
@@ -105,17 +106,19 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::PickBucketArea( FOdysseyVectorBuc
             BLMatrix2D& worldMatrix = iBucket->GetOwner()->GetWorldMatrix();
             ::ULIS::FVec2D localP0 = iBucket->GetLinearP0();
             ::ULIS::FVec2D localP1 = iBucket->GetLinearP1();
-            ::ULIS::FVec2D worldHandle[2] = { FOdysseyVector::MapPoint( worldMatrix, localP0 )
-                                            , FOdysseyVector::MapPoint( worldMatrix, localP1 ) };
+            ::ULIS::FVec2D handleWorldCoords[2] = { FOdysseyVector::MapPoint( worldMatrix, localP0 )
+                                                  , FOdysseyVector::MapPoint( worldMatrix, localP1 ) };
+            FVector2D handleHUDCoords[2] = { TextureToHUD( FVector2D( handleWorldCoords[0].x
+                                                                    , handleWorldCoords[0].y ) )
+                                           , TextureToHUD( FVector2D( handleWorldCoords[1].x
+                                                                    , handleWorldCoords[1].y ) ) };
 
-            if( ::ULIS::FVec2D( iWorldX - worldHandle[0].x
-                              , iWorldY - worldHandle[0].y ).Distance() < mPaintBucketTool->PickingRadius )
+            if( ( mouseHUDCoords - handleHUDCoords[0] ).Size() < mPaintBucketTool->PickingRadius )
             {
                 return PICK_LINEAR_HANDLE0;
             }
 
-            if( ::ULIS::FVec2D( iWorldX - worldHandle[1].x
-                              , iWorldY - worldHandle[1].y ).Distance() < mPaintBucketTool->PickingRadius )
+            if( ( mouseHUDCoords - handleHUDCoords[1] ).Size() < mPaintBucketTool->PickingRadius )
             {
                 return PICK_LINEAR_HANDLE1;
             }
@@ -124,32 +127,30 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::PickBucketArea( FOdysseyVectorBuc
 
         if( iBucket->GetColorMode() == eBucketColorMode::RadialGradient )
         {
-            ::ULIS::FVec2D radialHandleWorldCoords = FOdysseyVectorHUD::GetBucketRadialHandlePosition( iBucket, true );
-            ::ULIS::FVec2D radialHandleDif = ::ULIS::FVec2D( iWorldX - radialHandleWorldCoords.x
-                                                           , iWorldY - radialHandleWorldCoords.y );
-            ::ULIS::FVec2D radialWorldCoords = FOdysseyVectorHUD::GetBucketRadialPosition( iBucket, true );
-            ::ULIS::FVec2D radialDif = ::ULIS::FVec2D( iWorldX - radialWorldCoords.x
-                                                     , iWorldY - radialWorldCoords.y );
+            ::ULIS::FVec2D handleWorldCoords = FOdysseyVectorHUD::GetBucketRadialHandlePosition( iBucket, true );
+            FVector2D handleHUDCoords = TextureToHUD( FVector2D( handleWorldCoords.x, handleWorldCoords.y ) );
+            ::ULIS::FVec2D centerWorldCoords = FOdysseyVectorHUD::GetBucketRadialPosition( iBucket, true );
+            FVector2D centerHUDCoords = TextureToHUD( FVector2D( centerWorldCoords.x, centerWorldCoords.y ) );
 
-            if ( radialHandleDif.Distance() < mPaintBucketTool->PickingRadius )
+            if ( ( mouseHUDCoords - handleHUDCoords ).Size() < mPaintBucketTool->PickingRadius )
             {
                 return PICK_RADIAL_HANDLE;
             }
 
-            if ( radialDif.Distance() < mPaintBucketTool->PickingRadius )
+            if ( ( mouseHUDCoords - centerHUDCoords ).Size() < FOdysseyVectorHUD::RADIAL_AREA_RADIUS )
             {
                 return PICK_RADIAL_AREA;
             }
         }
 
-        if ( pickDif.Distance() < mPaintBucketTool->PickingRadius )
+        if ( pickHUDDif.Size() < mPaintBucketTool->PickingRadius )
         {
             return PICK_PROPAGATE;
         }
     }
     else
     {
-        if ( pickDif.Distance() < mPaintBucketTool->PickingRadius )
+        if ( pickHUDDif.Size() < mPaintBucketTool->PickingRadius )
         {
             return PICK_BUCKET;
         }

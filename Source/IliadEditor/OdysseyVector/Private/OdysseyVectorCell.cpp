@@ -165,7 +165,10 @@ FOdysseyVectorCell::Invalidate( uint64 iInvalidationFlags )
 void
 FOdysseyVectorCell::InvalidateRect()
 {
-    mInvalidatedRect = ::ULIS::FRectD( 0.0f, 0.0f, DBL_MAX, DBL_MAX );
+    if( mParent )
+    {
+        mInvalidatedRect = ::ULIS::FRectD( 0.0f, 0.0f, GetLayer()->GetWidth(), GetLayer()->GetHeight() );
+    }
 }
 
 void

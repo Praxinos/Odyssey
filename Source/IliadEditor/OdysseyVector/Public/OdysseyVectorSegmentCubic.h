@@ -90,7 +90,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
          * @brief Draw the cubic segment
          * @param iRoi the region-of-interest
          */
-        virtual void Draw( BLContext* iBLContext ) override;
+        virtual void Draw( BLContext* iBLContext, FOdysseyVectorEngine* iVectorEngine ) override;
 
         virtual void DrawStructure( BLContext* iBLContext, FOdysseyVectorObject* iParentObject, bool iWorld ) override;
 
