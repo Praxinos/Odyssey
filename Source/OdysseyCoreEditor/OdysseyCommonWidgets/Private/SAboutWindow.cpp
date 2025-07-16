@@ -118,6 +118,7 @@ SAboutWindow::Construct( const FArguments& iArgs )
                         SNew( STextBlock )
                         .ColorAndOpacity( FLinearColor( 0.7f, 0.7f, 0.7f ) )
                         .Text( VersionFull )
+                        .Justification(ETextJustify::Center)
                     ]
                 ]
             ]
@@ -165,7 +166,7 @@ SAboutWindow::Construct( const FArguments& iArgs )
                 .Padding( FMargin( 0.f, 1.f ) )
                 [
                     SNew( STextBlock )
-                    .Text( LOCTEXT( "copyright.team-names-1", "Elodie Moog, Fabrice Debarge, Thomas Schmitt, Cléa Gonay, " ) )
+                    .Text( LOCTEXT( "copyright.team-names-1", "Elodie Moog, Fabrice Debarge, Thomas Schmitt, Naomiki Sato," ) )
                     .Justification( ETextJustify::Center )
                     .TextStyle(FOdysseyStyle::Get(), "Odyssey.About.SmallText" )
                 ]
@@ -174,7 +175,7 @@ SAboutWindow::Construct( const FArguments& iArgs )
                 .Padding( FMargin( 0.f, 1.f ) )
                 [
                     SNew( STextBlock )
-                    .Text( LOCTEXT( "copyright.team-names-2", "Naomiki Sato, Gary Gabriel, Eric Scholl, Michael Schreiner" ) )
+                    .Text( LOCTEXT( "copyright.team-names-2", "Gary Gabriel, Eric Scholl, Michael Schreiner" ) )
                     .Justification( ETextJustify::Center )
                     .TextStyle(FOdysseyStyle::Get(), "Odyssey.About.SmallText" )
                 ]
@@ -192,7 +193,7 @@ SAboutWindow::Construct( const FArguments& iArgs )
                 .Padding( FMargin( 0.f, 1.f ) )
                 [
                     SNew( STextBlock )
-                    .Text( LOCTEXT( "copyright.team-former-names", "Clément Berthaud, Antoine Antin" ) )
+                    .Text( LOCTEXT( "copyright.team-former-names", "Clément Berthaud, Antoine Antin, Cléa Gonay" ) )
                     .Justification( ETextJustify::Center )
                     .TextStyle(FOdysseyStyle::Get(), "Odyssey.About.SmallSubduedText" )
                 ]
