@@ -1140,6 +1140,8 @@ FOdysseyVectorGroupPaint::RemoveBucket( FOdysseyVectorBucket* iBucket )
         UnselectBucket( iBucket );
     }
 
+    GetCell()->InvalidateRect();
+
     Invalidate( FOdysseyVectorObject::INVALIDATE_COLOR );
 }
 
@@ -1155,6 +1157,8 @@ FOdysseyVectorGroupPaint::RemoveAllBuckets()
 
                                 return true;
                             } );
+
+    GetCell()->InvalidateRect();
 
     Invalidate( FOdysseyVectorObject::INVALIDATE_COLOR );
 }
