@@ -16,6 +16,14 @@
 
 class FOdysseyPainterEditor;
 
+UENUM()
+enum class EObjectViewApplyPolicy : uint8
+{
+    Selection = 0,
+    AllInCell = 1,
+    AllInAllCells = 2
+};
+
 USTRUCT()
 struct FPaletteEntrySelection
 {
@@ -28,7 +36,7 @@ struct FPaletteEntrySelection
     UOdysseyPaletteEntryColor* OdysseyPaletteEntryColor = nullptr;
 };
 
-UCLASS( meta = ( HideCategories = Hidden ) )
+UCLASS( meta = ( HideCategories = Hidden, prioritizeCategories = Options ) )
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectView : public UObject
 {
     public:
@@ -52,6 +60,12 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectView : public UO
         uint32 BackgroundPaletteSelection : 1;
     } PropertyBits;
 
+    enum class EditionMode : uint8
+    {
+        Direct = 0,
+        OnValidation = 1
+    };
+
     public:
         ~UOdysseyPainterEditorVectorObjectView();
         UOdysseyPainterEditorVectorObjectView();
@@ -61,8 +75,10 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectView : public UO
 
         FOdysseyPainterEditor* GetEditor();
 
+        void SetEditionMode( EditionMode iEditionMode );
+        void ValidateProperties();
+
     protected:
-        void ParseBits( const PropertyBits& iBits );
         virtual void ImportParam();
         virtual void PropertyChanged( const FName& iPropertyName
                                       , const FName& iMemberPropertyName
@@ -72,7 +88,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectView : public UO
         FOdysseyPainterEditor* mEditor;
         FOdysseyVectorGroupPaint* mScene;
         std::list<FOdysseyVectorObject*> mFocusedObjectList;
-
+        EditionMode mEditionMode;
+        PropertyBits mPropertyBits;
     public:
         // hidden property for use with EditCondition
         UPROPERTY( EditDefaultsOnly
@@ -83,6 +100,11 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectView : public UO
         UPROPERTY( EditDefaultsOnly
                  , Category=Hidden )
         bool bDisplayForegroundProperties;
+
+        // hidden property for use with EditCondition
+        UPROPERTY( EditDefaultsOnly
+                 , Category=Options )
+        EObjectViewApplyPolicy ApplyTo;
 
         UPROPERTY( EditAnywhere
                  , Category=Identity

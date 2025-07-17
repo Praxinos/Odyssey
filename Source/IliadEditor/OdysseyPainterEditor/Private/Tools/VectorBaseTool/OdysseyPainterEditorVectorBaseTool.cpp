@@ -3,6 +3,7 @@
 
 #include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.h"
 #include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseToolHUD.h"
+#include "Widgets/Tab/SOdysseyPainterEditorVectorSceneDetailsView.h"
 //#include "Widgets/Tools/SOdysseyPainterEditorVectorEditionMode.h"
 #include "Widgets/Layout/SWrapBox.h"
 #include "Framework/Commands/GenericCommands.h"
@@ -1064,54 +1065,57 @@ UOdysseyPainterEditorVectorBaseTool::ExtendToolbar( FToolBarBuilder& iBuilder )
     iBuilder.EndSection();
 }
 
-TSharedPtr<SWidget>
+FReply
+UOdysseyPainterEditorVectorBaseTool::AcceptProperties( TSharedRef<SOdysseyPainterEditorVectorSceneDetailsView> objectView)
+{
+    objectView.Get().ValidateProperties();
+
+    return FReply::Handled();
+}
+
+void
 UOdysseyPainterEditorVectorBaseTool::ObjectProperties()
 {
-    FPropertyEditorModule& PropertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
-    TSharedPtr<IDetailsView> detailsView;
-    FDetailsViewArgs DetailsViewArgs;
-    SOdysseyPainterEditorVectorSceneDetailsView* ojectView = NewObject<SOdysseyPainterEditorVectorSceneDetailsView>();
+    TSharedRef<SOdysseyPainterEditorVectorSceneDetailsView> objectView = SNew(SOdysseyPainterEditorVectorSceneDetailsView, mEditor, false )
+                                                                         .Scene(mWorkingCell->GetScene());
 
-    bucketView->Update( iEditor, iBucket );
+    objectView->Update();
 
-    DetailsViewArgs.bUpdatesFromSelection = false;
-    DetailsViewArgs.bLockable = false;
-    DetailsViewArgs.bAllowSearch = false;
-    DetailsViewArgs.NameAreaSettings = FDetailsViewArgs::HideNameArea;
-
-    detailsView = PropertyEditorModule.CreateDetailView(DetailsViewArgs);
-    detailsView->SetObject(bucketView);
-
-    TSharedRef<SWindow> BucketWindow = SNew(SWindow)
-    .Title(FText::FromString(TEXT("Bucket Properties")))
+    TSharedRef<SWindow> ObjectWindow = SNew(SWindow)
+    .Title(FText::FromString(TEXT("Object Properties")))
     //.ClientSize(FVector2D(800, 400))
     .SizingRule(ESizingRule::Autosized)
     .SupportsMaximize(false)
     .SupportsMinimize(false)
     [
-        detailsView.ToSharedRef()
-      /*SNew(SVerticalBox)
+      SNew(SVerticalBox)
       +SVerticalBox::Slot()
+      .AutoHeight()
       .HAlign(HAlign_Center)
       .VAlign(VAlign_Center)
       [
-        SNew(STextBlock)
-        .Text(FText::FromString(TEXT("Hello from Slate")))
-      ]*/
+          objectView
+      ]
+      +SVerticalBox::Slot()
+      .AutoHeight()
+      .HAlign(HAlign_Center)
+      .VAlign(VAlign_Center)
+      [
+          SNew(SButton)
+          .Text(LOCTEXT("vector-object-properties-apply", "Apply"))
+          .OnClicked(this, &UOdysseyPainterEditorVectorBaseTool::AcceptProperties, objectView )
+      ]
     ];
 
-    TSharedPtr<FOdysseyPainterEditorViewportTab> viewportTab = iEditor->FindTab<FOdysseyPainterEditorViewportTab>();
+    TSharedPtr<FOdysseyPainterEditorViewportTab> viewportTab = mEditor->FindTab<FOdysseyPainterEditorViewportTab>();
 
     FSlateApplication::Get().AddModalWindow
     (
-        BucketWindow,
+        ObjectWindow,
         viewportTab->Widget(),
         false
     );
-
-    bucketView->ConditionalBeginDestroy();
-
-
+/*
     return SNew(SWidgetSwitcher)
         .WidgetIndex(this, &FOdysseyPainterEditorVectorSceneTreeViewTab::WidgetIndex)
         +SWidgetSwitcher::Slot()
@@ -1136,7 +1140,7 @@ UOdysseyPainterEditorVectorBaseTool::ObjectProperties()
                 .Scene(this, &FOdysseyPainterEditorVectorSceneTreeViewTab::GetScene)
             ]
         ];
-
+*/
 }
 
 bool
@@ -1259,6 +1263,12 @@ UOdysseyPainterEditorVectorBaseTool::ExtendContextMenuObject( FOdysseyVectorGrou
         , LOCTEXT("vector-tool.object-context-menu.apply-transformations.tooltip", "Apply Transformations")
         , FSlateIcon()
         , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::ApplyTransformations, GetEditor(), iScene )));
+    menu.AddMenuEntry(
+            LOCTEXT("vector-tool.object-context-menu.context-menu.object-properties.name", "Object properties")
+        , LOCTEXT("vector-tool.object-context-menu.context-menu.object-properties.tooltip", "Object Properties")
+        , FSlateIcon()
+        , FUIAction(FExecuteAction::CreateUObject(this, &UOdysseyPainterEditorVectorBaseTool::ObjectProperties )));
+
     //menu.AddMenuEntry(
     //    LOCTEXT("vector-tool.object-context-menu.apply-transformations.name", "Make DemoBrush")
     //    , LOCTEXT("vector-tool.object-context-menu.apply-transformations.tooltip", "Make DemoBrush")

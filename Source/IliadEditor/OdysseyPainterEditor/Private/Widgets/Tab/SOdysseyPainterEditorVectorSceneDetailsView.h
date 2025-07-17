@@ -35,8 +35,11 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorSceneDetailsView
         ~SOdysseyPainterEditorVectorSceneDetailsView();
         SOdysseyPainterEditorVectorSceneDetailsView();
 
-        void Construct(const FArguments& InArgs, FOdysseyPainterEditor* iEditor);
+        void Construct(const FArguments& InArgs
+                     , FOdysseyPainterEditor* iEditor
+                     , bool iEditDirect = true );
         void Update();
+        void ValidateProperties();
 
     protected:
         virtual void AddReferencedObjects(FReferenceCollector& Collector) override;

@@ -51,17 +51,12 @@ SOdysseyPainterEditorVectorSceneDetailsView::SOdysseyPainterEditorVectorSceneDet
     , mOldVectorLayer ( nullptr )
     , mVectorLayer ( nullptr )
 {
-    mObjectView = NewObject<UOdysseyPainterEditorVectorObjectView>();
-    mGroupView = NewObject<UOdysseyPainterEditorVectorGroupView>();
-    mPathView = NewObject<UOdysseyPainterEditorVectorPathView>();
-    mGroupPaintView = NewObject<UOdysseyPainterEditorVectorGroupPaintView>();
-    mTagInbetweenerView = NewObject<UOdysseyPainterEditorVectorTagInbetweenerView>();
-
-    UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw(this, &SOdysseyPainterEditorVectorSceneDetailsView::OnCurrentLayerChanged);
 }
 
 void
-SOdysseyPainterEditorVectorSceneDetailsView::Construct( const FArguments& InArgs, FOdysseyPainterEditor* iEditor)
+SOdysseyPainterEditorVectorSceneDetailsView::Construct( const FArguments& InArgs
+                                                      , FOdysseyPainterEditor* iEditor
+                                                      , bool iEditDirect )
 {
     mEditor = iEditor;
     mScene.Assign(*this, InArgs._Scene);
@@ -71,7 +66,29 @@ SOdysseyPainterEditorVectorSceneDetailsView::Construct( const FArguments& InArgs
         mDetailsView.ToSharedRef()
     ];
 
+    mObjectView = NewObject<UOdysseyPainterEditorVectorObjectView>();
+    mGroupView = NewObject<UOdysseyPainterEditorVectorGroupView>();
+    mPathView = NewObject<UOdysseyPainterEditorVectorPathView>();
+    mGroupPaintView = NewObject<UOdysseyPainterEditorVectorGroupPaintView>();
+    mTagInbetweenerView = NewObject<UOdysseyPainterEditorVectorTagInbetweenerView>();
+
+    if( iEditDirect == false )
+    {
+        mObjectView->SetEditionMode( UOdysseyPainterEditorVectorObjectView::EditionMode::OnValidation );
+        mGroupView->SetEditionMode( UOdysseyPainterEditorVectorObjectView::EditionMode::OnValidation );
+        mPathView->SetEditionMode( UOdysseyPainterEditorVectorObjectView::EditionMode::OnValidation );
+        mGroupPaintView->SetEditionMode( UOdysseyPainterEditorVectorObjectView::EditionMode::OnValidation );
+    }
+
+    UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw(this, &SOdysseyPainterEditorVectorSceneDetailsView::OnCurrentLayerChanged);
+
     mEditor->OnSourceChanged().AddSP( this, &SOdysseyPainterEditorVectorSceneDetailsView::OnSourceChanged );
+}
+
+void
+SOdysseyPainterEditorVectorSceneDetailsView::ValidateProperties()
+{
+
 }
 
 TSharedPtr<IDetailsView>

@@ -21,6 +21,7 @@ class FOdysseyVectorHandleSegment;
 class FOdysseyVectorVertex;
 class FOdysseyVectorHandleSegment;
 class FOdysseyVectorCell;
+class SOdysseyPainterEditorVectorSceneDetailsView;
 
 enum class eMouseEventName : uint8
 {
@@ -194,6 +195,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         bool CanAddTag( FOdysseyVectorGroupPaint* iScene );
         bool CanAlterTag( FOdysseyVectorGroupPaint* iScene );
         bool CanBePainted( FOdysseyVectorGroupPaint* iScene );
+        void ObjectProperties();
+        FReply AcceptProperties( TSharedRef<SOdysseyPainterEditorVectorSceneDetailsView> objectView );
 
     protected:
         static const uint64 OBJECTMENU_HASSUBDIVIDE = ( 1ULL << 0 );
