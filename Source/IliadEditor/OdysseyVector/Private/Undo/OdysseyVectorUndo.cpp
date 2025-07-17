@@ -71,9 +71,9 @@ FSnapshotTrajectory::~FSnapshotTrajectory()
 FSnapshotTrajectory::FSnapshotTrajectory( FInbetweenerTrajectory* iTrajectory
                                         , uint64 iSnapshotFlags
                                         , eSnapshotState iState )
-    : mSnapshotFlags( iSnapshotFlags )
-    , mRoute( iTrajectory->GetRoute() )
+    : mRoute( iTrajectory->GetRoute() )
     , mIndex( iTrajectory - &iTrajectory->GetRoute()->GetTrajectoryBuffer()[0] )
+    , mSnapshotFlags( iSnapshotFlags )
     , mInitialState ( nullptr )
     , mAlteredState ( nullptr )
 {
@@ -893,11 +893,11 @@ FSnapshotTagInbetweener::FSnapshotTagInbetweener( FOdysseyVectorTagInbetweener* 
                                                 , uint64 iRouteSnapshotFlags
                                                 , uint64 iTrajectorySnapshotFlags
                                                 , eSnapshotState iStateType )
-    : mSnapshotFlags( iSnapshotFlags )
+    : mInbetweenerTag( iInbetweenerTag )
+    , mSnapshotFlags( iSnapshotFlags )
     , mBreakdownSnapshotFlags( iBreakdownSnapshotFlags )
     , mRouteSnapshotFlags( iRouteSnapshotFlags )
     , mTrajectorySnapshotFlags( iTrajectorySnapshotFlags )
-    , mInbetweenerTag( iInbetweenerTag )
     , mInitialState( nullptr )
     , mAlteredState( nullptr )
 {
@@ -1120,8 +1120,8 @@ FSnapshotObject::~FSnapshotObject()
 FSnapshotObject::FSnapshotObject( FOdysseyVectorObject* iObject
                                 , uint64 iSnapshotFlags
                                 , eSnapshotState iStateType )
-    : mSnapshotFlags( iSnapshotFlags )
-    , mObject( iObject )
+    : mObject( iObject )
+    , mSnapshotFlags( iSnapshotFlags )
     , mObjectInitialState ( nullptr )
     , mObjectAlteredState ( nullptr )
 {
@@ -1279,8 +1279,8 @@ FSnapshotPoint::~FSnapshotPoint()
 }
 
 FSnapshotPoint::FSnapshotPoint( FOdysseyVectorPoint* iPoint, uint64 iSnapshotFlags, eSnapshotState iStateType )
-    : mSnapshotFlags( iSnapshotFlags )
-    , mPoint( iPoint )
+    : mPoint( iPoint )
+    , mSnapshotFlags( iSnapshotFlags )
     , mPointInitialState ( nullptr )
     , mPointAlteredState ( nullptr )
 {
@@ -1686,8 +1686,8 @@ FSnapshotSegmentCubic::~FSnapshotSegmentCubic()
 FSnapshotSegmentCubic::FSnapshotSegmentCubic( FOdysseyVectorSegmentCubic* iCubicSegment
                                             , uint64 iSnapshotFlags
                                             , eSnapshotState iSnapshotState )
-    : mSnapshotFlags( iSnapshotFlags )
-    , mCubicSegment( iCubicSegment )
+    : mCubicSegment( iCubicSegment )
+    , mSnapshotFlags( iSnapshotFlags )
     , mInitialState( nullptr )
     , mAlteredState( nullptr )
 {
