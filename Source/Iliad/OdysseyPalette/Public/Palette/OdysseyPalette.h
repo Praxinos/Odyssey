@@ -217,6 +217,7 @@ protected:
 public:
     // UObject overrides
 
+#if WITH_EDITOR
     /**
      * Called when a property on this object has been modified
      *
@@ -231,6 +232,7 @@ public:
      * @param TransactionEvent
      */
     virtual void PostTransacted(const FTransactionObjectEvent& TransactionEvent) override;
+#endif //WITH_EDITOR
 
     virtual void PostInitProperties() override;
 

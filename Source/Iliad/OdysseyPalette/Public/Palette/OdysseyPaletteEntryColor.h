@@ -41,9 +41,11 @@ public:
 public:
     // UObject overrides
     virtual void PostInitProperties() override;
+    virtual void PostLoad() override;
+#if WITH_EDITOR
     virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
     virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
-    virtual void PostLoad() override;
+#endif //WITH_EDITOR
 
 protected:
     //Property changed methods

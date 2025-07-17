@@ -3,7 +3,6 @@
 
 #include "OdysseyPalette.h"
 #include "OdysseyPaletteEntryFolder.h"
-#include "ScopedTransaction.h"
 #include "Widgets/Colors/SColorBlock.h"
 #include "Misc/TransactionObjectEvent.h"
 
@@ -482,6 +481,7 @@ void UOdysseyPalette::PostLoad()
     //---
 }
 
+#if WITH_EDITOR
 void UOdysseyPalette::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
     if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
@@ -505,6 +505,7 @@ void UOdysseyPalette::PostTransacted(const FTransactionObjectEvent& iTransaction
         PostPropertyChanged( propertyName );
     }
 }
+#endif //WITH_EDITOR
 
 void UOdysseyPalette::PostInitProperties()
 {

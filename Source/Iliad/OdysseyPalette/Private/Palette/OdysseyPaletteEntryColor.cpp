@@ -2,10 +2,8 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "Palette/OdysseyPaletteEntryColor.h"
-#include "OdysseyStyle.h"
 #include "OdysseyPalette.h"
 #include "Misc/TransactionObjectEvent.h"
-#include "ScopedTransaction.h"
 
 #define LOCTEXT_NAMESPACE "Palette"
 
@@ -13,7 +11,6 @@ UOdysseyPaletteEntryColor::UOdysseyPaletteEntryColor()
 {
     EntryTypeName = LOCTEXT( "entry-color.type", "Color" );
     DefaultName = LOCTEXT("entry-color.default-name", "Color");
-    Icon = *FOdysseyStyle::GetBrush("OdysseyPalette.EntryColor");
 }
 
 void
@@ -67,6 +64,7 @@ void UOdysseyPaletteEntryColor::RemoveSet(FString iIndex)
     EntryColorsIDs.Remove( iIndex );
 }
 
+#if WITH_EDITOR
 void UOdysseyPaletteEntryColor::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
     Super::PostEditChangeProperty(PropertyChangedEvent);
@@ -92,6 +90,7 @@ void UOdysseyPaletteEntryColor::PostTransacted(const FTransactionObjectEvent& iT
         PostPropertyChanged(propertyName);
     }
 }
+#endif //WITH_EDITOR
 
 void UOdysseyPaletteEntryColor::PostLoad()
 {

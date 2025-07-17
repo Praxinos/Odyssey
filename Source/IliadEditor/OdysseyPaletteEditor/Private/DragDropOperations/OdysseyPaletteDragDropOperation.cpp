@@ -6,6 +6,8 @@
 #include "OdysseyPalette.h"
 #include "OdysseyPaletteEntry.h"
 #include "OdysseyStyle.h"
+#include "Palette/OdysseyPaletteEntryColor.h"
+#include "Palette/OdysseyPaletteEntryFolder.h"
 #include "Widgets/Images/SImage.h"
 #include "Widgets/Text/STextBlock.h"
 
@@ -54,7 +56,20 @@ const FSlateBrush*
 FOdysseyPaletteDragDropOperation::GetIcon() const
 {
     if (mPaletteEntries.Num() == 1)
-        return &mPaletteEntries[0]->Icon;
+    {
+        if(mPaletteEntries[0]->IsA<UOdysseyPaletteEntryFolder>())
+        {
+            return FAppStyle::GetBrush("ContentBrowser.AssetTreeFolderClosed");
+        }
+        else if(mPaletteEntries[0]->IsA<UOdysseyPaletteEntryColor>())
+        {
+            return FOdysseyStyle::GetBrush("OdysseyPalette.EntryColor");
+        }
+        else
+        {
+            checkNoEntry();
+        }
+    }
 
     return FOdysseyStyle::GetBrush("PainterEditor.Layers16");
 }

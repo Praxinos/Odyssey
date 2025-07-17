@@ -50,21 +50,13 @@ namespace UnrealBuildTool.Rules
                 new string[]
                 {
                     "AppFramework",
-                    "AssetTools",
                     "Core",
                     "CoreUObject",
-                    "EditorStyle",
-                    "EditorWidgets",
                     "Engine",
                     "InputCore",
-                    "ToolMenus",
                     "OdysseyCore",
                     "Slate",
                     "SlateCore",
-                    "UnrealEd",
-                    "OdysseyStyle",
-                    "PropertyEditor",
-                    "ToolWidgets",
                     // ... add private dependencies that you statically link with here ...
                 }
                 );

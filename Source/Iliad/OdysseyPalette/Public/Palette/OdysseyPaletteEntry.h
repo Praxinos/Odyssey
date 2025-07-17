@@ -140,10 +140,12 @@ protected:
     virtual void PropertyChanged(const FName& iPropertyName);
     virtual void PostPropertyChanged(const FName& iPropertyName);
 
+#if WITH_EDITOR
 public:
     // UObject overrides
     virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
     virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
+#endif
 
 public:
     UPROPERTY(EditAnywhere, Category="PaletteEntry")
@@ -157,12 +159,6 @@ public:
 
     UPROPERTY(EditDefaultsOnly, Category="PaletteEntry")
     FText Description = FText::FromString(TEXT(""));
-
-    UPROPERTY(EditDefaultsOnly, Category="PaletteEntry")
-    FSlateBrush Icon;
-
-    UPROPERTY(EditDefaultsOnly, Category="PaletteEntry")
-    FSlateBrush IconExpanded;
 
     UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="PaletteEntry")
     bool IsActivated = true;

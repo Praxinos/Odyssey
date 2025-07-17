@@ -189,6 +189,7 @@ void UOdysseyPaletteEntry::PostPropertyChanged(const FName& iPropertyName)
         ChildrenChanged();
 }
 
+#if WITH_EDITOR
 void UOdysseyPaletteEntry::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
     Super::PostEditChangeProperty(PropertyChangedEvent);
@@ -214,3 +215,4 @@ void UOdysseyPaletteEntry::PostTransacted(const FTransactionObjectEvent& iTransa
         PostPropertyChanged(propertyName);
     }
 }
+#endif
