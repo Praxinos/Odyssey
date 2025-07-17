@@ -41,6 +41,6 @@ FOdysseyPaletteModule::UnregisterAssetTypeActions()
     assetTools.UnregisterAssetTypeActions(mOdysseyTypeActions.ToSharedRef());
 }
 
-IMPLEMENT_MODULE(FOdysseyPaletteModule, OdysseyPalette);
+IMPLEMENT_MODULE(FOdysseyPaletteModule, OdysseyPaletteEditor);
 
 #undef LOCTEXT_NAMESPACE
