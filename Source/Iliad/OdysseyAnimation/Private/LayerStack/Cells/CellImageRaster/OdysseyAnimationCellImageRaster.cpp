@@ -208,6 +208,8 @@ UOdysseyAnimationCellImageRaster::OnBlockCommited(const TArray<::ULIS::FRectI>& 
 
     TArray<FIntRect> intRects = ::ULISUtils::ToIntRects(iRects);
     CopyBlockDataToTextureSource(block.Get(), GetRenderTexture(), intRects);
+
+    RenderingChanged(::ULISUtils::ToIntRects(iRects), false);
 }
 
 FOdysseyMediaProvider
