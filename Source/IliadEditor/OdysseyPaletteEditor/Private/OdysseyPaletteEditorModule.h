@@ -4,7 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Modules/ModuleInterface.h"
+#include "Modules/ModuleManager.h"
 
 class FAssetTypeActions_OdysseyPalette;
 class IAssetTypeActions;
@@ -12,7 +12,7 @@ class IAssetTypeActions;
 /**
  * The Texture Asset module.
  */
-class FOdysseyPaletteModule :
+class FOdysseyPaletteEditorModule :
     public IModuleInterface
 {
 public:
@@ -29,5 +29,4 @@ private:
 private:
     /** All created asset type actions. Cached here so that we can unregister them during shutdown. */
     TSharedPtr<IAssetTypeActions> mOdysseyTypeActions;
-
 };

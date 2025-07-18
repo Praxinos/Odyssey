@@ -1,23 +1,24 @@
 // IDDN.FR.001.060015.013.S.X.2019.000.00000
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
-#include "OdysseyPaletteModule.h"
+#include "OdysseyPaletteEditorModule.h"
+
 #include "IAssetTools.h"
 #include "OdysseyPaletteAssetTypeActions.h"
 
 #define LOCTEXT_NAMESPACE "Palette"
 
-void FOdysseyPaletteModule::StartupModule()
+void FOdysseyPaletteEditorModule::StartupModule()
 {
-    FCoreDelegates::OnFEngineLoopInitComplete.AddRaw(this, &FOdysseyPaletteModule::RegisterAssetTypeActions);
+    FCoreDelegates::OnFEngineLoopInitComplete.AddRaw(this, &FOdysseyPaletteEditorModule::RegisterAssetTypeActions);
 }
 
-void FOdysseyPaletteModule::ShutdownModule()
+void FOdysseyPaletteEditorModule::ShutdownModule()
 {
 }
 
 void
-FOdysseyPaletteModule::RegisterAssetTypeActions()
+FOdysseyPaletteEditorModule::RegisterAssetTypeActions()
 {
     IAssetTools& assetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
 
@@ -32,7 +33,7 @@ FOdysseyPaletteModule::RegisterAssetTypeActions()
 }
 
 void
-FOdysseyPaletteModule::UnregisterAssetTypeActions()
+FOdysseyPaletteEditorModule::UnregisterAssetTypeActions()
 {
     if (!FModuleManager::Get().IsModuleLoaded("AssetTools"))
         return;
@@ -41,6 +42,6 @@ FOdysseyPaletteModule::UnregisterAssetTypeActions()
     assetTools.UnregisterAssetTypeActions(mOdysseyTypeActions.ToSharedRef());
 }
 
-IMPLEMENT_MODULE(FOdysseyPaletteModule, OdysseyPaletteEditor);
+IMPLEMENT_MODULE( FOdysseyPaletteEditorModule, OdysseyPaletteEditor );
 
 #undef LOCTEXT_NAMESPACE

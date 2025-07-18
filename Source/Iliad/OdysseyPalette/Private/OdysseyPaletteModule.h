@@ -4,7 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Modules/ModuleInterface.h"
+#include "Modules/ModuleManager.h"
 
 class FAssetTypeActions_OdysseyPalette;
 class IAssetTypeActions;
@@ -20,14 +20,4 @@ public:
     virtual void StartupModule() override;
     virtual void ShutdownModule() override;
     // End of IModuleInterface interface
-
-private:
-    //Asset Type Action
-    void RegisterAssetTypeActions();
-    void UnregisterAssetTypeActions();
-
-private:
-    /** All created asset type actions. Cached here so that we can unregister them during shutdown. */
-    TSharedPtr<IAssetTypeActions> mOdysseyTypeActions;
-
 };
