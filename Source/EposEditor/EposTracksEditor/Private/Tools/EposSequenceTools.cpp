@@ -7,11 +7,11 @@
 #include "CineCameraActor.h"
 #include "Engine/Selection.h"
 #include "ISequencer.h"
+#include "LevelEditorViewport.h"
 #include "MovieScene.h"
 #include "MovieSceneSection.h"
 #include "MovieSceneSequence.h"
 #include "MovieSceneTimeHelpers.h"
-#include "LevelEditorViewport.h"
 
 #include "Board/BoardSequence.h"
 #include "EposSequenceHelpers.h"
@@ -178,28 +178,36 @@ BoardSequenceTools::AddSelectedActorToHistory( AActor* iActor )
 AActor*
 BoardSequenceTools::GuessActorToSelect( ISequencer* iSequencer, const FFrameNumber& iFrameNumber )
 {
-    // Store the currently selected actor to guess the type of actor (camera or animation) to auto-select
-    USelection* selection = GEditor->GetSelectedActors();
+    // This is no more used as there are some times where this selection is auto-empty by the engine
+    // so we can't rely on it to always guess the animation/camera to auto-select
+    //
     TArray<AActor*> actor_selected;
-    selection->GetSelectedObjects<AActor>( actor_selected );
+    //// Store the currently selected actor to guess the type of actor (camera or animation) to auto-select
+    //USelection* selection = GEditor->GetSelectedActors();
+    //TArray<AActor*> actor_selected;
+    //selection->GetSelectedObjects<AActor>( actor_selected );
 
     AActor* actor_to_select = BoardSequenceTools::GuessActorToSelect( iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber, actor_selected );
     // If already selected, nothing to do
-    if( actor_selected.Contains( actor_to_select ) )
-        return nullptr;
+    //if( actor_selected.Contains( actor_to_select ) )
+    //    return nullptr;
 
     return actor_to_select;
 }
 
 //static
 AActor*
-BoardSequenceTools::GuessActorToSelect( ISequencer* iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceId, const FFrameNumber& iFrameNumber, const TArray<AActor*>& iLastSelectedActors )
+BoardSequenceTools::GuessActorToSelect( ISequencer* iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceId, const FFrameNumber& iFrameNumber, const TArray<AActor*>& /*iLastSelectedActors*/ )
 {
-    TArray<AActor*> actors = iLastSelectedActors.FilterByPredicate( []( const AActor* iActor )
-                                                                    {
-                                                                        return iActor->IsA<ACineCameraActor>();
-                                                                    } );
-    if( actors.Num() )
+    // See comment above in GuessActorToSelect() to know why iLastSelectedActors is no more used
+    //TArray<AActor*> actors = iLastSelectedActors.FilterByPredicate( []( const AActor* iActor )
+    //                                                                {
+    //                                                                    return iActor->IsA<ACineCameraActor>();
+    //                                                                } );
+
+    // Auto-select camera if it's the last actor type directly selected by the user
+    if( mDirectActorsSelectedHistory.Num() && mDirectActorsSelectedHistory.Last()->IsA<ACineCameraActor>() )
+    //if( actors.Num() )
     {
         UMovieSceneSequence* sequence = nullptr;
         FMovieSceneSequenceID sequenceId = MovieSceneSequenceID::Invalid;
@@ -210,11 +218,14 @@ BoardSequenceTools::GuessActorToSelect( ISequencer* iSequencer, UMovieSceneSeque
 
     //---
 
-    actors = iLastSelectedActors.FilterByPredicate( []( const AActor* iActor )
-                                                    {
-                                                        return iActor->IsA<AOdysseyAnimationActor>();
-                                                    } );
-    if( actors.Num() )
+    // Otherwise *always* return an animation (if there is one at the current frame)
+
+    //actors = iLastSelectedActors.FilterByPredicate( []( const AActor* iActor )
+    //                                                {
+    //                                                    return iActor->IsA<AOdysseyAnimationActor>();
+    //                                                } );
+    //if( mDirectActorsSelectedHistory.Num() && mDirectActorsSelectedHistory.Last()->IsA<AOdysseyAnimationActor>() )
+    //if( actors.Num() )
     {
         TArray<AOdysseyAnimationActor*> animations;
         TArray<FGuid> unordered_bindings;

@@ -1220,23 +1220,72 @@ FBoardSequenceCustomization::OnGlobalTimeChanged()
 {
     TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
 
-    //FString prefix = TEXT( "global time changed" );
-    //FQualifiedFrameTime frame_time = sequencer->GetLocalTime();
     EMovieScenePlayerStatus::Type playback_state = sequencer->GetPlaybackStatus();
 
+    //FString prefix = TEXT( "global time changed" );
+    //FQualifiedFrameTime frame_time = sequencer->GetLocalTime();
     //UE_LOG( LogTemp, Warning, TEXT( "%s: frame=%d state=%d" ), *prefix, frame_time.Time.GetFrame().Value, playback_state );
 
     // Don't auto-select an actor if currently play or scrub because changing the actor in Odyssey mode is not instant
     // So just change the actor at the end of play/scrub
     if( playback_state != EMovieScenePlayerStatus::Playing && playback_state != EMovieScenePlayerStatus::Scrubbing )
     {
-        AActor* actor_to_select = BoardSequenceTools::GuessActorToSelect( sequencer.Get(), sequencer->GetLocalTime().Time.FloorToFrame() );
-        if( actor_to_select )
+        UMovieScene* moviescene = sequencer->GetFocusedMovieSceneSequence()->GetMovieScene();
+        UMovieSceneCinematicBoardTrack* board_track = moviescene ? moviescene->FindTrack<UMovieSceneCinematicBoardTrack>() : nullptr;
+        UMovieSceneSection* section = board_track ? MovieSceneHelpers::FindSectionAtTime( board_track->GetAllSections(), sequencer->GetLocalTime().Time.FloorToFrame() ) : nullptr;
+        UMovieSceneSubSection* subsection = Cast<UMovieSceneSubSection>( section );
+
+        //USelection* selection = GEditor->GetSelectedActors();
+        //TArray<AActor*> actor_selected;
+        //selection->GetSelectedObjects<AActor>( actor_selected );
+
+        TArray<UMovieSceneTrack*> selected_tracks;
+        sequencer->GetSelectedTracks( selected_tracks );
+        TArray<TPair<UMovieSceneTrack*, int32>> selected_track_rows;
+        sequencer->GetSelectedTrackRows( selected_track_rows );
+        TArray<UMovieSceneFolder*> selected_folders;
+        sequencer->GetSelectedFolders( selected_folders );
+        TArray<UMovieSceneSection*> selected_sections;
+        sequencer->GetSelectedSections( selected_sections );
+        TArray<const IKeyArea*> selected_key_areas;
+        sequencer->GetSelectedKeyAreas( selected_key_areas );
+        TArray<FGuid> selected_bindings;
+        sequencer->GetSelectedObjects( selected_bindings );
+
+        // Check if something is already selected by the sequencer
+        bool nothing_selected = selected_tracks.IsEmpty()
+            && selected_track_rows.IsEmpty()
+            && selected_folders.IsEmpty()
+            && selected_sections.IsEmpty()
+            && selected_key_areas.IsEmpty()
+            && selected_bindings.IsEmpty();
+
+        // if nothing is selected by the sequencer, always select an actor in the board track
+        // if something is already selected in the board track (track or section), keep continuing auto-selecting in the board track
+        // if something is already selected outside the board track, don't auto-select in the board track
+        if( nothing_selected
+            || selected_tracks.Contains( board_track )
+            || selected_sections.ContainsByPredicate( [board_track]( const UMovieSceneSection* iSection )
+                                                      {
+                                                          return board_track->GetAllSections().Contains( iSection );
+                                                      } ) )
         {
-            GEditor->SelectNone( true /*bNoteSelectionChange*/, true /*bDeselectBSPSurfs*/ );
-            // Do not notify, otherwise it lags
-            // But as we filter on NOT scrubbing and NOT playing, we can enable notification
-            GEditor->SelectActor( actor_to_select, true /*bInSelected*/, true /*bNotify*/, true /*bSelectEvenIfHidden*/ );
+            AActor* actor_to_select = BoardSequenceTools::GuessActorToSelect( sequencer.Get(), sequencer->GetLocalTime().Time.FloorToFrame() );
+            if( actor_to_select )
+            {
+                sequencer->EmptySelection();
+                sequencer->SelectSection( subsection );
+
+                GEditor->SelectNone( true /*bNoteSelectionChange*/, true /*bDeselectBSPSurfs*/ );
+                // Do not notify, otherwise it lags
+                // But as we filter on NOT scrubbing and NOT playing, we can enable notification
+                GEditor->SelectActor( actor_to_select, true /*bInSelected*/, true /*bNotify*/, true /*bSelectEvenIfHidden*/ );
+            }
+            else
+            {
+                sequencer->EmptySelection();
+                GEditor->SelectNone( true /*bNoteSelectionChange*/, true /*bDeselectBSPSurfs*/ );
+            }
         }
     }
 
