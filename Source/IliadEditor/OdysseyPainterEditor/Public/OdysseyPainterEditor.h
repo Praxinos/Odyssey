@@ -384,8 +384,8 @@ protected:
     UOdysseyPainterEditorTool*               mCurrentMainTool;
     UOdysseyPainterEditorTool*               mCurrentTemporaryTool;
 
-    TArray<UOdysseyPainterEditorTool*>       mTools;
-    TSharedPtr<FOdysseyPainterEditorGUI>     mGUI;
+    TArray<TObjectPtr<UOdysseyPainterEditorTool>>       mTools;
+    TSharedPtr<FOdysseyPainterEditorGUI>                mGUI;
 
     uint64                          mVectorHUDFlags;
     uint64                          mVectorDrawingFlags;
@@ -431,7 +431,7 @@ protected:
     FName mToolbarMenuName;
 
     //Local editor data, for convenience. Palettes and sets are stored in TextureData and Animation. Colors are stored in vector objects.
-    UOdysseyPaletteEntryColor* mCurrentPaletteEntryColor = nullptr;
+    TObjectPtr<UOdysseyPaletteEntryColor> mCurrentPaletteEntryColor;
     FString mCurrentPaletteSet = FString();
 
     TSharedPtr<FOdysseyPainterEditorAnimationFlipSystem> mAnimationFlipSystem;

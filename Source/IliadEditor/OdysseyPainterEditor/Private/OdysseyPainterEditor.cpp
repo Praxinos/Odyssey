@@ -492,7 +492,7 @@ FOdysseyPainterEditor::ExtendMenu( TSharedRef<FExtender> iExtender )
         tab->ExtendMenu( iExtender );
     }
 
-    for (UOdysseyPainterEditorTool* tool : mTools)
+    for (TObjectPtr<UOdysseyPainterEditorTool> tool : mTools)
     {
         tool->ExtendMenu(iExtender);
     }
@@ -1282,7 +1282,7 @@ FOdysseyPainterEditor::GetAnimationTimelinePosition()
 UOdysseyPainterEditorTool*
 FOdysseyPainterEditor::FindDefaultToolForCurrentLayer()
 {
-    for (UOdysseyPainterEditorTool* tool : mTools)
+    for (TObjectPtr<UOdysseyPainterEditorTool> tool : mTools)
     {
         if ( !tool->IsActivable() )
             continue;
@@ -3331,7 +3331,7 @@ FOdysseyPainterEditor::GetReferencerName() const
 void
 FOdysseyPainterEditor::AddReferencedObjects(FReferenceCollector& Collector)
 {
-    for (UOdysseyPainterEditorTool* tool : mTools)
+    for (TObjectPtr<UOdysseyPainterEditorTool> tool : mTools)
     {
         Collector.AddReferencedObject(tool);
     }

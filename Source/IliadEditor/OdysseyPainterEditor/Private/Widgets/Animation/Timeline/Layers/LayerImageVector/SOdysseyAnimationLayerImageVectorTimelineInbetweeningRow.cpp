@@ -447,10 +447,11 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
         {
             FSlateDrawElement::MakeBox( OutDrawElements
                                       , LayerId
-                                      , AllottedGeometry.ToPaintGeometry( FVector2D( mBoxPos.X
-                                                                                   , mBoxPos.Y )
-                                                                        , FVector2D( mBoxSize.X
-                                                                                   , mBoxSize.Y ) )
+                                      , AllottedGeometry.ToPaintGeometry( FVector2D( mBoxSize.X
+                                                                                   , mBoxSize.Y )
+                                                                        , FSlateLayoutTransform( FVector2D( mBoxPos.X
+                                                                                                          , mBoxPos.Y ) )
+                                                                        )
                                       , &defaultBrush
                                       , ESlateDrawEffect::None
                                       , FStyleColors::PrimaryPress.GetColor( FWidgetStyle() ) );
@@ -476,10 +477,11 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
 
         FSlateDrawElement::MakeBox( OutDrawElements
                                   , LayerId
-                                  , AllottedGeometry.ToPaintGeometry( FVector2D( cellBox.x
-                                                                               , cellBox.y )
-                                                                    , FVector2D( cellBox.w
-                                                                               , cellBox.h ) )
+                                  , AllottedGeometry.ToPaintGeometry( FVector2D( cellBox.w
+                                                                               , cellBox.h )
+                                                                    , FSlateLayoutTransform( FVector2D( cellBox.x
+                                                                                                      , cellBox.y ) )
+                                                                    )
                                   , &defaultBrush
                                   , ESlateDrawEffect::None
                                   , color );
@@ -494,10 +496,11 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
 
             FSlateDrawElement::MakeLines( OutDrawElements
                                         , LayerId
-                                        , AllottedGeometry.ToPaintGeometry( FVector2D( cellBox.x
-                                                                                     , cellBox.y )
-                                                                          , FVector2D( cellBox.w
-                                                                                     , cellBox.h ) )
+                                        , AllottedGeometry.ToPaintGeometry( FVector2D( cellBox.w
+                                                                                     , cellBox.h )
+                                                                          , FSlateLayoutTransform( FVector2D( cellBox.x
+                                                                                                            , cellBox.y ) )
+                                                                          )
                                         , line
                                         , ESlateDrawEffect::None
                                         , strokeColor
@@ -509,10 +512,11 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
         {
             FSlateDrawElement::MakeBox( OutDrawElements
                                         , LayerId
-                                        , AllottedGeometry.ToPaintGeometry( FVector2D( cellBox.x + midX - 8
-                                                                                     , cellBox.y + midY - 9 )
-                                                                          , FVector2D( 16
-                                                                                     , 16 ) )
+                                        , AllottedGeometry.ToPaintGeometry( FVector2D( 16
+                                                                                     , 16 )
+                                                                          , FSlateLayoutTransform( FVector2D( cellBox.x + midX - 8
+                                                                                                           , cellBox.y + midY - 9 ) )
+                                                                          )
                                         , visibilityBrush );
 
             visibilityGap = 8;
@@ -571,10 +575,11 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
             {
                 FSlateDrawElement::MakeLines( OutDrawElements
                                             , LayerId
-                                            , AllottedGeometry.ToPaintGeometry( FVector2D( cellBox.x
-                                                                                         , cellBox.y )
-                                                                              , FVector2D( cellBox.w
-                                                                                         , cellBox.h ) )
+                                            , AllottedGeometry.ToPaintGeometry( FVector2D( cellBox.w
+                                                                                         , cellBox.h )
+                                                                              , FSlateLayoutTransform( FVector2D( cellBox.x
+                                                                                                                , cellBox.y ) )
+                                                                              )
                                             , arrow
                                             , ESlateDrawEffect::None
                                             , strokeColor
@@ -584,10 +589,11 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
 
             FSlateDrawElement::MakeLines( OutDrawElements
                                         , LayerId
-                                        , AllottedGeometry.ToPaintGeometry( FVector2D( cellBox.x
-                                                                                     , cellBox.y )
-                                                                          , FVector2D( cellBox.w
-                                                                                     , cellBox.h ) )
+                                        , AllottedGeometry.ToPaintGeometry( FVector2D( cellBox.w
+                                                                                     , cellBox.h )
+                                                                          , FSlateLayoutTransform( FVector2D( cellBox.x
+                                                                                                            , cellBox.y ) )
+                                                                          )
                                         , line
                                         , ESlateDrawEffect::None
                                         , strokeColor
@@ -627,10 +633,11 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
 
             FSlateDrawElement::MakeLines( OutDrawElements
                                         , LayerId
-                                        , AllottedGeometry.ToPaintGeometry( FVector2D( cellBox.x
-                                                                                     , cellBox.y )
-                                                                          , FVector2D( cellBox.w
-                                                                                     , cellBox.h ) )
+                                        , AllottedGeometry.ToPaintGeometry( FVector2D( cellBox.w
+                                                                                     , cellBox.h )
+                                                                          , FSlateLayoutTransform( FVector2D( cellBox.x
+                                                                                                            , cellBox.y ) )
+                                                                          )
                                         , line
                                         , ESlateDrawEffect::None
                                         , strokeColor
@@ -639,10 +646,11 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
 
             FSlateDrawElement::MakeLines( OutDrawElements
                                         , LayerId
-                                        , AllottedGeometry.ToPaintGeometry( FVector2D( cellBox.x
-                                                                                     , cellBox.y )
-                                                                          , FVector2D( cellBox.w
-                                                                                     , cellBox.h ) )
+                                        , AllottedGeometry.ToPaintGeometry( FVector2D( cellBox.w
+                                                                                     , cellBox.h )
+                                                                          , FSlateLayoutTransform( FVector2D( cellBox.x
+                                                                                                            , cellBox.y ) )
+                                                                          )
                                         , arrow
                                         , ESlateDrawEffect::None
                                         , strokeColor
@@ -656,10 +664,11 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
         // draw candidate target (when resizing breakdown)
         FSlateDrawElement::MakeBox( OutDrawElements
                                   , LayerId
-                                  , AllottedGeometry.ToPaintGeometry( FVector2D( mCandidateTargetCellBox.x
-                                                                               , mCandidateTargetCellBox.y )
-                                                                    , FVector2D( mCandidateTargetCellBox.w
-                                                                               , mCandidateTargetCellBox.h ) )
+                                  , AllottedGeometry.ToPaintGeometry( FVector2D( mCandidateTargetCellBox.w
+                                                                               , mCandidateTargetCellBox.h )
+                                                                    , FSlateLayoutTransform( FVector2D( mCandidateTargetCellBox.x
+                                                                                                      , mCandidateTargetCellBox.y ) )
+                                                                    )
                                   , &defaultBrush
                                   , ESlateDrawEffect::None
                                   , targetColor );
@@ -673,10 +682,11 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
 
     FSlateDrawElement::MakeLines( OutDrawElements
                                 , LayerId
-                                , AllottedGeometry.ToPaintGeometry( FVector2D( mBoxPos.X
-                                                                             , mBoxPos.Y )
-                                                                  , FVector2D( mBoxSize.X
-                                                                             , mBoxSize.Y ) )
+                                , AllottedGeometry.ToPaintGeometry( FVector2D( mBoxSize.X
+                                                                             , mBoxSize.Y )
+                                                                  , FSlateLayoutTransform(FVector2D( mBoxPos.X
+                                                                                                   , mBoxPos.Y ) )
+                                                                  )
                                 , framePointBuffer
                                 , ESlateDrawEffect::None
                                 , frameColor

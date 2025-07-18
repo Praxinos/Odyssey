@@ -292,7 +292,7 @@ SOdysseyViewport::Construct( const FArguments& InArgs )
                             .OnValueChanged( this, &SOdysseyViewport::HandleZoomSliderChanged )
                             // .LinearDeltaSensitivity(20)  // If we're an unbounded spinbox, what value do we divide mouse movement by before multiplying by Delta. Requires Delta to be set. But we choosed not to use this option here.
                             .TypeInterface(MakeShared<TNumericUnitTypeInterface<float>>(EUnit::Percentage))
-                            .ShiftMouseMovePixelPerDelta( 15 )
+                            .ShiftMultiplier( 15.f )
                             .Delta( 1 )
                             .SliderExponent( 0.8f ) // Can't work properly if the following options are in use :  .LinearDeltaSensitivity .MinValue .MaxValue
                             .SliderExponentNeutralValue( 100.0f )

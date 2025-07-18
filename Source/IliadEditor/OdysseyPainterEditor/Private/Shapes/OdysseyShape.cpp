@@ -350,7 +350,7 @@ UOdysseyShape::GeneratePointsFromFunction(TFunction<FVector2D(float)> iFunction)
         points.Add(FOdysseyPoint(midPos.X, midPos.Y));
         FVector2D maxPos = iFunction(candidate.mMax);
         float dist = FVector2D::DistSquared(midPos, maxPos);
-        candidates.Pop(false); //false does not allow shrinking the array, so we keep memory available
+        candidates.Pop(EAllowShrinking::No); //EAllowShrinking::No does not allow shrinking the array, so we keep memory available
 
         if (dist >= 1)
         {

@@ -396,7 +396,7 @@ float FOdysseyViewportDrawingEditorScreenBasedAdapter::GetStampQuality()
     const ERHIFeatureLevel::Type featureLevel = mExtension->Component()->GetWorld()->GetFeatureLevel();
 
     FTextureRenderTargetResource* strokeRenderTargetResource = mStrokeBufferRenderTarget2D->GameThread_GetRenderTargetResource();
-    FCanvas strokePaintCanvas(strokeRenderTargetResource, nullptr, 0, 0, 0, featureLevel);
+    FCanvas strokePaintCanvas(strokeRenderTargetResource, nullptr, FGameTime(), featureLevel);
     FHitProxyId strokePaintHitProxyId = strokePaintCanvas.GetHitProxyId();
     FBatchedElements* strokePaintBatchedElements = strokePaintCanvas.GetBatchedElements(FCanvas::ET_Triangle, screenPaintBatchedElementParameters, nullptr, SE_BLEND_Opaque);
 

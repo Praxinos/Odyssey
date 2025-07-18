@@ -33,7 +33,7 @@ SOdysseyAnimationCellImageRaster::Construct(const FArguments& iArgs, UOdysseyAni
     thumbnailConfig.bAllowHintText = false;
     thumbnailConfig.bAllowRealTimeOnHovered = false;
     thumbnailConfig.bForceGenericThumbnail = false;
-    thumbnailConfig.bAllowAssetSpecificThumbnailOverlay = false;
+    thumbnailConfig.AllowAssetSpecificThumbnailOverlay = false;
     thumbnailConfig.ThumbnailLabel = EThumbnailLabel::NoLabel;
     thumbnailConfig.HighlightedText = FText::FromString("");
     thumbnailConfig.HintColorAndOpacity = FLinearColor( 0.f, 0.f, 0.f, 0.f);

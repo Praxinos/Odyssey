@@ -132,13 +132,13 @@ SOdysseyPainterEditorVectorSceneDetailsView::Update()
                 mDetailsView->SetObject( mGroupView );
             }
 
-            if( ( objectClass == FOdysseyVectorGroupPaint::StaticClass() ) )
+            if( objectClass == FOdysseyVectorGroupPaint::StaticClass() )
             {
                 mGroupPaintView->Update( mEditor, scene, focusedObjectList );
                 mDetailsView->SetObject( mGroupPaintView );
             }
 
-            if( ( objectClass == FOdysseyVectorObject::StaticClass() ) )
+            if( objectClass == FOdysseyVectorObject::StaticClass() )
             {
                 // default
                 mObjectView->Update( mEditor, scene, focusedObjectList );
