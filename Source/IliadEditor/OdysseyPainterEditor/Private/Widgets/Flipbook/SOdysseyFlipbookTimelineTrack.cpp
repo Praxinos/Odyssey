@@ -124,7 +124,7 @@ SOdysseyFlipbookTimelineTrack::CreateFrameContent(UTexture2D* iTexture)
         ThumbnailConfig.bAllowFadeIn = true;
         ThumbnailConfig.bAllowHintText = false;
         ThumbnailConfig.bForceGenericThumbnail = false;
-        ThumbnailConfig.bAllowAssetSpecificThumbnailOverlay = false;
+        ThumbnailConfig.AllowAssetSpecificThumbnailOverlay = false;
         ThumbnailConfig.ThumbnailLabel = EThumbnailLabel::NoLabel;
         ThumbnailConfig.HighlightedText = FText::FromString("");
         ThumbnailConfig.HintColorAndOpacity = FLinearColor( 1.0, 1.0, 1.0, 1.0 );
