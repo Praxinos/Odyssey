@@ -86,6 +86,8 @@ public:
     virtual uint32 GetHeight() override;
     virtual FOdysseyVectorCell* GetMaxCellFrom( uint32 iIndex ) override;
     virtual FOdysseyVectorCell* GetMinCellFrom( uint32 iIndex ) override;
+    // Implements Interface IOdysseyVectorLayer::GetMinCellFrom
+    virtual FString GetPaletteSetID( UOdysseyPalette* iPalette ) override;
 
     // Implements Interface IOdysseyVectorCell
     virtual int32 GetIndex() override;

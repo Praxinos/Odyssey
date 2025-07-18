@@ -3,6 +3,7 @@
 
 #include "OdysseyVectorBucket.h"
 #include "OdysseyVector.h"
+#include "OdysseyVectorLayer.h"
 #include "OdysseyVectorObject.h"
 #include "Palette/OdysseyPalette.h"
 #include "Palette/OdysseyPaletteEntryColor.h"
@@ -264,17 +265,24 @@ FOdysseyVectorBucket::GetColor()
     switch ( mColorMode )
     {
         case eBucketColorMode::Palette:
-        if( mPaletteEntry && mPaletteEntry->IsValidLowLevel() )
         {
-            UOdysseyPalette* palette = mPaletteEntry->GetPalette();
-            return Cast< UOdysseyPaletteEntryColor >(mPaletteEntry)->GetColor(mPaletteSetID);
+            if( mPaletteEntry && mPaletteEntry->IsValidLowLevel() )
+            {
+                UOdysseyPalette* palette = mPaletteEntry->GetPalette();
+                FOdysseyVectorLayer* layer = mOwner->GetLayer();
+
+                return layer ? Cast< UOdysseyPaletteEntryColor >(mPaletteEntry)->GetColor(layer->GetPaletteSetID( palette ))
+                             : mSolidColor;
+            }
+            else
+            {
+                mPaletteEntry = nullptr;
+                mPaletteSetID = FString();
+                return mSolidColor;
+            }
         }
-        else
-        {
-            mPaletteEntry = nullptr;
-            mPaletteSetID = FString();
-            return mSolidColor;
-        }
+        break;
+
         case eBucketColorMode::SolidColor:
         return mSolidColor;
     }
@@ -327,20 +335,8 @@ FOdysseyVectorBucket::SetPaletteSet( int iPaletteSet )
     mPaletteSet = iPaletteSet;
 }
 
-void
-FOdysseyVectorBucket::SetPaletteSetID(FString iPaletteSetID)
-{
-    mPaletteSetID = iPaletteSetID;
-}
-
 int
 FOdysseyVectorBucket::GetPaletteSet()
 {
     return mPaletteSet;
-}
-
-FString
-FOdysseyVectorBucket::GetPaletteSetID()
-{
-    return mPaletteSetID;
 }

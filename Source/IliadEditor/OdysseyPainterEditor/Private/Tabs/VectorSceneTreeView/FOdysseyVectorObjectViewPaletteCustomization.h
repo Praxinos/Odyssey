@@ -50,7 +50,6 @@ private:
 
 private:
     TSharedPtr<IPropertyHandle> mPaletteEntryHandle;
-    TSharedPtr<IPropertyHandle> mPaletteSetHandle;
     TSharedPtr<IPropertyHandle> mPaletteHandle;
 
 private:

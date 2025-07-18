@@ -17,6 +17,7 @@
 class IOdysseyVectorHUD;
 class IOdysseyVectorCell;
 class FOdysseyVectorTag;
+class UOdysseyPalette;
 
 // Recommended for the unreal reflection system + Garbage collection
 // (however it seems to work fine with IOdysseyVectorLayer declared only)
@@ -39,6 +40,7 @@ class IOdysseyVectorLayer
         virtual uint32 GetHeight() = 0;
         virtual FOdysseyVectorCell* GetMaxCellFrom( uint32 iIndex ) = 0;
         virtual FOdysseyVectorCell* GetMinCellFrom( uint32 iIndex ) = 0;
+        virtual FString GetPaletteSetID( UOdysseyPalette* iPalette ) = 0;
 };
 
 class ODYSSEYVECTOR_API FOdysseyVectorLayer : public FOdysseyVectorObject
@@ -77,6 +79,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorLayer : public FOdysseyVectorObject
         FOdysseyVectorCell* GetCellByIndex( uint32 iIndex );
         FOdysseyVectorCell* GetLastCell();
         FOdysseyVectorCell* GetFirstCell();
+        FString GetPaletteSetID( UOdysseyPalette* iPalette );
         bool Contains( FOdysseyVectorCell* iCell );
         uint32 GetWidth();
         uint32 GetHeight();

@@ -17,6 +17,8 @@
 #include "Widgets/SOdysseyPaletteTreeView.h"
 #include "Widgets/Colors/SColorBlock.h"
 #include "Widgets/SOdysseyPaletteSetComboBox.h"
+#include "OdysseyAnimation.h"
+#include "OdysseyTextureLayerStackUserData.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -31,7 +33,6 @@ void FOdysseyVectorObjectViewPaletteCustomization::CustomizeHeader(TSharedRef<IP
     StructPropertyHandle->GetNumChildren(NumChildren);
     mPaletteHandle = StructPropertyHandle->GetChildHandle( GET_MEMBER_NAME_CHECKED(FPaletteEntrySelection, OdysseyPalette) );
     mPaletteEntryHandle = StructPropertyHandle->GetChildHandle( GET_MEMBER_NAME_CHECKED(FPaletteEntrySelection, OdysseyPaletteEntryColor) );
-    mPaletteSetHandle = StructPropertyHandle->GetChildHandle( GET_MEMBER_NAME_CHECKED(FPaletteEntrySelection, OdysseyPaletteSet) );
 
     HeaderRow
     .NameContent()
@@ -44,7 +45,6 @@ void FOdysseyVectorObjectViewPaletteCustomization::CustomizeHeader(TSharedRef<IP
     ];
 
     mPaletteEntryHandle->SetOnPropertyValueChanged(FSimpleDelegate::CreateRaw(this, &FOdysseyVectorObjectViewPaletteCustomization::OnChildPropertyValueChanged, StructPropertyHandle));
-    mPaletteSetHandle->SetOnPropertyValueChanged(FSimpleDelegate::CreateRaw(this, &FOdysseyVectorObjectViewPaletteCustomization::OnChildPropertyValueChanged, StructPropertyHandle));
     mPaletteHandle->SetOnPropertyValueChanged(FSimpleDelegate::CreateRaw(this, &FOdysseyVectorObjectViewPaletteCustomization::OnChildPropertyValueChanged, StructPropertyHandle));
 }
 
@@ -77,7 +77,6 @@ void FOdysseyVectorObjectViewPaletteCustomization::CustomizeChildren(TSharedRef<
     uint32 NumChildren;
     StructPropertyHandle->GetNumChildren(NumChildren);
     mPaletteHandle = StructPropertyHandle->GetChildHandle( GET_MEMBER_NAME_CHECKED(FPaletteEntrySelection, OdysseyPalette) );
-    mPaletteSetHandle = StructPropertyHandle->GetChildHandle( GET_MEMBER_NAME_CHECKED(FPaletteEntrySelection, OdysseyPaletteSet) );
     mPaletteEntryHandle = StructPropertyHandle->GetChildHandle( GET_MEMBER_NAME_CHECKED(FPaletteEntrySelection, OdysseyPaletteEntryColor) );
 
     //Not the best, but we need to know which palettes are loaded by the editor to filter the assets in the SObjectPropertyEntryBox below
@@ -138,20 +137,6 @@ void FOdysseyVectorObjectViewPaletteCustomization::CustomizeChildren(TSharedRef<
             .OnObjectChanged(this, &FOdysseyVectorObjectViewPaletteCustomization::OnPaletteChanged)
     ];
 
-    StructBuilder.AddProperty(mPaletteSetHandle->AsShared())
-    .CustomWidget()
-    .NameContent()
-    [
-        mPaletteSetHandle->CreatePropertyNameWidget()
-    ]
-    .ValueContent()
-    [
-        SNew(SOdysseyPaletteSetComboBox)
-        .Palette(this, &FOdysseyVectorObjectViewPaletteCustomization::GetPalette)
-        .CurrentSet(this, &FOdysseyVectorObjectViewPaletteCustomization::GetCurrentSet)
-        .OnCurrentSetSelected(this, &FOdysseyVectorObjectViewPaletteCustomization::OnPaletteCurrentSetSelected)
-    ];
-
     StructBuilder.AddProperty(mPaletteEntryHandle->AsShared())
     .CustomWidget()
     .NameContent()
@@ -169,8 +154,38 @@ void FOdysseyVectorObjectViewPaletteCustomization::CustomizeChildren(TSharedRef<
     ];
 
     mPaletteEntryHandle->SetOnPropertyValueChanged(FSimpleDelegate::CreateRaw(this, &FOdysseyVectorObjectViewPaletteCustomization::OnChildPropertyValueChanged, StructPropertyHandle));
-    mPaletteSetHandle->SetOnPropertyValueChanged(FSimpleDelegate::CreateRaw(this, &FOdysseyVectorObjectViewPaletteCustomization::OnChildPropertyValueChanged, StructPropertyHandle));
     mPaletteHandle->SetOnPropertyValueChanged(FSimpleDelegate::CreateRaw(this, &FOdysseyVectorObjectViewPaletteCustomization::OnChildPropertyValueChanged, StructPropertyHandle));
+}
+
+FString
+FOdysseyVectorObjectViewPaletteCustomization::GetCurrentSet() const
+{
+    UOdysseyAnimation* animation = mEditor->GetAnimation();
+    UOdysseyTextureLayerStackUserData* userData = mEditor->GetTextureUserData();
+
+    if( animation )
+    {
+        for( int32 i = 0; i < animation->Palettes.Num(); i++ )
+        {
+            if( animation->Palettes[i]->mPalette == GetPalette() )
+            {
+                return animation->Palettes[i]->mSet;
+            }
+        }
+    }
+    else
+    if( userData )
+    {
+        for( int32 i = 0; i < userData->Palettes.Num(); i++ )
+        {
+            if( userData->Palettes[i]->mPalette == GetPalette() )
+            {
+                return userData->Palettes[i]->mSet;
+            }
+        }
+    }
+
+    return FString();
 }
 
 TSharedRef<SWidget>
@@ -203,14 +218,6 @@ FOdysseyVectorObjectViewPaletteCustomization::GetPalette() const
     return Cast<UOdysseyPalette>(palette);
 }
 
-FString
-FOdysseyVectorObjectViewPaletteCustomization::GetCurrentSet() const
-{
-    FString setId;
-    mPaletteSetHandle->GetValue(setId);
-    return setId;
-}
-
 UOdysseyPaletteEntryColor*
 FOdysseyVectorObjectViewPaletteCustomization::GetCurrentEntryColor() const
 {
@@ -227,11 +234,6 @@ FOdysseyVectorObjectViewPaletteCustomization::GetCurrentEntryColorAsLinear() con
         return FLinearColor();
     return FLinearColor( entry->GetColor(GetCurrentSet()) );
 }
-void
-FOdysseyVectorObjectViewPaletteCustomization::OnPaletteCurrentSetSelected(FString iSet)
-{
-    mPaletteSetHandle->SetValue(iSet);
-}
 
 void
 FOdysseyVectorObjectViewPaletteCustomization::OnPaletteCurrentColorEntryChanged(UOdysseyPaletteEntryColor* iEntry)
@@ -244,21 +246,6 @@ void FOdysseyVectorObjectViewPaletteCustomization::OnPaletteChanged(const FAsset
     UOdysseyPalette* palette = Cast<UOdysseyPalette>(AssetData.GetAsset());
     mPaletteHandle->SetValue(palette);
     mPaletteEntryHandle->SetValue((UObject*)nullptr);
-
-    if( mEditor )
-    {
-        for(UOdysseyPaletteSet* set : mEditor->GetPaletteSets())
-        {
-            if( set->mPalette == palette )
-            {
-                mPaletteSetHandle->SetValue(set->mSet);
-            }
-        }
-    }
-    else
-    {
-        mPaletteSetHandle->SetValue(FString());
-    }
 }
 
 void

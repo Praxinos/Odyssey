@@ -48,19 +48,6 @@ FOdysseyVectorExportV2::WriteBucketPaletteSet( FOdysseyVectorBucket& iBucket, FA
     } );
 }
 
-void
-FOdysseyVectorExportV2::WriteBucketPaletteSetID(FOdysseyVectorBucket& iBucket, FArchive& Ar)
-{
-    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_BUCKET_PALETTESETID
-                            , Ar
-                            , [&iBucket](FArchive& Ar) -> void
-        {
-            FString setID = iBucket.GetPaletteSetID();
-
-            Ar << setID;
-        });
-}
-
 // unused. Kept as history
 void
 FOdysseyVectorExportV2::WriteBucketPaletteEntryMark1( FOdysseyVectorBucket& iBucket, FArchive& Ar)
@@ -259,7 +246,6 @@ FOdysseyVectorExportV2::WriteBucket( FOdysseyVectorBucket& iBucket, FArchive &Ar
         {
             WriteBucketPaletteEntryMark2( iBucket, Ar );
             WriteBucketPaletteSet( iBucket, Ar );
-            WriteBucketPaletteSetID(iBucket, Ar);
         }
 
         WriteBucketGradient( iBucket, Ar );

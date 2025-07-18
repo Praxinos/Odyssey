@@ -21,6 +21,7 @@
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorObject.h"
+#include "OdysseyPalette.h"
 
 #include "OdysseyVectorObject.h"
 #include "OdysseyVectorGroupPaint.h"
@@ -570,6 +571,26 @@ UOdysseyAnimationLayerImageVector::GetMinCellFrom( uint32 iIndex )
     }
 
     return maxLayerCell ? maxLayerCell->GetVectorCell() : nullptr;
+}
+
+// Implements Interface IOdysseyVectorLayer::GetPaletteSetID
+FString
+UOdysseyAnimationLayerImageVector::GetPaletteSetID( UOdysseyPalette* iPalette )
+{
+    UOdysseyAnimation* animation = GetAnimation();
+
+    if( animation )
+    {
+        for( int32 i = 0; animation->Palettes.Num(); i++ )
+        {
+            if( animation->Palettes[i]->mPalette == iPalette )
+            {
+                return animation->Palettes[i]->mSet;
+            }
+        }
+    }
+
+    return FString();
 }
 
 #if WITH_EDITOR

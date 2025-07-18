@@ -69,6 +69,12 @@ FOdysseyVectorLayer::GetFirstCell()
     return mLayerInterface->GetFirstCell();
 }
 
+FString
+FOdysseyVectorLayer::GetPaletteSetID( UOdysseyPalette* iPalette )
+{
+    return mLayerInterface->GetPaletteSetID( iPalette );
+}
+
 bool
 FOdysseyVectorLayer::Contains( FOdysseyVectorCell* iCell )
 {

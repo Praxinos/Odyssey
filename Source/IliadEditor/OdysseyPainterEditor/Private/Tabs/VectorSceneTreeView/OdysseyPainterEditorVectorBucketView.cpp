@@ -40,13 +40,11 @@ UOdysseyPainterEditorVectorBucketView::ImportParam()
     {
         PaletteSelection.OdysseyPalette = mBucket->GetPaletteEntry()->GetPalette();
         PaletteSelection.OdysseyPaletteEntryColor = Cast<UOdysseyPaletteEntryColor>(mBucket->GetPaletteEntry());
-        PaletteSelection.OdysseyPaletteSet = mBucket->GetPaletteSetID();
     }
     else
     {
         PaletteSelection.OdysseyPalette = nullptr;
         PaletteSelection.OdysseyPaletteEntryColor = nullptr;
-        PaletteSelection.OdysseyPaletteSet = FString();
     }
 }
 
@@ -85,7 +83,6 @@ UOdysseyPainterEditorVectorBucketView::PropertyChanged( const FName& iPropertyNa
         if ( (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorBucketView, PaletteSelection)) || ( iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorBucketView, PaletteSelection) ) )
         {
             mBucket->SetPaletteEntry( PaletteSelection.OdysseyPaletteEntryColor );
-            mBucket->SetPaletteSetID( PaletteSelection.OdysseyPaletteSet );
         }
 
         // note: iMemberPropertyName because FColor is a struct

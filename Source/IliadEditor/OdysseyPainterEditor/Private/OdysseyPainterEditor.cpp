@@ -3480,6 +3480,7 @@ void FOdysseyPainterEditor::SetPaletteSet(FString iIndex, UOdysseyPaletteSet* iP
                 {
                     for (int i = 0; i < mediaVectors.Num(); i++)
                     {
+/*
                         FOdysseyVectorGroupPaint* vectorScene = mediaVectors[i]->GetScene();
                         std::list<FOdysseyVectorBucket*>& bucketList = vectorScene->GetBucketList();
                         std::list<FOdysseyVectorPath*>& pathList = vectorScene->GetPathList();
@@ -3495,7 +3496,9 @@ void FOdysseyPainterEditor::SetPaletteSet(FString iIndex, UOdysseyPaletteSet* iP
                             if (path->GetForegroundBucket().GetPaletteEntry() && path->GetForegroundBucket().GetPaletteEntry()->GetPalette() == iPaletteSet->mPalette)
                                 path->GetForegroundBucket().SetPaletteSetID(iIndex);
                         }
+*/
                         FOdysseyVectorCell* vectorCell = mediaVectors[i]->GetScene()->GetCell();
+
                         vectorCell->GetLayer()->RequestRedraw(vectorCell, 0);
                     }
                 }
@@ -3518,6 +3521,7 @@ void FOdysseyPainterEditor::SetPaletteSet(FString iIndex, UOdysseyPaletteSet* iP
             {
                 for (int i = 0; i < mediaVectors.Num(); i++)
                 {
+/*
                     FOdysseyVectorGroupPaint* vectorScene = mediaVectors[i]->GetScene();
                     std::list<FOdysseyVectorBucket*>& bucketList = vectorScene->GetBucketList();
                     std::list<FOdysseyVectorPath*>& pathList = vectorScene->GetPathList();
@@ -3533,6 +3537,7 @@ void FOdysseyPainterEditor::SetPaletteSet(FString iIndex, UOdysseyPaletteSet* iP
                         if (path->GetForegroundBucket().GetPaletteEntry() && path->GetForegroundBucket().GetPaletteEntry()->GetPalette() == iPaletteSet->mPalette)
                             path->GetForegroundBucket().SetPaletteSetID(iIndex);
                     }
+*/
                     FOdysseyVectorCell* vectorCell = mediaVectors[i]->GetScene()->GetCell();
                     vectorCell->GetLayer()->RequestRedraw(vectorCell, 0);
                 }
@@ -3604,21 +3609,6 @@ FOdysseyPainterEditor::SetCurrentPaletteColorEntry(UOdysseyPaletteEntryColor* iE
                 {
                     for (int i = 0; i < mediaVectors.Num(); i++)
                     {
-                        FOdysseyVectorGroupPaint* vectorScene = mediaVectors[i]->GetScene();
-                        std::list<FOdysseyVectorBucket*>& bucketList = vectorScene->GetBucketList();
-                        std::list<FOdysseyVectorPath*>& pathList = vectorScene->GetPathList();
-                        for (FOdysseyVectorBucket* bucket : bucketList)
-                        {
-                            if (bucket->GetPaletteEntry() && bucket->GetPaletteEntry()->GetPalette() == iEntry->GetPalette())
-                                bucket->SetPaletteSetID(iSet);
-                        }
-                        for (FOdysseyVectorPath* path : pathList)
-                        {
-                            if (path->GetBackgroundBucket().GetPaletteEntry() && path->GetBackgroundBucket().GetPaletteEntry()->GetPalette() == iEntry->GetPalette())
-                                path->GetBackgroundBucket().SetPaletteSetID(iSet);
-                            if (path->GetForegroundBucket().GetPaletteEntry() && path->GetForegroundBucket().GetPaletteEntry()->GetPalette() == iEntry->GetPalette())
-                                path->GetForegroundBucket().SetPaletteSetID(iSet);
-                        }
                         FOdysseyVectorCell* vectorCell = mediaVectors[i]->GetScene()->GetCell();
                         vectorCell->GetLayer()->RequestRedraw(vectorCell, 0);
                     }
@@ -3642,21 +3632,6 @@ FOdysseyPainterEditor::SetCurrentPaletteColorEntry(UOdysseyPaletteEntryColor* iE
             {
                 for (int i = 0; i < mediaVectors.Num(); i++)
                 {
-                    FOdysseyVectorGroupPaint* vectorScene = mediaVectors[i]->GetScene();
-                    std::list<FOdysseyVectorBucket*>& bucketList = vectorScene->GetBucketList();
-                    std::list<FOdysseyVectorPath*>& pathList = vectorScene->GetPathList();
-                    for (FOdysseyVectorBucket* bucket : bucketList)
-                    {
-                        if (bucket->GetPaletteEntry() && bucket->GetPaletteEntry()->GetPalette() == iEntry->GetPalette())
-                            bucket->SetPaletteSetID(iSet);
-                    }
-                    for (FOdysseyVectorPath* path : pathList)
-                    {
-                        if (path->GetBackgroundBucket().GetPaletteEntry() && path->GetBackgroundBucket().GetPaletteEntry()->GetPalette() == iEntry->GetPalette())
-                            path->GetBackgroundBucket().SetPaletteSetID(iSet);
-                        if (path->GetForegroundBucket().GetPaletteEntry() && path->GetForegroundBucket().GetPaletteEntry()->GetPalette() == iEntry->GetPalette())
-                            path->GetForegroundBucket().SetPaletteSetID(iSet);
-                    }
                     FOdysseyVectorCell* vectorCell = mediaVectors[i]->GetScene()->GetCell();
                     vectorCell->GetLayer()->RequestRedraw(vectorCell, 0);
                 }

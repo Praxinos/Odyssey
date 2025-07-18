@@ -23,6 +23,7 @@
 #include "Misc/TransactionObjectEvent.h"
 #include "TextureCompiler.h"
 #include "UObject/ObjectSaveContext.h"
+#include "OdysseyTextureLayerStackUserData.h"
 
 #include "blend2d.h"
 
@@ -465,6 +466,26 @@ uint32
 UOdysseyTextureLayerImageVector::GetFrame()
 {
     return 0;
+}
+
+// Implements Interface IOdysseyVectorLayer::GetPaletteSetID
+FString
+UOdysseyTextureLayerImageVector::GetPaletteSetID( UOdysseyPalette* iPalette )
+{
+    UOdysseyTextureLayerStackUserData* userData = Cast<UOdysseyTextureLayerStackUserData>(GetTexture()->GetAssetUserDataOfClass(UOdysseyTextureLayerStackUserData::StaticClass()));
+
+    if( userData )
+    {
+        for( int32 i = 0; i < userData->Palettes.Num(); i++ )
+        {
+            if( userData->Palettes[i]->mPalette == iPalette )
+            {
+                return userData->Palettes[i]->mSet;
+            }
+        }
+    }
+
+    return FString();
 }
 
 void
