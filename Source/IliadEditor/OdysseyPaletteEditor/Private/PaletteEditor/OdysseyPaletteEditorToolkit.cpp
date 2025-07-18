@@ -227,7 +227,7 @@ FOdysseyPaletteEditorToolkit::BuildToolbarPaletteSection(FToolBarBuilder& iBuild
 void
 FOdysseyPaletteEditorToolkit::AddEntry(UClass* iEntryClass)
 {
-#ifdef WITH_EDITOR
+#if WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("transaction.add-color-entry", "Add Color Entry"));
 #endif
 

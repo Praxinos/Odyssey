@@ -134,7 +134,7 @@ FOdysseyLayerStackShortcuts::Action_Cut()
     TSharedPtr<FOdysseyLayerStackClipboardData> clipboardData = MakeShared<FOdysseyLayerStackClipboardData>(layersToCopy);
     odysseyCoreEditorModule.GetClipboard()->SetData(clipboardData);
 
-#ifdef WITH_EDITOR
+#if WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("shortcuts.transaction.cut-layers", "Cut Layers"));
 #endif
     Action_Delete();
@@ -152,7 +152,7 @@ FOdysseyLayerStackShortcuts::Action_Paste()
     if (!treeView)
         return;
 
-#ifdef WITH_EDITOR
+#if WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("shortcuts.transaction.paste-layers", "Paste Layers"));
 #endif
 
@@ -185,7 +185,7 @@ FOdysseyLayerStackShortcuts::Action_Delete()
     if (!treeView)
         return;
 
-#ifdef WITH_EDITOR
+#if WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("shortcuts.transaction.remove-layers", "Remove Layers"));
 #endif
 
@@ -207,7 +207,7 @@ FOdysseyLayerStackShortcuts::Action_Duplicate()
     if (selectedLayers.Num() <= 0)
         return;
 
-#ifdef WITH_EDITOR
+#if WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("shortcuts.transaction.duplicate-layers", "Duplicate Layers"));
 #endif
 
@@ -299,7 +299,7 @@ FOdysseyLayerStackShortcuts::Action_MergeSelectedLayers()
     if (selectedLayers.Num() <= 0)
         return;
 
-#ifdef WITH_EDITOR
+#if WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("shortcuts.transaction.merge-layers", "Merge Layers"));
 #endif
 

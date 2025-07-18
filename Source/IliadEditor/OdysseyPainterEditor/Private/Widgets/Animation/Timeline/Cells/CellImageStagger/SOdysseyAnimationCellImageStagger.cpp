@@ -172,7 +172,7 @@ SOdysseyAnimationCellImageStagger::OnReachValueChanged(int iReach)
 void
 SOdysseyAnimationCellImageStagger::OnReachValueCommited(int iReach, ETextCommit::Type iType)
 {
-#ifdef WITH_EDITOR
+#if WITH_EDITOR
     FScopedTransaction ScopedTransaction(mSetReachTransactionName);
 #endif
     mCell->SetReach(FMath::Max(0, iReach), false);
@@ -182,7 +182,7 @@ SOdysseyAnimationCellImageStagger::OnReachValueCommited(int iReach, ETextCommit:
 void
 SOdysseyAnimationCellImageStagger::OnReachBeginSliderMovement()
 {
-#ifdef WITH_EDITOR
+#if WITH_EDITOR
     GEditor->BeginTransaction(mSetReachTransactionName);
 #endif
 }
@@ -190,7 +190,7 @@ SOdysseyAnimationCellImageStagger::OnReachBeginSliderMovement()
 void
 SOdysseyAnimationCellImageStagger::OnReachEndSliderMovement(int iReach)
 {
-#ifdef WITH_EDITOR
+#if WITH_EDITOR
     GEditor->EndTransaction();
 #endif
     //Clear the keyboard focus here because the spinbox keeps it after dragging the value
@@ -248,7 +248,7 @@ SOdysseyAnimationCellImageStagger::BuildContextMenu(FMenuBuilder& iMenuBuilder)
 void
 SOdysseyAnimationCellImageStagger::SetBehaviour(EOdysseyLayerCellImageStaggerBehaviour iBehaviour)
 {
-#ifdef WITH_EDITOR
+#if WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("cell-image-stagger.transaction.set-behaviour", "Set Stagger Cell Behaviour"));
 #endif
     mCell->SetBehaviour(iBehaviour);

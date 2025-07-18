@@ -299,7 +299,9 @@ public:
     virtual FInt32Range GetFrameRange() const override;
 
     virtual UTextureRenderTarget2D* CreateRenderingRenderTarget() override;
+#if WITH_EDITOR
     virtual UTexture2D* CreateExportTexture(UObject* Outer, FName Name, EObjectFlags Flags = RF_NoFlags) override;
+#endif
     virtual bool BuildRenderPipelineInternal(FFrameNumber iFrame, uint64 iType, IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction, const IOdysseyTextureRenderingAbility::FCanRenderFunction& iCanRenderFunction, const TArray<const IOdysseyTextureRenderingAbility*>& iParents) const override;
 
 protected:

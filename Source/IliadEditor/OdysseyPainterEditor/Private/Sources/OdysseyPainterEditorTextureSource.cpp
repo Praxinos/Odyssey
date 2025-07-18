@@ -159,7 +159,7 @@ FOdysseyPainterEditorTextureSource::Clear()
     //UOdysseyTextureLayerImageRaster* currentLayerRaster = Cast<UOdysseyTextureLayerImageRaster>(layerStack->GetCurrentLayer());
     //UOdysseyTextureLayerImageVector* currentLayerVector = Cast<UOdysseyTextureLayerImageVector>(layerStack->GetCurrentLayer());
 
-    #ifdef WITH_EDITOR
+    #if WITH_EDITOR
         FScopedTransaction ScopedTransaction(LOCTEXT("actions.clear", "Clear"));
     #endif
 
@@ -233,7 +233,7 @@ FOdysseyPainterEditorTextureSource::ClearFromCopyBlock(TSharedPtr<::ULIS::FBlock
     if (!layerStack)
         return;
 
-#ifdef WITH_EDITOR
+#if WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("actions.cut", "Cut"));
 #endif
 
@@ -293,7 +293,7 @@ void FOdysseyPainterEditorTextureSource::PasteBlockToCurrentLayer(TSharedPtr<::U
     if (!layerStack)
         return;
 
-#ifdef WITH_EDITOR
+#if WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("actions.paste", "Paste"));
 #endif
 
@@ -378,7 +378,7 @@ FOdysseyPainterEditorTextureSource::PasteBlockToNewLayer( TSharedPtr<::ULIS::FBl
     if (!GetCurrentMediaProvider().HasMedia<FOdysseyMediaRaster>())
         return;
 
-#ifdef WITH_EDITOR
+#if WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("actions.paste", "Paste"));
 #endif
     GetLayerStack()->Modify();

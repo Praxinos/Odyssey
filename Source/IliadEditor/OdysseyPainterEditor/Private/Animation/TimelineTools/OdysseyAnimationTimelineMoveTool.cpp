@@ -50,7 +50,7 @@ FOdysseyAnimationTimelineMoveTool::OnDragDetected(const FMouseEventParams& iPara
     if (mOffsettingLayer)
       {
         mLayerOffsetData.mIsDragDetected = true;
-    #ifdef WITH_EDITOR
+    #if WITH_EDITOR
         GEditor->BeginTransaction(LOCTEXT("timeline.move-tool.transaction.set-offset", "Change Layer Offset"));
     #endif
 
@@ -99,7 +99,7 @@ FOdysseyAnimationTimelineMoveTool::OnMouseButtonUp(const FMouseEventParams& iPar
         mOffsettingLayer = false;
 
         iParams.mLayer->SetCellsOffset(iParams.mLayer->GetCellsOffset());
-        #ifdef WITH_EDITOR
+        #if WITH_EDITOR
             GEditor->EndTransaction();
         #endif
         return FReply::Handled().ReleaseMouseCapture();

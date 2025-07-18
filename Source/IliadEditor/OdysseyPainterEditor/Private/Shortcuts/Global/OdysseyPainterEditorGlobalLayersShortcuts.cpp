@@ -55,7 +55,7 @@ FOdysseyPainterEditorGlobalLayersShortcuts::Action_CreateNewLayer()
 
     UOdysseyLayer* layer = nullptr;
     {
-    #ifdef WITH_EDITOR
+    #if WITH_EDITOR
         FScopedTransaction ScopedTransaction(LOCTEXT("global-layers-shortcuts.transaction.create-new-layer", "Add Layer"));
     #endif
         layerStack->Modify();
@@ -120,7 +120,7 @@ FOdysseyPainterEditorGlobalLayersShortcuts::Action_ChangeLayerOpacity(float iOpa
         return;
 
 
-#ifdef WITH_EDITOR
+#if WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("global-layers-shortcuts.transaction..set-layer-opacity", "Change Layer Opacity"));
 #endif
     layerStack->GetCurrentLayer()->SetOpacity(FMath::Clamp(iOpacity, 0.f, 1.f));

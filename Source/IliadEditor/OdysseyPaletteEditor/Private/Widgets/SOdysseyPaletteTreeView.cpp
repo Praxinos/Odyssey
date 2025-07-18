@@ -428,7 +428,7 @@ SOdysseyPaletteTreeView::DeleteSelectedEntries()
     if ( !mPalette )
         return;
 
-#ifdef WITH_EDITOR
+#if WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("tree-view.transaction.remove-selected-entries", "Remove Entries"));
 #endif
 
@@ -493,7 +493,7 @@ SOdysseyPaletteTreeView::DuplicateSelectedEntries()
     if (selectedEntries.Num() <= 0)
         return;
 
-#ifdef WITH_EDITOR
+#if WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("tree-view.transaction.duplicate-selected-entries", "Duplicate Entries"));
 #endif
 
@@ -652,7 +652,7 @@ SOdysseyPaletteTreeView::AddColorEntry()
     if (!mPalette)
         return FReply::Unhandled();
 
-#ifdef WITH_EDITOR
+#if WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("palette-tree-view.transaction.add-color-entry", "Add Color Entry"));
 #endif
 
@@ -693,7 +693,7 @@ SOdysseyPaletteTreeView::AddFolderEntry()
     if (!mPalette)
         return FReply::Unhandled();
 
-#ifdef WITH_EDITOR
+#if WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("add-folder-entry-button.transaction.add-folder-entry", "Add Folder Entry"));
 #endif
 

@@ -137,7 +137,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_Cut()
     if (selectedCells.IsEmpty())
         return;
 
-#ifdef WITH_EDITOR
+#if WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("timeline.shortcuts.cut-frame", "Cut Frames"));
 #endif
 
@@ -173,7 +173,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_Paste()
     if (!clipboardData->CanPaste(layer))
         return;
 
-#ifdef WITH_EDITOR
+#if WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("timeline.shortcuts.paste-frame", "Paste Frames"));
 #endif
     clipboardData->Paste(layer, mCurrentFrame.Get());
@@ -219,7 +219,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_Delete()
     if (selectedCells.IsEmpty())
         return;
 
-#ifdef WITH_EDITOR
+#if WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("timeline.shortcuts.remove-frame", "Remove Frames"));
 #endif
     mOnTransactCurrentFrame.ExecuteIfBound(selectedCells[0]->GetFrameRange().GetLowerBoundValue());
@@ -268,7 +268,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_ConvertToStaggerCell()
     if (selectedCells.IsEmpty())
         return;
 
-#ifdef WITH_EDITOR
+#if WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.create-stagger-cell", "Stagger Cell"));
 #endif
 
@@ -309,7 +309,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_IncreaseCellExposure()
         selectedCells.Add(cell);
     }
 
-#ifdef WITH_EDITOR
+#if WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.increase-selected-cells-exposure", "Increase Selected Cells Exposure"));
 #endif
 
@@ -348,7 +348,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_DecreaseCellExposure()
         selectedCells.Add(cell);
     }
 
-#ifdef WITH_EDITOR
+#if WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.decrease-selected-cells-exposure", "Decrease Selected Cells Exposure"));
 #endif
     mOnTransactCurrentFrame.ExecuteIfBound(selectedCells[0]->GetFrameRange().GetLowerBoundValue());
@@ -415,7 +415,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_SetCellExposure()
             {
                 UOdysseyAnimation* animation = layer->GetAnimation();
 
-                #ifdef WITH_EDITOR
+                #if WITH_EDITOR
                 FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.set-selected-cells-exposure", "Set Selected Cells Exposure"));
                 #endif
 

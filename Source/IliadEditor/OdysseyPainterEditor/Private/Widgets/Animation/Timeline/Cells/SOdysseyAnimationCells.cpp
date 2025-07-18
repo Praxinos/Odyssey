@@ -702,7 +702,7 @@ SOdysseyAnimationCells::OnExposureHandleDragStarted(const FGeometry& iGeometry, 
     if (!mHoveredCell)
         return;
 
-    #ifdef WITH_EDITOR
+    #if WITH_EDITOR
         GEditor->BeginTransaction(LOCTEXT("timeline.cells.transaction.set-cell-exposure", "Change Cell Exposure"));
     #endif
 
@@ -739,7 +739,7 @@ SOdysseyAnimationCells::OnExposureHandleDragStopped(const FGeometry& iGeometry, 
 
     UOdysseyLayerCell* cell = mExposureHandleDragData.mCell;
     cell->SetExposure(cell->GetExposure());
-#ifdef WITH_EDITOR
+#if WITH_EDITOR
     GEditor->EndTransaction();
 #endif
 
@@ -752,7 +752,7 @@ SOdysseyAnimationCells::OnTimingHandleDragStarted(const FGeometry& iGeometry, co
     if (!mHoveredCell)
         return;
 
-    #ifdef WITH_EDITOR
+    #if WITH_EDITOR
         GEditor->BeginTransaction(LOCTEXT("timeline.cells.transaction.set-cell-timing", "Change Cell Timing"));
     #endif
 
@@ -905,7 +905,7 @@ SOdysseyAnimationCells::OnTimingHandleDragStopped(const FGeometry& iGeometry, co
 
     mTimingHandleDragData.mAffectedCells.Empty();
 
-#ifdef WITH_EDITOR
+#if WITH_EDITOR
     GEditor->EndTransaction();
 #endif
 
@@ -939,7 +939,7 @@ SOdysseyAnimationCells::GetAddCellsHandleLeftVisibility() const
 void
 SOdysseyAnimationCells::OnAddCellsHandleDragStarted(const FGeometry& iGeometry, const FPointerEvent& iEvent, bool iIsRightHandle)
 {
-    #ifdef WITH_EDITOR
+    #if WITH_EDITOR
         GEditor->BeginTransaction(LOCTEXT("timeline.cells.transaction.add-cells-at-start", "Add Cells"));
     #endif
 
@@ -1094,7 +1094,7 @@ SOdysseyAnimationCells::OnAddCellsHandleDragStopped(const FGeometry& iGeometry, 
         }
     }
 
-#ifdef WITH_EDITOR
+#if WITH_EDITOR
     GEditor->EndTransaction();
 #endif
 
@@ -1268,7 +1268,7 @@ SOdysseyAnimationCells::GetPostBehaviourMenuContent()
 void
 SOdysseyAnimationCells::SetPreBehaviour(EOdysseyLayerImagePostBehaviour iBehaviour)
 {
-#ifdef WITH_EDITOR
+#if WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("animation.layer.transaction.set-prebehaviour", "Set Layer Pre Behaviour"));
 #endif
     mAnimationLayer->SetPreBehaviour(iBehaviour);
@@ -1289,7 +1289,7 @@ SOdysseyAnimationCells::IsPreBehaviour(EOdysseyLayerImagePostBehaviour iBehaviou
 void
 SOdysseyAnimationCells::SetPostBehaviour(EOdysseyLayerImagePostBehaviour iBehaviour)
 {
-#ifdef WITH_EDITOR
+#if WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("animation.layer.transaction.set-postbehaviour", "Set Layer Post Behaviour"));
 #endif
     mAnimationLayer->SetPostBehaviour(iBehaviour);

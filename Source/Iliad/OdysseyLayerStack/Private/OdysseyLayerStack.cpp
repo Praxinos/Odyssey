@@ -694,9 +694,13 @@ UOdysseyLayerStack::CreateRenderingRenderTarget()
     return nullptr;
 }
 
+#if WITH_EDITOR
+
 UTexture2D*
 UOdysseyLayerStack::CreateExportTexture(UObject* Outer, FName Name, EObjectFlags Flags)
 {
     checkf(false, TEXT("Must be implemented by child class"));
     return nullptr;
 }
+
+#endif

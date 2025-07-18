@@ -178,7 +178,7 @@ SOdysseyAnimationLayerStackTreeView::Action_ConvertLayerToRasterLayer()
     if (!shouldConvert)
         return;
 
-#ifdef WITH_EDITOR
+#if WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("animation.layer.transaction.convert-to-raster", "Convert Layer To Raster Layer"));
 #endif
 

@@ -572,7 +572,7 @@ UOdysseyAnimationLayerImageVector::GetMinCellFrom( uint32 iIndex )
     return maxLayerCell ? maxLayerCell->GetVectorCell() : nullptr;
 }
 
-#ifdef WITH_EDITOR
+#if WITH_EDITOR
 
 TArray<FName>
 UOdysseyAnimationLayerImageVector::GetRows() const

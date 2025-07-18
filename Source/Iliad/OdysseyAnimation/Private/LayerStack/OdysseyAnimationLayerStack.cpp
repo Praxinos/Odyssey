@@ -80,8 +80,10 @@ UOdysseyAnimationLayerStack::CreateRenderingRenderTarget()
     return GetAnimation()->CreateRenderingRenderTarget();
 }
 
+#if WITH_EDITOR
 UTexture2D*
 UOdysseyAnimationLayerStack::CreateExportTexture(UObject* Outer, FName Name, EObjectFlags Flags)
 {
     return GetAnimation()->CreateExportTexture(Outer, Name, Flags);
 }
+#endif

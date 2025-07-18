@@ -81,7 +81,7 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
         case EOdysseyAnimationFormat::RGBAF: format = ::ULIS::Format_RGBAF;
     } */
 
-#ifdef WITH_EDITOR
+#if WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("cell-image-raster.transaction.cross-fade", "Cross Fade"));
 #endif
 

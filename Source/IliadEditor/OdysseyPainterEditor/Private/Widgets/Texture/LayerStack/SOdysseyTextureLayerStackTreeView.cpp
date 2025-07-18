@@ -88,7 +88,7 @@ SOdysseyTextureLayerStackTreeView::Action_ConvertLayerToRasterLayer()
     if (!canConvert)
         return;
 
-#ifdef WITH_EDITOR
+#if WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("texture.layer.transaction.convert-to-raster", "Convert Layer To Raster Layer"));
 #endif
 

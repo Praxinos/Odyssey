@@ -89,7 +89,7 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_BreakCell()
     if (frame == 0)
         return;
 
-#ifdef WITH_EDITOR
+#if WITH_EDITOR
         FScopedTransaction ScopedTransaction(LOCTEXT("global-cells-shortcuts.transaction.break-cell", "Break Cell"));
 #endif
     UOdysseyLayerCell* newCell = cell->Break(frame, false);
@@ -129,7 +129,7 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_BreakAndClearCell()
     if (frame == 0)
         return;
 
-#ifdef WITH_EDITOR
+#if WITH_EDITOR
         FScopedTransaction ScopedTransaction(LOCTEXT("global-cells-shortcuts.transaction.break-cell", "Break Cell"));
 #endif
     UOdysseyLayerCell* newCell = cell->Break(frame, true);
@@ -167,7 +167,7 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_RemoveCellMark()
         selectedCells.Add(cell);
     }
 
-#ifdef WITH_EDITOR
+#if WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("global-cells-shortcuts.transaction.remove-cell-mark", "Remove Cell Mark"));
 #endif
     for (UOdysseyLayerCell* cell : selectedCells)
@@ -206,7 +206,7 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_SetCellMark(int iMarkId)
         selectedCells.Add(cell);
     }
 
-#ifdef WITH_EDITOR
+#if WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("global-cells-shortcuts.transaction.remove-cell-mark", "Remove Cell Mark"));
 #endif
     for (UOdysseyLayerCell* cell : selectedCells)

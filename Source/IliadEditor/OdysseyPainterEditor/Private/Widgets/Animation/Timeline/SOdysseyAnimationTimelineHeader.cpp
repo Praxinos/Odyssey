@@ -432,7 +432,7 @@ SOdysseyAnimationTimelineHeader::FrameToMousePosition(float iFrame) const
 void
 SOdysseyAnimationTimelineHeader::OnLeftHandleDragStarted(const FGeometry& iGeometry, const FPointerEvent& iEvent)
 {
-#ifdef WITH_EDITOR
+#if WITH_EDITOR
     GEditor->BeginTransaction(GSetLeftBoundTransactionName);
 #endif
     mHandleMousePosition = iEvent.GetScreenSpacePosition().X;
@@ -462,7 +462,7 @@ SOdysseyAnimationTimelineHeader::OnLeftHandleStopped(const FGeometry& iGeometry,
 void
 SOdysseyAnimationTimelineHeader::OnRightHandleDragStarted(const FGeometry& iGeometry, const FPointerEvent& iEvent)
 {
-#ifdef WITH_EDITOR
+#if WITH_EDITOR
     GEditor->BeginTransaction(GSetRightBoundTransactionName);
 #endif
     mHandleMousePosition = iEvent.GetScreenSpacePosition().X;

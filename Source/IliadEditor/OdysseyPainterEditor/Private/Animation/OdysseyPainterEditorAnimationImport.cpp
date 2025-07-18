@@ -201,7 +201,7 @@ FOdysseyPainterEditorAnimationLayerImport::ImportImageSequence(UOdysseyAnimation
         importedTextures.Emplace(importedTexture);
     }
 
-    #ifdef WITH_EDITOR
+    #if WITH_EDITOR
         FScopedTransaction ScopedTransaction(LOCTEXT("animation-editor.transaction.import-image-sequence", "Import Image Sequence"));
     #endif
 

@@ -510,7 +510,7 @@ SOdysseyAnimationLayerImageTimeline::OnDrop(const FGeometry& iGeometry, const FD
 
     if (mDragState == kDrag_Copy)
     {
-    #ifdef WITH_EDITOR
+    #if WITH_EDITOR
         FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.dnd-copy", "Copy Cells"));
     #endif
         operation->GetData().Paste(mLayer, mDragPosition);
@@ -658,7 +658,7 @@ SOdysseyAnimationLayerImageTimeline::RemoveCellMark()
     if (selectedCells.IsEmpty())
         return;
 
-#ifdef WITH_EDITOR
+#if WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.set-mark", "Set cell mark"));
 #endif
     mOnTransactCurrentFrame.ExecuteIfBound(selectedCells[0]->GetFrameRange().GetLowerBoundValue());
@@ -691,7 +691,7 @@ SOdysseyAnimationLayerImageTimeline::SetCellMark( int iMarkId )
     if (selectedCells.IsEmpty())
         return;
 
-#ifdef WITH_EDITOR
+#if WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.set-mark", "Set cell mark"));
 #endif
     mOnTransactCurrentFrame.ExecuteIfBound(selectedCells[0]->GetFrameRange().GetLowerBoundValue());

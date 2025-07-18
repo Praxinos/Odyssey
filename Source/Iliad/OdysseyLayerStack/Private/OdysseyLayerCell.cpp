@@ -291,8 +291,12 @@ UOdysseyLayerCell::CreateRenderingRenderTarget()
     return GetLayer()->CreateRenderingRenderTarget();
 }
 
+#if WITH_EDITOR
+
 UTexture2D*
 UOdysseyLayerCell::CreateExportTexture(UObject* Outer, FName Name, EObjectFlags Flags)
 {
     return GetLayer()->CreateExportTexture(Outer, Name, Flags);
 }
+
+#endif

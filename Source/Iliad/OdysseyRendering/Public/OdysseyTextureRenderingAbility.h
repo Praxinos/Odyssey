@@ -80,7 +80,9 @@ public:
 
 public:
     virtual UTextureRenderTarget2D* CreateRenderingRenderTarget() = 0;
+#if WITH_EDITOR
     virtual UTexture2D* CreateExportTexture(UObject* Outer, FName Name, EObjectFlags Flags = RF_NoFlags) = 0;
+#endif
 
 protected:
     virtual bool BuildRenderPipelineInternal(

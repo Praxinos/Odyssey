@@ -254,13 +254,13 @@ SOdysseyPaletteEntryRow::OnRowAcceptDrop(const FDragDropEvent& iEvent, EItemDrop
     {
         case EItemDropZone::AboveItem:
         {
-            #ifdef WITH_EDITOR
+            #if WITH_EDITOR
                 FScopedTransaction ScopedTransaction(moveEntriesTransactionName);
             #endif
             //do nothing
             if ( operationPalette == palette ) //dropped from same Palette, do a move of topmost dropped entries
             {
-                #ifdef WITH_EDITOR
+                #if WITH_EDITOR
                     for (UOdysseyPaletteEntry* entry : entries)
                     {
                         bool bChangeParent = entry->Parent != parent;
@@ -276,7 +276,7 @@ SOdysseyPaletteEntryRow::OnRowAcceptDrop(const FDragDropEvent& iEvent, EItemDrop
 
                 palette->MoveEntries(entries, parent, index);
 
-                #ifdef WITH_EDITOR
+                #if WITH_EDITOR
                     for (UOdysseyPaletteEntry* entry : entries)
                     {
                         bool bChangeParent = entry->Parent != parent;
@@ -301,13 +301,13 @@ SOdysseyPaletteEntryRow::OnRowAcceptDrop(const FDragDropEvent& iEvent, EItemDrop
         {
             if ( operationPalette == palette ) //dropped from same palette, do a move of topmost dropped entries
             {
-                #ifdef WITH_EDITOR
+                #if WITH_EDITOR
                     FScopedTransaction ScopedTransaction(moveEntriesTransactionName);
                 #endif
 
                 if (mEntry->CanHaveChildren)
                 {
-                    #ifdef WITH_EDITOR
+                    #if WITH_EDITOR
                         for (UOdysseyPaletteEntry* entry : entries)
                         {
                             bool bChangeParent = entry->Parent != mEntry;
@@ -323,7 +323,7 @@ SOdysseyPaletteEntryRow::OnRowAcceptDrop(const FDragDropEvent& iEvent, EItemDrop
 
                     palette->MoveEntries(entries, mEntry, 0);
 
-                    #ifdef WITH_EDITOR
+                    #if WITH_EDITOR
                         for (UOdysseyPaletteEntry* entry : entries)
                         {
                             bool bChangeParent = entry->Parent != mEntry;
@@ -339,7 +339,7 @@ SOdysseyPaletteEntryRow::OnRowAcceptDrop(const FDragDropEvent& iEvent, EItemDrop
                 }
                 else
                 {
-                    #ifdef WITH_EDITOR
+                    #if WITH_EDITOR
                         for (UOdysseyPaletteEntry* entry : entries)
                         {
                             bool bChangeParent = entry->Parent != parent;
@@ -355,7 +355,7 @@ SOdysseyPaletteEntryRow::OnRowAcceptDrop(const FDragDropEvent& iEvent, EItemDrop
 
                     palette->MoveEntries(entries, parent, index);
 
-                    #ifdef WITH_EDITOR
+                    #if WITH_EDITOR
                         for (UOdysseyPaletteEntry* entry : entries)
                         {
                             bool bChangeParent = entry->Parent != parent;
@@ -372,7 +372,7 @@ SOdysseyPaletteEntryRow::OnRowAcceptDrop(const FDragDropEvent& iEvent, EItemDrop
             }
             else
             {
-                #ifdef WITH_EDITOR
+                #if WITH_EDITOR
                     FScopedTransaction ScopedTransaction(copyEntriesTransactionName);
                 #endif
                 if (mEntry->CanHaveChildren)
@@ -391,11 +391,11 @@ SOdysseyPaletteEntryRow::OnRowAcceptDrop(const FDragDropEvent& iEvent, EItemDrop
         {
             if (operationPalette == palette) //droped from same palette, do a move of topmost dropped entries
             {
-                #ifdef WITH_EDITOR
+                #if WITH_EDITOR
                     FScopedTransaction ScopedTransaction(moveEntriesTransactionName);
                 #endif
 
-                #ifdef WITH_EDITOR
+                #if WITH_EDITOR
                     for (UOdysseyPaletteEntry* entry : entries)
                     {
                         bool bChangeParent = entry->Parent != parent;
@@ -411,7 +411,7 @@ SOdysseyPaletteEntryRow::OnRowAcceptDrop(const FDragDropEvent& iEvent, EItemDrop
 
                 palette->MoveEntries(entries, parent, index + 1);
 
-                #ifdef WITH_EDITOR
+                #if WITH_EDITOR
                     for (UOdysseyPaletteEntry* entry : entries)
                     {
                         bool bChangeParent = entry->Parent != parent;
@@ -427,7 +427,7 @@ SOdysseyPaletteEntryRow::OnRowAcceptDrop(const FDragDropEvent& iEvent, EItemDrop
             }
             else
             {
-                #ifdef WITH_EDITOR
+                #if WITH_EDITOR
                     FScopedTransaction ScopedTransaction(copyEntriesTransactionName);
                 #endif
                 palette->CopyEntries(entries, parent, index + 1);

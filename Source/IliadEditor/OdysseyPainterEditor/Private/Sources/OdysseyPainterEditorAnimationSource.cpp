@@ -252,7 +252,7 @@ FOdysseyPainterEditorAnimationSource::Clear()
     if (!player)
         return;
 
-#ifdef WITH_EDITOR
+#if WITH_EDITOR
     FScopedTransaction ScopedTransaction(transactionName);
 #endif
     FOdysseyMediaProvider mediaProvider = currentLayer->GetMediaProvider(player->GetCurrentFrame().FrameNumber.Value);
@@ -333,7 +333,7 @@ void FOdysseyPainterEditorAnimationSource::ClearFromCopyBlock(TSharedPtr<::ULIS:
     if (!player)
         return;
 
-#ifdef WITH_EDITOR
+#if WITH_EDITOR
     FScopedTransaction ScopedTransaction(transactionName);
 #endif
     FOdysseyMediaProvider mediaProvider = currentLayer->GetMediaProvider(player->GetCurrentFrame().FrameNumber.Value);
@@ -396,7 +396,7 @@ void FOdysseyPainterEditorAnimationSource::PasteBlockToCurrentLayer(TSharedPtr<:
     if (!player)
         return;
 
-#ifdef WITH_EDITOR
+#if WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("actions.paste", "Paste"));
 #endif
 
@@ -491,7 +491,7 @@ FOdysseyPainterEditorAnimationSource::PasteBlockToNewLayer( TSharedPtr<::ULIS::F
     if (!player)
         return;
 
-#ifdef WITH_EDITOR
+#if WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("actions.pasteInNewLayer", "Paste In New Layer"));
 #endif
     GetLayerStack()->Modify();
