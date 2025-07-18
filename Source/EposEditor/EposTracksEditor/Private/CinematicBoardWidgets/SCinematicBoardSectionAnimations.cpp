@@ -223,7 +223,9 @@ public:
     virtual FCursorReply OnCursorQuery( const FGeometry& MyGeometry, const FPointerEvent& CursorEvent ) const override;
 
 private:
-    void MovieSceneDataChanged( EMovieSceneDataChangeType iType );
+    void                MovieSceneDataChanged( EMovieSceneDataChangeType iType );
+
+    FText               GetTooltipText() const;
 
     void                ToggleAnimationVisibility();
     bool                IsAnimationVisible() const;
@@ -259,6 +261,8 @@ SCinematicBoardSectionAnimationTitle::Construct( const FArguments& InArgs, TShar
     check( mBinding.GetGuid().IsValid() );
     mOptionalWidgetsVisibility = InArgs._OptionalWidgetsVisibility;
 
+    SetToolTipText( MakeAttributeSP( this, &SCinematicBoardSectionAnimationTitle::GetTooltipText ) );
+
     //---
 
     FSlimHorizontalToolBarBuilder LeftToolbarBuilder( nullptr, FMultiBoxCustomization::None );
@@ -283,11 +287,16 @@ SCinematicBoardSectionAnimationTitle::Construct( const FArguments& InArgs, TShar
 
     auto GetKeysAreaTooltip = [this]() -> FText
     {
+        FText commun_tooltip = GetTooltipText();
+        FText button_tooltip;
+
         UMovieSceneCinematicBoardSection* section_object = Cast<UMovieSceneCinematicBoardSection>( mBoardSection.Pin()->GetSectionObject() );
         if( section_object->IsAnimationKeysAreaVisible( mBinding.GetGuid() ) )
-            return LOCTEXT( "hide-animation-keys-area-tooltip", "Hide keys area" );
+            button_tooltip = LOCTEXT( "hide-animation-keys-area-tooltip", "Hide keys area" );
         else
-            return LOCTEXT( "show-animation-keys-area-tooltip", "Show keys area" );
+            button_tooltip = LOCTEXT( "show-animation-keys-area-tooltip", "Show keys area" );
+
+        return FText::Join( FText::FromString( TEXT( "\n\n" ) ), commun_tooltip, button_tooltip );
     };
 
     auto GetKeysAreaIcon = [this]() -> FSlateIcon
@@ -312,10 +321,15 @@ SCinematicBoardSectionAnimationTitle::Construct( const FArguments& InArgs, TShar
 
     auto GetAnimationActorVisibilityTooltip = [this]() -> FText
     {
+        FText commun_tooltip = GetTooltipText();
+        FText button_tooltip;
+
         if( IsAnimationVisible() )
-            return LOCTEXT( "hide-animation-actor-tooltip", "Hide animation actor" );
+            button_tooltip = LOCTEXT( "hide-animation-actor-tooltip", "Hide animation actor" );
         else
-            return LOCTEXT( "show-animation-actor-tooltip", "Show animation actor" );
+            button_tooltip = LOCTEXT( "show-animation-actor-tooltip", "Show animation actor" );
+
+        return FText::Join( FText::FromString( TEXT( "\n\n" ) ), commun_tooltip, button_tooltip );
     };
 
     auto GetAnimationActorVisibilityIcon = [this]() -> FSlateIcon
@@ -359,6 +373,16 @@ SCinematicBoardSectionAnimationTitle::Construct( const FArguments& InArgs, TShar
         return BoardSequenceTools::CanDetachAnimation( sequencer, subsection_object, mBinding.GetGuid() );
     };
 
+    auto GetDetachAnimationTooltip = [this]() -> FText
+        {
+            FText commun_tooltip = GetTooltipText();
+            FText button_tooltip;
+
+            button_tooltip = LOCTEXT( "DetachAnimation", "Detach the animation" );
+
+            return FText::Join( FText::FromString( TEXT( "\n\n" ) ), commun_tooltip, button_tooltip );
+        };
+
     LeftToolbarBuilder.AddToolBarButton(
         FUIAction(
             FExecuteAction::CreateLambda( DetachAnimation ),
@@ -368,7 +392,7 @@ SCinematicBoardSectionAnimationTitle::Construct( const FArguments& InArgs, TShar
         ),
         NAME_None,
         FText::GetEmpty(),
-        LOCTEXT( "DetachAnimation", "Detach the animation" ),
+        MakeAttributeLambda( GetDetachAnimationTooltip ),
         FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "DetachAnimation" ) );
 
     //-
@@ -397,6 +421,16 @@ SCinematicBoardSectionAnimationTitle::Construct( const FArguments& InArgs, TShar
         return BoardSequenceTools::CanCreateAnimationCut( sequencer, subsection_object, local_frame, mBinding.GetGuid() );
     };
 
+    auto GetCreateAnimationCutTooltip = [this]() -> FText
+        {
+            FText commun_tooltip = GetTooltipText();
+            FText button_tooltip;
+
+            button_tooltip = LOCTEXT( "create-animationcut", "Create a animation cut (set the current frame where to create the animation cut)" );
+
+            return FText::Join( FText::FromString( TEXT( "\n\n" ) ), commun_tooltip, button_tooltip );
+        };
+
     LeftToolbarBuilder.AddToolBarButton(
         FUIAction(
             FExecuteAction::CreateLambda( CreateAnimationCut ),
@@ -404,21 +438,26 @@ SCinematicBoardSectionAnimationTitle::Construct( const FArguments& InArgs, TShar
         ),
         NAME_None,
         FText::GetEmpty(),
-        LOCTEXT( "create-animationcut", "Create a animation cut (set the current frame where to create the animation cut)" ),
+        MakeAttributeLambda( GetCreateAnimationCutTooltip ),
         FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "CreateAnimationCut" ) );
 
     //-
 
     auto GetLighttableTooltip = [this]() -> FText
         {
+            FText commun_tooltip = GetTooltipText();
+            FText button_tooltip;
+
             FText warning;
             if( !GLevelEditorModeTools().IsModeActive( FOdysseyViewportDrawingEditorEdMode::EM_OdysseyViewportDrawingEditorEdModeId ) )
                 warning = LOCTEXT( "warning-no-odyssey-edmode-tooltip", "\n\nWarning: Lighttable is only visible when Odyssey Mode is active" );
 
             if( IsLighttableOn() )
-                return FText::Format( LOCTEXT( "disable-lighttable-tooltip", "Disable the lighttable{0}" ), warning );
+                button_tooltip = FText::Format( LOCTEXT( "disable-lighttable-tooltip", "Disable the lighttable{0}" ), warning );
             else
-                return FText::Format( LOCTEXT( "enable-lighttable-tooltip", "Enable the lighttable{0}" ), warning );
+                button_tooltip = FText::Format( LOCTEXT( "enable-lighttable-tooltip", "Enable the lighttable{0}" ), warning );
+
+            return FText::Join( FText::FromString( TEXT( "\n\n" ) ), commun_tooltip, button_tooltip );
         };
 
     auto GetLighttableIcon = [this]() -> FSlateIcon
@@ -585,6 +624,23 @@ SCinematicBoardSectionAnimationTitle::OnMouseButtonUp( const FGeometry& MyGeomet
     }
 
     return SCompoundWidget::OnMouseButtonUp( MyGeometry, MouseEvent );
+}
+
+//---
+
+FText
+SCinematicBoardSectionAnimationTitle::GetTooltipText() const
+{
+    FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+    const UMovieSceneSubSection& subsection_object = board_section->GetSubSectionObject();
+    UMovieSceneSequence* inner_sequence = subsection_object.GetSequence();
+    UMovieScene* inner_moviescene = inner_sequence ? inner_sequence->GetMovieScene() : nullptr;
+
+    FText animation_track_text = inner_moviescene ? inner_moviescene->GetObjectDisplayName( mBinding.GetGuid() ) : FText::GetEmpty();
+
+    FText animation_text = FText::Format( LOCTEXT( "tooltip-animation-timeline-area-animation-name", "Animation: {0}" ), animation_track_text );
+
+    return FText::Join( FText::FromString( TEXT( "\n" ) ), animation_text );
 }
 
 //---
