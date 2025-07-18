@@ -1068,7 +1068,13 @@ UOdysseyPainterEditorVectorBaseTool::ExtendToolbar( FToolBarBuilder& iBuilder )
 FReply
 UOdysseyPainterEditorVectorBaseTool::AcceptProperties( TSharedRef<SOdysseyPainterEditorVectorSceneDetailsView> objectView)
 {
+    TSharedPtr<SWindow> topWindow;
+
     objectView.Get().ValidateProperties();
+
+    topWindow = FSlateApplicationBase::Get().GetActiveTopLevelWindow();
+
+    FSlateApplicationBase::Get().RequestDestroyWindow( topWindow.ToSharedRef() );
 
     return FReply::Handled();
 }
@@ -1103,7 +1109,7 @@ UOdysseyPainterEditorVectorBaseTool::ObjectProperties()
       [
           SNew(SButton)
           .Text(LOCTEXT("vector-object-properties-apply", "Apply"))
-          .OnClicked(this, &UOdysseyPainterEditorVectorBaseTool::AcceptProperties, objectView )
+          .OnClicked_UObject(this, &UOdysseyPainterEditorVectorBaseTool::AcceptProperties, objectView )
       ]
     ];
 

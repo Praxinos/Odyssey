@@ -20,9 +20,9 @@ UOdysseyPainterEditorVectorObjectView::UOdysseyPainterEditorVectorObjectView()
     : mEditor( nullptr )
     , mScene( nullptr )
     , mEditionMode( EditionMode::Direct )
-    , mPropertyBits ( {0} )
-    , bDisplayBackgroundProperties( false )
-    , bDisplayForegroundProperties( false )
+    , mObjectPropertyBits ( {0} )
+    , bDisplayBackgroundProperties( true )
+    , bDisplayForegroundProperties( true )
     , ApplyTo( EObjectViewApplyPolicy::Selection )
     , Name( "VectorObject" )
     , TranslationX ( 0.0f )
@@ -117,70 +117,105 @@ UOdysseyPainterEditorVectorObjectView::Update( FOdysseyPainterEditor* iEditor
 }
 
 void
+UOdysseyPainterEditorVectorObjectView::ApplyPropertyBits( FOdysseyVectorObject* iObject )
+{
+    // Category "Identity"
+    if( mObjectPropertyBits.Name )
+    {
+        iObject->SetName( Name );
+    }
+
+    // Category "Transform"
+    if( mObjectPropertyBits.TranslationX )
+        iObject->Translate( TranslationX, iObject->GetTranslationY() );
+
+    if( mObjectPropertyBits.TranslationY )
+        iObject->Translate( iObject->GetTranslationX(), TranslationY );
+
+    if( mObjectPropertyBits.Rotation )
+        iObject->Rotate( Rotation );
+
+    if( mObjectPropertyBits.ScalingX )
+        iObject->Scale( ScalingX, iObject->GetScalingY() );
+
+    if( mObjectPropertyBits.ScalingY )
+        iObject->Scale( iObject->GetScalingX(), ScalingY );
+
+    if( mObjectPropertyBits.TranslationX
+        || mObjectPropertyBits.TranslationY
+        || mObjectPropertyBits.Rotation
+        || mObjectPropertyBits.ScalingX
+        || mObjectPropertyBits.ScalingY )
+        iObject->UpdateMatrix();
+
+    // Category "Appearance"
+    if( mObjectPropertyBits.Opacity )
+        iObject->SetOpacity( Opacity );
+
+    if( mObjectPropertyBits.Visible )
+        iObject->SetVisible( Visible );
+
+    if( mObjectPropertyBits.ForegroundColorMode )
+        iObject->GetForegroundBucket().SetColorMode( static_cast<eBucketColorMode>(ForegroundColorMode) );
+
+    if( mObjectPropertyBits.ForegroundColor )
+        iObject->GetForegroundBucket().SetSolidColor( ForegroundColor );
+
+    if ( mObjectPropertyBits.ForegroundPaletteSelection )
+        iObject->GetForegroundBucket().SetPaletteEntry( ForegroundPaletteSelection.OdysseyPaletteEntryColor );
+
+    if( mObjectPropertyBits.BackgroundColorMode )
+        iObject->GetBackgroundBucket().SetColorMode( static_cast<eBucketColorMode>(BackgroundColorMode) );
+
+    if( mObjectPropertyBits.BackgroundColor )
+        iObject->GetBackgroundBucket().SetSolidColor( BackgroundColor );
+
+    if ( mObjectPropertyBits.BackgroundPaletteSelection )
+        iObject->GetBackgroundBucket().SetPaletteEntry( BackgroundPaletteSelection.OdysseyPaletteEntryColor );
+}
+
+void
 UOdysseyPainterEditorVectorObjectView::ValidateProperties()
 {
-    for( FOdysseyVectorObject* selectedObject : mFocusedObjectList )
+    if( ApplyTo == EObjectViewApplyPolicy::Selection )
     {
-        // Category "Identity"
-        if( mPropertyBits.Name )
+        for( FOdysseyVectorObject* selectedObject : mFocusedObjectList )
         {
-            selectedObject->SetName( Name );
-        }
-
-        // Category "Transform"
-        if( mPropertyBits.TranslationX )
-            selectedObject->Translate( TranslationX, selectedObject->GetTranslationY() );
-
-        if( mPropertyBits.TranslationY )
-            selectedObject->Translate( selectedObject->GetTranslationX(), TranslationY );
-
-        if( mPropertyBits.Rotation )
-            selectedObject->Rotate( Rotation );
-
-        if( mPropertyBits.ScalingX )
-            selectedObject->Scale( ScalingX, selectedObject->GetScalingY() );
-
-        if( mPropertyBits.ScalingY )
-            selectedObject->Scale( selectedObject->GetScalingX(), ScalingY );
-
-        if( mPropertyBits.TranslationX
-         || mPropertyBits.TranslationY
-         || mPropertyBits.Rotation
-         || mPropertyBits.ScalingX
-         || mPropertyBits.ScalingY )
-            selectedObject->UpdateMatrix();
-
-        // Category "Appearance"
-        if( mPropertyBits.Opacity )
-            selectedObject->SetOpacity( Opacity );
-
-        if( mPropertyBits.Visible )
-            selectedObject->SetVisible( Visible );
-
-        if( mPropertyBits.ForegroundColorMode )
-            selectedObject->GetForegroundBucket().SetColorMode( static_cast<eBucketColorMode>(ForegroundColorMode) );
-
-        if( mPropertyBits.ForegroundColor )
-            selectedObject->GetForegroundBucket().SetSolidColor( ForegroundColor );
-
-        if ( mPropertyBits.ForegroundPaletteSelection )
-        {
-            selectedObject->GetForegroundBucket().SetPaletteEntry( ForegroundPaletteSelection.OdysseyPaletteEntryColor );
-        }
-
-        if( mPropertyBits.BackgroundColorMode )
-            selectedObject->GetBackgroundBucket().SetColorMode( static_cast<eBucketColorMode>(BackgroundColorMode) );
-
-        if( mPropertyBits.BackgroundColor )
-            selectedObject->GetBackgroundBucket().SetSolidColor( BackgroundColor );
-
-        if ( mPropertyBits.BackgroundPaletteSelection )
-        {
-            selectedObject->GetBackgroundBucket().SetPaletteEntry( BackgroundPaletteSelection.OdysseyPaletteEntryColor );
+            ApplyPropertyBits( selectedObject );
         }
     }
 
-    memset( &mPropertyBits, 0, sizeof( mPropertyBits ) );
+    if( ApplyTo == EObjectViewApplyPolicy::AllInCell )
+    {
+        FOdysseyVectorObject::Traverse( mScene
+                                      , 0
+                                      , [ this ]( FOdysseyVectorObject* object, uint64 traversalFlags )
+                                      {
+                                          ApplyPropertyBits( object );
+
+                                          return FOdysseyVectorObject::TRAVERSE_CONTINUE;
+                                      } );
+    }
+
+    if( ApplyTo == EObjectViewApplyPolicy::AllInAllCells )
+    {
+        FOdysseyVectorObject::Traverse( mScene->GetLayer()
+                                      , 0
+                                      , [ this ]( FOdysseyVectorObject* object, uint64 traversalFlags )
+                                      {
+                                          ApplyPropertyBits( object );
+
+                                          return FOdysseyVectorObject::TRAVERSE_CONTINUE;
+                                      } );
+    }
+
+    ClearPropertyBits();
+}
+
+void
+UOdysseyPainterEditorVectorObjectView::ClearPropertyBits()
+{
+    memset( &mObjectPropertyBits, 0, sizeof( mObjectPropertyBits ) );
 }
 
 void
@@ -190,57 +225,52 @@ UOdysseyPainterEditorVectorObjectView::PropertyChanged( const FName& iPropertyNa
 {
     // Category "Identity"
     if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, Name) )
-        mPropertyBits.Name = 1;
+        mObjectPropertyBits.Name = 1;
 
     // Category "Transform"
     if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, TranslationX) )
-        mPropertyBits.TranslationX = 1;
+        mObjectPropertyBits.TranslationX = 1;
 
     if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, TranslationY) )
-        mPropertyBits.TranslationY = 1;
+        mObjectPropertyBits.TranslationY = 1;
 
     if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, Rotation) )
-        mPropertyBits.Rotation = 1;
+        mObjectPropertyBits.Rotation = 1;
 
     if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, ScalingX) )
-        mPropertyBits.ScalingX = 1;
+        mObjectPropertyBits.ScalingX = 1;
 
     if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, ScalingY) )
-        mPropertyBits.ScalingY = 1;
+        mObjectPropertyBits.ScalingY = 1;
 
     // Category "Appearance"
     if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, Opacity) )
-        mPropertyBits.Opacity = 1;
+        mObjectPropertyBits.Opacity = 1;
 
     if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, Visible) )
-        mPropertyBits.Visible = 1;
+        mObjectPropertyBits.Visible = 1;
 
     if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, ForegroundColorMode) )
-        mPropertyBits.ForegroundColorMode = 1;
+        mObjectPropertyBits.ForegroundColorMode = 1;
 
     // note: iMemberPropertyName because FColor is a struct
     // and we can edit individual struct members RGBA
     if( ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, ForegroundColor) ) || ( iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, ForegroundColor) ) )
-        mPropertyBits.ForegroundColor = 1;
+        mObjectPropertyBits.ForegroundColor = 1;
 
     if ( (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, ForegroundPaletteSelection)) || (iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, ForegroundPaletteSelection)) )
-        mPropertyBits.ForegroundPaletteSelection = 1;
+        mObjectPropertyBits.ForegroundPaletteSelection = 1;
 
     if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, BackgroundColorMode) )
-        mPropertyBits.BackgroundColorMode = 1;
+        mObjectPropertyBits.BackgroundColorMode = 1;
 
     // note: iMemberPropertyName because FColor is a struct
     // and we can edit individual struct members RGBA
     if( ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, BackgroundColor) ) || ( iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, BackgroundColor) ) )
-        mPropertyBits.BackgroundColor = 1;
+        mObjectPropertyBits.BackgroundColor = 1;
 
     if ((iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, BackgroundPaletteSelection)) || (iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, BackgroundPaletteSelection)))
-        mPropertyBits.BackgroundPaletteSelection = 1;
-
-    if( mEditionMode == EditionMode::Direct )
-    {
-        ValidateProperties();
-    }
+        mObjectPropertyBits.BackgroundPaletteSelection = 1;
 }
 
 void
@@ -280,6 +310,11 @@ UOdysseyPainterEditorVectorObjectView::PostEditChangeProperty( FPropertyChangedE
         PropertyChanged( PropertyChangedEvent.GetPropertyName()
                        , PropertyChangedEvent.MemberProperty->GetFName()
                        , FName(PropertyChangedEvent.Property->GetMetaData(TEXT("Category"))) );
+
+        if( mEditionMode == EditionMode::Direct )
+        {
+            ValidateProperties();
+        }
 
         // force redraw the whole screen
         mScene->GetCell()->InvalidateRect();

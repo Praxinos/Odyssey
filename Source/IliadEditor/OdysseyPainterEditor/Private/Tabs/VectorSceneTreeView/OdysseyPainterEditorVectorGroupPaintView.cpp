@@ -23,6 +23,7 @@ UOdysseyPainterEditorVectorGroupPaintView::UOdysseyPainterEditorVectorGroupPaint
     , Multithreaded( true )
 {
     bDisplayBackgroundProperties = true;
+    bDisplayForegroundProperties = false;
 }
 
 void

@@ -61,6 +61,7 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorSceneDetailsView
         TSharedPtr<FOdysseyVectorLayer> mVectorLayer;
 
         TSharedPtr<IDetailsView> mDetailsView;
+        TObjectPtr<UOdysseyPainterEditorVectorObjectView> mCurrentObjectView;
         TObjectPtr<UOdysseyPainterEditorVectorObjectView> mObjectView;
         TObjectPtr<UOdysseyPainterEditorVectorPathView> mPathView;
         TObjectPtr<UOdysseyPainterEditorVectorGroupView> mGroupView;

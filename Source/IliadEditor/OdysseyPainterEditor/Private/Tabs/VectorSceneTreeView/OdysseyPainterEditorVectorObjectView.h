@@ -42,7 +42,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectView : public UO
     public:
         GENERATED_BODY()
 
-    typedef struct _PropertyBits
+    typedef struct _ObjectPropertyBits
     {
         uint32 Name : 1;
         uint32 TranslationX : 1;
@@ -58,7 +58,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectView : public UO
         uint32 BackgroundColorMode : 1;
         uint32 BackgroundColor : 1;
         uint32 BackgroundPaletteSelection : 1;
-    } PropertyBits;
+    } ObjectPropertyBits;
 
     enum class EditionMode : uint8
     {
@@ -79,17 +79,20 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectView : public UO
         void ValidateProperties();
 
     protected:
+        virtual void ClearPropertyBits();
+        virtual void ApplyPropertyBits( FOdysseyVectorObject* iObject );
         virtual void ImportParam();
         virtual void PropertyChanged( const FName& iPropertyName
-                                      , const FName& iMemberPropertyName
-                                      , const FName& iCategory );
+                                    , const FName& iMemberPropertyName
+                                    , const FName& iCategory );
 
     protected:
         FOdysseyPainterEditor* mEditor;
         FOdysseyVectorGroupPaint* mScene;
         std::list<FOdysseyVectorObject*> mFocusedObjectList;
         EditionMode mEditionMode;
-        PropertyBits mPropertyBits;
+        ObjectPropertyBits mObjectPropertyBits;
+
     public:
         // hidden property for use with EditCondition
         UPROPERTY( EditDefaultsOnly

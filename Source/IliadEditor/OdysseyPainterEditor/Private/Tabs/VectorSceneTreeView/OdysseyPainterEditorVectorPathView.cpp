@@ -10,7 +10,9 @@ UOdysseyPainterEditorVectorPathView::~UOdysseyPainterEditorVectorPathView()
 UOdysseyPainterEditorVectorPathView::UOdysseyPainterEditorVectorPathView()
     : UOdysseyPainterEditorVectorObjectView()
     , Brush ( nullptr )
+    , mPathPropertyBits( { 0 } )
 {
+    bDisplayBackgroundProperties = false;
     bDisplayForegroundProperties = true;
 }
 
@@ -35,6 +37,29 @@ UOdysseyPainterEditorVectorPathView::ImportParam()
 }
 
 void
+UOdysseyPainterEditorVectorPathView::ClearPropertyBits()
+{
+    UOdysseyPainterEditorVectorObjectView::ClearPropertyBits();
+
+    memset( &mPathPropertyBits, 0, sizeof( mPathPropertyBits ) );
+}
+
+void
+UOdysseyPainterEditorVectorPathView::ApplyPropertyBits( FOdysseyVectorObject* iObject )
+{
+    FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iObject);
+
+    if( mPathPropertyBits.JointType )
+        path->SetJointType( JointType, true );
+
+    if( mPathPropertyBits.Brush )
+        path->SetBrush( Brush );
+
+    if( mPathPropertyBits.MiterLimit )
+        path->SetMiterLimit( MiterLimit, true );
+}
+
+void
 UOdysseyPainterEditorVectorPathView::PropertyChanged( const FName& iPropertyName
                                                     , const FName& iMemberPropertyName
                                                     , const FName& iCategory)
@@ -43,20 +68,12 @@ UOdysseyPainterEditorVectorPathView::PropertyChanged( const FName& iPropertyName
                                                           , iMemberPropertyName
                                                           , iCategory );
 
-    for( FOdysseyVectorObject* selectedObject : mFocusedObjectList )
-    {
-        if( selectedObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
-        {
-            FOdysseyVectorPath* selectedPath = static_cast<FOdysseyVectorPath*>(selectedObject);
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorPathView, JointType) )
+        mPathPropertyBits.JointType = 1;
 
-            if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorPathView, JointType) )
-                selectedPath->SetJointType( JointType, true );
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorPathView, Brush) )
+        mPathPropertyBits.Brush = 1;
 
-            if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorPathView, Brush) )
-                selectedPath->SetBrush( Brush );
-
-            if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorPathView, MiterLimit) )
-                selectedPath->SetMiterLimit( MiterLimit, true );
-        }
-    }
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorPathView, MiterLimit) )
+        mPathPropertyBits.MiterLimit = 1;
 }

@@ -20,6 +20,8 @@ UOdysseyPainterEditorVectorGroupView::~UOdysseyPainterEditorVectorGroupView()
 UOdysseyPainterEditorVectorGroupView::UOdysseyPainterEditorVectorGroupView()
     : HUDColor ( FOdysseyVectorHUD::GetForegroundColor() )
 {
+    bDisplayBackgroundProperties = false;
+    bDisplayForegroundProperties = false;
 }
 
 void

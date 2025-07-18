@@ -338,7 +338,8 @@ FOdysseyVectorPath::UpdateShape( uint32 iUpdateFlags )
                  , [ this ]( FOdysseyVectorSegment *segment )*/
 
     // invalidate the whole bounding box to force redraw textured segments that are interdependent
-    if( mBrush.GetTexture() && ( mBrush.ExtensionMode != eBrushExtensionMode::Segment ) )
+    if( ( mBrush.GetTexture() && ( mBrush.ExtensionMode != eBrushExtensionMode::Segment ) )
+     || ( mInvalidationFlags & INVALIDATE_COLOR ) )
     {
         FOdysseyVectorCell* cell = GetCell();
 

@@ -88,7 +88,10 @@ SOdysseyPainterEditorVectorSceneDetailsView::Construct( const FArguments& InArgs
 void
 SOdysseyPainterEditorVectorSceneDetailsView::ValidateProperties()
 {
-
+    if( mCurrentObjectView )
+    {
+        mCurrentObjectView->ValidateProperties();
+    }
 }
 
 TSharedPtr<IDetailsView>
@@ -114,6 +117,7 @@ void
 SOdysseyPainterEditorVectorSceneDetailsView::Update()
 {
     mDetailsView->SetObject( nullptr );
+    mCurrentObjectView = nullptr;
 
     FOdysseyVectorGroupPaint* scene = mScene.Get();
     if (!scene)
@@ -141,18 +145,21 @@ SOdysseyPainterEditorVectorSceneDetailsView::Update()
             {
                 mPathView->Update( mEditor, scene, focusedObjectList );
                 mDetailsView->SetObject( mPathView );
+                mCurrentObjectView = mPathView;
             }
 
             if( objectClass == FOdysseyVectorGroup::StaticClass() )
             {
                 mGroupView->Update( mEditor, scene, focusedObjectList );
                 mDetailsView->SetObject( mGroupView );
+                mCurrentObjectView = mGroupView;
             }
 
             if( objectClass == FOdysseyVectorGroupPaint::StaticClass() )
             {
                 mGroupPaintView->Update( mEditor, scene, focusedObjectList );
                 mDetailsView->SetObject( mGroupPaintView );
+                mCurrentObjectView = mGroupPaintView;
             }
 
             if( objectClass == FOdysseyVectorObject::StaticClass() )
@@ -160,6 +167,7 @@ SOdysseyPainterEditorVectorSceneDetailsView::Update()
                 // default
                 mObjectView->Update( mEditor, scene, focusedObjectList );
                 mDetailsView->SetObject( mObjectView );
+                mCurrentObjectView = mObjectView;
             }
         }
     }
