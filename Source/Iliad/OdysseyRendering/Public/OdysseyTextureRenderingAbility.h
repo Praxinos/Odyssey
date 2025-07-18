@@ -34,6 +34,10 @@ public:
         const FMatrix& /*iSrcTransform*/) > FRenderFunction;
 
 public:
+    UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Odyssey|Rendering", meta=(DisplayName="CreateRenderTarget"))
+    UTextureRenderTarget2D* CreateRenderTarget_Blueprint();
+    UTextureRenderTarget2D* CreateRenderTarget_Blueprint_Implementation();
+
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Odyssey|Rendering")
     void Render(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame) const;
     void Render_Implementation(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame) const;
@@ -73,6 +77,10 @@ public:
         iParents.Add(this);
         return BuildRenderPipelineInternal(iFrame, iType, oRenderFunction, iCanRenderFunction, iParents);
     }
+
+public:
+    virtual UTextureRenderTarget2D* CreateRenderingRenderTarget() = 0;
+    virtual UTexture2D* CreateExportTexture(UObject* Outer, FName Name, EObjectFlags Flags = RF_NoFlags) = 0;
 
 protected:
     virtual bool BuildRenderPipelineInternal(

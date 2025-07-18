@@ -185,7 +185,7 @@ FOdysseyPainterEditorLayerStackTab::ExportTextureToOperatingSystem()
     FString filename = FPaths::GetBaseFilename(path);
     path = FPaths::ConvertRelativePathToFull( path );
 
-    Odyssey::ExportAsImage(layerStack, 0, EOdysseyExportImageFormat::PNG, FIntRect(0, 0, currentTexture->Source.GetSizeX(), currentTexture->Source.GetSizeY()), filename, path);
+    Odyssey::ExportAsImage(layerStack, 0, EOdysseyExportImageFormat::PNG, filename, path);
 }
 
 
@@ -282,7 +282,7 @@ FOdysseyPainterEditorLayerStackTab::ExportLayersAsTextures()
 
         FString assetPath = FPaths::GetPath(saveObjectPath) + "/";
         FString textureName = FPaths::GetBaseFilename(saveObjectPath) + TEXT("_") + layer->GetLayerName().ToString().Replace(TEXT(" "), TEXT("_"));
-        ::Odyssey::ExportAsTexture(layer, 0, FIntRect(0, 0, texture->Source.GetSizeX(), texture->Source.GetSizeY()), textureName, assetPath );
+        ::Odyssey::ExportAsTexture(layer, 0, textureName, assetPath );
     }
 }
 
@@ -317,7 +317,7 @@ FOdysseyPainterEditorLayerStackTab::ExportCurrentLayerAsTexture()
 
     FString assetPath = FPaths::GetPath(saveObjectPath) + "/";
     FString textureName = FPaths::GetBaseFilename(saveObjectPath) + TEXT("_") + layerStack->GetCurrentLayer()->GetLayerName().ToString().Replace(TEXT(" "), TEXT("_"));
-    ::Odyssey::ExportAsTexture(layerStack->GetCurrentLayer(), 0, FIntRect(0, 0, texture->Source.GetSizeX(), texture->Source.GetSizeY()), textureName, assetPath );
+    ::Odyssey::ExportAsTexture(layerStack->GetCurrentLayer(), 0, textureName, assetPath );
 }
 
 #undef LOCTEXT_NAMESPACE

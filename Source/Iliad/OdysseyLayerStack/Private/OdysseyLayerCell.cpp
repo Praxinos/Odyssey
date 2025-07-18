@@ -284,3 +284,15 @@ UOdysseyLayerCell::BuildRenderPipelineInternal(
 
     return true;
 }
+
+UTextureRenderTarget2D*
+UOdysseyLayerCell::CreateRenderingRenderTarget()
+{
+    return GetLayer()->CreateRenderingRenderTarget();
+}
+
+UTexture2D*
+UOdysseyLayerCell::CreateExportTexture(UObject* Outer, FName Name, EObjectFlags Flags)
+{
+    return GetLayer()->CreateExportTexture(Outer, Name, Flags);
+}

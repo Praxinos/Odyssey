@@ -1145,6 +1145,18 @@ UOdysseyLayer::BuildRenderPipelineInternal(
 #endif
 }
 
+UTextureRenderTarget2D*
+UOdysseyLayer::CreateRenderingRenderTarget()
+{
+    return GetLayerStack()->CreateRenderingRenderTarget();
+}
+
+UTexture2D*
+UOdysseyLayer::CreateExportTexture(UObject* Outer, FName InName, EObjectFlags Flags)
+{
+    return GetLayerStack()->CreateExportTexture(Outer, InName, Flags);
+}
+
 #if WITH_EDITOR
 bool
 UOdysseyLayer::BuildLighttableRenderPipeline(

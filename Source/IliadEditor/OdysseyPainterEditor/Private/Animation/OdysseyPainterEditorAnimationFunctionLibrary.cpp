@@ -53,8 +53,7 @@ UOdysseyPainterEditorAnimationFunctionLibrary::ExportAsImageSequence(
     if (!Animation)
         return {};
 
-    FIntRect rect(0, 0, Animation->GetWidth(), Animation->GetHeight());
-    return Odyssey::ExportAsImageSequence(Animation, FrameRange, rect, Filename, Path, Format );
+    return Odyssey::ExportAsImageSequence(Animation, FrameRange, Filename, Path, Format );
 }
 
 FString
@@ -69,8 +68,7 @@ UOdysseyPainterEditorAnimationFunctionLibrary::ExportFrameAsImage(
     if (!Animation)
         return TEXT("");
 
-    FIntRect rect(0, 0, Animation->GetWidth(), Animation->GetHeight());
-    return Odyssey::ExportAsImage(Animation, Frame, Format, rect, Filename, Path );
+    return Odyssey::ExportAsImage(Animation, Frame, Format, Filename, Path );
 }
 
 UTexture2D*
@@ -84,15 +82,7 @@ UOdysseyPainterEditorAnimationFunctionLibrary::ExportFrameAsTexture(
     if (!Animation)
         return nullptr;
 
-    ::ULIS::eFormat format = ::ULIS::Format_BGRA8;
-    switch(Animation->GetFormat())
-    {
-        case EOdysseyAnimationFormat::BGRA8: format = ::ULIS::Format_BGRA8;
-        case EOdysseyAnimationFormat::RGBAF: format = ::ULIS::Format_RGBAF;
-    }
-
-    FIntRect rect(0, 0, Animation->GetWidth(), Animation->GetHeight());
-    return Odyssey::ExportAsTexture(Animation, Frame, rect, Filename, Path );
+    return Odyssey::ExportAsTexture(Animation, Frame, Filename, Path );
 }
 
 TArray<UTexture2D*>
@@ -104,7 +94,6 @@ UOdysseyPainterEditorAnimationFunctionLibrary::ExportAsTextureSequence(UOdysseyA
     return Odyssey::ExportAsTextureSequence(
         Animation,
         FrameRange,
-        FIntRect(0, 0, Animation->GetWidth(), Animation->GetHeight()),
         AssetName,
         Path
     );
@@ -119,7 +108,6 @@ UOdysseyPainterEditorAnimationFunctionLibrary::ExportAsFlipbook(UOdysseyAnimatio
     return Odyssey::ExportAsFlipbook(
         Animation,
         FrameRange,
-        FIntRect(0, 0, Animation->GetWidth(), Animation->GetHeight()),
         Animation->FramesPerSecond,
         AssetName,
         Path
@@ -153,8 +141,7 @@ UOdysseyPainterEditorAnimationLayerFunctionLibrary::ExportAsImageSequence(
         return {};
 
     UOdysseyAnimation* animation = Layer->GetAnimation();
-    FIntRect rect(0, 0, animation->GetWidth(), animation->GetHeight());
-    return Odyssey::ExportAsImageSequence(Layer, FrameRange, rect, Filename, Path, Format );
+    return Odyssey::ExportAsImageSequence(Layer, FrameRange, Filename, Path, Format );
 }
 
 FString
@@ -170,8 +157,7 @@ UOdysseyPainterEditorAnimationLayerFunctionLibrary::ExportFrameAsImage(
         return TEXT("");
 
     UOdysseyAnimation* animation = Layer->GetAnimation();
-    FIntRect rect(0, 0, animation->GetWidth(), animation->GetHeight());
-    return Odyssey::ExportAsImage(Layer, Frame, Format, rect, Filename, Path );
+    return Odyssey::ExportAsImage(Layer, Frame, Format, Filename, Path );
 }
 
 UTexture2D*
@@ -186,8 +172,7 @@ UOdysseyPainterEditorAnimationLayerFunctionLibrary::ExportFrameAsTexture(
         return nullptr;
 
     UOdysseyAnimation* animation = Layer->GetAnimation();
-    FIntRect rect(0, 0, animation->GetWidth(), animation->GetHeight());
-    return Odyssey::ExportAsTexture(Layer, Frame, rect, Filename, Path );
+    return Odyssey::ExportAsTexture(Layer, Frame, Filename, Path );
 }
 
 TArray<UTexture2D*>
@@ -200,7 +185,6 @@ UOdysseyPainterEditorAnimationLayerFunctionLibrary::ExportAsTextureSequence(UOdy
     return Odyssey::ExportAsTextureSequence(
         Layer,
         FrameRange,
-        FIntRect(0, 0, animation->GetWidth(), animation->GetHeight()),
         AssetName,
         Path
     );
@@ -216,7 +200,6 @@ UOdysseyPainterEditorAnimationLayerFunctionLibrary::ExportAsFlipbook(UOdysseyAni
     return Odyssey::ExportAsFlipbook(
         Layer,
         FrameRange,
-        FIntRect(0, 0, animation->GetWidth(), animation->GetHeight()),
         animation->FramesPerSecond,
         AssetName,
         Path

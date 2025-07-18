@@ -250,6 +250,8 @@ public:
 
 public:
     virtual TArray<FGuid> GetRenderingComposition(uint64 iRenderType, int iFrameIndex) const override;
+    virtual UTextureRenderTarget2D* CreateRenderingRenderTarget() override;
+    virtual UTexture2D* CreateExportTexture(UObject* Outer, FName Name, EObjectFlags Flags = RF_NoFlags) override;
     virtual bool BuildRenderPipelineInternal(
         FFrameNumber iFrame,
         uint64 iType,

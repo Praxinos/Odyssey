@@ -134,6 +134,8 @@ public:
         const TArray<const IOdysseyTextureRenderingAbility*>& iParents
     ) const override;
     virtual FIntRect GetDefaultRenderRect() const override;
+    virtual UTextureRenderTarget2D* CreateRenderingRenderTarget() override;
+    virtual UTexture2D* CreateExportTexture(UObject* Outer, FName Name, EObjectFlags Flags = RF_NoFlags) override;
 
 public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Odyssey|Animation", meta=(ClampMin=1, UIMin=1))

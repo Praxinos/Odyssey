@@ -23,11 +23,17 @@ public:
     UTexture2D* GetRenderTexture() const;
 
 public:
+    virtual void PostLoad() override;
+
+public:
     virtual void InitTexture();
     virtual bool BuildRenderPipelineInternal( FFrameNumber iFrame, uint64 iType, IOdysseyTextureRenderingAbility::FRenderFunction& oRenderFunction, const IOdysseyTextureRenderingAbility::FCanRenderFunction& iCanRenderFunction, const TArray<const IOdysseyTextureRenderingAbility*>& iParents ) const override;
 
 public:
 #if WITH_EDITOR
+    /* UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
+    UTexture2D* ExportAsTexture(FString iAssetName, FString iPath ); */
+
     FSimpleMulticastDelegate& OnThumbnailChanged();
     FSimpleMulticastDelegate& OnThumbnailDirtied();
 #endif

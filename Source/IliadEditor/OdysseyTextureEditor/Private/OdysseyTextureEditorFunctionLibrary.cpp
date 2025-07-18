@@ -177,9 +177,7 @@ UOdysseyTextureEditorTextureFunctionLibrary::ExportAsImage(
     if ( !layerStack )
         return TEXT("");
 
-    FIntRect rect(0, 0, Texture->Source.GetSizeX(), Texture->Source.GetSizeY());
-
-    return Odyssey::ExportAsImage(layerStack, 0, Format, rect, Filename, Path );
+    return Odyssey::ExportAsImage(layerStack, 0, Format, Filename, Path );
 }
 
 FString
@@ -194,8 +192,7 @@ UOdysseyTextureEditorLayerFunctionLibrary::ExportAsImage(
         return TEXT("");
 
     UTexture2D* texture = Layer->GetTexture();
-    FIntRect rect(0, 0, texture->Source.GetSizeX(), texture->Source.GetSizeY());
-    return Odyssey::ExportAsImage(Layer, 0, Format, rect, Filename, Path );
+    return Odyssey::ExportAsImage(Layer, 0, Format, Filename, Path );
 }
 
 UTexture2D*
@@ -209,6 +206,5 @@ UOdysseyTextureEditorLayerFunctionLibrary::ExportAsTexture(
         return nullptr;
 
     UTexture2D* texture = Layer->GetTexture();
-    FIntRect rect (0, 0, texture->Source.GetSizeX(), texture->Source.GetSizeY());
-    return Odyssey::ExportAsTexture(Layer, 0, rect, Filename, Path );
+    return Odyssey::ExportAsTexture(Layer, 0, Filename, Path );
 }

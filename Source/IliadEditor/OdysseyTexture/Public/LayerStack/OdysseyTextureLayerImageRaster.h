@@ -33,10 +33,10 @@ public:
     TSharedPtr<FOdysseyRasterBlock> GetRasterBlock() const;
 
 public:
-    UFUNCTION(BlueprintCallable, Category="Odyssey|Cell")
+    UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     void SetIsAlphaLocked(bool Value);
 
-    UFUNCTION(BlueprintPure, Category="Odyssey|Cell")
+    UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     bool IsAlphaLocked() const;
 
 public:
@@ -77,6 +77,7 @@ private:
     void InitRasterBlock();
     void ConvertRasterBlock();
     void BindRasterBlockDelegates();
+    void UnbindRasterBlockDelegates();
     void SanitizeRasterBlock(const TArray<::ULIS::FRectI>& iRects);
 
     TArray<::ULIS::FEvent> RasterBlockPostProcess(const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock>>& iOriginalBlocks, const FOdysseyInvalidTileMap& iInvalidMap, const TArray<::ULIS::FEvent>& iWaitList);

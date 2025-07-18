@@ -98,6 +98,8 @@ public:
 
 public:
     //IOdysseyRenderingAbility overrides
+    virtual UTextureRenderTarget2D* CreateRenderingRenderTarget() override;
+    virtual UTexture2D* CreateExportTexture(UObject* Outer, FName Name, EObjectFlags Flags = RF_NoFlags) override;
     virtual FIntRect GetDefaultRenderRect() const override;
 
 private:
@@ -106,6 +108,9 @@ private:
     virtual void Tick(float DeltaTime) override;
 
 private:
+    void CreateRenderTarget();
+    void UpdateRenderTargetFormat();
+
     void CompressTexture();
     void UncompressTexture();
     void FastUpdateTexture(const TArray<FIntRect>& iRects);

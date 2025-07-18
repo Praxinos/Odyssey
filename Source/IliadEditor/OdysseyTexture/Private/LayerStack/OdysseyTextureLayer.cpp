@@ -7,6 +7,7 @@
 #include "ScreenPass.h"
 #include "OdysseyBlendShader.h"
 #include "TextureCompiler.h"
+#include "AssetToolsModule.h"
 
 UTexture2D*
 UOdysseyTextureLayer::GetTexture() const
@@ -29,6 +30,21 @@ UOdysseyTextureLayer::GetRenderTexture() const
     }
 
     return Texture;
+}
+
+void
+UOdysseyTextureLayer::PostLoad()
+{
+    Super::PostLoad();
+
+    if ( Texture )
+    {
+        Texture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
+        Texture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
+        Texture->Filter = TextureFilter::TF_Nearest;
+        Texture->SRGB = false;
+        Texture->PostEditChange();
+    }
 }
 
 void
@@ -77,6 +93,7 @@ UOdysseyTextureLayer::InitTexture()
         Texture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
         Texture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
         Texture->Filter = TextureFilter::TF_Nearest;
+        Texture->SRGB = false;
         Texture->Source.Init(
             OwnerTexture->Source.GetSizeX(),
             OwnerTexture->Source.GetSizeY(),
@@ -154,5 +171,40 @@ UOdysseyTextureLayer::OnThumbnailDirtied()
 {
     return mOnThumbnailDirtied;
 }
+
+/* UTexture2D*
+UOdysseyTextureLayer::ExportAsTexture(FString iAssetName, FString iPath )
+{
+    UTexture2D* texture = GetTexture();
+    if ( !texture )
+        return nullptr;
+
+    UTexture2D* renderTexture = GetRenderTexture();
+    if ( !renderTexture )
+        return nullptr;
+
+    FString AssetName;
+    FString PackageName;
+
+    IAssetTools& AssetTools = FModuleManager::Get().LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
+    AssetTools.CreateUniqueAssetName(iPath, iAssetName, PackageName, AssetName);
+
+    FObjectDuplicationParameters params( texture, CreatePackage(*PackageName) );
+    params.DestName = FName(*AssetName);
+    params.FlagMask = RF_Public | RF_Standalone | RF_Transactional;
+    params.DuplicateMode = EDuplicateMode::Normal;
+
+    UTexture2D* createdTexture = Cast<UTexture2D>(StaticDuplicateObjectEx(params));
+
+
+    FImage srcImage;
+    renderTexture->Source.GetMipImage(srcImage, 0);
+
+    createdTexture->PreEditChange(nullptr);
+    createdTexture->Source.Init(srcImage);
+    createdTexture->PostEditChange();
+
+    return createdTexture;
+} */
 
 #endif

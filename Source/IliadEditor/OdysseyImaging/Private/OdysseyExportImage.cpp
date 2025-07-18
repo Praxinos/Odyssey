@@ -54,57 +54,49 @@ GetFileFormatExtension(EOdysseyExportImageFormat iFormat)
 }
 
 UTexture2D*
-ExportAsTexture(UObject* iObject, int iFrame, const FIntRect& iRect, FString iAssetName, FString iPath )
+ExportAsTexture(UObject* iObject, int iFrame, FString iAssetName, FString iPath )
 {
     if (!iObject->Implements<UOdysseyTextureRenderingAbility>())
         return nullptr;
 
+    //Render in a RenderTarget
     IOdysseyTextureRenderingAbility* ability = Cast<IOdysseyTextureRenderingAbility>(iObject);
+    TStrongObjectPtr<UTextureRenderTarget2D> renderTarget(ability->CreateRenderingRenderTarget());
+    ability->Render_GameThread(renderTarget.Get(), FFrameNumber(iFrame), EOdysseyRenderingType::Render);
 
-    //TStrongObjectPtr ensures the render target is destroyed at the end of this function
-    //instead of keeping it in memory waiting for the garbage collector to destroy it
-    TStrongObjectPtr<UTextureRenderTarget2D> renderTarget(NewObject<UTextureRenderTarget2D>());
-    renderTarget->RenderTargetFormat = RTF_RGBA8_SRGB;
-    renderTarget->bForceLinearGamma = false;
-    renderTarget->SRGB = renderTarget->IsSRGB();
-    renderTarget->InitAutoFormat(iRect.Width(), iRect.Height());
+    FImage OutImage;
+    if (!FImageUtils::GetRenderTargetImage(renderTarget.Get(), OutImage))
+        return nullptr;
 
-    ability->Render_GameThread(renderTarget.Get(), FFrameNumber(iFrame), EOdysseyRenderingType::Render, iRect);
-
+    //Create a Package to save the new texture in
     FString Name;
     FString PackageName;
-
     IAssetTools& AssetTools = FModuleManager::Get().LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
     AssetTools.CreateUniqueAssetName(iPath, iAssetName, PackageName, Name);
 
-    FText ErrorMessage;
-    UObject* object = renderTarget->ConstructTexture(CreatePackage(*PackageName), Name, renderTarget->GetMaskedFlags() | RF_Public | RF_Standalone,
-        static_cast<EConstructTextureFlags>(CTF_Compress | CTF_SRGB | CTF_AllowMips), /*InAlphaOverride = */nullptr, &ErrorMessage);
+    //Create the texture and update it with the renderTarget content
 
-    return Cast<UTexture2D>(object);
+    UTexture2D* texture = ability->CreateExportTexture(CreatePackage(*PackageName), FName(*Name), renderTarget->GetMaskedFlags() | RF_Public | RF_Standalone);
+
+    texture->PreEditChange(nullptr);
+    texture->Source.Init(OutImage);
+    texture->PostEditChange();
+
+    return texture;
 }
 
 FString
-ExportAsImage(UObject* iObject, int iFrame, EOdysseyExportImageFormat iFormat, const FIntRect& iRect, FString iFilename, FString iPath)
+ExportAsImage(UObject* iObject, int iFrame, EOdysseyExportImageFormat iFormat, FString iFilename, FString iPath)
 {
     if (!iObject->Implements<UOdysseyTextureRenderingAbility>())
         return "";
 
     IOdysseyTextureRenderingAbility* ability = Cast<IOdysseyTextureRenderingAbility>(iObject);
-
-    TStrongObjectPtr<UTextureRenderTarget2D> renderTarget(NewObject<UTextureRenderTarget2D>());
-    //if (iSRGB)
-        renderTarget->RenderTargetFormat = RTF_RGBA8_SRGB;
-        renderTarget->bForceLinearGamma = false;
-        renderTarget->SRGB = renderTarget->IsSRGB();
-    //else
-        //renderTarget->RenderTargetFormat = RTF_RGBA8;
-    renderTarget->InitAutoFormat(iRect.Width(), iRect.Height());
-
-    ability->Render_GameThread(renderTarget.Get(), FFrameNumber(iFrame), EOdysseyRenderingType::Render, iRect);
+    TStrongObjectPtr<UTextureRenderTarget2D> renderTarget(ability->CreateRenderingRenderTarget());
+    ability->Render_GameThread(renderTarget.Get(), FFrameNumber(iFrame), EOdysseyRenderingType::Render);
 
     FImage OutImage;
-    if (!FImageUtils::GetRenderTargetImage(renderTarget.Get(), OutImage, iRect))
+    if (!FImageUtils::GetRenderTargetImage(renderTarget.Get(), OutImage))
         return "";
 
     FString extension = GetFileFormatExtension(iFormat);
@@ -125,7 +117,7 @@ ExportAsImage(UObject* iObject, int iFrame, EOdysseyExportImageFormat iFormat, c
 }
 
 UPaperFlipbook*
-ExportAsFlipbook(UObject* iObject, const FInt32Range& iRange, const FIntRect& iRect, float iFramesPerSecond, FString AssetName, FString Path)
+ExportAsFlipbook(UObject* iObject, const FInt32Range& iRange, float iFramesPerSecond, FString AssetName, FString Path)
 {
     if ( Path.IsEmpty())
         return nullptr;
@@ -194,7 +186,7 @@ ExportAsFlipbook(UObject* iObject, const FInt32Range& iRange, const FIntRect& iR
             spriteFactory
         ));
 
-        UTexture2D* texture = ExportAsTexture(iObject, i, iRect, textureName, flipbookPackagePath);
+        UTexture2D* texture = ExportAsTexture(iObject, i, textureName, flipbookPackagePath);
         FOdysseyObjectEditorUtils::SetPropertyValue(sprite, "SourceTexture", TSoftObjectPtr<UTexture2D>(texture));
 
         FPaperFlipbookKeyFrame keyframe;
@@ -213,7 +205,7 @@ ExportAsFlipbook(UObject* iObject, const FInt32Range& iRange, const FIntRect& iR
 }
 
 TArray<UTexture2D*>
-ExportAsTextureSequence(UObject* iObject, const FInt32Range& iRange, const FIntRect& iRect, FString AssetName, FString Path)
+ExportAsTextureSequence(UObject* iObject, const FInt32Range& iRange, FString AssetName, FString Path)
 {
     if ( Path.IsEmpty())
         return {};
@@ -245,7 +237,7 @@ ExportAsTextureSequence(UObject* iObject, const FInt32Range& iRange, const FIntR
         FString numStr = FString::Format(TEXT("{0}"), {i});
         FString textureName = AssetName + TEXT("_") + numStr;
 
-        UTexture2D* texture = ExportAsTexture(iObject, i, iRect, textureName, Path);
+        UTexture2D* texture = ExportAsTexture(iObject, i, textureName, Path);
 
         textures.Add(texture);
     }
@@ -257,7 +249,6 @@ TArray<FString>
 ExportAsImageSequence(
     UObject* iObject,
     const FInt32Range& iRange,
-    const FIntRect& iRect,
     FString Filename,
     FString Path,
     EOdysseyExportImageFormat Format
@@ -299,7 +290,7 @@ ExportAsImageSequence(
         }
         filename += FString::Printf(TEXT("%d"), i);
 
-        FString fullpath = ExportAsImage(iObject, i, Format, iRect, filename, Path );
+        FString fullpath = ExportAsImage(iObject, i, Format, filename, Path );
 
         paths.Add(fullpath);
     }

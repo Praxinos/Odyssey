@@ -216,6 +216,64 @@ UOdysseyAnimation::BuildRenderPipelineInternal(
 #endif
 }
 
+UTextureRenderTarget2D*
+UOdysseyAnimation::CreateRenderingRenderTarget()
+{
+    UTextureRenderTarget2D* renderTarget = NewObject<UTextureRenderTarget2D>();
+    ETextureRenderTargetFormat renderTargetFormat = RTF_RGBA8;
+    switch(Format)
+    {
+        case EOdysseyAnimationFormat::BGRA8:
+        {
+            renderTarget->RenderTargetFormat = RTF_RGBA8_SRGB;
+            renderTarget->bForceLinearGamma = false;
+        }
+        break;
+
+        case EOdysseyAnimationFormat::RGBAF:
+        {
+            renderTarget->RenderTargetFormat = RTF_RGBA32f;
+            renderTarget->bForceLinearGamma = true;
+        }
+        break;
+        default: checkf(false, TEXT("Non implemented format"))
+    }
+    renderTarget->SRGB = renderTarget->IsSRGB();
+    renderTarget->InitAutoFormat(mWidth, mHeight);
+
+    return renderTarget;
+}
+
+UTexture2D*
+UOdysseyAnimation::CreateExportTexture(UObject* Outer, FName Name, EObjectFlags Flags)
+{
+    UTexture2D* texture = NewObject<UTexture2D>(Outer, Name, Flags);
+
+    switch(Format)
+    {
+        case EOdysseyAnimationFormat::BGRA8:
+        {
+            texture->PreEditChange(nullptr);
+            texture->Source.Init(mWidth, mHeight, 1, 1, TSF_BGRA8);
+            texture->SRGB = true;
+            texture->PostEditChange();
+        }
+        break;
+
+        case EOdysseyAnimationFormat::RGBAF:
+        {
+            texture->PreEditChange(nullptr);
+            texture->Source.Init(mWidth, mHeight, 1, 1, TSF_RGBA32F);
+            texture->SRGB = false;
+            texture->PostEditChange();
+        }
+        break;
+        default: checkf(false, TEXT("Non implemented format"))
+    }
+
+    return texture;
+}
+
 EOdysseyAnimationBoundMode
 UOdysseyAnimation::GetLeftBoundMode() const
 {

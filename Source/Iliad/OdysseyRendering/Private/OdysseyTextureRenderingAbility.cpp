@@ -13,6 +13,12 @@
 
 #define LOCTEXT_NAMESPACE "Imaging"
 
+UTextureRenderTarget2D*
+IOdysseyTextureRenderingAbility::CreateRenderTarget_Blueprint_Implementation()
+{
+    return CreateRenderingRenderTarget();
+}
+
 void
 IOdysseyTextureRenderingAbility::Render_Implementation(UTextureRenderTarget2D* iRenderTarget, FFrameNumber iFrame) const
 {

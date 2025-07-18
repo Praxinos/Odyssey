@@ -52,6 +52,7 @@ namespace UnrealBuildTool.Rules
                     "CoreUObject",
                     "Engine",
                     "Kismet",
+                    "ImageCore",
                     "SlateCore",
                     "RHI",
                     "RenderCore",

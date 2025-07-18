@@ -686,3 +686,17 @@ UOdysseyLayerStack::GetRenderingComposition(uint64 iRenderType, int iFrameIndex)
     idComposition.Append(layerRoot->GetRenderingComposition(iRenderType, iFrameIndex));
     return idComposition;
 }
+
+UTextureRenderTarget2D*
+UOdysseyLayerStack::CreateRenderingRenderTarget()
+{
+    checkf(false, TEXT("Must be implemented by child class"));
+    return nullptr;
+}
+
+UTexture2D*
+UOdysseyLayerStack::CreateExportTexture(UObject* Outer, FName Name, EObjectFlags Flags)
+{
+    checkf(false, TEXT("Must be implemented by child class"));
+    return nullptr;
+}

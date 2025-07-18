@@ -16,6 +16,7 @@
 #include "Engine/TextureRenderTarget2D.h"
 #include "ImageUtils.h"
 #include "ULISUtils.h"
+#include "OdysseyTextureLayerStackUserData.h"
 
 UOdysseyTextureLayerStack*
 UOdysseyTextureLayerStack::CreateEmptyFromTexture(UTexture2D* iTexture, UObject* iOuter)
@@ -82,10 +83,6 @@ UOdysseyTextureLayerStack::UOdysseyTextureLayerStack()
     SupportedLayerClasses.Add(UOdysseyTextureLayerImageVector::StaticClass());
 
     IOdysseyRenderingAbility::OnRenderingChangedDelegate().AddUObject(this, &UOdysseyTextureLayerStack::OnRenderingChanged);
-    RenderTarget = CreateDefaultSubobject<UTextureRenderTarget2D>("RenderTarget");
-    RenderTarget->RenderTargetFormat = RTF_RGBA8_SRGB;
-    RenderTarget->bForceLinearGamma = false;
-    RenderTarget->SRGB = RenderTarget->IsSRGB();
 }
 
 void
@@ -255,16 +252,12 @@ UOdysseyTextureLayerStack::CompressTexture()
 void
 UOdysseyTextureLayerStack::FastUpdateTexture(const TArray<FIntRect>& iRects)
 {
-     UTexture2D* texture = GetTexture();
+    UTexture2D* texture = GetTexture();
     if ( !texture )
         return;
 
     FTextureCompilingManager::Get().FinishCompilation({ texture });
-
-    if (RenderTarget->SizeX != texture->GetSizeX() || RenderTarget->SizeY != texture->GetSizeY() )
-        RenderTarget->ResizeTarget(texture->GetSizeX(), texture->GetSizeY());
-
-    RenderTarget->UpdateResourceImmediate();
+    ETextureSourceFormat textureSourceFormat = texture->Source.GetFormat();
 
     for (const FIntRect& rect : iRects)
     {
@@ -375,19 +368,17 @@ UOdysseyTextureLayerStack::UpdateTexture(bool iForceRefresh)
     if ( !texture )
         return;
 
+    if (!RenderTarget)
+        CreateRenderTarget();
+
+    UpdateRenderTargetFormat();
+
     if ( mTextureFastUpdateSurface.IsValid() )
     {
         FastUpdateTexture(mInvalidTileMap.InvalidRects());
     }
     else
     {
-        FTextureCompilingManager::Get().FinishCompilation({ texture });
-
-        if (RenderTarget->SizeX != texture->GetSizeX() || RenderTarget->SizeY != texture->GetSizeY() )
-            RenderTarget->ResizeTarget(texture->GetSizeX(), texture->GetSizeY());
-
-        RenderTarget->UpdateResourceImmediate();
-
         TArray<FIntRect> invalidRects = mInvalidTileMap.InvalidRects();
 
         for (const FIntRect& rect : invalidRects)
@@ -429,4 +420,127 @@ UOdysseyTextureLayerStack::Tick(float DeltaTime)
         return;
 
     UpdateTexture();
+}
+
+void
+UOdysseyTextureLayerStack::CreateRenderTarget()
+{
+    RenderTarget = NewObject<UTextureRenderTarget2D>(this, NAME_None, RF_Public);
+}
+
+void
+UOdysseyTextureLayerStack::UpdateRenderTargetFormat()
+{
+    UTexture2D* texture = GetTexture();
+    if ( !texture )
+        return;
+
+    FTextureCompilingManager::Get().FinishCompilation({ texture });
+
+    ETextureSourceFormat textureSourceFormat = texture->Source.GetFormat();
+    //bool expectSRGB = false; //(textureSourceFormat == TSF_BGRA8 || textureSourceFormat == TSF_G8) && texture->SRGB;
+    ETextureRenderTargetFormat format = RTF_RGBA8_SRGB;
+
+    switch(textureSourceFormat)
+    {
+        case TSF_BGRA8:
+        case TSF_BGRE8:
+        case TSF_G8:
+        case TSF_RGBA8_DEPRECATED:
+        case TSF_RGBE8_DEPRECATED:
+        {
+            format = RTF_RGBA8; //expectSRGB ? RTF_RGBA8_SRGB : RTF_RGBA8;
+        }
+        break;
+
+        case TSF_R16F: //we could use RTF_R16f here
+        case TSF_G16:
+        case TSF_RGBA16:
+        case TSF_RGBA16F:
+        {
+            format = RTF_RGBA16f;
+        }
+
+        case TSF_R32F: //we could use RTF_R32f here
+        case TSF_RGBA32F:
+        {
+            format = RTF_RGBA32f;
+        }
+    }
+
+
+    if (RenderTarget->RenderTargetFormat != format)
+    {
+        RenderTarget->RenderTargetFormat = format;
+        RenderTarget->bForceLinearGamma = true; //!expectSRGB;
+        RenderTarget->PostEditChange();
+        RenderTarget->UpdateResourceImmediate();
+    }
+
+    if (RenderTarget->SizeX != texture->GetSizeX() || RenderTarget->SizeY != texture->GetSizeY() )
+    {
+        RenderTarget->ResizeTarget(texture->GetSizeX(), texture->GetSizeY());
+        RenderTarget->UpdateResourceImmediate();
+    }
+}
+
+UTextureRenderTarget2D*
+UOdysseyTextureLayerStack::CreateRenderingRenderTarget()
+{
+    UTexture2D* texture = GetTexture();
+    if ( !texture )
+        return nullptr;
+
+    FTextureCompilingManager::Get().FinishCompilation({ texture });
+
+    ETextureSourceFormat textureSourceFormat = texture->Source.GetFormat();
+    ETextureRenderTargetFormat format = RTF_RGBA8_SRGB;
+
+    switch(textureSourceFormat)
+    {
+        case TSF_BGRA8:
+        case TSF_BGRE8:
+        case TSF_G8:
+        case TSF_RGBA8_DEPRECATED:
+        case TSF_RGBE8_DEPRECATED:
+        {
+            format = RTF_RGBA8; //expectSRGB ? RTF_RGBA8_SRGB : RTF_RGBA8;
+        }
+        break;
+
+        case TSF_R16F: //we could use RTF_R16f here
+        case TSF_G16:
+        case TSF_RGBA16:
+        case TSF_RGBA16F:
+        {
+            format = RTF_RGBA16f;
+        }
+
+        case TSF_R32F: //we could use RTF_R32f here
+        case TSF_RGBA32F:
+        {
+            format = RTF_RGBA32f;
+        }
+    }
+
+    UTextureRenderTarget2D* renderTarget = NewObject<UTextureRenderTarget2D>();
+    renderTarget->RenderTargetFormat = format;
+    renderTarget->bForceLinearGamma = true;
+    renderTarget->SRGB = renderTarget->IsSRGB();
+    renderTarget->InitAutoFormat(texture->GetSizeX(), texture->GetSizeY());
+
+    return renderTarget;
+}
+
+UTexture2D*
+UOdysseyTextureLayerStack::CreateExportTexture(UObject* Outer, FName Name, EObjectFlags Flags)
+{
+    FObjectDuplicationParameters params(GetTexture(), Outer);
+    params.DestName = Name;
+    params.ApplyFlags = Flags;
+
+    UTexture2D* texture = Cast<UTexture2D>(StaticDuplicateObjectEx(params));
+    texture->RemoveUserDataOfClass(UOdysseyTextureLayerStackUserData::StaticClass());
+
+    return texture;
 }

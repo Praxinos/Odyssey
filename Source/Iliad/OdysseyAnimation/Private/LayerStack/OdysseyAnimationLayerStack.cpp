@@ -73,3 +73,15 @@ UOdysseyAnimationLayerStack::OnRenderingChanged(const FOdysseyRenderingChangedEv
         }
     }
 }
+
+UTextureRenderTarget2D*
+UOdysseyAnimationLayerStack::CreateRenderingRenderTarget()
+{
+    return GetAnimation()->CreateRenderingRenderTarget();
+}
+
+UTexture2D*
+UOdysseyAnimationLayerStack::CreateExportTexture(UObject* Outer, FName Name, EObjectFlags Flags)
+{
+    return GetAnimation()->CreateExportTexture(Outer, Name, Flags);
+}

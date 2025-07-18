@@ -10,6 +10,10 @@ FOdysseyTextureLayerImageRasterImport::Read( UOdysseyTextureLayerImageRaster* iT
                                             , FArchive &Ar )
 {
     uint64 start = Ar.Tell();
+    uint64 end = Ar.TotalSize();
+    if (end - start < 4 + 8) //check if we can read chunkID and chunkLen
+        return false;
+
 
     uint32 chunkID;
     uint64 chunkLen;
