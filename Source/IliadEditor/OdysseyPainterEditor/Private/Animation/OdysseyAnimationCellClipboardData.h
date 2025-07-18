@@ -37,7 +37,7 @@ private:
 private:
     struct FCellCopy
     {
-        UOdysseyLayerCell* mCell;
+        TObjectPtr<UOdysseyLayerCell> mCell;
         int mExposure;
     };
     TArray<FCellCopy> mCellCopies;
