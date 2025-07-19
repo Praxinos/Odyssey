@@ -31,7 +31,7 @@ FOdysseyPaletteEditorToolkit::FOdysseyPaletteEditorToolkit(UOdysseyPalette* iPal
     if( mPalette )
         mCurrentSet = mPalette->GetDefaultSetID();
     else
-        mCurrentSet = FString();
+        mCurrentSet = FGuid();
 
     // Legacy, to remove next version, ensure that the Palettes are going to be saved with the upgraded data
     if (mPalette && mPalette->NeedsSavingAfterUpgrade)
@@ -265,14 +265,14 @@ FOdysseyPaletteEditorToolkit::InitToolMenuContext(FToolMenuContext& MenuContext)
     MenuContext.AddObject(Context);
 }
 
-FString
+FGuid
 FOdysseyPaletteEditorToolkit::GetCurrentSet() const
 {
     return mCurrentSet;
 }
 
 void
-FOdysseyPaletteEditorToolkit::OnCurrentSetSelected(FString iSet)
+FOdysseyPaletteEditorToolkit::OnCurrentSetSelected(FGuid iSet)
 {
     mCurrentSet = iSet;
 }

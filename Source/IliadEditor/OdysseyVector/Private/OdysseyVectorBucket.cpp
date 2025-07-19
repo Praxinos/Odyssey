@@ -277,7 +277,7 @@ FOdysseyVectorBucket::GetColor()
             else
             {
                 mPaletteEntry = nullptr;
-                mPaletteSetID = FString();
+                mPaletteSetID = FGuid();
                 return mSolidColor;
             }
         }

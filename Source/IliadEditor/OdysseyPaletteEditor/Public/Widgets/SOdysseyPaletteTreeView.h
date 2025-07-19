@@ -27,11 +27,11 @@ public:
     SLATE_BEGIN_ARGS(SOdysseyPaletteTreeView)
         : _IsReadOnly(true)
         , _Palette(nullptr)
-        , _Set(FString())
+        , _Set(FGuid())
         {}
         SLATE_ARGUMENT(bool, IsReadOnly)
         SLATE_ATTRIBUTE(UOdysseyPalette*, Palette)
-        SLATE_ATTRIBUTE(FString, Set)
+        SLATE_ATTRIBUTE(FGuid, Set)
         SLATE_ATTRIBUTE(UOdysseyPaletteEntryColor*, CurrentColorEntry)
         SLATE_EVENT(FOnCurrentColorEntryChanged, OnCurrentColorEntryChanged)
     SLATE_END_ARGS()
@@ -170,7 +170,7 @@ protected:
     UOdysseyPalette* mPalette;
     TSlateAttribute<UOdysseyPaletteEntryColor*> mCurrentColorEntryAttribute;
     UOdysseyPaletteEntryColor* mCurrentColorEntry;
-    TAttribute<FString> mSet;
+    TAttribute<FGuid> mSet;
     UOdysseyPaletteEntry* mSelectedEntry;
     FOnCurrentColorEntryChanged mOnCurrentColorEntryChanged;
     TSharedPtr<UE::Slate::Containers::TObservableArray<UOdysseyPaletteEntry*>> mItemsSource;

@@ -16,7 +16,7 @@ class ODYSSEYPALETTEEDITOR_API SOdysseyPaletteSetComboBox
     SLATE_DECLARE_WIDGET(SOdysseyPaletteSetComboBox, SComboButton)
 
 public:
-    DECLARE_DELEGATE_OneParam(FOnCurrentSetSelected, FString)
+    DECLARE_DELEGATE_OneParam(FOnCurrentSetSelected, FGuid)
 
 public:
     SLATE_BEGIN_ARGS(SOdysseyPaletteSetComboBox)
@@ -24,7 +24,7 @@ public:
         {}
         SLATE_ARGUMENT(bool, IsReadOnly)
         SLATE_ATTRIBUTE(UOdysseyPalette*, Palette)
-        SLATE_ATTRIBUTE(FString, CurrentSet)
+        SLATE_ATTRIBUTE(FGuid, CurrentSet)
         SLATE_EVENT(FOnCurrentSetSelected, OnCurrentSetSelected)
     SLATE_END_ARGS()
 
@@ -37,7 +37,7 @@ public:
 
 public:
     UOdysseyPalette* GetPalette() const;
-    static void BuildMenu(FMenuBuilder& iMenuBuilder, UOdysseyPalette* iPalette, FString iCurrentSet, bool iIsReadOnly, FOnCurrentSetSelected iOnCurrentSetSelected);
+    static void BuildMenu(FMenuBuilder& iMenuBuilder, UOdysseyPalette* iPalette, FGuid iCurrentSet, bool iIsReadOnly, FOnCurrentSetSelected iOnCurrentSetSelected);
 
 private:
     void OnPaletteChanged();
@@ -49,8 +49,8 @@ private:
 protected:
     TSlateAttribute<UOdysseyPalette*> mPaletteAttribute;
     UOdysseyPalette* mPalette;
-    TSlateAttribute<FString> mCurrentSetAttribute;
-    FString mCurrentSet;
+    TSlateAttribute<FGuid> mCurrentSetAttribute;
+    FGuid mCurrentSet;
     FOnCurrentSetSelected mOnCurrentSetSelected;
     bool mIsReadOnly;
 };

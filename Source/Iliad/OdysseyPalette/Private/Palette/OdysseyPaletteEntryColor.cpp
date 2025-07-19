@@ -30,7 +30,7 @@ UOdysseyPaletteEntryColor::FOnEntryColorChanged& UOdysseyPaletteEntryColor::OnEn
     return onEntryColorChanged;
 }
 
-FColor& UOdysseyPaletteEntryColor::GetColor(FString iSet)
+FColor& UOdysseyPaletteEntryColor::GetColor(FGuid iSet)
 {
     if( !EntryColorsIDs.Contains(iSet) )
     {
@@ -40,7 +40,7 @@ FColor& UOdysseyPaletteEntryColor::GetColor(FString iSet)
     return EntryColorsIDs[iSet];
 }
 
-void UOdysseyPaletteEntryColor::SetColor(FColor iColor, FString iSet)
+void UOdysseyPaletteEntryColor::SetColor(FColor iColor, FGuid iSet)
 {
     if (!EntryColorsIDs.Contains(iSet))
         return;
@@ -48,18 +48,18 @@ void UOdysseyPaletteEntryColor::SetColor(FColor iColor, FString iSet)
     EntryColorsIDs[iSet] = iColor;
 }
 
-void UOdysseyPaletteEntryColor::AddSet(FString iNewId)
+void UOdysseyPaletteEntryColor::AddSet(FGuid iNewId)
 {
     EntryColorsIDs.Add( iNewId, FColor::Black );
 }
 
-void UOdysseyPaletteEntryColor::DuplicateSetAt(FString iIndexToCopy, FString iNewId)
+void UOdysseyPaletteEntryColor::DuplicateSetAt(FGuid iIndexToCopy, FGuid iNewId)
 {
     FColor color = EntryColorsIDs[iIndexToCopy];
     EntryColorsIDs.Add(iNewId, color);
 }
 
-void UOdysseyPaletteEntryColor::RemoveSet(FString iIndex)
+void UOdysseyPaletteEntryColor::RemoveSet(FGuid iIndex)
 {
     EntryColorsIDs.Remove( iIndex );
 }
@@ -101,7 +101,7 @@ void UOdysseyPaletteEntryColor::PostLoad()
     {
         // We have to be careful, because we could have a palette with multiple sets with the same name.
         // Colors may be mismatched in that case, but at least the TMap will be consistent with the IDs stored in the UOdysseyPalette
-        TArray<FString> ids;
+        TArray<FGuid> ids;
 
         for (const auto& Pair : GetPalette()->GetSetsIDs())
         {

@@ -78,7 +78,7 @@ public:
     virtual uint32 GetHeight() override;
     virtual FOdysseyVectorCell* GetMaxCellFrom( uint32 iIndex ) override;
     virtual FOdysseyVectorCell* GetMinCellFrom( uint32 iIndex ) override;
-    virtual FString GetPaletteSetID( UOdysseyPalette* iPalette ) override;
+    virtual FGuid GetPaletteSetID( UOdysseyPalette* iPalette ) override;
 
 protected:
     void IsColoredChanged();

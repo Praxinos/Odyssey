@@ -43,15 +43,15 @@ private:
     TSharedRef<SDockTab> SpawnColorsTab(const FSpawnTabArgs& Args);
 
     void AddEntry(UClass* iEntryClass);
-    FString GetCurrentSet() const;
-    void OnCurrentSetSelected(FString iSet);
+    FGuid GetCurrentSet() const;
+    void OnCurrentSetSelected(FGuid iSet);
 
     void BuildToolbarPaletteSection(FToolBarBuilder& iBuilder);
 
 private:
     FName mColorsTabId;
     UOdysseyPalette* mPalette;
-    FString mCurrentSet;
+    FGuid mCurrentSet;
 
     TSharedPtr<SOdysseyPaletteTreeView> mTreeView;
 };

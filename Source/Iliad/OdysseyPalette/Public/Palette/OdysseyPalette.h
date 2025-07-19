@@ -7,6 +7,7 @@
 #include "Widgets/Layout/SScrollBox.h"
 #include "OdysseyPaletteEntry.h"
 #include "Templates/SubclassOf.h"
+#include "Misc/Guid.h"
 
 #include "OdysseyPalette.generated.h"
 
@@ -26,7 +27,7 @@ public:
     TObjectPtr<UOdysseyPalette> mPalette = nullptr;
 
     UPROPERTY()
-    FString mSet = FString();
+    FGuid mSet = FGuid();
 };
 
 /////////////////////////////////////////////////////
@@ -198,11 +199,11 @@ public:
 public:
     //Sets
     const TArray<FName>& GetSets() const;
-    const TMap<FString, FName>& GetSetsIDs() const;
-    void RenameSet(FString iSetId, const FName& iName);
-    FString DuplicateSet(FString iSetId, const FName& iName );
-    void RemoveSet(FString iSetId);
-    FString GetDefaultSetID(); //Returns the first ID we find in the TMap
+    const TMap<FGuid, FName>& GetSetsIDs() const;
+    void RenameSet(FGuid iSetId, const FName& iName);
+    FGuid DuplicateSet(FGuid iSetId, const FName& iName );
+    void RemoveSet(FGuid iSetId);
+    FGuid GetDefaultSetID(); //Returns the first ID we find in the TMap
 
 public:
     //Called by layers when there Parent or Children changed
@@ -255,7 +256,7 @@ private:
     //---
 
     UPROPERTY()
-    TMap<FString, FName> SetsIDs;
+    TMap<FGuid, FName> SetsIDs;
 
 public:
     // Legacy, to delete next version

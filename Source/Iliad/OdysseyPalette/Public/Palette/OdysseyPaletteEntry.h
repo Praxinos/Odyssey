@@ -124,10 +124,10 @@ public:
     UFUNCTION(BlueprintPure, Category="Palette")
     const TArray<UOdysseyPaletteEntry*>& GetChildren() const;
 
-    virtual void AddSet( FString iIndex );
-    virtual void DuplicateSetAt( FString iIndexToCopy, FString iNewId );
+    virtual void AddSet( FGuid iIndex );
+    virtual void DuplicateSetAt( FGuid iIndexToCopy, FGuid iNewId );
 
-    virtual void RemoveSet( FString iIndex );
+    virtual void RemoveSet( FGuid iIndex );
 
 protected:
     //Property changed methods

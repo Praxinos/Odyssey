@@ -469,7 +469,7 @@ UOdysseyTextureLayerImageVector::GetFrame()
 }
 
 // Implements Interface IOdysseyVectorLayer::GetPaletteSetID
-FString
+FGuid
 UOdysseyTextureLayerImageVector::GetPaletteSetID( UOdysseyPalette* iPalette )
 {
     UOdysseyTextureLayerStackUserData* userData = Cast<UOdysseyTextureLayerStackUserData>(GetTexture()->GetAssetUserDataOfClass(UOdysseyTextureLayerStackUserData::StaticClass()));
@@ -485,7 +485,7 @@ UOdysseyTextureLayerImageVector::GetPaletteSetID( UOdysseyPalette* iPalette )
         }
     }
 
-    return FString();
+    return FGuid();
 }
 
 void

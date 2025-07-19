@@ -18,11 +18,11 @@ public:
     SLATE_BEGIN_ARGS(SOdysseyPainterEditorPaletteColorRow)
         : _IsCurrent( false )
         , _Entry(nullptr)
-        , _Set(FString())
+        , _Set(FGuid())
         {}
         SLATE_ATTRIBUTE(bool, IsCurrent)
         SLATE_ATTRIBUTE(UOdysseyPaletteEntryColor*, Entry)
-        SLATE_ATTRIBUTE(FString, Set)
+        SLATE_ATTRIBUTE(FGuid, Set)
     SLATE_END_ARGS()
 
 public:
@@ -43,6 +43,6 @@ private:
 
 private:
     TAttribute<bool> mIsCurrent;
-    TAttribute<FString> mSet;
+    TAttribute<FGuid> mSet;
     TAttribute<UOdysseyPaletteEntryColor*> mEntryColor;
 };

@@ -25,10 +25,10 @@ class SOdysseyPainterEditorPaletteSetList : public SCompoundWidget
     SLATE_DECLARE_WIDGET(SOdysseyPainterEditorPaletteSetList, SCompoundWidget)
 
 public:
-    DECLARE_DELEGATE_TwoParams(FOnCurrentColorEntryChanged, UOdysseyPaletteEntryColor*, FString)
+    DECLARE_DELEGATE_TwoParams(FOnCurrentColorEntryChanged, UOdysseyPaletteEntryColor*, FGuid)
     DECLARE_DELEGATE_OneParam(FOnAddPaletteSet, UOdysseyPalette*)
     DECLARE_DELEGATE_OneParam(FOnRemovePaletteSet, UOdysseyPaletteSet*)
-    DECLARE_DELEGATE_TwoParams(FOnPaletteSetChanged, FString, UOdysseyPaletteSet* )
+    DECLARE_DELEGATE_TwoParams(FOnPaletteSetChanged, FGuid, UOdysseyPaletteSet* )
 
 public:
     ~SOdysseyPainterEditorPaletteSetList();
@@ -38,7 +38,7 @@ public:
         {}
         SLATE_ATTRIBUTE(TArray<UOdysseyPaletteSet*>, PaletteSets)
         SLATE_ATTRIBUTE(UOdysseyPaletteEntryColor*, CurrentColorEntry)
-        SLATE_ATTRIBUTE(FString, CurrentSet)
+        SLATE_ATTRIBUTE(FGuid, CurrentSet)
         SLATE_EVENT(FOnAddPaletteSet, OnAddPaletteSet)
         SLATE_EVENT(FOnRemovePaletteSet, OnRemovePaletteSet)
         SLATE_EVENT(FOnPaletteSetChanged, OnPaletteSetChanged)
@@ -69,7 +69,7 @@ private:
     // Private data
     TSlateAttribute<TArray<UOdysseyPaletteSet*>> mPaletteSets;
     TSlateAttribute<UOdysseyPaletteEntryColor*> mCurrentColorEntry;
-    TAttribute<FString> mCurrentSet;
+    TAttribute<FGuid> mCurrentSet;
     TSharedPtr<UE::Slate::Containers::TObservableArray<TSharedPtr<FOdysseyPainterEditorPaletteTreeViewItem>>> mItemsSource;
     FOnAddPaletteSet mOnAddPaletteSet;
     FOnRemovePaletteSet mOnRemovePaletteSet;

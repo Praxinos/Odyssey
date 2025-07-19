@@ -34,7 +34,7 @@ protected:
 
     TArray<UOdysseyPaletteSet*> GetPaletteSets() const;
     UOdysseyPaletteEntryColor* GetCurrentPaletteColorEntry() const;
-    FString GetCurrentPaletteSet() const;
+    FGuid GetCurrentPaletteSet() const;
 
     EOdysseyPainterEditorColorType GetColorType() const;
     void OnColorTypeChanged(EOdysseyPainterEditorColorType iType, ECheckBoxState iState);
@@ -56,10 +56,10 @@ protected:
     // Event Listeners
     void OnColorChanged( eOdysseyEventState::Type iEventState, const ::ULIS::FColor& iColor );
 
-    void OnPaletteSetChanged(FString iIndex, UOdysseyPaletteSet* iPaletteSet);
+    void OnPaletteSetChanged(FGuid iIndex, UOdysseyPaletteSet* iPaletteSet);
     void OnAddPaletteSet(UOdysseyPalette* iPalette);
     void OnRemovePaletteSet(UOdysseyPaletteSet* iPaletteSet);
-    void OnPaletteCurrentColorEntryChanged(UOdysseyPaletteEntryColor* iEntry, FString iSet);
+    void OnPaletteCurrentColorEntryChanged(UOdysseyPaletteEntryColor* iEntry, FGuid iSet);
 
     FReply OnColorWheelExpanderArrowClicked();
     FReply OnColorSlidersExpanderArrowClicked();

@@ -101,17 +101,17 @@ TArray<UOdysseyPaletteEntry*> UOdysseyPaletteEntry::GetParents() const
     return parents;
 }
 
-void UOdysseyPaletteEntry::AddSet(FString iNewId)
+void UOdysseyPaletteEntry::AddSet(FGuid iNewId)
 {
 
 }
 
-void UOdysseyPaletteEntry::DuplicateSetAt(FString iIndexToCopy, FString iNewId)
+void UOdysseyPaletteEntry::DuplicateSetAt(FGuid iIndexToCopy, FGuid iNewId)
 {
 
 }
 
-void UOdysseyPaletteEntry::RemoveSet(FString iIndex)
+void UOdysseyPaletteEntry::RemoveSet(FGuid iIndex)
 {
 
 }

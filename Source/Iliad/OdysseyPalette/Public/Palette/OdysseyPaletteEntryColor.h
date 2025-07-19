@@ -30,13 +30,13 @@ public:
     static FOnEntryColorChanged& OnEntryColorChanged();
 
 public:
-    FColor& GetColor( FString iSet);
-    void SetColor( FColor iColor, FString iSet );
+    FColor& GetColor( FGuid iSet);
+    void SetColor( FColor iColor, FGuid iSet );
 
-    virtual void AddSet( FString iNewId ) override;
-    virtual void DuplicateSetAt( FString iIndexToCopy, FString iNewId ) override;
+    virtual void AddSet( FGuid iNewId ) override;
+    virtual void DuplicateSetAt( FGuid iIndexToCopy, FGuid iNewId ) override;
 
-    virtual void RemoveSet( FString iIndex ) override;
+    virtual void RemoveSet( FGuid iIndex ) override;
 
 public:
     // UObject overrides
@@ -61,5 +61,5 @@ public:
     //--
 
     UPROPERTY(EditAnywhere, Category = Palette)
-    TMap<FString, FColor> EntryColorsIDs;
+    TMap<FGuid, FColor> EntryColorsIDs;
 };

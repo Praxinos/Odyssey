@@ -574,7 +574,7 @@ UOdysseyAnimationLayerImageVector::GetMinCellFrom( uint32 iIndex )
 }
 
 // Implements Interface IOdysseyVectorLayer::GetPaletteSetID
-FString
+FGuid
 UOdysseyAnimationLayerImageVector::GetPaletteSetID( UOdysseyPalette* iPalette )
 {
     UOdysseyAnimation* animation = GetAnimation();
@@ -590,7 +590,7 @@ UOdysseyAnimationLayerImageVector::GetPaletteSetID( UOdysseyPalette* iPalette )
         }
     }
 
-    return FString();
+    return FGuid();
 }
 
 #if WITH_EDITOR

@@ -37,8 +37,8 @@ SOdysseyPaletteSetComboBox::~SOdysseyPaletteSetComboBox()
 SOdysseyPaletteSetComboBox::SOdysseyPaletteSetComboBox()
     : mPaletteAttribute(*this, nullptr)
     , mPalette(nullptr)
-    , mCurrentSetAttribute(*this, FString())
-    , mCurrentSet(FString())
+    , mCurrentSetAttribute(*this, FGuid())
+    , mCurrentSet(FGuid())
 {
 }
 
@@ -64,7 +64,7 @@ void SOdysseyPaletteSetComboBox::Construct(const FArguments& InArgs)
 }
 
 void
-SOdysseyPaletteSetComboBox::BuildMenu(FMenuBuilder& iMenuBuilder, UOdysseyPalette* iPalette, FString iCurrentSet, bool iIsReadOnly, FOnCurrentSetSelected iOnCurrentSetSelected)
+SOdysseyPaletteSetComboBox::BuildMenu(FMenuBuilder& iMenuBuilder, UOdysseyPalette* iPalette, FGuid iCurrentSet, bool iIsReadOnly, FOnCurrentSetSelected iOnCurrentSetSelected)
 {
     if (!iIsReadOnly)
     {
@@ -97,7 +97,7 @@ SOdysseyPaletteSetComboBox::BuildMenu(FMenuBuilder& iMenuBuilder, UOdysseyPalett
                             {
                                 const FScopedTransaction transaction(LOCTEXT("palette-set-combobox.add-set.transaction", "Add Palette Set"));
                                 FOdysseyObjectEditorUtils::PreChangePropertyValue(iPalette, "Sets");
-                                FString newId = iPalette->DuplicateSet(iCurrentSet, FName(*setName.ToString()));
+                                FGuid newId = iPalette->DuplicateSet(iCurrentSet, FName(*setName.ToString()));
                                 iOnCurrentSetSelected.ExecuteIfBound(newId);
                                 FOdysseyObjectEditorUtils::PostChangePropertyValue(iPalette, "Sets", EPropertyChangeType::ArrayAdd);
                             }

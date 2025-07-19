@@ -157,7 +157,7 @@ void FOdysseyVectorObjectViewPaletteCustomization::CustomizeChildren(TSharedRef<
     mPaletteHandle->SetOnPropertyValueChanged(FSimpleDelegate::CreateRaw(this, &FOdysseyVectorObjectViewPaletteCustomization::OnChildPropertyValueChanged, StructPropertyHandle));
 }
 
-FString
+FGuid
 FOdysseyVectorObjectViewPaletteCustomization::GetCurrentSet() const
 {
     UOdysseyAnimation* animation = mEditor->GetAnimation();
@@ -185,7 +185,7 @@ FOdysseyVectorObjectViewPaletteCustomization::GetCurrentSet() const
         }
     }
 
-    return FString();
+    return FGuid();
 }
 
 TSharedRef<SWidget>

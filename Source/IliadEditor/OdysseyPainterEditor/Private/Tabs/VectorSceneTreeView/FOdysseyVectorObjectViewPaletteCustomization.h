@@ -37,13 +37,13 @@ private:
     TSharedRef<SWidget> GetPaletteEntryMenuContent();
 
     UOdysseyPalette* GetPalette() const;
-    FString GetCurrentSet() const;
+    FGuid GetCurrentSet() const;
     UOdysseyPaletteEntryColor* GetCurrentEntryColor() const;
     FLinearColor GetCurrentEntryColorAsLinear() const;
 
     EVisibility GetTreeViewVisibility() const;
 
-    void OnPaletteCurrentSetSelected(FString iSet);
+    void OnPaletteCurrentSetSelected(FGuid iSet);
     void OnPaletteCurrentColorEntryChanged(UOdysseyPaletteEntryColor* iEntry);
 
     TSharedRef<SWidget> MakeCurrentColorEntryWidget();

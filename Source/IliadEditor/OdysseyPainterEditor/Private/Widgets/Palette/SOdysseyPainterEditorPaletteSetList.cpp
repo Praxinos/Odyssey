@@ -214,7 +214,7 @@ SOdysseyPainterEditorPaletteSetList::OnGenerateRow( TSharedPtr<FOdysseyPainterEd
                 }
             )
             .OnSetChanged_Lambda(
-                [this, iItem](FString iSet)
+                [this, iItem](FGuid iSet)
                 {
                     if( iItem->mPaletteSet->mSet != iSet )
                     {
@@ -260,8 +260,8 @@ SOdysseyPainterEditorPaletteSetList::OnGenerateRow( TSharedPtr<FOdysseyPainterEd
                         if (!currentEntryColor)
                             return false;
 
-                        FString currentEntrySet = mCurrentSet.Get();
-                        FString entrySet = iItem->mPaletteSet->mSet;
+                        FGuid currentEntrySet = mCurrentSet.Get();
+                        FGuid entrySet = iItem->mPaletteSet->mSet;
                         return currentEntryColor == iItem->mEntry && currentEntrySet == entrySet;
                     }
                 );
@@ -442,7 +442,7 @@ SOdysseyPainterEditorPaletteSetList::OnSelectionChanged(TSharedPtr<FOdysseyPaint
                     return;
                 }
             }
-            mOnCurrentColorEntryChanged.ExecuteIfBound(nullptr, FString());
+            mOnCurrentColorEntryChanged.ExecuteIfBound(nullptr, FGuid());
             return;
         }
 
@@ -450,7 +450,7 @@ SOdysseyPainterEditorPaletteSetList::OnSelectionChanged(TSharedPtr<FOdysseyPaint
             return;
 
         UOdysseyPaletteEntryColor* entryColor = Cast<UOdysseyPaletteEntryColor>(iItem->mEntry);
-        FString set = iItem->mPaletteSet->mSet;
+        FGuid set = iItem->mPaletteSet->mSet;
         mOnCurrentColorEntryChanged.ExecuteIfBound(entryColor, set);
     }
     else
@@ -465,7 +465,7 @@ SOdysseyPainterEditorPaletteSetList::OnSelectionChanged(TSharedPtr<FOdysseyPaint
         }
 
         UOdysseyPaletteEntryColor* entryColor = Cast<UOdysseyPaletteEntryColor>(iItem->mEntry);
-        FString set = iItem->mPaletteSet->mSet;
+        FGuid set = iItem->mPaletteSet->mSet;
         mOnCurrentColorEntryChanged.ExecuteIfBound(entryColor, set);
     }
 }

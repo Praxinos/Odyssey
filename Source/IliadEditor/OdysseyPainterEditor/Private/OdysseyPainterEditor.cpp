@@ -1266,7 +1266,7 @@ FOdysseyPainterEditor::PaintColor(const FOdysseyBrushColor& iColor, bool iIsComm
 {
     mPaintColor = iColor;
     mCurrentPaletteEntryColor = nullptr;
-    mCurrentPaletteSet = FString();
+    mCurrentPaletteSet = FGuid();
 
     //PATCH: should be automatic in the new drawing Tool, fix it asap
     if (iIsCommit)
@@ -3389,7 +3389,7 @@ FOdysseyPainterEditor::GetCurrentPaletteColorEntry() const
     return mCurrentPaletteEntryColor;
 }
 
-FString
+FGuid
 FOdysseyPainterEditor::GetCurrentPaletteSet() const
 {
     return mCurrentPaletteSet;
@@ -3448,12 +3448,12 @@ FOdysseyPainterEditor::RemovePaletteSet(UOdysseyPaletteSet* iPaletteSet)
         if (shouldReset)
         {
             mCurrentPaletteEntryColor = nullptr;
-            mCurrentPaletteSet = FString();
+            mCurrentPaletteSet = FGuid();
         }
     }
 }
 
-void FOdysseyPainterEditor::SetPaletteSet(FString iIndex, UOdysseyPaletteSet* iPaletteSet)
+void FOdysseyPainterEditor::SetPaletteSet(FGuid iIndex, UOdysseyPaletteSet* iPaletteSet)
 {
     iPaletteSet->mSet = iIndex;
 
@@ -3547,12 +3547,12 @@ void FOdysseyPainterEditor::SetPaletteSet(FString iIndex, UOdysseyPaletteSet* iP
 }
 
 void
-FOdysseyPainterEditor::SetCurrentPaletteColorEntry(UOdysseyPaletteEntryColor* iEntry, FString iSet)
+FOdysseyPainterEditor::SetCurrentPaletteColorEntry(UOdysseyPaletteEntryColor* iEntry, FGuid iSet)
 {
     if (!iEntry)
     {
         mCurrentPaletteEntryColor = nullptr;
-        mCurrentPaletteSet = FString();
+        mCurrentPaletteSet = FGuid();
         return;
     }
 

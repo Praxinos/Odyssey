@@ -385,14 +385,14 @@ UOdysseyPalette::GetSets() const
     return Sets;
 }
 
-const TMap<FString, FName>&
+const TMap<FGuid, FName>&
 UOdysseyPalette::GetSetsIDs() const
 {
     return SetsIDs;
 }
 
 void
-UOdysseyPalette::RenameSet(FString iSetId, const FName& iName)
+UOdysseyPalette::RenameSet(FGuid iSetId, const FName& iName)
 {
     if( !SetsIDs.Contains(iSetId) )
         return;
@@ -400,12 +400,12 @@ UOdysseyPalette::RenameSet(FString iSetId, const FName& iName)
     SetsIDs[iSetId] = iName;
 }
 
-FString UOdysseyPalette::DuplicateSet(FString iSetId, const FName& iName)
+FGuid UOdysseyPalette::DuplicateSet(FGuid iSetId, const FName& iName)
 {
     if (!SetsIDs.Contains(iSetId))
-        return FString();
+        return FGuid();
 
-    FString newId = FGuid::NewGuid().ToString();
+    FGuid newId = FGuid::NewGuid();
 
     TArray<UOdysseyPaletteEntry*> entries = GetEntries();
     for (int i = 0; i < entries.Num(); i++)
@@ -418,7 +418,7 @@ FString UOdysseyPalette::DuplicateSet(FString iSetId, const FName& iName)
     return newId;
 }
 
-void UOdysseyPalette::RemoveSet(FString iSetId)
+void UOdysseyPalette::RemoveSet(FGuid iSetId)
 {
     if (!SetsIDs.Contains(iSetId))
         return;
@@ -430,14 +430,14 @@ void UOdysseyPalette::RemoveSet(FString iSetId)
     SetsIDs.Remove(iSetId);
 }
 
-FString UOdysseyPalette::GetDefaultSetID()
+FGuid UOdysseyPalette::GetDefaultSetID()
 {
     if (SetsIDs.Num() > 0)
     {
-        TMap<FString, FName>::TIterator It(SetsIDs);
+        TMap<FGuid, FName>::TIterator It(SetsIDs);
         return It.Key();
     }
-    return FString();
+    return FGuid();
 }
 
 void UOdysseyPalette::HierarchyChanged()
@@ -475,7 +475,7 @@ void UOdysseyPalette::PostLoad()
 
     for (int i = 0; i < Sets.Num(); i++)
     {
-        SetsIDs.Add(FGuid::NewGuid().ToString(), Sets[i]);
+        SetsIDs.Add(FGuid::NewGuid(), Sets[i]);
         NeedsSavingAfterUpgrade = true;
     }
     //---
@@ -516,7 +516,7 @@ void UOdysseyPalette::PostInitProperties()
 
     if (!HasAnyFlags( RF_NeedLoad | RF_WasLoaded))
     {
-        SetsIDs.Add(FGuid::NewGuid().ToString(), "Default Set"); //Only add a default set if it's a newly created asset
+        SetsIDs.Add(FGuid::NewGuid(), "Default Set"); //Only add a default set if it's a newly created asset
     }
 
     PaletteRoot = NewObject<UOdysseyPaletteEntry>(this, UOdysseyPaletteEntryFolder::StaticClass(), NAME_None, RF_Public | RF_Transactional);
