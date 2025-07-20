@@ -240,7 +240,7 @@ FOdysseyPaletteEditorToolkit::BuildToolbarPaletteSection(FToolBarBuilder& iBuild
     iBuilder.BeginSection("ApplySection");
 
     iBuilder.AddWidget(
-        SNew(SButton)
+        SAssignNew(mApplyButton, SButton)
         .ButtonStyle(FAppStyle::Get(), "SimpleButton")
         .OnClicked(this, &FOdysseyPaletteEditorToolkit::OnApplyClicked)
         .ToolTipText(NSLOCTEXT("OdysseyPaletteEditorToolkit", "ApplyTooltip", "Apply the palette and its colors to all assets that use it"))
@@ -327,7 +327,76 @@ FOdysseyPaletteEditorToolkit::OnCurrentSetSelected(FGuid iSet)
 FReply
 FOdysseyPaletteEditorToolkit::OnApplyClicked()
 {
-    for( FName assetName : GetReferencedAssetsViaAssetRegistry() )
+    int numReferencedAssets = GetReferencedAssetsViaAssetRegistry().Num();
+    if( numReferencedAssets == 0 )
+        return FReply::Handled();
+
+    FText confirmText = FText::Format(
+        NSLOCTEXT("PaletteEditor", "ConfirmApply", "Are you sure you want to apply this palette to {0} assets?"),
+        FText::AsNumber(numReferencedAssets)
+    );
+
+    FSlateApplication::Get().PushMenu(
+        mApplyButton->AsShared(),
+        FWidgetPath(),
+        SNew(SBorder)
+        .Padding(10)
+        .BorderImage(FCoreStyle::Get().GetBrush("Menu.Background"))
+        [
+            SNew(SVerticalBox)
+
+                + SVerticalBox::Slot()
+                .AutoHeight()
+                .Padding(5)
+                [
+                    SNew(STextBlock)
+                        .Text(confirmText)
+                ]
+
+                + SVerticalBox::Slot()
+                .AutoHeight()
+                .HAlign(HAlign_Right)
+                .Padding(5)
+                [
+                    SNew(SHorizontalBox)
+
+                        + SHorizontalBox::Slot()
+                        .AutoWidth()
+                        .Padding(2)
+                        [
+                            SNew(SButton)
+                                .Text(FText::FromString("Confirm"))
+                                .OnClicked_Lambda([this]() {
+                                FSlateApplication::Get().DismissAllMenus();
+                                ApplyPaletteToReferencedAssets(); //Apply palette
+                                return FReply::Handled();
+                                    })
+                        ]
+
+                        + SHorizontalBox::Slot()
+                        .AutoWidth()
+                        .Padding(2)
+                        [
+                            SNew(SButton)
+                                .Text(FText::FromString("Cancel"))
+                                .OnClicked_Lambda([]() {
+                                FSlateApplication::Get().DismissAllMenus();
+                                return FReply::Handled();
+                                })
+                        ]
+
+                ]
+        ],
+        FSlateApplication::Get().GetCursorPos(),
+        FPopupTransitionEffect(FPopupTransitionEffect::ContextMenu)
+    );
+
+    return FReply::Handled();
+}
+
+void FOdysseyPaletteEditorToolkit::ApplyPaletteToReferencedAssets()
+{
+    for (FName assetName : GetReferencedAssetsViaAssetRegistry())
     {
         FString pathStr = assetName.ToString();
         FString assetType = FPackageName::GetShortName(pathStr);
@@ -340,11 +409,14 @@ FOdysseyPaletteEditorToolkit::OnApplyClicked()
         {
             //Save the animation before applying the palette, because all these refresh only affect the "on disk" version of the asset, not the dirty "on memory" one.
             //Therefore, if the palette is freshly added to the (then dirtied) animation, the refresh won't apply to it
-            UPackage* package = animation->GetOutermost();
+            /*UPackage* package = animation->GetOutermost();
             FSavePackageArgs saveArgs;
             saveArgs.TopLevelFlags = RF_Standalone;
             saveArgs.Error = GWarn;
+            saveArgs.SaveFlags = SAVE_NoError;
+            FTimerHandle TimerHandle;
             UPackage::SavePackage(package, animation.Get(), *package->GetName(), saveArgs);
+            FlushAsyncLoading();*/
 
             TArray<UOdysseyLayer*> layers = animation->GetLayerStack()->GetLayers();
             for (UOdysseyLayer* layer : layers)
@@ -373,14 +445,19 @@ FOdysseyPaletteEditorToolkit::OnApplyClicked()
         else if (texture.IsValid()) // The asset is valid AND loaded
         {
             UOdysseyTextureLayerStackUserData* textureUserData = Cast<UOdysseyTextureLayerStackUserData>(texture->GetAssetUserDataOfClass(UOdysseyTextureLayerStackUserData::StaticClass()));
-            if( !textureUserData )
+            if (!textureUserData)
                 continue;
 
-            UPackage* package = texture->GetOutermost();
+            /*UPackage* package = texture->GetOutermost();
             FSavePackageArgs saveArgs;
             saveArgs.TopLevelFlags = RF_Standalone;
             saveArgs.Error = GWarn;
+            saveArgs.SaveFlags = SAVE_NoError;
+            FTimerHandle TimerHandle;
             UPackage::SavePackage(package, texture.Get(), *package->GetName(), saveArgs);
+            FlushAsyncLoading();
+            texture->UpdateResource();
+            texture->PostEditChange();*/
 
             TArray<UOdysseyLayer*> layers = textureUserData->GetLayerStack()->GetLayers();
             for (UOdysseyLayer* layer : layers)
@@ -404,7 +481,6 @@ FOdysseyPaletteEditorToolkit::OnApplyClicked()
         }
     }
 
-    return FReply::Handled();
 }
 
 TArray<FName>
