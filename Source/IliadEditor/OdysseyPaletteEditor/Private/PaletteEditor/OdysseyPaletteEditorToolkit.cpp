@@ -3,16 +3,30 @@
 
 #include "PaletteEditor/OdysseyPaletteEditorToolkit.h"
 
+#include "AssetRegistry/IAssetRegistry.h"
+#include "AssetRegistry/AssetRegistryModule.h"
+
 #include "Palette/OdysseyPalette.h"
 #include "Palette/OdysseyPaletteEntryColor.h"
 #include "Palette/OdysseyPaletteEntryFolder.h"
 
 #include "PaletteEditor/OdysseyPaletteEditorToolMenuContext.h"
 
+#include "UObject/SavePackage.h"
+
 #include "Widgets/SOdysseyPaletteTreeView.h"
 #include "Widgets/SOdysseyPaletteSetComboBox.h"
 
+#include "OdysseyAnimation.h"
+#include "OdysseyAnimationCellImageVector.h"
 #include "OdysseyStyle.h"
+#include "OdysseyTextureLayerStackUserData.h"
+#include "OdysseyLayerCell.h"
+#include "OdysseyLayer.h"
+#include "OdysseyMediaVector.h"
+#include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVectorLayer.h"
+#include "LayerStack/OdysseyTextureLayerImageVector.h"
 
 #define LOCTEXT_NAMESPACE "PaletteEditor"
 
@@ -222,6 +236,39 @@ FOdysseyPaletteEditorToolkit::BuildToolbarPaletteSection(FToolBarBuilder& iBuild
         );
 
     iBuilder.EndSection();
+
+    iBuilder.BeginSection("ApplySection");
+
+    iBuilder.AddWidget(
+        SNew(SButton)
+        .ButtonStyle(FAppStyle::Get(), "SimpleButton")
+        .OnClicked(this, &FOdysseyPaletteEditorToolkit::OnApplyClicked)
+        .ToolTipText(NSLOCTEXT("OdysseyPaletteEditorToolkit", "ApplyTooltip", "Apply the palette and its colors to all assets that use it"))
+        .ContentPadding(FMargin(4, 2))
+        .Content()
+        [
+            SNew(SHorizontalBox)
+                + SHorizontalBox::Slot()
+                .AutoWidth()
+                .VAlign(VAlign_Center)
+                [
+                    SNew(SImage)
+                        .Image(FAppStyle::Get().GetBrush("AssetEditor.Apply"))
+                ]
+                + SHorizontalBox::Slot()
+                .AutoWidth()
+                .VAlign(VAlign_Center)
+                .Padding(FMargin(4, 0, 0, 0))
+                [
+                    SNew(STextBlock)
+                        .Text(NSLOCTEXT("OdysseyPaletteEditorToolkit", "Apply", "Apply"))
+                        .TextStyle(FAppStyle::Get(), "NormalText")
+                ]
+        ]
+    );
+
+    iBuilder.EndSection();
+
 }
 
 void
@@ -275,6 +322,113 @@ void
 FOdysseyPaletteEditorToolkit::OnCurrentSetSelected(FGuid iSet)
 {
     mCurrentSet = iSet;
+}
+
+FReply
+FOdysseyPaletteEditorToolkit::OnApplyClicked()
+{
+    for( FName assetName : GetReferencedAssetsViaAssetRegistry() )
+    {
+        FString pathStr = assetName.ToString();
+        FString assetType = FPackageName::GetShortName(pathStr);
+        FString fullObjectPath = FString::Printf(TEXT("%s.%s"), *pathStr, *assetType);
+
+        TSoftObjectPtr<UOdysseyAnimation> animation(fullObjectPath);
+        TSoftObjectPtr<UTexture2D> texture(fullObjectPath);
+
+        if (animation.IsValid()) // The asset is valid AND loaded
+        {
+            //Save the animation before applying the palette, because all these refresh only affect the "on disk" version of the asset, not the dirty "on memory" one.
+            //Therefore, if the palette is freshly added to the (then dirtied) animation, the refresh won't apply to it
+            UPackage* package = animation->GetOutermost();
+            FSavePackageArgs saveArgs;
+            saveArgs.TopLevelFlags = RF_Standalone;
+            saveArgs.Error = GWarn;
+            UPackage::SavePackage(package, animation.Get(), *package->GetName(), saveArgs);
+
+            TArray<UOdysseyLayer*> layers = animation->GetLayerStack()->GetLayers();
+            for (UOdysseyLayer* layer : layers)
+            {
+                for (UOdysseyLayerCell* cell : layer->GetCells())
+                {
+                    UOdysseyAnimationCellImageVector* animationVectorCell;
+                    if (cell->IsA(UOdysseyAnimationCellImageVector::StaticClass()))
+                        animationVectorCell = Cast<UOdysseyAnimationCellImageVector>(cell);
+                    else
+                        continue;
+
+                    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = animationVectorCell->GetMediaProvider().GetMedias<FOdysseyMediaVector>();
+
+                    if (mediaVectors.Num() > 0)
+                    {
+                        for (int i = 0; i < mediaVectors.Num(); i++)
+                        {
+                            FOdysseyVectorCell* vectorCell = mediaVectors[i]->GetScene()->GetCell();
+                            vectorCell->GetLayer()->RequestRedraw(vectorCell, 0);
+                        }
+                    }
+                }
+            }
+        }
+        else if (texture.IsValid()) // The asset is valid AND loaded
+        {
+            UOdysseyTextureLayerStackUserData* textureUserData = Cast<UOdysseyTextureLayerStackUserData>(texture->GetAssetUserDataOfClass(UOdysseyTextureLayerStackUserData::StaticClass()));
+            if( !textureUserData )
+                continue;
+
+            UPackage* package = texture->GetOutermost();
+            FSavePackageArgs saveArgs;
+            saveArgs.TopLevelFlags = RF_Standalone;
+            saveArgs.Error = GWarn;
+            UPackage::SavePackage(package, texture.Get(), *package->GetName(), saveArgs);
+
+            TArray<UOdysseyLayer*> layers = textureUserData->GetLayerStack()->GetLayers();
+            for (UOdysseyLayer* layer : layers)
+            {
+                if (!layer->IsA(UOdysseyTextureLayerImageVector::StaticClass()))
+                    continue;
+
+                UOdysseyTextureLayerImageVector* vectorLayer = Cast<UOdysseyTextureLayerImageVector>(layer);
+
+                TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = vectorLayer->GetMediaProvider(0).GetMedias<FOdysseyMediaVector>();
+
+                if (mediaVectors.Num() > 0)
+                {
+                    for (int i = 0; i < mediaVectors.Num(); i++)
+                    {
+                        FOdysseyVectorCell* vectorCell = mediaVectors[i]->GetScene()->GetCell();
+                        vectorCell->GetLayer()->RequestRedraw(vectorCell, 0);
+                    }
+                }
+            }
+        }
+    }
+
+    return FReply::Handled();
+}
+
+TArray<FName>
+FOdysseyPaletteEditorToolkit::GetReferencedAssetsViaAssetRegistry()
+{
+    TArray<FName> outDependencies;
+
+    if (!mPalette)
+        return outDependencies;
+
+    FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
+    IAssetRegistry& AssetRegistry = AssetRegistryModule.Get();
+
+    FAssetData AssetData = AssetRegistry.GetAssetByObjectPath(FSoftObjectPath(mPalette->GetPathName()));
+    FName AssetPath;
+
+    if (AssetData.IsValid())
+    {
+        AssetPath = AssetData.PackageName;
+    }
+
+    AssetRegistry.GetReferencers(AssetPath, outDependencies);
+
+    return outDependencies;
 }
 
 #undef LOCTEXT_NAMESPACE

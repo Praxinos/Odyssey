@@ -161,9 +161,6 @@ private:
     void OnCurrentColorEntryChanged();
     void RefreshItemsSource();
 
-    FReply AddColorEntry();
-    FReply AddFolderEntry();
-
 protected:
     bool mIsReadOnly;
     TSlateAttribute<UOdysseyPalette*> mPaletteAttribute;

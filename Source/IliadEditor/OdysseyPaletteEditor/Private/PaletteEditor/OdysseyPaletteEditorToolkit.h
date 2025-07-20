@@ -45,7 +45,9 @@ private:
     void AddEntry(UClass* iEntryClass);
     FGuid GetCurrentSet() const;
     void OnCurrentSetSelected(FGuid iSet);
+    FReply OnApplyClicked();
 
+    TArray<FName> GetReferencedAssetsViaAssetRegistry();
     void BuildToolbarPaletteSection(FToolBarBuilder& iBuilder);
 
 private:
