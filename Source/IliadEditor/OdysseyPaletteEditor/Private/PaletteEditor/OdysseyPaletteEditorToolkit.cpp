@@ -362,14 +362,15 @@ void FOdysseyPaletteEditorToolkit::RefreshReferencedAssets()
         {
             //Save the animation before applying the palette, because all these refresh only affect the "on disk" version of the asset, not the dirty "on memory" one.
             //Therefore, if the palette is freshly added to the (then dirtied) animation, the refresh won't apply to it
-            /*UPackage* package = animation->GetOutermost();
+            UPackage* package = animation->GetOutermost();
             FSavePackageArgs saveArgs;
             saveArgs.TopLevelFlags = RF_Standalone;
             saveArgs.Error = GWarn;
             saveArgs.SaveFlags = SAVE_NoError;
-            FTimerHandle TimerHandle;
-            UPackage::SavePackage(package, animation.Get(), *package->GetName(), saveArgs);
-            FlushAsyncLoading();*/
+            FString packageFilename = FPackageName::LongPackageNameToFilename(package->GetName(), FPackageName::GetAssetPackageExtension());
+            UPackage::SavePackage(package, animation.Get(), *packageFilename, saveArgs);
+            FlushAsyncLoading();
+
 
             TArray<UOdysseyLayer*> layers = animation->GetLayerStack()->GetLayers();
             for (UOdysseyLayer* layer : layers)
@@ -401,16 +402,14 @@ void FOdysseyPaletteEditorToolkit::RefreshReferencedAssets()
             if (!textureUserData)
                 continue;
 
-            /*UPackage* package = texture->GetOutermost();
+            UPackage* package = texture->GetOutermost();
             FSavePackageArgs saveArgs;
             saveArgs.TopLevelFlags = RF_Standalone;
             saveArgs.Error = GWarn;
             saveArgs.SaveFlags = SAVE_NoError;
-            FTimerHandle TimerHandle;
-            UPackage::SavePackage(package, texture.Get(), *package->GetName(), saveArgs);
+            FString packageFilename = FPackageName::LongPackageNameToFilename(package->GetName(), FPackageName::GetAssetPackageExtension());
+            UPackage::SavePackage(package, texture.Get(), *packageFilename, saveArgs);
             FlushAsyncLoading();
-            texture->UpdateResource();
-            texture->PostEditChange();*/
 
             TArray<UOdysseyLayer*> layers = textureUserData->GetLayerStack()->GetLayers();
             for (UOdysseyLayer* layer : layers)
