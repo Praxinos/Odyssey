@@ -272,7 +272,7 @@ FOdysseyVectorBucket::GetColor()
                 FOdysseyVectorLayer* layer = mOwner->GetLayer();
 
                 return layer ? Cast< UOdysseyPaletteEntryColor >(mPaletteEntry)->GetColor(layer->GetPaletteSetID( palette ))
-                             : mSolidColor;
+                             : FColor(0,0,0,255);
             }
             else
             {
