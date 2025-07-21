@@ -5,6 +5,8 @@
 
 #include "AssetRegistry/IAssetRegistry.h"
 #include "AssetRegistry/AssetRegistryModule.h"
+#include "Framework/Notifications/NotificationManager.h"
+#include "Widgets/Notifications/SNotificationList.h"
 
 #include "Palette/OdysseyPalette.h"
 #include "Palette/OdysseyPaletteEntryColor.h"
@@ -20,13 +22,13 @@
 #include "OdysseyAnimation.h"
 #include "OdysseyAnimationCellImageVector.h"
 #include "OdysseyStyle.h"
+#include "OdysseyTextureLayerImageVector.h"
 #include "OdysseyTextureLayerStackUserData.h"
 #include "OdysseyLayerCell.h"
 #include "OdysseyLayer.h"
 #include "OdysseyMediaVector.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorLayer.h"
-#include "LayerStack/OdysseyTextureLayerImageVector.h"
 
 #define LOCTEXT_NAMESPACE "PaletteEditor"
 
@@ -237,13 +239,13 @@ FOdysseyPaletteEditorToolkit::BuildToolbarPaletteSection(FToolBarBuilder& iBuild
 
     iBuilder.EndSection();
 
-    iBuilder.BeginSection("ApplySection");
+    iBuilder.BeginSection("RefreshSection");
 
     iBuilder.AddWidget(
-        SAssignNew(mApplyButton, SButton)
+        SAssignNew(mRefreshButton, SButton)
         .ButtonStyle(FAppStyle::Get(), "SimpleButton")
-        .OnClicked(this, &FOdysseyPaletteEditorToolkit::OnApplyClicked)
-        .ToolTipText(NSLOCTEXT("OdysseyPaletteEditorToolkit", "ApplyTooltip", "Apply the palette and its colors to all assets that use it"))
+        .OnClicked(this, &FOdysseyPaletteEditorToolkit::OnRefreshClicked)
+        .ToolTipText(NSLOCTEXT("OdysseyPaletteEditorToolkit", "RefreshTooltip", "Refresh the assets that uses this palette"))
         .ContentPadding(FMargin(4, 2))
         .Content()
         [
@@ -261,7 +263,7 @@ FOdysseyPaletteEditorToolkit::BuildToolbarPaletteSection(FToolBarBuilder& iBuild
                 .Padding(FMargin(4, 0, 0, 0))
                 [
                     SNew(STextBlock)
-                        .Text(NSLOCTEXT("OdysseyPaletteEditorToolkit", "Apply", "Apply"))
+                        .Text(NSLOCTEXT("OdysseyPaletteEditorToolkit", "Refresh", "Refresh"))
                         .TextStyle(FAppStyle::Get(), "NormalText")
                 ]
         ]
@@ -325,76 +327,27 @@ FOdysseyPaletteEditorToolkit::OnCurrentSetSelected(FGuid iSet)
 }
 
 FReply
-FOdysseyPaletteEditorToolkit::OnApplyClicked()
+FOdysseyPaletteEditorToolkit::OnRefreshClicked()
 {
     int numReferencedAssets = GetReferencedAssetsViaAssetRegistry().Num();
     if( numReferencedAssets == 0 )
         return FReply::Handled();
 
+    RefreshReferencedAssets();
+
     FText confirmText = FText::Format(
-        NSLOCTEXT("PaletteEditor", "ConfirmApply", "Are you sure you want to apply this palette to {0} assets?"),
-        FText::AsNumber(numReferencedAssets)
+    NSLOCTEXT("PaletteEditor", "RefreshReferencedAsset", "{0} assets have been refreshed"),
+    FText::AsNumber(numReferencedAssets)
     );
 
-    FSlateApplication::Get().PushMenu(
-        mApplyButton->AsShared(),
-        FWidgetPath(),
-        SNew(SBorder)
-        .Padding(10)
-        .BorderImage(FCoreStyle::Get().GetBrush("Menu.Background"))
-        [
-            SNew(SVerticalBox)
-
-                + SVerticalBox::Slot()
-                .AutoHeight()
-                .Padding(5)
-                [
-                    SNew(STextBlock)
-                        .Text(confirmText)
-                ]
-
-                + SVerticalBox::Slot()
-                .AutoHeight()
-                .HAlign(HAlign_Right)
-                .Padding(5)
-                [
-                    SNew(SHorizontalBox)
-
-                        + SHorizontalBox::Slot()
-                        .AutoWidth()
-                        .Padding(2)
-                        [
-                            SNew(SButton)
-                                .Text(FText::FromString("Confirm"))
-                                .OnClicked_Lambda([this]() {
-                                FSlateApplication::Get().DismissAllMenus();
-                                ApplyPaletteToReferencedAssets(); //Apply palette
-                                return FReply::Handled();
-                                    })
-                        ]
-
-                        + SHorizontalBox::Slot()
-                        .AutoWidth()
-                        .Padding(2)
-                        [
-                            SNew(SButton)
-                                .Text(FText::FromString("Cancel"))
-                                .OnClicked_Lambda([]() {
-                                FSlateApplication::Get().DismissAllMenus();
-                                return FReply::Handled();
-                                })
-                        ]
-
-                ]
-        ],
-        FSlateApplication::Get().GetCursorPos(),
-        FPopupTransitionEffect(FPopupTransitionEffect::ContextMenu)
-    );
+    FNotificationInfo Info(confirmText);
+    Info.ExpireDuration = 5.0f;
+    FSlateNotificationManager::Get().AddNotification(Info)->SetCompletionState(SNotificationItem::CS_Success);
 
     return FReply::Handled();
 }
 
-void FOdysseyPaletteEditorToolkit::ApplyPaletteToReferencedAssets()
+void FOdysseyPaletteEditorToolkit::RefreshReferencedAssets()
 {
     for (FName assetName : GetReferencedAssetsViaAssetRegistry())
     {

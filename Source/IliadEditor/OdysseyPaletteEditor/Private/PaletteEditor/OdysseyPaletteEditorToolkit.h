@@ -45,8 +45,8 @@ private:
     void AddEntry(UClass* iEntryClass);
     FGuid GetCurrentSet() const;
     void OnCurrentSetSelected(FGuid iSet);
-    FReply OnApplyClicked();
-    void ApplyPaletteToReferencedAssets();
+    FReply OnRefreshClicked();
+    void RefreshReferencedAssets();
 
     TArray<FName> GetReferencedAssetsViaAssetRegistry();
     void BuildToolbarPaletteSection(FToolBarBuilder& iBuilder);
@@ -56,6 +56,6 @@ private:
     UOdysseyPalette* mPalette;
     FGuid mCurrentSet;
 
-    TSharedPtr<SButton> mApplyButton;
+    TSharedPtr<SButton> mRefreshButton;
     TSharedPtr<SOdysseyPaletteTreeView> mTreeView;
 };
