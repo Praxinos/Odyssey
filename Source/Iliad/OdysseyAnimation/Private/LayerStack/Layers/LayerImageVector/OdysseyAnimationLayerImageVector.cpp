@@ -581,7 +581,7 @@ UOdysseyAnimationLayerImageVector::GetPaletteSetID( UOdysseyPalette* iPalette )
 
     if( animation )
     {
-        for( int32 i = 0; animation->Palettes.Num(); i++ )
+        for( int32 i = 0; i < animation->Palettes.Num(); i++ )
         {
             if( animation->Palettes[i]->mPalette == iPalette )
             {
