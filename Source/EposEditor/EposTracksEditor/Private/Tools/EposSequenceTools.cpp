@@ -206,7 +206,9 @@ BoardSequenceTools::GuessActorToSelect( ISequencer* iSequencer, UMovieSceneSeque
     //                                                                } );
 
     // Auto-select camera if it's the last actor type directly selected by the user
-    if( mDirectActorsSelectedHistory.Num() && mDirectActorsSelectedHistory.Last()->IsA<ACineCameraActor>() )
+    if( mDirectActorsSelectedHistory.Num()
+        && mDirectActorsSelectedHistory.Last()
+        && mDirectActorsSelectedHistory.Last()->IsA<ACineCameraActor>() )
     //if( actors.Num() )
     {
         UMovieSceneSequence* sequence = nullptr;
@@ -224,7 +226,9 @@ BoardSequenceTools::GuessActorToSelect( ISequencer* iSequencer, UMovieSceneSeque
     //                                                {
     //                                                    return iActor->IsA<AOdysseyAnimationActor>();
     //                                                } );
-    //if( mDirectActorsSelectedHistory.Num() && mDirectActorsSelectedHistory.Last()->IsA<AOdysseyAnimationActor>() )
+    //if( mDirectActorsSelectedHistory.Num()
+    //    && mDirectActorsSelectedHistory.Last()
+    //    && mDirectActorsSelectedHistory.Last()->IsA<AOdysseyAnimationActor>() )
     //if( actors.Num() )
     {
         TArray<AOdysseyAnimationActor*> animations;
