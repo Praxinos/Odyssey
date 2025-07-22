@@ -1,0 +1,365 @@
+
+name: 📝Check list before release
+description: List all entries to check before a release
+title: Check list - vX.X.XX - xx/xx/xxxx [Windows|MacOSX]
+type: Task
+labels: Check List
+projects: Praxinos/15
+# assignees:
+
+body:
+
+  - type: markdown
+    attributes:
+      value: |
+        # Pré-requis
+
+  - type: checkboxes
+    id: prerequisites
+    attributes:
+      label: "Pré-requis"
+      options:
+        - label: "Réinitialiser Odyssey en supprimant les fichiers .ini de la config"
+        - label: "Démarrer un projet vierge pour vérifier le layout ou les raccourcis non-parasités par des paramètres personnalisés"
+        - label: "About page a le bon IDDN et les bonnes personnes et les bonnes librairies"
+
+  - type: markdown
+    attributes:
+      value: |
+        # Drawing
+
+  - type: checkboxes
+    id: iliad-texture-editor
+    attributes:
+      label: "ILIAD Texture Editor"
+      options:
+        - label: "Création & ouverture de tous les formats de texture et vérifier que l'on peut dessiner"
+        - label: "Créer et tester une Texture Verticale"
+        - label: "Edition d'une texture existante en double cliquant dessus"
+        - label: "Vérification du layout depuis un projet vierge"
+        - label: "Exporter une Texture depuis le Texture Editor"
+        - label: "Exporter une Texture depuis le Content Browser"
+        - label: "Vérification du live update entre une texture non créée par ILIAD et un objet 3D  (en mode noMipMap)"
+        - label: "Vérification du live update entre une texture créée par ILIAD et un objet 3D  (en mode noMipMap)"
+        - label: "Prise en charge tablette (Pression + clic gauche et droit)"
+        - label: "Tester les modes de fusion des brosses"
+        - label: "Tester les modes d'alpha"
+        - label: "Déplacer les fenêtres"
+        - label: "Sauvegarder une texture"
+        - label: "Fermer / rouvrir une texture"
+        - label: "Utiliser la corbeille"
+        - label: "Undo / Redo"
+        - label: "Pot de peinture"
+        - label: "Sliders Color"
+        - label: "Color Wheel"
+        - label: "Color Wheel change hex values"
+        - label: "Raccourcis : color picker, rotation, pan, delete..."
+        - label: "Sélectionner un mesh / le supprimer"
+
+  - type: checkboxes
+    id: layer-stack
+    attributes:
+      label: "Layer Stack (tester des mix raster & vector)"
+      options:
+        - label: "Créer un calque Raster"
+        - label: "Créer un calque Vector"
+        - label: "Déplacer un calque"
+        - label: "Dupliquer un calque"
+        - label: "Supprimer un calque"
+        - label: "Renommer un calque"
+        - label: "Fusionner un calque"
+        - label: "Verrouiller / déverrouiller un calque"
+        - label: "Verrouiller / déverrouiller l'Alpha d'un calque"
+        - label: "Masquer / afficher un calque"
+        - label: "Modifier l'opacité d'un calque"
+        - label: "Modifier le mode de fusion d'un calque"
+        - label: "Créer un dossier"
+        - label: "Déplacer un dossier"
+        - label: "Supprimer un dossier"
+        - label: "Renommer un dossier"
+        - label: "Cliquer glisser un calque dans un dossier"
+        - label: "Dupliquer un dossier"
+        - label: "Aplatir un dossier"
+        - label: "Modifier l'opacité d'un dossier"
+        - label: "Modifier le mode de fusion d'un dossier"
+        - label: "Masquer / afficher un dossier"
+        - label: "Verrouiller le dossier"
+        - label: "Créer un calque dans un dossier"
+        - label: "Déplacer un calque dans un dossier"
+        - label: "Déplacer un dossier dans un dossier"
+        - label: "Dupliquer un calque dans un dossier"
+        - label: "Supprimer un calque dans un dossier"
+        - label: "Renommer un calque dans un dossier"
+        - label: "Fusionner un calque dans un dossier"
+        - label: "Verrouiller / déverrouiller un calque dans un dossier"
+        - label: "Verrouiller / déverrouiller l'Alpha d'un calque dans un dossier"
+        - label: "Masquer / afficher un calque dans un dossier"
+        - label: "Modifier l'opacité d'un calque dans un dossier"
+        - label: "Modifier le mode de fusion d'un calque dans un dossier"
+        - label: "Tester la multi sélection"
+
+  - type: checkboxes
+    id: odyssey-brush
+    attributes:
+      label: "Odyssey Brush"
+      options:
+        - label: "Test de toutes les brosses du pack par défaut (si mise à jour d'ULIS)"
+        - label: "Création d'une Odyssey brush"
+        - label: "Modifier une Odyssey Brush (et voir automatiquement les modif en l'utilisant)"
+        - label: "Fonctionnement des noeuds les plus basiques."
+        - label: "Sauvegarde d'une Odyssey brush"
+        - label: "Fermer / rouvrir une Odyssey brush"
+        - label: "Faire fonctionner les Keydowns des brosses"
+        - label: "Tester le Line Smoothing"
+
+  - type: checkboxes
+    id: paint-viewport
+    attributes:
+      label: "Paint Viewport"
+      options:
+        - label: "Editer une texture via le viewport d'Unreal"
+        - label: "Dessiner sur un objet avec plusieurs matériaux"
+        - label: "Dessiner sur un objet avec plusieurs textures"
+        - label: "Pipette pour choisir l'acteur"
+        - label: "Bonne prise en charge du stylet / souris"
+        - label: "Déplacer / Repositionner les panneaux"
+        - label: "Undo / Redo"
+        - label: "Créer / Editer / Supprimer les calques"
+        - label: "Mise à jour automatique de la texture en quittant ILIAD"
+        - label: "Prévention d'ouverture multiples"
+        - label: "Basculer d'ILIAD à toute autre manipulation dans le viewport"
+        - label: "Animer en 2D dans un contexte 3D"
+        - label: "Se déplacer autour de l'objet avec Alt, Clic droit, clic gauche, clic milieu"
+
+  - type: markdown
+    attributes:
+      value: |
+        # Storyboard
+
+  - type: checkboxes
+    id: create-manage-shot-board-in-sequencer
+    attributes:
+      label: "Création et agencement des Shots / Board Sequence depuis le Sequencer"
+      options:
+        - label: "'Start Storyboarding' génère un Board Sequence et ouvre le Sequencer"
+        - label: "Créer un Board Sequence depuis la partie gauche du Sequencer"
+        - label: "Créer un Shot Sequence depuis la partie gauche du Sequencer"
+        - label: "Créer plusieurs Shot Sequence à la droite du Shot Sequence courant"
+        - label: "Créer plusieurs Shot Sequence à la droite du Shot Sequence courant avec une durée custom"
+        - label: "Créer plusieurs Board Sequence à la droite du Shot Sequence courant"
+        - label: "Créer plusieurs Board Sequence à la droite du Shot Sequence courant avec une durée custom"
+        - label: "Créer plusieurs Shot Sequence à la gauche du Shot Sequence courant"
+        - label: "Créer plusieurs Shot Sequence à la gauche du Shot Sequence courant avec une durée custom"
+        - label: "Créer plusieurs Board Sequence à la gauche du Shot Sequence courant"
+        - label: "Créer plusieurs Board Sequence à la gauche du Shot Sequence courant avec une durée custom"
+        - label: "Déplacer les Shot et Board Sequence dans le Sequencer"
+        - label: "Créer une Camera + Plane"
+        - label: "Changer la durée d'un Shot / Board Sequence dans le Sequencer"
+        - label: "Vérifier que le changement de durée affecte bien le Visibility in / out dans Shot Sequence"
+        - label: "Créer une Take et effectuer un changement visible"
+        - label: "Switcher entre 2 Takes"
+        - label: "Créer plusieurs Shot Sequence à la droite du Board Sequence courant"
+        - label: "Créer plusieurs Shot Sequence à la droite du Board Sequence courant avec une durée custom"
+        - label: "Créer plusieurs Board Sequence à la droite du Board Sequence courant"
+        - label: "Créer plusieurs Board Sequence à la droite du Board Sequence courant avec une durée custom"
+        - label: "Créer plusieurs Shot Sequence à la gauche du Board Sequence courant"
+        - label: "Créer plusieurs Shot Sequence à la gauche du Board Sequence courant avec une durée custom"
+        - label: "Créer plusieurs Board Sequence à la gauche du Board Sequence courant"
+        - label: "Créer plusieurs Board Sequence à la gauche du Board Sequence courant avec une durée custom"
+        - label: "Cloner un Shot (à droite et à gauche du Shot courant)"
+        - label: "Cloner un Shot avec des Drawings vides (à droite et à gauche du Shot courant)"
+        - label: "Supprimer un Shot (puis annuler pour qu'il revienne)"
+
+  - type: checkboxes
+    id: create-manage-shot-board-in-content-browser
+    attributes:
+      label: "Création et agencement des Shots / Board Sequence depuis le Content Browser"
+      options:
+        - label: "Créer un Shot Sequence depuis le Content Browser"
+        - label: "Drag and drop le Shot Sequence dans un Board Sequence ouvert dans le Sequencer"
+        - label: "Créer un Board Sequence depuis le Content Browser"
+        - label: "Drag and drop le Board Sequence dans un Board Sequence ouvert dans le Sequencer"
+        - label: "Générer un Board Sequence à partir d'une séquence d'images importée"
+
+  - type: checkboxes
+    id: drawings
+    attributes:
+      label: "Gestion des Drawings"
+      options:
+        - label: "Créer plusieurs Drawings"
+        - label: "Vérifier que le scrub à la main met bien à jour les Materials"
+        - label: "Dessiner dans les Drawings avec ILIAD"
+        - label: "Activer la Table Lumineuse"
+        - label: "Fliper d'un Drawing à l'autre"
+        - label: "Déplacer les Drawings"
+        - label: "Cloner un Drawing"
+        - label: "Dupliquer un Drawing (depuis le Shot View, avec Alt)"
+        - label: "Supprimer un Drawing"
+        - label: "Editer un Drawing"
+
+  - type: checkboxes
+    id: planes
+    attributes:
+      label: "Gestion des Planes"
+      options:
+        - label: "Créer un nouveau Plane"
+        - label: "Créer un nouveau Plane avec Safe Margins"
+        - label: "Créer un nouveau Plane avec Safe Margins, sans le Relative Scaling verrouillé"
+        - label: "Plane Distance: Scale 100% Camera"
+        - label: "Plane Distance: Relative Scale (modifier sa taille absolue au préalable)"
+        - label: "Plane Distance: No scale"
+        - label: "Cacher le Plane"
+        - label: "Détacher le Plane"
+        - label: "Collapse Plane"
+        - label: "Supprimer Plane"
+        - label: "Créer des clés d'opacité"
+
+  - type: checkboxes
+    id: camera
+    attributes:
+      label: "Caméra"
+      options:
+        - label: "Piloter / Ejecter la Camera"
+        - label: "Créer des clés Camera (Auto Key actif)"
+        - label: "Créer des clés Camera (Auto Key inactif)"
+        - label: "Fliper d'une clé Caméra à l'autre"
+        - label: "Camera Focal Length: No Scale"
+        - label: "Camera Focal Length: Relative Scale (modifier la taille absolue d'un Plane ou la Focal Length au préalable)"
+        - label: "Camera Focal Length: Scale 100% Camera"
+        - label: "Activer la Camera du Board Sequence"
+        - label: "Scrub dans le Sequencer"
+        - label: "Lecture du Sequencer"
+
+  - type: checkboxes
+    id: gui
+    attributes:
+      label: "Interface & Ergonomie"
+      options:
+        - label: "Tester quelques raccourcis, dont les suivants : next / prev Drawing | Next / prev Shot Sequence (uniquement dans la Shot View) | Create Drawing | Create Plane"
+        - label: "Changer les Settings des Material"
+        - label: "Changer les Settings de la Table Lumineuse"
+        - label: "Créer des Notes dans un Board"
+        - label: "Créer des Notes dans un Shot"
+        - label: "Editer les Notes"
+        - label: "Afficher les Notes (Overlay / Viewport)"
+        - label: "Tourner / zoomer le Viewport"
+        - label: "Editer les Settings de la Naming Convention"
+        - label: "Editer les Settings des Tracks"
+        - label: "Changer 'Arrange Sections'"
+        - label: "Undo / redo"
+        - label: "Vérifier la compatibilité Board Sequence avec Level Sequence"
+
+  - type: checkboxes
+    id: export
+    attributes:
+      label: "Export"
+      options:
+        - label: "Exporter une séquence en ffmpeg"
+        - label: "Exporter une séquence en pdf storyboard"
+        - label: "Exporter une séquence en Movie Render Queue"
+        - label: "Exporter une séquence d'images"
+
+  - type: markdown
+    attributes:
+      value: |
+        # Animation
+
+  - type: checkboxes
+    id: animation
+    attributes:
+      label: "Animation"
+      options:
+        - label: "Tester la multi sélection des calques"
+        - label: "Créer un calque"
+        - label: "Déplacer un calque"
+        - label: "Dupliquer un calque"
+        - label: "Supprimer un calque"
+        - label: "Renommer un calque"
+        - label: "Fusionner un calque"
+        - label: "Verrouiller / déverrouiller un calque"
+        - label: "Verrouiller / déverrouiller l'Alpha d'un calque"
+        - label: "Masquer / afficher un calque"
+        - label: "Modifier l'opacité d'un calque"
+        - label: "Modifier le mode de fusion d'un calque"
+        - label: "Créer un dossier"
+        - label: "Déplacer un dossier"
+        - label: "Supprimer un dossier"
+        - label: "Renommer un dossier"
+        - label: "Cliquer glisser un calque dans un dossier"
+        - label: "Dupliquer un dossier"
+        - label: "Aplatir un dossier"
+        - label: "Modifier l'opacité d'un dossier"
+        - label: "Modifier le mode de fusion d'un dossier"
+        - label: "Masquer / afficher un dossier"
+        - label: "Verrouiller le dossier"
+        - label: "Créer un calque dans un dossier"
+        - label: "Déplacer un calque dans un dossier"
+        - label: "Déplacer un dossier dans un dossier"
+        - label: "Dupliquer un calque dans un dossier"
+        - label: "Supprimer un calque dans un dossier"
+        - label: "Renommer un calque dans un dossier"
+        - label: "Fusionner un calque dans un dossier"
+        - label: "Verrouiller / déverrouiller un calque dans un dossier"
+        - label: "Verrouiller / déverrouiller l'Alpha d'un calque dans un dossier"
+        - label: "Masquer / afficher un calque dans un dossier"
+        - label: "Modifier l'opacité d'un calque dans un dossier"
+        - label: "Modifier le mode de fusion d'un calque dans un dossier"
+        - label: "Tester la multi sélection des cellules"
+        - label: "Créer des cellules d'animation"
+        - label: "Supprimer des cellules d'animation"
+        - label: "Déplacer les clés"
+        - label: "Navigation (R | T)"
+        - label: "Lecture / pause"
+        - label: "Accès à tous les panneaux / fonctions d'ILIAD"
+        - label: "Vérfier que l'animation est lisible en 3D (Media Plate, Sequencer, etc)"
+        - label: "Vérifier que l'animation est éditable en 3D"
+        - label: "Augmenter / réduire longueur d'une keyframe"
+        - label: "Tester la LightTable"
+        - label: "Tester l'Out Of Pegs"
+        - label: "Tester les Flips"
+        - label: "Tester les pre/post behavior"
+
+  - type: checkboxes
+    id: vector-tools
+    attributes:
+      label: "Vector tools"
+      options:
+        - label: "Dessiner un path"
+        - label: "Dessiner au stylet puis à la souris"
+        - label: "cocher/décocher stitch et desinner des path connectés"
+        - label: "Changer le stitiching radius ( y compris valeurs farfelues)"
+        - label: "Dessiner des primitives"
+        - label: "Déplacer un vertex"
+        - label: "Déplacer un path"
+        - label: "Déplacer un objet"
+        - label: "Modifier l'épaisseur d'un path"
+        - label: "Modifier l'épaisseur d'un objet"
+        - label: "Déformer un path"
+        - label: "Déformer un objet"
+        - label: "Cut"
+        - label: "Cut plusieurs paths en même temps"
+        - label: "Cut dans le vide"
+        - label: "Modifier la courbure d'un vertex"
+        - label: "Angles et arrondis"
+        - label: "Supprimer un vertex (Alt)"
+        - label: "Gomme vectorielle"
+        - label: "Renouer des paths"
+        - label: "Redimensionenr un objet"
+        - label: "Tourner un objet"
+        - label: "Déplacer le pivot pour tourner un objet"
+        - label: "Tester le clic droit"
+        - label: "Faire un group paint et en modifier les traits"
+        - label: "Sélectionner plusieurs paths dans Vector Scene Tree View"
+
+  - type: checkboxes
+    id: color-palette
+    attributes:
+      label: "Color Palette"
+      options:
+        - label: "Créer une palette"
+        - label: "Ajouter des couleurs"
+        - label: "Nommer les couleurs"
+        - label: "Créer un set"
+        - label: "Editer les couleurs"
+        - label: "Sauvegarder la palette"
+        - label: "Charger une autre palette"
