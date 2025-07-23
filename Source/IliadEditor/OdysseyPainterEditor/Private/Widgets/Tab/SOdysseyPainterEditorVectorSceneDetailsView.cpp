@@ -14,6 +14,9 @@
 #include "OdysseyAnimationLayerImageVector.h"
 #include "OdysseyTextureLayerImageVector.h"
 
+#include "IDetailPropertyRow.h"
+#include "DetailWidgetRow.h"
+
 #include "HUD/OdysseyVectorHUD.h"
 
 
@@ -74,15 +77,20 @@ SOdysseyPainterEditorVectorSceneDetailsView::Construct( const FArguments& InArgs
 
     if( iEditDirect == false )
     {
-        mObjectView->SetEditionMode( UOdysseyPainterEditorVectorObjectView::EditionMode::OnValidation );
-        mGroupView->SetEditionMode( UOdysseyPainterEditorVectorObjectView::EditionMode::OnValidation );
-        mPathView->SetEditionMode( UOdysseyPainterEditorVectorObjectView::EditionMode::OnValidation );
-        mGroupPaintView->SetEditionMode( UOdysseyPainterEditorVectorObjectView::EditionMode::OnValidation );
+        mObjectView->SetEditionMode( EObjectViewEditionMode::OnValidation );
+        mGroupView->SetEditionMode( EObjectViewEditionMode::OnValidation );
+        mPathView->SetEditionMode( EObjectViewEditionMode::OnValidation );
+        mGroupPaintView->SetEditionMode( EObjectViewEditionMode::OnValidation );
     }
 
     UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw(this, &SOdysseyPainterEditorVectorSceneDetailsView::OnCurrentLayerChanged);
 
     mEditor->OnSourceChanged().AddSP( this, &SOdysseyPainterEditorVectorSceneDetailsView::OnSourceChanged );
+
+    if( iEditDirect == false )
+    {
+        mDetailsView->SetExtensionHandler(SharedThis(this));
+    }
 }
 
 void
@@ -172,6 +180,46 @@ SOdysseyPainterEditorVectorSceneDetailsView::Update()
         }
     }
 }
+
+// IDetailPropertyExtensionHandler::ExtendWidgetRow
+void
+SOdysseyPainterEditorVectorSceneDetailsView::ExtendWidgetRow ( FDetailWidgetRow& InWidgetRow
+                                                             , const IDetailLayoutBuilder& InDetailBuilder
+                                                             , const UClass* InObjectClass
+                                                             , TSharedPtr< IPropertyHandle > iPropertyHandle )
+{
+    iPropertyHandle.Get()->SetOnPropertyValueChanged( FSimpleDelegate::CreateLambda( [ this
+                                                                                     , InWidgetRow
+                                                                                     , iPropertyHandle ]()
+        {
+            iPropertyHandle.Get()->SetPropertyDisplayName( FText::Format( INVTEXT("*{0}"), FText::FromString(iPropertyHandle.Get()->GetProperty()->GetName()) ) );
+
+            InWidgetRow.NameWidget.Widget->Invalidate( EInvalidateWidgetReason::Visibility );
+        } ) );
+}
+
+bool
+SOdysseyPainterEditorVectorSceneDetailsView::IsPropertyExtendable( const UClass* InObjectClass
+                                                                 , const IPropertyHandle& PropertyHandle) const
+{
+    return true;
+}
+/*
+void
+SOdysseyPainterEditorVectorSceneDetailsView::PropertyValueChanged( FDetailWidgetRow& InWidgetRow )
+{
+    mDetailsView.Get()->ForceRefresh();
+}
+*/
+/*
+void
+SOdysseyPainterEditorVectorSceneDetailsView::PropertyValueChanged( FDetailWidgetRow& InWidgetRow, TSharedPtr< IPropertyHandle > iPropertyHandle )
+{
+    iPropertyHandle.Get()->SetPropertyDisplayName( FText::Format(INVTEXT ("*{0}"), iPropertyHandle->GetPropertyDisplayName() ) );
+
+    mDetailsView.Get()->ForceRefresh();
+}
+*/
 
 void
 SOdysseyPainterEditorVectorSceneDetailsView::OnVectorLayerNotify( FOdysseyVectorLayer* iLayer, uint64 iSignalFlags )

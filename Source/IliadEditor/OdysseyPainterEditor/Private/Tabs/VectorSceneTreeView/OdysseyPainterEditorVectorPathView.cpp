@@ -9,6 +9,7 @@ UOdysseyPainterEditorVectorPathView::~UOdysseyPainterEditorVectorPathView()
 
 UOdysseyPainterEditorVectorPathView::UOdysseyPainterEditorVectorPathView()
     : UOdysseyPainterEditorVectorObjectView()
+    , PathWidth ( 100.0f )
     , Brush ( nullptr )
     , mPathPropertyBits( { 0 } )
 {
@@ -44,19 +45,47 @@ UOdysseyPainterEditorVectorPathView::ClearPropertyBits()
     memset( &mPathPropertyBits, 0, sizeof( mPathPropertyBits ) );
 }
 
+bool
+UOdysseyPainterEditorVectorPathView::HasPropertyBits()
+{
+    // we use a loop so that we don't forget any flags, even the ones that will be added later
+    for( uint32 i = 0; i < sizeof( mPathPropertyBits ); i++  )
+    {
+        if( mPathPropertyBits.raw[i] )
+        {
+            return true;
+        }
+    }
+
+    return UOdysseyPainterEditorVectorObjectView::HasPropertyBits();
+}
+
 void
 UOdysseyPainterEditorVectorPathView::ApplyPropertyBits( FOdysseyVectorObject* iObject )
 {
-    FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iObject);
+    UOdysseyPainterEditorVectorObjectView::ApplyPropertyBits( iObject );
 
-    if( mPathPropertyBits.JointType )
-        path->SetJointType( JointType, true );
+    if( iObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+    {
+        FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iObject);
 
-    if( mPathPropertyBits.Brush )
-        path->SetBrush( Brush );
+        if( mPathPropertyBits.PathWidth )
+        {
+            for( FOdysseyVectorVertex* vertex : path->GetVertexList() )
+            {
+                vertex->SetRadius( vertex->GetRadius() * PathWidth * 0.01f );
+            }
+        }
 
-    if( mPathPropertyBits.MiterLimit )
-        path->SetMiterLimit( MiterLimit, true );
+        if( mPathPropertyBits.JointType )
+            path->SetJointType( JointType, true );
+
+        if( mPathPropertyBits.Brush )
+            path->SetBrush( Brush );
+
+        if( mPathPropertyBits.MiterLimit )
+            path->SetMiterLimit( MiterLimit, true );
+    }
 }
 
 void
@@ -67,6 +96,9 @@ UOdysseyPainterEditorVectorPathView::PropertyChanged( const FName& iPropertyName
     UOdysseyPainterEditorVectorObjectView::PropertyChanged( iPropertyName
                                                           , iMemberPropertyName
                                                           , iCategory );
+
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorPathView, PathWidth) )
+        mPathPropertyBits.PathWidth = 1;
 
     if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorPathView, JointType) )
         mPathPropertyBits.JointType = 1;

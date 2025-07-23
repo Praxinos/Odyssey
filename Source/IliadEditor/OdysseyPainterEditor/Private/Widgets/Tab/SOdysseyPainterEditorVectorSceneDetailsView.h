@@ -4,6 +4,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "IDetailPropertyExtensionHandler.h"
+#include "IDetailChildrenBuilder.h"
+#include "DetailWidgetRow.h"
 
 class UOdysseyPainterEditorVectorObjectView;
 class UOdysseyPainterEditorVectorPathView;
@@ -14,6 +17,7 @@ class FOdysseyVectorGroupPaint;
 class FOdysseyPainterEditor;
 class FOdysseyVectorLayer;
 class UOdysseyLayerStack;
+struct FPropertyChangedEvent;
 
 /**
  * Implements the Scene Tree View Widget
@@ -21,6 +25,7 @@ class UOdysseyLayerStack;
 class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorSceneDetailsView
     : public SCompoundWidget
     , public FGCObject
+    , public IDetailPropertyExtensionHandler
 {
     SLATE_DECLARE_WIDGET(SOdysseyPainterEditorVectorSceneDetailsView, SCompoundWidget)
 
@@ -41,9 +46,19 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorSceneDetailsView
         void Update();
         void ValidateProperties();
 
+    // implements IDetailPropertyExtensionHandler
+    public:
+        virtual void ExtendWidgetRow ( FDetailWidgetRow& InWidgetRow
+                                     , const IDetailLayoutBuilder& InDetailBuilder
+                                     , const UClass* InObjectClass
+                                     , TSharedPtr< IPropertyHandle > PropertyHandle ) override;
+        virtual bool IsPropertyExtendable( const UClass* InObjectClass
+                                         , const IPropertyHandle& PropertyHandle) const override;
+
     protected:
         virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
         virtual FString GetReferencerName() const override;
+        void PropertyValueChanged( FDetailWidgetRow& InWidgetRow );
 
     protected:
         TSharedPtr<IDetailsView> CreateObjectPropertiesPanel();

@@ -19,7 +19,7 @@ UOdysseyPainterEditorVectorObjectView::~UOdysseyPainterEditorVectorObjectView()
 UOdysseyPainterEditorVectorObjectView::UOdysseyPainterEditorVectorObjectView()
     : mEditor( nullptr )
     , mScene( nullptr )
-    , mEditionMode( EditionMode::Direct )
+    , mEditionMode( EObjectViewEditionMode::Direct )
     , mObjectPropertyBits ( {0} )
     , bDisplayBackgroundProperties( true )
     , bDisplayForegroundProperties( true )
@@ -45,7 +45,7 @@ UOdysseyPainterEditorVectorObjectView::UOdysseyPainterEditorVectorObjectView()
 }
 
 void
-UOdysseyPainterEditorVectorObjectView::SetEditionMode( EditionMode iEditionMode )
+UOdysseyPainterEditorVectorObjectView::SetEditionMode( EObjectViewEditionMode iEditionMode )
 {
     mEditionMode = iEditionMode;
 }
@@ -116,6 +116,21 @@ UOdysseyPainterEditorVectorObjectView::Update( FOdysseyPainterEditor* iEditor
     ImportParam();
 }
 
+bool
+UOdysseyPainterEditorVectorObjectView::HasPropertyBits()
+{
+    // we use a loop so that we don't forget any flags, even the ones that will be added later
+    for( uint32 i = 0; i < sizeof( mObjectPropertyBits ); i++  )
+    {
+        if( mObjectPropertyBits.raw[i] )
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 void
 UOdysseyPainterEditorVectorObjectView::ApplyPropertyBits( FOdysseyVectorObject* iObject )
 {
@@ -142,10 +157,10 @@ UOdysseyPainterEditorVectorObjectView::ApplyPropertyBits( FOdysseyVectorObject* 
         iObject->Scale( iObject->GetScalingX(), ScalingY );
 
     if( mObjectPropertyBits.TranslationX
-        || mObjectPropertyBits.TranslationY
-        || mObjectPropertyBits.Rotation
-        || mObjectPropertyBits.ScalingX
-        || mObjectPropertyBits.ScalingY )
+     || mObjectPropertyBits.TranslationY
+     || mObjectPropertyBits.Rotation
+     || mObjectPropertyBits.ScalingX
+     || mObjectPropertyBits.ScalingY )
         iObject->UpdateMatrix();
 
     // Category "Appearance"
@@ -177,39 +192,53 @@ UOdysseyPainterEditorVectorObjectView::ApplyPropertyBits( FOdysseyVectorObject* 
 void
 UOdysseyPainterEditorVectorObjectView::ValidateProperties()
 {
-    if( ApplyTo == EObjectViewApplyPolicy::Selection )
+    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
+                                | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
+
+    if( HasPropertyBits() )
     {
-        for( FOdysseyVectorObject* selectedObject : mFocusedObjectList )
+        if( ApplyTo == EObjectViewApplyPolicy::Selection )
         {
-            ApplyPropertyBits( selectedObject );
+            for( FOdysseyVectorObject* selectedObject : mFocusedObjectList )
+            {
+                ApplyPropertyBits( selectedObject );
+            }
+        }
+
+        if( ApplyTo == EObjectViewApplyPolicy::AllInCell )
+        {
+            FOdysseyVectorObject::Traverse( mScene
+                                          , 0
+                                          , [ this ]( FOdysseyVectorObject* object, uint64 traversalFlags )
+                                          {
+                                              ApplyPropertyBits( object );
+
+                                              return FOdysseyVectorObject::TRAVERSE_CONTINUE;
+                                          } );
+        }
+
+        if( ApplyTo == EObjectViewApplyPolicy::AllInAllCells )
+        {
+            FOdysseyVectorObject::Traverse( mScene->GetLayer()
+                                          , 0
+                                          , [ this ]( FOdysseyVectorObject* object, uint64 traversalFlags )
+                                          {
+                                              ApplyPropertyBits( object );
+
+                                              return FOdysseyVectorObject::TRAVERSE_CONTINUE;
+                                          } );
         }
     }
 
-    if( ApplyTo == EObjectViewApplyPolicy::AllInCell )
-    {
-        FOdysseyVectorObject::Traverse( mScene
-                                      , 0
-                                      , [ this ]( FOdysseyVectorObject* object, uint64 traversalFlags )
-                                      {
-                                          ApplyPropertyBits( object );
-
-                                          return FOdysseyVectorObject::TRAVERSE_CONTINUE;
-                                      } );
-    }
-
-    if( ApplyTo == EObjectViewApplyPolicy::AllInAllCells )
-    {
-        FOdysseyVectorObject::Traverse( mScene->GetLayer()
-                                      , 0
-                                      , [ this ]( FOdysseyVectorObject* object, uint64 traversalFlags )
-                                      {
-                                          ApplyPropertyBits( object );
-
-                                          return FOdysseyVectorObject::TRAVERSE_CONTINUE;
-                                      } );
-    }
-
     ClearPropertyBits();
+
+    // force redraw the whole screen
+    mScene->GetCell()->InvalidateRect();
+
+    mScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    mScene->GetLayer()->RequestRedraw( mScene->GetCell(), 0 );
+
+    mScene->GetLayer()->Notify( notificationFlags );
 }
 
 void
@@ -283,9 +312,6 @@ UOdysseyPainterEditorVectorObjectView::PostEditChangeProperty( FPropertyChangedE
 
     if( mScene )
     {
-        uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                                 | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
-
         // needed for valid GUndo pointer
         GEditor->BeginTransaction(LOCTEXT("vector-object.transaction.property-changed","Property Changed"));
         if( GUndo )
@@ -293,7 +319,7 @@ UOdysseyPainterEditorVectorObjectView::PostEditChangeProperty( FPropertyChangedE
             FOdysseyVectorUndo *undo = new FOdysseyVectorUndoObjectParam( mScene
                                                                         , mFocusedObjectList
                                                                         , FName(PropertyChangedEvent.Property->GetMetaData(TEXT("Category")))
-                                                                        , notificationFlags
+                                                                        , FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
                                                                         | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
                                                                         | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD );
             // We use GEditor as the UObject, otherwise if we use "this", at each UNDO, PostEditChangeProperty() will be called
@@ -311,18 +337,10 @@ UOdysseyPainterEditorVectorObjectView::PostEditChangeProperty( FPropertyChangedE
                        , PropertyChangedEvent.MemberProperty->GetFName()
                        , FName(PropertyChangedEvent.Property->GetMetaData(TEXT("Category"))) );
 
-        if( mEditionMode == EditionMode::Direct )
+        if( mEditionMode == EObjectViewEditionMode::Direct )
         {
             ValidateProperties();
         }
-
-        // force redraw the whole screen
-        mScene->GetCell()->InvalidateRect();
-
-        mScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-        mScene->GetLayer()->RequestRedraw( mScene->GetCell(), 0 );
-
-        mScene->GetLayer()->Notify( notificationFlags );
     }
 }
 

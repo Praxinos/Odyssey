@@ -16,11 +16,16 @@
 UCLASS( HideCategories = (SelectionTool) )
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathView : public UOdysseyPainterEditorVectorObjectView
 {
-    typedef struct _PathPropertyBits
-    {
-        uint32 JointType : 1;
-        uint32 MiterLimit : 1;
-        uint32 Brush : 1;
+    // we use a bitfields in case we have more than 64 flags
+    typedef union {
+        struct
+        {
+            uint32 PathWidth : 1;
+            uint32 JointType : 1;
+            uint32 MiterLimit : 1;
+            uint32 Brush : 1;
+        };
+        uint8 raw[1];
     } PathPropertyBits;
 
     public:
@@ -33,15 +38,25 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathView : public UOdy
     protected:
         virtual void ClearPropertyBits() override;
         virtual void ApplyPropertyBits( FOdysseyVectorObject* iObject ) override;
+        virtual bool HasPropertyBits() override;
+
         virtual void ImportParam() override;
         virtual void PropertyChanged( const FName& iPropertyName
                                     , const FName& iMemberPropertyName
                                     , const FName& iCategory ) override;
 
-    protected:
+    private:
         PathPropertyBits mPathPropertyBits;
 
     public:
+        UPROPERTY( EditAnywhere
+                 , Category=Path
+                 , meta = ( ToolTip = "Width in percent"
+                          , Units = "Percent"
+                          , EditCondition = "( mEditionMode == EObjectViewEditionMode::OnValidation )"
+                          , EditConditionHides ) )
+        double PathWidth;
+
         UPROPERTY( EditAnywhere
                  , Category=Path
                  , meta = ( ToolTip = "Joint Type" ) )

@@ -24,6 +24,13 @@ enum class EObjectViewApplyPolicy : uint8
     AllInAllCells = 2
 };
 
+UENUM()
+enum class EObjectViewEditionMode : uint8
+{
+    Direct = 0,
+    OnValidation = 1
+};
+
 USTRUCT()
 struct FPaletteEntrySelection
 {
@@ -39,32 +46,30 @@ struct FPaletteEntrySelection
 UCLASS( meta = ( HideCategories = Hidden, prioritizeCategories = Options ) )
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectView : public UObject
 {
-    public:
-        GENERATED_BODY()
-
-    typedef struct _ObjectPropertyBits
-    {
-        uint32 Name : 1;
-        uint32 TranslationX : 1;
-        uint32 TranslationY : 1;
-        uint32 Rotation : 1;
-        uint32 ScalingX : 1;
-        uint32 ScalingY : 1;
-        uint32 Opacity : 1;
-        uint32 Visible : 1;
-        uint32 ForegroundColorMode : 1;
-        uint32 ForegroundColor : 1;
-        uint32 ForegroundPaletteSelection : 1;
-        uint32 BackgroundColorMode : 1;
-        uint32 BackgroundColor : 1;
-        uint32 BackgroundPaletteSelection : 1;
+    // we use a bitfields in case we have more than 64 flags
+    typedef union {
+        struct
+        {
+            uint32 Name : 1;
+            uint32 TranslationX : 1;
+            uint32 TranslationY : 1;
+            uint32 Rotation : 1;
+            uint32 ScalingX : 1;
+            uint32 ScalingY : 1;
+            uint32 Opacity : 1;
+            uint32 Visible : 1;
+            uint32 ForegroundColorMode : 1;
+            uint32 ForegroundColor : 1;
+            uint32 ForegroundPaletteSelection : 1;
+            uint32 BackgroundColorMode : 1;
+            uint32 BackgroundColor : 1;
+            uint32 BackgroundPaletteSelection : 1;
+        };
+        uint8 raw[1];
     } ObjectPropertyBits;
 
-    enum class EditionMode : uint8
-    {
-        Direct = 0,
-        OnValidation = 1
-    };
+    public:
+        GENERATED_BODY()
 
     public:
         ~UOdysseyPainterEditorVectorObjectView();
@@ -75,12 +80,14 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectView : public UO
 
         FOdysseyPainterEditor* GetEditor();
 
-        void SetEditionMode( EditionMode iEditionMode );
+        void SetEditionMode( EObjectViewEditionMode iEditionMode );
         void ValidateProperties();
 
     protected:
         virtual void ClearPropertyBits();
         virtual void ApplyPropertyBits( FOdysseyVectorObject* iObject );
+        virtual bool HasPropertyBits();
+
         virtual void ImportParam();
         virtual void PropertyChanged( const FName& iPropertyName
                                     , const FName& iMemberPropertyName
@@ -90,10 +97,16 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectView : public UO
         FOdysseyPainterEditor* mEditor;
         FOdysseyVectorGroupPaint* mScene;
         std::list<FOdysseyVectorObject*> mFocusedObjectList;
-        EditionMode mEditionMode;
+
+    private:
         ObjectPropertyBits mObjectPropertyBits;
 
     public:
+        // hidden property for use with EditCondition
+        UPROPERTY( EditDefaultsOnly
+                 , Category=Hidden )
+        EObjectViewEditionMode mEditionMode;
+
         // hidden property for use with EditCondition
         UPROPERTY( EditDefaultsOnly
                  , Category=Hidden )
@@ -106,7 +119,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectView : public UO
 
         // hidden property for use with EditCondition
         UPROPERTY( EditDefaultsOnly
-                 , Category=Options )
+                 , Category=Options
+                 , meta = ( EditCondition = "( mEditionMode == EObjectViewEditionMode::OnValidation )"
+                          , EditConditionHides ) )
         EObjectViewApplyPolicy ApplyTo;
 
         UPROPERTY( EditAnywhere
