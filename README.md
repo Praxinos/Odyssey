@@ -1,7 +1,5 @@
-[![License: CC BY-ND 4.0](https://img.shields.io/badge/License-CC_BY--ND_4.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nd/4.0/)
-[![UE5](https://img.shields.io/badge/UE5-5.6+-orange)](www.fab.com/fr/listings/******************)
+[![UE5](https://img.shields.io/badge/UE5-5.6+-orange)](https://www.fab.com/listings/c2a71aa9-998c-4286-9d5b-df91d9cc4034)
 [![Discord](https://img.shields.io/discord/639891086369882112?label=Discord&style=flat&logo=Discord&logoColor=whitesmoke&color=mediumslateblue)](https://discordapp.com/invite/gEd6pj7)
-<!-- [![Release](https://img.shields.io/github/release/Praxinos/Odyssey-Plugin.svg)](https://github.com/Praxinos/Odyssey-Plugin/releases) -->
 
 # Odyssey
 
@@ -36,7 +34,7 @@ Create brushes to make traditional tools ( crayons, paintbrushes, pencils... ).
 
 # Installation
 
-Install the plugin directly to your Unreal Engine 5 via [Fab](www.fab.com/fr/listings/******************) ... **it's free !** :heart_eyes::+1:
+Install the plugin directly to your Unreal Engine 5 via [Fab](https://www.fab.com/listings/c2a71aa9-998c-4286-9d5b-df91d9cc4034) ... **it's free !** :heart_eyes::+1:
 
 <!-- -->
 
@@ -48,11 +46,11 @@ Read the [:blue_book:User Documentation](https://praxinos.coop/odyssey-user-doc)
 
 # Links
 
-[Official Repository](https://github.com/Praxinos/Odyssey-Plugin)
-[Official Homepage :house:](https://praxinos.coop/odyssey)
-[Praxinos Website](https://praxinos.coop)
-[Odyssey on Discord](https://discordapp.com/invite/gEd6pj7)
-[Fab](www.fab.com/fr/listings/******************)
+[Official Repository](https://github.com/Praxinos/Odyssey-Plugin)  
+[Official Homepage :house:](https://praxinos.coop/odyssey)  
+[Praxinos Website](https://praxinos.coop)  
+[Odyssey on Discord](https://discordapp.com/invite/gEd6pj7)  
+[Fab](https://www.fab.com/listings/c2a71aa9-998c-4286-9d5b-df91d9cc4034)  
 
 <!-- -->
 
