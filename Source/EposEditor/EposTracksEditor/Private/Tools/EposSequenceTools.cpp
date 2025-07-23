@@ -161,7 +161,7 @@ ShotSequenceTools::RenameBinding( ISequencer& iSequencer, UMovieSceneSequence* i
 
 //---
 
-TArray<AActor*> BoardSequenceTools::mDirectActorsSelectedHistory;
+TArray<TWeakObjectPtr<AActor>> BoardSequenceTools::mDirectActorsSelectedHistory;
 
 //static
 void
@@ -205,9 +205,17 @@ BoardSequenceTools::GuessActorToSelect( ISequencer* iSequencer, UMovieSceneSeque
     //                                                                    return iActor->IsA<ACineCameraActor>();
     //                                                                } );
 
+    // Actor may be destroyed, for example:
+    // - drag on some shots (to select some animations)
+    // - open another map
+    // - actors in the cache are all invalid
+    mDirectActorsSelectedHistory.RemoveAll( []( TWeakObjectPtr<AActor> iActor )
+                                            {
+                                                return !iActor.IsValid();
+                                            } );
+
     // Auto-select camera if it's the last actor type directly selected by the user
     if( mDirectActorsSelectedHistory.Num()
-        && mDirectActorsSelectedHistory.Last()
         && mDirectActorsSelectedHistory.Last()->IsA<ACineCameraActor>() )
     //if( actors.Num() )
     {
@@ -227,7 +235,6 @@ BoardSequenceTools::GuessActorToSelect( ISequencer* iSequencer, UMovieSceneSeque
     //                                                    return iActor->IsA<AOdysseyAnimationActor>();
     //                                                } );
     //if( mDirectActorsSelectedHistory.Num()
-    //    && mDirectActorsSelectedHistory.Last()
     //    && mDirectActorsSelectedHistory.Last()->IsA<AOdysseyAnimationActor>() )
     //if( actors.Num() )
     {
@@ -260,7 +267,7 @@ BoardSequenceTools::GuessActorToSelect( ISequencer* iSequencer, UMovieSceneSeque
 
             AActor* preferred_animation = nullptr;
             if( mDirectActorsSelectedHistory.IsValidIndex( max_preferred_index ) )
-                preferred_animation = mDirectActorsSelectedHistory[max_preferred_index];
+                preferred_animation = mDirectActorsSelectedHistory[max_preferred_index].Get();
 
             if( !preferred_animation )
             {

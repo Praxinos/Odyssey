@@ -177,7 +177,7 @@ public:
     /**  Add an actor to an history list, to be able to know later which actor best fit during auto-selection actor */
     static void AddSelectedActorToHistory( AActor* iActor );
 protected:
-    static TArray<AActor*> mDirectActorsSelectedHistory;
+    static TArray<TWeakObjectPtr<AActor>> mDirectActorsSelectedHistory;
 
 public:
     static void RenameBinding( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FGuid iBinding, FString iNewLabel );
