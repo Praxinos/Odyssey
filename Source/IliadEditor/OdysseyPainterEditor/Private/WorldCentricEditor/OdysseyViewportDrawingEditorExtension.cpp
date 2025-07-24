@@ -141,7 +141,7 @@ FOdysseyViewportDrawingEditorExtension::OnSourceChanged()
         UOdysseyAnimationPlayer* player = animationSource->GetAnimationPlayer();
         if (player)
         {
-            player->OnCurrentFrameChanged().RemoveAll(this);
+            player->OnCursorFrameChanged().RemoveAll(this);
         }
     }
 
