@@ -270,10 +270,39 @@
         }
     ],
     "PreBuildSteps": {
+        "Comment": "exit must NOT be called without condition, otherwise E:\\Unreal Projects\\dev_56_odyssey\\Intermediate\\Build\\Win64\\x64\\dev_56_odysseyEditor\\DebugGame\\PreBuild-1.bat won't update anymore",
         "Win64": [
+            "",
+            "echo Checking pre-commit hooks for $(PluginDir)",
+            "",
+            "IF EXIST \"$(PluginDir)\\.git\" (",
+            "   IF NOT EXIST \"$(PluginDir)\\.git\\hooks\\pre-commit\" (",
+            "       echo ERROR: $(PluginDir)\\.git\\hooks\\pre-commit NOT installed -> execute Setup.bat",
+            "       exit /b 121",
+            "   )",
+            "   IF NOT EXIST \"$(PluginDir)\\.venv\" (",
+            "       echo ERROR: $(PluginDir)\\.venv NOT set -> execute Setup.bat",
+            "       exit /b 111",
+            "   )",
+            ")",
+            "",
             "copy /Y \"$(PluginDir)\\Config\\BaseOdyssey.ini\" \"$(PluginDir)\\Config\\DefaultOdyssey.ini\""
         ],
         "Mac": [
+            "",
+            "echo Checking pre-commit hooks for $(PluginDir)",
+            "",
+            "if [ -e \"$(PluginDir)/.git\" ]; then",
+            "   if [ ! -e \"$(PluginDir)/.git/hooks/pre-commit\" ]; then",
+            "       echo ERROR: $(PluginDir)/.git/hooks/pre-commit NOT installed -> execute Setup.bat",
+            "       exit 121",
+            "   fi",
+            "   if [ ! -e \"$(PluginDir)/.venv\" ]; then",
+            "       echo ERROR: $(PluginDir)/.venv NOT installed -> execute Setup.bat",
+            "       exit 111",
+            "   fi",
+            "fi",
+            "",
             "cp \"$(PluginDir)/Config/BaseOdyssey.ini\" \"$(PluginDir)/Config/DefaultOdyssey.ini\""
         ]
     }
