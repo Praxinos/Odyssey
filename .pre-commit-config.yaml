@@ -1,0 +1,50 @@
+# IDDN.FR.001.060015.014.S.X.2019.000.00000
+# ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2025
+
+# ---
+
+files: |
+  (?x)^(
+      Source/.*|    # Everything in Source
+      [^/]*|        # All files in root
+  )$
+
+exclude: |
+  (?x)^(
+      Source/ThirdParty/.*|   # Exclude thirdparty directories
+  )$
+
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+    - id: mixed-line-ending
+      args: [--fix=no]
+
+    - id: check-json
+    - id: check-toml
+    - id: check-xml
+    - id: check-yaml
+    - id: check-case-conflict
+    - id: check-merge-conflict
+
+-   repo: https://github.com/Praxinos/Lib-PreCommitHooksChecker-Python
+    rev: v1.2.0
+    hooks:
+    -   id: check-only-spaces
+    -   id: check-single-newline-end-of-file
+    -   id: check-utf8-wihtout-byte-order-marker
+    -   id: check-no-trailing-spaces
+        args: [--markdown-linebreak-ext=md]
+    -   id: check-copyright
+        exclude: |
+          (?x)^(
+              .*requirements.*[.]txt|   # Exclude python requirements files
+              .*[.]uplugin|             # Exclude uplugin files (=json)
+          )$
+    -   id: check-iddn
+        exclude: |
+          (?x)^(
+              .*requirements.*[.]txt|   # Exclude python requirements files
+              .*[.]uplugin|             # Exclude uplugin files (=json)
+          )$
