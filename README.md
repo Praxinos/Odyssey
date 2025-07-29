@@ -1,3 +1,6 @@
+<!-- IDDN.FR.001.060015.014.S.X.2019.000.00000 -->
+<!-- ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023 -->
+
 [![UE5](https://img.shields.io/badge/UE5-5.6+-orange)](https://www.fab.com/listings/c2a71aa9-998c-4286-9d5b-df91d9cc4034)
 [![Discord](https://img.shields.io/discord/639891086369882112?label=Discord&style=flat&logo=Discord&logoColor=whitesmoke&color=mediumslateblue)](https://discordapp.com/invite/gEd6pj7)
 
