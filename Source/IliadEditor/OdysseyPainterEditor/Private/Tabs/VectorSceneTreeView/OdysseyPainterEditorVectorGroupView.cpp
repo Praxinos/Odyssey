@@ -25,11 +25,11 @@ UOdysseyPainterEditorVectorGroupView::UOdysseyPainterEditorVectorGroupView()
 }
 
 void
-UOdysseyPainterEditorVectorGroupView::ImportParam()
+UOdysseyPainterEditorVectorGroupView::ImportParam( const std::list<FOdysseyVectorObject*>& iFocusedObjectList )
 {
-    UOdysseyPainterEditorVectorObjectView::ImportParam();
+    UOdysseyPainterEditorVectorObjectView::ImportParam( iFocusedObjectList );
 
-    for( FOdysseyVectorObject* selectedObject : mFocusedObjectList )
+    for( FOdysseyVectorObject* selectedObject : iFocusedObjectList )
     {
         if( selectedObject->HasBaseClass( FOdysseyVectorGroup::StaticClass() ) )
         {
@@ -51,7 +51,7 @@ UOdysseyPainterEditorVectorGroupView::PropertyChanged( const FName& iPropertyNam
     UOdysseyPainterEditorVectorObjectView::PropertyChanged( iPropertyName
                                                           , iMemberPropertyName
                                                           , iCategory );
-
+/*
     for( FOdysseyVectorObject* selectedObject : mFocusedObjectList )
     {
         if( selectedObject->HasBaseClass( FOdysseyVectorGroup::StaticClass() ) )
@@ -62,6 +62,7 @@ UOdysseyPainterEditorVectorGroupView::PropertyChanged( const FName& iPropertyNam
                 selectedGroup->SetHUDColor( HUDColor );
         }
     }
+*/
 }
 
 

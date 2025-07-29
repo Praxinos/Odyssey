@@ -27,11 +27,11 @@ UOdysseyPainterEditorVectorGroupPaintView::UOdysseyPainterEditorVectorGroupPaint
 }
 
 void
-UOdysseyPainterEditorVectorGroupPaintView::ImportParam()
+UOdysseyPainterEditorVectorGroupPaintView::ImportParam( const std::list<FOdysseyVectorObject*>& iFocusedObjectList )
 {
-    UOdysseyPainterEditorVectorGroupView::ImportParam();
+    UOdysseyPainterEditorVectorGroupView::ImportParam( iFocusedObjectList );
 
-    for( FOdysseyVectorObject* selectedObject : mFocusedObjectList )
+    for( FOdysseyVectorObject* selectedObject : iFocusedObjectList )
     {
         if( selectedObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
         {
@@ -56,60 +56,152 @@ UOdysseyPainterEditorVectorGroupPaintView::ImportParam()
     }
 }
 
-void
-UOdysseyPainterEditorVectorGroupPaintView::PropertyChanged( const FName& iPropertyName
-                                                          , const FName& iMemberPropertyName
-                                                          , const FName& iCategory)
+bool
+UOdysseyPainterEditorVectorGroupPaintView::GetPropertyBit( const FName& iPropertyName )
 {
-    UOdysseyPainterEditorVectorGroupView::PropertyChanged( iPropertyName
-                                                         , iMemberPropertyName
-                                                         , iCategory );
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, Painted) )
+        return mGroupPaintPropertyBits.Painted;
 
-    for( FOdysseyVectorObject* selectedObject : mFocusedObjectList )
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, Monochrome) )
+        return mGroupPaintPropertyBits.Monochrome;
+
+    // Note: iMemberPropertyName because FColor is a struct
+    // and we can edit individual struct members RGBA
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, MonochromeColor) )
+        return mGroupPaintPropertyBits.MonochromeColor;
+
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, Realtime) )
+        return mGroupPaintPropertyBits.Realtime;
+
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, GapTolerance) )
+        return mGroupPaintPropertyBits.GapTolerance;
+
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, IntersectsCanvas) )
+        return mGroupPaintPropertyBits.IntersectsCanvas;
+
+    //if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, Wireframe) )
+    //    selectedPaintGroup->SetWireframe( Wireframe );
+
+    // Note: iMemberPropertyName because FColor is a struct
+    // and we can edit individual struct members RGBA
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, WireframeColor) )
+        return mGroupPaintPropertyBits.WireframeColor;
+
+//    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, Multithreaded) )
+//        mGroupPaintPropertyBits.Multithreaded = iState;
+
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, GapDetectionScheme) )
+        return mGroupPaintPropertyBits.GapDetectionScheme;
+
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, SegmentExtensionScheme) )
+        return mGroupPaintPropertyBits.SegmentExtensionScheme;
+
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, SegmentExtensionSimplified) )
+        return mGroupPaintPropertyBits.SegmentExtensionSimplified;
+
+
+    return UOdysseyPainterEditorVectorGroupView::GetPropertyBit( iPropertyName  );
+}
+
+void
+UOdysseyPainterEditorVectorGroupPaintView::ApplyPropertyBits( FOdysseyVectorObject* iObject )
+{
+    UOdysseyPainterEditorVectorGroupView::ApplyPropertyBits( iObject );
+
+    if( iObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
     {
-        if( selectedObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
-        {
-            FOdysseyVectorGroupPaint* selectedPaintGroup = static_cast<FOdysseyVectorGroupPaint*>(selectedObject);
+        FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(iObject);
 
-            if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, Painted) )
-                selectedPaintGroup->SetPainted( Painted );
+        if( mGroupPaintPropertyBits.Painted )
+            paintGroup->SetPainted( Painted );
 
-            if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, Monochrome) )
-                selectedPaintGroup->SetMonochrome( Monochrome );
+        if( mGroupPaintPropertyBits.Monochrome )
+            paintGroup->SetMonochrome( Monochrome );
 
-            // Note: iMemberPropertyName because FColor is a struct
-            // and we can edit individual struct members RGBA
-            if( ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, MonochromeColor) ) || ( iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, MonochromeColor) ) )
-                selectedPaintGroup->SetMonochromeColor( MonochromeColor );
+        // Note: iMemberPropertyName because FColor is a struct
+        // and we can edit individual struct members RGBA
+        if( mGroupPaintPropertyBits.MonochromeColor )
+            paintGroup->SetMonochromeColor( MonochromeColor );
 
-            if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, Realtime) )
-                selectedPaintGroup->SetRealtime( Realtime );
+        if( mGroupPaintPropertyBits.Realtime )
+            paintGroup->SetRealtime( Realtime );
 
-            if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, GapTolerance) )
-                selectedPaintGroup->SetGapTolerance( GapTolerance );
+        if( mGroupPaintPropertyBits.GapTolerance )
+            paintGroup->SetGapTolerance( GapTolerance );
 
-            if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, IntersectsCanvas) )
-                selectedPaintGroup->SetIntersectsCanvas( IntersectsCanvas );
+        if( mGroupPaintPropertyBits.IntersectsCanvas )
+            paintGroup->SetIntersectsCanvas( IntersectsCanvas );
 
-            //if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, Wireframe) )
-            //    selectedPaintGroup->SetWireframe( Wireframe );
+        //if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, Wireframe) )
+        //    selectedPaintGroup->SetWireframe( Wireframe );
 
-            // Note: iMemberPropertyName because FColor is a struct
-            // and we can edit individual struct members RGBA
-            if( ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, WireframeColor) ) || ( iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, WireframeColor) ) )
-                selectedPaintGroup->SetWireframeColor( WireframeColor );
+        // Note: iMemberPropertyName because FColor is a struct
+        // and we can edit individual struct members RGBA
+        if( mGroupPaintPropertyBits.WireframeColor )
+            paintGroup->SetWireframeColor( WireframeColor );
 
-            if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, Multithreaded) )
-                selectedPaintGroup->SetMultithreaded( Multithreaded );
+//        if( mGroupPaintPropertyBits.Multithreaded )
+//            paintGroup->SetMultithreaded( Multithreaded );
 
-            if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, GapDetectionScheme) )
-                selectedPaintGroup->SetGapDetectionScheme( GapDetectionScheme );
+        if( mGroupPaintPropertyBits.GapDetectionScheme )
+            paintGroup->SetGapDetectionScheme( GapDetectionScheme );
 
-            if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, SegmentExtensionScheme) )
-                selectedPaintGroup->SetSegmentExtensionScheme( SegmentExtensionScheme );
+        if( mGroupPaintPropertyBits.SegmentExtensionScheme )
+            paintGroup->SetSegmentExtensionScheme( SegmentExtensionScheme );
 
-            if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, SegmentExtensionSimplified) )
-                selectedPaintGroup->SetSegmentExtensionSimplified( SegmentExtensionSimplified );
-        }
+        if( mGroupPaintPropertyBits.SegmentExtensionSimplified )
+            paintGroup->SetSegmentExtensionSimplified( SegmentExtensionSimplified );
     }
+}
+
+void
+UOdysseyPainterEditorVectorGroupPaintView::SetPropertyBit( const FName& iPropertyName
+                                                         , const FName& iMemberPropertyName
+                                                         , const FName& iCategory
+                                                         , bool iState )
+{
+    UOdysseyPainterEditorVectorGroupView::SetPropertyBit( iPropertyName
+                                                        , iMemberPropertyName
+                                                        , iCategory
+                                                        , iState );
+
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, Painted) )
+        mGroupPaintPropertyBits.Painted = iState;
+
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, Monochrome) )
+        mGroupPaintPropertyBits.Monochrome = iState;
+
+    // Note: iMemberPropertyName because FColor is a struct
+    // and we can edit individual struct members RGBA
+    if( ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, MonochromeColor) ) || ( iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, MonochromeColor) ) )
+        mGroupPaintPropertyBits.MonochromeColor = iState;
+
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, Realtime) )
+        mGroupPaintPropertyBits.Realtime = iState;
+
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, GapTolerance) )
+        mGroupPaintPropertyBits.GapTolerance = iState;
+
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, IntersectsCanvas) )
+        mGroupPaintPropertyBits.IntersectsCanvas = iState;
+
+    //if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, Wireframe) )
+    //    selectedPaintGroup->SetWireframe( Wireframe );
+
+    // Note: iMemberPropertyName because FColor is a struct
+    // and we can edit individual struct members RGBA
+    if( ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, WireframeColor) ) || ( iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, WireframeColor) ) )
+        mGroupPaintPropertyBits.WireframeColor = iState;
+
+//    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, Multithreaded) )
+//        mGroupPaintPropertyBits.Multithreaded = iState;
+
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, GapDetectionScheme) )
+        mGroupPaintPropertyBits.GapDetectionScheme = iState;
+
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, SegmentExtensionScheme) )
+        mGroupPaintPropertyBits.SegmentExtensionScheme = iState;
+
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, SegmentExtensionSimplified) )
+        mGroupPaintPropertyBits.SegmentExtensionSimplified = iState;
 }

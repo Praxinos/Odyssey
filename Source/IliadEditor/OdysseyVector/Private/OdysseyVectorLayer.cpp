@@ -75,6 +75,12 @@ FOdysseyVectorLayer::GetPaletteSetID( UOdysseyPalette* iPalette )
     return mLayerInterface->GetPaletteSetID( iPalette );
 }
 
+const TArray<UOdysseyPaletteSet*>
+FOdysseyVectorLayer::GetPaletteSets() const
+{
+    return mLayerInterface->GetPaletteSets();
+}
+
 bool
 FOdysseyVectorLayer::Contains( FOdysseyVectorCell* iCell )
 {

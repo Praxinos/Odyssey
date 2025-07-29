@@ -29,12 +29,18 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBucketView : public UO
         void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
 
         FOdysseyPainterEditor* GetEditor();
+        // Pointer to the layer (useful to retrieve palette sets needed by FOdysseyVectorObjectViewPaletteCustomization)
+        void SetVectorLayer( TSharedPtr<FOdysseyVectorLayer> iVectorLayer );
+        TSharedPtr<FOdysseyVectorLayer> GetVectorLayer();
 
     protected:
         virtual void ImportParam();
         virtual void PropertyChanged( const FName& iPropertyName
                                     , const FName& iMemberPropertyName
                                     , const FName& iCategory );
+
+    protected:
+        TSharedPtr<FOdysseyVectorLayer> mVectorLayer;
 
     protected:
         FOdysseyPainterEditor* mEditor;

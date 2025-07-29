@@ -8,6 +8,8 @@
 #include "Widgets/Animation/Timeline/Cells/SOdysseyAnimationCells.h"
 #include "TimelineTools/OdysseyAnimationTimelineTool.h"
 #include "OdysseyAnimationCellsDragDropOperation.h"
+#include "OdysseyAnimationLayerImageVector.h"
+#include "OdysseyAnimationCellImageVector.h"
 #include "Framework/Commands/GenericCommands.h"
 #include "OdysseyPainterEditorAnimationCommands.h"
 #include "OdysseyPainterEditorAnimationProjectSettings.h"
@@ -23,6 +25,7 @@
 #include "Widgets/Input/SButton.h"
 #include "Widgets/Colors/SColorBlock.h"
 #include "Widgets/Layout/SEnableBox.h"
+#include "Widgets/Tab/SOdysseyPainterEditorVectorMassModifierView.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -614,6 +617,92 @@ SOdysseyAnimationLayerImageTimeline::BuildContextMenu(TSharedRef<FUICommandList>
             FNewMenuDelegate::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::BuildCellsMarksSubMenu)
         );
     MenuBuilder.EndSection();
+
+    if( mLayer->GetClass() == UOdysseyAnimationLayerImageVector::StaticClass() )
+    {
+        MenuBuilder.BeginSection("More", LOCTEXT("timeline-cells.context-menu.mass-modifier.name", "Mass Modifier"));
+        MenuBuilder.AddMenuEntry(
+              LOCTEXT("timeline-cells.context-menu.mass-modifier.name", "Mass Modifier")
+            , LOCTEXT("timeline-cells.context-menu.mass-modifier.tooltip", "Mass Modifier")
+            , FSlateIcon()
+            , FUIAction( FExecuteAction::CreateSP( this, &SOdysseyAnimationLayerImageTimeline::MassModifier ) ) );
+
+        MenuBuilder.EndSection();
+    }
+}
+
+FReply
+SOdysseyAnimationLayerImageTimeline::AcceptProperties( TSharedRef<SOdysseyPainterEditorVectorMassModifierView> objectView)
+{
+    TSharedPtr<SWindow> topWindow;
+
+    objectView.Get().ValidateProperties();
+
+    topWindow = FSlateApplicationBase::Get().GetActiveTopLevelWindow();
+
+    FSlateApplicationBase::Get().RequestDestroyWindow( topWindow.ToSharedRef() );
+
+    return FReply::Handled();
+}
+
+void
+SOdysseyAnimationLayerImageTimeline::MassModifier()
+{
+    UOdysseyAnimationLayerImageVector* layerImageVector = Cast<UOdysseyAnimationLayerImageVector>(mLayer->GetLayerStack()->GetCurrentLayer());
+    TArray<UOdysseyLayerCell*> selectedCells = mLayer->GetLayerStack()->GetCellSelection()->GetSelectedCells();
+    TArray<FOdysseyVectorGroupPaint*> vectorSceneArray;
+
+    vectorSceneArray.Reserve( selectedCells.Num() );
+
+    if (selectedCells.IsEmpty())
+        return;
+
+    for( UOdysseyLayerCell* cell : selectedCells )
+    {
+        UOdysseyAnimationCellImageVector* animationCell = Cast<UOdysseyAnimationCellImageVector>(cell);
+
+        if( animationCell )
+        {
+            vectorSceneArray.Push( animationCell->GetVectorCell()->GetScene() );
+        }
+    }
+
+    TSharedRef<SOdysseyPainterEditorVectorMassModifierView> objectView = SNew(SOdysseyPainterEditorVectorMassModifierView)
+                                                                            .VectorLayer( layerImageVector->GetVectorLayer() )
+                                                                            .SceneArray(vectorSceneArray);
+
+    TSharedRef<SWindow> ObjectWindow = SNew(SWindow)
+    .Title(LOCTEXT("vector-mass-modifier-window.name", "Mass Modifier"))
+    //.ClientSize(FVector2D(800, 400))
+    .SizingRule(ESizingRule::Autosized)
+    .SupportsMaximize(false)
+    .SupportsMinimize(false)
+    [
+        SNew(SVerticalBox)
+        +SVerticalBox::Slot()
+        .AutoHeight()
+        .HAlign(HAlign_Center)
+        .VAlign(VAlign_Center)
+        [
+            objectView
+        ]
+        +SVerticalBox::Slot()
+        .AutoHeight()
+        .HAlign(HAlign_Center)
+        .VAlign(VAlign_Center)
+        [
+            SNew(SButton)
+            .Text(LOCTEXT("vector-mass-modifier-window-apply", "Apply"))
+            .OnClicked_Raw(this, &SOdysseyAnimationLayerImageTimeline::AcceptProperties, objectView )
+        ]
+    ];
+
+    FSlateApplication::Get().AddModalWindow
+    (
+        ObjectWindow,
+        SharedThis(this),
+        false
+    );
 }
 
 void

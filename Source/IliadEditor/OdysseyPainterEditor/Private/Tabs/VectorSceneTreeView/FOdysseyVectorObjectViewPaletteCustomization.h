@@ -11,6 +11,7 @@
 
 class UOdysseyPaletteEntryColor;
 class FOdysseyPainterEditor;
+class FOdysseyVectorLayer;
 
 class FOdysseyVectorObjectViewPaletteCustomization : public IPropertyTypeCustomization
 {
@@ -53,5 +54,5 @@ private:
     TSharedPtr<IPropertyHandle> mPaletteHandle;
 
 private:
-    FOdysseyPainterEditor* mEditor;
+    TSharedPtr<FOdysseyVectorLayer> mVectorLayer;
 };

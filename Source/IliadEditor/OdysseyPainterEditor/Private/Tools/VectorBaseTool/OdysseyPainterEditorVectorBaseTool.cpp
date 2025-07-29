@@ -3,7 +3,6 @@
 
 #include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.h"
 #include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseToolHUD.h"
-#include "Widgets/Tab/SOdysseyPainterEditorVectorSceneDetailsView.h"
 //#include "Widgets/Tools/SOdysseyPainterEditorVectorEditionMode.h"
 #include "Widgets/Layout/SWrapBox.h"
 #include "Framework/Commands/GenericCommands.h"
@@ -1065,90 +1064,6 @@ UOdysseyPainterEditorVectorBaseTool::ExtendToolbar( FToolBarBuilder& iBuilder )
     iBuilder.EndSection();
 }
 
-FReply
-UOdysseyPainterEditorVectorBaseTool::AcceptProperties( TSharedRef<SOdysseyPainterEditorVectorSceneDetailsView> objectView)
-{
-    TSharedPtr<SWindow> topWindow;
-
-    objectView.Get().ValidateProperties();
-
-    topWindow = FSlateApplicationBase::Get().GetActiveTopLevelWindow();
-
-    FSlateApplicationBase::Get().RequestDestroyWindow( topWindow.ToSharedRef() );
-
-    return FReply::Handled();
-}
-
-void
-UOdysseyPainterEditorVectorBaseTool::ObjectProperties()
-{
-    TSharedRef<SOdysseyPainterEditorVectorSceneDetailsView> objectView = SNew(SOdysseyPainterEditorVectorSceneDetailsView, mEditor, false )
-                                                                         .Scene(mWorkingCell->GetScene());
-
-    objectView->Update();
-
-    TSharedRef<SWindow> ObjectWindow = SNew(SWindow)
-    .Title(FText::FromString(TEXT("Object Properties")))
-    //.ClientSize(FVector2D(800, 400))
-    .SizingRule(ESizingRule::Autosized)
-    .SupportsMaximize(false)
-    .SupportsMinimize(false)
-    [
-      SNew(SVerticalBox)
-      +SVerticalBox::Slot()
-      .AutoHeight()
-      .HAlign(HAlign_Center)
-      .VAlign(VAlign_Center)
-      [
-          objectView
-      ]
-      +SVerticalBox::Slot()
-      .AutoHeight()
-      .HAlign(HAlign_Center)
-      .VAlign(VAlign_Center)
-      [
-          SNew(SButton)
-          .Text(LOCTEXT("vector-object-properties-apply", "Apply"))
-          .OnClicked_UObject(this, &UOdysseyPainterEditorVectorBaseTool::AcceptProperties, objectView )
-      ]
-    ];
-
-    TSharedPtr<FOdysseyPainterEditorViewportTab> viewportTab = mEditor->FindTab<FOdysseyPainterEditorViewportTab>();
-
-    FSlateApplication::Get().AddModalWindow
-    (
-        ObjectWindow,
-        viewportTab->Widget(),
-        false
-    );
-/*
-    return SNew(SWidgetSwitcher)
-        .WidgetIndex(this, &FOdysseyPainterEditorVectorSceneTreeViewTab::WidgetIndex)
-        +SWidgetSwitcher::Slot()
-        [
-            SNew(STextBlock)
-            .Text(LOCTEXT("vector-scene-tree-view-tab.no-scene-text", "This tab is only available when editing a vector scene."))
-            .AutoWrapText(true)
-        ]
-        +SWidgetSwitcher::Slot()
-        [
-            SNew(SSplitter)
-            .Orientation( EOrientation::Orient_Vertical )
-            +SSplitter::Slot()
-            [
-                SNew( SOdysseyPainterEditorVectorSceneTreeView )
-                .Editor(mEditor)
-                .Scene(this, &FOdysseyPainterEditorVectorSceneTreeViewTab::GetScene)
-            ]
-            +SSplitter::Slot()
-            [
-                SNew( SOdysseyPainterEditorVectorSceneDetailsView, mEditor )
-                .Scene(this, &FOdysseyPainterEditorVectorSceneTreeViewTab::GetScene)
-            ]
-        ];
-*/
-}
-
 bool
 UOdysseyPainterEditorVectorBaseTool::SupportsColorType(EOdysseyPainterEditorColorType iType)
 {
@@ -1269,12 +1184,6 @@ UOdysseyPainterEditorVectorBaseTool::ExtendContextMenuObject( FOdysseyVectorGrou
         , LOCTEXT("vector-tool.object-context-menu.apply-transformations.tooltip", "Apply Transformations")
         , FSlateIcon()
         , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::ApplyTransformations, GetEditor(), iScene )));
-    menu.AddMenuEntry(
-            LOCTEXT("vector-tool.object-context-menu.context-menu.object-properties.name", "Object properties")
-        , LOCTEXT("vector-tool.object-context-menu.context-menu.object-properties.tooltip", "Object Properties")
-        , FSlateIcon()
-        , FUIAction(FExecuteAction::CreateUObject(this, &UOdysseyPainterEditorVectorBaseTool::ObjectProperties )));
-
     //menu.AddMenuEntry(
     //    LOCTEXT("vector-tool.object-context-menu.apply-transformations.name", "Make DemoBrush")
     //    , LOCTEXT("vector-tool.object-context-menu.apply-transformations.tooltip", "Make DemoBrush")

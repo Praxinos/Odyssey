@@ -28,7 +28,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorGroupView : public UOd
         UOdysseyPainterEditorVectorGroupView();
 
     protected:
-        virtual void ImportParam() override;
+        virtual void ImportParam( const std::list<FOdysseyVectorObject*>& iFocusedObjectList ) override;
         virtual void PropertyChanged( const FName& iPropertyName
                                     , const FName& iMemberPropertyName
                                     , const FName& iCategory ) override;

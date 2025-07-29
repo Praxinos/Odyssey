@@ -78,7 +78,8 @@ FOdysseyPainterEditorVectorSceneTreeViewTab::CreateWidget()
             ]
             +SSplitter::Slot()
             [
-                SNew( SOdysseyPainterEditorVectorSceneDetailsView, mEditor )
+                SNew( SOdysseyPainterEditorVectorSceneDetailsView )
+                .Editor(mEditor)
                 .Scene(this, &FOdysseyPainterEditorVectorSceneTreeViewTab::GetScene)
             ]
         ];

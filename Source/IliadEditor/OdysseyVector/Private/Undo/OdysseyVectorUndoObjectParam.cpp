@@ -62,19 +62,19 @@ FOdysseyVectorUndoObjectParam::CreateObjectSnapshot( FOdysseyVectorObject* iObje
 
     if( iObject->HasBaseClass( FOdysseyVectorObject::StaticClass() ) )
     {
-        if( iCategoryName == "Identity" )
+        if( ( iCategoryName == "Identity" ) || ( iCategoryName == "" ) )
         {
             objectParamFlags |= FSnapshotFlags::Object::NAME;
         }
 
-        if( iCategoryName == "Appearance" )
+        if( ( iCategoryName == "Appearance" ) || ( iCategoryName == "" ) )
         {
             objectParamFlags |= FSnapshotFlags::Object::COLORING;
             objectParamFlags |= FSnapshotFlags::Object::VISIBILITY;
             objectParamFlags |= FSnapshotFlags::Object::OPACITY;
         }
 
-        if( iCategoryName == "Transform" )
+        if( ( iCategoryName == "Transform" ) || ( iCategoryName == "" ) )
         {
             objectParamFlags |= FSnapshotFlags::Object::TRANSFORMATIONS;
         }
@@ -82,7 +82,7 @@ FOdysseyVectorUndoObjectParam::CreateObjectSnapshot( FOdysseyVectorObject* iObje
 
     if( iObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
     {
-        if( iCategoryName == "Path" )
+        if( ( iCategoryName == "Path" ) || ( iCategoryName == "" ) )
         {
             objectParamFlags |= FSnapshotFlags::Object::Path::BRUSH;
             objectParamFlags |= FSnapshotFlags::Object::Path::JOINTTYPE;
@@ -92,7 +92,7 @@ FOdysseyVectorUndoObjectParam::CreateObjectSnapshot( FOdysseyVectorObject* iObje
 
     if( iObject->HasBaseClass( FOdysseyVectorGroup::StaticClass() ) )
     {
-        if( iCategoryName == "Appearance" )
+        if( ( iCategoryName == "Appearance" ) || ( iCategoryName == "" ) )
         {
             objectParamFlags |= FSnapshotFlags::Object::Group::HUDCOLOR;
         }
@@ -100,7 +100,7 @@ FOdysseyVectorUndoObjectParam::CreateObjectSnapshot( FOdysseyVectorObject* iObje
 
     if( iObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
     {
-        if( iCategoryName == "PaintGroup" )
+        if( ( iCategoryName == "PaintGroup" ) || ( iCategoryName == "" ) )
         {
             objectParamFlags |= FSnapshotFlags::Object::Group::Paint::PAINTED;
             objectParamFlags |= FSnapshotFlags::Object::Group::Paint::MONOCHROME;
@@ -110,7 +110,7 @@ FOdysseyVectorUndoObjectParam::CreateObjectSnapshot( FOdysseyVectorObject* iObje
             objectParamFlags |= FSnapshotFlags::Object::Group::Paint::INTERSECTSCANVAS;
         }
 
-        if( iCategoryName == "GapDetection" )
+        if( ( iCategoryName == "GapDetection" ) || ( iCategoryName == "" ) )
         {
             objectParamFlags |= FSnapshotFlags::Object::Group::Paint::GAPTOLERANCE;
             objectParamFlags |= FSnapshotFlags::Object::Group::Paint::GAPDETECTIONSCHEME;
@@ -118,7 +118,7 @@ FOdysseyVectorUndoObjectParam::CreateObjectSnapshot( FOdysseyVectorObject* iObje
             objectParamFlags |= FSnapshotFlags::Object::Group::Paint::SEGMENTEXTENSIONSIMPLIFIED;
         }
 
-        if( iCategoryName == "Advanced" )
+        if( ( iCategoryName == "Advanced" ) || ( iCategoryName == "" ) )
         {
             objectParamFlags |= FSnapshotFlags::Object::Group::Paint::REALTIME;
         }
@@ -127,27 +127,27 @@ FOdysseyVectorUndoObjectParam::CreateObjectSnapshot( FOdysseyVectorObject* iObje
     return CreateObjectSnapshot( iObject, objectParamFlags );
 }
 
-FOdysseyVectorUndoObjectParam::FOdysseyVectorUndoObjectParam( FOdysseyVectorGroupPaint* iScene
+FOdysseyVectorUndoObjectParam::FOdysseyVectorUndoObjectParam( FOdysseyVectorLayer* iLayer
                                                             , FOdysseyVectorObject* iObject
                                                             , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
+    : FOdysseyVectorUndo( iLayer, iReturnFlags )
 {
 }
 
-FOdysseyVectorUndoObjectParam::FOdysseyVectorUndoObjectParam( FOdysseyVectorGroupPaint* iScene
+FOdysseyVectorUndoObjectParam::FOdysseyVectorUndoObjectParam( FOdysseyVectorLayer* iLayer
                                                             , FOdysseyVectorObject* iObject
                                                             , const FName& iCategoryName
                                                             , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
+    : FOdysseyVectorUndo( iLayer, iReturnFlags )
 {
     mObjectSnapshotArray.push_back( CreateObjectSnapshot( iObject, iCategoryName ) );
 }
 
-FOdysseyVectorUndoObjectParam::FOdysseyVectorUndoObjectParam( FOdysseyVectorGroupPaint* iScene
+FOdysseyVectorUndoObjectParam::FOdysseyVectorUndoObjectParam( FOdysseyVectorLayer* iLayer
                                                             , const std::vector<FOdysseyVectorObject*>& iObjectArray
                                                             , const FName& iCategoryName
                                                             , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
+    : FOdysseyVectorUndo( iLayer, iReturnFlags )
 {
     mObjectSnapshotArray.reserve( iObjectArray.size() );
 
@@ -159,11 +159,11 @@ FOdysseyVectorUndoObjectParam::FOdysseyVectorUndoObjectParam( FOdysseyVectorGrou
     }
 }
 
-FOdysseyVectorUndoObjectParam::FOdysseyVectorUndoObjectParam( FOdysseyVectorGroupPaint* iScene
+FOdysseyVectorUndoObjectParam::FOdysseyVectorUndoObjectParam( FOdysseyVectorLayer* iLayer
                                                             , const std::list<FOdysseyVectorObject*>& iObjectList
                                                             , const FName& iCategoryName
                                                             , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
+    : FOdysseyVectorUndo( iLayer, iReturnFlags )
 {
     mObjectSnapshotArray.reserve( iObjectList.size() );
 
@@ -215,10 +215,10 @@ FOdysseyVectorUndoObjectVisibility::~FOdysseyVectorUndoObjectVisibility( )
 {
 }
 
-FOdysseyVectorUndoObjectVisibility::FOdysseyVectorUndoObjectVisibility( FOdysseyVectorGroupPaint* iScene
+FOdysseyVectorUndoObjectVisibility::FOdysseyVectorUndoObjectVisibility( FOdysseyVectorLayer* iLayer
                                                                       , FOdysseyVectorObject* iObject
                                                                       , uint64 iReturnFlags )
-    : FOdysseyVectorUndoObjectParam( iScene, iObject, iReturnFlags )
+    : FOdysseyVectorUndoObjectParam( iLayer, iObject, iReturnFlags )
 {
     mObjectSnapshotArray.push_back( CreateObjectSnapshot( iObject, FSnapshotFlags::Object::VISIBILITY ) );
 }

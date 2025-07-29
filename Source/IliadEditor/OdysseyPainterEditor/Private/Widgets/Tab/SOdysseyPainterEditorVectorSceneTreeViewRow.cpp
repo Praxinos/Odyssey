@@ -72,7 +72,7 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnCheckBoxStateChanged( ECheckBoxSt
     GEditor->BeginTransaction(LOCTEXT("vector-scene-tree-view.transaction.object-visibility", "Set Object Visibility"));
     if( GUndo )
     {
-        FOdysseyVectorUndo* undo = static_cast<FOdysseyVectorUndo*>( new FOdysseyVectorUndoObjectParam( mItem->GetVectorObject()->GetScene()
+        FOdysseyVectorUndo* undo = static_cast<FOdysseyVectorUndo*>( new FOdysseyVectorUndoObjectParam( mItem->GetVectorObject()->GetLayer()
                                                                                                       , mItem->GetVectorObject()
                                                                                                       , notificationFlags ) );
 

@@ -13,6 +13,9 @@
 #include "OdysseyLayerStack.h"
 #include "OdysseyAnimationLayerImageVector.h"
 #include "OdysseyTextureLayerImageVector.h"
+#include "Undo/OdysseyVectorUndoObjectParam.h"
+#include "OdysseyAnimationLayerImageVector.h"
+#include "OdysseyTextureLayerImageVector.h"
 
 #include "IDetailPropertyRow.h"
 #include "DetailWidgetRow.h"
@@ -57,12 +60,11 @@ SOdysseyPainterEditorVectorSceneDetailsView::SOdysseyPainterEditorVectorSceneDet
 }
 
 void
-SOdysseyPainterEditorVectorSceneDetailsView::Construct( const FArguments& InArgs
-                                                      , FOdysseyPainterEditor* iEditor
-                                                      , bool iEditDirect )
+SOdysseyPainterEditorVectorSceneDetailsView::Construct( const FArguments& InArgs )
 {
-    mEditor = iEditor;
+    mEditor = InArgs._Editor;
     mScene.Assign(*this, InArgs._Scene);
+
     mDetailsView = CreateObjectPropertiesPanel();
     ChildSlot
     [
@@ -75,31 +77,11 @@ SOdysseyPainterEditorVectorSceneDetailsView::Construct( const FArguments& InArgs
     mGroupPaintView = NewObject<UOdysseyPainterEditorVectorGroupPaintView>();
     mTagInbetweenerView = NewObject<UOdysseyPainterEditorVectorTagInbetweenerView>();
 
-    if( iEditDirect == false )
-    {
-        mObjectView->SetEditionMode( EObjectViewEditionMode::OnValidation );
-        mGroupView->SetEditionMode( EObjectViewEditionMode::OnValidation );
-        mPathView->SetEditionMode( EObjectViewEditionMode::OnValidation );
-        mGroupPaintView->SetEditionMode( EObjectViewEditionMode::OnValidation );
-    }
-
     UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw(this, &SOdysseyPainterEditorVectorSceneDetailsView::OnCurrentLayerChanged);
 
     mEditor->OnSourceChanged().AddSP( this, &SOdysseyPainterEditorVectorSceneDetailsView::OnSourceChanged );
 
-    if( iEditDirect == false )
-    {
-        mDetailsView->SetExtensionHandler(SharedThis(this));
-    }
-}
-
-void
-SOdysseyPainterEditorVectorSceneDetailsView::ValidateProperties()
-{
-    if( mCurrentObjectView )
-    {
-        mCurrentObjectView->ValidateProperties();
-    }
+    mDetailsView->OnFinishedChangingProperties().AddSP( this, &SOdysseyPainterEditorVectorSceneDetailsView::PropertyValueChanged );
 }
 
 TSharedPtr<IDetailsView>
@@ -151,21 +133,21 @@ SOdysseyPainterEditorVectorSceneDetailsView::Update()
         {
             if( objectClass == FOdysseyVectorPath::StaticClass() )
             {
-                mPathView->Update( mEditor, scene, focusedObjectList );
+                mPathView->Update( focusedObjectList );
                 mDetailsView->SetObject( mPathView );
                 mCurrentObjectView = mPathView;
             }
 
             if( objectClass == FOdysseyVectorGroup::StaticClass() )
             {
-                mGroupView->Update( mEditor, scene, focusedObjectList );
+                mGroupView->Update( focusedObjectList );
                 mDetailsView->SetObject( mGroupView );
                 mCurrentObjectView = mGroupView;
             }
 
             if( objectClass == FOdysseyVectorGroupPaint::StaticClass() )
             {
-                mGroupPaintView->Update( mEditor, scene, focusedObjectList );
+                mGroupPaintView->Update( focusedObjectList );
                 mDetailsView->SetObject( mGroupPaintView );
                 mCurrentObjectView = mGroupPaintView;
             }
@@ -173,53 +155,13 @@ SOdysseyPainterEditorVectorSceneDetailsView::Update()
             if( objectClass == FOdysseyVectorObject::StaticClass() )
             {
                 // default
-                mObjectView->Update( mEditor, scene, focusedObjectList );
+                mObjectView->Update( focusedObjectList );
                 mDetailsView->SetObject( mObjectView );
                 mCurrentObjectView = mObjectView;
             }
         }
     }
 }
-
-// IDetailPropertyExtensionHandler::ExtendWidgetRow
-void
-SOdysseyPainterEditorVectorSceneDetailsView::ExtendWidgetRow ( FDetailWidgetRow& InWidgetRow
-                                                             , const IDetailLayoutBuilder& InDetailBuilder
-                                                             , const UClass* InObjectClass
-                                                             , TSharedPtr< IPropertyHandle > iPropertyHandle )
-{
-    iPropertyHandle.Get()->SetOnPropertyValueChanged( FSimpleDelegate::CreateLambda( [ this
-                                                                                     , InWidgetRow
-                                                                                     , iPropertyHandle ]()
-        {
-            iPropertyHandle.Get()->SetPropertyDisplayName( FText::Format( INVTEXT("*{0}"), FText::FromString(iPropertyHandle.Get()->GetProperty()->GetName()) ) );
-
-            InWidgetRow.NameWidget.Widget->Invalidate( EInvalidateWidgetReason::Visibility );
-        } ) );
-}
-
-bool
-SOdysseyPainterEditorVectorSceneDetailsView::IsPropertyExtendable( const UClass* InObjectClass
-                                                                 , const IPropertyHandle& PropertyHandle) const
-{
-    return true;
-}
-/*
-void
-SOdysseyPainterEditorVectorSceneDetailsView::PropertyValueChanged( FDetailWidgetRow& InWidgetRow )
-{
-    mDetailsView.Get()->ForceRefresh();
-}
-*/
-/*
-void
-SOdysseyPainterEditorVectorSceneDetailsView::PropertyValueChanged( FDetailWidgetRow& InWidgetRow, TSharedPtr< IPropertyHandle > iPropertyHandle )
-{
-    iPropertyHandle.Get()->SetPropertyDisplayName( FText::Format(INVTEXT ("*{0}"), iPropertyHandle->GetPropertyDisplayName() ) );
-
-    mDetailsView.Get()->ForceRefresh();
-}
-*/
 
 void
 SOdysseyPainterEditorVectorSceneDetailsView::OnVectorLayerNotify( FOdysseyVectorLayer* iLayer, uint64 iSignalFlags )
@@ -243,6 +185,12 @@ SOdysseyPainterEditorVectorSceneDetailsView::ParseVectorNotifications( uint64 iS
     {
         Update();
     }
+}
+
+void
+SOdysseyPainterEditorVectorSceneDetailsView::UnbindLayerDelegates( UOdysseyLayerStack* iLayerStack )
+{
+    mVectorLayer->OnNotifyDelegate().RemoveAll( this );
 }
 
 void
@@ -282,9 +230,74 @@ SOdysseyPainterEditorVectorSceneDetailsView::OnSourceChanged()
 
         if( layerStack )
         {
+            UOdysseyLayer* layer = layerStack->GetCurrentLayer();
+            UOdysseyAnimationLayerImageVector* animationLayer = Cast<UOdysseyAnimationLayerImageVector>(layer);
+            UOdysseyTextureLayerImageVector* textureLayer = Cast<UOdysseyTextureLayerImageVector>(layer);
+
+            if( animationLayer || textureLayer )
+            {
+                TSharedPtr<FOdysseyVectorLayer> vectorLayer = animationLayer ? animationLayer->GetVectorLayer()
+                                                                             : textureLayer->GetVectorLayer();
+
+                mObjectView->SetVectorLayer( vectorLayer );
+                mGroupView->SetVectorLayer( vectorLayer );
+                mPathView->SetVectorLayer( vectorLayer );
+                mGroupPaintView->SetVectorLayer( vectorLayer );
+            }
+
             BindLayerDelegates( layerStack );
         }
     }
+}
+
+void
+SOdysseyPainterEditorVectorSceneDetailsView::PropertyValueChanged( const FPropertyChangedEvent& iEvent )
+{
+    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
+                             | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
+                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
+    FOdysseyVectorGroupPaint* scene = mScene.Get();
+
+    if (!scene)
+        return;
+
+    // defaults to scene
+    std::list<FOdysseyVectorObject*>& sceneAsList = scene->GetCell()->GetChildrenList();
+    std::list<FOdysseyVectorObject*>& selectedObjectList = scene->GetCell()->GetSelectedObjectList();
+    std::list<FOdysseyVectorObject*>& focusedObjectList = selectedObjectList.size() ? selectedObjectList
+                                                                                    : sceneAsList;
+    // needed for valid GUndo pointer
+    GEditor->BeginTransaction(LOCTEXT("vector-object.transaction.property-changed","Property Changed"));
+    if( GUndo )
+    {
+        FOdysseyVectorUndo *undo = new FOdysseyVectorUndoObjectParam( scene->GetLayer()
+                                                                    , focusedObjectList
+                                                                    , FName(iEvent.Property->GetMetaData(TEXT("Category")))
+                                                                    , FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
+                                                                    | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
+                                                                    | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD );
+        // We use GEditor as the UObject, otherwise if we use "this", at each UNDO, PostEditChangeProperty() will be called
+        // which will again call StoreUndo + this will lead to a crash. I don't know however what will be the consequences
+        // of a call to GEditor::PostEditChangeProperty()
+        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+
+        TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
+        if (source)
+            source->RecordCurrentFrameUndo();
+    }
+    GEditor->EndTransaction();
+
+    mCurrentObjectView->ValidateProperties( focusedObjectList );
+
+    // prevent THIS widget update by unregistering its delegates
+    UnbindLayerDelegates( mEditor->GetSource()->GetLayerStack() );
+    // Update vector scene
+    scene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    scene->GetLayer()->RequestRedraw( nullptr, 0 );
+    // update widgets
+    scene->GetLayer()->Notify( notificationFlags );
+    // Re-register THIS widget delegates
+    BindLayerDelegates( mEditor->GetSource()->GetLayerStack() );
 }
 
 void

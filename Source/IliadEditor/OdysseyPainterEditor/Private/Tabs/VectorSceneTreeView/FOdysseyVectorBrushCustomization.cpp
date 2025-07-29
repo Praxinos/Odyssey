@@ -212,7 +212,6 @@ FOdysseyVectorBrushCustomization::OnAssetSelected( const FAssetData& AssetData
 
         vectorBrush->SetTexture( texture );
 
-
         OuterObject->PostEditChangeProperty( propertyChangedEvent );
     }
 }

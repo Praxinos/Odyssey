@@ -19,6 +19,7 @@
 #include "Widgets/SOdysseyPaletteSetComboBox.h"
 #include "OdysseyAnimation.h"
 #include "OdysseyTextureLayerStackUserData.h"
+#include "OdysseyVectorLayer.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -81,26 +82,25 @@ void FOdysseyVectorObjectViewPaletteCustomization::CustomizeChildren(TSharedRef<
 
     //Not the best, but we need to know which palettes are loaded by the editor to filter the assets in the SObjectPropertyEntryBox below
     TArray<UObject*> OuterObjects;
-    mEditor = nullptr;
+    mVectorLayer = nullptr;
     FOnShouldFilterAsset filterPalette;
 
     StructPropertyHandle->GetOuterObjects(OuterObjects);
     if( OuterObjects.Num() > 0 && OuterObjects[0]->IsA(UOdysseyPainterEditorVectorObjectView::StaticClass() ) )
     {
         UOdysseyPainterEditorVectorObjectView* view = Cast<UOdysseyPainterEditorVectorObjectView>(OuterObjects[0]);
-        mEditor = view->GetEditor();
+        mVectorLayer = view->GetVectorLayer();
     }
     else if( OuterObjects.Num() > 0 && OuterObjects[0]->IsA(UOdysseyPainterEditorVectorBucketView::StaticClass()))
     {
         UOdysseyPainterEditorVectorBucketView* view = Cast<UOdysseyPainterEditorVectorBucketView>(OuterObjects[0]);
-        mEditor = view->GetEditor();
+        mVectorLayer = view->GetVectorLayer();
     }
 
-    if(mEditor)
+    if( mVectorLayer )
     {
-
         TArray<UOdysseyPalette*> palettesAlreadyLoaded;
-        for (UOdysseyPaletteSet* set : mEditor->GetPaletteSets())
+        for ( UOdysseyPaletteSet* set : mVectorLayer->GetPaletteSets() )
         {
             palettesAlreadyLoaded.Add(set->mPalette);
         }
@@ -160,32 +160,7 @@ void FOdysseyVectorObjectViewPaletteCustomization::CustomizeChildren(TSharedRef<
 FGuid
 FOdysseyVectorObjectViewPaletteCustomization::GetCurrentSet() const
 {
-    UOdysseyAnimation* animation = mEditor->GetAnimation();
-    UOdysseyTextureLayerStackUserData* userData = mEditor->GetTextureUserData();
-
-    if( animation )
-    {
-        for( int32 i = 0; i < animation->Palettes.Num(); i++ )
-        {
-            if( animation->Palettes[i]->mPalette == GetPalette() )
-            {
-                return animation->Palettes[i]->mSet;
-            }
-        }
-    }
-    else
-    if( userData )
-    {
-        for( int32 i = 0; i < userData->Palettes.Num(); i++ )
-        {
-            if( userData->Palettes[i]->mPalette == GetPalette() )
-            {
-                return userData->Palettes[i]->mSet;
-            }
-        }
-    }
-
-    return FGuid();
+    return mVectorLayer->GetPaletteSetID( GetPalette() );
 }
 
 TSharedRef<SWidget>

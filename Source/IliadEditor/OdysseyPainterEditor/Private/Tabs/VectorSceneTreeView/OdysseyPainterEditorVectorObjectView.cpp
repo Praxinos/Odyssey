@@ -3,7 +3,6 @@
 
 #include "OdysseyPainterEditorVectorObjectView.h"
 //#include "Undo/OdysseyVectorUndoPropertyChanged.h"
-#include "Undo/OdysseyVectorUndoObjectParam.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorCell.h"
 #include "OdysseyVectorLayer.h"
@@ -17,13 +16,10 @@ UOdysseyPainterEditorVectorObjectView::~UOdysseyPainterEditorVectorObjectView()
 }
 
 UOdysseyPainterEditorVectorObjectView::UOdysseyPainterEditorVectorObjectView()
-    : mEditor( nullptr )
-    , mScene( nullptr )
-    , mEditionMode( EObjectViewEditionMode::Direct )
+    : mVectorLayer( nullptr )
     , mObjectPropertyBits ( {0} )
     , bDisplayBackgroundProperties( true )
     , bDisplayForegroundProperties( true )
-    , ApplyTo( EObjectViewApplyPolicy::Selection )
     , Name( "VectorObject" )
     , TranslationX ( 0.0f )
     , TranslationY ( 0.0f )
@@ -45,15 +41,9 @@ UOdysseyPainterEditorVectorObjectView::UOdysseyPainterEditorVectorObjectView()
 }
 
 void
-UOdysseyPainterEditorVectorObjectView::SetEditionMode( EObjectViewEditionMode iEditionMode )
+UOdysseyPainterEditorVectorObjectView::ImportParam( const std::list<FOdysseyVectorObject*>& iFocusedObjectList )
 {
-    mEditionMode = iEditionMode;
-}
-
-void
-UOdysseyPainterEditorVectorObjectView::ImportParam()
-{
-    for( FOdysseyVectorObject* focusedObject : mFocusedObjectList )
+    for( FOdysseyVectorObject* focusedObject : iFocusedObjectList )
     {
         // Category "Identity"
         Name = focusedObject->GetName();
@@ -105,15 +95,21 @@ UOdysseyPainterEditorVectorObjectView::ImportParam()
 }
 
 void
-UOdysseyPainterEditorVectorObjectView::Update( FOdysseyPainterEditor* iEditor
-                                             , FOdysseyVectorGroupPaint* iScene
-                                             , std::list<FOdysseyVectorObject*>& iFocusedObjectList )
+UOdysseyPainterEditorVectorObjectView::Update( const std::list<FOdysseyVectorObject*>& iFocusedObjectList )
 {
-    mEditor = iEditor;
-    mScene = iScene;
-    mFocusedObjectList = iFocusedObjectList;
+    ImportParam( iFocusedObjectList );
+}
 
-    ImportParam();
+void
+UOdysseyPainterEditorVectorObjectView::SetVectorLayer( TSharedPtr<FOdysseyVectorLayer> iVectorLayer )
+{
+    mVectorLayer = iVectorLayer;
+}
+
+TSharedPtr<FOdysseyVectorLayer>
+UOdysseyPainterEditorVectorObjectView::GetVectorLayer()
+{
+    return mVectorLayer;
 }
 
 bool
@@ -127,6 +123,71 @@ UOdysseyPainterEditorVectorObjectView::HasPropertyBits()
             return true;
         }
     }
+
+    return false;
+}
+
+bool
+UOdysseyPainterEditorVectorObjectView::HasProperty( const FName& iPropertyName )
+{
+    for ( TFieldIterator<FProperty> it(GetClass()); it; ++it )
+    {
+        FProperty* property = (*it);
+
+        if( property->GetName() == iPropertyName )
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
+bool
+UOdysseyPainterEditorVectorObjectView::GetPropertyBit( const FName& iPropertyName )
+{
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, Name) )
+        return mObjectPropertyBits.Name;
+
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, TranslationX) )
+        return mObjectPropertyBits.TranslationX;
+
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, TranslationY) )
+        return mObjectPropertyBits.TranslationY;
+
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, Rotation) )
+        return mObjectPropertyBits.Rotation;
+
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, ScalingX) )
+        return mObjectPropertyBits.ScalingX;
+
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, ScalingY) )
+        return mObjectPropertyBits.ScalingY;
+
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, Opacity) )
+        return mObjectPropertyBits.Opacity;
+
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, Visible) )
+        return mObjectPropertyBits.Visible;
+
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, ForegroundColorMode) )
+        return mObjectPropertyBits.ForegroundColorMode;
+
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, ForegroundColor) )
+        return mObjectPropertyBits.ForegroundColor;
+
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, ForegroundPaletteSelection) )
+        return mObjectPropertyBits.ForegroundPaletteSelection;
+
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, BackgroundColorMode) )
+        return mObjectPropertyBits.BackgroundColorMode;
+
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, BackgroundColor) )
+        return mObjectPropertyBits.BackgroundColor;
+
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, BackgroundPaletteSelection) )
+        return mObjectPropertyBits.BackgroundPaletteSelection;
 
     return false;
 }
@@ -190,55 +251,27 @@ UOdysseyPainterEditorVectorObjectView::ApplyPropertyBits( FOdysseyVectorObject* 
 }
 
 void
-UOdysseyPainterEditorVectorObjectView::ValidateProperties()
+UOdysseyPainterEditorVectorObjectView::ValidateProperties( const std::list<FOdysseyVectorObject*>& iObjectList )
 {
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                                | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
+    TSet<FOdysseyVectorCell*> cellSet;
 
     if( HasPropertyBits() )
     {
-        if( ApplyTo == EObjectViewApplyPolicy::Selection )
+        for( FOdysseyVectorObject* selectedObject : iObjectList )
         {
-            for( FOdysseyVectorObject* selectedObject : mFocusedObjectList )
-            {
-                ApplyPropertyBits( selectedObject );
-            }
-        }
+            ApplyPropertyBits( selectedObject );
 
-        if( ApplyTo == EObjectViewApplyPolicy::AllInCell )
-        {
-            FOdysseyVectorObject::Traverse( mScene
-                                          , 0
-                                          , [ this ]( FOdysseyVectorObject* object, uint64 traversalFlags )
-                                          {
-                                              ApplyPropertyBits( object );
-
-                                              return FOdysseyVectorObject::TRAVERSE_CONTINUE;
-                                          } );
-        }
-
-        if( ApplyTo == EObjectViewApplyPolicy::AllInAllCells )
-        {
-            FOdysseyVectorObject::Traverse( mScene->GetLayer()
-                                          , 0
-                                          , [ this ]( FOdysseyVectorObject* object, uint64 traversalFlags )
-                                          {
-                                              ApplyPropertyBits( object );
-
-                                              return FOdysseyVectorObject::TRAVERSE_CONTINUE;
-                                          } );
+            cellSet.Add( selectedObject->GetCell() );
         }
     }
 
     ClearPropertyBits();
 
-    // force redraw the whole screen
-    mScene->GetCell()->InvalidateRect();
-
-    mScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    mScene->GetLayer()->RequestRedraw( mScene->GetCell(), 0 );
-
-    mScene->GetLayer()->Notify( notificationFlags );
+    for( FOdysseyVectorCell* cell : cellSet )
+    {
+        // force redraw the whole screen
+        cell->InvalidateRect();
+    }
 }
 
 void
@@ -248,58 +281,71 @@ UOdysseyPainterEditorVectorObjectView::ClearPropertyBits()
 }
 
 void
+UOdysseyPainterEditorVectorObjectView::SetPropertyBit( const FName& iPropertyName
+                                                     , const FName& iMemberPropertyName
+                                                     , const FName& iCategory
+                                                     , bool iState )
+{
+    // Category "Identity"
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, Name) )
+        mObjectPropertyBits.Name = iState;
+
+    // Category "Transform"
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, TranslationX) )
+        mObjectPropertyBits.TranslationX = iState;
+
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, TranslationY) )
+        mObjectPropertyBits.TranslationY = iState;
+
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, Rotation) )
+        mObjectPropertyBits.Rotation = iState;
+
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, ScalingX) )
+        mObjectPropertyBits.ScalingX = iState;
+
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, ScalingY) )
+        mObjectPropertyBits.ScalingY = iState;
+
+    // Category "Appearance"
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, Opacity) )
+        mObjectPropertyBits.Opacity = iState;
+
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, Visible) )
+        mObjectPropertyBits.Visible = iState;
+
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, ForegroundColorMode) )
+        mObjectPropertyBits.ForegroundColorMode = iState;
+
+    // note: iMemberPropertyName because FColor is a struct
+    // and we can edit individual struct members RGBA
+    if( ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, ForegroundColor) )
+     || ( iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, ForegroundColor) ) )
+        mObjectPropertyBits.ForegroundColor = iState;
+
+    if ( ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, ForegroundPaletteSelection) )
+      || ( iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, ForegroundPaletteSelection) ) )
+        mObjectPropertyBits.ForegroundPaletteSelection = iState;
+
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, BackgroundColorMode) )
+        mObjectPropertyBits.BackgroundColorMode = iState;
+
+    // note: iMemberPropertyName because FColor is a struct
+    // and we can edit individual struct members RGBA
+    if( ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, BackgroundColor) )
+     || ( iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, BackgroundColor) ) )
+        mObjectPropertyBits.BackgroundColor = iState;
+
+    if ( ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, BackgroundPaletteSelection) )
+      || ( iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, BackgroundPaletteSelection) ) )
+        mObjectPropertyBits.BackgroundPaletteSelection = iState;
+}
+
+void
 UOdysseyPainterEditorVectorObjectView::PropertyChanged( const FName& iPropertyName
                                                       , const FName& iMemberPropertyName
                                                       , const FName& iCategory )
 {
-    // Category "Identity"
-    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, Name) )
-        mObjectPropertyBits.Name = 1;
-
-    // Category "Transform"
-    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, TranslationX) )
-        mObjectPropertyBits.TranslationX = 1;
-
-    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, TranslationY) )
-        mObjectPropertyBits.TranslationY = 1;
-
-    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, Rotation) )
-        mObjectPropertyBits.Rotation = 1;
-
-    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, ScalingX) )
-        mObjectPropertyBits.ScalingX = 1;
-
-    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, ScalingY) )
-        mObjectPropertyBits.ScalingY = 1;
-
-    // Category "Appearance"
-    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, Opacity) )
-        mObjectPropertyBits.Opacity = 1;
-
-    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, Visible) )
-        mObjectPropertyBits.Visible = 1;
-
-    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, ForegroundColorMode) )
-        mObjectPropertyBits.ForegroundColorMode = 1;
-
-    // note: iMemberPropertyName because FColor is a struct
-    // and we can edit individual struct members RGBA
-    if( ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, ForegroundColor) ) || ( iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, ForegroundColor) ) )
-        mObjectPropertyBits.ForegroundColor = 1;
-
-    if ( (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, ForegroundPaletteSelection)) || (iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, ForegroundPaletteSelection)) )
-        mObjectPropertyBits.ForegroundPaletteSelection = 1;
-
-    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, BackgroundColorMode) )
-        mObjectPropertyBits.BackgroundColorMode = 1;
-
-    // note: iMemberPropertyName because FColor is a struct
-    // and we can edit individual struct members RGBA
-    if( ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, BackgroundColor) ) || ( iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, BackgroundColor) ) )
-        mObjectPropertyBits.BackgroundColor = 1;
-
-    if ((iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, BackgroundPaletteSelection)) || (iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, BackgroundPaletteSelection)))
-        mObjectPropertyBits.BackgroundPaletteSelection = 1;
+    SetPropertyBit( iPropertyName, iMemberPropertyName, iCategory, true );
 }
 
 void
@@ -310,43 +356,9 @@ UOdysseyPainterEditorVectorObjectView::PostEditChangeProperty( FPropertyChangedE
     if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive )
         return;
 
-    if( mScene )
-    {
-        // needed for valid GUndo pointer
-        GEditor->BeginTransaction(LOCTEXT("vector-object.transaction.property-changed","Property Changed"));
-        if( GUndo )
-        {
-            FOdysseyVectorUndo *undo = new FOdysseyVectorUndoObjectParam( mScene
-                                                                        , mFocusedObjectList
-                                                                        , FName(PropertyChangedEvent.Property->GetMetaData(TEXT("Category")))
-                                                                        , FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                                                                        | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                                                                        | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD );
-            // We use GEditor as the UObject, otherwise if we use "this", at each UNDO, PostEditChangeProperty() will be called
-            // which will again call StoreUndo + this will lead to a crash. I don't know however what will be the consequences
-            // of a call to GEditor::PostEditChangeProperty()
-            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-
-            TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
-            if (source)
-                source->RecordCurrentFrameUndo();
-        }
-        GEditor->EndTransaction();
-
-        PropertyChanged( PropertyChangedEvent.GetPropertyName()
-                       , PropertyChangedEvent.MemberProperty->GetFName()
-                       , FName(PropertyChangedEvent.Property->GetMetaData(TEXT("Category"))) );
-
-        if( mEditionMode == EObjectViewEditionMode::Direct )
-        {
-            ValidateProperties();
-        }
-    }
-}
-
-FOdysseyPainterEditor* UOdysseyPainterEditorVectorObjectView::GetEditor()
-{
-    return mEditor;
+    PropertyChanged( PropertyChangedEvent.GetPropertyName()
+                   , PropertyChangedEvent.MemberProperty->GetFName()
+                   , FName(PropertyChangedEvent.Property->GetMetaData(TEXT("Category"))) );
 }
 
 #undef LOCTEXT_NAMESPACE

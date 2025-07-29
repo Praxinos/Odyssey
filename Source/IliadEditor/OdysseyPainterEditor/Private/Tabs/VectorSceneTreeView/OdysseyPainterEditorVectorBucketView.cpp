@@ -49,6 +49,18 @@ UOdysseyPainterEditorVectorBucketView::ImportParam()
 }
 
 void
+UOdysseyPainterEditorVectorBucketView::SetVectorLayer( TSharedPtr<FOdysseyVectorLayer> iVectorLayer )
+{
+    mVectorLayer = iVectorLayer;
+}
+
+TSharedPtr<FOdysseyVectorLayer>
+UOdysseyPainterEditorVectorBucketView::GetVectorLayer()
+{
+    return mVectorLayer;
+}
+
+void
 UOdysseyPainterEditorVectorBucketView::Update( FOdysseyPainterEditor* iEditor, FOdysseyVectorBucket* iBucket )
 {
     mEditor = iEditor;

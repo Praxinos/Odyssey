@@ -16,6 +16,24 @@
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorGroupPaintView : public UOdysseyPainterEditorVectorGroupView
 {
+    // we use a bitfields in case we have more than 64 flags
+    typedef union {
+        struct
+        {
+            uint32 Painted : 1;
+            uint32 Monochrome : 1;
+            uint32 MonochromeColor : 1;
+            uint32 GapTolerance : 1;
+            uint32 WireframeColor : 1;
+            uint32 IntersectsCanvas : 1;
+            uint32 GapDetectionScheme : 1;
+            uint32 SegmentExtensionScheme : 1;
+            uint32 SegmentExtensionSimplified : 1;
+            uint32 Realtime : 1;
+        };
+        uint8 raw[1];
+    } PropertyBits;
+
     public:
         GENERATED_BODY()
 
@@ -23,11 +41,19 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorGroupPaintView : publi
         ~UOdysseyPainterEditorVectorGroupPaintView();
         UOdysseyPainterEditorVectorGroupPaintView();
 
+    public:
+        virtual bool GetPropertyBit( const FName& iPropertyName ) override;
+        virtual void SetPropertyBit( const FName& iPropertyName
+                                   , const FName& iMemberPropertyName
+                                   , const FName& iCategory
+                                   , bool iState ) override;
+
     protected:
-        virtual void ImportParam() override;
-        virtual void PropertyChanged( const FName& iPropertyName
-                                    , const FName& iMemberPropertyName
-                                    , const FName& iCategory ) override;
+        virtual void ImportParam( const std::list<FOdysseyVectorObject*>& iFocusedObjectList ) override;
+        virtual void ApplyPropertyBits( FOdysseyVectorObject* iObject ) override;
+
+    private:
+        PropertyBits mGroupPaintPropertyBits;
 
     public:
         UPROPERTY( EditAnywhere

@@ -79,6 +79,7 @@ public:
     virtual FOdysseyVectorCell* GetMaxCellFrom( uint32 iIndex ) override;
     virtual FOdysseyVectorCell* GetMinCellFrom( uint32 iIndex ) override;
     virtual FGuid GetPaletteSetID( UOdysseyPalette* iPalette ) override;
+    virtual const TArray<UOdysseyPaletteSet*> GetPaletteSets() const override;
 
 protected:
     void IsColoredChanged();

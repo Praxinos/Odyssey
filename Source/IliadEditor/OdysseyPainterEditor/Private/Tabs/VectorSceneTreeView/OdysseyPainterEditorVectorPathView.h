@@ -13,6 +13,13 @@
 
 #include "OdysseyPainterEditorVectorPathView.generated.h"
 
+UENUM()
+enum class EPathViewWideningMode : uint8
+{
+    Percent = 0 UMETA( ToolTip = "Percent" ),
+    Units = 1 UMETA( ToolTip = "Units" )
+};
+
 UCLASS( HideCategories = (SelectionTool) )
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathView : public UOdysseyPainterEditorVectorObjectView
 {
@@ -20,7 +27,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathView : public UOdy
     typedef union {
         struct
         {
-            uint32 PathWidth : 1;
+            uint32 PathWidthInPercent : 1;
+            uint32 PathWidthInUnits : 1;
             uint32 JointType : 1;
             uint32 MiterLimit : 1;
             uint32 Brush : 1;
@@ -35,15 +43,19 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathView : public UOdy
         ~UOdysseyPainterEditorVectorPathView();
         UOdysseyPainterEditorVectorPathView();
 
+    public:
+        virtual bool GetPropertyBit( const FName& iPropertyName ) override;
+        virtual void SetPropertyBit( const FName& iPropertyName
+                                   , const FName& iMemberPropertyName
+                                   , const FName& iCategory
+                                   , bool iState ) override;
+
     protected:
         virtual void ClearPropertyBits() override;
         virtual void ApplyPropertyBits( FOdysseyVectorObject* iObject ) override;
         virtual bool HasPropertyBits() override;
 
-        virtual void ImportParam() override;
-        virtual void PropertyChanged( const FName& iPropertyName
-                                    , const FName& iMemberPropertyName
-                                    , const FName& iCategory ) override;
+        virtual void ImportParam( const std::list<FOdysseyVectorObject*>& iFocusedObjectList ) override;
 
     private:
         PathPropertyBits mPathPropertyBits;
@@ -51,11 +63,23 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathView : public UOdy
     public:
         UPROPERTY( EditAnywhere
                  , Category=Path
+                 , meta = ( ToolTip = "Widen in percent or units" ) )
+        EPathViewWideningMode WideningMode;
+
+        UPROPERTY( EditAnywhere
+                 , Category=Path
                  , meta = ( ToolTip = "Width in percent"
                           , Units = "Percent"
-                          , EditCondition = "( mEditionMode == EObjectViewEditionMode::OnValidation )"
+                          , EditCondition = "( WideningMode == EPathViewWideningMode::Percent )"
                           , EditConditionHides ) )
-        double PathWidth;
+        double PathWidthInPercent;
+
+        UPROPERTY( EditAnywhere
+                 , Category=Path
+                 , meta = ( ToolTip = "Width in units"
+                          , EditCondition = "( WideningMode == EPathViewWideningMode::Units )"
+                          , EditConditionHides ) )
+        double PathWidthInUnits;
 
         UPROPERTY( EditAnywhere
                  , Category=Path

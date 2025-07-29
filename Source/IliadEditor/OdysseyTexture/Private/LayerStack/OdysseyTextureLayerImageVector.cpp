@@ -488,6 +488,39 @@ UOdysseyTextureLayerImageVector::GetPaletteSetID( UOdysseyPalette* iPalette )
     return FGuid();
 }
 
+// Implements Interface IOdysseyVectorLayer::GetPaletteSetID
+const TArray<UOdysseyPaletteSet*>
+UOdysseyTextureLayerImageVector::GetPaletteSets() const
+{
+    TArray<UOdysseyPaletteSet*> paletteSets;
+    UOdysseyTextureLayerStackUserData* textureUserData = Cast<UOdysseyTextureLayerStackUserData>(GetTexture()->GetAssetUserDataOfClass(UOdysseyTextureLayerStackUserData::StaticClass()));
+
+    paletteSets = textureUserData->Palettes;
+
+    //Fail safe in case the user force delete a used palette while in the editor
+    for( int i = 0; i < paletteSets.Num(); i++ )
+    {
+        if( !paletteSets[i]->mPalette || !paletteSets[i]->mPalette->IsValidLowLevel() )
+        {
+            paletteSets.RemoveAt(i);
+            i--;
+        }
+    }
+
+    // Legacy, to remove next version, ensure that the Palettes are going to be saved with the upgraded data
+    for(int i = 0; i < paletteSets.Num(); i++)
+    {
+        if(paletteSets[i]->mPalette->NeedsSavingAfterUpgrade)
+        {
+            paletteSets[i]->mPalette->MarkPackageDirty();
+            paletteSets[i]->mPalette->NeedsSavingAfterUpgrade = false;
+        }
+    }
+    //---
+
+    return paletteSets;
+}
+
 void
 UOdysseyTextureLayerImageVector::PreSave(FObjectPreSaveContext SaveContext)
 {

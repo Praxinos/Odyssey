@@ -88,6 +88,7 @@ public:
     virtual FOdysseyVectorCell* GetMinCellFrom( uint32 iIndex ) override;
     // Implements Interface IOdysseyVectorLayer::GetMinCellFrom
     virtual FGuid GetPaletteSetID( UOdysseyPalette* iPalette ) override;
+    const TArray<UOdysseyPaletteSet*> GetPaletteSets() const;
 
     // Implements Interface IOdysseyVectorCell
     virtual int32 GetIndex() override;

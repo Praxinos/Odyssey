@@ -16,21 +16,6 @@
 
 class FOdysseyPainterEditor;
 
-UENUM()
-enum class EObjectViewApplyPolicy : uint8
-{
-    Selection = 0,
-    AllInCell = 1,
-    AllInAllCells = 2
-};
-
-UENUM()
-enum class EObjectViewEditionMode : uint8
-{
-    Direct = 0,
-    OnValidation = 1
-};
-
 USTRUCT()
 struct FPaletteEntrySelection
 {
@@ -75,38 +60,38 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectView : public UO
         ~UOdysseyPainterEditorVectorObjectView();
         UOdysseyPainterEditorVectorObjectView();
 
-        void Update( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene, std::list<FOdysseyVectorObject*>& iFocusedObjectList );
+        void Update( const std::list<FOdysseyVectorObject*>& iFocusedObjectList );
         void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
 
-        FOdysseyPainterEditor* GetEditor();
-
-        void SetEditionMode( EObjectViewEditionMode iEditionMode );
-        void ValidateProperties();
+        void ValidateProperties( const std::list<FOdysseyVectorObject*>& iObjectList );
+        virtual bool GetPropertyBit( const FName& iPropertyName );
+        virtual void SetPropertyBit( const FName& iPropertyName
+                                   , const FName& iMemberPropertyName
+                                   , const FName& iCategory
+                                   , bool iState  );
+        // Pointer to the layer (useful to retrieve palette sets needed by FOdysseyVectorObjectViewPaletteCustomization)
+        void SetVectorLayer( TSharedPtr<FOdysseyVectorLayer> iVectorLayer );
+        TSharedPtr<FOdysseyVectorLayer> GetVectorLayer();
+        bool HasProperty( const FName& iPropertyName );
 
     protected:
         virtual void ClearPropertyBits();
         virtual void ApplyPropertyBits( FOdysseyVectorObject* iObject );
         virtual bool HasPropertyBits();
 
-        virtual void ImportParam();
+
+        virtual void ImportParam( const std::list<FOdysseyVectorObject*>& iFocusedObjectList );
         virtual void PropertyChanged( const FName& iPropertyName
                                     , const FName& iMemberPropertyName
                                     , const FName& iCategory );
 
     protected:
-        FOdysseyPainterEditor* mEditor;
-        FOdysseyVectorGroupPaint* mScene;
-        std::list<FOdysseyVectorObject*> mFocusedObjectList;
+        TSharedPtr<FOdysseyVectorLayer> mVectorLayer;
 
     private:
         ObjectPropertyBits mObjectPropertyBits;
 
     public:
-        // hidden property for use with EditCondition
-        UPROPERTY( EditDefaultsOnly
-                 , Category=Hidden )
-        EObjectViewEditionMode mEditionMode;
-
         // hidden property for use with EditCondition
         UPROPERTY( EditDefaultsOnly
                  , Category=Hidden )
@@ -116,13 +101,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectView : public UO
         UPROPERTY( EditDefaultsOnly
                  , Category=Hidden )
         bool bDisplayForegroundProperties;
-
-        // hidden property for use with EditCondition
-        UPROPERTY( EditDefaultsOnly
-                 , Category=Options
-                 , meta = ( EditCondition = "( mEditionMode == EObjectViewEditionMode::OnValidation )"
-                          , EditConditionHides ) )
-        EObjectViewApplyPolicy ApplyTo;
 
         UPROPERTY( EditAnywhere
                  , Category=Identity

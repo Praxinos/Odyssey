@@ -16,19 +16,19 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoObjectParam : public FOdysseyVectorUnd
 {
     public:
         ~FOdysseyVectorUndoObjectParam();
-         FOdysseyVectorUndoObjectParam( FOdysseyVectorGroupPaint* iScene
+         FOdysseyVectorUndoObjectParam( FOdysseyVectorLayer* iLayer
                                       , FOdysseyVectorObject* iObject
                                       , const FName& iCategoryName
                                       , uint64 iReturnFlags );
-         FOdysseyVectorUndoObjectParam( FOdysseyVectorGroupPaint* iScene
+         FOdysseyVectorUndoObjectParam( FOdysseyVectorLayer* iLayer
                                       , const std::vector<FOdysseyVectorObject*>& iObjectArray
                                       , const FName& iCategoryName
                                       , uint64 iReturnFlags );
-         FOdysseyVectorUndoObjectParam( FOdysseyVectorGroupPaint* iScene
+         FOdysseyVectorUndoObjectParam( FOdysseyVectorLayer* iLayer
                                       , const std::list<FOdysseyVectorObject*>& iObjectList
                                       , const FName& iCategoryName
                                       , uint64 iReturnFlags );
-        FOdysseyVectorUndoObjectParam( FOdysseyVectorGroupPaint* iScene
+        FOdysseyVectorUndoObjectParam( FOdysseyVectorLayer* iLayer
                                      , FOdysseyVectorObject* iObject
                                      , uint64 iReturnFlags );
 
@@ -55,7 +55,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoObjectVisibility : public FOdysseyVect
 {
     public:
         ~FOdysseyVectorUndoObjectVisibility();
-         FOdysseyVectorUndoObjectVisibility( FOdysseyVectorGroupPaint* iScene
+         FOdysseyVectorUndoObjectVisibility( FOdysseyVectorLayer* iLayer
                                            , FOdysseyVectorObject* iObject
                                            , uint64 iReturnFlags );
 };

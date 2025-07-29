@@ -9,7 +9,9 @@ UOdysseyPainterEditorVectorPathView::~UOdysseyPainterEditorVectorPathView()
 
 UOdysseyPainterEditorVectorPathView::UOdysseyPainterEditorVectorPathView()
     : UOdysseyPainterEditorVectorObjectView()
-    , PathWidth ( 100.0f )
+    , WideningMode ( EPathViewWideningMode::Percent )
+    , PathWidthInPercent ( 100.0f )
+    , PathWidthInUnits ( 2.0f )
     , Brush ( nullptr )
     , mPathPropertyBits( { 0 } )
 {
@@ -18,11 +20,11 @@ UOdysseyPainterEditorVectorPathView::UOdysseyPainterEditorVectorPathView()
 }
 
 void
-UOdysseyPainterEditorVectorPathView::ImportParam()
+UOdysseyPainterEditorVectorPathView::ImportParam( const std::list<FOdysseyVectorObject*>& iFocusedObjectList )
 {
-    UOdysseyPainterEditorVectorObjectView::ImportParam();
+    UOdysseyPainterEditorVectorObjectView::ImportParam( iFocusedObjectList );
 
-    for( FOdysseyVectorObject* selectedObject : mFocusedObjectList )
+    for( FOdysseyVectorObject* selectedObject : iFocusedObjectList )
     {
         if( selectedObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
         {
@@ -60,6 +62,30 @@ UOdysseyPainterEditorVectorPathView::HasPropertyBits()
     return UOdysseyPainterEditorVectorObjectView::HasPropertyBits();
 }
 
+bool
+UOdysseyPainterEditorVectorPathView::GetPropertyBit( const FName& iPropertyName )
+{
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorPathView, WideningMode) )
+        return true;
+
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorPathView, PathWidthInPercent) )
+        return mPathPropertyBits.PathWidthInPercent;
+
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorPathView, PathWidthInUnits) )
+        return mPathPropertyBits.PathWidthInUnits;
+
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorPathView, JointType) )
+        return mPathPropertyBits.JointType;
+
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorPathView, Brush) )
+        return mPathPropertyBits.Brush;
+
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorPathView, MiterLimit) )
+        return mPathPropertyBits.MiterLimit;
+
+    return UOdysseyPainterEditorVectorObjectView::GetPropertyBit( iPropertyName );
+}
+
 void
 UOdysseyPainterEditorVectorPathView::ApplyPropertyBits( FOdysseyVectorObject* iObject )
 {
@@ -69,11 +95,25 @@ UOdysseyPainterEditorVectorPathView::ApplyPropertyBits( FOdysseyVectorObject* iO
     {
         FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iObject);
 
-        if( mPathPropertyBits.PathWidth )
+        if( WideningMode == EPathViewWideningMode::Percent )
         {
-            for( FOdysseyVectorVertex* vertex : path->GetVertexList() )
+            if( mPathPropertyBits.PathWidthInPercent )
             {
-                vertex->SetRadius( vertex->GetRadius() * PathWidth * 0.01f );
+                for( FOdysseyVectorVertex* vertex : path->GetVertexList() )
+                {
+                    vertex->SetRadius( vertex->GetRadius() * PathWidthInPercent * 0.01f );
+                }
+            }
+        }
+
+        if( WideningMode == EPathViewWideningMode::Units )
+        {
+            if( mPathPropertyBits.PathWidthInUnits )
+            {
+                for( FOdysseyVectorVertex* vertex : path->GetVertexList() )
+                {
+                    vertex->SetRadius( PathWidthInUnits );
+                }
             }
         }
 
@@ -89,23 +129,27 @@ UOdysseyPainterEditorVectorPathView::ApplyPropertyBits( FOdysseyVectorObject* iO
 }
 
 void
-UOdysseyPainterEditorVectorPathView::PropertyChanged( const FName& iPropertyName
-                                                    , const FName& iMemberPropertyName
-                                                    , const FName& iCategory)
+UOdysseyPainterEditorVectorPathView::SetPropertyBit( const FName& iPropertyName
+                                                   , const FName& iMemberPropertyName
+                                                   , const FName& iCategory
+                                                   , bool iState )
 {
-    UOdysseyPainterEditorVectorObjectView::PropertyChanged( iPropertyName
-                                                          , iMemberPropertyName
-                                                          , iCategory );
+    UOdysseyPainterEditorVectorObjectView::SetPropertyBit( iPropertyName
+                                                         , iMemberPropertyName
+                                                         , iCategory
+                                                         , iState );
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorPathView, PathWidthInPercent) )
+        mPathPropertyBits.PathWidthInPercent = iState;
 
-    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorPathView, PathWidth) )
-        mPathPropertyBits.PathWidth = 1;
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorPathView, PathWidthInUnits) )
+        mPathPropertyBits.PathWidthInUnits = iState;
 
     if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorPathView, JointType) )
-        mPathPropertyBits.JointType = 1;
+        mPathPropertyBits.JointType = iState;
 
     if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorPathView, Brush) )
-        mPathPropertyBits.Brush = 1;
+        mPathPropertyBits.Brush = iState;
 
     if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorPathView, MiterLimit) )
-        mPathPropertyBits.MiterLimit = 1;
+        mPathPropertyBits.MiterLimit = iState;
 }

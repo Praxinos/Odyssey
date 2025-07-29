@@ -15,6 +15,7 @@ class SOdysseyLayerStackTreeView;
 class FOdysseyPainterEditorAnimationTimelinePosition;
 class FOdysseyAnimationTimelineTool;
 class FOdysseyPainterEditor;
+class SOdysseyPainterEditorVectorMassModifierView;
 
 /**
  * Implements a layer row widget
@@ -79,6 +80,8 @@ public:
 protected:
     virtual TSharedRef<SWidget> OnGenerateCellWidget(UOdysseyLayerCell* iCell) = 0;
     virtual void BuildContextMenu(TSharedRef<FUICommandList> CommandList, FMenuBuilder& MenuBuilder);
+    FReply AcceptProperties( TSharedRef<SOdysseyPainterEditorVectorMassModifierView> iObjectView);
+    void MassModifier();
 
 protected:
     //TArray<TSharedPtr<FOdysseyAnimationCell>> GetSelectedCells() const;
