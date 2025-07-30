@@ -5,6 +5,7 @@
 
 from pathlib import Path
 import platform
+import shutil
 import subprocess
 import sys
 
@@ -38,11 +39,12 @@ def main():
     venv_path = root / '.venv'
     requirements_pathfile = root / '.requirements.txt'
 
-    if not venv_path.exists():
-        print( f'*** Creating venv... {venv_path}' )
-        _RunCommand( [ _GetPython(), '-m', 'venv', venv_path ] )
-    else:
-        print( f'*** Using venv... {venv_path}' )
+    if venv_path.exists():
+        print( f'*** Removing existing venv... {venv_path}' )
+        shutil.rmtree( venv_path )
+
+    print( f'*** Creating venv... {venv_path}' )
+    _RunCommand( [ _GetPython(), '-m', 'venv', venv_path ] )
 
     print( f'*** Updating venv: pip...' )
     _RunCommand( [ _GetPython( venv_path ), '-m', 'pip', 'install', '--upgrade', 'pip' ] )
@@ -53,7 +55,7 @@ def main():
     print( f'*** Setup pre-commit...' )
     _RunCommand( [ _GetPython( venv_path ), '-m', 'pre_commit', 'install', '--overwrite' ] )
 
-    print( f'*** Run pre-commit...' )
+    print( f'*** Run pre-commit on all files...' )
     _RunCommand( [ _GetPython( venv_path ), '-m', 'pre_commit', 'run', '--all-files' ] )
 
 #-
