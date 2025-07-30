@@ -57,14 +57,11 @@ Read the [:blue_book:User Documentation](https://praxinos.coop/odyssey-user-doc)
 
 <!-- -->
 
-# Setting Hooks (after cloning)
+# Setup (after cloning)
 
-- go to `.git/hooks` folder
-- rename `pre-commit.sample` to `pre-commit`
-- open `pre-commit` file
-- add this line after the last `fi`:
-    `exec py .githooks/check.py` [Windows]
-    `exec python3 .githooks/check.py` [MacOSX]
+- Double-click on:
+    * ![Static Badge](https://img.shields.io/badge/Windows-aaaaff) `Setup.bat`
+    * ![Static Badge](https://img.shields.io/badge/MacOSX-ffaaaa) `Setup.command`
 
 <!-- -->
 
