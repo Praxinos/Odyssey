@@ -271,6 +271,7 @@
     ],
     "PreBuildSteps": {
         "Comment": "exit must NOT be called without condition, otherwise E:\\Unreal Projects\\dev_56_odyssey\\Intermediate\\Build\\Win64\\x64\\dev_56_odysseyEditor\\DebugGame\\PreBuild-1.bat won't update anymore",
+        "Comment2": "let's see if steps should be done in script ?",
         "Win64": [
             "",
             "echo Checking pre-commit hooks for $(PluginDir)",
@@ -294,11 +295,11 @@
             "",
             "if [ -e \"$(PluginDir)/.git\" ]; then",
             "   if [ ! -e \"$(PluginDir)/.git/hooks/pre-commit\" ]; then",
-            "       echo ERROR: $(PluginDir)/.git/hooks/pre-commit NOT installed -> execute Setup.bat",
+            "       echo ERROR: $(PluginDir)/.git/hooks/pre-commit NOT installed -> execute Setup.command",
             "       exit 121",
             "   fi",
             "   if [ ! -e \"$(PluginDir)/.venv\" ]; then",
-            "       echo ERROR: $(PluginDir)/.venv NOT installed -> execute Setup.bat",
+            "       echo ERROR: $(PluginDir)/.venv NOT installed -> execute Setup.command",
             "       exit 111",
             "   fi",
             "fi",

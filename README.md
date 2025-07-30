@@ -59,9 +59,11 @@ Read the [:blue_book:User Documentation](https://praxinos.coop/odyssey-user-doc)
 
 # Setup (after cloning)
 
-- Double-click on:
-    * ![Static Badge](https://img.shields.io/badge/Windows-aaaaff) `Setup.bat`
-    * ![Static Badge](https://img.shields.io/badge/MacOSX-ffaaaa) `Setup.command`
+- ![Static Badge](https://img.shields.io/badge/Windows-aaaaff) Double-click on `Setup.bat`
+- ![Static Badge](https://img.shields.io/badge/MacOSX-ffaaaa) Double-click on `Setup.command`
+
+> [!TIP]  
+> Don't hesitate to double-click on `Setup.bat` | `Setup.command` from time to time
 
 <!-- -->
 
