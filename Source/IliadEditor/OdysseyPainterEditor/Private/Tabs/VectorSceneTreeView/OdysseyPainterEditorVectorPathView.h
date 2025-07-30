@@ -50,34 +50,43 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathView : public UOdy
                                    , const FName& iCategory
                                    , bool iState ) override;
 
+        void SetDisplayWideningOptions( bool iValue );
+
     protected:
+        virtual void ImportParam( const std::list<FOdysseyVectorObject*>& iFocusedObjectList ) override;
         virtual void ClearPropertyBits() override;
         virtual void ApplyPropertyBits( FOdysseyVectorObject* iObject ) override;
         virtual bool HasPropertyBits() override;
 
-        virtual void ImportParam( const std::list<FOdysseyVectorObject*>& iFocusedObjectList ) override;
 
     private:
         PathPropertyBits mPathPropertyBits;
 
     public:
+        // hidden property for use with EditCondition
+        UPROPERTY( EditDefaultsOnly
+                 , Category=Hidden )
+        bool bDisplayWideningOptions;
+
         UPROPERTY( EditAnywhere
                  , Category=Path
-                 , meta = ( ToolTip = "Widen in percent or units" ) )
+                 , meta = ( ToolTip = "Widen in percent or units"
+                          , EditCondition = "bDisplayWideningOptions"
+                          , EditConditionHides ) )
         EPathViewWideningMode WideningMode;
 
         UPROPERTY( EditAnywhere
                  , Category=Path
                  , meta = ( ToolTip = "Width in percent"
                           , Units = "Percent"
-                          , EditCondition = "( WideningMode == EPathViewWideningMode::Percent )"
+                          , EditCondition = "bDisplayWideningOptions && ( WideningMode == EPathViewWideningMode::Percent )"
                           , EditConditionHides ) )
         double PathWidthInPercent;
 
         UPROPERTY( EditAnywhere
                  , Category=Path
                  , meta = ( ToolTip = "Width in units"
-                          , EditCondition = "( WideningMode == EPathViewWideningMode::Units )"
+                          , EditCondition = "bDisplayWideningOptions && ( WideningMode == EPathViewWideningMode::Units )"
                           , EditConditionHides ) )
         double PathWidthInUnits;
 

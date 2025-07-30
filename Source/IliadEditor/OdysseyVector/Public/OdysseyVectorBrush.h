@@ -30,8 +30,8 @@ struct ODYSSEYVECTOR_API FOdysseyVectorBrush
 {
     GENERATED_BODY()
 
-    //UPROPERTY( EditAnywhere, Category="Default" )
-    //UTexture2D* Texture;
+    UPROPERTY( EditAnywhere )
+    UTexture2D* Texture;
 
     UPROPERTY( EditAnywhere
              , Category="Default"
@@ -74,7 +74,7 @@ struct ODYSSEYVECTOR_API FOdysseyVectorBrush
         height = 0;
         bitsPerPixel = 0;
         pixels = nullptr;
-        texture = nullptr;
+        Texture = nullptr;
         ColorFromBrush = false;
         ExtensionMode = eBrushExtensionMode::Adapt;
         Revert = false;
@@ -103,7 +103,7 @@ struct ODYSSEYVECTOR_API FOdysseyVectorBrush
     uint32  bitsPerPixel;
 
     private:
-        UTexture2D* texture;
+        //UTexture2D* texture;
         FOdysseyVectorObject* owner;
         // Experimental. Vector brush
         std::vector<FOdysseyVectorBrushObject*> brushObjectArray;

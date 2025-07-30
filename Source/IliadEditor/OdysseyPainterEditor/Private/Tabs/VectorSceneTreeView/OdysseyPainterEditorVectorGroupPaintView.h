@@ -16,7 +16,7 @@
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorGroupPaintView : public UOdysseyPainterEditorVectorGroupView
 {
-    // we use a bitfields in case we have more than 64 flags
+    // we use a bitfields in case we need more than 64 flags
     typedef union {
         struct
         {
@@ -50,7 +50,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorGroupPaintView : publi
 
     protected:
         virtual void ImportParam( const std::list<FOdysseyVectorObject*>& iFocusedObjectList ) override;
+        virtual void ClearPropertyBits() override;
         virtual void ApplyPropertyBits( FOdysseyVectorObject* iObject ) override;
+        virtual bool HasPropertyBits() override;
 
     private:
         PropertyBits mGroupPaintPropertyBits;

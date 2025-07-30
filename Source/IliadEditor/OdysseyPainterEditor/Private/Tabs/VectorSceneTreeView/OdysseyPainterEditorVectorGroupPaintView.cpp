@@ -56,6 +56,29 @@ UOdysseyPainterEditorVectorGroupPaintView::ImportParam( const std::list<FOdyssey
     }
 }
 
+void
+UOdysseyPainterEditorVectorGroupPaintView::ClearPropertyBits()
+{
+    UOdysseyPainterEditorVectorObjectView::ClearPropertyBits();
+
+    memset( &mGroupPaintPropertyBits, 0, sizeof( mGroupPaintPropertyBits ) );
+}
+
+bool
+UOdysseyPainterEditorVectorGroupPaintView::HasPropertyBits()
+{
+    // we use a loop so that we don't forget any flags, even the ones that will be added later
+    for( uint32 i = 0; i < sizeof( mGroupPaintPropertyBits ); i++  )
+    {
+        if( mGroupPaintPropertyBits.raw[i] )
+        {
+            return true;
+        }
+    }
+
+    return UOdysseyPainterEditorVectorObjectView::HasPropertyBits();
+}
+
 bool
 UOdysseyPainterEditorVectorGroupPaintView::GetPropertyBit( const FName& iPropertyName )
 {
@@ -173,7 +196,8 @@ UOdysseyPainterEditorVectorGroupPaintView::SetPropertyBit( const FName& iPropert
 
     // Note: iMemberPropertyName because FColor is a struct
     // and we can edit individual struct members RGBA
-    if( ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, MonochromeColor) ) || ( iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, MonochromeColor) ) )
+    if( ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, MonochromeColor) )
+     || ( iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, MonochromeColor) ) )
         mGroupPaintPropertyBits.MonochromeColor = iState;
 
     if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, Realtime) )
@@ -190,7 +214,8 @@ UOdysseyPainterEditorVectorGroupPaintView::SetPropertyBit( const FName& iPropert
 
     // Note: iMemberPropertyName because FColor is a struct
     // and we can edit individual struct members RGBA
-    if( ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, WireframeColor) ) || ( iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, WireframeColor) ) )
+    if( ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, WireframeColor) )
+     || ( iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, WireframeColor) ) )
         mGroupPaintPropertyBits.WireframeColor = iState;
 
 //    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, Multithreaded) )

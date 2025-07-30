@@ -34,7 +34,6 @@ public:
     private:
         void OnAssetSelected( const FAssetData& AssetData
                             , TSharedRef<IPropertyHandle> StructPropertyHandle );
-        void OnPropertyValueChanged( TSharedRef<IPropertyHandle> StructPropertyHandle );
         void OnChildPropertyValueChanged( TSharedRef<IPropertyHandle> StructPropertyHandle );
         FReply OnClicked( TSharedRef<IPropertyHandle> StructPropertyHandle );
         bool FilterAsset( const struct FAssetData& InAssetData );

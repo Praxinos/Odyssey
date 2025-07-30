@@ -54,7 +54,7 @@ FOdysseyVectorBrush::FOdysseyVectorBrush( FOdysseyVectorObject* iOwner // can be
     ExtensionMode = eBrushExtensionMode::Adapt;
     Revert = false;
     BilinearFiltering = false;
-    texture = nullptr;
+    Texture = nullptr;
 
     for( FOdysseyVectorObject* vectorObject : iObjectList )
     {
@@ -94,7 +94,7 @@ FOdysseyVectorBrush::SetTexture( UTexture2D* iTexture )
         height = iTexture->GetSizeY();
     }
 
-    texture = iTexture;
+    Texture = iTexture;
 
     if( owner )
         owner->Invalidate( FOdysseyVectorObject::INVALIDATE_COLOR );
@@ -103,19 +103,19 @@ FOdysseyVectorBrush::SetTexture( UTexture2D* iTexture )
 UTexture2D*
 FOdysseyVectorBrush::GetTexture() const
 {
-    return texture;
+    return Texture;
 }
 
 void
 FOdysseyVectorBrush::Lock()
 {
-    if( texture )
+    if( Texture )
     {
-        if( texture->GetPlatformData() && texture->GetPlatformData()->Mips.Num() && ( pixels == nullptr ) )
+        if( Texture->GetPlatformData() && Texture->GetPlatformData()->Mips.Num() && ( pixels == nullptr ) )
         {
-            FTexture2DMipMap *mip = &texture->GetPlatformData()->Mips[0];
+            FTexture2DMipMap *mip = &Texture->GetPlatformData()->Mips[0];
             const FColor* colors = static_cast<const FColor*>(mip->BulkData.LockReadOnly());
-            EPixelFormat pixelFormat = texture->GetPixelFormat(0);
+            EPixelFormat pixelFormat = Texture->GetPixelFormat(0);
             uint32 bufferSize;
 
             pixels = const_cast<FColor*>(colors);
@@ -151,7 +151,7 @@ FOdysseyVectorBrush::Lock()
                 break;
             }
 
-            texture->GetPlatformData()->Mips[0].BulkData.Unlock();
+            Texture->GetPlatformData()->Mips[0].BulkData.Unlock();
         }
     }
 }
@@ -166,11 +166,11 @@ FOdysseyVectorBrush::Unlock()
     bitsPerPixel = 0;
 */
 /*
-    if( texture )
+    if( Texture )
     {
-        if( texture->GetPlatformData()->Mips.Num() )
+        if( Texture->GetPlatformData()->Mips.Num() )
         {
-            texture->GetPlatformData()->Mips[0].BulkData.Unlock();
+            Texture->GetPlatformData()->Mips[0].BulkData.Unlock();
         }
     }
 */

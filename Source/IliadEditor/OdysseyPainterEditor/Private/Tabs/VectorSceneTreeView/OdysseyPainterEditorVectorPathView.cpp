@@ -9,14 +9,21 @@ UOdysseyPainterEditorVectorPathView::~UOdysseyPainterEditorVectorPathView()
 
 UOdysseyPainterEditorVectorPathView::UOdysseyPainterEditorVectorPathView()
     : UOdysseyPainterEditorVectorObjectView()
+    , mPathPropertyBits( { 0 } )
+    , bDisplayWideningOptions( false )
     , WideningMode ( EPathViewWideningMode::Percent )
     , PathWidthInPercent ( 100.0f )
     , PathWidthInUnits ( 2.0f )
     , Brush ( nullptr )
-    , mPathPropertyBits( { 0 } )
 {
     bDisplayBackgroundProperties = false;
     bDisplayForegroundProperties = true;
+}
+
+void
+UOdysseyPainterEditorVectorPathView::SetDisplayWideningOptions( bool iValue )
+{
+    bDisplayWideningOptions = iValue;
 }
 
 void
@@ -147,7 +154,8 @@ UOdysseyPainterEditorVectorPathView::SetPropertyBit( const FName& iPropertyName
     if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorPathView, JointType) )
         mPathPropertyBits.JointType = iState;
 
-    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorPathView, Brush) )
+    if( ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorPathView, Brush) )
+     || ( iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorPathView, Brush) ) )
         mPathPropertyBits.Brush = iState;
 
     if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorPathView, MiterLimit) )

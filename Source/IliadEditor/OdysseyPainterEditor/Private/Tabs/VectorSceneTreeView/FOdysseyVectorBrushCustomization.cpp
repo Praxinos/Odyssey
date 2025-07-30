@@ -57,22 +57,6 @@ FOdysseyVectorBrushCustomization::CustomizeHeader( TSharedRef<IPropertyHandle> S
         .AutoWidth()
         [
             mBrushButton.ToSharedRef()
-/*
-            SNew(SObjectPropertyEntryBox)
-                .AllowedClass(          UTexture2D::StaticClass() )
-                .ObjectPath(            this, &FOdysseyVectorBrushCustomization::ObjectPath, StructPropertyHandle )
-                .ThumbnailPool(         mAssetThumbnailPool )
-                .OnObjectChanged(       this, &FOdysseyVectorBrushCustomization::OnObjectChanged, StructPropertyHandle )
-                .OnShouldFilterAsset(   this, &FOdysseyVectorBrushCustomization::FilterAsset )
-                .AllowClear(            true )
-                .DisplayUseSelected(    true )
-                .DisplayBrowse(         true )
-                .EnableContentPicker(   true )
-                .DisplayCompactSize(    true )
-                .DisplayThumbnail(      true )
-                .AllowCreate(           true )
-                .ThumbnailSizeOverride( FIntPoint( 64, 16 ) )
-*/
         ]
     ];
 }
@@ -147,18 +131,6 @@ FOdysseyVectorBrushCustomization::GetVectorBrush( TSharedRef<IPropertyHandle> St
     return nullptr;
 }
 
-//FString
-void
-FOdysseyVectorBrushCustomization::OnPropertyValueChanged( TSharedRef<IPropertyHandle> StructPropertyHandle )
-{
-    FOdysseyVectorBrush* vectorBrush = GetVectorBrush( StructPropertyHandle );
-
-    if( vectorBrush )
-    {
-        mBrushIcon.Get()->SetResourceObject( vectorBrush->GetTexture() );
-    }
-}
-
 FText
 FOdysseyVectorBrushCustomization::UpdateButtonToolTip( TSharedRef<IPropertyHandle> StructPropertyHandle ) const
 {
@@ -197,12 +169,13 @@ FOdysseyVectorBrushCustomization::OnAssetSelected( const FAssetData& AssetData
     UTexture2D* texture = AssetData.IsValid() ? CastChecked<UTexture2D>( AssetData.GetAsset() ) : nullptr;
     FProperty *property = StructPropertyHandle.Get().GetProperty();
     TArray<UObject*> OuterObjects;
+    TSharedPtr<IPropertyHandle> texturePropertyHandle = StructPropertyHandle.Get().GetChildHandle( GET_MEMBER_NAME_CHECKED( FOdysseyVectorBrush, Texture ) );
 
     StructPropertyHandle.Get().GetOuterObjects( OuterObjects );
 
     mBrushIcon.Get()->SetResourceObject( texture );
 
-    for ( int i = 0; i < OuterObjects.Num(); i++ )
+    if ( OuterObjects.Num() )
     {
         UObject* OuterObject = OuterObjects[0];
         FPropertyChangedEvent propertyChangedEvent = FPropertyChangedEvent( property
@@ -210,28 +183,7 @@ FOdysseyVectorBrushCustomization::OnAssetSelected( const FAssetData& AssetData
                                                                           , OuterObjects );
         FOdysseyVectorBrush* vectorBrush = property->ContainerPtrToValuePtr<FOdysseyVectorBrush>( OuterObject, 0 );
 
-        vectorBrush->SetTexture( texture );
-
-        OuterObject->PostEditChangeProperty( propertyChangedEvent );
-    }
-}
-
-void
-FOdysseyVectorBrushCustomization::OnChildPropertyValueChanged( TSharedRef<IPropertyHandle> StructPropertyHandle )
-{
-    FProperty *property = StructPropertyHandle.Get().GetProperty();
-    TArray<UObject*> OuterObjects;
-
-    StructPropertyHandle.Get().GetOuterObjects( OuterObjects );
-
-    for ( int i = 0; i < OuterObjects.Num(); i++ )
-    {
-        UObject* OuterObject = OuterObjects[0];
-        FPropertyChangedEvent propertyChangedEvent = FPropertyChangedEvent( property
-                                                                          , EPropertyChangeType::ValueSet
-                                                                          , OuterObjects );
-
-        OuterObject->PostEditChangeProperty( propertyChangedEvent );
+        texturePropertyHandle.Get()->SetValue( texture );
     }
 }
 
@@ -240,17 +192,19 @@ FOdysseyVectorBrushCustomization::CustomizeChildren( TSharedRef<IPropertyHandle>
                                                    , class IDetailChildrenBuilder& StructBuilder
                                                    , IPropertyTypeCustomizationUtils& StructCustomizationUtils )
 {
+    TSharedPtr<IPropertyHandle> texturePropertyHandle = StructPropertyHandle.Get().GetChildHandle( GET_MEMBER_NAME_CHECKED( FOdysseyVectorBrush, Texture ) );
     uint32 numChildren = 0;
     StructPropertyHandle->GetNumChildren(numChildren);
+
     for( uint32 i = 0; i < numChildren; i++ )
     {
-        TSharedPtr<IPropertyHandle> propertyHandle = StructPropertyHandle->GetChildHandle(i);
-        StructBuilder.AddProperty(propertyHandle.ToSharedRef());
+        TSharedPtr<IPropertyHandle> propertyHandle = StructPropertyHandle.Get().GetChildHandle(i);
 
-        //SetOnPropertyValueChanged needed because StructBuilder.AddProperty()
-        //does not call PostEditChangeProperty when the property is changed
-        //It seems weird, but it is the case, sadly
-        propertyHandle->SetOnPropertyValueChanged( FSimpleDelegate::CreateRaw( this, &FOdysseyVectorBrushCustomization::OnChildPropertyValueChanged, StructPropertyHandle ) );
+        // hide Texture property. All the other thign s I tried did not work.
+        if( propertyHandle.Get()->GetProperty()->GetFName() != GET_MEMBER_NAME_CHECKED( FOdysseyVectorBrush, Texture ) )
+        {
+            StructBuilder.AddProperty(propertyHandle.ToSharedRef());
+        }
     }
 }
 
