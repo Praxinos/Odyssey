@@ -219,6 +219,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         // is cleaned (a new scene is then assigned to this cell) and there is a risk to work with an
         // orphaned scene.
         FOdysseyVectorCell* mWorkingCell;
+        // We also have to store the layer, as FOdysseyVectorCell::GetLayer() is going to return null because
+        // UOdysseyPainterEditorVectorBaseTool::Unload() is not called in the same context as Load()
+        FOdysseyVectorLayer* mWorkingLayer;
 
         TSharedPtr<::ULIS::FBlock> mVectorBlock;
 

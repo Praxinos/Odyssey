@@ -52,9 +52,14 @@ uint64
 UOdysseyPainterEditorVectorMatchingTool::UnloadVector( FOdysseyVectorGroupPaint* iScene )
 {
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
-    iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // Note: we use mworkingLayer because is not called in the same context as Load, so there could be
+    // an orphan cell here in the case of a cell deletion for example.
+    mWorkingLayer->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
     // force redrawing when we switch tool
-    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
+    if( iScene->GetCell()->GetLayer() == mWorkingLayer )
+    {
+        mWorkingLayer->RequestRedraw( iScene->GetCell(), 0 );
+    }
 
     return 0;
 }

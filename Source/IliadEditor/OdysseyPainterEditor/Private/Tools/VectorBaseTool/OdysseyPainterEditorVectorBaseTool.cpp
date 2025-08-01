@@ -48,6 +48,7 @@ UOdysseyPainterEditorVectorBaseTool::UOdysseyPainterEditorVectorBaseTool( TShare
     , mAutoCreateMedia( iAutoCreateMedia )
     , bMouseEventViaHUD( iMouseEventViaHUD )
     , mWorkingCell( nullptr )
+    , mWorkingLayer( nullptr )
 {
 }
 
@@ -250,11 +251,10 @@ void
 UOdysseyPainterEditorVectorBaseTool::Unload()
 {
     UOdysseyPainterEditorTool::Unload();
+    uint64 notificationFlags = 0;
 
     if( mWorkingCell )
     {
-        uint64 notificationFlags = 0;
-
         notificationFlags = UnloadVector( mWorkingCell->GetScene() );
 
         /**
@@ -263,16 +263,19 @@ UOdysseyPainterEditorVectorBaseTool::Unload()
             */
         mVectorBlock = nullptr;
         //END PATCH
+    }
 
-        mWorkingCell->GetLayer()->Notify( notificationFlags );
+    if( mWorkingLayer )
+    {
+        mWorkingLayer->Notify( notificationFlags );
 
-        mWorkingCell->GetLayer()->OnNotifyDelegate().RemoveAll( this );
+        mWorkingLayer->OnNotifyDelegate().RemoveAll( this );
 
         if( mBaseHUD )
         {
             mBaseHUD->Unload();
             // 2D HUD
-            mWorkingCell->GetLayer()->RemoveHUD( mBaseHUD.Get() );
+            mWorkingLayer->RemoveHUD( mBaseHUD.Get() );
             // 3D HUD
             mHUD->RemoveElement( mBaseHUD );
         }
@@ -297,6 +300,7 @@ UOdysseyPainterEditorVectorBaseTool::Load()
     UOdysseyPainterEditorTool::Load();
 
     mWorkingCell = nullptr;
+    mWorkingLayer = nullptr;
 
     if( hasVector )
     {
@@ -308,6 +312,7 @@ UOdysseyPainterEditorVectorBaseTool::Load()
             uint64 notificationFlags;
 
             mWorkingCell = mediaVectors[0]->GetScene()->GetCell();
+            mWorkingLayer = mWorkingCell->GetLayer();
 
             mWorkingCell->GetLayer()->ClearHUD();
 
@@ -344,7 +349,10 @@ UOdysseyPainterEditorVectorBaseTool::Load()
 void
 UOdysseyPainterEditorVectorBaseTool::OnVectorLayerNotify( FOdysseyVectorLayer* iLayer, uint64 iNotificationFlags )
 {
-    if ( mWorkingCell )
+                         // The notification might be called after the cell has been removed from the layer,
+                         // then mWorkingCell->GetLayer() woul dbe null and that would likely create crashes
+                         // in HUD Reset methods. so we check that.
+    if ( mWorkingCell && ( mWorkingCell->GetLayer() == mWorkingLayer ) )
     {
         if( iNotificationFlags & FOdysseyVectorEngine::NOTIFY_UPDATE_HUD )
         {
