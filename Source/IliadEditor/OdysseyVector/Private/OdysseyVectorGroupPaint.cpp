@@ -1902,6 +1902,8 @@ void
 FOdysseyVectorGroupPaint::SetMonochrome( bool iIsMonochrome )
 {
     bMonochrome = iIsMonochrome;
+
+    Invalidate( FOdysseyVectorObject::INVALIDATE_COLOR );
 }
 
 FColor&
@@ -1914,6 +1916,8 @@ void
 FOdysseyVectorGroupPaint::SetMonochromeColor( const FColor& iMonochromeColor )
 {
     mMonochromeColor = iMonochromeColor;
+
+    Invalidate( FOdysseyVectorObject::INVALIDATE_COLOR );
 }
 
 void
@@ -1944,6 +1948,8 @@ void
 FOdysseyVectorGroupPaint::SetWireframe( bool iIsWireframe )
 {
     bWireframe = iIsWireframe;
+
+    Invalidate( FOdysseyVectorObject::INVALIDATE_COLOR );
 }
 
 FColor&
@@ -1965,6 +1971,8 @@ FOdysseyVectorGroupPaint::SetWireframeColor( uint8 iR, uint8 iG, uint8 iB, uint8
     mWireframeColor.G = iG;
     mWireframeColor.B = iB;
     mWireframeColor.A = iA;
+
+    Invalidate( FOdysseyVectorObject::INVALIDATE_COLOR );
 }
 
 void
@@ -1974,6 +1982,8 @@ FOdysseyVectorGroupPaint::GetWireframeColor( uint8 &oR, uint8 &oG, uint8& oB, ui
     oG = mWireframeColor.G;
     oB = mWireframeColor.B;
     oA = mWireframeColor.A;
+
+    Invalidate( FOdysseyVectorObject::INVALIDATE_COLOR );
 }
 
 bool

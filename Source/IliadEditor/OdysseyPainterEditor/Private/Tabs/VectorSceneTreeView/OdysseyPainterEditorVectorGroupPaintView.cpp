@@ -65,7 +65,7 @@ UOdysseyPainterEditorVectorGroupPaintView::ClearPropertyBits()
 }
 
 bool
-UOdysseyPainterEditorVectorGroupPaintView::HasPropertyBits()
+UOdysseyPainterEditorVectorGroupPaintView::HasAnyPropertyBit()
 {
     // we use a loop so that we don't forget any flags, even the ones that will be added later
     for( uint32 i = 0; i < sizeof( mGroupPaintPropertyBits ); i++  )
@@ -76,7 +76,7 @@ UOdysseyPainterEditorVectorGroupPaintView::HasPropertyBits()
         }
     }
 
-    return UOdysseyPainterEditorVectorObjectView::HasPropertyBits();
+    return UOdysseyPainterEditorVectorObjectView::HasAnyPropertyBit();
 }
 
 bool

@@ -80,7 +80,9 @@ public:
 protected:
     virtual TSharedRef<SWidget> OnGenerateCellWidget(UOdysseyLayerCell* iCell) = 0;
     virtual void BuildContextMenu(TSharedRef<FUICommandList> CommandList, FMenuBuilder& MenuBuilder);
-    FReply AcceptProperties( TSharedRef<SOdysseyPainterEditorVectorMassModifierView> iObjectView);
+    FReply MassModifierAcceptProperties( TSharedRef<SOdysseyPainterEditorVectorMassModifierView> iObjectView);
+    void MassModifierWindowClosed( const TSharedRef<SWindow>& iWindow
+                                 , TSharedRef<SOdysseyPainterEditorVectorMassModifierView> objectView );
     void MassModifier();
 
 protected:

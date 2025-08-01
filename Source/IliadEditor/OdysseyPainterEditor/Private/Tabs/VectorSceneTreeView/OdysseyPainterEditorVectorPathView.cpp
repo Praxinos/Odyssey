@@ -55,7 +55,7 @@ UOdysseyPainterEditorVectorPathView::ClearPropertyBits()
 }
 
 bool
-UOdysseyPainterEditorVectorPathView::HasPropertyBits()
+UOdysseyPainterEditorVectorPathView::HasAnyPropertyBit()
 {
     // we use a loop so that we don't forget any flags, even the ones that will be added later
     for( uint32 i = 0; i < sizeof( mPathPropertyBits ); i++  )
@@ -66,7 +66,7 @@ UOdysseyPainterEditorVectorPathView::HasPropertyBits()
         }
     }
 
-    return UOdysseyPainterEditorVectorObjectView::HasPropertyBits();
+    return UOdysseyPainterEditorVectorObjectView::HasAnyPropertyBit();
 }
 
 bool

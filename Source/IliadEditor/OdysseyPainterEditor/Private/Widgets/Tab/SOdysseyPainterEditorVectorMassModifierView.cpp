@@ -17,6 +17,7 @@
 
 #include "IDetailPropertyRow.h"
 #include "DetailWidgetRow.h"
+#include "DetailLayoutBuilder.h"
 
 #include "HUD/OdysseyVectorHUD.h"
 
@@ -48,49 +49,6 @@ SOdysseyPainterEditorVectorMassModifierView::Construct( const FArguments& InArgs
     ChildSlot
     [
         SNew(SVerticalBox)
-/*
-        + SVerticalBox::Slot()
-        .AutoHeight()
-        [
-            SNew(SHorizontalBox)
-            + SHorizontalBox::Slot()
-            .MinWidth( 100 )
-            [
-                SNew(STextBlock)
-                .Text( LOCTEXT("vector-mass-modifier.apply-to-label.name", "Apply to") )
-            ]
-            + SHorizontalBox::Slot()
-            [
-                SNew(SComboBox<TSharedPtr<FString>>)
-                .OptionsSource(&_objectTypeOptions)
-                .OnGenerateWidget(this, &SOdysseyPainterEditorVectorMassModifierView::MakeWidgetForOption)
-                .OnSelectionChanged(this, &SOdysseyPainterEditorVectorMassModifierView::ObjectTypeSelectionChanged )
-                .InitiallySelectedItem(_objectTypeOptions[0])
-                [
-                    SNew(STextBlock)
-                    .Text( FText::FromString( *_objectTypeOptions[0].Get() ) )
-                ]
-            ]
-        ]
-        + SVerticalBox::Slot()
-        .AutoHeight()
-        [
-            SNew(SHorizontalBox)
-            + SHorizontalBox::Slot()
-            .MinWidth( 100 )
-            [
-                SNew(STextBlock)
-                .Text( LOCTEXT("vector-mass-modifier.filter-label.name", "Filter") )
-            ]
-            + SHorizontalBox::Slot()
-            .MinWidth( 100 )
-            [
-                SNew(SEditableText)
-                .HintText( LOCTEXT("vector-mass-modifier.filter-hint-text.name", "e.g: path_*, group_*, etc...") )
-                .OnTextChanged_Raw( this, &SOdysseyPainterEditorVectorMassModifierView::FilterTextChanged )
-            ]
-        ]
-*/
         + SVerticalBox::Slot()
         .AutoHeight()
         [
@@ -122,10 +80,41 @@ SOdysseyPainterEditorVectorMassModifierView::Construct( const FArguments& InArgs
     mPathView->SetDisplayWideningOptions( true );
 
     mObjectDetailsView->SetExtensionHandler(SharedThis(this));
+    mObjectDetailsView->SetGenericLayoutDetailsDelegate( FOnGetDetailCustomizationInstance::CreateSP( this, &SOdysseyPainterEditorVectorMassModifierView::GetCustomizationInstance ) );
     mObjectDetailsView->OnFinishedChangingProperties().AddSP( this, &SOdysseyPainterEditorVectorMassModifierView::PropertyValueChanged );
     mObjectDetailsView->SetObject( mObjectView );
 
     mCurrentObjectView = mObjectView;
+}
+
+// I could not find a way to collapse all categories without the config being save dto the disk so I ended
+// up with this solution :
+void
+SOdysseyPainterEditorVectorMassModifierView::DetailCustomizationHandler::CustomizeDetails( IDetailLayoutBuilder& DetailBuilder )
+{
+    TArray<FName> categoryNames;
+
+    DetailBuilder.GetCategoryNames( categoryNames );
+
+    for( FName& categoryName : categoryNames )
+    {
+        DetailBuilder.EditCategory( categoryName ).InitiallyCollapsed( true );
+        DetailBuilder.EditCategory( categoryName ).RestoreExpansionState( false );
+    }
+}
+
+bool
+SOdysseyPainterEditorVectorMassModifierView::HasAnyPropertyBit()
+{
+    return mCurrentObjectView->HasAnyPropertyBit();
+}
+
+TSharedRef<IDetailCustomization>
+SOdysseyPainterEditorVectorMassModifierView::GetCustomizationInstance()
+{
+    // Note: DetailCustomizationHandler is a nested class of SOdysseyPainterEditorVectorMassModifierView
+    // Note 2 : the instance will be deleted by unreal. Implement PendingDelete() if needed.
+    return MakeShared<DetailCustomizationHandler>();
 }
 
 TSharedRef<SWidget>
@@ -296,7 +285,7 @@ SOdysseyPainterEditorVectorMassModifierView::ExtendWidgetRow ( FDetailWidgetRow&
     // properties in ustruct. We don't want a checkbox for child properties.
     if( ( mCurrentObjectView->HasProperty( property->GetFName() ) )
     // We also don't want a checkbox for the Path Widening Mode property
-    && ( ( mCurrentObjectView == mPathView ) && ( property->GetFName() != GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorPathView, WideningMode) ) ) )
+     && ( property->GetFName() != GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorPathView, WideningMode) ) )
     {
         // Add a checkbox to the name content to be able to chose what should be modified en-masse
         InWidgetRow.NameContent()

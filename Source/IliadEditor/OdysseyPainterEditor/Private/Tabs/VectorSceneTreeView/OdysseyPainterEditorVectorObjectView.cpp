@@ -113,7 +113,7 @@ UOdysseyPainterEditorVectorObjectView::GetVectorLayer()
 }
 
 bool
-UOdysseyPainterEditorVectorObjectView::HasPropertyBits()
+UOdysseyPainterEditorVectorObjectView::HasAnyPropertyBit()
 {
     // we use a loop so that we don't forget any flags, even the ones that will be added later
     for( uint32 i = 0; i < sizeof( mObjectPropertyBits ); i++  )
@@ -255,7 +255,7 @@ UOdysseyPainterEditorVectorObjectView::ValidateProperties( const std::list<FOdys
 {
     TSet<FOdysseyVectorCell*> cellSet;
 
-    if( HasPropertyBits() )
+    if( HasAnyPropertyBit() )
     {
         for( FOdysseyVectorObject* selectedObject : iObjectList )
         {

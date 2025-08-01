@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 #include "IDetailPropertyExtensionHandler.h"
 #include "IDetailChildrenBuilder.h"
+#include "IDetailCustomization.h"
 #include "DetailWidgetRow.h"
 #include "Misc/WildcardString.h"
 
@@ -86,6 +87,19 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorMassModifierView
 {
     SLATE_DECLARE_WIDGET(SOdysseyPainterEditorVectorMassModifierView, SCompoundWidget)
 
+    // we create a nested class to handle IDetailCustomization interface otherwise there are some multiple inheritance issues
+    // thrown by the compiler. We only need it to collapse the categories.
+    class DetailCustomizationHandler : public IDetailCustomization
+    {
+        public:
+            ~DetailCustomizationHandler(){};
+            DetailCustomizationHandler(){};
+
+        protected:
+            // implements IDetailCustomization::CustomizeDetails
+           virtual void CustomizeDetails( IDetailLayoutBuilder& DetailBuilder ) override;
+    };
+
     public:
         SLATE_BEGIN_ARGS(SOdysseyPainterEditorVectorMassModifierView)
             {}
@@ -110,6 +124,7 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorMassModifierView
         virtual bool IsPropertyExtendable( const UClass* InObjectClass
                                          , const IPropertyHandle& PropertyHandle) const override;
         void ObjectTypeSelectionChanged( EMassModifierApplyTo NewValue );
+        bool HasAnyPropertyBit();
 
     protected:
         virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
@@ -125,6 +140,8 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorMassModifierView
 
     protected:
         TSharedPtr<IDetailsView> CreateViewPanel();
+        TSharedRef<IDetailCustomization> GetCustomizationInstance();
+
 
     protected:
         TArray<FOdysseyVectorGroupPaint*> mSceneArray;

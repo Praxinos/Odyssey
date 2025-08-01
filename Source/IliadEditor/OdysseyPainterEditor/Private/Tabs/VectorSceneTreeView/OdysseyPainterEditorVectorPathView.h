@@ -20,7 +20,7 @@ enum class EPathViewWideningMode : uint8
     Units = 1 UMETA( ToolTip = "Units" )
 };
 
-UCLASS( HideCategories = (SelectionTool) )
+UCLASS( HideCategories = "Hidden" )
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathView : public UOdysseyPainterEditorVectorObjectView
 {
     // we use a bitfields in case we have more than 64 flags
@@ -43,6 +43,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathView : public UOdy
         ~UOdysseyPainterEditorVectorPathView();
         UOdysseyPainterEditorVectorPathView();
 
+        void SetDisplayWideningOptions( bool iValue );
+
     public:
         virtual bool GetPropertyBit( const FName& iPropertyName ) override;
         virtual void SetPropertyBit( const FName& iPropertyName
@@ -50,14 +52,12 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathView : public UOdy
                                    , const FName& iCategory
                                    , bool iState ) override;
 
-        void SetDisplayWideningOptions( bool iValue );
+        virtual bool HasAnyPropertyBit() override;
 
     protected:
         virtual void ImportParam( const std::list<FOdysseyVectorObject*>& iFocusedObjectList ) override;
         virtual void ClearPropertyBits() override;
         virtual void ApplyPropertyBits( FOdysseyVectorObject* iObject ) override;
-        virtual bool HasPropertyBits() override;
-
 
     private:
         PathPropertyBits mPathPropertyBits;

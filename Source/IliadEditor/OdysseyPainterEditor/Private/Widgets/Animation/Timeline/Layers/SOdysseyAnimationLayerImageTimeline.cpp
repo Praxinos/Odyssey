@@ -632,7 +632,7 @@ SOdysseyAnimationLayerImageTimeline::BuildContextMenu(TSharedRef<FUICommandList>
 }
 
 FReply
-SOdysseyAnimationLayerImageTimeline::AcceptProperties( TSharedRef<SOdysseyPainterEditorVectorMassModifierView> objectView)
+SOdysseyAnimationLayerImageTimeline::MassModifierAcceptProperties( TSharedRef<SOdysseyPainterEditorVectorMassModifierView> objectView )
 {
     TSharedPtr<SWindow> topWindow;
 
@@ -693,9 +693,12 @@ SOdysseyAnimationLayerImageTimeline::MassModifier()
         [
             SNew(SButton)
             .Text(LOCTEXT("vector-mass-modifier-window-apply", "Apply"))
-            .OnClicked_Raw(this, &SOdysseyAnimationLayerImageTimeline::AcceptProperties, objectView )
+            .OnClicked_Raw(this, &SOdysseyAnimationLayerImageTimeline::MassModifierAcceptProperties, objectView )
         ]
     ];
+
+    // Ask whether or not to apply modified properties
+    ObjectWindow.Get().SetOnWindowClosed( FOnWindowClosed::CreateSP( this, &SOdysseyAnimationLayerImageTimeline::MassModifierWindowClosed, objectView ) );
 
     FSlateApplication::Get().AddModalWindow
     (
@@ -703,6 +706,21 @@ SOdysseyAnimationLayerImageTimeline::MassModifier()
         SharedThis(this),
         false
     );
+}
+
+void
+SOdysseyAnimationLayerImageTimeline::MassModifierWindowClosed( const TSharedRef<SWindow>& iWindow
+                                                             , TSharedRef<SOdysseyPainterEditorVectorMassModifierView> objectView )
+{
+    FText dialogText = LOCTEXT( "mass-modifier.apply-properties.title","Apply Properties ?" );
+
+    if( objectView->HasAnyPropertyBit() )
+    {
+        if( FMessageDialog::Open( EAppMsgType::YesNo, dialogText ) == EAppReturnType::Yes )
+        {
+            MassModifierAcceptProperties( objectView );
+        }
+    }
 }
 
 void

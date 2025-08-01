@@ -13,7 +13,7 @@
 
 #include "OdysseyPainterEditorVectorGroupPaintView.generated.h"
 
-UCLASS()
+UCLASS( HideCategories = "Hidden" )
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorGroupPaintView : public UOdysseyPainterEditorVectorGroupView
 {
     // we use a bitfields in case we need more than 64 flags
@@ -47,12 +47,12 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorGroupPaintView : publi
                                    , const FName& iMemberPropertyName
                                    , const FName& iCategory
                                    , bool iState ) override;
+        virtual bool HasAnyPropertyBit() override;
 
     protected:
         virtual void ImportParam( const std::list<FOdysseyVectorObject*>& iFocusedObjectList ) override;
         virtual void ClearPropertyBits() override;
         virtual void ApplyPropertyBits( FOdysseyVectorObject* iObject ) override;
-        virtual bool HasPropertyBits() override;
 
     private:
         PropertyBits mGroupPaintPropertyBits;

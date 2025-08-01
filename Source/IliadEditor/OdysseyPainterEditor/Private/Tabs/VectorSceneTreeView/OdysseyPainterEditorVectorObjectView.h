@@ -28,7 +28,7 @@ struct FPaletteEntrySelection
     UOdysseyPaletteEntryColor* OdysseyPaletteEntryColor = nullptr;
 };
 
-UCLASS( meta = ( HideCategories = Hidden, prioritizeCategories = Options ) )
+UCLASS( HideCategories = "Hidden" )
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectView : public UObject
 {
     // we use a bitfields in case we have more than 64 flags
@@ -64,20 +64,24 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectView : public UO
         void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
 
         void ValidateProperties( const std::list<FOdysseyVectorObject*>& iObjectList );
+
+        // Pointer to the layer (useful to retrieve palette sets needed by FOdysseyVectorObjectViewPaletteCustomization)
+        void SetVectorLayer( TSharedPtr<FOdysseyVectorLayer> iVectorLayer );
+        TSharedPtr<FOdysseyVectorLayer> GetVectorLayer();
+
+    public:
         virtual bool GetPropertyBit( const FName& iPropertyName );
         virtual void SetPropertyBit( const FName& iPropertyName
                                    , const FName& iMemberPropertyName
                                    , const FName& iCategory
                                    , bool iState  );
-        // Pointer to the layer (useful to retrieve palette sets needed by FOdysseyVectorObjectViewPaletteCustomization)
-        void SetVectorLayer( TSharedPtr<FOdysseyVectorLayer> iVectorLayer );
-        TSharedPtr<FOdysseyVectorLayer> GetVectorLayer();
         bool HasProperty( const FName& iPropertyName );
+        virtual bool HasAnyPropertyBit();
 
     protected:
         virtual void ClearPropertyBits();
         virtual void ApplyPropertyBits( FOdysseyVectorObject* iObject );
-        virtual bool HasPropertyBits();
+
 
 
         virtual void ImportParam( const std::list<FOdysseyVectorObject*>& iFocusedObjectList );
