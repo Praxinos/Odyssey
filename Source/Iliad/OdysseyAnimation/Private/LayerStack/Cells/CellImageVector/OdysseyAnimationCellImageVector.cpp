@@ -128,10 +128,6 @@ UOdysseyAnimationCellImageVector::PostInitProperties()
     if (GetFlags() & RF_ClassDefaultObject)
         return;
 
-    // bind refresh function to delegates on existing vector scenes at load. Needed to refresh necessary widgets.
-    UOdysseyAnimationLayerImageVector::OnIsColoredChanged().AddUObject( this, &UOdysseyAnimationCellImageVector::OnIsColoredChanged );
-    UOdysseyAnimationLayerImageVector::OnIsWireframeChanged().AddUObject( this, &UOdysseyAnimationCellImageVector::OnIsWireframeChanged );
-
     mVectorBlockId = FGuid::NewGuid();
     mVectorBlock = MakeShared<FOdysseyVectorBlock>();
     mVectorBlock->OnInvalidated().AddUObject(this, &UOdysseyAnimationCellImageVector::OnVectorBlockInvalidated);

@@ -30,7 +30,7 @@ enum class EMassModifierApplyTo : uint8
     AllTypes    = 0 UMETA( ToolTip = "All Types" ),
     Paths       = 1 UMETA( ToolTip = "Paths" ),
     Groups      = 2 UMETA( ToolTip = "Groups" ),
-    PaintGroups = 3 UMETA( ToolTip = "Paint Groups" )
+    PaintGroups = 3 UMETA( ToolTip = "Paint Groups" ),
 };
 
 UCLASS()
@@ -93,11 +93,17 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorMassModifierView
     {
         public:
             ~DetailCustomizationHandler(){};
-            DetailCustomizationHandler(){};
+            DetailCustomizationHandler( TObjectPtr<UOdysseyPainterEditorVectorMassModifierOptionsView> iMassModifierOptionsView )
+            : mMassModifierOptionsView ( iMassModifierOptionsView )
+            {
+            };
 
         protected:
             // implements IDetailCustomization::CustomizeDetails
            virtual void CustomizeDetails( IDetailLayoutBuilder& DetailBuilder ) override;
+
+        protected:
+            TObjectPtr<UOdysseyPainterEditorVectorMassModifierOptionsView> mMassModifierOptionsView;
     };
 
     public:
@@ -125,6 +131,7 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorMassModifierView
                                          , const IPropertyHandle& PropertyHandle) const override;
         void ObjectTypeSelectionChanged( EMassModifierApplyTo NewValue );
         bool HasAnyPropertyBit();
+        TObjectPtr<UOdysseyPainterEditorVectorObjectView> GetCurrentObjectView();
 
     protected:
         virtual void AddReferencedObjects(FReferenceCollector& Collector) override;

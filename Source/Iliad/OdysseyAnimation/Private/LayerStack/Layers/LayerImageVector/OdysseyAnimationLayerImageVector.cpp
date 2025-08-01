@@ -57,20 +57,6 @@ UOdysseyAnimationLayerImageVector::PostInitProperties()
 }
 
 #if WITH_EDITOR
-UOdysseyAnimationLayerImageVector::FOnIsColoredChanged&
-UOdysseyAnimationLayerImageVector::OnIsColoredChanged()
-{
-    static FOnIsColoredChanged onIsColoredChanged;
-    return onIsColoredChanged;
-}
-
-UOdysseyAnimationLayerImageVector::FOnIsWireframeChanged&
-UOdysseyAnimationLayerImageVector::OnIsWireframeChanged()
-{
-    static FOnIsWireframeChanged onIsWireframeChanged;
-    return onIsWireframeChanged;
-}
-
 UOdysseyAnimationLayerImageVector::~UOdysseyAnimationLayerImageVector()
 {
     mVectorLayer->RemoveAllChildren();
@@ -190,10 +176,30 @@ UOdysseyAnimationLayerImageVector::Serialize(FArchive& Ar)
 }
 
 void
+UOdysseyAnimationLayerImageVector::RequestRedrawAllVectorCells()
+{
+    for (UOdysseyLayerCell* cell : Cells)
+    {
+        // note: a cell can be nullptr
+        if ( cell && cell->IsA<UOdysseyAnimationCellImageVector>() )
+        {
+            UOdysseyAnimationCellImageVector* cellVector = Cast<UOdysseyAnimationCellImageVector>(cell);
+
+            if( cellVector )
+            {
+                mVectorLayer->RequestRedraw( cellVector->GetVectorCell(), 0 );
+            }
+        }
+    }
+}
+
+void
 UOdysseyAnimationLayerImageVector::SetIsWireframe(bool Value)
 {
     bIsWireframe = Value;
-    OnIsWireframeChanged().Broadcast(this);
+
+    RequestRedrawAllVectorCells();
+
     RenderingChanged();
 }
 
@@ -201,7 +207,9 @@ void
 UOdysseyAnimationLayerImageVector::SetIsColored(bool Value)
 {
     bIsColored = Value;
-    OnIsColoredChanged().Broadcast(this);
+
+    RequestRedrawAllVectorCells();
+
     RenderingChanged();
 }
 
@@ -231,13 +239,11 @@ UOdysseyAnimationLayerImageVector::PostTransacted(const FTransactionObjectEvent&
 
     if (changedPropertyNames.Contains(GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayerImageVector, bIsColored)))
     {
-        OnIsColoredChanged().Broadcast(this);
         RenderingChanged();
     }
 
     if (changedPropertyNames.Contains(GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayerImageVector, bIsWireframe)))
     {
-        OnIsWireframeChanged().Broadcast(this);
         RenderingChanged();
     }
 }

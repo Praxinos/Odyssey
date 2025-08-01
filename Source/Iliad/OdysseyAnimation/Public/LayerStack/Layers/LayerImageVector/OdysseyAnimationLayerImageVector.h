@@ -35,18 +35,6 @@ public:
     virtual void PostInitProperties() override;
 
 #if WITH_EDITOR
-public:
-    /**
-     * @brief Delegate called when something changed the result of RenderImage()
-     *
-     */
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnIsColoredChanged, UOdysseyAnimationLayerImageVector*)
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnIsWireframeChanged, UOdysseyAnimationLayerImageVector*)
-
-public:
-    static FOnIsColoredChanged& OnIsColoredChanged();
-    static FOnIsWireframeChanged& OnIsWireframeChanged();
-
     ~UOdysseyAnimationLayerImageVector();
 
 public:
@@ -82,11 +70,10 @@ public:
     virtual const TArray<UOdysseyPaletteSet*> GetPaletteSets() const override;
 
 protected:
-    void IsColoredChanged();
-    void IsWireframeChanged();
     virtual void CellsChanged() override;
     void MakeBreakdownTargetMap();
     void CheckBreakdownTargetMap();
+    void RequestRedrawAllVectorCells();
 
 public:
     virtual TArray<FName> GetRows() const override;

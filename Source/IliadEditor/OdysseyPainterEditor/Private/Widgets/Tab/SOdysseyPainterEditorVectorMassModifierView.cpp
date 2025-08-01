@@ -40,6 +40,8 @@ SOdysseyPainterEditorVectorMassModifierView::SOdysseyPainterEditorVectorMassModi
 void
 SOdysseyPainterEditorVectorMassModifierView::Construct( const FArguments& InArgs )
 {
+    FString detailCategoriesSectionName = FString ( "DetailCategories" );
+
     mVectorLayer = InArgs._VectorLayer;
     mSceneArray = InArgs._SceneArray;
 
@@ -77,6 +79,11 @@ SOdysseyPainterEditorVectorMassModifierView::Construct( const FArguments& InArgs
     mPathView->SetVectorLayer( mVectorLayer );
     mGroupPaintView->SetVectorLayer( mVectorLayer );
 
+    mObjectView->OverrideConfigSection( detailCategoriesSectionName );
+    mGroupView->OverrideConfigSection( detailCategoriesSectionName );
+    mPathView->OverrideConfigSection( detailCategoriesSectionName );
+    mGroupPaintView->OverrideConfigSection( detailCategoriesSectionName );
+
     mPathView->SetDisplayWideningOptions( true );
 
     mObjectDetailsView->SetExtensionHandler(SharedThis(this));
@@ -87,20 +94,30 @@ SOdysseyPainterEditorVectorMassModifierView::Construct( const FArguments& InArgs
     mCurrentObjectView = mObjectView;
 }
 
-// I could not find a way to collapse all categories without the config being save dto the disk so I ended
-// up with this solution :
+// I could not find a way to collapse all categories without the config being saved to the disk so I ended
+// up with this solution which is a bit complicated but I'm open to other options
 void
 SOdysseyPainterEditorVectorMassModifierView::DetailCustomizationHandler::CustomizeDetails( IDetailLayoutBuilder& DetailBuilder )
 {
+/*
+    // store the collapse status. We don't want to collapse all the time,
+    // just once, the first time a widget of type SOdysseyPainterEditorVectorMassModifierView is launched,
+    // that's why we declare it as static
+    //static TMap<FName,bool> expanded;
     TArray<FName> categoryNames;
 
     DetailBuilder.GetCategoryNames( categoryNames );
 
     for( FName& categoryName : categoryNames )
     {
+        //bool& value = expanded.FindOrAdd( categoryName );
+
         DetailBuilder.EditCategory( categoryName ).InitiallyCollapsed( true );
         DetailBuilder.EditCategory( categoryName ).RestoreExpansionState( false );
+
+        //value = true;
     }
+*/
 }
 
 bool
@@ -114,13 +131,19 @@ SOdysseyPainterEditorVectorMassModifierView::GetCustomizationInstance()
 {
     // Note: DetailCustomizationHandler is a nested class of SOdysseyPainterEditorVectorMassModifierView
     // Note 2 : the instance will be deleted by unreal. Implement PendingDelete() if needed.
-    return MakeShared<DetailCustomizationHandler>();
+    return MakeShared<DetailCustomizationHandler>( mOptionsView );
 }
 
 TSharedRef<SWidget>
 SOdysseyPainterEditorVectorMassModifierView::MakeWidgetForOption( TSharedPtr<FString> InOption )
 {
     return SNew(STextBlock).Text(FText::FromString(*InOption));
+}
+
+TObjectPtr<UOdysseyPainterEditorVectorObjectView>
+SOdysseyPainterEditorVectorMassModifierView::GetCurrentObjectView()
+{
+    return mCurrentObjectView;
 }
 
 void
@@ -396,7 +419,7 @@ SOdysseyPainterEditorVectorMassModifierView::IsPropertyExtendable( const UClass*
 void
 SOdysseyPainterEditorVectorMassModifierView::PropertyValueChanged( const FPropertyChangedEvent& iEvent )
 {
-
+    //mObjectDetailsView->ForceRefresh();
 }
 
 FString

@@ -37,6 +37,8 @@ FOdysseyVectorUndoTransferObjects::FOdysseyVectorUndoTransferObjects( FOdysseyVe
     : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
     , mScene( iScene )
 {
+    mTransferredObjectSnapshotBuffer.reserve( iTransferredObjectList.size() );
+
     for( FOdysseyVectorObject* transferredObject : iTransferredObjectList )
     {
         mTransferredObjectSnapshotBuffer.emplace_back( transferredObject

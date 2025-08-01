@@ -436,21 +436,21 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnTextChanged( const FText& InText
 
     mTextBlockWidget.Get()->SetText( FText::FromString( mItem.Get()->GetVectorObject()->GetName() ) );
 
-    itemScene->GetLayer()->Notify( FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                                 | FOdysseyPainterEditor::UI_UPDATE_TIMELINE );
+    itemScene->GetLayer()->Notify( FOdysseyPainterEditor::UI_UPDATE_TIMELINE );
 }
 
 FReply
 SOdysseyPainterEditorVectorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
                                                    , const FDragDropEvent& iDragDropEvent )
 {
+    const TSharedPtr< SOdysseyPainterEditorVectorSceneTreeView > treeView = StaticCastSharedPtr<SOdysseyPainterEditorVectorSceneTreeView>(OwnerTablePtr.Pin());
     TSharedPtr<FDragDropOperation> Operation = iDragDropEvent.GetOperation();
     //FVector2D position = iGeometry.GetAbsolutePosition();
     FOdysseyVectorObject* itemObject = mItem.Get()->GetVectorObject();
     FOdysseyVectorGroupPaint* itemScene = itemObject->GetScene();
     std::list<FOdysseyVectorObject*> focusedObjectList;
     FOdysseyVectorObject* insertObject = itemObject;
-    uint32 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
+    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
                              | FOdysseyPainterEditor::UI_UPDATE_TIMELINE;
 
     itemScene->GetCell()->GetFocusedAncestorList( focusedObjectList );
@@ -464,7 +464,6 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
-        const TSharedPtr< SOdysseyPainterEditorVectorSceneTreeView > treeView = StaticCastSharedPtr<SOdysseyPainterEditorVectorSceneTreeView>(OwnerTablePtr.Pin());
         TSharedPtr<FOdysseyPainterEditorSource> source = treeView->GetEditor()->GetSource();
         if (source)
             source->RecordCurrentFrameUndo();
@@ -509,10 +508,9 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
             {
                 FOdysseyVectorObject* parentObject = itemObject->GetParent();
 
-                // note: SharedEnv and Root are system objects
+                // note: Layer and Cell are system objects
                 if( parentObject->IsSystem() == false )
                 {
-
                     if( parentObject != focusedObject )
                     {
                         parentObject->TransferChild( focusedObject, insertObject );
@@ -534,6 +532,8 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
     itemScene->GetLayer()->RequestRedraw( itemScene->GetCell(), 0 );
 
     itemScene->GetLayer()->Notify( notificationFlags );
+
+    treeView->RequestTreeRefresh();
 
     return FReply::Handled();
 }
