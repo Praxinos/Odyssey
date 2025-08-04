@@ -344,7 +344,8 @@ public:
     void  AddExtension(TSharedPtr<FOdysseyPainterEditorExtension> iExtension);
     void  SetSource(TSharedPtr<FOdysseyPainterEditorSource> iSource);
     void  PaintColor(const FOdysseyBrushColor& iColor, bool iIsCommit);
-    template <class T> T* AddTool();
+    template <class T> T* AddMainTool();
+    template <class T> T* AddTemporaryTool();
 
 protected:
     //Callbacks
@@ -384,7 +385,8 @@ protected:
     UOdysseyPainterEditorTool*               mCurrentMainTool;
     UOdysseyPainterEditorTool*               mCurrentTemporaryTool;
 
-    TArray<TObjectPtr<UOdysseyPainterEditorTool>>       mTools;
+    TArray<TObjectPtr<UOdysseyPainterEditorTool>> mMainTools;
+    TArray<TObjectPtr<UOdysseyPainterEditorTool>> mTemporaryTools;
     TSharedPtr<FOdysseyPainterEditorGUI>                mGUI;
 
     uint64                          mVectorHUDFlags;
@@ -440,11 +442,20 @@ protected:
 };
 
 template <class T>
-T* FOdysseyPainterEditor::AddTool()
+T* FOdysseyPainterEditor::AddMainTool()
 {
     T* tool = NewObject<T>();
     tool->SetEditor(this);
-    mTools.Add(tool);
+    mMainTools.Add(tool);
+    return tool;
+}
+
+template <class T>
+T* FOdysseyPainterEditor::AddTemporaryTool()
+{
+    T* tool = NewObject<T>();
+    tool->SetEditor(this);
+    mTemporaryTools.Add(tool);
     return tool;
 }
 

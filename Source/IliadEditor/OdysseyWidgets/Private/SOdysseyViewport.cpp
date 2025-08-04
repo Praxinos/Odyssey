@@ -443,7 +443,6 @@ void SOdysseyViewport::Tick( const FGeometry& AllottedGeometry, const double InC
         FitToViewport();
 
     mViewport->Invalidate();
-    mViewport->InvalidateDisplay();
 }
 
 
