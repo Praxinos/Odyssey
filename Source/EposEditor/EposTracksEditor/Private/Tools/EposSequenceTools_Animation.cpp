@@ -16,6 +16,7 @@
 #include "Framework/Notifications/NotificationManager.h"
 #include "ISequencer.h"
 #include "Kismet/GameplayStatics.h"
+#include "LevelEditor.h"
 #include "LevelEditorActions.h"
 #include "LevelEditorSubsystem.h"
 #include "LevelEditorViewport.h"
@@ -94,11 +95,19 @@ ShotSequenceTools::SpawnAnimation( UWorld* iWorld, ACineCameraActor* iCamera, fl
         material->SetScalarParameterValueEditorOnly( FMaterialParameterInfo( "Overlay" ), 1 );
 #endif
 
+    //https://forums.unrealengine.com/t/add-component-to-actor-in-c-the-final-word/646838/14
+
     // Using this will delete the component once the actor is renamed at the end of SpawnAndBindAnimation() -_-
     //UActorComponent* actor_component = animation->AddComponentByClass( UScalingComponent::StaticClass(), false, FTransform::Identity, false );
+
     // So create and attach/register it to the actor in 2 steps
-    UScalingComponent* actor_component = NewObject<UScalingComponent>( animation, UScalingComponent::StaticClass() );
+    UScalingComponent* actor_component = NewObject<UScalingComponent>( animation, UScalingComponent::StaticClass(), FName( "Scaling" ), RF_Transactional /* ??? it's done in USubobjectDataSubsystem::AddNewSubobject()*/ );
     animation->FinishAddComponent( actor_component, false, FTransform::Identity );
+    // This will add the component in details view of the actor
+    animation->AddInstanceComponent( actor_component );
+    // To update everything (done in USubobjectDataSubsystem::AddNewSubobject())
+    FLevelEditorModule& LevelEditor = FModuleManager::LoadModuleChecked<FLevelEditorModule>( "LevelEditor" );
+    LevelEditor.BroadcastComponentsEdited();
 
     check( actor_component );
     UScalingComponent* scaling_component = Cast<UScalingComponent>( actor_component );
