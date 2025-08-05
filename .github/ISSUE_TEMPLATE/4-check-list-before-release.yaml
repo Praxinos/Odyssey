@@ -12,6 +12,12 @@ body:
   - type: markdown
     attributes:
       value: |
+        > [!WARNING]  
+        > Quand la liste sera vraiment utilisée, il faudra peut-être penser à faire des (au moins certains) tests sur des anciens projets pour voir la compatibilité des fonctionnalités
+
+  - type: markdown
+    attributes:
+      value: |
         # Pré-requis
 
   - type: checkboxes
