@@ -52,6 +52,10 @@ public:
 
     virtual void Tick(float iDeltaTime) override;
 
+public:
+    UFUNCTION(BlueprintCallable, Category="Actions", CallInEditor)
+    void Deselect();
+
 private:
     // Internal - Callbacks
     void OnShapeCommit(const TArray<FOdysseyPoint>& iPoints, bool iReset);

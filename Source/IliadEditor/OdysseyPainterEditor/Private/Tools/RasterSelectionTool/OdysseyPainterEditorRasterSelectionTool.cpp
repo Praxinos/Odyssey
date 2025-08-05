@@ -138,6 +138,13 @@ void UOdysseyPainterEditorRasterSelectionTool::Unload()
     UOdysseyPainterEditorTool::Unload();
 }
 
+void
+UOdysseyPainterEditorRasterSelectionTool::Deselect()
+{
+    TSharedPtr<FOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
+    rasterSelection->Clear();
+}
+
 void UOdysseyPainterEditorRasterSelectionTool::Tick(float iDeltaTime)
 {
     //Tick the shape
