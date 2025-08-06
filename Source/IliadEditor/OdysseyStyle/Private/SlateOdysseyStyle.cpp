@@ -172,6 +172,10 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
         .SetNormalPadding( FMargin(0,0) )
         .SetPressedPadding( FMargin(0,0) )
     );
+    Set( "SimpleButton.NoPadding", FButtonStyle(FAppStyle::Get().GetWidgetStyle< FButtonStyle >( "SimpleButton" ))
+        .SetNormalPadding( FMargin(0,0) )
+        .SetPressedPadding( FMargin(0,0) )
+    );
 
     // OdysseyTexture
     Set( "ClassIcon.OdysseyTexture", new IMAGE_BRUSH( "OdysseyTexture/OdysseyTextureDefaultThumbnail_16", mIcon16x16 ) );

@@ -114,6 +114,7 @@ private:
     float GetCellBreakIndicatorWidth() const;
 
     const FSlateBrush* GetPreBehaviourBrush() const;
+    FMargin GetPreBehaviourPadding() const;
     TSharedRef<SWidget> GetPreBehaviourMenuContent();
     void SetPreBehaviour(EOdysseyLayerImagePostBehaviour iBehaviour);
     bool CanSetPreBehaviour(EOdysseyLayerImagePostBehaviour iBehaviour) const;
@@ -158,6 +159,8 @@ private:
     const FSlateBrush* mAddCellsHandleLeftBrush;
     const FSlateBrush* mCellBreakIndicatorBrush;
     const FSlateBrush* mCellBreakIndicatorExtendedBrush;
+
+    TSharedPtr<SComboButton> mPreBehaviourButton;
 
 private:
     //Events structures

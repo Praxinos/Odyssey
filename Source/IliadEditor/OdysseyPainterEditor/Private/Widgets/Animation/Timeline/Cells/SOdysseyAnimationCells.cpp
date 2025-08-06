@@ -73,7 +73,6 @@ SOdysseyAnimationCells::Construct(
     mCellBreakIndicatorExtendedBrush = FOdysseyStyle::GetBrush("Animation.CellBreakIndicatorExtended");
     FSlateColor preBehaviourColor( FOdysseyStyle::GetColor( "Animation.Layer.PreBehaviourColor" ) );
     FSlateColor postBehaviourColor( FOdysseyStyle::GetColor( "Animation.Layer.PostBehaviourColor" ) );
-    float preBehaviourPadding = mTimelinePosition->GetPadding();
     mAnimationLayer = iAnimationLayer;
 
     mOnCreateCellWidget = InArgs._OnCreateCellWidget;
@@ -89,27 +88,26 @@ SOdysseyAnimationCells::Construct(
         + SHorizontalBox::Slot()
         .AutoWidth()
         [
-            //Timeline Section for Layer Offset
-            SNew(SOdysseyAnimationTimelineSection)
-            .TimelinePosition(mTimelinePosition)
-            .WidthInFrames(this, &SOdysseyAnimationCells::GetOffset)
-            .Content()
+            SNew(SOverlay)
+            + SOverlay::Slot()
+
             [
-                SNullWidget::NullWidget
+                //Timeline Section for Layer Offset
+                SNew(SOdysseyAnimationTimelineSection)
+                .TimelinePosition(mTimelinePosition)
+                .WidthInFrames(this, &SOdysseyAnimationCells::GetOffset)
+                .Content()
+                [
+                    SNullWidget::NullWidget
+                ]
             ]
-        ]
-        + SHorizontalBox::Slot()
-        .AutoWidth()
-        .Padding(FMargin(-preBehaviourPadding, 0, 0.f, 0))
-        [
-            SNew(SBox)
-            .Padding(FMargin(0, 0, 4.f, 0))
-            .WidthOverride(preBehaviourPadding)
+            + SOverlay::Slot()
+            .Padding(FMargin(-100.f, 0, 4.f, 0)) //100.f is an arbitrary non precise number to allow the prebehaviour button to overlap widgets on the left of it
             .HAlign(HAlign_Right)
             .VAlign(VAlign_Center)
             [
                 SNew(SComboButton)
-                .Visibility_Lambda([this]() { return mAnimationLayer->GetCellsOffset() > 0 ? EVisibility::Visible : EVisibility::Hidden; })
+                .Visibility_Lambda([this]() { return mAnimationLayer->GetCellsOffset() > 0 ? EVisibility::Visible : EVisibility::Collapsed; })
                 .ButtonStyle(&FAppStyle::Get().GetWidgetStyle< FButtonStyle >( "SimpleButton" ))
                 .HasDownArrow(false)
                 .OnGetMenuContent(this, &SOdysseyAnimationCells::GetPreBehaviourMenuContent)
@@ -1182,6 +1180,8 @@ SOdysseyAnimationCells::GetPreBehaviourBrush() const
     }
     return nullptr;
 }
+
+
 
 const FSlateBrush*
 SOdysseyAnimationCells::GetPostBehaviourBrush() const
