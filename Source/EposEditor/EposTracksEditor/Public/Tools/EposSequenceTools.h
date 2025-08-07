@@ -693,11 +693,10 @@ enum class EScaleActor : uint8
 {
     // The animation won't scale
     kNo                 UMETA( DisplayName = "No Scale" ),
-    // The animation will scale relatively to its original size
-    // If the animation is already 100% camera FOV, it will act as the option "100% Camera"
+    // The animation will scale relatively to its current size
     kRelativeScale      UMETA( DisplayName = "Relative Scale" ),
     // The animation will auto-scale to match the 100% camera FOV
-    kFitToCamera        UMETA( DisplayName = "Scale 100% Camera" ),
+    kFitToCamera        UE_DEPRECATED( 5.6, "Moved to its own function like FitActorToCameraView()" ) UMETA( Hidden ),
 };
 
 class EPOSTRACKSEDITOR_API ShotSequenceTools
@@ -754,6 +753,9 @@ public:
 public:
     static bool MoveAndScaleActor( AActor* ioActor, const ACineCameraActor* iCamera, float iNewDistance, EScaleActor iScaleType );
     static bool CanMoveAndScaleActor( const AActor* iActor, const ACineCameraActor* iCamera );
+
+    static bool FitActorToCameraView( AActor* ioActor, const ACineCameraActor* iCamera );
+    static bool CanFitActorToCameraView( const AActor* iActor, const ACineCameraActor* iCamera );
 
 // Inside EposSequenceTools_Camera
 public:

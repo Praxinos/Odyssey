@@ -13,6 +13,7 @@
 #include "MovieSceneSequence.h"
 #include "MovieSceneTimeHelpers.h"
 
+#include "ActorHelpers.h"
 #include "Board/BoardSequence.h"
 #include "EposSequenceHelpers.h"
 #include "OdysseyAnimationActor.h"
@@ -360,37 +361,35 @@ ShotSequenceTools::MoveAndScaleActor( AActor* ioActor, const ACineCameraActor* i
     if( FMath::IsNearlyZero( iNewDistance ) )
         return false;
 
-    UScalingComponent* scaling_component = ioActor->FindComponentByClass<UScalingComponent>();
-    if( !scaling_component )
-        return false;
+    struct FParameterCache
+    {
+        float mDistanceFromCamera;
+        FVector mActorScale;
+        FVector mCameraViewSize;
+    };
 
-    float old_distance = FVector::Distance( iCamera->GetActorLocation(), ioActor->GetActorLocation() );
-    FVector old_scale = ioActor->GetActorScale3D();
-    FVector old_camera_view_size = scaling_component->ComputeSizeOfCameraView( iCamera, old_distance );
-    FVector old_scale_camera100 = scaling_component->ComputeScaleWithScaleAndMargin( old_camera_view_size );
+    FParameterCache old_parameter;
+    old_parameter.mActorScale = ioActor->GetActorScale3D();
+    old_parameter.mDistanceFromCamera = FVector::Distance( iCamera->GetActorLocation(), ioActor->GetActorLocation() );
+    old_parameter.mCameraViewSize = ActorHelpers::ComputeSizeOfCameraView( iCamera, old_parameter.mDistanceFromCamera );
 
-    FVector new_camera_view_size = scaling_component->ComputeSizeOfCameraView( iCamera, iNewDistance );
+    FVector new_camera_view_size = ActorHelpers::ComputeSizeOfCameraView( iCamera, iNewDistance );
 
     FVector new_animation_location = iCamera->GetActorLocation() + ( ioActor->GetActorLocation() - iCamera->GetActorLocation() ).GetSafeNormal() * iNewDistance;
-
     ioActor->SetActorLocation( new_animation_location );
 
     switch( iScaleType )
     {
+        // Until EScaleActor::kFitToCamera will be removed
+        PRAGMA_DISABLE_DEPRECATION_WARNINGS
         case EScaleActor::kFitToCamera:
-        {
-            FVector scale = scaling_component->ComputeScaleWithScaleAndMargin( new_camera_view_size );
-            ioActor->SetActorScale3D( scale );
-        }
-        break;
-
+        PRAGMA_ENABLE_DEPRECATION_WARNINGS
         case EScaleActor::kRelativeScale:
         {
-            FVector new_scale_camera100 = scaling_component->ComputeScaleWithScaleAndMargin( new_camera_view_size );
-            FVector ratio = new_scale_camera100 / old_scale_camera100;
-            FVector new_scale = old_scale * ratio;
+            FVector ratio = new_camera_view_size / old_parameter.mCameraViewSize;
+            FVector new_actor_scale = old_parameter.mActorScale * ratio;
 
-            ioActor->SetActorScale3D( new_scale );
+            ioActor->SetActorScale3D( new_actor_scale );
         }
         break;
 
@@ -404,5 +403,31 @@ ShotSequenceTools::MoveAndScaleActor( AActor* ioActor, const ACineCameraActor* i
     return true;
 }
 
+//static
+bool
+ShotSequenceTools::CanFitActorToCameraView( const AActor* iActor, const ACineCameraActor* iCamera )
+{
+    return CanMoveAndScaleActor( iActor, iCamera );
+};
+
+//static
+bool
+ShotSequenceTools::FitActorToCameraView( AActor* ioActor, const ACineCameraActor* iCamera )
+{
+    if( !CanFitActorToCameraView( ioActor, iCamera ) )
+        return false;
+
+    float distance = FVector::Distance( iCamera->GetActorLocation(), ioActor->GetActorLocation() );
+    FVector new_camera_view_size = ActorHelpers::ComputeSizeOfCameraView( iCamera, distance );
+
+    FVector scale = new_camera_view_size;
+    UScalingComponent* scaling_component = ioActor->FindComponentByClass<UScalingComponent>();
+    if( scaling_component )
+        scale = scaling_component->ComputeScaleWithScaleAndMargin( new_camera_view_size );
+
+    ioActor->SetActorScale3D( scale );
+
+    return true;
+}
 
 #undef LOCTEXT_NAMESPACE

@@ -392,6 +392,12 @@ public:
     UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor" )
     static void SetCameraFocalLengthAndScaleActor( TArray<AActor*> Actors, ACineCameraActor* Camera, float NewFocalLength, EScaleActor ScaleType );
 
+    /**
+     * Fit the actor to 100% of the camera view (if possible)
+     */
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor" )
+    static void FitActorToCameraView( AActor* Actor, const ACineCameraActor* Camera );
+
 public:
 
     /**

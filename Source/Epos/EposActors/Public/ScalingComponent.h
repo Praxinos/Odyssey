@@ -19,7 +19,6 @@ class EPOSACTORS_API UScalingComponent
     GENERATED_UCLASS_BODY()
 
 public:
-    virtual FVector ComputeSizeOfCameraView( const ACineCameraActor* iCamera, float iDistance ) const; // From FDrawFrustumSceneProxy::GetDynamicMeshElements()
     virtual FVector ComputeScaleWithScaleAndMargin( const FVector& iCameraViewSize ) const;
 
     virtual FIntPoint ComputeTextureSize( const FVector& iCameraViewSize, int32 iTextureHeight ) const;
@@ -49,7 +48,7 @@ public:
 
 private:
     /** This will make the actor bigger than the original size viewed by the camera by adding a margin to the actor */
-    UPROPERTY( EditAnywhere, Category="Scaling", meta=(UIMin="0", ClampMin="0", UIMax="200", ClampMax="200", Units=Percent) )
+    UPROPERTY( VisibleAnywhere, Category="Scaling", meta=(UIMin="0", ClampMin="0", UIMax="200", ClampMax="200", Units=Percent) )
     float SafeMargin = 0.f;
 
     /** This will rescale the original size of the actor
@@ -57,6 +56,6 @@ private:
       * The scale is applied before safe margin
       * The default value (which means no rescale) is (100%, 100%)
       */
-    UPROPERTY( EditAnywhere, Category="Scaling", meta=(AllowPreserveRatio) )
+    UPROPERTY( VisibleAnywhere, Category="Scaling", meta=(AllowPreserveRatio) )
     FVector2D RelativeScaling = { 100.f, 100.f };
 };

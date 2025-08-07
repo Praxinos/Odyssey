@@ -29,6 +29,7 @@
 #include "Sections/MovieSceneSubSection.h"
 #include "Widgets/Notifications/SNotificationList.h"
 
+#include "ActorHelpers.h"
 #include "Board/BoardSequence.h"
 #include "EposSequenceHelpers.h"
 #include "NamingConvention.h"
@@ -133,7 +134,7 @@ ShotSequenceTools::SpawnAnimation( UWorld* iWorld, ACineCameraActor* iCamera, fl
     FVector animation_location = CamLocation + CamDir * iFocusDistance;
     animation_location = FindNextFreeAnimationLocation( iWorld, animation_location, CamLocation );
 
-    FVector camera_view_size = scaling_component->ComputeSizeOfCameraView( iCamera, iFocusDistance );
+    FVector camera_view_size = ActorHelpers::ComputeSizeOfCameraView( iCamera, iFocusDistance );
     FVector animation_scale = scaling_component->ComputeScaleWithScaleAndMargin( camera_view_size );
 
     FRotator animation_rotator = CamRot;
@@ -179,7 +180,7 @@ ShotSequenceTools::SpawnAndBindAnimation( ISequencer& iSequencer, UMovieSceneSeq
 
     //---
 
-    FVector camera_view_size = scaling_component->ComputeSizeOfCameraView( iCamera, focusDistance );
+    FVector camera_view_size = ActorHelpers::ComputeSizeOfCameraView( iCamera, focusDistance );
     FVector camera_view_size_with_scaling = scaling_component->ComputeScaleWithScaleAndMargin( camera_view_size );
     FIntPoint texture_size = scaling_component->ComputeTextureSize( camera_view_size_with_scaling, settings->AnimationSettings.Height );
 
