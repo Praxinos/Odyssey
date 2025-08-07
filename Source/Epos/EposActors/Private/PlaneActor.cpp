@@ -37,8 +37,9 @@ APlaneActor::PostLoad()
             UScalingComponent* scaling_component = FindComponentByClass<UScalingComponent>();
             if( !scaling_component )
             {
-                UScalingComponent* actor_component = NewObject<UScalingComponent>( this, UScalingComponent::StaticClass() );
+                UScalingComponent* actor_component = NewObject<UScalingComponent>( this, UScalingComponent::StaticClass(), FName( "Scaling" ), RF_Transactional );
                 FinishAddComponent( actor_component, false, FTransform::Identity );
+                AddInstanceComponent( actor_component );
                 check( actor_component );
                 scaling_component = Cast<UScalingComponent>( actor_component );
                 check( scaling_component && FindComponentByClass<UScalingComponent>() );

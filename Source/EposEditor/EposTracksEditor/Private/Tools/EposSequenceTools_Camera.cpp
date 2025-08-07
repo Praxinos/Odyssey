@@ -21,6 +21,7 @@
 #include "Tracks/MovieScene3DTransformTrack.h"
 #include "Widgets/Notifications/SNotificationList.h"
 
+#include "ActorHelpers.h"
 #include "Board/BoardSequence.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "EposSequenceHelpers.h"
@@ -1387,58 +1388,50 @@ ShotSequenceTools::GotoNextCameraPosition( ISequencer& iSequencer, UMovieSceneSe
 bool
 ShotSequenceTools::SetCameraFocalLengthAndScaleActor( TArray<TWeakObjectPtr<AActor>> ioActors, ACineCameraActor* ioCamera, float iNewFocalLength, EScaleActor iScaleType )
 {
-    TArray<TWeakObjectPtr<AActor>> actors;
-    TArray<float> current_distances;
-    TArray<FVector> old_scales;
-    TArray<FVector> old_scales_camera100;
+    struct FParameterCache
+    {
+        TWeakObjectPtr<AActor> mActor;
+        float mCurrentDistance;
+        FVector mActorScale;
+        FVector mCameraViewSize;
+    };
+
+    TArray<FParameterCache> old_parameters;
     for( auto actor : ioActors )
     {
         if( !actor.IsValid() || !ShotSequenceTools::CanMoveAndScaleActor( actor.Get(), ioCamera ) )
             continue;
 
-        UScalingComponent* scaling_component = actor->FindComponentByClass<UScalingComponent>();
-        if( !scaling_component )
-            continue;
+        FParameterCache parameter;
+        parameter.mActor = actor;
+        parameter.mCurrentDistance = FVector::Distance( ioCamera->GetActorLocation(), actor->GetActorLocation() );
+        parameter.mActorScale = actor->GetActorScale3D();
+        parameter.mCameraViewSize = ActorHelpers::ComputeSizeOfCameraView( ioCamera, parameter.mCurrentDistance );
 
-        actors.Add( actor );
-        current_distances.Add( FVector::Distance( ioCamera->GetActorLocation(), actor->GetActorLocation() ) );
-        old_scales.Add( actor->GetActorScale3D() );
-        FVector camera_view_size = scaling_component->ComputeSizeOfCameraView( ioCamera, current_distances.Last() );
-        old_scales_camera100.Add( scaling_component->ComputeScaleWithScaleAndMargin( camera_view_size ) );
+        old_parameters.Add( parameter );
     }
 
     ioCamera->GetCineCameraComponent()->SetCurrentFocalLength( iNewFocalLength );
 
-    for( int i = 0; i < actors.Num(); i++ )
+    for( const FParameterCache& old_parameter : old_parameters )
     {
-        AActor* actor = actors[i].Get();
-        check( actor );
-        float current_distance = current_distances[i];
-        FVector old_scale = old_scales[i];
-        FVector old_scale_camera100 = old_scales_camera100[i];
+        check( old_parameter.mActor.IsValid() );
 
-        UScalingComponent* scaling_component = actor->FindComponentByClass<UScalingComponent>();
-        if( !scaling_component )
-            continue;
-
-        FVector camera_view_size = scaling_component->ComputeSizeOfCameraView( ioCamera, current_distance );
+        FVector new_camera_view_size = ActorHelpers::ComputeSizeOfCameraView( ioCamera, old_parameter.mCurrentDistance );
 
         switch( iScaleType )
         {
+            // Until EScaleActor::kFitToCamera will be removed
+            PRAGMA_DISABLE_DEPRECATION_WARNINGS
             case EScaleActor::kFitToCamera:
-            {
-                FVector scale = scaling_component->ComputeScaleWithScaleAndMargin( camera_view_size );
-                actor->SetActorScale3D( scale );
-            }
-            break;
-
+            PRAGMA_ENABLE_DEPRECATION_WARNINGS
             case EScaleActor::kRelativeScale:
             {
-                FVector new_scale_camera100 = scaling_component->ComputeScaleWithScaleAndMargin( camera_view_size );
-                FVector ratio = new_scale_camera100 / old_scale_camera100;
-                FVector new_scale = old_scale * ratio;
+                FVector ratio = new_camera_view_size / old_parameter.mCameraViewSize;
 
-                actor->SetActorScale3D( new_scale );
+                FVector new_actor_scale = old_parameter.mActorScale * ratio;
+
+                old_parameter.mActor->SetActorScale3D( new_actor_scale );
             }
             break;
 

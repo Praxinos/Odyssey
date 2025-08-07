@@ -724,6 +724,16 @@ UEposSequenceEditorBlueprintLibrary::SetCameraFocalLengthAndScaleActor( TArray<A
     ShotSequenceTools::SetCameraFocalLengthAndScaleActor( actors, ioCamera, iNewFocalLength, iScaleType );
 }
 
+//static
+void
+UEposSequenceEditorBlueprintLibrary::FitActorToCameraView( AActor* ioActor, const ACineCameraActor* iCamera )
+{
+    if( !ioActor || !iCamera )
+        return;
+
+    ShotSequenceTools::FitActorToCameraView( ioActor, iCamera );
+}
+
 //---
 
 //static

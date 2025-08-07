@@ -16,6 +16,7 @@
 #include "Framework/Notifications/NotificationManager.h"
 #include "ISequencer.h"
 #include "Kismet/GameplayStatics.h"
+#include "LevelEditor.h"
 #include "LevelEditorActions.h"
 #include "LevelEditorSubsystem.h"
 #include "LevelEditorViewport.h"
@@ -28,6 +29,7 @@
 #include "Sections/MovieSceneSubSection.h"
 #include "Widgets/Notifications/SNotificationList.h"
 
+#include "ActorHelpers.h"
 #include "Board/BoardSequence.h"
 #include "EposSequenceHelpers.h"
 #include "NamingConvention.h"
@@ -94,11 +96,19 @@ ShotSequenceTools::SpawnAnimation( UWorld* iWorld, ACineCameraActor* iCamera, fl
         material->SetScalarParameterValueEditorOnly( FMaterialParameterInfo( "Overlay" ), 1 );
 #endif
 
+    //https://forums.unrealengine.com/t/add-component-to-actor-in-c-the-final-word/646838/14
+
     // Using this will delete the component once the actor is renamed at the end of SpawnAndBindAnimation() -_-
     //UActorComponent* actor_component = animation->AddComponentByClass( UScalingComponent::StaticClass(), false, FTransform::Identity, false );
+
     // So create and attach/register it to the actor in 2 steps
-    UScalingComponent* actor_component = NewObject<UScalingComponent>( animation, UScalingComponent::StaticClass() );
+    UScalingComponent* actor_component = NewObject<UScalingComponent>( animation, UScalingComponent::StaticClass(), FName( "Scaling" ), RF_Transactional /* ??? it's done in USubobjectDataSubsystem::AddNewSubobject()*/ );
     animation->FinishAddComponent( actor_component, false, FTransform::Identity );
+    // This will add the component in details view of the actor
+    animation->AddInstanceComponent( actor_component );
+    // To update everything (done in USubobjectDataSubsystem::AddNewSubobject())
+    FLevelEditorModule& LevelEditor = FModuleManager::LoadModuleChecked<FLevelEditorModule>( "LevelEditor" );
+    LevelEditor.BroadcastComponentsEdited();
 
     check( actor_component );
     UScalingComponent* scaling_component = Cast<UScalingComponent>( actor_component );
@@ -124,7 +134,7 @@ ShotSequenceTools::SpawnAnimation( UWorld* iWorld, ACineCameraActor* iCamera, fl
     FVector animation_location = CamLocation + CamDir * iFocusDistance;
     animation_location = FindNextFreeAnimationLocation( iWorld, animation_location, CamLocation );
 
-    FVector camera_view_size = scaling_component->ComputeSizeOfCameraView( iCamera, iFocusDistance );
+    FVector camera_view_size = ActorHelpers::ComputeSizeOfCameraView( iCamera, iFocusDistance );
     FVector animation_scale = scaling_component->ComputeScaleWithScaleAndMargin( camera_view_size );
 
     FRotator animation_rotator = CamRot;
@@ -170,7 +180,7 @@ ShotSequenceTools::SpawnAndBindAnimation( ISequencer& iSequencer, UMovieSceneSeq
 
     //---
 
-    FVector camera_view_size = scaling_component->ComputeSizeOfCameraView( iCamera, focusDistance );
+    FVector camera_view_size = ActorHelpers::ComputeSizeOfCameraView( iCamera, focusDistance );
     FVector camera_view_size_with_scaling = scaling_component->ComputeScaleWithScaleAndMargin( camera_view_size );
     FIntPoint texture_size = scaling_component->ComputeTextureSize( camera_view_size_with_scaling, settings->AnimationSettings.Height );
 

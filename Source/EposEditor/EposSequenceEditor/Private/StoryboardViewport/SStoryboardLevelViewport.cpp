@@ -1228,12 +1228,11 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
 
                                 + SHorizontalBox::Slot()
                                 .AutoWidth()
-                                .VAlign(VAlign_Center)
+                                .VAlign( VAlign_Center )
                                 .Padding( 10, 0 )
                                 [
-                                    SNew(STextBlock)
-                                    .ColorAndOpacity(Gray)
-                                    .Text( LOCTEXT( "ActorScaleLabel", "Scale" ) )
+                                    SNew(SSeparator)
+                                    .Orientation( EOrientation::Orient_Vertical )
                                 ]
 
                                 + SHorizontalBox::Slot()
@@ -1246,6 +1245,28 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                                     //.Font( FAppStyle::Get().GetFontStyle( "Sequencer.AnimationOutliner.RegularFont" ) )
                                     .OnEnumSelectionChanged( this, &SStoryboardLevelViewport::OnScaleActorTypeChanged )
                                     .ToolTipText( LOCTEXT( "ActorScaleTooltip", "Scale the actor accordingly to its parent camera." ) )
+                                ]
+
+                                + SHorizontalBox::Slot()
+                                .AutoWidth()
+                                .VAlign( VAlign_Center )
+                                .Padding( 10, 0 )
+                                [
+                                    SNew(SSeparator)
+                                    .Orientation( EOrientation::Orient_Vertical )
+                                ]
+
+                                + SHorizontalBox::Slot()
+                                .AutoWidth()
+                                [
+                                    SNew( SButton )
+                                    .VAlign( VAlign_Center )
+                                    .OnClicked( this, &SStoryboardLevelViewport::OnFitActorToCameraView )
+                                    .ToolTipText( LOCTEXT( "ActorFitToCameraViewTooltip", "Fit the actor to 100% of its parent camera view." ) )
+                                    [
+                                        SNew( SImage )
+                                        .Image( FEposSequenceEditorStyle::Get().GetBrush( "Viewport.FitToCameraView" ) )
+                                    ]
                                 ]
                             ]
 
@@ -1281,12 +1302,11 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
 
                                 + SHorizontalBox::Slot()
                                 .AutoWidth()
-                                .VAlign(VAlign_Center)
+                                .VAlign( VAlign_Center )
                                 .Padding( 10, 0 )
                                 [
-                                    SNew(STextBlock)
-                                    .ColorAndOpacity(Gray)
-                                    .Text( LOCTEXT( "ActorScaleLabel", "Scale" ) )
+                                    SNew( SSeparator )
+                                    .Orientation( EOrientation::Orient_Vertical )
                                 ]
 
                                 + SHorizontalBox::Slot()
@@ -1299,6 +1319,28 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                                     //.Font( FAppStyle::Get().GetFontStyle( "Sequencer.AnimationOutliner.RegularFont" ) )
                                     .OnEnumSelectionChanged( this, &SStoryboardLevelViewport::OnScaleActorTypeChanged )
                                     .ToolTipText( LOCTEXT( "ActorScaleTooltip", "Scale the actor accordingly to its parent camera." ) )
+                                ]
+
+                                + SHorizontalBox::Slot()
+                                .AutoWidth()
+                                .VAlign( VAlign_Center )
+                                .Padding( 10, 0 )
+                                [
+                                    SNew(SSeparator)
+                                    .Orientation( EOrientation::Orient_Vertical )
+                                ]
+
+                                + SHorizontalBox::Slot()
+                                .AutoWidth()
+                                [
+                                    SNew( SButton )
+                                    .VAlign( VAlign_Center )
+                                    .OnClicked( this, &SStoryboardLevelViewport::OnFitActorToCameraView )
+                                    .ToolTipText( LOCTEXT( "ActorFitToCameraViewTooltip", "Fit the actor to 100% of its parent camera view." ) )
+                                    [
+                                        SNew( SImage )
+                                        .Image( FEposSequenceEditorStyle::Get().GetBrush( "Viewport.FitToCameraView" ) )
+                                    ]
                                 ]
                             ]
                         ]
@@ -2362,6 +2404,38 @@ void
 SStoryboardLevelViewport::OnScaleActorTypeChanged( int32 iScaleActorType, ESelectInfo::Type iSelectType )
 {
     mScaleActorType = EScaleActor( iScaleActorType );
+}
+
+FReply
+SStoryboardLevelViewport::OnFitActorToCameraView()
+{
+    if( mActorToMove.IsValid() )
+    {
+        ACineCameraActor* camera = Cast<ACineCameraActor>( mActorToMove->GetAttachParentActor() );
+
+        ShotSequenceTools::FitActorToCameraView( mActorToMove.Get(), camera );
+    }
+
+    if( mCameraToFocalLength.IsValid() )
+    {
+        TArray<AActor*> children;
+        mCameraToFocalLength->GetAttachedActors( children );
+
+        TArray<TWeakObjectPtr<AActor>> actors;
+        for( auto child : children )
+        {
+            UScalingComponent* scaling_component = child->FindComponentByClass<UScalingComponent>();
+            if( scaling_component )
+                actors.Add( child );
+        }
+
+        for( TWeakObjectPtr<AActor> actor : actors )
+        {
+            ShotSequenceTools::FitActorToCameraView( actor.Get(), mCameraToFocalLength.Get() );
+        }
+    }
+
+    return FReply::Handled();
 }
 
 EVisibility

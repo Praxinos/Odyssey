@@ -237,6 +237,7 @@ public:
 
     int32 GetScaleActorType() const;
     void OnScaleActorTypeChanged( int32 iScaleActorType, ESelectInfo::Type iSelectType );
+    FReply OnFitActorToCameraView();
 
     EVisibility GetCameraFocalLengthVisibility() const;
 
@@ -329,7 +330,7 @@ private:
     bool                                mStartStoryboardActorPicking = false;
     TArray<AActor*>                     mActorsTemporaryHidden;
     TSharedPtr<SComboButton>            mActorPickerComboList;
-    EScaleActor                         mScaleActorType = EScaleActor::kFitToCamera;
+    EScaleActor                         mScaleActorType = EScaleActor::kRelativeScale;
     TArray<TWeakObjectPtr<UStoryNote>>  mNotes;
     TSharedPtr<SNotesInViewport>        mWidgetNotesInViewport;
     TSharedPtr<SNotesAsOverlay>         mWidgetNotesAsOverlay;
