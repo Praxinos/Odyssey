@@ -21,6 +21,7 @@
 #include "RenderGraphBuilder.h"
 #include "OdysseyBlendShader.h"
 #include "ScreenPass.h"
+#include "GenerateMips.h"
 
 #define THUMBNAIL_RENDER_SIZE 64
 
@@ -75,7 +76,8 @@ UOdysseyAnimationCellThumbnailRenderer::Draw(UObject* Object, int32 X, int32 Y, 
                 srcRect.Size(),
                 destinationTexture->Desc.Format,
                 FClearValueBinding::Transparent,
-                ETextureCreateFlags::ShaderResource | ETextureCreateFlags::RenderTargetable
+                ETextureCreateFlags::ShaderResource | ETextureCreateFlags::RenderTargetable,
+                FMath::CeilLogTwo(FMath::Max(srcRect.Width(), srcRect.Height())) //NumMips
             );
 
             FCanvasTileItem checkboardTileItem(
@@ -103,6 +105,8 @@ UOdysseyAnimationCellThumbnailRenderer::Draw(UObject* Object, int32 X, int32 Y, 
                 FMatrix::Identity
             );
 
+            FGenerateMips::Execute(graphBuilder, featureLevel, renderTexture);
+
             FOdysseyBlendShader::BlendRect(
                 graphBuilder,
                 featureLevel,
@@ -115,7 +119,7 @@ UOdysseyAnimationCellThumbnailRenderer::Draw(UObject* Object, int32 X, int32 Y, 
                 EOdysseyBlendingMode::kNormal,
                 EOdysseyAlphaMode::kNormal,
                 1.0f,
-                EOdysseyAntiAliasing::Anisotropic
+                EOdysseyAntiAliasing::Trilinear
             );
 
             graphBuilder.Execute();
