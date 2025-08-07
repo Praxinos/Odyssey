@@ -8,6 +8,7 @@
 #include "Engine/TextureRenderTarget2D.h"
 #include "Engine/World.h"
 #include "TextureResource.h"
+#include "GenerateMips.h"
 
 #include "OdysseyBlendShader.h"
 
@@ -145,7 +146,12 @@ IOdysseyTextureRenderingAbility::RenderAndResize_GameThread(UTextureRenderTarget
         {
             FRDGBuilder graphBuilder( RHICmdList );
 
-            FRDGTextureRef destinationTexture = graphBuilder.RegisterExternalTexture( CreateRenderTarget( iDstRenderTarget->GetRenderTargetResource()->GetRenderTargetTexture(), TEXT( "UOdysseyAnimationCellThumbnailRenderer::destinationTexture" ) ) );
+            FRDGTextureRef destinationTexture = graphBuilder.RegisterExternalTexture(
+                CreateRenderTarget(
+                    iDstRenderTarget->GetRenderTargetResource()->GetRenderTargetTexture(),
+                    TEXT( "UOdysseyAnimationCellThumbnailRenderer::destinationTexture" )
+                )
+            );
 
             AddClearRenderTargetPass( graphBuilder, destinationTexture, FLinearColor::Transparent, iDstRect );
 
@@ -153,7 +159,8 @@ IOdysseyTextureRenderingAbility::RenderAndResize_GameThread(UTextureRenderTarget
                 iSrcRect.Size(),
                 destinationTexture->Desc.Format,
                 FClearValueBinding::Transparent,
-                ETextureCreateFlags::ShaderResource | ETextureCreateFlags::RenderTargetable
+                ETextureCreateFlags::ShaderResource | ETextureCreateFlags::RenderTargetable,
+                FMath::CeilLogTwo(FMath::Max(iSrcRect.Width(), iSrcRect.Height())) //NumMips
             );
             FRDGTextureRef renderTexture = graphBuilder.CreateTexture( renderTextureDesc, TEXT( "UOdysseyLayer::renderTexture" ) );
 
@@ -165,6 +172,8 @@ IOdysseyTextureRenderingAbility::RenderAndResize_GameThread(UTextureRenderTarget
                 iSrcRect,
                 FMatrix::Identity
             );
+
+            FGenerateMips::Execute(graphBuilder, featureLevel, renderTexture);
 
             FOdysseyBlendShader::BlendRect(
                 graphBuilder,
