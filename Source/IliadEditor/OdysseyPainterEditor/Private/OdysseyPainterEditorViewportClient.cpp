@@ -82,7 +82,7 @@ FOdysseyPainterEditorViewportClient::FOdysseyPainterEditorViewportClient( FOdyss
         {
             FSamplerStateInitializerRHI SamplerStateInitializerNN(SF_Point , AM_Clamp, AM_Clamp, AM_Clamp);
             mNearestNeighbourTexture.SamplerStateRHI = RHICreateSamplerState(SamplerStateInitializerNN);
-            FSamplerStateInitializerRHI SamplerStateInitializerB(SF_Bilinear , AM_Clamp, AM_Clamp, AM_Clamp);
+            FSamplerStateInitializerRHI SamplerStateInitializerB(SF_Trilinear , AM_Clamp, AM_Clamp, AM_Clamp);
             mBilinearTexture.SamplerStateRHI = RHICreateSamplerState(SamplerStateInitializerB);
         }
     );
@@ -109,6 +109,10 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
     if (!texture->GetResource())
         return;
 
+    // Fully stream in the texture before drawing it.
+    texture->SetForceMipLevelsToBeResident( 30.0f );
+    texture->WaitForStreaming();
+
     mNearestNeighbourTexture.TextureRHI = texture->GetResource()->TextureRHI;
     mBilinearTexture.TextureRHI = texture->GetResource()->TextureRHI;
 
@@ -122,10 +126,6 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
     //if SViewport->GetPan() == 0,0, it means the center of the texture should be centered in the viewport
     FVector2D pan = mOdysseyPainterEditorViewportPtr.Pin()->GetPan();
     pan += mOdysseyPainterEditorViewportPtr.Pin()->GetViewportCenter() - (FVector2D(width, height) / 2.0f);
-
-    // Fully stream in the texture before drawing it.
-    texture->SetForceMipLevelsToBeResident( 30.0f );
-    texture->WaitForStreaming();
 
     // Figure out the size we need
     const float mipLevel = 0; //should be -1, but as we are editing only the first mipmap, then the other mipmaps are not updated and so we cannot use -1 to have automatic mipmap selection.
