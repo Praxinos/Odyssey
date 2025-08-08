@@ -14,7 +14,6 @@ FOdysseyTextureLayerImageRasterImport::Read( UOdysseyTextureLayerImageRaster* iT
     if (end - start < 4 + 8) //check if we can read chunkID and chunkLen
         return false;
 
-
     uint32 chunkID;
     uint64 chunkLen;
     uint64 chunkEnd;

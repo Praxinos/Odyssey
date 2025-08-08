@@ -282,6 +282,31 @@ UOdysseyTextureLayerImageRaster::GetMediaProvider(uint32 iFrameIndex) const
     return mediaProvider;
 }
 
+/* struct FOdysseyTextureLayerImageRasterObjectVersion
+{
+    enum Type
+    {
+        // Before any version changes were made
+        BeforeCustomVersionWasAdded,
+
+        // Stopped relying on Raster Block and use UTexture2D instead
+        NoRasterBlockSaving,
+
+        // -----<new versions can be added above this line>-------------------------------------------------
+        VersionPlusOne,
+        LatestVersion = VersionPlusOne - 1
+    };
+
+    // The GUID for this custom version number
+    const static FGuid GUID;
+
+private:
+    FOdysseyTextureLayerImageRasterObjectVersion() {}
+};
+
+const FGuid FOdysseyTextureLayerImageRasterObjectVersion::GUID(0xD5CF1CCA, 0xEAC04893, 0x9F032A90, 0x2D3E968F);
+FDevVersionRegistration GRegisterOdysseyTextureLayerImageRasterObjectVersion(FOdysseyTextureLayerImageRasterObjectVersion::GUID, FOdysseyTextureLayerImageRasterObjectVersion::LatestVersion, TEXT("OdysseyTextureLayerImageRaster")); */
+
 void
 UOdysseyTextureLayerImageRaster::Serialize(FArchive& Ar)
 {
@@ -299,8 +324,35 @@ UOdysseyTextureLayerImageRaster::Serialize(FArchive& Ar)
     {
         if (!FOdysseyTextureLayerImageRasterImport::Read( this, Ar ))
         {
-            //Old Style No Chunk Loading
-            //Ar << *RasterBlock;
+            //PATCH: allows us to load most of the old textures without implying new textures crash
+            //This is needed because we do not write RasterBlock in save anymore
+            //And when FOdysseyTextureLayerImageRasterImport::Read() returns false, it can mean 2 things :
+            // - There is nothing to read (happens with recent textures)
+            // - There is something to read in an old fashioned way (happens with really old textures)
+            //This code is not perfect, but should do the trick, and we will be able to remove it in the future
+            //when we consider that really old projects should not be openable anymore (Example: the Roller_board_long storyboard project made by Antoine Antin)
+            uint64 start = Ar.Tell();
+            uint64 end = Ar.TotalSize();
+            uint64 neededSize = sizeof(uint32) * 7; //Id(4*uint32) + width(1*uint32) + height(1*uint32) + format(1*uint32)
+            if (end - start >= neededSize) //check if we can read chunkID and chunkLen
+            {
+                FGuid id;
+                int width;
+                int height;
+
+                Ar << id; //uint32 * 4
+                Ar << width; //int32
+                Ar << height; //int32
+
+                Ar.Seek(start);
+
+                bool canRead = id.IsValid() && width > 0 && width <= 8192 && height > 0 && height <= 8192;
+                if (canRead)
+                {
+                    RasterBlock = MakeShared<FOdysseyRasterBlock>(this);
+                    Ar << *RasterBlock;
+                }
+            }
         }
     }
 }
