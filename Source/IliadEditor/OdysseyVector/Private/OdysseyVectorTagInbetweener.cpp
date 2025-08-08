@@ -1549,31 +1549,28 @@ FOdysseyVectorTagInbetweener::Draw( BLContext* iBLContext
 
 // when drawn as a shared tag
 void
-FOdysseyVectorTagInbetweener::Draw( FOdysseyVectorGroupPaint* iDisplayedScene
+FOdysseyVectorTagInbetweener::Draw( FOdysseyVectorCell* iDisplayedCell
                                   , BLContext* iBLContext
                                   , FOdysseyVectorEngine* iEngine
                                   , const ::ULIS::FRectD& iInvalidationArea
                                   , double iAncestorsOpacity
                                   , uint64 iDrawingFlags )
 {
-    FOdysseyVectorCell* displayedCell = iDisplayedScene->GetCell();
-
     // check the object is still displayed (it could have been removed but still in memory)
     if( /*mOwner->GetScene()*/ mOwner->IsVisible( true ) )
     {
-
         FOdysseyVectorCell* tagCell = mOwner->GetScene()->GetCell();
 
         iBLContext->save();
         iBLContext->resetMatrix();
 
         // if th eobject hasn't been removed from the scene
-        if( displayedCell && tagCell )
+        if( iDisplayedCell && tagCell )
         {
             int32 sourceCellIndex = tagCell->GetIndex();
             // Note: target can be negative
             int32 targetCellIndex = sourceCellIndex + ( ( GetLength() - 1 ) * (int)mInterpolationDirection );
-            int32 displayedCellIndex = displayedCell->GetIndex();
+            int32 displayedCellIndex = iDisplayedCell->GetIndex();
             int32 fromCellIndex = std::min( sourceCellIndex, targetCellIndex );
             int32   toCellIndex = std::max( sourceCellIndex, targetCellIndex );
 
@@ -1592,7 +1589,7 @@ FOdysseyVectorTagInbetweener::Draw( FOdysseyVectorGroupPaint* iDisplayedScene
                         uint32 inbetweenIndex = drawingIndex - breakdown->GetSourceDrawingIndex();
                         FInbetweenerChart::Inbetween* inbetween = &breakdown->GetChart()->GetInbetweenBuffer()[inbetweenIndex];
 
-                        DrawPathsInbetween( iDisplayedScene
+                        DrawPathsInbetween( iDisplayedCell
                                           , inbetween
                                           , iBLContext
                                           , iEngine );
@@ -1637,7 +1634,7 @@ GetPerpendicularVector( const ::ULIS::FVec2D* iP0
 }
 
 void
-FOdysseyVectorTagInbetweener::DrawPathAt( FOdysseyVectorGroupPaint* iDisplayedScene
+FOdysseyVectorTagInbetweener::DrawPathAt( FOdysseyVectorCell* iDisplayedCell
                                         , FInbetweenerChart::Inbetween* iInbetween
                                         , FInterpolatedPath* iInterpolatedPath
                                         , BLContext* iBLContext
@@ -1917,7 +1914,7 @@ FOdysseyVectorTagInbetweener::HasConstantWidth()
 }
 
 void
-FOdysseyVectorTagInbetweener::DrawPathsInbetween( FOdysseyVectorGroupPaint* iDisplayedScene
+FOdysseyVectorTagInbetweener::DrawPathsInbetween( FOdysseyVectorCell* iDisplayedCell
                                                 , FInbetweenerChart::Inbetween* inbetween
                                                 , BLContext* iBLContext
                                                 , FOdysseyVectorEngine* iEngine )
@@ -1927,7 +1924,7 @@ FOdysseyVectorTagInbetweener::DrawPathsInbetween( FOdysseyVectorGroupPaint* iDis
 
     for( FInterpolatedPath& interpolatedPath : mInterpolatedPathBuffer )
     {
-        DrawPathAt( iDisplayedScene
+        DrawPathAt( iDisplayedCell
                   , inbetween
                   , &interpolatedPath
                   //, pointPositionBuffer
@@ -2259,7 +2256,7 @@ FOdysseyVectorTagInbetweener::Commit( std::list<FOdysseyVectorTag*>& oRemovedTag
                                 uint32 pointCount = interpolatedPath.GetInterpolatedPointBuffer().size();
                                 uint32 skippedOffset = ( drawing->GetIndex() * pointCount );
                                 FOdysseyVectorPath* path = interpolatedPath.GetOriginalPath();
-                                double translationX, translationY, rotation, scalingX, scalingY;
+                                double translationX, translationY, rotation, scalingX, scalingY, skewX, skewY;
                                 BLMatrix2D pathLocalMatrix = path->GetParent()->GetInverseWorldMatrix();
 
                                 // save transformations. Will be restored in post-processing
@@ -2267,7 +2264,9 @@ FOdysseyVectorTagInbetweener::Commit( std::list<FOdysseyVectorTag*>& oRemovedTag
                                                   , interpolatedPath.commitTranslationY
                                                   , interpolatedPath.commitRotation
                                                   , interpolatedPath.commitScalingX
-                                                  , interpolatedPath.commitScalingY );
+                                                  , interpolatedPath.commitScalingY
+                                                  , interpolatedPath.commitSkewX
+                                                  , interpolatedPath.commitSkewY );
 
                                 pathWorldMatrix.transform( drawing->localMatrix );
                                 pathWorldMatrix.transform( interpolatedPath.GetRelativeMatrix() );
@@ -2280,8 +2279,16 @@ FOdysseyVectorTagInbetweener::Commit( std::list<FOdysseyVectorTag*>& oRemovedTag
                                                                       , &rotation
                                                                       , &scalingX
                                                                       , &scalingY
+                                                                      , &skewX
+                                                                      , &skewY
                                                                       , true );
-                                path->SetTransform( translationX, translationY, rotation, scalingX, scalingY );
+                                path->SetTransform( translationX
+                                                  , translationY
+                                                  , rotation
+                                                  , scalingX
+                                                  , scalingY
+                                                  , skewX
+                                                  , skewY );
                                 //path->UpdateMatrix();
 
                                 for( uint32 i = 0; i < interpolatedPath.GetInterpolatedPointBuffer().size(); i++ )
@@ -2367,7 +2374,9 @@ FOdysseyVectorTagInbetweener::Commit( std::list<FOdysseyVectorTag*>& oRemovedTag
                                                   , interpolatedPath.commitTranslationY
                                                   , interpolatedPath.commitRotation
                                                   , interpolatedPath.commitScalingX
-                                                  , interpolatedPath.commitScalingY );
+                                                  , interpolatedPath.commitScalingY
+                                                  , interpolatedPath.commitSkewX
+                                                  , interpolatedPath.commitSkewY );
                                 path->UpdateMatrix();
 
                                 // restore point coords that were changed in the pre-process
@@ -2402,7 +2411,7 @@ FOdysseyVectorTagInbetweener::Commit( std::list<FOdysseyVectorTag*>& oRemovedTag
                                                                      , postProcess );
                     BLMatrix2D conversionMatrix = inbetweenScene->GetInverseWorldMatrix();
                     BLMatrix2D copiedObjectWorldMatrix;
-                    double translationX, translationY, rotation, scalingX, scalingY;
+                    double translationX, translationY, rotation, scalingX, scalingY, skewX, skewY;
 
                     FOdysseyVector::MatrixMultiply( mOwner->GetParent()->GetWorldMatrix(), copiedObject->GetLocalMatrix(), copiedObjectWorldMatrix );
 
@@ -2428,9 +2437,17 @@ FOdysseyVectorTagInbetweener::Commit( std::list<FOdysseyVectorTag*>& oRemovedTag
                                                           , &rotation
                                                           , &scalingX
                                                           , &scalingY
+                                                          , &skewX
+                                                          , &skewY
                                                           , true );
 
-                    copiedObject->SetTransform( translationX, translationY, rotation, scalingX, scalingY );
+                    copiedObject->SetTransform( translationX
+                                              , translationY
+                                              , rotation
+                                              , scalingX
+                                              , scalingY
+                                              , skewX
+                                              , skewY );
 
                     inbetweenScene->AppendChild( copiedObject );
                     inbetweenScene->UpdateMatrix();

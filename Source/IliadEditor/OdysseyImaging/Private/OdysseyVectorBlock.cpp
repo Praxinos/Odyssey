@@ -90,7 +90,7 @@ FOdysseyVectorBlock::Render( ::ULIS::FBlock& ioBlock, const ::ULIS::FRectI& iRec
         BLContextCreateInfo createInfo{};
         createInfo.threadCount = FPlatformMisc::NumberOfCoresIncludingHyperthreads();
         mBLContext->begin(*mBLImage, createInfo);
-        mEngine.Render( mBLContext.Get(), iRect, mVectorCell->GetScene(), iDrawingFlags);
+        mEngine.Render( mBLContext.Get(), iRect, mVectorCell.Get(), iDrawingFlags);
         mBLContext->end();
 
         if ( iRect.Area() )

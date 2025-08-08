@@ -27,6 +27,24 @@ UOdysseyPainterEditorVectorPathView::SetDisplayWideningOptions( bool iValue )
 }
 
 void
+UOdysseyPainterEditorVectorPathView::ImportParamFromOtherView( UOdysseyPainterEditorVectorObjectView* iOtherView )
+{
+    UOdysseyPainterEditorVectorPathView* otherPathView = Cast<UOdysseyPainterEditorVectorPathView>(iOtherView);
+
+    if( otherPathView )
+    {
+        mPathPropertyBits = otherPathView->mPathPropertyBits;
+
+        WideningMode = otherPathView->WideningMode;
+        PathWidthInPercent = otherPathView->PathWidthInPercent;
+        PathWidthInUnits = otherPathView->PathWidthInUnits;
+        Brush = otherPathView->Brush;
+    }
+
+    UOdysseyPainterEditorVectorObjectView::ImportParamFromOtherView( iOtherView );
+}
+
+void
 UOdysseyPainterEditorVectorPathView::ImportParam( const std::list<FOdysseyVectorObject*>& iFocusedObjectList )
 {
     UOdysseyPainterEditorVectorObjectView::ImportParam( iFocusedObjectList );

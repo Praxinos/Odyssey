@@ -58,6 +58,21 @@ FOdysseyVectorExportV2::WriteDeclareObjects( std::vector<FOdysseyVectorObject*>&
 }
 
 void
+FOdysseyVectorExportV2::WriteObjectTransformSkew( FOdysseyVectorObject& iObject, FArchive &Ar )
+{
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_OBJECT_TRANSFORM_SKEW
+                            , Ar
+                            , [&iObject](FArchive &Ar) -> void
+    {
+        double skewX = iObject.GetSkewX(),
+               skewY = iObject.GetSkewY();
+
+        Ar << skewX;
+        Ar << skewY;
+    } );
+}
+
+void
 FOdysseyVectorExportV2::WriteObjectTransformScaling( FOdysseyVectorObject& iObject, FArchive &Ar )
 {
     FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_OBJECT_TRANSFORM_SCALING
@@ -110,6 +125,7 @@ FOdysseyVectorExportV2::WriteObjectTransform( FOdysseyVectorObject& iObject, FAr
         WriteObjectTransformTranslation( iObject, Ar );
         WriteObjectTransformRotation( iObject, Ar );
         WriteObjectTransformScaling( iObject, Ar );
+        WriteObjectTransformSkew( iObject, Ar );
     } );
 }
 

@@ -92,13 +92,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
          * @brief Draw the object to the Blend2D context passed as parameter
          *        Note: This is called when the tag is dran as a shared tag. The current scene
          *        may therefore NOT be the top level object
-         * FOdysseyVectorGroupPaint* iCurrentScene current scene in which to draw the tag
+         * FOdysseyVectorCell* iCurrentCell current cell in which to draw the tag
          * @param iBLContext The Blend2D context to draw to
          * @param iInvalidationArea
          * @param iAncestorsOpacity The cumulated opacity from parent objects
          * @param iDrawingFlags drawing flags
          */
-        virtual void Draw( FOdysseyVectorGroupPaint* iCurrentScene
+        virtual void Draw( FOdysseyVectorCell* iDisplayedCell
                          , BLContext* iBLContext
                          , FOdysseyVectorEngine* iEngine
                          , const ::ULIS::FRectD& iInvalidationArea
@@ -204,7 +204,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         bool GetMapAsPolyline();
         void SetWithThickness( bool iWithThickness );
         bool GetWithThickness();
-        void DrawPathsInbetween( FOdysseyVectorGroupPaint* iDisplayedScene
+        void DrawPathsInbetween( FOdysseyVectorCell* iDisplayedCell
                                , FInbetweenerChart::Inbetween* inbetween
                                , BLContext* iBLContext
                                , FOdysseyVectorEngine* iEngine );
@@ -226,7 +226,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void SetUsedPointCount( uint32 );
         uint32 GetUsedQuadCount();
         uint32 GetUsedPointCount();
-        void DrawPathAt( FOdysseyVectorGroupPaint* iDisplayedScene
+        void DrawPathAt( FOdysseyVectorCell* iDisplayedCell
                        , FInbetweenerChart::Inbetween* iInbetween
                        , FInterpolatedPath* iInterpolatedPath
                        //, ::ULIS::FVec2D* iPointPositionBuffer

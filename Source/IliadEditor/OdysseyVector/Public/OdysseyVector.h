@@ -10,12 +10,14 @@ namespace FOdysseyVector
 {
     void ODYSSEYVECTOR_API PrintMatrix( char* name, BLMatrix2D& matrix );
     void ODYSSEYVECTOR_API MatrixMultiply( const BLMatrix2D& iA, const BLMatrix2D& iB, BLMatrix2D& oOut );
-    void ODYSSEYVECTOR_API ExtractTransformations( BLMatrix2D &iMatrix
+    void ODYSSEYVECTOR_API ExtractTransformations( const BLMatrix2D &iMatrix
                                                  , double* iTranslationX
                                                  , double* iTranslationY
                                                  , double* iRotation
                                                  , double* iScalingX
                                                  , double* iScalingY
+                                                 , double* iSkewX
+                                                 , double* iSkewY
                                                  , bool iDegree );
 
     bool ODYSSEYVECTOR_API IntersectSegment( const ::ULIS::FVec2D& line0p0

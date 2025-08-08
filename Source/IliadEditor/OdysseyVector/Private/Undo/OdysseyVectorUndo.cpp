@@ -21,7 +21,14 @@ FOdysseyVectorUndo::FOdysseyVectorUndo( FOdysseyVectorLayer* iSharedEnv, uint64 
     : mApplied( true )
     , mLayer( iSharedEnv )
     , mReturnFlags( iReturnFlags )
+    , bUpdateViaDelegation ( true )
 {
+}
+
+void
+FOdysseyVectorUndo::SetUpdateViaDelegation( bool iUpdateViaDelegation )
+{
+    bUpdateViaDelegation = iUpdateViaDelegation;
 }
 
 void
@@ -37,26 +44,39 @@ FOdysseyVectorUndo::Revert( UObject* iIgnored )
 }
 
 void
+FOdysseyVectorUndo::UpdateLayer()
+{
+    // update invalidated objects
+    mLayer->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+
+    mLayer->Notify( mReturnFlags );
+
+    // prepare for full redraw
+    for( FOdysseyVectorCell* cell : mLayer->GetInvalidateCellList() )
+    {
+        cell->InvalidateRect();
+    }
+
+    mLayer->RequestRedraw( nullptr, 0 );
+}
+
+void
 FOdysseyVectorUndo::Update()
 {
-    // call callbacks if any (for refreshing GUI e.g)
-    FOdysseyUndoDelegates::Get().OnAfterUndoRedo().AddLambda(
-        [this]( bool iIsRedo )
-        {
-            // update invalidated objects
-            mLayer->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-
-            mLayer->Notify( mReturnFlags );
-
-            // prepare for full redraw
-            for( FOdysseyVectorCell* cell : mLayer->GetInvalidateCellList() )
+    if( bUpdateViaDelegation )
+    {
+        // call callbacks if any (for refreshing GUI e.g)
+        FOdysseyUndoDelegates::Get().OnAfterUndoRedo().AddLambda(
+            [this]( bool iIsRedo )
             {
-                cell->InvalidateRect();
+                UpdateLayer();
             }
-
-            mLayer->RequestRedraw( nullptr, 0 );
-        }
-    );
+        );
+    }
+    else
+    {
+        UpdateLayer();
+    }
 }
 
 FSnapshotTrajectory::~FSnapshotTrajectory()
@@ -1163,7 +1183,9 @@ FSnapshotObject::RecordState( eSnapshotState iStateType )
                                      , requestedState->translationY
                                      , requestedState->rotation
                                      , requestedState->scalingX
-                                     , requestedState->scalingY );
+                                     , requestedState->scalingY
+                                     , requestedState->skewX
+                                     , requestedState->skewY );
             }
 
             if( mSnapshotFlags & FSnapshotFlags::Object::HIERARCHY )
@@ -1219,7 +1241,9 @@ FSnapshotObject::LoadState( eSnapshotState iStateType )
                                  , requestedState->translationY
                                  , requestedState->rotation
                                  , requestedState->scalingX
-                                 , requestedState->scalingY );
+                                 , requestedState->scalingY
+                                 , requestedState->skewX
+                                 , requestedState->skewY );
 
             mObject->UpdateMatrix();
         }

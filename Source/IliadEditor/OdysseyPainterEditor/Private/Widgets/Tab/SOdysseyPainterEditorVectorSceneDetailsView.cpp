@@ -287,7 +287,7 @@ SOdysseyPainterEditorVectorSceneDetailsView::PropertyValueChanged( const FProper
     }
     GEditor->EndTransaction();
 
-    mCurrentObjectView->ValidateProperties( focusedObjectList );
+    mCurrentObjectView->ValidateProperties( focusedObjectList, true );
 
     // prevent THIS widget update by unregistering its delegates
     UnbindLayerDelegates( mEditor->GetSource()->GetLayerStack() );

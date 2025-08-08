@@ -108,6 +108,7 @@ namespace FOdysseyFile
                             static const uint32 CHUNK_OBJECT_TRANSFORM_TRANSLATION = 0x621d21c; // double(X)-double(Y)
                             static const uint32 CHUNK_OBJECT_TRANSFORM_ROTATION = 0xbf4d725c; // double(A)
                             static const uint32 CHUNK_OBJECT_TRANSFORM_SCALING = 0x4cc21f6d; // double(X)-double(Y)
+                            static const uint32 CHUNK_OBJECT_TRANSFORM_SKEW = 0x59c08d8d; // double(X)-double(Y)
                         static const uint32 CHUNK_OBJECT_OPACITY = 0x93792183; // double(opacity)
                         static const uint32 CHUNK_OBJECT_VISIBILITY = 0xde195421; // uint32(bool)
                         static const uint32 CHUNK_OBJECT_EXPANSION = 0x02e0858e; // uint32(bool)

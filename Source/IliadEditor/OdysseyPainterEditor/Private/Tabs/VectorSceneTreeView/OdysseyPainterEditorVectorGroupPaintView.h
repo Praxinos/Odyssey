@@ -48,6 +48,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorGroupPaintView : publi
                                    , const FName& iCategory
                                    , bool iState ) override;
         virtual bool HasAnyPropertyBit() override;
+        virtual void ImportParamFromOtherView( UOdysseyPainterEditorVectorObjectView* iOtherView ) override;
 
     protected:
         virtual void ImportParam( const std::list<FOdysseyVectorObject*>& iFocusedObjectList ) override;

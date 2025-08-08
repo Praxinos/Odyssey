@@ -282,7 +282,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
                          , double& oTranslationY
                          , double& oRotation
                          , double& oScalingX
-                         , double& oScalingY );
+                         , double& oScalingY
+                         , double& oSkewX
+                         , double& oSkewY );
 
         /**
          * @brief Get the object's translation value on x-axis.
@@ -313,6 +315,18 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
          * @return the scaling value on y-axis.
          */
         double GetScalingY();
+
+        /**
+         * @brief Get the object's skew value on x-axis.
+         * @return the skew value on x-axis.
+         */
+        double GetSkewX();
+
+        /**
+         * @brief Get the object's skew value on y-axis.
+         * @return the skew value on y-axis.
+         */
+        double GetSkewY();
 
         /**
          * @brief Retrieve the root object, i.e the top-most displayable object.
@@ -507,7 +521,16 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
                          , double iTranslationY
                          , double iRotation
                          , double iScalingX
-                         , double iScalingY );
+                         , double iScalingY
+                         , double iSkewX
+                         , double iSkewY );
+
+        /**
+         * @brief Set values for skew. A call to UpdateMatrix() is needed after that.
+         * @param iX
+         * @param iY
+         */
+        void Skew( double iX, double iY );
 
         /**
          * @brief Transfer object to the coordinates system defined by the World matrix passed as parameter
@@ -635,5 +658,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         double mRotation;
         double mScalingX;
         double mScalingY;
+        double mSkewX;
+        double mSkewY;
         std::mutex mDrawingMutex;
 };

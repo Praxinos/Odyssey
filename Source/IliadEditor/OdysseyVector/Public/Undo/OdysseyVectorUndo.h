@@ -820,6 +820,8 @@ class ODYSSEYVECTOR_API FSnapshotObject
         double rotation;
         double scalingX;
         double scalingY;
+        double skewX;
+        double skewY;
         FString name;
         double opacity;
         bool visibility;
@@ -1089,21 +1091,27 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndo : public FCommandChange
         ~FOdysseyVectorUndo();
         FOdysseyVectorUndo( FOdysseyVectorLayer* iSharedEnv, uint64 iReturnFlags );
 
-    protected:
+
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;
 
         /** called when undoing */
         virtual void Revert( UObject* iIgnored ) override;
 
+        // usefull for undos that are "standalone"
+        void SetUpdateViaDelegation( bool iUpdateViaDelegation );
+
+    protected:
         /** Describes this change (for debugging) */
         //virtual FString ToString() const override;
 
         void Update();
+        void UpdateLayer();
 
     protected:
         bool mApplied;
         std::list<FOdysseyVectorCell*> mRootList; // list of engines that need to be redrawn
         FOdysseyVectorLayer* mLayer;
         uint64 mReturnFlags;
+        bool bUpdateViaDelegation;
 };

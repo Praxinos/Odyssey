@@ -7,16 +7,21 @@
 #define M_PI 3.14159265358979323846L
 #endif
 
-/* works too
+/* works better than the other methods I could find */
 // https://stackoverflow.com/questions/4361242/extract-rotation-scale-values-from-2d-transformation-matrix
 // https://frederic-wang.fr/decomposition-of-2d-transform-matrices.html
+// https://stackoverflow.com/questions/12469770/get-skew-or-rotation-value-from-affine-transformation-matrix
+// inspired by a method described by Frederic Wang.
 void
-FOdysseyVector::ExtractTransformations( BLMatrix2D &iMatrix
+FOdysseyVector::ExtractTransformations( const BLMatrix2D &iMatrix
                                       , double* oTranslationX
                                       , double* oTranslationY
                                       , double* oRotation
                                       , double* oScalingX
-                                      , double* oScalingY )
+                                      , double* oScalingY
+                                      , double* oSkewX
+                                      , double* oSkewY
+                                      , bool iDegree )
 {
     double a = iMatrix.m00;
     double b = iMatrix.m01;
@@ -37,10 +42,8 @@ FOdysseyVector::ExtractTransformations( BLMatrix2D &iMatrix
         if( oRotation ) *oRotation = b > 0 ? acos( a / r ) : -acos( a / r );
         if( oScalingX ) *oScalingX = r;
         if( oScalingY ) *oScalingY = delta / r;
-
-        //result.skew = [Math.atan((a * c + b * d) / (r * r)), 0];
-
-
+        if( oSkewX ) *oSkewX = atan((a * c + b * d) / (r * r));
+        if( oSkewY ) *oSkewY = 0;
     }
     else
     {
@@ -51,12 +54,16 @@ FOdysseyVector::ExtractTransformations( BLMatrix2D &iMatrix
             if( oRotation ) *oRotation = M_PI / 2.0f - ( d > 0.0f ? acos( -c / s ) : -acos( c / s ) );
             if( oScalingX ) *oScalingX = delta / s;
             if( oScalingY ) *oScalingY = s;
-
-            //result.skew = [0, Math.atan((a * c + b * d) / (s * s))];
+            if( oSkewX ) *oSkewX = 0;
+            if( oSkewY ) *oSkewY = atan((a * c + b * d) / (s * s));
         }
     }
+
+    if( oRotation && iDegree )
+    {
+        *oRotation = *oRotation * 180.0f / M_PI;
+    }
 }
-*/
 
 ::ULIS::FRectD
 FOdysseyVector::MapRect( const BLMatrix2D& iMatrix
@@ -73,106 +80,6 @@ FOdysseyVector::MapRect( const BLMatrix2D& iMatrix
 
     return bbox;
 }
-
-// https://drafts.csswg.org/css-transforms/#decomposing-a-2d-matrix
-void
-FOdysseyVector::ExtractTransformations( BLMatrix2D &iMatrix
-                                      , double* iTranslationX
-                                      , double* iTranslationY
-                                      , double* iRotation
-                                      , double* iScalingX
-                                      , double* iScalingY
-                                      , bool iDegree )
-{
-    double row0x = iMatrix.m00;
-    double row0y = iMatrix.m01;
-    double row1x = iMatrix.m10;
-    double row1y = iMatrix.m11;
-    double translation[2];
-    double scale[2];
-
-    translation[0] = iMatrix.m20;
-    translation[1] = iMatrix.m21;
-
-    scale[0] = sqrt( row0x * row0x + row0y * row0y );
-    scale[1] = sqrt( row1x * row1x + row1y * row1y );
-
-    // If determinant is negative, one axis was flipped.
-    double determinant = row0x * row1y - row0y * row1x;
-
-    if( determinant < 0 )
-    {
-        // Flip axis with minimum unit vector dot product.
-        if ( row0x < row1y )
-        {
-            scale[0] = -scale[0];
-        }
-        else
-        {
-            scale[1] = -scale[1];
-        }
-    }
-
-    // Renormalize matrix to remove scale.
-
-    if( scale[0] )
-    {
-        row0x *= 1.0f / scale[0];
-        row0y *= 1.0f / scale[0];
-    }
-
-    if( scale[1] )
-    {
-        row1x *= 1.0f / scale[1];
-        row1y *= 1.0f / scale[1];
-    }
-
-    // Compute rotation and renormalize matrix.
-    double angle = atan2( row0y, row0x );
-
-    if( iTranslationX ) *iTranslationX = translation[0];
-    if( iTranslationY ) *iTranslationY = translation[1];
-    if( iRotation     ) *iRotation = iDegree ? angle * 180.0f / M_PI : angle;
-    if( iScalingX     ) *iScalingX = scale[0];
-    if( iScalingY     ) *iScalingY = scale[1];
-}
-
-/*
-// https://stackoverflow.com/questions/45159314/decompose-2d-transformation-matrix
-void
-FOdysseyVector::ExtractTransformations( BLMatrix2D &iMatrix
-                                      , double* iTranslationX
-                                      , double* iTranslationY
-                                      , double* iRotation
-                                      , double* iScalingX
-                                      , double* iScalingY )
-{
-    if( iTranslationX )
-    {
-        *iTranslationX = iMatrix.m20;
-    }
-
-    if( iTranslationY )
-    {
-        *iTranslationY = iMatrix.m21;
-    }
-
-    if( iRotation )
-    {
-        *iRotation = atan2( iMatrix.m01, iMatrix.m00 );
-    }
-
-    if( iScalingX )
-    {
-        *iScalingX = sqrt( ( iMatrix.m00 * iMatrix.m00 ) + ( iMatrix.m01 * iMatrix.m01 ) );
-    }
-
-    if( iScalingY )
-    {
-        *iScalingY = sqrt( ( iMatrix.m10 * iMatrix.m10 ) + ( iMatrix.m11 * iMatrix.m11 ) );
-    }
-}
-*/
 
 ::ULIS::FVec2D
 FOdysseyVector::MapPoint( const BLMatrix2D& iMatrix

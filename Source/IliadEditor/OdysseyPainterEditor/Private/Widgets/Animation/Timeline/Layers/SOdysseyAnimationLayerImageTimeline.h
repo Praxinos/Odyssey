@@ -16,6 +16,7 @@ class FOdysseyPainterEditorAnimationTimelinePosition;
 class FOdysseyAnimationTimelineTool;
 class FOdysseyPainterEditor;
 class SOdysseyPainterEditorVectorMassModifierView;
+class FOdysseyVectorGroupPaint;
 
 /**
  * Implements a layer row widget

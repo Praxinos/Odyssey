@@ -26,6 +26,7 @@
 #include "Widgets/Colors/SColorBlock.h"
 #include "Widgets/Layout/SEnableBox.h"
 #include "Widgets/Tab/SOdysseyPainterEditorVectorMassModifierView.h"
+#include "OdysseyVectorGroupPaint.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -632,11 +633,12 @@ SOdysseyAnimationLayerImageTimeline::BuildContextMenu(TSharedRef<FUICommandList>
 }
 
 FReply
-SOdysseyAnimationLayerImageTimeline::MassModifierAcceptProperties( TSharedRef<SOdysseyPainterEditorVectorMassModifierView> objectView )
+SOdysseyAnimationLayerImageTimeline::MassModifierAcceptProperties( TSharedRef<SOdysseyPainterEditorVectorMassModifierView> iMassModifierView )
 {
     TSharedPtr<SWindow> topWindow;
 
-    objectView.Get().ValidateProperties();
+    iMassModifierView.Get().UndoPreview();
+    iMassModifierView.Get().ValidateProperties();
 
     topWindow = FSlateApplicationBase::Get().GetActiveTopLevelWindow();
 
@@ -651,74 +653,105 @@ SOdysseyAnimationLayerImageTimeline::MassModifier()
     UOdysseyAnimationLayerImageVector* layerImageVector = Cast<UOdysseyAnimationLayerImageVector>(mLayer->GetLayerStack()->GetCurrentLayer());
     TArray<UOdysseyLayerCell*> selectedCells = mLayer->GetLayerStack()->GetCellSelection()->GetSelectedCells();
     TArray<FOdysseyVectorGroupPaint*> vectorSceneArray;
+    FOdysseyVectorGroupPaint* previewScene;
 
     vectorSceneArray.Reserve( selectedCells.Num() );
 
     if (selectedCells.IsEmpty())
         return;
-
-    for( UOdysseyLayerCell* cell : selectedCells )
+    //
     {
-        UOdysseyAnimationCellImageVector* animationCell = Cast<UOdysseyAnimationCellImageVector>(cell);
-
-        if( animationCell )
+        for( UOdysseyLayerCell* cell : selectedCells )
         {
-            vectorSceneArray.Push( animationCell->GetVectorCell()->GetScene() );
+            UOdysseyAnimationCellImageVector* animationCell = Cast<UOdysseyAnimationCellImageVector>(cell);
+
+            if( animationCell )
+            {
+                vectorSceneArray.Push( animationCell->GetVectorCell()->GetScene() );
+            }
         }
+
+        UOdysseyLayerCell* cell = mLayer->GetCellAtFrame(mCurrentFrame.Get());
+        UOdysseyAnimationCellImageVector* imageVectorCell = Cast<UOdysseyAnimationCellImageVector>(cell);
+
+        previewScene = imageVectorCell ? imageVectorCell->GetVectorCell()->GetScene() : nullptr;
+
+        TSharedRef<SOdysseyPainterEditorVectorMassModifierView> massModifierView = SNew(SOdysseyPainterEditorVectorMassModifierView)
+                                                                                   .VectorLayer( layerImageVector->GetVectorLayer() )
+                                                                                   .SceneArray(vectorSceneArray)
+                                                                                   .PreviewScene( previewScene );
+
+        TSharedRef<SWindow> ObjectWindow = SNew(SWindow)
+        .Title(LOCTEXT("vector-mass-modifier-window.name", "Mass Modifier"))
+        //.ClientSize(FVector2D(800, 400))
+        .SizingRule(ESizingRule::Autosized)
+        .SupportsMaximize(false)
+        .SupportsMinimize(false)
+        .IsTopmostWindow(true) // kind-of mimic modal window because we need it to be non-modal for the preview.
+        [
+            SNew(SVerticalBox)
+            +SVerticalBox::Slot()
+            .AutoHeight()
+            .HAlign(HAlign_Center)
+            .VAlign(VAlign_Center)
+            [
+                massModifierView
+            ]
+            +SVerticalBox::Slot()
+            .AutoHeight()
+            .HAlign(HAlign_Center)
+            .VAlign(VAlign_Center)
+            [
+                SNew(SButton)
+                .Text(LOCTEXT("vector-mass-modifier-window-apply", "Apply"))
+                .OnClicked_Raw(this, &SOdysseyAnimationLayerImageTimeline::MassModifierAcceptProperties, massModifierView )
+            ]
+        ];
+
+        // Ask whether or not to apply modified properties
+        ObjectWindow.Get().SetOnWindowClosed( FOnWindowClosed::CreateSP( this
+                                                                       , &SOdysseyAnimationLayerImageTimeline::MassModifierWindowClosed
+                                                                       , massModifierView ) );
+
+        massModifierView.Get().GetOnPreviewPropertiesDelegate().AddLambda( []()
+        {
+
+        } );
+/*
+        // We don't run a ModalWindow because we need the viewport to redraw for previewing.
+        FSlateApplication::Get().AddWindow
+        (
+            ObjectWindow,
+            true
+        );
+*/
+        // We don't run a ModalWindow because we need the viewport to redraw for previewing.
+        FSlateApplication::Get().AddModalWindow
+        (
+            ObjectWindow,
+            FGlobalTabmanager::Get()->GetRootWindow(),
+            false
+        );
+/*
+        //ObjectWindow.Get().ShowWindow();
+*/
     }
-
-    TSharedRef<SOdysseyPainterEditorVectorMassModifierView> objectView = SNew(SOdysseyPainterEditorVectorMassModifierView)
-                                                                            .VectorLayer( layerImageVector->GetVectorLayer() )
-                                                                            .SceneArray(vectorSceneArray);
-
-    TSharedRef<SWindow> ObjectWindow = SNew(SWindow)
-    .Title(LOCTEXT("vector-mass-modifier-window.name", "Mass Modifier"))
-    //.ClientSize(FVector2D(800, 400))
-    .SizingRule(ESizingRule::Autosized)
-    .SupportsMaximize(false)
-    .SupportsMinimize(false)
-    [
-        SNew(SVerticalBox)
-        +SVerticalBox::Slot()
-        .AutoHeight()
-        .HAlign(HAlign_Center)
-        .VAlign(VAlign_Center)
-        [
-            objectView
-        ]
-        +SVerticalBox::Slot()
-        .AutoHeight()
-        .HAlign(HAlign_Center)
-        .VAlign(VAlign_Center)
-        [
-            SNew(SButton)
-            .Text(LOCTEXT("vector-mass-modifier-window-apply", "Apply"))
-            .OnClicked_Raw(this, &SOdysseyAnimationLayerImageTimeline::MassModifierAcceptProperties, objectView )
-        ]
-    ];
-
-    // Ask whether or not to apply modified properties
-    ObjectWindow.Get().SetOnWindowClosed( FOnWindowClosed::CreateSP( this, &SOdysseyAnimationLayerImageTimeline::MassModifierWindowClosed, objectView ) );
-
-    FSlateApplication::Get().AddModalWindow
-    (
-        ObjectWindow,
-        SharedThis(this),
-        false
-    );
 }
 
 void
 SOdysseyAnimationLayerImageTimeline::MassModifierWindowClosed( const TSharedRef<SWindow>& iWindow
-                                                             , TSharedRef<SOdysseyPainterEditorVectorMassModifierView> objectView )
+                                                             , TSharedRef<SOdysseyPainterEditorVectorMassModifierView> iMassModifierView )
 {
+    UOdysseyAnimationLayerImageVector* layerImageVector = Cast<UOdysseyAnimationLayerImageVector>(mLayer->GetLayerStack()->GetCurrentLayer());
     FText dialogText = LOCTEXT( "mass-modifier.apply-properties.title","Apply Properties ?" );
 
-    if( objectView->HasAnyPropertyBit() )
+    if( iMassModifierView.Get().HasAnyPropertyBit() )
     {
+        iMassModifierView.Get().UndoPreview();
+
         if( FMessageDialog::Open( EAppMsgType::YesNo, dialogText ) == EAppReturnType::Yes )
         {
-            MassModifierAcceptProperties( objectView );
+            MassModifierAcceptProperties( iMassModifierView );
         }
     }
 }

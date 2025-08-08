@@ -23,6 +23,7 @@ class FOdysseyVectorLayer;
 class UOdysseyLayerStack;
 struct FPropertyChangedEvent;
 class SOdysseyPainterEditorVectorMassModifierView;
+class FOdysseyVectorUndo;
 
 UENUM()
 enum class EMassModifierApplyTo : uint8
@@ -87,6 +88,9 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorMassModifierView
 {
     SLATE_DECLARE_WIDGET(SOdysseyPainterEditorVectorMassModifierView, SCompoundWidget)
 
+    public:
+        DECLARE_MULTICAST_DELEGATE(FOnPreviewPropertiesDelegate)
+
     // we create a nested class to handle IDetailCustomization interface otherwise there are some multiple inheritance issues
     // thrown by the compiler. We only need it to collapse the categories.
     class DetailCustomizationHandler : public IDetailCustomization
@@ -111,6 +115,7 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorMassModifierView
             {}
             SLATE_ARGUMENT(TSharedPtr<FOdysseyVectorLayer>, VectorLayer)
             SLATE_ARGUMENT(TArray<FOdysseyVectorGroupPaint*>, SceneArray)
+            SLATE_ARGUMENT(FOdysseyVectorGroupPaint*, PreviewScene)
         SLATE_END_ARGS()
 
     public:
@@ -132,6 +137,8 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorMassModifierView
         void ObjectTypeSelectionChanged( EMassModifierApplyTo NewValue );
         bool HasAnyPropertyBit();
         TObjectPtr<UOdysseyPainterEditorVectorObjectView> GetCurrentObjectView();
+        void UndoPreview();
+        FOnPreviewPropertiesDelegate& GetOnPreviewPropertiesDelegate();
 
     protected:
         virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
@@ -144,6 +151,7 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorMassModifierView
                                       , TSharedRef<SWidget> NameWidget
                                       , TSharedRef<SWidget> ValueWidget );
         ECheckBoxState GetPropertyCheckState( TSharedPtr<IPropertyHandle> iPropertyHandle ) const;
+        void PreviewProperties();
 
     protected:
         TSharedPtr<IDetailsView> CreateViewPanel();
@@ -151,8 +159,11 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorMassModifierView
 
 
     protected:
+        FOnPreviewPropertiesDelegate OnPreviewPropertiesDelegate;
         TArray<FOdysseyVectorGroupPaint*> mSceneArray;
         TSharedPtr<FOdysseyVectorLayer> mVectorLayer;
+        FOdysseyVectorGroupPaint* mPreviewScene;
+        FOdysseyVectorUndo* mPreviewUndo;
 
         TSharedPtr<IDetailsView> mOptionsDetailsView;
         TObjectPtr<UOdysseyPainterEditorVectorMassModifierOptionsView> mOptionsView;

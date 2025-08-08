@@ -533,8 +533,6 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
 
     itemScene->GetLayer()->Notify( notificationFlags );
 
-    treeView->RequestTreeRefresh();
-
     return FReply::Handled();
 }
 

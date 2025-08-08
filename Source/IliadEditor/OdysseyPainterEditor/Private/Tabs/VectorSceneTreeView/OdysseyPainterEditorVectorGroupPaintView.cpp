@@ -27,6 +27,31 @@ UOdysseyPainterEditorVectorGroupPaintView::UOdysseyPainterEditorVectorGroupPaint
 }
 
 void
+UOdysseyPainterEditorVectorGroupPaintView::ImportParamFromOtherView( UOdysseyPainterEditorVectorObjectView* iOtherView )
+{
+    UOdysseyPainterEditorVectorGroupPaintView* otherGroupPaintView = Cast<UOdysseyPainterEditorVectorGroupPaintView>(iOtherView);
+
+    if( otherGroupPaintView )
+    {
+        mGroupPaintPropertyBits = otherGroupPaintView->mGroupPaintPropertyBits;
+
+        Painted                    = otherGroupPaintView->Painted;
+        Monochrome                 = otherGroupPaintView->Monochrome;
+        MonochromeColor            = otherGroupPaintView->MonochromeColor;
+        Realtime                   = otherGroupPaintView->Realtime;
+        GapTolerance               = otherGroupPaintView->GapTolerance;
+        WireframeColor             = otherGroupPaintView->WireframeColor;
+        Multithreaded              = otherGroupPaintView->Multithreaded;
+        IntersectsCanvas           = otherGroupPaintView->IntersectsCanvas;
+        GapDetectionScheme         = otherGroupPaintView->GapDetectionScheme;
+        SegmentExtensionScheme     = otherGroupPaintView->SegmentExtensionScheme;
+        SegmentExtensionSimplified = otherGroupPaintView->SegmentExtensionSimplified;
+    }
+
+    UOdysseyPainterEditorVectorGroupView::ImportParamFromOtherView( iOtherView );
+}
+
+void
 UOdysseyPainterEditorVectorGroupPaintView::ImportParam( const std::list<FOdysseyVectorObject*>& iFocusedObjectList )
 {
     UOdysseyPainterEditorVectorGroupView::ImportParam( iFocusedObjectList );

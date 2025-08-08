@@ -41,6 +41,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectView : public UO
             uint32 Rotation : 1;
             uint32 ScalingX : 1;
             uint32 ScalingY : 1;
+            uint32 SkewX : 1;
+            uint32 SkewY : 1;
             uint32 Opacity : 1;
             uint32 Visible : 1;
             uint32 ForegroundColorMode : 1;
@@ -63,11 +65,13 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectView : public UO
         void Update( const std::list<FOdysseyVectorObject*>& iFocusedObjectList );
         void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
 
-        void ValidateProperties( const std::list<FOdysseyVectorObject*>& iObjectList );
+        void ValidateProperties( const std::list<FOdysseyVectorObject*>& iObjectList
+                               , bool iClearBits );
 
         // Pointer to the layer (useful to retrieve palette sets needed by FOdysseyVectorObjectViewPaletteCustomization)
         void SetVectorLayer( TSharedPtr<FOdysseyVectorLayer> iVectorLayer );
         TSharedPtr<FOdysseyVectorLayer> GetVectorLayer();
+        virtual void ImportParamFromOtherView( UOdysseyPainterEditorVectorObjectView* iOtherView );
 
     public:
         virtual bool GetPropertyBit( const FName& iPropertyName );
@@ -135,6 +139,16 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectView : public UO
                  , Category= Transform
                  , meta = ( ToolTip = "Scaling Y" ) )
         double ScalingY;
+
+        UPROPERTY( EditAnywhere
+                 , Category= Transform
+                 , meta = ( ToolTip = "Skew X" ) )
+        double SkewX;
+
+        UPROPERTY( EditAnywhere
+                 , Category= Transform
+                 , meta = ( ToolTip = "Skew Y" ) )
+        double SkewY;
 
         // unused for now
         //UPROPERTY( EditAnywhere, Category=Appearance , meta = (ClampMin = "0.0", UIMin = "0.0", ClampMax = "1.0", UIMax = "1.0" ))

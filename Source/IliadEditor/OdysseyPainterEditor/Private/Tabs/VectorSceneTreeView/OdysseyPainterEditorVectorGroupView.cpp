@@ -25,6 +25,21 @@ UOdysseyPainterEditorVectorGroupView::UOdysseyPainterEditorVectorGroupView()
 }
 
 void
+UOdysseyPainterEditorVectorGroupView::ImportParamFromOtherView( UOdysseyPainterEditorVectorObjectView* iOtherView )
+{
+    UOdysseyPainterEditorVectorGroupView* otherGroupView = Cast<UOdysseyPainterEditorVectorGroupView>(iOtherView);
+
+    if( otherGroupView )
+    {
+        mGroupPropertyBits = otherGroupView->mGroupPropertyBits;
+
+        HUDColor = otherGroupView->HUDColor;
+    }
+
+    UOdysseyPainterEditorVectorObjectView::ImportParamFromOtherView( iOtherView );
+}
+
+void
 UOdysseyPainterEditorVectorGroupView::ImportParam( const std::list<FOdysseyVectorObject*>& iFocusedObjectList )
 {
     UOdysseyPainterEditorVectorObjectView::ImportParam( iFocusedObjectList );

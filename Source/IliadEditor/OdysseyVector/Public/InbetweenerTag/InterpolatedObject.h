@@ -41,6 +41,8 @@ class ODYSSEYVECTOR_API FInterpolatedObject
         double commitRotation;
         double commitScalingX;
         double commitScalingY;
+        double commitSkewX;
+        double commitSkewY;
 
     protected:
         FOdysseyVectorObject* mOriginalObject;

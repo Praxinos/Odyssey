@@ -26,6 +26,8 @@ UOdysseyPainterEditorVectorObjectView::UOdysseyPainterEditorVectorObjectView()
     , Rotation ( 0.0f )
     , ScalingX ( 1.0f )
     , ScalingY ( 1.0f )
+    , SkewX ( 0.0f )
+    , SkewY ( 0.0f )
     , Visible ( true )
     , ForegroundColorMode ( eForegroundColorMode::SolidColor )
     , ForegroundColor ( FOdysseyVectorObject::FOREGROUNDCOLOR_DEFAULT_R
@@ -38,6 +40,28 @@ UOdysseyPainterEditorVectorObjectView::UOdysseyPainterEditorVectorObjectView()
                       , FOdysseyVectorObject::BACKGROUNDCOLOR_DEFAULT_B
                       , FOdysseyVectorObject::BACKGROUNDCOLOR_DEFAULT_A )
 {
+}
+
+void
+UOdysseyPainterEditorVectorObjectView::ImportParamFromOtherView( UOdysseyPainterEditorVectorObjectView* iOtherView )
+{
+    mObjectPropertyBits = iOtherView->mObjectPropertyBits;
+
+    TranslationX = iOtherView->TranslationX;
+    TranslationY = iOtherView->TranslationY;
+    Rotation = iOtherView->Rotation;
+    ScalingX = iOtherView->ScalingX;
+    ScalingY = iOtherView->ScalingY;
+    SkewX = iOtherView->SkewX;
+    SkewY = iOtherView->SkewY;
+    Opacity = iOtherView->Opacity;
+    Visible = iOtherView->Visible;
+    ForegroundColorMode = iOtherView->ForegroundColorMode;
+    BackgroundColorMode = iOtherView->BackgroundColorMode;
+    ForegroundColor = iOtherView->ForegroundColor;
+    BackgroundColor = iOtherView->BackgroundColor;
+    ForegroundPaletteSelection = iOtherView->ForegroundPaletteSelection;
+    BackgroundPaletteSelection = iOtherView->BackgroundPaletteSelection;
 }
 
 void
@@ -54,6 +78,8 @@ UOdysseyPainterEditorVectorObjectView::ImportParam( const std::list<FOdysseyVect
         Rotation     = focusedObject->GetRotation();
         ScalingX     = focusedObject->GetScalingX();
         ScalingY     = focusedObject->GetScalingY();
+        SkewX        = focusedObject->GetSkewX();
+        SkewY        = focusedObject->GetSkewY();
 
         // Category "Appearance"
         Opacity = focusedObject->GetOpacity();
@@ -165,6 +191,12 @@ UOdysseyPainterEditorVectorObjectView::GetPropertyBit( const FName& iPropertyNam
     if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, ScalingY) )
         return mObjectPropertyBits.ScalingY;
 
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, SkewX) )
+        return mObjectPropertyBits.SkewX;
+
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, SkewY) )
+        return mObjectPropertyBits.SkewY;
+
     if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, Opacity) )
         return mObjectPropertyBits.Opacity;
 
@@ -217,11 +249,19 @@ UOdysseyPainterEditorVectorObjectView::ApplyPropertyBits( FOdysseyVectorObject* 
     if( mObjectPropertyBits.ScalingY )
         iObject->Scale( iObject->GetScalingX(), ScalingY );
 
+    if( mObjectPropertyBits.SkewX )
+        iObject->Skew( SkewX, iObject->GetSkewY() );
+
+    if( mObjectPropertyBits.SkewY )
+        iObject->Skew( iObject->GetSkewX(), SkewY );
+
     if( mObjectPropertyBits.TranslationX
      || mObjectPropertyBits.TranslationY
      || mObjectPropertyBits.Rotation
      || mObjectPropertyBits.ScalingX
-     || mObjectPropertyBits.ScalingY )
+     || mObjectPropertyBits.ScalingY
+     || mObjectPropertyBits.SkewX
+     || mObjectPropertyBits.SkewY )
         iObject->UpdateMatrix();
 
     // Category "Appearance"
@@ -251,7 +291,8 @@ UOdysseyPainterEditorVectorObjectView::ApplyPropertyBits( FOdysseyVectorObject* 
 }
 
 void
-UOdysseyPainterEditorVectorObjectView::ValidateProperties( const std::list<FOdysseyVectorObject*>& iObjectList )
+UOdysseyPainterEditorVectorObjectView::ValidateProperties( const std::list<FOdysseyVectorObject*>& iObjectList
+                                                         , bool iClearBits )
 {
     TSet<FOdysseyVectorCell*> cellSet;
 
@@ -265,7 +306,10 @@ UOdysseyPainterEditorVectorObjectView::ValidateProperties( const std::list<FOdys
         }
     }
 
-    ClearPropertyBits();
+    if( iClearBits )
+    {
+        ClearPropertyBits();
+    }
 
     for( FOdysseyVectorCell* cell : cellSet )
     {
@@ -305,6 +349,12 @@ UOdysseyPainterEditorVectorObjectView::SetPropertyBit( const FName& iPropertyNam
 
     if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, ScalingY) )
         mObjectPropertyBits.ScalingY = iState;
+
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, SkewX) )
+        mObjectPropertyBits.SkewX = iState;
+
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, SkewY) )
+        mObjectPropertyBits.SkewY = iState;
 
     // Category "Appearance"
     if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, Opacity) )

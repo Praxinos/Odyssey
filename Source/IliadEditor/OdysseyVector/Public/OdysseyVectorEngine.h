@@ -94,7 +94,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
 
         ::ULIS::FRectD Render( BLContext* iBLContext
                              , const ::ULIS::FRectD& iRedrawRect
-                             , FOdysseyVectorGroupPaint* iScene
+                             , FOdysseyVectorCell* iCell
                              , uint64 iDrawingFlags );
 
         void TraceLine ( int32 iX0

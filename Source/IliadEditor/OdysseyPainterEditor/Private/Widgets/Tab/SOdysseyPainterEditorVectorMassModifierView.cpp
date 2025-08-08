@@ -34,7 +34,13 @@ SOdysseyPainterEditorVectorMassModifierView::~SOdysseyPainterEditorVectorMassMod
 }
 
 SOdysseyPainterEditorVectorMassModifierView::SOdysseyPainterEditorVectorMassModifierView()
+    : mPreviewUndo ( nullptr )
 {
+/*
+    FSlateApplication::Get().GetOnModalLoopTickEvent().AddLambda([this](float DeltaTime)
+    {
+    } );
+*/
 }
 
 void
@@ -44,6 +50,7 @@ SOdysseyPainterEditorVectorMassModifierView::Construct( const FArguments& InArgs
 
     mVectorLayer = InArgs._VectorLayer;
     mSceneArray = InArgs._SceneArray;
+    mPreviewScene = InArgs._PreviewScene;
 
     mObjectDetailsView = CreateViewPanel();
     mOptionsDetailsView = CreateViewPanel();
@@ -92,6 +99,7 @@ SOdysseyPainterEditorVectorMassModifierView::Construct( const FArguments& InArgs
     mObjectDetailsView->SetObject( mObjectView );
 
     mCurrentObjectView = mObjectView;
+
 }
 
 // I could not find a way to collapse all categories without the config being saved to the disk so I ended
@@ -149,6 +157,8 @@ SOdysseyPainterEditorVectorMassModifierView::GetCurrentObjectView()
 void
 SOdysseyPainterEditorVectorMassModifierView::ObjectTypeSelectionChanged( EMassModifierApplyTo NewValue )
 {
+    TObjectPtr<UOdysseyPainterEditorVectorObjectView> formerObjectView = mCurrentObjectView;
+
     if( mOptionsView.Get()->ApplyTo == EMassModifierApplyTo::Paths )
     {
         //mPathView->Update( mEditor, scene, focusedObjectList );
@@ -177,6 +187,107 @@ SOdysseyPainterEditorVectorMassModifierView::ObjectTypeSelectionChanged( EMassMo
         mObjectDetailsView->SetObject( mObjectView );
         mCurrentObjectView = mObjectView;
     }
+
+    mCurrentObjectView->ImportParamFromOtherView( formerObjectView );
+}
+
+void
+SOdysseyPainterEditorVectorMassModifierView::UndoPreview()
+{
+    if( mPreviewUndo )
+    {
+        mPreviewUndo->Revert( nullptr );
+
+        delete mPreviewUndo;
+
+        mPreviewUndo = nullptr;
+    }
+}
+
+SOdysseyPainterEditorVectorMassModifierView::FOnPreviewPropertiesDelegate&
+SOdysseyPainterEditorVectorMassModifierView::GetOnPreviewPropertiesDelegate()
+{
+    return OnPreviewPropertiesDelegate;
+}
+
+void
+SOdysseyPainterEditorVectorMassModifierView::PreviewProperties()
+{
+    std::list<FOdysseyVectorObject*> objectList;
+    uint64 objectClass;
+
+    UndoPreview();
+
+    switch( mOptionsView.Get()->ApplyTo )
+    {
+        case EMassModifierApplyTo::Paths :
+            objectClass = FOdysseyVectorPath::StaticClass();
+        break;
+
+        case EMassModifierApplyTo::Groups :
+            objectClass = FOdysseyVectorGroup::StaticClass();
+        break;
+
+        case EMassModifierApplyTo::PaintGroups :
+            objectClass = FOdysseyVectorGroupPaint::StaticClass();
+        break;
+
+        default :
+            objectClass = FOdysseyVectorObject::StaticClass();
+        break;
+    }
+
+    // Get all objects that will be modified according to the options selected by the user.
+    FOdysseyVectorObject::Traverse( mPreviewScene
+                                  , 0
+                                  , [ this
+                                  , objectClass
+                                  , &objectList ] ( FOdysseyVectorObject* object, uint64 traverseFlags ) -> uint64
+                                  {
+                                      if( object->HasBaseClass( objectClass ) )
+                                      {
+                                          if( mOptionsView.Get()->Filter.Len() )
+                                          {
+                                              if( object->GetName().MatchesWildcard( mOptionsView.Get()->Filter
+                                                                                   , mOptionsView.Get()->MatchCase ? ESearchCase::Type::IgnoreCase
+                                                                                                                     : ESearchCase::Type::CaseSensitive ) )
+                                              {
+                                                  objectList.push_back( object );
+                                              }
+                                          }
+                                          else
+                                          {
+                                              objectList.push_back( object );
+                                          }
+                                      }
+
+                                      return FOdysseyVectorObject::TRAVERSE_CONTINUE;
+                                  } );
+
+    mPreviewUndo = new FOdysseyVectorUndoMassModifier( mVectorLayer.Get()
+                                                     , objectList
+                                                     , ""
+                                                     , true
+                                                     , 0 );
+    // because this is a standalone undo, we don't call update functions via delegates but directly
+    mPreviewUndo->SetUpdateViaDelegation( false );
+
+    if( mCurrentObjectView )
+    {
+        mCurrentObjectView->ValidateProperties( objectList, false );
+
+        // Update vector scene
+        mVectorLayer->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+        mVectorLayer->RequestRedraw( nullptr, 0 );
+
+        // update widgets
+        mVectorLayer->Notify( FOdysseyVectorEngine::NOTIFY_UPDATE_HUD );
+    }
+
+    OnPreviewPropertiesDelegate.Broadcast();
+
+    //GEditor->RedrawAllViewports();
+    //FSlateApplication::Get().ForceRedrawWindow( FGlobalTabmanager::Get()->GetRootWindow().ToSharedRef() );
 }
 
 void
@@ -262,7 +373,7 @@ SOdysseyPainterEditorVectorMassModifierView::ValidateProperties()
         }
         GEditor->EndTransaction();
 
-        mCurrentObjectView->ValidateProperties( objectList );
+        mCurrentObjectView->ValidateProperties( objectList, true );
 
         // Update vector scene
         mVectorLayer->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
@@ -420,6 +531,11 @@ void
 SOdysseyPainterEditorVectorMassModifierView::PropertyValueChanged( const FPropertyChangedEvent& iEvent )
 {
     //mObjectDetailsView->ForceRefresh();
+
+    if( mPreviewScene )
+    {
+        PreviewProperties();
+    }
 }
 
 FString

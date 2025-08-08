@@ -130,6 +130,18 @@ FOdysseyVectorImportV2::ReadObjectTransform( FOdysseyVectorObject& iObject, uint
                 }
                 break;
 
+                case FOdysseyFile::VectorV2::CHUNK_OBJECT_TRANSFORM_SKEW:
+                {
+                    double skewX;
+                    double skewY;
+
+                    Ar << skewX;
+                    Ar << skewY;
+
+                    iObject.Skew( skewX, skewY );
+                }
+                break;
+
                 default:
                 // Mandatory
                     Ar.Seek( Ar.Tell() + iChunkLen );

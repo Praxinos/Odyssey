@@ -160,19 +160,18 @@ FOdysseyVectorEngine::GetDrawingMutex()
 ::ULIS::FRectD
 FOdysseyVectorEngine::Render( BLContext* iBLContext
                             , const ::ULIS::FRectD& iRedrawRect
-                            , FOdysseyVectorGroupPaint* iScene
+                            , FOdysseyVectorCell* iCell
                             , uint64 iDrawingFlags )
 {
     // The thumbnail generator sometimes tries to render on cells that were removed from the layer.
     // this is a quickfix.
-    if( iScene->GetLayer() == nullptr )
+    if( iCell->GetLayer() == nullptr )
         return ::ULIS::FRectD( 0.0f, 0.0f, 0.0f, 0.0F );
 
     TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorEngine::Render);
     BLImage* image = iBLContext->targetImage();
     ::ULIS::FRectD sanitizedRect;
     ::ULIS::FRectD screen;
-    FOdysseyVectorGroupPaint* scene = iScene;
 
     // for some unknown reason there was a case where the proxy, at the loading of the file, called this func
     // and image was nullptr. check it.
@@ -203,80 +202,88 @@ FOdysseyVectorEngine::Render( BLContext* iBLContext
         mHorizontalLineBuffer.resize( mRenderData.size.h );
     }
 
-    if( sanitizedRect.Area() )
+    for( FOdysseyVectorObject* child : iCell->GetChildrenList() )
     {
-        BLRgba32 blFillColor;
-        FColor fillColor = ( iDrawingFlags & FOdysseyVectorEngine::DRAWING_IGNORECOLOR ) ? scene->GetMonochromeColor()
-                                                                                         : scene->GetBackgroundColor();
+        FOdysseyVectorGroupPaint* scene = static_cast<FOdysseyVectorGroupPaint*>(child);
 
-
-        iBLContext->save();
-        iBLContext->setCompOp( BL_COMP_OP_SRC_COPY );
-
-        blFillColor.setR( fillColor.R );
-        blFillColor.setG( fillColor.G );
-        blFillColor.setB( fillColor.B );
-        blFillColor.setA( fillColor.A );
-
-        iBLContext->setFillStyle( blFillColor );
-
-        iBLContext->clipToRect( BLRect( sanitizedRect.x - 1
-                                      , sanitizedRect.y - 1
-                                      , sanitizedRect.w + 2
-                                      , sanitizedRect.h + 2 ) );
-        // Note: we enlarge the block 1 pixel because when FOdysseyVectorBlock renders,
-        // the rect seems to be 1 pixel larger. If we don't do this, then the block
-        // isn't filled fully and this creates an artefact on the screen.
-        iBLContext->fillRect( BLRect( sanitizedRect.x - 1
-                                    , sanitizedRect.y - 1
-                                    , sanitizedRect.w + 2
-                                    , sanitizedRect.h + 2 ) );
-
-        scene->Draw( iBLContext, this, sanitizedRect, 1.0f, iDrawingFlags );
-
-        //--- uncomment to view the invalidation rectangle --- //
-        //iBLContext->setStrokeWidth( 2.0f );
-        //iBLContext->setStrokeStyle( BLRgba32( 0, 255, 0, 255 ) );
-        //iBLContext->strokeRect( BLRect( sanitizedRect.x
-        //                              , sanitizedRect.y
-        //                              , sanitizedRect.w
-        //                              , sanitizedRect.h ) );
-        //------------------------------------------------------//
-
-        iBLContext->restore();
-
-        if( scene->GetLayer() )
+        if( scene->IsVisible( false ) )
         {
-            // Because the Proxy can run this function at anytime, we must also protect the access
-            // to the list of shared tags
-            scene->GetLayer()->GetSharedTagMutex().lock();
-
-            for ( FOdysseyVectorTag* tag : scene->GetLayer()->GetSharedTagList() )
+            if( sanitizedRect.Area() )
             {
-                FOdysseyVectorObject* tagOwner = tag->GetOwner();
+                BLRgba32 blFillColor;
+                FColor fillColor = ( iDrawingFlags & FOdysseyVectorEngine::DRAWING_IGNORECOLOR ) ? scene->GetMonochromeColor()
+                                                                                                 : scene->GetBackgroundColor();
 
-                // only draw tag as a shared tag if it does NOT belong to the scene
-                if( tagOwner->GetScene() != scene )
-                {
-                    tagOwner->LockDrawing();
-                    tag->Draw( scene, iBLContext, this, sanitizedRect, 1.0f, iDrawingFlags );
-                    tagOwner->UnlockDrawing();
-                }
+
+                iBLContext->save();
+                iBLContext->setCompOp( BL_COMP_OP_SRC_COPY );
+
+                blFillColor.setR( fillColor.R );
+                blFillColor.setG( fillColor.G );
+                blFillColor.setB( fillColor.B );
+                blFillColor.setA( fillColor.A );
+
+                iBLContext->setFillStyle( blFillColor );
+
+                iBLContext->clipToRect( BLRect( sanitizedRect.x - 1
+                                              , sanitizedRect.y - 1
+                                              , sanitizedRect.w + 2
+                                              , sanitizedRect.h + 2 ) );
+                // Note: we enlarge the block 1 pixel because when FOdysseyVectorBlock renders,
+                // the rect seems to be 1 pixel larger. If we don't do this, then the block
+                // isn't filled fully and this creates an artefact on the screen.
+                iBLContext->fillRect( BLRect( sanitizedRect.x - 1
+                                            , sanitizedRect.y - 1
+                                            , sanitizedRect.w + 2
+                                            , sanitizedRect.h + 2 ) );
+
+                scene->Draw( iBLContext, this, sanitizedRect, 1.0f, iDrawingFlags );
+
+                //--- uncomment to view the invalidation rectangle --- //
+                //iBLContext->setStrokeWidth( 2.0f );
+                //iBLContext->setStrokeStyle( BLRgba32( 0, 255, 0, 255 ) );
+                //iBLContext->strokeRect( BLRect( sanitizedRect.x
+                //                              , sanitizedRect.y
+                //                              , sanitizedRect.w
+                //                              , sanitizedRect.h ) );
+                //------------------------------------------------------//
+
+                iBLContext->restore();
             }
-
-            scene->GetLayer()->GetSharedTagMutex().unlock();
         }
-
-        // redraw HUDs that need to be fused with the render.
-        scene->GetLayer()->LockDrawing();
-        for( IOdysseyVectorHUD *hud : scene->GetLayer()->GetHUDList() )
-        {
-            hud->Draw( iBLContext );
-        }
-        scene->GetLayer()->UnlockDrawing();
-
-        iBLContext->flush(BL_CONTEXT_FLUSH_SYNC);
     }
+
+    if( iCell->GetLayer() )
+    {
+        // Because the Proxy can run this function at anytime, we must also protect the access
+        // to the list of shared tags
+        iCell->GetLayer()->GetSharedTagMutex().lock();
+
+        for ( FOdysseyVectorTag* tag : iCell->GetLayer()->GetSharedTagList() )
+        {
+            FOdysseyVectorObject* tagOwner = tag->GetOwner();
+
+            // only draw tag as a shared tag if it does NOT belong to the scene
+            if( tagOwner->GetCell() != iCell )
+            {
+                tagOwner->LockDrawing();
+                tag->Draw( iCell, iBLContext, this, sanitizedRect, 1.0f, iDrawingFlags );
+                tagOwner->UnlockDrawing();
+            }
+        }
+
+        iCell->GetLayer()->GetSharedTagMutex().unlock();
+    }
+
+    // redraw HUDs that need to be fused with the render.
+    iCell->GetLayer()->LockDrawing();
+    for( IOdysseyVectorHUD *hud : iCell->GetLayer()->GetHUDList() )
+    {
+        hud->Draw( iBLContext );
+    }
+    iCell->GetLayer()->UnlockDrawing();
+
+    iBLContext->flush(BL_CONTEXT_FLUSH_SYNC);
 
 /*
     if( scene->GetCell()->GetBLMask() )
@@ -290,7 +297,7 @@ FOdysseyVectorEngine::Render( BLContext* iBLContext
     // to some value ).
     //mInvalidatedRect = ::ULIS::FRectD( 0, 0, 0, 0 );
     // this resets the rect to its default size
-    scene->GetCell()->SetPendingRedraw( false );
+    iCell->SetPendingRedraw( false );
 
     mInvalidationFlags = 0;
 

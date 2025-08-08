@@ -51,7 +51,7 @@ FOdysseyVectorObject::FOdysseyVectorObject( const FString& iName )
     SetName( iName );
     SetOpacity( 1.0f );
     SetExpanded(true);
-    SetTransform( 0.0f, 0.0f, 0.0f, 1.0f, 1.0f );
+    SetTransform( 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f );
 
     mForegroundBucket.SetColorMode( eBucketColorMode::SolidColor );
     mForegroundBucket.SetSolidColor( FOREGROUNDCOLOR_DEFAULT_R
@@ -342,7 +342,7 @@ void FOdysseyVectorObject::ApplyTransformations()
         BLMatrix2D& parentInverseWorldMatrix = mParent->GetInverseWorldMatrix();
         BLMatrix2D& childWorldMatrix = child->GetWorldMatrix();
         BLMatrix2D localMatrix;
-        double translationX, translationY, rotation, scalingX, scalingY;
+        double translationX, translationY, rotation, scalingX, scalingY, skewX, skewY;
 
         FOdysseyVector::MatrixMultiply( parentInverseWorldMatrix, childWorldMatrix, localMatrix );
 
@@ -352,16 +352,20 @@ void FOdysseyVectorObject::ApplyTransformations()
                                               , &rotation
                                               , &scalingX
                                               , &scalingY
+                                              , &skewX
+                                              , &skewY
                                               , true ); // in Degrees
 
         child->SetTransform( translationX
                            , translationY
                            , rotation
                            , scalingX
-                           , scalingY );
+                           , scalingY
+                           , skewX
+                           , skewY );
     }
 
-    SetTransform( 0.0f, 0.0f, 0.0f, 1.0f, 1.0f );
+    SetTransform( 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f );
 
     UpdateMatrix();
 }
@@ -381,6 +385,8 @@ FOdysseyVectorObject::Transfer( const BLMatrix2D& iMatrix )
                                           , &mRotation
                                           , &mScalingX
                                           , &mScalingY
+                                          , &mSkewX
+                                          , &mSkewY
                                           , true );
 
     //UpdateMatrix();
@@ -412,6 +418,15 @@ FOdysseyVectorObject::Scale( double iX, double iY )
     Invalidate( INVALIDATE_MATRIX );
 }
 
+void
+FOdysseyVectorObject::Skew( double iX, double iY )
+{
+    mSkewX = iX;
+    mSkewY = iY;
+
+    Invalidate( INVALIDATE_MATRIX );
+}
+
 double
 FOdysseyVectorObject::GetScalingX()
 {
@@ -425,6 +440,18 @@ FOdysseyVectorObject::GetScalingY()
 }
 
 double
+FOdysseyVectorObject::GetSkewX()
+{
+    return mSkewX;
+}
+
+double
+FOdysseyVectorObject::GetSkewY()
+{
+    return mSkewY;
+}
+
+double
 FOdysseyVectorObject::GetRotation()
 {
     return mRotation;
@@ -435,13 +462,17 @@ FOdysseyVectorObject::GetTransform( double& oTranslationX
                                   , double& oTranslationY
                                   , double& oRotation
                                   , double& oScalingX
-                                  , double& oScalingY )
+                                  , double& oScalingY
+                                  , double& oSkewX
+                                  , double& oSkewY )
 {
     oTranslationX = mTranslationX;
     oTranslationY = mTranslationY;
     oRotation = mRotation;
     oScalingX = mScalingX;
     oScalingY = mScalingY;
+    oSkewX = mSkewX;
+    oSkewY = mSkewY;
 }
 
 void
@@ -449,13 +480,17 @@ FOdysseyVectorObject::SetTransform( double iTranslationX
                                   , double iTranslationY
                                   , double iRotation
                                   , double iScalingX
-                                  , double iScalingY )
+                                  , double iScalingY
+                                  , double iSkewX
+                                  , double iSkewY )
 {
     mTranslationX = iTranslationX;
     mTranslationY = iTranslationY;
     mRotation = iRotation;
     mScalingX = iScalingX;
     mScalingY = iScalingY;
+    mSkewX = iSkewX;
+    mSkewY = iSkewY;
 
     Invalidate( INVALIDATE_MATRIX );
 }
@@ -466,6 +501,7 @@ FOdysseyVectorObject::ResetTransform()
     Translate( 0.0f, 0.0f );
     Scale( 1.0f, 1.0f );
     Rotate( 0.0f );
+    Skew( 0.0f, 0.0f );
 }
 
 void
@@ -648,6 +684,7 @@ FOdysseyVectorObject::UpdateMatrix()
     mLocalMatrix.translate( mTranslationX, mTranslationY );
     mLocalMatrix.rotate( mRotation * M_PI / 180.0f );
     mLocalMatrix.scale( mScalingX, mScalingY );
+    mLocalMatrix.skew( mSkewX, mSkewY );
 
     BLMatrix2D::invert( mInverseLocalMatrix, mLocalMatrix );
 
@@ -1273,7 +1310,7 @@ FOdysseyVectorObject::TransferChild( FOdysseyVectorObject* iFosterChild
 
             if( additionFlags == HIERARCHY_CHANGE_SUCCESS )
             {
-                double translationX, translationY, rotation, scalingX, scalingY;
+                double translationX, translationY, rotation, scalingX, scalingY, skewX, skewY;
                 BLMatrix2D localMatrix;
 
                 FOdysseyVector::MatrixMultiply( mInverseWorldMatrix, childFormerWorldMatrix, localMatrix );
@@ -1283,13 +1320,17 @@ FOdysseyVectorObject::TransferChild( FOdysseyVectorObject* iFosterChild
                                                       , &rotation
                                                       , &scalingX
                                                       , &scalingY
+                                                      , &skewX
+                                                      , &skewY
                                                       , true ); // in degrees
 
                 iFosterChild->SetTransform( translationX
                                           , translationY
                                           , rotation
                                           , scalingX
-                                          , scalingY );
+                                          , scalingY
+                                          , skewX
+                                          , skewY );
 
                 iFosterChild->UpdateMatrix();
             }
@@ -1349,7 +1390,9 @@ FOdysseyVectorObject::CopyTransformation( FOdysseyVectorObject& iDestinationObje
                                    , mTranslationY
                                    , mRotation
                                    , mScalingX
-                                   , mScalingY );
+                                   , mScalingY
+                                   , mSkewX
+                                   , mSkewY );
 }
 
 std::list<FOdysseyVectorObject*>&

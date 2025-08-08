@@ -53,6 +53,7 @@ namespace FOdysseyVectorExportV2
     void WriteObjectTransformTranslation( FOdysseyVectorObject& iObject, FArchive &Ar );
     void WriteObjectTransformRotation( FOdysseyVectorObject& iObject, FArchive &Ar );
     void WriteObjectTransformScaling( FOdysseyVectorObject& iObject, FArchive &Ar );
+    void WriteObjectTransformSkew( FOdysseyVectorObject& iObject, FArchive &Ar );
     void WriteDeclareObjects( std::vector<FOdysseyVectorObject*>& vectorObjectArray, FArchive &Ar );
     void WriteDeclareObjectEntry( FOdysseyVectorObject& iObject, FArchive &Ar );
 

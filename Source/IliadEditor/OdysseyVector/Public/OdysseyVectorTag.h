@@ -14,6 +14,7 @@ class FOdysseyVectorObject;
 class FOdysseyVectorGroupPaint;
 class FOdysseyVectorLayer;
 class FOdysseyVectorEngine;
+class FOdysseyVectorCell;
 
 class ODYSSEYVECTOR_API FOdysseyVectorTag
 {
@@ -32,7 +33,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTag
                          , double iAncestorsOpacity
                          , uint64 iDrawingFlags ) = 0;
         // when drawn as a shared tag
-        virtual void Draw( FOdysseyVectorGroupPaint* iCurrentScene
+        virtual void Draw( FOdysseyVectorCell* iCurrentCell
                          , BLContext* iBLContext
                          , FOdysseyVectorEngine* iEngine
                          , const ::ULIS::FRectD& iInvalidationArea
