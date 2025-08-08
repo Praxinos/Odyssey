@@ -128,7 +128,7 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
     pan += mOdysseyPainterEditorViewportPtr.Pin()->GetViewportCenter() - (FVector2D(width, height) / 2.0f);
 
     // Figure out the size we need
-    const float mipLevel = -1;
+    const float mipLevel = 0;
 
     TRefCountPtr<FBatchedElementParameters> batchedElementParameters;
 
