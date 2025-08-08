@@ -42,6 +42,7 @@ UOdysseyAnimationPlayer::PostInitProperties()
 
     RenderTarget = NewObject<UTextureRenderTarget2D>(this, NAME_None, RF_Public | RF_Transient);
     RenderTarget->RenderTargetFormat = RTF_RGBA16f;
+    RenderTarget->bAutoGenerateMips = true;
     RenderTarget->UpdateResource();
 }
 
@@ -447,6 +448,7 @@ UOdysseyAnimationPlayer::UpdateTexture()
 
         RenderTarget->WaitForPendingInitOrStreaming();
         Animation->Render_GameThread(RenderTarget, frame.GetFrame(), renderType );
+        RenderTarget->UpdateResourceImmediate(false); //Update MipMaps
 
         mInvalidTileMap.Clear();
         return;
@@ -461,6 +463,7 @@ UOdysseyAnimationPlayer::UpdateTexture()
         {
             Animation->Render_GameThread(RenderTarget, frame.GetFrame(), renderType, rect);
         }
+        RenderTarget->UpdateResourceImmediate(false); //Update MipMaps
 
         mInvalidTileMap.Clear();
     }
@@ -507,7 +510,7 @@ UOdysseyAnimationPlayer::AnimationChanged()
     }
 
     RenderTarget->ResizeTarget(Animation->GetWidth(), Animation->GetHeight());
-    RenderTarget->UpdateResourceImmediate();
+    RenderTarget->UpdateResourceImmediate(false);
 
     mInvalidTileMap = FOdysseyInvalidTileMap(64, Animation->GetWidth(), Animation->GetHeight());
 
@@ -653,6 +656,7 @@ UOdysseyAnimationPlayer::PostLoad()
     {
         RenderTarget = NewObject<UTextureRenderTarget2D>(this, NAME_None, RF_Public | RF_Transient);
         RenderTarget->RenderTargetFormat = RTF_RGBA16f;
+        RenderTarget->bAutoGenerateMips = true;
     }
 
     //will create the texture if needed
@@ -662,7 +666,7 @@ UOdysseyAnimationPlayer::PostLoad()
 
     RenderTarget->ResizeTarget(Animation->GetWidth(), Animation->GetHeight());
     RenderTarget->UpdateResource();
-    RenderTarget->UpdateResourceImmediate();
+    RenderTarget->UpdateResourceImmediate(false);
 
     mInvalidTileMap = FOdysseyInvalidTileMap(64, Animation->GetWidth(), Animation->GetHeight());
 
@@ -690,7 +694,7 @@ UOdysseyAnimationPlayer::PostDuplicate(EDuplicateMode::Type iDuplicateMode)
 
     RenderTarget->ResizeTarget(Animation->GetWidth(), Animation->GetHeight());
     RenderTarget->UpdateResource();
-    RenderTarget->UpdateResourceImmediate();
+    RenderTarget->UpdateResourceImmediate(false);
 
     mInvalidTileMap = FOdysseyInvalidTileMap(64, Animation->GetWidth(), Animation->GetHeight());
 
