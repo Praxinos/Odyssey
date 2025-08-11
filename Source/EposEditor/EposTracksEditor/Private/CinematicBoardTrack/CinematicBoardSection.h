@@ -138,7 +138,11 @@ private:
         UTexture2D* Texture = nullptr;
     };
     typedef TArray<FGuid> FRenderingComposition;
+    // A pool containing textures corresponding to each thumbnail and referenced by the render composition of the cell
     TMap<FRenderingComposition, FPoolData>  mAnimationsTimelineThumbnailPool;
+    // A basic pool of raw textures which contains textures no more used and can be get to update them (instead of recreate a new one and let GC clean it every 10min)
+    TArray<TWeakObjectPtr<UTexture2D>>  mAnimationsTimelineTexturePool;
+    // A single render target used to render an animation and recreate only if some animation parameters are no more compatible
     TObjectPtr<UTextureRenderTarget2D> mBuildRenderTargetTmp;
 
 private:

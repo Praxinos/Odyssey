@@ -44,7 +44,7 @@ public:
 
     /** Override the duration of all panels. */
     UPROPERTY( EditAnywhere, BlueprintReadWrite, Category=ImportImageSequenceOptions, meta=(InlineEditConditionToggle) )
-    bool bOverrideDuration;
+    bool bOverrideDuration = false;
 
     /** The duration to override all panels. */
     UPROPERTY( EditAnywhere, BlueprintReadWrite, Category=ImportImageSequenceOptions, meta=(EditCondition=bOverrideDuration) )

@@ -705,6 +705,16 @@ FCinematicBoardSection::ReBuildAnimationsTimelineMetaChannel()
         mAnimationsTimelineMetaChannel.Add( guid, meta_channel );
     }
 
+    for( TPair<FGuid, TArray<FThumbnailData>>& pair : mAnimationsTimelineThumbnails )
+    {
+        for( FThumbnailData& data : pair.Value )
+        {
+            data.Brush->SetResourceObject( nullptr );
+            delete data.Brush;
+            data.Brush = nullptr;
+            data.Texture = nullptr;
+        }
+    }
     mAnimationsTimelineThumbnails.Empty();
     for( const auto& pair1 : mAnimationsTimelineMetaChannel )
     {
@@ -780,9 +790,34 @@ FCinematicBoardSection::RebuildAnimationThumbnailDataInternal( UOdysseyAnimation
             mBuildRenderTargetTmp->UpdateResource();
         }
 
+        // Render the animation into the render target
         animation->RenderAndResize_GameThread( mBuildRenderTargetTmp, frame_in_timeline.Value, EOdysseyRenderingType::Render );
 
-        texture = mBuildRenderTargetTmp->ConstructTexture2D( GetTransientPackage(), FString::Printf( TEXT( "textureThumbnail-%s" ), *FGuid::NewGuid().ToString() ), RF_Public | RF_Transient );
+        // Let's see if a old no more used compatible texture is available
+        for( TWeakObjectPtr<UTexture2D> old_texture : mAnimationsTimelineTexturePool )
+        {
+            if( old_texture.IsValid() && mBuildRenderTargetTmp->UpdateTexture( old_texture.Get() ) )
+            {
+                texture = old_texture.Get();
+                mAnimationsTimelineTexturePool.RemoveSwap( old_texture );
+                break;
+            }
+        }
+
+        // If no existing compatible texture is found, create a new one
+        if( !texture )
+            texture = mBuildRenderTargetTmp->ConstructTexture2D( GetTransientPackage(), FString::Printf( TEXT( "textureThumbnail-%s" ), *FGuid::NewGuid().ToString() ), RF_Public | RF_Transient );
+
+        // If the thumbnail pool already contains the rendering composition (aka iFrameId is found which means image modified),
+        if( mAnimationsTimelineThumbnailPool.Contains( rendering_composition ) )
+        {
+            // Remove it from the thumbnail pool
+            FPoolData pool_data;
+            mAnimationsTimelineThumbnailPool.RemoveAndCopyValue( rendering_composition, pool_data );
+
+            // And add the texture to the old texture pool to be usable again later without having to realloc a new object
+            mAnimationsTimelineTexturePool.Add( pool_data.Texture );
+        }
 
         //mAnimationsTimelineThumbnailPool.Add( rendering_composition, FPoolData{ mBuildRenderTargetTmp } );
         mAnimationsTimelineThumbnailPool.Add( rendering_composition, FPoolData{ texture } );
@@ -830,7 +865,16 @@ void
 FCinematicBoardSection::ReBuildAnimationsTimelineThumbnails( FGuid iGuid, TOptional<FGuid> iFrameId )
 {
     if( mAnimationsTimelineThumbnails.Contains( iGuid ) )
+    {
+        for( FThumbnailData& data : mAnimationsTimelineThumbnails[iGuid] )
+        {
+            data.Brush->SetResourceObject( nullptr );
+            delete data.Brush;
+            data.Brush = nullptr;
+            data.Texture = nullptr;
+        }
         mAnimationsTimelineThumbnails.Remove( iGuid );
+    }
 
     if( !mAnimationsTimelineMetaChannel.Contains( iGuid ) )
         return;
