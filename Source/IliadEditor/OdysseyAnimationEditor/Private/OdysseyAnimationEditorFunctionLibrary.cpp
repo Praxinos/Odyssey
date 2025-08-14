@@ -4,11 +4,12 @@
 #include "OdysseyAnimationEditorFunctionLibrary.h"
 #include "AssetToolsModule.h"
 #include "OdysseyAnimationFactory.h"
+#include "OdysseyAnimationLayerImageRaster.h"
 
 #define LOCTEXT_NAMESPACE "UOdysseyAnimationEditorFunctionLibrary"
 
 UOdysseyAnimation*
-UOdysseyAnimationEditorFunctionLibrary::CreateAnimationAsset(FString AssetName, FString PackagePath, int Width, int Height, EOdysseyAnimationFormat Format, float FramesPerSecond)
+UOdysseyAnimationEditorFunctionLibrary::CreateAnimationAsset(FString AssetName, FString PackagePath, int Width, int Height, EOdysseyAnimationFormat Format, float FramesPerSecond, TSubclassOf<class UOdysseyAnimationLayer> DefaultLayerClass)
 {
     if (AssetName.IsEmpty())
         return nullptr;
@@ -27,6 +28,7 @@ UOdysseyAnimationEditorFunctionLibrary::CreateAnimationAsset(FString AssetName, 
     factory->Height = Height;
     factory->Format = Format;
     factory->FrameRate = FFrameRate( FramesPerSecond, 1.f );
+    factory->DefaultLayerClass = DefaultLayerClass.Get() ? DefaultLayerClass.Get() : UOdysseyAnimationLayerImageRaster::StaticClass();
 
     IAssetTools& assetTools = FAssetToolsModule::GetModule().Get();
     UOdysseyAnimation* animation = Cast<UOdysseyAnimation>(
