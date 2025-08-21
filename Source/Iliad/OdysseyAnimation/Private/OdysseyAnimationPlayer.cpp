@@ -49,6 +49,9 @@ UOdysseyAnimationPlayer::PostInitProperties()
 void
 UOdysseyAnimationPlayer::Play(bool iBackward)
 {
+    if (!Animation)
+        return;
+
     if (Status == EOdysseyAnimationPlayerStatus::Playing && mIsBackward == iBackward)
         return;
 
@@ -58,10 +61,22 @@ UOdysseyAnimationPlayer::Play(bool iBackward)
     mIsBackward = iBackward;
     Status = EOdysseyAnimationPlayerStatus::Playing;
 
-#if WITH_EDITOR
-    if (mRange.IsSet())
-        SeekToFrame(FMath::Clamp(mCursorFrame, mRange->GetLowerBoundValue(), mRange->GetUpperBoundValue()));
-#endif
+    FFrameTime newFrame = mCursorFrame;
+    switch(PlayRange)
+    {
+        case EOdysseyAnimationPlayerPlayRange::AnimationBounds:
+        {
+            newFrame = FMath::Clamp(newFrame, FFrameTime(Animation->GetFrameRange().GetLowerBoundValue()), FFrameTime(Animation->GetFrameRange().GetUpperBoundValue()));
+        }
+        break;
+
+        case EOdysseyAnimationPlayerPlayRange::Custom:
+        {
+            newFrame = FMath::Clamp(newFrame, FFrameTime(CustomPlayRangeStartFrame), FFrameTime(CustomPlayRangeEndFrame));
+        }
+        break;
+    }
+    SeekToFrame(newFrame);
 }
 
 void
@@ -105,7 +120,14 @@ UOdysseyAnimationPlayer::SeekToFrame(FFrameTime iFrame)
         cursorFrameChanged = true;
     }
 
-    FFrameTime displayedFrame = GetFrameInAnimationBounds(mCursorFrame);
+#if WITH_EDITOR
+    FFrameTime displayedFrame = mCursorFrame;
+    if (!mIgnorePrePostBehaviour)
+        displayedFrame = ApplyPrePostBehaviour(mCursorFrame);
+#else
+    FFrameTime displayedFrame = ApplyPrePostBehaviour(mCursorFrame);
+#endif
+
     if (mDisplayedFrame != displayedFrame)
     {
         mDisplayedFrame = displayedFrame;
@@ -141,7 +163,15 @@ UOdysseyAnimationPlayer::SeekToFrameImmediate(FFrameTime iFrame)
         cursorFrameChanged = true;
     }
 
-    FFrameTime displayedFrame = GetFrameInAnimationBounds(mCursorFrame);
+
+#if WITH_EDITOR
+    FFrameTime displayedFrame = mCursorFrame;
+    if (!mIgnorePrePostBehaviour)
+        displayedFrame = ApplyPrePostBehaviour(mCursorFrame);
+#else
+    FFrameTime displayedFrame = ApplyPrePostBehaviour(mCursorFrame);
+#endif
+
     if (mDisplayedFrame != displayedFrame)
     {
         mDisplayedFrame = displayedFrame;
@@ -189,17 +219,6 @@ UOdysseyAnimationPlayer::GetDisplayedFrame() const
     return mDisplayedFrame;
 }
 
-bool
-UOdysseyAnimationPlayer::GetDuration(FFrameTime& oFrame) const
-{
-    if (!Animation)
-        return false;
-
-    int frameDuration = Animation->GetFrameCount();
-    oFrame = FFrameTime(frameDuration);
-    return true;
-}
-
 EOdysseyAnimationPlayerStatus
 UOdysseyAnimationPlayer::GetStatus() const
 {
@@ -207,15 +226,10 @@ UOdysseyAnimationPlayer::GetStatus() const
 }
 
 FFrameTime
-UOdysseyAnimationPlayer::GetFrameInAnimationBounds(FFrameTime iFrame) const
+UOdysseyAnimationPlayer::ApplyPrePostBehaviour(FFrameTime iFrame) const
 {
     if (!Animation)
         return iFrame;
-
-#if WITH_EDITOR
-    if (mIgnoreAnimationBounds)
-        return iFrame;
-#endif
 
     FInt32Range frameRange = Animation->GetFrameRange();
     FFrameTime leftBound = FFrameTime(frameRange.GetLowerBoundValue());
@@ -251,11 +265,6 @@ UOdysseyAnimationPlayer::ApplyPreBehaviour(FFrameTime iFrame) const
     if (!Animation)
         return iFrame;
 
-#if WITH_EDITOR
-    if (!mUsePreBehaviour)
-        return iFrame;
-#endif
-
     switch(PreBehaviour)
     {
         case EOdysseyAnimationPlayerPostBehaviour::Hold:
@@ -266,10 +275,7 @@ UOdysseyAnimationPlayer::ApplyPreBehaviour(FFrameTime iFrame) const
 
         case EOdysseyAnimationPlayerPostBehaviour::Loop:
         {
-            FFrameTime duration;
-            if (!GetDuration(duration))
-                return iFrame;
-
+            FFrameTime duration(Animation->GetFrameCount());
             if ( duration <= 0 )
                 return iFrame;
 
@@ -292,11 +298,6 @@ UOdysseyAnimationPlayer::ApplyPostBehaviour(FFrameTime iFrame) const
     if ( !Animation )
         return iFrame;
 
-#if WITH_EDITOR
-    if (!mUsePostBehaviour)
-        return iFrame;
-#endif
-
     switch(PostBehaviour)
     {
         case EOdysseyAnimationPlayerPostBehaviour::Hold:
@@ -307,10 +308,7 @@ UOdysseyAnimationPlayer::ApplyPostBehaviour(FFrameTime iFrame) const
 
         case EOdysseyAnimationPlayerPostBehaviour::Loop:
         {
-            FFrameTime duration;
-            if (!GetDuration(duration))
-                return iFrame;
-
+            FFrameTime duration(Animation->GetFrameCount());
             if ( duration <= 0 )
                 return iFrame;
 
@@ -357,62 +355,73 @@ UOdysseyAnimationPlayer::Tick(float iDeltaTime)
 
     if (Status == EOdysseyAnimationPlayerStatus::Playing)
     {
-        FFrameTime duration;
-        if (!GetDuration(duration))
-            return;
+        FFrameTime leftBound;
+        FFrameTime rightBound;
+        switch(PlayRange)
+        {
+            case EOdysseyAnimationPlayerPlayRange::AnimationBounds:
+            {
+                leftBound = FFrameTime(Animation->GetFrameRange().GetLowerBoundValue());
+                rightBound = FFrameTime(Animation->GetFrameRange().GetUpperBoundValue());
+            }
+            break;
 
-        //FFrameTime leftBound = mIgnoreAnimationBounds ? FFrameTime(Animation->GetFrameRange().GetLowerBoundValue()) : FFrameTime(Animation->GetLeftBoundValue());
-        //FFrameTime rightBound = mIgnoreAnimationBounds ? FFrameTime(Animation->GetFrameRange().GetUpperBoundValue()) : FFrameTime(Animation->GetRightBoundValue()) + FFrameTime(1);
-
-        FFrameTime leftBound = FFrameTime(Animation->GetFrameRange().GetLowerBoundValue());
-        FFrameTime rightBound = FFrameTime(Animation->GetFrameRange().GetUpperBoundValue());
+            case EOdysseyAnimationPlayerPlayRange::Custom:
+            {
+                leftBound = CustomPlayRangeStartFrame;
+                rightBound = CustomPlayRangeEndFrame;
+            }
+            break;
+        }
+        FFrameTime duration = rightBound - leftBound + FFrameTime(1);
 
         bool bStop = false;
         FFrameTime newFrame = mDisplayedFrame;
         if ( mIsBackward )
         {
             newFrame -= FFrameTime::FromDecimal(iDeltaTime * PlayRate * Animation->GetFramesPerSecond());
-#if WITH_EDITOR
-            if (newFrame < leftBound)
+
+            if (PlayRange != EOdysseyAnimationPlayerPlayRange::Infinite)
             {
-                if ( mIsLooping )
+                if (newFrame < leftBound)
                 {
-                    while ( newFrame < leftBound )
+                    if ( IsLoopingInPlayRange )
                     {
-                        newFrame += duration;
+                        while ( newFrame < leftBound )
+                        {
+                            newFrame += duration;
+                        }
+                    }
+                    else
+                    {
+                        newFrame = leftBound;
+                        bStop = true;
                     }
                 }
-                else
-                if (!mUsePreBehaviour)
-                {
-                    newFrame = leftBound;
-                    bStop = true;
-                }
             }
-#endif
         }
         else
         {
             newFrame += FFrameTime::FromDecimal(iDeltaTime * PlayRate * Animation->GetFramesPerSecond());
-#if WITH_EDITOR
-            if (newFrame >= rightBound + FFrameTime(1))
-            {
 
-                if ( mIsLooping )
+            if (PlayRange != EOdysseyAnimationPlayerPlayRange::Infinite)
+            {
+                if (newFrame >= rightBound + FFrameTime(1))
                 {
-                    while ( newFrame >= rightBound + FFrameTime(1) )
+                    if ( IsLoopingInPlayRange )
                     {
-                        newFrame -= duration;
+                        while ( newFrame >= rightBound + FFrameTime(1) )
+                        {
+                            newFrame -= duration;
+                        }
+                    }
+                    else
+                    {
+                        newFrame = rightBound;
+                        bStop = true;
                     }
                 }
-                else
-                if (!mUsePostBehaviour)
-                {
-                    newFrame = rightBound;
-                    bStop = true;
-                }
             }
-#endif
         }
 
         SeekToFrame(newFrame);
@@ -539,49 +548,45 @@ UOdysseyAnimationPlayer::EndScrub()
     SeekToFrame(mCursorFrame);
 }
 
+void
+UOdysseyAnimationPlayer::SetIsLoopingInPlayRange(bool IsLooping)
+{
+    IsLoopingInPlayRange = IsLooping;
+}
+
+bool
+UOdysseyAnimationPlayer::GetIsLoopingInPlayRange() const
+{
+    return IsLoopingInPlayRange;
+}
+
+void
+UOdysseyAnimationPlayer::SetPlayRange(EOdysseyAnimationPlayerPlayRange InPlayRange)
+{
+    PlayRange = InPlayRange;
+}
+
+EOdysseyAnimationPlayerPlayRange
+UOdysseyAnimationPlayer::GetPlayRange() const
+{
+    return PlayRange;
+}
+
+void
+UOdysseyAnimationPlayer::SetCustomPlayRange(FFrameNumber StartFrame, FFrameNumber EndFrame)
+{
+    CustomPlayRangeStartFrame = StartFrame;
+    CustomPlayRangeEndFrame = EndFrame;
+}
+
+void
+UOdysseyAnimationPlayer::GetCustomPlayRange(FFrameNumber& StartFrame, FFrameNumber& EndFrame)
+{
+    StartFrame = CustomPlayRangeStartFrame;
+    EndFrame = CustomPlayRangeEndFrame;
+}
+
 #if WITH_EDITOR
-
-void
-UOdysseyAnimationPlayer::SetFrameRange(const TOptional<TRange<FFrameTime>>& iRange)
-{
-    mRange = iRange;
-}
-
-void
-UOdysseyAnimationPlayer::SetUsePreBehaviour(bool iValue)
-{
-    mUsePreBehaviour = iValue;
-}
-
-void
-UOdysseyAnimationPlayer::SetUsePostBehaviour(bool iValue)
-{
-    mUsePostBehaviour = iValue;
-}
-
-bool
-UOdysseyAnimationPlayer::UsePreBehaviour() const
-{
-    return mUsePreBehaviour;
-}
-
-bool
-UOdysseyAnimationPlayer::UsePostBehaviour() const
-{
-    return mUsePreBehaviour;
-}
-
-bool
-UOdysseyAnimationPlayer::IsLooping() const
-{
-    return mIsLooping;
-}
-
-void
-UOdysseyAnimationPlayer::SetIsLooping(bool iIsLooping)
-{
-    mIsLooping = iIsLooping;
-}
 
 void
 UOdysseyAnimationPlayer::SetRenderType(TAttribute<uint64> iRenderType)
@@ -596,15 +601,15 @@ UOdysseyAnimationPlayer::GetRenderType() const
 }
 
 void
-UOdysseyAnimationPlayer::SetIgnoreAnimationBounds(bool iValue)
+UOdysseyAnimationPlayer::SetIgnorePrePostBehaviour(bool iValue)
 {
-    mIgnoreAnimationBounds = iValue;
+    mIgnorePrePostBehaviour = iValue;
 }
 
 bool
-UOdysseyAnimationPlayer::GetIgnoreAnimationBounds() const
+UOdysseyAnimationPlayer::GetIgnorePrePostBehaviour() const
 {
-    return mIgnoreAnimationBounds;
+    return mIgnorePrePostBehaviour;
 }
 
 void
@@ -700,4 +705,40 @@ UOdysseyAnimationPlayer::PostDuplicate(EDuplicateMode::Type iDuplicateMode)
 
     IOdysseyRenderingAbility::OnRenderingChangedDelegate().AddUObject(this, &UOdysseyAnimationPlayer::OnRenderingChanged);
     mImageRenderingComposition.Empty();
+}
+
+struct FOdysseyAnimationPlayerObjectVersion
+{
+    enum Type
+    {
+        // Before any version changes were made
+        BeforeCustomVersionWasAdded,
+
+        // Added the Play Range system
+        AddPlayRange,
+
+        // -----<new versions can be added above this line>-------------------------------------------------
+        VersionPlusOne,
+        LatestVersion = VersionPlusOne - 1
+    };
+
+    // The GUID for this custom version number
+    const static FGuid GUID;
+
+private:
+    FOdysseyAnimationPlayerObjectVersion() {}
+};
+
+const FGuid FOdysseyAnimationPlayerObjectVersion::GUID(0x19967258, 0x708644FE, 0x92B03E58, 0x23F1B6BC);
+FDevVersionRegistration GRegisterOdysseyAnimationPlayerObjectVersion(FOdysseyAnimationPlayerObjectVersion::GUID, FOdysseyAnimationPlayerObjectVersion::LatestVersion, TEXT("OdysseyAnimationPlayer"));
+
+void
+UOdysseyAnimationPlayer::Serialize(FArchive& Ar)
+{
+    Super::Serialize(Ar);
+
+    if( Ar.IsLoading() && Ar.CustomVer(FOdysseyAnimationPlayerObjectVersion::GUID) < FOdysseyAnimationPlayerObjectVersion::AddPlayRange )
+    {
+        PlayRange = EOdysseyAnimationPlayerPlayRange::Infinite;
+    }
 }

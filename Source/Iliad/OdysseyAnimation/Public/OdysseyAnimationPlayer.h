@@ -33,6 +33,14 @@ enum class EOdysseyAnimationPlayerPostBehaviour : uint8
     Loop
 };
 
+UENUM(BlueprintType)
+enum class EOdysseyAnimationPlayerPlayRange : uint8
+{
+    AnimationBounds,
+    Infinite,
+    Custom
+};
+
 UCLASS()
 class ODYSSEYANIMATION_API UOdysseyAnimationPlayer
     : public UObject
@@ -53,6 +61,7 @@ protected:
     virtual void PostInitProperties() override;
     virtual void PostLoad() override;
     virtual void PostDuplicate(EDuplicateMode::Type iDuplicateMode) override;
+    virtual void Serialize(FArchive& Ar) override;
 
 #if WITH_EDITOR
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent) override;
@@ -97,11 +106,8 @@ public:
     UFUNCTION(BlueprintPure, Category = "Odyssey|AnimationPlayer")
     UOdysseyAnimation* GetAnimation() const;
 
-    UFUNCTION(BlueprintPure, Category = "Odyssey|AnimationPlayer")
-    bool GetDuration(FFrameTime& oTime) const;
-
     UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationPlayer")
-    FFrameTime GetFrameInAnimationBounds(FFrameTime iFrame) const;
+    FFrameTime ApplyPrePostBehaviour(FFrameTime iFrame) const;
 
     UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationPlayer")
     void SetPreBehaviour(EOdysseyAnimationPlayerPostBehaviour iValue);
@@ -118,18 +124,29 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationPlayer")
     void EndScrub();
 
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationPlayer")
+    void SetIsLoopingInPlayRange(bool IsLooping);
+
+    UFUNCTION(BlueprintPure, Category = "Odyssey|AnimationPlayer")
+    bool GetIsLoopingInPlayRange() const;
+
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationPlayer")
+    void SetPlayRange(EOdysseyAnimationPlayerPlayRange PlayRange);
+
+    UFUNCTION(BlueprintPure, Category = "Odyssey|AnimationPlayer")
+    EOdysseyAnimationPlayerPlayRange GetPlayRange() const;
+
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationPlayer")
+    void SetCustomPlayRange(FFrameNumber StartFrame, FFrameNumber EndFrame);
+
+    UFUNCTION(BlueprintPure, Category = "Odyssey|AnimationPlayer")
+    void GetCustomPlayRange(FFrameNumber& StartFrame, FFrameNumber& EndFrame);
+
 #if WITH_EDITOR
-    void SetUsePreBehaviour(bool iValue);
-    void SetUsePostBehaviour(bool iValue);
-    bool UsePreBehaviour() const;
-    bool UsePostBehaviour() const;
-    bool IsLooping() const;
-    void SetIsLooping(bool iIsLooping);
     void SetRenderType(TAttribute<uint64> iRenderType);
     uint64 GetRenderType() const;
-    void SetFrameRange(const TOptional<TRange<FFrameTime>>& iRange);
-    void SetIgnoreAnimationBounds(bool iValue);
-    bool GetIgnoreAnimationBounds() const;
+    void SetIgnorePrePostBehaviour(bool iValue);
+    bool GetIgnorePrePostBehaviour() const;
 #endif
 
 protected:
@@ -149,6 +166,18 @@ private:
     TObjectPtr<UOdysseyAnimation> Animation;
 
     UPROPERTY()
+    bool IsLoopingInPlayRange = false;
+
+    UPROPERTY()
+    EOdysseyAnimationPlayerPlayRange PlayRange = EOdysseyAnimationPlayerPlayRange::AnimationBounds; //Infinite, Custom
+
+    UPROPERTY()
+    FFrameNumber CustomPlayRangeStartFrame;
+
+    UPROPERTY()
+    FFrameNumber CustomPlayRangeEndFrame;
+
+    UPROPERTY()
     EOdysseyAnimationPlayerPostBehaviour PreBehaviour = EOdysseyAnimationPlayerPostBehaviour::Loop;
 
     UPROPERTY()
@@ -165,11 +194,8 @@ public:
 
 private:
 #if WITH_EDITOR
-    bool mUsePreBehaviour = true;
-    bool mUsePostBehaviour = true;
-    bool mIgnoreAnimationBounds = false;
-    TOptional<TRange<FFrameTime>> mRange;
-    bool mIsLooping = true;
+    //Allows to have Infinite Animation Scrubbing in Editor
+    bool mIgnorePrePostBehaviour = false;
 #endif
 
     TAttribute<uint64> mRenderType = EOdysseyRenderingType::Render;

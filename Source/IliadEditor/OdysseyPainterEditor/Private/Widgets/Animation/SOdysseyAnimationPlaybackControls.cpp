@@ -162,7 +162,7 @@ SOdysseyAnimationPlaybackControls::GetLoopingButtonVisibility() const
     if (!mPlayer)
         return EVisibility::Collapsed;
 
-    return mPlayer->IsLooping() ? EVisibility::Visible : EVisibility::Collapsed;
+    return mPlayer->GetIsLoopingInPlayRange() ? EVisibility::Visible : EVisibility::Collapsed;
 }
 
 EVisibility
@@ -171,7 +171,7 @@ SOdysseyAnimationPlaybackControls::GetNotLoopingButtonVisibility() const
     if (!mPlayer)
         return EVisibility::Collapsed;
 
-    return mPlayer->IsLooping() ? EVisibility::Collapsed : EVisibility::Visible;
+    return mPlayer->GetIsLoopingInPlayRange() ? EVisibility::Collapsed : EVisibility::Visible;
 }
 
 FReply
@@ -181,20 +181,21 @@ SOdysseyAnimationPlaybackControls::OnPlayClicked()
     TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
     if (selectedCells.IsEmpty())
     {
-        mPlayer->SetFrameRange(TOptional<TRange<FFrameTime>>());
+        mPlayer->SetPlayRange(EOdysseyAnimationPlayerPlayRange::AnimationBounds);
     }
     else
     {
-        TArray<TRange<FFrameTime>> ranges;
+        TArray<TRange<FFrameNumber>> ranges;
         for (UOdysseyLayerCell* cell : selectedCells)
         {
             FInt32Range frameRange = cell->GetFrameRange();
-            TRange<FFrameTime> frameTimeRange(frameRange.GetLowerBoundValue(), frameRange.GetLowerBoundValue() + 1);
-            ranges.Add(frameTimeRange);
+            TRange<FFrameNumber> frameNumberRange(frameRange.GetLowerBoundValue(), frameRange.GetLowerBoundValue() + 1);
+            ranges.Add(frameNumberRange);
         }
 
-        TRange<FFrameTime> range = TRange<FFrameTime>::Hull(ranges);
-        mPlayer->SetFrameRange(range);
+        TRange<FFrameNumber> range = TRange<FFrameNumber>::Hull(ranges);
+        mPlayer->SetCustomPlayRange(range.GetLowerBoundValue(), range.GetUpperBoundValue());
+        mPlayer->SetPlayRange(EOdysseyAnimationPlayerPlayRange::Custom);
     }
     mPlayer->Play(false);
     return FReply::Handled();
@@ -207,20 +208,21 @@ SOdysseyAnimationPlaybackControls::OnPlayBackwardClicked()
     TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
     if (selectedCells.IsEmpty())
     {
-        mPlayer->SetFrameRange(TOptional<TRange<FFrameTime>>());
+        mPlayer->SetPlayRange(EOdysseyAnimationPlayerPlayRange::AnimationBounds);
     }
     else
     {
-        TArray<TRange<FFrameTime>> ranges;
+        TArray<TRange<FFrameNumber>> ranges;
         for (UOdysseyLayerCell* cell : selectedCells)
         {
             FInt32Range frameRange = cell->GetFrameRange();
-            TRange<FFrameTime> frameTimeRange(frameRange.GetLowerBoundValue(), frameRange.GetLowerBoundValue() + 1);
-            ranges.Add(frameTimeRange);
+            TRange<FFrameNumber> frameNumberRange(frameRange.GetLowerBoundValue(), frameRange.GetLowerBoundValue() + 1);
+            ranges.Add(frameNumberRange);
         }
 
-        TRange<FFrameTime> range = TRange<FFrameTime>::Hull(ranges);
-        mPlayer->SetFrameRange(range);
+        TRange<FFrameNumber> range = TRange<FFrameNumber>::Hull(ranges);
+        mPlayer->SetCustomPlayRange(range.GetLowerBoundValue(), range.GetUpperBoundValue());
+        mPlayer->SetPlayRange(EOdysseyAnimationPlayerPlayRange::Custom);
     }
     mPlayer->Play(true);
     return FReply::Handled();
@@ -350,6 +352,6 @@ SOdysseyAnimationPlaybackControls::OnNextKeyClicked()
 FReply
 SOdysseyAnimationPlaybackControls::OnLoopClicked()
 {
-    mPlayer->SetIsLooping(!mPlayer->IsLooping());
+    mPlayer->SetIsLoopingInPlayRange(!mPlayer->GetIsLoopingInPlayRange());
     return FReply::Handled();
 }

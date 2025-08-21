@@ -48,9 +48,7 @@ FOdysseyPainterEditorAnimationSource::FOdysseyPainterEditorAnimationSource(UOdys
     , mPlayer ( NewObject<UOdysseyAnimationPlayer>() )
     , mEditor( nullptr )
 {
-    mPlayer->SetUsePreBehaviour(false);
-    mPlayer->SetUsePostBehaviour(false);
-    mPlayer->SetIgnoreAnimationBounds(true);
+    mPlayer->SetIgnorePrePostBehaviour(true);
 }
 
 const FGuid&
