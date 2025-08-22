@@ -69,6 +69,17 @@ FOdysseyVectorImportV2::ReadBreakdown( FInbetweenerBreakdown& iBreakdown
                     //iBreakdown.UpdateMatrix();
                 break;
 
+                case FOdysseyFile::VectorV2::CHUNK_BREAKDOWN_TRANSFORM_SKEW:
+                    double skewX;
+                    double skewY;
+
+                    Ar << skewX;
+                    Ar << skewY;
+
+                    iBreakdown.Skew( skewX, skewY );
+                    //iBreakdown.UpdateMatrix();
+                break;
+
                 case FOdysseyFile::VectorV2::CHUNK_BREAKDOWN_GRIDGEOMETRY:
                 {
                     uint32 numQuadX = iBreakdown.GetInbetweenerTag()->GetGridNumQuadX();

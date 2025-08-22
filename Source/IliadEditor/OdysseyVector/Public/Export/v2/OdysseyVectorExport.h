@@ -148,6 +148,7 @@ namespace FOdysseyVectorExportV2
     ////////////////////////////////////
     void ODYSSEYVECTOR_API WriteBreakdown( FInbetweenerBreakdown& iBreakdown, FArchive &Ar );
     void WriteBreakdownGridGeometry( FInbetweenerBreakdown& iBreakdown, FArchive &Ar );
+    void WriteBreakdownTransformSkew( FInbetweenerBreakdown& iBreakdown, FArchive &Ar );
     void WriteBreakdownTransformScaling( FInbetweenerBreakdown& iBreakdown, FArchive &Ar );
     void WriteBreakdownTransformRotation( FInbetweenerBreakdown& iBreakdown, FArchive &Ar );
     void WriteBreakdownTransformTranslation( FInbetweenerBreakdown& iBreakdown, FArchive &Ar );

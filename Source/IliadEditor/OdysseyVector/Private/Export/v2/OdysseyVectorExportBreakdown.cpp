@@ -87,6 +87,22 @@ FOdysseyVectorExportV2::WriteBreakdownGridGeometry( FInbetweenerBreakdown& iBrea
 }
 
 void
+FOdysseyVectorExportV2::WriteBreakdownTransformSkew( FInbetweenerBreakdown& iBreakdown
+                                                   , FArchive &Ar )
+{
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_BREAKDOWN_TRANSFORM_SKEW
+                            , Ar
+                            , [&iBreakdown](FArchive &Ar) -> void
+    {
+        double skewX = iBreakdown.GetTargetSkewX();
+        double skewY = iBreakdown.GetTargetSkewY();
+
+        Ar << skewX;
+        Ar << skewY;
+    } );
+}
+
+void
 FOdysseyVectorExportV2::WriteBreakdownTransformScaling( FInbetweenerBreakdown& iBreakdown
                                                       , FArchive &Ar )
 {
@@ -143,6 +159,7 @@ FOdysseyVectorExportV2::WriteBreakdownTransform( FInbetweenerBreakdown& iBreakdo
         WriteBreakdownTransformTranslation( iBreakdown, Ar );
         WriteBreakdownTransformRotation( iBreakdown, Ar );
         WriteBreakdownTransformScaling( iBreakdown, Ar );
+        WriteBreakdownTransformSkew( iBreakdown, Ar );
     } );
 }
 

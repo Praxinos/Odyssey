@@ -165,6 +165,7 @@ namespace FOdysseyFile
                                             static const uint32 CHUNK_BREAKDOWN_TRANSFORM_TRANSLATION = 0xc3264834; // double(translationX)-double(translationY)
                                             static const uint32 CHUNK_BREAKDOWN_TRANSFORM_ROTATION = 0xb788e00d; // double(rotation)
                                             static const uint32 CHUNK_BREAKDOWN_TRANSFORM_SCALING = 0xe46d6320; // double(scalingX)-double(scalingY)
+                                            static const uint32 CHUNK_BREAKDOWN_TRANSFORM_SKEW =  0xf1958809; // double(skeX)-double(skewY)
                                         static const uint32 CHUNK_BREAKDOWN_GRIDGEOMETRY = 0xfe47d3ff;  // array[double(sourcex)-double(sourcey)-double(targetx)-double(targety)]
                                         static const uint32 CHUNK_BREAKDOWN_CHART = 0xa58722fe;  // container
                                             static const uint32 CHUNK_BREAKDOWN_CHART_HUDBEZIER = 0x8ca1702e; // double(x0)-double(y0)-double(x1)-double(y1)-double(x2)-double(y2)
