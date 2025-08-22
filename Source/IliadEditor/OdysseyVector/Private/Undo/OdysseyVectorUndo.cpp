@@ -823,7 +823,9 @@ FSnapshotInbetweenerBreakdown::RecordState( eSnapshotState iStateType )
                                               , requestedState->translationY
                                               , requestedState->rotation
                                               , requestedState->scalingX
-                                              , requestedState->scalingY );
+                                              , requestedState->scalingY
+                                              , requestedState->skewX
+                                              , requestedState->skewY );
             }
 
             if( mSnapshotFlags & FSnapshotFlags::Breakdown::TARGETVISIBILITY )
@@ -877,7 +879,9 @@ FSnapshotInbetweenerBreakdown::LoadState( eSnapshotState iStateType )
                                           , requestedState->translationY
                                           , requestedState->rotation
                                           , requestedState->scalingX
-                                          , requestedState->scalingY );
+                                          , requestedState->scalingY
+                                          , requestedState->skewX
+                                          , requestedState->skewY );
 
             mBreakdown->UpdateMatrix();
         }

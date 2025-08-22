@@ -27,6 +27,8 @@ FInbetweenerBreakdown::FInbetweenerBreakdown( FOdysseyVectorTagInbetweener* iInb
     , mTargetRotation    ( 0.0f )
     , mTargetScalingX    ( 1.0f )
     , mTargetScalingY    ( 1.0f )
+    , mTargetSkewX       ( 0.0f )
+    , mTargetSkewY       ( 0.0f )
     , mInbetweenerTag( iInbetweenerTag )
     , mPrevBreakdown( nullptr )
     , mNextBreakdown( nullptr )
@@ -129,6 +131,18 @@ FInbetweenerBreakdown::GetTargetScalingY()
 }
 
 double
+FInbetweenerBreakdown::GetTargetSkewX()
+{
+    return mTargetSkewX;
+}
+
+double
+FInbetweenerBreakdown::GetTargetSkewY()
+{
+    return mTargetSkewY;
+}
+
+double
 FInbetweenerBreakdown::GetSourceTranslationX()
 {
     return mPrevBreakdown ? mPrevBreakdown->GetTargetTranslationX() : 0.0f;
@@ -158,15 +172,29 @@ FInbetweenerBreakdown::GetSourceScalingY()
     return mPrevBreakdown ? mPrevBreakdown->GetTargetScalingY() : 1.0f;
 }
 
+double
+FInbetweenerBreakdown::GetSourceSkewX()
+{
+    return mPrevBreakdown ? mPrevBreakdown->GetTargetSkewX() : 0.0f;
+}
+
+double
+FInbetweenerBreakdown::GetSourceSkewY()
+{
+    return mPrevBreakdown ? mPrevBreakdown->GetTargetSkewY() : 0.0f;
+}
+
 void
 FInbetweenerBreakdown::InterpolateTransform()
 {
     FInbetweenerBreakdown* prevBreakdown = GetPrevBreakdown();
     double sourceTranslationX = prevBreakdown ? prevBreakdown->GetTargetTranslationX() : 0.0f
          , sourceTranslationY = prevBreakdown ? prevBreakdown->GetTargetTranslationY() : 0.0f
-         , sourceRotation     = prevBreakdown ? prevBreakdown->GetTargetRotation()    : 0.0f
+         , sourceRotation     = prevBreakdown ? prevBreakdown->GetTargetRotation()     : 0.0f
          , sourceScalingX     = prevBreakdown ? prevBreakdown->GetTargetScalingX()     : 1.0f
-         , sourceScalingY     = prevBreakdown ? prevBreakdown->GetTargetScalingY()     : 1.0f;
+         , sourceScalingY     = prevBreakdown ? prevBreakdown->GetTargetScalingY()     : 1.0f
+         , sourceSkewX        = prevBreakdown ? prevBreakdown->GetTargetSkewX()        : 0.0f
+         , sourceSkewY        = prevBreakdown ? prevBreakdown->GetTargetSkewY()        : 0.0f;
 
     for( uint32 i = 1; i < GetDrawingCount() - 1; i++ )
     {
@@ -179,6 +207,8 @@ FInbetweenerBreakdown::InterpolateTransform()
         inbetween->GetDrawing()->rotation = sourceRotation + ( ( mTargetRotation - sourceRotation ) * t );
         inbetween->GetDrawing()->scalingX = sourceScalingX + ( ( mTargetScalingX - sourceScalingX ) * t );
         inbetween->GetDrawing()->scalingY = sourceScalingY + ( ( mTargetScalingY - sourceScalingY ) * t );
+        inbetween->GetDrawing()->skewX = sourceSkewX + ( ( mTargetSkewX - sourceSkewX ) * t );
+        inbetween->GetDrawing()->skewY = sourceSkewY + ( ( mTargetSkewY - sourceSkewY ) * t );
 
         inbetween->GetDrawing()->localMatrix.reset();
         inbetween->GetDrawing()->localMatrix.translate( inbetween->GetDrawing()->translationX
@@ -186,6 +216,8 @@ FInbetweenerBreakdown::InterpolateTransform()
         inbetween->GetDrawing()->localMatrix.rotate( inbetween->GetDrawing()->rotation * M_PI / 180.0f ); // convert to radians
         inbetween->GetDrawing()->localMatrix.scale( inbetween->GetDrawing()->scalingX
                                                   , inbetween->GetDrawing()->scalingY );
+        inbetween->GetDrawing()->localMatrix.skew( inbetween->GetDrawing()->skewX
+                                                 , inbetween->GetDrawing()->skewY );
 
         BLMatrix2D::invert( inbetween->GetDrawing()->inverseMatrix, inbetween->GetDrawing()->localMatrix );
     }
@@ -443,13 +475,17 @@ FInbetweenerBreakdown::GetTargetTransform( double& oTranslationX
                                          , double& oTranslationY
                                          , double& oRotation
                                          , double& oScalingX
-                                         , double& oScalingY )
+                                         , double& oScalingY
+                                         , double& oSkewX
+                                         , double& oSkewY )
 {
     oTranslationX = mTargetTranslationX;
     oTranslationY = mTargetTranslationY;
     oRotation = mTargetRotation;
     oScalingX = mTargetScalingX;
     oScalingY = mTargetScalingY;
+    oSkewX = mTargetSkewX;
+    oSkewY = mTargetSkewY;
 }
 
 void
@@ -457,13 +493,17 @@ FInbetweenerBreakdown::SetTargetTransform( double iTranslationX
                                          , double iTranslationY
                                          , double iRotation
                                          , double iScalingX
-                                         , double iScalingY )
+                                         , double iScalingY
+                                         , double iSkewX
+                                         , double iSkewY )
 {
     mTargetTranslationX = iTranslationX;
     mTargetTranslationY = iTranslationY;
     mTargetRotation = iRotation;
     mTargetScalingX = iScalingX;
     mTargetScalingY = iScalingY;
+    mTargetSkewX    = iSkewX;
+    mTargetSkewY    = iSkewY;
 
     //UpdateMatrix( );
 }
@@ -478,11 +518,14 @@ FInbetweenerBreakdown::UpdateMatrix()
     drawing->rotation = mTargetRotation;
     drawing->scalingX = mTargetScalingX;
     drawing->scalingY = mTargetScalingY;
+    drawing->skewX    = mTargetSkewX;
+    drawing->skewY    = mTargetSkewY;
 
     drawing->localMatrix.reset();
     drawing->localMatrix.translate( mTargetTranslationX, mTargetTranslationY );
     drawing->localMatrix.rotate( mTargetRotation * M_PI / 180.0f );
     drawing->localMatrix.scale( mTargetScalingX, mTargetScalingY );
+    drawing->localMatrix.skew( mTargetSkewX, mTargetSkewY );
 
     BLMatrix2D::invert( drawing->inverseMatrix, drawing->localMatrix );
 
@@ -501,6 +544,13 @@ FInbetweenerBreakdown::Translate( double iX, double iY )
 {
     mTargetTranslationX = iX;
     mTargetTranslationY = iY;
+}
+
+void
+FInbetweenerBreakdown::Skew( double iX, double iY )
+{
+    mTargetSkewX = iX;
+    mTargetSkewY = iY;
 }
 
 void

@@ -2478,7 +2478,7 @@ FOdysseyPainterEditor::ResetInbetweenerGrid( FOdysseyPainterEditor* iEditor
             {
                 if( iResetTransformation )
                 {
-                    breakdown->SetTargetTransform( 0.0f, 0.0f, 0.0f, 1.0f, 1.0f );
+                    breakdown->SetTargetTransform( 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f );
                     breakdown->UpdateMatrix();
                 }
 

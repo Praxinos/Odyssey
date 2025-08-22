@@ -24,7 +24,8 @@ struct ODYSSEYVECTOR_API FInbetweenerDrawing
     double rotation;
     double scalingX;
     double scalingY;
-
+    double skewX;
+    double skewY;
 
     FInbetweenerDrawing( FOdysseyVectorTagInbetweener* iInbetweenerTag );
     uint32 GetIndex();

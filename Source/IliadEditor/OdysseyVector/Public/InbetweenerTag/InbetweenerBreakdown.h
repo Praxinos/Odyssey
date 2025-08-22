@@ -44,16 +44,21 @@ class ODYSSEYVECTOR_API FInbetweenerBreakdown
         void Translate( double iX, double iY );
         void Rotate( double iAngle );
         void Scale( double iX, double iY );
+        void Skew( double iX, double iY );
         void GetTargetTransform( double& oTranslationX
                                , double& oTranslationY
                                , double& oRotation
                                , double& oScalingX
-                               , double& oScalingY );
+                               , double& oScalingY
+                               , double& oSkewX
+                               , double& oSkewY );
         void SetTargetTransform( double iTranslationX
                                , double iTranslationY
                                , double iRotation
                                , double iScalingX
-                               , double iScalingY );
+                               , double iScalingY
+                               , double iSkewX
+                               , double iSkewY );
         int32 GetTargetCellIndex();
         int32 GetSourceCellIndex();
         void UpdateMatrix();
@@ -65,12 +70,16 @@ class ODYSSEYVECTOR_API FInbetweenerBreakdown
         double GetTargetRotation();
         double GetTargetScalingX();
         double GetTargetScalingY();
+        double GetTargetSkewX();
+        double GetTargetSkewY();
 
         double GetSourceTranslationX();
         double GetSourceTranslationY();
         double GetSourceRotation();
         double GetSourceScalingX();
         double GetSourceScalingY();
+        double GetSourceSkewX();
+        double GetSourceSkewY();
 
         //bool  IsMaster();
         uint32 GetDrawingCount();
@@ -91,6 +100,8 @@ class ODYSSEYVECTOR_API FInbetweenerBreakdown
         double mTargetRotation;
         double mTargetScalingX;
         double mTargetScalingY;
+        double mTargetSkewX;
+        double mTargetSkewY;
         BLMatrix2D mTargetLocalMatrix;
 /*
         BLMatrix2D mTargetWorldMatrix;

@@ -14,9 +14,31 @@ class FOdysseyVectorUndo;
 class FInbetweenerBreakdown;
 class FOdysseyVectorObject;
 
+UENUM()
+enum class ETransformToolScalingCenter: uint8
+{
+    OppositeCorner = 0,
+    BoxCenter = 1,
+    Gizmo = 2
+};
+
 UCLASS( HideCategories = (SelectionTool) )
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTransformTool : public UOdysseyPainterEditorVectorBaseTool
 {
+    struct TransformedObject
+    {
+        FOdysseyVectorObject* object;
+        BLMatrix2D worldMatrix;
+        BLMatrix2D parentInverseWorldMatrix;
+    };
+
+    struct TransformedBreakdown
+    {
+        FInbetweenerBreakdown* breakdown;
+        BLMatrix2D worldMatrix;
+        BLMatrix2D ownerInverseWorldMatrix;
+    };
+
     public:
         GENERATED_BODY()
 
@@ -66,6 +88,11 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTransformTool : public
                                      , std::list<FOdysseyVectorObject*>& oObjectList );
 
         EVisibility IsModeInbetween() const;
+        void MakeSpaceMatrixForScaling();
+        void MakeSpaceMatrixForRotation();
+        void MakeSpaceMatrixForTranslation();
+        void MakeSpaceMatrix();
+        void TransformGizmo( BLMatrix2D& iTransformationMatrix );
 
     private:
         std::list<FInbetweenerBreakdown*> mTransformedBreakdownList;
@@ -79,6 +106,12 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTransformTool : public
         ::ULIS::FVec2D* mPickedPivot;
         bool mDragging;
         FVector2D mScreenMouseAtDown;
+        ::ULIS::FVec2D mMouseAtDown;
+        BLMatrix2D mSpaceMatrix;
+        BLMatrix2D mInverseSpaceMatrix;
+        ::ULIS::FVec2D mSpaceGizmo;
+        std::vector<TransformedObject> mTransformedObjectBuffer;
+        std::vector<TransformedBreakdown> mTransformedBreakdownBuffer;
 
     public:
         UPROPERTY( EditAnywhere
@@ -100,6 +133,11 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTransformTool : public
                  , meta = ( ToolTip = "Uniform" ) )
         bool Uniform;
         bool UniformAtKeyDown;
+
+        UPROPERTY( EditAnywhere
+                 , Category=TransformTool
+                 , meta = ( ToolTip = "Scaling Center" ) )
+        ETransformToolScalingCenter ScalingCenter;
 
         UPROPERTY( EditAnywhere
                  , Category=TransformTool

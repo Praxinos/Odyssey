@@ -689,6 +689,8 @@ class ODYSSEYVECTOR_API FSnapshotInbetweenerBreakdown
         double rotation;
         double scalingX;
         double scalingY;
+        double skewX;
+        double skewY;
         bool targetVisibility;
         std::vector<FSnapshotInbetweenerChart> chartSnapshotBuffer;
 

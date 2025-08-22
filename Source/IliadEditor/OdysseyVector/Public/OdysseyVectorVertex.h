@@ -366,6 +366,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
 
         static bool GetMinMaxFromList( std::list<FOdysseyVectorVertex*>& iVertexList
                                      , bool iWithHandles
+                                     , bool iWorld
                                      , double& oXMin
                                      , double& oYMin
                                      , double& oXMax

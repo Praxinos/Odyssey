@@ -455,28 +455,51 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawText( BLContext* iBLContext
 void
 FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxVertexMode()
 {
+    double xmin, ymin, xmax, ymax;
+
     mSelectionBox.inited = false;
     mSelectionBox.rect = ::ULIS::FRectD( 0, 0, 0, 0 );
-    mSelectionBox.worldMatrix = mScene->GetWorldMatrix();
-    mSelectionBox.inverseWorldMatrix = mScene->GetInverseWorldMatrix();
+    mSelectionBox.worldMatrix.reset(); /* = mScene->GetWorldMatrix()*/;
+    mSelectionBox.inverseWorldMatrix.reset(); /* = mScene->GetInverseWorldMatrix()*/;
 
     // call lambda on each object of the tree
     FOdysseyVectorObject::Traverse
     ( mScene
     , 0
-    , [ this ]( FOdysseyVectorObject* object, uint64 iTraversalFlags ) -> uint64
+    , [ this
+      , &xmin
+      , &ymin
+      , &xmax
+      , &ymax ]( FOdysseyVectorObject* object, uint64 iTraversalFlags ) -> uint64
       {
           if( mScene->GetCell()->ObjectHasFocus( object, iTraversalFlags ) )
           {
               if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
               {
                   FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
+                  double vertexXMin, vertexYMin, vertexXMax, vertexYMax;
                   ::ULIS::FRectD pathBBox;
 
-                  if( path->GetBBoxFromSelectedVertices( pathBBox, true, true ) )
+                  if( FOdysseyVectorVertex::GetMinMaxFromList( path->GetSelectedVertexList()
+                                                             , false
+                                                             , true
+                                                             , vertexXMin
+                                                             , vertexYMin
+                                                             , vertexXMax
+                                                             , vertexYMax ) )
                   {
-                      mSelectionBox.rect = mSelectionBox.inited ? mSelectionBox.rect | pathBBox
-                                                                : pathBBox;
+                      if( mSelectionBox.inited == false )
+                      {
+                          xmin = vertexXMin;
+                          xmax = vertexXMin;
+                          ymin = vertexYMin;
+                          ymax = vertexYMin;
+                      }
+
+                      if( vertexXMin < xmin ) xmin = vertexXMin;
+                      if( vertexYMin < ymin ) ymin = vertexYMin;
+                      if (vertexXMax > xmax ) xmax = vertexXMax;
+                      if( vertexYMax > ymax ) ymax = vertexYMax;
 
                       mSelectionBox.inited = true;
                   }
@@ -490,18 +513,17 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxVertexMode()
 
     if( mSelectionBox.inited )
     {
-        ::ULIS::FRectD rect = mSelectionBox.rect;
         BLPoint p0, p1, p2, p3;
 
-        p0 = mSelectionBox.inverseWorldMatrix.mapPoint( rect.x         , rect.y          );
-        p1 = mSelectionBox.inverseWorldMatrix.mapPoint( rect.x + rect.w, rect.y          );
-        p2 = mSelectionBox.inverseWorldMatrix.mapPoint( rect.x + rect.w, rect.y + rect.h );
-        p3 = mSelectionBox.inverseWorldMatrix.mapPoint( rect.x         , rect.y + rect.h );
+        p0 = mSelectionBox.inverseWorldMatrix.mapPoint( xmin, ymin );
+        p1 = mSelectionBox.inverseWorldMatrix.mapPoint( xmax, ymin );
+        p2 = mSelectionBox.inverseWorldMatrix.mapPoint( xmax, ymax );
+        p3 = mSelectionBox.inverseWorldMatrix.mapPoint( xmin, ymax );
 
         mSelectionBox.rect = ::ULIS::FRectD::FromMinMax( ::ULIS::FMath::Min4( p0.x, p1.x, p2.x, p3.x )
-                                                        , ::ULIS::FMath::Min4( p0.y, p1.y, p2.y, p3.y )
-                                                        , ::ULIS::FMath::Max4( p0.x, p1.x, p2.x, p3.x )
-                                                        , ::ULIS::FMath::Max4( p0.y, p1.y, p2.y, p3.y ) );
+                                                       , ::ULIS::FMath::Min4( p0.y, p1.y, p2.y, p3.y )
+                                                       , ::ULIS::FMath::Max4( p0.x, p1.x, p2.x, p3.x )
+                                                       , ::ULIS::FMath::Max4( p0.y, p1.y, p2.y, p3.y ) );
     }
 }
 
@@ -523,8 +545,8 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxObjectMode( bool iForc
     {
         mSelectionBox.inited = false;
         mSelectionBox.rect = ::ULIS::FRectD( 0, 0, 0, 0 );
-        mSelectionBox.worldMatrix = mScene->GetWorldMatrix();
-        mSelectionBox.inverseWorldMatrix = mScene->GetInverseWorldMatrix();
+        mSelectionBox.worldMatrix.reset(); /* = mScene->GetWorldMatrix()*/;
+        mSelectionBox.inverseWorldMatrix.reset(); /* = mScene->GetInverseWorldMatrix()*/;
 
         // call lambda on each object of the tree
         FOdysseyVectorObject::Traverse

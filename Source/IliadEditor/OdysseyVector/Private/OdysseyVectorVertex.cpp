@@ -65,6 +65,7 @@ FOdysseyVectorVertex::GetWorldCoords()
 bool
 FOdysseyVectorVertex::GetMinMaxFromList( std::list<FOdysseyVectorVertex*>& iVertexList
                                        , bool iWithHandles
+                                       , bool iWorld
                                        , double& oXMin
                                        , double& oYMin
                                        , double& oXMax
@@ -73,14 +74,18 @@ FOdysseyVectorVertex::GetMinMaxFromList( std::list<FOdysseyVectorVertex*>& iVert
     if( iVertexList.size() )
     {
         FOdysseyVectorVertex* firstVertex = iVertexList.front();
-        ::ULIS::FVec2D& firstVertexCoords = firstVertex->GetCoords();
+        ::ULIS::FVec2D firstVertexCoords = iWorld ? FOdysseyVector::MapPoint( firstVertex->GetOwner()->GetWorldMatrix()
+                                                                            , firstVertex->GetCoords() )
+                                                  : firstVertex->GetCoords();
 
         oXMin = oXMax = firstVertexCoords.x;
         oYMin = oYMax = firstVertexCoords.y;
 
         for( FOdysseyVectorVertex* vertex : iVertexList )
         {
-            ::ULIS::FVec2D& vertexCoords = vertex->GetCoords();
+            ::ULIS::FVec2D vertexCoords = iWorld ? FOdysseyVector::MapPoint( vertex->GetOwner()->GetWorldMatrix()
+                                                                           , vertex->GetCoords() )
+                                                 : vertex->GetCoords();
 
             if( vertexCoords.x < oXMin ) oXMin = vertexCoords.x;
             if( vertexCoords.y < oYMin ) oYMin = vertexCoords.y;
@@ -92,7 +97,10 @@ FOdysseyVectorVertex::GetMinMaxFromList( std::list<FOdysseyVectorVertex*>& iVert
                 for( FOdysseyVectorSegment* segment : vertex->GetSegmentList() )
                 {
                     FOdysseyVectorHandleSegment* handle = segment->GetHandle( vertex );
-                    ::ULIS::FVec2D& handleCoords = handle->GetCoords();
+                    ::ULIS::FVec2D handleCoords = iWorld ? FOdysseyVector::MapPoint( segment->GetOwner()->GetWorldMatrix()
+                                                                                   , handle->GetCoords() )
+                                                         : handle->GetCoords();
+
 
                     if( handleCoords.x < oXMin ) oXMin = handleCoords.x;
                     if( handleCoords.y < oYMin ) oYMin = handleCoords.y;

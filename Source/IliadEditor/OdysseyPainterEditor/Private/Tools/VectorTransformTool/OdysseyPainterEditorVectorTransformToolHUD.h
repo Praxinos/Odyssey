@@ -15,16 +15,21 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorTransformToolHUD : pub
         static const uint32 GIZMO_RADIUS  = 5;
         static const uint32 SCALER_RADIUS = 5;
 
-        static const uint32 PICK_XAXIS              = ( 1      );
-        static const uint32 PICK_YAXIS              = ( 1 << 1 );
-        static const uint32 PICK_ZAXIS              = ( 1 << 2 );
-        static const uint32 PICK_TRANSLATE          = ( 1 << 3 );
-        static const uint32 PICK_ROTATE             = ( 1 << 4 );
-        static const uint32 PICK_CHANGED            = ( 1 << 5 );
-        static const uint32 PICK_SCALER_TOPLEFT     = ( 1 << 6 );
-        static const uint32 PICK_SCALER_TOPRIGHT    = ( 1 << 7 );
-        static const uint32 PICK_SCALER_BOTTOMRIGHT = ( 1 << 8 );
-        static const uint32 PICK_SCALER_BOTTOMLEFT  = ( 1 << 9 );
+        static const uint32 PICK_XAXIS              = ( 1       );
+        static const uint32 PICK_YAXIS              = ( 1 << 1  );
+        static const uint32 PICK_ZAXIS              = ( 1 << 2  );
+        static const uint32 PICK_TRANSLATE          = ( PICK_XAXIS
+                                                      | PICK_YAXIS );
+        static const uint32 PICK_ROTATE             = ( 1 << 4  );
+        static const uint32 PICK_CHANGED            = ( 1 << 5  );
+        static const uint32 PICK_SCALER_TOPLEFT     = ( 1 << 6  );
+        static const uint32 PICK_SCALER_TOPRIGHT    = ( 1 << 7  );
+        static const uint32 PICK_SCALER_BOTTOMRIGHT = ( 1 << 8  );
+        static const uint32 PICK_SCALER_BOTTOMLEFT  = ( 1 << 9  );
+        static const uint32 PICK_SCALE              = ( PICK_SCALER_TOPLEFT
+                                                      | PICK_SCALER_TOPRIGHT
+                                                      | PICK_SCALER_BOTTOMRIGHT
+                                                      | PICK_SCALER_BOTTOMLEFT );
 
         virtual ~FOdysseyPainterEditorVectorTransformToolHUD();
         FOdysseyPainterEditorVectorTransformToolHUD(  UOdysseyPainterEditorVectorTransformTool* iTransformTool );

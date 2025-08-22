@@ -139,7 +139,9 @@ FOdysseyVectorTagInbetweener::Copy( FOdysseyVectorObject* iDestOwnerObject )
                                            ,  breakdown->GetTargetTranslationY()
                                            ,  breakdown->GetTargetRotation()
                                            ,  breakdown->GetTargetScalingX()
-                                           ,  breakdown->GetTargetScalingY() );
+                                           ,  breakdown->GetTargetScalingY()
+                                           ,  breakdown->GetTargetSkewX()
+                                           ,  breakdown->GetTargetSkewY() );
 
             newBreakdown->GetGrid()->Make( targetPositionBuffer, true );
 
@@ -702,11 +704,15 @@ FOdysseyVectorTagInbetweener::AddBreakdown( FInbetweenerBreakdown* iNewBreakdown
             double prevRotation = prevBreakdown ? prevBreakdown->GetTargetRotation() : 0.0f;
             double prevScalingX = prevBreakdown ? prevBreakdown->GetTargetScalingX() : 1.0f;
             double prevScalingY = prevBreakdown ? prevBreakdown->GetTargetScalingY() : 1.0f;
+            double prevSkewX = prevBreakdown ? prevBreakdown->GetTargetSkewX() : 0.0f;
+            double prevSkewY = prevBreakdown ? prevBreakdown->GetTargetSkewY() : 0.0f;
             double translationX = curBreakdown->GetTargetTranslationX();
             double translationY = curBreakdown->GetTargetTranslationY();
             double rotation = curBreakdown->GetTargetRotation();
             double scalingX = curBreakdown->GetTargetScalingX();
             double scalingY = curBreakdown->GetTargetScalingY();
+            double skewX = curBreakdown->GetTargetSkewX();
+            double skewY = curBreakdown->GetTargetSkewY();
 
             newBreakdown->GetGrid()->SetGeometry( curBreakdownSourceGeometry, eInbetweenerPointPositionType::SourcePosition, true );
             newBreakdown->GetGrid()->SetGeometry( curBreakdownInterpGeometry, eInbetweenerPointPositionType::TargetPosition, true );
@@ -715,7 +721,9 @@ FOdysseyVectorTagInbetweener::AddBreakdown( FInbetweenerBreakdown* iNewBreakdown
                                             , prevTranslationY + ( ( translationY - prevTranslationY ) * t )
                                             , prevRotation     + ( ( rotation     - prevRotation     ) * t )
                                             , prevScalingX     + ( ( scalingX     - prevScalingX     ) * t )
-                                            , prevScalingY     + ( ( scalingY     - prevScalingY     ) * t ) );
+                                            , prevScalingY     + ( ( scalingY     - prevScalingY     ) * t )
+                                            , prevSkewX        + ( ( skewX        - prevSkewX        ) * t )
+                                            , prevSkewY        + ( ( skewY        - prevSkewY        ) * t ) );
             newBreakdown->UpdateMatrix();
         }
 

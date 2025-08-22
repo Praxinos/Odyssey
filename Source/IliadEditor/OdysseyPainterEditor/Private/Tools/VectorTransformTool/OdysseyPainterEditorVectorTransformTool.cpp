@@ -41,6 +41,7 @@ UOdysseyPainterEditorVectorTransformTool::UOdysseyPainterEditorVectorTransformTo
     , ShowInbetweens( eShowInbetweens::Surrounding )
     , PickingRadius(10.0f)
     , Uniform( true )
+    , ScalingCenter( ETransformToolScalingCenter::OppositeCorner )
     //, KeepPathWidth( false )
     , World( false )
     , bInbetweenMode( false )
@@ -205,8 +206,54 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDownVector( FOdysseyVectorGroup
 
         mDragging = false;
         mScreenMouseAtDown = FSlateApplication::Get().GetCursorPos();
+        mMouseAtDown.x = iPointInTexture.x;
+        mMouseAtDown.y = iPointInTexture.y;
 
         mPickedPivot = hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_ZAXIS ? &mTransformHUD->GetGizmo() : nullptr;
+
+        MakeSpaceMatrix();
+
+        mTransformedObjectBuffer.clear();
+        mTransformedBreakdownBuffer.clear();
+
+        if( ( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_VERTEX )
+        ||  ( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_OBJECT ) )
+        {
+            FOdysseyVectorObject::Traverse
+            ( iScene
+            , 0
+            , [ iScene
+              , this ]( FOdysseyVectorObject* object, uint64 travesalFlags ) -> uint64
+              {
+                  if( iScene->GetCell()->ObjectHasFocus( object, travesalFlags ) )
+                  {
+                      BLMatrix2D objectWorldMatrix = object->GetWorldMatrix();
+                      BLMatrix2D parentInverseWorldMatrix = object->GetParent()->GetInverseWorldMatrix();
+                      TransformedObject& transformedObject = mTransformedObjectBuffer.emplace_back();
+
+                      transformedObject.object = object;
+                      transformedObject.worldMatrix = object->GetWorldMatrix();
+                      transformedObject.parentInverseWorldMatrix = object->GetParent()->GetInverseWorldMatrix();
+
+                      // transform is recursive per se, do not recurse if the parent was transformed already
+                      return FOdysseyVectorObject::TRAVERSE_OBJECT_IGNORE_CHILDREN;
+                  }
+
+                  return 0;
+              } );
+        }
+
+        if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
+        {
+            for( FInbetweenerBreakdown* breakdown : mTransformHUD->GetSelectedBreakdownList() )
+            {
+                TransformedBreakdown& transformedBreakdown = mTransformedBreakdownBuffer.emplace_back();
+
+                transformedBreakdown.breakdown = breakdown;
+                transformedBreakdown.worldMatrix = breakdown->GetTargetWorldMatrix();
+                transformedBreakdown.ownerInverseWorldMatrix = breakdown->GetInbetweenerTag()->GetOwner()->GetInverseWorldMatrix();
+            }
+        }
 
         if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_VERTEX )
         {
@@ -275,6 +322,21 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDownVector( FOdysseyVectorGroup
     return true;
 }
 
+void
+UOdysseyPainterEditorVectorTransformTool::TransformGizmo( BLMatrix2D& iTransformationMatrix )
+{
+    FSelectionBox& selectionBox = mTransformHUD->GetSelectionBox();
+    ::ULIS::FVec2D& gizmo = mTransformHUD->GetGizmo();
+
+    if( selectionBox.rect.Area() )
+    {
+        ::ULIS::FVec2D gizmoSpaceTransformedCoords = FOdysseyVector::MapPoint( iTransformationMatrix, mSpaceGizmo );
+        ::ULIS::FVec2D newWorldCoords  = FOdysseyVector::MapPoint( mSpaceMatrix, gizmoSpaceTransformedCoords );
+
+        gizmo = FOdysseyVector::MapPoint( selectionBox.inverseWorldMatrix, newWorldCoords );
+    }
+}
+
 static void
 TransformPoint( FOdysseyVectorPoint* iPoint
               , ::ULIS::FVec2D& iOriginalPosition
@@ -316,46 +378,33 @@ TransformPoint( FOdysseyVectorPoint* iPoint
 
         iPoint->Set( newLocalCoords.x, newLocalCoords.y );
     }
-
-    // Update original position because modification is incremental
-    iOriginalPosition = iPoint->GetCoords();
 }
 
 void
 UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVectorGroupPaint* iScene
                                                                   , const FOdysseyPoint& iPointInTexture )
 {
+    ::ULIS::FVec2D oldLocalCoords = FOdysseyVector::MapPoint( mInverseSpaceMatrix, ::ULIS::FVec2D( mMouseAtDown.x
+                                                                                                 , mMouseAtDown.y ) );
+    ::ULIS::FVec2D localCoords = FOdysseyVector::MapPoint( mInverseSpaceMatrix, ::ULIS::FVec2D( iPointInTexture.x
+                                                                                              , iPointInTexture.y ) );
     FSelectionBox& selectionBox = mTransformHUD->GetSelectionBox();
     uint32 hudFlags = mTransformHUD->GetFlags();
-    ::ULIS::FVec2D& pivot = mTransformHUD->GetGizmo();
-    BLMatrix2D spaceMatrix = selectionBox.worldMatrix;
-    BLMatrix2D inverseSpaceMatrix;
     BLMatrix2D translateMatrix;
     BLPoint translateBy(0,0);
-    BLPoint localDelta;
+    ::ULIS::FVec2D localDelta = localCoords - oldLocalCoords;
 
-    BLMatrix2D::invert( inverseSpaceMatrix, spaceMatrix );
-
-    localDelta = inverseSpaceMatrix.mapVector( iPointInTexture.deltaPosition.X
-                                             , iPointInTexture.deltaPosition.Y );
-
-    translateMatrix.reset();
-
-    if( ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_XAXIS     )
-     || ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_TRANSLATE ) )
+    if( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_XAXIS )
     {
         translateBy.x = localDelta.x;
-
-        translateMatrix.translate( translateBy.x, 0 );
     }
 
-    if( ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_YAXIS     )
-     || ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_TRANSLATE ) )
+    if( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_YAXIS )
     {
         translateBy.y = localDelta.y;
-
-        translateMatrix.translate( 0, translateBy.y );
     }
+
+    translateMatrix.resetToTranslation( translateBy.x, translateBy.y );
 
     if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_VERTEX )
     {
@@ -363,8 +412,8 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
         {
             TransformPoint( mTransformedVertexArray[i]
                           , mTransformedVertexPositionArray[i]
-                          , spaceMatrix
-                          , inverseSpaceMatrix
+                          , mSpaceMatrix
+                          , mInverseSpaceMatrix
                           , translateMatrix );
         }
 
@@ -372,8 +421,8 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
         {
             TransformPoint( mTransformedHandleArray[i]
                           , mTransformedHandlePositionArray[i]
-                          , spaceMatrix
-                          , inverseSpaceMatrix
+                          , mSpaceMatrix
+                          , mInverseSpaceMatrix
                           , translateMatrix );
         }
 
@@ -382,76 +431,57 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
 
         // update the selection box with the newly modified matrices
         iScene->GetLayer()->ResetHUD( iScene );
-
-        // replace pivot correctly.
-        pivot.x += translateBy.x;
-        pivot.y += translateBy.y;
     }
 
     if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_OBJECT )
     {
-        BLPoint spacePivot = BLPoint( pivot.x - selectionBox.rect.x
-                                    , pivot.y - selectionBox.rect.y );
+        for( TransformedObject& transformedObject : mTransformedObjectBuffer )
+        {
+            FOdysseyVectorObject* object = transformedObject.object;
+            double translationX;
+            double translationY;
+            double rotation;
+            double scalingX;
+            double scalingY;
+            double skewX;
+            double skewY;
+            BLMatrix2D objectSpaceMatrix;
+            BLMatrix2D objectSpaceTransformedMatrix;
+            BLMatrix2D objectLocalMatrix;
+            BLMatrix2D objectWorldMatrix = transformedObject.worldMatrix;
+            BLMatrix2D parentInverseWorldMatrix = transformedObject.parentInverseWorldMatrix;
 
-        // run lambda recursively on altered objects
-        FOdysseyVectorObject::Traverse
-        ( iScene
-        , 0
-        , [ iScene
-          , &spaceMatrix
-          , &inverseSpaceMatrix
-          , &translateMatrix ]( FOdysseyVectorObject* object, uint64 travesalFlags ) -> uint64
-          {
-              // transform is recursive per se, do not recurse if the parent was transformed already
-              if( ( travesalFlags & FOdysseyVectorObject::TRAVERSE_PARENT_HASFOCUS ) == 0 )
-              {
-                  if( iScene->GetCell()->ObjectHasFocus( object, travesalFlags ) )
-                  {
-                      double translationX;
-                      double translationY;
-                      double rotation;
-                      double scalingX;
-                      double scalingY;
-                      BLMatrix2D objectSpaceMatrix;
-                      BLMatrix2D objectTranslateMatrix;
-                      BLMatrix2D objectLocalMatrix;
-                      BLMatrix2D objectWorldMatrix = object->GetWorldMatrix();
-                      BLMatrix2D parentInverseWorldMatrix = object->GetParent()->GetInverseWorldMatrix();
+            // transfer object in "Selection Space" coordinates system
+            FOdysseyVector::MatrixMultiply( mInverseSpaceMatrix, objectWorldMatrix, objectSpaceMatrix );
 
-                      // transfer object in "Selection Space" coordinates system
-                      FOdysseyVector::MatrixMultiply( inverseSpaceMatrix, objectWorldMatrix, objectSpaceMatrix );
+            // translate the object (local to the "Selection Space" coordinates system)
+            FOdysseyVector::MatrixMultiply( translateMatrix, objectSpaceMatrix, objectSpaceTransformedMatrix );
 
-                      // translate the object (local to the "Selection Space" coordinates system)
-                      FOdysseyVector::MatrixMultiply( translateMatrix, objectSpaceMatrix, objectTranslateMatrix );
+            // transfer the object back to world coordinates system
+            FOdysseyVector::MatrixMultiply( mSpaceMatrix, objectSpaceTransformedMatrix, objectWorldMatrix );
 
-                      // transfer the object back to world coordinates system
-                      FOdysseyVector::MatrixMultiply( spaceMatrix, objectTranslateMatrix, objectWorldMatrix );
+            // Convert the object to its parent coordinate system, i.e its local coordinates system.
+            FOdysseyVector::MatrixMultiply( parentInverseWorldMatrix, objectWorldMatrix, objectLocalMatrix );
 
-                      // Convert the object to its parent coordinate system, i.e its local coordinates system.
-                      FOdysseyVector::MatrixMultiply( parentInverseWorldMatrix, objectWorldMatrix, objectLocalMatrix );
+            // Extract the local transformations
+            FOdysseyVector::ExtractTransformations( objectLocalMatrix
+                                                , &translationX
+                                                , &translationY
+                                                , &rotation // in radians
+                                                , &scalingX
+                                                , &scalingY
+                                                , &skewX
+                                                , &skewY
+                                                , false );
 
-                      // Extract the local transformations
-                      FOdysseyVector::ExtractTransformations( objectLocalMatrix
-                                                            , &translationX
-                                                            , &translationY
-                                                            , &rotation // in radians
-                                                            , &scalingX
-                                                            , &scalingY
-                                                            , false );
+            // Apply the local transformations
+            object->Translate( translationX, translationY );
+            object->Rotate( rotation / M_PI * 180 ); // in degrees
+            object->Scale( scalingX, scalingY );
+            object->Skew( skewX, skewY );
 
-                      // Apply the local transformations
-                      object->Translate( translationX, translationY );
-                      object->Rotate( rotation / M_PI * 180 ); // in degrees
-                      object->Scale( scalingX, scalingY );
-
-                      object->UpdateMatrix();
-
-                      return FOdysseyVectorObject::TRAVERSE_OBJECT_ACCEPTED;
-                  }
-              }
-
-              return 0;
-          } );
+            object->UpdateMatrix();
+        }
 
         // Update the matrix for all objects
         //iScene->UpdateMatrix();
@@ -461,56 +491,54 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
 
         // update the selection box with the newly modified matrices
         iScene->GetLayer()->ResetHUD( iScene );
-
-        // replace pivot correctly.
-        pivot.x = selectionBox.rect.x + spacePivot.x;
-        pivot.y = selectionBox.rect.y + spacePivot.y;
     }
-
 
     if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
     {
-        BLPoint spacePivot = BLPoint( pivot.x - selectionBox.rect.x
-                                    , pivot.y - selectionBox.rect.y );
-
-        for( FInbetweenerBreakdown* breakdown : mTransformHUD->GetSelectedBreakdownList() )
+        for( TransformedBreakdown& transformedBreakdown : mTransformedBreakdownBuffer )
         {
             double translationX;
             double translationY;
             double rotation;
             double scalingX;
             double scalingY;
-            BLMatrix2D tagSpaceMatrix;
-            BLMatrix2D tagTranslateMatrix;
-            BLMatrix2D tagLocalMatrix;
-            BLMatrix2D tagWorldMatrix = breakdown->GetTargetWorldMatrix();
-            BLMatrix2D parentInverseWorldMatrix = breakdown->GetInbetweenerTag()->GetOwner()->GetInverseWorldMatrix();
+            double skewX;
+            double skewY;
+            BLMatrix2D breakdownSpaceMatrix;
+            BLMatrix2D breakdownTranslateMatrix;
+            BLMatrix2D breakdownLocalMatrix;
+            FInbetweenerBreakdown* breakdown = transformedBreakdown.breakdown;
+            BLMatrix2D breakdownWorldMatrix = transformedBreakdown.worldMatrix;
+            BLMatrix2D ownerInverseWorldMatrix = transformedBreakdown.ownerInverseWorldMatrix;
 
             // transfer object in "Selection Space" coordinates system
-            FOdysseyVector::MatrixMultiply( inverseSpaceMatrix, tagWorldMatrix, tagSpaceMatrix );
+            FOdysseyVector::MatrixMultiply( mInverseSpaceMatrix, breakdownWorldMatrix, breakdownSpaceMatrix );
 
             // translate the object (local to the "Selection Space" coordinates system)
-            FOdysseyVector::MatrixMultiply( translateMatrix, tagSpaceMatrix, tagTranslateMatrix );
+            FOdysseyVector::MatrixMultiply( translateMatrix, breakdownSpaceMatrix, breakdownTranslateMatrix );
 
             // transfer the object back to world coordinates system
-            FOdysseyVector::MatrixMultiply( spaceMatrix, tagTranslateMatrix, tagWorldMatrix );
+            FOdysseyVector::MatrixMultiply( mSpaceMatrix, breakdownTranslateMatrix, breakdownWorldMatrix );
 
             // Convert the object to its parent coordinate system, i.e its local coordinates system.
-            FOdysseyVector::MatrixMultiply( parentInverseWorldMatrix, tagWorldMatrix, tagLocalMatrix );
+            FOdysseyVector::MatrixMultiply( ownerInverseWorldMatrix, breakdownWorldMatrix, breakdownLocalMatrix );
 
             // Extract the local transformations
-            FOdysseyVector::ExtractTransformations( tagLocalMatrix
-                                                 , &translationX
-                                                 , &translationY
-                                                 , &rotation // in radians
-                                                 , &scalingX
-                                                 , &scalingY
-                                                 , false );
+            FOdysseyVector::ExtractTransformations( breakdownLocalMatrix
+                                                  , &translationX
+                                                  , &translationY
+                                                  , &rotation // in radians
+                                                  , &scalingX
+                                                  , &scalingY
+                                                  , &skewX
+                                                  , &skewY
+                                                  , false );
 
             // Apply the local transformations
             breakdown->Translate( translationX, translationY );
             breakdown->Rotate( rotation / M_PI * 180 ); // in degrees
             breakdown->Scale( scalingX, scalingY );
+            breakdown->Skew( skewX, skewY );
 
             breakdown->UpdateMatrix();
         }
@@ -519,30 +547,28 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
 
         // update the selection box with the newly modified matrices
         iScene->GetLayer()->ResetHUD( iScene );
-
-        // replace pivot correctly.
-        pivot.x = selectionBox.rect.x + spacePivot.x;
-        pivot.y = selectionBox.rect.y + spacePivot.y;
     }
+
+    TransformGizmo( translateMatrix );
 }
 
 double
 UOdysseyPainterEditorVectorTransformTool::GetRotationAngle( const FOdysseyPoint& iPointInTexture )
 {
     FSelectionBox& selectionBox = mTransformHUD->GetSelectionBox();
-    BLPoint pt[2] = { selectionBox.inverseWorldMatrix.mapPoint( iPointInTexture.x - iPointInTexture.deltaPosition.X
-                                                              , iPointInTexture.y - iPointInTexture.deltaPosition.Y )
-                    , selectionBox.inverseWorldMatrix.mapPoint( iPointInTexture.x
-                                                              , iPointInTexture.y ) };
-    ::ULIS::FVec2D& pivot = mTransformHUD->GetGizmo();
+    ::ULIS::FVec2D pt[2] = { FOdysseyVector::MapPoint( mInverseSpaceMatrix, mMouseAtDown )
+                           , FOdysseyVector::MapPoint( mInverseSpaceMatrix, ::ULIS::FVec2D( iPointInTexture.x
+                                                                                          , iPointInTexture.y ) ) };
+    ::ULIS::FVec2D worldGizmo = FOdysseyVector::MapPoint( selectionBox.worldMatrix, mTransformHUD->GetGizmo() );
+    ::ULIS::FVec2D spaceGizmo = FOdysseyVector::MapPoint( mInverseSpaceMatrix, worldGizmo );
     ::ULIS::FVec2D vector[2];
     double angle = 0.0f;
 
-    vector[0].x = pt[0].x - pivot.x;
-    vector[0].y = pt[0].y - pivot.y;
+    vector[0].x = pt[0].x - spaceGizmo.x;
+    vector[0].y = pt[0].y - spaceGizmo.y;
 
-    vector[1].x = pt[1].x - pivot.x;
-    vector[1].y = pt[1].y - pivot.y;
+    vector[1].x = pt[1].x - spaceGizmo.x;
+    vector[1].y = pt[1].y - spaceGizmo.y;
 
     if( vector[0].DistanceSquared() )
     {
@@ -554,9 +580,10 @@ UOdysseyPainterEditorVectorTransformTool::GetRotationAngle( const FOdysseyPoint&
         vector[1].Normalize();
     }
 
-    angle = fabs( acos( vector[0].DotProduct( vector[1] ) ) );
+    angle = ( FOdysseyVector::Cross2D( vector[0], vector[1] ) > 0.0f ) ?  acos( vector[0].DotProduct( vector[1] ) )
+                                                                       : -acos( vector[0].DotProduct( vector[1] ) ) + ( 2 * M_PI );
 
-    return FOdysseyVector::Cross2D( vector[0], vector[1] ) > 0.0f ? angle : - angle;
+    return angle;
 }
 
 void
@@ -564,19 +591,10 @@ UOdysseyPainterEditorVectorTransformTool::RotateObjectSelection( FOdysseyVectorG
                                                                , const FOdysseyPoint& iPointInTexture )
 {
     FSelectionBox& selectionBox = mTransformHUD->GetSelectionBox();
-    BLMatrix2D spaceMatrix/* = selectionBox.worldMatrix*/;
-    BLMatrix2D inverseSpaceMatrix;
-    ::ULIS::FVec2D& pivot = mTransformHUD->GetGizmo();
     BLMatrix2D rotateMatrix;
     double rotationAngle = GetRotationAngle( iPointInTexture );
-    BLPoint worldPivot = selectionBox.worldMatrix.mapPoint( pivot.x, pivot.y );
 
     rotateMatrix.resetToRotation( rotationAngle ); // Radians
-
-    spaceMatrix.reset();
-    spaceMatrix.translate( worldPivot.x, worldPivot.y );
-
-    BLMatrix2D::invert( inverseSpaceMatrix, spaceMatrix );
 
     if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_VERTEX )
     {
@@ -584,8 +602,8 @@ UOdysseyPainterEditorVectorTransformTool::RotateObjectSelection( FOdysseyVectorG
         {
             TransformPoint( mTransformedVertexArray[i]
                           , mTransformedVertexPositionArray[i]
-                          , spaceMatrix
-                          , inverseSpaceMatrix
+                          , mSpaceMatrix
+                          , mInverseSpaceMatrix
                           , rotateMatrix );
         }
 
@@ -593,8 +611,8 @@ UOdysseyPainterEditorVectorTransformTool::RotateObjectSelection( FOdysseyVectorG
         {
             TransformPoint( mTransformedHandleArray[i]
                           , mTransformedHandlePositionArray[i]
-                          , spaceMatrix
-                          , inverseSpaceMatrix
+                          , mSpaceMatrix
+                          , mInverseSpaceMatrix
                           , rotateMatrix );
         }
 
@@ -604,65 +622,53 @@ UOdysseyPainterEditorVectorTransformTool::RotateObjectSelection( FOdysseyVectorG
 
     if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_OBJECT )
     {
-        // run lambda recursively on altered objects
-        FOdysseyVectorObject::Traverse
-        ( iScene
-        , 0
-        ,[ iScene
-          , &spaceMatrix
-          , &inverseSpaceMatrix
-          , &rotateMatrix ]( FOdysseyVectorObject* object, uint64 travesalFlags ) -> uint64
-          {
-              // transform is recursive per se, do not recurse if the parent was transformed already
-              if( ( travesalFlags & FOdysseyVectorObject::TRAVERSE_PARENT_HASFOCUS ) == 0 )
-              {
-                  if( iScene->GetCell()->ObjectHasFocus( object, travesalFlags ) )
-                  {
-                      double translationX;
-                      double translationY;
-                      double rotation;
-                      double scalingX;
-                      double scalingY;
-                      BLMatrix2D objectSpaceMatrix;
-                      BLMatrix2D objectScaledMatrix;
-                      BLMatrix2D objectLocalMatrix;
-                      BLMatrix2D objectWorldMatrix = object->GetWorldMatrix();
-                      BLMatrix2D parentInverseWorldMatrix = object->GetParent()->GetInverseWorldMatrix();
+        for( TransformedObject& transformedObject : mTransformedObjectBuffer )
+        {
+            FOdysseyVectorObject* object = transformedObject.object;
+            double translationX;
+            double translationY;
+            double rotation;
+            double scalingX;
+            double scalingY;
+            double skewX;
+            double skewY;
+            BLMatrix2D objectSpaceMatrix;
+            BLMatrix2D objectSpaceTransformedMatrix;
+            BLMatrix2D objectLocalMatrix;
+            BLMatrix2D objectWorldMatrix = transformedObject.worldMatrix;
+            BLMatrix2D parentInverseWorldMatrix = transformedObject.parentInverseWorldMatrix;
 
-                      // transfer object in "Rotation Space" coordinates system
-                      FOdysseyVector::MatrixMultiply( inverseSpaceMatrix, objectWorldMatrix, objectSpaceMatrix );
+            // transfer object in "Rotation Space" coordinates system
+            FOdysseyVector::MatrixMultiply( mInverseSpaceMatrix, objectWorldMatrix, objectSpaceMatrix );
 
-                      // rotate the object (local to the "Rotation Space" coordinates system)
-                      FOdysseyVector::MatrixMultiply( rotateMatrix, objectSpaceMatrix, objectScaledMatrix );
+            // rotate the object (local to the "Rotation Space" coordinates system)
+            FOdysseyVector::MatrixMultiply( rotateMatrix, objectSpaceMatrix, objectSpaceTransformedMatrix );
 
-                      // transfer the object back to world coordinates system
-                      FOdysseyVector::MatrixMultiply( spaceMatrix, objectScaledMatrix, objectWorldMatrix );
+            // transfer the object back to world coordinates system
+            FOdysseyVector::MatrixMultiply( mSpaceMatrix, objectSpaceTransformedMatrix, objectWorldMatrix );
 
-                      // Convert the object to its parent coordinate system, i.e its local coordinates system.
-                      FOdysseyVector::MatrixMultiply( parentInverseWorldMatrix, objectWorldMatrix, objectLocalMatrix );
+            // Convert the object to its parent coordinate system, i.e its local coordinates system.
+            FOdysseyVector::MatrixMultiply( parentInverseWorldMatrix, objectWorldMatrix, objectLocalMatrix );
 
-                      // Extract the local transformations
-                      FOdysseyVector::ExtractTransformations( objectLocalMatrix
-                                                            , &translationX
-                                                            , &translationY
-                                                            , &rotation // in radians
-                                                            , &scalingX
-                                                            , &scalingY
-                                                            , false );
+            // Extract the local transformations
+            FOdysseyVector::ExtractTransformations( objectLocalMatrix
+                                                  , &translationX
+                                                  , &translationY
+                                                  , &rotation // in radians
+                                                  , &scalingX
+                                                  , &scalingY
+                                                  , &skewX
+                                                  , &skewY
+                                                  , false );
 
-                      // Apply the local transformations
-                      object->Translate( translationX, translationY );
-                      object->Rotate( rotation / M_PI * 180 ); // in degrees
-                      object->Scale( scalingX, scalingY );
+            // Apply the local transformations
+            object->Translate( translationX, translationY );
+            object->Rotate( rotation / M_PI * 180.0f ); // in degrees
+            object->Scale( scalingX, scalingY );
+            object->Skew( skewX, skewY );
 
-                      object->UpdateMatrix();
-
-                      return FOdysseyVectorObject::TRAVERSE_OBJECT_ACCEPTED;
-                  }
-              }
-
-              return 0;
-          } );
+            object->UpdateMatrix();
+        }
 
         iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
                                   | FOdysseyVectorObject::UPDATE_NOINBETWEENING );
@@ -670,47 +676,50 @@ UOdysseyPainterEditorVectorTransformTool::RotateObjectSelection( FOdysseyVectorG
 
     if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
     {
-        BLPoint spacePivot = BLPoint( pivot.x - selectionBox.rect.x
-                                    , pivot.y - selectionBox.rect.y );
-
-        for( FInbetweenerBreakdown* breakdown : mTransformHUD->GetSelectedBreakdownList() )
+        for( TransformedBreakdown& transformedBreakdown : mTransformedBreakdownBuffer )
         {
             double translationX;
             double translationY;
             double rotation;
             double scalingX;
             double scalingY;
-            BLMatrix2D tagSpaceMatrix;
-            BLMatrix2D tagRotateMatrix;
-            BLMatrix2D tagLocalMatrix;
-            BLMatrix2D tagWorldMatrix = breakdown->GetTargetWorldMatrix();
-            BLMatrix2D parentInverseWorldMatrix = breakdown->GetInbetweenerTag()->GetOwner()->GetInverseWorldMatrix();
+            double skewX;
+            double skewY;
+            BLMatrix2D breakdownSpaceMatrix;
+            BLMatrix2D breakdownSpaceTransformedMatrix;
+            BLMatrix2D breakdownLocalMatrix;
+            FInbetweenerBreakdown* breakdown = transformedBreakdown.breakdown;
+            BLMatrix2D breakdownWorldMatrix = transformedBreakdown.worldMatrix;
+            BLMatrix2D ownerInverseWorldMatrix = transformedBreakdown.ownerInverseWorldMatrix;
 
             // transfer object in "Rotation Space" coordinates system
-            FOdysseyVector::MatrixMultiply( inverseSpaceMatrix, tagWorldMatrix, tagSpaceMatrix );
+            FOdysseyVector::MatrixMultiply( mInverseSpaceMatrix, breakdownWorldMatrix, breakdownSpaceMatrix );
 
             // rotate the object (local to the "Rotation Space" coordinates system)
-            FOdysseyVector::MatrixMultiply( rotateMatrix, tagSpaceMatrix, tagRotateMatrix );
+            FOdysseyVector::MatrixMultiply( rotateMatrix, breakdownSpaceMatrix, breakdownSpaceTransformedMatrix );
 
             // transfer the object back to world coordinates system
-            FOdysseyVector::MatrixMultiply( spaceMatrix, tagRotateMatrix, tagWorldMatrix );
+            FOdysseyVector::MatrixMultiply( mSpaceMatrix, breakdownSpaceTransformedMatrix, breakdownWorldMatrix );
 
             // Convert the object to its parent coordinate system, i.e its local coordinates system.
-            FOdysseyVector::MatrixMultiply( parentInverseWorldMatrix, tagWorldMatrix, tagLocalMatrix );
+            FOdysseyVector::MatrixMultiply( ownerInverseWorldMatrix, breakdownWorldMatrix, breakdownLocalMatrix );
 
             // Extract the local transformations
-            FOdysseyVector::ExtractTransformations( tagLocalMatrix
+            FOdysseyVector::ExtractTransformations( breakdownLocalMatrix
                                                   , &translationX
                                                   , &translationY
                                                   , &rotation // in radians
                                                   , &scalingX
                                                   , &scalingY
+                                                  , &skewX
+                                                  , &skewY
                                                   , false );
 
             // Apply the local transformations
             breakdown->Translate( translationX, translationY );
-            breakdown->Rotate( rotation / M_PI * 180 ); // in degrees
+            breakdown->Rotate( rotation / M_PI * 180.0f ); // in degrees
             breakdown->Scale( scalingX, scalingY );
+            breakdown->Skew( skewX, skewY );
 
             breakdown->UpdateMatrix();
         }
@@ -721,10 +730,148 @@ UOdysseyPainterEditorVectorTransformTool::RotateObjectSelection( FOdysseyVectorG
     // update the selection box with the newly modified matrices
     iScene->GetLayer()->ResetHUD( iScene );
 
-    // replace pivot correctly.
-    BLPoint spacePivot = selectionBox.inverseWorldMatrix.mapPoint( worldPivot.x, worldPivot.y );
-    pivot.x = spacePivot.x;
-    pivot.y = spacePivot.y;
+    TransformGizmo( rotateMatrix );
+}
+
+void
+UOdysseyPainterEditorVectorTransformTool::MakeSpaceMatrix()
+{
+    FSelectionBox& selectionBox = mTransformHUD->GetSelectionBox();
+    ::ULIS::FVec2D worldGizmo = FOdysseyVector::MapPoint( selectionBox.worldMatrix, mTransformHUD->GetGizmo() );
+    uint32 hudFlags = mTransformHUD->GetFlags();
+
+    if( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_TRANSLATE )
+    {
+        MakeSpaceMatrixForTranslation();
+    }
+
+    if( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_ROTATE )
+    {
+        MakeSpaceMatrixForRotation();
+    }
+
+    if( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_SCALE )
+    {
+        MakeSpaceMatrixForScaling();
+    }
+
+    mSpaceGizmo = FOdysseyVector::MapPoint( mInverseSpaceMatrix, worldGizmo );
+}
+
+void
+UOdysseyPainterEditorVectorTransformTool::MakeSpaceMatrixForRotation()
+{
+    FSelectionBox& selectionBox = mTransformHUD->GetSelectionBox();
+    double selectionBoxSurface = selectionBox.rect.w * selectionBox.rect.h;
+    BLMatrix2D spaceMatrix = selectionBox.worldMatrix;
+    ::ULIS::FVec2D& pivot = mTransformHUD->GetGizmo();
+    BLPoint worldPivot = spaceMatrix.mapPoint( pivot.x, pivot.y );
+
+    if( selectionBoxSurface )
+    {
+        spaceMatrix = selectionBox.worldMatrix;
+
+        spaceMatrix.translate( pivot.x, pivot.y );
+    }
+
+    mSpaceMatrix = spaceMatrix;
+
+    BLMatrix2D::invert( mInverseSpaceMatrix, spaceMatrix );
+}
+
+void
+UOdysseyPainterEditorVectorTransformTool::MakeSpaceMatrixForTranslation()
+{
+    FSelectionBox& selectionBox = mTransformHUD->GetSelectionBox();
+    double selectionBoxSurface = selectionBox.rect.w * selectionBox.rect.h;
+    BLMatrix2D spaceMatrix = selectionBox.worldMatrix;
+
+    if( selectionBoxSurface )
+    {
+        spaceMatrix = selectionBox.worldMatrix;
+    }
+
+    mSpaceMatrix = spaceMatrix;
+
+    BLMatrix2D::invert( mInverseSpaceMatrix, spaceMatrix );
+}
+
+void
+UOdysseyPainterEditorVectorTransformTool::MakeSpaceMatrixForScaling()
+{
+    FSelectionBox& selectionBox = mTransformHUD->GetSelectionBox();
+    double selectionBoxSurface = selectionBox.rect.w * selectionBox.rect.h;
+    //::ULIS::FRectI redrawRegion = { 0, 0, 0, 0 };
+    uint32 hudFlags = mTransformHUD->GetFlags();
+    double oldX1 = selectionBox.rect.x
+         , oldY1 = selectionBox.rect.y
+         , oldX2 = selectionBox.rect.x + selectionBox.rect.w
+         , oldY2 = selectionBox.rect.y + selectionBox.rect.h;
+    ::ULIS::FVec2D pivot = ::ULIS::FVec2D( 0.0f, 0.0f );
+    BLMatrix2D spaceMatrix;
+
+    switch( ScalingCenter )
+    {
+        case ETransformToolScalingCenter::OppositeCorner :
+        {
+            ::ULIS::FVec2D oppositeCorner;
+
+            if ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_SCALER_TOPLEFT )
+            {
+                oppositeCorner.x = oldX2;
+                oppositeCorner.y = oldY2;
+            }
+
+            if ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_SCALER_TOPRIGHT )
+            {
+                oppositeCorner.x = oldX1;
+                oppositeCorner.y = oldY2;
+            }
+
+            if ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_SCALER_BOTTOMRIGHT )
+            {
+                oppositeCorner.x = oldX1;
+                oppositeCorner.y = oldY1;
+            }
+
+            if ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_SCALER_BOTTOMLEFT )
+            {
+                oppositeCorner.x = oldX2;
+                oppositeCorner.y = oldY1;
+            }
+
+            pivot = oppositeCorner;
+        }
+        break;
+
+        case ETransformToolScalingCenter::BoxCenter :
+            pivot.x = oldX1 + ( oldX2 - oldX1 ) * 0.5f;
+            pivot.y = oldY1 + ( oldY2 - oldY1 ) * 0.5f;
+        break;
+
+        case ETransformToolScalingCenter::Gizmo :
+            pivot.x = mTransformHUD->GetGizmo().x;
+            pivot.y = mTransformHUD->GetGizmo().y;
+        break;
+
+        default :
+        break;
+    }
+
+    spaceMatrix.reset();
+
+    if( selectionBoxSurface )
+    {
+        spaceMatrix = selectionBox.worldMatrix;
+
+        // build a "space matrix", i.e the matrix that will serve as a "container" of all matrices that are inside.
+        // objects will then have a relative matrix computed from this matrix and we will rescale that relative matrix.
+        spaceMatrix.translate( pivot.x, pivot.y );
+    }
+
+    mSpaceMatrix = spaceMatrix;
+
+    BLMatrix2D::invert( mInverseSpaceMatrix, spaceMatrix );
 }
 
 void
@@ -734,103 +881,52 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorGr
     FSelectionBox& selectionBox = mTransformHUD->GetSelectionBox();
     //::ULIS::FRectI redrawRegion = { 0, 0, 0, 0 };
     uint32 hudFlags = mTransformHUD->GetFlags();
-    BLPoint oldLocalCoords = selectionBox.inverseWorldMatrix.mapPoint( iPointInTexture.x - iPointInTexture.deltaPosition.X
-                                                                     , iPointInTexture.y - iPointInTexture.deltaPosition.Y );
-    BLPoint localCoords = selectionBox.inverseWorldMatrix.mapPoint( iPointInTexture.x, iPointInTexture.y );
+    ::ULIS::FVec2D oldLocalCoords = FOdysseyVector::MapPoint( mInverseSpaceMatrix, ::ULIS::FVec2D( mMouseAtDown.x
+                                                                                                 , mMouseAtDown.y ) );
+    ::ULIS::FVec2D localCoords = FOdysseyVector::MapPoint( mInverseSpaceMatrix, ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y ) );
     double difx = localCoords.x - oldLocalCoords.x;
     double dify = localCoords.y - oldLocalCoords.y;
     double oldX1 = selectionBox.rect.x
          , oldY1 = selectionBox.rect.y
          , oldX2 = selectionBox.rect.x + selectionBox.rect.w
          , oldY2 = selectionBox.rect.y + selectionBox.rect.h;
-    double oldDiagonal = sqrt( ( selectionBox.rect.w * selectionBox.rect.w )
-                             + ( selectionBox.rect.h * selectionBox.rect.h ) );
     double selectionBoxSurface = selectionBox.rect.w * selectionBox.rect.h;
-    double x1 = 0.0f, y1 = 0.0f, x2 = 0.0f, y2 = 0.0f;
-    ::ULIS::FVec2D pivot;
-
-    if ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_SCALER_TOPLEFT )
-    {
-        x1 = localCoords.x;
-        y1 = localCoords.y;
-        x2 = oldX2;
-        y2 = oldY2;
-
-        pivot.x = oldX2;
-        pivot.y = oldY2;
-    }
-
-    if ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_SCALER_TOPRIGHT )
-    {
-        x1 = oldX1;
-        y1 = localCoords.y;
-        x2 = localCoords.x;
-        y2 = oldY2;
-
-        pivot.x = oldX1;
-        pivot.y = oldY2;
-    }
-
-    if ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_SCALER_BOTTOMRIGHT )
-    {
-        x1 = oldX1;
-        y1 = oldY1;
-        x2 = localCoords.x;
-        y2 = localCoords.y;
-
-        pivot.x = oldX1;
-        pivot.y = oldY1;
-    }
-
-    if ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_SCALER_BOTTOMLEFT )
-    {
-        x1 = localCoords.x;
-        y1 = oldY1;
-        x2 = oldX2;
-        y2 = localCoords.y;
-
-        pivot.x = oldX2;
-        pivot.y = oldY1;
-    }
 
     if( selectionBoxSurface )
     {
-        BLMatrix2D spaceMatrix = selectionBox.worldMatrix;
-        BLMatrix2D inverseSpaceMatrix;
-        double x2mx1 = ( x2 - x1 );
-        double y2my1 = ( y2 - y1 );
         BLMatrix2D scalingMatrix;
-
-        spaceMatrix.translate( pivot.x, pivot.y );
-
-        BLMatrix2D::invert( inverseSpaceMatrix, spaceMatrix );
 
         scalingMatrix.reset();
 
         if( Uniform )
         {
-            double newDiagonal = sqrt( ( x2mx1 * x2mx1 ) + ( y2my1 * y2my1 ) );
-            double ratio = newDiagonal / oldDiagonal;
+            //double ratio = (fabs(difx) > fabs(dify) ) ? 1.0f + ( difx / selectionBox.rect.w )
+            //                                          : 1.0f + ( dify / selectionBox.rect.h );
+            double ratio = ( localCoords ).Distance() / ( oldLocalCoords ).Distance();
 
             scalingMatrix.scale( ratio, ratio );
         }
         else
         {
-            scalingMatrix.scale( x2mx1 / selectionBox.rect.w, y2my1 / selectionBox.rect.h );
+            double xratio = ( localCoords.x ) / ( oldLocalCoords.x );
+            double yratio = ( localCoords.y ) / ( oldLocalCoords.y );
+
+            //if( ( xratio > 0.0f ) && ( yratio > 0.0f ) )
+                scalingMatrix.scale( xratio, yratio );
         }
 
         if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_VERTEX )
         {
             double selectionBoxArea = selectionBox.rect.Area();
              // side note: the sqrt() is there because surface rises at the square of dimension factor. We have to correct that.
-            double radiusRatio = selectionBoxArea ? sqrt ( ( x2mx1 * y2my1 ) / selectionBoxArea ) : 1.0f;
+            double radiusRatio = /*selectionBoxArea ? sqrt ( ( x2mx1 * y2my1 ) / selectionBoxArea ) : 1.0f*/1.0f;
 
             for( int i = 0; i < mTransformedVertexArray.size(); i++ )
             {
                 TransformPoint( mTransformedVertexArray[i]
                               , mTransformedVertexPositionArray[i]
-                              , spaceMatrix
-                              , inverseSpaceMatrix
+                              , mSpaceMatrix
+                              , mInverseSpaceMatrix
                               , scalingMatrix );
 
                 mTransformedVertexArray[i]->SetRadius( mTransformedVertexArray[i]->GetRadius() * radiusRatio );
@@ -840,8 +936,8 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorGr
             {
                 TransformPoint( mTransformedHandleArray[i]
                               , mTransformedHandlePositionArray[i]
-                              , spaceMatrix
-                              , inverseSpaceMatrix
+                              , mSpaceMatrix
+                              , mInverseSpaceMatrix
                               , scalingMatrix );
             }
 
@@ -851,96 +947,56 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorGr
 
         if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_OBJECT )
         {
-/*
-            if( KeepPathWidth )
+            for( TransformedObject& transformedObject : mTransformedObjectBuffer )
             {
-                double surfaceRatio = ( x2mx1 * y2my1 ) / ( selectionBoxSurface );
-                double scaleFactor = 1.0f / ( surfaceRatio );
+                FOdysseyVectorObject* object = transformedObject.object;
+                double translationX;
+                double translationY;
+                double rotation;
+                double scalingX;
+                double scalingY;
+                double skewX;
+                double skewY;
+                BLMatrix2D objectSpaceMatrix;
+                BLMatrix2D objectScaledMatrix;
+                BLMatrix2D objectLocalMatrix;
+                BLMatrix2D objectWorldMatrix = transformedObject.worldMatrix;
+                BLMatrix2D parentInverseWorldMatrix = transformedObject.parentInverseWorldMatrix;
 
-                // run lambda recursively on altered paths
-                FOdysseyVectorObject::Traverse
-                ( iScene
-                , 0
-                ,[ iScene
-                 , scaleFactor ]( FOdysseyVectorObject* object, uint64 travesalFlags ) -> uint64
-                {
-                    if( iScene->GetCell()->ObjectHasFocus( object, travesalFlags ) )
-                    {
-                        if( object->GetClass() == FOdysseyVectorPath::StaticClass() )
-                        {
-                            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
+                // transfer object in "Scaling Space" coordinates system
+                FOdysseyVector::MatrixMultiply( mInverseSpaceMatrix, objectWorldMatrix, objectSpaceMatrix );
 
-                            // compensate. 2D dimensions evolves at the square of the scaling factor.
-                            path->AlterRadius( scaleFactor );
+                // scale the object (local to the "Scaling Space" coordinates system)
+                FOdysseyVector::MatrixMultiply( scalingMatrix, objectSpaceMatrix, objectScaledMatrix );
 
-                            return FOdysseyVectorObject::TRAVERSE_OBJECT_ACCEPTED;
-                        }
-                    }
+                // transfer the object back to world coordinates system
+                FOdysseyVector::MatrixMultiply( mSpaceMatrix, objectScaledMatrix, objectWorldMatrix );
 
-                    return 0;
-                } );
+                // Convert the object to its parent coordinate system, i.e its local coordinates system.
+                FOdysseyVector::MatrixMultiply( parentInverseWorldMatrix, objectWorldMatrix, objectLocalMatrix );
+
+                // Extract the local transformations
+                FOdysseyVector::ExtractTransformations( objectLocalMatrix
+                                                      , &translationX
+                                                      , &translationY
+                                                      , &rotation // in radians
+                                                      , &scalingX
+                                                      , &scalingY
+                                                      , &skewX
+                                                      , &skewY
+                                                      , false );
+
+                // Apply the local transformations
+                object->Translate( translationX, translationY );
+                // for some reasons this affects the rotation, so we ignore it.
+                object->Rotate( rotation / M_PI * 180.0f );
+                object->Scale( scalingX, scalingY );
+                object->Skew( skewX, skewY );
+
+                object->UpdateMatrix();
+
+                objectLocalMatrix = object->GetLocalMatrix();
             }
-*/
-            // run lambda recursively on altered objects
-            FOdysseyVectorObject::Traverse
-            ( iScene
-            , 0
-            ,[ iScene
-             , &spaceMatrix
-             , &inverseSpaceMatrix
-             , &scalingMatrix ]( FOdysseyVectorObject* object, uint64 travesalFlags ) -> uint64
-             {
-                  // transform is recursive per se, do not recurse if the parent was transformed already
-                  if( ( travesalFlags & FOdysseyVectorObject::TRAVERSE_PARENT_HASFOCUS ) == 0 )
-                  {
-                      if( iScene->GetCell()->ObjectHasFocus( object, travesalFlags ) )
-                      {
-                          double translationX;
-                          double translationY;
-                          double rotation;
-                          double scalingX;
-                          double scalingY;
-                          BLMatrix2D objectSpaceMatrix;
-                          BLMatrix2D objectScaledMatrix;
-                          BLMatrix2D objectLocalMatrix;
-                          BLMatrix2D objectWorldMatrix = object->GetWorldMatrix();
-                          BLMatrix2D parentInverseWorldMatrix = object->GetParent()->GetInverseWorldMatrix();
-
-                          // transfer object in "Scaling Space" coordinates system
-                          FOdysseyVector::MatrixMultiply( inverseSpaceMatrix, objectWorldMatrix, objectSpaceMatrix );
-
-                          // scale the object (local to the "Scaling Space" coordinates system)
-                          FOdysseyVector::MatrixMultiply( scalingMatrix, objectSpaceMatrix, objectScaledMatrix );
-
-                          // transfer the object back to world coordinates system
-                          FOdysseyVector::MatrixMultiply( spaceMatrix, objectScaledMatrix, objectWorldMatrix );
-
-                          // Convert the object to its parent coordinate system, i.e its local coordinates system.
-                          FOdysseyVector::MatrixMultiply( parentInverseWorldMatrix, objectWorldMatrix, objectLocalMatrix );
-
-                          // Extract the local transformations
-                          FOdysseyVector::ExtractTransformations( objectLocalMatrix
-                                                                , &translationX
-                                                                , &translationY
-                                                                , &rotation // in radians
-                                                                , &scalingX
-                                                                , &scalingY
-                                                                , false );
-
-                          // Apply the local transformations
-                          object->Translate( translationX, translationY );
-                          // for some reasons this affects the rotation, so we ignore it.
-                          object->Rotate( /*rotation / M_PI * 180*/object->GetRotation() );
-                          object->Scale( scalingX, scalingY );
-
-                          object->UpdateMatrix();
-
-                          return FOdysseyVectorObject::TRAVERSE_OBJECT_ACCEPTED;
-                      }
-                  }
-
-                  return 0;
-              } );
 
             iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
                                       | FOdysseyVectorObject::UPDATE_NOINBETWEENING );
@@ -948,41 +1004,43 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorGr
 
         if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
         {
-            BLPoint spacePivot = BLPoint( pivot.x - selectionBox.rect.x
-                                        , pivot.y - selectionBox.rect.y );
-
-            for( FInbetweenerBreakdown* breakdown : mTransformHUD->GetSelectedBreakdownList() )
+            for( TransformedBreakdown& transformedBreakdown : mTransformedBreakdownBuffer )
             {
                 double translationX;
                 double translationY;
                 double rotation;
                 double scalingX;
                 double scalingY;
-                BLMatrix2D tagSpaceMatrix;
-                BLMatrix2D tagScaledMatrix;
-                BLMatrix2D tagLocalMatrix;
-                BLMatrix2D tagWorldMatrix = breakdown->GetTargetWorldMatrix();
-                BLMatrix2D parentInverseWorldMatrix = breakdown->GetInbetweenerTag()->GetOwner()->GetInverseWorldMatrix();
+                double skewX;
+                double skewY;
+                BLMatrix2D breakdownSpaceMatrix;
+                BLMatrix2D breakdownScalingMatrix;
+                BLMatrix2D breakdownLocalMatrix;
+                FInbetweenerBreakdown* breakdown = transformedBreakdown.breakdown;
+                BLMatrix2D breakdownWorldMatrix = transformedBreakdown.worldMatrix;
+                BLMatrix2D ownerInverseWorldMatrix = transformedBreakdown.ownerInverseWorldMatrix;
 
                 // transfer object in "Rotation Space" coordinates system
-                FOdysseyVector::MatrixMultiply( inverseSpaceMatrix, tagWorldMatrix, tagSpaceMatrix );
+                FOdysseyVector::MatrixMultiply( mInverseSpaceMatrix, breakdownWorldMatrix, breakdownSpaceMatrix );
 
                 // rotate the object (local to the "Rotation Space" coordinates system)
-                FOdysseyVector::MatrixMultiply( scalingMatrix, tagSpaceMatrix, tagScaledMatrix );
+                FOdysseyVector::MatrixMultiply( scalingMatrix, breakdownSpaceMatrix, breakdownScalingMatrix );
 
                 // transfer the object back to world coordinates system
-                FOdysseyVector::MatrixMultiply( spaceMatrix, tagScaledMatrix, tagWorldMatrix );
+                FOdysseyVector::MatrixMultiply( mSpaceMatrix, breakdownScalingMatrix, breakdownWorldMatrix );
 
                 // Convert the object to its parent coordinate system, i.e its local coordinates system.
-                FOdysseyVector::MatrixMultiply( parentInverseWorldMatrix, tagWorldMatrix, tagLocalMatrix );
+                FOdysseyVector::MatrixMultiply( ownerInverseWorldMatrix, breakdownWorldMatrix, breakdownLocalMatrix );
 
                 // Extract the local transformations
-                FOdysseyVector::ExtractTransformations( tagLocalMatrix
+                FOdysseyVector::ExtractTransformations( breakdownLocalMatrix
                                                       , &translationX
                                                       , &translationY
                                                       , &rotation // in radians
                                                       , &scalingX
                                                       , &scalingY
+                                                      , &skewX
+                                                      , &skewY
                                                       , false );
 
                 // Apply the local transformations
@@ -990,16 +1048,19 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorGr
                 // for some reasons this affects the rotation, so we ignore it.
                 breakdown->Rotate( breakdown->GetTargetRotation() ); // in degrees
                 breakdown->Scale( scalingX, scalingY );
+                breakdown->Skew( skewX, skewY );
 
                 breakdown->UpdateMatrix();
             }
 
             iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
         }
-    }
 
-    // update the selection box with the newly modified matrices
-    iScene->GetLayer()->ResetHUD( iScene );
+        // update the selection box with the newly modified matrices
+        iScene->GetLayer()->ResetHUD( iScene );
+
+        TransformGizmo( scalingMatrix );
+    }
 }
 
 void
@@ -1050,9 +1111,8 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDragVector( FOdysseyVectorGroup
                 }
                 else
                 {
-                    if( ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_XAXIS     )
-                     || ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_YAXIS     )
-                     || ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_TRANSLATE ) )
+                    if( ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_XAXIS )
+                     || ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_YAXIS ) )
                     {
                         TranslateObjectSelection( iScene, pointInTexture );
                     }
