@@ -89,7 +89,7 @@ FOdysseyVectorObject::SetOpacity( double iOpacity )
 {
     mOpacity = iOpacity;
 
-    Invalidate( FOdysseyVectorObject::INVALIDATE_COLOR );
+    Invalidate( InvalidationFlags().Color() );
 }
 
 void
@@ -99,7 +99,7 @@ FOdysseyVectorObject::AddTag( FOdysseyVectorTag* iTag )
 
     iTag->Added();
 
-    Invalidate( FOdysseyVectorObject::INVALIDATE_CHILD_TAG_LIST );
+    Invalidate( InvalidationFlags().TagList() );
 }
 
 void
@@ -109,7 +109,7 @@ FOdysseyVectorObject::RemoveTag( FOdysseyVectorTag* iTag )
 
     iTag->Removed();
 
-    Invalidate( FOdysseyVectorObject::INVALIDATE_CHILD_TAG_LIST );
+    Invalidate( InvalidationFlags().TagList() );
 }
 
 void
@@ -398,7 +398,7 @@ FOdysseyVectorObject::Translate( double iX, double iY )
     mTranslationX = iX;
     mTranslationY = iY;
 
-    Invalidate( INVALIDATE_MATRIX );
+    Invalidate( InvalidationFlags().Matrix() );
 }
 
 void
@@ -406,7 +406,7 @@ FOdysseyVectorObject::Rotate( double iAngle )
 {
     mRotation = iAngle;
 
-    Invalidate( INVALIDATE_MATRIX );
+    Invalidate( InvalidationFlags().Matrix() );
 }
 
 void
@@ -415,7 +415,7 @@ FOdysseyVectorObject::Scale( double iX, double iY )
     mScalingX = iX;
     mScalingY = iY;
 
-    Invalidate( INVALIDATE_MATRIX );
+    Invalidate( InvalidationFlags().Matrix() );
 }
 
 void
@@ -424,7 +424,7 @@ FOdysseyVectorObject::Skew( double iX, double iY )
     mSkewX = iX;
     mSkewY = iY;
 
-    Invalidate( INVALIDATE_MATRIX );
+    Invalidate( InvalidationFlags().Matrix() );
 }
 
 double
@@ -492,7 +492,7 @@ FOdysseyVectorObject::SetTransform( double iTranslationX
     mSkewX = iSkewX;
     mSkewY = iSkewY;
 
-    Invalidate( INVALIDATE_MATRIX );
+    Invalidate( InvalidationFlags().Matrix() );
 }
 
 void
@@ -647,7 +647,7 @@ FOdysseyVectorObject::ExportParam( FOdysseyVectorObject* iDestinationObject, boo
 
     if( iInvalidate )
     {
-        iDestinationObject->Invalidate( FOdysseyVectorObject::INVALIDATE_COLOR  );
+        iDestinationObject->Invalidate( InvalidationFlags().Color()  );
     }
 }
 
@@ -916,7 +916,7 @@ FOdysseyVectorObject::GetTagByType( uint32 iTagClass )
     return nullptr;
 }
 
-uint64
+FOdysseyVectorObject::InvalidationFlags
 FOdysseyVectorObject::GetInvalidationFlags()
 {
     return mInvalidationFlags;
@@ -924,7 +924,7 @@ FOdysseyVectorObject::GetInvalidationFlags()
 
 void
 FOdysseyVectorObject::InvalidateChild( FOdysseyVectorObject* iChild
-                                     , uint64 iChildInvalidationFlags )
+                                     , const InvalidationFlags& iChildInvalidationFlags )
 {
     // this is temporary and should be optimized somehow
     if( std::find( mInvalidatedChildrenList.begin(), mInvalidatedChildrenList.end(), iChild ) == mInvalidatedChildrenList.end() )
@@ -933,36 +933,31 @@ FOdysseyVectorObject::InvalidateChild( FOdysseyVectorObject* iChild
         mInvalidatedChildrenList.push_back( iChild );
     }
 
-    Invalidate(   ( iChildInvalidationFlags & INVALIDATE_HIERARCHY )
-              | ( ( iChildInvalidationFlags & INVALIDATE_SHAPE     ) << INVALIDATE_CHILD_SHIFT )
-              | ( ( iChildInvalidationFlags & INVALIDATE_COLOR     ) << INVALIDATE_CHILD_SHIFT )
-              | ( ( iChildInvalidationFlags & INVALIDATE_TOPOLOGY  ) << INVALIDATE_CHILD_SHIFT )
-              | ( ( iChildInvalidationFlags & INVALIDATE_TAG       ) << INVALIDATE_CHILD_SHIFT )
-              | ( ( iChildInvalidationFlags & INVALIDATE_TAG_LIST  ) << INVALIDATE_CHILD_SHIFT )
-              | ( ( iChildInvalidationFlags & INVALIDATE_MATRIX    ) << INVALIDATE_CHILD_SHIFT )
-              |   ( iChildInvalidationFlags & INVALIDATE_CHILD_SHAPE    )
-              |   ( iChildInvalidationFlags & INVALIDATE_CHILD_COLOR    )
-              |   ( iChildInvalidationFlags & INVALIDATE_CHILD_TAG      )
-              |   ( iChildInvalidationFlags & INVALIDATE_CHILD_TAG_LIST )
-              |   ( iChildInvalidationFlags & INVALIDATE_CHILD_TOPOLOGY )
-              |   ( iChildInvalidationFlags & INVALIDATE_CHILD_MATRIX   ) );
+    mChildrenInvalidationFlags |= iChildInvalidationFlags;
+
+    if( mParent )
+    {
+        mParent->InvalidateChild( this, iChildInvalidationFlags );
+    }
 }
 
 void
 FOdysseyVectorObject::InvalidateTag( FOdysseyVectorTag* iTag )
 {
-    Invalidate( FOdysseyVectorObject::INVALIDATE_TAG );
+    Invalidate( InvalidationFlags().Tag() );
 }
 
 void
-FOdysseyVectorObject::Invalidate( uint64 iInvalidationFlags )
+FOdysseyVectorObject::Invalidate( const InvalidationFlags& iInvalidationFlags )
 {
     if ( mParent )
     {
         mParent->InvalidateChild( this, iInvalidationFlags );
     }
 
-    mInvalidationFlags |= ( INVALIDATE_DEFAULT | iInvalidationFlags );
+    mInvalidationFlags |= iInvalidationFlags;
+
+    mInvalidationFlags.Default();
 }
 
 FOdysseyVectorCell*
@@ -1044,7 +1039,7 @@ FOdysseyVectorObject::SendBackward()
             }
         }
 
-        Invalidate( INVALIDATE_HIERARCHY );
+        Invalidate( InvalidationFlags().Hierarchy() );
     }
 }
 
@@ -1071,7 +1066,7 @@ FOdysseyVectorObject::BringForward()
             }
         }
 
-        Invalidate( INVALIDATE_HIERARCHY );
+        Invalidate( InvalidationFlags().Hierarchy() );
     }
 }
 
@@ -1188,7 +1183,7 @@ FOdysseyVectorObject::AddChild( FOdysseyVectorObject* iChild, FOdysseyVectorObje
             }
         }
 
-        iChild->Invalidate( INVALIDATE_HIERARCHY );
+        iChild->Invalidate( InvalidationFlags().Hierarchy() );
     }
 
     if( ret == HIERARCHY_CHANGE_SUCCESS )
@@ -1226,13 +1221,13 @@ FOdysseyVectorObject::RemoveChild( FOdysseyVectorObject* iChild )
         mChildrenList.remove( iChild );
         mInvalidatedChildrenList.remove( iChild );
 
-        Invalidate( INVALIDATE_HIERARCHY );
+        Invalidate( InvalidationFlags().Hierarchy() );
         // needed for undoing
         iChild->mOldParent = this;
         iChild->mParent = nullptr;
 
         // update now
-        iChild->mInvalidationFlags |= INVALIDATE_HIERARCHY;
+        iChild->mInvalidationFlags |= InvalidationFlags().Hierarchy();
         iChild->Update( 0 );
 
         ret = HIERARCHY_CHANGE_SUCCESS; // removal succeeded
@@ -1262,7 +1257,7 @@ FOdysseyVectorObject::RemoveAllChildren()
 
     LockDrawing();
 
-    Invalidate( INVALIDATE_HIERARCHY );
+    Invalidate( InvalidationFlags().Hierarchy() );
 
     for( FOdysseyVectorObject* child : mChildrenList )
     {
@@ -1271,7 +1266,7 @@ FOdysseyVectorObject::RemoveAllChildren()
         child->mParent = nullptr;
 
         // update now
-        child->mInvalidationFlags |= INVALIDATE_HIERARCHY;
+        child->mInvalidationFlags |= InvalidationFlags().Hierarchy();
         child->Update( 0 );
 
         child->Recurse( &FOdysseyVectorObject::Removed );
