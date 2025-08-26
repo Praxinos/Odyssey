@@ -8,6 +8,7 @@
 #include <blend2d.h>
 #include <ULIS>
 #include "OdysseyVectorBucket.h"
+#include <bitset>
 
 class FOdysseyVectorEngine;
 class FOdysseyVectorGroupPaint;
@@ -21,78 +22,24 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
 {
     struct InvalidationFlags
     {
-        // Set all flags to 0 at init
-        InvalidationFlags()
+        static const uint32 DEFAULT    = 0;
+        static const uint32 SHAPE      = 1;
+        static const uint32 COLOR      = 2;
+        static const uint32 TOPOLOGY   = 3;
+        static const uint32 TAG        = 4;
+        static const uint32 TAG_LIST   = 5;
+        static const uint32 MATRIX     = 6;
+        static const uint32 FLAG_COUNT = 7;
+
+        InvalidationFlags Set( uint32 iFlag )
         {
-            Clear();
+            bits[iFlag] = 1;
+
+            return *this;
         }
 
-        void Clear()
-        {
-            memset( this, 0, sizeof( *this ) );
-        }
-
-        bool IsEmpty()
-        {
-            for( uint32 i = 0; i < sizeof(InvalidationFlags); i++ )
-            {
-                if( this->raw[i] )
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        InvalidationFlags operator |= ( const InvalidationFlags& iOther )
-        {
-            for( uint32 i = 0; i < sizeof(InvalidationFlags); i++ )
-            {
-                this->raw[i] |= iOther.raw[i];
-            }
-        }
-
-        InvalidationFlags operator &= ( const InvalidationFlags& iOther )
-        {
-            for( uint32 i = 0; i < sizeof(InvalidationFlags); i++ )
-            {
-                this->raw[i] &= iOther.raw[i];
-            }
-        }
-
-        static InvalidationFlags operator | ( const InvalidationFlags& lhs, const InvalidationFlags& rhs )
-        {
-            InvalidationFlags ret = lhs;
-
-            for( uint32 i = 0; i < sizeof(InvalidationFlags); i++ )
-            {
-                ret.raw[i] |= rhs.raw[i];
-            }
-
-            return ret;
-        }
-
-        static InvalidationFlags operator & ( const InvalidationFlags& lhs, const InvalidationFlags& rhs )
-        {
-            InvalidationFlags ret = lhs;
-
-            for( uint32 i = 0; i < sizeof(InvalidationFlags); i++ )
-            {
-                ret.raw[i] &= rhs.raw[i];
-            }
-
-            return ret;
-        }
-
-        InvalidationFlags& Default(){ this->DEFAULT = 1; return *this; }
-        InvalidationFlags& Matrix(){ this->MATRIX = 1; return *this; }
-        InvalidationFlags& Hierarchy(){ this->HIERARCHY = 1; return *this; }
-        InvalidationFlags& Shape(){ this->SHAPE = 1; return *this; }
-        InvalidationFlags& Color(){ this->COLOR = 1; return *this; }
-        InvalidationFlags& Topology(){ this->TOPOLOGY = 1; return *this; }
-        InvalidationFlags& Tag(){ this->TAG = 1; return *this; }
-        InvalidationFlags& TagList(){ this->TAG_LIST = 1; return *this; }
+        public:
+            std::bitset<FLAG_COUNT*2> bits;
 
         union
         {
