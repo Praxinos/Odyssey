@@ -44,7 +44,7 @@ FOdysseyPainterEditorVectorScenePanToolHUD::Unload()
 }
 
 void
-FOdysseyPainterEditorVectorScenePanToolHUD::DrawFrame( const FOdysseyHUD::FDrawHUDParams& iParams
+FOdysseyPainterEditorVectorScenePanToolHUD::DrawFrame( const FOdysseyHUDElement::FDrawHUDParams& iParams
                                                      , ::ULIS::FRectI& iFrame
                                                      , ::ULIS::FVec2I& iFrameLength
                                                      , const FLinearColor& iFgColor
@@ -86,7 +86,7 @@ FOdysseyPainterEditorVectorScenePanToolHUD::DrawFrame( const FOdysseyHUD::FDrawH
 }
 
 void
-FOdysseyPainterEditorVectorScenePanToolHUD::DrawHUD( const FOdysseyHUD::FDrawHUDParams& iParams )
+FOdysseyPainterEditorVectorScenePanToolHUD::DrawHUD( const FOdysseyHUDElement::FDrawHUDParams& iParams )
 {
     mCurrentHUDParams = iParams;
 

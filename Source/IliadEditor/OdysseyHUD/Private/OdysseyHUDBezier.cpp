@@ -21,7 +21,7 @@ FOdysseyHUDBezier::FOdysseyHUDBezier(const FVector2D& iStartPoint, const FVector
 }
 
 void
-FOdysseyHUDBezier::DrawHUD(const FOdysseyHUD::FDrawHUDParams& iParams)
+FOdysseyHUDBezier::DrawHUD(const FOdysseyHUDElement::FDrawHUDParams& iParams)
 {
     const FLinearColor bezierLineColor(0.f, 1.f, 0.f, 1.f);
     const FLinearColor controlLineColor(0.f, 1.f, 0.f, 0.4f);

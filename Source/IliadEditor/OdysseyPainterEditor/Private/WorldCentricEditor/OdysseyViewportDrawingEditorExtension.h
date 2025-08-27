@@ -6,7 +6,7 @@
 #include "CoreMinimal.h"
 #include "OdysseyPainterEditorExtension.h"
 #include "MeshPaintTypes.h"
-#include "OdysseyHUD.h"
+#include "OdysseyHUDElement.h"
 #include "TickableEditorObject.h"
 #include "Engine/Texture2D.h"
 #include "ISequencer.h"
@@ -75,7 +75,7 @@ public:
     float  GetMeshComponentMaxSize() const;
 
     bool GetHUDPlaneParams(FVector& oPlaneTopLeft, double& oW, double& oH, FVector& oXAxis, FVector& oYAxis);
-    bool GetDrawHUDParams(const FSceneView* View, FCanvas* Canvas, float iScaleFactor, FOdysseyHUD::FDrawHUDParams& oParams);
+    bool GetDrawHUDParams(const FSceneView* View, FCanvas* Canvas, float iScaleFactor, FOdysseyHUDElement::FDrawHUDParams& oParams);
     bool ViewportToHUD(FEditorViewportClient* iViewportClient, const FVector2D& iViewportPoint, FVector2D& oHUDPoint);
 
 public:

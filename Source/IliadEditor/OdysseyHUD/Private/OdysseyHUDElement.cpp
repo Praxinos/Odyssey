@@ -17,7 +17,7 @@ FOdysseyHUDElement::FOdysseyHUDElement()
 }
 
 void
-FOdysseyHUDElement::Draw(const FOdysseyHUD::FDrawHUDParams& iParams)
+FOdysseyHUDElement::Draw(const FOdysseyHUDElement::FDrawHUDParams& iParams)
 {
     if (!IsVisible())
         return;
@@ -29,7 +29,7 @@ FOdysseyHUDElement::Draw(const FOdysseyHUD::FDrawHUDParams& iParams)
 }
 
 void
-FOdysseyHUDElement::DrawHUD(const FOdysseyHUD::FDrawHUDParams& iParams)
+FOdysseyHUDElement::DrawHUD(const FOdysseyHUDElement::FDrawHUDParams& iParams)
 {
 }
 
@@ -49,6 +49,18 @@ void
 FOdysseyHUDElement::EmptyElements()
 {
     mElements.Empty();
+}
+
+void
+FOdysseyHUDElement::SetCustomization(const FHUDCustomization& iCustomization)
+{
+    mCustomization = iCustomization;
+}
+
+const FOdysseyHUDElement::FHUDCustomization&
+FOdysseyHUDElement::GetCustomization() const
+{
+    return mCustomization;
 }
 
 bool FOdysseyHUDElement::IsCaptured() const

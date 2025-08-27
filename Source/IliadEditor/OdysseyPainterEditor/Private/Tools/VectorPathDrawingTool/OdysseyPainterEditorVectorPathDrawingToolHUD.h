@@ -19,7 +19,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPathDrawingToolHUD : p
 
         FOdysseyPainterEditorVectorPathDrawingToolHUD( UOdysseyPainterEditorVectorPathDrawingTool* iPathDrawingTool );
 
-        virtual void DrawHUD( const FOdysseyHUD::FDrawHUDParams& iParams ) override;
+        virtual void DrawHUD( const FOdysseyHUDElement::FDrawHUDParams& iParams ) override;
         virtual void Draw( BLContext* iBLContext ) override;
         virtual void Reset() override;
         virtual void Load() override;

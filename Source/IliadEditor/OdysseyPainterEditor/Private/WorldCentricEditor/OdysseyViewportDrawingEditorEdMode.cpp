@@ -92,11 +92,11 @@ FOdysseyViewportDrawingEditorEdMode::DrawHUD(FEditorViewportClient* ViewportClie
 
     float scaleFactor = FSlateApplication::Get().GetApplicationScale() * window->GetNativeWindow()->GetDPIScaleFactor();
 
-    FOdysseyHUD::FDrawHUDParams params;
+    FOdysseyHUDElement::FDrawHUDParams params;
     if (!mViewportDrawingEditorExtension->GetDrawHUDParams(View, Canvas, scaleFactor, params))
         return;
 
-    GetEditor()->HUDSystem()->DrawHUD(params);
+    GetEditor()->HUDSystem()->Draw(params);
 }
 
 

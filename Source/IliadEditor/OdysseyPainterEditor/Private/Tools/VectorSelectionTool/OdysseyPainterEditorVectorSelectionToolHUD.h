@@ -8,7 +8,7 @@
 #include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.h"
 #include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseToolHUD.h"
 #include "Tools/VectorSelectionTool/OdysseyPainterEditorVectorSelectionTool.h"
-#include "OdysseyHUD.h"
+#include "OdysseyHUDElement.h"
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorSelectionToolHUD : public FOdysseyPainterEditorVectorBaseToolHUD
 {
@@ -47,14 +47,14 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorSelectionToolHUD : pub
          * @return the bounding box including the rectangle.
          */
         ::ULIS::FRectD GenerateRectangleMask( const ::ULIS::FRectD& iRect );
-        virtual void DrawHUD( const FOdysseyHUD::FDrawHUDParams& iParams ) override;
+        virtual void DrawHUD( const FOdysseyHUDElement::FDrawHUDParams& iParams ) override;
 
     protected:
         void DrawPickingArea( BLContext* iBLContext
                             , BLRgba32 fgColor
                             , BLRgba32 bgColor
                             , BLRgba32 hcColor );
-        void DrawPickingArea( const FOdysseyHUD::FDrawHUDParams& iParams
+        void DrawPickingArea( const FOdysseyHUDElement::FDrawHUDParams& iParams
                             , const FLinearColor& fgColor
                             , const FLinearColor& bgColor
                             , const FLinearColor& hcColor );

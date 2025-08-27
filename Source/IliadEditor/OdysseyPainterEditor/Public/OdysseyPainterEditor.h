@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "OdysseyHUD.h"
+#include "OdysseyHUDElement.h"
 #include "OdysseyEditorTab.h"
 #include "OdysseyEditorShortcuts.h"
 #include "OdysseyMediaProvider.h"
@@ -225,7 +225,7 @@ public:
     template<class T> TSharedPtr<T> GetSourceTyped() const;
     virtual FOdysseyPainterEditorGUI*                    GetGUI();
 
-    virtual FOdysseyHUD*                               HUDSystem() const;
+    virtual FOdysseyHUDElement*                              HUDSystem() const;
     virtual const FOdysseyBrushColor&                        PaintColor() const;
 
     UOdysseyAnimation*                                       GetAnimation() const;
@@ -355,9 +355,7 @@ protected:
 
 private:
     void InitTools();
-    void InitHUD();
 
-    void OnDrawHUD(const FOdysseyHUD::FDrawHUDParams& iParams);
     UOdysseyPainterEditorTool* FindDefaultToolForCurrentLayer();
 
 protected:
@@ -392,7 +390,7 @@ protected:
     uint64                          mVectorHUDFlags;
     uint64                          mVectorDrawingFlags;
 
-    FOdysseyHUD*              mHUDSystem;
+    FOdysseyHUDElement*             mHUDSystem;
     TSharedPtr<FOdysseyPainterEditorRasterSelection> mRasterSelection;
     TArray<FOdysseyBrushContext*>   mBrushContexts;
     FOdysseyBrushColor              mPaintColor;

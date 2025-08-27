@@ -17,7 +17,7 @@ public:
     FOdysseyHUDEllipse( const FVector2D& iCenter, int iXRadius, int iYRadius);
 
 public:
-    virtual void DrawHUD(const FOdysseyHUD::FDrawHUDParams& iParams) override;
+    virtual void DrawHUD(const FOdysseyHUDElement::FDrawHUDParams& iParams) override;
 
 public:
     void SetCenter(const FVector2D& iCenter);

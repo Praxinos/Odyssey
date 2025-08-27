@@ -6,7 +6,6 @@
 #include "CoreMinimal.h"
 
 #include "OdysseyHUDElement.h"
-#include "OdysseyHUD.h"
 #include "Engine/Texture.h"
 
 /////////////////////////////////////////////////////
@@ -22,7 +21,7 @@ public:
 
 //FOdysseyHUDElement overrides
 public:
-    virtual void DrawHUD(const FOdysseyHUD::FDrawHUDParams& iParams) override;
+    virtual void DrawHUD(const FOdysseyHUDElement::FDrawHUDParams& iParams) override;
 
 public:
     //HitProxy version

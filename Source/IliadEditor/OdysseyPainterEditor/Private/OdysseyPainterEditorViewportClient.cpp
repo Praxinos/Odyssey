@@ -28,7 +28,7 @@
 
 #include "IOdysseyStylusInputModule.h"
 #include "OdysseyPaintEngine.h"
-#include "OdysseyHUD.h"
+#include "OdysseyHUDElement.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorSettings.h"
 #include "OdysseyStylusInputSettings.h"
@@ -38,7 +38,6 @@
 #include "SOdysseyViewport.h"
 #include "OdysseyPainterEditorCommands.h"
 #include "OdysseyKeyState.h"
-#include "OdysseyHUDElement.h"
 #include "MouseDeltaTracker.h"
 #include "Tools/OdysseyPainterEditorTool.h"
 
@@ -236,20 +235,30 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
         }
     }
 
-    FOdysseyHUD::FDrawHUDParams params;
+    FOdysseyHUDElement::FDrawHUDParams params;
     params.mCanvas = ioCanvas;
     params.mTextureWidth = texture->GetSurfaceWidth();
     params.mTextureHeight = texture->GetSurfaceHeight();
 
     TSharedPtr<SOdysseyViewport> viewportWidget = mOdysseyPainterEditorViewportPtr.Pin();
-    params.mTextureToHUD = FOdysseyHUD::FDrawHUDParams::FTextureToHUD::CreateLambda(
+    params.mTextureToHUD = FOdysseyHUDElement::FDrawHUDParams::FTextureToHUD::CreateLambda(
         [viewportWidget, w = params.mTextureWidth, h = params.mTextureHeight](const FVector2D& iPosition)
         {
             return viewportWidget->ToWorld(iPosition - FVector2D(w / 2.f, h / 2.f));
         }
     );
 
-    mOdysseyPainterEditor->HUDSystem()->DrawHUD(params);
+    /*
+    params.mColors.Add(FLinearColor::Red);
+    params.mColors.Add(FLinearColor(1.f, 0.5f, 0.f));
+    params.mColors.Add(FLinearColor::Yellow);
+    params.mColors.Add(FLinearColor::Green);
+    params.mColors.Add(FLinearColor(0.f, 1.f, 1.f));
+    params.mColors.Add(FLinearColor::Blue);
+    params.mColors.Add(FLinearColor(0.5f, 0.f, 1.f));
+    params.mSegmentLength = 10.f;*/
+
+    mOdysseyPainterEditor->HUDSystem()->Draw(params);
 }
 
 EMouseCursor::Type

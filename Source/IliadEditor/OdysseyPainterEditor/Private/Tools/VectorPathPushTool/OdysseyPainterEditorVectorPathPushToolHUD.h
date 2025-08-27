@@ -19,7 +19,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPathPushToolHUD : publ
         virtual ~FOdysseyPainterEditorVectorPathPushToolHUD();
         FOdysseyPainterEditorVectorPathPushToolHUD( UOdysseyPainterEditorVectorPathPushTool* iPathPushTool );
 
-        void DrawHUD( const FOdysseyHUD::FDrawHUDParams& iParams );
+        void DrawHUD( const FOdysseyHUDElement::FDrawHUDParams& iParams );
         virtual void Draw( BLContext* iBLContext ) override;
         virtual void Reset() override;
         virtual void Load() override;

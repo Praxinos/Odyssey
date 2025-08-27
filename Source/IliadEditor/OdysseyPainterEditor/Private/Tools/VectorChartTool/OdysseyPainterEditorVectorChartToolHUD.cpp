@@ -115,7 +115,7 @@ FOdysseyPainterEditorVectorChartToolHUD::UpdateBreakdown()
 }
 
 void
-FOdysseyPainterEditorVectorChartToolHUD::DrawBreakdownChart( const FOdysseyHUD::FDrawHUDParams& iParams
+FOdysseyPainterEditorVectorChartToolHUD::DrawBreakdownChart( const FOdysseyHUDElement::FDrawHUDParams& iParams
                                                            , const FLinearColor& iFgColor
                                                            , const FLinearColor& iBgColor
                                                            , const FLinearColor& iHcColor
@@ -294,7 +294,7 @@ FOdysseyPainterEditorVectorChartToolHUD::DrawBreakdownChart( const FOdysseyHUD::
 }
 
 void
-FOdysseyPainterEditorVectorChartToolHUD::DrawHUD( const FOdysseyHUD::FDrawHUDParams& iParams )
+FOdysseyPainterEditorVectorChartToolHUD::DrawHUD( const FOdysseyHUDElement::FDrawHUDParams& iParams )
 {
     mCurrentHUDParams = iParams;
 

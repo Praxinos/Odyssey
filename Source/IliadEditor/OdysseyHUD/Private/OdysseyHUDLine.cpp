@@ -19,9 +19,9 @@ FOdysseyHUDLine::FOdysseyHUDLine(const FVector2D& iStartPoint, const FVector2D& 
 }
 
 void
-FOdysseyHUDLine::DrawHUD(const FOdysseyHUD::FDrawHUDParams& iParams)
+FOdysseyHUDLine::DrawHUD(const FOdysseyHUDElement::FDrawHUDParams& iParams)
 {
-    const FLinearColor color(0.f, 1.f, 0.f);
+    const FLinearColor color(0.f, 0.f, 0.f);
 
     FVector2D startPoint = iParams.mTextureToHUD.Execute(mStartPoint);
     FVector2D endPoint = iParams.mTextureToHUD.Execute(mEndPoint);

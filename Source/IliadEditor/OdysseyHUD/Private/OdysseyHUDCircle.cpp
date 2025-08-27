@@ -20,7 +20,7 @@ FOdysseyHUDCircle::FOdysseyHUDCircle(const FVector2D& iCenterPoint, float iRadiu
 }
 
 void
-FOdysseyHUDCircle::DrawHUD(const FOdysseyHUD::FDrawHUDParams& iParams)
+FOdysseyHUDCircle::DrawHUD(const FOdysseyHUDElement::FDrawHUDParams& iParams)
 {
     const FLinearColor color(0.f, 1.f, 0.f);
 

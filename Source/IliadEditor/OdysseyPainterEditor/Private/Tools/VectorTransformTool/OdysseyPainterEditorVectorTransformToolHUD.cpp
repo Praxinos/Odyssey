@@ -117,7 +117,7 @@ GetWorldScalers( FSelectionBox& iSelectionBox, FSelectionBoxScaler iScaler[4] )
 }
 
 void
-FOdysseyPainterEditorVectorTransformToolHUD::DrawScalers( const FOdysseyHUD::FDrawHUDParams& iParams )
+FOdysseyPainterEditorVectorTransformToolHUD::DrawScalers( const FOdysseyHUDElement::FDrawHUDParams& iParams )
 {
     FLinearColor fgColor = FLinearColor( FOdysseyVectorHUD::GetForegroundColor() );
     FLinearColor bgColor = FLinearColor( FOdysseyVectorHUD::GetBackgroundColor() );
@@ -137,7 +137,7 @@ FOdysseyPainterEditorVectorTransformToolHUD::DrawScalers( const FOdysseyHUD::FDr
 }
 
 void
-FOdysseyPainterEditorVectorTransformToolHUD::DrawGizmo( const FOdysseyHUD::FDrawHUDParams& iParams )
+FOdysseyPainterEditorVectorTransformToolHUD::DrawGizmo( const FOdysseyHUDElement::FDrawHUDParams& iParams )
 {
     FLinearColor fgColor = FLinearColor( FOdysseyVectorHUD::GetForegroundColor() );
     FLinearColor bgColor = FLinearColor( FOdysseyVectorHUD::GetBackgroundColor() );
@@ -388,7 +388,7 @@ FOdysseyPainterEditorVectorTransformToolHUD::Reset( )
 }
 
 void
-FOdysseyPainterEditorVectorTransformToolHUD::DrawHUD( const FOdysseyHUD::FDrawHUDParams& iParams )
+FOdysseyPainterEditorVectorTransformToolHUD::DrawHUD( const FOdysseyHUDElement::FDrawHUDParams& iParams )
 {
     mCurrentHUDParams = iParams;
 

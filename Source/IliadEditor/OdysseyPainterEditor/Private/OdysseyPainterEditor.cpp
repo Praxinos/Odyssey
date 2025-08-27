@@ -16,7 +16,6 @@
 #include "OdysseyBlockClipboardData.h"
 #include "OdysseyCoreEditorModule.h"
 #include "OdysseyPainterEditorSource.h"
-#include "OdysseyHUD.h"
 #include "OdysseyHUDElement.h"
 #include "OdysseyMediaRaster.h"
 #include "OdysseyMediaVector.h"
@@ -137,7 +136,7 @@ FOdysseyPainterEditor::FOdysseyPainterEditor(TSharedRef<FBaseToolkit> iToolkit)
     , mCurrentTemporaryTool(nullptr)
     , mVectorHUDFlags(FOdysseyVectorHUD::HUD_MODE_OBJECT)
     , mVectorDrawingFlags(0)
-    , mHUDSystem(new FOdysseyHUD())
+    , mHUDSystem(new FOdysseyHUDElement())
     , mRasterSelection(MakeShared< FOdysseyPainterEditorRasterSelection >())
     , mBrushContexts()
     , mPaintColor(::ULIS::FColor::Black)
@@ -183,8 +182,6 @@ FOdysseyPainterEditor::Initialize()
 {
     FOdysseyPainterEditorModule& painterEditorModule = FModuleManager::GetModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
     painterEditorModule.AddOpenedEditor(this);
-
-    InitHUD();
 
     //Init Tools
     InitTools();
@@ -685,11 +682,6 @@ FOdysseyPainterEditor::OnClose()
 }
 
 void
-FOdysseyPainterEditor::InitHUD()
-{
-}
-
-void
 FOdysseyPainterEditor::InitTools()
 {
     mRasterDrawingTool = AddMainTool<UOdysseyPainterEditorRasterDrawingTool>();
@@ -908,7 +900,7 @@ FOdysseyPainterEditor::GetBrushContexts()
     return mBrushContexts;
 }
 
-FOdysseyHUD*
+FOdysseyHUDElement*
 FOdysseyPainterEditor::HUDSystem() const
 {
     return mHUDSystem;

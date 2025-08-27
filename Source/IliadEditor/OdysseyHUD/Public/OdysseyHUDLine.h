@@ -19,7 +19,7 @@ public:
     FOdysseyHUDLine(const FVector2D& iStartPoint, const FVector2D& iEndPoint);
 
 public:
-    virtual void DrawHUD(const FOdysseyHUD::FDrawHUDParams& iParams) override;
+    virtual void DrawHUD(const FOdysseyHUDElement::FDrawHUDParams& iParams) override;
 
 public:
     void SetStartPoint(const FVector2D& iPoint);

@@ -99,7 +99,7 @@ FOdysseyPainterEditorVectorPathEditToolHUD::GenerateMask( double iX
 }
 
 void
-FOdysseyPainterEditorVectorPathEditToolHUD::DrawHUD( const FOdysseyHUD::FDrawHUDParams& iParams )
+FOdysseyPainterEditorVectorPathEditToolHUD::DrawHUD( const FOdysseyHUDElement::FDrawHUDParams& iParams )
 {
     mCurrentHUDParams = iParams;
 

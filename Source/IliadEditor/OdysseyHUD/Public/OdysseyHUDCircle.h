@@ -17,7 +17,7 @@ public:
     FOdysseyHUDCircle( const FVector2D& iCenterPoint, float iRadius);
 
 public:
-    virtual void DrawHUD(const FOdysseyHUD::FDrawHUDParams& iParams) override;
+    virtual void DrawHUD(const FOdysseyHUDElement::FDrawHUDParams& iParams) override;
 
 public:
     void SetCenter(const FVector2D& iCenterPoint);

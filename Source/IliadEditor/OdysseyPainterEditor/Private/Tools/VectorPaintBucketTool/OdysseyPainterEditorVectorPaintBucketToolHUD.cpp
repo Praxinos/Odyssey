@@ -202,7 +202,7 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::PickBucket( double iWorldX
 }
 
 void
-FOdysseyPainterEditorVectorPaintBucketToolHUD::DrawHUD( const FOdysseyHUD::FDrawHUDParams& iParams )
+FOdysseyPainterEditorVectorPaintBucketToolHUD::DrawHUD( const FOdysseyHUDElement::FDrawHUDParams& iParams )
 {
     mCurrentHUDParams = iParams;
 

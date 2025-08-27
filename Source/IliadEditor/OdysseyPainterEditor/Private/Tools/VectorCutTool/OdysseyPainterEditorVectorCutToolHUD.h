@@ -8,7 +8,7 @@
 #include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.h"
 #include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseToolHUD.h"
 #include "Tools/VectorCutTool/OdysseyPainterEditorVectorCutTool.h"
-#include "OdysseyHUD.h"
+#include "OdysseyHUDElement.h"
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorCutToolHUD : public FOdysseyPainterEditorVectorBaseToolHUD
 {
@@ -51,14 +51,14 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorCutToolHUD : public FO
         ::ULIS::FRectD GenerateLineMask( const ::ULIS::FVec2D& iPoint0
                                        , const ::ULIS::FVec2D& iPoint1 );
 
-        virtual void DrawHUD( const FOdysseyHUD::FDrawHUDParams& iParams ) override;
+        virtual void DrawHUD( const FOdysseyHUDElement::FDrawHUDParams& iParams ) override;
 
     protected:
         void DrawPickingArea( BLContext* iBLContext
                             , BLRgba32 fgColor
                             , BLRgba32 bgColor
                             , BLRgba32 hcColor );
-        void DrawPickingArea( const FOdysseyHUD::FDrawHUDParams& iParams
+        void DrawPickingArea( const FOdysseyHUDElement::FDrawHUDParams& iParams
                             , const FLinearColor& fgColor
                             , const FLinearColor& bgColor
                             , const FLinearColor& hcColor );

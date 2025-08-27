@@ -7,8 +7,9 @@
 
 #include "HitProxies.h"
 #include "Input/OdysseyPoint.h"
-#include "OdysseyHUD.h"
+#include "OdysseyHUDElement.h"
 #include "UObject/GCObject.h"
+
 
 /////////////////////////////////////////////////////
 // UOdysseyHUDElement
@@ -16,6 +17,28 @@ class ODYSSEYHUD_API FOdysseyHUDElement
     : public TSharedFromThis<FOdysseyHUDElement>
     , public FGCObject //Allows us to register UObjects in Garbage Collector
 {
+
+public:
+    struct FHUDCustomization
+    {
+        // For dotted lines
+        TArray<FLinearColor> mColors;
+        float mSegmentLength = INFINITY;
+        float mGapLength = 0.f;
+    };
+
+    struct FDrawHUDParams
+    {
+        DECLARE_DELEGATE_RetVal_OneParam(FVector2D, FTextureToHUD, const FVector2D&)
+
+        FCanvas* mCanvas;
+        FTextureToHUD mTextureToHUD;
+        int32 mTextureWidth;
+        int32 mTextureHeight;
+
+        const FHUDCustomization* mCustomization = nullptr; // non-owning
+    };
+
 public:
     // Destructor
     virtual ~FOdysseyHUDElement();
@@ -24,7 +47,7 @@ public:
     FOdysseyHUDElement();
 
 public:
-    void Draw(const FOdysseyHUD::FDrawHUDParams& iParams);
+    void Draw(const FOdysseyHUDElement::FDrawHUDParams& iParams);
 
 public:
     //HitProxy version
@@ -42,6 +65,9 @@ public:
     void RemoveElement( TSharedPtr<FOdysseyHUDElement> iElementToRemove );
     void EmptyElements();
 
+    void SetCustomization(const FHUDCustomization& iCustomization);
+    const FHUDCustomization& GetCustomization() const;
+
     bool IsCaptured() const;
     void Capture(bool iCapture);
 
@@ -49,12 +75,15 @@ public:
     void SetIsVisible(TAttribute<bool> iIsVisible);
 
 protected:
-    virtual void DrawHUD(const FOdysseyHUD::FDrawHUDParams& iParams);
+    virtual void DrawHUD(const FOdysseyHUDElement::FDrawHUDParams& iParams);
 
 protected:
     // FGCObject implementation
     virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
     virtual FString GetReferencerName() const override;
+
+protected:
+    FHUDCustomization mCustomization;
 
 private:
     TArray<TSharedPtr<FOdysseyHUDElement>> mElements;

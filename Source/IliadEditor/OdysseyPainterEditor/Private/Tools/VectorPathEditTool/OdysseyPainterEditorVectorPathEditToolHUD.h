@@ -14,7 +14,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPathEditToolHUD : publ
         virtual ~FOdysseyPainterEditorVectorPathEditToolHUD(  );
         FOdysseyPainterEditorVectorPathEditToolHUD( UOdysseyPainterEditorVectorPathEditTool* iPathEditTool );
 
-        void DrawHUD( const FOdysseyHUD::FDrawHUDParams& iParams );
+        void DrawHUD( const FOdysseyHUDElement::FDrawHUDParams& iParams );
         virtual void Draw( BLContext* iBLContext ) override;
         virtual void Reset() override;
         virtual void Load() override;
@@ -36,13 +36,13 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPathEditToolHUD : publ
 
     private:
 
-        void DrawMinus( const FOdysseyHUD::FDrawHUDParams& iParams
+        void DrawMinus( const FOdysseyHUDElement::FDrawHUDParams& iParams
                       , const FLinearColor& iFgColor
                       , const FLinearColor& iBgColor
                       , float iThickness
                       , bool iContour );
 
-        void DrawPlus( const FOdysseyHUD::FDrawHUDParams& iParams
+        void DrawPlus( const FOdysseyHUDElement::FDrawHUDParams& iParams
                      , const FLinearColor& iFgColor
                      , const FLinearColor& iBgColor
                      , float iThickness

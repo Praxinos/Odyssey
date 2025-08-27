@@ -45,7 +45,7 @@ FOdysseyPainterEditorVectorPathSmoothToolHUD::Unload()
 }
 
 void
-FOdysseyPainterEditorVectorPathSmoothToolHUD::DrawHUD( const FOdysseyHUD::FDrawHUDParams& iParams )
+FOdysseyPainterEditorVectorPathSmoothToolHUD::DrawHUD( const FOdysseyHUDElement::FDrawHUDParams& iParams )
 {
     mCurrentHUDParams = iParams;
 

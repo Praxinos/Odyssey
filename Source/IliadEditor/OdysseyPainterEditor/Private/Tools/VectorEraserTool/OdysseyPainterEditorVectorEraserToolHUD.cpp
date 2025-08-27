@@ -53,7 +53,7 @@ FOdysseyPainterEditorVectorEraserToolHUD::Reset()
 }
 
 void
-FOdysseyPainterEditorVectorEraserToolHUD::DrawHUD( const FOdysseyHUD::FDrawHUDParams& iParams )
+FOdysseyPainterEditorVectorEraserToolHUD::DrawHUD( const FOdysseyHUDElement::FDrawHUDParams& iParams )
 {
     mCurrentHUDParams = iParams;
 

@@ -175,7 +175,7 @@ struct HOdysseyHUDDummyCursorHitProxy : public HOdysseyHUDElementHitProxy
 IMPLEMENT_HIT_PROXY(HOdysseyHUDDummyCursorHitProxy, HOdysseyHUDElementHitProxy)
 
 void
-FOdysseyPainterEditorVectorBaseToolHUD::DrawInbetweens( const FOdysseyHUD::FDrawHUDParams& iParams
+FOdysseyPainterEditorVectorBaseToolHUD::DrawInbetweens( const FOdysseyHUDElement::FDrawHUDParams& iParams
                                                       , FInbetweenerBreakdown* iBreakdown
                                                       , eShowInbetweens ShowInbetweens
                                                       , uint64 iSourceExtraHUDFlags
@@ -659,7 +659,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBox( bool iForceWorld
 }
 
 void
-FOdysseyPainterEditorVectorBaseToolHUD::DrawSelectionBox( const FOdysseyHUD::FDrawHUDParams& iParams
+FOdysseyPainterEditorVectorBaseToolHUD::DrawSelectionBox( const FOdysseyHUDElement::FDrawHUDParams& iParams
                                                         , const FLinearColor& iForegroundColor
                                                         , const FLinearColor& iBackgroundColor
                                                         , const FLinearColor& iHighlightColor
@@ -712,7 +712,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawSelectionBox( const FOdysseyHUD::FDr
 }
 
 void
-FOdysseyPainterEditorVectorBaseToolHUD::DrawBucket( const FOdysseyHUD::FDrawHUDParams& iParams
+FOdysseyPainterEditorVectorBaseToolHUD::DrawBucket( const FOdysseyHUDElement::FDrawHUDParams& iParams
                                                   , FOdysseyVectorBucket* iBucket
                                                   , const FLinearColor& fgColor
                                                   , const FLinearColor& bgColor
@@ -837,7 +837,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawBucket( const FOdysseyHUD::FDrawHUDP
 }
 
 void
-FOdysseyPainterEditorVectorBaseToolHUD::DrawGroupPaint( const FOdysseyHUD::FDrawHUDParams& iParams
+FOdysseyPainterEditorVectorBaseToolHUD::DrawGroupPaint( const FOdysseyHUDElement::FDrawHUDParams& iParams
                                                       , FOdysseyVectorGroupPaint* iPaintGroup
                                                       , const FLinearColor& fgColor
                                                       , const FLinearColor& bgColor
@@ -856,7 +856,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawGroupPaint( const FOdysseyHUD::FDraw
 }
 
 void
-FOdysseyPainterEditorVectorBaseToolHUD::DrawHierarchy( const FOdysseyHUD::FDrawHUDParams& iParams
+FOdysseyPainterEditorVectorBaseToolHUD::DrawHierarchy( const FOdysseyHUDElement::FDrawHUDParams& iParams
                                                      , FOdysseyVectorObject* iTopObject
                                                      , const FLinearColor& iForegroundColor
                                                      , const FLinearColor& iBackgroundColor
@@ -934,7 +934,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawHierarchy( const FOdysseyHUD::FDrawH
 
 //3D HUD
 void
-FOdysseyPainterEditorVectorBaseToolHUD::DrawHUD( const FOdysseyHUD::FDrawHUDParams& iParams )
+FOdysseyPainterEditorVectorBaseToolHUD::DrawHUD( const FOdysseyHUDElement::FDrawHUDParams& iParams )
 {
     FLinearColor fg = FLinearColor( FOdysseyVectorHUD::GetForegroundColor() );
     FLinearColor bg = FLinearColor( FOdysseyVectorHUD::GetBackgroundColor() );
@@ -973,7 +973,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::Draw( BLContext* iBLContext )
 
 // static
 void
-FOdysseyPainterEditorVectorBaseToolHUD::DrawVertex( const FOdysseyHUD::FDrawHUDParams& iParams
+FOdysseyPainterEditorVectorBaseToolHUD::DrawVertex( const FOdysseyHUDElement::FDrawHUDParams& iParams
                                                   , FOdysseyVectorVertex* iVertex
                                                   , const FLinearColor& fgColor
                                                   , const FLinearColor& bgColor
@@ -1134,7 +1134,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::TextureToHUD( const FVector2D& iPosition
 }
 
 void
-FOdysseyPainterEditorVectorBaseToolHUD::DrawModifierInfo( const FOdysseyHUD::FDrawHUDParams& iParams )
+FOdysseyPainterEditorVectorBaseToolHUD::DrawModifierInfo( const FOdysseyHUDElement::FDrawHUDParams& iParams )
 {
     DrawInfo( iParams, mModifierInfoText, FLinearColor( 1.0f, 0.5f, 0.0f, 1.0f ) );
 }
@@ -1189,7 +1189,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::WorldVectorToHUD( const ::ULIS::FVec2D& 
 }
 
 void
-FOdysseyPainterEditorVectorBaseToolHUD::DrawInfo( const FOdysseyHUD::FDrawHUDParams& iParams
+FOdysseyPainterEditorVectorBaseToolHUD::DrawInfo( const FOdysseyHUDElement::FDrawHUDParams& iParams
                                                 , const FText& iText
                                                 , const FLinearColor& iColor )
 {
@@ -1254,7 +1254,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawInfo( const FOdysseyHUD::FDrawHUDPar
 }
 
 void
-FOdysseyPainterEditorVectorBaseToolHUD::DrawPrimitiveVertex( const FOdysseyHUD::FDrawHUDParams& iParams
+FOdysseyPainterEditorVectorBaseToolHUD::DrawPrimitiveVertex( const FOdysseyHUDElement::FDrawHUDParams& iParams
                                                            , const FVector2D& iHUDCoords
                                                            , double iRadius
                                                            , const FLinearColor& iFillColor
@@ -1294,7 +1294,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawPrimitiveVertex( const FOdysseyHUD::
 }
 
 void
-FOdysseyPainterEditorVectorBaseToolHUD::DrawPrimitiveHandle( const FOdysseyHUD::FDrawHUDParams& iParams
+FOdysseyPainterEditorVectorBaseToolHUD::DrawPrimitiveHandle( const FOdysseyHUDElement::FDrawHUDParams& iParams
                                                            , const FVector2D& iHUDCoords
                                                            , double iRadius
                                                            , const FLinearColor& iFillColor
@@ -1321,7 +1321,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawPrimitiveHandle( const FOdysseyHUD::
 }
 
 void
-FOdysseyPainterEditorVectorBaseToolHUD::DrawBatchedLines( const FOdysseyHUD::FDrawHUDParams& iParams
+FOdysseyPainterEditorVectorBaseToolHUD::DrawBatchedLines( const FOdysseyHUDElement::FDrawHUDParams& iParams
                                                         , const std::vector<BatchedLine>& iLineBuffer
                                                         , const std::vector<FVector2D>& iPointBuffer
                                                         , const FLinearColor& iColor
@@ -1375,7 +1375,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawBatchedLines( const FOdysseyHUD::FDr
 }
 
 void
-FOdysseyPainterEditorVectorBaseToolHUD::DrawPrimitiveBezierCubic( const FOdysseyHUD::FDrawHUDParams& iParams
+FOdysseyPainterEditorVectorBaseToolHUD::DrawPrimitiveBezierCubic( const FOdysseyHUDElement::FDrawHUDParams& iParams
                                                                 , const FVector2D& iHUDCoordsP0
                                                                 , const FVector2D& iHUDCoordsP1
                                                                 , const FVector2D& iHUDCoordsP2
@@ -1446,7 +1446,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawPrimitiveBezierCubic( const FOdyssey
 }
 
 void
-FOdysseyPainterEditorVectorBaseToolHUD::DrawPrimitiveBezierQuadratic( const FOdysseyHUD::FDrawHUDParams& iParams
+FOdysseyPainterEditorVectorBaseToolHUD::DrawPrimitiveBezierQuadratic( const FOdysseyHUDElement::FDrawHUDParams& iParams
                                                                     , const FVector2D& iHUDCoordsP0
                                                                     , const FVector2D& iHUDCoordsP1
                                                                     , const FVector2D& iHUDCoordsP2
@@ -1514,7 +1514,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawPrimitiveBezierQuadratic( const FOdy
 }
 
 void
-FOdysseyPainterEditorVectorBaseToolHUD::DrawPrimitivePlus( const FOdysseyHUD::FDrawHUDParams& iParams
+FOdysseyPainterEditorVectorBaseToolHUD::DrawPrimitivePlus( const FOdysseyHUDElement::FDrawHUDParams& iParams
                                                          , const FVector2D& iHUDCoords
                                                          , uint32 iSize
                                                          , const FLinearColor& iColor
@@ -1535,7 +1535,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawPrimitivePlus( const FOdysseyHUD::FD
 }
 
 void
-FOdysseyPainterEditorVectorBaseToolHUD::DrawPrimitiveLineOutlined( const FOdysseyHUD::FDrawHUDParams& iParams
+FOdysseyPainterEditorVectorBaseToolHUD::DrawPrimitiveLineOutlined( const FOdysseyHUDElement::FDrawHUDParams& iParams
                                                                  , const FVector2D& iHUDCoordsP0
                                                                  , const FVector2D& iHUDCoordsP1
                                                                  , const FLinearColor& iColor
@@ -1579,7 +1579,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawPrimitiveLineOutlined( const FOdysse
 }
 
 void
-FOdysseyPainterEditorVectorBaseToolHUD::DrawPrimitiveLine( const FOdysseyHUD::FDrawHUDParams& iParams
+FOdysseyPainterEditorVectorBaseToolHUD::DrawPrimitiveLine( const FOdysseyHUDElement::FDrawHUDParams& iParams
                                                          , const FVector2D& iHUDCoordsP0
                                                          , const FVector2D& iHUDCoordsP1
                                                          , const FLinearColor& iColor
@@ -1609,7 +1609,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawPrimitiveLine( const FOdysseyHUD::FD
 }
 
 void
-FOdysseyPainterEditorVectorBaseToolHUD::DrawPrimitiveCircle( const FOdysseyHUD::FDrawHUDParams& iParams
+FOdysseyPainterEditorVectorBaseToolHUD::DrawPrimitiveCircle( const FOdysseyHUDElement::FDrawHUDParams& iParams
                                                            , const FVector2D& iHUDCoords
                                                            , double iRadius
                                                            , const FLinearColor& iColor
@@ -1639,7 +1639,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawPrimitiveCircle( const FOdysseyHUD::
 }
 
 void
-FOdysseyPainterEditorVectorBaseToolHUD::DrawCubicSegment( const FOdysseyHUD::FDrawHUDParams& iParams
+FOdysseyPainterEditorVectorBaseToolHUD::DrawCubicSegment( const FOdysseyHUDElement::FDrawHUDParams& iParams
                                                         , FOdysseyVectorSegmentCubic* iCubicSegment
                                                         , const FLinearColor& fgColor
                                                         , const FLinearColor& bgColor
@@ -1703,7 +1703,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawCubicSegment( const FOdysseyHUD::FDr
 }
 
 void
-FOdysseyPainterEditorVectorBaseToolHUD::DrawSectionArray( const FOdysseyHUD::FDrawHUDParams& iParams
+FOdysseyPainterEditorVectorBaseToolHUD::DrawSectionArray( const FOdysseyHUDElement::FDrawHUDParams& iParams
                                                         , std::vector<FOdysseyVectorSection*>& iSectionArray
                                                         , const FLinearColor& fgColor
                                                         , const FLinearColor& bgColor
@@ -1774,7 +1774,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawSectionArray( const FOdysseyHUD::FDr
 }
 
 void
-FOdysseyPainterEditorVectorBaseToolHUD::DrawCycle( const FOdysseyHUD::FDrawHUDParams& iParams
+FOdysseyPainterEditorVectorBaseToolHUD::DrawCycle( const FOdysseyHUDElement::FDrawHUDParams& iParams
                                                  , FOdysseyVectorCycle* iCycle
                                                  , const FLinearColor& fgColor
                                                  , const FLinearColor& bgColor
@@ -1785,7 +1785,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawCycle( const FOdysseyHUD::FDrawHUDPa
 }
 
 ::ULIS::FRectD
-FOdysseyPainterEditorVectorBaseToolHUD::BBoxToHUD( const FOdysseyHUD::FDrawHUDParams& iParams
+FOdysseyPainterEditorVectorBaseToolHUD::BBoxToHUD( const FOdysseyHUDElement::FDrawHUDParams& iParams
                                                  , const ::ULIS::FRectD& iBBox )
 {
     FVector2D origin = WorldPointToHUD( FVector2D( iBBox.x, iBBox.y ) );
@@ -1795,7 +1795,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::BBoxToHUD( const FOdysseyHUD::FDrawHUDPa
 }
 
 void
-FOdysseyPainterEditorVectorBaseToolHUD::DrawPath( const FOdysseyHUD::FDrawHUDParams& iParams
+FOdysseyPainterEditorVectorBaseToolHUD::DrawPath( const FOdysseyHUDElement::FDrawHUDParams& iParams
                                                 , FOdysseyVectorPath* iPath
                                                 , const FLinearColor& fgColor
                                                 , const FLinearColor& bgColor
@@ -1844,7 +1844,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawPath( const FOdysseyHUD::FDrawHUDPar
 }
 
 void
-FOdysseyPainterEditorVectorBaseToolHUD::DrawGrid( const FOdysseyHUD::FDrawHUDParams& iParams
+FOdysseyPainterEditorVectorBaseToolHUD::DrawGrid( const FOdysseyHUDElement::FDrawHUDParams& iParams
                                                 , FInbetweenerGrid* iGrid
                                                 , eInbetweenerPointPositionType iPositionType
                                                 , const FLinearColor& iColor
@@ -1899,7 +1899,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawGrid( const FOdysseyHUD::FDrawHUDPar
 }
 
 void
-FOdysseyPainterEditorVectorBaseToolHUD::DrawInbetweenerInterpolatedPathAt( const FOdysseyHUD::FDrawHUDParams& iParams
+FOdysseyPainterEditorVectorBaseToolHUD::DrawInbetweenerInterpolatedPathAt( const FOdysseyHUDElement::FDrawHUDParams& iParams
                                                                          , FOdysseyVectorTagInbetweener* iInbetweenerTag
                                                                          , FInterpolatedPath* iInterpolatedPath
                                                                          , FInbetweenerChart::Inbetween* iInbetween
@@ -1981,7 +1981,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawInbetweenerInterpolatedPathAt( const
 }
 
 void
-FOdysseyPainterEditorVectorBaseToolHUD::DrawBreakdown( const FOdysseyHUD::FDrawHUDParams& iParams
+FOdysseyPainterEditorVectorBaseToolHUD::DrawBreakdown( const FOdysseyHUDElement::FDrawHUDParams& iParams
                                                      , FInbetweenerBreakdown* iBreakdown
                                                      , const FLinearColor& iSourceDrawingColor
                                                      , const FLinearColor& iTargetDrawingColor
@@ -2098,7 +2098,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::OnMouseDrag(const FOdysseyPoint& iPointI
 }
 
 void
-FOdysseyPainterEditorVectorBaseToolHUD::DrawDummyPlane( const FOdysseyHUD::FDrawHUDParams& iParams )
+FOdysseyPainterEditorVectorBaseToolHUD::DrawDummyPlane( const FOdysseyHUDElement::FDrawHUDParams& iParams )
 {
     if( iParams.mCanvas->IsHitTesting() )
     {

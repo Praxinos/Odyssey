@@ -92,7 +92,7 @@ FOdysseyPainterEditorVectorPathStitchToolHUD::SetCursorPosition( double iWorldX
 }
 
 void
-FOdysseyPainterEditorVectorPathStitchToolHUD::DrawHUD( const FOdysseyHUD::FDrawHUDParams& iParams )
+FOdysseyPainterEditorVectorPathStitchToolHUD::DrawHUD( const FOdysseyHUDElement::FDrawHUDParams& iParams )
 {
     mCurrentHUDParams = iParams;
 

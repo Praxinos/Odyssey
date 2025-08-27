@@ -304,7 +304,7 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::PickWaypoint( FOdysseyVectorTagInb
 }
 
 void
-FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawQuad( const FOdysseyHUD::FDrawHUDParams& iParams
+FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawQuad( const FOdysseyHUDElement::FDrawHUDParams& iParams
                                                       , const FLinearColor& iColor
                                                       , FInbetweenerQuad* iQuad )
 {
@@ -332,7 +332,7 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawQuad( const FOdysseyHUD::FDraw
 }
 
 void
-FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawTrajectory( const FOdysseyHUD::FDrawHUDParams& iParams
+FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawTrajectory( const FOdysseyHUDElement::FDrawHUDParams& iParams
                                                             , const FLinearColor& iFgColor
                                                             , const FLinearColor& iBgColor
                                                             , const FLinearColor& iHcColor
@@ -436,7 +436,7 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawTrajectory( const FOdysseyHUD:
 }
 
 void
-FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawHUD( const FOdysseyHUD::FDrawHUDParams& iParams )
+FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawHUD( const FOdysseyHUDElement::FDrawHUDParams& iParams )
 {
     mCurrentHUDParams = iParams;
 

@@ -195,7 +195,7 @@ FOdysseyPainterEditorVectorGridToolHUD::PickNodes( ::ULIS::FRectD& iWorldRect
 }
 
 void
-FOdysseyPainterEditorVectorGridToolHUD::DrawSelectionRectangle( const FOdysseyHUD::FDrawHUDParams& iParams
+FOdysseyPainterEditorVectorGridToolHUD::DrawSelectionRectangle( const FOdysseyHUDElement::FDrawHUDParams& iParams
                                                               , FLinearColor& iHighlightColor )
 {
     if( mWorldSelDrag != mWorldSelStart )
@@ -245,7 +245,7 @@ FOdysseyPainterEditorVectorGridToolHUD::Draw( BLContext* iBLContext )
 }
 
 void
-FOdysseyPainterEditorVectorGridToolHUD::DrawHUD( const FOdysseyHUD::FDrawHUDParams& iParams )
+FOdysseyPainterEditorVectorGridToolHUD::DrawHUD( const FOdysseyHUDElement::FDrawHUDParams& iParams )
 {
     mCurrentHUDParams = iParams;
 

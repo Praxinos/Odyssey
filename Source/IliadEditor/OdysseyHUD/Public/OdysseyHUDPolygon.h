@@ -20,7 +20,7 @@ public:
 
 //FOdysseyHUDElement overrides
 public:
-    virtual void DrawHUD(const FOdysseyHUD::FDrawHUDParams& iParams) override;
+    virtual void DrawHUD(const FOdysseyHUDElement::FDrawHUDParams& iParams) override;
 
 public:
     TArray<FVector2D>& GetPoints();

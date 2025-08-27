@@ -142,7 +142,16 @@ void
 FOdysseyPainterEditorRasterSelection::RefreshHUD()
 {
     mHUD->EmptyElements();
+    mHUD->SetCustomization( FOdysseyHUDElement::FHUDCustomization() ); // Reset the customization
+
     mBoundingRect = ::ULIS::FRectI::FromXYWH(0, 0, 0, 0);
+
+    FOdysseyHUDElement::FHUDCustomization dottedSelectionCustomization;
+    dottedSelectionCustomization.mColors.Add( FLinearColor::Black );
+    dottedSelectionCustomization.mColors.Add( FLinearColor::White );
+    dottedSelectionCustomization.mGapLength = 5.f;
+    dottedSelectionCustomization.mSegmentLength = 10.f;
+    mHUD->SetCustomization( dottedSelectionCustomization );
 
     if (!mBlock)
         return;

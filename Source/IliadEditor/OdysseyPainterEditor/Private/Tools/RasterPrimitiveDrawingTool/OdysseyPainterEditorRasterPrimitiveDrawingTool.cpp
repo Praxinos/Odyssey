@@ -14,7 +14,6 @@
 
 #include "OdysseyMediaRaster.h"
 #include "OdysseyHUDElement.h"
-#include "OdysseyHUD.h"
 #include "OdysseyHUDHandle.h"
 #include "OdysseyPainterEditorSource.h"
 #include "OdysseyPainterEditorRasterSelection.h"

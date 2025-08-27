@@ -8,7 +8,7 @@
 #include "ToolMenuOwner.h"
 #include "Input/OdysseyPoint.h"
 #include "OdysseyStyle.h"
-#include "OdysseyHUD.h"
+#include "OdysseyHUDElement.h"
 #include "Widgets/SWidget.h"
 
 #include "OdysseyPainterEditor.h"
@@ -83,7 +83,6 @@ public:
     virtual void ExtendToolbar( FToolBarBuilder& iBuilder );
     virtual TSharedPtr<FOdysseyHUDElement> GetHUD();
     virtual EMouseCursor::Type GetMouseCursor() const;
-    virtual void DrawHUD(const FOdysseyHUD::FDrawHUDParams& iParams);
     virtual bool IsHUDVisible() const;
 
     virtual bool SupportsColorType(EOdysseyPainterEditorColorType iType);

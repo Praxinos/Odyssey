@@ -4,6 +4,7 @@
 #include "OdysseyHUDPolygon.h"
 #include "CanvasTypes.h"
 
+#include "OdysseyHUDUtils.h"
 #include "ULISLoaderModule.h"
 
 FOdysseyHUDPolygon::~FOdysseyHUDPolygon()
@@ -16,45 +17,32 @@ FOdysseyHUDPolygon::FOdysseyHUDPolygon()
 }
 
 void
-FOdysseyHUDPolygon::DrawHUD(const FOdysseyHUD::FDrawHUDParams& iParams)
+FOdysseyHUDPolygon::DrawHUD(const FOdysseyHUDElement::FDrawHUDParams& iParams)
 {
     if (mPoints.Num() < 2)
         return;
 
-    FBatchedElements* batchedElements = iParams.mCanvas->GetBatchedElements(FCanvas::ET_Line);
-    const FLinearColor color(0.f, 1.f, 0.f);
+    // If we passed a customization in iParams, we use this one, else, we use the one that is in FOdysseyHUD
+    const FOdysseyHUDElement::FHUDCustomization& customization = iParams.mCustomization ? *iParams.mCustomization : mCustomization;
 
+    FBatchedElements* batchedElements = iParams.mCanvas->GetBatchedElements(FCanvas::ET_Line);
+
+    // Draw edges
     for (int i = 1; i < mPoints.Num(); i++)
     {
-        FVector2D startPosition = iParams.mTextureToHUD.Execute(mPoints[i - 1]);
-        FVector2D finishPosition = iParams.mTextureToHUD.Execute(mPoints[i]);
+        FVector2D start = iParams.mTextureToHUD.Execute(mPoints[i - 1]);
+        FVector2D end = iParams.mTextureToHUD.Execute(mPoints[i]);
 
-        batchedElements->AddTranslucentLine(
-            FVector(startPosition, 0.f),
-            FVector(finishPosition, 0.f),
-            color,
-            iParams.mCanvas->GetHitProxyId(),
-            1.f,
-            0.f,
-            true
-        );
+        FOdysseyHUDUtils::DrawCustomizedLine(start, end, customization, iParams, batchedElements);
     }
 
-    //Close the polygon
+    // Close polygon if needed
     if (mClosePolygon)
     {
-        FVector2D startPosition = iParams.mTextureToHUD.Execute(mPoints.Last());
-        FVector2D finishPosition = iParams.mTextureToHUD.Execute(mPoints[0]);
+        FVector2D start = iParams.mTextureToHUD.Execute(mPoints.Last());
+        FVector2D end = iParams.mTextureToHUD.Execute(mPoints[0]);
 
-        batchedElements->AddTranslucentLine(
-            FVector(startPosition, 0.f),
-            FVector(finishPosition, 0.f),
-            color,
-            iParams.mCanvas->GetHitProxyId(),
-            1.f,
-            0.f,
-            true
-        );
+        FOdysseyHUDUtils::DrawCustomizedLine(start, end, customization, iParams, batchedElements);
     }
 
     FOdysseyHUDElement::DrawHUD(iParams);

@@ -34,7 +34,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorTransformToolHUD : pub
         virtual ~FOdysseyPainterEditorVectorTransformToolHUD();
         FOdysseyPainterEditorVectorTransformToolHUD(  UOdysseyPainterEditorVectorTransformTool* iTransformTool );
 
-        virtual void DrawHUD( const FOdysseyHUD::FDrawHUDParams& iParams ) override;
+        virtual void DrawHUD( const FOdysseyHUDElement::FDrawHUDParams& iParams ) override;
         virtual void Draw( BLContext* iBLContext ) override;
         virtual void Reset() override;
         virtual void OnMouseHover( const FOdysseyPoint& iPointInTexture ) override;
@@ -53,8 +53,8 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorTransformToolHUD : pub
         uint32 PickSelectionBox( double iWorldX, double iWorldY );
         uint32 PickGizmo( double iWorldX, double iWorldY );
         void UpdateGizmo();
-        void DrawGizmo( const FOdysseyHUD::FDrawHUDParams& iParams );
-        void DrawScalers( const FOdysseyHUD::FDrawHUDParams& iParams );
+        void DrawGizmo( const FOdysseyHUDElement::FDrawHUDParams& iParams );
+        void DrawScalers( const FOdysseyHUDElement::FDrawHUDParams& iParams );
 
     private:
         UOdysseyPainterEditorVectorTransformTool* mTransformTool;

@@ -7,7 +7,6 @@
 #include "Framework/Application/SlateApplication.h"
 #include "Misc/TransactionObjectEvent.h"
 #include "OdysseyPainterEditor.h"
-#include "OdysseyHUD.h"
 #include "Misc/OdysseyUndoDelegates.h"
 #include "OdysseyPainterEditorToolInputProcessor.h"
 #include "OdysseyAnimationPlayer.h"
@@ -213,14 +212,6 @@ UOdysseyPainterEditorTool::ExtendToolbar( FToolBarBuilder& iBuilder )
 TSharedPtr<FOdysseyHUDElement> UOdysseyPainterEditorTool::GetHUD()
 {
     return mHUD;
-}
-
-void
-UOdysseyPainterEditorTool::DrawHUD(const FOdysseyHUD::FDrawHUDParams& iParams)
-{
-    TSharedPtr<FOdysseyHUDElement> hud = GetHUD();
-    if (hud)
-        hud->Draw(iParams);
 }
 
 bool

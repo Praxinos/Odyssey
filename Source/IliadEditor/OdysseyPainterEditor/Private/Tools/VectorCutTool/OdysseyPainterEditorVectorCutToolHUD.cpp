@@ -70,7 +70,7 @@ FOdysseyPainterEditorVectorCutToolHUD::GetMask()
 
 //3D HUD
 void
-FOdysseyPainterEditorVectorCutToolHUD::DrawHUD( const FOdysseyHUD::FDrawHUDParams& iParams )
+FOdysseyPainterEditorVectorCutToolHUD::DrawHUD( const FOdysseyHUDElement::FDrawHUDParams& iParams )
 {
     mCurrentHUDParams = iParams;
 
@@ -150,7 +150,7 @@ FOdysseyPainterEditorVectorCutToolHUD::DrawSelectionSpace( BLContext* iBLContext
 }
 
 void
-FOdysseyPainterEditorVectorCutToolHUD::DrawPickingArea( const FOdysseyHUD::FDrawHUDParams& iParams
+FOdysseyPainterEditorVectorCutToolHUD::DrawPickingArea( const FOdysseyHUDElement::FDrawHUDParams& iParams
                                                             , const FLinearColor& fgColor
                                                             , const FLinearColor& bgColor
                                                             , const FLinearColor& hcColor )

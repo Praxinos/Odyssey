@@ -1123,7 +1123,7 @@ FOdysseyViewportDrawingEditorExtension::AddReferencedObjects(FReferenceCollector
 }
 
 bool
-FOdysseyViewportDrawingEditorExtension::GetDrawHUDParams(const FSceneView* View, FCanvas* Canvas, float iScaleFactor, FOdysseyHUD::FDrawHUDParams& oParams)
+FOdysseyViewportDrawingEditorExtension::GetDrawHUDParams(const FSceneView* View, FCanvas* Canvas, float iScaleFactor, FOdysseyHUDElement::FDrawHUDParams& oParams)
 {
     AActor* actor = Actor();
     UMeshComponent* component = Component();
@@ -1174,7 +1174,7 @@ FOdysseyViewportDrawingEditorExtension::GetDrawHUDParams(const FSceneView* View,
     FMatrix textureToWorld = textureToComponent * componentToWorld;
 
     oParams.mCanvas = Canvas;
-    oParams.mTextureToHUD = FOdysseyHUD::FDrawHUDParams::FTextureToHUD::CreateLambda(
+    oParams.mTextureToHUD = FOdysseyHUDElement::FDrawHUDParams::FTextureToHUD::CreateLambda(
         [textureToWorld, View, scaleFactor = iScaleFactor](const FVector2D& iPosition)
         {
             FVector worldPoint = textureToWorld.TransformPosition(FVector(iPosition.X, iPosition.Y, 0.f));

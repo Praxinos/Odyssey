@@ -38,7 +38,7 @@ FOdysseyPainterEditorVectorMatchingToolHUD::Reset()
 }
 
 void
-FOdysseyPainterEditorVectorMatchingToolHUD::DrawHUD( const FOdysseyHUD::FDrawHUDParams& iParams )
+FOdysseyPainterEditorVectorMatchingToolHUD::DrawHUD( const FOdysseyHUDElement::FDrawHUDParams& iParams )
 {
     mCurrentHUDParams = iParams;
 
