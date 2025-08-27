@@ -44,13 +44,6 @@ FOdysseyVectorLayer::InvalidateCell( FOdysseyVectorCell* iCell )
     iCell->SetPendingRedraw( true );
 }
 
-void
-FOdysseyVectorLayer::InvalidateChild( FOdysseyVectorObject* iChild
-                                    , uint64 iChildInvalidationFlags )
-{
-    FOdysseyVectorObject::InvalidateChild( iChild, iChildInvalidationFlags );
-}
-
 FOdysseyVectorCell*
 FOdysseyVectorLayer::GetCellByIndex( uint32 iIndex )
 {
@@ -155,11 +148,20 @@ FOdysseyVectorLayer::ResetHUD( FOdysseyVectorGroupPaint* iScene )
     UnlockDrawing();
 }
 
+void FOdysseyVectorLayer::Update( uint32 iUpdateFlags )
+{
+    FOdysseyVectorObjectInvalidationFlags invalidationFlags = mInvalidationFlags;
+
+    FOdysseyVectorObject::Update( iUpdateFlags );
+
+    Notify( invalidationFlags );
+}
+
 // static
 void
-FOdysseyVectorLayer::Notify( uint64 iNotifyFlags )
+FOdysseyVectorLayer::Notify( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags )
 {
-    OnNotifyDelegate().Broadcast( this, iNotifyFlags );
+    OnNotifyDelegate().Broadcast( this, iInvalidationFlags );
 }
 
 void

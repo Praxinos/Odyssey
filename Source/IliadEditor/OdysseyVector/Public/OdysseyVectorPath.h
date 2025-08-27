@@ -74,7 +74,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
         virtual bool PickShape( const ::ULIS::FRectD &iRoi
                               , uint32 iSelectionFlags ) override;
         virtual FOdysseyVectorObject* CopyShape( uint64 iCopyFlags ) override;
-        virtual void Invalidate( uint64 iInvalidationFlags ) override;
+        virtual void Invalidate( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags ) override;
         virtual void ExportParam( FOdysseyVectorObject* iDestinationObject
                                 , bool iInvalidate ) override;
         virtual void UpdateBBox() override;

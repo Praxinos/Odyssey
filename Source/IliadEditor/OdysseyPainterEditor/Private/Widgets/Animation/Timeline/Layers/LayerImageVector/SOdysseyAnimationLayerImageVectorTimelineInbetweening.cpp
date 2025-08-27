@@ -82,9 +82,10 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::Construct( const FArgumen
 }
 
 void
-SOdysseyAnimationLayerImageVectorTimelineInbetweening::OnVectorSceneNotify( FOdysseyVectorLayer* iLayer, uint64 iNotificationFlags )
+SOdysseyAnimationLayerImageVectorTimelineInbetweening::OnVectorSceneNotify( FOdysseyVectorLayer* iLayer
+                                                                          , const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags )
 {
-    if( iNotificationFlags & FOdysseyPainterEditor::UI_UPDATE_TIMELINE )
+    //if( iNotificationFlags & FOdysseyPainterEditor::UI_UPDATE_TIMELINE )
     {
         Update();
     }
@@ -133,8 +134,6 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::OnSelectionChanged( TShar
                                                                          , ESelectInfo::Type SelectInfo )
 {
     std::list<FOdysseyVectorCell*> cellList;
-    uint64 retFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                    | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     if( SelectInfo != ESelectInfo::Type::Direct )
     {
@@ -154,7 +153,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::OnSelectionChanged( TShar
         {
             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectObject( mAnimationLayerImageVector->GetVectorLayer().Get()
                                                                          , cellList
-                                                                         , retFlags );
+                                                                         , 0 );
 
             GUndo->StoreUndo( mAnimationLayerImageVector, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -184,9 +183,9 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::OnSelectionChanged( TShar
             }
         }
 
-        mAnimationLayerImageVector->GetVectorLayer()->RequestRedraw( nullptr, 0 );
+        mAnimationLayerImageVector->GetVectorLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
-        mAnimationLayerImageVector->GetVectorLayer()->Notify( retFlags );
+        mAnimationLayerImageVector->GetVectorLayer()->RequestRedraw( nullptr, 0 );
     }
 }
 
@@ -279,7 +278,6 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::AddBreakdown()
     int breakdownCellIndex = cell->GetIndexInLayer();
     std::list<FOdysseyVectorTagInbetweener*> selectedInbetweenerTagList;
     std::list<FOdysseyVectorEngine*> engineList;
-    uint64 notificationFlags = FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     GetSelectedInbetweenerTags( selectedInbetweenerTagList );
 
@@ -291,7 +289,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::AddBreakdown()
         {
             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerBreakdownAdd( mAnimationLayerImageVector->GetVectorLayer().Get()
                                                                                        , selectedInbetweenerTagList
-                                                                                       , notificationFlags );
+                                                                                       , 0 );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -328,7 +326,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::AddBreakdown()
         mAnimationLayerImageVector->GetVectorLayer()->RequestRedraw( nullptr, 0 );
     }
 
-    mAnimationLayerImageVector->GetVectorLayer()->Notify( notificationFlags );
+    //refactor mAnimationLayerImageVector->GetVectorLayer()->Notify( notificationFlags );
 }
 
 void
@@ -341,7 +339,6 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::RemoveBreakdown()
 
     int breakdownCellIndex = cell->GetIndexInLayer();
     std::list<FOdysseyVectorTagInbetweener*> selectedInbetweenerTagList;
-    uint64 notificationFlags = FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     GetSelectedInbetweenerTags( selectedInbetweenerTagList );
 
@@ -353,7 +350,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::RemoveBreakdown()
         {
             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerBreakdownRemove( mAnimationLayerImageVector->GetVectorLayer().Get()
                                                                                           , selectedInbetweenerTagList
-                                                                                          , notificationFlags );
+                                                                                          , 0 );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -389,7 +386,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::RemoveBreakdown()
     }
 
     // static call
-    mAnimationLayerImageVector->GetVectorLayer()->Notify( notificationFlags );
+    //refactor mAnimationLayerImageVector->GetVectorLayer()->Notify( notificationFlags );
 }
 
 void
@@ -403,7 +400,6 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::ShowHideTarget()
     int breakdownCellIndex = cell->GetIndexInLayer();
     std::list<FOdysseyVectorTagInbetweener*> selectedInbetweenerTagList;
     std::list<FInbetweenerBreakdown*> breakdownList;
-    uint64 notificationFlags = FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     GetSelectedInbetweenerTags( selectedInbetweenerTagList );
 
@@ -427,7 +423,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::ShowHideTarget()
         {
             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerBreakdownTargetVisibility( mAnimationLayerImageVector->GetVectorLayer().Get()
                                                                                                     , breakdownList
-                                                                                                    , notificationFlags );
+                                                                                                    , 0 );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -455,7 +451,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::ShowHideTarget()
     }
 
     // static call
-    mAnimationLayerImageVector->GetVectorLayer()->Notify( notificationFlags );
+    //refactor mAnimationLayerImageVector->GetVectorLayer()->Notify( notificationFlags );
 }
 
 const FSlateBrush *
@@ -474,7 +470,6 @@ void
 SOdysseyAnimationLayerImageVectorTimelineInbetweening::ChangeDirection()
 {
     std::list<FOdysseyVectorTagInbetweener*> selectedInbetweenerTagList;
-    uint64 notificationFlags = FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     GetSelectedInbetweenerTags( selectedInbetweenerTagList );
 
@@ -520,7 +515,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::ChangeDirection()
     mAnimationLayerImageVector->GetVectorLayer()->RequestRedraw( nullptr, 0 );
 
     // static call
-    mAnimationLayerImageVector->GetVectorLayer()->Notify( notificationFlags );
+    //refactor mAnimationLayerImageVector->GetVectorLayer()->Notify( notificationFlags );
 }
 
 void

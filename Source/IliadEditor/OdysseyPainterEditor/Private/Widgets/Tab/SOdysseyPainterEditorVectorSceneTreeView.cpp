@@ -263,10 +263,6 @@ void
 SOdysseyPainterEditorVectorSceneTreeView::OnSelectionChanged( TSharedPtr<FVectorSceneTreeViewItem> iItem
                                                             , ESelectInfo::Type SelectInfo )
 {
-    uint64 retFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                    | FOdysseyPainterEditor::UI_UPDATE_TIMELINE
-                    | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
-
     if( mRootItem && ( SelectInfo != ESelectInfo::Type::Direct ) )
     {
         FOdysseyVectorGroupPaint* scene = static_cast<FOdysseyVectorGroupPaint*>(mRootItem.Get()->GetVectorObject());
@@ -277,7 +273,7 @@ SOdysseyPainterEditorVectorSceneTreeView::OnSelectionChanged( TSharedPtr<FVector
         {
             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectObject( scene->GetLayer()
                                                                          , scene->GetCell()
-                                                                         , retFlags );
+                                                                         , 0 );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -302,8 +298,9 @@ SOdysseyPainterEditorVectorSceneTreeView::OnSelectionChanged( TSharedPtr<FVector
             }
         }
 
+        scene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+
         scene->GetLayer()->RequestRedraw( scene->GetCell(), 0 );
-        scene->GetLayer()->Notify( retFlags );
     }
 }
 
@@ -388,7 +385,8 @@ SOdysseyPainterEditorVectorSceneTreeView::MapActionsToCommandList()
 }
 
 void
-SOdysseyPainterEditorVectorSceneTreeView::OnVectorLayerNotify( FOdysseyVectorLayer* iLayer, uint64 iSignalFlags )
+SOdysseyPainterEditorVectorSceneTreeView::OnVectorLayerNotify( FOdysseyVectorLayer* iLayer
+                                                             , const FOdysseyVectorObjectInvalidationFlags& iSignalFlags )
 {
     FOdysseyVectorGroupPaint* currentScene = mScene.Get();
 
@@ -404,9 +402,14 @@ SOdysseyPainterEditorVectorSceneTreeView::OnVectorLayerNotify( FOdysseyVectorLay
 }
 
 void
-SOdysseyPainterEditorVectorSceneTreeView::ParseVectorNotifications( uint64 iSignalFlags )
+SOdysseyPainterEditorVectorSceneTreeView::ParseVectorNotifications( const FOdysseyVectorObjectInvalidationFlags& iSignalFlags )
 {
-    if( iSignalFlags & FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW )
+    if( iSignalFlags.bits[FOdysseyVectorObjectInvalidationFlags::HIERARCHY]
+     || iSignalFlags.bits[FOdysseyVectorObjectInvalidationFlags::OBJECT_SELECTION]
+     || iSignalFlags.bits[FOdysseyVectorObjectInvalidationFlags::TAG_LIST]
+     || iSignalFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_HIERARCHY]
+     || iSignalFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_TAG_LIST]
+     || iSignalFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_OBJECT_SELECTION] )
     {
         Update();
     }
@@ -415,7 +418,7 @@ SOdysseyPainterEditorVectorSceneTreeView::ParseVectorNotifications( uint64 iSign
 void
 SOdysseyPainterEditorVectorSceneTreeView::OnSceneChanged()
 {
-    ParseVectorNotifications(FOdysseyVectorEngine::NOTIFY_ALL);
+    //ParseVectorNotifications( FOdysseyVectorEngine::NOTIFY_ALL );
 }
 
 void

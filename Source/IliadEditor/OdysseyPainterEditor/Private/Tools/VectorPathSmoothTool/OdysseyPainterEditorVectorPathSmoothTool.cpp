@@ -114,8 +114,6 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDownVector( FOdysseyVectorGrou
     if (iKey != EKeys::LeftMouseButton)
         return false;
 
-    uint64 notificationFlags = 0;
-
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
     {
@@ -124,8 +122,7 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDownVector( FOdysseyVectorGrou
         if( GUndo )
         {
             mUndoSegmentReshape = new FOdysseyVectorUndoSegmentReshape( iScene
-                                                                      , notificationFlags
-                                                                      | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD );
+                                                                      , 0 );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>( mUndoSegmentReshape ) );
 
@@ -138,8 +135,6 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDownVector( FOdysseyVectorGrou
 
     // Calling Update via Root will request a redraw even if root is not invalidated
     //iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
-
-    oSignalFlags = notificationFlags;
 
     return true;
 }
@@ -212,8 +207,6 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseUpVector( FOdysseyVectorGroupP
                                                           , const FKey& iKey
                                                           , uint64& oSignalFlags )
 {
-    uint64 notificationFlags = FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
-
     if (iKey != EKeys::LeftMouseButton)
         return false;
 
@@ -226,8 +219,6 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseUpVector( FOdysseyVectorGroupP
 
         iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS ); // update invalidated objects
     }
-
-    oSignalFlags = notificationFlags;
 
     return true;
 }

@@ -392,10 +392,6 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorGroupPaint
                                                            , mMin.y - Radius
                                                            , mMax.x + Radius
                                                            , mMax.y + Radius );
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                             | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                             | FOdysseyPainterEditor::UI_UPDATE_TIMELINE
-                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
@@ -450,8 +446,7 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorGroupPaint
                                                                   , removedObjectArray
                                                                   , removedVertexArray
                                                                   , removedSegmentArray
-                                                                  , notificationFlags
-                                                                  | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD );
+                                                                  , 0 );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -461,8 +456,6 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorGroupPaint
         }
         GEditor->EndTransaction();
    }
-
-    oSignalFlags = notificationFlags;
 
     iScene->GetCell()->InvalidateRect(); // force redraw the whole thing to clear the blended HUD
 

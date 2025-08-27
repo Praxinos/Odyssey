@@ -157,10 +157,6 @@ UOdysseyPainterEditorVectorPathDrawingTool::RecordUndoPathAlter( FOdysseyVectorG
                                                                , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
                                                                , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray )
 {
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                             | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                             | FOdysseyPainterEditor::UI_UPDATE_TIMELINE;
-
     // stays empty
     std::vector<FOdysseyVectorPath*> addedObjectArray;
 
@@ -172,8 +168,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::RecordUndoPathAlter( FOdysseyVectorG
                                                                   , addedObjectArray
                                                                   , iAddedVertexArray
                                                                   , iAddedSegmentArray
-                                                                  , notificationFlags
-                                                                  | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD );
+                                                                  , 0 );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -190,17 +185,13 @@ UOdysseyPainterEditorVectorPathDrawingTool::RecordUndoPathAdd( FOdysseyVectorGro
                                                              , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
                                                              , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray )
 {
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                             | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW;
-
     // needed for valid GUndo pointer
     GEditor->BeginTransaction(LOCTEXT("vector-path-drawing-tool.transaction.draw-path","Vector Path Drawing Tool"));
     if( GUndo )
     {
         FOdysseyVectorUndo* undo = static_cast<FOdysseyVectorUndo*>( new FOdysseyVectorUndoObjectAdd( iScene
                                                                                                     , iPath
-                                                                                                    , notificationFlags
-                                                                                                    | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD ) );
+                                                                                                    , 0 ) );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -286,9 +277,6 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorGro
 
     double pointRadius = PressureSensitive ? ( iPointInTexture.pressure * Radius ) : Radius;
     ::ULIS::FVec2D vertexWorldCoords = ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y );
-    uint64 retFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                    | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                    | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD; // re-creates the quadtree
 
     mPathTracer.Reset();
     mStitchedVertex = nullptr;
@@ -382,8 +370,6 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorGro
                                   | FOdysseyVectorObject::UPDATE_NOINBETWEENING );
         iScene->GetLayer()->RequestRedraw( iScene->GetCell(), FOdysseyVectorCell::REDRAW_INTERACTIVE );
     }
-
-    oSignalFlags = retFlags;
 
     return true;
 }
@@ -495,9 +481,6 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorGroup
         return false;
 
     ::ULIS::FVec2D vertexWorldCoords = ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y );
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                             | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD; // re-creates the quadtree;
 
     mTimeAtUp = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 
@@ -625,8 +608,6 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorGroup
                                                 , iScene->GetEngine()->GetLayer()->GetWidth()
                                                 , iScene->GetEngine()->GetLayer()->GetHeight() ) );
 */
-
-    oSignalFlags = notificationFlags;
 
     return true;
 }

@@ -17,57 +17,51 @@ class FOdysseyVectorTag;
 class FOdysseyVectorLayer;
 class FOdysseyVectorCell;
 
+struct FOdysseyVectorObjectInvalidationFlags
+{
+    static const uint32 DEFAULT                =  0;
+    static const uint32 OBJECT_SELECTION       =  1;
+    static const uint32 SHAPE                  =  2;
+    static const uint32 COLOR                  =  3;
+    static const uint32 TOPOLOGY               =  4;
+    static const uint32 TAG                    =  5;
+    static const uint32 TAG_LIST               =  6;
+    static const uint32 MATRIX                 =  7;
+    static const uint32 HIERARCHY              =  8;
+    static const uint32 PARAM                  =  9;
+    static const uint32 FLAG_COUNT             = 10;
+    static const uint32 CHILD_DEFAULT          = ( FLAG_COUNT + DEFAULT );
+    static const uint32 CHILD_OBJECT_SELECTION = ( FLAG_COUNT + OBJECT_SELECTION );
+    static const uint32 CHILD_SHAPE            = ( FLAG_COUNT + SHAPE );
+    static const uint32 CHILD_COLOR            = ( FLAG_COUNT + COLOR );
+    static const uint32 CHILD_TOPOLOGY         = ( FLAG_COUNT + TOPOLOGY );
+    static const uint32 CHILD_TAG              = ( FLAG_COUNT + TAG );
+    static const uint32 CHILD_TAG_LIST         = ( FLAG_COUNT + TAG_LIST );
+    static const uint32 CHILD_MATRIX           = ( FLAG_COUNT + MATRIX );
+    static const uint32 CHILD_HIERARCHY        = ( FLAG_COUNT + HIERARCHY );
+    static const uint32 CHILD_PARAM            = ( FLAG_COUNT + PARAM );
+
+    FOdysseyVectorObjectInvalidationFlags& Set()
+    {
+        bits.set();
+
+        return *this;
+    }
+
+    FOdysseyVectorObjectInvalidationFlags& Set( uint32 iFlag )
+    {
+        bits[iFlag] = 1;
+
+        return *this;
+    }
+
+    public:
+        std::bitset<FLAG_COUNT> bits;
+};
+
 
 class ODYSSEYVECTOR_API FOdysseyVectorObject
 {
-    struct InvalidationFlags
-    {
-        static const uint32 DEFAULT    = 0;
-        static const uint32 SHAPE      = 1;
-        static const uint32 COLOR      = 2;
-        static const uint32 TOPOLOGY   = 3;
-        static const uint32 TAG        = 4;
-        static const uint32 TAG_LIST   = 5;
-        static const uint32 MATRIX     = 6;
-        static const uint32 FLAG_COUNT = 7;
-
-        InvalidationFlags Set( uint32 iFlag )
-        {
-            bits[iFlag] = 1;
-
-            return *this;
-        }
-
-        public:
-            std::bitset<FLAG_COUNT*2> bits;
-
-        union
-        {
-            struct
-            {
-                uint8 DEFAULT   : 1;
-                uint8 MATRIX    : 1;
-                uint8 HIERARCHY : 1;
-                uint8 SHAPE     : 1;
-                uint8 COLOR     : 1;
-                uint8 TOPOLOGY  : 1;
-                uint8 TAG       : 1;
-                uint8 TAG_LIST  : 1;
-            };
-            uint8 raw[1];
-        };
-
-/*
-        static const uint64 INVALIDATE_CHILD_SHIFT    = 15;
-        static const uint64 INVALIDATE_CHILD_SHAPE    = ( INVALIDATE_SHAPE    << INVALIDATE_CHILD_SHIFT );
-        static const uint64 INVALIDATE_CHILD_COLOR    = ( INVALIDATE_COLOR    << INVALIDATE_CHILD_SHIFT );
-        static const uint64 INVALIDATE_CHILD_TOPOLOGY = ( INVALIDATE_TOPOLOGY << INVALIDATE_CHILD_SHIFT );
-        static const uint64 INVALIDATE_CHILD_TAG      = ( INVALIDATE_TAG      << INVALIDATE_CHILD_SHIFT );
-        static const uint64 INVALIDATE_CHILD_TAG_LIST = ( INVALIDATE_TAG_LIST << INVALIDATE_CHILD_SHIFT );
-        static const uint64 INVALIDATE_CHILD_MATRIX   = ( INVALIDATE_MATRIX   << INVALIDATE_CHILD_SHIFT );
-*/
-    };
-
     private:
         static const uint32 mStaticClass = 0x84cd3d16; // value is crc32 FOdysseyVectorObject
 
@@ -408,7 +402,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
          * @brief Invalidates the object and its ancestor objects as well
          * @param iInvalidationFlags
          */
-        virtual void Invalidate( const InvalidationFlags& iInvalidationFlags );
+        virtual void Invalidate( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags );
 
         /**
          * @brief Get the expansion status
@@ -629,7 +623,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         std::list<FOdysseyVectorTag*>& GetTagList();
         void InvalidateTag( FOdysseyVectorTag* iTag );
         FOdysseyVectorLayer* GetLayer();
-        InvalidationFlags GetInvalidationFlags();
+        FOdysseyVectorObjectInvalidationFlags GetInvalidationFlags();
         FOdysseyVectorCell* GetCell();
         virtual void Added();
         virtual void Removed();
@@ -662,7 +656,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
                               , std::function<uint64(FOdysseyVectorObject*,uint64)> iCallback );
         bool IsVisible( bool iHierarchical );
         void SetVisible( bool iVisible );
-        void InvalideTree( const InvalidationFlags& iInvalidationFlags );
+        void InvalideTree( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags );
         virtual FColor GetHUDColor();
 
     protected:
@@ -676,7 +670,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
                                , uint64 iFlags ){};
         virtual bool PickShape( const ::ULIS::FRectD& iRoi, uint32 iSelectionFlags ){ return false; };
         virtual void InvalidateChild( FOdysseyVectorObject* iChild
-                                    , const InvalidationFlags& iChildInvalidationFlags );
+                                    , const FOdysseyVectorObjectInvalidationFlags& iChildInvalidationFlags );
         void Recurse( void (FOdysseyVectorObject::*Func)() );
         void MakeInDepthBBox();
         virtual void UpdateBBox();
@@ -700,8 +694,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         FOdysseyVectorBucket mBackgroundBucket;
         FOdysseyVectorBucket mForegroundBucket;
         uint32 mID;
-        InvalidationFlags mInvalidationFlags;
-        InvalidationFlags mChildrenInvalidationFlags;
+        FOdysseyVectorObjectInvalidationFlags mInvalidationFlags;
 
         FString mName;
         double mOpacity;

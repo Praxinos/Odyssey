@@ -448,7 +448,7 @@ UOdysseyAnimationLayerImageVector::Merge(const TArray<UOdysseyLayer*>& iLayers)
 
     mVectorLayer->RequestRedraw( nullptr, 0 );
 
-    mVectorLayer->Notify( FOdysseyVectorEngine::NOTIFY_ALL );
+    //refactor mVectorLayer->Notify( FOdysseyVectorEngine::NOTIFY_ALL );
 }
 
 //static
@@ -764,7 +764,7 @@ UOdysseyAnimationLayerImageVector::CheckBreakdownTargetMap()
     mVectorLayer->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
     mVectorLayer->RequestRedraw( nullptr, 0 );
 
-    mVectorLayer->Notify( FOdysseyVectorEngine::NOTIFY_ALL );
+    //refactor mVectorLayer->Notify( FOdysseyVectorEngine::NOTIFY_ALL );
 
 
     mBreakdownTargetMap.Empty();

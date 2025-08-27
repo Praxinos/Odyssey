@@ -91,7 +91,7 @@ FOdysseyVectorLine::SetSize( double iWidth, double iHeight )
     mBBox.w = mWidth  + mStrokeWidth;
     mBBox.h = mHeight + mStrokeWidth;
 
-    Invalidate( FOdysseyVectorObject::INVALIDATE_SHAPE );
+    Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::SHAPE) );
 }
 
 double FOdysseyVectorLine::GetWidth()

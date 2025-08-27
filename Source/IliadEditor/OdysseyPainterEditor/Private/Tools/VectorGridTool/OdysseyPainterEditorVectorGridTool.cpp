@@ -145,8 +145,6 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDownVector( FOdysseyVectorGroupPaint
     if (iKey != EKeys::LeftMouseButton)
         return false;
 
-    uint64 notificationFlags = 0;
-
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
     {
@@ -156,8 +154,7 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDownVector( FOdysseyVectorGroupPaint
         {
             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoPointPosition( iScene
                                                                           , mPointArray
-                                                                          , notificationFlags
-                                                                          | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD );
+                                                                          , 0 );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 

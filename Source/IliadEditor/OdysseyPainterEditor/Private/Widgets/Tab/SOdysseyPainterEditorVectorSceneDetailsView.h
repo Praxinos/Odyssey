@@ -18,6 +18,7 @@ class FOdysseyPainterEditor;
 class FOdysseyVectorLayer;
 class UOdysseyLayerStack;
 struct FPropertyChangedEvent;
+struct FOdysseyVectorObjectInvalidationFlags;
 
 /**
  * Implements the Scene Tree View Widget
@@ -49,8 +50,9 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorSceneDetailsView
 
     protected:
         TSharedPtr<IDetailsView> CreateObjectPropertiesPanel();
-        void OnVectorLayerNotify( FOdysseyVectorLayer* iLayer, uint64 iSignalFlags );
-        void ParseVectorNotifications( uint64 iSignalFlags );
+        void OnVectorLayerNotify( FOdysseyVectorLayer* iLayer
+                                , const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags );
+        void ParseVectorNotifications( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags );
         void OnSceneChanged();
         void OnSourceChanged();
         void OnCurrentLayerChanged( UOdysseyLayerStack* iLayerStack );

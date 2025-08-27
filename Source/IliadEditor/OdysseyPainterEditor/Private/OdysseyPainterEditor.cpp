@@ -1376,8 +1376,6 @@ void
 FOdysseyPainterEditor::BringForward( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene )
 {
     FOdysseyVectorObject* selectedObject = iScene->GetCell()->GetLastSelectedObject();
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     if( selectedObject )
     {
@@ -1387,7 +1385,7 @@ FOdysseyPainterEditor::BringForward( FOdysseyPainterEditor* iEditor, FOdysseyVec
         {
            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTransferObjects( iScene
                                                                            , selectedObject
-                                                                           , notificationFlags );
+                                                                           , 0 );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -1407,7 +1405,7 @@ FOdysseyPainterEditor::BringForward( FOdysseyPainterEditor* iEditor, FOdysseyVec
     //vectorEngine->Invalidate( 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
-    iScene->GetLayer()->Notify( notificationFlags );
+    //refactor iScene->GetLayer()->Notify( notificationFlags );
 }
 
 // static
@@ -1415,8 +1413,6 @@ void
 FOdysseyPainterEditor::SendBackward( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene )
 {
     FOdysseyVectorObject* selectedObject = iScene->GetCell()->GetLastSelectedObject();
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     if( selectedObject )
     {
@@ -1426,7 +1422,7 @@ FOdysseyPainterEditor::SendBackward( FOdysseyPainterEditor* iEditor, FOdysseyVec
         {
            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTransferObjects( iScene
                                                                            , selectedObject
-                                                                           , notificationFlags );
+                                                                           , 0 );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -1446,7 +1442,7 @@ FOdysseyPainterEditor::SendBackward( FOdysseyPainterEditor* iEditor, FOdysseyVec
     //vectorEngine->Invalidate( 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
-    iScene->GetLayer()->Notify( notificationFlags );
+    //refactor iScene->GetLayer()->Notify( notificationFlags );
 }
 
 // static
@@ -1454,9 +1450,6 @@ void
 FOdysseyPainterEditor::ApplyTransformations( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene )
 {
     std::list<FOdysseyVectorObject*> objectList;
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                             | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     // concerns only top-most objects of a branch, including the scene
     iScene->GetCell()->GetFocusedAncestorList( objectList );
@@ -1468,7 +1461,7 @@ FOdysseyPainterEditor::ApplyTransformations( FOdysseyPainterEditor* iEditor, FOd
     {
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoApplyTransformations( iScene
                                                                              , objectList
-                                                                             , notificationFlags );
+                                                                             , 0 );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -1487,7 +1480,7 @@ FOdysseyPainterEditor::ApplyTransformations( FOdysseyPainterEditor* iEditor, FOd
     iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
-    iScene->GetLayer()->Notify( notificationFlags );
+    //refactor iScene->GetLayer()->Notify( notificationFlags );
 }
 
 // static
@@ -1498,9 +1491,6 @@ FOdysseyPainterEditor::MakePaintGroup( FOdysseyPainterEditor* iEditor, FOdysseyV
     std::vector<FOdysseyVectorObject*> cubicPathArray;
     std::list<FOdysseyVectorObject*> objectList;
     FOdysseyVectorGroupPaint* paintGroup;
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                             | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     // concerns all selected objects of a branch but the scene
     iScene->GetCell()->GetFocusedObjectList( objectList );
@@ -1520,7 +1510,7 @@ FOdysseyPainterEditor::MakePaintGroup( FOdysseyPainterEditor* iEditor, FOdysseyV
                                                                   , paintGroup
                                                                   , cubicPathArray
                                                                   , removedBucketArray
-                                                                  , notificationFlags );
+                                                                  , 0 );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -1538,7 +1528,7 @@ FOdysseyPainterEditor::MakePaintGroup( FOdysseyPainterEditor* iEditor, FOdysseyV
     }
 
     // call callbacks if any (for refreshing GUI e.g)
-    iScene->GetLayer()->Notify( notificationFlags );
+    //refactor iScene->GetLayer()->Notify( notificationFlags );
 }
 
 // static
@@ -1546,10 +1536,6 @@ void
 FOdysseyPainterEditor::Ungroup( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene )
 {
     FOdysseyVectorObject* selectedObject = iScene->GetCell()->GetLastSelectedObject();
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                             | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                             | FOdysseyPainterEditor::UI_UPDATE_TIMELINE
-                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     if( selectedObject )
     {
@@ -1566,7 +1552,7 @@ FOdysseyPainterEditor::Ungroup( FOdysseyPainterEditor* iEditor, FOdysseyVectorGr
             {
                 FOdysseyVectorUndo* undo = new FOdysseyVectorUndoUngroup( iScene
                                                                         , group
-                                                                        , notificationFlags );
+                                                                        , 0 );
 
                 GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -1593,7 +1579,7 @@ FOdysseyPainterEditor::Ungroup( FOdysseyPainterEditor* iEditor, FOdysseyVectorGr
     }
 
     // call callbacks if any (for refreshing GUI e.g)
-    iScene->GetLayer()->Notify( notificationFlags );
+    //refactor iScene->GetLayer()->Notify( notificationFlags );
 }
 
 void
@@ -1602,10 +1588,6 @@ FOdysseyPainterEditor::GroupAndAddInbetweenerTag( FOdysseyPainterEditor* iEditor
 {
     // this call will also handle the creation of an Undo entry
     FOdysseyVectorGroup* group = _Group( iEditor, iScene );
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                             | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                             | FOdysseyPainterEditor::UI_UPDATE_TIMELINE
-                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     if( group )
     {
@@ -1628,7 +1610,7 @@ FOdysseyPainterEditor::GroupAndAddInbetweenerTag( FOdysseyPainterEditor* iEditor
     iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
-    iScene->GetLayer()->Notify( notificationFlags );
+    //refactor iScene->GetLayer()->Notify( notificationFlags );
 }
 
 // static
@@ -1648,10 +1630,6 @@ FOdysseyPainterEditor::_Group( FOdysseyPainterEditor* iEditor
     std::vector<FOdysseyVectorObject*> objectArray;
     std::list<FOdysseyVectorObject*> objectList;
     FOdysseyVectorGroup* group;
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                             | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                             | FOdysseyPainterEditor::UI_UPDATE_TIMELINE
-                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     iScene->GetCell()->GetFocusedAncestorList( objectList );
 
@@ -1666,7 +1644,7 @@ FOdysseyPainterEditor::_Group( FOdysseyPainterEditor* iEditor
             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoGroup( iScene
                                                                   , group
                                                                   , objectArray
-                                                                  , notificationFlags );
+                                                                  , 0 );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -1684,7 +1662,7 @@ FOdysseyPainterEditor::_Group( FOdysseyPainterEditor* iEditor
     }
 
     // call callbacks if any (for refreshing GUI e.g)
-    iScene->GetLayer()->Notify( notificationFlags );
+    //refactor iScene->GetLayer()->Notify( notificationFlags );
 
     return group;
 }
@@ -1694,9 +1672,6 @@ void
 FOdysseyPainterEditor::Subdivide( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene )
 {
     std::list<FOdysseyVectorObject*> objectList;
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                             | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
     std::vector<FOdysseyVectorPath*> addedPathArray;
     std::vector<FOdysseyVectorVertex*> addedVertexArray;
     std::vector<FOdysseyVectorSegment*> addedSegmentArray;
@@ -1728,7 +1703,7 @@ FOdysseyPainterEditor::Subdivide( FOdysseyPainterEditor* iEditor, FOdysseyVector
                                                                   , addedPathArray
                                                                   , addedVertexArray
                                                                   , addedSegmentArray
-                                                                  , notificationFlags );
+                                                                  , 0 );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -1750,9 +1725,6 @@ void
 FOdysseyPainterEditor::SelectAllPoints( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene )
 {
     std::list<FOdysseyVectorObject*> objectList;
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                             | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     // concerns all selected objects of a branch including implicit selection
     iScene->GetCell()->GetFocusedObjectList( objectList );
@@ -1763,7 +1735,7 @@ FOdysseyPainterEditor::SelectAllPoints( FOdysseyPainterEditor* iEditor, FOdyssey
     {
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectVertex( iScene
                                                                      , objectList
-                                                                     , notificationFlags );
+                                                                     , 0 );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -1793,23 +1765,20 @@ FOdysseyPainterEditor::SelectAllPoints( FOdysseyPainterEditor* iEditor, FOdyssey
     iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
-    iScene->GetLayer()->Notify( notificationFlags );
+    //refactor iScene->GetLayer()->Notify( notificationFlags );
 }
 
 // static
 void
 FOdysseyPainterEditor::SelectAllObjects( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene )
 {
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
-
     // needed for undos
     GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.select-all-objects", "Select All"));
     if( GUndo )
     {
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectObject( iScene->GetLayer()
                                                                      , iScene->GetCell()
-                                                                     , notificationFlags );
+                                                                     , 0 );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -1824,21 +1793,18 @@ FOdysseyPainterEditor::SelectAllObjects( FOdysseyPainterEditor* iEditor, FOdysse
     iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
-    iScene->GetLayer()->Notify( notificationFlags );
+    //refactor iScene->GetLayer()->Notify( notificationFlags );
 }
 
 // static
 void
 FOdysseyPainterEditor::ResetView( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene )
 {
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
-
     // needed for undos
     GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.reset-view", "Reset view"));
     if( GUndo )
     {
-        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoObjectTransform( iScene, iScene, notificationFlags );
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoObjectTransform( iScene, iScene, 0 );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -1855,7 +1821,7 @@ FOdysseyPainterEditor::ResetView( FOdysseyPainterEditor* iEditor, FOdysseyVector
     iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
-    iScene->GetLayer()->Notify( notificationFlags );
+    //refactor iScene->GetLayer()->Notify( notificationFlags );
 }
 
 // static
@@ -1863,7 +1829,6 @@ void
 FOdysseyPainterEditor::LockPointSelection( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene )
 {
     std::vector<FOdysseyVectorVertex*> selectedVertexArray; // for undoing
-    uint64 notificationFlags = FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     selectedVertexArray.reserve( 50 );
 
@@ -1875,7 +1840,7 @@ FOdysseyPainterEditor::LockPointSelection( FOdysseyPainterEditor* iEditor, FOdys
     GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.unalign-point-selection","Unalign Point Selection"));
     if( GUndo )
     {
-        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoVertexLock( iScene, selectedVertexArray, notificationFlags );
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoVertexLock( iScene, selectedVertexArray, 0 );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -1894,7 +1859,7 @@ FOdysseyPainterEditor::LockPointSelection( FOdysseyPainterEditor* iEditor, FOdys
     iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
-    iScene->GetLayer()->Notify( notificationFlags );
+    //refactor iScene->GetLayer()->Notify( notificationFlags );
 }
 
 // static
@@ -1902,7 +1867,6 @@ void
 FOdysseyPainterEditor::UnlockPointSelection( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene )
 {
     std::vector<FOdysseyVectorVertex*> selectedVertexArray; // for undoing
-    uint64 notificationFlags = FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     selectedVertexArray.reserve( 50 );
 
@@ -1914,7 +1878,7 @@ FOdysseyPainterEditor::UnlockPointSelection( FOdysseyPainterEditor* iEditor, FOd
     GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.unalign-point-selection","Unalign Point Selection"));
     if( GUndo )
     {
-        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoVertexLock( iScene, selectedVertexArray, notificationFlags );
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoVertexLock( iScene, selectedVertexArray, 0 );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -1933,7 +1897,7 @@ FOdysseyPainterEditor::UnlockPointSelection( FOdysseyPainterEditor* iEditor, FOd
     iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
-    iScene->GetLayer()->Notify( notificationFlags );
+    //refactor iScene->GetLayer()->Notify( notificationFlags );
 }
 
 // static
@@ -1941,7 +1905,6 @@ void
 FOdysseyPainterEditor::UnalignPointSelection( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene )
 {
     std::vector<FOdysseyVectorVertex*> selectedVertexArray; // for undoing
-    uint64 notificationFlags = FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     selectedVertexArray.reserve( 50 );
 
@@ -1953,7 +1916,7 @@ FOdysseyPainterEditor::UnalignPointSelection( FOdysseyPainterEditor* iEditor, FO
     GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.unalign-point-selection","Unalign Point Selection"));
     if( GUndo )
     {
-        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoVertexAlignment( iScene, selectedVertexArray, notificationFlags );
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoVertexAlignment( iScene, selectedVertexArray, 0 );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -1974,7 +1937,7 @@ FOdysseyPainterEditor::UnalignPointSelection( FOdysseyPainterEditor* iEditor, FO
     iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
-    iScene->GetLayer()->Notify( notificationFlags );
+    //refactor iScene->GetLayer()->Notify( notificationFlags );
 }
 
 // static
@@ -1982,7 +1945,6 @@ void
 FOdysseyPainterEditor::AlignPointSelection( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene )
 {
     std::vector<FOdysseyVectorVertex*> selectedVertexArray; // for undoing
-    uint64 notificationFlags = FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     selectedVertexArray.reserve( 50 );
 
@@ -1994,7 +1956,7 @@ FOdysseyPainterEditor::AlignPointSelection( FOdysseyPainterEditor* iEditor, FOdy
     GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.align-point-selection","Align Point Selection"));
     if( GUndo )
     {
-        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoVertexAlignment( iScene, selectedVertexArray, notificationFlags );
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoVertexAlignment( iScene, selectedVertexArray, 0 );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -2020,7 +1982,7 @@ FOdysseyPainterEditor::AlignPointSelection( FOdysseyPainterEditor* iEditor, FOdy
     iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
-    iScene->GetLayer()->Notify( notificationFlags );
+    //refactor iScene->GetLayer()->Notify( notificationFlags );
 }
 
 // static
@@ -2034,10 +1996,6 @@ FOdysseyPainterEditor::DeletePointSelection( FOdysseyPainterEditor* iEditor, FOd
     std::vector<FOdysseyVectorVertex*> addedVertexArray; // not filled, here just for the undo record
     std::vector<FOdysseyVectorSegment*> addedSegmentArray;
     std::list<FOdysseyVectorObject*> objectList;
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                             | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                             | FOdysseyPainterEditor::UI_UPDATE_TIMELINE
-                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
     // concerns all selected objects of a branch including implicit selection
     iScene->GetCell()->GetFocusedObjectList( objectList );
 
@@ -2087,7 +2045,7 @@ FOdysseyPainterEditor::DeletePointSelection( FOdysseyPainterEditor* iEditor, FOd
                                                                   , addedPathArray
                                                                   , addedVertexArray
                                                                   , addedSegmentArray
-                                                                  , notificationFlags );
+                                                                  , 0 );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -2100,7 +2058,7 @@ FOdysseyPainterEditor::DeletePointSelection( FOdysseyPainterEditor* iEditor, FOd
     iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
-    iScene->GetLayer()->Notify( notificationFlags );
+    //refactor iScene->GetLayer()->Notify( notificationFlags );
 }
 
 // static
@@ -2109,10 +2067,6 @@ FOdysseyPainterEditor::DeleteObjects( FOdysseyPainterEditor* iEditor, FOdysseyVe
 {
     std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetCell()->GetSelectedObjectList();
     std::vector<FOdysseyVectorObject*> removedObjectArray;
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                             | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                             | FOdysseyPainterEditor::UI_UPDATE_TIMELINE
-                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     removedObjectArray.reserve( selectedObjectList.size() );
 
@@ -2126,7 +2080,7 @@ FOdysseyPainterEditor::DeleteObjects( FOdysseyPainterEditor* iEditor, FOdysseyVe
     {
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoRemoveObjects( iScene
                                                                       , removedObjectArray
-                                                                      , notificationFlags );
+                                                                      , 0 );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -2140,7 +2094,7 @@ FOdysseyPainterEditor::DeleteObjects( FOdysseyPainterEditor* iEditor, FOdysseyVe
     iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
-    iScene->GetLayer()->Notify( notificationFlags );
+    //refactor iScene->GetLayer()->Notify( notificationFlags );
 }
 
 // static
@@ -2150,10 +2104,6 @@ FOdysseyPainterEditor::RemoveInbetweenerTag( FOdysseyPainterEditor* iEditor
 {
     std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetCell()->GetSelectedObjectList();
     std::vector<FOdysseyVectorTag*> removedTagArray;
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                             | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                             | FOdysseyPainterEditor::UI_UPDATE_TIMELINE
-                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     removedTagArray.reserve( selectedObjectList.size() );
 
@@ -2179,7 +2129,7 @@ FOdysseyPainterEditor::RemoveInbetweenerTag( FOdysseyPainterEditor* iEditor
     {
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagRemove( iScene
                                                                   , removedTagArray
-                                                                  , notificationFlags );
+                                                                  , 0 );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -2193,7 +2143,7 @@ FOdysseyPainterEditor::RemoveInbetweenerTag( FOdysseyPainterEditor* iEditor
     iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
-    iScene->GetLayer()->Notify( notificationFlags );
+    //refactor iScene->GetLayer()->Notify( notificationFlags );
 }
 
 // static
@@ -2204,10 +2154,6 @@ FOdysseyPainterEditor::CommitSelectedInbetweenerTag( FOdysseyPainterEditor* iEdi
     std::list<FOdysseyVectorGroupPaint*> committedSceneList;
     std::list<FOdysseyVectorObject*> addedObjectList;
     std::list<FOdysseyVectorTag*> removedTagList;
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                             | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                             | FOdysseyPainterEditor::UI_UPDATE_TIMELINE
-                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
     std::list<FOdysseyVectorTag*> selectedTagList;
 
     iLayer->GetSelectedTagByClassType( FOdysseyVectorTagInbetweener::StaticClass(), selectedTagList );
@@ -2236,7 +2182,7 @@ FOdysseyPainterEditor::CommitSelectedInbetweenerTag( FOdysseyPainterEditor* iEdi
                                                                                  , removedTagList
                                                                                  , addedObjectList
                                                                                  , committedSceneList
-                                                                                 , notificationFlags );
+                                                                                 , 0 );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -2250,7 +2196,7 @@ FOdysseyPainterEditor::CommitSelectedInbetweenerTag( FOdysseyPainterEditor* iEdi
         iLayer->RequestRedraw( nullptr, 0 );
 
         // call callbacks if any (for refreshing GUI e.g)
-        iLayer->Notify( notificationFlags );
+        //refactor iLayer->Notify( notificationFlags );
     }
 }
 
@@ -2261,10 +2207,6 @@ FOdysseyPainterEditor::AddInbetweenerTag( FOdysseyPainterEditor* iEditor
 {
     std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetCell()->GetSelectedObjectList();
     std::vector<FOdysseyVectorTag*> addedTagArray;
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                             | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                             | FOdysseyPainterEditor::UI_UPDATE_TIMELINE
-                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     for( FOdysseyVectorObject* selectedObject : selectedObjectList )
     {
@@ -2300,7 +2242,7 @@ FOdysseyPainterEditor::AddInbetweenerTag( FOdysseyPainterEditor* iEditor
     {
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagAdd( iScene
                                                                , addedTagArray
-                                                               , notificationFlags );
+                                                               , 0 );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -2314,7 +2256,7 @@ FOdysseyPainterEditor::AddInbetweenerTag( FOdysseyPainterEditor* iEditor
     iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
-    iScene->GetLayer()->Notify( notificationFlags );
+    //refactor iScene->GetLayer()->Notify( notificationFlags );
 }
 
 static std::vector<::ULIS::FVec2D>&
@@ -2368,7 +2310,6 @@ FOdysseyPainterEditor::PasteInbetweenerGrid( FOdysseyPainterEditor* iEditor
     std::list<FOdysseyVectorTag*> selectedTagList;
     std::list<FInbetweenerBreakdown*> selectedBreakdownList;
     std::vector<::ULIS::FVec2D>& copiedGridGeometry = GetCopiedInbetweenerGridGeometry();
-    uint64 notificationFlags = FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     iScene->GetLayer()->GetSelectedTagByClassType( FOdysseyVectorTagInbetweener::StaticClass()
                                                  , selectedTagList );
@@ -2396,7 +2337,7 @@ FOdysseyPainterEditor::PasteInbetweenerGrid( FOdysseyPainterEditor* iEditor
         {
                 FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerMatching( iScene
                                                                                        , selectedBreakdownList
-                                                                                       , notificationFlags );
+                                                                                       , 0 );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -2418,7 +2359,7 @@ FOdysseyPainterEditor::PasteInbetweenerGrid( FOdysseyPainterEditor* iEditor
     iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
-    iScene->GetLayer()->Notify( notificationFlags );
+    //refactor iScene->GetLayer()->Notify( notificationFlags );
 }
 
 // static
@@ -2429,7 +2370,6 @@ FOdysseyPainterEditor::ResetInbetweenerGrid( FOdysseyPainterEditor* iEditor
                                            , bool iResetDeformation )
 {
     std::list<FOdysseyVectorTagInbetweener*> selectedInbetweenerTagList;
-    uint64 notificationFlags = FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
     std::list<FOdysseyVectorTag*> selectedTagList;
 
     iScene->GetLayer()->GetSelectedTagByClassType( FOdysseyVectorTagInbetweener::StaticClass()
@@ -2452,7 +2392,7 @@ FOdysseyPainterEditor::ResetInbetweenerGrid( FOdysseyPainterEditor* iEditor
                                                                                 , selectedInbetweenerTagList
                                                                                 , iResetDeformation
                                                                                 , iResetTransformation
-                                                                                , notificationFlags );
+                                                                                , 0 );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -2486,7 +2426,7 @@ FOdysseyPainterEditor::ResetInbetweenerGrid( FOdysseyPainterEditor* iEditor
     iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
-    iScene->GetLayer()->Notify( notificationFlags );
+    //refactor iScene->GetLayer()->Notify( notificationFlags );
 }
 
 // static
@@ -2496,7 +2436,6 @@ FOdysseyPainterEditor::ResetSpacingChart( FOdysseyPainterEditor* iEditor
                                         , bool iResetPositionning
                                         , bool iCurrentBreakdownOnly )
 {
-    uint64 notificationFlags = FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
     std::list<FOdysseyVectorTag*> selectedTagList;
     uint32 cellIndex = iScene->GetCell()->GetIndex();
 
@@ -2511,7 +2450,7 @@ FOdysseyPainterEditor::ResetSpacingChart( FOdysseyPainterEditor* iEditor
         {
             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerChartAlter( iScene->GetLayer()
                                                                                      , selectedTagList
-                                                                                     , notificationFlags );
+                                                                                     , 0 );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -2548,7 +2487,7 @@ FOdysseyPainterEditor::ResetSpacingChart( FOdysseyPainterEditor* iEditor
     iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
-    iScene->GetLayer()->Notify( notificationFlags );
+    //refactor iScene->GetLayer()->Notify( notificationFlags );
 }
 
 // static
@@ -2556,7 +2495,6 @@ void
 FOdysseyPainterEditor::ResetInbetweenerTagSpacingChart( FOdysseyPainterEditor* iEditor
                                                       , FOdysseyVectorLayer* iLayer )
 {
-    uint64 notificationFlags = FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
     std::list<FOdysseyVectorTag*> selectedTagList;
 
     iLayer->GetSelectedTagByClassType( FOdysseyVectorTagInbetweener::StaticClass()
@@ -2570,7 +2508,7 @@ FOdysseyPainterEditor::ResetInbetweenerTagSpacingChart( FOdysseyPainterEditor* i
         {
             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerChartAlter( iLayer
                                                                                      , selectedTagList
-                                                                                     , notificationFlags );
+                                                                                     , 0 );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -2597,7 +2535,7 @@ FOdysseyPainterEditor::ResetInbetweenerTagSpacingChart( FOdysseyPainterEditor* i
     iLayer->RequestRedraw( nullptr, 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
-    iLayer->Notify( notificationFlags );
+    //refactor iLayer->Notify( notificationFlags );
 }
 
 // static
@@ -2605,8 +2543,6 @@ void
 FOdysseyPainterEditor::FlipHorizontal( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene )
 {
     std::list<FOdysseyVectorObject*> objectList;
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     // concerns only the top-most selected objects of a branch, including the scene
     iScene->GetCell()->GetFocusedAncestorList( objectList );
@@ -2615,7 +2551,7 @@ FOdysseyPainterEditor::FlipHorizontal( FOdysseyPainterEditor* iEditor, FOdysseyV
     GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.flip-horizontal", "Flip Horizontal"));
     if( GUndo )
     {
-        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoObjectTransform( iScene, objectList, notificationFlags );
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoObjectTransform( iScene, objectList, 0 );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -2631,7 +2567,7 @@ FOdysseyPainterEditor::FlipHorizontal( FOdysseyPainterEditor* iEditor, FOdysseyV
     iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
-    iScene->GetLayer()->Notify( notificationFlags );
+    //refactor iScene->GetLayer()->Notify( notificationFlags );
 }
 
 // static
@@ -2639,8 +2575,6 @@ void
 FOdysseyPainterEditor::FlipVertical( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene )
 {
     std::list<FOdysseyVectorObject*> objectList;
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     // concerns only the top-most selected objects of a branch, including the scene
     iScene->GetCell()->GetFocusedAncestorList( objectList );
@@ -2649,7 +2583,7 @@ FOdysseyPainterEditor::FlipVertical( FOdysseyPainterEditor* iEditor, FOdysseyVec
     GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.flip-vertical", "Flip Vertical"));
     if( GUndo )
     {
-        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoObjectTransform( iScene, objectList, notificationFlags );
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoObjectTransform( iScene, objectList, 0 );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -2665,7 +2599,7 @@ FOdysseyPainterEditor::FlipVertical( FOdysseyPainterEditor* iEditor, FOdysseyVec
     iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
-    iScene->GetLayer()->Notify( notificationFlags );
+    //refactor iScene->GetLayer()->Notify( notificationFlags );
 }
 
 // static
@@ -2674,7 +2608,6 @@ FOdysseyPainterEditor::ClearColoring( FOdysseyPainterEditor* iEditor, FOdysseyVe
 {
     std::vector<FOdysseyVectorBucket*> bucketArray;
     std::list<FOdysseyVectorObject*> objectList;
-    uint64 notificationFlags = FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     // concerns all objects of a branch, including the scene
     iScene->GetCell()->GetFocusedObjectList( objectList );
@@ -2711,7 +2644,7 @@ FOdysseyPainterEditor::ClearColoring( FOdysseyPainterEditor* iEditor, FOdysseyVe
     GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.clear-coloring", "Clear Coloring"));
     if( GUndo )
     {
-        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketRemove( iScene, bucketArray, notificationFlags );
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketRemove( iScene, bucketArray, 0 );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -2725,7 +2658,7 @@ FOdysseyPainterEditor::ClearColoring( FOdysseyPainterEditor* iEditor, FOdysseyVe
     iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
-    iScene->GetLayer()->Notify( notificationFlags );
+    //refactor iScene->GetLayer()->Notify( notificationFlags );
 }
 
 // static
@@ -2734,7 +2667,6 @@ FOdysseyPainterEditor::DeleteBucket( FOdysseyPainterEditor* iEditor, FOdysseyVec
 {
     FOdysseyVectorObject* ownerObject = iBucket->GetOwner();
     FOdysseyVectorGroupPaint* scene = ownerObject->GetScene();
-    uint64 notificationFlags = FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     if( ownerObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
     {
@@ -2746,7 +2678,7 @@ FOdysseyPainterEditor::DeleteBucket( FOdysseyPainterEditor* iEditor, FOdysseyVec
         GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.delete-bucket","Delete Bucket"));
         if( GUndo )
         {
-            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketRemove( scene, iBucket, notificationFlags );
+            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketRemove( scene, iBucket, 0 );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -2761,7 +2693,7 @@ FOdysseyPainterEditor::DeleteBucket( FOdysseyPainterEditor* iEditor, FOdysseyVec
     scene->GetLayer()->RequestRedraw( nullptr, 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
-    scene->GetLayer()->Notify( notificationFlags );
+    //refactor scene->GetLayer()->Notify( notificationFlags );
 }
 
 void
@@ -2770,7 +2702,6 @@ FOdysseyPainterEditor::AlterContourWidth( FOdysseyVectorGroupPaint* iScene
                                         , bool   iAbsolute )
 {
     //std::list<FOdysseyVectorGroupPaint*> paintgroupList;
-    uint64 notificationFlags = FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     FOdysseyVectorObject::Traverse
     ( iScene
@@ -2803,7 +2734,7 @@ FOdysseyPainterEditor::AlterContourWidth( FOdysseyVectorGroupPaint* iScene
     iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
-    iScene->GetLayer()->Notify( notificationFlags );
+    //refactor iScene->GetLayer()->Notify( notificationFlags );
 }
 
 bool FOdysseyPainterEditor::HasCopyBlockClipboard()
@@ -2840,7 +2771,7 @@ SetBucketPropagation( FOdysseyPainterEditor* iEditor, FOdysseyVectorBucket* iBuc
     scene->GetLayer()->RequestRedraw( scene->GetCell(), 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
-    scene->GetLayer()->Notify( notificationFlags );
+    //refactor scene->GetLayer()->Notify( notificationFlags );
 }
 
 // static
@@ -2872,7 +2803,6 @@ FOdysseyPainterEditor::PasteSpacingChart( FOdysseyPainterEditor* iEditor
                                         , bool iCurrentBreakdownOnly )
 {
     std::list<std::vector<float>>& spacingList = GetCopiedChart();
-    uint64 notificationFlags = FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
     uint32 cellIndex = iScene->GetCell()->GetIndex();
     std::list<FOdysseyVectorTag*> selectedTagList;
 
@@ -2889,7 +2819,7 @@ FOdysseyPainterEditor::PasteSpacingChart( FOdysseyPainterEditor* iEditor
             {
                 FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerChartAlter( iScene->GetLayer()
                                                                                          , selectedTagList
-                                                                                         , notificationFlags );
+                                                                                         , 0 );
 
                 GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -2953,7 +2883,7 @@ FOdysseyPainterEditor::PasteSpacingChart( FOdysseyPainterEditor* iEditor
     iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
     iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
-    iScene->GetLayer()->Notify( notificationFlags );
+    //refactor iScene->GetLayer()->Notify( notificationFlags );
 }
 
 // static
@@ -3037,8 +2967,6 @@ void
 FOdysseyPainterEditor::PasteTransformation( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene )
 {
     FOdysseyVectorObject* selectedObject = iScene->GetCell()->GetLastSelectedObject();
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     if( selectedObject )
     {
@@ -3048,7 +2976,7 @@ FOdysseyPainterEditor::PasteTransformation( FOdysseyPainterEditor* iEditor, FOdy
         GEditor->BeginTransaction(LOCTEXT("PasteTransformation", "Paste Transformation"));
         if( GUndo )
         {
-            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoObjectTransform( iScene, selectedObject, notificationFlags );
+            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoObjectTransform( iScene, selectedObject, 0 );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -3068,7 +2996,7 @@ FOdysseyPainterEditor::PasteTransformation( FOdysseyPainterEditor* iEditor, FOdy
     iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
-    iScene->GetLayer()->Notify( notificationFlags );
+    //refactor iScene->GetLayer()->Notify( notificationFlags );
 }
 
 // static
@@ -3098,10 +3026,6 @@ void
 FOdysseyPainterEditor::PasteObjects( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene )
 {
     std::list<FOdysseyVectorObject*> pastedObjectList;
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                             | FOdysseyPainterEditor::UI_UPDATE_TIMELINE
-                             | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     // TODO: Check why pastedObjectList has to be copied, unclear
     // First copy all objects. This is needed to record their state-before-addition for the UNDO operation.
@@ -3119,7 +3043,7 @@ FOdysseyPainterEditor::PasteObjects( FOdysseyPainterEditor* iEditor, FOdysseyVec
     {
         FOdysseyVectorUndo* undo = static_cast<FOdysseyVectorUndo*>( new FOdysseyVectorUndoObjectAdd( iScene
                                                                                                     , pastedObjectList
-                                                                                                    , notificationFlags ) );
+                                                                                                    , 0 ) );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -3148,7 +3072,7 @@ FOdysseyPainterEditor::PasteObjects( FOdysseyPainterEditor* iEditor, FOdysseyVec
     iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
-    iScene->GetLayer()->Notify( notificationFlags );
+    //refactor iScene->GetLayer()->Notify( notificationFlags );
 }
 
 // static
@@ -3156,11 +3080,6 @@ void
 FOdysseyPainterEditor::MergeScenes( FOdysseyVectorGroupPaint* iDestinationScene
                                   , const TArray<FOdysseyVectorGroupPaint*>& iSourceSceneArray )
 {
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                             | FOdysseyPainterEditor::UI_UPDATE_TIMELINE
-                             | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
-
     for( int i = 0; i < iSourceSceneArray.Num(); i++ )
     {
         for( FOdysseyVectorObject* child : iSourceSceneArray[i]->GetChildrenList() )
@@ -3180,7 +3099,7 @@ FOdysseyPainterEditor::MergeScenes( FOdysseyVectorGroupPaint* iDestinationScene
     // request redraw
 
     // call callbacks if any (for refreshing GUI e.g)
-    iDestinationScene->GetLayer()->Notify( notificationFlags );
+    //refactor iDestinationScene->GetLayer()->Notify( notificationFlags );
 }
 
 // static
@@ -3188,10 +3107,6 @@ void
 FOdysseyPainterEditor::RemoveInbetweenerTag( FOdysseyPainterEditor* iEditor
                                            , FOdysseyVectorLayer* iLayer )
 {
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_TIMELINE
-                             | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                             | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
     std::list<FOdysseyVectorTag*> tagList;
 
     iLayer->GetSelectedTagByClassType( FOdysseyVectorTagInbetweener::StaticClass()
@@ -3205,7 +3120,7 @@ FOdysseyPainterEditor::RemoveInbetweenerTag( FOdysseyPainterEditor* iEditor
         {
             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagRemove( tagList.front()->GetOwner()->GetScene()
                                                                       , tagList
-                                                                      , notificationFlags );
+                                                                      , 0 );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -3228,7 +3143,7 @@ FOdysseyPainterEditor::RemoveInbetweenerTag( FOdysseyPainterEditor* iEditor
     iLayer->RequestRedraw( nullptr, 0 );
 
     // update UI
-    iLayer->Notify( notificationFlags );
+    iLayer->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 }
 
 void
@@ -3249,10 +3164,6 @@ FOdysseyPainterEditor::StitchVertices( FOdysseyPainterEditor* iEditor
     std::vector<FOdysseyVectorVertex*> mergedVertexArray;
     std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetCell()->GetSelectedObjectList();
     FOdysseyVectorPath* mergedPath = nullptr;
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                             | FOdysseyPainterEditor::UI_UPDATE_TIMELINE
-                             | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     if( ( iVertexA->GetSegmentCount() == 1 ) && ( iVertexB->GetSegmentCount() == 1 ) )
     {
@@ -3292,7 +3203,7 @@ FOdysseyPainterEditor::StitchVertices( FOdysseyPainterEditor* iEditor
                                                                             , addedSegmentArray
                                                                             , mergedVertexArray
                                                                             , mergedSegmentArray
-                                                                            , notificationFlags );
+                                                                            , 0 );
 
                 GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -3308,7 +3219,7 @@ FOdysseyPainterEditor::StitchVertices( FOdysseyPainterEditor* iEditor
     iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
-    iScene->GetLayer()->Notify( notificationFlags );
+    //refactor iScene->GetLayer()->Notify( notificationFlags );
 }
 
 //--------------------------------------------------------------------------------------

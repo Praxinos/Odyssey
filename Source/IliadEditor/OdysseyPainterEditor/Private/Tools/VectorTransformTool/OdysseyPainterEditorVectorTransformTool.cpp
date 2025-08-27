@@ -194,8 +194,6 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDownVector( FOdysseyVectorGroup
     if (iKey != EKeys::LeftMouseButton)
         return false;
 
-    uint64 notificationFlags = FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
-
     mTransformHUD->SetCenterGizmo( false );
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
@@ -286,7 +284,7 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDownVector( FOdysseyVectorGroup
             mUndo = new FOdysseyVectorUndoPointPosition( iScene
                                                        , mTransformedVertexArray
                                                        , mTransformedHandleArray
-                                                       , notificationFlags );
+                                                       , 0 );
         }
 
         if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_OBJECT )
@@ -299,7 +297,7 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDownVector( FOdysseyVectorGroup
             // it could conflict with the undo created by th emouse up event in the case of a no-drag
             mUndo = new FOdysseyVectorUndoObjectTransform( iScene
                                                          , transformedObjectList
-                                                         , notificationFlags );
+                                                         , 0 );
         }
 
         if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
@@ -308,7 +306,7 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDownVector( FOdysseyVectorGroup
             // it could conflict with the undo created by th emouse up event in the case of a no-drag
             mUndo = new FOdysseyVectorUndoTagInbetweenerTransform( iScene
                                                                  , mTransformHUD->GetSelectedBreakdownList()
-                                                                 , notificationFlags );
+                                                                 , 0 );
         }
 
         if( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_ROTATE )

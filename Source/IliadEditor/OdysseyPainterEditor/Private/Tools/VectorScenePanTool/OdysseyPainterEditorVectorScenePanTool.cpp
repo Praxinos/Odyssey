@@ -78,7 +78,6 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseDownVector( FOdysseyVectorGroupP
                                                           , uint64& oSignalFlags )
 {
     BLPoint localCoords = iScene->GetInverseWorldMatrix().mapPoint(iPointInTexture.x,iPointInTexture.y);
-    uint64 notificationFlags = 0;
 
     mDragged = false;
 
@@ -89,8 +88,7 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseDownVector( FOdysseyVectorGroupP
         // save selected object translation/rotation/scaling before transform
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoObjectTransform( iScene
                                                                         , iScene
-                                                                        , notificationFlags
-                                                                        | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD );
+                                                                        , 0 );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -105,8 +103,6 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseDownVector( FOdysseyVectorGroupP
 
     // redraw
     iScene->GetLayer()->RequestRedraw( iScene->GetCell(), FOdysseyVectorCell::REDRAW_INTERACTIVE );
-
-    oSignalFlags = notificationFlags;
 
     return true;
 }

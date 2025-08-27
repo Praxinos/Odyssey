@@ -184,7 +184,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void RemoveAllRoutes();
         virtual FOdysseyVectorTagInbetweener* Copy( FOdysseyVectorObject* iDestOwnerObject ) override;
         virtual void Update( uint32 iUpdateFlags
-                           , uint64 iOwnerInvalidationFlags ) override;
+                           , const FOdysseyVectorObjectInvalidationFlags& iOwnerInvalidationFlags ) override;
         void Commit( std::list<FOdysseyVectorTag*>& oRemovedTagList
                    , std::list<FOdysseyVectorObject*>& oAddedObjectList
                    , std::list<FOdysseyVectorGroupPaint*>& oCommittedSceneList );

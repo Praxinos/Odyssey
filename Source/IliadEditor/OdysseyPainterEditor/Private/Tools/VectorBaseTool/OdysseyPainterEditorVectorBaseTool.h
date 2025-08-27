@@ -22,6 +22,7 @@ class FOdysseyVectorVertex;
 class FOdysseyVectorHandleSegment;
 class FOdysseyVectorCell;
 class SOdysseyPainterEditorVectorSceneDetailsView;
+struct FOdysseyVectorObjectInvalidationFlags;
 
 enum class eMouseEventName : uint8
 {
@@ -144,7 +145,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
 
         void PopupContextMenu();
         TSharedPtr<SWidget> CreateContextMenu();
-        void OnVectorLayerNotify( FOdysseyVectorLayer* iLayer, uint64 iNotificationFlags );
+        void OnVectorLayerNotify( FOdysseyVectorLayer* iLayer
+                                , const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags );
 
     private:
         void Copy();

@@ -288,7 +288,6 @@ FOdysseyPainterEditorAnimationSource::Clear()
     {
         UOdysseyAnimationLayerImageVector* imageVectorLayer = Cast<UOdysseyAnimationLayerImageVector>(currentLayer);
         TArray<TSharedPtr<FOdysseyMediaVector>> mediasVector = mediaProvider.GetOrCreateMedias<FOdysseyMediaVector>();
-        uint64 notificationFlags = FOdysseyVectorEngine::NOTIFY_ALL;
 
         for (TSharedPtr<FOdysseyMediaVector> mediaVector : mediasVector)
         {
@@ -298,7 +297,7 @@ FOdysseyPainterEditorAnimationSource::Clear()
             GEditor->BeginTransaction(transactionName);
             if (GUndo)
             {
-                FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSceneClear( vectorCell->GetScene(), notificationFlags );
+                FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSceneClear( vectorCell->GetScene(), 0 );
 
                 GUndo->StoreUndo(GEditor, TUniquePtr<FOdysseyVectorUndo>(undo));
 
@@ -314,7 +313,9 @@ FOdysseyPainterEditorAnimationSource::Clear()
 
         if( imageVectorLayer )
         {
-            imageVectorLayer->GetVectorLayer()->Notify( notificationFlags );
+            imageVectorLayer->GetVectorLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+
+            //refactor imageVectorLayer->GetVectorLayer()->Notify( notificationFlags );
         }
     }
 }

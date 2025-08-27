@@ -48,7 +48,9 @@ class IOdysseyVectorLayer
 class ODYSSEYVECTOR_API FOdysseyVectorLayer : public FOdysseyVectorObject
 {
     public:
-        DECLARE_MULTICAST_DELEGATE_TwoParams( FNotifyDelegate, FOdysseyVectorLayer* iLayer, uint64 iDelegateFlags )
+        DECLARE_MULTICAST_DELEGATE_TwoParams( FNotifyDelegate
+                                            , FOdysseyVectorLayer* iLayer
+                                            , const FOdysseyVectorObjectInvalidationFlags& iDelegateFlags )
 
     private:
         static const uint32 mStaticClass = 0x442744a7; // value is crc32 FOdysseyVectorLayer
@@ -57,6 +59,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorLayer : public FOdysseyVectorObject
         static uint32 StaticClass() { return mStaticClass; };
         virtual uint32 GetClass() { return mStaticClass; };
         virtual bool HasBaseClass( uint32 iBaseClassID );
+
+        /**
+         * @brief Update the object after it was invalidated
+         * @param iUpdateFlags
+         */
+        virtual void Update( uint32 iUpdateFlags ) override;
 
     public:
         virtual ~FOdysseyVectorLayer();
@@ -75,7 +83,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorLayer : public FOdysseyVectorObject
         std::list<FOdysseyVectorTag*>& GetSharedTagList();
         const std::list<FOdysseyVectorTag*>& GetSharedTagList() const;
         std::mutex& GetSharedTagMutex();
-        virtual void InvalidateChild( FOdysseyVectorObject* iChild, uint64 iChildInvalidationFlags ) override;
         void RequestRedraw( FOdysseyVectorCell *iCell, uint64 iRedrawFlags );
 
         FOdysseyVectorCell* GetCellByIndex( uint32 iIndex );
@@ -90,12 +97,14 @@ class ODYSSEYVECTOR_API FOdysseyVectorLayer : public FOdysseyVectorObject
         virtual uint32 RemoveChild( FOdysseyVectorObject* iChild ) override;
         std::list<FOdysseyVectorCell*>& GetInvalidateCellList();
         FNotifyDelegate& OnNotifyDelegate();
-        void Notify( uint64 iNotifyFlags );
         std::list<IOdysseyVectorHUD*>& GetHUDList();
         void AddHUD( IOdysseyVectorHUD* iHUDObject );
         void RemoveHUD( IOdysseyVectorHUD* iHUDObject );
         void ClearHUD();
         void ResetHUD( FOdysseyVectorGroupPaint* iScene );
+
+    protected:
+        void Notify( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags );
 
     private:
         std::list<FOdysseyVectorCell*> mInvalidatedCellList;

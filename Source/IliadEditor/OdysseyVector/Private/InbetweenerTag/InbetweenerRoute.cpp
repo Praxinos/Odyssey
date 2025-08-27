@@ -188,7 +188,7 @@ FInbetweenerRoute::GetStepBuffer()
 
 void
 FInbetweenerRoute::Update( uint32 iUpdateFlags
-                         , uint64 iOwnerInvalidationFlags
+                         , const FOdysseyVectorObjectInvalidationFlags& iOwnerInvalidationFlags
                          , uint64 iTagInvalidationFlags )
 {
     if( ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_ROUTES  )

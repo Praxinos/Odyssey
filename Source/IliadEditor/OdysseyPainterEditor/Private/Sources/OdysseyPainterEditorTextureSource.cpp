@@ -198,7 +198,6 @@ FOdysseyPainterEditorTextureSource::Clear()
     {
         UOdysseyTextureLayerImageVector* imageVectorLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
         TArray<TSharedPtr<FOdysseyMediaVector>> mediasVector = mediaProvider.GetOrCreateMedias<FOdysseyMediaVector>();
-        uint64 notificationFlags = FOdysseyVectorEngine::NOTIFY_ALL;
 
         for (TSharedPtr<FOdysseyMediaVector> mediaVector : mediasVector)
         {
@@ -207,7 +206,7 @@ FOdysseyPainterEditorTextureSource::Clear()
             // needed for undos
             if (GUndo)
             {
-                FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSceneClear( mediaVector->GetScene(), notificationFlags );
+                FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSceneClear( mediaVector->GetScene(), 0 );
                 GUndo->StoreUndo(GEditor, TUniquePtr<FOdysseyVectorUndo>(undo));
                 RecordCurrentFrameUndo();
             }
@@ -218,7 +217,9 @@ FOdysseyPainterEditorTextureSource::Clear()
 
         if( imageVectorLayer )
         {
-            imageVectorLayer->GetVectorLayer()->Notify( notificationFlags );
+            imageVectorLayer->GetVectorLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+
+            //refactor imageVectorLayer->GetVectorLayer()->Notify( notificationFlags );
         }
     }
 }

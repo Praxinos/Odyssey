@@ -86,18 +86,18 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPaintBucketTool : publ
 
     private:
         void SetBucketColor( FOdysseyVectorBucket* iBucket );
-        uint64 OnMouseUpVectorClearBucket( FOdysseyVectorGroupPaint* iScene
+        void OnMouseUpVectorClearBucket( FOdysseyVectorGroupPaint* iScene
                                        , FOdysseyVectorBucket* iBucket );
-        uint64 OnMouseUpVectorCreateBucket( FOdysseyVectorGroupPaint* iScene
+        void OnMouseUpVectorCreateBucket( FOdysseyVectorGroupPaint* iScene
                                         , const FOdysseyPoint& iPointInTexture
                                         , const FKey& iKey );
-        uint64 OnMouseUpVectorRemoveBucket( FOdysseyVectorGroupPaint* iScene
+        void OnMouseUpVectorRemoveBucket( FOdysseyVectorGroupPaint* iScene
                                         , FOdysseyVectorBucket* iBucket );
-        uint64 OnMouseUpVectorPropagateBucket( FOdysseyVectorGroupPaint* iScene
-                                            , FOdysseyVectorBucket* iBucket
-                                            , bool iPropagate );
-        uint64 OnMouseUpVectorColorBucket( FOdysseyVectorGroupPaint* iScene
-                                        , FOdysseyVectorBucket* iBucket );
+        void OnMouseUpVectorPropagateBucket( FOdysseyVectorGroupPaint* iScene
+                                           , FOdysseyVectorBucket* iBucket
+                                           , bool iPropagate );
+        void OnMouseUpVectorColorBucket( FOdysseyVectorGroupPaint* iScene
+                                       , FOdysseyVectorBucket* iBucket );
         double GetRotationAngle( FOdysseyVectorBucket* iBucket
                                 , const FOdysseyPoint& iPointInTexture );
         TSharedRef<SWidget> CreateModifierSegmentControl();

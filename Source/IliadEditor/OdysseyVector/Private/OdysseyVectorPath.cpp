@@ -142,7 +142,7 @@ FOdysseyVectorPath::SetBrush( const FOdysseyVectorBrush& iBrush )
 {
     mBrush = iBrush;
 
-    Invalidate( INVALIDATE_COLOR );
+    Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::COLOR) );
 }
 
 void
@@ -150,7 +150,7 @@ FOdysseyVectorPath::SetFilled( bool iIsFilled )
 {
     bFilled = iIsFilled;
 
-    Invalidate( INVALIDATE_COLOR );
+    Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::COLOR) );
 }
 
 eJointType
@@ -167,7 +167,7 @@ FOdysseyVectorPath::SetJointType( eJointType iJointType, bool iInvalidate )
     if( iInvalidate )
     {
         InvalidateAllVertices();
-        Invalidate( INVALIDATE_SHAPE );
+        Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::SHAPE) );
     }
 }
 
@@ -185,7 +185,7 @@ FOdysseyVectorPath::SetMiterLimit( double iMiterLimit, bool iInvalidate )
     if( iInvalidate )
     {
         InvalidateAllVertices();
-        Invalidate( INVALIDATE_SHAPE );
+        Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::SHAPE) );
     }
 }
 
@@ -206,7 +206,9 @@ FOdysseyVectorPath::ExportParam( FOdysseyVectorObject* iDestinationObject, bool 
 
     if( iInvalidate )
     {
-        iDestinationObject->Invalidate( INVALIDATE_SHAPE | INVALIDATE_COLOR | INVALIDATE_TOPOLOGY );
+        iDestinationObject->Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::SHAPE)
+                                                                               .Set(FOdysseyVectorObjectInvalidationFlags::COLOR)
+                                                                               .Set(FOdysseyVectorObjectInvalidationFlags::TOPOLOGY) );
     }
 }
 
@@ -339,7 +341,7 @@ FOdysseyVectorPath::UpdateShape( uint32 iUpdateFlags )
 
     // invalidate the whole bounding box to force redraw textured segments that are interdependent
     if( ( mBrush.GetTexture() && ( mBrush.ExtensionMode != eBrushExtensionMode::Segment ) )
-     || ( mInvalidationFlags & INVALIDATE_COLOR ) )
+     || ( mInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::COLOR] ) )
     {
         FOdysseyVectorCell* cell = GetCell();
 
@@ -386,7 +388,7 @@ FOdysseyVectorPath::UpdateShape( uint32 iUpdateFlags )
 
     /*);*/
 
-    if( mInvalidationFlags & INVALIDATE_TOPOLOGY )
+    if( mInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::TOPOLOGY] )
     {
         FindChains();
     }
@@ -513,7 +515,7 @@ FOdysseyVectorPath::InvalidateSegment( FOdysseyVectorSegment* iSegment )
         mInvalidatedSegmentList.push_back( iSegment );
     }
 
-    Invalidate( INVALIDATE_SHAPE );
+    Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::SHAPE) );
 }
 
 void
@@ -523,7 +525,7 @@ FOdysseyVectorPath::AddVertex( FOdysseyVectorVertex* iVertex )
 
     iVertex->SetOwner( this );
 
-    Invalidate( INVALIDATE_SHAPE );
+    Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::SHAPE) );
 }
 
 void
@@ -544,7 +546,7 @@ FOdysseyVectorPath::RemoveVertex( FOdysseyVectorVertex* iVertex )
         UnselectVertex( iVertex );
     }
 
-    Invalidate( INVALIDATE_SHAPE );
+    Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::SHAPE) );
     //iVertex->SetPath( nullptr );
 }
 
@@ -580,7 +582,7 @@ FOdysseyVectorPath::AddSegment( FOdysseyVectorSegment* iSegment )
     iSegment->GetVertex(0)->Invalidate();
     iSegment->GetVertex(1)->Invalidate();
 
-    Invalidate( INVALIDATE_TOPOLOGY );
+    Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::TOPOLOGY) );
 }
 
 void
@@ -599,7 +601,7 @@ FOdysseyVectorPath::RemoveAllSegments()
     // DO NOT invalidate the segments here, only the path. Otherwise the segment
     // would be added to the list of segments to invalidate BUT the segment does
     // not belong to the path anymore, leading to issues if it has been freed.
-    Invalidate( INVALIDATE_TOPOLOGY );
+    Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::TOPOLOGY) );
 }
 
 void
@@ -615,11 +617,11 @@ FOdysseyVectorPath::RemoveSegment( FOdysseyVectorSegment* iSegment )
     // DO NOT invalidate the segment here, only the path. Otherwise the segment
     // would be added to the list of segments to invalidate BUT the segment does
     // not belong to the path anymore, leading to issues if it has been freed.
-    Invalidate( INVALIDATE_TOPOLOGY );
+    Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::TOPOLOGY) );
 }
 
 void
-FOdysseyVectorPath::Invalidate( uint64 iInvalidationFlags )
+FOdysseyVectorPath::Invalidate( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags )
 {
     //if( iInvalidationFlags & INVALIDATE_MATRIX )
     //{
@@ -1011,7 +1013,9 @@ FOdysseyVectorPath::Erase( std::vector<FOdysseyVectorObject*>& oAddedPathArray
     //UE_LOG(LogTemp, Warning, TEXT("Added Segments: %d"), oAddedVertexArray.size() );
     //UE_LOG(LogTemp, Warning, TEXT("Added Vertices: %d"), oAddedSegmentArray.size() );
 
-    Invalidate( INVALIDATE_SHAPE | INVALIDATE_COLOR | INVALIDATE_TOPOLOGY );
+    Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::SHAPE)
+                                                       .Set(FOdysseyVectorObjectInvalidationFlags::COLOR)
+                                                       .Set(FOdysseyVectorObjectInvalidationFlags::TOPOLOGY) );
 
     // return true if path is empty
     return ( mVertexList.size() == 0 ) && ( mSegmentList.size() == 0 );

@@ -345,7 +345,8 @@ FOdysseyVectorGroupPaint::SetIntersectsCanvas( bool iIntersectsCanvas )
 {
     bIntersectsCanvas = iIntersectsCanvas;
 
-    Invalidate( INVALIDATE_SHAPE | INVALIDATE_HIERARCHY );
+    Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::SHAPE)
+                                                       .Set(FOdysseyVectorObjectInvalidationFlags::HIERARCHY) );
 }
 
 bool
@@ -396,7 +397,7 @@ FOdysseyVectorGroupPaint::UpdateMatrix()
 
     if( bIntersectsCanvas )
     {
-        Invalidate( FOdysseyVectorObject::INVALIDATE_SHAPE );
+        Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::SHAPE) );
     }
 }
 
@@ -1007,12 +1008,12 @@ FOdysseyVectorGroupPaint::UpdateShape( uint32 iUpdateFlags )
 {
     BLMatrix2D identityMatrix = BLMatrix2D( BLMatrix2D::makeIdentity() );
 
-    if( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_HIERARCHY )
+    if( mInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::HIERARCHY] )
     {
         UpdatePathList();
     }
 
-    if( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_SHAPE )
+    if( mInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::SHAPE] )
     {
         if( bIntersectsCanvas )
         {
@@ -1102,11 +1103,11 @@ FOdysseyVectorGroupPaint::UpdateShape( uint32 iUpdateFlags )
         if( ( bRealtime == true  )
        || ( ( bRealtime == false ) && ( iUpdateFlags & FOdysseyVectorObject::UPDATE_PAINTGROUPS ) ) )
         {
-            if( ( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_HIERARCHY      )
-             || ( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_SHAPE    )
-             || ( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_MATRIX   )
-             || ( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_TOPOLOGY )
-             || ( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_SHAPE          ) )
+            if( ( mInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::HIERARCHY]      )
+             || ( mInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_SHAPE]    )
+             || ( mInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_MATRIX]   )
+             || ( mInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_TOPOLOGY] )
+             || ( mInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::SHAPE]          ) )
             {
                 FindCycles(); // also calls Clear()
             }
@@ -1127,7 +1128,7 @@ FOdysseyVectorGroupPaint::AddBucket( FOdysseyVectorBucket* iBucket )
     mBucketList.push_back( iBucket );
 
     //iBucket->SetParent( this );
-    Invalidate( FOdysseyVectorObject::INVALIDATE_COLOR );
+    Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::COLOR) );
 }
 
 void
@@ -1142,7 +1143,7 @@ FOdysseyVectorGroupPaint::RemoveBucket( FOdysseyVectorBucket* iBucket )
 
     GetCell()->InvalidateRect();
 
-    Invalidate( FOdysseyVectorObject::INVALIDATE_COLOR );
+    Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::COLOR) );
 }
 
 void
@@ -1160,7 +1161,7 @@ FOdysseyVectorGroupPaint::RemoveAllBuckets()
 
     GetCell()->InvalidateRect();
 
-    Invalidate( FOdysseyVectorObject::INVALIDATE_COLOR );
+    Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::COLOR) );
 }
 
 void
@@ -1225,7 +1226,7 @@ FOdysseyVectorGroupPaint::DrawShape( BLContext* iBLContext
             iBLContext->setStrokeWidth( 1.0f );
             iBLContext->setStrokeStyle( BLRgba32( 0xFF, 0x00, 0x00, 0xFF ) );
 
-            if( mInvalidationFlags == 0 )
+            if( mInvalidationFlags.bits.any() == false )
             {
                 for( int i = 0; i < mGapSegmentBuffer.size(); i++ )
                 {
@@ -1861,7 +1862,7 @@ FOdysseyVectorGroupPaint::SetGapDetectionScheme( eGapDetectionScheme iGapDetecti
 {
     mGapDetectionScheme = iGapDetectionScheme;
 
-    Invalidate( FOdysseyVectorObject::INVALIDATE_SHAPE );
+    Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::SHAPE) );
 }
 
 eSegmentExtensionScheme
@@ -1875,7 +1876,7 @@ FOdysseyVectorGroupPaint::SetSegmentExtensionScheme( eSegmentExtensionScheme iSe
 {
     mSegmentExtensionScheme = iSegmentExtensionScheme;
 
-    Invalidate( FOdysseyVectorObject::INVALIDATE_SHAPE );
+    Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::SHAPE) );
 }
 
 double
@@ -1889,7 +1890,7 @@ FOdysseyVectorGroupPaint::SetGapTolerance( double iGapTolerance )
 {
     mGapTolerance = iGapTolerance;
 
-    Invalidate( FOdysseyVectorObject::INVALIDATE_SHAPE );
+    Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::SHAPE) );
 }
 
 bool
@@ -1903,7 +1904,7 @@ FOdysseyVectorGroupPaint::SetMonochrome( bool iIsMonochrome )
 {
     bMonochrome = iIsMonochrome;
 
-    Invalidate( FOdysseyVectorObject::INVALIDATE_COLOR );
+    Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::COLOR) );
 }
 
 FColor&
@@ -1917,7 +1918,7 @@ FOdysseyVectorGroupPaint::SetMonochromeColor( const FColor& iMonochromeColor )
 {
     mMonochromeColor = iMonochromeColor;
 
-    Invalidate( FOdysseyVectorObject::INVALIDATE_COLOR );
+    Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::COLOR) );
 }
 
 void
@@ -1949,7 +1950,7 @@ FOdysseyVectorGroupPaint::SetWireframe( bool iIsWireframe )
 {
     bWireframe = iIsWireframe;
 
-    Invalidate( FOdysseyVectorObject::INVALIDATE_COLOR );
+    Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::COLOR) );
 }
 
 FColor&
@@ -1972,7 +1973,7 @@ FOdysseyVectorGroupPaint::SetWireframeColor( uint8 iR, uint8 iG, uint8 iB, uint8
     mWireframeColor.B = iB;
     mWireframeColor.A = iA;
 
-    Invalidate( FOdysseyVectorObject::INVALIDATE_COLOR );
+    Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::COLOR) );
 }
 
 void
@@ -1983,7 +1984,7 @@ FOdysseyVectorGroupPaint::GetWireframeColor( uint8 &oR, uint8 &oG, uint8& oB, ui
     oB = mWireframeColor.B;
     oA = mWireframeColor.A;
 
-    Invalidate( FOdysseyVectorObject::INVALIDATE_COLOR );
+    Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::COLOR) );
 }
 
 bool
@@ -1997,7 +1998,7 @@ FOdysseyVectorGroupPaint::SetPainted( bool iPainted )
 {
     bPainted = iPainted;
 
-    Invalidate( FOdysseyVectorObject::INVALIDATE_SHAPE );
+    Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::SHAPE) );
 }
 
 bool
@@ -2614,7 +2615,7 @@ FOdysseyVectorGroupPaint::SetSegmentExtensionSimplified( bool iSegmentExtensionS
 {
     bSegmentExtensionSimplified = iSegmentExtensionSimplified;
 
-    Invalidate( FOdysseyVectorObject::INVALIDATE_SHAPE );
+    Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::SHAPE) );
 }
 
 bool

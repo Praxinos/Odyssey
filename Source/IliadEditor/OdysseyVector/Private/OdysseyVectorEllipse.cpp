@@ -134,7 +134,7 @@ FOdysseyVectorEllipse::SetRadius( double iRadiusX, double iRadiusY )
     mRadiusX = iRadiusX;
     mRadiusY = iRadiusY;
 
-    Invalidate( INVALIDATE_SHAPE );
+    Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::SHAPE) );
 }
 
 double

@@ -219,8 +219,7 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDownVector( FOdysseyVectorGroupP
         {
             FOdysseyVectorUndo *undo = new FOdysseyVectorUndoSegmentReshape( iScene
                                                                            , vertexArray
-                                                                           , notificationFlags
-                                                                           | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD );
+                                                                           , 0 );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -317,16 +316,12 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseUpVector( FOdysseyVectorGroupPai
     if (iKey != EKeys::LeftMouseButton)
         return false;
 
-    uint64 notificationFlags = FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
-
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
     {
         iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS ); // update invalidated objects
         iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
     }
-
-    oSignalFlags = notificationFlags;
 
     return true;
 }

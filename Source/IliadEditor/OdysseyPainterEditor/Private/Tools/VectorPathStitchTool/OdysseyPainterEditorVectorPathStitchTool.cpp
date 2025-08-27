@@ -81,11 +81,6 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseDownVector( FOdysseyVectorGrou
     if (iKey != EKeys::LeftMouseButton)
         return false;
 
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                             | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                             | FOdysseyPainterEditor::UI_UPDATE_TIMELINE
-                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
-
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
     {
@@ -161,8 +156,7 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseDownVector( FOdysseyVectorGrou
                                                                                , addedSegmentArray
                                                                                , mergedVertexArray
                                                                                , mergedSegmentArray
-                                                                               , notificationFlags
-                                                                               | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD );
+                                                                               , 0 );
 
                     GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -179,8 +173,6 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseDownVector( FOdysseyVectorGrou
     }
 
     iScene->GetLayer()->RequestRedraw( iScene->GetCell(), FOdysseyVectorCell::REDRAW_INTERACTIVE );
-
-    oSignalFlags = notificationFlags;
 
     return true;
 }

@@ -10,6 +10,7 @@
 #include "InbetweenerTag/InbetweenerStep.h"
 
 class FOdysseyVectorTagInbetweener;
+struct FOdysseyVectorObjectInvalidationFlags;
 
 class ODYSSEYVECTOR_API FInbetweenerRoute
 {
@@ -26,7 +27,7 @@ class ODYSSEYVECTOR_API FInbetweenerRoute
         double GetQuadU();
         double GetQuadV();
         void Update( uint32 iUpdateFlags
-                   , uint64 iOwnerInvalidationFlags
+                   , const FOdysseyVectorObjectInvalidationFlags& iOwnerInvalidationFlags
                    , uint64 iTagInvalidationFlags );
         FOdysseyVectorTagInbetweener* GetInbetweenerTag();
         void ResizeWaypoints();

@@ -267,7 +267,7 @@ UOdysseyPainterEditorVectorBaseTool::Unload()
 
     if( mWorkingLayer )
     {
-        mWorkingLayer->Notify( notificationFlags );
+        //refactor mWorkingLayer->Notify( notificationFlags );
 
         mWorkingLayer->OnNotifyDelegate().RemoveAll( this );
 
@@ -341,20 +341,21 @@ UOdysseyPainterEditorVectorBaseTool::Load()
 
             mWorkingCell->GetLayer()->OnNotifyDelegate().AddUObject( this, &UOdysseyPainterEditorVectorBaseTool::OnVectorLayerNotify );
 
-            mWorkingCell->GetLayer()->Notify( notificationFlags );
+            //rezfactor mWorkingCell->GetLayer()->Notify( notificationFlags );
         }
     }
 }
 
 void
-UOdysseyPainterEditorVectorBaseTool::OnVectorLayerNotify( FOdysseyVectorLayer* iLayer, uint64 iNotificationFlags )
+UOdysseyPainterEditorVectorBaseTool::OnVectorLayerNotify( FOdysseyVectorLayer* iLayer
+                                                        , const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags )
 {
                          // The notification might be called after the cell has been removed from the layer,
                          // then mWorkingCell->GetLayer() woul dbe null and that would likely create crashes
                          // in HUD Reset methods. so we check that.
     if ( mWorkingCell && ( mWorkingCell->GetLayer() == mWorkingLayer ) )
     {
-        if( iNotificationFlags & FOdysseyVectorEngine::NOTIFY_UPDATE_HUD )
+        //refactor if( iInvalidationFlags & FOdysseyVectorEngine::NOTIFY_UPDATE_HUD )
         {
             iLayer->ResetHUD( mWorkingCell->GetScene() );
         }
@@ -376,9 +377,10 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyDownGlobal( const FKeyEvent& InKeyEven
     if( mWorkingCell )
     {
         uint64 notificationFlags = 0;
+
         bool handled = OnKeyDownGlobalVector ( mWorkingCell->GetScene(), InKeyEvent, notificationFlags );
 
-        mWorkingCell->GetLayer()->Notify( notificationFlags );
+        //refactor mWorkingCell->GetLayer()->Notify( notificationFlags );
 
         // we always return false because other tools might need the signal
         //return handled;
@@ -439,7 +441,7 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyDown( const FKey& iKey )
 
         bool handled = OnKeyDownVector( mWorkingCell->GetScene(), iKey, notificationFlags );
 
-        mWorkingCell->GetLayer()->Notify( notificationFlags );
+        //refactor mWorkingCell->GetLayer()->Notify( notificationFlags );
 
         return handled;
     }
@@ -462,9 +464,10 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyUpGlobal( const FKeyEvent& InKeyEvent 
     if( mWorkingCell )
     {
         uint64 notificationFlags = 0;
+
         bool handled = OnKeyUpGlobalVector( mWorkingCell->GetScene(), InKeyEvent, notificationFlags );
 
-        mWorkingCell->GetLayer()->Notify( notificationFlags );
+        //refactor mWorkingCell->GetLayer()->Notify( notificationFlags );
 
         // we always return false because other tools might need the signal
         //return handled;
@@ -491,7 +494,7 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyUp( const FKey& iKey )
 
         bool handled = OnKeyUpVector( mWorkingCell->GetScene(), iKey, notificationFlags );
 
-        mWorkingCell->GetLayer()->Notify( notificationFlags );
+        //refactor mWorkingCell->GetLayer()->Notify( notificationFlags );
 
         return handled;
     }
@@ -542,7 +545,7 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseDownViaHUD( const FOdysseyPoint& iPo
 
         bool handled = OnMouseDownVector( mWorkingCell->GetScene(), iPointInTexture, iKey, notificationFlags );
 
-        mWorkingCell->GetLayer()->Notify( notificationFlags );
+        //refactor mWorkingCell->GetLayer()->Notify( notificationFlags );
 
         return handled;
     }
@@ -581,7 +584,7 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseHoverViaHUD( const FOdysseyPoint& iP
 
         if( notificationFlags )
         {
-            mWorkingCell->GetLayer()->Notify( notificationFlags );
+            //refactor mWorkingCell->GetLayer()->Notify( notificationFlags );
         }
     }
 }
@@ -664,7 +667,7 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseDragViaHUD( const FOdysseyPoint& iPo
 
         if( notificationFlags )
         {
-            mWorkingCell->GetLayer()->Notify( notificationFlags );
+            //refactor mWorkingCell->GetLayer()->Notify( notificationFlags );
         }
     }
 }
@@ -693,7 +696,7 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseClickViaHUD( const FOdysseyPoint& iP
 
         bool handled = OnMouseClickVector( mWorkingCell->GetScene(), iPointInTexture, iKey, notificationFlags );
 
-        mWorkingCell->GetLayer()->Notify( notificationFlags );
+        //refactor mWorkingCell->GetLayer()->Notify( notificationFlags );
 
         if (!handled)
         {
@@ -755,7 +758,7 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseUpViaHUD( const FOdysseyPoint& iPoin
 
         bool handled = OnMouseUpVector( mWorkingCell->GetScene(), iPointInTexture, iKey, notificationFlags );
 
-        mWorkingCell->GetLayer()->Notify( notificationFlags );
+        //refactor mWorkingCell->GetLayer()->Notify( notificationFlags );
 
         return handled;
     }
@@ -789,7 +792,7 @@ UOdysseyPainterEditorVectorBaseTool::PostEditChangeProperty( FPropertyChangedEve
 
         notificationFlags = PropertyChangedVector( mWorkingCell->GetScene(), PropertyChangedEvent.GetPropertyName() );
 
-        mWorkingCell->GetLayer()->Notify( notificationFlags );
+        //refactor mWorkingCell->GetLayer()->Notify( notificationFlags );
     }
 }
 
@@ -976,10 +979,18 @@ UOdysseyPainterEditorVectorBaseTool::SetVectorEditionFlags( uint64 iViewMode )
             }
         }
 
+        // force invalidation ot force HUD update
+        mWorkingCell->Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::DEFAULT) );
+
+        //refactor
+        /*
         mWorkingCell->GetLayer()->Notify( FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
                                          | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
                                          | FOdysseyPainterEditor::UI_UPDATE_TIMELINE
                                          | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD );
+        */
+
+        mWorkingCell->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
         mWorkingCell->GetLayer()->RequestRedraw( mWorkingCell, 0 );
     }

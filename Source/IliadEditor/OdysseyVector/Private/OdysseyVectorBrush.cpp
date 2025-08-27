@@ -97,7 +97,7 @@ FOdysseyVectorBrush::SetTexture( UTexture2D* iTexture )
     Texture = iTexture;
 
     if( owner )
-        owner->Invalidate( FOdysseyVectorObject::INVALIDATE_COLOR );
+        owner->Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::COLOR) );
 }
 
 UTexture2D*

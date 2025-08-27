@@ -15,6 +15,7 @@ class FOdysseyVectorGroupPaint;
 class FOdysseyVectorLayer;
 class FOdysseyVectorEngine;
 class FOdysseyVectorCell;
+struct FOdysseyVectorObjectInvalidationFlags;
 
 class ODYSSEYVECTOR_API FOdysseyVectorTag
 {
@@ -40,7 +41,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTag
                          , double iAncestorsOpacity
                          , uint64 iDrawingFlags ) = 0;
         virtual void Update( uint32 iUpdateFlags
-                           , uint64 iOwnerInvalidationFlags ) = 0;
+                           , const FOdysseyVectorObjectInvalidationFlags& iOwnerInvalidationFlags ) = 0;
         virtual void UpdateMatrix() = 0;
         virtual void Share( FOdysseyVectorLayer* iSharedEnv );
         virtual void Unshare( FOdysseyVectorLayer* iSharedEnv );

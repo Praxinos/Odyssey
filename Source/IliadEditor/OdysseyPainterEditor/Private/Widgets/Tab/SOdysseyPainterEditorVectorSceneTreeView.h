@@ -10,6 +10,7 @@ class FOdysseyVectorGroupPaint;
 class FVectorSceneTreeViewItem;
 class FOdysseyVectorLayer;
 class UOdysseyLayerStack;
+struct FOdysseyVectorObjectInvalidationFlags;
 
 /**
  * Implements the Scene Tree View Widget
@@ -77,8 +78,9 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorSceneTreeView
 
         FReply OnKeyDown( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent );
 
-        void OnVectorLayerNotify( FOdysseyVectorLayer* iLayer, uint64 iSignalFlags );
-        void ParseVectorNotifications( uint64 iSignalFlags );
+        void OnVectorLayerNotify( FOdysseyVectorLayer* iLayer
+                                , const FOdysseyVectorObjectInvalidationFlags& iSignalFlags );
+        void ParseVectorNotifications( const FOdysseyVectorObjectInvalidationFlags& iSignalFlags );
         void OnSceneChanged();
         void OnCurrentLayerChanged( UOdysseyLayerStack* iLayerStack );
         void OnSourceChanged();

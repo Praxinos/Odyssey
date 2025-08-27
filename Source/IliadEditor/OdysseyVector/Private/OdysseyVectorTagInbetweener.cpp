@@ -1070,18 +1070,18 @@ FOdysseyVectorTagInbetweener::Removed()
 }
 
 void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
-                                         , uint64 iOwnerInvalidationFlags )
+                                         , const FOdysseyVectorObjectInvalidationFlags& iOwnerInvalidationFlags )
 {
     if( ( bShared == true )
      && ( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_NOINBETWEENING ) == 0 ) )
     {
-        if( ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_HIERARCHY      )
-         || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_SHAPE          )
-         || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_TOPOLOGY       )
-         || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_TAG_LIST )
-         || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_TOPOLOGY )
-         || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_SHAPE    )
-         || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_MATRIX   ) )
+        if( ( iOwnerInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::HIERARCHY]      )
+         || ( iOwnerInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::SHAPE]          )
+         || ( iOwnerInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::TOPOLOGY]       )
+         || ( iOwnerInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_TAG_LIST] )
+         || ( iOwnerInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_TOPOLOGY] )
+         || ( iOwnerInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_SHAPE]    )
+         || ( iOwnerInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_MATRIX]   ) )
         {
             for( FInbetweenerBreakdown* breakdown : mBreakdownList )
             {
@@ -1099,14 +1099,14 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
         if( ( mInvalidationFlags & INVALIDATE_MAP            )
             || ( mInvalidationFlags & INVALIDATE_BREAKDOWN_LIST )
             // owner flags
-            || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_HIERARCHY      )
-            || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_TOPOLOGY       )
-            || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_SHAPE          )
-            || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_COLOR          ) // for buckets
-            || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_TAG_LIST )
-            || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_TOPOLOGY )
-            || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_SHAPE    )
-            || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_COLOR    ) ) // for buckets
+            || ( iOwnerInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::HIERARCHY]      )
+            || ( iOwnerInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::TOPOLOGY]       )
+            || ( iOwnerInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::SHAPE]          )
+            || ( iOwnerInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::COLOR]          ) // for buckets
+            || ( iOwnerInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_TAG_LIST] )
+            || ( iOwnerInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_TOPOLOGY] )
+            || ( iOwnerInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_SHAPE]    )
+            || ( iOwnerInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_COLOR]    ) ) // for buckets
         {
             // map object to the first grid
             Map();

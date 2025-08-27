@@ -72,9 +72,6 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonDown( con
     FOdysseyVectorLayer* sharedEnv = mInbetweenerTag->GetOwner()->GetLayer();
     std::list<FOdysseyVectorTag*>& sharedTagList = sharedEnv->GetSharedTagList();
     FOdysseyVectorGroupPaint* scene = mInbetweenerTag->GetOwner()->GetScene();
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                             | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     // Call base method
     FReply reply = STableRow<TSharedPtr<FInbetweeningListViewItem>>::OnMouseButtonDown( MyGeometry, MouseEvent );
@@ -100,7 +97,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonDown( con
         {
             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerBreakdownAlter( sharedEnv
                                                                                          , mInbetweenerTag
-                                                                                         , notificationFlags );
+                                                                                         , 0 );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -128,7 +125,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonDown( con
     }
 
     // update UI
-    layer->GetVectorLayer()->Notify( notificationFlags );
+    //refactor layer->GetVectorLayer()->Notify( notificationFlags );
 
     return reply;
 }
@@ -218,10 +215,6 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonUp( const
 
     if ( MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton )
     {
-        uint64 retFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                        | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                        | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
-
         if( mPickedBreakdown )
         {
             if( mCandidateTargetCellBox.type & CellBox::TYPE_TARGET )
@@ -240,7 +233,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonUp( const
             vectorLayer->GetVectorLayer()->RequestRedraw( vectorCell->GetVectorCell(), 0 );
         }
 
-        vectorLayer->GetVectorLayer()->Notify( retFlags );
+        //refactor vectorLayer->GetVectorLayer()->Notify( retFlags );
 
         reply.ReleaseMouseCapture();
     }

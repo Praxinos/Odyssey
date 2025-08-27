@@ -164,7 +164,8 @@ SOdysseyPainterEditorVectorSceneDetailsView::Update()
 }
 
 void
-SOdysseyPainterEditorVectorSceneDetailsView::OnVectorLayerNotify( FOdysseyVectorLayer* iLayer, uint64 iSignalFlags )
+SOdysseyPainterEditorVectorSceneDetailsView::OnVectorLayerNotify( FOdysseyVectorLayer* iLayer
+                                                                , const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags )
 {
     FOdysseyVectorGroupPaint* currentScene = mScene.Get();
 
@@ -174,14 +175,14 @@ SOdysseyPainterEditorVectorSceneDetailsView::OnVectorLayerNotify( FOdysseyVector
     // if the attributes value does not changes, we force the update of the tree
     if( currentScene == mScene.Get() )
     {
-        ParseVectorNotifications( iSignalFlags );
+        ParseVectorNotifications( iInvalidationFlags );
     }
 }
 
 void
-SOdysseyPainterEditorVectorSceneDetailsView::ParseVectorNotifications( uint64 iSignalFlags )
+SOdysseyPainterEditorVectorSceneDetailsView::ParseVectorNotifications( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags )
 {
-    if( iSignalFlags & FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS )
+    if( iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::OBJECT_SELECTION] )
     {
         Update();
     }
@@ -253,9 +254,6 @@ SOdysseyPainterEditorVectorSceneDetailsView::OnSourceChanged()
 void
 SOdysseyPainterEditorVectorSceneDetailsView::PropertyValueChanged( const FPropertyChangedEvent& iEvent )
 {
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                             | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
     FOdysseyVectorGroupPaint* scene = mScene.Get();
 
     if (!scene)
@@ -273,9 +271,7 @@ SOdysseyPainterEditorVectorSceneDetailsView::PropertyValueChanged( const FProper
         FOdysseyVectorUndo *undo = new FOdysseyVectorUndoObjectParam( scene->GetLayer()
                                                                     , focusedObjectList
                                                                     , FName(iEvent.Property->GetMetaData(TEXT("Category")))
-                                                                    , FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                                                                    | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                                                                    | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD );
+                                                                    , 0 );
         // We use GEditor as the UObject, otherwise if we use "this", at each UNDO, PostEditChangeProperty() will be called
         // which will again call StoreUndo + this will lead to a crash. I don't know however what will be the consequences
         // of a call to GEditor::PostEditChangeProperty()
@@ -295,7 +291,7 @@ SOdysseyPainterEditorVectorSceneDetailsView::PropertyValueChanged( const FProper
     scene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
     scene->GetLayer()->RequestRedraw( nullptr, 0 );
     // update widgets
-    scene->GetLayer()->Notify( notificationFlags );
+    //refactor scene->GetLayer()->Notify( notificationFlags );
     // Re-register THIS widget delegates
     BindLayerDelegates( mEditor->GetSource()->GetLayerStack() );
 }
@@ -309,7 +305,7 @@ SOdysseyPainterEditorVectorSceneDetailsView::OnCurrentLayerChanged( UOdysseyLaye
 void
 SOdysseyPainterEditorVectorSceneDetailsView::OnSceneChanged()
 {
-    ParseVectorNotifications( FOdysseyVectorEngine::NOTIFY_ALL );
+    ParseVectorNotifications( FOdysseyVectorObjectInvalidationFlags().Set() );
 }
 
 FString

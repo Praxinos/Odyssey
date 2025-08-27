@@ -281,7 +281,7 @@ SOdysseyPainterEditorVectorMassModifierView::PreviewProperties()
         mVectorLayer->RequestRedraw( nullptr, 0 );
 
         // update widgets
-        mVectorLayer->Notify( FOdysseyVectorEngine::NOTIFY_UPDATE_HUD );
+        //refactor mVectorLayer->Notify( FOdysseyVectorEngine::NOTIFY_UPDATE_HUD );
     }
 
     OnPreviewPropertiesDelegate.Broadcast();
@@ -293,9 +293,6 @@ SOdysseyPainterEditorVectorMassModifierView::PreviewProperties()
 void
 SOdysseyPainterEditorVectorMassModifierView::ValidateProperties()
 {
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                             | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
     std::list<FOdysseyVectorObject*> objectList;
     uint64 objectClass;
 
@@ -363,9 +360,7 @@ SOdysseyPainterEditorVectorMassModifierView::ValidateProperties()
                                                                          , objectList
                                                                          , ""
                                                                          , saveVertices
-                                                                         , FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                                                                         | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                                                                         | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD );
+                                                                         , 0 );
             // We use GEditor as the UObject, otherwise if we use "this", at each UNDO, PostEditChangeProperty() will be called
             // which will again call StoreUndo + this will lead to a crash. I don't know however what will be the consequences
             // of a call to GEditor::PostEditChangeProperty()
@@ -379,7 +374,7 @@ SOdysseyPainterEditorVectorMassModifierView::ValidateProperties()
         mVectorLayer->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
         mVectorLayer->RequestRedraw( nullptr, 0 );
         // update widgets
-        mVectorLayer->Notify( notificationFlags );
+        //refactor mVectorLayer->Notify( notificationFlags );
     }
 }
 

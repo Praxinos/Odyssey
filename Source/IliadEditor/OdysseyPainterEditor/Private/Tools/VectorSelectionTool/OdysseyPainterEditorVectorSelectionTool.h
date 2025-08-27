@@ -76,19 +76,13 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorSelectionTool : public
         void Paste( FOdysseyVectorEngine* iEngine, FOdysseyVectorGroupPaint* iScene );
 
 protected:
-    uint64 OnMouseUpVectorObjectMode( FOdysseyVectorGroupPaint* iScene
-                                    , const FOdysseyPoint& iPointInTexture
-                                    , const FKey& iKey );
-    uint64 OnMouseUpVectorVertexMode( FOdysseyVectorGroupPaint* iScene
-                                    , const FOdysseyPoint& iPointInTexture
-                                    , const FKey& iKey );
+    void OnMouseUpVectorObjectMode( FOdysseyVectorGroupPaint* iScene
+                                  , const FOdysseyPoint& iPointInTexture
+                                  , const FKey& iKey );
+    void OnMouseUpVectorVertexMode( FOdysseyVectorGroupPaint* iScene
+                                  , const FOdysseyPoint& iPointInTexture
+                                  , const FKey& iKey );
     ::ULIS::FRectD GenerateMask();
-
-    uint64 PickVertexFromPath( FOdysseyVectorPath* iPath
-                             , std::vector<FOdysseyVectorVertex*>& oPickedVertexArray );
-
-    uint64 PickBucketFromPaintGroup( FOdysseyVectorGroupPaint* iPaintGroup
-                                   , std::vector<FOdysseyVectorBucket*>& oPickedBucketArray );
 
 protected:
     FOdysseyPainterEditorVectorSelectionToolHUD* mPickHUD;

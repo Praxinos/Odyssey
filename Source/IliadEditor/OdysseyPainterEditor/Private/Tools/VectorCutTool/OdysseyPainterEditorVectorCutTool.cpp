@@ -252,10 +252,6 @@ UOdysseyPainterEditorVectorCutTool::OnMouseUpVectorObjectMode( FOdysseyVectorGro
 {
     std::vector<FOdysseyVectorObject*> pickedObjectArray;
     ::ULIS::FRectD roi;
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                             | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                             | FOdysseyPainterEditor::UI_UPDATE_TIMELINE
-                             | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     // deselect all if control key is not pressed
     if( FSlateApplication::Get().GetModifierKeys().IsControlDown() == false )
@@ -311,7 +307,7 @@ UOdysseyPainterEditorVectorCutTool::OnMouseUpVectorObjectMode( FOdysseyVectorGro
                                                                   , removedObjectArray
                                                                   , removedVertexArray
                                                                   , removedSegmentArray
-                                                                  , notificationFlags );
+                                                                  , 0 );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -322,7 +318,7 @@ UOdysseyPainterEditorVectorCutTool::OnMouseUpVectorObjectMode( FOdysseyVectorGro
         GEditor->EndTransaction();
     }
 
-    return notificationFlags;
+    return 0;
 }
 
 void

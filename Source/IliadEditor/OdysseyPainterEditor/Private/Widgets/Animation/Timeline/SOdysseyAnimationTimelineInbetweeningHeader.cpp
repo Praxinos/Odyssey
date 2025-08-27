@@ -75,9 +75,10 @@ SOdysseyAnimationTimelineInbetweeningHeader::Construct( const FArguments& InArgs
 }
 
 void
-SOdysseyAnimationTimelineInbetweeningHeader::OnVectorSceneNotify( FOdysseyVectorLayer* iLayer, uint64 iNotificationFlags )
+SOdysseyAnimationTimelineInbetweeningHeader::OnVectorSceneNotify( FOdysseyVectorLayer* iLayer
+                                                                , const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags )
 {
-    if( iNotificationFlags & FOdysseyPainterEditor::UI_UPDATE_TIMELINE )
+    //if( iNotificationFlags & FOdysseyPainterEditor::UI_UPDATE_TIMELINE )
     {
         Update();
     }
@@ -212,8 +213,6 @@ SOdysseyAnimationTimelineInbetweeningHeader::OnSelectionChanged( TSharedPtr<FInb
                                                                , ESelectInfo::Type SelectInfo )
 {
     std::list<FOdysseyVectorCell*> cellList;
-    uint64 retFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                    | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD;
 
     if( SelectInfo != ESelectInfo::Type::Direct )
     {
@@ -233,7 +232,7 @@ SOdysseyAnimationTimelineInbetweeningHeader::OnSelectionChanged( TSharedPtr<FInb
         {
             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectObject( mAnimationLayerImageVector->GetVectorLayer().Get()
                                                                          , cellList
-                                                                         , retFlags );
+                                                                         , 0 );
 
             GUndo->StoreUndo( mAnimationLayerImageVector, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -263,9 +262,9 @@ SOdysseyAnimationTimelineInbetweeningHeader::OnSelectionChanged( TSharedPtr<FInb
             }
         }
 
-        mAnimationLayerImageVector->GetVectorLayer()->RequestRedraw( nullptr, 0 );
+        mAnimationLayerImageVector->GetVectorLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
-        mAnimationLayerImageVector->GetVectorLayer()->Notify( retFlags );
+        mAnimationLayerImageVector->GetVectorLayer()->RequestRedraw( nullptr, 0 );
     }
 }
 

@@ -82,7 +82,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorCell : public FOdysseyVectorObject
 
         void SetScene( FOdysseyVectorGroupPaint* iScene );
         FOdysseyVectorGroupPaint* GetScene();
-        virtual void Invalidate( uint64 iInvalidationFlags ) override;
         FOdysseyVectorLayer* GetLayer();
         IOdysseyVectorCell* GetCellInterface();
         void GetFocusedObjectList( std::list<FOdysseyVectorObject*>& oObjectList );

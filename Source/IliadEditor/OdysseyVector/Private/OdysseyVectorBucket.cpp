@@ -63,7 +63,7 @@ FOdysseyVectorBucket::Invalidate()
 {
     if( mOwner ) // owner can be nullptr (when copy pasting a bucket)
     {
-        mOwner->Invalidate( FOdysseyVectorObject::INVALIDATE_COLOR );
+        mOwner->Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::COLOR) );
     }
 }
 

@@ -65,6 +65,8 @@ FOdysseyVectorCell::UnselectObject( FOdysseyVectorObject* iVecObj )
     iVecObj->SetSelected( false );
 
     mSelectedObjectList.remove( iVecObj );
+
+    Invalidate( FOdysseyVectorObjectInvalidationFlags() );
 }
 
 void
@@ -75,6 +77,8 @@ FOdysseyVectorCell::SelectObject( FOdysseyVectorObject* iVecObj )
         iVecObj->SetSelected( true );
 
         mSelectedObjectList.push_back( iVecObj );
+
+        Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::OBJECT_SELECTION) );
     }
 }
 
@@ -154,12 +158,6 @@ FOdysseyVectorCell::Update( uint32 iUpdateFlags )
     {
         GetLayer()->InvalidateCell( this );
     }
-}
-
-void
-FOdysseyVectorCell::Invalidate( uint64 iInvalidationFlags )
-{
-    FOdysseyVectorObject::Invalidate( iInvalidationFlags );
 }
 
 void

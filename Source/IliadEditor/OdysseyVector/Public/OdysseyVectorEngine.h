@@ -60,8 +60,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
 
 
         // Notifications flags
-        static const uint64 NOTIFY_ALL                = 0x0FFFFFFFFFFFFFFF;
-        static const uint64 NOTIFY_UPDATE_HUD         = ( 1ULL <<  0 );
         static const uint64 NOTIFY_RESERVED_SHIFT     = ( 15 );
 
         /**
