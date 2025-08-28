@@ -22,6 +22,7 @@ public:
     struct FHUDCustomization
     {
         // For dotted lines
+        bool mIsActive = false; // To toggle the customization on and off
         TArray<FLinearColor> mColors;
         float mSegmentLength = INFINITY;
         float mGapLength = 0.f;
@@ -67,6 +68,8 @@ public:
 
     void SetCustomization(const FHUDCustomization& iCustomization);
     const FHUDCustomization& GetCustomization() const;
+    void ActivateCustomization();
+    void InactivateCustomization();
 
     bool IsCaptured() const;
     void Capture(bool iCapture);

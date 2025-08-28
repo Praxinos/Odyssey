@@ -22,10 +22,17 @@ FOdysseyHUDElement::Draw(const FOdysseyHUDElement::FDrawHUDParams& iParams)
     if (!IsVisible())
         return;
 
+    // Parent customization always has priority over the customization in each children
+    // This way, we only have to customize the HUD once (for the parent) and all children will share it
+    FDrawHUDParams childParams = iParams;
+
+    if( mCustomization.mIsActive )
+        childParams.mCustomization = &mCustomization;
+
     DrawHUD(iParams);
 
     for (TSharedPtr<FOdysseyHUDElement> element : mElements)
-        element->Draw(iParams);
+        element->Draw(childParams);
 }
 
 void
@@ -61,6 +68,16 @@ const FOdysseyHUDElement::FHUDCustomization&
 FOdysseyHUDElement::GetCustomization() const
 {
     return mCustomization;
+}
+
+void FOdysseyHUDElement::ActivateCustomization()
+{
+    mCustomization.mIsActive = true;
+}
+
+void FOdysseyHUDElement::InactivateCustomization()
+{
+    mCustomization.mIsActive = false;
 }
 
 bool FOdysseyHUDElement::IsCaptured() const

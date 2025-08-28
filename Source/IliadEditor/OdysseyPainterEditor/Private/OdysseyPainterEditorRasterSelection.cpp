@@ -13,6 +13,12 @@ FOdysseyPainterEditorRasterSelection::~FOdysseyPainterEditorRasterSelection()
 FOdysseyPainterEditorRasterSelection::FOdysseyPainterEditorRasterSelection()
     : mHUD(MakeShared<FOdysseyHUDElement>())
 {
+    mDottedSelectionCustomization.mColors.Add(FLinearColor::Red);
+    mDottedSelectionCustomization.mColors.Add(FLinearColor::Green);
+    mDottedSelectionCustomization.mGapLength = 5.f;
+    mDottedSelectionCustomization.mSegmentLength = 10.f;
+    mDottedSelectionCustomization.mIsActive = false;
+    mHUD->SetCustomization( mDottedSelectionCustomization );
 }
 
 FSimpleMulticastDelegate&
@@ -142,19 +148,14 @@ void
 FOdysseyPainterEditorRasterSelection::RefreshHUD()
 {
     mHUD->EmptyElements();
-    mHUD->SetCustomization( FOdysseyHUDElement::FHUDCustomization() ); // Reset the customization
+    mHUD->InactivateCustomization();
 
     mBoundingRect = ::ULIS::FRectI::FromXYWH(0, 0, 0, 0);
 
-    FOdysseyHUDElement::FHUDCustomization dottedSelectionCustomization;
-    dottedSelectionCustomization.mColors.Add( FLinearColor::Black );
-    dottedSelectionCustomization.mColors.Add( FLinearColor::White );
-    dottedSelectionCustomization.mGapLength = 5.f;
-    dottedSelectionCustomization.mSegmentLength = 10.f;
-    mHUD->SetCustomization( dottedSelectionCustomization );
-
     if (!mBlock)
         return;
+
+    mHUD->ActivateCustomization();
 
     TArray<FVector2D> points;
 

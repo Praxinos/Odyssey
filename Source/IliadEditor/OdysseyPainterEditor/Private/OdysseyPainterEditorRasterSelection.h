@@ -4,10 +4,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "OdysseyHUDElement.h"
 
 #include <ULIS>
 
-class FOdysseyHUDElement;
 class FOdysseyHUDLine;
 
 class FOdysseyPainterEditorRasterSelection
@@ -40,6 +40,7 @@ private:
     TSharedPtr<::ULIS::FBlock> mBlock;
     TSharedPtr<FOdysseyHUDElement> mHUD;
     ::ULIS::FRectI mBoundingRect;
+    FOdysseyHUDElement::FHUDCustomization mDottedSelectionCustomization;
 
     FSimpleMulticastDelegate mOnChanged;
 };

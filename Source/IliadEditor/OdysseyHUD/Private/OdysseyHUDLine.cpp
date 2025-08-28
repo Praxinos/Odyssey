@@ -21,7 +21,8 @@ FOdysseyHUDLine::FOdysseyHUDLine(const FVector2D& iStartPoint, const FVector2D& 
 void
 FOdysseyHUDLine::DrawHUD(const FOdysseyHUDElement::FDrawHUDParams& iParams)
 {
-    const FLinearColor color(0.f, 0.f, 0.f);
+    //Do dotted line here. But HUD Element has LOTS of lines in it for selection
+    const FLinearColor color(0.f, 1.f, 0.f);
 
     FVector2D startPoint = iParams.mTextureToHUD.Execute(mStartPoint);
     FVector2D endPoint = iParams.mTextureToHUD.Execute(mEndPoint);

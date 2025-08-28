@@ -248,16 +248,6 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
         }
     );
 
-    /*
-    params.mColors.Add(FLinearColor::Red);
-    params.mColors.Add(FLinearColor(1.f, 0.5f, 0.f));
-    params.mColors.Add(FLinearColor::Yellow);
-    params.mColors.Add(FLinearColor::Green);
-    params.mColors.Add(FLinearColor(0.f, 1.f, 1.f));
-    params.mColors.Add(FLinearColor::Blue);
-    params.mColors.Add(FLinearColor(0.5f, 0.f, 1.f));
-    params.mSegmentLength = 10.f;*/
-
     mOdysseyPainterEditor->HUDSystem()->Draw(params);
 }
 
