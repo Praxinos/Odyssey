@@ -5,6 +5,7 @@
 
 #include "ULISLoaderModule.h"
 #include "OdysseyHUDLine.h"
+#include "OdysseyHUDPolygon.h"
 
 FOdysseyPainterEditorRasterSelection::~FOdysseyPainterEditorRasterSelection()
 {
@@ -158,6 +159,7 @@ FOdysseyPainterEditorRasterSelection::RefreshHUD()
     mHUD->ActivateCustomization();
 
     TArray<FVector2D> points;
+    TArray<FIntEdge> edges;
 
     for (int y = 0; y <= mBlock->Height(); y++)
     {
@@ -171,27 +173,97 @@ FOdysseyPainterEditorRasterSelection::RefreshHUD()
 
             if (leftValue == 0.f && value != 0.f || leftValue != 0.f && value == 0.f)
             {
+                //left vertical Line
                 points.Add(FVector2D(x, y));
                 points.Add(FVector2D(x, y+1));
-
-                //left vertical Line
-                TSharedPtr<FOdysseyHUDLine> lineHUD = MakeShared<FOdysseyHUDLine>(FVector2D(x, y), FVector2D(x, y+1));
-                mHUD->AddElement(lineHUD);
+                edges.Add({ FIntPoint(x, y), FIntPoint(x, y + 1) });
             }
 
             if (topValue == 0.f && value != 0.f || topValue != 0.f && value == 0.f)
             {
+                //top horizontal Line
                 points.Add(FVector2D(x, y));
                 points.Add(FVector2D(x+1, y));
-
-                //top horizontal Line
-                TSharedPtr<FOdysseyHUDLine> lineHUD = MakeShared<FOdysseyHUDLine>(FVector2D(x, y), FVector2D(x+1, y));
-                mHUD->AddElement(lineHUD);
+                edges.Add({ FIntPoint(x, y), FIntPoint(x + 1, y) });
             }
         }
     }
 
     mBoundingRect = ComputeBoundingRect(points);
+
+    TArray<TArray<FVector2D>> contours = BuildContours(edges);
+
+    for (const TArray<FVector2D>& contour : contours)
+    {
+        TSharedPtr<FOdysseyHUDPolygon> polygonHUD = MakeShared<FOdysseyHUDPolygon>();
+        TArray<FVector2D>& polygonPoints = polygonHUD->GetPoints();
+        for( FVector2D point : contour )
+        {
+            polygonPoints.Add(point);
+        }
+
+        mHUD->AddElement(polygonHUD);
+    }
+}
+
+TArray<TArray<FVector2D>> FOdysseyPainterEditorRasterSelection::BuildContours(const TArray<FIntEdge>& edges)
+{
+    TMultiMap<FIntPoint, FIntPoint> adjacency;
+    for( const FIntEdge& edge : edges )
+    {
+        adjacency.Add( edge.Start, edge.End );
+        adjacency.Add( edge.End, edge.Start ); // Start -> End == End -> Start for our search
+    }
+
+    TSet<FIntEdge> used;
+    TArray<TArray<FVector2D>> contours;
+
+    for( const FIntEdge& edge : edges )
+    {
+        if( used.Contains( edge ) )
+            continue;
+
+        // Start a new contour
+        TArray<FVector2D> contour;
+        FIntPoint current = edge.Start;
+        FIntPoint next = edge.End;
+
+        contour.Add( FVector2D( current ) );
+        used.Add( edge );
+
+        while( true )
+        {
+            contour.Add( FVector2D( next ) );
+
+            // Find next unused edge from next
+            bool bFound = false;
+            TArray<FIntPoint> connected;
+            adjacency.MultiFind( next, connected );
+
+            for( const FIntPoint& connectPoint : connected )
+            {
+                FIntEdge connectedEged{ next, connectPoint };
+                FIntEdge connectedEdgeReverse{ connectPoint, next };
+
+                if( !used.Contains( connectedEged ) && !used.Contains( connectedEdgeReverse ) )
+                {
+                    used.Add( connectedEged );
+                    current = next;
+                    next = connectPoint;
+                    bFound = true;
+                    break;
+                }
+            }
+
+            if (!bFound || next == edge.Start) // Closed contour
+                break;
+        }
+
+        if ( contour.Num() > 1 ) // We ignore single lines that can sometimes "float" in the selection if it crosses over itself a lot
+            contours.Add( contour );
+    }
+
+    return contours;
 }
 
 ::ULIS::FRectI

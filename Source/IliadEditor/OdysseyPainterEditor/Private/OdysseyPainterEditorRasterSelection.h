@@ -8,7 +8,23 @@
 
 #include <ULIS>
 
-class FOdysseyHUDLine;
+// Used to create the correct pixel snapping polygon represented by the selection
+struct FIntEdge
+{
+    FIntPoint Start;
+    FIntPoint End;
+
+    // For hash map usage
+    bool operator==(const FIntEdge& Other) const
+    {
+        return (Start == Other.Start && End == Other.End);
+    }
+};
+
+FORCEINLINE uint32 GetTypeHash(const FIntEdge& Edge)
+{
+    return HashCombine(GetTypeHash(Edge.Start), GetTypeHash(Edge.End));
+}
 
 class FOdysseyPainterEditorRasterSelection
 {
@@ -35,6 +51,7 @@ public:
 
 private:
     ::ULIS::FRectI ComputeBoundingRect(const TArray<FVector2D>& iPoints) const;
+    TArray<TArray<FVector2D>> BuildContours(const TArray<FIntEdge>& Edges);
 
 private:
     TSharedPtr<::ULIS::FBlock> mBlock;
