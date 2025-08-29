@@ -14,10 +14,10 @@ FOdysseyPainterEditorRasterSelection::~FOdysseyPainterEditorRasterSelection()
 FOdysseyPainterEditorRasterSelection::FOdysseyPainterEditorRasterSelection()
     : mHUD(MakeShared<FOdysseyHUDElement>())
 {
-    mDottedSelectionCustomization.mColors.Add(FLinearColor::Red);
-    mDottedSelectionCustomization.mColors.Add(FLinearColor::Green);
+    mDottedSelectionCustomization.mColors.Add(FLinearColor::Black);
     mDottedSelectionCustomization.mGapLength = 5.f;
     mDottedSelectionCustomization.mSegmentLength = 10.f;
+    mDottedSelectionCustomization.mSpeed = 10.f;
     mDottedSelectionCustomization.mIsActive = false;
     mHUD->SetCustomization( mDottedSelectionCustomization );
 }
@@ -259,7 +259,7 @@ TArray<TArray<FVector2D>> FOdysseyPainterEditorRasterSelection::BuildContours(co
                 break;
         }
 
-        if ( contour.Num() > 1 ) // We ignore single lines that can sometimes "float" in the selection if it crosses over itself a lot
+        if ( contour.Num() > 2 ) // We ignore single lines that can sometimes "float" in the selection if it crosses over itself a lot
             contours.Add( contour );
     }
 

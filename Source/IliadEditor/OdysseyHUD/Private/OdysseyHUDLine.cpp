@@ -21,14 +21,42 @@ FOdysseyHUDLine::FOdysseyHUDLine(const FVector2D& iStartPoint, const FVector2D& 
 void
 FOdysseyHUDLine::DrawHUD(const FOdysseyHUDElement::FDrawHUDParams& iParams)
 {
-    //Do dotted line here. But HUD Element has LOTS of lines in it for selection
-    const FLinearColor color(0.f, 1.f, 0.f);
+    // If we passed a customization in iParams, we use this one, else, we use the one that is in FOdysseyHUD
+    const FOdysseyHUDElement::FHUDCustomization& customization = iParams.mCustomization ? *iParams.mCustomization : mCustomization;
+
+    if (customization.mSegmentLength <= 0.f || customization.mGapLength < 0.f)
+        return;
 
     FVector2D startPoint = iParams.mTextureToHUD.Execute(mStartPoint);
     FVector2D endPoint = iParams.mTextureToHUD.Execute(mEndPoint);
 
     FBatchedElements* batchedElements = iParams.mCanvas->GetBatchedElements(FCanvas::ET_Line);
-    batchedElements->AddTranslucentLine(FVector(startPoint, 0.f), FVector(endPoint, 0.f), color, iParams.mCanvas->GetHitProxyId(), 1.f, 0.f, true);
+
+    TArray<FLinearColor> colors = customization.mColors;
+    if (colors.Num() == 0)
+        colors.Add(FLinearColor::Black);
+
+    int colorIndex = 0;
+    int numColors = colors.Num();
+    float cumulLength = 0.f;
+
+    // Total pattern length (Segment + Gap)
+    float patternLength = customization.mSegmentLength + customization.mGapLength;
+
+    double time = FApp::GetCurrentTime();
+    float timeOffset = FMath::Fmod(time * customization.mSpeed, patternLength);
+
+    DrawCustomizedLine(iParams.mCanvas,
+        startPoint,
+        endPoint,
+        timeOffset,
+        patternLength,
+        cumulLength,
+        colorIndex,
+        colors,
+        customization,
+        batchedElements
+    );
 
     FOdysseyHUDElement::DrawHUD(iParams);
 }

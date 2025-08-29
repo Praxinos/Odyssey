@@ -23,14 +23,15 @@ FOdysseyHUDBezier::FOdysseyHUDBezier(const FVector2D& iStartPoint, const FVector
 void
 FOdysseyHUDBezier::DrawHUD(const FOdysseyHUDElement::FDrawHUDParams& iParams)
 {
-    const FLinearColor bezierLineColor(0.f, 1.f, 0.f, 1.f);
-    const FLinearColor controlLineColor(0.f, 1.f, 0.f, 0.4f);
+    // If we passed a customization in iParams, we use this one, else, we use the one that is in FOdysseyHUD
+    const FOdysseyHUDElement::FHUDCustomization& customization = iParams.mCustomization ? *iParams.mCustomization : mCustomization;
+
+    if (customization.mSegmentLength <= 0.f || customization.mGapLength < 0.f)
+        return;
 
     FVector2D startPoint = iParams.mTextureToHUD.Execute(mStartPoint);
     FVector2D controlPoint = iParams.mTextureToHUD.Execute(mControlPoint);
     FVector2D endPoint = iParams.mTextureToHUD.Execute(mEndPoint);
-
-    FBatchedElements* batchedElements = iParams.mCanvas->GetBatchedElements(FCanvas::ET_Line);
 
     ::ULIS::TArray<::ULIS::FVec2I> pointsArray;
     ::ULIS::GenerateQuadraticBezierPoints(
@@ -44,17 +45,66 @@ FOdysseyHUDBezier::DrawHUD(const FOdysseyHUDElement::FDrawHUDParams& iParams)
     if (pointsArray.Size() < 2)
         return;
 
+    FBatchedElements* batchedElements = iParams.mCanvas->GetBatchedElements(FCanvas::ET_Line);
+
+    TArray<FLinearColor> colors = customization.mColors;
+    if (colors.Num() == 0)
+        colors.Add(FLinearColor::Black);
+
+    int colorIndex = 0;
+    int numColors = colors.Num();
+    float cumulLength = 0.f;
+
+    // Total pattern length (Segment + Gap)
+    float patternLength = customization.mSegmentLength + customization.mGapLength;
+
+    double time = FApp::GetCurrentTime();
+    float timeOffset = FMath::Fmod(time * customization.mSpeed, patternLength);
+
     for (int i = 1; i < pointsArray.Size(); i++)
     {
 
         FVector2D startBezierPoint = iParams.mTextureToHUD.Execute(FVector2D(pointsArray[i - 1].x, pointsArray[i - 1].y));
         FVector2D endBezierPoint = iParams.mTextureToHUD.Execute(FVector2D(pointsArray[i].x, pointsArray[i].y));
 
-        batchedElements->AddTranslucentLine(FVector(startBezierPoint, 0.f), FVector(endBezierPoint, 0.f), bezierLineColor, iParams.mCanvas->GetHitProxyId(), 1.f, 0.f, true);
+        // Bezier
+        DrawCustomizedLine(iParams.mCanvas,
+            startBezierPoint,
+            endBezierPoint,
+            timeOffset,
+            patternLength,
+            cumulLength,
+            colorIndex,
+            colors,
+            customization,
+            batchedElements
+        );
     }
 
-    batchedElements->AddTranslucentLine(FVector(startPoint, 0.f), FVector(controlPoint, 0.f), controlLineColor, iParams.mCanvas->GetHitProxyId(), 1.f, 0.f, true);
-    batchedElements->AddTranslucentLine(FVector(controlPoint, 0.f), FVector(endPoint, 0.f), controlLineColor, iParams.mCanvas->GetHitProxyId(), 1.f, 0.f, true);
+    // Control lines
+    DrawCustomizedLine(iParams.mCanvas,
+        startPoint,
+        controlPoint,
+        timeOffset,
+        patternLength,
+        cumulLength,
+        colorIndex,
+        colors,
+        customization,
+        batchedElements
+    );
+
+    DrawCustomizedLine(iParams.mCanvas,
+        controlPoint,
+        endPoint,
+        timeOffset,
+        patternLength,
+        cumulLength,
+        colorIndex,
+        colors,
+        customization,
+        batchedElements
+    );
 
     FOdysseyHUDElement::DrawHUD(iParams);
 }

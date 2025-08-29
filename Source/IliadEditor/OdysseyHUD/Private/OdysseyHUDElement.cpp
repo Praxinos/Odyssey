@@ -2,6 +2,7 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "OdysseyHUDElement.h"
+#include "CanvasTypes.h"
 
 IMPLEMENT_HIT_PROXY(HOdysseyHUDElementHitProxy, HHitProxy)
 
@@ -38,6 +39,56 @@ FOdysseyHUDElement::Draw(const FOdysseyHUDElement::FDrawHUDParams& iParams)
 void
 FOdysseyHUDElement::DrawHUD(const FOdysseyHUDElement::FDrawHUDParams& iParams)
 {
+}
+
+void FOdysseyHUDElement::DrawCustomizedLine(FCanvas* iCanvas, const FVector2D& iStart, const FVector2D& iEnd, float iTimeOffset, float iPatternLength, float& ioCumulLength, int& ioColorIndex, const TArray<FLinearColor>& iColors, const FHUDCustomization& iCustomization, FBatchedElements* iBatchedElements) const
+{
+    FVector2D dir = iEnd - iStart;
+    float segmentLength = dir.Size();
+    if (segmentLength <= 0.f)
+        return;
+
+    dir.Normalize();
+    float current = 0.f;
+
+    while (current < segmentLength)
+    {
+        // Absolute position along polygon perimeter, shifted by time offset
+        float globalPos = ioCumulLength + current + iTimeOffset;
+        float cycleOffset = FMath::Fmod(globalPos, iPatternLength);
+        float segmentLeft = iCustomization.mSegmentLength - cycleOffset;
+
+        if (segmentLeft <= 0.f)
+        {
+            // We are inside the gap -> skip ahead
+            float skip = -segmentLeft + iCustomization.mGapLength;
+            current += skip;
+            continue;
+        }
+
+        // Draw the remaining length of this segment
+        float available = segmentLength - current;
+        float drawLen = FMath::Min(segmentLeft, available);
+
+        FVector2D segmentStart = iStart + dir * current;
+        FVector2D segmentEnd = iStart + dir * (current + drawLen);
+
+        iBatchedElements->AddTranslucentLine(
+            FVector(segmentStart, 0.f),
+            FVector(segmentEnd, 0.f),
+            iColors[ioColorIndex],
+            iCanvas->GetHitProxyId(),
+            1.f,   // thickness
+            0.f,   // depth bias
+            true   // antialiasing
+        );
+
+        // move forward past dash + gap
+        current += drawLen + iCustomization.mGapLength;
+        ioColorIndex = (ioColorIndex + 1) % iColors.Num();
+    }
+
+    ioCumulLength += segmentLength;
 }
 
 void FOdysseyHUDElement::AddElement(TSharedPtr<FOdysseyHUDElement> iElementToAdd)

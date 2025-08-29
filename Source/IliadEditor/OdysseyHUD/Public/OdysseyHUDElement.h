@@ -22,6 +22,7 @@ public:
     struct FHUDCustomization
     {
         // For dotted lines
+        int32 mSpeed = 0; // Animate offset: mSpeed = world units per second
         bool mIsActive = false; // To toggle the customization on and off
         TArray<FLinearColor> mColors;
         float mSegmentLength = INFINITY;
@@ -79,6 +80,7 @@ public:
 
 protected:
     virtual void DrawHUD(const FOdysseyHUDElement::FDrawHUDParams& iParams);
+    void DrawCustomizedLine(FCanvas* iCanvas, const FVector2D& iStart, const FVector2D& iEnd, float iTimeOffset, float iPatternLength, float& ioCumulLength, int& ioColorIndex, const TArray<FLinearColor>& iColors, const FHUDCustomization& iCustomization, FBatchedElements* iBatchedElements) const;
 
 protected:
     // FGCObject implementation

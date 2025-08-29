@@ -20,17 +20,80 @@ FOdysseyHUDRectangle::FOdysseyHUDRectangle(const FVector2D& iTopLeftPoint, const
 void
 FOdysseyHUDRectangle::DrawHUD(const FOdysseyHUDElement::FDrawHUDParams& iParams)
 {
-    const FLinearColor color(0.f, 1.f, 0.f);
+    // If we passed a customization in iParams, we use this one, else, we use the one that is in FOdysseyHUD
+    const FOdysseyHUDElement::FHUDCustomization& customization = iParams.mCustomization ? *iParams.mCustomization : mCustomization;
+
+    if (customization.mSegmentLength <= 0.f || customization.mGapLength < 0.f)
+        return;
+
     FVector2D topLeft = iParams.mTextureToHUD.Execute(mTopLeftPoint);
     FVector2D topRight = iParams.mTextureToHUD.Execute(FVector2D(mBottomRightPoint.X, mTopLeftPoint.Y));
     FVector2D bottomRight = iParams.mTextureToHUD.Execute(mBottomRightPoint);
     FVector2D bottomLeft = iParams.mTextureToHUD.Execute(FVector2D(mTopLeftPoint.X, mBottomRightPoint.Y));
 
     FBatchedElements* batchedElements = iParams.mCanvas->GetBatchedElements(FCanvas::ET_Line);
-    batchedElements->AddTranslucentLine(FVector(topLeft, 0.f), FVector(topRight, 0.f), color, iParams.mCanvas->GetHitProxyId(), 1.f, 0.f, true);
-    batchedElements->AddTranslucentLine(FVector(topRight, 0.f), FVector(bottomRight, 0.f), color, iParams.mCanvas->GetHitProxyId(), 1.f, 0.f, true);
-    batchedElements->AddTranslucentLine(FVector(bottomRight, 0.f), FVector(bottomLeft, 0.f), color, iParams.mCanvas->GetHitProxyId(), 1.f, 0.f, true);
-    batchedElements->AddTranslucentLine(FVector(bottomLeft, 0.f), FVector(topLeft, 0.f), color, iParams.mCanvas->GetHitProxyId(), 1.f, 0.f, true);
+
+    TArray<FLinearColor> colors = customization.mColors;
+    if (colors.Num() == 0)
+        colors.Add(FLinearColor::Black);
+
+    int colorIndex = 0;
+    int numColors = colors.Num();
+    float cumulLength = 0.f;
+
+    // Total pattern length (Segment + Gap)
+    float patternLength = customization.mSegmentLength + customization.mGapLength;
+
+    double time = FApp::GetCurrentTime();
+    float timeOffset = FMath::Fmod(time * customization.mSpeed, patternLength);
+
+    DrawCustomizedLine(iParams.mCanvas,
+        topLeft,
+        topRight,
+        timeOffset,
+        patternLength,
+        cumulLength,
+        colorIndex,
+        colors,
+        customization,
+        batchedElements
+    );
+
+    DrawCustomizedLine(iParams.mCanvas,
+        topRight,
+        bottomRight,
+        timeOffset,
+        patternLength,
+        cumulLength,
+        colorIndex,
+        colors,
+        customization,
+        batchedElements
+    );
+
+    DrawCustomizedLine(iParams.mCanvas,
+        bottomRight,
+        bottomLeft,
+        timeOffset,
+        patternLength,
+        cumulLength,
+        colorIndex,
+        colors,
+        customization,
+        batchedElements
+    );
+
+    DrawCustomizedLine(iParams.mCanvas,
+        bottomLeft,
+        topLeft,
+        timeOffset,
+        patternLength,
+        cumulLength,
+        colorIndex,
+        colors,
+        customization,
+        batchedElements
+    );
 
     FOdysseyHUDElement::DrawHUD(iParams);
 }

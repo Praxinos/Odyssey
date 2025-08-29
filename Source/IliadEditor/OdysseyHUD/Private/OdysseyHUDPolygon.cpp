@@ -6,6 +6,7 @@
 
 #include "OdysseyHUDUtils.h"
 #include "ULISLoaderModule.h"
+#include "Misc/App.h"
 
 FOdysseyHUDPolygon::~FOdysseyHUDPolygon()
 {
@@ -25,24 +26,55 @@ FOdysseyHUDPolygon::DrawHUD(const FOdysseyHUDElement::FDrawHUDParams& iParams)
     // If we passed a customization in iParams, we use this one, else, we use the one that is in FOdysseyHUD
     const FOdysseyHUDElement::FHUDCustomization& customization = iParams.mCustomization ? *iParams.mCustomization : mCustomization;
 
+    if( customization.mSegmentLength <= 0.f || customization.mGapLength < 0.f )
+        return;
+
     FBatchedElements* batchedElements = iParams.mCanvas->GetBatchedElements(FCanvas::ET_Line);
 
-    // Draw edges
+    TArray<FLinearColor> colors = customization.mColors;
+    if( colors.Num() == 0 )
+        colors.Add(FLinearColor::Black);
+
+    int colorIndex = 0;
+    int numColors = colors.Num();
+    float cumulLength = 0.f;
+
+    // Total pattern length (Segment + Gap)
+    float patternLength = customization.mSegmentLength + customization.mGapLength;
+
+    double time = FApp::GetCurrentTime();
+    float timeOffset = FMath::Fmod(time * customization.mSpeed, patternLength);
+
+    // Draw all polygon edges
     for (int i = 1; i < mPoints.Num(); i++)
     {
-        FVector2D start = iParams.mTextureToHUD.Execute(mPoints[i - 1]);
-        FVector2D end = iParams.mTextureToHUD.Execute(mPoints[i]);
-
-        FOdysseyHUDUtils::DrawCustomizedLine(start, end, customization, iParams, batchedElements);
+        DrawCustomizedLine( iParams.mCanvas,
+                            iParams.mTextureToHUD.Execute(mPoints[i - 1]),
+                            iParams.mTextureToHUD.Execute(mPoints[i]),
+                            timeOffset,
+                            patternLength,
+                            cumulLength,
+                            colorIndex,
+                            colors,
+                            customization,
+                            batchedElements
+                         );
     }
 
-    // Close polygon if needed
+    // Close polygon if needed (continue pattern seamlessly)
     if (mClosePolygon)
     {
-        FVector2D start = iParams.mTextureToHUD.Execute(mPoints.Last());
-        FVector2D end = iParams.mTextureToHUD.Execute(mPoints[0]);
-
-        FOdysseyHUDUtils::DrawCustomizedLine(start, end, customization, iParams, batchedElements);
+        DrawCustomizedLine(iParams.mCanvas,
+            iParams.mTextureToHUD.Execute(mPoints.Last()),
+            iParams.mTextureToHUD.Execute(mPoints[0]),
+            timeOffset,
+            patternLength,
+            cumulLength,
+            colorIndex,
+            colors,
+            customization,
+            batchedElements
+        );
     }
 
     FOdysseyHUDElement::DrawHUD(iParams);
