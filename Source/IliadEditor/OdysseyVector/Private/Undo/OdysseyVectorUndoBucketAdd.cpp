@@ -21,9 +21,8 @@ FOdysseyVectorUndoBucketAdd::~FOdysseyVectorUndoBucketAdd()
 }
 
 FOdysseyVectorUndoBucketAdd::FOdysseyVectorUndoBucketAdd( FOdysseyVectorGroupPaint* iScene
-                                                        , std::vector<FOdysseyVectorBucket*>& iBucketArray
-                                                        , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
+                                                        , std::vector<FOdysseyVectorBucket*>& iBucketArray )
+    : FOdysseyVectorUndo( iScene->GetLayer() )
 {
     mBucketArray = iBucketArray;
 }

@@ -96,8 +96,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonDown( con
         if( GUndo )
         {
             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerBreakdownAlter( sharedEnv
-                                                                                         , mInbetweenerTag
-                                                                                         , 0 );
+                                                                                         , mInbetweenerTag );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -124,9 +123,6 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonDown( con
         reply.CaptureMouse( AsShared() );
     }
 
-    // update UI
-    //refactor layer->GetVectorLayer()->Notify( notificationFlags );
-
     return reply;
 }
 
@@ -137,6 +133,8 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseMove ( const FG
     //STableRow<TSharedPtr<FInbetweeningListViewItem>>::OnMouseMove( MyGeometry, MouseEvent );
     TSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening> treeView = StaticCastSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening>(OwnerTablePtr.Pin());
     TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition> timelinePosition = treeView->GetTimelinePosition();
+
+    treeView->UnbindLayerDelegates();
 
     if( MouseEvent.IsMouseButtonDown( EKeys::LeftMouseButton ) )
     {
@@ -171,7 +169,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseMove ( const FG
                     {
                         mInbetweenerTag->SetInterpolationDirection( direction );
 
-                        mInbetweenerTag->GetOwner()->GetLayer()->Update( 0 );
+                        mInbetweenerTag->GetOwner()->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
                         CacheDesiredSize( 1.0f /* mLayoutScaleMultiplier */);
                     }
@@ -198,6 +196,8 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseMove ( const FG
         }
     }
 
+    treeView->BindLayerDelegates();
+
     return FReply::Handled();
 }
 
@@ -209,6 +209,8 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonUp( const
     UOdysseyAnimationLayerImageVector* vectorLayer = treeView.Get()->GetAnimationLayerImageVector();
     int currentFrame = mCurrentFrame.Get();
     UOdysseyLayerCell* cell = vectorLayer->GetCellAtFrame( currentFrame );
+
+    treeView->UnbindLayerDelegates();
 
     // Call base method
     FReply reply = STableRow<TSharedPtr<FInbetweeningListViewItem>>::OnMouseButtonUp( MyGeometry, MouseEvent );
@@ -233,13 +235,15 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonUp( const
             vectorLayer->GetVectorLayer()->RequestRedraw( vectorCell->GetVectorCell(), 0 );
         }
 
-        //refactor vectorLayer->GetVectorLayer()->Notify( retFlags );
+        vectorLayer->GetVectorLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
         reply.ReleaseMouseCapture();
     }
 
     mPickedBreakdown = nullptr;
     mCandidateTargetCellBox.type = 0;
+
+    treeView->BindLayerDelegates();
 
     return reply;
 }

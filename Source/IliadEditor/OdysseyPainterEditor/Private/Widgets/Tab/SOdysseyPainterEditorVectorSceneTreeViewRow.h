@@ -78,6 +78,7 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorSceneTreeViewRow
         bool IsVisibilityEnabled() const;
         FReply PickColor( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent );
         void OnColorCommitted( FLinearColor iColor );
+        void OnUndoRedo();
 
     protected:
         uint32 mDropZone;

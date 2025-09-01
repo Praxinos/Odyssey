@@ -206,7 +206,7 @@ FOdysseyPainterEditorTextureSource::Clear()
             // needed for undos
             if (GUndo)
             {
-                FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSceneClear( mediaVector->GetScene(), 0 );
+                FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSceneClear( mediaVector->GetScene() );
                 GUndo->StoreUndo(GEditor, TUniquePtr<FOdysseyVectorUndo>(undo));
                 RecordCurrentFrameUndo();
             }
@@ -218,8 +218,6 @@ FOdysseyPainterEditorTextureSource::Clear()
         if( imageVectorLayer )
         {
             imageVectorLayer->GetVectorLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-
-            //refactor imageVectorLayer->GetVectorLayer()->Notify( notificationFlags );
         }
     }
 }

@@ -20,9 +20,8 @@ FOdysseyVectorUndoTagInbetweenerTransform::~FOdysseyVectorUndoTagInbetweenerTran
 }
 
 FOdysseyVectorUndoTagInbetweenerTransform::FOdysseyVectorUndoTagInbetweenerTransform( FOdysseyVectorGroupPaint* iScene
-                                                                                    , const std::list<FInbetweenerBreakdown*>& iBreakdownList
-                                                                                    , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
+                                                                                    , const std::list<FInbetweenerBreakdown*>& iBreakdownList )
+    : FOdysseyVectorUndo( iScene->GetLayer() )
 {
     mBreakdownSnapshotBuffer.reserve( iBreakdownList.size() );
 

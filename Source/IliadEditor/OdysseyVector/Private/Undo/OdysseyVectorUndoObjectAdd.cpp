@@ -23,18 +23,16 @@ FOdysseyVectorUndoObjectAdd::~FOdysseyVectorUndoObjectAdd()
 }
 
 FOdysseyVectorUndoObjectAdd::FOdysseyVectorUndoObjectAdd( FOdysseyVectorGroupPaint* iScene
-                                                        , FOdysseyVectorObject* iObject
-                                                        , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
+                                                        , FOdysseyVectorObject* iObject )
+    : FOdysseyVectorUndo( iScene->GetLayer() )
     , mScene ( iScene )
 {
     mObjectArray.push_back( iObject );
 }
 
 FOdysseyVectorUndoObjectAdd::FOdysseyVectorUndoObjectAdd( FOdysseyVectorGroupPaint* iScene
-                                                        , std::list<FOdysseyVectorObject*>& iObjectList
-                                                        , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
+                                                        , std::list<FOdysseyVectorObject*>& iObjectList )
+    : FOdysseyVectorUndo( iScene->GetLayer() )
     , mScene ( iScene )
 {
     for( FOdysseyVectorObject* object : iObjectList )

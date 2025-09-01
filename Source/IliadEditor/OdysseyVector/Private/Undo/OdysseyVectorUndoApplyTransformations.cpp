@@ -18,9 +18,8 @@ FOdysseyVectorUndoApplyTransformations::~FOdysseyVectorUndoApplyTransformations(
 }
 
 FOdysseyVectorUndoApplyTransformations::FOdysseyVectorUndoApplyTransformations( FOdysseyVectorGroupPaint* iScene
-                                                                              , std::list<FOdysseyVectorObject*>& iObjectList
-                                                                              , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
+                                                                              , std::list<FOdysseyVectorObject*>& iObjectList )
+    : FOdysseyVectorUndo( iScene->GetLayer() )
 {
     uint32 childrenCount = 0;
 

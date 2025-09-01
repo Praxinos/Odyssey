@@ -21,11 +21,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoTagInbetweenerBreakdownRemove : public
     public:
         ~FOdysseyVectorUndoTagInbetweenerBreakdownRemove();
         FOdysseyVectorUndoTagInbetweenerBreakdownRemove( FOdysseyVectorLayer* iSharedEnv
-                                                       , FOdysseyVectorTagInbetweener* iInbetweenerTag
-                                                       , uint64 iReturnFlags );
+                                                       , FOdysseyVectorTagInbetweener* iInbetweenerTag );
         FOdysseyVectorUndoTagInbetweenerBreakdownRemove( FOdysseyVectorLayer* iSharedEnv
-                                                       , const std::list<FOdysseyVectorTagInbetweener*>& iInbetweenerTagList
-                                                       , uint64 iReturnFlags );
+                                                       , const std::list<FOdysseyVectorTagInbetweener*>& iInbetweenerTagList );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;

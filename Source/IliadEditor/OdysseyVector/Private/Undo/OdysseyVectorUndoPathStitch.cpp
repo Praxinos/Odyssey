@@ -37,16 +37,14 @@ FOdysseyVectorUndoPathStitch::FOdysseyVectorUndoPathStitch( FOdysseyVectorGroupP
                                                           , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
                                                           , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray
                                                           , std::vector<FOdysseyVectorVertex*>& iMergedVertexArray
-                                                          , std::vector<FOdysseyVectorSegment*>& iMergedSegmentArray
-                                                          , uint64 iReturnFlags )
+                                                          , std::vector<FOdysseyVectorSegment*>& iMergedSegmentArray )
     : FOdysseyVectorUndoPathAlter( iScene
                                  , iRemovedPathArray
                                  , iRemovedVertexArray
                                  , iRemovedSegmentArray
                                  , iAddedPathArray
                                  , iAddedVertexArray
-                                 , iAddedSegmentArray
-                                 , iReturnFlags )
+                                 , iAddedSegmentArray )
 {
     mMergedVertexArray = iMergedVertexArray;
     mMergedSegmentArray = iMergedSegmentArray;

@@ -20,9 +20,8 @@ FOdysseyVectorUndoTagInbetweenerBreakdownAlter::~FOdysseyVectorUndoTagInbetweene
 }
 
 FOdysseyVectorUndoTagInbetweenerBreakdownAlter::FOdysseyVectorUndoTagInbetweenerBreakdownAlter( FOdysseyVectorLayer* iSharedEnv
-                                                                                              , FOdysseyVectorTagInbetweener* iInbetweenerTag
-                                                                                              , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iSharedEnv, iReturnFlags )
+                                                                                              , FOdysseyVectorTagInbetweener* iInbetweenerTag )
+    : FOdysseyVectorUndo( iSharedEnv )
 {
     mInbetweenerTagSnapshotArray.emplace_back(  iInbetweenerTag
                                               , FSnapshotFlags::Tag::Inbetweener::BREAKDOWNS
@@ -36,9 +35,8 @@ FOdysseyVectorUndoTagInbetweenerBreakdownAlter::FOdysseyVectorUndoTagInbetweener
 }
 
 FOdysseyVectorUndoTagInbetweenerBreakdownAlter::FOdysseyVectorUndoTagInbetweenerBreakdownAlter( FOdysseyVectorLayer* iSharedEnv
-                                                                                              , const std::vector<FOdysseyVectorTagInbetweener*>& iInbetweenerTagArray
-                                                                                              , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iSharedEnv, iReturnFlags )
+                                                                                              , const std::vector<FOdysseyVectorTagInbetweener*>& iInbetweenerTagArray )
+    : FOdysseyVectorUndo( iSharedEnv )
 {
     mInbetweenerTagSnapshotArray.reserve( iInbetweenerTagArray.size() );
 
@@ -57,9 +55,8 @@ FOdysseyVectorUndoTagInbetweenerBreakdownAlter::FOdysseyVectorUndoTagInbetweener
 }
 
 FOdysseyVectorUndoTagInbetweenerBreakdownAlter::FOdysseyVectorUndoTagInbetweenerBreakdownAlter( FOdysseyVectorLayer* iSharedEnv
-                                                                                              , const std::list<FOdysseyVectorTagInbetweener*>& iInbetweenerTagList
-                                                                                              , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iSharedEnv, iReturnFlags )
+                                                                                              , const std::list<FOdysseyVectorTagInbetweener*>& iInbetweenerTagList )
+    : FOdysseyVectorUndo( iSharedEnv )
 {
     mInbetweenerTagSnapshotArray.reserve( iInbetweenerTagList.size() );
 

@@ -92,8 +92,7 @@ UOdysseyPainterEditorVectorGridTool::LoadVector( FOdysseyVectorGroupPaint* iScen
 
 bool
 UOdysseyPainterEditorVectorGridTool::OnKeyDownGlobalVector( FOdysseyVectorGroupPaint* iScene
-                                                          , const FKeyEvent& InKeyEvent
-                                                          , uint64& oSignalFlags )
+                                                          , const FKeyEvent& InKeyEvent )
 {
     if( InKeyEvent.IsRepeat() == false )
     {
@@ -114,8 +113,7 @@ UOdysseyPainterEditorVectorGridTool::OnKeyDownGlobalVector( FOdysseyVectorGroupP
 
 bool
 UOdysseyPainterEditorVectorGridTool::OnKeyUpGlobalVector( FOdysseyVectorGroupPaint* iScene
-                                                        , const FKeyEvent& InKeyEvent
-                                                        , uint64& oSignalFlags )
+                                                        , const FKeyEvent& InKeyEvent )
 {
     mEditionMode = eVectorGridEditionMode::Single;
 
@@ -139,8 +137,7 @@ UOdysseyPainterEditorVectorGridTool::NodesAlreadySelected( std::vector<FGridNode
 bool
 UOdysseyPainterEditorVectorGridTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                       , const FOdysseyPoint& iPointInTexture
-                                                      , const FKey& iKey
-                                                      , uint64& oSignalFlags )
+                                                      , const FKey& iKey )
 {
     if (iKey != EKeys::LeftMouseButton)
         return false;
@@ -153,8 +150,7 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDownVector( FOdysseyVectorGroupPaint
         if( GUndo )
         {
             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoPointPosition( iScene
-                                                                          , mPointArray
-                                                                          , 0 );
+                                                                          , mPointArray );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -203,19 +199,15 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDownVector( FOdysseyVectorGroupPaint
 
 void
 UOdysseyPainterEditorVectorGridTool::OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
-                                                       , const FOdysseyPoint& iPointInTexture
-                                                       , uint64& oSignalFlags )
+                                                       , const FOdysseyPoint& iPointInTexture )
 {
     // TODO: highlight grid handles ?
 }
 
 void
 UOdysseyPainterEditorVectorGridTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
-                                                      , const FOdysseyPoint& iPointInTexture
-                                                      , uint64& oSignalFlags )
+                                                      , const FOdysseyPoint& iPointInTexture )
 {
-    uint64 notificationFlags = 0;
-
     if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
     {
         if( mEditionMode == eVectorGridEditionMode::Multi )
@@ -257,13 +249,10 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDragVector( FOdysseyVectorGroupPaint
 bool
 UOdysseyPainterEditorVectorGridTool::OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                                     , const FOdysseyPoint& iPointInTexture
-                                                    , const FKey& iKey
-                                                    , uint64& oSignalFlags )
+                                                    , const FKey& iKey )
 {
     if (iKey != EKeys::LeftMouseButton)
         return false;
-
-    uint64 notificationFlags = 0;
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
@@ -295,15 +284,14 @@ UOdysseyPainterEditorVectorGridTool::OnMouseUpVector( FOdysseyVectorGroupPaint* 
 bool
 UOdysseyPainterEditorVectorGridTool::OnMouseClickVector( FOdysseyVectorGroupPaint* iScene
                                                        , const FOdysseyPoint& iPointInTexture
-                                                       , const FKey& iKey
-                                                       , uint64& oSignalFlags )
+                                                       , const FKey& iKey )
 {
     mGridHUD->ClearSelection();
 
     return false;
 }
 
-uint64
+void
 UOdysseyPainterEditorVectorGridTool::PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
                                                           , const FName& iPropertyName )
 {
@@ -313,7 +301,7 @@ UOdysseyPainterEditorVectorGridTool::PropertyChangedVector( FOdysseyVectorGroupP
     iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
     iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
-    return UOdysseyPainterEditorVectorBaseTool::PropertyChangedVector( iScene, iPropertyName );
+    UOdysseyPainterEditorVectorBaseTool::PropertyChangedVector( iScene, iPropertyName );
 }
 
 eVectorGridEditionMode

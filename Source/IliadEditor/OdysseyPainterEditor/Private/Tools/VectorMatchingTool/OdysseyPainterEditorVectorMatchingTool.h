@@ -58,20 +58,16 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorMatchingTool : public 
         //virtual bool OnKeyUpVector( FOdysseyVectorGroupPaint* iScene, const FKey& iKey
                                             //, uint64& oSignalFlags ) override;
         virtual bool OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
-                                        , const FOdysseyPoint& iPointInTexture
-                                        , const FKey& iKey
-                                        , uint64& oSignalFlags ) override;
+                                      , const FOdysseyPoint& iPointInTexture
+                                      , const FKey& iKey ) override;
         virtual void OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
-                                        , const FOdysseyPoint& iPointInTexture
-                                        , uint64& oSignalFlags ) override;
+                                       , const FOdysseyPoint& iPointInTexture ) override;
         virtual void OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
-                                        , const FOdysseyPoint& iPointInTexture
-                                        , uint64& oSignalFlags ) override;
+                                      , const FOdysseyPoint& iPointInTexture ) override;
         virtual bool OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
-                                        , const FOdysseyPoint& iPointInTexture
-                                        , const FKey& iKey
-                                        , uint64& oSignalFlags ) override;
-        virtual uint64 PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
+                                    , const FOdysseyPoint& iPointInTexture
+                                    , const FKey& iKey ) override;
+        virtual void PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
                                             , const FName& iPropertyName ) override;
 
     private:

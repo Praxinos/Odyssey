@@ -41,34 +41,30 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorGridTool : public UOdy
     protected:
         //OdysseyPainterVectorBaseEditorTool overrides
         bool OnKeyUpGlobalVector( FOdysseyVectorGroupPaint* iScene
-                                , const FKeyEvent& InKeyEvent
-                                , uint64& oSignalFlags );
+                                , const FKeyEvent& InKeyEvent );
         bool OnKeyDownGlobalVector( FOdysseyVectorGroupPaint* iScene
-                                  , const FKeyEvent& InKeyEvent
-                                  , uint64& oSignalFlags );
+                                  , const FKeyEvent& InKeyEvent );
 
         virtual uint64 LoadVector( FOdysseyVectorGroupPaint* iScene ) override;
         virtual uint64 UnloadVector( FOdysseyVectorGroupPaint* iScene ) override;
         //virtual bool OnKeyDownVector( FOdysseyVectorGroupPaint* iScene
-        //                            , const FKey& iKey, uint64& oSignalFlags ) override;
-        //virtual bool OnKeyUpVector( FOdysseyVectorGroupPaint* iScene, const FKey& iKey, uint64& oSignalFlags ) override;
+        //                            , const FKey& iKey ) override;
+        //virtual bool OnKeyUpVector( FOdysseyVectorGroupPaint* iScene, const FKey& iKey ) override;
         virtual bool OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
-                                        , const FOdysseyPoint& iPointInTexture
-                                        , const FKey& iKey
-                                        , uint64& oSignalFlags ) override;
-        virtual void OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
-                                         , const FOdysseyPoint& iPointInTexture, uint64& oSignalFlags ) override;
-        virtual void OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
-                                        , const FOdysseyPoint& iPointInTexture, uint64& oSignalFlags ) override;
-        virtual bool OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                       , const FOdysseyPoint& iPointInTexture
-                                      , const FKey& iKey, uint64& oSignalFlags ) override;
+                                      , const FKey& iKey ) override;
+        virtual void OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
+                                       , const FOdysseyPoint& iPointInTexture ) override;
+        virtual void OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
+                                      , const FOdysseyPoint& iPointInTexture ) override;
+        virtual bool OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
+                                    , const FOdysseyPoint& iPointInTexture
+                                    , const FKey& iKey ) override;
         virtual bool OnMouseClickVector( FOdysseyVectorGroupPaint* iScene
                                        , const FOdysseyPoint& iPointInTexture
-                                       , const FKey& iKey
-                                       , uint64& oSignalFlags ) override;
-        virtual uint64 PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
-                                            , const FName& iPropertyName ) override;
+                                       , const FKey& iKey ) override;
+        virtual void PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
+                                          , const FName& iPropertyName ) override;
         TSharedRef<SWidget> CreateModifierSegmentControl();
         const FSlateBrush* GetBackgroundColor( eVectorGridEditionMode iMode ) const;
         void SetEditionMode( eVectorGridEditionMode iMode );

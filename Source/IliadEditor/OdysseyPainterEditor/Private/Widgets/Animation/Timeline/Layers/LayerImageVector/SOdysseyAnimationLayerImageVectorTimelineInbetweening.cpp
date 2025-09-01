@@ -39,7 +39,7 @@
 
 SOdysseyAnimationLayerImageVectorTimelineInbetweening::~SOdysseyAnimationLayerImageVectorTimelineInbetweening()
 {
-    mAnimationLayerImageVector->GetVectorLayer()->OnNotifyDelegate().RemoveAll( this );
+    UnbindLayerDelegates( );
 }
 
 SOdysseyAnimationLayerImageVectorTimelineInbetweening::SOdysseyAnimationLayerImageVectorTimelineInbetweening()
@@ -59,8 +59,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::Construct( const FArgumen
     mAnimationLayerImageVector = iAnimationLayerImageVector;
     mTimelinePosition = InArgs._TimelinePosition;
 
-    // bind refresh function to delegates on existing vector scenes at load. Needed to refresh necessary widgets.
-    mAnimationLayerImageVector->GetVectorLayer()->OnNotifyDelegate().AddRaw( this, &SOdysseyAnimationLayerImageVectorTimelineInbetweening::OnVectorSceneNotify );
+    BindLayerDelegates( );
 
     SListView<TSharedPtr<FInbetweeningListViewItem>>::Construct(
         SListView<TSharedPtr<FInbetweeningListViewItem>>::FArguments()
@@ -82,10 +81,11 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::Construct( const FArgumen
 }
 
 void
-SOdysseyAnimationLayerImageVectorTimelineInbetweening::OnVectorSceneNotify( FOdysseyVectorLayer* iLayer
-                                                                          , const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags )
+SOdysseyAnimationLayerImageVectorTimelineInbetweening::OnVectorSceneNotify( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags
+                                                                          , uint32 iUpdateFlags )
 {
-    //if( iNotificationFlags & FOdysseyPainterEditor::UI_UPDATE_TIMELINE )
+    if( ( iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::TAG_LIST] )
+     || ( iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_TAG_LIST] ) )
     {
         Update();
     }
@@ -135,6 +135,8 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::OnSelectionChanged( TShar
 {
     std::list<FOdysseyVectorCell*> cellList;
 
+    UnbindLayerDelegates();
+
     if( SelectInfo != ESelectInfo::Type::Direct )
     {
         for( TSharedPtr<FInbetweeningListViewItem> item : mItemsSource )
@@ -152,8 +154,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::OnSelectionChanged( TShar
         if( GUndo )
         {
             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectObject( mAnimationLayerImageVector->GetVectorLayer().Get()
-                                                                         , cellList
-                                                                         , 0 );
+                                                                         , cellList );
 
             GUndo->StoreUndo( mAnimationLayerImageVector, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -187,6 +188,8 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::OnSelectionChanged( TShar
 
         mAnimationLayerImageVector->GetVectorLayer()->RequestRedraw( nullptr, 0 );
     }
+
+    BindLayerDelegates();
 }
 
 bool
@@ -288,8 +291,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::AddBreakdown()
         if( GUndo )
         {
             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerBreakdownAdd( mAnimationLayerImageVector->GetVectorLayer().Get()
-                                                                                       , selectedInbetweenerTagList
-                                                                                       , 0 );
+                                                                                       , selectedInbetweenerTagList );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -325,8 +327,6 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::AddBreakdown()
         mAnimationLayerImageVector->GetVectorLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
         mAnimationLayerImageVector->GetVectorLayer()->RequestRedraw( nullptr, 0 );
     }
-
-    //refactor mAnimationLayerImageVector->GetVectorLayer()->Notify( notificationFlags );
 }
 
 void
@@ -349,8 +349,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::RemoveBreakdown()
         if( GUndo )
         {
             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerBreakdownRemove( mAnimationLayerImageVector->GetVectorLayer().Get()
-                                                                                          , selectedInbetweenerTagList
-                                                                                          , 0 );
+                                                                                          , selectedInbetweenerTagList );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -384,9 +383,6 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::RemoveBreakdown()
         mAnimationLayerImageVector->GetVectorLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
         mAnimationLayerImageVector->GetVectorLayer()->RequestRedraw( nullptr, 0 );
     }
-
-    // static call
-    //refactor mAnimationLayerImageVector->GetVectorLayer()->Notify( notificationFlags );
 }
 
 void
@@ -394,8 +390,11 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::ShowHideTarget()
 {
     int breakdownFrameIndex = MousePositionToFrame( mCursorPos.X );
     UOdysseyLayerCell* cell = mAnimationLayerImageVector->GetCellAtFrame( breakdownFrameIndex );
+
     if (!cell)
         return;
+
+    UnbindLayerDelegates();
 
     int breakdownCellIndex = cell->GetIndexInLayer();
     std::list<FOdysseyVectorTagInbetweener*> selectedInbetweenerTagList;
@@ -422,8 +421,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::ShowHideTarget()
         if( GUndo )
         {
             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerBreakdownTargetVisibility( mAnimationLayerImageVector->GetVectorLayer().Get()
-                                                                                                    , breakdownList
-                                                                                                    , 0 );
+                                                                                                    , breakdownList );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -450,8 +448,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::ShowHideTarget()
         mAnimationLayerImageVector->GetVectorLayer()->RequestRedraw( nullptr, 0 );
     }
 
-    // static call
-    //refactor mAnimationLayerImageVector->GetVectorLayer()->Notify( notificationFlags );
+    BindLayerDelegates();
 }
 
 const FSlateBrush *
@@ -467,9 +464,24 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::GetBackwardArrowBrush()
 }
 
 void
+SOdysseyAnimationLayerImageVectorTimelineInbetweening::UnbindLayerDelegates()
+{
+    mAnimationLayerImageVector->GetVectorLayer()->OnNotifyDelegate().RemoveAll( this );
+}
+
+void
+SOdysseyAnimationLayerImageVectorTimelineInbetweening::BindLayerDelegates()
+{
+    // bind refresh function to delegates on existing vector scenes at load. Needed to refresh necessary widgets.
+    mAnimationLayerImageVector->GetVectorLayer()->OnNotifyDelegate().AddRaw( this, &SOdysseyAnimationLayerImageVectorTimelineInbetweening::OnVectorSceneNotify );
+}
+
+void
 SOdysseyAnimationLayerImageVectorTimelineInbetweening::ChangeDirection()
 {
     std::list<FOdysseyVectorTagInbetweener*> selectedInbetweenerTagList;
+
+    UnbindLayerDelegates();
 
     GetSelectedInbetweenerTags( selectedInbetweenerTagList );
 
@@ -480,8 +492,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::ChangeDirection()
     {
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerBreakdownRemove( nullptr
                                                                                       , selectedInbetweenerTagList
-                                                                                      , engineList
-                                                                                      , notificationFlags );
+                                                                                      , engineList );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -514,8 +525,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::ChangeDirection()
     mAnimationLayerImageVector->GetVectorLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
     mAnimationLayerImageVector->GetVectorLayer()->RequestRedraw( nullptr, 0 );
 
-    // static call
-    //refactor mAnimationLayerImageVector->GetVectorLayer()->Notify( notificationFlags );
+    BindLayerDelegates();
 }
 
 void

@@ -104,8 +104,7 @@ UOdysseyPainterEditorVectorTransformTool::LoadVector( FOdysseyVectorGroupPaint* 
 
 bool
 UOdysseyPainterEditorVectorTransformTool::OnKeyDownVector( FOdysseyVectorGroupPaint* iScene
-                                                         , const FKey& iKey
-                                                         , uint64& oSignalFlags )
+                                                         , const FKey& iKey )
 {
     UniformAtKeyDown = Uniform;
 
@@ -115,23 +114,21 @@ UOdysseyPainterEditorVectorTransformTool::OnKeyDownVector( FOdysseyVectorGroupPa
         return true;
     }
 
-    return UOdysseyPainterEditorVectorBaseTool::OnKeyDownVector( iScene, iKey, oSignalFlags );
+    return UOdysseyPainterEditorVectorBaseTool::OnKeyDownVector( iScene, iKey );
 }
 
 bool
 UOdysseyPainterEditorVectorTransformTool::OnKeyUpVector( FOdysseyVectorGroupPaint* iScene
-                                                       , const FKey& iKey
-                                                       , uint64& oSignalFlags )
+                                                       , const FKey& iKey )
 {
     Uniform = UniformAtKeyDown;
 
-    return UOdysseyPainterEditorVectorBaseTool::OnKeyUpVector( iScene, iKey, oSignalFlags );
+    return UOdysseyPainterEditorVectorBaseTool::OnKeyUpVector( iScene, iKey );
 }
 
 void
 UOdysseyPainterEditorVectorTransformTool::OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
-                                                            , const FOdysseyPoint& iPointInTexture
-                                                            , uint64& oSignalFlags )
+                                                            , const FOdysseyPoint& iPointInTexture )
 {
     ::ULIS::FRectD redrawRegion = { 0, 0, 0, 0 };
     ::ULIS::FRectD imageRegion;
@@ -188,8 +185,7 @@ UOdysseyPainterEditorVectorTransformTool::GetTransformedObjectList( FOdysseyVect
 bool
 UOdysseyPainterEditorVectorTransformTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                            , const FOdysseyPoint& iPointInTexture
-                                                           , const FKey& iKey
-                                                           , uint64& oSignalFlags )
+                                                           , const FKey& iKey )
 {
     if (iKey != EKeys::LeftMouseButton)
         return false;
@@ -283,8 +279,7 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDownVector( FOdysseyVectorGroup
             // it could conflict with the undo created by the mouse up event in the case of a no-drag
             mUndo = new FOdysseyVectorUndoPointPosition( iScene
                                                        , mTransformedVertexArray
-                                                       , mTransformedHandleArray
-                                                       , 0 );
+                                                       , mTransformedHandleArray );
         }
 
         if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_OBJECT )
@@ -296,8 +291,7 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDownVector( FOdysseyVectorGroup
             // remember for undos. we don't register the undo in the mouse down event yet because
             // it could conflict with the undo created by th emouse up event in the case of a no-drag
             mUndo = new FOdysseyVectorUndoObjectTransform( iScene
-                                                         , transformedObjectList
-                                                         , 0 );
+                                                         , transformedObjectList );
         }
 
         if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
@@ -305,8 +299,7 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDownVector( FOdysseyVectorGroup
             // remember for undos. we don't register the undo in the mouse down event yet because
             // it could conflict with the undo created by th emouse up event in the case of a no-drag
             mUndo = new FOdysseyVectorUndoTagInbetweenerTransform( iScene
-                                                                 , mTransformHUD->GetSelectedBreakdownList()
-                                                                 , 0 );
+                                                                 , mTransformHUD->GetSelectedBreakdownList() );
         }
 
         if( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_ROTATE )
@@ -1063,8 +1056,7 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorGr
 
 void
 UOdysseyPainterEditorVectorTransformTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
-                                                           , const FOdysseyPoint& iPointInTexture
-                                                           , uint64& oSignalFlags )
+                                                           , const FOdysseyPoint& iPointInTexture )
 {
     static FVector2D deltaPositionCumul = FVector2D( 0.0f, 0.0f );
     FOdysseyPoint pointInTexture = iPointInTexture;
@@ -1143,13 +1135,10 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDragVector( FOdysseyVectorGroup
 bool
 UOdysseyPainterEditorVectorTransformTool::OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                                          , const FOdysseyPoint& iPointInTexture
-                                                         , const FKey& iKey
-                                                         , uint64& oSignalFlags)
+                                                         , const FKey& iKey )
 {
     if (iKey != EKeys::LeftMouseButton)
         return false;
-
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS;
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
@@ -1212,12 +1201,10 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseUpVector( FOdysseyVectorGroupPa
 
     mTransformHUD->SetCenterGizmo( true );
 
-    oSignalFlags = notificationFlags;
-
     return true;
 }
 
-uint64
+void
 UOdysseyPainterEditorVectorTransformTool::PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
                                                                , const FName& iPropertyName )
 {
@@ -1232,7 +1219,7 @@ UOdysseyPainterEditorVectorTransformTool::PropertyChangedVector( FOdysseyVectorG
 
     iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
-    return UOdysseyPainterEditorVectorBaseTool::PropertyChangedVector( iScene, iPropertyName );
+    UOdysseyPainterEditorVectorBaseTool::PropertyChangedVector( iScene, iPropertyName );
 }
 
 EVisibility

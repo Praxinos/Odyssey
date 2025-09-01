@@ -21,9 +21,8 @@ FOdysseyVectorUndoTransferObjects::~FOdysseyVectorUndoTransferObjects()
 }
 
 FOdysseyVectorUndoTransferObjects::FOdysseyVectorUndoTransferObjects( FOdysseyVectorGroupPaint* iScene
-                                                                    , FOdysseyVectorObject* iTransferredObject
-                                                                    , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
+                                                                    , FOdysseyVectorObject* iTransferredObject )
+    : FOdysseyVectorUndo( iScene->GetLayer() )
     , mScene( iScene )
 {
     mTransferredObjectSnapshotBuffer.emplace_back( iTransferredObject
@@ -32,9 +31,8 @@ FOdysseyVectorUndoTransferObjects::FOdysseyVectorUndoTransferObjects( FOdysseyVe
 }
 
 FOdysseyVectorUndoTransferObjects::FOdysseyVectorUndoTransferObjects( FOdysseyVectorGroupPaint* iScene
-                                                                    , const std::list<FOdysseyVectorObject*>& iTransferredObjectList
-                                                                    , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
+                                                                    , const std::list<FOdysseyVectorObject*>& iTransferredObjectList )
+    : FOdysseyVectorUndo( iScene->GetLayer() )
     , mScene( iScene )
 {
     mTransferredObjectSnapshotBuffer.reserve( iTransferredObjectList.size() );

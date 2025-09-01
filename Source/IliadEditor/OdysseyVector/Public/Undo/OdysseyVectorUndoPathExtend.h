@@ -17,8 +17,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoPathExtend : public FOdysseyVectorUndo
     public:
         ~FOdysseyVectorUndoPathExtend();
         FOdysseyVectorUndoPathExtend( FOdysseyVectorGroupPaint* iScene
-                                    , FOdysseyVectorPath* iPath
-                                    , uint64 iReturnFlags );
+                                    , FOdysseyVectorPath* iPath );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;

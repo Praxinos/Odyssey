@@ -74,8 +74,7 @@ UOdysseyPainterEditorVectorScenePanTool::LoadVector( FOdysseyVectorGroupPaint* i
 bool
 UOdysseyPainterEditorVectorScenePanTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                           , const FOdysseyPoint& iPointInTexture
-                                                          , const FKey& iKey
-                                                          , uint64& oSignalFlags )
+                                                          , const FKey& iKey )
 {
     BLPoint localCoords = iScene->GetInverseWorldMatrix().mapPoint(iPointInTexture.x,iPointInTexture.y);
 
@@ -87,8 +86,7 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseDownVector( FOdysseyVectorGroupP
     {
         // save selected object translation/rotation/scaling before transform
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoObjectTransform( iScene
-                                                                        , iScene
-                                                                        , 0 );
+                                                                        , iScene );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -164,11 +162,8 @@ UOdysseyPainterEditorVectorScenePanTool::Scale( FOdysseyVectorGroupPaint* iScene
 
 void
 UOdysseyPainterEditorVectorScenePanTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
-                                                          , const FOdysseyPoint& iPointInTexture
-                                                          , uint64& oSignalFlags )
+                                                          , const FOdysseyPoint& iPointInTexture )
 {
-    uint64 notificationFlags = 0;
-
     mDragged = true;
 
     if( iPointInTexture.keysDown.Find( EKeys::RightMouseButton ) != INDEX_NONE)
@@ -186,22 +181,15 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseDragVector( FOdysseyVectorGroupP
     // redraw
     //iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
     iScene->GetLayer()->RequestRedraw( iScene->GetCell(), FOdysseyVectorCell::REDRAW_INTERACTIVE );
-
-    oSignalFlags = notificationFlags;
 }
 
 bool
 UOdysseyPainterEditorVectorScenePanTool::OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                                         , const FOdysseyPoint& iPointInTexture
-                                                        , const FKey& iKey
-                                                        , uint64& oSignalFlags )
+                                                        , const FKey& iKey )
 {
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS;
-
     iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
     iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
-
-    oSignalFlags = notificationFlags;
 
     return true;
 }

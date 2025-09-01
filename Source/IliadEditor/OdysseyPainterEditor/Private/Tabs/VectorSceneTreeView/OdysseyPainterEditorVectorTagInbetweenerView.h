@@ -52,6 +52,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTagInbetweenerView : p
                                     , const FName& iMemberPropertyName
                                     , const FName& iCategory );
 
+        void OnUndoRedo();
+
     protected:
         FOdysseyPainterEditor* mEditor;
         FOdysseyVectorGroupPaint* mScene;

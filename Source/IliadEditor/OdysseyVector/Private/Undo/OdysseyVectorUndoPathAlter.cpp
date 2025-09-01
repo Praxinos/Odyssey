@@ -60,9 +60,8 @@ FOdysseyVectorUndoPathAlter::FOdysseyVectorUndoPathAlter( FOdysseyVectorGroupPai
                                                         , FOdysseyVectorVertex* iRemovedVertex
                                                         , FOdysseyVectorSegment* iRemovedSegment
                                                         , FOdysseyVectorVertex* iAddedVertex
-                                                        , FOdysseyVectorSegment* iAddedSegment
-                                                        , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
+                                                        , FOdysseyVectorSegment* iAddedSegment )
+    : FOdysseyVectorUndo( iScene->GetLayer() )
 {
     if( iRemovedVertex )
         mRemovedVertexArray.push_back( iRemovedVertex );
@@ -83,9 +82,8 @@ FOdysseyVectorUndoPathAlter::FOdysseyVectorUndoPathAlter( FOdysseyVectorGroupPai
                                                         , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray
                                                         , std::vector<FOdysseyVectorPath*>& iAddedPathArray
                                                         , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
-                                                        , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray
-                                                        , uint64 iReturnFlags )
-    : FOdysseyVectorUndoPathAlter( iScene, iAddedPathArray, iAddedVertexArray, iAddedSegmentArray, iReturnFlags )
+                                                        , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray )
+    : FOdysseyVectorUndoPathAlter( iScene, iAddedPathArray, iAddedVertexArray, iAddedSegmentArray )
 {
     mRemovedPathArray = iRemovedPathArray;
     mRemovedVertexArray = iRemovedVertexArray;
@@ -95,9 +93,8 @@ FOdysseyVectorUndoPathAlter::FOdysseyVectorUndoPathAlter( FOdysseyVectorGroupPai
 FOdysseyVectorUndoPathAlter::FOdysseyVectorUndoPathAlter( FOdysseyVectorGroupPaint* iScene
                                                         , std::vector<FOdysseyVectorPath*>& iAddedPathArray
                                                         , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
-                                                        , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray
-                                                        , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
+                                                        , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray )
+    : FOdysseyVectorUndo( iScene->GetLayer() )
 {
     mAddedPathArray = iAddedPathArray;
     mAddedVertexArray = iAddedVertexArray;

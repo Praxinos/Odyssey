@@ -23,9 +23,8 @@ FOdysseyVectorUndoTagInbetweenerReset::~FOdysseyVectorUndoTagInbetweenerReset()
 FOdysseyVectorUndoTagInbetweenerReset::FOdysseyVectorUndoTagInbetweenerReset( FOdysseyVectorGroupPaint* iScene
                                                                             , const std::list<FInbetweenerBreakdown*>& iBreakdownList
                                                                             , bool iResetGridGeometry
-                                                                            , bool iResetTransformations
-                                                                            , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
+                                                                            , bool iResetTransformations )
+    : FOdysseyVectorUndo( iScene->GetLayer() )
 {
     mBreakdownSnapshotBuffer.reserve( iBreakdownList.size() );
 
@@ -41,9 +40,8 @@ FOdysseyVectorUndoTagInbetweenerReset::FOdysseyVectorUndoTagInbetweenerReset( FO
 FOdysseyVectorUndoTagInbetweenerReset::FOdysseyVectorUndoTagInbetweenerReset( FOdysseyVectorGroupPaint* iScene
                                                                             , const std::list<FOdysseyVectorTagInbetweener*>& iInbetweenerTagList
                                                                             , bool iResetGridGeometry
-                                                                            , bool iResetTransformations
-                                                                            , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
+                                                                            , bool iResetTransformations )
+    : FOdysseyVectorUndo( iScene->GetLayer() )
 {
     uint32 breakdownCount = 0;
 

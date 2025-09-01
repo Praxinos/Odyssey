@@ -23,17 +23,15 @@ FOdysseyVectorUndoTagAdd::~FOdysseyVectorUndoTagAdd()
 }
 
 FOdysseyVectorUndoTagAdd::FOdysseyVectorUndoTagAdd( FOdysseyVectorGroupPaint* iScene
-                                                  , FOdysseyVectorTag* iTag
-                                                  , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
+                                                  , FOdysseyVectorTag* iTag )
+    : FOdysseyVectorUndo( iScene->GetLayer() )
 {
     mTagArray.push_back( iTag );
 }
 
 FOdysseyVectorUndoTagAdd::FOdysseyVectorUndoTagAdd( FOdysseyVectorGroupPaint* iScene
-                                                  , const std::vector<FOdysseyVectorTag*>& iTagArray
-                                                  , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
+                                                  , const std::vector<FOdysseyVectorTag*>& iTagArray )
+    : FOdysseyVectorUndo( iScene->GetLayer() )
 {
     mTagArray = iTagArray;
 }

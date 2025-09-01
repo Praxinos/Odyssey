@@ -116,6 +116,7 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorMassModifierView
             SLATE_ARGUMENT(TSharedPtr<FOdysseyVectorLayer>, VectorLayer)
             SLATE_ARGUMENT(TArray<FOdysseyVectorGroupPaint*>, SceneArray)
             SLATE_ARGUMENT(FOdysseyVectorGroupPaint*, PreviewScene)
+            SLATE_ARGUMENT(FOdysseyPainterEditor*, Editor)
         SLATE_END_ARGS()
 
     public:
@@ -160,6 +161,7 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorMassModifierView
 
     protected:
         FOnPreviewPropertiesDelegate OnPreviewPropertiesDelegate;
+        FOdysseyPainterEditor* mEditor;
         TArray<FOdysseyVectorGroupPaint*> mSceneArray;
         TSharedPtr<FOdysseyVectorLayer> mVectorLayer;
         FOdysseyVectorGroupPaint* mPreviewScene;

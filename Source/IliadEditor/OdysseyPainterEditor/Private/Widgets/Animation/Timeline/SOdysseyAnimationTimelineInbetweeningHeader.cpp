@@ -75,8 +75,8 @@ SOdysseyAnimationTimelineInbetweeningHeader::Construct( const FArguments& InArgs
 }
 
 void
-SOdysseyAnimationTimelineInbetweeningHeader::OnVectorSceneNotify( FOdysseyVectorLayer* iLayer
-                                                                , const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags )
+SOdysseyAnimationTimelineInbetweeningHeader::OnVectorSceneNotify( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags
+                                                                , uint32 iUpdateFlags )
 {
     //if( iNotificationFlags & FOdysseyPainterEditor::UI_UPDATE_TIMELINE )
     {
@@ -231,8 +231,7 @@ SOdysseyAnimationTimelineInbetweeningHeader::OnSelectionChanged( TSharedPtr<FInb
         if( GUndo )
         {
             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectObject( mAnimationLayerImageVector->GetVectorLayer().Get()
-                                                                         , cellList
-                                                                         , 0 );
+                                                                         , cellList );
 
             GUndo->StoreUndo( mAnimationLayerImageVector, TUniquePtr<FOdysseyVectorUndo>(undo) );
 

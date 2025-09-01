@@ -19,6 +19,7 @@
 #include "OdysseyVectorLayer.h"
 #include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyVectorEllipse.h"
+#include "Undo/OdysseyVectorUndo.h"
 #include <chrono>
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
@@ -27,17 +28,15 @@
 //----------------------------------------------------------- Construction / Destruction
 UOdysseyPainterEditorVectorBaseTool::~UOdysseyPainterEditorVectorBaseTool()
 {
-    //if( mBaseHUD )
-    //{
-    //    delete mBaseHUD;
-    //}
+    // commented-out: FOdysseyUndoDelegates cannot be used because its delegates are cleared after the first call
+    //FOdysseyUndoDelegates::Get().OnAfterUndoRedo().RemoveAll( this );
+    FOdysseyVectorUndo::OnPostUndoRedoDelegate().RemoveAll( this );
 }
 
 UOdysseyPainterEditorVectorBaseTool::UOdysseyPainterEditorVectorBaseTool()
     : mBaseHUD( nullptr )
     , mHasContextMenu( true )
 {
-
 }
 
 UOdysseyPainterEditorVectorBaseTool::UOdysseyPainterEditorVectorBaseTool( TSharedPtr<FOdysseyPainterEditorVectorBaseToolHUD> iBaseHUD
@@ -251,11 +250,14 @@ void
 UOdysseyPainterEditorVectorBaseTool::Unload()
 {
     UOdysseyPainterEditorTool::Unload();
-    uint64 notificationFlags = 0;
+
+    // commented-out: FOdysseyUndoDelegates cannot be used because its delegates are cleared after the first call
+    //FOdysseyUndoDelegates::Get().OnAfterUndoRedo().RemoveAll( this );
+    FOdysseyVectorUndo::OnPostUndoRedoDelegate().RemoveAll( this );
 
     if( mWorkingCell )
     {
-        notificationFlags = UnloadVector( mWorkingCell->GetScene() );
+        UnloadVector( mWorkingCell->GetScene() );
 
         /**
             * ERIC PATCH
@@ -267,8 +269,6 @@ UOdysseyPainterEditorVectorBaseTool::Unload()
 
     if( mWorkingLayer )
     {
-        //refactor mWorkingLayer->Notify( notificationFlags );
-
         mWorkingLayer->OnNotifyDelegate().RemoveAll( this );
 
         if( mBaseHUD )
@@ -286,6 +286,10 @@ void
 UOdysseyPainterEditorVectorBaseTool::Load()
 {
     TSharedPtr<FOdysseyPainterEditorViewportTab> viewportTab = GetEditor()->FindTab<FOdysseyPainterEditorViewportTab>();
+
+    // commented-out: FOdysseyUndoDelegates cannot be used because its delegates are cleared after the first call
+    //FOdysseyUndoDelegates::Get().OnAfterUndoRedo().AddUObject( this, &UOdysseyPainterEditorVectorBaseTool::OnUndoRedo );
+    FOdysseyVectorUndo::OnPostUndoRedoDelegate().AddUObject( this, &UOdysseyPainterEditorVectorBaseTool::OnUndoRedo );
 
     UOdysseyPainterEditorTool::Load();
 
@@ -309,8 +313,6 @@ UOdysseyPainterEditorVectorBaseTool::Load()
 
         if( mediaVectors.Num() > 0 )
         {
-            uint64 notificationFlags;
-
             mWorkingCell = mediaVectors[0]->GetScene()->GetCell();
             mWorkingLayer = mWorkingCell->GetLayer();
 
@@ -337,37 +339,27 @@ UOdysseyPainterEditorVectorBaseTool::Load()
             mVectorBlock = mWorkingCell->GetScene()->GetCell()->GetCellInterface()->GetBlock();
             //END PATCH
 
-            notificationFlags = LoadVector( mWorkingCell->GetScene() );
-
-            mWorkingCell->GetLayer()->OnNotifyDelegate().AddUObject( this, &UOdysseyPainterEditorVectorBaseTool::OnVectorLayerNotify );
-
-            //rezfactor mWorkingCell->GetLayer()->Notify( notificationFlags );
+            LoadVector( mWorkingCell->GetScene() );
         }
     }
 }
 
 void
-UOdysseyPainterEditorVectorBaseTool::OnVectorLayerNotify( FOdysseyVectorLayer* iLayer
-                                                        , const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags )
+UOdysseyPainterEditorVectorBaseTool::OnUndoRedo()
 {
                          // The notification might be called after the cell has been removed from the layer,
                          // then mWorkingCell->GetLayer() woul dbe null and that would likely create crashes
                          // in HUD Reset methods. so we check that.
     if ( mWorkingCell && ( mWorkingCell->GetLayer() == mWorkingLayer ) )
     {
-        //refactor if( iInvalidationFlags & FOdysseyVectorEngine::NOTIFY_UPDATE_HUD )
-        {
-            iLayer->ResetHUD( mWorkingCell->GetScene() );
-        }
+        mWorkingLayer->ResetHUD( mWorkingCell->GetScene() );
     }
 }
 
 bool
 UOdysseyPainterEditorVectorBaseTool::OnKeyDownGlobalVector( FOdysseyVectorGroupPaint* iScene
-                                                          , const FKeyEvent& InKeyEvent
-                                                          , uint64& oSignalFlags )
+                                                          , const FKeyEvent& InKeyEvent )
 {
-    oSignalFlags = 0;
     return false;
 }
 
@@ -376,11 +368,7 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyDownGlobal( const FKeyEvent& InKeyEven
 {
     if( mWorkingCell )
     {
-        uint64 notificationFlags = 0;
-
-        bool handled = OnKeyDownGlobalVector ( mWorkingCell->GetScene(), InKeyEvent, notificationFlags );
-
-        //refactor mWorkingCell->GetLayer()->Notify( notificationFlags );
+        bool handled = OnKeyDownGlobalVector ( mWorkingCell->GetScene(), InKeyEvent );
 
         // we always return false because other tools might need the signal
         //return handled;
@@ -391,16 +379,13 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyDownGlobal( const FKeyEvent& InKeyEven
 
 bool
 UOdysseyPainterEditorVectorBaseTool::OnKeyDownVector( FOdysseyVectorGroupPaint* iScene
-                                                    , const FKey& iKey
-                                                    , uint64& oSignalFlags )
+                                                    , const FKey& iKey )
 {
     if( iKey == EKeys::Delete )
     {
         Delete();
         // force redraw
         iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
-
-        oSignalFlags = 0;
 
         return true;
     }
@@ -437,11 +422,7 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyDown( const FKey& iKey )
 {
     if( mWorkingCell )
     {
-        uint64 notificationFlags = 0;
-
-        bool handled = OnKeyDownVector( mWorkingCell->GetScene(), iKey, notificationFlags );
-
-        //refactor mWorkingCell->GetLayer()->Notify( notificationFlags );
+        bool handled = OnKeyDownVector( mWorkingCell->GetScene(), iKey );
 
         return handled;
     }
@@ -451,10 +432,8 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyDown( const FKey& iKey )
 
 bool
 UOdysseyPainterEditorVectorBaseTool::OnKeyUpGlobalVector( FOdysseyVectorGroupPaint* iScene
-                                                        , const FKeyEvent& InKeyEvent
-                                                        , uint64& oSignalFlags )
+                                                        , const FKeyEvent& InKeyEvent )
 {
-    oSignalFlags = 0;
     return false;
 }
 
@@ -463,11 +442,7 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyUpGlobal( const FKeyEvent& InKeyEvent 
 {
     if( mWorkingCell )
     {
-        uint64 notificationFlags = 0;
-
-        bool handled = OnKeyUpGlobalVector( mWorkingCell->GetScene(), InKeyEvent, notificationFlags );
-
-        //refactor mWorkingCell->GetLayer()->Notify( notificationFlags );
+        bool handled = OnKeyUpGlobalVector( mWorkingCell->GetScene(), InKeyEvent );
 
         // we always return false because other tools might need the signal
         //return handled;
@@ -478,10 +453,8 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyUpGlobal( const FKeyEvent& InKeyEvent 
 
 bool
 UOdysseyPainterEditorVectorBaseTool::OnKeyUpVector( FOdysseyVectorGroupPaint* iScene
-                                                  , const FKey& iKey
-                                                  , uint64& oSignalFlags )
+                                                  , const FKey& iKey )
 {
-    oSignalFlags = 0;
     return false;
 }
 
@@ -490,11 +463,7 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyUp( const FKey& iKey )
 {
     if( mWorkingCell )
     {
-        uint64 notificationFlags = 0;
-
-        bool handled = OnKeyUpVector( mWorkingCell->GetScene(), iKey, notificationFlags );
-
-        //refactor mWorkingCell->GetLayer()->Notify( notificationFlags );
+        bool handled = OnKeyUpVector( mWorkingCell->GetScene(), iKey );
 
         return handled;
     }
@@ -541,11 +510,7 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseDownViaHUD( const FOdysseyPoint& iPo
 
     if( mWorkingCell )
     {
-        uint64 notificationFlags = 0;
-
-        bool handled = OnMouseDownVector( mWorkingCell->GetScene(), iPointInTexture, iKey, notificationFlags );
-
-        //refactor mWorkingCell->GetLayer()->Notify( notificationFlags );
+        bool handled = OnMouseDownVector( mWorkingCell->GetScene(), iPointInTexture, iKey );
 
         return handled;
     }
@@ -578,14 +543,7 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseHoverViaHUD( const FOdysseyPoint& iP
 
     if( mWorkingCell )
     {
-        uint64 notificationFlags = 0;
-
-        OnMouseHoverVector( mWorkingCell->GetScene(), iPointInTexture, notificationFlags );
-
-        if( notificationFlags )
-        {
-            //refactor mWorkingCell->GetLayer()->Notify( notificationFlags );
-        }
+        OnMouseHoverVector( mWorkingCell->GetScene(), iPointInTexture );
     }
 }
 
@@ -661,14 +619,7 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseDragViaHUD( const FOdysseyPoint& iPo
 
     if( mWorkingCell )
     {
-        uint64 notificationFlags = 0;
-
-        OnMouseDragVector( mWorkingCell->GetScene(), iPointInTexture, notificationFlags );
-
-        if( notificationFlags )
-        {
-            //refactor mWorkingCell->GetLayer()->Notify( notificationFlags );
-        }
+        OnMouseDragVector( mWorkingCell->GetScene(), iPointInTexture );
     }
 }
 
@@ -692,11 +643,7 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseClickViaHUD( const FOdysseyPoint& iP
 {
     if( mWorkingCell )
     {
-        uint64 notificationFlags = 0;
-
-        bool handled = OnMouseClickVector( mWorkingCell->GetScene(), iPointInTexture, iKey, notificationFlags );
-
-        //refactor mWorkingCell->GetLayer()->Notify( notificationFlags );
+        bool handled = OnMouseClickVector( mWorkingCell->GetScene(), iPointInTexture, iKey );
 
         if (!handled)
         {
@@ -720,8 +667,7 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseClickViaHUD( const FOdysseyPoint& iP
 bool
 UOdysseyPainterEditorVectorBaseTool::OnMouseClickVector( FOdysseyVectorGroupPaint* iScene
                                                        , const FOdysseyPoint& iPointInTexture
-                                                       , const FKey& iKey
-                                                       , uint64& oSignalFlags )
+                                                       , const FKey& iKey )
 {
     return false;
 }
@@ -754,11 +700,7 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseUpViaHUD( const FOdysseyPoint& iPoin
 
     if( mWorkingCell )
     {
-        uint64 notificationFlags = 0;
-
-        bool handled = OnMouseUpVector( mWorkingCell->GetScene(), iPointInTexture, iKey, notificationFlags );
-
-        //refactor mWorkingCell->GetLayer()->Notify( notificationFlags );
+        bool handled = OnMouseUpVector( mWorkingCell->GetScene(), iPointInTexture, iKey );
 
         return handled;
     }
@@ -766,17 +708,10 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseUpViaHUD( const FOdysseyPoint& iPoin
     return false;
 }
 
-uint64
+void
 UOdysseyPainterEditorVectorBaseTool::PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
                                                           , const FName& iPropertyName )
 {
-    // RestrictToSelection was changed, return redraw flag
-    /* if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorBaseTool, RestrictToSelectedObjects) )
-    {
-        iScene->GetEngine()->ResetHUD();
-    } */
-
-    return 0;
 }
 
 void
@@ -788,11 +723,7 @@ UOdysseyPainterEditorVectorBaseTool::PostEditChangeProperty( FPropertyChangedEve
     // redraw
     if ( mWorkingCell )
     {
-        uint64 notificationFlags;
-
-        notificationFlags = PropertyChangedVector( mWorkingCell->GetScene(), PropertyChangedEvent.GetPropertyName() );
-
-        //refactor mWorkingCell->GetLayer()->Notify( notificationFlags );
+        PropertyChangedVector( mWorkingCell->GetScene(), PropertyChangedEvent.GetPropertyName() );
     }
 }
 

@@ -18,11 +18,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoVertexAlignment : public FOdysseyVecto
     public:
         ~FOdysseyVectorUndoVertexAlignment();
         FOdysseyVectorUndoVertexAlignment( FOdysseyVectorGroupPaint* iScene
-                                         , const std::vector<FOdysseyVectorVertex*>& iVertexArray
-                                         , uint64 iReturnFlags );
+                                         , const std::vector<FOdysseyVectorVertex*>& iVertexArray );
         FOdysseyVectorUndoVertexAlignment( FOdysseyVectorGroupPaint* iScene
-                                         , FOdysseyVectorVertex* iVertex
-                                         , uint64 iReturnFlags );
+                                         , FOdysseyVectorVertex* iVertex );
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;
 

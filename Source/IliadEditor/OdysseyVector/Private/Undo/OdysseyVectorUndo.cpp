@@ -17,10 +17,9 @@ FOdysseyVectorUndo::~FOdysseyVectorUndo()
 {
 }
 
-FOdysseyVectorUndo::FOdysseyVectorUndo( FOdysseyVectorLayer* iSharedEnv, uint64 iReturnFlags )
+FOdysseyVectorUndo::FOdysseyVectorUndo( FOdysseyVectorLayer* iSharedEnv )
     : mApplied( true )
     , mLayer( iSharedEnv )
-    , mReturnFlags( iReturnFlags )
     , bUpdateViaDelegation ( true )
 {
 }
@@ -58,6 +57,17 @@ FOdysseyVectorUndo::UpdateLayer()
     }
 
     mLayer->RequestRedraw( nullptr, 0 );
+
+    OnPostUndoRedoDelegate().Broadcast();
+}
+
+// staic
+FOdysseyVectorUndo::FOnPostUndoRedo&
+FOdysseyVectorUndo::OnPostUndoRedoDelegate()
+{
+    static FOnPostUndoRedo onPostUndoRedo;
+
+    return onPostUndoRedo;
 }
 
 void
@@ -538,27 +548,31 @@ FSnapshotLayout::LoadState( eSnapshotState iStateType )
 
 FSnapshotDynamics::~FSnapshotDynamics()
 {
-    for( FInbetweenerRoute* route : mInitialState->routeArray )
-    {
-        if( route->GetInbetweenerTag() == nullptr )
-        {
-            delete route;
-        }
-    }
-
-    for( FInbetweenerRoute* route : mAlteredState->routeArray )
-    {
-        if( route->GetInbetweenerTag() == nullptr )
-        {
-            delete route;
-        }
-    }
-
     if( mInitialState )
+    {
+        for( FInbetweenerRoute* route : mInitialState->routeArray )
+        {
+            if( route->GetInbetweenerTag() == nullptr )
+            {
+                delete route;
+            }
+        }
+
         delete mInitialState;
+    }
 
     if( mAlteredState )
+    {
+        for( FInbetweenerRoute* route : mAlteredState->routeArray )
+        {
+            if( route->GetInbetweenerTag() == nullptr )
+            {
+                delete route;
+            }
+        }
+
         delete mAlteredState;
+    }
 }
 
 FSnapshotDynamics::FSnapshotDynamics()
@@ -1805,37 +1819,41 @@ FSnapshotPath::~FSnapshotPath()
     // free removed vertices and segments
     if( mSnapshotFlags & FSnapshotFlags::Object::Path::TOPOLOGY )
     {
-        for( FOdysseyVectorVertex* vertex : mPathInitialState->topologyVertexList )
+        if( mPathInitialState )
         {
-            if( path->HasVertex( vertex ) == false )
+            for( FOdysseyVectorVertex* vertex : mPathInitialState->topologyVertexList )
             {
-                delete vertex;
+                if( path->HasVertex( vertex ) == false )
+                {
+                    delete vertex;
+                }
+            }
+
+            for( FOdysseyVectorSegment* segment : mPathInitialState->topologySegmentList )
+            {
+                if( path->HasSegment( segment ) == false )
+                {
+                    delete segment;
+                }
             }
         }
 
-        for( FOdysseyVectorSegment* segment : mPathInitialState->topologySegmentList )
+        if( mPathAlteredState )
         {
-            if( path->HasSegment( segment ) == false )
+            for( FOdysseyVectorVertex* vertex : mPathAlteredState->topologyVertexList )
             {
-                delete segment;
+                if( path->HasVertex( vertex ) == false )
+                {
+                    delete vertex;
+                }
             }
-        }
 
-
-
-        for( FOdysseyVectorVertex* vertex : mPathAlteredState->topologyVertexList )
-        {
-            if( path->HasVertex( vertex ) == false )
+            for( FOdysseyVectorSegment* segment : mPathAlteredState->topologySegmentList )
             {
-                delete vertex;
-            }
-        }
-
-        for( FOdysseyVectorSegment* segment : mPathAlteredState->topologySegmentList )
-        {
-            if( path->HasSegment( segment ) == false )
-            {
-                delete segment;
+                if( path->HasSegment( segment ) == false )
+                {
+                    delete segment;
+                }
             }
         }
     }

@@ -89,15 +89,12 @@ UOdysseyPainterEditorVectorPathPushTool::GetPushedPoint( FOdysseyVectorPoint* iP
 bool
 UOdysseyPainterEditorVectorPathPushTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                           , const FOdysseyPoint& iPointInTexture
-                                                          , const FKey& iKey
-                                                          , uint64& oSignalFlags )
+                                                          , const FKey& iKey )
 {
     TSharedPtr<FOdysseyPainterEditorViewportTab> viewportTab = GetEditor()->FindTab<FOdysseyPainterEditorViewportTab>();
 
     if (iKey != EKeys::LeftMouseButton)
         return false;
-
-    uint64 notificationFlags = 0;
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
@@ -218,8 +215,7 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDownVector( FOdysseyVectorGroupP
         if( GUndo )
         {
             FOdysseyVectorUndo *undo = new FOdysseyVectorUndoSegmentReshape( iScene
-                                                                           , vertexArray
-                                                                           , 0 );
+                                                                           , vertexArray );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -230,26 +226,20 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDownVector( FOdysseyVectorGroupP
         GEditor->EndTransaction();
     }
 
-    oSignalFlags = notificationFlags;
-
     return true;
 }
 
 void
 UOdysseyPainterEditorVectorPathPushTool::OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
-                                                           , const FOdysseyPoint& iPointInTexture
-                                                           , uint64& oSignalFlags )
+                                                           , const FOdysseyPoint& iPointInTexture )
 {
     mPathPushHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
 }
 
 void
 UOdysseyPainterEditorVectorPathPushTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
-                                                          , const FOdysseyPoint& iPointInTexture
-                                                          , uint64& oSignalFlags )
+                                                          , const FOdysseyPoint& iPointInTexture )
 {
-    uint64 notificationFlags = 0;
-
     // Left mouse button clicked
     if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
     {
@@ -303,15 +293,12 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDragVector( FOdysseyVectorGroupP
                                   | FOdysseyVectorObject::UPDATE_NOINBETWEENING );
         iScene->GetLayer()->RequestRedraw( iScene->GetCell(), FOdysseyVectorCell::REDRAW_INTERACTIVE );
     }
-
-    oSignalFlags = notificationFlags;
 }
 
 bool
 UOdysseyPainterEditorVectorPathPushTool::OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                                         , const FOdysseyPoint& iPointInTexture
-                                                        , const FKey& iKey
-                                                        , uint64& oSignalFlags )
+                                                        , const FKey& iKey )
 {
     if (iKey != EKeys::LeftMouseButton)
         return false;

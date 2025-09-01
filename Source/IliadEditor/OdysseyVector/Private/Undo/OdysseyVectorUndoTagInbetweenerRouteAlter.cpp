@@ -21,9 +21,8 @@ FOdysseyVectorUndoTagInbetweenerRouteAlter::~FOdysseyVectorUndoTagInbetweenerRou
 
 FOdysseyVectorUndoTagInbetweenerRouteAlter::FOdysseyVectorUndoTagInbetweenerRouteAlter( FOdysseyVectorGroupPaint* iScene
                                                                                       , FOdysseyVectorTagInbetweener* iInbetweenerTag
-                                                                                      , FInbetweenerRoute* iRoute
-                                                                                      , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
+                                                                                      , FInbetweenerRoute* iRoute )
+    : FOdysseyVectorUndo( iScene->GetLayer() )
     , mInbetweenerTag( iInbetweenerTag )
     , mRouteSnapshot( iRoute
                     , ( FSnapshotFlags::Route::TRAJECTORIES

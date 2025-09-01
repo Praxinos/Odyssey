@@ -21,9 +21,8 @@ FOdysseyVectorUndoTagInbetweenerMatching::~FOdysseyVectorUndoTagInbetweenerMatch
 }
 
 FOdysseyVectorUndoTagInbetweenerMatching::FOdysseyVectorUndoTagInbetweenerMatching( FOdysseyVectorGroupPaint* iScene
-                                                                                  , const std::list<FInbetweenerBreakdown*>& iBreakdownList
-                                                                                  , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
+                                                                                  , const std::list<FInbetweenerBreakdown*>& iBreakdownList )
+    : FOdysseyVectorUndo( iScene->GetLayer() )
 {
     mBreakdownSnapshotBuffer.reserve( iBreakdownList.size() );
 
@@ -36,9 +35,8 @@ FOdysseyVectorUndoTagInbetweenerMatching::FOdysseyVectorUndoTagInbetweenerMatchi
 }
 
 FOdysseyVectorUndoTagInbetweenerMatching::FOdysseyVectorUndoTagInbetweenerMatching( FOdysseyVectorGroupPaint* iScene
-                                                                                  , const std::list<FOdysseyVectorTagInbetweener*>& iInbetweenerTagList
-                                                                                  , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
+                                                                                  , const std::list<FOdysseyVectorTagInbetweener*>& iInbetweenerTagList )
+    : FOdysseyVectorUndo( iScene->GetLayer() )
 {
     uint32 breakdownCount = 0;
 

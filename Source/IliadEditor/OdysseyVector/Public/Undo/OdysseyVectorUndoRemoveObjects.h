@@ -19,8 +19,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoRemoveObjects : public FOdysseyVectorU
     public:
         ~FOdysseyVectorUndoRemoveObjects();
         FOdysseyVectorUndoRemoveObjects( FOdysseyVectorGroupPaint* iScene
-                                       , const std::vector<FOdysseyVectorObject*>& iRemovedObjectArray
-                                       , uint64 iReturnFlags );
+                                       , const std::vector<FOdysseyVectorObject*>& iRemovedObjectArray );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;

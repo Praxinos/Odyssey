@@ -17,12 +17,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoBucketParam : public FOdysseyVectorUnd
     public:
         ~FOdysseyVectorUndoBucketParam();
          FOdysseyVectorUndoBucketParam( FOdysseyVectorGroupPaint* iScene
-                                      , FOdysseyVectorBucket* iBucket
-                                      , uint64 iReturnFlags );
+                                      , FOdysseyVectorBucket* iBucket );
         FOdysseyVectorUndoBucketParam( FOdysseyVectorGroupPaint* iScene
                                      , std::vector<FOdysseyVectorBucket*>& iAddedBucketArray
-                                     , std::vector<FOdysseyVectorBucket*>& iParamBucketArray
-                                     , uint64 iReturnFlags );
+                                     , std::vector<FOdysseyVectorBucket*>& iParamBucketArray );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;

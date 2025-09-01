@@ -20,8 +20,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoTagInbetweenerRouteRemove : public FOd
         ~FOdysseyVectorUndoTagInbetweenerRouteRemove();
         FOdysseyVectorUndoTagInbetweenerRouteRemove( FOdysseyVectorGroupPaint* iScene
                                                    , FOdysseyVectorTagInbetweener* iInbetweenerTag
-                                                   , FInbetweenerRoute* iRoute
-                                                   , uint64 iReturnFlags );
+                                                   , FInbetweenerRoute* iRoute );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;

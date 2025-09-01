@@ -75,8 +75,7 @@ UOdysseyPainterEditorVectorPathSmoothTool::LoadVector( FOdysseyVectorGroupPaint*
 
 bool
 UOdysseyPainterEditorVectorPathSmoothTool::OnKeyDownVector( FOdysseyVectorGroupPaint* iScene
-                                                          , const FKey& iKey
-                                                          , uint64& oSignalFlags )
+                                                          , const FKey& iKey )
 {
     // backup SmoothingMode value
     SmoothingModeAtKeyDown = SmoothingMode;
@@ -89,25 +88,23 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnKeyDownVector( FOdysseyVectorGroupP
         return true;
     }
 
-    return UOdysseyPainterEditorVectorBaseTool::OnKeyDownVector( iScene, iKey, oSignalFlags );
+    return UOdysseyPainterEditorVectorBaseTool::OnKeyDownVector( iScene, iKey );
 }
 
 bool
 UOdysseyPainterEditorVectorPathSmoothTool::OnKeyUpVector( FOdysseyVectorGroupPaint* iScene
-                                                        , const FKey& iKey
-                                                        , uint64& oSignalFlags )
+                                                        , const FKey& iKey )
 {
     // restore SmoothingMode value
     SmoothingMode = SmoothingModeAtKeyDown;
 
-    return UOdysseyPainterEditorVectorBaseTool::OnKeyUpVector( iScene, iKey, oSignalFlags );
+    return UOdysseyPainterEditorVectorBaseTool::OnKeyUpVector( iScene, iKey );
 }
 
 bool
 UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                             , const FOdysseyPoint& iPointInTexture
-                                                            , const FKey& iKey
-                                                            , uint64& oSignalFlags )
+                                                            , const FKey& iKey )
 {
     TSharedPtr<FOdysseyPainterEditorViewportTab> viewportTab = GetEditor()->FindTab<FOdysseyPainterEditorViewportTab>();
 
@@ -121,8 +118,7 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDownVector( FOdysseyVectorGrou
         GEditor->BeginTransaction(LOCTEXT("vector-path-smooth-tool.transaction.smooth-path","Vector Path Smooth Tool"));
         if( GUndo )
         {
-            mUndoSegmentReshape = new FOdysseyVectorUndoSegmentReshape( iScene
-                                                                      , 0 );
+            mUndoSegmentReshape = new FOdysseyVectorUndoSegmentReshape( iScene );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>( mUndoSegmentReshape ) );
 
@@ -141,8 +137,7 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDownVector( FOdysseyVectorGrou
 
 void
 UOdysseyPainterEditorVectorPathSmoothTool::OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
-                                                             , const FOdysseyPoint& iPointInTexture
-                                                             , uint64& oSignalFlags )
+                                                             , const FOdysseyPoint& iPointInTexture )
 {
 
     mPathSmoothHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
@@ -150,8 +145,7 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseHoverVector( FOdysseyVectorGro
 
 void
 UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
-                                                            , const FOdysseyPoint& iPointInTexture
-                                                            , uint64& oSignalFlags )
+                                                            , const FOdysseyPoint& iPointInTexture )
 {
     // Left mouse button clicked
     if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
@@ -204,8 +198,7 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDragVector( FOdysseyVectorGrou
 bool
 UOdysseyPainterEditorVectorPathSmoothTool::OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                                           , const FOdysseyPoint& iPointInTexture
-                                                          , const FKey& iKey
-                                                          , uint64& oSignalFlags )
+                                                          , const FKey& iKey )
 {
     if (iKey != EKeys::LeftMouseButton)
         return false;

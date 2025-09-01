@@ -20,9 +20,8 @@ FOdysseyVectorUndoTagInbetweenerTrajectoryAlter::~FOdysseyVectorUndoTagInbetween
 }
 
 FOdysseyVectorUndoTagInbetweenerTrajectoryAlter::FOdysseyVectorUndoTagInbetweenerTrajectoryAlter( FOdysseyVectorGroupPaint* iScene
-                                                                                                , FInbetweenerTrajectory* iTrajectory
-                                                                                                , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
+                                                                                                , FInbetweenerTrajectory* iTrajectory )
+    : FOdysseyVectorUndo( iScene->GetLayer() )
     , mTrajectorySnapshot( iTrajectory, FSnapshotFlags::Trajectory::BEZIER, eSnapshotState::Initial )
 {
 }

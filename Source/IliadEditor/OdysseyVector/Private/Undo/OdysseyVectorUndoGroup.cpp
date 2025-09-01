@@ -32,9 +32,8 @@ FOdysseyVectorUndoGroup::~FOdysseyVectorUndoGroup()
 FOdysseyVectorUndoGroup::FOdysseyVectorUndoGroup( FOdysseyVectorGroupPaint* iScene
                                                 , FOdysseyVectorGroup* iAddedGroup
                                                 , std::vector<FOdysseyVectorObject*>& iAddedObjectArray
-                                                , std::vector<FOdysseyVectorBucket*>& iRemovedBucketArray
-                                                , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
+                                                , std::vector<FOdysseyVectorBucket*>& iRemovedBucketArray )
+    : FOdysseyVectorUndo( iScene->GetLayer() )
     , mAddedGroup( iAddedGroup )
     , mScene ( iScene )
 {
@@ -51,9 +50,8 @@ FOdysseyVectorUndoGroup::FOdysseyVectorUndoGroup( FOdysseyVectorGroupPaint* iSce
 
 FOdysseyVectorUndoGroup::FOdysseyVectorUndoGroup( FOdysseyVectorGroupPaint* iScene
                                                 , FOdysseyVectorGroup* iAddedGroup
-                                                , std::vector<FOdysseyVectorObject*>& iAddedObjectArray
-                                                , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
+                                                , std::vector<FOdysseyVectorObject*>& iAddedObjectArray )
+    : FOdysseyVectorUndo( iScene->GetLayer() )
     , mAddedGroup( iAddedGroup )
     , mScene ( iScene )
 {

@@ -18,8 +18,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoPathEdit : public FOdysseyVectorUndo
         ~FOdysseyVectorUndoPathEdit();
         FOdysseyVectorUndoPathEdit( FOdysseyVectorGroupPaint* iScene
                                   , const std::vector<FOdysseyVectorVertex*>& iEditedVertexArray
-                                  , const std::vector<FOdysseyVectorSegment*>& iEditedSegmentArray
-                                  , uint64 iReturnFlags );
+                                  , const std::vector<FOdysseyVectorSegment*>& iEditedSegmentArray );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;

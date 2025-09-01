@@ -51,6 +51,7 @@ SOdysseyPainterEditorVectorMassModifierView::Construct( const FArguments& InArgs
     mVectorLayer = InArgs._VectorLayer;
     mSceneArray = InArgs._SceneArray;
     mPreviewScene = InArgs._PreviewScene;
+    mEditor = InArgs._Editor;
 
     mObjectDetailsView = CreateViewPanel();
     mOptionsDetailsView = CreateViewPanel();
@@ -267,8 +268,7 @@ SOdysseyPainterEditorVectorMassModifierView::PreviewProperties()
     mPreviewUndo = new FOdysseyVectorUndoMassModifier( mVectorLayer.Get()
                                                      , objectList
                                                      , ""
-                                                     , true
-                                                     , 0 );
+                                                     , true );
     // because this is a standalone undo, we don't call update functions via delegates but directly
     mPreviewUndo->SetUpdateViaDelegation( false );
 
@@ -359,8 +359,7 @@ SOdysseyPainterEditorVectorMassModifierView::ValidateProperties()
             FOdysseyVectorUndo *undo = new FOdysseyVectorUndoMassModifier( mVectorLayer.Get()
                                                                          , objectList
                                                                          , ""
-                                                                         , saveVertices
-                                                                         , 0 );
+                                                                         , saveVertices );
             // We use GEditor as the UObject, otherwise if we use "this", at each UNDO, PostEditChangeProperty() will be called
             // which will again call StoreUndo + this will lead to a crash. I don't know however what will be the consequences
             // of a call to GEditor::PostEditChangeProperty()
@@ -373,8 +372,6 @@ SOdysseyPainterEditorVectorMassModifierView::ValidateProperties()
         // Update vector scene
         mVectorLayer->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
         mVectorLayer->RequestRedraw( nullptr, 0 );
-        // update widgets
-        //refactor mVectorLayer->Notify( notificationFlags );
     }
 }
 
@@ -525,11 +522,10 @@ SOdysseyPainterEditorVectorMassModifierView::IsPropertyExtendable( const UClass*
 void
 SOdysseyPainterEditorVectorMassModifierView::PropertyValueChanged( const FPropertyChangedEvent& iEvent )
 {
-    //mObjectDetailsView->ForceRefresh();
-
     if( mPreviewScene )
     {
-        PreviewProperties();
+        // commented-out: no preview for now because the viewport does not refresh behind a modal window
+        //PreviewProperties();
     }
 }
 

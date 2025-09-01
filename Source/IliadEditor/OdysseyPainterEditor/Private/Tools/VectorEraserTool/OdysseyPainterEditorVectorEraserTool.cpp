@@ -76,8 +76,7 @@ UOdysseyPainterEditorVectorEraserTool::LoadVector( FOdysseyVectorGroupPaint* iSc
 
 bool
 UOdysseyPainterEditorVectorEraserTool::OnKeyDownGlobalVector( FOdysseyVectorGroupPaint* iScene
-                                                            , const FKeyEvent& InKeyEvent
-                                                            , uint64& oSignalFlags )
+                                                            , const FKeyEvent& InKeyEvent )
 {
     if( InKeyEvent.IsRepeat() == false )
     {
@@ -107,8 +106,7 @@ UOdysseyPainterEditorVectorEraserTool::OnKeyDownGlobalVector( FOdysseyVectorGrou
 
 bool
 UOdysseyPainterEditorVectorEraserTool::OnKeyUpGlobalVector( FOdysseyVectorGroupPaint* iScene
-                                                          , const FKeyEvent& InKeyEvent
-                                                          , uint64& oSignalFlags )
+                                                          , const FKeyEvent& InKeyEvent )
 {
     // first reset display mode
     mEditionMode = eVectorEraserEditionMode::Default;
@@ -119,8 +117,7 @@ UOdysseyPainterEditorVectorEraserTool::OnKeyUpGlobalVector( FOdysseyVectorGroupP
 bool
 UOdysseyPainterEditorVectorEraserTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                         , const FOdysseyPoint& iPointInTexture
-                                                        , const FKey& iKey
-                                                        , uint64& oSignalFlags )
+                                                        , const FKey& iKey )
 {
     TSharedPtr<FOdysseyPainterEditorViewportTab> viewportTab = GetEditor()->FindTab<FOdysseyPainterEditorViewportTab>();
 
@@ -145,16 +142,14 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseDownVector( FOdysseyVectorGroupPai
 
 void
 UOdysseyPainterEditorVectorEraserTool::OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
-                                                         , const FOdysseyPoint& iPointInTexture
-                                                         , uint64& oSignalFlags )
+                                                         , const FOdysseyPoint& iPointInTexture )
 {
     mEraserHUD->SetPosition( iPointInTexture.x, iPointInTexture.y );
 }
 
 void
 UOdysseyPainterEditorVectorEraserTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
-                                                        , const FOdysseyPoint& iPointInTexture
-                                                        , uint64& oSignalFlags )
+                                                        , const FOdysseyPoint& iPointInTexture )
 {
     if( iPointInTexture.x < mMin.x ) mMin.x = iPointInTexture.x;
     if( iPointInTexture.y < mMin.y ) mMin.y = iPointInTexture.y;
@@ -382,8 +377,7 @@ UOdysseyPainterEditorVectorEraserTool::ErasePaths( FOdysseyVectorGroupPaint* iSc
 bool
 UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                                       , const FOdysseyPoint& iPointInTexture
-                                                      , const FKey& iKey
-                                                      , uint64& oSignalFlags )
+                                                      , const FKey& iKey )
 {
     if (iKey != EKeys::LeftMouseButton)
         return false;
@@ -445,8 +439,7 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorGroupPaint
                                                                   , addedSegmentArray
                                                                   , removedObjectArray
                                                                   , removedVertexArray
-                                                                  , removedSegmentArray
-                                                                  , 0 );
+                                                                  , removedSegmentArray );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 

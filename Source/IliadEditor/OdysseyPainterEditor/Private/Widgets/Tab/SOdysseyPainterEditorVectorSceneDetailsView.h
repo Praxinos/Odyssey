@@ -44,26 +44,27 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorSceneDetailsView
         void Construct(const FArguments& InArgs );
         void Update();
 
+        void BindLayerDelegates();
+        void UnbindLayerDelegates();
+
     protected:
         virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
         virtual FString GetReferencerName() const override;
 
     protected:
         TSharedPtr<IDetailsView> CreateObjectPropertiesPanel();
-        void OnVectorLayerNotify( FOdysseyVectorLayer* iLayer
-                                , const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags );
+        void OnVectorLayerNotify( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags
+                                , uint32 iUpdateFlags );
         void ParseVectorNotifications( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags );
         void OnSceneChanged();
         void OnSourceChanged();
         void OnCurrentLayerChanged( UOdysseyLayerStack* iLayerStack );
-        void BindLayerDelegates( UOdysseyLayerStack* iLayerStack );
-        void UnbindLayerDelegates( UOdysseyLayerStack* iLayerStack );
         void PropertyValueChanged( const FPropertyChangedEvent& iEvent );
+        void UpdateCurrentLayer( UOdysseyLayerStack* iLayerStack );
 
     protected:
         FOdysseyPainterEditor* mEditor;
         TSlateAttribute<FOdysseyVectorGroupPaint*> mScene;
-        TSharedPtr<FOdysseyVectorLayer> mOldVectorLayer;
         TSharedPtr<FOdysseyVectorLayer> mVectorLayer;
 
         TSharedPtr<IDetailsView> mDetailsView;

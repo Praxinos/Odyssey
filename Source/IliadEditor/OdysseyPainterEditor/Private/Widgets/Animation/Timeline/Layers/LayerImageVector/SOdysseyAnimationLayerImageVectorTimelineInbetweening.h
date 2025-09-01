@@ -43,6 +43,8 @@ class SOdysseyAnimationLayerImageVectorTimelineInbetweening
         const FSlateBrush *GetBackwardArrowBrush();
         virtual FReply OnKeyDown( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent ) override;
         TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition> GetTimelinePosition() const;
+        void UnbindLayerDelegates();
+        void BindLayerDelegates();
 
     protected:
         void OnSelectionChanged( TSharedPtr<FInbetweeningListViewItem> iItem, ESelectInfo::Type SelectInfo );
@@ -55,8 +57,8 @@ class SOdysseyAnimationLayerImageVectorTimelineInbetweening
         void ShowHideTarget();
         void GetSelectedInbetweenerTags( std::list<FOdysseyVectorTagInbetweener*>& oSelectedInbetweenerTagList );
         void MapActionsToCommandList();
-        void OnVectorSceneNotify( FOdysseyVectorLayer* iLayer
-                                , const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags );
+        void OnVectorSceneNotify( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags
+                                , uint32 iUpdateFlags );
         void RemoveInbetweenerTag();
 
         float MousePositionToFrame(float iX) const;

@@ -37,10 +37,7 @@ SOdysseyPainterEditorVectorSceneTreeView::PrivateRegisterAttributes(FSlateAttrib
 
 SOdysseyPainterEditorVectorSceneTreeView::~SOdysseyPainterEditorVectorSceneTreeView()
 {
-    if( mVectorLayer.IsValid() )
-    {
-        mVectorLayer->OnNotifyDelegate().RemoveAll( this );
-    }
+    UnbindLayerDelegates();
 
     // Keep commented-out until we convert mEditor to a sharedptr
     //mEditor->OnSourceChanged().RemoveAll( this );
@@ -263,6 +260,10 @@ void
 SOdysseyPainterEditorVectorSceneTreeView::OnSelectionChanged( TSharedPtr<FVectorSceneTreeViewItem> iItem
                                                             , ESelectInfo::Type SelectInfo )
 {
+    // Unregister this widget's updates when the vector scene is updated. We don't want this widget to be
+    // rebuilt while it's processing stuff
+    UnbindLayerDelegates();
+
     if( mRootItem && ( SelectInfo != ESelectInfo::Type::Direct ) )
     {
         FOdysseyVectorGroupPaint* scene = static_cast<FOdysseyVectorGroupPaint*>(mRootItem.Get()->GetVectorObject());
@@ -272,8 +273,7 @@ SOdysseyPainterEditorVectorSceneTreeView::OnSelectionChanged( TSharedPtr<FVector
         if( GUndo )
         {
             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectObject( scene->GetLayer()
-                                                                         , scene->GetCell()
-                                                                         , 0 );
+                                                                         , scene->GetCell() );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -302,6 +302,9 @@ SOdysseyPainterEditorVectorSceneTreeView::OnSelectionChanged( TSharedPtr<FVector
 
         scene->GetLayer()->RequestRedraw( scene->GetCell(), 0 );
     }
+
+    // Re-register this widget after we are done
+    BindLayerDelegates();
 }
 
 void
@@ -385,28 +388,33 @@ SOdysseyPainterEditorVectorSceneTreeView::MapActionsToCommandList()
 }
 
 void
-SOdysseyPainterEditorVectorSceneTreeView::OnVectorLayerNotify( FOdysseyVectorLayer* iLayer
-                                                             , const FOdysseyVectorObjectInvalidationFlags& iSignalFlags )
+SOdysseyPainterEditorVectorSceneTreeView::OnVectorLayerNotify( const FOdysseyVectorObjectInvalidationFlags& iSignalFlags
+                                                             , uint32 iUpdateFlags )
 {
-    FOdysseyVectorGroupPaint* currentScene = mScene.Get();
-
-    // update the cached Value by calling the getter.
-    mScene.UpdateNow( *this );
-
-    // if the attributes value changes, it will automatically trigger Update().
-    // Otherwise, like here, we force the update of the tree
-    if( currentScene == mScene.Get() )
+    if( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_INTERACTIVE ) == 0 )
     {
-        ParseVectorNotifications( iSignalFlags );
+        FOdysseyVectorGroupPaint* currentScene = mScene.Get();
+
+        // update the cached Value by calling the getter.
+        mScene.UpdateNow( *this );
+
+        // if the attributes value changes, it will automatically trigger Update().
+        // Otherwise, like here, we force the update of the tree
+        if( currentScene == mScene.Get() )
+        {
+            ParseVectorNotifications( iSignalFlags );
+        }
     }
 }
 
 void
 SOdysseyPainterEditorVectorSceneTreeView::ParseVectorNotifications( const FOdysseyVectorObjectInvalidationFlags& iSignalFlags )
 {
-    if( iSignalFlags.bits[FOdysseyVectorObjectInvalidationFlags::HIERARCHY]
+    if( iSignalFlags.bits[FOdysseyVectorObjectInvalidationFlags::DEFAULT]
+     || iSignalFlags.bits[FOdysseyVectorObjectInvalidationFlags::HIERARCHY]
      || iSignalFlags.bits[FOdysseyVectorObjectInvalidationFlags::OBJECT_SELECTION]
      || iSignalFlags.bits[FOdysseyVectorObjectInvalidationFlags::TAG_LIST]
+     || iSignalFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_DEFAULT]
      || iSignalFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_HIERARCHY]
      || iSignalFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_TAG_LIST]
      || iSignalFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_OBJECT_SELECTION] )
@@ -418,35 +426,40 @@ SOdysseyPainterEditorVectorSceneTreeView::ParseVectorNotifications( const FOdyss
 void
 SOdysseyPainterEditorVectorSceneTreeView::OnSceneChanged()
 {
-    //ParseVectorNotifications( FOdysseyVectorEngine::NOTIFY_ALL );
+    // Parse by simulating a scene invalidation
+    ParseVectorNotifications( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::DEFAULT) );
 }
 
 void
-SOdysseyPainterEditorVectorSceneTreeView::BindLayerDelegates( UOdysseyLayerStack* iLayerStack )
+SOdysseyPainterEditorVectorSceneTreeView::UnbindLayerDelegates()
+{
+    if( mVectorLayer.IsValid() )
+    {
+        mVectorLayer->OnNotifyDelegate().RemoveAll( this );
+    }
+}
+
+void
+SOdysseyPainterEditorVectorSceneTreeView::UpdateCurrentLayer( UOdysseyLayerStack* iLayerStack )
 {
     UOdysseyAnimationLayerImageVector* animationVectorLayer = Cast<UOdysseyAnimationLayerImageVector>(iLayerStack->GetCurrentLayer());
     UOdysseyTextureLayerImageVector* textureVectorLayer = Cast<UOdysseyTextureLayerImageVector>(iLayerStack->GetCurrentLayer());
 
-    if( mOldVectorLayer.IsValid() )
-    {
-        mOldVectorLayer->OnNotifyDelegate().RemoveAll( this );
-    }
-
     if( animationVectorLayer )
     {
-        mOldVectorLayer = mVectorLayer;
         mVectorLayer = animationVectorLayer->GetVectorLayer();
-
-        mVectorLayer->OnNotifyDelegate().AddSP( this, &SOdysseyPainterEditorVectorSceneTreeView::OnVectorLayerNotify );
     }
 
     if( textureVectorLayer )
     {
-        mOldVectorLayer = mVectorLayer;
         mVectorLayer = textureVectorLayer->GetVectorLayer();
-
-        mVectorLayer->OnNotifyDelegate().AddSP( this, &SOdysseyPainterEditorVectorSceneTreeView::OnVectorLayerNotify );
     }
+}
+
+void
+SOdysseyPainterEditorVectorSceneTreeView::BindLayerDelegates()
+{
+    mVectorLayer->OnNotifyDelegate().AddSP( this, &SOdysseyPainterEditorVectorSceneTreeView::OnVectorLayerNotify );
 }
 
 void
@@ -458,7 +471,9 @@ SOdysseyPainterEditorVectorSceneTreeView::OnSourceChanged()
 
         if( layerStack )
         {
-            BindLayerDelegates( layerStack );
+            UnbindLayerDelegates();
+            UpdateCurrentLayer( layerStack );
+            BindLayerDelegates();
         }
     }
 }
@@ -466,7 +481,9 @@ SOdysseyPainterEditorVectorSceneTreeView::OnSourceChanged()
 void
 SOdysseyPainterEditorVectorSceneTreeView::OnCurrentLayerChanged( UOdysseyLayerStack* iLayerStack )
 {
-    BindLayerDelegates( iLayerStack );
+    UnbindLayerDelegates();
+    UpdateCurrentLayer( iLayerStack );
+    BindLayerDelegates();
 }
 
 #undef LOCTEXT_NAMESPACE

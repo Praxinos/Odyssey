@@ -20,8 +20,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoMassModifier : public FOdysseyVectorUn
          FOdysseyVectorUndoMassModifier( FOdysseyVectorLayer* iLayer
                                        , const std::list<FOdysseyVectorObject*>& iObjectList
                                        , const FName& iCategoryName
-                                       , bool iSavePaths
-                                       , uint64 iReturnFlags );
+                                       , bool iSavePaths );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;

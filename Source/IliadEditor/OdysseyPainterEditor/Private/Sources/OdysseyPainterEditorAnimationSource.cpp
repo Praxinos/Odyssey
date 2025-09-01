@@ -297,7 +297,7 @@ FOdysseyPainterEditorAnimationSource::Clear()
             GEditor->BeginTransaction(transactionName);
             if (GUndo)
             {
-                FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSceneClear( vectorCell->GetScene(), 0 );
+                FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSceneClear( vectorCell->GetScene() );
 
                 GUndo->StoreUndo(GEditor, TUniquePtr<FOdysseyVectorUndo>(undo));
 
@@ -314,8 +314,6 @@ FOdysseyPainterEditorAnimationSource::Clear()
         if( imageVectorLayer )
         {
             imageVectorLayer->GetVectorLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-
-            //refactor imageVectorLayer->GetVectorLayer()->Notify( notificationFlags );
         }
     }
 }

@@ -24,9 +24,8 @@ FOdysseyVectorUndoRemoveObjects::~FOdysseyVectorUndoRemoveObjects()
 }
 
 FOdysseyVectorUndoRemoveObjects::FOdysseyVectorUndoRemoveObjects( FOdysseyVectorGroupPaint* iScene
-                                                                , const std::vector<FOdysseyVectorObject*>& iRemovedObjectArray
-                                                                , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
+                                                                , const std::vector<FOdysseyVectorObject*>& iRemovedObjectArray )
+    : FOdysseyVectorUndo( iScene->GetLayer() )
     , mCell ( iScene->GetCell() )
 {
     mRemovedObjectArray = iRemovedObjectArray;

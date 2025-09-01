@@ -20,9 +20,8 @@ FOdysseyVectorUndoTagInbetweenerParam::~FOdysseyVectorUndoTagInbetweenerParam()
 }
 
 FOdysseyVectorUndoTagInbetweenerParam::FOdysseyVectorUndoTagInbetweenerParam( FOdysseyVectorGroupPaint* iScene
-                                                                            , const std::vector<FOdysseyVectorTagInbetweener*>& iInbetweenerTagArray
-                                                                            , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
+                                                                            , const std::vector<FOdysseyVectorTagInbetweener*>& iInbetweenerTagArray )
+    : FOdysseyVectorUndo( iScene->GetLayer() )
 {
 }
 
@@ -31,9 +30,8 @@ FOdysseyVectorUndoTagInbetweenerWithThickness::~FOdysseyVectorUndoTagInbetweener
 }
 
 FOdysseyVectorUndoTagInbetweenerWithThickness::FOdysseyVectorUndoTagInbetweenerWithThickness( FOdysseyVectorGroupPaint* iScene
-                                                                                            , const std::vector<FOdysseyVectorTagInbetweener*>& iInbetweenerTagArray
-                                                                                            , uint64 iReturnFlags  )
-    : FOdysseyVectorUndoTagInbetweenerParam( iScene, iInbetweenerTagArray, iReturnFlags )
+                                                                                            , const std::vector<FOdysseyVectorTagInbetweener*>& iInbetweenerTagArray )
+    : FOdysseyVectorUndoTagInbetweenerParam( iScene, iInbetweenerTagArray )
 {
     mInbetweenerTagSnapshotArray.reserve( iInbetweenerTagArray.size() );
 
@@ -54,9 +52,8 @@ FOdysseyVectorUndoTagInbetweenerConstantWidth::~FOdysseyVectorUndoTagInbetweener
 }
 
 FOdysseyVectorUndoTagInbetweenerConstantWidth::FOdysseyVectorUndoTagInbetweenerConstantWidth( FOdysseyVectorGroupPaint* iScene
-                                                                                            , const std::vector<FOdysseyVectorTagInbetweener*>& iInbetweenerTagArray
-                                                                                            , uint64 iReturnFlags  )
-    : FOdysseyVectorUndoTagInbetweenerParam( iScene, iInbetweenerTagArray, iReturnFlags )
+                                                                                            , const std::vector<FOdysseyVectorTagInbetweener*>& iInbetweenerTagArray )
+    : FOdysseyVectorUndoTagInbetweenerParam( iScene, iInbetweenerTagArray )
 {
     mInbetweenerTagSnapshotArray.reserve( iInbetweenerTagArray.size() );
 
@@ -76,9 +73,8 @@ FOdysseyVectorUndoTagInbetweenerGridSize::~FOdysseyVectorUndoTagInbetweenerGridS
 }
 
 FOdysseyVectorUndoTagInbetweenerGridSize::FOdysseyVectorUndoTagInbetweenerGridSize( FOdysseyVectorGroupPaint* iScene
-                                                                                  , const std::vector<FOdysseyVectorTagInbetweener*>& iInbetweenerTagArray
-                                                                                  , uint64 iReturnFlags )
-    : FOdysseyVectorUndoTagInbetweenerParam( iScene, iInbetweenerTagArray, iReturnFlags )
+                                                                                  , const std::vector<FOdysseyVectorTagInbetweener*>& iInbetweenerTagArray )
+    : FOdysseyVectorUndoTagInbetweenerParam( iScene, iInbetweenerTagArray )
 {
     mInbetweenerTagSnapshotArray.reserve( iInbetweenerTagArray.size() );
 
@@ -100,9 +96,8 @@ FOdysseyVectorUndoTagInbetweenerGridType::~FOdysseyVectorUndoTagInbetweenerGridT
 }
 
 FOdysseyVectorUndoTagInbetweenerGridType::FOdysseyVectorUndoTagInbetweenerGridType( FOdysseyVectorGroupPaint* iScene
-                                                                                  , const std::vector<FOdysseyVectorTagInbetweener*>& iInbetweenerTagArray
-                                                                                  , uint64 iReturnFlags )
-    : FOdysseyVectorUndoTagInbetweenerParam( iScene, iInbetweenerTagArray, iReturnFlags )
+                                                                                  , const std::vector<FOdysseyVectorTagInbetweener*>& iInbetweenerTagArray )
+    : FOdysseyVectorUndoTagInbetweenerParam( iScene, iInbetweenerTagArray )
 {
     mInbetweenerTagSnapshotArray.reserve( iInbetweenerTagArray.size() );
 
@@ -123,9 +118,8 @@ FOdysseyVectorUndoTagInbetweenerSquare::~FOdysseyVectorUndoTagInbetweenerSquare(
 }
 
 FOdysseyVectorUndoTagInbetweenerSquare::FOdysseyVectorUndoTagInbetweenerSquare( FOdysseyVectorGroupPaint* iScene
-                                                                              , const std::vector<FOdysseyVectorTagInbetweener*>& iInbetweenerTagArray
-                                                                              , uint64 iReturnFlags )
-    : FOdysseyVectorUndoTagInbetweenerParam( iScene, iInbetweenerTagArray, iReturnFlags )
+                                                                              , const std::vector<FOdysseyVectorTagInbetweener*>& iInbetweenerTagArray )
+    : FOdysseyVectorUndoTagInbetweenerParam( iScene, iInbetweenerTagArray )
 {
     mInbetweenerTagSnapshotArray.reserve( iInbetweenerTagArray.size() );
 
@@ -147,9 +141,8 @@ FOdysseyVectorUndoTagInbetweenerInterpolationType::~FOdysseyVectorUndoTagInbetwe
 }
 
 FOdysseyVectorUndoTagInbetweenerInterpolationType::FOdysseyVectorUndoTagInbetweenerInterpolationType( FOdysseyVectorGroupPaint* iScene
-                                                                                                    , const std::vector<FOdysseyVectorTagInbetweener*>& iInbetweenerTagArray
-                                                                                                    , uint64 iReturnFlags )
-    : FOdysseyVectorUndoTagInbetweenerParam( iScene, iInbetweenerTagArray, iReturnFlags )
+                                                                                                    , const std::vector<FOdysseyVectorTagInbetweener*>& iInbetweenerTagArray )
+    : FOdysseyVectorUndoTagInbetweenerParam( iScene, iInbetweenerTagArray )
 {
     mInbetweenerTagSnapshotArray.reserve( iInbetweenerTagArray.size() );
 
@@ -170,9 +163,8 @@ FOdysseyVectorUndoTagInbetweenerColor::~FOdysseyVectorUndoTagInbetweenerColor()
 }
 
 FOdysseyVectorUndoTagInbetweenerColor::FOdysseyVectorUndoTagInbetweenerColor( FOdysseyVectorGroupPaint* iScene
-                                                                            , const std::vector<FOdysseyVectorTagInbetweener*>& iInbetweenerTagArray
-                                                                            , uint64 iReturnFlags )
-    : FOdysseyVectorUndoTagInbetweenerParam( iScene, iInbetweenerTagArray, iReturnFlags )
+                                                                            , const std::vector<FOdysseyVectorTagInbetweener*>& iInbetweenerTagArray )
+    : FOdysseyVectorUndoTagInbetweenerParam( iScene, iInbetweenerTagArray )
 {
     mInbetweenerTagSnapshotArray.reserve( iInbetweenerTagArray.size() );
 
@@ -192,9 +184,8 @@ FOdysseyVectorUndoTagInbetweenerMapAsPolyline::~FOdysseyVectorUndoTagInbetweener
 }
 
 FOdysseyVectorUndoTagInbetweenerMapAsPolyline::FOdysseyVectorUndoTagInbetweenerMapAsPolyline( FOdysseyVectorGroupPaint* iScene
-                                                                                            , const std::vector<FOdysseyVectorTagInbetweener*>& iInbetweenerTagArray
-                                                                                            , uint64 iReturnFlags )
-    : FOdysseyVectorUndoTagInbetweenerParam( iScene, iInbetweenerTagArray, iReturnFlags )
+                                                                                            , const std::vector<FOdysseyVectorTagInbetweener*>& iInbetweenerTagArray )
+    : FOdysseyVectorUndoTagInbetweenerParam( iScene, iInbetweenerTagArray )
 {
     mInbetweenerTagSnapshotArray.reserve( iInbetweenerTagArray.size() );
 

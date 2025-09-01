@@ -40,10 +40,7 @@ SOdysseyPainterEditorVectorSceneDetailsView::PrivateRegisterAttributes(FSlateAtt
 
 SOdysseyPainterEditorVectorSceneDetailsView::~SOdysseyPainterEditorVectorSceneDetailsView()
 {
-    if( mVectorLayer.IsValid() )
-    {
-        mVectorLayer->OnNotifyDelegate().RemoveAll( this );
-    }
+    UnbindLayerDelegates();
 
     // Keep commented-out until we convert mEditor to a sharedptr
     //mEditor->OnSourceChanged().RemoveAll( this );
@@ -54,7 +51,6 @@ SOdysseyPainterEditorVectorSceneDetailsView::~SOdysseyPainterEditorVectorSceneDe
 SOdysseyPainterEditorVectorSceneDetailsView::SOdysseyPainterEditorVectorSceneDetailsView()
     : mEditor(nullptr)
     , mScene(*this, nullptr)
-    , mOldVectorLayer ( nullptr )
     , mVectorLayer ( nullptr )
 {
 }
@@ -164,62 +160,65 @@ SOdysseyPainterEditorVectorSceneDetailsView::Update()
 }
 
 void
-SOdysseyPainterEditorVectorSceneDetailsView::OnVectorLayerNotify( FOdysseyVectorLayer* iLayer
-                                                                , const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags )
+SOdysseyPainterEditorVectorSceneDetailsView::OnVectorLayerNotify( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags
+                                                                , uint32 iUpdateFlags )
 {
-    FOdysseyVectorGroupPaint* currentScene = mScene.Get();
-
-    // update the cached Value by calling the getter. Hence it will call OnSceneChanged()
-    mScene.UpdateNow( *this );
-
-    // if the attributes value does not changes, we force the update of the tree
-    if( currentScene == mScene.Get() )
+    if( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_INTERACTIVE ) == 0 )
     {
-        ParseVectorNotifications( iInvalidationFlags );
+        FOdysseyVectorGroupPaint* currentScene = mScene.Get();
+
+        // update the cached Value by calling the getter. Hence it will call OnSceneChanged()
+        mScene.UpdateNow( *this );
+
+        // if the attributes value does not changes, we force the update of the tree
+        if( currentScene == mScene.Get() )
+        {
+            ParseVectorNotifications( iInvalidationFlags );
+        }
     }
 }
 
 void
 SOdysseyPainterEditorVectorSceneDetailsView::ParseVectorNotifications( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags )
 {
-    if( iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::OBJECT_SELECTION] )
+    if( ( iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::DEFAULT] )
+     || ( iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_DEFAULT] )
+     || ( iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::OBJECT_SELECTION] )
+     || ( iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_OBJECT_SELECTION] ) )
     {
         Update();
     }
 }
 
 void
-SOdysseyPainterEditorVectorSceneDetailsView::UnbindLayerDelegates( UOdysseyLayerStack* iLayerStack )
+SOdysseyPainterEditorVectorSceneDetailsView::UnbindLayerDelegates()
 {
-    mVectorLayer->OnNotifyDelegate().RemoveAll( this );
+    if( mVectorLayer.IsValid() )
+    {
+        mVectorLayer->OnNotifyDelegate().RemoveAll( this );
+    }
 }
 
 void
-SOdysseyPainterEditorVectorSceneDetailsView::BindLayerDelegates( UOdysseyLayerStack* iLayerStack )
+SOdysseyPainterEditorVectorSceneDetailsView::UpdateCurrentLayer( UOdysseyLayerStack* iLayerStack )
 {
     UOdysseyAnimationLayerImageVector* animationVectorLayer = Cast<UOdysseyAnimationLayerImageVector>(iLayerStack->GetCurrentLayer());
     UOdysseyTextureLayerImageVector* textureVectorLayer = Cast<UOdysseyTextureLayerImageVector>(iLayerStack->GetCurrentLayer());
 
-    if( mOldVectorLayer.IsValid() )
-    {
-        mOldVectorLayer->OnNotifyDelegate().RemoveAll( this );
-    }
-
     if( animationVectorLayer )
     {
-        mOldVectorLayer = mVectorLayer;
         mVectorLayer = animationVectorLayer->GetVectorLayer();
-
-        mVectorLayer->OnNotifyDelegate().AddSP( this, &SOdysseyPainterEditorVectorSceneDetailsView::OnVectorLayerNotify );
     }
 
     if( textureVectorLayer )
     {
-        mOldVectorLayer = mVectorLayer;
-        mVectorLayer = textureVectorLayer->GetVectorLayer();
+        mVectorLayer = textureVectorLayer->GetVectorLayer();    }
+}
 
-        mVectorLayer->OnNotifyDelegate().AddSP( this, &SOdysseyPainterEditorVectorSceneDetailsView::OnVectorLayerNotify );
-    }
+void
+SOdysseyPainterEditorVectorSceneDetailsView::BindLayerDelegates()
+{
+    mVectorLayer->OnNotifyDelegate().AddSP( this, &SOdysseyPainterEditorVectorSceneDetailsView::OnVectorLayerNotify );
 }
 
 void
@@ -246,7 +245,9 @@ SOdysseyPainterEditorVectorSceneDetailsView::OnSourceChanged()
                 mGroupPaintView->SetVectorLayer( vectorLayer );
             }
 
-            BindLayerDelegates( layerStack );
+            UnbindLayerDelegates();
+            UpdateCurrentLayer( layerStack );
+            BindLayerDelegates();
         }
     }
 }
@@ -254,58 +255,65 @@ SOdysseyPainterEditorVectorSceneDetailsView::OnSourceChanged()
 void
 SOdysseyPainterEditorVectorSceneDetailsView::PropertyValueChanged( const FPropertyChangedEvent& iEvent )
 {
-    FOdysseyVectorGroupPaint* scene = mScene.Get();
-
-    if (!scene)
-        return;
-
-    // defaults to scene
-    std::list<FOdysseyVectorObject*>& sceneAsList = scene->GetCell()->GetChildrenList();
-    std::list<FOdysseyVectorObject*>& selectedObjectList = scene->GetCell()->GetSelectedObjectList();
-    std::list<FOdysseyVectorObject*>& focusedObjectList = selectedObjectList.size() ? selectedObjectList
-                                                                                    : sceneAsList;
-    // needed for valid GUndo pointer
-    GEditor->BeginTransaction(LOCTEXT("vector-object.transaction.property-changed","Property Changed"));
-    if( GUndo )
+    // mCurrentObjectView can be NULL in INBETWEENING mode
+    if( mCurrentObjectView )
     {
-        FOdysseyVectorUndo *undo = new FOdysseyVectorUndoObjectParam( scene->GetLayer()
-                                                                    , focusedObjectList
-                                                                    , FName(iEvent.Property->GetMetaData(TEXT("Category")))
-                                                                    , 0 );
-        // We use GEditor as the UObject, otherwise if we use "this", at each UNDO, PostEditChangeProperty() will be called
-        // which will again call StoreUndo + this will lead to a crash. I don't know however what will be the consequences
-        // of a call to GEditor::PostEditChangeProperty()
-        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+        FOdysseyVectorGroupPaint* scene = mScene.Get();
 
-        TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
-        if (source)
-            source->RecordCurrentFrameUndo();
+        if (!scene)
+            return;
+
+        // Unregister this widget's updates when the vector scene is updated. We don't want this widget to be
+        // rebuilt while it's processing stuff
+        UnbindLayerDelegates();
+
+        // defaults to scene
+        std::list<FOdysseyVectorObject*>& sceneAsList = scene->GetCell()->GetChildrenList();
+        std::list<FOdysseyVectorObject*>& selectedObjectList = scene->GetCell()->GetSelectedObjectList();
+        std::list<FOdysseyVectorObject*>& focusedObjectList = selectedObjectList.size() ? selectedObjectList
+                                                                                        : sceneAsList;
+        // needed for valid GUndo pointer
+        GEditor->BeginTransaction(LOCTEXT("vector-object.transaction.property-changed","Property Changed"));
+        if( GUndo )
+        {
+            FOdysseyVectorUndo *undo = new FOdysseyVectorUndoObjectParam( scene->GetLayer()
+                                                                        , focusedObjectList
+                                                                        , FName(iEvent.Property->GetMetaData(TEXT("Category"))) );
+            // We use GEditor as the UObject, otherwise if we use "this", at each UNDO, PostEditChangeProperty() will be called
+            // which will again call StoreUndo + this will lead to a crash. I don't know however what will be the consequences
+            // of a call to GEditor::PostEditChangeProperty()
+            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+
+            TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
+            if (source)
+                source->RecordCurrentFrameUndo();
+        }
+        GEditor->EndTransaction();
+
+        mCurrentObjectView->ValidateProperties( focusedObjectList, true );
+
+        // Update vector scene
+        scene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+        scene->GetLayer()->RequestRedraw( nullptr, 0 );
+
+        // Re-register this widget after we are done
+        BindLayerDelegates();
     }
-    GEditor->EndTransaction();
-
-    mCurrentObjectView->ValidateProperties( focusedObjectList, true );
-
-    // prevent THIS widget update by unregistering its delegates
-    UnbindLayerDelegates( mEditor->GetSource()->GetLayerStack() );
-    // Update vector scene
-    scene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    scene->GetLayer()->RequestRedraw( nullptr, 0 );
-    // update widgets
-    //refactor scene->GetLayer()->Notify( notificationFlags );
-    // Re-register THIS widget delegates
-    BindLayerDelegates( mEditor->GetSource()->GetLayerStack() );
 }
 
 void
 SOdysseyPainterEditorVectorSceneDetailsView::OnCurrentLayerChanged( UOdysseyLayerStack* iLayerStack )
 {
-    BindLayerDelegates( iLayerStack );
+    UnbindLayerDelegates();
+    UpdateCurrentLayer( iLayerStack );
+    BindLayerDelegates();
 }
 
 void
 SOdysseyPainterEditorVectorSceneDetailsView::OnSceneChanged()
 {
-    ParseVectorNotifications( FOdysseyVectorObjectInvalidationFlags().Set() );
+    // Parse by simulating a scene invalidation
+    ParseVectorNotifications( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::DEFAULT) );
 }
 
 FString

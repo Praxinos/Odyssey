@@ -20,19 +20,16 @@ FOdysseyVectorUndoTagInbetweenerBreakdownRemove::~FOdysseyVectorUndoTagInbetween
 }
 
 FOdysseyVectorUndoTagInbetweenerBreakdownRemove::FOdysseyVectorUndoTagInbetweenerBreakdownRemove( FOdysseyVectorLayer* iSharedEnv
-                                                                                                , FOdysseyVectorTagInbetweener* iInbetweenerTag
-                                                                                                , uint64 iReturnFlags )
+                                                                                                , FOdysseyVectorTagInbetweener* iInbetweenerTag )
     : FOdysseyVectorUndoTagInbetweenerBreakdownRemove( iSharedEnv
-                                                     , std::list<FOdysseyVectorTagInbetweener*> ({ iInbetweenerTag })
-                                                     , iReturnFlags )
+                                                     , std::list<FOdysseyVectorTagInbetweener*> ({ iInbetweenerTag }) )
 {
 
 }
 
 FOdysseyVectorUndoTagInbetweenerBreakdownRemove::FOdysseyVectorUndoTagInbetweenerBreakdownRemove( FOdysseyVectorLayer* iSharedEnv
-                                                                                                , const std::list<FOdysseyVectorTagInbetweener*>& iInbetweenerTagList
-                                                                                                , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iSharedEnv, iReturnFlags )
+                                                                                                , const std::list<FOdysseyVectorTagInbetweener*>& iInbetweenerTagList )
+    : FOdysseyVectorUndo( iSharedEnv )
 {
     mInbetweenerTagSnapshotBuffer.reserve( iInbetweenerTagList.size() );
 

@@ -20,9 +20,8 @@ FOdysseyVectorUndoTagInbetweenerTrajectoryShiftWaypoint::~FOdysseyVectorUndoTagI
 }
 
 FOdysseyVectorUndoTagInbetweenerTrajectoryShiftWaypoint::FOdysseyVectorUndoTagInbetweenerTrajectoryShiftWaypoint( FOdysseyVectorGroupPaint* iScene
-                                                                                                                , FInbetweenerTrajectory* iTrajectory
-                                                                                                                , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
+                                                                                                                , FInbetweenerTrajectory* iTrajectory )
+    : FOdysseyVectorUndo( iScene->GetLayer() )
 {
     mTrajectorySnapshotBuffer.emplace_back( iTrajectory
                                           , FSnapshotFlags::Trajectory::WAYPOINTS

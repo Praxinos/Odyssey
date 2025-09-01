@@ -676,7 +676,6 @@ void
 UOdysseyAnimationLayerImageVector::MakeBreakdownTargetMap()
 {
     std::list<FOdysseyVectorTagInbetweener*> inbetweenerTagList;
-    uint64 notificationFlags = 0xFFFFFFFFFFFFFFFF;
 
     // Make breakdown lookup for adapting the length of the inbetweener tags
     for( FOdysseyVectorTag* sharedTag : mVectorLayer->GetSharedTagList() )
@@ -702,8 +701,7 @@ UOdysseyAnimationLayerImageVector::MakeBreakdownTargetMap()
         if( GUndo )
         {
             FOdysseyVectorUndo *undo = new FOdysseyVectorUndoTagInbetweenerBreakdownAlter( mVectorLayer.Get()
-                                                                                         , inbetweenerTagList
-                                                                                         , notificationFlags );
+                                                                                         , inbetweenerTagList );
 
             // We use GEditor as the UObject, otherwise if we use "this", at each UNDO, PostEditChangeProperty() will be called
             // which will again call StoreUndo + this will lead to a crash. I don't know however what will be the consequences

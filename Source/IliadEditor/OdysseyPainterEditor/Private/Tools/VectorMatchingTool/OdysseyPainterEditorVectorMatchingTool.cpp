@@ -77,14 +77,11 @@ UOdysseyPainterEditorVectorMatchingTool::LoadVector( FOdysseyVectorGroupPaint* i
 
 bool
 UOdysseyPainterEditorVectorMatchingTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
-                                                              , const FOdysseyPoint& iPointInTexture
-                                                              , const FKey& iKey
-                                                            , uint64& oSignalFlags )
+                                                          , const FOdysseyPoint& iPointInTexture
+                                                          , const FKey& iKey )
 {
     if (iKey != EKeys::LeftMouseButton)
         return false;
-
-    uint64 notificationFlags = 0;
 
     mPickedPointArray.clear();
     mWorldDistanceArray.clear();
@@ -99,8 +96,7 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseDownVector( FOdysseyVectorGroupP
         if( GUndo )
         {
             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerMatching( iScene
-                                                                                    , mMatchingHUD->GetSelectedBreakdownList()
-                                                                                    , notificationFlags );
+                                                                                   , mMatchingHUD->GetSelectedBreakdownList() );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -133,25 +129,20 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseDownVector( FOdysseyVectorGroupP
     // redraw
     //iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
 
-    oSignalFlags = notificationFlags;
     return true;
 }
 
 void
 UOdysseyPainterEditorVectorMatchingTool::OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
-                                                           , const FOdysseyPoint& iPointInTexture
-                                                           , uint64& oSignalFlags )
+                                                           , const FOdysseyPoint& iPointInTexture )
 {
     mMatchingHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
 }
 
 void
 UOdysseyPainterEditorVectorMatchingTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
-                                                          , const FOdysseyPoint& iPointInTexture
-                                                          , uint64& oSignalFlags )
+                                                          , const FOdysseyPoint& iPointInTexture )
 {
-    uint64 notificationFlags = 0;
-
 //UE_LOG(LogTemp, Warning, TEXT("UOdysseyPainterEditorVectorMatchingTool::OnMouseDragVector %d") );
 
     // For some reason we receive quite a lot of mouse events between 2 screen refresh, I don't know why
@@ -197,21 +188,15 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseDragVector( FOdysseyVectorGroupP
         iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
         iScene->GetLayer()->RequestRedraw( iScene->GetCell(), FOdysseyVectorCell::REDRAW_INTERACTIVE );
     }
-
-
-    oSignalFlags = notificationFlags;
 }
 
 bool
 UOdysseyPainterEditorVectorMatchingTool::OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                                         , const FOdysseyPoint& iPointInTexture
-                                                        , const FKey& iKey
-                                                        , uint64& oSignalFlags )
+                                                        , const FKey& iKey )
 {
     if (iKey != EKeys::LeftMouseButton)
         return false;
-
-    uint64 notificationFlags = 0;
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
@@ -220,11 +205,10 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseUpVector( FOdysseyVectorGroupPai
         iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
     }
 
-    oSignalFlags =notificationFlags;
     return true;
 }
 
-uint64
+void
 UOdysseyPainterEditorVectorMatchingTool::PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
                                                               , const FName& iPropertyName )
 {
@@ -233,8 +217,6 @@ UOdysseyPainterEditorVectorMatchingTool::PropertyChangedVector( FOdysseyVectorGr
     // redraw
     iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
     iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
-
-    return 0;
 }
 
 void

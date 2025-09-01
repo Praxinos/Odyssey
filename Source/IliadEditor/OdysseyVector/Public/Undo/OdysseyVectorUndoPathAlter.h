@@ -20,21 +20,18 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoPathAlter : public FOdysseyVectorUndo
                                    , FOdysseyVectorVertex* iRemovedVertex
                                    , FOdysseyVectorSegment* iRemovedSegment
                                    , FOdysseyVectorVertex* iAddedVertex
-                                   , FOdysseyVectorSegment* iAddedSegment
-                                   , uint64 iReturnFlags );
+                                   , FOdysseyVectorSegment* iAddedSegment );
         FOdysseyVectorUndoPathAlter( FOdysseyVectorGroupPaint* iScene
                                    , std::vector<FOdysseyVectorPath*>& iAddedPathArray
                                    , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
-                                   , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray
-                                   , uint64 iReturnFlags );
+                                   , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray );
         FOdysseyVectorUndoPathAlter( FOdysseyVectorGroupPaint* iScene
                                    , std::vector<FOdysseyVectorPath*>& iRemovedPathArray
                                    , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
                                    , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray
                                    , std::vector<FOdysseyVectorPath*>& iAddedPathArray
                                    , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
-                                   , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray
-                                   , uint64 iReturnFlags );
+                                   , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;

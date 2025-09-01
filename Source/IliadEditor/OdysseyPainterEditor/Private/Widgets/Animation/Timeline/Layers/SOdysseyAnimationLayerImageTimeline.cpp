@@ -654,12 +654,15 @@ SOdysseyAnimationLayerImageTimeline::MassModifier()
     TArray<UOdysseyLayerCell*> selectedCells = mLayer->GetLayerStack()->GetCellSelection()->GetSelectedCells();
     TArray<FOdysseyVectorGroupPaint*> vectorSceneArray;
     FOdysseyVectorGroupPaint* previewScene;
+    FOdysseyVectorGroupPaint* previewSceneCopy = nullptr;
 
     vectorSceneArray.Reserve( selectedCells.Num() );
 
     if (selectedCells.IsEmpty())
         return;
-    //
+
+    // prevent multiple instances of the mass modifier
+    //if( bMassModifierWindowRunning == false )
     {
         for( UOdysseyLayerCell* cell : selectedCells )
         {
@@ -735,6 +738,7 @@ SOdysseyAnimationLayerImageTimeline::MassModifier()
 /*
         //ObjectWindow.Get().ShowWindow();
 */
+        //bMassModifierWindowRunning = true;
     }
 }
 
@@ -754,6 +758,8 @@ SOdysseyAnimationLayerImageTimeline::MassModifierWindowClosed( const TSharedRef<
             MassModifierAcceptProperties( iMassModifierView );
         }
     }
+
+    //bMassModifierWindowRunning = false;
 }
 
 void

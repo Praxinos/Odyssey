@@ -18,8 +18,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoSceneClear : public FOdysseyVectorUndo
 {
     public:
         ~FOdysseyVectorUndoSceneClear();
-        FOdysseyVectorUndoSceneClear( FOdysseyVectorGroupPaint* iScene
-                                    , uint64 iReturnFlags );
+        FOdysseyVectorUndoSceneClear( FOdysseyVectorGroupPaint* iScene );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;

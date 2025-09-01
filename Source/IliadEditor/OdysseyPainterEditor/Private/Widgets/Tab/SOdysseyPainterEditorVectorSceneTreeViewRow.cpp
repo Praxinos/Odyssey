@@ -67,18 +67,20 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::IsVisibilityEnabled() const
 void
 SOdysseyPainterEditorVectorSceneTreeViewRow::OnCheckBoxStateChanged( ECheckBoxState iState )
 {
-    uint32 notificationFlags = 0;
+    const TSharedPtr< SOdysseyPainterEditorVectorSceneTreeView > treeView = StaticCastSharedPtr<SOdysseyPainterEditorVectorSceneTreeView>(OwnerTablePtr.Pin());
+
+    // Unregister this widget's updates when the vector scene is updated. We don't want this widget to be
+    // rebuilt while it's processing stuff
+    treeView->UnbindLayerDelegates();
 
     GEditor->BeginTransaction(LOCTEXT("vector-scene-tree-view.transaction.object-visibility", "Set Object Visibility"));
     if( GUndo )
     {
         FOdysseyVectorUndo* undo = static_cast<FOdysseyVectorUndo*>( new FOdysseyVectorUndoObjectParam( mItem->GetVectorObject()->GetLayer()
-                                                                                                      , mItem->GetVectorObject()
-                                                                                                      , notificationFlags ) );
+                                                                                                      , mItem->GetVectorObject() ) );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
-        const TSharedPtr< SOdysseyPainterEditorVectorSceneTreeView > treeView = StaticCastSharedPtr<SOdysseyPainterEditorVectorSceneTreeView>(OwnerTablePtr.Pin());
         TSharedPtr<FOdysseyPainterEditorSource> source = treeView->GetEditor()->GetSource();
         if (source)
             source->RecordCurrentFrameUndo();
@@ -101,6 +103,8 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnCheckBoxStateChanged( ECheckBoxSt
 
     mItem->GetVectorObject()->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
     mItem->GetVectorObject()->GetLayer()->RequestRedraw( mItem->GetVectorObject()->GetCell(), 0 );
+
+    treeView->BindLayerDelegates();
 }
 
 void
@@ -282,12 +286,8 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnMouseButtonUp( const FGeometry & 
     FReply reply = FReply::Handled();
 
     reply = STableRow::OnMouseButtonUp( MyGeometry, MouseEvent );
-//refactor
-/*
-    scene->GetLayer()->Notify( FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                            //| FOdysseyPainterEditor::UI_UPDATE_TIMELINE
-                              | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD );
-*/
+
+    scene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     // request redraw
     scene->GetLayer()->RequestRedraw( scene->GetCell(), 0 );
@@ -431,6 +431,12 @@ void
 SOdysseyPainterEditorVectorSceneTreeViewRow::OnTextChanged( const FText& InText
                                                           , ETextCommit::Type CommitInfo )
 {
+    const TSharedPtr< SOdysseyPainterEditorVectorSceneTreeView > treeView = StaticCastSharedPtr<SOdysseyPainterEditorVectorSceneTreeView>(OwnerTablePtr.Pin());
+
+    // Unregister this widget's updates when the vector scene is updated. We don't want this widget to be
+    // rebuilt while it's processing stuff
+    treeView->UnbindLayerDelegates();
+
     FOdysseyVectorObject* itemObject = mItem.Get()->GetVectorObject();
     FOdysseyVectorGroupPaint* itemScene = itemObject->GetScene();
 
@@ -440,6 +446,16 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnTextChanged( const FText& InText
 
     itemScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
     //itemScene->GetLayer()->Notify( FOdysseyPainterEditor::UI_UPDATE_TIMELINE );
+
+    treeView->BindLayerDelegates();
+}
+
+void
+SOdysseyPainterEditorVectorSceneTreeViewRow::OnUndoRedo()
+{
+    FOdysseyVectorObject* itemObject = mItem.Get()->GetVectorObject();
+
+    itemObject->GetLayer()->ResetHUD( itemObject->GetScene() );
 }
 
 FReply
@@ -453,8 +469,10 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
     FOdysseyVectorGroupPaint* itemScene = itemObject->GetScene();
     std::list<FOdysseyVectorObject*> focusedObjectList;
     FOdysseyVectorObject* insertObject = itemObject;
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                             | FOdysseyPainterEditor::UI_UPDATE_TIMELINE;
+
+    // Unregister this widget's updates when the vector scene is updated. We don't want this widget to be
+    // rebuilt while it's processing stuff
+    treeView->UnbindLayerDelegates();
 
     itemScene->GetCell()->GetFocusedAncestorList( focusedObjectList );
 
@@ -462,8 +480,7 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
     if( GUndo )
     {
         FOdysseyVectorUndo* undo = static_cast<FOdysseyVectorUndo*>( new FOdysseyVectorUndoTransferObjects( itemScene
-                                                                                                          , focusedObjectList
-                                                                                                          , notificationFlags ) );
+                                                                                                          , focusedObjectList ) );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -534,7 +551,7 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
     itemScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
     itemScene->GetLayer()->RequestRedraw( itemScene->GetCell(), 0 );
 
-    //refactor itemScene->GetLayer()->Notify( notificationFlags );
+    treeView->BindLayerDelegates();
 
     return FReply::Handled();
 }

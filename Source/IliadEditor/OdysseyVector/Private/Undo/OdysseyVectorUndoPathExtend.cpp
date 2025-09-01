@@ -32,9 +32,8 @@ FOdysseyVectorUndoPathExtend::~FOdysseyVectorUndoPathExtend()
 }
 
 FOdysseyVectorUndoPathExtend::FOdysseyVectorUndoPathExtend( FOdysseyVectorGroupPaint* iScene
-                                                          , FOdysseyVectorPath* iPath
-                                                          , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
+                                                          , FOdysseyVectorPath* iPath )
+    : FOdysseyVectorUndo( iScene->GetLayer() )
     , mPath( iPath )
 {
 }

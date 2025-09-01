@@ -18,17 +18,14 @@ FOdysseyVectorUndoSegmentReshape::~FOdysseyVectorUndoSegmentReshape()
     }
 }
 
-FOdysseyVectorUndoSegmentReshape::FOdysseyVectorUndoSegmentReshape( FOdysseyVectorGroupPaint* iScene
-                                                                  , uint64 iReturnFlags
- )
-    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
+FOdysseyVectorUndoSegmentReshape::FOdysseyVectorUndoSegmentReshape( FOdysseyVectorGroupPaint* iScene )
+    : FOdysseyVectorUndo( iScene->GetLayer() )
 {
 }
 
 FOdysseyVectorUndoSegmentReshape::FOdysseyVectorUndoSegmentReshape( FOdysseyVectorGroupPaint* iScene
-                                                                  , const std::vector<FOdysseyVectorVertex*>& iVertexArray
-                                                                  , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
+                                                                  , const std::vector<FOdysseyVectorVertex*>& iVertexArray )
+    : FOdysseyVectorUndo( iScene->GetLayer() )
 {
     std::vector<FOdysseyVectorSegment*> segmentArray;
 
@@ -47,9 +44,8 @@ FOdysseyVectorUndoSegmentReshape::FOdysseyVectorUndoSegmentReshape( FOdysseyVect
 }
 
 FOdysseyVectorUndoSegmentReshape::FOdysseyVectorUndoSegmentReshape( FOdysseyVectorGroupPaint* iScene
-                                                                  , const std::vector<FOdysseyVectorSegment*>& iSegmentArray
-                                                                  , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
+                                                                  , const std::vector<FOdysseyVectorSegment*>& iSegmentArray )
+    : FOdysseyVectorUndo( iScene->GetLayer() )
 {
     RecordSegment( iSegmentArray );
 }

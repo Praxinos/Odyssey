@@ -63,9 +63,8 @@ FOdysseyVectorUndoErase::FOdysseyVectorUndoErase( FOdysseyVectorGroupPaint* iSce
                                                 , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray
                                                 , std::vector<FOdysseyVectorObject*>& iRemovedObjectArray
                                                 , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
-                                                , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray
-                                                , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
+                                                , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray )
+    : FOdysseyVectorUndo( iScene->GetLayer() )
     // to restore the selection (we dont record the initial state, it is already altered at that point anyways)
     , mCellSnapshot( iScene->GetCell(), 0, eSnapshotState::None ) // unused anyways
 {

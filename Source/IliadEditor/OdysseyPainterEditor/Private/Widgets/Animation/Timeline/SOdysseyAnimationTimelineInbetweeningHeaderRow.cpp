@@ -62,14 +62,11 @@ SOdysseyAnimationTimelineInbetweeningHeaderRow::IsVisibilityEnabled() const
 void
 SOdysseyAnimationTimelineInbetweeningHeaderRow::OnCheckBoxStateChanged( ECheckBoxState iState )
 {
-    uint32 notificationFlags = 0;
-
     GEditor->BeginTransaction(LOCTEXT("vector-scene-tree-view.transaction.object-visibility", "Set Object Visibility"));
     if( GUndo )
     {
         FOdysseyVectorUndo* undo = static_cast<FOdysseyVectorUndo*>( new FOdysseyVectorUndoObjectVisibility( mInbetweenerTag->GetOwner()->GetLayer()
-                                                                                                           , mInbetweenerTag->GetOwner()
-                                                                                                           , notificationFlags ) );
+                                                                                                           , mInbetweenerTag->GetOwner() ) );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 

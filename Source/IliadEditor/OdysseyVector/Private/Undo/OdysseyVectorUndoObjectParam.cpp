@@ -128,26 +128,23 @@ FOdysseyVectorUndoObjectParam::CreateObjectSnapshot( FOdysseyVectorObject* iObje
 }
 
 FOdysseyVectorUndoObjectParam::FOdysseyVectorUndoObjectParam( FOdysseyVectorLayer* iLayer
-                                                            , FOdysseyVectorObject* iObject
-                                                            , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iLayer, iReturnFlags )
+                                                            , FOdysseyVectorObject* iObject )
+    : FOdysseyVectorUndo( iLayer )
 {
 }
 
 FOdysseyVectorUndoObjectParam::FOdysseyVectorUndoObjectParam( FOdysseyVectorLayer* iLayer
                                                             , FOdysseyVectorObject* iObject
-                                                            , const FName& iCategoryName
-                                                            , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iLayer, iReturnFlags )
+                                                            , const FName& iCategoryName )
+    : FOdysseyVectorUndo( iLayer )
 {
     mObjectSnapshotArray.push_back( CreateObjectSnapshot( iObject, iCategoryName ) );
 }
 
 FOdysseyVectorUndoObjectParam::FOdysseyVectorUndoObjectParam( FOdysseyVectorLayer* iLayer
                                                             , const std::vector<FOdysseyVectorObject*>& iObjectArray
-                                                            , const FName& iCategoryName
-                                                            , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iLayer, iReturnFlags )
+                                                            , const FName& iCategoryName )
+    : FOdysseyVectorUndo( iLayer )
 {
     mObjectSnapshotArray.reserve( iObjectArray.size() );
 
@@ -161,9 +158,8 @@ FOdysseyVectorUndoObjectParam::FOdysseyVectorUndoObjectParam( FOdysseyVectorLaye
 
 FOdysseyVectorUndoObjectParam::FOdysseyVectorUndoObjectParam( FOdysseyVectorLayer* iLayer
                                                             , const std::list<FOdysseyVectorObject*>& iObjectList
-                                                            , const FName& iCategoryName
-                                                            , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iLayer, iReturnFlags )
+                                                            , const FName& iCategoryName )
+    : FOdysseyVectorUndo( iLayer )
 {
     mObjectSnapshotArray.reserve( iObjectList.size() );
 
@@ -216,9 +212,8 @@ FOdysseyVectorUndoObjectVisibility::~FOdysseyVectorUndoObjectVisibility( )
 }
 
 FOdysseyVectorUndoObjectVisibility::FOdysseyVectorUndoObjectVisibility( FOdysseyVectorLayer* iLayer
-                                                                      , FOdysseyVectorObject* iObject
-                                                                      , uint64 iReturnFlags )
-    : FOdysseyVectorUndoObjectParam( iLayer, iObject, iReturnFlags )
+                                                                      , FOdysseyVectorObject* iObject )
+    : FOdysseyVectorUndoObjectParam( iLayer, iObject )
 {
     mObjectSnapshotArray.push_back( CreateObjectSnapshot( iObject, FSnapshotFlags::Object::VISIBILITY ) );
 }

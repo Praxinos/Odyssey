@@ -101,8 +101,7 @@ UOdysseyPainterEditorVectorCutTool::GetMouseCursor() const
 
 void
 UOdysseyPainterEditorVectorCutTool::OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
-                                                      , const FOdysseyPoint& iPointInTexture
-                                                      , uint64& oSignalFlags )
+                                                      , const FOdysseyPoint& iPointInTexture )
 {
     if( ( iPointInTexture.x < 0 )
      || ( iPointInTexture.y < 0 )
@@ -120,8 +119,7 @@ UOdysseyPainterEditorVectorCutTool::OnMouseHoverVector( FOdysseyVectorGroupPaint
 bool
 UOdysseyPainterEditorVectorCutTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                      , const FOdysseyPoint& iPointInTexture
-                                                     , const FKey& iKey
-                                                     , uint64& oSignalFlags )
+                                                     , const FKey& iKey )
 {
     if (iKey != EKeys::LeftMouseButton)
         return false;
@@ -153,8 +151,7 @@ UOdysseyPainterEditorVectorCutTool::OnMouseDownVector( FOdysseyVectorGroupPaint*
 
 void
 UOdysseyPainterEditorVectorCutTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
-                                                     , const FOdysseyPoint& iPointInTexture
-                                                     , uint64& oSignalFlags )
+                                                     , const FOdysseyPoint& iPointInTexture )
 {
     //::ULIS::FRectI redrawRegion = { 0, 0, 0, 0 };
 
@@ -306,8 +303,7 @@ UOdysseyPainterEditorVectorCutTool::OnMouseUpVectorObjectMode( FOdysseyVectorGro
                                                                   , addedSegmentArray
                                                                   , removedObjectArray
                                                                   , removedVertexArray
-                                                                  , removedSegmentArray
-                                                                  , 0 );
+                                                                  , removedSegmentArray );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -407,15 +403,13 @@ UOdysseyPainterEditorVectorCutTool::CutPaths( FOdysseyVectorGroupPaint* iScene
 bool
 UOdysseyPainterEditorVectorCutTool::OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                                          , const FOdysseyPoint& iPointInTexture
-                                                         , const FKey& iKey
-                                                         , uint64& oSignalFlags )
+                                                         , const FKey& iKey )
 {
     if (iKey != EKeys::LeftMouseButton)
         return false;
 
     FOdysseyVectorCell* vectorCell = iScene->GetCell();
     ::ULIS::FRectD roi;
-    uint64 notificationFlags = 0;
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( ( mMouseCursor == EMouseCursor::Crosshairs )
@@ -429,7 +423,7 @@ UOdysseyPainterEditorVectorCutTool::OnMouseUpVector( FOdysseyVectorGroupPaint* i
         if( ( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_OBJECT )
          || ( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_VERTEX ) )
         {
-            notificationFlags |= OnMouseUpVectorObjectMode( iScene, iPointInTexture, iKey );
+            OnMouseUpVectorObjectMode( iScene, iPointInTexture, iKey );
         }
 
         vectorCell->SetBLMask( nullptr );
@@ -442,8 +436,6 @@ UOdysseyPainterEditorVectorCutTool::OnMouseUpVector( FOdysseyVectorGroupPaint* i
     iScene->GetLayer()->ResetHUD( iScene );
 
     //iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
-
-    oSignalFlags = notificationFlags;
 
     return true;
 }

@@ -12,9 +12,8 @@ FOdysseyVectorUndoDeleteVertex::~FOdysseyVectorUndoDeleteVertex()
 }
 
 FOdysseyVectorUndoDeleteVertex::FOdysseyVectorUndoDeleteVertex( FOdysseyVectorGroupPaint* iScene
-                                                              , const std::list<FOdysseyVectorObject*>& iObjectList
-                                                              , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
+                                                              , const std::list<FOdysseyVectorObject*>& iObjectList )
+    : FOdysseyVectorUndo( iScene->GetLayer() )
 {
     mPathSnapshotBuffer.reserve( iObjectList.size() );
 

@@ -61,6 +61,12 @@ UOdysseyPainterEditorVectorTagInbetweenerView::UOdysseyPainterEditorVectorTagInb
 }
 
 void
+UOdysseyPainterEditorVectorTagInbetweenerView::OnUndoRedo()
+{
+    mScene->GetLayer()->ResetHUD( mScene );
+}
+
+void
 UOdysseyPainterEditorVectorTagInbetweenerView::ImportParam()
 {
     if( mSelectedInbetweenerTagArray.size() )
@@ -318,53 +324,42 @@ UOdysseyPainterEditorVectorTagInbetweenerView::MakeUndo( const FName& iPropertyN
                                                        , const FName& iMemberPropertyName
                                                        , const FName& iCategory )
 {
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_TIMELINE
-                             | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS;
-
     if( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, InterpolationType ) )
         return new FOdysseyVectorUndoTagInbetweenerInterpolationType( mScene
-                                                                    , mSelectedInbetweenerTagArray
-                                                                    , notificationFlags );
+                                                                    , mSelectedInbetweenerTagArray );
 
     if( ( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, DivisionX ) )
       ||( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, DivisionY ) )
       ||( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, Divisions ) ) )
         return new FOdysseyVectorUndoTagInbetweenerGridSize( mScene
-                                                           , mSelectedInbetweenerTagArray
-                                                           , notificationFlags );
+                                                           , mSelectedInbetweenerTagArray );
 
     if( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, GridType ) )
         return new FOdysseyVectorUndoTagInbetweenerGridType( mScene
-                                                           , mSelectedInbetweenerTagArray
-                                                           , notificationFlags );
+                                                           , mSelectedInbetweenerTagArray );
 
     if( ( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, InbetweenColor  ) )
       ||( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, ChartColor      ) )
       ||( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, GridColor       ) )
       ||( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, TrajectoryColor ) ) )
         return new FOdysseyVectorUndoTagInbetweenerColor( mScene
-                                                        , mSelectedInbetweenerTagArray
-                                                        , notificationFlags );
+                                                        , mSelectedInbetweenerTagArray );
 
     if( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, MappingMode ) )
         return new FOdysseyVectorUndoTagInbetweenerMapAsPolyline( mScene
-                                                                , mSelectedInbetweenerTagArray
-                                                                , notificationFlags );
+                                                                , mSelectedInbetweenerTagArray );
 
     if( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, WithThickness ) )
         return new FOdysseyVectorUndoTagInbetweenerWithThickness( mScene
-                                                                , mSelectedInbetweenerTagArray
-                                                                , notificationFlags );
+                                                                , mSelectedInbetweenerTagArray );
 
     if( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, ConstantWidth ) )
         return new FOdysseyVectorUndoTagInbetweenerConstantWidth( mScene
-                                                                , mSelectedInbetweenerTagArray
-                                                                , notificationFlags );
+                                                                , mSelectedInbetweenerTagArray );
 
     if( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, Square ) )
         return new FOdysseyVectorUndoTagInbetweenerSquare( mScene
-                                                         , mSelectedInbetweenerTagArray
-                                                         , notificationFlags );
+                                                         , mSelectedInbetweenerTagArray );
 
     return nullptr;
 }

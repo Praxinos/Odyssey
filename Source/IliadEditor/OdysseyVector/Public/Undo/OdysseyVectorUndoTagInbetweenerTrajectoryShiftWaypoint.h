@@ -19,8 +19,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoTagInbetweenerTrajectoryShiftWaypoint 
     public:
         ~FOdysseyVectorUndoTagInbetweenerTrajectoryShiftWaypoint();
         FOdysseyVectorUndoTagInbetweenerTrajectoryShiftWaypoint( FOdysseyVectorGroupPaint* iScene
-                                                               , FInbetweenerTrajectory* iTrajectory
-                                                               , uint64 iReturnFlags  );
+                                                               , FInbetweenerTrajectory* iTrajectory );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;

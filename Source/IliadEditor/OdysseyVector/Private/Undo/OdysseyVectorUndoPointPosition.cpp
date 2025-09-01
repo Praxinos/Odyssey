@@ -19,9 +19,8 @@ FOdysseyVectorUndoPointPosition::~FOdysseyVectorUndoPointPosition()
 }
 
 FOdysseyVectorUndoPointPosition::FOdysseyVectorUndoPointPosition( FOdysseyVectorGroupPaint* iScene
-                                                                , std::vector<FOdysseyVectorPoint*>& iPointArray
-                                                                , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
+                                                                , std::vector<FOdysseyVectorPoint*>& iPointArray )
+    : FOdysseyVectorUndo( iScene->GetLayer() )
 {
     mPointSnapshotBuffer.reserve( iPointArray.size() );
 
@@ -35,9 +34,8 @@ FOdysseyVectorUndoPointPosition::FOdysseyVectorUndoPointPosition( FOdysseyVector
 
 FOdysseyVectorUndoPointPosition::FOdysseyVectorUndoPointPosition( FOdysseyVectorGroupPaint* iScene
                                                                 , std::vector<FOdysseyVectorVertex*>& iVertexArray
-                                                                , std::vector<FOdysseyVectorHandleSegment*>& iHandleArray
-                                                                , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
+                                                                , std::vector<FOdysseyVectorHandleSegment*>& iHandleArray )
+    : FOdysseyVectorUndo( iScene->GetLayer() )
 {
     mPointSnapshotBuffer.reserve( iVertexArray.size() + iHandleArray.size() );
 
@@ -57,9 +55,8 @@ FOdysseyVectorUndoPointPosition::FOdysseyVectorUndoPointPosition( FOdysseyVector
 }
 
 FOdysseyVectorUndoPointPosition::FOdysseyVectorUndoPointPosition( FOdysseyVectorGroupPaint* iScene
-                                                                , FOdysseyVectorPoint* iPoint
-                                                                , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
+                                                                , FOdysseyVectorPoint* iPoint )
+    : FOdysseyVectorUndo( iScene->GetLayer() )
 {
     mPointSnapshotBuffer.emplace_back( iPoint
                                      , FSnapshotFlags::ALL

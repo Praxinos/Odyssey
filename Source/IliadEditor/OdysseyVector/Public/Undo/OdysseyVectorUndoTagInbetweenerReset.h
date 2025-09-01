@@ -21,14 +21,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoTagInbetweenerReset : public FOdysseyV
         FOdysseyVectorUndoTagInbetweenerReset( FOdysseyVectorGroupPaint* iScene
                                              , const std::list<FInbetweenerBreakdown*>& iBreakdownList
                                              , bool iResetGridGeometry
-                                             , bool iResetGridTransformations
-                                             , uint64 iReturnFlags );
+                                             , bool iResetGridTransformations );
 
         FOdysseyVectorUndoTagInbetweenerReset( FOdysseyVectorGroupPaint* iScene
                                              , const std::list<FOdysseyVectorTagInbetweener*>& iInbetweenerTagList
                                              , bool iResetGridGeometry
-                                             , bool iResetGridTransformations
-                                             , uint64 iReturnFlags );
+                                             , bool iResetGridTransformations );
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;
 

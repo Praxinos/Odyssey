@@ -19,11 +19,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoSelectObject : public FOdysseyVectorUn
     public:
         ~FOdysseyVectorUndoSelectObject();
         FOdysseyVectorUndoSelectObject( FOdysseyVectorLayer* iLayer
-                                      , FOdysseyVectorCell* iCell
-                                      , uint64 iReturnFlags );
+                                      , FOdysseyVectorCell* iCell );
         FOdysseyVectorUndoSelectObject( FOdysseyVectorLayer* iLayer
-                                      , const std::list<FOdysseyVectorCell*>& iCellList
-                                      , uint64 iReturnFlags );
+                                      , const std::list<FOdysseyVectorCell*>& iCellList );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;

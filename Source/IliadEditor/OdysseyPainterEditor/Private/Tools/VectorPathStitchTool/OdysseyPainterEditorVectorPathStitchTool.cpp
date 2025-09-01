@@ -75,8 +75,7 @@ UOdysseyPainterEditorVectorPathStitchTool::UnloadVector( FOdysseyVectorGroupPain
 bool
 UOdysseyPainterEditorVectorPathStitchTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                             , const FOdysseyPoint& iPointInTexture
-                                                            , const FKey& iKey
-                                                            , uint64& oSignalFlags )
+                                                            , const FKey& iKey )
 {
     if (iKey != EKeys::LeftMouseButton)
         return false;
@@ -155,8 +154,7 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseDownVector( FOdysseyVectorGrou
                                                                                , addedVertexArray
                                                                                , addedSegmentArray
                                                                                , mergedVertexArray
-                                                                               , mergedSegmentArray
-                                                                               , 0 );
+                                                                               , mergedSegmentArray );
 
                     GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -179,16 +177,14 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseDownVector( FOdysseyVectorGrou
 
 void
 UOdysseyPainterEditorVectorPathStitchTool::OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
-                                                             , const FOdysseyPoint& iPointInTexture
-                                                             , uint64& oSignalFlags )
+                                                             , const FOdysseyPoint& iPointInTexture )
 {
     mPathStitchHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
 }
 
 void
 UOdysseyPainterEditorVectorPathStitchTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
-                                                            , const FOdysseyPoint& iPointInTexture
-                                                            , uint64& oSignalFlags )
+                                                            , const FOdysseyPoint& iPointInTexture )
 {
     // Left mouse button clicked
     if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
@@ -202,8 +198,7 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseDragVector( FOdysseyVectorGrou
 bool
 UOdysseyPainterEditorVectorPathStitchTool::OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                                           , const FOdysseyPoint& iPointInTexture
-                                                          , const FKey& iKey
-                                                          , uint64& oSignalFlags )
+                                                          , const FKey& iKey )
 {
     if (iKey != EKeys::LeftMouseButton)
         return false;
@@ -214,14 +209,14 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseUpVector( FOdysseyVectorGroupP
     return true;
 }
 
-uint64
+void
 UOdysseyPainterEditorVectorPathStitchTool::PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
                                                                 , const FName& iPropertyName )
 {
     iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
     iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
-    return UOdysseyPainterEditorVectorBaseTool::PropertyChangedVector( iScene, iPropertyName );
+    UOdysseyPainterEditorVectorBaseTool::PropertyChangedVector( iScene, iPropertyName );
 }
 
 void

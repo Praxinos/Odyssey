@@ -19,9 +19,8 @@ FOdysseyVectorUndoVertexAlignment::~FOdysseyVectorUndoVertexAlignment()
 }
 
 FOdysseyVectorUndoVertexAlignment::FOdysseyVectorUndoVertexAlignment( FOdysseyVectorGroupPaint* iScene
-                                                                    , const std::vector<FOdysseyVectorVertex*>& iAlignedVertexArray
-                                                                    , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
+                                                                    , const std::vector<FOdysseyVectorVertex*>& iAlignedVertexArray )
+    : FOdysseyVectorUndo( iScene->GetLayer() )
 {
     std::vector<FOdysseyVectorSegment*> segmentArray;
 

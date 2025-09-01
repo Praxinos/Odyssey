@@ -21,17 +21,15 @@ FOdysseyVectorUndoBucketRemove::~FOdysseyVectorUndoBucketRemove()
 }
 
 FOdysseyVectorUndoBucketRemove::FOdysseyVectorUndoBucketRemove( FOdysseyVectorGroupPaint* iScene
-                                                              , FOdysseyVectorBucket* iBucket
-                                                              , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
+                                                              , FOdysseyVectorBucket* iBucket )
+    : FOdysseyVectorUndo( iScene->GetLayer() )
 {
     mBucketArray.push_back( iBucket );
 }
 
 FOdysseyVectorUndoBucketRemove::FOdysseyVectorUndoBucketRemove( FOdysseyVectorGroupPaint* iScene
-                                                              , std::vector<FOdysseyVectorBucket*>& iBucketArray
-                                                              , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
+                                                              , std::vector<FOdysseyVectorBucket*>& iBucketArray )
+    : FOdysseyVectorUndo( iScene->GetLayer() )
     , mBucketArray( iBucketArray )
 {
 }

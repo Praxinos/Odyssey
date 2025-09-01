@@ -98,8 +98,7 @@ UOdysseyPainterEditorVectorSelectionTool::UnloadVector( FOdysseyVectorGroupPaint
 bool
 UOdysseyPainterEditorVectorSelectionTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                            , const FOdysseyPoint& iPointInTexture
-                                                           , const FKey& iKey
-                                                           , uint64& oSignalFlags )
+                                                           , const FKey& iKey )
 {
     if (iKey != EKeys::LeftMouseButton)
         return false;
@@ -122,8 +121,7 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseDownVector( FOdysseyVectorGroup
 
 void
 UOdysseyPainterEditorVectorSelectionTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
-                                                           , const FOdysseyPoint& iPointInTexture
-                                                           , uint64& oSignalFlags )
+                                                           , const FOdysseyPoint& iPointInTexture )
 {
     //::ULIS::FRectI redrawRegion = { 0, 0, 0, 0 };
 
@@ -236,8 +234,7 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorObjectMode( FOdysseyVec
         if( GUndo )
         {
             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectObject( iScene->GetLayer()
-                                                                         , iScene->GetCell()
-                                                                         , 0 );
+                                                                         , iScene->GetCell() );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -332,8 +329,7 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorVertexMode( FOdysseyVec
     if( GUndo )
     {
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectVertex( iScene
-                                                                     , objectList
-                                                                     , 0 );
+                                                                     , objectList );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -396,8 +392,7 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorVertexMode( FOdysseyVec
 bool
 UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                                          , const FOdysseyPoint& iPointInTexture
-                                                         , const FKey& iKey
-                                                         , uint64& oSignalFlags )
+                                                         , const FKey& iKey )
 {
     if (iKey != EKeys::LeftMouseButton)
         return false;

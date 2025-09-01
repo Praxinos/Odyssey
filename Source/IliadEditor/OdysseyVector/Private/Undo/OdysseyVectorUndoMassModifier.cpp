@@ -23,9 +23,8 @@ FOdysseyVectorUndoMassModifier::~FOdysseyVectorUndoMassModifier()
 FOdysseyVectorUndoMassModifier::FOdysseyVectorUndoMassModifier( FOdysseyVectorLayer* iLayer
                                                               , const std::list<FOdysseyVectorObject*>& iObjectList
                                                               , const FName& iCategoryName
-                                                              , bool iSavePaths
-                                                              , uint64 iReturnFlags )
-    : FOdysseyVectorUndoObjectParam( iLayer, iObjectList, iCategoryName, iReturnFlags )
+                                                              , bool iSavePaths )
+    : FOdysseyVectorUndoObjectParam( iLayer, iObjectList, iCategoryName )
 {
     if( iSavePaths )
     {

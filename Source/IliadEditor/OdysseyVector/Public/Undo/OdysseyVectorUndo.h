@@ -1089,10 +1089,16 @@ class ODYSSEYVECTOR_API FSnapshotCell : public FSnapshotObject
 
 class ODYSSEYVECTOR_API FOdysseyVectorUndo : public FCommandChange
 {
+    DECLARE_MULTICAST_DELEGATE(FOnPostUndoRedo);
+
+    public:
+        // We use a delegate on Undo/Redo because FOdysseyUndoDelegates clears delegates after execution so
+        // we cannot use it.
+        static FOnPostUndoRedo& OnPostUndoRedoDelegate();
+
     public:
         ~FOdysseyVectorUndo();
-        FOdysseyVectorUndo( FOdysseyVectorLayer* iSharedEnv, uint64 iReturnFlags );
-
+        FOdysseyVectorUndo( FOdysseyVectorLayer* iSharedEnv );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;
@@ -1114,6 +1120,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndo : public FCommandChange
         bool mApplied;
         std::list<FOdysseyVectorCell*> mRootList; // list of engines that need to be redrawn
         FOdysseyVectorLayer* mLayer;
-        uint64 mReturnFlags;
         bool bUpdateViaDelegation;
 };

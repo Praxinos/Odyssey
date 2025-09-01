@@ -108,45 +108,35 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         virtual uint64 LoadVector( FOdysseyVectorGroupPaint* iScene ){ return 0; };
         virtual uint64 UnloadVector( FOdysseyVectorGroupPaint* iScene ){ return 0; };
         virtual bool OnKeyDownGlobalVector( FOdysseyVectorGroupPaint* iScene
-                                          , const FKeyEvent& InKeyEvent
-                                          , uint64& oSignalFlags );
+                                          , const FKeyEvent& InKeyEvent );
         virtual bool OnKeyUpGlobalVector( FOdysseyVectorGroupPaint* iScene
-                                        , const FKeyEvent& InKeyEvent
-                                        , uint64& oSignalFlags );
+                                        , const FKeyEvent& InKeyEvent );
         virtual bool OnKeyDownVector( FOdysseyVectorGroupPaint* iScene
-                                        , const FKey& iKey
-                                        , uint64& oSignalFlags );
+                                        , const FKey& iKey );
         virtual bool OnKeyUpVector( FOdysseyVectorGroupPaint* iScene
-                                      , const FKey& iKey
-                                      , uint64& oSignalFlags );
+                                      , const FKey& iKey );
         virtual bool OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                         , const FOdysseyPoint& iPointInTexture
-                                        , const FKey& iKey
-                                        , uint64& oSignalFlags ){ return false; };
+                                        , const FKey& iKey ){ return false; };
         virtual void OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
-                                        , const FOdysseyPoint& iPointInTexture
-                                        , uint64& oSignalFlags ){};
+                                        , const FOdysseyPoint& iPointInTexture ){};
         virtual void OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
-                                        , const FOdysseyPoint& iPointInTexture
-                                        , uint64& oSignalFlags ){};
+                                        , const FOdysseyPoint& iPointInTexture ){};
         virtual bool OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                       , const FOdysseyPoint& iPointInTexture
-                                      , const FKey& iKey
-                                      , uint64& oSignalFlags ){ return false; };
+                                      , const FKey& iKey ){ return false; };
 
         virtual bool OnMouseClickVector(FOdysseyVectorGroupPaint* iScene
                                       , const FOdysseyPoint& iPointInTexture
-                                      , const FKey& iKey
-                                      , uint64& oSignalFlags );
+                                      , const FKey& iKey );
 
-        virtual uint64 PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
-                                            , const FName& iPropertyName );
+        virtual void PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
+                                          , const FName& iPropertyName );
         bool FilterMouseEvent( eMouseEventName iCurrentMouseEvent );
 
         void PopupContextMenu();
         TSharedPtr<SWidget> CreateContextMenu();
-        void OnVectorLayerNotify( FOdysseyVectorLayer* iLayer
-                                , const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags );
+        void OnUndoRedo();
 
     private:
         void Copy();

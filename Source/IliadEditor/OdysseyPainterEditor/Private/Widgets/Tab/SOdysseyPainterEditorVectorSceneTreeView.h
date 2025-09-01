@@ -42,6 +42,8 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorSceneTreeView
         TSharedPtr<FVectorSceneTreeViewItem> GetRootItem();
 
         FOdysseyPainterEditor* GetEditor() const;
+        void UnbindLayerDelegates();
+        void BindLayerDelegates();
 
     protected:
         /**
@@ -78,18 +80,17 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorSceneTreeView
 
         FReply OnKeyDown( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent );
 
-        void OnVectorLayerNotify( FOdysseyVectorLayer* iLayer
-                                , const FOdysseyVectorObjectInvalidationFlags& iSignalFlags );
+        void OnVectorLayerNotify( const FOdysseyVectorObjectInvalidationFlags& iSignalFlags
+                                , uint32 iUpdateFlags );
         void ParseVectorNotifications( const FOdysseyVectorObjectInvalidationFlags& iSignalFlags );
         void OnSceneChanged();
         void OnCurrentLayerChanged( UOdysseyLayerStack* iLayerStack );
         void OnSourceChanged();
-        void BindLayerDelegates( UOdysseyLayerStack* iLayerStack );
+        void UpdateCurrentLayer( UOdysseyLayerStack* iLayerStack );
 
     protected:
         FOdysseyPainterEditor* mEditor;
         TSlateAttribute<FOdysseyVectorGroupPaint*> mScene;
-        TSharedPtr<FOdysseyVectorLayer> mOldVectorLayer;
         TSharedPtr<FOdysseyVectorLayer> mVectorLayer;
 
         TSharedPtr<FVectorSceneTreeViewItem> mRootItem;

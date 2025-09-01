@@ -13,18 +13,16 @@ FOdysseyVectorUndoSelectObject::~FOdysseyVectorUndoSelectObject()
 }
 
 FOdysseyVectorUndoSelectObject::FOdysseyVectorUndoSelectObject( FOdysseyVectorLayer* iLayer
-                                                              , FOdysseyVectorCell* iCell
-                                                              , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iLayer, iReturnFlags )
+                                                              , FOdysseyVectorCell* iCell )
+    : FOdysseyVectorUndo( iLayer )
     , mCellList ( { iCell } )
 {
     GetSelectedObjectList( mSelectedObjectList );
 }
 
 FOdysseyVectorUndoSelectObject::FOdysseyVectorUndoSelectObject( FOdysseyVectorLayer* iLayer
-                                                              , const std::list<FOdysseyVectorCell*>& iCellList
-                                                              , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iLayer, iReturnFlags )
+                                                              , const std::list<FOdysseyVectorCell*>& iCellList )
+    : FOdysseyVectorUndo( iLayer )
     , mCellList ( iCellList )
 {
     GetSelectedObjectList( mSelectedObjectList );

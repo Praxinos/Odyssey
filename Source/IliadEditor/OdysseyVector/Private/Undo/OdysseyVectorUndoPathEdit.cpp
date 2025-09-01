@@ -51,9 +51,8 @@ FOdysseyVectorUndoPathEdit::HasRecordedSegment( FOdysseyVectorSegment* iSegment 
 
 FOdysseyVectorUndoPathEdit::FOdysseyVectorUndoPathEdit( FOdysseyVectorGroupPaint* iScene
                                                       , const std::vector<FOdysseyVectorVertex*>& iEditedVertexArray
-                                                      , const std::vector<FOdysseyVectorSegment*>& iEditedSegmentArray
-                                                      , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
+                                                      , const std::vector<FOdysseyVectorSegment*>& iEditedSegmentArray )
+    : FOdysseyVectorUndo( iScene->GetLayer() )
 {
     mVertexSnapshotBuffer.reserve( iEditedVertexArray.size() );
     mCubicSegmentSnapshotBuffer.reserve( iEditedSegmentArray.size() );

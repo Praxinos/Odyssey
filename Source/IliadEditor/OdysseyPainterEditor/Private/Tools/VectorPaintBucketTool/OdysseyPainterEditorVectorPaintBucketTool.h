@@ -58,22 +58,19 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPaintBucketTool : publ
         virtual uint64 LoadVector( FOdysseyVectorGroupPaint* iScene ) override;
         virtual uint64 UnloadVector( FOdysseyVectorGroupPaint* iScene ) override;
         virtual bool OnKeyDownGlobalVector( FOdysseyVectorGroupPaint* iScene
-                                          , const FKeyEvent& InKeyEvent
-                                          , uint64& oSignalFlags ) override;
+                                          , const FKeyEvent& InKeyEvent ) override;
         virtual bool OnKeyUpGlobalVector( FOdysseyVectorGroupPaint* iScene
-                                        , const FKeyEvent& InKeyEvent
-                                        , uint64& oSignalFlags ) override;
+                                        , const FKeyEvent& InKeyEvent ) override;
         virtual bool OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                         , const FOdysseyPoint& iPointInTexture
-                                        , const FKey& iKey
-                                        , uint64& oSignalFlags ) override;
+                                        , const FKey& iKey ) override;
         virtual void OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
-                                         , const FOdysseyPoint& iPointInTexture, uint64& oSignalFlags ) override;
+                                         , const FOdysseyPoint& iPointInTexture ) override;
         virtual void OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
-                                        , const FOdysseyPoint& iPointInTexture, uint64& oSignalFlags ) override;
+                                        , const FOdysseyPoint& iPointInTexture ) override;
         virtual bool OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                       , const FOdysseyPoint& iPointInTexture
-                                      , const FKey& iKey, uint64& oSignalFlags ) override;
+                                      , const FKey& iKey ) override;
         //virtual uint64 PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
         //                                  , const FName& iPropertyName ) override;
 

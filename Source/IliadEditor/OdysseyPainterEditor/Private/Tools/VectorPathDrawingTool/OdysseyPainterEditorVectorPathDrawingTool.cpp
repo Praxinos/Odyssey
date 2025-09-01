@@ -167,8 +167,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::RecordUndoPathAlter( FOdysseyVectorG
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoPathAlter( iScene
                                                                   , addedObjectArray
                                                                   , iAddedVertexArray
-                                                                  , iAddedSegmentArray
-                                                                  , 0 );
+                                                                  , iAddedSegmentArray );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -190,8 +189,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::RecordUndoPathAdd( FOdysseyVectorGro
     if( GUndo )
     {
         FOdysseyVectorUndo* undo = static_cast<FOdysseyVectorUndo*>( new FOdysseyVectorUndoObjectAdd( iScene
-                                                                                                    , iPath
-                                                                                                    , 0 ) );
+                                                                                                    , iPath ) );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -204,8 +202,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::RecordUndoPathAdd( FOdysseyVectorGro
 
 bool
 UOdysseyPainterEditorVectorPathDrawingTool::OnKeyDownGlobalVector( FOdysseyVectorGroupPaint* iScene
-                                                                 , const FKeyEvent& InKeyEvent
-                                                                 , uint64& oSignalFlags )
+                                                                 , const FKeyEvent& InKeyEvent )
 {
     if( InKeyEvent.IsRepeat() == false )
     {
@@ -221,13 +218,12 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnKeyDownGlobalVector( FOdysseyVecto
         }
     }
 
-    return UOdysseyPainterEditorVectorBaseTool::OnKeyDownGlobalVector( iScene, InKeyEvent, oSignalFlags );
+    return UOdysseyPainterEditorVectorBaseTool::OnKeyDownGlobalVector( iScene, InKeyEvent );
 }
 
 bool
 UOdysseyPainterEditorVectorPathDrawingTool::OnKeyUpGlobalVector( FOdysseyVectorGroupPaint* iScene
-                                                               , const FKeyEvent& InKeyEvent
-                                                               , uint64& oSignalFlags )
+                                                               , const FKeyEvent& InKeyEvent )
 {
     FKey key = InKeyEvent.GetKey();
 
@@ -244,7 +240,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnKeyUpGlobalVector( FOdysseyVectorG
         return true;
     }
 
-    return UOdysseyPainterEditorVectorBaseTool::OnKeyUpGlobalVector( iScene, InKeyEvent, oSignalFlags );
+    return UOdysseyPainterEditorVectorBaseTool::OnKeyUpGlobalVector( iScene, InKeyEvent );
 }
 
 FOdysseyVectorObject*
@@ -269,8 +265,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::GetParentObject( FOdysseyVectorGroup
 bool
 UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                              , const FOdysseyPoint& iPointInTexture
-                                                             , const FKey& iKey
-                                                             , uint64& oSignalFlags )
+                                                             , const FKey& iKey )
 {
     if (iKey != EKeys::LeftMouseButton)
         return false;
@@ -376,20 +371,16 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorGro
 
 void
 UOdysseyPainterEditorVectorPathDrawingTool::OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
-                                                              , const FOdysseyPoint& iPointInTexture
-                                                              , uint64& oSignalFlags )
+                                                              , const FOdysseyPoint& iPointInTexture )
 {
     mPathDrawingHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
 }
 
 void
 UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
-                                                             , const FOdysseyPoint& iPointInTexture
-                                                             , uint64& oSignalFlags )
+                                                             , const FOdysseyPoint& iPointInTexture )
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector);
-
-    uint64 notificationFlags = 0;
 
 //UE_LOG(LogTemp, Warning, TEXT("Hello %f"), iPointInTexture.pressure );
 
@@ -467,15 +458,12 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorGro
                                   | FOdysseyVectorObject::UPDATE_NOINBETWEENING ); // update invalidated path after segment insertion
         iScene->GetLayer()->RequestRedraw( iScene->GetCell(), FOdysseyVectorCell::REDRAW_INTERACTIVE );
     }
-
-    oSignalFlags = notificationFlags;
 }
 
 bool
 UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                                            , const FOdysseyPoint& iPointInTexture
-                                                           , const FKey& iKey
-                                                           , uint64& oSignalFlags )
+                                                           , const FKey& iKey )
 {
     if (iKey != EKeys::LeftMouseButton)
         return false;
@@ -612,7 +600,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorGroup
     return true;
 }
 
-uint64
+void
 UOdysseyPainterEditorVectorPathDrawingTool::PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
                                                                  , const FName& iPropertyName )
 {

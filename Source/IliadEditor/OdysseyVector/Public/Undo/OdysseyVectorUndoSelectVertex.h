@@ -15,8 +15,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoSelectVertex : public FOdysseyVectorUn
     public:
         ~FOdysseyVectorUndoSelectVertex();
          FOdysseyVectorUndoSelectVertex( FOdysseyVectorGroupPaint* iScene
-                                       , const std::list<FOdysseyVectorObject*>& iObjectList
-                                       , uint64 iReturnFlags );
+                                       , const std::list<FOdysseyVectorObject*>& iObjectList );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;

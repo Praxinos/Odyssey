@@ -20,19 +20,16 @@ FOdysseyVectorUndoTagInbetweenerBreakdownTargetVisibility::~FOdysseyVectorUndoTa
 }
 
 FOdysseyVectorUndoTagInbetweenerBreakdownTargetVisibility::FOdysseyVectorUndoTagInbetweenerBreakdownTargetVisibility( FOdysseyVectorLayer* iSharedEnv
-                                                                                                                    , FInbetweenerBreakdown* iBreakdown
-                                                                                                                    , uint64 iReturnFlags )
+                                                                                                                    , FInbetweenerBreakdown* iBreakdown )
     : FOdysseyVectorUndoTagInbetweenerBreakdownTargetVisibility( iSharedEnv
-                                                               , std::list<FInbetweenerBreakdown*> ({ iBreakdown })
-                                                               , iReturnFlags )
+                                                               , std::list<FInbetweenerBreakdown*> ({ iBreakdown }) )
 {
 
 }
 
 FOdysseyVectorUndoTagInbetweenerBreakdownTargetVisibility::FOdysseyVectorUndoTagInbetweenerBreakdownTargetVisibility( FOdysseyVectorLayer* iSharedEnv
-                                                                                                                    , const std::list<FInbetweenerBreakdown*>& iBreakdownList
-                                                                                                                    , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iSharedEnv, iReturnFlags )
+                                                                                                                    , const std::list<FInbetweenerBreakdown*>& iBreakdownList )
+    : FOdysseyVectorUndo( iSharedEnv )
 {
     //mEngineList = iEngineList;
 

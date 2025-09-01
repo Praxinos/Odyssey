@@ -20,14 +20,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoTagInbetweenerChartAlter : public FOdy
     public:
         ~FOdysseyVectorUndoTagInbetweenerChartAlter();
         FOdysseyVectorUndoTagInbetweenerChartAlter( FOdysseyVectorGroupPaint* iScene
-                                                  , FOdysseyVectorTagInbetweener* iInbetweenerTag
-                                                  , uint64 iReturnFlags );
+                                                  , FOdysseyVectorTagInbetweener* iInbetweenerTag );
         FOdysseyVectorUndoTagInbetweenerChartAlter( FOdysseyVectorGroupPaint* iScene
-                                                  , const std::list<FOdysseyVectorTagInbetweener*>& iInbetweenerTagList
-                                                  , uint64 iReturnFlags );
+                                                  , const std::list<FOdysseyVectorTagInbetweener*>& iInbetweenerTagList );
         FOdysseyVectorUndoTagInbetweenerChartAlter( FOdysseyVectorLayer* iSharedEnv
-                                                  , const std::list<FOdysseyVectorTag*>& tagList
-                                                  , uint64 iReturnFlags );
+                                                  , const std::list<FOdysseyVectorTag*>& tagList );
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;
 

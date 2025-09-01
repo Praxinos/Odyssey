@@ -49,8 +49,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorLayer : public FOdysseyVectorObject
 {
     public:
         DECLARE_MULTICAST_DELEGATE_TwoParams( FNotifyDelegate
-                                            , FOdysseyVectorLayer* iLayer
-                                            , const FOdysseyVectorObjectInvalidationFlags& iDelegateFlags )
+                                            , const FOdysseyVectorObjectInvalidationFlags& iLayerInvalidationFlags
+                                            , uint32 iUpdateFlags )
 
     private:
         static const uint32 mStaticClass = 0x442744a7; // value is crc32 FOdysseyVectorLayer
@@ -104,7 +104,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorLayer : public FOdysseyVectorObject
         void ResetHUD( FOdysseyVectorGroupPaint* iScene );
 
     protected:
-        void Notify( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags );
+        void Notify( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags
+                   , uint32 iUpdateFlags );
 
     private:
         std::list<FOdysseyVectorCell*> mInvalidatedCellList;

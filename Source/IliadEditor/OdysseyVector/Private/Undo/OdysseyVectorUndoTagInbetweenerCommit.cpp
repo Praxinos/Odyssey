@@ -28,9 +28,8 @@ FOdysseyVectorUndoTagInbetweenerCommit::~FOdysseyVectorUndoTagInbetweenerCommit(
 FOdysseyVectorUndoTagInbetweenerCommit::FOdysseyVectorUndoTagInbetweenerCommit( FOdysseyVectorLayer* iSharedEnv
                                                                               , const std::list<FOdysseyVectorTag*>& iRemovedTagList
                                                                               , const std::list<FOdysseyVectorObject*>& iAddedObjectList
-                                                                              , const std::list<FOdysseyVectorGroupPaint*>& iCommittedSceneList
-                                                                              , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iSharedEnv, iReturnFlags )
+                                                                              , const std::list<FOdysseyVectorGroupPaint*>& iCommittedSceneList )
+    : FOdysseyVectorUndo( iSharedEnv )
     , mRemovedTagList( iRemovedTagList )
     , mAddedObjectList( iAddedObjectList )
     , mCommittedSceneList( iCommittedSceneList )

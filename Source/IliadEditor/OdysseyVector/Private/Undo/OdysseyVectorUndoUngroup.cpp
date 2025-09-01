@@ -23,9 +23,8 @@ FOdysseyVectorUndoUngroup::~FOdysseyVectorUndoUngroup()
 }
 
 FOdysseyVectorUndoUngroup::FOdysseyVectorUndoUngroup( FOdysseyVectorGroupPaint* iScene
-                                                    , FOdysseyVectorGroup* iGroup
-                                                    , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
+                                                    , FOdysseyVectorGroup* iGroup )
+    : FOdysseyVectorUndo( iScene->GetLayer() )
     , mGroup( iGroup )
     , mScene( iScene )
 {

@@ -12,9 +12,8 @@ FOdysseyVectorUndoObjectTransform::~FOdysseyVectorUndoObjectTransform()
 }
 
 FOdysseyVectorUndoObjectTransform::FOdysseyVectorUndoObjectTransform( FOdysseyVectorGroupPaint* iScene
-                                                                    , FOdysseyVectorObject* iObject
-                                                                    , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
+                                                                    , FOdysseyVectorObject* iObject )
+    : FOdysseyVectorUndo( iScene->GetLayer() )
 {
     mObjectSnapshotBuffer.emplace_back( iObject
                                       , FSnapshotFlags::Object::TRANSFORMATIONS
@@ -22,9 +21,8 @@ FOdysseyVectorUndoObjectTransform::FOdysseyVectorUndoObjectTransform( FOdysseyVe
 }
 
 FOdysseyVectorUndoObjectTransform::FOdysseyVectorUndoObjectTransform( FOdysseyVectorGroupPaint* iScene
-                                                                    , std::list<FOdysseyVectorObject*>& iObjectList
-                                                                    , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
+                                                                    , std::list<FOdysseyVectorObject*>& iObjectList )
+    : FOdysseyVectorUndo( iScene->GetLayer() )
 {
     mObjectSnapshotBuffer.reserve( iObjectList.size() );
 

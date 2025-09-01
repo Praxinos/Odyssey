@@ -154,14 +154,15 @@ void FOdysseyVectorLayer::Update( uint32 iUpdateFlags )
 
     FOdysseyVectorObject::Update( iUpdateFlags );
 
-    Notify( invalidationFlags );
+    Notify( invalidationFlags, iUpdateFlags );
 }
 
 // static
 void
-FOdysseyVectorLayer::Notify( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags )
+FOdysseyVectorLayer::Notify( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags
+                           , uint32 iUpdateFlags )
 {
-    OnNotifyDelegate().Broadcast( this, iInvalidationFlags );
+    OnNotifyDelegate().Broadcast( iInvalidationFlags, iUpdateFlags );
 }
 
 void

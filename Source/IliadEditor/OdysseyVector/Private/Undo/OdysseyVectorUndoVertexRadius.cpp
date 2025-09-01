@@ -20,9 +20,8 @@ FOdysseyVectorUndoVertexRadius::~FOdysseyVectorUndoVertexRadius()
 }
 
 FOdysseyVectorUndoVertexRadius::FOdysseyVectorUndoVertexRadius( FOdysseyVectorGroupPaint* iScene
-                                                              , std::vector<FOdysseyVectorPath*>& iPathArray
-                                                              , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
+                                                              , std::vector<FOdysseyVectorPath*>& iPathArray )
+    : FOdysseyVectorUndo( iScene->GetLayer() )
 {
     mPathSnapshotBuffer.reserve( iPathArray.size() );
 
@@ -35,9 +34,8 @@ FOdysseyVectorUndoVertexRadius::FOdysseyVectorUndoVertexRadius( FOdysseyVectorGr
 }
 
 FOdysseyVectorUndoVertexRadius::FOdysseyVectorUndoVertexRadius( FOdysseyVectorGroupPaint* iScene
-                                                              , std::vector<FOdysseyVectorVertex*>& iVertexArray
-                                                              , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
+                                                              , std::vector<FOdysseyVectorVertex*>& iVertexArray )
+    : FOdysseyVectorUndo( iScene->GetLayer() )
 {
     mVertexSnapshotBuffer.reserve( iVertexArray.size() );
 

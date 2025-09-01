@@ -19,9 +19,8 @@ FOdysseyVectorUndoVertexLock::~FOdysseyVectorUndoVertexLock()
 }
 
 FOdysseyVectorUndoVertexLock::FOdysseyVectorUndoVertexLock( FOdysseyVectorGroupPaint* iScene
-                                                          , const std::vector<FOdysseyVectorVertex*>& iAlignedVertexArray
-                                                          , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
+                                                          , const std::vector<FOdysseyVectorVertex*>& iAlignedVertexArray )
+    : FOdysseyVectorUndo( iScene->GetLayer() )
 {
     //------ Backup vertex lock flag part ---------//
 

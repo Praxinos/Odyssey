@@ -76,8 +76,7 @@ UOdysseyPainterEditorVectorChartTool::LoadVector( FOdysseyVectorGroupPaint* iSce
 
 bool
 UOdysseyPainterEditorVectorChartTool::OnKeyDownGlobalVector( FOdysseyVectorGroupPaint* iScene
-                                                           , const FKeyEvent& InKeyEvent
-                                                           , uint64& oSignalFlags )
+                                                           , const FKeyEvent& InKeyEvent )
 {
     if( InKeyEvent.IsRepeat() == false )
     {
@@ -132,8 +131,7 @@ UOdysseyPainterEditorVectorChartTool::OnKeyDownGlobalVector( FOdysseyVectorGroup
 
 bool
 UOdysseyPainterEditorVectorChartTool::OnKeyUpGlobalVector( FOdysseyVectorGroupPaint* iScene
-                                                         , const FKeyEvent& InKeyEvent
-                                                         , uint64& oSignalFlags )
+                                                         , const FKeyEvent& InKeyEvent )
 {
     EditionMode = eVectorChartEditionMode::OneByOne;
 
@@ -143,13 +141,10 @@ UOdysseyPainterEditorVectorChartTool::OnKeyUpGlobalVector( FOdysseyVectorGroupPa
 bool
 UOdysseyPainterEditorVectorChartTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                        , const FOdysseyPoint& iPointInTexture
-                                                       , const FKey& iKey
-                                                       , uint64& oSignalFlags )
+                                                       , const FKey& iKey )
 {
     if (iKey != EKeys::LeftMouseButton)
         return false;
-
-    uint64 notificationFlags = 0;
 
     mPickedBreakdown = nullptr;
     mPickedInbetween = nullptr;
@@ -180,8 +175,7 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDownVector( FOdysseyVectorGroupPain
                     if( GUndo )
                     {
                         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerChartAlter( iScene
-                                                                                                 , inbetweenerTag
-                                                                                                 , notificationFlags );
+                                                                                                 , inbetweenerTag );
 
                         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -215,8 +209,7 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDownVector( FOdysseyVectorGroupPain
                     if( GUndo )
                     {
                         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerChartAlter( iScene
-                                                                                                 , inbetweenerTag
-                                                                                                 , notificationFlags );
+                                                                                                 , inbetweenerTag );
 
                         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -233,8 +226,6 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDownVector( FOdysseyVectorGroupPain
     // Calling Update via Root will request a redraw even if root is not invalidated
     //iScene->GetRoot()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
 
-    oSignalFlags = notificationFlags;
-
     return true;
 }
 
@@ -246,8 +237,7 @@ UOdysseyPainterEditorVectorChartTool::GetHoveredInbetween()
 
 void
 UOdysseyPainterEditorVectorChartTool::OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
-                                                        , const FOdysseyPoint& iPointInTexture
-                                                        , uint64& oSignalFlags )
+                                                        , const FOdysseyPoint& iPointInTexture )
 {
     mHoveredInbetween = nullptr;
 
@@ -263,12 +253,10 @@ UOdysseyPainterEditorVectorChartTool::OnMouseHoverVector( FOdysseyVectorGroupPai
 
 void
 UOdysseyPainterEditorVectorChartTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
-                                                        , const FOdysseyPoint& iPointInTexture
-                                                        , uint64& oSignalFlags )
+                                                        , const FOdysseyPoint& iPointInTexture )
 {
     static FVector2D deltaPositionCumul = FVector2D( 0.0f, 0.0f );
     FOdysseyPoint pointInTexture = iPointInTexture;
-    uint64 notificationFlags = 0;
 
     // because we ignore some events, we need to accumulate the delta
     deltaPositionCumul += iPointInTexture.deltaPosition;
@@ -394,20 +382,15 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDragVector( FOdysseyVectorGroupPain
     iScene->GetLayer()->RequestRedraw( iScene->GetCell(), FOdysseyVectorCell::REDRAW_INTERACTIVE );
 
     deltaPositionCumul = FVector2D( 0.0f, 0.0f );
-
-    oSignalFlags = notificationFlags;
 }
 
 bool
 UOdysseyPainterEditorVectorChartTool::OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                                         , const FOdysseyPoint& iPointInTexture
-                                                        , const FKey& iKey
-                                                        , uint64& oSignalFlags )
+                                                        , const FKey& iKey )
 {
     if (iKey != EKeys::LeftMouseButton)
         return false;
-
-    uint64 retFlags = 0;
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
@@ -425,12 +408,10 @@ UOdysseyPainterEditorVectorChartTool::OnMouseUpVector( FOdysseyVectorGroupPaint*
         }
     }
 
-    oSignalFlags = retFlags;
-
     return true;
 }
 
-uint64
+void
 UOdysseyPainterEditorVectorChartTool::PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
                                                            , const FName& iPropertyName )
 {
@@ -438,8 +419,6 @@ UOdysseyPainterEditorVectorChartTool::PropertyChangedVector( FOdysseyVectorGroup
 
     iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
     iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
-
-    return 0;
 }
 
 eVectorChartEditionMode

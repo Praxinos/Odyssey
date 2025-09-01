@@ -96,8 +96,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::LoadVector( FOdysseyVectorGroup
 
 bool
 UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnKeyDownVector( FOdysseyVectorGroupPaint* iScene
-                                                                , const FKey& iKey
-                                                                , uint64& oSignalFlags )
+                                                                , const FKey& iKey )
 {
     UniformAtKeyDown = Uniform;
 
@@ -112,8 +111,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnKeyDownVector( FOdysseyVector
 
 bool
 UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnKeyUpVector( FOdysseyVectorGroupPaint* iScene
-                                                              , const FKey& iKey
-                                                              , uint64& oSignalFlags )
+                                                              , const FKey& iKey )
 {
     Uniform = UniformAtKeyDown;
 
@@ -142,14 +140,10 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::GetParentObject( FOdysseyVector
 bool
 UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                                   , const FOdysseyPoint& iPointInTexture
-                                                                  , const FKey& iKey
-                                                                  , uint64& oSignalFlags )
+                                                                  , const FKey& iKey )
 {
     if (iKey != EKeys::LeftMouseButton)
         return false;
-
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                             | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW;
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
@@ -206,8 +200,6 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDownVector( FOdysseyVect
     // redraw
     iScene->GetLayer()->RequestRedraw( iScene->GetCell(), FOdysseyVectorCell::REDRAW_INTERACTIVE );
 
-    oSignalFlags = notificationFlags;
-
     return true;
 }
 
@@ -234,11 +226,8 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::GetLineRotationAngle( FOdysseyV
 
 void
 UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
-                                                                  , const FOdysseyPoint& iPointInTexture
-                                                                  , uint64& oSignalFlags )
+                                                                  , const FOdysseyPoint& iPointInTexture )
 {
-    uint64 notificationFlags = 0;
-
     // Left mouse button clicked
     if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
     {
@@ -313,21 +302,15 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDragVector( FOdysseyVect
     }
 
     iScene->GetLayer()->RequestRedraw( iScene->GetCell(), FOdysseyVectorCell::REDRAW_INTERACTIVE );
-
-    oSignalFlags = notificationFlags;
 }
 
 bool
 UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                                                 , const FOdysseyPoint& iPointInTexture
-                                                                , const FKey& iKey
-                                                                , uint64& oSignalFlags )
+                                                                , const FKey& iKey )
 {
     if( iKey != EKeys::LeftMouseButton )
         return false;
-
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                             | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW;
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
@@ -353,7 +336,8 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUpVector( FOdysseyVector
             GEditor->BeginTransaction(LOCTEXT("vector-primitive-drawing-tool.transaction.draw-primitive","Vector Primitive Drawing Tool"));
             if( GUndo )
             {
-                FOdysseyVectorUndo *undo = new FOdysseyVectorUndoObjectAdd( iScene, path, notificationFlags );
+                FOdysseyVectorUndo *undo = new FOdysseyVectorUndoObjectAdd( iScene
+                                                                          , path );
 
                 GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -368,8 +352,6 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUpVector( FOdysseyVector
     }
 
     iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
-
-    oSignalFlags = notificationFlags;
 
     return true;
 }

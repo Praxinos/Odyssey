@@ -12,9 +12,8 @@ FOdysseyVectorUndoSelectVertex::~FOdysseyVectorUndoSelectVertex()
 }
 
 FOdysseyVectorUndoSelectVertex::FOdysseyVectorUndoSelectVertex( FOdysseyVectorGroupPaint* iScene
-                                                              , const std::list<FOdysseyVectorObject*>& iObjectList
-                                                              , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
+                                                              , const std::list<FOdysseyVectorObject*>& iObjectList )
+    : FOdysseyVectorUndo( iScene->GetLayer() )
 {
     uint32 pathCount = 0;
     uint32 groupCount = 0;

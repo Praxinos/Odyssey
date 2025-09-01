@@ -12,9 +12,8 @@ FOdysseyVectorUndoSceneClear::~FOdysseyVectorUndoSceneClear()
     delete mScene;
 }
 
-FOdysseyVectorUndoSceneClear::FOdysseyVectorUndoSceneClear( FOdysseyVectorGroupPaint* iScene
-                                                          , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
+FOdysseyVectorUndoSceneClear::FOdysseyVectorUndoSceneClear( FOdysseyVectorGroupPaint* iScene )
+    : FOdysseyVectorUndo( iScene->GetLayer() )
     , mScene ( iScene )
     , mCell ( iScene->GetCell() )
 {

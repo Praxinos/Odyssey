@@ -12,25 +12,23 @@
 #include "OdysseyVectorObject.h"
 #include "OdysseyVectorGroupPaint.h"
 
+
+
 class ODYSSEYVECTOR_API FOdysseyVectorUndoObjectParam : public FOdysseyVectorUndo
 {
     public:
         ~FOdysseyVectorUndoObjectParam();
          FOdysseyVectorUndoObjectParam( FOdysseyVectorLayer* iLayer
                                       , FOdysseyVectorObject* iObject
-                                      , const FName& iCategoryName
-                                      , uint64 iReturnFlags );
+                                      , const FName& iCategoryName );
          FOdysseyVectorUndoObjectParam( FOdysseyVectorLayer* iLayer
                                       , const std::vector<FOdysseyVectorObject*>& iObjectArray
-                                      , const FName& iCategoryName
-                                      , uint64 iReturnFlags );
+                                      , const FName& iCategoryName );
          FOdysseyVectorUndoObjectParam( FOdysseyVectorLayer* iLayer
                                       , const std::list<FOdysseyVectorObject*>& iObjectList
-                                      , const FName& iCategoryName
-                                      , uint64 iReturnFlags );
+                                      , const FName& iCategoryName );
         FOdysseyVectorUndoObjectParam( FOdysseyVectorLayer* iLayer
-                                     , FOdysseyVectorObject* iObject
-                                     , uint64 iReturnFlags );
+                                     , FOdysseyVectorObject* iObject );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;
@@ -56,6 +54,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoObjectVisibility : public FOdysseyVect
     public:
         ~FOdysseyVectorUndoObjectVisibility();
          FOdysseyVectorUndoObjectVisibility( FOdysseyVectorLayer* iLayer
-                                           , FOdysseyVectorObject* iObject
-                                           , uint64 iReturnFlags );
+                                           , FOdysseyVectorObject* iObject );
 };
