@@ -14,16 +14,24 @@ This summary of license terms is for your convenience only and is not legally bi
  
 
 You may:
-    -Modify and adjust the source code of Odyssey to your needs
-    -Commercially distribute your Projects made with Odyssey
-    -Distribute Odyssey to your employees, affiliates and contractors, as sources or plugin
+
+- Modify and adjust the source code of Odyssey to your needs
+
+- Commercially distribute your Projects made with Odyssey
+
+- Distribute Odyssey to your employees, affiliates and contractors, as sources or plugin
 
  You may not:
-    -Resell or redistribute Odyssey or allow anyone else to resell or redistribute Odyssey
-    -Make derivates from Odyssey sources
-    -Use Odyssey sources to train AI programs
+
+- Resell or redistribute Odyssey or allow anyone else to resell or redistribute Odyssey
+
+- Make derivates from Odyssey sources
+
+- Use Odyssey sources to train AI programs
 
  
 Additional notes:
-    -You are not required to give credit to Praxinos (but it’s always welcome)
-    -No warranties are given
+   
+- You are not required to give credit to Praxinos (but it’s always welcome)
+
+- No warranties are given
