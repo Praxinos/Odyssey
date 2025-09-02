@@ -84,7 +84,9 @@ void
 SOdysseyAnimationLayerImageVectorTimelineInbetweening::OnVectorSceneNotify( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags
                                                                           , uint32 iUpdateFlags )
 {
-    if( ( iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::TAG_LIST] )
+    if( ( iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::HIERARCHY] )
+     || ( iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_HIERARCHY] )
+     || ( iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::TAG_LIST] )
      || ( iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_TAG_LIST] ) )
     {
         Update();

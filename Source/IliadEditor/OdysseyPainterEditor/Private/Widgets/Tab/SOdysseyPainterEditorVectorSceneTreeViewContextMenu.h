@@ -20,6 +20,6 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorSceneTreeViewContextMe
     protected:
         static bool CanAddInbetweener( FOdysseyVectorGroupPaint* iScene );
         static bool CanAlterInbetweener( FOdysseyVectorGroupPaint* iScene );
+        static bool CanUngroup( FOdysseyVectorGroupPaint* iScene );
         static void Group( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iPaintGroup );
-
 };

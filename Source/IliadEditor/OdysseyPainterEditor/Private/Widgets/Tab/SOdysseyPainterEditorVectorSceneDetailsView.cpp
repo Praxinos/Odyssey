@@ -183,6 +183,10 @@ SOdysseyPainterEditorVectorSceneDetailsView::ParseVectorNotifications( const FOd
 {
     if( ( iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::DEFAULT] )
      || ( iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_DEFAULT] )
+     || ( iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::MATRIX] )
+     || ( iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_MATRIX] )
+     || ( iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::PARAM] )
+     || ( iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_PARAM] )
      || ( iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::OBJECT_SELECTION] )
      || ( iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_OBJECT_SELECTION] ) )
     {

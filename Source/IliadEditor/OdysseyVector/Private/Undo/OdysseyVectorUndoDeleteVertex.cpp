@@ -25,6 +25,7 @@ FOdysseyVectorUndoDeleteVertex::FOdysseyVectorUndoDeleteVertex( FOdysseyVectorGr
 
             mPathSnapshotBuffer.emplace_back( path
                                             , FSnapshotFlags::Object::Path::TOPOLOGY
+                                            | FSnapshotFlags::Object::Path::SELECTED_VERTICES
                                             , eSnapshotState::Initial );
         }
     }

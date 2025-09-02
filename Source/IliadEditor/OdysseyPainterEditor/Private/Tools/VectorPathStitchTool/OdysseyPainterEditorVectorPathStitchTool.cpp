@@ -206,6 +206,8 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseUpVector( FOdysseyVectorGroupP
     iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
     iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
+    mPathStitchHUD->Reset();
+
     return true;
 }
 

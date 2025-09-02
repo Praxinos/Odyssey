@@ -327,7 +327,7 @@ UOdysseyPainterEditorVectorBaseTool::Load()
                 // 3D HUD
                 mHUD->AddElement( mBaseHUD );
 
-                mWorkingCell->GetLayer()->GetLayer()->ResetHUD( mWorkingCell->GetScene() );
+                mWorkingCell->GetLayer()->ResetHUD( mWorkingCell->GetScene() );
             }
 
             /**
@@ -1097,7 +1097,8 @@ UOdysseyPainterEditorVectorBaseTool::ExtendContextMenuObject( FOdysseyVectorGrou
           LOCTEXT("vector-tool.object-context-menu.ungroup.name", "Ungroup")
         , LOCTEXT("vector-tool.object-context-menu.ungroup.tooltip", "Ungroup")
         , FSlateIcon()
-        , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::Ungroup, GetEditor(), iScene )));
+        , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::Ungroup, GetEditor(), iScene )
+                  , FCanExecuteAction::CreateStatic( &UOdysseyPainterEditorVectorBaseTool::CanUngroup, iScene )));
     menu.AddMenuEntry(
           LOCTEXT("vector-tool.object-context-menu.bring-forward.name", "Bring forward")
         , LOCTEXT("vector-tool.object-context-menu.bring-forward.tooltip", "Bring forward")
@@ -1128,7 +1129,7 @@ UOdysseyPainterEditorVectorBaseTool::ExtendContextMenuObject( FOdysseyVectorGrou
         , LOCTEXT("vector-tool.object-context-menu.clear-coloring.tooltip", "Clear Coloring")
         , FSlateIcon()
         , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::ClearColoring, GetEditor(), iScene )
-                  , FCanExecuteAction::CreateUObject( this, &UOdysseyPainterEditorVectorBaseTool::CanBePainted, iScene )));
+                  , FCanExecuteAction::CreateStatic( &UOdysseyPainterEditorVectorBaseTool::CanBePainted, iScene )));
     menu.AddMenuEntry(
           LOCTEXT("vector-tool.object-context-menu.apply-transformations.name", "Apply Transformations")
         , LOCTEXT("vector-tool.object-context-menu.apply-transformations.tooltip", "Apply Transformations")
@@ -1215,7 +1216,7 @@ UOdysseyPainterEditorVectorBaseTool::ExtendContextMenuInbetween( FOdysseyVectorG
                 , LOCTEXT("vector-tool.inbetween-context-menu.groupadd-inbetweener-tag.tooltip", "Group and Add Inbetweener Tag")
                 , FSlateIcon()
                 , FUIAction( FExecuteAction::CreateStatic( &FOdysseyPainterEditor::GroupAndAddInbetweenerTag, GetEditor(), iScene )
-                           , FCanExecuteAction::CreateUObject( this, &UOdysseyPainterEditorVectorBaseTool::CanAddTag, iScene ) ) );
+                           , FCanExecuteAction::CreateStatic( &UOdysseyPainterEditorVectorBaseTool::CanAddTag, iScene ) ) );
     }
 
     menu.AddMenuEntry(
@@ -1223,21 +1224,21 @@ UOdysseyPainterEditorVectorBaseTool::ExtendContextMenuInbetween( FOdysseyVectorG
             , LOCTEXT("vector-tool.inbetween-context-menu.add-inbetweener-tag.tooltip", "Add Inbetweener Tag")
             , FSlateIcon()
             , FUIAction( FExecuteAction::CreateStatic( &FOdysseyPainterEditor::AddInbetweenerTag, GetEditor(), iScene )
-                       , FCanExecuteAction::CreateUObject( this, &UOdysseyPainterEditorVectorBaseTool::CanAddTag, iScene )));
+                       , FCanExecuteAction::CreateStatic( &UOdysseyPainterEditorVectorBaseTool::CanAddTag, iScene )));
 
     menu.AddMenuEntry(
               LOCTEXT("vector-tool.inbetween-context-menu.remove-inbetweener-tag.name", "Remove Inbetweener Tag")
             , LOCTEXT("vector-tool.inbetween-context-menu.remove-inbetweener-tag.tooltip", "Remove Inbetweener Tag")
             , FSlateIcon()
             , FUIAction( FExecuteAction::CreateStatic( &FOdysseyPainterEditor::RemoveInbetweenerTag, GetEditor(), iScene )
-                       , FCanExecuteAction::CreateUObject( this, &UOdysseyPainterEditorVectorBaseTool::CanAlterTag, iScene )));
+                       , FCanExecuteAction::CreateStatic( &UOdysseyPainterEditorVectorBaseTool::CanAlterTag, iScene )));
 
     menu.AddMenuEntry(
             LOCTEXT("vector-tool.inbetween-context-menu.commit-inbetweener-tag.name", "Commit Inbetweener Tag")
           , LOCTEXT("vector-tool.inbetween-context-menu.commit-inbetweener-tag.tooltip", "Commit Inbetweener Tag")
           , FSlateIcon()
           , FUIAction( FExecuteAction::CreateStatic( &FOdysseyPainterEditor::CommitSelectedInbetweenerTag, GetEditor(), iScene->GetLayer() )
-                     , FCanExecuteAction::CreateUObject( this, &UOdysseyPainterEditorVectorBaseTool::CanAlterTag, iScene )));
+                     , FCanExecuteAction::CreateStatic( &UOdysseyPainterEditorVectorBaseTool::CanAlterTag, iScene )));
 
     menu.AddSubMenu(
         LOCTEXT("vector-tool.inbetween-context-menu.reset-grid.name", "Reset Grid")
@@ -1249,14 +1250,14 @@ UOdysseyPainterEditorVectorBaseTool::ExtendContextMenuInbetween( FOdysseyVectorG
       , LOCTEXT("vector-tool.inbetween-context-menu.copy-grid.tooltip", "Copy Grid")
       , FSlateIcon()
       , FUIAction( FExecuteAction::CreateStatic( &FOdysseyPainterEditor::CopyInbetweenerGrid, iScene )
-                 , FCanExecuteAction::CreateUObject( this, &UOdysseyPainterEditorVectorBaseTool::CanAlterTag, iScene )));
+                 , FCanExecuteAction::CreateStatic( &UOdysseyPainterEditorVectorBaseTool::CanAlterTag, iScene )));
 
     menu.AddMenuEntry(
         LOCTEXT("vector-tool.inbetween-context-menu.paste-grid.name", "Paste Grid")
       , LOCTEXT("vector-tool.inbetween-context-menu.paste-grid.tooltip", "Paste Grid")
       , FSlateIcon()
       , FUIAction( FExecuteAction::CreateStatic( &FOdysseyPainterEditor::PasteInbetweenerGrid, GetEditor(), iScene )
-                 , FCanExecuteAction::CreateUObject( this, &UOdysseyPainterEditorVectorBaseTool::CanAlterTag, iScene )));
+                 , FCanExecuteAction::CreateStatic( &UOdysseyPainterEditorVectorBaseTool::CanAlterTag, iScene )));
 
     menu.AddSubMenu(
             LOCTEXT("vector-tool.inbetween-context-menu.reset-spacing.name", "Reset Spacing")
@@ -1289,6 +1290,26 @@ UOdysseyPainterEditorVectorBaseTool::ExtendContextMenuInbetween( FOdysseyVectorG
 
 //    }
 //    menu.EndSection();
+}
+
+// static
+bool
+UOdysseyPainterEditorVectorBaseTool::CanUngroup( FOdysseyVectorGroupPaint* iScene )
+{
+    bool ret = false;
+
+    for( FOdysseyVectorObject* selectedObject : iScene->GetCell()->GetSelectedObjectList() )
+    {
+        if( ( selectedObject->HasBaseClass( FOdysseyVectorGroup::StaticClass() ) == false )
+         || ( selectedObject == iScene ) )
+        {
+            return false;
+        }
+
+        ret = true;
+    }
+
+    return ret;
 }
 
 bool
@@ -1342,21 +1363,21 @@ UOdysseyPainterEditorVectorBaseTool::ResetGridMenu( FMenuBuilder& menu
         , LOCTEXT("vector-tool.inbetween-context-menu.reset-grid-transformation.tooltip", "Transformation")
         , FSlateIcon()
         , FUIAction( FExecuteAction::CreateStatic( &FOdysseyPainterEditor::ResetInbetweenerGrid, GetEditor(), iScene, true, false )
-                   , FCanExecuteAction::CreateUObject( this, &UOdysseyPainterEditorVectorBaseTool::CanAlterTag, iScene )));
+                   , FCanExecuteAction::CreateStatic( &UOdysseyPainterEditorVectorBaseTool::CanAlterTag, iScene )));
 
     menu.AddMenuEntry(
           LOCTEXT("vector-tool.inbetween-context-menu.reset-grid-deformation.name", "Deformation")
         , LOCTEXT("vector-tool.inbetween-context-menu.reset-grid-deformation.tooltip", "Deformation")
         , FSlateIcon()
         , FUIAction( FExecuteAction::CreateStatic( &FOdysseyPainterEditor::ResetInbetweenerGrid, GetEditor(), iScene, false, true )
-                   , FCanExecuteAction::CreateUObject( this, &UOdysseyPainterEditorVectorBaseTool::CanAlterTag, iScene )));
+                   , FCanExecuteAction::CreateStatic( &UOdysseyPainterEditorVectorBaseTool::CanAlterTag, iScene )));
 
     menu.AddMenuEntry(
           LOCTEXT("vector-tool.inbetween-context-menu.reset-grid-both.name", "Both")
         , LOCTEXT("vector-tool.inbetween-context-menu.reset-grid-both.tooltip", "Both")
         , FSlateIcon()
         , FUIAction( FExecuteAction::CreateStatic( &FOdysseyPainterEditor::ResetInbetweenerGrid, GetEditor(), iScene, true, true )
-                   , FCanExecuteAction::CreateUObject( this, &UOdysseyPainterEditorVectorBaseTool::CanAlterTag, iScene )));
+                   , FCanExecuteAction::CreateStatic( &UOdysseyPainterEditorVectorBaseTool::CanAlterTag, iScene )));
 }
 
 void
@@ -1368,14 +1389,14 @@ UOdysseyPainterEditorVectorBaseTool::ResetSpacingMenu( FMenuBuilder& menu
         , LOCTEXT("vector-tool.inbetween-context-menu.reset-spacing-current-breakdown.tooltip", "Current Breakdown")
         , FSlateIcon()
         , FUIAction( FExecuteAction::CreateStatic( &FOdysseyPainterEditor::ResetSpacingChart, GetEditor(), iScene, false, true )
-                   , FCanExecuteAction::CreateUObject( this, &UOdysseyPainterEditorVectorBaseTool::CanAlterTag, iScene )));
+                   , FCanExecuteAction::CreateStatic( &UOdysseyPainterEditorVectorBaseTool::CanAlterTag, iScene )));
 
     menu.AddMenuEntry(
           LOCTEXT("vector-tool.inbetween-context-menu.reset-spacing-all-breakdowns.name", "All Breakdonws")
         , LOCTEXT("vector-tool.inbetween-context-menu.reset-spacing-all-breakdowns.tooltip", "All Breakdonws")
         , FSlateIcon()
         , FUIAction( FExecuteAction::CreateStatic( &FOdysseyPainterEditor::ResetSpacingChart, GetEditor(), iScene, false, false )
-                   , FCanExecuteAction::CreateUObject( this, &UOdysseyPainterEditorVectorBaseTool::CanAlterTag, iScene )));
+                   , FCanExecuteAction::CreateStatic( &UOdysseyPainterEditorVectorBaseTool::CanAlterTag, iScene )));
 }
 
 void
@@ -1387,14 +1408,14 @@ UOdysseyPainterEditorVectorBaseTool::CopySpacingMenu( FMenuBuilder& menu
         , LOCTEXT("vector-tool.inbetween-context-menu.copy-spacing-current-breakdown.tooltip", "Current Breakdown")
         , FSlateIcon()
         , FUIAction( FExecuteAction::CreateStatic( &FOdysseyPainterEditor::CopySpacingChart, GetEditor(), iScene, true )
-                   , FCanExecuteAction::CreateUObject( this, &UOdysseyPainterEditorVectorBaseTool::CanAlterTag, iScene )));
+                   , FCanExecuteAction::CreateStatic( &UOdysseyPainterEditorVectorBaseTool::CanAlterTag, iScene )));
 
     menu.AddMenuEntry(
           LOCTEXT("vector-tool.inbetween-context-menu.copy-spacing-all-breakdowns.name", "All Breakdonws")
         , LOCTEXT("vector-tool.inbetween-context-menu.copy-spacing-all-breakdowns.tooltip", "All Breakdonws")
         , FSlateIcon()
         , FUIAction( FExecuteAction::CreateStatic( &FOdysseyPainterEditor::CopySpacingChart, GetEditor(), iScene, false )
-                   , FCanExecuteAction::CreateUObject( this, &UOdysseyPainterEditorVectorBaseTool::CanAlterTag, iScene )));
+                   , FCanExecuteAction::CreateStatic( &UOdysseyPainterEditorVectorBaseTool::CanAlterTag, iScene )));
 }
 
 void
@@ -1406,14 +1427,14 @@ UOdysseyPainterEditorVectorBaseTool::PasteSpacingMenu( FMenuBuilder& menu
         , LOCTEXT("vector-tool.inbetween-context-menu.paste-spacing-current-breakdown.tooltip", "Current Breakdown")
         , FSlateIcon()
         , FUIAction( FExecuteAction::CreateStatic( &FOdysseyPainterEditor::PasteSpacingChart, GetEditor(), iScene, true )
-                   , FCanExecuteAction::CreateUObject( this, &UOdysseyPainterEditorVectorBaseTool::CanAlterTag, iScene )));
+                   , FCanExecuteAction::CreateStatic( &UOdysseyPainterEditorVectorBaseTool::CanAlterTag, iScene )));
 
     menu.AddMenuEntry(
           LOCTEXT("vector-tool.inbetween-context-menu.paste-spacing-all-breakdowns.name", "All Breakdonws")
         , LOCTEXT("vector-tool.inbetween-context-menu.paste-spacing-all-breakdowns.tooltip", "All Breakdonws")
         , FSlateIcon()
         , FUIAction( FExecuteAction::CreateStatic( &FOdysseyPainterEditor::PasteSpacingChart, GetEditor(), iScene, false )
-                   , FCanExecuteAction::CreateUObject( this, &UOdysseyPainterEditorVectorBaseTool::CanAlterTag, iScene )));
+                   , FCanExecuteAction::CreateStatic( &UOdysseyPainterEditorVectorBaseTool::CanAlterTag, iScene )));
 }
 
 #ifndef M_PI

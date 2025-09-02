@@ -302,11 +302,12 @@ FOdysseyVectorObject::Update( uint32 iUpdateFlags )
             UpdateBBox();
         }
 
-        if( ( mInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::SHAPE]        )
-         || ( mInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::MATRIX]       )
-         || ( mInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_SHAPE]  )
-         || ( mInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_MATRIX] )
-         || ( mInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::HIERARCHY]    ) )
+        if( ( mInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::SHAPE]           )
+         || ( mInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::MATRIX]          )
+         || ( mInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::HIERARCHY]       )
+         || ( mInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_SHAPE]     )
+         || ( mInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_MATRIX  ]  )
+         || ( mInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_HIERARCHY] ) )
         {
             MakeInDepthBBox();
         }
@@ -715,7 +716,8 @@ FOdysseyVectorObject::UpdateMatrix()
         tag->UpdateMatrix();
     }
 
-    mInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::MATRIX] = 0;
+    // Commented-out : flag reset is handle by Update()
+    //mInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::MATRIX] = 0;
 }
 
 //static
@@ -1041,12 +1043,12 @@ FOdysseyVectorObject::SendBackward()
                 {
                     std::swap(*it1, *it2);
 
+                    Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::HIERARCHY) );
+
                     return;
                 }
             }
         }
-
-        Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::HIERARCHY) );
     }
 }
 
@@ -1068,12 +1070,14 @@ FOdysseyVectorObject::BringForward()
                 {
                     std::swap(*it1, *it2);
 
+                    Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::HIERARCHY) );
+
                     return;
                 }
             }
         }
 
-        Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::HIERARCHY) );
+
     }
 }
 
@@ -1228,7 +1232,7 @@ FOdysseyVectorObject::RemoveChild( FOdysseyVectorObject* iChild )
         mChildrenList.remove( iChild );
         mInvalidatedChildrenList.remove( iChild );
 
-        Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::HIERARCHY) );
+        Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::CHILD_HIERARCHY) );
         // needed for undoing
         iChild->mOldParent = this;
         iChild->mParent = nullptr;

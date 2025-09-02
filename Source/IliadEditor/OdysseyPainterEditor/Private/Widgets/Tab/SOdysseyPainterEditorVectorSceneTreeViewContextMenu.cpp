@@ -50,7 +50,8 @@ SOdysseyPainterEditorVectorSceneTreeViewContextMenu::CreateWidget( SOdysseyPaint
             LOCTEXT("vector-scene-tree-view.context-menu.ungroup.name", "Ungroup")
           , LOCTEXT("vector-scene-tree-view.context-menu.ungroup.tooltip", "Ungroup")
           , FSlateIcon()
-          , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::Ungroup, iTreeView->GetEditor(), vectorScene )));
+          , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::Ungroup, iTreeView->GetEditor(), vectorScene )
+                    , FCanExecuteAction::CreateStatic( &SOdysseyPainterEditorVectorSceneTreeViewContextMenu::CanUngroup, vectorScene )));
 
         menu.AddMenuEntry(
             LOCTEXT("vector-scene-tree-view.context-menu.copy.name", "Copy")
@@ -138,6 +139,26 @@ SOdysseyPainterEditorVectorSceneTreeViewContextMenu::Group( FOdysseyPainterEdito
                                     , true );
 */
     FOdysseyPainterEditor::Group( iEditor, iPaintGroup );
+}
+
+// static
+bool
+SOdysseyPainterEditorVectorSceneTreeViewContextMenu::CanUngroup( FOdysseyVectorGroupPaint* iScene )
+{
+    bool ret = false;
+
+    for( FOdysseyVectorObject* selectedObject : iScene->GetCell()->GetSelectedObjectList() )
+    {
+        if( ( selectedObject->HasBaseClass( FOdysseyVectorGroup::StaticClass() ) == false )
+         || ( selectedObject == iScene ) )
+        {
+            return false;
+        }
+
+        ret = true;
+    }
+
+    return ret;
 }
 
 // static

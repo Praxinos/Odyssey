@@ -211,6 +211,8 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseUpVector( FOdysseyVectorGroupP
         std::vector<FOdysseyVectorPoint*> pickedPointArray = mPathSmoothHUD->GetPickedPointArray();
 
         iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS ); // update invalidated objects
+
+        iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
     }
 
     return true;

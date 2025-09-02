@@ -1007,6 +1007,8 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUpVector( FOdysseyVectorGroupPai
         iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
     }
 
+    mPathEditHUD->Reset();
+
     return true;
 }
 

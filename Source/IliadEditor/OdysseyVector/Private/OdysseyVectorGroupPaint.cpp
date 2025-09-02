@@ -1008,7 +1008,8 @@ FOdysseyVectorGroupPaint::UpdateShape( uint32 iUpdateFlags )
 {
     BLMatrix2D identityMatrix = BLMatrix2D( BLMatrix2D::makeIdentity() );
 
-    if( mInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::HIERARCHY] )
+    if( ( mInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::HIERARCHY] )
+     || ( mInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_HIERARCHY] ) )
     {
         UpdatePathList();
     }
@@ -1103,11 +1104,11 @@ FOdysseyVectorGroupPaint::UpdateShape( uint32 iUpdateFlags )
         if( ( bRealtime == true  )
        || ( ( bRealtime == false ) && ( iUpdateFlags & FOdysseyVectorObject::UPDATE_PAINTGROUPS ) ) )
         {
-            if( ( mInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::HIERARCHY]      )
-             || ( mInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_SHAPE]    )
-             || ( mInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_MATRIX]   )
-             || ( mInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_TOPOLOGY] )
-             || ( mInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::SHAPE]          ) )
+            if( ( mInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::SHAPE]           )
+             || ( mInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_HIERARCHY] )
+             || ( mInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_SHAPE]     )
+             || ( mInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_MATRIX]    )
+             || ( mInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_TOPOLOGY]  ) )
             {
                 FindCycles(); // also calls Clear()
             }

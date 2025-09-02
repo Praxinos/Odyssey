@@ -56,7 +56,7 @@ struct FOdysseyVectorObjectInvalidationFlags
     }
 
     public:
-        std::bitset<FLAG_COUNT> bits;
+        std::bitset<FLAG_COUNT*2> bits;
 };
 
 
