@@ -61,12 +61,6 @@ UOdysseyPainterEditorVectorTagInbetweenerView::UOdysseyPainterEditorVectorTagInb
 }
 
 void
-UOdysseyPainterEditorVectorTagInbetweenerView::OnUndoRedo()
-{
-    mScene->GetLayer()->ResetHUD( mScene );
-}
-
-void
 UOdysseyPainterEditorVectorTagInbetweenerView::ImportParam()
 {
     if( mSelectedInbetweenerTagArray.size() )

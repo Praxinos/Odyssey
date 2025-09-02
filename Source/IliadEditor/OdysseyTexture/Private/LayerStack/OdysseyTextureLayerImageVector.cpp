@@ -189,7 +189,6 @@ UOdysseyTextureLayerImageVector::PostLoad()
     mVectorBlock->OnInvalidated().AddUObject(this, &UOdysseyTextureLayerImageVector::OnVectorBlockInvalidated);
 
     mVectorLayer->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    //refactor mVectorLayer->Notify( FOdysseyVectorEngine::NOTIFY_ALL );
 
     // textures must be assigned to brushes in PostLoad and not in Serialize(), because the UAsset won't be fully loaded
     // and there dimensions would be 0 at that point.
@@ -292,7 +291,6 @@ UOdysseyTextureLayerImageVector::Serialize(FArchive& Ar)
         }
 
         mVectorLayer->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-        //refactor mVectorLayer->Notify( FOdysseyVectorEngine::NOTIFY_ALL );
     }
 }
 
@@ -389,8 +387,6 @@ UOdysseyTextureLayerImageVector::Merge(const TArray<UOdysseyLayer*>& iLayers)
 
     destinationScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
     destinationScene->GetLayer()->RequestRedraw( destinationScene->GetCell(), 0 );
-
-    //refactor destinationScene->GetLayer()->Notify( FOdysseyVectorEngine::NOTIFY_ALL );
 }
 
 // Implements Interface IOdysseyVectorLayer::GetWidth

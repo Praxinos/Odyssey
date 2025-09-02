@@ -910,19 +910,9 @@ UOdysseyPainterEditorVectorBaseTool::SetVectorEditionFlags( uint64 iViewMode )
             }
         }
 
-        // force invalidation ot force HUD update
+        // force invalidation
         mWorkingCell->Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::DEFAULT) );
-
-        //refactor
-        /*
-        mWorkingCell->GetLayer()->Notify( FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                                         | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                                         | FOdysseyPainterEditor::UI_UPDATE_TIMELINE
-                                         | FOdysseyVectorEngine::NOTIFY_UPDATE_HUD );
-        */
-
         mWorkingCell->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-
         mWorkingCell->GetLayer()->RequestRedraw( mWorkingCell, 0 );
     }
 }

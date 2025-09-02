@@ -279,9 +279,6 @@ SOdysseyPainterEditorVectorMassModifierView::PreviewProperties()
         // Update vector scene
         mVectorLayer->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
         mVectorLayer->RequestRedraw( nullptr, 0 );
-
-        // update widgets
-        //refactor mVectorLayer->Notify( FOdysseyVectorEngine::NOTIFY_UPDATE_HUD );
     }
 
     OnPreviewPropertiesDelegate.Broadcast();

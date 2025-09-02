@@ -48,8 +48,6 @@ FOdysseyVectorUndo::UpdateLayer()
     // update invalidated objects
     mLayer->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
-    //refactor mLayer->Notify( mReturnFlags );
-
     // prepare for full redraw
     for( FOdysseyVectorCell* cell : mLayer->GetInvalidateCellList() )
     {
