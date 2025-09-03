@@ -25,7 +25,7 @@ public:
         int32 mSpeed = 0; // Animate offset: mSpeed = world units per second
         bool mIsActive = false; // To toggle the customization on and off
         TArray<FLinearColor> mColors;
-        float mSegmentLength = INFINITY;
+        float mSegmentLength = std::numeric_limits<float>::infinity();
         float mGapLength = 0.f;
     };
 
