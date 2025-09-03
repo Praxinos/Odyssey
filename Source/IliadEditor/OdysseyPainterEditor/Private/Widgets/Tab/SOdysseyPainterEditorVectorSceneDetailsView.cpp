@@ -222,7 +222,10 @@ SOdysseyPainterEditorVectorSceneDetailsView::UpdateCurrentLayer( UOdysseyLayerSt
 void
 SOdysseyPainterEditorVectorSceneDetailsView::BindLayerDelegates()
 {
-    mVectorLayer->OnNotifyDelegate().AddSP( this, &SOdysseyPainterEditorVectorSceneDetailsView::OnVectorLayerNotify );
+    if( mVectorLayer.IsValid() )
+    {
+        mVectorLayer->OnNotifyDelegate().AddSP( this, &SOdysseyPainterEditorVectorSceneDetailsView::OnVectorLayerNotify );
+    }
 }
 
 void

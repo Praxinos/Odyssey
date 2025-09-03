@@ -459,7 +459,10 @@ SOdysseyPainterEditorVectorSceneTreeView::UpdateCurrentLayer( UOdysseyLayerStack
 void
 SOdysseyPainterEditorVectorSceneTreeView::BindLayerDelegates()
 {
-    mVectorLayer->OnNotifyDelegate().AddSP( this, &SOdysseyPainterEditorVectorSceneTreeView::OnVectorLayerNotify );
+    if( mVectorLayer.IsValid() )
+    {
+        mVectorLayer->OnNotifyDelegate().AddSP( this, &SOdysseyPainterEditorVectorSceneTreeView::OnVectorLayerNotify );
+    }
 }
 
 void
