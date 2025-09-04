@@ -425,7 +425,10 @@ void UOdysseyPalette::RemoveSet(FGuid iSetId)
 
     TArray<UOdysseyPaletteEntry*> entries = GetEntries();
     for (int i = 0; i < entries.Num(); i++)
+    {
+        entries[i]->Modify();
         entries[i]->RemoveSet(iSetId);
+    }
 
     SetsIDs.Remove(iSetId);
 }
