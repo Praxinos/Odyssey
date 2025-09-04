@@ -282,6 +282,8 @@ UOdysseyPainterEditorVectorBaseTool::Unload()
 
     if( mWorkingLayer )
     {
+        mWorkingLayer->OnUpdateDelegate().RemoveAll( this );
+
         if( mBaseHUD )
         {
             mBaseHUD->Unload();
@@ -327,6 +329,8 @@ UOdysseyPainterEditorVectorBaseTool::Load()
             mWorkingCell = mediaVectors[0]->GetScene()->GetCell();
             mWorkingLayer = mWorkingCell->GetLayer();
 
+            mWorkingLayer->OnUpdateDelegate().AddUObject( this, &UOdysseyPainterEditorVectorBaseTool::OnVectorLayerUpdate );
+
             mWorkingCell->GetLayer()->ClearHUD();
 
             if( mBaseHUD )
@@ -350,6 +354,20 @@ UOdysseyPainterEditorVectorBaseTool::Load()
             //END PATCH
 
             LoadVector( mWorkingCell->GetScene() );
+        }
+    }
+}
+
+void
+UOdysseyPainterEditorVectorBaseTool::OnVectorLayerUpdate( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags
+                                                        , uint32 iUpdateFlags )
+{
+    if( ( iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::OBJECT_SELECTION] )
+     || ( iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_OBJECT_SELECTION] ) )
+    {
+        if( mBaseHUD )
+        {
+            mBaseHUD->Reset();
         }
     }
 }

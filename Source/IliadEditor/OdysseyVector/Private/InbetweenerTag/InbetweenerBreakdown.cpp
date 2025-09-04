@@ -537,6 +537,8 @@ FInbetweenerBreakdown::UpdateMatrix()
     mInbetweenerTag->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_CELLS
                                | FOdysseyVectorTagInbetweener::INVALIDATE_ROUTES
                                | FOdysseyVectorTagInbetweener::INVALIDATE_SPACING );
+
+    mInbetweenerTag->GetOwner()->Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::MATRIX) );
 }
 
 void

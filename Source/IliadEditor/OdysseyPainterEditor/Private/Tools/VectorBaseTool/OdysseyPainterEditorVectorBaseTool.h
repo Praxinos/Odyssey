@@ -139,6 +139,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         void PopupContextMenu();
         TSharedPtr<SWidget> CreateContextMenu();
         void OnUndoRedo();
+        virtual void OnVectorLayerUpdate( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags
+                                        , uint32 iUpdateFlags );
 
     private:
         void Copy();

@@ -33,7 +33,6 @@ FOdysseyPainterEditorVectorPathEditToolHUD::Reset()
 
     MakePointQuadTree( true, hudFlags );
 
-    // Updates the selection box
     UpdateSelectionBox( false, hudFlags );
 }
 

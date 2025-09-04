@@ -73,6 +73,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorSelectionTool : public
 
         void Copy( FOdysseyVectorEngine* iEngine, FOdysseyVectorGroupPaint* iScene );
         void Paste( FOdysseyVectorEngine* iEngine, FOdysseyVectorGroupPaint* iScene );
+        virtual void OnVectorLayerUpdate( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags
+                                        , uint32 iUpdateFlags ) override;
 
 protected:
     void OnMouseUpVectorObjectMode( FOdysseyVectorGroupPaint* iScene

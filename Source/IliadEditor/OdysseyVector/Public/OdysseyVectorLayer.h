@@ -103,10 +103,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorLayer : public FOdysseyVectorObject
         void ClearHUD();
         void ResetHUD( FOdysseyVectorGroupPaint* iScene );
 
-    protected:
-        void Notify( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags
-                   , uint32 iUpdateFlags );
-
     private:
         std::list<FOdysseyVectorCell*> mInvalidatedCellList;
         std::list<FOdysseyVectorObject*> mSharedObjectList;

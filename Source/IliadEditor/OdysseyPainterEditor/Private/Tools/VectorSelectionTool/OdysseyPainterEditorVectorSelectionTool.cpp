@@ -97,6 +97,28 @@ UOdysseyPainterEditorVectorSelectionTool::UnloadVector( FOdysseyVectorGroupPaint
     return 0;
 }
 
+void
+UOdysseyPainterEditorVectorSelectionTool::OnVectorLayerUpdate( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags
+                                                             , uint32 iUpdateFlags )
+{
+    if( ( iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::MATRIX] )
+     || ( iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_MATRIX] )
+     || ( iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_SHAPE] )
+     || ( iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_TAG_INBETWEENER_SHAPE] )
+     || ( iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_MATRIX] )
+     || ( iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_TAG_INBETWEENER_MATRIX] ) )
+    {
+        if( mBaseHUD )
+        {
+            mBaseHUD->Reset();
+        }
+    }
+
+    // will react to OBJECT_SELECTION and CHILD_OBJECT_SELECTION.
+    // Will also Reset the HUD. the HUD in that case might be reset twice
+    UOdysseyPainterEditorVectorBaseTool::OnVectorLayerUpdate( iInvalidationFlags, iUpdateFlags );
+}
+
 bool
 UOdysseyPainterEditorVectorSelectionTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                            , const FOdysseyPoint& iPointInTexture

@@ -147,11 +147,12 @@ FOdysseyPainterEditorVectorGridToolHUD::ClearSelection()
 }
 
 void
-FOdysseyPainterEditorVectorGridToolHUD::PickNodes( double iWorldX
-                                                 , double iWorldY
-                                                 , double iWorldRadius
+FOdysseyPainterEditorVectorGridToolHUD::PickNodes( double iTexX
+                                                 , double iTexY
+                                                 , double iRadius
                                                  , std::vector<FGridNode*>& oNodeArray )
 {
+    FVector2D hudCoords = TextureToHUD( iTexX, iTexY );
     bool picked = false;
 
     if( mSelectionBox.rect.Area() )
@@ -161,10 +162,12 @@ FOdysseyPainterEditorVectorGridToolHUD::PickNodes( double iWorldX
         for( int i = 0; i < mNodeArray.size(); i++ )
         {
             FGridNode* node = &mNodeArray[i];
-            BLPoint pt = worldMatrix.mapPoint( node->GetX(), node->GetY() );
-            ::ULIS::FVec2D vec = ::ULIS::FVec2D( iWorldX - pt.x, iWorldY - pt.y );
+            ::ULIS::FVec2D worldNode = FOdysseyVector::MapPoint( worldMatrix, node->GetX(), node->GetY() );
+            FVector2D hudNode = TextureToHUD( worldNode.x, worldNode.y );
 
-            if ( vec.Distance() <= iWorldRadius )
+            FVector2D vec = hudCoords - hudNode;
+
+            if ( vec.Length() <= iRadius )
             {
                 oNodeArray.push_back( node );
             }
@@ -206,10 +209,10 @@ FOdysseyPainterEditorVectorGridToolHUD::DrawSelectionRectangle( const FOdysseyHU
             double ymin = ::ULIS::FMath::Min( mWorldSelDrag.y, mWorldSelStart.y );
             double xmax = ::ULIS::FMath::Max( mWorldSelDrag.x, mWorldSelStart.x );
             double ymax = ::ULIS::FMath::Max( mWorldSelDrag.y, mWorldSelStart.y );
-            FVector2D hudCoords[4] = { iParams.mTextureToHUD.Execute( FVector2D( xmin, ymin ) )
-                                     , iParams.mTextureToHUD.Execute( FVector2D( xmax, ymin ) )
-                                     , iParams.mTextureToHUD.Execute( FVector2D( xmax, ymax ) )
-                                     , iParams.mTextureToHUD.Execute( FVector2D( xmin, ymax ) ) };
+            FVector2D hudCoords[4] = { TextureToHUD( xmin, ymin )
+                                     , TextureToHUD( xmax, ymin )
+                                     , TextureToHUD( xmax, ymax )
+                                     , TextureToHUD( xmin, ymax ) };
 
             for( uint32 i = 0; i < 4; i++ )
             {
@@ -272,10 +275,10 @@ FOdysseyPainterEditorVectorGridToolHUD::DrawHUD( const FOdysseyHUDElement::FDraw
                                             FOdysseyVector::MapPoint( worldMatrix, mCellArray[i].mNode[1]->GetCoords() ),
                                             FOdysseyVector::MapPoint( worldMatrix, mCellArray[i].mNode[2]->GetCoords() ),
                                             FOdysseyVector::MapPoint( worldMatrix, mCellArray[i].mNode[3]->GetCoords() ) };
-            FVector2D hudCoords[4] = { iParams.mTextureToHUD.Execute( FVector2D( texCoords[0].x, texCoords[0].y ) )
-                                     , iParams.mTextureToHUD.Execute( FVector2D( texCoords[1].x, texCoords[1].y ) )
-                                     , iParams.mTextureToHUD.Execute( FVector2D( texCoords[2].x, texCoords[2].y ) )
-                                     , iParams.mTextureToHUD.Execute( FVector2D( texCoords[3].x, texCoords[3].y ) ) };
+            FVector2D hudCoords[4] = { TextureToHUD( texCoords[0].x, texCoords[0].y )
+                                     , TextureToHUD( texCoords[1].x, texCoords[1].y )
+                                     , TextureToHUD( texCoords[2].x, texCoords[2].y )
+                                     , TextureToHUD( texCoords[3].x, texCoords[3].y ) };
 
             for( uint32 j = 0; j < 4; j ++ )
             {
@@ -288,7 +291,7 @@ FOdysseyPainterEditorVectorGridToolHUD::DrawHUD( const FOdysseyHUDElement::FDraw
         for( int i = 0; i < mNodeArray.size(); i++ )
         {
             ::ULIS::FVec2D texCoords = FOdysseyVector::MapPoint( worldMatrix, mNodeArray[i].GetCoords() );
-            FVector2D hudCoords = iParams.mTextureToHUD.Execute( FVector2D( texCoords.x, texCoords.y ) );
+            FVector2D hudCoords = TextureToHUD( texCoords.x, texCoords.y );
 
             DrawPrimitiveHandle( iParams
                                , hudCoords

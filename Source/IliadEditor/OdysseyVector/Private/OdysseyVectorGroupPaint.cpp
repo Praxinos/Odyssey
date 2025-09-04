@@ -1964,6 +1964,8 @@ void
 FOdysseyVectorGroupPaint::SetWireframeColor( const FColor& iWireframeColor )
 {
     mWireframeColor = iWireframeColor;
+
+    Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::COLOR) );
 }
 
 void

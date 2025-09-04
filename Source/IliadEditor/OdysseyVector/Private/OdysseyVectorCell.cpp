@@ -57,6 +57,8 @@ FOdysseyVectorCell::ClearObjectSelection()
     }
 
     mSelectedObjectList.clear();
+
+    Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::OBJECT_SELECTION) );
 }
 
 void
@@ -66,7 +68,7 @@ FOdysseyVectorCell::UnselectObject( FOdysseyVectorObject* iVecObj )
 
     mSelectedObjectList.remove( iVecObj );
 
-    Invalidate( FOdysseyVectorObjectInvalidationFlags() );
+    Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::OBJECT_SELECTION) );
 }
 
 void

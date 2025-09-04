@@ -825,8 +825,8 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxInbetweenMode( bool iF
     {
         mSelectionBox.inited = false;
         mSelectionBox.rect = ::ULIS::FRectD( 0, 0, 0, 0 );
-        mSelectionBox.worldMatrix = scene->GetWorldMatrix();
-        mSelectionBox.inverseWorldMatrix = scene->GetInverseWorldMatrix();
+        mSelectionBox.worldMatrix.reset(); /* = mScene->GetWorldMatrix()*/;
+        mSelectionBox.inverseWorldMatrix.reset(); /* = mScene->GetInverseWorldMatrix()*/;
 
         for( FInbetweenerBreakdown* breakdown : mSelectedBreakdownList )
         {

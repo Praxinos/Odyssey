@@ -19,27 +19,31 @@ class FOdysseyVectorCell;
 
 struct FOdysseyVectorObjectInvalidationFlags
 {
-    static const uint32 DEFAULT                =  0;
-    static const uint32 OBJECT_SELECTION       =  1;
-    static const uint32 SHAPE                  =  2;
-    static const uint32 COLOR                  =  3;
-    static const uint32 TOPOLOGY               =  4;
-    static const uint32 TAG                    =  5;
-    static const uint32 TAG_LIST               =  6;
-    static const uint32 MATRIX                 =  7;
-    static const uint32 HIERARCHY              =  8;
-    static const uint32 PARAM                  =  9;
-    static const uint32 FLAG_COUNT             = 10;
-    static const uint32 CHILD_DEFAULT          = ( FLAG_COUNT + DEFAULT );
-    static const uint32 CHILD_OBJECT_SELECTION = ( FLAG_COUNT + OBJECT_SELECTION );
-    static const uint32 CHILD_SHAPE            = ( FLAG_COUNT + SHAPE );
-    static const uint32 CHILD_COLOR            = ( FLAG_COUNT + COLOR );
-    static const uint32 CHILD_TOPOLOGY         = ( FLAG_COUNT + TOPOLOGY );
-    static const uint32 CHILD_TAG              = ( FLAG_COUNT + TAG );
-    static const uint32 CHILD_TAG_LIST         = ( FLAG_COUNT + TAG_LIST );
-    static const uint32 CHILD_MATRIX           = ( FLAG_COUNT + MATRIX );
-    static const uint32 CHILD_HIERARCHY        = ( FLAG_COUNT + HIERARCHY );
-    static const uint32 CHILD_PARAM            = ( FLAG_COUNT + PARAM );
+    static const uint32 DEFAULT                      =  0;
+    static const uint32 OBJECT_SELECTION             =  1;
+    static const uint32 SHAPE                        =  2;
+    static const uint32 COLOR                        =  3;
+    static const uint32 TOPOLOGY                     =  4;
+    static const uint32 TAG                          =  5;
+    static const uint32 TAG_LIST                     =  6;
+    static const uint32 MATRIX                       =  7;
+    static const uint32 HIERARCHY                    =  8;
+    static const uint32 PARAM                        =  9;
+    static const uint32 TAG_INBETWEENER_SHAPE        = 10;
+    static const uint32 TAG_INBETWEENER_MATRIX       = 11;
+    static const uint32 FLAG_COUNT                   = 12;
+    static const uint32 CHILD_DEFAULT                = ( FLAG_COUNT + DEFAULT );
+    static const uint32 CHILD_OBJECT_SELECTION       = ( FLAG_COUNT + OBJECT_SELECTION );
+    static const uint32 CHILD_SHAPE                  = ( FLAG_COUNT + SHAPE );
+    static const uint32 CHILD_COLOR                  = ( FLAG_COUNT + COLOR );
+    static const uint32 CHILD_TOPOLOGY               = ( FLAG_COUNT + TOPOLOGY );
+    static const uint32 CHILD_TAG                    = ( FLAG_COUNT + TAG );
+    static const uint32 CHILD_TAG_LIST               = ( FLAG_COUNT + TAG_LIST );
+    static const uint32 CHILD_MATRIX                 = ( FLAG_COUNT + MATRIX );
+    static const uint32 CHILD_HIERARCHY              = ( FLAG_COUNT + HIERARCHY );
+    static const uint32 CHILD_PARAM                  = ( FLAG_COUNT + PARAM );
+    static const uint32 CHILD_TAG_INBETWEENER_SHAPE  = ( FLAG_COUNT + TAG_INBETWEENER_SHAPE );
+    static const uint32 CHILD_TAG_INBETWEENER_MATRIX = ( FLAG_COUNT + TAG_INBETWEENER_MATRIX );
 
     FOdysseyVectorObjectInvalidationFlags& Set()
     {
