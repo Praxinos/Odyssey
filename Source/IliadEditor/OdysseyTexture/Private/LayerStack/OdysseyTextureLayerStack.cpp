@@ -227,6 +227,8 @@ UOdysseyTextureLayerStack::UncompressTexture()
 
     // Overwrite Texture properties
     textureFormatSettings.CompressionNone = 1;
+    mPreviousMipSettings = texture->MipGenSettings;
+    texture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
     texture->SetLayerFormatSettings(0, textureFormatSettings);
 
     //needed because we need the texture resource to be uncompressed and ready for edition
@@ -246,6 +248,7 @@ UOdysseyTextureLayerStack::CompressTexture()
     texture->GetLayerFormatSettings(0, textureFormatSettings);
     textureFormatSettings.CompressionNone = mTextureCompressionNone;
     texture->SetLayerFormatSettings(0, textureFormatSettings);
+    texture->MipGenSettings = mPreviousMipSettings;
     UpdateTextureSource();
 }
 

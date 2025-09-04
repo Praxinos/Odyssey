@@ -125,6 +125,7 @@ private:
 private:
     TSharedPtr<FOdysseySurfaceTexture2DEditable> mTextureFastUpdateSurface;
     int mTextureCompressionNone;
+    TextureMipGenSettings mPreviousMipSettings;
 
     EOdysseyTextureLayerStackTextureUpdateMode mTextureUpdateMode = EOdysseyTextureLayerStackTextureUpdateMode::OnTick;
     FOdysseyInvalidTileMap mInvalidTileMap;
