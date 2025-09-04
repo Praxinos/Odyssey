@@ -423,18 +423,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         bool IsSelected();
 
         /**
-         * @brief Pick a single object inside a selection space (a parent group). If the object belongs
-         * to a group that is a child of the selection space, that group is returned.
-         * @param iSelectionSpace The selection space, i.e the top most object from where
-         *                        we pick an object in the hierarchy.
-         * @param iRoi the picking rectangle for math based picking
-         * @param iSelectionFlags flags to request a mask based picking of math based picking.
-         */
-        FOdysseyVectorObject* Pick( FOdysseyVectorGroup* iSelectionSpace
-                                  , const ::ULIS::FRectD& iRoi
-                                  , uint32 iPickingFlags );
-
-        /**
          * @brief Add a child object at the beggining of the list.
          * @param iChild the child object.
          * @return Hierarchy status flags (for failure, success or prohibition. Cf flags)
@@ -668,7 +656,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
                                , const ::ULIS::FRectD& iInvalidationArea
                                , double iCombinedOpacity
                                , uint64 iFlags ){};
-        virtual bool PickShape( const ::ULIS::FRectD& iRoi, uint32 iSelectionFlags ){ return false; };
         virtual void InvalidateChild( FOdysseyVectorObject* iChild
                                     , const FOdysseyVectorObjectInvalidationFlags& iChildInvalidationFlags );
         void Recurse( void (FOdysseyVectorObject::*Func)() );

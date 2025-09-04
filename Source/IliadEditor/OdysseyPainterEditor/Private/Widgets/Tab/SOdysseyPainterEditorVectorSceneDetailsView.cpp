@@ -199,7 +199,7 @@ SOdysseyPainterEditorVectorSceneDetailsView::UnbindLayerDelegates()
 {
     if( mVectorLayer.IsValid() )
     {
-        mVectorLayer->OnNotifyDelegate().RemoveAll( this );
+        mVectorLayer->OnUpdateDelegate().RemoveAll( this );
     }
 }
 
@@ -224,7 +224,7 @@ SOdysseyPainterEditorVectorSceneDetailsView::BindLayerDelegates()
 {
     if( mVectorLayer.IsValid() )
     {
-        mVectorLayer->OnNotifyDelegate().AddSP( this, &SOdysseyPainterEditorVectorSceneDetailsView::OnVectorLayerNotify );
+        mVectorLayer->OnUpdateDelegate().AddSP( this, &SOdysseyPainterEditorVectorSceneDetailsView::OnVectorLayerNotify );
     }
 }
 

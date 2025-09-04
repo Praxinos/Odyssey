@@ -20,15 +20,16 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPathEditToolHUD : publ
         virtual void Load() override;
         virtual void Unload() override;
         void ClearMask();
-        ::ULIS::FRectD GenerateMask( double iX
-                                   , double iY
-                                   , double iRadius );
+        void GenerateMask( double iTexX
+                         , double iTexY
+                         , double iRadius );
         BLImage* GetMask();
 
         virtual void SetCursorPosition( double iWorldX, double iWorldY );
 
         std::vector<FOdysseyVectorPoint*>& GetHoveredPointArray();
-
+        void SelectObject( FOdysseyVectorGroupPaint* iScene
+                         , std::vector<FOdysseyVectorObject*>& oPickedObjectArray );
         void SetCutLineP0( double iX, double iY );
         void SetCutLineP1(  double iX, double iY );
         ::ULIS::FVec2D& GetCutLineP0();
@@ -54,4 +55,5 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPathEditToolHUD : publ
         BLContext mBLSelectionContext;
         BLImage mBLSelectionMask;
         ::ULIS::FVec2D mCutLinePoint[2];
+        ::ULIS::FRectD mROI;
 };

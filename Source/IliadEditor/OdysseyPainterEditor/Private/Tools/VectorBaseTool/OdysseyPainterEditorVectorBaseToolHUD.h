@@ -67,6 +67,11 @@ class ODYSSEYPAINTEREDITOR_API FPointQuadTree
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorBaseToolHUD : public FOdysseyHUDElement, public IOdysseyVectorHUD
 {
+    public:
+        static const uint64 PICK_HANDLE_VERTEX  = 1;
+        static const uint64 PICK_HANDLE_SEGMENT = 1 << 1;
+        static const uint64 PICK_VERTEX         = 1 << 2;
+
     protected:
         struct BatchedLine
         {
@@ -115,8 +120,6 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorBaseToolHUD : public F
 
         FSelectionBox& GetSelectionBox();
 
-        virtual void SetScene( FOdysseyVectorGroupPaint* iScene ) override;
-
         std::list<FInbetweenerBreakdown*>& GetSelectedBreakdownList();
         std::list<FOdysseyVectorTagInbetweener*>& GetSelectedInbetweenerTagList();
 
@@ -129,6 +132,13 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorBaseToolHUD : public F
                               , uint64 iHUDFlags );
 
         virtual void SetCursorPosition( double iX, double iY );
+        bool PickPathPoints( FOdysseyVectorPath* iPath
+                           , double iWorldX
+                           , double iWorldY
+                           , double iSelectionRadius
+                           , std::vector<FOdysseyVectorVertex*>& oPickedVertexArray
+                           , std::vector<FOdysseyVectorHandleSegment*>& oPickedHandleArray
+                           , uint64 iSelectionFlags );
 
     protected:
         void DrawInbetweens( const FOdysseyHUDElement::FDrawHUDParams& iParams
@@ -281,6 +291,24 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorBaseToolHUD : public F
                                 , const ::ULIS::FRectD& iBBox );
 
         void DrawDummyPlane( const FOdysseyHUDElement::FDrawHUDParams& iParams );
+        FOdysseyVectorObject* PickPath( FOdysseyVectorGroup* iSelectionSpace
+                                      , FOdysseyVectorPath* iPath
+                                      , const BLImage& iHUDMaskImage
+                                      , const ::ULIS::FRectD& iHUDRoi );
+        FOdysseyVectorObject* PickObject( FOdysseyVectorGroup* iSelectionSpace
+                                        , FOdysseyVectorObject* iObj
+                                        , const BLImage& iHUDMaskImage
+                                        , const ::ULIS::FRectD& iHUDRoi );
+
+        void RecursivePick( FOdysseyVectorGroup* iSelectionSpace
+                          , FOdysseyVectorObject* iObj
+                          , const BLImage& iHUDMaskImage
+                          , const ::ULIS::FRectD& iHUDRoi
+                          , std::vector<FOdysseyVectorObject*>& oSelectedObjectArray );
+        void Pick( FOdysseyVectorGroupPaint* iScene
+                 , const BLImage& iHUDMaskImage
+                 , const ::ULIS::FRectD& iHUDRoi
+                 , std::vector<FOdysseyVectorObject*>& oPickedObjectArray );
 
     protected:
         void UpdateSelectionBoxVertexMode();
@@ -315,13 +343,13 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorBaseToolHUD : public F
                                        , const ::ULIS::FVec2D& iWorldVectorCoords );
         ::ULIS::FRectD WorldRectToHUD( const ::ULIS::FRectD& iWorldRect );
         FVector2D TextureToHUD( const FVector2D& iPosition );
+        FVector2D TextureToHUD( double iX, double iY );
 
     protected:
         UOdysseyPainterEditorVectorBaseTool* mBaseTool;
         FSelectionBox mSelectionBox;
         std::list<FInbetweenerBreakdown*> mSelectedBreakdownList;
         std::list<FOdysseyVectorTagInbetweener*> mSelectedInbetweenerTagList;
-        FOdysseyVectorGroupPaint* mScene;
         TObjectPtr<UTexture> mVertexTexture;
         TObjectPtr<UTexture> mVertexContourTexture;
         TObjectPtr<UTexture> mHandleTexture;

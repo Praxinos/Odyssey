@@ -34,7 +34,7 @@
 
 SOdysseyAnimationTimelineInbetweeningHeader::~SOdysseyAnimationTimelineInbetweeningHeader()
 {
-    mAnimationLayerImageVector->GetVectorLayer()->OnNotifyDelegate().RemoveAll( this );
+    mAnimationLayerImageVector->GetVectorLayer()->OnUpdateDelegate().RemoveAll( this );
 }
 
 SOdysseyAnimationTimelineInbetweeningHeader::SOdysseyAnimationTimelineInbetweeningHeader()
@@ -53,7 +53,7 @@ SOdysseyAnimationTimelineInbetweeningHeader::Construct( const FArguments& InArgs
     mOnTransactCurrentFrame = InArgs._OnTransactCurrentFrame;
 
     // bind refresh function to delegates on existing vector scenes at load. Needed to refresh necessary widgets.
-    mAnimationLayerImageVector->GetVectorLayer()->OnNotifyDelegate().AddRaw( this, &SOdysseyAnimationTimelineInbetweeningHeader::OnVectorSceneNotify );
+    mAnimationLayerImageVector->GetVectorLayer()->OnUpdateDelegate().AddRaw( this, &SOdysseyAnimationTimelineInbetweeningHeader::OnVectorSceneNotify );
 
     SListView<TSharedPtr<FInbetweeningListViewItem>>::Construct(
         SListView<TSharedPtr<FInbetweeningListViewItem>>::FArguments()

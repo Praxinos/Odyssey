@@ -31,8 +31,9 @@ FOdysseyPainterEditorVectorCutToolHUD::FOdysseyPainterEditorVectorCutToolHUD( UO
 void
 FOdysseyPainterEditorVectorCutToolHUD::Load()
 {
-    uint32 width = mScene->GetLayer()->GetWidth();
-    uint32 height = mScene->GetLayer()->GetHeight();
+    FOdysseyVectorGroupPaint* scene = mCutTool->GetWorkingCell()->GetScene();
+    uint32 width = scene->GetLayer()->GetWidth();
+    uint32 height = scene->GetLayer()->GetHeight();
 
     mBLSelectionMask.create( width, height, BL_FORMAT_A8 );
 
@@ -77,15 +78,14 @@ FOdysseyPainterEditorVectorCutToolHUD::DrawHUD( const FOdysseyHUDElement::FDrawH
     FLinearColor fgColor = FLinearColor( FOdysseyVectorHUD::GetForegroundColor() );
     FLinearColor bgColor = FLinearColor( FOdysseyVectorHUD::GetBackgroundColor() );
     FLinearColor hcColor = FLinearColor( FOdysseyVectorHUD::GetHighlightColor() );
-
-    uint32 selectedObjectCount = mScene->GetCell()->GetSelectedObjectList().size();
+    FOdysseyVectorGroupPaint* scene = mCutTool->GetWorkingCell()->GetScene();
     uint64 hudFlags = mCutTool->GetEditor()->GetVectorHUDFlags();
 
     // Draw object details only in vertex mode
     if( hudFlags & FOdysseyVectorHUD::HUD_MODE_VERTEX )
     {
         DrawHierarchy( iParams
-                     , mScene
+                     , mCutTool->GetWorkingCell()->GetScene()
                      , fgColor
                      , bgColor
                      , hcColor
@@ -97,7 +97,7 @@ FOdysseyPainterEditorVectorCutToolHUD::DrawHUD( const FOdysseyHUDElement::FDrawH
     if( ( hudFlags & FOdysseyVectorHUD::HUD_MODE_OBJECT    )
      || ( hudFlags & FOdysseyVectorHUD::HUD_MODE_INBETWEEN ) )
     {
-        if( mScene->GetCell()->GetSelectedObjectList().size() )
+        if( mCutTool->GetWorkingCell()->GetSelectedObjectList().size() )
         {
             DrawSelectionBox( iParams, fgColor, bgColor, hcColor, hudFlags );
         }
@@ -116,15 +116,15 @@ FOdysseyPainterEditorVectorCutToolHUD::DrawHUD( const FOdysseyHUDElement::FDrawH
 
 void
 FOdysseyPainterEditorVectorCutToolHUD::DrawSelectionSpace( BLContext* iBLContext
-                                                               , uint64 iFlags )
+                                                         , uint64 iFlags )
 {
     BLPoint topLeft = { 0, 0 };
 
     mBLSelectionContext.save();
 
-    if( mScene->GetCell()->GetSelectionSpace() )
+    if( mCutTool->GetWorkingCell()->GetSelectionSpace() )
     {
-        FOdysseyVectorGroup* selectionSpace = mScene->GetCell()->GetSelectionSpace();
+        FOdysseyVectorGroup* selectionSpace = mCutTool->GetWorkingCell()->GetSelectionSpace();
         ::ULIS::FRectD selectionSpaceBBox = selectionSpace->GetBBox( false, false );
         BLRgba32 strokeColor = { 0x80, 0x80, 0x80, 0xFF };
         BLMatrix2D& worldMatrix = selectionSpace->GetWorldMatrix();
@@ -244,7 +244,6 @@ FOdysseyPainterEditorVectorCutToolHUD::Draw( BLContext* iBLContext )
     BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
     BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
-    uint32 selectedObjectCount = mScene->GetCell()->GetSelectedObjectList().size();
     uint64 hudFlags = mCutTool->GetEditor()->GetVectorHUDFlags();
 
     DrawSelectionSpace( iBLContext, hudFlags );

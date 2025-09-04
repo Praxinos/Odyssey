@@ -42,12 +42,13 @@ FOdysseyPainterEditorVectorMatchingToolHUD::DrawHUD( const FOdysseyHUDElement::F
 {
     mCurrentHUDParams = iParams;
 
+    FOdysseyVectorGroupPaint* scene = mBaseTool->GetWorkingCell()->GetScene();
     FLinearColor fgColor = FLinearColor( FOdysseyVectorHUD::GetForegroundColor() );
     FLinearColor bgColor = FLinearColor( FOdysseyVectorHUD::GetBackgroundColor() );
     FLinearColor hcColor = FLinearColor( FOdysseyVectorHUD::GetHighlightColor() );
     static FLinearColor greyColor = FLinearColor( 0.5f, 0.5f, 0.5f, 0.5f );
     uint64 hudFlags = mMatchingTool->GetEditor()->GetVectorHUDFlags();
-    FOdysseyVectorLayer *sharedEnv = mScene->GetLayer();
+    FOdysseyVectorLayer *sharedEnv = scene->GetLayer();
     uint64 gridDotted = mMatchingTool->GridDisplayMode == eMatchingGridDisplayMode::AsPoints ?  FOdysseyVectorHUD::HUD_BREAKDOWN_GRID_DOTTED : 0;
     FVector2D hudCursor = iParams.mTextureToHUD.Execute( FVector2D( mX, mY ) );
 
@@ -65,7 +66,7 @@ FOdysseyPainterEditorVectorMatchingToolHUD::DrawHUD( const FOdysseyHUDElement::F
             // Caution: even though here we pick a tag that is displayed in the scene,
             // it does not mean it belongs to an object that belongs to the scene.
             FOdysseyVectorGroupPaint* inbetweenerTagScene = inbetweenerTag->GetOwner()->GetScene();
-            uint32 currentCellIndex = mScene->GetCell()->GetIndex();
+            uint32 currentCellIndex = scene->GetCell()->GetIndex();
 
             if( breakdown->GetTargetCellIndex() == currentCellIndex )
             {

@@ -28,6 +28,7 @@ FOdysseyVectorGroup::HasBaseClass( uint32 iBaseClassID )
     return FOdysseyVectorObject::HasBaseClass( iBaseClassID );
 }
 
+/*
 bool
 FOdysseyVectorGroup::PickShape( const ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
 {
@@ -43,6 +44,7 @@ FOdysseyVectorGroup::PickShape( const ::ULIS::FRectD &iRoi, uint32 iSelectionFla
 
     return false;
 }
+*/
 
 FOdysseyVectorObject*
 FOdysseyVectorGroup::CopyShape( uint64 iCopyFlags )

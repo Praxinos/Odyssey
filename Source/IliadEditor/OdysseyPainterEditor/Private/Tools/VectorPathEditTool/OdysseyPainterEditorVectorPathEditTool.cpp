@@ -32,7 +32,7 @@ UOdysseyPainterEditorVectorPathEditTool::~UOdysseyPainterEditorVectorPathEditToo
 
 UOdysseyPainterEditorVectorPathEditTool::UOdysseyPainterEditorVectorPathEditTool()
     : UOdysseyPainterEditorVectorBaseTool( MakeShared<FOdysseyPainterEditorVectorPathEditToolHUD>( this ), false, true )
-    , mPickingFlags ( FOdysseyVectorPath::PICK_VERTEX )
+    , mPickingFlags ( FOdysseyPainterEditorVectorBaseToolHUD::PICK_VERTEX )
     , mEditionMode  ( eVectorPathEditEditionMode::Vertex )
     , PickingRadius(10.0f)
     , WidenAllAlong( true )
@@ -106,8 +106,8 @@ UOdysseyPainterEditorVectorPathEditTool::OnKeyDownGlobalVector( FOdysseyVectorGr
           || ( key == EKeys::LeftCommand ) || ( key == EKeys::RightCommand ) )
         {
             mEditionMode   = eVectorPathEditEditionMode::SegmentHandle;
-            mPickingFlags  = FOdysseyVectorPath::PICK_HANDLE_SEGMENT
-                           | FOdysseyVectorPath::PICK_VERTEX ;
+            mPickingFlags  = FOdysseyPainterEditorVectorBaseToolHUD::PICK_HANDLE_SEGMENT
+                           | FOdysseyPainterEditorVectorBaseToolHUD::PICK_VERTEX ;
 
             iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
@@ -119,7 +119,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnKeyDownGlobalVector( FOdysseyVectorGr
         if ( ( key == EKeys::LeftShift ) || ( key == EKeys::RightShift ) )
         {
             mEditionMode  = eVectorPathEditEditionMode::VertexHandle;
-            mPickingFlags = FOdysseyVectorPath::PICK_HANDLE_VERTEX;
+            mPickingFlags = FOdysseyPainterEditorVectorBaseToolHUD::PICK_HANDLE_VERTEX;
 
             iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
@@ -131,7 +131,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnKeyDownGlobalVector( FOdysseyVectorGr
         if ( ( key == EKeys::LeftAlt ) || ( key == EKeys::RightAlt ) )
         {
             mEditionMode  = eVectorPathEditEditionMode::Alter;
-            mPickingFlags = FOdysseyVectorPath::PICK_VERTEX;
+            mPickingFlags = FOdysseyPainterEditorVectorBaseToolHUD::PICK_VERTEX;
 
             iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
@@ -162,7 +162,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnKeyUpGlobalVector( FOdysseyVectorGrou
 
     // first reset display mode
     mEditionMode = eVectorPathEditEditionMode::Vertex;
-    mPickingFlags = FOdysseyVectorPath::PICK_VERTEX;
+    mPickingFlags = FOdysseyPainterEditorVectorBaseToolHUD::PICK_VERTEX;
 
     return false;
 }
@@ -513,12 +513,13 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorGro
               {
                   FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
 
-                  path->PickPoint( iPointInTexture.x
-                                 , iPointInTexture.y
-                                 , PickingRadius
-                                 , mPickedVertexArray
-                                 , mPickedHandleArray
-                                 , mPickingFlags );
+                  mPathEditHUD->PickPathPoints( path
+                                              , iPointInTexture.x
+                                              , iPointInTexture.y
+                                              , PickingRadius
+                                              , mPickedVertexArray
+                                              , mPickedHandleArray
+                                              , mPickingFlags );
               }
 
               return FOdysseyVectorObject::TRAVERSE_OBJECT_ACCEPTED;
@@ -916,10 +917,7 @@ UOdysseyPainterEditorVectorPathEditTool::PickObjects( FOdysseyVectorGroupPaint* 
     }
     GEditor->EndTransaction();
 
-          mPathEditHUD->ClearMask();
-    roi = mPathEditHUD->GenerateMask( iX, iY, PickingRadius );
-    // TODO: pass the mask image as arg to Pick function
-    vectorCell->SetBLMask( mPathEditHUD->GetMask() );
+    mPathEditHUD->GenerateMask( iX, iY, PickingRadius );
 
     // deselect all if control key is not pressed
     if( FSlateApplication::Get().GetModifierKeys().IsControlDown() == false )
@@ -927,16 +925,12 @@ UOdysseyPainterEditorVectorPathEditTool::PickObjects( FOdysseyVectorGroupPaint* 
         vectorCell->ClearObjectSelection();
     }
 
-    // dragging occured
-    vectorCell->Pick( iScene, roi, pickedObjectArray, FOdysseyVectorObject::PICK_MASK_BASED );
+    mPathEditHUD->SelectObject( iScene, pickedObjectArray );
 
-    // when dragging occured, we select all objects lying in the selection area.
     for ( int i = 0; i < pickedObjectArray.size(); i++ )
     {
         vectorCell->SelectObject( pickedObjectArray[i] );
     }
-
-    vectorCell->SetBLMask( nullptr );
 
     return 0;
 }

@@ -30,7 +30,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorSelectionToolHUD : pub
          * @brief Fill the mask image with a shape defined by a array of points.
          * @param iPointArray a reference to the array of points.
          */
-        ::ULIS::FRectD GenerateFreehandMask( std::vector<::ULIS::FVec2D>& iPointArray );
+        void GenerateFreehandMask( const std::vector<::ULIS::FVec2D>& iTexPointArray );
 
         /**
          * @brief Fill the mask image with an alpha Circle.
@@ -39,15 +39,19 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorSelectionToolHUD : pub
          * @param iRadius the circle's radius.
          * @return the bounding box including the circle.
          */
-        ::ULIS::FRectD GenerateCircleMask( double iX, double iY, double iRadius );
+        void GenerateCircleMask( double iX, double iY, double iRadius );
 
         /**
          * @brief Fill the mask image with an alpha Rectangle.
          * @param iRect the rectangle
          * @return the bounding box including the rectangle.
          */
-        ::ULIS::FRectD GenerateRectangleMask( const ::ULIS::FRectD& iRect );
+        void GenerateRectangleMask( const std::vector<::ULIS::FVec2D>& iTexPointArray );
+        void GenerateMask( const std::vector<::ULIS::FVec2D>& iTexPointArray
+                         , EOdysseyShapeType iActiveShapeType );
         virtual void DrawHUD( const FOdysseyHUDElement::FDrawHUDParams& iParams ) override;
+        void SelectObject( FOdysseyVectorGroupPaint* iScene
+                         , std::vector<FOdysseyVectorObject*>& oPickedObjectArray );
 
     protected:
         void DrawPickingArea( BLContext* iBLContext
@@ -69,4 +73,5 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorSelectionToolHUD : pub
         //bool mSelecting;
         BLContext mBLSelectionContext;
         BLImage mBLSelectionMask;
+        ::ULIS::FRectD mROI;
 };

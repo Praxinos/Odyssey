@@ -95,6 +95,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
                              , FOdysseyVectorCell* iCell
                              , uint64 iDrawingFlags );
 
+        static bool TraceGenericLine( int32 iX0, int32 iY0, double iT0
+                                    , int32 iX1, int32 iY1, double iT1
+                                    , std::function<bool(int32 iX, int32 iY, double iT)> iCallback );
+
         void TraceLine ( int32 iX0
                        , int32 iY0
                        , double iU0

@@ -26,7 +26,6 @@ class FInterpolatedPath;
 class ODYSSEYVECTOR_API IOdysseyVectorHUD
 {
     public:
-        virtual void SetScene( FOdysseyVectorGroupPaint* iScene ) = 0;
         virtual void Reset() = 0;
         virtual void Draw( BLContext* iBLContext ) = 0;
 };

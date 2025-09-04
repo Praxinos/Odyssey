@@ -92,10 +92,10 @@ FOdysseyVectorLayer::GetHeight()
     return mLayerInterface->GetHeight();
 }
 
-FOdysseyVectorLayer::FNotifyDelegate&
-FOdysseyVectorLayer::OnNotifyDelegate()
+FOdysseyVectorLayer::FUpdateDelegate&
+FOdysseyVectorLayer::OnUpdateDelegate()
 {
-    return mOnNotifyDelegate;
+    return mOnUpdateDelegate;
 }
 
 std::list<IOdysseyVectorHUD*>&
@@ -141,7 +141,6 @@ FOdysseyVectorLayer::ResetHUD( FOdysseyVectorGroupPaint* iScene )
 
     for( IOdysseyVectorHUD *hud : GetHUDList() )
     {
-        hud->SetScene( iScene );
         hud->Reset();
     }
 
@@ -154,15 +153,7 @@ void FOdysseyVectorLayer::Update( uint32 iUpdateFlags )
 
     FOdysseyVectorObject::Update( iUpdateFlags );
 
-    Notify( invalidationFlags, iUpdateFlags );
-}
-
-// static
-void
-FOdysseyVectorLayer::Notify( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags
-                           , uint32 iUpdateFlags )
-{
-    OnNotifyDelegate().Broadcast( iInvalidationFlags, iUpdateFlags );
+    mOnUpdateDelegate.Broadcast( invalidationFlags, iUpdateFlags );
 }
 
 void

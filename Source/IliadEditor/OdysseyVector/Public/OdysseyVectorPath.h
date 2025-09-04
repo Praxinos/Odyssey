@@ -71,8 +71,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
                               , const ::ULIS::FRectD& iInvalidationArea
                               , double iCombinedOpacity
                               , uint64 iFlags ) override;
-        virtual bool PickShape( const ::ULIS::FRectD &iRoi
-                              , uint32 iSelectionFlags ) override;
         virtual FOdysseyVectorObject* CopyShape( uint64 iCopyFlags ) override;
         virtual void Invalidate( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags ) override;
         virtual void ExportParam( FOdysseyVectorObject* iDestinationObject
@@ -147,6 +145,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
                   , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
                   , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
                   , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
+                  , const BLImage& iBLMaskImage
                   , bool iWholeSection
                   , bool iSplit );
 
@@ -320,7 +319,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
          * @brief Mask based method for picking segments
          * @param oPickedSegmentArray a reference to an array for storing pointers to the picked segments
          */
-        void PickSegments( std::vector<FOdysseyVectorSegment*>& oPickedSegmentArray );
+        void PickSegments( std::vector<FOdysseyVectorSegment*>& oPickedSegmentArray
+                         , const BLImage& iBLMaskImage );
 
         /**
          * @brief Math based method for picking segments matching a picking circle
@@ -342,7 +342,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
          * @brief Pick vertices according to the mask image.
          * @param oPickedVertexArray array of pointers to picked vertices.
          */
-        void PickVertex( std::vector<FOdysseyVectorVertex*>& oPickedVertexArray );
+        void PickVertex( std::vector<FOdysseyVectorVertex*>& oPickedVertexArray
+                       , const BLPath& iSelectionPath );
 
         /**
          * @brief Remove all vertices
@@ -451,6 +452,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
                      , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
                      , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
                      , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
+                     , const BLImage& iBLMaskImage
                      , bool iSplit );
 
     protected:
@@ -485,11 +487,4 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
         eJointType mJointType;
         double mMiterLimit;
         bool bFilled; // unused for now
-
-    public:
-        static const uint64 PICK_HANDLE_VERTEX  = 1;
-        static const uint64 PICK_HANDLE_SEGMENT = 1 << 1;
-        static const uint64 PICK_VERTEX         = 1 << 2;
-
-
 };

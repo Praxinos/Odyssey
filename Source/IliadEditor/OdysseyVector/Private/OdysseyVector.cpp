@@ -91,6 +91,14 @@ FOdysseyVector::MapPoint( const BLMatrix2D& iMatrix
 }
 
 ::ULIS::FVec2D
+FOdysseyVector::MapPoint( const BLMatrix2D& iMatrix
+                        , double iX
+                        , double iY )
+{
+    return MapPoint( iMatrix, ::ULIS::FVec2D( iX, iY ) );
+}
+
+::ULIS::FVec2D
 FOdysseyVector::MapVector( const BLMatrix2D& iMatrix
                          , const ::ULIS::FVec2D& iPoint )
 {

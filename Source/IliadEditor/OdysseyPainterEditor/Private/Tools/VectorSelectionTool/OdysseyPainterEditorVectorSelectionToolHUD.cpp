@@ -31,8 +31,8 @@ FOdysseyPainterEditorVectorSelectionToolHUD::FOdysseyPainterEditorVectorSelectio
 void
 FOdysseyPainterEditorVectorSelectionToolHUD::Load()
 {
-    uint32 width = mScene->GetLayer()->GetWidth();
-    uint32 height = mScene->GetLayer()->GetHeight();
+    uint32 width = mSelectionTool->GetViewportWidth();
+    uint32 height = mSelectionTool->GetViewportHeight();
 
     mBLSelectionMask.create( width, height, BL_FORMAT_A8 );
 
@@ -68,24 +68,30 @@ FOdysseyPainterEditorVectorSelectionToolHUD::GetMask()
     return &mBLSelectionMask;
 }
 
+void
+FOdysseyPainterEditorVectorSelectionToolHUD::SelectObject( FOdysseyVectorGroupPaint* iScene
+                                                         , std::vector<FOdysseyVectorObject*>& oPickedObjectArray )
+{
+    Pick( iScene, mBLSelectionMask, mROI, oPickedObjectArray );
+}
+
 //3D HUD
 void
 FOdysseyPainterEditorVectorSelectionToolHUD::DrawHUD( const FOdysseyHUDElement::FDrawHUDParams& iParams )
 {
     mCurrentHUDParams = iParams;
 
+    FOdysseyVectorGroupPaint* scene = mBaseTool->GetWorkingCell()->GetScene();
     FLinearColor fgColor = FLinearColor( FOdysseyVectorHUD::GetForegroundColor() );
     FLinearColor bgColor = FLinearColor( FOdysseyVectorHUD::GetBackgroundColor() );
     FLinearColor hcColor = FLinearColor( FOdysseyVectorHUD::GetHighlightColor() );
-
-    uint32 selectedObjectCount = mScene->GetCell()->GetSelectedObjectList().size();
     uint64 hudFlags = mSelectionTool->GetEditor()->GetVectorHUDFlags();
 
     // Draw object details only in vertex mode
     if( hudFlags & FOdysseyVectorHUD::HUD_MODE_VERTEX )
     {
         DrawHierarchy( iParams
-                     , mScene
+                     , scene
                      , fgColor
                      , bgColor
                      , hcColor
@@ -97,7 +103,7 @@ FOdysseyPainterEditorVectorSelectionToolHUD::DrawHUD( const FOdysseyHUDElement::
     if( ( hudFlags & FOdysseyVectorHUD::HUD_MODE_OBJECT    )
      || ( hudFlags & FOdysseyVectorHUD::HUD_MODE_INBETWEEN ) )
     {
-        if( mScene->GetCell()->GetSelectedObjectList().size() )
+        if( mBaseTool->GetWorkingCell()->GetSelectedObjectList().size() )
         {
             DrawSelectionBox( iParams, fgColor, bgColor, hcColor, hudFlags );
         }
@@ -122,9 +128,9 @@ FOdysseyPainterEditorVectorSelectionToolHUD::DrawSelectionSpace( BLContext* iBLC
 
     mBLSelectionContext.save();
 
-    if( mScene->GetCell()->GetSelectionSpace() )
+    if( mBaseTool->GetWorkingCell()->GetSelectionSpace() )
     {
-        FOdysseyVectorGroup* selectionSpace = mScene->GetCell()->GetSelectionSpace();
+        FOdysseyVectorGroup* selectionSpace = mBaseTool->GetWorkingCell()->GetSelectionSpace();
         ::ULIS::FRectD selectionSpaceBBox = selectionSpace->GetBBox( false, false );
         BLRgba32 strokeColor = { 0x80, 0x80, 0x80, 0xFF };
         BLMatrix2D& worldMatrix = selectionSpace->GetWorldMatrix();
@@ -163,28 +169,6 @@ FOdysseyPainterEditorVectorSelectionToolHUD::DrawPickingArea( const FOdysseyHUDE
 
         switch( mSelectionTool->Shapes.GetActiveShapeType() )
         {
-            case EOdysseyShapeType::kRectangle :
-            {
-                double xmin = ::ULIS::FMath::Min( pointArray[0].x, pointArray[1].x );
-                double ymin = ::ULIS::FMath::Min( pointArray[0].y, pointArray[1].y );
-                double xmax = ::ULIS::FMath::Max( pointArray[0].x, pointArray[1].x );
-                double ymax = ::ULIS::FMath::Max( pointArray[0].y, pointArray[1].y );
-                //::ULIS::FRectD rect = ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax );
-
-                FVector2D p[4] = { iParams.mTextureToHUD.Execute( FVector2D( xmin, ymin ) )
-                                 , iParams.mTextureToHUD.Execute( FVector2D( xmax, ymin ) )
-                                 , iParams.mTextureToHUD.Execute( FVector2D( xmax, ymax ) )
-                                 , iParams.mTextureToHUD.Execute( FVector2D( xmin, ymax ) ) };
-
-                for( uint32 i = 0; i < 4; i++ )
-                {
-                    uint32 n = ( i + 1 ) % 4;
-
-                    DrawPrimitiveLine( iParams, p[i], p[n], hcColor, 1.0f );
-                }
-            }
-            break;
-
             case EOdysseyShapeType::kEllipse:
             {
                 double xmin = ::ULIS::FMath::Min( pointArray[0].x, pointArray[1].x );
@@ -208,6 +192,7 @@ FOdysseyPainterEditorVectorSelectionToolHUD::DrawPickingArea( const FOdysseyHUDE
             }
             break;
 
+            case EOdysseyShapeType::kRectangle :
             case EOdysseyShapeType::kFreehand :
                 for( int i = 0; i < pointArray.size(); i++ )
                 {
@@ -235,7 +220,6 @@ FOdysseyPainterEditorVectorSelectionToolHUD::Draw( BLContext* iBLContext )
     BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
     BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
-    uint32 selectedObjectCount = mScene->GetCell()->GetSelectedObjectList().size();
     uint64 hudFlags = mSelectionTool->GetEditor()->GetVectorHUDFlags();
 
     DrawSelectionSpace( iBLContext, hudFlags );
@@ -254,41 +238,94 @@ FOdysseyPainterEditorVectorSelectionToolHUD::ClearMask()
     mBLSelectionContext.restore();
 }
 
-::ULIS::FRectD
-FOdysseyPainterEditorVectorSelectionToolHUD::GenerateCircleMask( double iX, double iY, double iRadius )
+void
+FOdysseyPainterEditorVectorSelectionToolHUD::GenerateMask( const std::vector<::ULIS::FVec2D>& iTexPointArray
+                                                         , EOdysseyShapeType iActiveShapeType )
 {
+    ::ULIS::FRectD roi = ::ULIS::FRectD::FromXYWH( 0, 0, 0, 0 );
+
+    ClearMask();
+
+    if( iTexPointArray.size() > 1 )
+    {
+        switch( iActiveShapeType )
+        {
+            case EOdysseyShapeType::kRectangle:
+            {
+                GenerateRectangleMask( iTexPointArray );
+            }
+            break;
+
+            case EOdysseyShapeType::kEllipse:
+            {
+                ::ULIS::FVec2D diagonal = ::ULIS::FVec2D( iTexPointArray[1] - iTexPointArray[0] );
+
+                GenerateCircleMask( iTexPointArray[0].x, iTexPointArray[0].y, diagonal.Distance() );
+            }
+            break;
+
+            case EOdysseyShapeType::kFreehand:
+                GenerateFreehandMask( iTexPointArray );
+            break;
+
+            default:
+            break;
+        }
+    }
+}
+
+void
+FOdysseyPainterEditorVectorSelectionToolHUD::GenerateCircleMask( double iTexX
+                                                               , double iTexY
+                                                               , double iRadius )
+{
+    FVector2D hudCoords = mCurrentHUDParams.mTextureToHUD.Execute( FVector2D( iTexX, iTexY ) );
+
     mBLSelectionContext.save();
 
     mBLSelectionContext.setCompOp( BL_COMP_OP_SRC_COPY );
     mBLSelectionContext.setFillAlpha( 1.0f );
-    mBLSelectionContext.fillCircle( iX, iY, iRadius );
+    mBLSelectionContext.fillCircle( hudCoords.X, hudCoords.Y, iRadius );
     mBLSelectionContext.flush( BL_CONTEXT_FLUSH_SYNC );
 
     mBLSelectionContext.restore();
 
-    return ::ULIS::FRectD::FromMinMax( iX - iRadius, iY - iRadius
-                                     , iX + iRadius, iY + iRadius );
+    mROI = ::ULIS::FRectD::FromMinMax( hudCoords.X - iRadius, hudCoords.Y - iRadius
+                                     , hudCoords.X + iRadius, hudCoords.Y + iRadius );
 }
 
-::ULIS::FRectD
-FOdysseyPainterEditorVectorSelectionToolHUD::GenerateRectangleMask( const ::ULIS::FRectD& iRect )
+void
+FOdysseyPainterEditorVectorSelectionToolHUD::GenerateRectangleMask( const std::vector<::ULIS::FVec2D>& iTexPointArray )
 {
+    FVector2D hudCoords[4] = { mCurrentHUDParams.mTextureToHUD.Execute( FVector2D( iTexPointArray[0].x
+                                                                                 , iTexPointArray[0].y ) )
+                             , mCurrentHUDParams.mTextureToHUD.Execute( FVector2D( iTexPointArray[1].x
+                                                                                 , iTexPointArray[1].y ) )
+                             , mCurrentHUDParams.mTextureToHUD.Execute( FVector2D( iTexPointArray[2].x
+                                                                                 , iTexPointArray[2].y ) )
+                             , mCurrentHUDParams.mTextureToHUD.Execute( FVector2D( iTexPointArray[3].x
+                                                                                 , iTexPointArray[3].y ) ) };
+    double xmin = ::ULIS::FMath::Min4( hudCoords[0].X, hudCoords[1].X, hudCoords[2].X, hudCoords[3].X );
+    double ymin = ::ULIS::FMath::Min4( hudCoords[0].Y, hudCoords[1].Y, hudCoords[2].Y, hudCoords[3].Y );
+    double xmax = ::ULIS::FMath::Min4( hudCoords[0].X, hudCoords[1].X, hudCoords[2].X, hudCoords[3].X );
+    double ymax = ::ULIS::FMath::Min4( hudCoords[0].Y, hudCoords[1].Y, hudCoords[2].Y, hudCoords[3].Y );
+
     mBLSelectionContext.save();
 
     mBLSelectionContext.setCompOp( BL_COMP_OP_SRC_COPY );
     mBLSelectionContext.setFillAlpha( 0.0f );
     mBLSelectionContext.clearAll();
     mBLSelectionContext.setFillAlpha( 1.0f );
-    mBLSelectionContext.fillRect( iRect.x, iRect.y, iRect.w, iRect.h );
+    mBLSelectionContext.fillRect( BLRect( xmin, ymin, xmax - xmin, ymax - ymin ) );
     mBLSelectionContext.flush( BL_CONTEXT_FLUSH_SYNC );
 
     mBLSelectionContext.restore();
 
-    return iRect;
+    mROI = ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax );
 }
 
-::ULIS::FRectD
-FOdysseyPainterEditorVectorSelectionToolHUD::GenerateFreehandMask( std::vector<::ULIS::FVec2D>& iPointArray )
+void
+FOdysseyPainterEditorVectorSelectionToolHUD::GenerateFreehandMask( const std::vector<::ULIS::FVec2D>& iTexPointArray )
 {
     ::ULIS::FRectD rect = { 0, 0, 0, 0 };
     BLPath path;
@@ -300,39 +337,45 @@ FOdysseyPainterEditorVectorSelectionToolHUD::GenerateFreehandMask( std::vector<:
     mBLSelectionContext.setFillAlpha(0.0f);
     mBLSelectionContext.clearAll();
 
-    if( iPointArray.size() )
+    if( iTexPointArray.size() )
     {
-        double x1 = iPointArray[0].x, y1 = iPointArray[0].y
-             , x2 = iPointArray[0].x, y2 = iPointArray[0].y;
+        FVector2D hudCoords = mCurrentHUDParams.mTextureToHUD.Execute( FVector2D( iTexPointArray[0].x
+                                                                                , iTexPointArray[0].y ) );
 
-        path.moveTo( iPointArray[0].x, iPointArray[0].y );
+        double x1 = hudCoords.X, y1 = hudCoords.Y
+             , x2 = hudCoords.X, y2 = hudCoords.Y;
 
-        for( uint32 i = 1; i < iPointArray.size(); i++ )
+        path.moveTo( hudCoords.X, hudCoords.Y );
+
+        for( uint32 i = 1; i < iTexPointArray.size(); i++ )
         {
-            path.lineTo( iPointArray[i].x, iPointArray[i].y );
+            hudCoords = mCurrentHUDParams.mTextureToHUD.Execute( FVector2D( iTexPointArray[i].x
+                                                                          , iTexPointArray[i].y ) );
 
-            if( iPointArray[i].x < x1 )
+            path.lineTo( hudCoords.X, hudCoords.Y );
+
+            if( hudCoords.X < x1 )
             {
-                x1 = iPointArray[i].x;
+                x1 = hudCoords.X;
             }
 
-            if( iPointArray[i].y < y1 )
+            if( hudCoords.Y < y1 )
             {
-                y1 = iPointArray[i].y;
+                y1 = hudCoords.Y;
             }
 
-            if( iPointArray[i].x > x2 )
+            if( hudCoords.X > x2 )
             {
-                x2 = iPointArray[i].x;
+                x2 = hudCoords.X;
             }
 
-            if( iPointArray[i].y > y2 )
+            if( hudCoords.Y > y2 )
             {
-                y2 = iPointArray[i].y;
+                y2 = hudCoords.Y;
             }
         }
 
-        path.lineTo( iPointArray[0].x, iPointArray[0].y );
+        path.lineTo( hudCoords.X, hudCoords.Y );
 
         rect = ::ULIS::FRectD::FromMinMax( x1, y1, x2, y2 );
 
@@ -343,7 +386,7 @@ FOdysseyPainterEditorVectorSelectionToolHUD::GenerateFreehandMask( std::vector<:
     mBLSelectionContext.flush(BL_CONTEXT_FLUSH_SYNC);
     mBLSelectionContext.restore();
 
-    return rect;
+    mROI = rect;
 }
 
 #undef LOCTEXT_NAMESPACE

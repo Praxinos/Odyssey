@@ -242,6 +242,7 @@ UOdysseyPainterEditorVectorEraserTool::EraseSections( FOdysseyVectorGroupPaint* 
                                      , oRemovedObjectArray
                                      , oRemovedVertexArray
                                      , oRemovedSegmentArray
+                                     , *mEraserHUD->GetMask()
                                      , SplitPath );
         }
     }
@@ -319,6 +320,7 @@ UOdysseyPainterEditorVectorEraserTool::ErasePaths( FOdysseyVectorGroupPaint* iSc
                                          , oAddedSegmentArray
                                          , oRemovedVertexArray
                                          , oRemovedSegmentArray
+                                         , *mEraserHUD->GetMask()
                                          , false
                                          , SplitPath ) )
                           {
@@ -328,10 +330,12 @@ UOdysseyPainterEditorVectorEraserTool::ErasePaths( FOdysseyVectorGroupPaint* iSc
 
                       if( mEditionMode == eVectorEraserEditionMode::Path )
                       {
+/*refactor
                           if( path->Pick( iScene, iErasureArea, FOdysseyVectorObject::PICK_MASK_BASED ) )
                           {
                               oRemovedObjectArray.push_back( path );
                           }
+*/
                       }
                   }
               }
@@ -398,9 +402,11 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorGroupPaint
         std::vector<FOdysseyVectorSegment*> removedSegmentArray;
         ::ULIS::FRectD roi;
 
+/*refactor
         mEraserHUD->BlendMask( false );
         // TODO: pass the mask image as arg to Pick function
         iScene->GetCell()->SetBLMask( mEraserHUD->GetMask() );
+*/
 
         if ( ( mEditionMode == eVectorEraserEditionMode::Default )
           || ( mEditionMode == eVectorEraserEditionMode::Path    ) )
@@ -426,8 +432,6 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorGroupPaint
                          , removedVertexArray
                          , removedSegmentArray );
         }
-
-        iScene->GetCell()->SetBLMask( nullptr );
 
         // needed for valid GUndo pointer
         GEditor->BeginTransaction(LOCTEXT("vector-eraser-tool.transaction.erase","Erase"));

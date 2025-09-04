@@ -61,7 +61,6 @@ UOdysseyPainterEditorVectorSelectionTool::UOdysseyPainterEditorVectorSelectionTo
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
 
-
 bool
 UOdysseyPainterEditorVectorSelectionTool::IsActivable() const
 {
@@ -71,6 +70,9 @@ UOdysseyPainterEditorVectorSelectionTool::IsActivable() const
 uint64
 UOdysseyPainterEditorVectorSelectionTool::LoadVector( FOdysseyVectorGroupPaint* iScene )
 {
+    uint32 width = GetViewportWidth();
+    uint32 height = GetViewportHeight();
+
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
     iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
     // force redrawing when we switch tool
@@ -132,13 +134,20 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseDragVector( FOdysseyVectorGroup
         switch( Shapes.GetActiveShapeType() )
         {
             case EOdysseyShapeType::kRectangle:
-            case EOdysseyShapeType::kEllipse :
             {
-                ::ULIS::FVec2D downPoint = mPointArray[0];
-
                 mPointArray.clear();
-                mPointArray.push_back( downPoint );
-                mPointArray.push_back( point );
+                mPointArray.push_back( ::ULIS::FVec2D( mPressedMouseCoords.x, mPressedMouseCoords.y ) );
+                mPointArray.push_back( ::ULIS::FVec2D( iPointInTexture.x    , mPressedMouseCoords.y ) );
+                mPointArray.push_back( ::ULIS::FVec2D( iPointInTexture.x    , iPointInTexture.y     ) );
+                mPointArray.push_back( ::ULIS::FVec2D( mPressedMouseCoords.x, iPointInTexture.y     ) );
+            }
+            break;
+
+            case EOdysseyShapeType::kEllipse:
+            {
+                mPointArray.clear();
+                mPointArray.push_back( ::ULIS::FVec2D( mPressedMouseCoords.x, mPressedMouseCoords.y ) );
+                mPointArray.push_back( ::ULIS::FVec2D( iPointInTexture.x    , iPointInTexture.y     ) );
             }
             break;
 
@@ -153,49 +162,6 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseDragVector( FOdysseyVectorGroup
 
     // force redraw
     //iScene->GetLayer()->RequestRedraw( iScene->GetCell(), FOdysseyVectorCell::REDRAW_INTERACTIVE );
-}
-
-::ULIS::FRectD
-UOdysseyPainterEditorVectorSelectionTool::GenerateMask()
-{
-    ::ULIS::FRectD roi = ::ULIS::FRectD::FromXYWH( 0, 0, 0, 0 );
-
-    mPickHUD->ClearMask();
-
-    if( mPointArray.size() > 1 )
-    {
-        switch( Shapes.GetActiveShapeType() )
-        {
-            case EOdysseyShapeType::kRectangle:
-            {
-                double xmin = ::ULIS::FMath::Min( mPointArray[0].x, mPointArray[1].x );
-                double ymin = ::ULIS::FMath::Min( mPointArray[0].y, mPointArray[1].y );
-                double xmax = ::ULIS::FMath::Max( mPointArray[0].x, mPointArray[1].x );
-                double ymax = ::ULIS::FMath::Max( mPointArray[0].y, mPointArray[1].y );
-                ::ULIS::FRectD rect = ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax );
-
-                return mPickHUD->GenerateRectangleMask( rect );
-            }
-            break;
-
-            case EOdysseyShapeType::kEllipse:
-            {
-                ::ULIS::FVec2D diagonal = ::ULIS::FVec2D( mPointArray[1] - mPointArray[0] );
-
-                return mPickHUD->GenerateCircleMask( mPointArray[0].x, mPointArray[0].y, diagonal.Distance() );
-            }
-            break;
-
-            case EOdysseyShapeType::kFreehand:
-                return mPickHUD->GenerateFreehandMask( mPointArray );
-            break;
-
-            default:
-            break;
-        }
-    }
-
-    return roi;
 }
 
 void
@@ -213,7 +179,7 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorObjectMode( FOdysseyVec
         roi.x = iPointInTexture.x;
         roi.y = iPointInTexture.y;
 
-        iScene->GetCell()->Pick( iScene, roi, pickedObjectArray, FOdysseyVectorObject::PICK_MATH_BASED );
+        mPickHUD->SelectObject( iScene, pickedObjectArray );
 
         if( pickedObjectArray.size() )
         {
@@ -253,7 +219,7 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorObjectMode( FOdysseyVec
         // dragging occured
         if ( mPointArray.size() > 1 )
         {
-            iScene->GetCell()->Pick( iScene, roi, pickedObjectArray, FOdysseyVectorObject::PICK_MASK_BASED );
+            mPickHUD->SelectObject( iScene, pickedObjectArray );
 
             // when dragging occured, we select all objects lying in the selection area.
             for ( int i = 0; i < pickedObjectArray.size(); i++ )
@@ -268,7 +234,7 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorObjectMode( FOdysseyVec
             roi.x = mPointArray[0].x;
             roi.y = mPointArray[0].y;
 
-            iScene->GetCell()->Pick( iScene, roi, pickedObjectArray, FOdysseyVectorObject::PICK_MATH_BASED );
+            mPickHUD->SelectObject( iScene, pickedObjectArray );
 
             // if no dragging occured, we only select the object that is the most forward
             if( pickedObjectArray.size() )
@@ -287,6 +253,14 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorVertexMode( FOdysseyVec
     std::list<FOdysseyVectorObject*> objectList;
     std::vector<FOdysseyVectorVertex*> pickedVertexArray;
     std::vector<FOdysseyVectorBucket*> pickedBucketArray;
+    BLPath selectionPath;
+
+    selectionPath.moveTo( mPointArray[0].x, mPointArray[0].y );
+    for( uint32 i = 1; i < mPointArray.size(); i++ )
+    {
+        selectionPath.lineTo( mPointArray[i].x, mPointArray[i].y );
+    }
+    selectionPath.close();
 
     // run lambda on object tree
     FOdysseyVectorObject::Traverse
@@ -294,6 +268,7 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorVertexMode( FOdysseyVec
     , 0
     , [ this
       , iScene
+      , &selectionPath
       , &objectList
       , &pickedVertexArray
       , &pickedBucketArray ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
@@ -308,14 +283,16 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorVertexMode( FOdysseyVec
             {
                 FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
 
-                path->PickVertex( pickedVertexArray );
+                path->PickVertex( pickedVertexArray, selectionPath );
             }
 
             if( object->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
             {
                 FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(object);
 
-                paintGroup->PickBucket( pickedBucketArray );
+                // note: bucket selection is invisible to the User. We nevertheless select bucket to be able to move
+                // them with the vertices that are selected in the same area.
+                paintGroup->PickBucket( pickedBucketArray, selectionPath );
             }
 
             return FOdysseyVectorObject::TRAVERSE_OBJECT_ACCEPTED; // keep traversing
@@ -398,15 +375,12 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVector( FOdysseyVectorGroupPa
         return false;
 
     FOdysseyVectorCell* vectorCell = iScene->GetCell();
-    ::ULIS::FRectD roi;
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
     {
-        roi = GenerateMask();
+        mPickHUD->GenerateMask( mPointArray, Shapes.GetActiveShapeType() );
 
-        // TODO: pass the mask image as arg to Pick function
-        vectorCell->SetBLMask( mPickHUD->GetMask() );
         if( ( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_OBJECT    )
          || ( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_INBETWEEN ) )
         {
@@ -417,7 +391,6 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVector( FOdysseyVectorGroupPa
         {
             OnMouseUpVectorVertexMode( iScene, iPointInTexture, iKey );
         }
-        vectorCell->SetBLMask( nullptr );
 
         mPointArray.clear();
     }

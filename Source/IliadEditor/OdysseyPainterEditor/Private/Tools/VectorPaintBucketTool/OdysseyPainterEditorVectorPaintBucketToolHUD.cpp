@@ -55,11 +55,11 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::UpdateWorkingPaintgroupList()
     mWorkingPaintgroupList.clear();
 
     FOdysseyVectorObject::Traverse
-    ( mScene
+    ( mPaintBucketTool->GetWorkingCell()->GetScene()
     , 0
     , [ this ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
         {
-            if( mScene->GetCell()->ObjectHasFocus( object, traversalFlags ) )
+            if( mPaintBucketTool->GetWorkingCell()->ObjectHasFocus( object, traversalFlags ) )
             {
                 if( object->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
                 {
@@ -206,6 +206,7 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::DrawHUD( const FOdysseyHUDElement
 {
     mCurrentHUDParams = iParams;
 
+    FOdysseyVectorGroupPaint* scene = mBaseTool->GetWorkingCell()->GetScene();
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
     FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
@@ -219,7 +220,7 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::DrawHUD( const FOdysseyHUDElement
     if( hudFlags & FOdysseyVectorHUD::HUD_MODE_VERTEX )
     {
         DrawHierarchy( iParams
-                     , mScene
+                     , scene
                      , fgColor
                      , bgColor
                      , hcColor
@@ -234,7 +235,7 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::DrawHUD( const FOdysseyHUDElement
     if( hudFlags & FOdysseyVectorHUD::HUD_MODE_OBJECT )
     {
         DrawHierarchy( iParams
-                     , mScene
+                     , scene
                      , fgColor
                      , bgColor
                      , hcColor

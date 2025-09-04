@@ -1081,6 +1081,7 @@ FOdysseyVectorObject::BringForward()
     }
 }
 
+/*
 FOdysseyVectorObject*
 FOdysseyVectorObject::Pick( FOdysseyVectorGroup* iSelectionSpace, const ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
 {
@@ -1105,24 +1106,12 @@ FOdysseyVectorObject::Pick( FOdysseyVectorGroup* iSelectionSpace, const ::ULIS::
             }
 
             return pickedObject;
-    /*
-            // Note: We cannot use dynamic casting with UE, this is not an ideal bypass
-            if( ( this->mParent->GetClass() == FOdysseyVectorGroup::StaticClass()      )
-                || ( this->mParent->GetClass() == FOdysseyVectorGroupPaint::StaticClass() ) )
-            {
-                if( this->mParent != iSelectionSpace )
-                {
-                    return this->mParent;
-                }
-            }
-
-            return this;
-    */
         }
     }
 
     return nullptr;
 }
+*/
 
 void
 FOdysseyVectorObject::Recurse( void (FOdysseyVectorObject::*Func)() )

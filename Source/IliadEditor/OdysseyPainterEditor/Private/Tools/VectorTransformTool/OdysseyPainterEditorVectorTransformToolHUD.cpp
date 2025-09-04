@@ -395,7 +395,6 @@ FOdysseyPainterEditorVectorTransformToolHUD::DrawHUD( const FOdysseyHUDElement::
     FLinearColor fgColor = FLinearColor( FOdysseyVectorHUD::GetForegroundColor() );
     FLinearColor bgColor = FLinearColor( FOdysseyVectorHUD::GetBackgroundColor() );
     FLinearColor hcColor = FLinearColor( FOdysseyVectorHUD::GetHighlightColor() );
-    uint32 selectedObjectCount = mScene->GetCell()->GetSelectedObjectList().size();
     uint64 hudFlags = mTransformTool->GetEditor()->GetVectorHUDFlags();
 
     // Draw default

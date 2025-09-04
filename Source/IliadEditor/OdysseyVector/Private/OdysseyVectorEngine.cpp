@@ -308,6 +308,75 @@ FOdysseyVectorEngine::Render( BLContext* iBLContext
     return sanitizedRect;
 }
 
+// Note: callbak returns true to end immediately, false to keep tracing
+// static
+bool
+FOdysseyVectorEngine::TraceGenericLine( int32 iX0, int32 iY0, double iT0
+                                      , int32 iX1, int32 iY1, double iT1
+                                      , std::function<bool(int32 iX, int32 iY, double iT)> iCallback )
+{
+    int32  dx  = ( iX1 - iX0 );
+    uint32 ddx = abs ( dx );
+    int32  dy  = ( iY1 - iY0 );
+    uint32 ddy = abs ( dy );
+    double dt  = ( iT1 - iT0 );
+    int32  dd  = ( ddx > ddy ) ? ddx : ddy;
+    int32  px  = ( dx > 0 ) ? 1 : -1;
+    int32  py  = ( dy > 0 ) ? 1 : -1;
+    double pt  = ( dd ) ? dt / dd : 0.0f;
+    int32  x   = iX0;
+    int32  y   = iY0;
+    double t   = iT0;
+    uint32 cumul = 0;
+
+    if ( ddx > ddy )
+    {
+        for ( uint32 i = 0; i <= ddx; i++ )
+        {
+            if( i == ddx ) t = iT1; // to address imprecision, we set the exact value on the last loop
+
+            // return immediately
+            if ( iCallback( x, y, t ) == true ) {
+                return true;
+            }
+
+            cumul += ddy;
+            x     += px;
+            t     += pt;
+
+            if ( cumul >= ddx )
+            {
+                cumul -= ddx;
+                y     += py;
+            }
+        }
+    }
+    else
+    {
+        for ( uint32 i = 0; i <= ddy; i++ )
+        {
+            if( i == ddy ) t = iT1; // to address imprecision, we set the exact value on the last loop
+
+            // return immediately
+            if ( iCallback( x, y, t ) == true ) {
+                return true;
+            }
+
+            cumul += ddx;
+            y     += py;
+            t     += pt;
+
+            if ( cumul >= ddy )
+            {
+                cumul -= ddy;
+                x     += px;
+            }
+        }
+    }
+
+    return false;
+}
+
 void
 FOdysseyVectorEngine::TraceLine ( int32 iX0
                                 , int32 iY0

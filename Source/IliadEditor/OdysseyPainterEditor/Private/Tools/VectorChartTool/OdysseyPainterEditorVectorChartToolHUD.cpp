@@ -72,11 +72,11 @@ FOdysseyPainterEditorVectorChartToolHUD::GetBreakdownList()
 void
 FOdysseyPainterEditorVectorChartToolHUD::UpdateBreakdown()
 {
-    uint32 cellIndex = mScene->GetCell()->GetIndex();
+    uint32 cellIndex = mBaseTool->GetWorkingCell()->GetIndex();
 
     mBreakdownList.clear();
 
-    for( FOdysseyVectorTag* tag : mScene->GetLayer()->GetSharedTagList() )
+    for( FOdysseyVectorTag* tag : mBaseTool->GetWorkingCell()->GetLayer()->GetSharedTagList() )
     {
         if( tag->GetOwner()->IsSelected() )
         {
@@ -305,7 +305,7 @@ FOdysseyPainterEditorVectorChartToolHUD::DrawHUD( const FOdysseyHUDElement::FDra
     FLinearColor bgColor = FLinearColor( bg );
     FLinearColor hcColor = FLinearColor( hc );
     uint64 hudFlags = mChartTool->GetEditor()->GetVectorHUDFlags();
-    uint32 cellIndex = mScene->GetCell()->GetIndex();
+    uint32 cellIndex = mBaseTool->GetWorkingCell()->GetIndex();
 
     // Draw default
     // -> nothing in object mode.
@@ -338,7 +338,7 @@ FOdysseyPainterEditorVectorChartToolHUD::DrawHUD( const FOdysseyHUDElement::FDra
                                   , hcColor
                                   , breakdown
                                   , breakdown->GetChart()->GetHUDBezier()
-                                  , mScene->GetCell()->GetIndex()
+                                  , mBaseTool->GetWorkingCell()->GetIndex()
                                   , prevBreakdown ? false : true );
             }
 
@@ -350,7 +350,7 @@ FOdysseyPainterEditorVectorChartToolHUD::DrawHUD( const FOdysseyHUDElement::FDra
                                   , hcColor
                                   , breakdown
                                   , breakdown->GetChart()->GetHUDBezier()
-                                  , mScene->GetCell()->GetIndex()
+                                  , mBaseTool->GetWorkingCell()->GetIndex()
                                   , true );
             }
 

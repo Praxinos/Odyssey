@@ -85,7 +85,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
              PICK_MASK_BASED : picking is according to the mask image.
          * @return true if the shape is picked, false otherwise.
          */
-        virtual bool PickShape( const ::ULIS::FRectD& iRoi, uint32 iSelectionFlags ) override;
+        //virtual bool PickShape( const ::ULIS::FRectD& iRoi, uint32 iSelectionFlags ) override;
 
         /**
          * @brief Copy the shape to a new object.
@@ -124,7 +124,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         std::list<FOdysseyVectorBucket*>& GetSelectedBucketList();
 
         bool GetBBoxFromSelectedVertices( ::ULIS::FRectD& oBBox, bool iWorld );
-        void PickBucket( std::vector<FOdysseyVectorBucket*>& oPickedBucketArray );
+        void PickBucket( std::vector<FOdysseyVectorBucket*>& oPickedBucketArray
+                       , const BLPath& iSelectionPath );
         FOdysseyVectorCycle* PickCycle( double iWorldX, double iWorldY );
         FOdysseyVectorBucket* PickBucket( double iWorldX, double iWorldY );
         bool IsMonochrome();
@@ -149,7 +150,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         virtual void ApplyMatrix( BLMatrix2D& iMatrix ) override;
 
         void GetChildrenPaths( std::vector<FOdysseyVectorPath*>& oPathArray );
-        void PickSectionLessPaths( std::vector<FOdysseyVectorObject*>& oObjectArray );
+        void PickSectionLessPaths( std::vector<FOdysseyVectorObject*>& oObjectArray
+                                 , const BLImage& iBLMaskImage );
         void SetRealtime( bool iRealtime );
         void SetIntersectsCanvas( bool iIntersectCanvas );
         bool IntersectsCanvas();
@@ -163,6 +165,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
                           , std::vector<FOdysseyVectorObject*>& oRemovedPathArray
                           , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
                           , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
+                          , const BLImage& iBLMaskImage
                           , bool iSplit );
 
         void SetMultithreaded( bool iMultithreaded );
@@ -175,7 +178,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         bool PickSection( FOdysseyVectorSection* iSection
                         , const ::ULIS::FRectD& iMaskRect
                         , const uint8* iMaskPixelData );
-        void PickErasedSections( std::vector<FOdysseyVectorSection*>& oErasedSectionArray );
+        void PickErasedSections( std::vector<FOdysseyVectorSection*>& oErasedSectionArray
+                               , const BLImage& iBLMaskImage );
         virtual void UpdateBBox() override;
         eGapDetectionScheme GetGapDetectionScheme();
         void SetGapDetectionScheme( eGapDetectionScheme iGapDetectionScheme );
@@ -208,6 +212,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
 
         void SanitizeGraph();
         void SimplifyGraph();
+        bool PickPath( FOdysseyVectorPath* iPath, const BLImage& iHUDMaskImage );
 
         /**
          * @brief Recursive function that traverses the graph and find cycles.
@@ -277,7 +282,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         void MakeCanvasPath();
 
         void UpdatePathList();
-
 
 protected:
     static const uint32 NOCYCLE  = 0;

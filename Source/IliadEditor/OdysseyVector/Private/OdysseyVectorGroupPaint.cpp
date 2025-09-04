@@ -1264,11 +1264,11 @@ FOdysseyVectorGroupPaint::DrawShape( BLContext* iBLContext
     }
 }
 
+/*
 bool
 FOdysseyVectorGroupPaint::PickShape( const ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
 {
     return FOdysseyVectorGroup::PickShape( iRoi, iSelectionFlags );
-/*
     if( iSelectionFlags & PICK_MATH_BASED )
     {
         BLPoint pt = mInverseWorldMatrix.mapPoint( iRoi.x, iRoi.y );
@@ -1283,8 +1283,8 @@ FOdysseyVectorGroupPaint::PickShape( const ::ULIS::FRectD &iRoi, uint32 iSelecti
     }
 
     return false;
-*/
 }
+*/
 
 void
 FOdysseyVectorGroupPaint::CreateVertexGapSegment( FOdysseyVectorVertex* iVertex )
@@ -2874,12 +2874,13 @@ FOdysseyVectorGroupPaint::GetBBoxFromSelectedVertices( ::ULIS::FRectD& oBBox, bo
 
 // Pick from mask image
 void
-FOdysseyVectorGroupPaint::PickBucket( std::vector<FOdysseyVectorBucket*>& oPickedBucketArray )
+FOdysseyVectorGroupPaint::PickBucket( std::vector<FOdysseyVectorBucket*>& oPickedBucketArray
+                                    , const BLPath& iSelectionPath )
 {
-    BLImage* maskImage = GetCell()->GetBLMask();
-    BLImageData imageData;
+    //BLImage* maskImage = GetCell()->GetBLMask();
+    //BLImageData imageData;
 
-    maskImage->getData( &imageData );
+    //maskImage->getData( &imageData );
 
     for( FOdysseyVectorBucket* bucket : mBucketList )
     {
@@ -2889,6 +2890,11 @@ FOdysseyVectorGroupPaint::PickBucket( std::vector<FOdysseyVectorBucket*>& oPicke
         int32 x = (int32) worldCoords.x;
         int32 y = (int32) worldCoords.y;
 
+        if( iSelectionPath.hitTest( worldCoords, BL_FILL_RULE_EVEN_ODD ) == BL_HIT_TEST_IN )
+        {
+            oPickedBucketArray.push_back( bucket );
+        }
+/*
         if( ( x >= 0 ) && ( x < imageData.size.w )
          && ( y >= 0 ) && ( y < imageData.size.h ) )
         {
@@ -2901,6 +2907,7 @@ FOdysseyVectorGroupPaint::PickBucket( std::vector<FOdysseyVectorBucket*>& oPicke
                 oPickedBucketArray.push_back( bucket );
             }
         }
+*/
     }
 }
 
@@ -2989,13 +2996,13 @@ FOdysseyVectorGroupPaint::PickSection( FOdysseyVectorSection* iSection
 }
 
 void
-FOdysseyVectorGroupPaint::PickErasedSections( std::vector<FOdysseyVectorSection*>& oErasedSectionArray )
+FOdysseyVectorGroupPaint::PickErasedSections( std::vector<FOdysseyVectorSection*>& oErasedSectionArray
+                                            , const BLImage& iBLMaskImage )
 {
-    BLImage* maskImage = GetCell()->GetBLMask();
     BLImageData maskData;
     ::ULIS::FRectD maskRect;
 
-    maskImage->getData( &maskData );
+    iBLMaskImage.getData( &maskData );
 
     maskRect = ::ULIS::FRectD( 0, 0, maskData.size.w, maskData.size.h );
 
@@ -3018,13 +3025,13 @@ FOdysseyVectorGroupPaint::EraseSections( std::vector<FOdysseyVectorObject*>& oAd
                                        , std::vector<FOdysseyVectorObject*>& oRemovedPathArray
                                        , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
                                        , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
+                                       , const BLImage& iBLMaskImage
                                        , bool iSplit )
 {
     std::vector<FOdysseyVectorSection*> erasedSectionArray;
     BLImageData imageData;
-    BLImage* blimg = GetCell()->GetBLMask(); // the mask image must be selected by the vector engine at this point
 
-    blimg->getData( &imageData );
+    iBLMaskImage.getData( &imageData );
 
     // first step : relink sections as they were all unlinked after the cycle detection process
     // Note: we don't stitch sections of size 0 here because it disturb the erasing process.
@@ -3039,7 +3046,7 @@ FOdysseyVectorGroupPaint::EraseSections( std::vector<FOdysseyVectorObject*>& oAd
 //    }
 
     // first step
-    PickErasedSections( erasedSectionArray );
+    PickErasedSections( erasedSectionArray, iBLMaskImage );
 
     // second step. Extend erased section array with the neighbour sections until we reach
     // the end of the chain or an intersection
@@ -3072,6 +3079,7 @@ FOdysseyVectorGroupPaint::EraseSections( std::vector<FOdysseyVectorObject*>& oAd
                                    , oAddedSegmentArray
                                    , oRemovedVertexArray
                                    , oRemovedSegmentArray
+                                   , iBLMaskImage
                                    , true
                                    , iSplit ) )
                     {
@@ -3158,8 +3166,58 @@ FOdysseyVectorGroupPaint::GetChildrenPaths( std::vector<FOdysseyVectorPath*>& oP
     }
 }
 
+// static
+bool
+FOdysseyVectorGroupPaint::PickPath( FOdysseyVectorPath* iPath
+                                  , const BLImage& iHUDMaskImage )
+{
+    const BLMatrix2D& worldMatrix = iPath->GetWorldMatrix();
+    BLImageData imageData;
+
+    iHUDMaskImage.getData( &imageData );
+
+    for( FOdysseyVectorSegment* segment : iPath->GetSegmentList() )
+    {
+        std::vector<FOdysseyVectorFraction>& fractionCache = segment->GetFractionCache();
+
+        for( uint32 i = 0; i < fractionCache.size(); i++ )
+        {
+            ::ULIS::FVec2D& p0Coords = fractionCache[i].point[0]->GetCoords();
+            ::ULIS::FVec2D& p1Coords = fractionCache[i].point[1]->GetCoords();
+            ::ULIS::FVec2D texP0Coords = FOdysseyVector::MapPoint( worldMatrix, ::ULIS::FVec2D( p0Coords.x
+                                                                                              , p0Coords.y ) );
+            ::ULIS::FVec2D texP1Coords = FOdysseyVector::MapPoint( worldMatrix, ::ULIS::FVec2D( p1Coords.x
+                                                                                              , p1Coords.y ) );
+
+            bool pointHitMask = FOdysseyVectorEngine::TraceGenericLine( texP0Coords.x, texP0Coords.y, 0.0f
+                                                                      , texP1Coords.x, texP1Coords.y, 0.0f
+                                                                      , [&imageData]( int32 iX, int32 iY, double iT)
+            {
+                if( ( iX >= 0 && iX < imageData.size.w )
+                 && ( iY >= 0 && iY < imageData.size.h ) )
+                {
+                    uint8 *pixel = static_cast<uint8*>(imageData.pixelData);
+                    uint32 offset = ( iY * imageData.size.w ) + iX;
+
+                    return ( pixel[offset] ) ? true : false;
+                }
+
+                return false;
+            } );
+
+            if( pointHitMask )
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
 void
-FOdysseyVectorGroupPaint::PickSectionLessPaths( std::vector<FOdysseyVectorObject*>& oObjectArray )
+FOdysseyVectorGroupPaint::PickSectionLessPaths( std::vector<FOdysseyVectorObject*>& oObjectArray
+                                              , const BLImage& iBLMaskImage )
 {
     // do not use mPathList because it may contains the canvas path
     for( FOdysseyVectorObject* child : mChildrenList )
@@ -3170,7 +3228,7 @@ FOdysseyVectorGroupPaint::PickSectionLessPaths( std::vector<FOdysseyVectorObject
 
             if( path->GetPaintingCode() != mPaintingCode )
             {
-                if( path->Pick( this, ::ULIS::FRectD( 0, 0, 0, 0 ), FOdysseyVectorObject::PICK_MASK_BASED ) )
+                if( PickPath( path, iBLMaskImage ) )
                 {
                     oObjectArray.push_back( path );
                 }

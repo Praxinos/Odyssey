@@ -81,7 +81,6 @@ protected:
     void OnMouseUpVectorVertexMode( FOdysseyVectorGroupPaint* iScene
                                   , const FOdysseyPoint& iPointInTexture
                                   , const FKey& iKey );
-    ::ULIS::FRectD GenerateMask();
 
 protected:
     FOdysseyPainterEditorVectorSelectionToolHUD* mPickHUD;

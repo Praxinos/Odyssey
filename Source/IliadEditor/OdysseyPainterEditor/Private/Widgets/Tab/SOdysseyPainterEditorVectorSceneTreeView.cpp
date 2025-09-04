@@ -435,7 +435,7 @@ SOdysseyPainterEditorVectorSceneTreeView::UnbindLayerDelegates()
 {
     if( mVectorLayer.IsValid() )
     {
-        mVectorLayer->OnNotifyDelegate().RemoveAll( this );
+        mVectorLayer->OnUpdateDelegate().RemoveAll( this );
     }
 }
 
@@ -461,7 +461,7 @@ SOdysseyPainterEditorVectorSceneTreeView::BindLayerDelegates()
 {
     if( mVectorLayer.IsValid() )
     {
-        mVectorLayer->OnNotifyDelegate().AddSP( this, &SOdysseyPainterEditorVectorSceneTreeView::OnVectorLayerNotify );
+        mVectorLayer->OnUpdateDelegate().AddSP( this, &SOdysseyPainterEditorVectorSceneTreeView::OnVectorLayerNotify );
     }
 }
 

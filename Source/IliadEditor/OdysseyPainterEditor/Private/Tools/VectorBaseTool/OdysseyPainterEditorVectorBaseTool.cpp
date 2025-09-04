@@ -20,6 +20,7 @@
 #include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyVectorEllipse.h"
 #include "Undo/OdysseyVectorUndo.h"
+#include "FOdysseySceneViewport.h"
 #include <chrono>
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
@@ -119,6 +120,18 @@ UOdysseyPainterEditorVectorBaseTool::SetPathColor( FOdysseyVectorPath* iPath )
     }
 
     iPath->GetForegroundBucket().SetColorMode( colorMode );
+}
+
+uint32
+UOdysseyPainterEditorVectorBaseTool::GetViewportWidth()
+{
+    return mViewport.Pin()->GetViewport().Get()->GetSize().X;
+}
+
+uint32
+UOdysseyPainterEditorVectorBaseTool::GetViewportHeight()
+{
+    return mViewport.Pin()->GetViewport().Get()->GetSize().Y;
 }
 
 FOdysseyVectorSegment*
@@ -269,8 +282,6 @@ UOdysseyPainterEditorVectorBaseTool::Unload()
 
     if( mWorkingLayer )
     {
-        mWorkingLayer->OnNotifyDelegate().RemoveAll( this );
-
         if( mBaseHUD )
         {
             mBaseHUD->Unload();
@@ -320,7 +331,6 @@ UOdysseyPainterEditorVectorBaseTool::Load()
 
             if( mBaseHUD )
             {
-                mBaseHUD->SetScene( mWorkingCell->GetScene() );
                 mBaseHUD->Load();
                 // 2D HUD
                 mWorkingCell->GetLayer()->AddHUD( mBaseHUD.Get() );

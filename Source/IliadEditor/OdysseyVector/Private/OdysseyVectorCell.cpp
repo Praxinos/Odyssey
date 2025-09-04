@@ -120,18 +120,6 @@ FOdysseyVectorCell::GetCellInterface()
     return mCellInterface;
 }
 
-BLImage*
-FOdysseyVectorCell::GetBLMask()
-{
-    return mBLMask;
-}
-
-void
-FOdysseyVectorCell::SetBLMask( BLImage* iBLMask )
-{
-    mBLMask = iBLMask;
-}
-
 bool
 FOdysseyVectorCell::PendingRedraw()
 {
@@ -200,42 +188,6 @@ FOdysseyVectorGroup*
 FOdysseyVectorCell::GetSelectionSpace()
 {
     return mSelectionSpace;
-}
-
-// static
-void
-FOdysseyVectorCell::RecursivePick( FOdysseyVectorGroup* iSelectionSpace
-                                 , FOdysseyVectorObject* iObj
-                                 , std::vector<FOdysseyVectorObject*>& oSelectedObjectArray
-                                 , const ::ULIS::FRectD& iRoi
-                                 , uint32 iSelectionFlags )
-{
-    FOdysseyVectorObject* pickedObject = ( iObj != iSelectionSpace ) ? iObj->Pick( iSelectionSpace, iRoi, iSelectionFlags ) : nullptr;
-
-    for( FOdysseyVectorObject* child : iObj->GetChildrenList() )
-    {
-        RecursivePick( iSelectionSpace, child, oSelectedObjectArray, iRoi, iSelectionFlags );
-    }
-
-    if( pickedObject )
-    {
-        oSelectedObjectArray.push_back( pickedObject );
-    }
-}
-
-void
-FOdysseyVectorCell::Pick( FOdysseyVectorGroupPaint* iScene
-                          , const ::ULIS::FRectD& iRoi
-                          , std::vector<FOdysseyVectorObject*>& oPickedObjectArray
-                          , uint32 iSelectionFlags )
-{
-    RecursivePick( mSelectionSpace ? mSelectionSpace : iScene, iScene, oPickedObjectArray, iRoi, iSelectionFlags );
-/*
-    if( iSelectionFlags & FOdysseyVectorObject::PICK_MASK_BASED )
-    {
-        UseColorImage();
-    }
-*/
 }
 
 ::ULIS::FRectD
@@ -429,7 +381,7 @@ FOdysseyVectorCell::GetFocusedObjectList( std::list<FOdysseyVectorObject*>& oObj
           return 0;
       } );
 }
-
+/*
 void
 FOdysseyVectorCell::PickPathPoints( FOdysseyVectorGroupPaint* iScene
                                   , double iWorldX
@@ -482,6 +434,7 @@ FOdysseyVectorCell::PickPathPoints( FOdysseyVectorGroupPaint* iScene
           return 0;
       } );
 }
+*/
 
 // static
 FOdysseyVectorVertex*

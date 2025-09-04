@@ -5,6 +5,7 @@
 #include "OdysseyPainterEditor.h"
 // Vector engine
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorCell.h"
 #include "OdysseyVectorGroupPaint.h"
 //
 #include "SOdysseyViewport.h"
@@ -90,6 +91,7 @@ FOdysseyPainterEditorVectorScenePanToolHUD::DrawHUD( const FOdysseyHUDElement::F
 {
     mCurrentHUDParams = iParams;
 
+    FOdysseyVectorGroupPaint* scene = mBaseTool->GetWorkingCell()->GetScene();
     FLinearColor fgColor = FLinearColor( FOdysseyVectorHUD::GetForegroundColor() );
     FLinearColor bgColor = FLinearColor( FOdysseyVectorHUD::GetBackgroundColor() );
     FLinearColor hcColor = FLinearColor( FOdysseyVectorHUD::GetHighlightColor() );
@@ -100,10 +102,10 @@ FOdysseyPainterEditorVectorScenePanToolHUD::DrawHUD( const FOdysseyHUDElement::F
     //char zoomText[255];
     FText infoText = FText::Format( LOCTEXT("vector-scene-pan-tool-hud-info"
                                           , "Pan[x:{0} y:{1}]     Zoom[x:{2} y:{3}]" )
-                                  , mScene->GetTranslationX()
-                                  , mScene->GetTranslationY()
-                                  , mScene->GetScalingX()
-                                  , mScene->GetScalingY() );
+                                  , scene->GetTranslationX()
+                                  , scene->GetTranslationY()
+                                  , scene->GetScalingX()
+                                  , scene->GetScalingY() );
 
 /*
     const UFont* font = Cast<UFont>(mFontInfo.FontObject);

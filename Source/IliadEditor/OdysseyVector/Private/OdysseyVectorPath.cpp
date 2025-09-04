@@ -779,82 +779,15 @@ FOdysseyVectorPath::GetPerpendicularVector( FOdysseyVectorVertex* iVertex, bool 
 
 ///////////////////////////////////////////
 
-// Note: callbak returns true to end immediately, false to keep tracing
-static bool
-TraceLine( int32 iX0, int32 iY0, double iT0
-         , int32 iX1, int32 iY1, double iT1
-         , std::function<bool(int32 iX, int32 iY, double iT)> iCallback )
-{
-    int32  dx  = ( iX1 - iX0 );
-    uint32 ddx = abs ( dx );
-    int32  dy  = ( iY1 - iY0 );
-    uint32 ddy = abs ( dy );
-    double dt  = ( iT1 - iT0 );
-    int32  dd  = ( ddx > ddy ) ? ddx : ddy;
-    int32  px  = ( dx > 0 ) ? 1 : -1;
-    int32  py  = ( dy > 0 ) ? 1 : -1;
-    double pt  = ( dd ) ? dt / dd : 0.0f;
-    int32  x   = iX0;
-    int32  y   = iY0;
-    double t   = iT0;
-    uint32 cumul = 0;
-
-    if ( ddx > ddy )
-    {
-        for ( uint32 i = 0; i <= ddx; i++ )
-        {
-            if( i == ddx ) t = iT1; // to address imprecision, we set the exact value on the last loop
-
-            // return as soon as a point is detected inside the mask
-            if ( iCallback( x, y, t ) == true ) {
-                return true;
-            }
-
-            cumul += ddy;
-            x     += px;
-            t     += pt;
-
-            if ( cumul >= ddx )
-            {
-                cumul -= ddx;
-                y     += py;
-            }
-        }
-    }
-    else
-    {
-        for ( uint32 i = 0; i <= ddy; i++ )
-        {
-            if( i == ddy ) t = iT1; // to address imprecision, we set the exact value on the last loop
-
-            // return as soon as a point is detected inside the mask
-            if ( iCallback( x, y, t ) == true ) {
-                return true;
-            }
-
-            cumul += ddx;
-            y     += py;
-            t     += pt;
-
-            if ( cumul >= ddy )
-            {
-                cumul -= ddy;
-                x     += px;
-            }
-        }
-    }
-
-    return false;
-}
-
 // Pick from mask image
 void
-FOdysseyVectorPath::PickVertex( std::vector<FOdysseyVectorVertex*>& oPickedVertexArray )
+FOdysseyVectorPath::PickVertex( std::vector<FOdysseyVectorVertex*>& oPickedVertexArray
+                              , const BLPath& iSelectionPath )
 {
-    BLImage* maskImage = GetCell()->GetBLMask();
-    BLImageData imageData;
+    //BLImage* maskImage = GetCell()->GetBLMask();
+    //BLImageData imageData;
 
-    maskImage->getData( &imageData );
+    //maskImage->getData( &imageData );
 
     for( FOdysseyVectorVertex* vertex : mVertexList )
     {
@@ -864,6 +797,11 @@ FOdysseyVectorPath::PickVertex( std::vector<FOdysseyVectorVertex*>& oPickedVerte
         int32 x = (int32) worldCoords.x;
         int32 y = (int32) worldCoords.y;
 
+        if( iSelectionPath.hitTest( worldCoords, BL_FILL_RULE_EVEN_ODD ) == BL_HIT_TEST_IN )
+        {
+            oPickedVertexArray.push_back( vertex );
+        }
+/*
         if( ( x >= 0 ) && ( x < imageData.size.w )
          && ( y >= 0 ) && ( y < imageData.size.h ) )
         {
@@ -876,6 +814,7 @@ FOdysseyVectorPath::PickVertex( std::vector<FOdysseyVectorVertex*>& oPickedVerte
                 oPickedVertexArray.push_back( vertex );
             }
         }
+*/
     }
 }
 
@@ -934,6 +873,7 @@ FOdysseyVectorPath::Erase( std::vector<FOdysseyVectorObject*>& oAddedPathArray
                          , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
                          , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
                          , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
+                         , const BLImage& iBLMaskImage
                          , bool iWholeSection
                          , bool iSplit )
 {
@@ -941,13 +881,9 @@ FOdysseyVectorPath::Erase( std::vector<FOdysseyVectorObject*>& oAddedPathArray
     uint32 removedVertexCountBeforeAlter = oRemovedVertexArray.size();
     uint32 addedSegmentCountBeforeAlter = oAddedSegmentArray.size();
     uint32 addedVertexCountBeforeAlter = oAddedVertexArray.size();
-    BLImage* blimg = GetCell()->GetBLMask(); // the mask image must be selected by the vector engine at this point
     BLImageData imageData;
 
-    if( blimg )
-    {
-        blimg->getData( &imageData );
-    }
+    iBLMaskImage.getData( &imageData );
 
     for( FOdysseyVectorChain& chain : mChainArray )
     {
@@ -966,10 +902,9 @@ FOdysseyVectorPath::Erase( std::vector<FOdysseyVectorObject*>& oAddedPathArray
         // EraseNoSplit() to allocate new vertices / segments or paths
         bool hit = iWholeSection ? chain.EraseSections( wayPointBuffer
                                                       , wayFragmentBuffer )
-                                 : ( blimg ? chain.EraseSegments( &imageData
-                                                                , wayPointBuffer
-                                                                , wayFragmentBuffer )
-                                           : false );
+                                 : chain.EraseSegments( &imageData
+                                                      , wayPointBuffer
+                                                      , wayFragmentBuffer );
 
         if( hit )
         {
@@ -1021,164 +956,6 @@ FOdysseyVectorPath::Erase( std::vector<FOdysseyVectorObject*>& oAddedPathArray
     return ( mVertexList.size() == 0 ) && ( mSegmentList.size() == 0 );
 }
 
-bool
-FOdysseyVectorPath::PickShape( const ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
-{
-    if( iSelectionFlags & PICK_MATH_BASED )
-    {
-        BLPoint pt = mInverseWorldMatrix.mapPoint( iRoi.x, iRoi.y );
-
-        if( mBBox.HitTest( ::ULIS::FVec2D( pt.x, pt.y ) ) )
-        {
-            for( FOdysseyVectorSegment* segment : mSegmentList )
-            {
-                if( segment->Pick( pt.x, pt.y, 0.0f ) )
-                {
-                    return true;
-                }
-            }
-        }
-    }
-
-    if ( iSelectionFlags & PICK_MASK_BASED )
-    {
-        BLImage* blimg = GetCell()->GetBLMask(); // the mask image must be selected by the vector engine at this point
-        BLImageData imageData;
-
-        if( blimg )
-        {
-            blimg->getData( &imageData );
-
-            for( FOdysseyVectorSegment* segment : mSegmentList )
-            {
-                std::vector<FOdysseyVectorFraction>& fractionCache = segment->GetFractionCache();
-
-                for( uint32 i = 0; i < fractionCache.size(); i++ )
-                {
-                    ::ULIS::FVec2D& p0Coords = fractionCache[i].point[0]->GetCoords();
-                    ::ULIS::FVec2D& p1Coords = fractionCache[i].point[1]->GetCoords();
-                    BLPoint p0 = mWorldMatrix.mapPoint( p0Coords.x, p0Coords.y );
-                    BLPoint p1 = mWorldMatrix.mapPoint( p1Coords.x, p1Coords.y  );
-                    bool pointHitMask = TraceLine( p0.x, p0.y, 0.0f
-                                                 , p1.x, p1.y, 0.0f
-                                                 , [&imageData]( int32 iX, int32 iY, double iT)
-                                                   {
-                                                        if( ( iX >= 0 && iX < imageData.size.w )
-                                                         && ( iY >= 0 && iY < imageData.size.h ) )
-                                                        {
-                                                            uint8 *pixel = static_cast<uint8*>(imageData.pixelData);
-                                                            uint32 offset = ( iY * imageData.size.w ) + iX;
-
-                                                            return ( pixel[offset] ) ? true : false;
-                                                        }
-
-                                                        return false;
-                                                   });
-
-                    if( pointHitMask )
-                    {
-                        return true;
-                    }
-                }
-            }
-        }
-    }
-
-    return false;
-}
-
-bool
-FOdysseyVectorPath::PickPoint( double iWorldX
-                             , double iWorldY
-                             , double iSelectionRadius
-                             , std::vector<FOdysseyVectorVertex*>& oPickedVertexArray
-                             , std::vector<FOdysseyVectorHandleSegment*>& oPickedHandleArray
-                             , uint64 iSelectionFlags )
-{
-    bool anythingPicked = false;
-
-    for( FOdysseyVectorVertex* vertex : mVertexList )
-    {
-        ::ULIS::FVec2D perpendicularVector = FOdysseyVectorPath::GetPerpendicularVector( vertex, true );
-        BLPoint worldPerpendicularVector = mWorldMatrix.mapVector( perpendicularVector.x * vertex->GetRadius()
-                                                                 , perpendicularVector.y * vertex->GetRadius() );
-
-        // Pick vertex
-        if ( iSelectionFlags & PICK_VERTEX )
-        {
-            ::ULIS::FVec2D& localCoords = vertex->GetCoords();
-            // convert vertex coordinates to world coordinates. Easier to detect collision inside the picking circle.
-            BLPoint worldCoords = mWorldMatrix.mapPoint( localCoords.x, localCoords.y );
-            ::ULIS::FVec2D dif = ::ULIS::FVec2D( worldCoords.x - iWorldX, worldCoords.y - iWorldY );
-
-            if( dif.Distance() <= iSelectionRadius )
-            {
-                oPickedVertexArray.push_back( vertex );
-
-                anythingPicked = true;
-            }
-        }
-
-        // Pick vertex handle
-        if( iSelectionFlags & PICK_HANDLE_VERTEX )
-        {
-            ::ULIS::FVec2D localCoords[2];
-
-            vertex->GetHandlePosition( localCoords );
-
-            for( int i = 0; i < 2; i++ )
-            {
-                BLPoint worldCoords = mWorldMatrix.mapPoint( localCoords[i].x, localCoords[i].y );
-                ::ULIS::FVec2D dif = ::ULIS::FVec2D( worldCoords.x - iWorldX
-                                                   , worldCoords.y - iWorldY );
-
-                if( dif.Distance() <= iSelectionRadius )
-                {
-                    oPickedVertexArray.push_back( vertex );
-
-                    anythingPicked = true;
-
-                    break;
-                }
-            }
-        }
-    }
-
-    // Pick segment handles
-    if( iSelectionFlags & PICK_HANDLE_SEGMENT )
-    {
-        for( FOdysseyVectorSegment* segment : mSegmentList )
-        {
-            // TODO: hit-test with segment's bounding box.
-            FOdysseyVectorHandleSegment* handle0 = segment->GetHandle(0);
-            FOdysseyVectorHandleSegment* handle1 = segment->GetHandle(1);
-            ::ULIS::FVec2D& handle0LocalCoords = handle0->GetCoords();
-            ::ULIS::FVec2D& handle1LocalCoords = handle1->GetCoords();
-            // convert handles coordinates to world coordinates. Easier to detect collision inside the picking circle.
-            BLPoint handle0WorldCoords = mWorldMatrix.mapPoint( handle0LocalCoords.x, handle0LocalCoords.y );
-            BLPoint handle1WorldCoords = mWorldMatrix.mapPoint( handle1LocalCoords.x, handle1LocalCoords.y );
-            ::ULIS::FVec2D dif0 = ::ULIS::FVec2D( handle0WorldCoords.x - iWorldX, handle0WorldCoords.y - iWorldY );
-            ::ULIS::FVec2D dif1 = ::ULIS::FVec2D( handle1WorldCoords.x - iWorldX, handle1WorldCoords.y - iWorldY );
-
-            if( dif0.Distance() <= iSelectionRadius )
-            {
-                oPickedHandleArray.push_back( handle0 );
-
-                anythingPicked = true;
-            }
-
-            if( dif1.Distance() <= iSelectionRadius )
-            {
-                oPickedHandleArray.push_back( handle1 );
-
-                anythingPicked = true;
-            }
-        }
-    }
-
-    return anythingPicked;
-}
-
 void
 FOdysseyVectorPath::SplitCut( const std::vector<::ULIS::FVec2D>& iSelectionPointArray
                             , std::vector<FOdysseyVectorObject*>& oAddedPathArray
@@ -1186,6 +963,7 @@ FOdysseyVectorPath::SplitCut( const std::vector<::ULIS::FVec2D>& iSelectionPoint
                             , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
                             , std::vector<FOdysseyVectorVertex*>& oRemovedVertexArray
                             , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
+                            , const BLImage& iBLMaskImage
                             , bool iSplit )
 {
     std::vector<FOdysseyVectorVertexIntersection::TRecord> TRecordBuffer;
@@ -1272,6 +1050,7 @@ FOdysseyVectorPath::SplitCut( const std::vector<::ULIS::FVec2D>& iSelectionPoint
          , oAddedSegmentArray
          , oRemovedVertexArray
          , oRemovedSegmentArray
+         , iBLMaskImage
          , true
          , true );
 
@@ -2389,14 +2168,14 @@ FOdysseyVectorPath::PickSegments( double iWorldX
 
 // Mask based version
 void
-FOdysseyVectorPath::PickSegments( std::vector<FOdysseyVectorSegment*>& oPickedSegmentArray )
+FOdysseyVectorPath::PickSegments( std::vector<FOdysseyVectorSegment*>& oPickedSegmentArray
+                                , const BLImage& iBLMaskImage )
 {
-    BLImage* maskImage = GetCell()->GetBLMask();
-    BLImageData maskData;
     ::ULIS::FRectD maskRect;
+    BLImageData maskData;
     bool picked = false;
 
-    maskImage->getData( &maskData );
+    iBLMaskImage.getData( &maskData );
 
     maskRect = ::ULIS::FRectD( 0, 0, maskData.size.w, maskData.size.h );
 

@@ -48,7 +48,7 @@ class IOdysseyVectorLayer
 class ODYSSEYVECTOR_API FOdysseyVectorLayer : public FOdysseyVectorObject
 {
     public:
-        DECLARE_MULTICAST_DELEGATE_TwoParams( FNotifyDelegate
+        DECLARE_MULTICAST_DELEGATE_TwoParams( FUpdateDelegate
                                             , const FOdysseyVectorObjectInvalidationFlags& iLayerInvalidationFlags
                                             , uint32 iUpdateFlags )
 
@@ -96,7 +96,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorLayer : public FOdysseyVectorObject
         void InvalidateCell( FOdysseyVectorCell* iCell );
         virtual uint32 RemoveChild( FOdysseyVectorObject* iChild ) override;
         std::list<FOdysseyVectorCell*>& GetInvalidateCellList();
-        FNotifyDelegate& OnNotifyDelegate();
+        FUpdateDelegate& OnUpdateDelegate();
         std::list<IOdysseyVectorHUD*>& GetHUDList();
         void AddHUD( IOdysseyVectorHUD* iHUDObject );
         void RemoveHUD( IOdysseyVectorHUD* iHUDObject );
@@ -113,6 +113,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorLayer : public FOdysseyVectorObject
         std::list<FOdysseyVectorTag*> mSharedTagList;
         std::mutex mSharedTagMutex;
         IOdysseyVectorLayer* mLayerInterface;
-        FNotifyDelegate mOnNotifyDelegate;
+        FUpdateDelegate mOnUpdateDelegate;
         std::list<IOdysseyVectorHUD*> mHUDList;
 };

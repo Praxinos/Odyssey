@@ -262,31 +262,33 @@ void
 FOdysseyPainterEditorVectorBaseToolHUD::MakePointQuadTree( bool iFocusedObjectsOnly
                                                          , uint64 iHUDFlags )
 {
+    FOdysseyVectorGroupPaint* scene = mBaseTool->GetWorkingCell()->GetScene();
     std::vector<FPointQuadTreeEntry> pointQuadTreeEntryArray;
-    uint32 width = mScene->GetLayer()->GetWidth();
-    uint32 height = mScene->GetLayer()->GetHeight();
-    ::ULIS::FRectD screenRect = mScene->GetBBox( true, true );
+    uint32 width = scene->GetLayer()->GetWidth();
+    uint32 height = scene->GetLayer()->GetHeight();
+    ::ULIS::FRectD screenRect = scene->GetBBox( true, true );
 
     //screenRect = ::ULIS::FRectD::FromXYWH( 0, 0, width, height );
 
     pointQuadTreeEntryArray.reserve( 200 );
 
-    FOdysseyVectorObject::Traverse( mScene
+    FOdysseyVectorObject::Traverse( scene
                           , iHUDFlags
                           , [ this
-                          ,   iFocusedObjectsOnly
-                          ,   &screenRect
-                          ,   &pointQuadTreeEntryArray ]( FOdysseyVectorObject* object, uint64 traverseFlags ) -> uint64
-                            {
-                                if( ( iFocusedObjectsOnly == false ) || mScene->GetCell()->ObjectHasFocus( object, traverseFlags ) )
-                                {
-                                    MapPoints( object, screenRect, pointQuadTreeEntryArray );
+                            , scene
+                            , iFocusedObjectsOnly
+                            , &screenRect
+                            , &pointQuadTreeEntryArray ]( FOdysseyVectorObject* object, uint64 traverseFlags ) -> uint64
+    {
+        if( ( iFocusedObjectsOnly == false ) || scene->GetCell()->ObjectHasFocus( object, traverseFlags ) )
+        {
+            MapPoints( object, screenRect, pointQuadTreeEntryArray );
 
-                                    return FOdysseyVectorObject::TRAVERSE_OBJECT_ACCEPTED;
-                                }
+            return FOdysseyVectorObject::TRAVERSE_OBJECT_ACCEPTED;
+        }
 
-                                return 0;
-                            } );
+        return 0;
+    } );
 
     if( mPointQuadTree )
     {
@@ -339,12 +341,6 @@ FOdysseyPainterEditorVectorBaseToolHUD::FOdysseyPainterEditorVectorBaseToolHUD( 
 }
 
 void
-FOdysseyPainterEditorVectorBaseToolHUD::SetScene( FOdysseyVectorGroupPaint* iScene )
-{
-    mScene = iScene;
-}
-
-void
 FOdysseyPainterEditorVectorBaseToolHUD::Load()
 {
 }
@@ -374,8 +370,9 @@ FOdysseyPainterEditorVectorBaseToolHUD::GetSelectionBox()
 void
 FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionInbetweenMode( bool iOnTargetCellOnly )
 {
-    FOdysseyVectorLayer* sharedEnv = mScene->GetLayer();
-    int32 cellIndex = mScene->GetCell()->GetIndex();
+    FOdysseyVectorGroupPaint* scene = mBaseTool->GetWorkingCell()->GetScene();
+    FOdysseyVectorLayer* sharedEnv = scene->GetLayer();
+    int32 cellIndex = scene->GetCell()->GetIndex();
 
     mSelectedInbetweenerTagList.clear();
     mSelectedBreakdownList.clear();
@@ -452,9 +449,228 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawText( BLContext* iBLContext
 //    blctx->strokeUtf8Text( BLPoint( iFrame.x + 10, iFrame.y + iFrame.h - 10 ), mFont, str );
 }
 
+FOdysseyVectorObject*
+FOdysseyPainterEditorVectorBaseToolHUD::PickPath( FOdysseyVectorGroup* iSelectionSpace
+                                                , FOdysseyVectorPath* iPath
+                                                , const BLImage& iHUDMaskImage
+                                                , const ::ULIS::FRectD& iHUDRoi )
+{
+    const BLMatrix2D& worldMatrix = iPath->GetWorldMatrix();
+    BLImageData imageData;
+
+    iHUDMaskImage.getData( &imageData );
+
+    for( FOdysseyVectorSegment* segment : iPath->GetSegmentList() )
+    {
+        std::vector<FOdysseyVectorFraction>& fractionCache = segment->GetFractionCache();
+
+        for( uint32 i = 0; i < fractionCache.size(); i++ )
+        {
+            ::ULIS::FVec2D& p0Coords = fractionCache[i].point[0]->GetCoords();
+            ::ULIS::FVec2D& p1Coords = fractionCache[i].point[1]->GetCoords();
+            ::ULIS::FVec2D texP0Coords = FOdysseyVector::MapPoint( worldMatrix, ::ULIS::FVec2D( p0Coords.x
+                                                                                              , p0Coords.y ) );
+            ::ULIS::FVec2D texP1Coords = FOdysseyVector::MapPoint( worldMatrix, ::ULIS::FVec2D( p1Coords.x
+                                                                                              , p1Coords.y ) );
+            FVector2D hudP0Coords = TextureToHUD( FVector2D( texP0Coords.x, texP0Coords.y ) );
+            FVector2D hudP1Coords = TextureToHUD( FVector2D( texP1Coords.x, texP1Coords.y ) );
+
+            bool pointHitMask = FOdysseyVectorEngine::TraceGenericLine( hudP0Coords.X, hudP0Coords.Y, 0.0f
+                                                                      , hudP1Coords.X, hudP1Coords.Y, 0.0f
+                                                                      , [&imageData]( int32 iX, int32 iY, double iT)
+            {
+                if( ( iX >= 0 && iX < imageData.size.w )
+                 && ( iY >= 0 && iY < imageData.size.h ) )
+                {
+                    uint8 *pixel = static_cast<uint8*>(imageData.pixelData);
+                    uint32 offset = ( iY * imageData.size.w ) + iX;
+
+                    return ( pixel[offset] ) ? true : false;
+                }
+
+                return false;
+            } );
+
+            if( pointHitMask )
+            {
+                return iPath;
+            }
+        }
+    }
+
+    return nullptr;
+}
+
+FOdysseyVectorObject*
+FOdysseyPainterEditorVectorBaseToolHUD::PickObject( FOdysseyVectorGroup* iSelectionSpace
+                                                  , FOdysseyVectorObject* iObj
+                                                  , const BLImage& iHUDMaskImage
+                                                  , const ::ULIS::FRectD& iHUDRoi )
+{
+    if( iObj->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+    {
+        FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iObj);
+
+        return PickPath( iSelectionSpace, path, iHUDMaskImage, iHUDRoi );
+    }
+
+    return nullptr;
+}
+
+void
+FOdysseyPainterEditorVectorBaseToolHUD::RecursivePick( FOdysseyVectorGroup* iSelectionSpace
+                                                     , FOdysseyVectorObject* iObj
+                                                     , const BLImage& iHUDMaskImage
+                                                     , const ::ULIS::FRectD& iHUDRoi
+                                                     , std::vector<FOdysseyVectorObject*>& oSelectedObjectArray )
+{
+    FOdysseyVectorObject* pickedObject = ( iObj->HasAncestor( iSelectionSpace ) ) ? PickObject( iSelectionSpace
+                                                                                              , iObj
+                                                                                              , iHUDMaskImage
+                                                                                              , iHUDRoi ) : nullptr;
+
+    for( FOdysseyVectorObject* child : iObj->GetChildrenList() )
+    {
+        RecursivePick( iSelectionSpace
+                     , child
+                     , iHUDMaskImage
+                     , iHUDRoi
+                     , oSelectedObjectArray );
+    }
+
+    if( pickedObject )
+    {
+        oSelectedObjectArray.push_back( pickedObject );
+    }
+}
+
+bool
+FOdysseyPainterEditorVectorBaseToolHUD::PickPathPoints( FOdysseyVectorPath* iPath
+                                                      , double iWorldX
+                                                      , double iWorldY
+                                                      , double iSelectionRadius
+                                                      , std::vector<FOdysseyVectorVertex*>& oPickedVertexArray
+                                                      , std::vector<FOdysseyVectorHandleSegment*>& oPickedHandleArray
+                                                      , uint64 iSelectionFlags )
+{
+    FVector2D hudCoords = TextureToHUD( iWorldX, iWorldY );
+    BLMatrix2D& worldMatrix = iPath->GetWorldMatrix();
+    bool anythingPicked = false;
+
+    for( FOdysseyVectorVertex* vertex : iPath->GetVertexList() )
+    {
+        ::ULIS::FVec2D perpendicularVector = FOdysseyVectorPath::GetPerpendicularVector( vertex, true );
+        BLPoint worldPerpendicularVector = worldMatrix.mapVector( perpendicularVector.x * vertex->GetRadius()
+                                                                , perpendicularVector.y * vertex->GetRadius() );
+
+        // Pick vertex
+        if ( iSelectionFlags & PICK_VERTEX )
+        {
+            ::ULIS::FVec2D& vertexLocalCoords = vertex->GetCoords();
+            // convert vertex coordinates to world coordinates. Easier to detect collision inside the picking circle.
+            ::ULIS::FVec2D vertexWorldCoords = FOdysseyVector::MapPoint( worldMatrix
+                                                                       , vertexLocalCoords.x
+                                                                       , vertexLocalCoords.y );
+            FVector2D vertexHUDCoords = TextureToHUD( vertexWorldCoords.x, vertexWorldCoords.y );
+            FVector2D dif = vertexHUDCoords - hudCoords;
+
+            if( dif.Length() <= iSelectionRadius )
+            {
+                oPickedVertexArray.push_back( vertex );
+
+                anythingPicked = true;
+            }
+        }
+
+        // Pick vertex handle
+        if( iSelectionFlags & PICK_HANDLE_VERTEX )
+        {
+            ::ULIS::FVec2D handlelocalCoords[2];
+
+            vertex->GetHandlePosition( handlelocalCoords );
+
+            for( int i = 0; i < 2; i++ )
+            {
+                ::ULIS::FVec2D handleWorldCoords = FOdysseyVector::MapPoint( worldMatrix
+                                                                           , handlelocalCoords[i].x
+                                                                           , handlelocalCoords[i].y );
+                FVector2D handleHUDCoords = TextureToHUD( handleWorldCoords.x, handleWorldCoords.y );
+                FVector2D dif = handleHUDCoords - hudCoords;
+
+                if( dif.Length() <= iSelectionRadius )
+                {
+                    oPickedVertexArray.push_back( vertex );
+
+                    anythingPicked = true;
+
+                    break;
+                }
+            }
+        }
+    }
+
+    // Pick segment handles
+    if( iSelectionFlags & PICK_HANDLE_SEGMENT )
+    {
+        for( FOdysseyVectorSegment* segment : iPath->GetSegmentList() )
+        {
+            // TODO: hit-test with segment's bounding box.
+            FOdysseyVectorHandleSegment* handle0 = segment->GetHandle(0);
+            FOdysseyVectorHandleSegment* handle1 = segment->GetHandle(1);
+            ::ULIS::FVec2D& handle0LocalCoords = handle0->GetCoords();
+            ::ULIS::FVec2D& handle1LocalCoords = handle1->GetCoords();
+            // convert handles coordinates to world coordinates. Easier to detect collision inside
+            // the picking circle.
+            ::ULIS::FVec2D handle0WorldCoords = FOdysseyVector::MapPoint( worldMatrix
+                                                                        , handle0LocalCoords.x
+                                                                        , handle0LocalCoords.y );
+            ::ULIS::FVec2D handle1WorldCoords = FOdysseyVector::MapPoint( worldMatrix
+                                                                        , handle1LocalCoords.x
+                                                                        , handle1LocalCoords.y );
+            FVector2D handle0HUDCoords = TextureToHUD( handle0WorldCoords.x, handle0WorldCoords.y );
+            FVector2D handle1HUDCoords = TextureToHUD( handle1WorldCoords.x, handle1WorldCoords.y );
+            FVector2D dif0 = handle0HUDCoords - hudCoords;
+            FVector2D dif1 = handle1HUDCoords - hudCoords;
+
+            if( dif0.Length() <= iSelectionRadius )
+            {
+                oPickedHandleArray.push_back( handle0 );
+
+                anythingPicked = true;
+            }
+
+            if( dif1.Length() <= iSelectionRadius )
+            {
+                oPickedHandleArray.push_back( handle1 );
+
+                anythingPicked = true;
+            }
+        }
+    }
+
+    return anythingPicked;
+}
+
+// mask-based picking
+void
+FOdysseyPainterEditorVectorBaseToolHUD::Pick( FOdysseyVectorGroupPaint* iScene
+                                            , const BLImage& iHUDMaskImage
+                                            , const ::ULIS::FRectD& iHUDRoi
+                                            , std::vector<FOdysseyVectorObject*>& oPickedObjectArray )
+{
+    FOdysseyVectorGroup* selectionSpace = iScene->GetCell()->GetSelectionSpace();
+
+    RecursivePick( selectionSpace ? selectionSpace : iScene
+                 , iScene
+                 , iHUDMaskImage
+                 , iHUDRoi
+                 , oPickedObjectArray );
+}
+
 void
 FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxVertexMode()
 {
+    FOdysseyVectorGroupPaint* scene = mBaseTool->GetWorkingCell()->GetScene();
     double xmin, ymin, xmax, ymax;
 
     mSelectionBox.inited = false;
@@ -464,15 +680,16 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxVertexMode()
 
     // call lambda on each object of the tree
     FOdysseyVectorObject::Traverse
-    ( mScene
+    ( scene
     , 0
     , [ this
+      , scene
       , &xmin
       , &ymin
       , &xmax
       , &ymax ]( FOdysseyVectorObject* object, uint64 iTraversalFlags ) -> uint64
       {
-          if( mScene->GetCell()->ObjectHasFocus( object, iTraversalFlags ) )
+          if( scene->GetCell()->ObjectHasFocus( object, iTraversalFlags ) )
           {
               if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
               {
@@ -530,11 +747,12 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxVertexMode()
 void
 FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxObjectMode( bool iForceWorld )
 {
-    std::list<FOdysseyVectorObject*>& selectedObjectList = mScene->GetCell()->GetSelectedObjectList();
+    FOdysseyVectorGroupPaint* scene = mBaseTool->GetWorkingCell()->GetScene();
+    std::list<FOdysseyVectorObject*>& selectedObjectList = scene->GetCell()->GetSelectedObjectList();
 
     if( ( selectedObjectList.size() <= 1 ) && ( iForceWorld == false ) )
     {
-        FOdysseyVectorObject* selectedObject = selectedObjectList.size() ? selectedObjectList.front() : mScene;
+        FOdysseyVectorObject* selectedObject = selectedObjectList.size() ? selectedObjectList.front() : scene;
 
         mSelectionBox.inited = true;
         mSelectionBox.rect = selectedObject->GetBBox( true, false );
@@ -550,12 +768,13 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxObjectMode( bool iForc
 
         // call lambda on each object of the tree
         FOdysseyVectorObject::Traverse
-        ( mScene
+        ( scene
         , 0
         , [ this
+          , scene
           , &selectedObjectList ]( FOdysseyVectorObject* object, uint64 iTraversalFlags ) -> uint64
           {
-              if( mScene->GetCell()->ObjectHasFocus( object, iTraversalFlags ) )
+              if( scene->GetCell()->ObjectHasFocus( object, iTraversalFlags ) )
               {
                   ::ULIS::FRectD selectedObjectBBox = object->GetBBox( true, true );
 
@@ -591,6 +810,8 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxObjectMode( bool iForc
 void
 FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxInbetweenMode( bool iForceWorld )
 {
+    FOdysseyVectorGroupPaint* scene = mBaseTool->GetWorkingCell()->GetScene();
+
     if( mSelectedBreakdownList.size() == 1 )
     {
         FInbetweenerBreakdown* breakdown = mSelectedBreakdownList.front();
@@ -604,8 +825,8 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxInbetweenMode( bool iF
     {
         mSelectionBox.inited = false;
         mSelectionBox.rect = ::ULIS::FRectD( 0, 0, 0, 0 );
-        mSelectionBox.worldMatrix = mScene->GetWorldMatrix();
-        mSelectionBox.inverseWorldMatrix = mScene->GetInverseWorldMatrix();
+        mSelectionBox.worldMatrix = scene->GetWorldMatrix();
+        mSelectionBox.inverseWorldMatrix = scene->GetInverseWorldMatrix();
 
         for( FInbetweenerBreakdown* breakdown : mSelectedBreakdownList )
         {
@@ -936,6 +1157,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawHierarchy( const FOdysseyHUDElement:
 void
 FOdysseyPainterEditorVectorBaseToolHUD::DrawHUD( const FOdysseyHUDElement::FDrawHUDParams& iParams )
 {
+    FOdysseyVectorGroupPaint* scene = mBaseTool->GetWorkingCell()->GetScene();
     FLinearColor fg = FLinearColor( FOdysseyVectorHUD::GetForegroundColor() );
     FLinearColor bg = FLinearColor( FOdysseyVectorHUD::GetBackgroundColor() );
     FLinearColor hc = FLinearColor( FOdysseyVectorHUD::GetHighlightColor() );
@@ -945,7 +1167,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawHUD( const FOdysseyHUDElement::FDraw
     if( hudFlags & FOdysseyVectorHUD::HUD_MODE_VERTEX )
     {
         DrawHierarchy( iParams
-                     , mScene
+                     , scene
                      , fg
                      , bg
                      , hc
@@ -957,7 +1179,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawHUD( const FOdysseyHUDElement::FDraw
     if( hudFlags & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
     {
         DrawHierarchy( iParams
-                     , mScene
+                     , scene
                      , fg
                      , bg
                      , hc
@@ -1118,6 +1340,13 @@ FOdysseyPainterEditorVectorBaseToolHUD::FormatModifierInfo( const FText* iCtrlTe
     }
 
     mModifierInfoText = FText::FromString( modifierInfoString );
+}
+
+FVector2D
+FOdysseyPainterEditorVectorBaseToolHUD::TextureToHUD( double iX
+                                                    , double iY )
+{
+    return TextureToHUD( FVector2D( iX, iY ) );
 }
 
 FVector2D

@@ -45,12 +45,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroup : public FOdysseyVectorObject
 
     protected:
        /**
-         * @brief Pick this shape.
-         * @param iFlags selection flags from the engine.
-         */
-        virtual bool PickShape( const ::ULIS::FRectD& iRoi, uint32 iSelectionFlags ) override;
-
-       /**
          * @brief Copy this group (for copy-paste operations).
          * @return a newly allocated group.
          */

@@ -284,8 +284,9 @@ UOdysseyPainterEditorVectorCutTool::OnMouseUpVectorObjectMode( FOdysseyVectorGro
             roi = GenerateMask( false );
 
             // we then select the path that were newly added
+/*refactor
             iScene->GetCell()->Pick( iScene, roi, pickedObjectArray, FOdysseyVectorObject::PICK_MASK_BASED );
-
+*/
             // when dragging occured, we select all objects lying in the selection area.
             for ( int i = 0; i < pickedObjectArray.size(); i++ )
             {
@@ -356,6 +357,7 @@ UOdysseyPainterEditorVectorCutTool::CutPaths( FOdysseyVectorGroupPaint* iScene
                                       , oAddedSegmentArray
                                       , oRemovedVertexArray
                                       , oRemovedSegmentArray
+                                      , *mPickHUD->GetMask()
                                       , false
                                       , true ) )
                       {
@@ -415,18 +417,14 @@ UOdysseyPainterEditorVectorCutTool::OnMouseUpVector( FOdysseyVectorGroupPaint* i
     if( ( mMouseCursor == EMouseCursor::Crosshairs )
      && ( iKey == EKeys::LeftMouseButton ) )
     {
-        roi = GenerateMask( true );
-
-        // TODO: pass the mask image used by the Erase function
-        vectorCell->SetBLMask( mPickHUD->GetMask() );
-
+/*refactor
+        mCutToolHUD->GenerateMask( true );
+*/
         if( ( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_OBJECT )
          || ( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_VERTEX ) )
         {
             OnMouseUpVectorObjectMode( iScene, iPointInTexture, iKey );
         }
-
-        vectorCell->SetBLMask( nullptr );
 
         mPointArray.clear();
     }

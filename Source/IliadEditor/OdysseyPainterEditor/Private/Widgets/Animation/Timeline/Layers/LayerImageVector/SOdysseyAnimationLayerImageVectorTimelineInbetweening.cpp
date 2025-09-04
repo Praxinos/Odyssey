@@ -468,14 +468,14 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::GetBackwardArrowBrush()
 void
 SOdysseyAnimationLayerImageVectorTimelineInbetweening::UnbindLayerDelegates()
 {
-    mAnimationLayerImageVector->GetVectorLayer()->OnNotifyDelegate().RemoveAll( this );
+    mAnimationLayerImageVector->GetVectorLayer()->OnUpdateDelegate().RemoveAll( this );
 }
 
 void
 SOdysseyAnimationLayerImageVectorTimelineInbetweening::BindLayerDelegates()
 {
     // bind refresh function to delegates on existing vector scenes at load. Needed to refresh necessary widgets.
-    mAnimationLayerImageVector->GetVectorLayer()->OnNotifyDelegate().AddRaw( this, &SOdysseyAnimationLayerImageVectorTimelineInbetweening::OnVectorSceneNotify );
+    mAnimationLayerImageVector->GetVectorLayer()->OnUpdateDelegate().AddRaw( this, &SOdysseyAnimationLayerImageVectorTimelineInbetweening::OnVectorSceneNotify );
 }
 
 void

@@ -103,6 +103,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
 
         TSharedPtr<SOdysseyViewport> GetViewport();
         FOdysseyVectorCell* GetWorkingCell();
+        uint32 GetViewportWidth();
+        uint32 GetViewportHeight();
 
     protected:
         virtual uint64 LoadVector( FOdysseyVectorGroupPaint* iScene ){ return 0; };

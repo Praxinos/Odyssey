@@ -355,11 +355,11 @@ FOdysseyPainterEditorVectorGridToolHUD::Map()
     mPointCount = 0;
 
     FOdysseyVectorObject::Traverse
-    ( mScene
+    ( mGridTool->GetWorkingCell()->GetScene()
     , 0
     , [ this]( FOdysseyVectorObject* object, uint64 travesalFlags ) -> uint64
       {
-          if( mScene->GetCell()->ObjectHasFocus( object, travesalFlags ) )
+          if( mGridTool->GetWorkingCell()->ObjectHasFocus( object, travesalFlags ) )
           {
               BLMatrix2D& inverseSpaceMatrix = mSelectionBox.inverseWorldMatrix;
 

@@ -43,8 +43,8 @@ FOdysseyPainterEditorVectorPathEditToolHUD::Load()
     FText ctrlInfoText = LOCTEXT("vector-path-edit-tool-hud-info-ctrl", "deform segment" );
     FText shiftInfoText = LOCTEXT("vector-path-edit-tool-hud-info-shift", "widen vertex" );
     FText altInfoText = LOCTEXT("vector-path-edit-tool-hud-info-alt", "add/remove vertex" );
-    uint32 height = mScene->GetLayer()->GetHeight();
-    uint32 width = mScene->GetLayer()->GetWidth();
+    uint32 width = mPathEditTool->GetViewportWidth();
+    uint32 height = mPathEditTool->GetViewportHeight();
 
     FormatModifierInfo( &ctrlInfoText, &shiftInfoText, &altInfoText );
 
@@ -80,22 +80,33 @@ FOdysseyPainterEditorVectorPathEditToolHUD::ClearMask()
     mBLSelectionContext.restore();
 }
 
-::ULIS::FRectD
-FOdysseyPainterEditorVectorPathEditToolHUD::GenerateMask( double iX
-                                                        , double iY
+void
+FOdysseyPainterEditorVectorPathEditToolHUD::GenerateMask( double iTexX
+                                                        , double iTexY
                                                         , double iRadius )
 {
+    FVector2D hudCoords = mCurrentHUDParams.mTextureToHUD.Execute( FVector2D( iTexX, iTexY ) );
+
+    ClearMask();
+
     mBLSelectionContext.save();
 
     mBLSelectionContext.setCompOp( BL_COMP_OP_SRC_COPY );
     mBLSelectionContext.setFillAlpha( 1.0f );
-    mBLSelectionContext.fillCircle( iX, iY, iRadius );
+    mBLSelectionContext.fillCircle( hudCoords.X, hudCoords.Y, iRadius );
     mBLSelectionContext.flush( BL_CONTEXT_FLUSH_SYNC );
 
     mBLSelectionContext.restore();
 
-    return ::ULIS::FRectD::FromMinMax( iX - iRadius, iY - iRadius
-                                     , iX + iRadius, iY + iRadius );
+    mROI = ::ULIS::FRectD::FromMinMax( hudCoords.X - iRadius, hudCoords.Y - iRadius
+                                     , hudCoords.X + iRadius, hudCoords.Y + iRadius );
+}
+
+void
+FOdysseyPainterEditorVectorPathEditToolHUD::SelectObject( FOdysseyVectorGroupPaint* iScene
+                                                        , std::vector<FOdysseyVectorObject*>& oPickedObjectArray )
+{
+    Pick( iScene, mBLSelectionMask, mROI, oPickedObjectArray );
 }
 
 void
@@ -103,6 +114,7 @@ FOdysseyPainterEditorVectorPathEditToolHUD::DrawHUD( const FOdysseyHUDElement::F
 {
     mCurrentHUDParams = iParams;
 
+    FOdysseyVectorGroupPaint* scene = mBaseTool->GetWorkingCell()->GetScene();
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
     FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
@@ -130,7 +142,7 @@ FOdysseyPainterEditorVectorPathEditToolHUD::DrawHUD( const FOdysseyHUDElement::F
      || ( hudFlags & FOdysseyVectorHUD::HUD_MODE_INBETWEEN ) )
     {
         DrawHierarchy( iParams
-                     , mScene
+                     , scene
                      , fgColor
                      , bgColor
                      , hcColor
@@ -175,8 +187,7 @@ FOdysseyPainterEditorVectorPathEditToolHUD::DrawHUD( const FOdysseyHUDElement::F
         // cursor
         DrawPrimitiveCircle( iParams
                            , hudCursor
-                           , WorldVectorToHUD( ::ULIS::FVec2D( mX, mY )
-                                             , ::ULIS::FVec2D( mPathEditTool->PickingRadius, 0 ) ).Distance()
+                           , mPathEditTool->PickingRadius
                            , hcColor
                            , 1.0f );
     }

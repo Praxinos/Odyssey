@@ -106,6 +106,9 @@ namespace FOdysseyVector
 
     ::ULIS::FVec2D ODYSSEYVECTOR_API MapPoint( const BLMatrix2D& iMatrix
                                              , const ::ULIS::FVec2D& iPoint );
+    ::ULIS::FVec2D ODYSSEYVECTOR_API MapPoint( const BLMatrix2D& iMatrix
+                                             , double iX
+                                             , double iY );
     ::ULIS::FVec2D ODYSSEYVECTOR_API MapVector( const BLMatrix2D& iMatrix
                                               , const ::ULIS::FVec2D& iPoint );
     ::ULIS::FRectD ODYSSEYVECTOR_API MapRect( const BLMatrix2D& iMatrix

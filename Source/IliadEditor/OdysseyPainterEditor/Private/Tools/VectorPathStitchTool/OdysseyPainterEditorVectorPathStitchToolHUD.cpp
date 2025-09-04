@@ -3,6 +3,7 @@
 
 #include "Tools/VectorPathStitchTool/OdysseyPainterEditorVectorPathStitchToolHUD.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorCell.h"
 #include "OdysseyVectorVertex.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyPainterEditor.h"
@@ -96,6 +97,7 @@ FOdysseyPainterEditorVectorPathStitchToolHUD::DrawHUD( const FOdysseyHUDElement:
 {
     mCurrentHUDParams = iParams;
 
+    FOdysseyVectorGroupPaint* scene = mBaseTool->GetWorkingCell()->GetScene();
     FLinearColor fgColor = FLinearColor( FOdysseyVectorHUD::GetForegroundColor() );
     FLinearColor bgColor = FLinearColor( FOdysseyVectorHUD::GetBackgroundColor() );
     FLinearColor hcColor = FLinearColor( FOdysseyVectorHUD::GetHighlightColor() );
@@ -113,7 +115,7 @@ FOdysseyPainterEditorVectorPathStitchToolHUD::DrawHUD( const FOdysseyHUDElement:
     if( hudFlags & FOdysseyVectorHUD::HUD_MODE_OBJECT )
     {
         DrawHierarchy( iParams
-                     , mScene
+                     , scene
                      , fgColor
                      , bgColor
                      , hcColor
