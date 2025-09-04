@@ -69,6 +69,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorGridTool : public UOdy
         const FSlateBrush* GetBackgroundColor( eVectorGridEditionMode iMode ) const;
         void SetEditionMode( eVectorGridEditionMode iMode );
         bool NodesAlreadySelected( std::vector<FGridNode *>& iNodeArray );
+        virtual void OnVectorLayerUpdate( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags
+                                        , uint32 iUpdateFlags ) override;
 
     private:
         std::vector<FOdysseyVectorPoint*> mPointArray;

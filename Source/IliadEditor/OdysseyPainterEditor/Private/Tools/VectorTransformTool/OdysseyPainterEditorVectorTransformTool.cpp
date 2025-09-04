@@ -182,6 +182,28 @@ UOdysseyPainterEditorVectorTransformTool::GetTransformedObjectList( FOdysseyVect
       } );
 }
 
+void
+UOdysseyPainterEditorVectorTransformTool::OnVectorLayerUpdate( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags
+                                                             , uint32 iUpdateFlags )
+{
+    if( ( iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::MATRIX] )
+     || ( iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_MATRIX] )
+     || ( iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_SHAPE] )
+     || ( iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_TAG_INBETWEENER_SHAPE] )
+     || ( iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_MATRIX] )
+     || ( iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_TAG_INBETWEENER_MATRIX] ) )
+    {
+        if( mBaseHUD )
+        {
+            mBaseHUD->Reset();
+        }
+    }
+
+    // will react to OBJECT_SELECTION and CHILD_OBJECT_SELECTION.
+    // Will also Reset the HUD. the HUD in that case might be reset twice
+    UOdysseyPainterEditorVectorBaseTool::OnVectorLayerUpdate( iInvalidationFlags, iUpdateFlags );
+}
+
 bool
 UOdysseyPainterEditorVectorTransformTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                            , const FOdysseyPoint& iPointInTexture
@@ -417,11 +439,10 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
                           , translateMatrix );
         }
 
+        // this will also reset the HUD due to the object's shape being modified
         iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
                                   | FOdysseyVectorObject::UPDATE_NOINBETWEENING );
 
-        // update the selection box with the newly modified matrices
-        iScene->GetLayer()->ResetHUD( iScene );
     }
 
     if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_OBJECT )
@@ -474,14 +495,9 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
             object->UpdateMatrix();
         }
 
-        // Update the matrix for all objects
-        //iScene->UpdateMatrix();
-
+        // this will also reset the HUD due to the object's matrix being modified
         iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
                                   | FOdysseyVectorObject::UPDATE_NOINBETWEENING );
-
-        // update the selection box with the newly modified matrices
-        iScene->GetLayer()->ResetHUD( iScene );
     }
 
     if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
@@ -534,10 +550,8 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
             breakdown->UpdateMatrix();
         }
 
+        // this will also reset the HUD due to the tag's matrix being modified
         iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
-
-        // update the selection box with the newly modified matrices
-        iScene->GetLayer()->ResetHUD( iScene );
     }
 
     TransformGizmo( translateMatrix );
@@ -607,6 +621,7 @@ UOdysseyPainterEditorVectorTransformTool::RotateObjectSelection( FOdysseyVectorG
                           , rotateMatrix );
         }
 
+        // this will also reset the HUD due to the object's shape being modified
         iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
                                   | FOdysseyVectorObject::UPDATE_NOINBETWEENING );
     }
@@ -661,6 +676,7 @@ UOdysseyPainterEditorVectorTransformTool::RotateObjectSelection( FOdysseyVectorG
             object->UpdateMatrix();
         }
 
+        // this will also reset the HUD due to the object's matrix being modified
         iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
                                   | FOdysseyVectorObject::UPDATE_NOINBETWEENING );
     }
@@ -715,11 +731,9 @@ UOdysseyPainterEditorVectorTransformTool::RotateObjectSelection( FOdysseyVectorG
             breakdown->UpdateMatrix();
         }
 
+        // this will also reset the HUD due to the tag's matrix being modified
         iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
     }
-
-    // update the selection box with the newly modified matrices
-    iScene->GetLayer()->ResetHUD( iScene );
 
     TransformGizmo( rotateMatrix );
 }
@@ -932,6 +946,7 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorGr
                               , scalingMatrix );
             }
 
+            // this will also reset the HUD due to the object's shape being modified
             iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
                                       | FOdysseyVectorObject::UPDATE_NOINBETWEENING );
         }
@@ -989,6 +1004,7 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorGr
                 objectLocalMatrix = object->GetLocalMatrix();
             }
 
+            // this will also reset the HUD due to the object's matrix being modified
             iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
                                       | FOdysseyVectorObject::UPDATE_NOINBETWEENING );
         }
@@ -1044,11 +1060,9 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorGr
                 breakdown->UpdateMatrix();
             }
 
+            // this will also reset the HUD due to the tag's matrix being modified
             iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
         }
-
-        // update the selection box with the newly modified matrices
-        iScene->GetLayer()->ResetHUD( iScene );
 
         TransformGizmo( scalingMatrix );
     }
