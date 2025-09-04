@@ -525,7 +525,8 @@ FOdysseyVectorPath::AddVertex( FOdysseyVectorVertex* iVertex )
 
     iVertex->SetOwner( this );
 
-    Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::SHAPE) );
+    Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::SHAPE)
+                                                       .Set(FOdysseyVectorObjectInvalidationFlags::TOPOLOGY) );
 }
 
 void
@@ -546,7 +547,8 @@ FOdysseyVectorPath::RemoveVertex( FOdysseyVectorVertex* iVertex )
         UnselectVertex( iVertex );
     }
 
-    Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::SHAPE) );
+    Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::SHAPE)
+                                                       .Set(FOdysseyVectorObjectInvalidationFlags::TOPOLOGY) );
     //iVertex->SetPath( nullptr );
 }
 
@@ -564,6 +566,9 @@ FOdysseyVectorPath::RemoveAllVertices()
 
                                return true;
                            } );
+
+    Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::SHAPE)
+                                                       .Set(FOdysseyVectorObjectInvalidationFlags::TOPOLOGY) );
 }
 
 void
@@ -582,7 +587,8 @@ FOdysseyVectorPath::AddSegment( FOdysseyVectorSegment* iSegment )
     iSegment->GetVertex(0)->Invalidate();
     iSegment->GetVertex(1)->Invalidate();
 
-    Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::TOPOLOGY) );
+    Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::SHAPE)
+                                                       .Set(FOdysseyVectorObjectInvalidationFlags::TOPOLOGY) );
 }
 
 void
@@ -601,7 +607,8 @@ FOdysseyVectorPath::RemoveAllSegments()
     // DO NOT invalidate the segments here, only the path. Otherwise the segment
     // would be added to the list of segments to invalidate BUT the segment does
     // not belong to the path anymore, leading to issues if it has been freed.
-    Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::TOPOLOGY) );
+    Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::SHAPE)
+                                                       .Set(FOdysseyVectorObjectInvalidationFlags::TOPOLOGY) );
 }
 
 void
@@ -617,7 +624,8 @@ FOdysseyVectorPath::RemoveSegment( FOdysseyVectorSegment* iSegment )
     // DO NOT invalidate the segment here, only the path. Otherwise the segment
     // would be added to the list of segments to invalidate BUT the segment does
     // not belong to the path anymore, leading to issues if it has been freed.
-    Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::TOPOLOGY) );
+    Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::SHAPE)
+                                                       .Set(FOdysseyVectorObjectInvalidationFlags::TOPOLOGY) );
 }
 
 void
