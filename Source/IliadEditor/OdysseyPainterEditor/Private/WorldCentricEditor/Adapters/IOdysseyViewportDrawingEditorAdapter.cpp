@@ -483,7 +483,6 @@ bool IOdysseyViewportDrawingEditorAdapter::InputKey(FEditorViewportClient* iView
     //If we didn't initiate the drawing process in a previous event
     //and the current event is a mouse event
     //we filter some mouse events to allow (return false) :
-    // - double click on meshes
     // - right click camera movement
     // - Rotation around mesh
     //and disallow (return true) left click camera movement
@@ -493,9 +492,6 @@ bool IOdysseyViewportDrawingEditorAdapter::InputKey(FEditorViewportClient* iView
         /*GEditor->GetActiveViewport()
         GEngine->GameViewport->SetMouseCaptureMode(EMouseCaptureMode::NoCapture);
         GEngine->GameViewport->SetMouseLockMode(EMouseLockMode::DoNotLock);*/
-
-        if (iKey == EKeys::LeftMouseButton && iEvent == EInputEvent::IE_DoubleClick ) //Selecting by double clicking on an actor/mesh
-            return false;
 
         if (iKey == EKeys::RightMouseButton ) //Moving camera
             return false;
