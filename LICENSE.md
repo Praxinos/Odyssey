@@ -11,7 +11,7 @@ Odyssey source code is provided under Fab End User License Agreement ("Agreement
 By downloading the source code, you are agreeing to be bound by the terms of this Agreement.
 
 This summary of license terms is for your convenience only and is not legally binding. Please be aware that the full text of the Fab EULA available here (https://www.fab.com/eula) explains the Fab Standard License and is what is binding legally.
- 
+
 
 You may:
 
@@ -29,9 +29,9 @@ You may:
 
 - Use Odyssey sources to train AI programs
 
- 
+
 Additional notes:
-   
+
 - You are not required to give credit to Praxinos (but it’s always welcome)
 
 - No warranties are given
