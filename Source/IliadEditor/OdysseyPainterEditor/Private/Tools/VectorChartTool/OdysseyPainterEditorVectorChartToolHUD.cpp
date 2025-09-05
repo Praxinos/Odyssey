@@ -59,7 +59,7 @@ FOdysseyPainterEditorVectorChartToolHUD::Reset()
 
     if( hudFlags & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
     {
-        UpdateBreakdown();
+        UpdateBreakdownList();
     }
 }
 
@@ -70,7 +70,7 @@ FOdysseyPainterEditorVectorChartToolHUD::GetBreakdownList()
 }
 
 void
-FOdysseyPainterEditorVectorChartToolHUD::UpdateBreakdown()
+FOdysseyPainterEditorVectorChartToolHUD::UpdateBreakdownList()
 {
     uint32 cellIndex = mBaseTool->GetWorkingCell()->GetIndex();
 

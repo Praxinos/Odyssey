@@ -306,9 +306,13 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseHoverVector( FOdysseyVectorGro
 
     if( mEditionMode == eVectorTrajectoryEditionMode::Add )
     {
-        if( mTrajectoryHUD->GetSelectedInbetweenerTagList().size() )
+        // We use the breakdown list and not the inbetweener tag list because we only
+        // want the trajectory to be displayed when the timeline cursor lies within the beginning
+        // and the end of a breakdown
+        if( mTrajectoryHUD->GetSelectedBreakdownList().size() )
         {
-            FOdysseyVectorTagInbetweener* inbetweenerTag = mTrajectoryHUD->GetSelectedInbetweenerTagList().front();
+            FInbetweenerBreakdown* breakdown = mTrajectoryHUD->GetSelectedBreakdownList().front();
+            FOdysseyVectorTagInbetweener* inbetweenerTag = breakdown->GetInbetweenerTag();
 
             if( inbetweenerTag->GetInterpolationType() == eInbetweenerInterpolationType::ARAP )
             {

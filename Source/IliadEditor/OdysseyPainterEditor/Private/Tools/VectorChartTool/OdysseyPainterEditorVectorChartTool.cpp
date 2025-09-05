@@ -138,6 +138,28 @@ UOdysseyPainterEditorVectorChartTool::OnKeyUpGlobalVector( FOdysseyVectorGroupPa
     return false;
 }
 
+void
+UOdysseyPainterEditorVectorChartTool::OnVectorLayerUpdate( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags
+                                                         , uint32 iUpdateFlags )
+{
+    if( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_INTERACTIVE ) == 0 )
+    {
+        // we need to reset when a tag is removed
+        if( ( iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::TAG_LIST] )
+         || ( iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_TAG_LIST] ) )
+        {
+            if( mBaseHUD )
+            {
+                mBaseHUD->Reset();
+            }
+        }
+    }
+
+    // will react to OBJECT_SELECTION and CHILD_OBJECT_SELECTION.
+    // Will also Reset the HUD. the HUD in that case might be reset twice
+    UOdysseyPainterEditorVectorBaseTool::OnVectorLayerUpdate( iInvalidationFlags, iUpdateFlags );
+}
+
 bool
 UOdysseyPainterEditorVectorChartTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                        , const FOdysseyPoint& iPointInTexture

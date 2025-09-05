@@ -78,6 +78,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorChartTool : public UOd
         TSharedRef<SWidget> CreateModifierSegmentControl();
         void SetEditionMode( eVectorChartEditionMode iMode );
         const FSlateBrush* GetBackgroundColor( eVectorChartEditionMode iMode ) const;
+        void OnVectorLayerUpdate( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags
+                                , uint32 iUpdateFlags );
 
     private:
         FOdysseyPainterEditorVectorChartToolHUD* mChartHUD;

@@ -34,7 +34,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorChartToolHUD : public 
                           , double iWorldY
                           , bool iRelative );
 
-        void UpdateBreakdown( );
+        void UpdateBreakdownList( );
         std::list<FInbetweenerBreakdown*>& GetBreakdownList();
         FInbetweenerChart::HUDBezier::Point* PickBezierPoint( double iWorldX
                                                             , double iWorldY

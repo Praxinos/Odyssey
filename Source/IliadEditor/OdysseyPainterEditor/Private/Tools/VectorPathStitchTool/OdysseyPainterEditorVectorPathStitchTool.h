@@ -48,6 +48,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathStitchTool : publi
                                       , const FKey& iKey ) override;
         virtual void PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
                                             , const FName& iPropertyName ) override;
+        virtual void OnVectorLayerUpdate( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags
+                                        , uint32 iUpdateFlags ) override;
 
     private:
             FOdysseyPainterEditorVectorPathStitchToolHUD* mPathStitchHUD;

@@ -113,8 +113,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathEditTool : public 
         virtual bool OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                       , const FOdysseyPoint& iPointInTexture
                                       , const FKey& iKey ) override;
-        //virtual void PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
-        //                                  , const FName& iPropertyName ) override;
+        virtual void OnVectorLayerUpdate( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags
+                                        , uint32 iUpdateFlags ) override;
 
     private:
         uint64 OnMouseUpCutPaths( FOdysseyVectorGroupPaint* iScene

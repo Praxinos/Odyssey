@@ -1343,6 +1343,12 @@ FOdysseyPainterEditorVectorBaseToolHUD::FormatModifierInfo( const FText* iCtrlTe
 }
 
 FVector2D
+FOdysseyPainterEditorVectorBaseToolHUD::TextureToHUD( const ::ULIS::FVec2D& iPosition )
+{
+    return TextureToHUD( FVector2D( iPosition.x, iPosition.y ) );
+}
+
+FVector2D
 FOdysseyPainterEditorVectorBaseToolHUD::TextureToHUD( double iX
                                                     , double iY )
 {

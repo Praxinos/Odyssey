@@ -54,8 +54,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathSmoothTool : publi
         virtual bool OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                       , const FOdysseyPoint& iPointInTexture
                                       , const FKey& iKey ) override;
-        //virtual void PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
-        //                                  , const FName& iPropertyName ) override;
+        virtual void OnVectorLayerUpdate( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags
+                                        , uint32 iUpdateFlags ) override;
 
     private:
         FOdysseyPainterEditorVectorPathSmoothToolHUD* mPathSmoothHUD;

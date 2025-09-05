@@ -344,6 +344,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorBaseToolHUD : public F
         ::ULIS::FRectD WorldRectToHUD( const ::ULIS::FRectD& iWorldRect );
         FVector2D TextureToHUD( const FVector2D& iPosition );
         FVector2D TextureToHUD( double iX, double iY );
+        FVector2D TextureToHUD( const ::ULIS::FVec2D& iPosition );
 
     protected:
         UOdysseyPainterEditorVectorBaseTool* mBaseTool;

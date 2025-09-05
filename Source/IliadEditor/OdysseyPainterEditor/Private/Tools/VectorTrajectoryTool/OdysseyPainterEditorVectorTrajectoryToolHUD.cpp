@@ -107,31 +107,35 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::PickSourceQuad( FInbetweenerGrid* 
     return nullptr;
 }
 
-static FInbetweenerRoute*
-PickRouteFromTag( FOdysseyVectorTagInbetweener* iInbetweenerTag
-                , double iWorldPointX
-                , double iWorldPointY
-                , double iPickingRadius )
+FInbetweenerRoute*
+FOdysseyPainterEditorVectorTrajectoryToolHUD::PickRouteFromTag( FOdysseyVectorTagInbetweener* iInbetweenerTag
+                                                              , double iWorldPointX
+                                                              , double iWorldPointY
+                                                              , double iPickingRadius )
 {
     std::list<FInbetweenerRoute*>& routeList = iInbetweenerTag->GetRouteList();
     BLMatrix2D& ownerWorldMatrix = iInbetweenerTag->GetOwner()->GetWorldMatrix();
+    FVector2D pickHUDPoint = TextureToHUD( iWorldPointX, iWorldPointY );
 
     for( FInbetweenerRoute* route : routeList )
     {
         for( FInbetweenerTrajectory& trajectory : route->GetTrajectoryBuffer() )
         {
-            ::ULIS::FVec2D* localBezier = trajectory.GetCubicBezier();
-            ::ULIS::FVec2D worldBezier[4] = { FOdysseyVector::MapPoint( ownerWorldMatrix, localBezier[0] )
-                                            , FOdysseyVector::MapPoint( ownerWorldMatrix, localBezier[1] )
-                                            , FOdysseyVector::MapPoint( ownerWorldMatrix, localBezier[2] )
-                                            , FOdysseyVector::MapPoint( ownerWorldMatrix, localBezier[3] ) };
+            ::ULIS::FVec2D* trajectoryLocalBezier = trajectory.GetCubicBezier();
+            ::ULIS::FVec2D trajectoryWorldBezier[4] = { FOdysseyVector::MapPoint( ownerWorldMatrix, trajectoryLocalBezier[0] )
+                                                      , FOdysseyVector::MapPoint( ownerWorldMatrix, trajectoryLocalBezier[1] )
+                                                      , FOdysseyVector::MapPoint( ownerWorldMatrix, trajectoryLocalBezier[2] )
+                                                      , FOdysseyVector::MapPoint( ownerWorldMatrix, trajectoryLocalBezier[3] ) };
+            FVector2D trajectoryHUDBezier[4] = { TextureToHUD( trajectoryWorldBezier[0] )
+                                               , TextureToHUD( trajectoryWorldBezier[1] )
+                                               , TextureToHUD( trajectoryWorldBezier[2] )
+                                               , TextureToHUD( trajectoryWorldBezier[3] ) };
 
-            double absoluteT = FOdysseyVector::CubicBezierHitTest( ::ULIS::FVec2D( iWorldPointX
-                                                                                 , iWorldPointY )
-                                                                 , worldBezier[0]
-                                                                 , worldBezier[1]
-                                                                 , worldBezier[2]
-                                                                 , worldBezier[3]
+            double absoluteT = FOdysseyVector::CubicBezierHitTest( ::ULIS::FVec2D( pickHUDPoint.X, pickHUDPoint.Y )
+                                                                 , ::ULIS::FVec2D( trajectoryHUDBezier[0].X, trajectoryHUDBezier[0].Y )
+                                                                 , ::ULIS::FVec2D( trajectoryHUDBezier[1].X, trajectoryHUDBezier[0].Y )
+                                                                 , ::ULIS::FVec2D( trajectoryHUDBezier[2].X, trajectoryHUDBezier[0].Y )
+                                                                 , ::ULIS::FVec2D( trajectoryHUDBezier[3].X, trajectoryHUDBezier[0].Y )
                                                                  , 16
                                                                  , iPickingRadius );
             if( absoluteT >= 0.0f )
@@ -168,31 +172,31 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::PickHandle( double iWorldX
     return nullptr;
 }
 
-static FInbetweenerHandleTrajectory*
-PickHandleFromTag( FOdysseyVectorTagInbetweener* iInbetweenerTag
-                 , double iWorldX
-                 , double iWorldY
-                 , double iPickingRadius )
+FInbetweenerHandleTrajectory*
+FOdysseyPainterEditorVectorTrajectoryToolHUD::PickHandleFromTag( FOdysseyVectorTagInbetweener* iInbetweenerTag
+                                                               , double iWorldPointX
+                                                               , double iWorldPointY
+                                                               , double iPickingRadius )
 {
     BLMatrix2D& ownerWorldMatrix = iInbetweenerTag->GetOwner()->GetWorldMatrix();
+    FVector2D pickHUDPoint = TextureToHUD( iWorldPointX, iWorldPointY );
 
     for( FInbetweenerRoute* route : iInbetweenerTag->GetRouteList() )
     {
         for( FInbetweenerTrajectory& trajectory : route->GetTrajectoryBuffer() )
         {
             ::ULIS::FVec2D* cubicBezier = trajectory.GetCubicBezier();
-            BLPoint p1World = ownerWorldMatrix.mapPoint( cubicBezier[1].x, cubicBezier[1].y );
-            BLPoint p2World = ownerWorldMatrix.mapPoint( cubicBezier[2].x, cubicBezier[2].y );
+            ::ULIS::FVec2D p1World = FOdysseyVector::MapPoint( ownerWorldMatrix, cubicBezier[1].x, cubicBezier[1].y );
+            ::ULIS::FVec2D p2World = FOdysseyVector::MapPoint( ownerWorldMatrix, cubicBezier[2].x, cubicBezier[2].y );
+            FVector2D p1HUD = TextureToHUD( p1World );
+            FVector2D p2HUD = TextureToHUD( p2World );
 
-
-            if( ( ::ULIS::FVec2D( p1World.x, p1World.y )
-                - ::ULIS::FVec2D( iWorldX  , iWorldY   ) ).Distance() <= iPickingRadius )
+            if( ( p1HUD - pickHUDPoint ).Length() <= iPickingRadius )
             {
                 return trajectory.GetHandle(0);
             }
 
-            if( ( ::ULIS::FVec2D( p2World.x, p2World.y )
-                - ::ULIS::FVec2D( iWorldX  , iWorldY   ) ).Distance() <= iPickingRadius )
+            if( ( p2HUD - pickHUDPoint ).Length() <= iPickingRadius )
             {
                 return trajectory.GetHandle(1);
             }
@@ -478,8 +482,10 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawHUD( const FOdysseyHUDElement:
                           , 0 );
         }
 
-        for( FOdysseyVectorTagInbetweener* inbetweenerTag : mSelectedInbetweenerTagList )
+        for( FInbetweenerBreakdown* breakdown : mSelectedBreakdownList )
         {
+            FOdysseyVectorTagInbetweener* inbetweenerTag = breakdown->GetInbetweenerTag();
+
             inbetweenerTag->GetOwner()->LockDrawing();
 
             for( FInbetweenerRoute* route : inbetweenerTag->GetRouteList() )
@@ -524,8 +530,7 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawHUD( const FOdysseyHUDElement:
         // cursor
         DrawPrimitiveCircle( iParams
                             , hudCursor
-                            , WorldVectorToHUD( ::ULIS::FVec2D( mX, mY )
-                                              , ::ULIS::FVec2D( mTrajectoryTool->PickingRadius, 0 ) ).Distance()
+                            , mTrajectoryTool->PickingRadius
                             , hcColor
                             , 1.0f );
     }
