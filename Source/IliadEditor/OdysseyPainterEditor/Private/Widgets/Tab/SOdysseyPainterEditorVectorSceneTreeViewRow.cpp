@@ -440,6 +440,24 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnTextChanged( const FText& InText
     FOdysseyVectorObject* itemObject = mItem.Get()->GetVectorObject();
     FOdysseyVectorGroupPaint* itemScene = itemObject->GetScene();
 
+    // needed for valid GUndo pointer
+    GEditor->BeginTransaction(LOCTEXT("vector-object.transaction.property-changed","Property Changed"));
+    if( GUndo )
+    {
+        FOdysseyVectorUndo *undo = new FOdysseyVectorUndoObjectParam( itemScene->GetLayer()
+                                                                    , itemObject
+                                                                    , FName( "Identity" ) );
+        // We use GEditor as the UObject, otherwise if we use "this", at each UNDO, PostEditChangeProperty() will be called
+        // which will again call StoreUndo + this will lead to a crash. I don't know however what will be the consequences
+        // of a call to GEditor::PostEditChangeProperty()
+        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+
+        TSharedPtr<FOdysseyPainterEditorSource> source = treeView->GetEditor()->GetSource();
+        if (source)
+            source->RecordCurrentFrameUndo();
+    }
+    GEditor->EndTransaction();
+
     mItem.Get()->GetVectorObject()->SetName( InText.ToString() );
 
     mTextBlockWidget.Get()->SetText( FText::FromString( mItem.Get()->GetVectorObject()->GetName() ) );
