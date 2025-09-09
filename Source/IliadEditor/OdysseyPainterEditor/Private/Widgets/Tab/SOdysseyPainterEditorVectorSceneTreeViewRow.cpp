@@ -120,7 +120,9 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::Construct( const typename STableRow
 TSharedRef<SWidget>
 SOdysseyPainterEditorVectorSceneTreeViewRow::GenerateWidgetForColumn ( const FName& InColumnName )
 {
-    if( InColumnName == "Visible" )
+    FOdysseyVectorObject* vectorObject = mItem->GetVectorObject();
+
+    if( InColumnName == VSTV_OBJECT_VISIBLE )
     {
         const FCheckBoxStyle* isVisibleToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("VectorSceneTreeView.IsVisibleToggle");
 
@@ -137,7 +139,7 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::GenerateWidgetForColumn ( const FNa
                ];
     }
 
-    if( InColumnName == "HUD Color" )
+    if( InColumnName == VSTV_OBJECT_HUD_COLOR )
     {
         return SNew(SBorder)
                .Padding(0, 1)
@@ -160,16 +162,10 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::GenerateWidgetForColumn ( const FNa
                ];
     }
 
-    if( InColumnName == "Name" )
+    if( InColumnName == VSTV_OBJECT_NAME )
     {
-        FOdysseyVectorObject* vectorObject = mItem->GetVectorObject();
-        TSharedPtr<SHorizontalBox> tagBox;
-        const FSlateBrush* objectIcon = nullptr;
-        const FSlateBrush* inbetweenerTagIcon = nullptr;
         uint32 cellIndex = vectorObject->GetCell()->GetIndex();
-
-        //inbetweenerTagIcon = FOdysseyStyle::GetBrush( "PainterEditor.VectorSceneTreeView.InbetweenerTag16" );
-        inbetweenerTagIcon = FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Matching16" );
+        const FSlateBrush* objectIcon = nullptr;
 
         if ( vectorObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
         {
@@ -198,22 +194,6 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::GenerateWidgetForColumn ( const FNa
                            .OnVerifyTextChanged( this, &SOdysseyPainterEditorVectorSceneTreeViewRow::OnVerifyTextChanged )
                            .OnTextCommitted( this, &SOdysseyPainterEditorVectorSceneTreeViewRow::OnTextChanged );
 
-        tagBox = SNew(SHorizontalBox);
-
-        for( FOdysseyVectorTag* tag : vectorObject->GetTagList() )
-        {
-            if( tag->GetClass() == FOdysseyVectorTagInbetweener::StaticClass() )
-            {
-                //Cells widgets
-                tagBox->AddSlot()
-                .AutoWidth()
-                [
-                    SNew( SImage )
-                    .Image( inbetweenerTagIcon )
-                ];
-            }
-        }
-
         return SNew(SHorizontalBox)
                     .IsEnabled( mItem.Get()->IsSensitive() )
                     +SHorizontalBox::Slot()
@@ -233,7 +213,33 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::GenerateWidgetForColumn ( const FNa
                     .AutoWidth()
                     [
                         mTextBlockWidget.ToSharedRef()
-                    ]
+                    ];
+    }
+
+    if( InColumnName == VSTV_OBJECT_TAGS )
+    {
+        const FSlateBrush* inbetweenerTagIcon = nullptr;
+        TSharedPtr<SHorizontalBox> tagBox = SNew(SHorizontalBox);
+
+        //inbetweenerTagIcon = FOdysseyStyle::GetBrush( "PainterEditor.VectorSceneTreeView.InbetweenerTag16" );
+        inbetweenerTagIcon = FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Matching16" );
+
+        for( FOdysseyVectorTag* tag : vectorObject->GetTagList() )
+        {
+            if( tag->GetClass() == FOdysseyVectorTagInbetweener::StaticClass() )
+            {
+                //Cells widgets
+                tagBox->AddSlot()
+                .AutoWidth()
+                [
+                    SNew( SImage )
+                    .Image( inbetweenerTagIcon )
+                ];
+            }
+        }
+
+        return SNew(SHorizontalBox)
+                    .IsEnabled( mItem.Get()->IsSensitive() )
                     + SHorizontalBox::Slot()
                     .Padding( 10, 0 )
                     .AutoWidth()

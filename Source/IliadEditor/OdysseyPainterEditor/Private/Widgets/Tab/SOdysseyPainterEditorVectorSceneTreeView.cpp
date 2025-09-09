@@ -76,7 +76,23 @@ SOdysseyPainterEditorVectorSceneTreeView::Construct( const FArguments& InArgs )
                                       [
                                           SNullWidget::NullWidget
                                       ]
-                                      + SHeaderRow::Column("Name");
+                                      + SHeaderRow::Column("Name")
+                                      + SHeaderRow::Column("T")
+                                      .FixedWidth( 16.f )
+                                      [
+                                          SNew(SBorder)
+                                          .Padding(0,0)
+                                          .BorderBackgroundColor( FSlateColor( FLinearColor( 0, 0, 0, 0 ) ) )
+                                          .Content()
+                                          [
+                                              SNew(SImage)
+                                              .Image( FOdysseyStyle::GetBrush("Level.VisibleIcon16x") )
+                                          ]
+                                      ]
+                                      + SHeaderRow::Column("Tags")
+                                      [
+                                          SNullWidget::NullWidget
+                                      ];
     mEditor = InArgs._Editor;
     mScene.Assign(*this, InArgs._Scene);
 

@@ -241,18 +241,16 @@ void
 FOdysseyVectorObject::MakeInDepthBBox()
 {
     ::ULIS::FRectD childrenBBox = ::ULIS::FRectD( 0, 0, 0, 0 );
-    ::ULIS::FVec2D p0, p1, p2, p3;
 
     mInDepthBBox = ::ULIS::FRectD( 0, 0, 0, 0 );
 
     for( FOdysseyVectorObject* child : mChildrenList )
     {
         ::ULIS::FRectD bbox = child->GetBBox( true, false );
-        p0 = FOdysseyVector::MapPoint( child->GetLocalMatrix(), ::ULIS::FVec2D( bbox.x         , bbox.y          ) );
-        p1 = FOdysseyVector::MapPoint( child->GetLocalMatrix(), ::ULIS::FVec2D( bbox.x + bbox.w, bbox.y          ) );
-        p2 = FOdysseyVector::MapPoint( child->GetLocalMatrix(), ::ULIS::FVec2D( bbox.x + bbox.w, bbox.y + bbox.h ) );
-        p3 = FOdysseyVector::MapPoint( child->GetLocalMatrix(), ::ULIS::FVec2D( bbox.x         , bbox.y + bbox.h ) );
-
+        ::ULIS::FVec2D p0 = FOdysseyVector::MapPoint( child->GetLocalMatrix(), ::ULIS::FVec2D( bbox.x         , bbox.y          ) );
+        ::ULIS::FVec2D p1 = FOdysseyVector::MapPoint( child->GetLocalMatrix(), ::ULIS::FVec2D( bbox.x + bbox.w, bbox.y          ) );
+        ::ULIS::FVec2D p2 = FOdysseyVector::MapPoint( child->GetLocalMatrix(), ::ULIS::FVec2D( bbox.x + bbox.w, bbox.y + bbox.h ) );
+        ::ULIS::FVec2D p3 = FOdysseyVector::MapPoint( child->GetLocalMatrix(), ::ULIS::FVec2D( bbox.x         , bbox.y + bbox.h ) );
         ::ULIS::FRectD relativeBBox = ::ULIS::FRectD::FromMinMax( ::ULIS::FMath::Min4( p0.x, p1.x, p2.x, p3.x )
                                                                 , ::ULIS::FMath::Min4( p0.y, p1.y, p2.y, p3.y )
                                                                 , ::ULIS::FMath::Max4( p0.x, p1.x, p2.x, p3.x )
