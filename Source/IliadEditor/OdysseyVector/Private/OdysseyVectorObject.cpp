@@ -247,26 +247,25 @@ FOdysseyVectorObject::MakeInDepthBBox()
 
     for( FOdysseyVectorObject* child : mChildrenList )
     {
-        ::ULIS::FRectD bbox = child->GetBBox( true, true );
+        ::ULIS::FRectD bbox = child->GetBBox( true, false );
+        p0 = FOdysseyVector::MapPoint( child->GetLocalMatrix(), ::ULIS::FVec2D( bbox.x         , bbox.y          ) );
+        p1 = FOdysseyVector::MapPoint( child->GetLocalMatrix(), ::ULIS::FVec2D( bbox.x + bbox.w, bbox.y          ) );
+        p2 = FOdysseyVector::MapPoint( child->GetLocalMatrix(), ::ULIS::FVec2D( bbox.x + bbox.w, bbox.y + bbox.h ) );
+        p3 = FOdysseyVector::MapPoint( child->GetLocalMatrix(), ::ULIS::FVec2D( bbox.x         , bbox.y + bbox.h ) );
 
-        if( bbox.Area() )
+        ::ULIS::FRectD relativeBBox = ::ULIS::FRectD::FromMinMax( ::ULIS::FMath::Min4( p0.x, p1.x, p2.x, p3.x )
+                                                                , ::ULIS::FMath::Min4( p0.y, p1.y, p2.y, p3.y )
+                                                                , ::ULIS::FMath::Max4( p0.x, p1.x, p2.x, p3.x )
+                                                                , ::ULIS::FMath::Max4( p0.y, p1.y, p2.y, p3.y ) );
+
+        if( relativeBBox.Area() )
         {
-            childrenBBox = childrenBBox.Area() ? ( childrenBBox | bbox ) : bbox;
+            childrenBBox = childrenBBox.Area() ? ( childrenBBox | relativeBBox ) : relativeBBox;
         }
     }
 
     if( childrenBBox.Area() )
     {
-        p0 = FOdysseyVector::MapPoint( mInverseWorldMatrix, ::ULIS::FVec2D( childrenBBox.x                 , childrenBBox.y                  ) );
-        p1 = FOdysseyVector::MapPoint( mInverseWorldMatrix, ::ULIS::FVec2D( childrenBBox.x + childrenBBox.w, childrenBBox.y                  ) );
-        p2 = FOdysseyVector::MapPoint( mInverseWorldMatrix, ::ULIS::FVec2D( childrenBBox.x + childrenBBox.w, childrenBBox.y + childrenBBox.h ) );
-        p3 = FOdysseyVector::MapPoint( mInverseWorldMatrix, ::ULIS::FVec2D( childrenBBox.x                 , childrenBBox.y + childrenBBox.h ) );
-
-        childrenBBox = ::ULIS::FRectD::FromMinMax( ::ULIS::FMath::Min4( p0.x, p1.x, p2.x, p3.x )
-                                                 , ::ULIS::FMath::Min4( p0.y, p1.y, p2.y, p3.y )
-                                                 , ::ULIS::FMath::Max4( p0.x, p1.x, p2.x, p3.x )
-                                                 , ::ULIS::FMath::Max4( p0.y, p1.y, p2.y, p3.y ) );
-
         mInDepthBBox = childrenBBox;
     }
 

@@ -753,7 +753,6 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxObjectMode( bool iForc
     if( ( selectedObjectList.size() <= 1 ) && ( iForceWorld == false ) )
     {
         FOdysseyVectorObject* selectedObject = selectedObjectList.size() ? selectedObjectList.front() : scene;
-
         mSelectionBox.inited = true;
         mSelectionBox.rect = selectedObject->GetBBox( true, false );
         mSelectionBox.worldMatrix = selectedObject->GetWorldMatrix();

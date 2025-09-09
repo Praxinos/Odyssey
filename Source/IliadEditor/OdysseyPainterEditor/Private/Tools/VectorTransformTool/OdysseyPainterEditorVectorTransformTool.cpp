@@ -892,7 +892,8 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorGr
     uint32 hudFlags = mTransformHUD->GetFlags();
     ::ULIS::FVec2D oldLocalCoords = FOdysseyVector::MapPoint( mInverseSpaceMatrix, ::ULIS::FVec2D( mMouseAtDown.x
                                                                                                  , mMouseAtDown.y ) );
-    ::ULIS::FVec2D localCoords = FOdysseyVector::MapPoint( mInverseSpaceMatrix, ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y ) );
+    ::ULIS::FVec2D localCoords = FOdysseyVector::MapPoint( mInverseSpaceMatrix, ::ULIS::FVec2D( iPointInTexture.x
+                                                                                              , iPointInTexture.y ) );
     double difx = localCoords.x - oldLocalCoords.x;
     double dify = localCoords.y - oldLocalCoords.y;
     double oldX1 = selectionBox.rect.x
@@ -1004,8 +1005,6 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorGr
                 object->Skew( skewX, skewY );
 
                 object->UpdateMatrix();
-
-                objectLocalMatrix = object->GetLocalMatrix();
             }
 
             // this will also reset the HUD due to the object's matrix being modified
