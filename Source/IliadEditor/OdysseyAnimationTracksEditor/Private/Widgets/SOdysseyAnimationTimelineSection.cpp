@@ -13,10 +13,11 @@
 #include "Widgets/Colors/SColorBlock.h"
 
 #include "OdysseyAnimation.h"
-#include "OdysseyAnimationCell.h"
+#include "OdysseyAnimationLayer.h"
 #include "OdysseyAnimationComponent.h"
 #include "OdysseyAnimationPlayer.h"
 #include "OdysseyAnimationLayerStack.h"
+#include "OdysseyLayerCell.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorAnimationOutOfPegsTool.h"
 #include "OdysseyPainterEditorAnimationTimelinePosition.h"
@@ -94,7 +95,7 @@ SOdysseyAnimationTimelineSection::OnPreviewMouseButtonDown(const FGeometry& MyGe
 }
 
 void
-SOdysseyAnimationTimelineSection::OnActivateOutOfPegs(UOdysseyAnimationCell* iCell)
+SOdysseyAnimationTimelineSection::OnActivateOutOfPegs(UOdysseyLayerCell* iCell)
 {
     if (!GLevelEditorModeTools().IsModeActive( FOdysseyViewportDrawingEditorEdMode::EM_OdysseyViewportDrawingEditorEdModeId ))
         return;
@@ -112,7 +113,11 @@ SOdysseyAnimationTimelineSection::OnActivateOutOfPegs(UOdysseyAnimationCell* iCe
     if(!toolkit)
         return;
 
-    UOdysseyAnimation* animation = iCell->GetAnimation();
+    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(iCell->GetLayer());
+    if (!layer)
+        return;
+
+    UOdysseyAnimation* animation = layer->GetAnimation();
     if (!animation)
         return;
 
@@ -142,7 +147,7 @@ SOdysseyAnimationTimelineSection::OnInactivateOutOfPegs()
 }
 
 ECheckBoxState
-SOdysseyAnimationTimelineSection::OnIsOutOfPegsChecked(UOdysseyAnimationCell* iCell)
+SOdysseyAnimationTimelineSection::OnIsOutOfPegsChecked(UOdysseyLayerCell* iCell)
 {
     if (!GLevelEditorModeTools().IsModeActive( FOdysseyViewportDrawingEditorEdMode::EM_OdysseyViewportDrawingEditorEdModeId))
         return ECheckBoxState::Unchecked;
@@ -160,7 +165,11 @@ SOdysseyAnimationTimelineSection::OnIsOutOfPegsChecked(UOdysseyAnimationCell* iC
     if(!toolkit)
         return ECheckBoxState::Unchecked;
 
-    UOdysseyAnimation* animation = iCell->GetAnimation();
+    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(iCell->GetLayer());
+    if (!layer)
+        return ECheckBoxState::Unchecked;
+
+    UOdysseyAnimation* animation = layer->GetAnimation();
     if (!animation)
         return ECheckBoxState::Unchecked;
 

@@ -9,11 +9,11 @@
 #include "OdysseyHUDHandle.h"
 #include "OdysseyHUDCircle.h"
 #include "OdysseyHUDLine.h"
-#include "OdysseyAnimationCell.h"
-#include "OdysseyAnimationLayer.h"
 #include "OdysseyPainterEditor.h"
-#include "OdysseyAnimation.h"
 #include "DetailLayoutBuilder.h"
+#include "OdysseyAnimation.h"
+#include "OdysseyAnimationLayer.h"
+#include "OdysseyLayerCell.h"
 
 #include <ULIS>
 
@@ -199,14 +199,14 @@ UOdysseyPainterEditorAnimationOutOfPegsTool::PostEditChangeProperty( FPropertyCh
     }
 }
 
-UOdysseyAnimationCell*
+UOdysseyLayerCell*
 UOdysseyPainterEditorAnimationOutOfPegsTool::GetCell() const
 {
     return mCell;
 }
 
 void
-UOdysseyPainterEditorAnimationOutOfPegsTool::SetCell(UOdysseyAnimationCell* iCell)
+UOdysseyPainterEditorAnimationOutOfPegsTool::SetCell(UOdysseyLayerCell* iCell)
 {
     if (iCell == mCell)
         return;
@@ -221,7 +221,7 @@ UOdysseyPainterEditorAnimationOutOfPegsTool::SetCell(UOdysseyAnimationCell* iCel
 
     if (mCell)
     {
-        mLayer = Cast<UOdysseyAnimationLayer>(mCell->GetLayer());
+        mLayer = mCell->GetLayer();
         mLayer->OnLighttableChanged().AddUObject(this, &UOdysseyPainterEditorAnimationOutOfPegsTool::OnLighttableChanged);
 
         Pan = mCell->GetOutOfPegs().Pan;
@@ -317,7 +317,7 @@ UOdysseyPainterEditorAnimationOutOfPegsTool::RebuildHUD()
 FVector2D
 UOdysseyPainterEditorAnimationOutOfPegsTool::GetCenter() const
 {
-    UOdysseyAnimation* animation = mCell->GetAnimation();
+    UOdysseyAnimation* animation = Cast<UOdysseyAnimationLayer>(mLayer)->GetAnimation();
     if (!animation)
         return FVector2D();
 
@@ -332,7 +332,7 @@ UOdysseyPainterEditorAnimationOutOfPegsTool::GetCenter() const
 void
 UOdysseyPainterEditorAnimationOutOfPegsTool::RefreshHUD()
 {
-    UOdysseyAnimation* animation = mCell->GetAnimation();
+    UOdysseyAnimation* animation = Cast<UOdysseyAnimationLayer>(mLayer)->GetAnimation();
     if (!animation)
         return;
 
@@ -495,8 +495,6 @@ UOdysseyPainterEditorAnimationOutOfPegsTool::ResetAll()
     const TArray<UOdysseyLayerCell*> cells = mLayer->GetCells();
     for (UOdysseyLayerCell* cell : cells)
     {
-        UOdysseyAnimationCell* animationCell = Cast<UOdysseyAnimationCell>(cell);
-        if (animationCell)
-            animationCell->SetOutOfPegs(FOdysseyLayerCellOutOfPegs());
+        cell->SetOutOfPegs(FOdysseyLayerCellOutOfPegs());
     }
 }

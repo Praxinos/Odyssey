@@ -7,8 +7,7 @@
 #include "OdysseyLighttable.h"
 #include "Widgets/SCompoundWidget.h"
 
-class UOdysseyAnimationLayer;
-class UOdysseyAnimationCell;
+class UOdysseyLayerCell;
 class FOdysseyPainterEditorAnimationTimelinePosition;
 
 class SOdysseyAnimationTimelineOutOfPegsKey
@@ -16,14 +15,14 @@ class SOdysseyAnimationTimelineOutOfPegsKey
 {
 public:
     DECLARE_DELEGATE_OneParam(FOnKeyChanged, FOdysseyLighttableKey)
-    DECLARE_DELEGATE_OneParam(FOnActivateOutOfPegs, UOdysseyAnimationCell*)
-    DECLARE_DELEGATE_RetVal_OneParam(ECheckBoxState, FOnIsOutOfPegsChecked, UOdysseyAnimationCell*)
+    DECLARE_DELEGATE_OneParam(FOnActivateOutOfPegs, UOdysseyLayerCell*)
+    DECLARE_DELEGATE_RetVal_OneParam(ECheckBoxState, FOnIsOutOfPegsChecked, UOdysseyLayerCell*)
 
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineOutOfPegsKey)
     {}
         SLATE_ARGUMENT(TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition>, TimelinePosition)
-        SLATE_ATTRIBUTE(UOdysseyAnimationCell*, Cell)
+        SLATE_ATTRIBUTE(UOdysseyLayerCell*, Cell)
         SLATE_ATTRIBUTE(FOdysseyLighttableKey, Key)
         SLATE_EVENT(FOnActivateOutOfPegs, OnActivateOutOfPegs)
         SLATE_EVENT(FSimpleDelegate, OnInactivateOutOfPegs)
@@ -39,7 +38,7 @@ private:
     ECheckBoxState IsOutOfPegsChecked() const;
 
 private:
-    TAttribute<UOdysseyAnimationCell*> mCell;
+    TAttribute<UOdysseyLayerCell*> mCell;
     TAttribute<FOdysseyLighttableKey> mKey;
 
     FOnActivateOutOfPegs mOnActivateOutOfPegs;

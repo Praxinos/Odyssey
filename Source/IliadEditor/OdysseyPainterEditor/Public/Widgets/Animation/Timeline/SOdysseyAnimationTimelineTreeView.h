@@ -8,7 +8,7 @@
 class UOdysseyAnimationLayerStack;
 class FOdysseyAnimationTimelineShortcuts;
 class FOdysseyPainterEditorAnimationTimelinePosition;
-class UOdysseyAnimationCell;
+class UOdysseyLayerCell;
 class ITableRow;
 class FOdysseyPainterEditor;
 
@@ -16,8 +16,8 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyAnimationTimelineTreeView
     : public SOdysseyLayerStackTreeView
 {
 public:
-    DECLARE_DELEGATE_OneParam(FOnActivateOutOfPegs, UOdysseyAnimationCell*)
-    DECLARE_DELEGATE_RetVal_OneParam(ECheckBoxState, FOnIsOutOfPegsChecked, UOdysseyAnimationCell*)
+    DECLARE_DELEGATE_OneParam(FOnActivateOutOfPegs, UOdysseyLayerCell*)
+    DECLARE_DELEGATE_RetVal_OneParam(ECheckBoxState, FOnIsOutOfPegsChecked, UOdysseyLayerCell*)
     DECLARE_DELEGATE_OneParam(FOnTransactCurrentFrame, TOptional<int>)
     DECLARE_DELEGATE_OneParam(FOnCurrentFrameChanged, int /*iFrame*/)
 
