@@ -413,11 +413,13 @@ SOdysseyPainterEditorVectorSceneTreeView::ParseVectorNotifications( const FOdyss
     if( iSignalFlags.bits[FOdysseyVectorObjectInvalidationFlags::DEFAULT]
      || iSignalFlags.bits[FOdysseyVectorObjectInvalidationFlags::HIERARCHY]
      || iSignalFlags.bits[FOdysseyVectorObjectInvalidationFlags::OBJECT_SELECTION]
+     || iSignalFlags.bits[FOdysseyVectorObjectInvalidationFlags::PARAM]
      || iSignalFlags.bits[FOdysseyVectorObjectInvalidationFlags::TAG_LIST]
      || iSignalFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_DEFAULT]
      || iSignalFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_HIERARCHY]
-     || iSignalFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_TAG_LIST]
-     || iSignalFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_OBJECT_SELECTION] )
+     || iSignalFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_OBJECT_SELECTION]
+     || iSignalFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_PARAM]
+     || iSignalFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_TAG_LIST] )
     {
         Update();
     }

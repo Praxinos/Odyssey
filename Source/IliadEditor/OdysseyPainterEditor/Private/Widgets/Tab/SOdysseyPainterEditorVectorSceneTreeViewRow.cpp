@@ -435,7 +435,7 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnTextChanged( const FText& InText
 
     // Unregister this widget's updates when the vector scene is updated. We don't want this widget to be
     // rebuilt while it's processing stuff
-    treeView->UnbindLayerDelegates();
+    //treeView->UnbindLayerDelegates();
 
     FOdysseyVectorObject* itemObject = mItem.Get()->GetVectorObject();
     FOdysseyVectorGroupPaint* itemScene = itemObject->GetScene();
@@ -447,15 +447,7 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnTextChanged( const FText& InText
     itemScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
     //itemScene->GetLayer()->Notify( FOdysseyPainterEditor::UI_UPDATE_TIMELINE );
 
-    treeView->BindLayerDelegates();
-}
-
-void
-SOdysseyPainterEditorVectorSceneTreeViewRow::OnUndoRedo()
-{
-    FOdysseyVectorObject* itemObject = mItem.Get()->GetVectorObject();
-
-    itemObject->GetLayer()->ResetHUD( itemObject->GetScene() );
+    //treeView->BindLayerDelegates();
 }
 
 FReply
@@ -472,7 +464,7 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
 
     // Unregister this widget's updates when the vector scene is updated. We don't want this widget to be
     // rebuilt while it's processing stuff
-    treeView->UnbindLayerDelegates();
+    //treeView->UnbindLayerDelegates();
 
     itemScene->GetCell()->GetFocusedAncestorList( focusedObjectList );
 
@@ -551,7 +543,7 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
     itemScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
     itemScene->GetLayer()->RequestRedraw( itemScene->GetCell(), 0 );
 
-    treeView->BindLayerDelegates();
+    //treeView->BindLayerDelegates();
 
     return FReply::Handled();
 }
