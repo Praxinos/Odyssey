@@ -209,6 +209,8 @@ FImportImageSequenceConverter::CreateAnimation( const TArray<FImportImageSequenc
             FOdysseyPainterEditorAnimationImport import_sequence;
             UOdysseyAnimationLayerImageRaster* animation_layer = import_sequence.ImportTextureSequence( new_animation, textures, nullptr, 0 );
 
+            new_animation->GetLayerStack()->SetCurrentLayer( animation_layer );
+
             //---
 
             TArray<UOdysseyLayerCell*> cells = animation_layer->GetCells();
