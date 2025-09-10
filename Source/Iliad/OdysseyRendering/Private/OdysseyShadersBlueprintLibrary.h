@@ -8,7 +8,6 @@
 #include "OdysseyAntiAliasing.h"
 #include "OdysseyBlendingMode.h"
 #include "OdysseyBlendShader.h"
-#include "OdysseyImageAnchor.h"
 
 #include "OdysseyShadersBlueprintLibrary.generated.h"
 

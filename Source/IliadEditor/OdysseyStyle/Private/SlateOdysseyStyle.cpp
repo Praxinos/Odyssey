@@ -182,15 +182,14 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "ClassThumbnail.OdysseyTexture", new IMAGE_BRUSH( "OdysseyTexture/OdysseyTextureDefaultThumbnail_64", mIcon64x64 ) );
     Set( "ClassIcon.Texture2D", new IMAGE_BRUSH( "OdysseyTexture/OdysseyTextureDefaultThumbnail_16", mIcon16x16 ) );
     Set( "ClassThumbnail.Texture2D", new IMAGE_BRUSH( "OdysseyTexture/OdysseyTextureDefaultThumbnail_64", mIcon64x64 ) );
-
     Set( "ClassIcon.OdysseyFlipbook", new IMAGE_BRUSH("OdysseyFlipbook/OdysseyFlipbook_16x", mIcon16x16));
     Set( "ClassThumbnail.OdysseyFlipbook", new IMAGE_BRUSH("OdysseyFlipbook/OdysseyFlipbook_64x", mIcon64x64));
 
     Set( "OdysseyTexture.ExportTexture_16", new IMAGE_BRUSH("OdysseyTexture/ExportTexture_16", mIcon16x16));
-    Set( "OdysseyTexture.ExportTexture_64", new IMAGE_BRUSH("OdysseyTexture/ExportTexture_64", mIcon64x64));
+    Set( "OdysseyTexture.ExportTexture_64", new IMAGE_BRUSH("OdysseyTexture/ExportTexture_64", mIcon64x64)); //unused
 
     // OdysseyLogo
-    Set( "OdysseyLogo.PraxinosLogo16", new IMAGE_BRUSH("Logo/Praxinos_Logo_16", mIcon16x16));
+    Set( "OdysseyLogo.PraxinosLogo16", new IMAGE_BRUSH("Logo/Praxinos_Logo_16", mIcon16x16)); //unused
 
     // OdysseyBrush
     Set( "ClassIcon.OdysseyBrush", new IMAGE_BRUSH( "Brush/OdysseyBrushDefaultThumbnail_16", mIcon16x16 ) );
@@ -198,22 +197,22 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "ClassIcon.OdysseyBrushAssetBase", new IMAGE_BRUSH( "Brush/OdysseyBrushDefaultThumbnail_16", mIcon16x16 ) );
     Set( "ClassThumbnail.OdysseyBrushAssetBase", new IMAGE_BRUSH( "Brush/OdysseyBrushDefaultThumbnail_64", mIcon64x64 ) );
 
-    Set( "OdysseyBrush.EditBrush16", new IMAGE_BRUSH( "Brush/edit_brush_16", mIcon16x16 ) );
-    Set( "OdysseyBrush.EditBrush64", new IMAGE_BRUSH( "Brush/edit_brush_64", mIcon64x64 ) );
+    Set( "OdysseyBrush.EditBrush16", new IMAGE_BRUSH( "Brush/edit_brush_16", mIcon16x16 ) ); //unused
+    Set( "OdysseyBrush.EditBrush64", new IMAGE_BRUSH( "Brush/edit_brush_64", mIcon64x64 ) ); //unused
 
     // OdysseyPalette
     Set("ClassIcon.OdysseyPalette", new IMAGE_BRUSH( "OdysseyPalette/OdysseyPaletteDefaultThumbnail_16", mIcon16x16 ));
     Set("ClassThumbnail.OdysseyPalette", new IMAGE_BRUSH("OdysseyPalette/OdysseyPaletteDefaultThumbnail_64", mIcon64x64));
-    Set("OdysseyPalette.PaletteTab", new IMAGE_BRUSH_SVG("OdysseyPalette/OdysseyPaletteTab", mIcon16x16));
+    Set("OdysseyPalette.PaletteTab", new IMAGE_BRUSH_SVG("OdysseyPalette/OdysseyPaletteTab", mIcon16x16)); //unused
     Set("OdysseyPalette.EntryColor", new IMAGE_BRUSH_SVG("OdysseyPalette/OdysseyPaletteEntryColor", mIcon16x16));
-    Set("OdysseyPalette.EntryFolder", new IMAGE_BRUSH_SVG("OdysseyPalette/OdysseyPaletteEntryFolder", mIcon16x16));
-    Set("OdysseyPalette.EntryMaterial", new IMAGE_BRUSH_SVG("OdysseyPalette/OdysseyPaletteEntryMaterial", mIcon16x16));
+    Set("OdysseyPalette.EntryFolder", new IMAGE_BRUSH_SVG("OdysseyPalette/OdysseyPaletteEntryFolder", mIcon16x16)); //unused
+    Set("OdysseyPalette.EntryMaterial", new IMAGE_BRUSH_SVG("OdysseyPalette/OdysseyPaletteEntryMaterial", mIcon16x16)); //unused
     Set("OdysseyPalette.AddColor", new IMAGE_BRUSH_SVG("OdysseyPalette/OdysseyPaletteAddColor", mIcon24x24));
-    Set("OdysseyPalette.AddFolder", new IMAGE_BRUSH_SVG("OdysseyPalette/OdysseyPaletteAddFolder", mIcon24x24));
-    Set("OdysseyPalette.AddMaterial", new IMAGE_BRUSH_SVG("OdysseyPalette/OdysseyPaletteAddMaterial", mIcon24x24));
-    Set("OdysseyPalette.AddSet", new IMAGE_BRUSH_SVG("OdysseyPalette/OdysseyPaletteAddSet", mIcon24x24));
-    Set("OdysseyPalette.AddPicker", new IMAGE_BRUSH_SVG("OdysseyPalette/OdysseyPaletteAddPicker", mIcon24x24));
-    Set("OdysseyPalette.Save", new IMAGE_BRUSH_SVG("OdysseyPalette/OdysseyPaletteSave", mIcon24x24));
+    Set("OdysseyPalette.AddFolder", new IMAGE_BRUSH_SVG("OdysseyPalette/OdysseyPaletteAddFolder", mIcon24x24)); //unused
+    Set("OdysseyPalette.AddMaterial", new IMAGE_BRUSH_SVG("OdysseyPalette/OdysseyPaletteAddMaterial", mIcon24x24)); //unused
+    Set("OdysseyPalette.AddSet", new IMAGE_BRUSH_SVG("OdysseyPalette/OdysseyPaletteAddSet", mIcon24x24)); //unused
+    Set("OdysseyPalette.AddPicker", new IMAGE_BRUSH_SVG("OdysseyPalette/OdysseyPaletteAddPicker", mIcon24x24)); //unused
+    Set("OdysseyPalette.Save", new IMAGE_BRUSH_SVG("OdysseyPalette/OdysseyPaletteSave", mIcon24x24)); //unused
     Set("OdysseyPalette.Row", FTableRowStyle(mCoreTableRowStyle)
         .SetEvenRowBackgroundBrush(FSlateColorBrush(FStyleColors::Panel))
         .SetEvenRowBackgroundHoveredBrush(FSlateColorBrush(FStyleColors::Hover))
@@ -239,105 +238,46 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "AdvancedColorWheel.HintColorA", new IMAGE_BRUSH( "Color/AdvancedColorWheel/HintColorA", FVector2D( 223, 221 ) ) );
     Set( "AdvancedColorWheel.HintColorB", new IMAGE_BRUSH( "Color/AdvancedColorWheel/HintColorB", FVector2D( 100, 89 ) ) );
 
-    //About
-    Set( "About.Facebook", new IMAGE_BRUSH( "About/facebook", FVector2D( 30, 30 ) ) );
-    Set( "About.LinkedIn", new IMAGE_BRUSH( "About/linkedin", FVector2D( 30, 30 ) ) );
-    Set( "About.Youtube", new IMAGE_BRUSH( "About/youtube", FVector2D( 30, 30 ) ) );
-    Set( "About.Twitter", new IMAGE_BRUSH( "About/twitter", FVector2D( 30, 30 ) ) );
-    Set( "About.Instagram", new IMAGE_BRUSH( "About/instagram", FVector2D( 30, 30 ) ) );
-    Set( "About.Discord", new IMAGE_BRUSH( "About/discord", FVector2D( 30, 30 ) ) );
-    Set( "About.UserDoc", new IMAGE_BRUSH( "About/userDoc", FVector2D( 30, 30 ) ) );
-    Set( "About.Git", new IMAGE_BRUSH( "About/git", FVector2D( 30, 30 ) ) );
-    Set( "About.Praxinos", new IMAGE_BRUSH( "About/praxinos", FVector2D( 128, 128 ) ) );
-    Set( "About.Manual16", new IMAGE_BRUSH("About/Manual_16", mIcon16x16));
-    Set( "About.MorePencils16", new IMAGE_BRUSH("About/More_Pencils_16", mIcon16x16));
-    Set( "About.Discord2_16", new IMAGE_BRUSH("About/Discord2_16", mIcon16x16));
-
-    Set( "About.UnderlineText", FTextBlockStyle( FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>( "NormalUnderlinedText" ) )
-         .SetFontSize( 10 )
-         .SetColorAndOpacity( FLinearColor( 1.f, 1.f, 1.f ) )
-    );
-    Set( "About.SmallText", FTextBlockStyle( FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>( "SmallText" ) )
-         .SetColorAndOpacity( FLinearColor( 1.f, 1.f, 1.f ) )
-    );
-    Set( "About.BigText", FTextBlockStyle( FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>( "NormalText" ) )
-         .SetFontSize( 15 )
-         .SetColorAndOpacity( FLinearColor( 1.f, 1.f, 1.f ) )
-    );
-
-    Set( "About.UnderlineSubduedText", FTextBlockStyle( FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>( "NormalUnderlinedText" ) )
-         .SetFontSize( 10 )
-         .SetColorAndOpacity( FLinearColor( FColor( 128, 128, 128 ) ) )
-    );
-    Set( "About.SmallSubduedText", FTextBlockStyle( FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>( "SmallText" ) )
-         .SetColorAndOpacity( FLinearColor( FColor( 128, 128, 128 ) ) )
-    );
-    Set( "About.BigSubduedText", FTextBlockStyle( FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>( "NormalText" ) )
-         .SetFontSize( 15 )
-         .SetColorAndOpacity( FLinearColor( FColor( 128, 128, 128 ) ) )
-    );
-
     //PainterEditor
-    Set( "PainterEditor.OpenPaintEditor64", new IMAGE_BRUSH( "PainterEditor/open_paint_editor_64", mIcon64x64 ) );
-    Set( "PainterEditor.OpenPaintEditor16", new IMAGE_BRUSH( "PainterEditor/open_paint_editor_16", mIcon16x16 ) );
+    Set( "PainterEditor.OpenPaintEditor64", new IMAGE_BRUSH( "PainterEditor/open_paint_editor_64", mIcon64x64 ) ); //unused
+    Set( "PainterEditor.OpenPaintEditor16", new IMAGE_BRUSH( "PainterEditor/open_paint_editor_16", mIcon16x16 ) ); //unused
 
-    Set( "PainterEditor.Notes64", new IMAGE_BRUSH( "PainterEditor/notes_64", mIcon64x64 ) );
-    Set( "PainterEditor.Notes16", new IMAGE_BRUSH( "PainterEditor/notes_16", mIcon16x16 ) );
+    Set( "PainterEditor.Notes64", new IMAGE_BRUSH( "PainterEditor/notes_64", mIcon64x64 ) ); //unused
+    Set( "PainterEditor.Notes16", new IMAGE_BRUSH( "PainterEditor/notes_16", mIcon16x16 ) ); //unused
 
-    Set( "PainterEditor.Spark32", new IMAGE_BRUSH( "PainterEditor/spark_32", mIcon32x32 ) );
-    Set( "PainterEditor.Spark20", new IMAGE_BRUSH( "PainterEditor/spark_20", mIcon20x20 ) );
-    Set( "PainterEditor.Spark16", new IMAGE_BRUSH( "PainterEditor/spark_16", mIcon16x16 ) );
+    Set( "PainterEditor.Spark32", new IMAGE_BRUSH( "PainterEditor/spark_32", mIcon32x32 ) ); //unused
+    Set( "PainterEditor.Spark20", new IMAGE_BRUSH( "PainterEditor/spark_20", mIcon20x20 ) ); //unused
+    Set( "PainterEditor.Spark16", new IMAGE_BRUSH( "PainterEditor/spark_16", mIcon16x16 ) ); //unused
 
-    Set( "PainterEditor.Tools64", new IMAGE_BRUSH( "PainterEditor/tools_64", mIcon64x64 ) );
-    Set( "PainterEditor.Tools20", new IMAGE_BRUSH( "PainterEditor/tools_20", mIcon20x20 ) );
-    Set( "PainterEditor.Tools16", new IMAGE_BRUSH( "PainterEditor/tools_16", mIcon16x16 ) );
+    Set( "PainterEditor.Tools64", new IMAGE_BRUSH( "PainterEditor/tools_64", mIcon64x64 ) ); //unused
+    Set( "PainterEditor.Tools20", new IMAGE_BRUSH( "PainterEditor/tools_20", mIcon20x20 ) ); //unused
+    Set( "PainterEditor.Tools16", new IMAGE_BRUSH( "PainterEditor/tools_16", mIcon16x16 ) ); //unused
     Set( "PainterEditor.Tools", new IMAGE_BRUSH_SVG( "PainterEditor/tools", mIcon16x16 ) );
 
-    Set( "PainterEditor.Layers64", new IMAGE_BRUSH_SVG( "PainterEditor/layers", mIcon64x64 ) );
-    Set( "PainterEditor.Layers20", new IMAGE_BRUSH_SVG( "PainterEditor/layers", mIcon20x20 ) );
+    Set( "PainterEditor.Layers64", new IMAGE_BRUSH_SVG( "PainterEditor/layers", mIcon64x64 ) ); //unused
+    Set( "PainterEditor.Layers20", new IMAGE_BRUSH_SVG( "PainterEditor/layers", mIcon20x20 ) ); //unused
     Set( "PainterEditor.Layers16", new IMAGE_BRUSH_SVG( "PainterEditor/layers", mIcon16x16 ) );
 
-    Set( "PainterEditor.ColorSliders64", new IMAGE_BRUSH( "PainterEditor/color_sliders_64", mIcon64x64 ) );
-    Set( "PainterEditor.ColorSliders16", new IMAGE_BRUSH( "PainterEditor/color_sliders_16", mIcon16x16 ) );
-    Set( "PainterEditor.ColorSliders_2_64", new IMAGE_BRUSH( "PainterEditor/color_sliders_2_64", mIcon64x64 ) );
-    Set( "PainterEditor.ColorSliders_2_20", new IMAGE_BRUSH( "PainterEditor/color_sliders_2_20", mIcon20x20 ) );
-    Set( "PainterEditor.ColorSliders_2_16", new IMAGE_BRUSH( "PainterEditor/color_sliders_2_16", mIcon16x16 ) );
+    Set( "PainterEditor.BrushExposedParameters64", new IMAGE_BRUSH( "PainterEditor/brush_exposed_parameters_64", mIcon64x64 ) ); //unused
+    Set( "PainterEditor.BrushExposedParameters20", new IMAGE_BRUSH( "PainterEditor/brush_exposed_parameters_20", mIcon20x20 ) ); //unused
+    Set( "PainterEditor.BrushExposedParameters16", new IMAGE_BRUSH( "PainterEditor/brush_exposed_parameters_16", mIcon16x16 ) ); //unused
+    Set( "PainterEditor.ToolOptions", new IMAGE_BRUSH_SVG( "PainterEditor/ToolOptions", mIcon16x16 ) ); //unused
 
-    Set( "PainterEditor.ColorSelector64", new IMAGE_BRUSH( "PainterEditor/color_selector_64", mIcon64x64 ) );
-    Set( "PainterEditor.ColorSelector16", new IMAGE_BRUSH( "PainterEditor/color_selector_16", mIcon16x16 ) );
-    Set( "PainterEditor.ColorSelectorBis64", new IMAGE_BRUSH( "PainterEditor/color_selector_bis_64", mIcon64x64 ) );
-    Set( "PainterEditor.ColorSelectorBis16", new IMAGE_BRUSH( "PainterEditor/color_selector_bis_16", mIcon16x16 ) );
+    Set( "PainterEditor.BrushSelector64", new IMAGE_BRUSH( "PainterEditor/brush_selector_64", mIcon64x64 ) ); //unused
+    Set( "PainterEditor.BrushSelector20", new IMAGE_BRUSH( "PainterEditor/brush_selector_20", mIcon20x20 ) ); //unused
+    Set( "PainterEditor.BrushSelector16", new IMAGE_BRUSH( "PainterEditor/brush_selector_16", mIcon16x16 ) ); //unused
 
-    Set( "PainterEditor.BrushExposedParameters64", new IMAGE_BRUSH( "PainterEditor/brush_exposed_parameters_64", mIcon64x64 ) );
-    Set( "PainterEditor.BrushExposedParameters20", new IMAGE_BRUSH( "PainterEditor/brush_exposed_parameters_20", mIcon20x20 ) );
-    Set( "PainterEditor.BrushExposedParameters16", new IMAGE_BRUSH( "PainterEditor/brush_exposed_parameters_16", mIcon16x16 ) );
-    Set( "PainterEditor.ToolOptions", new IMAGE_BRUSH_SVG( "PainterEditor/ToolOptions", mIcon16x16 ) );
+    Set( "PainterEditor.Navigator64", new IMAGE_BRUSH( "PainterEditor/navigator_64", mIcon64x64 ) ); //unused
+    Set( "PainterEditor.Navigator16", new IMAGE_BRUSH( "PainterEditor/navigator_16", mIcon16x16 ) ); //unused
 
-    Set( "PainterEditor.BrushSelector64", new IMAGE_BRUSH( "PainterEditor/brush_selector_64", mIcon64x64 ) );
-    Set( "PainterEditor.BrushSelector20", new IMAGE_BRUSH( "PainterEditor/brush_selector_20", mIcon20x20 ) );
-    Set( "PainterEditor.BrushSelector16", new IMAGE_BRUSH( "PainterEditor/brush_selector_16", mIcon16x16 ) );
+    Set( "PainterEditor.PerformanceTools64", new IMAGE_BRUSH( "PainterEditor/performance_tools_64", mIcon64x64 ) ); //unused
+    Set( "PainterEditor.PerformanceTools16", new IMAGE_BRUSH( "PainterEditor/performance_tools_16", mIcon16x16 ) ); //unused
 
-    Set( "PainterEditor.Navigator64", new IMAGE_BRUSH( "PainterEditor/navigator_64", mIcon64x64 ) );
-    Set( "PainterEditor.Navigator16", new IMAGE_BRUSH( "PainterEditor/navigator_16", mIcon16x16 ) );
+    Set( "PainterEditor.BotBar64", new IMAGE_BRUSH( "PainterEditor/bot_bar_64", mIcon64x64 ) ); //unused
+    Set( "PainterEditor.BotBar16", new IMAGE_BRUSH( "PainterEditor/bot_bar_16", mIcon16x16 ) ); //unused
 
-    Set( "PainterEditor.BrushPreview64", new IMAGE_BRUSH( "PainterEditor/brush_preview_64", mIcon64x64 ) );
-    Set( "PainterEditor.BrushPreview20", new IMAGE_BRUSH( "PainterEditor/brush_preview_20", mIcon20x20 ) );
-    Set( "PainterEditor.BrushPreview16", new IMAGE_BRUSH( "PainterEditor/brush_preview_16", mIcon16x16 ) );
-
-    Set( "PainterEditor.PerformanceTools64", new IMAGE_BRUSH( "PainterEditor/performance_tools_64", mIcon64x64 ) );
-    Set( "PainterEditor.PerformanceTools16", new IMAGE_BRUSH( "PainterEditor/performance_tools_16", mIcon16x16 ) );
-
-    Set( "PainterEditor.BotBar64", new IMAGE_BRUSH( "PainterEditor/bot_bar_64", mIcon64x64 ) );
-    Set( "PainterEditor.BotBar16", new IMAGE_BRUSH( "PainterEditor/bot_bar_16", mIcon16x16 ) );
-
-    Set( "PainterEditor.Trash64", new IMAGE_BRUSH( "PainterEditor/trash_64", mIcon64x64 ) );
-    Set( "PainterEditor.Trash16", new IMAGE_BRUSH( "PainterEditor/trash_16", mIcon16x16 ) );
-
-    Set( "PainterEditor.Trash_2_64", new IMAGE_BRUSH( "PainterEditor/trash_2_64", mIcon64x64 ) );
-    Set( "PainterEditor.Trash_2_16", new IMAGE_BRUSH( "PainterEditor/trash_2_16", mIcon16x16 ) );
-
-    Set( "PainterEditor.Viewport64", new IMAGE_BRUSH( "PainterEditor/viewport_64", mIcon64x64 ) );
-    Set( "PainterEditor.Viewport20", new IMAGE_BRUSH( "PainterEditor/viewport_20", mIcon20x20 ) );
+    Set( "PainterEditor.Viewport64", new IMAGE_BRUSH( "PainterEditor/viewport_64", mIcon64x64 ) ); //unused
+    Set( "PainterEditor.Viewport20", new IMAGE_BRUSH( "PainterEditor/viewport_20", mIcon20x20 ) ); //unused
     Set( "PainterEditor.Viewport16", new IMAGE_BRUSH( "PainterEditor/viewport_16", mIcon16x16 ) );
 
     Set("PainterEditor.FlipVertical32", new IMAGE_BRUSH_SVG("PainterEditor/flip_vertical", mIcon32x32));
@@ -345,53 +285,40 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set("PainterEditor.FlipVertical16", new IMAGE_BRUSH_SVG("PainterEditor/flip_vertical_2", mIcon16x16));
     Set("PainterEditor.FlipHorizontal16", new IMAGE_BRUSH_SVG("PainterEditor/flip_horizontal_2", mIcon16x16));
 
-    //Set("PainterEditor.FlipVerticalFilled32", new IMAGE_BRUSH_SVG("PainterEditor/flip_vertical_filled", mIcon32x32));
-    //Set("PainterEditor.FlipHorizontalFilled32", new IMAGE_BRUSH_SVG("PainterEditor/flip_horizontal_filled", mIcon32x32));
-
-    Set( "PainterEditor.Draw64", new IMAGE_BRUSH( "PainterEditor/draw_64", mIcon64x64 ) );
-    Set( "PainterEditor.Draw16", new IMAGE_BRUSH( "PainterEditor/draw_16", mIcon16x16 ) );
-
-    Set( "PainterEditor.Mesh64", new IMAGE_BRUSH( "PainterEditor/mesh_64", mIcon64x64 ) );
-    Set( "PainterEditor.Mesh20", new IMAGE_BRUSH( "PainterEditor/mesh_20", mIcon20x20 ) );
+    Set( "PainterEditor.Mesh64", new IMAGE_BRUSH( "PainterEditor/mesh_64", mIcon64x64 ) ); //unused
+    Set( "PainterEditor.Mesh20", new IMAGE_BRUSH( "PainterEditor/mesh_20", mIcon20x20 ) ); //unused
     Set( "PainterEditor.Mesh16", new IMAGE_BRUSH( "PainterEditor/mesh_16", mIcon16x16 ) );
 
-    Set( "PainterEditor.Pan64", new IMAGE_BRUSH( "PainterEditor/pan_64", mIcon64x64 ) );
-    Set( "PainterEditor.Pan16", new IMAGE_BRUSH( "PainterEditor/pan_16", mIcon16x16 ) );
+    Set( "PainterEditor.Pan64", new IMAGE_BRUSH( "PainterEditor/pan_64", mIcon64x64 ) ); //unused
+    Set( "PainterEditor.Pan16", new IMAGE_BRUSH( "PainterEditor/pan_16", mIcon16x16 ) ); //unused
 
-    Set( "PainterEditor.Rotate64", new IMAGE_BRUSH( "PainterEditor/rotate_64", mIcon64x64 ) );
-    Set( "PainterEditor.Rotate16", new IMAGE_BRUSH( "PainterEditor/rotate_16", mIcon16x16 ) );
-    Set( "PainterEditor.Rotate_2_64", new IMAGE_BRUSH( "PainterEditor/rotate_2_64", mIcon64x64 ) );
-    Set( "PainterEditor.Rotate_2_16", new IMAGE_BRUSH( "PainterEditor/rotate_2_16", mIcon16x16 ) );
+    Set( "PainterEditor.Rotate64", new IMAGE_BRUSH( "PainterEditor/rotate_64", mIcon64x64 ) ); //unused
+    Set( "PainterEditor.Rotate16", new IMAGE_BRUSH( "PainterEditor/rotate_16", mIcon16x16 ) ); //unused
+    Set( "PainterEditor.Rotate_2_16", new IMAGE_BRUSH( "PainterEditor/rotate_2_16", mIcon16x16 ) ); //unused
 
-    Set( "PainterEditor.RotateLeft64", new IMAGE_BRUSH( "PainterEditor/rotate_left_64", mIcon64x64 ) );
-    Set( "PainterEditor.RotateLeft16", new IMAGE_BRUSH( "PainterEditor/rotate_left_16", mIcon16x16 ) );
     Set( "PainterEditor.RotateLeft", new IMAGE_BRUSH_SVG( "PainterEditor/rotate_left", mIcon16x16 ) );
-    Set( "PainterEditor.RotateRight64", new IMAGE_BRUSH( "PainterEditor/rotate_right_64", mIcon64x64 ) );
-    Set( "PainterEditor.RotateRight16", new IMAGE_BRUSH( "PainterEditor/rotate_right_16", mIcon16x16 ) );
     Set( "PainterEditor.RotateRight", new IMAGE_BRUSH_SVG( "PainterEditor/rotate_right", mIcon16x16 ) );
 
-    Set( "PainterEditor.ArrowDown64", new IMAGE_BRUSH( "PainterEditor/arrow_down_64", mIcon64x64 ) );
-    Set( "PainterEditor.ArrowDown16", new IMAGE_BRUSH( "PainterEditor/arrow_down_16", mIcon16x16 ) );
-    Set( "PainterEditor.ArrowUp64", new IMAGE_BRUSH( "PainterEditor/arrow_up_64", mIcon64x64 ) );
-    Set( "PainterEditor.ArrowUp16", new IMAGE_BRUSH( "PainterEditor/arrow_up_16", mIcon16x16 ) );
-    Set( "PainterEditor.ArrowLeft64", new IMAGE_BRUSH( "PainterEditor/arrow_left_64", mIcon64x64 ) );
-    Set( "PainterEditor.ArrowLeft16", new IMAGE_BRUSH( "PainterEditor/arrow_left_16", mIcon16x16 ) );
-    Set( "PainterEditor.ArrowRight64", new IMAGE_BRUSH( "PainterEditor/arrow_right_64", mIcon64x64 ) );
-    Set( "PainterEditor.ArrowRight16", new IMAGE_BRUSH( "PainterEditor/arrow_right_16", mIcon16x16 ) );
+    Set( "PainterEditor.ArrowDown64", new IMAGE_BRUSH( "PainterEditor/arrow_down_64", mIcon64x64 ) ); //unused
+    Set( "PainterEditor.ArrowDown16", new IMAGE_BRUSH( "PainterEditor/arrow_down_16", mIcon16x16 ) ); //unused
+    Set( "PainterEditor.ArrowUp64", new IMAGE_BRUSH( "PainterEditor/arrow_up_64", mIcon64x64 ) ); //unused
+    Set( "PainterEditor.ArrowUp16", new IMAGE_BRUSH( "PainterEditor/arrow_up_16", mIcon16x16 ) ); //unused
+    Set( "PainterEditor.ArrowLeft64", new IMAGE_BRUSH( "PainterEditor/arrow_left_64", mIcon64x64 ) ); //unused
+    Set( "PainterEditor.ArrowLeft16", new IMAGE_BRUSH( "PainterEditor/arrow_left_16", mIcon16x16 ) ); //unused
+    Set( "PainterEditor.ArrowRight64", new IMAGE_BRUSH( "PainterEditor/arrow_right_64", mIcon64x64 ) ); //unused
+    Set( "PainterEditor.ArrowRight16", new IMAGE_BRUSH( "PainterEditor/arrow_right_16", mIcon16x16 ) ); //unused
 
-    Set( "PainterEditor.ColorWheel64", new IMAGE_BRUSH( "PainterEditor/color_wheel_64", mIcon64x64 ) );
-    Set( "PainterEditor.ColorWheel20", new IMAGE_BRUSH( "PainterEditor/color_wheel_20", mIcon20x20 ) );
+    Set( "PainterEditor.ColorWheel64", new IMAGE_BRUSH( "PainterEditor/color_wheel_64", mIcon64x64 ) ); //unused
+    Set( "PainterEditor.ColorWheel20", new IMAGE_BRUSH( "PainterEditor/color_wheel_20", mIcon20x20 ) ); //unused
     Set( "PainterEditor.ColorWheel16", new IMAGE_BRUSH( "PainterEditor/color_wheel_16", mIcon16x16 ) );
 
-    Set( "PainterEditor.Trombone64", new IMAGE_BRUSH( "PainterEditor/trombone_64", mIcon64x64 ) );
-    Set( "PainterEditor.Trombone20", new IMAGE_BRUSH( "PainterEditor/trombone_20", mIcon20x20 ) );
+    Set( "PainterEditor.Trombone64", new IMAGE_BRUSH( "PainterEditor/trombone_64", mIcon64x64 ) ); //unused
+    Set( "PainterEditor.Trombone20", new IMAGE_BRUSH( "PainterEditor/trombone_20", mIcon20x20 ) ); //unused
     Set( "PainterEditor.Trombone16", new IMAGE_BRUSH( "PainterEditor/trombone_16", mIcon16x16 ) );
 
-    Set( "PainterEditor.UndoHistory64", new IMAGE_BRUSH( "PainterEditor/undo_history_64", mIcon64x64 ) );
-    Set( "PainterEditor.UndoHistory16", new IMAGE_BRUSH( "PainterEditor/undo_history_16", mIcon16x16 ) );
+    Set( "PainterEditor.UndoHistory64", new IMAGE_BRUSH( "PainterEditor/undo_history_64", mIcon64x64 ) ); //unused
+    Set( "PainterEditor.UndoHistory16", new IMAGE_BRUSH( "PainterEditor/undo_history_16", mIcon16x16 ) ); //unused
 
-    Set( "PainterEditor.RotateReset64", new IMAGE_BRUSH( "PainterEditor/rotate_reset_64", mIcon64x64 ) );
-    Set( "PainterEditor.RotateReset16", new IMAGE_BRUSH( "PainterEditor/rotate_reset_16", mIcon16x16 ) );
     Set( "PainterEditor.RotateReset", new IMAGE_BRUSH_SVG( "PainterEditor/rotate_reset", mIcon16x16 ) );
 
     //PainterEditor - Vector Scene Tree View
@@ -424,81 +351,63 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
 
     //PainterEditor - ToolsTab
     Set( "PainterEditor.ToolsTab.Transform64", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/transform_tool", mIcon64x64 ) );
-    Set( "PainterEditor.ToolsTab.Transform32", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/transform_tool", mIcon32x32 ) );
-    Set( "PainterEditor.ToolsTab.Transform16", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/transform_tool", mIcon16x16 ) );
-    Set( "PainterEditor.ToolsTab.SceneScale64", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/hand", mIcon64x64 ) );
-    Set( "PainterEditor.ToolsTab.SceneScale32", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/hand", mIcon32x32 ) );
-    Set( "PainterEditor.ToolsTab.SceneScale16", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/hand", mIcon16x16 ) );
+    Set( "PainterEditor.ToolsTab.Transform32", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/transform_tool", mIcon32x32 ) ); //unused
+    Set( "PainterEditor.ToolsTab.Transform16", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/transform_tool", mIcon16x16 ) ); //unused
+    Set( "PainterEditor.ToolsTab.SceneScale64", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/hand", mIcon64x64 ) ); //unused
+    Set( "PainterEditor.ToolsTab.SceneScale32", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/hand", mIcon32x32 ) ); //unused
+    Set( "PainterEditor.ToolsTab.SceneScale16", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/hand", mIcon16x16 ) ); //unused
     Set( "PainterEditor.ToolsTab.ScenePan64", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/hand", mIcon64x64 ) );
-    Set( "PainterEditor.ToolsTab.ScenePan32", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/hand", mIcon32x32 ) );
-    Set( "PainterEditor.ToolsTab.ScenePan16", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/hand", mIcon16x16 ) );
+    Set( "PainterEditor.ToolsTab.ScenePan32", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/hand", mIcon32x32 ) ); //unused
+    Set( "PainterEditor.ToolsTab.ScenePan16", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/hand", mIcon16x16 ) ); //unused
     Set( "PainterEditor.ToolsTab.PathCut64", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/path_cut_tool", mIcon64x64 ) );
-    Set( "PainterEditor.ToolsTab.PathCut32", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/path_cut_tool", mIcon32x32 ) );
-    Set( "PainterEditor.ToolsTab.PathCut16", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/path_cut_tool", mIcon16x16 ) );
+    Set( "PainterEditor.ToolsTab.PathCut32", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/path_cut_tool", mIcon32x32 ) ); //unused
+    Set( "PainterEditor.ToolsTab.PathCut16", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/path_cut_tool", mIcon16x16 ) ); //unused
     Set( "PainterEditor.ToolsTab.PathPush64", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/path_push_tool", mIcon64x64 ) );
-    Set( "PainterEditor.ToolsTab.PathPush32", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/path_push_tool", mIcon32x32 ) );
-    Set( "PainterEditor.ToolsTab.PathPush16", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/path_push_tool", mIcon16x16 ) );
+    Set( "PainterEditor.ToolsTab.PathPush32", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/path_push_tool", mIcon32x32 ) ); //unused
+    Set( "PainterEditor.ToolsTab.PathPush16", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/path_push_tool", mIcon16x16 ) ); //unused
     Set( "PainterEditor.ToolsTab.PathSmooth64", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/path_smooth_tool", mIcon64x64 ) );
-    Set( "PainterEditor.ToolsTab.PathSmooth32", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/path_smooth_tool", mIcon32x32 ) );
-    Set( "PainterEditor.ToolsTab.PathSmooth16", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/path_smooth_tool", mIcon16x16 ) );
+    Set( "PainterEditor.ToolsTab.PathSmooth32", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/path_smooth_tool", mIcon32x32 ) ); //unused
+    Set( "PainterEditor.ToolsTab.PathSmooth16", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/path_smooth_tool", mIcon16x16 ) ); //unused
     Set( "PainterEditor.ToolsTab.PathStitch64", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/path_stitch_tool", mIcon64x64 ) );
-    Set( "PainterEditor.ToolsTab.PathStitch32", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/path_stitch_tool", mIcon32x32 ) );
-    Set( "PainterEditor.ToolsTab.PathStitch16", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/path_stitch_tool", mIcon16x16 ) );
+    Set( "PainterEditor.ToolsTab.PathStitch32", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/path_stitch_tool", mIcon32x32 ) ); //unused
+    Set( "PainterEditor.ToolsTab.PathStitch16", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/path_stitch_tool", mIcon16x16 ) ); //unused
     Set( "PainterEditor.ToolsTab.Lasso64", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/lasso_tool", mIcon64x64 ) );
-    Set( "PainterEditor.ToolsTab.Lasso32", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/lasso_tool", mIcon32x32 ) );
-    Set( "PainterEditor.ToolsTab.Lasso16", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/lasso_tool", mIcon16x16 ) );
+    Set( "PainterEditor.ToolsTab.Lasso32", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/lasso_tool", mIcon32x32 ) ); //unused
+    Set( "PainterEditor.ToolsTab.Lasso16", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/lasso_tool", mIcon16x16 ) ); //unused
     Set( "PainterEditor.ToolsTab.Grid64", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/grid_tool", mIcon64x64 ) );
-    Set( "PainterEditor.ToolsTab.Grid32", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/grid_tool", mIcon32x32 ) );
-    Set( "PainterEditor.ToolsTab.Grid16", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/grid_tool", mIcon16x16 ) );
+    Set( "PainterEditor.ToolsTab.Grid32", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/grid_tool", mIcon32x32 ) ); //unused
+    Set( "PainterEditor.ToolsTab.Grid16", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/grid_tool", mIcon16x16 ) ); //unused
     Set( "PainterEditor.ToolsTab.PathEdit64", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/path_edit_tool", mIcon64x64 ) );
-    Set( "PainterEditor.ToolsTab.PathEdit32", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/path_edit_tool", mIcon32x32 ) );
-    Set( "PainterEditor.ToolsTab.PathEdit16", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/path_edit_tool", mIcon16x16 ) );
+    Set( "PainterEditor.ToolsTab.PathEdit32", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/path_edit_tool", mIcon32x32 ) ); //unused
+    Set( "PainterEditor.ToolsTab.PathEdit16", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/path_edit_tool", mIcon16x16 ) ); //unused
     Set( "PainterEditor.ToolsTab.PathDrawing64", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/path_drawing_tool", mIcon64x64 ) );
-    Set( "PainterEditor.ToolsTab.PathDrawing32", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/path_drawing_tool", mIcon32x32 ) );
-    Set( "PainterEditor.ToolsTab.PathDrawing16", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/path_drawing_tool", mIcon16x16 ) );
+    Set( "PainterEditor.ToolsTab.PathDrawing32", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/path_drawing_tool", mIcon32x32 ) ); //unused
+    Set( "PainterEditor.ToolsTab.PathDrawing16", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/path_drawing_tool", mIcon16x16 ) ); //unused
     Set( "PainterEditor.ToolsTab.DrawingTool64", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/raster_drawing_tool", mIcon64x64 ) );
-    Set( "PainterEditor.ToolsTab.DrawingTool16", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/raster_drawing_tool", mIcon16x16 ) );
-    Set( "PainterEditor.ToolsTab.ClearLayer64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/clear_layer_64", mIcon64x64 ) );
-    Set( "PainterEditor.ToolsTab.ClearLayer32", new IMAGE_BRUSH( "PainterEditor/ToolsTab/clear_layer_32", mIcon32x32 ) );
-    Set( "PainterEditor.ToolsTab.ClearLayer16", new IMAGE_BRUSH( "PainterEditor/ToolsTab/clear_layer_16", mIcon16x16 ) );
+    Set( "PainterEditor.ToolsTab.DrawingTool16", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/raster_drawing_tool", mIcon16x16 ) ); //unused
     Set( "PainterEditor.ToolsTab.ColorPicker64", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/color_picker_tool", mIcon64x64 ) );
-    Set( "PainterEditor.ToolsTab.ColorPicker32", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/color_picker_tool", mIcon32x32 ) );
-    Set( "PainterEditor.ToolsTab.ColorPicker16", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/color_picker_tool", mIcon16x16 ) );
+    Set( "PainterEditor.ToolsTab.ColorPicker32", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/color_picker_tool", mIcon32x32 ) ); //unused
+    Set( "PainterEditor.ToolsTab.ColorPicker16", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/color_picker_tool", mIcon16x16 ) ); //unused
     Set( "PainterEditor.ToolsTab.PaintBucket64", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/paint_bucket_tool", mIcon64x64 ) );
-    Set( "PainterEditor.ToolsTab.PaintBucket32", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/paint_bucket_tool", mIcon32x32 ) );
-    Set( "PainterEditor.ToolsTab.PaintBucket16", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/paint_bucket_tool", mIcon16x16 ) );
-    Set( "PainterEditor.ToolsTab.Shredder64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/shredder_64", mIcon64x64 ) );
-    Set( "PainterEditor.ToolsTab.Shredder32", new IMAGE_BRUSH( "PainterEditor/ToolsTab/shredder_32", mIcon32x32 ) );
-    Set( "PainterEditor.ToolsTab.Shredder16", new IMAGE_BRUSH( "PainterEditor/ToolsTab/shredder_16", mIcon16x16 ) );
+    Set( "PainterEditor.ToolsTab.PaintBucket32", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/paint_bucket_tool", mIcon32x32 ) ); //unused
+    Set( "PainterEditor.ToolsTab.PaintBucket16", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/paint_bucket_tool", mIcon16x16 ) ); //unused
     Set( "PainterEditor.ToolsTab.Eraser64", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/eraser_tool", mIcon64x64 ) );
-    Set( "PainterEditor.ToolsTab.Eraser32", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/eraser_tool", mIcon32x32 ) );
-    Set( "PainterEditor.ToolsTab.Eraser16", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/eraser_tool", mIcon16x16 ) );
+    Set( "PainterEditor.ToolsTab.Eraser32", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/eraser_tool", mIcon32x32 ) ); //unused
+    Set( "PainterEditor.ToolsTab.Eraser16", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/eraser_tool", mIcon16x16 ) ); //unused
     Set( "PainterEditor.ToolsTab.Shapes64", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/shapes_tool", mIcon64x64 ) );
-    Set( "PainterEditor.ToolsTab.Shapes32", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/shapes_tool", mIcon32x32 ) );
-    Set( "PainterEditor.ToolsTab.Shapes16", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/shapes_tool", mIcon16x16 ) );
-    Set( "PainterEditor.ToolsTab.Circle64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/circle_64", mIcon64x64 ) );
-    Set( "PainterEditor.ToolsTab.Circle32", new IMAGE_BRUSH( "PainterEditor/ToolsTab/circle_32", mIcon32x32 ) );
-    Set( "PainterEditor.ToolsTab.Circle16", new IMAGE_BRUSH( "PainterEditor/ToolsTab/circle_16", mIcon16x16 ) );
-    Set( "PainterEditor.ToolsTab.Square64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/square_64", mIcon64x64 ) );
-    Set( "PainterEditor.ToolsTab.Square32", new IMAGE_BRUSH( "PainterEditor/ToolsTab/square_32", mIcon32x32 ) );
-    Set( "PainterEditor.ToolsTab.Square16", new IMAGE_BRUSH( "PainterEditor/ToolsTab/square_16", mIcon16x16 ) );
-    Set( "PainterEditor.ToolsTab.Line64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/line_64", mIcon64x64 ) );
-    Set( "PainterEditor.ToolsTab.Line32", new IMAGE_BRUSH( "PainterEditor/ToolsTab/line_32", mIcon32x32 ) );
-    Set( "PainterEditor.ToolsTab.Line16", new IMAGE_BRUSH( "PainterEditor/ToolsTab/line_16", mIcon16x16 ) );
-    Set( "PainterEditor.ToolsTab.Bezier64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/bezier_64", mIcon64x64 ) );
-    Set( "PainterEditor.ToolsTab.Bezier32", new IMAGE_BRUSH( "PainterEditor/ToolsTab/bezier_32", mIcon32x32 ) );
-    Set( "PainterEditor.ToolsTab.Bezier16", new IMAGE_BRUSH( "PainterEditor/ToolsTab/bezier_16", mIcon16x16 ) );
-    Set( "PainterEditor.ToolsTab.Curve64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/curve_64", mIcon64x64 ) );
-    Set( "PainterEditor.ToolsTab.Curve32", new IMAGE_BRUSH( "PainterEditor/ToolsTab/curve_32", mIcon32x32 ) );
-    Set( "PainterEditor.ToolsTab.Curve16", new IMAGE_BRUSH( "PainterEditor/ToolsTab/curve_16", mIcon16x16 ) );
-    Set( "PainterEditor.ToolsTab.Polygon32", new IMAGE_BRUSH( "PainterEditor/ToolsTab/polygon_32", mIcon32x32 ) );
-    Set( "PainterEditor.ToolsTab.FreeHand32", new IMAGE_BRUSH( "PainterEditor/ToolsTab/freehand_32", mIcon32x32 ) );
+    Set( "PainterEditor.ToolsTab.Shapes32", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/shapes_tool", mIcon32x32 ) ); //unused
+    Set( "PainterEditor.ToolsTab.Shapes16", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/shapes_tool", mIcon16x16 ) ); //unused
+    Set( "PainterEditor.ToolsTab.Line64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/line_64", mIcon64x64 ) ); //unused
+    Set( "PainterEditor.ToolsTab.Line32", new IMAGE_BRUSH( "PainterEditor/ToolsTab/line_32", mIcon32x32 ) ); //unused
+    Set( "PainterEditor.ToolsTab.Line16", new IMAGE_BRUSH( "PainterEditor/ToolsTab/line_16", mIcon16x16 ) ); //unused
+    Set( "PainterEditor.ToolsTab.Curve16", new IMAGE_BRUSH( "PainterEditor/ToolsTab/curve_16", mIcon16x16 ) ); //unused
+    Set( "PainterEditor.ToolsTab.FreeHand32", new IMAGE_BRUSH( "PainterEditor/ToolsTab/freehand_32", mIcon32x32 ) ); //unused
     Set( "PainterEditor.ToolsTab.Chart64", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/chart_tool", mIcon64x64 ) );
 // commented out: this SVG icon is poorly displayed, I don't know why. I then converted it to PNG
 //    Set( "PainterEditor.ToolsTab.Trajectory64", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/trajectory_tool", mIcon64x64 ) );
     Set( "PainterEditor.ToolsTab.Trajectory64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/trajectory_64", mIcon64x64 ) );
-    Set( "PainterEditor.ToolsTab.Trajectory32", new IMAGE_BRUSH( "PainterEditor/ToolsTab/trajectory_32", mIcon32x32 ) );
-    Set( "PainterEditor.ToolsTab.Trajectory16", new IMAGE_BRUSH( "PainterEditor/ToolsTab/trajectory_64", mIcon16x16 ) );
+    Set( "PainterEditor.ToolsTab.Trajectory32", new IMAGE_BRUSH( "PainterEditor/ToolsTab/trajectory_32", mIcon32x32 ) ); //unused
+    Set( "PainterEditor.ToolsTab.Trajectory16", new IMAGE_BRUSH( "PainterEditor/ToolsTab/trajectory_64", mIcon16x16 ) ); //unused
     Set( "PainterEditor.ToolsTab.Matching16", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/matching_tool", mIcon16x16 ) );
     Set( "PainterEditor.ToolsTab.Matching64", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/matching_tool", mIcon64x64 ) );
 
@@ -527,42 +436,36 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "PainterEditor.ToolsShortcuts.GridSingleSelection20", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/grid_tool_single_selection", mIcon20x20 ) );
     Set( "PainterEditor.ToolsShortcuts.GridMultipleSelection20", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/grid_tool_multiple_selection", mIcon20x20 ) );
 
-    //OdysseyPainterEditorTools
-    Set( "OdysseyPainterEditorTools.Tile", FTableRowStyle(mCoreTableRowStyle)
-
-    );
-
     //OdysseyLayerStack
-    Set( "OdysseyLayerStack.ImageLayer64", new IMAGE_BRUSH( "OdysseyLayerStack/image_layer_64", mIcon64x64 ) );
-    Set( "OdysseyLayerStack.ImageLayer16", new IMAGE_BRUSH( "OdysseyLayerStack/image_layer_16", mIcon16x16 ) );
-    Set( "OdysseyLayerStack.LayerBitmap64", new IMAGE_BRUSH( "OdysseyLayerStack/layer_bitmap_64", mIcon64x64 ) );
+    Set( "OdysseyLayerStack.ImageLayer64", new IMAGE_BRUSH( "OdysseyLayerStack/image_layer_64", mIcon64x64 ) ); //unused
+    Set( "OdysseyLayerStack.ImageLayer16", new IMAGE_BRUSH( "OdysseyLayerStack/image_layer_16", mIcon16x16 ) ); //unused
+    Set( "OdysseyLayerStack.LayerBitmap64", new IMAGE_BRUSH( "OdysseyLayerStack/layer_bitmap_64", mIcon64x64 ) ); //unused
     Set( "OdysseyLayerStack.LayerBitmap16", new IMAGE_BRUSH( "OdysseyLayerStack/layer_bitmap_16", mIcon16x16 ) );
-    Set( "OdysseyLayerStack.LayerVector64", new IMAGE_BRUSH( "OdysseyLayerStack/layer_vector_64", mIcon64x64 ) );
+    Set( "OdysseyLayerStack.LayerVector64", new IMAGE_BRUSH( "OdysseyLayerStack/layer_vector_64", mIcon64x64 ) ); //unused
     Set( "OdysseyLayerStack.LayerVector16", new IMAGE_BRUSH( "OdysseyLayerStack/layer_vector_16", mIcon16x16 ) );
-    Set( "OdysseyLayerStack.NotVisible64", new IMAGE_BRUSH( "OdysseyLayerStack/not_visible_64", mIcon64x64 ) );
-    Set( "OdysseyLayerStack.NotVisible16", new IMAGE_BRUSH( "OdysseyLayerStack/not_visible_16", mIcon16x16 ) );
-    Set( "OdysseyLayerStack.Visible64", new IMAGE_BRUSH( "OdysseyLayerStack/visible_64", mIcon64x64 ) );
+    Set( "OdysseyLayerStack.NotVisible64", new IMAGE_BRUSH( "OdysseyLayerStack/not_visible_64", mIcon64x64 ) ); //unused
+    Set( "OdysseyLayerStack.NotVisible16", new IMAGE_BRUSH( "OdysseyLayerStack/not_visible_16", mIcon16x16 ) ); //unused
+    Set( "OdysseyLayerStack.Visible64", new IMAGE_BRUSH( "OdysseyLayerStack/visible_64", mIcon64x64 ) ); //unused
     Set( "OdysseyLayerStack.Visible16", new IMAGE_BRUSH( "OdysseyLayerStack/visible_16", mIcon16x16 ) );
-    Set( "OdysseyLayerStack.Locked64", new IMAGE_BRUSH( "OdysseyLayerStack/locked_64", mIcon64x64 ) );
+    Set( "OdysseyLayerStack.Locked64", new IMAGE_BRUSH( "OdysseyLayerStack/locked_64", mIcon64x64 ) ); //unused
     Set( "OdysseyLayerStack.Locked16", new IMAGE_BRUSH( "OdysseyLayerStack/locked_16", mIcon16x16 ) );
-    Set( "OdysseyLayerStack.Unlocked64", new IMAGE_BRUSH( "OdysseyLayerStack/unlocked_64", mIcon64x64 ) );
-    Set( "OdysseyLayerStack.Unlocked16", new IMAGE_BRUSH( "OdysseyLayerStack/unlocked_16", mIcon16x16 ) );
+    Set( "OdysseyLayerStack.Unlocked64", new IMAGE_BRUSH( "OdysseyLayerStack/unlocked_64", mIcon64x64 ) ); //unused
+    Set( "OdysseyLayerStack.Unlocked16", new IMAGE_BRUSH( "OdysseyLayerStack/unlocked_16", mIcon16x16 ) ); //unused
     Set( "OdysseyLayerStack.OptionsHeader64", new IMAGE_BRUSH( "OdysseyLayerStack/options_header_64", mIcon64x64 ) );
-    Set( "OdysseyLayerStack.OptionsHeader16", new IMAGE_BRUSH( "OdysseyLayerStack/options_header_16", mIcon16x16 ) );
-    Set( "OdysseyLayerStack.OptionsDisplayed64", new IMAGE_BRUSH( "OdysseyLayerStack/options_displayed_64", mIcon64x64 ) );
-    Set( "OdysseyLayerStack.OptionsDisplayed16", new IMAGE_BRUSH( "OdysseyLayerStack/options_displayed_16", mIcon16x16 ) );
-    Set( "OdysseyLayerStack.OptionsHidden64", new IMAGE_BRUSH( "OdysseyLayerStack/options_hidden_64", mIcon64x64 ) );
-    Set( "OdysseyLayerStack.OptionsHidden16", new IMAGE_BRUSH( "OdysseyLayerStack/options_hidden_16", mIcon16x16 ) );
-    Set( "OdysseyLayerStack.Blend64", new IMAGE_BRUSH( "OdysseyLayerStack/blend_64", mIcon64x64 ) );
-    Set( "OdysseyLayerStack.Blend16", new IMAGE_BRUSH( "OdysseyLayerStack/blend_16", mIcon16x16 ) );
-    Set( "OdysseyLayerStack.Blend_2_64", new IMAGE_BRUSH( "OdysseyLayerStack/blend_2_64", mIcon64x64 ) );
-    Set( "OdysseyLayerStack.Blend_2_16", new IMAGE_BRUSH( "OdysseyLayerStack/blend_2_16", mIcon16x16 ) );
-    Set( "OdysseyLayerStack.Merge64", new IMAGE_BRUSH( "OdysseyLayerStack/merge_64", mIcon64x64 ) );
-    Set( "OdysseyLayerStack.Merge16", new IMAGE_BRUSH( "OdysseyLayerStack/merge_16", mIcon16x16 ) );
-    Set( "OdysseyLayerStack.AlphaLocked16", new IMAGE_BRUSH( "OdysseyLayerStack/alpha_locked_16", mIcon16x16 ) );
-    Set( "OdysseyLayerStack.AlphaUnlocked16", new IMAGE_BRUSH( "OdysseyLayerStack/alpha_unlocked_16", mIcon16x16 ) );
-    Set( "OdysseyLayerStack.Colored16", new IMAGE_BRUSH( "OdysseyLayerStack/colored_16", mIcon16x16 ) );
-    Set( "OdysseyLayerStack.Uncolored16", new IMAGE_BRUSH( "OdysseyLayerStack/uncolored_16", mIcon16x16 ) );
+    Set( "OdysseyLayerStack.OptionsHeader16", new IMAGE_BRUSH( "OdysseyLayerStack/options_header_16", mIcon16x16 ) ); //unused
+    Set( "OdysseyLayerStack.OptionsDisplayed64", new IMAGE_BRUSH( "OdysseyLayerStack/options_displayed_64", mIcon64x64 ) ); //unused
+    Set( "OdysseyLayerStack.OptionsDisplayed16", new IMAGE_BRUSH( "OdysseyLayerStack/options_displayed_16", mIcon16x16 ) ); //unused
+    Set( "OdysseyLayerStack.OptionsHidden64", new IMAGE_BRUSH( "OdysseyLayerStack/options_hidden_64", mIcon64x64 ) ); //unused
+    Set( "OdysseyLayerStack.OptionsHidden16", new IMAGE_BRUSH( "OdysseyLayerStack/options_hidden_16", mIcon16x16 ) ); //unused
+    Set( "OdysseyLayerStack.Blend16", new IMAGE_BRUSH( "OdysseyLayerStack/blend_16", mIcon16x16 ) ); //unused
+    Set( "OdysseyLayerStack.Blend_2_64", new IMAGE_BRUSH( "OdysseyLayerStack/blend_2_64", mIcon64x64 ) ); //unused
+    Set( "OdysseyLayerStack.Blend_2_16", new IMAGE_BRUSH( "OdysseyLayerStack/blend_2_16", mIcon16x16 ) ); //unused
+    Set( "OdysseyLayerStack.Merge64", new IMAGE_BRUSH( "OdysseyLayerStack/merge_64", mIcon64x64 ) ); //unused
+    Set( "OdysseyLayerStack.Merge16", new IMAGE_BRUSH( "OdysseyLayerStack/merge_16", mIcon16x16 ) ); //unused
+    Set( "OdysseyLayerStack.AlphaLocked16", new IMAGE_BRUSH( "OdysseyLayerStack/alpha_locked_16", mIcon16x16 ) ); //unused
+    Set( "OdysseyLayerStack.AlphaUnlocked16", new IMAGE_BRUSH( "OdysseyLayerStack/alpha_unlocked_16", mIcon16x16 ) ); //unused
+    Set( "OdysseyLayerStack.Colored16", new IMAGE_BRUSH( "OdysseyLayerStack/colored_16", mIcon16x16 ) ); //unused
+    Set( "OdysseyLayerStack.Uncolored16", new IMAGE_BRUSH( "OdysseyLayerStack/uncolored_16", mIcon16x16 ) ); //unused
 
     Set("LayerStack.DisplayOptionsToggle", FCheckBoxStyle()
         .SetPadding(FMargin(8)) //8 because left+right = 16 and top+bottom = 16
@@ -629,30 +532,22 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
 
 
     Set("OdysseySpinBoxStyle.DarkSpinBox",FSpinBoxStyle()
-        .SetBackgroundBrush(BOX_BRUSH("SpinBox/Spinbox",FMargin(4.0f/16.0f), FLinearColor( 0.05f, 0.05f, 0.05f )))
-        .SetInactiveFillBrush(BOX_BRUSH("SpinBox/Spinbox_Fill",FMargin(4.0f/16.0f,4.0f/16.0f,8.0f/16.0f,4.0f/16.0f),FLinearColor(0.1f,0.1f,0.1f)))
-        .SetHoveredBackgroundBrush(BOX_BRUSH("SpinBox/Spinbox_Hovered", FMargin(4.0f/16.0f), FLinearColor( 0.05f, 0.05f, 0.05f )))
-        .SetActiveFillBrush(BOX_BRUSH("SpinBox/Spinbox_Fill_Hovered",FMargin(4.0f/16.0f), FLinearColor( 0.25f, 0.25f, 0.25f )))
+        .SetBackgroundBrush(BOX_BRUSH("SpinBox/Spinbox",FMargin(4.0f/16.0f), FLinearColor( 0.05f, 0.05f, 0.05f ))) //unused
+        .SetInactiveFillBrush(BOX_BRUSH("SpinBox/Spinbox_Fill",FMargin(4.0f/16.0f,4.0f/16.0f,8.0f/16.0f,4.0f/16.0f),FLinearColor(0.1f,0.1f,0.1f))) //unused
+        .SetHoveredBackgroundBrush(BOX_BRUSH("SpinBox/Spinbox_Hovered", FMargin(4.0f/16.0f), FLinearColor( 0.05f, 0.05f, 0.05f ))) //unused
+        .SetActiveFillBrush(BOX_BRUSH("SpinBox/Spinbox_Fill_Hovered",FMargin(4.0f/16.0f), FLinearColor( 0.25f, 0.25f, 0.25f ))) //unused
         .SetArrowsImage(IMAGE_BRUSH("SpinBox/SpinArrows",mIcon12x12))
-    );
-
-    Set("OdysseySpinBoxStyle.TransparentSpinBox",FSpinBoxStyle()
-        .SetBackgroundBrush(FSlateNoResource())
-        .SetHoveredBackgroundBrush(FSlateNoResource())
-        .SetActiveFillBrush(FSlateNoResource())
-        .SetInactiveFillBrush(FSlateNoResource())
-        .SetArrowsImage(FSlateNoResource())
     );
 
     Set("OdysseyCheckBoxStyle.TransparentCheckBox", FCheckBoxStyle()
         .SetForegroundColor(FLinearColor(0, 0, 0, 0))
         .SetCheckBoxType(ESlateCheckBoxType::ToggleButton)
         .SetUncheckedImage(FSlateNoResource())
-        .SetUncheckedHoveredImage(BOX_BRUSH("Common/RoundedSelection_16x", 4.0f / 16.0f, FLinearColor(0.728f, 0.364f, 0.003f)))
-        .SetUncheckedPressedImage(BOX_BRUSH("Common/RoundedSelection_16x", 4.0f / 16.0f, FLinearColor(0.701f, 0.225f, 0.003f)))
-        .SetCheckedImage(BOX_BRUSH("Common/RoundedSelection_16x", 4.0f / 16.0f, FLinearColor(0.701f, 0.225f, 0.003f)))
-        .SetCheckedHoveredImage(BOX_BRUSH("Common/RoundedSelection_16x", 4.0f / 16.0f, FLinearColor(0.728f, 0.364f, 0.003f)))
-        .SetCheckedPressedImage(BOX_BRUSH("Common/RoundedSelection_16x", 4.0f / 16.0f, FLinearColor(0.701f, 0.225f, 0.003f)))
+        .SetUncheckedHoveredImage(BOX_BRUSH("Common/RoundedSelection_16x", 4.0f / 16.0f, FLinearColor(0.728f, 0.364f, 0.003f))) //unused
+        .SetUncheckedPressedImage(BOX_BRUSH("Common/RoundedSelection_16x", 4.0f / 16.0f, FLinearColor(0.701f, 0.225f, 0.003f))) //unused
+        .SetCheckedImage(BOX_BRUSH("Common/RoundedSelection_16x", 4.0f / 16.0f, FLinearColor(0.701f, 0.225f, 0.003f))) //unused
+        .SetCheckedHoveredImage(BOX_BRUSH("Common/RoundedSelection_16x", 4.0f / 16.0f, FLinearColor(0.728f, 0.364f, 0.003f))) //unused
+        .SetCheckedPressedImage(BOX_BRUSH("Common/RoundedSelection_16x", 4.0f / 16.0f, FLinearColor(0.701f, 0.225f, 0.003f))) //unused
     );
 
     Set("OdysseyCheckBoxStyle.ToggleButton", FCheckBoxStyle( FAppStyle::Get().GetWidgetStyle<FCheckBoxStyle>("ToggleButtonCheckbox") )
@@ -743,13 +638,11 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     );
 
     //Animation
-    Set("TimelineHeader.backgroundColorEven", FLinearColor(1.0f, 1.0f, 1.0f, 0.05f));
-    Set("TimelineHeader.backgroundColorOdd", FLinearColor(0.0f, 0.0f, 0.0f, 0.05f));
-    Set("TimelineHeader.ProxyDoneColor", FLinearColor(0.0f, 1.0f, 0.0f, 0.5f));
-    Set("TimelineHeader.ProxyPendingColor", FLinearColor(1.0f, 0.6f, 0.0f, 0.5f));
-
     Set( "ClassIcon.OdysseyAnimation", new IMAGE_BRUSH( "OdysseyAnimation/OdysseyAnimationDefaultThumbnail_16", mIcon16x16 ) );
     Set( "ClassThumbnail.OdysseyAnimation", new IMAGE_BRUSH( "OdysseyAnimation/OdysseyAnimationDefaultThumbnail_64", mIcon64x64 ) );
+
+    Set("TimelineHeader.backgroundColorEven", FLinearColor(1.0f, 1.0f, 1.0f, 0.05f));
+    Set("TimelineHeader.backgroundColorOdd", FLinearColor(0.0f, 0.0f, 0.0f, 0.05f));
 
     Set("Animation.Timeline.Padding", 28.f);
 
@@ -757,8 +650,8 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set("Animation.Timeline.Tools.Move", new IMAGE_BRUSH_SVG("OdysseyAnimation/Timeline/Tools/Move", mIcon16x16));
     Set("Animation.Timeline.Tools.Cut", new IMAGE_BRUSH_SVG("OdysseyAnimation/Timeline/Tools/Cut", mIcon16x16));
 
-    Set("Animation.Timeline.Inbetweening.Forward16", new IMAGE_BRUSH("OdysseyAnimation/Timeline/Inbetweening/forward16", mIcon16x16));
-    Set("Animation.Timeline.Inbetweening.Backward16", new IMAGE_BRUSH("OdysseyAnimation/Timeline/Inbetweening/backward16", mIcon16x16));
+    Set("Animation.Timeline.Inbetweening.Forward16", new IMAGE_BRUSH("OdysseyAnimation/Timeline/Inbetweening/forward16", mIcon16x16)); //unused
+    Set("Animation.Timeline.Inbetweening.Backward16", new IMAGE_BRUSH("OdysseyAnimation/Timeline/Inbetweening/backward16", mIcon16x16)); //unused
 
     Set("Animation.Timeline.OutOfRangeColor", FStyleColors::AccentBlack);
     Set("Animation.Timeline.OutOfRangeColorOpacity", 0.3f);
@@ -772,7 +665,7 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set("Animation.Timeline.LeftBoundHandle", new IMAGE_BRUSH_SVG("OdysseyAnimation/Timeline/Header/AnimationLeftBoundHandle", mIcon16x16));
     Set("Animation.Timeline.RightBoundHandle", new IMAGE_BRUSH_SVG("OdysseyAnimation/Timeline/Header/AnimationRightBoundHandle", mIcon16x16));
 
-    Set("Animation.Lighttable64", new IMAGE_BRUSH("OdysseyAnimation/Lighttable_64", mIcon64x64));
+    Set("Animation.Lighttable64", new IMAGE_BRUSH("OdysseyAnimation/Lighttable_64", mIcon64x64)); //unused
     Set("Animation.Lighttable16", new IMAGE_BRUSH("OdysseyAnimation/Lighttable_16", mIcon16x16));
 
     Set("Animation.LighttableToggle", FCheckBoxStyle()
@@ -873,7 +766,6 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
 
     Set("Animation.Lighttable.OutOfPegs.Button.On", new IMAGE_BRUSH_SVG("OdysseyAnimation/out-of-pegs-on", mIcon16x16));
     Set("Animation.Lighttable.OutOfPegs.Button.Off", new IMAGE_BRUSH_SVG("OdysseyAnimation/out-of-pegs-off", mIcon16x16));
-    Set("Animation.Lighttable.OutOfPegs.Button.Color", primary);
 
     // Inbetweening
     Set("Inbetweening.TableView", FTableViewStyle()
@@ -980,10 +872,10 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
 void
 FOdysseyStyleDefault::SetupOdysseyCommands()
 {
-    Set("OdysseyCommands.OpenOdysseyAboutWindow", new IMAGE_BRUSH_SVG("OdysseyCoreEditor/Commands/open-about-window", mIcon20x20));
-    Set("OdysseyCommands.OpenOdysseyAboutWindow.Small", new IMAGE_BRUSH_SVG("OdysseyCoreEditor/Commands/open-about-window", mIcon20x20));
-    Set("OdysseyCommands.OpenOdysseyDocumentation", new IMAGE_BRUSH_SVG("OdysseyCoreEditor/Commands/go-to-user-documentation", mIcon20x20));
-    Set("OdysseyCommands.OpenOdysseyDocumentation.Small", new IMAGE_BRUSH_SVG("OdysseyCoreEditor/Commands/go-to-user-documentation", mIcon20x20));
+    Set("OdysseyCommands.OpenOdysseyAboutWindow", new IMAGE_BRUSH_SVG("OdysseyCoreEditor/Commands/open-about-window", mIcon20x20)); //unused
+    Set("OdysseyCommands.OpenOdysseyAboutWindow.Small", new IMAGE_BRUSH_SVG("OdysseyCoreEditor/Commands/open-about-window", mIcon20x20)); //unused
+    Set("OdysseyCommands.OpenOdysseyDocumentation", new IMAGE_BRUSH_SVG("OdysseyCoreEditor/Commands/go-to-user-documentation", mIcon20x20)); //unused
+    Set("OdysseyCommands.OpenOdysseyDocumentation.Small", new IMAGE_BRUSH_SVG("OdysseyCoreEditor/Commands/go-to-user-documentation", mIcon20x20)); //unused
 }
 
 void
@@ -1021,10 +913,6 @@ FOdysseyStyleDefault::SetupOdysseyAboutWindow()
         .SetColorAndOpacity(FLinearColor(FColor(128, 128, 128)))
     );
     Set("Odyssey.About.SmallSubduedText", FTextBlockStyle(FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>("SmallText"))
-        .SetColorAndOpacity(FLinearColor(FColor(128, 128, 128)))
-    );
-    Set("Odyssey.About.BigSubduedText", FTextBlockStyle(FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>("NormalText"))
-        .SetFontSize(15)
         .SetColorAndOpacity(FLinearColor(FColor(128, 128, 128)))
     );
 }

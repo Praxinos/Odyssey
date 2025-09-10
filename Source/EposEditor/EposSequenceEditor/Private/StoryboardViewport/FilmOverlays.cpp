@@ -715,7 +715,6 @@ TSharedRef<SWidget> SFilmOverlayOptions::ConstructPrimaryOverlaysMenu()
                 .Padding(0.f, 0.f, 0.f, 4.f)
                 [
                     SNew(STextBlock)
-                    .ColorAndOpacity(FAppStyle::Get().GetColor("DefaultForeground"))
                     .Text(Overlay.GetDisplayName())
                 ]
             ]

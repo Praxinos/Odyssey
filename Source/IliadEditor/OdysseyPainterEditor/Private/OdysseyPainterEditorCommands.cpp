@@ -61,8 +61,8 @@ FOdysseyPainterEditorCommands::RegisterCommands()
     UI_BUNDLE_COMMAND( RotateViewport, ViewportShortcuts,  "Rotate Viewport", "Hold the key to Rotate the viewport",                                              EUserInterfaceActionType::None, FInputChord(EModifierKey::Control, EKeys::M));
     UI_BUNDLE_COMMAND( ResetViewportRotation, ViewportShortcuts, "Reset Viewport Rotation", "Reset viewport rotation",                                      EUserInterfaceActionType::Button, FInputChord( EModifierKey::Control, EKeys::R ) );
     UI_BUNDLE_COMMAND( ResetViewportPosition, ViewportShortcuts, "Reset Viewport Position", "Reset viewport position",                                      EUserInterfaceActionType::Button, FInputChord( EKeys::Escape ) );
-    UI_BUNDLE_COMMAND( RotateViewportLeft, ViewportShortcuts, "Rotate Viewport Left", "Rotate viewport left",                                               EUserInterfaceActionType::Button, FInputChord( EModifierKey::Shift, EKeys::L ) );
-    UI_BUNDLE_COMMAND( RotateViewportRight, ViewportShortcuts, "Rotate Viewport Right", "Rotate viewport right",                                            EUserInterfaceActionType::Button, FInputChord( EModifierKey::Shift, EKeys::R ) );
+    UI_BUNDLE_COMMAND( RotateViewportLeft, ViewportShortcuts, "Rotate Viewport Left", "Rotate viewport left",                                               EUserInterfaceActionType::Button, FInputChord() );
+    UI_BUNDLE_COMMAND( RotateViewportRight, ViewportShortcuts, "Rotate Viewport Right", "Rotate viewport right",                                            EUserInterfaceActionType::Button, FInputChord() );
     UI_BUNDLE_COMMAND( FlipViewportHorizontally, ViewportShortcuts, "Flip the viewport horizontally", "Flip the viewport horizontally",                     EUserInterfaceActionType::Button, FInputChord() );
     UI_BUNDLE_COMMAND( FlipViewportVertically, ViewportShortcuts, "Flip the viewport vertically", "Flip the viewport vertically",                           EUserInterfaceActionType::Button, FInputChord() );
     UI_BUNDLE_COMMAND( SetZoom10Percent, ViewportShortcuts, "Set Zoom 10 Percent", "Set zoom at 10 percent",                                                EUserInterfaceActionType::Button, FInputChord() );
@@ -141,7 +141,7 @@ FOdysseyPainterEditorCommands::RegisterCommands()
     UI_BUNDLE_COMMAND( SetBlendModeWhiteOut, BrushBlendingModeShortcuts, "Whiteout", "Set Brush Blend Mode to Whiteout",                                    EUserInterfaceActionType::Button, FInputChord() );
     UI_BUNDLE_COMMAND( SetBlendModeAngleCorrected, BrushBlendingModeShortcuts, "AngleCorrected", "Set Brush Blend Mode to AngleCorrected",                  EUserInterfaceActionType::Button, FInputChord() );
 
-    UI_BUNDLE_COMMAND( ActivateColorPickerTool, ToolsShortcuts, "Activate Color Picker Tool", "Activates the Color Picker Tool", EUserInterfaceActionType::Button, FInputChord(EKeys::I));
+    UI_BUNDLE_COMMAND( ActivateColorPickerTool, ToolsShortcuts, "Activate Color Picker Tool", "Activates the Color Picker Tool", EUserInterfaceActionType::Button, FInputChord());
     UI_BUNDLE_COMMAND( ActivateDrawingTool, ToolsShortcuts, "Activate Drawing Tool", "Activates the Drawing Tool", EUserInterfaceActionType::Button, FInputChord(EKeys::B));
     UI_BUNDLE_COMMAND( ActivateSelectionTool, ToolsShortcuts, "Activate Selection Tool", "Activates the Selection Tool", EUserInterfaceActionType::Button, FInputChord(EModifierKey::Shift, EKeys::L));
     UI_BUNDLE_COMMAND( ActivatePaintBucketTool, ToolsShortcuts, "Activate PaintBucket Tool", "Activates the Paint Bucket Tool", EUserInterfaceActionType::Button, FInputChord(EKeys::G));
