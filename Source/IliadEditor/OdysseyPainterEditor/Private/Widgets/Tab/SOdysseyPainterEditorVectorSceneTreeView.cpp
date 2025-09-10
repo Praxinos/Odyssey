@@ -58,41 +58,48 @@ void
 SOdysseyPainterEditorVectorSceneTreeView::Construct( const FArguments& InArgs )
 {
     TSharedPtr<SHeaderRow> headerRow = SNew(SHeaderRow)
-                                      .Visibility( EVisibility::Collapsed )
-                                      + SHeaderRow::Column("Visible")
+                                      .Visibility( EVisibility::Visible )
+                                      .CanSelectGeneratedColumn( true )
+                                      + SHeaderRow::Column( VSTV_OBJECT_VISIBLE )
+                                      .DefaultLabel(FText::FromString(VSTV_OBJECT_VISIBLE))
                                       .FixedWidth( 24.0f )
                                       [
                                           SNew(SBorder)
                                           .Padding(0,0)
                                           .BorderBackgroundColor( FSlateColor( FLinearColor( 0, 0, 0, 0 ) ) )
-                                          .Content()
+                                          .VAlign( EVerticalAlignment::VAlign_Center )
+                                          .HAlign( EHorizontalAlignment::HAlign_Center )
                                           [
                                               SNew(SImage)
-                                              .Image( FOdysseyStyle::GetBrush("Level.VisibleIcon16x") )
+                                              .Image( FAppStyle::Get().GetBrush("Level.VisibleIcon16x") )
                                           ]
                                       ]
-                                      + SHeaderRow::Column("HUD Color")
+                                      + SHeaderRow::Column( VSTV_OBJECT_HUDCOLOR )
+                                      .DefaultLabel(FText::FromString(VSTV_OBJECT_HUDCOLOR))
                                       .FixedWidth( 3.0f )
                                       [
                                           SNullWidget::NullWidget
                                       ]
-                                      + SHeaderRow::Column("Name")
-                                      + SHeaderRow::Column("T")
-                                      .FixedWidth( 16.f )
+                                      + SHeaderRow::Column( VSTV_OBJECT_NAME )
+                                      .DefaultLabel(FText::FromString(VSTV_OBJECT_NAME))
+                                      .ShouldGenerateWidget(true)
+                                      .ManualWidth( 144.0f )
+                                      + SHeaderRow::Column( VSTV_OBJECT_TRANSFORMED )
+                                      .DefaultLabel(FText::FromString(VSTV_OBJECT_TRANSFORMED))
+                                      .FixedWidth( 24.0f )
                                       [
                                           SNew(SBorder)
-                                          .Padding(0,0)
+                                          .ContentScale( 0.8 )
                                           .BorderBackgroundColor( FSlateColor( FLinearColor( 0, 0, 0, 0 ) ) )
-                                          .Content()
+                                          .VAlign( EVerticalAlignment::VAlign_Center )
+                                          .HAlign( EHorizontalAlignment::HAlign_Center )
                                           [
                                               SNew(SImage)
-                                              .Image( FOdysseyStyle::GetBrush("Level.VisibleIcon16x") )
+                                              .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Transform16") )
                                           ]
                                       ]
-                                      + SHeaderRow::Column("Tags")
-                                      [
-                                          SNullWidget::NullWidget
-                                      ];
+                                      + SHeaderRow::Column(VSTV_OBJECT_TAGS)
+                                      .DefaultLabel(FText::FromString(VSTV_OBJECT_TAGS));
     mEditor = InArgs._Editor;
     mScene.Assign(*this, InArgs._Scene);
 

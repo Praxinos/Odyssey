@@ -13,7 +13,7 @@ class UOdysseyLayerStack;
 struct FOdysseyVectorObjectInvalidationFlags;
 
 #define VSTV_OBJECT_VISIBLE     "Visible"
-#define VSTV_OBJECT_HUD_COLOR   "HUD Color"
+#define VSTV_OBJECT_HUDCOLOR    "HUD Color"
 #define VSTV_OBJECT_NAME        "Name"
 #define VSTV_OBJECT_TRANSFORMED "Transformed"
 #define VSTV_OBJECT_TAGS        "Tags"

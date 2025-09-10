@@ -139,7 +139,7 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::GenerateWidgetForColumn ( const FNa
                ];
     }
 
-    if( InColumnName == VSTV_OBJECT_HUD_COLOR )
+    if( InColumnName == VSTV_OBJECT_HUDCOLOR )
     {
         return SNew(SBorder)
                .Padding(0, 1)
@@ -191,8 +191,14 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::GenerateWidgetForColumn ( const FNa
                            .Text( FText::FromString( mItem->IsSensitive() ? vectorObject->GetName()
                                                                           : FString::Printf( TEXT("Cell %d / "), cellIndex )
                                                                           + vectorObject->GetName() ) )
+                           .ToolTipText_Lambda( [ vectorObject ]
+                                                {
+                                                    return FText::FromString( *vectorObject->GetName() );
+                                                } )
                            .OnVerifyTextChanged( this, &SOdysseyPainterEditorVectorSceneTreeViewRow::OnVerifyTextChanged )
                            .OnTextCommitted( this, &SOdysseyPainterEditorVectorSceneTreeViewRow::OnTextChanged );
+
+        mTextBlockWidget.Get()->SetOverflowPolicy( TOptional<ETextOverflowPolicy>(ETextOverflowPolicy::Ellipsis) );
 
         return SNew(SHorizontalBox)
                     .IsEnabled( mItem.Get()->IsSensitive() )
@@ -214,6 +220,32 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::GenerateWidgetForColumn ( const FNa
                     [
                         mTextBlockWidget.ToSharedRef()
                     ];
+    }
+
+    if( InColumnName == VSTV_OBJECT_TRANSFORMED )
+    {
+        const FSlateBrush* transformedIcon = nullptr;
+        TSharedPtr<SHorizontalBox> tagBox = SNew(SHorizontalBox);
+
+        //inbetweenerTagIcon = FOdysseyStyle::GetBrush( "PainterEditor.VectorSceneTreeView.InbetweenerTag16" );
+        transformedIcon = FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Transform16" );
+
+        return SNew(SBorder)
+               .ContentScale( 0.8 )
+               .BorderBackgroundColor( FSlateColor( FLinearColor( 0, 0, 0, 0 ) ) )
+               .VAlign( EVerticalAlignment::VAlign_Center )
+               .HAlign( EHorizontalAlignment::HAlign_Center )
+               [
+                   SNew( SImage )
+                   .Image( transformedIcon )
+                   .Visibility_Lambda( [this]
+                   {
+                       FOdysseyVectorObject* vectorObject = mItem->GetVectorObject();
+
+                       return ( vectorObject->GetLocalMatrix() == BLMatrix2D::makeIdentity() ) ? EVisibility::Hidden
+                                                                                               : EVisibility::Visible;
+                   } )
+               ];
     }
 
     if( InColumnName == VSTV_OBJECT_TAGS )
