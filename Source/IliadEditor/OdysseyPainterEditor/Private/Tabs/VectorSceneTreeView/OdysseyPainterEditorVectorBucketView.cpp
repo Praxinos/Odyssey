@@ -2,6 +2,9 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "OdysseyPainterEditorVectorBucketView.h"
+#include "OdysseyLayerStack.h"
+#include "OdysseyAnimationLayerImageVector.h"
+#include "OdysseyTextureLayerImageVector.h"
 #include "Undo/OdysseyVectorUndoBucketParam.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorCell.h"
@@ -48,16 +51,24 @@ UOdysseyPainterEditorVectorBucketView::ImportParam()
     }
 }
 
-void
-UOdysseyPainterEditorVectorBucketView::SetVectorLayer( TSharedPtr<FOdysseyVectorLayer> iVectorLayer )
-{
-    mVectorLayer = iVectorLayer;
-}
-
 TSharedPtr<FOdysseyVectorLayer>
 UOdysseyPainterEditorVectorBucketView::GetVectorLayer()
 {
-    return mVectorLayer;
+    UOdysseyLayer* currentLayer = mEditor->LayerStack()->GetCurrentLayer();
+    UOdysseyAnimationLayerImageVector* animationLayer = Cast<UOdysseyAnimationLayerImageVector>(currentLayer);
+    UOdysseyTextureLayerImageVector* textureLayer = Cast<UOdysseyTextureLayerImageVector>(currentLayer);
+
+    if( animationLayer )
+    {
+        return animationLayer->GetVectorLayer();
+    }
+
+    if( textureLayer )
+    {
+        return textureLayer->GetVectorLayer();
+    }
+
+    return nullptr;
 }
 
 void

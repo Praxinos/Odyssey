@@ -30,7 +30,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBucketView : public UO
 
         FOdysseyPainterEditor* GetEditor();
         // Pointer to the layer (useful to retrieve palette sets needed by FOdysseyVectorObjectViewPaletteCustomization)
-        void SetVectorLayer( TSharedPtr<FOdysseyVectorLayer> iVectorLayer );
         TSharedPtr<FOdysseyVectorLayer> GetVectorLayer();
 
     protected:
@@ -38,9 +37,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBucketView : public UO
         virtual void PropertyChanged( const FName& iPropertyName
                                     , const FName& iMemberPropertyName
                                     , const FName& iCategory );
-
-    protected:
-        TSharedPtr<FOdysseyVectorLayer> mVectorLayer;
 
     protected:
         FOdysseyPainterEditor* mEditor;
