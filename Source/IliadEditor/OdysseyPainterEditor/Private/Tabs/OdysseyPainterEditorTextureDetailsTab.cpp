@@ -25,7 +25,7 @@ FOdysseyPainterEditorTextureDetailsTab::~FOdysseyPainterEditorTextureDetailsTab(
 }
 
 FOdysseyPainterEditorTextureDetailsTab::FOdysseyPainterEditorTextureDetailsTab(FOdysseyPainterEditor* iEditor)
-    : FOdysseyEditorTab( LOCTEXT( "texture-details-tab.name", "Texture Details" ), FSlateIcon( "OdysseyStyle", "PainterEditor.Trombone16" ))
+    : FOdysseyEditorTab( LOCTEXT( "texture-details-tab.name", "Texture Details" ), FSlateIcon( "OdysseyStyle", "PainterEditor.DetailsTab" ))
     , mEditor(iEditor)
 {
 }
