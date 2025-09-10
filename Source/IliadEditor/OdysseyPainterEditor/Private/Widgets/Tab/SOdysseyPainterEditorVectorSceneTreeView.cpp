@@ -71,12 +71,13 @@ SOdysseyPainterEditorVectorSceneTreeView::Construct( const FArguments& InArgs )
                                           .HAlign( EHorizontalAlignment::HAlign_Center )
                                           [
                                               SNew(SImage)
+                                              .ToolTipText( FText::FromString(VSTV_OBJECT_VISIBLE))
                                               .Image( FAppStyle::Get().GetBrush("Level.VisibleIcon16x") )
                                           ]
                                       ]
                                       + SHeaderRow::Column( VSTV_OBJECT_HUDCOLOR )
                                       .DefaultLabel(FText::FromString(VSTV_OBJECT_HUDCOLOR))
-                                      .FixedWidth( 3.0f )
+                                      .FixedWidth( 4.0f )
                                       [
                                           SNullWidget::NullWidget
                                       ]
@@ -95,6 +96,7 @@ SOdysseyPainterEditorVectorSceneTreeView::Construct( const FArguments& InArgs )
                                           .HAlign( EHorizontalAlignment::HAlign_Center )
                                           [
                                               SNew(SImage)
+                                              .ToolTipText( FText::FromString(VSTV_OBJECT_TRANSFORMED))
                                               .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Transform16") )
                                           ]
                                       ]
