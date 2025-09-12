@@ -90,9 +90,9 @@ UOdysseyLayerCellImageStagger::GetReferenceFrameAtFrame(int iFrameIndex) const
         {
             int loopFrameIndex = ( Reach <= 0 ) ? iFrameIndex : ( iFrameIndex % Reach );
 
-            // We use the cell start frame as a base for the seed.
-            // In the future we can decide for another user-chosen value
-            srand( cellStartFrame + loopFrameIndex );
+            // We call srand everytime with a known seed value, so that the randomness does not change from
+            // one computer to another. In the future we can decide for a user-chosen value
+            srand( Seed + loopFrameIndex );
 
             int layerStartFrame = GetLayer()->GetFrameRange().GetLowerBoundValue();
             int startFrame = ( Reach <= 0 ) ? layerStartFrame

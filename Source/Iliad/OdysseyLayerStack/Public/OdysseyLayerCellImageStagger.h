@@ -66,4 +66,7 @@ protected:
 
     UPROPERTY()
     int Reach = 0;
+
+    UPROPERTY()
+    int Seed = 0;
 };
