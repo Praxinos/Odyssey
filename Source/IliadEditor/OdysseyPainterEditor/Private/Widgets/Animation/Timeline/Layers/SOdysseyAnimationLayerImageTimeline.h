@@ -56,6 +56,7 @@ protected:
     virtual float GetRowHeight(FName iRow) const override;
     virtual EVisibility GetRowVisibility(FName iRow) const override;
     virtual FMargin GetRowPadding(FName iRow) const override;
+    virtual bool IsRowEnabled(FName iRow) const;
 
     TSharedRef<SWidget> GenerateMainRowTimelineWidget();
     TSharedRef<SWidget> GenerateLighttableRowTimelineWidget();
@@ -113,6 +114,8 @@ private:
 
     FReply OnContextMenuMinusButtonClicked();
     FReply OnContextMenuPlusButtonClicked();
+
+    EVisibility GetRowDisabledColorVisibility(FName iRow) const;
 
 protected:
     UOdysseyAnimationLayer* mLayer;

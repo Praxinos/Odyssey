@@ -325,7 +325,7 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "OdysseyLayerStack.LayerVector16", new IMAGE_BRUSH( "OdysseyLayerStack/layer_vector_16", mIcon16x16 ) );
     Set( "OdysseyLayerStack.Visible16", new IMAGE_BRUSH_SVG( "OdysseyLayerStack/visible", mIcon16x16 ) );
     Set( "OdysseyLayerStack.Locked16", new IMAGE_BRUSH_SVG( "OdysseyLayerStack/locked", mIcon16x16 ) );
-    Set( "OdysseyLayerStack.OptionsHeader64", new IMAGE_BRUSH_SVG( "OdysseyLayerStack/options_header", mIcon64x64 ) );
+    Set( "OdysseyLayerStack.OptionsHeader16", new IMAGE_BRUSH( "OdysseyLayerStack/options_header_16", mIcon16x16 ) );
 
     Set("LayerStack.DisplayOptionsToggle", FCheckBoxStyle()
         .SetPadding(FMargin(8)) //8 because left+right = 16 and top+bottom = 16

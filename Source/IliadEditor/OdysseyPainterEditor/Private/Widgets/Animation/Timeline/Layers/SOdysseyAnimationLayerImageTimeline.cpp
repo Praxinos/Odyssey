@@ -65,53 +65,27 @@ SOdysseyAnimationLayerImageTimeline::GenerateWidgetForRow( const FName& iRow, co
 {
     TSharedPtr<SWidget> widget = SOdysseyLayerRowBase::GenerateWidgetForRow( iRow, iColumn );
 
-    widget = SNew(SOdysseyAnimationTimelineScrollBox)
-        .TimelinePosition(mTimelinePosition)
-        + SOdysseyAnimationTimelineScrollBox::Slot()
+    widget = SNew(SOverlay)
+        + SOverlay::Slot()
         [
-            widget.ToSharedRef()
-        ];
-
-    if (iRow == "Main")
-    {
-        widget = SNew(SOverlay)
-            + SOverlay::Slot()
+            SNew(SEnableBox)
+            .IsEnabled(this, &SOdysseyAnimationLayerImageTimeline::IsRowEnabled, iRow)
             [
-                SNew(SEnableBox)
-                .IsEnabled_Lambda(
-                    [this]()
-                    {
-                        if (!mLayer)
-                            return false;
-
-                        if (!mLayer->IsEditable())
-                            return false;
-
-                        return true;
-                    }
-                )
+                SNew(SOdysseyAnimationTimelineScrollBox)
+                .TimelinePosition(mTimelinePosition)
+                + SOdysseyAnimationTimelineScrollBox::Slot()
                 [
                     widget.ToSharedRef()
                 ]
             ]
-            + SOverlay::Slot()
-            [
-                SNew(SColorBlock)
-                .Visibility(EVisibility::SelfHitTestInvisible)
-                .Color_Lambda(
-                    [this]()
-                    {
-                        if (!mLayer)
-                            return FLinearColor(0, 0, 0, 0);
-
-                        if (mLayer->IsActivatedRecursively())
-                            return FLinearColor(0, 0, 0, 0);
-
-                        return FLinearColor(0, 0, 0, 0.75f);
-                    }
-                )
-            ];
-    }
+        ]
+        + SOverlay::Slot()
+        [
+            SNew(SColorBlock)
+            .Visibility(this, &SOdysseyAnimationLayerImageTimeline::GetRowDisabledColorVisibility, iRow)
+            .Color(FLinearColor(0, 0, 0, 0.75f))
+            .Size(FVector2D(0, 0))
+        ];
 
     return widget.ToSharedRef();
 }
@@ -135,6 +109,24 @@ SOdysseyAnimationLayerImageTimeline::GenerateWidget( const FName& iRow, const FN
     }
 
     return SOdysseyAnimationLayerTimeline::GenerateWidget( iRow, iColumn );
+}
+
+bool
+SOdysseyAnimationLayerImageTimeline::IsRowEnabled(FName iRow) const
+{
+    if (iRow == "Lighttable" || iRow == "OutOfPegs")
+        return true;
+
+    return mLayer && mLayer->IsEditable();
+}
+
+EVisibility
+SOdysseyAnimationLayerImageTimeline::GetRowDisabledColorVisibility(FName iRow) const
+{
+    if (IsRowEnabled(iRow))
+        return EVisibility::Collapsed;
+
+    return EVisibility::SelfHitTestInvisible;
 }
 
 float
