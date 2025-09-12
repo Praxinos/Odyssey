@@ -153,6 +153,10 @@ SOdysseyAnimationCellImageStagger::GetBehaviourBrush() const
         case EOdysseyLayerCellImageStaggerBehaviour::PingPong:
             return FOdysseyStyle::GetBrush("Animation.CellImageStagger.Behaviour.PingPong");
         break;
+
+        case EOdysseyLayerCellImageStaggerBehaviour::Random:
+            return FOdysseyStyle::GetBrush("Animation.CellImageStagger.Behaviour.Random");
+        break;
     }
     return nullptr;
 }
@@ -242,6 +246,18 @@ SOdysseyAnimationCellImageStagger::BuildContextMenu(FMenuBuilder& iMenuBuilder)
             NAME_None,
             EUserInterfaceActionType::RadioButton
         );
+        iMenuBuilder.AddMenuEntry(
+            LOCTEXT("cell-image-stagger.behaviour-menu.random", "Random"),
+            TAttribute<FText>(),
+            FSlateIcon("OdysseyStyle", "Animation.CellImageStagger.Behaviour.Random"),
+            FUIAction(
+                FExecuteAction::CreateRaw(this, &SOdysseyAnimationCellImageStagger::SetBehaviour, EOdysseyLayerCellImageStaggerBehaviour::Random),
+                FCanExecuteAction::CreateRaw(this, &SOdysseyAnimationCellImageStagger::CanSetBehaviour, EOdysseyLayerCellImageStaggerBehaviour::Random),
+                FIsActionChecked::CreateRaw(this, &SOdysseyAnimationCellImageStagger::IsBehaviour, EOdysseyLayerCellImageStaggerBehaviour::Random)
+            ),
+            NAME_None,
+            EUserInterfaceActionType::RadioButton
+        );
     iMenuBuilder.EndSection();
 }
 
@@ -285,6 +301,7 @@ SOdysseyAnimationCellImageStagger::GetStaggerLength() const
     switch(mCell->GetBehaviour())
     {
         case EOdysseyLayerCellImageStaggerBehaviour::Loop:
+        case EOdysseyLayerCellImageStaggerBehaviour::Random:
             return GetClampedReach();
         break;
 

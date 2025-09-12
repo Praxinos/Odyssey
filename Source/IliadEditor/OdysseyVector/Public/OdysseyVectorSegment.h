@@ -245,6 +245,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
                            , std::vector<FOdysseyVectorSection>& iSectionBuffer
                            , bool iStitchShortSections
                            , std::vector<FOdysseyVectorSection*>* iShortSectionArray );
+        void SetPressureProfile( const std::vector<double>& iPressureProfile );
+        void ClearPressureProfile();
 
     protected:
         void DrawFractionCache( BLContext* iBLContext
@@ -271,4 +273,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
         bool mNeedsWidth;
         FOdysseyVectorSection* mSectionBuffer;
         uint32 mSectionCount;
+        std::vector<double> mPressureProfile;
 };

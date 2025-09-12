@@ -11,7 +11,8 @@ UENUM(BlueprintType)
 enum class EOdysseyLayerCellImageStaggerBehaviour : uint8
 {
     Loop,
-    PingPong
+    PingPong,
+    Random
 };
 
 UCLASS(BlueprintType)

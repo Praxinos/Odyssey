@@ -21,9 +21,9 @@ FOdysseyVectorPathTracer::FOdysseyVectorPathTracer()
     , mTracingWidth( 6.0f )
     , mCubicPath(nullptr)
 {
-    mPointArray.reserve(100);
-    mRecordArray.reserve(100);
-    mEdgeArray.reserve(100);
+    mPointBuffer.reserve(100);
+    mRecordBuffer.reserve(100);
+    mEdgeBuffer.reserve(100);
 }
 
 void
@@ -48,9 +48,9 @@ void
 FOdysseyVectorPathTracer::Reset()
 {
     mBestBezier.inited = false;
-    mPointArray.clear();
-    mRecordArray.clear();
-    mEdgeArray.clear();
+    mPointBuffer.clear();
+    mRecordBuffer.clear();
+    mEdgeBuffer.clear();
     mCubicPath = nullptr;
     mPointID = 0;
 }
@@ -70,7 +70,7 @@ FOdysseyVectorPathTracer::Flush( FOdysseyVectorVertex* iPreviousVertex
         return nullptr;
     }
 
-    if( mEdgeArray.size() )
+    if( mEdgeBuffer.size() )
     {
         MakeBezier( true );
         // newSegment will be nullptr if iEndVertex == mPreviousVertex
@@ -78,10 +78,10 @@ FOdysseyVectorPathTracer::Flush( FOdysseyVectorVertex* iPreviousVertex
                                   , iEndVertex ? iEndVertex : CommitVertex( false ) );
 
         // relocate the last vertex at the last entry
-        if( ( iEndVertex == nullptr ) && mPointArray.size() )
+        if( ( iEndVertex == nullptr ) && mPointBuffer.size() )
         {
             BLMatrix2D& cubicPathInverseWorldMatrix = mCubicPath->GetInverseWorldMatrix();
-            ::ULIS::FVec2D lastPointCoords = mPointArray.back().coords;
+            ::ULIS::FVec2D lastPointCoords = mPointBuffer.back().coords;
             BLPoint localPoint = { cubicPathInverseWorldMatrix.mapPoint( lastPointCoords.x
                                                                        , lastPointCoords.y ) };
 
@@ -95,21 +95,21 @@ FOdysseyVectorPathTracer::Flush( FOdysseyVectorVertex* iPreviousVertex
 }
 
 std::vector<FTracerPoint>&
-FOdysseyVectorPathTracer::GetPointArray()
+FOdysseyVectorPathTracer::GetPointBuffer()
 {
-    return mPointArray;
+    return mPointBuffer;
 }
 
 std::vector<FTracerRecord>&
-FOdysseyVectorPathTracer::GetRecordArray()
+FOdysseyVectorPathTracer::GetRecordBuffer()
 {
-    return mRecordArray;
+    return mRecordBuffer;
 }
 
 std::vector<FTracerEdge>&
-FOdysseyVectorPathTracer::GetEdgeArray()
+FOdysseyVectorPathTracer::GetEdgeBuffer()
 {
-    return mEdgeArray;
+    return mEdgeBuffer;
 }
 
 double
@@ -117,9 +117,9 @@ FOdysseyVectorPathTracer::GetEdgeChainLength()
 {
     double length = 0.0f;
 
-    for( int i = 0; i < mEdgeArray.size(); i++ )
+    for( int i = 0; i < mEdgeBuffer.size(); i++ )
     {
-        length += mEdgeArray[i].length;
+        length += mEdgeBuffer[i].length;
     }
 
     return length;
@@ -167,9 +167,9 @@ FOdysseyVectorPathTracer::GetSamplePointAtParameter( double iEdgeChainLength, do
     double ti, tf = 0.0f;
     ::ULIS::FVec2D samplePoint;
 
-    for( int i = 0; i < mEdgeArray.size(); i++ )
+    for( int i = 0; i < mEdgeBuffer.size(); i++ )
     {
-        cumulEdgeLength += mEdgeArray[i].length;
+        cumulEdgeLength += mEdgeBuffer[i].length;
 
         ti = tf;
         tf = cumulEdgeLength / iEdgeChainLength;
@@ -178,7 +178,7 @@ FOdysseyVectorPathTracer::GetSamplePointAtParameter( double iEdgeChainLength, do
         {
             double t = iAt - ti;
 
-            samplePoint = mEdgeArray[i].p0 + ( mEdgeArray[i].p1 - mEdgeArray[i].p0 ) * t;
+            samplePoint = mEdgeBuffer[i].p0 + ( mEdgeBuffer[i].p1 - mEdgeBuffer[i].p0 ) * t;
 
             break;
         }
@@ -277,7 +277,7 @@ FOdysseyVectorPathTracer::TestBezier( ::ULIS::FVec2D iBezier[4] )
     {
         double minDistance = DBL_MAX;
 
-        for( FTracerEdge& edge : mEdgeArray )
+        for( FTracerEdge& edge : mEdgeBuffer )
         {
             double dist;
             double t = FOdysseyVector::DistanceToSegmentConstrained( samples[i], edge.p0, edge.p1, dist );
@@ -312,18 +312,18 @@ FOdysseyVectorPathTracer::GetRawBezier()
 bool
 FOdysseyVectorPathTracer::MakeBezier( bool iForce )
 {
-    FTracerRecord* firstRecord = &mRecordArray.front();
-    FTracerRecord* lastRecord = &mRecordArray.back();
+    FTracerRecord* firstRecord = &mRecordBuffer.front();
+    FTracerRecord* lastRecord = &mRecordBuffer.back();
     ::ULIS::FVec2D& firstRecordCoords = firstRecord->coords;
     ::ULIS::FVec2D& lastRecordCoords = lastRecord->coords;
-    FTracerEdge* firstEdge = &mEdgeArray.front();
-    FTracerEdge* lastEdge = &mEdgeArray.back();
+    FTracerEdge* firstEdge = &mEdgeBuffer.front();
+    FTracerEdge* lastEdge = &mEdgeBuffer.back();
     double edgeChainLength = GetEdgeChainLength();
     ::ULIS::FVec2D firstEdgeVector = firstRecord->smooth ? mSmoothVector * edgeChainLength * 0.33f
                                                          : firstEdge->vector * edgeChainLength * 0.33f;
     ::ULIS::FVec2D lastEdgeVector = lastEdge->vector * edgeChainLength * 0.33f;
 
-    //UE_LOG(LogTemp,Warning,TEXT("mRecordArray:%d mEdgeArray:%d %f"),mRecordArray.size(),mEdgeArray.size(),edgeChainLength);
+    //UE_LOG(LogTemp,Warning,TEXT("mRecordBuffer:%d mEdgeBuffer:%d %f"),mRecordBuffer.size(),mEdgeBuffer.size(),edgeChainLength);
 
 
     mCandidateBezier.inited = true;
@@ -368,16 +368,16 @@ FOdysseyVectorPathTracer::ClearPointsTo( uint32 iPointID )
     int pointRank = 0;
 
     // clear points until the one passed as parameter (but keep it)
-    newPointArray.reserve( mPointArray.size() );
+    newPointArray.reserve( mPointBuffer.size() );
 
-    while( mPointArray[pointRank++].id != iPointID );
+    while( mPointBuffer[pointRank++].id != iPointID );
 
-    for( int i = --pointRank, j = 0; i < mPointArray.size(); i++, j++ )
+    for( int i = --pointRank, j = 0; i < mPointBuffer.size(); i++, j++ )
     {
-        newPointArray.push_back( mPointArray[i] );
+        newPointArray.push_back( mPointBuffer[i] );
     }
 
-    mPointArray = newPointArray;
+    mPointBuffer = newPointArray;
 }
 
 void
@@ -389,27 +389,27 @@ FOdysseyVectorPathTracer::ClearTo( uint32 iRecordID, uint32 iEdgeID )
     int edgeRank = 0;
 
     // clear records until the one passed as parameter (but keep it)
-    newRecordArray.reserve( mRecordArray.size() );
+    newRecordArray.reserve( mRecordBuffer.size() );
 
-    while( mRecordArray[recordRank++].id != iRecordID );
+    while( mRecordBuffer[recordRank++].id != iRecordID );
 
-    for( int i = --recordRank, j = 0; i < mRecordArray.size(); i++, j++ )
+    for( int i = --recordRank, j = 0; i < mRecordBuffer.size(); i++, j++ )
     {
-        newRecordArray.push_back( mRecordArray[i] );
+        newRecordArray.push_back( mRecordBuffer[i] );
     }
 
-    mRecordArray = newRecordArray;
+    mRecordBuffer = newRecordArray;
 
-    newEdgeArray.reserve( mEdgeArray.size() );
+    newEdgeArray.reserve( mEdgeBuffer.size() );
 
-    while( mEdgeArray[edgeRank++].id != iEdgeID );
+    while( mEdgeBuffer[edgeRank++].id != iEdgeID );
 
-    for( int i = edgeRank, j = 0; i < mEdgeArray.size(); i++, j++ )
+    for( int i = edgeRank, j = 0; i < mEdgeBuffer.size(); i++, j++ )
     {
-        newEdgeArray.push_back( mEdgeArray[i] );
+        newEdgeArray.push_back( mEdgeBuffer[i] );
     }
 
-    mEdgeArray = newEdgeArray;
+    mEdgeBuffer = newEdgeArray;
 }
 
 FOdysseyVectorVertex*
@@ -451,11 +451,25 @@ FOdysseyVectorPathTracer::CommitSegment( FOdysseyVectorVertex* iPreviousVertex
                                                                                     , localHandlePoint[1].y
                                                                                     , iEndVertex
                                                                                     , true );
-
+        std::vector<double> pressureProfile;
 
         mCubicPath->AddSegment( newCubicSegment );
 
         newCubicSegment->Update( 0 );
+
+        // build pressure profile
+        /* unused - commented-out for now.
+        {
+            pressureProfile.reserve( mRecordBuffer.size() );
+
+            for( FTracerRecord& record : mRecordBuffer )
+            {
+                pressureProfile.push_back( record.radius );
+            }
+
+            newCubicSegment->SetPressureProfile( pressureProfile );
+        }
+        */
 
         ClearTo( mBestBezier.lastRecordID, mBestBezier.lastEdgeID );
 
@@ -485,32 +499,32 @@ FOdysseyVectorPathTracer::CommitSegment( FOdysseyVectorVertex* iPreviousVertex
 ::ULIS::FRectD
 FOdysseyVectorPathTracer::GetRedrawRect()
 {
-    if( mPointArray.size() )
+    if( mPointBuffer.size() )
     {
-        double xmin = mPointArray[0].coords.x
-             , ymin = mPointArray[0].coords.y
+        double xmin = mPointBuffer[0].coords.x
+             , ymin = mPointBuffer[0].coords.y
              , xmax = xmin
              , ymax = ymin;
-        double maxRadius = mPointArray[0].radius;
+        double maxRadius = mPointBuffer[0].radius;
 
-        for( int i = 1; i < mPointArray.size(); i++ )
+        for( int i = 1; i < mPointBuffer.size(); i++ )
         {
-            if( mPointArray[i].coords.x < xmin ) xmin = mPointArray[i].coords.x;
-            if( mPointArray[i].coords.x > xmax ) xmax = mPointArray[i].coords.x;
-            if( mPointArray[i].coords.y < ymin ) ymin = mPointArray[i].coords.y;
-            if( mPointArray[i].coords.y > ymax ) ymax = mPointArray[i].coords.y;
+            if( mPointBuffer[i].coords.x < xmin ) xmin = mPointBuffer[i].coords.x;
+            if( mPointBuffer[i].coords.x > xmax ) xmax = mPointBuffer[i].coords.x;
+            if( mPointBuffer[i].coords.y < ymin ) ymin = mPointBuffer[i].coords.y;
+            if( mPointBuffer[i].coords.y > ymax ) ymax = mPointBuffer[i].coords.y;
 
-            if( mPointArray[i].radius > maxRadius ) maxRadius = mPointArray[i].radius;
+            if( mPointBuffer[i].radius > maxRadius ) maxRadius = mPointBuffer[i].radius;
         }
 
-        for( int i = 0; i < mRecordArray.size(); i++ )
+        for( int i = 0; i < mRecordBuffer.size(); i++ )
         {
-            if( mRecordArray[i].coords.x < xmin ) xmin = mRecordArray[i].coords.x;
-            if( mRecordArray[i].coords.x > xmax ) xmax = mRecordArray[i].coords.x;
-            if( mRecordArray[i].coords.y < ymin ) ymin = mRecordArray[i].coords.y;
-            if( mRecordArray[i].coords.y > ymax ) ymax = mRecordArray[i].coords.y;
+            if( mRecordBuffer[i].coords.x < xmin ) xmin = mRecordBuffer[i].coords.x;
+            if( mRecordBuffer[i].coords.x > xmax ) xmax = mRecordBuffer[i].coords.x;
+            if( mRecordBuffer[i].coords.y < ymin ) ymin = mRecordBuffer[i].coords.y;
+            if( mRecordBuffer[i].coords.y > ymax ) ymax = mRecordBuffer[i].coords.y;
 
-            if( mRecordArray[i].radius > maxRadius ) maxRadius = mRecordArray[i].radius;
+            if( mRecordBuffer[i].radius > maxRadius ) maxRadius = mRecordBuffer[i].radius;
         }
 
         return ::ULIS::FRectD::FromMinMax( xmin - maxRadius
@@ -529,25 +543,25 @@ FOdysseyVectorPathTracer::Trace( FOdysseyVectorVertex* iPreviousVertex
                                , double iRadius )
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorPathTracer::Trace);
-    uint32 indexn = mPointArray.size();
+    uint32 indexn = mPointBuffer.size();
     FOdysseyVectorSegment* newSegment = nullptr;
 
-    mPointArray.emplace_back( mPointID, iWorldX, iWorldY, iRadius );
+    mPointBuffer.emplace_back( mPointID, iWorldX, iWorldY, iRadius );
 
     if( indexn == 0 )
     {
-        mRecordArray.emplace_back( mPointID, iWorldX, iWorldY, iRadius );
+        mRecordBuffer.emplace_back( mPointID, iWorldX, iWorldY, iRadius );
     }
     else
     {
-        FTracerRecord* lastRecord = mRecordArray.size() ? &mRecordArray.back() : nullptr;
+        FTracerRecord* lastRecord = mRecordBuffer.size() ? &mRecordBuffer.back() : nullptr;
         uint32 indexi = indexn - 1;
 
         if( ::ULIS::FVec2D( lastRecord->coords.x - iWorldX
                           , lastRecord->coords.y - iWorldY ).Distance() > mSampleDistance )
         {
-            uint32 edgeCount = mEdgeArray.size();
-            FTracerEdge* lastEdge = edgeCount ? &mEdgeArray.back() : nullptr;
+            uint32 edgeCount = mEdgeBuffer.size();
+            FTracerEdge* lastEdge = edgeCount ? &mEdgeBuffer.back() : nullptr;
             FTracerRecord newRecord = FTracerRecord( mPointID, iWorldX, iWorldY, iRadius );
             FTracerEdge newEdge = FTracerEdge( lastRecord->id
                                              , lastRecord->coords.x
@@ -577,13 +591,13 @@ FOdysseyVectorPathTracer::Trace( FOdysseyVectorVertex* iPreviousVertex
                 newVertex = CommitVertex( lastRecord->smooth );
                 newSegment = CommitSegment( iPreviousVertex, newVertex );
 
-                mRecordArray.push_back( newRecord );
-                mEdgeArray.push_back( newEdge );
+                mRecordBuffer.push_back( newRecord );
+                mEdgeBuffer.push_back( newEdge );
             }
             else
             {
-                mRecordArray.push_back( newRecord );
-                mEdgeArray.push_back( newEdge );
+                mRecordBuffer.push_back( newRecord );
+                mEdgeBuffer.push_back( newEdge );
 
                 if( MakeBezier( false ) == false )
                 {

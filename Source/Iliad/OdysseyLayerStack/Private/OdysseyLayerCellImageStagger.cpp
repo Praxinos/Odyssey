@@ -86,6 +86,29 @@ UOdysseyLayerCellImageStagger::GetReferenceFrameAtFrame(int iFrameIndex) const
         }
         break;
 
+        case EOdysseyLayerCellImageStaggerBehaviour::Random:
+        {
+            int loopFrameIndex = ( Reach <= 0 ) ? iFrameIndex : ( iFrameIndex % Reach );
+
+            // We use the cell start frame as a base for the seed.
+            // In the future we can decide for another user-chosen value
+            srand( cellStartFrame + loopFrameIndex );
+
+            int layerStartFrame = GetLayer()->GetFrameRange().GetLowerBoundValue();
+            int startFrame = ( Reach <= 0 ) ? layerStartFrame
+                                            : FMath::Max(layerStartFrame, int(cellStartFrame - Reach));
+
+            if (cellStartFrame - startFrame <= 0)
+                return INDEX_NONE;
+
+            int pseudoRand = rand();
+            int randomReach = ( Reach <= 0 ) ? ( cellStartFrame ? ( pseudoRand % cellStartFrame ) : 0 )
+                                             : pseudoRand % Reach;
+
+            frame = startFrame + randomReach;
+        }
+        break;
+
         default:
             break;;
     }

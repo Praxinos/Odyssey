@@ -191,9 +191,9 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::Draw( BLContext* iBLContext )
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
     // PathTracer data
     FOdysseyVectorPathTracer& pathTracer = mPathDrawingTool->GetPathTracer();
-    std::vector<FTracerRecord>& recordArray = pathTracer.GetRecordArray();
-    std::vector<FTracerPoint>& pointArray = pathTracer.GetPointArray();
-    std::vector<FTracerEdge>& edgeArray = pathTracer.GetEdgeArray();
+    std::vector<FTracerRecord>& recordBuffer = pathTracer.GetRecordBuffer();
+    std::vector<FTracerPoint>& pointBuffer = pathTracer.GetPointBuffer();
+    std::vector<FTracerEdge>& edgeBuffer = pathTracer.GetEdgeBuffer();
     FOdysseyVectorPath* path = pathTracer.GetPath();
     FTracerBezier& bestBezier = pathTracer.GetBestBezier();
     FTracerBezier& rawBezier = pathTracer.GetRawBezier();
@@ -210,25 +210,25 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::Draw( BLContext* iBLContext )
         iBLContext->setStrokeStartCap(BL_STROKE_CAP_BUTT);
         iBLContext->setStrokeEndCap(BL_STROKE_CAP_BUTT);
 
-        for( int n = 1; n < pointArray.size(); n++)
+        for( int n = 1; n < pointBuffer.size(); n++)
         {
             int i = n - 1;
 
-            iBLContext->setStrokeWidth( pointArray[i].radius * 2.0f );
-            iBLContext->strokeLine( pointArray[i].coords.x, pointArray[i].coords.y
-                                  , pointArray[n].coords.x, pointArray[n].coords.y );
+            iBLContext->setStrokeWidth( pointBuffer[i].radius * 2.0f );
+            iBLContext->strokeLine( pointBuffer[i].coords.x, pointBuffer[i].coords.y
+                                  , pointBuffer[n].coords.x, pointBuffer[n].coords.y );
         }
 
         iBLContext->setFillStyle( BLRgba32( pathcolor.R, pathcolor.G, pathcolor.B, pathcolor.A ) );
 
-        for( int i = 0; i < edgeArray.size(); i++ )
+        for( int i = 0; i < edgeBuffer.size(); i++ )
         {
             int p = i - 1;
             int n = i + 1;
-            FTracerEdge* prevEdge = ( p >= 0               ) ? prevEdge = &edgeArray[p] : nullptr;
-            FTracerEdge* nextEdge = ( n < edgeArray.size() ) ? nextEdge = &edgeArray[n] : nullptr;
+            FTracerEdge* prevEdge = ( p >= 0               ) ? prevEdge = &edgeBuffer[p] : nullptr;
+            FTracerEdge* nextEdge = ( n < edgeBuffer.size() ) ? nextEdge = &edgeBuffer[n] : nullptr;
 
-            DrawEdge( iBLContext, prevEdge, &edgeArray[i], nextEdge );
+            DrawEdge( iBLContext, prevEdge, &edgeBuffer[i], nextEdge );
         }
 
         iBLContext->restore();

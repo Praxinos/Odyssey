@@ -590,6 +590,18 @@ FOdysseyVectorSegment::GetFractionPointBuffer()
     return mFractionPointBuffer;
 }
 
+void
+FOdysseyVectorSegment::SetPressureProfile( const std::vector<double>& iPressureProfile )
+{
+    mPressureProfile = iPressureProfile;
+}
+
+void
+FOdysseyVectorSegment::ClearPressureProfile()
+{
+    mPressureProfile.clear();
+}
+
 /*
 void
 FOdysseyVectorSegment::BuildExplorationPairs( std::vector<FExplorationPair>& iExplorationPairsArray )

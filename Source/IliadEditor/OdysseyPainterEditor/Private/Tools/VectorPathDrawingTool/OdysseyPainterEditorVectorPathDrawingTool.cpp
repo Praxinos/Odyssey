@@ -398,14 +398,14 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorGro
         // mandatory for stitching vertices
         mPathDrawingHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
 
-        if( mPathTracer.GetPointArray().size() == 1 )
+        if( mPathTracer.GetPointBuffer().size() == 1 )
         {
             BLMatrix2D& pathInverseWorldMatrix = path->GetInverseWorldMatrix();
             BLPoint localVector = pathInverseWorldMatrix.mapVector( pointRadius * 0.7071f
                                                                   , pointRadius * 0.7071f );
             double localRadius = ::ULIS::FVec2D( localVector.x, localVector.y ).Distance();
 
-            mPathTracer.GetPointArray()[0].radius = pointRadius;
+            mPathTracer.GetPointBuffer()[0].radius = pointRadius;
             mStitchedVertex->SetRadius( localRadius );
         }
 

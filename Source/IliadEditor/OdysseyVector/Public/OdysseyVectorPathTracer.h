@@ -110,9 +110,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathTracer
         bool MakeBezier( bool iForce );
         bool TestBezier( ::ULIS::FVec2D iBezier[4] );
         void Init( FOdysseyVectorGroupPaint* iScene );
-        std::vector<FTracerPoint>& GetPointArray();
-        std::vector<FTracerRecord>& GetRecordArray();
-        std::vector<FTracerEdge>& GetEdgeArray();
+        std::vector<FTracerPoint>& GetPointBuffer();
+        std::vector<FTracerRecord>& GetRecordBuffer();
+        std::vector<FTracerEdge>& GetEdgeBuffer();
         FOdysseyVectorSegment* Flush( FOdysseyVectorVertex* iPreviousVertex
                                     , FOdysseyVectorVertex* iEndVertex );
         FOdysseyVectorSegment* CommitSegment( FOdysseyVectorVertex* iPreviousVertex
@@ -137,9 +137,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathTracer
         uint32 mPointID;
         double mSampleDistance;
         double mTracingWidth;
-        std::vector<FTracerPoint> mPointArray;
-        std::vector<FTracerRecord> mRecordArray;
-        std::vector<FTracerEdge> mEdgeArray;
+        std::vector<FTracerPoint> mPointBuffer;
+        std::vector<FTracerRecord> mRecordBuffer;
+        std::vector<FTracerEdge> mEdgeBuffer;
         ::ULIS::FVec2D mSmoothVector;
         FTracerBezier mCandidateBezier;
         FTracerBezier mBestBezier;
