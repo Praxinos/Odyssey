@@ -325,7 +325,7 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "OdysseyLayerStack.LayerVector16", new IMAGE_BRUSH( "OdysseyLayerStack/layer_vector_16", mIcon16x16 ) );
     Set( "OdysseyLayerStack.Visible16", new IMAGE_BRUSH_SVG( "OdysseyLayerStack/visible", mIcon16x16 ) );
     Set( "OdysseyLayerStack.Locked16", new IMAGE_BRUSH_SVG( "OdysseyLayerStack/locked", mIcon16x16 ) );
-    Set( "OdysseyLayerStack.OptionsHeader16", new IMAGE_BRUSH( "OdysseyLayerStack/options_header_16", mIcon16x16 ) );
+    Set( "OdysseyLayerStack.OptionsHeader16", new IMAGE_BRUSH_SVG( "OdysseyLayerStack/options_header", mIcon16x16 ) );
 
     Set("LayerStack.DisplayOptionsToggle", FCheckBoxStyle()
         .SetPadding(FMargin(8)) //8 because left+right = 16 and top+bottom = 16
@@ -504,19 +504,19 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set("Animation.Timeline.LeftBoundHandle", new IMAGE_BRUSH_SVG("OdysseyAnimation/Timeline/Header/AnimationLeftBoundHandle", mIcon16x16));
     Set("Animation.Timeline.RightBoundHandle", new IMAGE_BRUSH_SVG("OdysseyAnimation/Timeline/Header/AnimationRightBoundHandle", mIcon16x16));
 
-    Set("Animation.Lighttable16", new IMAGE_BRUSH("OdysseyAnimation/Lighttable_16", mIcon16x16));
+    Set("Animation.Lighttable16", new IMAGE_BRUSH_SVG("OdysseyAnimation/lighttable-off", mIcon16x16));
 
     Set("Animation.LighttableToggle", FCheckBoxStyle()
         //.Padding(FMargin(0,0,0,0))
         .SetPadding(FMargin(8)) //8 because left+right = 16 and top+bottom = 16
         .SetForegroundColor(FLinearColor(0, 0, 0, 0))
         .SetCheckBoxType(ESlateCheckBoxType::ToggleButton)
-        .SetUncheckedImage(IMAGE_BRUSH("OdysseyAnimation/LighttableToggle_OFF_16", mIcon16x16))
-        .SetUncheckedHoveredImage(IMAGE_BRUSH("OdysseyAnimation/LighttableToggle_OFF_16", mIcon16x16))
-        .SetUncheckedPressedImage(IMAGE_BRUSH("OdysseyAnimation/LighttableToggle_OFF_16", mIcon16x16))
-        .SetCheckedImage(IMAGE_BRUSH("OdysseyAnimation/LighttableToggle_ON_16", mIcon16x16))
-        .SetCheckedHoveredImage(IMAGE_BRUSH("OdysseyAnimation/LighttableToggle_ON_16", mIcon16x16))
-        .SetCheckedPressedImage(IMAGE_BRUSH("OdysseyAnimation/LighttableToggle_ON_16", mIcon16x16))
+        .SetUncheckedImage(IMAGE_BRUSH_SVG("OdysseyAnimation/lighttable-off", mIcon16x16))
+        .SetUncheckedHoveredImage(IMAGE_BRUSH_SVG("OdysseyAnimation/lighttable-off", mIcon16x16))
+        .SetUncheckedPressedImage(IMAGE_BRUSH_SVG("OdysseyAnimation/lighttable-off", mIcon16x16))
+        .SetCheckedImage(IMAGE_BRUSH_SVG("OdysseyAnimation/lighttable-on", mIcon16x16))
+        .SetCheckedHoveredImage(IMAGE_BRUSH_SVG("OdysseyAnimation/lighttable-on", mIcon16x16))
+        .SetCheckedPressedImage(IMAGE_BRUSH_SVG("OdysseyAnimation/lighttable-on", mIcon16x16))
     );
 
     Set("Animation.AlphaLockedToggle", FCheckBoxStyle()

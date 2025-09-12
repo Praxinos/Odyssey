@@ -86,9 +86,6 @@ FEposSequenceEditorStyle::InitSequencer()
 
     Set( "Settings", new IMAGE_BRUSH_SVG( "epos-settings", Icon20x20 ) );
     Set( "Settings.Small", new IMAGE_BRUSH_SVG( "epos-settings", Icon20x20 ) );
-
-    Set( "Help", new IMAGE_BRUSH_SVG( "epos-help", Icon20x20 ) );
-    Set( "Help.Small", new IMAGE_BRUSH_SVG( "epos-help", Icon20x20 ) );
 }
 
 void
