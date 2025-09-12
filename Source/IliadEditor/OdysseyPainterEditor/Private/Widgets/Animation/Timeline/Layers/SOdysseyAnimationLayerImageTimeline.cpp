@@ -26,6 +26,7 @@
 #include "Widgets/Colors/SColorBlock.h"
 #include "Widgets/Layout/SEnableBox.h"
 #include "Widgets/Tab/SOdysseyPainterEditorVectorMassModifierView.h"
+#include "Widgets/SOdysseyEvents.h"
 #include "OdysseyVectorGroupPaint.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
@@ -65,18 +66,36 @@ SOdysseyAnimationLayerImageTimeline::GenerateWidgetForRow( const FName& iRow, co
 {
     TSharedPtr<SWidget> widget = SOdysseyLayerRowBase::GenerateWidgetForRow( iRow, iColumn );
 
+    TSharedRef<SOdysseyEvents> eventWidget = SNew(SOdysseyEvents)
+        .OnMouseButtonDown(this, &SOdysseyAnimationLayerImageTimeline::OnSubRowMouseButtonDown, iRow)
+        .OnMouseMove(this, &SOdysseyAnimationLayerImageTimeline::OnSubRowMouseMove, iRow)
+        .OnMouseButtonUp(this, &SOdysseyAnimationLayerImageTimeline::OnSubRowMouseButtonUp, iRow)
+        .OnDragDetected(this, &SOdysseyAnimationLayerImageTimeline::OnSubRowDragDetected, iRow)
+        .OnDragEnter(this, &SOdysseyAnimationLayerImageTimeline::OnSubRowDragEnter, iRow)
+        .OnDragLeave(this, &SOdysseyAnimationLayerImageTimeline::OnSubRowDragLeave, iRow)
+        .OnDragOver(this, &SOdysseyAnimationLayerImageTimeline::OnSubRowDragOver, iRow)
+        .OnDrop(this, &SOdysseyAnimationLayerImageTimeline::OnSubRowDrop, iRow)
+        [
+            SNew(SOdysseyAnimationTimelineScrollBox)
+            .TimelinePosition(mTimelinePosition)
+            + SOdysseyAnimationTimelineScrollBox::Slot()
+            [
+                widget.ToSharedRef()
+            ]
+        ];
+
+    if (mEventWidgets.Contains(iRow))
+        mEventWidgets[iRow] = eventWidget;
+    else
+        mEventWidgets.Add(iRow, eventWidget);
+
     widget = SNew(SOverlay)
         + SOverlay::Slot()
         [
             SNew(SEnableBox)
             .IsEnabled(this, &SOdysseyAnimationLayerImageTimeline::IsRowEnabled, iRow)
             [
-                SNew(SOdysseyAnimationTimelineScrollBox)
-                .TimelinePosition(mTimelinePosition)
-                + SOdysseyAnimationTimelineScrollBox::Slot()
-                [
-                    widget.ToSharedRef()
-                ]
+                eventWidget
             ]
         ]
         + SOverlay::Slot()
@@ -210,13 +229,23 @@ SOdysseyAnimationLayerImageTimeline::GenerateOutOfPegsRowTimelineWidget()
 }
 
 FReply
-SOdysseyAnimationLayerImageTimeline::OnMouseButtonDown(const FGeometry& iGeometry, const FPointerEvent& iEvent)
+SOdysseyAnimationLayerImageTimeline::OnSubRowMouseButtonDown( const FGeometry& iGeometry, const FPointerEvent& iEvent, FName iRow )
+{
+    if (iRow == "Main")
+    {
+        return OnMainSubRowMouseButtonDown( iGeometry, iEvent );
+    }
+    return FReply::Unhandled();
+}
+
+FReply
+SOdysseyAnimationLayerImageTimeline::OnMainSubRowMouseButtonDown( const FGeometry& iGeometry, const FPointerEvent& iEvent )
 {
     FOdysseyAnimationTimelineTool::FMouseEventParams params =
     {
         iGeometry,
         iEvent,
-        SharedThis(this),
+        mEventWidgets["Main"].ToSharedRef(),
         FOdysseyAnimationTimelineTool::EMouseEventOrigin::Layer,
         mLayer
     };
@@ -244,14 +273,25 @@ SOdysseyAnimationLayerImageTimeline::OnMouseButtonDown(const FGeometry& iGeometr
         if (selectedCells.IsEmpty() || !selectedCells.Contains(cell))
             mLayer->GetLayerStack()->GetCellSelection()->SetSelectedCells({cell});
 
-        return FReply::Handled().CaptureMouse( AsShared() );
+        return FReply::Handled().CaptureMouse( mEventWidgets["Main"].ToSharedRef() );
     }
 
     return FReply::Unhandled();
 }
 
 FReply
-SOdysseyAnimationLayerImageTimeline::OnMouseMove(const FGeometry& iGeometry, const FPointerEvent& iEvent)
+SOdysseyAnimationLayerImageTimeline::OnSubRowMouseMove(const FGeometry& iGeometry, const FPointerEvent& iEvent, FName iRow)
+{
+    if (iRow == "Main")
+    {
+        return OnMainSubRowMouseMove( iGeometry, iEvent );
+    }
+    return FReply::Unhandled();
+}
+
+
+FReply
+SOdysseyAnimationLayerImageTimeline::OnMainSubRowMouseMove(const FGeometry& iGeometry, const FPointerEvent& iEvent)
 {
     if (!mTool)
         return FReply::Unhandled();
@@ -260,7 +300,7 @@ SOdysseyAnimationLayerImageTimeline::OnMouseMove(const FGeometry& iGeometry, con
     {
         iGeometry,
         iEvent,
-        SharedThis(this),
+        mEventWidgets["Main"].ToSharedRef(),
         FOdysseyAnimationTimelineTool::EMouseEventOrigin::Layer,
         mLayer
     };
@@ -268,7 +308,17 @@ SOdysseyAnimationLayerImageTimeline::OnMouseMove(const FGeometry& iGeometry, con
 }
 
 FReply
-SOdysseyAnimationLayerImageTimeline::OnDragDetected(const FGeometry& iGeometry, const FPointerEvent& iEvent)
+SOdysseyAnimationLayerImageTimeline::OnSubRowDragDetected(const FGeometry& iGeometry, const FPointerEvent& iEvent, FName iRow)
+{
+    if (iRow == "Main")
+    {
+        return OnMainSubRowDragDetected( iGeometry, iEvent );
+    }
+    return FReply::Unhandled();
+}
+
+FReply
+SOdysseyAnimationLayerImageTimeline::OnMainSubRowDragDetected(const FGeometry& iGeometry, const FPointerEvent& iEvent)
 {
     if (!mTool)
         return FReply::Unhandled();
@@ -277,7 +327,7 @@ SOdysseyAnimationLayerImageTimeline::OnDragDetected(const FGeometry& iGeometry, 
     {
         iGeometry,
         iEvent,
-        SharedThis(this),
+        mEventWidgets["Main"].ToSharedRef(),
         FOdysseyAnimationTimelineTool::EMouseEventOrigin::Layer,
         mLayer
     };
@@ -285,7 +335,17 @@ SOdysseyAnimationLayerImageTimeline::OnDragDetected(const FGeometry& iGeometry, 
 }
 
 FReply
-SOdysseyAnimationLayerImageTimeline::OnMouseButtonUp(const FGeometry& iGeometry, const FPointerEvent& iEvent)
+SOdysseyAnimationLayerImageTimeline::OnSubRowMouseButtonUp(const FGeometry& iGeometry, const FPointerEvent& iEvent, FName iRow)
+{
+    if (iRow == "Main")
+    {
+        return OnMainSubRowMouseButtonUp( iGeometry, iEvent );
+    }
+    return FReply::Unhandled();
+}
+
+FReply
+SOdysseyAnimationLayerImageTimeline::OnMainSubRowMouseButtonUp(const FGeometry& iGeometry, const FPointerEvent& iEvent)
 {
     if (!mTool)
         return FReply::Unhandled();
@@ -294,7 +354,7 @@ SOdysseyAnimationLayerImageTimeline::OnMouseButtonUp(const FGeometry& iGeometry,
     {
         iGeometry,
         iEvent,
-        SharedThis(this),
+        mEventWidgets["Main"].ToSharedRef(),
         FOdysseyAnimationTimelineTool::EMouseEventOrigin::Layer,
         mLayer
     };
@@ -314,7 +374,7 @@ SOdysseyAnimationLayerImageTimeline::OnMouseButtonUp(const FGeometry& iGeometry,
 
         TSharedRef<SWidget> menuContents = menuBuilder.MakeWidget();
         FWidgetPath widgetPath = iEvent.GetEventPath() != nullptr ? *iEvent.GetEventPath() : FWidgetPath();
-        FSlateApplication::Get().PushMenu(AsShared(), widgetPath, menuContents, iEvent.GetScreenSpacePosition(), FPopupTransitionEffect(FPopupTransitionEffect::ContextMenu));
+        FSlateApplication::Get().PushMenu(mEventWidgets["Main"].ToSharedRef(), widgetPath, menuContents, iEvent.GetScreenSpacePosition(), FPopupTransitionEffect(FPopupTransitionEffect::ContextMenu));
         return FReply::Handled();
     }
     return FReply::Unhandled().ReleaseMouseCapture();
@@ -410,7 +470,14 @@ SOdysseyAnimationLayerImageTimeline::OnPaint(const FPaintArgs& Args, const FGeom
 }
 
 void
-SOdysseyAnimationLayerImageTimeline::OnDragEnter(const FGeometry& iGeometry, const FDragDropEvent& iEvent)
+SOdysseyAnimationLayerImageTimeline::OnSubRowDragEnter(const FGeometry& iGeometry, const FDragDropEvent& iEvent, FName iRow)
+{
+    if (iRow == "Main")
+        OnMainSubRowDragEnter( iGeometry, iEvent );
+}
+
+void
+SOdysseyAnimationLayerImageTimeline::OnMainSubRowDragEnter(const FGeometry& iGeometry, const FDragDropEvent& iEvent)
 {
     TSharedPtr<FOdysseyAnimationCellsDragDropOperation> operation = iEvent.GetOperationAs<FOdysseyAnimationCellsDragDropOperation>();
     if (!operation)
@@ -423,7 +490,14 @@ SOdysseyAnimationLayerImageTimeline::OnDragEnter(const FGeometry& iGeometry, con
 }
 
 void
-SOdysseyAnimationLayerImageTimeline::OnDragLeave(const FDragDropEvent& iEvent)
+SOdysseyAnimationLayerImageTimeline::OnSubRowDragLeave(const FDragDropEvent& iEvent, FName iRow)
+{
+    if (iRow == "Main")
+        OnMainSubRowDragLeave( iEvent );
+}
+
+void
+SOdysseyAnimationLayerImageTimeline::OnMainSubRowDragLeave(const FDragDropEvent& iEvent)
 {
     TSharedPtr<FOdysseyAnimationCellsDragDropOperation> operation = iEvent.GetOperationAs<FOdysseyAnimationCellsDragDropOperation>();
     if (!operation)
@@ -436,7 +510,17 @@ SOdysseyAnimationLayerImageTimeline::OnDragLeave(const FDragDropEvent& iEvent)
 }
 
 FReply
-SOdysseyAnimationLayerImageTimeline::OnDragOver(const FGeometry& iGeometry, const FDragDropEvent& iEvent)
+SOdysseyAnimationLayerImageTimeline::OnSubRowDragOver(const FGeometry& iGeometry, const FDragDropEvent& iEvent, FName iRow)
+{
+    if (iRow == "Main")
+    {
+        return OnMainSubRowDragOver( iGeometry, iEvent );
+    }
+    return FReply::Unhandled();
+}
+
+FReply
+SOdysseyAnimationLayerImageTimeline::OnMainSubRowDragOver(const FGeometry& iGeometry, const FDragDropEvent& iEvent)
 {
     TSharedPtr<FOdysseyAnimationCellsDragDropOperation> operation = iEvent.GetOperationAs<FOdysseyAnimationCellsDragDropOperation>();
     if (!operation)
@@ -492,7 +576,17 @@ SOdysseyAnimationLayerImageTimeline::OnDragOver(const FGeometry& iGeometry, cons
 }
 
 FReply
-SOdysseyAnimationLayerImageTimeline::OnDrop(const FGeometry& iGeometry, const FDragDropEvent& iEvent)
+SOdysseyAnimationLayerImageTimeline::OnSubRowDrop(const FGeometry& iGeometry, const FDragDropEvent& iEvent, FName iRow)
+{
+    if (iRow == "Main")
+    {
+        return OnMainSubRowDrop( iGeometry, iEvent );
+    }
+    return FReply::Unhandled();
+}
+
+FReply
+SOdysseyAnimationLayerImageTimeline::OnMainSubRowDrop(const FGeometry& iGeometry, const FDragDropEvent& iEvent)
 {
     TSharedPtr<FOdysseyAnimationCellsDragDropOperation> operation = iEvent.GetOperationAs<FOdysseyAnimationCellsDragDropOperation>();
     if (!operation)

@@ -115,4 +115,10 @@ SOdysseyAnimationTimelineTreeView::OnCursorQuery( const FGeometry& MyGeometry, c
     return FCursorReply::Cursor( EMouseCursor::Default );
 }
 
+TSharedPtr<SWidget>
+SOdysseyAnimationTimelineTreeView::OnContextMenuOpening()
+{
+    return nullptr;
+}
+
 #undef LOCTEXT_NAMESPACE

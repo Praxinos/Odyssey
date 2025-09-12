@@ -17,6 +17,7 @@ class FOdysseyAnimationTimelineTool;
 class FOdysseyPainterEditor;
 class SOdysseyPainterEditorVectorMassModifierView;
 class FOdysseyVectorGroupPaint;
+class SOdysseyEvents;
 
 /**
  * Implements a layer row widget
@@ -64,17 +65,30 @@ protected:
 
 public:
     virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;
-    virtual FReply OnMouseButtonDown(const FGeometry& iGeometry, const FPointerEvent& iEvent) override;
-    virtual FReply OnMouseMove(const FGeometry& iGeometry, const FPointerEvent& iEvent) override;
-    virtual FReply OnMouseButtonUp(const FGeometry& iGeometry, const FPointerEvent& iEvent) override;
-    virtual FReply OnDragDetected(const FGeometry& iGeometry, const FPointerEvent& iEvent) override;
-    virtual void OnDragEnter(const FGeometry& iGeometry, const FDragDropEvent& iEvent) override;
-    virtual void OnDragLeave(const FDragDropEvent& iEvent) override;
-    virtual FReply OnDragOver(const FGeometry& iGeometry, const FDragDropEvent& iEvent) override;
-    virtual FReply OnDrop(const FGeometry& iGeometry, const FDragDropEvent& iEvent) override;
 
     virtual FReply OnKeyDown( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent ) override;
     virtual FReply OnKeyUp( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent ) override;
+
+private:
+    FReply OnSubRowMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent, FName iRow);
+    FReply OnSubRowMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent, FName iRow);
+    FReply OnSubRowMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent, FName iRow);
+
+    FReply OnSubRowDragDetected(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent, FName iRow);
+    void OnSubRowDragEnter(const FGeometry& MyGeometry, const FDragDropEvent& DragDropEvent, FName iRow);
+    void OnSubRowDragLeave(const FDragDropEvent& DragDropEvent, FName iRow);
+    FReply OnSubRowDragOver(const FGeometry& MyGeometry, const FDragDropEvent& DragDropEvent, FName iRow);
+    FReply OnSubRowDrop(const FGeometry& MyGeometry, const FDragDropEvent& DragDropEvent, FName iRow);
+
+private:
+    FReply OnMainSubRowMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent);
+    FReply OnMainSubRowMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent);
+    FReply OnMainSubRowMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent);
+    FReply OnMainSubRowDragDetected(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent);
+    void OnMainSubRowDragEnter(const FGeometry& MyGeometry, const FDragDropEvent& DragDropEvent);
+    void OnMainSubRowDragLeave(const FDragDropEvent& DragDropEvent);
+    FReply OnMainSubRowDragOver(const FGeometry& MyGeometry, const FDragDropEvent& DragDropEvent);
+    FReply OnMainSubRowDrop(const FGeometry& MyGeometry, const FDragDropEvent& DragDropEvent);
 
 public:
     UOdysseyAnimationLayer* GetLayer() const;
@@ -125,6 +139,8 @@ protected:
     SOdysseyAnimationTimelineOutOfPegsKey::FOnActivateOutOfPegs mOnActivateOutOfPegs;
     FSimpleDelegate mOnInactivateOutOfPegs;
     SOdysseyAnimationTimelineOutOfPegsKey::FOnIsOutOfPegsChecked mOnIsOutOfPegsChecked;
+
+    TMap<FName, TSharedPtr<SOdysseyEvents>> mEventWidgets;
 
     TSharedPtr<FOdysseyAnimationTimelineTool> mTool;
 

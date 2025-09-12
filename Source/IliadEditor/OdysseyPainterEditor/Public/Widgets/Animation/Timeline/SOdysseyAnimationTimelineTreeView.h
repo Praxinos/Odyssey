@@ -52,6 +52,7 @@ private:
     //Events
     TSharedRef<ITableRow> OnGenerateRow(UOdysseyLayer* iLayer, const TSharedRef<STableViewBase>& iOwnerTable);
     void OnGetChildren(UOdysseyLayer* iParent, TArray<UOdysseyLayer*>& oChildren) const;
+    virtual TSharedPtr<SWidget> OnContextMenuOpening() override;
 
 private:
     TAttribute<int> mCurrentFrame;

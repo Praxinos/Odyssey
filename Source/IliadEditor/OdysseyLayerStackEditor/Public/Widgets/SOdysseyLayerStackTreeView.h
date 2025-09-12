@@ -95,7 +95,7 @@ protected:
      *
      * @return TSharedPtr<SWidget>
      */
-    TSharedPtr<SWidget> OnContextMenuOpening();
+    virtual TSharedPtr<SWidget> OnContextMenuOpening();
 
     /**
      * @brief Called when the treeview asks for the children of a specific item
