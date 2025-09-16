@@ -275,6 +275,94 @@ void UShotSequence::LocateBoundObjects( const FGuid& ObjectId, UObject* Context,
     ActorsBindingReferences.ResolveBinding( ObjectId, Context, OutObjects );
 }
 
+
+FGuid UShotSequence::CreatePossessable( UObject* ObjectToPossess ) //override
+{
+    return FindOrAddBinding( ObjectToPossess );
+}
+//FGuid UShotSequence::CreateSpawnable( UObject* ObjectToSpawn ) //override
+//{
+//}
+
+// From LevelSequence.cpp
+FGuid UShotSequence::FindOrAddBinding( UObject* InObject )
+{
+    using namespace UE::MovieScene;
+
+    UObject* PlaybackContext = InObject ? InObject->GetWorld() : nullptr;
+    if( !InObject || !PlaybackContext )
+    {
+        return FGuid();
+    }
+
+    AActor* Actor = Cast<AActor>( InObject );
+    //if( Actor && Actor->ActorHasTag( "SequencerActor" ) )
+    //{
+    //    TOptional<FMovieSceneSpawnableAnnotation> Annotation = FMovieSceneSpawnableAnnotation::Find( Actor );
+    //    if( Annotation.IsSet() && Annotation->OriginatingSequence == this )
+    //    {
+    //        return Annotation->ObjectBindingID;
+    //    }
+
+    //    // If this actor is a spawnable and is not in the same originating sequence, it's likely a spawnable that will be possessed.
+    //    // SetSpawnableObjectBindingID will need to be called on that possessable.
+    //}
+
+    UObject* ParentObject = GetParentObject( InObject );
+    FGuid    ParentGuid = ParentObject ? FindOrAddBinding( ParentObject ) : FGuid();
+
+    if( ParentObject && !ParentGuid.IsValid() )
+    {
+        //UE_LOG( LogLevelSequence, Error, TEXT( "Unable to possess object '%s' because it's parent could not be bound." ), *InObject->GetName() );
+        return FGuid();
+    }
+
+    // Perform a potentially slow lookup of every possessable binding in the sequence to see if we already have this
+    {
+        FSharedPlaybackStateCreateParams CreateParams;
+        CreateParams.PlaybackContext = PlaybackContext;
+        TSharedRef<FSharedPlaybackState> TransientPlaybackState = MakeShared<FSharedPlaybackState>( *this, CreateParams );
+
+        FMovieSceneEvaluationState State;
+        TransientPlaybackState->AddCapabilityRaw( &State );
+        State.AssignSequence( MovieSceneSequenceID::Root, *this, TransientPlaybackState );
+
+        FGuid ExistingID = State.FindObjectId( *InObject, MovieSceneSequenceID::Root, TransientPlaybackState );
+        if( ExistingID.IsValid() )
+        {
+            return ExistingID;
+        }
+    }
+
+    // We have to possess this object
+    if( !CanPossessObject( *InObject, PlaybackContext ) )
+    {
+        return FGuid();
+    }
+
+    FString NewName = Actor ? Actor->GetActorLabel() : InObject->GetName();
+
+    const FGuid NewGuid = MovieScene->AddPossessable( NewName, InObject->GetClass() );
+
+    // Attempt to use the parent as a context if necessary
+    UObject* BindingContext = ParentObject && AreParentContextsSignificant() ? ParentObject : PlaybackContext;
+
+    // Set up parent/child guids for possessables within spawnables
+    if( ParentGuid.IsValid() )
+    {
+        FMovieScenePossessable* ChildPossessable = MovieScene->FindPossessable( NewGuid );
+        if( ensure( ChildPossessable ) )
+        {
+            ChildPossessable->SetParent( ParentGuid, MovieScene );
+        }
+    }
+
+    BindPossessableObject( NewGuid, *InObject, BindingContext );
+
+    return NewGuid;
+}
+
+
 UMovieScene* UShotSequence::GetMovieScene() const
 {
     return MovieScene;

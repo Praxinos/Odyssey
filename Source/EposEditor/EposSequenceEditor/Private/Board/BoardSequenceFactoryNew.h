@@ -11,7 +11,7 @@
 /**
  * Implements a factory for UBoardSequence objects.
  */
-UCLASS( hidecategories = Object )
+UCLASS( BlueprintType, hidecategories = Object )
 class UBoardSequenceFactoryNew : public UFactory
 {
     GENERATED_UCLASS_BODY()

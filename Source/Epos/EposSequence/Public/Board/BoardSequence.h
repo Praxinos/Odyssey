@@ -60,6 +60,13 @@ public:
     virtual void SectionResized( UMovieSceneSection* iSection ) override;
     virtual void SectionAddedOrRemoved( UMovieSceneSection* iSection ) override;
 
+protected:
+
+    virtual FGuid CreatePossessable( UObject* ObjectToPossess ) override;
+    //virtual FGuid CreateSpawnable( UObject* ObjectToSpawn ) override;
+
+    FGuid FindOrAddBinding( UObject* ObjectToPossess );
+
 public:
     UPROPERTY()
     UMovieScene* MovieScene;
