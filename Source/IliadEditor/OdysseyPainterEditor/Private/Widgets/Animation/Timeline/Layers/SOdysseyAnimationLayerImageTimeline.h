@@ -100,6 +100,8 @@ protected:
     void MassModifierWindowClosed( const TSharedRef<SWindow>& iWindow
                                  , TSharedRef<SOdysseyPainterEditorVectorMassModifierView> objectView );
     void MassModifier();
+    void ReverseSelectedCells();
+    bool CanReverseSelectedCells();
 
 protected:
     //TArray<TSharedPtr<FOdysseyAnimationCell>> GetSelectedCells() const;

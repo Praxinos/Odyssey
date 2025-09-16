@@ -555,6 +555,39 @@ UOdysseyLayer::UpdateCellsIndexInLayer()
     }
 }
 
+bool
+UOdysseyLayer::ReverseCells( const TArray<UOdysseyLayerCell*>& iCellsToReverse )
+{
+    if( iCellsToReverse.Num() >= 2 )
+    {
+        TArray<UOdysseyLayerCell*> sortedSelectedCells = iCellsToReverse;
+
+        Modify();
+
+        sortedSelectedCells.Sort( []( const UOdysseyLayerCell& iA, const UOdysseyLayerCell& iB ) -> bool
+        {
+            return iA.GetIndexInLayer() < iB.GetIndexInLayer();
+        } );
+
+        for( int i = 0; i < sortedSelectedCells.Num(); i++ )
+        {
+            int n = sortedSelectedCells.Num() - i - 1;
+            int originalIndex = sortedSelectedCells[i]->GetIndexInLayer();
+            int reversedIndex = sortedSelectedCells[n]->GetIndexInLayer();
+
+            Cells[originalIndex] = sortedSelectedCells[n];
+            Cells[reversedIndex] = sortedSelectedCells[i];
+        }
+
+        UpdateCellsIndexInLayer();
+        CellsChanged();
+
+        return true; // success
+    }
+
+    return false; // failure
+}
+
 UOdysseyLayerCell*
 UOdysseyLayer::CopyCell(UOdysseyLayerCell* Cell, int Index)
 {

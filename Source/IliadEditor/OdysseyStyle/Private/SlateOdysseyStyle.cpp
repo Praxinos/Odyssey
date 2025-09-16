@@ -580,6 +580,7 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set("Animation.CellImageStagger.BehaviourColor", FLinearColor(1.f, 1.f, 1.f, 1.f));
     Set("Animation.CellImageStagger.Behaviour.Loop", new IMAGE_BRUSH_SVG("OdysseyAnimation/CellImageStaggerBehaviourLoop", mIcon16x16));
     Set("Animation.CellImageStagger.Behaviour.PingPong", new IMAGE_BRUSH_SVG("OdysseyAnimation/CellImageStaggerBehaviourPingPong", mIcon16x16));
+    Set("Animation.CellImageStagger.Behaviour.Random", new IMAGE_BRUSH_SVG("OdysseyAnimation/CellImageStaggerBehaviourRandom", mIcon16x16));
 
     Set("Animation.CellMark.Symbol.Triangle", new IMAGE_BRUSH_SVG("OdysseyAnimation/cell-mark-symbol-triangle", mIcon16x16));
     Set("Animation.CellMark.Symbol.Diamond", new IMAGE_BRUSH_SVG("OdysseyAnimation/cell-mark-symbol-diamond", mIcon16x16));

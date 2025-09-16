@@ -281,6 +281,7 @@ public:
     void InvalidateCellsFrameRanges();
     const TArray<FInt32Range>& GetCellsFrameRanges() const;
     void UpdateCellsIndexInLayer();
+    bool ReverseCells( const TArray<UOdysseyLayerCell*>& iCellsToReverse );
 
 public:
 #if WITH_EDITOR
