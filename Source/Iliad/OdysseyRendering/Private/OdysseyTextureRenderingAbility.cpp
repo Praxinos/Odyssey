@@ -95,6 +95,10 @@ IOdysseyTextureRenderingAbility::Render_GameThread(UTextureRenderTarget2D* iRend
 
             FRDGTextureRef destinationTexture = iRenderTarget->GetRenderTargetResource()->GetRenderTargetTexture( graphBuilder );
 
+            //ensure the render target is cleared
+            //this ensures that, if there is nothing to render the result will be a fully transparent texture
+            AddClearRenderTargetPass(graphBuilder, destinationTexture, FLinearColor::Transparent, iDstRect);
+
             renderFunction(
                 graphBuilder,
                 featureLevel,

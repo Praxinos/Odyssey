@@ -584,7 +584,7 @@ FOdysseyViewportDrawingEditorExtension::SyncSequencerWithAnimationPlayer()
         params.PreBehaviour = section->GetPreBehaviour();
         params.PostBehaviour = section->GetPostBehaviour();
         TRange<FFrameTime> range(cursorFrame, cursorFrame);
-        FFrameTime evaluatedFrame = FOdysseyAnimationTimelineTemplate::GetEvaluatedFrame(animation, range, params, tickResolution);
+        FFrameTime evaluatedFrame = FOdysseyAnimationTimelineTemplate::GetEvaluatedFrame(animation, range, EPlayDirection::Forwards, params, tickResolution);
         //evaluatedFrame = player->GetFrameInAnimationBounds(evaluatedFrame);
 
         if (evaluatedFrame.GetFrame() == animationCursorFrame.GetFrame())

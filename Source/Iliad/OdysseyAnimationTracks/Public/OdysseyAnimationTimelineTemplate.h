@@ -66,8 +66,8 @@ public:
     virtual void TearDown(FPersistentEvaluationData& PersistentData, IMovieScenePlayer& Player) const override;
 
 public:
-    static FFrameNumber GetEvaluatedFrame(UOdysseyAnimation* iComponent, const TRange<FFrameTime>& iRange, const FOdysseyAnimationTimelineSectionParams& iParams, const FFrameRate& iFrameRate);
-    static void EvaluateImmediate(UOdysseyAnimationComponent* iComponent, const TRange<FFrameTime>& iRange, const FOdysseyAnimationTimelineSectionParams& iParams, const FFrameRate& iFrameRate );
+    static FFrameNumber GetEvaluatedFrame(UOdysseyAnimation* iComponent, const TRange<FFrameTime>& iRange, EPlayDirection iDirection, const FOdysseyAnimationTimelineSectionParams& iParams, const FFrameRate& iFrameRate);
+    static void EvaluateImmediate(UOdysseyAnimationComponent* iComponent, const TRange<FFrameTime>& iRange, EPlayDirection iDirection, const FOdysseyAnimationTimelineSectionParams& iParams, const FFrameRate& iFrameRate );
 
 private:
     UPROPERTY()

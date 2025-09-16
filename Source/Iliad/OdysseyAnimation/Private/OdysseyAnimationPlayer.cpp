@@ -132,50 +132,6 @@ UOdysseyAnimationPlayer::SeekToFrame(FFrameTime iFrame)
     {
         mDisplayedFrame = displayedFrame;
         displayedFrameChanged = true;
-    }
-
-    if (Status == EOdysseyAnimationPlayerStatus::Stopped && mCurrentFrame != displayedFrame)
-    {
-        mCurrentFrame = displayedFrame;
-        currentFrameChanged = true;
-    }
-
-    if (cursorFrameChanged)
-        mOnCursorFrameChanged.Broadcast();
-
-    if (displayedFrameChanged)
-        mOnDisplayedFrameChanged.Broadcast();
-
-    if (currentFrameChanged)
-        mOnCurrentFrameChanged.Broadcast();
-}
-
-void
-UOdysseyAnimationPlayer::SeekToFrameImmediate(FFrameTime iFrame)
-{
-    bool cursorFrameChanged = false;
-    bool displayedFrameChanged = false;
-    bool currentFrameChanged = false;
-
-    if (mCursorFrame != iFrame)
-    {
-        mCursorFrame = iFrame;
-        cursorFrameChanged = true;
-    }
-
-
-#if WITH_EDITOR
-    FFrameTime displayedFrame = mCursorFrame;
-    if (!mIgnorePrePostBehaviour)
-        displayedFrame = ApplyPrePostBehaviour(mCursorFrame);
-#else
-    FFrameTime displayedFrame = ApplyPrePostBehaviour(mCursorFrame);
-#endif
-
-    if (mDisplayedFrame != displayedFrame)
-    {
-        mDisplayedFrame = displayedFrame;
-        displayedFrameChanged = true;
         UpdateTexture();
     }
 
@@ -424,9 +380,15 @@ UOdysseyAnimationPlayer::Tick(float iDeltaTime)
             }
         }
 
-        SeekToFrame(newFrame);
+
         if (bStop)
+        {
             Stop();
+        }
+        else
+        {
+            SeekToFrame(newFrame);
+        }
     }
 
     //If the frame has changed, render the whole frame
@@ -446,18 +408,16 @@ UOdysseyAnimationPlayer::UpdateTexture()
     TArray<FGuid> imageRenderingComposition = Animation->GetRenderingComposition(renderType, frame.GetFrame().Value);
     if ( imageRenderingComposition != mImageRenderingComposition )
     {
-        //PATCH:
-        if ( mPatchDelayFirstRender < 1 )
-        {
-            mPatchDelayFirstRender++;
-            return;
-        }
-
         mImageRenderingComposition = imageRenderingComposition;
 
         RenderTarget->WaitForPendingInitOrStreaming();
         Animation->Render_GameThread(RenderTarget, frame.GetFrame(), renderType );
         RenderTarget->UpdateResourceImmediate(false); //Update MipMaps
+
+        /* FlushRenderingCommands();
+        FRenderCommandFence fence;
+        fence.BeginFence();
+        fence.Wait(); */
 
         mInvalidTileMap.Clear();
         return;
@@ -473,6 +433,11 @@ UOdysseyAnimationPlayer::UpdateTexture()
             Animation->Render_GameThread(RenderTarget, frame.GetFrame(), renderType, rect);
         }
         RenderTarget->UpdateResourceImmediate(false); //Update MipMaps
+
+        /* FlushRenderingCommands();
+        FRenderCommandFence fence;
+        fence.BeginFence();
+        fence.Wait(); */
 
         mInvalidTileMap.Clear();
     }
@@ -522,6 +487,8 @@ UOdysseyAnimationPlayer::AnimationChanged()
     RenderTarget->UpdateResourceImmediate(false);
 
     mInvalidTileMap = FOdysseyInvalidTileMap(64, Animation->GetWidth(), Animation->GetHeight());
+
+    UpdateTexture();
 
     IOdysseyRenderingAbility::OnRenderingChangedDelegate().AddUObject(this, &UOdysseyAnimationPlayer::OnRenderingChanged);
 }
@@ -675,6 +642,8 @@ UOdysseyAnimationPlayer::PostLoad()
 
     mInvalidTileMap = FOdysseyInvalidTileMap(64, Animation->GetWidth(), Animation->GetHeight());
 
+    UpdateTexture();
+
     IOdysseyRenderingAbility::OnRenderingChangedDelegate().AddUObject(this, &UOdysseyAnimationPlayer::OnRenderingChanged);
 }
 
@@ -702,6 +671,8 @@ UOdysseyAnimationPlayer::PostDuplicate(EDuplicateMode::Type iDuplicateMode)
     RenderTarget->UpdateResourceImmediate(false);
 
     mInvalidTileMap = FOdysseyInvalidTileMap(64, Animation->GetWidth(), Animation->GetHeight());
+
+    UpdateTexture();
 
     IOdysseyRenderingAbility::OnRenderingChangedDelegate().AddUObject(this, &UOdysseyAnimationPlayer::OnRenderingChanged);
     mImageRenderingComposition.Empty();

@@ -6,6 +6,7 @@
 #include "OdysseyAnimation.h"
 #include "OdysseyAnimationPlayer.h"
 #include "OdysseyAnimationComponent.h"
+#include "Evaluation/MovieScenePlayback.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(OdysseyAnimationTimelineTemplate)
 
@@ -17,8 +18,9 @@
 struct FOdysseyAnimationTimelineSectionExecutionToken
     : IMovieSceneExecutionToken
 {
-    FOdysseyAnimationTimelineSectionExecutionToken(const TRange<FFrameTime>& iRange, const FOdysseyAnimationTimelineSectionParams& iParams, const FFrameRate& iFrameRate)
+    FOdysseyAnimationTimelineSectionExecutionToken(const TRange<FFrameTime>& iRange, EPlayDirection iDirection, const FOdysseyAnimationTimelineSectionParams& iParams, const FFrameRate& iFrameRate)
         : mRange(iRange)
+        , mDirection(iDirection)
         , mParams(iParams)
         , mFrameRate(iFrameRate)
     { }
@@ -41,13 +43,13 @@ struct FOdysseyAnimationTimelineSectionExecutionToken
             }
         }
 
-        Execute(component, mRange, mParams, mFrameRate);
+        Execute(component, mRange, mDirection, mParams, mFrameRate);
     }
 
 #if PLATFORM_WINDOWS
     __declspec(noinline)
 #endif
-    static void Execute(UOdysseyAnimationComponent* iComponent, const TRange<FFrameTime>& iRange, const FOdysseyAnimationTimelineSectionParams& iParams, const FFrameRate& iFrameRate)
+    static void Execute(UOdysseyAnimationComponent* iComponent, const TRange<FFrameTime>& iRange, EPlayDirection iDirection, const FOdysseyAnimationTimelineSectionParams& iParams, const FFrameRate& iFrameRate)
     {
         if (!iComponent)
             return;
@@ -65,12 +67,13 @@ struct FOdysseyAnimationTimelineSectionExecutionToken
         player->SetPreBehaviour(iParams.PreBehaviour);
         player->SetPostBehaviour(iParams.PostBehaviour);
 
-        FFrameNumber frame = FOdysseyAnimationTimelineTemplate::GetEvaluatedFrame(animation, iRange, iParams, iFrameRate);
-        player->SeekToFrameImmediate(frame.Value);
+        FFrameNumber frame = FOdysseyAnimationTimelineTemplate::GetEvaluatedFrame(animation, iRange, iDirection, iParams, iFrameRate);
+        player->SeekToFrame(frame.Value);
     }
 
 private:
     TRange<FFrameTime> mRange;
+    EPlayDirection mDirection;
     FOdysseyAnimationTimelineSectionParams mParams;
     FFrameRate mFrameRate;
 };
@@ -89,7 +92,7 @@ FOdysseyAnimationTimelineTemplate::FOdysseyAnimationTimelineTemplate(const UOdys
  *****************************************************************************/
 
 FFrameNumber
-FOdysseyAnimationTimelineTemplate::GetEvaluatedFrame(UOdysseyAnimation* iAnimation, const TRange<FFrameTime>& iRange, const FOdysseyAnimationTimelineSectionParams& iParams, const FFrameRate& iFrameRate)
+FOdysseyAnimationTimelineTemplate::GetEvaluatedFrame(UOdysseyAnimation* iAnimation, const TRange<FFrameTime>& iRange, EPlayDirection iDirection, const FOdysseyAnimationTimelineSectionParams& iParams, const FFrameRate& iFrameRate)
 {
     FFrameRate animationFrameRate(iAnimation->GetFramesPerSecond() * 100, 100);
 
@@ -99,18 +102,11 @@ FOdysseyAnimationTimelineTemplate::GetEvaluatedFrame(UOdysseyAnimation* iAnimati
     FFrameTime startFrame = FFrameRate::TransformTime(rangeStartFrame, iFrameRate, animationFrameRate);
     FFrameTime endFrame = FFrameRate::TransformTime(rangeEndFrame, iFrameRate, animationFrameRate);
 
-    FFrameNumber frame = startFrame.GetFrame();
-    if (startFrame.GetFrame() == endFrame.GetFrame())
+    FFrameNumber frame;
+    switch (iDirection)
     {
-        //Do Nothing
-    }
-    else if (endFrame.GetFrame() == startFrame.GetFrame() + 1)
-    {
-        frame = endFrame.GetSubFrame() > 1.f - startFrame.GetSubFrame() ? endFrame.GetFrame() : startFrame.GetFrame();
-    }
-    else if (endFrame.GetFrame() > startFrame.GetFrame() + 1)
-    {
-        frame = startFrame.GetSubFrame() < UE_SMALL_NUMBER ? startFrame.GetFrame() : startFrame.GetFrame() + 1;
+        case EPlayDirection::Forwards: frame = endFrame.FrameNumber; break;
+        case EPlayDirection::Backwards: frame = startFrame.FrameNumber; break;
     }
     return frame;
 }
@@ -135,13 +131,13 @@ FOdysseyAnimationTimelineTemplate::Evaluate(const FMovieSceneEvaluationOperand& 
     params.PreBehaviour = mSection->GetPreBehaviour();
     params.PostBehaviour = mSection->GetPostBehaviour();
 
-    ExecutionTokens.Add(FOdysseyAnimationTimelineSectionExecutionToken(Context.GetRange(), params, Context.GetFrameRate()));
+    ExecutionTokens.Add(FOdysseyAnimationTimelineSectionExecutionToken(Context.GetRange(), Context.GetDirection(), params, Context.GetFrameRate()));
 }
 
 void
-FOdysseyAnimationTimelineTemplate::EvaluateImmediate(UOdysseyAnimationComponent* iComponent, const TRange<FFrameTime>& iRange, const FOdysseyAnimationTimelineSectionParams& iParams, const FFrameRate& iFrameRate )
+FOdysseyAnimationTimelineTemplate::EvaluateImmediate(UOdysseyAnimationComponent* iComponent, const TRange<FFrameTime>& iRange, EPlayDirection iDirection, const FOdysseyAnimationTimelineSectionParams& iParams, const FFrameRate& iFrameRate )
 {
-    FOdysseyAnimationTimelineSectionExecutionToken::Execute(iComponent, iRange, iParams, iFrameRate);
+    FOdysseyAnimationTimelineSectionExecutionToken::Execute(iComponent, iRange, iDirection, iParams, iFrameRate);
 }
 
 UScriptStruct&

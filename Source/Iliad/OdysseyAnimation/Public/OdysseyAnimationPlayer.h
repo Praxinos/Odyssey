@@ -83,7 +83,6 @@ public:
 
     UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationPlayer")
     void SeekToFrame(FFrameTime iFrame);
-    void SeekToFrameImmediate(FFrameTime iFrame);
 
     UFUNCTION(BlueprintPure, Category = "Odyssey|AnimationPlayer")
     UTextureRenderTarget2D* GetRenderTarget();
@@ -187,7 +186,7 @@ public:
     UPROPERTY()
     float PlayRate = 1.0f; //1.0f means 100% of the animation framepersecond
 
-    UPROPERTY()
+    UPROPERTY(Transient)
     TObjectPtr<UTextureRenderTarget2D> RenderTarget;
 
     int mPatchDelayFirstRender = 0;
