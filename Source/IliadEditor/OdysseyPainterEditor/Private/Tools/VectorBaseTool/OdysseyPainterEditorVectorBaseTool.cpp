@@ -792,6 +792,8 @@ void UOdysseyPainterEditorVectorBaseTool::BindShortcuts(TSharedPtr<FUICommandLis
         FExecuteAction::CreateUObject( this, &UOdysseyPainterEditorVectorBaseTool::Paste )
     );
 
+    // shortcuts available in object mode menu
+
     iCommandList->MapAction(
         FOdysseyPainterEditorCommands::Get().VectorResetView,
         FExecuteAction::CreateUObject(this, &UOdysseyPainterEditorVectorBaseTool::ActionResetView)
@@ -823,11 +825,6 @@ void UOdysseyPainterEditorVectorBaseTool::BindShortcuts(TSharedPtr<FUICommandLis
     );
 
     iCommandList->MapAction(
-        FOdysseyPainterEditorCommands::Get().VectorDeleteSelection,
-        FExecuteAction::CreateUObject(this, &UOdysseyPainterEditorVectorBaseTool::ActionDelete)
-    );
-
-    iCommandList->MapAction(
         FOdysseyPainterEditorCommands::Get().VectorFlipHorizontal,
         FExecuteAction::CreateUObject(this, &UOdysseyPainterEditorVectorBaseTool::ActionFlipHorizontal)
     );
@@ -846,6 +843,8 @@ void UOdysseyPainterEditorVectorBaseTool::BindShortcuts(TSharedPtr<FUICommandLis
         FOdysseyPainterEditorCommands::Get().VectorApplyTransformations,
         FExecuteAction::CreateUObject(this, &UOdysseyPainterEditorVectorBaseTool::ActionApplyTransformations)
     );
+
+    // shortcuts available in vertex mode menu
 
     iCommandList->MapAction(
         FOdysseyPainterEditorCommands::Get().VectorSubdivideSegments,

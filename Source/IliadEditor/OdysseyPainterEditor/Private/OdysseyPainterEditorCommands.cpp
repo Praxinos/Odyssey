@@ -164,7 +164,6 @@ FOdysseyPainterEditorCommands::RegisterCommands()
 
     // Vector Menu commands
     // All modes
-    UI_BUNDLE_COMMAND( VectorDeleteSelection, ToolsShortcuts, "Delete Selection", "Delete selection", EUserInterfaceActionType::Button, FInputChord(EKeys::Delete));
     // Object Mode
     UI_BUNDLE_COMMAND( VectorResetView, ToolsShortcuts, "Reset View", "Reset the current view", EUserInterfaceActionType::Button, FInputChord() );
     UI_BUNDLE_COMMAND( VectorMakePaintGroup, ToolsShortcuts, "Make Paint Group", "Make a paint group from selection", EUserInterfaceActionType::Button, FInputChord() );

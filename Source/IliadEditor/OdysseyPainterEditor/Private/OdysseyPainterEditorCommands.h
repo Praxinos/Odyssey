@@ -348,12 +348,11 @@ public:
     TSharedPtr<FUICommandInfo> VectorUngroup;
     TSharedPtr<FUICommandInfo> VectorBringForward;
     TSharedPtr<FUICommandInfo> VectorSendBackward;
-    TSharedPtr<FUICommandInfo> VectorDeleteSelection;
     TSharedPtr<FUICommandInfo> VectorFlipHorizontal;
     TSharedPtr<FUICommandInfo> VectorFlipVertical;
     TSharedPtr<FUICommandInfo> VectorClearColoring;
     TSharedPtr<FUICommandInfo> VectorApplyTransformations;
-
+    // Vector Tools Actions in vertex Mode
     TSharedPtr<FUICommandInfo> VectorSubdivideSegments;
     TSharedPtr<FUICommandInfo> VectorAlignPointSelection;
     TSharedPtr<FUICommandInfo> VectorUnalignPointSelection;
