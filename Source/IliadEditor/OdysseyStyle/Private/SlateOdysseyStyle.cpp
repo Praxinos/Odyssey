@@ -274,6 +274,7 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
 
     //PainterEditor - ToolsTab
     Set( "PainterEditor.ToolsTab.Transform64", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/transform_tool", mIcon64x64 ) );
+    Set( "PainterEditor.ToolsTab.Transform16", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/transform_tool", mIcon16x16 ) );
     Set( "PainterEditor.ToolsTab.ScenePan64", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/hand", mIcon64x64 ) );
     Set( "PainterEditor.ToolsTab.PathCut64", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/path_cut_tool", mIcon64x64 ) );
     Set( "PainterEditor.ToolsTab.PathPush64", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/path_push_tool", mIcon64x64 ) );

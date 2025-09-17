@@ -126,9 +126,11 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::GenerateWidgetForColumn ( const FNa
     {
         const FCheckBoxStyle* isVisibleToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("VectorSceneTreeView.IsVisibleToggle");
 
-        return SNew(SBorder)
-            .Padding(4, 0)
-               .BorderBackgroundColor( FSlateColor( FLinearColor( 0, 0, 0, 0 ) ) )
+        return SNew(SHorizontalBox)
+               + SHorizontalBox::Slot()
+               .AutoWidth()
+               .HAlign( EHorizontalAlignment::HAlign_Center )
+               .VAlign( EVerticalAlignment::VAlign_Center )
                [
                    SNew( SCheckBox )
                   .IsEnabled( mItem.Get()->IsSensitive() )
@@ -142,7 +144,7 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::GenerateWidgetForColumn ( const FNa
     if( InColumnName == VSTV_OBJECT_HUDCOLOR )
     {
         return SNew(SBorder)
-               .Padding(0, 1)
+               .Padding(0, 2)
                .BorderBackgroundColor( FSlateColor( FLinearColor( 0, 0, 0, 0 ) ) )
                [
                    SNew( SColorBlock )
@@ -201,25 +203,27 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::GenerateWidgetForColumn ( const FNa
         mTextBlockWidget.Get()->SetOverflowPolicy( TOptional<ETextOverflowPolicy>(ETextOverflowPolicy::Ellipsis) );
 
         return SNew(SHorizontalBox)
-                    .IsEnabled( mItem.Get()->IsSensitive() )
-                    +SHorizontalBox::Slot()
-                    .AutoWidth()
-                    .Padding(6.f, 0.f, 0.f, 0.f)
-                    [
-                        SNew( SExpanderArrow, SharedThis(this) ).IndentAmount(12)
-                    ]
-                    + SHorizontalBox::Slot()
-                    .AutoWidth()
-                    [
-                        SNew( SImage )
-                        .Image( objectIcon )
-                    ]
-                    + SHorizontalBox::Slot()
-                    .Padding( 2, 0 )
-                    .AutoWidth()
-                    [
-                        mTextBlockWidget.ToSharedRef()
-                    ];
+               .IsEnabled( mItem.Get()->IsSensitive() )
+               +SHorizontalBox::Slot()
+               .AutoWidth()
+               .Padding(6.f, 0.f, 0.f, 0.f)
+               [
+                   SNew( SExpanderArrow, SharedThis(this) ).IndentAmount(12)
+               ]
+               + SHorizontalBox::Slot()
+               .AutoWidth()
+               .VAlign( EVerticalAlignment::VAlign_Center )
+               .HAlign( EHorizontalAlignment::HAlign_Center )
+               [
+                   SNew( SImage )
+                   .Image( objectIcon )
+               ]
+               + SHorizontalBox::Slot()
+               .Padding( 2, 0 )
+               .AutoWidth()
+               [
+                   mTextBlockWidget.ToSharedRef()
+               ];
     }
 
     if( InColumnName == VSTV_OBJECT_TRANSFORMED )
@@ -230,9 +234,9 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::GenerateWidgetForColumn ( const FNa
         //inbetweenerTagIcon = FOdysseyStyle::GetBrush( "PainterEditor.VectorSceneTreeView.InbetweenerTag16" );
         transformedIcon = FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Transform16" );
 
-        return SNew(SBorder)
-               .ContentScale( 0.8 )
-               .BorderBackgroundColor( FSlateColor( FLinearColor( 0, 0, 0, 0 ) ) )
+        return SNew(SHorizontalBox)
+               + SHorizontalBox::Slot()
+               .AutoWidth()
                .VAlign( EVerticalAlignment::VAlign_Center )
                .HAlign( EHorizontalAlignment::HAlign_Center )
                [
@@ -262,7 +266,8 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::GenerateWidgetForColumn ( const FNa
             {
                 //Cells widgets
                 tagBox->AddSlot()
-                .AutoWidth()
+                .HAlign( EHorizontalAlignment::HAlign_Center )
+                .VAlign( EVerticalAlignment::VAlign_Center )
                 [
                     SNew( SImage )
                     .Image( inbetweenerTagIcon )
