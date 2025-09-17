@@ -94,6 +94,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathEditTool : public 
         virtual FText GetTooltip() const override;
 
         virtual void ExtendToolbar( FToolBarBuilder& iBuilder ) override;
+        virtual void BindShortcuts( TSharedPtr<FUICommandList> iCommandList ) override;
 
     protected:
         //OdysseyPainterVectorBaseEditorTool overrides
@@ -130,15 +131,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathEditTool : public 
         uint64 PickObjects( FOdysseyVectorGroupPaint* iScene
                           , double iX
                           , double iY );
-/*
-        void GroupPaintDeletePoint( FOdysseyVectorGroupPaint* iGroupPaint
-                                  , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
-                                  , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray
-                                  , std::vector<FOdysseyVectorPath*>& iRemovedPathArray
-                                  , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray
-                                  , double iSelectionRadius
-                                  , const FOdysseyPoint& iPointInTexture );
-*/
+
         void DragSegmentHandle( FOdysseyVectorHandleSegment *iHandle
                               , double iWorldX
                               , double iWorldY
@@ -168,6 +161,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathEditTool : public 
         void SetEditionMode( eVectorPathEditEditionMode inValue );
         TSharedRef<SWidget> CreateModifierSegmentControl();
         const FSlateBrush* GetBackgroundColor( eVectorPathEditEditionMode iMode ) const;
+        void ActionSubdivideSegments();
 
     private:
         FOdysseyPainterEditorVectorPathEditToolHUD *mPathEditHUD;

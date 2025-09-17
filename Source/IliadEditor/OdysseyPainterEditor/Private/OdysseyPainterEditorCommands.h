@@ -341,6 +341,25 @@ public:
     TSharedPtr<FUICommandInfo> ActivateVectorSelectionTool;
     TSharedPtr<FUICommandInfo> ActivateVectorTransformTool;
 
+    // Vector Tools Actions in Object Mode
+    TSharedPtr<FUICommandInfo> VectorResetView;
+    TSharedPtr<FUICommandInfo> VectorMakePaintGroup;
+    TSharedPtr<FUICommandInfo> VectorGroup;
+    TSharedPtr<FUICommandInfo> VectorUngroup;
+    TSharedPtr<FUICommandInfo> VectorBringForward;
+    TSharedPtr<FUICommandInfo> VectorSendBackward;
+    TSharedPtr<FUICommandInfo> VectorDeleteSelection;
+    TSharedPtr<FUICommandInfo> VectorFlipHorizontal;
+    TSharedPtr<FUICommandInfo> VectorFlipVertical;
+    TSharedPtr<FUICommandInfo> VectorClearColoring;
+    TSharedPtr<FUICommandInfo> VectorApplyTransformations;
+
+    TSharedPtr<FUICommandInfo> VectorSubdivideSegments;
+    TSharedPtr<FUICommandInfo> VectorAlignPointSelection;
+    TSharedPtr<FUICommandInfo> VectorUnalignPointSelection;
+    TSharedPtr<FUICommandInfo> VectorLockPointSelection;
+    TSharedPtr<FUICommandInfo> VectorUnlockPointSelection;
+
     //Layers Actions
     /** Action for creating a new layer */
     TSharedPtr<FUICommandInfo> CreateNewLayer;

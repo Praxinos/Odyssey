@@ -142,14 +142,32 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         virtual void OnVectorLayerUpdate( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags
                                         , uint32 iUpdateFlags );
 
+
+
     private:
         void Copy();
         void Paste();
         void SelectAll();
-        void Delete();
         void IncreaseContourWidth();
         void DecreaseContourWidth();
         void Cut();
+
+        void ActionDelete();
+        void ActionResetView();
+        void ActionMakePaintGroup();
+        void ActionGroup();
+        void ActionUngroup();
+        void ActionBringForward();
+        void ActionSendBackward();
+        void ActionFlipHorizontal();
+        void ActionFlipVertical();
+        void ActionClearColoring();
+        void ActionApplyTransformations();
+        void ActionSubdivideSegments();
+        void ActionAlignPointSelection();
+        void ActionUnalignPointSelection();
+        void ActionLockPointSelection();
+        void ActionUnlockPointSelection();
 
     protected:
         // returns the closest segment among those picked.

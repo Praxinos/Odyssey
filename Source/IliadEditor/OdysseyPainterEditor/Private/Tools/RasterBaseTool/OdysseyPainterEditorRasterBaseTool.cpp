@@ -320,7 +320,6 @@ void UOdysseyPainterEditorRasterBaseTool::BindShortcuts(TSharedPtr<FUICommandLis
         FExecuteAction::CreateUObject(this, &UOdysseyPainterEditorRasterBaseTool::SelectAll)
     );
 
-
     iCommandList->MapAction(
         FOdysseyPainterEditorCommands::Get().ClearCurrentSelection,
         FExecuteAction::CreateUObject(this, &UOdysseyPainterEditorRasterBaseTool::ClearCurrentSelection)

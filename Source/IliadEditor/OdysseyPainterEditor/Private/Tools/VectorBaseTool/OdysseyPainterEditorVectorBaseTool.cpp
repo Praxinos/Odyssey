@@ -3,11 +3,13 @@
 
 #include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.h"
 #include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseToolHUD.h"
+#include "Tools/VectorPathEditTool/OdysseyPainterEditorVectorPathEditTool.h"
 //#include "Widgets/Tools/SOdysseyPainterEditorVectorEditionMode.h"
 #include "Widgets/Layout/SWrapBox.h"
 #include "Framework/Commands/GenericCommands.h"
 #include "OdysseyMediaVector.h"
 #include "OdysseyPainterEditor.h"
+#include "OdysseyPainterEditorCommands.h"
 #include "OdysseyPainterEditorViewportTab.h"
 #include "Palette/OdysseyPaletteEntryColor.h"
 #include "Palette/OdysseyPalette.h"
@@ -409,14 +411,14 @@ bool
 UOdysseyPainterEditorVectorBaseTool::OnKeyDownVector( FOdysseyVectorGroupPaint* iScene
                                                     , const FKey& iKey )
 {
-    if( iKey == EKeys::Delete )
-    {
-        Delete();
-        // force redraw
-        iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
+//    if( iKey == EKeys::Delete )
+//    {
+//        ActionDelete();
+//        // force redraw
+//        iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
-        return true;
-    }
+//        return true;
+//    }
 
 //    if( iKey == EKeys::Add )
 //    {
@@ -772,7 +774,7 @@ void UOdysseyPainterEditorVectorBaseTool::BindShortcuts(TSharedPtr<FUICommandLis
 
     iCommandList->MapAction(
         FGenericCommands::Get().Delete,
-        FExecuteAction::CreateUObject( this, &UOdysseyPainterEditorVectorBaseTool::Delete )
+        FExecuteAction::CreateUObject( this, &UOdysseyPainterEditorVectorBaseTool::ActionDelete )
     );
 
     iCommandList->MapAction(
@@ -789,6 +791,178 @@ void UOdysseyPainterEditorVectorBaseTool::BindShortcuts(TSharedPtr<FUICommandLis
         FGenericCommands::Get().Paste,
         FExecuteAction::CreateUObject( this, &UOdysseyPainterEditorVectorBaseTool::Paste )
     );
+
+    iCommandList->MapAction(
+        FOdysseyPainterEditorCommands::Get().VectorResetView,
+        FExecuteAction::CreateUObject(this, &UOdysseyPainterEditorVectorBaseTool::ActionResetView)
+    );
+
+    iCommandList->MapAction(
+        FOdysseyPainterEditorCommands::Get().VectorMakePaintGroup,
+        FExecuteAction::CreateUObject(this, &UOdysseyPainterEditorVectorBaseTool::ActionMakePaintGroup)
+    );
+
+    iCommandList->MapAction(
+        FOdysseyPainterEditorCommands::Get().VectorGroup,
+        FExecuteAction::CreateUObject(this, &UOdysseyPainterEditorVectorBaseTool::ActionGroup)
+    );
+
+    iCommandList->MapAction(
+        FOdysseyPainterEditorCommands::Get().VectorUngroup,
+        FExecuteAction::CreateUObject(this, &UOdysseyPainterEditorVectorBaseTool::ActionUngroup)
+    );
+
+    iCommandList->MapAction(
+        FOdysseyPainterEditorCommands::Get().VectorBringForward,
+        FExecuteAction::CreateUObject(this, &UOdysseyPainterEditorVectorBaseTool::ActionBringForward)
+    );
+
+    iCommandList->MapAction(
+        FOdysseyPainterEditorCommands::Get().VectorSendBackward,
+        FExecuteAction::CreateUObject(this, &UOdysseyPainterEditorVectorBaseTool::ActionSendBackward)
+    );
+
+    iCommandList->MapAction(
+        FOdysseyPainterEditorCommands::Get().VectorDeleteSelection,
+        FExecuteAction::CreateUObject(this, &UOdysseyPainterEditorVectorBaseTool::ActionDelete)
+    );
+
+    iCommandList->MapAction(
+        FOdysseyPainterEditorCommands::Get().VectorFlipHorizontal,
+        FExecuteAction::CreateUObject(this, &UOdysseyPainterEditorVectorBaseTool::ActionFlipHorizontal)
+    );
+
+    iCommandList->MapAction(
+        FOdysseyPainterEditorCommands::Get().VectorFlipVertical,
+        FExecuteAction::CreateUObject(this, &UOdysseyPainterEditorVectorBaseTool::ActionFlipVertical)
+    );
+
+    iCommandList->MapAction(
+        FOdysseyPainterEditorCommands::Get().VectorClearColoring,
+        FExecuteAction::CreateUObject(this, &UOdysseyPainterEditorVectorBaseTool::ActionClearColoring)
+    );
+
+    iCommandList->MapAction(
+        FOdysseyPainterEditorCommands::Get().VectorApplyTransformations,
+        FExecuteAction::CreateUObject(this, &UOdysseyPainterEditorVectorBaseTool::ActionApplyTransformations)
+    );
+
+    iCommandList->MapAction(
+        FOdysseyPainterEditorCommands::Get().VectorSubdivideSegments,
+        FExecuteAction::CreateUObject(this, &UOdysseyPainterEditorVectorBaseTool::ActionSubdivideSegments)
+    );
+
+    iCommandList->MapAction(
+        FOdysseyPainterEditorCommands::Get().VectorAlignPointSelection,
+        FExecuteAction::CreateUObject(this, &UOdysseyPainterEditorVectorBaseTool::ActionAlignPointSelection)
+    );
+
+    iCommandList->MapAction(
+        FOdysseyPainterEditorCommands::Get().VectorUnalignPointSelection,
+        FExecuteAction::CreateUObject(this, &UOdysseyPainterEditorVectorBaseTool::ActionUnalignPointSelection)
+    );
+
+    iCommandList->MapAction(
+        FOdysseyPainterEditorCommands::Get().VectorLockPointSelection,
+        FExecuteAction::CreateUObject(this, &UOdysseyPainterEditorVectorBaseTool::ActionLockPointSelection)
+    );
+
+    iCommandList->MapAction(
+        FOdysseyPainterEditorCommands::Get().VectorUnlockPointSelection,
+        FExecuteAction::CreateUObject(this, &UOdysseyPainterEditorVectorBaseTool::ActionUnlockPointSelection)
+    );
+}
+
+// Actions in object mode
+
+void
+UOdysseyPainterEditorVectorBaseTool::ActionResetView()
+{
+    if( mWorkingCell )
+    {
+        FOdysseyPainterEditor::ResetView( mEditor, mWorkingCell->GetScene() );
+    }
+}
+
+void
+UOdysseyPainterEditorVectorBaseTool::ActionMakePaintGroup()
+{
+    if( mWorkingCell )
+    {
+        FOdysseyPainterEditor::MakePaintGroup( mEditor, mWorkingCell->GetScene() );
+    }
+}
+
+void
+UOdysseyPainterEditorVectorBaseTool::ActionGroup()
+{
+    if( mWorkingCell )
+    {
+        FOdysseyPainterEditor::Group( mEditor, mWorkingCell->GetScene() );
+    }
+}
+
+void
+UOdysseyPainterEditorVectorBaseTool::ActionUngroup()
+{
+    if( mWorkingCell )
+    {
+        FOdysseyPainterEditor::Ungroup( mEditor, mWorkingCell->GetScene() );
+    }
+}
+
+void
+UOdysseyPainterEditorVectorBaseTool::ActionBringForward()
+{
+    if( mWorkingCell )
+    {
+        FOdysseyPainterEditor::BringForward( mEditor, mWorkingCell->GetScene() );
+    }
+}
+
+void
+UOdysseyPainterEditorVectorBaseTool::ActionSendBackward()
+{
+    if( mWorkingCell )
+    {
+        FOdysseyPainterEditor::SendBackward( mEditor, mWorkingCell->GetScene() );
+    }
+}
+
+void
+UOdysseyPainterEditorVectorBaseTool::ActionFlipHorizontal()
+{
+    if( mWorkingCell )
+    {
+        FOdysseyPainterEditor::FlipHorizontal( mEditor, mWorkingCell->GetScene() );
+    }
+}
+
+void
+UOdysseyPainterEditorVectorBaseTool::ActionFlipVertical()
+{
+    if( mWorkingCell )
+    {
+        FOdysseyPainterEditor::FlipVertical( mEditor, mWorkingCell->GetScene() );
+    }
+}
+
+void
+UOdysseyPainterEditorVectorBaseTool::ActionClearColoring()
+{
+    if( mWorkingCell )
+    {
+        FOdysseyPainterEditor::ClearColoring( mEditor, mWorkingCell->GetScene() );
+    }
+}
+
+void
+UOdysseyPainterEditorVectorBaseTool::ActionApplyTransformations()
+{
+    if( mWorkingCell )
+    {
+        FOdysseyPainterEditor::ApplyTransformations( mEditor, mWorkingCell->GetScene() );
+    }
 }
 
 void
@@ -854,11 +1028,11 @@ void
 UOdysseyPainterEditorVectorBaseTool::Cut()
 {
     UOdysseyPainterEditorVectorBaseTool::Copy();
-    UOdysseyPainterEditorVectorBaseTool::Delete();
+    UOdysseyPainterEditorVectorBaseTool::ActionDelete();
 }
 
 void
-UOdysseyPainterEditorVectorBaseTool::Delete()
+UOdysseyPainterEditorVectorBaseTool::ActionDelete()
 {
     if( mWorkingCell )
     {
@@ -870,6 +1044,65 @@ UOdysseyPainterEditorVectorBaseTool::Delete()
         if( GetEditor()->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_VERTEX )
         {
             FOdysseyPainterEditor::DeletePointSelection( GetEditor(), mWorkingCell->GetScene() );
+        }
+    }
+}
+
+// Actions in vertex mode
+
+void
+UOdysseyPainterEditorVectorBaseTool::ActionSubdivideSegments()
+{
+    if( mWorkingCell )
+    {
+        if( GetEditor()->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_VERTEX )
+        {
+            FOdysseyPainterEditor::Subdivide( mEditor, mWorkingCell->GetScene() );
+        }
+    }
+}
+
+void
+UOdysseyPainterEditorVectorBaseTool::ActionAlignPointSelection()
+{
+    if( mWorkingCell )
+    {
+        if( GetEditor()->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_VERTEX )
+        {
+            FOdysseyPainterEditor::AlignPointSelection( mEditor, mWorkingCell->GetScene() );
+        }
+    }
+}
+
+void
+UOdysseyPainterEditorVectorBaseTool::ActionUnalignPointSelection()
+{
+    if( mWorkingCell )
+    {
+        if( GetEditor()->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_VERTEX )
+        {
+            FOdysseyPainterEditor::UnalignPointSelection( mEditor, mWorkingCell->GetScene() );
+        }
+    }
+}
+
+void
+UOdysseyPainterEditorVectorBaseTool::ActionLockPointSelection()
+{
+    if( mWorkingCell )
+    {
+        FOdysseyPainterEditor::LockPointSelection( mEditor, mWorkingCell->GetScene() );
+    }
+}
+
+void
+UOdysseyPainterEditorVectorBaseTool::ActionUnlockPointSelection()
+{
+    if( mWorkingCell )
+    {
+        if( GetEditor()->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_VERTEX )
+        {
+            FOdysseyPainterEditor::UnlockPointSelection( mEditor, mWorkingCell->GetScene() );
         }
     }
 }

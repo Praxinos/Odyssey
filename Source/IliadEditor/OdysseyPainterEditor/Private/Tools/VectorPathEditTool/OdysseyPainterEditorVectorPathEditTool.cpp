@@ -4,6 +4,7 @@
 #include "Tools/VectorPathEditTool/OdysseyPainterEditorVectorPathEditTool.h"
 #include "Tools/VectorPathEditTool/OdysseyPainterEditorVectorPathEditToolHUD.h"
 #include "OdysseyPainterEditor.h"
+#include "OdysseyPainterEditorCommands.h"
 #include "OdysseyMediaVector.h"
 #include "OdysseyVector.h"
 #include "OdysseyVectorLayer.h"
@@ -1211,6 +1212,29 @@ UOdysseyPainterEditorVectorPathEditTool::ExtendToolbar( FToolBarBuilder& iBuilde
     );
 
     iBuilder.EndSection();
+}
+
+void
+UOdysseyPainterEditorVectorPathEditTool::BindShortcuts(TSharedPtr<FUICommandList> iCommandList)
+{
+    UOdysseyPainterEditorVectorBaseTool::BindShortcuts( iCommandList );
+
+    iCommandList->MapAction(
+        FOdysseyPainterEditorCommands::Get().VectorSubdivideSegments,
+        FExecuteAction::CreateUObject(this, &UOdysseyPainterEditorVectorPathEditTool::ActionSubdivideSegments)
+    );
+}
+
+void
+UOdysseyPainterEditorVectorPathEditTool::ActionSubdivideSegments()
+{
+    if( mWorkingCell )
+    {
+        if( GetEditor()->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_OBJECT )
+        {
+            FOdysseyPainterEditor::Subdivide( mEditor, mWorkingCell->GetScene() );
+        }
+    }
 }
 
 FText
