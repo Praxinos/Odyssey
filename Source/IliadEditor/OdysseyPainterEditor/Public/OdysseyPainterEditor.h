@@ -58,6 +58,7 @@ class UOdysseyPainterEditorVectorTransformTool;
 class UOdysseyPainterEditorVectorMatchingTool;
 class UOdysseyPainterEditorVectorChartTool;
 class UOdysseyPainterEditorVectorTrajectoryTool;
+class UOdysseyToolCollection;
 
 class UOdysseyAnimation;
 class UOdysseyAnimationPlayer;
@@ -181,6 +182,12 @@ public:
      * And activates the first activable tool available if needed
      */
     void SanitizeCurrentTool();
+
+    /**
+     * @brief Saves iTool to mRecentTools (if not already in it)
+     * mRecentTools can't be bigger than 10 tools (most ancient tools are discarded if necessary)
+     */
+    void SaveToRecentTools(UOdysseyPainterEditorTool* iTool);
 
     virtual UOdysseyPainterEditorRasterDrawingTool*                  GetRasterDrawingTool() const;
     virtual UOdysseyPainterEditorRasterEraserTool*                   GetRasterEraserTool() const;
@@ -425,6 +432,8 @@ protected:
 
     TMap<UClass*, UOdysseyPainterEditorTool*> mCurrentMainToolPerLayerClass;
 
+    TObjectPtr<UOdysseyToolCollection> mRecentTools;
+
     FName mToolbarMenuName;
 
     //Local editor data, for convenience. Palettes and sets are stored in TextureData and Animation. Colors are stored in vector objects.
@@ -434,6 +443,7 @@ protected:
     TSharedPtr<FOdysseyPainterEditorAnimationFlipSystem> mAnimationFlipSystem;
     TArray<FGuid> mImageRenderingComposition;
     bool mAnimationTimelineIsScrubbing = false;
+
 };
 
 template <class T>

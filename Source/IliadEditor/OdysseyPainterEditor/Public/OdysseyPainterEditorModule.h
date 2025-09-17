@@ -6,6 +6,7 @@
 #include "Modules/ModuleManager.h"
 
 class FOdysseyPainterEditor;
+class IAssetTypeActions;
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorModule
     : public IModuleInterface
@@ -60,7 +61,14 @@ private:
     void RegisterFactoryDelayed();
     void ReorderFactories();
 
+    void RegisterAssetTypeActions();
+    void UnregisterAssetTypeActions();
+
+
 private:
+    /** All created asset type actions. Cached here so that we can unregister them during shutdown. */
+    TSharedPtr<IAssetTypeActions> mOdysseyTypeActions;
+
     FDelegateHandle mExtendLevelEditorLayout;
     TArray<FOdysseyPainterEditor*> mOpenedEditors;
 };

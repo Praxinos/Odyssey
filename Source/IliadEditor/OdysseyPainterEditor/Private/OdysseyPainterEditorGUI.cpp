@@ -21,6 +21,7 @@
 #include "OdysseyPainterEditorRasterSelection.h"
 #include "OdysseyPainterEditorSource.h"
 #include "OdysseyPainterEditorTextureDetailsTab.h"
+#include "OdysseyPainterEditorToolCollectionTab.h"
 #include "OdysseyPainterEditorToolsTab.h"
 #include "OdysseyPainterEditorViewportTab.h"
 #include "OdysseyPainterEditorVectorSceneTreeViewTab.h"
@@ -73,6 +74,7 @@ FOdysseyPainterEditorGUI::CreateTabs()
     TSharedRef<FOdysseyPainterEditorViewportTab> viewportTab = MakeShared<FOdysseyPainterEditorViewportTab>(mEditor);
     TSharedRef<FOdysseyPainterEditorColorSelectorTab> colorSelectorTab = MakeShared<FOdysseyPainterEditorColorSelectorTab>(mEditor);
     TSharedRef<FOdysseyPainterEditorToolsTab> toolsTab = MakeShared<FOdysseyPainterEditorToolsTab>(mEditor);
+    TSharedRef<FOdysseyPainterEditorToolCollectionTab> toolCollectionTab = MakeShared<FOdysseyPainterEditorToolCollectionTab>(mEditor);
     TSharedRef<FOdysseyPainterEditorVectorSceneTreeViewTab> vectorSceneTreeViewTab = MakeShared<FOdysseyPainterEditorVectorSceneTreeViewTab>(mEditor);
     TSharedRef<FOdysseyPainterEditorLayerStackTab> layerStackTab = MakeShared<FOdysseyPainterEditorLayerStackTab>(mEditor);
     TSharedRef<FOdysseyPainterEditorTextureDetailsTab> textureDetailsTab = MakeShared<FOdysseyPainterEditorTextureDetailsTab>(mEditor);
@@ -84,6 +86,7 @@ FOdysseyPainterEditorGUI::CreateTabs()
     //Used for the viewport drawing editor to know which tab to open by default
 
     mEditor->AddTab(toolsTab);
+    mEditor->AddTab(toolCollectionTab);
     mEditor->AddTab(meshSelectorTab);
     mEditor->AddTab(viewportTab);
     mEditor->AddTab(colorSelectorTab);

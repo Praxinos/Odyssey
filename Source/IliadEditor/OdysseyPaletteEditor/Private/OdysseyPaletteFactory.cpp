@@ -7,10 +7,6 @@
 #include "EditorStyleSet.h"
 #include "OdysseyPalette.h"
 
-#include "ULISLoaderModule.h"
-
-#include <ULIS>
-
 UOdysseyPaletteFactory::UOdysseyPaletteFactory( const FObjectInitializer& iObjectInitializer )
     : Super( iObjectInitializer )
 {

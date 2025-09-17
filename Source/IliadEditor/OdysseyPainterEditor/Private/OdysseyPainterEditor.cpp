@@ -72,6 +72,7 @@
 #include "Undo/OdysseyVectorUndoTagInbetweenerMatching.h"
 #include "Undo/OdysseyVectorUndoTagInbetweenerReset.h"
 
+#include "ToolCollection/OdysseyToolCollection.h"
 #include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
 #include "Tools/RasterEraserTool/OdysseyPainterEditorRasterEraserTool.h"
 #include "Tools/RasterSelectionTool/OdysseyPainterEditorRasterSelectionTool.h"
@@ -165,6 +166,7 @@ FOdysseyPainterEditor::FOdysseyPainterEditor(TSharedRef<FBaseToolkit> iToolkit)
     , mVectorMatchingTool(nullptr)
     , mVectorChartTool(nullptr)
     , mOutOfPegsTool(nullptr)
+    , mRecentTools( NewObject<UOdysseyToolCollection>(GetTransientPackage()) )
     , mAnimationFlipSystem(MakeShared<FOdysseyPainterEditorAnimationFlipSystem>(this))
 {
     UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw(this, &FOdysseyPainterEditor::OnCurrentLayerChanged);
@@ -727,6 +729,7 @@ FOdysseyPainterEditor::OnClose()
 
     delete mHUDSystem;
     mHUDSystem = nullptr;
+    mRecentTools = nullptr;
 
     FOdysseyPainterEditorModule& painterEditorModule = FModuleManager::GetModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
     painterEditorModule.RemoveOpenedEditor(this);
@@ -3515,6 +3518,21 @@ FOdysseyPainterEditor::SetCurrentPaletteColorEntry(UOdysseyPaletteEntryColor* iE
             }
         }
     }
+}
+
+void FOdysseyPainterEditor::SaveToRecentTools(UOdysseyPainterEditorTool* iTool)
+{
+    //WARNING, WE HAVE TO DUPLICATE THE TOOL HERE, NOT JUST THE POINTER, ELSE WE'LL HAVE INCONSISTANT DATA FOR THEM AND WE WON'T BE ABLE TO STORE THEM IN A MORE PERMANENT TOOL COLLECTION
+    if( !iTool )
+        return;
+
+    if( mRecentTools->mToolsConfig.Contains( iTool ) )
+        return;
+
+    mRecentTools->mToolsConfig.Add(iTool);
+
+    if( mRecentTools->mToolsConfig.Num() > 10 )
+        mRecentTools->mToolsConfig.RemoveAt(0);
 }
 
 #undef LOCTEXT_NAMESPACE

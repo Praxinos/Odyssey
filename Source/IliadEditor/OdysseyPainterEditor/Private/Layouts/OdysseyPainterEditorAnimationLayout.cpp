@@ -7,6 +7,7 @@
 #include "OdysseyPainterEditorAnimationLighttableTab.h"
 #include "OdysseyPainterEditorAnimationDetailsTab.h"
 #include "OdysseyPainterEditorColorSelectorTab.h"
+#include "OdysseyPainterEditorToolCollectionTab.h"
 #include "OdysseyPainterEditorToolsTab.h"
 #include "OdysseyPainterEditorViewportTab.h"
 #include "OdysseyPainterEditorVectorSceneTreeViewTab.h"
@@ -44,6 +45,15 @@ FOdysseyPainterEditorAnimationLayout::Create()
                             ->SetSizeCoefficient(0.33f)
                             ->AddTab(
                                 FOdysseyPainterEditorToolsTab::StaticId(),
+                                ETabState::OpenedTab
+                            )
+                        )
+                        ->Split(
+                            //Tool collection Stack
+                            FTabManager::NewStack()
+                            ->SetSizeCoefficient(0.33f)
+                            ->AddTab(
+                                FOdysseyPainterEditorToolCollectionTab::StaticId(),
                                 ETabState::OpenedTab
                             )
                         )

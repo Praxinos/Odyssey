@@ -106,6 +106,8 @@ UOdysseyPainterEditorRasterTransformTool::ExtendToolbar( UToolMenu* iToolMenu )
 
 bool UOdysseyPainterEditorRasterTransformTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
+    UOdysseyPainterEditorTool::OnMouseDown(iPointInTexture, iKey);
+
     if( !mTransformAreaHUD )
         return false;
 
