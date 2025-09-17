@@ -43,21 +43,11 @@ FOdysseyPainterEditorCommands::RegisterCommands()
     RegisterTextureCommands();
 
 // Help Shortcuts Category
-    UI_BUNDLE_COMMAND( AboutOdyssey, HelpShortcuts, "About Odyssey", "About Odyssey",                                                                             EUserInterfaceActionType::Button, FInputChord() );
+    UI_BUNDLE_COMMAND( AboutOdyssey, HelpShortcuts, "About Odyssey", "About Odyssey",                                                                       EUserInterfaceActionType::Button, FInputChord() );
     UI_BUNDLE_COMMAND( VisitPraxinosWebsite, HelpShortcuts, "Praxinos Website...", "Praxinos Website...",                                                   EUserInterfaceActionType::Button, FInputChord() );
     UI_BUNDLE_COMMAND( ManualAndReleaseNotes, HelpShortcuts, "Manual and Release Notes ...", "Manual and Release Notes ...",                                EUserInterfaceActionType::Button, FInputChord() );
     UI_BUNDLE_COMMAND( Discord, HelpShortcuts, "Talk with the developpers ...", "Talk with the developpers ...",                                            EUserInterfaceActionType::Button, FInputChord() );
     UI_BUNDLE_COMMAND( SwitchTabletAPI, HelpShortcuts, "Change Tablet API", "Switch between Ink and Wintab on Windows, use NSevent on Mac",                 EUserInterfaceActionType::Button, FInputChord() );
-
-// Uncategorized Yet Shortcuts
-    UI_BUNDLE_COMMAND( ClearCurrentLayer, UncategorizedYetShortcuts, "Clear Current Layer", "Clear current layer",                                                      EUserInterfaceActionType::Button, FInputChord( EKeys::Delete ) );
-    UI_BUNDLE_COMMAND( SelectAll, UncategorizedYetShortcuts, "Select All", "Select All",                                                                                EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::A));
-    UI_BUNDLE_COMMAND( ClearCurrentSelection, UncategorizedYetShortcuts, "Clear Current Selection", "Clear current selection",                                          EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::D) );
-    UI_BUNDLE_COMMAND( CopyCurrentSelection, UncategorizedYetShortcuts, "Copy Current Selection", "Copy current selection",                                             EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::C));
-    UI_BUNDLE_COMMAND( CutCurrentSelection, UncategorizedYetShortcuts, "Cut Current Selection", "Cut current selection",                                                EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::X));
-    UI_BUNDLE_COMMAND( PasteCurrentSelection, UncategorizedYetShortcuts, "Paste Current Selection", "Paste current selection",                                          EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::V));
-    UI_BUNDLE_COMMAND( PasteCurrentSelectionInNewLayer, UncategorizedYetShortcuts, "Paste Current Selection In New Layer", "Paste current selection In New Layer",      EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control | EModifierKey::Shift, EKeys::V));
-    UI_BUNDLE_COMMAND( InvertSelection, UncategorizedYetShortcuts, "Invert Current Selection", "Invert Current Selection",                                              EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::I));
 
 // Viewport Shortcuts Category
     UI_BUNDLE_COMMAND( PanZoomViewport, ViewportShortcuts,  "Pan / Zoom Viewport", "Hold the key to Pan (Left Mouse Button) or Zoom (Right Mouse Button) the viewport",                                        EUserInterfaceActionType::None, FInputChord(EKeys::M));
@@ -174,7 +164,7 @@ FOdysseyPainterEditorCommands::RegisterCommands()
 
     // Vector Menu commands
     // All modes
-    UI_BUNDLE_COMMAND( VectorDeleteSelection, ToolsShortcuts, "Delete Selection", "Delete selection", EUserInterfaceActionType::Button, FInputChord() );
+    UI_BUNDLE_COMMAND( VectorDeleteSelection, ToolsShortcuts, "Delete Selection", "Delete selection", EUserInterfaceActionType::Button, FInputChord(EKeys::Delete));
     // Object Mode
     UI_BUNDLE_COMMAND( VectorResetView, ToolsShortcuts, "Reset View", "Reset the current view", EUserInterfaceActionType::Button, FInputChord() );
     UI_BUNDLE_COMMAND( VectorMakePaintGroup, ToolsShortcuts, "Make Paint Group", "Make a paint group from selection", EUserInterfaceActionType::Button, FInputChord() );
@@ -231,6 +221,17 @@ FOdysseyPainterEditorCommands::RegisterCommands()
 
         SetCurrentLayerBlendMode.Add(commandInfo);
     }
+
+    // Uncategorized Yet Shortcuts. Will be triggered last if no shortcut above has been.
+    UI_BUNDLE_COMMAND(ClearCurrentLayer, UncategorizedYetShortcuts, "Clear Current Layer", "Clear current layer", EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::Delete));
+    UI_BUNDLE_COMMAND(SelectAll, UncategorizedYetShortcuts, "Select All", "Select All", EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::A));
+    UI_BUNDLE_COMMAND(ClearCurrentSelection, UncategorizedYetShortcuts, "Clear Current Selection", "Clear current selection", EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::D));
+    UI_BUNDLE_COMMAND(CopyCurrentSelection, UncategorizedYetShortcuts, "Copy Current Selection", "Copy current selection", EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::C));
+    UI_BUNDLE_COMMAND(CutCurrentSelection, UncategorizedYetShortcuts, "Cut Current Selection", "Cut current selection", EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::X));
+    UI_BUNDLE_COMMAND(PasteCurrentSelection, UncategorizedYetShortcuts, "Paste Current Selection", "Paste current selection", EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::V));
+    UI_BUNDLE_COMMAND(PasteCurrentSelectionInNewLayer, UncategorizedYetShortcuts, "Paste Current Selection In New Layer", "Paste current selection In New Layer", EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control | EModifierKey::Shift, EKeys::V));
+    UI_BUNDLE_COMMAND(InvertSelection, UncategorizedYetShortcuts, "Invert Current Selection", "Invert Current Selection", EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::I));
+
 }
 
 void
