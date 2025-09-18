@@ -4,7 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-
+#include "UObject/AssetRegistryTagsContext.h"
 #include "BaseMediaSource.h"
 #include "OdysseyTextureRenderingAbility.h"
 
@@ -58,6 +58,8 @@ public:
     virtual void PropertyChanged(const FName& iPropertyName);
     virtual void PreSave(FObjectPreSaveContext SaveContext) override;
     virtual void CollectSaveOverrides(FObjectCollectSaveOverridesContext SaveContext) override;
+    virtual void GetAssetRegistryTagMetadata( TMap<FName, FAssetRegistryTagMetadata>& OutMetadata ) const override;
+    virtual void GetAssetRegistryTags( FAssetRegistryTagsContext ioContext ) const override;
 #endif
 
 public:

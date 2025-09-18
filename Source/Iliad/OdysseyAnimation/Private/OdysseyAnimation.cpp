@@ -508,6 +508,40 @@ UOdysseyAnimation::CollectSaveOverrides(FObjectCollectSaveOverridesContext SaveC
 }
 
 void
+UOdysseyAnimation::GetAssetRegistryTags( FAssetRegistryTagsContext ioContext ) const
+{
+    Super::GetAssetRegistryTags( ioContext );
+
+    ioContext.AddTag( { "Image Size", FString::Printf(TEXT("%dx%d"), mWidth, mHeight), FAssetRegistryTag::TT_Alphabetical } );
+
+    // don't display the decimal part if none
+    if( ((int)FramesPerSecond) == FramesPerSecond )
+        ioContext.AddTag( { "Frame Rate", FString::Printf(TEXT("%d fps"), (int)FramesPerSecond), FAssetRegistryTag::TT_Alphabetical } );
+    else
+        ioContext.AddTag( { "Frame Rate", FString::Printf(TEXT("%.2f fps"), FramesPerSecond), FAssetRegistryTag::TT_Alphabetical } );
+}
+
+void
+UOdysseyAnimation::GetAssetRegistryTagMetadata( TMap<FName, FAssetRegistryTagMetadata>& OutMetadata ) const
+{
+    Super::GetAssetRegistryTagMetadata( OutMetadata );
+
+    OutMetadata.Add(
+        "Image Size",
+        FAssetRegistryTagMetadata()
+        .SetDisplayName( NSLOCTEXT( "OdysseyAnimation", "ImageSize_Label", "Image Size" ) )
+        .SetTooltip( NSLOCTEXT( "OdysseyAnimation", "ImageSize_Tooltip", "Image size" ) )
+    );
+
+    OutMetadata.Add(
+        "Frame Rate",
+        FAssetRegistryTagMetadata()
+        .SetDisplayName( NSLOCTEXT( "OdysseyAnimation", "FrameRate_Label", "Frame Rate" ) )
+        .SetTooltip( NSLOCTEXT( "OdysseyAnimation", "FrameRate_Tooltip", "Frame Rate" ) )
+    );
+}
+
+void
 UOdysseyAnimation::PreSave(FObjectPreSaveContext SaveContext)
 {
     Super::PreSave(SaveContext);
