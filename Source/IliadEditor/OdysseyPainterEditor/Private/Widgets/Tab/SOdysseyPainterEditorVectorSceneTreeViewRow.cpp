@@ -144,20 +144,15 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::GenerateWidgetForColumn ( const FNa
     if( InColumnName == VSTV_OBJECT_HUDCOLOR )
     {
         return SNew(SBorder)
-               .Padding(0, 2)
+               .Padding(3, 2)
                .BorderBackgroundColor( FSlateColor( FLinearColor( 0, 0, 0, 0 ) ) )
+               .IsEnabled( mItem->GetVectorObject()->HasBaseClass( FOdysseyVectorGroup::StaticClass() ) )
+               .OnMouseButtonDown( FPointerEventHandler::CreateSP( this, &SOdysseyPainterEditorVectorSceneTreeViewRow::PickColor ) )
                [
                    SNew( SColorBlock )
-                  .IsEnabled( mItem->GetVectorObject()->HasBaseClass( FOdysseyVectorGroup::StaticClass() ) )
-                  .OnMouseButtonDown( FPointerEventHandler::CreateSP( this, &SOdysseyPainterEditorVectorSceneTreeViewRow::PickColor ) )
                   .Color_Lambda( [this]
                                  {
                                      FLinearColor LinearHUDColor = FLinearColor( mItem->GetVectorObject()->GetHUDColor() );
-
-                                     if( mItem->GetVectorObject()->HasBaseClass( FOdysseyVectorGroup::StaticClass() ) == false )
-                                     {
-                                         LinearHUDColor.A *= 0.5f;
-                                     }
 
                                      return LinearHUDColor;
                                  } )

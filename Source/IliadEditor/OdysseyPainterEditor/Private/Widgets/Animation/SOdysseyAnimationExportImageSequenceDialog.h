@@ -19,7 +19,7 @@ enum class EOdysseyAnimationExportImageSequenceSource : uint8
     Animation,
     AllLayers,
     CurrentLayer,
-    //SelectedLayers //TODO:
+    SelectedLayers
 };
 
 UENUM()
@@ -27,6 +27,7 @@ enum class EOdysseyAnimationExportImageSequenceRange : uint8
 {
     AllFrames,
     AllCells,
+    MarkInMarkOut UMETA( DisplayName = "Mark In / Mark Out" ),
     Custom
 };
 

@@ -77,7 +77,7 @@ SOdysseyPainterEditorVectorSceneTreeView::Construct( const FArguments& InArgs )
                                        ]
                                        + SHeaderRow::Column( VSTV_OBJECT_HUDCOLOR )
                                        .DefaultLabel(FText::FromString(VSTV_OBJECT_HUDCOLOR))
-                                       .FixedWidth( 3.0f )
+                                       .FixedWidth( 8.0f )
                                        [
                                            SNullWidget::NullWidget
                                        ]

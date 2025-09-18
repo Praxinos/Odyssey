@@ -176,6 +176,8 @@ FOdysseyAnimationImageSequenceExporter::GetSourceRange(const FSource& iSource)
             range.SetLowerBoundValue(0);
             return range;
         }
+
+        case EOdysseyAnimationExportImageSequenceRange::MarkInMarkOut: return mAnimation->GetFrameRange();
         case EOdysseyAnimationExportImageSequenceRange::AllCells: return iSource.mRange;
         case EOdysseyAnimationExportImageSequenceRange::Custom: return mCustomRange;
     }
@@ -233,6 +235,49 @@ FOdysseyAnimationImageSequenceExporter::GetSources()
                     animationLayer->GetFrameRange()
                 }
             };
+        }
+        case EOdysseyAnimationExportImageSequenceSource::SelectedLayers:
+        {
+            TArray<UOdysseyLayer*> layers = layerStack->GetLayers();
+            TArray<UOdysseyLayer*> selectedLayers;
+            TArray<FSource> animationLayers;
+
+            selectedLayers.Reserve( layers.Num() );
+
+            for (UOdysseyLayer* layer : layers)
+            {
+                if ( layer->IsSelected() )
+                {
+                    UOdysseyAnimationLayer* animationLayer = Cast<UOdysseyAnimationLayer>(layer);
+
+                    selectedLayers.Add( animationLayer );
+                }
+            }
+
+            // if no layer was selected, use the default layer
+            if ( selectedLayers.Num() == 0 )
+            {
+                UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(layerStack->GetCurrentLayer());
+
+                selectedLayers.Add( currentLayer );
+            }
+
+            for( UOdysseyLayer* selectedLayer : selectedLayers )
+            {
+                if ( !selectedLayer->CanHaveChildren() ) //do not export folders here
+                {
+                    UOdysseyAnimationLayer* animationLayer = Cast<UOdysseyAnimationLayer>(selectedLayer);
+
+                    animationLayers.Add(
+                        {
+                            animationLayer,
+                            animationLayer->GetLayerName().ToString().Replace(TEXT(" "), TEXT("_")),
+                            animationLayer->GetFrameRange()
+                        } );
+                }
+            }
+
+            return animationLayers;
         }
     }
 
