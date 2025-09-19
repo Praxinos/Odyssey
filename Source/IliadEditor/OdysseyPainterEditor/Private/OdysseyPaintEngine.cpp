@@ -176,7 +176,7 @@ FOdysseyPaintEngine::PaintBlock()
 void
 FOdysseyPaintEngine::ClearPaintBlock()
 {
-    if (!mRasterBlock)
+    if (!mPaintBlock)
         return;
 
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(mPaintBlock->Format());
