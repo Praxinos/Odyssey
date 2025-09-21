@@ -12,6 +12,7 @@
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "UObject/ObjectSaveContext.h"
 #include "Palette/OdysseyPalette.h"
+#include "UObject/SoftObjectPath.h"
 #include "OdysseyPaletteReferencer.h"
 
 #include "OdysseyTextureLayerStackUserData.generated.h"
@@ -50,4 +51,8 @@ public:
 
     UPROPERTY()
     TArray<UOdysseyPaletteSet*> Palettes;
+
+    // We store the path to the Tool Collections Assets, so that we don't have to include the painterEditorModule (where the tools and tool collections are) in the build.cs
+    UPROPERTY()
+    TArray<FSoftObjectPath> ToolCollections;
 };

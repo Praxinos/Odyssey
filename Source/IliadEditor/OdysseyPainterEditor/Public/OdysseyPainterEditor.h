@@ -151,6 +151,26 @@ public:
     virtual UOdysseyPainterEditorTool* GetCurrentTool() const;
 
     /**
+     * @brief Returns the recent tools as a tool collection
+     */
+    virtual UOdysseyToolCollection* GetRecentTools() const;
+
+     /**
+     * @brief Adds a tool collection to edited asset
+     */
+    void AddToolCollection(UOdysseyToolCollection* iToolCollection);
+
+    /**
+    * @brief Removes a tool collection from edited asset
+    */
+    void RemoveToolCollection(UOdysseyToolCollection* iToolCollection);
+
+    /**
+     * @brief Returns the tool collections ownaed by the asset that opened the editor
+     */
+    const TArray<UOdysseyToolCollection*> GetToolCollections() const;
+
+    /**
      * @brief Inactivates all tools
      */
     void InactivateAllTools();

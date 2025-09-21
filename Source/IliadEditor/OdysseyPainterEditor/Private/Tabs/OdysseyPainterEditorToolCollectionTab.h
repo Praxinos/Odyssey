@@ -8,6 +8,7 @@
 
 class FOdysseyPainterEditor;
 class UOdysseyPainterEditorTool;
+class UOdysseyToolCollection;
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorToolCollectionTab :
     public FOdysseyEditorTab
@@ -28,13 +29,16 @@ protected:
 
 protected:
     // Event Listeners
-    void OnToolSelected(UOdysseyPainterEditorTool* iTool);
+    void OnAssetSelected(const FAssetData& AssetData);
+    TSharedRef<SWidget> OnGetAddToolCollectionMenuContent();
 
 protected:
-    // Widget Getters
-    int WidgetIndex() const;
-    UOdysseyPainterEditorTool* GetCurrentTool() const;
+    void RefreshCollectionsUI();
+
 
 private:
     FOdysseyPainterEditor* mEditor;
+
+    TArray<TWeakObjectPtr<UOdysseyToolCollection>> mSelectedCollections;
+    TSharedPtr<SVerticalBox> mCollectionsWidget;
 };

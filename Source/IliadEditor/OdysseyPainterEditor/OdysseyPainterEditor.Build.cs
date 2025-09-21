@@ -129,7 +129,6 @@ public class OdysseyPainterEditor : ModuleRules
                 Path.Combine(ModuleDirectory, "Public", "Animation"),
                 Path.Combine(ModuleDirectory, "Public", "Sources"),
                 Path.Combine(ModuleDirectory, "Public", "Tools"),
-                Path.Combine(ModuleDirectory, "Public", "ToolCollection"),
                 Path.Combine(ModuleDirectory, "Public", "Tools", "OutOfPegsTool"),
                 Path.Combine(ModuleDirectory, "Public", "Widgets"),
                 Path.Combine(ModuleDirectory, "Public", "Widgets", "Animation"),

@@ -14,9 +14,23 @@
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyToolCollection : public UObject
 {
+    DECLARE_MULTICAST_DELEGATE(FOnCollectionChanged);
+
     GENERATED_UCLASS_BODY()
 
 public:
-    UPROPERTY(EditAnywhere, Instanced)
+    bool IsCollectionTransient() const;
+
+    void AddTool(UOdysseyPainterEditorTool* iTool);
+    void RemoveToolAtIndex( int iIndex );
+    void MoveTool(int32 iFromIndex, int32 iToIndex);
+    bool ContainsTool(UOdysseyPainterEditorTool* iTool);
+    const TArray<UOdysseyPainterEditorTool*>& GetTools() const;
+
+public:
+    FOnCollectionChanged OnCollectionChanged;
+
+private:
+    UPROPERTY(Instanced)
     TArray<UOdysseyPainterEditorTool*> mToolsConfig;
 };

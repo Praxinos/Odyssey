@@ -166,7 +166,7 @@ FOdysseyPainterEditor::FOdysseyPainterEditor(TSharedRef<FBaseToolkit> iToolkit)
     , mVectorMatchingTool(nullptr)
     , mVectorChartTool(nullptr)
     , mOutOfPegsTool(nullptr)
-    , mRecentTools( NewObject<UOdysseyToolCollection>(GetTransientPackage()) )
+    , mRecentTools( NewObject<UOdysseyToolCollection>(GetTransientPackage(), NAME_None, RF_Transient) )
     , mAnimationFlipSystem(MakeShared<FOdysseyPainterEditorAnimationFlipSystem>(this))
 {
     UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw(this, &FOdysseyPainterEditor::OnCurrentLayerChanged);
@@ -1039,6 +1039,88 @@ UOdysseyPainterEditorTool*
 FOdysseyPainterEditor::GetCurrentTool() const
 {
     return mCurrentTemporaryTool ? mCurrentTemporaryTool : mCurrentMainTool;
+}
+
+UOdysseyToolCollection* FOdysseyPainterEditor::GetRecentTools() const
+{
+    return mRecentTools;
+}
+
+void FOdysseyPainterEditor::AddToolCollection(UOdysseyToolCollection* iToolCollection)
+{
+    TSharedPtr<FOdysseyPainterEditorSource> source = GetSource();
+    if (!source)
+        return;
+
+    if (!IsValid(iToolCollection))
+        return;
+
+    FSoftObjectPath assetPath(iToolCollection);
+
+    UOdysseyAnimation* animation = GetAnimation();
+    UOdysseyTextureLayerStackUserData* textureUserData = GetTextureUserData();
+    if (animation)
+    {
+        if( !animation->ToolCollections.Contains(assetPath) )
+            animation->ToolCollections.Add( assetPath );
+    }
+    else if (textureUserData)
+    {
+        if (!textureUserData->ToolCollections.Contains(assetPath))
+            textureUserData->ToolCollections.Add(assetPath);
+    }
+}
+
+void FOdysseyPainterEditor::RemoveToolCollection(UOdysseyToolCollection* iToolCollection)
+{
+    UOdysseyAnimation* animation = GetAnimation();
+    UOdysseyTextureLayerStackUserData* textureUserData = GetTextureUserData();
+
+    if (!IsValid(iToolCollection))
+        return;
+
+    FSoftObjectPath assetPath(iToolCollection);
+
+    if (animation)
+    {
+        animation->ToolCollections.Remove(assetPath);
+    }
+    else if (textureUserData)
+    {
+        textureUserData->ToolCollections.Remove(assetPath);
+    }
+}
+
+const TArray<UOdysseyToolCollection*> FOdysseyPainterEditor::GetToolCollections() const
+{
+    TArray<UOdysseyToolCollection*> toolCollections;
+
+    UOdysseyAnimation* animation = GetAnimation();
+    UOdysseyTextureLayerStackUserData* textureUserData = GetTextureUserData();
+    if (animation)
+    {
+        for (const FSoftObjectPath& Path : animation->ToolCollections)
+        {
+            UObject* Obj = Path.TryLoad();
+            if (UOdysseyToolCollection* Col = Cast<UOdysseyToolCollection>(Obj))
+            {
+                toolCollections.Add(Col);
+            }
+        }
+    }
+    else if (textureUserData)
+    {
+        for (const FSoftObjectPath& Path : textureUserData->ToolCollections)
+        {
+            UObject* Obj = Path.TryLoad();
+            if (UOdysseyToolCollection* Col = Cast<UOdysseyToolCollection>(Obj))
+            {
+                toolCollections.Add(Col);
+            }
+        }
+    }
+
+    return toolCollections;
 }
 
 void
@@ -3526,13 +3608,13 @@ void FOdysseyPainterEditor::SaveToRecentTools(UOdysseyPainterEditorTool* iTool)
     if( !iTool )
         return;
 
-    if( mRecentTools->mToolsConfig.Contains( iTool ) )
+    if( mRecentTools->ContainsTool(iTool) )
         return;
 
-    mRecentTools->mToolsConfig.Add(iTool);
+    mRecentTools->AddTool(iTool);
 
-    if( mRecentTools->mToolsConfig.Num() > 10 )
-        mRecentTools->mToolsConfig.RemoveAt(0);
+    if( mRecentTools->GetTools().Num() > 10 )
+        mRecentTools->RemoveToolAtIndex(0);
 }
 
 #undef LOCTEXT_NAMESPACE

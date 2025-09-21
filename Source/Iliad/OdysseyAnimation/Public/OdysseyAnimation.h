@@ -7,6 +7,7 @@
 #include "UObject/AssetRegistryTagsContext.h"
 #include "BaseMediaSource.h"
 #include "OdysseyTextureRenderingAbility.h"
+#include "UObject/SoftObjectPath.h"
 #include "OdysseyPaletteReferencer.h"
 
 #include "OdysseyAnimation.generated.h"
@@ -187,4 +188,9 @@ protected:
 public:
     UPROPERTY()
     TArray<UOdysseyPaletteSet*> Palettes;
+
+    // We store the path to the Tool Collections Assets, so that we don't have to include the painterEditorModule (where the tools and tool collections are) in the build.cs
+    UPROPERTY()
+    TArray<FSoftObjectPath> ToolCollections;
+
 };

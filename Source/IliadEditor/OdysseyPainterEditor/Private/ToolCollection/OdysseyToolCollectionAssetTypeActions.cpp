@@ -46,7 +46,7 @@ FOdysseyToolCollectionAssetTypeActions::GetSupportedClass()  const
 
 
 bool
-FOdysseyToolCollectionAssetTypeActions::HasActions( const  TArray< UObject* >&  InObjects)  const
+FOdysseyToolCollectionAssetTypeActions::HasActions( const  TArray< UObject* >& InObjects)  const
 {
     return true;
 }
