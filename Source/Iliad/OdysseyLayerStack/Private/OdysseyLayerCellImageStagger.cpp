@@ -93,7 +93,6 @@ UOdysseyLayerCellImageStagger::GetReferenceFrameAtFrame(int iFrameIndex) const
                 int layerStartFrame = GetLayer()->GetFrameRange().GetLowerBoundValue();
                 int realReach = ( Reach <= 0 ) ? ( cellStartFrame - layerStartFrame ) : Reach;
 
-
                 if( realReach )
                 {
                     // this will update the array of random intergers only if the exposure changes or
@@ -106,6 +105,12 @@ UOdysseyLayerCellImageStagger::GetReferenceFrameAtFrame(int iFrameIndex) const
                         return INDEX_NONE;
 
                     frame = startFrame + mRandomIntegers[iFrameIndex];
+
+                    // I don't know why but in some cases (drag), the frameRange changes with weird values,
+                    // giving unwanted results that makes frame >= cellStartFrame, which should not be possible.
+                    // it seems it's an update issue or something.
+                    if( frame >= cellStartFrame )
+                        return INDEX_NONE;
                 }
             }
         }
