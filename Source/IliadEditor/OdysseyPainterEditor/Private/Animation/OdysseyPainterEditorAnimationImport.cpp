@@ -213,7 +213,7 @@ FOdysseyPainterEditorAnimationLayerImport::ImportImageSequence(UOdysseyAnimation
     }
 
     FOdysseyPainterEditorAnimationLayerImport import_layer;
-    return import_layer.ImportTextureSequence(Layer, textures, 0);
+    return import_layer.ImportTextureSequence(Layer, textures, iCellIndex);
 }
 
 #undef LOCTEXT_NAMESPACE

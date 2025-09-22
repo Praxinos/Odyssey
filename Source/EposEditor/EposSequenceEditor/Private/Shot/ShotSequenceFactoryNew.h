@@ -11,7 +11,7 @@
 /**
  * Implements a factory for UShotSequence objects.
  */
-UCLASS( hidecategories = Object )
+UCLASS( BlueprintType, hidecategories = Object )
 class UShotSequenceFactoryNew : public UFactory
 {
     GENERATED_UCLASS_BODY()

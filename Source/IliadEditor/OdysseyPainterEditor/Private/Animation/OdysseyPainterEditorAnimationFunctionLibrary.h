@@ -59,10 +59,10 @@ class UOdysseyPainterEditorAnimationLayerFunctionLibrary : public UBlueprintFunc
 
 public:
     UFUNCTION(BlueprintCallable, Category="Odyssey|Animation")
-    static TArray<UOdysseyAnimationCellImageRaster*> ImportTextureSequence(UOdysseyAnimationLayerImageRaster* Layer, TArray<UTexture2D*> Textures, int iCellIndex = -1);
+    static TArray<UOdysseyAnimationCellImageRaster*> ImportTextureSequence(UOdysseyAnimationLayerImageRaster* Layer, TArray<UTexture2D*> Textures, int CellIndex = -1);
 
     UFUNCTION(BlueprintCallable, Category="Odyssey|Animation")
-    static TArray<UOdysseyAnimationCellImageRaster*> ImportImageSequence(UOdysseyAnimationLayerImageRaster* Layer, TArray<FString> Paths, int iCellIndex = -1);
+    static TArray<UOdysseyAnimationCellImageRaster*> ImportImageSequence(UOdysseyAnimationLayerImageRaster* Layer, TArray<FString> Paths, int CellIndex = -1);
 
     UFUNCTION(BlueprintCallable, Category="Odyssey|Animation")
     static FString ExportFrameAsImage(
