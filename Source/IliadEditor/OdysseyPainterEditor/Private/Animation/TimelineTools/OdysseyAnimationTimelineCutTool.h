@@ -15,5 +15,6 @@ public:
     FOdysseyAnimationTimelineCutTool(TSharedRef<FOdysseyPainterEditorAnimationTimelinePosition> iTimelinePosition);
 
 public:
+    virtual FReply OnMouseButtonDown(const FMouseEventParams& iParams) override;
     virtual FReply OnMouseButtonUp(const FMouseEventParams& iParams) override;
 };

@@ -53,6 +53,9 @@ public:
     UFUNCTION(BlueprintCallable, Category="Odyssey|Cell")
     void SetReach(int Value, bool IsInteractive);
 
+protected:
+    void UpdateRandomIntegers( int iMaxValue ) const;
+
 public:
 #if WITH_EDITOR
     virtual UOdysseyLayerCell* Break(int Frame, bool bClear) override;
@@ -69,4 +72,9 @@ protected:
 
     UPROPERTY()
     int Seed = 0;
+
+    private:
+        // declared mutable to bypass the functions const-ness
+        mutable TArray<int> mRandomIntegers;
+        mutable int mRandomLimitValue = 0;
 };

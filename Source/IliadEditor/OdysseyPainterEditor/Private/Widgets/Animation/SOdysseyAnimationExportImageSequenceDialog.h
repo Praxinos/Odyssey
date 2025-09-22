@@ -19,7 +19,7 @@ enum class EOdysseyAnimationExportImageSequenceSource : uint8
     Animation,
     AllLayers,
     CurrentLayer,
-    SelectedLayers
+    SelectedLayers UMETA(Hidden) // disabled for now. See issue https://github.com/Praxinos/Odyssey-Plugin/issues/259
 };
 
 UENUM()

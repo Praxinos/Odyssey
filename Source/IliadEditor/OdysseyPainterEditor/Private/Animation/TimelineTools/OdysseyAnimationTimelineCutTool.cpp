@@ -19,6 +19,21 @@ FOdysseyAnimationTimelineCutTool::FOdysseyAnimationTimelineCutTool(TSharedRef<FO
 }
 
 FReply
+FOdysseyAnimationTimelineCutTool::OnMouseButtonDown(const FMouseEventParams& iParams)
+{
+    if (iParams.mMouseEvent.GetEffectingButton() != EKeys::LeftMouseButton)
+        return FReply::Unhandled();
+
+    if (!iParams.mLayer->IsEditable())
+        return FReply::Unhandled();
+
+    if (iParams.mOrigin != EMouseEventOrigin::CellsTimeline)
+        return FReply::Unhandled();
+
+    return FReply::Handled();
+}
+
+FReply
 FOdysseyAnimationTimelineCutTool::OnMouseButtonUp(const FMouseEventParams& iParams)
 {
     if (iParams.mMouseEvent.GetEffectingButton() != EKeys::LeftMouseButton)

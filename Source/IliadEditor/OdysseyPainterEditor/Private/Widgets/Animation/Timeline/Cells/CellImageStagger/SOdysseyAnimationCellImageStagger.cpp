@@ -86,18 +86,29 @@ SOdysseyAnimationCellImageStagger::OnPaint(const FPaintArgs& Args, const FGeomet
 
     if (staggerLength != INDEX_NONE && staggerLength > 0)
     {
-        FLinearColor staggerLengthColor = FOdysseyStyle::GetColor( "Animation.CellImageStagger.StaggerLengthColor" );
-        for (int x = staggerLength * frameSize; x < width; x += staggerLength * frameSize)
+        switch(mCell->GetBehaviour())
         {
-            //Repeatiton Limits
-            FSlateDrawElement::MakeBox(
-                OutDrawElements,
-                LayerId,
-                AllottedGeometry.ToPaintGeometry( FVector2D(1, height - 7.f), FSlateLayoutTransform(1.0, TransformPoint(1.0, FVector2D(x, 7.f)) ) ),
-                GenericBrush,
-                ESlateDrawEffect::None,
-                staggerLengthColor
-            );
+            case EOdysseyLayerCellImageStaggerBehaviour::Loop:
+            case EOdysseyLayerCellImageStaggerBehaviour::PingPong:
+            {
+                FLinearColor staggerLengthColor = FOdysseyStyle::GetColor( "Animation.CellImageStagger.StaggerLengthColor" );
+                for (int x = staggerLength * frameSize; x < width; x += staggerLength * frameSize)
+                {
+                    //Repeatiton Limits
+                    FSlateDrawElement::MakeBox(
+                        OutDrawElements,
+                        LayerId,
+                        AllottedGeometry.ToPaintGeometry( FVector2D(1, height - 7.f), FSlateLayoutTransform(1.0, TransformPoint(1.0, FVector2D(x, 7.f)) ) ),
+                        GenericBrush,
+                        ESlateDrawEffect::None,
+                        staggerLengthColor
+                    );
+                }
+            }
+            break;
+
+            default:
+            break;
         }
     }
 

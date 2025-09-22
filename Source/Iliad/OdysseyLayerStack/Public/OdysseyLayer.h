@@ -282,6 +282,9 @@ public:
     const TArray<FInt32Range>& GetCellsFrameRanges() const;
     void UpdateCellsIndexInLayer();
     bool ReverseCells( const TArray<UOdysseyLayerCell*>& iCellsToReverse );
+    static bool AreCellsContiguous( const TArray<UOdysseyLayerCell*>& iCellsToReverse );
+    static bool AreCellsContiguous( const TArray<UOdysseyLayerCell*>& iCellsToReverse
+                                  , TArray<UOdysseyLayerCell*>& oSortedCells  );
 
 public:
 #if WITH_EDITOR

@@ -745,7 +745,8 @@ SOdysseyAnimationLayerImageTimeline::CanReverseSelectedCells()
     TSharedRef<FOdysseyLayerCellSelection> cellSelection = mLayer->GetLayerStack()->GetCellSelection();
     TArray<UOdysseyLayerCell*> selectedCells = cellSelection.Get().GetSelectedCells();
 
-    return selectedCells.Num() < 2 ? false : true;
+    return UOdysseyAnimationLayer::AreCellsContiguous( selectedCells ) && ( selectedCells.Num() > 1 ) ? true
+                                                                                                      : false;
 }
 
 FReply

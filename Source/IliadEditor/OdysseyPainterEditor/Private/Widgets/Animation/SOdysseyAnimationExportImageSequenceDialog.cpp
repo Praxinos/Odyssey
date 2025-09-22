@@ -236,6 +236,7 @@ FOdysseyAnimationImageSequenceExporter::GetSources()
                 }
             };
         }
+
         case EOdysseyAnimationExportImageSequenceSource::SelectedLayers:
         {
             TArray<UOdysseyLayer*> layers = layerStack->GetLayers();

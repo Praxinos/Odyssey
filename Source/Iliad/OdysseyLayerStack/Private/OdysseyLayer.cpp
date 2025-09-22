@@ -555,34 +555,67 @@ UOdysseyLayer::UpdateCellsIndexInLayer()
     }
 }
 
+//static
+bool
+UOdysseyLayer::AreCellsContiguous( const TArray<UOdysseyLayerCell*>& iCells  )
+{
+    TArray<UOdysseyLayerCell*> unusedSortedCells;
+
+    return AreCellsContiguous( iCells, unusedSortedCells );
+}
+
+//static
+bool
+UOdysseyLayer::AreCellsContiguous( const TArray<UOdysseyLayerCell*>& iCells
+                                 , TArray<UOdysseyLayerCell*>& oSortedCells  )
+{
+    oSortedCells = iCells;
+
+    oSortedCells.Sort( []( const UOdysseyLayerCell& iA, const UOdysseyLayerCell& iB ) -> bool
+    {
+        return iA.GetIndexInLayer() < iB.GetIndexInLayer();
+    } );
+
+    // check contiguity
+    for( int i = 0, n = 1; n < oSortedCells.Num(); i++, n++ )
+    {
+        if( oSortedCells[i]->GetIndexInLayer() != ( oSortedCells[n]->GetIndexInLayer() - 1 ) )
+        {
+            oSortedCells.Empty();
+
+            return false;
+        }
+    }
+
+    return true;
+}
+
 bool
 UOdysseyLayer::ReverseCells( const TArray<UOdysseyLayerCell*>& iCellsToReverse )
 {
     if( iCellsToReverse.Num() >= 2 )
     {
-        TArray<UOdysseyLayerCell*> sortedSelectedCells = iCellsToReverse;
+        TArray<UOdysseyLayerCell*> sortedSelectedCells;
 
         Modify();
 
-        sortedSelectedCells.Sort( []( const UOdysseyLayerCell& iA, const UOdysseyLayerCell& iB ) -> bool
+        if( AreCellsContiguous( iCellsToReverse, sortedSelectedCells ) )
         {
-            return iA.GetIndexInLayer() < iB.GetIndexInLayer();
-        } );
+            for( int i = 0; i < sortedSelectedCells.Num(); i++ )
+            {
+                int n = sortedSelectedCells.Num() - i - 1;
+                int originalIndex = sortedSelectedCells[i]->GetIndexInLayer();
+                int reversedIndex = sortedSelectedCells[n]->GetIndexInLayer();
 
-        for( int i = 0; i < sortedSelectedCells.Num(); i++ )
-        {
-            int n = sortedSelectedCells.Num() - i - 1;
-            int originalIndex = sortedSelectedCells[i]->GetIndexInLayer();
-            int reversedIndex = sortedSelectedCells[n]->GetIndexInLayer();
+                Cells[originalIndex] = sortedSelectedCells[n];
+                Cells[reversedIndex] = sortedSelectedCells[i];
+            }
 
-            Cells[originalIndex] = sortedSelectedCells[n];
-            Cells[reversedIndex] = sortedSelectedCells[i];
+            UpdateCellsIndexInLayer();
+            CellsChanged();
+
+            return true; // success
         }
-
-        UpdateCellsIndexInLayer();
-        CellsChanged();
-
-        return true; // success
     }
 
     return false; // failure

@@ -88,24 +88,26 @@ UOdysseyLayerCellImageStagger::GetReferenceFrameAtFrame(int iFrameIndex) const
 
         case EOdysseyLayerCellImageStaggerBehaviour::Random:
         {
-            int loopFrameIndex = ( Reach <= 0 ) ? iFrameIndex : ( iFrameIndex % Reach );
+            if( iFrameIndex >= 0 ) // for some reasons sometimes iFrameIndex is < 0
+            {
+                int layerStartFrame = GetLayer()->GetFrameRange().GetLowerBoundValue();
+                int realReach = ( Reach <= 0 ) ? ( cellStartFrame - layerStartFrame ) : Reach;
 
-            // We call srand everytime with a known seed value, so that the randomness does not change from
-            // one computer to another. In the future we can decide for a user-chosen value
-            srand( Seed + loopFrameIndex );
 
-            int layerStartFrame = GetLayer()->GetFrameRange().GetLowerBoundValue();
-            int startFrame = ( Reach <= 0 ) ? layerStartFrame
-                                            : FMath::Max(layerStartFrame, int(cellStartFrame - Reach));
+                if( realReach )
+                {
+                    // this will update the array of random intergers only if the exposure changes or
+                    // the reach changes
+                    UpdateRandomIntegers( realReach );
 
-            if (cellStartFrame - startFrame <= 0)
-                return INDEX_NONE;
+                    int startFrame = FMath::Max(layerStartFrame, int(cellStartFrame - realReach));
 
-            int pseudoRand = rand();
-            int randomReach = ( Reach <= 0 ) ? ( cellStartFrame ? ( pseudoRand % cellStartFrame ) : 0 )
-                                             : pseudoRand % Reach;
+                    if (cellStartFrame - startFrame <= 0)
+                        return INDEX_NONE;
 
-            frame = startFrame + randomReach;
+                    frame = startFrame + mRandomIntegers[iFrameIndex];
+                }
+            }
         }
         break;
 
@@ -170,6 +172,37 @@ FIntRect
 UOdysseyLayerCellImageStagger::GetDefaultRenderRect() const
 {
     return GetLayer()->GetDefaultRenderRect();
+}
+
+void
+UOdysseyLayerCellImageStagger::UpdateRandomIntegers( int iLimitValue ) const
+{
+    if( ( mRandomIntegers.Num() != Exposure ) || ( mRandomLimitValue != iLimitValue ) )
+    {
+        int randomRelativeIndex = 0, previousRandomRelativeIndex = randomRelativeIndex;
+
+        mRandomIntegers.Empty();
+        mRandomIntegers.Reserve( Exposure );
+
+        for( int i = 0; i < Exposure; i++ )
+        {
+            srand( Seed + i );
+
+            // we make predefined random indexes to ensure they always vary.
+            // it would not be guaranteed if you just used rand() % x because then we can
+            // end up with many similar return values for small values of x
+            do
+            {
+                randomRelativeIndex = rand() % iLimitValue;
+            } while( randomRelativeIndex == previousRandomRelativeIndex );
+
+            mRandomIntegers.Push( randomRelativeIndex );
+
+            previousRandomRelativeIndex = randomRelativeIndex;
+        }
+
+        mRandomLimitValue = iLimitValue;
+    }
 }
 
 #if WITH_EDITOR
