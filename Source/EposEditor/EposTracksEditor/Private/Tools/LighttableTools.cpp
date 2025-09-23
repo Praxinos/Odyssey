@@ -137,6 +137,8 @@ LighttableTools::Activate( ISequencer& iSequencer, UMovieSceneSequence* iSequenc
     for( TWeakObjectPtr<UOdysseyAnimationTimelineSection> section : result.mSections )
     {
         UOdysseyAnimation* animation = section->GetAnimation();
+        if( !animation )
+            continue;
 
         UOdysseyLayerStack* layer_stack = animation->GetLayerStack();
         TArray<UOdysseyLayer*> layers = layer_stack->GetLayers();
@@ -165,6 +167,8 @@ LighttableTools::Deactivate( ISequencer& iSequencer, UMovieSceneSequence* iSeque
     for( TWeakObjectPtr<UOdysseyAnimationTimelineSection> section : result.mSections )
     {
         UOdysseyAnimation* animation = section->GetAnimation();
+        if( !animation )
+            continue;
 
         UOdysseyLayerStack* layer_stack = animation->GetLayerStack();
         TArray<UOdysseyLayer*> layers = layer_stack->GetLayers();

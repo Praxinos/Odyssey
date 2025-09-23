@@ -421,7 +421,17 @@ ShotSequenceTools::CanDetachAnimation( ISequencer& iSequencer, UMovieSceneSequen
     for( auto animation_binding : iAnimationBindings )
     {
         for( auto object : iSequencer.FindBoundObjects( animation_binding, iSequenceID ) )
-            animations.Add( Cast<AOdysseyAnimationActor>( object ) );
+        {
+            AOdysseyAnimationActor* animation = Cast<AOdysseyAnimationActor>( object );
+            // It seems it can happen (animation == nullptr) when actors are moved from one (sub)level to another (sub)level in the Levels panel
+            // During the move (maybe):
+            // - the actor is removed from a level
+            // - then the binding is invalid
+            // - a tick occurs (which calls all CanExecute() of every commands)
+            // - then try to resolve the binding which are still invalid
+            if( animation )
+                animations.Add( animation );
+        }
     }
 
     bool can_detach = false;

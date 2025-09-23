@@ -250,9 +250,14 @@ FFrameNumber
 UOdysseyAnimationTimelineSection::ConvertFrameFromTimelineToSequence( FFrameNumber iFrameInTimeline )
 {
     UMovieSceneSequence* sequence = GetTypedOuter<UMovieSceneSequence>();
+    // Default value if animation doesn't exist
+    // Otherwise animation validity must be checked everywhere outside this function
+    FFrameRate animation_framerate( 24000, 1000 );
+    if( ensure( GetAnimation() ) )
+        animation_framerate = FFrameRate( GetAnimation()->GetFramesPerSecond() * 1000, 1000 );
 
     // Convert a real timeline frame to a sequence frame (change framerate from animation framerate to sequence framerate (aka tickresolution))
-    FFrameTime frametime_in_timeline = FFrameRate::TransformTime( iFrameInTimeline, FFrameRate( GetAnimation()->GetFramesPerSecond() * 1000, 1000 ), sequence->GetMovieScene()->GetTickResolution() );
+    FFrameTime frametime_in_timeline = FFrameRate::TransformTime( iFrameInTimeline, animation_framerate, sequence->GetMovieScene()->GetTickResolution() );
     FFrameNumber frame_in_timeline = frametime_in_timeline.GetFrame(); // It should be ok (?), otherwise return a FFrameTime
 
     // Apply all offsets in sequence framerate (aka tickresolution)
@@ -266,13 +271,18 @@ FFrameNumber
 UOdysseyAnimationTimelineSection::ConvertFrameFromSequenceToTimeline( FFrameNumber iFrameInSequence )
 {
     UMovieSceneSequence* sequence = GetTypedOuter<UMovieSceneSequence>();
+    // Default value if animation doesn't exist
+    // Otherwise animation validity must be checked everywhere outside this function
+    FFrameRate animation_framerate( 24000, 1000 );
+    if( ensure( GetAnimation() ) )
+        animation_framerate = FFrameRate( GetAnimation()->GetFramesPerSecond() * 1000, 1000 );
 
     // Apply all offsets in sequence framerate (aka tickresolution)
     FFrameNumber frame_in_section = iFrameInSequence - GetTrueRange().GetLowerBoundValue();
     FFrameNumber frame_in_timeline = frame_in_section + GetStartFrameOffset();
 
     // Convert a sequence frame to a real timeline frame (change framerate from sequence framerate (aka tickresolution) to animation framerate)
-    FFrameTime frametime_in_timeline = FFrameRate::TransformTime( frame_in_timeline, sequence->GetMovieScene()->GetTickResolution(), FFrameRate( GetAnimation()->GetFramesPerSecond() * 1000, 1000 ) );
+    FFrameTime frametime_in_timeline = FFrameRate::TransformTime( frame_in_timeline, sequence->GetMovieScene()->GetTickResolution(), animation_framerate );
     frame_in_timeline = frametime_in_timeline.GetFrame();
 
     return frame_in_timeline;

@@ -304,8 +304,6 @@ UOdysseyAnimationLayerImageVector::AutoCreateCell(int iFrameIndex)
 
     FScopedTransaction transaction(LOCTEXT("layer-image-vector.create-cell-transaction", "Create Cell"));
 
-    UOdysseyAnimation* animation = GetAnimation();
-
     FInt32Range range = GetFrameRange();
 
     //Check if iFrameIndex is Out Of Range
@@ -603,6 +601,8 @@ UOdysseyAnimationLayerImageVector::GetPaletteSets() const
 {
     TArray<UOdysseyPaletteSet*> paletteSets;
     UOdysseyAnimation* animation = GetAnimation();
+    if( !animation )
+        return TArray<UOdysseyPaletteSet*>();
 
     paletteSets = animation->Palettes;
 

@@ -325,7 +325,6 @@ UOdysseyAnimationLayerImageRaster::AutoCreateCell(int iFrameIndex)
 
     FScopedTransaction transaction(LOCTEXT("layer-image-raster.create-cell-transaction", "Create Cell"));
 
-    UOdysseyAnimation* animation = GetAnimation();
     //Check if iFrameIndex is Out Of Range
     FInt32Range range = GetFrameRange();
 

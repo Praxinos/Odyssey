@@ -77,6 +77,8 @@ UOdysseyAnimationLayerStack::OnRenderingChanged(const FOdysseyRenderingChangedEv
 UTextureRenderTarget2D*
 UOdysseyAnimationLayerStack::CreateRenderingRenderTarget()
 {
+    check( GetAnimation() );
+
     return GetAnimation()->CreateRenderingRenderTarget();
 }
 
@@ -84,6 +86,8 @@ UOdysseyAnimationLayerStack::CreateRenderingRenderTarget()
 UTexture2D*
 UOdysseyAnimationLayerStack::CreateExportTexture(UObject* Outer, FName Name, EObjectFlags Flags)
 {
+    check( GetAnimation() );
+
     return GetAnimation()->CreateExportTexture(Outer, Name, Flags);
 }
 #endif

@@ -164,9 +164,12 @@ ShotSequenceTools::CreateAnimationCut( ISequencer& iSequencer, UMovieSceneSequen
 
         for( TWeakObjectPtr<UOdysseyAnimationTimelineSection> section : result.mSections )
         {
+            UOdysseyAnimation* animation = section->GetAnimation();
+            if( !animation )
+                continue;
+
             FFrameNumber frame_in_timeline = section->ConvertFrameFromSequenceToTimeline( iFrameNumber );
 
-            UOdysseyAnimation* animation = section->GetAnimation();
             TArray<UOdysseyLayer*> layers = animation->GetLayerStack()->GetLayers();
             TArray<UOdysseyAnimationLayer*> animation_layers;
             for( UOdysseyLayer* layer : layers )

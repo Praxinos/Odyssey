@@ -1104,7 +1104,8 @@ SCinematicBoardSectionAnimationTimelineKeys::SetDelegates()
     for( TWeakObjectPtr<UOdysseyAnimationTimelineSection> animation_timeline_section : result.mSections )
     {
         animation_timeline_section->OnAnimationCutChannelChanged().AddSP( this, &SCinematicBoardSectionAnimationTimelineKeys::OnAnimationCutChannelChanged );
-        animation_timeline_section->GetAnimation()->OnRenderingChangedDelegate().AddSP( this, &SCinematicBoardSectionAnimationTimelineKeys::OnAnimationChanged );
+        if( animation_timeline_section->GetAnimation() )
+            animation_timeline_section->GetAnimation()->OnRenderingChangedDelegate().AddSP( this, &SCinematicBoardSectionAnimationTimelineKeys::OnAnimationChanged );
     }
 
     //TSet<UOdysseyAnimation*> animations;

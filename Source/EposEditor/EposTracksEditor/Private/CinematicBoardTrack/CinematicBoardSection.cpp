@@ -756,6 +756,10 @@ FCinematicBoardSection::RebuildAnimationThumbnailDataInternal( UOdysseyAnimation
 
     //---
 
+    UOdysseyAnimation* animation = iSection->GetAnimation();
+    if( !animation )
+        return FThumbnailData();
+
     FFrameNumber frame_in_timeline = iSection->ConvertFrameFromSequenceToTimeline( iFrameInSequence );
 
     TOptional<FFrameTime> outer_time = inner_to_outer_transform.TryTransformTime( iFrameInSequence );
@@ -763,8 +767,6 @@ FCinematicBoardSection::RebuildAnimationThumbnailDataInternal( UOdysseyAnimation
         return FThumbnailData();
 
     //---
-
-    UOdysseyAnimation* animation = iSection->GetAnimation();
 
     float ratio = animation->GetWidth() / float( animation->GetHeight() );
     const FIntVector2 thumbnail_size( 200 * ratio, 200 );

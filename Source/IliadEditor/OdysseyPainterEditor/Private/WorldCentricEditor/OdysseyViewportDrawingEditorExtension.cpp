@@ -458,9 +458,11 @@ FOdysseyViewportDrawingEditorExtension::SetTextureInternal(UTexture* iTexture)
     {
         UOdysseyAnimationComponent* animationComponent = Cast<UOdysseyAnimationComponent>(mComponent);
         if (!animationComponent)
-        return;
+            return;
 
         TSharedPtr<FOdysseyPainterEditorAnimationSource> animationSource = MakeShared<FOdysseyPainterEditorAnimationSource>(animationComponent->GetAnimation());
+        if( !animationSource )
+            return;
         animationSource->SetExternalPlayer(animationComponent->GetPlayer());
         mEditor->SetSource(animationSource);
     }
