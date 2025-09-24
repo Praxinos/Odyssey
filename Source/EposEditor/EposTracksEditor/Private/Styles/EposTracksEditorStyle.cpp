@@ -66,39 +66,39 @@ FEposTracksEditorStyle::FEposTracksEditorStyle()
 void
 FEposTracksEditorStyle::InitSequencer()
 {
-    SetContentRoot( IPluginManager::Get().FindPlugin( "Odyssey" )->GetBaseDir() / TEXT( "Resources" ) );
+    SetContentRoot( IPluginManager::Get().FindPlugin( "Odyssey" )->GetBaseDir() / TEXT( "Resources" ) / TEXT( "OdysseyAssetResources" ) );
 
     //---
 
-    Set( "Sequencer.Tracks.CinematicBoard", new IMAGE_BRUSH_SVG( "track-board", Icon16x16 ) );
+    Set( "Sequencer.Tracks.CinematicBoard", new IMAGE_BRUSH_SVG( "Storyboard/track-board", Icon16x16 ) );
     Set( "Sequencer.Tracks.SingleCameraCut", new PARENT_IMAGE_BRUSH( "Sequencer/Dropdown_Icons/Icon_Camera_Cut_Track_16x", Icon16x16 ) ); // same as FAppStyle::Get().GetBrush( "Sequencer.Tracks.CameraCut" ) );
-    Set( "Sequencer.Tracks.Note", new IMAGE_BRUSH_SVG( "track-note", Icon16x16 ) );
+    Set( "Sequencer.Tracks.Note", new IMAGE_BRUSH_SVG( "Storyboard/track-note", Icon16x16 ) );
 }
 
 void
 FEposTracksEditorStyle::InitTracks()
 {
-    SetContentRoot( IPluginManager::Get().FindPlugin( "Odyssey" )->GetBaseDir() / TEXT( "Resources" ) );
+    SetContentRoot( IPluginManager::Get().FindPlugin( "Odyssey" )->GetBaseDir() / TEXT( "Resources" ) / TEXT( "OdysseyAssetResources" ) );
 
     //---
 
-    Set( "CreateCamera", new IMAGE_BRUSH_SVG( "camera-create.large", Icon24x16 ) );
-    Set( "PilotCamera", new IMAGE_BRUSH_SVG( "camera-pilot", Icon16x16 ) );
-    Set( "EjectCamera", new IMAGE_BRUSH_SVG( "camera-eject", Icon16x16 ) );
-    Set( "SnapCameraToViewport", new IMAGE_BRUSH_SVG( "camera-snap-to-viewport", Icon16x16 ) );
+    Set( "CreateCamera", new IMAGE_BRUSH_SVG( "Storyboard/camera-create.large", Icon24x16 ) );
+    Set( "PilotCamera", new IMAGE_BRUSH_SVG( "Storyboard/camera-pilot", Icon16x16 ) );
+    Set( "EjectCamera", new IMAGE_BRUSH_SVG( "Storyboard/camera-eject", Icon16x16 ) );
+    Set( "SnapCameraToViewport", new IMAGE_BRUSH_SVG( "Storyboard/camera-snap-to-viewport", Icon16x16 ) );
 
-    Set( "CreateAnimationCut", new IMAGE_BRUSH_SVG( "animationcut-create", Icon16x16 ) );
+    Set( "CreateAnimationCut", new IMAGE_BRUSH_SVG( "Storyboard/animationcut-create", Icon16x16 ) );
 
-    Set( "CreateAnimation", new IMAGE_BRUSH_SVG( "animation-create.large", Icon24x16 ) );
-    Set( "DetachAnimation", new IMAGE_BRUSH_SVG( "animation-detach", Icon16x16 ) );
+    Set( "CreateAnimation", new IMAGE_BRUSH_SVG( "Storyboard/animation-create.large", Icon24x16 ) );
+    Set( "DetachAnimation", new IMAGE_BRUSH_SVG( "Storyboard/animation-detach", Icon16x16 ) );
 
-    Set( "LighttableOff", new IMAGE_BRUSH_SVG( "lighttable-off", Icon16x16 ) );
-    Set( "LighttableOn", new IMAGE_BRUSH_SVG( "lighttable-on", Icon16x16 ) );
+    Set( "LighttableOff", new IMAGE_BRUSH_SVG( "Storyboard/lighttable-off", Icon16x16 ) );
+    Set( "LighttableOn", new IMAGE_BRUSH_SVG( "Storyboard/lighttable-on", Icon16x16 ) );
 
-    Set( "Take", new IMAGE_BRUSH_SVG( "take", Icon16x16 ) );
+    Set( "Take", new IMAGE_BRUSH_SVG( "Storyboard/take", Icon16x16 ) );
 
-    Set( "NoteSettings", new IMAGE_BRUSH_SVG( "note", Icon16x16 ) );
-    Set( "CreateNote", new IMAGE_BRUSH_SVG( "note-create.large", Icon24x16 ) );
+    Set( "NoteSettings", new IMAGE_BRUSH_SVG( "Storyboard/note", Icon16x16 ) );
+    Set( "CreateNote", new IMAGE_BRUSH_SVG( "Storyboard/note-create.large", Icon24x16 ) );
 
     //---
 
@@ -114,22 +114,22 @@ FEposTracksEditorStyle::InitTracks()
 void
 FEposTracksEditorStyle::InitCommands()
 {
-    SetContentRoot( IPluginManager::Get().FindPlugin( "Odyssey" )->GetBaseDir() / TEXT( "Resources" ) );
+    SetContentRoot( IPluginManager::Get().FindPlugin( "Odyssey" )->GetBaseDir() / TEXT( "Resources" ) / TEXT( "OdysseyAssetResources" ) );
 
     //---
 
-    Set( "EposTracksEditorCommands.NewSectionWithBoardAtCurrentFrame", new IMAGE_BRUSH_SVG( "sequence-board", Icon16x16 ) );
-    Set( "EposTracksEditorCommands.NewSectionWithShotAtCurrentFrame", new IMAGE_BRUSH_SVG( "sequence-shot", Icon16x16 ) );
+    Set( "EposTracksEditorCommands.NewSectionWithBoardAtCurrentFrame", new IMAGE_BRUSH_SVG( "Storyboard/sequence-board", Icon16x16 ) );
+    Set( "EposTracksEditorCommands.NewSectionWithShotAtCurrentFrame", new IMAGE_BRUSH_SVG( "Storyboard/sequence-shot", Icon16x16 ) );
 
-    Set( "EposTracksEditorCommands.ArrangeShotsManually", new IMAGE_BRUSH_SVG( "arrange-shots-manually", Icon16x16 ) );
-    Set( "EposTracksEditorCommands.ArrangeShotsOnOneRow", new IMAGE_BRUSH_SVG( "arrange-shots-on-one-row", Icon16x16 ) );
-    Set( "EposTracksEditorCommands.ArrangeShotsOnTwoRows", new IMAGE_BRUSH_SVG( "arrange-shots-on-two-rows", Icon16x16 ) );
+    Set( "EposTracksEditorCommands.ArrangeShotsManually", new IMAGE_BRUSH_SVG( "Storyboard/arrange-shots-manually", Icon16x16 ) );
+    Set( "EposTracksEditorCommands.ArrangeShotsOnOneRow", new IMAGE_BRUSH_SVG( "Storyboard/arrange-shots-on-one-row", Icon16x16 ) );
+    Set( "EposTracksEditorCommands.ArrangeShotsOnTwoRows", new IMAGE_BRUSH_SVG( "Storyboard/arrange-shots-on-two-rows", Icon16x16 ) );
 }
 
 void
 FEposTracksEditorStyle::InitToolbar()
 {
-    SetContentRoot( IPluginManager::Get().FindPlugin( "Odyssey" )->GetBaseDir() / TEXT( "Resources" ) );
+    SetContentRoot( IPluginManager::Get().FindPlugin( "Odyssey" )->GetBaseDir() / TEXT( "Resources" ) / TEXT( "OdysseyAssetResources" ) );
 
     //---
 
@@ -174,7 +174,7 @@ FEposTracksEditorStyle::InitToolbar()
 void
 FEposTracksEditorStyle::InitNotes()
 {
-    SetContentRoot( IPluginManager::Get().FindPlugin( "Odyssey" )->GetBaseDir() / TEXT( "Resources" ) );
+    SetContentRoot( IPluginManager::Get().FindPlugin( "Odyssey" )->GetBaseDir() / TEXT( "Resources" ) / TEXT( "OdysseyAssetResources" ) );
 
     //---
 

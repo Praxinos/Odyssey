@@ -61,20 +61,20 @@ FEposSequenceEditorStyle::FEposSequenceEditorStyle()
 void
 FEposSequenceEditorStyle::InitSequencer()
 {
-    SetContentRoot( IPluginManager::Get().FindPlugin( "Odyssey" )->GetBaseDir() / TEXT( "Resources" ) );
+    SetContentRoot( IPluginManager::Get().FindPlugin( "Odyssey" )->GetBaseDir() / TEXT( "Resources" ) / TEXT( "OdysseyAssetResources" ) );
 
     //---
 
     // tab icons
-    Set( "EposSequenceEditor.Tabs.Sequencer", new IMAGE_BRUSH_SVG( "sequencer-tab", Icon16x16 ) ); // Seems to be only in toolkit standalone mode, but the plugin seems to always be in world-centric mode
+    Set( "EposSequenceEditor.Tabs.Sequencer", new IMAGE_BRUSH_SVG( "Storyboard/sequencer-tab", Icon16x16 ) ); // Seems to be only in toolkit standalone mode, but the plugin seems to always be in world-centric mode
 
     // asset thumbnail
-    Set( "ClassIcon.BoardSequence", new IMAGE_BRUSH_SVG( "sequence-board", Icon16x16 ) );
-    Set( "ClassThumbnail.BoardSequence", new IMAGE_BRUSH_SVG( "sequence-board", Icon64x64 ) );
-    Set( "ClassIcon.ShotSequence", new IMAGE_BRUSH_SVG( "sequence-shot", Icon16x16 ) );
-    Set( "ClassThumbnail.ShotSequence", new IMAGE_BRUSH_SVG( "sequence-shot", Icon64x64 ) );
-    Set( "ClassIcon.StoryNote", new IMAGE_BRUSH_SVG( "storynote", Icon16x16 ) );
-    Set( "ClassThumbnail.StoryNote", new IMAGE_BRUSH_SVG( "storynote", Icon64x64 ) );
+    Set( "ClassIcon.BoardSequence", new IMAGE_BRUSH_SVG( "Storyboard/sequence-board", Icon16x16 ) );
+    Set( "ClassThumbnail.BoardSequence", new IMAGE_BRUSH_SVG( "Storyboard/sequence-board", Icon64x64 ) );
+    Set( "ClassIcon.ShotSequence", new IMAGE_BRUSH_SVG( "Storyboard/sequence-shot", Icon16x16 ) );
+    Set( "ClassThumbnail.ShotSequence", new IMAGE_BRUSH_SVG( "Storyboard/sequence-shot", Icon64x64 ) );
+    Set( "ClassIcon.StoryNote", new IMAGE_BRUSH_SVG( "Storyboard/storynote", Icon16x16 ) );
+    Set( "ClassThumbnail.StoryNote", new IMAGE_BRUSH_SVG( "Storyboard/storynote", Icon64x64 ) );
 
     //---
 
@@ -84,71 +84,71 @@ FEposSequenceEditorStyle::InitSequencer()
          .SetColorAndOpacity( FLinearColor( FColor( 96, 96, 96 ) ) )
     );
 
-    Set( "Settings", new IMAGE_BRUSH_SVG( "epos-settings", Icon20x20 ) );
-    Set( "Settings.Small", new IMAGE_BRUSH_SVG( "epos-settings", Icon20x20 ) );
+    Set( "Settings", new IMAGE_BRUSH_SVG( "Storyboard/settings", Icon20x20 ) );
+    Set( "Settings.Small", new IMAGE_BRUSH_SVG( "Storyboard/settings", Icon20x20 ) );
 }
 
 void
 FEposSequenceEditorStyle::InitCommands()
 {
-    SetContentRoot( IPluginManager::Get().FindPlugin( "Odyssey" )->GetBaseDir() / TEXT( "Resources" ) );
+    SetContentRoot( IPluginManager::Get().FindPlugin( "Odyssey" )->GetBaseDir() / TEXT( "Resources" ) / TEXT( "OdysseyAssetResources" ) );
 
     //---
 
-    Set( "EposSequenceCommands.NewStoryboardWithSettings", new IMAGE_BRUSH_SVG( "new-storyboard-with-settings", Icon20x20 ) );
-    Set( "EposSequenceCommands.NewStoryboardWithSettings.Small", new IMAGE_BRUSH_SVG( "new-storyboard-with-settings", Icon20x20 ) );
-    Set( "EposSequenceCommands.NewStoryboardImportImageSequence", new IMAGE_BRUSH_SVG( "new-storyboard-import-image-sequence", Icon20x20 ) );
-    Set( "EposSequenceCommands.NewStoryboardImportImageSequence.Small", new IMAGE_BRUSH_SVG( "new-storyboard-import-image-sequence", Icon20x20 ) );
+    Set( "EposSequenceCommands.NewStoryboardWithSettings", new IMAGE_BRUSH_SVG( "Storyboard/new-storyboard-with-settings", Icon20x20 ) );
+    Set( "EposSequenceCommands.NewStoryboardWithSettings.Small", new IMAGE_BRUSH_SVG( "Storyboard/new-storyboard-with-settings", Icon20x20 ) );
+    Set( "EposSequenceCommands.NewStoryboardImportImageSequence", new IMAGE_BRUSH_SVG( "Storyboard/new-storyboard-import-image-sequence", Icon20x20 ) );
+    Set( "EposSequenceCommands.NewStoryboardImportImageSequence.Small", new IMAGE_BRUSH_SVG( "Storyboard/new-storyboard-import-image-sequence", Icon20x20 ) );
 
-    Set( "EposSequenceCommands.ToggleStoryboardViewportCommand", new IMAGE_BRUSH_SVG( "toggle-storyboard-viewport-type", Icon20x20 ) );
+    Set( "EposSequenceCommands.ToggleStoryboardViewportCommand", new IMAGE_BRUSH_SVG( "StoryboardViewport/toggle-storyboard-viewport-type", Icon20x20 ) );
 
-    Set( "EposSequenceCommands.CreateCameraAtCurrentTime", new IMAGE_BRUSH_SVG( "camera-create", Icon20x20 ) );
-    Set( "EposSequenceCommands.CreateCameraAtCurrentTime.Small", new IMAGE_BRUSH_SVG( "camera-create", Icon20x20 ) );
-    Set( "EposSequenceCommands.SnapCameraToViewportAtCurrentTime", new IMAGE_BRUSH_SVG( "camera-snap-to-viewport", Icon20x20 ) );         // inside popup (and maybe big toolbar ?) but Icon..x.. is not used ?
-    Set( "EposSequenceCommands.SnapCameraToViewportAtCurrentTime.Small", new IMAGE_BRUSH_SVG( "camera-snap-to-viewport", Icon20x20 ) );   // in the toolbar, stretch to the size Icon..x..
-    //Set( "EposSequenceCommands.PilotCameraAtCurrentTime", new IMAGE_BRUSH_SVG( "camera-pilot", Icon20x20 ) );
-    //Set( "EposSequenceCommands.PilotCameraAtCurrentTime.Small", new IMAGE_BRUSH_SVG( "camera-pilot", Icon20x20 ) );
-    //Set( "EposSequenceCommands.EjectCameraAtCurrentTime", new IMAGE_BRUSH_SVG( "camera-eject", Icon20x20 ) );
-    //Set( "EposSequenceCommands.EjectCameraAtCurrentTime.Small", new IMAGE_BRUSH_SVG( "camera-eject", Icon20x20 ) ); // Not used in a widget, only in shortcuts for the moment
-    Set( "EposSequenceCommands.GotoPreviousCameraPosition", new IMAGE_BRUSH_SVG( "camera-previous", Icon20x20 ) );
-    Set( "EposSequenceCommands.GotoPreviousCameraPosition.Small", new IMAGE_BRUSH_SVG( "camera-previous", Icon20x20 ) );
-    Set( "EposSequenceCommands.GotoNextCameraPosition", new IMAGE_BRUSH_SVG( "camera-next", Icon20x20 ) );
-    Set( "EposSequenceCommands.GotoNextCameraPosition.Small", new IMAGE_BRUSH_SVG( "camera-next", Icon20x20 ) );
+    Set( "EposSequenceCommands.CreateCameraAtCurrentTime", new IMAGE_BRUSH_SVG( "Storyboard/camera-create", Icon20x20 ) );
+    Set( "EposSequenceCommands.CreateCameraAtCurrentTime.Small", new IMAGE_BRUSH_SVG( "Storyboard/camera-create", Icon20x20 ) );
+    Set( "EposSequenceCommands.SnapCameraToViewportAtCurrentTime", new IMAGE_BRUSH_SVG( "Storyboard/camera-snap-to-viewport", Icon20x20 ) );         // inside popup (and maybe big toolbar ?) but Icon..x.. is not used ?
+    Set( "EposSequenceCommands.SnapCameraToViewportAtCurrentTime.Small", new IMAGE_BRUSH_SVG( "Storyboard/camera-snap-to-viewport", Icon20x20 ) );   // in the toolbar, stretch to the size Icon..x..
+    //Set( "EposSequenceCommands.PilotCameraAtCurrentTime", new IMAGE_BRUSH_SVG( "Storyboard/camera-pilot", Icon20x20 ) );
+    //Set( "EposSequenceCommands.PilotCameraAtCurrentTime.Small", new IMAGE_BRUSH_SVG( "Storyboard/camera-pilot", Icon20x20 ) );
+    //Set( "EposSequenceCommands.EjectCameraAtCurrentTime", new IMAGE_BRUSH_SVG( "Storyboard/camera-eject", Icon20x20 ) );
+    //Set( "EposSequenceCommands.EjectCameraAtCurrentTime.Small", new IMAGE_BRUSH_SVG( "Storyboard/camera-eject", Icon20x20 ) ); // Not used in a widget, only in shortcuts for the moment
+    Set( "EposSequenceCommands.GotoPreviousCameraPosition", new IMAGE_BRUSH_SVG( "Storyboard/camera-previous", Icon20x20 ) );
+    Set( "EposSequenceCommands.GotoPreviousCameraPosition.Small", new IMAGE_BRUSH_SVG( "Storyboard/camera-previous", Icon20x20 ) );
+    Set( "EposSequenceCommands.GotoNextCameraPosition", new IMAGE_BRUSH_SVG( "Storyboard/camera-next", Icon20x20 ) );
+    Set( "EposSequenceCommands.GotoNextCameraPosition.Small", new IMAGE_BRUSH_SVG( "Storyboard/camera-next", Icon20x20 ) );
 
-    Set( "EposSequenceCommands.CreateAnimationAtCurrentTime", new IMAGE_BRUSH_SVG( "animation-create", Icon20x20 ) );
-    Set( "EposSequenceCommands.CreateAnimationAtCurrentTime.Small", new IMAGE_BRUSH_SVG( "animation-create", Icon20x20 ) );
-    Set( "EposSequenceCommands.DetachAnimationAtCurrentTime", new IMAGE_BRUSH_SVG( "animation-detach", Icon20x20 ) );
-    Set( "EposSequenceCommands.DetachAnimationAtCurrentTime.Small", new IMAGE_BRUSH_SVG( "animation-detach", Icon20x20 ) );
+    Set( "EposSequenceCommands.CreateAnimationAtCurrentTime", new IMAGE_BRUSH_SVG( "Storyboard/animation-create", Icon20x20 ) );
+    Set( "EposSequenceCommands.CreateAnimationAtCurrentTime.Small", new IMAGE_BRUSH_SVG( "Storyboard/animation-create", Icon20x20 ) );
+    Set( "EposSequenceCommands.DetachAnimationAtCurrentTime", new IMAGE_BRUSH_SVG( "Storyboard/animation-detach", Icon20x20 ) );
+    Set( "EposSequenceCommands.DetachAnimationAtCurrentTime.Small", new IMAGE_BRUSH_SVG( "Storyboard/animation-detach", Icon20x20 ) );
 
-    Set( "EposSequenceCommands.CreateAnimationCutAtCurrentTime", new IMAGE_BRUSH_SVG( "animationcut-create", Icon20x20 ) );
-    Set( "EposSequenceCommands.CreateAnimationCutAtCurrentTime.Small", new IMAGE_BRUSH_SVG( "animationcut-create", Icon20x20 ) );
-    Set( "EposSequenceCommands.GotoPreviousAnimationCut", new IMAGE_BRUSH_SVG( "animationcut-previous", Icon20x20 ) );
-    Set( "EposSequenceCommands.GotoPreviousAnimationCut.Small", new IMAGE_BRUSH_SVG( "animationcut-previous", Icon20x20 ) );
-    Set( "EposSequenceCommands.GotoNextAnimationCut", new IMAGE_BRUSH_SVG( "animationcut-next", Icon20x20 ) );
-    Set( "EposSequenceCommands.GotoNextAnimationCut.Small", new IMAGE_BRUSH_SVG( "animationcut-next", Icon20x20 ) );
+    Set( "EposSequenceCommands.CreateAnimationCutAtCurrentTime", new IMAGE_BRUSH_SVG( "Storyboard/animationcut-create", Icon20x20 ) );
+    Set( "EposSequenceCommands.CreateAnimationCutAtCurrentTime.Small", new IMAGE_BRUSH_SVG( "Storyboard/animationcut-create", Icon20x20 ) );
+    Set( "EposSequenceCommands.GotoPreviousAnimationCut", new IMAGE_BRUSH_SVG( "Storyboard/animationcut-previous", Icon20x20 ) );
+    Set( "EposSequenceCommands.GotoPreviousAnimationCut.Small", new IMAGE_BRUSH_SVG( "Storyboard/animationcut-previous", Icon20x20 ) );
+    Set( "EposSequenceCommands.GotoNextAnimationCut", new IMAGE_BRUSH_SVG( "Storyboard/animationcut-next", Icon20x20 ) );
+    Set( "EposSequenceCommands.GotoNextAnimationCut.Small", new IMAGE_BRUSH_SVG( "Storyboard/animationcut-next", Icon20x20 ) );
 
-    Set( "EposSequenceCommands.OpenSequenceEditorSettings", new IMAGE_BRUSH_SVG( "epos-settings", Icon20x20 ) );
-    Set( "EposSequenceCommands.OpenSequenceEditorSettings.Small", new IMAGE_BRUSH_SVG( "epos-settings", Icon20x20 ) );
-    Set( "EposSequenceCommands.OpenTrackEditorSettings", new IMAGE_BRUSH_SVG( "epos-settings", Icon20x20 ) );
-    Set( "EposSequenceCommands.OpenTrackEditorSettings.Small", new IMAGE_BRUSH_SVG( "epos-settings", Icon20x20 ) );
-    Set( "EposSequenceCommands.OpenNamingConventionEditorSettings", new IMAGE_BRUSH_SVG( "epos-settings", Icon20x20 ) );
-    Set( "EposSequenceCommands.OpenNamingConventionEditorSettings.Small", new IMAGE_BRUSH_SVG( "epos-settings", Icon20x20 ) );
+    Set( "EposSequenceCommands.OpenSequenceEditorSettings", new IMAGE_BRUSH_SVG( "Storyboard/settings", Icon20x20 ) );
+    Set( "EposSequenceCommands.OpenSequenceEditorSettings.Small", new IMAGE_BRUSH_SVG( "Storyboard/settings", Icon20x20 ) );
+    Set( "EposSequenceCommands.OpenTrackEditorSettings", new IMAGE_BRUSH_SVG( "Storyboard/settings", Icon20x20 ) );
+    Set( "EposSequenceCommands.OpenTrackEditorSettings.Small", new IMAGE_BRUSH_SVG( "Storyboard/settings", Icon20x20 ) );
+    Set( "EposSequenceCommands.OpenNamingConventionEditorSettings", new IMAGE_BRUSH_SVG( "Storyboard/settings", Icon20x20 ) );
+    Set( "EposSequenceCommands.OpenNamingConventionEditorSettings.Small", new IMAGE_BRUSH_SVG( "Storyboard/settings", Icon20x20 ) );
 
-    Set( "EposSequenceCommands.StoryboardViewportResetPanZoomRotate", new IMAGE_BRUSH_SVG( "viewport-reset-transform", Icon20x20 ) );
-    Set( "EposSequenceCommands.StoryboardViewportResetPanZoomRotate.Small", new IMAGE_BRUSH_SVG( "viewport-reset-transform", Icon20x20 ) );
+    Set( "EposSequenceCommands.StoryboardViewportResetPanZoomRotate", new IMAGE_BRUSH_SVG( "StoryboardViewport/viewport-reset-transform", Icon20x20 ) );
+    Set( "EposSequenceCommands.StoryboardViewportResetPanZoomRotate.Small", new IMAGE_BRUSH_SVG( "StoryboardViewport/viewport-reset-transform", Icon20x20 ) );
 }
 
 void
 FEposSequenceEditorStyle::InitViewport()
 {
-    SetContentRoot( IPluginManager::Get().FindPlugin( "Odyssey" )->GetBaseDir() / TEXT( "Resources" ) );
+    SetContentRoot( IPluginManager::Get().FindPlugin( "Odyssey" )->GetBaseDir() / TEXT( "Resources" ) / TEXT( "OdysseyAssetResources" ) );
 
     //---
 
-    Set( "Viewport.Settings", new IMAGE_BRUSH_SVG( "viewport-settings", Icon24x24 ) );
+    Set( "Viewport.Settings", new IMAGE_BRUSH_SVG( "StoryboardViewport/viewport-settings", Icon24x24 ) );
 
-    Set( "Viewport.ResetTransform", new IMAGE_BRUSH_SVG( "viewport-reset-transform", Icon24x24 ) );
-    Set( "Viewport.FitToCameraView", new IMAGE_BRUSH_SVG( "viewport-fit-to-camera-view", Icon16x16 ) );
+    Set( "Viewport.ResetTransform", new IMAGE_BRUSH_SVG( "StoryboardViewport/viewport-reset-transform", Icon24x24 ) );
+    Set( "Viewport.FitToCameraView", new IMAGE_BRUSH_SVG( "StoryboardViewport/viewport-fit-to-camera-view", Icon16x16 ) );
 
     //-
 
@@ -216,7 +216,7 @@ FEposSequenceEditorStyle::InitViewport()
 void
 FEposSequenceEditorStyle::InitImportExport()
 {
-    SetContentRoot( IPluginManager::Get().FindPlugin( "Odyssey" )->GetBaseDir() / TEXT( "Resources" ) );
+    SetContentRoot( IPluginManager::Get().FindPlugin( "Odyssey" )->GetBaseDir() / TEXT( "Resources" ) / TEXT( "OdysseyAssetResources" ) );
 
     //---
 
