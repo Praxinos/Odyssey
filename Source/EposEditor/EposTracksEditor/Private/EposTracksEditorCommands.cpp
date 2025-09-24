@@ -8,7 +8,7 @@
 #define LOCTEXT_NAMESPACE "EposTracksEditorCommands"
 
 FEposTracksEditorCommands::FEposTracksEditorCommands()
-    : TCommands<FEposTracksEditorCommands>("EposTracksEditorCommands" /* must match Set() parameter in style*/, LOCTEXT("EposTracksEditorStyle", "Epos Tracks Editor"), NAME_None, FEposTracksEditorStyle::Get().GetStyleSetName() )
+    : TCommands<FEposTracksEditorCommands>("EposTracksEditorCommands" /* must match Set() parameter in style*/, LOCTEXT("OdysseyTracksEditorCommand", "Odyssey Storyboard Tracks Editor"), NAME_None, FEposTracksEditorStyle::Get().GetStyleSetName() )
 {
 }
 

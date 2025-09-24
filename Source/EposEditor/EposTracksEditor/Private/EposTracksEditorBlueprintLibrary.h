@@ -23,6 +23,6 @@ public:
     /**
      * Get Settings
      */
-    UFUNCTION( BlueprintCallable, Category = "Epos Tracks Editor" )
+    UFUNCTION( BlueprintCallable, Category = "Odyssey|Storyboard Editor|Tracks" )
     static UEposTracksEditorSettings* GetEposTracksEditorDefaultSettings();
 };

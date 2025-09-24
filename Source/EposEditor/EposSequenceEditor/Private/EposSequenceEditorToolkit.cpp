@@ -371,7 +371,7 @@ bool FEposSequenceEditorToolkit::CanFindInContentBrowser() const
 
 FText FEposSequenceEditorToolkit::GetBaseToolkitName() const
 {
-    return LOCTEXT( "AppLabel", "Epos Sequence Editor" );
+    return LOCTEXT( "AppLabel", "Odyssey Storyboard Editor" );
 }
 
 FName FEposSequenceEditorToolkit::GetToolkitFName() const

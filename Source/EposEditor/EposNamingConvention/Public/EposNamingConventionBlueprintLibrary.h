@@ -23,7 +23,7 @@ public:
     /*
      * Open a board sequence asset
      */
-    UFUNCTION(BlueprintCallable, Category = "Epos Naming Convention")
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard|Naming Convention")
     static FString GenerateNoteAssetPathName( FString& Path, FString& Name );
 
 public:
@@ -31,7 +31,7 @@ public:
     /**
      * Get Settings
      */
-    UFUNCTION( BlueprintCallable, Category = "Epos Naming Convention" )
+    UFUNCTION( BlueprintCallable, Category = "Odyssey|Storyboard|Naming Convention" )
     static UNamingConventionSettings* GetEposNamingConventionDefaultSettings();
 
 public:

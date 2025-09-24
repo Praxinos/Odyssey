@@ -122,7 +122,7 @@ FEposSequenceEditorModule::RegisterMenuExtensions()
     mCinematicsMenuExtender = MakeShareable( new FExtender );
     mCinematicsMenuExtender->AddMenuExtension( "LevelEditorNewCinematics", EExtensionHook::After, mCommandList, FMenuExtensionDelegate::CreateLambda( []( FMenuBuilder& MenuBuilder )
     {
-        MenuBuilder.BeginSection( "CinematicsEpos", LOCTEXT( "CinematicsEpos", "Epos" ) );
+        MenuBuilder.BeginSection( "CinematicsOdyssey", LOCTEXT( "CinematicsOdyssey", "Odyssey" ) );
         {
             MenuBuilder.AddMenuEntry( FEposSequenceEditorCommands::Get().NewStoryboardWithSettings );
             MenuBuilder.AddMenuEntry( FEposSequenceEditorCommands::Get().NewStoryboardImportImageSequence );

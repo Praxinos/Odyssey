@@ -18,7 +18,7 @@ const FName ViewportZoomBundleName = "ViewportZoom";
 }
 
 FEposSequenceEditorCommands::FEposSequenceEditorCommands()
-    : TCommands<FEposSequenceEditorCommands>( "EposSequenceCommands" /* must match Set() parameter in style*/, LOCTEXT("EposSequenceEditorStyle", "Epos Editor"), NAME_None, FEposSequenceEditorStyle::Get().GetStyleSetName() )
+    : TCommands<FEposSequenceEditorCommands>( "EposSequenceCommands" /* must match Set() parameter in style*/, LOCTEXT("OdysseySequenceEditorCommand", "Odyssey Storyboard Editor"), NAME_None, FEposSequenceEditorStyle::Get().GetStyleSetName() )
 {
     AddBundle( ViewportRotationBundleName, LOCTEXT( "CommandsCategory.ViewportRotation", "Viewport Rotation" ) );
     AddBundle( ViewportZoomBundleName, LOCTEXT( "CommandsCategory.ViewportZoom", "Viewport Zoom" ) );

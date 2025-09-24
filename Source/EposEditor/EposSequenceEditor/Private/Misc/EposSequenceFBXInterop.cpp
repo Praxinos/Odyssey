@@ -135,7 +135,7 @@ void FEposSequenceFBXInterop::ExportFBX()
 
         bExportFileNamePicked = DesktopPlatform->SaveFileDialog(
             FSlateApplication::Get().FindBestParentWindowHandleForDialogs(nullptr),
-            LOCTEXT( "ExportEposSequence", "Export Epos Sequence" ).ToString(),
+            LOCTEXT( "ExportStoryboardSequence", "Export Storyboard Sequence" ).ToString(),
             *( FEditorDirectories::Get().GetLastDirectory( ELastDirectory::FBX ) ),
             TEXT( "" ),
             *FileTypes,

@@ -41,7 +41,7 @@ public:
     * @param    PanelList       The structure which contains all the panels to construct the layout.
     * @param    Preview         To know if it's for the preview in the export panel or the final pdf file.
     */
-    UFUNCTION( BlueprintImplementableEvent, Category="Epos PDF Layout" )
+    UFUNCTION( BlueprintImplementableEvent, Category="Odyssey|Storyboard Editor|PDF Doc" )
     void OnConstructPDFLayout( const FExportStruct& PanelList, bool Preview );
 
     /**
@@ -49,7 +49,7 @@ public:
     *
     * @return The list of page to export
     */
-    UFUNCTION( BlueprintImplementableEvent, BlueprintCallable, Category="Epos PDF Layout" )
+    UFUNCTION( BlueprintImplementableEvent, BlueprintCallable, Category="Odyssey|Storyboard Editor|PDF Doc" )
     int32 GetTotalPDFPageNumber();
 
     /**
@@ -57,7 +57,7 @@ public:
     *
     * @return The current page number
     */
-    UFUNCTION( BlueprintImplementableEvent, BlueprintCallable, Category="Epos PDF Layout" )
+    UFUNCTION( BlueprintImplementableEvent, BlueprintCallable, Category="Odyssey|Storyboard Editor|PDF Doc" )
     int32 GetCurrentPDFPageNumber();
 
     /**
@@ -65,7 +65,7 @@ public:
     *
     * @param The page in the pdf file
     */
-    UFUNCTION( BlueprintImplementableEvent, BlueprintCallable, Category="Epos PDF Layout" )
+    UFUNCTION( BlueprintImplementableEvent, BlueprintCallable, Category="Odyssey|Storyboard Editor|PDF Doc" )
     void HandlePDFPageNumber( int32 PDFPageNumber );
 
     /**
@@ -74,7 +74,7 @@ public:
     * @param The page in the pdf file
     * @return The page format
     */
-    UFUNCTION( BlueprintImplementableEvent, BlueprintCallable, Category="Epos PDF Layout" )
+    UFUNCTION( BlueprintImplementableEvent, BlueprintCallable, Category="Odyssey|Storyboard Editor|PDF Doc" )
     EPDFPageFormat GetPDFPageFormat( int32 PDFPageNumber );
 
     /**
@@ -83,6 +83,6 @@ public:
     * @param The page in the pdf file
     * @return The page orientation
     */
-    UFUNCTION( BlueprintImplementableEvent, BlueprintCallable, Category="Epos PDF Layout" )
+    UFUNCTION( BlueprintImplementableEvent, BlueprintCallable, Category="Odyssey|Storyboard Editor|PDF Doc" )
     EPDFPageOrientation GetPDFPageOrientation( int32 PDFPageNumber );
 };

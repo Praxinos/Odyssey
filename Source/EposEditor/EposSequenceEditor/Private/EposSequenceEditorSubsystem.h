@@ -65,7 +65,7 @@ public:
      * The ExportedTest string can be used in conjunction with PasteFolders if, for example, pasting copy/pasting multiple
      * folders without relying on a single clipboard.
      */
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor")
     void CopyFolders(const TArray<UMovieSceneFolder*>& Folders, FString& FoldersExportedText, FString& ObjectsExportedText, FString& TracksExportedText);
 
     UE_DEPRECATED(5.5, "CopyFolders now gathers objects and tracks within the folders. Please use CopyFolders that outputs ObjectsExportedText and TracksExportedText")
@@ -76,7 +76,7 @@ public:
      * Paste folders from the given TextToImport string (used in conjunction with CopyFolders).
      * If TextToImport is empty, the contents of the clipboard will be used.
      */
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor")
     bool PasteFolders(const FString& TextToImport, FMovieScenePasteFoldersParams PasteFoldersParams, TArray<UMovieSceneFolder*>& OutFolders);
 
     /**
@@ -85,7 +85,7 @@ public:
      * The ExportedTest string can be used in conjunction with PasteSections if, for example, pasting copy/pasting multiple
      * sections without relying on a single clipboard.
      */
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor")
     void CopySections(const TArray<UMovieSceneSection*>& Sections, FString& ExportedText);
 
     /**
@@ -93,7 +93,7 @@ public:
      * Paste sections from the given TextToImport string (used in conjunction with CopySections).
      * If TextToImport is empty, the contents of the clipboard will be used.
      */
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor")
     bool PasteSections(const FString& TextToImport, FMovieScenePasteSectionsParams PasteSectionsParams, TArray<UMovieSceneSection*>& OutSections);
 
     /**
@@ -102,7 +102,7 @@ public:
      * The ExportedTest string can be used in conjunction with PasteTracks if, for example, pasting copy/pasting multiple
      * tracks without relying on a single clipboard.
      */
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor")
     void CopyTracks(const TArray<UMovieSceneTrack*>& Tracks, const TArray<UMovieSceneFolder*>& Folders, FString& ExportedText);
 
     /**
@@ -110,7 +110,7 @@ public:
      * Paste tracks from the given TextToImport string (used in conjunction with CopyTracks).
      * If TextToImport is empty, the contents of the clipboard will be used.
      */
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor")
     bool PasteTracks(const FString& TextToImport, FMovieScenePasteTracksParams PasteTracksParams, TArray<UMovieSceneTrack*>& OutTracks);
 
     /**
@@ -119,7 +119,7 @@ public:
      * The ExportedTest string can be used in conjunction with PasteBindings if, for example, pasting copy/pasting multiple
      * bindings without relying on a single clipboard.
      */
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor")
     void CopyBindings(const TArray<FMovieSceneBindingProxy>& Bindings, const TArray<UMovieSceneFolder*>& Folders, FString& ExportedText);
 
     /**
@@ -127,13 +127,13 @@ public:
      * Paste bindings from the given TextToImport string (used in conjunction with CopyBindings).
      * If TextToImport is empty, the contents of the clipboard will be used.
      */
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor")
     bool PasteBindings(const FString& TextToImport, FMovieScenePasteBindingsParams PasteBindingsParams, TArray<FMovieSceneBindingProxy>& OutObjectBindings);
 
     //...
 
     /** Attempts to automatically fix up broken actor references in the current scene */
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor")
     void FixActorReferences();
 
     //...

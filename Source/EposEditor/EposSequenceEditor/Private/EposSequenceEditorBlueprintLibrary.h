@@ -63,13 +63,13 @@ public:
     /**
      * Get the currently opened root/master board sequence asset
      */
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor|Board")
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor|Board")
     static UBoardSequence* GetRootBoardSequence();
 
     /**
      * Get the currently focused/viewed board sequence asset if there is a hierarchy of sequences.
      */
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor|Board")
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor|Board")
     static UBoardSequence* GetFocusedBoardSequence();
 
 public:
@@ -77,31 +77,31 @@ public:
     /**
      * Create a new root board sequence
      */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board" )
+    UFUNCTION( BlueprintCallable, Category = "Odyssey|Storyboard Editor|Board" )
     static UBoardSequence* CreateRootBoardSequence( const FString& BoardPath, const FString& BoardName );
 
     /**
      * Insert a new board sequence at the given frame
      */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board" )
+    UFUNCTION( BlueprintCallable, Category = "Odyssey|Storyboard Editor|Board" )
     static UMovieSceneSubSection* InsertBoardSequence( int32 StartFrame, int32 EndFrame );
 
     /**
      * Insert a new shot sequence at the given frame
      */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board" )
+    UFUNCTION( BlueprintCallable, Category = "Odyssey|Storyboard Editor|Board" )
     static UMovieSceneSubSection* InsertShotSequence( int32 StartFrame, int32 EndFrame );
 
     /**
      * Clone a subsection with its sequence
      */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board" )
+    UFUNCTION( BlueprintCallable, Category = "Odyssey|Storyboard Editor|Board" )
     static UMovieSceneSubSection* CloneSection( UMovieSceneSubSection* SubSection, int32 FrameNumber );
 
     /**
      * Import an image sequence
      */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board" )
+    UFUNCTION( BlueprintCallable, Category = "Odyssey|Storyboard Editor|Board" )
     static UBoardSequence* ImportImageSequence( const FString& BoardPath, const FString& BoardName, const FImportImageSequenceOptions& Options );
 
 public:
@@ -109,7 +109,7 @@ public:
     /**
      * Create a camera in a subsection at the given frame
      */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board" )
+    UFUNCTION( BlueprintCallable, Category = "Odyssey|Storyboard Editor|Board" )
     static void CreateCameraWithAnimation( UMovieSceneSubSection* SubSection );
 
 public:
@@ -117,43 +117,43 @@ public:
     /**
      * Create a animation in a subsection at the given frame
      */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board" )
+    UFUNCTION( BlueprintCallable, Category = "Odyssey|Storyboard Editor|Board" )
     static void CreateAnimation( UMovieSceneSubSection* SubSection );
 
     /**
      * Collapse animation's keys area
      */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board" )
+    UFUNCTION( BlueprintCallable, Category = "Odyssey|Storyboard Editor|Board" )
     static void CollapseAnimation( UMovieSceneSubSection* SubSection, const FMovieSceneBindingProxy& Binding );
 
     /**
      * Expand animation's keys area
      */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board" )
+    UFUNCTION( BlueprintCallable, Category = "Odyssey|Storyboard Editor|Board" )
     static void ExpandAnimation( UMovieSceneSubSection* SubSection, const FMovieSceneBindingProxy& Binding );
 
     /**
      * Get animation's keys area state
      */
-    UFUNCTION( BlueprintPure, Category = "Epos Sequence Editor|Board" )
+    UFUNCTION( BlueprintPure, Category = "Odyssey|Storyboard Editor|Board" )
     static bool IsAnimationCollapsed( UMovieSceneSubSection* SubSection, const FMovieSceneBindingProxy& Binding );
 
     /**
      * Get animation's keys area state
      */
-    UFUNCTION( BlueprintPure, Category = "Epos Sequence Editor|Board" )
+    UFUNCTION( BlueprintPure, Category = "Odyssey|Storyboard Editor|Board" )
     static bool IsAnimationExpanded( UMovieSceneSubSection* SubSection, const FMovieSceneBindingProxy& Binding );
 
     /**
      * Activate the lighttable on the plane
      */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board|Lighttable" )
+    UFUNCTION( BlueprintCallable, Category = "Odyssey|Storyboard Editor|Board|Lighttable" )
     static void ActivateLighttable( UMovieSceneSubSection* SubSection, const FMovieSceneBindingProxy& Binding );
 
     /**
      * Deactivate the lighttable on the plane
      */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board|Lighttable" )
+    UFUNCTION( BlueprintCallable, Category = "Odyssey|Storyboard Editor|Board|Lighttable" )
     static void DeactivateLighttable( UMovieSceneSubSection* SubSection, const FMovieSceneBindingProxy& Binding );
 
     /**
@@ -164,7 +164,7 @@ public:
      *   -1: undetermined (mix of on and off, not enough animation layers)
      * @return 1 | 0 | -1 -> on | off | undetermined
      */
-    UFUNCTION( BlueprintPure, Category = "Epos Sequence Editor|Board|Lighttable" )
+    UFUNCTION( BlueprintPure, Category = "Odyssey|Storyboard Editor|Board|Lighttable" )
     static int32 GetLighttableState( UMovieSceneSubSection* SubSection, const FMovieSceneBindingProxy& Binding );
 
 public:
@@ -172,7 +172,7 @@ public:
     /**
      * Create an animationcut in a animation at the given frame
      */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board" )
+    UFUNCTION( BlueprintCallable, Category = "Odyssey|Storyboard Editor|Board" )
     static void CreateAnimationCut( UMovieSceneSubSection* SubSection, const FMovieSceneBindingProxy& Binding, int32 Frame );
 
 public:
@@ -180,7 +180,7 @@ public:
     /**
      * Rename a animation/camera binding and its actor
      */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board" )
+    UFUNCTION( BlueprintCallable, Category = "Odyssey|Storyboard Editor|Board" )
     static void RenameBinding( UMovieSceneSubSection* SubSection, const FMovieSceneBindingProxy& Binding, FString NewLabel );
 
 public:
@@ -188,43 +188,43 @@ public:
     /**
      * Create a new take in the subsection
      */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board|Take" )
+    UFUNCTION( BlueprintCallable, Category = "Odyssey|Storyboard Editor|Board|Take" )
     static FBoardSectionTake CreateTake( UMovieSceneSubSection* SubSection );
 
     /**
      * Switch take to another in the subsection
      */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Board|Take" )
+    UFUNCTION( BlueprintCallable, Category = "Odyssey|Storyboard Editor|Board|Take" )
     static FBoardSectionTake SwitchTake( UMovieSceneSubSection* SubSection, FBoardSectionTake Take );
 
     /**
      * Get the list of takes in the subsection
      */
-    UFUNCTION( BlueprintPure, Category = "Epos Sequence Editor|Board|Take" )
+    UFUNCTION( BlueprintPure, Category = "Odyssey|Storyboard Editor|Board|Take" )
     static TArray<FBoardSectionTake> GetTakes( UMovieSceneSubSection* SubSection );
 
     /**
      * Get the current take in the subsection
      */
-    UFUNCTION( BlueprintPure, Category = "Epos Sequence Editor|Board|Take" )
+    UFUNCTION( BlueprintPure, Category = "Odyssey|Storyboard Editor|Board|Take" )
     static FBoardSectionTake GetCurrentTake( UMovieSceneSubSection* SubSection );
 
     /**
      * Check the validity of a take
      */
-    UFUNCTION( BlueprintPure, Category = "Epos Sequence Editor|Board|Take" )
+    UFUNCTION( BlueprintPure, Category = "Odyssey|Storyboard Editor|Board|Take" )
     static bool IsValid( FBoardSectionTake Take );
 
     /**
      * Get the name of a take
      */
-    UFUNCTION( BlueprintPure, Category = "Epos Sequence Editor|Board|Take" )
+    UFUNCTION( BlueprintPure, Category = "Odyssey|Storyboard Editor|Board|Take" )
     static FText GetDisplayName( FBoardSectionTake Take );
 
     /**
      * Compare 2 takes
      */
-    UFUNCTION( BlueprintPure, Category = "Epos Sequence Editor|Board|Take", meta = ( DisplayName = "Equal (BoardSectionTake)", CompactNodeTitle = "==" ) )
+    UFUNCTION( BlueprintPure, Category = "Odyssey|Storyboard Editor|Board|Take", meta = ( DisplayName = "Equal (BoardSectionTake)", CompactNodeTitle = "==" ) )
     static bool EqualEqual_BoardSectionTakeBoardSectionTake( FBoardSectionTake A, FBoardSectionTake B );
 };
 
@@ -241,25 +241,25 @@ public:
     /**
      * Get the currently opened root/master shot sequence asset
      */
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor|Shot")
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor|Shot")
     static UShotSequence* GetRootShotSequence();
 
     /**
      * Get the currently focused/viewed shot sequence asset if there is a hierarchy of sequences.
      */
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor|Shot")
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor|Shot")
     static UShotSequence* GetFocusedShotSequence();
 
     /**
      * Step to next sibling shot.
      */
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor|Shot")
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor|Shot")
     static void StepToNextShot();
 
     /**
      * Step to previous sibling shot.
      */
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor|Shot")
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor|Shot")
     static void StepToPreviousShot();
 
 public:
@@ -267,7 +267,7 @@ public:
     /**
      * Create a camera in a shot at the given frame
      */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Shot" )
+    UFUNCTION( BlueprintCallable, Category = "Odyssey|Storyboard Editor|Shot" )
     static void CreateCameraWithAnimation();
 
 public:
@@ -275,19 +275,19 @@ public:
     /**
      * Create a animation in a shot at the given frame
      */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Shot" )
+    UFUNCTION( BlueprintCallable, Category = "Odyssey|Storyboard Editor|Shot" )
     static void CreateAnimation();
 
     /**
      * Activate the lighttable on the plane
      */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Shot|Lighttable" )
+    UFUNCTION( BlueprintCallable, Category = "Odyssey|Storyboard Editor|Shot|Lighttable" )
     static void ActivateLighttable( const FMovieSceneBindingProxy& Binding );
 
     /**
      * Deactivate the lighttable on the plane
      */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Shot|Lighttable" )
+    UFUNCTION( BlueprintCallable, Category = "Odyssey|Storyboard Editor|Shot|Lighttable" )
     static void DeactivateLighttable( const FMovieSceneBindingProxy& Binding );
 
     /**
@@ -298,7 +298,7 @@ public:
      *   -1: undetermined (mix of on and off, not enough animation layers)
      * @return 1 | 0 | -1 -> on | off | undetermined
      */
-    UFUNCTION( BlueprintPure, Category = "Epos Sequence Editor|Shot|Lighttable" )
+    UFUNCTION( BlueprintPure, Category = "Odyssey|Storyboard Editor|Shot|Lighttable" )
     static int32 GetLighttableState( const FMovieSceneBindingProxy& Binding );
 
 public:
@@ -306,7 +306,7 @@ public:
     /**
      * Create an naimationcut in a animation at the given frame
      */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Shot" )
+    UFUNCTION( BlueprintCallable, Category = "Odyssey|Storyboard Editor|Shot" )
     static void CreateAnimationCut( const FMovieSceneBindingProxy& Binding, int32 Frame );
 
 public:
@@ -314,7 +314,7 @@ public:
     /**
      * Rename a animation/camera binding and its actor
      */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor|Shot" )
+    UFUNCTION( BlueprintCallable, Category = "Odyssey|Storyboard Editor|Shot" )
     static void RenameBinding( const FMovieSceneBindingProxy& Binding, FString NewLabel );
 
 };
@@ -339,43 +339,43 @@ public:
     /**
      * Open a board sequence asset
      */
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor")
     static bool OpenEposSequence( UEposMovieSceneSequence* EposSequence );
 
     /**
      * Get the currently opened root/master epos sequence asset
      */
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor")
     static UEposMovieSceneSequence* GetRootEposSequence();
 
     /**
      * Get the currently focused/viewed epos sequence asset if there is a hierarchy of sequences.
      */
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor")
     static UEposMovieSceneSequence* GetFocusedEposSequence();
 
     /**
      * Focus/view the sequence associated to the given sub sequence section.
      */
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor")
     static void FocusEposSequence(UMovieSceneSubSection* SubSection);
 
     /**
      * Focus/view the parent sequence, popping out of the current sub sequence section.
      */
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor")
     static void FocusParentSequence();
 
     /**
      * Get the current sub section hierarchy from the current sequence to the section associated with the focused sequence.
      */
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor")
     static TArray<UMovieSceneSubSection*> GetSubSequenceHierarchy();
 
     /**
      * Close
      */
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor")
     static void CloseEposSequence();
 
 public:
@@ -383,19 +383,19 @@ public:
     /**
      * Move and scale an animation from the camera
      */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor" )
+    UFUNCTION( BlueprintCallable, Category = "Odyssey|Storyboard Editor" )
     static void MoveAndScaleActor( AActor* Actor, const ACineCameraActor* Camera, float NewDistance, EScaleActor ScaleType );
 
     /**
      * Modify camera focal length and scale an animation accordingly
      */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor" )
+    UFUNCTION( BlueprintCallable, Category = "Odyssey|Storyboard Editor" )
     static void SetCameraFocalLengthAndScaleActor( TArray<AActor*> Actors, ACineCameraActor* Camera, float NewFocalLength, EScaleActor ScaleType );
 
     /**
      * Fit the actor to 100% of the camera view (if possible)
      */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor" )
+    UFUNCTION( BlueprintCallable, Category = "Odyssey|Storyboard Editor" )
     static void FitActorToCameraView( AActor* Actor, const ACineCameraActor* Camera );
 
 public:
@@ -406,7 +406,7 @@ public:
      * @param Options The export options
      * @return The export state
      */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor" )
+    UFUNCTION( BlueprintCallable, Category = "Odyssey|Storyboard Editor" )
     static bool ExportAsPDF( const FExportPDFOptions& Options );
 
     /**
@@ -415,7 +415,7 @@ public:
      * @param Options The export options
      * @return The export state
      */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor" )
+    UFUNCTION( BlueprintCallable, Category = "Odyssey|Storyboard Editor" )
     static bool ExportAsImageSequence( const FExportImageSequenceOptions& Options );
 
 public:
@@ -423,7 +423,7 @@ public:
     /**
      * Get Settings
      */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor" )
+    UFUNCTION( BlueprintCallable, Category = "Odyssey|Storyboard Editor" )
     static UEposSequenceEditorSettings* GetEposSequenceEditorDefaultSettings();
 
 public:
@@ -431,273 +431,273 @@ public:
     /**
      * Play the current level sequence
      */
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor")
     static void Play();
 
     /**
      * Pause the current level sequence
      */
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor")
     static void Pause();
 
 public:
 
     UE_DEPRECATED( 5.4, "Use SetCurrentTime that takes a FMovieSceneSequencePlaybackParams" )
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor", meta = ( DeprecatedFunction, DeprecationMessage = "Use SetCurrentTime that takes a FMovieSceneSequencePlaybackParams" ) )
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor", meta = ( DeprecatedFunction, DeprecationMessage = "Use SetCurrentTime that takes a FMovieSceneSequencePlaybackParams" ) )
     static void SetCurrentTime(int32 NewFrame);
 
     UE_DEPRECATED( 5.4, "Use GetCurrentTime that returns a FMovieSceneSequencePlaybackParams" )
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor", meta = ( DeprecatedFunction, DeprecationMessage = "Use GetCurrentTime that returns a FMovieSceneSequencePlaybackParams" ) )
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor", meta = ( DeprecatedFunction, DeprecationMessage = "Use GetCurrentTime that returns a FMovieSceneSequencePlaybackParams" ) )
     static int32 GetCurrentTime();
 
     UE_DEPRECATED( 5.4, "Use SetCurrentLocalTime that takes a FMovieSceneSequencePlaybackParams" )
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor", meta = ( DeprecatedFunction, DeprecationMessage = "Use SetCurrentLocalTime that takes a FMovieSceneSequencePlaybackParams" ) )
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor", meta = ( DeprecatedFunction, DeprecationMessage = "Use SetCurrentLocalTime that takes a FMovieSceneSequencePlaybackParams" ) )
     static void SetCurrentLocalTime(int32 NewFrame);
 
     UE_DEPRECATED( 5.4, "Use GetCurrentLocalTime that takes a FMovieSceneSequencePlaybackParams" )
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor", meta = ( DeprecatedFunction, DeprecationMessage = "Use GetCurrentLocalTime that returns a FMovieSceneSequencePlaybackParams" ) )
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor", meta = ( DeprecatedFunction, DeprecationMessage = "Use GetCurrentLocalTime that returns a FMovieSceneSequencePlaybackParams" ) )
     static int32 GetCurrentLocalTime();
 
     /**
      * Set global playhead position for the current epos sequence. If the requested time is the same as the current time, an evaluation will be forced.
      */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor", DisplayName = "Set Current Time" )
+    UFUNCTION( BlueprintCallable, Category = "Odyssey|Storyboard Editor", DisplayName = "Set Current Time" )
     static void SetGlobalPosition( FMovieSceneSequencePlaybackParams PlaybackParams, EMovieSceneTimeUnit TimeUnit = EMovieSceneTimeUnit::DisplayRate );
 
     /**
      * Get the current global playhead position
      */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor", DisplayName = "Get Current Time" )
+    UFUNCTION( BlueprintCallable, Category = "Odyssey|Storyboard Editor", DisplayName = "Get Current Time" )
     static FMovieSceneSequencePlaybackParams GetGlobalPosition( EMovieSceneTimeUnit TimeUnit = EMovieSceneTimeUnit::DisplayRate );
 
     /**
      * Set local playhead position for the current epos sequence. If the requested time is the same as the current time, an evaluation will be forced.
      */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor", DisplayName = "Set Current Local Time" )
+    UFUNCTION( BlueprintCallable, Category = "Odyssey|Storyboard Editor", DisplayName = "Set Current Local Time" )
     static void SetLocalPosition( FMovieSceneSequencePlaybackParams PlaybackParams, EMovieSceneTimeUnit TimeUnit = EMovieSceneTimeUnit::DisplayRate );
 
     /**
      * Get the current local playhead position
      */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor", DisplayName = "Get Current Local Time" )
+    UFUNCTION( BlueprintCallable, Category = "Odyssey|Storyboard Editor", DisplayName = "Get Current Local Time" )
     static FMovieSceneSequencePlaybackParams GetLocalPosition( EMovieSceneTimeUnit TimeUnit = EMovieSceneTimeUnit::DisplayRate );
 
     /**
      * Set playback speed of the current epos sequence
      */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor" )
+    UFUNCTION( BlueprintCallable, Category = "Odyssey|Storyboard Editor" )
     static void SetPlaybackSpeed( float NewPlaybackSpeed );
 
     /**
      * Get playback speed of the current epos sequence
      */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor" )
+    UFUNCTION( BlueprintCallable, Category = "Odyssey|Storyboard Editor" )
     static float GetPlaybackSpeed();
 
     /**
      * Set loop mode (note this is a per user preference)
      */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor" )
+    UFUNCTION( BlueprintCallable, Category = "Odyssey|Storyboard Editor" )
     static void SetLoopMode( ESequencerLoopMode NewLoopMode );
 
     /**
      * Get loop mode (note this is a per user preference)
      */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor" )
+    UFUNCTION( BlueprintCallable, Category = "Odyssey|Storyboard Editor" )
     static ESequencerLoopMode GetLoopMode();
 
     /**
      * Play from the current time to the requested time in frames
      */
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor")
     static void PlayTo(FMovieSceneSequencePlaybackParams PlaybackParams, EMovieSceneTimeUnit TimeUnit = EMovieSceneTimeUnit::DisplayRate);
 
 public:
 
     /** Return the playback start position */
-    UFUNCTION( BlueprintCallable, Category = "Level Sequence Editor", DisplayName = "Get Playback Start Time" )
+    UFUNCTION( BlueprintCallable, Category = "Odyssey|Storyboard Editor", DisplayName = "Get Playback Start Time" )
     static FMovieSceneSequencePlaybackParams GetPlaybackStartPosition( EMovieSceneTimeUnit TimeUnit = EMovieSceneTimeUnit::DisplayRate );
 
     /** Return end of the playback range in the Sequencer UI, which accounts for the exclusive upper bound */
-    UFUNCTION( BlueprintCallable, Category = "Level Sequence Editor", DisplayName = "Get Playback End Time" )
+    UFUNCTION( BlueprintCallable, Category = "Odyssey|Storyboard Editor", DisplayName = "Get Playback End Time" )
     static FMovieSceneSequencePlaybackParams GetPlaybackEndPosition( EMovieSceneTimeUnit TimeUnit = EMovieSceneTimeUnit::DisplayRate );
 
     /** Check whether the sequence is actively playing. */
-    UFUNCTION(BlueprintPure, Category = "Epos Sequence Editor")
+    UFUNCTION(BlueprintPure, Category = "Odyssey|Storyboard Editor")
     static bool IsPlaying();
 
 public:
 
     /** Gets the currently selected tracks. */
-    UFUNCTION(BlueprintPure, Category = "Epos Sequence Editor")
+    UFUNCTION(BlueprintPure, Category = "Odyssey|Storyboard Editor")
     static TArray<UMovieSceneTrack*> GetSelectedTracks();
 
     /** Gets the currently selected sections. */
-    UFUNCTION(BlueprintPure, Category = "Epos Sequence Editor")
+    UFUNCTION(BlueprintPure, Category = "Odyssey|Storyboard Editor")
     static TArray<UMovieSceneSection*> GetSelectedSections();
 
     /** Gets the currently selected channels. */
-    UFUNCTION(BlueprintPure, Category = "Epos Sequence Editor")
+    UFUNCTION(BlueprintPure, Category = "Odyssey|Storyboard Editor")
     static TArray<FSequencerChannelProxy> GetSelectedChannels();
 
     /** Gets the channel with selected keys. */
-    UFUNCTION( BlueprintPure, Category = "Level Sequence Editor" )
+    UFUNCTION( BlueprintPure, Category = "Odyssey|Storyboard Editor" )
     static TArray<FSequencerChannelProxy> GetChannelsWithSelectedKeys();
 
     /** Gets the selected key indices with this channel */
-    UFUNCTION( BlueprintPure, Category = "Level Sequence Editor" )
+    UFUNCTION( BlueprintPure, Category = "Odyssey|Storyboard Editor" )
     static TArray<int32> GetSelectedKeys( const FSequencerChannelProxy& ChannelProxy );
 
     /** Gets the currently selected folders. */
-    UFUNCTION(BlueprintPure, Category = "Epos Sequence Editor")
+    UFUNCTION(BlueprintPure, Category = "Odyssey|Storyboard Editor")
     static TArray<UMovieSceneFolder*> GetSelectedFolders();
 
     /** Gets the currently selected object bindings */
-    UFUNCTION(BlueprintPure, Category = "Epos Sequence Editor")
+    UFUNCTION(BlueprintPure, Category = "Odyssey|Storyboard Editor")
     static TArray<FMovieSceneBindingProxy> GetSelectedBindings();
 
     /** Select tracks */
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor")
     static void SelectTracks(const TArray<UMovieSceneTrack*>& Tracks);
 
     /** Select sections */
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor")
     static void SelectSections(const TArray<UMovieSceneSection*>& Sections);
 
     /** Select channels */
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor")
     static void SelectChannels(const TArray<FSequencerChannelProxy>& Channels);
 
     /** Select keys from indices */
-    UFUNCTION( BlueprintCallable, Category = "Level Sequence Editor" )
+    UFUNCTION( BlueprintCallable, Category = "Odyssey|Storyboard Editor" )
     static void SelectKeys( const FSequencerChannelProxy& Channel, const TArray<int32>& Indices );
 
     /** Select folders */
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor")
     static void SelectFolders(const TArray<UMovieSceneFolder*>& Folders);
 
     /** Select bindings */
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor")
     static void SelectBindings(const TArray<FMovieSceneBindingProxy>& ObjectBindings);
 
     /** Empties the current selection. */
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor")
     static void EmptySelection();
 
     /** Set the selection range start frame. */
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor")
     static void SetSelectionRangeStart(int32 NewFrame);
 
     /** Set the selection range end frame. */
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor")
     static void SetSelectionRangeEnd(int32 NewFrame);
 
     /** Get the selection range start frame. */
-    UFUNCTION(BlueprintPure, Category = "Epos Sequence Editor")
+    UFUNCTION(BlueprintPure, Category = "Odyssey|Storyboard Editor")
     static int32 GetSelectionRangeStart();
 
     /** Get the selection range end frame. */
-    UFUNCTION(BlueprintPure, Category = "Epos Sequence Editor")
+    UFUNCTION(BlueprintPure, Category = "Odyssey|Storyboard Editor")
     static int32 GetSelectionRangeEnd();
 
 public:
 
     /** Refresh Sequencer UI on next tick */
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor")
     static void RefreshCurrentEposSequence();
 
     /** Force sequencer evaluation and UI update immediately */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor" )
+    UFUNCTION( BlueprintCallable, Category = "Odyssey|Storyboard Editor" )
     static void ForceUpdate();
 
     /** Get the object bound to the given binding ID with the current Epos Sequence Editor */
-    UFUNCTION(BlueprintPure, Category="Epos Sequence Editor")
+    UFUNCTION(BlueprintPure, Category="Odyssey|Storyboard Editor")
     static TArray<UObject*> GetBoundObjects(FMovieSceneObjectBindingID ObjectBinding);
 
     /** Check whether the current level sequence and its descendants are locked for editing. */
-    UFUNCTION(BlueprintPure, Category = "Epos Sequence Editor")
+    UFUNCTION(BlueprintPure, Category = "Odyssey|Storyboard Editor")
     static bool IsEposSequenceLocked();
 
     /** Sets the lock for the current level sequence and its descendants for editing. */
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor")
     static void SetLockEposSequence(bool bLock);
 
 public:
 
     /** Check whether the lock for the viewport to the camera cuts is enabled. */
-    UFUNCTION(BlueprintPure, Category = "Epos Sequence Editor")
+    UFUNCTION(BlueprintPure, Category = "Odyssey|Storyboard Editor")
     static bool IsCameraCutLockedToViewport();
 
     /** Sets the lock for the viewport to the camera cuts. */
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor")
     static void SetLockCameraCutToViewport(bool bLock);
 
     /** Check whether the lock for the viewport on the board track to the inner camera cuts is enabled. */
-    UFUNCTION(BlueprintPure, Category = "Epos Sequence Editor")
+    UFUNCTION(BlueprintPure, Category = "Odyssey|Storyboard Editor")
     static bool IsBoardInnerCameraCutLockedToViewport();
 
     /** Sets the lock for the viewport on the board track to the inner camera cuts. */
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor")
     static void SetLockBoardInnerCameraCutToViewport(bool bLock);
 
 public:
 
     /** Gets whether the specified track filter is on/off */
     UE_DEPRECATED( 5.5, "Use IsTrackFilterActive" )
-    UFUNCTION(BlueprintPure, Category = "Epos Sequence Editor")
+    UFUNCTION(BlueprintPure, Category = "Odyssey|Storyboard Editor")
     static bool IsTrackFilterEnabled(const FText& TrackFilterName);
 
     /** Gets whether the specified track filter is on/off */
-    UFUNCTION( BlueprintPure, Category = "Epos Sequence Editor" )
+    UFUNCTION( BlueprintPure, Category = "Odyssey|Storyboard Editor" )
     static bool IsTrackFilterActive( const FText& TrackFilterName );
 
     /** Sets the specified track filter to be on or off */
     UE_DEPRECATED( 5.5, "Use SetTrackFilterActive" )
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor")
     static void SetTrackFilterEnabled(const FText& TrackFilterName, bool bEnabled);
 
     /** Sets the specified track filter to be on or off */
-    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor" )
+    UFUNCTION( BlueprintCallable, Category = "Odyssey|Storyboard Editor" )
     static void SetTrackFilterActive( const FText& TrackFilterName, bool bActive );
 
     /** Gets all the available track filter names */
-    UFUNCTION(BlueprintPure, Category = "Epos Sequence Editor")
+    UFUNCTION(BlueprintPure, Category = "Odyssey|Storyboard Editor")
     static TArray<FText> GetTrackFilterNames();
 
 public:
     /** Get if a custom color for specified channel idendified by it's class and identifier exists */
     UE_DEPRECATED( 5.4, "Use USequencerCurveEditorObject::HasCustomColorForChannel" )
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor",
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor",
     meta = (DeprecatedFunction, DeprecationMessage = "Use USequencerCurveEditorObject::HasCustomColorForChannel"))
     static bool HasCustomColorForChannel(UClass* Class, const FString& Identifier);
 
     /** Get custom color for specified channel idendified by it's class and identifier,if none exists will return white*/
     UE_DEPRECATED( 5.4, "Use USequencerCurveEditorObject::GetCustomColorForChannel" )
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor",
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor",
     meta = (DeprecatedFunction, DeprecationMessage = "Use USequencerCurveEditorObject::HasCustomColorForChannel"))
     static FLinearColor GetCustomColorForChannel(UClass* Class, const FString& Identifier);
 
     /** Set Custom Color for specified channel idendified by it's class and identifier. This will be stored in editor user preferences.*/
     UE_DEPRECATED( 5.4, "Use USequencerCurveEditorObject::SetCustomColorForChannel" )
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor",
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor",
     meta = (DeprecatedFunction, DeprecationMessage = "Use USequencerCurveEditorObject::SetCustomColorForChannel"))
     static void SetCustomColorForChannel(UClass* Class, const FString& Identifier, const FLinearColor& NewColor);
 
     /** Set Custom Color for specified channels idendified by it's class and identifiers. This will be stored in editor user preferences.*/
     UE_DEPRECATED( 5.4, "Use USequencerCurveEditorObject::DeleteColorForChannels" )
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor",
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor",
     meta = (DeprecatedFunction, DeprecationMessage = "Use USequencerCurveEditorObject::DeleteColorForChannels"))
     static void SetCustomColorForChannels(UClass* Class, const TArray<FString>& Identifiers, const TArray<FLinearColor>& NewColors);
 
     /** Set Random Colors for specified channels idendified by it's class and identifiers. This will be stored in editor user preferences.*/
     UE_DEPRECATED( 5.4, "Use USequencerCurveEditorObject::SetRandomColorForChannels" )
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor",
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor",
     meta = (DeprecatedFunction, DeprecationMessage = "Use USequencerCurveEditorObject::SetRandomColorForChannels"))
     static void SetRandomColorForChannels(UClass* Class, const TArray<FString>& Identifiers);
 
     /** Delete for specified channel idendified by it's class and identifier.*/
     UE_DEPRECATED( 5.4, "Use USequencerCurveEditorObject::DeleteColorForChannels" )
-    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor",
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor",
     meta = (DeprecatedFunction, DeprecationMessage = "Use USequencerCurveEditorObject::DeleteColorForChannels"))
     static void DeleteColorForChannels(UClass* Class, FString& Identifier);
 

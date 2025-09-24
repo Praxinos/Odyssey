@@ -25,7 +25,7 @@ public:
      * @param The list of panels
      * @return The name of the storyboard
      */
-    UFUNCTION( BlueprintPure, Category="Epos Sequence Editor|Export PDF" )
+    UFUNCTION( BlueprintPure, Category="Odyssey|Storyboard Editor|PDF" )
     static FText GetRootBoardName( const FExportStruct& ExportStruct );
 
     /**
@@ -34,7 +34,7 @@ public:
      * @param The list of panels
      * @return The name of the studio
      */
-    UFUNCTION( BlueprintPure, Category="Epos Sequence Editor|Export PDF" )
+    UFUNCTION( BlueprintPure, Category="Odyssey|Storyboard Editor|PDF" )
     static TArray<FSequenceNameElements> GetNameElementsOfPanels( const FExportStruct& ExportStruct );
 
 public:
@@ -44,7 +44,7 @@ public:
      * @param The list of panels
      * @return The number of panels
      */
-    UFUNCTION( BlueprintPure, Category="Epos Sequence Editor|Export PDF" )
+    UFUNCTION( BlueprintPure, Category="Odyssey|Storyboard Editor|PDF" )
     static int32 GetNumberOfPanels( const FExportStruct& ExportStruct );
 
     /**
@@ -54,7 +54,7 @@ public:
      * @param The index of the desired panel
      * @return The frame number as string (manage frame/timecode/second settings)
      */
-    UFUNCTION( BlueprintPure, Category="Epos Sequence Editor|Export PDF" )
+    UFUNCTION( BlueprintPure, Category="Odyssey|Storyboard Editor|PDF" )
     static FString GetPanelFrameFormatted( const FExportStruct& ExportStruct, int32 PanelIndex );
 
     /**
@@ -64,7 +64,7 @@ public:
      * @param The index of the desired panel
      * @return The frame number (in tick resolution)
      */
-    UFUNCTION( BlueprintPure, Category="Epos Sequence Editor|Export PDF" )
+    UFUNCTION( BlueprintPure, Category="Odyssey|Storyboard Editor|PDF" )
     static FFrameNumber GetPanelFrame( const FExportStruct& ExportStruct, int32 PanelIndex );
 
     /**
@@ -74,7 +74,7 @@ public:
      * @param The index of the desired panel
      * @return The frame number (in tick resolution)
      */
-    UFUNCTION( BlueprintPure, Category="Epos Sequence Editor|Export PDF" )
+    UFUNCTION( BlueprintPure, Category="Odyssey|Storyboard Editor|PDF" )
     static int32 GetPanelDuration( const FExportStruct& ExportStruct, int32 PanelIndex );
 
     /**
@@ -84,14 +84,14 @@ public:
      * @param The index of the desired panel
      * @return The name of the shot
      */
-    UFUNCTION( BlueprintPure, Category="Epos Sequence Editor|Export PDF" )
+    UFUNCTION( BlueprintPure, Category="Odyssey|Storyboard Editor|PDF" )
     static FText GetPanelShotName( const FExportStruct& ExportStruct, int32 PanelIndex );
 
     /**
      * Get the shot name of a panel
      */
     // I don't know if it's a good idea to give access on the sequence and maybe modifying it during the loop ...
-    //UFUNCTION( BlueprintPure, Category="Epos Sequence Editor|Export PDF" )
+    //UFUNCTION( BlueprintPure, Category="Odyssey|Storyboard Editor|PDF" )
     //static const UMovieSceneSequence* GetPanelSequence( const FExportStruct& ExportStruct, int32 PanelIndex );
 
     /**
@@ -103,7 +103,7 @@ public:
      * @param The height (in px) of the wanted texture
      * @return The texture containing the scene
      */
-    UFUNCTION( BlueprintPure, Category="Epos Sequence Editor|Export PDF" )
+    UFUNCTION( BlueprintPure, Category="Odyssey|Storyboard Editor|PDF" )
     static const UTexture2D* GetPanelTexture2D( const FExportStruct& ExportStruct, int32 PanelIndex, int32 Height, EViewModeIndex ViewMode = EViewModeIndex::VMI_Lit );
 
     /**
@@ -114,6 +114,6 @@ public:
      * @param The index of the desired panel
      * @return The array of all notes at the frame of the panel
      */
-    UFUNCTION( BlueprintPure, Category="Epos Sequence Editor|Export PDF" )
+    UFUNCTION( BlueprintPure, Category="Odyssey|Storyboard Editor|PDF" )
     static TArray<UStoryNote*> GetPanelNotes( const FExportStruct& ExportStruct, int32 PanelIndex );
 };
