@@ -721,14 +721,13 @@ SOdysseyAnimationLayerImageTimeline::BuildContextMenu(TSharedRef<FUICommandList>
             FNewMenuDelegate::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::BuildCellsMarksSubMenu)
         );
         MenuBuilder.AddMenuEntry(
-              LOCTEXT("timeline-cells.context-menu.reverse-selected-cells.name", "Reverse Selected Cells")
+              FOdysseyPainterEditorAnimationCommands::Get().ReverseSelectedCells
+            , NAME_None
+            , LOCTEXT("timeline-cells.context-menu.reverse-selected-cells.name", "Reverse Selected Cells")
             , LOCTEXT("timeline-cells.context-menu.reverse-selected-cells.tooltip", "Reverse the order of the selected cells")
             , FSlateIcon()
-            , FUIAction( FExecuteAction::CreateSP(this, &SOdysseyAnimationLayerImageTimeline::ReverseSelectedCells)
-                       , FCanExecuteAction::CreateSP(this, &SOdysseyAnimationLayerImageTimeline::CanReverseSelectedCells))
         );
     MenuBuilder.EndSection();
-
 
     if( mLayer->GetClass() == UOdysseyAnimationLayerImageVector::StaticClass() )
     {
@@ -741,29 +740,6 @@ SOdysseyAnimationLayerImageTimeline::BuildContextMenu(TSharedRef<FUICommandList>
 
         MenuBuilder.EndSection();
     }
-}
-
-
-void
-SOdysseyAnimationLayerImageTimeline::ReverseSelectedCells()
-{
-    TSharedRef<FOdysseyLayerCellSelection> cellSelection = mLayer->GetLayerStack()->GetCellSelection();
-    TArray<UOdysseyLayerCell*> selectedCells = cellSelection.Get().GetSelectedCells();
-
-#if WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("timeline.shortcuts.reverse-selected-cells", "Reverse Selected Cells"));
-#endif
-    mLayer->ReverseCells( selectedCells );
-}
-
-bool
-SOdysseyAnimationLayerImageTimeline::CanReverseSelectedCells()
-{
-    TSharedRef<FOdysseyLayerCellSelection> cellSelection = mLayer->GetLayerStack()->GetCellSelection();
-    TArray<UOdysseyLayerCell*> selectedCells = cellSelection.Get().GetSelectedCells();
-
-    return UOdysseyAnimationLayer::AreCellsContiguous( selectedCells ) && ( selectedCells.Num() > 1 ) ? true
-                                                                                                      : false;
 }
 
 FReply

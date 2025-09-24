@@ -209,8 +209,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         void PasteSpacingMenu( FMenuBuilder& menu, FOdysseyVectorGroupPaint* iScene );
         static bool CanAddTag( FOdysseyVectorGroupPaint* iScene );
         static bool CanAlterTag( FOdysseyVectorGroupPaint* iScene );
-        static bool CanBePainted( FOdysseyVectorGroupPaint* iScene );
-        static bool CanUngroup( FOdysseyVectorGroupPaint* iScene );
+        bool CanBePainted();
+        bool CanUngroup();
 
     protected:
         static const uint64 OBJECTMENU_HASSUBDIVIDE = ( 1ULL << 0 );
