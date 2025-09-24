@@ -34,6 +34,7 @@ void UOdysseyAnimationTimelineSection::PostLoad()
     if( Animation )
     {
         Animation->OnRenderingChangedDelegate().AddUObject( this, &UOdysseyAnimationTimelineSection::OnAnimationChanged );
+        RebuildAnimationCutChannel();
     }
 }
 

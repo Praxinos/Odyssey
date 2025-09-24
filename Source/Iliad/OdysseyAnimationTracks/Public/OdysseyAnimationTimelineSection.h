@@ -75,7 +75,7 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Animation")
     FFrameNumber StartFrameOffset = 0;
 
-    UPROPERTY()
+    UPROPERTY(Transient)
     FOdysseyAnimationCutChannel AnimationCutChannel;
 
     FOnAnimationCutChannelChanged mOnAnimationCutChannelChanged;
