@@ -31,6 +31,7 @@ public:
     void Action_IncreaseCellExposure();
     void Action_DecreaseCellExposure();
     void Action_SetCellExposure();
+    void Action_ReverseSelectedCells();
 
     bool CanAction_Copy();
     bool CanAction_Cut();
@@ -41,6 +42,7 @@ public:
     bool CanAction_IncreaseCellExposure();
     bool CanAction_DecreaseCellExposure();
     bool CanAction_SetCellExposure();
+    bool CanAction_ReverseSelectedCells();
 
 private:
     TAttribute<UOdysseyAnimation*> mAnimation;

@@ -38,6 +38,7 @@ public:
     //Layers Actions
     TSharedPtr<FUICommandInfo> ConvertToStaggerCell;
     TSharedPtr<FUICommandInfo> ConvertToReferenceCells;
+    TSharedPtr<FUICommandInfo> ReverseSelectedCells;
 
     // Cross Fade the selected cells
     TSharedPtr<FUICommandInfo> CrossFade;

@@ -51,6 +51,7 @@ FOdysseyPainterEditorAnimationCommands::RegisterCommands()
     UI_BUNDLE_COMMAND( ConvertToStaggerCell, CellsShortcuts, "Convert To Stagger Cell", "Converts selected cells to Stagger Cells", EUserInterfaceActionType::Button, FInputChord());
     UI_BUNDLE_COMMAND( ConvertToReferenceCells, CellsShortcuts, "Convert To Reference Cell", "Converts selected cells to the cells referenced  by them.", EUserInterfaceActionType::Button, FInputChord());
     UI_BUNDLE_COMMAND( CrossFade, CellsShortcuts, "Cross Fade Selected Cells", "Applies a cross fade on selected cells", EUserInterfaceActionType::Button, FInputChord());
+    UI_BUNDLE_COMMAND( ReverseSelectedCells, CellsShortcuts, "Reverse Selected Cells", "Reverses the order of the selected cells", EUserInterfaceActionType::Button, FInputChord());
 
     UI_BUNDLE_COMMAND( ActivateTimelineSelectionTool, TimelineShortcuts, "Activate Timeline Selection Tool", "Activates the timeline Selection Tool", EUserInterfaceActionType::Button, FInputChord(EKeys::V));
     UI_BUNDLE_COMMAND( ActivateTimelineMoveTool, TimelineShortcuts, "Activate Timeline Move Tool", "Activates the timeline Move Tool", EUserInterfaceActionType::Button, FInputChord(EKeys::A));

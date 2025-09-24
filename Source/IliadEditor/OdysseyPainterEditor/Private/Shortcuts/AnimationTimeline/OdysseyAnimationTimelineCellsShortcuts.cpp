@@ -74,6 +74,12 @@ FOdysseyAnimationTimelineCellsShortcuts::MapActionsToCommandList(TSharedRef<FUIC
     );
 
     iCommandList->MapAction(
+        FOdysseyPainterEditorAnimationCommands::Get().ReverseSelectedCells,
+        FExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellsShortcuts::Action_ReverseSelectedCells),
+        FCanExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellsShortcuts::CanAction_ReverseSelectedCells)
+    );
+
+    iCommandList->MapAction(
         FOdysseyPainterEditorAnimationCommands::Get().IncreaseCellExposure,
         FExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellsShortcuts::Action_IncreaseCellExposure),
         FCanExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellsShortcuts::CanAction_IncreaseCellExposure)
@@ -429,6 +435,33 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_SetCellExposure()
     );
 }
 
+void
+FOdysseyAnimationTimelineCellsShortcuts::Action_ReverseSelectedCells()
+{
+    UOdysseyAnimation* animation = mAnimation.Get();
+    if (!animation)
+        return;
+
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(animation->GetLayerStack());
+    if (!layerStack)
+        return;
+
+    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerStack->GetCurrentLayer());
+    if (!layer)
+        return;
+
+    if (!layer->IsEditable())
+        return;
+
+    TSharedRef<FOdysseyLayerCellSelection> cellSelection = layer->GetLayerStack()->GetCellSelection();
+    TArray<UOdysseyLayerCell*> selectedCells = cellSelection.Get().GetSelectedCells();
+
+#if WITH_EDITOR
+    FScopedTransaction ScopedTransaction(LOCTEXT("timeline.shortcuts.reverse-selected-cells", "Reverse Selected Cells"));
+#endif
+    layer->ReverseCells( selectedCells );
+}
+
 bool
 FOdysseyAnimationTimelineCellsShortcuts::CanAction_Copy()
 {
@@ -675,6 +708,32 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_SetCellExposure()
     }
 
     return true;
+}
+
+
+bool
+FOdysseyAnimationTimelineCellsShortcuts::CanAction_ReverseSelectedCells()
+{
+    UOdysseyAnimation* animation = mAnimation.Get();
+    if (!animation)
+        return false;
+
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(animation->GetLayerStack());
+    if (!layerStack)
+        return false;
+
+    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerStack->GetCurrentLayer());
+    if (!layer)
+        return false;
+
+    if (!layer->IsEditable())
+        return false;
+
+    TSharedRef<FOdysseyLayerCellSelection> cellSelection = layer->GetLayerStack()->GetCellSelection();
+    TArray<UOdysseyLayerCell*> selectedCells = cellSelection.Get().GetSelectedCells();
+
+    return UOdysseyAnimationLayer::AreCellsContiguous( selectedCells ) && ( selectedCells.Num() > 1 ) ? true
+                                                                                                      : false;
 }
 
 #undef LOCTEXT_NAMESPACE
