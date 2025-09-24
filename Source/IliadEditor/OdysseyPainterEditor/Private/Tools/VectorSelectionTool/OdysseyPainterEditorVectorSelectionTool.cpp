@@ -448,4 +448,15 @@ UOdysseyPainterEditorVectorSelectionTool::GetTooltip() const
     return LOCTEXT("vector-selection-tool.tooltip", "Selection Tool");
 }
 
+bool UOdysseyPainterEditorVectorSelectionTool::IsSameAs(const UOdysseyPainterEditorTool* Other) const
+{
+    // Same class verification
+    if (!UOdysseyPainterEditorTool::IsSameAs(Other))
+        return false;
+
+    //const UOdysseyPainterEditorVectorSelectionTool* otherTool = Cast< UOdysseyPainterEditorVectorSelectionTool >(Other);
+
+    return  true;
+}
+
 #undef LOCTEXT_NAMESPACE

@@ -590,4 +590,18 @@ UOdysseyPainterEditorVectorChartTool::GetTooltip() const
     return LOCTEXT("vector-chart-tool.tooltip", "Chart Tool");
 }
 
+bool UOdysseyPainterEditorVectorChartTool::IsSameAs(const UOdysseyPainterEditorTool* Other) const
+{
+    // Same class verification
+    if (!UOdysseyPainterEditorTool::IsSameAs(Other))
+        return false;
+
+    const UOdysseyPainterEditorVectorChartTool* otherTool = Cast< UOdysseyPainterEditorVectorChartTool >(Other);
+
+    return  PickingRadius == otherTool->PickingRadius &&
+            EditionMode == otherTool->EditionMode &&
+            Factor == otherTool->Factor &&
+            ChartType == otherTool->ChartType;
+}
+
 #undef LOCTEXT_NAMESPACE

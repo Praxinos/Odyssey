@@ -1241,6 +1241,18 @@ UOdysseyPainterEditorVectorPathEditTool::ActionSubdivideSegments()
     }
 }
 
+bool UOdysseyPainterEditorVectorPathEditTool::IsSameAs(const UOdysseyPainterEditorTool* Other) const
+{
+    // Same class verification
+    if (!UOdysseyPainterEditorTool::IsSameAs(Other))
+        return false;
+
+    const UOdysseyPainterEditorVectorPathEditTool* otherTool = Cast< UOdysseyPainterEditorVectorPathEditTool >(Other);
+
+    return  PickingRadius == otherTool->PickingRadius &&
+            WidenAllAlong == otherTool->WidenAllAlong;
+}
+
 FText
 UOdysseyPainterEditorVectorPathEditTool::GetTooltip() const
 {

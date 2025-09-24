@@ -583,4 +583,16 @@ UOdysseyPainterEditorVectorEraserTool::GetTooltip() const
     return LOCTEXT("vector-eraser-tool.tooltip", "Eraser Tool");
 }
 
+bool UOdysseyPainterEditorVectorEraserTool::IsSameAs(const UOdysseyPainterEditorTool* Other) const
+{
+    // Same class verification
+    if (!UOdysseyPainterEditorTool::IsSameAs(Other))
+        return false;
+
+    const UOdysseyPainterEditorVectorEraserTool* otherTool = Cast< UOdysseyPainterEditorVectorEraserTool >(Other);
+
+    return  SplitPath == otherTool->SplitPath &&
+            Radius == otherTool->Radius;
+}
+
 #undef LOCTEXT_NAMESPACE

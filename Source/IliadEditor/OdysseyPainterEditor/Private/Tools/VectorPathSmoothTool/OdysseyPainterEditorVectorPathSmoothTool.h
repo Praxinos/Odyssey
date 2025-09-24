@@ -57,6 +57,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathSmoothTool : publi
         virtual void OnVectorLayerUpdate( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags
                                         , uint32 iUpdateFlags ) override;
 
+    public:
+        virtual bool IsSameAs(const UOdysseyPainterEditorTool* Other) const override;
+
     private:
         FOdysseyPainterEditorVectorPathSmoothToolHUD* mPathSmoothHUD;
         FOdysseyVectorUndoSegmentReshape* mUndoSegmentReshape;

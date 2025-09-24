@@ -69,6 +69,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathPushTool : public 
         //virtual void PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
         //                                  , const FName& iPropertyName ) override;
 
+    public:
+        virtual bool IsSameAs(const UOdysseyPainterEditorTool* Other) const override;
+
     private:
         FPushedPoint* GetPushedPoint( FOdysseyVectorPoint* iPoint );
         std::vector<FPushedPoint> mPushedPointArray;

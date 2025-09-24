@@ -271,4 +271,18 @@ UOdysseyPainterEditorVectorPathSmoothTool::GetTooltip() const
     return LOCTEXT("vector-path-smooth-tool.tooltip", "Path Smooth Tool");
 }
 
+bool UOdysseyPainterEditorVectorPathSmoothTool::IsSameAs(const UOdysseyPainterEditorTool* Other) const
+{
+    // Same class verification
+    if (!UOdysseyPainterEditorTool::IsSameAs(Other))
+        return false;
+
+    const UOdysseyPainterEditorVectorPathSmoothTool* otherTool = Cast< UOdysseyPainterEditorVectorPathSmoothTool >(Other);
+
+    return  SmoothingMode == otherTool->SmoothingMode &&
+            PickingRadius == otherTool->PickingRadius &&
+            PreserveHandleLength == otherTool->PreserveHandleLength &&
+            RestrictToSelectedObjects == otherTool->RestrictToSelectedObjects;
+}
+
 #undef LOCTEXT_NAMESPACE

@@ -429,4 +429,18 @@ UOdysseyPainterEditorVectorGridTool::GetTooltip() const
     return LOCTEXT("vector-grid-tool.tooltip", "Grid Tool");
 }
 
+bool UOdysseyPainterEditorVectorGridTool::IsSameAs(const UOdysseyPainterEditorTool* Other) const
+{
+    // Same class verification
+    if (!UOdysseyPainterEditorTool::IsSameAs(Other))
+        return false;
+
+    const UOdysseyPainterEditorVectorGridTool* otherTool = Cast< UOdysseyPainterEditorVectorGridTool >(Other);
+
+    return  DivisionsX == otherTool->DivisionsX &&
+            DivisionsY == otherTool->DivisionsY &&
+            PickingRadius == otherTool->PickingRadius &&
+            World == otherTool->World;
+}
+
 #undef LOCTEXT_NAMESPACE

@@ -4,6 +4,7 @@
 #include "Widgets/ToolCollection/SOdysseyPainterEditorToolTile.h"
 #include "Widgets/Layout/SWrapBox.h"
 #include "Widgets/Input/SCheckBox.h"
+#include "ToolCollection/OdysseyToolCollection.h"
 #include "ToolCollection/OdysseyToolCollectionDragDropOp.h"
 
 SOdysseyPainterEditorToolTile::~SOdysseyPainterEditorToolTile()
@@ -21,10 +22,19 @@ SOdysseyPainterEditorToolTile::Construct(const FArguments& InArgs, const TShared
     mTool = InArgs._Tool;
     mCollection = InArgs._ToolCollection;
 
+    /*
     STableRow<UOdysseyPainterEditorTool*>::Construct(
         STableRow<UOdysseyPainterEditorTool*>::FArguments(),
         InOwnerTable
     );
+    */
+
+    STableRow<UOdysseyPainterEditorTool*>::FArguments Args;
+    Args.OnCanAcceptDrop(this, &SOdysseyPainterEditorToolTile::HandleCanAcceptDrop)
+        .OnAcceptDrop(this, &SOdysseyPainterEditorToolTile::HandleAcceptDrop)
+        .OnDragDetected(this, &SOdysseyPainterEditorToolTile::OnDragDetected);
+
+    STableRow<UOdysseyPainterEditorTool*>::Construct(Args, InOwnerTable);
 
     ChildSlot
     .HAlign(HAlign_Fill)
@@ -37,6 +47,62 @@ SOdysseyPainterEditorToolTile::Construct(const FArguments& InArgs, const TShared
     ];
 }
 
+FReply SOdysseyPainterEditorToolTile::OnDragDetected(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
+{
+    if (MouseEvent.IsMouseButtonDown(EKeys::LeftMouseButton))
+    {
+        return FReply::Handled().BeginDragDrop(
+            FOdysseyToolCollectionDragDropOp::Create(mTool, mCollection)
+        );
+    }
+    return FReply::Unhandled();
+}
+
+TOptional<EItemDropZone> SOdysseyPainterEditorToolTile::HandleCanAcceptDrop(
+    const FDragDropEvent& DragDropEvent, EItemDropZone DropZone, UOdysseyPainterEditorTool* TargetItem)
+{
+    auto DragOp = DragDropEvent.GetOperationAs<FOdysseyToolCollectionDragDropOp>();
+    if (DragOp.IsValid())
+    {
+        return DropZone; // Allow before/after/onto
+    }
+    return TOptional<EItemDropZone>();
+}
+
+FReply SOdysseyPainterEditorToolTile::HandleAcceptDrop(
+    const FDragDropEvent& DragDropEvent, EItemDropZone DropZone, UOdysseyPainterEditorTool* TargetItem)
+{
+    auto DragOp = DragDropEvent.GetOperationAs<FOdysseyToolCollectionDragDropOp>();
+    if (!DragOp.IsValid() || !mCollection)
+        return FReply::Unhandled();
+
+    UOdysseyPainterEditorTool* Tool = DragOp->GetTool();
+    UOdysseyToolCollection* Source = DragOp->GetSourceCollection().Get();
+
+    if (Source && Source != mCollection)
+    {
+        Source->RemoveTool(Tool);
+    }
+
+    /*int32 TargetIndex = mCollection->FindToolIndex(TargetItem);
+    if (TargetIndex == INDEX_NONE)
+    {*/
+        mCollection->AddTool(Tool);
+    /*}
+    else
+    {
+        if (DropZone == EItemDropZone::BelowItem)
+        {
+            TargetIndex++;
+        }
+        mCollection->InsertToolAt(Tool, TargetIndex);
+    }*/
+
+    return FReply::Handled();
+}
+
+
+/*
 FReply SOdysseyPainterEditorToolTile::OnDragDetected(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
     if (MouseEvent.IsMouseButtonDown(EKeys::LeftMouseButton))
@@ -64,6 +130,41 @@ void SOdysseyPainterEditorToolTile::OnDragLeave(const FDragDropEvent& DragDropEv
 {
     mDropSide = EDropIndicatorSide::None;
 }
+
+FReply SOdysseyPainterEditorToolTile::OnDrop(const FGeometry& MyGeometry, const FDragDropEvent& DragDropEvent)
+{
+    auto DragOp = DragDropEvent.GetOperationAs<FOdysseyToolCollectionDragDropOp>();
+    if (DragOp.IsValid() && mCollection && DragOp->GetTool())
+    {
+        UOdysseyPainterEditorTool* Tool = DragOp->GetTool();
+        UOdysseyToolCollection* Source = DragOp->GetSourceCollection().Get();
+
+        if (Source && Source != mCollection)
+        {
+            Source->RemoveTool(Tool);
+        }
+
+        //int32 TargetIndex = mCollection->FindToolIndex(mTool); // hovered tool
+        int32 TargetIndex = 0;
+        if (TargetIndex != INDEX_NONE)
+        {
+            if (mDropSide == EDropIndicatorSide::Right)
+            {
+                TargetIndex++; // insert after
+            }
+            //mCollection->InsertToolAt(Tool, TargetIndex);
+            mCollection->AddTool(Tool);
+        }
+        else
+        {
+            // If for some reason target tool not found, just append
+            mCollection->AddTool(Tool);
+        }
+
+        return FReply::Handled();
+    }
+    return FReply::Unhandled();
+}*/
 
 int32 SOdysseyPainterEditorToolTile::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry,
         const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements,

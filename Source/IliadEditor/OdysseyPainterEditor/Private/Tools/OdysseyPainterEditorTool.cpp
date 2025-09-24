@@ -44,6 +44,11 @@ UOdysseyPainterEditorTool::GetEditor() const
     return mEditor;
 }
 
+bool UOdysseyPainterEditorTool::IsSameAs(const UOdysseyPainterEditorTool* Other) const
+{
+    return Other && Other->GetClass() == GetClass();
+}
+
 void
 UOdysseyPainterEditorTool::PostInitProperties()
 {

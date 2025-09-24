@@ -187,4 +187,15 @@ UOdysseyPainterEditorRasterSelectionTool::OnShapeAbort()
 {
 }
 
+bool UOdysseyPainterEditorRasterSelectionTool::IsSameAs(const UOdysseyPainterEditorTool* Other) const
+{
+    // Same class verification
+    if (!UOdysseyPainterEditorTool::IsSameAs(Other))
+        return false;
+
+    //const UOdysseyPainterEditorRasterSelectionTool* otherTool = Cast< UOdysseyPainterEditorRasterSelectionTool >(Other);
+
+    return true;
+}
+
 #undef LOCTEXT_NAMESPACE

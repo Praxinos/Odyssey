@@ -86,6 +86,9 @@ private:
     void PrepareStampBlock();
     void Stamp(const FOdysseyPoint& iPoint);
 
+public:
+    virtual bool IsSameAs(const UOdysseyPainterEditorTool* Other) const override;
+
 protected:
     //Visible properties
     UPROPERTY(EditAnywhere, Category="Shape")

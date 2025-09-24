@@ -72,6 +72,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorGridTool : public UOdy
         virtual void OnVectorLayerUpdate( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags
                                         , uint32 iUpdateFlags ) override;
 
+    public:
+        virtual bool IsSameAs(const UOdysseyPainterEditorTool* Other) const override;
+
     private:
         std::vector<FOdysseyVectorPoint*> mPointArray;
         FOdysseyPainterEditorVectorGridToolHUD* mGridHUD;

@@ -164,6 +164,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathEditTool : public 
         const FSlateBrush* GetBackgroundColor( eVectorPathEditEditionMode iMode ) const;
         void ActionSubdivideSegments();
 
+    public:
+        virtual bool IsSameAs(const UOdysseyPainterEditorTool* Other) const override;
+
     private:
         FOdysseyPainterEditorVectorPathEditToolHUD *mPathEditHUD;
         std::vector<FOdysseyVectorVertex*> mPickedVertexArray;

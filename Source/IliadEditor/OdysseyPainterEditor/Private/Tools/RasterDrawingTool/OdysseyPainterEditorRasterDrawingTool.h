@@ -178,6 +178,9 @@ private:
     void AddBlendingModeToolbarMenuEntry(FMenuBuilder& iMenuBuilder, EOdysseyBlendingMode iBlendingMode);
 
 public:
+    virtual bool IsSameAs(const UOdysseyPainterEditorTool* Other) const override;
+
+public:
     friend class SOdysseyPainterEditorRasterDrawingToolBrushSelector;
 
 private:

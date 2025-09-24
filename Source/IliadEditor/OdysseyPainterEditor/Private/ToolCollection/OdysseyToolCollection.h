@@ -22,10 +22,12 @@ public:
     bool IsCollectionTransient() const;
 
     void AddTool(UOdysseyPainterEditorTool* iTool);
+    bool ContainsSimilarTool( UOdysseyPainterEditorTool* iTool );
     void RemoveToolAtIndex( int iIndex );
+    void RemoveTool(UOdysseyPainterEditorTool* iTool);
     void MoveTool(int32 iFromIndex, int32 iToIndex);
     bool ContainsTool(UOdysseyPainterEditorTool* iTool);
-    const TArray<UOdysseyPainterEditorTool*>& GetTools() const;
+    const TArray<UOdysseyPainterEditorTool*> GetTools() const;
 
 public:
     FOnCollectionChanged OnCollectionChanged;

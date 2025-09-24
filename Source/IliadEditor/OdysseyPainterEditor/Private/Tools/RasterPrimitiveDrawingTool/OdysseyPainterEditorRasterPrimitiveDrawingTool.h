@@ -59,6 +59,9 @@ private:
 
     void OnRasterSelectionChanged();
 
+public:
+    virtual bool IsSameAs(const UOdysseyPainterEditorTool* Other) const override;
+
 protected:
     FOdysseyPaintEngine mPaintEngine;
 

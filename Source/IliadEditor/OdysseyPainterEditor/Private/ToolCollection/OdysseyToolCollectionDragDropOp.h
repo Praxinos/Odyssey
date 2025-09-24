@@ -19,6 +19,7 @@ public:
 
 public:
     UOdysseyPainterEditorTool* GetTool() const;
+    TWeakObjectPtr<UOdysseyToolCollection> GetSourceCollection() const;
 
 private:
     FText GetText() const;

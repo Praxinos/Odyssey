@@ -3604,7 +3604,6 @@ FOdysseyPainterEditor::SetCurrentPaletteColorEntry(UOdysseyPaletteEntryColor* iE
 
 void FOdysseyPainterEditor::SaveToRecentTools(UOdysseyPainterEditorTool* iTool)
 {
-    //WARNING, WE HAVE TO DUPLICATE THE TOOL HERE, NOT JUST THE POINTER, ELSE WE'LL HAVE INCONSISTANT DATA FOR THEM AND WE WON'T BE ABLE TO STORE THEM IN A MORE PERMANENT TOOL COLLECTION
     if( !iTool )
         return;
 

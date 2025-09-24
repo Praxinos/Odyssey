@@ -665,4 +665,23 @@ UOdysseyPainterEditorVectorPathDrawingTool::GetTooltip() const
     return LOCTEXT("vector-path-drawing-tool.tooltip", "Drawing Tool");
 }
 
+bool UOdysseyPainterEditorVectorPathDrawingTool::IsSameAs(const UOdysseyPainterEditorTool* Other) const
+{
+    // Same class verification
+    if (!UOdysseyPainterEditorTool::IsSameAs(Other))
+        return false;
+
+    const UOdysseyPainterEditorVectorPathDrawingTool* otherTool = Cast< UOdysseyPainterEditorVectorPathDrawingTool >(Other);
+
+    return  //Brush == otherTool->Brush && // Todo make operator == for FOdysseyVectorBrush ?
+            TracingFidelity == otherTool->TracingFidelity &&
+            FMath::IsNearlyEqual(Radius, otherTool->Radius) &&
+            PressureSensitive == otherTool->PressureSensitive &&
+            UpdatePaintGroups == otherTool->UpdatePaintGroups &&
+            Stitch == otherTool->Stitch &&
+            Snap == otherTool->Snap &&
+            AverageStitchedRadius == otherTool->AverageStitchedRadius &&
+            StitchingRadius == otherTool->StitchingRadius;
+}
+
 #undef LOCTEXT_NAMESPACE

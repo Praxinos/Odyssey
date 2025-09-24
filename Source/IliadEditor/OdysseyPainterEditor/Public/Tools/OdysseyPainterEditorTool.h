@@ -103,6 +103,9 @@ public:
     FOdysseyPainterEditor* GetEditor() const;
     //template<class T> T* GetEditorAs() const { return static_cast<T*>(mEditor); };
 
+public:
+    virtual bool IsSameAs(const UOdysseyPainterEditorTool* Other) const;
+
 protected:
     TSharedPtr<FOdysseyPainterEditorToolInputProcessor> mInputProcessor;
     FOdysseyPainterEditor*              mEditor;

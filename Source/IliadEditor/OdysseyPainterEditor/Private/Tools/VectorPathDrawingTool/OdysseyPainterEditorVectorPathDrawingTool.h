@@ -97,6 +97,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
                                        , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray );
 
     public:
+        virtual bool IsSameAs(const UOdysseyPainterEditorTool* Other) const override;
+
+    public:
         //UPROPERTY( EditAnywhere, Category=PathDrawingTool, meta = (ClampMin = "0.0",UIMin = "0.0", ClampMax = "1.0", UIMax = "1.0" ))
         double Opacity;
 

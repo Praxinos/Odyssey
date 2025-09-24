@@ -15,10 +15,8 @@ bool UOdysseyToolCollection::IsCollectionTransient() const
 {
     if(HasAnyFlags(RF_Transient) || GetOutermost()->HasAnyPackageFlags(PKG_TransientFlags))
     {
-        UE_LOG(LogTemp, Display, TEXT("IsTransient"));
         return true;
     }
-    UE_LOG(LogTemp, Display, TEXT("Is NOT Transient"));
     return false;
 }
 
@@ -27,8 +25,27 @@ void UOdysseyToolCollection::AddTool(UOdysseyPainterEditorTool* iTool)
     if( !iTool )
         return;
 
-    mToolsConfig.Add( iTool );
+    if( ContainsSimilarTool(iTool) ) // We don't add the tool if a similar one is already in the collection
+        return;
+
+    UOdysseyPainterEditorTool* duplicate = DuplicateObject<UOdysseyPainterEditorTool>(iTool, this);
+
+    mToolsConfig.Add( duplicate );
     OnCollectionChanged.Broadcast();
+}
+
+bool UOdysseyToolCollection::ContainsSimilarTool(UOdysseyPainterEditorTool* iTool)
+{
+    if (!iTool)
+        return false;
+
+    for (UOdysseyPainterEditorTool* tool : mToolsConfig)
+    {
+        if (iTool->IsSameAs(tool)) // We don't add the tool if a similar one is already in the collection
+            return true;
+    }
+
+    return false;
 }
 
 void UOdysseyToolCollection::RemoveToolAtIndex(int iIndex)
@@ -38,6 +55,12 @@ void UOdysseyToolCollection::RemoveToolAtIndex(int iIndex)
 
     mToolsConfig.RemoveAt( iIndex );
     OnCollectionChanged.Broadcast();
+}
+
+void UOdysseyToolCollection::RemoveTool(UOdysseyPainterEditorTool* iTool)
+{
+    if( mToolsConfig.Contains(iTool))
+        mToolsConfig.Remove(iTool);
 }
 
 void UOdysseyToolCollection::MoveTool(int32 iFromIndex, int32 iToIndex)
@@ -64,7 +87,7 @@ bool UOdysseyToolCollection::ContainsTool(UOdysseyPainterEditorTool* iTool)
     return mToolsConfig.Contains( iTool );
 }
 
-const TArray<UOdysseyPainterEditorTool*>& UOdysseyToolCollection::GetTools() const
+const TArray<UOdysseyPainterEditorTool*> UOdysseyToolCollection::GetTools() const
 {
     return mToolsConfig;
 }

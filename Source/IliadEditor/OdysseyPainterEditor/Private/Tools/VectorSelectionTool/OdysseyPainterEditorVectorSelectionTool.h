@@ -84,6 +84,9 @@ protected:
                                   , const FOdysseyPoint& iPointInTexture
                                   , const FKey& iKey );
 
+public:
+    virtual bool IsSameAs(const UOdysseyPainterEditorTool* Other) const override;
+
 protected:
     FOdysseyPainterEditorVectorSelectionToolHUD* mPickHUD;
     std::vector<::ULIS::FVec2D> mPointArray;

@@ -97,6 +97,9 @@ private:
     TArray<IOdysseyRenderingAbility*> GetForegroundLayersToExclude(UOdysseyLayer* iLayer) const;
 
 public:
+    virtual bool IsSameAs(const UOdysseyPainterEditorTool* Other) const override;
+
+public:
     UPROPERTY( EditAnywhere, Category=RasterPaintBucketTool)
     EOdysseyRasterPaintBucketToolSource Source = EOdysseyRasterPaintBucketToolSource::AllLayers;
     UPROPERTY( EditAnywhere, Category=RasterPaintBucketTool)

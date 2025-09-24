@@ -97,6 +97,9 @@ private:
     void ResetRasterSelection();
 
 public:
+    virtual bool IsSameAs(const UOdysseyPainterEditorTool* Other) const override;
+
+public:
     UPROPERTY(EditAnywhere, Category="Transform options")
     bool Perspective = false;
 

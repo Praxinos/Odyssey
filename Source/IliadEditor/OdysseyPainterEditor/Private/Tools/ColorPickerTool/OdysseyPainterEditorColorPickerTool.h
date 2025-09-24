@@ -42,6 +42,9 @@ public:
     void PickColorMove( const FOdysseyPoint& iPointInTexture );
     void PickColorUp( const FOdysseyPoint& iPointInTexture );
 
+public:
+    virtual bool IsSameAs(const UOdysseyPainterEditorTool* Other) const override;
+
 protected:
     // protected Data Members
 

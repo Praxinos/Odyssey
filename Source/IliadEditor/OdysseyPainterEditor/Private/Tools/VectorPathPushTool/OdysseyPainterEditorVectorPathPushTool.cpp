@@ -340,4 +340,18 @@ UOdysseyPainterEditorVectorPathPushTool::GetTooltip() const
     return LOCTEXT("vector-path-push-tool.tooltip", "Path Push Tool");
 }
 
+bool UOdysseyPainterEditorVectorPathPushTool::IsSameAs(const UOdysseyPainterEditorTool* Other) const
+{
+    // Same class verification
+    if (!UOdysseyPainterEditorTool::IsSameAs(Other))
+        return false;
+
+    const UOdysseyPainterEditorVectorPathPushTool* otherTool = Cast< UOdysseyPainterEditorVectorPathPushTool >(Other);
+
+    return  Radius == otherTool->Radius &&
+            RestrictToSelectedObjects == otherTool->RestrictToSelectedObjects;
+}
+
+
+
 #undef LOCTEXT_NAMESPACE

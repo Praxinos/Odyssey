@@ -102,6 +102,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPaintBucketTool : publ
         void SetEditionMode( eVectorPaintBucketEditionMode iMode );
 
     public:
+        virtual bool IsSameAs(const UOdysseyPainterEditorTool* Other) const override;
+
+    public:
         UPROPERTY( EditAnywhere
                  , Category=PaintBucketTool
                  , meta = ( ToolTip  = "Propagate" ) )

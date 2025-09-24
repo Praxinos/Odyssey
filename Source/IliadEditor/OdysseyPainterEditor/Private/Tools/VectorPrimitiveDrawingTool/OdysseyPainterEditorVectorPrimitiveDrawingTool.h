@@ -68,6 +68,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPrimitiveDrawingTool :
         double GetLineRotationAngle( FOdysseyVectorLine* iLine, const FOdysseyPoint& iPointInTexture );
 
     public:
+        virtual bool IsSameAs(const UOdysseyPainterEditorTool* Other) const override;
+
+    public:
         UPROPERTY( EditAnywhere
                  , Category = "Shape" )
         FOdysseyShapes Shapes;

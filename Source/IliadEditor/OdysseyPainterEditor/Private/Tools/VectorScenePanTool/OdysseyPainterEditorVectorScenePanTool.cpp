@@ -200,4 +200,15 @@ UOdysseyPainterEditorVectorScenePanTool::GetTooltip() const
     return LOCTEXT("vector-scene-pan-tool.tooltip", "Scene Pan Tool");
 }
 
+bool UOdysseyPainterEditorVectorScenePanTool::IsSameAs(const UOdysseyPainterEditorTool* Other) const
+{
+    // Same class verification
+    if (!UOdysseyPainterEditorTool::IsSameAs(Other))
+        return false;
+
+    //const UOdysseyPainterEditorVectorScenePanTool* otherTool = Cast< UOdysseyPainterEditorVectorScenePanTool >(Other);
+
+    return  true;
+}
+
 #undef LOCTEXT_NAMESPACE

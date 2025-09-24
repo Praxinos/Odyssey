@@ -105,6 +105,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTransformTool : public
         const FSlateBrush* GetBackgroundColor( ETransformToolScalingCenter iScalingCenter ) const;
         TSharedRef<SWidget> CreateModifierSegmentControl();
 
+    public:
+        virtual bool IsSameAs(const UOdysseyPainterEditorTool* Other) const override;
+
     private:
         std::list<FInbetweenerBreakdown*> mTransformedBreakdownList;
         FOdysseyPainterEditorVectorTransformToolHUD* mTransformHUD;

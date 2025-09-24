@@ -73,6 +73,9 @@ private:
     void OnRotationHandleDragEnd();
 
 public:
+    virtual bool IsSameAs(const UOdysseyPainterEditorTool* Other) const override;
+
+public:
     UFUNCTION(BlueprintCallable, Category="Actions", CallInEditor)
     void Reset();
 

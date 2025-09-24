@@ -82,6 +82,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorChartTool : public UOd
         void OnVectorLayerUpdate( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags
                                 , uint32 iUpdateFlags );
 
+public:
+    virtual bool IsSameAs(const UOdysseyPainterEditorTool* Other) const override;
+
     private:
         FOdysseyPainterEditorVectorChartToolHUD* mChartHUD;
         FInbetweenerChart::Inbetween* mPickedInbetween;

@@ -45,6 +45,11 @@ UOdysseyPainterEditorTool* FOdysseyToolCollectionDragDropOp::GetTool() const
     return mTool;
 }
 
+TWeakObjectPtr<UOdysseyToolCollection> FOdysseyToolCollectionDragDropOp::GetSourceCollection() const
+{
+    return mSourceCollection;
+}
+
 FText
 FOdysseyToolCollectionDragDropOp::GetText() const
 {

@@ -1052,6 +1052,25 @@ UOdysseyPainterEditorRasterDrawingTool::ResetInterpolation()
     mLastPoint = FOdysseyPoint();
 }
 
+bool UOdysseyPainterEditorRasterDrawingTool::IsSameAs(const UOdysseyPainterEditorTool* Other) const
+{
+    // Same class verification
+    if (!UOdysseyPainterEditorTool::IsSameAs(Other))
+        return false;
+
+    const UOdysseyPainterEditorRasterDrawingTool* otherTool = Cast< UOdysseyPainterEditorRasterDrawingTool >(Other);
+
+    return  Brush == otherTool->Brush &&
+            //BrushInstance == otherTool->BrushInstance &&
+            //BrushOptions == otherTool->BrushOptions &&
+            //Shapes == otherTool->Shapes;
+            SubPixel == otherTool->SubPixel &&
+            FMath::IsNearlyEqual(Step, otherTool->Step) &&
+            AdaptativeStep == otherTool->AdaptativeStep &&
+            InterpolationType == InterpolationType &&
+            BlendParameters == otherTool->BlendParameters;
+}
+
 void
 UOdysseyPainterEditorRasterDrawingTool::SubPixelBlueprintSetter(bool Value)
 {

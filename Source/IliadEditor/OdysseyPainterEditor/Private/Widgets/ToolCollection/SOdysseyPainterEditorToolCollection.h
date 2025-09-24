@@ -40,5 +40,7 @@ protected:
 protected:
     TAttribute<FOdysseyPainterEditor*> mEditor;
     TAttribute<UOdysseyToolCollection*> mToolCollection;
+
+    TArray<UOdysseyPainterEditorTool*> mDisplayedTools;
     TSharedPtr<STileView<UOdysseyPainterEditorTool*>> mToolListView;
 };

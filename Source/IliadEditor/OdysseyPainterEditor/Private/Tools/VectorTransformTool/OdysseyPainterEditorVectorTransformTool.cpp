@@ -1439,4 +1439,20 @@ UOdysseyPainterEditorVectorTransformTool::GetTooltip() const
     return LOCTEXT("vector-transform-tool.tooltip", "Transform Tool");
 }
 
+bool UOdysseyPainterEditorVectorTransformTool::IsSameAs(const UOdysseyPainterEditorTool* Other) const
+{
+    // Same class verification
+    if (!UOdysseyPainterEditorTool::IsSameAs(Other))
+        return false;
+
+    const UOdysseyPainterEditorVectorTransformTool* otherTool = Cast< UOdysseyPainterEditorVectorTransformTool >(Other);
+
+    return  ShowInbetweens == otherTool->ShowInbetweens &&
+        PickingRadius == otherTool->PickingRadius &&
+        Uniform == otherTool->Uniform &&
+        ScalingCenter == otherTool->ScalingCenter &&
+        World == otherTool->World &&
+        bInbetweenMode == otherTool->bInbetweenMode;
+}
+
 #undef LOCTEXT_NAMESPACE

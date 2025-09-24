@@ -86,6 +86,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorEraserTool : public UO
         const FSlateBrush* GetBackgroundColor( eVectorEraserEditionMode iMode ) const;
         void SetEditionMode( eVectorEraserEditionMode iMode );
 
+    public:
+        virtual bool IsSameAs(const UOdysseyPainterEditorTool* Other) const override;
+
     private:
         FOdysseyPainterEditorVectorEraserToolHUD* mEraserHUD;
         eVectorEraserEditionMode mEditionMode;
