@@ -59,6 +59,7 @@ public:
 
     void UndoTransformTransaction();
     void RedoTransformTransaction();
+    virtual void BindShortcuts( TSharedPtr<FUICommandList> iCommandList ) override;
 
 private:
     int GetRotationAngleFromLastReference(FVector2D iPointInTexture);
@@ -81,6 +82,7 @@ private:
     bool IsPolygonConvex(const TArray<FVector2D>& Points);
 
     void RecordTransformTransaction();
+    void TogglePerspectiveMode();
 
 private:
     void OnTopLeftHandleDragged();

@@ -359,6 +359,10 @@ public:
     TSharedPtr<FUICommandInfo> VectorLockPointSelection;
     TSharedPtr<FUICommandInfo> VectorUnlockPointSelection;
 
+    // Raster Tools Actions
+    // Transform Tool specific
+    TSharedPtr<FUICommandInfo> RasterTranformToolTogglePerspectiveMode;
+
     //Layers Actions
     /** Action for creating a new layer */
     TSharedPtr<FUICommandInfo> CreateNewLayer;

@@ -162,26 +162,6 @@ FOdysseyPainterEditorCommands::RegisterCommands()
     UI_BUNDLE_COMMAND( ActivateVectorSelectionTool, ToolsShortcuts, "Activate Vector Selection Tool", "Activates the editor Vector Selection tool", EUserInterfaceActionType::Button, FInputChord() );
     UI_BUNDLE_COMMAND( ActivateVectorTransformTool, ToolsShortcuts, "Activate Vector Transform Tool", "Activates the editor Vector Transform tool", EUserInterfaceActionType::Button, FInputChord() );
 
-    // Vector Menu commands
-    // All modes
-    // Object Mode
-    UI_BUNDLE_COMMAND( VectorResetView, ToolsShortcuts, "Reset View", "Reset the current view", EUserInterfaceActionType::Button, FInputChord() );
-    UI_BUNDLE_COMMAND( VectorMakePaintGroup, ToolsShortcuts, "Make Paint Group", "Make a paint group from selection", EUserInterfaceActionType::Button, FInputChord() );
-    UI_BUNDLE_COMMAND( VectorGroup, ToolsShortcuts, "Make Group", "Make a group from selection", EUserInterfaceActionType::Button, FInputChord() );
-    UI_BUNDLE_COMMAND( VectorUngroup, ToolsShortcuts, "Ungroup", "Ungroup selected groups", EUserInterfaceActionType::Button, FInputChord() );
-    UI_BUNDLE_COMMAND( VectorBringForward, ToolsShortcuts, "Bring Forward", "Bring the selection forward", EUserInterfaceActionType::Button, FInputChord() );
-    UI_BUNDLE_COMMAND( VectorSendBackward, ToolsShortcuts, "Send Backward", "Send the selection backward", EUserInterfaceActionType::Button, FInputChord() );
-    UI_BUNDLE_COMMAND( VectorFlipHorizontal, ToolsShortcuts, "Flip Horizontal", "Flip selection horizontally", EUserInterfaceActionType::Button, FInputChord() );
-    UI_BUNDLE_COMMAND( VectorFlipVertical, ToolsShortcuts, "Flip Vertical", "Flip selection vertically", EUserInterfaceActionType::Button, FInputChord() );
-    UI_BUNDLE_COMMAND( VectorClearColoring, ToolsShortcuts, "Clear Coloring", "Clear Coloring", EUserInterfaceActionType::Button, FInputChord() );
-    UI_BUNDLE_COMMAND( VectorApplyTransformations, ToolsShortcuts, "Apply Transformations", "Apply matrix transformations", EUserInterfaceActionType::Button, FInputChord() );
-    // Vertex Mode
-    UI_BUNDLE_COMMAND( VectorSubdivideSegments, ToolsShortcuts, "Subdivide Segments", "Subdivide segments", EUserInterfaceActionType::Button, FInputChord() );
-    UI_BUNDLE_COMMAND( VectorAlignPointSelection, ToolsShortcuts, "Align Point Selection", "Align segment handles attached to the selected points", EUserInterfaceActionType::Button, FInputChord() );
-    UI_BUNDLE_COMMAND( VectorUnalignPointSelection, ToolsShortcuts, "Unalign Point Selection", "Unalign segment handles attached to the selected points", EUserInterfaceActionType::Button, FInputChord() );
-    UI_BUNDLE_COMMAND( VectorLockPointSelection, ToolsShortcuts, "Lock Point Selection", "Lock selected points", EUserInterfaceActionType::Button, FInputChord() );
-    UI_BUNDLE_COMMAND( VectorUnlockPointSelection, ToolsShortcuts, "Unlock Point Selection", "Unlock selected points", EUserInterfaceActionType::Button, FInputChord() );
-
     // LayerStack Shortcuts Category
     UI_BUNDLE_COMMAND( CreateNewLayer, LayerStackShortcuts, "Create New Layer", "Create new image layer",                                                                                                      EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::N));
     for (int i = 0; i <= 10; i++)
@@ -220,6 +200,30 @@ FOdysseyPainterEditorCommands::RegisterCommands()
 
         SetCurrentLayerBlendMode.Add(commandInfo);
     }
+
+    // Vector Menu commands
+    // All modes
+    // ...
+    // Object Mode
+    UI_BUNDLE_COMMAND( VectorResetView, ToolsShortcuts, "Reset View", "Reset the current view", EUserInterfaceActionType::Button, FInputChord() );
+    UI_BUNDLE_COMMAND( VectorMakePaintGroup, ToolsShortcuts, "Make Paint Group", "Make a paint group from selection", EUserInterfaceActionType::Button, FInputChord() );
+    UI_BUNDLE_COMMAND( VectorGroup, ToolsShortcuts, "Make Group", "Make a group from selection", EUserInterfaceActionType::Button, FInputChord() );
+    UI_BUNDLE_COMMAND( VectorUngroup, ToolsShortcuts, "Ungroup", "Ungroup selected groups", EUserInterfaceActionType::Button, FInputChord() );
+    UI_BUNDLE_COMMAND( VectorBringForward, ToolsShortcuts, "Bring Forward", "Bring the selection forward", EUserInterfaceActionType::Button, FInputChord() );
+    UI_BUNDLE_COMMAND( VectorSendBackward, ToolsShortcuts, "Send Backward", "Send the selection backward", EUserInterfaceActionType::Button, FInputChord() );
+    UI_BUNDLE_COMMAND( VectorFlipHorizontal, ToolsShortcuts, "Flip Horizontal", "Flip selection horizontally", EUserInterfaceActionType::Button, FInputChord() );
+    UI_BUNDLE_COMMAND( VectorFlipVertical, ToolsShortcuts, "Flip Vertical", "Flip selection vertically", EUserInterfaceActionType::Button, FInputChord() );
+    UI_BUNDLE_COMMAND( VectorClearColoring, ToolsShortcuts, "Clear Coloring", "Clear Coloring", EUserInterfaceActionType::Button, FInputChord() );
+    UI_BUNDLE_COMMAND( VectorApplyTransformations, ToolsShortcuts, "Apply Transformations", "Apply matrix transformations", EUserInterfaceActionType::Button, FInputChord() );
+    // Vertex Mode
+    UI_BUNDLE_COMMAND( VectorSubdivideSegments, ToolsShortcuts, "Subdivide Segments", "Subdivide segments", EUserInterfaceActionType::Button, FInputChord() );
+    UI_BUNDLE_COMMAND( VectorAlignPointSelection, ToolsShortcuts, "Align Point Selection", "Align segment handles attached to the selected points", EUserInterfaceActionType::Button, FInputChord() );
+    UI_BUNDLE_COMMAND( VectorUnalignPointSelection, ToolsShortcuts, "Unalign Point Selection", "Unalign segment handles attached to the selected points", EUserInterfaceActionType::Button, FInputChord() );
+    UI_BUNDLE_COMMAND( VectorLockPointSelection, ToolsShortcuts, "Lock Point Selection", "Lock selected points", EUserInterfaceActionType::Button, FInputChord() );
+    UI_BUNDLE_COMMAND( VectorUnlockPointSelection, ToolsShortcuts, "Unlock Point Selection", "Unlock selected points", EUserInterfaceActionType::Button, FInputChord() );
+
+    // Raster Menu commands
+    UI_BUNDLE_COMMAND( RasterTranformToolTogglePerspectiveMode, ToolsShortcuts, "Raster Transform Tool : Toggle Perspective Mode", "Toggle the perspective mode for the Raster Transform Tool", EUserInterfaceActionType::Button, FInputChord() );
 
     // Uncategorized Yet Shortcuts. Will be triggered last if no shortcut above has been.
     UI_BUNDLE_COMMAND(ClearCurrentLayer, UncategorizedYetShortcuts, "Clear Current Layer", "Clear current layer", EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::Delete));
