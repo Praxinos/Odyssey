@@ -24,7 +24,8 @@ enum class eVectorPathEditEditionMode : uint8
     Vertex = 0,
     VertexHandle = 1,
     SegmentHandle = 2,
-    Alter = 3 // Add, Remove or cut
+    Alter = 3, // Add, Remove or cut
+    ToolRadius = 4 UMETA(Hidden)
 };
 
 // struct that stores the ratio of handleLength / segmentLength at mouseDown

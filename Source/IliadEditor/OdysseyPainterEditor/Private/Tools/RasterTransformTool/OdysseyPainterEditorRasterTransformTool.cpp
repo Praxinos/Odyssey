@@ -3,6 +3,7 @@
 
 #include "Tools/RasterTransformTool/OdysseyPainterEditorRasterTransformTool.h"
 #include "OdysseyPainterEditor.h"
+#include "OdysseyPainterEditorCommands.h"
 #include "OdysseyMediaRaster.h"
 #include "OdysseyHUDElement.h"
 #include "OdysseyHUDPolygon.h"
@@ -1122,5 +1123,21 @@ UOdysseyPainterEditorRasterTransformTool::OnRasterSelectionChanged()
     UpdateTransformHUD();
 }
 
+void
+UOdysseyPainterEditorRasterTransformTool::BindShortcuts(TSharedPtr<FUICommandList> iCommandList)
+{
+    Super::BindShortcuts(iCommandList);
+
+    iCommandList->MapAction(
+        FOdysseyPainterEditorCommands::Get().RasterTranformToolTogglePerspectiveMode,
+        FExecuteAction::CreateUObject( this, &UOdysseyPainterEditorRasterTransformTool::TogglePerspectiveMode )
+    );
+}
+
+void
+UOdysseyPainterEditorRasterTransformTool::TogglePerspectiveMode()
+{
+    Perspective = Perspective ? false : true;
+}
 
 #undef LOCTEXT_NAMESPACE

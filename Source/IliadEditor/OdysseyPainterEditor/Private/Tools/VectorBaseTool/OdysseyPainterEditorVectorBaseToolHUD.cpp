@@ -2319,7 +2319,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::OnMouseUp( const FOdysseyPoint& iPointIn
 void
 FOdysseyPainterEditorVectorBaseToolHUD::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
-    SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
+    //SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
 
     return mBaseTool->OnMouseDragViaHUD( iPointInTexture );
 }

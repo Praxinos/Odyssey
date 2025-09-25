@@ -139,6 +139,9 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorBaseToolHUD : public F
                            , std::vector<FOdysseyVectorVertex*>& oPickedVertexArray
                            , std::vector<FOdysseyVectorHandleSegment*>& oPickedHandleArray
                            , uint64 iSelectionFlags );
+        FVector2D TextureToHUD( const FVector2D& iPosition );
+        FVector2D TextureToHUD( double iX, double iY );
+        FVector2D TextureToHUD( const ::ULIS::FVec2D& iPosition );
 
     protected:
         void DrawInbetweens( const FOdysseyHUDElement::FDrawHUDParams& iParams
@@ -342,9 +345,6 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorBaseToolHUD : public F
         ::ULIS::FVec2D WorldVectorToHUD( const ::ULIS::FVec2D& iWorldOriginCoords
                                        , const ::ULIS::FVec2D& iWorldVectorCoords );
         ::ULIS::FRectD WorldRectToHUD( const ::ULIS::FRectD& iWorldRect );
-        FVector2D TextureToHUD( const FVector2D& iPosition );
-        FVector2D TextureToHUD( double iX, double iY );
-        FVector2D TextureToHUD( const ::ULIS::FVec2D& iPosition );
 
     protected:
         UOdysseyPainterEditorVectorBaseTool* mBaseTool;
