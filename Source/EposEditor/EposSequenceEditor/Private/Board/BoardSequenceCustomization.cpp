@@ -1270,7 +1270,10 @@ FBoardSequenceCustomization::OnGlobalTimeChanged()
                                                           return board_track->GetAllSections().Contains( iSection );
                                                       } ) )
         {
-            AActor* actor_to_select = BoardSequenceTools::GuessActorToSelect( sequencer.Get(), sequencer->GetLocalTime().Time.FloorToFrame() );
+            FQualifiedFrameTime qframetime = sequencer->GetLocalTime();
+            FFrameTime frametime = qframetime.Time;
+            FFrameNumber framenumber = frametime.FloorToFrame();
+            AActor* actor_to_select = BoardSequenceTools::GuessActorToSelect( sequencer.Get(), framenumber );
             if( actor_to_select )
             {
                 sequencer->EmptySelection();
