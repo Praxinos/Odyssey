@@ -342,6 +342,7 @@ ShotSequenceTools::CreateAnimation( ISequencer& iSequencer, UMovieSceneSequence*
     const FScopedTransaction transaction( LOCTEXT( "CreateStoryAnimationHere", "Create Storyboard Animation Here" ) );
 
     AOdysseyAnimationActor* animation_actor;
+    TOptional<FFrameTime> start_sequence_in_storyboard;
 
     {
         cTemporarySwitchInner switch_to( iSequencer, iSequenceID );
@@ -352,13 +353,21 @@ ShotSequenceTools::CreateAnimation( ISequencer& iSequencer, UMovieSceneSequence*
 
         //---
 
+        FMovieSceneInverseSequenceTransform localToRootTransform = iSequencer.GetFocusedMovieSceneSequenceTransform().Inverse();
+        start_sequence_in_storyboard = localToRootTransform.TryTransformTime( 0 );
+
         iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemAdded );
     }
 
     // Must be done after the inner/outer sequence switch
     // Otherwise it resets the selection if GEditor->SelectActor() is called inside SpawnAndBindAnimation()
     // Furthermore the hidden flag must also be set to true now
+    iSequencer.EmptySelection();
+    GEditor->SelectNone( true /*bNoteSelectionChange*/, true /*bDeselectBSPSurfs*/ );
     GEditor->SelectActor( animation_actor, true /*bInSelected*/, true /*bNotify*/, true /*bSelectEvenIfHidden*/ );
+
+    if( start_sequence_in_storyboard )
+        iSequencer.SetLocalTime( *start_sequence_in_storyboard, STM_All, true /* Evaluate */ );
 }
 
 //---
