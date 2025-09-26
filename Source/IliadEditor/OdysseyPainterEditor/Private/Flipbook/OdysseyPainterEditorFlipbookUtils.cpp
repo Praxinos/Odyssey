@@ -44,6 +44,10 @@ CreateKeyFrame(UPaperFlipbook* iFlipbook, int32 iIndex, UTexture2D** oTexture, U
     FString spriteName = textureConfiguration.Name.ToString() + TEXT("_Sprite");
     textureConfiguration.Name = FName(*textureName);
 
+    // save width and Height for future KeyFrame creations
+    ioTextureConfiguration.Width  = textureConfigurationWindow->GetConfiguration().Width;
+    ioTextureConfiguration.Height = textureConfigurationWindow->GetConfiguration().Height;
+
     //Create the keyframe
     CreateEmptyKeyFrame(iFlipbook, iIndex);
 
