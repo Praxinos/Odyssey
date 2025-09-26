@@ -9,6 +9,8 @@
 #include "Widgets/SOdysseyLayerStackTreeView.h"
 #include "Widgets/Layout/SWidgetSwitcher.h"
 #include "OdysseyLayerStack.h"
+#include "OdysseyLayerStackEditorCommands.h"
+#include "OdysseyLayerStackShortcuts.h"
 #include "Widgets/SOdysseyLayerExpanderArrow.h"
 #include "Widgets/Input/SNumericEntryBox.h"
 #include "OdysseyLayerStack.h"
@@ -28,6 +30,8 @@ SOdysseyLayerRow::SOdysseyLayerRow()
 void SOdysseyLayerRow::Construct(const FArguments& InArgs, const TSharedRef<SOdysseyLayerStackTreeView>& iOwnerTableView, UOdysseyLayer* iLayer)
 {
     ensure(iLayer);
+
+    mLayerStackGlobalShortcuts = MakeShared<FOdysseyLayerStackGlobalShortcuts>(TAttribute<UOdysseyLayerStack*>::CreateSP( this, &SOdysseyLayerRow::GetLayerStack ) );
 
     SOdysseyLayerRowBase::Construct(
         InArgs,
@@ -152,39 +156,70 @@ SOdysseyLayerRow::GenerateMainRowHeaderOptionWidgets()
 }
 
 TSharedRef<SWidget>
+SOdysseyLayerRow::CreateBlendModesMenu()
+{
+    TSharedPtr<SOdysseyLayerStackTreeView> treeView = StaticCastSharedPtr<SOdysseyLayerStackTreeView>(OwnerTablePtr.Pin());
+    //Create a new command, so that we can add context menu specific entries
+    TSharedRef<FUICommandList> commandList = MakeShared<FUICommandList>();
+
+    GetLayer()->GetLayerStack()->SetCurrentLayer( GetLayer() );
+
+    // global shortcuts
+    mLayerStackGlobalShortcuts->MapActionsToCommandList( commandList );
+    // widget shortcuts
+    commandList->Append( treeView.Get()->GetLayerStackShortcuts()->GetCommandList());
+
+    FMenuBuilder menu( true, commandList );
+
+    menu.BeginSection("Context Menu");
+    for ( TSharedPtr<FUICommandInfo> commandInfo : FOdysseyLayerStackEditorCommands::Get().SetCurrentLayerBlendMode )
+    {
+        menu.AddMenuEntry( commandInfo );
+    }
+    menu.EndSection();
+
+    return menu.MakeWidget();
+}
+
+TSharedRef<SWidget>
 SOdysseyLayerRow::GenerateBlendRowHeaderWidget()
 {
     return SNew(SHorizontalBox)
-        +SHorizontalBox::Slot()
-        .Padding(FMargin(0, 0, 1.f, 0))
-        [
-            SNew(SNumericEntryBox<int>)
-            .IsEnabled_Lambda([this](){ return GetLayer()->IsEditable();})
-            .Value_Lambda([this]() { return (int)(GetLayer()->GetOpacity() * 100.f + 0.5f);})
-            .TypeInterface(MakeShareable( new TNumericUnitTypeInterface<int32>( EUnit::Percentage ) ))
-            .AllowSpin(true)
-            .ShiftMultiplier(10)
-            .Delta(1)
-            .MinValue(0)
-            .MinSliderValue(0)
-            .MaxValue(100)
-            .MaxSliderValue(100)
-            .OnValueChanged(this, &SOdysseyLayerRow::OnOpacityValueChanged)
-            .OnValueCommitted(this, &SOdysseyLayerRow::OnOpacityValueCommitted)
-            .OnBeginSliderMovement(this, &SOdysseyLayerRow::OnOpacityBeginSliderMovement)
-            .OnEndSliderMovement(this, &SOdysseyLayerRow::OnOpacityEndSliderMovement)
+          +SHorizontalBox::Slot()
+          .Padding(FMargin(0, 0, 1.f, 0))
+          [
+              SNew(SNumericEntryBox<int>)
+              .IsEnabled_Lambda([this](){ return GetLayer()->IsEditable();})
+              .Value_Lambda([this]() { return (int)(GetLayer()->GetOpacity() * 100.f + 0.5f);})
+              .TypeInterface(MakeShareable( new TNumericUnitTypeInterface<int32>( EUnit::Percentage ) ))
+              .AllowSpin(true)
+              .ShiftMultiplier(10)
+              .Delta(1)
+              .MinValue(0)
+              .MinSliderValue(0)
+              .MaxValue(100)
+              .MaxSliderValue(100)
+              .OnValueChanged(this, &SOdysseyLayerRow::OnOpacityValueChanged)
+              .OnValueCommitted(this, &SOdysseyLayerRow::OnOpacityValueCommitted)
+              .OnBeginSliderMovement(this, &SOdysseyLayerRow::OnOpacityBeginSliderMovement)
+              .OnEndSliderMovement(this, &SOdysseyLayerRow::OnOpacityEndSliderMovement)
             //.MinDesiredValueWidth
-        ]
-        +SHorizontalBox::Slot()
-        .Padding(FMargin(1.f, 0, 0, 0))
-        .VAlign(VAlign_Center)
-        [
-            SNew(SEnumComboBox, StaticEnum<EOdysseyBlendingMode>())
-            .IsEnabled_Lambda([this](){ return GetLayer()->IsEditable();})
-            .CurrentValue_Lambda([this](){ return (int32)GetLayer()->GetBlendMode();})
-            .ContentPadding(FMargin(0))
-            .OnEnumSelectionChanged(this, &SOdysseyLayerRow::OnBlendModeComboBoxChanged)
-        ];
+          ]
+          +SHorizontalBox::Slot()
+          .Padding(FMargin(1.f, 0, 0, 0))
+          .VAlign(VAlign_Center)
+          [
+              //SNew(SEnumComboBox, StaticEnum<EOdysseyBlendingMode>())
+              SNew(SComboButton)
+              .IsEnabled_Lambda([this](){ return GetLayer()->IsEditable();})
+              .OnGetMenuContent( this, &SOdysseyLayerRow::CreateBlendModesMenu )
+              .ContentPadding(FMargin(0))
+              .ButtonContent()
+              [
+                  SNew(STextBlock)
+                  .Text_Lambda([this](){ return UEnum::GetDisplayValueAsText(GetLayer()->GetBlendMode()); } )
+              ]
+          ];
 }
 
 TSharedRef<SWidget>
@@ -288,6 +323,12 @@ SOdysseyLayerRow::GetIsLockedCheckBoxEnabled() const
 }
 
 //---
+
+UOdysseyLayerStack*
+SOdysseyLayerRow::GetLayerStack() const
+{
+    return GetLayer()->GetLayerStack();
+}
 
 FText
 SOdysseyLayerRow::GetLayerName() const

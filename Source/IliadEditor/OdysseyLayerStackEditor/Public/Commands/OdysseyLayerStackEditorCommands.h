@@ -30,4 +30,9 @@ public:
     TSharedPtr<FUICommandInfo> NavigateToPreviousLayer;
     TSharedPtr<FUICommandInfo> OpenFolderLayer;
     TSharedPtr<FUICommandInfo> CloseFolderLayer;
+
+    /** Action for changing the current layer's blending mode */
+    TArray<TSharedPtr<FUICommandInfo>> SetCurrentLayerBlendMode;
+    TSharedPtr<FUICommandInfo> SetCurrentLayerBlendModeToNextBlendMode;
+    TSharedPtr<FUICommandInfo> SetCurrentLayerBlendModeToPreviousBlendMode;
 };

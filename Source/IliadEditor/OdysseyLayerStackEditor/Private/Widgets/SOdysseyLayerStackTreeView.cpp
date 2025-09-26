@@ -466,6 +466,11 @@ SOdysseyLayerStackTreeView::OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStac
 }
 
 // ContextMenu
+TSharedPtr<FOdysseyLayerStackShortcuts>
+SOdysseyLayerStackTreeView::GetLayerStackShortcuts()
+{
+    return mLayerStackShortcuts;
+}
 
 TSharedPtr<SWidget>
 SOdysseyLayerStackTreeView::OnContextMenuOpening()

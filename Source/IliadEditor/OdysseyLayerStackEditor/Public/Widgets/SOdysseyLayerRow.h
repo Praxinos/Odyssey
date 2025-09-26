@@ -8,8 +8,10 @@
 #include "CoreMinimal.h"
 #include "Widgets/Views/STableRow.h"
 #include "Widgets/SOdysseyLayerRowBase.h"
+#include "OdysseyLayerStackGlobalShortcuts.h"
 
 class SOdysseyLayerStackTreeView;
+class UOdysseyLayerStack;
 
 /**
  * Implements a layer row widget
@@ -51,6 +53,8 @@ protected:
     void OnLayerNameCommited(const FText& iText, ETextCommit::Type iType);
     FText GetLayerName() const;
     FSlateFontInfo GetLayerNameFont() const;
+    TSharedRef<SWidget> CreateBlendModesMenu();
+    UOdysseyLayerStack* GetLayerStack() const;
 
     virtual FReply OnRowDragDetected(const FGeometry& iGeometry, const FPointerEvent& iEvent, TWeakPtr<SOdysseyLayerStackTreeView> iTreeView) override;
 
@@ -70,4 +74,6 @@ private:
 private:
     TSharedPtr<SInlineEditableTextBlock> mNameWidget = nullptr;
     FText mSetOpacityTransactionName;
+
+    TSharedPtr<FOdysseyLayerStackGlobalShortcuts> mLayerStackGlobalShortcuts;
 };

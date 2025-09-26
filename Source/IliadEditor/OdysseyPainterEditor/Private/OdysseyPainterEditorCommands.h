@@ -370,11 +370,6 @@ public:
     /** Action for changing the current layer's opacity */
     TArray<TSharedPtr<FUICommandInfo>> ChangeLayerOpacity;
 
-    /** Action for changing the current layer's blending mode */
-    TArray<TSharedPtr<FUICommandInfo>> SetCurrentLayerBlendMode;
-    TSharedPtr<FUICommandInfo> SetCurrentLayerBlendModeToNextBlendMode;
-    TSharedPtr<FUICommandInfo> SetCurrentLayerBlendModeToPreviousBlendMode;
-
     TSharedPtr<FUICommandInfo> ImportTexturesAsLayers;
     TSharedPtr<FUICommandInfo> ExportLayersAsTextures;
     TSharedPtr<FUICommandInfo> ExportCurrentLayerAsTexture;
