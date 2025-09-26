@@ -162,11 +162,18 @@ ShotSequenceTools::RenameBinding( ISequencer& iSequencer, UMovieSceneSequence* i
 
 //---
 
-TArray<TWeakObjectPtr<AActor>> BoardSequenceTools::mDirectActorsSelectedHistory;
+TArray<TWeakObjectPtr<AActor>> ShotSequenceTools::mDirectActorsSelectedHistory;
 
 //static
 void
 BoardSequenceTools::AddSelectedActorToHistory( AActor* iActor )
+{
+    ShotSequenceTools::AddSelectedActorToHistory( iActor );
+}
+
+//static
+void
+ShotSequenceTools::AddSelectedActorToHistory( AActor* iActor )
 {
     if( !iActor )
         return;
@@ -188,7 +195,7 @@ BoardSequenceTools::GuessActorToSelect( ISequencer* iSequencer, const FFrameNumb
     //TArray<AActor*> actor_selected;
     //selection->GetSelectedObjects<AActor>( actor_selected );
 
-    AActor* actor_to_select = BoardSequenceTools::GuessActorToSelect( iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber, actor_selected );
+    AActor* actor_to_select = ShotSequenceTools::GuessActorToSelect( iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber, actor_selected );
     // If already selected, nothing to do
     //if( actor_selected.Contains( actor_to_select ) )
     //    return nullptr;
@@ -198,7 +205,28 @@ BoardSequenceTools::GuessActorToSelect( ISequencer* iSequencer, const FFrameNumb
 
 //static
 AActor*
-BoardSequenceTools::GuessActorToSelect( ISequencer* iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceId, const FFrameNumber& iFrameNumber, const TArray<AActor*>& /*iLastSelectedActors*/ )
+ShotSequenceTools::GuessActorToSelect( ISequencer* iSequencer, const FFrameNumber& iFrameNumber )
+{
+    // This is no more used as there are some times where this selection is auto-empty by the engine
+    // so we can't rely on it to always guess the animation/camera to auto-select
+    //
+    TArray<AActor*> actor_selected;
+    //// Store the currently selected actor to guess the type of actor (camera or animation) to auto-select
+    //USelection* selection = GEditor->GetSelectedActors();
+    //TArray<AActor*> actor_selected;
+    //selection->GetSelectedObjects<AActor>( actor_selected );
+
+    AActor* actor_to_select = ShotSequenceTools::GuessActorToSelect( iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber, actor_selected );
+    // If already selected, nothing to do
+    //if( actor_selected.Contains( actor_to_select ) )
+    //    return nullptr;
+
+    return actor_to_select;
+}
+
+//static
+AActor*
+ShotSequenceTools::GuessActorToSelect( ISequencer* iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceId, const FFrameNumber& iFrameNumber, const TArray<AActor*>& /*iLastSelectedActors*/ )
 {
     // See comment above in GuessActorToSelect() to know why iLastSelectedActors is no more used
     //TArray<AActor*> actors = iLastSelectedActors.FilterByPredicate( []( const AActor* iActor )
@@ -211,9 +239,9 @@ BoardSequenceTools::GuessActorToSelect( ISequencer* iSequencer, UMovieSceneSeque
     // - open another map
     // - actors in the cache are all invalid
     mDirectActorsSelectedHistory.RemoveAll( []( TWeakObjectPtr<AActor> iActor )
-                                            {
-                                                return !iActor.IsValid();
-                                            } );
+                                                               {
+                                                                   return !iActor.IsValid();
+                                                               } );
 
     // Auto-select camera if it's the last actor type directly selected by the user
     if( mDirectActorsSelectedHistory.Num()
@@ -222,9 +250,20 @@ BoardSequenceTools::GuessActorToSelect( ISequencer* iSequencer, UMovieSceneSeque
     {
         UMovieSceneSequence* sequence = nullptr;
         FMovieSceneSequenceID sequenceId = MovieSceneSequenceID::Invalid;
-        ACineCameraActor* camera = BoardSequenceHelpers::GetCameraRecursive( *iSequencer, iSequence, iSequenceId, iFrameNumber, nullptr, &sequence, &sequenceId );
+        if( iSequence->IsA<UBoardSequence>() )
+        {
+            ACineCameraActor* camera = BoardSequenceHelpers::GetCameraRecursive( *iSequencer, iSequence, iSequenceId, iFrameNumber, nullptr, &sequence, &sequenceId );
 
-        return camera;
+            return camera;
+        }
+        else if( iSequence->IsA<UShotSequence>() )
+        {
+            sequence = iSequence;
+            sequenceId = iSequenceId;
+            ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( *iSequencer, iSequence, iSequenceId, nullptr );
+
+            return camera;
+        }
     }
 
     //---
@@ -235,15 +274,25 @@ BoardSequenceTools::GuessActorToSelect( ISequencer* iSequencer, UMovieSceneSeque
     //                                                {
     //                                                    return iActor->IsA<AOdysseyAnimationActor>();
     //                                                } );
-    //if( mDirectActorsSelectedHistory.Num()
-    //    && mDirectActorsSelectedHistory.Last()->IsA<AOdysseyAnimationActor>() )
+    //if( ShotSequenceTools::mDirectActorsSelectedHistory.Num()
+    //    && ShotSequenceTools::mDirectActorsSelectedHistory.Last()->IsA<AOdysseyAnimationActor>() )
     //if( actors.Num() )
     {
         TArray<AOdysseyAnimationActor*> animations;
         TArray<FGuid> unordered_bindings;
         UMovieSceneSequence* sequence = nullptr;
         FMovieSceneSequenceID sequenceId = MovieSceneSequenceID::Invalid;
-        BoardSequenceHelpers::GetAllAnimationsRecursive( *iSequencer, iSequence, iSequenceId, EGetAnimation::kAll, iFrameNumber, &animations, &unordered_bindings, &sequence, &sequenceId );
+        if( iSequence->IsA<UBoardSequence>() )
+        {
+            BoardSequenceHelpers::GetAllAnimationsRecursive( *iSequencer, iSequence, iSequenceId, EGetAnimation::kAll, iFrameNumber, &animations, &unordered_bindings, &sequence, &sequenceId );
+        }
+        else if( iSequence->IsA<UShotSequence>() )
+        {
+            sequence = iSequence;
+            sequenceId = iSequenceId;
+            ShotSequenceHelpers::GetAllAnimations( *iSequencer, iSequence, iSequenceId, EGetAnimation::kAll, &animations, &unordered_bindings );
+        }
+
 
         // Animation not found AND no sequence (shot) found, so nothing can be guess
         if( !sequence )

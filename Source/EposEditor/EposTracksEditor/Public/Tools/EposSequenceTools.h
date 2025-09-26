@@ -170,14 +170,9 @@ public:
     */
     static AActor* GuessActorToSelect( ISequencer* iSequencer, const FFrameNumber& iFrameNumber );
 
-private:
-    static AActor* GuessActorToSelect( ISequencer* iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceId, const FFrameNumber& iFrameNumber, const TArray<AActor*>& iLastSelectedActors );
-
 public:
     /**  Add an actor to an history list, to be able to know later which actor best fit during auto-selection actor */
     static void AddSelectedActorToHistory( AActor* iActor );
-protected:
-    static TArray<TWeakObjectPtr<AActor>> mDirectActorsSelectedHistory;
 
 public:
     static void RenameBinding( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FGuid iBinding, FString iNewLabel );
@@ -740,6 +735,25 @@ private:
     };
 
     friend class FImportImageSequenceConverter;
+
+public:
+    /**
+    *  Guess to actor to auto select from the currently selected actors and the actor history selection
+    *
+    * @param ISequencer*                iSequencer to get the auto-select actor.
+    * @param iFrameNumber               iFrameNumber to get the auto-select actor.
+    * @return AActor* the best actor to auto-select.
+    */
+    static AActor* GuessActorToSelect( ISequencer* iSequencer, const FFrameNumber& iFrameNumber );
+
+private:
+    static AActor* GuessActorToSelect( ISequencer* iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceId, const FFrameNumber& iFrameNumber, const TArray<AActor*>& iLastSelectedActors );
+
+public:
+    /**  Add an actor to an history list, to be able to know later which actor best fit during auto-selection actor */
+    static void AddSelectedActorToHistory( AActor* iActor );
+protected:
+    static TArray<TWeakObjectPtr<AActor>> mDirectActorsSelectedHistory;
 
 public:
     static void RenameBinding( ISequencer* iSequencer, FGuid iBinding, FString iNewLabel );

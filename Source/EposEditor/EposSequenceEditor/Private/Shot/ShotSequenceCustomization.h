@@ -46,6 +46,10 @@ private:
     //void ExtendObjectBindingSidebarMenu( FMenuBuilder& MenuBuilder, TSharedPtr<FObjectBindingModel> ObjectBindingModel );
 
 private:
+    void OnObjectSelectedMulti( const TArray<UObject*>& iObjects, bool bForceRefresh );
+    void OnGlobalTimeChanged();
+
+private:
     /**
      * Called before an actor or component transform changes
      *
@@ -90,6 +94,8 @@ private:
     FDelegateHandle mSequencerActorAddedDelegates;
     FDelegateHandle mSequencerActivatedDelegates;
     FDelegateHandle mSequencerSelectionSectionChangedDelegates;
+    FDelegateHandle mSequencerGlobalTimeChangedDelegates;
+    FDelegateHandle mSelectionChangedDelegates;
     UShotSequence*  mShotSequence;
 
     TSharedPtr<FUICommandList> mShotCommandList;

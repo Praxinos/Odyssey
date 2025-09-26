@@ -1218,6 +1218,9 @@ FBoardSequenceCustomization::OnObjectSelectedMulti( const TArray<UObject*>& iObj
 void
 FBoardSequenceCustomization::OnGlobalTimeChanged()
 {
+    if( !mWeakSequencer.IsValid() )
+        return;
+
     TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
 
     EMovieScenePlayerStatus::Type playback_state = sequencer->GetPlaybackStatus();

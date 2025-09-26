@@ -90,7 +90,13 @@ FShotSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomizat
     mSequencerActivatedDelegates = mWeakSequencer.Pin()->OnActivateSequence().AddStatic( &ToolkitHelpers::HandleOnActivateSequence, mWeakSequencer.Pin().Get() );
     mSequencerSelectionSectionChangedDelegates = mWeakSequencer.Pin()->GetSelectionChangedSections().AddStatic( &ToolkitHelpers::HandleOnSelectionChangedSections, mWeakSequencer.Pin().Get() );
 
+    mSequencerGlobalTimeChangedDelegates = mWeakSequencer.Pin()->OnGlobalTimeChanged().AddRaw( this, &FShotSequenceCustomization::OnGlobalTimeChanged );
+
     mMovieSceneDataChangedHandle = mWeakSequencer.Pin()->OnMovieSceneDataChanged().AddRaw( this, &FShotSequenceCustomization::MovieSceneDataChanged );
+
+    FLevelEditorModule& levelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>( "LevelEditor" );
+    mSelectionChangedDelegates = levelEditorModule.OnActorSelectionChanged().AddRaw( this, &FShotSequenceCustomization::OnObjectSelectedMulti );
+    //ULevelEditorSubsystem& subsystem = GEditor->GetSubsystem<ULevelEditorSubsystem>();
 }
 
 void
@@ -110,8 +116,13 @@ FShotSequenceCustomization::UnregisterSequencerCustomization()
         mWeakSequencer.Pin()->OnActivateSequence().Remove( mSequencerActivatedDelegates );
         mWeakSequencer.Pin()->GetSelectionChangedSections().Remove( mSequencerSelectionSectionChangedDelegates );
 
+        mWeakSequencer.Pin()->OnGlobalTimeChanged().Remove( mSequencerGlobalTimeChangedDelegates );
+
         mWeakSequencer.Pin()->OnMovieSceneDataChanged().Remove( mMovieSceneDataChangedHandle );
     }
+
+    FLevelEditorModule& levelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>( "LevelEditor" );
+    levelEditorModule.OnActorSelectionChanged().Remove( mSelectionChangedDelegates );
 
     mWeakSequencer = nullptr;
     mShotSequence = nullptr;
@@ -845,6 +856,107 @@ FShotSequenceCustomization::ExtendObjectBindingContextMenu(FMenuBuilder& MenuBui
 //{
 //    ExtendObjectBindingContextMenu( MenuBuilder, ObjectBindingModel );
 //}
+
+//---
+
+void
+FShotSequenceCustomization::OnObjectSelectedMulti( const TArray<UObject*>& iObjects, bool bForceRefresh )
+{
+    // Store an history of selected actors to know later (when scrubbing) which actor best fit the auto-selection
+    for( UObject* object : iObjects )
+    {
+        ACineCameraActor* camera = Cast<ACineCameraActor>( object );
+        if( camera )
+            ShotSequenceTools::AddSelectedActorToHistory( camera );
+
+        AOdysseyAnimationActor* animation = Cast<AOdysseyAnimationActor>( object );
+        if( animation )
+            ShotSequenceTools::AddSelectedActorToHistory( animation );
+    }
+}
+
+void
+FShotSequenceCustomization::OnGlobalTimeChanged()
+{
+    if( !mWeakSequencer.IsValid() )
+        return;
+
+    TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+
+    EMovieScenePlayerStatus::Type playback_state = sequencer->GetPlaybackStatus();
+
+    //FString prefix = TEXT( "global time changed" );
+    //FQualifiedFrameTime frame_time = sequencer->GetLocalTime();
+    //UE_LOG( LogTemp, Warning, TEXT( "%s: frame=%d state=%s" ), *prefix, frame_time.Time.GetFrame().Value,
+    //        playback_state == EMovieScenePlayerStatus::Type::Stopped
+    //        ? TEXT("Stopped")
+    //        : playback_state == EMovieScenePlayerStatus::Type::Playing
+    //        ? TEXT( "Playing" )
+    //        : playback_state == EMovieScenePlayerStatus::Type::Scrubbing
+    //        ? TEXT( "Scrubbing" )
+    //        : playback_state == EMovieScenePlayerStatus::Type::Jumping
+    //        ? TEXT( "Jumping" )
+    //        : playback_state == EMovieScenePlayerStatus::Type::Stepping
+    //        ? TEXT( "Stepping" )
+    //        : playback_state == EMovieScenePlayerStatus::Type::Paused
+    //        ? TEXT( "Paused" )
+    //        : TEXT( "Unknown" )
+    //);
+
+    // Don't auto-select an actor if currently play or scrub because changing the actor in Odyssey mode is not instant
+    // So just change the actor at the end of play/scrub
+    if( playback_state != EMovieScenePlayerStatus::Playing && playback_state != EMovieScenePlayerStatus::Scrubbing )
+    {
+        //USelection* selection = GEditor->GetSelectedActors();
+        //TArray<AActor*> actor_selected;
+        //selection->GetSelectedObjects<AActor>( actor_selected );
+
+        TArray<UMovieSceneTrack*> selected_tracks;
+        sequencer->GetSelectedTracks( selected_tracks );
+        TArray<TPair<UMovieSceneTrack*, int32>> selected_track_rows;
+        sequencer->GetSelectedTrackRows( selected_track_rows );
+        TArray<UMovieSceneFolder*> selected_folders;
+        sequencer->GetSelectedFolders( selected_folders );
+        TArray<UMovieSceneSection*> selected_sections;
+        sequencer->GetSelectedSections( selected_sections );
+        TArray<const IKeyArea*> selected_key_areas;
+        sequencer->GetSelectedKeyAreas( selected_key_areas );
+        TArray<FGuid> selected_bindings;
+        sequencer->GetSelectedObjects( selected_bindings );
+
+        // Check if something is already selected by the sequencer
+        bool nothing_selected = selected_tracks.IsEmpty()
+            && selected_track_rows.IsEmpty()
+            && selected_folders.IsEmpty()
+            && selected_sections.IsEmpty()
+            && selected_key_areas.IsEmpty()
+            && selected_bindings.IsEmpty();
+
+        // if nothing is selected by the sequencer, always select an actor in the board track
+        if( nothing_selected )
+        {
+            FQualifiedFrameTime qframetime = sequencer->GetLocalTime();
+            FFrameTime frametime = qframetime.Time;
+            FFrameNumber framenumber = frametime.FloorToFrame();
+            AActor* actor_to_select = ShotSequenceTools::GuessActorToSelect( sequencer.Get(), framenumber );
+            if( actor_to_select )
+            {
+                sequencer->EmptySelection();
+                //sequencer->SelectSection( subsection );
+
+                GEditor->SelectNone( true /*bNoteSelectionChange*/, true /*bDeselectBSPSurfs*/ );
+                // Do not notify, otherwise it lags
+                // But as we filter on NOT scrubbing and NOT playing, we can enable notification
+                GEditor->SelectActor( actor_to_select, true /*bInSelected*/, true /*bNotify*/, true /*bSelectEvenIfHidden*/ );
+            }
+            else
+            {
+                sequencer->EmptySelection();
+                GEditor->SelectNone( true /*bNoteSelectionChange*/, true /*bDeselectBSPSurfs*/ );
+            }
+        }
+    }
+}
 
 //---
 
