@@ -341,6 +341,8 @@ public:
     TSharedPtr<FUICommandInfo> ActivateVectorSelectionTool;
     TSharedPtr<FUICommandInfo> ActivateVectorTransformTool;
 
+    TSharedPtr<FUICommandInfo> SetToolRadius;
+
     // Vector Tools Actions in Object Mode
     TSharedPtr<FUICommandInfo> VectorResetView;
     TSharedPtr<FUICommandInfo> VectorMakePaintGroup;

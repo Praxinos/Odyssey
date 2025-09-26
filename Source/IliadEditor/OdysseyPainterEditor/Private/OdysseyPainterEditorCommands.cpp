@@ -159,6 +159,8 @@ FOdysseyPainterEditorCommands::RegisterCommands()
     UI_BUNDLE_COMMAND( ActivateVectorSelectionTool, ToolsShortcuts, "Activate Vector Selection Tool", "Activates the editor Vector Selection tool", EUserInterfaceActionType::Button, FInputChord() );
     UI_BUNDLE_COMMAND( ActivateVectorTransformTool, ToolsShortcuts, "Activate Vector Transform Tool", "Activates the editor Vector Transform tool", EUserInterfaceActionType::Button, FInputChord() );
 
+    UI_BUNDLE_COMMAND( SetToolRadius, ToolsShortcuts, "Set Tool Radius", "Set the radius of the current tool (press and hold)", EUserInterfaceActionType::Button, FInputChord() );
+
     // LayerStack Shortcuts Category
     UI_BUNDLE_COMMAND( CreateNewLayer, LayerStackShortcuts, "Create New Layer", "Create new image layer",                                                                                                      EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::N));
     for (int i = 0; i <= 10; i++)

@@ -108,7 +108,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnKeyDownGlobalVector( FOdysseyVectorGr
                                        | ( InKeyEvent.IsAltDown()     ? EModifierKey::Alt     : 0 )
                                        , key );
 
-        if( chord == FOdysseyPainterEditorCommands::Get().VectorResetView.Get()->GetFirstValidChord().Get() )
+        if( chord == FOdysseyPainterEditorCommands::Get().SetToolRadius.Get()->GetFirstValidChord().Get() )
         {
             mEditionMode   = eVectorPathEditEditionMode::ToolRadius;
         }
