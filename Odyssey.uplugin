@@ -81,6 +81,10 @@
         {
             "Enabled": true,
             "Name": "GeometryScripting"
+        },
+        {
+            "Enabled": true,
+            "Name": "TemplateSequence"
         }
     ],
     "Modules": [

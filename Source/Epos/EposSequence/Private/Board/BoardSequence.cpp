@@ -23,6 +23,7 @@
 #include "SubObjectLocator.h"
 #include "UniversalObjectLocators/ActorLocatorFragment.h"
 #include "Sequencer/MovieSceneControlRigParameterTrack.h"
+#include "Tracks/TemplateSequenceTrack.h"
 
 #include "Board/BoardHelpers.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
@@ -271,7 +272,8 @@ UBoardSequence::IsTrackSupportedImpl( TSubclassOf<class UMovieSceneTrack> InTrac
         InTrackClass == UMovieSceneMediaTrack::StaticClass() ||
         InTrackClass == UMovieSceneLevelVisibilityTrack::StaticClass() ||
         InTrackClass == UMovieSceneControlRigParameterTrack::StaticClass() ||
-        InTrackClass == UMovieSceneSkeletalAnimationTrack::StaticClass() )
+        InTrackClass == UMovieSceneSkeletalAnimationTrack::StaticClass() ||
+        InTrackClass == UTemplateSequenceTrack::StaticClass() )
     {
         return ETrackSupport::Supported;
     }

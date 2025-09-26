@@ -62,6 +62,7 @@ public class EposSequence : ModuleRules
                 "MediaPlate",
                 "UniversalObjectLocator",
                 "ControlRig",
+                "TemplateSequence",
                 // [RUNTIME] custom plugin dependencies
                 "EposMovieScene",
                 "EposTracks",
