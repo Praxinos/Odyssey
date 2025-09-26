@@ -5,11 +5,9 @@
 
 #include "OdysseyPainterEditor.h"
 #include "ToolCollection/OdysseyToolCollection.h"
-#include "Widgets/Views/STileView.h"
 #include "Widgets/Layout/SExpandableArea.h"
 #include "ToolCollection/OdysseyToolCollectionDragDropOp.h"
 #include "SOdysseyPainterEditorToolTile.h"
-#include "Widgets/Layout/SWrapBox.h"
 
 SOdysseyPainterEditorToolCollection::~SOdysseyPainterEditorToolCollection()
 {
@@ -22,8 +20,7 @@ SOdysseyPainterEditorToolCollection::~SOdysseyPainterEditorToolCollection()
 SOdysseyPainterEditorToolCollection::SOdysseyPainterEditorToolCollection()
 {}
 
-void
-SOdysseyPainterEditorToolCollection::Construct(const FArguments& InArgs)
+void SOdysseyPainterEditorToolCollection::Construct(const FArguments& InArgs)
 {
     mEditor = InArgs._Editor;
     mToolCollection = InArgs._ToolCollection;
@@ -43,46 +40,21 @@ SOdysseyPainterEditorToolCollection::Construct(const FArguments& InArgs)
                 .AreaTitle(this, &SOdysseyPainterEditorToolCollection::GetCollectionDisplayName)
                 .BodyContent()
                 [
-                    SNew(SWrapBox)
+                    SAssignNew(mToolWrapBox, SWrapBox)
                         .UseAllottedSize(true)
-                        .Orientation(EOrientation::Orient_Horizontal)
-                        + SWrapBox::Slot()
-                        [
-                            // Tile view with tools
-                            SAssignNew(mToolListView, STileView<UOdysseyPainterEditorTool*>)
-                                .ListItemsSource(&mDisplayedTools)
-                                .OnGenerateTile(this, &SOdysseyPainterEditorToolCollection::GenerateToolTile)
-                                .ItemHeight(32)
-                                .ItemWidth(32)
-                                .Orientation(EOrientation::Orient_Horizontal)
-                        ]
-                        + SWrapBox::Slot()
-                        .Padding(2)
-                        [
-                            SNew(SButton)
-                                .ContentPadding(0)
-                                //.ButtonStyle(FCoreStyle::Get(), "NoBorder")
-                                .OnClicked(this, &SOdysseyPainterEditorToolCollection::OnAddToolClicked)
-                                [
-                                    SNew(SBox)
-                                        .WidthOverride(32)
-                                        .HeightOverride(32)
-                                        [
-                                            SNew(STextBlock)
-                                                .Text(FText::FromString(TEXT("+")))
-                                                .Justification(ETextJustify::Center)
-                                        ]
-                                ]
-                        ]
+                        .InnerSlotPadding(FVector2D(2.f, 2.f))
                 ]
         ];
+
+    RefreshTools();
 }
 
 
-TSharedRef<ITableRow> SOdysseyPainterEditorToolCollection::GenerateToolTile(UOdysseyPainterEditorTool* Tool, const TSharedRef<STableViewBase>& OwnerTable)
+TSharedRef<SWidget> SOdysseyPainterEditorToolCollection::GenerateToolTile(UOdysseyPainterEditorTool* Tool)
 {
-    return SNew(SOdysseyPainterEditorToolTile, OwnerTable)
-            .Tool( Tool );
+    return SNew(SOdysseyPainterEditorToolTile)
+        .Tool(Tool)
+        .ToolCollection(mToolCollection.Get());
 }
 
 FText
@@ -115,8 +87,39 @@ SOdysseyPainterEditorToolCollection::HandleToolsChanged()
 {
     mDisplayedTools = mToolCollection.Get()->GetTools();
 
-    if (mToolListView.IsValid())
+    RefreshTools();
+}
+
+void SOdysseyPainterEditorToolCollection::RefreshTools()
+{
+    if (!mToolWrapBox.IsValid())
+        return;
+
+    mToolWrapBox->ClearChildren();
+
+    // Rebuild tool tiles
+    for (UOdysseyPainterEditorTool* Tool : mDisplayedTools)
     {
-        mToolListView->RequestListRefresh();
+        mToolWrapBox->AddSlot()
+            [
+                GenerateToolTile(Tool)
+            ];
     }
+
+    mToolWrapBox->AddSlot()
+        [
+            SNew(SButton)
+                .ContentPadding(0)
+                .OnClicked(this, &SOdysseyPainterEditorToolCollection::OnAddToolClicked)
+                [
+                    SNew(SBox)
+                        .WidthOverride(32)
+                        .HeightOverride(32)
+                        [
+                            SNew(STextBlock)
+                                .Text(FText::FromString(TEXT("+")))
+                                .Justification(ETextJustify::Center)
+                        ]
+                ]
+        ];
 }

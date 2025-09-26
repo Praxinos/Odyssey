@@ -17,43 +17,36 @@ SOdysseyPainterEditorToolTile::SOdysseyPainterEditorToolTile()
 
 //CONSTRUCTION/DESTRUCTION-----------------------------------------------
 void
-SOdysseyPainterEditorToolTile::Construct(const FArguments& InArgs, const TSharedRef<STableViewBase>& InOwnerTable)
+SOdysseyPainterEditorToolTile::Construct(const FArguments& InArgs)
 {
     mTool = InArgs._Tool;
     mCollection = InArgs._ToolCollection;
 
-    /*
-    STableRow<UOdysseyPainterEditorTool*>::Construct(
-        STableRow<UOdysseyPainterEditorTool*>::FArguments(),
-        InOwnerTable
-    );
-    */
-
-    STableRow<UOdysseyPainterEditorTool*>::FArguments Args;
-    Args.OnCanAcceptDrop(this, &SOdysseyPainterEditorToolTile::HandleCanAcceptDrop)
-        .OnAcceptDrop(this, &SOdysseyPainterEditorToolTile::HandleAcceptDrop)
-        .OnDragDetected(this, &SOdysseyPainterEditorToolTile::OnDragDetected);
-
-    STableRow<UOdysseyPainterEditorTool*>::Construct(Args, InOwnerTable);
-
     ChildSlot
-    .HAlign(HAlign_Fill)
-    .VAlign(VAlign_Fill)
-    .Padding(4)
-    [
-        SNew(SImage)
-            .Image(&mTool->Icon)
-            .DesiredSizeOverride(FVector2D(32.f, 32.f))
-    ];
+        .HAlign(HAlign_Fill)
+        .VAlign(VAlign_Fill)
+        .Padding(4)
+        [
+            SNew(SImage)
+                .Image(&mTool->Icon)
+                .DesiredSizeOverride(FVector2D(32.f, 32.f))
+        ];
+}
+
+FReply SOdysseyPainterEditorToolTile::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
+{
+    if (MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
+    {
+        return FReply::Handled().DetectDrag(SharedThis(this), EKeys::LeftMouseButton);
+    }
+    return FReply::Unhandled();
 }
 
 FReply SOdysseyPainterEditorToolTile::OnDragDetected(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
     if (MouseEvent.IsMouseButtonDown(EKeys::LeftMouseButton))
     {
-        return FReply::Handled().BeginDragDrop(
-            FOdysseyToolCollectionDragDropOp::Create(mTool, mCollection)
-        );
+        return FReply::Handled().BeginDragDrop(FOdysseyToolCollectionDragDropOp::Create(mTool, mCollection));
     }
     return FReply::Unhandled();
 }
@@ -64,13 +57,13 @@ TOptional<EItemDropZone> SOdysseyPainterEditorToolTile::HandleCanAcceptDrop(
     auto DragOp = DragDropEvent.GetOperationAs<FOdysseyToolCollectionDragDropOp>();
     if (DragOp.IsValid())
     {
+        UE_LOG(LogTemp, Display, TEXT("CAN ACCEPT DROP"));
         return DropZone; // Allow before/after/onto
     }
     return TOptional<EItemDropZone>();
 }
 
-FReply SOdysseyPainterEditorToolTile::HandleAcceptDrop(
-    const FDragDropEvent& DragDropEvent, EItemDropZone DropZone, UOdysseyPainterEditorTool* TargetItem)
+FReply SOdysseyPainterEditorToolTile::HandleAcceptDrop(const FDragDropEvent& DragDropEvent, EItemDropZone DropZone, UOdysseyPainterEditorTool* TargetItem)
 {
     auto DragOp = DragDropEvent.GetOperationAs<FOdysseyToolCollectionDragDropOp>();
     if (!DragOp.IsValid() || !mCollection)
@@ -98,19 +91,9 @@ FReply SOdysseyPainterEditorToolTile::HandleAcceptDrop(
         mCollection->InsertToolAt(Tool, TargetIndex);
     }*/
 
+    UE_LOG(LogTemp, Display, TEXT("ACCEPT DROP"));
+
     return FReply::Handled();
-}
-
-
-/*
-FReply SOdysseyPainterEditorToolTile::OnDragDetected(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
-{
-    if (MouseEvent.IsMouseButtonDown(EKeys::LeftMouseButton))
-    {
-        TSharedRef<FOdysseyToolCollectionDragDropOp> DragOp = FOdysseyToolCollectionDragDropOp::Create(mTool, mCollection);
-        return FReply::Handled().BeginDragDrop(DragOp);
-    }
-    return FReply::Unhandled();
 }
 
 FReply SOdysseyPainterEditorToolTile::OnDragOver(const FGeometry& MyGeometry, const FDragDropEvent& DragDropEvent)
@@ -131,6 +114,7 @@ void SOdysseyPainterEditorToolTile::OnDragLeave(const FDragDropEvent& DragDropEv
     mDropSide = EDropIndicatorSide::None;
 }
 
+/*
 FReply SOdysseyPainterEditorToolTile::OnDrop(const FGeometry& MyGeometry, const FDragDropEvent& DragDropEvent)
 {
     auto DragOp = DragDropEvent.GetOperationAs<FOdysseyToolCollectionDragDropOp>();

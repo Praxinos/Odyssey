@@ -15,6 +15,8 @@
 #include "ToolCollection/OdysseyToolCollection.h"
 #include "Editor/PropertyEditor/Public/PropertyCustomizationHelpers.h"
 #include "SPositiveActionButton.h"
+#include "Widgets/Views/SListView.h"
+#include "Widgets/Layout/SWrapBox.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -62,6 +64,15 @@ FOdysseyPainterEditorToolCollectionTab::CreateWidget()
         + SVerticalBox::Slot() //Recent tools
         .AutoHeight()
         [
+            SAssignNew(CollectionsListView, SListView<TWeakObjectPtr<UOdysseyToolCollection>>)
+                .ListItemsSource(&mSelectedCollections) // TArray<TWeakObjectPtr<UOdysseyToolCollection>>
+                .OnGenerateRow(this, &FOdysseyPainterEditorToolCollectionTab::OnGenerateCollectionRow)
+                .SelectionMode(ESelectionMode::None)
+        ];
+
+        /*+ SVerticalBox::Slot() //Recent tools
+        .AutoHeight()
+        [
             SNew(SOdysseyPainterEditorToolCollection)
                 .Editor(mEditor)
                 .ToolCollection(mEditor->GetRecentTools())
@@ -69,7 +80,7 @@ FOdysseyPainterEditorToolCollectionTab::CreateWidget()
         + SVerticalBox::Slot().FillHeight(1.f)
         [
             SAssignNew(mCollectionsWidget, SVerticalBox)
-        ];
+        ];*/
 
     return widget;
 }
@@ -85,10 +96,20 @@ FOdysseyPainterEditorToolCollectionTab::BindShortcuts(FBaseToolkit* iToolkit)
     #undef MAP_ACTION
 }
 
+TSharedRef<ITableRow> FOdysseyPainterEditorToolCollectionTab::OnGenerateCollectionRow( TWeakObjectPtr<UOdysseyToolCollection> InCollection, const TSharedRef<STableViewBase>& OwnerTable)
+{
+    return SNew(STableRow<TWeakObjectPtr<UOdysseyToolCollection>>, OwnerTable)
+        [
+            SNew(SOdysseyPainterEditorToolCollection)
+                .Editor(mEditor)
+                .ToolCollection(InCollection.Get())
+        ];
+}
+
 TSharedRef<SWidget>
 FOdysseyPainterEditorToolCollectionTab::OnGetAddToolCollectionMenuContent()
 {
-    RefreshCollectionsUI();
+    //RefreshCollectionsUI();
 
     TArray<FSoftObjectPath> loadedCollectionPaths;
     for (const TWeakObjectPtr<UOdysseyToolCollection>& collectionPtr : mSelectedCollections)
@@ -130,7 +151,7 @@ FOdysseyPainterEditorToolCollectionTab::OnGetAddToolCollectionMenuContent()
 
 void FOdysseyPainterEditorToolCollectionTab::RefreshCollectionsUI()
 {
-    mCollectionsWidget->ClearChildren();
+    //mCollectionsWidget->ClearChildren();
     mSelectedCollections.Empty();
 
     if (mEditor)
@@ -141,7 +162,7 @@ void FOdysseyPainterEditorToolCollectionTab::RefreshCollectionsUI()
         }
     }
 
-    for(TWeakObjectPtr<UOdysseyToolCollection> collection : mSelectedCollections)
+    /*for(TWeakObjectPtr<UOdysseyToolCollection> collection : mSelectedCollections)
     {
         mCollectionsWidget->AddSlot().AutoHeight()
         [
@@ -149,7 +170,7 @@ void FOdysseyPainterEditorToolCollectionTab::RefreshCollectionsUI()
                 .Editor(mEditor)
                 .ToolCollection(collection.Get())
         ];
-    }
+    }*/
 }
 
 void FOdysseyPainterEditorToolCollectionTab::OnAssetSelected(const FAssetData& AssetData)
@@ -161,12 +182,12 @@ void FOdysseyPainterEditorToolCollectionTab::OnAssetSelected(const FAssetData& A
     mSelectedCollections.Add(collection);
     mEditor->AddToolCollection(collection);
 
-    mCollectionsWidget->AddSlot().AutoHeight()
+    /*mCollectionsWidget->AddSlot().AutoHeight()
     [
         SNew(SOdysseyPainterEditorToolCollection)
             .Editor(mEditor)
             .ToolCollection(collection)
-    ];
+    ];*/
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -27,6 +27,7 @@ protected:
     virtual TSharedPtr<SWidget> CreateWidget() override;
     virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
 
+    TSharedRef<ITableRow> OnGenerateCollectionRow(TWeakObjectPtr<UOdysseyToolCollection> InCollection, const TSharedRef<STableViewBase>& OwnerTable);
 protected:
     // Event Listeners
     void OnAssetSelected(const FAssetData& AssetData);
@@ -40,5 +41,6 @@ private:
     FOdysseyPainterEditor* mEditor;
 
     TArray<TWeakObjectPtr<UOdysseyToolCollection>> mSelectedCollections;
+    TSharedPtr<SListView<TWeakObjectPtr<UOdysseyToolCollection>>> CollectionsListView;
     TSharedPtr<SVerticalBox> mCollectionsWidget;
 };

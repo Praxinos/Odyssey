@@ -4,7 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Widgets/Views/STileView.h"
+#include "Widgets/Layout/SWrapBox.h"
 
 class FOdysseyPainterEditor;
 class UOdysseyPainterEditorTool;
@@ -31,16 +31,18 @@ public:
     void Construct(const FArguments& InArgs);
 
 protected:
-    TSharedRef<ITableRow> GenerateToolTile(UOdysseyPainterEditorTool* Tool, const TSharedRef<STableViewBase>& OwnerTable);
+
+    TSharedRef<SWidget> GenerateToolTile(UOdysseyPainterEditorTool* Tool);
     FText GetCollectionDisplayName() const;
     const FSlateBrush* GetToolIcon(UOdysseyPainterEditorTool* iTool) const;
     FReply OnAddToolClicked();
     void HandleToolsChanged();
+    void RefreshTools();
 
 protected:
     TAttribute<FOdysseyPainterEditor*> mEditor;
     TAttribute<UOdysseyToolCollection*> mToolCollection;
 
     TArray<UOdysseyPainterEditorTool*> mDisplayedTools;
-    TSharedPtr<STileView<UOdysseyPainterEditorTool*>> mToolListView;
+    TSharedPtr<SWrapBox> mToolWrapBox;
 };
