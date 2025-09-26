@@ -19,13 +19,9 @@ public:
 public:
     void Action_ChangeLayerOpacity(float iOpacity);
     void Action_CreateNewLayer();
-    void Action_SetCurrentLayerBlendMode(EOdysseyBlendingMode iBlendMode);
-    void Action_SetCurrentLayerBlendModeToNextBlendMode();
-    void Action_SetCurrentLayerBlendModeToPreviousBlendMode();
 
     bool CanAction_CreateNewLayer();
     bool CanAction_ChangeLayerOpacity();
-    bool CanAction_AlterLayer();
 
 public:
     //Shortcuts

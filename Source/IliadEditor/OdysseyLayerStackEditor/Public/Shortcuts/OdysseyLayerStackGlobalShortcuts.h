@@ -3,6 +3,7 @@
 
 #pragma once
 #include "OdysseyEditorShortcuts.h"
+#include "OdysseyBlendingMode.h"
 
 class UOdysseyLayerStack;
 
@@ -20,6 +21,12 @@ public:
     void Action_NavigateToPreviousLayer();
     void Action_OpenFolderLayer();
     void Action_CloseFolderLayer();
+
+    void Action_SetCurrentLayerBlendMode(EOdysseyBlendingMode iBlendMode);
+    void Action_SetCurrentLayerBlendModeToNextBlendMode();
+    void Action_SetCurrentLayerBlendModeToPreviousBlendMode();
+
+    bool CanAction_AlterLayer();
 
 public:
     //Shortcuts

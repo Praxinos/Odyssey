@@ -46,6 +46,7 @@ public:
     UOdysseyLayerStack* GetLayerStack() const;
     void SetIsRenamePending(bool iValue);
     TSharedPtr<FOdysseyLayerStackDragDropOperation> CreateDragDropOperation() const;
+    TSharedPtr<FOdysseyLayerStackShortcuts> GetLayerStackShortcuts();
 
 protected:
     //SWidget overrides

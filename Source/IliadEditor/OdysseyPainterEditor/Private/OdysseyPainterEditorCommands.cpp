@@ -4,7 +4,6 @@
 #include "OdysseyPainterEditorCommands.h"
 #include "OdysseyStyle.h"
 #include "Command/OdysseyCommandMacros.h"
-#include "OdysseyBlendingMode.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -18,7 +17,6 @@ namespace
     const FName UncategorizedYetShortcuts = "Uncategorized Yet Shortcuts";
     const FName ToolsShortcuts = "Tools Shortcuts";
     const FName LayerStackShortcuts = "LayerStack Shortcuts";
-    const FName LayerBlendingModeShortcuts = "Layer Blending Mode Shortcuts";
     const FName ImportExportShortcuts = "Import & Export Shortcuts";
 }
 
@@ -33,7 +31,6 @@ FOdysseyPainterEditorCommands::FOdysseyPainterEditorCommands()
     AddBundle(ToolsShortcuts, LOCTEXT("editor-commands.category.tools-shortcuts", "Tools Shortcuts"));
     AddBundle(UncategorizedYetShortcuts, LOCTEXT("editor-commands.category.uncategorized-yet-shortcuts", "Uncategorized Yet Shortcuts"));
     AddBundle(LayerStackShortcuts, LOCTEXT("editor-commands.category.layerstack-shortcuts-category", "LayerStack Shortcuts"));
-    AddBundle(LayerBlendingModeShortcuts, LOCTEXT("editor-commands.category.layer-blending-mode-shortcuts-category", "Layer Blending Mode Shortcuts"));
     AddBundle(ImportExportShortcuts, LOCTEXT("editor-commands.category.import-export-shortcuts", "Import & Export Shortcuts"));
 }
 
@@ -179,26 +176,6 @@ FOdysseyPainterEditorCommands::RegisterCommands()
         .DefaultChord( FInputChord() );
 
         ChangeLayerOpacity.Add(commandInfo);
-    }
-
-    // Layer Blend Modes shorcuts Category
-    UI_BUNDLE_COMMAND( SetCurrentLayerBlendModeToNextBlendMode, LayerBlendingModeShortcuts, "Set Current Layer Blend Mode To Next Blend Mode", "Sets the current layer blend mode to the next blend mode", EUserInterfaceActionType::Button, FInputChord() );
-    UI_BUNDLE_COMMAND( SetCurrentLayerBlendModeToPreviousBlendMode, LayerBlendingModeShortcuts, "Set Current Layer Blend Mode To Previous Blend Mode", "Sets the current layer blend mode to the previous blend mode", EUserInterfaceActionType::Button, FInputChord() );
-    for (int i = 0; EOdysseyBlendingMode blendMode : TEnumRange<EOdysseyBlendingMode>())
-    {
-        FText blendModeText = UEnum::GetDisplayValueAsText(blendMode);
-
-        TSharedPtr<FUICommandInfo> commandInfo = FUICommandInfoDecl(
-              this->AsShared()
-            , FName( *FString::Printf( TEXT( "SetCurrentLayerBlendModeTo%s" ), *blendModeText.ToString() ))
-            , FText::Format( LOCTEXT( "commands.set-current-layer-blend-mode.label", "Set Current Layer Blend Mode To {0}"), blendModeText )
-            , FText::Format( LOCTEXT( "commands.set-current-layer-blend-mode.tooltip", "Set Current Layer Blend Mode To {0}"), blendModeText )
-            , LayerBlendingModeShortcuts
-        )
-        .UserInterfaceType( EUserInterfaceActionType::Button )
-        .DefaultChord( FInputChord() );
-
-        SetCurrentLayerBlendMode.Add(commandInfo);
     }
 
     // Vector Menu commands
