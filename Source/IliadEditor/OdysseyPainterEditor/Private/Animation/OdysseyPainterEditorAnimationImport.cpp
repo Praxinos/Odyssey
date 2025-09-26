@@ -92,6 +92,9 @@ FOdysseyPainterEditorAnimationLayerImport::ImportTextureSequence(UOdysseyAnimati
         return {};
 
     UOdysseyAnimation* animation = Layer->GetAnimation();
+    if( !animation )
+        return {};
+
     if (iCellIndex != INDEX_NONE)
         iCellIndex = FMath::Clamp(iCellIndex, 0, Layer->GetCells().Num());
 
@@ -173,6 +176,9 @@ FOdysseyPainterEditorAnimationLayerImport::ImportImageSequence(UOdysseyAnimation
         return {};
 
     UOdysseyAnimation* animation = Layer->GetAnimation();
+    if( !animation )
+        return {};
+
     ::ULIS::eFormat format = ::ULIS::Format_BGRA8;
     switch(animation->GetFormat())
     {

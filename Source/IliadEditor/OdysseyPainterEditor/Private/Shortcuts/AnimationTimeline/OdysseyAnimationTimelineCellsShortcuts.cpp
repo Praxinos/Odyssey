@@ -413,11 +413,9 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_SetCellExposure()
         .OnOkPressed_Lambda(
             [this, &value, &layer, &selectedCells]()
             {
-                UOdysseyAnimation* animation = layer->GetAnimation();
-
-                #if WITH_EDITOR
+#if WITH_EDITOR
                 FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.set-selected-cells-exposure", "Set Selected Cells Exposure"));
-                #endif
+#endif
 
                 mOnTransactCurrentFrame.ExecuteIfBound(selectedCells[0]->GetFrameRange().GetLowerBoundValue());
                 for (UOdysseyLayerCell* selectedCell : selectedCells)

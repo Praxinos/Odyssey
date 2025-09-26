@@ -140,7 +140,6 @@ UOdysseyPainterEditorAnimationLayerFunctionLibrary::ExportAsImageSequence(
     if (!Layer)
         return {};
 
-    UOdysseyAnimation* animation = Layer->GetAnimation();
     return Odyssey::ExportAsImageSequence(Layer, FrameRange, Filename, Path, Format );
 }
 
@@ -156,7 +155,6 @@ UOdysseyPainterEditorAnimationLayerFunctionLibrary::ExportFrameAsImage(
     if (!Layer)
         return TEXT("");
 
-    UOdysseyAnimation* animation = Layer->GetAnimation();
     return Odyssey::ExportAsImage(Layer, Frame, Format, Filename, Path );
 }
 
@@ -171,7 +169,6 @@ UOdysseyPainterEditorAnimationLayerFunctionLibrary::ExportFrameAsTexture(
     if (!Layer)
         return nullptr;
 
-    UOdysseyAnimation* animation = Layer->GetAnimation();
     return Odyssey::ExportAsTexture(Layer, Frame, Filename, Path );
 }
 
@@ -181,7 +178,6 @@ UOdysseyPainterEditorAnimationLayerFunctionLibrary::ExportAsTextureSequence(UOdy
     if ( !Layer )
         return {};
 
-    UOdysseyAnimation* animation = Layer->GetAnimation();
     return Odyssey::ExportAsTextureSequence(
         Layer,
         FrameRange,
@@ -197,6 +193,9 @@ UOdysseyPainterEditorAnimationLayerFunctionLibrary::ExportAsFlipbook(UOdysseyAni
         return nullptr;
 
     UOdysseyAnimation* animation = Layer->GetAnimation();
+    if( !animation )
+        return nullptr;
+
     return Odyssey::ExportAsFlipbook(
         Layer,
         FrameRange,

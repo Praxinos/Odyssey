@@ -22,21 +22,31 @@ UMovieSceneSection*
 UOdysseyAnimationTimelineTrack::AddNewSection(FFrameNumber KeyTime, UOdysseyAnimation* iAnimation)
 {
     UMovieScene* movieScene = GetTypedOuter<UMovieScene>();
-    if (!movieScene)
-        return nullptr;
+    check( movieScene );
 
     UOdysseyAnimationTimelineSection* NewSection = Cast<UOdysseyAnimationTimelineSection>(CreateNewSection());
     NewSection->SetAnimation(iAnimation);
 
-    TRange<FFrameNumber> defaultRange = UOdysseyAnimationTimelineSection::GetDefaultSectionRange(NewSection);
-    int32 animationDuration = UE::MovieScene::DiscreteSize(defaultRange);
+    if( NewSection->GetAnimation() )
+    {
+        TRange<FFrameNumber> defaultRange = UOdysseyAnimationTimelineSection::GetDefaultSectionRange( NewSection );
+        int32 animationDuration = UE::MovieScene::DiscreteSize( defaultRange );
 
-    FFrameRate animationFrameRate(iAnimation->GetFramesPerSecond() * 100, 100);
-    FInt32Range frameRange = iAnimation->GetFrameRange();
-    FFrameNumber animationLeftBoundFrame(frameRange.GetLowerBoundValue());
+        FFrameRate animationFrameRate( iAnimation->GetFramesPerSecond() * 100, 100 );
+        FInt32Range frameRange = iAnimation->GetFrameRange();
+        FFrameNumber animationLeftBoundFrame( frameRange.GetLowerBoundValue() );
 
-    NewSection->SetStartFrameOffset(FFrameRate::TransformTime(animationLeftBoundFrame, animationFrameRate, movieScene->GetDisplayRate()).GetFrame());
-    NewSection->InitialPlacement(Sections, KeyTime, animationDuration, false);
+        NewSection->SetStartFrameOffset( FFrameRate::TransformTime( animationLeftBoundFrame, animationFrameRate, movieScene->GetDisplayRate() ).GetFrame() );
+        NewSection->InitialPlacement( Sections, KeyTime, animationDuration, false );
+    }
+    else
+    {
+        // If no animation, just create a 1 frame (in display rate) section
+        TRange<FFrameNumber> defaultRange( FFrameRate::TransformTime( 0, movieScene->GetDisplayRate(), movieScene->GetTickResolution() ).GetFrame()
+                                           , FFrameRate::TransformTime( 1, movieScene->GetDisplayRate(), movieScene->GetTickResolution() ).GetFrame() );
+        int32 animationDuration = UE::MovieScene::DiscreteSize( defaultRange );
+        NewSection->InitialPlacement( Sections, KeyTime, animationDuration, false );
+    }
 
     AddSection(*NewSection);
     UpdateEasing();
