@@ -20,32 +20,27 @@ bool UOdysseyToolCollection::IsCollectionTransient() const
     return false;
 }
 
-void UOdysseyToolCollection::AddTool(UOdysseyPainterEditorTool* iTool)
+void UOdysseyToolCollection::AddTool(UOdysseyPainterEditorTool* iTool, int32 iIndex)
 {
     if( !iTool )
         return;
 
-    if( ContainsSimilarTool(iTool) ) // We don't add the tool if a similar one is already in the collection
-        return;
+    if( !mToolsConfig.IsValidIndex(iIndex) )
+        iIndex = INDEX_NONE;
+
+    /*if( ContainsSimilarTool(iTool) ) // We don't add the tool if a similar one is already in the collection
+        return;*/
 
     UOdysseyPainterEditorTool* duplicate = DuplicateObject<UOdysseyPainterEditorTool>(iTool, this);
 
-    mToolsConfig.Add( duplicate );
+    Modify();
+
+    if( iIndex == INDEX_NONE )
+        mToolsConfig.Add( duplicate );
+    else
+        mToolsConfig.Insert( duplicate, iIndex );
+
     OnCollectionChanged.Broadcast();
-}
-
-bool UOdysseyToolCollection::ContainsSimilarTool(UOdysseyPainterEditorTool* iTool)
-{
-    if (!iTool)
-        return false;
-
-    for (UOdysseyPainterEditorTool* tool : mToolsConfig)
-    {
-        if (iTool->IsSameAs(tool)) // We don't add the tool if a similar one is already in the collection
-            return true;
-    }
-
-    return false;
 }
 
 void UOdysseyToolCollection::RemoveToolAtIndex(int iIndex)
@@ -53,20 +48,29 @@ void UOdysseyToolCollection::RemoveToolAtIndex(int iIndex)
     if( iIndex >= mToolsConfig.Num() )
         return;
 
+    Modify();
+
     mToolsConfig.RemoveAt( iIndex );
     OnCollectionChanged.Broadcast();
 }
 
 void UOdysseyToolCollection::RemoveTool(UOdysseyPainterEditorTool* iTool)
 {
-    if( mToolsConfig.Contains(iTool))
-        mToolsConfig.Remove(iTool);
+    if( !mToolsConfig.Contains(iTool))
+        return;
+
+    Modify();
+
+    mToolsConfig.Remove(iTool);
+    OnCollectionChanged.Broadcast();
 }
 
 void UOdysseyToolCollection::MoveTool(int32 iFromIndex, int32 iToIndex)
 {
-    if (mToolsConfig.IsValidIndex(iFromIndex) && mToolsConfig.IsValidIndex(iToIndex))
+    if (mToolsConfig.IsValidIndex(iFromIndex) && (mToolsConfig.IsValidIndex(iToIndex) || iToIndex == mToolsConfig.Num()) )
     {
+        Modify();
+
         UOdysseyPainterEditorTool* tool = mToolsConfig[iFromIndex];
         mToolsConfig.RemoveAt(iFromIndex);
 
@@ -82,9 +86,30 @@ void UOdysseyToolCollection::MoveTool(int32 iFromIndex, int32 iToIndex)
     }
 }
 
+int32 UOdysseyToolCollection::GetIndexOfTool(UOdysseyPainterEditorTool* iTool)
+{
+    int32 index = INDEX_NONE;
+    mToolsConfig.Find(iTool, index);
+    return index;
+}
+
 bool UOdysseyToolCollection::ContainsTool(UOdysseyPainterEditorTool* iTool)
 {
     return mToolsConfig.Contains( iTool );
+}
+
+bool UOdysseyToolCollection::ContainsSimilarTool(UOdysseyPainterEditorTool* iTool)
+{
+    if (!iTool)
+        return false;
+
+    for (UOdysseyPainterEditorTool* tool : mToolsConfig)
+    {
+        if (iTool->IsSameAs(tool))
+            return true;
+    }
+
+    return false;
 }
 
 const TArray<UOdysseyPainterEditorTool*> UOdysseyToolCollection::GetTools() const

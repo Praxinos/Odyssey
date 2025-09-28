@@ -46,7 +46,7 @@ void SOdysseyPainterEditorToolCollection::Construct(const FArguments& InArgs)
                 ]
         ];
 
-    RefreshTools();
+    HandleToolsChanged();
 }
 
 
@@ -87,10 +87,10 @@ SOdysseyPainterEditorToolCollection::HandleToolsChanged()
 {
     mDisplayedTools = mToolCollection.Get()->GetTools();
 
-    RefreshTools();
+    RefreshToolsGUI();
 }
 
-void SOdysseyPainterEditorToolCollection::RefreshTools()
+void SOdysseyPainterEditorToolCollection::RefreshToolsGUI()
 {
     if (!mToolWrapBox.IsValid())
         return;
@@ -106,20 +106,23 @@ void SOdysseyPainterEditorToolCollection::RefreshTools()
             ];
     }
 
-    mToolWrapBox->AddSlot()
-        [
-            SNew(SButton)
-                .ContentPadding(0)
-                .OnClicked(this, &SOdysseyPainterEditorToolCollection::OnAddToolClicked)
-                [
-                    SNew(SBox)
-                        .WidthOverride(32)
-                        .HeightOverride(32)
-                        [
-                            SNew(STextBlock)
-                                .Text(FText::FromString(TEXT("+")))
-                                .Justification(ETextJustify::Center)
-                        ]
-                ]
-        ];
+    if( !mToolCollection.Get()->IsCollectionTransient() )
+    {
+        mToolWrapBox->AddSlot()
+            [
+                SNew(SButton)
+                    .ContentPadding(0)
+                    .OnClicked(this, &SOdysseyPainterEditorToolCollection::OnAddToolClicked)
+                    [
+                        SNew(SBox)
+                            .WidthOverride(32)
+                            .HeightOverride(32)
+                            [
+                                SNew(STextBlock)
+                                    .Text(FText::FromString(TEXT("+")))
+                                    .Justification(ETextJustify::Center)
+                            ]
+                    ]
+            ];
+    }
 }

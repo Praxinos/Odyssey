@@ -51,47 +51,34 @@ FReply SOdysseyPainterEditorToolTile::OnDragDetected(const FGeometry& MyGeometry
     return FReply::Unhandled();
 }
 
-TOptional<EItemDropZone> SOdysseyPainterEditorToolTile::HandleCanAcceptDrop(
-    const FDragDropEvent& DragDropEvent, EItemDropZone DropZone, UOdysseyPainterEditorTool* TargetItem)
+FReply SOdysseyPainterEditorToolTile::OnDrop(const FGeometry& MyGeometry, const FDragDropEvent& DragDropEvent)
 {
-    auto DragOp = DragDropEvent.GetOperationAs<FOdysseyToolCollectionDragDropOp>();
-    if (DragOp.IsValid())
-    {
-        UE_LOG(LogTemp, Display, TEXT("CAN ACCEPT DROP"));
-        return DropZone; // Allow before/after/onto
-    }
-    return TOptional<EItemDropZone>();
-}
+    auto dragOp = DragDropEvent.GetOperationAs<FOdysseyToolCollectionDragDropOp>();
+    if (!dragOp.IsValid() || !mCollection || mCollection->IsCollectionTransient()) // No drop allowed in transient collection
 
-FReply SOdysseyPainterEditorToolTile::HandleAcceptDrop(const FDragDropEvent& DragDropEvent, EItemDropZone DropZone, UOdysseyPainterEditorTool* TargetItem)
-{
-    auto DragOp = DragDropEvent.GetOperationAs<FOdysseyToolCollectionDragDropOp>();
-    if (!DragOp.IsValid() || !mCollection)
         return FReply::Unhandled();
 
-    UOdysseyPainterEditorTool* Tool = DragOp->GetTool();
-    UOdysseyToolCollection* Source = DragOp->GetSourceCollection().Get();
+    UOdysseyPainterEditorTool* sourceTool = dragOp->GetTool();
+    UOdysseyToolCollection* sourceCollection = dragOp->GetSourceCollection().Get();
 
-    if (Source && Source != mCollection)
+    if (sourceCollection && sourceCollection != mCollection)
     {
-        Source->RemoveTool(Tool);
+        sourceCollection->RemoveTool(sourceTool);
+        int32 targetIndex = mCollection->GetIndexOfTool(mTool);
+        mCollection->AddTool(sourceTool, targetIndex);
     }
-
-    /*int32 TargetIndex = mCollection->FindToolIndex(TargetItem);
-    if (TargetIndex == INDEX_NONE)
-    {*/
-        mCollection->AddTool(Tool);
-    /*}
     else
     {
-        if (DropZone == EItemDropZone::BelowItem)
-        {
-            TargetIndex++;
-        }
-        mCollection->InsertToolAt(Tool, TargetIndex);
-    }*/
+        int32 fromIndex = mCollection->GetIndexOfTool(sourceTool);
+        int32 targetIndex = mCollection->GetIndexOfTool(mTool);
 
-    UE_LOG(LogTemp, Display, TEXT("ACCEPT DROP"));
+        if( mDropSide == EDropIndicatorSide::Right )
+            targetIndex++;
+
+        mCollection->MoveTool(fromIndex, targetIndex);
+    }
+
+    mDropSide = EDropIndicatorSide::None;
 
     return FReply::Handled();
 }
@@ -99,7 +86,8 @@ FReply SOdysseyPainterEditorToolTile::HandleAcceptDrop(const FDragDropEvent& Dra
 FReply SOdysseyPainterEditorToolTile::OnDragOver(const FGeometry& MyGeometry, const FDragDropEvent& DragDropEvent)
 {
     auto DragOp = DragDropEvent.GetOperationAs<FOdysseyToolCollectionDragDropOp>();
-    if (!DragOp.IsValid()) return FReply::Unhandled();
+    if (!DragOp.IsValid() || mCollection->IsCollectionTransient() )
+        return FReply::Unhandled();
 
     FVector2D LocalPos = MyGeometry.AbsoluteToLocal(DragDropEvent.GetScreenSpacePosition());
     float HalfWidth = MyGeometry.GetLocalSize().X * 0.5f;
@@ -114,48 +102,11 @@ void SOdysseyPainterEditorToolTile::OnDragLeave(const FDragDropEvent& DragDropEv
     mDropSide = EDropIndicatorSide::None;
 }
 
-/*
-FReply SOdysseyPainterEditorToolTile::OnDrop(const FGeometry& MyGeometry, const FDragDropEvent& DragDropEvent)
-{
-    auto DragOp = DragDropEvent.GetOperationAs<FOdysseyToolCollectionDragDropOp>();
-    if (DragOp.IsValid() && mCollection && DragOp->GetTool())
-    {
-        UOdysseyPainterEditorTool* Tool = DragOp->GetTool();
-        UOdysseyToolCollection* Source = DragOp->GetSourceCollection().Get();
-
-        if (Source && Source != mCollection)
-        {
-            Source->RemoveTool(Tool);
-        }
-
-        //int32 TargetIndex = mCollection->FindToolIndex(mTool); // hovered tool
-        int32 TargetIndex = 0;
-        if (TargetIndex != INDEX_NONE)
-        {
-            if (mDropSide == EDropIndicatorSide::Right)
-            {
-                TargetIndex++; // insert after
-            }
-            //mCollection->InsertToolAt(Tool, TargetIndex);
-            mCollection->AddTool(Tool);
-        }
-        else
-        {
-            // If for some reason target tool not found, just append
-            mCollection->AddTool(Tool);
-        }
-
-        return FReply::Handled();
-    }
-    return FReply::Unhandled();
-}*/
-
 int32 SOdysseyPainterEditorToolTile::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry,
         const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements,
         int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
 {
-    int32 RetLayer = SCompoundWidget::OnPaint(
-        Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
+    int32 RetLayer = SCompoundWidget::OnPaint( Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled );
 
     if (mDropSide != EDropIndicatorSide::None)
     {
@@ -186,17 +137,16 @@ int32 SOdysseyPainterEditorToolTile::OnPaint(const FPaintArgs& Args, const FGeom
             Thickness
         );
     }
-
     return RetLayer + 1;
 }
 
-
+/*
 void
 SOdysseyPainterEditorToolTile::OnToolCheckStateChanged(ECheckBoxState InValue, UOdysseyPainterEditorTool* iTool)
 {
-/*
+
     if (InValue == ECheckBoxState::Checked)
-        mOnToolSelected.ExecuteIfBound(iTool);*/
+        mOnToolSelected.ExecuteIfBound(iTool);
 }
 
 EVisibility
@@ -216,3 +166,4 @@ SOdysseyPainterEditorToolTile::ToolTooltip(UOdysseyPainterEditorTool* iTool) con
 {
     return iTool->GetTooltip();
 }
+*/

@@ -21,12 +21,20 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyToolCollection : public UObject
 public:
     bool IsCollectionTransient() const;
 
-    void AddTool(UOdysseyPainterEditorTool* iTool);
-    bool ContainsSimilarTool( UOdysseyPainterEditorTool* iTool );
+    void AddTool(UOdysseyPainterEditorTool* iTool, int32 iIndex = INDEX_NONE);
     void RemoveToolAtIndex( int iIndex );
     void RemoveTool(UOdysseyPainterEditorTool* iTool);
     void MoveTool(int32 iFromIndex, int32 iToIndex);
+
+    /* Returns the index of iTool in mToolsConfig, if it's in it */
+    int32 GetIndexOfTool(UOdysseyPainterEditorTool* iTool);
+
+    /* Check by comparison of pointers */
     bool ContainsTool(UOdysseyPainterEditorTool* iTool);
+
+    /* Check by comparison of similarities (class and properties) */
+    bool ContainsSimilarTool(UOdysseyPainterEditorTool* iTool);
+
     const TArray<UOdysseyPainterEditorTool*> GetTools() const;
 
 public:

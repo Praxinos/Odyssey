@@ -3607,7 +3607,7 @@ void FOdysseyPainterEditor::SaveToRecentTools(UOdysseyPainterEditorTool* iTool)
     if( !iTool )
         return;
 
-    if( mRecentTools->ContainsTool(iTool) )
+    if( mRecentTools->ContainsTool(iTool) || mRecentTools->ContainsSimilarTool(iTool) )
         return;
 
     mRecentTools->AddTool(iTool);

@@ -33,9 +33,8 @@ protected:
     void OnAssetSelected(const FAssetData& AssetData);
     TSharedRef<SWidget> OnGetAddToolCollectionMenuContent();
 
-protected:
-    void RefreshCollectionsUI();
-
+public:
+    void RefreshCollectionsGUI();
 
 private:
     FOdysseyPainterEditor* mEditor;

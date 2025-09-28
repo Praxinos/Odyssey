@@ -37,7 +37,7 @@ protected:
     const FSlateBrush* GetToolIcon(UOdysseyPainterEditorTool* iTool) const;
     FReply OnAddToolClicked();
     void HandleToolsChanged();
-    void RefreshTools();
+    void RefreshToolsGUI();
 
 protected:
     TAttribute<FOdysseyPainterEditor*> mEditor;
