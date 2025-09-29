@@ -335,8 +335,17 @@ SCinematicBoardSectionNotes::Construct( const FArguments& InArgs, TSharedRef<FCi
         LOCTEXT( "CreateNote", "Create a new Note" ),
         FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "CreateNote" ) );
 
+    // This will overwrite the default value (EVisibility::Collapse)
+    // because there is nothing else in this row and collapse will set the row height to 0
+    auto IsToolBarVisible = [this]() -> EVisibility
+        {
+            bool is_visible = mOptionalWidgetsVisibility.Get().IsVisible();
+
+            return is_visible ? EVisibility::Visible : EVisibility::Hidden;
+        };
+
     TSharedRef< SWidget > middle_toolbar = MiddleToolbarBuilder.MakeWidget();
-    middle_toolbar->SetVisibility( mOptionalWidgetsVisibility );
+    middle_toolbar->SetVisibility( MakeAttributeLambda( IsToolBarVisible ) );
 
     //---
 

@@ -263,10 +263,21 @@ SCinematicBoardSectionAnimationTitle::Construct( const FArguments& InArgs, TShar
 
     SetToolTipText( MakeAttributeSP( this, &SCinematicBoardSectionAnimationTitle::GetTooltipText ) );
 
+    enum class ePriority: int32
+    {
+        VeryLow = 0,
+        Low = 100,
+        Medium = 200,
+        High = 300,
+        VeryHigh = 400,
+    };
+
     //---
 
     FSlimHorizontalToolBarBuilder LeftToolbarBuilder( nullptr, FMultiBoxCustomization::None );
     LeftToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get(), "SectionTitleToolBar" );
+
+    FMenuEntryResizeParams resize_params;
 
     //-
 
@@ -308,6 +319,8 @@ SCinematicBoardSectionAnimationTitle::Construct( const FArguments& InArgs, TShar
             return FSlateIcon( FAppStyle::Get().GetStyleSetName(), "TreeArrow_Collapsed" );
     };
 
+    resize_params.ClippingPriority = ePriority::Medium;
+
     LeftToolbarBuilder.AddToolBarButton(
         FUIAction(
             FExecuteAction::CreateLambda( ToggleKeysAreaVisibility )
@@ -315,7 +328,13 @@ SCinematicBoardSectionAnimationTitle::Construct( const FArguments& InArgs, TShar
         NAME_None,
         FText::GetEmpty(),
         MakeAttributeLambda( GetKeysAreaTooltip ),
-        MakeAttributeLambda( GetKeysAreaIcon ) );
+        MakeAttributeLambda( GetKeysAreaIcon ),
+        EUserInterfaceActionType::Button,
+        NAME_None,
+        mOptionalWidgetsVisibility,
+        TAttribute<FText>(),
+        resize_params
+    );
 
     //-
 
@@ -340,6 +359,8 @@ SCinematicBoardSectionAnimationTitle::Construct( const FArguments& InArgs, TShar
             return FSlateIcon( FAppStyle::Get().GetStyleSetName(), "Level.NotVisibleIcon16x" );
     };
 
+    resize_params.ClippingPriority = ePriority::High;
+
     LeftToolbarBuilder.AddToolBarButton(
         FUIAction(
             FExecuteAction::CreateRaw( this, &SCinematicBoardSectionAnimationTitle::ToggleAnimationVisibility )
@@ -347,7 +368,13 @@ SCinematicBoardSectionAnimationTitle::Construct( const FArguments& InArgs, TShar
         NAME_None,
         FText::GetEmpty(),
         MakeAttributeLambda( GetAnimationActorVisibilityTooltip ),
-        MakeAttributeLambda( GetAnimationActorVisibilityIcon ) );
+        MakeAttributeLambda( GetAnimationActorVisibilityIcon ),
+        EUserInterfaceActionType::Button,
+        NAME_None,
+        mOptionalWidgetsVisibility,
+        TAttribute<FText>(),
+        resize_params
+    );
 
     //-
 
@@ -383,6 +410,8 @@ SCinematicBoardSectionAnimationTitle::Construct( const FArguments& InArgs, TShar
             return FText::Join( FText::FromString( TEXT( "\n\n" ) ), commun_tooltip, button_tooltip );
         };
 
+    resize_params.ClippingPriority = ePriority::Low;
+
     LeftToolbarBuilder.AddToolBarButton(
         FUIAction(
             FExecuteAction::CreateLambda( DetachAnimation ),
@@ -393,7 +422,13 @@ SCinematicBoardSectionAnimationTitle::Construct( const FArguments& InArgs, TShar
         NAME_None,
         FText::GetEmpty(),
         MakeAttributeLambda( GetDetachAnimationTooltip ),
-        FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "DetachAnimation" ) );
+        FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "DetachAnimation" ),
+        EUserInterfaceActionType::Button,
+        NAME_None,
+        mOptionalWidgetsVisibility,
+        TAttribute<FText>(),
+        resize_params
+    );
 
     //-
 
@@ -431,6 +466,8 @@ SCinematicBoardSectionAnimationTitle::Construct( const FArguments& InArgs, TShar
             return FText::Join( FText::FromString( TEXT( "\n\n" ) ), commun_tooltip, button_tooltip );
         };
 
+    resize_params.ClippingPriority = ePriority::VeryHigh;
+
     LeftToolbarBuilder.AddToolBarButton(
         FUIAction(
             FExecuteAction::CreateLambda( CreateAnimationCut ),
@@ -439,7 +476,13 @@ SCinematicBoardSectionAnimationTitle::Construct( const FArguments& InArgs, TShar
         NAME_None,
         FText::GetEmpty(),
         MakeAttributeLambda( GetCreateAnimationCutTooltip ),
-        FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "CreateAnimationCut" ) );
+        FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "CreateAnimationCut" ),
+        EUserInterfaceActionType::Button,
+        NAME_None,
+        mOptionalWidgetsVisibility,
+        TAttribute<FText>(),
+        resize_params
+    );
 
     //-
 
@@ -468,6 +511,8 @@ SCinematicBoardSectionAnimationTitle::Construct( const FArguments& InArgs, TShar
                 return FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "LighttableOff" );
         };
 
+    resize_params.ClippingPriority = ePriority::Medium;
+
     LeftToolbarBuilder.AddToolBarButton(
         FUIAction(
             FExecuteAction::CreateRaw( this, &SCinematicBoardSectionAnimationTitle::ToggleLighttable ),
@@ -478,24 +523,49 @@ SCinematicBoardSectionAnimationTitle::Construct( const FArguments& InArgs, TShar
 
                                                  return true;
                                              } )
-
         ),
         NAME_None,
         FText::GetEmpty(),
         MakeAttributeLambda( GetLighttableTooltip ),
-        MakeAttributeLambda( GetLighttableIcon ) );
-
-    //-
-
-    TSharedRef< SWidget > left_toolbar = LeftToolbarBuilder.MakeWidget();
-    left_toolbar->SetVisibility( mOptionalWidgetsVisibility );
+        MakeAttributeLambda( GetLighttableIcon ),
+        EUserInterfaceActionType::Button,
+        NAME_None,
+        mOptionalWidgetsVisibility,
+        TAttribute<FText>(),
+        resize_params
+    );
 
     //---
 
-    FSlimHorizontalToolBarBuilder RightToolbarBuilder( nullptr, FMultiBoxCustomization::None );
-    RightToolbarBuilder.SetStyle( &FEposTracksEditorStyle::Get(), "SectionTitleToolBar" );
+    FMenuEntryStyleParams style_params;
+    style_params.HorizontalAlignment = HAlign_Fill;
+    style_params.SizeRule = FSizeParam::ESizeRule::SizeRule_Stretch;
+    style_params.FillSize = 1.f;
 
-    //-
+    resize_params.ClippingPriority = ePriority::VeryLow;
+
+    LeftToolbarBuilder.AddWidget(
+        SNew( SHorizontalBox )
+        +SHorizontalBox::Slot()
+        .FillWidth( 1.f )
+        .HAlign( HAlign_Center )
+        .Padding( 0, 3.f )
+        [
+            SNew( SInlineEditableTextBlockOnDoubleClick4 )
+            .Text( this, &SCinematicBoardSectionAnimationTitle::HandleTitleText )
+            .OnTextCommitted( this, &SCinematicBoardSectionAnimationTitle::HandleTitleTextOnCommited )
+        ]
+        ,
+        style_params,
+        NAME_None,
+        true,
+        FNewMenuDelegate(),
+        TAttribute<EVisibility>(),
+        //mOptionalWidgetsVisibility,
+        resize_params
+    );
+
+    //---
 
     auto IsWarning = [this]() -> bool
     {
@@ -527,7 +597,9 @@ SCinematicBoardSectionAnimationTitle::Construct( const FArguments& InArgs, TShar
         return LOCTEXT( "warning-tooltip", "Warning: the animation visibility track doesn't match the shot length, set it maually" );
     };
 
-    RightToolbarBuilder.AddToolBarButton(
+    resize_params.ClippingPriority = int32(ePriority::VeryLow) + 10;
+
+    LeftToolbarBuilder.AddToolBarButton(
         FUIAction(
             FExecuteAction(),
             FCanExecuteAction(),
@@ -537,10 +609,18 @@ SCinematicBoardSectionAnimationTitle::Construct( const FArguments& InArgs, TShar
         NAME_None,
         FText::GetEmpty(),
         MakeAttributeLambda( GetWarningTooltip ),
-        FSlateIcon( FAppStyle::Get().GetStyleSetName(), "Icons.Warning" ) );
+        FSlateIcon( FAppStyle::Get().GetStyleSetName(), "Icons.Warning" ),
+        EUserInterfaceActionType::Button,
+        NAME_None,
+        TAttribute<EVisibility>(),
+        //mOptionalWidgetsVisibility,
+        TAttribute<FText>(),
+        resize_params
+    );
 
-    TSharedRef< SWidget > right_toolbar = RightToolbarBuilder.MakeWidget();
-    right_toolbar->SetVisibility( mOptionalWidgetsVisibility );
+    //---
+
+    TSharedRef< SWidget > left_toolbar = LeftToolbarBuilder.MakeWidget();
 
     //---
 
@@ -555,27 +635,13 @@ SCinematicBoardSectionAnimationTitle::Construct( const FArguments& InArgs, TShar
             + SVerticalBox::Slot()
             .AutoHeight()
             [
-                SNew( SHorizontalBox )
-                + SHorizontalBox::Slot()
-                .FillWidth( .5f )
-                [
-                    left_toolbar
-                ]
-                + SHorizontalBox::Slot()
-                .AutoWidth()
-                .HAlign( HAlign_Center )
-                .VAlign( VAlign_Center )
-                [
-                    SNew( SInlineEditableTextBlockOnDoubleClick4 )
-                    .Text( this, &SCinematicBoardSectionAnimationTitle::HandleTitleText )
-                    .OnTextCommitted( this, &SCinematicBoardSectionAnimationTitle::HandleTitleTextOnCommited )
-                ]
-                + SHorizontalBox::Slot()
-                .FillWidth( .5f )
-                .HAlign( HAlign_Right )
-                [
-                    right_toolbar
-                ]
+                    SNew( SHorizontalBox )
+
+                    + SHorizontalBox::Slot()
+                    .FillWidth( 1.f )
+                    [
+                        left_toolbar
+                    ]
             ]
         ]
     ];

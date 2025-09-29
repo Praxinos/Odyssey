@@ -100,7 +100,7 @@ SCinematicBoardSectionContent::OnMouseEnter( const FGeometry& MyGeometry, const 
 void
 SCinematicBoardSectionContent::OnMouseLeave( const FPointerEvent& MouseEvent ) //override
 {
-    mOptionalWidgetsVisibility = EVisibility::Hidden;
+    mOptionalWidgetsVisibility = EVisibility::Collapsed; // Also change the initialization in .h
 }
 
 //FReply
