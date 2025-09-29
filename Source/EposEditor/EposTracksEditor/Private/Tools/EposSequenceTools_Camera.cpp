@@ -172,7 +172,6 @@ ShotSequenceTools::CreateCamera( ISequencer& iSequencer, UMovieSceneSequence* iS
     const FScopedTransaction transaction( LOCTEXT( "transaction.create-storycamera-here", "Create Storyboard Camera Here" ) );
 
     TArray<AActor*> actors;
-    TOptional<FFrameTime> start_sequence_in_storyboard;
 
     {
         cTemporarySwitchInner switch_to( iSequencer, iSequenceID );
@@ -188,22 +187,14 @@ ShotSequenceTools::CreateCamera( ISequencer& iSequencer, UMovieSceneSequence* iS
 
         //---
 
-        FMovieSceneInverseSequenceTransform localToRootTransform = iSequencer.GetFocusedMovieSceneSequenceTransform().Inverse();
-        start_sequence_in_storyboard = localToRootTransform.TryTransformTime( 0 );
-
         iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::RefreshAllImmediately );
     }
 
     // Must be done after the inner/outer sequence switch (that's why it is in its own block)
     // Otherwise it resets the selection if GEditor->SelectActor() is called inside CameraAdded()
     // Furthermore the hidden flag must also be set to true now
-    iSequencer.EmptySelection();
-    GEditor->SelectNone( true /*bNoteSelectionChange*/, true /*bDeselectBSPSurfs*/ );
     if( actors.Num() )
         GEditor->SelectActor( actors[0], true /*bInSelected*/, true /*bNotify*/, true /*bSelectEvenIfHidden*/ );
-
-    if( start_sequence_in_storyboard )
-        iSequencer.SetLocalTime( *start_sequence_in_storyboard, STM_All, true /* Evaluate */ );
 }
 
 
