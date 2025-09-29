@@ -470,14 +470,14 @@ SOdysseyPaletteTreeView::CanDeleteSelectedEntries()
         return false;
 
     //If one of the root layers is not selected, we can delete selected entries
-    const TArray<UOdysseyPaletteEntry*>& rootEntries = mPalette->GetRootEntries();
+    /*const TArray<UOdysseyPaletteEntry*>& rootEntries = mPalette->GetRootEntries();
     for (UOdysseyPaletteEntry* rootEntry : rootEntries)
     {
         if (!selectedEntries.Contains(rootEntry))
             return true;
-    }
+    }*/
 
-    return false;
+    return true;
 }
 
 void
