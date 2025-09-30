@@ -28,7 +28,7 @@ UOdysseyPainterEditorRasterSelectionTool::UOdysseyPainterEditorRasterSelectionTo
     : mSelectionState( EOdysseySelectionState::Normal )
     , mShapeHUD(MakeShared<FOdysseyHUDElement>())
 {
-    Icon = *FOdysseyStyle::GetBrush("PainterEditor.ToolsTab.Lasso32");
+    Icon = *FOdysseyStyle::GetBrush("PainterEditor.ToolsTab.Lasso64");
 
     UOdysseyFreehandShape* freehandShape = CreateShape<UOdysseyFreehandShape>("UOdysseyPainterEditorRasterSelectionTool::FreehandShape");
     freehandShape->DisplayHUD(true);

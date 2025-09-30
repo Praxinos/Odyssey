@@ -5,7 +5,6 @@
 
 #include "OdysseyBlendingMode.h"
 #include "OdysseyAntiAliasing.h"
-#include "OdysseyImageAnchor.h"
 #include "BatchedElements.h"
 #include "RHI.h"
 #include "RenderGraphFwd.h"

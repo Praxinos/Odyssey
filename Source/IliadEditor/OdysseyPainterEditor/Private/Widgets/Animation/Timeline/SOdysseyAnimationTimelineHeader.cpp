@@ -184,24 +184,6 @@ int32 SOdysseyAnimationTimelineHeader::OnPaint(const FPaintArgs& Args, const FGe
                 textFontInfo,
                 ESlateDrawEffect::None);
         }
-
-        /* if (animationRange.Contains(keyNum))
-        {
-            bool isProxyDone = proxy->IsDone(keyNum);
-            const FLinearColor& proxyDoneColor = FOdysseyStyle::GetColor("TimelineHeader.ProxyDoneColor");
-            const FLinearColor& proxyPendingColor = FOdysseyStyle::GetColor("TimelineHeader.ProxyPendingColor");
-            const FVector2D proxyPos(x, height - 2.f);
-            const FVector2D proxySize(frameSize, 2.f);
-            const FColor color = isProxyDone ? proxyDoneColor.ToFColor(true) : proxyPendingColor.ToFColor(true);
-            FSlateDrawElement::MakeBox(
-                OutDrawElements,
-                proxyLayer,
-                AllottedGeometry.ToPaintGeometry( proxySize, FSlateLayoutTransform( 1.0, TransformPoint( 1.0, proxyPos ) ) ),
-                GenericBrush,
-                ESlateDrawEffect::None,
-                InWidgetStyle.GetColorAndOpacityTint() * color
-            );
-        } */
     }
 
     int leftBoundFrame = mAnimation->GetLeftBoundValue();

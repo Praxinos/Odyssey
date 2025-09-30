@@ -191,7 +191,9 @@ FEposSequenceEditorModule::RegisterSettings()
     //mSequencerSettings->LoadConfig( USequencerSettings::StaticClass(), *FPaths::Combine( PluginConfigDir, TEXT( "EditorPerProjectUserSettings.ini" ) ) );
     // Move its content to BaseOdyssey.ini
     // This line will override the user config values
-    mSequencerSettings->LoadConfig( USequencerSettings::StaticClass(), *FPaths::Combine( PluginConfigDir, TEXT( "BaseOdyssey.ini" ) ) );
+
+    FString configPath = FConfigCacheIni::NormalizeConfigIniPath( FPaths::Combine( PluginConfigDir, TEXT( "BaseOdyssey.ini" ) ) );
+    mSequencerSettings->LoadConfig( USequencerSettings::StaticClass(), *configPath );
     // This line is to load again the user config values
     // Otherwise, the values will always be the ones inside BaseOdyssey.ini (like ZeroPaddedFrame which will always be 4)
     mSequencerSettings->LoadConfig();

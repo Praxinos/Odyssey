@@ -7,7 +7,6 @@
 #include "ISettingsModule.h"
 #include "Modules/ModuleManager.h"
 
-#include "Widgets/SAboutWindow.h"
 #include "Styles/EposSequenceEditorStyle.h"
 
 #define LOCTEXT_NAMESPACE "EposSequenceEditorCommands"

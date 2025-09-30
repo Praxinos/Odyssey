@@ -7,7 +7,6 @@
 #include "RenderGraphFwd.h"
 #include "OdysseyBlendingMode.h"
 #include "OdysseyAntiAliasing.h"
-#include "OdysseyImageAnchor.h"
 #include "ShaderParameterMacros.h"
 
 class FRDGBuilder;

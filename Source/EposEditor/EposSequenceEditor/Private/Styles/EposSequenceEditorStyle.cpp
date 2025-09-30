@@ -54,7 +54,6 @@ FEposSequenceEditorStyle::FEposSequenceEditorStyle()
 
     InitSequencer();
     InitCommands();
-    InitAbout();
     InitViewport();
     InitImportExport();
 }
@@ -140,52 +139,6 @@ FEposSequenceEditorStyle::InitCommands()
 
     Set( "EposSequenceCommands.StoryboardViewportResetPanZoomRotate", new IMAGE_BRUSH_SVG( "viewport-reset-transform", Icon20x20 ) );
     Set( "EposSequenceCommands.StoryboardViewportResetPanZoomRotate.Small", new IMAGE_BRUSH_SVG( "viewport-reset-transform", Icon20x20 ) );
-}
-
-void
-FEposSequenceEditorStyle::InitAbout()
-{
-    SetContentRoot( IPluginManager::Get().FindPlugin( "Odyssey" )->GetBaseDir() / TEXT( "Resources" ) );
-
-    //---
-
-    static const FVector2D Icon30x30( 30.0f, 30.0f );
-    static const FVector2D Icon128x128( 128.0f, 128.0f );
-
-    Set( "About.Facebook", new IMAGE_BRUSH_SVG( "About/facebook", Icon30x30 ) );
-    Set( "About.LinkedIn", new IMAGE_BRUSH_SVG( "About/linkedin", Icon30x30 ) );
-    Set( "About.Youtube", new IMAGE_BRUSH_SVG( "About/youtube", Icon30x30 ) );
-    Set( "About.Twitter", new IMAGE_BRUSH_SVG( "About/twitter", Icon30x30 ) );
-    Set( "About.Instagram", new IMAGE_BRUSH_SVG( "About/instagram", Icon30x30 ) );
-    Set( "About.Discord", new IMAGE_BRUSH_SVG( "About/discord", Icon30x30 ) );
-    Set( "About.UserDoc", new IMAGE_BRUSH_SVG( "About/user-doc", Icon30x30 ) );
-    Set( "About.Git", new IMAGE_BRUSH_SVG( "About/github", Icon30x30 ) );
-    Set( "About.Praxinos", new IMAGE_BRUSH_SVG( "About/praxinos", Icon128x128 ) );
-    Set( "About.Epos", new IMAGE_BRUSH_SVG( "About/epos", Icon128x128 ) );
-
-    Set( "About.UnderlineText", FTextBlockStyle( FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>( "NormalUnderlinedText" ) )
-         .SetFontSize( 10 )
-         .SetColorAndOpacity( FLinearColor( 1.f, 1.f, 1.f ) )
-    );
-    Set( "About.SmallText", FTextBlockStyle( FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>( "SmallText" ) )
-         .SetColorAndOpacity( FLinearColor( 1.f, 1.f, 1.f ) )
-    );
-    Set( "About.BigText", FTextBlockStyle( FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>( "NormalText" ) )
-         .SetFontSize( 15 )
-         .SetColorAndOpacity( FLinearColor( 1.f, 1.f, 1.f ) )
-    );
-
-    Set( "About.UnderlineSubduedText", FTextBlockStyle( FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>( "NormalUnderlinedText" ) )
-         .SetFontSize( 10 )
-         .SetColorAndOpacity( FLinearColor( FColor( 128, 128, 128 ) ) )
-    );
-    Set( "About.SmallSubduedText", FTextBlockStyle( FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>( "SmallText" ) )
-         .SetColorAndOpacity( FLinearColor( FColor( 128, 128, 128 ) ) )
-    );
-    Set( "About.BigSubduedText", FTextBlockStyle( FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>( "NormalText" ) )
-         .SetFontSize( 15 )
-         .SetColorAndOpacity( FLinearColor( FColor( 128, 128, 128 ) ) )
-    );
 }
 
 void
