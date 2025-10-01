@@ -53,6 +53,8 @@ void UBoardSequence::Initialize( FFrameRate iTickRate, FFrameRate iDisplayRate )
     MovieScene->SetTickResolutionDirectly( iTickRate );
 
     MovieScene->SetDisplayRate( iDisplayRate );
+
+    MovieScene->SetPlaybackRangeLocked( true );
 }
 
 void UBoardSequence::PostLoad()

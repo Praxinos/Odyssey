@@ -137,6 +137,21 @@ BoardHelpers::ResizeParentSequenceRecursively( UEposMovieSceneSequence* iSequenc
         if( !child_sequence )
         {
             child_sequence = parent_sequence;
+
+            // For the input iSequence, we call the resize on it mainly to update the playback range (as it is now locked by default)
+            UMovieSceneTrack* track = child_sequence->GetMovieScene()->FindTrack<UMovieSceneCinematicBoardTrack>();
+            if( !track )
+            {
+                track = child_sequence->GetMovieScene()->GetCameraCutTrack();
+                if( !track )
+                {
+                    return;
+                }
+            }
+
+            TRange<FFrameNumber> full_range = TRange<FFrameNumber>( track->GetAllSections()[0]->GetInclusiveStartFrame(), track->GetAllSections().Last()->GetExclusiveEndFrame() );
+            child_sequence->Resize( UE::MovieScene::DiscreteSize( full_range ) );
+
             continue;
         }
 
