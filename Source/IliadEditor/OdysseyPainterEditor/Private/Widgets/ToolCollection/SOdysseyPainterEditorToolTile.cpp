@@ -6,6 +6,7 @@
 #include "Widgets/Input/SCheckBox.h"
 #include "ToolCollection/OdysseyToolCollection.h"
 #include "ToolCollection/OdysseyToolCollectionDragDropOp.h"
+#include "Widgets/Colors/SColorBlock.h"
 
 SOdysseyPainterEditorToolTile::~SOdysseyPainterEditorToolTile()
 {
@@ -21,15 +22,36 @@ SOdysseyPainterEditorToolTile::Construct(const FArguments& InArgs)
 {
     mTool = InArgs._Tool;
     mCollection = InArgs._ToolCollection;
+    mEditor = InArgs._Editor;
 
     ChildSlot
         .HAlign(HAlign_Fill)
         .VAlign(VAlign_Fill)
-        .Padding(4)
         [
-            SNew(SImage)
-                .Image(&mTool->Icon)
-                .DesiredSizeOverride(FVector2D(32.f, 32.f))
+            SNew(SOverlay)
+
+                // Background layer (solid fill)
+                + SOverlay::Slot()
+                [
+                    SNew(SColorBlock)
+                        .Color(this, &SOdysseyPainterEditorToolTile::GetTileColor)
+                ]
+
+                // Glow overlay
+                + SOverlay::Slot()
+                [
+                    SNew(SColorBlock)
+                        .Color(this, &SOdysseyPainterEditorToolTile::GetTileColor)
+                ]
+                + SOverlay::Slot() // foreground (icon)
+                .HAlign(HAlign_Center)
+                .VAlign(VAlign_Center)
+                .Padding(4)
+                [
+                    SNew(SImage)
+                        .Image(&mTool->Icon)
+                        .DesiredSizeOverride(FVector2D(32.f, 32.f))
+                ]
         ];
 }
 
@@ -37,8 +59,26 @@ FReply SOdysseyPainterEditorToolTile::OnMouseButtonDown(const FGeometry& MyGeome
 {
     if (MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
     {
+        if (mTool && mEditor)
+        {
+            mTool->SetEditor(mEditor);
+            mEditor->ActivateMainTool(mTool);
+        }
         return FReply::Handled().DetectDrag(SharedThis(this), EKeys::LeftMouseButton);
     }
+    else if (MouseEvent.GetEffectingButton() == EKeys::RightMouseButton)
+    {
+        FSlateApplication::Get().PushMenu(
+            SharedThis(this),
+            FWidgetPath(),
+            BuildContextMenu(),
+            MouseEvent.GetScreenSpacePosition(),
+            FPopupTransitionEffect(FPopupTransitionEffect::ContextMenu)
+        );
+
+        return FReply::Handled();
+    }
+
     return FReply::Unhandled();
 }
 
@@ -85,8 +125,8 @@ FReply SOdysseyPainterEditorToolTile::OnDrop(const FGeometry& MyGeometry, const 
 
 FReply SOdysseyPainterEditorToolTile::OnDragOver(const FGeometry& MyGeometry, const FDragDropEvent& DragDropEvent)
 {
-    auto DragOp = DragDropEvent.GetOperationAs<FOdysseyToolCollectionDragDropOp>();
-    if (!DragOp.IsValid() || mCollection->IsCollectionTransient() )
+    auto dragOp = DragDropEvent.GetOperationAs<FOdysseyToolCollectionDragDropOp>();
+    if (!dragOp.IsValid() || mCollection->IsCollectionTransient() )
         return FReply::Unhandled();
 
     FVector2D LocalPos = MyGeometry.AbsoluteToLocal(DragDropEvent.GetScreenSpacePosition());
@@ -139,6 +179,75 @@ int32 SOdysseyPainterEditorToolTile::OnPaint(const FPaintArgs& Args, const FGeom
     }
     return RetLayer + 1;
 }
+
+FLinearColor SOdysseyPainterEditorToolTile::GetTileColor() const
+{
+    if (!mEditor || !mTool)
+        return FLinearColor::White; //Error
+
+    if(IsHovered())
+    {
+        if(mEditor->GetCurrentTool() == mTool) //Hovered and tool is selected
+            return FLinearColor(0.05f, 0.4f, 0.9f, 0.9f);
+        else //Hovered not selected
+            return FLinearColor(0.3f, 0.3f, 0.3f, 0.8f);
+    }
+    else
+    {
+        if (mEditor->GetCurrentTool() == mTool) //Non hovered and tool is selected
+            return FLinearColor(0.05f, 0.3f, 0.7f, 0.7f);
+        else //Non hovered and tool is not selected
+            return FLinearColor::Transparent;
+    }
+}
+
+TSharedRef<SWidget> SOdysseyPainterEditorToolTile::BuildContextMenu()
+{
+    FMenuBuilder menuBuilder(true, nullptr);
+
+    menuBuilder.AddMenuEntry(
+        FText::FromString(TEXT("Duplicate Tool")),
+        FText::FromString(TEXT("Create a duplicate of this tool.")),
+        FSlateIcon(),
+        FUIAction(
+            FExecuteAction::CreateSP(this, &SOdysseyPainterEditorToolTile::OnDuplicateTool),
+            FCanExecuteAction::CreateSP(this, &SOdysseyPainterEditorToolTile::CanDuplicateTool)
+        )
+    );
+
+    menuBuilder.AddMenuEntry(
+        FText::FromString(TEXT("Delete Tool")),
+        FText::FromString(TEXT("Remove this tool from the collection.")),
+        FSlateIcon(),
+        FUIAction(
+            FExecuteAction::CreateSP(this, &SOdysseyPainterEditorToolTile::OnDeleteTool),
+            FCanExecuteAction::CreateSP(this, &SOdysseyPainterEditorToolTile::CanDeleteTool)
+        )
+    );
+
+    return menuBuilder.MakeWidget();
+}
+
+bool SOdysseyPainterEditorToolTile::CanDeleteTool() const
+{
+    return (mCollection && mTool);
+}
+
+void SOdysseyPainterEditorToolTile::OnDeleteTool()
+{
+    mCollection->RemoveTool(mTool);
+}
+
+bool SOdysseyPainterEditorToolTile::CanDuplicateTool() const
+{
+    return (mCollection && mTool && !mCollection->IsCollectionTransient());
+}
+
+void SOdysseyPainterEditorToolTile::OnDuplicateTool()
+{
+    mCollection->AddTool(mTool);
+}
+
 
 /*
 void

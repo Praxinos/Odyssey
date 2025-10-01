@@ -452,6 +452,7 @@ protected:
 
     TMap<UClass*, UOdysseyPainterEditorTool*> mCurrentMainToolPerLayerClass;
 
+    UPROPERTY() // Prevents GC of this transient tool collection
     TObjectPtr<UOdysseyToolCollection> mRecentTools;
 
     FName mToolbarMenuName;

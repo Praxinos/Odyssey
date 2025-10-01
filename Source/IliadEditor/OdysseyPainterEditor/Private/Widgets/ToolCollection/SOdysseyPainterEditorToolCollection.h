@@ -19,8 +19,8 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorToolCollection
 public:
     SLATE_BEGIN_ARGS(SOdysseyPainterEditorToolCollection)
         {}
-        SLATE_ATTRIBUTE(FOdysseyPainterEditor*, Editor)
-        SLATE_ATTRIBUTE(UOdysseyToolCollection*, ToolCollection)
+        SLATE_ARGUMENT(FOdysseyPainterEditor*, Editor)
+        SLATE_ARGUMENT(UOdysseyToolCollection*, ToolCollection)
     SLATE_END_ARGS()
 
 public:
@@ -40,8 +40,8 @@ protected:
     void RefreshToolsGUI();
 
 protected:
-    TAttribute<FOdysseyPainterEditor*> mEditor;
-    TAttribute<UOdysseyToolCollection*> mToolCollection;
+    FOdysseyPainterEditor* mEditor;
+    UOdysseyToolCollection* mToolCollection;
 
     TArray<UOdysseyPainterEditorTool*> mDisplayedTools;
     TSharedPtr<SWrapBox> mToolWrapBox;

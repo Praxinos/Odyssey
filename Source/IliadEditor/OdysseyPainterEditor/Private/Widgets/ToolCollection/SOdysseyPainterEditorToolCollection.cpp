@@ -11,9 +11,9 @@
 
 SOdysseyPainterEditorToolCollection::~SOdysseyPainterEditorToolCollection()
 {
-    if (mToolCollection.Get())
+    if (mToolCollection)
     {
-        mToolCollection.Get()->OnCollectionChanged.RemoveAll(this);
+        mToolCollection->OnCollectionChanged.RemoveAll(this);
     }
 }
 
@@ -25,13 +25,10 @@ void SOdysseyPainterEditorToolCollection::Construct(const FArguments& InArgs)
     mEditor = InArgs._Editor;
     mToolCollection = InArgs._ToolCollection;
 
-    FOdysseyPainterEditor* editor = mEditor.Get();
-    UOdysseyToolCollection* toolCollection = mToolCollection.Get();
-
-    if (!editor || !toolCollection)
+    if (!mEditor || !mToolCollection)
         return;
 
-    toolCollection->OnCollectionChanged.AddSP(this, &SOdysseyPainterEditorToolCollection::HandleToolsChanged);
+    mToolCollection->OnCollectionChanged.AddSP(this, &SOdysseyPainterEditorToolCollection::HandleToolsChanged);
 
     ChildSlot
         [
@@ -54,13 +51,14 @@ TSharedRef<SWidget> SOdysseyPainterEditorToolCollection::GenerateToolTile(UOdyss
 {
     return SNew(SOdysseyPainterEditorToolTile)
         .Tool(Tool)
-        .ToolCollection(mToolCollection.Get());
+        .ToolCollection(mToolCollection)
+        .Editor(mEditor);
 }
 
 FText
 SOdysseyPainterEditorToolCollection::GetCollectionDisplayName() const
 {
-    return mToolCollection.Get() && !mToolCollection.Get()->IsCollectionTransient() ? FText::FromString(mToolCollection.Get()->GetName())
+    return mToolCollection && !mToolCollection->IsCollectionTransient() ? FText::FromString(mToolCollection->GetName())
                                  : FText::FromString(TEXT("Recent Tools"));
 }
 
@@ -76,7 +74,7 @@ SOdysseyPainterEditorToolCollection::GetToolIcon(UOdysseyPainterEditorTool* iToo
 FReply
 SOdysseyPainterEditorToolCollection::OnAddToolClicked()
 {
-    mToolCollection.Get()->AddTool( mEditor.Get()->GetCurrentTool() );
+    mToolCollection->AddTool( mEditor->GetCurrentTool() );
     HandleToolsChanged();
 
     return FReply::Handled();
@@ -85,13 +83,14 @@ SOdysseyPainterEditorToolCollection::OnAddToolClicked()
 void
 SOdysseyPainterEditorToolCollection::HandleToolsChanged()
 {
-    mDisplayedTools = mToolCollection.Get()->GetTools();
+    mDisplayedTools = mToolCollection->GetTools();
 
     RefreshToolsGUI();
 }
 
 void SOdysseyPainterEditorToolCollection::RefreshToolsGUI()
 {
+    UE_LOG(LogTemp, Display, TEXT("REFRESH"));
     if (!mToolWrapBox.IsValid())
         return;
 
@@ -106,7 +105,7 @@ void SOdysseyPainterEditorToolCollection::RefreshToolsGUI()
             ];
     }
 
-    if( !mToolCollection.Get()->IsCollectionTransient() )
+    if( !mToolCollection->IsCollectionTransient() )
     {
         mToolWrapBox->AddSlot()
             [

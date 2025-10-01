@@ -23,6 +23,7 @@ public:
         {}
         SLATE_ARGUMENT( UOdysseyPainterEditorTool*, Tool )
         SLATE_ARGUMENT( UOdysseyToolCollection*, ToolCollection)
+        SLATE_ARGUMENT( FOdysseyPainterEditor*, Editor)
         //SLATE_EVENT( FOnToolSelected, OnToolSelected )
     SLATE_END_ARGS()
 
@@ -43,7 +44,15 @@ public:
 
     virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;
 
-/*
+private:
+    FLinearColor GetTileColor() const;
+    TSharedRef<SWidget> BuildContextMenu();
+    bool CanDeleteTool() const;
+    void OnDeleteTool();
+    bool CanDuplicateTool() const;
+    void OnDuplicateTool();
+
+    /*
 private:
     void OnToolCheckStateChanged(ECheckBoxState InValue, UOdysseyPainterEditorTool* iTool);
     EVisibility ToolVisibility(UOdysseyPainterEditorTool* iTool) const;
@@ -53,6 +62,8 @@ private:
 private:
     UOdysseyPainterEditorTool* mTool = nullptr;
     UOdysseyToolCollection* mCollection = nullptr;
+    FOdysseyPainterEditor* mEditor = nullptr;
+
     mutable EDropIndicatorSide mDropSide = EDropIndicatorSide::None;
     //FOnToolSelected mOnToolSelected;
 };

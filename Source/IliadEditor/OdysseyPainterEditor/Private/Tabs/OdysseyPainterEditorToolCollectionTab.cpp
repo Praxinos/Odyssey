@@ -18,6 +18,7 @@
 #include "Widgets/Views/SListView.h"
 #include "Widgets/Layout/SWrapBox.h"
 
+
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
 const FName&
@@ -71,7 +72,7 @@ FOdysseyPainterEditorToolCollectionTab::CreateWidget()
         + SVerticalBox::Slot() //Recent tools
         .AutoHeight()
         [
-            SAssignNew(CollectionsListView, SListView<TWeakObjectPtr<UOdysseyToolCollection>>)
+            SAssignNew(mCollectionsListView, SListView<TWeakObjectPtr<UOdysseyToolCollection>>)
                 .ListItemsSource(&mSelectedCollections)
                 .OnGenerateRow(this, &FOdysseyPainterEditorToolCollectionTab::OnGenerateCollectionRow)
                 .SelectionMode(ESelectionMode::None)
@@ -91,13 +92,31 @@ FOdysseyPainterEditorToolCollectionTab::BindShortcuts(FBaseToolkit* iToolkit)
     #undef MAP_ACTION
 }
 
-TSharedRef<ITableRow> FOdysseyPainterEditorToolCollectionTab::OnGenerateCollectionRow( TWeakObjectPtr<UOdysseyToolCollection> InCollection, const TSharedRef<STableViewBase>& OwnerTable)
+TSharedRef<ITableRow> FOdysseyPainterEditorToolCollectionTab::OnGenerateCollectionRow( TWeakObjectPtr<UOdysseyToolCollection> iCollection, const TSharedRef<STableViewBase>& iOwnerTable)
 {
-    return SNew(STableRow<TWeakObjectPtr<UOdysseyToolCollection>>, OwnerTable)
+    return SNew(STableRow<TWeakObjectPtr<UOdysseyToolCollection>>, iOwnerTable)
         [
-            SNew(SOdysseyPainterEditorToolCollection)
-                .Editor(mEditor)
-                .ToolCollection(InCollection.Get())
+            SNew(SHorizontalBox)
+                + SHorizontalBox::Slot()
+                .FillWidth(1.f)
+                [
+                    SNew(SOdysseyPainterEditorToolCollection)
+                        .Editor(mEditor)
+                        .ToolCollection(iCollection.Get())
+                ]
+
+                + SHorizontalBox::Slot()
+                .AutoWidth()
+                .VAlign(VAlign_Top)
+                [
+                    SNew(SButton)
+                        .ButtonStyle(FAppStyle::Get(), "SimpleButton")
+                        .OnClicked(this, &FOdysseyPainterEditorToolCollectionTab::OnRemoveCollectionClicked, iCollection)
+                        [
+                            SNew(STextBlock)
+                                .Text(FText::FromString("X"))
+                        ]
+                ]
         ];
 }
 
@@ -152,6 +171,11 @@ void FOdysseyPainterEditorToolCollectionTab::RefreshCollectionsGUI()
         {
             mSelectedCollections.Add(collection);
         }
+
+        if (mCollectionsListView.IsValid())
+        {
+            mCollectionsListView->RequestListRefresh();
+        }
     }
 }
 
@@ -161,8 +185,18 @@ void FOdysseyPainterEditorToolCollectionTab::OnAssetSelected(const FAssetData& A
     if (!collection)
         return;
 
-    mSelectedCollections.Add(collection);
     mEditor->AddToolCollection(collection);
+    RefreshCollectionsGUI();
+}
+
+FReply FOdysseyPainterEditorToolCollectionTab::OnRemoveCollectionClicked( TWeakObjectPtr<UOdysseyToolCollection> iCollectionToRemove )
+{
+    if (iCollectionToRemove.IsValid())
+    {
+        mEditor->RemoveToolCollection(iCollectionToRemove.Get());
+        RefreshCollectionsGUI();
+    }
+    return FReply::Handled();
 }
 
 #undef LOCTEXT_NAMESPACE

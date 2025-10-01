@@ -31,6 +31,7 @@ protected:
 protected:
     // Event Listeners
     void OnAssetSelected(const FAssetData& AssetData);
+    FReply OnRemoveCollectionClicked(TWeakObjectPtr<UOdysseyToolCollection> iCollectionToRemove);
     TSharedRef<SWidget> OnGetAddToolCollectionMenuContent();
 
 public:
@@ -40,6 +41,6 @@ private:
     FOdysseyPainterEditor* mEditor;
 
     TArray<TWeakObjectPtr<UOdysseyToolCollection>> mSelectedCollections;
-    TSharedPtr<SListView<TWeakObjectPtr<UOdysseyToolCollection>>> CollectionsListView;
+    TSharedPtr<SListView<TWeakObjectPtr<UOdysseyToolCollection>>> mCollectionsListView;
     TSharedPtr<SVerticalBox> mCollectionsWidget;
 };
