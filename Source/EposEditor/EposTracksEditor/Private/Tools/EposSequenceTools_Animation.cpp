@@ -367,7 +367,7 @@ ShotSequenceTools::CreateAnimation( ISequencer& iSequencer, UMovieSceneSequence*
     GEditor->SelectActor( animation_actor, true /*bInSelected*/, true /*bNotify*/, true /*bSelectEvenIfHidden*/ );
 
     if( start_sequence_in_storyboard )
-        iSequencer.SetLocalTime( *start_sequence_in_storyboard, STM_All, true /* Evaluate */ );
+        iSequencer.SetGlobalTime( *start_sequence_in_storyboard, true /* Evaluate */ );
 }
 
 //---

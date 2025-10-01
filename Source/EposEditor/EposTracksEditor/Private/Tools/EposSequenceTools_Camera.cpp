@@ -203,7 +203,7 @@ ShotSequenceTools::CreateCamera( ISequencer& iSequencer, UMovieSceneSequence* iS
         GEditor->SelectActor( actors[0], true /*bInSelected*/, true /*bNotify*/, true /*bSelectEvenIfHidden*/ );
 
     if( start_sequence_in_storyboard )
-        iSequencer.SetLocalTime( *start_sequence_in_storyboard, STM_All, true /* Evaluate */ );
+        iSequencer.SetGlobalTime( *start_sequence_in_storyboard, true /* Evaluate */ );
 }
 
 
