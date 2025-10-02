@@ -1580,6 +1580,13 @@ UOdysseyLayer::PostTransacted(const FTransactionObjectEvent& iTransactionEvent)
     }
 }
 
+#if WITH_EDITOR
+bool
+UOdysseyLayer::IsSelectedInEditor() const
+{
+    return GetLayerStack()->IsLayerSelected( this );
+}
+#endif
 
 FOdysseyLighttable
 UOdysseyLayer::GetLighttable() const

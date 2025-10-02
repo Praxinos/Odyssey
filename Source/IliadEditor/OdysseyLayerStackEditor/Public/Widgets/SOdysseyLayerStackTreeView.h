@@ -115,6 +115,8 @@ protected:
      */
     void OnExpansionChanged(UOdysseyLayer* iLayer, bool iIsExpanded);
 
+    void OnSelectionChanged( UOdysseyLayer* iLayerNode, ESelectInfo::Type SelectInfo );
+
     /**
      * @brief The layer's DisplayChildren property changes
      *

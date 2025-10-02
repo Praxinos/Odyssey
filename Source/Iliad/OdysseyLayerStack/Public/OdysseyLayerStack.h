@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 #include "OdysseyTextureRenderingAbility.h"
 #include "Templates/SubclassOf.h"
+#include "Selection.h"
 
 #if WITH_EDITOR
 #include "OdysseyLayerCellSelection.h"
@@ -47,6 +48,7 @@ public:
     static FOnHierarchyChanged& OnHierarchyChanged();
 
 public:
+    ~UOdysseyLayerStack();
     UOdysseyLayerStack();
 
 public:
@@ -215,6 +217,11 @@ public:
     UFUNCTION(BlueprintCallable, Category="Odyssey|LayerStack")
     void MoveLayers(TArray<UOdysseyLayer*> Layers, UOdysseyLayer* ParentLayer = nullptr, int IndexInParent = 0);
 
+    void SelectLayer( UOdysseyLayer* iLayer );
+    void DeselectAllLayers();
+    void DeselectLayer( UOdysseyLayer* iLayer );
+    bool IsLayerSelected( const UOdysseyLayer* iLayer ) const;
+
 public:
     //virtual int GetWidth() const { return -1; };
     //virtual int GetHeight() const { return -1; };
@@ -304,5 +311,6 @@ protected:
 private:
 #if WITH_EDITOR
     TSharedRef<FOdysseyLayerCellSelection> mCellSelection;
+    USelection* mLayerSelection;
 #endif
 };

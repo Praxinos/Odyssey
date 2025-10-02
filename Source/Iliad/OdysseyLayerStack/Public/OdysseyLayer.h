@@ -318,6 +318,8 @@ protected:
     TArray<FGuid> GetLighttableImageRenderingComposition(int iFrameIndex) const;
     // UObject overrides
     virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
+    // overide for UObject::IsSelected() which calls IsSelectedInEditor()
+    virtual bool IsSelectedInEditor() const override;
 #endif
 
 protected:

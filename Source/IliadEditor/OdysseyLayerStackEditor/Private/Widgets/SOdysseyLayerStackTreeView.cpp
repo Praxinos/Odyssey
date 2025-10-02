@@ -143,6 +143,7 @@ void SOdysseyLayerStackTreeView::Construct(const FArguments& InArgs)
         .OnGenerateRow( InArgs._OnGenerateRow )
         .OnGetChildren( this, &SOdysseyLayerStackTreeView::OnGetChildren )
         .OnExpansionChanged( this, &SOdysseyLayerStackTreeView::OnExpansionChanged )
+        .OnSelectionChanged( this, &SOdysseyLayerStackTreeView::OnSelectionChanged )
         .OnItemScrolledIntoView(this, &SOdysseyLayerStackTreeView::OnItemScrolledIntoView)
         .OnContextMenuOpening( this, &SOdysseyLayerStackTreeView::OnContextMenuOpening )
         .SelectionMode( ESelectionMode::Multi )
@@ -560,6 +561,22 @@ void
 SOdysseyLayerStackTreeView::OnExpansionChanged( UOdysseyLayer* iLayerNode, bool iIsExpanded )
 {
     iLayerNode->SetDisplayChildren(iIsExpanded);
+}
+
+void
+SOdysseyLayerStackTreeView::OnSelectionChanged( UOdysseyLayer* iLayerNode, ESelectInfo::Type SelectInfo )
+{
+    TArray<UOdysseyLayer*> selectedItems = GetSelectedItems();
+    USelection* objectSelection = GEditor->GetSelectedSet( UObject::StaticClass() );
+
+    GetLayerStack()->DeselectAllLayers();
+
+    for( int i = 0; i < selectedItems.Num(); i++ )
+    {
+        UOdysseyLayer* layer = selectedItems[i];
+
+        layer->GetLayerStack()->SelectLayer( layer );
+    }
 }
 
 void

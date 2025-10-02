@@ -12,6 +12,15 @@
 #include "Engine/TextureRenderTarget2D.h"
 #include "CanvasTypes.h"
 
+UOdysseyLayerStack::~UOdysseyLayerStack()
+{
+#if WITH_EDITOR
+    if ( UObjectInitialized() )
+    {
+        mLayerSelection->RemoveFromRoot();
+    }
+#endif
+}
 
 UOdysseyLayerStack::UOdysseyLayerStack()
 #if WITH_EDITOR
@@ -44,6 +53,10 @@ UOdysseyLayerStack::PostLoad()
     {
         CurrentLayer = rootLayers[0];
     }
+
+    mLayerSelection = USelection::CreateObjectSelection(GetTransientPackage(), NAME_None, RF_Transactional);
+    mLayerSelection->SetElementSelectionSet(NewObject<UTypedElementSelectionSet>(mLayerSelection, NAME_None, RF_Transactional));
+    mLayerSelection->AddToRoot();
 #endif
 }
 
@@ -633,6 +646,32 @@ UOdysseyLayerStack::CopyLayerInternal(UOdysseyLayer* iLayer, UOdysseyLayer* iPar
 
     return duplicatedLayer;
 }
+
+#if WITH_EDITOR
+bool
+UOdysseyLayerStack::IsLayerSelected( const UOdysseyLayer* iLayer ) const
+{
+    return mLayerSelection->IsSelected( iLayer );
+}
+
+void
+UOdysseyLayerStack::SelectLayer( UOdysseyLayer* iLayer )
+{
+    mLayerSelection->Select( iLayer );
+}
+
+void
+UOdysseyLayerStack::DeselectAllLayers()
+{
+    mLayerSelection->DeselectAll();
+}
+
+void
+UOdysseyLayerStack::DeselectLayer( UOdysseyLayer* iLayer )
+{
+    mLayerSelection->Deselect( iLayer );
+}
+#endif
 
 //--- UObject overrides
 
