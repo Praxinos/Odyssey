@@ -17,7 +17,7 @@ UOdysseyPainterEditorVectorObjectView::~UOdysseyPainterEditorVectorObjectView()
 
 UOdysseyPainterEditorVectorObjectView::UOdysseyPainterEditorVectorObjectView()
     : mVectorLayer( nullptr )
-    , mObjectPropertyBits ( {0} )
+    , mObjectPropertyBits ( {{0}} )
     , bDisplayBackgroundProperties( true )
     , bDisplayForegroundProperties( true )
     , Name( "VectorObject" )

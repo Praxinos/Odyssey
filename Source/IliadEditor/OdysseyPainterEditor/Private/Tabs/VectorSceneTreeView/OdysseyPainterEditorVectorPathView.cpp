@@ -9,7 +9,7 @@ UOdysseyPainterEditorVectorPathView::~UOdysseyPainterEditorVectorPathView()
 
 UOdysseyPainterEditorVectorPathView::UOdysseyPainterEditorVectorPathView()
     : UOdysseyPainterEditorVectorObjectView()
-    , mPathPropertyBits( { 0 } )
+    , mPathPropertyBits( {{ 0 }} )
     , bDisplayWideningOptions( false )
     , WideningMode ( EPathViewWideningMode::Percent )
     , PathWidthInPercent ( 100.0f )
