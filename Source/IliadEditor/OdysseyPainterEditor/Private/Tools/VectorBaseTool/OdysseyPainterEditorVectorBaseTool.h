@@ -95,7 +95,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         virtual void ExtendContextMenu( FMenuBuilder& menu );
         virtual void BindShortcuts( TSharedPtr<FUICommandList> iCommandList );
         virtual EMouseCursor::Type GetMouseCursor() const override;
-        virtual void ExtendToolbar( FToolBarBuilder& iBuilder ) override;
+        virtual void ExtendToolbar( UToolMenu* iToolMenu ) override;
 
         virtual bool SupportsColorType(EOdysseyPainterEditorColorType iType) override;
 

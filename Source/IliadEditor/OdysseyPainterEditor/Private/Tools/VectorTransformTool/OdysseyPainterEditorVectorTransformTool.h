@@ -53,7 +53,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTransformTool : public
 
         virtual FText GetTooltip() const override;
 
-        virtual void ExtendToolbar( FToolBarBuilder& iBuilder ) override;
+        virtual void ExtendToolbar( UToolMenu* iToolMenu ) override;
 
     protected:
         //OdysseyPainterVectorBaseEditorTool overrides

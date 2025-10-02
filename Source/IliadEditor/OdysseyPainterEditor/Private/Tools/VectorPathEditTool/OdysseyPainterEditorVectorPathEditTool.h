@@ -93,7 +93,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathEditTool : public 
 
         virtual FText GetTooltip() const override;
 
-        virtual void ExtendToolbar( FToolBarBuilder& iBuilder ) override;
+        virtual void ExtendToolbar( UToolMenu* iToolMenu ) override;
         virtual void BindShortcuts( TSharedPtr<FUICommandList> iCommandList ) override;
 
     protected:

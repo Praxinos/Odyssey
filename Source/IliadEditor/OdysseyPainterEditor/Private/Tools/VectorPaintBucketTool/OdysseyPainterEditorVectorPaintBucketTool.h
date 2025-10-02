@@ -76,7 +76,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPaintBucketTool : publ
 
         virtual FText GetTooltip() const override;
 
-        virtual void ExtendToolbar( FToolBarBuilder& iBuilder ) override;
+        virtual void ExtendToolbar( UToolMenu* iToolMenu ) override;
 
     protected:
         virtual void ExtendContextMenu( FMenuBuilder& menu );

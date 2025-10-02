@@ -478,45 +478,51 @@ UOdysseyPainterEditorRasterPaintBucketTool::SetSourceProvider(TSharedPtr<FOdysse
 }
 
 void
-UOdysseyPainterEditorRasterPaintBucketTool::ExtendToolbar( FToolBarBuilder& iBuilder )
+UOdysseyPainterEditorRasterPaintBucketTool::ExtendToolbar( UToolMenu* iToolMenu )
 {
-    Super::ExtendToolbar(iBuilder);
+    Super::ExtendToolbar(iToolMenu);
 
-    iBuilder.BeginSection( NAME_None );
+    FToolMenuSection& section = iToolMenu->AddSection(NAME_None);
 
-    iBuilder.AddWidget(
-        SNew(SBox)
-        .Padding(10.f, 0.f, 10.f, 0.f)
-        [
-            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterPaintBucketTool, BlendParameters), FSinglePropertyParams())
-            .InnerPadding(10.f)
-            .ValueWidthOverride(100.f)
-            .OnOverridePropertyHandle_Lambda(
-                [](TSharedPtr<IPropertyHandle> iHandle)
-                {
-                    return iHandle->GetChildHandle("Opacity");
-                }
-            )
-        ]
+    section.AddEntry(
+        FToolMenuEntry::InitWidget(
+            NAME_None,
+            SNew(SBox)
+            .Padding(10.f, 0.f, 10.f, 0.f)
+            [
+                SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterPaintBucketTool, BlendParameters), FSinglePropertyParams())
+                .InnerPadding(10.f)
+                .ValueWidthOverride(100.f)
+                .OnOverridePropertyHandle_Lambda(
+                    [](TSharedPtr<IPropertyHandle> iHandle)
+                    {
+                        return iHandle->GetChildHandle("Opacity");
+                    }
+                )
+            ],
+            FText()
+        )
     );
 
-    iBuilder.AddWidget(
-        SNew(SBox)
-        .Padding(10.f, 0.f, 10.f, 0.f)
-        [
-            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterPaintBucketTool, BlendParameters), FSinglePropertyParams())
-            .InnerPadding(10.f)
-            .ValueWidthOverride(100.f)
-            .OnOverridePropertyHandle_Lambda(
-                [](TSharedPtr<IPropertyHandle> iHandle)
-                {
-                    return iHandle->GetChildHandle("BlendingMode");
-                }
-            )
-        ]
+    section.AddEntry(
+        FToolMenuEntry::InitWidget(
+            NAME_None,
+            SNew(SBox)
+            .Padding(10.f, 0.f, 10.f, 0.f)
+            [
+                SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterPaintBucketTool, BlendParameters), FSinglePropertyParams())
+                .InnerPadding(10.f)
+                .ValueWidthOverride(100.f)
+                .OnOverridePropertyHandle_Lambda(
+                    [](TSharedPtr<IPropertyHandle> iHandle)
+                    {
+                        return iHandle->GetChildHandle("BlendingMode");
+                    }
+                )
+            ],
+            FText()
+        )
     );
-
-    iBuilder.EndSection();
 }
 
 // Returns the BlendParameters

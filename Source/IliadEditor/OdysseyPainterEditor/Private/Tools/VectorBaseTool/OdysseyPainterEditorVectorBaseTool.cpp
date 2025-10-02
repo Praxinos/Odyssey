@@ -1178,90 +1178,97 @@ UOdysseyPainterEditorVectorBaseTool::SetVectorEditionFlags( uint64 iViewMode )
 }
 
 void
-UOdysseyPainterEditorVectorBaseTool::ExtendToolbar( FToolBarBuilder& iBuilder )
+UOdysseyPainterEditorVectorBaseTool::ExtendToolbar( UToolMenu* iToolMenu )
 {
-    Super::ExtendToolbar(iBuilder);
+    Super::ExtendToolbar(iToolMenu);
 
-    iBuilder.BeginSection( NAME_None );
+    FToolMenuSection& section = iToolMenu->AddSection(NAME_None);
 
     uint64 HUDFlags = mEditor->GetVectorHUDFlags();
 
     if( HUDFlags & FOdysseyVectorHUD::HUD_MODE_OBJECT_ALLOWED )
     {
-        FButtonArgs objectModeButtonArgs;
-        objectModeButtonArgs.ToolTipOverride = LOCTEXT("vector-edition-mode.object-mode.tooltip", "Object Mode");
-        objectModeButtonArgs.ExtensionHook = "VectorObjectMode";
-        objectModeButtonArgs.IconOverride = FSlateIcon("OdysseyStyle", "PainterEditor.TopBar.VectorModeObject32");
-        objectModeButtonArgs.UserInterfaceActionType = EUserInterfaceActionType::RadioButton;
-        objectModeButtonArgs.Action = FUIAction(
-            FExecuteAction::CreateLambda(
-                [this]()
-                {
-                    SetVectorEditionFlags(static_cast<uint64>(FOdysseyVectorHUD::HUD_MODE_OBJECT));
-                }
-            ),
-            FCanExecuteAction(),
-            FIsActionChecked::CreateLambda(
-                [this]() -> bool
-                {
-                    return mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_OBJECT;
-                }
+        section.AddEntry(
+            FToolMenuEntry::InitToolBarButton(
+                "VectorObjectMode",
+                FUIAction(
+                    FExecuteAction::CreateLambda(
+                        [this]()
+                        {
+                            SetVectorEditionFlags(static_cast<uint64>(FOdysseyVectorHUD::HUD_MODE_OBJECT));
+                        }
+                    ),
+                    FCanExecuteAction(),
+                    FIsActionChecked::CreateLambda(
+                        [this]() -> bool
+                        {
+                            return mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_OBJECT;
+                        }
+                    )
+                ),
+                FText(),
+                LOCTEXT("vector-edition-mode.object-mode.tooltip", "Object Mode"),
+                FSlateIcon("OdysseyStyle", "PainterEditor.TopBar.VectorModeObject32"),
+                EUserInterfaceActionType::RadioButton
             )
         );
-        iBuilder.AddToolBarButton(objectModeButtonArgs);
     }
 
     if( HUDFlags & FOdysseyVectorHUD::HUD_MODE_VERTEX_ALLOWED)
     {
-        FButtonArgs vertexModeButtonArgs;
-        vertexModeButtonArgs.ToolTipOverride = LOCTEXT("vector-edition-mode.vertex-mode.tooltip", "Vertex Mode");
-        vertexModeButtonArgs.ExtensionHook = "VectorVertexMode";
-        vertexModeButtonArgs.IconOverride = FSlateIcon("OdysseyStyle", "PainterEditor.TopBar.VectorModeVertex32");
-        vertexModeButtonArgs.UserInterfaceActionType = EUserInterfaceActionType::RadioButton;
-        vertexModeButtonArgs.Action = FUIAction(
-            FExecuteAction::CreateLambda(
-                [this]()
-                {
-                    SetVectorEditionFlags(static_cast<uint64>(FOdysseyVectorHUD::HUD_MODE_VERTEX));
-                }
-            ),
-            FCanExecuteAction(),
-            FIsActionChecked::CreateLambda(
-                [this]() -> bool
-                {
-                    return mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_VERTEX;
-                }
+        section.AddEntry(
+            FToolMenuEntry::InitToolBarButton(
+                "VectorVertexMode",
+                FUIAction(
+                    FExecuteAction::CreateLambda(
+                        [this]()
+                        {
+                            SetVectorEditionFlags(static_cast<uint64>(FOdysseyVectorHUD::HUD_MODE_VERTEX));
+                        }
+                    ),
+                    FCanExecuteAction(),
+                    FIsActionChecked::CreateLambda(
+                        [this]() -> bool
+                        {
+                            return mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_VERTEX;
+                        }
+                    )
+                ),
+                FText(),
+                LOCTEXT("vector-edition-mode.vertex-mode.tooltip", "Vertex Mode"),
+                FSlateIcon("OdysseyStyle", "PainterEditor.TopBar.VectorModeVertex32"),
+                EUserInterfaceActionType::RadioButton
             )
         );
-        iBuilder.AddToolBarButton(vertexModeButtonArgs);
     }
 
     if( HUDFlags & FOdysseyVectorHUD::HUD_MODE_INBETWEEN_ALLOWED)
     {
-        FButtonArgs inbetweenModeButtonArgs;
-        inbetweenModeButtonArgs.ToolTipOverride = LOCTEXT("vector-edition-mode.inbetween-mode.tooltip", "Inbetween Mode");
-        inbetweenModeButtonArgs.ExtensionHook = "VectorVertexMode";
-        inbetweenModeButtonArgs.IconOverride = FSlateIcon("OdysseyStyle", "PainterEditor.TopBar.VectorModeInbetween32");
-        inbetweenModeButtonArgs.UserInterfaceActionType = EUserInterfaceActionType::RadioButton;
-        inbetweenModeButtonArgs.Action = FUIAction(
-            FExecuteAction::CreateLambda(
-                [this]()
-                {
-                    SetVectorEditionFlags(static_cast<uint64>(FOdysseyVectorHUD::HUD_MODE_INBETWEEN));
-                }
-            ),
-            FCanExecuteAction(),
-            FIsActionChecked::CreateLambda(
-                [this]() -> bool
-                {
-                    return mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_INBETWEEN;
-                }
+        section.AddEntry(
+            FToolMenuEntry::InitToolBarButton(
+                "VectorInbetweenMode",
+                FUIAction(
+                    FExecuteAction::CreateLambda(
+                        [this]()
+                        {
+                            SetVectorEditionFlags(static_cast<uint64>(FOdysseyVectorHUD::HUD_MODE_INBETWEEN));
+                        }
+                    ),
+                    FCanExecuteAction(),
+                    FIsActionChecked::CreateLambda(
+                        [this]() -> bool
+                        {
+                            return mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_INBETWEEN;
+                        }
+                    )
+                ),
+                FText(),
+                LOCTEXT("vector-edition-mode.inbetween-mode.tooltip", "Inbetween Mode"),
+                FSlateIcon("OdysseyStyle", "PainterEditor.TopBar.VectorModeInbetween32"),
+                EUserInterfaceActionType::RadioButton
             )
         );
-        iBuilder.AddToolBarButton(inbetweenModeButtonArgs);
     }
-
-    iBuilder.EndSection();
 }
 
 bool

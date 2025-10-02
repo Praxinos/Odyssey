@@ -245,23 +245,24 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseUpVector( FOdysseyVectorGroupP
 }
 
 void
-UOdysseyPainterEditorVectorPathSmoothTool::ExtendToolbar( FToolBarBuilder& iBuilder )
+UOdysseyPainterEditorVectorPathSmoothTool::ExtendToolbar( UToolMenu* iToolMenu )
 {
-    Super::ExtendToolbar(iBuilder);
+    Super::ExtendToolbar(iToolMenu);
 
-    iBuilder.BeginSection( NAME_None );
-
-    iBuilder.AddWidget(
-        SNew(SBox)
-        .Padding(10.f, 0.f, 10.f, 0.f)
-        [
-            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorPathSmoothTool, PickingRadius ), FSinglePropertyParams())
-            .InnerPadding(10.f)
-            .ValueWidthOverride(100.f)
-        ]
+    FToolMenuSection& section = iToolMenu->AddSection(NAME_None);
+    section.AddEntry(
+        FToolMenuEntry::InitWidget(
+            NAME_None,
+            SNew(SBox)
+            .Padding(10.f, 0.f, 10.f, 0.f)
+            [
+                SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorPathSmoothTool, PickingRadius ), FSinglePropertyParams())
+                .InnerPadding(10.f)
+                .ValueWidthOverride(100.f)
+            ],
+            FText()
+        )
     );
-
-    iBuilder.EndSection();
 }
 
 FText

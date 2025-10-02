@@ -43,7 +43,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorCutTool : public UOdys
 
         virtual FText GetTooltip() const override;
 
-        virtual void ExtendToolbar( FToolBarBuilder& iBuilder ) override;
+        virtual void ExtendToolbar( UToolMenu* iToolMenu ) override;
 
         std::vector<::ULIS::FVec2D>& GetPointArray();
 

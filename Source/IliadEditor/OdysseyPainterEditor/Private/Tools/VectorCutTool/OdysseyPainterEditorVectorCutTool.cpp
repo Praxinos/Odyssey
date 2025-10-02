@@ -445,24 +445,9 @@ UOdysseyPainterEditorVectorCutTool::GetPointArray()
 }
 
 void
-UOdysseyPainterEditorVectorCutTool::ExtendToolbar( FToolBarBuilder& iBuilder )
+UOdysseyPainterEditorVectorCutTool::ExtendToolbar( UToolMenu* iToolMenu )
 {
-    Super::ExtendToolbar(iBuilder);
-/*
-    iBuilder.BeginSection( NAME_None );
-
-    iBuilder.AddWidget(
-        SNew(SBox)
-        .Padding(10.f, 0.f, 10.f, 0.f)
-        [
-            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorCutTool, Shapes ), FSinglePropertyParams())
-            .InnerPadding(10.f)
-            .ValueWidthOverride(100.f)
-        ]
-    );
-
-    iBuilder.EndSection();
-*/
+    Super::ExtendToolbar(iToolMenu);
 }
 
 FText

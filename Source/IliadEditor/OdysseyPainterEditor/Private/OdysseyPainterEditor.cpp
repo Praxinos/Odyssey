@@ -513,11 +513,11 @@ FOdysseyPainterEditor::ExtendLevelEditorToolbar(UToolMenu* iToolbar)
 
     iToolbar->AddDynamicSection(
         "ToolParameters",
-        FNewToolBarDelegateLegacy::CreateLambda(
-            [this](FToolBarBuilder& iBuilder, UToolMenu* iToolMenu)
+        FNewToolMenuDelegate::CreateLambda(
+            [this](UToolMenu* iToolMenu)
             {
-                ExtendToolbarSaveAssetButton(iBuilder);
-                ExtendToolbarToolParameters(iBuilder);
+                ExtendToolbarSaveAssetButton(iToolMenu);
+                ExtendToolbarToolParameters(iToolMenu);
             }
         )
     );
@@ -530,7 +530,22 @@ FOdysseyPainterEditor::ExtendAssetEditorToolbar(UToolMenu* iToolbar)
 
     iToolbar->AddDynamicSection(
         "ToolParameters",
-        FNewToolBarDelegateLegacy::CreateLambda(
+        FNewToolMenuDelegate::CreateLambda(
+            [](UToolMenu* iToolMenu)
+            {
+                const UOdysseyPainterEditorToolMenuContext* Context = iToolMenu->FindContext<UOdysseyPainterEditorToolMenuContext>();
+                if (!Context)
+                    return;
+
+                FOdysseyPainterEditor* painterEditor = Context->PainterEditor;
+                if (!painterEditor)
+                    return;
+
+                painterEditor->ExtendToolbarToolParameters(iToolMenu);
+            }
+        )
+
+        /* FNewToolBarDelegateLegacy::CreateLambda(
             [](FToolBarBuilder& iBuilder, UToolMenu* iToolMenu)
             {
                 const UOdysseyPainterEditorToolMenuContext* Context = iToolMenu->FindContext<UOdysseyPainterEditorToolMenuContext>();
@@ -543,15 +558,45 @@ FOdysseyPainterEditor::ExtendAssetEditorToolbar(UToolMenu* iToolbar)
 
                 painterEditor->ExtendToolbarToolParameters(iBuilder);
             }
-        )
+        )*/
     );
 }
 
 void
-FOdysseyPainterEditor::ExtendToolbarSaveAssetButton(FToolBarBuilder& iBuilder)
+FOdysseyPainterEditor::ExtendToolbarSaveAssetButton(UToolMenu* iToolMenu)
 {
-    FButtonArgs saveAssetButtonArgs;
-    saveAssetButtonArgs.Command = FGenericCommands::Get().Undo;
+    FToolMenuSection& assetSection = iToolMenu->AddSection("Asset");
+
+    assetSection.AddEntry(
+        FToolMenuEntry::InitToolBarButton(
+            NAME_None,
+            FUIAction(
+                FExecuteAction::CreateLambda(
+                    [this]()
+                    {
+                        TArray<UPackage*> packages;
+                        UObject* editedObject = GetEditedObject();
+                        if (editedObject)
+                            packages.Add(editedObject->GetOutermost());
+
+                        TArray<UObject*> additionalEditedObjects = GetAdditionalEditedObjects();
+                        for( UObject* additionalEditedObject : additionalEditedObjects )
+                        {
+                            packages.Add( additionalEditedObject->GetOutermost() );
+                        }
+
+                        FEditorFileUtils::PromptForCheckoutAndSave(packages, true, false);
+                    }
+                )
+            ),
+            FText(),
+            LOCTEXT("top-tab.save-asset", "Saves the painted asset"),
+            FSlateIcon("OdysseyStyle", "PainterEditor.TopBar.Save32"),
+            EUserInterfaceActionType::Button
+        )
+    );
+
+    /* FButtonArgs saveAssetButtonArgs;
     saveAssetButtonArgs.ToolTipOverride = LOCTEXT("top-tab.save-asset", "Saves the painted asset");
     saveAssetButtonArgs.IconOverride = FSlateIcon("OdysseyStyle", "PainterEditor.TopBar.Save32");
     saveAssetButtonArgs.ExtensionHook = "Save";
@@ -578,80 +623,84 @@ FOdysseyPainterEditor::ExtendToolbarSaveAssetButton(FToolBarBuilder& iBuilder)
 
     iBuilder.BeginSection("Asset");
         iBuilder.AddToolBarButton(saveAssetButtonArgs);
-    iBuilder.EndSection();
+    iBuilder.EndSection(); */
 }
 
 void
-FOdysseyPainterEditor::ExtendToolbarToolParameters(FToolBarBuilder& iBuilder)
+FOdysseyPainterEditor::ExtendToolbarToolParameters(UToolMenu* iToolMenu)
 {
-    FButtonArgs undoButtonArgs;
-    undoButtonArgs.Command = FGenericCommands::Get().Undo;
-    undoButtonArgs.ToolTipOverride = LOCTEXT("top-tab.undo", "Undo the previous action.");
-    undoButtonArgs.IconOverride = FSlateIcon("OdysseyStyle", "PainterEditor.TopBar.Undo32");
-    undoButtonArgs.ExtensionHook = "Undo";
-    undoButtonArgs.UserInterfaceActionType = EUserInterfaceActionType::Button;
-    undoButtonArgs.Action = FUIAction(
-        FExecuteAction::CreateLambda(
-            [this]()
-            {
-                if( GetCurrentMainTool() && GetCurrentMainTool()->IsA( UOdysseyPainterEditorRasterTransformTool::StaticClass() ) )
-                    Cast<UOdysseyPainterEditorRasterTransformTool>( GetCurrentMainTool() )->UndoTransformTransaction();
-                else
-                    GEditor->UndoTransaction(true);
-            }
+    FToolMenuSection& undoRedoSection = iToolMenu->AddSection("UndoRedo");
+
+    undoRedoSection.AddEntry(
+        FToolMenuEntry::InitToolBarButton(
+            "Undo",
+            FUIAction(
+                FExecuteAction::CreateLambda(
+                    [this]()
+                    {
+                        if( GetCurrentMainTool() && GetCurrentMainTool()->IsA( UOdysseyPainterEditorRasterTransformTool::StaticClass() ) )
+                            Cast<UOdysseyPainterEditorRasterTransformTool>( GetCurrentMainTool() )->UndoTransformTransaction();
+                        else
+                            GEditor->UndoTransaction(true);
+                    }
+                )
+            ),
+            FText(),
+            LOCTEXT("top-tab.undo", "Undo the previous action."),
+            FSlateIcon("OdysseyStyle", "PainterEditor.TopBar.Undo32"),
+            EUserInterfaceActionType::Button
         )
     );
 
-    FButtonArgs redoButtonArgs;
-    redoButtonArgs.Command = FGenericCommands::Get().Redo;
-    redoButtonArgs.ToolTipOverride = LOCTEXT("top-tab.redo", "Redo the next action.");
-    redoButtonArgs.IconOverride = FSlateIcon("OdysseyStyle", "PainterEditor.TopBar.Redo32");
-    redoButtonArgs.ExtensionHook = "Redo";
-    redoButtonArgs.UserInterfaceActionType = EUserInterfaceActionType::Button;
-    redoButtonArgs.Action = FUIAction(
-        FExecuteAction::CreateLambda(
-            [this]()
-            {
-                if (GetCurrentMainTool() && GetCurrentMainTool()->IsA(UOdysseyPainterEditorRasterTransformTool::StaticClass()))
-                    Cast<UOdysseyPainterEditorRasterTransformTool>(GetCurrentMainTool())->RedoTransformTransaction();
-                else
-                    GEditor->RedoTransaction();
-            }
+    undoRedoSection.AddEntry(
+        FToolMenuEntry::InitToolBarButton(
+            "Redo",
+            FUIAction(
+                FExecuteAction::CreateLambda(
+                    [this]()
+                    {
+                        if( GetCurrentMainTool() && GetCurrentMainTool()->IsA( UOdysseyPainterEditorRasterTransformTool::StaticClass() ) )
+                            Cast<UOdysseyPainterEditorRasterTransformTool>( GetCurrentMainTool() )->RedoTransformTransaction();
+                        else
+                            GEditor->RedoTransaction();
+                    }
+                )
+            ),
+            FText(),
+            LOCTEXT("top-tab.redo", "Redo the next action."),
+            FSlateIcon("OdysseyStyle", "PainterEditor.TopBar.Redo32"),
+            EUserInterfaceActionType::Button
         )
     );
 
-    FButtonArgs clearCanvasButtonArgs;
-    clearCanvasButtonArgs.Command = FGenericCommands::Get().Redo;
-    clearCanvasButtonArgs.ToolTipOverride = LOCTEXT("top-tab.clear", "Clear the whole canvas.");
-    clearCanvasButtonArgs.IconOverride = FSlateIcon("OdysseyStyle", "PainterEditor.TopBar.Clear32");
-    clearCanvasButtonArgs.ExtensionHook = "ClearCanvas";
-    clearCanvasButtonArgs.UserInterfaceActionType = EUserInterfaceActionType::Button;
-    clearCanvasButtonArgs.Action = FUIAction(
-        FExecuteAction::CreateLambda(
-            [this]()
-            {
-                TSharedPtr<FOdysseyPainterEditorSource> source = GetSource();
-                if (!source)
-                    return;
+    FToolMenuSection& clearCanvasSection = iToolMenu->AddSection("ClearCanvas");
 
-                source->Clear();
-            }
+    clearCanvasSection.AddEntry(
+        FToolMenuEntry::InitToolBarButton(
+            "ClearCanvas",
+            FUIAction(
+                FExecuteAction::CreateLambda(
+                    [this]()
+                    {
+                        TSharedPtr<FOdysseyPainterEditorSource> source = GetSource();
+                        if (!source)
+                            return;
+
+                        source->Clear();
+                    }
+                )
+            ),
+            FText(),
+            LOCTEXT("top-tab.clear", "Clear the whole canvas."),
+            FSlateIcon("OdysseyStyle", "PainterEditor.TopBar.Clear32"),
+            EUserInterfaceActionType::Button
         )
     );
-
-    iBuilder.BeginSection("UndoRedo");
-        iBuilder.AddToolBarButton(undoButtonArgs);
-        iBuilder.AddToolBarButton(redoButtonArgs);
-    iBuilder.EndSection();
-
-    iBuilder.BeginSection("ClearCanvas");
-        iBuilder.AddToolBarButton(clearCanvasButtonArgs);
-    iBuilder.EndSection();
 
     UOdysseyPainterEditorTool* currentTool = GetCurrentTool();
     if (currentTool)
     {
-        currentTool->ExtendToolbar(iBuilder);
+        currentTool->ExtendToolbar(iToolMenu);
     }
 }
 
@@ -1111,7 +1160,22 @@ FOdysseyPainterEditor::ActivateTemporaryTool( UOdysseyPainterEditorTool* iTool )
 void
 FOdysseyPainterEditor::SanitizeCurrentTool()
 {
-    InactivateAllTools();
+    if (mCurrentTemporaryTool)
+    {
+        InactivateTemporaryTool();
+        return;
+    }
+
+    if (mCurrentMainTool)
+    {
+        if (mCurrentMainTool->IsActivable())
+        {
+            mCurrentMainTool->Unload();
+            mCurrentMainTool->Load();
+            return;
+        }
+        InactivateMainTool();
+    }
 
     UOdysseyLayerStack* layerStack = LayerStack();
     if (!layerStack)

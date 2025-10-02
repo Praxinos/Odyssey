@@ -434,80 +434,127 @@ UOdysseyPainterEditorRasterDrawingTool::ExtendMenu( TSharedRef<FExtender> iExten
 }
 
 void
-UOdysseyPainterEditorRasterDrawingTool::ExtendToolbar( FToolBarBuilder& iBuilder )
+UOdysseyPainterEditorRasterDrawingTool::ExtendToolbar( UToolMenu* iToolMenu )
 {
-    Super::ExtendToolbar(iBuilder);
+    Super::ExtendToolbar(iToolMenu);
 
-    iBuilder.BeginSection( NAME_None );
-
-    iBuilder.AddWidget(
-        SNew(SBox)
-        .Padding(10.f, 0.f, 10.f, 0.f)
-        [
-            SNew(SOdysseySinglePropertyView, BrushOptions, GET_MEMBER_NAME_CHECKED(UOdysseyBrushOptions, Size), FSinglePropertyParams())
-            .InnerPadding(10.f)
-            .ValueWidthOverride(100.f)
-        ]
+    FToolMenuSection& section = iToolMenu->AddSection(NAME_None);
+    section.AddEntry(
+        FToolMenuEntry::InitWidget(
+            NAME_None,
+            SNew(SBox)
+            .Padding(10.f, 0.f, 10.f, 0.f)
+            [
+                SNew(SOdysseySinglePropertyView, BrushOptions, GET_MEMBER_NAME_CHECKED(UOdysseyBrushOptions, Size), FSinglePropertyParams())
+                .InnerPadding(10.f)
+                .ValueWidthOverride(100.f)
+            ],
+            FText()
+        )
     );
 
-    iBuilder.AddWidget(
-        SNew(SBox)
-        .Padding(10.f, 0.f, 10.f, 0.f)
-        [
-            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterDrawingTool, BlendParameters), FSinglePropertyParams())
-            .InnerPadding(10.f)
-            .ValueWidthOverride(100.f)
-            .OnOverridePropertyHandle_Lambda(
-                [](TSharedPtr<IPropertyHandle> iHandle)
-                {
-                    return iHandle->GetChildHandle("Opacity");
-                }
-            )
-        ]
+    section.AddEntry(
+        FToolMenuEntry::InitWidget(
+            NAME_None,
+            SNew(SBox)
+            .Padding(10.f, 0.f, 10.f, 0.f)
+            [
+                SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterDrawingTool, BlendParameters), FSinglePropertyParams())
+                .InnerPadding(10.f)
+                .ValueWidthOverride(100.f)
+                .OnOverridePropertyHandle_Lambda(
+                    [](TSharedPtr<IPropertyHandle> iHandle)
+                    {
+                        return iHandle->GetChildHandle("Opacity");
+                    }
+                )
+            ],
+            FText()
+        )
     );
 
-    iBuilder.AddWidget(
-        SNew(SBox)
-        .Padding(10.f, 0.f, 10.f, 0.f)
-        [
-            SNew(SOdysseySinglePropertyView, BrushOptions, GET_MEMBER_NAME_CHECKED(UOdysseyBrushOptions, Flow), FSinglePropertyParams())
-            .InnerPadding(10.f)
-            .ValueWidthOverride(100.f)
-        ]
+    section.AddEntry(
+        FToolMenuEntry::InitWidget(
+            NAME_None,
+            SNew(SBox)
+            .Padding(10.f, 0.f, 10.f, 0.f)
+            [
+                SNew(SOdysseySinglePropertyView, BrushOptions, GET_MEMBER_NAME_CHECKED(UOdysseyBrushOptions, Flow), FSinglePropertyParams())
+                .InnerPadding(10.f)
+                .ValueWidthOverride(100.f)
+            ],
+            FText()
+        )
     );
 
-    iBuilder.AddWidget(
-        SNew(SBox)
-        .Padding(10.f, 0.f, 10.f, 0.f)
-        [
-            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterDrawingTool, BlendParameters), FSinglePropertyParams())
-            .InnerPadding(10.f)
-            .ValueWidthOverride(100.f)
-            .OnOverridePropertyHandle_Lambda(
-                [](TSharedPtr<IPropertyHandle> iHandle)
-                {
-                    return iHandle->GetChildHandle("BlendingMode");
-                }
-            )
-        ]
+    section.AddEntry(
+        FToolMenuEntry::InitWidget(
+            NAME_None,
+            SNew(SBox)
+            .Padding(10.f, 0.f, 10.f, 0.f)
+            [
+                SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterDrawingTool, BlendParameters), FSinglePropertyParams())
+                .InnerPadding(10.f)
+                .ValueWidthOverride(100.f)
+                .OnOverridePropertyHandle_Lambda(
+                    [](TSharedPtr<IPropertyHandle> iHandle)
+                    {
+                        return iHandle->GetChildHandle("BlendingMode");
+                    }
+                )
+            ],
+            FText()
+        )
     );
 
+    section.AddEntry(
+        FToolMenuEntry::InitWidget(
+            NAME_None,
+            SNew(SBox)
+            .Padding(10.f, 0.f, 10.f, 0.f)
+            [
+                SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterDrawingTool, BlendParameters), FSinglePropertyParams())
+                .InnerPadding(10.f)
+                .ValueWidthOverride(100.f)
+                .OnOverridePropertyHandle_Lambda(
+                    [](TSharedPtr<IPropertyHandle> iHandle)
+                    {
+                        return iHandle->GetChildHandle("BlendingMode");
+                    }
+                )
+            ],
+            FText()
+        )
+    );
+
+    section.AddEntry(
+        FToolMenuEntry::InitToolBarButton(
+            NAME_None,
+            FUIAction(
+                FExecuteAction::CreateLambda(
+                    [this]()
+                    {
+                        FOdysseyBlendParameters value = BlendParameters;
+                        value.bEraserMode = !value.bEraserMode;
+                        FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterDrawingTool, BlendParameters), value);
+                    }
+                ),
+                FCanExecuteAction::CreateLambda([](){ return true;}),
+                FIsActionChecked::CreateLambda([this](){ return BlendParameters.bEraserMode;})
+            ),
+            FText(),
+            LOCTEXT("raster-drawing-tool.toolbar.eraser-mode.tooltip", "Toggles the tool Eraser Mode"),
+            FSlateIcon("OdysseyStyle", "PainterEditor.TopBar.Eraser32"),
+            EUserInterfaceActionType::ToggleButton
+        )
+    );
+
+    /*
     FButtonArgs eraserModeButtonArgs;
     eraserModeButtonArgs.ExtensionHook = "EraserMode";
     eraserModeButtonArgs.IconOverride = FSlateIcon("OdysseyStyle", "PainterEditor.TopBar.Eraser32");
     eraserModeButtonArgs.UserInterfaceActionType = EUserInterfaceActionType::ToggleButton;
-    eraserModeButtonArgs.Action = FUIAction(
-        FExecuteAction::CreateLambda(
-            [this]()
-            {
-                FOdysseyBlendParameters value = BlendParameters;
-                value.bEraserMode = !value.bEraserMode;
-                FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterDrawingTool, BlendParameters), value);
-            }
-        ),
-        FCanExecuteAction::CreateLambda([](){ return true;}),
-        FIsActionChecked::CreateLambda([this](){ return BlendParameters.bEraserMode;})
-    );
+    eraserModeButtonArgs.Action =
     eraserModeButtonArgs.CustomMenuDelegate = FNewMenuDelegate::CreateLambda(
         [this, eraserModeButtonArgs](FMenuBuilder& iMenuBuilder)
         {
@@ -524,7 +571,7 @@ UOdysseyPainterEditorRasterDrawingTool::ExtendToolbar( FToolBarBuilder& iBuilder
 
     iBuilder.AddToolBarButton(eraserModeButtonArgs);
 
-    iBuilder.EndSection();
+    iBuilder.EndSection(); */
 }
 
 //--------------------------------------------------------------------------------------

@@ -67,7 +67,7 @@ public:
 
     virtual void BindShortcuts(TSharedPtr<FUICommandList> iCommandList) override;
     virtual void ExtendMenu( TSharedRef<FExtender> iExtender) override;
-    virtual void ExtendToolbar( FToolBarBuilder& iBuilder ) override;
+    virtual void ExtendToolbar( UToolMenu* iToolMenu ) override;
 
     virtual EMouseCursor::Type GetMouseCursor() const override;
 

@@ -220,51 +220,64 @@ UOdysseyPainterEditorVectorMatchingTool::PropertyChangedVector( FOdysseyVectorGr
 }
 
 void
-UOdysseyPainterEditorVectorMatchingTool::ExtendToolbar( FToolBarBuilder& iBuilder )
+UOdysseyPainterEditorVectorMatchingTool::ExtendToolbar( UToolMenu* iToolMenu )
 {
-    Super::ExtendToolbar(iBuilder);
+    Super::ExtendToolbar(iToolMenu);
 
-    iBuilder.BeginSection( NAME_None );
-
-    iBuilder.AddWidget(
-        SNew(SBox)
-        .Padding(10.f, 0.f, 10.f, 0.f)
-        [
-            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorMatchingTool, ShowInbetweens ), FSinglePropertyParams())
-            .InnerPadding(10.f)
-        ]
+    FToolMenuSection& section = iToolMenu->AddSection(NAME_None);
+    section.AddEntry(
+        FToolMenuEntry::InitWidget(
+            NAME_None,
+            SNew(SBox)
+            .Padding(10.f, 0.f, 10.f, 0.f)
+            [
+                SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorMatchingTool, ShowInbetweens ), FSinglePropertyParams())
+                .InnerPadding(10.f)
+            ],
+            FText()
+        )
     );
 
-    iBuilder.AddWidget(
-        SNew(SBox)
-        .Padding(10.f, 0.f, 10.f, 0.f)
-        [
-            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorMatchingTool, PickingRadius ), FSinglePropertyParams())
-            .InnerPadding(10.f)
-            .ValueWidthOverride(100.f)
-        ]
+    section.AddEntry(
+        FToolMenuEntry::InitWidget(
+            NAME_None,
+            SNew(SBox)
+            .Padding(10.f, 0.f, 10.f, 0.f)
+            [
+                SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorMatchingTool, PickingRadius ), FSinglePropertyParams())
+                .InnerPadding(10.f)
+                .ValueWidthOverride(100.f)
+            ],
+            FText()
+        )
     );
 
-    iBuilder.AddWidget(
-        SNew(SBox)
-        .Padding(10.f, 0.f, 10.f, 0.f)
-        [
-            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorMatchingTool, Rigidity ), FSinglePropertyParams())
-            .InnerPadding(10.f)
-            .ValueWidthOverride(100.f)
-        ]
+    section.AddEntry(
+        FToolMenuEntry::InitWidget(
+            NAME_None,
+            SNew(SBox)
+            .Padding(10.f, 0.f, 10.f, 0.f)
+            [
+                SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorMatchingTool, Rigidity ), FSinglePropertyParams())
+                .InnerPadding(10.f)
+                .ValueWidthOverride(100.f)
+            ],
+            FText()
+        )
     );
 
-    iBuilder.AddWidget(
-        SNew(SBox)
-        .Padding(10.f, 0.f, 10.f, 0.f)
-        [
-            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorMatchingTool, RigidifySelectionOnly ), FSinglePropertyParams())
-            .InnerPadding(10.f)
-        ]
+    section.AddEntry(
+        FToolMenuEntry::InitWidget(
+            NAME_None,
+            SNew(SBox)
+            .Padding(10.f, 0.f, 10.f, 0.f)
+            [
+                SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorMatchingTool, RigidifySelectionOnly ), FSinglePropertyParams())
+                .InnerPadding(10.f)
+            ],
+            FText()
+        )
     );
-
-    iBuilder.EndSection();
 }
 
 FText

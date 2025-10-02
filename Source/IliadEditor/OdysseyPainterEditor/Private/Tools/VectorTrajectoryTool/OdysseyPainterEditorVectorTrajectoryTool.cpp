@@ -625,36 +625,45 @@ UOdysseyPainterEditorVectorTrajectoryTool::CreateModifierSegmentControl()
 }
 
 void
-UOdysseyPainterEditorVectorTrajectoryTool::ExtendToolbar( FToolBarBuilder& iBuilder )
+UOdysseyPainterEditorVectorTrajectoryTool::ExtendToolbar( UToolMenu* iToolMenu )
 {
-    Super::ExtendToolbar(iBuilder);
+    Super::ExtendToolbar(iToolMenu);
 
-    iBuilder.BeginSection( NAME_None );
-
-    iBuilder.AddWidget(
-        CreateModifierSegmentControl()
+    FToolMenuSection& section = iToolMenu->AddSection(NAME_None);
+    section.AddEntry(
+        FToolMenuEntry::InitWidget(
+            NAME_None,
+            CreateModifierSegmentControl(),
+            FText()
+        )
     );
 
-    iBuilder.AddWidget(
-        SNew(SBox)
-        .Padding(10.f, 0.f, 10.f, 0.f)
-        [
-            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTrajectoryTool, ShowInbetweens ), FSinglePropertyParams())
-            .InnerPadding(10.f)
-        ]
+    section.AddEntry(
+        FToolMenuEntry::InitWidget(
+            NAME_None,
+            SNew(SBox)
+            .Padding(10.f, 0.f, 10.f, 0.f)
+            [
+                SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTrajectoryTool, ShowInbetweens ), FSinglePropertyParams())
+                .InnerPadding(10.f)
+            ],
+            FText()
+        )
     );
 
-    iBuilder.AddWidget(
-        SNew(SBox)
-        .Padding(10.f, 0.f, 10.f, 0.f)
-        [
-            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTrajectoryTool, PickingRadius ), FSinglePropertyParams())
-            .InnerPadding(10.f)
-            .ValueWidthOverride(100.f)
-        ]
+    section.AddEntry(
+        FToolMenuEntry::InitWidget(
+            NAME_None,
+            SNew(SBox)
+            .Padding(10.f, 0.f, 10.f, 0.f)
+            [
+                SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTrajectoryTool, PickingRadius ), FSinglePropertyParams())
+                .InnerPadding(10.f)
+                .ValueWidthOverride(100.f)
+            ],
+            FText()
+        )
     );
-
-    iBuilder.EndSection();
 }
 
 FText

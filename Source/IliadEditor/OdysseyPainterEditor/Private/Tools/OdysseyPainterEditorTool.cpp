@@ -204,9 +204,8 @@ UOdysseyPainterEditorTool::ExtendMenu( TSharedRef<FExtender> iExtender )
 }
 
 void
-UOdysseyPainterEditorTool::ExtendToolbar( FToolBarBuilder& iBuilder )
+UOdysseyPainterEditorTool::ExtendToolbar( UToolMenu* iToolMenu )
 {
-
 }
 
 TSharedPtr<FOdysseyHUDElement> UOdysseyPainterEditorTool::GetHUD()

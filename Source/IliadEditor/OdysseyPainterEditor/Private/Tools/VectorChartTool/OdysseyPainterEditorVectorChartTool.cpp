@@ -546,27 +546,32 @@ UOdysseyPainterEditorVectorChartTool::CreateModifierSegmentControl()
 }
 
 void
-UOdysseyPainterEditorVectorChartTool::ExtendToolbar( FToolBarBuilder& iBuilder )
+UOdysseyPainterEditorVectorChartTool::ExtendToolbar( UToolMenu* iToolMenu )
 {
-    Super::ExtendToolbar(iBuilder);
+    Super::ExtendToolbar(iToolMenu);
 
-    iBuilder.BeginSection( NAME_None );
-
-    iBuilder.AddWidget(
-        CreateModifierSegmentControl()
+    FToolMenuSection& section = iToolMenu->AddSection(NAME_None);
+    section.AddEntry(
+        FToolMenuEntry::InitWidget(
+            NAME_None,
+            CreateModifierSegmentControl(),
+            FText()
+        )
     );
 
-    iBuilder.AddWidget(
-        SNew(SBox)
-        .Padding(10.f, 0.f, 10.f, 0.f)
-        [
-            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorChartTool, ChartType ), FSinglePropertyParams())
-            .InnerPadding(10.f)
-            .ValueWidthOverride(100.f)
-        ]
+    section.AddEntry(
+        FToolMenuEntry::InitWidget(
+            NAME_None,
+            SNew(SBox)
+            .Padding(10.f, 0.f, 10.f, 0.f)
+            [
+                SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorChartTool, ChartType ), FSinglePropertyParams())
+                .InnerPadding(10.f)
+                .ValueWidthOverride(100.f)
+            ],
+            FText()
+        )
     );
-
-    iBuilder.EndSection();
 }
 
 FText

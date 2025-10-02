@@ -1249,25 +1249,26 @@ UOdysseyPainterEditorVectorTransformTool::IsModeInbetween() const
 }
 
 void
-UOdysseyPainterEditorVectorTransformTool::ExtendToolbar( FToolBarBuilder& iBuilder )
+UOdysseyPainterEditorVectorTransformTool::ExtendToolbar( UToolMenu* iToolMenu )
 {
-    Super::ExtendToolbar(iBuilder);
+    Super::ExtendToolbar(iToolMenu);
 
-    iBuilder.BeginSection( NAME_None );
+    FToolMenuSection& section = iToolMenu->AddSection(NAME_None);
 
     TAttribute<EVisibility> value = TAttribute<EVisibility>::Create(TAttribute<EVisibility>::FGetter::CreateUObject (this, &UOdysseyPainterEditorVectorTransformTool::IsModeInbetween) );
-
-    iBuilder.AddWidget(
-        SNew(SBox)
-        .Visibility_UObject(this, &UOdysseyPainterEditorVectorTransformTool::IsModeInbetween)
-        .Padding(10.f, 0.f, 10.f, 0.f)
-        [
-            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTransformTool, ShowInbetweens ), FSinglePropertyParams())
-            .InnerPadding(10.f)
-        ]
+    section.AddEntry(
+        FToolMenuEntry::InitWidget(
+            NAME_None,
+            SNew(SBox)
+            .Visibility_UObject(this, &UOdysseyPainterEditorVectorTransformTool::IsModeInbetween)
+            .Padding(10.f, 0.f, 10.f, 0.f)
+            [
+                SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTransformTool, ShowInbetweens ), FSinglePropertyParams())
+                .InnerPadding(10.f)
+            ],
+            FText()
+        )
     );
-
-    iBuilder.EndSection();
 }
 
 FText

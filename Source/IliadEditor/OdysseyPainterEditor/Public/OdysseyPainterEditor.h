@@ -136,8 +136,8 @@ protected:
 
 public:
     //Tools
-    void ExtendToolbarSaveAssetButton(FToolBarBuilder& iBuilder);
-    void ExtendToolbarToolParameters(FToolBarBuilder& iBuilder);
+    void ExtendToolbarSaveAssetButton(UToolMenu* iToolMenu);
+    void ExtendToolbarToolParameters(UToolMenu* iToolMenu);
 
     /**
      * @brief Returns the current main tool

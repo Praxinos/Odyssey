@@ -1146,72 +1146,45 @@ UOdysseyPainterEditorVectorPathEditTool::CreateModifierSegmentControl()
 }
 
 void
-UOdysseyPainterEditorVectorPathEditTool::ExtendToolbar( FToolBarBuilder& iBuilder )
+UOdysseyPainterEditorVectorPathEditTool::ExtendToolbar( UToolMenu* iToolMenu )
 {
-    //TOptional<eVectorPathEditEditionMode> val;
+    Super::ExtendToolbar(iToolMenu);
 
-    Super::ExtendToolbar(iBuilder);
-
-    iBuilder.BeginSection( NAME_None );
-
-    iBuilder.AddWidget(
-        CreateModifierSegmentControl()
+    FToolMenuSection& section = iToolMenu->AddSection(NAME_None);
+    section.AddEntry(
+        FToolMenuEntry::InitWidget(
+            NAME_None,
+            CreateModifierSegmentControl(),
+            FText()
+        )
     );
 
-    iBuilder.AddWidget(
-        SNew(SBox)
-        .Padding(10.f, 0.f, 10.f, 0.f)
-        [
-            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorPathEditTool, PickingRadius ), FSinglePropertyParams())
-            .InnerPadding(10.f)
-            .ValueWidthOverride(100.f)
-        ]
+    section.AddEntry(
+        FToolMenuEntry::InitWidget(
+            NAME_None,
+            SNew(SBox)
+            .Padding(10.f, 0.f, 10.f, 0.f)
+            [
+                SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorPathEditTool, PickingRadius ), FSinglePropertyParams())
+                .InnerPadding(10.f)
+                .ValueWidthOverride(100.f)
+            ],
+            FText()
+        )
     );
 
-/*
-    iBuilder.AddWidget(
-        SNew(SBox)
-        .Padding(10.f, 0.f, 10.f, 0.f)
-        [
-            SNew(SHorizontalBox)
-            + SHorizontalBox::Slot()
-            .MinWidth( 16 )
+    section.AddEntry(
+        FToolMenuEntry::InitWidget(
+            NAME_None,
+            SNew(SBox)
+            .Padding(10.f, 0.f, 10.f, 0.f)
             [
-                SNew(SImage)
-                .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathEdit16") )
-            ]
-            + SHorizontalBox::Slot()
-            .MinWidth( 16 )
-            [
-                SNew(SImage)
-                .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathEdit16") )
-            ]
-            + SHorizontalBox::Slot()
-            .MinWidth( 16 )
-            [
-                SNew(SImage)
-                .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathEdit16") )
-            ]
-            + SHorizontalBox::Slot()
-            .MinWidth( 16 )
-            [
-                SNew(SImage)
-                .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathEdit16") )
-            ]
-        ]
+                SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorPathEditTool, WidenAllAlong ), FSinglePropertyParams())
+                .InnerPadding(10.f)
+            ],
+            FText()
+        )
     );
-*/
-
-    iBuilder.AddWidget(
-        SNew(SBox)
-        .Padding(10.f, 0.f, 10.f, 0.f)
-        [
-            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorPathEditTool, WidenAllAlong ), FSinglePropertyParams())
-            .InnerPadding(10.f)
-        ]
-    );
-
-    iBuilder.EndSection();
 }
 
 void

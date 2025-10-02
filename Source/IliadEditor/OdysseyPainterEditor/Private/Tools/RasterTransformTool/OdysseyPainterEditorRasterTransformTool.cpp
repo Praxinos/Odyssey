@@ -60,44 +60,47 @@ UOdysseyPainterEditorRasterTransformTool::IsActivable() const
 }
 
 void
-UOdysseyPainterEditorRasterTransformTool::ExtendToolbar( FToolBarBuilder& iBuilder )
+UOdysseyPainterEditorRasterTransformTool::ExtendToolbar( UToolMenu* iToolMenu )
 {
-    Super::ExtendToolbar(iBuilder);
+    Super::ExtendToolbar(iToolMenu);
 
-    iBuilder.BeginSection( NAME_None );
+    FToolMenuSection& section = iToolMenu->AddSection(NAME_None);
 
-    FButtonArgs flipHorizontalButtonArgs;
-    flipHorizontalButtonArgs.ToolTipOverride = LOCTEXT("raster-transform-tool.top-tab.flip_horizontal", "Flip the selection horizontally");
-    flipHorizontalButtonArgs.ExtensionHook = "FlipHorizontal";
-    flipHorizontalButtonArgs.IconOverride = FSlateIcon("OdysseyStyle", "PainterEditor.FlipHorizontal32");
-    flipHorizontalButtonArgs.UserInterfaceActionType = EUserInterfaceActionType::Button;
-    flipHorizontalButtonArgs.Action = FUIAction(
-        FExecuteAction::CreateLambda(
-            [this]()
-            {
-                FlipHorizontal();
-            }
+    section.AddEntry(
+        FToolMenuEntry::InitToolBarButton(
+            "FlipHorizontal",
+            FUIAction(
+                FExecuteAction::CreateLambda(
+                    [this]()
+                    {
+                        FlipHorizontal();
+                    }
+                )
+            ),
+            FText(),
+            LOCTEXT("raster-transform-tool.top-tab.flip_horizontal", "Flip the selection horizontally"),
+            FSlateIcon("OdysseyStyle", "PainterEditor.FlipHorizontal32"),
+            EUserInterfaceActionType::Button
         )
     );
 
-    FButtonArgs flipVerticalButtonArgs;
-    flipVerticalButtonArgs.ToolTipOverride = LOCTEXT("raster-transform-tool.top-tab.flip_vertical", "Flip the selection vertically");
-    flipVerticalButtonArgs.ExtensionHook = "FlipVertical";
-    flipVerticalButtonArgs.IconOverride = FSlateIcon("OdysseyStyle", "PainterEditor.FlipVertical32");
-    flipVerticalButtonArgs.UserInterfaceActionType = EUserInterfaceActionType::Button;
-    flipVerticalButtonArgs.Action = FUIAction(
-        FExecuteAction::CreateLambda(
-            [this]()
-            {
-                FlipVertical();
-            }
+    section.AddEntry(
+        FToolMenuEntry::InitToolBarButton(
+            "FlipVertical",
+            FUIAction(
+                FExecuteAction::CreateLambda(
+                    [this]()
+                    {
+                        FlipVertical();
+                    }
+                )
+            ),
+            FText(),
+            LOCTEXT("raster-transform-tool.top-tab.flip_vertical", "Flip the selection vertically"),
+            FSlateIcon("OdysseyStyle", "PainterEditor.FlipVertical32"),
+            EUserInterfaceActionType::Button
         )
     );
-
-    iBuilder.AddToolBarButton(flipHorizontalButtonArgs);
-    iBuilder.AddToolBarButton(flipVerticalButtonArgs);
-
-    iBuilder.EndSection();
 }
 
 bool UOdysseyPainterEditorRasterTransformTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)

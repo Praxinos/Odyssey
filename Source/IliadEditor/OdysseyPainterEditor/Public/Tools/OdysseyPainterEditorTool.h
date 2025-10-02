@@ -80,7 +80,7 @@ public:
     // Interface
     virtual void BindShortcuts(TSharedPtr<FUICommandList> iCommandList);
     virtual void ExtendMenu( TSharedRef<FExtender> iExtender );
-    virtual void ExtendToolbar( FToolBarBuilder& iBuilder );
+    virtual void ExtendToolbar( UToolMenu* iToolMenu );
     virtual TSharedPtr<FOdysseyHUDElement> GetHUD();
     virtual EMouseCursor::Type GetMouseCursor() const;
     virtual bool IsHUDVisible() const;
