@@ -58,7 +58,9 @@ public class OdysseyLayerStack : ModuleRules
                 "RenderCore",
                 "Renderer",
                 "RHI",
-
+                "LevelEditor",
+                "UnrealEd",
+                "TypedElementRuntime",
                 "OdysseyMedia",
                 "OdysseyRendering",
             }
