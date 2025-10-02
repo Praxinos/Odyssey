@@ -14,17 +14,12 @@
 
 UOdysseyLayerStack::~UOdysseyLayerStack()
 {
-#if WITH_EDITOR
-    if ( UObjectInitialized() )
-    {
-        mLayerSelection->RemoveFromRoot();
-    }
-#endif
 }
 
 UOdysseyLayerStack::UOdysseyLayerStack()
 #if WITH_EDITOR
     : mCellSelection(MakeShared<FOdysseyLayerCellSelection>(this))
+    , mLayerSelection( nullptr )
 #endif
 {
 }
