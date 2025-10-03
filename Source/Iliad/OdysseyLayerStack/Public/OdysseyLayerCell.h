@@ -104,9 +104,6 @@ public:
     // UObject overrides
     virtual void OldSerialize(FArchive& Ar); //DEPRECATED: Keep that for compatibility with early versions of Odyssey
 #if WITH_EDITOR
-    //Properties modifications
-    void OutOfPegsChanged(bool iIsInteractive);
-
     virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
 #endif
 
@@ -116,6 +113,12 @@ public:
     FOnOutOfPegsChanged& OnOutOfPegsChanged();
     void SetOutOfPegsInteractive(FOdysseyLayerCellOutOfPegs Value);
     void SetExposureInteractive(int Value);
+#endif
+
+private:
+    void ExposureChanged(bool iIsInteractive);
+#if WITH_EDITOR
+    void OutOfPegsChanged(bool iIsInteractive);
 #endif
 
 public: //Public needed for the shortcuts

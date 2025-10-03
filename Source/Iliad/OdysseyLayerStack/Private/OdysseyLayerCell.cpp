@@ -81,13 +81,16 @@ void
 UOdysseyLayerCell::SetExposure(int Value)
 {
     Modify();
-
     Exposure = Value;
+    ExposureChanged(false);
+}
 
+void
+UOdysseyLayerCell::ExposureChanged(bool iIsInteractive)
+{
     if (GetLayer())
         GetLayer()->InvalidateCellsFrameRanges();
-
-    RenderingCompositionChanged();
+    RenderingCompositionChanged(iIsInteractive);
 }
 
 UTexture2D*
@@ -118,13 +121,8 @@ void
 UOdysseyLayerCell::SetExposureInteractive(int Value)
 {
     Modify();
-
     Exposure = Value;
-
-    if (GetLayer())
-        GetLayer()->InvalidateCellsFrameRanges();
-
-    RenderingCompositionChanged(true);
+    ExposureChanged(true);
 }
 
 void
@@ -145,12 +143,13 @@ UOdysseyLayerCell::PostTransacted(const FTransactionObjectEvent& iTransactionEve
 
     const TArray<FName>& changedPropertyNames = iTransactionEvent.GetChangedProperties();
     if (changedPropertyNames.Contains(GET_MEMBER_NAME_CHECKED(UOdysseyLayerCell, Exposure)))
-        RenderingCompositionChanged();
+    {
+        ExposureChanged(false);
+    }
 
     if (changedPropertyNames.Contains(GET_MEMBER_NAME_CHECKED(UOdysseyLayerCell, OutOfPegs)))
     {
-        mOnOutOfPegsChanged.Broadcast(false);
-        RenderingChanged(false);
+        OutOfPegsChanged(false);
     }
 }
 
@@ -194,16 +193,21 @@ void
 UOdysseyLayerCell::SetOutOfPegs(FOdysseyLayerCellOutOfPegs Value)
 {
     OutOfPegs = Value;
-    mOnOutOfPegsChanged.Broadcast(false);
-    RenderingChanged(false);
+    OutOfPegsChanged(false);
 }
 
 void
 UOdysseyLayerCell::SetOutOfPegsInteractive(FOdysseyLayerCellOutOfPegs Value)
 {
     OutOfPegs = Value;
-    mOnOutOfPegsChanged.Broadcast(true);
-    RenderingChanged(true);
+    OutOfPegsChanged(true);
+}
+
+void
+UOdysseyLayerCell::OutOfPegsChanged(bool iIsInteractive)
+{
+    mOnOutOfPegsChanged.Broadcast(iIsInteractive);
+    RenderingChanged(iIsInteractive);
 }
 
 FMatrix
