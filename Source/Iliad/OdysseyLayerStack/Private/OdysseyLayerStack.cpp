@@ -688,7 +688,7 @@ UOdysseyLayerStack::GetRenderingComposition(uint64 iRenderType, int iFrameIndex)
 }
 
 UTextureRenderTarget2D*
-UOdysseyLayerStack::CreateRenderingRenderTarget()
+UOdysseyLayerStack::CreateRenderingRenderTarget() const
 {
     checkf(false, TEXT("Must be implemented by child class"));
     return nullptr;

@@ -75,7 +75,7 @@ UOdysseyAnimationLayerStack::OnRenderingChanged(const FOdysseyRenderingChangedEv
 }
 
 UTextureRenderTarget2D*
-UOdysseyAnimationLayerStack::CreateRenderingRenderTarget()
+UOdysseyAnimationLayerStack::CreateRenderingRenderTarget() const
 {
     check( GetAnimation() );
 

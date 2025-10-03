@@ -184,10 +184,8 @@ UOdysseyAnimationLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
     TArray<UOdysseyLayerCell*> cells = AddCells(UOdysseyAnimationCellImageRaster::StaticClass(), 0, cellRanges.Num());
 
     FIntRect rect = GetDefaultRenderRect();
-    TStrongObjectPtr<UTextureRenderTarget2D> layerRenderTarget(NewObject<UTextureRenderTarget2D>());
-    TStrongObjectPtr<UTextureRenderTarget2D> destinationRenderTarget(NewObject<UTextureRenderTarget2D>());
-    layerRenderTarget->InitAutoFormat(rect.Width(), rect.Height());
-    destinationRenderTarget->InitAutoFormat(rect.Width(), rect.Height());
+    TStrongObjectPtr<UTextureRenderTarget2D> layerRenderTarget(CreateRenderingRenderTarget());
+    TStrongObjectPtr<UTextureRenderTarget2D> destinationRenderTarget(CreateRenderingRenderTarget());
 
     for (int i = 0; i < cellRanges.Num(); i++)
     {

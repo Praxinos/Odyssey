@@ -250,7 +250,7 @@ public:
 
 public:
     virtual TArray<FGuid> GetRenderingComposition(uint64 iRenderType, int iFrameIndex) const override;
-    virtual UTextureRenderTarget2D* CreateRenderingRenderTarget() override;
+    virtual UTextureRenderTarget2D* CreateRenderingRenderTarget() const override;
 #if WITH_EDITOR
     virtual UTexture2D* CreateExportTexture(UObject* Outer, FName Name, EObjectFlags Flags = RF_NoFlags) override;
 #endif

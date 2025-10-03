@@ -488,7 +488,7 @@ UOdysseyTextureLayerStack::UpdateRenderTargetFormat()
 }
 
 UTextureRenderTarget2D*
-UOdysseyTextureLayerStack::CreateRenderingRenderTarget()
+UOdysseyTextureLayerStack::CreateRenderingRenderTarget() const
 {
     UTexture2D* texture = GetTexture();
     if ( !texture )

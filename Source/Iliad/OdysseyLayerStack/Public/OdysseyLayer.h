@@ -302,7 +302,7 @@ public:
     virtual FIntRect GetDefaultRenderRect() const override;
     virtual FInt32Range GetFrameRange() const override;
 
-    virtual UTextureRenderTarget2D* CreateRenderingRenderTarget() override;
+    virtual UTextureRenderTarget2D* CreateRenderingRenderTarget() const override;
 #if WITH_EDITOR
     virtual UTexture2D* CreateExportTexture(UObject* Outer, FName Name, EObjectFlags Flags = RF_NoFlags) override;
 #endif

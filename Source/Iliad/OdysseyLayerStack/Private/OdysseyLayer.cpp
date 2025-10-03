@@ -1212,7 +1212,7 @@ UOdysseyLayer::BuildRenderPipelineInternal(
 }
 
 UTextureRenderTarget2D*
-UOdysseyLayer::CreateRenderingRenderTarget()
+UOdysseyLayer::CreateRenderingRenderTarget() const
 {
     return GetLayerStack()->CreateRenderingRenderTarget();
 }

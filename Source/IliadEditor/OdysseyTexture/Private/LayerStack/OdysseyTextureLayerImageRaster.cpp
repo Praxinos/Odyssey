@@ -199,10 +199,8 @@ void
 UOdysseyTextureLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
 {
     FIntRect rect = GetDefaultRenderRect();
-    TStrongObjectPtr<UTextureRenderTarget2D> layerRenderTarget(NewObject<UTextureRenderTarget2D>());
-    TStrongObjectPtr<UTextureRenderTarget2D> destinationRenderTarget(NewObject<UTextureRenderTarget2D>());
-    layerRenderTarget->InitAutoFormat(rect.Width(), rect.Height());
-    destinationRenderTarget->InitAutoFormat(rect.Width(), rect.Height());
+    TStrongObjectPtr<UTextureRenderTarget2D> layerRenderTarget(CreateRenderingRenderTarget());
+    TStrongObjectPtr<UTextureRenderTarget2D> destinationRenderTarget(CreateRenderingRenderTarget());
 
     //Clear the destination rendertarget before blending on it
     ENQUEUE_RENDER_COMMAND(IOdysseyTextureRenderingAbility_RenderRectAtRect)(

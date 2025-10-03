@@ -217,7 +217,7 @@ UOdysseyAnimation::BuildRenderPipelineInternal(
 }
 
 UTextureRenderTarget2D*
-UOdysseyAnimation::CreateRenderingRenderTarget()
+UOdysseyAnimation::CreateRenderingRenderTarget() const
 {
     UTextureRenderTarget2D* renderTarget = NewObject<UTextureRenderTarget2D>();
     ETextureRenderTargetFormat renderTargetFormat = RTF_RGBA8;

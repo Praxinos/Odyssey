@@ -53,11 +53,13 @@ void FOdysseyBlendShader::BlendRect(
 
     if ( iBackgroundTexture == iDestinationTexture )
     {
+        ETextureCreateFlags textureFlags = ETextureCreateFlags::ShaderResource | ETextureCreateFlags::RenderTargetable;
+        textureFlags |= iBackgroundTexture->Desc.Flags & ETextureCreateFlags::SRGB;
         FRDGTextureDesc desc = FRDGTextureDesc::Create2D(
             destinationTexture->Desc.Extent,
             destinationTexture->Desc.Format,
             FClearValueBinding::Transparent,
-            ETextureCreateFlags::ShaderResource | ETextureCreateFlags::RenderTargetable
+            textureFlags
         );
         backgroundTexture = iGraphBuilder.CreateTexture(desc, TEXT("FOdysseyBlendShader::BackgroundTexture"));
         AddClearRenderTargetPass(iGraphBuilder, backgroundTexture, FLinearColor::Transparent, iDstRect);

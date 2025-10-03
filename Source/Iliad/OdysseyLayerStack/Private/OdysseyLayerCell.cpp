@@ -290,7 +290,7 @@ UOdysseyLayerCell::BuildRenderPipelineInternal(
 }
 
 UTextureRenderTarget2D*
-UOdysseyLayerCell::CreateRenderingRenderTarget()
+UOdysseyLayerCell::CreateRenderingRenderTarget() const
 {
     return GetLayer()->CreateRenderingRenderTarget();
 }
