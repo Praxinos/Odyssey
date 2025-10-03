@@ -21,7 +21,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyToolCollection : public UObject
 public:
     bool IsCollectionTransient() const;
 
-    void AddTool(UOdysseyPainterEditorTool* iTool, int32 iIndex = INDEX_NONE);
+    UOdysseyPainterEditorTool* AddTool(UOdysseyPainterEditorTool* iTool, int32 iIndex = INDEX_NONE);
     void RemoveToolAtIndex( int iIndex );
     void RemoveTool(UOdysseyPainterEditorTool* iTool);
     void MoveTool(int32 iFromIndex, int32 iToIndex);

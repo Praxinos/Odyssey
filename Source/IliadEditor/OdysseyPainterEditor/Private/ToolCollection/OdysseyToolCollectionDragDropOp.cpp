@@ -3,15 +3,17 @@
 
 #include "OdysseyToolCollectionDragDropOp.h"
 
+#include "OdysseyPainterEditor.h"
 #include "Tools/OdysseyPainterEditorTool.h"
 #include "ToolCollection/OdysseyToolCollection.h"
 
 TSharedRef<FOdysseyToolCollectionDragDropOp>
-FOdysseyToolCollectionDragDropOp::Create(UOdysseyPainterEditorTool* iTool, UOdysseyToolCollection* iSource)
+FOdysseyToolCollectionDragDropOp::Create(UOdysseyPainterEditorTool* iTool, UOdysseyToolCollection* iSource, FOdysseyPainterEditor* iEditor)
 {
     TSharedRef<FOdysseyToolCollectionDragDropOp> op = MakeShareable(new FOdysseyToolCollectionDragDropOp);
     op->mTool = iTool;
     op->mSourceCollection = iSource;
+    op->mEditor = iEditor;
     op->Construct();
     return op;
 }
@@ -48,6 +50,11 @@ UOdysseyPainterEditorTool* FOdysseyToolCollectionDragDropOp::GetTool() const
 TWeakObjectPtr<UOdysseyToolCollection> FOdysseyToolCollectionDragDropOp::GetSourceCollection() const
 {
     return mSourceCollection;
+}
+
+FOdysseyPainterEditor* FOdysseyToolCollectionDragDropOp::GetEditor() const
+{
+    return mEditor;
 }
 
 FText

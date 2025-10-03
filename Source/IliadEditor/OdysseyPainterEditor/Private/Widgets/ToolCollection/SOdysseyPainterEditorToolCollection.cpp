@@ -74,7 +74,13 @@ SOdysseyPainterEditorToolCollection::GetToolIcon(UOdysseyPainterEditorTool* iToo
 FReply
 SOdysseyPainterEditorToolCollection::OnAddToolClicked()
 {
-    mToolCollection->AddTool( mEditor->GetCurrentTool() );
+    UOdysseyPainterEditorTool* tool = mToolCollection->AddTool( mEditor->GetCurrentTool() );
+    if (tool && mEditor)
+    {
+        tool->SetEditor(mEditor);
+        mEditor->ActivateMainTool(tool);
+    }
+
     HandleToolsChanged();
 
     return FReply::Handled();
@@ -90,7 +96,6 @@ SOdysseyPainterEditorToolCollection::HandleToolsChanged()
 
 void SOdysseyPainterEditorToolCollection::RefreshToolsGUI()
 {
-    UE_LOG(LogTemp, Display, TEXT("REFRESH"));
     if (!mToolWrapBox.IsValid())
         return;
 

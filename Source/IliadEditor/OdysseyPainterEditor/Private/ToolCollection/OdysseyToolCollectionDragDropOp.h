@@ -7,6 +7,7 @@
 
 class UOdysseyPainterEditorTool;
 class UOdysseyToolCollection;
+class FOdysseyPainterEditor;
 
 class FOdysseyToolCollectionDragDropOp : public FDragDropOperation
 {
@@ -14,12 +15,13 @@ public:
     DRAG_DROP_OPERATOR_TYPE(FOdysseyToolCollectionDragDropOp, FDragDropOperation)
 
 public:
-    static TSharedRef<FOdysseyToolCollectionDragDropOp> Create(UOdysseyPainterEditorTool* iTool, UOdysseyToolCollection* iSource);
+    static TSharedRef<FOdysseyToolCollectionDragDropOp> Create(UOdysseyPainterEditorTool* iTool, UOdysseyToolCollection* iSource, FOdysseyPainterEditor* iEditor);
     virtual TSharedPtr<SWidget> GetDefaultDecorator() const override;
 
 public:
     UOdysseyPainterEditorTool* GetTool() const;
     TWeakObjectPtr<UOdysseyToolCollection> GetSourceCollection() const;
+    FOdysseyPainterEditor* GetEditor() const;
 
 private:
     FText GetText() const;
@@ -28,4 +30,5 @@ private:
 private:
     UOdysseyPainterEditorTool* mTool;
     TWeakObjectPtr<UOdysseyToolCollection> mSourceCollection;
+    FOdysseyPainterEditor* mEditor;
 };

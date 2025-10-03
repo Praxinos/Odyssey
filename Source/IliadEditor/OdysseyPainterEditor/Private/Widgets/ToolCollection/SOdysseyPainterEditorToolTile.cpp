@@ -86,7 +86,7 @@ FReply SOdysseyPainterEditorToolTile::OnDragDetected(const FGeometry& MyGeometry
 {
     if (MouseEvent.IsMouseButtonDown(EKeys::LeftMouseButton))
     {
-        return FReply::Handled().BeginDragDrop(FOdysseyToolCollectionDragDropOp::Create(mTool, mCollection));
+        return FReply::Handled().BeginDragDrop(FOdysseyToolCollectionDragDropOp::Create(mTool, mCollection, mEditor));
     }
     return FReply::Unhandled();
 }
@@ -100,19 +100,31 @@ FReply SOdysseyPainterEditorToolTile::OnDrop(const FGeometry& MyGeometry, const 
 
     UOdysseyPainterEditorTool* sourceTool = dragOp->GetTool();
     UOdysseyToolCollection* sourceCollection = dragOp->GetSourceCollection().Get();
+    FOdysseyPainterEditor* sourceEditor = dragOp->GetEditor();
 
     if (sourceCollection && sourceCollection != mCollection)
     {
         sourceCollection->RemoveTool(sourceTool);
         int32 targetIndex = mCollection->GetIndexOfTool(mTool);
-        mCollection->AddTool(sourceTool, targetIndex);
+        UOdysseyPainterEditorTool* tool = mCollection->AddTool(sourceTool, targetIndex);
+
+        if (tool && mEditor)
+        {
+            tool->SetEditor(mEditor);
+            mEditor->ActivateMainTool(tool);
+        }
+
+        if (sourceEditor != mEditor)
+        {
+            mEditor->InactivateMainTool();
+        }
     }
     else
     {
         int32 fromIndex = mCollection->GetIndexOfTool(sourceTool);
         int32 targetIndex = mCollection->GetIndexOfTool(mTool);
 
-        if( mDropSide == EDropIndicatorSide::Right )
+        if ( mDropSide == EDropIndicatorSide::Right )
             targetIndex++;
 
         mCollection->MoveTool(fromIndex, targetIndex);
@@ -236,6 +248,8 @@ bool SOdysseyPainterEditorToolTile::CanDeleteTool() const
 void SOdysseyPainterEditorToolTile::OnDeleteTool()
 {
     mCollection->RemoveTool(mTool);
+    //mEditor->ActivateMainTool(mEditor->FindDefaultToolForCurrentLayer());
+    mEditor->InactivateMainTool();
 }
 
 bool SOdysseyPainterEditorToolTile::CanDuplicateTool() const
@@ -245,7 +259,9 @@ bool SOdysseyPainterEditorToolTile::CanDuplicateTool() const
 
 void SOdysseyPainterEditorToolTile::OnDuplicateTool()
 {
-    mCollection->AddTool(mTool);
+    UOdysseyPainterEditorTool* tool = mCollection->AddTool(mTool);
+    tool->SetEditor(mEditor);
+    mEditor->ActivateMainTool(tool);
 }
 
 

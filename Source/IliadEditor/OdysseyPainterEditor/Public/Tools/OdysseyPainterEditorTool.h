@@ -19,7 +19,7 @@ class FOdysseyPainterEditor;
 class FOdysseyHUDElement;
 class FOdysseyPainterEditorToolInputProcessor;
 
-UCLASS()
+UCLASS(DefaultToInstanced)
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorTool : public UObject
 {
     GENERATED_BODY()

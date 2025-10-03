@@ -1043,7 +1043,7 @@ FOdysseyPainterEditor::GetCurrentTool() const
 
 UOdysseyToolCollection* FOdysseyPainterEditor::GetRecentTools() const
 {
-    return mRecentTools;
+    return mRecentTools.Get();
 }
 
 void FOdysseyPainterEditor::AddToolCollection(UOdysseyToolCollection* iToolCollection)
@@ -3304,6 +3304,12 @@ FOdysseyPainterEditor::AddReferencedObjects(FReferenceCollector& Collector)
     }
 
     Collector.AddReferencedObject(mCurrentPaletteEntryColor);
+
+    if (mRecentTools.IsValid())
+    {
+        UObject* CollectionObject = mRecentTools.Get();
+        Collector.AddReferencedObject(CollectionObject);
+    }
 }
 
 const TArray<UOdysseyPaletteSet*>
