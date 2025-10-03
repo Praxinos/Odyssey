@@ -250,9 +250,6 @@ FFrameNumber
 UOdysseyAnimationTimelineSection::ConvertFrameFromTimelineToSequence( FFrameNumber iFrameInTimeline )
 {
     UMovieSceneSequence* sequence = GetTypedOuter<UMovieSceneSequence>();
-    if (!sequence)
-        return FFrameNumber(0);
-
     // Default value if animation doesn't exist
     // Otherwise animation validity must be checked everywhere outside this function
     FFrameRate animation_framerate( 24000, 1000 );
