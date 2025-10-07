@@ -6,7 +6,7 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
-#include "Windows/WINTAB.H"
+#include "WINTAB.H"
 
 /**
  * Wrapper class to load and initialize our function pointers to wintab dll ones.

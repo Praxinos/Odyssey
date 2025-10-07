@@ -759,7 +759,7 @@ public:
     virtual EVisibility GetSelectedActorsCurrentLevelTextVisibility() const override { return EVisibility::Collapsed; }
     virtual EVisibility GetViewportControlsVisibility() const override { return EVisibility::Collapsed; }
 
-    virtual TSharedPtr<SWidget> MakeViewportToolbar() { return nullptr; }
+    //virtual TSharedPtr<SWidget> MakeViewportToolbar() { return nullptr; }
     virtual TSharedPtr<SWidget> BuildViewportToolbar() override
     {
         //Build our own toolbar

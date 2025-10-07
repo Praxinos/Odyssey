@@ -214,7 +214,7 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
                     IAllocatedVirtualTexture* AllocatedVT = VTResource->AcquireAllocatedVT();
 
                     IRendererModule& RenderModule = GetRendererModule();
-                    RenderModule.RequestVirtualTextureTilesForRegion(AllocatedVT, ScreenSpaceSize, ViewportPositon, ViewportSize, UV0, UV1, 0);
+                    RenderModule.RequestVirtualTextureTiles(AllocatedVT, ScreenSpaceSize, ViewportPositon, ViewportSize, UV0, UV1, 0);
                     RenderModule.LoadPendingVirtualTextureTiles(RHICmdList, InFeatureLevel);
                 });
         }
