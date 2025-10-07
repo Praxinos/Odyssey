@@ -21,6 +21,12 @@ FOdysseyAnimationCutChannel::FOdysseyAnimationCutChannel( UOdysseyAnimationTimel
 {
 }
 
+void
+FOdysseyAnimationCutChannel::SetParentSection( UOdysseyAnimationTimelineSection* iTimelineSection )
+{
+    TimelineSection = iTimelineSection;
+}
+
 const FOdysseyAnimationCutValue* FOdysseyAnimationCutChannel::Evaluate(FFrameTime InTime) const
 {
     if (Times.Num())

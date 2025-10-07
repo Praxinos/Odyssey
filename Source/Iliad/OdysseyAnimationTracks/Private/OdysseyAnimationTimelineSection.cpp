@@ -27,7 +27,66 @@ UOdysseyAnimationTimelineSection::UOdysseyAnimationTimelineSection(const FObject
 
 //---
 
-void UOdysseyAnimationTimelineSection::PostLoad()
+// During a copy/paste of a binding (actor) track:
+//
+// [during ue splash screen]
+//
+// Default object (section)
+// - Ctor
+// - PostInitProperties
+//
+//
+// [loading a board/shot sequence]
+//
+// Original object with its hierarchy (binding track + binding section)
+// - -------------------- sequence = SS_xxxx (GetOuter<MovieSceneSequence>())
+// - Ctor
+// - PostInitProperties
+// - -------------------- Animation = A_xxxx
+// - PostLoad()
+//
+//
+// [CTRL+C]
+//
+// Copy Object - /Engine/Transient
+// - Ctor
+// - PostInitProperties
+// - -------------------- Animation = A_xxxx
+// - PostDuplicate()
+// - PostLoad()
+//
+//
+// [CTRL+V]
+//
+// Paste Object - /Engine/Sequencer/Editor/Transient
+// - Ctor
+// - PostInitProperties
+// - PostEditImport
+// - -------------------- Animation = A_xxxx
+// - PostEditImport
+//
+//
+// [Ask to duplicate the actor if needed]
+//
+//
+// New Object - /Engine/Sequencer/Editor/Transient
+// - Ctor
+// - PostInitProperties
+// - PostEditImport
+// - -------------------- Animation = A_xxxx
+// - PostEditImport
+// - -------------------- sequence = SS_xxxx (GetOuter<MovieSceneSequence>()) (no more transient)
+// - OnBindingIDsUpdated
+//
+
+void UOdysseyAnimationTimelineSection::PostInitProperties() //override
+{
+    Super::PostInitProperties();
+
+    AnimationCutChannel.SetParentSection( this );
+}
+
+void UOdysseyAnimationTimelineSection::PostLoad() //override
 {
     Super::PostLoad();
 
@@ -36,6 +95,49 @@ void UOdysseyAnimationTimelineSection::PostLoad()
         Animation->OnRenderingChangedDelegate().AddUObject( this, &UOdysseyAnimationTimelineSection::OnAnimationChanged );
     }
 }
+
+void UOdysseyAnimationTimelineSection::PostEditImport() //override
+{
+    Super::PostEditImport();
+}
+
+void UOdysseyAnimationTimelineSection::PostDuplicate( EDuplicateMode::Type DuplicateMode ) //override
+{
+    Super::Super::PostDuplicate( DuplicateMode );
+}
+
+void UOdysseyAnimationTimelineSection::OnBindingIDsUpdated( const TMap<UE::MovieScene::FFixedObjectBindingID, UE::MovieScene::FFixedObjectBindingID>& OldFixedToNewFixedMap, FMovieSceneSequenceID LocalSequenceID, TSharedRef<UE::MovieScene::FSharedPlaybackState> SharedPlaybackState ) //override
+{
+    Super::OnBindingIDsUpdated( OldFixedToNewFixedMap, LocalSequenceID, SharedPlaybackState );
+
+    if( ensure(Animation) )
+        Animation->OnRenderingChangedDelegate().AddUObject( this, &UOdysseyAnimationTimelineSection::OnAnimationChanged );
+}
+
+#if WITH_EDITOR
+
+void UOdysseyAnimationTimelineSection::PreEditChange( FProperty* PropertyAboutToChange )
+{
+    if( PropertyAboutToChange && PropertyAboutToChange->GetFName() == GET_MEMBER_NAME_CHECKED( UOdysseyAnimationTimelineSection, Animation ) )
+    {
+        SetAnimation( nullptr );
+    }
+
+    Super::PreEditChange( PropertyAboutToChange );
+}
+
+void UOdysseyAnimationTimelineSection::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent )
+{
+    Super::PostEditChangeProperty( PropertyChangedEvent );
+
+    const FName PropertyName = PropertyChangedEvent.GetPropertyName();
+    if( PropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyAnimationTimelineSection, Animation ) )
+    {
+        SetAnimation( Animation );
+    }
+}
+
+#endif
 
 UOdysseyAnimationTimelineSection::FOnAnimationCutChannelChanged&
 UOdysseyAnimationTimelineSection::OnAnimationCutChannelChanged()
@@ -107,10 +209,14 @@ UOdysseyAnimationTimelineSection::GetStartFrameOffset() const
 void
 UOdysseyAnimationTimelineSection::SetAnimation(UOdysseyAnimation* iAnimation)
 {
-    Animation->OnRenderingChangedDelegate().RemoveAll( this );
+    if( Animation )
+        Animation->OnRenderingChangedDelegate().RemoveAll( this );
 
     Animation = iAnimation;
-    Animation->OnRenderingChangedDelegate().AddUObject( this, &UOdysseyAnimationTimelineSection::OnAnimationChanged );
+
+    if( Animation )
+        Animation->OnRenderingChangedDelegate().AddUObject( this, &UOdysseyAnimationTimelineSection::OnAnimationChanged );
+
     RebuildAnimationCutChannel();
 }
 
@@ -151,6 +257,10 @@ void
 UOdysseyAnimationTimelineSection::RebuildAnimationCutChannel()
 {
     AnimationCutChannel.Reset();
+
+    UMovieSceneSequence* sequence = GetTypedOuter<UMovieSceneSequence>();
+    if( !sequence )
+        return;
 
     UOdysseyLayerStack* layer_stack = GetAnimation() ? GetAnimation()->GetLayerStack() : nullptr;
     TArray<UOdysseyLayer*> layers = layer_stack ? layer_stack->GetLayers() : TArray<UOdysseyLayer*>();

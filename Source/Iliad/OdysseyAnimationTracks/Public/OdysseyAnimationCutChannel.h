@@ -60,6 +60,8 @@ struct FOdysseyAnimationCutChannel : public FMovieSceneChannel
     FOdysseyAnimationCutChannel();
     FOdysseyAnimationCutChannel( UOdysseyAnimationTimelineSection* iTimelineSection );
 
+    void SetParentSection( UOdysseyAnimationTimelineSection* iTimelineSection );
+
     /**
      * Access a mutable interface for this channel's data
      *
