@@ -896,10 +896,6 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorGr
                                                                                               , iPointInTexture.y ) );
     double difx = localCoords.x - oldLocalCoords.x;
     double dify = localCoords.y - oldLocalCoords.y;
-    double oldX1 = selectionBox.rect.x
-         , oldY1 = selectionBox.rect.y
-         , oldX2 = selectionBox.rect.x + selectionBox.rect.w
-         , oldY2 = selectionBox.rect.y + selectionBox.rect.h;
     double selectionBoxSurface = selectionBox.rect.w * selectionBox.rect.h;
 
     if( selectionBoxSurface )
@@ -910,19 +906,17 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorGr
 
         if( Uniform )
         {
-            //double ratio = (fabs(difx) > fabs(dify) ) ? 1.0f + ( difx / selectionBox.rect.w )
-            //                                          : 1.0f + ( dify / selectionBox.rect.h );
             double ratio = ( localCoords ).Distance() / ( oldLocalCoords ).Distance();
+            double sign = oldLocalCoords.DotProduct( localCoords ) > 0.0f ? 1.0f : -1.0f;
 
-            scalingMatrix.scale( ratio, ratio );
+            scalingMatrix.scale( ratio * sign, ratio * sign );
         }
         else
         {
             double xratio = ( localCoords.x ) / ( oldLocalCoords.x );
             double yratio = ( localCoords.y ) / ( oldLocalCoords.y );
 
-            //if( ( xratio > 0.0f ) && ( yratio > 0.0f ) )
-                scalingMatrix.scale( xratio, yratio );
+            scalingMatrix.scale( xratio, yratio );
         }
 
         if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_VERTEX )
