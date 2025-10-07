@@ -12,42 +12,34 @@ body:
   - type: markdown
     attributes:
       value: |
-        > [!WARNING]  
-        > Quand la liste sera vraiment utilisée, il faudra peut-être penser à faire des (au moins certains) tests sur des anciens projets pour voir la compatibilité des fonctionnalités
+        # ${\color{FFFF00}\textnormal{Version 1.0 du 07/10/2025}}$
 
   - type: markdown
     attributes:
       value: |
-        # Pré-requis
-
-  - type: checkboxes
-    id: prerequisites
-    attributes:
-      label: "Pré-requis"
-      options:
-        - label: "Réinitialiser Odyssey en supprimant les fichiers .ini de la config"
-        - label: "Démarrer un projet vierge pour vérifier le layout ou les raccourcis non-parasités par des paramètres personnalisés"
-        - label: "About page a le bon IDDN et les bonnes personnes et les bonnes librairies"
+        ## ${\color{00AAFF}\textnormal{Texture Editor}}$
 
   - type: markdown
     attributes:
       value: |
-        # Drawing
+        ## ${\color{00FF99}\textnormal{---------------------------------------------------------------------}}$
 
   - type: checkboxes
-    id: iliad-texture-editor
+    id: texture-editor
     attributes:
-      label: "ILIAD Texture Editor"
+      label: "Texture Editor"
       options:
         - label: "Création & ouverture de tous les formats de texture et vérifier que l'on peut dessiner"
         - label: "Créer et tester une Texture Verticale"
+        - label: "Créer et tester une Texture avec une taille qui n'est pas un multiple de 2"
         - label: "Edition d'une texture existante en double cliquant dessus"
+        - label: "Clic droit sur l'icône d'une texture pour choisir l'éditeur"
         - label: "Vérification du layout depuis un projet vierge"
         - label: "Exporter une Texture depuis le Texture Editor"
         - label: "Exporter une Texture depuis le Content Browser"
-        - label: "Vérification du live update entre une texture non créée par ILIAD et un objet 3D  (en mode noMipMap)"
-        - label: "Vérification du live update entre une texture créée par ILIAD et un objet 3D  (en mode noMipMap)"
-        - label: "Prise en charge tablette (Pression + clic gauche et droit)"
+        - label: "Exporter une Arborescence de Texture depuis le Content Browser"
+        - label: "Vérification du live update entre une texture non créée par Odyssey et un objet 3D  (en mode noMipMap)"
+        - label: "Vérification du live update entre une texture créée par Odyssey et un objet 3D  (en mode noMipMap)"
         - label: "Tester les modes de fusion des brosses"
         - label: "Tester les modes d'alpha"
         - label: "Déplacer les fenêtres"
@@ -55,17 +47,16 @@ body:
         - label: "Fermer / rouvrir une texture"
         - label: "Utiliser la corbeille"
         - label: "Undo / Redo"
-        - label: "Pot de peinture"
-        - label: "Sliders Color"
-        - label: "Color Wheel"
-        - label: "Color Wheel change hex values"
-        - label: "Raccourcis : color picker, rotation, pan, delete..."
-        - label: "Sélectionner un mesh / le supprimer"
+        - label: "Test du Pot de peinture"
+        - label: "Test des Sliders Color"
+        - label: "Test de la Color Wheel"
+        - label: "Test de du change hex values"
+        - label: "Sélectionner un mesh dans le MeshSelector et le supprimer"
 
   - type: checkboxes
-    id: layer-stack
+    id: texture-layer-stack
     attributes:
-      label: "Layer Stack (tester des mix raster & vector)"
+      label: "Texture Layer Stack (tester des mix raster & vector)"
       options:
         - label: "Créer un calque Raster"
         - label: "Créer un calque Vector"
@@ -104,171 +95,15 @@ body:
         - label: "Modifier le mode de fusion d'un calque dans un dossier"
         - label: "Tester la multi sélection"
 
-  - type: checkboxes
-    id: odyssey-brush
+  - type: markdown
     attributes:
-      label: "Odyssey Brush"
-      options:
-        - label: "Test de toutes les brosses du pack par défaut (si mise à jour d'ULIS)"
-        - label: "Création d'une Odyssey brush"
-        - label: "Modifier une Odyssey Brush (et voir automatiquement les modif en l'utilisant)"
-        - label: "Fonctionnement des noeuds les plus basiques."
-        - label: "Sauvegarde d'une Odyssey brush"
-        - label: "Fermer / rouvrir une Odyssey brush"
-        - label: "Faire fonctionner les Keydowns des brosses"
-        - label: "Tester le Line Smoothing"
-
-  - type: checkboxes
-    id: paint-viewport
-    attributes:
-      label: "Paint Viewport"
-      options:
-        - label: "Editer une texture via le viewport d'Unreal"
-        - label: "Dessiner sur un objet avec plusieurs matériaux"
-        - label: "Dessiner sur un objet avec plusieurs textures"
-        - label: "Pipette pour choisir l'acteur"
-        - label: "Bonne prise en charge du stylet / souris"
-        - label: "Déplacer / Repositionner les panneaux"
-        - label: "Undo / Redo"
-        - label: "Créer / Editer / Supprimer les calques"
-        - label: "Mise à jour automatique de la texture en quittant ILIAD"
-        - label: "Prévention d'ouverture multiples"
-        - label: "Basculer d'ILIAD à toute autre manipulation dans le viewport"
-        - label: "Animer en 2D dans un contexte 3D"
-        - label: "Se déplacer autour de l'objet avec Alt, Clic droit, clic gauche, clic milieu"
+      value: |
+        ## ${\color{00AAFF}\textnormal{Animation Editor}}$
 
   - type: markdown
     attributes:
       value: |
-        # Storyboard
-
-  - type: checkboxes
-    id: create-manage-shot-board-in-sequencer
-    attributes:
-      label: "Création et agencement des Shots / Board Sequence depuis le Sequencer"
-      options:
-        - label: "'Start Storyboarding' génère un Board Sequence et ouvre le Sequencer"
-        - label: "Créer un Board Sequence depuis la partie gauche du Sequencer"
-        - label: "Créer un Shot Sequence depuis la partie gauche du Sequencer"
-        - label: "Créer plusieurs Shot Sequence à la droite du Shot Sequence courant"
-        - label: "Créer plusieurs Shot Sequence à la droite du Shot Sequence courant avec une durée custom"
-        - label: "Créer plusieurs Board Sequence à la droite du Shot Sequence courant"
-        - label: "Créer plusieurs Board Sequence à la droite du Shot Sequence courant avec une durée custom"
-        - label: "Créer plusieurs Shot Sequence à la gauche du Shot Sequence courant"
-        - label: "Créer plusieurs Shot Sequence à la gauche du Shot Sequence courant avec une durée custom"
-        - label: "Créer plusieurs Board Sequence à la gauche du Shot Sequence courant"
-        - label: "Créer plusieurs Board Sequence à la gauche du Shot Sequence courant avec une durée custom"
-        - label: "Déplacer les Shot et Board Sequence dans le Sequencer"
-        - label: "Créer une Camera + Plane"
-        - label: "Changer la durée d'un Shot / Board Sequence dans le Sequencer"
-        - label: "Vérifier que le changement de durée affecte bien le Visibility in / out dans Shot Sequence"
-        - label: "Créer une Take et effectuer un changement visible"
-        - label: "Switcher entre 2 Takes"
-        - label: "Créer plusieurs Shot Sequence à la droite du Board Sequence courant"
-        - label: "Créer plusieurs Shot Sequence à la droite du Board Sequence courant avec une durée custom"
-        - label: "Créer plusieurs Board Sequence à la droite du Board Sequence courant"
-        - label: "Créer plusieurs Board Sequence à la droite du Board Sequence courant avec une durée custom"
-        - label: "Créer plusieurs Shot Sequence à la gauche du Board Sequence courant"
-        - label: "Créer plusieurs Shot Sequence à la gauche du Board Sequence courant avec une durée custom"
-        - label: "Créer plusieurs Board Sequence à la gauche du Board Sequence courant"
-        - label: "Créer plusieurs Board Sequence à la gauche du Board Sequence courant avec une durée custom"
-        - label: "Cloner un Shot (à droite et à gauche du Shot courant)"
-        - label: "Cloner un Shot avec des Drawings vides (à droite et à gauche du Shot courant)"
-        - label: "Supprimer un Shot (puis annuler pour qu'il revienne)"
-
-  - type: checkboxes
-    id: create-manage-shot-board-in-content-browser
-    attributes:
-      label: "Création et agencement des Shots / Board Sequence depuis le Content Browser"
-      options:
-        - label: "Créer un Shot Sequence depuis le Content Browser"
-        - label: "Drag and drop le Shot Sequence dans un Board Sequence ouvert dans le Sequencer"
-        - label: "Créer un Board Sequence depuis le Content Browser"
-        - label: "Drag and drop le Board Sequence dans un Board Sequence ouvert dans le Sequencer"
-        - label: "Générer un Board Sequence à partir d'une séquence d'images importée"
-
-  - type: checkboxes
-    id: drawings
-    attributes:
-      label: "Gestion des Drawings"
-      options:
-        - label: "Créer plusieurs Drawings"
-        - label: "Vérifier que le scrub à la main met bien à jour les Materials"
-        - label: "Dessiner dans les Drawings avec ILIAD"
-        - label: "Activer la Table Lumineuse"
-        - label: "Fliper d'un Drawing à l'autre"
-        - label: "Déplacer les Drawings"
-        - label: "Cloner un Drawing"
-        - label: "Dupliquer un Drawing (depuis le Shot View, avec Alt)"
-        - label: "Supprimer un Drawing"
-        - label: "Editer un Drawing"
-
-  - type: checkboxes
-    id: planes
-    attributes:
-      label: "Gestion des Planes"
-      options:
-        - label: "Créer un nouveau Plane"
-        - label: "Créer un nouveau Plane avec Safe Margins"
-        - label: "Créer un nouveau Plane avec Safe Margins, sans le Relative Scaling verrouillé"
-        - label: "Plane Distance: Scale 100% Camera"
-        - label: "Plane Distance: Relative Scale (modifier sa taille absolue au préalable)"
-        - label: "Plane Distance: No scale"
-        - label: "Cacher le Plane"
-        - label: "Détacher le Plane"
-        - label: "Collapse Plane"
-        - label: "Supprimer Plane"
-        - label: "Créer des clés d'opacité"
-
-  - type: checkboxes
-    id: camera
-    attributes:
-      label: "Caméra"
-      options:
-        - label: "Piloter / Ejecter la Camera"
-        - label: "Créer des clés Camera (Auto Key actif)"
-        - label: "Créer des clés Camera (Auto Key inactif)"
-        - label: "Fliper d'une clé Caméra à l'autre"
-        - label: "Camera Focal Length: No Scale"
-        - label: "Camera Focal Length: Relative Scale (modifier la taille absolue d'un Plane ou la Focal Length au préalable)"
-        - label: "Camera Focal Length: Scale 100% Camera"
-        - label: "Activer la Camera du Board Sequence"
-        - label: "Scrub dans le Sequencer"
-        - label: "Lecture du Sequencer"
-
-  - type: checkboxes
-    id: gui
-    attributes:
-      label: "Interface & Ergonomie"
-      options:
-        - label: "Tester quelques raccourcis, dont les suivants : next / prev Drawing | Next / prev Shot Sequence (uniquement dans la Shot View) | Create Drawing | Create Plane"
-        - label: "Changer les Settings des Material"
-        - label: "Changer les Settings de la Table Lumineuse"
-        - label: "Créer des Notes dans un Board"
-        - label: "Créer des Notes dans un Shot"
-        - label: "Editer les Notes"
-        - label: "Afficher les Notes (Overlay / Viewport)"
-        - label: "Tourner / zoomer le Viewport"
-        - label: "Editer les Settings de la Naming Convention"
-        - label: "Editer les Settings des Tracks"
-        - label: "Changer 'Arrange Sections'"
-        - label: "Undo / redo"
-        - label: "Vérifier la compatibilité Board Sequence avec Level Sequence"
-
-  - type: checkboxes
-    id: export
-    attributes:
-      label: "Export"
-      options:
-        - label: "Exporter une séquence en ffmpeg"
-        - label: "Exporter une séquence en pdf storyboard"
-        - label: "Exporter une séquence en Movie Render Queue"
-        - label: "Exporter une séquence d'images"
-
-  - type: markdown
-    attributes:
-      value: |
-        # Animation
+        ## ${\color{00FF99}\textnormal{---------------------------------------------------------------------}}$
 
   - type: checkboxes
     id: animation
@@ -326,7 +161,112 @@ body:
         - label: "Tester les pre/post behavior"
 
   - type: checkboxes
-    id: vector-tools
+    id: animation-layer-stack
+    attributes:
+      label: "Animation Layer Stack (tester des mix raster & vector)"
+      options:
+        - label: "Créer un calque Raster"
+        - label: "Créer un calque Vector"
+        - label: "Déplacer un calque"
+        - label: "Dupliquer un calque"
+        - label: "Supprimer un calque"
+        - label: "Renommer un calque"
+        - label: "Fusionner un calque"
+        - label: "Verrouiller / déverrouiller un calque"
+        - label: "Verrouiller / déverrouiller l'Alpha d'un calque"
+        - label: "Masquer / afficher un calque"
+        - label: "Modifier l'opacité d'un calque"
+        - label: "Modifier le mode de fusion d'un calque"
+        - label: "Créer un dossier"
+        - label: "Déplacer un dossier"
+        - label: "Supprimer un dossier"
+        - label: "Renommer un dossier"
+        - label: "Cliquer glisser un calque dans un dossier"
+        - label: "Dupliquer un dossier"
+        - label: "Aplatir un dossier"
+        - label: "Modifier l'opacité d'un dossier"
+        - label: "Modifier le mode de fusion d'un dossier"
+        - label: "Masquer / afficher un dossier"
+        - label: "Verrouiller le dossier"
+        - label: "Créer un calque dans un dossier"
+        - label: "Déplacer un calque dans un dossier"
+        - label: "Déplacer un dossier dans un dossier"
+        - label: "Dupliquer un calque dans un dossier"
+        - label: "Supprimer un calque dans un dossier"
+        - label: "Renommer un calque dans un dossier"
+        - label: "Fusionner un calque dans un dossier"
+        - label: "Verrouiller / déverrouiller un calque dans un dossier"
+        - label: "Verrouiller / déverrouiller l'Alpha d'un calque dans un dossier"
+        - label: "Masquer / afficher un calque dans un dossier"
+        - label: "Modifier l'opacité d'un calque dans un dossier"
+        - label: "Modifier le mode de fusion d'un calque dans un dossier"
+        - label: "Tester la multi sélection"
+
+  - type: markdown
+    attributes:
+      value: |
+        ## ${\color{00AAFF}\textnormal{Flipbook Editor}}$
+
+  - type: markdown
+    attributes:
+      value: |
+        ## ${\color{00FF99}\textnormal{---------------------------------------------------------------------}}$
+
+  - type: checkboxes
+    id: flipbook-basic
+    attributes:
+      label: "Basic FlipBook options"
+      options:
+        - label: "créer un nouveau flipbook"
+        - label: "sauver un flipbook"
+        - label: "ouvrir le flipbook avec la grue"
+        - label: "utiliser les controles play/stop/pause/next/prev ..."
+        - label: "ajouter/retirer des expositions (icône losange)"
+        - label: "ajouter/retirer des expositions (icône triangle)"
+        - label: "changer le framerate"
+        - label: "ajouter une keyframe"
+        - label: "déplacer une keyframe"
+        - label: "zoomer/dézommer dans la timeline du flipbook"
+
+  - type: checkboxes
+    id: flipbook-import-export
+    attributes:
+      label: "Import/Export options"
+      options:
+        - label: "Import Textures as Layers"
+        - label: "Export Layers as Textures"
+        - label: "Export Current Layer as Textures"
+        - label: "Export Textures As Operating System"
+
+  - type: markdown
+    attributes:
+      value: |
+        ## ${\color{00AAFF}\textnormal{Bitmap Tools}}$
+
+  - type: markdown
+    attributes:
+      value: |
+        ## ${\color{00FF99}\textnormal{---------------------------------------------------------------------}}$
+
+  - type: checkboxes
+    id: tools-bitmap
+    attributes:
+      label: "Bitmap Tools"
+      options:
+        - label: "Dessiner"
+
+  - type: markdown
+    attributes:
+      value: |
+        ## ${\color{00AAFF}\textnormal{Vector Tools}}$
+
+  - type: markdown
+    attributes:
+      value: |
+        ## ${\color{00FF99}\textnormal{---------------------------------------------------------------------}}$
+
+  - type: checkboxes
+    id: tools-vector
     attributes:
       label: "Vector tools"
       options:
@@ -358,7 +298,376 @@ body:
         - label: "Sélectionner plusieurs paths dans Vector Scene Tree View"
 
   - type: checkboxes
-    id: color-palette
+    id: tools-inbetweener
+    attributes:
+      label: "Inbetweener"
+      options:
+        - label: "Créer un Tag Inbetweener sur un path (+ undo/redo)"
+        - label: "Créer un Tag Inbetweener sur un groupe (+ undo/redo)"
+        - label: "Dupliquer un calque ayant un Inbetweener actif (+ undo/redo)"
+        - label: "Supprimer un Tag Inbetweener (+ undo/redo)"
+        - label: "Supprimer un calque ayant un Inbetweener actif (+ undo/redo)"
+        - label: "Déformer un groupe de path (+ undo/redo)"
+        - label: "Transformer un groupe de path (+ undo/redo)"
+        - label: "Créer un breakdown (+ undo/redo)"
+        - label: "Déformer un breakdown (+ undo/redo)"
+        - label: "Afficher la Spacing Chart (+ undo/redo)"
+        - label: "Modifier la Spacing Chart ease in/out (+ undo/redo)"
+        - label: "Modifier la Spacing Chart acceleration (+ undo/redo)"
+        - label: "Modifier la Spacing Chart ralenti (+ undo/redo)"
+        - label: "Modifier la Spacing Chart avec juste un élément (+ undo/redo)"
+        - label: "Ajouter une ou des cellule(s) et s'assurer que la chart se met à jour (+ undo/redo)"
+        - label: "Supprimer une ou des cellule(s) et s'assurer que la chart se met à jour (+ undo/redo)"
+        - label: "Créer des trajectoires (+ undo/redo)"
+        - label: "Supprimer des trajectoires (+ undo/redo)"
+        - label: "Modifier des points le long des trajectoires (+ undo/redo)"
+        - label: "Modifier les tangentes des trajectoires (+ undo/redo)"
+        - label: "Faire une interpolation qui ne commence pas à la première image"
+        - label: "Faire une interpolation qui va dans le sens classique, de gauche à droite"
+        - label: "Faire une interpolation qui va dans le sens inverse, de droite à gauche"
+
+  - type: markdown
+    attributes:
+      value: |
+        ## ${\color{00AAFF}\textnormal{Odyssey Viewport}}$
+
+  - type: markdown
+    attributes:
+      value: |
+        ## ${\color{00FF99}\textnormal{---------------------------------------------------------------------}}$
+
+  - type: checkboxes
+    id: paint-viewport
+    attributes:
+      label: "Paint Viewport"
+      options:
+        - label: "Editer une texture via le viewport d'Unreal"
+        - label: "Dessiner sur un objet avec plusieurs matériaux"
+        - label: "Dessiner sur un objet avec plusieurs textures"
+        - label: "Pipette pour choisir l'acteur"
+        - label: "Bonne prise en charge du stylet / souris"
+        - label: "Déplacer / Repositionner les panneaux"
+        - label: "Undo / Redo"
+        - label: "Créer / Editer / Supprimer les calques"
+        - label: "Mise à jour automatique de la texture en quittant ILIAD"
+        - label: "Prévention d'ouverture multiples"
+        - label: "Basculer d'ILIAD à toute autre manipulation dans le viewport"
+        - label: "Animer en 2D dans un contexte 3D"
+        - label: "Se déplacer autour de l'objet avec Alt, Clic droit, clic gauche, clic milieu"
+
+  - type: markdown
+    attributes:
+      value: |
+        ## ${\color{00AAFF}\textnormal{Shortcuts Assignés}}$
+
+  - type: markdown
+    attributes:
+      value: |
+        ## ${\color{00FF99}\textnormal{---------------------------------------------------------------------}}$
+
+  - type: checkboxes
+    id: shortcut-level-editor-mode
+    attributes:
+      label: "Level Editor Mode"
+      options:
+        - label: "test raccourci [M] : Odyssey Viewport Pan/Zoom"
+
+  - type: checkboxes
+    id: shortcut-navigation
+    attributes:
+      label: "Navigation Shortcut"
+      options:
+        - label: "test raccourci [Ctrl+Shift+M]: Odyssey Viewport Reset Pan"
+        - label: "test raccourci [Ctrl+M] : Odyssey Viewport Rotate"
+        - label: "test raccourci [Shift+2] : Activate Mode Odyssey Viewport"
+        - label: "test raccourci [T] : Navigate to next Cell"
+        - label: "test raccourci [Semicolon] : Navigate to next Frame"
+        - label: "test raccourci [R] : Navigate to previous Cell"
+        - label: "test raccourci [Comma] : Navigate to previous Frame"
+        - label: "test raccourci [Space Bar] : Play/Stop"
+
+  - type: checkboxes
+    id: shortcut-timeline
+    attributes:
+      label: "Timeline Shortcuts"
+      options:
+        - label: "test raccourci [C] : Activate Timeline Cut Tool"
+        - label: "test raccourci [A] : Activate Timeline Move Tool"
+        - label: "test raccourci [V] : Activate Timeline Selection Tool"
+        - label: "test raccourci [Num -]: Decrease Cell Exposure"
+        - label: "test raccourci [Num +]: Increase Cell Exposure"
+        - label: "test raccourci [M] : Pan/Zoom Timeline"
+
+  - type: checkboxes
+    id: shortcut-flipbook-editor
+    attributes:
+      label: "Odyssey Flipbook Editor"
+      options:
+        - label: "test raccourci [Alt+Shift+Left] : Go To First Frame"
+        - label: "test raccourci [Alt+Shift+Right] : Go To Last Frame"
+        - label: "test raccourci [Right] : Go To Next Frame"
+        - label: "test raccourci [Left] : Go To Previous Frame"
+
+  - type: checkboxes
+    id: shortcut-keyframe
+    attributes:
+      label: "KeyFrame Shortcuts"
+      options:
+        - label: "test raccourci [Shift+N] : Add Key Frame"
+        - label: "test raccourci [Shift+Right] : Go To Next Key Frame"
+        - label: "test raccourci [Shift+Left] : Go To Previous Key Frame"
+        - label: "test raccourci [I] : Insert Key Frame After"
+        - label: "test raccourci [Shift+I] : Insert Key Frame Before"
+
+  - type: checkboxes
+    id: shortcut-other
+    attributes:
+      label: "Other Shortcuts"
+      options:
+        - label: "test raccourci [Shift+B] : Show in Content Browser"
+
+  - type: checkboxes
+    id: shortcut-playback
+    attributes:
+      label: "Playback Shortcuts"
+      options:
+        - label: "test raccourci [Space Bar] : Pause"
+
+  - type: checkboxes
+    id: shortcut-brushes-and-strokes
+    attributes:
+      label: "Brushes & Strokes Shortcuts"
+      options:
+        - label: "test raccourci [Shift + L] : Shift+L"
+        - label: "test raccourci [I] : color picker"
+        - label: "test raccourci [Num -] : Decrease Brush Size"
+        - label: "test raccourci [Num +] : Increase Brush Size"
+        - label: "test raccourci [F5] : Refresh Brush"
+
+  - type: checkboxes
+    id: shortcut-import-and-export
+    attributes:
+      label: "Import & Export Shortcuts"
+      options:
+        - label: "test raccourci [Ctrl+E] : Export Layers As Textures"
+        - label: "test raccourci [Ctrl+F] : Export Texture To Operating System"
+
+  - type: checkboxes
+    id: shortcut-layers
+    attributes:
+      label: "Layers Shortcuts"
+      options:
+        - label: "test raccourci [Ctrl+N] : Create New Layer"
+
+  - type: checkboxes
+    id: shortcut-tools
+    attributes:
+      label: "Tools Shortcuts"
+      options:
+        - label: "test raccourci [B] : Activate Drawing Tool"
+        - label: "test raccourci [E] : Activate Eraser Tool"
+        - label: "test raccourci [G] : Activate PaintBucket Tool"
+        - label: "test raccourci [U] : Activate Primitive Drawing Tool"
+        - label: "test raccourci [Shift+L] : Activate Selection Tool"
+        - label: "test raccourci [Ctrl+T] : Activate Transform Tool"
+        - label: "test raccourci [Shift+D] : Activate Vector Path Edit Tool"
+        - label: "test raccourci [Shift+P] : Activate Vector Path Push Tool"
+        - label: "test raccourci [Equals] : Activate Vector Path Stitch Tool"
+        - label: "test raccourci [H] : Activate Vector Scene Path Tool"
+        - label: "test raccourci [W] : Activate Warp Tool"
+        - label: "test raccourci [Delete] : Clear Current Layer"
+        - label: "test raccourci [Ctrl+D] : Clear Current Selection"
+        - label: "test raccourci [Ctrl+C] : Copy Current Selection"
+        - label: "test raccourci [Ctrl+X] : Cut Current Selection"
+        - label: "test raccourci [Ctrl+I] : Invert Current Selection"
+        - label: "test raccourci [Ctrl+V] : Past Current Selection"
+        - label: "test raccourci [Ctrl+Shift+V] : Past Current Selection in New Layer"
+        - label: "test raccourci [Ctrl+A] : Select All"
+
+  - type: checkboxes
+    id: shortcut-viewport
+    attributes:
+      label: "Viewport Shortcuts"
+      options:
+        - label: "test raccourci [M] : Pan/Zoom Viewport"
+        - label: "test raccourci [Escape] : Reset Viewport Position"
+        - label: "test raccourci [Ctrl+R] : Reset Viewport Rotation"
+        - label: "test raccourci [Ctrl+M] : Rotate Viewport"
+        - label: "test raccourci [Shift+Z] : Set Zoom 100%"
+        - label: "test raccourci [S] : Set Zoom Fit Screen"
+        - label: "test raccourci [Num *] : Zoom In"
+        - label: "test raccourci [Num /] : Zoom Out"
+
+  - type: checkboxes
+    id: shortcut-storyboard-editor
+    attributes:
+      label: "Odyssey Storyboard Editor"
+      options:
+        - label: "test raccourci [M] : Odyssey Storyboard Viewport Pan/Zoom"
+        - label: "test raccourci [Ctrl+Shift+M]: Odyssey Storyboard Viewport Reset Pan"
+        - label: "test raccourci [Ctrl+M] : Odyssey Storyboard Viewport Rotate"
+        - label: "test raccourci [U] : Step to Next Shot"
+        - label: "test raccourci [Y] : Step to Previous Shot"
+
+  - type: markdown
+    attributes:
+      value: |
+        ## ${\color{00AAFF}\textnormal{Storyboard}}$
+
+  - type: markdown
+    attributes:
+      value: |
+        ## ${\color{00FF99}\textnormal{---------------------------------------------------------------------}}$
+
+  - type: checkboxes
+    id: create-manage-shot-board-in-sequencer
+    attributes:
+      label: "Création et agencement des Shots / Board Sequence depuis le Sequencer"
+      options:
+        - label: "'Start Storyboarding' génère un Board Sequence et ouvre le Sequencer"
+        - label: "Créer un Board Sequence depuis la partie gauche du Sequencer"
+        - label: "Créer un Shot Sequence depuis la partie gauche du Sequencer"
+        - label: "Créer plusieurs Shot Sequence à la droite du Shot Sequence courant"
+        - label: "Créer plusieurs Shot Sequence à la droite du Shot Sequence courant avec une durée custom"
+        - label: "Créer plusieurs Board Sequence à la droite du Shot Sequence courant"
+        - label: "Créer plusieurs Board Sequence à la droite du Shot Sequence courant avec une durée custom"
+        - label: "Créer plusieurs Shot Sequence à la gauche du Shot Sequence courant"
+        - label: "Créer plusieurs Shot Sequence à la gauche du Shot Sequence courant avec une durée custom"
+        - label: "Créer plusieurs Board Sequence à la gauche du Shot Sequence courant"
+        - label: "Créer plusieurs Board Sequence à la gauche du Shot Sequence courant avec une durée custom"
+        - label: "Déplacer les Shot et Board Sequence dans le Sequencer"
+        - label: "Créer une Camera + Plane"
+        - label: "Changer la durée d'un Shot / Board Sequence dans le Sequencer"
+        - label: "Vérifier que le changement de durée affecte bien le Visibility in / out dans Shot Sequence"
+        - label: "Créer une Take et effectuer un changement visible"
+        - label: "Switcher entre 2 Takes"
+        - label: "Créer plusieurs Shot Sequence à la droite du Board Sequence courant"
+        - label: "Créer plusieurs Shot Sequence à la droite du Board Sequence courant avec une durée custom"
+        - label: "Créer plusieurs Board Sequence à la droite du Board Sequence courant"
+        - label: "Créer plusieurs Board Sequence à la droite du Board Sequence courant avec une durée custom"
+        - label: "Créer plusieurs Shot Sequence à la gauche du Board Sequence courant"
+        - label: "Créer plusieurs Shot Sequence à la gauche du Board Sequence courant avec une durée custom"
+        - label: "Créer plusieurs Board Sequence à la gauche du Board Sequence courant"
+        - label: "Créer plusieurs Board Sequence à la gauche du Board Sequence courant avec une durée custom"
+        - label: "Cloner un Shot (à droite et à gauche du Shot courant)"
+        - label: "Cloner un Shot avec des Drawings vides (à droite et à gauche du Shot courant)"
+        - label: "Supprimer un Shot (puis annuler pour qu'il revienne)"
+
+  - type: checkboxes
+    id: create-manage-shot-board-in-content-browser
+    attributes:
+      label: "Création et agencement des Shots / Board Sequence depuis le Content Browser"
+      options:
+        - label: "Créer un Shot Sequence depuis le Content Browser"
+        - label: "Drag and drop le Shot Sequence dans un Board Sequence ouvert dans le Sequencer"
+        - label: "Créer un Board Sequence depuis le Content Browser"
+        - label: "Drag and drop le Board Sequence dans un Board Sequence ouvert dans le Sequencer"
+        - label: "Générer un Board Sequence à partir d'une séquence d'images importée"
+
+  - type: checkboxes
+    id: storyboard-animation-asset
+    attributes:
+      label: "Gestion des assets animation dans le storyboard"
+      options:
+        - label: "Créer plusieurs dessins"
+        - label: "Déplacer les dessins via les poignées (losanges)"
+        - label: "S'assurer que les thumbnails sont bien rafraichis et cohérents avec ceux du shot"
+        - label: "Activer la Table Lumineuse"
+        - label: "Flipper d'un Drawing à l'autre"
+        - label: "Dupliquer un dessin"
+        - label: "Supprimer un dessin"
+        - label: "Editer un dessin"
+        - label: "Créer un nouveau asset animation"
+        - label: "Créer un nouveau Plane avec Safe Margins"
+        - label: "Créer un nouveau Plane avec Safe Margins, sans le Relative Scaling verrouillé"
+        - label: "S'assurer que d'un Shot à l'autre, le dernier asset animation sélectionné est bien retrouvé lors du scrub"
+        - label: "Plane Distance: Scale 100% Camera"
+        - label: "Plane Distance: Relative Scale (modifier sa taille absolue au préalable)"
+        - label: "Plane Distance: No scale"
+        - label: "Cacher l'asset animation"
+        - label: "Détacher l'asset animation"
+        - label: "Collapse l'asset animation"
+        - label: "Supprimer l'asset animation"
+        - label: "Créer des clés d'opacité"
+
+  - type: checkboxes
+    id: storyboard-camera
+    attributes:
+      label: "Gestion des caméras dans le Storyboard"
+      options:
+        - label: "Piloter / Ejecter la Camera"
+        - label: "Créer des clés Camera (Auto Key actif)"
+        - label: "Créer des clés Camera (Auto Key inactif)"
+        - label: "Fliper d'une clé Caméra à l'autre"
+        - label: "Camera Focal Length: No Scale"
+        - label: "Camera Focal Length: Relative Scale (modifier la taille absolue d'un Plane ou la Focal Length au préalable)"
+        - label: "Camera Focal Length: Scale 100% Camera"
+        - label: "Activer la Camera du Board Sequence"
+        - label: "Scrub dans le Sequencer"
+        - label: "Lecture du Sequencer"
+
+  - type: checkboxes
+    id: storyboard-gui
+    attributes:
+      label: "Interface & Ergonomie du Storyboard"
+      options:
+        - label: "Changer les Settings des Material"
+        - label: "Changer les Settings de la Table Lumineuse"
+        - label: "Tourner / zoomer le Viewport"
+        - label: "Editer les Settings de la Naming Convention"
+        - label: "Editer les Settings des Tracks"
+        - label: "Changer 'Arrange Sections'"
+        - label: "Undo / redo"
+        - label: "Vérifier la compatibilité Board Sequence avec Level Sequence"
+
+  - type: checkboxes
+    id: storyboard-export
+    attributes:
+      label: "Export Storyboard"
+      options:
+        - label: "Exporter une séquence en ffmpeg"
+        - label: "Exporter une séquence en pdf storyboard"
+        - label: "Exporter une séquence en Movie Render Queue"
+        - label: "Exporter une séquence d'images"
+
+  - type: markdown
+    attributes:
+      value: |
+        ## ${\color{00AAFF}\textnormal{Autres assets et éléments correlés}}$
+
+  - type: markdown
+    attributes:
+      value: |
+        ## ${\color{00FF99}\textnormal{---------------------------------------------------------------------}}$
+
+  - type: checkboxes
+    id: odyssey-brush
+    attributes:
+      label: "Odyssey Brush"
+      options:
+        - label: "Test de toutes les brosses du pack par défaut"
+        - label: "Création d'une Odyssey brush"
+        - label: "Modifier une Odyssey Brush (et voir automatiquement les modif en l'utilisant)"
+        - label: "Fonctionnement des noeuds les plus basiques."
+        - label: "Sauvegarde d'une Odyssey brush"
+        - label: "Fermer / rouvrir une Odyssey brush"
+        - label: "Faire fonctionner les Keydowns des brosses"
+        - label: "Tester le Line Smoothing"
+
+  - type: checkboxes
+    id: Stylus-Input
+    attributes:
+      label: "Stylus Input"
+      options:
+        - label: "Verifier que l'on peut dessiner avec Ink, Wintab, NSEvent, etc."
+        - label: "Verifier que la Pression fonctionne"
+        - label: "Verifier que l'Altitude fonctionne"
+        - label: "Verifier que l'Azimut fonctionne"
+        - label: "Verifier que le Tilt fonctionne"
+        - label: "Vérifier avec une tablette écran + un second écran que le curseur est bien au même endroit que le stylet, notamment sur Mac Retina"
+
+  - type: checkboxes
+    id: asset-color-palette
     attributes:
       label: "Color Palette"
       options:
@@ -369,3 +678,89 @@ body:
         - label: "Editer les couleurs"
         - label: "Sauvegarder la palette"
         - label: "Charger une autre palette"
+
+  - type: checkboxes
+    id: asset-note
+    attributes:
+      label: "Note Asset"
+      options:
+        - label: "Créer des Notes dans un Board"
+        - label: "Créer des Notes dans un Shot"
+        - label: "Editer les Notes"
+        - label: "Afficher les Notes (Overlay / Viewport)"
+
+  - type: checkboxes
+    id: asset-tool-collection
+    attributes:
+      label: "Tool Collection Asset"
+      options:
+        - label: "TO DO"
+
+  - type: markdown
+    attributes:
+      value: |
+        ## ${\color{00AAFF}\textnormal{Autres tests à effectuer}}$
+
+  - type: markdown
+    attributes:
+      value: |
+        ## ${\color{00FF99}\textnormal{---------------------------------------------------------------------}}$
+
+  - type: checkboxes
+    id: templates
+    attributes:
+      label: "Templates"
+      options:
+        - label: "Tester le template 'Animation 2D 720p'"
+        - label: "Tester le template 'Animation 2D 1080p'"
+        - label: "Tester le template 'Animation 2D dans un espace 3D : 720p'"
+        - label: "Tester le template 'Animation 2D dans un espace 3D : 1080p'"
+        - label: "Tester le template 'Storyboard sur fond blanc : 720p'"
+        - label: "Tester le template 'Storyboard sur fond blanc : 1080p'"
+        - label: "Tester le template 'Storyboard sur fond 3D : 720p'"
+        - label: "Tester le template 'Storyboard sur fond 3D : 1080p'"
+        - label: "Tester le template 'Texture 2D 720p'"
+        - label: "Tester le template 'Texture 2D 1080p'"
+        - label: "Tester le template 'Mannequin 3D'"
+        - label: "Tester le template 'Empty 3D Scene'"
+
+  - type: checkboxes
+    id: widgets
+    attributes:
+      label: "Widgets"
+      options:
+        - label: "Tester le Widget EUWBP_Import_Json"
+        - label: "Tester le Widget QuickStart"
+
+  - type: checkboxes
+    id: interface-layout
+    attributes:
+      label: "Layouts"
+      options:
+        - label: "Sauver un layout"
+        - label: "Importer un layout"
+        - label: "revenir au layout par défaut"
+
+  - type: checkboxes
+    id: old-projects
+    attributes:
+      label: "old-projects"
+      options:
+        - label: "faire fonctionner le projet avec l'ours (lakeside)"
+        - label: "faire fonctionner le projet avec les brosses bitmap en blueprint"
+        - label: "faire fonctionner le projet avec les widgets de test"
+        - label: "faire fonctionner le projet avec le chat (Jenkins House)"
+        - label: "faire fonctionner le projet avec la grenouille"
+        - label: "faire fonctionner le projet avec le cyclope"
+        - label: "faire fonctionner le projet avec le roller"
+        - label: "faire fonctionner le projet avec la patineuse"
+
+  - type: checkboxes
+    id: various
+    attributes:
+      label: "Divers"
+      options:
+        - label: "About page a le bon IDDN et les bonnes personnes et les bonnes librairies"
+        - label: "Compiler Odyssey en Shipping"
+        - label: "Compiler un jeu"
+        - label: "Lancer un projet en mode jeu (map gymnastique)"
