@@ -93,6 +93,8 @@ void UOdysseyAnimationTimelineSection::PostLoad() //override
     if( Animation )
     {
         Animation->OnRenderingChangedDelegate().AddUObject( this, &UOdysseyAnimationTimelineSection::OnAnimationChanged );
+
+        RebuildAnimationCutChannel();
     }
 }
 
@@ -112,6 +114,8 @@ void UOdysseyAnimationTimelineSection::OnBindingIDsUpdated( const TMap<UE::Movie
 
     if( ensure(Animation) )
         Animation->OnRenderingChangedDelegate().AddUObject( this, &UOdysseyAnimationTimelineSection::OnAnimationChanged );
+
+    RebuildAnimationCutChannel();
 }
 
 #if WITH_EDITOR
