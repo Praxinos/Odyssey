@@ -24,7 +24,6 @@ CreateEmptyKeyFrame(UPaperFlipbook* iFlipbook, int32 iIndex)
     iFlipbook->MarkPackageDirty();
 }
 
-
 bool
 CreateKeyFrame(UPaperFlipbook* iFlipbook, int32 iIndex, UTexture2D** oTexture, UPaperSprite** oSprite, FOdysseyTextureConfiguration& ioTextureConfiguration)
 {
@@ -36,6 +35,9 @@ CreateKeyFrame(UPaperFlipbook* iFlipbook, int32 iIndex, UTexture2D** oTexture, U
     //If cancel is clicked, we do nothing
     if(!textureConfigurationWindow->GetWindowAnswer())
         return false;
+
+    // save all settings for future KeyFrame creations
+    ioTextureConfiguration = textureConfigurationWindow->GetConfiguration();
 
     FOdysseyTextureConfiguration textureConfiguration = ioTextureConfiguration;
     FString textureName = textureConfiguration.Name.ToString() + TEXT("_Texture");

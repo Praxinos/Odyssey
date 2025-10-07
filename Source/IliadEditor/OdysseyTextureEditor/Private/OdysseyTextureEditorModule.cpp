@@ -59,7 +59,7 @@ FOdysseyTextureEditorModule::RegisterAssetTypeActions()
     mOdysseyTypeActions = MakeShareable(new FOdysseyTextureAssetTypeActions(category));
 
     //Register created Asset Type Actions
-    assetTools.RegisterAssetTypeActions(mOdysseyTypeActions.ToSharedRef());
+    assetTools.RegisterAssetTypeActions( mOdysseyTypeActions.ToSharedRef() );
 }
 
 void
