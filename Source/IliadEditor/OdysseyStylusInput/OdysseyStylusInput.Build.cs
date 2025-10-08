@@ -45,13 +45,20 @@ namespace UnrealBuildTool.Rules
                     "EditorSubsystem",
                     "Engine",
                     "UnrealEd",
-                    "Wintab",
                     // ... add other public dependencies that you statically link with here ...
                 }
             );
 
             if (Target.Platform == UnrealTargetPlatform.Win64)
             {
+                PublicDependencyModuleNames.AddRange(
+                    new string[]
+                    {
+                        "Wintab",
+                        // ... add other public dependencies that you statically link with here ...
+                    }
+                );
+
                 PrivateDefinitions.AddRange(
                     new string[]
                     {
