@@ -154,6 +154,7 @@ FOdysseyPainterEditorVectorTransformToolHUD::DrawGizmo( const FOdysseyHUDElement
     FVector2D hudYAxisStart;
     FVector2D hudXAxisVector;
     FVector2D hudYAxisVector;
+    FVector2D hudCoords;
 
     GetWorldGizmo( mSelectionBox
                  , mGizmo
@@ -163,6 +164,7 @@ FOdysseyPainterEditorVectorTransformToolHUD::DrawGizmo( const FOdysseyHUDElement
                  , worldXAxisVector
                  , worldYAxisVector );
 
+    hudCoords = WorldPointToHUD( FVector2D( worldGizmo.x, worldGizmo.y ) );
     hudXAxisStart = WorldPointToHUD( FVector2D( worldXAxisStart.x, worldXAxisStart.y ) );
     hudYAxisStart = WorldPointToHUD( FVector2D( worldYAxisStart.x, worldYAxisStart.y ) );
     hudXAxisVector = WorldVectorToHUD( hudXAxisStart
@@ -173,14 +175,19 @@ FOdysseyPainterEditorVectorTransformToolHUD::DrawGizmo( const FOdysseyHUDElement
                                                 , worldYAxisVector.y ) );
 
     hudXAxisVector.Normalize();
-    hudXAxisStart  += ( hudXAxisVector *FOdysseyPainterEditorVectorTransformToolHUD::GIZMO_RADIUS );
+    hudXAxisStart  += ( hudXAxisVector * FOdysseyPainterEditorVectorTransformToolHUD::GIZMO_RADIUS );
     hudXAxisVector *= FOdysseyPainterEditorVectorTransformToolHUD::AXIS_LENGTH;
 
     hudYAxisVector.Normalize();
-    hudYAxisStart  += ( hudYAxisVector *FOdysseyPainterEditorVectorTransformToolHUD::GIZMO_RADIUS );
+    hudYAxisStart  += ( hudYAxisVector * FOdysseyPainterEditorVectorTransformToolHUD::GIZMO_RADIUS );
     hudYAxisVector *= FOdysseyPainterEditorVectorTransformToolHUD::AXIS_LENGTH;
 
     // Central circle
+    DrawPrimitiveHandle( iParams
+                       , hudCoords
+                       , FOdysseyPainterEditorVectorTransformToolHUD::GIZMO_RADIUS
+                       , gizmoColor
+                       , bgColor );
 /*
     iBLContext->setFillStyle( gizmoColor );
     iBLContext->fillCircle( worldGizmo.x, worldGizmo.y, GIZMO_RADIUS );
