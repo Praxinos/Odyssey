@@ -122,13 +122,23 @@ FOdysseyPainterEditorVectorTransformToolHUD::DrawScalers( const FOdysseyHUDEleme
     FLinearColor fgColor = FLinearColor( FOdysseyVectorHUD::GetForegroundColor() );
     FLinearColor bgColor = FLinearColor( FOdysseyVectorHUD::GetBackgroundColor() );
     FLinearColor hcColor = FLinearColor( FOdysseyVectorHUD::GetHighlightColor() );
+    double scalingRatioX = mSelectionBox.aabb ? mTransformTool->GetScalingRatioX() : 1.0f;
+    double scalingRatioY = mSelectionBox.aabb ? mTransformTool->GetScalingRatioY() : 1.0f;
     FSelectionBoxScaler texScaler[4];
 
     GetWorldScalers( mSelectionBox, texScaler);
 
+
+
     for( int i = 0; i < 4; i++ )
     {
-        FLinearColor scalerColor = ( mFlags & texScaler[i].flag ) ? hcColor : fgColor;
+        // this is a small fix to resolve an inconsistency between the handle that is picked and the handle
+        // that is highlighted, uniquely when the selection box is AABB (multiple objects are selected or
+        // the world option is forced )
+        int handleIndex = ( i + ( ( scalingRatioX < 0.0f ) ? 1 : 0 )
+                              + ( ( scalingRatioY < 0.0f ) ? 1 : 0 ) ) % 4;
+
+        FLinearColor scalerColor = ( mFlags & texScaler[handleIndex].flag ) ? hcColor : fgColor;
         FVector2D hudCoords = iParams.mTextureToHUD.Execute( FVector2D( texScaler[i].position.x
                                                                       , texScaler[i].position.y ) );
 

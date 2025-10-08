@@ -38,6 +38,8 @@ UOdysseyPainterEditorVectorTransformTool::UOdysseyPainterEditorVectorTransformTo
     : UOdysseyPainterEditorVectorBaseTool( MakeShared<FOdysseyPainterEditorVectorTransformToolHUD>( this ), false, true )
     , mPickedPivot( nullptr )
     , mDragging( false )
+    , mScalingRatioX( 1.0f )
+    , mScalingRatioY( 1.0f )
     , ShowInbetweens( eShowInbetweens::Surrounding )
     , PickingRadius(10.0f)
     , Uniform( true )
@@ -883,6 +885,18 @@ UOdysseyPainterEditorVectorTransformTool::MakeSpaceMatrixForScaling()
     BLMatrix2D::invert( mInverseSpaceMatrix, spaceMatrix );
 }
 
+double
+UOdysseyPainterEditorVectorTransformTool::GetScalingRatioX()
+{
+    return mScalingRatioX;
+}
+
+double
+UOdysseyPainterEditorVectorTransformTool::GetScalingRatioY()
+{
+    return mScalingRatioY;
+}
+
 void
 UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorGroupPaint* iScene
                                                               , const FOdysseyPoint& iPointInTexture )
@@ -909,14 +923,20 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorGr
             double ratio = ( localCoords ).Distance() / ( oldLocalCoords ).Distance();
             double sign = oldLocalCoords.DotProduct( localCoords ) > 0.0f ? 1.0f : -1.0f;
 
-            scalingMatrix.scale( ratio * sign, ratio * sign );
+            mScalingRatioX = ratio * sign;
+            mScalingRatioY = ratio * sign;
+
+            scalingMatrix.scale( mScalingRatioX, mScalingRatioY );
         }
         else
         {
             double xratio = ( localCoords.x ) / ( oldLocalCoords.x );
             double yratio = ( localCoords.y ) / ( oldLocalCoords.y );
 
-            scalingMatrix.scale( xratio, yratio );
+            mScalingRatioX = xratio;
+            mScalingRatioY = yratio;
+
+            scalingMatrix.scale( mScalingRatioX, mScalingRatioY );
         }
 
         if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_VERTEX )
@@ -1148,6 +1168,9 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseUpVector( FOdysseyVectorGroupPa
                                                          , const FOdysseyPoint& iPointInTexture
                                                          , const FKey& iKey )
 {
+    mScalingRatioX = 1.0f;
+    mScalingRatioY = 1.0f;
+
     if (iKey != EKeys::LeftMouseButton)
         return false;
 

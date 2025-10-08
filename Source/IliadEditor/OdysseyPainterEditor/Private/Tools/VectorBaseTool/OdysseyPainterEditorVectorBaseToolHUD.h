@@ -21,6 +21,7 @@ class FOdysseyVectorSection;
 typedef struct _FSelectionBox
 {
     bool inited;
+    bool aabb;
     ::ULIS::FRectD rect;
     BLMatrix2D worldMatrix;
     BLMatrix2D inverseWorldMatrix;
