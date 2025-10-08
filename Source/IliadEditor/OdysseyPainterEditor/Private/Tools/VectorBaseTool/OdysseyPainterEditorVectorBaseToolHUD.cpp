@@ -674,6 +674,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxVertexMode()
     double xmin, ymin, xmax, ymax;
 
     mSelectionBox.inited = false;
+    mSelectionBox.aabb = true;
     mSelectionBox.rect = ::ULIS::FRectD( 0, 0, 0, 0 );
     mSelectionBox.worldMatrix.reset(); /* = mScene->GetWorldMatrix()*/;
     mSelectionBox.inverseWorldMatrix.reset(); /* = mScene->GetInverseWorldMatrix()*/;
@@ -754,6 +755,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxObjectMode( bool iForc
     {
         FOdysseyVectorObject* selectedObject = selectedObjectList.size() ? selectedObjectList.front() : scene;
         mSelectionBox.inited = true;
+        mSelectionBox.aabb = false;
         mSelectionBox.rect = selectedObject->GetBBox( true, false );
         mSelectionBox.worldMatrix = selectedObject->GetWorldMatrix();
         mSelectionBox.inverseWorldMatrix = selectedObject->GetInverseWorldMatrix();
@@ -761,6 +763,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxObjectMode( bool iForc
     else
     {
         mSelectionBox.inited = false;
+        mSelectionBox.aabb = true;
         mSelectionBox.rect = ::ULIS::FRectD( 0, 0, 0, 0 );
         mSelectionBox.worldMatrix.reset(); /* = mScene->GetWorldMatrix()*/;
         mSelectionBox.inverseWorldMatrix.reset(); /* = mScene->GetInverseWorldMatrix()*/;
@@ -816,6 +819,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxInbetweenMode( bool iF
         FInbetweenerBreakdown* breakdown = mSelectedBreakdownList.front();
 
         mSelectionBox.inited = true;
+        mSelectionBox.aabb = false;
         mSelectionBox.rect = breakdown->GetTargetBBox( false );
         mSelectionBox.worldMatrix = breakdown->GetTargetWorldMatrix();
         mSelectionBox.inverseWorldMatrix = breakdown->GetTargetInverseWorldMatrix();
@@ -823,6 +827,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxInbetweenMode( bool iF
     else
     {
         mSelectionBox.inited = false;
+        mSelectionBox.aabb = true;
         mSelectionBox.rect = ::ULIS::FRectD( 0, 0, 0, 0 );
         mSelectionBox.worldMatrix.reset(); /* = mScene->GetWorldMatrix()*/;
         mSelectionBox.inverseWorldMatrix.reset(); /* = mScene->GetInverseWorldMatrix()*/;

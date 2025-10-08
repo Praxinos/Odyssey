@@ -55,6 +55,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTransformTool : public
 
         virtual void ExtendToolbar( UToolMenu* iToolMenu ) override;
 
+        double GetScalingRatioX();
+        double GetScalingRatioY();
+
     protected:
         //OdysseyPainterVectorBaseEditorTool overrides
         virtual uint64 LoadVector( FOdysseyVectorGroupPaint* iScene ) override;
@@ -113,6 +116,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTransformTool : public
         ::ULIS::FVec2D mSpaceGizmo;
         std::vector<TransformedObject> mTransformedObjectBuffer;
         std::vector<TransformedBreakdown> mTransformedBreakdownBuffer;
+        double mScalingRatioX;
+        double mScalingRatioY;
 
     public:
         UPROPERTY( EditAnywhere
