@@ -9,6 +9,7 @@
 #include "TextureCompiler.h"
 #include "Misc/TransactionObjectEvent.h"
 #include "Engine/TextureRenderTarget2D.h"
+#include "UObject/DevObjectVersion.h"
 
 FSimpleMulticastDelegate&
 UOdysseyAnimationPlayer::OnCursorFrameChanged()
