@@ -62,10 +62,12 @@ public:
 
 protected:
 
+#if WITH_EDITOR
     virtual FGuid CreatePossessable( UObject* ObjectToPossess ) override;
     //virtual FGuid CreateSpawnable( UObject* ObjectToSpawn ) override;
 
     FGuid FindOrAddBinding( UObject* ObjectToPossess );
+#endif
 
 public:
     UPROPERTY()
