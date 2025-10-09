@@ -17,6 +17,20 @@
 FOdysseyTextureAssetTypeActions::FOdysseyTextureAssetTypeActions( EAssetTypeCategories::Type iAssetCategory )
     : mMyAssetCategory( iAssetCategory )
 {
+    // will store default type actions for UTexture2D so that we can call the default actions for the type.
+    // it has to be done when the module is loaded first.
+    // see https://forums.unrealengine.com/t/extending-asset-type-actions/56902
+    static TSharedPtr<IAssetTypeActions> defaultTypeActions = nullptr;
+
+    // must be inited only once, hence the static status;
+    if ( defaultTypeActions == nullptr )
+    {
+        IAssetTools& assetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
+
+        defaultTypeActions = assetTools.GetAssetTypeActionsForClass( GetSupportedClass() ).Pin();
+    }
+
+    mDefaultTypeActions = defaultTypeActions;
 }
 
 FText
@@ -83,6 +97,12 @@ const FSlateBrush*
 FOdysseyTextureAssetTypeActions::GetIconBrush(const FAssetData& InAssetData, const FName InClassName) const
 {
     return FOdysseyStyle::GetBrush("ClassIcon.OdysseyTexture");
+}
+
+bool
+FOdysseyTextureAssetTypeActions::IsImportedAsset() const
+{
+    return mDefaultTypeActions.IsValid() ? mDefaultTypeActions->IsImportedAsset() : false;
 }
 
 #undef LOCTEXT_NAMESPACE

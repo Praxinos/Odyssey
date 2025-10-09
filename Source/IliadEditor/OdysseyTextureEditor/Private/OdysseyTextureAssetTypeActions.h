@@ -24,7 +24,9 @@ public:
     virtual const FSlateBrush* GetThumbnailBrush(const FAssetData& InAssetData, const FName InClassName) const override;
     virtual const FSlateBrush* GetIconBrush(const FAssetData& InAssetData, const FName InClassName) const override;
     // End of IAssetTypeActions interface
+    virtual bool IsImportedAsset() const override;
 
 private:
     EAssetTypeCategories::Type mMyAssetCategory;
+    TSharedPtr<IAssetTypeActions> mDefaultTypeActions;
 };
