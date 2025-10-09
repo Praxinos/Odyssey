@@ -30,7 +30,7 @@ struct ODYSSEYVECTOR_API FOdysseyVectorBrush
 {
     GENERATED_BODY()
 
-    UPROPERTY( EditAnywhere )
+    UPROPERTY( EditAnywhere, Category="Default" )
     UTexture2D* Texture;
 
     UPROPERTY( EditAnywhere
