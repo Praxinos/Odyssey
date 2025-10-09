@@ -308,11 +308,16 @@ ShotSequenceTools::SortBindings( TArray<AOdysseyAnimationActor*> iAnimationActor
 
     // Sort scene bindings by their sorting order/name
     // (This should match the native sorting of tracks inside shot)
-    Algo::StableSort( binding_and_animation_actors, []( const FBindingAndAnimationActor& iA, const FBindingAndAnimationActor& iB )
+    Algo::StableSort( binding_and_animation_actors, [iMovieScene]( const FBindingAndAnimationActor& iA, const FBindingAndAnimationActor& iB )
                       {
                           // If at least one of the binding was not already sorted (by drag'n drop in shot), use the name to sort both
                           if( iA.Binding->GetSortingOrder() == -1 || iB.Binding->GetSortingOrder() == -1 )
-                              return iA.Binding->GetName() < iB.Binding->GetName();
+                          {
+                              FString nameA = iMovieScene->GetObjectDisplayName( iA.Binding->GetObjectGuid() ).ToString();
+                              FString nameB = iMovieScene->GetObjectDisplayName( iB.Binding->GetObjectGuid() ).ToString();
+
+                              return nameA < nameB;
+                          }
                           // Otherwise just use the set sorting order
                           else
                               return iA.Binding->GetSortingOrder() < iB.Binding->GetSortingOrder();

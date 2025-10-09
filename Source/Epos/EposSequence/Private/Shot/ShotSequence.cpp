@@ -587,7 +587,7 @@ UShotSequence::Resize( int32 iNewDuration ) //override
     // "Master" tracks if needed
     //TArray<UMovieSceneTrack*> tracks = movie_scene->GetTracks();
 
-    TArray<FMovieSceneBinding> bindings = movie_scene->GetBindings();
+    TArray<FMovieSceneBinding> bindings = ((const UMovieScene*)movie_scene)->GetBindings();
     for( FMovieSceneBinding binding : bindings )
     {
         TArray<UMovieSceneTrack*> tracks = binding.GetTracks();

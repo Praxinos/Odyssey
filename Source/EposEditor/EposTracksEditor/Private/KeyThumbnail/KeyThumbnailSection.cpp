@@ -192,7 +192,9 @@ int32 FKeyThumbnailSection::OnPaintSection( FSequencerSectionPainter& InPainter 
             FSlateLayoutTransform( ThumbnailScale, FVector2D( PositionX - HorizontalCropOffset, PositionY ) )
         );
 
+PRAGMA_DISABLE_DEPRECATION_WARNINGS // TODO: XR Creative Framework relevant?
         if( IVREditorModule::Get().IsVREditorModeActive() )
+PRAGMA_ENABLE_DEPRECATION_WARNINGS
         {
             // In VR editor every widget is in the world and gamma corrected by the scene renderer.  Thumbnails will have already been gamma
             // corrected and so they need to be reversed

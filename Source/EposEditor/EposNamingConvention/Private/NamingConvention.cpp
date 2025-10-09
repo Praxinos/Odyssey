@@ -469,10 +469,11 @@ NamingConvention::GenerateAnimationActorPathName( const IMovieScenePlayer& iPlay
 
     //--- Find all animation track names
 
-    const TArray<FMovieSceneBinding>& bindings = iSequence.GetMovieScene()->GetBindings();
+    const UMovieScene* moviescene = iSequence.GetMovieScene();
+    const TArray<FMovieSceneBinding>& bindings = moviescene->GetBindings();
     TArray<FString> binding_names;
     for( auto binding : bindings )
-        binding_names.AddUnique( iSequence.GetMovieScene()->GetObjectDisplayName( binding.GetObjectGuid() ).ToString() );
+        binding_names.AddUnique( moviescene->GetObjectDisplayName( binding.GetObjectGuid() ).ToString() );
         // Don't use binding.GetName() because (for example) it is not updated when the name is changed directly in the shot track label (instead of the board section view)
         // binding.GetName() is still keeping the old "track" name
 
