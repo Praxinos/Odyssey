@@ -580,6 +580,10 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor")
     static void SelectBindings(const TArray<FMovieSceneBindingProxy>& ObjectBindings);
 
+    /** Deselect bindings */
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor")
+    static void DeselectBindings(const TArray<FMovieSceneBindingProxy>& ObjectBindings);
+
     /** Empties the current selection. */
     UFUNCTION(BlueprintCallable, Category = "Odyssey|Storyboard Editor")
     static void EmptySelection();

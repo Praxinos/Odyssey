@@ -280,7 +280,8 @@ ToolkitHelpers::CreatePropertyTrack( ISequencer* iSequencer, AActor* iActor, con
         break;
     }
 
-    //FGuid ComponentBinding = iSequencer->GetHandleToObject( PropertyOwner );
+    //const bool bCreateHandleIfMissing = false;
+    //FGuid ComponentBinding = Sequencer->GetHandleToObject( PropertyOwner, bCreateHandleIfMissing );
 
     //TODO: added in 5.2
     //if( bReplaceWithTransformTrack )

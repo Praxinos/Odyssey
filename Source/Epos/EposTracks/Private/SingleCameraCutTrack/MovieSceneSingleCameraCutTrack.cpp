@@ -52,6 +52,7 @@ UMovieSceneSingleCameraCutSection* UMovieSceneSingleCameraCutTrack::AddNewSingle
     UMovieSceneSingleCameraCutSection* NewSection = ExistingSection;
     if (ExistingSection != nullptr)
     {
+        ExistingSection->Modify();
         ExistingSection->SetCameraBindingID(CameraBindingID);
     }
     else

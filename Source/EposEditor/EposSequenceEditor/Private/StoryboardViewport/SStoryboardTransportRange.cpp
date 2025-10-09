@@ -12,6 +12,7 @@
 #include "Styles/EposSequenceEditorStyle.h"
 #include "ISequencer.h"
 #include "TimeToPixel.h"
+#include "TimeSliderArgs.h"
 
 #define LOCTEXT_NAMESPACE "SStoryboardTransportRange"
 
@@ -85,7 +86,8 @@ void SStoryboardTransportRange::SetTime(const FGeometry& MyGeometry, const FPoin
         FMovieSceneEditorData& EditorData = Sequencer->GetFocusedMovieSceneSequence()->GetMovieScene()->GetEditorData();
         double NewTimeSeconds = EditorData.ViewStart + (EditorData.ViewEnd - EditorData.ViewStart) * Lerp;
 
-        FFrameTime ScrubTime = NewTimeSeconds * Sequencer->GetFocusedTickResolution();
+        FFrameRate TickResolution = Sequencer->GetFocusedTickResolution();
+        FFrameTime ScrubTime = NewTimeSeconds * TickResolution;
 
         // Clamp first, snap to frame last
         if (Sequencer->GetSequencerSettings()->ShouldKeepCursorInPlayRangeWhileScrubbing())
@@ -94,7 +96,58 @@ void SStoryboardTransportRange::SetTime(const FGeometry& MyGeometry, const FPoin
             ScrubTime = UE::MovieScene::ClampToDiscreteRange(ScrubTime, PlaybackRange);
         }
 
-        Sequencer->SetLocalTime(ScrubTime, ESnapTimeMode::STM_All);
+        ENearestKeyOption NearestKeyOption = ENearestKeyOption::NKO_None;
+
+        TRange<double> ViewRange = Sequencer->GetFocusedMovieSceneSequence()->GetMovieScene()->GetEditorData().GetViewRange();
+
+        TRange<FFrameNumber> VisibleFrameRange(
+            ( ViewRange.GetLowerBoundValue() * TickResolution ).FloorToFrame(),
+            ( ViewRange.GetUpperBoundValue() * TickResolution ).CeilToFrame()
+        );
+
+        TArrayView<const FFrameNumber> Keys = ActiveKeyCollection.IsValid() ? ActiveKeyCollection->GetKeysInRange( VisibleFrameRange, EFindKeyType::FKT_All ) : TArrayView<const FFrameNumber>();
+
+        if( Keys.Num() > 0 )
+        {
+            if( Sequencer->GetSequencerSettings()->GetSnapPlayTimeToKeys() && ( Sequencer->GetSequencerSettings()->GetIsSnapEnabled() || FSlateApplication::Get().GetModifierKeys().IsShiftDown() ) )
+            {
+                EnumAddFlags( NearestKeyOption, ENearestKeyOption::NKO_SearchKeys );
+            }
+
+            if( Sequencer->GetSequencerSettings()->GetSnapPlayTimeToSections() && ( Sequencer->GetSequencerSettings()->GetIsSnapEnabled() || FSlateApplication::Get().GetModifierKeys().IsShiftDown() ) )
+            {
+                EnumAddFlags( NearestKeyOption, ENearestKeyOption::NKO_SearchSections );
+            }
+        }
+
+        TArray<FMovieSceneMarkedFrame> MarkedFrames = Sequencer->GetMarkedFrames();
+
+        if( MarkedFrames.Num() > 0 )
+        {
+            if( Sequencer->GetSequencerSettings()->GetSnapPlayTimeToMarkers() && ( Sequencer->GetSequencerSettings()->GetIsSnapEnabled() || FSlateApplication::Get().GetModifierKeys().IsShiftDown() ) )
+            {
+                EnumAddFlags( NearestKeyOption, ENearestKeyOption::NKO_SearchMarkers );
+            }
+        }
+
+        if( NearestKeyOption != ENearestKeyOption::NKO_None )
+        {
+            FFrameTime NearestKey = Sequencer->OnGetNearestKey( ScrubTime, NearestKeyOption );
+
+            FTimeToPixel TimeToPixelConverter( MyGeometry, ViewRange, Sequencer->GetFocusedTickResolution() );
+
+            const float ScrubPixel = TimeToPixelConverter.FrameToPixel( ScrubTime );
+            const float NearestKeyPixel = TimeToPixelConverter.FrameToPixel( NearestKey );
+
+            static float MouseTolerance = 20.f;
+
+            if( FMath::IsNearlyEqual( ScrubPixel, NearestKeyPixel, MouseTolerance ) )
+            {
+                ScrubTime = NearestKey;
+            }
+        }
+
+        Sequencer->SetLocalTime( ScrubTime, ESnapTimeMode::STM_None );
     }
 }
 
@@ -347,7 +400,7 @@ int32 SStoryboardTransportRange::OnPaint(const FPaintArgs& Args, const FGeometry
             AllottedGeometry.ToPaintGeometry(FVector2f(BrushWidth, TrackHeight), FSlateLayoutTransform(FVector2f(AllottedGeometry.GetLocalSize().X*PlaybackStartLerp, TrackOffsetY))),
             FEposSequenceEditorStyle::Get().GetBrush("CinematicViewportRangeStart"),
             DrawEffects,
-            FColor(32, 128, 32) // 120, 75, 50 (HSV)
+            Sequencer->GetSequencerSettings()->GetPlaybackRangeStartColor().ToFColor( true )
         );
 
         FSlateDrawElement::MakeBox(
@@ -356,7 +409,7 @@ int32 SStoryboardTransportRange::OnPaint(const FPaintArgs& Args, const FGeometry
             AllottedGeometry.ToPaintGeometry(FVector2f(BrushWidth, TrackHeight), FSlateLayoutTransform(FVector2f(AllottedGeometry.GetLocalSize().X*PlaybackEndLerp - BrushWidth, TrackOffsetY))),
             FEposSequenceEditorStyle::Get().GetBrush("CinematicViewportRangeEnd"),
             DrawEffects,
-            FColor(128, 32, 32) // 0, 75, 50 (HSV)
+            Sequencer->GetSequencerSettings()->GetPlaybackRangeEndColor().ToFColor( true )
         );
     }
 

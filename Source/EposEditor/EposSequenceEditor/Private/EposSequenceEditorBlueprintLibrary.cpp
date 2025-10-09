@@ -1291,6 +1291,17 @@ void UEposSequenceEditorBlueprintLibrary::SelectBindings( const TArray<FMovieSce
     }
 }
 
+void UEposSequenceEditorBlueprintLibrary::DeselectBindings(const TArray<FMovieSceneBindingProxy>& ObjectBindings)
+{
+    if (CurrentSequencer.IsValid())
+    {
+        for (const FMovieSceneBindingProxy& ObjectBinding : ObjectBindings)
+        {
+            CurrentSequencer.Pin()->DeselectObject(ObjectBinding.BindingID);
+        }
+    }
+}
+
 void UEposSequenceEditorBlueprintLibrary::EmptySelection()
 {
     if (CurrentSequencer.IsValid())

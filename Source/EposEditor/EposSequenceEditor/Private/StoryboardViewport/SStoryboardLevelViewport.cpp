@@ -757,9 +757,7 @@ public:
     virtual const FSlateBrush* OnGetViewportBorderBrush() const override { return nullptr; }
     virtual bool IsActorEditorContextVisible() const { return false; }
     virtual EVisibility GetSelectedActorsCurrentLevelTextVisibility() const override { return EVisibility::Collapsed; }
-    virtual EVisibility GetViewportControlsVisibility() const override { return EVisibility::Collapsed; }
 
-    //virtual TSharedPtr<SWidget> MakeViewportToolbar() { return nullptr; }
     virtual TSharedPtr<SWidget> BuildViewportToolbar() override
     {
         //Build our own toolbar
@@ -837,7 +835,6 @@ public:
 private:
     void MakeExternalViewportToolbar()
     {
-
         // Adding Film Overlay Options widget to new toolbars
         ExtendLevelToolbar();
 
