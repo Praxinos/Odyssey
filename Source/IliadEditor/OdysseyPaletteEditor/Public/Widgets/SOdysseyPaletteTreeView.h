@@ -119,6 +119,11 @@ protected:
      */
     void RenameCurrentEntry();
 
+    /**
+     * @brief Returns all Vector cells that use the entries in parameter
+     */
+    TArray<FOdysseyVectorCell*> GetVectorCellsUsedByEntries(TArray<UOdysseyPaletteEntry*> &iEntriesToRemove);
+
 protected:
     //Callbacks
     /**
