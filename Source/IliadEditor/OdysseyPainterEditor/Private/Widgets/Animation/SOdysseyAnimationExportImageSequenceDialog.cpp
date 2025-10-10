@@ -255,8 +255,8 @@ FOdysseyAnimationImageSequenceExporter::GetSources()
                 }
             }
 
-            // if no layer was selected, use the default layer
-            if ( selectedLayers.Num() == 0 )
+            // add the current layer
+            if ( selectedLayers.Find( layerStack->GetCurrentLayer() ) == INDEX_NONE )
             {
                 UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(layerStack->GetCurrentLayer());
 
