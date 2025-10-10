@@ -104,7 +104,9 @@ FReply SOdysseyPainterEditorToolTile::OnDrop(const FGeometry& MyGeometry, const 
 
     if (sourceCollection && sourceCollection != mCollection)
     {
-        sourceCollection->RemoveTool(sourceTool);
+        if(!sourceCollection->IsCollectionTransient())
+            sourceCollection->RemoveTool(sourceTool);
+
         int32 targetIndex = mCollection->GetIndexOfTool(mTool);
         UOdysseyPainterEditorTool* tool = mCollection->AddTool(sourceTool, targetIndex);
 

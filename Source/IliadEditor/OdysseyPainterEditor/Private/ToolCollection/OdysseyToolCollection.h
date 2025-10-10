@@ -41,6 +41,6 @@ public:
     FOnCollectionChanged OnCollectionChanged;
 
 private:
-    UPROPERTY(Instanced)
-    TArray<UOdysseyPainterEditorTool*> mToolsConfig;
+    UPROPERTY()
+    TArray<TObjectPtr<UOdysseyPainterEditorTool>> mToolsConfig;
 };

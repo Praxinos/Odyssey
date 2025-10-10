@@ -55,13 +55,6 @@ TSharedPtr<SWidget>
 FOdysseyPainterEditorToolCollectionTab::CreateWidget()
 {
     TSharedPtr<SWidget> widget = SNew(SVerticalBox)
-        + SVerticalBox::Slot()
-        .AutoHeight()
-        [
-            SNew(SPositiveActionButton)
-                .Text(LOCTEXT("ToolCollection.add-tool-collection", "Add Tool Collection"))
-                .OnGetMenuContent(this, &FOdysseyPainterEditorToolCollectionTab::OnGetAddToolCollectionMenuContent)
-        ]
         + SVerticalBox::Slot() //Recent tools
         .AutoHeight()
         [
@@ -69,7 +62,14 @@ FOdysseyPainterEditorToolCollectionTab::CreateWidget()
                 .Editor(mEditor)
                 .ToolCollection(mEditor->GetRecentTools())
         ]
-        + SVerticalBox::Slot() //Recent tools
+        + SVerticalBox::Slot()
+        .AutoHeight()
+        [
+            SNew(SPositiveActionButton)
+                .Text(LOCTEXT("ToolCollection.add-tool-collection", "Add Tool Collection"))
+                .OnGetMenuContent(this, &FOdysseyPainterEditorToolCollectionTab::OnGetAddToolCollectionMenuContent)
+        ]
+        + SVerticalBox::Slot()
         .AutoHeight()
         [
             SAssignNew(mCollectionsListView, SListView<TWeakObjectPtr<UOdysseyToolCollection>>)

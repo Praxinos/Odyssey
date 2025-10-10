@@ -189,13 +189,13 @@ private:
 
 public:
     UPROPERTY(meta=(ForceShowEngineContent, ForceShowPluginContent))
-    UOdysseyBrush* Brush;
+    TObjectPtr<UOdysseyBrush> Brush;
 
     UPROPERTY()
-    UOdysseyBrushAssetBase* BrushInstance;
+    TObjectPtr<UOdysseyBrushAssetBase> BrushInstance;
 
     UPROPERTY()
-    UOdysseyBrushOptions* BrushOptions;
+    TObjectPtr<UOdysseyBrushOptions> BrushOptions;
 
     UPROPERTY(EditAnywhere, Category="Shape")
     FOdysseyShapes Shapes;
