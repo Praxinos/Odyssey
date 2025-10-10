@@ -33,6 +33,12 @@ UOdysseyLayerStack::PostInitProperties()
         return;
 
     LayerRoot = NewObject<UOdysseyLayerRoot>(this, NAME_None, RF_Public | RF_Transactional);
+
+#if WITH_EDITOR
+    mLayerSelection = USelection::CreateObjectSelection(this, NAME_None, RF_Transactional);
+    mLayerSelection->SetElementSelectionSet(NewObject<UTypedElementSelectionSet>(mLayerSelection, NAME_None, RF_Transactional));
+    mLayerSelection->AddToRoot();
+#endif
 }
 
 void
@@ -48,10 +54,6 @@ UOdysseyLayerStack::PostLoad()
     {
         CurrentLayer = rootLayers[0];
     }
-
-    mLayerSelection = USelection::CreateObjectSelection(GetTransientPackage(), NAME_None, RF_Transactional);
-    mLayerSelection->SetElementSelectionSet(NewObject<UTypedElementSelectionSet>(mLayerSelection, NAME_None, RF_Transactional));
-    mLayerSelection->AddToRoot();
 #endif
 }
 

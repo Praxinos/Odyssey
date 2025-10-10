@@ -295,9 +295,6 @@ protected:
 #if WITH_EDITORONLY_DATA
     UPROPERTY()
     TObjectPtr<UOdysseyLayer> CurrentLayer;
-
-    UPROPERTY()
-    USelection* mLayerSelection;
 #endif
 
     UPROPERTY()
@@ -314,5 +311,6 @@ protected:
 private:
 #if WITH_EDITOR
     TSharedRef<FOdysseyLayerCellSelection> mCellSelection;
+    USelection* mLayerSelection;
 #endif
 };
