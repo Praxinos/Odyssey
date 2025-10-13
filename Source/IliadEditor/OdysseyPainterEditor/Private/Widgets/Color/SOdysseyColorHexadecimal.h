@@ -27,13 +27,6 @@ public:
     void Construct(const FArguments& InArgs);
 
 private:
-    // Private Callbacks
-    bool HexBoxIsValidChar( TCHAR iChar ) const;
-    FReply HexBoxOnKeyChar( const FGeometry&, const FCharacterEvent& iEvent ) const;
-    void HexBoxOnTextChanged( const FText& iText );
-    void HexBoxOnTextCommited( const FText&, ETextCommit::Type );
-    FText GetColorHex() const;
-
     FText GetHexText() const;
     void OnHexTextChanged( const FText& iText );
     void OnHexTextCommitted(const FText& Text, ETextCommit::Type CommitType);
