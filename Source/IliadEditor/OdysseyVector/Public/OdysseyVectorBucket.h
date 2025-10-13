@@ -275,7 +275,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorBucket : public FOdysseyVectorPoint
         /* The Palette Entry associated with this vector object, if any*/
         UOdysseyPaletteEntry* mPaletteEntry;
         int mPaletteSet;
-        FGuid mPaletteSetID;
         ::ULIS::FVec2D mLinearP0;
         ::ULIS::FVec2D mLinearP1;
 };

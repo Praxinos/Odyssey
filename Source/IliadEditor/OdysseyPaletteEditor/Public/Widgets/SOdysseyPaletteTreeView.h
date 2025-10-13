@@ -11,6 +11,7 @@
 
 class UOdysseyPalette;
 class UOdysseyPaletteEntryColor;
+class FOdysseyVectorCell;
 
 /**
  * Implements the Palette widget
@@ -114,6 +115,11 @@ protected:
      */
     void RenameCurrentEntry();
 
+    /**
+     * @brief Returns all Vector cells that use the entries in parameter
+     */
+    TArray<FOdysseyVectorCell*> GetVectorCellsUsedByEntries(TArray<UOdysseyPaletteEntry*> &iEntriesToRemove);
+
 protected:
     //Callbacks
     /**
@@ -171,6 +177,9 @@ protected:
     UOdysseyPaletteEntry* mSelectedEntry;
     FOnCurrentColorEntryChanged mOnCurrentColorEntryChanged;
     TSharedPtr<UE::Slate::Containers::TObservableArray<UOdysseyPaletteEntry*>> mItemsSource;
+
+    FDelegateHandle mUndoHandle;
+    FDelegateHandle mRedoHandle;
 
     TSharedRef<FUICommandList> mCommandList;
 

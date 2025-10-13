@@ -35,6 +35,7 @@ namespace UnrealBuildTool.Rules
                 new string[] {
                     // ... add other private include paths required here ...
                     Path.Combine(ModuleDirectory, "Private", "Widgets"),
+                    Path.Combine(ModuleDirectory, "Private", "UndoRedo"),
                     Path.Combine(ModuleDirectory, "Private", "DragDropOperations"),
                 }
                 );

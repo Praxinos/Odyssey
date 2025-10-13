@@ -13,12 +13,24 @@
 #include "SOdysseyPaletteFolderRow.h"
 #include "SOdysseyPaletteColorRow.h"
 
-#include "ToolMenus.h"
+#include "OdysseyAnimation.h"
+#include "OdysseyAnimationLayerImageVector.h"
+#include "OdysseyLayer.h"
+#include "OdysseyTextureLayerImageVector.h"
+#include "OdysseyTextureLayerStackUserData.h"
+#include "OdysseyVectorCell.h"
+#include "OdysseyVectorObject.h"
+
+#include "AssetRegistry/AssetRegistryModule.h"
+#include "AssetRegistry/IAssetRegistry.h"
 #include "Framework/Commands/GenericCommands.h"
 #include "ToolMenuContext.h"
+#include "ToolMenus.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
+#include "UObject/UObjectGlobals.h"
 #include "UObject/SavePackage.h"
 #include "ISinglePropertyView.h"
+#include "OdysseyPaletteUndoRemovePaletteEntry.h"
 
 
 #define LOCTEXT_NAMESPACE "Palette"
@@ -446,7 +458,21 @@ SOdysseyPaletteTreeView::DeleteSelectedEntries()
     for (UOdysseyPaletteEntry* parent : parents)
         FOdysseyObjectEditorUtils::PreChangePropertyValue(parent, "Children");
 
+    TArray<FOdysseyVectorCell*> cells = GetVectorCellsUsedByEntries(entriesToRemove);
+
     mPalette->RemoveEntries(entriesToRemove);
+
+    for (FOdysseyVectorCell* cell : cells)
+    {
+        cell->GetLayer()->RequestRedraw(cell, 0);
+    }
+
+    if (GUndo)
+    {
+        FOdysseyPaletteUndoRemovePaletteEntry* undo = new FOdysseyPaletteUndoRemovePaletteEntry(cells);
+
+        GUndo->StoreUndo(GEditor, TUniquePtr<FChange>(undo));
+    }
 
     //Call propertyPostChange in a stable state of the palette
     for (UOdysseyPaletteEntry* entry : entriesToRemove)
@@ -470,14 +496,14 @@ SOdysseyPaletteTreeView::CanDeleteSelectedEntries()
         return false;
 
     //If one of the root layers is not selected, we can delete selected entries
-    /*const TArray<UOdysseyPaletteEntry*>& rootEntries = mPalette->GetRootEntries();
+    const TArray<UOdysseyPaletteEntry*>& rootEntries = mPalette->GetRootEntries();
     for (UOdysseyPaletteEntry* rootEntry : rootEntries)
     {
         if (!selectedEntries.Contains(rootEntry))
             return true;
-    }*/
+    }
 
-    return true;
+    return false;
 }
 
 void
@@ -515,6 +541,82 @@ SOdysseyPaletteTreeView::RenameCurrentEntry()
 
     mIsRenamePending = true; //has to come before ScrollItemIntoView() in case the item is already into view, which will trigger OnItemScrolledIntoView() immediately
     RequestScrollIntoView(mSelectedEntry);
+}
+
+TArray<FOdysseyVectorCell*> SOdysseyPaletteTreeView::GetVectorCellsUsedByEntries(TArray<UOdysseyPaletteEntry*> &iEntriesToRemove)
+{
+    if( iEntriesToRemove.Num() <= 0 )
+        return TArray<FOdysseyVectorCell*>();
+
+    UOdysseyPalette* palette = iEntriesToRemove[0]->GetPalette(); //All entries in parameter have the same palette
+    TArray<FOdysseyVectorBucket*> buckets;
+
+    FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
+    IAssetRegistry& AssetRegistry = AssetRegistryModule.Get();
+
+    FAssetData AssetData = AssetRegistry.GetAssetByObjectPath(FSoftObjectPath(mPalette->GetPathName()));
+    FName AssetPath;
+
+    TArray<FName> outDependencies;
+
+    if (AssetData.IsValid())
+    {
+        AssetPath = AssetData.PackageName;
+    }
+
+    AssetRegistry.GetReferencers(AssetPath, outDependencies);
+
+    for( int i = 0; i < outDependencies.Num(); i++ )
+    {
+        UOdysseyAnimation* animation = LoadObject<UOdysseyAnimation>(nullptr, *outDependencies[i].ToString());
+        UTexture2D* texture = LoadObject<UTexture2D>(nullptr, *outDependencies[i].ToString());
+
+        if( animation )
+        {
+            for( UOdysseyLayer* layer : animation->GetLayerStack()->GetLayers() )
+            {
+                UOdysseyAnimationLayerImageVector* imageVectorLayer = Cast< UOdysseyAnimationLayerImageVector >(layer);
+                if( imageVectorLayer )
+                {
+                    for (UOdysseyPaletteEntry* entry : iEntriesToRemove)
+                    {
+                        FOdysseyVectorObject::GetBucketsFromPaletteEntryRecursively(imageVectorLayer->GetVectorLayer().Get(), entry, buckets);
+                    }
+                }
+            }
+        }
+
+        if (texture)
+        {
+            UOdysseyTextureLayerStackUserData* textureUserData = Cast<UOdysseyTextureLayerStackUserData>(texture->GetAssetUserDataOfClass(UOdysseyTextureLayerStackUserData::StaticClass()));
+            if( textureUserData )
+            {
+                for (UOdysseyLayer* layer : textureUserData->GetLayerStack()->GetLayers())
+                {
+                    UOdysseyTextureLayerImageVector* imageVectorLayer = Cast< UOdysseyTextureLayerImageVector >(layer);
+                    if (imageVectorLayer)
+                    {
+                        for (UOdysseyPaletteEntry* entry : iEntriesToRemove)
+                        {
+                            FOdysseyVectorObject::GetBucketsFromPaletteEntryRecursively(imageVectorLayer->GetVectorLayer().Get(), entry, buckets);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    TArray<FOdysseyVectorCell*> cells;
+    for (FOdysseyVectorBucket* bucket : buckets)
+    {
+        FOdysseyVectorCell* cell = bucket->GetOwner()->GetCell();
+        if( cells.Find(cell) == INDEX_NONE )
+        {
+            cells.Add(cell);
+        }
+    }
+
+    return cells;
 }
 
 void
