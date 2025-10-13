@@ -261,7 +261,7 @@ UOdysseyTextureLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
     TSharedPtr<::ULIS::FBlock> block = MakeShareable(new ::ULIS::FBlock( rect.Width(), rect.Height(), format ));
     CopyImageToBlock(OutImage, block.Get());
 
-    FOdysseyRasterBlockMutator mutator(RasterBlock);
+    FOdysseyRasterBlockMutator mutator( GetRasterBlock() );
     mutator.Copy(block, {::ULISUtils::ToULISRectI(rect)});
     mutator.Commit();
 }
