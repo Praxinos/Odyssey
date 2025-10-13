@@ -648,7 +648,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
                               , std::function<uint64(FOdysseyVectorObject*,uint64)> iCallback );
         bool IsVisible( bool iHierarchical );
         void SetVisible( bool iVisible );
-        void InvalideTree( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags );
+        void InvalidateTree( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags );
         virtual FColor GetHUDColor();
         static void GetBucketsFromPaletteEntryRecursively( FOdysseyVectorObject* iObject
                                                          , UOdysseyPaletteEntry* iPaletteEntry

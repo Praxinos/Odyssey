@@ -202,55 +202,58 @@ FOdysseyVectorEngine::Render( BLContext* iBLContext
         mHorizontalLineBuffer.resize( mRenderData.size.h );
     }
 
-    for( FOdysseyVectorObject* child : iCell->GetChildrenList() )
+    FOdysseyVectorGroupPaint* scene = iCell->GetScene();
+
+    if( scene->IsVisible( false ) )
     {
-        FOdysseyVectorGroupPaint* scene = static_cast<FOdysseyVectorGroupPaint*>(child);
-
-        if( scene->IsVisible( false ) )
+        if( sanitizedRect.Area() )
         {
-            if( sanitizedRect.Area() )
-            {
-                BLRgba32 blFillColor;
-                FColor fillColor = ( iDrawingFlags & FOdysseyVectorEngine::DRAWING_IGNORECOLOR ) ? scene->GetMonochromeColor()
-                                                                                                 : scene->GetBackgroundColor();
+            BLRgba32 blFillColor;
+            FColor fillColor = ( iDrawingFlags & FOdysseyVectorEngine::DRAWING_IGNORECOLOR ) ? scene->GetMonochromeColor()
+                                                                                             : scene->GetBackgroundColor();
 
 
-                iBLContext->save();
-                iBLContext->setCompOp( BL_COMP_OP_SRC_COPY );
+            iBLContext->save();
+            iBLContext->setCompOp( BL_COMP_OP_SRC_COPY );
 
-                blFillColor.setR( fillColor.R );
-                blFillColor.setG( fillColor.G );
-                blFillColor.setB( fillColor.B );
-                blFillColor.setA( fillColor.A );
+            blFillColor.setR( fillColor.R );
+            blFillColor.setG( fillColor.G );
+            blFillColor.setB( fillColor.B );
+            blFillColor.setA( fillColor.A );
 
-                iBLContext->setFillStyle( blFillColor );
+            iBLContext->setFillStyle( blFillColor );
 
-                iBLContext->clipToRect( BLRect( sanitizedRect.x - 1
-                                              , sanitizedRect.y - 1
-                                              , sanitizedRect.w + 2
-                                              , sanitizedRect.h + 2 ) );
-                // Note: we enlarge the block 1 pixel because when FOdysseyVectorBlock renders,
-                // the rect seems to be 1 pixel larger. If we don't do this, then the block
-                // isn't filled fully and this creates an artefact on the screen.
-                iBLContext->fillRect( BLRect( sanitizedRect.x - 1
+            iBLContext->clipToRect( BLRect( sanitizedRect.x - 1
                                             , sanitizedRect.y - 1
                                             , sanitizedRect.w + 2
                                             , sanitizedRect.h + 2 ) );
+            // Note: we enlarge the block 1 pixel because when FOdysseyVectorBlock renders,
+            // the rect seems to be 1 pixel larger. If we don't do this, then the block
+            // isn't filled fully and this creates an artefact on the screen.
+            iBLContext->fillRect( BLRect( sanitizedRect.x - 1
+                                        , sanitizedRect.y - 1
+                                        , sanitizedRect.w + 2
+                                        , sanitizedRect.h + 2 ) );
 
-                scene->Draw( iBLContext, this, sanitizedRect, 1.0f, iDrawingFlags );
+            scene->Draw( iBLContext, this, sanitizedRect, 1.0f, iDrawingFlags );
 
-                //--- uncomment to view the invalidation rectangle --- //
-                //iBLContext->setStrokeWidth( 2.0f );
-                //iBLContext->setStrokeStyle( BLRgba32( 0, 255, 0, 255 ) );
-                //iBLContext->strokeRect( BLRect( sanitizedRect.x
-                //                              , sanitizedRect.y
-                //                              , sanitizedRect.w
-                //                              , sanitizedRect.h ) );
-                //------------------------------------------------------//
+            //--- uncomment to view the invalidation rectangle --- //
+            //iBLContext->setStrokeWidth( 2.0f );
+            //iBLContext->setStrokeStyle( BLRgba32( 0, 255, 0, 255 ) );
+            //iBLContext->strokeRect( BLRect( sanitizedRect.x
+            //                              , sanitizedRect.y
+            //                              , sanitizedRect.w
+            //                              , sanitizedRect.h ) );
+            //------------------------------------------------------//
 
-                iBLContext->restore();
-            }
+            iBLContext->restore();
         }
+    }
+    else
+    {
+        iBLContext->save();
+        iBLContext->clearAll();
+        iBLContext->restore();
     }
 
     if( iCell->GetLayer() )

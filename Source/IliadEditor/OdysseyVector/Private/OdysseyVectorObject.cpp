@@ -578,24 +578,31 @@ FOdysseyVectorObject::RecursiveRemoveTagByType( uint32 iTagType
 }
 
 void
-FOdysseyVectorObject::InvalideTree( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags  )
+FOdysseyVectorObject::InvalidateTree( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags  )
 {
     Invalidate( iInvalidationFlags );
 
-
     for( FOdysseyVectorObject* child : mChildrenList )
     {
-        child->InvalideTree( iInvalidationFlags );
+        child->InvalidateTree( iInvalidationFlags );
     }
 }
 
 void
 FOdysseyVectorObject::SetVisible( bool iVisible )
 {
+    FOdysseyVectorCell* cell = GetCell();
+
     bVisible = iVisible;
 
     // visibility has consequences on the whole tree. We then have to invalidate the whole tree.
-    InvalideTree( FOdysseyVectorObjectInvalidationFlags() );
+    InvalidateTree( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::PARAM) );
+
+    // auto invalidation of the whole region that needs to be redrawn
+    if( cell )
+    {
+        cell->InvalidateRect( GetBBox( true, true ) );
+    }
 }
 
 bool
