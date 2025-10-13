@@ -206,17 +206,22 @@ SOdysseyPainterEditorVectorSceneDetailsView::UnbindLayerDelegates()
 void
 SOdysseyPainterEditorVectorSceneDetailsView::UpdateCurrentLayer( UOdysseyLayerStack* iLayerStack )
 {
-    UOdysseyAnimationLayerImageVector* animationVectorLayer = Cast<UOdysseyAnimationLayerImageVector>(iLayerStack->GetCurrentLayer());
-    UOdysseyTextureLayerImageVector* textureVectorLayer = Cast<UOdysseyTextureLayerImageVector>(iLayerStack->GetCurrentLayer());
-
-    if( animationVectorLayer )
+    //warning. The CurrentLayerStack delegate is STATIC. The iLayerStack received might not belong to this editor
+    if( mEditor->LayerStack() == iLayerStack )
     {
-        mVectorLayer = animationVectorLayer->GetVectorLayer();
+        UOdysseyAnimationLayerImageVector* animationVectorLayer = Cast<UOdysseyAnimationLayerImageVector>(iLayerStack->GetCurrentLayer());
+        UOdysseyTextureLayerImageVector* textureVectorLayer = Cast<UOdysseyTextureLayerImageVector>(iLayerStack->GetCurrentLayer());
+
+        if( animationVectorLayer )
+        {
+            mVectorLayer = animationVectorLayer->GetVectorLayer();
+        }
+
+        if( textureVectorLayer )
+        {
+            mVectorLayer = textureVectorLayer->GetVectorLayer();
+        }
     }
-
-    if( textureVectorLayer )
-    {
-        mVectorLayer = textureVectorLayer->GetVectorLayer();    }
 }
 
 void
