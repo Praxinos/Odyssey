@@ -324,6 +324,60 @@ FOdysseyVectorObject::Update( uint32 iUpdateFlags )
     UnlockDrawing();
 }
 
+// static
+void
+FOdysseyVectorObject::GetBucketsFromPaletteEntryRecursively( FOdysseyVectorObject* iObject
+                                                           , UOdysseyPaletteEntry* iPaletteEntry
+                                                           , TArray<FOdysseyVectorBucket*>& oBucketArray )
+{
+    std::list<FOdysseyVectorBucket*> bucketList;
+
+    GetBucketsFromPaletteEntryRecursively( iObject, iPaletteEntry, bucketList );
+
+    oBucketArray.Reserve( oBucketArray.Num() + bucketList.size() );
+
+    for( FOdysseyVectorBucket* bucket : bucketList )
+    {
+        oBucketArray.Add( bucket );
+    }
+}
+
+// static
+void
+FOdysseyVectorObject::GetBucketsFromPaletteEntryRecursively( FOdysseyVectorObject* iObject
+                                                           , UOdysseyPaletteEntry* iPaletteEntry
+                                                           , std::list<FOdysseyVectorBucket*>& oBucketList )
+{
+    if( iObject->GetForegroundBucket().GetPaletteEntry() == iPaletteEntry )
+    {
+        oBucketList.push_back( &iObject->GetForegroundBucket() );
+    }
+
+    if( iObject->GetBackgroundBucket().GetPaletteEntry() == iPaletteEntry )
+    {
+        oBucketList.push_back( &iObject->GetBackgroundBucket() );
+    }
+
+    if( iObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+    {
+        FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(iObject);
+
+        for( FOdysseyVectorBucket* bucket : paintGroup->GetBucketList() )
+        {
+            if( bucket->GetPaletteEntry() == iPaletteEntry )
+            {
+                oBucketList.push_back( bucket );
+            }
+        }
+    }
+
+    // recurse
+    for( FOdysseyVectorObject* child : iObject->GetChildrenList() )
+    {
+        GetBucketsFromPaletteEntryRecursively( child, iPaletteEntry, oBucketList );
+    }
+}
+
 void
 FOdysseyVectorObject::SetSelected( bool iIsSelected )
 {
