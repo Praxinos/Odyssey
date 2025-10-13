@@ -19,7 +19,6 @@ UOdysseyLayerStack::~UOdysseyLayerStack()
 UOdysseyLayerStack::UOdysseyLayerStack()
 #if WITH_EDITOR
     : mCellSelection(MakeShared<FOdysseyLayerCellSelection>(this))
-    , mLayerSelection( nullptr )
 #endif
 {
 }
@@ -35,9 +34,9 @@ UOdysseyLayerStack::PostInitProperties()
     LayerRoot = NewObject<UOdysseyLayerRoot>(this, NAME_None, RF_Public | RF_Transactional);
 
 #if WITH_EDITOR
-    mLayerSelection = USelection::CreateObjectSelection(this, NAME_None, RF_Transactional);
-    mLayerSelection->SetElementSelectionSet(NewObject<UTypedElementSelectionSet>(mLayerSelection, NAME_None, RF_Transactional));
-    mLayerSelection->AddToRoot();
+    LayerSelection = USelection::CreateObjectSelection(this, NAME_None, RF_Transactional);
+    LayerSelection->SetElementSelectionSet(NewObject<UTypedElementSelectionSet>(LayerSelection, NAME_None, RF_Transactional));
+    //LayerSelection->AddToRoot();
 #endif
 }
 
@@ -648,25 +647,25 @@ UOdysseyLayerStack::CopyLayerInternal(UOdysseyLayer* iLayer, UOdysseyLayer* iPar
 bool
 UOdysseyLayerStack::IsLayerSelected( const UOdysseyLayer* iLayer ) const
 {
-    return mLayerSelection->IsSelected( iLayer );
+    return LayerSelection->IsSelected( iLayer );
 }
 
 void
 UOdysseyLayerStack::SelectLayer( UOdysseyLayer* iLayer )
 {
-    mLayerSelection->Select( iLayer );
+    LayerSelection->Select( iLayer );
 }
 
 void
 UOdysseyLayerStack::DeselectAllLayers()
 {
-    mLayerSelection->DeselectAll();
+    LayerSelection->DeselectAll();
 }
 
 void
 UOdysseyLayerStack::DeselectLayer( UOdysseyLayer* iLayer )
 {
-    mLayerSelection->Deselect( iLayer );
+    LayerSelection->Deselect( iLayer );
 }
 #endif
 
