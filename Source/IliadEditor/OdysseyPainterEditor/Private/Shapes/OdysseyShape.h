@@ -89,6 +89,7 @@ public:
 
 public:
     // Getters
+    FSimpleMulticastDelegate& OnBegin() { return mOnBegin; }
     FOnInteractive& OnInteractive() { return mOnInteractive; }
     FOnCommit& OnCommit() { return mOnCommit; }
     FSimpleMulticastDelegate& OnAbort() { return mOnAbort; }
@@ -97,6 +98,7 @@ protected:
     TArray<FOdysseyPoint> GeneratePointsFromFunction(TFunction<FVector2D(float)> iFunction) const;
 
 protected:
+    FSimpleMulticastDelegate mOnBegin;
     FOnInteractive mOnInteractive;
     FOnCommit mOnCommit;
     FSimpleMulticastDelegate mOnAbort;

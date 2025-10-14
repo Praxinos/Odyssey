@@ -58,7 +58,9 @@ public:
 
 private:
     // Internal - Callbacks
+    void OnShapeBegin();
     void OnShapeCommit(const TArray<FOdysseyPoint>& iPoints, bool iReset);
+    void OnShapeAbort();
 
 protected:
     UPROPERTY(EditAnywhere, Category="Shape")
@@ -66,4 +68,5 @@ protected:
 
     EOdysseySelectionState mSelectionState;
     TSharedPtr<FOdysseyHUDElement> mShapeHUD;
+    TSharedPtr<FScopedTransaction> mTransaction;
 };

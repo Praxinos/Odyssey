@@ -16,11 +16,6 @@ class FOdysseyRasterBlock;
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPaintEngine
 {
-public:
-    // Delegates
-
-    // Any type of painting delegates (stroke, clear, fill, etc...)
-    //DECLARE_DELEGATE_RetVal_OneParam(FOdysseyBlendParameters, FOnPreUpdate, const FOdysseyBlendParameters& iBlendParameters);
 
 public:
     // Destructor
@@ -31,20 +26,13 @@ public:
 
 public:
     // Setters
-
-    // Sets the Block on which the Paint Engine will draw
     void RasterBlock(TSharedPtr<FOdysseyRasterBlock> iRasterBlock);
-
     void SetMaskBlock(TSharedPtr<::ULIS::FBlock> iMaskBlock);
 
 public:
     // Getters
-
-    //Returns the PaintBlock (Stroke Block), use with caution as it is mostly used by the brush in an asynchronous way
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> PaintBlock();
-
-    // Delegates
-    //FOnPreUpdate& OnPreUpdateDelegate() { return mOnPreUpdateDelegate; }
+    TSharedPtr<::ULIS::FBlock> PaintBlock();
+    TSharedPtr<FOdysseyRasterBlock> GetRasterBlock() const;
 
 public:
     // Update Edited block according to PaintBlock content without commiting
@@ -60,6 +48,8 @@ public:
 private:
     // Internal Blocks Management
     static void PaintBlockChanged( const ::ULIS::FBlock* iBlock, const ::ULIS::FRectI* iRects, const uint32 iNumRects, void* iInfo );
+
+    void OnRasterBlockChanged(const TArray<::ULIS::FRectI>& iRects);
 
     // Internal Methods
     void ClearPaintBlock();
@@ -80,19 +70,14 @@ private:
     TSharedPtr<FOdysseyRasterBlock> mRasterBlock;
     FOdysseyRasterBlockMutator mRasterBlockMutator;
 
-    //TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mEditedBlock; // The Block to edit (mPaintBlock over mOriginalBlock)
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mPaintBlock; // The Block containing only the modified tiles
+    TSharedPtr<::ULIS::FBlock> mPaintBlock; // The Block containing only the modified tiles
     TSharedPtr<::ULIS::FBlock> mMaskBlock;
-    //TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mOriginalBlock; // The Block containing the edited block before being edited
 
     //Options
     FOdysseyBlendParameters             mPreviousBlendParameters;
 
-    // Delegates
-    //FOnPreUpdate                        mOnPreUpdateDelegate;
-
     //Internal
     TArray<::ULIS::FRectI>              mInvalidRects;
     bool mIsBeforeUndoBound;
-    //FOdysseyInvalidTileMap                 mInvalidMap;
+    bool mIsChangingBlock = false;
 };

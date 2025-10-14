@@ -28,6 +28,8 @@ UOdysseyBezierShape::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKe
     {
         mEventState = eEventState::EndPoint;
 
+        mOnBegin.Broadcast();
+
         //Bezier Shape does not manage stylus params, so we create a new OdysseyPoint from scratch
         FOdysseyPoint point = FOdysseyPoint(iPointInTexture.x, iPointInTexture.y);
         mStartPoint = point;

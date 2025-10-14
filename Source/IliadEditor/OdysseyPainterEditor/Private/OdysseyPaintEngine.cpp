@@ -35,6 +35,10 @@ FOdysseyPaintEngine::RasterBlock(TSharedPtr<FOdysseyRasterBlock> iRasterBlock)
 
     //Automatically commit the previous block
     Commit(mPreviousBlendParameters);
+
+    if (mRasterBlock)
+        mRasterBlock->OnBlockChanged().RemoveAll(this);
+
     if (!iRasterBlock)
     {
         mRasterBlockMutator.SetRasterBlock(nullptr);
@@ -48,6 +52,7 @@ FOdysseyPaintEngine::RasterBlock(TSharedPtr<FOdysseyRasterBlock> iRasterBlock)
     }
 
     mRasterBlock = iRasterBlock;
+    mRasterBlock->OnBlockChanged().AddRaw(this, &FOdysseyPaintEngine::OnRasterBlockChanged);
     mRasterBlockMutator.SetRasterBlock(iRasterBlock);
 
     if ( !mPaintBlock || mPaintBlock->Width() != mRasterBlock->GetWidth() || mPaintBlock->Height() != mRasterBlock->GetHeight() || mPaintBlock->Format() != mRasterBlock->GetFormat() )
@@ -58,6 +63,12 @@ FOdysseyPaintEngine::RasterBlock(TSharedPtr<FOdysseyRasterBlock> iRasterBlock)
 
     //Clear the paintblock before anything
     ClearPaintBlock();
+}
+
+TSharedPtr<FOdysseyRasterBlock>
+FOdysseyPaintEngine::GetRasterBlock() const
+{
+    return mRasterBlock;
 }
 
 void
@@ -123,7 +134,9 @@ FOdysseyPaintEngine::Commit(const FOdysseyBlendParameters& iBlendParameters)
     ClearPaintBlock();
 
     //Validate all the interactive modifications that has been done
+    mIsChangingBlock = true;
     mRasterBlockMutator.Commit();
+    mIsChangingBlock = false;
 }
 
 void
@@ -144,7 +157,9 @@ FOdysseyPaintEngine::Abort()
     //Clear the Paint Block
     ClearPaintBlock();
 
+    mIsChangingBlock = true;
     mRasterBlockMutator.Abort();
+    mIsChangingBlock = false;
 }
 
 //--------------------------------------------------------------------------------------
@@ -161,10 +176,19 @@ FOdysseyPaintEngine::PaintBlockChanged( const ::ULIS::FBlock* iBlock, const ::UL
     paintEngine->mInvalidRects.Append(rects);
 }
 
+void
+FOdysseyPaintEngine::OnRasterBlockChanged(const TArray<::ULIS::FRectI>& iRects)
+{
+    if (mIsChangingBlock)
+        return;
+
+    Abort();
+}
+
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Getters
 
-TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>
+TSharedPtr<::ULIS::FBlock>
 FOdysseyPaintEngine::PaintBlock()
 {
     return mPaintBlock;
@@ -211,6 +235,7 @@ FOdysseyPaintEngine::UpdateEditedBlock(const FOdysseyBlendParameters& iBlendPara
         mIsBeforeUndoBound = true;
     }
 
+    mIsChangingBlock = true;
     mRasterBlockMutator.ResetTilesFromRects(mInvalidRects);
     mRasterBlockMutator.EditTilesFromRects(
         mInvalidRects,
@@ -254,6 +279,7 @@ FOdysseyPaintEngine::UpdateEditedBlock(const FOdysseyBlendParameters& iBlendPara
             return events;
         }
     );
+    mIsChangingBlock = false;
     mInvalidRects.Empty();
     return true;
 }

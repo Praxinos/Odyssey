@@ -32,6 +32,8 @@ UOdysseyFreehandShape::OnMouseDown(const FOdysseyPoint& iPointInTexture, const F
 
     mIsDrawing = true;
 
+    mOnBegin.Broadcast();
+
     //Store the first raw point
     mRawStroke.Add( iPointInTexture );
 

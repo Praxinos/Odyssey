@@ -130,9 +130,6 @@ public:
     //Ends the stroke
     bool End();
 
-    //Aborts the stroke
-    bool Abort();
-
 private:
     // Internal - BrushInstance
 
@@ -158,13 +155,14 @@ private:
     void ApplyOverrides(UOdysseyBrushAssetBase* iBrushInstance);
 
 private:
+    TSharedPtr<FOdysseyRasterBlock> GetRasterBlockFromEditor(bool iCreate) const;
+
     void BeginStroke(const FOdysseyPoint& iPoint);
     void StrokeTo(const TArray<FOdysseyPoint>& iPoints);
     void StrokeEnd();
-    void StrokeAbort();
-    void StrokeReset();
 
     // Internal - Callbacks
+    void OnShapeBegin();
     void OnShapeInteractive(const TArray<FOdysseyPoint>& iPoints);
     void OnShapeCommit(const TArray<FOdysseyPoint>& iPoints, bool iReset);
     void OnShapeAbort();
@@ -239,4 +237,5 @@ protected:
     bool mIsFirstPoint = true;
 
     FOdysseyPoint mSubPixelPoint;
+    TSharedPtr<FScopedTransaction> mTransaction;
 };
