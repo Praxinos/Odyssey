@@ -26,6 +26,8 @@ UOdysseyRectangleShape::OnMouseDown(const FOdysseyPoint& iPointInTexture, const 
 {
     mIsDrawing = true;
 
+    mOnBegin.Broadcast();
+
     //Rectangle Shape does not manage stylus params, so we create a new OdysseyPoint from scratch
     mTopLeftPoint = FOdysseyPoint(iPointInTexture.x, iPointInTexture.y);
     mBottomRightPoint = FOdysseyPoint(iPointInTexture.x, iPointInTexture.y);

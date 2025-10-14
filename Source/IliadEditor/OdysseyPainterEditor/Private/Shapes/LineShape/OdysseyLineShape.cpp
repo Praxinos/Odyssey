@@ -25,6 +25,8 @@ UOdysseyLineShape::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey&
 {
     mIsDrawing = true;
 
+    mOnBegin.Broadcast();
+
     //Line Shape does not manage stylus params, so we create a new OdysseyPoint from scratch
     mStartPoint = FOdysseyPoint(iPointInTexture.x, iPointInTexture.y);
     mEndPoint = FOdysseyPoint(iPointInTexture.x, iPointInTexture.y);

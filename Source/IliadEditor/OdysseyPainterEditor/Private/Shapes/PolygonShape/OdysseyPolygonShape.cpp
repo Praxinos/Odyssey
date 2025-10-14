@@ -28,6 +28,9 @@ UOdysseyPolygonShape::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FK
     {
         mIsDrawing = true;
 
+        if (mPoints.IsEmpty())
+            mOnBegin.Broadcast();
+
         //Polygon Shape does not manage stylus params, so we create a new OdysseyPoint from scratch
         FOdysseyPoint point(iPointInTexture.x, iPointInTexture.y);
 

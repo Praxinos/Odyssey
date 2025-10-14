@@ -23,6 +23,8 @@ UOdysseyEllipseShape::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FK
 {
     mIsDrawing = true;
 
+    mOnBegin.Broadcast();
+
     //Ellipse Shape does not manage stylus params, so we create a new OdysseyPoint from scratch
     FOdysseyPoint point(iPointInTexture.x, iPointInTexture.y);
     mCenterPoint = point;
