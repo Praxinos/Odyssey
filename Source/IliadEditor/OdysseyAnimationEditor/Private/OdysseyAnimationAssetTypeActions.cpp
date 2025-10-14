@@ -20,7 +20,7 @@ FOdysseyAnimationAssetTypeActions::FOdysseyAnimationAssetTypeActions( EAssetType
 FText
 FOdysseyAnimationAssetTypeActions::GetName() const
 {
-    return LOCTEXT( "asset-type-actions.name", "Animation" );
+    return LOCTEXT( "asset-type-actions.name", "Animation 2D" );
 }
 
 FColor
