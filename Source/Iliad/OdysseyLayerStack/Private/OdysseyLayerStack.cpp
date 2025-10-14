@@ -587,6 +587,9 @@ UOdysseyLayerStack::CopyLayerInternal(UOdysseyLayer* iLayer, UOdysseyLayer* iPar
 
     iParent->AddChild(duplicatedLayer, iIndexInParent);
 
+    const TArray<UOdysseyLayer*>& children = duplicatedLayer->GetChildren();
+    duplicatedLayer->RemoveChildren( children );
+
     for(UOdysseyLayer* child : iLayer->GetChildren() )
     {
         CopyLayerInternal(child, duplicatedLayer, iLayer->GetChildren().Num());

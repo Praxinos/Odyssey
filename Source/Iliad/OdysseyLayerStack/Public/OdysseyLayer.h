@@ -344,7 +344,7 @@ protected:
     UOdysseyLayer* Parent = nullptr;
 
     UPROPERTY()
-    TArray<UOdysseyLayer*> Children;
+    TArray<TObjectPtr<UOdysseyLayer>> Children;
 
 protected:
 //Instance properties
