@@ -51,14 +51,11 @@ public:
 
 private:
     // Internal - Callbacks
+    TSharedPtr<FOdysseyRasterBlock> GetRasterBlockFromEditor(bool iCreate) const;
 
-    //void OnShapePathBegin(const FOdysseyPoint& iPoint);
-    //void OnShapePathTo(const TArray<FOdysseyPoint>& iPoints);
-    //void OnShapePathEnd(const FOdysseyPoint& iPoint);
-    //void OnShapePathAbort();
-    //void OnShapePathReset();
-
+    void OnShapeBegin();
     void OnShapeCommit(const TArray<FOdysseyPoint>& iPoints, bool iReset);
+    void OnShapeAbort();
 
     void OnRasterSelectionChanged();
 
@@ -68,6 +65,7 @@ protected:
     TArray<FOdysseyPoint> mPath;
 
     TSharedPtr<FOdysseyHUDElement> mShapeHUD;
+    TSharedPtr<FScopedTransaction> mTransaction;
 
 public:
     UPROPERTY(EditAnywhere, Category="Shape")

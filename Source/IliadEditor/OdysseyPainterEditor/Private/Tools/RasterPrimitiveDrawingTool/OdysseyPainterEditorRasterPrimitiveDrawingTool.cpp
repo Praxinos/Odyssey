@@ -36,11 +36,11 @@ UOdysseyPainterEditorRasterPrimitiveDrawingTool::UOdysseyPainterEditorRasterPrim
     freehandShape->DisplayHUD(true);
 
     Shapes.AddShapeType(EOdysseyShapeType::kFreehand, freehandShape);
-    Shapes.AddShapeType(EOdysseyShapeType::kLine, CreateShape<UOdysseyLineShape>("UOdysseyPainterEditorRasterDrawingTool::LineShape"));
-    Shapes.AddShapeType(EOdysseyShapeType::kRectangle, CreateShape<UOdysseyRectangleShape>("UOdysseyPainterEditorRasterDrawingTool::RectangleShape"));
-    Shapes.AddShapeType(EOdysseyShapeType::kPolygon, CreateShape<UOdysseyPolygonShape>("UOdysseyPainterEditorRasterDrawingTool::PolygonShape"));
-    Shapes.AddShapeType(EOdysseyShapeType::kEllipse, CreateShape<UOdysseyEllipseShape>("UOdysseyPainterEditorRasterDrawingTool::EllipseShape"));
-    Shapes.AddShapeType(EOdysseyShapeType::kBezier, CreateShape<UOdysseyBezierShape>("UOdysseyPainterEditorRasterDrawingTool::BezierShape"));
+    Shapes.AddShapeType(EOdysseyShapeType::kLine, CreateShape<UOdysseyLineShape>("UOdysseyPainterEditorRasterPrimitiveDrawingTool::LineShape"));
+    Shapes.AddShapeType(EOdysseyShapeType::kRectangle, CreateShape<UOdysseyRectangleShape>("UOdysseyPainterEditorRasterPrimitiveDrawingTool::RectangleShape"));
+    Shapes.AddShapeType(EOdysseyShapeType::kPolygon, CreateShape<UOdysseyPolygonShape>("UOdysseyPainterEditorRasterPrimitiveDrawingTool::PolygonShape"));
+    Shapes.AddShapeType(EOdysseyShapeType::kEllipse, CreateShape<UOdysseyEllipseShape>("UOdysseyPainterEditorRasterPrimitiveDrawingTool::EllipseShape"));
+    Shapes.AddShapeType(EOdysseyShapeType::kBezier, CreateShape<UOdysseyBezierShape>("UOdysseyPainterEditorRasterPrimitiveDrawingTool::BezierShape"));
 
     Shapes.SetActiveShapeType(EOdysseyShapeType::kFreehand);
 }
@@ -51,7 +51,9 @@ UOdysseyPainterEditorRasterPrimitiveDrawingTool::CreateShape(FName iName)
 {
     T* shape = CreateDefaultSubobject<T>(iName, true);
 
+    shape->OnBegin().AddUObject(this, &UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapeBegin);
     shape->OnCommit().AddUObject(this, &UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapeCommit);
+    shape->OnAbort().AddUObject(this, &UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapeAbort);
 
     shape->SetHUD(mShapeHUD);
 
@@ -64,24 +66,38 @@ UOdysseyPainterEditorRasterPrimitiveDrawingTool::IsActivable() const
     return GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaRaster>();
 }
 
+TSharedPtr<FOdysseyRasterBlock>
+UOdysseyPainterEditorRasterPrimitiveDrawingTool::GetRasterBlockFromEditor(bool iCreate) const
+{
+    FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
+    if (mediaProvider.IsLocked())
+        return nullptr;
+
+    bool hasRaster = mediaProvider.HasMedia<FOdysseyMediaRaster>();
+    if (!hasRaster)
+        return nullptr;
+
+    TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters;
+    if (iCreate)
+        mediaRasters = mediaProvider.GetOrCreateMedias<FOdysseyMediaRaster>();
+    else
+        mediaRasters = mediaProvider.GetMedias<FOdysseyMediaRaster>();
+
+    if( mediaRasters.Num() <= 0 )
+        return nullptr;
+
+    return mediaRasters[0]->GetRasterBlock();
+}
+
 bool UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
     if (iKey != EKeys::LeftMouseButton)
         return false;
 
-    FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
-    if (mediaProvider.IsLocked())
+    TSharedPtr<FOdysseyRasterBlock> rasterBlock = GetRasterBlockFromEditor(true);
+    if (!rasterBlock)
         return false;
 
-    bool hasRaster = mediaProvider.HasMedia<FOdysseyMediaRaster>();
-    if (!hasRaster)
-        return false;
-
-    TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = mediaProvider.GetOrCreateMedias<FOdysseyMediaRaster>();
-    if (mediaRasters.Num() <= 0)
-        return false;
-
-    TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRasters[0]->GetRasterBlock();
     mPaintEngine.RasterBlock(rasterBlock);
 
     FOdysseyPoint point = iPointInTexture;
@@ -101,17 +117,8 @@ bool UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnMouseDown(const FOdyssey
 
 void UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnMouseHover(const FOdysseyPoint& iPointInTexture)
 {
-    FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
-    if (mediaProvider.IsLocked())
-        return;
-
-    bool hasRaster = mediaProvider.HasMedia<FOdysseyMediaRaster>();
-    if (!hasRaster)
-        return;
-
-    //ensure we can retrieve a media
-    TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = mediaProvider.GetMedias<FOdysseyMediaRaster>();
-    if (mediaRasters.Num() <= 0)
+    TSharedPtr<FOdysseyRasterBlock> rasterBlock = GetRasterBlockFromEditor(false);
+    if (!rasterBlock)
         return;
 
     FOdysseyPoint point = iPointInTexture;
@@ -131,18 +138,12 @@ void UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnMouseHover(const FOdysse
 
 void UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
-    FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
-    if (mediaProvider.IsLocked())
+    TSharedPtr<FOdysseyRasterBlock> rasterBlock = GetRasterBlockFromEditor(false);
+    if (!rasterBlock || rasterBlock != mPaintEngine.GetRasterBlock())
+    {
+        Shapes.GetActiveShape()->Abort();
         return;
-
-    bool hasRaster = mediaProvider.HasMedia<FOdysseyMediaRaster>();
-    if (!hasRaster)
-        return;
-
-    //ensure we can retrieve a media
-    TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = mediaProvider.GetMedias<FOdysseyMediaRaster>();
-    if (mediaRasters.Num() <= 0)
-        return;
+    }
 
     FOdysseyPoint point = iPointInTexture;
     if (!SubPixel)
@@ -164,18 +165,12 @@ bool UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnMouseUp(const FOdysseyPo
     if (iKey != EKeys::LeftMouseButton)
         return false;
 
-    FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
-    if (mediaProvider.IsLocked())
+    TSharedPtr<FOdysseyRasterBlock> rasterBlock = GetRasterBlockFromEditor(false);
+    if (!rasterBlock || rasterBlock != mPaintEngine.GetRasterBlock())
+    {
+        Shapes.GetActiveShape()->Abort();
         return false;
-
-    bool hasRaster = mediaProvider.HasMedia<FOdysseyMediaRaster>();
-    if (!hasRaster)
-        return false;
-
-    //ensure we can retrieve a media
-    TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = mediaProvider.GetMedias<FOdysseyMediaRaster>();
-    if (mediaRasters.Num() <= 0)
-        return false;
+    }
 
     FOdysseyPoint point = iPointInTexture;
     if (!SubPixel)
@@ -217,6 +212,8 @@ void UOdysseyPainterEditorRasterPrimitiveDrawingTool::Load()
 
 void UOdysseyPainterEditorRasterPrimitiveDrawingTool::Unload()
 {
+    Shapes.GetActiveShape()->Abort();
+
     UOdysseyPainterEditorTool::Unload();
     mPaintEngine.SetMaskBlock(nullptr);
 
@@ -257,6 +254,12 @@ void UOdysseyPainterEditorRasterPrimitiveDrawingTool::Tick(float iDeltaTime)
 
     //Update the paintEngine
     mPaintEngine.Update(BlendParameters);
+}
+
+void
+UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapeBegin()
+{
+    mTransaction = MakeShared<FScopedTransaction>(LOCTEXT("raster-primitive-drawing-tool.transaction.draw-shape", "Draw Primitive Shape"));
 }
 
 void
@@ -373,8 +376,6 @@ UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapeCommit(const TArray<FOdy
     mPaintEngine.PaintBlock()->Dirty();
     mPaintEngine.Update(BlendParameters);
 
-    FScopedTransaction Transaction(LOCTEXT("raster-primitive-drawing-tool.transaction.draw-shape", "Draw Primitive Shape"));
-
     Flush();
     Commit();
 
@@ -384,6 +385,16 @@ UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapeCommit(const TArray<FOdy
         source->RecordCurrentFrameUndo();
 
     mShapeHUD->EmptyElements();
+
+    mTransaction = nullptr; //Finish the undo transaction
+}
+
+void
+UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapeAbort()
+{
+    if(mTransaction)
+        mTransaction->Cancel();
+    mTransaction = nullptr; //Finish the undo transaction
 }
 
 EMouseCursor::Type

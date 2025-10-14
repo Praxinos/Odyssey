@@ -66,7 +66,10 @@ public:
     virtual void PostPropertyChanged(const FName& iPropertyName, bool iIsInteractive) override;
 
 private:
+    TSharedPtr<FOdysseyRasterBlock> GetRasterBlockFromEditor(bool iCreate) const;
+
     // Internal - Callbacks
+    void OnShapeBegin();
     void OnShapeInteractive(const TArray<FOdysseyPoint>& iPoints);
     void OnShapeCommit(const TArray<FOdysseyPoint>& iPoints, bool iReset);
     void OnShapeAbort();
@@ -123,4 +126,5 @@ protected:
     FSimpleMulticastDelegate            mOnOpacityChanged;
 
     TSharedPtr<FOdysseyHUDElement> mShapeHUD;
+    TSharedPtr<FScopedTransaction> mTransaction;
 };

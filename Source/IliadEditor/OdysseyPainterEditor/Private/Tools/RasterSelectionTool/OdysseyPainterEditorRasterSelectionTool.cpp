@@ -48,7 +48,9 @@ UOdysseyPainterEditorRasterSelectionTool::CreateShape(FName iName)
 {
     T* shape = CreateDefaultSubobject<T>(iName, true);
 
+    shape->OnBegin().AddUObject(this, &UOdysseyPainterEditorRasterSelectionTool::OnShapeBegin);
     shape->OnCommit().AddUObject(this, &UOdysseyPainterEditorRasterSelectionTool::OnShapeCommit);
+    shape->OnAbort().AddUObject(this, &UOdysseyPainterEditorRasterSelectionTool::OnShapeAbort);
 
     shape->SetHUD(mShapeHUD);
 
@@ -131,6 +133,8 @@ void UOdysseyPainterEditorRasterSelectionTool::Load()
 
 void UOdysseyPainterEditorRasterSelectionTool::Unload()
 {
+    Shapes.GetActiveShape()->Abort();
+
     TSharedPtr<FOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
     mHUD->RemoveElement(rasterSelection->GetHUD());
     mHUD->RemoveElement(mShapeHUD);
@@ -152,6 +156,12 @@ void UOdysseyPainterEditorRasterSelectionTool::Tick(float iDeltaTime)
 }
 
 void
+UOdysseyPainterEditorRasterSelectionTool::OnShapeBegin()
+{
+    mTransaction = MakeShared<FScopedTransaction>(LOCTEXT("raster-selection-tool.transaction.set-raster-selection", "Set Raster Selection"));
+}
+
+void
 UOdysseyPainterEditorRasterSelectionTool::OnShapeCommit(const TArray<FOdysseyPoint>& iPoints, bool iReset)
 {
     TArray<FVector2D> points(iPoints);
@@ -169,6 +179,14 @@ UOdysseyPainterEditorRasterSelectionTool::OnShapeCommit(const TArray<FOdysseyPoi
         rasterSelection->Clear();
         rasterSelection->Add(points);
     }
+}
+
+void
+UOdysseyPainterEditorRasterSelectionTool::OnShapeAbort()
+{
+    if(mTransaction)
+        mTransaction->Cancel();
+    mTransaction = nullptr; //Finish the undo transaction
 }
 
 #undef LOCTEXT_NAMESPACE
