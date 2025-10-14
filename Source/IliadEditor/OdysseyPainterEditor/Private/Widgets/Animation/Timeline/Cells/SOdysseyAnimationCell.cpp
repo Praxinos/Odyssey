@@ -45,7 +45,7 @@ int32 SOdysseyAnimationCell::OnPaint(const FPaintArgs& Args, const FGeometry& Al
         FLinearColor markColor = GetMarkColor();
         markColor.A = GetMarkOpacity();
         const FSlateBrush* markBrush = GetMarkBrush();
-        FVector2D markPosition(0, height - markBrush->ImageSize.Y);
+        FVector2D markPosition(0, 0);
 
         FSlateDrawElement::MakeBox(
             OutDrawElements,
