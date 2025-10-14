@@ -519,7 +519,7 @@ UOdysseyPainterEditorRasterDrawingTool::ExtendToolbar( UToolMenu* iToolMenu )
                 .OnOverridePropertyHandle_Lambda(
                     [](TSharedPtr<IPropertyHandle> iHandle)
                     {
-                        return iHandle->GetChildHandle("BlendingMode");
+                        return iHandle->GetChildHandle("AlphaMode");
                     }
                 )
             ],
