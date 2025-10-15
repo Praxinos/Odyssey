@@ -412,7 +412,6 @@ void UOdysseyPainterEditorRasterTransformTool::UpdateTransformHUD()
         [&, referenceBlock = mSelectionBlock](TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
         {
             ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
-            ::ULIS::FEvent blendEvent;
 
             ctx.Blend(
                 *referenceBlock,
@@ -430,23 +429,27 @@ void UOdysseyPainterEditorRasterTransformTool::UpdateTransformHUD()
 
             ctx.Finish();
 
-            ctx.Blend(
-                *referenceBlock,
-                *paintBlock,
-                referenceBlock->Rect(),
-                ::ULIS::FVec2I(boundingBox.x, boundingBox.y),
-                ::ULIS::Blend_Normal,
-                ::ULIS::Alpha_Normal,
-                1.f,
-                ::ULIS::FSchedulePolicy::MultiScanlines,
-                0,
-                nullptr,
-                &blendEvent
-            );
-
-            return { blendEvent };
+            return { };
         }
     );
+
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
+
+    ctx.Blend(
+        *mSelectionBlock,
+        *paintBlock,
+        mSelectionBlock->Rect(),
+        ::ULIS::FVec2I(boundingBox.x, boundingBox.y),
+        ::ULIS::Blend_Normal,
+        ::ULIS::Alpha_Normal,
+        1.f,
+        ::ULIS::FSchedulePolicy::MultiScanlines,
+        0,
+        nullptr,
+        nullptr
+    );
+
+    ctx.Finish();
 
     paintBlock->Dirty();
     mPaintEngine.Update(FOdysseyBlendParameters());
