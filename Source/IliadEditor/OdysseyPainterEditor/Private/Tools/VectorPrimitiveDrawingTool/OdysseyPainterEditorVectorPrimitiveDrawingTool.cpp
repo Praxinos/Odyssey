@@ -146,7 +146,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDownVector( FOdysseyVect
         return false;
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
-    if( iKey == EKeys::LeftMouseButton )
+    if( ( iKey == EKeys::LeftMouseButton ) && GetWorkingGroup()->IsVisible( true ) )
     {
         FOdysseyVectorObject* parentObject = GetParentObject( iScene );
         BLPoint localCoords = parentObject->GetInverseWorldMatrix().mapPoint( iPointInTexture.x
@@ -201,6 +201,13 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDownVector( FOdysseyVect
     iScene->GetLayer()->RequestRedraw( iScene->GetCell(), FOdysseyVectorCell::REDRAW_INTERACTIVE );
 
     return true;
+}
+
+EMouseCursor::Type
+UOdysseyPainterEditorVectorPrimitiveDrawingTool::GetMouseCursor() const
+{
+    return GetWorkingGroup()->IsVisible( true ) ? EMouseCursor::Type::Crosshairs
+                                                : EMouseCursor::Type::SlashedCircle;;
 }
 
 double
@@ -313,7 +320,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUpVector( FOdysseyVector
         return false;
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
-    if( iKey == EKeys::LeftMouseButton )
+    if( ( iKey == EKeys::LeftMouseButton ) && GetWorkingGroup()->IsVisible( true ) )
     {
         if( mPrimitive )
         {

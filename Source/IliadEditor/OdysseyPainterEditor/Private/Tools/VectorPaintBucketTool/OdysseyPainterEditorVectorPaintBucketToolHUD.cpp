@@ -69,7 +69,9 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::UpdateWorkingPaintgroupList()
                 }
                 else
                 {
-                    FOdysseyVectorGroupPaint* ancestor = static_cast<FOdysseyVectorGroupPaint*>(object->GetAncestorByClass( FOdysseyVectorGroupPaint::StaticClass(), false ));
+                    FOdysseyVectorGroupPaint* ancestor = static_cast<FOdysseyVectorGroupPaint*>(object->GetAncestorByClass( FOdysseyVectorGroupPaint::StaticClass()
+                                                                                                                          , false
+                                                                                                                          , false ) );
 
                     if( ancestor )
                     {

@@ -243,6 +243,25 @@ UOdysseyPainterEditorVectorBaseTool::GetWorkingCell()
     return mWorkingCell;
 }
 
+FOdysseyVectorGroup*
+UOdysseyPainterEditorVectorBaseTool::GetWorkingGroup() const
+{
+    FOdysseyVectorGroupPaint* scene = mWorkingCell->GetScene();
+    FOdysseyVectorGroup* workingGroup = scene;
+
+    // Add the path to the current unique selected group
+    if( mWorkingCell->GetSelectedObjectList().size() == 1 )
+    {
+        FOdysseyVectorObject* selectedObject = mWorkingCell->GetLastSelectedObject();
+
+        workingGroup = static_cast<FOdysseyVectorGroup*>( selectedObject->GetAncestorByClass( FOdysseyVectorGroup::StaticClass()
+                                                                                            , true
+                                                                                            , true ) );
+    }
+
+    return workingGroup;
+}
+
 void
 UOdysseyPainterEditorVectorBaseTool::GetSegmentHandlesFromVertices( const std::vector<FOdysseyVectorVertex*>& iVertexArray
                                                                   , std::vector<FOdysseyVectorHandleSegment*>& oSegmentHandleArray )

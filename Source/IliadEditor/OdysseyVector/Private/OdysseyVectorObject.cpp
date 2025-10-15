@@ -174,7 +174,9 @@ CheckCommonClass( std::list<FOdysseyVectorObject*>& iObjectList, uint32 iCommonC
 FColor
 FOdysseyVectorObject::GetHUDColor()
 {
-    FOdysseyVectorObject* group = GetAncestorByClass( FOdysseyVectorGroup::StaticClass(), true );
+    FOdysseyVectorObject* group = GetAncestorByClass( FOdysseyVectorGroup::StaticClass()
+                                                    , true
+                                                    , false );
 
     return group ? group->GetHUDColor() : FOdysseyVectorHUD::GetForegroundColor();
 }
@@ -830,9 +832,9 @@ FOdysseyVectorObject::UnlockDrawing()
 }
 
 FOdysseyVectorObject*
-FOdysseyVectorObject::GetAncestorByClass( uint32 iClass, bool iBaseClass )
+FOdysseyVectorObject::GetAncestorByClass( uint32 iClass, bool iBaseClass, bool iSelf )
 {
-    FOdysseyVectorObject* parent = mParent;
+    FOdysseyVectorObject* parent = iSelf ? this : mParent;
 
     while ( parent )
     {

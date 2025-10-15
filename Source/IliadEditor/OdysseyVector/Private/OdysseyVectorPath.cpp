@@ -1534,7 +1534,9 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
 
     if( iDrawingFlags & FOdysseyVectorEngine::DRAWING_WIREFRAME )
     {
-        FOdysseyVectorObject* topPaintGroup = GetAncestorByClass( FOdysseyVectorGroupPaint::StaticClass(), false );
+        FOdysseyVectorObject* topPaintGroup = GetAncestorByClass( FOdysseyVectorGroupPaint::StaticClass()
+                                                                , false
+                                                                , false );
         // normally, topPaintGroup cannot be null. just a precaution.
         FColor wireframeColor = topPaintGroup ? static_cast<FOdysseyVectorGroupPaint*>(topPaintGroup)->GetWireframeColor()
                                               : FColor( 255, 255, 255, 255 );

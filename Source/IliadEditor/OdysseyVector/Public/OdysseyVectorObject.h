@@ -620,7 +620,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         virtual void Added();
         virtual void Removed();
         bool IsSystem();
-        FOdysseyVectorObject* GetAncestorByClass( uint32 iClass, bool iBaseClass );
+        FOdysseyVectorObject* GetAncestorByClass( uint32 iClass, bool iBaseClass, bool iSelf );
         void LockDrawing();
         void UnlockDrawing();
 

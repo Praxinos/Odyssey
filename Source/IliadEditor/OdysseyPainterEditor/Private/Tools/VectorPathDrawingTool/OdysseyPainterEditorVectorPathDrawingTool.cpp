@@ -243,25 +243,6 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnKeyUpGlobalVector( FOdysseyVectorG
     return UOdysseyPainterEditorVectorBaseTool::OnKeyUpGlobalVector( iScene, InKeyEvent );
 }
 
-FOdysseyVectorObject*
-UOdysseyPainterEditorVectorPathDrawingTool::GetParentObject( FOdysseyVectorGroupPaint* iScene )
-{
-    FOdysseyVectorObject* parentObject = iScene;
-
-    // Add the path to the current unique selected group
-    if( iScene->GetCell()->GetSelectedObjectList().size() == 1 )
-    {
-        FOdysseyVectorObject* selectedObject = iScene->GetCell()->GetLastSelectedObject();
-
-        if(  selectedObject->HasBaseClass( FOdysseyVectorGroup::StaticClass() ) )
-        {
-            parentObject = selectedObject;
-        }
-    }
-
-    return parentObject;
-}
-
 bool
 UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                              , const FOdysseyPoint& iPointInTexture
@@ -277,12 +258,10 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorGro
     mStitchedVertex = nullptr;
     mPathDrawingMode = ePathDrawingMode::Create;
 
-//UE_LOG(LogTemp, Warning, TEXT("Hello %f"), iPointInTexture.pressure );
-
     mTimeAtDown = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
-    if( iKey == EKeys::LeftMouseButton )
+    if( ( iKey == EKeys::LeftMouseButton ) && GetWorkingGroup()->IsVisible( true ) )
     {
         FOdysseyVectorPath* path = nullptr;
 
@@ -321,11 +300,11 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorGro
 
         if( mPathDrawingMode == ePathDrawingMode::Create )
         {
-            FOdysseyVectorObject* parentObject = GetParentObject( iScene );
+            FOdysseyVectorGroup* workingGroup = GetWorkingGroup();
 
             path = new FOdysseyVectorPath( FString( "Path_" ) + FString::FromInt( mPathNumber++ ) );
 
-            parentObject->AppendChild( path );
+            workingGroup->AppendChild( path );
             path->UpdateMatrix();
 
             SetPathColor( path );
@@ -358,15 +337,19 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorGro
 
         path->SetBrush( Brush );
 
-        //iScene->ClearSelection();
-        //iScene->Select( path );
-
         iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
                                   | FOdysseyVectorObject::UPDATE_NOINBETWEENING );
         iScene->GetLayer()->RequestRedraw( iScene->GetCell(), FOdysseyVectorCell::REDRAW_INTERACTIVE );
     }
 
     return true;
+}
+
+EMouseCursor::Type
+UOdysseyPainterEditorVectorPathDrawingTool::GetMouseCursor() const
+{
+    return GetWorkingGroup()->IsVisible( true ) ? EMouseCursor::Type::Crosshairs
+                                                : EMouseCursor::Type::SlashedCircle;;
 }
 
 void
@@ -382,13 +365,11 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorGro
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector);
 
-//UE_LOG(LogTemp, Warning, TEXT("Hello %f"), iPointInTexture.pressure );
-
     // Left mouse button clicked
     // For some reason, iPointInTexture.keysDown.Find does not find the left button click for the first few events
     // when using the stylus so we use mPathTracer.GetPath instead
     //if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
-    if( mPathTracer.GetPath() )
+    if( mPathTracer.GetPath() && GetWorkingGroup()->IsVisible( true ) )
     {
         FOdysseyVectorPath* path = mPathTracer.GetPath();
         double pointRadius = PressureSensitive ? ( iPointInTexture.pressure * Radius ) : Radius;
@@ -473,7 +454,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorGroup
     mTimeAtUp = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
-    if( iKey == EKeys::LeftMouseButton)
+    if( ( iKey == EKeys::LeftMouseButton ) && GetWorkingGroup()->IsVisible( true ) )
     {
         // check path validity in case we get a UP without a DOWN first
         if( mPathTracer.GetPath() )

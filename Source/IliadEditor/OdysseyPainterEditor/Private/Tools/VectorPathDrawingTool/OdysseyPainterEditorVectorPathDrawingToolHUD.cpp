@@ -3,6 +3,7 @@
 
 #include "Tools/VectorPathDrawingTool/OdysseyPainterEditorVectorPathDrawingToolHUD.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorGroup.h"
 #include "OdysseyPainterEditor.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
@@ -173,6 +174,15 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::DrawHUD( const FOdysseyHUDElement
                 }
             }
         }
+    }
+
+    if( mPathDrawingTool->GetWorkingGroup()->IsVisible(true) == false )
+    {
+        static FText warningText = LOCTEXT( "vector-path-drawing-tool-nodraw-warning"
+                                          , "Cannot draw inside an invisible group" );
+        static FLinearColor warningColor = FLinearColor( 1.0f, 0.5f, 0.0f );
+
+        DrawInfo( iParams, warningText, warningColor );
     }
 
     // invisible plane will get mouse events

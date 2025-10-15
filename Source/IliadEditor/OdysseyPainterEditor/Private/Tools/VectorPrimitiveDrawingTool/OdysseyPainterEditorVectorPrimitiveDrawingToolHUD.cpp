@@ -55,7 +55,14 @@ FOdysseyPainterEditorVectorPrimitiveDrawingToolHUD::DrawHUD( const FOdysseyHUDEl
     // invisible plane will get mouse events
     DrawDummyPlane( iParams );
 
-    //DrawModifierInfo( iParams );
+    if( mPrimitiveDrawingTool->GetWorkingGroup()->IsVisible(true) == false )
+    {
+        static FText warningText = LOCTEXT( "vector-primitive-drawing-tool-nodraw-warning"
+                                          , "Cannot draw inside an invisible group" );
+        static FLinearColor warningColor = FLinearColor( 1.0f, 0.5f, 0.0f );
+
+        DrawInfo( iParams, warningText, warningColor );
+    }
 }
 
 void

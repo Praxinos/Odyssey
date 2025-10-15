@@ -1357,13 +1357,6 @@ FOdysseyPainterEditorVectorBaseToolHUD::TextureToHUD( double iX
 FVector2D
 FOdysseyPainterEditorVectorBaseToolHUD::TextureToHUD( const FVector2D& iPosition )
 {
-/*
-    uint32 textureWidth = mBaseTool->GetWorkingCell()->GetLayer()->GetWidth();
-    uint32 textureHeight = mBaseTool->GetWorkingCell()->GetLayer()->GetHeight();
-
-    return mBaseTool->GetViewport()->ToWorld( iPosition - FVector2D( textureWidth  * 0.5f
-                                                                   , textureHeight * 0.5f ) );
-*/
     return mCurrentHUDParams.mTextureToHUD.Execute( iPosition );
 }
 
