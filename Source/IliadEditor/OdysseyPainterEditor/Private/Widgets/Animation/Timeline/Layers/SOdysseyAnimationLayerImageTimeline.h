@@ -132,6 +132,7 @@ private:
     FReply OnContextMenuPlusButtonClicked();
 
     EVisibility GetRowDisabledColorVisibility(FName iRow) const;
+    const FSlateBrush* GetRowDisabledColorValue(FName iRow) const;
 
 protected:
     UOdysseyAnimationLayer* mLayer;

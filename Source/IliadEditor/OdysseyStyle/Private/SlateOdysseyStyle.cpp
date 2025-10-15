@@ -486,6 +486,9 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
 
     Set("Animation.Timeline.Padding", 28.f);
 
+    Set( "Animation.Timeline.LockedOverlay", new IMAGE_BRUSH( "OdysseyAnimation/Timeline/layer-locked", mIcon10x10 /* seems to not being used in tiling mode */, FLinearColor( 0, 0, 0, .5f ), ESlateBrushTileType::Both ) );
+    Set( "Animation.Timeline.DeactivatedOverlay", new FSlateColorBrush( FLinearColor( 0, 0, 0, 0.75f ) ) );
+
     Set("Animation.Timeline.Tools.Selection", new IMAGE_BRUSH_SVG("OdysseyAnimation/Timeline/Tools/Selection", mIcon16x16));
     Set("Animation.Timeline.Tools.Move", new IMAGE_BRUSH_SVG("OdysseyAnimation/Timeline/Tools/Move", mIcon16x16));
     Set("Animation.Timeline.Tools.Cut", new IMAGE_BRUSH_SVG("OdysseyAnimation/Timeline/Tools/Cut", mIcon16x16));

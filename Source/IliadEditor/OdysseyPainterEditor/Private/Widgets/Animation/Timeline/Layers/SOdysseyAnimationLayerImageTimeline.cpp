@@ -100,10 +100,10 @@ SOdysseyAnimationLayerImageTimeline::GenerateWidgetForRow( const FName& iRow, co
         ]
         + SOverlay::Slot()
         [
-            SNew(SColorBlock)
+            SNew(SBorder)
+            .Padding(0)
             .Visibility(this, &SOdysseyAnimationLayerImageTimeline::GetRowDisabledColorVisibility, iRow)
-            .Color(FLinearColor(0, 0, 0, 0.75f))
-            .Size(FVector2D(0, 0))
+            .BorderImage(this, &SOdysseyAnimationLayerImageTimeline::GetRowDisabledColorValue, iRow)
         ];
 
     return widget.ToSharedRef();
@@ -146,6 +146,23 @@ SOdysseyAnimationLayerImageTimeline::GetRowDisabledColorVisibility(FName iRow) c
         return EVisibility::Collapsed;
 
     return EVisibility::SelfHitTestInvisible;
+}
+
+const FSlateBrush*
+SOdysseyAnimationLayerImageTimeline::GetRowDisabledColorValue(FName iRow) const
+{
+    static const FSlateBrush* nobrush = new FSlateNoResource();
+
+    if (IsRowEnabled(iRow))
+        return nobrush;
+
+    if( mLayer && !mLayer->IsActivatedRecursively() )
+        return FOdysseyStyle::Get().GetBrush( "Animation.Timeline.DeactivatedOverlay" );
+
+    if( mLayer && mLayer->IsLockedRecursively() )
+        return FOdysseyStyle::Get().GetBrush( "Animation.Timeline.LockedOverlay" );
+
+    return nobrush;
 }
 
 float
