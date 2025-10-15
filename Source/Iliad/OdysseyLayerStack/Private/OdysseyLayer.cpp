@@ -65,10 +65,10 @@ void
 UOdysseyLayer::PostDuplicate(EDuplicateMode::Type iDuplicateMode)
 {
     Super::PostDuplicate(iDuplicateMode);
-    for (UOdysseyLayer* child : Children)
-    {
-        child->Parent = this;
-    }
+
+    // See comment REALLY in ...\Plugins\Odyssey\Source\Iliad\OdysseyLayerStack\Private\OdysseyLayerStack.cpp#590: CopyLayerInternal()
+    // Once a layer is duplicated (especially a folder one), the Children are not duplicated (just "pointer-copied") so just empty the Children of the duplicated object
+    Children.Empty();
 }
 
 void

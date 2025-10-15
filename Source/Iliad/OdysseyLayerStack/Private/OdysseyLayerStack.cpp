@@ -587,8 +587,44 @@ UOdysseyLayerStack::CopyLayerInternal(UOdysseyLayer* iLayer, UOdysseyLayer* iPar
 
     iParent->AddChild(duplicatedLayer, iIndexInParent);
 
-    const TArray<UOdysseyLayer*>& children = duplicatedLayer->GetChildren();
-    duplicatedLayer->RemoveChildren( children );
+    // The StaticDuplicateObjectEx() will duplicate the original layer WITHOUT duplicated its Children (only copying pointers)
+    //
+    // The UE mecanism of duplication:
+    // - the original object is always duplicated
+    // - all objects inside the original object is also duplicated (and then recursively) ONLY if the Outer of the inner object has already been duplicated
+    //
+    // Now, as the Outer of ALL layers are always the layer stack
+    // (the layer hierarchy is managed by the Parent member)
+    // the duplication of Children layers is not processed because the layer stack is never duplicated
+    //
+    // layer-folder:        Parent = layer_root         outer = layerstack
+    //    layer1:           Parent = layer-folder       outer = layerstack
+    //    layer2:           Parent = layer-folder       outer = layerstack
+    //    layer3:           Parent = layer-folder       outer = layerstack
+    //    layer-folderX:    Parent = layer-folder       outer = layerstack
+    //        layer8:       Parent = layer-folderX      outer = layerstack
+    //        layer9:       Parent = layer-folderX      outer = layerstack
+    //
+    // All layers inside a layer folder are not duplicated (just "pointer-copied"), because the Outer of the Children layers is NOT the duplicated layer (it's the layerstack)
+    //
+    // layerX: outer = layerstack
+    //    cell1: outer = layerX
+    //    cell2: outer = layerX
+    //    ...
+    //    cellN: outer = layerX
+    //
+    // All cells inside a layer are automatically duplicated when duplicating the layer, because the Outer of cells (a layer) has been already duplicated
+    //
+    // To manage this case, the children of a duplicated layer must be emptied
+    // But it's not easily doable here as duplicatedLayer->RemoveChildren() will:
+    // - empty the Children array: OK
+    // - also reset the Parent of the Children layers: NOT OK, as the Parent of all children are still the ORIGINAL layer (because Children are only "pointer-copied")
+    //
+    // So the best way to solve this, is inside PostDuplicate() of layer which just empty the Children array
+    // ...\Plugins\Odyssey\Source\Iliad\OdysseyLayerStack\Private\OdysseyLayer.cpp
+    //
+    // Another way to natively manage this case would be to remove Parent member and manage the layer hierarchy via the Outer
+    // https://github.com/Praxinos/Odyssey-Plugin/issues/585
 
     for(UOdysseyLayer* child : iLayer->GetChildren() )
     {
