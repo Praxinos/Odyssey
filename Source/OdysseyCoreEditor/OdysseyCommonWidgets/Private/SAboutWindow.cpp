@@ -175,7 +175,7 @@ SAboutWindow::Construct( const FArguments& iArgs )
                 .Padding( FMargin( 0.f, 1.f ) )
                 [
                     SNew( STextBlock )
-                    .Text( LOCTEXT( "copyright.team-names-2", "Gary Gabriel, Eric Scholl, Michael Schreiner" ) )
+                    .Text( LOCTEXT( "copyright.team-names-2", "Gary Gabriel, Eric Scholl, Michael Schreiner, Yann Montgermont" ) )
                     .Justification( ETextJustify::Center )
                     .TextStyle(FOdysseyStyle::Get(), "Odyssey.About.SmallText" )
                 ]
