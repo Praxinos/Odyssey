@@ -67,11 +67,14 @@ FOdysseyTextureAssetTypeActions::BuildBackendFilter( FARFilter & InFilter )
 void FOdysseyTextureAssetTypeActions::OpenAssetEditor(const TArray<UObject*>& InObjects, TSharedPtr<class IToolkitHost> EditWithinLevelEditor )
 {
     EToolkitMode::Type Mode = EditWithinLevelEditor.IsValid() ? EToolkitMode::WorldCentric : EToolkitMode::Standalone;
-
+    UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
     for (UObject* object : InObjects)
     {
         UTexture2D* texture = Cast<UTexture2D>(object);
         if (!texture)
+            continue;
+
+        if (AssetEditorSubsystem->FindEditorForAsset(texture, true))
             continue;
 
         if( UOdysseyTextureEditorSettings::Get()->DefaultTextureEditor == EOdysseyDefaultTextureEditor::OdysseyPainterEditor)

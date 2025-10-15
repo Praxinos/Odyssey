@@ -394,13 +394,23 @@ FOdysseyViewportDrawingEditorExtension::SetTexture(UTexture* iTexture, bool iWar
         {
             canSetTexture = false;
         }
+        else if (iTexture->IsA(UTextureRenderTarget2D::StaticClass()) && mComponent->IsA<UOdysseyAnimationComponent>())
+        {
+            UOdysseyAnimationComponent* animationComponent = Cast<UOdysseyAnimationComponent>(mComponent);
+            if (!animationComponent)
+                return false;
+
+            canSetTexture = AssetEditorSubsystem->FindEditorForAsset(animationComponent->GetAnimation(), true) == nullptr;
+        }
 
         if (!canSetTexture)
         {
-            if (iWarnUserIfFailed && !isMediaTexture)
-                FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("painter-editor-extension.texture-already-opened-dialog.message", "The selected texture is already opened in an other editor. Please close the editor before selecting this texture."), LOCTEXT("painter-editor-extension.texture-already-opened-dialog.title", "Selected Texture Already Opened"));
-            else if (iWarnUserIfFailed && isMediaTexture)
+            if (iWarnUserIfFailed && iTexture->IsA(UTexture2D::StaticClass()))
+                FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("painter-editor-extension.texture-already-opened-dialog.message","The selected texture is already opened in an other editor. Please close the editor before selecting this texture."), LOCTEXT("painter-editor-extension.texture-already-opened-dialog.title", "Selected Texture Already Opened"));
+            else if (iWarnUserIfFailed && iTexture->IsA(UMediaTexture::StaticClass()))
                 FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("painter-editor-extension.media-texture-fail-dialog.message", "A media texture doesn't have a media source and therefore can't be edited. Please setup all your media textures correctly by assigning them a media source."), LOCTEXT("painter-editor-extension.media-texture-fail-dialog.title", "Media source missing") );
+            else if (iWarnUserIfFailed && iTexture->IsA(UTextureRenderTarget2D::StaticClass()) && mComponent->IsA<UOdysseyAnimationComponent>())
+                FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("painter-editor-extension.animation-already-opened-dialog.message", "The selected animation is already opened in an other editor. Please close the editor before selecting this animation."), LOCTEXT("painter-editor-extension.animation-already-opened-dialog.title", "Selected Animation Already Opened"));
 
             return false;
         }

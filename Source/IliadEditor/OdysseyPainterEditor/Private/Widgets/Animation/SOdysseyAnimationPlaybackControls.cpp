@@ -194,7 +194,7 @@ SOdysseyAnimationPlaybackControls::OnPlayClicked()
         }
 
         TRange<FFrameNumber> range = TRange<FFrameNumber>::Hull(ranges);
-        mPlayer->SetCustomPlayRange(range.GetLowerBoundValue(), range.GetUpperBoundValue());
+        mPlayer->SetCustomPlayRange(range.GetLowerBoundValue(), range.GetUpperBoundValue() - 1);
         mPlayer->SetPlayRange(EOdysseyAnimationPlayerPlayRange::Custom);
     }
     mPlayer->Play(false);

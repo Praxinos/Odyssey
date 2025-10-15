@@ -166,9 +166,13 @@ ExecuteExportTexture( TArray<UTexture2D*> iTextures )
 void
 ExecuteEditWithOdysseyTextureEditor(TArray<UTexture2D*> iTextures)
 {
+    UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
     for (UTexture2D* texture : iTextures)
     {
         if (!texture)
+            continue;
+
+        if (AssetEditorSubsystem->FindEditorForAsset(texture, true))
             continue;
 
         FOdysseyPainterEditorModule* painterEditorModule = &FModuleManager::GetModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
@@ -179,9 +183,13 @@ ExecuteEditWithOdysseyTextureEditor(TArray<UTexture2D*> iTextures)
 void
 ExecuteEditWithDefaultTextureEditor(TArray<UTexture2D*> iTextures)
 {
+    UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
     for (UTexture2D* texture : iTextures)
     {
         if (!texture)
+            continue;
+
+        if (AssetEditorSubsystem->FindEditorForAsset(texture, true))
             continue;
 
         ITextureEditorModule* TextureEditorModule = &FModuleManager::LoadModuleChecked<ITextureEditorModule>("TextureEditor");

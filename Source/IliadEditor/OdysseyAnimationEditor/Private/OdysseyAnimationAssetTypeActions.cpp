@@ -53,11 +53,14 @@ FOdysseyAnimationAssetTypeActions::BuildBackendFilter( FARFilter & InFilter )
 void FOdysseyAnimationAssetTypeActions::OpenAssetEditor(const TArray<UObject*>& InObjects, TSharedPtr<class IToolkitHost> EditWithinLevelEditor )
 {
     EToolkitMode::Type Mode = EditWithinLevelEditor.IsValid() ? EToolkitMode::WorldCentric : EToolkitMode::Standalone;
-
+    UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
     for (auto ObjIt = InObjects.CreateConstIterator(); ObjIt; ++ObjIt)
     {
         auto animation = Cast<UOdysseyAnimation>(*ObjIt);
         if (!animation)
+            continue;
+
+        if (AssetEditorSubsystem->FindEditorForAsset(animation, true))
             continue;
 
         FOdysseyPainterEditorModule* painterEditorModule = &FModuleManager::GetModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
