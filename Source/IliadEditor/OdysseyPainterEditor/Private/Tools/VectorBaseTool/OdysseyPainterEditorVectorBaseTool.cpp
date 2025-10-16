@@ -246,20 +246,25 @@ UOdysseyPainterEditorVectorBaseTool::GetWorkingCell()
 FOdysseyVectorGroup*
 UOdysseyPainterEditorVectorBaseTool::GetWorkingGroup() const
 {
-    FOdysseyVectorGroupPaint* scene = mWorkingCell->GetScene();
-    FOdysseyVectorGroup* workingGroup = scene;
-
-    // Add the path to the current unique selected group
-    if( mWorkingCell->GetSelectedObjectList().size() == 1 )
+    if( mWorkingCell )
     {
-        FOdysseyVectorObject* selectedObject = mWorkingCell->GetLastSelectedObject();
+        FOdysseyVectorGroupPaint* scene = mWorkingCell->GetScene();
+        FOdysseyVectorGroup* workingGroup = scene;
 
-        workingGroup = static_cast<FOdysseyVectorGroup*>( selectedObject->GetAncestorByClass( FOdysseyVectorGroup::StaticClass()
-                                                                                            , true
-                                                                                            , true ) );
+        // Add the path to the current unique selected group
+        if( mWorkingCell->GetSelectedObjectList().size() == 1 )
+        {
+            FOdysseyVectorObject* selectedObject = mWorkingCell->GetLastSelectedObject();
+
+            workingGroup = static_cast<FOdysseyVectorGroup*>( selectedObject->GetAncestorByClass( FOdysseyVectorGroup::StaticClass()
+                                                                                                , true
+                                                                                                , true ) );
+        }
+
+        return workingGroup;
     }
 
-    return workingGroup;
+    return nullptr;
 }
 
 void

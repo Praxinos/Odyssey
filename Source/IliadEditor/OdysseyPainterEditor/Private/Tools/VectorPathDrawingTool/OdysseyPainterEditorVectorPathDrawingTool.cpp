@@ -261,7 +261,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorGro
     mTimeAtDown = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
-    if( ( iKey == EKeys::LeftMouseButton ) && GetWorkingGroup()->IsVisible( true ) )
+    if( ( iKey == EKeys::LeftMouseButton ) && GetWorkingGroup() && GetWorkingGroup()->IsVisible( true ) )
     {
         FOdysseyVectorPath* path = nullptr;
 
@@ -348,8 +348,16 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorGro
 EMouseCursor::Type
 UOdysseyPainterEditorVectorPathDrawingTool::GetMouseCursor() const
 {
-    return GetWorkingGroup()->IsVisible( true ) ? EMouseCursor::Type::Crosshairs
-                                                : EMouseCursor::Type::SlashedCircle;;
+    // working group can be null if were are not on a cell
+    FOdysseyVectorGroup* workingGroup = GetWorkingGroup();
+
+    if( workingGroup )
+    {
+        return workingGroup->IsVisible( true ) ? EMouseCursor::Type::Crosshairs
+                                               : EMouseCursor::Type::SlashedCircle;
+    }
+
+    return EMouseCursor::Type::Crosshairs;
 }
 
 void
@@ -369,7 +377,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorGro
     // For some reason, iPointInTexture.keysDown.Find does not find the left button click for the first few events
     // when using the stylus so we use mPathTracer.GetPath instead
     //if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
-    if( mPathTracer.GetPath() && GetWorkingGroup()->IsVisible( true ) )
+    if( mPathTracer.GetPath() && GetWorkingGroup() && GetWorkingGroup()->IsVisible( true ) )
     {
         FOdysseyVectorPath* path = mPathTracer.GetPath();
         double pointRadius = PressureSensitive ? ( iPointInTexture.pressure * Radius ) : Radius;
@@ -454,7 +462,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorGroup
     mTimeAtUp = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
-    if( ( iKey == EKeys::LeftMouseButton ) && GetWorkingGroup()->IsVisible( true ) )
+    if( ( iKey == EKeys::LeftMouseButton ) && GetWorkingGroup() && GetWorkingGroup()->IsVisible( true ) )
     {
         // check path validity in case we get a UP without a DOWN first
         if( mPathTracer.GetPath() )

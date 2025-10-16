@@ -176,13 +176,16 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::DrawHUD( const FOdysseyHUDElement
         }
     }
 
-    if( mPathDrawingTool->GetWorkingGroup()->IsVisible(true) == false )
+    if( mPathDrawingTool->GetWorkingGroup() )
     {
-        static FText warningText = LOCTEXT( "vector-path-drawing-tool-nodraw-warning"
-                                          , "Cannot draw inside an invisible group" );
-        static FLinearColor warningColor = FLinearColor( 1.0f, 0.5f, 0.0f );
+        if( mPathDrawingTool->GetWorkingGroup()->IsVisible(true) == false )
+        {
+            static FText warningText = LOCTEXT( "vector-path-drawing-tool-nodraw-warning"
+                                              , "Cannot draw inside an invisible group" );
+            static FLinearColor warningColor = FLinearColor( 1.0f, 0.5f, 0.0f );
 
-        DrawInfo( iParams, warningText, warningColor );
+            DrawInfo( iParams, warningText, warningColor );
+        }
     }
 
     // invisible plane will get mouse events

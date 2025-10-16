@@ -206,8 +206,16 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDownVector( FOdysseyVect
 EMouseCursor::Type
 UOdysseyPainterEditorVectorPrimitiveDrawingTool::GetMouseCursor() const
 {
-    return GetWorkingGroup()->IsVisible( true ) ? EMouseCursor::Type::Crosshairs
-                                                : EMouseCursor::Type::SlashedCircle;;
+    // working group can be null if were are not on a cell
+    FOdysseyVectorGroup* workingGroup = GetWorkingGroup();
+
+    if( workingGroup )
+    {
+        return workingGroup->IsVisible( true ) ? EMouseCursor::Type::Crosshairs
+                                               : EMouseCursor::Type::SlashedCircle;
+    }
+
+    return EMouseCursor::Type::Crosshairs;
 }
 
 double
