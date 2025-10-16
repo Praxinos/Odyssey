@@ -133,6 +133,7 @@ bool UBoardSequence::CanRebindPossessable( const FMovieScenePossessable& InPosse
     return !InPossessable.GetParent().IsValid();
 }
 
+#if WITH_EDITOR
 FGuid UBoardSequence::CreatePossessable( UObject* ObjectToPossess ) //override
 {
     return FindOrAddBinding( ObjectToPossess );
@@ -142,6 +143,8 @@ FGuid UBoardSequence::CreatePossessable( UObject* ObjectToPossess ) //override
 //}
 
 // From LevelSequence.cpp
+
+
 FGuid UBoardSequence::FindOrAddBinding( UObject* InObject )
 {
     using namespace UE::MovieScene;
@@ -218,6 +221,7 @@ FGuid UBoardSequence::FindOrAddBinding( UObject* InObject )
 
     return NewGuid;
 }
+#endif
 
 void UBoardSequence::LocateBoundObjects(const FGuid& ObjectId, UObject* Context, TArray<UObject*, TInlineAllocator<1>>& OutObjects) const // override
 {

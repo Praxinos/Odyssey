@@ -275,7 +275,7 @@ void UShotSequence::LocateBoundObjects( const FGuid& ObjectId, UObject* Context,
     ActorsBindingReferences.ResolveBinding( ObjectId, Context, OutObjects );
 }
 
-
+#if WITH_EDITOR
 FGuid UShotSequence::CreatePossessable( UObject* ObjectToPossess ) //override
 {
     return FindOrAddBinding( ObjectToPossess );
@@ -361,7 +361,7 @@ FGuid UShotSequence::FindOrAddBinding( UObject* InObject )
 
     return NewGuid;
 }
-
+#endif
 
 UMovieScene* UShotSequence::GetMovieScene() const
 {
