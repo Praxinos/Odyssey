@@ -189,12 +189,14 @@ SOdysseyAnimationPlaybackControls::OnPlayClicked()
         for (UOdysseyLayerCell* cell : selectedCells)
         {
             FInt32Range frameRange = cell->GetFrameRange();
-            TRange<FFrameNumber> frameNumberRange(frameRange.GetLowerBoundValue(), frameRange.GetLowerBoundValue() + 1);
+            TRange<FFrameNumber> frameNumberRange(frameRange.GetLowerBoundValue(), frameRange.GetUpperBoundValue() + 1 );
             ranges.Add(frameNumberRange);
         }
 
         TRange<FFrameNumber> range = TRange<FFrameNumber>::Hull(ranges);
-        mPlayer->SetCustomPlayRange(range.GetLowerBoundValue(), range.GetUpperBoundValue() - 1);
+
+        mPlayer->SetCustomPlayRange(range.GetLowerBoundValue(), range.GetUpperBoundValue() - 1 );
+
         mPlayer->SetPlayRange(EOdysseyAnimationPlayerPlayRange::Custom);
     }
     mPlayer->Play(false);
