@@ -90,7 +90,7 @@ public:
     /** Closes the dialog. */
     void CloseDialog();
 
-    static ::ULIS::eFileFormat GetUlisExportImageFormat( TEnumAsByte<EExportImageFormat> iExportImageFormat );
+    static FString GetExtensionFromExportImageFormat( TEnumAsByte<EExportImageFormat> iExportImageFormat );
 
 private:
     /** Recursively sets the checked/active state of every child of this node in the tree when a checkbox is toggled. */

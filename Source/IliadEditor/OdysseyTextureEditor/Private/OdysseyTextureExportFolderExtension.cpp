@@ -8,6 +8,7 @@
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "AssetToolsModule.h"
 #include "FileHelpers.h"
+#include "ImageUtils.h"
 #include "Misc/MessageDialog.h"
 #include "Misc/ScopedSlowTask.h"
 #include "AssetRegistry/ARFilter.h"
@@ -18,7 +19,6 @@
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "OdysseyPixelFormat.h"
 #include "EditorDirectories.h"
-#include "ULISLoaderModule.h"
 #include "Misc/Paths.h"
 #include <string>
 
@@ -211,9 +211,6 @@ void FOdysseyTextureExportFolderExtension::PerformExportFolder(TArray<FName> iPa
 
 void FOdysseyTextureExportFolderExtension::ExportFolder_ReportConfirmed( TEnumAsByte<EExportImageFormat> iExportImageFormat, TSharedPtr<TArray<ReportPackageData>> iPackageDataToExport, FString iDestinationFolder )
 {
-    // Convert the Uenum into Ulis Enum
-    ::ULIS::eFileFormat ulisExportImageFormat = SOdysseyPackageReportDialog::GetUlisExportImageFormat( iExportImageFormat );
-
     // Check if destination directory is empty
     TArray<FString> foundFiles;
     IFileManager::Get().FindFilesRecursive( foundFiles, GetData( FPaths::GetPath( iDestinationFolder ) ), *FString( "*" ), true, true, false );
@@ -268,12 +265,12 @@ void FOdysseyTextureExportFolderExtension::ExportFolder_ReportConfirmed( TEnumAs
                     bool bFileOKToCopy = true;
 
                     FString destFilename = iDestinationFolder;
-                    const char* ext = ::ULIS::kwImageFormat[ulisExportImageFormat];
+                    FString extension = SOdysseyPackageReportDialog::GetExtensionFromExportImageFormat( iExportImageFormat );
 
                     FString subFolder;
                     if ( srcFilename.Split( TEXT("/Content/"), nullptr, &subFolder ) )
                     {
-                        destFilename = FPaths::GetPath( destFilename + *subFolder ) + TEXT("/") + FPaths::GetBaseFilename( srcFilename ) + TEXT(".") + ext;
+                        destFilename = FPaths::GetPath( destFilename + *subFolder ) + TEXT("/") + FPaths::GetBaseFilename( srcFilename ) + TEXT(".") + extension;
 
                         if ( IFileManager::Get().FileSize(*destFilename) > 0 )
                         {
@@ -313,85 +310,43 @@ void FOdysseyTextureExportFolderExtension::ExportFolder_ReportConfirmed( TEnumAs
                     if ( bFileOKToCopy )
                     {
                         UTexture2D* textureToSave = LoadObject<UTexture2D>( nullptr, GetData( packageName ), nullptr, ELoadFlags::LOAD_None, nullptr );
-                        ExportFile( textureToSave, destFilename, ulisExportImageFormat );
+                        ExportFile( textureToSave, destFilename );
                     }
                 }
             }
         }
     }
 
-    const FText exportFinished = FText::Format( LOCTEXT("export-folder.operation-finished", "The export operation is finished "), FText::FromString( iDestinationFolder ) );
+    const FText exportFinished = FText::Format( LOCTEXT("export-folder.operation-finished", "The export operation is finished in {0}"), FText::FromString( iDestinationFolder ) );
     FMessageDialog::Open( EAppMsgType::Ok, exportFinished );
 }
 
-// TODO : check is the OdysseyBlock format is correct according to the export file format
-void FOdysseyTextureExportFolderExtension::ExportFile( UTexture2D* iCurrentTexture, FString iSystemPathNameExt, ::ULIS::eFileFormat iExportFormat )
+void FOdysseyTextureExportFolderExtension::ExportFile( UTexture2D* iCurrentTexture, FString iSystemPathNameExt )
 {
-    std::string stringSystemPathNameExt = TCHAR_TO_UTF8( *iSystemPathNameExt );
-    // The OdysseyBLock is required to be used with Ulis export function
-    FTexturePlatformData* platformData = iCurrentTexture->GetPlatformData();
-    ::ULIS::FBlock* odysseyBlockToSave = new ::ULIS::FBlock( platformData->SizeX, platformData->SizeY, ULISFormatForTextureSourceFormat( iCurrentTexture->Source.GetFormat() ) );
-    FOdysseyScopedTextureSettings settingsGuard = FOdysseyScopedTextureSettings::MakeUncompressedNoMipMaps( iCurrentTexture );
-    CopyUTextureSourceDataIntoBlock( odysseyBlockToSave, iCurrentTexture );
-
-    // ::ul3::SaveToFile doesn't recreate directories
-    if ( !IFileManager::Get().DirectoryExists( GetData( FPaths::GetPath( iSystemPathNameExt ) ) ) )
-        {
-            IFileManager::Get().MakeDirectory( GetData( FPaths::GetPath( iSystemPathNameExt ) ), true );
-        }
-
-    // Exporting the actual image
-    IULISLoaderModule& ULISModule = IULISLoaderModule::Get();
-    ::ULIS::FContext& ctx = ULISModule.FindOrAddContext(odysseyBlockToSave->Format());
-
-
-    bool canSaveDirectly = false;
-    ::ULIS::FContext::SaveBlockToDiskMetrics(*odysseyBlockToSave, iExportFormat, &canSaveDirectly);
-    if (canSaveDirectly)
+    FImage OutImage;
+    if( !FImageUtils::GetTexture2DSourceImage( iCurrentTexture, OutImage ) )
     {
-        ctx.SaveBlockToDisk(
-            *odysseyBlockToSave
-            , stringSystemPathNameExt
-            , iExportFormat
-            , 100
-        );
-
-        ctx.Finish();
-    }
-    else
-    {
-        ::ULIS::eFormat format = odysseyBlockToSave->Model() == ::ULIS::ColorModel_GREY ? ::ULIS::Format_GA8 : ::ULIS::Format_RGBA8;
-        if (iExportFormat == ::ULIS::FileFormat_hdr)
-        {
-            format = ::ULIS::Format_RGBAF;
-        }
-
-        ::ULIS::FBlock blockProxy(odysseyBlockToSave->Width(), odysseyBlockToSave->Height(), format);
-
-        ::ULIS::FEvent eventConvert;
-        ctx.ConvertFormat(
-            *odysseyBlockToSave
-            , blockProxy
-            , ULIS::FRectI::Auto
-            , ULIS::FVec2I(0)
-            , ULIS::FSchedulePolicy::CacheEfficient
-            , 0
-            , nullptr
-            , &eventConvert
-        );
-
-        ctx.SaveBlockToDisk(
-            blockProxy
-            , stringSystemPathNameExt
-            , iExportFormat
-            , 100
-        );
-
-        ctx.Finish();
+        const FText exportFinished = FText::Format( LOCTEXT( "export-folder.can-not-get-source-from-texture2d", "The texture \"{0}\" can\'t be exported.\n\nNo source image." ), FText::FromString( iCurrentTexture->GetName() ) );
+        FMessageDialog::Open( EAppMsgType::Ok, exportFinished );
+        return;
     }
 
-    delete odysseyBlockToSave;
+    IPlatformFile& platformFile = FPlatformFileManager::Get().GetPlatformFile();
+
+    FString path = GetData( FPaths::GetPath( iSystemPathNameExt ) );
+
+    // Ensure Directory Exists
+    if( !platformFile.DirectoryExists( *path ) )
+        platformFile.CreateDirectory( *path );
+
+    if( !FImageUtils::SaveImageByExtension( *iSystemPathNameExt, OutImage ) )
+    {
+        const FText exportFinished = FText::Format( LOCTEXT( "export-folder.can-not-export-to-disk", "The texture \"{0}\" can\'t be exported to:\n\n{1}" ), FText::FromString( iCurrentTexture->GetName() ), FText::FromString( iSystemPathNameExt ) );
+        FMessageDialog::Open( EAppMsgType::Ok, exportFinished );
+        return;
+    }
 }
+
 
 void FOdysseyTextureExportFolderExtension::RecursiveGetDependencies(const FName& iPackageName, TSet<FName>& ioAllDependencies, const FString& iOriginalRoot)
 {
