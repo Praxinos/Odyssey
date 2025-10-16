@@ -404,6 +404,9 @@ UOdysseyAnimationPlayer::UpdateTexture()
     if (!Animation)
         return;
 
+    if( !RenderTarget->GameThread_GetRenderTargetResource() )
+        return;
+
     FFrameTime frame = mDisplayedFrame;
     uint64 renderType = mRenderType.Get();
     TArray<FGuid> imageRenderingComposition = Animation->GetRenderingComposition(renderType, frame.GetFrame().Value);
