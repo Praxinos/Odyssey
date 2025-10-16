@@ -707,7 +707,7 @@ SOdysseyAnimationCells::OnExposureHandleDragStarted(const FGeometry& iGeometry, 
     mExposureHandleDragData.mIsDragging = true;
     mExposureHandleDragData.mCell = mHoveredCell;
     mExposureHandleDragData.mInitialExposure = mHoveredCell->GetExposure();
-    mExposureHandleDragData.mMousePosition = iEvent.GetScreenSpacePosition().X;
+    mExposureHandleDragData.mMousePosition = iEvent.GetScreenSpacePosition();
 }
 
 void
@@ -717,7 +717,7 @@ SOdysseyAnimationCells::OnExposureHandleDragged(const FGeometry& iGeometry, cons
         return;
 
     const int minExposure = 1;
-    float mouseOffset = iEvent.GetScreenSpacePosition().X - mExposureHandleDragData.mMousePosition;
+    float mouseOffset = iGeometry.AbsoluteToLocal(iEvent.GetScreenSpacePosition() - mExposureHandleDragData.mMousePosition + iGeometry.GetAbsolutePosition()).X;
     int mouseOffsetInt = 0;
     if ( mouseOffset > 0 )
         mouseOffsetInt = (int)(mouseOffset / mTimelinePosition->GetFrameSize() + 0.5f);
@@ -762,7 +762,7 @@ SOdysseyAnimationCells::OnTimingHandleDragStarted(const FGeometry& iGeometry, co
     mTimingHandleDragData.mMinOffset = -cellRange.GetLowerBoundValue();
     mTimingHandleDragData.mHasMaxOffset = mHoveredCell->GetIndexInLayer() == 0;
     mTimingHandleDragData.mMaxOffset = layerRange.GetUpperBoundValue() - cellRange.GetLowerBoundValue();
-    mTimingHandleDragData.mMousePosition = iEvent.GetScreenSpacePosition().X;
+    mTimingHandleDragData.mMousePosition = iEvent.GetScreenSpacePosition();
     mTimingHandleDragData.mInitialOffset = mAnimationLayer->GetCellsOffset();
 }
 
@@ -784,7 +784,7 @@ SOdysseyAnimationCells::OnTimingHandleDragged(const FGeometry& iGeometry, const 
     mAnimationLayer->SetCellsOffsetInteractive(mTimingHandleDragData.mInitialOffset);
 
     //Compute Mouse Offset
-    float mouseOffset = iEvent.GetScreenSpacePosition().X - mTimingHandleDragData.mMousePosition;
+    float mouseOffset = iGeometry.AbsoluteToLocal(iEvent.GetScreenSpacePosition() - mTimingHandleDragData.mMousePosition + iGeometry.GetAbsolutePosition()).X;
     int mouseOffsetInt = 0;
     if ( mouseOffset > 0 )
         mouseOffsetInt = (int)(mouseOffset / mTimelinePosition->GetFrameSize() + 0.5f);
@@ -944,7 +944,7 @@ SOdysseyAnimationCells::OnAddCellsHandleDragStarted(const FGeometry& iGeometry, 
     FInt32Range layerRange = mAnimationLayer->GetFrameRange();
     mAddCellsHandleDragData.mIsDragging = true;
     mAddCellsHandleDragData.mIsRightHandle = iIsRightHandle;
-    mAddCellsHandleDragData.mMousePosition = iEvent.GetScreenSpacePosition().X;
+    mAddCellsHandleDragData.mMousePosition = iEvent.GetScreenSpacePosition();
     mAddCellsHandleDragData.mInitialOffset = mAnimationLayer->GetCellsOffset();
 
     if (iIsRightHandle)
@@ -985,7 +985,7 @@ SOdysseyAnimationCells::OnAddCellsHandleDragged(const FGeometry& iGeometry, cons
     int numTempCellsToAppend = 0;
 
     //Compute Mouse Offset
-    float mouseOffset = iEvent.GetScreenSpacePosition().X - mAddCellsHandleDragData.mMousePosition;
+    float mouseOffset = iGeometry.AbsoluteToLocal(iEvent.GetScreenSpacePosition() - mAddCellsHandleDragData.mMousePosition + iGeometry.GetAbsolutePosition()).X;
     int mouseOffsetInt = 0;
     if ( mouseOffset > 0 )
         mouseOffsetInt = (int)(mouseOffset / mTimelinePosition->GetFrameSize() + 0.5f);

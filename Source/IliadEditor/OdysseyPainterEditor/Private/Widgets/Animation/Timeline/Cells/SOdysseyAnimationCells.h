@@ -172,7 +172,7 @@ private:
     {
         bool mIsDragging = false;
         UOdysseyLayerCell* mCell = nullptr;
-        double mMousePosition = 0;
+        FVector2D mMousePosition;
         int mInitialExposure = 0;
     } mExposureHandleDragData;
 
@@ -183,7 +183,7 @@ private:
         int mMinOffset = 0;
         bool mHasMaxOffset = false;
         int mMaxOffset = 0;
-        double mMousePosition = 0;
+        FVector2D mMousePosition;
 
         int mInitialOffset = 0;
         TMap<UOdysseyLayerCell*, int> mAffectedCells;
@@ -195,7 +195,7 @@ private:
         int mMinOffset;
         int mMaxOffset;
         bool mHasMaxOffset;
-        double mMousePosition;
+        FVector2D mMousePosition;
         bool mIsRightHandle;
 
         int mInitialOffset;

@@ -39,7 +39,7 @@ SOdysseyFlipbookTimelineFrameHandle::OnMouseMove(const FGeometry& iGeometry, con
 {
     if (mIsDragging)
     {
-        float offset = iMouseEvent.GetScreenSpacePosition().X - mDragScreenSpacePosition.X;
+        float offset = iGeometry.AbsoluteToLocal(iMouseEvent.GetScreenSpacePosition().X - mDragScreenSpacePosition.X + iGeometry.GetAbsolutePosition()).X;
         int32 frameOffset = FGenericPlatformMath::RoundToInt(offset / mFrameSize.Get());
         mOnDragged.ExecuteIfBound(frameOffset);
         return FReply::Handled();
