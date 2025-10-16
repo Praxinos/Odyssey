@@ -226,6 +226,7 @@ SOdysseyLayerRow::GenerateMainRowIsLockedWidget()
         .VAlign(VAlign_Center)
         [
             SNew(SCheckBox)
+            .IsEnabled_Lambda([this](){ return !GetLayer()->GetParent()->IsLockedRecursively();})
             .Style(isLockedToggleStyle)
             .OnCheckStateChanged(this, &SOdysseyLayerRow::OnIsLockedCheckBoxStateChanged)
             .IsChecked(this, &SOdysseyLayerRow::GetIsLockedCheckBoxState)
