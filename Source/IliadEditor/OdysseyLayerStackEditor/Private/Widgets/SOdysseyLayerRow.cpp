@@ -197,6 +197,7 @@ SOdysseyLayerRow::GenerateMainRowDisplayOptionsWidget()
         [
             SNew(SCheckBox)
             .Style(displayOptionsToggleStyle)
+            .IsFocusable(false)
             .OnCheckStateChanged(this, &SOdysseyLayerRow::OnDisplayOptionsCheckBoxStateChanged)
             .IsChecked(this, &SOdysseyLayerRow::GetDisplayOptionsCheckBoxState)
         ];
@@ -212,6 +213,7 @@ SOdysseyLayerRow::GenerateMainRowIsActivatedWidget()
         [
             SNew(SCheckBox)
             .Style(isActivatedToggleStyle)
+            .IsFocusable(false)
             .OnCheckStateChanged(this, &SOdysseyLayerRow::OnIsActivatedCheckBoxStateChanged)
             .IsChecked(this, &SOdysseyLayerRow::GetIsActivatedCheckBoxState)
         ];
@@ -226,6 +228,7 @@ SOdysseyLayerRow::GenerateMainRowIsLockedWidget()
         .VAlign(VAlign_Center)
         [
             SNew(SCheckBox)
+            .IsFocusable(false)
             .IsEnabled_Lambda([this](){ return !GetLayer()->GetParent()->IsLockedRecursively();})
             .Style(isLockedToggleStyle)
             .OnCheckStateChanged(this, &SOdysseyLayerRow::OnIsLockedCheckBoxStateChanged)

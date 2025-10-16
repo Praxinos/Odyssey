@@ -257,6 +257,7 @@ void SStylusInputDebugWidget::Construct(const FArguments& InArgs, UOdysseyStylus
             .FillWidth(1)
             [
                 SNew(SCheckBox)
+                .IsFocusable(false)
                 .IsChecked(this, &SStylusInputDebugWidget::IsTouching)
             ]
         ]
@@ -274,6 +275,7 @@ void SStylusInputDebugWidget::Construct(const FArguments& InArgs, UOdysseyStylus
             .FillWidth(1)
             [
                 SNew(SCheckBox)
+                .IsFocusable(false)
                 .IsChecked(this, &SStylusInputDebugWidget::IsInverted)
             ]
         ]

@@ -105,6 +105,7 @@ SOdysseyLighttable::GeneratePreviousKeyWidget(int iKeyIndex)
     .HAlign(HAlign_Center)
     [
         SNew(SCheckBox)
+        .IsFocusable(false)
         .OnCheckStateChanged(this, &SOdysseyLighttable::OnPreviousKeyIsActivatedCheckStateChanged, iKeyIndex)
         .IsChecked(this, &SOdysseyLighttable::GetPreviousKeyIsActivated, iKeyIndex )
     ]
@@ -136,6 +137,7 @@ SOdysseyLighttable::GenerateNextKeyWidget(int iKeyIndex)
     .HAlign(HAlign_Center)
     [
         SNew(SCheckBox)
+        .IsFocusable(false)
         .OnCheckStateChanged(this, &SOdysseyLighttable::OnNextKeyIsActivatedCheckStateChanged, iKeyIndex)
         .IsChecked(this, &SOdysseyLighttable::GetNextKeyIsActivated, iKeyIndex )
     ]

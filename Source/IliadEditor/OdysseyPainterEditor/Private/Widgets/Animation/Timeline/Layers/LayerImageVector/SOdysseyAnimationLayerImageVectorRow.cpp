@@ -72,6 +72,7 @@ SOdysseyAnimationLayerImageVectorRow::GenerateMainRowHeaderOptionWidgets()
     widgets.Add(
         //WireframeLock
         SNew(SCheckBox)
+        .IsFocusable(false)
         .Style(wireframeToggleStyle)
         .OnCheckStateChanged(this, &SOdysseyAnimationLayerImageVectorRow::OnIsWireframeCheckStateChanged)
         .IsChecked(this, &SOdysseyAnimationLayerImageVectorRow::GetIsWireframeIsChecked)
@@ -80,6 +81,7 @@ SOdysseyAnimationLayerImageVectorRow::GenerateMainRowHeaderOptionWidgets()
     widgets.Add(
         //ColoredLock
         SNew(SCheckBox)
+        .IsFocusable(false)
         .Style(coloredToggleStyle)
         .OnCheckStateChanged(this, &SOdysseyAnimationLayerImageVectorRow::OnIsColoredCheckStateChanged)
         .IsChecked(this, &SOdysseyAnimationLayerImageVectorRow::GetIsColoredIsChecked)

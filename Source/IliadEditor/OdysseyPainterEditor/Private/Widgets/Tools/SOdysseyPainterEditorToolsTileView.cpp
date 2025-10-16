@@ -30,6 +30,7 @@ SOdysseyPainterEditorToolsTileView::Construct(const FArguments& InArgs)
         [
             SNew(SCheckBox)
             .Style( checkboxStyle )
+            .IsFocusable(false)
             .OnCheckStateChanged(this, &SOdysseyPainterEditorToolsTileView::OnToolCheckStateChanged, tool)
             .IsChecked(this, &SOdysseyPainterEditorToolsTileView::IsToolChecked, tool)
             .Visibility(this, &SOdysseyPainterEditorToolsTileView::ToolVisibility, tool)

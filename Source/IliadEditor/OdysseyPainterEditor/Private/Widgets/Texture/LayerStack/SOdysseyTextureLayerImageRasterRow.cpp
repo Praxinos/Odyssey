@@ -42,6 +42,7 @@ SOdysseyTextureLayerImageRasterRow::GenerateMainRowHeaderOptionWidgets()
     widgets.Add(
         SNew(SCheckBox)
         .Style(alphaLockedToggleStyle)
+        .IsFocusable(false)
         .OnCheckStateChanged(this, &SOdysseyTextureLayerImageRasterRow::OnIsAlphaLockedCheckStateChanged)
         .IsChecked(this, &SOdysseyTextureLayerImageRasterRow::GetIsAlphaLockedIsChecked)
     );

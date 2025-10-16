@@ -77,6 +77,7 @@ SOdysseyAnimationLayerRow::GenerateMainRowHeaderOptionWidgets()
         widgets.Add(
             SNew(SCheckBox)
             .Style(lighttableToggleStyle)
+            .IsFocusable(false)
             .OnCheckStateChanged(this, &SOdysseyAnimationLayerRow::OnLighttableCheckStateChanged)
             .IsChecked(this, &SOdysseyAnimationLayerRow::GetLighttableIsChecked)
         );

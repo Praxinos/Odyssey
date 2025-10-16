@@ -248,6 +248,7 @@ SOdysseyViewport::Construct( const FArguments& InArgs )
                     [
                         SNew(SCheckBox)
                             .Style(&FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("CheckBox.BasicOnOff"))
+                            .IsFocusable(false)
                             .OnCheckStateChanged(this, &SOdysseyViewport::HandleFlipHorizontal)
                             .IsChecked_Lambda([this]() -> ECheckBoxState { return mFlipStateUV.X == 1 ? ECheckBoxState::Checked : ECheckBoxState::Unchecked; })
                             [
@@ -261,6 +262,7 @@ SOdysseyViewport::Construct( const FArguments& InArgs )
                     [
                         SNew(SCheckBox)
                             .Style(&FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("CheckBox.BasicOnOff"))
+                            .IsFocusable(false)
                             .OnCheckStateChanged(this, &SOdysseyViewport::HandleFlipVertical)
                             .IsChecked_Lambda([this]() -> ECheckBoxState { return mFlipStateUV.Y == 1 ? ECheckBoxState::Checked : ECheckBoxState::Unchecked; })
                             [

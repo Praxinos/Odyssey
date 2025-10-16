@@ -418,6 +418,7 @@ SOdysseyPainterEditorVectorMassModifierView::ExtendWidgetRow ( FDetailWidgetRow&
             .AutoWidth()
             [
                 SNew(SCheckBox)
+                .IsFocusable(false)
                 .OnCheckStateChanged( this
                                     , &SOdysseyPainterEditorVectorMassModifierView::PropertyCheckStateChanged
                                     , iPropertyHandle

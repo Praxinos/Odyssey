@@ -50,6 +50,7 @@ SOdysseyAnimationLayerImageRasterRow::GenerateMainRowHeaderOptionWidgets()
     //AlphaLock
     widgets.Add(
         SNew(SCheckBox)
+        .IsFocusable(false)
         .Style(alphaLockedToggleStyle)
         .OnCheckStateChanged(this, &SOdysseyAnimationLayerImageRasterRow::OnIsAlphaLockedCheckStateChanged)
         .IsChecked(this, &SOdysseyAnimationLayerImageRasterRow::GetIsAlphaLockedIsChecked)

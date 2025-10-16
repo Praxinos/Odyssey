@@ -46,6 +46,7 @@ SOdysseyTextureLayerImageVectorRow::GenerateMainRowHeaderOptionWidgets()
         //WireframeLock
         SNew(SCheckBox)
         .Style(wireframeToggleStyle)
+        .IsFocusable(false)
         .OnCheckStateChanged(this, &SOdysseyTextureLayerImageVectorRow::OnIsWireframeCheckStateChanged)
         .IsChecked(this, &SOdysseyTextureLayerImageVectorRow::GetIsWireframeIsChecked)
     );
@@ -54,6 +55,7 @@ SOdysseyTextureLayerImageVectorRow::GenerateMainRowHeaderOptionWidgets()
         //ColoredLock
         SNew(SCheckBox)
         .Style(coloredToggleStyle)
+        .IsFocusable(false)
         .OnCheckStateChanged(this, &SOdysseyTextureLayerImageVectorRow::OnIsColoredCheckStateChanged)
         .IsChecked(this, &SOdysseyTextureLayerImageVectorRow::GetIsColoredIsChecked)
     );
