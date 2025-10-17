@@ -746,7 +746,7 @@ FCinematicBoardSection::GetAnimationTimelineThumbnails( FMovieScenePossessable i
 }
 
 FCinematicBoardSection::FThumbnailData
-FCinematicBoardSection::RebuildAnimationThumbnailDataInternal( UOdysseyAnimationTimelineSection* iSection, FFrameNumber iFrameInSequence, TOptional<FGuid> iFrameId )
+FCinematicBoardSection::RebuildAnimationThumbnailDataInternal( UOdysseyAnimationTimelineSection* iSection, FGuid iPossessable, FFrameNumber iFrameInSequence, TOptional<FGuid> iFrameId )
 {
     const UMovieSceneSubSection* subsection_object = &GetSubSectionObject();
 
@@ -775,6 +775,8 @@ FCinematicBoardSection::RebuildAnimationThumbnailDataInternal( UOdysseyAnimation
     //UTextureRenderTarget2D* renderTarget = nullptr;
 
     FRenderingComposition rendering_composition = animation->GetRenderingComposition( EOdysseyRenderingType::Render, frame_in_timeline.Value ); // THIS DOESN'T MANAGE IMAGE CHANGES !!!
+    TArray<FGuid> bindings;
+    rendering_composition.Insert( iPossessable, 0 );
 
     if( !mAnimationsTimelineThumbnailPool.Contains( rendering_composition ) || ( iFrameId.IsSet() && rendering_composition.Contains( *iFrameId ) ) )
     {
@@ -905,7 +907,7 @@ FCinematicBoardSection::ReBuildAnimationsTimelineThumbnails( FGuid iGuid, TOptio
             if( !animation_timeline_section )
                 continue;
 
-            FThumbnailData thumbnail = RebuildAnimationThumbnailDataInternal( animation_timeline_section, meta_frame, iFrameId );
+            FThumbnailData thumbnail = RebuildAnimationThumbnailDataInternal( animation_timeline_section, iGuid, meta_frame, iFrameId );
             //if( !thumbnail.RenderTarget )
             if( !thumbnail.Texture )
                 continue;

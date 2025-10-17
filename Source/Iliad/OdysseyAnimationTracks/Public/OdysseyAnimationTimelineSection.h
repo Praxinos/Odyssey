@@ -53,10 +53,18 @@ public:
     void UpdateAnimationCutChannel( const TArray<FKeyHandle>& iKeyHandles, EPropertyChangeType::Type iChangeType );
 
 protected:
+    virtual void PostInitProperties() override;
+    virtual void PostEditImport() override;
     virtual void PostLoad() override;
+    virtual void PostDuplicate( EDuplicateMode::Type DuplicateMode ) override;
+#if WITH_EDITOR
+    virtual void PreEditChange( FProperty* PropertyAboutToChange );
+    virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent );
+#endif
 
     virtual EMovieSceneChannelProxyType CacheChannelProxy() override;
     virtual void MigrateFrameTimes(FFrameRate SourceRate, FFrameRate DestinationRate) override;
+    virtual void OnBindingIDsUpdated( const TMap<UE::MovieScene::FFixedObjectBindingID, UE::MovieScene::FFixedObjectBindingID>& OldFixedToNewFixedMap, FMovieSceneSequenceID LocalSequenceID, TSharedRef<UE::MovieScene::FSharedPlaybackState> SharedPlaybackState ) override;
 
     virtual void RebuildAnimationCutChannel();
 
