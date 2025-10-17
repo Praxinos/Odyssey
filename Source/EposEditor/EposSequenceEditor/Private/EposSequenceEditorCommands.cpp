@@ -85,8 +85,8 @@ FEposSequenceEditorCommands::RegisterCommands()
 
     //---
 
-    UI_COMMAND( StepToPreviousShot,                 "Step to Previous Shot", "Step to previous shot", EUserInterfaceActionType::Button, FInputChord( EKeys::Y ) );
-    UI_COMMAND( StepToNextShot,                     "Step to Next Shot", "Step to next shot", EUserInterfaceActionType::Button, FInputChord( EKeys::U ) );
+    UI_COMMAND( StepToPreviousShot,                 "Step to Previous Shot", "Step to previous sibling shot\nThis shortcut is available when the focused sequence is a shot, then its previous sibling shot will be focused.", EUserInterfaceActionType::Button, FInputChord( EKeys::Y ) );
+    UI_COMMAND( StepToNextShot,                     "Step to Next Shot", "Step to next sibling shot\nThis shortcut is available when the focused sequence is a shot, then its next sibling shot will be focused.", EUserInterfaceActionType::Button, FInputChord( EKeys::U ) );
 
     UI_COMMAND( DeactivateAllLighttables,           "Deactivate All Lighttables", "Deactivate all lighttables recursively from the root sequence", EUserInterfaceActionType::Button, FInputChord() );
 
