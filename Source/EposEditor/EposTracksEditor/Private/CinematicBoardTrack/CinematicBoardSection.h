@@ -118,7 +118,7 @@ public:
 
 private:
     virtual void ReBuildAnimationsTimelineThumbnails( FGuid iGuid, TOptional<FGuid> iFrameId = TOptional<FGuid>() );
-    virtual FThumbnailData RebuildAnimationThumbnailDataInternal( UOdysseyAnimationTimelineSection* iSection, FFrameNumber iFrameInSequence, TOptional<FGuid> iFrameId = TOptional<FGuid>() );
+    virtual FThumbnailData RebuildAnimationThumbnailDataInternal( UOdysseyAnimationTimelineSection* iSection, FGuid iPossessable, FFrameNumber iFrameInSequence, TOptional<FGuid> iFrameId = TOptional<FGuid>() );
 
 private:
     TArray<double> mThumbnailKeys;
