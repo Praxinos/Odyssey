@@ -760,7 +760,6 @@ TSharedRef<SWidget> SFilmOverlayOptions::ConstructToggleableOverlaysMenu()
         .Padding(10.f, 5.f)
         [
             SNew(SCheckBox)
-            .IsFocusable(false)
             .OnCheckStateChanged_Lambda(OnCheckStateChanged)
             .IsChecked_Lambda(IsChecked)
             .ToolTipText( FilmOverlay->GetToolTip() )

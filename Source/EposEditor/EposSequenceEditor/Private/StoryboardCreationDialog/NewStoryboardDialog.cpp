@@ -290,7 +290,6 @@ SNewStoryboardSettings::Construct( const FArguments& InArgs, EDialogType iDialog
             [
                 SNew(SCheckBox)
                 .Style( FAppStyle::Get(),  "ToolPalette.DockingTab" )
-                .IsFocusable(false)
                 .Padding( 7.f )
                 .HAlign( HAlign_Center )
                 .OnCheckStateChanged_Lambda( [this] (const ECheckBoxState) { mActiveTab = ETabs::kImportImageSequence; } )
@@ -308,7 +307,6 @@ SNewStoryboardSettings::Construct( const FArguments& InArgs, EDialogType iDialog
           [
               SNew(SCheckBox)
               .Style( FAppStyle::Get(),  "ToolPalette.DockingTab" )
-              .IsFocusable(false)
               .Padding( 7.f )
               .HAlign( HAlign_Center )
               .OnCheckStateChanged_Lambda( [this] (const ECheckBoxState) { mActiveTab = ETabs::kNamingConvention; } )
@@ -325,7 +323,6 @@ SNewStoryboardSettings::Construct( const FArguments& InArgs, EDialogType iDialog
             [
                 SNew(SCheckBox)
                 .Style( FAppStyle::Get(),  "ToolPalette.DockingTab" )
-                .IsFocusable(false)
                 .Padding( 7.f )
                 .HAlign( HAlign_Center )
                 .OnCheckStateChanged_Lambda( [this] (const ECheckBoxState) { mActiveTab = ETabs::kSequence; } )
@@ -342,7 +339,6 @@ SNewStoryboardSettings::Construct( const FArguments& InArgs, EDialogType iDialog
             [
                 SNew(SCheckBox)
                 .Style( FAppStyle::Get(),  "ToolPalette.DockingTab" )
-                .IsFocusable(false)
                 .Padding( 7.f )
                 .HAlign( HAlign_Center )
                 .OnCheckStateChanged_Lambda( [this] (const ECheckBoxState) { mActiveTab = ETabs::kSequencer; } )

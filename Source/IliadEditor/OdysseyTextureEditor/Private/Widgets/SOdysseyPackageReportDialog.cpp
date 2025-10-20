@@ -248,7 +248,6 @@ TSharedRef<ITableRow> SOdysseyPackageReportDialog::GenerateTreeRow( TSharedPtr<F
             .AutoWidth()
             [
                 SNew(SCheckBox)
-                .IsFocusable(false)
                 .OnCheckStateChanged(this, &SOdysseyPackageReportDialog::CheckBoxStateChanged, iTreeItem, iOwnerTable)
                 .IsChecked(this, &SOdysseyPackageReportDialog::GetEnabledCheckState, iTreeItem)
                 .IsEnabled(iTreeItem.Get()->Parent == nullptr ? true : iTreeItem.Get()->Parent->bIsActive)
