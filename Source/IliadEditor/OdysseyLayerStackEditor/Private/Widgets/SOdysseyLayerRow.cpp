@@ -213,6 +213,7 @@ SOdysseyLayerRow::GenerateMainRowIsActivatedWidget()
         [
             SNew(SCheckBox)
             .Style(isActivatedToggleStyle)
+            .IsEnabled(this, &SOdysseyLayerRow::GetIsActivatedCheckBoxEnabled)
             .IsFocusable(false)
             .OnCheckStateChanged(this, &SOdysseyLayerRow::OnIsActivatedCheckBoxStateChanged)
             .IsChecked(this, &SOdysseyLayerRow::GetIsActivatedCheckBoxState)
@@ -229,7 +230,7 @@ SOdysseyLayerRow::GenerateMainRowIsLockedWidget()
         [
             SNew(SCheckBox)
             .IsFocusable(false)
-            .IsEnabled_Lambda([this](){ return !GetLayer()->GetParent()->IsLockedRecursively();})
+            .IsEnabled(this, &SOdysseyLayerRow::GetIsLockedCheckBoxEnabled)
             .Style(isLockedToggleStyle)
             .OnCheckStateChanged(this, &SOdysseyLayerRow::OnIsLockedCheckBoxStateChanged)
             .IsChecked(this, &SOdysseyLayerRow::GetIsLockedCheckBoxState)
@@ -246,8 +247,20 @@ SOdysseyLayerRow::OnIsActivatedCheckBoxStateChanged(ECheckBoxState iState)
 ECheckBoxState
 SOdysseyLayerRow::GetIsActivatedCheckBoxState() const
 {
+    if( !GetLayer()->GetParent()->IsActivatedRecursively() )
+        return ECheckBoxState::Unchecked;
+        //return ECheckBoxState::Undetermined;
+
     return GetLayer()->IsActivated() ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
+
+bool
+SOdysseyLayerRow::GetIsActivatedCheckBoxEnabled() const
+{
+    return GetLayer()->GetParent()->IsActivatedRecursively();
+}
+
+//-
 
 void
 SOdysseyLayerRow::OnIsLockedCheckBoxStateChanged(ECheckBoxState iState)
@@ -259,8 +272,22 @@ SOdysseyLayerRow::OnIsLockedCheckBoxStateChanged(ECheckBoxState iState)
 ECheckBoxState
 SOdysseyLayerRow::GetIsLockedCheckBoxState() const
 {
+    if( !GetLayer()->IsActivatedRecursively() )
+        return ECheckBoxState::Undetermined;
+
     return GetLayer()->IsLocked() ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
+
+bool
+SOdysseyLayerRow::GetIsLockedCheckBoxEnabled() const
+{
+    if( !GetLayer()->IsActivatedRecursively() )
+        return false;
+
+    return !GetLayer()->GetParent()->IsLockedRecursively();
+}
+
+//---
 
 FText
 SOdysseyLayerRow::GetLayerName() const

@@ -350,6 +350,9 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
         .SetCheckedImage(IMAGE_BRUSH_SVG("OdysseyLayerStack/visible", mIcon16x16))
         .SetCheckedHoveredImage(IMAGE_BRUSH_SVG("OdysseyLayerStack/visible", mIcon16x16))
         .SetCheckedPressedImage(IMAGE_BRUSH_SVG("OdysseyLayerStack/visible", mIcon16x16))
+        .SetUndeterminedImage(IMAGE_BRUSH_SVG("OdysseyLayerStack/undetermined", mIcon16x16))
+        .SetUndeterminedHoveredImage(IMAGE_BRUSH_SVG("OdysseyLayerStack/undetermined", mIcon16x16))
+        .SetUndeterminedPressedImage(IMAGE_BRUSH_SVG("OdysseyLayerStack/undetermined", mIcon16x16))
     );
 
     Set("LayerStack.IsLockedToggle", FCheckBoxStyle()
@@ -362,6 +365,9 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
         .SetCheckedImage(IMAGE_BRUSH_SVG("OdysseyLayerStack/locked", mIcon16x16))
         .SetCheckedHoveredImage(IMAGE_BRUSH_SVG("OdysseyLayerStack/locked", mIcon16x16))
         .SetCheckedPressedImage(IMAGE_BRUSH_SVG("OdysseyLayerStack/locked", mIcon16x16))
+        .SetUndeterminedImage(IMAGE_BRUSH_SVG("OdysseyLayerStack/undetermined", mIcon16x16))
+        .SetUndeterminedHoveredImage(IMAGE_BRUSH_SVG("OdysseyLayerStack/undetermined", mIcon16x16))
+        .SetUndeterminedPressedImage(IMAGE_BRUSH_SVG("OdysseyLayerStack/undetermined", mIcon16x16))
     );
 
     //OdysseyViewportDrawingEditor

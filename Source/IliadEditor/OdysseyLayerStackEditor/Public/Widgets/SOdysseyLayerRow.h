@@ -43,8 +43,10 @@ protected:
 
     void OnIsActivatedCheckBoxStateChanged(ECheckBoxState iState);
     ECheckBoxState GetIsActivatedCheckBoxState() const;
+    bool GetIsActivatedCheckBoxEnabled() const;
     void OnIsLockedCheckBoxStateChanged(ECheckBoxState iState);
     ECheckBoxState GetIsLockedCheckBoxState() const;
+    bool GetIsLockedCheckBoxEnabled() const;
 
     void OnLayerNameCommited(const FText& iText, ETextCommit::Type iType);
     FText GetLayerName() const;
