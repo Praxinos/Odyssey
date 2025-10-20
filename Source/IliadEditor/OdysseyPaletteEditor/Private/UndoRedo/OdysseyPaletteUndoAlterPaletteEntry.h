@@ -11,10 +11,10 @@
 
 class FOdysseyVectorCell;
 
-class FOdysseyPaletteUndoRemovePaletteEntry : public FOdysseyPaletteUndo
+class FOdysseyPaletteUndoAlterPaletteEntry : public FOdysseyPaletteUndo
 {
 public:
-    FOdysseyPaletteUndoRemovePaletteEntry( const TArray<FOdysseyVectorCell*>& iCells );
+    FOdysseyPaletteUndoAlterPaletteEntry( const TArray<FOdysseyVectorCell*>& iCells );
 
     virtual FString ToString() const override;
 };

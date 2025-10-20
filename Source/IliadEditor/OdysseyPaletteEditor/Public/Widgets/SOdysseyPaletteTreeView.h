@@ -48,6 +48,10 @@ public:
     TSharedPtr<FOdysseyPaletteDragDropOperation> CreateDragDropOperation() const;
     UOdysseyPaletteEntryColor* GetCurrentColorEntry() const;
     UOdysseyPalette* GetPalette() const;
+    /**
+     * @brief Returns all Vector cells that use the entries in parameter
+     */
+    TArray<FOdysseyVectorCell*> GetVectorCellsUsedByEntries(const TArray<UOdysseyPaletteEntry*> &iEntriesToRemove);
 
 protected:
     //SWidget overrides
@@ -114,11 +118,6 @@ protected:
      *
      */
     void RenameCurrentEntry();
-
-    /**
-     * @brief Returns all Vector cells that use the entries in parameter
-     */
-    TArray<FOdysseyVectorCell*> GetVectorCellsUsedByEntries(TArray<UOdysseyPaletteEntry*> &iEntriesToRemove);
 
 protected:
     //Callbacks

@@ -20,7 +20,9 @@ class SOdysseyPaletteColorRow
 
 public:
     // Construction / Destruction
-    void Construct(const FArguments& iArgs, const TSharedRef<SOdysseyPaletteTreeView>& iTreeView, class UOdysseyPaletteEntryColor* iColorEntry);
+    void Construct(const FArguments& iArgs
+                 , const TSharedRef<SOdysseyPaletteTreeView>& iTreeView
+                 , class UOdysseyPaletteEntryColor* iColorEntry);
 
 protected:
     virtual const FSlateBrush* GetIcon() const override;

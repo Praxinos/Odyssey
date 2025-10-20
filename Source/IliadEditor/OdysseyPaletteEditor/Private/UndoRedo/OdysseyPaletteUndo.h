@@ -3,18 +3,27 @@
 
 #pragma once
 
-#include "OdysseyPaletteUndo.h"
-
 #include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
 #include "Misc/Change.h"
 
 class FOdysseyVectorCell;
 
-class FOdysseyPaletteUndoRemovePaletteEntry : public FOdysseyPaletteUndo
+class FOdysseyPaletteUndo : public FCommandChange
 {
 public:
-    FOdysseyPaletteUndoRemovePaletteEntry( const TArray<FOdysseyVectorCell*>& iCells );
+    FOdysseyPaletteUndo( const TArray<FOdysseyVectorCell*>& iCells );
+
+    void Refresh();
+
+    /** Called when redoing */
+    virtual void Apply(UObject* iIgnored) override;
+
+    /** called when undoing */
+    virtual void Revert(UObject* iIgnored) override;
 
     virtual FString ToString() const override;
+
+private:
+    TArray<FOdysseyVectorCell*> mCells;
 };

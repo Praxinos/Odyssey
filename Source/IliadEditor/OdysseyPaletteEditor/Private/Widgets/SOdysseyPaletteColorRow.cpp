@@ -6,14 +6,20 @@
 #include "Framework/Application/SlateApplication.h"
 #include "Layout/WidgetPath.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
+#include "OdysseyVectorCell.h"
+#include "OdysseyVectorLayer.h"
 #include "OdysseyStyle.h"
 #include "SOdysseyPaletteEntryRow.h"
+#include "SOdysseyPaletteTreeView.h"
 #include "Widgets/Colors/SColorPicker.h"
 #include "OdysseyPaletteEntryColor.h"
 #include "Widgets/Colors/SColorBlock.h"
+#include "OdysseyPaletteUndoAlterPaletteEntry.h"
 
 //CONSTRUCTION/DESTRUCTION----------------------------------------------- SMultiColumnTableRow
-void SOdysseyPaletteColorRow::Construct(const FArguments& InArgs, const TSharedRef<SOdysseyPaletteTreeView>& iTreeView, UOdysseyPaletteEntryColor* iColorEntry)
+void SOdysseyPaletteColorRow::Construct(const FArguments& InArgs
+                                      , const TSharedRef<SOdysseyPaletteTreeView>& iTreeView
+                                      , UOdysseyPaletteEntryColor* iColorEntry)
 {
     ensure(iColorEntry);
     mColorEntry = iColorEntry;
@@ -88,6 +94,21 @@ void SOdysseyPaletteColorRow::OnSetColorFromColorPicker(FLinearColor iNewColor)
     mColorEntry->SetColor( iNewColor.ToFColorSRGB(), mSet.Get() );
 
     FOdysseyObjectEditorUtils::PostChangePropertyValue(mColorEntry, "EntryColors", EPropertyChangeType::ValueSet);
+
+    // will refresh viewports on undo.
+    TArray<FOdysseyVectorCell*> cells = mTreeView.Pin()->GetVectorCellsUsedByEntries({mColorEntry});
+
+    for (FOdysseyVectorCell* cell : cells)
+    {
+        cell->GetLayer()->RequestRedraw(cell, 0);
+    }
+
+    if (GUndo)
+    {
+        FOdysseyPaletteUndoAlterPaletteEntry* undo = new FOdysseyPaletteUndoAlterPaletteEntry(cells);
+
+        GUndo->StoreUndo(GEditor, TUniquePtr<FChange>(undo));
+    }
 }
 
 FLinearColor SOdysseyPaletteColorRow::GetEntryColorAsLinear() const

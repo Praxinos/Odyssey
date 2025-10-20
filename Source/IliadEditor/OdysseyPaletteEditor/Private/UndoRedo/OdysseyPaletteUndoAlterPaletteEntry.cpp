@@ -1,20 +1,20 @@
 // IDDN.FR.001.060015.014.S.X.2019.000.00000
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
-#include "OdysseyPaletteUndoRemovePaletteEntry.h"
+#include "OdysseyPaletteUndoAlterPaletteEntry.h"
 #include "OdysseyVectorCell.h"
 #include "OdysseyVectorLayer.h"
 
 #define LOCTEXT_NAMESPACE "Palette"
 
-FOdysseyPaletteUndoRemovePaletteEntry::FOdysseyPaletteUndoRemovePaletteEntry( const TArray<FOdysseyVectorCell*>& iCells)
+FOdysseyPaletteUndoAlterPaletteEntry::FOdysseyPaletteUndoAlterPaletteEntry( const TArray<FOdysseyVectorCell*>& iCells)
     : FOdysseyPaletteUndo(iCells)
 {
 }
 
-FString FOdysseyPaletteUndoRemovePaletteEntry::ToString() const
+FString FOdysseyPaletteUndoAlterPaletteEntry::ToString() const
 {
-    return FString("FOdysseyPaletteUndoRemovePaletteEntry");
+    return FString("FOdysseyPaletteUndoAlterPaletteEntry");
 }
 
 #undef LOCTEXT_NAMESPACE

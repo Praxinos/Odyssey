@@ -543,7 +543,8 @@ SOdysseyPaletteTreeView::RenameCurrentEntry()
     RequestScrollIntoView(mSelectedEntry);
 }
 
-TArray<FOdysseyVectorCell*> SOdysseyPaletteTreeView::GetVectorCellsUsedByEntries(TArray<UOdysseyPaletteEntry*> &iEntriesToRemove)
+TArray<FOdysseyVectorCell*>
+SOdysseyPaletteTreeView::GetVectorCellsUsedByEntries(const TArray<UOdysseyPaletteEntry*> &iEntriesToRemove)
 {
     if( iEntriesToRemove.Num() <= 0 )
         return TArray<FOdysseyVectorCell*>();
