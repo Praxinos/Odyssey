@@ -98,6 +98,10 @@ FOdysseyRasterBlockMutator::EditTilesFromRects(const TArray<::ULIS::FRectI>& iRe
     if (!mRasterBlock)
         return;
 
+    // iRects must now be always explicitly filled (even if it's with the full size of the image)
+    // (related to https://github.com/Praxinos/Odyssey-Plugin/issues/602)
+    check( iRects.Num() );
+
     FOdysseyInvalidTileMap invalidTileMap(64, mRasterBlock->GetWidth(), mRasterBlock->GetHeight());
     TArray<FIntRect> rects = ::ULISUtils::ToIntRects(iRects);
     invalidTileMap.Invalidate(rects);

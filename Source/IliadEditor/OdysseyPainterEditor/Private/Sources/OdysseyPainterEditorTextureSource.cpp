@@ -386,7 +386,7 @@ FOdysseyPainterEditorTextureSource::PasteBlockToNewLayer( TSharedPtr<::ULIS::FBl
     GetLayerStack()->SetCurrentLayer(layer);
 
     FOdysseyRasterBlockMutator mutator(layer->GetRasterBlock());
-    mutator.Copy(iBlock, {});
+    mutator.Copy(iBlock, { iBlock->Rect() });
     mutator.Commit();
 }
 

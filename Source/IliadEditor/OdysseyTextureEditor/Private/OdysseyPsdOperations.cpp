@@ -896,7 +896,7 @@ void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
         UOdysseyTextureLayerImageRaster* layer = Cast<UOdysseyTextureLayerImageRaster>(mLayerStack->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass()));
 
         FOdysseyRasterBlockMutator mutator(layer->GetRasterBlock());
-        mutator.Copy(layerBlock, {});
+        mutator.Copy(layerBlock, { layerBlock->Rect() });
         mutator.Commit();
 
         delete srcblock;
@@ -1079,7 +1079,7 @@ void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
             imageLayer->SetBlendMode((EOdysseyBlendingMode)GetBlendingModeFromPSD(mLayersInfo[i].mBlendModeKey));
 
             FOdysseyRasterBlockMutator mutator(imageLayer->GetRasterBlock());
-            mutator.Copy(layerBlock, {});
+            mutator.Copy(layerBlock, { layerBlock->Rect() });
             mutator.Commit();
 
             //UE_LOG(LogTemp,Display,TEXT("flags: %d"),mLayersInfo[i].mFlags)
