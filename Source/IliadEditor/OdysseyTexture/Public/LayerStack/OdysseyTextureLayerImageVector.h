@@ -97,6 +97,11 @@ public:
 
     virtual TSharedPtr<::ULIS::FBlock> GetBlock() const override;
 
+public:
+#if WITH_EDITOR
+    void OnRefreshReferencedPalette(UOdysseyPalette* iPalette);
+#endif
+
 private:
     //Import/Export
     friend class FOdysseyTextureLayerImageVectorExport;

@@ -5,6 +5,11 @@
 #include "OdysseyPaletteEntryFolder.h"
 #include "Widgets/Colors/SColorBlock.h"
 #include "Misc/TransactionObjectEvent.h"
+#include "UObject/ObjectSaveContext.h"
+#include "OdysseyPaletteReferencer.h"
+#include "Widgets/Notifications/SNotificationList.h"
+#include "Framework/Notifications/NotificationManager.h"
+#include "AssetRegistry/AssetRegistryModule.h"
 
 UOdysseyPalette::UOdysseyPalette()
 {
@@ -604,3 +609,76 @@ UOdysseyPaletteEntry* UOdysseyPalette::CopyEntryInternal(UOdysseyPaletteEntry* i
 
     return duplicatedEntry;
 }
+
+#if WITH_EDITOR
+void
+UOdysseyPalette::PreSave(FObjectPreSaveContext SaveContext)
+{
+    Super::PreSave(SaveContext);
+    RefreshReferencedAssets();
+}
+
+void UOdysseyPalette::RefreshReferencedAssets()
+{
+    TArray<FName> assetNames = GetReferencedAssetsViaAssetRegistry();
+    if( assetNames.IsEmpty() )
+        return;
+
+    for (FName assetName : assetNames)
+    {
+        FString pathStr = assetName.ToString();
+        FString assetType = FPackageName::GetShortName(pathStr);
+        FString fullObjectPath = FString::Printf(TEXT("%s.%s"), *pathStr, *assetType);
+
+        FSoftObjectPath softPath(fullObjectPath);
+        TSoftObjectPtr<UObject> referencedAsset(softPath);
+
+        if (!referencedAsset.IsValid())
+            continue;
+
+        if (!referencedAsset->Implements<UOdysseyPaletteReferencer>())
+            continue;
+
+        IOdysseyPaletteReferencer* paletteReferencer = Cast<IOdysseyPaletteReferencer>(referencedAsset.Get());
+        if (!paletteReferencer)
+            return;
+
+        paletteReferencer->OnRefreshReferencedPalette(this);
+
+        /* if (texture.IsValid()) // The asset is valid AND loaded
+        {
+
+        } */
+    }
+
+    FText confirmText = FText::Format(
+    NSLOCTEXT("PaletteEditor", "RefreshReferencedAsset", "{0} assets have been refreshed"),
+    FText::AsNumber(assetNames.Num())
+    );
+
+    FNotificationInfo Info(confirmText);
+    Info.ExpireDuration = 5.0f;
+    FSlateNotificationManager::Get().AddNotification(Info)->SetCompletionState(SNotificationItem::CS_Success);
+}
+
+TArray<FName>
+UOdysseyPalette::GetReferencedAssetsViaAssetRegistry()
+{
+    TArray<FName> outDependencies;
+
+    FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
+    IAssetRegistry& AssetRegistry = AssetRegistryModule.Get();
+
+    FAssetData AssetData = AssetRegistry.GetAssetByObjectPath(FSoftObjectPath(GetPathName()));
+    FName AssetPath;
+
+    if (AssetData.IsValid())
+    {
+        AssetPath = AssetData.PackageName;
+    }
+
+    AssetRegistry.GetReferencers(AssetPath, outDependencies);
+
+    return outDependencies;
+}
+#endif

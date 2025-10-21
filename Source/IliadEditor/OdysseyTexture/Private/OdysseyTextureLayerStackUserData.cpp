@@ -3,6 +3,8 @@
 
 #include "OdysseyTextureLayerStackUserData.h"
 #include "UObject/ObjectSaveContext.h"
+#include "UObject/SavePackage.h"
+#include "OdysseyTextureLayerImageVector.h"
 
 #include "EngineUtils.h"
 
@@ -60,3 +62,33 @@ UOdysseyTextureLayerStackUserData::GetTexture()
 {
     return Cast<UTexture2D>(GetOuter());
 }
+
+#if WITH_EDITOR
+void
+UOdysseyTextureLayerStackUserData::OnRefreshReferencedPalette(UOdysseyPalette* iPalette)
+{
+    UTexture* texture = GetTexture();
+
+    UPackage* package = texture->GetOutermost();
+    FSavePackageArgs saveArgs;
+    saveArgs.TopLevelFlags = RF_Standalone;
+    saveArgs.Error = GWarn;
+    saveArgs.SaveFlags = SAVE_NoError;
+    FString packageFilename = FPackageName::LongPackageNameToFilename(package->GetName(), FPackageName::GetAssetPackageExtension());
+    UPackage::SavePackage(package, this, *packageFilename, saveArgs);
+    FlushAsyncLoading();
+
+    TArray<UOdysseyLayer*> layers = GetLayerStack()->GetLayers();
+    for (UOdysseyLayer* layer : layers)
+    {
+        if (!layer->IsA(UOdysseyTextureLayerImageVector::StaticClass()))
+            continue;
+
+        UOdysseyTextureLayerImageVector* vectorLayer = Cast<UOdysseyTextureLayerImageVector>(layer);
+        if (!vectorLayer)
+            continue;
+
+        vectorLayer->OnRefreshReferencedPalette(iPalette);
+    }
+}
+#endif

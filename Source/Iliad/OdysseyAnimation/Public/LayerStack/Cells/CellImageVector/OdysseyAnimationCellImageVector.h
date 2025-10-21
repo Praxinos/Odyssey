@@ -19,6 +19,7 @@ class FOdysseyVectorEngine;
 class FOdysseyVectorGroupPaint;
 class UOdysseyAnimationLayerImageVector;
 class FOdysseyVectorCell;
+class UOdysseyPalette;
 #endif
 
 #if !WITH_EDITOR
@@ -57,6 +58,7 @@ public:
 #if WITH_EDITOR
 public:
     virtual FOdysseyMediaProvider GetMediaProvider() const override;
+    void OnRefreshReferencedPalette(UOdysseyPalette* iPalette);
 
 public:
     virtual void PostInitProperties() override;

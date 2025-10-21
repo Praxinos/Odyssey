@@ -12,6 +12,10 @@
 #include "ScreenPass.h"
 #include "TextureResource.h"
 #include "OdysseyAnimationLayerStack.h"
+#include "UObject/SavePackage.h"
+#include "OdysseyLayer.h"
+#include "OdysseyLayerCell.h"
+#include "OdysseyAnimationCellImageVector.h"
 
 #define LOCTEXT_NAMESPACE "Animation"
 
@@ -617,6 +621,34 @@ UOdysseyAnimation::CreateExportTexture(UObject* Outer, FName Name, EObjectFlags 
     }
 
     return texture;
+}
+
+void
+UOdysseyAnimation::OnRefreshReferencedPalette(UOdysseyPalette* iPalette)
+{
+    //Save the animation before applying the palette, because all these refresh only affect the "on disk" version of the asset, not the dirty "on memory" one.
+    //Therefore, if the palette is freshly added to the (then dirtied) animation, the refresh won't apply to it
+    UPackage* package = GetOutermost();
+    FSavePackageArgs saveArgs;
+    saveArgs.TopLevelFlags = RF_Standalone;
+    saveArgs.Error = GWarn;
+    saveArgs.SaveFlags = SAVE_NoError;
+    FString packageFilename = FPackageName::LongPackageNameToFilename(package->GetName(), FPackageName::GetAssetPackageExtension());
+    UPackage::SavePackage(package, this, *packageFilename, saveArgs);
+    FlushAsyncLoading();
+
+    TArray<UOdysseyLayer*> layers = GetLayerStack()->GetLayers();
+    for (UOdysseyLayer* layer : layers)
+    {
+        for (UOdysseyLayerCell* cell : layer->GetCells())
+        {
+            if (!cell->IsA(UOdysseyAnimationCellImageVector::StaticClass()))
+                continue;
+
+            UOdysseyAnimationCellImageVector* animationVectorCell = Cast<UOdysseyAnimationCellImageVector>(cell);
+            animationVectorCell->OnRefreshReferencedPalette(iPalette);
+        }
+    }
 }
 
 #endif

@@ -46,9 +46,7 @@ private:
     FGuid GetCurrentSet() const;
     void OnCurrentSetSelected(FGuid iSet);
     FReply OnRefreshClicked();
-    void RefreshReferencedAssets();
 
-    TArray<FName> GetReferencedAssetsViaAssetRegistry();
     void BuildToolbarPaletteSection(FToolBarBuilder& iBuilder);
 
 private:

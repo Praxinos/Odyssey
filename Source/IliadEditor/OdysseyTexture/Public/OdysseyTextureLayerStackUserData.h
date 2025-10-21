@@ -12,11 +12,14 @@
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "UObject/ObjectSaveContext.h"
 #include "Palette/OdysseyPalette.h"
+#include "OdysseyPaletteReferencer.h"
 
 #include "OdysseyTextureLayerStackUserData.generated.h"
 
 UCLASS(BlueprintType)
-class ODYSSEYTEXTURE_API UOdysseyTextureLayerStackUserData : public UAssetUserData
+class ODYSSEYTEXTURE_API UOdysseyTextureLayerStackUserData
+    : public UAssetUserData
+    , public IOdysseyPaletteReferencer
 {
     GENERATED_BODY()
 
@@ -35,6 +38,11 @@ public:
      */
     UOdysseyTextureLayerStack* GetLayerStack();
     UTexture2D* GetTexture();
+
+private:
+#if WITH_EDITOR
+    virtual void OnRefreshReferencedPalette(UOdysseyPalette* iPalette) override;
+#endif
 
 public:
     UPROPERTY(BlueprintReadOnly, Category="Odyssey|LayerStack")

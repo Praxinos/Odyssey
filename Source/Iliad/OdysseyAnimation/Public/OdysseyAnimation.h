@@ -7,6 +7,7 @@
 #include "UObject/AssetRegistryTagsContext.h"
 #include "BaseMediaSource.h"
 #include "OdysseyTextureRenderingAbility.h"
+#include "OdysseyPaletteReferencer.h"
 
 #include "OdysseyAnimation.generated.h"
 
@@ -47,6 +48,7 @@ UCLASS(HideCategories=(Platforms))
 class ODYSSEYANIMATION_API UOdysseyAnimation
     : public UBaseMediaSource
     , public IOdysseyTextureRenderingAbility
+    , public IOdysseyPaletteReferencer
 {
     GENERATED_BODY()
 
@@ -140,6 +142,11 @@ public:
 
 #if WITH_EDITOR
     virtual UTexture2D* CreateExportTexture(UObject* Outer, FName Name, EObjectFlags Flags = RF_NoFlags) override;
+#endif
+
+private:
+#if WITH_EDITOR
+    virtual void OnRefreshReferencedPalette(UOdysseyPalette* iPalette) override;
 #endif
 
 public:

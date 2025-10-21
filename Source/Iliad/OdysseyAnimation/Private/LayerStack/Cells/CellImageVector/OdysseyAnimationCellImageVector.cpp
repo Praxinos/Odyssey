@@ -369,4 +369,19 @@ UOdysseyAnimationCellImageVector::PreSave(FObjectPreSaveContext SaveContext)
     mDrawingFlags = 0;
     InitTexture();
 }
+
+void
+UOdysseyAnimationCellImageVector::OnRefreshReferencedPalette(UOdysseyPalette* iPalette)
+{
+    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = GetMediaProvider().GetMedias<FOdysseyMediaVector>();
+
+    if (mediaVectors.IsEmpty())
+        return;
+
+    for (int i = 0; i < mediaVectors.Num(); i++)
+    {
+        FOdysseyVectorCell* vectorCell = mediaVectors[i]->GetScene()->GetCell();
+        vectorCell->GetLayer()->RequestRedraw(vectorCell, 0);
+    }
+}
 #endif

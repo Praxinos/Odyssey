@@ -197,6 +197,10 @@ public:
     void MoveEntries(TArray<UOdysseyPaletteEntry*> iEntries, UOdysseyPaletteEntry* iParentEntry = nullptr, int iIndexInParent = 0);
 
 public:
+    TArray<FName> GetReferencedAssetsViaAssetRegistry();
+    void RefreshReferencedAssets();
+
+public:
     //Sets
     const TArray<FName>& GetSets() const;
     const TMap<FGuid, FName>& GetSetsIDs() const;
@@ -233,6 +237,8 @@ public:
      * @param TransactionEvent
      */
     virtual void PostTransacted(const FTransactionObjectEvent& TransactionEvent) override;
+
+    virtual void PreSave(FObjectPreSaveContext SaveContext) override;
 #endif //WITH_EDITOR
 
     virtual void PostInitProperties() override;
