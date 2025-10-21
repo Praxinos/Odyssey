@@ -248,15 +248,18 @@ UOdysseyFreehandShape::CatchUp()
 void
 UOdysseyFreehandShape::Abort()
 {
-    mIsDrawing = false;
+    if (mIsDrawing)
+    {
+        mIsDrawing = false;
 
-    mRawStroke.Empty();
-    mSmoothedStroke.Empty();
-    mSmoother = nullptr;
+        mRawStroke.Empty();
+        mSmoothedStroke.Empty();
+        mSmoother = nullptr;
 
-    RemoveHUD();
+        RemoveHUD();
 
-    mOnAbort.Broadcast();
+        mOnAbort.Broadcast();
+    }
 }
 
 void
