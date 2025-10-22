@@ -292,6 +292,12 @@ FOdysseyPainterEditorViewportClient::InputKey( const FInputKeyEventArgs& iEventA
     //Here you receive Mouse Buttons and Keyboard keys events
     //UE_LOG(LogTemp, Warning, TEXT("UE InputKey %s %s"), *iKey.ToString(), iEvent == EInputEvent::IE_Pressed ? TEXT("PRESSED") : iEvent == EInputEvent::IE_Released ? TEXT("RELEASED") : TEXT("OTHER"));
 
+    // Don't manage the repeat event in the viewport client (return false)
+    // Otherwise it takes priority over the shortcuts which may use the repeat flag
+    // And then, the shortcut doesn't activate its repeat mode
+    if( iEventArgs.Event == EInputEvent::IE_Repeat )
+        return false;
+
     if( iEventArgs.Event == EInputEvent::IE_Pressed )
     {
         //key already pressed, don't send a KeyDown or MouseDown twice

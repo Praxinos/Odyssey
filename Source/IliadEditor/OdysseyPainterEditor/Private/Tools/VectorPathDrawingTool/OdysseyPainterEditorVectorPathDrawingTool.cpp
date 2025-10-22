@@ -62,10 +62,11 @@ void UOdysseyPainterEditorVectorPathDrawingTool::BindShortcuts(TSharedPtr<FUICom
 
     const FOdysseyPainterEditorCommands& painterEditorToolCommands = FOdysseyPainterEditorCommands::Get();
 
-    #define MAP_ACTION(action, ...) iCommandList->MapAction( action, FExecuteAction::CreateUObject( this, &UOdysseyPainterEditorVectorPathDrawingTool::__VA_ARGS__ ), FCanExecuteAction() );
+    #define MAP_ACTION(action, ...) iCommandList->MapAction( action, FExecuteAction::CreateUObject( this, &UOdysseyPainterEditorVectorPathDrawingTool::__VA_ARGS__ ) );
+    #define MAP_ACTION_REPEAT(action, ...) iCommandList->MapAction( action, FExecuteAction::CreateUObject( this, &UOdysseyPainterEditorVectorPathDrawingTool::__VA_ARGS__ ), EUIActionRepeatMode::RepeatEnabled );
 
-    MAP_ACTION(painterEditorToolCommands.IncreaseBrushSize, AddSize, 1)
-    MAP_ACTION(painterEditorToolCommands.DecreaseBrushSize, AddSize, -1)
+    MAP_ACTION_REPEAT(painterEditorToolCommands.IncreaseBrushSize, AddSize, 1)
+    MAP_ACTION_REPEAT(painterEditorToolCommands.DecreaseBrushSize, AddSize, -1)
 
     #undef MAP_ACTION
 }

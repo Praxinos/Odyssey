@@ -331,11 +331,12 @@ void UOdysseyPainterEditorRasterDrawingTool::BindShortcuts(TSharedPtr<FUICommand
 
     const FOdysseyPainterEditorCommands& painterEditorToolCommands = FOdysseyPainterEditorCommands::Get();
 
-    #define MAP_ACTION(action, ...) iCommandList->MapAction( action, FExecuteAction::CreateUObject( this, &UOdysseyPainterEditorRasterDrawingTool::__VA_ARGS__ ), FCanExecuteAction() );
+    #define MAP_ACTION(action, ...) iCommandList->MapAction( action, FExecuteAction::CreateUObject( this, &UOdysseyPainterEditorRasterDrawingTool::__VA_ARGS__ ) );
+    #define MAP_ACTION_REPEAT(action, ...) iCommandList->MapAction( action, FExecuteAction::CreateUObject( this, &UOdysseyPainterEditorRasterDrawingTool::__VA_ARGS__ ), EUIActionRepeatMode::RepeatEnabled );
 
     MAP_ACTION(painterEditorToolCommands.RefreshBrush, RefreshBrushInstance)
-    MAP_ACTION(painterEditorToolCommands.IncreaseBrushSize, AddSize, 1)
-    MAP_ACTION(painterEditorToolCommands.DecreaseBrushSize, AddSize, -1)
+    MAP_ACTION_REPEAT(painterEditorToolCommands.IncreaseBrushSize, AddSize, 1)
+    MAP_ACTION_REPEAT(painterEditorToolCommands.DecreaseBrushSize, AddSize, -1)
     MAP_ACTION(painterEditorToolCommands.SetAlphaModeNormal, SetAlphaMode, ::ULIS::eAlphaMode::Alpha_Normal )
     MAP_ACTION(painterEditorToolCommands.SetAlphaModeErase, SetAlphaMode, ::ULIS::eAlphaMode::Alpha_Erase )
     MAP_ACTION(painterEditorToolCommands.SetAlphaModeTop, SetAlphaMode, ::ULIS::eAlphaMode::Alpha_Top )
