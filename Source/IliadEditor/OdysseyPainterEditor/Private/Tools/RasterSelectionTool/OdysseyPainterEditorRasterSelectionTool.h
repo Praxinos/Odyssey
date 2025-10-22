@@ -68,5 +68,4 @@ protected:
 
     EOdysseySelectionState mSelectionState;
     TSharedPtr<FOdysseyHUDElement> mShapeHUD;
-    TSharedPtr<FScopedTransaction> mTransaction;
 };

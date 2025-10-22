@@ -158,7 +158,6 @@ void UOdysseyPainterEditorRasterSelectionTool::Tick(float iDeltaTime)
 void
 UOdysseyPainterEditorRasterSelectionTool::OnShapeBegin()
 {
-    mTransaction = MakeShared<FScopedTransaction>(LOCTEXT("raster-selection-tool.transaction.set-raster-selection", "Set Raster Selection"));
 }
 
 void
@@ -184,9 +183,6 @@ UOdysseyPainterEditorRasterSelectionTool::OnShapeCommit(const TArray<FOdysseyPoi
 void
 UOdysseyPainterEditorRasterSelectionTool::OnShapeAbort()
 {
-    if(mTransaction)
-        mTransaction->Cancel();
-    mTransaction = nullptr; //Finish the undo transaction
 }
 
 #undef LOCTEXT_NAMESPACE
