@@ -100,6 +100,7 @@ public:
 public:
 #if WITH_EDITOR
     void OnRefreshReferencedPalette(UOdysseyPalette* iPalette);
+    void CopyVectorBlockInRenderTexture(FIntRect iRect) const;
 #endif
 
 private:
