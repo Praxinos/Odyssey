@@ -85,6 +85,7 @@ SOdysseyPainterEditorVectorSceneTreeView::Construct( const FArguments& InArgs )
                                        .DefaultLabel(FText::FromString(VSTV_OBJECT_NAME))
                                        .ShouldGenerateWidget(true)
                                        .ManualWidth( 144.0f )
+/*
                                        + SHeaderRow::Column( VSTV_OBJECT_TRANSFORMED )
                                        .DefaultLabel(FText::FromString(VSTV_OBJECT_TRANSFORMED))
                                        .FixedWidth( 24.0f )
@@ -100,6 +101,7 @@ SOdysseyPainterEditorVectorSceneTreeView::Construct( const FArguments& InArgs )
                                                .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Transform16") )
                                            ]
                                        ]
+*/
                                        + SHeaderRow::Column(VSTV_OBJECT_TAGS)
                                        .DefaultLabel(FText::FromString(VSTV_OBJECT_TAGS));
     mEditor = InArgs._Editor;
