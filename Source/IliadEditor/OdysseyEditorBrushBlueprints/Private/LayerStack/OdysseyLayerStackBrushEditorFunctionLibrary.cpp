@@ -100,10 +100,8 @@ namespace
             }
         }
 
-        TStrongObjectPtr<UTextureRenderTarget2D> renderTarget(NewObject<UTextureRenderTarget2D>());
-        renderTarget->RenderTargetFormat = RTF_RGBA8_SRGB;
+        TStrongObjectPtr<UTextureRenderTarget2D> renderTarget(iLayer->CreateRenderingRenderTarget());
         renderTarget->InitAutoFormat(rect.w, rect.h);
-
         iLayer->Render_GameThread(renderTarget.Get(), frame, EOdysseyRenderingType::Render, ::ULISUtils::ToIntRect(rect), FIntPoint(0, 0));
 
         FImage OutImage;
