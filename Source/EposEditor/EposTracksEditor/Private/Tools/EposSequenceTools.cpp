@@ -393,14 +393,24 @@ ShotSequenceTools::CanMoveAndScaleActor( const AActor* iActor, const ACineCamera
     FVector camera_lookat = iCamera->GetActorForwardVector();
     FVector animation_lookat = iActor->GetActorUpVector();
 
-    if( !FVector::Parallel( camera_lookat, animation_lookat ) )
+    // Check if the animation (as an infinit mathematical plane) is orthogonal to the camera
+    // but the center of the animation is not necessary facing the camera
+    if( !FVector::Parallel( camera_lookat, animation_lookat, FMath::Cos( FMath::DegreesToRadians( 0.1f ) ) /* tolerance is less than 0.1° */ ) )
         return false;
 
     FVector camera_to_animation( iActor->GetActorLocation() - iCamera->GetActorLocation() );
     camera_to_animation.Normalize();
 
-    if( !FVector::Coplanar( iCamera->GetActorLocation(), camera_lookat, iCamera->GetActorLocation(), camera_to_animation ) )
+    // Now check if the center of the animation is facing the camera
+    if( !camera_lookat.Equals( camera_to_animation ) && !camera_lookat.Equals( -camera_to_animation ) )
         return false;
+    // The tolerance between 2 parallels is the cosinus of angle
+    // and by default, 2 parallels are considered parallel if the angle is less than 1°
+    // and the angle can't be reduce too much due to precision
+    // so, just compare the 2 normalized vectors with the default tolerance
+    // (in addition, as it is the same base point, coplanar just check parallelism)
+    //if( !FVector::Coplanar( iCamera->GetActorLocation(), camera_lookat, iCamera->GetActorLocation(), camera_to_animation, FMath::Cos( FMath::DegreesToRadians( 0.1f ) ) ) )
+    //    return false;
 
     return true;
 };
