@@ -301,7 +301,6 @@ protected:
     // which prevents us to compile this for runtime.
     //UPROPERTY(Transient, NonTransactional)
     //USelection* LayerSelection = nullptr;
-
 #endif
 
     UPROPERTY()
