@@ -33,6 +33,7 @@
 
 #include "Shot/ShotSequence.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
+#include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrackInstance.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"
 #include "SingleCameraCutTrack/SingleCameraCutSection.h"
 #include "Styles/EposTracksEditorStyle.h"
@@ -623,7 +624,7 @@ void FSingleCameraCutTrackEditor::OnLockCameraClicked(ECheckBoxState CheckBoxSta
     }
 
     UMovieSceneEntitySystemLinker* Linker = SequencerPtr->GetEvaluationTemplate().GetEntitySystemLinker();
-    UMovieSceneCameraCutTrackInstance::ToggleCameraCutLock( Linker, bEnableCameraCuts, bNeedsRestoreViewport );
+    UMovieSceneSingleCameraCutTrackInstance::ToggleCameraCutLock( Linker, bEnableCameraCuts, bNeedsRestoreViewport );
 
     SequencerPtr->ForceEvaluate();
 }
