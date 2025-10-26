@@ -38,7 +38,7 @@ FOdysseyPainterEditorViewportTab::~FOdysseyPainterEditorViewportTab()
 }
 
 FOdysseyPainterEditorViewportTab::FOdysseyPainterEditorViewportTab(FOdysseyPainterEditor* iEditor)
-    : FOdysseyEditorTab(LOCTEXT( "viewport-tab.name", "Viewport" ), FSlateIcon( "OdysseyStyle", "PainterEditor.Viewport16" ))
+    : FOdysseyEditorTab(LOCTEXT( "viewport-tab.name", "2D Viewport" ), FSlateIcon( "OdysseyStyle", "PainterEditor.Viewport16" ))
     , mEditor(iEditor)
     , mViewport(nullptr)
     , mViewportClient(nullptr)
