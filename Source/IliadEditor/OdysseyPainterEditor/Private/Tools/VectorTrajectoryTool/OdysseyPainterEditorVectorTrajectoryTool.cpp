@@ -669,7 +669,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::ExtendToolbar( UToolMenu* iToolMenu )
 FText
 UOdysseyPainterEditorVectorTrajectoryTool::GetTooltip() const
 {
-    return LOCTEXT("vector-matching-tool.tooltip", "Trajectory Tool");
+    return LOCTEXT("vector-trajectory-tool.tooltip", "Trajectory Tool");
 }
 
 #undef LOCTEXT_NAMESPACE

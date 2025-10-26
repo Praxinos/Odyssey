@@ -533,7 +533,7 @@ UOdysseyPainterEditorVectorChartTool::CreateModifierSegmentControl()
            .ToolTip( LOCTEXT("vector-chart-tool.edition-mode.ctrlshift.name", "Reshape (CTRL + SHIFT)") )
 #endif
 #if PLATFORM_MAC
-           .ToolTip( LOCTEXT("vector-chart-tool.edition-mode.alt.name", "Reshape (CMD + SHIFT)") )
+           .ToolTip( LOCTEXT("vector-chart-tool.edition-mode.cmdshift.name", "Reshape (CMD + SHIFT)") )
 #endif
            [
                SNew(SBorder)
@@ -577,7 +577,7 @@ UOdysseyPainterEditorVectorChartTool::ExtendToolbar( UToolMenu* iToolMenu )
 FText
 UOdysseyPainterEditorVectorChartTool::GetTooltip() const
 {
-    return LOCTEXT("vector-matching-tool.tooltip", "Chart Tool");
+    return LOCTEXT("vector-chart-tool.tooltip", "Chart Tool");
 }
 
 #undef LOCTEXT_NAMESPACE

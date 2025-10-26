@@ -820,7 +820,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::CreateModifierSegmentControl()
            .ToolTip( LOCTEXT("vector-paint-bucket-tool.edition-mode.ctrl.name", "Control radial/linear gradient settings (CTRL)") )
 #endif
 #if PLATFORM_MAC
-           .ToolTip( LOCTEXT("vector-paint-bucket-tool.edition-mode.ctrl.name", "Erase to intersection (CMD)") )
+           .ToolTip( LOCTEXT("vector-paint-bucket-tool.edition-mode.cmd.name", "Control radial/linear gradient settings (CMD)") )
 #endif
            [
                SNew(SBorder)

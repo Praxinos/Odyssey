@@ -25,8 +25,8 @@ void
 FOdysseyPainterEditorVectorEraserToolHUD::Load()
 {
     FOdysseyVectorGroupPaint* scene = mEraserTool->GetWorkingCell()->GetScene();
-    FText shiftInfoText = LOCTEXT("vector-eraser-tool-hud-info", "erase to intersection" );
-    FText altInfoText = LOCTEXT("vector-eraser-tool-hud-info", "erase whole path");
+    FText shiftInfoText = LOCTEXT("vector-eraser-tool-hud-info.erase-to-intersection", "erase to intersection" );
+    FText altInfoText = LOCTEXT("vector-eraser-tool-hud-info.erase-whole-path", "erase whole path");
     uint32 height = scene->GetLayer()->GetHeight();
     uint32 width = scene->GetLayer()->GetWidth();
 
