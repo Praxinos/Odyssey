@@ -56,7 +56,7 @@ protected:
     virtual void PostInitProperties() override;
     virtual void PostEditImport() override;
     virtual void PostLoad() override;
-    virtual void PostDuplicate( EDuplicateMode::Type DuplicateMode ) override;
+    virtual void PostDuplicate( bool bDuplicateForPIE ) override;
 #if WITH_EDITOR
     virtual void PreEditChange( FProperty* PropertyAboutToChange );
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent );

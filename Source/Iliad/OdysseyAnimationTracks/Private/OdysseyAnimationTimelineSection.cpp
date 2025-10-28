@@ -101,9 +101,9 @@ void UOdysseyAnimationTimelineSection::PostEditImport() //override
     Super::PostEditImport();
 }
 
-void UOdysseyAnimationTimelineSection::PostDuplicate( EDuplicateMode::Type DuplicateMode ) //override
+void UOdysseyAnimationTimelineSection::PostDuplicate( bool bDuplicateForPIE ) //override
 {
-    Super::Super::PostDuplicate( DuplicateMode );
+    Super::Super::PostDuplicate( bDuplicateForPIE );
 }
 
 void UOdysseyAnimationTimelineSection::OnBindingIDsUpdated( const TMap<UE::MovieScene::FFixedObjectBindingID, UE::MovieScene::FFixedObjectBindingID>& OldFixedToNewFixedMap, FMovieSceneSequenceID LocalSequenceID, TSharedRef<UE::MovieScene::FSharedPlaybackState> SharedPlaybackState ) //override
