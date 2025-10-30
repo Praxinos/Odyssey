@@ -623,13 +623,13 @@ UOdysseyLayerStack::CopyLayerInternal(UOdysseyLayer* iLayer, UOdysseyLayer* iPar
     // So the best way to solve this, is inside PostDuplicate() of layer which just empty the Children array
     // ...\Plugins\Odyssey\Source\Iliad\OdysseyLayerStack\Private\OdysseyLayer.cpp
     //
+    // UPDATE:
+    // if the children are only empty inside PostDuplicate(), when duplicate the asset, the duplicated layer root will be just empty
+    // So, no other way to recursively duplicate the layer hierarchy inside PostDuplicate() and no more here
+    //
+    // BEST WAY:
     // Another way to natively manage this case would be to remove Parent member and manage the layer hierarchy via the Outer
     // https://github.com/Praxinos/Odyssey-Plugin/issues/585
-
-    for(UOdysseyLayer* child : iLayer->GetChildren() )
-    {
-        CopyLayerInternal(child, duplicatedLayer, iLayer->GetChildren().Num());
-    }
 
     return duplicatedLayer;
 }
