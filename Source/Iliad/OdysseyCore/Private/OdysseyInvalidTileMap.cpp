@@ -26,7 +26,10 @@ FOdysseyInvalidTileMap::FOdysseyInvalidTileMap(int iTileSize, int iWidth, int iH
 void
 FOdysseyInvalidTileMap::Resize(int iWidth, int iHeight)
 {
-    mTileMap.Resize(ceil( (float)iWidth / mTileSize ), ceil( (float)iHeight / mTileSize ));
+    mTileMap.Resize(
+        FMath::Max(1, ((iWidth - 1) / mTileSize) + 1),
+        FMath::Max(1, ((iHeight - 1) / mTileSize) + 1)
+    );
 
     mWidth = iWidth;
     mHeight = iHeight;
