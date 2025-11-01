@@ -127,7 +127,7 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
         //Reduce the original cell to 1 frame Exposure
         selectedCell->SetExposure(1);
 
-        if (nextCellIndex < layer->GetCells().Num() || !layer->GetCells()[nextCellIndex])
+        if (layer->GetCells().IsValidIndex( nextCellIndex ) && layer->GetCells()[nextCellIndex])
         {
             UOdysseyLayerCell* nextCell = layer->GetCells()[nextCellIndex];
 
