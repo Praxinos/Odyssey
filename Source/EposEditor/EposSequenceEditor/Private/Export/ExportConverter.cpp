@@ -104,6 +104,9 @@ FExportConverter::ProcessAnimationCuts( UShotSequence& iShotSequence, FMovieScen
                 const FFrameNumber& frame_in_sequence = times[i];
                 const FOdysseyAnimationCutValue& value = values[i];
 
+                if( !section->GetTrueRange().Contains( frame_in_sequence ) )
+                    continue;
+
                 FMovieSceneInverseSequenceTransform localToRootTransform = iRootToSequenceTransform.Inverse();
                 TOptional<FFrameTime> time_in_root = localToRootTransform.TryTransformTime( frame_in_sequence );
                 if( !time_in_root )
