@@ -777,7 +777,7 @@ UOdysseyPainterEditorVectorTransformTool::MakeSpaceMatrixForRotation()
     BLMatrix2D spaceMatrix = selectionBox.worldMatrix;
     ::ULIS::FVec2D& pivot = mTransformHUD->GetGizmo();
     BLPoint worldPivot = spaceMatrix.mapPoint( pivot.x, pivot.y );
-
+/*
     if( selectionBoxSurface )
     {
         spaceMatrix = selectionBox.worldMatrix;
@@ -786,8 +786,12 @@ UOdysseyPainterEditorVectorTransformTool::MakeSpaceMatrixForRotation()
     }
 
     mSpaceMatrix = spaceMatrix;
+*/
+    // rotations are always in world-based to prevent issues when a matrix has non-uniform transforms
+    mSpaceMatrix.reset();
+    mSpaceMatrix.translate( worldPivot.x, worldPivot.y );
 
-    BLMatrix2D::invert( mInverseSpaceMatrix, spaceMatrix );
+    BLMatrix2D::invert( mInverseSpaceMatrix, mSpaceMatrix );
 }
 
 void
