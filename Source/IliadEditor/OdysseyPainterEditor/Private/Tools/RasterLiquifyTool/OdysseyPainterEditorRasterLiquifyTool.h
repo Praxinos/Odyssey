@@ -28,12 +28,47 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
             FDistortion()
             {
                 mapped = false;
+                coveredDistance = 0.0f;
             }
 
             bool mapped;
             ::ULIS::FVec2I coords;
-            double distance;
+            ::ULIS::FVec2I newCoords;
+            double distanceToCenter;
             float angle;
+            double coveredDistance;
+        };
+
+        struct FFlow
+        {
+            FFlow()
+            {
+                coveredDistance = 0.0f;
+            }
+
+            uint32 fromPathIndex;
+            double coveredDistance;
+            ::ULIS::FVec2I delta;
+            ::ULIS::FVec2I debug_distortionCoords;
+        };
+
+        struct FPath
+        {
+            FPath( const ::ULIS::FVec2D& iPoint0, const ::ULIS::FVec2D& iPoint1, double iCoveredDistance )
+            {
+                ::ULIS::FVec2D vec = ( iPoint1 - iPoint0 );
+
+                point[0] = iPoint0;
+                point[1] = iPoint1;
+                distance = vec.Distance();
+                vector = vec.Normalized();
+                coveredDistance = iCoveredDistance;
+            }
+
+            ::ULIS::FVec2D point[2];
+            ::ULIS::FVec2D vector;
+            double distance;
+            double coveredDistance;
         };
 
         typedef std::function<void(FDistortion&,::ULIS::FVec2D&,::ULIS::FVec2D&)> FLiquifyFunction;
@@ -74,6 +109,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
 
     protected:
         void MakeDistortionMap();
+        void MakeFlowMap();
         void Twirl( int32 iSrcCenterX
                   , int32 iSrcCenterY
                   , int32 iDstCenterX
@@ -83,11 +119,21 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
                  , int32 iSrcCenterY
                  , int32 iDstCenterX
                  , int32 iDstCenterY );
+        ::ULIS::FVec2D GetRelativeCoords( const FFlow& iFlow );
         void Liquify( int32 iSrcCenterX
                     , int32 iSrcCenterY
                     , int32 iDstCenterX
-                    , int32 iDstCenterY
-                    , FLiquifyFunction iLiquifyfunc );
+                    , int32 iDstCenterY );
+        void Flow( int32 iCenterX
+                 , int32 iCenterY
+                 , double iLength );
+        inline void _Liquify_Push( int32 iSrcCenterX
+                                 , int32 iSrcCenterY
+                                 , int32 iDstCenterX
+                                 , int32 iDstCenterY
+                                 , FDistortion& distortion
+                                 , ::ULIS::FVec2D& oSrcCoords
+                                 , ::ULIS::FVec2D& oDstCoords );
 
     public:
         virtual void PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive) override;
@@ -138,6 +184,11 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
         TSharedPtr<FScopedTransaction> mTransaction;
 
         TArray<FDistortion> mDistortionMap;
+        TArray<FFlow> mFlowMap;
+        TArray<FPath> mPathBuffer;
+        double mPathCoveredDistance;
         FVector2D mMouseAtDown;
         bool bIsMouseDown = false;
+        FVector2D mPreviousPointInTexture;
+        TArray<uint32> mSourcePixels;
 };
