@@ -20,12 +20,35 @@
 #include "ULISLoaderModule.h"
 #include "ULISUtils.h"
 
+#include "OdysseyVector.h"
+
 #include "OdysseyHUDElement.h"
 #include "SOdysseySinglePropertyView.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
 #define M_PI 3.14159265358979323846L
+//#define ROTATIONSPEEDINRADIANS 0.0872665f // five degrees
+#define ROTATIONSPEEDINRADIANS 0.0349066f // 2 degrees
+
+UOdysseyPainterEditorRasterLiquifyTool::FAlteredImage::FAlteredImage( TSharedPtr<FOdysseyRasterBlock> iSourceRasterBlock )
+    : context( IULISLoaderModule::StaticFindOrAddContext( ::ULIS::eFormat::Format_RGBA8 ) )
+{
+    TSharedPtr<::ULIS::FBlock> sourceBlock = iSourceRasterBlock->GetBlock();
+
+    copiedSourceBlock =  MakeShared<::ULIS::FBlock>( sourceBlock->Width()
+                                                   , sourceBlock->Height()
+                                                   , ::ULIS::eFormat::Format_RGBA8 );
+
+    context.ConvertFormat( *sourceBlock.Get(), *copiedSourceBlock.Get() );
+    context.Finish();
+
+    destinationBlock =  MakeShared<::ULIS::FBlock>( sourceBlock->Width()
+                                                  , sourceBlock->Height()
+                                                  , ::ULIS::eFormat::Format_RGBA8 );
+
+    paintEngine.RasterBlock( iSourceRasterBlock );
+}
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
@@ -35,10 +58,15 @@ UOdysseyPainterEditorRasterLiquifyTool::~UOdysseyPainterEditorRasterLiquifyTool(
 
 UOdysseyPainterEditorRasterLiquifyTool::UOdysseyPainterEditorRasterLiquifyTool()
     : mLiquifyHUD( MakeShared<FOdysseyPainterEditorRasterLiquifyToolHUD>( this ) )
-    , mPaintEngine()
-    , Radius ( 10 )
+    , Radius ( 40 )
+    , Mode ( ELiquifyToolMode::Push )
+    , Strength ( 100 )
+    , Hardness ( 0 )
+    , OnlyReferToEditngArea ( true )
+    , AdjustmentStrength( 100 )
+    , bIsMouseLeftButtonDown ( false )
 {
-    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.DrawingTool64");
+    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Liquify64");
 }
 
 //--------------------------------------------------------------------------------------
@@ -59,6 +87,10 @@ UOdysseyPainterEditorRasterLiquifyTool::Load()
 
     rasterSelection->OnChanged().AddUObject(this, &UOdysseyPainterEditorRasterLiquifyTool::OnRasterSelectionChanged);
 
+    FetchSourceImages();
+    MakeDistortionMap();
+    MakeFlowMap();
+
 //    if (!rasterSelection->IsEmpty())
 //        mPaintEngine.SetMaskBlock(rasterSelection->GetBlock());
 
@@ -67,9 +99,6 @@ UOdysseyPainterEditorRasterLiquifyTool::Load()
     mLiquifyHUD->Reset();
 
     mHUD->AddElement( mLiquifyHUD );
-
-//    mHUD->AddElement(rasterSelection->GetHUD());
-//    mHUD->AddElement(mShapeHUD);
 }
 
 void
@@ -77,7 +106,8 @@ UOdysseyPainterEditorRasterLiquifyTool::Unload()
 {
     TSharedPtr<FOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
 
-    mPaintEngine.RasterBlock(nullptr);
+     // TODO: what to do when the tool is unloaded ?
+    //mPaintEngine.RasterBlock(nullptr);
     //mPaintEngine.SetMaskBlock(nullptr);
 
     rasterSelection->OnChanged().RemoveAll(this);
@@ -120,77 +150,38 @@ UOdysseyPainterEditorRasterLiquifyTool::GetRasterBlockFromEditor(bool iCreate) c
     return mediaRasters[0]->GetRasterBlock();
 }
 
-
-
-bool
-UOdysseyPainterEditorRasterLiquifyTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
-{
-    bIsMouseDown = true;
-
-    mMouseAtDown = FVector2D( iPointInTexture.x, iPointInTexture.y );
-    mPreviousPointInTexture = mMouseAtDown;
-
-    if (iKey != EKeys::LeftMouseButton)
-        return false;
-
-    TSharedPtr<FOdysseyRasterBlock> rasterBlock = GetRasterBlockFromEditor(true);
-    if (!rasterBlock)
-        return false;
-
-    mPaintEngine.RasterBlock(rasterBlock);
-
-    MakeDistortionMap();
-    MakeFlowMap();
-
-    mSourcePixels.SetNum( rasterBlock->GetWidth() * rasterBlock->GetHeight() );
-    memcpy( &mSourcePixels[0]
-          , rasterBlock->GetBlock()->PixelBits(0,0)
-          , rasterBlock->GetWidth() * rasterBlock->GetHeight() * sizeof ( uint32 ) );
-
-    return true;
-}
-
-bool
-UOdysseyPainterEditorRasterLiquifyTool::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
-{
-    TSharedPtr<FOdysseyRasterBlock> srcRasterBlock = GetRasterBlockFromEditor(false);
-    TSharedPtr<::ULIS::FBlock> srcBlock = srcRasterBlock->GetBlock();
-    TSharedPtr<::ULIS::FBlock> dstBlock = mPaintEngine.PaintBlock();
-
-    bIsMouseDown = false;
-
-    if (iKey != EKeys::LeftMouseButton)
-        return false;
-
-    TSharedPtr<FOdysseyRasterBlock> rasterBlock = GetRasterBlockFromEditor(false);
-    if (!rasterBlock || rasterBlock != mPaintEngine.GetRasterBlock())
-    {
-        return false;
-    }
-
-    ApplyFlow( srcBlock
-             , dstBlock
-             , ::ULIS::FRectI::FromXYWH( 0
-                                       , 0
-                                       , rasterBlock->GetWidth()
-                                       , rasterBlock->GetHeight() )
-             , false
-             , true );
-
-    mPaintEngine.Commit( FOdysseyBlendParameters() );
-
-    return true;
-}
-
 void
 UOdysseyPainterEditorRasterLiquifyTool::OnMouseHover(const FOdysseyPoint& iPointInTexture)
 {
     TSharedPtr<FOdysseyRasterBlock> rasterBlock = GetRasterBlockFromEditor(false);
 
-    mLiquifyHUD->SetCursorPositionInTexture( FVector2D( iPointInTexture.x, iPointInTexture.y ) );
+    mMousePosition = FVector2D( iPointInTexture.x, iPointInTexture.y );
+
+    mLiquifyHUD->SetCursorPositionInTexture( mMousePosition );
 
     if (!rasterBlock)
         return;
+}
+
+bool
+UOdysseyPainterEditorRasterLiquifyTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+{
+    mMouseAtDown = FVector2D( iPointInTexture.x, iPointInTexture.y );
+    mPreviousPointInTexture = mMouseAtDown;
+
+    if ( iKey == EKeys::LeftMouseButton )
+    {
+        bIsMouseLeftButtonDown = true;
+
+        mEditingArea = ::ULIS::FRectI::FromXYWH( iPointInTexture.x - Radius
+                                               , iPointInTexture.y - Radius
+                                               , (Radius*2) + 1
+                                               , (Radius*2) + 1 );
+
+        return true;
+    }
+
+    return false;
 }
 
 /*
@@ -229,6 +220,15 @@ UOdysseyPainterEditorRasterLiquifyTool::GetCurrentLayerBlock() const
 */
 
 void
+UOdysseyPainterEditorRasterLiquifyTool::FetchSourceImages()
+{
+    TSharedPtr<FOdysseyRasterBlock> srcRasterBlock = GetRasterBlockFromEditor(false);
+
+    mAlteredImageArray.Empty();
+    mAlteredImageArray.Emplace( srcRasterBlock );
+}
+
+void
 UOdysseyPainterEditorRasterLiquifyTool::MakeFlowMap()
 {
     TSharedPtr<FOdysseyRasterBlock> srcRasterBlock = GetRasterBlockFromEditor(false);
@@ -265,297 +265,353 @@ UOdysseyPainterEditorRasterLiquifyTool::MakeDistortionMap()
             {
                 distortion.mapped = false;
             }
+
+            //distortion.offset = offset++;
         }
     }
-}
-
-inline void
-UOdysseyPainterEditorRasterLiquifyTool::_Liquify_Push( int32 iPrevCenterX
-                                                     , int32 iPrevCenterY
-                                                     , int32 iCurrCenterX
-                                                     , int32 iCurrCenterY
-                                                     , FDistortion& distortion
-                                                     , ::ULIS::FVec2D& oPrevCoords
-                                                     , ::ULIS::FVec2D& oCurrCoords )
-{
-    ::ULIS::FVec2D prevCenter = ::ULIS::FVec2D( iPrevCenterX, iPrevCenterY );
-    ::ULIS::FVec2D currCenter = ::ULIS::FVec2D( iCurrCenterX, iCurrCenterY );
-    ::ULIS::FVec2D difCenter = currCenter - prevCenter;
-
-    double distance = distortion.distanceToCenter;
-    double factor = 1.0f - ( distance / Radius ); // can be precomputed
-    ::ULIS::FVec2D currCoords = currCenter + ::ULIS::FVec2D( distortion.coords.x
-                                                           , distortion.coords.y );
-    ::ULIS::FVec2D prevCoords = currCoords - ( difCenter * factor );
-
-    oPrevCoords = prevCoords;
-    oCurrCoords = distortion.newCoords = currCoords;
-}
-
-
-#define _LIQUIFY_PUSH(iPrevCenterX,iPrevCenterY,iCurrCenterX,iCurrCenterY,distortion,oPrevCoords,oCurrCoords) \
-::ULIS::FVec2D _prevCenter = ::ULIS::FVec2D( iPrevCenterX, iPrevCenterY );                                    \
-::ULIS::FVec2D _currCenter = ::ULIS::FVec2D( iCurrCenterX, iCurrCenterY );                                    \
-::ULIS::FVec2D _difCenter = _currCenter - _prevCenter;                                                        \
-                                                                                                              \
-double _distance = distortion.distance;                                                                       \
-double _factor = 1.0f - ( _distance / Radius );     /* this can be precomputed */                             \
-::ULIS::FVec2D _currCoords = _currCenter + ::ULIS::FVec2D( distortion.coords.x                                \
-                                                         , distortion.coords.y );                             \
-::ULIS::FVec2D _prevCoords = _currCoords - ( _difCenter * _factor );                                          \
-                                                                                                              \
-oPrevCoords = _prevCoords;                                                                                    \
-oCurrCoords = distortion.newCoords = _currCoords;                                                             \
-
-void
-UOdysseyPainterEditorRasterLiquifyTool::Twirl( int32 iSrcCenterX
-                                             , int32 iSrcCenterY
-                                             , int32 iDstCenterX
-                                             , int32 iDstCenterY
-                                             , double iAngleInRadians )
-{
-#ifdef  unused
-    Liquify( iSrcCenterX
-           , iSrcCenterY
-           , iDstCenterX
-           , iDstCenterY
-           , [ iSrcCenterX
-             , iSrcCenterY
-             , iDstCenterX
-             , iDstCenterY
-             , iAngleInRadians ]( FDistortion& distortion
-                                , ::ULIS::FVec2D& oSrcCoords
-                                , ::ULIS::FVec2D& oDstCoords )
-    {
-        double distance = distortion.distance;
-        double factor = 1.0f/* - ( distance / Radius )*/; // can be precomputed
-        double newAngle = distortion.angle - ( iAngleInRadians * factor );
-        // TODO : Matrix Operation
-        ::ULIS::FVec2D srcCoords = ::ULIS::FVec2D( ( distance * cos( newAngle ) )
-                                                 , ( distance * sin( newAngle ) ) );
-        ::ULIS::FVec2D dstCoords = ::ULIS::FVec2D( distortion.coords.x
-                                                 , distortion.coords.y );
-
-        oSrcCoords = iSrcCenterX + srcCoords;
-        oDstCoords = iDstCenterX + dstCoords;
-    } );
-#endif
 }
 
 void
 UOdysseyPainterEditorRasterLiquifyTool::Flow( const FVector2D& iPrevCenter
-                                            , const FVector2D& iCurrCenter )
+                                            , const FVector2D& iCurrCenter
+                                            , double iStrength
+                                            , double iHardness )
 {
-    TSharedPtr<FOdysseyRasterBlock> srcRasterBlock = GetRasterBlockFromEditor(false);
-    TSharedPtr<::ULIS::FBlock> srcBlock = srcRasterBlock->GetBlock();
-    FVector2D delta = iCurrCenter - iPrevCenter;
+    uint32 threadCount = FPlatformMisc::NumberOfCoresIncludingHyperthreads();
+    FVector2D motion = iPrevCenter - iCurrCenter;
+    uint32 assetWidth = mAlteredImageArray[0].copiedSourceBlock->Width();
+    uint32 assetHeight = mAlteredImageArray[0].copiedSourceBlock->Height();
 
-    for( FDistortion& distortion : mDistortionMap )
+    ParallelFor( threadCount, [&]( int32 coreID )
     {
-        if( distortion.mapped )
+        for( int32 y = coreID; y < ((Radius*2)+1); y += threadCount )
         {
-            ::ULIS::FVec2I absoluteCoords = ::ULIS::FVec2I( iCurrCenter.X + distortion.coords.x
-                                                          , iCurrCenter.Y + distortion.coords.y );
+            for( int32 x = 0; x < ((Radius*2)+1); x++ )
+            {
+                uint32 distortionIndex = y * ((Radius*2)+1) + x;
+                FDistortion& distortion = mDistortionMap[distortionIndex];
 
-            uint32 offset = ( absoluteCoords.y * srcBlock->Width() ) + absoluteCoords.x;
-            double factor = 1.0f - ( distortion.distanceToCenter / Radius );
+                if( distortion.mapped )
+                {
+                    ::ULIS::FVec2I absoluteCoords = ::ULIS::FVec2I( ((int32)iCurrCenter.X) + distortion.coords.x
+                                                                  , ((int32)iCurrCenter.Y) + distortion.coords.y );
+                    FVector2D distortionDstCoords = FVector2D( (double) distortion.coords.x
+                                                             , (double) distortion.coords.y );
+                    double factor = 1.0f - ( distortion.distanceToCenter / Radius ); // <---- can be precomputed
+                    FVector2D newPosition = FVector2D( 0.0f, 0.0f );
 
-            mFlowMap[offset].delta += ( delta * factor );
+                    switch( Mode )
+                    {
+                        case ELiquifyToolMode::Push :
+                        {
+                            newPosition = distortionDstCoords + ( motion * factor );
+                        }
+                        break;
+
+                        case ELiquifyToolMode::Expand :
+                        {
+                            double cosAngle = cos( distortion.angle );
+                            double sinAngle = sin( distortion.angle );
+                            FVector2D minPosition = FVector2D( 0.0f
+                                                             , 0.0f );
+
+                            newPosition = distortionDstCoords + ( minPosition - distortionDstCoords ) * factor * iStrength * 0.005f;
+                        }
+                        break;
+
+                        case ELiquifyToolMode::Pinch :
+                        {
+                            double cosAngle = cos( distortion.angle );
+                            double sinAngle = sin( distortion.angle );
+                            FVector2D maxPosition = FVector2D( Radius * cosAngle
+                                                             , Radius * sinAngle );
+
+                            newPosition = distortionDstCoords + ( maxPosition - distortionDstCoords ) * factor * iStrength * 0.005f;
+                        }
+                        break;
+
+                        case ELiquifyToolMode::Twirl :
+                        {
+                            double cosAngle = cos( ROTATIONSPEEDINRADIANS * factor * iStrength );
+                            double sinAngle = sin( ROTATIONSPEEDINRADIANS * factor * iStrength );
+                            // Note: can be precomputed
+                            FVector2D distortionSrcCoords  = FVector2D( ( distortionDstCoords.X * cosAngle ) - ( distortionDstCoords.Y * sinAngle )
+                                                                      , ( distortionDstCoords.X * sinAngle ) + ( distortionDstCoords.Y * cosAngle ) );
+
+                            newPosition = ( distortionSrcCoords );
+                        }
+                        break;
+
+                        default :
+                        break;
+                    }
+
+                    FIntVector2 intSrcCoords = FIntVector2( newPosition.X + (int32)iCurrCenter.X
+                                                          , newPosition.Y + (int32)iCurrCenter.Y );
+                    uint32 srcOffset = ((intSrcCoords.Y) * assetWidth) + intSrcCoords.X;
+
+                    // retrieve deltas for bilinear filtering of the vectors
+                    double deltaX = newPosition.X - floorf(newPosition.X);
+                    double deltaY = newPosition.Y - floorf(newPosition.Y);
+
+                    uint32 SRCOFFSETTOPLEFT     = srcOffset
+                         , SRCOFFSETTOPRIGHT    = SRCOFFSETTOPLEFT + 1
+                         , SRCOFFSETBOTTOMRIGHT = SRCOFFSETTOPLEFT + 1 + (assetWidth)
+                         , SRCOFFSETBOTTOMLEFT  = SRCOFFSETTOPLEFT + (assetWidth);
+
+                    FVector2D v0 = (mFlowMap[SRCOFFSETTOPRIGHT   ].currToPrev - mFlowMap[SRCOFFSETTOPLEFT   ].currToPrev) * deltaX + mFlowMap[SRCOFFSETTOPLEFT   ].currToPrev;
+                    FVector2D v1 = (mFlowMap[SRCOFFSETBOTTOMRIGHT].currToPrev - mFlowMap[SRCOFFSETBOTTOMLEFT].currToPrev) * deltaX + mFlowMap[SRCOFFSETBOTTOMLEFT].currToPrev;
+                    FVector2D vf = ( v1 - v0 ) * deltaY + v0;
+
+                    distortion.currToPrev = FVector2D( vf.X, vf.Y ) + ( newPosition - distortionDstCoords );
+                }
+            }
         }
-    }
+    } );
+
+    ParallelFor( threadCount, [&]( int32 coreID )
+    {
+        for( int32 y = coreID; y < ((Radius*2)+1); y += threadCount )
+        {
+            for( int32 x = 0; x < ((Radius*2)+1); x++ )
+            {
+                uint32 distortionIndex = y * ((Radius*2)+1) + x;
+                FDistortion& distortion = mDistortionMap[distortionIndex];
+
+                ::ULIS::FVec2I absoluteCoords = ::ULIS::FVec2I( ((int32)iCurrCenter.X) + distortion.coords.x
+                                                              , ((int32)iCurrCenter.Y) + distortion.coords.y );
+                uint32 offset = ( absoluteCoords.y * assetWidth ) + absoluteCoords.x;
+
+                if( OnlyReferToEditngArea )
+                {
+                    ::ULIS::FVec2I absoluteExpectedCoords = ::ULIS::FVec2I( absoluteCoords.x + distortion.currToPrev.X
+                                                                          , absoluteCoords.y + distortion.currToPrev.Y );
+
+                    if( mEditingArea.HitTest( absoluteExpectedCoords ) == true )
+                    {
+                        mFlowMap[offset].currToPrev = distortion.currToPrev;
+                    }
+                }
+                else
+                {
+                    mFlowMap[offset].currToPrev = distortion.currToPrev;
+                }
+            }
+        }
+    });
 }
 
 void UOdysseyPainterEditorRasterLiquifyTool::Tick(float iDeltaTime)
 {
-    if( bIsMouseDown )
+    if( bIsMouseLeftButtonDown )
     {
-        //Twirl( mMouseAtDown.X, mMouseAtDown.Y, 5.0f * M_PI / 180.0f );
+        ::ULIS::FRectI roi = ::ULIS::FRectI::FromXYWH( mMousePosition.X - Radius
+                                                     , mMousePosition.Y - Radius
+                                                     , (Radius*2) + 1
+                                                     , (Radius*2) + 1 ) ;
+        double strength = (double) Strength / 100;
+        double hardness = (double) Hardness / 100;
+
+        switch( Mode )
+        {
+            case ELiquifyToolMode::Expand :
+            case ELiquifyToolMode::Pinch  :
+            case ELiquifyToolMode::Twirl  :
+                Flow( mMousePosition
+                    , mMousePosition
+                    , strength
+                    , hardness );
+
+                for( FAlteredImage& alteredImage : mAlteredImageArray )
+                {
+                    ApplyFlow( alteredImage
+                             , roi
+                             , false );
+
+                    alteredImage.paintEngine.Update( FOdysseyBlendParameters() );
+                }
+            break;
+
+            default:
+            break;
+        }
     }
 }
 
 void
-UOdysseyPainterEditorRasterLiquifyTool::ApplyFlow( TSharedPtr<::ULIS::FBlock> iSrcBlock
-                                                 , TSharedPtr<::ULIS::FBlock> iDstBlock
+UOdysseyPainterEditorRasterLiquifyTool::ApplyFlow( FAlteredImage& iAlteredImage
                                                  , const ::ULIS::FRectI& iRegionOfInterest
-                                                 , bool iReferToROIOnly
                                                  , bool iBilinearFiltered )
 {
-    const ULIS::uint8 *srcBlockPixels = iSrcBlock->PixelBits(0,0);
-    const ULIS::uint8 *dstBlockPixels = iDstBlock->PixelBits(0,0);
+    const ULIS::uint8 *srcBlockPixels = iAlteredImage.copiedSourceBlock->PixelBits(0,0);
+    const ULIS::uint8 *dstBlockPixels = iAlteredImage.destinationBlock->PixelBits(0,0);
+    uint32 assetWidth = mAlteredImageArray[0].copiedSourceBlock->Width();
+    uint32 assetHeight = mAlteredImageArray[0].copiedSourceBlock->Height();
     ::ULIS::FRectI roi = iRegionOfInterest;
+    uint32 threadCount = FPlatformMisc::NumberOfCoresIncludingHyperthreads();
+    double adjustment = ( double ) AdjustmentStrength / 100;
 
-    for( int32 y = iRegionOfInterest.y; y < ( roi.y + roi.h ); y++ )
+    ParallelFor( threadCount, [&]( int32 coreID )
     {
-        for( int32 x = roi.x; x < ( roi.x + roi.w ); x++ )
+        for( int32 y = roi.y + coreID; y < ( roi.y + roi.h ); y += threadCount )
         {
-            uint32 dstOffset = ( y * iSrcBlock->Width() ) + x;
-            FFlow& flow = mFlowMap[dstOffset];
-
-            if( flow.delta.IsZero() == false )
+            for( int32 x = roi.x; x < ( roi.x + roi.w ); x++ )
             {
-                //::ULIS::FVec2D relativeCoords = GetRelativeCoords( flow );
-                ::ULIS::FVec2D srcCoords = ::ULIS::FVec2D( x - flow.delta.X
-                                                         , y - flow.delta.Y );
-                double deltaX = srcCoords.x - ((uint32)srcCoords.x);
-                double deltaY = srcCoords.y - ((uint32)srcCoords.y);
+                uint32 dstOffset = ( y * assetWidth ) + x;
+                FFlow& flow = mFlowMap[dstOffset];
 
-                srcCoords.x = ((uint32)srcCoords.x) % iSrcBlock->Width();
-                srcCoords.y = ((uint32)srcCoords.y) % iSrcBlock->Height();
-
-                uint32 srcOffset = ( ((uint32)srcCoords.y) * iSrcBlock->Width() ) + ((uint32)srcCoords.x);
-
-                switch( iSrcBlock->BytesPerPixel() )
+                if( flow.currToPrev.IsZero() == false )
                 {
-                    case 4 :
+                    ::ULIS::FVec2D srcCoords = ::ULIS::FVec2D( x + ( flow.currToPrev.X * adjustment )
+                                                             , y + ( flow.currToPrev.Y * adjustment ) );
+                    double deltaX = srcCoords.x - ((int32)srcCoords.x);
+                    double deltaY = srcCoords.y - ((int32)srcCoords.y);
+
+                    srcCoords.x = ((int32)srcCoords.x) % assetWidth;
+                    srcCoords.y = ((int32)srcCoords.y) % assetHeight;
+
+                    uint32 srcOffset = ( ((int32)srcCoords.y) * assetWidth ) + ((int32)srcCoords.x);
+
+                    // we only work at 4-bytes per pixel
+                    switch( 4 /*iSrcBlock->BytesPerPixel()*/ )
                     {
-                        uint8 (*srcBlockPixels32)[4] = (uint8(*)[4]) &mSourcePixels[0];
-                        uint8 (*dstBlockPixels32)[4] = (uint8(*)[4]) dstBlockPixels;
-
-                        // Do the bilinear interpolation thing for every component of the pixel
-                        if( iBilinearFiltered )
+                        case 4 :
                         {
-                            uint32 SRCOFFSETTOPLEFT     = srcOffset
-                                 , SRCOFFSETTOPRIGHT    = SRCOFFSETTOPLEFT + 1
-                                 , SRCOFFSETBOTTOMRIGHT = SRCOFFSETTOPLEFT + 1 + (iSrcBlock->Width())
-                                 , SRCOFFSETBOTTOMLEFT  = SRCOFFSETTOPLEFT + (iSrcBlock->Width());
+                            uint8 (*srcBlockPixels32)[4] = (uint8(*)[4]) srcBlockPixels;
+                            uint8 (*dstBlockPixels32)[4] = (uint8(*)[4]) dstBlockPixels;
 
-                            for ( uint32 k = 0; k < 4; ++k )
+                            // Do the bilinear interpolation thing for every component of the pixel
+                            if( iBilinearFiltered )
                             {
-                                uint8 C0 = (srcBlockPixels32[SRCOFFSETTOPRIGHT][k]    - srcBlockPixels32[SRCOFFSETTOPLEFT][k])    * deltaX + srcBlockPixels32[SRCOFFSETTOPLEFT][k];
-                                uint8 C1 = (srcBlockPixels32[SRCOFFSETBOTTOMRIGHT][k] - srcBlockPixels32[SRCOFFSETBOTTOMLEFT][k]) * deltaX + srcBlockPixels32[SRCOFFSETBOTTOMLEFT][k];
-                                uint8 CF = (C1 - C0) * deltaY + C0;
+                                uint32 SRCOFFSETTOPLEFT     = srcOffset
+                                     , SRCOFFSETTOPRIGHT    = SRCOFFSETTOPLEFT + 1
+                                     , SRCOFFSETBOTTOMRIGHT = SRCOFFSETTOPLEFT + 1 + assetWidth
+                                     , SRCOFFSETBOTTOMLEFT  = SRCOFFSETTOPLEFT + assetWidth;
 
-                                dstBlockPixels32[dstOffset][k] = CF;
+                                for ( uint32 k = 0; k < 4; ++k )
+                                {
+                                    uint8 C0 = (srcBlockPixels32[SRCOFFSETTOPRIGHT][k]    - srcBlockPixels32[SRCOFFSETTOPLEFT][k])    * deltaX + srcBlockPixels32[SRCOFFSETTOPLEFT][k];
+                                    uint8 C1 = (srcBlockPixels32[SRCOFFSETBOTTOMRIGHT][k] - srcBlockPixels32[SRCOFFSETBOTTOMLEFT][k]) * deltaX + srcBlockPixels32[SRCOFFSETBOTTOMLEFT][k];
+                                    uint8 CF = (C1 - C0) * deltaY + C0;
+
+                                    dstBlockPixels32[dstOffset][k] = CF;
+                                }
+                            }
+                            else
+                            {
+                                uint8 R = srcBlockPixels32[srcOffset][0];
+                                uint8 G = srcBlockPixels32[srcOffset][1];
+                                uint8 B = srcBlockPixels32[srcOffset][2];
+                                uint8 A = srcBlockPixels32[srcOffset][3];
+
+                                dstBlockPixels32[dstOffset][0] = R;
+                                dstBlockPixels32[dstOffset][1] = G;
+                                dstBlockPixels32[dstOffset][2] = B;
+                                dstBlockPixels32[dstOffset][3] = A;
                             }
                         }
-                        else
-                        {
-                            uint8 R = srcBlockPixels32[srcOffset][0];
-                            uint8 G = srcBlockPixels32[srcOffset][1];
-                            uint8 B = srcBlockPixels32[srcOffset][2];
-                            uint8 A = srcBlockPixels32[srcOffset][3];
+                        break;
 
-                            dstBlockPixels32[dstOffset][0] = R;
-                            dstBlockPixels32[dstOffset][1] = G;
-                            dstBlockPixels32[dstOffset][2] = B;
-                            dstBlockPixels32[dstOffset][3] = A;
-                        }
+                        default :
+                        break;
                     }
-                    break;
-
-                    default :
-                    break;
                 }
             }
         }
-    }
+    });
 
-    iDstBlock->Dirty( roi );
+    iAlteredImage.context.ConvertFormat( *iAlteredImage.destinationBlock.Get()
+                                       , *iAlteredImage.paintEngine.PaintBlock().Get()
+                                       , roi );
+    iAlteredImage.context.Finish();
+
+    iAlteredImage.paintEngine.PaintBlock()->Dirty( roi );
 }
 
 void
 UOdysseyPainterEditorRasterLiquifyTool::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
-    TSharedPtr<FOdysseyRasterBlock> rasterBlock = GetRasterBlockFromEditor(false);
     FVector2D deltaPoint = FVector2D( iPointInTexture.x - mPreviousPointInTexture.X
                                     , iPointInTexture.y - mPreviousPointInTexture.Y );
     double deltaPointDistance = deltaPoint.Length();
 
-    mLiquifyHUD->SetCursorPositionInTexture( FVector2D( iPointInTexture.x, iPointInTexture.y ) );
+    mMousePosition = FVector2D( iPointInTexture.x, iPointInTexture.y );
 
-    if (!rasterBlock || rasterBlock != mPaintEngine.GetRasterBlock())
+    if( bIsMouseLeftButtonDown )
     {
-        return;
-    }
+        TSharedPtr<FOdysseyRasterBlock> rasterBlock = GetRasterBlockFromEditor(false);
 
+        mEditingArea = mEditingArea | ::ULIS::FRectI::FromXYWH( iPointInTexture.x - Radius
+                                                              , iPointInTexture.y - Radius
+                                                              , (Radius*2) + 1
+                                                              , (Radius*2) + 1 );
 
+        mLiquifyHUD->SetCursorPositionInTexture( mMousePosition );
 
-//    TSharedPtr<::ULIS::FBlock> sourceBlock = GetSourceBlock();
-//    if (!sourceBlock)
-//        return false;
-
-    TSharedPtr<::ULIS::FBlock> block = rasterBlock->GetBlock();
-
-//    ::ULIS::FPixel sourceColor = sourceBlock->Pixel(iPointInTexture.x, iPointInTexture.y);
-//    ::ULIS::FColor dstColor = GetEditor()->PaintColor().GetValue();
-//    dstColor.SetAlphaF(BlendParameters.Opacity / 100.f);
-//    TSharedPtr<::ULIS::FBlock> sourceMaskBlock = CreateSourceMaskBlock(sourceBlock, sourceColor);
-//    TSharedPtr<::ULIS::FBlock> maskBlock = MakeShared<::ULIS::FBlock>(block->Width(), block->Height(), ::ULIS::Format_G8);
-
-
-//    TSharedPtr<FOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
-//    TSharedPtr<::ULIS::FBlock> selectionBlock = mPaintEngine.PaintBlock();
-    //TSharedPtr<::ULIS::FBlock> selectionBlock = rasterSelection->GetBlock();
-//    ULIS::uint8 *selectionBlockPixels = selectionBlock->PixelBits(0,0);
-
-
-    /*Twirl( iPointInTexture.x - iPointInTexture.deltaPosition.X
-         , iPointInTexture.y - iPointInTexture.deltaPosition.Y
-         , iPointInTexture.x
-         , iPointInTexture.y
-         , 5.0f * M_PI / 180.0f );*/
-
-    // iPointInTexture.deltaPosition can not be trusted, I had strange result
-    // with it so I had to use mPreviousPointInTexture
-/*
-    Liquify( mPreviousPointInTexture.X
-           , mPreviousPointInTexture.Y
-           , iPointInTexture.x
-           , iPointInTexture.y );
-*/
-
-    if( deltaPointDistance >= 1.0f )
-    {
-        FVector2D stampPointInTexture = mPreviousPointInTexture;
-        double stepX = deltaPoint.X  / (uint32) deltaPointDistance;
-        double stepY = deltaPoint.Y  / (uint32) deltaPointDistance;
-
-        for( uint32 i = 0; i < (uint32) deltaPointDistance; i++ )
+        if( deltaPointDistance >= 1.0f )
         {
-            FVector2D stampNextPointInTexture = FVector2D( stampPointInTexture.X + stepX
-                                                         , stampPointInTexture.Y + stepY );
+            FVector2D stampPointInTexture = mPreviousPointInTexture;
+            double stepX = deltaPoint.X  / (uint32) deltaPointDistance;
+            double stepY = deltaPoint.Y  / (uint32) deltaPointDistance;
+            double strength = (double) Strength / 100;
+            double hardness = (double) Hardness / 100;
 
-            Flow( stampPointInTexture, stampNextPointInTexture );
+            for( uint32 i = 0; i < (uint32) deltaPointDistance; i++ )
+            {
+                FVector2D stampNextPointInTexture = FVector2D( stampPointInTexture.X + stepX
+                                                             , stampPointInTexture.Y + stepY );
 
-            stampPointInTexture = stampNextPointInTexture;
+                Flow( stampPointInTexture
+                    , stampNextPointInTexture
+                    , strength
+                    , hardness );
+
+                stampPointInTexture = stampNextPointInTexture;
+            }
+
+            ::ULIS::FRectI roi = ::ULIS::FRectI::FromXYWH( mPreviousPointInTexture.X - Radius
+                                                         , mPreviousPointInTexture.Y - Radius
+                                                         , (Radius*2) + 1
+                                                         , (Radius*2) + 1 )
+                               | ::ULIS::FRectI::FromXYWH( iPointInTexture.x - Radius
+                                                         , iPointInTexture.y - Radius
+                                                         , (Radius*2) + 1
+                                                         , (Radius*2) + 1 );
+
+            for( FAlteredImage& alteredImage : mAlteredImageArray )
+            {
+                ApplyFlow( alteredImage
+                         , roi
+                         , false );
+
+                alteredImage.paintEngine.Update( FOdysseyBlendParameters() );
+            }
+
+            mPreviousPointInTexture = FVector2D( iPointInTexture.x, iPointInTexture.y );
+        }
+    }
+}
+
+bool
+UOdysseyPainterEditorRasterLiquifyTool::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+{
+    if ( iKey == EKeys::LeftMouseButton )
+    {
+        for( FAlteredImage& alteredImage : mAlteredImageArray )
+        {
+            ApplyFlow( alteredImage
+                     , alteredImage.copiedSourceBlock->Rect()
+                     , true );
+
+            alteredImage.paintEngine.Commit( FOdysseyBlendParameters() );
         }
 
-        TSharedPtr<FOdysseyRasterBlock> srcRasterBlock = GetRasterBlockFromEditor(false);
-        TSharedPtr<::ULIS::FBlock> srcBlock = srcRasterBlock->GetBlock();
-        const ULIS::uint8 *srcBlockPixels = srcBlock->PixelBits(0,0);
-        TSharedPtr<::ULIS::FBlock> dstBlock = mPaintEngine.PaintBlock();
-        const ULIS::uint8 *dstBlockPixels = dstBlock->PixelBits(0,0);
-        ::ULIS::FRectI roi = ::ULIS::FRectI::FromXYWH( mPreviousPointInTexture.X - Radius
-                                                     , mPreviousPointInTexture.Y - Radius
-                                                     , (Radius*2) + 1
-                                                     , (Radius*2) + 1 )
-                           | ::ULIS::FRectI::FromXYWH( iPointInTexture.x - Radius
-                                                     , iPointInTexture.y - Radius
-                                                     , (Radius*2) + 1
-                                                     , (Radius*2) + 1 );
+        bIsMouseLeftButtonDown = false;
 
-        ApplyFlow( srcBlock, dstBlock, roi, false, false );
-
-        mPaintEngine.Update( FOdysseyBlendParameters() );
-
-        //mPaintEngine.PaintBlock()->Dirty();
-        //mPaintEngine.Update( FOdysseyBlendParameters() );
-
-    //    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_G8);
-
-    /*
-        //paintBlock->Dirty();
-        Commit();
-
-        FOdysseyPainterEditor* editor = GetEditor();
-        TSharedPtr<FOdysseyPainterEditorSource> source = editor->GetSource();
-        if (source)
-            source->RecordCurrentFrameUndo();
-
-        GEditor->EndTransaction();
-    */
-        mPreviousPointInTexture = FVector2D( iPointInTexture.x, iPointInTexture.y );
+        return true;
     }
+
+    return false;
 }
 
 bool
@@ -692,6 +748,24 @@ void UOdysseyPainterEditorRasterLiquifyTool::PropertyChanged(const FName& iPrope
 {
     Super::PropertyChanged(iPropertyName);
 
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorRasterLiquifyTool, AdjustmentStrength ) )
+    {
+        for( FAlteredImage& alteredImage : mAlteredImageArray )
+        {
+            ApplyFlow( alteredImage
+                     , alteredImage.copiedSourceBlock->Rect()
+                     , true );
+
+            alteredImage.paintEngine.Commit( FOdysseyBlendParameters() );
+        }
+    }
+
+    if( ( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorRasterLiquifyTool, Mode   ) )
+     || ( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorRasterLiquifyTool, Radius ) ) )
+    {
+        MakeDistortionMap();
+    }
+
     mLiquifyHUD->Reset();
 }
 
@@ -699,7 +773,6 @@ void
 UOdysseyPainterEditorRasterLiquifyTool::PostPropertyChanged(const FName& iPropertyName, bool iIsInteractive)
 {
     Super::PostPropertyChanged(iPropertyName, iIsInteractive);
-
 }
 
 EMouseCursor::Type

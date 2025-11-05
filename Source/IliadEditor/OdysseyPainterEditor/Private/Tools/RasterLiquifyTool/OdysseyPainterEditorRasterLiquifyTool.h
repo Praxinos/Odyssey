@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <ULIS>
 #include "CoreMinimal.h"
 #include "UObject/UObjectGlobals.h"
 #include "InputCoreTypes.h"
@@ -10,12 +11,23 @@
 #include "OdysseyBlendParameters.h"
 #include "OdysseyPaintEngine.h"
 
-#include <functional>
-
 #include "OdysseyPainterEditorRasterLiquifyTool.generated.h"
 
 class FOdysseyPaintEngine;
 class FOdysseyPainterEditorRasterLiquifyToolHUD;
+
+UENUM()
+enum class ELiquifyToolMode : uint8
+{
+    Push,
+    Twirl,
+    Pinch,
+    Expand,
+    Crystals,
+    Edge,
+    Reconstruct,
+    Adjust
+};
 
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public UOdysseyPainterEditorRasterBaseTool
@@ -23,6 +35,16 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
     GENERATED_BODY()
 
     public:
+        struct FAlteredImage
+        {
+            FAlteredImage( TSharedPtr<FOdysseyRasterBlock> iSourceRasterBlock );
+
+            TSharedPtr<::ULIS::FBlock> copiedSourceBlock;
+            TSharedPtr<::ULIS::FBlock> destinationBlock;
+            FOdysseyPaintEngine paintEngine;
+            ::ULIS::FContext& context;
+        };
+
         struct FDistortion
         {
             FDistortion()
@@ -35,16 +57,18 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
             ::ULIS::FVec2I newCoords;
             double distanceToCenter;
             float angle;
+            FVector2D currToPrev; // temp for rotations
+            //uint32 offset;
         };
 
         struct FFlow
         {
             FFlow()
-            : delta ( 0.0f, 0.0f )
+            : currToPrev ( 0.0f, 0.0f )
             {
             }
 
-            FVector2D delta;
+            FVector2D currToPrev;
         };
 
         typedef std::function<void(FDistortion&,::ULIS::FVec2D&,::ULIS::FVec2D&)> FLiquifyFunction;
@@ -84,39 +108,17 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
         virtual FText GetTooltip() const override;
 
     protected:
+        void FetchSourceImages();
         void MakeDistortionMap();
         void MakeFlowMap();
-        void Twirl( int32 iSrcCenterX
-                  , int32 iSrcCenterY
-                  , int32 iDstCenterX
-                  , int32 iDstCenterY
-                  , double iAngleInRadians );
-
-        void ApplyFlow( TSharedPtr<::ULIS::FBlock> iSrcBlock
-                      , TSharedPtr<::ULIS::FBlock> iDstBlock
+        void ApplyFlow( FAlteredImage& iAlteredImage
                       , const ::ULIS::FRectI& iRegionOfInterest
-                      , bool iReferToROIOnly
                       , bool iBilinearFiltered );
 
-        void Liquify( int32 iSrcCenterX
-                    , int32 iSrcCenterY
-                    , int32 iDstCenterX
-                    , int32 iDstCenterY );
-/*
-        void Flow( int32 iCenterX
-                 , int32 iCenterY
-                 , double iLength );
-*/
         void Flow( const FVector2D& iPrevCenter
-                 , const FVector2D& iCurrCenter );
-
-        inline void _Liquify_Push( int32 iSrcCenterX
-                                 , int32 iSrcCenterY
-                                 , int32 iDstCenterX
-                                 , int32 iDstCenterY
-                                 , FDistortion& distortion
-                                 , ::ULIS::FVec2D& oSrcCoords
-                                 , ::ULIS::FVec2D& oDstCoords );
+                 , const FVector2D& iCurrCenter
+                 , double iStrength
+                 , double iHardness );
 
     public:
         virtual void PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive) override;
@@ -147,30 +149,70 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
                           , Multiple = "1" ) )
         int Radius;
 
+        UPROPERTY( EditAnywhere
+                 , Category = "Liquify Tool" )
+        ELiquifyToolMode Mode;
+
+        UPROPERTY( EditAnywhere
+                 , Category = "Liquify Tool"
+                 , meta = ( Units = "Percent"
+                          , ClampMin = "0"
+                          , UIMin = "0"
+                          , ClampMax = "100"
+                          , UIMax = "100"
+                          , Delta = "1"
+                          , Multiple = "1" ) )
+        int32 Strength;
+
+        UPROPERTY( EditAnywhere
+                 , Category = "Liquify Tool"
+                 , meta = ( Units = "Percent"
+                          , ClampMin = "0"
+                          , UIMin = "0"
+                          , ClampMax = "100"
+                          , UIMax = "100"
+                          , Delta = "1"
+                          , Multiple = "1" ) )
+        int32 Hardness;
+
+        UPROPERTY( EditAnywhere
+                 , Category = "Liquify Tool" )
+        bool OnlyReferToEditngArea;
+
+        UPROPERTY( EditAnywhere
+                 , Category = "Liquify Tool"
+                 , meta = ( Units = "Percent"
+                          , ClampMin = "0"
+                          , UIMin = "0"
+                          , ClampMax = "100"
+                          , UIMax = "100"
+                          , Delta = "1"
+                          , Multiple = "1" ) )
+        int32 AdjustmentStrength;
+
     private:
         TSharedPtr<FOdysseyRasterBlock> GetRasterBlockFromEditor(bool iCreate) const;
 
         void OnRasterSelectionChanged();
 
-    public:
-        UPROPERTY(EditInstanceOnly, Category="Blending", meta=(ShowOnlyInnerProperties))
-        FOdysseyBlendParameters BlendParameters;
-
     protected:
         // protected Data Members
         TSharedPtr<FOdysseyPainterEditorRasterLiquifyToolHUD> mLiquifyHUD;
         //Resources
-        FOdysseyPaintEngine                 mPaintEngine;
-        //TSharedPtr<IOdysseyInterpolation>   mInterpolator;
-        float mBaseSize; //Size on which the tool is based to compute its size from a percentage
+
 
         TSharedPtr<FScopedTransaction> mTransaction;
 
+        // We copy the source image and stores it into an array of source image
+        // the array will be used when this tool will be made multi-layer compatible
+        TArray<FAlteredImage> mAlteredImageArray;
         TArray<FDistortion> mDistortionMap;
         TArray<FFlow> mFlowMap;
+
         double mPathCoveredDistance;
         FVector2D mMouseAtDown;
-        bool bIsMouseDown = false;
+        FVector2D mMousePosition;
+        bool bIsMouseLeftButtonDown = false;
         FVector2D mPreviousPointInTexture;
-        TArray<uint32> mSourcePixels;
+        ::ULIS::FRectI mEditingArea;
 };
