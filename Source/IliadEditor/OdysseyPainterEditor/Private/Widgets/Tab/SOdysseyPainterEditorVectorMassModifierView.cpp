@@ -82,11 +82,6 @@ SOdysseyPainterEditorVectorMassModifierView::Construct( const FArguments& InArgs
     mPathView = NewObject<UOdysseyPainterEditorVectorPathView>();
     mGroupPaintView = NewObject<UOdysseyPainterEditorVectorGroupPaintView>();
 
-    mObjectView->SetVectorLayer( mVectorLayer );
-    mGroupView->SetVectorLayer( mVectorLayer );
-    mPathView->SetVectorLayer( mVectorLayer );
-    mGroupPaintView->SetVectorLayer( mVectorLayer );
-
     mObjectView->OverrideConfigSection( detailCategoriesSectionName );
     mGroupView->OverrideConfigSection( detailCategoriesSectionName );
     mPathView->OverrideConfigSection( detailCategoriesSectionName );

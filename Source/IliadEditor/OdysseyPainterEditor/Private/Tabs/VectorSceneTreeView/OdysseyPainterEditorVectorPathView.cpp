@@ -47,7 +47,7 @@ UOdysseyPainterEditorVectorPathView::ImportParamFromOtherView( UOdysseyPainterEd
 void
 UOdysseyPainterEditorVectorPathView::ImportParam( const std::list<FOdysseyVectorObject*>& iFocusedObjectList )
 {
-    UOdysseyPainterEditorVectorObjectView::ImportParam( iFocusedObjectList );
+    Super::ImportParam( iFocusedObjectList );
 
     for( FOdysseyVectorObject* selectedObject : iFocusedObjectList )
     {
@@ -67,7 +67,7 @@ UOdysseyPainterEditorVectorPathView::ImportParam( const std::list<FOdysseyVector
 void
 UOdysseyPainterEditorVectorPathView::ClearPropertyBits()
 {
-    UOdysseyPainterEditorVectorObjectView::ClearPropertyBits();
+    Super::ClearPropertyBits();
 
     memset( &mPathPropertyBits, 0, sizeof( mPathPropertyBits ) );
 }
@@ -84,7 +84,7 @@ UOdysseyPainterEditorVectorPathView::HasAnyPropertyBit()
         }
     }
 
-    return UOdysseyPainterEditorVectorObjectView::HasAnyPropertyBit();
+    return Super::HasAnyPropertyBit();
 }
 
 bool
@@ -108,13 +108,13 @@ UOdysseyPainterEditorVectorPathView::GetPropertyBit( const FName& iPropertyName 
     if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorPathView, MiterLimit) )
         return mPathPropertyBits.MiterLimit;
 
-    return UOdysseyPainterEditorVectorObjectView::GetPropertyBit( iPropertyName );
+    return Super::GetPropertyBit( iPropertyName );
 }
 
 void
 UOdysseyPainterEditorVectorPathView::ApplyPropertyBits( FOdysseyVectorObject* iObject )
 {
-    UOdysseyPainterEditorVectorObjectView::ApplyPropertyBits( iObject );
+    Super::ApplyPropertyBits( iObject );
 
     if( iObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
     {
@@ -159,10 +159,11 @@ UOdysseyPainterEditorVectorPathView::SetPropertyBit( const FName& iPropertyName
                                                    , const FName& iCategory
                                                    , bool iState )
 {
-    UOdysseyPainterEditorVectorObjectView::SetPropertyBit( iPropertyName
-                                                         , iMemberPropertyName
-                                                         , iCategory
-                                                         , iState );
+    Super::SetPropertyBit( iPropertyName
+                         , iMemberPropertyName
+                         , iCategory
+                         , iState );
+
     if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorPathView, PathWidthInPercent) )
         mPathPropertyBits.PathWidthInPercent = iState;
 

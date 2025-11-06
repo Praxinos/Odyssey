@@ -54,7 +54,7 @@ UOdysseyPainterEditorVectorGroupPaintView::ImportParamFromOtherView( UOdysseyPai
 void
 UOdysseyPainterEditorVectorGroupPaintView::ImportParam( const std::list<FOdysseyVectorObject*>& iFocusedObjectList )
 {
-    UOdysseyPainterEditorVectorGroupView::ImportParam( iFocusedObjectList );
+    Super::ImportParam( iFocusedObjectList );
 
     for( FOdysseyVectorObject* selectedObject : iFocusedObjectList )
     {
@@ -84,7 +84,7 @@ UOdysseyPainterEditorVectorGroupPaintView::ImportParam( const std::list<FOdyssey
 void
 UOdysseyPainterEditorVectorGroupPaintView::ClearPropertyBits()
 {
-    UOdysseyPainterEditorVectorObjectView::ClearPropertyBits();
+    Super::ClearPropertyBits();
 
     memset( &mGroupPaintPropertyBits, 0, sizeof( mGroupPaintPropertyBits ) );
 }
@@ -101,7 +101,7 @@ UOdysseyPainterEditorVectorGroupPaintView::HasAnyPropertyBit()
         }
     }
 
-    return UOdysseyPainterEditorVectorObjectView::HasAnyPropertyBit();
+    return Super::HasAnyPropertyBit();
 }
 
 bool
@@ -154,7 +154,7 @@ UOdysseyPainterEditorVectorGroupPaintView::GetPropertyBit( const FName& iPropert
 void
 UOdysseyPainterEditorVectorGroupPaintView::ApplyPropertyBits( FOdysseyVectorObject* iObject )
 {
-    UOdysseyPainterEditorVectorGroupView::ApplyPropertyBits( iObject );
+    Super::ApplyPropertyBits( iObject );
 
     if( iObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
     {
@@ -208,10 +208,10 @@ UOdysseyPainterEditorVectorGroupPaintView::SetPropertyBit( const FName& iPropert
                                                          , const FName& iCategory
                                                          , bool iState )
 {
-    UOdysseyPainterEditorVectorGroupView::SetPropertyBit( iPropertyName
-                                                        , iMemberPropertyName
-                                                        , iCategory
-                                                        , iState );
+    Super::SetPropertyBit( iPropertyName
+                         , iMemberPropertyName
+                         , iCategory
+                         , iState );
 
     if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, Painted) )
         mGroupPaintPropertyBits.Painted = iState;

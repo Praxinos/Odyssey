@@ -62,14 +62,13 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectView : public UO
         ~UOdysseyPainterEditorVectorObjectView();
         UOdysseyPainterEditorVectorObjectView();
 
-        void Update( const std::list<FOdysseyVectorObject*>& iFocusedObjectList );
+        void Update( TSharedPtr<FOdysseyVectorLayer> iLayer, const std::list<FOdysseyVectorObject*>& iFocusedObjectList );
         void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
 
         void ValidateProperties( const std::list<FOdysseyVectorObject*>& iObjectList
                                , bool iClearBits );
 
         // Pointer to the layer (useful to retrieve palette sets needed by FOdysseyVectorObjectViewPaletteCustomization)
-        void SetVectorLayer( TSharedPtr<FOdysseyVectorLayer> iVectorLayer );
         TSharedPtr<FOdysseyVectorLayer> GetVectorLayer();
         virtual void ImportParamFromOtherView( UOdysseyPainterEditorVectorObjectView* iOtherView );
 

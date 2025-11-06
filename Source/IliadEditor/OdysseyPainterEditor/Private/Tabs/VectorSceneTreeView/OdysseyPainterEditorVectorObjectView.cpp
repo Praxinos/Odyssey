@@ -121,15 +121,12 @@ UOdysseyPainterEditorVectorObjectView::ImportParam( const std::list<FOdysseyVect
 }
 
 void
-UOdysseyPainterEditorVectorObjectView::Update( const std::list<FOdysseyVectorObject*>& iFocusedObjectList )
+UOdysseyPainterEditorVectorObjectView::Update( TSharedPtr<FOdysseyVectorLayer> iLayer
+                                             , const std::list<FOdysseyVectorObject*>& iFocusedObjectList )
 {
     ImportParam( iFocusedObjectList );
-}
 
-void
-UOdysseyPainterEditorVectorObjectView::SetVectorLayer( TSharedPtr<FOdysseyVectorLayer> iVectorLayer )
-{
-    mVectorLayer = iVectorLayer;
+    mVectorLayer = iLayer;
 }
 
 TSharedPtr<FOdysseyVectorLayer>

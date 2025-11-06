@@ -36,13 +36,13 @@ UOdysseyPainterEditorVectorGroupView::ImportParamFromOtherView( UOdysseyPainterE
         HUDColor = otherGroupView->HUDColor;
     }
 
-    UOdysseyPainterEditorVectorObjectView::ImportParamFromOtherView( iOtherView );
+    Super::ImportParamFromOtherView( iOtherView );
 }
 
 void
 UOdysseyPainterEditorVectorGroupView::ImportParam( const std::list<FOdysseyVectorObject*>& iFocusedObjectList )
 {
-    UOdysseyPainterEditorVectorObjectView::ImportParam( iFocusedObjectList );
+    Super::ImportParam( iFocusedObjectList );
 
     for( FOdysseyVectorObject* selectedObject : iFocusedObjectList )
     {
@@ -61,7 +61,7 @@ UOdysseyPainterEditorVectorGroupView::ImportParam( const std::list<FOdysseyVecto
 void
 UOdysseyPainterEditorVectorGroupView::ClearPropertyBits()
 {
-    UOdysseyPainterEditorVectorObjectView::ClearPropertyBits();
+    Super::ClearPropertyBits();
 
     memset( &mGroupPropertyBits, 0, sizeof( mGroupPropertyBits ) );
 }
@@ -78,7 +78,7 @@ UOdysseyPainterEditorVectorGroupView::HasAnyPropertyBit()
         }
     }
 
-    return UOdysseyPainterEditorVectorObjectView::HasAnyPropertyBit();
+    return Super::HasAnyPropertyBit();
 }
 
 bool
@@ -87,13 +87,13 @@ UOdysseyPainterEditorVectorGroupView::GetPropertyBit( const FName& iPropertyName
     if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupView, HUDColor) )
         return mGroupPropertyBits.HUDColor;
 
-    return UOdysseyPainterEditorVectorObjectView::GetPropertyBit( iPropertyName  );
+    return Super::GetPropertyBit( iPropertyName  );
 }
 
 void
 UOdysseyPainterEditorVectorGroupView::ApplyPropertyBits( FOdysseyVectorObject* iObject )
 {
-    UOdysseyPainterEditorVectorObjectView::ApplyPropertyBits( iObject );
+    Super::ApplyPropertyBits( iObject );
 
     if( iObject->HasBaseClass( FOdysseyVectorGroup::StaticClass() ) )
     {
@@ -110,10 +110,10 @@ UOdysseyPainterEditorVectorGroupView::SetPropertyBit( const FName& iPropertyName
                                                     , const FName& iCategory
                                                     , bool iState )
 {
-    UOdysseyPainterEditorVectorObjectView::SetPropertyBit( iPropertyName
-                                                        , iMemberPropertyName
-                                                        , iCategory
-                                                        , iState );
+    Super::SetPropertyBit( iPropertyName
+                         , iMemberPropertyName
+                         , iCategory
+                         , iState );
 
     if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupView, HUDColor) )
         mGroupPropertyBits.HUDColor = iState;

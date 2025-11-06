@@ -129,21 +129,21 @@ SOdysseyPainterEditorVectorSceneDetailsView::Update()
         {
             if( objectClass == FOdysseyVectorPath::StaticClass() )
             {
-                mPathView->Update( focusedObjectList );
+                mPathView->Update( mVectorLayer, focusedObjectList );
                 mDetailsView->SetObject( mPathView );
                 mCurrentObjectView = mPathView;
             }
 
             if( objectClass == FOdysseyVectorGroup::StaticClass() )
             {
-                mGroupView->Update( focusedObjectList );
+                mGroupView->Update( mVectorLayer, focusedObjectList );
                 mDetailsView->SetObject( mGroupView );
                 mCurrentObjectView = mGroupView;
             }
 
             if( objectClass == FOdysseyVectorGroupPaint::StaticClass() )
             {
-                mGroupPaintView->Update( focusedObjectList );
+                mGroupPaintView->Update( mVectorLayer, focusedObjectList );
                 mDetailsView->SetObject( mGroupPaintView );
                 mCurrentObjectView = mGroupPaintView;
             }
@@ -151,7 +151,7 @@ SOdysseyPainterEditorVectorSceneDetailsView::Update()
             if( objectClass == FOdysseyVectorObject::StaticClass() )
             {
                 // default
-                mObjectView->Update( focusedObjectList );
+                mObjectView->Update( mVectorLayer, focusedObjectList );
                 mDetailsView->SetObject( mObjectView );
                 mCurrentObjectView = mObjectView;
             }
@@ -250,11 +250,6 @@ SOdysseyPainterEditorVectorSceneDetailsView::OnSourceChanged()
             {
                 TSharedPtr<FOdysseyVectorLayer> vectorLayer = animationLayer ? animationLayer->GetVectorLayer()
                                                                              : textureLayer->GetVectorLayer();
-
-                mObjectView->SetVectorLayer( vectorLayer );
-                mGroupView->SetVectorLayer( vectorLayer );
-                mPathView->SetVectorLayer( vectorLayer );
-                mGroupPaintView->SetVectorLayer( vectorLayer );
             }
 
             UnbindLayerDelegates();
