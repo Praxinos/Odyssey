@@ -128,25 +128,6 @@ void IOdysseyViewportDrawingEditorAdapter::BindStampBrushInstance(UOdysseyBrushA
 
 void IOdysseyViewportDrawingEditorAdapter::StartPainting()
 {
-    if (mIsPickingColor)
-    {
-        mCapturedByEditor = true;
-        mExtension->GetEditor()->GetColorPickerTool()->PickColorMove(mCurrentStrokeRay.mPoint);
-        return;
-    }
-
-    UOdysseyPainterEditorRasterDrawingTool* rasterDrawingTool = Cast<UOdysseyPainterEditorRasterDrawingTool>(mTool.Get());
-    if (rasterDrawingTool)
-    {
-        UOdysseyBrushAssetBase* brushInstance = rasterDrawingTool->GetBrushInstance();
-        if (brushInstance)
-            brushInstance->GetStampOverrideDelegate().BindRaw(this, &IOdysseyViewportDrawingEditorAdapter::StampOverride);
-    }
-
-    if (mTool)
-    {
-        mCapturedByEditor = mTool->OnMouseDown(mCurrentStrokeRay.mPoint, mMouseButton);
-    }
 }
 
 void IOdysseyViewportDrawingEditorAdapter::Paint()
@@ -165,26 +146,6 @@ void IOdysseyViewportDrawingEditorAdapter::Paint()
 
 void IOdysseyViewportDrawingEditorAdapter::FinishPainting()
 {
-    if (mIsPickingColor)
-    {
-        mCapturedByEditor = false;
-        mExtension->GetEditor()->GetColorPickerTool()->PickColorUp(mCurrentStrokeRay.mPoint);
-        return;
-    }
-
-    if (!mTool)
-        return;
-
-    mTool->OnMouseUp(mCurrentStrokeRay.mPoint, mMouseButton);
-    mCapturedByEditor = false;
-
-    UOdysseyPainterEditorRasterDrawingTool* rasterDrawingTool = Cast<UOdysseyPainterEditorRasterDrawingTool>(mTool.Get());
-    if (rasterDrawingTool)
-    {
-        UOdysseyBrushAssetBase* brushInstance = rasterDrawingTool->GetBrushInstance();
-        if (brushInstance)
-            brushInstance->GetStampOverrideDelegate().Unbind();
-    }
 }
 
 bool
@@ -400,10 +361,10 @@ bool IOdysseyViewportDrawingEditorAdapter::InputKey(FEditorViewportClient* iView
         if (selectedTool->OnMouseDoubleClick(mCurrentStrokeRay.mPoint, iKey))
             return true;
 
-        if (mKeysPressed.Contains(iKey))
+        if (mKeysPressed.Contains(iKey)) //UP
             return true;
 
-        mKeysPressed.Add( iKey );
+        mKeysPressed.Add( iKey ); //DOWN
     }
 
     //Cleanup PressedKeys
@@ -487,7 +448,7 @@ bool IOdysseyViewportDrawingEditorAdapter::InputKey(FEditorViewportClient* iView
     // - Rotation around mesh
     //and disallow (return true) left click camera movement
     bool isMouseEvent = iKey == EKeys::LeftMouseButton || iKey == EKeys::RightMouseButton;
-    if (isOutsideTexture && isMouseEvent)
+    if (mState != eState::kCapturedByEditor && !mIsRecordingStylus && isOutsideTexture && isMouseEvent)
     {
         /*GEditor->GetActiveViewport()
         GEngine->GameViewport->SetMouseCaptureMode(EMouseCaptureMode::NoCapture);
@@ -511,17 +472,14 @@ bool IOdysseyViewportDrawingEditorAdapter::InputKey(FEditorViewportClient* iView
     strokeRay.mPoint.keysDown = mKeysPressed;
     strokeRay.mPoint.ComputeRelativeParameters(mCurrentStrokeRay.mPoint);
 
-    if (!mIsMouseDown && (iKey == EKeys::LeftMouseButton || iKey == EKeys::RightMouseButton))
-        mMouseButton = iKey;
-
     if (iKey == EKeys::LeftMouseButton || iKey == EKeys::RightMouseButton)
     {
         if (iEvent == EInputEvent::IE_Pressed || iEvent == EInputEvent::IE_DoubleClick)
         {
-            StartStylusInputRecord();
-            if (!mIsRecordingStylus)
+            StartStylusInputRecord(iKey);
+            if (!mIsRecordingStylus || iKey == EKeys::RightMouseButton)
             {
-                MouseDown(strokeRay);
+                MouseDown(strokeRay, iKey);
             }
         }
         else if(iEvent == EInputEvent::IE_Released)
@@ -530,13 +488,7 @@ bool IOdysseyViewportDrawingEditorAdapter::InputKey(FEditorViewportClient* iView
             {
                 StopStylusInputRecord();
             }
-            else
-            {
-                MouseUp(strokeRay);
-            }
-
-            if (mIsMouseDown && !mKeysPressed.Contains(mMouseButton))
-                mMouseButton = FKey();
+            MouseUp(strokeRay, iKey); //PATCH: forced mouseUp
         }
     }
     else
@@ -551,13 +503,13 @@ bool IOdysseyViewportDrawingEditorAdapter::InputKey(FEditorViewportClient* iView
         }
     }
 
-    return mCapturedByEditor;
+    return ShouldEditorCaptureMouse();
 }
 
 bool IOdysseyViewportDrawingEditorAdapter::CapturedMouseMove(FEditorViewportClient* iViewportClient, FViewport* iViewport, int32 iMouseX, int32 iMouseY)
 {
     if (mIsRecordingStylus)
-        return mCapturedByEditor;
+        return true;
 
     //HUD
     if (mCurrentHUDElement)
@@ -588,9 +540,8 @@ bool IOdysseyViewportDrawingEditorAdapter::CapturedMouseMove(FEditorViewportClie
     if (isTextureBased)
         pointPos = posInTexture;
 
-    bool isEventIntercepted = mIsMouseDown;
     if (isOutsideTexture)
-        return isEventIntercepted; //don't allow camera to move with left click, but allow with right click
+        return ShouldEditorCaptureMouse(); //don't allow camera to move with left click, but allow with right click
 
     //Init our StrokeRay, having all the basic info to draw
     FOdysseyRay strokeRay;
@@ -602,7 +553,7 @@ bool IOdysseyViewportDrawingEditorAdapter::CapturedMouseMove(FEditorViewportClie
     strokeRay.mPoint.ComputeRelativeParameters(mCurrentStrokeRay.mPoint);
 
     MouseDrag(strokeRay);
-    return mCapturedByEditor;
+    return ShouldEditorCaptureMouse();
 }
 
 bool
@@ -649,46 +600,89 @@ IOdysseyViewportDrawingEditorAdapter::HandleClick(FEditorViewportClient* iViewpo
 //------------------------------------------------------------------ Input Functions----
 
 void
-IOdysseyViewportDrawingEditorAdapter::MouseDown(const FOdysseyRay& iRay)
+IOdysseyViewportDrawingEditorAdapter::MouseDown(const FOdysseyRay& iRay, const FKey& iMouseButton)
 {
     if(!IsReadyToDraw())
         return;
 
-    if (mIsMouseDown)
-        return;
-
-    mIsMouseDown = true;
-
     mLastStrokeRay = mCurrentStrokeRay;
     mCurrentStrokeRay = iRay;
 
-    if (mState == eState::kIdleReady && (mMouseButton == EKeys::LeftMouseButton || mMouseButton == EKeys::RightMouseButton))
+    if (mState != eState::kIdleReady)
+        return;
+
+    if (iMouseButton != EKeys::LeftMouseButton && iMouseButton != EKeys::RightMouseButton)
+        return;
+
+    if (mIsPickingColor)
     {
-        mState = eState::kDrawing;
-        StartPainting();
+        mState = eState::kCapturedByEditor;
+        mMouseButton = iMouseButton;
+        mExtension->GetEditor()->GetColorPickerTool()->PickColorMove(mCurrentStrokeRay.mPoint);
         return;
     }
+
+    UOdysseyPainterEditorRasterDrawingTool* rasterDrawingTool = Cast<UOdysseyPainterEditorRasterDrawingTool>(mTool.Get());
+    if (rasterDrawingTool)
+    {
+        UOdysseyBrushAssetBase* brushInstance = rasterDrawingTool->GetBrushInstance();
+        if (brushInstance)
+            brushInstance->GetStampOverrideDelegate().BindRaw(this, &IOdysseyViewportDrawingEditorAdapter::StampOverride);
+    }
+
+    if (mTool && mTool->OnMouseDown(mCurrentStrokeRay.mPoint, iMouseButton))
+    {
+        mState = eState::kCapturedByEditor;
+        mMouseButton = iMouseButton;
+    }
+
+    StartPainting();
 }
 
 void
-IOdysseyViewportDrawingEditorAdapter::MouseUp(const FOdysseyRay& iRay)
+IOdysseyViewportDrawingEditorAdapter::MouseUp(const FOdysseyRay& iRay, const FKey& iMouseButton)
 {
     if(!IsReadyToDraw())
-        return;
-
-    if (!mIsMouseDown)
         return;
 
     mLastStrokeRay = mCurrentStrokeRay;
     mCurrentStrokeRay = iRay;
 
-    mIsMouseDown = false;
 
-    if (mState == eState::kDrawing && (mMouseButton == EKeys::LeftMouseButton || mMouseButton == EKeys::RightMouseButton))
+    if (mState != eState::kCapturedByEditor)
+        return;
+
+    if (iMouseButton != EKeys::LeftMouseButton && iMouseButton != EKeys::RightMouseButton)
+        return;
+
+    if (mIsPickingColor)
     {
-        FinishPainting();
         mState = eState::kIdleReady;
+        mMouseButton = FKey();
+        mExtension->GetEditor()->GetColorPickerTool()->PickColorUp(mCurrentStrokeRay.mPoint);
+        return;
     }
+
+    if (!mTool)
+    {
+        mState = eState::kIdleReady;
+        mMouseButton = FKey();
+        return;
+    }
+
+    mTool->OnMouseUp(mCurrentStrokeRay.mPoint, mMouseButton);
+    mState = eState::kIdleReady;
+    mMouseButton = FKey();
+
+    UOdysseyPainterEditorRasterDrawingTool* rasterDrawingTool = Cast<UOdysseyPainterEditorRasterDrawingTool>(mTool.Get());
+    if (rasterDrawingTool)
+    {
+        UOdysseyBrushAssetBase* brushInstance = rasterDrawingTool->GetBrushInstance();
+        if (brushInstance)
+            brushInstance->GetStampOverrideDelegate().Unbind();
+    }
+
+    FinishPainting();
 }
 
 void
@@ -697,21 +691,17 @@ IOdysseyViewportDrawingEditorAdapter::MouseDrag(const FOdysseyRay& iRay)
     if(!IsReadyToDraw())
         return;
 
-    if (!mIsMouseDown)
-        return;
-
     mLastStrokeRay = mCurrentStrokeRay;
     mCurrentStrokeRay = iRay;
 
+    if (mState != eState::kCapturedByEditor)
+        return;
+
     bool hasMoved = !FMath::IsNearlyEqual(mCurrentStrokeRay.mPoint.x - mLastStrokeRay.mPoint.x, 0.f) || !FMath::IsNearlyEqual(mCurrentStrokeRay.mPoint.y - mLastStrokeRay.mPoint.y, 0.f);
+    if (!hasMoved)
+        return;
 
-    if (mState == eState::kDrawing)
-    {
-        if (!hasMoved)
-            return;
-
-        Paint();
-    }
+    Paint();
 }
 
 bool
@@ -744,7 +734,7 @@ IOdysseyViewportDrawingEditorAdapter::KeyUp(FKey iKey)
 //------------------------------------------------------------------ Stylus Functions
 
 void
-IOdysseyViewportDrawingEditorAdapter::StartStylusInputRecord()
+IOdysseyViewportDrawingEditorAdapter::StartStylusInputRecord(const FKey& iMouseButton)
 {
     if (mIsRecordingStylus)
         return;
@@ -755,6 +745,7 @@ IOdysseyViewportDrawingEditorAdapter::StartStylusInputRecord()
         return;
 
     mIsRecordingStylus = true;
+    mStylusButton = iMouseButton;
 
     //Down
     ReadStylusInput();
@@ -770,6 +761,7 @@ IOdysseyViewportDrawingEditorAdapter::StopStylusInputRecord()
         return;
 
     ReadStylusInput();
+    mStylusButton = FKey();
 
     UOdysseyStylusInputSubsystem* inputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
     inputSubsystem->Flush(); //Get late stylus events
@@ -867,28 +859,42 @@ IOdysseyViewportDrawingEditorAdapter::ReadStylusInput()
 
         FOdysseyRay ray = StylusStateToRay(state);
 
-        //Force MouseDown when using the Right Mouse Button to allow hovered mouse clicks
-        if (!mStylusIsDown && (state.IsStylusDown() || mMouseButton == EKeys::RightMouseButton ))
+        //Don't manage MouseDown when using the Right Mouse Button to allow hovered mouse clicks
+        if (!mStylusIsDown && state.IsStylusDown() && mStylusButton != EKeys::RightMouseButton)
         {
             //MouseDown
-            MouseDown(ray);
+            MouseDown(ray, mStylusButton);
             mStylusIsDown = true;
             mLastStylusEventIndex = i;
         }
-        else if (mStylusIsDown && !state.IsStylusDown() && !mKeysPressed.Contains(mMouseButton))
+        else if (mStylusIsDown && !state.IsStylusDown() && mStylusButton != EKeys::RightMouseButton)
         {
             //MouseUp
-            MouseUp(ray);
+            MouseUp(ray, mStylusButton);
             mStylusIsDown = false;
             mLastStylusEventIndex = i;
         }
-        else if (mStylusIsDown)
+        //Force Right Mouse Button Drag
+        else if (mStylusIsDown || mStylusButton == EKeys::RightMouseButton)
         {
             //MouseMove
             MouseDrag(ray);
             mLastStylusEventIndex = i;
         }
     }
+}
+
+
+bool
+IOdysseyViewportDrawingEditorAdapter::ShouldEditorCaptureMouse() const
+{
+    if (mState == eState::kCapturedByEditor)
+        return true;
+
+    if (mIsRecordingStylus && mStylusButton != EKeys::RightMouseButton)
+        return true;
+
+    return false;
 }
 
 void
