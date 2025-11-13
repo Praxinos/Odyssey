@@ -460,7 +460,7 @@ static void GetDPI( IRealTimeStylus* RealTimeStylus, int& oDPIX, int& oDPIY, POI
 void FInkRealTimeStylusPlugin::HandlePacket(IRealTimeStylus* RealTimeStylus, const StylusInfo* StylusInfo, ULONG PacketCount, ULONG PacketBufferLength, LONG* Packets)
 {
     FInkTabletContextInfo* TabletContext = FindTabletContext(StylusInfo->tcid);
-    if (TabletContext == nullptr)
+    if (TabletContext == nullptr || TabletContext->Kind == TDK_Mouse)
     {
         return;
     }
@@ -549,10 +549,6 @@ void FInkRealTimeStylusPlugin::HandlePacket(IRealTimeStylus* RealTimeStylus, con
         }
 
         ink_state.IsTouching = TabletContext->IsTouching;
-
-        if( TabletContext->IsTouching && TabletContext->Kind == TDK_Mouse ) // Here, as we don't have pressure packet for mouse -> simulate it (TODO: maybe do it for other attributes)
-            ink_state.NormalPressure = 1.0;
-
         states.Add( ink_state );
 
         //UE_LOG( LogStylusInput, Log, TEXT( "HandlePacket x:%f y:%f" ), ink_state.Position.X, ink_state.Position.Y );

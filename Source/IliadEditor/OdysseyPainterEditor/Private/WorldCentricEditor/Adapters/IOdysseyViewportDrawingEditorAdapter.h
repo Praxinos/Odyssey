@@ -25,7 +25,7 @@ public:
     {
         kIdle, //Idle, but preparations are not made yet
         kIdleReady, //Idle, but we're now ready to paint
-        kDrawing,
+        kCapturedByEditor
     };
 
 public:
@@ -65,7 +65,7 @@ public:
 private:
     /** IStylusMessageHandler Overrides */
     virtual void OnStylusStateChanged(const TWeakPtr<SWidget> iWidget, const TArray<FStylusState>& iStates, int32 iIndex) override;
-    void StartStylusInputRecord();
+    void StartStylusInputRecord(const FKey& iMouseButton);
     void StopStylusInputRecord();
     FOdysseyRay StylusStateToRay(const FStylusState& iState);
     void ReadStylusInput();
@@ -82,11 +82,12 @@ protected:
 
 private:
     //New API to manage drawing events
-    void MouseDown(const FOdysseyRay& iRay);
-    void MouseUp(const FOdysseyRay& iRay);
+    void MouseDown(const FOdysseyRay& iRay, const FKey& iMouseButton);
+    void MouseUp(const FOdysseyRay& iRay, const FKey& iMouseButton);
     void MouseDrag(const FOdysseyRay& iRay);
     bool KeyDown(FKey iKey);
     bool KeyUp(FKey iKey);
+    bool ShouldEditorCaptureMouse() const;
 
     TSharedPtr<FOdysseyHUDElement> GetHUDElement(FViewport* iViewport, int32 iX, int32 iY);
 
@@ -117,9 +118,6 @@ protected:
     /** Current or previous selected tool which still has delegates on this adapter, we keep it here so that we can handle said delegates */
     TStrongObjectPtr<UOdysseyPainterEditorTool> mTool;
 
-    /** True if a mouse button is considered as down (set just before calling the tool OnMouseButtonDown event)*/
-    bool mIsMouseDown = false;
-
     /** Contains the MouseButton considered as the one currently used*/
     FKey mMouseButton;
 
@@ -134,8 +132,7 @@ protected:
 
     /** Indicates if the stylus is considered as touching the tablet or not */
     bool mStylusIsDown = false;
-
-    bool mCapturedByEditor = false;
+    FKey mStylusButton;
 
     bool mOverrideMouseCursor = false;
     EMouseCursor::Type mMouseCursor = EMouseCursor::Default;
