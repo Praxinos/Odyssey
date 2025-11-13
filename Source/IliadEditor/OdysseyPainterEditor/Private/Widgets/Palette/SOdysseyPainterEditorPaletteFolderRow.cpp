@@ -28,6 +28,20 @@ SOdysseyPainterEditorPaletteFolderRow::GetIconColorAndOpacity() const
     return FAppStyle::Get().GetSlateColor(FolderColorName).GetSpecifiedColor();
 }
 
+TSharedRef<SWidget>
+SOdysseyPainterEditorPaletteFolderRow::GenerateContentWidget() //override
+{
+    return SNew( SHorizontalBox )
+        + SHorizontalBox::Slot()
+        .AutoWidth()
+        .VAlign( VAlign_Center )
+        [
+            SNew( SImage )
+            .Image( this, &SOdysseyPainterEditorPaletteFolderRow::GetIcon )
+            .ColorAndOpacity( this, &SOdysseyPainterEditorPaletteFolderRow::GetIconColorAndOpacity )
+        ];
+}
+
 bool
 SOdysseyPainterEditorPaletteFolderRow::IsItemSelected() const
 {

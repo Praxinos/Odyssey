@@ -30,16 +30,17 @@ public:
 
 protected:
     //STableRow overrides
-    virtual TSharedRef<SWidget> GenerateWidgetForColumn( const FName& InColumnName );
+    //virtual TSharedRef<SWidget> GenerateWidgetForColumn( const FName& InColumnName );
 
     virtual const FSlateBrush* GetIcon() const;
     virtual FSlateColor GetIconColorAndOpacity() const;
 
-    float GetColumnWidth(int iColumnIndex) const;
-    void OnColumnResized(float iSize, int iColumnIndex);
+    //float GetColumnWidth(int iColumnIndex) const;
+    //void OnColumnResized(float iSize, int iColumnIndex);
 
 protected:
-    virtual TSharedRef<SWidget> GenerateHeaderWidget();
+    virtual TSharedRef<SWidget> GenerateWidget();
+    virtual TSharedRef<SWidget> GenerateContentWidget();
 
     FText GetEntryName() const;
 

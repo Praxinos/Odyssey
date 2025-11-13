@@ -52,13 +52,13 @@ FOdysseyPainterEditorColorSelectorTab::CreateWidget()
             .Value(this, &FOdysseyPainterEditorColorSelectorTab::GetColorType)
             .OnValueChecked(this, &FOdysseyPainterEditorColorSelectorTab::OnColorTypeChanged)
 
-            //Selection Tool
+            //Color Type: RAW
             + SSegmentedControl<EOdysseyPainterEditorColorType>::Slot(EOdysseyPainterEditorColorType::Raw)
             .Text(LOCTEXT("color-selector.color-type.raw.name", "Raw"))
             .ToolTip(LOCTEXT("color-selector.color-type.raw.tooltip", "Switch to Raw colors"))
             .Icon(FOdysseyStyle::GetBrush( "PainterEditor.ColorSelector.ColorType.Raw" ))
 
-            //Move Tool
+            //Color Type: INDEXED
             + SSegmentedControl<EOdysseyPainterEditorColorType>::Slot(EOdysseyPainterEditorColorType::Indexed)
             .Text(LOCTEXT("color-selector.color-type.indexed.name", "Indexed"))
             .ToolTip(LOCTEXT("color-selector.color-type.indexed.tooltip", "Switch to Indexed colors"))

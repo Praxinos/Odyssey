@@ -205,6 +205,8 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
         .SetOddRowBackgroundHoveredBrush(FSlateColorBrush(FStyleColors::Hover))
     );
 
+    Set( "OdysseyPalette.BadgeShape", new FSlateRoundedBoxBrush( FStyleColors::White, FVector4( 5.0f, 5.0f, 5.0f, 5.0f ) ) );
+
 
     // OdysseyWidgets - AdvancedColorWheel
     FVector2D AdvancedColorWheelSize( 1024, 1024 );

@@ -29,6 +29,8 @@ protected:
     virtual const FSlateBrush* GetIcon() const override;
     virtual FSlateColor GetIconColorAndOpacity() const override;
 
+    virtual TSharedRef<SWidget> GenerateContentWidget() override;
+
 public:
     /** @return True if the corresponding item is selected; false otherwise */
     virtual bool IsItemSelected() const override;
