@@ -30,28 +30,6 @@ void SOdysseyPainterEditorPaletteColorRow::Construct(const FArguments& InArgs, c
 }
 
 //PRIVATE API-----------------------------------------------------------
-//
-//TSharedRef<SWidget>
-//SOdysseyPainterEditorPaletteColorRow::GenerateWidgetForColumn( const FName& InColumnName )
-//{
-//    if (InColumnName == "Color")
-//    {
-//        return GenerateColorWidget();
-//    }
-//
-//    return SOdysseyPainterEditorPaletteEntryRow::GenerateWidgetForColumn(InColumnName);
-//}
-//
-//TSharedRef<SWidget>
-//SOdysseyPainterEditorPaletteColorRow::GenerateColorWidget()
-//{
-//    return SNew(SBox)
-//        .Padding(FMargin(10, 2, 0, 2))
-//        [
-//            SNew(SColorBlock )
-//            .Color(this, &SOdysseyPainterEditorPaletteColorRow::GetEntryColorAsLinear)
-//        ];
-//}
 
 FLinearColor SOdysseyPainterEditorPaletteColorRow::GetEntryColorAsLinear() const
 {
@@ -70,21 +48,7 @@ TSharedRef<SWidget>
 SOdysseyPainterEditorPaletteColorRow::GenerateContentWidget() //override
 {
     return SNew( SHorizontalBox )
-        //+ SHorizontalBox::Slot()
-        //.AutoWidth()
-        //.VAlign( VAlign_Center )
-        //[
-        //    SNew( SImage )
-        //    .Image( this, &SOdysseyPainterEditorPaletteColorRow::GetIcon )
-        //    .ColorAndOpacity( this, &SOdysseyPainterEditorPaletteColorRow::GetIconColorAndOpacity )
-        //]
-        //+ SHorizontalBox::Slot()
-        //.AutoWidth()
-        //.VAlign( VAlign_Center )
-        //[
-        //    SNew( SColorBlock )
-        //    .Color( this, &SOdysseyPainterEditorPaletteColorRow::GetEntryColorAsLinear )
-        //]
+
         + SHorizontalBox::Slot()
         .AutoWidth()
         .VAlign( VAlign_Fill )
@@ -110,6 +74,7 @@ SOdysseyPainterEditorPaletteColorRow::GenerateContentWidget() //override
                 ]
             ]
         ]
+
         + SHorizontalBox::Slot()
         .AutoWidth()
         .VAlign( VAlign_Fill )

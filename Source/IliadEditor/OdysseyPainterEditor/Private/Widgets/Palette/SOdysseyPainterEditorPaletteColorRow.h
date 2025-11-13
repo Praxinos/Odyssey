@@ -42,8 +42,6 @@ public:
     virtual bool IsItemSelected() const override;
 
 private:
-    //virtual TSharedRef<SWidget> GenerateWidgetForColumn( const FName& InColumnName ) override;
-    //TSharedRef<SWidget> GenerateColorWidget();
     FLinearColor GetEntryColorAsLinear() const;
 
 private:
