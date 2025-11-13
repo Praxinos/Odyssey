@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "OdysseyPainterEditorColorType.h"
 #include "Palette/OdysseyPalette.h"
 #include "Palette/OdysseyPaletteEntryColor.h"
 
@@ -39,6 +40,7 @@ public:
         SLATE_ATTRIBUTE(TArray<UOdysseyPaletteSet*>, PaletteSets)
         SLATE_ATTRIBUTE(UOdysseyPaletteEntryColor*, CurrentColorEntry)
         SLATE_ATTRIBUTE(FGuid, CurrentSet)
+        SLATE_ATTRIBUTE(EOdysseyPainterEditorColorType, ColorType)
         SLATE_EVENT(FOnAddPaletteSet, OnAddPaletteSet)
         SLATE_EVENT(FOnRemovePaletteSet, OnRemovePaletteSet)
         SLATE_EVENT(FOnPaletteSetChanged, OnPaletteSetChanged)
@@ -70,6 +72,7 @@ private:
     TSlateAttribute<TArray<UOdysseyPaletteSet*>> mPaletteSets;
     TSlateAttribute<UOdysseyPaletteEntryColor*> mCurrentColorEntry;
     TAttribute<FGuid> mCurrentSet;
+    TAttribute<EOdysseyPainterEditorColorType> mColorType;
     TSharedPtr<UE::Slate::Containers::TObservableArray<TSharedPtr<FOdysseyPainterEditorPaletteTreeViewItem>>> mItemsSource;
     FOnAddPaletteSet mOnAddPaletteSet;
     FOnRemovePaletteSet mOnRemovePaletteSet;

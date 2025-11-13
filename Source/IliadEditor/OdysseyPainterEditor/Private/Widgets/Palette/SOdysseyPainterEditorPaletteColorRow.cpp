@@ -7,11 +7,14 @@
 #include "Palette/OdysseyPaletteEntryColor.h"
 #include "OdysseyStyle.h"
 
+#define LOCTEXT_NAMESPACE "OdysseyPainterEditor"
+
 //CONSTRUCTION/DESTRUCTION----------------------------------------------- SMultiColumnTableRow
 void SOdysseyPainterEditorPaletteColorRow::Construct(const FArguments& InArgs, const TSharedRef<STableViewBase>& iTreeView)
 {
     mIsCurrent = InArgs._IsCurrent;
     mSet = InArgs._Set;
+    mColorType = InArgs._ColorType;
     mEntryColor = InArgs._Entry;
 
     SOdysseyPainterEditorPaletteEntryRow::Construct(
@@ -58,7 +61,9 @@ FLinearColor SOdysseyPainterEditorPaletteColorRow::GetEntryColorAsLinear() const
 const FSlateBrush*
 SOdysseyPainterEditorPaletteColorRow::GetIcon() const
 {
-    return FOdysseyStyle::Get().GetBrush("OdysseyPalette.EntryColor");
+    static FSlateNoResource no_brush;
+    return &no_brush;
+    //return FOdysseyStyle::Get().GetBrush("OdysseyPalette.EntryColor");
 }
 
 TSharedRef<SWidget>
@@ -89,17 +94,19 @@ SOdysseyPainterEditorPaletteColorRow::GenerateContentWidget() //override
             .Padding( FMargin( 5.f, 0 ) )
             [
                 SNew( SBorder )
+                .BorderImage( FOdysseyStyle::Get().GetBrush( "OdysseyPalette.BadgeShape" ) )
                 .BorderBackgroundColor_Lambda( [this]()
                                                {
                                                    return FColor( 20, 20, 20 );
                                                } )
-                .BorderImage( FOdysseyStyle::Get().GetBrush( "OdysseyPalette.BadgeShape" ) )
                 .VAlign( VAlign_Fill )
                 .HAlign( HAlign_Center )
                 [
                     SNew( STextBlock )
-                    .Text( FMath::RandBool() ? FText::FromString( TEXT( "Indexed" ) ) : FText::FromString( TEXT( "Raw" ) ) )
-                    //.Text( LOCTEXT( "
+                    .Text_Lambda( [this]()
+                                  {
+                                      return ( mColorType.Get() == EOdysseyPainterEditorColorType::Indexed ) ? LOCTEXT( "PainterEditor.Palette.ColorTypeBadge-Indexed", "Indexed" ) : LOCTEXT( "PainterEditor.Palette.ColorTypeBadge-Raw", "Raw" );
+                                  } )
                 ]
             ]
         ]
@@ -112,11 +119,11 @@ SOdysseyPainterEditorPaletteColorRow::GenerateContentWidget() //override
             .Padding( FMargin( 5.f, 0 ) )
             [
                 SNew( SBorder )
+                .BorderImage( FOdysseyStyle::Get().GetBrush( "OdysseyPalette.BadgeShape" ) )
                 .BorderBackgroundColor_Lambda( [this]()
                                                {
                                                    return GetEntryColorAsLinear();
                                                } )
-                .BorderImage( FOdysseyStyle::Get().GetBrush( "OdysseyPalette.BadgeShape" ) )
                 .VAlign( VAlign_Fill )
             ]
         ];
@@ -127,3 +134,5 @@ SOdysseyPainterEditorPaletteColorRow::IsItemSelected() const
 {
     return mIsCurrent.Get();
 }
+
+#undef LOCTEXT_NAMESPACE

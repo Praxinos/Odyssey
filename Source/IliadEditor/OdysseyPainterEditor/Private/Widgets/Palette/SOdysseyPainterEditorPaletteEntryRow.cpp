@@ -106,6 +106,7 @@ SOdysseyPainterEditorPaletteEntryRow::GenerateWidget()
         .Padding(FMargin(0, 2, 0, 2))
         [
             SNew(SHorizontalBox)
+
             + SHorizontalBox::Slot()
             .AutoWidth()
             .HAlign(HAlign_Right)
@@ -114,20 +115,24 @@ SOdysseyPainterEditorPaletteEntryRow::GenerateWidget()
                 SNew(SExpanderArrow, SharedThis(this) )
                 .ShouldDrawWires(false)
             ]
-            //+ SHorizontalBox::Slot()
-            //.AutoWidth()
-            //.VAlign(VAlign_Center)
-            //[
-            //    SNew(SImage)
-            //    .Image(this, &SOdysseyPainterEditorPaletteEntryRow::GetIcon)
-            //    .ColorAndOpacity(this, &SOdysseyPainterEditorPaletteEntryRow::GetIconColorAndOpacity)
-            //]
+
+            + SHorizontalBox::Slot()
+            .AutoWidth()
+            .VAlign( VAlign_Center )
+            .Padding( FMargin( 3.f, 0 ) )
+            [
+                SNew( SImage )
+                .Image( this, &SOdysseyPainterEditorPaletteEntryRow::GetIcon )
+                .ColorAndOpacity( this, &SOdysseyPainterEditorPaletteEntryRow::GetIconColorAndOpacity )
+            ]
+
             + SHorizontalBox::Slot()
             .AutoWidth()
             .VAlign(VAlign_Center)
             [
                 GenerateContentWidget()
             ]
+
             + SHorizontalBox::Slot()
             .VAlign(VAlign_Center)
             [

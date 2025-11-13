@@ -31,15 +31,7 @@ SOdysseyPainterEditorPaletteFolderRow::GetIconColorAndOpacity() const
 TSharedRef<SWidget>
 SOdysseyPainterEditorPaletteFolderRow::GenerateContentWidget() //override
 {
-    return SNew( SHorizontalBox )
-        + SHorizontalBox::Slot()
-        .AutoWidth()
-        .VAlign( VAlign_Center )
-        [
-            SNew( SImage )
-            .Image( this, &SOdysseyPainterEditorPaletteFolderRow::GetIcon )
-            .ColorAndOpacity( this, &SOdysseyPainterEditorPaletteFolderRow::GetIconColorAndOpacity )
-        ];
+    return SNullWidget::NullWidget;
 }
 
 bool

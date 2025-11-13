@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "OdysseyPainterEditorColorType.h"
 #include "Widgets/Palette/SOdysseyPainterEditorPaletteEntryRow.h"
 
 class UOdysseyPaletteEntryColor;
@@ -19,10 +20,12 @@ public:
         : _IsCurrent( false )
         , _Entry(nullptr)
         , _Set(FGuid())
+        , _ColorType(EOdysseyPainterEditorColorType::Raw)
         {}
         SLATE_ATTRIBUTE(bool, IsCurrent)
         SLATE_ATTRIBUTE(UOdysseyPaletteEntryColor*, Entry)
         SLATE_ATTRIBUTE(FGuid, Set)
+        SLATE_ATTRIBUTE(EOdysseyPainterEditorColorType, ColorType)
     SLATE_END_ARGS()
 
 public:
@@ -46,5 +49,6 @@ private:
 private:
     TAttribute<bool> mIsCurrent;
     TAttribute<FGuid> mSet;
+    TAttribute<EOdysseyPainterEditorColorType> mColorType;
     TAttribute<UOdysseyPaletteEntryColor*> mEntryColor;
 };
