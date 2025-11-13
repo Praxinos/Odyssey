@@ -10,7 +10,7 @@ struct FOdysseyMathUtils
     struct FOdysseyBezierLutElement
     {
         FVector2D point;
-        float length;
+        float length = 0.f;
     };
 
     template< class T >
