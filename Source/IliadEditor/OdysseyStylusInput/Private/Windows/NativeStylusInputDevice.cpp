@@ -32,9 +32,7 @@ void LogPenInfo(POINTER_PEN_INFO& iPenInfo)
         case PT_TOUCH : pointerType = TEXT("TOUCH"); break;
         case PT_PEN : pointerType = TEXT("PEN"); break;
         case PT_MOUSE : pointerType = TEXT("MOUSE"); break;
-#if(WINVER >= 0x0603)
         case PT_TOUCHPAD : pointerType = TEXT("TOUCHPAD"); break;
-#endif
     }
 
     FString pointerFlags = TEXT("");

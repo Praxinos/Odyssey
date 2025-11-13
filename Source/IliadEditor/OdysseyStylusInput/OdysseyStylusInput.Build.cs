@@ -58,13 +58,6 @@ namespace UnrealBuildTool.Rules
                         // ... add other public dependencies that you statically link with here ...
                     }
                 );
-
-                PrivateDefinitions.AddRange(
-                    new string[]
-                    {
-                        "WINVER=0x0602" //Minimal version Windows 8, needed to get access to WM_POINTER events
-                    }
-                );
             }
 
             if (Target.Platform == UnrealTargetPlatform.Mac)
