@@ -51,6 +51,7 @@ FOdysseyPainterEditorColorSelectorTab::CreateWidget()
             .Visibility(this, &FOdysseyPainterEditorColorSelectorTab::GetColorTypeVisibility)
             .Value(this, &FOdysseyPainterEditorColorSelectorTab::GetColorType)
             .OnValueChecked(this, &FOdysseyPainterEditorColorSelectorTab::OnColorTypeChanged)
+            .Style( &FOdysseyStyle::Get(), "OdysseyPalette.Tabs" )
 
             //Color Type: RAW
             + SSegmentedControl<EOdysseyPainterEditorColorType>::Slot(EOdysseyPainterEditorColorType::Raw)
