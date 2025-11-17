@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "OdysseyPainterEditorColorType.h"
 #include "Widgets/Palette/SOdysseyPainterEditorPaletteEntryRow.h"
 
 class UOdysseyPaletteEntryColor;
@@ -19,10 +20,12 @@ public:
         : _IsCurrent( false )
         , _Entry(nullptr)
         , _Set(FGuid())
+        , _ColorType(EOdysseyPainterEditorColorType::Raw)
         {}
         SLATE_ATTRIBUTE(bool, IsCurrent)
         SLATE_ATTRIBUTE(UOdysseyPaletteEntryColor*, Entry)
         SLATE_ATTRIBUTE(FGuid, Set)
+        SLATE_ATTRIBUTE(EOdysseyPainterEditorColorType, ColorType)
     SLATE_END_ARGS()
 
 public:
@@ -32,17 +35,18 @@ public:
 protected:
     virtual const FSlateBrush* GetIcon() const override;
 
+    virtual TSharedRef<SWidget> GenerateContentWidget() override;
+
 public:
     /** @return True if the corresponding item is selected; false otherwise */
     virtual bool IsItemSelected() const override;
 
 private:
-    virtual TSharedRef<SWidget> GenerateWidgetForColumn( const FName& InColumnName ) override;
-    TSharedRef<SWidget> GenerateColorWidget();
     FLinearColor GetEntryColorAsLinear() const;
 
 private:
     TAttribute<bool> mIsCurrent;
     TAttribute<FGuid> mSet;
+    TAttribute<EOdysseyPainterEditorColorType> mColorType;
     TAttribute<UOdysseyPaletteEntryColor*> mEntryColor;
 };

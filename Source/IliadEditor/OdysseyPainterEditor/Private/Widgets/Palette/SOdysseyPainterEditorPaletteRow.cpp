@@ -20,33 +20,40 @@ void SOdysseyPainterEditorPaletteRow::Construct(const FArguments& InArgs, const 
     STableRow<TSharedPtr<FOdysseyPainterEditorPaletteTreeViewItem>>::FArguments args;
     args.Padding(FMargin(0, 2, 0, 2))
         [
-            SNew(SHorizontalBox)
-            + SHorizontalBox::Slot()
-            .VAlign(VAlign_Center)
+            SNew(SVerticalBox)
+            + SVerticalBox::Slot()
             [
-                SNew(STextBlock)
-                .Text(this, &SOdysseyPainterEditorPaletteRow::GetPaletteName)
+                SNew(SHorizontalBox)
+                + SHorizontalBox::Slot()
+                .HAlign(HAlign_Fill)
+                .VAlign(VAlign_Center)
+                [
+                    SNew(STextBlock)
+                    .Text(this, &SOdysseyPainterEditorPaletteRow::GetPaletteName)
+                ]
+                + SHorizontalBox::Slot()
+                .AutoWidth()
+                .VAlign(VAlign_Center)
+                [
+                    SNew(SButton)
+                    .ButtonStyle(&FOdysseyStyle::GetWidgetStyle<FButtonStyle>("SimpleButton.NoPadding"))
+                    .ToolTipText( LOCTEXT( "PainterEditor.Palette.RemoveFromList", "Remove this palette from the list" ) )
+                    .OnClicked(mOnDeleteButtonClicked)
+                    [
+                        SNew( SImage )
+                        .Image( FAppStyle::GetBrush("Icons.Delete") )
+                        .ColorAndOpacity( FSlateColor::UseForeground() )
+                    ]
+                ]
             ]
-            + SHorizontalBox::Slot()
-            .VAlign(VAlign_Center)
+            + SVerticalBox::Slot()
+            .AutoHeight()
+            .HAlign( HAlign_Fill )
             [
                 SNew(SOdysseyPaletteSetComboBox)
                 .Palette(mPalette)
                 .CurrentSet(mSet)
                 .OnCurrentSetSelected(mOnSetChanged)
-            ]
-            + SHorizontalBox::Slot()
-            .VAlign(VAlign_Center)
-            .AutoWidth()
-            [
-                SNew(SButton)
-                .ButtonStyle(&FOdysseyStyle::GetWidgetStyle<FButtonStyle>("Button.TransparentNoPadding"))
-                .OnClicked(mOnDeleteButtonClicked)
-                [
-                    SNew( SImage )
-                    .Image( FAppStyle::GetBrush("Icons.Delete") )
-                    .ColorAndOpacity( FSlateColor::UseForeground() )
-                ]
             ]
         ];
 

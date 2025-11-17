@@ -10,6 +10,7 @@
 #include "OdysseyVectorEngine.h"
 #include "Proxies/OdysseyBrushColor.h"
 #include "OdysseyPainterEditorAnimationTimelinePosition.h"
+#include "OdysseyPainterEditorColorType.h"
 #include "OdysseyPainterEditorSource.h"
 #include "OdysseyRenderingAbility.h"
 #include <ULIS>
@@ -61,13 +62,6 @@ class UOdysseyAnimation;
 class UOdysseyAnimationPlayer;
 class UOdysseyPainterEditorAnimationOutOfPegsTool;
 class FOdysseyPainterEditorAnimationFlipSystem;
-
-UENUM()
-enum class EOdysseyPainterEditorColorType : uint8
-{
-    Raw,
-    Indexed
-};
 
 /**
  * Base class for a Painting Editor

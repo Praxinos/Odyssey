@@ -5,6 +5,7 @@
 
 #include "Misc/CommandLine.h"
 #include "Styling/CoreStyle.h"
+#include "Styling/SegmentedControlStyle.h"
 #include "Styling/SlateStyle.h"
 #include "Styling/StyleColors.h"
 #include "Styling/SlateTypes.h"
@@ -205,6 +206,17 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
         .SetOddRowBackgroundHoveredBrush(FSlateColorBrush(FStyleColors::Hover))
     );
 
+    Set( "OdysseyPalette.BadgeShape", new FSlateRoundedBoxBrush( FStyleColors::White, FVector4( 5.0f, 5.0f, 5.0f, 5.0f ) ) );
+
+    FCheckBoxStyle control_style = FCheckBoxStyle( FAppStyle::Get().GetWidgetStyle<FSegmentedControlStyle>( "SegmentedControl" ).ControlStyle )
+        .SetCheckedImage( FSlateRoundedBoxBrush( FStyleColors::Primary, CoreStyleConstants::InputFocusRadius ) )
+        .SetCheckedHoveredImage( FSlateRoundedBoxBrush( FStyleColors::PrimaryHover, CoreStyleConstants::InputFocusRadius ) )
+        .SetCheckedPressedImage( FSlateRoundedBoxBrush( FStyleColors::PrimaryPress, CoreStyleConstants::InputFocusRadius ) );
+    Set( "OdysseyPalette.Tabs", FSegmentedControlStyle( FAppStyle::Get().GetWidgetStyle<FSegmentedControlStyle>( "SegmentedControl" ) )
+         .SetControlStyle( control_style )
+         .SetFirstControlStyle( control_style )
+         .SetLastControlStyle( control_style )
+    );
 
     // OdysseyWidgets - AdvancedColorWheel
     FVector2D AdvancedColorWheelSize( 1024, 1024 );

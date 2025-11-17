@@ -62,6 +62,7 @@ void SOdysseyPainterEditorPaletteSetList::Construct(const FArguments& InArgs)
     mPaletteSets.Assign(*this, InArgs._PaletteSets);
     mCurrentColorEntry.Assign(*this, InArgs._CurrentColorEntry);
     mCurrentSet = InArgs._CurrentSet;
+    mColorType = InArgs._ColorType;
     mOnAddPaletteSet = InArgs._OnAddPaletteSet;
     mOnRemovePaletteSet = InArgs._OnRemovePaletteSet;
     mOnPaletteSetChanged = InArgs._OnPaletteSetChanged;
@@ -253,6 +254,7 @@ SOdysseyPainterEditorPaletteSetList::OnGenerateRow( TSharedPtr<FOdysseyPainterEd
                         return iItem->mPaletteSet->mSet;
                     }
                 )
+                .ColorType( mColorType )
                 .IsCurrent_Lambda(
                     [this, iItem]()
                     {

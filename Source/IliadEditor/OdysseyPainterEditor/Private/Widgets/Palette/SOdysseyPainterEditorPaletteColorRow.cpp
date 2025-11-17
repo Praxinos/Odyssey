@@ -7,11 +7,14 @@
 #include "Palette/OdysseyPaletteEntryColor.h"
 #include "OdysseyStyle.h"
 
+#define LOCTEXT_NAMESPACE "OdysseyPainterEditor"
+
 //CONSTRUCTION/DESTRUCTION----------------------------------------------- SMultiColumnTableRow
 void SOdysseyPainterEditorPaletteColorRow::Construct(const FArguments& InArgs, const TSharedRef<STableViewBase>& iTreeView)
 {
     mIsCurrent = InArgs._IsCurrent;
     mSet = InArgs._Set;
+    mColorType = InArgs._ColorType;
     mEntryColor = InArgs._Entry;
 
     SOdysseyPainterEditorPaletteEntryRow::Construct(
@@ -28,28 +31,6 @@ void SOdysseyPainterEditorPaletteColorRow::Construct(const FArguments& InArgs, c
 
 //PRIVATE API-----------------------------------------------------------
 
-TSharedRef<SWidget>
-SOdysseyPainterEditorPaletteColorRow::GenerateWidgetForColumn( const FName& InColumnName )
-{
-    if (InColumnName == "Color")
-    {
-        return GenerateColorWidget();
-    }
-
-    return SOdysseyPainterEditorPaletteEntryRow::GenerateWidgetForColumn(InColumnName);
-}
-
-TSharedRef<SWidget>
-SOdysseyPainterEditorPaletteColorRow::GenerateColorWidget()
-{
-    return SNew(SBox)
-        .Padding(FMargin(10, 2, 0, 2))
-        [
-            SNew(SColorBlock )
-            .Color(this, &SOdysseyPainterEditorPaletteColorRow::GetEntryColorAsLinear)
-        ];
-}
-
 FLinearColor SOdysseyPainterEditorPaletteColorRow::GetEntryColorAsLinear() const
 {
     return FLinearColor( mEntryColor.Get()->GetColor( mSet.Get() ) );
@@ -58,7 +39,59 @@ FLinearColor SOdysseyPainterEditorPaletteColorRow::GetEntryColorAsLinear() const
 const FSlateBrush*
 SOdysseyPainterEditorPaletteColorRow::GetIcon() const
 {
-    return FOdysseyStyle::Get().GetBrush("OdysseyPalette.EntryColor");
+    static FSlateNoResource no_brush;
+    return &no_brush;
+    //return FOdysseyStyle::Get().GetBrush("OdysseyPalette.EntryColor");
+}
+
+TSharedRef<SWidget>
+SOdysseyPainterEditorPaletteColorRow::GenerateContentWidget() //override
+{
+    return SNew( SHorizontalBox )
+
+        + SHorizontalBox::Slot()
+        .AutoWidth()
+        .VAlign( VAlign_Fill )
+        [
+            SNew( SBox )
+            .WidthOverride( 5.f + 60.f + 5.f )
+            .Padding( FMargin( 5.f, 0 ) )
+            [
+                SNew( SBorder )
+                .BorderImage( FOdysseyStyle::Get().GetBrush( "OdysseyPalette.BadgeShape" ) )
+                .BorderBackgroundColor_Lambda( [this]()
+                                               {
+                                                   return FColor( 20, 20, 20 );
+                                               } )
+                .VAlign( VAlign_Fill )
+                .HAlign( HAlign_Center )
+                [
+                    SNew( STextBlock )
+                    .Text_Lambda( [this]()
+                                  {
+                                      return ( mColorType.Get() == EOdysseyPainterEditorColorType::Indexed ) ? LOCTEXT( "PainterEditor.Palette.ColorTypeBadge-Indexed", "Indexed" ) : LOCTEXT( "PainterEditor.Palette.ColorTypeBadge-Raw", "Raw" );
+                                  } )
+                ]
+            ]
+        ]
+
+        + SHorizontalBox::Slot()
+        .AutoWidth()
+        .VAlign( VAlign_Fill )
+        [
+            SNew( SBox )
+            .WidthOverride( 5.f + 50.f + 5.f )
+            .Padding( FMargin( 5.f, 0 ) )
+            [
+                SNew( SBorder )
+                .BorderImage( FOdysseyStyle::Get().GetBrush( "OdysseyPalette.BadgeShape" ) )
+                .BorderBackgroundColor_Lambda( [this]()
+                                               {
+                                                   return GetEntryColorAsLinear();
+                                               } )
+                .VAlign( VAlign_Fill )
+            ]
+        ];
 }
 
 bool
@@ -66,3 +99,5 @@ SOdysseyPainterEditorPaletteColorRow::IsItemSelected() const
 {
     return mIsCurrent.Get();
 }
+
+#undef LOCTEXT_NAMESPACE
