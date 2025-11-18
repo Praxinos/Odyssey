@@ -426,7 +426,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_SetCellExposure()
                 mOnTransactCurrentFrame.ExecuteIfBound(selectedCells[0]->GetFrameRange().GetLowerBoundValue());
                 for (UOdysseyLayerCell* selectedCell : selectedCells)
                 {
-                    FOdysseyObjectEditorUtils::SetPropertyValue(selectedCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), FMath::Max(1, value));
+                    selectedCell->SetExposure( FMath::Max( 1, value ) );
                 }
             }
         ),
