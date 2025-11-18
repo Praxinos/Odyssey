@@ -10,6 +10,7 @@
 
 #if WITH_EDITOR
 #include "OdysseyLayerCellSelection.h"
+#include "OdysseyLayerSelection.h"
 #endif
 
 #include "OdysseyLayerStack.generated.h"
@@ -220,7 +221,7 @@ public:
     void SelectLayer( UOdysseyLayer* iLayer );
     void DeselectAllLayers();
     void DeselectLayer( UOdysseyLayer* iLayer );
-    bool IsLayerSelected( const UOdysseyLayer* iLayer ) const;
+    bool IsLayerSelected( UOdysseyLayer* iLayer ) const;
 
 public:
     //virtual int GetWidth() const { return -1; };
@@ -296,8 +297,11 @@ protected:
     UPROPERTY()
     TObjectPtr<UOdysseyLayer> CurrentLayer;
 
-    UPROPERTY()
-    USelection* LayerSelection = nullptr;
+    // Commented out. We don't use USelection anymore because it requires module UnrealEd
+    // which prevents us to compile this for runtime.
+    //UPROPERTY(Transient, NonTransactional)
+    //USelection* LayerSelection = nullptr;
+
 #endif
 
     UPROPERTY()
@@ -314,5 +318,6 @@ protected:
 private:
 #if WITH_EDITOR
     TSharedRef<FOdysseyLayerCellSelection> mCellSelection;
+    TSharedRef<FOdysseyLayerSelection> mLayerSelection;
 #endif
 };

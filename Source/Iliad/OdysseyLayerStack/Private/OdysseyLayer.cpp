@@ -1600,7 +1600,7 @@ UOdysseyLayer::PostTransacted(const FTransactionObjectEvent& iTransactionEvent)
 bool
 UOdysseyLayer::IsSelectedInEditor() const
 {
-    return GetLayerStack()->IsLayerSelected( this );
+    return GetLayerStack()->IsLayerSelected( ( UOdysseyLayer* ) this );
 }
 #endif
 

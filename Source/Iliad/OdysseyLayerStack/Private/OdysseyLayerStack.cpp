@@ -19,6 +19,7 @@ UOdysseyLayerStack::~UOdysseyLayerStack()
 UOdysseyLayerStack::UOdysseyLayerStack()
 #if WITH_EDITOR
     : mCellSelection(MakeShared<FOdysseyLayerCellSelection>(this))
+    , mLayerSelection(MakeShared<FOdysseyLayerSelection>(this))
 #endif
 {
 }
@@ -34,9 +35,10 @@ UOdysseyLayerStack::PostInitProperties()
     LayerRoot = NewObject<UOdysseyLayerRoot>(this, NAME_None, RF_Public | RF_Transactional);
 
 #if WITH_EDITOR
-    LayerSelection = USelection::CreateObjectSelection(this, NAME_None, RF_Transactional);
-    LayerSelection->SetElementSelectionSet(NewObject<UTypedElementSelectionSet>(LayerSelection, NAME_None, RF_Transactional));
-    //LayerSelection->AddToRoot();
+    // Commented out. We don't use USelection anymore because it requires module UnrealEd
+    // which prevents us to compile this for runtime.
+    //LayerSelection = USelection::CreateObjectSelection(this, NAME_None, RF_Public | RF_Transient );
+    //LayerSelection->SetElementSelectionSet(NewObject<UTypedElementSelectionSet>(LayerSelection, NAME_None, RF_Public | RF_Transient));
 #endif
 }
 
@@ -645,27 +647,27 @@ UOdysseyLayerStack::CopyLayerInternal(UOdysseyLayer* iLayer, UOdysseyLayer* iPar
 
 #if WITH_EDITOR
 bool
-UOdysseyLayerStack::IsLayerSelected( const UOdysseyLayer* iLayer ) const
+UOdysseyLayerStack::IsLayerSelected( UOdysseyLayer* iLayer ) const
 {
-    return LayerSelection->IsSelected( iLayer );
+    return mLayerSelection->IsSelected( iLayer );
 }
 
 void
 UOdysseyLayerStack::SelectLayer( UOdysseyLayer* iLayer )
 {
-    LayerSelection->Select( iLayer );
+    mLayerSelection->Select( iLayer );
 }
 
 void
 UOdysseyLayerStack::DeselectAllLayers()
 {
-    LayerSelection->DeselectAll();
+    mLayerSelection->DeselectAll();
 }
 
 void
 UOdysseyLayerStack::DeselectLayer( UOdysseyLayer* iLayer )
 {
-    LayerSelection->Deselect( iLayer );
+    mLayerSelection->Deselect( iLayer );
 }
 #endif
 
