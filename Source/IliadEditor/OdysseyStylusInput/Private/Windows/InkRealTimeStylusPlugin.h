@@ -6,11 +6,9 @@
 #include "CoreMinimal.h"
 #include "Windows/WindowsHWrapper.h"
 #include "Windows/AllowWindowsPlatformTypes.h"
-#include "Windows/PreWindowsApi.h"
-#include "Microsoft/COMPointer.h"
+    #include "Microsoft/COMPointer.h"
     #include <guiddef.h>
     #include <RTSCom.h>
-#include "Windows/PostWindowsApi.h"
 #include "Windows/HideWindowsPlatformTypes.h"
 
 #include "IStylusState.h"

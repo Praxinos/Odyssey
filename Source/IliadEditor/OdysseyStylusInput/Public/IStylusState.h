@@ -44,6 +44,12 @@ public:
         , Pressure(InPressure), TangentPressure(InTanPressure), Size(InSize)
         , IsDown(InDown), IsInverted(InInverted)
     {
+        check( FMath::IsWithinInclusive( TiltX, -90.f, 90.f ) );
+        check( FMath::IsWithinInclusive( TiltY, -90.f, 90.f ) );
+        check( FMath::IsWithinInclusive( Twist, 0.f, 360.f ) );
+        check( FMath::IsWithinInclusive( Pressure, 0.f, 1.f ) );
+        check( FMath::IsWithinInclusive( TangentPressure, 0.f, 1.f ) );
+
         double tiltx_rad = FMath::DegreesToRadians(TiltX);
         double tilty_rad = FMath::DegreesToRadians(TiltY);
 
@@ -69,6 +75,10 @@ public:
         Tilt = FMath::RadiansToDegrees(tilt_rad);
 
         Altitude = FMath::Cos(tilt_rad);
+
+        check( FMath::IsWithinInclusive( Tilt, 0.f, 90.f ) );
+        check( FMath::IsWithinInclusive( Altitude, 0.f, 1.f ) );
+        check( FMath::IsWithinInclusive( Azimuth, 0.f, 360.f ) );
     }
 
     FStylusState(FVector2D InPosition, float InZ, unsigned int InTimer, double InAzimuth, double InAltitude, float InTwist,
@@ -78,6 +88,12 @@ public:
         , Pressure(InPressure), TangentPressure(InTanPressure), Size(InSize)
         , IsDown(InDown), IsInverted(InInverted)
     {
+        check( FMath::IsWithinInclusive( Altitude, 0.f, 1.f ) );
+        check( FMath::IsWithinInclusive( Azimuth, 0.f, 360.f ) );
+        check( FMath::IsWithinInclusive( Twist, 0.f, 360.f ) );
+        check( FMath::IsWithinInclusive( Pressure, 0.f, 1.f ) );
+        check( FMath::IsWithinInclusive( TangentPressure, 0.f, 1.f ) );
+
         double tilt_rad = FMath::Acos(Altitude);
         Tilt = FMath::RadiansToDegrees(tilt_rad);
 
@@ -88,6 +104,10 @@ public:
         double siny = FMath::Sin(azimuth_rad) * dist;
         TiltX = FMath::RadiansToDegrees(FMath::Asin(cosx));
         TiltY = FMath::RadiansToDegrees(FMath::Asin(siny));
+
+        check( FMath::IsWithinInclusive( Tilt, 0.f, 90.f ) );
+        check( FMath::IsWithinInclusive( TiltX, -90.f, 90.f ) );
+        check( FMath::IsWithinInclusive( TiltY, -90.f, 90.f ) );
     }
 
     FStylusState(const FStylusState& Other)
