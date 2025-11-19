@@ -10,6 +10,7 @@
 #include "Tools/RasterBaseTool/OdysseyPainterEditorRasterBaseTool.h"
 #include "OdysseyBlendParameters.h"
 #include "OdysseyPaintEngine.h"
+#include "IPropertyTypeCustomization.h"
 
 #include "OdysseyPainterEditorRasterLiquifyTool.generated.h"
 
@@ -29,6 +30,41 @@ enum class ELiquifyToolMode : uint8
     Adjust
 };
 
+USTRUCT(BlueprintType)
+struct FStylusPressureOptions
+{
+    GENERATED_BODY()
+
+    public:
+        FStylusPressureOptions()
+            : UseSize( false )
+            , UseStrength( false )
+            , UseHardness( false )
+        {
+        }
+
+        UPROPERTY( EditAnywhere
+                 , meta = ( DisplayName = "Size"
+                          , ToolTip = "Stylus pressure influences size"
+                          , EditCondition = "(UseStylusPressure == true)"
+                          , EditConditionHides ) )
+        bool UseSize;
+
+        UPROPERTY( EditAnywhere
+                 , meta = ( DisplayName = "Strength"
+                          , ToolTip = "Stylus pressure influences strength"
+                          , EditCondition = "(UseStylusPressure == true)"
+                          , EditConditionHides ) )
+        bool UseStrength;
+
+        UPROPERTY( EditAnywhere
+                 , meta = ( DisplayName = "Strength"
+                          , ToolTip = "Stylus pressure influences hardness"
+                          , EditCondition = "(UseStylusPressure == true)"
+                          , EditConditionHides ) )
+        bool UseHardness;
+};
+
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public UOdysseyPainterEditorRasterBaseTool
 {
@@ -37,6 +73,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
     public:
         struct FAlteredImage
         {
+            ~FAlteredImage();
             FAlteredImage( TSharedPtr<FOdysseyRasterBlock> iSourceRasterBlock );
 
             TSharedPtr<::ULIS::FBlock> copiedSourceBlock;
@@ -54,11 +91,10 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
 
             bool mapped;
             ::ULIS::FVec2I coords;
-            ::ULIS::FVec2I newCoords;
             double distanceToCenter;
-            float angle;
-            FVector2D currToPrev; // temp for rotations
-            //uint32 offset;
+            double angle;
+            // TODO: try with floats instead of doubles
+            FVector2D currToPrev; // temporarily store flow
         };
 
         struct FFlow
@@ -68,10 +104,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
             {
             }
 
+            // TODO: try with floats instead of doubles
             FVector2D currToPrev;
         };
-
-        typedef std::function<void(FDistortion&,::ULIS::FVec2D&,::ULIS::FVec2D&)> FLiquifyFunction;
 
     public:
         // Destructor
@@ -108,6 +143,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
         virtual FText GetTooltip() const override;
 
     protected:
+        double GetStrength();
+        double GetHardness();
         void FetchSourceImages();
         void MakeDistortionMap();
         void MakeFlowMap();
@@ -138,6 +175,17 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
         bool End();
 
     public:
+        UPROPERTY( EditAnywhere
+                 , Category = "Liquify Tool"
+                 , meta = ( InlineEditConditionToggle ) )
+        bool UseStylusPressure;
+
+        UPROPERTY( EditAnywhere
+                 , Category = "Liquify Tool"
+                 , meta = ( ToolTip = "Increase or decrease displacement"
+                          , EditCondition = "(UseStylusPressure == true)" ) )
+        FStylusPressureOptions StylusPressureOptions;
+
         UPROPERTY( EditAnywhere
                  , Category = "Liquify Tool"
                  , meta = ( ClampMin = "1"
@@ -181,7 +229,11 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
 
         UPROPERTY( EditAnywhere
                  , Category = "Liquify Tool"
-                 , meta = ( Units = "Percent"
+                 , meta = ( DisplayName = "Strength"
+                          , ToolTip = "Increase or decrease displacement"
+                          , EditCondition = "(Mode == ELiquifyToolMode::Adjust)"
+                          , EditConditionHides
+                          , Units = "Percent"
                           , ClampMin = "0"
                           , UIMin = "0"
                           , ClampMax = "100"
@@ -189,6 +241,33 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
                           , Delta = "1"
                           , Multiple = "1" ) )
         int32 AdjustmentStrength;
+
+        UPROPERTY( EditAnywhere
+                 , Category = "Liquify Tool"
+                 , meta = ( InlineEditConditionToggle ) )
+        bool bHasAngle;
+
+        UPROPERTY( EditAnywhere
+                 , Category = "Liquify Tool"
+                 , meta = ( EditCondition = "bHasAngle"
+                          , Units = "Degrees"
+                          , ClampMin = "-180"
+                          , UIMin = "-180"
+                          , ClampMax = "180"
+                          , UIMax = "180"
+                          , Delta = "1"
+                          , Multiple = "1"  ) )
+        int32 Angle;
+
+        UFUNCTION( BlueprintCallable
+                 , Category = "Liquify Tool"
+                 , CallInEditor )
+        void Apply();
+
+        UFUNCTION( BlueprintCallable
+                 , Category = "Liquify Tool"
+                 , CallInEditor )
+        void Reset();
 
     private:
         TSharedPtr<FOdysseyRasterBlock> GetRasterBlockFromEditor(bool iCreate) const;
@@ -215,4 +294,5 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
         bool bIsMouseLeftButtonDown = false;
         FVector2D mPreviousPointInTexture;
         ::ULIS::FRectI mEditingArea;
+        double mPressure;
 };

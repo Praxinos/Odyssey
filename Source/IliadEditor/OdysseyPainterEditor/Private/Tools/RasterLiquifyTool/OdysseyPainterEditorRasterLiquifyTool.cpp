@@ -31,6 +31,11 @@
 //#define ROTATIONSPEEDINRADIANS 0.0872665f // five degrees
 #define ROTATIONSPEEDINRADIANS 0.0349066f // 2 degrees
 
+UOdysseyPainterEditorRasterLiquifyTool::FAlteredImage::~FAlteredImage()
+{
+    paintEngine.RasterBlock( nullptr );
+}
+
 UOdysseyPainterEditorRasterLiquifyTool::FAlteredImage::FAlteredImage( TSharedPtr<FOdysseyRasterBlock> iSourceRasterBlock )
     : context( IULISLoaderModule::StaticFindOrAddContext( ::ULIS::eFormat::Format_RGBA8 ) )
 {
@@ -65,6 +70,7 @@ UOdysseyPainterEditorRasterLiquifyTool::UOdysseyPainterEditorRasterLiquifyTool()
     , OnlyReferToEditngArea ( true )
     , AdjustmentStrength( 100 )
     , bIsMouseLeftButtonDown ( false )
+    , mPressure ( 1.0f )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Liquify64");
 }
@@ -183,41 +189,6 @@ UOdysseyPainterEditorRasterLiquifyTool::OnMouseDown(const FOdysseyPoint& iPointI
 
     return false;
 }
-
-/*
-TSharedPtr<::ULIS::FBlock>
-UOdysseyPainterEditorRasterLiquifyTool::GetCurrentLayerBlock() const
-{
-    UOdysseyLayerStack* layerStack = GetEditor()->LayerStack();
-    if (!layerStack)
-        return nullptr;
-
-    UOdysseyLayer* layer = layerStack->GetCurrentLayer();
-    if (!layer)
-        return nullptr;
-
-    FFrameNumber currentFrame(0);
-    UOdysseyAnimationPlayer* player = GetEditor()->GetAnimationPlayer();
-    if (player)
-        currentFrame = player->GetCurrentFrame().FrameNumber;
-
-    TStrongObjectPtr<UTextureRenderTarget2D> renderTarget(NewObject<UTextureRenderTarget2D>());
-    FIntRect rect = layer->GetDefaultRenderRect();
-    renderTarget->InitAutoFormat(rect.Width(), rect.Height());
-    layer->Render_GameThread(renderTarget.Get(), currentFrame, EOdysseyRenderingType::Render);
-
-    FImage OutImage;
-    if (!FImageUtils::GetRenderTargetImage(renderTarget.Get(), OutImage))
-        return nullptr;
-
-    ::ULIS::eFormat format = ULISFormatForRawImageFormat(OutImage.Format);
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
-    TSharedPtr<::ULIS::FBlock> block = MakeShareable(new ::ULIS::FBlock( rect.Width(), rect.Height(), format ));
-    CopyImageToBlock(OutImage, block.Get());
-
-    return block;
-}
-*/
 
 void
 UOdysseyPainterEditorRasterLiquifyTool::FetchSourceImages()
@@ -378,27 +349,42 @@ UOdysseyPainterEditorRasterLiquifyTool::Flow( const FVector2D& iPrevCenter
                 uint32 distortionIndex = y * ((Radius*2)+1) + x;
                 FDistortion& distortion = mDistortionMap[distortionIndex];
 
-                ::ULIS::FVec2I absoluteCoords = ::ULIS::FVec2I( ((int32)iCurrCenter.X) + distortion.coords.x
-                                                              , ((int32)iCurrCenter.Y) + distortion.coords.y );
-                uint32 offset = ( absoluteCoords.y * assetWidth ) + absoluteCoords.x;
-
-                if( OnlyReferToEditngArea )
+                if( distortion.mapped )
                 {
-                    ::ULIS::FVec2I absoluteExpectedCoords = ::ULIS::FVec2I( absoluteCoords.x + distortion.currToPrev.X
-                                                                          , absoluteCoords.y + distortion.currToPrev.Y );
+                    ::ULIS::FVec2I absoluteCoords = ::ULIS::FVec2I( ((int32)iCurrCenter.X) + distortion.coords.x
+                                                                  , ((int32)iCurrCenter.Y) + distortion.coords.y );
+                    uint32 offset = ( absoluteCoords.y * assetWidth ) + absoluteCoords.x;
 
-                    if( mEditingArea.HitTest( absoluteExpectedCoords ) == true )
+                    if( OnlyReferToEditngArea )
+                    {
+                        ::ULIS::FVec2I absoluteExpectedCoords = ::ULIS::FVec2I( absoluteCoords.x + distortion.currToPrev.X
+                                                                              , absoluteCoords.y + distortion.currToPrev.Y );
+
+                        if( mEditingArea.HitTest( absoluteExpectedCoords ) == true )
+                        {
+                            mFlowMap[offset].currToPrev = distortion.currToPrev;
+                        }
+                    }
+                    else
                     {
                         mFlowMap[offset].currToPrev = distortion.currToPrev;
                     }
                 }
-                else
-                {
-                    mFlowMap[offset].currToPrev = distortion.currToPrev;
-                }
             }
         }
     });
+}
+
+double
+UOdysseyPainterEditorRasterLiquifyTool::GetStrength()
+{
+    return UseStylusPressure && StylusPressureOptions.UseStrength ? mPressure : Strength / 100;
+}
+
+double
+UOdysseyPainterEditorRasterLiquifyTool::GetHardness()
+{
+    return UseStylusPressure && StylusPressureOptions.UseHardness ? mPressure : Hardness / 100;
 }
 
 void UOdysseyPainterEditorRasterLiquifyTool::Tick(float iDeltaTime)
@@ -409,8 +395,8 @@ void UOdysseyPainterEditorRasterLiquifyTool::Tick(float iDeltaTime)
                                                      , mMousePosition.Y - Radius
                                                      , (Radius*2) + 1
                                                      , (Radius*2) + 1 ) ;
-        double strength = (double) Strength / 100;
-        double hardness = (double) Hardness / 100;
+        double strength = GetStrength();
+        double hardness = GetHardness();
 
         switch( Mode )
         {
@@ -522,10 +508,49 @@ UOdysseyPainterEditorRasterLiquifyTool::ApplyFlow( FAlteredImage& iAlteredImage
 
     iAlteredImage.context.ConvertFormat( *iAlteredImage.destinationBlock.Get()
                                        , *iAlteredImage.paintEngine.PaintBlock().Get()
-                                       , roi );
+                                       , roi
+                                       , ::ULIS::FVec2I( roi.x, roi.y ) );
     iAlteredImage.context.Finish();
 
     iAlteredImage.paintEngine.PaintBlock()->Dirty( roi );
+}
+
+void
+UOdysseyPainterEditorRasterLiquifyTool::Apply()
+{
+    // reset flow map
+    MakeFlowMap();
+    // use current version of the images as source  images
+    FetchSourceImages();
+}
+
+void
+UOdysseyPainterEditorRasterLiquifyTool::Reset()
+{
+    uint32 threadCount = FPlatformMisc::NumberOfCoresIncludingHyperthreads();
+    double adjustment = ( double ) AdjustmentStrength / 100;
+    uint32 assetWidth  = mAlteredImageArray.Num() ? mAlteredImageArray[0].copiedSourceBlock->Width()  : 0;
+    uint32 assetHeight = mAlteredImageArray.Num() ? mAlteredImageArray[0].copiedSourceBlock->Height() : 0;
+
+    if( assetWidth && assetHeight )
+    {
+        // reset flow map
+        MakeFlowMap();
+
+        // then restore source image
+        for( FAlteredImage& alteredImage : mAlteredImageArray )
+        {
+            alteredImage.context.ConvertFormat( *alteredImage.copiedSourceBlock
+                                              , *alteredImage.paintEngine.PaintBlock() );
+
+            alteredImage.context.Finish();
+
+            alteredImage.paintEngine.PaintBlock()->Dirty();
+            alteredImage.paintEngine.Update( FOdysseyBlendParameters() );
+        }
+
+        FetchSourceImages();
+    }
 }
 
 void
@@ -756,7 +781,7 @@ void UOdysseyPainterEditorRasterLiquifyTool::PropertyChanged(const FName& iPrope
                      , alteredImage.copiedSourceBlock->Rect()
                      , true );
 
-            alteredImage.paintEngine.Commit( FOdysseyBlendParameters() );
+            alteredImage.paintEngine.Update( FOdysseyBlendParameters() );
         }
     }
 
