@@ -747,6 +747,15 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set("Shapes.Ellipse", new IMAGE_BRUSH_SVG("OdysseyShapes/ellipse", mIcon16x16));
     Set("Shapes.Bezier", new IMAGE_BRUSH_SVG("OdysseyShapes/bezier", mIcon16x16));
 
+    Set("Liquify.Push", new IMAGE_BRUSH_SVG("PainterEditor/ToolsTab/liquify_tool_push", mIcon16x16));
+    Set("Liquify.Twirl", new IMAGE_BRUSH_SVG("PainterEditor/ToolsTab/liquify_tool_twirl", mIcon16x16));
+    Set("Liquify.Pinch", new IMAGE_BRUSH_SVG("PainterEditor/ToolsTab/liquify_tool_pinch", mIcon16x16));
+    Set("Liquify.Expand", new IMAGE_BRUSH_SVG("PainterEditor/ToolsTab/liquify_tool_expand", mIcon16x16));
+    Set("Liquify.Crystals", new IMAGE_BRUSH_SVG("PainterEditor/ToolsTab/liquify_tool_crystals", mIcon16x16));
+    Set("Liquify.Edge", new IMAGE_BRUSH_SVG("PainterEditor/ToolsTab/liquify_tool_edge", mIcon16x16));
+    Set("Liquify.Reconstruct", new IMAGE_BRUSH_SVG("PainterEditor/ToolsTab/liquify_tool_reconstruct", mIcon16x16));
+    Set("Liquify.Adjust", new IMAGE_BRUSH_SVG("PainterEditor/ToolsTab/liquify_tool_adjust", mIcon16x16));
+
     Set("ViewportDrawingEditor.MainTab.ModeTool.Selection", new IMAGE_BRUSH_SVG("OdysseyViewportDrawing/SelectionModeTool", mIcon16x16));
     Set("ViewportDrawingEditor.MainTab.ModeTool.Paint", new IMAGE_BRUSH_SVG("OdysseyViewportDrawing/PaintModeTool", mIcon16x16));
 

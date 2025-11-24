@@ -20,6 +20,7 @@
 #include "Tools/RasterDrawingTool/OdysseyBlendParametersOverrides.h"
 #include "FreehandShape/OdysseyFreehandShapeOverrides.h"
 #include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingToolOverrides.h"
+#include "Tools/RasterLiquifyTool/OdysseyLiquifyMode.h"
 #include "ActorFactories/ActorFactory.h"
 #include "EditorModeRegistry.h"
 #include "OdysseyViewportDrawingEditorEdMode.h"
@@ -250,6 +251,7 @@ void
 FOdysseyPainterEditorModule::RegisterDetailCustomizations()
 {
     FOdysseyShapes::RegisterDetailCustomization();
+    FOdysseyLiquifyMode::RegisterDetailCustomization();
 
     FOdysseyPainterEditorAnimationFlipSystem::RegisterDetailCustomization();
     FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
@@ -259,6 +261,7 @@ FOdysseyPainterEditorModule::RegisterDetailCustomizations()
 void
 FOdysseyPainterEditorModule::UnregisterDetailCustomization()
 {
+    FOdysseyLiquifyMode::UnregisterDetailCustomization();
     FOdysseyShapes::UnregisterDetailCustomization();
     FOdysseyPainterEditorAnimationFlipSystem::UnregisterDetailCustomization();
 }
