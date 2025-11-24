@@ -72,6 +72,7 @@ UOdysseyPainterEditorRasterLiquifyTool::UOdysseyPainterEditorRasterLiquifyTool()
     , mHiddenModeAsEnum ( Mode.Get() )
     , Strength ( 100 )
     , Hardness ( 0 )
+    , TwirlDirection( EOdysseyLiquifyTwirlDirection::Clockwise )
     , OnlyReferToEditngArea ( true )
     , AdjustmentStrength( 100 )
     , bIsMouseLeftButtonDown ( false )
@@ -255,6 +256,8 @@ UOdysseyPainterEditorRasterLiquifyTool::Flow( const FVector2D& iPrevCenter
     FVector2D motion = iPrevCenter - iCurrCenter;
     uint32 assetWidth = mAlteredImageArray[0].copiedSourceBlock->Width();
     uint32 assetHeight = mAlteredImageArray[0].copiedSourceBlock->Height();
+    double twirlDirection = ( TwirlDirection == EOdysseyLiquifyTwirlDirection::Clockwise ) ? -1.0f
+                                                                                           :  1.0f;
 
     ParallelFor( threadCount, [&]( int32 coreID )
     {
@@ -271,7 +274,9 @@ UOdysseyPainterEditorRasterLiquifyTool::Flow( const FVector2D& iPrevCenter
                                                                   , ((int32)iCurrCenter.Y) + distortion.coords.y );
                     FVector2D distortionDstCoords = FVector2D( (double) distortion.coords.x
                                                              , (double) distortion.coords.y );
-                    double factor = 1.0f - ( distortion.distanceToCenter / Radius ); // <---- can be precomputed
+                    double dist = distortion.distanceToCenter;
+                    double vdist = ::ULIS::FMath::Max( (double) 0.0f, dist -  (iHardness * Radius ) );
+                    double factor = 1.0f - ( vdist / Radius ); // <---- can be precomputed
                     FVector2D newPosition = FVector2D( 0.0f, 0.0f );
 
                     switch( Mode.Get() )
@@ -306,8 +311,8 @@ UOdysseyPainterEditorRasterLiquifyTool::Flow( const FVector2D& iPrevCenter
 
                         case EOdysseyLiquifyMode::Twirl :
                         {
-                            double cosAngle = cos( ROTATIONSPEEDINRADIANS * factor * iStrength );
-                            double sinAngle = sin( ROTATIONSPEEDINRADIANS * factor * iStrength );
+                            double cosAngle = cos( ROTATIONSPEEDINRADIANS * factor * iStrength * twirlDirection );
+                            double sinAngle = sin( ROTATIONSPEEDINRADIANS * factor * iStrength * twirlDirection );
                             // Note: can be precomputed
                             FVector2D distortionSrcCoords  = FVector2D( ( distortionDstCoords.X * cosAngle ) - ( distortionDstCoords.Y * sinAngle )
                                                                       , ( distortionDstCoords.X * sinAngle ) + ( distortionDstCoords.Y * cosAngle ) );
@@ -810,13 +815,16 @@ void UOdysseyPainterEditorRasterLiquifyTool::PropertyChanged( const FName& iProp
         }
     }
 
-    if( ( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorRasterLiquifyTool, Mode   ) ) )
+    // Caution: FOdysseyLiquifyMode is a struct in order to have a customization in the details view.
+    // so we need to compare with iMemberPropertyName instead of iPropertyName
+    if( ( iMemberPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorRasterLiquifyTool, Mode   ) ) )
     {
         mHiddenModeAsEnum = Mode.Get();
+
+        MakeDistortionMap();
     }
 
-    if( ( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorRasterLiquifyTool, Mode   ) )
-     || ( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorRasterLiquifyTool, Radius ) ) )
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorRasterLiquifyTool, Radius ) )
     {
         MakeDistortionMap();
     }

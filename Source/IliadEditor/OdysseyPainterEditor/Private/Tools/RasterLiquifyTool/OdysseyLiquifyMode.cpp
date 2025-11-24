@@ -46,7 +46,8 @@ FOdysseyLiquifyModeDetailCustomization::CustomizeChildren( TSharedRef<IPropertyH
         SNew( SSegmentedControl<EOdysseyLiquifyMode> )
               .SupportsEmptySelection( false )
               .SupportsMultiSelection( false )
-              .UniformPadding( FMargin( 2, 0, 2, 0 ) )
+              //.UniformPadding( FMargin( 2, 0, 2, 0 ) )
+              .UniformPadding( FMargin( 0, 0, 0, 0 ) )
               .Value( this, &FOdysseyLiquifyModeDetailCustomization::GetSelectedMode)
               .OnValueChecked(this, &FOdysseyLiquifyModeDetailCustomization::OnModeSelected);
 
