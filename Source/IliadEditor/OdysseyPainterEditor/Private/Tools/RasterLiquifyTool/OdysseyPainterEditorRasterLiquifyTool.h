@@ -10,25 +10,14 @@
 #include "Tools/RasterBaseTool/OdysseyPainterEditorRasterBaseTool.h"
 #include "OdysseyBlendParameters.h"
 #include "OdysseyPaintEngine.h"
-#include "IPropertyTypeCustomization.h"
+#include "OdysseyLiquifyMode.h"
 
 #include "OdysseyPainterEditorRasterLiquifyTool.generated.h"
 
 class FOdysseyPaintEngine;
 class FOdysseyPainterEditorRasterLiquifyToolHUD;
 
-UENUM()
-enum class ELiquifyToolMode : uint8
-{
-    Push,
-    Twirl,
-    Pinch,
-    Expand,
-    Crystals,
-    Edge,
-    Reconstruct,
-    Adjust
-};
+
 
 USTRUCT(BlueprintType)
 struct FStylusPressureOptions
@@ -71,10 +60,15 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
     GENERATED_BODY()
 
     public:
+        // use floats instead of doubles to save some space. We may want to use double some day so we create
+        // a type that we can change easily.
+        typedef FVector2f FFlow;
+
         struct FAlteredImage
         {
             ~FAlteredImage();
-            FAlteredImage( TSharedPtr<FOdysseyRasterBlock> iSourceRasterBlock );
+            FAlteredImage( TSharedPtr<FOdysseyRasterBlock> iSourceRasterBlock
+                         , TSharedPtr<::ULIS::FBlock> iMaskBlock );
 
             TSharedPtr<::ULIS::FBlock> copiedSourceBlock;
             TSharedPtr<::ULIS::FBlock> destinationBlock;
@@ -93,19 +87,29 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
             ::ULIS::FVec2I coords;
             double distanceToCenter;
             double angle;
-            // TODO: try with floats instead of doubles
-            FVector2D currToPrev; // temporarily store flow
+
+            FFlow currToPrev; // temporarily store flow
         };
 
-        struct FFlow
+        struct FFlowMap
         {
-            FFlow()
-            : currToPrev ( 0.0f, 0.0f )
+            void Empty()
             {
+                currToPrevBuffer.Empty();
             }
 
-            // TODO: try with floats instead of doubles
-            FVector2D currToPrev;
+            void SetSize( uint32 iWidth, uint32 iHeight )
+            {
+                width = iWidth;
+                height = iHeight;
+
+                currToPrevBuffer.SetNum( width * height );
+            }
+
+            // use floats instead of doubles to save some space
+            TArray<FFlow> currToPrevBuffer;
+            uint32 width;
+            uint32 height;
         };
 
     public:
@@ -199,7 +203,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
 
         UPROPERTY( EditAnywhere
                  , Category = "Liquify Tool" )
-        ELiquifyToolMode Mode;
+        FOdysseyLiquifyMode Mode;
+        EOdysseyLiquifyMode mHiddenModeAsEnum;
 
         UPROPERTY( EditAnywhere
                  , Category = "Liquify Tool"
@@ -231,7 +236,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
                  , Category = "Liquify Tool"
                  , meta = ( DisplayName = "Strength"
                           , ToolTip = "Increase or decrease displacement"
-                          , EditCondition = "(Mode == ELiquifyToolMode::Adjust)"
+                          , EditCondition = "(mHiddenModeAsEnum == ELiquifyToolMode::Adjust)"
                           , EditConditionHides
                           , Units = "Percent"
                           , ClampMin = "0"
@@ -286,8 +291,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
         // the array will be used when this tool will be made multi-layer compatible
         TArray<FAlteredImage> mAlteredImageArray;
         TArray<FDistortion> mDistortionMap;
-        TArray<FFlow> mFlowMap;
-
+        FFlowMap mFlowMap;
+        // this flow map will be used for undos. It allows us to save only the portion that has changed
+        FFlowMap mFlowMapBackup;
         double mPathCoveredDistance;
         FVector2D mMouseAtDown;
         FVector2D mMousePosition;

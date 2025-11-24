@@ -3,6 +3,7 @@
 
 #include "Tools/RasterLiquifyTool/OdysseyPainterEditorRasterLiquifyTool.h"
 #include "Tools/RasterLiquifyTool/OdysseyPainterEditorRasterLiquifyToolHUD.h"
+#include "Tools/RasterLiquifyTool/OdysseyPainterEditorRasterLiquifyToolUndo.h"
 #include "OdysseyMediaRaster.h"
 #include "Toolkits/BaseToolkit.h"
 
@@ -34,9 +35,11 @@
 UOdysseyPainterEditorRasterLiquifyTool::FAlteredImage::~FAlteredImage()
 {
     paintEngine.RasterBlock( nullptr );
+    paintEngine.SetMaskBlock( nullptr );
 }
 
-UOdysseyPainterEditorRasterLiquifyTool::FAlteredImage::FAlteredImage( TSharedPtr<FOdysseyRasterBlock> iSourceRasterBlock )
+UOdysseyPainterEditorRasterLiquifyTool::FAlteredImage::FAlteredImage( TSharedPtr<FOdysseyRasterBlock> iSourceRasterBlock
+                                                                    , TSharedPtr<::ULIS::FBlock> iMaskBlock )
     : context( IULISLoaderModule::StaticFindOrAddContext( ::ULIS::eFormat::Format_RGBA8 ) )
 {
     TSharedPtr<::ULIS::FBlock> sourceBlock = iSourceRasterBlock->GetBlock();
@@ -53,6 +56,7 @@ UOdysseyPainterEditorRasterLiquifyTool::FAlteredImage::FAlteredImage( TSharedPtr
                                                   , ::ULIS::eFormat::Format_RGBA8 );
 
     paintEngine.RasterBlock( iSourceRasterBlock );
+    paintEngine.SetMaskBlock( iMaskBlock );
 }
 
 //--------------------------------------------------------------------------------------
@@ -64,7 +68,8 @@ UOdysseyPainterEditorRasterLiquifyTool::~UOdysseyPainterEditorRasterLiquifyTool(
 UOdysseyPainterEditorRasterLiquifyTool::UOdysseyPainterEditorRasterLiquifyTool()
     : mLiquifyHUD( MakeShared<FOdysseyPainterEditorRasterLiquifyToolHUD>( this ) )
     , Radius ( 40 )
-    , Mode ( ELiquifyToolMode::Push )
+    , Mode ()
+    , mHiddenModeAsEnum ( Mode.Get() )
     , Strength ( 100 )
     , Hardness ( 0 )
     , OnlyReferToEditngArea ( true )
@@ -93,18 +98,14 @@ UOdysseyPainterEditorRasterLiquifyTool::Load()
 
     rasterSelection->OnChanged().AddUObject(this, &UOdysseyPainterEditorRasterLiquifyTool::OnRasterSelectionChanged);
 
+    mHUD->AddElement( rasterSelection->GetHUD() );
+    mHUD->AddElement( mLiquifyHUD );
+
     FetchSourceImages();
     MakeDistortionMap();
     MakeFlowMap();
 
-//    if (!rasterSelection->IsEmpty())
-//        mPaintEngine.SetMaskBlock(rasterSelection->GetBlock());
-
-    mHUD->AddElement(rasterSelection->GetHUD());
-
     mLiquifyHUD->Reset();
-
-    mHUD->AddElement( mLiquifyHUD );
 }
 
 void
@@ -112,17 +113,14 @@ UOdysseyPainterEditorRasterLiquifyTool::Unload()
 {
     TSharedPtr<FOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
 
-     // TODO: what to do when the tool is unloaded ?
-    //mPaintEngine.RasterBlock(nullptr);
-    //mPaintEngine.SetMaskBlock(nullptr);
+     // TODO: what to do when the tool is unloaded ? commit changes or not ?
+
+    mAlteredImageArray.Empty();
 
     rasterSelection->OnChanged().RemoveAll(this);
 
     mHUD->RemoveElement( mLiquifyHUD );
     mHUD->RemoveElement( rasterSelection->GetHUD() );
-
-//    mHUD->RemoveElement(rasterSelection->GetHUD());
-//    mHUD->RemoveElement(mShapeHUD);
 
     UOdysseyPainterEditorTool::Unload();
 }
@@ -179,6 +177,8 @@ UOdysseyPainterEditorRasterLiquifyTool::OnMouseDown(const FOdysseyPoint& iPointI
     {
         bIsMouseLeftButtonDown = true;
 
+        mFlowMapBackup = mFlowMap;
+
         mEditingArea = ::ULIS::FRectI::FromXYWH( iPointInTexture.x - Radius
                                                , iPointInTexture.y - Radius
                                                , (Radius*2) + 1
@@ -193,10 +193,13 @@ UOdysseyPainterEditorRasterLiquifyTool::OnMouseDown(const FOdysseyPoint& iPointI
 void
 UOdysseyPainterEditorRasterLiquifyTool::FetchSourceImages()
 {
+    TSharedPtr<FOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
     TSharedPtr<FOdysseyRasterBlock> srcRasterBlock = GetRasterBlockFromEditor(false);
 
+    TSharedPtr<::ULIS::FBlock> maskBlock = ( rasterSelection->IsEmpty() == false ) ? rasterSelection->GetBlock() : nullptr;
+
     mAlteredImageArray.Empty();
-    mAlteredImageArray.Emplace( srcRasterBlock );
+    mAlteredImageArray.Emplace( srcRasterBlock, maskBlock );
 }
 
 void
@@ -206,7 +209,7 @@ UOdysseyPainterEditorRasterLiquifyTool::MakeFlowMap()
     TSharedPtr<::ULIS::FBlock> srcBlock = srcRasterBlock->GetBlock();
 
     mFlowMap.Empty();
-    mFlowMap.SetNum( srcBlock->Width() * srcBlock->Height() );
+    mFlowMap.SetSize( srcBlock->Width(), srcBlock->Height() );
 }
 
 void
@@ -271,15 +274,15 @@ UOdysseyPainterEditorRasterLiquifyTool::Flow( const FVector2D& iPrevCenter
                     double factor = 1.0f - ( distortion.distanceToCenter / Radius ); // <---- can be precomputed
                     FVector2D newPosition = FVector2D( 0.0f, 0.0f );
 
-                    switch( Mode )
+                    switch( Mode.Get() )
                     {
-                        case ELiquifyToolMode::Push :
+                        case EOdysseyLiquifyMode::Push :
                         {
                             newPosition = distortionDstCoords + ( motion * factor );
                         }
                         break;
 
-                        case ELiquifyToolMode::Expand :
+                        case EOdysseyLiquifyMode::Expand :
                         {
                             double cosAngle = cos( distortion.angle );
                             double sinAngle = sin( distortion.angle );
@@ -290,7 +293,7 @@ UOdysseyPainterEditorRasterLiquifyTool::Flow( const FVector2D& iPrevCenter
                         }
                         break;
 
-                        case ELiquifyToolMode::Pinch :
+                        case EOdysseyLiquifyMode::Pinch :
                         {
                             double cosAngle = cos( distortion.angle );
                             double sinAngle = sin( distortion.angle );
@@ -301,7 +304,7 @@ UOdysseyPainterEditorRasterLiquifyTool::Flow( const FVector2D& iPrevCenter
                         }
                         break;
 
-                        case ELiquifyToolMode::Twirl :
+                        case EOdysseyLiquifyMode::Twirl :
                         {
                             double cosAngle = cos( ROTATIONSPEEDINRADIANS * factor * iStrength );
                             double sinAngle = sin( ROTATIONSPEEDINRADIANS * factor * iStrength );
@@ -330,11 +333,12 @@ UOdysseyPainterEditorRasterLiquifyTool::Flow( const FVector2D& iPrevCenter
                          , SRCOFFSETBOTTOMRIGHT = SRCOFFSETTOPLEFT + 1 + (assetWidth)
                          , SRCOFFSETBOTTOMLEFT  = SRCOFFSETTOPLEFT + (assetWidth);
 
-                    FVector2D v0 = (mFlowMap[SRCOFFSETTOPRIGHT   ].currToPrev - mFlowMap[SRCOFFSETTOPLEFT   ].currToPrev) * deltaX + mFlowMap[SRCOFFSETTOPLEFT   ].currToPrev;
-                    FVector2D v1 = (mFlowMap[SRCOFFSETBOTTOMRIGHT].currToPrev - mFlowMap[SRCOFFSETBOTTOMLEFT].currToPrev) * deltaX + mFlowMap[SRCOFFSETBOTTOMLEFT].currToPrev;
-                    FVector2D vf = ( v1 - v0 ) * deltaY + v0;
+                    FFlow v0 = (mFlowMap.currToPrevBuffer[SRCOFFSETTOPRIGHT   ] - mFlowMap.currToPrevBuffer[SRCOFFSETTOPLEFT   ]) * deltaX + mFlowMap.currToPrevBuffer[SRCOFFSETTOPLEFT   ];
+                    FFlow v1 = (mFlowMap.currToPrevBuffer[SRCOFFSETBOTTOMRIGHT] - mFlowMap.currToPrevBuffer[SRCOFFSETBOTTOMLEFT]) * deltaX + mFlowMap.currToPrevBuffer[SRCOFFSETBOTTOMLEFT];
+                    FFlow vf = ( v1 - v0 ) * deltaY + v0;
 
-                    distortion.currToPrev = FVector2D( vf.X, vf.Y ) + ( newPosition - distortionDstCoords );
+                    distortion.currToPrev = FFlow( vf.X, vf.Y ) + FFlow( newPosition.X - distortionDstCoords.X
+                                                                       , newPosition.Y - distortionDstCoords.Y );
                 }
             }
         }
@@ -362,12 +366,12 @@ UOdysseyPainterEditorRasterLiquifyTool::Flow( const FVector2D& iPrevCenter
 
                         if( mEditingArea.HitTest( absoluteExpectedCoords ) == true )
                         {
-                            mFlowMap[offset].currToPrev = distortion.currToPrev;
+                            mFlowMap.currToPrevBuffer[offset] = distortion.currToPrev;
                         }
                     }
                     else
                     {
-                        mFlowMap[offset].currToPrev = distortion.currToPrev;
+                        mFlowMap.currToPrevBuffer[offset] = distortion.currToPrev;
                     }
                 }
             }
@@ -398,11 +402,11 @@ void UOdysseyPainterEditorRasterLiquifyTool::Tick(float iDeltaTime)
         double strength = GetStrength();
         double hardness = GetHardness();
 
-        switch( Mode )
+        switch( Mode.Get() )
         {
-            case ELiquifyToolMode::Expand :
-            case ELiquifyToolMode::Pinch  :
-            case ELiquifyToolMode::Twirl  :
+            case EOdysseyLiquifyMode::Expand :
+            case EOdysseyLiquifyMode::Pinch  :
+            case EOdysseyLiquifyMode::Twirl  :
                 Flow( mMousePosition
                     , mMousePosition
                     , strength
@@ -444,12 +448,12 @@ UOdysseyPainterEditorRasterLiquifyTool::ApplyFlow( FAlteredImage& iAlteredImage
             for( int32 x = roi.x; x < ( roi.x + roi.w ); x++ )
             {
                 uint32 dstOffset = ( y * assetWidth ) + x;
-                FFlow& flow = mFlowMap[dstOffset];
+                FFlow& currToPrev = mFlowMap.currToPrevBuffer[dstOffset];
 
-                if( flow.currToPrev.IsZero() == false )
+                if( currToPrev.IsZero() == false )
                 {
-                    ::ULIS::FVec2D srcCoords = ::ULIS::FVec2D( x + ( flow.currToPrev.X * adjustment )
-                                                             , y + ( flow.currToPrev.Y * adjustment ) );
+                    ::ULIS::FVec2D srcCoords = ::ULIS::FVec2D( x + ( currToPrev.X * adjustment )
+                                                             , y + ( currToPrev.Y * adjustment ) );
                     double deltaX = srcCoords.x - ((int32)srcCoords.x);
                     double deltaY = srcCoords.y - ((int32)srcCoords.y);
 
@@ -520,7 +524,7 @@ UOdysseyPainterEditorRasterLiquifyTool::Apply()
 {
     // reset flow map
     MakeFlowMap();
-    // use current version of the images as source  images
+    // use current version of the images as source images
     FetchSourceImages();
 }
 
@@ -622,6 +626,8 @@ UOdysseyPainterEditorRasterLiquifyTool::OnMouseUp(const FOdysseyPoint& iPointInT
 {
     if ( iKey == EKeys::LeftMouseButton )
     {
+        FScopedTransaction transaction(LOCTEXT("raster-liquify-tool.transaction.liquify", "Liquify"));
+
         for( FAlteredImage& alteredImage : mAlteredImageArray )
         {
             ApplyFlow( alteredImage
@@ -629,6 +635,19 @@ UOdysseyPainterEditorRasterLiquifyTool::OnMouseUp(const FOdysseyPoint& iPointInT
                      , true );
 
             alteredImage.paintEngine.Commit( FOdysseyBlendParameters() );
+        }
+
+        if( GUndo )
+        {
+            FCommandChange* undo = new FOdysseyPainterEditorRasterLiquifyToolUndo( mFlowMapBackup
+                                                                                 , mEditingArea
+                                                                                 , mFlowMap );
+
+            GUndo->StoreUndo( GEditor, TUniquePtr<FCommandChange>(undo) );
+
+            TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
+            if ( source )
+                source->RecordCurrentFrameUndo();
         }
 
         bIsMouseLeftButtonDown = false;
@@ -747,13 +766,17 @@ void
 UOdysseyPainterEditorRasterLiquifyTool::OnRasterSelectionChanged()
 {
     TSharedPtr<FOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
-    if (rasterSelection->IsEmpty())
+
+    for( FAlteredImage& alteredImage : mAlteredImageArray )
     {
-        //mPaintEngine.SetMaskBlock(nullptr);
-    }
-    else
-    {
-        //mPaintEngine.SetMaskBlock(rasterSelection->GetBlock());
+        if ( rasterSelection->IsEmpty() )
+        {
+            alteredImage.paintEngine.SetMaskBlock( nullptr );
+        }
+        else
+        {
+            alteredImage.paintEngine.SetMaskBlock( rasterSelection->GetBlock() );
+        }
     }
 }
 
@@ -769,7 +792,9 @@ UOdysseyPainterEditorRasterLiquifyTool::ExtendToolbar( UToolMenu* iToolMenu )
     Super::ExtendToolbar(iToolMenu);
 }
 
-void UOdysseyPainterEditorRasterLiquifyTool::PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive)
+void UOdysseyPainterEditorRasterLiquifyTool::PropertyChanged( const FName& iPropertyName
+                                                            , const FName& iMemberPropertyName
+                                                            , bool iIsInteractive )
 {
     Super::PropertyChanged(iPropertyName);
 
@@ -783,6 +808,11 @@ void UOdysseyPainterEditorRasterLiquifyTool::PropertyChanged(const FName& iPrope
 
             alteredImage.paintEngine.Update( FOdysseyBlendParameters() );
         }
+    }
+
+    if( ( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorRasterLiquifyTool, Mode   ) ) )
+    {
+        mHiddenModeAsEnum = Mode.Get();
     }
 
     if( ( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorRasterLiquifyTool, Mode   ) )
