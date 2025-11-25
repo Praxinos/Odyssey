@@ -67,7 +67,7 @@ UOdysseyPainterEditorRasterLiquifyTool::~UOdysseyPainterEditorRasterLiquifyTool(
 
 UOdysseyPainterEditorRasterLiquifyTool::UOdysseyPainterEditorRasterLiquifyTool()
     : mLiquifyHUD( MakeShared<FOdysseyPainterEditorRasterLiquifyToolHUD>( this ) )
-    , Radius ( 40 )
+    , Size ( 100 )
     , Mode ()
     , mHiddenModeAsEnum ( Mode.Get() )
     , Strength ( 100 )
@@ -105,6 +105,8 @@ UOdysseyPainterEditorRasterLiquifyTool::Load()
     FetchSourceImages();
     MakeDistortionMap();
     MakeFlowMap();
+
+    AdjustmentStrength = 100;
 
     mLiquifyHUD->Reset();
 }
@@ -171,6 +173,8 @@ UOdysseyPainterEditorRasterLiquifyTool::OnMouseHover(const FOdysseyPoint& iPoint
 bool
 UOdysseyPainterEditorRasterLiquifyTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
+    uint32 radius = GetRadius();
+
     mMouseAtDown = FVector2D( iPointInTexture.x, iPointInTexture.y );
     mPreviousPointInTexture = mMouseAtDown;
 
@@ -180,10 +184,10 @@ UOdysseyPainterEditorRasterLiquifyTool::OnMouseDown(const FOdysseyPoint& iPointI
 
         mFlowMapBackup = mFlowMap;
 
-        mEditingArea = ::ULIS::FRectI::FromXYWH( iPointInTexture.x - Radius
-                                               , iPointInTexture.y - Radius
-                                               , (Radius*2) + 1
-                                               , (Radius*2) + 1 );
+        mEditingArea = ::ULIS::FRectI::FromXYWH( iPointInTexture.x - radius
+                                               , iPointInTexture.y - radius
+                                               , (radius*2) + 1
+                                               , (radius*2) + 1 );
 
         return true;
     }
@@ -216,34 +220,11 @@ UOdysseyPainterEditorRasterLiquifyTool::MakeFlowMap()
 void
 UOdysseyPainterEditorRasterLiquifyTool::MakeDistortionMap()
 {
-    uint32 offset = 0;
+    TSharedPtr<FOdysseyRasterBlock> srcRasterBlock = GetRasterBlockFromEditor(false);
+    TSharedPtr<::ULIS::FBlock> srcBlock = srcRasterBlock->GetBlock();
 
-    mDistortionMap.SetNum( ((Radius*2)+1) * ((Radius*2)+1) );
-
-    for( int32 j = -Radius, y = 0; j <= Radius; j++, y++ )
-    {
-        for( int32 i = -Radius, x = 0; i <= Radius; i++, x++ )
-        {
-            double distanceToCenter = sqrt( ( i * i ) + ( j * j ) );
-            FDistortion& distortion = mDistortionMap[offset++];
-
-            if( distanceToCenter <= Radius )
-            {
-                ::ULIS::FVec2I pointCoords = ::ULIS::FVec2I( i, j );
-
-                distortion.mapped = true;
-                distortion.coords = pointCoords;
-                distortion.distanceToCenter = distanceToCenter;
-                distortion.angle = atan2( j, i );
-            }
-            else
-            {
-                distortion.mapped = false;
-            }
-
-            //distortion.offset = offset++;
-        }
-    }
+    mDistortionMap.Empty();
+    mDistortionMap.SetSize( srcBlock->Width(), srcBlock->Height() );
 }
 
 void
@@ -253,97 +234,141 @@ UOdysseyPainterEditorRasterLiquifyTool::Flow( const FVector2D& iPrevCenter
                                             , double iHardness )
 {
     uint32 threadCount = FPlatformMisc::NumberOfCoresIncludingHyperthreads();
-    FVector2D motion = iPrevCenter - iCurrCenter;
+    FFlow motion = FFlow( iPrevCenter.X - iCurrCenter.X
+                        , iPrevCenter.Y - iCurrCenter.Y );
     uint32 assetWidth = mAlteredImageArray[0].copiedSourceBlock->Width();
     uint32 assetHeight = mAlteredImageArray[0].copiedSourceBlock->Height();
-    double twirlDirection = ( TwirlDirection == EOdysseyLiquifyTwirlDirection::Clockwise ) ? -1.0f
-                                                                                           :  1.0f;
+    double twirlDirection = ( TwirlDirection == EOdysseyLiquifyTwirlDirection::Clockwise ) ? -1.0f :  1.0f;
+    uint32 influenceRadius = GetRadius();
+    uint32 influenceRadiusSquared =  (influenceRadius * influenceRadius );
+    uint32 influenceSize = ((influenceRadius*2)+1);
+    uint32 xmin = assetWidth - 1
+         , ymin = assetHeight - 1
+         , xmax = 0
+         , ymax = 0;
 
     ParallelFor( threadCount, [&]( int32 coreID )
     {
-        for( int32 y = coreID; y < ((Radius*2)+1); y += threadCount )
+        for( int32 j = coreID, y = - (int32) influenceRadius + coreID; j < (int32) influenceSize; j += threadCount, y += threadCount )
         {
-            for( int32 x = 0; x < ((Radius*2)+1); x++ )
+            for( int32 i = 0, x = - (int32) influenceRadius; i < (int32) influenceSize; i++, x++ )
             {
-                uint32 distortionIndex = y * ((Radius*2)+1) + x;
-                FDistortion& distortion = mDistortionMap[distortionIndex];
+                ::ULIS::FVec2I absoluteCoords = ::ULIS::FVec2I( ((int32)iCurrCenter.X) + x
+                                                              , ((int32)iCurrCenter.Y) + y );
+                uint32 distanceSquared = ( y * y ) + ( x * x );
 
-                if( distortion.mapped )
+                if( ( absoluteCoords.x >= 0 ) && ( absoluteCoords.x < (int32) assetWidth )
+                 && ( absoluteCoords.y >= 0 ) && ( absoluteCoords.y < (int32) assetHeight ) )
                 {
-                    ::ULIS::FVec2I absoluteCoords = ::ULIS::FVec2I( ((int32)iCurrCenter.X) + distortion.coords.x
-                                                                  , ((int32)iCurrCenter.Y) + distortion.coords.y );
-                    FVector2D distortionDstCoords = FVector2D( (double) distortion.coords.x
-                                                             , (double) distortion.coords.y );
-                    double dist = distortion.distanceToCenter;
-                    double vdist = ::ULIS::FMath::Max( (double) 0.0f, dist -  (iHardness * Radius ) );
-                    double factor = 1.0f - ( vdist / Radius ); // <---- can be precomputed
-                    FVector2D newPosition = FVector2D( 0.0f, 0.0f );
+                    uint32 distortionOffset = ( absoluteCoords.y * assetWidth ) + absoluteCoords.x;
+                    FFlow& distortion = mDistortionMap.currToPrevBuffer[distortionOffset];
 
-                    switch( Mode.Get() )
+                    if ( distanceSquared <= influenceRadiusSquared )
                     {
-                        case EOdysseyLiquifyMode::Push :
+                        FFlow localPosition = FFlow( x, y );
+                        double vdistSquared = ::ULIS::FMath::Max( (double) 0.0f, distanceSquared - (iHardness * influenceRadiusSquared ) );
+                        double factor = 1.0f - ( vdistSquared / influenceRadiusSquared );
+                        FFlow newPosition = localPosition; // having the same values will result in no difference, so no effect
+
+
+                        switch( Mode.Get() )
                         {
-                            newPosition = distortionDstCoords + ( motion * factor );
-                        }
-                        break;
+                            case EOdysseyLiquifyMode::Push :
+                            {
+                                newPosition = localPosition + ( motion * factor );
+                            }
+                            break;
 
-                        case EOdysseyLiquifyMode::Expand :
+                            case EOdysseyLiquifyMode::Expand :
+                            {
+                                FFlow minPosition = FFlow( 0.0f, 0.0f );
+
+                                newPosition = localPosition + ( minPosition - localPosition ) * factor * iStrength * 0.005f;
+                            }
+                            break;
+
+                            case EOdysseyLiquifyMode::Pinch :
+                            {
+                                double angle = atan2( y, x );
+                                double cosAngle = cos( angle );
+                                double sinAngle = sin( angle );
+                                FFlow maxPosition = FFlow( influenceRadius * cosAngle
+                                                         , influenceRadius * sinAngle );
+
+                                newPosition = localPosition + ( maxPosition - localPosition ) * factor * iStrength * 0.005f;
+                            }
+                            break;
+
+                            case EOdysseyLiquifyMode::Crystals :
+                            {
+                                double angle = ( ( atan2( y, x ) + M_PI ) * 180.0f / M_PI );
+
+                                uint32 intAngle = angle * 0.1f; // reduce the number of possible angles by dividing by 10
+
+                                newPosition = localPosition + ( localPosition * factor * iStrength * 0.1f * ( ( intAngle % 2 ) ? 1.0f : -1.0f )  );
+                            }
+                            break;
+
+                            case EOdysseyLiquifyMode::Reconstruct :
+                            {
+                                newPosition = localPosition;
+
+                                mFlowMap.currToPrevBuffer[distortionOffset] = mFlowMap.currToPrevBuffer[distortionOffset] * ( 1.0f - factor ) * iStrength;
+                            }
+                            break;
+
+                            case EOdysseyLiquifyMode::Twirl :
+                            {
+                                double cosAngle = cos( ROTATIONSPEEDINRADIANS * factor * iStrength * twirlDirection );
+                                double sinAngle = sin( ROTATIONSPEEDINRADIANS * factor * iStrength * twirlDirection );
+
+                                newPosition = FFlow( ( localPosition.X * cosAngle ) - ( localPosition.Y * sinAngle )
+                                                   , ( localPosition.X * sinAngle ) + ( localPosition.Y * cosAngle ) );
+                            }
+                            break;
+
+                            default :
+                            break;
+                        }
+
+                        if( newPosition != localPosition )
                         {
-                            double cosAngle = cos( distortion.angle );
-                            double sinAngle = sin( distortion.angle );
-                            FVector2D minPosition = FVector2D( 0.0f
-                                                             , 0.0f );
+                            FIntVector2 intSrcCoords = FIntVector2( newPosition.X + (int32)iCurrCenter.X
+                                                                  , newPosition.Y + (int32)iCurrCenter.Y );
+                            uint32 srcOffset = ((intSrcCoords.Y) * assetWidth) + intSrcCoords.X;
 
-                            newPosition = distortionDstCoords + ( minPosition - distortionDstCoords ) * factor * iStrength * 0.005f;
+                            // retrieve deltas for bilinear filtering of the vectors
+                            double deltaX = newPosition.X - floorf(newPosition.X);
+                            double deltaY = newPosition.Y - floorf(newPosition.Y);
+
+                            uint32 SRCOFFSETTOPLEFT     = srcOffset
+                                 , SRCOFFSETTOPRIGHT    = SRCOFFSETTOPLEFT + 1
+                                 , SRCOFFSETBOTTOMRIGHT = SRCOFFSETTOPLEFT + 1 + (assetWidth)
+                                 , SRCOFFSETBOTTOMLEFT  = SRCOFFSETTOPLEFT + (assetWidth);
+
+                            FFlow v0 = (mFlowMap.currToPrevBuffer[SRCOFFSETTOPRIGHT   ] - mFlowMap.currToPrevBuffer[SRCOFFSETTOPLEFT   ]) * deltaX + mFlowMap.currToPrevBuffer[SRCOFFSETTOPLEFT   ];
+                            FFlow v1 = (mFlowMap.currToPrevBuffer[SRCOFFSETBOTTOMRIGHT] - mFlowMap.currToPrevBuffer[SRCOFFSETBOTTOMLEFT]) * deltaX + mFlowMap.currToPrevBuffer[SRCOFFSETBOTTOMLEFT];
+                            FFlow vf = ( v1 - v0 ) * deltaY + v0;
+
+
+
+                            distortion = FFlow( vf.X, vf.Y ) + FFlow( newPosition.X - localPosition.X
+                                                                    , newPosition.Y - localPosition.Y );
+
+                            if( (uint32) absoluteCoords.x < xmin ) xmin = (uint32) absoluteCoords.x;
+                            if( (uint32) absoluteCoords.y < ymin ) ymin = (uint32) absoluteCoords.y;
+                            if( (uint32) absoluteCoords.x > xmax ) xmax = (uint32) absoluteCoords.x;
+                            if( (uint32) absoluteCoords.y > ymax ) ymax = (uint32) absoluteCoords.y;
                         }
-                        break;
-
-                        case EOdysseyLiquifyMode::Pinch :
+                        else
                         {
-                            double cosAngle = cos( distortion.angle );
-                            double sinAngle = sin( distortion.angle );
-                            FVector2D maxPosition = FVector2D( Radius * cosAngle
-                                                             , Radius * sinAngle );
-
-                            newPosition = distortionDstCoords + ( maxPosition - distortionDstCoords ) * factor * iStrength * 0.005f;
+                            distortion = mFlowMap.currToPrevBuffer[distortionOffset];
                         }
-                        break;
-
-                        case EOdysseyLiquifyMode::Twirl :
-                        {
-                            double cosAngle = cos( ROTATIONSPEEDINRADIANS * factor * iStrength * twirlDirection );
-                            double sinAngle = sin( ROTATIONSPEEDINRADIANS * factor * iStrength * twirlDirection );
-                            // Note: can be precomputed
-                            FVector2D distortionSrcCoords  = FVector2D( ( distortionDstCoords.X * cosAngle ) - ( distortionDstCoords.Y * sinAngle )
-                                                                      , ( distortionDstCoords.X * sinAngle ) + ( distortionDstCoords.Y * cosAngle ) );
-
-                            newPosition = ( distortionSrcCoords );
-                        }
-                        break;
-
-                        default :
-                        break;
                     }
-
-                    FIntVector2 intSrcCoords = FIntVector2( newPosition.X + (int32)iCurrCenter.X
-                                                          , newPosition.Y + (int32)iCurrCenter.Y );
-                    uint32 srcOffset = ((intSrcCoords.Y) * assetWidth) + intSrcCoords.X;
-
-                    // retrieve deltas for bilinear filtering of the vectors
-                    double deltaX = newPosition.X - floorf(newPosition.X);
-                    double deltaY = newPosition.Y - floorf(newPosition.Y);
-
-                    uint32 SRCOFFSETTOPLEFT     = srcOffset
-                         , SRCOFFSETTOPRIGHT    = SRCOFFSETTOPLEFT + 1
-                         , SRCOFFSETBOTTOMRIGHT = SRCOFFSETTOPLEFT + 1 + (assetWidth)
-                         , SRCOFFSETBOTTOMLEFT  = SRCOFFSETTOPLEFT + (assetWidth);
-
-                    FFlow v0 = (mFlowMap.currToPrevBuffer[SRCOFFSETTOPRIGHT   ] - mFlowMap.currToPrevBuffer[SRCOFFSETTOPLEFT   ]) * deltaX + mFlowMap.currToPrevBuffer[SRCOFFSETTOPLEFT   ];
-                    FFlow v1 = (mFlowMap.currToPrevBuffer[SRCOFFSETBOTTOMRIGHT] - mFlowMap.currToPrevBuffer[SRCOFFSETBOTTOMLEFT]) * deltaX + mFlowMap.currToPrevBuffer[SRCOFFSETBOTTOMLEFT];
-                    FFlow vf = ( v1 - v0 ) * deltaY + v0;
-
-                    distortion.currToPrev = FFlow( vf.X, vf.Y ) + FFlow( newPosition.X - distortionDstCoords.X
-                                                                       , newPosition.Y - distortionDstCoords.Y );
+                    else
+                    {
+                        distortion = FFlow::Zero();
+                    }
                 }
             }
         }
@@ -351,37 +376,42 @@ UOdysseyPainterEditorRasterLiquifyTool::Flow( const FVector2D& iPrevCenter
 
     ParallelFor( threadCount, [&]( int32 coreID )
     {
-        for( int32 y = coreID; y < ((Radius*2)+1); y += threadCount )
+        for( uint32 y = ymin + coreID; y <= ymax; y += threadCount )
         {
-            for( int32 x = 0; x < ((Radius*2)+1); x++ )
+            for( uint32 x = xmin; x <= xmax; x++ )
             {
-                uint32 distortionIndex = y * ((Radius*2)+1) + x;
-                FDistortion& distortion = mDistortionMap[distortionIndex];
+                uint32 flowIndex = ( y * assetWidth ) + x;
+                FFlow& flow = mDistortionMap.currToPrevBuffer[flowIndex];
 
-                if( distortion.mapped )
+                if( flow != FFlow::Zero() )
                 {
-                    ::ULIS::FVec2I absoluteCoords = ::ULIS::FVec2I( ((int32)iCurrCenter.X) + distortion.coords.x
-                                                                  , ((int32)iCurrCenter.Y) + distortion.coords.y );
+                    ::ULIS::FVec2I absoluteCoords = ::ULIS::FVec2I( x, y );
                     uint32 offset = ( absoluteCoords.y * assetWidth ) + absoluteCoords.x;
 
                     if( OnlyReferToEditngArea )
                     {
-                        ::ULIS::FVec2I absoluteExpectedCoords = ::ULIS::FVec2I( absoluteCoords.x + distortion.currToPrev.X
-                                                                              , absoluteCoords.y + distortion.currToPrev.Y );
+                        ::ULIS::FVec2I absoluteExpectedCoords = ::ULIS::FVec2I( absoluteCoords.x + flow.X
+                                                                              , absoluteCoords.y + flow.Y );
 
                         if( mEditingArea.HitTest( absoluteExpectedCoords ) == true )
                         {
-                            mFlowMap.currToPrevBuffer[offset] = distortion.currToPrev;
+                            mFlowMap.currToPrevBuffer[offset] = flow;
                         }
                     }
                     else
                     {
-                        mFlowMap.currToPrevBuffer[offset] = distortion.currToPrev;
+                        mFlowMap.currToPrevBuffer[offset] = flow;
                     }
                 }
             }
         }
     });
+}
+
+uint32
+UOdysseyPainterEditorRasterLiquifyTool::GetRadius()
+{
+    return Size * 0.5f;
 }
 
 double
@@ -398,12 +428,14 @@ UOdysseyPainterEditorRasterLiquifyTool::GetHardness()
 
 void UOdysseyPainterEditorRasterLiquifyTool::Tick(float iDeltaTime)
 {
+
     if( bIsMouseLeftButtonDown )
     {
-        ::ULIS::FRectI roi = ::ULIS::FRectI::FromXYWH( mMousePosition.X - Radius
-                                                     , mMousePosition.Y - Radius
-                                                     , (Radius*2) + 1
-                                                     , (Radius*2) + 1 ) ;
+        uint32 radius = GetRadius();
+        ::ULIS::FRectI roi = ::ULIS::FRectI::FromXYWH( mMousePosition.X - radius
+                                                     , mMousePosition.Y - radius
+                                                     , (radius*2) + 1
+                                                     , (radius*2) + 1 ) ;
         double strength = GetStrength();
         double hardness = GetHardness();
 
@@ -412,6 +444,7 @@ void UOdysseyPainterEditorRasterLiquifyTool::Tick(float iDeltaTime)
             case EOdysseyLiquifyMode::Expand :
             case EOdysseyLiquifyMode::Pinch  :
             case EOdysseyLiquifyMode::Twirl  :
+            case EOdysseyLiquifyMode::Reconstruct :
                 Flow( mMousePosition
                     , mMousePosition
                     , strength
@@ -525,6 +558,17 @@ UOdysseyPainterEditorRasterLiquifyTool::ApplyFlow( FAlteredImage& iAlteredImage
 }
 
 void
+UOdysseyPainterEditorRasterLiquifyTool::ApplyAdjustment()
+{
+    for( FFlow& flow : mFlowMap.currToPrevBuffer )
+    {
+        flow = flow * AdjustmentStrength;
+    }
+
+    AdjustmentStrength = 100;
+}
+
+void
 UOdysseyPainterEditorRasterLiquifyTool::Apply()
 {
     // reset flow map
@@ -568,6 +612,7 @@ UOdysseyPainterEditorRasterLiquifyTool::OnMouseDrag(const FOdysseyPoint& iPointI
     FVector2D deltaPoint = FVector2D( iPointInTexture.x - mPreviousPointInTexture.X
                                     , iPointInTexture.y - mPreviousPointInTexture.Y );
     double deltaPointDistance = deltaPoint.Length();
+    uint32 radius = GetRadius();
 
     mMousePosition = FVector2D( iPointInTexture.x, iPointInTexture.y );
 
@@ -575,10 +620,10 @@ UOdysseyPainterEditorRasterLiquifyTool::OnMouseDrag(const FOdysseyPoint& iPointI
     {
         TSharedPtr<FOdysseyRasterBlock> rasterBlock = GetRasterBlockFromEditor(false);
 
-        mEditingArea = mEditingArea | ::ULIS::FRectI::FromXYWH( iPointInTexture.x - Radius
-                                                              , iPointInTexture.y - Radius
-                                                              , (Radius*2) + 1
-                                                              , (Radius*2) + 1 );
+        mEditingArea = mEditingArea | ::ULIS::FRectI::FromXYWH( iPointInTexture.x - radius
+                                                              , iPointInTexture.y - radius
+                                                              , (radius*2) + 1
+                                                              , (radius*2) + 1 );
 
         mLiquifyHUD->SetCursorPositionInTexture( mMousePosition );
 
@@ -603,14 +648,14 @@ UOdysseyPainterEditorRasterLiquifyTool::OnMouseDrag(const FOdysseyPoint& iPointI
                 stampPointInTexture = stampNextPointInTexture;
             }
 
-            ::ULIS::FRectI roi = ::ULIS::FRectI::FromXYWH( mPreviousPointInTexture.X - Radius
-                                                         , mPreviousPointInTexture.Y - Radius
-                                                         , (Radius*2) + 1
-                                                         , (Radius*2) + 1 )
-                               | ::ULIS::FRectI::FromXYWH( iPointInTexture.x - Radius
-                                                         , iPointInTexture.y - Radius
-                                                         , (Radius*2) + 1
-                                                         , (Radius*2) + 1 );
+            ::ULIS::FRectI roi = ::ULIS::FRectI::FromXYWH( mPreviousPointInTexture.X - radius
+                                                         , mPreviousPointInTexture.Y - radius
+                                                         , (radius*2) + 1
+                                                         , (radius*2) + 1 )
+                               | ::ULIS::FRectI::FromXYWH( iPointInTexture.x - radius
+                                                         , iPointInTexture.y - radius
+                                                         , (radius*2) + 1
+                                                         , (radius*2) + 1 );
 
             for( FAlteredImage& alteredImage : mAlteredImageArray )
             {
@@ -819,12 +864,27 @@ void UOdysseyPainterEditorRasterLiquifyTool::PropertyChanged( const FName& iProp
     // so we need to compare with iMemberPropertyName instead of iPropertyName
     if( ( iMemberPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorRasterLiquifyTool, Mode   ) ) )
     {
+        // Apply adjust (mHiddenModeAsEnum is in its prvious state as it is not updated yet)
+        switch ( mHiddenModeAsEnum )
+        {
+            case EOdysseyLiquifyMode::Adjust :
+                ApplyAdjustment();
+            break;
+
+            default :
+            break;
+        }
+
         mHiddenModeAsEnum = Mode.Get();
 
-        MakeDistortionMap();
+        //switch ( mHiddenModeAsEnum )
+        //{
+        //    default :
+        //    break;
+        //}
     }
 
-    if( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorRasterLiquifyTool, Radius ) )
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorRasterLiquifyTool, Size ) )
     {
         MakeDistortionMap();
     }

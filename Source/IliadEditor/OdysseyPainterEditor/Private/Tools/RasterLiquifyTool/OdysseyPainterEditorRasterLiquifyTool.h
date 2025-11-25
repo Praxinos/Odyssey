@@ -81,23 +81,13 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
             ::ULIS::FContext& context;
         };
 
-        struct FDistortion
-        {
-            FDistortion()
-            {
-                mapped = false;
-            }
-
-            bool mapped;
-            ::ULIS::FVec2I coords;
-            double distanceToCenter;
-            double angle;
-
-            FFlow currToPrev; // temporarily store flow
-        };
-
         struct FFlowMap
         {
+            void Zero()
+            {
+                memset( &currToPrevBuffer[0], 0, width * height );
+            }
+
             void Empty()
             {
                 currToPrevBuffer.Empty();
@@ -150,6 +140,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
         virtual EMouseCursor::Type GetMouseCursor() const override;
 
         virtual FText GetTooltip() const override;
+        uint32 GetRadius();
 
     protected:
         double GetStrength();
@@ -157,6 +148,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
         void FetchSourceImages();
         void MakeDistortionMap();
         void MakeFlowMap();
+        void ApplyAdjustment();
         void ApplyFlow( FAlteredImage& iAlteredImage
                       , const ::ULIS::FRectI& iRegionOfInterest
                       , bool iBilinearFiltered );
@@ -209,17 +201,17 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
 
         UPROPERTY( EditAnywhere
                  , Category = "Liquify Tool"
-                 , meta = ( ToolTip = "Radius"
+                 , meta = ( ToolTip = "Size"
                           , EditCondition = "(mHiddenModeAsEnum != EOdysseyLiquifyMode::Adjust)"
                           , EditConditionHides
-                          , ClampMin = "1"
-                          , UIMin = "1"
+                          , ClampMin = "0"
+                          , UIMin = "0"
                           , ClampMax = "2000"
                           , UIMax = "2000"
                           , LinearDeltaSensitivity = "5"
                           , Delta = "1"
                           , Multiple = "1" ) )
-        int Radius;
+        int Size;
 
         UPROPERTY( EditAnywhere
                  , Category = "Liquify Tool"
@@ -324,7 +316,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
         // We copy the source image and stores it into an array of source image
         // the array will be used when this tool will be made multi-layer compatible
         TArray<FAlteredImage> mAlteredImageArray;
-        TArray<FDistortion> mDistortionMap;
+        FFlowMap mDistortionMap;
         FFlowMap mFlowMap;
         // this flow map will be used for undos. It allows us to save only the portion that has changed
         FFlowMap mFlowMapBackup;

@@ -34,8 +34,8 @@ FOdysseyPainterEditorRasterLiquifyToolHUD::Reset()
     mCursorEllipsePoints.Clear();
 
     ::ULIS::GenerateEllipsePoints( 0.0f
-                                 , mLiquifyTool->Radius
-                                 , mLiquifyTool->Radius
+                                 , mLiquifyTool->GetRadius()
+                                 , mLiquifyTool->GetRadius()
                                  , mCursorEllipsePoints );
 }
 
