@@ -112,7 +112,10 @@ void
 FOdysseyLiquifyModeDetailCustomization::OnModeSelected( EOdysseyLiquifyMode iMode
                                                       , ECheckBoxState iState )
 {
-    mEnumValuePropertyHandle->SetValue( static_cast<uint8>(iMode) );
+    if( iState == ECheckBoxState::Checked )
+    {
+        mEnumValuePropertyHandle->SetValue( static_cast<uint8>(iMode) );
+    }
 }
 
 void

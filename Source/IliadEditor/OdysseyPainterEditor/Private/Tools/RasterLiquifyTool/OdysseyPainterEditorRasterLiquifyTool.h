@@ -24,6 +24,14 @@ enum class EOdysseyLiquifyTwirlDirection : uint8
     Counterclockwise
 };
 
+UENUM()
+enum class EOdysseyLiquifyPushDirection : uint8
+{
+    Front,
+    Left,
+    Right
+};
+
 USTRUCT(BlueprintType)
 struct FStylusPressureOptions
 {
@@ -75,9 +83,11 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
             FAlteredImage( TSharedPtr<FOdysseyRasterBlock> iSourceRasterBlock
                          , TSharedPtr<::ULIS::FBlock> iMaskBlock );
 
-            TSharedPtr<::ULIS::FBlock> copiedSourceBlock;
+            TSharedPtr<FOdysseyRasterBlock> sourceRasterBlock;
+            TSharedPtr<::ULIS::FBlock> sourceBlock; // to prevent garbagde collection of FOdysseyRasterBlock::GetBlock()
+            TSharedPtr<::ULIS::FBlock> sourceBlockCopy;
             TSharedPtr<::ULIS::FBlock> destinationBlock;
-            FOdysseyPaintEngine paintEngine;
+            TSharedPtr<::ULIS::FBlock> maskBlock;
             ::ULIS::FContext& context;
         };
 
@@ -157,6 +167,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
                  , const FVector2D& iCurrCenter
                  , double iStrength
                  , double iHardness );
+        void CommitAlteredImage( FAlteredImage& iAlteredImage
+                               , const ::ULIS::FRectI& iRegionOfInterest
+                               , bool iIsInteractive );
 
     public:
         virtual void PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive) override;
@@ -258,23 +271,10 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
 
         UPROPERTY( EditAnywhere
                  , Category = "Liquify Tool"
-                 , meta = ( ToolTip = "Has Angle"
-                          , InlineEditConditionToggle ) )
-        bool bHasAngle;
-
-        UPROPERTY( EditAnywhere
-                 , Category = "Liquify Tool"
-                 , meta = ( ToolTip = "Angle"
-                          , EditCondition = "bHasAngle && (mHiddenModeAsEnum == EOdysseyLiquifyMode::Push)"
-                          , EditConditionHides
-                          , Units = "Degrees"
-                          , ClampMin = "-180"
-                          , UIMin = "-180"
-                          , ClampMax = "180"
-                          , UIMax = "180"
-                          , Delta = "1"
-                          , Multiple = "1"  ) )
-        int32 Angle;
+                 , meta = ( ToolTip = "Direction"
+                          , EditCondition = "(mHiddenModeAsEnum == EOdysseyLiquifyMode::Push)"
+                          , EditConditionHides ) )
+        EOdysseyLiquifyPushDirection PushDirection;
 
         UPROPERTY( EditAnywhere
                  , Category = "Liquify Tool"
@@ -289,11 +289,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
                           , EditCondition = "(mHiddenModeAsEnum != EOdysseyLiquifyMode::Adjust)"
                           , EditConditionHides ) )
         bool OnlyReferToEditngArea;
-
-        UFUNCTION( BlueprintCallable
-                 , Category = "Liquify Tool"
-                 , CallInEditor )
-        void Apply();
 
         UFUNCTION( BlueprintCallable
                  , Category = "Liquify Tool"
