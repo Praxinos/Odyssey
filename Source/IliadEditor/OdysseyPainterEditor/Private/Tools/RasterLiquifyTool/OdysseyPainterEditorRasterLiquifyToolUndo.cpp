@@ -32,8 +32,8 @@ FOdysseyPainterEditorRasterLiquifyToolUndo::FOdysseyPainterEditorRasterLiquifyTo
         uint32 srcOffset = ( srcY * iFlowMapBackup.width ) + mPositionX;
         uint32 dstOffset = ( dstY * mPartialFlowMap.width );
 
-        memcpy( &mPartialFlowMap.currToPrevBuffer[dstOffset]
-              , &iFlowMapBackup.currToPrevBuffer[srcOffset]
+        memcpy( &mPartialFlowMap.toTargetBuffer[dstOffset]
+              , &iFlowMapBackup.toTargetBuffer[srcOffset]
               , iRect.w );
     }
 }
@@ -52,14 +52,14 @@ FOdysseyPainterEditorRasterLiquifyToolUndo::Apply( UObject* iIgnored )
         uint32 dstOffset = ( dstY * mFlowMapOriginal.width ) + mPositionX;
 
         memcpy( &line[0]
-              , &mFlowMapOriginal.currToPrevBuffer[dstOffset]
+              , &mFlowMapOriginal.toTargetBuffer[dstOffset]
               , mPartialFlowMap.width );
 
-        memcpy( &mFlowMapOriginal.currToPrevBuffer[dstOffset]
-              , &mPartialFlowMap.currToPrevBuffer[srcOffset]
+        memcpy( &mFlowMapOriginal.toTargetBuffer[dstOffset]
+              , &mPartialFlowMap.toTargetBuffer[srcOffset]
               , mPartialFlowMap.width );
 
-        memcpy( &mPartialFlowMap.currToPrevBuffer[srcOffset]
+        memcpy( &mPartialFlowMap.toTargetBuffer[srcOffset]
               , &line[0]
               , mPartialFlowMap.width );
     }
@@ -79,14 +79,14 @@ FOdysseyPainterEditorRasterLiquifyToolUndo::Revert( UObject* iIgnored )
         uint32 dstOffset = ( dstY * mFlowMapOriginal.width ) + mPositionX;
 
         memcpy( &line[0]
-              , &mFlowMapOriginal.currToPrevBuffer[dstOffset]
+              , &mFlowMapOriginal.toTargetBuffer[dstOffset]
               , mPartialFlowMap.width );
 
-        memcpy( &mFlowMapOriginal.currToPrevBuffer[dstOffset]
-              , &mPartialFlowMap.currToPrevBuffer[srcOffset]
+        memcpy( &mFlowMapOriginal.toTargetBuffer[dstOffset]
+              , &mPartialFlowMap.toTargetBuffer[srcOffset]
               , mPartialFlowMap.width );
 
-        memcpy( &mPartialFlowMap.currToPrevBuffer[srcOffset]
+        memcpy( &mPartialFlowMap.toTargetBuffer[srcOffset]
               , &line[0]
               , mPartialFlowMap.width );
     }

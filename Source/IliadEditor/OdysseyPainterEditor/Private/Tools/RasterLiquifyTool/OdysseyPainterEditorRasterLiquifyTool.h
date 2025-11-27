@@ -299,6 +299,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
         TSharedPtr<FOdysseyRasterBlock> GetRasterBlockFromEditor(bool iCreate) const;
 
         void OnRasterSelectionChanged();
+        uint32 GetThreadCount();
 
     protected:
         // protected Data Members

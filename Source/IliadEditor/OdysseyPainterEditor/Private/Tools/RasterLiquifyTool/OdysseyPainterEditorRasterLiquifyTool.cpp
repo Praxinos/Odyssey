@@ -243,7 +243,7 @@ UOdysseyPainterEditorRasterLiquifyTool::Flow( const FVector2D& iPrevCenter
                                             , double iStrength
                                             , double iHardness )
 {
-    uint32 threadCount = FPlatformMisc::NumberOfCoresIncludingHyperthreads();
+    uint32 threadCount = GetThreadCount();
     FFlow motion = FFlow( iPrevCenter.X - iCurrCenter.X
                         , iPrevCenter.Y - iCurrCenter.Y );
     uint32 assetWidth = mAlteredImageArray[0].sourceBlockCopy->Width();
@@ -279,6 +279,10 @@ UOdysseyPainterEditorRasterLiquifyTool::Flow( const FVector2D& iPrevCenter
                     if ( distanceSquared <= influenceRadiusSquared )
                     {
                         FFlow localPosition = FFlow( x, y );
+                        // compute a "virtual distance" determined by the hardness. That will impact the factor.
+                        // When the hardness is 100%, the distance is 0, mimicking a factor of 1.0f.
+                        // Well, or almost 1.0f because we don't use square roots to compute the factor
+                        // but squared values. It's good enough and saves some CPU cycles.
                         double vdistSquared = ::ULIS::FMath::Max( (double) 0.0f, distanceSquared - (iHardness * influenceRadiusSquared ) );
                         double factor = 1.0f - ( vdistSquared / influenceRadiusSquared );
                         FFlow newPosition = localPosition; // having the same values will result in no difference, so no effect
@@ -313,8 +317,11 @@ UOdysseyPainterEditorRasterLiquifyTool::Flow( const FVector2D& iPrevCenter
                                 // https://en.wikipedia.org/wiki/Vector_projection
                                 float dot =  ( motion.X * x ) + ( motion.Y * y );
                                 double t = dot / ( motionLength * motionLength );
+                                // compute the position of the point projected on the motion vector
                                 FFlow projected = t * motion;
-                                FFlow motionDirection = FFlow( x - projected.X, y - projected.Y );
+                                // compute a new vector that will go towards the motion direction (perpendicular to it, then)
+                                FFlow motionDirection = FFlow( x - projected.X
+                                                             , y - projected.Y );
 
                                 newPosition = localPosition + ( motionDirection * factor * iStrength * 0.01f );
                             }
@@ -354,7 +361,7 @@ UOdysseyPainterEditorRasterLiquifyTool::Flow( const FVector2D& iPrevCenter
                             {
                                 newPosition = localPosition;
 
-                                distortion = mFlowMap.toTargetBuffer[distortionOffset] * factor * iStrength;
+                                distortion = mFlowMap.toTargetBuffer[distortionOffset] * ( 1.0f - factor * iStrength );
                             }
                             break;
 
@@ -402,7 +409,7 @@ UOdysseyPainterEditorRasterLiquifyTool::Flow( const FVector2D& iPrevCenter
                                      , SRCOFFSETTOPRIGHT    = SRCOFFSETTOPLEFT + 1
                                      , SRCOFFSETBOTTOMRIGHT = SRCOFFSETTOPLEFT + 1 + (assetWidth)
                                      , SRCOFFSETBOTTOMLEFT  = SRCOFFSETTOPLEFT + (assetWidth);
-
+                                // bilinear filtering
                                 FFlow v0 = (mFlowMap.toTargetBuffer[SRCOFFSETTOPRIGHT   ] - mFlowMap.toTargetBuffer[SRCOFFSETTOPLEFT   ]) * deltaX + mFlowMap.toTargetBuffer[SRCOFFSETTOPLEFT   ];
                                 FFlow v1 = (mFlowMap.toTargetBuffer[SRCOFFSETBOTTOMRIGHT] - mFlowMap.toTargetBuffer[SRCOFFSETBOTTOMLEFT]) * deltaX + mFlowMap.toTargetBuffer[SRCOFFSETBOTTOMLEFT];
 
@@ -498,6 +505,7 @@ void UOdysseyPainterEditorRasterLiquifyTool::Tick(float iDeltaTime)
             case EOdysseyLiquifyMode::Expand :
             case EOdysseyLiquifyMode::Pinch  :
             case EOdysseyLiquifyMode::Twirl  :
+            case EOdysseyLiquifyMode::Edge  :
             case EOdysseyLiquifyMode::Reconstruct :
                 Flow( mMousePosition
                     , mMousePosition
@@ -522,6 +530,12 @@ void UOdysseyPainterEditorRasterLiquifyTool::Tick(float iDeltaTime)
     }
 }
 
+uint32
+UOdysseyPainterEditorRasterLiquifyTool::GetThreadCount()
+{
+    return FPlatformMisc::NumberOfCoresIncludingHyperthreads();
+}
+
 void
 UOdysseyPainterEditorRasterLiquifyTool::ApplyFlow( FAlteredImage& iAlteredImage
                                                  , const ::ULIS::FRectI& iSanitizedRegionOfInterest
@@ -534,7 +548,7 @@ UOdysseyPainterEditorRasterLiquifyTool::ApplyFlow( FAlteredImage& iAlteredImage
     uint32 assetWidth = mAlteredImageArray[0].sourceBlockCopy->Width();
     uint32 assetHeight = mAlteredImageArray[0].sourceBlockCopy->Height();
     ::ULIS::FRectI sanitizedROI = iSanitizedRegionOfInterest;
-    uint32 threadCount = FPlatformMisc::NumberOfCoresIncludingHyperthreads();
+    uint32 threadCount = GetThreadCount();
     double adjustment = ( double ) AdjustmentStrength / 100;
 
     ParallelFor( threadCount, [&]( int32 coreID )
@@ -620,7 +634,6 @@ UOdysseyPainterEditorRasterLiquifyTool::ApplyAdjustment()
 void
 UOdysseyPainterEditorRasterLiquifyTool::Reset()
 {
-    uint32 threadCount = FPlatformMisc::NumberOfCoresIncludingHyperthreads();
     double adjustment = ( double ) AdjustmentStrength / 100;
     uint32 assetWidth  = mAlteredImageArray.Num() ? mAlteredImageArray[0].sourceBlockCopy->Width()  : 0;
     uint32 assetHeight = mAlteredImageArray.Num() ? mAlteredImageArray[0].sourceBlockCopy->Height() : 0;
