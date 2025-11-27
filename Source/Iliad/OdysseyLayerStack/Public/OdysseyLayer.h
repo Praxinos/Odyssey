@@ -160,6 +160,9 @@ public:
     bool IsChildOf(UOdysseyLayer* Layer) const;
 
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
+    virtual FInt32Range GetFrameRange() const;
+
+    UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     FText GetLayerName() const;
 
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
@@ -300,7 +303,6 @@ public:
     virtual void PostDuplicate(EDuplicateMode::Type iDuplicateMode) override;
     virtual TArray<FGuid> GetRenderingComposition(uint64 iRenderType, int iFrame) const override;
     virtual FIntRect GetDefaultRenderRect() const override;
-    virtual FInt32Range GetFrameRange() const override;
 
     virtual UTextureRenderTarget2D* CreateRenderingRenderTarget() const override;
 #if WITH_EDITOR
