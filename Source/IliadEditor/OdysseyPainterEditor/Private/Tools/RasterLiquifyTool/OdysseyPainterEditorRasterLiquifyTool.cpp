@@ -256,6 +256,7 @@ UOdysseyPainterEditorRasterLiquifyTool::Flow( const FVector2D& iPrevCenter
          , ymin = assetHeight - 1
          , xmax = 0
          , ymax = 0;
+    double motionLength = motion.Length();
 
     ParallelFor( threadCount, [&]( int32 coreID )
     {
@@ -271,7 +272,7 @@ UOdysseyPainterEditorRasterLiquifyTool::Flow( const FVector2D& iPrevCenter
                  && ( absoluteCoords.y >= 0 ) && ( absoluteCoords.y < (int32) assetHeight ) )
                 {
                     uint32 distortionOffset = ( absoluteCoords.y * assetWidth ) + absoluteCoords.x;
-                    FFlow& distortion = mDistortionMap.currToPrevBuffer[distortionOffset];
+                    FFlow& distortion = mDistortionMap.toTargetBuffer[distortionOffset];
 
                     distortion = FFlow::Zero();
 
@@ -304,6 +305,18 @@ UOdysseyPainterEditorRasterLiquifyTool::Flow( const FVector2D& iPrevCenter
                                 }
 
                                 newPosition = localPosition + ( motionDirection * factor * iStrength );
+                            }
+                            break;
+
+                            case EOdysseyLiquifyMode::Edge :
+                            {
+                                // https://en.wikipedia.org/wiki/Vector_projection
+                                float dot =  ( motion.X * x ) + ( motion.Y * y );
+                                double t = dot / ( motionLength * motionLength );
+                                FFlow projected = t * motion;
+                                FFlow motionDirection = FFlow( x - projected.X, y - projected.Y );
+
+                                newPosition = localPosition + ( motionDirection * factor * iStrength * 0.01f );
                             }
                             break;
 
@@ -341,7 +354,7 @@ UOdysseyPainterEditorRasterLiquifyTool::Flow( const FVector2D& iPrevCenter
                             {
                                 newPosition = localPosition;
 
-                                distortion = mFlowMap.currToPrevBuffer[distortionOffset] * factor * iStrength;
+                                distortion = mFlowMap.toTargetBuffer[distortionOffset] * factor * iStrength;
                             }
                             break;
 
@@ -390,8 +403,8 @@ UOdysseyPainterEditorRasterLiquifyTool::Flow( const FVector2D& iPrevCenter
                                      , SRCOFFSETBOTTOMRIGHT = SRCOFFSETTOPLEFT + 1 + (assetWidth)
                                      , SRCOFFSETBOTTOMLEFT  = SRCOFFSETTOPLEFT + (assetWidth);
 
-                                FFlow v0 = (mFlowMap.currToPrevBuffer[SRCOFFSETTOPRIGHT   ] - mFlowMap.currToPrevBuffer[SRCOFFSETTOPLEFT   ]) * deltaX + mFlowMap.currToPrevBuffer[SRCOFFSETTOPLEFT   ];
-                                FFlow v1 = (mFlowMap.currToPrevBuffer[SRCOFFSETBOTTOMRIGHT] - mFlowMap.currToPrevBuffer[SRCOFFSETBOTTOMLEFT]) * deltaX + mFlowMap.currToPrevBuffer[SRCOFFSETBOTTOMLEFT];
+                                FFlow v0 = (mFlowMap.toTargetBuffer[SRCOFFSETTOPRIGHT   ] - mFlowMap.toTargetBuffer[SRCOFFSETTOPLEFT   ]) * deltaX + mFlowMap.toTargetBuffer[SRCOFFSETTOPLEFT   ];
+                                FFlow v1 = (mFlowMap.toTargetBuffer[SRCOFFSETBOTTOMRIGHT] - mFlowMap.toTargetBuffer[SRCOFFSETBOTTOMLEFT]) * deltaX + mFlowMap.toTargetBuffer[SRCOFFSETBOTTOMLEFT];
 
                                 vf = ( v1 - v0 ) * deltaY + v0;
                             }
@@ -417,7 +430,7 @@ UOdysseyPainterEditorRasterLiquifyTool::Flow( const FVector2D& iPrevCenter
             for( uint32 x = xmin; x <= xmax; x++ )
             {
                 uint32 flowIndex = ( y * assetWidth ) + x;
-                FFlow& flow = mDistortionMap.currToPrevBuffer[flowIndex];
+                FFlow& flow = mDistortionMap.toTargetBuffer[flowIndex];
 
                 if( flow != FFlow::Zero() )
                 {
@@ -431,12 +444,12 @@ UOdysseyPainterEditorRasterLiquifyTool::Flow( const FVector2D& iPrevCenter
 
                         if( mEditingArea.HitTest( absoluteExpectedCoords ) == true )
                         {
-                            mFlowMap.currToPrevBuffer[offset] = flow;
+                            mFlowMap.toTargetBuffer[offset] = flow;
                         }
                     }
                     else
                     {
-                        mFlowMap.currToPrevBuffer[offset] = flow;
+                        mFlowMap.toTargetBuffer[offset] = flow;
                     }
                 }
             }
@@ -516,7 +529,7 @@ UOdysseyPainterEditorRasterLiquifyTool::ApplyFlow( FAlteredImage& iAlteredImage
 {
     const ULIS::uint8 *srcBlockPixels = iAlteredImage.sourceBlockCopy->PixelBits(0,0);
     const ULIS::uint8 *dstBlockPixels = iAlteredImage.destinationBlock->PixelBits(0,0);
-    const ULIS::uint8 *mskBlockPixels = iAlteredImage.maskBlock->PixelBits(0,0);
+    const ULIS::uint8 *mskBlockPixels = iAlteredImage.maskBlock ? iAlteredImage.maskBlock->PixelBits(0,0) : nullptr;
     const float* mskBlockPixelsGF = (float*)mskBlockPixels;
     uint32 assetWidth = mAlteredImageArray[0].sourceBlockCopy->Width();
     uint32 assetHeight = mAlteredImageArray[0].sourceBlockCopy->Height();
@@ -531,14 +544,14 @@ UOdysseyPainterEditorRasterLiquifyTool::ApplyFlow( FAlteredImage& iAlteredImage
             for( int32 x = sanitizedROI.x; x < ( sanitizedROI.x + sanitizedROI.w ); x++ )
             {
                 uint32 dstOffset = ( y * assetWidth ) + x;
-                FFlow& currToPrev = mFlowMap.currToPrevBuffer[dstOffset];
+                FFlow& toTarget = mFlowMap.toTargetBuffer[dstOffset];
 
-                if( ( currToPrev.IsZero() == false )
+                if( ( toTarget.IsZero() == false )
                 // we handle masking by ourselves because we don't use a paintengine
                  && ( ( mskBlockPixelsGF == nullptr ) || ( mskBlockPixelsGF[dstOffset] ) ) )
                 {
-                    ::ULIS::FVec2D srcCoords = ::ULIS::FVec2D( x + ( currToPrev.X * adjustment )
-                                                             , y + ( currToPrev.Y * adjustment ) );
+                    ::ULIS::FVec2D srcCoords = ::ULIS::FVec2D( x + ( toTarget.X * adjustment )
+                                                             , y + ( toTarget.Y * adjustment ) );
                     double deltaX = srcCoords.x - ((int32)srcCoords.x);
                     double deltaY = srcCoords.y - ((int32)srcCoords.y);
 
@@ -596,7 +609,7 @@ UOdysseyPainterEditorRasterLiquifyTool::ApplyFlow( FAlteredImage& iAlteredImage
 void
 UOdysseyPainterEditorRasterLiquifyTool::ApplyAdjustment()
 {
-    for( FFlow& flow : mFlowMap.currToPrevBuffer )
+    for( FFlow& flow : mFlowMap.toTargetBuffer )
     {
         flow = flow * ( double ) AdjustmentStrength / 100.0f;
     }

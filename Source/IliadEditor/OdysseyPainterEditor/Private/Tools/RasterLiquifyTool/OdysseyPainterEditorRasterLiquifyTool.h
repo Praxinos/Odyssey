@@ -95,12 +95,12 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
         {
             void Zero()
             {
-                memset( &currToPrevBuffer[0], 0, width * height );
+                memset( &toTargetBuffer[0], 0, width * height );
             }
 
             void Empty()
             {
-                currToPrevBuffer.Empty();
+                toTargetBuffer.Empty();
             }
 
             void SetSize( uint32 iWidth, uint32 iHeight )
@@ -108,11 +108,11 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
                 width = iWidth;
                 height = iHeight;
 
-                currToPrevBuffer.SetNum( width * height );
+                toTargetBuffer.SetNum( width * height );
             }
 
             // use floats instead of doubles to save some space
-            TArray<FFlow> currToPrevBuffer;
+            TArray<FFlow> toTargetBuffer;
             uint32 width;
             uint32 height;
         };
@@ -311,6 +311,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
         // We copy the source image and stores it into an array of source image
         // the array will be used when this tool will be made multi-layer compatible
         TArray<FAlteredImage> mAlteredImageArray;
+        // Distortion Map temporarily stores the displacement vectors
         FFlowMap mDistortionMap;
         FFlowMap mFlowMap;
         // this flow map will be used for undos. It allows us to save only the portion that has changed
