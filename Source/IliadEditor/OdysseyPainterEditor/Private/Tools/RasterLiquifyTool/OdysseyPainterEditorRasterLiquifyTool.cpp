@@ -361,7 +361,7 @@ UOdysseyPainterEditorRasterLiquifyTool::Flow( const FVector2D& iPrevCenter
                             {
                                 newPosition = localPosition;
 
-                                distortion = mFlowMap.toTargetBuffer[distortionOffset] * ( 1.0f - factor * iStrength );
+                                distortion = mFlowMap.toTargetBuffer[distortionOffset] * ( 1.0f - factor * iStrength * 0.01f );
                             }
                             break;
 
@@ -505,7 +505,7 @@ void UOdysseyPainterEditorRasterLiquifyTool::Tick(float iDeltaTime)
             case EOdysseyLiquifyMode::Expand :
             case EOdysseyLiquifyMode::Pinch  :
             case EOdysseyLiquifyMode::Twirl  :
-            case EOdysseyLiquifyMode::Edge  :
+            //case EOdysseyLiquifyMode::Edge  :
             case EOdysseyLiquifyMode::Reconstruct :
                 Flow( mMousePosition
                     , mMousePosition
