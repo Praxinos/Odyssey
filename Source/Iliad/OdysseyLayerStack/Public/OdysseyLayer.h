@@ -160,7 +160,7 @@ public:
     bool IsChildOf(UOdysseyLayer* Layer) const;
 
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
-    virtual FInt32Range GetFrameRange() const;
+    virtual FInt32Range GetFrameRange() const override;
 
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     FText GetLayerName() const;
