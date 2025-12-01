@@ -5,6 +5,7 @@
 #include "Widgets/Animation/Timeline/SOdysseyAnimationLayerStack.h"
 #include "OdysseyAnimationLayer.h"
 #include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineLighttableHeader.h"
+#include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineCellNamesHeader.h"
 #include "OdysseyStyle.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 
@@ -48,6 +49,14 @@ SOdysseyAnimationLayerRow::GenerateWidget( const FName& iRow, const FName& iColu
         }
     }
 
+    if (iRow == "CellNames")
+    {
+        if (iColumn == "Header")
+        {
+            return GenerateCellNamesRowHeaderWidget();
+        }
+    }
+
     return SOdysseyLayerRow::GenerateWidget( iRow, iColumn );
 }
 
@@ -65,10 +74,30 @@ SOdysseyAnimationLayerRow::GenerateOutOfPegsRowHeaderWidget()
         .Text(LOCTEXT("lighttable.timeline-header.out-of-pegs.name", "Out Of Pegs"));
 }
 
+TSharedRef<SWidget>
+SOdysseyAnimationLayerRow::GenerateCellNamesRowHeaderWidget()
+{
+    return SNew( SOdysseyAnimationTimelineCellNamesHeader )
+        .Layer( mLayer );
+}
+
 TArray<TSharedPtr<SWidget>>
 SOdysseyAnimationLayerRow::GenerateMainRowHeaderOptionWidgets()
 {
     TArray<TSharedPtr<SWidget>> widgets;
+
+    if( mLayer->GetCells().Num() )
+    {
+        const FCheckBoxStyle* cellNamesToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>( "Animation.CellNamesToggle" );
+
+        widgets.Add(
+            SNew( SCheckBox )
+            .Style( cellNamesToggleStyle )
+            .IsFocusable( false )
+            .OnCheckStateChanged( this, &SOdysseyAnimationLayerRow::OnCellNamesCheckStateChanged )
+            .IsChecked( this, &SOdysseyAnimationLayerRow::GetCellNamesIsChecked )
+        );
+    }
 
     if (mLayer->HasLighttable())
     {
@@ -100,6 +129,20 @@ SOdysseyAnimationLayerRow::OnLighttableCheckStateChanged(ECheckBoxState iState)
     FOdysseyLighttable lighttable = mLayer->GetLighttable();
     lighttable.bIsActivated = iState == ECheckBoxState::Checked;
     mLayer->SetLighttable(lighttable);
+    GetTreeView()->RequestTreeRefresh(); //needed to display layers previously hidden
+}
+
+ECheckBoxState
+SOdysseyAnimationLayerRow::GetCellNamesIsChecked() const
+{
+    return mLayer->ShouldDisplayCellNames() ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+}
+
+void
+SOdysseyAnimationLayerRow::OnCellNamesCheckStateChanged(ECheckBoxState iState)
+{
+    mLayer->SetDisplayCellNames(iState == ECheckBoxState::Checked);
+
     GetTreeView()->RequestTreeRefresh(); //needed to display layers previously hidden
 }
 

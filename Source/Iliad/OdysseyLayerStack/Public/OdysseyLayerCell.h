@@ -28,6 +28,13 @@ struct FOdysseyLayerCellOutOfPegs
     float Zoom = 100.f;
 };
 
+UENUM(BlueprintType)
+enum class ECellNameIfEmpty: uint8
+{
+    None,
+    IndexInLayer,
+};
+
 UCLASS(Abstract, BlueprintType, HideDropdown)
 class ODYSSEYLAYERSTACK_API UOdysseyLayerCell
     : public UObject
@@ -64,6 +71,15 @@ public:
 
 #if WITH_EDITOR
     UFUNCTION(BlueprintPure, Category="Odyssey|Cell")
+    FString GetName( ECellNameIfEmpty iCellNameIfEmpty ) const;
+
+    UFUNCTION(BlueprintCallable, Category="Odyssey|Cell")
+    void SetName(FString Value);
+
+    UFUNCTION( BlueprintPure, Category = "Odyssey|Cell" )
+    bool HasNoName() const;
+
+    UFUNCTION(BlueprintPure, Category="Odyssey|Cell")
     int GetMark() const;
 
     UFUNCTION(BlueprintCallable, Category="Odyssey|Cell")
@@ -85,7 +101,7 @@ public:
 public:
     virtual UTextureRenderTarget2D* CreateRenderingRenderTarget() const override;
 #if WITH_EDITOR
-    virtual UTexture2D* CreateExportTexture(UObject* Outer, FName Name, EObjectFlags Flags = RF_NoFlags) override;
+    virtual UTexture2D* CreateExportTexture(UObject* iOuter, FName iName, EObjectFlags iFlags = RF_NoFlags) override;
 #endif
     virtual bool BuildRenderPipelineInternal(
         FFrameNumber iFrame,
@@ -133,6 +149,9 @@ protected:
     int IndexInLayer = -1;
 
 #if WITH_EDITORONLY_DATA
+    UPROPERTY()
+    FString Name;
+
     UPROPERTY()
     int Mark = -1;
 

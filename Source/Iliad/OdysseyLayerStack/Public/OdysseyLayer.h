@@ -47,9 +47,11 @@ public:
 #if WITH_EDITOR
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnDisplayChildrenChanged, UOdysseyLayer*);
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnDisplayOptionsChanged, UOdysseyLayer*);
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnDisplayCellNamesChanged, UOdysseyLayer*);
 
     static FOnDisplayChildrenChanged& OnDisplayChildrenChanged();
     static FOnDisplayOptionsChanged& OnDisplayOptionsChanged();
+    static FOnDisplayCellNamesChanged& OnDisplayCellNamesChanged();
     FSimpleMulticastDelegate& OnLighttableChanged();
 #endif
 
@@ -74,6 +76,9 @@ public:
 
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     bool ShouldDisplayOptions() const;
+
+    UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
+    bool ShouldDisplayCellNames() const;
 
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     FOdysseyLighttable GetLighttable() const;
@@ -274,6 +279,7 @@ public:
     const FSlateIcon& GetIconExpanded() const;
     void SetDisplayChildren(bool Value);
     void SetDisplayOptions(bool Value);
+    void SetDisplayCellNames(bool Value);
     void AddCellInteractive(int Index = -1 );
     void AddCellsInteractive(int Index = -1, int Count = 1 );
     void SetOpacityInteractive(float Value);
@@ -362,6 +368,9 @@ protected:
 
     UPROPERTY(NonTransactional)
     bool bDisplayOptions = true;
+
+    UPROPERTY(NonTransactional)
+    bool bDisplayCellNames = false;
 
     UPROPERTY(NonTransactional)
     FOdysseyLighttable Lighttable;

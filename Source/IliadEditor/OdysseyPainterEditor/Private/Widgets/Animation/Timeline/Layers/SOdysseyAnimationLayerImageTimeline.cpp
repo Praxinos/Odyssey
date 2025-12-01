@@ -5,6 +5,7 @@
 #include "OdysseyLayerCellImageStagger.h"
 #include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineLighttable.h"
 #include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineOutOfPegs.h"
+#include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineCellNames.h"
 #include "Widgets/Animation/Timeline/Cells/SOdysseyAnimationCells.h"
 #include "TimelineTools/OdysseyAnimationTimelineTool.h"
 #include "OdysseyAnimationCellsDragDropOperation.h"
@@ -126,6 +127,10 @@ SOdysseyAnimationLayerImageTimeline::GenerateWidget( const FName& iRow, const FN
     {
         return GenerateOutOfPegsRowTimelineWidget();
     }
+    if (iRow == "CellNames")
+    {
+        return GenerateCellNamesRowTimelineWidget();
+    }
 
     return SOdysseyAnimationLayerTimeline::GenerateWidget( iRow, iColumn );
 }
@@ -243,6 +248,14 @@ SOdysseyAnimationLayerImageTimeline::GenerateOutOfPegsRowTimelineWidget()
         .OnActivateOutOfPegs(mOnActivateOutOfPegs)
         .OnInactivateOutOfPegs(mOnInactivateOutOfPegs)
         .OnIsOutOfPegsChecked(mOnIsOutOfPegsChecked);
+}
+
+TSharedRef<SWidget>
+SOdysseyAnimationLayerImageTimeline::GenerateCellNamesRowTimelineWidget()
+{
+    return SNew(SOdysseyAnimationTimelineCellNames, mLayer)
+        .TimelinePosition(mTimelinePosition)
+        .CurrentFrame(mCurrentFrame);
 }
 
 FReply
@@ -626,12 +639,6 @@ SOdysseyAnimationLayerImageTimeline::OnMainSubRowDrop(const FGeometry& iGeometry
     return FReply::Handled();
 }
 
-EVisibility
-SOdysseyAnimationLayerImageTimeline::GetLighttableVisibility() const
-{
-    return mLayer->GetLighttable().bIsActivated && mLayer->ShouldDisplayOptions() ? EVisibility::Visible : EVisibility::Collapsed;
-}
-
 bool
 SOdysseyAnimationLayerImageTimeline::GetShowCellsHandles() const
 {
@@ -664,6 +671,31 @@ SOdysseyAnimationLayerImageTimeline::BuildContextMenu(TSharedRef<FUICommandList>
 
     mAnimationTimelineCellImageStaggerShortcuts = MakeShared<FOdysseyAnimationTimelineCellImageStaggerShortcuts>(mLayer->GetAnimation());
     mAnimationTimelineCellImageStaggerShortcuts->MapActionsToCommandList(CommandList);
+
+    //TODO: harmonize with shortcuts ? see comment below
+    auto IsReadOnly = [this]()
+        {
+            UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>( mLayer->GetLayerStack() );
+            if( !layerStack )
+                return true;
+
+            UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>( layerStack->GetCurrentLayer() );
+            if( !layer )
+                return true;
+
+            if( !layer->IsEditable() )
+                return true;
+
+            TArray<UOdysseyLayerCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
+            if( selectedCells.IsEmpty() )
+            {
+                UOdysseyLayerCell* cell = layer->GetCellAtFrame( mCurrentFrame.Get() );
+                if( !cell )
+                    return true;
+            }
+
+            return false;
+        };
 
     MenuBuilder.AddWidget(
         SNew(SHorizontalBox)
@@ -714,6 +746,54 @@ SOdysseyAnimationLayerImageTimeline::BuildContextMenu(TSharedRef<FUICommandList>
             FOdysseyPainterEditorAnimationCommands::Get().SetCellExposure,
             NAME_None,
             LOCTEXT("timeline-cells.context-menu.set-selected-cells-exposure.name", "Set Exposure")
+        );
+        //TODO: add functions to shortcuts ? but it must be 2 distinct functions: 1 for shortcut with modal request and 1 for the popup menu here with a string/text as parameter
+        // and the first one must call the second one
+        MenuBuilder.AddEditableText(
+            //LOCTEXT( "timeline-cells.context-menu.set-selected-cells-name.name", "" ),
+            LOCTEXT( "timeline-cells.context-menu.set-selected-cells-name.name", "   Name" ),
+            LOCTEXT( "timeline-cells.context-menu.set-selected-cells-name.tooltip", "Set the cell name" ),
+            FSlateIcon(),
+            TAttribute<FText>::CreateLambda( [this]() -> FText
+                                             {
+                                                 TArray<FString> selected_names;
+                                                 const TArray<UOdysseyLayerCell*> selectedCells = mLayer->GetLayerStack()->GetCellSelection()->GetSelectedCells();
+                                                 if( selectedCells.IsEmpty() )
+                                                 {
+                                                     UOdysseyLayerCell* cell = mLayer->GetCellAtFrame( mCurrentFrame.Get() );
+                                                     return cell ? FText::FromString( cell->GetName( ECellNameIfEmpty::None ) ) : FText::GetEmpty();
+                                                 }
+                                                 for( const UOdysseyLayerCell* selectedcell : selectedCells )
+                                                     selected_names.AddUnique( selectedcell->GetName( ECellNameIfEmpty::None ) );
+
+                                                 if( selected_names.IsEmpty() )
+                                                     return FText::GetEmpty();
+
+                                                 if( selected_names.Num() != 1 )
+                                                     return FText::FromString( TEXT( "*" ) );
+
+                                                 return FText::FromString( selected_names[0] );
+                                             } ),
+            FOnTextCommitted::CreateLambda( [this]( const FText& iNewText, ETextCommit::Type iCommitType )
+                                            {
+                                                if( iCommitType != ETextCommit::OnEnter )
+                                                    return;
+
+                                                if( iNewText.ToString() == TEXT( "*" ) )
+                                                    return;
+
+                                                const TArray<UOdysseyLayerCell*> selectedCells = mLayer->GetLayerStack()->GetCellSelection()->GetSelectedCells();
+                                                if( selectedCells.IsEmpty() )
+                                                {
+                                                    UOdysseyLayerCell* cell = mLayer->GetCellAtFrame( mCurrentFrame.Get() );
+                                                    cell->SetName( iNewText.ToString() );
+                                                    return;
+                                                }
+                                                for( UOdysseyLayerCell* selectedcell : selectedCells )
+                                                    selectedcell->SetName( iNewText.ToString() );
+                                            } ),
+            FOnTextChanged(),
+            IsReadOnly()
         );
         MenuBuilder.AddSubMenu(
             LOCTEXT("timeline-cells.context-menu.cell-mark.name", "Mark"),
