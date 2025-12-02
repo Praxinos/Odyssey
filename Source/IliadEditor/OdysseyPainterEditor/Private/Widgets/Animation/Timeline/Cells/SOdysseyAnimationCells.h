@@ -88,7 +88,6 @@ private:
 
     //EVisibility GetFrameSelectorVisibility() const;
 
-    EVisibility GetCellVisibility(UOdysseyLayerCell* iCell) const;
     float GetCellHeight() const;
     float GetCellExposure(UOdysseyLayerCell* iCell) const;
 

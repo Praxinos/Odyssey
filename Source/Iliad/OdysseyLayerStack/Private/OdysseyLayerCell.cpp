@@ -11,6 +11,32 @@
 #include "Engine/Texture2D.h"
 #include "OdysseyBlendShader.h"
 
+void
+UOdysseyLayerCell::PostInitProperties() //override
+{
+    Super::PostInitProperties();
+}
+
+void
+UOdysseyLayerCell::PostLoad() //override
+{
+    Super::PostLoad();
+
+    if( Mark_DEPRECATED != -1 )
+    {
+        Marks.Add( 0, FCellMark{ Mark_DEPRECATED } );
+        Mark_DEPRECATED = -1;
+    }
+}
+
+void
+UOdysseyLayerCell::PostDuplicate( EDuplicateMode::Type iDuplicateMode ) //override
+{
+    Super::PostDuplicate( iDuplicateMode );
+}
+
+//---
+
 UOdysseyLayer*
 UOdysseyLayerCell::GetLayer() const
 {
@@ -94,8 +120,15 @@ UOdysseyLayerCell::HasNoName() const
 int
 UOdysseyLayerCell::GetMark() const
 {
-    return Mark;
+    return Marks.Find( 0 ) ? Marks.Find( 0 )->Index : -1;
 }
+
+TMap<int, FCellMark>
+UOdysseyLayerCell::GetMarks() const
+{
+    return Marks;
+}
+
 #endif
 
 void
@@ -109,8 +142,19 @@ UOdysseyLayerCell::SetExposure(int Value)
 void
 UOdysseyLayerCell::ExposureChanged(bool iIsInteractive)
 {
+    if( !iIsInteractive )
+    {
+        for( TPair<int, FCellMark> pair : Marks )
+        {
+            int32 index = pair.Key;
+            if( index >= Exposure )
+                Marks.Remove( index );
+        }
+    }
+
     if (GetLayer())
         GetLayer()->InvalidateCellsFrameRanges();
+
     RenderingCompositionChanged(iIsInteractive);
 }
 
@@ -155,11 +199,22 @@ UOdysseyLayerCell::SetName( FString iValue )
 }
 
 void
-UOdysseyLayerCell::SetMark(int Value)
+UOdysseyLayerCell::SetMark(int iValue)
 {
     Modify();
 
-    Mark = Value;
+    if( iValue == -1 )
+        Marks.Remove( 0 );
+    else
+        Marks.Add( 0, FCellMark{ iValue } );
+}
+
+void
+UOdysseyLayerCell::SetMarks( const TMap<int, FCellMark>& iMarks )
+{
+    Modify();
+
+    Marks = iMarks;
 }
 
 void

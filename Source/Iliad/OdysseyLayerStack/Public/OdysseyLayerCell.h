@@ -35,6 +35,19 @@ enum class ECellNameIfEmpty: uint8
     IndexInLayer,
 };
 
+USTRUCT(BlueprintType)
+struct FCellMark
+{
+    GENERATED_BODY()
+
+    /**
+     * The value of the cell mark
+     */
+    UPROPERTY(BlueprintReadWrite, Category="Odyssey|Cell")
+    int32 Index = 0;
+};
+
+
 UCLASS(Abstract, BlueprintType, HideDropdown)
 class ODYSSEYLAYERSTACK_API UOdysseyLayerCell
     : public UObject
@@ -46,6 +59,11 @@ class ODYSSEYLAYERSTACK_API UOdysseyLayerCell
 public:
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnOutOfPegsChanged, bool /*iIsInteractive*/)
 #endif
+
+public:
+    virtual void PostInitProperties() override;
+    virtual void PostLoad() override;
+    virtual void PostDuplicate( EDuplicateMode::Type iDuplicateMode ) override;
 
 public:
     UFUNCTION(BlueprintPure, Category="Odyssey|Cell")
@@ -79,11 +97,19 @@ public:
     UFUNCTION( BlueprintPure, Category = "Odyssey|Cell" )
     bool HasNoName() const;
 
+    UE_DEPRECATED( 5.7, "Use GetMarks() to return all marks" )
     UFUNCTION(BlueprintPure, Category="Odyssey|Cell")
     int GetMark() const;
 
+    UE_DEPRECATED( 5.7, "Use SetMarks() to set all marks" )
     UFUNCTION(BlueprintCallable, Category="Odyssey|Cell")
     void SetMark(int Value);
+
+    UFUNCTION( BlueprintPure, Category = "Odyssey|Cell" )
+    TMap<int, FCellMark> GetMarks() const;
+
+    UFUNCTION( BlueprintCallable, Category = "Odyssey|Cell" )
+    void SetMarks( const TMap<int, FCellMark>& iMarks );
 
     UFUNCTION(BlueprintCallable, Category="Odyssey|Cell")
     virtual UOdysseyLayerCell* Break(int Frame, bool bClear);
@@ -153,7 +179,12 @@ protected:
     FString Name;
 
     UPROPERTY()
-    int Mark = -1;
+    int Mark_DEPRECATED = -1;
+
+    // The key is the index of the mark in the cell
+    // (index 0 means the first frame of the cell, wherever the cell is in the layer)
+    UPROPERTY()
+    TMap<int, FCellMark> Marks;
 
     UPROPERTY(NonTransactional, DuplicateTransient)
     FOdysseyLayerCellOutOfPegs OutOfPegs;
