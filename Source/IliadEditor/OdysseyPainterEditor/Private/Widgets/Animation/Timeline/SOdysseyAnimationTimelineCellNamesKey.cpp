@@ -19,16 +19,10 @@ SOdysseyAnimationTimelineCellNamesKey::Construct(const FArguments& InArgs)
 
     ChildSlot
     [
-        SNew(SOdysseyAnimationTimelineSection)
-        .TimelinePosition(InArgs._TimelinePosition)
-        .WidthInFrames(1)
-        .HAlign(HAlign_Center)
-        [
-            SNew( SInlineEditableTextBlock ) //TODO: doesn't work, see SInlineEditableTextBlock::OnMouseButtonDown#267 ...
-            .Text( this, &SOdysseyAnimationTimelineCellNamesKey::GetText )
-            .IsEnabled_Lambda( [this](){ return mCell.Get()->GetLayer()->IsEditable();} )
-            .OnTextCommitted (this, &SOdysseyAnimationTimelineCellNamesKey::OnNameCommited )
-        ]
+        SNew( SInlineEditableTextBlock ) //TODO: doesn't work, see SInlineEditableTextBlock::OnMouseButtonDown#267 ...
+        .Text( this, &SOdysseyAnimationTimelineCellNamesKey::GetText )
+        .IsEnabled_Lambda( [this](){ return mCell.Get()->GetLayer()->IsEditable();} )
+        .OnTextCommitted (this, &SOdysseyAnimationTimelineCellNamesKey::OnNameCommited )
     ];
 }
 

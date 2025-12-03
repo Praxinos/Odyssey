@@ -66,7 +66,7 @@ SOdysseyAnimationTimelineCellNames::RebuildRow()
             [
                 SNew( SOdysseyAnimationTimelineSection )
                     .TimelinePosition( mTimelinePosition )
-                    .HAlign( HAlign_Left )
+                    .HAlign( HAlign_Fill )
                     .WidthInFrames_Lambda(
                         [cell]()
                         {
