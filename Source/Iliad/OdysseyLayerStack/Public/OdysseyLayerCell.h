@@ -125,6 +125,10 @@ public:
 #endif
 
 public:
+    int32 FrameInLayerToIndexInCell( FFrameNumber iFrame );
+    FFrameNumber IndexInCellToFrameInLayer( int32 iIndex );
+
+public:
     virtual UTextureRenderTarget2D* CreateRenderingRenderTarget() const override;
 #if WITH_EDITOR
     virtual UTexture2D* CreateExportTexture(UObject* iOuter, FName iName, EObjectFlags iFlags = RF_NoFlags) override;

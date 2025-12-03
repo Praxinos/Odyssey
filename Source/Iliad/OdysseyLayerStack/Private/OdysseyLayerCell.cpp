@@ -56,6 +56,24 @@ UOdysseyLayerCell::OldSerialize(FArchive& Ar)
     }
 }
 
+int32
+UOdysseyLayerCell::FrameInLayerToIndexInCell( FFrameNumber iFrame )
+{
+    FFrameNumber start_in_layer = GetFrameRange().GetLowerBoundValue();
+    int32 index_in_cell = ( iFrame - start_in_layer ).Value;
+
+    return index_in_cell;
+}
+
+FFrameNumber
+UOdysseyLayerCell::IndexInCellToFrameInLayer( int32 iIndex )
+{
+    FFrameNumber start_in_layer = GetFrameRange().GetLowerBoundValue();
+    int32 frame_in_layer = ( iIndex + start_in_layer ).Value;
+
+    return frame_in_layer;
+}
+
 UOdysseyLayerStack*
 UOdysseyLayerCell::GetLayerStack() const
 {

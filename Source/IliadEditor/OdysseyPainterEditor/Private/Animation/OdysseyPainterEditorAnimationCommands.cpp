@@ -86,6 +86,25 @@ FOdysseyPainterEditorAnimationCommands::RegisterCommands()
         SetCellMark.Add(commandInfo);
     }
 
+    UI_BUNDLE_COMMAND( RemoveCellMarkAtFrame, TimelineShortcuts, "Remove Cell Mark at Frame", "Removes any cell mark applied on the current frame", EUserInterfaceActionType::Button, FInputChord());
+
+    for (int i = 0; i < 12; i++)
+    {
+        FNumberFormattingOptions options;
+        options.SetMinimumIntegralDigits(2);
+        TSharedPtr<FUICommandInfo> commandInfo = FUICommandInfoDecl(
+              this->AsShared()
+            , FName( *FString::Printf( TEXT( "SetCellMarkAtFrame-%d" ), i + 1 ))
+            , FText::Format( LOCTEXT( "commands.set-cell-mark-at-frame.label", "Set Cell Mark at Frame #{0}"), FText::AsNumber(i + 1, &options) )
+            , FText::Format( LOCTEXT( "commands.set-cell-mark-at-frame.tooltip", "Sets the Cell Mark #{0} on the current frame"), FText::AsNumber(i + 1, &options))
+            , TimelineShortcuts
+        )
+        .UserInterfaceType( EUserInterfaceActionType::Button )
+        .DefaultChord( FInputChord() );
+
+        SetCellMarkAtFrame.Add(commandInfo);
+    }
+
     UI_BUNDLE_COMMAND( PanZoomTimeline, TimelineShortcuts,  "Pan / Zoom Timeline", "Hold the key to Pan (Left Mouse Button) or Zoom (Right Mouse Button) the Timeline",                                        EUserInterfaceActionType::None, FInputChord(EKeys::M));
 
     for (int i = 0; i < 10; i++)

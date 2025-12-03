@@ -3,10 +3,12 @@
 
 #pragma once
 
+#include "OdysseyAnimationCell.h"
 #include "OdysseyEditorShortcuts.h"
 
 class FOdysseyPainterEditor;
 class UOdysseyAnimation;
+struct FCellMark;
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyAnimationGlobalCellsShortcuts
     : public IOdysseyEditorShortcuts
@@ -35,6 +37,12 @@ public:
 
     void Action_SetCellMark(int iMarkId);
     bool CanAction_SetCellMark(int iMarkId);
+
+    void Action_RemoveCellMarkAtFrame();
+    bool CanAction_RemoveCellMarkAtFrame();
+
+    void Action_SetCellMarkAtFrame(FCellMark iMarkId);
+    bool CanAction_SetCellMarkAtFrame(FCellMark iMarkId);
 
 public:
     //Shortcuts
