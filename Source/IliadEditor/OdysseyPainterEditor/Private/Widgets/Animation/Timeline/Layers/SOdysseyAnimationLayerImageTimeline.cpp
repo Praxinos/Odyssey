@@ -955,6 +955,8 @@ SOdysseyAnimationLayerImageTimeline::MassModifierWindowClosed( const TSharedRef<
 void
 SOdysseyAnimationLayerImageTimeline::BuildCellsMarksSubMenu(FMenuBuilder& iMenuBuilder, FFrameNumber iClickedFrame)
 {
+    iMenuBuilder.BeginSection( NAME_None, FText::Format( LOCTEXT( "timeline-cells.context-menu.cell-mark.section-clicked.label", "Mark at Frame {0}" ), iClickedFrame.Value + 1 ) );
+
     iMenuBuilder.AddMenuEntry(
         FUIAction(
             FExecuteAction::CreateRaw( this, &SOdysseyAnimationLayerImageTimeline::RemoveCellMarkOnClickedFrame, iClickedFrame ),
@@ -967,6 +969,28 @@ SOdysseyAnimationLayerImageTimeline::BuildCellsMarksSubMenu(FMenuBuilder& iMenuB
 
     iMenuBuilder.AddSeparator();
 
+    UOdysseyPainterEditorAnimationProjectSettings* settings = UOdysseyPainterEditorAnimationProjectSettings::Get();
+    for( int i = 0; i < settings->AnimationCellsMarks.Num(); i++ )
+    {
+        FCellMark mark;
+        mark.Index = i;
+        iMenuBuilder.AddMenuEntry(
+            FUIAction(
+                FExecuteAction::CreateRaw( this, &SOdysseyAnimationLayerImageTimeline::SetCellMarkOnClickedFrame, iClickedFrame, mark ),
+                FCanExecuteAction::CreateRaw( this, &SOdysseyAnimationLayerImageTimeline::CanSetCellMarkOnClickedFrame, iClickedFrame ),
+                FIsActionChecked::CreateRaw( this, &SOdysseyAnimationLayerImageTimeline::IsCellMarkCheckedOnClickedFrame, iClickedFrame, mark )
+            ),
+            CreateCellMarkOnClickedFrameWidget( iClickedFrame, i ),
+            NAME_None,
+            TAttribute<FText>(),
+            EUserInterfaceActionType::RadioButton
+        );
+    }
+
+    iMenuBuilder.EndSection();
+
+    iMenuBuilder.BeginSection( NAME_None, LOCTEXT( "timeline-cells.context-menu.cell-mark.section-selected.label", "Mark in Selected Cells" ) );
+
     iMenuBuilder.AddMenuEntry(
         LOCTEXT("timeline-cells.context-menu.cell-mark.reset-all.name", "Remove All"),
         LOCTEXT("timeline-cells.context-menu.cell-mark.reset-all.tooltip", "Remove any mark from selected cells"),
@@ -977,25 +1001,29 @@ SOdysseyAnimationLayerImageTimeline::BuildCellsMarksSubMenu(FMenuBuilder& iMenuB
         )
     );
 
-    iMenuBuilder.AddSeparator();
+    //iMenuBuilder.AddSeparator();
 
-    UOdysseyPainterEditorAnimationProjectSettings* settings = UOdysseyPainterEditorAnimationProjectSettings::Get();
-    for (int i = 0; i < settings->AnimationCellsMarks.Num(); i++)
-    {
-        FCellMark mark;
-        mark.Index = i;
-        iMenuBuilder.AddMenuEntry(
-            FUIAction(
-                FExecuteAction::CreateRaw( this, &SOdysseyAnimationLayerImageTimeline::SetCellMark, mark ),
-                FCanExecuteAction::CreateRaw( this, &SOdysseyAnimationLayerImageTimeline::CanSetCellMark ),
-                FIsActionChecked::CreateRaw( this, &SOdysseyAnimationLayerImageTimeline::IsCellMarkChecked, mark )
-            ),
-            CreateCellMarkMenuWidget(i),
-            NAME_None,
-            TAttribute<FText>(),
-            EUserInterfaceActionType::RadioButton
-        );
-    }
+    // Keep the functions to manage setting mark on selected cells but only on the first frame
+
+    ////UOdysseyPainterEditorAnimationProjectSettings* settings = UOdysseyPainterEditorAnimationProjectSettings::Get();
+    //for (int i = 0; i < settings->AnimationCellsMarks.Num(); i++)
+    //{
+    //    FCellMark mark;
+    //    mark.Index = i;
+    //    iMenuBuilder.AddMenuEntry(
+    //        FUIAction(
+    //            FExecuteAction::CreateRaw( this, &SOdysseyAnimationLayerImageTimeline::SetCellMark, mark ),
+    //            FCanExecuteAction::CreateRaw( this, &SOdysseyAnimationLayerImageTimeline::CanSetCellMark ),
+    //            FIsActionChecked::CreateRaw( this, &SOdysseyAnimationLayerImageTimeline::IsCellMarkChecked, mark )
+    //        ),
+    //        CreateCellMarkMenuWidget(i),
+    //        NAME_None,
+    //        TAttribute<FText>(),
+    //        EUserInterfaceActionType::RadioButton
+    //    );
+    //}
+
+    iMenuBuilder.EndSection();
 }
 
 void
@@ -1044,19 +1072,22 @@ SOdysseyAnimationLayerImageTimeline::CreateRemoveCellMarkOnClickedFrameWidget( F
 {
     if( !mLayer->IsEditable() )
         return SNew( STextBlock )
-            .Text( FText::Format( LOCTEXT( "timeline-cells.context-menu.cell-mark.reset-clicked-nothing.label", "No Mark at Frame {0}" ), iClickedFrame.Value + 1 ) );
+            .Text( FText::Format( LOCTEXT( "timeline-cells.context-menu.cell-mark.reset-clicked-nothing.label", "No Mark" ), iClickedFrame.Value + 1 ) );
+            //.Text( FText::Format( LOCTEXT( "timeline-cells.context-menu.cell-mark.reset-clicked-nothing.label", "No Mark at {0}" ), iClickedFrame.Value + 1 ) ); // To display again the frame
 
     UOdysseyLayerCell* cell = mLayer->GetCellAtFrame( iClickedFrame.Value );
     if( !cell )
         return SNew( STextBlock )
-            .Text( FText::Format( LOCTEXT( "timeline-cells.context-menu.cell-mark.reset-clicked-nothing.label", "No Mark at Frame {0}" ), iClickedFrame.Value + 1 ) );
+            .Text( FText::Format( LOCTEXT( "timeline-cells.context-menu.cell-mark.reset-clicked-nothing.label", "No Mark" ), iClickedFrame.Value + 1 ) );
+            //.Text( FText::Format( LOCTEXT( "timeline-cells.context-menu.cell-mark.reset-clicked-nothing.label", "No Mark at {0}" ), iClickedFrame.Value + 1 ) ); // To display again the frame
 
     TMap<int, FCellMark> marks = cell->GetMarks();
     int32 index_in_cell = cell->FrameInLayerToIndexInCell( iClickedFrame );
 
     if( !marks.Contains( index_in_cell ) )
         return SNew( STextBlock )
-            .Text( FText::Format( LOCTEXT( "timeline-cells.context-menu.cell-mark.reset-clicked-nothing.label", "No Mark at Frame {0}" ), iClickedFrame.Value + 1 ) );
+            .Text( FText::Format( LOCTEXT( "timeline-cells.context-menu.cell-mark.reset-clicked-nothing.label", "No Mark" ), iClickedFrame.Value + 1 ) );
+            //.Text( FText::Format( LOCTEXT( "timeline-cells.context-menu.cell-mark.reset-clicked-nothing.label", "No Mark at {0}" ), iClickedFrame.Value + 1 ) ); // To display again the frame
 
     //---
 
@@ -1096,12 +1127,13 @@ SOdysseyAnimationLayerImageTimeline::CreateRemoveCellMarkOnClickedFrameWidget( F
             .ColorAndOpacity( iconColor )
         ]
 
-        + SHorizontalBox::Slot()
-        .AutoWidth()
-        [
-            SNew( STextBlock )
-            .Text( FText::Format( LOCTEXT( "timeline-cells.context-menu.cell-mark.reset-clicked.label-frame", " at Frame {0}" ), iClickedFrame.Value + 1 ) )
-        ];
+        //+ SHorizontalBox::Slot()
+        //.AutoWidth()
+        //[
+        //    SNew( STextBlock )
+        //    .Text( FText::Format( LOCTEXT( "timeline-cells.context-menu.cell-mark.reset-clicked.label-frame", " (at {0})" ), iClickedFrame.Value + 1 ) ) // To display again the frame
+        //]
+        ;
 }
 
 FText
@@ -1161,97 +1193,198 @@ SOdysseyAnimationLayerImageTimeline::CanRemoveCellMarkOnClickedFrame( FFrameNumb
 
 //---
 
+//void
+//SOdysseyAnimationLayerImageTimeline::SetCellMark( FCellMark iMarkId )
+//{
+//    if (!mLayer->IsEditable())
+//        return;
+//
+//    TArray<UOdysseyLayerCell*> selectedCells = mLayer->GetLayerStack()->GetCellSelection()->GetSelectedCells();
+//    if (selectedCells.IsEmpty())
+//        return;
+//
+//    FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.set-mark", "Set cell mark"));
+//
+//    mOnTransactCurrentFrame.ExecuteIfBound(selectedCells[0]->GetFrameRange().GetLowerBoundValue());
+//    for (UOdysseyLayerCell* selectedCell : selectedCells)
+//    {
+//        TMap<int, FCellMark> marks = selectedCell->GetMarks();
+//        marks.Add( 0, iMarkId );
+//        selectedCell->SetMarks( marks );
+//    }
+//}
+//
+//bool
+//SOdysseyAnimationLayerImageTimeline::CanSetCellMark() const
+//{
+//    if (!mLayer->IsEditable())
+//        return false;
+//
+//    TArray<UOdysseyLayerCell*> selectedCells = mLayer->GetLayerStack()->GetCellSelection()->GetSelectedCells();
+//    if (selectedCells.IsEmpty())
+//        return false;
+//
+//    return true;
+//}
+//
+//bool
+//SOdysseyAnimationLayerImageTimeline::IsCellMarkChecked( FCellMark iMarkId ) const
+//{
+//    TArray<UOdysseyLayerCell*> selectedCells = mLayer->GetLayerStack()->GetCellSelection()->GetSelectedCells();
+//    if (selectedCells.IsEmpty())
+//        return false;
+//
+//    for (UOdysseyLayerCell* selectedCell : selectedCells)
+//    {
+//        TMap<int, FCellMark> marks = selectedCell->GetMarks();
+//        if( !marks.Contains( 0 ) )
+//            return false;
+//        if( marks[0].Index != iMarkId.Index )
+//            return false;
+//    }
+//
+//    return true;
+//}
+//
+//TSharedRef<SWidget>
+//SOdysseyAnimationLayerImageTimeline::CreateCellMarkMenuWidget(int iMarkId)
+//{
+//    UOdysseyPainterEditorAnimationProjectSettings* settings = UOdysseyPainterEditorAnimationProjectSettings::Get();
+//    const FAnimationCellMarkSettings& markSettings = settings->AnimationCellsMarks[iMarkId];
+//    const FSlateBrush* icon = FCoreStyle::Get().GetBrush( "GenericWhiteBox" );
+//    switch(markSettings.Symbol)
+//    {
+//        case EOdysseyAnimationCellMarkSymbol::Triangle: icon = FOdysseyStyle::GetBrush("Animation.CellMark.Symbol.Triangle"); break;
+//        case EOdysseyAnimationCellMarkSymbol::FilledTriangle: icon = FOdysseyStyle::GetBrush("Animation.CellMark.Symbol.Filled.Triangle"); break;
+//        case EOdysseyAnimationCellMarkSymbol::Circle: icon = FOdysseyStyle::GetBrush("Animation.CellMark.Symbol.Circle"); break;
+//        case EOdysseyAnimationCellMarkSymbol::FilledCircle: icon = FOdysseyStyle::GetBrush("Animation.CellMark.Symbol.Filled.Circle"); break;
+//        case EOdysseyAnimationCellMarkSymbol::Diamond: icon = FOdysseyStyle::GetBrush("Animation.CellMark.Symbol.Diamond"); break;
+//        case EOdysseyAnimationCellMarkSymbol::FilledDiamond: icon = FOdysseyStyle::GetBrush("Animation.CellMark.Symbol.Filled.Diamond"); break;
+//        case EOdysseyAnimationCellMarkSymbol::Star: icon = FOdysseyStyle::GetBrush("Animation.CellMark.Symbol.Star"); break;
+//        case EOdysseyAnimationCellMarkSymbol::FilledStar: icon = FOdysseyStyle::GetBrush("Animation.CellMark.Symbol.Filled.Star"); break;
+//        case EOdysseyAnimationCellMarkSymbol::Cross: icon = FOdysseyStyle::GetBrush("Animation.CellMark.Symbol.Cross"); break;
+//        case EOdysseyAnimationCellMarkSymbol::Checkmark: icon = FOdysseyStyle::GetBrush("Animation.CellMark.Symbol.Checkmark"); break;
+//    }
+//    FLinearColor iconColor = markSettings.Color;
+//    FText name = FText::FromName(markSettings.Name);
+//
+//    return SNew(SHorizontalBox)
+//    + SHorizontalBox::Slot()
+//    .Padding(FMargin(0, 0, 4, 0))
+//    .AutoWidth()
+//    [
+//        SNew(SImage)
+//        .Image(icon)
+//        .ColorAndOpacity(iconColor)
+//    ]
+//    + SHorizontalBox::Slot()
+//    .AutoWidth()
+//    [
+//        SNew(STextBlock)
+//        .Text(name)
+//    ];
+//}
+
+//---
+
 void
-SOdysseyAnimationLayerImageTimeline::SetCellMark( FCellMark iMarkId )
+SOdysseyAnimationLayerImageTimeline::SetCellMarkOnClickedFrame( FFrameNumber iClickedFrame, FCellMark iMarkId )
 {
-    if (!mLayer->IsEditable())
+    if( !mLayer->IsEditable() )
         return;
 
-    TArray<UOdysseyLayerCell*> selectedCells = mLayer->GetLayerStack()->GetCellSelection()->GetSelectedCells();
-    if (selectedCells.IsEmpty())
+    UOdysseyLayerCell* cell = mLayer->GetCellAtFrame( iClickedFrame.Value );
+    if( !cell )
         return;
 
-    FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.set-mark", "Set cell mark"));
+    TMap<int, FCellMark> marks = cell->GetMarks();
+    int32 index_in_cell = cell->FrameInLayerToIndexInCell( iClickedFrame );
 
-    mOnTransactCurrentFrame.ExecuteIfBound(selectedCells[0]->GetFrameRange().GetLowerBoundValue());
-    for (UOdysseyLayerCell* selectedCell : selectedCells)
-    {
-        TMap<int, FCellMark> marks = selectedCell->GetMarks();
-        marks.Add( 0, iMarkId );
-        selectedCell->SetMarks( marks );
-    }
+    FScopedTransaction ScopedTransaction( LOCTEXT( "timeline-cells.transaction.set-mark-clicked", "Set cell mark on clicked frame" ) );
+
+    marks.Add( index_in_cell, iMarkId );
+    cell->SetMarks( marks );
 }
 
 bool
-SOdysseyAnimationLayerImageTimeline::CanSetCellMark() const
+SOdysseyAnimationLayerImageTimeline::CanSetCellMarkOnClickedFrame( FFrameNumber iClickedFrame ) const
 {
-    if (!mLayer->IsEditable())
+    if( !mLayer->IsEditable() )
         return false;
 
-    TArray<UOdysseyLayerCell*> selectedCells = mLayer->GetLayerStack()->GetCellSelection()->GetSelectedCells();
-    if (selectedCells.IsEmpty())
+    UOdysseyLayerCell* cell = mLayer->GetCellAtFrame( iClickedFrame.Value );
+    if( !cell )
         return false;
+
+    //TMap<int, FCellMark> marks = cell->GetMarks();
+    //int32 index_in_cell = cell->FrameInLayerToIndexInCell( iClickedFrame );
+
+    //if( !marks.Contains( index_in_cell ) )
+    //    return false;
 
     return true;
 }
 
 bool
-SOdysseyAnimationLayerImageTimeline::IsCellMarkChecked( FCellMark iMarkId ) const
+SOdysseyAnimationLayerImageTimeline::IsCellMarkCheckedOnClickedFrame( FFrameNumber iClickedFrame, FCellMark iMarkId ) const
 {
-    TArray<UOdysseyLayerCell*> selectedCells = mLayer->GetLayerStack()->GetCellSelection()->GetSelectedCells();
-    if (selectedCells.IsEmpty())
+    if( !mLayer->IsEditable() )
         return false;
 
-    for (UOdysseyLayerCell* selectedCell : selectedCells)
-    {
-        TMap<int, FCellMark> marks = selectedCell->GetMarks();
-        if( !marks.Contains( 0 ) )
-            return false;
-        if( marks[0].Index != iMarkId.Index )
-            return false;
-    }
+    UOdysseyLayerCell* cell = mLayer->GetCellAtFrame( iClickedFrame.Value );
+    if( !cell )
+        return false;
+
+    TMap<int, FCellMark> marks = cell->GetMarks();
+    int32 index_in_cell = cell->FrameInLayerToIndexInCell( iClickedFrame );
+
+    if( !marks.Contains( index_in_cell ) )
+        return false;
+
+    if( marks[index_in_cell].Index != iMarkId.Index )
+        return false;
 
     return true;
 }
 
 TSharedRef<SWidget>
-SOdysseyAnimationLayerImageTimeline::CreateCellMarkMenuWidget(int iMarkId)
+SOdysseyAnimationLayerImageTimeline::CreateCellMarkOnClickedFrameWidget( FFrameNumber iClickedFrame, int iMarkId )
 {
     UOdysseyPainterEditorAnimationProjectSettings* settings = UOdysseyPainterEditorAnimationProjectSettings::Get();
     const FAnimationCellMarkSettings& markSettings = settings->AnimationCellsMarks[iMarkId];
     const FSlateBrush* icon = FCoreStyle::Get().GetBrush( "GenericWhiteBox" );
-    switch(markSettings.Symbol)
+    switch( markSettings.Symbol )
     {
-        case EOdysseyAnimationCellMarkSymbol::Triangle: icon = FOdysseyStyle::GetBrush("Animation.CellMark.Symbol.Triangle"); break;
-        case EOdysseyAnimationCellMarkSymbol::FilledTriangle: icon = FOdysseyStyle::GetBrush("Animation.CellMark.Symbol.Filled.Triangle"); break;
-        case EOdysseyAnimationCellMarkSymbol::Circle: icon = FOdysseyStyle::GetBrush("Animation.CellMark.Symbol.Circle"); break;
-        case EOdysseyAnimationCellMarkSymbol::FilledCircle: icon = FOdysseyStyle::GetBrush("Animation.CellMark.Symbol.Filled.Circle"); break;
-        case EOdysseyAnimationCellMarkSymbol::Diamond: icon = FOdysseyStyle::GetBrush("Animation.CellMark.Symbol.Diamond"); break;
-        case EOdysseyAnimationCellMarkSymbol::FilledDiamond: icon = FOdysseyStyle::GetBrush("Animation.CellMark.Symbol.Filled.Diamond"); break;
-        case EOdysseyAnimationCellMarkSymbol::Star: icon = FOdysseyStyle::GetBrush("Animation.CellMark.Symbol.Star"); break;
-        case EOdysseyAnimationCellMarkSymbol::FilledStar: icon = FOdysseyStyle::GetBrush("Animation.CellMark.Symbol.Filled.Star"); break;
-        case EOdysseyAnimationCellMarkSymbol::Cross: icon = FOdysseyStyle::GetBrush("Animation.CellMark.Symbol.Cross"); break;
-        case EOdysseyAnimationCellMarkSymbol::Checkmark: icon = FOdysseyStyle::GetBrush("Animation.CellMark.Symbol.Checkmark"); break;
+        case EOdysseyAnimationCellMarkSymbol::Triangle: icon = FOdysseyStyle::GetBrush( "Animation.CellMark.Symbol.Triangle" ); break;
+        case EOdysseyAnimationCellMarkSymbol::FilledTriangle: icon = FOdysseyStyle::GetBrush( "Animation.CellMark.Symbol.Filled.Triangle" ); break;
+        case EOdysseyAnimationCellMarkSymbol::Circle: icon = FOdysseyStyle::GetBrush( "Animation.CellMark.Symbol.Circle" ); break;
+        case EOdysseyAnimationCellMarkSymbol::FilledCircle: icon = FOdysseyStyle::GetBrush( "Animation.CellMark.Symbol.Filled.Circle" ); break;
+        case EOdysseyAnimationCellMarkSymbol::Diamond: icon = FOdysseyStyle::GetBrush( "Animation.CellMark.Symbol.Diamond" ); break;
+        case EOdysseyAnimationCellMarkSymbol::FilledDiamond: icon = FOdysseyStyle::GetBrush( "Animation.CellMark.Symbol.Filled.Diamond" ); break;
+        case EOdysseyAnimationCellMarkSymbol::Star: icon = FOdysseyStyle::GetBrush( "Animation.CellMark.Symbol.Star" ); break;
+        case EOdysseyAnimationCellMarkSymbol::FilledStar: icon = FOdysseyStyle::GetBrush( "Animation.CellMark.Symbol.Filled.Star" ); break;
+        case EOdysseyAnimationCellMarkSymbol::Cross: icon = FOdysseyStyle::GetBrush( "Animation.CellMark.Symbol.Cross" ); break;
+        case EOdysseyAnimationCellMarkSymbol::Checkmark: icon = FOdysseyStyle::GetBrush( "Animation.CellMark.Symbol.Checkmark" ); break;
     }
     FLinearColor iconColor = markSettings.Color;
-    FText name = FText::FromName(markSettings.Name);
+    FText name = FText::FromName( markSettings.Name );
 
-    return SNew(SHorizontalBox)
-    + SHorizontalBox::Slot()
-    .Padding(FMargin(0, 0, 4, 0))
-    .AutoWidth()
-    [
-        SNew(SImage)
-        .Image(icon)
-        .ColorAndOpacity(iconColor)
-    ]
-    + SHorizontalBox::Slot()
-    .AutoWidth()
-    [
-        SNew(STextBlock)
-        .Text(name)
-    ];
+    return SNew( SHorizontalBox )
+        + SHorizontalBox::Slot()
+        .Padding( FMargin( 0, 0, 4, 0 ) )
+        .AutoWidth()
+        [
+            SNew( SImage )
+            .Image( icon )
+            .ColorAndOpacity( iconColor )
+        ]
+        + SHorizontalBox::Slot()
+        .AutoWidth()
+        [
+            SNew( STextBlock )
+            .Text( FText::Format( LOCTEXT( "timeline-cells.context-menu.cell-mark.set-clicked.label-frame", "{0}" ), name, iClickedFrame.Value + 1 ) )
+            //.Text( FText::Format( LOCTEXT( "timeline-cells.context-menu.cell-mark.set-clicked.label-frame", "{0} (at {1})" ), name, iClickedFrame.Value + 1 ) ) // To display again the frame
+        ];
 }
-
 
 #undef LOCTEXT_NAMESPACE
