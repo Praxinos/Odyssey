@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "OdysseyAnimationLayer.h"
+#include "OdysseyLayerCell.h"
 #include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineOutOfPegsKey.h"
 #include "Widgets/Animation/Timeline/Layers/SOdysseyAnimationLayerTimeline.h"
 
@@ -96,7 +97,7 @@ public:
 
 protected:
     virtual TSharedRef<SWidget> OnGenerateCellWidget(UOdysseyLayerCell* iCell) = 0;
-    virtual void BuildContextMenu(TSharedRef<FUICommandList> CommandList, FMenuBuilder& MenuBuilder);
+    virtual void BuildContextMenu(TSharedRef<FUICommandList> CommandList, FMenuBuilder& MenuBuilder, FFrameNumber iClickedFrame);
     FReply MassModifierAcceptProperties( TSharedRef<SOdysseyPainterEditorVectorMassModifierView> iObjectView);
     void MassModifierWindowClosed( const TSharedRef<SWindow>& iWindow
                                  , TSharedRef<SOdysseyPainterEditorVectorMassModifierView> objectView );
@@ -109,14 +110,20 @@ protected:
     float FrameToMousePosition(float iFrame) const;
 
 private:
-    void RemoveCellMark();
-    bool CanRemoveCellMark() const;
-    void SetCellMark( int iMarkId );
+    void RemoveAllCellMark();
+    bool CanRemoveAllCellMark() const;
+
+    TSharedRef<SWidget> CreateRemoveCellMarkOnClickedFrameWidget( FFrameNumber iClickedFrame ) const;
+    FText GetRemoveCellMarkOnClickedFrameTooltip( FFrameNumber iClickedFrame ) const;
+    void RemoveCellMarkOnClickedFrame( FFrameNumber iClickedFrame );
+    bool CanRemoveCellMarkOnClickedFrame( FFrameNumber iClickedFrame ) const;
+
+    void SetCellMark( FCellMark iMarkId );
     bool CanSetCellMark() const;
-    bool IsCellMarkChecked( int iMarkId ) const;
+    bool IsCellMarkChecked( FCellMark iMarkId ) const;
 
     TSharedRef<SWidget> CreateCellMarkMenuWidget(int iMarkId);
-    void BuildCellsMarksSubMenu(FMenuBuilder& iMenuBuilder);
+    void BuildCellsMarksSubMenu(FMenuBuilder& iMenuBuilder, FFrameNumber iClickedFrame);
 
     FReply OnContextMenuMinusButtonClicked();
     FReply OnContextMenuPlusButtonClicked();
