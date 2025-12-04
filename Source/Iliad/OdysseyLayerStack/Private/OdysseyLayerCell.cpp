@@ -162,9 +162,10 @@ UOdysseyLayerCell::ExposureChanged(bool iIsInteractive)
 {
     if( !iIsInteractive )
     {
-        for( TPair<int, FCellMark> pair : Marks )
+        TArray<int> indexes;
+        Marks.GetKeys( indexes );
+        for( int index : indexes )
         {
-            int32 index = pair.Key;
             if( index >= Exposure )
                 Marks.Remove( index );
         }
