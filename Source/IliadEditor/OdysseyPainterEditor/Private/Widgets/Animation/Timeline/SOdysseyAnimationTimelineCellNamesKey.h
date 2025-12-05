@@ -22,6 +22,8 @@ public:
 
 private:
     FText GetText() const;
+    FSlateFontInfo GetFontInfo() const;
+    FSlateColor GetColor() const;
 
     void OnNameCommited( const FText& iText, ETextCommit::Type iType );
 
