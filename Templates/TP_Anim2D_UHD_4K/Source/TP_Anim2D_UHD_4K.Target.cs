@@ -8,8 +8,8 @@ public class TP_Anim2D_UHD_4KTarget : TargetRules
 	public TP_Anim2D_UHD_4KTarget(TargetInfo Target) : base(Target)
 	{
 		Type = TargetType.Game;
-		DefaultBuildSettings = BuildSettingsVersion.V5;
-		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_6;
+		DefaultBuildSettings = BuildSettingsVersion.Latest;
+        IncludeOrderVersion = EngineIncludeOrderVersion.Latest;
 		ExtraModuleNames.Add("TP_Anim2D_UHD_4K");
 	}
 }
