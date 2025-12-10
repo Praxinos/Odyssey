@@ -7,7 +7,6 @@
 #include "OdysseyAnimationLayerStack.h"
 #include "OdysseyAnimationLayer.h"
 #include "OdysseyAnimationPlayer.h"
-#include "OdysseyAnimationCell.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "OdysseyLayerCellSelection.h"
 #include "ScopedTransaction.h"
@@ -60,7 +59,20 @@ FOdysseyAnimationGlobalCellsShortcuts::MapActionsToCommandList(TSharedRef<FUICom
         );
     }
 
+    iCommandList->MapAction(
+        FOdysseyPainterEditorAnimationCommands::Get().RemoveCellMarkAtFrame,
+        FExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalCellsShortcuts::Action_RemoveCellMarkAtFrame),
+        FCanExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalCellsShortcuts::CanAction_RemoveCellMarkAtFrame)
+    );
 
+    for (int i = 0; i < FOdysseyPainterEditorAnimationCommands::Get().SetCellMarkAtFrame.Num(); i++)
+    {
+        iCommandList->MapAction(
+            FOdysseyPainterEditorAnimationCommands::Get().SetCellMarkAtFrame[i],
+            FExecuteAction::CreateRaw( this, &FOdysseyAnimationGlobalCellsShortcuts::Action_SetCellMarkAtFrame, FCellMark{ i } ),
+            FCanExecuteAction::CreateRaw( this, &FOdysseyAnimationGlobalCellsShortcuts::CanAction_SetCellMarkAtFrame, FCellMark{ i } )
+        );
+    }
 }
 
 void
@@ -217,6 +229,70 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_SetCellMark(int iMarkId)
     mOnTransactCurrentFrame.ExecuteIfBound(selectedCells[0]->GetFrameRange().GetLowerBoundValue());
 }
 
+void
+FOdysseyAnimationGlobalCellsShortcuts::Action_RemoveCellMarkAtFrame()
+{
+    UOdysseyAnimation* animation = mAnimation.Get();
+    if (!animation)
+        return;
+
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(animation->GetLayerStack());
+    if (!layerStack)
+        return;
+
+    UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(layerStack->GetCurrentLayer());
+    if (!currentLayer)
+        return;
+
+    if (!currentLayer->IsEditable())
+        return;
+
+    UOdysseyLayerCell* cell = currentLayer->GetCellAtFrame(mCurrentFrame.Get());
+    if (!cell)
+        return;
+
+    FScopedTransaction ScopedTransaction(LOCTEXT("global-cells-shortcuts.transaction.remove-cell-mark-at-frame", "Remove Cell Mark at Frame"));
+
+    TMap<int, FCellMark> marks = cell->GetMarks();
+    int32 index_in_cell = cell->FrameInLayerToIndexInCell( mCurrentFrame.Get() );
+    marks.Remove( index_in_cell );
+    cell->SetMarks( marks );
+
+    //mOnTransactCurrentFrame.ExecuteIfBound(cell->GetFrameRange().GetLowerBoundValue());
+}
+
+void
+FOdysseyAnimationGlobalCellsShortcuts::Action_SetCellMarkAtFrame(FCellMark iMarkId)
+{
+    UOdysseyAnimation* animation = mAnimation.Get();
+    if (!animation)
+        return;
+
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(animation->GetLayerStack());
+    if (!layerStack)
+        return;
+
+    UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(layerStack->GetCurrentLayer());
+    if (!currentLayer)
+        return;
+
+    if (!currentLayer->IsEditable())
+        return;
+
+    UOdysseyLayerCell* cell = currentLayer->GetCellAtFrame( mCurrentFrame.Get() );
+    if( !cell )
+        return;
+
+    FScopedTransaction ScopedTransaction(LOCTEXT("global-cells-shortcuts.transaction.remove-cell-mark-at-frame", "Remove Cell Mark at Frame"));
+
+    TMap<int, FCellMark> marks = cell->GetMarks();
+    int32 index_in_cell = cell->FrameInLayerToIndexInCell( mCurrentFrame.Get() );
+    marks.Add( index_in_cell, iMarkId );
+    cell->SetMarks( marks );
+
+    //mOnTransactCurrentFrame.ExecuteIfBound(cell->GetFrameRange().GetLowerBoundValue());
+}
+
 bool
 FOdysseyAnimationGlobalCellsShortcuts::CanAction_BreakCell()
 {
@@ -260,6 +336,56 @@ FOdysseyAnimationGlobalCellsShortcuts::CanAction_RemoveCellMark()
 
 bool
 FOdysseyAnimationGlobalCellsShortcuts::CanAction_SetCellMark(int iMarkId)
+{
+    UOdysseyAnimation* animation = mAnimation.Get();
+    if (!animation)
+        return false;
+
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(animation->GetLayerStack());
+    if (!layerStack)
+        return false;
+
+    UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(layerStack->GetCurrentLayer());
+    if (!currentLayer )
+        return false;
+
+    if (!currentLayer->IsEditable())
+        return false;
+
+    UOdysseyLayerCell* cell = currentLayer->GetCellAtFrame( mCurrentFrame.Get() );
+    if( !cell )
+        return false;
+
+    return true;
+}
+
+bool
+FOdysseyAnimationGlobalCellsShortcuts::CanAction_RemoveCellMarkAtFrame()
+{
+    UOdysseyAnimation* animation = mAnimation.Get();
+    if (!animation)
+        return false;
+
+    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(animation->GetLayerStack());
+    if (!layerStack)
+        return false;
+
+    UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(layerStack->GetCurrentLayer());
+    if (!currentLayer )
+        return false;
+
+    if (!currentLayer->IsEditable())
+        return false;
+
+    UOdysseyLayerCell* cell = currentLayer->GetCellAtFrame( mCurrentFrame.Get() );
+    if( !cell )
+        return false;
+
+    return true;
+}
+
+bool
+FOdysseyAnimationGlobalCellsShortcuts::CanAction_SetCellMarkAtFrame(FCellMark iMarkId)
 {
     UOdysseyAnimation* animation = mAnimation.Get();
     if (!animation)

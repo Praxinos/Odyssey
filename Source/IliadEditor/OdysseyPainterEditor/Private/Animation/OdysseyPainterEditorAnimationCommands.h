@@ -53,6 +53,8 @@ public:
     TSharedPtr<FUICommandInfo> BreakAndClearCell;
     TSharedPtr<FUICommandInfo> RemoveCellMark;
     TArray<TSharedPtr<FUICommandInfo>> SetCellMark;
+    TSharedPtr<FUICommandInfo> RemoveCellMarkAtFrame;
+    TArray<TSharedPtr<FUICommandInfo>> SetCellMarkAtFrame;
 
     //Timeline Navigation Commands
     TSharedPtr<FUICommandInfo> NavigateToNextCell;

@@ -5,9 +5,10 @@
 
 #include "CoreMinimal.h"
 
-struct FSlateBrush;
+class FOdysseyPainterEditorAnimationTimelinePosition;
 class UOdysseyAnimationLayer;
 class UOdysseyLayerCell;
+struct FSlateBrush;
 
 class SOdysseyAnimationCell
     : public SCompoundWidget
@@ -16,6 +17,7 @@ public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationCell)
         {}
         SLATE_DEFAULT_SLOT(FArguments, Content)
+        SLATE_ARGUMENT(TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition>, TimelinePosition)
     SLATE_END_ARGS()
 
 public:
@@ -29,19 +31,21 @@ public:
 public:
     // SWidget interface
     virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;
-    // End of SWidget interfacepublic:
+    // End of SWidget interface
 
 private:
     bool IsSelected() const;
     bool IsSelectionCursor() const;
 
-    const FSlateBrush* GetMarkBrush() const;
-    FLinearColor GetMarkColor() const;
-    float GetMarkOpacity() const;
-    bool IsMarkSymbol() const;
-    bool IsMarkFill() const;
+    const FSlateBrush* GetMarkBrush( int32 iFrameInCell ) const;
+    FLinearColor GetMarkColor( int32 iFrameInCell ) const;
+    float GetMarkOpacity( int32 iFrameInCell ) const;
+    bool IsMarkSymbol( int32 iFrameInCell ) const;
+    bool IsMarkFill( int32 iFrameInCell ) const;
 
 private:
     UOdysseyAnimationLayer* mAnimationLayer;
     UOdysseyLayerCell* mCell;
+
+    TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition> mTimelinePosition;
 };

@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "OdysseyAnimationLayer.h"
+#include "OdysseyLayerCell.h"
 #include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineOutOfPegsKey.h"
 #include "Widgets/Animation/Timeline/Layers/SOdysseyAnimationLayerTimeline.h"
 
@@ -96,7 +97,7 @@ public:
 
 protected:
     virtual TSharedRef<SWidget> OnGenerateCellWidget(UOdysseyLayerCell* iCell) = 0;
-    virtual void BuildContextMenu(TSharedRef<FUICommandList> CommandList, FMenuBuilder& MenuBuilder);
+    virtual void BuildContextMenu(TSharedRef<FUICommandList> CommandList, FMenuBuilder& MenuBuilder, FFrameNumber iClickedFrame);
     FReply MassModifierAcceptProperties( TSharedRef<SOdysseyPainterEditorVectorMassModifierView> iObjectView);
     void MassModifierWindowClosed( const TSharedRef<SWindow>& iWindow
                                  , TSharedRef<SOdysseyPainterEditorVectorMassModifierView> objectView );
@@ -109,14 +110,26 @@ protected:
     float FrameToMousePosition(float iFrame) const;
 
 private:
-    void RemoveCellMark();
-    bool CanRemoveCellMark() const;
-    void SetCellMark( int iMarkId );
-    bool CanSetCellMark() const;
-    bool IsCellMarkChecked( int iMarkId ) const;
+    void RemoveAllCellMark();
+    bool CanRemoveAllCellMark() const;
 
-    TSharedRef<SWidget> CreateCellMarkMenuWidget(int iMarkId);
-    void BuildCellsMarksSubMenu(FMenuBuilder& iMenuBuilder);
+    TSharedRef<SWidget> CreateRemoveCellMarkOnClickedFrameWidget( FFrameNumber iClickedFrame ) const;
+    FText GetRemoveCellMarkOnClickedFrameTooltip( FFrameNumber iClickedFrame ) const;
+    void RemoveCellMarkOnClickedFrame( FFrameNumber iClickedFrame );
+    bool CanRemoveCellMarkOnClickedFrame( FFrameNumber iClickedFrame ) const;
+
+    // Those functions manage the mark in the selected cell(s) but only on the first frame of the selected cell(s)
+    //void SetCellMark( FCellMark iMarkId );
+    //bool CanSetCellMark() const;
+    //bool IsCellMarkChecked( FCellMark iMarkId ) const;
+    //TSharedRef<SWidget> CreateCellMarkMenuWidget(int iMarkId);
+
+    void SetCellMarkOnClickedFrame( FFrameNumber iClickedFrame, FCellMark iMarkId );
+    bool CanSetCellMarkOnClickedFrame( FFrameNumber iClickedFrame ) const;
+    bool IsCellMarkCheckedOnClickedFrame( FFrameNumber iClickedFrame, FCellMark iMarkId ) const;
+    TSharedRef<SWidget> CreateCellMarkOnClickedFrameWidget( FFrameNumber iClickedFrame, int iMarkId );
+
+    void BuildCellsMarksSubMenu(FMenuBuilder& iMenuBuilder, FFrameNumber iClickedFrame);
 
     FReply OnContextMenuMinusButtonClicked();
     FReply OnContextMenuPlusButtonClicked();

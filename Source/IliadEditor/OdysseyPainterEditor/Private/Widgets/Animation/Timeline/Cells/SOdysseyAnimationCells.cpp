@@ -211,15 +211,10 @@ SOdysseyAnimationCells::OnGenerateRow(TSharedPtr<FCellItem> iCell, const TShared
             .TimelinePosition(mTimelinePosition)
             .WidthInFrames(this, &SOdysseyAnimationCells::GetCellExposure, iCell->mCell)
             [
-                SNew(SBorder)
-                .BorderImage(FOdysseyStyle::GetBrush("FlipbookTimeline.TimelineFrameBackground"))
-                .BorderBackgroundColor(FLinearColor(1.f, 1.f, 1.f))
-                .Visibility(this, &SOdysseyAnimationCells::GetCellVisibility, iCell->mCell)
+                SNew(SOdysseyAnimationCell, mAnimationLayer, iCell->mCell)
+                .TimelinePosition( mTimelinePosition )
                 [
-                    SNew(SOdysseyAnimationCell, mAnimationLayer, iCell->mCell)
-                    [
-                        cellWidget.ToSharedRef()
-                    ]
+                    cellWidget.ToSharedRef()
                 ]
             ]
         ];
@@ -683,15 +678,6 @@ SOdysseyAnimationCells::GetCellBreakIndicatorBlankVisibility() const
         return EVisibility::Collapsed;
 
     return FSlateApplication::Get().GetModifierKeys().IsControlDown() ? EVisibility::Collapsed : EVisibility::Visible;
-}
-
-EVisibility
-SOdysseyAnimationCells::GetCellVisibility(UOdysseyLayerCell* iCell) const
-{
-    if ( iCell->GetExposure() > 0 )
-        return EVisibility::Visible;
-
-    return EVisibility::Collapsed;
 }
 
 void

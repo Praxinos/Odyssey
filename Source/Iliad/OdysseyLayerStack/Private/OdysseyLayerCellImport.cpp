@@ -84,7 +84,10 @@ FOdysseyLayerCellImport::Read( UOdysseyLayerCell* iCell
                 case CHUNK_CELL_MARKID :
                 {
 #if WITH_EDITOR
-                    Ar << iCell->Mark;
+                    int32 mark;
+                    Ar << mark;
+                    if( mark >= 0 )
+                        iCell->Marks.Add( 0, FCellMark{ mark } );
 #endif
                 }
                 break;

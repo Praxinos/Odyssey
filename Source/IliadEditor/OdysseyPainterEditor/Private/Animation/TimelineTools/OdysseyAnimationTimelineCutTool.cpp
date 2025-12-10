@@ -61,7 +61,7 @@ FOdysseyAnimationTimelineCutTool::OnMouseButtonUp(const FMouseEventParams& iPara
 
     //Remove mark from the new cell, because we consider the new cell will be modified by the user and will not represent the original cell anymore
     //This is an arbitrary choice, you are free to change this behaviour whenever you want without any side effect
-    newCell->SetMark(INDEX_NONE);
+    newCell->SetMarks( {} );
 
     return FReply::Handled();
 }
