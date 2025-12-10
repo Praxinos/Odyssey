@@ -70,6 +70,27 @@ UOdysseyLayerCell::GetExposure() const
 }
 
 #if WITH_EDITOR
+
+FString
+UOdysseyLayerCell::GetName( ECellNameIfEmpty iCellNameIfEmpty ) const
+{
+    if( Name.IsEmpty() )
+    {
+        if( iCellNameIfEmpty == ECellNameIfEmpty::IndexInLayer )
+        {
+            return FString::FromInt( GetIndexInLayer() );
+        }
+    }
+
+    return Name;
+}
+
+bool
+UOdysseyLayerCell::HasNoName() const
+{
+    return Name.IsEmpty();
+}
+
 int
 UOdysseyLayerCell::GetMark() const
 {
@@ -123,6 +144,14 @@ UOdysseyLayerCell::SetExposureInteractive(int Value)
     Modify();
     Exposure = Value;
     ExposureChanged(true);
+}
+
+void
+UOdysseyLayerCell::SetName( FString iValue )
+{
+    Modify();
+
+    Name = iValue;
 }
 
 void
@@ -298,9 +327,9 @@ UOdysseyLayerCell::CreateRenderingRenderTarget() const
 #if WITH_EDITOR
 
 UTexture2D*
-UOdysseyLayerCell::CreateExportTexture(UObject* Outer, FName Name, EObjectFlags Flags)
+UOdysseyLayerCell::CreateExportTexture(UObject* iOuter, FName iName, EObjectFlags iFlags)
 {
-    return GetLayer()->CreateExportTexture(Outer, Name, Flags);
+    return GetLayer()->CreateExportTexture(iOuter, iName, iFlags);
 }
 
 #endif

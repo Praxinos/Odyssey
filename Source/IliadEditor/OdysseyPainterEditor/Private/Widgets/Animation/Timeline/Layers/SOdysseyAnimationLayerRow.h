@@ -38,6 +38,10 @@ private:
     void OnLighttableCheckStateChanged(ECheckBoxState iState);
     ECheckBoxState GetLighttableIsChecked() const;
 
+    TSharedRef<SWidget> GenerateCellNamesRowHeaderWidget();
+    void OnCellNamesCheckStateChanged( ECheckBoxState iState );
+    ECheckBoxState GetCellNamesIsChecked() const;
+
 protected:
     UOdysseyAnimationLayer* mLayer;
     TAttribute<int> mCurrentFrame;

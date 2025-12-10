@@ -541,6 +541,19 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
         .SetCheckedPressedImage(IMAGE_BRUSH_SVG("OdysseyAnimation/lighttable-on", mIcon16x16))
     );
 
+    Set("Animation.CellNamesToggle", FCheckBoxStyle()
+        //.Padding(FMargin(0,0,0,0))
+        .SetPadding(FMargin(8)) //8 because left+right = 16 and top+bottom = 16
+        .SetForegroundColor(FLinearColor(0, 0, 0, 0))
+        .SetCheckBoxType(ESlateCheckBoxType::ToggleButton)
+        .SetUncheckedImage(IMAGE_BRUSH_SVG("OdysseyAnimation/cell-names-off", mIcon16x16))
+        .SetUncheckedHoveredImage(IMAGE_BRUSH_SVG("OdysseyAnimation/cell-names-off", mIcon16x16))
+        .SetUncheckedPressedImage(IMAGE_BRUSH_SVG("OdysseyAnimation/cell-names-off", mIcon16x16))
+        .SetCheckedImage(IMAGE_BRUSH_SVG("OdysseyAnimation/cell-names-on", mIcon16x16))
+        .SetCheckedHoveredImage(IMAGE_BRUSH_SVG("OdysseyAnimation/cell-names-on", mIcon16x16))
+        .SetCheckedPressedImage(IMAGE_BRUSH_SVG("OdysseyAnimation/cell-names-on", mIcon16x16))
+    );
+
     Set("Animation.AlphaLockedToggle", FCheckBoxStyle()
         //.Padding(FMargin(0,0,0,0))
         .SetPadding(FMargin(8)) //8 because left+right = 16 and top+bottom = 16
@@ -567,6 +580,17 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
 
     Set("Animation.Lighttable.Options.DisplayPosition.AboveLayer", new IMAGE_BRUSH_SVG("OdysseyAnimation/Lighttable_Options_DisplayPosition_AboveLayer", mIcon16x16));
     Set("Animation.Lighttable.Options.DisplayPosition.UnderLayer", new IMAGE_BRUSH_SVG("OdysseyAnimation/Lighttable_Options_DisplayPosition_UnderLayer", mIcon16x16));
+
+    Set("Animation.CellNames.Options", FComboButtonStyle(mComboButton)
+        .SetShadowOffset(FVector2D(0))
+        .SetButtonStyle( FButtonStyle(mButton)
+            .SetNormalPadding(FMargin(8)) //8 because left+right = 16 and top+bottom = 16
+            .SetPressedPadding(FMargin(8)) //8 because left+right = 16 and top+bottom = 16
+            .SetNormal(IMAGE_BRUSH_SVG("OdysseyAnimation/Lighttable_Options_OFF", mIcon16x16)) //TODO: use its own icon
+            .SetHovered(IMAGE_BRUSH_SVG("OdysseyFlipbook/Lighttable_Options_OFF", mIcon16x16)) //TODO: use its own icon
+            .SetPressed(IMAGE_BRUSH_SVG("OdysseyFlipbook/Lighttable_Options_ON", mIcon16x16)) //TODO: use its own icon
+        )
+    );
 
 
     Set("Animation.AddCellsHandleRight", new IMAGE_BRUSH_SVG("OdysseyAnimation/AddCellsHandleRight", mIcon16x16));

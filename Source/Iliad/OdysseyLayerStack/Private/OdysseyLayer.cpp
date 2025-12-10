@@ -25,6 +25,13 @@ UOdysseyLayer::OnDisplayOptionsChanged()
     static FOnDisplayOptionsChanged onDisplayOptionsChanged;
     return onDisplayOptionsChanged;
 }
+
+UOdysseyLayer::FOnDisplayCellNamesChanged&
+UOdysseyLayer::OnDisplayCellNamesChanged()
+{
+    static FOnDisplayCellNamesChanged onDisplayCellNamesChanged;
+    return onDisplayCellNamesChanged;
+}
 #endif
 
 FSimpleMulticastDelegate&
@@ -770,6 +777,12 @@ UOdysseyLayer::ShouldDisplayOptions() const
 {
     return bDisplayOptions;
 }
+
+bool
+UOdysseyLayer::ShouldDisplayCellNames() const
+{
+    return bDisplayCellNames;
+}
 #endif
 
 EOdysseyBlendingMode
@@ -1031,6 +1044,13 @@ UOdysseyLayer::SetDisplayOptions(bool Value)
 {
     bDisplayOptions = Value;
     OnDisplayOptionsChanged().Broadcast(this);
+}
+
+void
+UOdysseyLayer::SetDisplayCellNames(bool Value)
+{
+    bDisplayCellNames = Value;
+    OnDisplayCellNamesChanged().Broadcast(this);
 }
 #endif
 
@@ -1490,8 +1510,9 @@ UOdysseyLayer::GetRows() const
     return {
         "Main",
         "Blend",
+        "CellNames",
         "Lighttable",
-        "OutOfPegs"
+        "OutOfPegs",
     };
 }
 
@@ -1508,6 +1529,9 @@ UOdysseyLayer::GetRowHeight(FName iSubRowName) const
         return 40;
 
     if (iSubRowName == "OutOfPegs")
+        return 20;
+
+    if (iSubRowName == "CellNames")
         return 20;
 
     return 0;
@@ -1527,6 +1551,9 @@ UOdysseyLayer::IsRowVisible(FName iSubRowName) const
 
     if (iSubRowName == "OutOfPegs")
         return IsActivatedRecursively() && ShouldDisplayOptions() && bHasLighttable && Lighttable.bIsActivated;
+
+    if (iSubRowName == "CellNames")
+        return IsActivatedRecursively() && ShouldDisplayOptions() && bDisplayCellNames;
 
     return 0;
 }

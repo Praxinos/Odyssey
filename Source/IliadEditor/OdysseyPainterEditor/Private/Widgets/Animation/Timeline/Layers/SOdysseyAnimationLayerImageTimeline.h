@@ -62,6 +62,7 @@ protected:
     TSharedRef<SWidget> GenerateMainRowTimelineWidget();
     TSharedRef<SWidget> GenerateLighttableRowTimelineWidget();
     TSharedRef<SWidget> GenerateOutOfPegsRowTimelineWidget();
+    TSharedRef<SWidget> GenerateCellNamesRowTimelineWidget();
 
 public:
     virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;
@@ -102,15 +103,6 @@ protected:
     void MassModifier();
 
 protected:
-    //TArray<TSharedPtr<FOdysseyAnimationCell>> GetSelectedCells() const;
-    //FReply OnCellsSelectionDragged();
-
-    EVisibility GetLighttableVisibility() const;
-
-    FOptionalSize GetCellsHeight() const;
-    FOptionalSize GetLighttableHeight() const;
-    bool DisplayOptions() const;
-
     bool GetShowCellsHandles() const;
 
     float MousePositionToFrame(float iX) const;
