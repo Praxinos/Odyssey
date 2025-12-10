@@ -2,6 +2,7 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "Tools/RasterLiquifyTool/OdysseyPainterEditorRasterLiquifyTool.h"
+#include "Tools/RasterLiquifyTool/OdysseyPainterEditorRasterLiquifyToolCustomization.h"
 #include "Tools/RasterLiquifyTool/OdysseyPainterEditorRasterLiquifyToolHUD.h"
 #include "Tools/RasterLiquifyTool/OdysseyPainterEditorRasterLiquifyToolUndo.h"
 #include "OdysseyMediaRaster.h"
@@ -20,7 +21,7 @@
 #include "OdysseyPainterEditorRasterSelection.h"
 #include "ULISLoaderModule.h"
 #include "ULISUtils.h"
-
+#include "OdysseyRasterBlockMutator.h"
 #include "OdysseyVector.h"
 
 #include "OdysseyHUDElement.h"
@@ -77,8 +78,8 @@ UOdysseyPainterEditorRasterLiquifyTool::~UOdysseyPainterEditorRasterLiquifyTool(
 UOdysseyPainterEditorRasterLiquifyTool::UOdysseyPainterEditorRasterLiquifyTool()
     : mLiquifyHUD( MakeShared<FOdysseyPainterEditorRasterLiquifyToolHUD>( this ) )
     , Size ( 100 )
-    , Mode ()
-    , mHiddenModeAsEnum ( Mode.Get() )
+    , Mode ( EOdysseyLiquifyMode::Push )
+    , mPreviousMode ( EOdysseyLiquifyMode::Push )
     , Strength ( 100 )
     , Hardness ( 0 )
     , AdjustmentStrength( 100 )
@@ -291,7 +292,7 @@ UOdysseyPainterEditorRasterLiquifyTool::Flow( const FVector2D& iPrevCenter
                         double factor = 1.0f - ( vdistSquared / influenceRadiusSquared );
                         FFlow newPosition = localPosition; // having the same values will result in no difference, so no effect
 
-                        switch( Mode.Get() )
+                        switch( Mode )
                         {
                             case EOdysseyLiquifyMode::Push :
                             {
@@ -486,6 +487,12 @@ UOdysseyPainterEditorRasterLiquifyTool::GetHardness()
     return UseStylusPressure && StylusPressureOptions.UseHardness ? mPressure : ( double ) Hardness / 100;
 }
 
+::ULIS::FRectI
+UOdysseyPainterEditorRasterLiquifyTool::GetEditingArea()
+{
+    return mEditingArea;
+}
+
 void UOdysseyPainterEditorRasterLiquifyTool::Tick(float iDeltaTime)
 {
 
@@ -504,7 +511,7 @@ void UOdysseyPainterEditorRasterLiquifyTool::Tick(float iDeltaTime)
 
         roi = roi & screen; // sanitize
 
-        switch( Mode.Get() )
+        switch( Mode )
         {
             case EOdysseyLiquifyMode::Expand :
             case EOdysseyLiquifyMode::Pinch  :
@@ -658,6 +665,9 @@ UOdysseyPainterEditorRasterLiquifyTool::Reset()
 
         FetchSourceImages();
     }
+
+    mEditingArea = ::ULIS::FRectD::FromXYWH( 0, 0, 0, 0);
+    AdjustmentStrength = 100;
 }
 
 void
@@ -968,8 +978,8 @@ UOdysseyPainterEditorRasterLiquifyTool::PropertyChanged( const FName& iPropertyN
     // so we need to compare with iMemberPropertyName instead of iPropertyName
     if( ( iMemberPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorRasterLiquifyTool, Mode   ) ) )
     {
-        // Apply adjust (mHiddenModeAsEnum is in its prvious state as it is not updated yet)
-        switch ( mHiddenModeAsEnum )
+        // Apply adjust (mPreviousMode is in its prvious state as it is not updated yet)
+        switch ( mPreviousMode )
         {
             case EOdysseyLiquifyMode::Adjust :
                 ApplyAdjustment();
@@ -979,14 +989,14 @@ UOdysseyPainterEditorRasterLiquifyTool::PropertyChanged( const FName& iPropertyN
             break;
         }
 
-        mHiddenModeAsEnum = Mode.Get();
-
         //switch ( mHiddenModeAsEnum )
         //{
         //    default :
         //    break;
         //}
     }
+
+    mPreviousMode = Mode;
 
     if( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorRasterLiquifyTool, Size ) )
     {
@@ -1010,6 +1020,27 @@ UOdysseyPainterEditorRasterLiquifyTool::GetMouseCursor() const
         return EMouseCursor::SlashedCircle;
 
     return UOdysseyPainterEditorTool::GetMouseCursor();
+}
+
+void
+UOdysseyPainterEditorRasterLiquifyTool::RegisterDetailCustomization()
+{
+    FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
+
+    // Custom detail views
+    PropertyModule.RegisterCustomClassLayout( UOdysseyPainterEditorRasterLiquifyTool::StaticClass()->GetFName()
+                                            , FOnGetDetailCustomizationInstance::CreateLambda(
+                                                  []()
+                                                  {
+                                                      return MakeShareable( new FOdysseyPainterEditorRasterLiquifyToolCustomization() );
+                                                  } ) );
+}
+
+void
+UOdysseyPainterEditorRasterLiquifyTool::UnregisterDetailCustomization()
+{
+    FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
+    PropertyModule.UnregisterCustomPropertyTypeLayout( UOdysseyPainterEditorRasterLiquifyTool::StaticClass()->GetFName() );
 }
 
 FText

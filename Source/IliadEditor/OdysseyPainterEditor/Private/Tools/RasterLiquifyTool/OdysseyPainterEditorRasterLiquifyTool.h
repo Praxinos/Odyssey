@@ -8,14 +8,11 @@
 #include "UObject/UObjectGlobals.h"
 #include "InputCoreTypes.h"
 #include "Tools/RasterBaseTool/OdysseyPainterEditorRasterBaseTool.h"
-#include "OdysseyBlendParameters.h"
-#include "OdysseyPaintEngine.h"
-#include "OdysseyLiquifyMode.h"
 
 #include "OdysseyPainterEditorRasterLiquifyTool.generated.h"
 
-class FOdysseyPaintEngine;
 class FOdysseyPainterEditorRasterLiquifyToolHUD;
+class FOdysseyRasterBlock;
 
 UENUM()
 enum class EOdysseyLiquifyTwirlDirection : uint8
@@ -31,6 +28,22 @@ enum class EOdysseyLiquifyPushDirection : uint8
     Left,
     Right
 };
+
+UENUM()
+enum class EOdysseyLiquifyMode : uint8
+{
+    Push,
+    Twirl,
+    Pinch,
+    Expand,
+    Crystals,
+    Edge,
+    Reconstruct,
+    Adjust,
+    Count UMETA(Hidden)
+};
+
+ENUM_RANGE_BY_COUNT(EOdysseyLiquifyMode, EOdysseyLiquifyMode::Count)
 
 USTRUCT(BlueprintType)
 struct FStylusPressureOptions
@@ -152,12 +165,15 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
         virtual FText GetTooltip() const override;
         uint32 GetRadius();
 
+        static void RegisterDetailCustomization();
+        static void UnregisterDetailCustomization();
+
     protected:
         double GetStrength();
         double GetHardness();
         void FetchSourceImages();
-        void MakeDistortionMap();
-        void MakeFlowMap();
+        void MakeDistortionMap(); // instant map
+        void MakeFlowMap(); // cumulative map
         void ApplyAdjustment();
         void ApplyFlow( FAlteredImage& iAlteredImage
                       , const ::ULIS::FRectI& iRegionOfInterest
@@ -175,47 +191,32 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
         virtual void PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive) override;
         virtual void PostPropertyChanged(const FName& iPropertyName, bool iIsInteractive) override;
 
-    public:
-        // Paint Engine Stroke API
-
-        //Begins a stroke at iPoint
-        //Some value are computed from the last call to MoveTo(), like direction for example
-        bool Begin(const FOdysseyPoint& iPoint);
-
-        //Draws a Stroke from the last position to iPoint
-        bool To(const FOdysseyPoint& iPoint);
-
-        //Ends the stroke
-        bool End();
+        ::ULIS::FRectI GetEditingArea();
 
     public:
         UPROPERTY( EditAnywhere
                  , Category = "Liquify Tool" )
-        FOdysseyLiquifyMode Mode;
-
-        // hidden property for use with EditCondition
-        UPROPERTY( EditDefaultsOnly
-                 , Category = Hidden )
-        EOdysseyLiquifyMode mHiddenModeAsEnum;
+        EOdysseyLiquifyMode Mode;
+        EOdysseyLiquifyMode mPreviousMode;
 
         UPROPERTY( EditAnywhere
                  , Category = "Liquify Tool"
                  , meta = ( ToolTip = "Use Stylus Pressure"
-                          , EditCondition = "(mHiddenModeAsEnum != EOdysseyLiquifyMode::Adjust)"
+                          , EditCondition = "(Mode != EOdysseyLiquifyMode::Adjust)"
                           , EditConditionHides ) )
         bool UseStylusPressure;
 
         UPROPERTY( EditAnywhere
                  , Category = "Liquify Tool"
                  , meta = ( ToolTip = "Stylus Pressure Options"
-                          , EditCondition = "(UseStylusPressure == true) && (mHiddenModeAsEnum != EOdysseyLiquifyMode::Adjust)"
+                          , EditCondition = "(UseStylusPressure == true) && (Mode != EOdysseyLiquifyMode::Adjust)"
                           , EditConditionHides ) )
         FStylusPressureOptions StylusPressureOptions;
 
         UPROPERTY( EditAnywhere
                  , Category = "Liquify Tool"
                  , meta = ( ToolTip = "Size"
-                          , EditCondition = "(mHiddenModeAsEnum != EOdysseyLiquifyMode::Adjust)"
+                          , EditCondition = "(Mode != EOdysseyLiquifyMode::Adjust)"
                           , EditConditionHides
                           , ClampMin = "0"
                           , UIMin = "0"
@@ -229,7 +230,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
         UPROPERTY( EditAnywhere
                  , Category = "Liquify Tool"
                  , meta = ( ToolTip = "Strength"
-                          , EditCondition = "(mHiddenModeAsEnum != EOdysseyLiquifyMode::Adjust)"
+                          , EditCondition = "(Mode != EOdysseyLiquifyMode::Adjust)"
                           , EditConditionHides
                           , Units = "Percent"
                           , ClampMin = "0"
@@ -243,7 +244,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
         UPROPERTY( EditAnywhere
                  , Category = "Liquify Tool"
                  , meta = ( ToolTip = "Hardness"
-                          , EditCondition = "(mHiddenModeAsEnum != EOdysseyLiquifyMode::Adjust)"
+                          , EditCondition = "(Mode != EOdysseyLiquifyMode::Adjust)"
                           , EditConditionHides
                           , Units = "Percent"
                           , ClampMin = "0"
@@ -258,7 +259,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
                  , Category = "Liquify Tool"
                  , meta = ( DisplayName = "Strength"
                           , ToolTip = "Increase or decrease displacement"
-                          , EditCondition = "(mHiddenModeAsEnum == EOdysseyLiquifyMode::Adjust)"
+                          , EditCondition = "(Mode == EOdysseyLiquifyMode::Adjust)"
                           , EditConditionHides
                           , Units = "Percent"
                           , ClampMin = "0"
@@ -272,27 +273,25 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
         UPROPERTY( EditAnywhere
                  , Category = "Liquify Tool"
                  , meta = ( ToolTip = "Direction"
-                          , EditCondition = "(mHiddenModeAsEnum == EOdysseyLiquifyMode::Push)"
+                          , EditCondition = "(Mode == EOdysseyLiquifyMode::Push)"
                           , EditConditionHides ) )
         EOdysseyLiquifyPushDirection PushDirection;
 
         UPROPERTY( EditAnywhere
                  , Category = "Liquify Tool"
                  , meta = ( ToolTip = "Direction"
-                          , EditCondition = "(mHiddenModeAsEnum == EOdysseyLiquifyMode::Twirl)"
+                          , EditCondition = "(Mode == EOdysseyLiquifyMode::Twirl)"
                           , EditConditionHides ) )
         EOdysseyLiquifyTwirlDirection TwirlDirection;
 
         UPROPERTY( EditAnywhere
                  , Category = "Liquify Tool"
                  , meta = ( ToolTip = "OnlyReferToEditngArea"
-                          , EditCondition = "(mHiddenModeAsEnum != EOdysseyLiquifyMode::Adjust)"
+                          , EditCondition = "(Mode != EOdysseyLiquifyMode::Adjust)"
                           , EditConditionHides ) )
         bool OnlyReferToEditngArea;
 
-        UFUNCTION( BlueprintCallable
-                 , Category = "Liquify Tool"
-                 , CallInEditor )
+
         void Reset();
 
     private:
