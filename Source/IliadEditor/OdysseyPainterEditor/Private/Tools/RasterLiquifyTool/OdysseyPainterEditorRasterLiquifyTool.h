@@ -302,13 +302,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
         uint32 GetThreadCount();
 
     protected:
-        // protected Data Members
         TSharedPtr<FOdysseyPainterEditorRasterLiquifyToolHUD> mLiquifyHUD;
-        //Resources
-
-
-        TSharedPtr<FScopedTransaction> mTransaction;
-
         // We copy the source image and stores it into an array of source image
         // the array will be used when this tool will be made multi-layer compatible
         TArray<FAlteredImage> mAlteredImageArray;
@@ -317,11 +311,11 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
         FFlowMap mFlowMap;
         // this flow map will be used for undos. It allows us to save only the portion that has changed
         FFlowMap mFlowMapBackup;
-        double mPathCoveredDistance;
         FVector2D mMouseAtDown;
         FVector2D mMousePosition;
         bool bIsMouseLeftButtonDown = false;
         FVector2D mPreviousPointInTexture;
         ::ULIS::FRectI mEditingArea;
+        ::ULIS::FRectI mActionArea;
         double mPressure;
 };

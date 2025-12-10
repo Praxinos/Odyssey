@@ -118,6 +118,8 @@ UOdysseyPainterEditorRasterLiquifyTool::Load()
 
     AdjustmentStrength = 100;
 
+    mEditingArea = ::ULIS::FRectD::FromXYWH( 0, 0, 0, 0 );
+
     mLiquifyHUD->Reset();
 }
 
@@ -194,10 +196,12 @@ UOdysseyPainterEditorRasterLiquifyTool::OnMouseDown(const FOdysseyPoint& iPointI
 
         mFlowMapBackup = mFlowMap;
 
-        mEditingArea = ::ULIS::FRectI::FromXYWH( iPointInTexture.x - radius
-                                               , iPointInTexture.y - radius
-                                               , (radius*2) + 1
-                                               , (radius*2) + 1 );
+        mActionArea = ::ULIS::FRectI::FromXYWH( iPointInTexture.x - radius
+                                              , iPointInTexture.y - radius
+                                              , (radius*2) + 1
+                                              , (radius*2) + 1 );
+
+        mEditingArea = ( mEditingArea.Area() == 0.0f ) ? mActionArea : ( mEditingArea | mActionArea );
 
         return true;
     }
@@ -670,10 +674,12 @@ UOdysseyPainterEditorRasterLiquifyTool::OnMouseDrag(const FOdysseyPoint& iPointI
     {
         TSharedPtr<FOdysseyRasterBlock> rasterBlock = GetRasterBlockFromEditor(false);
 
-        mEditingArea = mEditingArea | ::ULIS::FRectI::FromXYWH( iPointInTexture.x - radius
-                                                              , iPointInTexture.y - radius
-                                                              , (radius*2) + 1
-                                                              , (radius*2) + 1 );
+        mActionArea = mActionArea | ::ULIS::FRectI::FromXYWH( iPointInTexture.x - radius
+                                                            , iPointInTexture.y - radius
+                                                            , (radius*2) + 1
+                                                            , (radius*2) + 1 );
+
+        mEditingArea = mEditingArea | mActionArea;
 
         mLiquifyHUD->SetCursorPositionInTexture( mMousePosition );
 
@@ -751,7 +757,7 @@ UOdysseyPainterEditorRasterLiquifyTool::OnMouseUp(const FOdysseyPoint& iPointInT
         {
             FCommandChange* undo = new FOdysseyPainterEditorRasterLiquifyToolUndo( mFlowMapBackup
                                                                                   // sanitize rect
-                                                                                 , mEditingArea & screen
+                                                                                 , mActionArea & screen
                                                                                  , mFlowMap );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FCommandChange>(undo) );
