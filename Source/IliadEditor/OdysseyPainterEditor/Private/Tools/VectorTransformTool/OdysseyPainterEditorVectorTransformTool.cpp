@@ -946,7 +946,7 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorGr
         if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_VERTEX )
         {
             double selectionBoxArea = selectionBox.rect.Area();
-             // side note: the sqrt() is there because surface rises at the square of dimension factor. We have to correct that.
+             // side note: the sqrt() is there because surface rises at the square of dimension factor. That's why we have to correct that.
             double radiusRatio = /*selectionBoxArea ? sqrt ( ( x2mx1 * y2my1 ) / selectionBoxArea ) : 1.0f*/1.0f;
 
             for( int i = 0; i < mTransformedVertexArray.size(); i++ )
@@ -1017,7 +1017,6 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorGr
 
                 // Apply the local transformations
                 object->Translate( translationX, translationY );
-                // for some reasons this affects the rotation, so we ignore it.
                 object->Rotate( rotation / M_PI * 180.0f );
                 object->Scale( scalingX, scalingY );
                 object->Skew( skewX, skewY );
@@ -1073,8 +1072,7 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorGr
 
                 // Apply the local transformations
                 breakdown->Translate( translationX, translationY );
-                // for some reasons this affects the rotation, so we ignore it.
-                breakdown->Rotate( breakdown->GetTargetRotation() ); // in degrees
+                breakdown->Rotate( rotation / M_PI * 180.0f );
                 breakdown->Scale( scalingX, scalingY );
                 breakdown->Skew( skewX, skewY );
 
