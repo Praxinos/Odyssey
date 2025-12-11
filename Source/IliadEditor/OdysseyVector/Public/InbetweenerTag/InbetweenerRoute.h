@@ -27,8 +27,7 @@ class ODYSSEYVECTOR_API FInbetweenerRoute
         double GetQuadU();
         double GetQuadV();
         void Update( uint32 iUpdateFlags
-                   , const FOdysseyVectorObjectInvalidationFlags& iOwnerInvalidationFlags
-                   , uint64 iTagInvalidationFlags );
+                   , FOdysseyVectorObjectInvalidationFlags& iOwnerInvalidationFlags );
         FOdysseyVectorTagInbetweener* GetInbetweenerTag();
         void ResizeWaypoints();
         std::vector<FInbetweenerTrajectory>& GetTrajectoryBuffer();

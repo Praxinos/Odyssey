@@ -322,8 +322,8 @@ FInbetweenerBreakdown::EaseOut( float iStrength, uint32 iFactor, uint32 iFrom, u
         mChart.GetInbetweenBuffer()[i].SetSpacing( fromSpacing + ( spacing * ( toSpacing - fromSpacing ) ) );
     }
 
-    mInbetweenerTag->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_CELLS
-                               | FOdysseyVectorTagInbetweener::INVALIDATE_SPACING );
+    mInbetweenerTag->GetOwner()->Invalidate( FOdysseyVectorObjectInvalidationFlags().Set( FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_SPACING )
+                                                                                    .Set( FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_CELLS ) );
 }
 
 void
@@ -356,8 +356,8 @@ FInbetweenerBreakdown::EaseIn( float iStrength, uint32 iFactor, uint32 iFrom, ui
         mChart.GetInbetweenBuffer()[i].SetSpacing ( fromSpacing + ( spacing * ( toSpacing - fromSpacing ) ) );
     }
 
-    mInbetweenerTag->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_CELLS
-                               | FOdysseyVectorTagInbetweener::INVALIDATE_SPACING );
+    mInbetweenerTag->GetOwner()->Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_SPACING)
+                                                                                    .Set(FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_CELLS) );
 }
 
 void
@@ -534,11 +534,10 @@ FInbetweenerBreakdown::UpdateMatrix()
 
     BLMatrix2D::invert( drawing->inverseWorldMatrix, drawing->worldMatrix );
 
-    mInbetweenerTag->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_CELLS
-                               | FOdysseyVectorTagInbetweener::INVALIDATE_ROUTES
-                               | FOdysseyVectorTagInbetweener::INVALIDATE_SPACING );
-
-    mInbetweenerTag->GetOwner()->Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::MATRIX) );
+    mInbetweenerTag->GetOwner()->Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_MATRIX)
+                                                                                    .Set(FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_CELLS)
+                                                                                    .Set(FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_ROUTES)
+                                                                                    .Set(FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_SPACING) );
 }
 
 void
@@ -620,8 +619,8 @@ FInbetweenerBreakdown::SetTargetDrawingIndex( uint32 iTargetDrawingIndex )
     // the t value fromthe chart, but I don't think it is the best place.
     mInbetweenerTag->UpdateMatrix();
 
-    mInbetweenerTag->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_SPACING
-                               | FOdysseyVectorTagInbetweener::INVALIDATE_BUFFERS  );
+    mInbetweenerTag->GetOwner()->Invalidate( FOdysseyVectorObjectInvalidationFlags().Set( FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_SPACING )
+                                                                                    .Set( FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_BUFFERS ) );
 }
 
 FInbetweenerChart*
@@ -715,7 +714,7 @@ FInbetweenerBreakdown::SetTargetVisibility( bool iTargetVisibility )
 {
     bTargetVisibility = iTargetVisibility;
 
-    mInbetweenerTag->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_CELLS );
+    mInbetweenerTag->GetOwner()->Invalidate( FOdysseyVectorObjectInvalidationFlags().Set( FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_CELLS ) );
 }
 
 void

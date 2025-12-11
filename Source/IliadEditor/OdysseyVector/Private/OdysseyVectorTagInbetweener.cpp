@@ -59,10 +59,6 @@ FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorObject
     , mGridNumQuadX( iNumQuadX )
     , mGridNumQuadY( iNumQuadY )
     , mInterpolationType( eInbetweenerInterpolationType::ARAP )
-    , mInvalidationFlags( INVALIDATE_MAP
-                        | INVALIDATE_ROUTES
-                        | INVALIDATE_SPACING
-                        | INVALIDATE_CELLS )
     , bMapAsPolyline( true )
     , bWithThickness( true )
     , bContiguous( true )
@@ -370,7 +366,7 @@ FOdysseyVectorTagInbetweener::SetInterpolationDirection( eInbetweenerInterpolati
 
     mInterpolationDirection = iDirection;
 
-    Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_CELLS );
+    mOwner->Invalidate( FOdysseyVectorObjectInvalidationFlags().Set( FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_CELLS ) );
 }
 
 bool
@@ -386,9 +382,9 @@ FOdysseyVectorTagInbetweener::AddRoute( FInbetweenerRoute* iRoute )
 
     iRoute->SetInbetweenerTag( this );
 
-    Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_ROUTES
-              | FOdysseyVectorTagInbetweener::INVALIDATE_SPACING
-              | FOdysseyVectorTagInbetweener::INVALIDATE_CELLS );
+    mOwner->Invalidate( FOdysseyVectorObjectInvalidationFlags().Set( FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_ROUTES )
+                                                               .Set( FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_SPACING )
+                                                               .Set( FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_CELLS ) );
 }
 
 void
@@ -398,8 +394,8 @@ FOdysseyVectorTagInbetweener::RemoveRoute( FInbetweenerRoute* iRoute )
 
     iRoute->SetInbetweenerTag( nullptr );
 
-    Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_SPACING
-              | FOdysseyVectorTagInbetweener::INVALIDATE_CELLS );
+    mOwner->Invalidate( FOdysseyVectorObjectInvalidationFlags().Set( FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_SPACING )
+                                                               .Set( FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_CELLS ) );
 }
 
 void
@@ -407,8 +403,8 @@ FOdysseyVectorTagInbetweener::RemoveAllRoutes()
 {
     mRouteList.clear();
 
-    Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_SPACING
-              | FOdysseyVectorTagInbetweener::INVALIDATE_CELLS );
+    mOwner->Invalidate( FOdysseyVectorObjectInvalidationFlags().Set( FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_SPACING )
+                                                               .Set( FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_CELLS ) );
 }
 
 FInbetweenerRoute*
@@ -472,7 +468,7 @@ FOdysseyVectorTagInbetweener::SetWithThickness( bool iWithThickness )
 {
     bWithThickness = iWithThickness;
 
-    Invalidate( INVALIDATE_CELLS );
+    mOwner->Invalidate( FOdysseyVectorObjectInvalidationFlags().Set( FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_CELLS ) );
 }
 
 bool
@@ -486,7 +482,8 @@ FOdysseyVectorTagInbetweener::SetMapAsPolyline( bool iMapAsPolyline )
 {
     bMapAsPolyline = iMapAsPolyline;
 
-    Invalidate( INVALIDATE_MAP | INVALIDATE_CELLS );
+    mOwner->Invalidate( FOdysseyVectorObjectInvalidationFlags().Set( FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_MAP )
+                                                               .Set( FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_CELLS ) );
 }
 
 const FColor&
@@ -567,7 +564,7 @@ FOdysseyVectorTagInbetweener::ResetLayout( bool iFreeMemNow )
 
     ChainBreakdowns();
 
-    Invalidate( INVALIDATE_BREAKDOWN_LIST );
+    mOwner->Invalidate( FOdysseyVectorObjectInvalidationFlags().Set( FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_BREAKDOWN_LIST ) );
 }
 
 void
@@ -731,7 +728,7 @@ FOdysseyVectorTagInbetweener::AddBreakdown( FInbetweenerBreakdown* iNewBreakdown
 
         // Invalidation might trigger a redrawing. It must be done outside the mutex locking mechanism
         // because redrawing will also lock the mutex.
-        Invalidate( INVALIDATE_BREAKDOWN_LIST );
+        GetOwner()->Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_BREAKDOWN_LIST) );
 
         return newBreakdown;
     }
@@ -753,7 +750,7 @@ FOdysseyVectorTagInbetweener::AddBreakdown( FInbetweenerBreakdown* iNewBreakdown
 
         // Invalidation might trigger a redrawing. It must be done outside the mutex locking mechanism
         // because redrawing will also lock the mutex.
-        Invalidate( INVALIDATE_BREAKDOWN_LIST );
+        mOwner->Invalidate( FOdysseyVectorObjectInvalidationFlags().Set( FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_BREAKDOWN_LIST ) );
 
         mOwner->UnlockDrawing();
 
@@ -902,7 +899,7 @@ FOdysseyVectorTagInbetweener::RemoveBreakdown( FInbetweenerBreakdown* iBreakdown
 
     // Invalidation might trigger a redrawing. It must be done outside the mutex locking mechanism
     // because redrawing will also lock the mutex.
-    Invalidate( INVALIDATE_BREAKDOWN_LIST );
+    GetOwner()->Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_BREAKDOWN_LIST) );
 }
 
 void
@@ -1058,6 +1055,11 @@ FOdysseyVectorTagInbetweener::Added()
         breakdown->GetGrid()->Make( true );
     }
 */
+    mOwner->Invalidate( FOdysseyVectorObjectInvalidationFlags().Set( FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_MAP )
+                                                               .Set( FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_ROUTES )
+                                                               .Set( FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_SPACING )
+                                                               .Set( FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_CELLS ) );
+
     RedrawCells();
 }
 
@@ -1070,7 +1072,7 @@ FOdysseyVectorTagInbetweener::Removed()
 }
 
 void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
-                                         , const FOdysseyVectorObjectInvalidationFlags& iOwnerInvalidationFlags )
+                                         , FOdysseyVectorObjectInvalidationFlags& iOwnerInvalidationFlags )
 {
     if( ( bShared == true )
      && ( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_NOINBETWEENING ) == 0 ) )
@@ -1092,37 +1094,36 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
                 breakdown->GetGrid()->Make( targetGeometry, false );
 
                 // calling Invalidate make trigger a call to draw and this would block due to the mutexes.
-                mInvalidationFlags |= ( INVALIDATE_MAP );
+                iOwnerInvalidationFlags.Set( FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_MAP );
             }
         }
 
-        if( ( mInvalidationFlags & INVALIDATE_MAP            )
-            || ( mInvalidationFlags & INVALIDATE_BREAKDOWN_LIST )
-            // owner flags
-            || ( iOwnerInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::HIERARCHY]      )
-            || ( iOwnerInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::TOPOLOGY]       )
-            || ( iOwnerInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::SHAPE]          )
-            || ( iOwnerInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::COLOR]          ) // for buckets
+        if(    ( iOwnerInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_MAP] )
+            || ( iOwnerInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_BREAKDOWN_LIST] )
+            || ( iOwnerInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::HIERARCHY] )
+            || ( iOwnerInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::TOPOLOGY] )
+            || ( iOwnerInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::SHAPE] )
+            || ( iOwnerInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::COLOR] ) // for buckets
             || ( iOwnerInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_TAG_LIST] )
             || ( iOwnerInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_TOPOLOGY] )
-            || ( iOwnerInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_SHAPE]    )
-            || ( iOwnerInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_COLOR]    ) ) // for buckets
+            || ( iOwnerInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_SHAPE] )
+            || ( iOwnerInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_COLOR] ) ) // for buckets
         {
             // map object to the first grid
             Map();
 
-            mInvalidationFlags |= FOdysseyVectorTagInbetweener::INVALIDATE_BUFFERS;
-            // if the map is invalidated, we'll need to run ARAP precompute
-            mInvalidationFlags |= FOdysseyVectorTagInbetweener::INVALIDATE_MAP;
+            iOwnerInvalidationFlags.Set( FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_BUFFERS )
+                                    // if the map is invalidated, we'll need to run ARAP precompute
+                                   .Set( FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_MAP );
         }
 
         // will update grids' BBoxes (needed for transform HUD and discarding of unused quads in ARAP grids)
         for( FInbetweenerBreakdown* breakdown : mBreakdownList )
         {
-            breakdown->GetGrid()->UpdateBBox( iUpdateFlags, mInvalidationFlags );
+            breakdown->GetGrid()->UpdateBBox( iUpdateFlags, iOwnerInvalidationFlags );
         }
 
-        if( mInvalidationFlags & INVALIDATE_BUFFERS )
+        if( iOwnerInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_BUFFERS] )
         {
             // alloc position for points at each interpolation step
             AllocBuffers();
@@ -1138,14 +1139,14 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
             FInbetweenerChart::Inbetween* inbetween = &breakdown->GetChart()->GetInbetweenBuffer().back();
 
             // Precompute ARAP interpolation after the grid and routes have been updated
-            if( ( mInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_INTERPOLATIONTYPE )
-             || ( mInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_GRIDTYPE          )
-             || ( mInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_SPACING           )
-             || ( mInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_MAP               ) )
+            if( ( iOwnerInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_INTERPOLATIONTYPE] )
+             || ( iOwnerInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_GRIDTYPE] )
+             || ( iOwnerInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_SPACING] )
+             || ( iOwnerInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_MAP] ) )
             {
                 if( breakdown->GetInbetweenerTag()->GetInterpolationType() == eInbetweenerInterpolationType::ARAP )
                 {
-                    breakdown->GetGrid()->UpdateCenterOfMass( iUpdateFlags, mInvalidationFlags );
+                    breakdown->GetGrid()->UpdateCenterOfMass( iUpdateFlags, iOwnerInvalidationFlags );
                     breakdown->GetGrid()->PrecomputeARAPInterpolation();
                 }
 
@@ -1157,7 +1158,7 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
         }
 
         // Update chart HUDs
-        if( mInvalidationFlags & INVALIDATE_CHARTHUD )
+        if( iOwnerInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_CHARTHUD] )
         {
             // Per-breakdown chart
             for( FInbetweenerBreakdown* breakdown : mBreakdownList )
@@ -1171,7 +1172,7 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
 
         for( FInbetweenerRoute* route : mRouteList )
         {
-            route->Update( iUpdateFlags, iOwnerInvalidationFlags, mInvalidationFlags );
+            route->Update( iUpdateFlags, iOwnerInvalidationFlags );
         }
 
         // TODO: Transform interpolation
@@ -1179,10 +1180,10 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
         InterpolateTransform();
         InterpolateDeform();
 
-        if( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_INTERACTIVE ) == 0 )
-        {
-            mInvalidationFlags = 0;
-        }
+        //if( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_INTERACTIVE ) == 0 )
+        //{
+        //    mInvalidationFlags = 0;
+        //}
     }
 
     if( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_INTERACTIVE ) == 0 )
@@ -1243,18 +1244,6 @@ int32
 FOdysseyVectorTagInbetweener::GetTargetCellIndex()
 {
     return mBreakdownList.back()->GetTargetCellIndex();
-}
-
-void
-FOdysseyVectorTagInbetweener::Invalidate( uint64 iInvalidationFlags )
-{
-    // do not reinvalidate
-    if( mInvalidationFlags == 0 )
-    {
-        mOwner->InvalidateTag( this );
-    }
-
-    mInvalidationFlags |= iInvalidationFlags;
 }
 
 void
@@ -1912,7 +1901,7 @@ FOdysseyVectorTagInbetweener::SetConstantWidth( bool iConstantWidth )
 {
     bConstantWidth = iConstantWidth;
 
-    Invalidate( INVALIDATE_CELLS );
+    GetOwner()->Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_CELLS) );
 }
 
 bool
@@ -2018,7 +2007,8 @@ FOdysseyVectorTagInbetweener::MoveInbetween( FInbetweenerChart::Inbetween* iInbe
         }
     }
 
-    Invalidate( INVALIDATE_ROUTES | INVALIDATE_SPACING );
+    GetOwner()->Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_ROUTES)
+                                                                   .Set(FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_SPACING) );
 }
 
 
@@ -2043,7 +2033,7 @@ FOdysseyVectorTagInbetweener::ResetGrid()
         breakdown->GetGrid()->Make( true );
     }
 
-    Invalidate( INVALIDATE_MAP );
+    GetOwner()->Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_MAP) );
 }
 
 eInbetweenerGridType
@@ -2100,10 +2090,10 @@ FOdysseyVectorTagInbetweener::SetGrid( eInbetweenerGridType iGridType
         breakdown->GetGrid()->Make( true );
     }
 
-    Invalidate( INVALIDATE_MAP
-              | INVALIDATE_SPACING
-              | INVALIDATE_GRIDTYPE
-              | INVALIDATE_CELLS );
+    GetOwner()->Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_MAP)
+                                                                   .Set(FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_SPACING)
+                                                                   .Set(FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_GRIDTYPE)
+                                                                   .Set(FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_CELLS) );
 }
 
 void
@@ -2129,9 +2119,9 @@ FOdysseyVectorTagInbetweener::SetGridNumQuad( uint32 iGridNumQuadX
                                   , true );
     }
 
-    Invalidate( INVALIDATE_MAP
-              | INVALIDATE_SPACING
-              | INVALIDATE_CELLS );
+    GetOwner()->Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_MAP)
+                                                                   .Set(FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_SPACING)
+                                                                   .Set(FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_CELLS) );
 }
 
 void
@@ -2155,9 +2145,9 @@ FOdysseyVectorTagInbetweener::SetGridNumQuad( uint32 iGridNumQuadX
         breakdown->GetGrid()->Make( true );
     }
 
-    Invalidate( INVALIDATE_MAP
-              | INVALIDATE_SPACING
-              | INVALIDATE_CELLS );
+    GetOwner()->Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_MAP)
+                                                                   .Set(FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_SPACING)
+                                                                   .Set(FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_CELLS) );
 }
 
 bool
@@ -2488,7 +2478,7 @@ FOdysseyVectorTagInbetweener::SetInterpolationType( eInbetweenerInterpolationTyp
 
     mInterpolationType = iInterpolationType;
 
-    Invalidate( INVALIDATE_SPACING
-              | INVALIDATE_INTERPOLATIONTYPE
-              | INVALIDATE_CELLS );
+    GetOwner()->Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_SPACING)
+                                                                   .Set(FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_INTERPOLATIONTYPE)
+                                                                   .Set(FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_CELLS) );
 }

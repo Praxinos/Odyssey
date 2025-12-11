@@ -5,6 +5,7 @@
 #include "InbetweenerTag/InbetweenerTrajectory.h"
 #include "InbetweenerTag/InbetweenerRoute.h"
 #include "OdysseyVectorTagInbetweener.h"
+#include "OdysseyVectorObject.h"
 
 FInbetweenerWaypoint::FInbetweenerWaypoint( FInbetweenerTrajectory* iTrajectory )
     : mTrajectory( iTrajectory )
@@ -39,6 +40,7 @@ FInbetweenerWaypoint::SetT( float iT )
     FInbetweenerBreakdown* breakdown = mTrajectory->GetBreakdown();
     uint32 inbetweenIndex = ( this - &mTrajectory->GetWaypointBuffer()[0] );
     double inbetweenT = breakdown->GetChart()->GetInbetweenBuffer()[inbetweenIndex].GetSpacing();
+    FOdysseyVectorObject* owner = inbetweenerTag->GetOwner();
 
     // waypoint is precisely on inbetween
     mRatio = 0.0f;
@@ -55,7 +57,7 @@ FInbetweenerWaypoint::SetT( float iT )
         mRatio = -( inbetweenT - iT ) / (        inbetweenT );
     }
 
-    mTrajectory->GetRoute()->GetInbetweenerTag()->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_SPACING );
+    owner->Invalidate( FOdysseyVectorObjectInvalidationFlags().Set( FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_SPACING ) );
 }
 
 float

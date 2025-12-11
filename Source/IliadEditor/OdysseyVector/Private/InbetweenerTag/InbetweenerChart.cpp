@@ -5,6 +5,7 @@
 #include "InbetweenerTag/InbetweenerBreakdown.h"
 #include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyVector.h"
+#include "OdysseyVectorObject.h"
 
 #define FRACTIONCOUNT 24
 
@@ -140,9 +141,11 @@ FInbetweenerChart::HUDBezier::GetQuadraticT( float iSpacingT )
 void
 FInbetweenerChart::HUDBezier::Invalidate()
 {
+    FOdysseyVectorTagInbetweener* inbetweenerTag = mChart->GetBreakdown()->GetInbetweenerTag();
+
     bInvalidated = true;
 
-    mChart->GetBreakdown()->GetInbetweenerTag()->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_CHARTHUD );
+    inbetweenerTag->GetOwner()->Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_CHARTHUD) );
 }
 
 FInbetweenerChart::HUDBezier::Point*
@@ -266,9 +269,11 @@ FInbetweenerChart::Inbetween::GetCellIndex()
 void
 FInbetweenerChart::Inbetween::SetSpacing( float iSpacing )
 {
+    FOdysseyVectorTagInbetweener* inbetweenerTag = mChart->GetBreakdown()->GetInbetweenerTag();
+
     mSpacing = iSpacing;
 
-    mChart->GetBreakdown()->GetInbetweenerTag()->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_SPACING );
+    inbetweenerTag->GetOwner()->Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_SPACING) );
 }
 
 float
@@ -370,8 +375,8 @@ FInbetweenerChart::Reset( bool iResetPositionning )
                                              , DEFAULT_POSITION_P2_Y );
     }
 
-    mBreakdown->GetInbetweenerTag()->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_SPACING
-                                               | FOdysseyVectorTagInbetweener::INVALIDATE_CELLS );
+    mBreakdown->GetInbetweenerTag()->GetOwner()->Invalidate( FOdysseyVectorObjectInvalidationFlags().Set( FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_SPACING )
+                                                                                                    .Set( FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_CELLS ) );
 }
 
 void
@@ -406,8 +411,8 @@ FInbetweenerChart::Resize()
 
     mInbetweenBuffer.back().SetSpacing ( 1.0f );
 
-    mBreakdown->GetInbetweenerTag()->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_SPACING
-                                               | FOdysseyVectorTagInbetweener::INVALIDATE_CELLS );
+    mBreakdown->GetInbetweenerTag()->GetOwner()->Invalidate( FOdysseyVectorObjectInvalidationFlags().Set( FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_SPACING )
+                                                                                                    .Set( FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_CELLS ) );
 }
 
 FInbetweenerChart::HUDBezier*

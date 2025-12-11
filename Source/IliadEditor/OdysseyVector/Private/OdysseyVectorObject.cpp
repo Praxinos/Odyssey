@@ -1013,12 +1013,6 @@ FOdysseyVectorObject::InvalidateChild( FOdysseyVectorObject* iChild
 }
 
 void
-FOdysseyVectorObject::InvalidateTag( FOdysseyVectorTag* iTag )
-{
-    Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::TAG) );
-}
-
-void
 FOdysseyVectorObject::Invalidate( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags )
 {
     if ( mParent )

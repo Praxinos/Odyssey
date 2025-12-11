@@ -4,6 +4,7 @@
 #include "InbetweenerTag/InbetweenerPoint.h"
 #include "InbetweenerTag/InbetweenerBreakdown.h"
 #include "OdysseyVectorTagInbetweener.h"
+#include "OdysseyVectorObject.h"
 
 FInbetweenerPoint::FInbetweenerPoint( FInbetweenerGrid* iGrid
                                     , double iSourcePositionX
@@ -93,9 +94,8 @@ FInbetweenerPoint::IsNeeded()
 void
 FInbetweenerPoint::SetTargetPosition( double iX, double iY, bool iInvalidate )
 {
+    FOdysseyVectorTagInbetweener* inbetweenerTag = mGrid->GetBreakdown()->GetInbetweenerTag();
     FInbetweenerBreakdown* nextBreakdown = mGrid->GetBreakdown()->GetNextBreakdown();
-    uint64 invalidationFlags = FOdysseyVectorTagInbetweener::INVALIDATE_CELLS
-                             | FOdysseyVectorTagInbetweener::INVALIDATE_SPACING;
     uint32 pointIndex = GetIndex();
 
     mTargetPosition.x = iX;
@@ -113,7 +113,10 @@ FInbetweenerPoint::SetTargetPosition( double iX, double iY, bool iInvalidate )
     // this might be called in the Update function, that's why there are cases when we don't want to invalidate.
     // Indeed, it is not wise to call invalidate() during the update.
     if( iInvalidate )
-        mGrid->GetBreakdown()->GetInbetweenerTag()->Invalidate( invalidationFlags );
+    {
+        inbetweenerTag->GetOwner()->Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_CELLS)
+                                                                                       .Set(FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_SPACING) );
+    }
 }
 
 void

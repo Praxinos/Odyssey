@@ -184,11 +184,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void RemoveAllRoutes();
         virtual FOdysseyVectorTagInbetweener* Copy( FOdysseyVectorObject* iDestOwnerObject ) override;
         virtual void Update( uint32 iUpdateFlags
-                           , const FOdysseyVectorObjectInvalidationFlags& iOwnerInvalidationFlags ) override;
+                           , FOdysseyVectorObjectInvalidationFlags& iOwnerInvalidationFlags ) override;
         void Commit( std::list<FOdysseyVectorTag*>& oRemovedTagList
                    , std::list<FOdysseyVectorObject*>& oAddedObjectList
                    , std::list<FOdysseyVectorGroupPaint*>& oCommittedSceneList );
-        void Invalidate( uint64 iInvalidationFlags );
         std::vector<FInterpolatedPath>& GetInterpolatedPathBuffer();
         std::vector<FInterpolatedGroupPaint>& GetInterpolatedGroupPaintBuffer();
         std::vector<FInterpolatedObject*>& GetInterpolatedObjectArray();
@@ -328,6 +327,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         static const uint8 TRAJECTORY_DEFAULT_BLUE_UINT8  = 0;
         static const uint8 TRAJECTORY_DEFAULT_ALPHA_UINT8 = 255;
 
+/*
         static const uint64 INVALIDATE_MAP               = ( 1LL <<  0 );
         static const uint64 INVALIDATE_BUFFERS           = ( 1LL <<  2 );
         static const uint64 INVALIDATE_SPACING           = ( 1LL <<  3 );
@@ -345,6 +345,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
                                                            | INVALIDATE_CELLS
                                                            | INVALIDATE_ROUTES
                                                            | INVALIDATE_BREAKDOWN_LIST );
+*/
 
     protected:
         FOdysseyVectorGroupPaint* mScene;
@@ -359,7 +360,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         uint32 mGridNumQuadY;
         eInbetweenerInterpolationType mInterpolationType;
         std::vector<FInbetweenerDrawing> mDrawingBuffer;
-        uint64 mInvalidationFlags;
+        //uint64 mInvalidationFlags;
         bool bMapAsPolyline;
         bool bWithThickness;
         bool bContiguous;

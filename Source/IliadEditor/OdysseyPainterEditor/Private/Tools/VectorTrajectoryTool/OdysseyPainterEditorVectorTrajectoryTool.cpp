@@ -571,6 +571,30 @@ UOdysseyPainterEditorVectorTrajectoryTool::GetBackgroundColor( eVectorTrajectory
     return ( iMode == mEditionMode ) ? &selected : nullptr;
 }
 
+void
+UOdysseyPainterEditorVectorTrajectoryTool::OnVectorLayerUpdate( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags
+                                                              , uint32 iUpdateFlags )
+{
+    if( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_INTERACTIVE ) == 0 )
+    {
+        // we need to reset when a tag is removed
+        if( ( iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::TAG_LIST] )
+         || ( iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_TAG_LIST] )
+         || ( iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_BREAKDOWN_LIST] )
+         || ( iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_TAG_INBETWEENER_BREAKDOWN_LIST] ) )
+        {
+            if( mBaseHUD )
+            {
+                mBaseHUD->Reset();
+            }
+        }
+    }
+
+    // will react to OBJECT_SELECTION and CHILD_OBJECT_SELECTION.
+    // Will also Reset the HUD. the HUD in that case might be reset twice
+    UOdysseyPainterEditorVectorBaseTool::OnVectorLayerUpdate( iInvalidationFlags, iUpdateFlags );
+}
+
 TSharedRef<SWidget>
 UOdysseyPainterEditorVectorTrajectoryTool::CreateModifierSegmentControl()
 {

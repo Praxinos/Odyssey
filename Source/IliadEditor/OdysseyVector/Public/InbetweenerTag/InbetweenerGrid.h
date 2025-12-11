@@ -32,6 +32,7 @@ class FInterpolatedPath;
 class FInterpolatedObject;
 struct FInbetweenerDrawing;
 class FInbetweenerBreakdown;
+struct FOdysseyVectorObjectInvalidationFlags;
 
 typedef Eigen::Triplet<double> TripletD;
 
@@ -111,9 +112,9 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
         const ::ULIS::FRectD& GetSourceBBox();
 
         void UpdateBBox( uint32 iUpdateFlags
-                       , uint64 iTagInvalidationFlags );
+                       , FOdysseyVectorObjectInvalidationFlags& iTagInvalidationFlags );
         void UpdateCenterOfMass( uint32 iUpdateFlags
-                               , uint64 iTagInvalidationFlags );
+                               , FOdysseyVectorObjectInvalidationFlags& iTagInvalidationFlags );
         void ResetDeformation( bool iInvalidate );
 
         bool ComputeARAPInterpolation( FInbetweenerChart::Inbetween* iInbetween

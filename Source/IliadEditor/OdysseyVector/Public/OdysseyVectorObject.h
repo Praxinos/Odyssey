@@ -19,31 +19,48 @@ class FOdysseyVectorCell;
 
 struct FOdysseyVectorObjectInvalidationFlags
 {
-    static const uint32 DEFAULT                      =  0;
-    static const uint32 OBJECT_SELECTION             =  1;
-    static const uint32 SHAPE                        =  2;
-    static const uint32 COLOR                        =  3;
-    static const uint32 TOPOLOGY                     =  4;
-    static const uint32 TAG                          =  5;
-    static const uint32 TAG_LIST                     =  6;
-    static const uint32 MATRIX                       =  7;
-    static const uint32 HIERARCHY                    =  8;
-    static const uint32 PARAM                        =  9;
-    static const uint32 TAG_INBETWEENER_SHAPE        = 10;
-    static const uint32 TAG_INBETWEENER_MATRIX       = 11;
-    static const uint32 FLAG_COUNT                   = 12;
-    static const uint32 CHILD_DEFAULT                = ( FLAG_COUNT + DEFAULT );
-    static const uint32 CHILD_OBJECT_SELECTION       = ( FLAG_COUNT + OBJECT_SELECTION );
-    static const uint32 CHILD_SHAPE                  = ( FLAG_COUNT + SHAPE );
-    static const uint32 CHILD_COLOR                  = ( FLAG_COUNT + COLOR );
-    static const uint32 CHILD_TOPOLOGY               = ( FLAG_COUNT + TOPOLOGY );
-    static const uint32 CHILD_TAG                    = ( FLAG_COUNT + TAG );
-    static const uint32 CHILD_TAG_LIST               = ( FLAG_COUNT + TAG_LIST );
-    static const uint32 CHILD_MATRIX                 = ( FLAG_COUNT + MATRIX );
-    static const uint32 CHILD_HIERARCHY              = ( FLAG_COUNT + HIERARCHY );
-    static const uint32 CHILD_PARAM                  = ( FLAG_COUNT + PARAM );
-    static const uint32 CHILD_TAG_INBETWEENER_SHAPE  = ( FLAG_COUNT + TAG_INBETWEENER_SHAPE );
-    static const uint32 CHILD_TAG_INBETWEENER_MATRIX = ( FLAG_COUNT + TAG_INBETWEENER_MATRIX );
+    static const uint32 DEFAULT                                 =  0;
+    static const uint32 OBJECT_SELECTION                        =  1;
+    static const uint32 SHAPE                                   =  2;
+    static const uint32 COLOR                                   =  3;
+    static const uint32 TOPOLOGY                                =  4;
+    static const uint32 TAG_LIST                                =  5;
+    static const uint32 MATRIX                                  =  6;
+    static const uint32 HIERARCHY                               =  7;
+    static const uint32 PARAM                                   =  8;
+    static const uint32 TAG_INBETWEENER_SHAPE                   =  9;
+    static const uint32 TAG_INBETWEENER_MATRIX                  = 10;
+    static const uint32 TAG_INBETWEENER_MAP                     = 11;
+    static const uint32 TAG_INBETWEENER_BUFFERS                 = 12;
+    static const uint32 TAG_INBETWEENER_SPACING                 = 13;
+    static const uint32 TAG_INBETWEENER_GRIDTYPE                = 14;
+    static const uint32 TAG_INBETWEENER_INTERPOLATIONTYPE       = 15;
+    static const uint32 TAG_INBETWEENER_CELLS                   = 16;
+    static const uint32 TAG_INBETWEENER_ROUTES                  = 17;
+    static const uint32 TAG_INBETWEENER_BREAKDOWN_LIST          = 18;
+    static const uint32 TAG_INBETWEENER_CHARTHUD                = 19;
+    static const uint32 FLAG_COUNT                              = 20;
+    static const uint32 CHILD_DEFAULT                           = ( FLAG_COUNT + DEFAULT );
+    static const uint32 CHILD_OBJECT_SELECTION                  = ( FLAG_COUNT + OBJECT_SELECTION );
+    static const uint32 CHILD_SHAPE                             = ( FLAG_COUNT + SHAPE );
+    static const uint32 CHILD_COLOR                             = ( FLAG_COUNT + COLOR );
+    static const uint32 CHILD_TOPOLOGY                          = ( FLAG_COUNT + TOPOLOGY );
+    static const uint32 CHILD_TAG_LIST                          = ( FLAG_COUNT + TAG_LIST );
+    static const uint32 CHILD_MATRIX                            = ( FLAG_COUNT + MATRIX );
+    static const uint32 CHILD_HIERARCHY                         = ( FLAG_COUNT + HIERARCHY );
+    static const uint32 CHILD_PARAM                             = ( FLAG_COUNT + PARAM );
+    static const uint32 CHILD_TAG_INBETWEENER_SHAPE             = ( FLAG_COUNT + TAG_INBETWEENER_SHAPE );
+    static const uint32 CHILD_TAG_INBETWEENER_MATRIX            = ( FLAG_COUNT + TAG_INBETWEENER_MATRIX );
+    static const uint32 CHILD_TAG_INBETWEENER_MAP               = ( FLAG_COUNT + TAG_INBETWEENER_MAP );
+    static const uint32 CHILD_TAG_INBETWEENER_BUFFERS           = ( FLAG_COUNT + TAG_INBETWEENER_BUFFERS );
+    static const uint32 CHILD_TAG_INBETWEENER_SPACING           = ( FLAG_COUNT + TAG_INBETWEENER_SPACING );
+    static const uint32 CHILD_TAG_INBETWEENER_GRIDTYPE          = ( FLAG_COUNT + TAG_INBETWEENER_GRIDTYPE );
+    static const uint32 CHILD_TAG_INBETWEENER_INTERPOLATIONTYPE = ( FLAG_COUNT + TAG_INBETWEENER_INTERPOLATIONTYPE );
+    static const uint32 CHILD_TAG_INBETWEENER_CELLS             = ( FLAG_COUNT + TAG_INBETWEENER_CELLS );
+    static const uint32 CHILD_TAG_INBETWEENER_ROUTES            = ( FLAG_COUNT + TAG_INBETWEENER_ROUTES );
+    static const uint32 CHILD_TAG_INBETWEENER_BREAKDOWN_LIST    = ( FLAG_COUNT + TAG_INBETWEENER_BREAKDOWN_LIST );
+    static const uint32 CHILD_TAG_INBETWEENER_CHARTHUD          = ( FLAG_COUNT + TAG_INBETWEENER_CHARTHUD );
+
 
     FOdysseyVectorObjectInvalidationFlags& Set()
     {
@@ -613,7 +630,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         FOdysseyVectorTag* GetTagByType( uint32 iTagClass );
 
         std::list<FOdysseyVectorTag*>& GetTagList();
-        void InvalidateTag( FOdysseyVectorTag* iTag );
         FOdysseyVectorLayer* GetLayer();
         FOdysseyVectorObjectInvalidationFlags GetInvalidationFlags();
         FOdysseyVectorCell* GetCell();

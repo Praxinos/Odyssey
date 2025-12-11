@@ -89,6 +89,10 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTrajectoryTool : publi
         const FSlateBrush* GetBackgroundColor( eVectorTrajectoryEditionMode iMode ) const;
         TSharedRef<SWidget> CreateModifierSegmentControl();
 
+    protected:
+        void OnVectorLayerUpdate( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags
+                                , uint32 iUpdateFlags );
+
     private:
         FOdysseyPainterEditorVectorTrajectoryToolHUD* mTrajectoryHUD;
         FInbetweenerHandleTrajectory* mPickedHandle;

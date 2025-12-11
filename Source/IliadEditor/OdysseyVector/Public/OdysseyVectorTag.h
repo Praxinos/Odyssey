@@ -41,7 +41,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTag
                          , double iAncestorsOpacity
                          , uint64 iDrawingFlags ) = 0;
         virtual void Update( uint32 iUpdateFlags
-                           , const FOdysseyVectorObjectInvalidationFlags& iOwnerInvalidationFlags ) = 0;
+                           , FOdysseyVectorObjectInvalidationFlags& iOwnerInvalidationFlags ) = 0;
         virtual void UpdateMatrix() = 0;
         virtual void Share( FOdysseyVectorLayer* iSharedEnv );
         virtual void Unshare( FOdysseyVectorLayer* iSharedEnv );

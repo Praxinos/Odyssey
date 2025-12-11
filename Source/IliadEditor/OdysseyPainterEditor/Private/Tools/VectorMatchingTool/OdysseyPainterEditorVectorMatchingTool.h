@@ -70,6 +70,10 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorMatchingTool : public 
         virtual void PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
                                             , const FName& iPropertyName ) override;
 
+    protected:
+        void OnVectorLayerUpdate( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags
+                                , uint32 iUpdateFlags );
+
     private:
         FOdysseyPainterEditorVectorMatchingToolHUD* mMatchingHUD;
         std::vector<FInbetweenerPoint*> mPickedPointArray;

@@ -86,10 +86,10 @@ FInbetweenerGrid::Invalidate( uint32 iInvalidationFlags )
 
 void
 FInbetweenerGrid::UpdateBBox( uint32 iUpdateFlags
-                            , uint64 iTagInvalidationFlags )
+                            , FOdysseyVectorObjectInvalidationFlags& iOwnerInvalidationFlags )
 {
     if( ( mInvalidationFlags    & INVALIDATE_SOURCEBBOX                             )
-     || ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_GRIDTYPE ) )
+     || ( iOwnerInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_GRIDTYPE] ) )
     {
         FInbetweenerBreakdown* prevBreakdown = mBreakdown->GetPrevBreakdown();
 
@@ -101,7 +101,7 @@ FInbetweenerGrid::UpdateBBox( uint32 iUpdateFlags
     }
 
     if( ( mInvalidationFlags    & INVALIDATE_TARGETBBOX                             )
-     || ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_GRIDTYPE ) )
+     || ( iOwnerInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_GRIDTYPE] ) )
     {
         mTargetBBox = GetBBox( eInbetweenerPointPositionType::TargetPosition );
 
@@ -111,10 +111,10 @@ FInbetweenerGrid::UpdateBBox( uint32 iUpdateFlags
 
 void
 FInbetweenerGrid::UpdateCenterOfMass( uint32 iUpdateFlags
-                                    , uint64 iTagInvalidationFlags )
+                                    , FOdysseyVectorObjectInvalidationFlags& iOwnerInvalidationFlags )
 {
     if( ( mInvalidationFlags    & INVALIDATE_SOURCECENTEROFMASS                     )
-     || ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_GRIDTYPE ) )
+     || ( iOwnerInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_GRIDTYPE] ) )
     {
         FInbetweenerBreakdown* prevBreakdown = mBreakdown->GetPrevBreakdown();
 
@@ -126,7 +126,7 @@ FInbetweenerGrid::UpdateCenterOfMass( uint32 iUpdateFlags
     }
 
     if( ( mInvalidationFlags    & INVALIDATE_TARGETCENTEROFMASS                     )
-     || ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_GRIDTYPE ) )
+     || ( iOwnerInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_GRIDTYPE] ) )
     {
         mTargetCenterOfMass = GetCenterOfMass( eInbetweenerPointPositionType::TargetPosition );
 

@@ -6,6 +6,7 @@
 #include "InbetweenerTag/InbetweenerRoute.h"
 #include "InbetweenerTag/InbetweenerChart.h"
 #include "OdysseyVectorTagInbetweener.h"
+#include "OdysseyVectorObject.h"
 
 FInbetweenerHandleTrajectory::FInbetweenerHandleTrajectory( FInbetweenerTrajectory* iTrajectory )
     : mTrajectory ( iTrajectory )
@@ -19,6 +20,8 @@ void
 FInbetweenerHandleTrajectory::Set( const ::ULIS::FVec2D& iDirection
                                  , double iLengthRatio )
 {
+    FOdysseyVectorTagInbetweener* inbetweenerTag = mTrajectory->GetRoute()->GetInbetweenerTag();
+
     mDirection = iDirection;
     mLengthRatio = iLengthRatio;
 
@@ -48,9 +51,9 @@ FInbetweenerHandleTrajectory::Set( const ::ULIS::FVec2D& iDirection
         }
     }
 
-    mTrajectory->GetRoute()->GetInbetweenerTag()->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_ROUTES
-                                                            | FOdysseyVectorTagInbetweener::INVALIDATE_SPACING
-                                                            | FOdysseyVectorTagInbetweener::INVALIDATE_CELLS );
+    inbetweenerTag->GetOwner()->Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_ROUTES)
+                                                                                   .Set(FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_SPACING)
+                                                                                   .Set(FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_CELLS) );
 }
 
 const ::ULIS::FVec2D&

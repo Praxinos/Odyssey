@@ -6,6 +6,7 @@
 #include "InbetweenerTag/InbetweenerBreakdown.h"
 #include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyVector.h"
+#include "OdysseyVectorObject.h"
 
 FInbetweenerRoute::~FInbetweenerRoute()
 {
@@ -188,11 +189,10 @@ FInbetweenerRoute::GetStepBuffer()
 
 void
 FInbetweenerRoute::Update( uint32 iUpdateFlags
-                         , const FOdysseyVectorObjectInvalidationFlags& iOwnerInvalidationFlags
-                         , uint64 iTagInvalidationFlags )
+                         , FOdysseyVectorObjectInvalidationFlags& iOwnerInvalidationFlags )
 {
-    if( ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_ROUTES  )
-     || ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_SPACING ) ) // when chart is modified
+    if( ( iOwnerInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_ROUTES] )
+     || ( iOwnerInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::TAG_INBETWEENER_SPACING] ) ) // when chart is modified
     {
         for( FInbetweenerTrajectory& trajectory : mTrajectoryBuffer )
         {
