@@ -2,11 +2,18 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "Widgets/ToolCollection/SOdysseyPainterEditorToolTile.h"
-#include "Widgets/Layout/SWrapBox.h"
-#include "Widgets/Input/SCheckBox.h"
+
+#include "AssetToolsModule.h"
+#include "Editor/ContentBrowser/Public/IContentBrowserSingleton.h"
+#include "Editor/ContentBrowser/Public/ContentBrowserModule.h"
+#include "Engine/Texture2D.h"
+#include "IAssetTools.h"
 #include "ToolCollection/OdysseyToolCollection.h"
 #include "ToolCollection/OdysseyToolCollectionDragDropOp.h"
+#include "Widgets/Layout/SWrapBox.h"
 #include "Widgets/Colors/SColorBlock.h"
+
+
 
 SOdysseyPainterEditorToolTile::~SOdysseyPainterEditorToolTile()
 {
@@ -239,6 +246,16 @@ TSharedRef<SWidget> SOdysseyPainterEditorToolTile::BuildContextMenu()
         )
     );
 
+    menuBuilder.AddMenuEntry(
+        FText::FromString(TEXT("Change Icon")),
+        FText::FromString(TEXT("Select a new icon for this tool")),
+        FSlateIcon(),
+        FUIAction(
+            FExecuteAction::CreateSP(this, &SOdysseyPainterEditorToolTile::OnChangeIcon),
+            FCanExecuteAction::CreateSP(this, &SOdysseyPainterEditorToolTile::CanChangeIcon)
+        )
+    );
+
     return menuBuilder.MakeWidget();
 }
 
@@ -266,6 +283,149 @@ void SOdysseyPainterEditorToolTile::OnDuplicateTool()
     mEditor->ActivateMainTool(tool);
 }
 
+bool SOdysseyPainterEditorToolTile::CanChangeIcon() const
+{
+    return true;
+}
+
+void SOdysseyPainterEditorToolTile::OnChangeIcon()
+{
+    TSharedRef<SWindow> PickerWindow = SNew(SWindow)
+        .Title(FText::FromString("Select Icon"))
+        .ClientSize(FVector2D(900, 500))
+        .SupportsMinimize(false)
+        .SupportsMaximize(false);
+
+    // Texture Picker
+    FAssetPickerConfig AssetPickerConfig;
+    AssetPickerConfig.Filter.ClassNames.Add(UTexture2D::StaticClass()->GetFName());
+    AssetPickerConfig.Filter.bRecursiveClasses = false;
+    AssetPickerConfig.SelectionMode = ESelectionMode::Single;
+
+    AssetPickerConfig.OnShouldFilterAsset = FOnShouldFilterAsset::CreateLambda(
+        [](const FAssetData& AssetData)
+        {
+            return !AssetData.GetClass()->IsChildOf(UTexture2D::StaticClass());
+        }
+    );
+
+    AssetPickerConfig.OnAssetSelected =
+        FOnAssetSelected::CreateSP(this, &SOdysseyPainterEditorToolTile::OnTextureSelected);
+
+    FContentBrowserModule& ContentBrowserModule =
+        FModuleManager::LoadModuleChecked<FContentBrowserModule>("ContentBrowser");
+
+    TSharedRef<SWidget> AssetPicker =
+        ContentBrowserModule.Get().CreateAssetPicker(AssetPickerConfig);
+
+    // Icon Picker
+    TArray<FName> ValidIcons;
+    TSet<FName> StyleKeys = FAppStyle::Get().GetStyleKeys();
+
+    for (const FName& Key : StyleKeys)
+    {
+        const FSlateBrush* Brush = FAppStyle::Get().GetBrush(Key);
+        if (!Brush)
+            continue;
+
+        // Must have a resource
+        if (Brush->GetResourceName().IsNone())
+            continue;
+
+        // Different tests to ditch checkerboard icons and small ones
+        const FSlateResourceHandle Handle = FSlateApplication::Get().GetRenderer()->GetResourceHandle(*Brush);
+        if (!Handle.IsValid())
+        {
+            continue;
+        }
+
+        const FSlateShaderResourceProxy* Proxy = Handle.GetResourceProxy();
+
+        if (!Proxy || !Proxy->Resource)
+            continue;
+
+        if( Proxy->ActualSize.X < 32 || Proxy->ActualSize.Y < 32 )
+            continue;
+
+        ValidIcons.Add(Key);
+    }
+
+    // A WrapBox that wraps tiles automatically
+    TSharedRef<SWrapBox> IconWrapBox =
+        SNew(SWrapBox)
+        .UseAllottedSize(true)          // resize to available width
+        .InnerSlotPadding(FVector2D(4, 4));
+
+    for (const FName& IconName : ValidIcons)
+    {
+        const FSlateBrush* Brush = FAppStyle::Get().GetBrush(IconName);
+
+        IconWrapBox->AddSlot()
+            .Padding(0)
+            .HAlign(HAlign_Fill)
+            [
+                SNew(SButton)
+                    .ButtonStyle(FAppStyle::Get(), "HoverHintOnly")
+                    .OnClicked_Lambda([this, IconName, PickerWindow]()
+                        {
+                            OnStyleIconSelected(IconName);
+                            PickerWindow->RequestDestroyWindow();
+                            return FReply::Handled();
+                        })
+                    [
+                        SNew(SImage)
+                            .Image(Brush)
+                            .DesiredSizeOverride(FVector2D(32, 32)) // fixed icon size
+                    ]
+            ];
+    }
+
+    TSharedRef<SSplitter> Content =
+        SNew(SSplitter)
+        + SSplitter::Slot().Value(0.6f)
+        [
+            AssetPicker
+        ]
+        + SSplitter::Slot().Value(0.4f)
+        [
+            SNew(SScrollBox)
+                + SScrollBox::Slot()
+                [
+                    IconWrapBox
+                ]
+        ];
+
+    PickerWindow->SetContent(Content);
+    FSlateApplication::Get().AddWindow(PickerWindow);
+    PickerWindowPtr = PickerWindow;
+}
+
+
+void SOdysseyPainterEditorToolTile::OnTextureSelected(const FAssetData& AssetData)
+{
+    if( !mTool )
+        return;
+
+    UTexture2D* SelectedTexture = Cast<UTexture2D>(AssetData.GetAsset());
+    if (SelectedTexture)
+    {
+        mTool->Icon.SetResourceObject(SelectedTexture);
+        mTool->Icon.ImageSize = FVector2D(32, 32);
+        // Close modal
+        if (PickerWindowPtr.IsValid())
+        {
+            PickerWindowPtr.Pin()->RequestDestroyWindow();
+        }
+    }
+}
+
+void SOdysseyPainterEditorToolTile::OnStyleIconSelected(FName StyleIconName)
+{
+    if (!mTool)
+        return;
+
+    mTool->Icon = *FAppStyle::Get().GetBrush(StyleIconName);
+}
 
 /*
 void

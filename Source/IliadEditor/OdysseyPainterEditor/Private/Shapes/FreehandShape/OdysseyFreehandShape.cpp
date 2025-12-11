@@ -280,6 +280,9 @@ UOdysseyFreehandShape::RefreshHUD()
 void
 UOdysseyFreehandShape::RemoveHUD()
 {
+    if( !mHUD )
+        return;
+
     mHUD->RemoveElement(mPathHUD);
     mPathHUD = nullptr;
 }

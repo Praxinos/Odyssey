@@ -51,6 +51,11 @@ private:
     void OnDeleteTool();
     bool CanDuplicateTool() const;
     void OnDuplicateTool();
+    bool CanChangeIcon() const;
+    void OnChangeIcon();
+
+    void OnTextureSelected(const FAssetData& AssetData);
+    void OnStyleIconSelected(FName StyleIconName);
 
     /*
 private:
@@ -66,4 +71,6 @@ private:
 
     mutable EDropIndicatorSide mDropSide = EDropIndicatorSide::None;
     //FOnToolSelected mOnToolSelected;
+
+    TWeakPtr<SWindow> PickerWindowPtr;
 };

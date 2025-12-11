@@ -114,7 +114,7 @@ protected:
     TSharedPtr<FUICommandList>          mCommandList;
 
 public:
-    UPROPERTY(EditDefaultsOnly, Category="Tool")
+    UPROPERTY(EditDefaultsOnly, Category = "Tool")
     FSlateBrush Icon;
     bool mIsActivated;
     bool mIsTemporaryTool = false;
