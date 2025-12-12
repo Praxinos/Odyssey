@@ -8,6 +8,7 @@
 #include "OdysseyAnimationLayerStack.h"
 #include "OdysseyLayerCellSelection.h"
 #include "OdysseyPainterEditorAnimationTimelinePosition.h"
+#include "Widgets/Text/SInlineEditableTextBlock.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -25,6 +26,10 @@ SOdysseyAnimationCell::Construct(
     mAnimationLayer = iAnimationLayer;
     mCell = iCell;
 
+    static FSlateBrush* brush = new FSlateRoundedBoxBrush( FStyleColors::AccentBlack, 4.f );
+
+    mExposureInterface = MakeShareable( new TDefaultNumericTypeInterface<int32> );
+
     ChildSlot
     [
         SNew( SBorder )
@@ -36,10 +41,96 @@ SOdysseyAnimationCell::Construct(
                                 return mCell->GetExposure() > 0 ? EVisibility::Visible : EVisibility::Collapsed;
                             } )
         [
-            InArgs._Content.Widget
+            SNew( SOverlay )
+
+            + SOverlay::Slot()
+            .HAlign( HAlign_Fill )
+            .VAlign( VAlign_Fill )
+            [
+                InArgs._Content.Widget
+            ]
+
+            + SOverlay::Slot()
+            //.HAlign( HAlign_Center )
+            //.VAlign( VAlign_Bottom )
+            .HAlign( HAlign_Right )
+            .VAlign( VAlign_Center )
+            .Padding( 0, 0, 8, 0 )
+            [
+                SNew( SBorder )
+                .BorderImage( brush )
+                .ColorAndOpacity( FLinearColor::White )
+                .Visibility( this, &SOdysseyAnimationCell::GetExposureVisibility )
+                [
+                    SNew( SInlineEditableTextBlock )
+                    .Text( this, &SOdysseyAnimationCell::GetExposureText )
+                    .ToolTipText( this, &SOdysseyAnimationCell::GetExposureTooltip )
+                    .OnVerifyTextChanged( this, &SOdysseyAnimationCell::OnExposureVerifyTextChanged )
+                    .OnTextCommitted( this, &SOdysseyAnimationCell::OnExposureTextCommitted )
+                ]
+            ]
         ]
     ];
 }
+
+//---
+
+EVisibility SOdysseyAnimationCell::GetExposureVisibility() const
+{
+    // Hide when there is only 1 exposure
+    if( mCell->GetExposure() <= 1 )
+        return EVisibility::Collapsed;
+
+    // Hide when there is not enough space to display the widget
+    if( mTimelinePosition->GetFrameSize() * mCell->GetExposure() <= 25.f )
+        return EVisibility::Collapsed;
+
+    return EVisibility::Visible;
+}
+
+FText SOdysseyAnimationCell::GetExposureText() const
+{
+    return FText::AsNumber( mCell->GetExposure() );
+}
+
+FText SOdysseyAnimationCell::GetExposureTooltip() const
+{
+    return FText::Format( LOCTEXT( "animation.timeline.cell.exposure.tooltip", "Cell contains {0} {0}|plural(one=exposure,other=exposures)" ), mCell->GetExposure() );
+}
+
+bool SOdysseyAnimationCell::OnExposureVerifyTextChanged( const FText& iNewText, FText& oErrorMessage ) const
+{
+    TOptional<int32> exposure = mExposureInterface->FromString( iNewText.ToString(), 0 );
+    if( !exposure.IsSet() )
+    {
+        //oErrorMessage = FText::Format( LOCTEXT( "animation.timeline.cell.exposure.tooltip", "Cell contains {0} {0}|plural(one=exposure,other=exposures)" ), mCell->GetExposure() );
+        return false;
+    }
+
+    if( exposure.GetValue() <= 0 )
+    {
+        return false;
+    }
+
+    return true;
+}
+
+void SOdysseyAnimationCell::OnExposureTextCommitted( const FText& iNewText, ETextCommit::Type iCommitType )
+{
+    if( iCommitType != ETextCommit::OnEnter )
+        return;
+
+    TOptional<int32> exposure = mExposureInterface->FromString( iNewText.ToString(), 0 );
+    if( !exposure.IsSet() )
+        return;
+
+    if( exposure.GetValue() <= 0 )
+        return;
+
+    mCell->SetExposure( exposure.GetValue() );
+}
+
+//---
 
 int32 SOdysseyAnimationCell::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
 {

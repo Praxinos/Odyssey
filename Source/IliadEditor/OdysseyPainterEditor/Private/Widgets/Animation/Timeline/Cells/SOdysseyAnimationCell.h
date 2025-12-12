@@ -34,6 +34,13 @@ public:
     // End of SWidget interface
 
 private:
+    EVisibility GetExposureVisibility() const;
+    FText GetExposureText() const;
+    FText GetExposureTooltip() const;
+    bool OnExposureVerifyTextChanged( const FText& iNewText, FText& oErrorMessage ) const;
+    void OnExposureTextCommitted( const FText& iNewText, ETextCommit::Type iCommitType );
+
+private:
     bool IsSelected() const;
     bool IsSelectionCursor() const;
 
@@ -48,4 +55,6 @@ private:
     UOdysseyLayerCell* mCell;
 
     TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition> mTimelinePosition;
+
+    TSharedPtr<TDefaultNumericTypeInterface<int32>> mExposureInterface;
 };
