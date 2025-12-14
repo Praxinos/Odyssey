@@ -59,6 +59,7 @@ class UOdysseyPainterEditorVectorMatchingTool;
 class UOdysseyPainterEditorVectorChartTool;
 class UOdysseyPainterEditorVectorTrajectoryTool;
 class UOdysseyToolCollection;
+struct FToolPropertySnapshot;
 
 class UOdysseyAnimation;
 class UOdysseyAnimationPlayer;
@@ -207,7 +208,9 @@ public:
      * @brief Saves iTool to mRecentTools (if not already in it)
      * mRecentTools can't be bigger than 10 tools (most ancient tools are discarded if necessary)
      */
-    void SaveToRecentTools(UOdysseyPainterEditorTool* iTool);
+    void SaveToRecentTools( UOdysseyPainterEditorTool* iTool );
+    void SaveToolSnapshot( UObject* iTool, FToolPropertySnapshot& oSnapshot );
+    void LoadToolSnapshot( UObject* iTool, const FToolPropertySnapshot& iSnapshot );
 
     virtual UOdysseyPainterEditorRasterDrawingTool*                  GetRasterDrawingTool() const;
     virtual UOdysseyPainterEditorRasterEraserTool*                   GetRasterEraserTool() const;

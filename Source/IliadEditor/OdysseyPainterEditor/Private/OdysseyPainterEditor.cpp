@@ -73,6 +73,8 @@
 #include "Undo/OdysseyVectorUndoTagInbetweenerReset.h"
 
 #include "ToolCollection/OdysseyToolCollection.h"
+#include "ToolCollection/ToolConfiguration/OdysseyPainterEditorToolConfiguration.h"
+#include "ToolCollection/ToolConfiguration/OdysseyPainterEditorToolConfigurationUtils.h"
 #include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
 #include "Tools/RasterEraserTool/OdysseyPainterEditorRasterEraserTool.h"
 #include "Tools/RasterSelectionTool/OdysseyPainterEditorRasterSelectionTool.h"
@@ -3608,18 +3610,89 @@ FOdysseyPainterEditor::SetCurrentPaletteColorEntry(UOdysseyPaletteEntryColor* iE
     }
 }
 
-void FOdysseyPainterEditor::SaveToRecentTools(UOdysseyPainterEditorTool* iTool)
+void FOdysseyPainterEditor::SaveToRecentTools( UOdysseyPainterEditorTool* iTool )
 {
     if( !iTool )
         return;
 
-    if( mRecentTools->ContainsTool(iTool) || mRecentTools->ContainsSimilarTool(iTool) )
+    if( mRecentTools->ContainsTool(iTool) || mRecentTools->ContainsSimilarTool( iTool ) )
         return;
 
-    mRecentTools->AddTool(iTool);
+    mRecentTools->AddTool( iTool );
 
     if( mRecentTools->GetTools().Num() > 10 )
-        mRecentTools->RemoveToolAtIndex(0);
+        mRecentTools->RemoveToolAtIndex( 0 );
+}
+
+void FOdysseyPainterEditor::SaveToolSnapshot( UObject* iTool, FToolPropertySnapshot& oSnapshot )
+{
+    oSnapshot.Values.Reset();
+
+    for( TFieldIterator<FProperty> it( iTool->GetClass() ); it; ++it )
+    {
+        FProperty* property = *it;
+
+        if( !property->HasMetaData( TEXT( "ToolConfiguration" ) ) )
+        {
+            continue;
+        }
+
+        const void* valuePtr = property->ContainerPtrToValuePtr<void>( iTool );
+
+        // Enum
+        if( FEnumProperty* enumProperty = CastField<FEnumProperty>( property ) )
+        {
+            FToolEnumValue data;
+            data.Value = enumProperty->GetUnderlyingProperty()->GetUnsignedIntPropertyValue(valuePtr);
+
+            oSnapshot.Values.Add( property->GetFName(), FInstancedStruct::Make(data) );
+        }
+        // Float
+        else if( FFloatProperty* floatProperty = CastField<FFloatProperty>( property ) )
+        {
+            FToolFloatValue data;
+            data.Value = floatProperty->GetPropertyValue( valuePtr );
+
+            oSnapshot.Values.Add( property->GetFName(),FInstancedStruct::Make( data ) );
+        }
+    }
+}
+
+void FOdysseyPainterEditor::LoadToolSnapshot( UObject* iTool, const FToolPropertySnapshot& iSnapshot )
+{
+    for( const auto& pair : iSnapshot.Values )
+    {
+        FProperty* property = iTool->GetClass()->FindPropertyByName( pair.Key );
+
+        if( !property )
+        {
+            continue; // property removed or renamed
+        }
+
+        void* valuePtr = property->ContainerPtrToValuePtr<void>( iTool );
+        const FInstancedStruct& storedData = pair.Value;
+
+        // Enum
+        if( FEnumProperty* enumProperty = CastField<FEnumProperty>( property ) )
+        {
+            const FToolEnumValue* data = storedData.GetPtr<FToolEnumValue>();
+
+            if( data )
+            {
+                enumProperty->GetUnderlyingProperty()->SetIntPropertyValue( valuePtr, data->Value );
+            }
+        }
+        // Float
+        else if( FFloatProperty* floatProperty = CastField<FFloatProperty>(property) )
+        {
+            const FToolFloatValue* data = storedData.GetPtr<FToolFloatValue>();
+
+            if (data)
+            {
+                floatProperty->SetPropertyValue( valuePtr, data->Value );
+            }
+        }
+    }
 }
 
 #undef LOCTEXT_NAMESPACE
