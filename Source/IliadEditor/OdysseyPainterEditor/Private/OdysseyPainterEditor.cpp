@@ -3615,16 +3615,20 @@ void FOdysseyPainterEditor::SaveToRecentTools( UOdysseyPainterEditorTool* iTool 
     if( !iTool )
         return;
 
-    if( mRecentTools->ContainsTool(iTool) || mRecentTools->ContainsSimilarTool( iTool ) )
+    FToolPropertySnapshot toolPropertySnapshot;
+    SaveToolPropertySnapshot( iTool, toolPropertySnapshot );
+
+    if( mRecentTools->ContainsSimilarToolConfiguration( iTool->GetClass(), toolPropertySnapshot ) )
         return;
 
-    mRecentTools->AddTool( iTool );
+    mRecentTools->AddToolConfiguration( iTool->GetClass(), toolPropertySnapshot, iTool->Icon );
 
-    if( mRecentTools->GetTools().Num() > 10 )
-        mRecentTools->RemoveToolAtIndex( 0 );
+    /*
+    if( mRecentTools->GetToolConfigurations().Num() > 10 )
+        mRecentTools->RemoveToolConfigurationAtIndex( 0 );*/
 }
 
-void FOdysseyPainterEditor::SaveToolSnapshot( UObject* iTool, FToolPropertySnapshot& oSnapshot )
+void FOdysseyPainterEditor::SaveToolPropertySnapshot( UOdysseyPainterEditorTool* iTool, FToolPropertySnapshot& oSnapshot )
 {
     oSnapshot.Values.Reset();
 
@@ -3658,7 +3662,7 @@ void FOdysseyPainterEditor::SaveToolSnapshot( UObject* iTool, FToolPropertySnaps
     }
 }
 
-void FOdysseyPainterEditor::LoadToolSnapshot( UObject* iTool, const FToolPropertySnapshot& iSnapshot )
+void FOdysseyPainterEditor::LoadToolFromPropertySnapshot( UOdysseyPainterEditorTool* iTool, const FToolPropertySnapshot& iSnapshot )
 {
     for( const auto& pair : iSnapshot.Values )
     {

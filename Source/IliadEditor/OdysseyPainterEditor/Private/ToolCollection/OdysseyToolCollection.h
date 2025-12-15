@@ -5,7 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/ObjectMacros.h"
-#include "Tools/OdysseyPainterEditorTool.h"
+#include "ToolConfiguration/OdysseyPainterEditorToolConfiguration.h"
 #include "OdysseyToolCollection.generated.h"
 
 /**
@@ -21,26 +21,23 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyToolCollection : public UObject
 public:
     bool IsCollectionTransient() const;
 
-    UOdysseyPainterEditorTool* AddTool(UOdysseyPainterEditorTool* iTool, int32 iIndex = INDEX_NONE);
-    void RemoveToolAtIndex( int iIndex );
-    void RemoveTool(UOdysseyPainterEditorTool* iTool);
-    void MoveTool(int32 iFromIndex, int32 iToIndex);
+    UOdysseyPainterEditorToolConfiguration* AddToolConfiguration(UClass* iToolClass, FToolPropertySnapshot& iSnapshotConfig, FSlateBrush &iIcon, int32 iIndex = INDEX_NONE);
+    void RemoveToolConfigurationAtIndex( int iIndex );
+    void RemoveToolConfiguration(UOdysseyPainterEditorToolConfiguration* iToolConfig);
+    void MoveToolConfiguration(int32 iFromIndex, int32 iToIndex);
 
     /* Returns the index of iTool in mToolsConfig, if it's in it */
-    int32 GetIndexOfTool(UOdysseyPainterEditorTool* iTool);
-
-    /* Check by comparison of pointers */
-    bool ContainsTool(UOdysseyPainterEditorTool* iTool);
+    int32 GetIndexOfToolConfiguration(UOdysseyPainterEditorToolConfiguration* iToolConfig);
 
     /* Check by comparison of similarities (class and properties) */
-    bool ContainsSimilarTool(UOdysseyPainterEditorTool* iTool);
+    bool ContainsSimilarToolConfiguration(UClass* iToolClass, FToolPropertySnapshot& iSnapshotConfig);
 
-    const TArray<UOdysseyPainterEditorTool*> GetTools() const;
+    const TArray<UOdysseyPainterEditorToolConfiguration*> GetToolConfigurations() const;
 
 public:
     FOnCollectionChanged OnCollectionChanged;
 
 private:
     UPROPERTY()
-    TArray<TObjectPtr<UOdysseyPainterEditorTool>> mToolsConfig;
+    TArray<TObjectPtr<UOdysseyPainterEditorToolConfiguration>> mToolsConfig;
 };

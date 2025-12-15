@@ -4,14 +4,14 @@
 #include "OdysseyToolCollectionDragDropOp.h"
 
 #include "OdysseyPainterEditor.h"
-#include "Tools/OdysseyPainterEditorTool.h"
 #include "ToolCollection/OdysseyToolCollection.h"
+#include "ToolConfiguration/OdysseyPainterEditorToolConfiguration.h"
 
 TSharedRef<FOdysseyToolCollectionDragDropOp>
-FOdysseyToolCollectionDragDropOp::Create(UOdysseyPainterEditorTool* iTool, UOdysseyToolCollection* iSource, FOdysseyPainterEditor* iEditor)
+FOdysseyToolCollectionDragDropOp::Create(UOdysseyPainterEditorToolConfiguration* iToolConfig, UOdysseyToolCollection* iSource, FOdysseyPainterEditor* iEditor)
 {
     TSharedRef<FOdysseyToolCollectionDragDropOp> op = MakeShareable(new FOdysseyToolCollectionDragDropOp);
-    op->mTool = iTool;
+    op->mToolConfig = iToolConfig;
     op->mSourceCollection = iSource;
     op->mEditor = iEditor;
     op->Construct();
@@ -42,9 +42,9 @@ FOdysseyToolCollectionDragDropOp::GetDefaultDecorator() const
         ];
 }
 
-UOdysseyPainterEditorTool* FOdysseyToolCollectionDragDropOp::GetTool() const
+UOdysseyPainterEditorToolConfiguration* FOdysseyToolCollectionDragDropOp::GetToolConfig() const
 {
-    return mTool;
+    return mToolConfig;
 }
 
 TWeakObjectPtr<UOdysseyToolCollection> FOdysseyToolCollectionDragDropOp::GetSourceCollection() const
@@ -60,14 +60,14 @@ FOdysseyPainterEditor* FOdysseyToolCollectionDragDropOp::GetEditor() const
 FText
 FOdysseyToolCollectionDragDropOp::GetText() const
 {
-    return FText::FromString(mTool ? mTool->GetName() : TEXT("Tool"));
+    return FText::FromString(mToolConfig ? mToolConfig->GetName() : TEXT("Tool"));
 }
 
 const FSlateBrush*
 FOdysseyToolCollectionDragDropOp::GetIcon() const
 {
-    if (!mTool)
+    if (!mToolConfig)
         return FAppStyle::GetBrush("ClassIcon.Default");
     else
-        return &mTool->Icon;
+        return &mToolConfig->mIcon;
 }

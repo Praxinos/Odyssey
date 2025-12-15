@@ -7,7 +7,7 @@
 #include "Widgets/Layout/SWrapBox.h"
 
 class FOdysseyPainterEditor;
-class UOdysseyPainterEditorTool;
+class UOdysseyPainterEditorToolConfiguration;
 class UOdysseyToolCollection;
 
 /**
@@ -32,9 +32,9 @@ public:
 
 protected:
 
-    TSharedRef<SWidget> GenerateToolTile(UOdysseyPainterEditorTool* Tool);
+    TSharedRef<SWidget> GenerateToolConfigTile(UOdysseyPainterEditorToolConfiguration* iTool);
     FText GetCollectionDisplayName() const;
-    const FSlateBrush* GetToolIcon(UOdysseyPainterEditorTool* iTool) const;
+    const FSlateBrush* GetToolConfigIcon(UOdysseyPainterEditorToolConfiguration* iTool) const;
     FReply OnAddToolClicked();
     void HandleToolsChanged();
     void RefreshToolsGUI();
@@ -43,6 +43,6 @@ protected:
     FOdysseyPainterEditor* mEditor;
     UOdysseyToolCollection* mToolCollection;
 
-    TArray<UOdysseyPainterEditorTool*> mDisplayedTools;
+    TArray<UOdysseyPainterEditorToolConfiguration*> mDisplayedTools;
     TSharedPtr<SWrapBox> mToolWrapBox;
 };

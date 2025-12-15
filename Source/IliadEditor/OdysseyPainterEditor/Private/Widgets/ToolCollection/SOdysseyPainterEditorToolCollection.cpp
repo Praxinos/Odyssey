@@ -47,10 +47,10 @@ void SOdysseyPainterEditorToolCollection::Construct(const FArguments& InArgs)
 }
 
 
-TSharedRef<SWidget> SOdysseyPainterEditorToolCollection::GenerateToolTile(UOdysseyPainterEditorTool* Tool)
+TSharedRef<SWidget> SOdysseyPainterEditorToolCollection::GenerateToolConfigTile(UOdysseyPainterEditorToolConfiguration* iTool)
 {
     return SNew(SOdysseyPainterEditorToolTile)
-        .Tool(Tool)
+        .ToolConfig(iTool)
         .ToolCollection(mToolCollection)
         .Editor(mEditor);
 }
@@ -63,23 +63,24 @@ SOdysseyPainterEditorToolCollection::GetCollectionDisplayName() const
 }
 
 const FSlateBrush*
-SOdysseyPainterEditorToolCollection::GetToolIcon(UOdysseyPainterEditorTool* iTool) const
+SOdysseyPainterEditorToolCollection::GetToolConfigIcon(UOdysseyPainterEditorToolConfiguration* iTool) const
 {
-    if( !iTool )
+    if( !iTool)
         return FAppStyle::GetBrush("ClassIcon.Default");
     else
-        return &iTool->Icon;
+        return &iTool->mIcon;
 }
 
 FReply
 SOdysseyPainterEditorToolCollection::OnAddToolClicked()
 {
-    UOdysseyPainterEditorTool* tool = mToolCollection->AddTool( mEditor->GetCurrentTool() );
-    if (tool && mEditor)
-    {
-        tool->SetEditor(mEditor);
-        mEditor->ActivateMainTool(tool);
-    }
+    if ( !mEditor )
+        return FReply::Unhandled();
+
+    FToolPropertySnapshot toolPropertySnapshot;
+    mEditor->SaveToolPropertySnapshot( mEditor->GetCurrentTool(), toolPropertySnapshot );
+
+    mToolCollection->AddToolConfiguration( mEditor->GetCurrentTool()->GetClass(), toolPropertySnapshot, mEditor->GetCurrentTool()->Icon );
 
     HandleToolsChanged();
 
@@ -89,7 +90,7 @@ SOdysseyPainterEditorToolCollection::OnAddToolClicked()
 void
 SOdysseyPainterEditorToolCollection::HandleToolsChanged()
 {
-    mDisplayedTools = mToolCollection->GetTools();
+    mDisplayedTools = mToolCollection->GetToolConfigurations();
 
     RefreshToolsGUI();
 }
@@ -102,11 +103,11 @@ void SOdysseyPainterEditorToolCollection::RefreshToolsGUI()
     mToolWrapBox->ClearChildren();
 
     // Rebuild tool tiles
-    for (UOdysseyPainterEditorTool* Tool : mDisplayedTools)
+    for (UOdysseyPainterEditorToolConfiguration* toolConfig : mDisplayedTools)
     {
         mToolWrapBox->AddSlot()
             [
-                GenerateToolTile(Tool)
+                GenerateToolConfigTile(toolConfig)
             ];
     }
 

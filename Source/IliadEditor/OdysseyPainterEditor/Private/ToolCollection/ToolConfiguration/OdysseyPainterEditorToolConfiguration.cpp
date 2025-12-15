@@ -4,11 +4,23 @@
 #include "OdysseyPainterEditorToolConfiguration.h"
 
 /////////////////////////////////////////////////////
-// UOdysseyPainterEditorToolConfiguration
+// FToolPropertySnapshot
 
-/*
-UOdysseyPainterEditorToolConfiguration::UOdysseyPainterEditorToolConfiguration(const FObjectInitializer& ObjectInitializer)
-    : Super(ObjectInitializer)
+bool FToolPropertySnapshot::operator==( const FToolPropertySnapshot& iOther ) const
 {
+    if( Values.Num() != iOther.Values.Num() )
+    {
+        return false;
+    }
+
+    TArray<uint8> bufferA;
+    TArray<uint8> bufferB;
+
+    FMemoryWriter writerA(bufferA, true);
+    FMemoryWriter writerB(bufferB, true);
+
+    FToolPropertySnapshot::StaticStruct()->SerializeItem( writerA, (void*)this, nullptr );
+    FToolPropertySnapshot::StaticStruct()->SerializeItem( writerB, (void*)&iOther, nullptr );
+
+    return bufferA == bufferB;
 }
-*/

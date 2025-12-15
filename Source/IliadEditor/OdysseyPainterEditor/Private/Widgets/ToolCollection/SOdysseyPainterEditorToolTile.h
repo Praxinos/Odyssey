@@ -7,6 +7,7 @@
 #include "Widgets/Views/STileView.h"
 
 #include "Tools/OdysseyPainterEditorTool.h"
+#include "ToolCollection/ToolConfiguration/OdysseyPainterEditorToolConfiguration.h"
 
 enum class EDropIndicatorSide
 {
@@ -21,7 +22,7 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorToolTile
 public:
     SLATE_BEGIN_ARGS(SOdysseyPainterEditorToolTile)
         {}
-        SLATE_ARGUMENT( UOdysseyPainterEditorTool*, Tool )
+        SLATE_ARGUMENT( UOdysseyPainterEditorToolConfiguration*, ToolConfig )
         SLATE_ARGUMENT( UOdysseyToolCollection*, ToolCollection)
         SLATE_ARGUMENT( FOdysseyPainterEditor*, Editor)
         //SLATE_EVENT( FOnToolSelected, OnToolSelected )
@@ -65,12 +66,12 @@ private:
     FText ToolTooltip(UOdysseyPainterEditorTool* iTool) const;*/
 
 private:
-    UOdysseyPainterEditorTool* mTool = nullptr;
+    UOdysseyPainterEditorToolConfiguration* mToolConfig = nullptr;
     UOdysseyToolCollection* mCollection = nullptr;
     FOdysseyPainterEditor* mEditor = nullptr;
 
     mutable EDropIndicatorSide mDropSide = EDropIndicatorSide::None;
     //FOnToolSelected mOnToolSelected;
 
-    TWeakPtr<SWindow> PickerWindowPtr;
+    TWeakPtr<SWindow> mPickerWindowPtr;
 };

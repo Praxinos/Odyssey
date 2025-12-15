@@ -5,7 +5,7 @@
 
 #include "CoreMinimal.h"
 
-class UOdysseyPainterEditorTool;
+class UOdysseyPainterEditorToolConfiguration;
 class UOdysseyToolCollection;
 class FOdysseyPainterEditor;
 
@@ -15,11 +15,11 @@ public:
     DRAG_DROP_OPERATOR_TYPE(FOdysseyToolCollectionDragDropOp, FDragDropOperation)
 
 public:
-    static TSharedRef<FOdysseyToolCollectionDragDropOp> Create(UOdysseyPainterEditorTool* iTool, UOdysseyToolCollection* iSource, FOdysseyPainterEditor* iEditor);
+    static TSharedRef<FOdysseyToolCollectionDragDropOp> Create(UOdysseyPainterEditorToolConfiguration* iToolConfig, UOdysseyToolCollection* iSource, FOdysseyPainterEditor* iEditor);
     virtual TSharedPtr<SWidget> GetDefaultDecorator() const override;
 
 public:
-    UOdysseyPainterEditorTool* GetTool() const;
+    UOdysseyPainterEditorToolConfiguration* GetToolConfig() const;
     TWeakObjectPtr<UOdysseyToolCollection> GetSourceCollection() const;
     FOdysseyPainterEditor* GetEditor() const;
 
@@ -28,7 +28,7 @@ private:
     const FSlateBrush* GetIcon() const;
 
 private:
-    UOdysseyPainterEditorTool* mTool;
+    UOdysseyPainterEditorToolConfiguration* mToolConfig;
     TWeakObjectPtr<UOdysseyToolCollection> mSourceCollection;
     FOdysseyPainterEditor* mEditor;
 };

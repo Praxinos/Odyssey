@@ -18,6 +18,12 @@ struct FToolPropertySnapshot
     // One entry per property
     UPROPERTY()
     TMap<FName, FInstancedStruct> Values;
+
+    bool operator==(const FToolPropertySnapshot& iOther) const;
+    bool operator!=(const FToolPropertySnapshot& iOther) const
+    {
+        return !(*this == iOther);
+    }
 };
 
 /**
@@ -35,4 +41,7 @@ public:
 
     UPROPERTY()
     FToolPropertySnapshot mSnapshot;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Tool")
+    FSlateBrush mIcon;
 };

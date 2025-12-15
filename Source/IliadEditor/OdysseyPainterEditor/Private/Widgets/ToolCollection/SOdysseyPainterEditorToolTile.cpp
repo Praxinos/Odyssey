@@ -27,7 +27,7 @@ SOdysseyPainterEditorToolTile::SOdysseyPainterEditorToolTile()
 void
 SOdysseyPainterEditorToolTile::Construct(const FArguments& InArgs)
 {
-    mTool = InArgs._Tool;
+    mToolConfig = InArgs._ToolConfig;
     mCollection = InArgs._ToolCollection;
     mEditor = InArgs._Editor;
 
@@ -56,7 +56,7 @@ SOdysseyPainterEditorToolTile::Construct(const FArguments& InArgs)
                 .Padding(4)
                 [
                     SNew(SImage)
-                        .Image(&mTool->Icon)
+                        .Image(&mToolConfig->mIcon)
                         .DesiredSizeOverride(FVector2D(32.f, 32.f))
                 ]
         ];
@@ -66,10 +66,10 @@ FReply SOdysseyPainterEditorToolTile::OnMouseButtonDown(const FGeometry& MyGeome
 {
     if (MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
     {
-        if (mTool && mEditor)
+        if (mToolConfig && mEditor)
         {
-            mTool->SetEditor(mEditor);
-            mEditor->ActivateMainTool(mTool);
+            /*mToolConfig->SetEditor(mEditor);
+            mEditor->ActivateMainTool(mToolConfig);*/
         }
         return FReply::Handled().DetectDrag(SharedThis(this), EKeys::LeftMouseButton);
     }
@@ -93,7 +93,7 @@ FReply SOdysseyPainterEditorToolTile::OnDragDetected(const FGeometry& MyGeometry
 {
     if (MouseEvent.IsMouseButtonDown(EKeys::LeftMouseButton))
     {
-        return FReply::Handled().BeginDragDrop(FOdysseyToolCollectionDragDropOp::Create(mTool, mCollection, mEditor));
+        return FReply::Handled().BeginDragDrop(FOdysseyToolCollectionDragDropOp::Create(mToolConfig, mCollection, mEditor));
     }
     return FReply::Unhandled();
 }
@@ -105,38 +105,26 @@ FReply SOdysseyPainterEditorToolTile::OnDrop(const FGeometry& MyGeometry, const 
 
         return FReply::Unhandled();
 
-    UOdysseyPainterEditorTool* sourceTool = dragOp->GetTool();
+    UOdysseyPainterEditorToolConfiguration* sourceToolConfig = dragOp->GetToolConfig();
     UOdysseyToolCollection* sourceCollection = dragOp->GetSourceCollection().Get();
     FOdysseyPainterEditor* sourceEditor = dragOp->GetEditor();
 
     if (sourceCollection && sourceCollection != mCollection)
     {
         if(!sourceCollection->IsCollectionTransient())
-            sourceCollection->RemoveTool(sourceTool);
+            sourceCollection->RemoveToolConfiguration(sourceToolConfig);
 
-        int32 targetIndex = mCollection->GetIndexOfTool(mTool);
-        UOdysseyPainterEditorTool* tool = mCollection->AddTool(sourceTool, targetIndex);
-
-        if (tool && mEditor)
-        {
-            tool->SetEditor(mEditor);
-            mEditor->ActivateMainTool(tool);
-        }
-
-        if (sourceEditor != mEditor)
-        {
-            mEditor->InactivateMainTool();
-        }
+        int32 targetIndex = mCollection->GetIndexOfToolConfiguration(mToolConfig);
     }
     else
     {
-        int32 fromIndex = mCollection->GetIndexOfTool(sourceTool);
-        int32 targetIndex = mCollection->GetIndexOfTool(mTool);
+        int32 fromIndex = mCollection->GetIndexOfToolConfiguration(sourceToolConfig);
+        int32 targetIndex = mCollection->GetIndexOfToolConfiguration(mToolConfig);
 
         if ( mDropSide == EDropIndicatorSide::Right )
             targetIndex++;
 
-        mCollection->MoveTool(fromIndex, targetIndex);
+        mCollection->MoveToolConfiguration(fromIndex, targetIndex);
     }
 
     mDropSide = EDropIndicatorSide::None;
@@ -150,10 +138,10 @@ FReply SOdysseyPainterEditorToolTile::OnDragOver(const FGeometry& MyGeometry, co
     if (!dragOp.IsValid() || mCollection->IsCollectionTransient() )
         return FReply::Unhandled();
 
-    FVector2D LocalPos = MyGeometry.AbsoluteToLocal(DragDropEvent.GetScreenSpacePosition());
-    float HalfWidth = MyGeometry.GetLocalSize().X * 0.5f;
+    FVector2D localPos = MyGeometry.AbsoluteToLocal(DragDropEvent.GetScreenSpacePosition());
+    float halfWidth = MyGeometry.GetLocalSize().X * 0.5f;
 
-    mDropSide = (LocalPos.X < HalfWidth) ? EDropIndicatorSide::Left : EDropIndicatorSide::Right;
+    mDropSide = (localPos.X < halfWidth) ? EDropIndicatorSide::Left : EDropIndicatorSide::Right;
 
     return FReply::Handled();
 }
@@ -203,23 +191,25 @@ int32 SOdysseyPainterEditorToolTile::OnPaint(const FPaintArgs& Args, const FGeom
 
 FLinearColor SOdysseyPainterEditorToolTile::GetTileColor() const
 {
-    if (!mEditor || !mTool)
+    if (!mEditor || !mToolConfig)
         return FLinearColor::White; //Error
 
-    if(IsHovered())
+    /*if(IsHovered())
     {
-        if(mEditor->GetCurrentTool() == mTool) //Hovered and tool is selected
+        if(mEditor->GetCurrentTool() == mToolConfig) //Hovered and tool is selected
             return FLinearColor(0.05f, 0.4f, 0.9f, 0.9f);
         else //Hovered not selected
             return FLinearColor(0.3f, 0.3f, 0.3f, 0.8f);
     }
     else
     {
-        if (mEditor->GetCurrentTool() == mTool) //Non hovered and tool is selected
+        if (mEditor->GetCurrentTool() == mToolConfig) //Non hovered and tool is selected
             return FLinearColor(0.05f, 0.3f, 0.7f, 0.7f);
         else //Non hovered and tool is not selected
             return FLinearColor::Transparent;
-    }
+    }*/
+
+    return FLinearColor::White; //Error
 }
 
 TSharedRef<SWidget> SOdysseyPainterEditorToolTile::BuildContextMenu()
@@ -261,26 +251,24 @@ TSharedRef<SWidget> SOdysseyPainterEditorToolTile::BuildContextMenu()
 
 bool SOdysseyPainterEditorToolTile::CanDeleteTool() const
 {
-    return (mCollection && mTool);
+    return (mCollection && mToolConfig);
 }
 
 void SOdysseyPainterEditorToolTile::OnDeleteTool()
 {
-    mCollection->RemoveTool(mTool);
+    mCollection->RemoveToolConfiguration(mToolConfig);
     //mEditor->ActivateMainTool(mEditor->FindDefaultToolForCurrentLayer());
     mEditor->InactivateMainTool();
 }
 
 bool SOdysseyPainterEditorToolTile::CanDuplicateTool() const
 {
-    return (mCollection && mTool && !mCollection->IsCollectionTransient());
+    return (mCollection && mToolConfig && !mCollection->IsCollectionTransient());
 }
 
 void SOdysseyPainterEditorToolTile::OnDuplicateTool()
 {
-    UOdysseyPainterEditorTool* tool = mCollection->AddTool(mTool);
-    tool->SetEditor(mEditor);
-    mEditor->ActivateMainTool(tool);
+    mCollection->AddToolConfiguration(mToolConfig->mToolClass, mToolConfig->mSnapshot, mToolConfig->mIcon );
 }
 
 bool SOdysseyPainterEditorToolTile::CanChangeIcon() const
@@ -290,141 +278,138 @@ bool SOdysseyPainterEditorToolTile::CanChangeIcon() const
 
 void SOdysseyPainterEditorToolTile::OnChangeIcon()
 {
-    TSharedRef<SWindow> PickerWindow = SNew(SWindow)
+    TSharedRef<SWindow> pickerWindow = SNew(SWindow)
         .Title(FText::FromString("Select Icon"))
         .ClientSize(FVector2D(900, 500))
         .SupportsMinimize(false)
         .SupportsMaximize(false);
 
     // Texture Picker
-    FAssetPickerConfig AssetPickerConfig;
-    AssetPickerConfig.Filter.ClassNames.Add(UTexture2D::StaticClass()->GetFName());
-    AssetPickerConfig.Filter.bRecursiveClasses = false;
-    AssetPickerConfig.SelectionMode = ESelectionMode::Single;
+    FAssetPickerConfig assetPickerConfig;
+    assetPickerConfig.Filter.ClassNames.Add(UTexture2D::StaticClass()->GetFName());
+    assetPickerConfig.Filter.bRecursiveClasses = false;
+    assetPickerConfig.SelectionMode = ESelectionMode::Single;
 
-    AssetPickerConfig.OnShouldFilterAsset = FOnShouldFilterAsset::CreateLambda(
+    assetPickerConfig.OnShouldFilterAsset = FOnShouldFilterAsset::CreateLambda(
         [](const FAssetData& AssetData)
         {
             return !AssetData.GetClass()->IsChildOf(UTexture2D::StaticClass());
         }
     );
 
-    AssetPickerConfig.OnAssetSelected =
-        FOnAssetSelected::CreateSP(this, &SOdysseyPainterEditorToolTile::OnTextureSelected);
+    assetPickerConfig.OnAssetSelected = FOnAssetSelected::CreateSP(this, &SOdysseyPainterEditorToolTile::OnTextureSelected);
 
-    FContentBrowserModule& ContentBrowserModule =
-        FModuleManager::LoadModuleChecked<FContentBrowserModule>("ContentBrowser");
+    FContentBrowserModule& contentBrowserModule = FModuleManager::LoadModuleChecked<FContentBrowserModule>("ContentBrowser");
 
-    TSharedRef<SWidget> AssetPicker =
-        ContentBrowserModule.Get().CreateAssetPicker(AssetPickerConfig);
+    TSharedRef<SWidget> assetPicker = contentBrowserModule.Get().CreateAssetPicker(assetPickerConfig);
 
     // Icon Picker
-    TArray<FName> ValidIcons;
-    TSet<FName> StyleKeys = FAppStyle::Get().GetStyleKeys();
+    TArray<FName> validIcons;
+    TSet<FName> styleKeys = FAppStyle::Get().GetStyleKeys();
 
-    for (const FName& Key : StyleKeys)
+    for (const FName& key : styleKeys)
     {
-        const FSlateBrush* Brush = FAppStyle::Get().GetBrush(Key);
-        if (!Brush)
+        const FSlateBrush* brush = FAppStyle::Get().GetBrush(key);
+        if (!brush)
             continue;
 
         // Must have a resource
-        if (Brush->GetResourceName().IsNone())
+        if (brush->GetResourceName().IsNone())
             continue;
 
         // Different tests to ditch checkerboard icons and small ones
-        const FSlateResourceHandle Handle = FSlateApplication::Get().GetRenderer()->GetResourceHandle(*Brush);
-        if (!Handle.IsValid())
+        const FSlateResourceHandle handle = FSlateApplication::Get().GetRenderer()->GetResourceHandle(*brush);
+        if (!handle.IsValid())
         {
             continue;
         }
 
-        const FSlateShaderResourceProxy* Proxy = Handle.GetResourceProxy();
+        const FSlateShaderResourceProxy* proxy = handle.GetResourceProxy();
 
-        if (!Proxy || !Proxy->Resource)
+        if (!proxy || !proxy->Resource)
             continue;
 
-        if( Proxy->ActualSize.X < 32 || Proxy->ActualSize.Y < 32 )
+        if( proxy->ActualSize.X < 32 || proxy->ActualSize.Y < 32 )
             continue;
 
-        ValidIcons.Add(Key);
+        validIcons.Add(key);
     }
 
     // A WrapBox that wraps tiles automatically
-    TSharedRef<SWrapBox> IconWrapBox =
+    TSharedRef<SWrapBox> iconWrapBox =
         SNew(SWrapBox)
         .UseAllottedSize(true)          // resize to available width
         .InnerSlotPadding(FVector2D(4, 4));
 
-    for (const FName& IconName : ValidIcons)
+    for (const FName& iconName : validIcons)
     {
-        const FSlateBrush* Brush = FAppStyle::Get().GetBrush(IconName);
+        const FSlateBrush* brush = FAppStyle::Get().GetBrush(iconName);
 
-        IconWrapBox->AddSlot()
+        iconWrapBox->AddSlot()
             .Padding(0)
             .HAlign(HAlign_Fill)
             [
                 SNew(SButton)
                     .ButtonStyle(FAppStyle::Get(), "HoverHintOnly")
-                    .OnClicked_Lambda([this, IconName, PickerWindow]()
+                    .OnClicked_Lambda([this, iconName, pickerWindow]()
                         {
-                            OnStyleIconSelected(IconName);
-                            PickerWindow->RequestDestroyWindow();
+                            OnStyleIconSelected(iconName);
+                            pickerWindow->RequestDestroyWindow();
                             return FReply::Handled();
                         })
                     [
                         SNew(SImage)
-                            .Image(Brush)
+                            .Image(brush)
                             .DesiredSizeOverride(FVector2D(32, 32)) // fixed icon size
                     ]
             ];
     }
 
-    TSharedRef<SSplitter> Content =
+    TSharedRef<SSplitter> content =
         SNew(SSplitter)
         + SSplitter::Slot().Value(0.6f)
         [
-            AssetPicker
+            assetPicker
         ]
         + SSplitter::Slot().Value(0.4f)
         [
             SNew(SScrollBox)
                 + SScrollBox::Slot()
                 [
-                    IconWrapBox
+                    iconWrapBox
                 ]
         ];
 
-    PickerWindow->SetContent(Content);
-    FSlateApplication::Get().AddWindow(PickerWindow);
-    PickerWindowPtr = PickerWindow;
+    pickerWindow->SetContent(content);
+    FSlateApplication::Get().AddWindow(pickerWindow);
+    mPickerWindowPtr = pickerWindow;
 }
 
 
 void SOdysseyPainterEditorToolTile::OnTextureSelected(const FAssetData& AssetData)
 {
-    if( !mTool )
+    if( !mToolConfig )
         return;
 
     UTexture2D* SelectedTexture = Cast<UTexture2D>(AssetData.GetAsset());
     if (SelectedTexture)
     {
-        mTool->Icon.SetResourceObject(SelectedTexture);
-        mTool->Icon.ImageSize = FVector2D(32, 32);
+        mToolConfig->mIcon.SetResourceObject(SelectedTexture);
+        mToolConfig->mIcon.ImageSize = FVector2D(32, 32);
         // Close modal
-        if (PickerWindowPtr.IsValid())
+        if (mPickerWindowPtr.IsValid())
         {
-            PickerWindowPtr.Pin()->RequestDestroyWindow();
+            mPickerWindowPtr.Pin()->RequestDestroyWindow();
         }
     }
 }
 
 void SOdysseyPainterEditorToolTile::OnStyleIconSelected(FName StyleIconName)
 {
-    if (!mTool)
+    if (!mToolConfig)
         return;
 
-    mTool->Icon = *FAppStyle::Get().GetBrush(StyleIconName);
+    mToolConfig->mIcon = *FAppStyle::Get().GetBrush(StyleIconName);
 }
 
 /*
