@@ -82,9 +82,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorChartTool : public UOd
         void OnVectorLayerUpdate( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags
                                 , uint32 iUpdateFlags );
 
-public:
-    virtual bool IsSameAs(const UOdysseyPainterEditorTool* Other) const override;
-
     private:
         FOdysseyPainterEditorVectorChartToolHUD* mChartHUD;
         FInbetweenerChart::Inbetween* mPickedInbetween;
@@ -100,7 +97,8 @@ public:
                  , Category = ChartTool
                  , meta = ( ToolTip  = "Picking Radius"
                           , ClampMin = "0"
-                          , UIMin    = "0" ) )
+                          , UIMin    = "0"
+                          , ToolConfiguration ) )
         uint32 PickingRadius;
 
         UPROPERTY()
@@ -114,11 +112,13 @@ public:
                           , ClampMax = "5"
                           , UIMax    = "5"
                           , EditCondition = "( EditionMode == eVectorChartEditionMode::EaseInOrOut ) || ( EditionMode == eVectorChartEditionMode::Magnet )"
-                          , EditConditionHides ) )
+                          , EditConditionHides
+                          , ToolConfiguration ) )
         uint32 Factor;
 
         UPROPERTY( EditAnywhere
                  , Category = ChartTool
-                 , meta = ( ToolTip  = "Chart Type" ) )
+                 , meta = ( ToolTip  = "Chart Type"
+                          , ToolConfiguration) )
         eChartType ChartType;
 };

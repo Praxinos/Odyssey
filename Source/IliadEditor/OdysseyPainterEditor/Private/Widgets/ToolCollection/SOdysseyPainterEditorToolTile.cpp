@@ -68,8 +68,12 @@ FReply SOdysseyPainterEditorToolTile::OnMouseButtonDown(const FGeometry& MyGeome
     {
         if (mToolConfig && mEditor)
         {
-            /*mToolConfig->SetEditor(mEditor);
-            mEditor->ActivateMainTool(mToolConfig);*/
+            UOdysseyPainterEditorTool* editorTool = mEditor->GetEditorToolOfClass( mToolConfig->mToolClass );
+            if( editorTool )
+            {
+                mEditor->LoadToolFromPropertySnapshot( editorTool, mToolConfig->mSnapshot );
+                mEditor->ActivateMainTool( editorTool );
+            }
         }
         return FReply::Handled().DetectDrag(SharedThis(this), EKeys::LeftMouseButton);
     }
@@ -191,25 +195,13 @@ int32 SOdysseyPainterEditorToolTile::OnPaint(const FPaintArgs& Args, const FGeom
 
 FLinearColor SOdysseyPainterEditorToolTile::GetTileColor() const
 {
-    if (!mEditor || !mToolConfig)
-        return FLinearColor::White; //Error
-
-    /*if(IsHovered())
-    {
-        if(mEditor->GetCurrentTool() == mToolConfig) //Hovered and tool is selected
-            return FLinearColor(0.05f, 0.4f, 0.9f, 0.9f);
-        else //Hovered not selected
-            return FLinearColor(0.3f, 0.3f, 0.3f, 0.8f);
-    }
+    if(IsHovered())
+        return FLinearColor(0.3f, 0.3f, 0.3f, 0.8f);
     else
-    {
-        if (mEditor->GetCurrentTool() == mToolConfig) //Non hovered and tool is selected
-            return FLinearColor(0.05f, 0.3f, 0.7f, 0.7f);
-        else //Non hovered and tool is not selected
-            return FLinearColor::Transparent;
-    }*/
+        return FLinearColor::Transparent;
 
-    return FLinearColor::White; //Error
+    /*if (mEditor->GetCurrentTool() == mToolConfig) //Non hovered and tool is selected
+        return FLinearColor(0.05f, 0.3f, 0.7f, 0.7f);*/
 }
 
 TSharedRef<SWidget> SOdysseyPainterEditorToolTile::BuildContextMenu()

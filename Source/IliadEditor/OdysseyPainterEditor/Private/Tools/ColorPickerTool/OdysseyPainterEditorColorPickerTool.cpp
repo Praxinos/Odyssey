@@ -103,17 +103,6 @@ UOdysseyPainterEditorColorPickerTool::PickColorUp( const FOdysseyPoint& iPointIn
     mEditor->PaintColor(mEditor->PaintColor(), true); //Commit paintColor
 }
 
-bool UOdysseyPainterEditorColorPickerTool::IsSameAs(const UOdysseyPainterEditorTool* Other) const
-{
-    // Same class verification
-    if (!UOdysseyPainterEditorTool::IsSameAs(Other))
-        return false;
-
-    //const UOdysseyPainterEditorColorPickerTool* otherTool = Cast< UOdysseyPainterEditorColorPickerTool >(Other);
-
-    return true; //No UProperty to check
-}
-
 void
 UOdysseyPainterEditorColorPickerTool::Commit()
 {

@@ -53,9 +53,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorScenePanTool : public 
         void Scale( FOdysseyVectorGroupPaint* iScene
                   , const FOdysseyPoint& iPointInTexture );
 
-    public:
-        virtual bool IsSameAs(const UOdysseyPainterEditorTool* Other) const override;
-
     private:
         bool mDragged;
         double mDownLocalMouseX;

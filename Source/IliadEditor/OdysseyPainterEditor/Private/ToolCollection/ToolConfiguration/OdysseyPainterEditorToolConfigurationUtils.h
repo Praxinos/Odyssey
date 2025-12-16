@@ -8,6 +8,24 @@
 #include "OdysseyPainterEditorToolConfigurationUtils.generated.h"
 
 USTRUCT()
+struct FToolEnumValue
+{
+    GENERATED_BODY()
+
+    UPROPERTY()
+    uint64 Value; // Generally, it's stored as a uint8, but just to be sure we use a bigger size
+};
+
+USTRUCT()
+struct FToolBoolValue
+{
+    GENERATED_BODY()
+
+    UPROPERTY()
+    bool Value;
+};
+
+USTRUCT()
 struct FToolIntValue
 {
     GENERATED_BODY()
@@ -17,19 +35,28 @@ struct FToolIntValue
 };
 
 USTRUCT()
-struct FToolEnumValue
-{
-    GENERATED_BODY()
-
-    UPROPERTY()
-    uint64 Value;
-};
-
-USTRUCT()
 struct FToolFloatValue
 {
     GENERATED_BODY()
 
     UPROPERTY()
     float Value;
+};
+
+USTRUCT()
+struct FToolDoubleValue
+{
+    GENERATED_BODY()
+
+    UPROPERTY()
+    double Value;
+};
+
+USTRUCT()
+struct FToolObjectValue
+{
+    GENERATED_BODY()
+
+    UPROPERTY()
+    TSoftObjectPtr<UObject> Value;
 };

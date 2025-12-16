@@ -164,9 +164,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathEditTool : public 
         const FSlateBrush* GetBackgroundColor( eVectorPathEditEditionMode iMode ) const;
         void ActionSubdivideSegments();
 
-    public:
-        virtual bool IsSameAs(const UOdysseyPainterEditorTool* Other) const override;
-
     private:
         FOdysseyPainterEditorVectorPathEditToolHUD *mPathEditHUD;
         std::vector<FOdysseyVectorVertex*> mPickedVertexArray;
@@ -185,11 +182,13 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathEditTool : public 
                  , Category=PathEditTool
                  , meta = ( ToolTip  = "Picking Radius"
                           , ClampMin = "0"
-                          , UIMin    = "0" ) )
+                          , UIMin    = "0"
+                          , ToolConfiguration ) )
         uint32 PickingRadius;
 
         UPROPERTY( EditAnywhere
                  , Category=PathEditTool
-                 , meta = ( ToolTip = "Widen All Along" ) )
+                 , meta = ( ToolTip = "Widen All Along"
+                 , ToolConfiguration ) )
         bool WidenAllAlong;
 };

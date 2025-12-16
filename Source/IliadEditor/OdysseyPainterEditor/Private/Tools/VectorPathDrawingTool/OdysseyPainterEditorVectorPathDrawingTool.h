@@ -97,15 +97,13 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
                                        , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray );
 
     public:
-        virtual bool IsSameAs(const UOdysseyPainterEditorTool* Other) const override;
-
-    public:
         //UPROPERTY( EditAnywhere, Category=PathDrawingTool, meta = (ClampMin = "0.0",UIMin = "0.0", ClampMax = "1.0", UIMax = "1.0" ))
         double Opacity;
 
         UPROPERTY( EditAnywhere
                  , Category=PathDrawingTool
-                 , meta = ( ToolTip = "Brush" ) )
+                 , meta = ( ToolTip = "Brush"
+                          , ToolConfiguration ) )
         FOdysseyVectorBrush Brush;
 
         //UPROPERTY( EditAnywhere, Category="Odyssey PathDrawing Tool" )
@@ -113,21 +111,24 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
 
         UPROPERTY( EditAnywhere
                  , Category=PathDrawingTool
-                 , meta = ( ToolTip = "Tracing Fidelity" ) )
+                 , meta = ( ToolTip = "Tracing Fidelity"
+                          , ToolConfiguration ) )
         eTracingFidelity TracingFidelity;
 
         UPROPERTY( EditAnywhere
                  , Category=PathDrawingTool
                  , meta = ( ToolTip = "Radius"
                           , ClampMin = "0.0"
-                          , UIMin = "0.0" ) )
+                          , UIMin = "0.0"
+                          , ToolConfiguration ) )
         double Radius;
         // computed based upon whether or not the pencil size is relative to the object's transformation matrix
         double mRealSize;
 
         UPROPERTY( EditAnywhere
                  , Category=PathDrawingTool
-                 , meta = ( ToolTip = "Pressure Sensitive" ) )
+                 , meta = ( ToolTip = "Pressure Sensitive"
+                          , ToolConfiguration ) )
         bool PressureSensitive;
 
         //UPROPERTY( EditAnywhere, Category=PathDrawingTool )
@@ -135,30 +136,35 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
 
         UPROPERTY( EditAnywhere
                  , Category=PathDrawingTool
-                 , meta = ( ToolTip = "Update PaintGroups" ) )
+                 , meta = ( ToolTip = "Update PaintGroups"
+                          , ToolConfiguration ) )
         bool UpdatePaintGroups;
 
         UPROPERTY( EditAnywhere
                  , Category=PathDrawingTool
-                 , meta = ( ToolTip = "Stitch" ) )
+                 , meta = ( ToolTip = "Stitch"
+                          , ToolConfiguration ) )
         bool Stitch;
         bool StitchAtKeyDown;
 
         UPROPERTY( EditAnywhere
                  , Category=PathDrawingTool
-                 , meta = ( ToolTip = "Snap" ) )
+                 , meta = ( ToolTip = "Snap"
+                          , ToolConfiguration ) )
         bool Snap;
 
         UPROPERTY( EditAnywhere
                  , Category=PathDrawingTool
-                 , meta = ( ToolTip = "Average Stitched Radius" ) )
+                 , meta = ( ToolTip = "Average Stitched Radius"
+                          , ToolConfiguration ) )
         bool AverageStitchedRadius;
 
         UPROPERTY( EditAnywhere
                  , Category=PathDrawingTool
                  , meta = ( ToolTip = "Snap/Stitching Radius"
                           , ClampMin = "0"
-                          , UIMin    = "0" ) )
+                          , UIMin    = "0"
+                          , ToolConfiguration ) )
         uint32 StitchingRadius;
 
         //UPROPERTY( EditAnywhere, Category="Odyssey PathDrawing Tool" )

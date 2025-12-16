@@ -558,22 +558,4 @@ UOdysseyPainterEditorRasterEraserTool::ResetInterpolation()
     mLastPoint = FOdysseyPoint();
 }
 
-bool
-UOdysseyPainterEditorRasterEraserTool::IsSameAs(const UOdysseyPainterEditorTool* Other) const
-{
-    // Same class verification
-    if (!UOdysseyPainterEditorTool::IsSameAs(Other))
-        return false;
-
-    const UOdysseyPainterEditorRasterEraserTool* otherTool = Cast< UOdysseyPainterEditorRasterEraserTool >(Other);
-
-    return  //Shapes == otherTool->Shapes &&
-        FMath::IsNearlyEqual(Size, otherTool->Size) &&
-        FMath::IsNearlyEqual(Flow, otherTool->Flow) &&
-        FMath::IsNearlyEqual(Opacity, otherTool->Opacity) &&
-        InterpolationType == otherTool->InterpolationType &&
-        AdaptativeStep == otherTool->AdaptativeStep &&
-        FMath::IsNearlyEqual(Step, otherTool->Step);
-}
-
 #undef LOCTEXT_NAMESPACE

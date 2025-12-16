@@ -69,9 +69,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathPushTool : public 
         //virtual void PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
         //                                  , const FName& iPropertyName ) override;
 
-    public:
-        virtual bool IsSameAs(const UOdysseyPainterEditorTool* Other) const override;
-
     private:
         FPushedPoint* GetPushedPoint( FOdysseyVectorPoint* iPoint );
         std::vector<FPushedPoint> mPushedPointArray;
@@ -85,11 +82,13 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathPushTool : public 
                  , Category=PathPushTool
                  , meta = ( ToolTip  = "Radius"
                           , ClampMin = "0"
-                          , UIMin    = "0" ) )
+                          , UIMin    = "0"
+                          , ToolConfiguration ) )
         uint32 Radius;
 
         UPROPERTY( EditAnywhere
                  , Category=PathPushTool
-                 , meta = ( ToolTip  = "Restrict To Selected Objects" ) )
+                 , meta = ( ToolTip  = "Restrict To Selected Objects"
+                          , ToolConfiguration ) )
         bool RestrictToSelectedObjects;
 };

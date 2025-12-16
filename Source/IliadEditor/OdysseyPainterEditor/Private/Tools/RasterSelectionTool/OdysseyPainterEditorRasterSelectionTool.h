@@ -62,11 +62,8 @@ private:
     void OnShapeCommit(const TArray<FOdysseyPoint>& iPoints, bool iReset);
     void OnShapeAbort();
 
-public:
-    virtual bool IsSameAs(const UOdysseyPainterEditorTool* Other) const override;
-
 protected:
-    UPROPERTY(EditAnywhere, Category="Shape")
+    UPROPERTY(EditAnywhere, Category="Shape", meta = ( ToolConfiguration ) )
     FOdysseyShapes Shapes;
 
     EOdysseySelectionState mSelectionState;

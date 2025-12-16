@@ -485,19 +485,6 @@ UOdysseyPainterEditorAnimationOutOfPegsTool::OnRotationHandleDragEnd()
     FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorAnimationOutOfPegsTool, Rotation), mCell->GetOutOfPegs().Rotation, EPropertyChangeType::ValueSet);
 }
 
-bool UOdysseyPainterEditorAnimationOutOfPegsTool::IsSameAs(const UOdysseyPainterEditorTool* Other) const
-{
-    // Same class verification
-    if( !UOdysseyPainterEditorTool::IsSameAs(Other) )
-        return false;
-
-    const UOdysseyPainterEditorAnimationOutOfPegsTool* otherTool = Cast< UOdysseyPainterEditorAnimationOutOfPegsTool >(Other);
-
-    return  Pan == otherTool->Pan &&
-            FMath::IsNearlyEqual(Rotation, otherTool->Rotation) &&
-            FMath::IsNearlyEqual(Zoom, otherTool->Zoom);
-}
-
 void
 UOdysseyPainterEditorAnimationOutOfPegsTool::Reset()
 {

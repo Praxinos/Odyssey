@@ -91,9 +91,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorCutTool : public UOdys
                                         , const FKey& iKey );
         ::ULIS::FRectD GenerateMask( bool iStroke );
 
-    public:
-        virtual bool IsSameAs(const UOdysseyPainterEditorTool* Other) const override;
-
     protected:
         FOdysseyPainterEditorVectorCutToolHUD* mPickHUD;
         std::vector<::ULIS::FVec2D> mPointArray;
@@ -101,6 +98,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorCutTool : public UOdys
 
     public:
         UPROPERTY( EditAnywhere
-                 , Category = "Shape" )
+                 , Category = "Shape"
+                 , meta = ( ToolConfiguration ) )
         FOdysseyShapes Shapes;
 };

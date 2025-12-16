@@ -274,15 +274,4 @@ UOdysseyPainterEditorVectorPathStitchTool::GetTooltip() const
     return LOCTEXT("vector-path-stitch-tool.tooltip", "Path Stitch Tool");
 }
 
-bool UOdysseyPainterEditorVectorPathStitchTool::IsSameAs(const UOdysseyPainterEditorTool* Other) const
-{
-    // Same class verification
-    if (!UOdysseyPainterEditorTool::IsSameAs(Other))
-        return false;
-
-    const UOdysseyPainterEditorVectorPathStitchTool* otherTool = Cast< UOdysseyPainterEditorVectorPathStitchTool >(Other);
-
-    return  PickingRadius == otherTool->PickingRadius;
-}
-
 #undef LOCTEXT_NAMESPACE

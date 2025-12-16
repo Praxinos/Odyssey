@@ -716,17 +716,4 @@ UOdysseyPainterEditorVectorTrajectoryTool::GetTooltip() const
     return LOCTEXT("vector-trajectory-tool.tooltip", "Trajectory Tool");
 }
 
-bool UOdysseyPainterEditorVectorTrajectoryTool::IsSameAs(const UOdysseyPainterEditorTool* Other) const
-{
-    // Same class verification
-    if (!UOdysseyPainterEditorTool::IsSameAs(Other))
-        return false;
-
-    const UOdysseyPainterEditorVectorTrajectoryTool* otherTool = Cast< UOdysseyPainterEditorVectorTrajectoryTool >(Other);
-
-    return  ShowInbetweens == otherTool->ShowInbetweens &&
-        PickingRadius == otherTool->PickingRadius &&
-        GridDisplayMode == otherTool->GridDisplayMode;
-}
-
 #undef LOCTEXT_NAMESPACE

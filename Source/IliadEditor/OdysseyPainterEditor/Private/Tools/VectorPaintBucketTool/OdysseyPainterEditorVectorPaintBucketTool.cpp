@@ -878,20 +878,4 @@ UOdysseyPainterEditorVectorPaintBucketTool::GetTooltip() const
     return LOCTEXT("vector-paint-bucket-tool.tooltip", "Paint Bucket Tool");
 }
 
-bool UOdysseyPainterEditorVectorPaintBucketTool::IsSameAs(const UOdysseyPainterEditorTool* Other) const
-{
-    // Same class verification
-    if (!UOdysseyPainterEditorTool::IsSameAs(Other))
-        return false;
-
-    const UOdysseyPainterEditorVectorPaintBucketTool* otherTool = Cast< UOdysseyPainterEditorVectorPaintBucketTool >(Other);
-
-    return  Propagate == otherTool->Propagate &&
-        ColorMode == otherTool->ColorMode &&
-        FMath::IsNearlyEqual(Opacity, otherTool->Opacity) &&
-        Color1 == otherTool->Color1 &&
-        Color2 == otherTool->Color2 &&
-        FMath::IsNearlyEqual(PickingRadius, otherTool->PickingRadius);
-}
-
 #undef LOCTEXT_NAMESPACE

@@ -3,12 +3,14 @@
 
 #include "OdysseyPainterEditorToolConfiguration.h"
 
+#include "Serialization/ObjectAndNameAsStringProxyArchive.h"
+
 /////////////////////////////////////////////////////
 // FToolPropertySnapshot
 
 bool FToolPropertySnapshot::operator==( const FToolPropertySnapshot& iOther ) const
 {
-    if( Values.Num() != iOther.Values.Num() )
+    if (Values.Num() != iOther.Values.Num())
     {
         return false;
     }
@@ -16,11 +18,17 @@ bool FToolPropertySnapshot::operator==( const FToolPropertySnapshot& iOther ) co
     TArray<uint8> bufferA;
     TArray<uint8> bufferB;
 
-    FMemoryWriter writerA(bufferA, true);
-    FMemoryWriter writerB(bufferB, true);
+    FMemoryWriter memWriterA( bufferA, true );
+    FMemoryWriter memWriterB( bufferB, true );
 
-    FToolPropertySnapshot::StaticStruct()->SerializeItem( writerA, (void*)this, nullptr );
-    FToolPropertySnapshot::StaticStruct()->SerializeItem( writerB, (void*)&iOther, nullptr );
+    FObjectAndNameAsStringProxyArchive arA(memWriterA, false);
+    FObjectAndNameAsStringProxyArchive arB(memWriterB, false);
+
+    arA.SetIsSaving( true );
+    arB.SetIsSaving( true );
+
+    FToolPropertySnapshot::StaticStruct()->SerializeItem( arA, (void*)this, nullptr );
+    FToolPropertySnapshot::StaticStruct()->SerializeItem( arB, (void*)&iOther, nullptr );
 
     return bufferA == bufferB;
 }

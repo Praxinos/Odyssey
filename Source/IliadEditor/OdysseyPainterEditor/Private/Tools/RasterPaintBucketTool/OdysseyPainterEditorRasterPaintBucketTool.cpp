@@ -767,21 +767,4 @@ UOdysseyPainterEditorRasterPaintBucketTool::GetForegroundLayersToExclude(UOdysse
     return resultLayers;
 }
 
-bool UOdysseyPainterEditorRasterPaintBucketTool::IsSameAs(const UOdysseyPainterEditorTool* Other) const
-{
-    // Same class verification
-    if (!UOdysseyPainterEditorTool::IsSameAs(Other))
-        return false;
-
-    const UOdysseyPainterEditorRasterPaintBucketTool* otherTool = Cast< UOdysseyPainterEditorRasterPaintBucketTool >(Other);
-
-    return  Source == otherTool->Source &&
-        ColorToleranceSource == otherTool->ColorToleranceSource &&
-        FMath::IsNearlyEqual(ColorTolerance, otherTool->ColorTolerance) &&
-        FMath::IsNearlyEqual(Expansion, otherTool->Expansion) &&
-        FMath::IsNearlyEqual(GapTolerance, otherTool->GapTolerance)&&
-        IncludeColors == otherTool->IncludeColors &&
-        BlendParameters == otherTool->BlendParameters;
-}
-
 #undef LOCTEXT_NAMESPACE

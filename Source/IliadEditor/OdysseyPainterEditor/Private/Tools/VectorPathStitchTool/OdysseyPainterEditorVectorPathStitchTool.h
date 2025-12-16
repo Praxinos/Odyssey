@@ -51,18 +51,16 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathStitchTool : publi
         virtual void OnVectorLayerUpdate( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags
                                         , uint32 iUpdateFlags ) override;
 
-    public:
-        virtual bool IsSameAs(const UOdysseyPainterEditorTool* Other) const override;
-
     private:
-            FOdysseyPainterEditorVectorPathStitchToolHUD* mPathStitchHUD;
+        FOdysseyPainterEditorVectorPathStitchToolHUD* mPathStitchHUD;
 
     public:
         UPROPERTY( EditAnywhere
                  , Category=PathStitchTool
                  , meta = ( ToolTip = "Picking Radius"
                           , ClampMin = "0"
-                          , UIMin    = "0" ) )
+                          , UIMin    = "0"
+                          , ToolConfiguration ) )
         uint32 PickingRadius;
 /*
         UPROPERTY( EditAnywhere, Category=PathStitchTool, meta = (ClampMin = "0.0", UIMin = "0.0") )

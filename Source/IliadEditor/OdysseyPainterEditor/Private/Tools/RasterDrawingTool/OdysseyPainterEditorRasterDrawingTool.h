@@ -178,9 +178,6 @@ private:
     void AddBlendingModeToolbarMenuEntry(FMenuBuilder& iMenuBuilder, EOdysseyBlendingMode iBlendingMode);
 
 public:
-    virtual bool IsSameAs(const UOdysseyPainterEditorTool* Other) const override;
-
-public:
     friend class SOdysseyPainterEditorRasterDrawingToolBrushSelector;
 
 private:
@@ -188,7 +185,7 @@ private:
     void SubPixelBlueprintSetter(bool Value);
 
 public:
-    UPROPERTY(meta=(ForceShowEngineContent, ForceShowPluginContent))
+    UPROPERTY(meta=(ForceShowEngineContent, ForceShowPluginContent, ToolConfiguration))
     TObjectPtr<UOdysseyBrush> Brush;
 
     UPROPERTY()
@@ -197,22 +194,22 @@ public:
     UPROPERTY()
     TObjectPtr<UOdysseyBrushOptions> BrushOptions;
 
-    UPROPERTY(EditAnywhere, Category="Shape")
+    UPROPERTY(EditAnywhere, Category="Shape", meta = (ToolConfiguration) )
     FOdysseyShapes Shapes;
 
-    UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="Shape", BlueprintSetter=SubPixelBlueprintSetter)
+    UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="Shape", BlueprintSetter=SubPixelBlueprintSetter, meta=(ToolConfiguration))
     bool SubPixel = true;
 
-    UPROPERTY(EditAnywhere, Category="Interpolation", meta = (ClampMin = "1", UIMin = "1", LinearDeltaSensitivity = "15", Delta = "1", Multiple = "1"))
+    UPROPERTY(EditAnywhere, Category="Interpolation", meta = (ClampMin = "1", UIMin = "1", LinearDeltaSensitivity = "15", Delta = "1", Multiple = "1", ToolConfiguration))
     float   Step = 1.0;
 
-    UPROPERTY( EditAnywhere, Category="Interpolation")
+    UPROPERTY( EditAnywhere, Category="Interpolation", meta = (ToolConfiguration))
     bool    AdaptativeStep = false;
 
-    UPROPERTY( EditInstanceOnly, Category="Interpolation")
+    UPROPERTY( EditInstanceOnly, Category="Interpolation", meta = (ToolConfiguration))
     EOdysseyInterpolationType InterpolationType = EOdysseyInterpolationType::kCatmullRom;
 
-    UPROPERTY(EditInstanceOnly, Category="Blending", meta=(ShowOnlyInnerProperties))
+    UPROPERTY(EditInstanceOnly, Category="Blending", meta=(ShowOnlyInnerProperties, ToolConfiguration))
     FOdysseyBlendParameters BlendParameters;
 
 protected:

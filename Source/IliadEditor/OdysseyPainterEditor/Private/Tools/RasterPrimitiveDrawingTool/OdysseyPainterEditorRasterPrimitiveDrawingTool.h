@@ -59,9 +59,6 @@ private:
 
     void OnRasterSelectionChanged();
 
-public:
-    virtual bool IsSameAs(const UOdysseyPainterEditorTool* Other) const override;
-
 protected:
     FOdysseyPaintEngine mPaintEngine;
 
@@ -71,21 +68,21 @@ protected:
     TSharedPtr<FScopedTransaction> mTransaction;
 
 public:
-    UPROPERTY(EditAnywhere, Category="Shape")
+    UPROPERTY(EditAnywhere, Category="Shape", meta = ( ToolConfiguration ))
     FOdysseyShapes Shapes;
 
-    UPROPERTY(EditAnywhere, Category="Parameters", meta=(UIMin=0, ClampMin=0, LinearDeltaSensitivity=1))
+    UPROPERTY(EditAnywhere, Category="Parameters", meta=(UIMin=0, ClampMin=0, LinearDeltaSensitivity=1, ToolConfiguration))
     float StrokeWidth = 1.0f;
 
-    UPROPERTY(EditAnywhere, Category="Parameters")
+    UPROPERTY(EditAnywhere, Category="Parameters", meta = ( ToolConfiguration ) )
     bool Antialiasing = true;
 
-    UPROPERTY(EditAnywhere, Category="Parameters")
+    UPROPERTY(EditAnywhere, Category="Parameters", meta = ( ToolConfiguration ) )
     bool SubPixel = true;
 
-    UPROPERTY(EditAnywhere, Category="Parameters")
+    UPROPERTY(EditAnywhere, Category="Parameters", meta = ( ToolConfiguration ) )
     bool Filled = true;
 
-    UPROPERTY(EditInstanceOnly, Category="Blending", meta = (ShowOnlyInnerProperties))
+    UPROPERTY(EditInstanceOnly, Category="Blending", meta = (ShowOnlyInnerProperties, ToolConfiguration))
     FOdysseyBlendParameters BlendParameters;
 };

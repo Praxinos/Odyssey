@@ -456,15 +456,4 @@ UOdysseyPainterEditorVectorCutTool::GetTooltip() const
     return LOCTEXT("vector-cut-tool.tooltip", "Cut Tool");
 }
 
-bool UOdysseyPainterEditorVectorCutTool::IsSameAs(const UOdysseyPainterEditorTool* Other) const
-{
-    // Same class verification
-    if (!UOdysseyPainterEditorTool::IsSameAs(Other))
-        return false;
-
-    const UOdysseyPainterEditorVectorCutTool* otherTool = Cast< UOdysseyPainterEditorVectorCutTool >(Other);
-
-    return  true;
-}
-
 #undef LOCTEXT_NAMESPACE

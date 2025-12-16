@@ -1142,16 +1142,4 @@ UOdysseyPainterEditorRasterTransformTool::TogglePerspectiveMode()
     Perspective = !Perspective;
 }
 
-bool UOdysseyPainterEditorRasterTransformTool::IsSameAs(const UOdysseyPainterEditorTool* Other) const
-{
-    // Same class verification
-    if (!UOdysseyPainterEditorTool::IsSameAs(Other))
-        return false;
-
-    const UOdysseyPainterEditorRasterTransformTool* otherTool = Cast< UOdysseyPainterEditorRasterTransformTool >(Other);
-
-    return  Perspective == otherTool->Perspective &&
-            Uniform == otherTool->Uniform;
-}
-
 #undef LOCTEXT_NAMESPACE

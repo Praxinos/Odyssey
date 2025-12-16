@@ -86,30 +86,27 @@ private:
     void PrepareStampBlock();
     void Stamp(const FOdysseyPoint& iPoint);
 
-public:
-    virtual bool IsSameAs(const UOdysseyPainterEditorTool* Other) const override;
-
 protected:
     //Visible properties
-    UPROPERTY(EditAnywhere, Category="Shape")
+    UPROPERTY(EditAnywhere, Category="Shape", meta = ( ToolConfiguration ) )
     FOdysseyShapes Shapes;
 
-    UPROPERTY( EditAnywhere, Category="Parameters", meta = ( ClampMin = "1", UIMin = "1", LinearDeltaSensitivity = "15", Delta = "1", Multiple="1", DisplayPriority="1" ) )
+    UPROPERTY( EditAnywhere, Category="Parameters", meta = ( ClampMin = "1", UIMin = "1", LinearDeltaSensitivity = "15", Delta = "1", Multiple="1", DisplayPriority="1", ToolConfiguration ) )
     float   Size = 20.f;
 
-    UPROPERTY( EditAnywhere, Category="Parameters", meta = ( ClampMin = "0", ClampMax = "100", UIMin = "0", UIMax = "100", Delta = "1", Multiple="1", Units="Percent") )
+    UPROPERTY( EditAnywhere, Category="Parameters", meta = ( ClampMin = "0", ClampMax = "100", UIMin = "0", UIMax = "100", Delta = "1", Multiple="1", Units="Percent", ToolConfiguration ) )
     float   Flow = 100.f;
 
-    UPROPERTY( EditAnywhere, Category="Parameters", meta = ( ClampMin = "0", ClampMax = "100", UIMin = "0", UIMax = "100", Delta = "1", Multiple = "1", Units = "Percent"))
+    UPROPERTY( EditAnywhere, Category="Parameters", meta = ( ClampMin = "0", ClampMax = "100", UIMin = "0", UIMax = "100", Delta = "1", Multiple = "1", Units = "Percent", ToolConfiguration ) )
     float   Opacity = 100.f;
 
-    UPROPERTY( EditInstanceOnly, Category="Interpolation")
+    UPROPERTY( EditInstanceOnly, Category="Interpolation", meta = ( ToolConfiguration ) )
     EOdysseyInterpolationType InterpolationType = EOdysseyInterpolationType::kCatmullRom;
 
-    UPROPERTY( EditAnywhere, Category="Interpolation")
+    UPROPERTY( EditAnywhere, Category="Interpolation", meta = ( ToolConfiguration ) )
     bool    AdaptativeStep = false;
 
-    UPROPERTY( EditAnywhere, Category="Interpolation", meta = (ClampMin = "1", UIMin = "1", LinearDeltaSensitivity = "15", Delta = "1", Multiple = "1", DisplayPriority = "0"))
+    UPROPERTY( EditAnywhere, Category="Interpolation", meta = (ClampMin = "1", UIMin = "1", LinearDeltaSensitivity = "15", Delta = "1", Multiple = "1", DisplayPriority = "0", ToolConfiguration ) )
     float   Step = 1.0;
 
 protected:

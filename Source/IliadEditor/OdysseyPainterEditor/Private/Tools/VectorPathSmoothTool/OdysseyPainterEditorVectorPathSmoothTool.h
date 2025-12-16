@@ -57,9 +57,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathSmoothTool : publi
         virtual void OnVectorLayerUpdate( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags
                                         , uint32 iUpdateFlags ) override;
 
-    public:
-        virtual bool IsSameAs(const UOdysseyPainterEditorTool* Other) const override;
-
     private:
         FOdysseyPainterEditorVectorPathSmoothToolHUD* mPathSmoothHUD;
         FOdysseyVectorUndoSegmentReshape* mUndoSegmentReshape;
@@ -67,7 +64,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathSmoothTool : publi
     public:
         UPROPERTY( EditAnywhere
                  , Category=PathSmoothTool
-                 , meta = ( ToolTip  = "Smoothing Mode" ) )
+                 , meta = ( ToolTip  = "Smoothing Mode"
+                          , ToolConfiguration ) )
         ePathSmoothingMode SmoothingMode;
         ePathSmoothingMode SmoothingModeAtKeyDown; // when pressing shift
 
@@ -75,16 +73,19 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathSmoothTool : publi
                  , Category=PathSmoothTool
                  , meta = ( ToolTip  = "Picking Radius"
                           , ClampMin = "0"
-                          , UIMin    = "0" ) )
+                          , UIMin    = "0"
+                          , ToolConfiguration ) )
         uint32 PickingRadius;
 
         UPROPERTY( EditAnywhere
                  , Category=PathSmoothTool
-                 , meta = ( ToolTip  = "Preserve Handle Length" ) )
+                 , meta = ( ToolTip  = "Preserve Handle Length"
+                          , ToolConfiguration ) )
         bool PreserveHandleLength;
 
         UPROPERTY( EditAnywhere
                  , Category=PathSmoothTool
-                 , meta = ( ToolTip  = "Restrict To Selected Objects" ) )
+                 , meta = ( ToolTip  = "Restrict To Selected Objects"
+                          , ToolConfiguration ) )
         bool RestrictToSelectedObjects;
 };

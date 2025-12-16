@@ -429,20 +429,4 @@ UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnRasterSelectionChanged()
     }
 }
 
-bool UOdysseyPainterEditorRasterPrimitiveDrawingTool::IsSameAs(const UOdysseyPainterEditorTool* Other) const
-{
-    // Same class verification
-    if (!UOdysseyPainterEditorTool::IsSameAs(Other))
-        return false;
-
-    const UOdysseyPainterEditorRasterPrimitiveDrawingTool* otherTool = Cast< UOdysseyPainterEditorRasterPrimitiveDrawingTool >(Other);
-
-    return  //Shapes == otherTool->Shapes &&
-        FMath::IsNearlyEqual(StrokeWidth, otherTool->StrokeWidth) &&
-        Antialiasing == otherTool->Antialiasing &&
-        SubPixel == otherTool->SubPixel &&
-        Filled == otherTool->Filled &&
-        BlendParameters == otherTool->BlendParameters;
-}
-
 #undef LOCTEXT_NAMESPACE

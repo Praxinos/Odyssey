@@ -105,9 +105,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTransformTool : public
         const FSlateBrush* GetBackgroundColor( ETransformToolScalingCenter iScalingCenter ) const;
         TSharedRef<SWidget> CreateModifierSegmentControl();
 
-    public:
-        virtual bool IsSameAs(const UOdysseyPainterEditorTool* Other) const override;
-
     private:
         std::list<FInbetweenerBreakdown*> mTransformedBreakdownList;
         FOdysseyPainterEditorVectorTransformToolHUD* mTransformHUD;
@@ -134,19 +131,22 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTransformTool : public
                  , Category = TransformTool
                  , meta = ( ToolTip = "Show Inbetweens"
                           , EditCondition = "bInbetweenMode"
-                          , EditConditionHides ) )
+                          , EditConditionHides
+                          , ToolConfiguration ) )
         eShowInbetweens ShowInbetweens;
 
         UPROPERTY( EditAnywhere
                  , Category=TransformTool
                  , meta = ( ToolTip  = "PickingRadius"
                           , ClampMin = "0"
-                          , UIMin    = "0" ) )
+                          , UIMin    = "0"
+                          , ToolConfiguration ) )
         uint32 PickingRadius;
 
         UPROPERTY( EditAnywhere
                  , Category=TransformTool
-                 , meta = ( ToolTip = "Uniform" ) )
+                 , meta = ( ToolTip = "Uniform"
+                          , ToolConfiguration ) )
         bool Uniform;
         bool UniformAtKeyDown;
 
@@ -157,10 +157,12 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTransformTool : public
 
         UPROPERTY( EditAnywhere
                  , Category=TransformTool
-                 , meta = ( ToolTip = "World" ) )
+                 , meta = ( ToolTip = "World"
+                          , ToolConfiguration ) )
         bool World;
 
         UPROPERTY( EditDefaultsOnly
-                 , Category = TransformTool )
+                 , Category = TransformTool
+                 , meta = ( ToolConfiguration ) )
         bool bInbetweenMode;
 };

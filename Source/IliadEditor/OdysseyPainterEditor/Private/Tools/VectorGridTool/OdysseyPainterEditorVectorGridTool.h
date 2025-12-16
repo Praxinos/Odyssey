@@ -72,9 +72,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorGridTool : public UOdy
         virtual void OnVectorLayerUpdate( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags
                                         , uint32 iUpdateFlags ) override;
 
-    public:
-        virtual bool IsSameAs(const UOdysseyPainterEditorTool* Other) const override;
-
     private:
         std::vector<FOdysseyVectorPoint*> mPointArray;
         FOdysseyPainterEditorVectorGridToolHUD* mGridHUD;
@@ -87,7 +84,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorGridTool : public UOdy
                           , ClampMin = "1"
                           , ClampMax = "32"
                           , UIMin    = "1"
-                          , UIMax    = "32" ) )
+                          , UIMax    = "32"
+                          , ToolConfiguration ) )
         uint32 DivisionsX;
 
         UPROPERTY( EditAnywhere
@@ -96,18 +94,21 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorGridTool : public UOdy
                           , ClampMin = "1"
                           , ClampMax = "32"
                           , UIMin    = "1"
-                          , UIMax    = "32" ) )
+                          , UIMax    = "32"
+                          , ToolConfiguration ) )
         uint32 DivisionsY;
 
         UPROPERTY( EditAnywhere
                  , Category=GridTool
                  , meta = ( ToolTip  = "Picking Radius"
                           , ClampMin = "0"
-                          , UIMin    = "0" ) )
+                          , UIMin    = "0"
+                          , ToolConfiguration ) )
         uint32 PickingRadius;
 
         UPROPERTY( EditAnywhere
                  , Category=GridTool
-                 , meta = ( ToolTip  = "World" ) )
+                 , meta = ( ToolTip  = "World"
+                 , ToolConfiguration ) )
         bool World;
 };

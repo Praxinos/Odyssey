@@ -73,9 +73,6 @@ private:
     void OnRotationHandleDragEnd();
 
 public:
-    virtual bool IsSameAs(const UOdysseyPainterEditorTool* Other) const override;
-
-public:
     UFUNCTION(BlueprintCallable, Category="Actions", CallInEditor)
     void Reset();
 
@@ -83,13 +80,13 @@ public:
     void ResetAll();
 
 public:
-    UPROPERTY(EditAnywhere, Category="Out Of Pegs", meta = (LinearDeltaSensitivity="1") )
+    UPROPERTY(EditAnywhere, Category="Out Of Pegs", meta = (LinearDeltaSensitivity="1", ToolConfiguration) )
     FVector2D Pan = FVector2D(0, 0);
 
-    UPROPERTY( EditAnywhere, Category="Out Of Pegs", meta = ( Units="Degrees", LinearDeltaSensitivity="1" ) )
+    UPROPERTY( EditAnywhere, Category="Out Of Pegs", meta = ( Units="Degrees", LinearDeltaSensitivity="1", ToolConfiguration) )
     float Rotation = 0.f;
 
-    UPROPERTY( EditAnywhere, Category="Out Of Pegs", meta = ( ClampMin = "0", UIMin = "0", Units="Percent" ) )
+    UPROPERTY( EditAnywhere, Category="Out Of Pegs", meta = ( ClampMin = "0", UIMin = "0", Units="Percent", ToolConfiguration) )
     float Zoom = 100.f;
 
 private:

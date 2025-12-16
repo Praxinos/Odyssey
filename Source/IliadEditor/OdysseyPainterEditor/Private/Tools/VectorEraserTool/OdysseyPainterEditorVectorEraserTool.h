@@ -86,9 +86,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorEraserTool : public UO
         const FSlateBrush* GetBackgroundColor( eVectorEraserEditionMode iMode ) const;
         void SetEditionMode( eVectorEraserEditionMode iMode );
 
-    public:
-        virtual bool IsSameAs(const UOdysseyPainterEditorTool* Other) const override;
-
     private:
         FOdysseyPainterEditorVectorEraserToolHUD* mEraserHUD;
         eVectorEraserEditionMode mEditionMode;
@@ -98,13 +95,15 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorEraserTool : public UO
     public:
         UPROPERTY( EditAnywhere
                  , Category=EraserTool
-                 , meta = ( Tooltip = "Split Path" ) )
+                 , meta = ( Tooltip = "Split Path",
+                            ToolConfiguration ) )
         bool SplitPath;
 
         UPROPERTY( EditAnywhere
                  , Category=EraserTool
                  , meta = ( Tooltip  = "Radius"
                           , ClampMin = "0"
-                          , UIMin    = "0") )
+                          , UIMin    = "0",
+                            ToolConfiguration ) )
         uint32 Radius;
 };
