@@ -28,6 +28,5 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorRasterLiquifyToolHUD : publi
 
     private:
         UOdysseyPainterEditorRasterLiquifyTool* mLiquifyTool;
-        ::ULIS::TArray<::ULIS::FVec2I> mCursorEllipsePoints;
         FVector2D mCursorPositionInTexture;
 };

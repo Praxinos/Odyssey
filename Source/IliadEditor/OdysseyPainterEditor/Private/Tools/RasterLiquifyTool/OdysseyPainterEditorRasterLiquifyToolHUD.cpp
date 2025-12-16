@@ -12,6 +12,10 @@
 
 #include "Fonts/FontMeasure.h"
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846f
+#endif
+
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
 FOdysseyPainterEditorRasterLiquifyToolHUD::~FOdysseyPainterEditorRasterLiquifyToolHUD()
@@ -31,12 +35,6 @@ FOdysseyPainterEditorRasterLiquifyToolHUD::Load()
 void
 FOdysseyPainterEditorRasterLiquifyToolHUD::Reset()
 {
-    mCursorEllipsePoints.Clear();
-
-    ::ULIS::GenerateEllipsePoints( 0.0f
-                                 , mLiquifyTool->GetRadius()
-                                 , mLiquifyTool->GetRadius()
-                                 , mCursorEllipsePoints );
 }
 
 void
@@ -50,18 +48,26 @@ FOdysseyPainterEditorRasterLiquifyToolHUD::DrawCursorCircle( const FOdysseyHUDEl
                                                            , const FLinearColor& iColor )
 {
     FVector2D cursorPosition = iParams.mTextureToHUD.Execute( mCursorPositionInTexture );
+    FVector2D vector = iParams.mTextureToHUD.Execute( FVector2D( 0, mLiquifyTool->GetRadius() ) )
+                     - iParams.mTextureToHUD.Execute( FVector2D( 0, 0 ) );
+    double radius = vector.Length();
+    uint32 segmentCount = 64;
+    double step = ( double ) ( M_PI * 2 ) / segmentCount;
+    double angle0 = 0.0f;
 
-    for( uint32 i = 0; i < mCursorEllipsePoints.Size(); i++)
+    for( uint32 i = 0; i < segmentCount; i++)
     {
-        uint32 n = ( i + 1 ) % mCursorEllipsePoints.Size();
-        FVector2D hudLineP0 = cursorPosition + FVector2D( mCursorEllipsePoints[i].x, mCursorEllipsePoints[i].y );;
-        FVector2D hudLineP1 = cursorPosition + FVector2D( mCursorEllipsePoints[n].x, mCursorEllipsePoints[n].y );
-        FCanvasLineItem hudLine = FCanvasLineItem( hudLineP0, hudLineP1 );
-        FCanvasLineItem line = FCanvasLineItem( hudLineP1, hudLineP1 );
+        double angle1 = angle0 + step;
+
+        FVector2D hudLineP0 = FVector2D( cos( angle0 ) * radius, sin( angle0 ) * radius ) + cursorPosition;
+        FVector2D hudLineP1 = FVector2D( cos( angle1 ) * radius, sin( angle1 ) * radius ) + cursorPosition;
+        FCanvasLineItem line = FCanvasLineItem( hudLineP0, hudLineP1 );
 
         line.LineThickness = 1.0f;
         line.SetColor( iColor );
         iParams.mCanvas->DrawItem( line );
+
+        angle0 = angle1;
     }
 }
 

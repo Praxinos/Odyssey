@@ -21,7 +21,6 @@
 #include "OdysseyPainterEditorRasterSelection.h"
 #include "ULISLoaderModule.h"
 #include "ULISUtils.h"
-#include "OdysseyRasterBlockMutator.h"
 #include "OdysseyVector.h"
 #include "Editor/Transactor.h"
 #include "Editor/TransBuffer.h"
@@ -48,6 +47,7 @@ UOdysseyPainterEditorRasterLiquifyTool::FAlteredImage::FAlteredImage( TSharedPtr
     , sourceRasterBlock ( iSourceRasterBlock )
     , sourceBlock ( iSourceRasterBlock->GetBlock() )
     , maskBlock( iMaskBlock )
+    , mutator( iSourceRasterBlock, true )
 
 {
     //sourceRasterBlock = iSourceRasterBlock;
@@ -70,12 +70,6 @@ UOdysseyPainterEditorRasterLiquifyTool::FAlteredImage::FAlteredImage( TSharedPtr
 
     context.ConvertFormat( *sourceBlockCopy.Get(), *destinationBlock.Get() );
     context.Finish();
-
-    // alloc memory to store pixels when the mouse button is pressed. Needed for undos.
-    imageAtDownBlock =  MakeShared<::ULIS::FBlock>( blockWidth
-                                                  , blockHeight
-                                                  , ::ULIS::eFormat::Format_RGBA8 );
-
 }
 
 //--------------------------------------------------------------------------------------
@@ -207,8 +201,8 @@ UOdysseyPainterEditorRasterLiquifyTool::OnMouseDown(const FOdysseyPoint& iPointI
 
         for( FAlteredImage& alteredImage : mAlteredImageBuffer )
         {
-            alteredImage.context.ConvertFormat( *alteredImage.sourceRasterBlock->GetBlock()
-                                              , *alteredImage.imageAtDownBlock.Get() );
+            alteredImage.mutator.EditTilesFromRects( { alteredImage.sourceRasterBlock->GetRect() }, nullptr );
+
             alteredImage.context.Finish();
         }
 
@@ -543,7 +537,7 @@ void UOdysseyPainterEditorRasterLiquifyTool::Tick(float iDeltaTime)
                              , roi
                              , false );
 
-                    CommitAlteredImage( alteredImage
+                    UpdateAlteredImage( alteredImage
                                       , roi
                                       , false );
                 }
@@ -749,7 +743,7 @@ UOdysseyPainterEditorRasterLiquifyTool::OnMouseDrag(const FOdysseyPoint& iPointI
                          , roi
                          , false );
 
-                CommitAlteredImage( alteredImage
+                UpdateAlteredImage( alteredImage
                                   , roi
                                   , false );
             }
@@ -777,7 +771,7 @@ UOdysseyPainterEditorRasterLiquifyTool::OnMouseUp(const FOdysseyPoint& iPointInT
                      , mActionArea & screen
                      , true );
 
-            CommitAlteredImage( alteredImage
+            UpdateAlteredImage( alteredImage
                               , mActionArea & screen
                               , true );
         }
@@ -937,22 +931,16 @@ UOdysseyPainterEditorRasterLiquifyTool::ExtendToolbar( UToolMenu* iToolMenu )
 }
 
 void
-UOdysseyPainterEditorRasterLiquifyTool::CommitAlteredImage( FAlteredImage& iAlteredImage
+UOdysseyPainterEditorRasterLiquifyTool::UpdateAlteredImage( FAlteredImage& iAlteredImage
                                                           , const ::ULIS::FRectI& iSanitizedRegionOfInterest
-                                                          , bool iStoreUndo
-                                                          , bool iUseImageAtDown )
+                                                          , bool iCommit )
 {
-    if( iStoreUndo )
-    {
-        // restore original image so that the raster mutator can save it when committing
-        FOdysseyRasterBlockMutator rasterBlockMutator( iAlteredImage.sourceRasterBlock, false );
-        rasterBlockMutator.Copy( iAlteredImage.imageAtDownBlock, { iSanitizedRegionOfInterest } );
-        rasterBlockMutator.Commit();
-    }
+    iAlteredImage.mutator.Copy( iAlteredImage.destinationBlock, { iSanitizedRegionOfInterest } );
 
-    FOdysseyRasterBlockMutator rasterBlockMutator( iAlteredImage.sourceRasterBlock, iStoreUndo );
-    rasterBlockMutator.Copy( iAlteredImage.destinationBlock, { iSanitizedRegionOfInterest } );
-    rasterBlockMutator.Commit();
+    if( iCommit )
+    {
+        iAlteredImage.mutator.Commit();
+    }
 }
 
 void
@@ -970,9 +958,9 @@ UOdysseyPainterEditorRasterLiquifyTool::PropertyChanged( const FName& iPropertyN
                      , alteredImage.sourceBlockCopy->Rect()
                      , true );
 
-            CommitAlteredImage( alteredImage
+            UpdateAlteredImage( alteredImage
                               , alteredImage.sourceBlockCopy->Rect()
-                              , iIsInteractive ? false : true );
+                              , true );
         }
 
         // store an undo to reinit the tool on undo / redo

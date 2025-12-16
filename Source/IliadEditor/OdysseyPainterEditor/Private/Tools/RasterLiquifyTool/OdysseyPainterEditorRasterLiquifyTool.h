@@ -8,6 +8,7 @@
 #include "UObject/UObjectGlobals.h"
 #include "InputCoreTypes.h"
 #include "Tools/RasterBaseTool/OdysseyPainterEditorRasterBaseTool.h"
+#include "OdysseyRasterBlockMutator.h"
 
 #include "OdysseyPainterEditorRasterLiquifyTool.generated.h"
 
@@ -15,6 +16,7 @@ class FOdysseyPainterEditorRasterLiquifyToolHUD;
 class FOdysseyRasterBlock;
 class FTransaction;
 class UTransBuffer;
+class FOdysseyRasterBlockMutator;
 
 UENUM()
 enum class EOdysseyLiquifyTwirlDirection : uint8
@@ -101,9 +103,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
             TSharedPtr<FOdysseyRasterBlock> sourceRasterBlock;
             TSharedPtr<::ULIS::FBlock> sourceBlock; // to prevent garbagde collection of FOdysseyRasterBlock::GetBlock()
             TSharedPtr<::ULIS::FBlock> sourceBlockCopy;
-            TSharedPtr<::ULIS::FBlock> imageAtDownBlock;
             TSharedPtr<::ULIS::FBlock> destinationBlock;
             TSharedPtr<::ULIS::FBlock> maskBlock;
+            FOdysseyRasterBlockMutator mutator;
             ::ULIS::FContext& context;
         };
 
@@ -187,9 +189,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
                  , const FVector2D& iCurrCenter
                  , double iStrength
                  , double iHardness );
-        void CommitAlteredImage( FAlteredImage& iAlteredImage
+        void UpdateAlteredImage( FAlteredImage& iAlteredImage
                                , const ::ULIS::FRectI& iSanitizedRegionOfInterest
-                               , bool iStoreUndo );
+                               , bool iCommit );
 
     public:
         virtual void PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive) override;
