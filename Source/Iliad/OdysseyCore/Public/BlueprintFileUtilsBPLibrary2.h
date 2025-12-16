@@ -17,6 +17,19 @@ class UBlueprintFileUtilsBPLibrary2
     /**
      * Create a file from the content.
      */
+    UE_DEPRECATED( 5.7, "Use ToTextFile() instead" )
     UFUNCTION(BlueprintCallable, Category = "FileUtils")
     static bool ToFile( const FString& Content, const FFilePath& PathFile );
+
+    /**
+     * Create a file from the content.
+     */
+    UFUNCTION(BlueprintCallable, Category = "FileUtils")
+    static bool ToTextFile( const FString& Content, const FFilePath& PathFile );
+
+    /**
+     * Get the content of a text file.
+     */
+    UFUNCTION(BlueprintCallable, Category = "FileUtils")
+    static bool FromTextFile( FString& Content, const FFilePath& PathFile );
 };
