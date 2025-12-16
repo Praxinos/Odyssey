@@ -12,9 +12,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorRasterLiquifyToolUndo : publ
 {
     public:
         ~FOdysseyPainterEditorRasterLiquifyToolUndo();
-        FOdysseyPainterEditorRasterLiquifyToolUndo( const UOdysseyPainterEditorRasterLiquifyTool::FFlowMap& iFlowMapToBackup
-                                                  , const ::ULIS::FRectI& iRect
-                                                  , UOdysseyPainterEditorRasterLiquifyTool::FFlowMap& iFlowMapToRestore );
+        FOdysseyPainterEditorRasterLiquifyToolUndo( TObjectPtr<UOdysseyPainterEditorRasterLiquifyTool> iLiquifyTool );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;
@@ -26,7 +24,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorRasterLiquifyToolUndo : publ
         virtual FString ToString() const override;
 
     private:
-        UOdysseyPainterEditorRasterLiquifyTool::FFlowMap& mFlowMapOriginal;
+        TObjectPtr<UOdysseyPainterEditorRasterLiquifyTool> mLiquifyTool;
         UOdysseyPainterEditorRasterLiquifyTool::FFlowMap mPartialFlowMap;
         uint32 mPositionX;
         uint32 mPositionY;

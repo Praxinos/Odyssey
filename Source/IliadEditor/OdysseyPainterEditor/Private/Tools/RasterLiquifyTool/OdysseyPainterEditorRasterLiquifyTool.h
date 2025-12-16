@@ -13,6 +13,8 @@
 
 class FOdysseyPainterEditorRasterLiquifyToolHUD;
 class FOdysseyRasterBlock;
+class FTransaction;
+class UTransBuffer;
 
 UENUM()
 enum class EOdysseyLiquifyTwirlDirection : uint8
@@ -99,6 +101,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
             TSharedPtr<FOdysseyRasterBlock> sourceRasterBlock;
             TSharedPtr<::ULIS::FBlock> sourceBlock; // to prevent garbagde collection of FOdysseyRasterBlock::GetBlock()
             TSharedPtr<::ULIS::FBlock> sourceBlockCopy;
+            TSharedPtr<::ULIS::FBlock> imageAtDownBlock;
             TSharedPtr<::ULIS::FBlock> destinationBlock;
             TSharedPtr<::ULIS::FBlock> maskBlock;
             ::ULIS::FContext& context;
@@ -167,6 +170,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
 
         static void RegisterDetailCustomization();
         static void UnregisterDetailCustomization();
+        FFlowMap& GetFlowMap();
 
     protected:
         double GetStrength();
@@ -184,14 +188,15 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
                  , double iStrength
                  , double iHardness );
         void CommitAlteredImage( FAlteredImage& iAlteredImage
-                               , const ::ULIS::FRectI& iRegionOfInterest
-                               , bool iIsInteractive );
+                               , const ::ULIS::FRectI& iSanitizedRegionOfInterest
+                               , bool iStoreUndo );
 
     public:
         virtual void PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive) override;
         virtual void PostPropertyChanged(const FName& iPropertyName, bool iIsInteractive) override;
 
         ::ULIS::FRectI GetEditingArea();
+        void Init();
 
     public:
         UPROPERTY( EditAnywhere
@@ -304,7 +309,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
         TSharedPtr<FOdysseyPainterEditorRasterLiquifyToolHUD> mLiquifyHUD;
         // We copy the source image and stores it into an array of source image
         // the array will be used when this tool will be made multi-layer compatible
-        TArray<FAlteredImage> mAlteredImageArray;
+        TArray<FAlteredImage> mAlteredImageBuffer;
         // Distortion Map temporarily stores the displacement vectors
         FFlowMap mDistortionMap;
         FFlowMap mFlowMap;

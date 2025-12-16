@@ -2,6 +2,7 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "OdysseyPainterEditorRasterLiquifyToolUndo.h"
+#include "Misc/OdysseyUndoDelegates.h"
 
 FOdysseyPainterEditorRasterLiquifyToolUndo::~FOdysseyPainterEditorRasterLiquifyToolUndo()
 {
@@ -17,79 +18,37 @@ FOdysseyPainterEditorRasterLiquifyToolUndo::~FOdysseyPainterEditorRasterLiquifyT
 */
 }
 
-FOdysseyPainterEditorRasterLiquifyToolUndo::FOdysseyPainterEditorRasterLiquifyToolUndo( const UOdysseyPainterEditorRasterLiquifyTool::FFlowMap& iFlowMapBackup
-                                                                                      , const ::ULIS::FRectI& iRect
-                                                                                      , UOdysseyPainterEditorRasterLiquifyTool::FFlowMap& iFlowMapOriginal )
-    : mFlowMapOriginal( iFlowMapOriginal )
+FOdysseyPainterEditorRasterLiquifyToolUndo::FOdysseyPainterEditorRasterLiquifyToolUndo( TObjectPtr<UOdysseyPainterEditorRasterLiquifyTool> iLiquifyTool )
+    : mLiquifyTool ( iLiquifyTool )
 {
-    mPartialFlowMap.SetSize( iRect.w, iRect.h );
-
-    mPositionX = iRect.x;
-    mPositionY = iRect.y;
-
-    for( uint32 srcY = mPositionY, dstY = 0; dstY < mPartialFlowMap.height; srcY++, dstY++ )
-    {
-        uint32 srcOffset = ( srcY * iFlowMapBackup.width ) + mPositionX;
-        uint32 dstOffset = ( dstY * mPartialFlowMap.width );
-
-        memcpy( &mPartialFlowMap.toTargetBuffer[dstOffset]
-              , &iFlowMapBackup.toTargetBuffer[srcOffset]
-              , iRect.w );
-    }
 }
 
 void
 FOdysseyPainterEditorRasterLiquifyToolUndo::Apply( UObject* iIgnored )
 {
-    TArray<UOdysseyPainterEditorRasterLiquifyTool::FFlow> line;
-
-    // for swapping values. We replace
-    line.SetNum( mPartialFlowMap.width );
-
-    for( uint32 srcY = 0, dstY = mPositionY; srcY < mPartialFlowMap.height; srcY++, dstY++ )
-    {
-        uint32 srcOffset = ( srcY * mPartialFlowMap.width );
-        uint32 dstOffset = ( dstY * mFlowMapOriginal.width ) + mPositionX;
-
-        memcpy( &line[0]
-              , &mFlowMapOriginal.toTargetBuffer[dstOffset]
-              , mPartialFlowMap.width );
-
-        memcpy( &mFlowMapOriginal.toTargetBuffer[dstOffset]
-              , &mPartialFlowMap.toTargetBuffer[srcOffset]
-              , mPartialFlowMap.width );
-
-        memcpy( &mPartialFlowMap.toTargetBuffer[srcOffset]
-              , &line[0]
-              , mPartialFlowMap.width );
-    }
+    FOdysseyUndoDelegates::Get().OnAfterUndoRedo().AddLambda(
+        [this]( bool iIsRedo )
+        {
+            if( mLiquifyTool->IsValidLowLevel() )
+            {
+                mLiquifyTool->Init();
+            }
+        }
+    );
 }
 
 void
 FOdysseyPainterEditorRasterLiquifyToolUndo::Revert( UObject* iIgnored )
 {
-    TArray<UOdysseyPainterEditorRasterLiquifyTool::FFlow> line;
-
-    // for swapping values. We replace
-    line.SetNum( mPartialFlowMap.width );
-
-    for( uint32 srcY = 0, dstY = mPositionY; srcY < mPartialFlowMap.height; srcY++, dstY++ )
-    {
-        uint32 srcOffset = ( srcY * mPartialFlowMap.width );
-        uint32 dstOffset = ( dstY * mFlowMapOriginal.width ) + mPositionX;
-
-        memcpy( &line[0]
-              , &mFlowMapOriginal.toTargetBuffer[dstOffset]
-              , mPartialFlowMap.width );
-
-        memcpy( &mFlowMapOriginal.toTargetBuffer[dstOffset]
-              , &mPartialFlowMap.toTargetBuffer[srcOffset]
-              , mPartialFlowMap.width );
-
-        memcpy( &mPartialFlowMap.toTargetBuffer[srcOffset]
-              , &line[0]
-              , mPartialFlowMap.width );
-    }
+    FOdysseyUndoDelegates::Get().OnAfterUndoRedo().AddLambda(
+        [this]( bool iIsRedo )
+        {
+            if( mLiquifyTool->IsValidLowLevel() )
+            {
+                mLiquifyTool->Init();
+            }
+        }
+    );
 }
 
 /** Describes this change (for debugging) */
