@@ -11,7 +11,7 @@
 /**
  * Odyssey Tool Collection
  */
-UCLASS()
+UCLASS(BlueprintType, meta = (EditorIcon = "ClassIcon.OdysseyToolCollection"))
 class ODYSSEYPAINTEREDITOR_API UOdysseyToolCollection : public UObject
 {
     DECLARE_MULTICAST_DELEGATE(FOnCollectionChanged);

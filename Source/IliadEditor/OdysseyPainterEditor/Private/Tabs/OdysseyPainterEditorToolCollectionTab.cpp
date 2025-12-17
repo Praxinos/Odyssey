@@ -112,9 +112,11 @@ TSharedRef<ITableRow> FOdysseyPainterEditorToolCollectionTab::OnGenerateCollecti
                     SNew(SButton)
                         .ButtonStyle(FAppStyle::Get(), "SimpleButton")
                         .OnClicked(this, &FOdysseyPainterEditorToolCollectionTab::OnRemoveCollectionClicked, iCollection)
+                        .ToolTipText(FText::FromString("Remove this collection"))
                         [
                             SNew(STextBlock)
                                 .Text(FText::FromString("X"))
+                                .ColorAndOpacity(FLinearColor::Red)
                         ]
                 ]
         ];

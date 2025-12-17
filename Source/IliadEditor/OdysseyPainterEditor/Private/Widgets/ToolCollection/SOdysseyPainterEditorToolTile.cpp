@@ -66,16 +66,38 @@ FReply SOdysseyPainterEditorToolTile::OnMouseButtonDown(const FGeometry& MyGeome
 {
     if (MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
     {
-        if (mToolConfig && mEditor)
+        bIsPressed = true;
+        bIsDragged = false;
+
+        return FReply::Handled()
+            .DetectDrag(SharedThis(this), EKeys::LeftMouseButton)
+            .CaptureMouse(SharedThis(this));
+    }
+
+    return FReply::Unhandled();
+}
+
+FReply SOdysseyPainterEditorToolTile::OnMouseButtonUp( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent )
+{
+    if( MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton && HasMouseCapture() )
+    {
+        if( !bIsDragged )
         {
-            UOdysseyPainterEditorTool* editorTool = mEditor->GetEditorToolOfClass( mToolConfig->mToolClass );
-            if( editorTool )
+            if (mToolConfig && mEditor)
             {
-                mEditor->LoadToolFromPropertySnapshot( editorTool, mToolConfig->mSnapshot );
-                mEditor->ActivateMainTool( editorTool );
+                UOdysseyPainterEditorTool* editorTool = mEditor->GetEditorToolOfClass(mToolConfig->mToolClass);
+                if (editorTool)
+                {
+                    mEditor->LoadToolFromPropertySnapshot(editorTool, mToolConfig->mSnapshot);
+                    mEditor->ActivateMainTool(editorTool);
+                }
             }
         }
-        return FReply::Handled().DetectDrag(SharedThis(this), EKeys::LeftMouseButton);
+
+        bIsPressed = false;
+        bIsDragged = false;
+
+        return FReply::Handled().ReleaseMouseCapture();
     }
     else if (MouseEvent.GetEffectingButton() == EKeys::RightMouseButton)
     {
@@ -97,6 +119,7 @@ FReply SOdysseyPainterEditorToolTile::OnDragDetected(const FGeometry& MyGeometry
 {
     if (MouseEvent.IsMouseButtonDown(EKeys::LeftMouseButton))
     {
+        bIsDragged = true;
         return FReply::Handled().BeginDragDrop(FOdysseyToolCollectionDragDropOp::Create(mToolConfig, mCollection, mEditor));
     }
     return FReply::Unhandled();
@@ -106,7 +129,6 @@ FReply SOdysseyPainterEditorToolTile::OnDrop(const FGeometry& MyGeometry, const 
 {
     auto dragOp = DragDropEvent.GetOperationAs<FOdysseyToolCollectionDragDropOp>();
     if (!dragOp.IsValid() || !mCollection || mCollection->IsCollectionTransient()) // No drop allowed in transient collection
-
         return FReply::Unhandled();
 
     UOdysseyPainterEditorToolConfiguration* sourceToolConfig = dragOp->GetToolConfig();
@@ -119,6 +141,11 @@ FReply SOdysseyPainterEditorToolTile::OnDrop(const FGeometry& MyGeometry, const 
             sourceCollection->RemoveToolConfiguration(sourceToolConfig);
 
         int32 targetIndex = mCollection->GetIndexOfToolConfiguration(mToolConfig);
+
+        if (mDropSide == EDropIndicatorSide::Right)
+            targetIndex++;
+
+        UOdysseyPainterEditorToolConfiguration* toolConfig = mCollection->AddToolConfiguration( sourceToolConfig->mToolClass, sourceToolConfig->mSnapshot, sourceToolConfig->mIcon, targetIndex );
     }
     else
     {
@@ -195,13 +222,12 @@ int32 SOdysseyPainterEditorToolTile::OnPaint(const FPaintArgs& Args, const FGeom
 
 FLinearColor SOdysseyPainterEditorToolTile::GetTileColor() const
 {
-    if(IsHovered())
+    if (bIsPressed && !bIsDragged)
+        return FLinearColor(0.05f, 0.3f, 0.7f, 0.7f);
+    else if(IsHovered())
         return FLinearColor(0.3f, 0.3f, 0.3f, 0.8f);
     else
         return FLinearColor::Transparent;
-
-    /*if (mEditor->GetCurrentTool() == mToolConfig) //Non hovered and tool is selected
-        return FLinearColor(0.05f, 0.3f, 0.7f, 0.7f);*/
 }
 
 TSharedRef<SWidget> SOdysseyPainterEditorToolTile::BuildContextMenu()
@@ -249,8 +275,6 @@ bool SOdysseyPainterEditorToolTile::CanDeleteTool() const
 void SOdysseyPainterEditorToolTile::OnDeleteTool()
 {
     mCollection->RemoveToolConfiguration(mToolConfig);
-    //mEditor->ActivateMainTool(mEditor->FindDefaultToolForCurrentLayer());
-    mEditor->InactivateMainTool();
 }
 
 bool SOdysseyPainterEditorToolTile::CanDuplicateTool() const
@@ -380,14 +404,18 @@ void SOdysseyPainterEditorToolTile::OnChangeIcon()
 
 void SOdysseyPainterEditorToolTile::OnTextureSelected(const FAssetData& AssetData)
 {
-    if( !mToolConfig )
+    if( !mToolConfig || !mCollection )
         return;
 
     UTexture2D* SelectedTexture = Cast<UTexture2D>(AssetData.GetAsset());
-    if (SelectedTexture)
+    if( SelectedTexture )
     {
-        mToolConfig->mIcon.SetResourceObject(SelectedTexture);
-        mToolConfig->mIcon.ImageSize = FVector2D(32, 32);
+        FSlateBrush newIcon;
+        newIcon.SetResourceObject(SelectedTexture);
+        newIcon.ImageSize = FVector2D(32, 32);
+        mCollection->Modify();
+        mToolConfig->mIcon = newIcon;
+        mCollection->MarkPackageDirty();
         // Close modal
         if (mPickerWindowPtr.IsValid())
         {
@@ -398,36 +426,10 @@ void SOdysseyPainterEditorToolTile::OnTextureSelected(const FAssetData& AssetDat
 
 void SOdysseyPainterEditorToolTile::OnStyleIconSelected(FName StyleIconName)
 {
-    if (!mToolConfig)
+    if (!mToolConfig || !mCollection)
         return;
 
+    mCollection->Modify();
     mToolConfig->mIcon = *FAppStyle::Get().GetBrush(StyleIconName);
+    mCollection->MarkPackageDirty();
 }
-
-/*
-void
-SOdysseyPainterEditorToolTile::OnToolCheckStateChanged(ECheckBoxState InValue, UOdysseyPainterEditorTool* iTool)
-{
-
-    if (InValue == ECheckBoxState::Checked)
-        mOnToolSelected.ExecuteIfBound(iTool);
-}
-
-EVisibility
-SOdysseyPainterEditorToolTile::ToolVisibility(UOdysseyPainterEditorTool* iTool) const
-{
-    return !iTool->mIsTemporaryTool && iTool->IsActivable() ? EVisibility::Visible : EVisibility::Collapsed;
-}
-
-ECheckBoxState
-SOdysseyPainterEditorToolTile::IsToolChecked(UOdysseyPainterEditorTool* iTool) const
-{
-    return iTool->IsActivated() ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
-}
-
-FText
-SOdysseyPainterEditorToolTile::ToolTooltip(UOdysseyPainterEditorTool* iTool) const
-{
-    return iTool->GetTooltip();
-}
-*/

@@ -390,6 +390,10 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set("OdysseyViewportDrawingEditMode.OdysseyViewportDrawingIcon16",new IMAGE_BRUSH_SVG("OdysseyViewportDrawing/viewport_drawing_icon",mIcon16x16));
     Set("OdysseyViewportDrawingEditMode.OdysseyViewportDrawingIcon40",new IMAGE_BRUSH_SVG("OdysseyViewportDrawing/viewport_drawing_icon",mIcon40x40));
 
+    //ToolCollection
+    Set("ClassIcon.OdysseyToolCollection", new IMAGE_BRUSH_SVG("PainterEditor/tool_collection", mIcon16x16));
+    Set("ClassThumbnail.OdysseyToolCollection", new IMAGE_BRUSH_SVG("PainterEditor/tool_collection", mIcon64x64));
+
     //LayerStack
     {
         FSlateColor selectedRow(FStyleColors::Select.GetSpecifiedColor().CopyWithNewOpacity(0.3f));

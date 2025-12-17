@@ -25,7 +25,6 @@ public:
         SLATE_ARGUMENT( UOdysseyPainterEditorToolConfiguration*, ToolConfig )
         SLATE_ARGUMENT( UOdysseyToolCollection*, ToolCollection)
         SLATE_ARGUMENT( FOdysseyPainterEditor*, Editor)
-        //SLATE_EVENT( FOnToolSelected, OnToolSelected )
     SLATE_END_ARGS()
 
 public:
@@ -37,6 +36,7 @@ public:
 
 public:
     FReply OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent);
+    FReply OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent);
     FReply OnDragDetected(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent);
 
     virtual FReply OnDrop(const FGeometry& MyGeometry, const FDragDropEvent& DragDropEvent) override;
@@ -58,20 +58,15 @@ private:
     void OnTextureSelected(const FAssetData& AssetData);
     void OnStyleIconSelected(FName StyleIconName);
 
-    /*
-private:
-    void OnToolCheckStateChanged(ECheckBoxState InValue, UOdysseyPainterEditorTool* iTool);
-    EVisibility ToolVisibility(UOdysseyPainterEditorTool* iTool) const;
-    ECheckBoxState IsToolChecked(UOdysseyPainterEditorTool* iTool) const;
-    FText ToolTooltip(UOdysseyPainterEditorTool* iTool) const;*/
-
 private:
     UOdysseyPainterEditorToolConfiguration* mToolConfig = nullptr;
     UOdysseyToolCollection* mCollection = nullptr;
     FOdysseyPainterEditor* mEditor = nullptr;
 
     mutable EDropIndicatorSide mDropSide = EDropIndicatorSide::None;
-    //FOnToolSelected mOnToolSelected;
 
     TWeakPtr<SWindow> mPickerWindowPtr;
+
+    bool bIsPressed = false;
+    bool bIsDragged = false;
 };

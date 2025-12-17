@@ -3843,4 +3843,13 @@ void FOdysseyPainterEditor::LoadToolFromPropertySnapshot( UOdysseyPainterEditorT
     }
 }
 
+/* Instanced UObjects
+if (objectProperty->HasAnyPropertyFlags(CPF_InstancedReference))
+{
+    UObject* objectValue = objectProperty->GetObjectPropertyValue(valuePtr)
+        FToolPropertySnapshot subSnapshot;
+    SaveToolPropertySnapshot(objectValue, subSnapshot);
+    oSnapshot.Values.Add(property->GetFName(), FInstancedStruct::Make(subSnapshot));
+}*/
+
 #undef LOCTEXT_NAMESPACE

@@ -3,6 +3,7 @@
 
 #include "OdysseyToolCollectionFactory.h"
 
+#include "AssetRegistry/AssetRegistryModule.h"
 #include "Editor.h"
 #include "EditorStyleSet.h"
 #include "OdysseyToolCollection.h"
@@ -28,6 +29,15 @@ UOdysseyToolCollectionFactory::GetDefaultNewAssetName() const
 UObject*
 UOdysseyToolCollectionFactory::FactoryCreateNew(UClass* iClass, UObject* iParent, FName iName, EObjectFlags iFlags, UObject* iContext, FFeedbackContext* iWarn)
 {
+    // Ensure correct flags
+    iFlags |= RF_Public | RF_Standalone;
+
     UOdysseyToolCollection* toolCollection = NewObject<UOdysseyToolCollection>(iParent, iClass, iName, iFlags);
+
+    toolCollection->PostEditChange();
+    toolCollection->MarkPackageDirty();
+
+    FAssetRegistryModule::AssetCreated(toolCollection);
+
     return toolCollection;
 }

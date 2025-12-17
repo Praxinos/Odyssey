@@ -74,7 +74,7 @@ SOdysseyPainterEditorToolCollection::GetToolConfigIcon(UOdysseyPainterEditorTool
 FReply
 SOdysseyPainterEditorToolCollection::OnAddToolClicked()
 {
-    if ( !mEditor )
+    if ( !mEditor || !mEditor->GetCurrentTool() )
         return FReply::Unhandled();
 
     FToolPropertySnapshot toolPropertySnapshot;
@@ -116,16 +116,16 @@ void SOdysseyPainterEditorToolCollection::RefreshToolsGUI()
         mToolWrapBox->AddSlot()
             [
                 SNew(SButton)
-                    .ContentPadding(0)
+                    .ContentPadding(8)
                     .OnClicked(this, &SOdysseyPainterEditorToolCollection::OnAddToolClicked)
+                    .ToolTipText(FText::FromString("Add the current tool to the collection"))
                     [
                         SNew(SBox)
-                            .WidthOverride(32)
-                            .HeightOverride(32)
+                            .WidthOverride(24)
+                            .HeightOverride(24)
                             [
-                                SNew(STextBlock)
-                                    .Text(FText::FromString(TEXT("+")))
-                                    .Justification(ETextJustify::Center)
+                                SNew(SImage)
+                                    .Image(FAppStyle::Get().GetBrush("Icons.Plus"))
                             ]
                     ]
             ];

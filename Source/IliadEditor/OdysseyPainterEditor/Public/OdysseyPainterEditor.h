@@ -209,7 +209,7 @@ public:
      * mRecentTools can't be bigger than 10 tools (most ancient tools are discarded if necessary)
      */
     void SaveToRecentTools( UOdysseyPainterEditorTool* iTool );
-    void SaveToolPropertySnapshot( UOdysseyPainterEditorTool* iTool, FToolPropertySnapshot& oSnapshot );
+    void SaveToolPropertySnapshot(UOdysseyPainterEditorTool* iTool, FToolPropertySnapshot& oSnapshot );
     void LoadToolFromPropertySnapshot( UOdysseyPainterEditorTool* iTool, const FToolPropertySnapshot& iSnapshot );
 
     virtual UOdysseyPainterEditorRasterDrawingTool*                  GetRasterDrawingTool() const;

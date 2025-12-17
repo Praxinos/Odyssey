@@ -13,10 +13,11 @@ UOdysseyToolCollection::UOdysseyToolCollection(const FObjectInitializer& ObjectI
 
 bool UOdysseyToolCollection::IsCollectionTransient() const
 {
-    if(HasAnyFlags(RF_Transient) || GetOutermost()->HasAnyPackageFlags(PKG_TransientFlags))
+    if (HasAnyFlags(RF_Transient) || GetOutermost() == GetTransientPackage())
     {
         return true;
     }
+
     return false;
 }
 
