@@ -1023,6 +1023,8 @@ UOdysseyPainterEditorTool* FOdysseyPainterEditor::GetEditorToolOfClass(UClass* i
         return mVectorChartTool;
     else if( iToolClass == UOdysseyPainterEditorVectorTrajectoryTool::StaticClass() )
         return mVectorTrajectoryTool;
+    /*else if (iToolClass == UOdysseyPainterEditorAnimationOutOfPegsTool::StaticClass())
+        return mOutOfPegsTool;*/
     else
         return nullptr;
 }
@@ -3664,7 +3666,7 @@ FOdysseyPainterEditor::SetCurrentPaletteColorEntry(UOdysseyPaletteEntryColor* iE
 
 void FOdysseyPainterEditor::SaveToRecentTools( UOdysseyPainterEditorTool* iTool )
 {
-    if( !iTool )
+    if( !iTool || !GetEditorToolOfClass(iTool->GetClass() ) )
         return;
 
     FToolPropertySnapshot toolPropertySnapshot;
