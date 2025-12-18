@@ -61,13 +61,33 @@ FOdysseyPainterEditorToolCollectionTab::CreateWidget()
             SNew(SOdysseyPainterEditorToolCollection)
                 .Editor(mEditor)
                 .ToolCollection(mEditor->GetRecentTools())
+                .IsUnlocked(this, &FOdysseyPainterEditorToolCollectionTab::IsUnlocked)
         ]
         + SVerticalBox::Slot()
         .AutoHeight()
         [
-            SNew(SPositiveActionButton)
-                .Text(LOCTEXT("ToolCollection.add-tool-collection", "Add Tool Collection"))
-                .OnGetMenuContent(this, &FOdysseyPainterEditorToolCollectionTab::OnGetAddToolCollectionMenuContent)
+            SAssignNew( mTabOptions, SHorizontalBox )
+                + SHorizontalBox::Slot()
+                .FillWidth(1.f)
+                .VAlign(VAlign_Center)
+                [
+                    SNew(SPositiveActionButton)
+                    .Text(LOCTEXT("ToolCollection.add-tool-collection", "Add Tool Collection"))
+                    .OnGetMenuContent(this, &FOdysseyPainterEditorToolCollectionTab::OnGetAddToolCollectionMenuContent)
+                ]
+                + SHorizontalBox::Slot()
+                .AutoWidth()
+                .VAlign(VAlign_Center)
+                [
+                    SNew(SButton)
+                        .ButtonStyle(FAppStyle::Get(), "NoBorder")
+                        .ContentPadding(2)
+                        .OnClicked(this, &FOdysseyPainterEditorToolCollectionTab::OnLockClicked)
+                        [
+                            SNew(SImage)
+                                .Image(this, &FOdysseyPainterEditorToolCollectionTab::GetLockIcon)
+                        ]
+                ]
         ]
         + SVerticalBox::Slot()
         .AutoHeight()
@@ -103,6 +123,7 @@ TSharedRef<ITableRow> FOdysseyPainterEditorToolCollectionTab::OnGenerateCollecti
                     SNew(SOdysseyPainterEditorToolCollection)
                         .Editor(mEditor)
                         .ToolCollection(iCollection.Get())
+                        .IsUnlocked( this, &FOdysseyPainterEditorToolCollectionTab::IsUnlocked )
                 ]
 
                 + SHorizontalBox::Slot()
@@ -110,6 +131,7 @@ TSharedRef<ITableRow> FOdysseyPainterEditorToolCollectionTab::OnGenerateCollecti
                 .VAlign(VAlign_Top)
                 [
                     SNew(SButton)
+                        .IsEnabled( this, &FOdysseyPainterEditorToolCollectionTab::IsUnlocked )
                         .ButtonStyle(FAppStyle::Get(), "SimpleButton")
                         .OnClicked(this, &FOdysseyPainterEditorToolCollectionTab::OnRemoveCollectionClicked, iCollection)
                         .ToolTipText(FText::FromString("Remove this collection"))
@@ -161,6 +183,23 @@ FOdysseyPainterEditorToolCollectionTab::OnGetAddToolCollectionMenuContent()
             }
         )
     );
+}
+
+FReply FOdysseyPainterEditorToolCollectionTab::OnLockClicked()
+{
+    bIsUnlocked = !bIsUnlocked;
+    RefreshCollectionsGUI();
+    return FReply::Handled();
+}
+
+bool FOdysseyPainterEditorToolCollectionTab::IsUnlocked() const
+{
+    return bIsUnlocked;
+}
+
+const FSlateBrush* FOdysseyPainterEditorToolCollectionTab::GetLockIcon() const
+{
+    return bIsUnlocked ? FAppStyle::Get().GetBrush("Icons.Unlock") : FAppStyle::Get().GetBrush("Icons.Lock");
 }
 
 void FOdysseyPainterEditorToolCollectionTab::RefreshCollectionsGUI()

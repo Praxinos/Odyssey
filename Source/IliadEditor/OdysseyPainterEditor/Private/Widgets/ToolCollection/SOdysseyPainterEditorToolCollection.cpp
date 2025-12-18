@@ -24,6 +24,7 @@ void SOdysseyPainterEditorToolCollection::Construct(const FArguments& InArgs)
 {
     mEditor = InArgs._Editor;
     mToolCollection = InArgs._ToolCollection;
+    bIsUnlocked = InArgs._IsUnlocked;
 
     if (!mEditor || !mToolCollection)
         return;
@@ -52,7 +53,8 @@ TSharedRef<SWidget> SOdysseyPainterEditorToolCollection::GenerateToolConfigTile(
     return SNew(SOdysseyPainterEditorToolTile)
         .ToolConfig(iTool)
         .ToolCollection(mToolCollection)
-        .Editor(mEditor);
+        .Editor(mEditor)
+        .IsUnlocked(bIsUnlocked);
 }
 
 FText
@@ -74,7 +76,7 @@ SOdysseyPainterEditorToolCollection::GetToolConfigIcon(UOdysseyPainterEditorTool
 FReply
 SOdysseyPainterEditorToolCollection::OnAddToolClicked()
 {
-    if ( !mEditor || !mEditor->GetCurrentTool() )
+    if ( !mEditor || !mEditor->GetCurrentTool() || !mEditor->GetEditorToolOfClass(mEditor->GetCurrentTool()->GetClass()) )
         return FReply::Unhandled();
 
     FToolPropertySnapshot toolPropertySnapshot;
@@ -119,6 +121,7 @@ void SOdysseyPainterEditorToolCollection::RefreshToolsGUI()
                     .ContentPadding(8)
                     .OnClicked(this, &SOdysseyPainterEditorToolCollection::OnAddToolClicked)
                     .ToolTipText(FText::FromString("Add the current tool to the collection"))
+                    .Visibility(this, &SOdysseyPainterEditorToolCollection::GetAddButtonVisibility)
                     [
                         SNew(SBox)
                             .WidthOverride(24)
@@ -130,4 +133,9 @@ void SOdysseyPainterEditorToolCollection::RefreshToolsGUI()
                     ]
             ];
     }
+}
+
+EVisibility SOdysseyPainterEditorToolCollection::GetAddButtonVisibility() const
+{
+    return bIsUnlocked.Get() ? EVisibility::Visible : EVisibility::Collapsed;
 }

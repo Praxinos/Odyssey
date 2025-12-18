@@ -10,6 +10,7 @@
 #include "IAssetTools.h"
 #include "ToolCollection/OdysseyToolCollection.h"
 #include "ToolCollection/OdysseyToolCollectionDragDropOp.h"
+#include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
 #include "Widgets/Layout/SWrapBox.h"
 #include "Widgets/Colors/SColorBlock.h"
 
@@ -30,13 +31,14 @@ SOdysseyPainterEditorToolTile::Construct(const FArguments& InArgs)
     mToolConfig = InArgs._ToolConfig;
     mCollection = InArgs._ToolCollection;
     mEditor = InArgs._Editor;
+    bIsUnlocked = InArgs._IsUnlocked;
 
     ChildSlot
         .HAlign(HAlign_Fill)
         .VAlign(VAlign_Fill)
         [
             SNew(SOverlay)
-
+                .IsEnabled( this, &SOdysseyPainterEditorToolTile::IsToolActivable )
                 // Background layer (solid fill)
                 + SOverlay::Slot()
                 [
@@ -85,10 +87,21 @@ FReply SOdysseyPainterEditorToolTile::OnMouseButtonUp( const FGeometry& MyGeomet
         {
             if (mToolConfig && mEditor)
             {
+                if (!IsToolActivable())
+                    return FReply::Handled().ReleaseMouseCapture();
+
                 UOdysseyPainterEditorTool* editorTool = mEditor->GetEditorToolOfClass(mToolConfig->mToolClass);
                 if (editorTool)
                 {
                     mEditor->LoadToolFromPropertySnapshot(editorTool, mToolConfig->mSnapshot);
+
+                    // Particular case of UOdysseyPainterEditorRasterDrawingTool where we have to refresh the brush instance to the loaded tool
+                    if (editorTool->IsA(UOdysseyPainterEditorRasterDrawingTool::StaticClass()))
+                        Cast<UOdysseyPainterEditorRasterDrawingTool>(editorTool)->RefreshBrushInstance();
+
+                    /*else if (editorTool->IsA(UOdysseyPainterEditorAnimationOutOfPegsTool::StaticClass()))
+                        Cast<UOdysseyPainterEditorAnimationOutOfPegsTool>(editorTool)->Load();*/
+
                     mEditor->ActivateMainTool(editorTool);
                 }
             }
@@ -101,6 +114,9 @@ FReply SOdysseyPainterEditorToolTile::OnMouseButtonUp( const FGeometry& MyGeomet
     }
     else if (MouseEvent.GetEffectingButton() == EKeys::RightMouseButton)
     {
+        if (!IsUnlocked())
+            return FReply::Unhandled();
+
         FSlateApplication::Get().PushMenu(
             SharedThis(this),
             FWidgetPath(),
@@ -117,6 +133,9 @@ FReply SOdysseyPainterEditorToolTile::OnMouseButtonUp( const FGeometry& MyGeomet
 
 FReply SOdysseyPainterEditorToolTile::OnDragDetected(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
+    if (!IsUnlocked())
+        return FReply::Unhandled();
+
     if (MouseEvent.IsMouseButtonDown(EKeys::LeftMouseButton))
     {
         bIsDragged = true;
@@ -127,6 +146,9 @@ FReply SOdysseyPainterEditorToolTile::OnDragDetected(const FGeometry& MyGeometry
 
 FReply SOdysseyPainterEditorToolTile::OnDrop(const FGeometry& MyGeometry, const FDragDropEvent& DragDropEvent)
 {
+    if (!IsUnlocked())
+        return FReply::Unhandled();
+
     auto dragOp = DragDropEvent.GetOperationAs<FOdysseyToolCollectionDragDropOp>();
     if (!dragOp.IsValid() || !mCollection || mCollection->IsCollectionTransient()) // No drop allowed in transient collection
         return FReply::Unhandled();
@@ -165,6 +187,9 @@ FReply SOdysseyPainterEditorToolTile::OnDrop(const FGeometry& MyGeometry, const 
 
 FReply SOdysseyPainterEditorToolTile::OnDragOver(const FGeometry& MyGeometry, const FDragDropEvent& DragDropEvent)
 {
+    if (!IsUnlocked())
+        return FReply::Unhandled();
+
     auto dragOp = DragDropEvent.GetOperationAs<FOdysseyToolCollectionDragDropOp>();
     if (!dragOp.IsValid() || mCollection->IsCollectionTransient() )
         return FReply::Unhandled();
@@ -222,6 +247,9 @@ int32 SOdysseyPainterEditorToolTile::OnPaint(const FPaintArgs& Args, const FGeom
 
 FLinearColor SOdysseyPainterEditorToolTile::GetTileColor() const
 {
+    if (!IsToolActivable())
+        return FLinearColor::Transparent;
+
     if (bIsPressed && !bIsDragged)
         return FLinearColor(0.05f, 0.3f, 0.7f, 0.7f);
     else if(IsHovered())
@@ -265,6 +293,24 @@ TSharedRef<SWidget> SOdysseyPainterEditorToolTile::BuildContextMenu()
     );
 
     return menuBuilder.MakeWidget();
+}
+
+bool SOdysseyPainterEditorToolTile::IsUnlocked() const
+{
+    return bIsUnlocked.Get();
+}
+
+bool SOdysseyPainterEditorToolTile::IsToolActivable() const
+{
+    if( !mEditor )
+        return false;
+
+    UOdysseyPainterEditorTool* tool = mEditor->GetEditorToolOfClass(mToolConfig->mToolClass);
+
+    if( !tool )
+        return false;
+
+    return tool->IsActivable();
 }
 
 bool SOdysseyPainterEditorToolTile::CanDeleteTool() const

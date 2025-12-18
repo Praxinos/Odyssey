@@ -33,6 +33,11 @@ protected:
     void OnAssetSelected(const FAssetData& AssetData);
     FReply OnRemoveCollectionClicked(TWeakObjectPtr<UOdysseyToolCollection> iCollectionToRemove);
     TSharedRef<SWidget> OnGetAddToolCollectionMenuContent();
+    FReply OnLockClicked();
+
+protected:
+    bool IsUnlocked() const;
+    const FSlateBrush* GetLockIcon() const;
 
 public:
     void RefreshCollectionsGUI();
@@ -41,6 +46,12 @@ private:
     FOdysseyPainterEditor* mEditor;
 
     TArray<TWeakObjectPtr<UOdysseyToolCollection>> mSelectedCollections;
+
+    /** Contains add collection button, lock, and filter options */
+    TSharedPtr<SHorizontalBox> mTabOptions;
+
     TSharedPtr<SListView<TWeakObjectPtr<UOdysseyToolCollection>>> mCollectionsListView;
     TSharedPtr<SVerticalBox> mCollectionsWidget;
+
+    bool bIsUnlocked = true;
 };

@@ -25,7 +25,8 @@ public:
         SLATE_ARGUMENT( UOdysseyPainterEditorToolConfiguration*, ToolConfig )
         SLATE_ARGUMENT( UOdysseyToolCollection*, ToolCollection)
         SLATE_ARGUMENT( FOdysseyPainterEditor*, Editor)
-    SLATE_END_ARGS()
+        SLATE_ARGUMENT(TAttribute<bool>, IsUnlocked)
+        SLATE_END_ARGS()
 
 public:
     // Construction / Destruction
@@ -48,6 +49,13 @@ public:
 private:
     FLinearColor GetTileColor() const;
     TSharedRef<SWidget> BuildContextMenu();
+
+    // Locked = can't modify the tool or the collection
+    bool IsUnlocked() const;
+
+    // ToolActivable = can load the tool by clicking on it -> Depends on the context (ex: active layer) in the editor
+    bool IsToolActivable() const;
+
     bool CanDeleteTool() const;
     void OnDeleteTool();
     bool CanDuplicateTool() const;
@@ -69,4 +77,5 @@ private:
 
     bool bIsPressed = false;
     bool bIsDragged = false;
+    TAttribute<bool> bIsUnlocked;
 };

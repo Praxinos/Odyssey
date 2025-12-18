@@ -21,6 +21,7 @@ public:
         {}
         SLATE_ARGUMENT(FOdysseyPainterEditor*, Editor)
         SLATE_ARGUMENT(UOdysseyToolCollection*, ToolCollection)
+        SLATE_ATTRIBUTE(bool, IsUnlocked)
     SLATE_END_ARGS()
 
 public:
@@ -31,17 +32,18 @@ public:
     void Construct(const FArguments& InArgs);
 
 protected:
-
     TSharedRef<SWidget> GenerateToolConfigTile(UOdysseyPainterEditorToolConfiguration* iTool);
     FText GetCollectionDisplayName() const;
     const FSlateBrush* GetToolConfigIcon(UOdysseyPainterEditorToolConfiguration* iTool) const;
     FReply OnAddToolClicked();
     void HandleToolsChanged();
     void RefreshToolsGUI();
+    EVisibility GetAddButtonVisibility() const;
 
 protected:
     FOdysseyPainterEditor* mEditor;
     UOdysseyToolCollection* mToolCollection;
+    TAttribute<bool> bIsUnlocked;
 
     TArray<UOdysseyPainterEditorToolConfiguration*> mDisplayedTools;
     TSharedPtr<SWrapBox> mToolWrapBox;
