@@ -188,6 +188,10 @@ UOdysseyPainterEditorRasterLiquifyTool::OnMouseDown(const FOdysseyPoint& iPointI
 
     if ( iKey == EKeys::LeftMouseButton )
     {
+        uint32 assetWidth = mAlteredImageBuffer[0].sourceBlockCopy->Width();
+        uint32 assetHeight = mAlteredImageBuffer[0].sourceBlockCopy->Height();
+        ::ULIS::FRectI screen = ::ULIS::FRectI::FromXYWH( 0, 0, assetWidth, assetHeight );
+
         bIsMouseLeftButtonDown = true;
 
         mFlowMapBackup = mFlowMap;
@@ -195,9 +199,10 @@ UOdysseyPainterEditorRasterLiquifyTool::OnMouseDown(const FOdysseyPoint& iPointI
         mActionArea = ::ULIS::FRectI::FromXYWH( iPointInTexture.x - radius
                                               , iPointInTexture.y - radius
                                               , (radius*2) + 1
-                                              , (radius*2) + 1 );
+                                              , (radius*2) + 1 ) & screen;
 
-        mEditingArea = ( mEditingArea.Area() == 0.0f ) ? mActionArea : ( mEditingArea | mActionArea );
+        mEditingArea = ( mEditingArea.Area() == 0.0f ) ? mActionArea
+                                                       : ( mEditingArea | mActionArea );
 
         for( FAlteredImage& alteredImage : mAlteredImageBuffer )
         {
@@ -257,8 +262,8 @@ UOdysseyPainterEditorRasterLiquifyTool::Flow( const FVector2D& iPrevCenter
                                             , double iHardness )
 {
     uint32 threadCount = GetThreadCount();
-    FFlow motion = FFlow( iPrevCenter.X - iCurrCenter.X
-                        , iPrevCenter.Y - iCurrCenter.Y );
+    FFlow motion = FFlow( iCurrCenter.X - iPrevCenter.X
+                        , iCurrCenter.Y - iPrevCenter.Y );
     uint32 assetWidth = mAlteredImageBuffer[0].sourceBlockCopy->Width();
     uint32 assetHeight = mAlteredImageBuffer[0].sourceBlockCopy->Height();
     double twirlDirection = ( TwirlDirection == EOdysseyLiquifyTwirlDirection::Clockwise ) ? -1.0f :  1.0f;
@@ -321,7 +326,7 @@ UOdysseyPainterEditorRasterLiquifyTool::Flow( const FVector2D& iPrevCenter
                                     break;
                                 }
 
-                                newPosition = localPosition + ( motionDirection * factor * iStrength );
+                                newPosition = localPosition - ( motionDirection * factor * iStrength );
                             }
                             break;
 
@@ -400,28 +405,36 @@ UOdysseyPainterEditorRasterLiquifyTool::Flow( const FVector2D& iPrevCenter
                             FIntVector2 intSrcCoords = FIntVector2( ( newPosition.X + (int32)iCurrCenter.X )
                                                                   , ( newPosition.Y + (int32)iCurrCenter.Y ) );
 
-                            if( Repeat )
+                            if( false )
                             {
-                                intSrcCoords.X = intSrcCoords.X % assetWidth;
-                                intSrcCoords.Y = intSrcCoords.Y % assetHeight;
+                                intSrcCoords.X = ( intSrcCoords.X < 0 ) ? ( intSrcCoords.X % assetWidth  ) + assetWidth
+                                                                        : ( intSrcCoords.X % assetWidth  );
+                                intSrcCoords.Y = ( intSrcCoords.Y < 0 ) ? ( intSrcCoords.Y % assetHeight ) + assetHeight
+                                                                        : ( intSrcCoords.Y % assetHeight );
                             }
 
                             uint32 srcOffset = ((intSrcCoords.Y) * assetWidth) + intSrcCoords.X;
                             FFlow vf = FFlow::Zero();
 
                             if( ( intSrcCoords.X >= 0 ) &&
-                                ( intSrcCoords.X < ((int32) assetWidth  - 1 ) ) &&
+                                ( intSrcCoords.X < ((int32) assetWidth  ) ) &&
                                 ( intSrcCoords.Y >= 0 ) &&
-                                ( intSrcCoords.Y < ((int32) assetHeight - 1 ) ) )
+                                ( intSrcCoords.Y < ((int32) assetHeight ) ) )
                             {
                                 // retrieve deltas for bilinear filtering of the vectors
                                 double deltaX = newPosition.X - floorf(newPosition.X);
                                 double deltaY = newPosition.Y - floorf(newPosition.Y);
+                                int32 nextSrcCoordsX = intSrcCoords.X + 1;
+                                int32 nextSrcCoordsY = intSrcCoords.Y + 1;
 
                                 uint32 SRCOFFSETTOPLEFT     = srcOffset
-                                     , SRCOFFSETTOPRIGHT    = SRCOFFSETTOPLEFT + 1
-                                     , SRCOFFSETBOTTOMRIGHT = SRCOFFSETTOPLEFT + 1 + (assetWidth)
-                                     , SRCOFFSETBOTTOMLEFT  = SRCOFFSETTOPLEFT + (assetWidth);
+                                     , SRCOFFSETTOPRIGHT    = ( nextSrcCoordsX == ((int32)assetWidth)  ) ? srcOffset
+                                                                                                         : SRCOFFSETTOPLEFT + 1
+                                     , SRCOFFSETBOTTOMRIGHT = ( nextSrcCoordsX == ((int32)assetWidth)  )
+                                                           || ( nextSrcCoordsY == ((int32)assetHeight) ) ? srcOffset
+                                                                                                         : SRCOFFSETTOPLEFT + 1 + (assetWidth)
+                                     , SRCOFFSETBOTTOMLEFT  = ( nextSrcCoordsY == ((int32)assetHeight) ) ? srcOffset
+                                                                                                         : SRCOFFSETTOPLEFT + (assetWidth);
                                 // bilinear filtering
                                 FFlow v0 = (mFlowMap.toTargetBuffer[SRCOFFSETTOPRIGHT   ] - mFlowMap.toTargetBuffer[SRCOFFSETTOPLEFT   ]) * deltaX + mFlowMap.toTargetBuffer[SRCOFFSETTOPLEFT   ];
                                 FFlow v1 = (mFlowMap.toTargetBuffer[SRCOFFSETBOTTOMRIGHT] - mFlowMap.toTargetBuffer[SRCOFFSETBOTTOMLEFT]) * deltaX + mFlowMap.toTargetBuffer[SRCOFFSETBOTTOMLEFT];
@@ -462,15 +475,52 @@ UOdysseyPainterEditorRasterLiquifyTool::Flow( const FVector2D& iPrevCenter
                         ::ULIS::FVec2I absoluteExpectedCoords = ::ULIS::FVec2I( absoluteCoords.x + flow.X
                                                                               , absoluteCoords.y + flow.Y );
 
-                        if( mEditingArea.HitTest( absoluteExpectedCoords ) == true )
+                        // truncate vector if not in editing area
+                        if( mEditingArea.HitTest( absoluteExpectedCoords ) == false )
                         {
-                            mFlowMap.toTargetBuffer[offset] = flow;
+                            ::ULIS::FVec2I relativeCoords = ::ULIS::FVec2I( absoluteCoords.x - mEditingArea.x
+                                                                          , absoluteCoords.y - mEditingArea.y );
+                            ::ULIS::FVec2D relativeExpectedCoords = ::ULIS::FVec2I( relativeCoords.x + flow.X
+                                                                                  , relativeCoords.y + flow.Y );
+
+                            if( relativeExpectedCoords.x >= mEditingArea.w )
+                            {
+                                double ratio = ( mEditingArea.w - relativeCoords.x ) / flow.X;
+
+                                relativeExpectedCoords = ::ULIS::FVec2D( mEditingArea.w - 1
+                                                                       , relativeCoords.y + flow.Y * ratio );
+                            }
+
+                            if( relativeExpectedCoords.x < 0 )
+                            {
+                                double ratio = ( - relativeCoords.x ) / flow.X;
+
+                                relativeExpectedCoords = ::ULIS::FVec2D( 0
+                                                                       , relativeCoords.y + flow.Y * ratio );
+                            }
+
+                            if( relativeExpectedCoords.y >= mEditingArea.h )
+                            {
+                                double ratio = ( mEditingArea.h - relativeCoords.y ) / flow.Y;
+
+                                relativeExpectedCoords = ::ULIS::FVec2D( relativeCoords.x + flow.X * ratio
+                                                                       , mEditingArea.h - 1 );
+                            }
+
+                            if( relativeExpectedCoords.y < 0 )
+                            {
+                                double ratio = ( - relativeCoords.y ) / flow.Y;
+
+                                relativeExpectedCoords = ::ULIS::FVec2D( relativeCoords.x + flow.X * ratio
+                                                                       , 0 );
+                            }
+
+                            flow.X = ( relativeExpectedCoords.x - relativeCoords.x );
+                            flow.Y = ( relativeExpectedCoords.y - relativeCoords.y );
                         }
                     }
-                    else
-                    {
-                        mFlowMap.toTargetBuffer[offset] = flow;
-                    }
+
+                    mFlowMap.toTargetBuffer[offset] = flow;
                 }
             }
         }
@@ -583,28 +633,35 @@ UOdysseyPainterEditorRasterLiquifyTool::ApplyFlow( FAlteredImage& iAlteredImage
                 // we handle masking by ourselves because we don't use a paintengine
                  && ( ( mskBlockPixelsGF == nullptr ) || ( mskBlockPixelsGF[dstOffset] ) ) )
                 {
-                    ::ULIS::FVec2D srcCoords = ::ULIS::FVec2D( x + ( toTarget.X * adjustment )
-                                                             , y + ( toTarget.Y * adjustment ) );
-                    double deltaX = srcCoords.x - ((int32)srcCoords.x);
-                    double deltaY = srcCoords.y - ((int32)srcCoords.y);
+                    ::ULIS::FVec2D targetCoords = ::ULIS::FVec2D( (double) x + ( toTarget.X * adjustment )
+                                                                , (double) y + ( toTarget.Y * adjustment ) );
+                    double deltaX = targetCoords.x - floorf(targetCoords.x);
+                    double deltaY = targetCoords.y - floorf(targetCoords.y);
+/*
+                    targetCoords.x = ( targetCoords.x < 0 ) ? ( ((int32)targetCoords.x) % assetWidth  ) + assetWidth
+                                                            : ( ((int32)targetCoords.x) % assetWidth  );
+                    targetCoords.y = ( targetCoords.y < 0 ) ? ( ((int32)targetCoords.y) % assetHeight ) + assetHeight
+                                                            : ( ((int32)targetCoords.y) % assetHeight );
+*/
+                    targetCoords.x = ((int32)targetCoords.x);
+                    targetCoords.y = ((int32)targetCoords.y);
 
-                    srcCoords.x = ((int32)srcCoords.x) % assetWidth;
-                    srcCoords.y = ((int32)srcCoords.y) % assetHeight;
+                    uint32 srcOffset = ( ((int32)targetCoords.y) * assetWidth ) + ((int32)targetCoords.x);
+                    uint8 (*dstBlockPixels32)[4] = (uint8(*)[4]) dstBlockPixels;
 
-                    uint32 srcOffset = ( ((int32)srcCoords.y) * assetWidth ) + ((int32)srcCoords.x);
-
-                    if( ( srcCoords.x >= 0 ) &&
+                    if( ( targetCoords.x >= 0 )
                         // substract 1 pixel from width for bilinear filtering
-                        ( srcCoords.x < ( assetWidth - 1 ) ) &&
-                        ( srcCoords.y >= 0 ) &&
+                     && ( targetCoords.x < ( assetWidth  ) )
+                     && ( targetCoords.y >= 0 )
                         // substract 1 pixel from height for bilinear filtering
-                        ( srcCoords.y < ( assetHeight - 1 ) ) )
+                     && ( targetCoords.y < ( assetHeight ) ) )
                     {
                         uint8 (*srcBlockPixels32)[4] = (uint8(*)[4]) srcBlockPixels;
-                        uint8 (*dstBlockPixels32)[4] = (uint8(*)[4]) dstBlockPixels;
 
                         // Do the bilinear interpolation thing for every component of the pixel
-                        if( iBilinearFiltered )
+                        if( iBilinearFiltered
+                         && ( targetCoords.x < ( assetWidth  - 1 ) )
+                         && ( targetCoords.y < ( assetHeight - 1 ) ) )
                         {
                             uint32 SRCOFFSETTOPLEFT     = srcOffset
                                  , SRCOFFSETTOPRIGHT    = SRCOFFSETTOPLEFT + 1
@@ -632,6 +689,13 @@ UOdysseyPainterEditorRasterLiquifyTool::ApplyFlow( FAlteredImage& iAlteredImage
                             dstBlockPixels32[dstOffset][2] = B;
                             dstBlockPixels32[dstOffset][3] = A;
                         }
+                    }
+                    else
+                    {
+                        dstBlockPixels32[dstOffset][0] = 0;
+                        dstBlockPixels32[dstOffset][1] = 0;
+                        dstBlockPixels32[dstOffset][2] = 0;
+                        dstBlockPixels32[dstOffset][3] = 0;
                     }
                 }
             }
@@ -691,12 +755,15 @@ UOdysseyPainterEditorRasterLiquifyTool::OnMouseDrag(const FOdysseyPoint& iPointI
 
     if( bIsMouseLeftButtonDown )
     {
+        uint32 assetWidth = mAlteredImageBuffer[0].sourceBlockCopy->Width();
+        uint32 assetHeight = mAlteredImageBuffer[0].sourceBlockCopy->Height();
+        ::ULIS::FRectI screen = ::ULIS::FRectI::FromXYWH( 0, 0, assetWidth, assetHeight );
         TSharedPtr<FOdysseyRasterBlock> rasterBlock = GetRasterBlockFromEditor(false);
 
-        mActionArea = mActionArea | ::ULIS::FRectI::FromXYWH( iPointInTexture.x - radius
-                                                            , iPointInTexture.y - radius
-                                                            , (radius*2) + 1
-                                                            , (radius*2) + 1 );
+        mActionArea = ( mActionArea | ::ULIS::FRectI::FromXYWH( iPointInTexture.x - radius
+                                                              , iPointInTexture.y - radius
+                                                              , (radius*2) + 1
+                                                              , (radius*2) + 1 ) ) & screen;
 
         mEditingArea = mEditingArea | mActionArea;
 
@@ -704,9 +771,6 @@ UOdysseyPainterEditorRasterLiquifyTool::OnMouseDrag(const FOdysseyPoint& iPointI
 
         if( deltaPointDistance >= 1.0f )
         {
-            uint32 assetWidth = mAlteredImageBuffer[0].sourceBlockCopy->Width();
-            uint32 assetHeight = mAlteredImageBuffer[0].sourceBlockCopy->Height();
-            ::ULIS::FRectI screen = ::ULIS::FRectI::FromXYWH( 0, 0, assetWidth, assetHeight );
             FVector2D stampPointInTexture = mPreviousPointInTexture;
             double stepX = deltaPoint.X  / (uint32) deltaPointDistance;
             double stepY = deltaPoint.Y  / (uint32) deltaPointDistance;
@@ -950,7 +1014,12 @@ UOdysseyPainterEditorRasterLiquifyTool::PropertyChanged( const FName& iPropertyN
 {
     Super::PropertyChanged(iPropertyName);
 
-    if( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorRasterLiquifyTool, AdjustmentStrength ) )
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorRasterLiquifyTool, OnlyReferToEditngArea ) )
+    {
+        Init();
+    }
+
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorRasterLiquifyTool, AdjustmentStrength    ) )
     {
         for( FAlteredImage& alteredImage : mAlteredImageBuffer )
         {
