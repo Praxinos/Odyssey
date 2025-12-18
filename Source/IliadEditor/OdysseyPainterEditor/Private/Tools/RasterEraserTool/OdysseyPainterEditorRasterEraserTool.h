@@ -88,7 +88,7 @@ private:
 
 protected:
     //Visible properties
-    UPROPERTY(EditAnywhere, Category="Shape", meta = ( ToolConfiguration ) )
+    UPROPERTY(EditAnywhere, Category="Shape")
     FOdysseyShapes Shapes;
 
     UPROPERTY( EditAnywhere, Category="Parameters", meta = ( ClampMin = "1", UIMin = "1", LinearDeltaSensitivity = "15", Delta = "1", Multiple="1", DisplayPriority="1", ToolConfiguration ) )

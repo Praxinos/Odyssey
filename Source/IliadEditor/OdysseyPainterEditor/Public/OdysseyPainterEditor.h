@@ -372,6 +372,8 @@ public:
     void  PaintColor(const FOdysseyBrushColor& iColor, bool iIsCommit);
     template <class T> T* AddMainTool();
     template <class T> T* AddTemporaryTool();
+
+    /** Get the main tool associated to class in parameter */
     UOdysseyPainterEditorTool* GetEditorToolOfClass(UClass* iToolClass);
 
 protected:

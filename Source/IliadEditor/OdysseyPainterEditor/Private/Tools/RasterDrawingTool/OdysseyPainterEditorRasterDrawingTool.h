@@ -194,7 +194,7 @@ public:
     UPROPERTY()
     TObjectPtr<UOdysseyBrushOptions> BrushOptions;
 
-    UPROPERTY(EditAnywhere, Category="Shape", meta = (ToolConfiguration) )
+    UPROPERTY(EditAnywhere, Category="Shape" )
     FOdysseyShapes Shapes;
 
     UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="Shape", BlueprintSetter=SubPixelBlueprintSetter, meta=(ToolConfiguration))

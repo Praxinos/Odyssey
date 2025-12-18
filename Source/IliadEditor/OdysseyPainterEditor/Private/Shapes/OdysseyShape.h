@@ -50,7 +50,7 @@ public:
     EOdysseyShapeType ActiveShapeType;
 
 private:
-    UPROPERTY(Instanced)
+    UPROPERTY()
     TMap<EOdysseyShapeType, UOdysseyShape*> Shapes;
 };
 

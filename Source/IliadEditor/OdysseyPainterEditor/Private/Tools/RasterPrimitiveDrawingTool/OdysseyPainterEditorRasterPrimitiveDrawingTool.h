@@ -68,7 +68,7 @@ protected:
     TSharedPtr<FScopedTransaction> mTransaction;
 
 public:
-    UPROPERTY(EditAnywhere, Category="Shape", meta = ( ToolConfiguration ))
+    UPROPERTY(EditAnywhere, Category="Shape")
     FOdysseyShapes Shapes;
 
     UPROPERTY(EditAnywhere, Category="Parameters", meta=(UIMin=0, ClampMin=0, LinearDeltaSensitivity=1, ToolConfiguration))
