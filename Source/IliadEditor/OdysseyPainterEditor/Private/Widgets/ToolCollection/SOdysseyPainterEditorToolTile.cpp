@@ -14,7 +14,7 @@
 #include "Widgets/Layout/SWrapBox.h"
 #include "Widgets/Colors/SColorBlock.h"
 
-
+static const FVector2D kTileSize = FVector2D(24.f, 24.f);
 
 SOdysseyPainterEditorToolTile::~SOdysseyPainterEditorToolTile()
 {
@@ -59,7 +59,7 @@ SOdysseyPainterEditorToolTile::Construct(const FArguments& InArgs)
                 [
                     SNew(SImage)
                         .Image(&mToolConfig->mIcon)
-                        .DesiredSizeOverride(FVector2D(32.f, 32.f))
+                        .DesiredSizeOverride(kTileSize)
                 ]
         ];
 }
@@ -391,7 +391,7 @@ void SOdysseyPainterEditorToolTile::OnChangeIcon()
         if (!proxy || !proxy->Resource)
             continue;
 
-        if( proxy->ActualSize.X < 32 || proxy->ActualSize.Y < 32 )
+        if( proxy->ActualSize.X < kTileSize.X || proxy->ActualSize.Y < kTileSize.Y)
             continue;
 
         validIcons.Add(key);
@@ -422,7 +422,7 @@ void SOdysseyPainterEditorToolTile::OnChangeIcon()
                     [
                         SNew(SImage)
                             .Image(brush)
-                            .DesiredSizeOverride(FVector2D(32, 32)) // fixed icon size
+                            .DesiredSizeOverride(kTileSize) // fixed icon size
                     ]
             ];
     }
@@ -458,7 +458,7 @@ void SOdysseyPainterEditorToolTile::OnTextureSelected(const FAssetData& AssetDat
     {
         FSlateBrush newIcon;
         newIcon.SetResourceObject(SelectedTexture);
-        newIcon.ImageSize = FVector2D(32, 32);
+        newIcon.ImageSize = kTileSize;
         mCollection->Modify();
         mToolConfig->mIcon = newIcon;
         mCollection->MarkPackageDirty();

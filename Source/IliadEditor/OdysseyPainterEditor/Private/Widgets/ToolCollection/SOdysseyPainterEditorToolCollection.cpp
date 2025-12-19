@@ -8,6 +8,7 @@
 #include "Widgets/Layout/SExpandableArea.h"
 #include "ToolCollection/OdysseyToolCollectionDragDropOp.h"
 #include "SOdysseyPainterEditorToolTile.h"
+#include "SPositiveActionButton.h"
 
 SOdysseyPainterEditorToolCollection::~SOdysseyPainterEditorToolCollection()
 {
@@ -117,20 +118,10 @@ void SOdysseyPainterEditorToolCollection::RefreshToolsGUI()
     {
         mToolWrapBox->AddSlot()
             [
-                SNew(SButton)
-                    .ContentPadding(8)
+                SNew(SPositiveActionButton)
                     .OnClicked(this, &SOdysseyPainterEditorToolCollection::OnAddToolClicked)
                     .ToolTipText(FText::FromString("Add the current tool to the collection"))
                     .Visibility(this, &SOdysseyPainterEditorToolCollection::GetAddButtonVisibility)
-                    [
-                        SNew(SBox)
-                            .WidthOverride(24)
-                            .HeightOverride(24)
-                            [
-                                SNew(SImage)
-                                    .Image(FAppStyle::Get().GetBrush("Icons.Plus"))
-                            ]
-                    ]
             ];
     }
 }
