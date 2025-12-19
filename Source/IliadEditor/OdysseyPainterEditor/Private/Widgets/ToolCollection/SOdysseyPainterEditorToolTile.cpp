@@ -114,7 +114,7 @@ FReply SOdysseyPainterEditorToolTile::OnMouseButtonUp( const FGeometry& MyGeomet
     }
     else if (MouseEvent.GetEffectingButton() == EKeys::RightMouseButton)
     {
-        if (!IsUnlocked())
+        if (!IsUnlocked() && !mCollection->IsCollectionTransient())
             return FReply::Unhandled();
 
         FSlateApplication::Get().PushMenu(
