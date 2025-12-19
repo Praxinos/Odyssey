@@ -136,9 +136,9 @@ TSharedRef<ITableRow> FOdysseyPainterEditorToolCollectionTab::OnGenerateCollecti
                         .OnClicked(this, &FOdysseyPainterEditorToolCollectionTab::OnRemoveCollectionClicked, iCollection)
                         .ToolTipText(FText::FromString("Remove this collection"))
                         [
-                            SNew(STextBlock)
-                                .Text(FText::FromString("X"))
-                                .ColorAndOpacity(FLinearColor::Red)
+                            SNew(SImage)
+                                .Image(FAppStyle::GetBrush("Icons.Delete"))
+                                .ColorAndOpacity(FSlateColor::UseForeground())
                         ]
                 ]
         ];
