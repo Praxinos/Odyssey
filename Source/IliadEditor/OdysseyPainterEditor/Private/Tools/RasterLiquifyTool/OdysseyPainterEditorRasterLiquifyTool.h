@@ -34,6 +34,16 @@ enum class EOdysseyLiquifyPushDirection : uint8
 };
 
 UENUM()
+enum class EOdysseyLiquifyBorderPolicy : uint8
+{
+    None,
+    Clamp
+    // commented-out, this mode would be complicated to implmeent due to the lack of vector information
+    // outside the canvas.
+    // Repeat
+};
+
+UENUM()
 enum class EOdysseyLiquifyMode : uint8
 {
     Push,
@@ -293,11 +303,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
 
         UPROPERTY( EditAnywhere
                  , Category = "Liquify Tool"
-                 , meta = ( ToolTip = "OnlyReferToEditngArea"
-                          , EditCondition = "(Mode != EOdysseyLiquifyMode::Adjust)"
-                          , EditConditionHides ) )
-        bool OnlyReferToEditngArea;
-
+                 , meta = ( ToolTip = "Border Policy" ) )
+        EOdysseyLiquifyBorderPolicy BorderPolicy;
 
         void Reset();
 

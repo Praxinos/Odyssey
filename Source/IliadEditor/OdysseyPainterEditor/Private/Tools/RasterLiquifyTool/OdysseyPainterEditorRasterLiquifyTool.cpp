@@ -88,7 +88,7 @@ UOdysseyPainterEditorRasterLiquifyTool::UOdysseyPainterEditorRasterLiquifyTool()
     , AdjustmentStrength( 100 )
     , PushDirection ( EOdysseyLiquifyPushDirection::Front )
     , TwirlDirection( EOdysseyLiquifyTwirlDirection::Clockwise )
-    , OnlyReferToEditngArea ( true )
+    , BorderPolicy ( EOdysseyLiquifyBorderPolicy::Clamp )
     , bIsMouseLeftButtonDown ( false )
     , mPressure ( 1.0f )
 {
@@ -303,7 +303,7 @@ UOdysseyPainterEditorRasterLiquifyTool::Flow( const FVector2D& iPrevCenter
                         // but squared values. It's good enough and saves some CPU cycles.
                         double vdistSquared = ::ULIS::FMath::Max( (double) 0.0f, distanceSquared - (iHardness * influenceRadiusSquared ) );
                         double factor = 1.0f - ( vdistSquared / influenceRadiusSquared );
-                        FFlow newPosition = localPosition; // having the same values will result in no difference, so no effect
+                        FFlow targetPosition = localPosition; // having the same values will result in no difference, so no effect
 
                         switch( Mode )
                         {
@@ -326,7 +326,7 @@ UOdysseyPainterEditorRasterLiquifyTool::Flow( const FVector2D& iPrevCenter
                                     break;
                                 }
 
-                                newPosition = localPosition - ( motionDirection * factor * iStrength );
+                                targetPosition = localPosition - ( motionDirection * factor * iStrength );
                             }
                             break;
 
@@ -341,7 +341,7 @@ UOdysseyPainterEditorRasterLiquifyTool::Flow( const FVector2D& iPrevCenter
                                 FFlow motionDirection = FFlow( x - projected.X
                                                              , y - projected.Y );
 
-                                newPosition = localPosition + ( motionDirection * factor * iStrength * 0.01f );
+                                targetPosition = localPosition + ( motionDirection * factor * iStrength * 0.01f );
                             }
                             break;
 
@@ -349,7 +349,7 @@ UOdysseyPainterEditorRasterLiquifyTool::Flow( const FVector2D& iPrevCenter
                             {
                                 FFlow minPosition = FFlow( 0.0f, 0.0f );
 
-                                newPosition = localPosition + ( minPosition - localPosition ) * factor * iStrength * 0.005f;
+                                targetPosition = localPosition + ( minPosition - localPosition ) * factor * iStrength * 0.005f;
                             }
                             break;
 
@@ -361,7 +361,7 @@ UOdysseyPainterEditorRasterLiquifyTool::Flow( const FVector2D& iPrevCenter
                                 FFlow maxPosition = FFlow( influenceRadius * cosAngle
                                                          , influenceRadius * sinAngle );
 
-                                newPosition = localPosition + ( maxPosition - localPosition ) * factor * iStrength * 0.005f;
+                                targetPosition = localPosition + ( maxPosition - localPosition ) * factor * iStrength * 0.005f;
                             }
                             break;
 
@@ -371,13 +371,13 @@ UOdysseyPainterEditorRasterLiquifyTool::Flow( const FVector2D& iPrevCenter
 
                                 uint32 intAngle = angle * 0.1f; // reduce the number of possible angles by dividing by 10
 
-                                newPosition = localPosition + ( localPosition * factor * iStrength * 0.1f * ( ( intAngle % 2 ) ? 1.0f : -1.0f )  );
+                                targetPosition = localPosition + ( localPosition * factor * iStrength * 0.1f * ( ( intAngle % 2 ) ? 1.0f : -1.0f )  );
                             }
                             break;
 
                             case EOdysseyLiquifyMode::Reconstruct :
                             {
-                                newPosition = localPosition;
+                                targetPosition = localPosition;
 
                                 distortion = mFlowMap.toTargetBuffer[distortionOffset] * ( 1.0f - factor * iStrength * 0.01f );
                             }
@@ -388,7 +388,7 @@ UOdysseyPainterEditorRasterLiquifyTool::Flow( const FVector2D& iPrevCenter
                                 double cosAngle = cos( ROTATIONSPEEDINRADIANS * factor * iStrength * twirlDirection );
                                 double sinAngle = sin( ROTATIONSPEEDINRADIANS * factor * iStrength * twirlDirection );
 
-                                newPosition = FFlow( ( localPosition.X * cosAngle ) - ( localPosition.Y * sinAngle )
+                                targetPosition = FFlow( ( localPosition.X * cosAngle ) - ( localPosition.Y * sinAngle )
                                                    , ( localPosition.X * sinAngle ) + ( localPosition.Y * cosAngle ) );
                             }
                             break;
@@ -397,33 +397,30 @@ UOdysseyPainterEditorRasterLiquifyTool::Flow( const FVector2D& iPrevCenter
                             break;
                         }
 
-                        if( newPosition != localPosition )
+                        if( targetPosition != localPosition )
                         {
                             bool Repeat = true;
                             // WARNING : At this step, only iCurrCenter must be cast to int32. DO NOT cast
-                            // newPosition or else in case of negative value the result will not be correct
-                            FIntVector2 intSrcCoords = FIntVector2( ( newPosition.X + (int32)iCurrCenter.X )
-                                                                  , ( newPosition.Y + (int32)iCurrCenter.Y ) );
-
-                            if( false )
-                            {
-                                intSrcCoords.X = ( intSrcCoords.X < 0 ) ? ( intSrcCoords.X % assetWidth  ) + assetWidth
-                                                                        : ( intSrcCoords.X % assetWidth  );
-                                intSrcCoords.Y = ( intSrcCoords.Y < 0 ) ? ( intSrcCoords.Y % assetHeight ) + assetHeight
-                                                                        : ( intSrcCoords.Y % assetHeight );
-                            }
-
-                            uint32 srcOffset = ((intSrcCoords.Y) * assetWidth) + intSrcCoords.X;
+                            // targetPosition or else in case of negative value the result will not be correct
+                            FIntVector2 intSrcCoords = FIntVector2( ( targetPosition.X + (int32)iCurrCenter.X )
+                                                                  , ( targetPosition.Y + (int32)iCurrCenter.Y ) );
                             FFlow vf = FFlow::Zero();
+
+                            if( Repeat )
+                            {
+                                intSrcCoords.X = ( intSrcCoords.X % assetWidth  );
+                                intSrcCoords.Y = ( intSrcCoords.Y % assetHeight );
+                            }
 
                             if( ( intSrcCoords.X >= 0 ) &&
                                 ( intSrcCoords.X < ((int32) assetWidth  ) ) &&
                                 ( intSrcCoords.Y >= 0 ) &&
                                 ( intSrcCoords.Y < ((int32) assetHeight ) ) )
                             {
+                                uint32 srcOffset = ((intSrcCoords.Y) * assetWidth) + intSrcCoords.X;
                                 // retrieve deltas for bilinear filtering of the vectors
-                                double deltaX = newPosition.X - floorf(newPosition.X);
-                                double deltaY = newPosition.Y - floorf(newPosition.Y);
+                                double deltaX = targetPosition.X - floorf(targetPosition.X);
+                                double deltaY = targetPosition.Y - floorf(targetPosition.Y);
                                 int32 nextSrcCoordsX = intSrcCoords.X + 1;
                                 int32 nextSrcCoordsY = intSrcCoords.Y + 1;
 
@@ -442,8 +439,8 @@ UOdysseyPainterEditorRasterLiquifyTool::Flow( const FVector2D& iPrevCenter
                                 vf = ( v1 - v0 ) * deltaY + v0;
                             }
 
-                            distortion = FFlow( vf.X, vf.Y ) + FFlow( newPosition.X - localPosition.X
-                                                                    , newPosition.Y - localPosition.Y );
+                            distortion = FFlow( vf.X, vf.Y ) + FFlow( targetPosition.X - localPosition.X
+                                                                    , targetPosition.Y - localPosition.Y );
                         }
 
                         if( (uint32) absoluteCoords.x < xmin ) xmin = (uint32) absoluteCoords.x;
@@ -469,56 +466,6 @@ UOdysseyPainterEditorRasterLiquifyTool::Flow( const FVector2D& iPrevCenter
                 {
                     ::ULIS::FVec2I absoluteCoords = ::ULIS::FVec2I( x, y );
                     uint32 offset = ( absoluteCoords.y * assetWidth ) + absoluteCoords.x;
-
-                    if( OnlyReferToEditngArea )
-                    {
-                        ::ULIS::FVec2I absoluteExpectedCoords = ::ULIS::FVec2I( absoluteCoords.x + flow.X
-                                                                              , absoluteCoords.y + flow.Y );
-
-                        // truncate vector if not in editing area
-                        if( mEditingArea.HitTest( absoluteExpectedCoords ) == false )
-                        {
-                            ::ULIS::FVec2I relativeCoords = ::ULIS::FVec2I( absoluteCoords.x - mEditingArea.x
-                                                                          , absoluteCoords.y - mEditingArea.y );
-                            ::ULIS::FVec2D relativeExpectedCoords = ::ULIS::FVec2I( relativeCoords.x + flow.X
-                                                                                  , relativeCoords.y + flow.Y );
-
-                            if( relativeExpectedCoords.x >= mEditingArea.w )
-                            {
-                                double ratio = ( mEditingArea.w - relativeCoords.x ) / flow.X;
-
-                                relativeExpectedCoords = ::ULIS::FVec2D( mEditingArea.w - 1
-                                                                       , relativeCoords.y + flow.Y * ratio );
-                            }
-
-                            if( relativeExpectedCoords.x < 0 )
-                            {
-                                double ratio = ( - relativeCoords.x ) / flow.X;
-
-                                relativeExpectedCoords = ::ULIS::FVec2D( 0
-                                                                       , relativeCoords.y + flow.Y * ratio );
-                            }
-
-                            if( relativeExpectedCoords.y >= mEditingArea.h )
-                            {
-                                double ratio = ( mEditingArea.h - relativeCoords.y ) / flow.Y;
-
-                                relativeExpectedCoords = ::ULIS::FVec2D( relativeCoords.x + flow.X * ratio
-                                                                       , mEditingArea.h - 1 );
-                            }
-
-                            if( relativeExpectedCoords.y < 0 )
-                            {
-                                double ratio = ( - relativeCoords.y ) / flow.Y;
-
-                                relativeExpectedCoords = ::ULIS::FVec2D( relativeCoords.x + flow.X * ratio
-                                                                       , 0 );
-                            }
-
-                            flow.X = ( relativeExpectedCoords.x - relativeCoords.x );
-                            flow.Y = ( relativeExpectedCoords.y - relativeCoords.y );
-                        }
-                    }
 
                     mFlowMap.toTargetBuffer[offset] = flow;
                 }
@@ -619,6 +566,7 @@ UOdysseyPainterEditorRasterLiquifyTool::ApplyFlow( FAlteredImage& iAlteredImage
     ::ULIS::FRectI sanitizedROI = iSanitizedRegionOfInterest;
     uint32 threadCount = GetThreadCount();
     double adjustment = ( double ) AdjustmentStrength / 100;
+    ::ULIS::FRectI screen = ::ULIS::FRectI::FromXYWH( 0, 0, assetWidth, assetHeight );
 
     ParallelFor( threadCount, [&]( int32 coreID )
     {
@@ -637,14 +585,47 @@ UOdysseyPainterEditorRasterLiquifyTool::ApplyFlow( FAlteredImage& iAlteredImage
                                                                 , (double) y + ( toTarget.Y * adjustment ) );
                     double deltaX = targetCoords.x - floorf(targetCoords.x);
                     double deltaY = targetCoords.y - floorf(targetCoords.y);
-/*
-                    targetCoords.x = ( targetCoords.x < 0 ) ? ( ((int32)targetCoords.x) % assetWidth  ) + assetWidth
-                                                            : ( ((int32)targetCoords.x) % assetWidth  );
-                    targetCoords.y = ( targetCoords.y < 0 ) ? ( ((int32)targetCoords.y) % assetHeight ) + assetHeight
-                                                            : ( ((int32)targetCoords.y) % assetHeight );
-*/
+
                     targetCoords.x = ((int32)targetCoords.x);
                     targetCoords.y = ((int32)targetCoords.y);
+
+                    // truncate vector if not in editing area
+                    if( screen.HitTest( targetCoords ) == false )
+                    {
+                        switch( BorderPolicy )
+                        {
+                            case EOdysseyLiquifyBorderPolicy::Clamp :
+                            {
+                                if( targetCoords.x >= screen.w )
+                                {
+                                    double ratio = ( screen.w - x ) / toTarget.X;
+                                    targetCoords = ::ULIS::FVec2D( screen.w - 1, y + targetCoords.y * ratio );
+                                }
+
+                                if( targetCoords.x < 0 )
+                                {
+                                    double ratio = ( - x ) / toTarget.X;
+                                    targetCoords = ::ULIS::FVec2D( 0, y + toTarget.Y * ratio );
+                                }
+
+                                if( targetCoords.y >= screen.h )
+                                {
+                                    double ratio = ( screen.h - y ) / toTarget.Y;
+                                    targetCoords = ::ULIS::FVec2D( x + toTarget.X * ratio, screen.h - 1 );
+                                }
+
+                                if( targetCoords.y < 0 )
+                                {
+                                    double ratio = ( - y ) / toTarget.Y;
+                                    targetCoords = ::ULIS::FVec2D( x + toTarget.X * ratio, 0 );
+                                }
+                            }
+                            break;
+
+                            default:
+                            break;
+                        }
+                    }
 
                     uint32 srcOffset = ( ((int32)targetCoords.y) * assetWidth ) + ((int32)targetCoords.x);
                     uint8 (*dstBlockPixels32)[4] = (uint8(*)[4]) dstBlockPixels;
@@ -1014,12 +995,8 @@ UOdysseyPainterEditorRasterLiquifyTool::PropertyChanged( const FName& iPropertyN
 {
     Super::PropertyChanged(iPropertyName);
 
-    if( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorRasterLiquifyTool, OnlyReferToEditngArea ) )
-    {
-        Init();
-    }
-
-    if( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorRasterLiquifyTool, AdjustmentStrength    ) )
+    if( ( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorRasterLiquifyTool, AdjustmentStrength ) )
+     || ( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorRasterLiquifyTool, BorderPolicy       ) ) )
     {
         for( FAlteredImage& alteredImage : mAlteredImageBuffer )
         {
