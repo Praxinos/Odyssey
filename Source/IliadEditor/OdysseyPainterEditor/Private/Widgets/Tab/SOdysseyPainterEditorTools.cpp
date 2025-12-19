@@ -13,6 +13,7 @@
 #include "Tools/RasterSelectionTool/OdysseyPainterEditorRasterSelectionTool.h"
 #include "Tools/RasterTransformTool/OdysseyPainterEditorRasterTransformTool.h"
 #include "Tools/RasterPrimitiveDrawingTool/OdysseyPainterEditorRasterPrimitiveDrawingTool.h"
+#include "Tools/RasterLiquifyTool/OdysseyPainterEditorRasterLiquifyTool.h"
 #include "Tools/RasterPaintBucketTool/OdysseyPainterEditorRasterPaintBucketTool.h"
 #include "Tools/VectorPrimitiveDrawingTool/OdysseyPainterEditorVectorPrimitiveDrawingTool.h"
 #include "Tools/VectorPathDrawingTool/OdysseyPainterEditorVectorPathDrawingTool.h"
@@ -54,6 +55,7 @@ SOdysseyPainterEditorTools::Construct(const FArguments& InArgs)
         editor->GetRasterSelectionTool(),
         editor->GetRasterTransformTool(),
         editor->GetRasterPrimitiveDrawingTool(),
+        editor->GetRasterLiquifyTool(),
         editor->GetRasterPaintBucketTool(),
         editor->GetVectorPathDrawingTool(),
         editor->GetVectorPathEditTool(),

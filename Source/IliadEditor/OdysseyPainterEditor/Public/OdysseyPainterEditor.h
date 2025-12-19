@@ -39,6 +39,7 @@ class UOdysseyPainterEditorRasterEraserTool;
 class UOdysseyPainterEditorRasterSelectionTool;
 class UOdysseyPainterEditorRasterTransformTool;
 class UOdysseyPainterEditorRasterPrimitiveDrawingTool;
+class UOdysseyPainterEditorRasterLiquifyTool;
 class UOdysseyPainterEditorRasterPaintBucketTool;
 class UOdysseyPainterEditorVectorPrimitiveDrawingTool;
 class UOdysseyPainterEditorVectorPathDrawingTool;
@@ -186,6 +187,7 @@ public:
     virtual UOdysseyPainterEditorRasterSelectionTool*                GetRasterSelectionTool() const;
     virtual UOdysseyPainterEditorRasterTransformTool*                GetRasterTransformTool() const;
     virtual UOdysseyPainterEditorRasterPrimitiveDrawingTool*         GetRasterPrimitiveDrawingTool() const;
+    virtual UOdysseyPainterEditorRasterLiquifyTool*                  GetRasterLiquifyTool() const;
     virtual UOdysseyPainterEditorRasterPaintBucketTool*              GetRasterPaintBucketTool() const;
     virtual UOdysseyPainterEditorVectorPrimitiveDrawingTool*         GetVectorPrimitiveDrawingTool() const;
     virtual UOdysseyPainterEditorVectorPathDrawingTool*              GetVectorPathDrawingTool() const;
@@ -400,6 +402,7 @@ protected:
     TObjectPtr<UOdysseyPainterEditorRasterSelectionTool> mRasterSelectionTool;
     TObjectPtr<UOdysseyPainterEditorRasterTransformTool> mRasterTransformTool;
     TObjectPtr<UOdysseyPainterEditorRasterPrimitiveDrawingTool> mRasterPrimitiveDrawingTool;
+    TObjectPtr<UOdysseyPainterEditorRasterLiquifyTool> mRasterLiquifyTool;
     TObjectPtr<UOdysseyPainterEditorRasterPaintBucketTool> mRasterPaintBucketTool;
     TObjectPtr<UOdysseyPainterEditorVectorPrimitiveDrawingTool> mVectorPrimitiveDrawingTool;
     TObjectPtr<UOdysseyPainterEditorVectorPathDrawingTool> mVectorPathDrawingTool;

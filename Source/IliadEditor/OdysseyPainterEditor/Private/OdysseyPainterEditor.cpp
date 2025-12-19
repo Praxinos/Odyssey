@@ -77,6 +77,7 @@
 #include "Tools/RasterSelectionTool/OdysseyPainterEditorRasterSelectionTool.h"
 #include "Tools/RasterTransformTool/OdysseyPainterEditorRasterTransformTool.h"
 #include "Tools/RasterPrimitiveDrawingTool/OdysseyPainterEditorRasterPrimitiveDrawingTool.h"
+#include "Tools/RasterLiquifyTool/OdysseyPainterEditorRasterLiquifyTool.h"
 #include "Tools/RasterPaintBucketTool/OdysseyPainterEditorRasterPaintBucketTool.h"
 #include "Tools/VectorPrimitiveDrawingTool/OdysseyPainterEditorVectorPrimitiveDrawingTool.h"
 #include "Tools/VectorPathDrawingTool/OdysseyPainterEditorVectorPathDrawingTool.h"
@@ -146,6 +147,7 @@ FOdysseyPainterEditor::FOdysseyPainterEditor(TSharedRef<FBaseToolkit> iToolkit)
     , mRasterSelectionTool(nullptr)
     , mRasterTransformTool(nullptr)
     , mRasterPrimitiveDrawingTool(nullptr)
+    , mRasterLiquifyTool(nullptr)
     , mVectorPrimitiveDrawingTool(nullptr)
     , mVectorPathDrawingTool(nullptr)
     , mVectorPathEditTool(nullptr)
@@ -738,9 +740,10 @@ FOdysseyPainterEditor::InitTools()
     mRasterSelectionTool = AddMainTool<UOdysseyPainterEditorRasterSelectionTool>();
     mRasterTransformTool = AddMainTool<UOdysseyPainterEditorRasterTransformTool>();
     mRasterPaintBucketTool = AddMainTool<UOdysseyPainterEditorRasterPaintBucketTool>();
+    mRasterPrimitiveDrawingTool = AddMainTool<UOdysseyPainterEditorRasterPrimitiveDrawingTool>();
+    mRasterLiquifyTool = AddMainTool<UOdysseyPainterEditorRasterLiquifyTool>();
     mVectorPathDrawingTool = AddMainTool<UOdysseyPainterEditorVectorPathDrawingTool>();
     mVectorPathEditTool = AddMainTool<UOdysseyPainterEditorVectorPathEditTool>();
-    mRasterPrimitiveDrawingTool = AddMainTool<UOdysseyPainterEditorRasterPrimitiveDrawingTool>();
     mVectorPrimitiveDrawingTool = AddMainTool<UOdysseyPainterEditorVectorPrimitiveDrawingTool>();
     mVectorSelectionTool = AddMainTool<UOdysseyPainterEditorVectorSelectionTool>();
     mVectorCutTool = AddMainTool<UOdysseyPainterEditorVectorCutTool>();
@@ -827,6 +830,12 @@ UOdysseyPainterEditorRasterPrimitiveDrawingTool*
 FOdysseyPainterEditor::GetRasterPrimitiveDrawingTool() const
 {
     return mRasterPrimitiveDrawingTool;
+}
+
+UOdysseyPainterEditorRasterLiquifyTool*
+FOdysseyPainterEditor::GetRasterLiquifyTool() const
+{
+    return mRasterLiquifyTool;
 }
 
 UOdysseyPainterEditorRasterPaintBucketTool*
