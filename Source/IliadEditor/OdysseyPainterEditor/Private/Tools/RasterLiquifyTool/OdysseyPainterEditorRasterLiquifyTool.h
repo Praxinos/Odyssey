@@ -331,4 +331,5 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterLiquifyTool : public U
         ::ULIS::FRectI mEditingArea;
         ::ULIS::FRectI mActionArea;
         double mPressure;
+        uint64 mPreviousTime;
 };

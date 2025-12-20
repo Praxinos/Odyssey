@@ -25,6 +25,7 @@
 #include "Editor/Transactor.h"
 #include "Editor/TransBuffer.h"
 #include "Framework/Notifications/NotificationManager.h"
+#include <chrono>
 
 #include "OdysseyHUDElement.h"
 #include "SOdysseySinglePropertyView.h"
@@ -34,6 +35,8 @@
 #define M_PI 3.14159265358979323846L
 //#define ROTATIONSPEEDINRADIANS 0.0872665f // five degrees
 #define ROTATIONSPEEDINRADIANS 0.0349066f // 2 degrees
+
+#define STAMP_DISTANCE 1.0f // stamp every "n" pixels
 
 UOdysseyPainterEditorRasterLiquifyTool::FAlteredImage::~FAlteredImage()
 {
@@ -186,6 +189,9 @@ UOdysseyPainterEditorRasterLiquifyTool::OnMouseDown(const FOdysseyPoint& iPointI
     mMouseAtDown = FVector2D( iPointInTexture.x, iPointInTexture.y );
     mPreviousPointInTexture = mMouseAtDown;
 
+    // we get too many events when using the stylus, so we will filter some event based on time between 2 events
+    mPreviousTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+
     if ( iKey == EKeys::LeftMouseButton )
     {
         uint32 assetWidth = mAlteredImageBuffer[0].sourceBlockCopy->Width();
@@ -204,13 +210,20 @@ UOdysseyPainterEditorRasterLiquifyTool::OnMouseDown(const FOdysseyPoint& iPointI
         mEditingArea = ( mEditingArea.Area() == 0.0f ) ? mActionArea
                                                        : ( mEditingArea | mActionArea );
 
+        // Apply non-bilinear filtered flow on image on mouse down for consistency, or else during the drag, some part of the image
+        // image will be bilinear filtered and some other parts not.
+/* Commented-out.
         for( FAlteredImage& alteredImage : mAlteredImageBuffer )
         {
-            alteredImage.mutator.EditTilesFromRects( { alteredImage.sourceRasterBlock->GetRect() }, nullptr );
+            ApplyFlow( alteredImage
+                     , mEditingArea
+                     , false );
 
-            alteredImage.context.Finish();
+            UpdateAlteredImage( alteredImage
+                              , mEditingArea
+                              , false );
         }
-
+*/
         return true;
     }
 
@@ -730,35 +743,45 @@ UOdysseyPainterEditorRasterLiquifyTool::OnMouseDrag(const FOdysseyPoint& iPointI
     FVector2D deltaPoint = FVector2D( iPointInTexture.x - mPreviousPointInTexture.X
                                     , iPointInTexture.y - mPreviousPointInTexture.Y );
     double deltaPointDistance = deltaPoint.Length();
-    uint32 radius = GetRadius();
+    uint64 currentTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 
     mMousePosition = FVector2D( iPointInTexture.x, iPointInTexture.y );
 
     if( bIsMouseLeftButtonDown )
     {
-        uint32 assetWidth = mAlteredImageBuffer[0].sourceBlockCopy->Width();
-        uint32 assetHeight = mAlteredImageBuffer[0].sourceBlockCopy->Height();
-        ::ULIS::FRectI screen = ::ULIS::FRectI::FromXYWH( 0, 0, assetWidth, assetHeight );
-        TSharedPtr<FOdysseyRasterBlock> rasterBlock = GetRasterBlockFromEditor(false);
-
-        mActionArea = ( mActionArea | ::ULIS::FRectI::FromXYWH( iPointInTexture.x - radius
-                                                              , iPointInTexture.y - radius
-                                                              , (radius*2) + 1
-                                                              , (radius*2) + 1 ) ) & screen;
-
-        mEditingArea = mEditingArea | mActionArea;
-
         mLiquifyHUD->SetCursorPositionInTexture( mMousePosition );
 
-        if( deltaPointDistance >= 1.0f )
+        // Note: deltaPointDistance stores the delta between two Flow operation
+        // not between to calls of Mouse Drag ...
+        // we also don't want to many calls to this function especially when using the stylus so we
+        // want at least 20 milliseconds between 2 calls
+        if( ( deltaPointDistance >= STAMP_DISTANCE ) && ( ( currentTime - mPreviousTime ) >= 40 ) )
         {
+            uint32 radius = GetRadius();
+            uint32 assetWidth = mAlteredImageBuffer[0].sourceBlockCopy->Width();
+            uint32 assetHeight = mAlteredImageBuffer[0].sourceBlockCopy->Height();
+            ::ULIS::FRectI screen = ::ULIS::FRectI::FromXYWH( 0, 0, assetWidth, assetHeight );
+
+//UE_LOG( LogTemp, Warning, TEXT("event delta time : %d ms"), ( currentTime - mPreviousTime ) );
+
             FVector2D stampPointInTexture = mPreviousPointInTexture;
             double stepX = deltaPoint.X  / (uint32) deltaPointDistance;
             double stepY = deltaPoint.Y  / (uint32) deltaPointDistance;
             double strength = (double) Strength / 100;
             double hardness = (double) Hardness / 100;
+            // ... however, iPointInTexture.deltaPosition is the delta between 2 calls to Mouse Drag. So,
+            // if the mouse motion is very fast, we call Flow every 4 pixels.
+            //uint32 flow_distance = 4;
+            uint32 flow_distance = 1;
 
-            for( uint32 i = 0; i < (uint32) deltaPointDistance; i++ )
+            mActionArea = ( mActionArea | ::ULIS::FRectI::FromXYWH( iPointInTexture.x - radius
+                                                                  , iPointInTexture.y - radius
+                                                                  , (radius*2) + 1
+                                                                  , (radius*2) + 1 ) ) & screen;
+
+            mEditingArea = mEditingArea | mActionArea;
+
+            for( uint32 i = 0; i < (uint32) deltaPointDistance; i += flow_distance )
             {
                 FVector2D stampNextPointInTexture = FVector2D( stampPointInTexture.X + stepX
                                                              , stampPointInTexture.Y + stepY );
@@ -794,6 +817,7 @@ UOdysseyPainterEditorRasterLiquifyTool::OnMouseDrag(const FOdysseyPoint& iPointI
             }
 
             mPreviousPointInTexture = FVector2D( iPointInTexture.x, iPointInTexture.y );
+            mPreviousTime = currentTime;
         }
     }
 }
