@@ -282,7 +282,6 @@ UOdysseyPainterEditorRasterLiquifyTool::Flow( const FVector2D& iPrevCenter
     double twirlDirection = ( TwirlDirection == EOdysseyLiquifyTwirlDirection::Clockwise ) ? -1.0f :  1.0f;
     uint32 influenceRadius = GetRadius();
     uint32 influenceRadiusSquared =  (influenceRadius * influenceRadius );
-    uint32 influenceSize = ((influenceRadius*2)+1);
     uint32 xmin = assetWidth - 1
          , ymin = assetHeight - 1
          , xmax = 0
@@ -291,9 +290,9 @@ UOdysseyPainterEditorRasterLiquifyTool::Flow( const FVector2D& iPrevCenter
 
     ParallelFor( threadCount, [&]( int32 coreID )
     {
-        for( int32 j = coreID, y = - (int32) influenceRadius + coreID; j < (int32) influenceSize; j += threadCount, y += threadCount )
+        for( int32 j = coreID, y = - (int32) influenceRadius + coreID; y < (int32) influenceRadius; j += threadCount, y += threadCount )
         {
-            for( int32 i = 0, x = - (int32) influenceRadius; i < (int32) influenceSize; i++, x++ )
+            for( int32 i = 0, x = - (int32) influenceRadius; x < (int32) influenceRadius; i++, x++ )
             {
                 ::ULIS::FVec2I absoluteCoords = ::ULIS::FVec2I( ((int32)iCurrCenter.X) + x
                                                               , ((int32)iCurrCenter.Y) + y );
@@ -402,7 +401,7 @@ UOdysseyPainterEditorRasterLiquifyTool::Flow( const FVector2D& iPrevCenter
                                 double sinAngle = sin( ROTATIONSPEEDINRADIANS * factor * iStrength * twirlDirection );
 
                                 targetPosition = FFlow( ( localPosition.X * cosAngle ) - ( localPosition.Y * sinAngle )
-                                                   , ( localPosition.X * sinAngle ) + ( localPosition.Y * cosAngle ) );
+                                                      , ( localPosition.X * sinAngle ) + ( localPosition.Y * cosAngle ) );
                             }
                             break;
 
@@ -413,6 +412,8 @@ UOdysseyPainterEditorRasterLiquifyTool::Flow( const FVector2D& iPrevCenter
                         if( targetPosition != localPosition )
                         {
                             bool Repeat = true;
+                            FVector2D floatSrcCoords = FVector2D( ( targetPosition.X + (int32)iCurrCenter.X )
+                                                                , ( targetPosition.Y + (int32)iCurrCenter.Y ) );
                             // WARNING : At this step, only iCurrCenter must be cast to int32. DO NOT cast
                             // targetPosition or else in case of negative value the result will not be correct
                             FIntVector2 intSrcCoords = FIntVector2( ( targetPosition.X + (int32)iCurrCenter.X )
@@ -431,9 +432,10 @@ UOdysseyPainterEditorRasterLiquifyTool::Flow( const FVector2D& iPrevCenter
                                 ( intSrcCoords.Y < ((int32) assetHeight ) ) )
                             {
                                 uint32 srcOffset = ((intSrcCoords.Y) * assetWidth) + intSrcCoords.X;
-                                // retrieve deltas for bilinear filtering of the vectors
-                                double deltaX = targetPosition.X - floorf(targetPosition.X);
-                                double deltaY = targetPosition.Y - floorf(targetPosition.Y);
+                                // retrieve deltas for bilinear filtering of the vectors. Use absolute coords only
+                                // as they are always positive. there won't be any miscalculation then.
+                                double deltaX = floatSrcCoords.X - floorf(floatSrcCoords.X);
+                                double deltaY = floatSrcCoords.Y - floorf(floatSrcCoords.Y);
                                 int32 nextSrcCoordsX = intSrcCoords.X + 1;
                                 int32 nextSrcCoordsY = intSrcCoords.Y + 1;
 
@@ -481,6 +483,8 @@ UOdysseyPainterEditorRasterLiquifyTool::Flow( const FVector2D& iPrevCenter
                     uint32 offset = ( absoluteCoords.y * assetWidth ) + absoluteCoords.x;
 
                     mFlowMap.toTargetBuffer[offset] = flow;
+
+                    flow = FFlow::Zero();
                 }
             }
         }
