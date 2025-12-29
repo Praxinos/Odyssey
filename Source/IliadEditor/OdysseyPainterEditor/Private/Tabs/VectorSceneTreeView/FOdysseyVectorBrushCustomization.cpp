@@ -77,6 +77,7 @@ FOdysseyVectorBrushCustomization::OnClicked( TSharedRef<IPropertyHandle> StructP
     Config.bAllowNullSelection = true;
     Config.bAllowDragging = false;
     Config.bForceShowEngineContent = true;
+    Config.bForceShowPluginContent = true;
 
     FSlateApplication::Get().AddModalWindow( SNew(SWindow)
                                               .Title( LOCTEXT( "vector-brush.brush-picker-window.title", "Pick Vector Brush" ) )
