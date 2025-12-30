@@ -346,6 +346,8 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorBaseToolHUD : public F
         ::ULIS::FVec2D WorldVectorToHUD( const ::ULIS::FVec2D& iWorldOriginCoords
                                        , const ::ULIS::FVec2D& iWorldVectorCoords );
         ::ULIS::FRectD WorldRectToHUD( const ::ULIS::FRectD& iWorldRect );
+        // checks if we are tryign to Pan / Rotate / Zoom the viewport or Pick
+        bool CanReceiveEvents();
 
     protected:
         UOdysseyPainterEditorVectorBaseTool* mBaseTool;

@@ -16,7 +16,8 @@
 #include "CanvasItem.h"
 #include "HitProxies.h"
 #include "Misc/Optional.h"
-
+#include "OdysseyPainterEditorCommands.h"
+#include "OdysseyKeyState.h"
 
 FPointQuadTree::~FPointQuadTree()
 {
@@ -2329,10 +2330,38 @@ FOdysseyPainterEditorVectorBaseToolHUD::OnMouseDrag(const FOdysseyPoint& iPointI
     return mBaseTool->OnMouseDragViaHUD( iPointInTexture );
 }
 
+bool
+FOdysseyPainterEditorVectorBaseToolHUD::CanReceiveEvents()
+{
+    FKey lastKey = FOdysseyKeyState::GetLastKey();
+
+    if ( lastKey != FKey() )
+    {
+        FModifierKeysState ModifierKeysState = FSlateApplication::Get().GetModifierKeys();
+        const FInputChord activeChord( lastKey,
+            EModifierKey::FromBools(
+                ModifierKeysState.IsControlDown(),
+                ModifierKeysState.IsAltDown(),
+                ModifierKeysState.IsShiftDown(),
+                ModifierKeysState.IsCommandDown()
+            )
+        );
+
+    if ( ( FOdysseyPainterEditorCommands::Get().PanZoomViewport->HasActiveChord( activeChord ) )
+      || ( FOdysseyPainterEditorCommands::Get().RotateViewport->HasActiveChord( activeChord ) )
+      || ( FOdysseyPainterEditorCommands::Get().PickColorInViewport->HasActiveChord( activeChord ) ) )
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 void
 FOdysseyPainterEditorVectorBaseToolHUD::DrawDummyPlane( const FOdysseyHUDElement::FDrawHUDParams& iParams )
 {
-    if( iParams.mCanvas->IsHitTesting() )
+    if( iParams.mCanvas->IsHitTesting() && CanReceiveEvents() )
     {
         FBatchedElements* batchedElements = iParams.mCanvas->GetBatchedElements( FCanvas::ET_Triangle );
         // Note: when HITProxy is testing, mCanvas->ViewRect is 0. so we use GetRenderTarget() instead of GetViewRect().
