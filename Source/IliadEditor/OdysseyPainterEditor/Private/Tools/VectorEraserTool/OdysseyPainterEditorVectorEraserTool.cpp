@@ -236,6 +236,10 @@ UOdysseyPainterEditorVectorEraserTool::EraseSections( FOdysseyVectorGroupPaint* 
                                                     , iErasureArea
                                                     , nullptr ) )
         {
+            // Note: this piece of code only works in the "texture coordinates system".
+            // The picking system used in the selection tool e.g works in the Viewport coordinates system
+            // and should be the one used here.  Thus the code below should be refactored to use a
+            // "viewport mask" to be able to erase objects outside the canvas
             paintGroup->EraseSections( oAddedObjectArray
                                      , oAddedVertexArray
                                      , oAddedSegmentArray
@@ -274,6 +278,8 @@ UOdysseyPainterEditorVectorEraserTool::EraseSections( FOdysseyVectorGroupPaint* 
     }
 
     iScene->UpdateMatrix();
+
+    iScene->GetCell()->InvalidateRect(); // force refreshing the whole screen to clear the erasure mask
 
     iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
     iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
@@ -315,6 +321,10 @@ UOdysseyPainterEditorVectorEraserTool::ErasePaths( FOdysseyVectorGroupPaint* iSc
                   {
                       if( mEditionMode == eVectorEraserEditionMode::Default )
                       {
+                          // Note: this piece of code only works in the "texture coordinates system".
+                          // The picking system used in the selection tool e.g works in the Viewport coordinates system
+                          // and should be the one used here.  Thus the code below should be refactored to use a
+                          // "viewport mask" to be able to erase objects outside the canvas
                           if( path->Erase( oAddedObjectArray
                                          , oAddedVertexArray
                                          , oAddedSegmentArray
@@ -330,12 +340,16 @@ UOdysseyPainterEditorVectorEraserTool::ErasePaths( FOdysseyVectorGroupPaint* iSc
 
                       if( mEditionMode == eVectorEraserEditionMode::Path )
                       {
-/*refactor
-                          if( path->Pick( iScene, iErasureArea, FOdysseyVectorObject::PICK_MASK_BASED ) )
+                          // Note: this piece of code only works in the "texture coordinates system".
+                          // The picking system used in the selection tool e.g works in the Viewport coordinates system
+                          // and should be the one used here.  Thus the code below should be refactored to use a
+                          // "viewport mask" to be able to erase objects outside the canvas
+                          if( path->Pick( iScene
+                                        , iErasureArea
+                                        , *mEraserHUD->GetMask() ) )
                           {
                               oRemovedObjectArray.push_back( path );
                           }
-*/
                       }
                   }
               }
@@ -374,6 +388,8 @@ UOdysseyPainterEditorVectorEraserTool::ErasePaths( FOdysseyVectorGroupPaint* iSc
 
     iScene->UpdateMatrix();
 
+    iScene->GetCell()->InvalidateRect(); // force refreshing the whole screen to clear the erasure mask
+
     iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
     iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 }
@@ -402,8 +418,8 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorGroupPaint
         std::vector<FOdysseyVectorSegment*> removedSegmentArray;
         ::ULIS::FRectD roi;
 
-/*refactor
         mEraserHUD->BlendMask( false );
+/*
         // TODO: pass the mask image as arg to Pick function
         iScene->GetCell()->SetBLMask( mEraserHUD->GetMask() );
 */
@@ -452,9 +468,7 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorGroupPaint
                 source->RecordCurrentFrameUndo();
         }
         GEditor->EndTransaction();
-   }
-
-    iScene->GetCell()->InvalidateRect(); // force redraw the whole thing to clear the blended HUD
+    }
 
     return true;
 }

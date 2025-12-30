@@ -2126,7 +2126,54 @@ FOdysseyVectorPath::SmoothSegments( FOdysseyVectorVertex* iVertex, ::ULIS::FVec2
     }
 }
 
-// Math based version
+
+bool
+FOdysseyVectorPath::PickShape( const ::ULIS::FRectD &iRoi
+                             , const BLImage& iMaskImage )
+{
+    BLImageData imageData;
+
+    iMaskImage.getData( &imageData );
+
+    for( FOdysseyVectorSegment* segment : GetSegmentList() )
+    {
+        std::vector<FOdysseyVectorFraction>& fractionCache = segment->GetFractionCache();
+
+        for( uint32 i = 0; i < fractionCache.size(); i++ )
+        {
+            ::ULIS::FVec2D& p0Coords = fractionCache[i].point[0]->GetCoords();
+            ::ULIS::FVec2D& p1Coords = fractionCache[i].point[1]->GetCoords();
+            ::ULIS::FVec2D texP0Coords = FOdysseyVector::MapPoint( mWorldMatrix, ::ULIS::FVec2D( p0Coords.x
+                                                                                               , p0Coords.y ) );
+            ::ULIS::FVec2D texP1Coords = FOdysseyVector::MapPoint( mWorldMatrix, ::ULIS::FVec2D( p1Coords.x
+                                                                                               , p1Coords.y ) );
+
+            bool pointHitMask = FOdysseyVectorEngine::TraceGenericLine( texP0Coords.x, texP0Coords.y, 0.0f
+                                                                      , texP1Coords.x, texP1Coords.y, 0.0f
+                                                                      , [&imageData]( int32 iX, int32 iY, double iT)
+            {
+                if( ( iX >= 0 && iX < imageData.size.w )
+                 && ( iY >= 0 && iY < imageData.size.h ) )
+                {
+                    uint8 *pixel = static_cast<uint8*>(imageData.pixelData);
+                    uint32 offset = ( iY * imageData.size.w ) + iX;
+
+                    return ( pixel[offset] ) ? true : false;
+                }
+
+                return false;
+            } );
+
+            if( pointHitMask )
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
 void
 FOdysseyVectorPath::PickSegments( double iWorldX
                                 , double iWorldY

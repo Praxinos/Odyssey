@@ -309,7 +309,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorBaseToolHUD : public F
                           , const BLImage& iHUDMaskImage
                           , const ::ULIS::FRectD& iHUDRoi
                           , std::vector<FOdysseyVectorObject*>& oSelectedObjectArray );
-        void Pick( FOdysseyVectorGroupPaint* iScene
+        bool Pick( FOdysseyVectorGroupPaint* iScene
                  , const BLImage& iHUDMaskImage
                  , const ::ULIS::FRectD& iHUDRoi
                  , std::vector<FOdysseyVectorObject*>& oPickedObjectArray );

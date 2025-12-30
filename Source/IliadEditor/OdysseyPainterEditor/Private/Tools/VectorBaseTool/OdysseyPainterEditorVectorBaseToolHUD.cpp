@@ -653,12 +653,14 @@ FOdysseyPainterEditorVectorBaseToolHUD::PickPathPoints( FOdysseyVectorPath* iPat
 }
 
 // mask-based picking
-void
+bool
 FOdysseyPainterEditorVectorBaseToolHUD::Pick( FOdysseyVectorGroupPaint* iScene
                                             , const BLImage& iHUDMaskImage
                                             , const ::ULIS::FRectD& iHUDRoi
                                             , std::vector<FOdysseyVectorObject*>& oPickedObjectArray )
 {
+    uint32 pickedObjectCount = oPickedObjectArray.size();
+
     FOdysseyVectorGroup* selectionSpace = iScene->GetCell()->GetSelectionSpace();
 
     RecursivePick( selectionSpace ? selectionSpace : iScene
@@ -666,6 +668,8 @@ FOdysseyPainterEditorVectorBaseToolHUD::Pick( FOdysseyVectorGroupPaint* iScene
                  , iHUDMaskImage
                  , iHUDRoi
                  , oPickedObjectArray );
+
+    return ( oPickedObjectArray.size() == pickedObjectCount ) ? false : true;
 }
 
 void

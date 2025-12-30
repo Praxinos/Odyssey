@@ -455,6 +455,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
                      , const BLImage& iBLMaskImage
                      , bool iSplit );
 
+        virtual bool PickShape( const ::ULIS::FRectD &iRoi
+                              , const BLImage& iMaskImage ) override;
+
     protected:
         void DrawJoint( BLContext* iBLContext, FOdysseyVectorVertex* iVertex, uint64 iFlags );
 

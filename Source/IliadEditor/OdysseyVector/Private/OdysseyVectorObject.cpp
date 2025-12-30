@@ -1135,13 +1135,21 @@ FOdysseyVectorObject::BringForward()
     }
 }
 
-/*
+bool
+FOdysseyVectorObject::PickShape( const ::ULIS::FRectD &iRoi
+                               , const BLImage& iMaskImage )
+{
+    return false;
+}
+
 FOdysseyVectorObject*
-FOdysseyVectorObject::Pick( FOdysseyVectorGroup* iSelectionSpace, const ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
+FOdysseyVectorObject::Pick( FOdysseyVectorGroup* iSelectionSpace
+                          , const ::ULIS::FRectD &iRoi
+                          , const BLImage& iMaskImage )
 {
     if( HasAncestor( iSelectionSpace ) )
     {
-        bool picked = PickShape( iRoi, iSelectionFlags );
+        bool picked = PickShape( iRoi, iMaskImage );
 
         // returns parent only if the parent is of Group type and is different from the selection space
         if( picked )
@@ -1165,7 +1173,6 @@ FOdysseyVectorObject::Pick( FOdysseyVectorGroup* iSelectionSpace, const ::ULIS::
 
     return nullptr;
 }
-*/
 
 void
 FOdysseyVectorObject::Recurse( void (FOdysseyVectorObject::*Func)() )

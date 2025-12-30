@@ -672,6 +672,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         static void GetBucketsFromPaletteEntryRecursively( FOdysseyVectorObject* iObject
                                                          , UOdysseyPaletteEntry* iPaletteEntry
                                                          , std::list<FOdysseyVectorBucket*>& oBucketList );
+        FOdysseyVectorObject* Pick( FOdysseyVectorGroup* iSelectionSpace
+                                  , const ::ULIS::FRectD &iRoi
+                                  , const BLImage& iMaskImage );
 
     protected:
 
@@ -687,6 +690,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         void Recurse( void (FOdysseyVectorObject::*Func)() );
         void MakeInDepthBBox();
         virtual void UpdateBBox();
+        virtual bool PickShape( const ::ULIS::FRectD &iRoi
+                              , const BLImage& iMaskImage );
 
     protected:
         BLMatrix2D mLocalMatrix;
