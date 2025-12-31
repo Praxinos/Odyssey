@@ -4,6 +4,7 @@
 #include "Tools/VectorTransformTool/OdysseyPainterEditorVectorTransformTool.h"
 #include "Tools/VectorTransformTool/OdysseyPainterEditorVectorTransformToolHUD.h"
 #include "Tools/VectorSelectionTool/OdysseyPainterEditorVectorSelectionTool.h"
+#include "Tools/VectorPathDrawingTool/OdysseyPainterEditorVectorPathDrawingTool.h"
 #include "OdysseyPainterEditorViewportTab.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyMediaVector.h"
@@ -124,6 +125,13 @@ UOdysseyPainterEditorVectorTransformTool::OnKeyUpVector( FOdysseyVectorGroupPain
                                                        , const FKey& iKey )
 {
     Uniform = UniformAtKeyDown;
+
+    if (iKey == EKeys::Enter || iKey == EKeys::SpaceBar )
+    {
+        mEditor->ActivateMainTool( mEditor->GetVectorPathDrawingTool() );
+
+        return true;
+    }
 
     return UOdysseyPainterEditorVectorBaseTool::OnKeyUpVector( iScene, iKey );
 }

@@ -127,6 +127,11 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::DrawEdge( BLContext* iBLContext
                    , iCurrEdge->p0.y - prevEdgePerpendicularVector.y );
 
     iBLContext->fillPolygon( pt, 4 );
+
+    // draw a thin line between edges for better visual displaying
+    iBLContext->setStrokeWidth( 1.0f );
+    iBLContext->strokeLine( pt[3], pt[0] );
+    iBLContext->strokeLine( pt[2], pt[1] );
 }
 
 void
