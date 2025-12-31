@@ -181,14 +181,7 @@ SOdysseyPainterEditorVectorSceneDetailsView::OnVectorLayerNotify( const FOdyssey
 void
 SOdysseyPainterEditorVectorSceneDetailsView::ParseVectorNotifications( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags )
 {
-    if( ( iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::DEFAULT] )
-     || ( iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_DEFAULT] )
-     || ( iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::MATRIX] )
-     || ( iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_MATRIX] )
-     || ( iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::PARAM] )
-     || ( iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_PARAM] )
-     || ( iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::OBJECT_SELECTION] )
-     || ( iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_OBJECT_SELECTION] ) )
+    if( iInvalidationFlags.bits.any() )
     {
         Update();
     }
@@ -285,7 +278,9 @@ SOdysseyPainterEditorVectorSceneDetailsView::PropertyValueChanged( const FProper
         {
             FOdysseyVectorUndo *undo = new FOdysseyVectorUndoObjectParam( scene->GetLayer()
                                                                         , focusedObjectList
-                                                                        , FName(iEvent.Property->GetMetaData(TEXT("Category"))) );
+                                                                        , FName(iEvent.Property->GetMetaData(TEXT("Category")))
+                                                                        , iEvent.MemberProperty->GetFName()
+                                                                        , iEvent.GetPropertyName() );
             // We use GEditor as the UObject, otherwise if we use "this", at each UNDO, PostEditChangeProperty() will be called
             // which will again call StoreUndo + this will lead to a crash. I don't know however what will be the consequences
             // of a call to GEditor::PostEditChangeProperty()

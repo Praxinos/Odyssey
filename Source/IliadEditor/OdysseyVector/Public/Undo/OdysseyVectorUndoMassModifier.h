@@ -20,6 +20,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoMassModifier : public FOdysseyVectorUn
          FOdysseyVectorUndoMassModifier( FOdysseyVectorLayer* iLayer
                                        , const std::list<FOdysseyVectorObject*>& iObjectList
                                        , const FName& iCategoryName
+                                       , const FName& iMemberPropertyName
+                                       , const FName& iPropertyName
                                        , bool iSavePaths );
 
         /** Called when redoing */

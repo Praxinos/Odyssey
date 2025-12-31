@@ -484,7 +484,9 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnTextChanged( const FText& InText
     {
         FOdysseyVectorUndo *undo = new FOdysseyVectorUndoObjectParam( itemScene->GetLayer()
                                                                     , itemObject
-                                                                    , FName( "Identity" ) );
+                                                                    , FName( "Identity" )
+                                                                    , ""
+                                                                    , "" );
         // We use GEditor as the UObject, otherwise if we use "this", at each UNDO, PostEditChangeProperty() will be called
         // which will again call StoreUndo + this will lead to a crash. I don't know however what will be the consequences
         // of a call to GEditor::PostEditChangeProperty()

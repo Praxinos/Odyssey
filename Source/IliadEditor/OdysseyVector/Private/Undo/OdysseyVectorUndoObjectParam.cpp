@@ -56,7 +56,9 @@ FOdysseyVectorUndoObjectParam::CreateObjectSnapshot( FOdysseyVectorObject* iObje
 
 FSnapshotObject*
 FOdysseyVectorUndoObjectParam::CreateObjectSnapshot( FOdysseyVectorObject* iObject
-                                                   , const FName& iCategoryName )
+                                                   , const FName& iCategoryName
+                                                   , const FName& iMemberPropertyName
+                                                   , const FName& iPropertyName )
 {
     uint64 objectParamFlags = 0;
 
@@ -82,9 +84,13 @@ FOdysseyVectorUndoObjectParam::CreateObjectSnapshot( FOdysseyVectorObject* iObje
 
     if( iObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
     {
-        if( ( iCategoryName == "Path" ) || ( iCategoryName == "" ) )
+        if( ( iMemberPropertyName == "Brush" ) || ( iCategoryName == "" ) )
         {
             objectParamFlags |= FSnapshotFlags::Object::Path::BRUSH;
+        }
+
+        if( ( iCategoryName == "Path" ) || ( iCategoryName == "" ) )
+        {
             objectParamFlags |= FSnapshotFlags::Object::Path::JOINTTYPE;
             objectParamFlags |= FSnapshotFlags::Object::Path::MITERLIMIT;
         }
@@ -135,15 +141,22 @@ FOdysseyVectorUndoObjectParam::FOdysseyVectorUndoObjectParam( FOdysseyVectorLaye
 
 FOdysseyVectorUndoObjectParam::FOdysseyVectorUndoObjectParam( FOdysseyVectorLayer* iLayer
                                                             , FOdysseyVectorObject* iObject
-                                                            , const FName& iCategoryName )
+                                                            , const FName& iCategoryName
+                                                            , const FName& iMemberPropertyName
+                                                            , const FName& iPropertyName )
     : FOdysseyVectorUndo( iLayer )
 {
-    mObjectSnapshotArray.push_back( CreateObjectSnapshot( iObject, iCategoryName ) );
+    mObjectSnapshotArray.push_back( CreateObjectSnapshot( iObject
+                                                        , iCategoryName
+                                                        , iMemberPropertyName
+                                                        , iPropertyName ) );
 }
 
 FOdysseyVectorUndoObjectParam::FOdysseyVectorUndoObjectParam( FOdysseyVectorLayer* iLayer
                                                             , const std::vector<FOdysseyVectorObject*>& iObjectArray
-                                                            , const FName& iCategoryName )
+                                                            , const FName& iCategoryName
+                                                            , const FName& iMemberPropertyName
+                                                            , const FName& iPropertyName )
     : FOdysseyVectorUndo( iLayer )
 {
     mObjectSnapshotArray.reserve( iObjectArray.size() );
@@ -152,13 +165,18 @@ FOdysseyVectorUndoObjectParam::FOdysseyVectorUndoObjectParam( FOdysseyVectorLaye
     {
         // Note: setting the owner does not make sense per se, as the bucket is only
         // temporary, but is mandatory in the ctor
-        mObjectSnapshotArray.push_back( CreateObjectSnapshot( vectorObject, iCategoryName ) );
+        mObjectSnapshotArray.push_back( CreateObjectSnapshot( vectorObject
+                                                            , iCategoryName
+                                                            , iMemberPropertyName
+                                                            , iPropertyName ) );
     }
 }
 
 FOdysseyVectorUndoObjectParam::FOdysseyVectorUndoObjectParam( FOdysseyVectorLayer* iLayer
                                                             , const std::list<FOdysseyVectorObject*>& iObjectList
-                                                            , const FName& iCategoryName )
+                                                            , const FName& iCategoryName
+                                                            , const FName& iMemberPropertyName
+                                                            , const FName& iPropertyName )
     : FOdysseyVectorUndo( iLayer )
 {
     mObjectSnapshotArray.reserve( iObjectList.size() );
@@ -167,7 +185,10 @@ FOdysseyVectorUndoObjectParam::FOdysseyVectorUndoObjectParam( FOdysseyVectorLaye
     {
         // Note: setting the owner does not make sense per se, as the bucket is only
         // temporary, but is mandatory in the ctor
-        mObjectSnapshotArray.push_back( CreateObjectSnapshot( vectorObject, iCategoryName ) );
+        mObjectSnapshotArray.push_back( CreateObjectSnapshot( vectorObject
+                                                            , iCategoryName
+                                                            , iMemberPropertyName
+                                                            , iPropertyName ) );
     }
 }
 

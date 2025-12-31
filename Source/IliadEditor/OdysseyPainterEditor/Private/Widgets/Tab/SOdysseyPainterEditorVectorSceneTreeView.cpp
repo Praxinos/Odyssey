@@ -412,6 +412,11 @@ SOdysseyPainterEditorVectorSceneTreeView::MapActionsToCommandList()
         FGenericCommands::Get().Paste,
         FExecuteAction::CreateRaw( this, &SOdysseyPainterEditorVectorSceneTreeView::PasteObjects )
     );
+
+    mCommandList->MapAction(
+        FGenericCommands::Get().Rename,
+        FExecuteAction::CreateRaw( this, &SOdysseyPainterEditorVectorSceneTreeView::RenameSelectedItem )
+    );
 }
 
 void
@@ -435,18 +440,18 @@ SOdysseyPainterEditorVectorSceneTreeView::OnVectorLayerNotify( const FOdysseyVec
 }
 
 void
-SOdysseyPainterEditorVectorSceneTreeView::ParseVectorNotifications( const FOdysseyVectorObjectInvalidationFlags& iSignalFlags )
+SOdysseyPainterEditorVectorSceneTreeView::ParseVectorNotifications( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags )
 {
-    if( iSignalFlags.bits[FOdysseyVectorObjectInvalidationFlags::DEFAULT]
-     || iSignalFlags.bits[FOdysseyVectorObjectInvalidationFlags::HIERARCHY]
-     || iSignalFlags.bits[FOdysseyVectorObjectInvalidationFlags::OBJECT_SELECTION]
-     || iSignalFlags.bits[FOdysseyVectorObjectInvalidationFlags::PARAM]
-     || iSignalFlags.bits[FOdysseyVectorObjectInvalidationFlags::TAG_LIST]
-     || iSignalFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_DEFAULT]
-     || iSignalFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_HIERARCHY]
-     || iSignalFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_OBJECT_SELECTION]
-     || iSignalFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_PARAM]
-     || iSignalFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_TAG_LIST] )
+    if( iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::DEFAULT]
+     || iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::HIERARCHY]
+     || iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::OBJECT_SELECTION]
+     || iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::PARAM]
+     || iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::TAG_LIST]
+     || iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_DEFAULT]
+     || iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_HIERARCHY]
+     || iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_OBJECT_SELECTION]
+     || iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_PARAM]
+     || iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_TAG_LIST] )
     {
         Update();
     }

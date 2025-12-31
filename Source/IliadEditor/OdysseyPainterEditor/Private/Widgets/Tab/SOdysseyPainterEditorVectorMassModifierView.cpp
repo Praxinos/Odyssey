@@ -263,6 +263,8 @@ SOdysseyPainterEditorVectorMassModifierView::PreviewProperties()
     mPreviewUndo = new FOdysseyVectorUndoMassModifier( mVectorLayer.Get()
                                                      , objectList
                                                      , ""
+                                                     , ""
+                                                     , ""
                                                      , true );
     // because this is a standalone undo, we don't call update functions via delegates but directly
     mPreviewUndo->SetUpdateViaDelegation( false );
@@ -350,6 +352,8 @@ SOdysseyPainterEditorVectorMassModifierView::ValidateProperties()
 
             FOdysseyVectorUndo *undo = new FOdysseyVectorUndoMassModifier( mVectorLayer.Get()
                                                                          , objectList
+                                                                         , ""
+                                                                         , ""
                                                                          , ""
                                                                          , saveVertices );
             // We use GEditor as the UObject, otherwise if we use "this", at each UNDO, PostEditChangeProperty() will be called

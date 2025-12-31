@@ -81,6 +81,19 @@ struct ODYSSEYVECTOR_API FOdysseyVectorBrush
         BilinearFiltering = false;
     }
 
+    // copy operator is mandatory to load the texture properly by calling SetTexture
+    FOdysseyVectorBrush& operator=(const FOdysseyVectorBrush& iOther)
+    {
+        if ( this != &iOther ) // not a self-assignment
+        {
+            memcpy( this, &iOther, sizeof( FOdysseyVectorBrush ) ); // copy all members
+            // force load the texture and make its pixels accessible
+            SetTexture( iOther.Texture );
+        }
+
+        return *this;
+    }
+
     FOdysseyVectorBrush( FOdysseyVectorObject* iOwner // can be NULL
                        , UTexture2D* iTexture )
         : FOdysseyVectorBrush( iOwner )
@@ -91,6 +104,7 @@ struct ODYSSEYVECTOR_API FOdysseyVectorBrush
     FOdysseyVectorBrush( FOdysseyVectorObject* iOwner // can be NULL
                        , const std::list<FOdysseyVectorObject*>& iObjectList
                        , const ::ULIS::FRectD& iBoundingBox );
+
 
     void SetTexture( UTexture2D* iTexture );
     UTexture2D* GetTexture() const;

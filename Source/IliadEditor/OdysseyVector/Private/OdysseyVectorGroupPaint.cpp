@@ -2028,8 +2028,8 @@ FOdysseyVectorGroupPaint::RecursiveUpdatePathList( FOdysseyVectorObject* iCandid
         iPathList.push_back( path );
     }
 
-    // recurse if simple group
-    if( iCandidateObject->GetClass() == FOdysseyVectorGroup::StaticClass() )
+    // recurse if not paint group
+    if( iCandidateObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) == false )
     {
         for( FOdysseyVectorObject* child : iCandidateObject->GetChildrenList() )
         {

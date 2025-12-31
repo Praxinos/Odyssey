@@ -20,13 +20,19 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoObjectParam : public FOdysseyVectorUnd
         ~FOdysseyVectorUndoObjectParam();
          FOdysseyVectorUndoObjectParam( FOdysseyVectorLayer* iLayer
                                       , FOdysseyVectorObject* iObject
-                                      , const FName& iCategoryName );
+                                      , const FName& iCategoryName
+                                      , const FName& iMemberPropertyName
+                                      , const FName& iPropertyName );
          FOdysseyVectorUndoObjectParam( FOdysseyVectorLayer* iLayer
                                       , const std::vector<FOdysseyVectorObject*>& iObjectArray
-                                      , const FName& iCategoryName );
+                                      , const FName& iCategoryName
+                                      , const FName& iMemberPropertyName
+                                      , const FName& iPropertyName );
          FOdysseyVectorUndoObjectParam( FOdysseyVectorLayer* iLayer
                                       , const std::list<FOdysseyVectorObject*>& iObjectList
-                                      , const FName& iCategoryName );
+                                      , const FName& iCategoryName
+                                      , const FName& iMemberPropertyName
+                                      , const FName& iPropertyName );
         FOdysseyVectorUndoObjectParam( FOdysseyVectorLayer* iLayer
                                      , FOdysseyVectorObject* iObject );
 
@@ -41,7 +47,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoObjectParam : public FOdysseyVectorUnd
 
     protected:
         FSnapshotObject* CreateObjectSnapshot( FOdysseyVectorObject* iObject
-                                             , const FName& iCategoryName );
+                                             , const FName& iCategoryName
+                                             , const FName& iMemberPropertyName
+                                             , const FName& iPropertyName );
         FSnapshotObject* CreateObjectSnapshot( FOdysseyVectorObject* iObject
                                              , uint64 iObjectParamFlags );
 
