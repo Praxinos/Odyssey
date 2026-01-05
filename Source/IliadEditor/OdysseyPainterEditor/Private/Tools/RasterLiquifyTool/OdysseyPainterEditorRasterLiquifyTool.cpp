@@ -83,10 +83,10 @@ UOdysseyPainterEditorRasterLiquifyTool::~UOdysseyPainterEditorRasterLiquifyTool(
 
 UOdysseyPainterEditorRasterLiquifyTool::UOdysseyPainterEditorRasterLiquifyTool()
     : mLiquifyHUD( MakeShared<FOdysseyPainterEditorRasterLiquifyToolHUD>( this ) )
-    , Size ( 100 )
+    , Size ( 200 )
     , Mode ( EOdysseyLiquifyMode::Push )
     , mPreviousMode ( EOdysseyLiquifyMode::Push )
-    , Strength ( 100 )
+    , Strength ( 20 )
     , Hardness ( 0 )
     , AdjustmentStrength( 100 )
     , PushDirection ( EOdysseyLiquifyPushDirection::Front )

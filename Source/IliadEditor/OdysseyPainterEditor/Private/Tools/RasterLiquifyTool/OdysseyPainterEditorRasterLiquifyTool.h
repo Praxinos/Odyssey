@@ -74,21 +74,21 @@ struct FStylusPressureOptions
 
         UPROPERTY( EditAnywhere
                  , meta = ( DisplayName = "Size"
-                          , ToolTip = "Stylus pressure influences size"
+                          , ToolTip = "Stylus pressure linked to size"
                           , EditCondition = "(UseStylusPressure == true)"
                           , EditConditionHides ) )
         bool UseSize;
 
         UPROPERTY( EditAnywhere
                  , meta = ( DisplayName = "Strength"
-                          , ToolTip = "Stylus pressure influences strength"
+                          , ToolTip = "Stylus pressure linked to strength"
                           , EditCondition = "(UseStylusPressure == true)"
                           , EditConditionHides ) )
         bool UseStrength;
 
         UPROPERTY( EditAnywhere
-                 , meta = ( DisplayName = "Strength"
-                          , ToolTip = "Stylus pressure influences hardness"
+                 , meta = ( DisplayName = "Hardness"
+                          , ToolTip = "Stylus pressure linked to Hardness"
                           , EditCondition = "(UseStylusPressure == true)"
                           , EditConditionHides ) )
         bool UseHardness;
