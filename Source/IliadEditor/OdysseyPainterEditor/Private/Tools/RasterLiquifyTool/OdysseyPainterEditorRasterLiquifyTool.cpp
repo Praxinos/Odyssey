@@ -32,7 +32,10 @@
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
-#define M_PI 3.14159265358979323846L
+#ifndef M_PI
+    #define M_PI 3.14159265358979323846L
+#endif
+
 //#define ROTATIONSPEEDINRADIANS 0.0872665f // five degrees
 #define ROTATIONSPEEDINRADIANS 0.0349066f // 2 degrees
 
@@ -44,14 +47,11 @@ UOdysseyPainterEditorRasterLiquifyTool::FAlteredImage::~FAlteredImage()
 
 UOdysseyPainterEditorRasterLiquifyTool::FAlteredImage::FAlteredImage( TSharedPtr<FOdysseyRasterBlock> iSourceRasterBlock
                                                                     , TSharedPtr<::ULIS::FBlock> iMaskBlock )
-    : context( IULISLoaderModule::StaticFindOrAddContext( ::ULIS::eFormat::Format_RGBA8 ) )
-    // I don't know why but it does not work when I use constructor member variable initialization above.
-    // I guess it has something to to with TSharedPtr constructors
-    , sourceRasterBlock ( iSourceRasterBlock )
+    : sourceRasterBlock ( iSourceRasterBlock )
     , sourceBlock ( iSourceRasterBlock->GetBlock() )
     , maskBlock( iMaskBlock )
     , mutator( iSourceRasterBlock, true )
-
+    , context( IULISLoaderModule::StaticFindOrAddContext( ::ULIS::eFormat::Format_RGBA8 ) )
 {
     //sourceRasterBlock = iSourceRasterBlock;
     //maskBlock = iMaskBlock;
@@ -82,16 +82,16 @@ UOdysseyPainterEditorRasterLiquifyTool::~UOdysseyPainterEditorRasterLiquifyTool(
 }
 
 UOdysseyPainterEditorRasterLiquifyTool::UOdysseyPainterEditorRasterLiquifyTool()
-    : mLiquifyHUD( MakeShared<FOdysseyPainterEditorRasterLiquifyToolHUD>( this ) )
-    , Size ( 200 )
-    , Mode ( EOdysseyLiquifyMode::Push )
+    : Mode ( EOdysseyLiquifyMode::Push )
     , mPreviousMode ( EOdysseyLiquifyMode::Push )
+    , Size ( 200 )
     , Strength ( 20 )
     , Hardness ( 0 )
     , AdjustmentStrength( 100 )
     , PushDirection ( EOdysseyLiquifyPushDirection::Front )
     , TwirlDirection( EOdysseyLiquifyTwirlDirection::Clockwise )
     , BorderPolicy ( EOdysseyLiquifyBorderPolicy::Clamp )
+    , mLiquifyHUD( MakeShared<FOdysseyPainterEditorRasterLiquifyToolHUD>( this ) )
     , bIsMouseLeftButtonDown ( false )
     , mPressure ( 1.0f )
 {
