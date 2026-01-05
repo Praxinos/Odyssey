@@ -88,7 +88,7 @@ struct FStylusPressureOptions
 
         UPROPERTY( EditAnywhere
                  , meta = ( DisplayName = "Hardness"
-                          , ToolTip = "Stylus pressure linked to Hardness"
+                          , ToolTip = "Stylus pressure linked to hardness"
                           , EditCondition = "(UseStylusPressure == true)"
                           , EditConditionHides ) )
         bool UseHardness;
