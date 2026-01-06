@@ -78,8 +78,8 @@ SOdysseyAnimationCells::Construct(
     mOnCreateCellWidget = InArgs._OnCreateCellWidget;
     mShowHandles = InArgs._ShowHandles;
 
-    mItemsSource = MakeShared<UE::Slate::Containers::TObservableArray<TSharedPtr<FCellItem>>>();
-    RefreshItemsSource();
+    //mItemsSource = MakeShared<UE::Slate::Containers::TObservableArray<TSharedPtr<FCellItem>>>();
+    //RefreshItemsSource();
 
     ChildSlot
     .Padding(FMargin(0, 4.f, 0, 4.f))
@@ -90,7 +90,6 @@ SOdysseyAnimationCells::Construct(
         [
             SNew(SOverlay)
             + SOverlay::Slot()
-
             [
                 //Timeline Section for Layer Offset
                 SNew(SOdysseyAnimationTimelineSection)
@@ -125,13 +124,20 @@ SOdysseyAnimationCells::Construct(
             SNew(SOverlay)
             + SOverlay::Slot()
             [
-                SNew(SListView<TSharedPtr<FCellItem>>)
-                .ListItemsSource(mItemsSource)
-                .OnGenerateRow(this, &SOdysseyAnimationCells::OnGenerateRow)
-                .Orientation(Orient_Horizontal)
-                .SelectionMode(ESelectionMode::None)
-                .ScrollbarVisibility(EVisibility::Collapsed)
-                .AllowOverscroll(EAllowOverscroll::No)
+                SNew(SOdysseyAnimationTimelineSection)
+                .TimelinePosition(mTimelinePosition)
+                .WidthInFrames(this, &SOdysseyAnimationCells::GetCellsWidth)
+                .Content()
+                [
+                    /* SNew(SListView<TSharedPtr<FCellItem>>)
+                    .ListItemsSource(mItemsSource)
+                    .OnGenerateRow(this, &SOdysseyAnimationCells::OnGenerateRow)
+                    .Orientation(Orient_Horizontal)
+                    .SelectionMode(ESelectionMode::None)
+                    .ScrollbarVisibility(EVisibility::Collapsed)
+                    .AllowOverscroll(EAllowOverscroll::No) */
+                    SAssignNew(mCellsHBox, SHorizontalBox)
+                ]
             ]
 
             + SOverlay::Slot() //Exposure Handle Top Right
@@ -177,25 +183,22 @@ SOdysseyAnimationCells::Construct(
     ];
 
     //mAnimationLayer->OnCellsChanged().AddRaw(this, &SOdysseyAnimationCells::OnCellsChanged);
-    //RefreshCells();
+    RefreshCellsHBox();
 }
 
-TSharedRef<ITableRow>
-SOdysseyAnimationCells::OnGenerateRow(TSharedPtr<FCellItem> iCell, const TSharedRef<STableViewBase>& iOwnerTable)
+TSharedRef<SWidget>
+SOdysseyAnimationCells::CreateCellWidget(UOdysseyLayerCell* iCell)
 {
-    if (!iCell->mCell)
+    if (!iCell)
     {
-        return SNew(STableRow<TSharedPtr<FCellItem>>, iOwnerTable)
+        return SNew(SOdysseyAnimationTimelineSection)
+            .TimelinePosition(mTimelinePosition)
+            .WidthInFrames(1)
             [
-                SNew(SOdysseyAnimationTimelineSection)
-                .TimelinePosition(mTimelinePosition)
-                .WidthInFrames(1)
-                [
-                    SNew(SImage)
-                    .Image(FOdysseyStyle::GetBrush("FlipbookTimeline.TimelineFrameBackground"))
-                    //.BorderBackgroundColor(FLinearColor(1.f, 1.f, 1.f))
-                    .ColorAndOpacity(FLinearColor(1.f, 1.f, 1.f, 0.3f))
-                ]
+                SNew(SImage)
+                .Image(FOdysseyStyle::GetBrush("FlipbookTimeline.TimelineFrameBackground"))
+                //.BorderBackgroundColor(FLinearColor(1.f, 1.f, 1.f))
+                .ColorAndOpacity(FLinearColor(1.f, 1.f, 1.f, 0.3f))
             ];
     }
 
@@ -203,19 +206,16 @@ SOdysseyAnimationCells::OnGenerateRow(TSharedPtr<FCellItem> iCell, const TShared
     if (!mOnCreateCellWidget.IsBound())
         cellWidget = SMissingWidget::MakeMissingWidget();
     else
-        cellWidget = mOnCreateCellWidget.Execute(iCell->mCell);
+        cellWidget = mOnCreateCellWidget.Execute(iCell);
 
-    return SNew(STableRow<TSharedPtr<FCellItem>>, iOwnerTable)
+    return SNew(SOdysseyAnimationTimelineSection)
+        .TimelinePosition(mTimelinePosition)
+        .WidthInFrames(this, &SOdysseyAnimationCells::GetCellExposure, iCell)
         [
-            SNew(SOdysseyAnimationTimelineSection)
-            .TimelinePosition(mTimelinePosition)
-            .WidthInFrames(this, &SOdysseyAnimationCells::GetCellExposure, iCell->mCell)
+            SNew(SOdysseyAnimationCell, mAnimationLayer, iCell)
+            .TimelinePosition( mTimelinePosition )
             [
-                SNew(SOdysseyAnimationCell, mAnimationLayer, iCell->mCell)
-                .TimelinePosition( mTimelinePosition )
-                [
-                    cellWidget.ToSharedRef()
-                ]
+                cellWidget.ToSharedRef()
             ]
         ];
 }
@@ -223,10 +223,43 @@ SOdysseyAnimationCells::OnGenerateRow(TSharedPtr<FCellItem> iCell, const TShared
 void
 SOdysseyAnimationCells::OnCellsChanged()
 {
-    RefreshItemsSource();
+    //RefreshItemsSource();
+    RefreshCellsHBox();
 }
 
 void
+SOdysseyAnimationCells::RefreshCellsHBox()
+{
+    mCellsHBox->ClearChildren();
+
+    TArray<UOdysseyLayerCell*> cells = mCells.Get();
+    TMap<UOdysseyLayerCell*, TSharedPtr<SWidget>> cellWidgetsCache;
+    for (UOdysseyLayerCell* cell : cells)
+    {
+        TSharedPtr<SWidget> cellWidget;
+        if (mCellWidgetsCache.Contains(cell))
+        {
+            cellWidget = mCellWidgetsCache[cell];
+        }
+        else
+        {
+            cellWidget = CreateCellWidget(cell);
+        }
+
+
+        mCellsHBox->AddSlot()
+        .AutoWidth()
+        [
+            cellWidget.ToSharedRef()
+        ];
+
+        cellWidgetsCache.Add(cell, cellWidget);
+    }
+
+    mCellWidgetsCache = cellWidgetsCache;
+}
+
+/*void
 SOdysseyAnimationCells::RefreshItemsSource()
 {
     mItemsSource->Reset();
@@ -242,12 +275,19 @@ SOdysseyAnimationCells::RefreshItemsSource()
     }
 
     mItemsSource->Append(cellItems);
-}
+}*/
 
 float
 SOdysseyAnimationCells::GetOffset() const
 {
     return mAnimationLayer->GetCellsOffset();
+}
+
+float
+SOdysseyAnimationCells::GetCellsWidth() const
+{
+    FInt32Range frameRange = mAnimationLayer->GetFrameRange();
+    return frameRange.GetUpperBoundValue() - frameRange.GetLowerBoundValue() + 1;
 }
 
 float

@@ -62,9 +62,7 @@ private:
     };
 
 private:
-    TSharedRef<ITableRow> OnGenerateRow(TSharedPtr<FCellItem> iCell, const TSharedRef<STableViewBase>& iOwnerTable);
-
-    TSharedRef<SWidget> CreateCellWidget(int iCellIndex);
+    TSharedRef<SWidget> CreateCellWidget(UOdysseyLayerCell* iCell);
     TSharedRef<SWidget> CreateTimingHandleWidget();
     //TSharedRef<SWidget> CreateExposureHandleWidget(int iCellIndex);
     TSharedRef<SWidget> CreateAddCellsHandleWidget();
@@ -84,6 +82,7 @@ private:
 private:
     //Widget Methods
     float GetOffset() const;
+    float GetCellsWidth() const;
     void UpdateHoveredCell();
 
     //EVisibility GetFrameSelectorVisibility() const;
@@ -128,12 +127,14 @@ private:
     float MousePositionToFrame(float iX) const;
     float FrameToMousePosition(float iFrame) const;
 
-    void RefreshItemsSource();
+    //void RefreshItemsSource();
+    void RefreshCellsHBox();
 
 private:
     TSlateAttribute<TArray<UOdysseyLayerCell*>> mCells;
-    TSharedPtr<UE::Slate::Containers::TObservableArray<TSharedPtr<FCellItem>>> mItemsSource;
+    //TSharedPtr<UE::Slate::Containers::TObservableArray<TSharedPtr<FCellItem>>> mItemsSource;
 
+    TSharedPtr<SHorizontalBox> mCellsHBox;
     TSharedPtr<FOdysseyPainterEditorAnimationTimelinePosition> mTimelinePosition;
     class UOdysseyAnimationLayer* mAnimationLayer;
     TSharedPtr<FOdysseyAnimationTimelineTool> mTool;
@@ -203,4 +204,6 @@ private:
 
     TAttribute<int> mCurrentFrame;
     FOnTransactCurrentFrame mOnTransactCurrentFrame;
+
+    TMap<UOdysseyLayerCell*, TSharedPtr<SWidget>> mCellWidgetsCache;
 };
