@@ -94,7 +94,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathView : public UOdy
         UPROPERTY( EditAnywhere
                  , Category=Path
                  , meta = ( ToolTip = "Joint Type" ) )
-        eJointType JointType;
+        eVectorPathJointType JointType;
 
         UPROPERTY( EditAnywhere
                  , Category=Path

@@ -893,7 +893,7 @@ class ODYSSEYVECTOR_API FSnapshotPath : public FSnapshotObject
         std::list<FOdysseyVectorVertex*> topologyVertexList;
         std::list<FOdysseyVectorSegment*> topologySegmentList;
         FOdysseyVectorBrush brush;
-        eJointType jointType;
+        eVectorPathJointType jointType;
         double miterLimit;
 
         State() : brush( nullptr ) { inited = false; }

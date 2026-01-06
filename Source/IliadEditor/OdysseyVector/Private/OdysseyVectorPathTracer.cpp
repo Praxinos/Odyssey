@@ -251,11 +251,21 @@ bool
 FOdysseyVectorPathTracer::TestBezier( ::ULIS::FVec2D iBezier[4] )
 {
     // take 3 sample points are check how far they are from the edges
-    ::ULIS::FVec2D samples[4] = { ::ULIS::CubicBezierPointAtParameter( iBezier[0]
+    ::ULIS::FVec2D samples[9] = { ::ULIS::CubicBezierPointAtParameter( iBezier[0]
                                                                      , iBezier[1]
                                                                      , iBezier[2]
                                                                      , iBezier[3]
-                                                                     , 0.15f )
+                                                                     , 0.10f )
+                                , ::ULIS::CubicBezierPointAtParameter( iBezier[0]
+                                                                     , iBezier[1]
+                                                                     , iBezier[2]
+                                                                     , iBezier[3]
+                                                                     , 0.20f )
+                                , ::ULIS::CubicBezierPointAtParameter( iBezier[0]
+                                                                     , iBezier[1]
+                                                                     , iBezier[2]
+                                                                     , iBezier[3]
+                                                                     , 0.30f )
                                 , ::ULIS::CubicBezierPointAtParameter( iBezier[0]
                                                                      , iBezier[1]
                                                                      , iBezier[2]
@@ -265,15 +275,30 @@ FOdysseyVectorPathTracer::TestBezier( ::ULIS::FVec2D iBezier[4] )
                                                                      , iBezier[1]
                                                                      , iBezier[2]
                                                                      , iBezier[3]
+                                                                     , 0.50f )
+                                , ::ULIS::CubicBezierPointAtParameter( iBezier[0]
+                                                                     , iBezier[1]
+                                                                     , iBezier[2]
+                                                                     , iBezier[3]
                                                                      , 0.60f )
                                 , ::ULIS::CubicBezierPointAtParameter( iBezier[0]
                                                                      , iBezier[1]
                                                                      , iBezier[2]
                                                                      , iBezier[3]
-                                                                     , 0.85f ) };
+                                                                     , 0.70f )
+                                , ::ULIS::CubicBezierPointAtParameter( iBezier[0]
+                                                                     , iBezier[1]
+                                                                     , iBezier[2]
+                                                                     , iBezier[3]
+                                                                     , 0.80f )
+                                , ::ULIS::CubicBezierPointAtParameter( iBezier[0]
+                                                                     , iBezier[1]
+                                                                     , iBezier[2]
+                                                                     , iBezier[3]
+                                                                     , 0.90f ) };
     double tolerance = mTracingWidth * 0.5f;
 
-    for( uint32 i = 0; i < 4; i++ )
+    for( uint32 i = 0; i < 9; i++ )
     {
         double minDistance = DBL_MAX;
 
@@ -309,6 +334,7 @@ FOdysseyVectorPathTracer::GetRawBezier()
     return mRawBezier;
 }
 
+// is there a bezier that matches ? return true if yes, false otherwise.
 bool
 FOdysseyVectorPathTracer::MakeBezier( bool iForce )
 {
@@ -320,11 +346,10 @@ FOdysseyVectorPathTracer::MakeBezier( bool iForce )
     FTracerEdge* lastEdge = &mEdgeBuffer.back();
     double edgeChainLength = GetEdgeChainLength();
     ::ULIS::FVec2D firstEdgeVector = firstRecord->smooth ? mSmoothVector * edgeChainLength * 0.33f
-                                                         : firstEdge->vector * edgeChainLength * 0.33f;
+                                                            : firstEdge->vector * edgeChainLength * 0.33f;
     ::ULIS::FVec2D lastEdgeVector = lastEdge->vector * edgeChainLength * 0.33f;
 
     //UE_LOG(LogTemp,Warning,TEXT("mRecordBuffer:%d mEdgeBuffer:%d %f"),mRecordBuffer.size(),mEdgeBuffer.size(),edgeChainLength);
-
 
     mCandidateBezier.inited = true;
     mCandidateBezier.firstRecordRadius = firstRecord->radius;
@@ -345,11 +370,38 @@ FOdysseyVectorPathTracer::MakeBezier( bool iForce )
 
     AdjustBezier( mCandidateBezier.pt, edgeChainLength );
 
-    if( ( iForce == true ) || ( TestBezier( mCandidateBezier.pt ) == true ) )
+    if( 1 ) // the else statement is disabled for now
+    {
+        if( ( iForce == true ) || ( TestBezier( mCandidateBezier.pt ) == true ) )
+        {
+            mBestBezier = mCandidateBezier;
+
+            return true;
+        }
+    }
+    else // disabled for now. Testing some "perfect mode" thats generates 1 bezier everytime the direction changes
+         // or everytime we can't find a better bezier
     {
         mBestBezier = mCandidateBezier;
 
-        return true;
+        if( mEdgeBuffer.size() > 1 )
+        {
+            FTracerEdge* anteEdge = &mEdgeBuffer[mEdgeBuffer.size()-2];
+            static double limit = 0.99939082701f; // cos( 2deg );
+
+            if( ( anteEdge->vector.DotProduct( lastEdge->vector ) < limit ) || ( TestBezier( mCandidateBezier.pt ) == false ) )
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+        else
+        {
+            return true;
+        }
     }
 
     // if we never found any best bezier, then we use the last candidate

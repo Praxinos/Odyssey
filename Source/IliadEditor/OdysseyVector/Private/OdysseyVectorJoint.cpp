@@ -114,7 +114,26 @@ FOdysseyVectorJoint::Draw( BLContext* iBLContext
     }
     else //otherwise use Blend2D's
     {
-        if( mPolygonCache.size() == 0 )
+        if( mPolygonCache.size() )
+        {
+            // for filled overlaps
+            iBLContext->setFillRule( BL_FILL_RULE_NON_ZERO );
+            BLPath joint;
+
+            joint.moveTo( mPolygonCache[0].point[0].x, mPolygonCache[0].point[0].y );
+            joint.lineTo( mPolygonCache[0].point[1].x, mPolygonCache[0].point[1].y );
+
+            for( int i = 0; i < mPolygonCache.size(); i++ )
+            {
+                joint.lineTo( mPolygonCache[i].point[2].x, mPolygonCache[i].point[2].y );
+            }
+
+            joint.close();
+
+            iBLContext->fillPath( joint );
+        }
+
+        //if( mPolygonCache.size() == 0 )
         {
             ::ULIS::FVec2D& vertexCoords =  mVertex->GetCoords();
             BLPoint vertexWorldCoords = worldMatrix.mapPoint( vertexCoords.x, vertexCoords.y );
@@ -123,44 +142,15 @@ FOdysseyVectorJoint::Draw( BLContext* iBLContext
             // might create a thin line between the polygons. So we draw a 1-3 pixel line at the edges.
             iBLContext->save();
             iBLContext->resetMatrix();
-            iBLContext->setStrokeWidth( 3.0f );  // 1 pixel is not enough due to antialiasing. Lets go with 3
+            iBLContext->setStrokeWidth( 2.0f );  // 1.0 is not enough due to antialiasing
             iBLContext->strokeLine( BLPoint( vertexWorldCoords.x, vertexWorldCoords.y )
-                                  , worldMatrix.mapPoint( mNextEdgePoint[0].x, mNextEdgePoint[0].y ) );
+                                           , worldMatrix.mapPoint( mNextEdgePoint[0].x, mNextEdgePoint[0].y ) );
             iBLContext->strokeLine( BLPoint( vertexWorldCoords.x, vertexWorldCoords.y )
-                                  , worldMatrix.mapPoint( mNextEdgePoint[1].x, mNextEdgePoint[1].y ) );
-            iBLContext->restore();
-        }
-        else
-        {
-            // for filled overlaps
-            iBLContext->setFillRule( BL_FILL_RULE_NON_ZERO );
-
-            for( int i = 0; i < mPolygonCache.size(); i++ )
-            {
-                BLPoint pt[3] = { { mPolygonCache[i].point[0].x, mPolygonCache[i].point[0].y }
-                                , { mPolygonCache[i].point[1].x, mPolygonCache[i].point[1].y }
-                                , { mPolygonCache[i].point[2].x, mPolygonCache[i].point[2].y } };
-
-                iBLContext->fillPolygon( pt, mPolygonCache[i].pointCount );
-            }
-
-            // this is to prevent a thin line between polygons because BLend2D draw them at sub-pixel level and this
-            // might create a thin line between the polygons. So we draw a 1-3 pixel line at the edges.
-            iBLContext->save();
-            iBLContext->resetMatrix();
-            iBLContext->setStrokeWidth( 3.0f ); // 1 pixel is not enough due to antialiasing. Lets go with 3
-
-            for ( int i = 0; i < mPolygonCache.size(); i++ )
-            {
-                if( i == 0 )
-                {
-                    iBLContext->strokeLine( worldMatrix.mapPoint( mPolygonCache[i].point[0].x, mPolygonCache[i].point[0].y )
-                                          , worldMatrix.mapPoint( mPolygonCache[i].point[1].x, mPolygonCache[i].point[1].y ) );
-                }
-
-                iBLContext->strokeLine( worldMatrix.mapPoint( mPolygonCache[i].point[2].x, mPolygonCache[i].point[2].y )
-                                      , worldMatrix.mapPoint( mPolygonCache[i].point[0].x, mPolygonCache[i].point[0].y ) );
-            }
+                                           , worldMatrix.mapPoint( mNextEdgePoint[1].x, mNextEdgePoint[1].y ) );
+            iBLContext->strokeLine( BLPoint( vertexWorldCoords.x, vertexWorldCoords.y )
+                                           , worldMatrix.mapPoint( mPrevEdgePoint[0].x, mPrevEdgePoint[0].y ) );
+            iBLContext->strokeLine( BLPoint( vertexWorldCoords.x, vertexWorldCoords.y )
+                                           , worldMatrix.mapPoint( mPrevEdgePoint[1].x, mPrevEdgePoint[1].y ) );
             iBLContext->restore();
         }
     }
@@ -514,7 +504,7 @@ FOdysseyVectorJoint::Make( FOdysseyVectorSegment* iPrevSegment
         {
             switch( path->GetJointType() )
             {
-                case eJointType::Linear :
+                case eVectorPathJointType::Linear :
                     MakeLinear( iPrevSegment
                               , iNextSegment
                               , mPrevEdgePoint[0]
@@ -522,7 +512,7 @@ FOdysseyVectorJoint::Make( FOdysseyVectorSegment* iPrevSegment
                               , cross > 0.0f ? 0 : 1 );
                 break;
 
-                case eJointType::Miter :
+                case eVectorPathJointType::Miter :
                     MakeMiter( iPrevSegment
                              , iNextSegment
                              , mPrevEdgePoint[0]
@@ -530,7 +520,7 @@ FOdysseyVectorJoint::Make( FOdysseyVectorSegment* iPrevSegment
                              , cross > 0.0f ? 0 : 1 );
                 break;
 
-                case eJointType::Radial :
+                case eVectorPathJointType::Radial :
                     MakeRadial( iPrevSegment
                               , iNextSegment
                               , mPrevEdgePoint[0]
@@ -573,7 +563,7 @@ FOdysseyVectorJoint::UpdateBBox()
 
     switch( path->GetJointType() )
     {
-        case eJointType::Miter :
+        case eVectorPathJointType::Miter :
             // basically this is needed for miter joints.
             // For other types of joint, defining the min max is easier.
             for( int i = 0; i < mPolygonCache.size(); i++ )

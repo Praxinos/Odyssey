@@ -18,7 +18,7 @@
 class FOdysseyVectorCycle;
 
 UENUM(BlueprintType)
-enum class eJointType : uint8
+enum class eVectorPathJointType : uint8
 {
     None   = 0,
     Radial = 1,
@@ -174,7 +174,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
          * @brief Get the joint type.
          * @return the joint type.
          */
-        eJointType GetJointType();
+        eVectorPathJointType GetJointType();
 
        /**
          * @brief Get the first vertex from the list of vertices.
@@ -396,7 +396,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
          * @brief Set the joint type.
          * @param mJointType the joint type.
          */
-        void SetJointType( eJointType mJointType, bool iInvalidate );
+        void SetJointType( eVectorPathJointType mJointType, bool iInvalidate );
 
         /**
          * @brief Set the miter limit
@@ -487,7 +487,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
         uint32 mPaintingCode;
         BLPath mBLPath;
         FOdysseyVectorBrush mBrush;
-        eJointType mJointType;
+        eVectorPathJointType mJointType;
         double mMiterLimit;
         bool bFilled; // unused for now
 };

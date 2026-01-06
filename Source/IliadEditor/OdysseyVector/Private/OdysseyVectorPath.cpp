@@ -31,7 +31,7 @@ FOdysseyVectorPath::FOdysseyVectorPath( const FString& iName )
     , mPaintingCode( 0 )
     , mBrush( this )
 {
-    SetJointType( eJointType::Miter, false );
+    SetJointType( eVectorPathJointType::Radial, false );
 
     bFilled = false;
     SetMiterLimit( 4.0f, false );
@@ -153,14 +153,14 @@ FOdysseyVectorPath::SetFilled( bool iIsFilled )
     Invalidate( FOdysseyVectorObjectInvalidationFlags().Set(FOdysseyVectorObjectInvalidationFlags::COLOR) );
 }
 
-eJointType
+eVectorPathJointType
 FOdysseyVectorPath::GetJointType()
 {
     return mJointType;
 }
 
 void
-FOdysseyVectorPath::SetJointType( eJointType iJointType, bool iInvalidate )
+FOdysseyVectorPath::SetJointType( eVectorPathJointType iJointType, bool iInvalidate )
 {
     mJointType = iJointType;
 
