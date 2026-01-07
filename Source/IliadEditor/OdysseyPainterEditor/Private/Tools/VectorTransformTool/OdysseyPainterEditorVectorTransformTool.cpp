@@ -22,6 +22,8 @@
 #include "Undo/OdysseyVectorUndoPointPosition.h"
 #include "Undo/OdysseyVectorUndoObjectTransform.h"
 #include "Undo/OdysseyVectorUndoTagInbetweenerTransform.h"
+// Slate
+#include "Widgets/Input/SSegmentedControl.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -106,17 +108,62 @@ UOdysseyPainterEditorVectorTransformTool::LoadVector( FOdysseyVectorGroupPaint* 
 }
 
 bool
-UOdysseyPainterEditorVectorTransformTool::OnKeyDownVector( FOdysseyVectorGroupPaint* iScene
-                                                         , const FKey& iKey )
+UOdysseyPainterEditorVectorTransformTool::OnKeyDownGlobalVector( FOdysseyVectorGroupPaint* iScene
+                                                               , const FKeyEvent& InKeyEvent )
 {
     UniformAtKeyDown = Uniform;
 
-    if ( FSlateApplication::Get().GetModifierKeys().IsShiftDown() )
+    if( InKeyEvent.IsRepeat() == false )
     {
-        Uniform = !Uniform; // flip the value
-        return true;
+        FKey key = InKeyEvent.GetKey();
+
+        // Note, we could FSlateApplication::Get().GetModifierKeys() as well, but for consistency
+        // with the events processing in the OnKeyUpGlobalVector(), we do like that.
+        if ( ( key == EKeys::LeftControl ) || ( key == EKeys::RightControl )
+          || ( key == EKeys::LeftCommand ) || ( key == EKeys::RightCommand ) )
+        {
+            ScalingCenter = ETransformToolScalingCenter::BoxCenter;
+
+            return true;
+        }
+
+        // Note, we could FSlateApplication::Get().GetModifierKeys() as well, but for consistency
+        // with the events processing in the OnKeyUpGlobalVector(), we do like that.
+        if ( ( key == EKeys::LeftShift ) || ( key == EKeys::RightShift ) )
+        {
+            Uniform = !Uniform; // flip the value
+
+            return true;
+        }
+
+        // Note, we could FSlateApplication::Get().GetModifierKeys() as well, but for consistency
+        // with the events processing in the OnKeyUpGlobalVector(), we do like that.
+        if ( ( key == EKeys::LeftAlt ) || ( key == EKeys::RightAlt ) )
+        {
+            ScalingCenter = ETransformToolScalingCenter::Gizmo;
+
+            return true;
+        }
     }
 
+    return false;
+}
+
+bool
+UOdysseyPainterEditorVectorTransformTool::OnKeyUpGlobalVector( FOdysseyVectorGroupPaint* iScene
+                                                             , const FKeyEvent& InKeyEvent )
+{
+    FKey key = InKeyEvent.GetKey();
+
+    ScalingCenter = ETransformToolScalingCenter::OppositeCorner;
+
+    return false;
+}
+
+bool
+UOdysseyPainterEditorVectorTransformTool::OnKeyDownVector( FOdysseyVectorGroupPaint* iScene
+                                                         , const FKey& iKey )
+{
     return UOdysseyPainterEditorVectorBaseTool::OnKeyDownVector( iScene, iKey );
 }
 
@@ -124,8 +171,6 @@ bool
 UOdysseyPainterEditorVectorTransformTool::OnKeyUpVector( FOdysseyVectorGroupPaint* iScene
                                                        , const FKey& iKey )
 {
-    Uniform = UniformAtKeyDown;
-
     if (iKey == EKeys::Enter || iKey == EKeys::SpaceBar )
     {
         mEditor->ActivateMainTool( mEditor->GetVectorPathDrawingTool() );
@@ -1278,11 +1323,91 @@ UOdysseyPainterEditorVectorTransformTool::IsModeInbetween() const
 }
 
 void
+UOdysseyPainterEditorVectorTransformTool::SetScalingCenter( ETransformToolScalingCenter iScalingCenter )
+{
+    ScalingCenter = iScalingCenter;
+}
+
+const FSlateBrush*
+UOdysseyPainterEditorVectorTransformTool::GetBackgroundColor( ETransformToolScalingCenter iScalingCenter ) const
+{
+    static FSlateColorBrush selected = FSlateColorBrush( FStyleColors::Select );
+
+    return ( iScalingCenter == ScalingCenter ) ? &selected : nullptr;
+}
+
+TSharedRef<SWidget>
+UOdysseyPainterEditorVectorTransformTool::CreateModifierSegmentControl()
+{
+    return SNew(SSegmentedControl<ETransformToolScalingCenter>)
+           .Value_Lambda( [this]{ return ScalingCenter; } )
+           .SupportsEmptySelection( false )
+           .SupportsMultiSelection( false )
+           .IsEnabled( false ) // currently not clickable - Info only
+           .UniformPadding( FMargin( 2, 0, 2, 0 ) )
+           .OnValueChanged( SSegmentedControl<ETransformToolScalingCenter>::FOnValueChanged::CreateUObject( this, &UOdysseyPainterEditorVectorTransformTool::SetScalingCenter ) )
+           // DEFAULT
+           + SSegmentedControl<ETransformToolScalingCenter>::Slot( ETransformToolScalingCenter::OppositeCorner )
+           //.Icon( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathEdit16") )
+           .ToolTip( LOCTEXT("vector-transform-tool.scaling-center.default.name", "Scaling center: opposite corner (Default)") )
+           [
+               SNew(SBorder)
+               .BorderImage_UObject( this, &UOdysseyPainterEditorVectorTransformTool::GetBackgroundColor, ETransformToolScalingCenter::OppositeCorner  )
+               [
+                   SNew(SImage)
+                   .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsShortcuts.TransformScalingOppositeCorner20") )
+               ]
+           ]
+           // CTRL
+           + SSegmentedControl<ETransformToolScalingCenter>::Slot( ETransformToolScalingCenter::BoxCenter )
+           //.Icon( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathEdit16") )
+#if PLATFORM_WINDOWS
+           .ToolTip( LOCTEXT("vector-transform-tool.scaling-center.ctrl.name", "Scaling center: selection center (CTRL)") )
+#endif
+#if PLATFORM_MAC
+           .ToolTip( LOCTEXT("vector-transform-tool.scaling-center.ctrl.name", "Scaling center: selection center (CMD)") )
+#endif
+           [
+               SNew(SBorder)
+               .BorderImage_UObject( this, &UOdysseyPainterEditorVectorTransformTool::GetBackgroundColor, ETransformToolScalingCenter::BoxCenter  )
+               [
+                   SNew(SImage)
+                   .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsShortcuts.TransformScalingCenter20") )
+               ]
+           ]
+           // SHIFT
+           + SSegmentedControl<ETransformToolScalingCenter>::Slot( ETransformToolScalingCenter::Gizmo )
+           //.Icon( FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathEdit16") )
+#if PLATFORM_WINDOWS
+           .ToolTip( LOCTEXT("vector-transform-tool.scaling-center.shift.name", "Scaling center: gizmo (ALT)") )
+#endif
+#if PLATFORM_MAC
+           .ToolTip( LOCTEXT("vector-transform-tool.scaling-center.shift.name", "Scaling center: gizmo (OPTION)") )
+#endif
+           [
+               SNew(SBorder)
+               .BorderImage_UObject( this, &UOdysseyPainterEditorVectorTransformTool::GetBackgroundColor, ETransformToolScalingCenter::Gizmo  )
+               [
+                   SNew(SImage)
+                   .Image( FOdysseyStyle::GetBrush( "PainterEditor.ToolsShortcuts.TransformScalingGizmo20") )
+               ]
+           ];
+}
+
+void
 UOdysseyPainterEditorVectorTransformTool::ExtendToolbar( UToolMenu* iToolMenu )
 {
     Super::ExtendToolbar(iToolMenu);
 
     FToolMenuSection& section = iToolMenu->AddSection(NAME_None);
+
+    section.AddEntry(
+        FToolMenuEntry::InitWidget(
+            NAME_None,
+            CreateModifierSegmentControl(),
+            FText()
+        )
+    );
 
     TAttribute<EVisibility> value = TAttribute<EVisibility>::Create(TAttribute<EVisibility>::FGetter::CreateUObject (this, &UOdysseyPainterEditorVectorTransformTool::IsModeInbetween) );
     section.AddEntry(

@@ -202,6 +202,16 @@ SOdysseyPainterEditorVectorSceneTreeView::ExpandTree( const TSharedPtr<FVectorSc
     }
 }
 
+void
+SOdysseyPainterEditorVectorSceneTreeView::Private_ClearSelection()
+{
+    FOdysseyVectorGroupPaint* scene = mScene.Get();
+
+    scene->GetCell()->ClearObjectSelection();
+
+    Super::Private_ClearSelection();
+}
+
 bool
 SOdysseyPainterEditorVectorSceneTreeView::Private_IsItemSelected( const TSharedPtr<FVectorSceneTreeViewItem>& iItem )  const
 {
@@ -220,6 +230,8 @@ SOdysseyPainterEditorVectorSceneTreeView::Update()
     FOdysseyVectorGroupPaint* scene = mScene.Get();
     if (!scene)
         return;
+
+    mLastSelection = scene->GetCell()->GetSelectedObjectList();
 
     //if( hudFlags & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
     {
@@ -291,43 +303,37 @@ SOdysseyPainterEditorVectorSceneTreeView::OnSelectionChanged( TSharedPtr<FVector
     // rebuilt while it's processing stuff
     UnbindLayerDelegates();
 
-    if( mRootItem && ( SelectInfo != ESelectInfo::Type::Direct ) )
+    // mRootItem can be null if the tree is empty
+    if( mRootItem )
     {
         FOdysseyVectorGroupPaint* scene = static_cast<FOdysseyVectorGroupPaint*>(mRootItem.Get()->GetVectorObject());
 
-        // needed for valid GUndo pointer
-        GEditor->BeginTransaction(LOCTEXT("vector-scene-tree-view.transaction.selection-changed","Selection Changed"));
-        if( GUndo )
-        {
-            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectObject( scene->GetLayer()
-                                                                         , scene->GetCell() );
-
-            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-
-            TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
-            if (source)
-                source->RecordCurrentFrameUndo();
-        }
-        GEditor->EndTransaction();
-
-        scene->GetCell()->ClearObjectSelection();
-
-        // iTtem is null when selection is empty
-        if( iItem )
+        // only if the action is interactive (user action via GUI)
+        if ( SelectInfo != ESelectInfo::Type::Direct )
         {
             TArray<TSharedPtr<FVectorSceneTreeViewItem>> selectedItems = GetSelectedItems();
 
-            for( int i = 0; i < selectedItems.Num(); i++ )
+            // needed for valid GUndo pointer
+            GEditor->BeginTransaction(LOCTEXT("vector-scene-tree-view.transaction.selection-changed","Selection Changed"));
+            if( GUndo )
             {
-                FOdysseyVectorObject* selectedObject = selectedItems[i].Get()->GetVectorObject();
+                FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectObject( scene->GetLayer()
+                                                                             , scene->GetCell()
+                                                                             , mLastSelection );
 
-                scene->GetCell()->SelectObject( selectedObject );
+                GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+
+                TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
+                if (source)
+                    source->RecordCurrentFrameUndo();
             }
+            GEditor->EndTransaction();
+
+            scene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+            scene->GetLayer()->RequestRedraw( scene->GetCell(), 0 );
         }
 
-        scene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-
-        scene->GetLayer()->RequestRedraw( scene->GetCell(), 0 );
+        mLastSelection = scene->GetCell()->GetSelectedObjectList();
     }
 
     // Re-register this widget after we are done

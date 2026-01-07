@@ -13,6 +13,15 @@ FOdysseyVectorUndoSelectObject::~FOdysseyVectorUndoSelectObject()
 }
 
 FOdysseyVectorUndoSelectObject::FOdysseyVectorUndoSelectObject( FOdysseyVectorLayer* iLayer
+                                                              , FOdysseyVectorCell* iCell
+                                                              , const std::list<FOdysseyVectorObject*>& iSelectedObjectList )
+    : FOdysseyVectorUndo( iLayer )
+    , mCellList ( { iCell } )
+{
+    mSelectedObjectList = iSelectedObjectList;
+}
+
+FOdysseyVectorUndoSelectObject::FOdysseyVectorUndoSelectObject( FOdysseyVectorLayer* iLayer
                                                               , FOdysseyVectorCell* iCell )
     : FOdysseyVectorUndo( iLayer )
     , mCellList ( { iCell } )

@@ -21,6 +21,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoSelectObject : public FOdysseyVectorUn
         FOdysseyVectorUndoSelectObject( FOdysseyVectorLayer* iLayer
                                       , FOdysseyVectorCell* iCell );
         FOdysseyVectorUndoSelectObject( FOdysseyVectorLayer* iLayer
+                                      , FOdysseyVectorCell* iCell
+                                      , const std::list<FOdysseyVectorObject*>& iSelectedObjectList );
+        FOdysseyVectorUndoSelectObject( FOdysseyVectorLayer* iLayer
                                       , const std::list<FOdysseyVectorCell*>& iCellList );
 
         /** Called when redoing */

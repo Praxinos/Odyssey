@@ -323,7 +323,7 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnMouseButtonUp( const FGeometry & 
     FOdysseyVectorGroupPaint* scene = mItem.Get()->GetVectorObject()->GetScene();
     FReply reply = FReply::Handled();
 
-    reply = STableRow::OnMouseButtonUp( MyGeometry, MouseEvent );
+    reply = SMultiColumnTableRow::OnMouseButtonUp( MyGeometry, MouseEvent );
 
     scene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
@@ -347,14 +347,19 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnMouseButtonDown( const FGeometry 
         return FReply::Unhandled();
     }
 */
-/*
-    if( vectorObject->IsSelected() == false )
-    {
-        vectorEngine->SelectObject( vectorObject );
-    }
-*/
-    reply = STableRow::OnMouseButtonDown( MyGeometry, MouseEvent );
+    reply = SMultiColumnTableRow::OnMouseButtonDown( MyGeometry, MouseEvent );
 
+    TArray<TSharedPtr<FVectorSceneTreeViewItem>> selectedItems = treeView->GetSelectedItems();
+
+    for( TSharedPtr<FVectorSceneTreeViewItem> selectedItem : selectedItems )
+    {
+        FOdysseyVectorObject* selectedObject = selectedItem.Get()->GetVectorObject();
+
+        if( selectedObject->IsSelected() == false )
+        {
+            selectedObject->GetCell()->SelectObject( selectedObject );
+        }
+    }
 
     return reply;
 }
@@ -618,13 +623,13 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnPaint( const FPaintArgs& Args
     const FTableRowStyle& style = FOdysseyStyle::GetWidgetStyle<FTableRowStyle>("OdysseyLayerStack.AlternatedRows");
     const FSlateBrush* DropIndicatorBrush = nullptr;
 
-    int32 rowLayerId = STableRow<TSharedPtr<FVectorSceneTreeViewItem>>::OnPaint( Args
-                                                                               , AllottedGeometry
-                                                                               , MyCullingRect
-                                                                               , OutDrawElements
-                                                                               , LayerId
-                                                                               , InWidgetStyle
-                                                                               , bParentEnabled );
+    int32 rowLayerId = SMultiColumnTableRow<TSharedPtr<FVectorSceneTreeViewItem>>::OnPaint( Args
+                                                                                          , AllottedGeometry
+                                                                                          , MyCullingRect
+                                                                                          , OutDrawElements
+                                                                                          , LayerId
+                                                                                          , InWidgetStyle
+                                                                                          , bParentEnabled );
     if( mDropZone )
     {
         switch( mDropZone )

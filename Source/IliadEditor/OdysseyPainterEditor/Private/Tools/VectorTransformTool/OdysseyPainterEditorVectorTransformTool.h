@@ -79,6 +79,10 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTransformTool : public
                                             , const FName& iPropertyName ) override;
         virtual void OnVectorLayerUpdate( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags
                                         , uint32 iUpdateFlags ) override;
+        bool OnKeyDownGlobalVector( FOdysseyVectorGroupPaint* iScene
+                                  , const FKeyEvent& InKeyEvent );
+        bool OnKeyUpGlobalVector( FOdysseyVectorGroupPaint* iScene
+                                , const FKeyEvent& InKeyEvent );
 
     private:
         void TranslateObjectSelection( FOdysseyVectorGroupPaint* iScene
@@ -97,6 +101,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTransformTool : public
         void MakeSpaceMatrixForTranslation();
         void MakeSpaceMatrix();
         void TransformGizmo( BLMatrix2D& iTransformationMatrix );
+        void SetScalingCenter( ETransformToolScalingCenter iScalingCenter );
+        const FSlateBrush* GetBackgroundColor( ETransformToolScalingCenter iScalingCenter ) const;
+        TSharedRef<SWidget> CreateModifierSegmentControl();
 
     private:
         std::list<FInbetweenerBreakdown*> mTransformedBreakdownList;
@@ -140,21 +147,16 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTransformTool : public
         bool Uniform;
         bool UniformAtKeyDown;
 
-        UPROPERTY( EditAnywhere
-                 , Category=TransformTool
-                 , meta = ( ToolTip = "Scaling Center" ) )
+        //UPROPERTY( EditAnywhere
+        //         , Category=TransformTool
+        //         , meta = ( ToolTip = "Scaling Center" ) )
         ETransformToolScalingCenter ScalingCenter;
 
         UPROPERTY( EditAnywhere
                  , Category=TransformTool
                  , meta = ( ToolTip = "World" ) )
         bool World;
-/*
-        UPROPERTY( EditAnywhere
-                 , Category=TransformTool
-                 , meta = ( ToolTip = "KeepPathWidth" ) )
-        bool KeepPathWidth;
-*/
+
         UPROPERTY( EditDefaultsOnly
                  , Category = TransformTool )
         bool bInbetweenMode;

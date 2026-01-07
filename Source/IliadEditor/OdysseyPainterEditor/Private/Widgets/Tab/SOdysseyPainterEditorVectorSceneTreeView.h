@@ -4,13 +4,16 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include <list>
 
 class FOdysseyPainterEditor;
 class FOdysseyVectorGroupPaint;
 class FVectorSceneTreeViewItem;
 class FOdysseyVectorLayer;
 class UOdysseyLayerStack;
+class FOdysseyVectorObject;
 struct FOdysseyVectorObjectInvalidationFlags;
+
 
 #define VSTV_OBJECT_VISIBLE     "Visible"
 #define VSTV_OBJECT_HUDCOLOR    "HUD Color"
@@ -68,11 +71,11 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorSceneTreeView
         //void SelectTree( const TSharedPtr<FVectorSceneTreeViewItem> iItem );
         //FReply OnDragOver( const FGeometry& MyGeometry, const FDragDropEvent& DragDropEvent );
         virtual bool Private_IsItemSelected( const TSharedPtr<FVectorSceneTreeViewItem>& iItem ) const override;
+        virtual void Private_ClearSelection() override;
 /*
         virtual void Private_SetItemSelection ( TSharedPtr<FVectorSceneTreeViewItem> iItem
                                               , bool bShouldBeSelected
                                               , bool bWasUserDirected ) override;
-        virtual void Private_ClearSelection() override;
         virtual void Private_SelectRangeFromCurrentTo ( TSharedPtr<FVectorSceneTreeViewItem> iItem ) override;
 */
         void MapActionsToCommandList();
@@ -102,4 +105,5 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorSceneTreeView
         TSharedPtr<FVectorSceneTreeViewItem> mRootItem;
         TArray<TSharedPtr<FVectorSceneTreeViewItem>> mItemsSource;
         TSharedRef<FUICommandList> mCommandList;
+        std::list<FOdysseyVectorObject*> mLastSelection;
 };

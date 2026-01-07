@@ -333,6 +333,9 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "PainterEditor.ToolsShortcuts.PaintBucketRadialLinear20", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/paint_bucket_tool_radial_linear", mIcon20x20 ) );
     Set( "PainterEditor.ToolsShortcuts.GridSingleSelection20", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/grid_tool_single_selection", mIcon20x20 ) );
     Set( "PainterEditor.ToolsShortcuts.GridMultipleSelection20", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/grid_tool_multiple_selection", mIcon20x20 ) );
+    Set( "PainterEditor.ToolsShortcuts.TransformScalingOppositeCorner20", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/transform_tool_scaling_opposite_corner", mIcon20x20 ) );
+    Set( "PainterEditor.ToolsShortcuts.TransformScalingCenter20", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/transform_tool_scaling_center", mIcon20x20 ) );
+    Set( "PainterEditor.ToolsShortcuts.TransformScalingGizmo20", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/transform_tool_scaling_gizmo", mIcon20x20 ) );
 
     //OdysseyLayerStack
     Set( "OdysseyLayerStack.LayerBitmap16", new IMAGE_BRUSH( "OdysseyLayerStack/layer_bitmap_16", mIcon16x16 ) );
