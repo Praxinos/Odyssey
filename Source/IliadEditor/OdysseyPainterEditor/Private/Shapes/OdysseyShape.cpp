@@ -100,12 +100,12 @@ FOdysseyShapesDetailCustomization::GetShapeIcon(EOdysseyShapeType iShape) const
     switch (iShape)
     {
         case EOdysseyShapeType::kNone: return FOdysseyStyle::GetBrush( "Shapes.None" );
-        case EOdysseyShapeType::kFreehand: return FOdysseyStyle::GetBrush( "Shapes.Freehand" );
         case EOdysseyShapeType::kLine: return FOdysseyStyle::GetBrush( "Shapes.Line" );
-        case EOdysseyShapeType::kRectangle: return FOdysseyStyle::GetBrush( "Shapes.Rectangle" );
-        case EOdysseyShapeType::kPolygon: return FOdysseyStyle::GetBrush( "Shapes.Polygon" );
-        case EOdysseyShapeType::kEllipse: return FOdysseyStyle::GetBrush( "Shapes.Ellipse" );
-        case EOdysseyShapeType::kBezier: return FOdysseyStyle::GetBrush( "Shapes.Bezier" );
+        case EOdysseyShapeType::kFreehand: return FOdysseyStyle::GetBrush( "Shapes.Freehand_Filled" );
+        case EOdysseyShapeType::kRectangle: return FOdysseyStyle::GetBrush( "Shapes.Rectangle_Filled" );
+        case EOdysseyShapeType::kPolygon: return FOdysseyStyle::GetBrush( "Shapes.Polygon_Filled" );
+        case EOdysseyShapeType::kEllipse: return FOdysseyStyle::GetBrush( "Shapes.Ellipse_Filled" );
+        case EOdysseyShapeType::kBezier: return FOdysseyStyle::GetBrush( "Shapes.Bezier_3pts_Filled" );
     }
 
     return nullptr;

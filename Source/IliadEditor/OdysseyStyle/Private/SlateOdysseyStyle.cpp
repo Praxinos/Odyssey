@@ -740,12 +740,17 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set("Sequencer.AnimationTimelineTrack.PrePostBehaviourOverlay", new IMAGE_BRUSH("OdysseyAnimation/Sequencer/PrePostBehaviourOverlay", FVector2D(16.f, 16.f), FLinearColor::White, ESlateBrushTileType::Both));
 
     Set("Shapes.None", new IMAGE_BRUSH_SVG("OdysseyShapes/none", mIcon16x16));
-    Set("Shapes.Freehand", new IMAGE_BRUSH_SVG("OdysseyShapes/freehand", mIcon16x16));
     Set("Shapes.Line", new IMAGE_BRUSH_SVG("OdysseyShapes/line", mIcon16x16));
-    Set("Shapes.Rectangle", new IMAGE_BRUSH_SVG("OdysseyShapes/rectangle", mIcon16x16));
-    Set("Shapes.Polygon", new IMAGE_BRUSH_SVG("OdysseyShapes/polygon", mIcon16x16));
-    Set("Shapes.Ellipse", new IMAGE_BRUSH_SVG("OdysseyShapes/ellipse", mIcon16x16));
-    Set("Shapes.Bezier", new IMAGE_BRUSH_SVG("OdysseyShapes/bezier", mIcon16x16));
+    Set("Shapes.Freehand_Filled", new IMAGE_BRUSH_SVG("OdysseyShapes/freehand_filled", mIcon16x16));
+    Set("Shapes.Rectangle_Filled", new IMAGE_BRUSH_SVG("OdysseyShapes/rectangle_filled", mIcon16x16));
+    Set("Shapes.Polygon_Filled", new IMAGE_BRUSH_SVG("OdysseyShapes/polygon_filled", mIcon16x16));
+    Set("Shapes.Ellipse_Filled", new IMAGE_BRUSH_SVG("OdysseyShapes/ellipse_filled", mIcon16x16));
+    Set("Shapes.Bezier_3pts_Filled", new IMAGE_BRUSH_SVG("OdysseyShapes/bezier_3pts_filled", mIcon16x16));
+    Set("Shapes.Freehand_Empty", new IMAGE_BRUSH_SVG("OdysseyShapes/freehand_empty", mIcon16x16));
+    Set("Shapes.Rectangle_Empty", new IMAGE_BRUSH_SVG("OdysseyShapes/rectangle_empty", mIcon16x16));
+    Set("Shapes.Polygon_Empty", new IMAGE_BRUSH_SVG("OdysseyShapes/polygon_empty", mIcon16x16));
+    Set("Shapes.Ellipse_Empty", new IMAGE_BRUSH_SVG("OdysseyShapes/ellipse_empty", mIcon16x16));
+    Set("Shapes.Bezier_3pts_Empty", new IMAGE_BRUSH_SVG("OdysseyShapes/bezier_3pts_empty", mIcon16x16));
 
     Set("Liquify.Push", new IMAGE_BRUSH_SVG("PainterEditor/ToolsTab/liquify_mode_push", mIcon16x16));
     Set("Liquify.Twirl", new IMAGE_BRUSH_SVG("PainterEditor/ToolsTab/liquify_mode_twirl", mIcon16x16));
