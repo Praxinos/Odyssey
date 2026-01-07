@@ -146,28 +146,18 @@ UOdysseyAnimationComponent::PostLoad()
         FVector new_scale = old_scale * FVector( 100.f, 100.f, 1.f ); // Because Plane.Plane mesh is 100x100 and S_1_Unit_Plane.S_1_Unit_Plane is 1x1
         SetRelativeScale3D( new_scale );
     }
-}
 
-void
-UOdysseyAnimationComponent::OnRegister()
-{
-    Super::OnRegister();
     CreateMaterialInstance();
-}
-
-void
-UOdysseyAnimationComponent::OnUnregister()
-{
-    Super::OnUnregister();
 }
 
 void
 UOdysseyAnimationComponent::CreateMaterialInstance()
 {
+    EmptyOverrideMaterials();
     MaterialInstance = UMaterialInstanceDynamic::Create(Material, GetTransientPackage());
     MaterialInstance->SetFlags(MaterialInstance->GetFlags() | RF_Public);
-    UStaticMeshComponent::SetMaterial(0, MaterialInstance);
     RefreshMaterialTexture();
+    UStaticMeshComponent::SetMaterial(0, MaterialInstance);
 }
 
 void

@@ -628,12 +628,9 @@ UOdysseyAnimationPlayer::PostLoad()
     if (GetFlags() & RF_ClassDefaultObject)
         return;
 
-    if (!RenderTarget)
-    {
-        RenderTarget = NewObject<UTextureRenderTarget2D>(this, NAME_None, RF_Public | RF_Transient);
-        RenderTarget->RenderTargetFormat = RTF_RGBA16f;
-        RenderTarget->bAutoGenerateMips = true;
-    }
+    RenderTarget = NewObject<UTextureRenderTarget2D>(this, NAME_None, RF_Public | RF_Transient);
+    RenderTarget->RenderTargetFormat = RTF_RGBA16f;
+    RenderTarget->bAutoGenerateMips = true;
 
     //will create the texture if needed
     IOdysseyRenderingAbility::OnRenderingChangedDelegate().RemoveAll(this);
@@ -659,11 +656,9 @@ UOdysseyAnimationPlayer::PostDuplicate(EDuplicateMode::Type iDuplicateMode)
     if (GetFlags() & RF_ClassDefaultObject)
         return;
 
-    if ( !RenderTarget )
-    {
-        RenderTarget = NewObject<UTextureRenderTarget2D>(this, NAME_None, RF_Public | RF_Transient);
-        RenderTarget->RenderTargetFormat = RTF_RGBA16f;
-    }
+    RenderTarget = NewObject<UTextureRenderTarget2D>(this, NAME_None, RF_Public | RF_Transient);
+    RenderTarget->RenderTargetFormat = RTF_RGBA16f;
+    RenderTarget->bAutoGenerateMips = true;
 
     //will create the texture if needed
     IOdysseyRenderingAbility::OnRenderingChangedDelegate().RemoveAll(this);
@@ -675,11 +670,11 @@ UOdysseyAnimationPlayer::PostDuplicate(EDuplicateMode::Type iDuplicateMode)
     RenderTarget->UpdateResourceImmediate(false);
 
     mInvalidTileMap = FOdysseyInvalidTileMap(64, Animation->GetWidth(), Animation->GetHeight());
+    mImageRenderingComposition.Empty();
 
     UpdateTexture();
 
     IOdysseyRenderingAbility::OnRenderingChangedDelegate().AddUObject(this, &UOdysseyAnimationPlayer::OnRenderingChanged);
-    mImageRenderingComposition.Empty();
 }
 
 struct FOdysseyAnimationPlayerObjectVersion
