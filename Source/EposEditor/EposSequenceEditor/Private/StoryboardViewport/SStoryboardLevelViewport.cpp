@@ -179,8 +179,8 @@ namespace UE::StoryboardViewport::Private
 
         FToolMenuEntry Entry = Section.AddSubMenu(
             "StoryboardViewportDisplaySettings",
-            LOCTEXT( "StoryboardViewportSettingsLabel", "Viewport Settings" ),
-            LOCTEXT( "StoryboardViewportSettingsTooltip", "Display Viewport Settings" ),
+            LOCTEXT( "StoryboardViewportSettingsLabel", "Viewport Display Settings" ),
+            LOCTEXT( "StoryboardViewportSettingsTooltip", "Display Viewport Settings, such as notes, camera bounds, etc." ),
             FNewToolMenuDelegate::CreateLambda(
                 [StoryboardLevelViewport]( UToolMenu* Submenu ) -> void
                 {
@@ -200,7 +200,7 @@ namespace UE::StoryboardViewport::Private
                 }
             ),
             false,
-            FSlateIcon( FAppStyle::GetAppStyleSetName(), "LevelEditor.GameSettings" )
+            FSlateIcon(FEposSequenceEditorStyle::Get().GetStyleSetName(),"Viewport.settings")
         );
 
         Entry.SetShowInToolbarTopLevel( true );
