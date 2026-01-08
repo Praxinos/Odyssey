@@ -156,6 +156,7 @@ UOdysseyPainterEditorVectorTransformTool::OnKeyUpGlobalVector( FOdysseyVectorGro
     FKey key = InKeyEvent.GetKey();
 
     ScalingCenter = ETransformToolScalingCenter::OppositeCorner;
+    Uniform = UniformAtKeyDown;
 
     return false;
 }

@@ -46,10 +46,7 @@ class SOdysseyAnimationTimelineInbetweeningHeaderRow
         void Construct( const FArguments& InArgs
                       , const TSharedRef< STableViewBase >& InOwnerTableView
                       , const TSharedPtr<FInbetweeningListViewItem> iInbetweenerTag );
-        // from STableRow::IsSelected
-        virtual bool IsItemSelected() const override;
         virtual FReply OnMouseButtonDown( const FGeometry & MyGeometry, const FPointerEvent & MouseEvent ) override;
-
 
     protected:
         virtual FVector2D ComputeDesiredSize ( float LayoutScaleMultiplier ) const override;

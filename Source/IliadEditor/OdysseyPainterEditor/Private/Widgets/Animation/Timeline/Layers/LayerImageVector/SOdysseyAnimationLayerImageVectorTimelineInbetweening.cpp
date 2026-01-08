@@ -152,7 +152,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::OnSelectionChanged( TShar
         }
 
         // needed for valid GUndo pointer
-        GEditor->BeginTransaction(LOCTEXT("vector-scene-tree-view.transaction.selection-changed","Selection Changed"));
+        GEditor->BeginTransaction(LOCTEXT("vector-timeline-inbetweening.transaction.selection-changed","Selection Changed"));
         if( GUndo )
         {
             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectObject( mAnimationLayerImageVector->GetVectorLayer().Get()
@@ -166,40 +166,43 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::OnSelectionChanged( TShar
         }
         GEditor->EndTransaction();
 
-        for( FOdysseyVectorCell* cell : cellList )
+        TArray<TSharedPtr<FInbetweeningListViewItem>> selectedItems = GetSelectedItems();
+
+        // clear selection on all cells
+        ClearObjectSelection();
+
+        for( TSharedPtr<FInbetweeningListViewItem> selectedItem : selectedItems )
         {
-            cell->ClearObjectSelection();
+            FOdysseyVectorObject* selectedObject = selectedItem.Get()->GetInbetweenerTag()->GetOwner();
 
-            // mark for redraw (to force-redraw the HUD)
-            mAnimationLayerImageVector->GetVectorLayer()->InvalidateCell( cell );
-        }
-
-        for( TSharedPtr<FInbetweeningListViewItem> item : mItemsSource )
-        {
-            TArray<TSharedPtr<FInbetweeningListViewItem>> selectedItems = GetSelectedItems();
-
-            for( int i = 0; i < selectedItems.Num(); i++ )
+            if( selectedObject->IsSelected() == false )
             {
-                FOdysseyVectorObject* selectedObject = selectedItems[i].Get()->GetInbetweenerTag()->GetOwner();
-
                 selectedObject->GetCell()->SelectObject( selectedObject );
             }
         }
 
-        mAnimationLayerImageVector->GetVectorLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+        for( FOdysseyVectorCell* cell : cellList )
+        {
+            // mark for redraw (to force-redraw the HUD)
+            mAnimationLayerImageVector->GetVectorLayer()->InvalidateCell( cell );
+        }
 
+        mAnimationLayerImageVector->GetVectorLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
         mAnimationLayerImageVector->GetVectorLayer()->RequestRedraw( nullptr, 0 );
     }
 
     BindLayerDelegates();
 }
 
-bool
-SOdysseyAnimationLayerImageVectorTimelineInbetweening::Private_IsItemSelected( const TSharedPtr<FInbetweeningListViewItem>& iItem )  const
+void
+SOdysseyAnimationLayerImageVectorTimelineInbetweening::ClearObjectSelection()
 {
-    UOdysseyLayerStack* layerStack = mAnimationLayerImageVector->GetLayerStack();
+    for( TSharedPtr<FInbetweeningListViewItem> item : mItemsSource )
+    {
+        FOdysseyVectorCell* cell = item->GetInbetweenerTag()->GetOwner()->GetCell();
 
-    return iItem.Get()->GetInbetweenerTag()->GetOwner()->IsSelected() && ( layerStack->GetCurrentLayer() == mAnimationLayerImageVector );
+        cell->ClearObjectSelection();
+    }
 }
 
 UOdysseyAnimationLayerImageVector*

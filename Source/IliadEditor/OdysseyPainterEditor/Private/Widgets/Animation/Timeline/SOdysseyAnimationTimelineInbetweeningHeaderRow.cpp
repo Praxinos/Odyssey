@@ -197,13 +197,7 @@ SOdysseyAnimationTimelineInbetweeningHeaderRow::OnMouseButtonDown( const FGeomet
         FOdysseyObjectEditorUtils::SetPropertyValue( layerStack, "CurrentLayer", layer );
     }
 
-    return STableRow<TSharedPtr<FInbetweeningListViewItem>>::OnMouseButtonDown( MyGeometry, MouseEvent );
-}
-
-bool
-SOdysseyAnimationTimelineInbetweeningHeaderRow::IsItemSelected() const
-{
-    return mInbetweenerTag->GetOwner()->IsSelected();
+    return STableRow::OnMouseButtonDown( MyGeometry, MouseEvent );
 }
 
 FVector2D

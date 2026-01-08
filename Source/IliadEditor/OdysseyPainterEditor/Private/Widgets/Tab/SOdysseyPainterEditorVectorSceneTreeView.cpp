@@ -200,22 +200,11 @@ SOdysseyPainterEditorVectorSceneTreeView::ExpandTree( const TSharedPtr<FVectorSc
             ExpandTree( iItem.Get()->mChildren[i] );
         }
     }
-}
 
-void
-SOdysseyPainterEditorVectorSceneTreeView::Private_ClearSelection()
-{
-    FOdysseyVectorGroupPaint* scene = mScene.Get();
-
-    scene->GetCell()->ClearObjectSelection();
-
-    Super::Private_ClearSelection();
-}
-
-bool
-SOdysseyPainterEditorVectorSceneTreeView::Private_IsItemSelected( const TSharedPtr<FVectorSceneTreeViewItem>& iItem )  const
-{
-    return iItem.Get()->GetVectorObject()->IsSelected();
+    if( itemObject->IsSelected() )
+    {
+        SetSelection( iItem );
+    }
 }
 
 void
@@ -230,8 +219,6 @@ SOdysseyPainterEditorVectorSceneTreeView::Update()
     FOdysseyVectorGroupPaint* scene = mScene.Get();
     if (!scene)
         return;
-
-    mLastSelection = scene->GetCell()->GetSelectedObjectList();
 
     //if( hudFlags & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
     {
@@ -311,15 +298,12 @@ SOdysseyPainterEditorVectorSceneTreeView::OnSelectionChanged( TSharedPtr<FVector
         // only if the action is interactive (user action via GUI)
         if ( SelectInfo != ESelectInfo::Type::Direct )
         {
-            TArray<TSharedPtr<FVectorSceneTreeViewItem>> selectedItems = GetSelectedItems();
-
             // needed for valid GUndo pointer
             GEditor->BeginTransaction(LOCTEXT("vector-scene-tree-view.transaction.selection-changed","Selection Changed"));
             if( GUndo )
             {
                 FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectObject( scene->GetLayer()
-                                                                             , scene->GetCell()
-                                                                             , mLastSelection );
+                                                                             , scene->GetCell() );
 
                 GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -329,11 +313,23 @@ SOdysseyPainterEditorVectorSceneTreeView::OnSelectionChanged( TSharedPtr<FVector
             }
             GEditor->EndTransaction();
 
-            scene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-            scene->GetLayer()->RequestRedraw( scene->GetCell(), 0 );
+            TArray<TSharedPtr<FVectorSceneTreeViewItem>> selectedItems = GetSelectedItems();
+
+            scene->GetCell()->ClearObjectSelection();
+
+            for( TSharedPtr<FVectorSceneTreeViewItem> selectedItem : selectedItems )
+            {
+                FOdysseyVectorObject* selectedObject = selectedItem.Get()->GetVectorObject();
+
+                if( selectedObject->IsSelected() == false )
+                {
+                    selectedObject->GetCell()->SelectObject( selectedObject );
+                }
+            }
         }
 
-        mLastSelection = scene->GetCell()->GetSelectedObjectList();
+        scene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+        scene->GetLayer()->RequestRedraw( scene->GetCell(), 0 );
     }
 
     // Re-register this widget after we are done

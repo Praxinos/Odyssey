@@ -34,7 +34,7 @@
 
 SOdysseyAnimationTimelineInbetweeningHeader::~SOdysseyAnimationTimelineInbetweeningHeader()
 {
-    mAnimationLayerImageVector->GetVectorLayer()->OnUpdateDelegate().RemoveAll( this );
+    UnbindLayerDelegates( );
 }
 
 SOdysseyAnimationTimelineInbetweeningHeader::SOdysseyAnimationTimelineInbetweeningHeader()
@@ -53,7 +53,7 @@ SOdysseyAnimationTimelineInbetweeningHeader::Construct( const FArguments& InArgs
     mOnTransactCurrentFrame = InArgs._OnTransactCurrentFrame;
 
     // bind refresh function to delegates on existing vector scenes at load. Needed to refresh necessary widgets.
-    mAnimationLayerImageVector->GetVectorLayer()->OnUpdateDelegate().AddRaw( this, &SOdysseyAnimationTimelineInbetweeningHeader::OnVectorSceneNotify );
+    BindLayerDelegates( );
 
     SListView<TSharedPtr<FInbetweeningListViewItem>>::Construct(
         SListView<TSharedPtr<FInbetweeningListViewItem>>::FArguments()
@@ -123,96 +123,24 @@ SOdysseyAnimationTimelineInbetweeningHeader::Update()
     RequestListRefresh();
 }
 
-/*
 void
-SOdysseyAnimationTimelineInbetweeningHeader::Private_SelectRangeFromCurrentTo ( TSharedPtr<FInbetweeningListViewItem> iItem )
+SOdysseyAnimationTimelineInbetweeningHeader::ClearObjectSelection()
 {
-    if( RangeSelectionStart )
+    for( TSharedPtr<FInbetweeningListViewItem> item : mItemsSource )
     {
-        FOdysseyVectorObject* fromObject = RangeSelectionStart.Get()->GetInbetweenerTag()->GetOwner();
-        FOdysseyVectorObject* toObject = iItem.Get()->GetInbetweenerTag()->GetOwner();
-        FOdysseyVectorObject* vectorObject = mItemsSource[0].Get()->GetInbetweenerTag()->GetOwner();
-        FOdysseyVectorCell* vectorRoot = fromObject->GetCell();
-        bool doSelect = false;
+        FOdysseyVectorCell* cell = item->GetInbetweenerTag()->GetOwner()->GetCell();
 
-        for( const TSharedPtr<FInbetweeningListViewItem>& rangeItem : GetItems() )
-        {
-            FOdysseyVectorObject* rangeItemObject = rangeItem.Get()->GetInbetweenerTag()->GetOwner();
-
-            if( ( rangeItemObject == fromObject ) || ( rangeItemObject == toObject ) )
-            {
-                if( rangeItemObject->IsSelected() == false )
-                {
-                    vectorRoot->SelectObject( rangeItemObject );
-                    // Keep internal array consistent for use by other methods
-                    SelectedItems.Add( rangeItem );
-                }
-
-                doSelect = !doSelect;
-            }
-            else
-            {
-                if( doSelect )
-                {
-                    if( rangeItemObject->IsSelected() == false )
-                    {
-                        vectorRoot->SelectObject( rangeItemObject );
-                        // Keep internal array consistent for use by other methods
-                        SelectedItems.Add( rangeItem );
-                    }
-                }
-            }
-        }
+        cell->ClearObjectSelection();
     }
 }
-
-void
-SOdysseyAnimationTimelineInbetweeningHeader::Private_SetItemSelection ( TSharedPtr<FInbetweeningListViewItem> iItem
-                                                                      , bool bShouldBeSelected
-                                                                      , bool bWasUserDirected )
-{
-    FOdysseyVectorObject* vectorObject = iItem.Get()->GetInbetweenerTag()->GetOwner();
-    FOdysseyVectorCell* vectorRoot = vectorObject->GetCell();
-
-    if( bShouldBeSelected )
-    {
-        vectorRoot->SelectObject( vectorObject );
-        // Keep internal array consistent for use by other methods
-        SelectedItems.Add( iItem );
-
-        RangeSelectionStart = iItem;
-    }
-    else
-    {
-        // Keep internal array consistent for use by other methods
-        SelectedItems.Remove( iItem );
-
-        vectorRoot->UnselectObject( vectorObject );
-    }
-}
-
-void
-SOdysseyAnimationTimelineInbetweeningHeader::Private_ClearSelection()
-{
-    if( mItemsSource.Num() )
-    {
-        // the scene
-        FOdysseyVectorObject* vectorObject = mItemsSource[0].Get()->GetInbetweenerTag()->GetOwner();
-        FOdysseyVectorCell* vectorRoot = vectorObject->GetCell();
-
-        vectorRoot->ClearObjectSelection();
-    }
-
-    // Keep internal array consistent for use by other methods
-    SelectedItems.Empty();
-}
-*/
 
 void
 SOdysseyAnimationTimelineInbetweeningHeader::OnSelectionChanged( TSharedPtr<FInbetweeningListViewItem> iItem
                                                                , ESelectInfo::Type SelectInfo )
 {
     std::list<FOdysseyVectorCell*> cellList;
+
+    UnbindLayerDelegates();
 
     if( SelectInfo != ESelectInfo::Type::Direct )
     {
@@ -227,7 +155,7 @@ SOdysseyAnimationTimelineInbetweeningHeader::OnSelectionChanged( TSharedPtr<FInb
         }
 
         // needed for valid GUndo pointer
-        GEditor->BeginTransaction(LOCTEXT("vector-scene-tree-view.transaction.selection-changed","Selection Changed"));
+        GEditor->BeginTransaction(LOCTEXT("vector-timeline-inbetweening.transaction.selection-changed","Selection Changed"));
         if( GUndo )
         {
             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectObject( mAnimationLayerImageVector->GetVectorLayer().Get()
@@ -241,38 +169,45 @@ SOdysseyAnimationTimelineInbetweeningHeader::OnSelectionChanged( TSharedPtr<FInb
         }
         GEditor->EndTransaction();
 
-        for( FOdysseyVectorCell* cell : cellList )
+        TArray<TSharedPtr<FInbetweeningListViewItem>> selectedItems = GetSelectedItems();
+
+        // clear selection on all cells
+        ClearObjectSelection();
+
+        for( TSharedPtr<FInbetweeningListViewItem> selectedItem : selectedItems )
         {
-            cell->ClearObjectSelection();
+            FOdysseyVectorObject* selectedObject = selectedItem.Get()->GetInbetweenerTag()->GetOwner();
 
-            // mark for redraw (to force-redraw the HUD)
-            mAnimationLayerImageVector->GetVectorLayer()->InvalidateCell( cell );
-        }
-
-        for( TSharedPtr<FInbetweeningListViewItem> item : mItemsSource )
-        {
-            TArray<TSharedPtr<FInbetweeningListViewItem>> selectedItems = GetSelectedItems();
-
-            for( int i = 0; i < selectedItems.Num(); i++ )
+            if( selectedObject->IsSelected() == false )
             {
-                FOdysseyVectorObject* selectedObject = selectedItems[i].Get()->GetInbetweenerTag()->GetOwner();
-
                 selectedObject->GetCell()->SelectObject( selectedObject );
             }
         }
 
-        mAnimationLayerImageVector->GetVectorLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+        for( FOdysseyVectorCell* cell : cellList )
+        {
+            // mark for redraw (to force-redraw the HUD)
+            mAnimationLayerImageVector->GetVectorLayer()->InvalidateCell( cell );
+        }
 
+        mAnimationLayerImageVector->GetVectorLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
         mAnimationLayerImageVector->GetVectorLayer()->RequestRedraw( nullptr, 0 );
     }
+
+    BindLayerDelegates();
 }
 
-bool
-SOdysseyAnimationTimelineInbetweeningHeader::Private_IsItemSelected( const TSharedPtr<FInbetweeningListViewItem>& iItem )  const
+void
+SOdysseyAnimationTimelineInbetweeningHeader::UnbindLayerDelegates()
 {
-    UOdysseyLayerStack* layerStack = mAnimationLayerImageVector->GetLayerStack();
+    mAnimationLayerImageVector->GetVectorLayer()->OnUpdateDelegate().RemoveAll( this );
+}
 
-    return iItem.Get()->GetInbetweenerTag()->GetOwner()->IsSelected() && ( layerStack->GetCurrentLayer() == mAnimationLayerImageVector );
+void
+SOdysseyAnimationTimelineInbetweeningHeader::BindLayerDelegates()
+{
+    // bind refresh function to delegates on existing vector scenes at load. Needed to refresh necessary widgets.
+    mAnimationLayerImageVector->GetVectorLayer()->OnUpdateDelegate().AddRaw( this, &SOdysseyAnimationTimelineInbetweeningHeader::OnVectorSceneNotify );
 }
 
 TSharedRef<ITableRow>

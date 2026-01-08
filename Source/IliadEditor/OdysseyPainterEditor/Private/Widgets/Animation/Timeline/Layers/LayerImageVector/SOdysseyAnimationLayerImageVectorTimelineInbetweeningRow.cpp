@@ -73,7 +73,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonDown( con
     std::list<FOdysseyVectorTag*>& sharedTagList = sharedEnv->GetSharedTagList();
     FOdysseyVectorGroupPaint* scene = mInbetweenerTag->GetOwner()->GetScene();
 
-    // Call base method
+    // call base method to fill SelectedItems arrray
     FReply reply = STableRow<TSharedPtr<FInbetweeningListViewItem>>::OnMouseButtonDown( MyGeometry, MouseEvent );
 
     // for AddBreakdown / RemoveBreakdown functions in the context menu
@@ -214,6 +214,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonUp( const
 
     // Call base method
     FReply reply = STableRow<TSharedPtr<FInbetweeningListViewItem>>::OnMouseButtonUp( MyGeometry, MouseEvent );
+
 
     if ( MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton )
     {

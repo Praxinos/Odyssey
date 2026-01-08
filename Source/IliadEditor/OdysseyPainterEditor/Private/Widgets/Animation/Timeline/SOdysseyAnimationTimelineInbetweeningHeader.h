@@ -37,6 +37,9 @@ class SOdysseyAnimationTimelineInbetweeningHeader
         virtual FReply OnKeyDown ( const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent ) override;
         virtual FReply OnKeyUp ( const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent ) override;
         void Update();
+        void ClearObjectSelection();
+        void UnbindLayerDelegates();
+        void BindLayerDelegates();
 
     protected:
         void OnSelectionChanged( TSharedPtr<FInbetweeningListViewItem> iItem, ESelectInfo::Type SelectInfo );
@@ -49,16 +52,6 @@ class SOdysseyAnimationTimelineInbetweeningHeader
         void OnVectorSceneNotify( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags
                                 , uint32 iUpdateFlags );
         void MapActionsToCommandList();
-
-    private :
-/*
-        virtual void Private_SelectRangeFromCurrentTo ( TSharedPtr<FInbetweeningListViewItem> iItem ) override;
-        virtual void Private_SetItemSelection ( TSharedPtr<FInbetweeningListViewItem> iItem
-                                              , bool bShouldBeSelected
-                                              , bool bWasUserDirected ) override;
-        virtual void Private_ClearSelection() override;
-*/
-        virtual bool Private_IsItemSelected( const TSharedPtr<FInbetweeningListViewItem>& iItem )  const override;
 
     protected:
         UOdysseyAnimationLayerImageVector* mAnimationLayerImageVector;
