@@ -2238,7 +2238,7 @@ FOdysseyVectorPath::PickSegments( std::vector<FOdysseyVectorSegment*>& oPickedSe
 
     for( FOdysseyVectorSegment* segment : mSegmentList )
     {
-        if( segment->Pick( maskRect, (uint8*)maskData.pixel_data ) )
+        if( segment->Pick( maskData ) )
         {
             oPickedSegmentArray.push_back( segment );
         }

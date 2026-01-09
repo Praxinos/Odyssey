@@ -2979,8 +2979,7 @@ typedef struct _FVertexPair
 
 bool
 FOdysseyVectorGroupPaint::PickSection( FOdysseyVectorSection* iSection
-                                     , const ::ULIS::FRectD& iMaskRect
-                                     , const uint8* iMaskPixelData )
+                                     , const BLImageData& iMaskData )
 {
     ::ULIS::FVec2D* bezier = iSection->GetBezier();
     // Note, section are in paingroup coordinates (path's parent), not in path coordinates.
@@ -2994,7 +2993,12 @@ FOdysseyVectorGroupPaint::PickSection( FOdysseyVectorSection* iSection
                                     , ::ULIS::FVec2D( pt[2].x, pt[2].y )
                                     , ::ULIS::FVec2D( pt[3].x, pt[3].y ) };
 
-    return FOdysseyVector::PickBezier( worldBezier, iMaskRect, iMaskPixelData );
+    ::ULIS::FRectD maskRect = ::ULIS::FRectD( 0, 0, iMaskData.size.w, iMaskData.size.h );
+
+    return FOdysseyVector::PickBezier( worldBezier
+                                     , maskRect
+                                     , static_cast<uint8*>(iMaskData.pixel_data)
+                                     , iMaskData.stride );
 }
 
 void
@@ -3006,13 +3010,13 @@ FOdysseyVectorGroupPaint::PickErasedSections( std::vector<FOdysseyVectorSection*
 
     iBLMaskImage.get_data( &maskData );
 
-    maskRect = ::ULIS::FRectD( 0, 0, maskData.size.w, maskData.size.h );
+//    maskRect = ::ULIS::FRectD( 0, 0, maskData.size.w, maskData.size.h );
 
     for( FOdysseyVectorSection& section : mSectionBuffer )
     {
         if( section.GetSegment()->GetOwner()->GetClass() == FOdysseyVectorPath::StaticClass() )
         {
-            if( PickSection( &section, maskRect, (uint8*) maskData.pixel_data ) )
+            if( PickSection( &section, maskData ) )
             {
                 oErasedSectionArray.push_back( &section );
             }

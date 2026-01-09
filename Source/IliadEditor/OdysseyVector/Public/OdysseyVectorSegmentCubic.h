@@ -111,7 +111,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
          * @param iRadius ignored.
          */
         virtual bool Pick( double iX, double iY, double iRadius ) override;
-        virtual bool Pick( const ::ULIS::FRectD& iMaskRect, uint8* iPixelData ) override;
+        virtual bool Pick( const BLImageData& iMaskData ) override;
 
        /**
          * @brief Increase the polygon cache.

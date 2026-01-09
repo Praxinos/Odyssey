@@ -176,8 +176,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
 
         void AlterContourWidth( double iValue, bool iAbsolute );
         bool PickSection( FOdysseyVectorSection* iSection
-                        , const ::ULIS::FRectD& iMaskRect
-                        , const uint8* iMaskPixelData );
+                        , const BLImageData& iMaskData );
         void PickErasedSections( std::vector<FOdysseyVectorSection*>& oErasedSectionArray
                                , const BLImage& iBLMaskImage );
         virtual void UpdateBBox() override;

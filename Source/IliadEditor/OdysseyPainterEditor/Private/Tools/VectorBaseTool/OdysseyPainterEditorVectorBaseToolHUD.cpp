@@ -484,7 +484,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::PickPath( FOdysseyVectorGroup* iSelectio
                  && ( iY >= 0 && iY < imageData.size.h ) )
                 {
                     uint8 *pixel = static_cast<uint8*>(imageData.pixel_data);
-                    uint32 offset = ( iY * imageData.size.w ) + iX;
+                    uint32 offset = ( iY * imageData.stride ) + iX;
 
                     return ( pixel[offset] ) ? true : false;
                 }

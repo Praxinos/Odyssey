@@ -283,7 +283,7 @@ FOdysseyVectorSegmentCubic::ResetPolygonCache( )
 
 // mask-based version of the picking process
 bool
-FOdysseyVectorSegmentCubic::Pick( const ::ULIS::FRectD& iMaskRect, uint8* iPixelData )
+FOdysseyVectorSegmentCubic::Pick( const BLImageData& iMaskData )
 {
     BLMatrix2D& worldMatrix = GetOwner()->GetWorldMatrix();
     BLPoint pt[4] = { worldMatrix.map_point( mBezier[0].x, mBezier[0].y )
@@ -295,7 +295,12 @@ FOdysseyVectorSegmentCubic::Pick( const ::ULIS::FRectD& iMaskRect, uint8* iPixel
                                     , ::ULIS::FVec2D( pt[2].x, pt[2].y )
                                     , ::ULIS::FVec2D( pt[3].x, pt[3].y ) };
 
-    return FOdysseyVector::PickBezier( worldBezier, iMaskRect, iPixelData );
+    ::ULIS::FRectD maskRect = ::ULIS::FRectD( 0, 0, iMaskData.size.w, iMaskData.size.h );
+
+    return FOdysseyVector::PickBezier( worldBezier
+                                     , maskRect
+                                     , static_cast<uint8*>(iMaskData.pixel_data)
+                                     , iMaskData.stride );
 }
 
 bool
@@ -843,6 +848,11 @@ FOdysseyVectorSegmentCubic::BuildVariableAdaptive( FOdysseyVectorPoint* iFromPoi
                                                  , std::vector<FOdysseyVectorPoint>& iSubPointBuffer
                                                  , std::vector<FSegmentSubLine>& iSubLineBuffer )
 {
+    ::ULIS::FVec2D midTangent = ::ULIS::CubicBezierTangentAtParameter<::ULIS::FVec2D>( iBezier[0]
+                                                                                     , iBezier[1]
+                                                                                     , iBezier[2]
+                                                                                     , iBezier[3]
+                                                                                     , 0.5f );
     ::ULIS::FVec2D childBezier[2][4];
     ::ULIS::FVec2D worldBezier[4] = { FOdysseyVector::MapPoint( mOwner->GetWorldMatrix(), iBezier[0] )
                                     , FOdysseyVector::MapPoint( mOwner->GetWorldMatrix(), iBezier[1] )
@@ -877,61 +887,65 @@ FOdysseyVectorSegmentCubic::BuildVariableAdaptive( FOdysseyVectorPoint* iFromPoi
         ctrlVector[1] = -straightVector;
     }
 
-    if( ( iRecurseDepth < iMinRecurse  )
+    if( midTangent.DistanceSquared()
+    && ( ( iRecurseDepth < iMinRecurse  )// <-- Force at least N subdivisions
      || ( ( iRecurseDepth < iMaxRecurse ) // <--- do not subdivide forever though.
        && ( ( ctrlVector[0].DotProduct(  straightVector ) < dotLimit )
-         || ( ctrlVector[1].DotProduct( -straightVector ) < dotLimit ) ) ) )
+         || ( ctrlVector[1].DotProduct( -straightVector ) < dotLimit ) ) ) ) )
     {
-        FOdysseyVectorPoint* splitPoint;
-        double radiusAt = ( iRadiusFrom + iRadiusTo ) * 0.5f;
-        double splitsAt = ( iToT + iFromT ) * 0.5f;
+        //if( midTangent.DistanceSquared() )
+        {
+            FOdysseyVectorPoint* splitPoint;
+            double radiusAt = ( iRadiusFrom + iRadiusTo ) * 0.5f;
+            double splitsAt = ( iToT + iFromT ) * 0.5f;
 
-        memcpy( childBezier[0], iBezier, sizeof( childBezier[0] ) );
-        memcpy( childBezier[1], iBezier, sizeof( childBezier[1] ) );
+            memcpy( childBezier[0], iBezier, sizeof( childBezier[0] ) );
+            memcpy( childBezier[1], iBezier, sizeof( childBezier[1] ) );
 
-        // First sub-bezier from the divided parent bezier
-        // Note: we always split at 0.5f. The splitsAt variable just helps setting the fromT and toT variables of the polygon cache.
-        ::ULIS::CubicBezierSplitAtParameter       <::ULIS::FVec2D>( &childBezier[0][0]
-                                                                  , &childBezier[0][1]
-                                                                  , &childBezier[0][2]
-                                                                  , &childBezier[0][3]
-                                                                  , 0.5f );
+            // First sub-bezier from the divided parent bezier
+            // Note: we always split at 0.5f. The splitsAt variable just helps setting the fromT and toT variables of the polygon cache.
+            ::ULIS::CubicBezierSplitAtParameter       <::ULIS::FVec2D>( &childBezier[0][0]
+                                                                      , &childBezier[0][1]
+                                                                      , &childBezier[0][2]
+                                                                      , &childBezier[0][3]
+                                                                      , 0.5f );
 
-        splitPoint = &iSubPointBuffer.emplace_back( childBezier[0][3].x
-                                                  , childBezier[0][3].y );
+            splitPoint = &iSubPointBuffer.emplace_back( childBezier[0][3].x
+                                                      , childBezier[0][3].y );
 
-        BuildVariableAdaptive( iFromPoint
-                              , splitPoint
-                              , iFromT
-                              , splitsAt
-                              , iRadiusFrom
-                              , radiusAt
-                              , childBezier[0]
-                              , iRecurseDepth + 1
-                              , iMinRecurse
-                              , iMaxRecurse
-                              , iSubPointBuffer
-                              , iSubLineBuffer );
+            BuildVariableAdaptive( iFromPoint
+                                  , splitPoint
+                                  , iFromT
+                                  , splitsAt
+                                  , iRadiusFrom
+                                  , radiusAt
+                                  , childBezier[0]
+                                  , iRecurseDepth + 1
+                                  , iMinRecurse
+                                  , iMaxRecurse
+                                  , iSubPointBuffer
+                                  , iSubLineBuffer );
 
-        // Second sub-bezier from the divided parent bezier
-        // Note: we always split at 0.5f. The splitsAt variable just helps setting the fromT and toT variables of the polygon cache.
-        ::ULIS::CubicBezierInverseSplitAtParameter<::ULIS::FVec2D>( &childBezier[1][0]
-                                                                  , &childBezier[1][1]
-                                                                  , &childBezier[1][2]
-                                                                  , &childBezier[1][3]
-                                                                  , 0.5f );
-        BuildVariableAdaptive( splitPoint
-                              , iToPoint
-                              , splitsAt
-                              , iToT
-                              , radiusAt
-                              , iRadiusTo
-                              , childBezier[1]
-                              , iRecurseDepth + 1
-                              , iMinRecurse
-                              , iMaxRecurse
-                              , iSubPointBuffer
-                              , iSubLineBuffer );
+            // Second sub-bezier from the divided parent bezier
+            // Note: we always split at 0.5f. The splitsAt variable just helps setting the fromT and toT variables of the polygon cache.
+            ::ULIS::CubicBezierInverseSplitAtParameter<::ULIS::FVec2D>( &childBezier[1][0]
+                                                                      , &childBezier[1][1]
+                                                                      , &childBezier[1][2]
+                                                                      , &childBezier[1][3]
+                                                                      , 0.5f );
+            BuildVariableAdaptive( splitPoint
+                                  , iToPoint
+                                  , splitsAt
+                                  , iToT
+                                  , radiusAt
+                                  , iRadiusTo
+                                  , childBezier[1]
+                                  , iRecurseDepth + 1
+                                  , iMinRecurse
+                                  , iMaxRecurse
+                                  , iSubPointBuffer
+                                  , iSubLineBuffer );
+        }
     }
     else
     {
@@ -955,6 +969,11 @@ FOdysseyVectorSegmentCubic::BuildOffsetCurvesRecursive( ::ULIS::FVec2D iBezier[4
                                                       , uint32 iCurrentRecurse
                                                       , std::vector<FOdysseyVectorBezierFragment>& oBezierFragmentArray )
 {
+    ::ULIS::FVec2D midTangent = ::ULIS::CubicBezierTangentAtParameter<::ULIS::FVec2D>( iBezier[0]
+                                                                                     , iBezier[1]
+                                                                                     , iBezier[2]
+                                                                                     , iBezier[3]
+                                                                                     , 0.5f );
     ::ULIS::FVec2D childBezier[2][4];
     ::ULIS::FVec2D straightVector = iBezier[3] - iBezier[0];
     ::ULIS::FVec2D ctrlVector[2] = { iBezier[1] - iBezier[0]
@@ -975,26 +994,15 @@ FOdysseyVectorSegmentCubic::BuildOffsetCurvesRecursive( ::ULIS::FVec2D iBezier[4
         ctrlVector[1].Normalize();
     }
 
-    if( ( iCurrentRecurse < iMinRecurse ) // <-- Force at least 4 subdivisions because the intersections for paint groups are tested
-                                          // linearly and we need precision. If the cubic segment is made of few linear sub-segments,
-                                          // then the T value at intersection does not match the T value we would get with mathematically
-                                          // accurate Bezier-Bezier intersection, but these are very complicated to implement so we just
-                                          // stick with linear intersections. By dividing the bezier segment with smaller liner segments
-                                          // whose T values at end points are known, we get almost correct values for T at intersections.
+    if( midTangent.DistanceSquared()
+    && ( ( iCurrentRecurse < iMinRecurse ) // <-- Force at least N subdivisions
      || ( ( iCurrentRecurse < iMaxRecurse ) // <--- do not subdivide forever though.
        && ( ( ctrlVector[0].DotProduct(  straightVector ) < iDotLimit )
-         || ( ctrlVector[1].DotProduct( -straightVector ) < iDotLimit ) ) ) )
+         || ( ctrlVector[1].DotProduct( -straightVector ) < iDotLimit ) ) ) ) )
     {
-        ::ULIS::FVec2D tangent = ::ULIS::CubicBezierTangentAtParameter<::ULIS::FVec2D>( iBezier[0]
-                                                                                      , iBezier[1]
-                                                                                      , iBezier[2]
-                                                                                      , iBezier[3]
-                                                                                      , 0.5f );
-        if( tangent.DistanceSquared() )
+        //if( tangent.DistanceSquared() )
         {
             double splitsAt = ( iToT + iFromT ) * 0.5f;
-
-            tangent.Normalize();
 
             memcpy( childBezier[0], iBezier, sizeof( childBezier[0] ) );
             memcpy( childBezier[1], iBezier, sizeof( childBezier[1] ) );
@@ -1250,7 +1258,6 @@ FOdysseyVectorSegmentCubic::Update( uint32 iUpdateFlags )
     ::ULIS::FRectD previousBBox = mBBox;
     double xmin, ymin, xmax, ymax;
 
-
     FOdysseyVectorSegment::Update( iUpdateFlags );
 
     mBezier[0] = mPoint[0]->GetCoords();
@@ -1342,6 +1349,10 @@ FOdysseyVectorSegmentCubic::BuildVariable( uint32 iMinRecurse
     mLength = 0.0f; // note: BuildVariableAdaptive will update the length
 
     ResetPolygonCache();
+
+    // init min / max values. Needed because in case the segment has length 0, otherwise the values will be undefined
+    oXmin = oXmax = mPoint[0]->GetX();
+    oYmin = oYmax = mPoint[0]->GetY();
 
     //if( mLength )
     {

@@ -353,7 +353,8 @@ FOdysseyVector::BezierExtract( const ::ULIS::FVec2D& iP0
 bool
 FOdysseyVector::PickBezier( const ::ULIS::FVec2D iWorldBezier[4]
                           , const ::ULIS::FRectD& iMaskRect
-                          , const uint8* iPixelData )
+                          , const uint8* iPixelData
+                          , uint32 iStride )
 {
     double xmin = ::ULIS::FMath::Min4( iWorldBezier[0].x, iWorldBezier[1].x
                                      , iWorldBezier[2].x, iWorldBezier[3].x );
@@ -382,7 +383,7 @@ FOdysseyVector::PickBezier( const ::ULIS::FVec2D iWorldBezier[4]
 
             if( ( x >= 0 ) && ( x < (int)iMaskRect.w ) && ( y >= 0 ) && ( y < (int)iMaskRect.h ) )
             {
-                uint32 offset = ( y * iMaskRect.w ) + x;
+                uint32 offset = ( y * iStride ) + x;
 
                 if ( iPixelData[offset] != 0 )
                 {
@@ -402,7 +403,7 @@ FOdysseyVector::PickBezier( const ::ULIS::FVec2D iWorldBezier[4]
                                                                       , &childBezier[0][2]
                                                                       , &childBezier[0][3]
                                                                       , 0.5f );
-            if( PickBezier( childBezier[0], iMaskRect, iPixelData ) == true )
+            if( PickBezier( childBezier[0], iMaskRect, iPixelData, iStride ) == true )
             {
                 return true;
             }
@@ -412,7 +413,7 @@ FOdysseyVector::PickBezier( const ::ULIS::FVec2D iWorldBezier[4]
                                                                       , &childBezier[1][2]
                                                                       , &childBezier[1][3]
                                                                       , 0.5f );
-            if( PickBezier( childBezier[1], iMaskRect, iPixelData ) == true )
+            if( PickBezier( childBezier[1], iMaskRect, iPixelData, iStride ) == true )
             {
                 return true;
             }

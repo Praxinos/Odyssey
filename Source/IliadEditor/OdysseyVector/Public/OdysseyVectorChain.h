@@ -180,10 +180,8 @@ class FOdysseyVectorChain
                   , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
                   , std::vector<FWayPoint>& oWayPointArray
                   , std::vector<FWayFragment>& oWayFragmentArray );
-        bool PickSection( FOdysseyVectorSection* iSection
-                        , const ::ULIS::FRectD& iMaskRect
-                        , const uint8* iMaskPixelData );
-        bool PickSections( std::vector<FOdysseyVectorSection*>& oPickedSectionArray );
+        bool PickSection( FOdysseyVectorSection* iSection, const BLImageData& iMaskData );
+        //bool PickSections( std::vector<FOdysseyVectorSection*>& oPickedSectionArray );
 
         void GetSections( FOdysseyVectorVertex* iVertex
                         , FOdysseyVectorPath* iPath

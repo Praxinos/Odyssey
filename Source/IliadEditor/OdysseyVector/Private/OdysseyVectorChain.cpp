@@ -220,8 +220,7 @@ FOdysseyVectorChain::ExtendErasedSection( FOdysseyVectorPath* iPath
 
 bool
 FOdysseyVectorChain::PickSection( FOdysseyVectorSection* iSection
-                                , const ::ULIS::FRectD& iMaskRect
-                                , const uint8* iMaskPixelData )
+                                , const BLImageData& iMaskData )
 {
     ::ULIS::FVec2D* bezier = iSection->GetBezier();
     // Note, section are in paingroup coordinates (path's parent), not in path coordinates.
@@ -235,7 +234,12 @@ FOdysseyVectorChain::PickSection( FOdysseyVectorSection* iSection
                                     , ::ULIS::FVec2D( pt[2].x, pt[2].y )
                                     , ::ULIS::FVec2D( pt[3].x, pt[3].y ) };
 
-    return FOdysseyVector::PickBezier( worldBezier, iMaskRect, iMaskPixelData );
+    ::ULIS::FRectD maskRect = ::ULIS::FRectD( 0, 0, iMaskData.size.w, iMaskData.size.h );
+
+    return FOdysseyVector::PickBezier( worldBezier
+                                     , maskRect
+                                     , static_cast<uint8*>(iMaskData.pixel_data)
+                                     , iMaskData.stride );
 }
 
 void
@@ -669,7 +673,7 @@ FOdysseyVectorChain::GetAlpha( int32 iX, int32 iY, BLImageData* iImageData )
      && ( iY >= 0 ) && ( iY < iImageData->size.h ) )
     {
         uint8 *pixel = static_cast<uint8*>( iImageData->pixel_data );
-        uint32 offset = ( iY * iImageData->size.w ) + iX;
+        uint32 offset = ( iY * iImageData->stride ) + iX;
 
         return pixel[offset];
     }

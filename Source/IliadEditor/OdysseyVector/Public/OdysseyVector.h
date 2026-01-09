@@ -87,7 +87,8 @@ namespace FOdysseyVector
 
     bool ODYSSEYVECTOR_API PickBezier( const ::ULIS::FVec2D iWorldBezier[4]
                                      , const ::ULIS::FRectD& iMaskRect
-                                     , const uint8* iPixelData );
+                                     , const uint8* iPixelData
+                                     , uint32 iStride );
 
     double ODYSSEYVECTOR_API GetCubicBezierApproximateLength( const ::ULIS::FVec2D iBezier[4]
                                                        , uint32 iDivisions );
