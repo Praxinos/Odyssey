@@ -113,7 +113,7 @@ FOdysseyPainterEditorVectorMatchingToolHUD::PickTargetPoints( FInbetweenerBreakd
 
     for( FInbetweenerPoint& point : iBreakdown->GetGrid()->GetPointBuffer() )
     {
-        BLPoint pt = worldMatrix.mapPoint( point.GetTargetPosition().x
+        BLPoint pt = worldMatrix.map_point( point.GetTargetPosition().x
                                          , point.GetTargetPosition().y );
         ::ULIS::FVec2D vec = ::ULIS::FVec2D( pt.x - iWorldX, pt.y - iWorldY );
         double distance = vec.Distance();

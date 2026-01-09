@@ -6,7 +6,7 @@
 #ifndef BLEND2D_THREADING_UNIQUEIDGENERATOR_P_H_INCLUDED
 #define BLEND2D_THREADING_UNIQUEIDGENERATOR_P_H_INCLUDED
 
-#include "../threading/atomic_p.h"
+#include <blend2d/threading/atomic_p.h>
 
 //! \cond INTERNAL
 //! \addtogroup blend2d_internal
@@ -21,7 +21,7 @@ enum class Domain : uint32_t {
   kMaxValue = 1
 };
 
-BL_HIDDEN BLUniqueId generateId(Domain domain) noexcept;
+BL_HIDDEN BLUniqueId generate_id(Domain domain) noexcept;
 
 } // {BLUniqueIdGenerator}
 

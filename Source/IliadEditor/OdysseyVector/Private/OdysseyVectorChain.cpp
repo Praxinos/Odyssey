@@ -226,10 +226,10 @@ FOdysseyVectorChain::PickSection( FOdysseyVectorSection* iSection
     ::ULIS::FVec2D* bezier = iSection->GetBezier();
     // Note, section are in paingroup coordinates (path's parent), not in path coordinates.
     BLMatrix2D& worldMatrix = iSection->GetOwner()->GetWorldMatrix();
-    BLPoint pt[4] = { worldMatrix.mapPoint( bezier[0].x, bezier[0].y )
-                    , worldMatrix.mapPoint( bezier[1].x, bezier[1].y )
-                    , worldMatrix.mapPoint( bezier[2].x, bezier[2].y )
-                    , worldMatrix.mapPoint( bezier[3].x, bezier[3].y ) };
+    BLPoint pt[4] = { worldMatrix.map_point( bezier[0].x, bezier[0].y )
+                    , worldMatrix.map_point( bezier[1].x, bezier[1].y )
+                    , worldMatrix.map_point( bezier[2].x, bezier[2].y )
+                    , worldMatrix.map_point( bezier[3].x, bezier[3].y ) };
     ::ULIS::FVec2D worldBezier[4] = { ::ULIS::FVec2D( pt[0].x, pt[0].y )
                                     , ::ULIS::FVec2D( pt[1].x, pt[1].y )
                                     , ::ULIS::FVec2D( pt[2].x, pt[2].y )
@@ -388,9 +388,9 @@ FOdysseyVectorChain::EraseSections( std::vector<FWayPoint>& oWayPointBuffer
                     ::ULIS::FVec2D& vertexCoords = nextVertex->GetCoords();
                     // owner is the paintgroup
                     BLMatrix2D& ownerWorldMatrix = nextVertex->GetOwner()->GetWorldMatrix();
-                    BLPoint vertexWorldCoords = ownerWorldMatrix.mapPoint( vertexCoords.x
+                    BLPoint vertexWorldCoords = ownerWorldMatrix.map_point( vertexCoords.x
                                                                          , vertexCoords.y );
-                    BLPoint vertexPathCoords  = pathInverseWorldMatrix.mapPoint( vertexWorldCoords.x
+                    BLPoint vertexPathCoords  = pathInverseWorldMatrix.map_point( vertexWorldCoords.x
                                                                                , vertexWorldCoords.y );
                     FOdysseyVectorVertex* derivedVertex = new FOdysseyVectorVertex( vertexPathCoords.x
                                                                                   , vertexPathCoords.y
@@ -668,7 +668,7 @@ FOdysseyVectorChain::GetAlpha( int32 iX, int32 iY, BLImageData* iImageData )
     if( ( iX >= 0 ) && ( iX < iImageData->size.w )
      && ( iY >= 0 ) && ( iY < iImageData->size.h ) )
     {
-        uint8 *pixel = static_cast<uint8*>( iImageData->pixelData );
+        uint8 *pixel = static_cast<uint8*>( iImageData->pixel_data );
         uint32 offset = ( iY * iImageData->size.w ) + iX;
 
         return pixel[offset];
@@ -828,7 +828,7 @@ FOdysseyVectorChain::VertexToWaypoint( BLImageData* iImageData
 {
     BLMatrix2D& worldMatrix = mPath->GetWorldMatrix();
     ::ULIS::FVec2D& coords = iVertex->GetCoords();
-    BLPoint point = worldMatrix.mapPoint( coords.x, coords.y );
+    BLPoint point = worldMatrix.map_point( coords.x, coords.y );
     uint8 alpha = GetAlpha( point.x, point.y, iImageData );
 
     if( alpha == 0 ) // vertex in dark zone, keep it
@@ -898,8 +898,8 @@ FOdysseyVectorChain::EraseSegments( BLImageData* iImageData
                 ::ULIS::FVec2D& p0Coords = fraction.point[0]->GetCoords();
                 ::ULIS::FVec2D& p1Coords = fraction.point[1]->GetCoords();
 
-                BLPoint p0 = worldMatrix.mapPoint( p0Coords.x, p0Coords.y );
-                BLPoint p1 = worldMatrix.mapPoint( p1Coords.x, p1Coords.y );
+                BLPoint p0 = worldMatrix.map_point( p0Coords.x, p0Coords.y );
+                BLPoint p1 = worldMatrix.map_point( p1Coords.x, p1Coords.y );
 
                 chainVertex = TraceLine( p0.x
                                        , p0.y
@@ -925,8 +925,8 @@ FOdysseyVectorChain::EraseSegments( BLImageData* iImageData
                 ::ULIS::FVec2D& p0Coords = fraction.point[0]->GetCoords();
                 ::ULIS::FVec2D& p1Coords = fraction.point[1]->GetCoords();
 
-                BLPoint p0 = worldMatrix.mapPoint( p0Coords.x, p0Coords.y );
-                BLPoint p1 = worldMatrix.mapPoint( p1Coords.x, p1Coords.y );
+                BLPoint p0 = worldMatrix.map_point( p0Coords.x, p0Coords.y );
+                BLPoint p1 = worldMatrix.map_point( p1Coords.x, p1Coords.y );
 
                 chainVertex = TraceLine( p1.x
                                        , p1.y

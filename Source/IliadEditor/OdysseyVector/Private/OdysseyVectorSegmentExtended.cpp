@@ -44,12 +44,12 @@ FOdysseyVectorSegmentExtended::DrawStructure( BLContext* iBLContext
     BLMatrix2D& worldMatrix = iParentObject->GetWorldMatrix();
     ::ULIS::FVec2D vertex0Coords = GetVertex(0)->GetCoords();
     ::ULIS::FVec2D vertex1Coords = GetVertex(1)->GetCoords();
-    BLPoint point0 = iWorld ? worldMatrix.mapPoint( vertex0Coords.x, vertex0Coords.y ) : BLPoint( vertex0Coords.x, vertex0Coords.y );
-    BLPoint point1 = iWorld ? worldMatrix.mapPoint( vertex1Coords.x, vertex1Coords.y ) : BLPoint( vertex1Coords.x, vertex1Coords.y );
+    BLPoint point0 = iWorld ? worldMatrix.map_point( vertex0Coords.x, vertex0Coords.y ) : BLPoint( vertex0Coords.x, vertex0Coords.y );
+    BLPoint point1 = iWorld ? worldMatrix.map_point( vertex1Coords.x, vertex1Coords.y ) : BLPoint( vertex1Coords.x, vertex1Coords.y );
     BLPath path;
 
-    path.moveTo( point0 );
-    path.lineTo( point1 );
+    path.move_to( point0 );
+    path.line_to( point1 );
 
-    iBLContext->strokePath( path );
+    iBLContext->stroke_path( path );
 }

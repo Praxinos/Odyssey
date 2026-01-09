@@ -6,15 +6,17 @@
 #ifndef BLEND2D_SUPPORT_WRAP_P_H_INCLUDED
 #define BLEND2D_SUPPORT_WRAP_P_H_INCLUDED
 
-#include "../api-internal_p.h"
+#include <blend2d/core/api-internal_p.h>
 
 //! \cond INTERNAL
 //! \addtogroup blend2d_internal
 //! \{
 
+namespace bl {
+
 //! Wrapper to control construction & destruction of `T`.
 template<typename T>
-struct alignas(alignof(T)) BLWrap {
+struct alignas(alignof(T)) Wrap {
   //! Storage required to instantiate `T`.
   char _data[sizeof(T)];
 
@@ -25,14 +27,14 @@ struct alignas(alignof(T)) BLWrap {
   template<typename... Args>
   BL_INLINE T* init(Args&&... args) noexcept {
     T* instance = static_cast<T*>(static_cast<void*>(_data));
-    blCallCtor(*instance, std::forward<Args>(args)...);
+    bl_call_ctor(*instance, BLInternal::forward<Args>(args)...);
     return instance;
   }
 
   //! Placement delete destructor.
   BL_INLINE void destroy() noexcept {
     T* instance = static_cast<T*>(static_cast<void*>(_data));
-    blCallDtor(*instance);
+    bl_call_dtor(*instance);
   }
 
   //! \}
@@ -57,6 +59,8 @@ struct alignas(alignof(T)) BLWrap {
 
   //! \}
 };
+
+} // {bl}
 
 //! \}
 //! \endcond

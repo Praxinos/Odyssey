@@ -6,99 +6,77 @@
 #ifndef BLEND2D_RASTER_RENDERBATCH_P_H_INCLUDED
 #define BLEND2D_RASTER_RENDERBATCH_P_H_INCLUDED
 
-#include "../image.h"
-#include "../raster/rasterdefs_p.h"
-#include "../raster/renderqueue_p.h"
-#include "../support/arenaallocator_p.h"
-#include "../support/arenalist_p.h"
-#include "../threading/atomic_p.h"
+#include <blend2d/core/image.h>
+#include <blend2d/raster/rasterdefs_p.h>
+#include <blend2d/raster/renderqueue_p.h>
+#include <blend2d/support/arenaallocator_p.h>
+#include <blend2d/support/arenalist_p.h>
+#include <blend2d/threading/atomic_p.h>
 
 //! \cond INTERNAL
 //! \addtogroup blend2d_raster_engine_impl
 //! \{
 
-namespace BLRasterEngine {
+namespace bl::RasterEngine {
 
 class WorkerSynchronization;
 
 //! Holds jobs and commands to be dispatched and then consumed by worker threads.
 class alignas(BL_CACHE_LINE_SIZE) RenderBatch {
 public:
+  //! \name Members
+  //! \{
+
   struct alignas(BL_CACHE_LINE_SIZE) {
     //! Job index, incremented by each worker when trying to get the next job.
     //! Can go out of range in case there is no more jobs to process.
-    size_t _jobIndex;
+    size_t _job_index;
 
     //! Accumulated errors, initially zero for each batch. Since all workers
     //! would only OR their errors (if happened) at the end we can share the
-    //! cache line with `_jobIndex`.
-    uint32_t _accumulatedErrorFlags;
+    //! cache line with `_job_index`.
+    uint32_t _accumulated_error_flags;
   };
-
-  struct alignas(BL_CACHE_LINE_SIZE) {
-    //! Band index, incremented by workers to get a band index to process.
-    //! Can go out of range in case there is no more bands to process.
-    size_t _bandIndex;
-  };
-
-  //! Pointer to the synchronization data.
-  WorkerSynchronization* _synchronization;
 
   //! Contains all jobs of this batch.
-  BLArenaList<RenderJobQueue> _jobList;
-  //! Contains all RenderFetchData objects of this batch.
-  BLArenaList<RenderFetchQueue> _fetchList;
+  ArenaList<RenderJobQueue> _job_list;
   //! Contains all commands of this batch.
-  BLArenaList<RenderCommandQueue> _commandList;
-  //! A storage where all user objects (currently only BLImage) are kept until they can be released.
-  BLArenaList<RenderImageQueue> _imageList;
+  ArenaList<RenderCommandQueue> _command_list;
 
-  BLArenaAllocator::Block* _pastBlock;
+  ArenaAllocator::Block* _past_block;
 
-  uint32_t _workerCount;
-  uint32_t _jobCount;
-  uint32_t _commandCount;
-  uint32_t _bandCount;
-  uint32_t _stateSlotCount;
+  uint32_t _worker_count;
+  uint32_t _job_count;
+  uint32_t _command_count;
+  uint32_t _band_count;
+  uint32_t _state_slot_count;
 
-  BL_INLINE RenderBatch() noexcept
-    : _jobIndex(0),
-      _accumulatedErrorFlags(0),
-      _bandIndex(0),
-      _synchronization(nullptr),
-      _jobList(),
-      _fetchList(),
-      _commandList(),
-      _pastBlock(nullptr),
-      _workerCount(0),
-      _jobCount(0),
-      _commandCount(0),
-      _bandCount(0),
-      _stateSlotCount(0) {}
+  //! \}
 
-  BL_INLINE ~RenderBatch() noexcept {}
+  //! name Accessors
+  //! \{
 
-  BL_INLINE size_t nextJobIndex() noexcept { return blAtomicFetchAddStrong(&_jobIndex); }
-  BL_INLINE size_t nextBandIndex() noexcept { return blAtomicFetchAddStrong(&_bandIndex); }
+  BL_INLINE_NODEBUG size_t next_job_index() noexcept { return bl_atomic_fetch_add_strong(&_job_index); }
 
-  BL_INLINE const BLArenaList<RenderJobQueue>& jobList() const noexcept { return _jobList; }
-  BL_INLINE const BLArenaList<RenderFetchQueue>& fetchList() const noexcept { return _fetchList; }
-  BL_INLINE const BLArenaList<RenderCommandQueue>& commandList() const noexcept { return _commandList; }
+  BL_INLINE_NODEBUG const ArenaList<RenderJobQueue>& job_list() const noexcept { return _job_list; }
+  BL_INLINE_NODEBUG const ArenaList<RenderCommandQueue>& command_list() const noexcept { return _command_list; }
 
-  BL_INLINE uint32_t workerCount() const noexcept { return _workerCount; }
+  BL_INLINE_NODEBUG uint32_t worker_count() const noexcept { return _worker_count; }
 
-  BL_INLINE uint32_t jobCount() const noexcept { return _jobCount; }
-  BL_INLINE uint32_t commandCount() const noexcept { return _commandCount; }
+  BL_INLINE_NODEBUG uint32_t job_count() const noexcept { return _job_count; }
+  BL_INLINE_NODEBUG uint32_t command_count() const noexcept { return _command_count; }
 
-  BL_INLINE uint32_t bandCount() const noexcept { return _bandCount; }
-  BL_INLINE uint32_t stateSlotCount() const noexcept { return _stateSlotCount; }
+  BL_INLINE_NODEBUG uint32_t band_count() const noexcept { return _band_count; }
+  BL_INLINE_NODEBUG uint32_t state_slot_count() const noexcept { return _state_slot_count; }
 
-  BL_INLINE void accumulateErrorFlags(uint32_t errorFlags) noexcept {
-    blAtomicFetchOrRelaxed(&_accumulatedErrorFlags, errorFlags);
+  BL_INLINE void accumulate_error_flags(uint32_t error_flags) noexcept {
+    bl_atomic_fetch_or_relaxed(&_accumulated_error_flags, error_flags);
   }
+
+  //! \}
 };
 
-} // {BLRasterEngine}
+} // {bl::RasterEngine}
 
 //! \}
 //! \endcond

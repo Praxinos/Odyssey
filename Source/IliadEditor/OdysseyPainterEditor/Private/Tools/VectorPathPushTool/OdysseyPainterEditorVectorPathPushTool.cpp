@@ -157,10 +157,10 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDownVector( FOdysseyVectorGroupP
                 ::ULIS::FVec2D& ctrlPoint1 = handle1->GetCoords();
                 ::ULIS::FVec2D& point0 = vertex0->GetCoords();
                 ::ULIS::FVec2D& point1 = vertex1->GetCoords();
-                BLPoint worldCtrlPoint0 = pathWorldMatrix.mapPoint( ctrlPoint0.x, ctrlPoint0.y );
-                BLPoint worldCtrlPoint1 = pathWorldMatrix.mapPoint( ctrlPoint1.x, ctrlPoint1.y );
-                BLPoint worldPoint0 = pathWorldMatrix.mapPoint( point0.x, point0.y );
-                BLPoint worldPoint1 = pathWorldMatrix.mapPoint( point1.x, point1.y );
+                BLPoint worldCtrlPoint0 = pathWorldMatrix.map_point( ctrlPoint0.x, ctrlPoint0.y );
+                BLPoint worldCtrlPoint1 = pathWorldMatrix.map_point( ctrlPoint1.x, ctrlPoint1.y );
+                BLPoint worldPoint0 = pathWorldMatrix.map_point( point0.x, point0.y );
+                BLPoint worldPoint1 = pathWorldMatrix.map_point( point1.x, point1.y );
                 double pointDistance0 = ::ULIS::FVec2D( iPointInTexture.x - worldPoint0.x
                                                       , iPointInTexture.y - worldPoint0.y ).Distance();
                 double pointDistance1 = ::ULIS::FVec2D( iPointInTexture.x - worldPoint1.x
@@ -255,7 +255,7 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDragVector( FOdysseyVectorGroupP
             {
                 FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>(point);
                 FOdysseyVectorPath* path = vertex->GetOwnerAsPath();
-                BLPoint delta = path->GetInverseWorldMatrix().mapVector( iPointInTexture.deltaPosition.X
+                BLPoint delta = path->GetInverseWorldMatrix().map_vector( iPointInTexture.deltaPosition.X
                                                                        , iPointInTexture.deltaPosition.Y );
 
                 point->Set( mPushedPointArray[i].originalCoords.x + ( delta.x * ratio )
@@ -277,7 +277,7 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDragVector( FOdysseyVectorGroupP
             {
                 FOdysseyVectorHandleSegment* handleSegment = static_cast<FOdysseyVectorHandleSegment*>(point);
                 FOdysseyVectorPath* path = handleSegment->GetOwner()->GetOwnerAsPath();
-                BLPoint delta = path->GetInverseWorldMatrix().mapVector( iPointInTexture.deltaPosition.X
+                BLPoint delta = path->GetInverseWorldMatrix().map_vector( iPointInTexture.deltaPosition.X
                                                                        , iPointInTexture.deltaPosition.Y );
 
                 point->Set( mPushedPointArray[i].originalCoords.x + ( delta.x * ratio )

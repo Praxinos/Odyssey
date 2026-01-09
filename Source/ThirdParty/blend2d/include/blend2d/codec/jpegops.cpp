@@ -7,22 +7,22 @@
 // released into PUBLIC DOMAIN. Blend2D's JPEG codec can be distributed
 // under Blend2D's ZLIB license or under STB's PUBLIC DOMAIN as well.
 
-#include "../api-build_p.h"
-#include "../rgba_p.h"
-#include "../codec/jpegcodec_p.h"
-#include "../codec/jpegops_p.h"
-#include "../support/intops_p.h"
-#include "../support/memops_p.h"
+#include <blend2d/core/api-build_p.h>
+#include <blend2d/core/rgba_p.h>
+#include <blend2d/codec/jpegcodec_p.h>
+#include <blend2d/codec/jpegops_p.h>
+#include <blend2d/support/intops_p.h>
+#include <blend2d/support/memops_p.h>
 
-// ============================================================================
-// [Global Variables]
-// ============================================================================
+namespace bl::Jpeg {
 
-BLJpegOps blJpegOps;
+// bl::Jpeg::Opts - Globals
+// ========================
 
-// ============================================================================
-// [BLJpegOps - IDCT]
-// ============================================================================
+FuncOpts opts;
+
+// bl::Jpeg::Opts - IDCT
+// =====================
 
 #define BL_JPEG_IDCT_IDCT(s0, s1, s2, s3, s4, s5, s6, s7) \
   int x0, x1, x2, x3;                             \
@@ -72,27 +72,27 @@ BLJpegOps blJpegOps;
   t1 += p2 + p4;                                  \
   t0 += p1 + p3;
 
-void BL_CDECL blJpegIDCT8(uint8_t* dst, intptr_t dstStride, const int16_t* src, const uint16_t* qTable) noexcept {
+void BL_CDECL idct8(uint8_t* dst, intptr_t dst_stride, const int16_t* src, const uint16_t* q_table) noexcept {
   uint32_t i;
   int32_t* tmp;
-  int32_t tmpData[64];
+  int32_t tmp_data[64];
 
-  for (i = 0, tmp = tmpData; i < 8; i++, src++, tmp++, qTable++) {
+  for (i = 0, tmp = tmp_data; i < 8; i++, src++, tmp++, q_table++) {
     // Avoid dequantizing and IDCTing zeros.
     if (src[8] == 0 && src[16] == 0 && src[24] == 0 && src[32] == 0 && src[40] == 0 && src[48] == 0 && src[56] == 0) {
-      int32_t dcTerm = (int32_t(src[0]) * int32_t(qTable[0])) << (BL_JPEG_IDCT_PREC - BL_JPEG_IDCT_COL_NORM);
-      tmp[0] = tmp[8] = tmp[16] = tmp[24] = tmp[32] = tmp[40] = tmp[48] = tmp[56] = dcTerm;
+      int32_t dc_term = (int32_t(src[0]) * int32_t(q_table[0])) << (BL_JPEG_IDCT_PREC - BL_JPEG_IDCT_COL_NORM);
+      tmp[0] = tmp[8] = tmp[16] = tmp[24] = tmp[32] = tmp[40] = tmp[48] = tmp[56] = dc_term;
     }
     else {
       BL_JPEG_IDCT_IDCT(
-        int32_t(src[ 0]) * int32_t(qTable[ 0]),
-        int32_t(src[ 8]) * int32_t(qTable[ 8]),
-        int32_t(src[16]) * int32_t(qTable[16]),
-        int32_t(src[24]) * int32_t(qTable[24]),
-        int32_t(src[32]) * int32_t(qTable[32]),
-        int32_t(src[40]) * int32_t(qTable[40]),
-        int32_t(src[48]) * int32_t(qTable[48]),
-        int32_t(src[56]) * int32_t(qTable[56]));
+        int32_t(src[ 0]) * int32_t(q_table[ 0]),
+        int32_t(src[ 8]) * int32_t(q_table[ 8]),
+        int32_t(src[16]) * int32_t(q_table[16]),
+        int32_t(src[24]) * int32_t(q_table[24]),
+        int32_t(src[32]) * int32_t(q_table[32]),
+        int32_t(src[40]) * int32_t(q_table[40]),
+        int32_t(src[48]) * int32_t(q_table[48]),
+        int32_t(src[56]) * int32_t(q_table[56]));
 
       x0 += BL_JPEG_IDCT_COL_BIAS;
       x1 += BL_JPEG_IDCT_COL_BIAS;
@@ -110,7 +110,7 @@ void BL_CDECL blJpegIDCT8(uint8_t* dst, intptr_t dstStride, const int16_t* src, 
     }
   }
 
-  for (i = 0, tmp = tmpData; i < 8; i++, dst += dstStride, tmp += 8) {
+  for (i = 0, tmp = tmp_data; i < 8; i++, dst += dst_stride, tmp += 8) {
     BL_JPEG_IDCT_IDCT(tmp[0], tmp[1], tmp[2], tmp[3], tmp[4], tmp[5], tmp[6], tmp[7])
 
     x0 += BL_JPEG_IDCT_ROW_BIAS;
@@ -118,22 +118,21 @@ void BL_CDECL blJpegIDCT8(uint8_t* dst, intptr_t dstStride, const int16_t* src, 
     x2 += BL_JPEG_IDCT_ROW_BIAS;
     x3 += BL_JPEG_IDCT_ROW_BIAS;
 
-    dst[0] = BLIntOps::clampToByte((x0 + t3) >> BL_JPEG_IDCT_ROW_NORM);
-    dst[7] = BLIntOps::clampToByte((x0 - t3) >> BL_JPEG_IDCT_ROW_NORM);
-    dst[1] = BLIntOps::clampToByte((x1 + t2) >> BL_JPEG_IDCT_ROW_NORM);
-    dst[6] = BLIntOps::clampToByte((x1 - t2) >> BL_JPEG_IDCT_ROW_NORM);
-    dst[2] = BLIntOps::clampToByte((x2 + t1) >> BL_JPEG_IDCT_ROW_NORM);
-    dst[5] = BLIntOps::clampToByte((x2 - t1) >> BL_JPEG_IDCT_ROW_NORM);
-    dst[3] = BLIntOps::clampToByte((x3 + t0) >> BL_JPEG_IDCT_ROW_NORM);
-    dst[4] = BLIntOps::clampToByte((x3 - t0) >> BL_JPEG_IDCT_ROW_NORM);
+    dst[0] = IntOps::clamp_to_byte((x0 + t3) >> BL_JPEG_IDCT_ROW_NORM);
+    dst[7] = IntOps::clamp_to_byte((x0 - t3) >> BL_JPEG_IDCT_ROW_NORM);
+    dst[1] = IntOps::clamp_to_byte((x1 + t2) >> BL_JPEG_IDCT_ROW_NORM);
+    dst[6] = IntOps::clamp_to_byte((x1 - t2) >> BL_JPEG_IDCT_ROW_NORM);
+    dst[2] = IntOps::clamp_to_byte((x2 + t1) >> BL_JPEG_IDCT_ROW_NORM);
+    dst[5] = IntOps::clamp_to_byte((x2 - t1) >> BL_JPEG_IDCT_ROW_NORM);
+    dst[3] = IntOps::clamp_to_byte((x3 + t0) >> BL_JPEG_IDCT_ROW_NORM);
+    dst[4] = IntOps::clamp_to_byte((x3 - t0) >> BL_JPEG_IDCT_ROW_NORM);
   }
 }
 
-// ============================================================================
-// [BLJpegOps - RGB32FromYCbCr8]
-// ============================================================================
+// bl::Jpeg::Opts - RGB32 From YCbCr8
+// ==================================
 
-void BL_CDECL blJpegRGB32FromYCbCr8(uint8_t* dst, const uint8_t* pY, const uint8_t* pCb, const uint8_t* pCr, uint32_t count) noexcept {
+void BL_CDECL rgb32_from_ycbcr8(uint8_t* dst, const uint8_t* pY, const uint8_t* pCb, const uint8_t* pCr, uint32_t count) noexcept {
   for (uint32_t i = 0; i < count; i++) {
     int yy = (int(pY[i]) << BL_JPEG_YCBCR_PREC) + (1 << (BL_JPEG_YCBCR_PREC - 1));
     int cr = int(pCr[i]) - 128;
@@ -143,27 +142,26 @@ void BL_CDECL blJpegRGB32FromYCbCr8(uint8_t* dst, const uint8_t* pY, const uint8
     int g = yy - cr * BL_JPEG_YCBCR_FIXED(0.71414) - cb * BL_JPEG_YCBCR_FIXED(0.34414);
     int b = yy + cb * BL_JPEG_YCBCR_FIXED(1.77200);
 
-    uint32_t rgba32 = BLRgbaPrivate::packRgba32(
-      BLIntOps::clampToByte(r >> BL_JPEG_YCBCR_PREC),
-      BLIntOps::clampToByte(g >> BL_JPEG_YCBCR_PREC),
-      BLIntOps::clampToByte(b >> BL_JPEG_YCBCR_PREC));
-    BLMemOps::writeU32a(dst, rgba32);
+    uint32_t rgba32 = RgbaInternal::packRgba32(
+      IntOps::clamp_to_byte(r >> BL_JPEG_YCBCR_PREC),
+      IntOps::clamp_to_byte(g >> BL_JPEG_YCBCR_PREC),
+      IntOps::clamp_to_byte(b >> BL_JPEG_YCBCR_PREC));
+    MemOps::writeU32a(dst, rgba32);
     dst += 4;
   }
 }
 
-// ============================================================================
-// [BLJpegOps - Upsample]
-// ============================================================================
+// bl::Jpeg::Opts - Upsample
+// =========================
 
-uint8_t* BL_CDECL blJpegUpsample1x1(uint8_t* dst, uint8_t* src0, uint8_t* src1, uint32_t w, uint32_t hs) noexcept {
-  blUnused(dst, src1, w, hs);
+uint8_t* BL_CDECL upsample_1x1(uint8_t* dst, uint8_t* src0, uint8_t* src1, uint32_t w, uint32_t hs) noexcept {
+  bl_unused(dst, src1, w, hs);
 
   return src0;
 }
 
-uint8_t* BL_CDECL blJpegUpsample1x2(uint8_t* dst, uint8_t* src0, uint8_t* src1, uint32_t w, uint32_t hs) noexcept {
-  blUnused(src1, hs);
+uint8_t* BL_CDECL upsample_1x2(uint8_t* dst, uint8_t* src0, uint8_t* src1, uint32_t w, uint32_t hs) noexcept {
+  bl_unused(src1, hs);
 
   for (uint32_t i = 0; i < w; i++)
     dst[i] = uint8_t((3 * src0[i] + src1[i] + 2) >> 2);
@@ -171,8 +169,8 @@ uint8_t* BL_CDECL blJpegUpsample1x2(uint8_t* dst, uint8_t* src0, uint8_t* src1, 
   return dst;
 }
 
-uint8_t* BL_CDECL blJpegUpsample2x1(uint8_t* dst, uint8_t* src0, uint8_t* src1, uint32_t w, uint32_t hs) noexcept {
-  blUnused(hs, src1);
+uint8_t* BL_CDECL upsample_2x1(uint8_t* dst, uint8_t* src0, uint8_t* src1, uint32_t w, uint32_t hs) noexcept {
+  bl_unused(hs, src1);
 
   // If only one sample, can't do any interpolation.
   if (w == 1) {
@@ -196,8 +194,8 @@ uint8_t* BL_CDECL blJpegUpsample2x1(uint8_t* dst, uint8_t* src0, uint8_t* src1, 
   return dst;
 }
 
-uint8_t* BL_CDECL blJpegUpsample2x2(uint8_t* dst, uint8_t* src0, uint8_t* src1, uint32_t w, uint32_t hs) noexcept {
-  blUnused(hs);
+uint8_t* BL_CDECL upsample_2x2(uint8_t* dst, uint8_t* src0, uint8_t* src1, uint32_t w, uint32_t hs) noexcept {
+  bl_unused(hs);
 
   if (w == 1) {
     dst[0] = dst[1] = uint8_t((3 * src0[0] + src1[0] + 2) >> 2);
@@ -220,8 +218,8 @@ uint8_t* BL_CDECL blJpegUpsample2x2(uint8_t* dst, uint8_t* src0, uint8_t* src1, 
   return dst;
 }
 
-uint8_t* BL_CDECL blJpegUpsampleAny(uint8_t* dst, uint8_t* src0, uint8_t* src1, uint32_t w, uint32_t hs) noexcept {
-  blUnused(src1);
+uint8_t* BL_CDECL upsample_generic(uint8_t* dst, uint8_t* src0, uint8_t* src1, uint32_t w, uint32_t hs) noexcept {
+  bl_unused(src1);
 
   for (uint32_t i = 0; i < w; i++)
     for (uint32_t j = 0; j < hs; j++)
@@ -229,3 +227,5 @@ uint8_t* BL_CDECL blJpegUpsampleAny(uint8_t* dst, uint8_t* src0, uint8_t* src1, 
 
   return dst;
 }
+
+} // {bl::Jpeg}

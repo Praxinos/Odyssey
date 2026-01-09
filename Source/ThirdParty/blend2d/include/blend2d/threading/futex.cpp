@@ -4,53 +4,59 @@
 // [License]
 // Zlib - See LICENSE.md file in the package.
 
-#include "../api-build_p.h"
-#include "../runtime_p.h"
-#include "../threading/futex_p.h"
+#include <blend2d/core/api-build_p.h>
+#include <blend2d/core/runtime_p.h>
+#include <blend2d/threading/futex_p.h>
 
-#ifdef _WIN32
-  #include <windows.h>
+#if !defined(BL_BUILD_NO_FUTEX)
+  #ifdef _WIN32
+    #include <windows.h>
+  #endif
 #endif
 
-// Futex - Runtime Registration
-// ============================
+// bl::Futex - Runtime Registration
+// ================================
 
-#if defined(__linux__)
+#if !defined(BL_BUILD_NO_FUTEX) && defined(__linux__)
 
-// Initially in Linux 2.6.0, improved at 2.6.7, which is the minimum for FUTEX_WAIT_PRIVATE / FUTEX_WAKE_PRIVATE.
-void blFuxexRtInit(BLRuntimeContext* rt) noexcept {
-  rt->featuresInfo.futexEnabled = 1;
+void bl_fuxex_rt_init(BLRuntimeContext* rt) noexcept {
+  // Initially in Linux 2.6.0, improved at 2.6.7, which is the minimum for FUTEX_WAIT_PRIVATE / FUTEX_WAKE_PRIVATE.
+  rt->features_info.futex_enabled = 1;
 }
 
-#elif defined(__OpenBSD__)
+#elif !defined(BL_BUILD_NO_FUTEX) && defined(__OpenBSD__)
 
-// TODO: How to detect support on OpenBSD?
-void blFuxexRtInit(BLRuntimeContext* rt) noexcept {
-  rt->featuresInfo.futexEnabled = 0;
+void bl_fuxex_rt_init(BLRuntimeContext* rt) noexcept {
+  // TODO: How to detect support on OpenBSD?
+  rt->features_info.futex_enabled = 0;
 }
 
-#elif defined(_WIN32)
+#elif !defined(BL_BUILD_NO_FUTEX) && defined(_WIN32)
 
-namespace BLFutex { FutexWinAPI futexWinAPI; }
+namespace bl::Futex::Native {
+FutexSyncAPI futexSyncAPI;
+} // {bl::Futex::Native}
 
-void blFuxexRtInit(BLRuntimeContext* rt) noexcept {
+void bl_fuxex_rt_init(BLRuntimeContext* rt) noexcept {
   HMODULE hModule = GetModuleHandleA("api-ms-win-core-synch-l1-2-0.dll");
 
   if (!hModule)
     return;
 
-  BLFutex::futexWinAPI.WaitOnAddress       = (BLFutex::FutexWinAPI::WaitOnAddressFunc      )GetProcAddress(hModule, "WaitOnAddress");
-  BLFutex::futexWinAPI.WakeByAddressSingle = (BLFutex::FutexWinAPI::WakeByAddressSingleFunc)GetProcAddress(hModule, "WakeByAddressSingle");
-  BLFutex::futexWinAPI.WakeByAddressAll    = (BLFutex::FutexWinAPI::WakeByAddressAllFunc   )GetProcAddress(hModule, "WakeByAddressAll");
+  using FutexSyncAPI = bl::Futex::Native::FutexSyncAPI;
+  FutexSyncAPI& fn = bl::Futex::Native::futexSyncAPI;
 
-  rt->featuresInfo.futexEnabled = BLFutex::futexWinAPI.WaitOnAddress       != nullptr &&
-                                  BLFutex::futexWinAPI.WakeByAddressSingle != nullptr &&
-                                  BLFutex::futexWinAPI.WakeByAddressAll    != nullptr ;
+  fn.WaitOnAddress       = (FutexSyncAPI::WaitOnAddressFunc      )GetProcAddress(hModule, "WaitOnAddress");
+  fn.WakeByAddressSingle = (FutexSyncAPI::WakeByAddressSingleFunc)GetProcAddress(hModule, "WakeByAddressSingle");
+  fn.WakeByAddressAll    = (FutexSyncAPI::WakeByAddressAllFunc   )GetProcAddress(hModule, "WakeByAddressAll");
+
+  bool ok = fn.WaitOnAddress != nullptr && fn.WakeByAddressSingle != nullptr && fn.WakeByAddressAll != nullptr;
+  rt->features_info.futex_enabled = ok;
 }
 
 #else
 
 // Futex not supported.
-void blFuxexRtInit(BLRuntimeContext* rt) noexcept { blUnused(rt); }
+void bl_fuxex_rt_init(BLRuntimeContext* rt) noexcept { bl_unused(rt); }
 
 #endif

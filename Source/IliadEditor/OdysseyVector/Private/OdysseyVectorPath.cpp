@@ -414,8 +414,8 @@ FOdysseyVectorPath::UpdateShape( uint32 iUpdateFlags )
             ::ULIS::FVec2D& ctrlPoint0 = cubicSegment->GetHandle(0)->GetCoords();
             ::ULIS::FVec2D& ctrlPoint1 = cubicSegment->GetHandle(1)->GetCoords();
 
-            mBLPath.moveTo( point0.x, point0.y );
-            mBLPath.cubicTo( ctrlPoint0.x
+            mBLPath.move_to( point0.x, point0.y );
+            mBLPath.cubic_to( ctrlPoint0.x
                            , ctrlPoint0.y
                            , ctrlPoint1.x
                            , ctrlPoint1.y
@@ -795,17 +795,17 @@ FOdysseyVectorPath::PickVertex( std::vector<FOdysseyVectorVertex*>& oPickedVerte
     //BLImage* maskImage = GetCell()->GetBLMask();
     //BLImageData imageData;
 
-    //maskImage->getData( &imageData );
+    //maskImage->get_data( &imageData );
 
     for( FOdysseyVectorVertex* vertex : mVertexList )
     {
         ::ULIS::FVec2D& localCoords = vertex->GetCoords();
         // convert vertex coordinates to world coordinates. Easier to detect collision inside the picking circle.
-        BLPoint worldCoords = mWorldMatrix.mapPoint( localCoords.x, localCoords.y );
+        BLPoint worldCoords = mWorldMatrix.map_point( localCoords.x, localCoords.y );
         int32 x = (int32) worldCoords.x;
         int32 y = (int32) worldCoords.y;
 
-        if( iSelectionPath.hitTest( worldCoords, BL_FILL_RULE_EVEN_ODD ) == BL_HIT_TEST_IN )
+        if( iSelectionPath.hit_test( worldCoords, BL_FILL_RULE_EVEN_ODD ) == BL_HIT_TEST_IN )
         {
             oPickedVertexArray.push_back( vertex );
         }
@@ -891,7 +891,7 @@ FOdysseyVectorPath::Erase( std::vector<FOdysseyVectorObject*>& oAddedPathArray
     uint32 addedVertexCountBeforeAlter = oAddedVertexArray.size();
     BLImageData imageData;
 
-    iBLMaskImage.getData( &imageData );
+    iBLMaskImage.get_data( &imageData );
 
     for( FOdysseyVectorChain& chain : mChainArray )
     {
@@ -1365,8 +1365,8 @@ FOdysseyVectorPath::DrawSegment( BLContext* iBLContext
             double difU = iEndU - iStartU;
 
             // for testing
-            //iBLContext->setStrokeWidth( 1.0f );
-            //iBLContext->setStrokeStyle( BLRgba32( 0, 0, 0, 255 ) );
+            //iBLContext->set_stroke_width( 1.0f );
+            //iBLContext->set_stroke_style( BLRgba32( 0, 0, 0, 255 ) );
 
             for( int i = 0; i < fractionCache.size(); i++ )
             {
@@ -1523,7 +1523,7 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
     BLRgba32 strokeColor = ( iDrawingFlags & FOdysseyVectorEngine::DRAWING_IGNORECOLOR ) ? BLRgba32( 0, 0, 0, 255 )
                                                                                          : BLRgba32( color.R, color.G, color.B, 255 * iCombinedOpacity /*color.A * iCombinedOpacity*/ );
 
-    BLImage* image = iBLContext->targetImage();
+    BLImage* image = iBLContext->target_image();
     BLImageData& imageData = iVectorEngine->GetRenderData();
     ::ULIS::FRectD screen;
 
@@ -1635,10 +1635,10 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
         else
         {
             // We fill with stroke color because our curve is made of filled shapes.
-            //iBLContext->setFillRule( BL_FILL_RULE_NON_ZERO );
-            iBLContext->setFillRule( BL_FILL_RULE_EVEN_ODD );
-            iBLContext->setFillStyle( strokeColor );
-            iBLContext->setStrokeStyle( strokeColor );
+            //iBLContext->set_fill_rule( BL_FILL_RULE_NON_ZERO );
+            iBLContext->set_fill_rule( BL_FILL_RULE_EVEN_ODD );
+            iBLContext->set_fill_style( strokeColor );
+            iBLContext->set_stroke_style( strokeColor );
 
             iChain.IterateSegments( [ this
                                     , iBLContext
@@ -1692,19 +1692,19 @@ FOdysseyVectorPath::DrawStructure( BLContext* iBLContext
 
     if( iWorld )
     {
-        iBLContext->resetMatrix();
+        iBLContext->reset_transform();
     }
 
-    iBLContext->setStrokeWidth( iStrokeWidth );
-    iBLContext->setStrokeStyle( iStrokeColor );
+    iBLContext->set_stroke_width( iStrokeWidth );
+    iBLContext->set_stroke_style( iStrokeColor );
 
     for( FOdysseyVectorSegment* segment : mSegmentList )
     {
-        //iBLContext->setStrokeWidth( iStrokeWidth + 1.0f );
-        //iBLContext->setStrokeStyle( blackColor );
+        //iBLContext->set_stroke_width( iStrokeWidth + 1.0f );
+        //iBLContext->set_stroke_style( blackColor );
         //segment->DrawStructure( iBLContext, this, iWorld );
-        //iBLContext->setStrokeWidth( iStrokeWidth );
-        //iBLContext->setStrokeStyle( iStrokeColor );
+        //iBLContext->set_stroke_width( iStrokeWidth );
+        //iBLContext->set_stroke_style( iStrokeColor );
         segment->DrawStructure( iBLContext, this, iWorld );
     }
 
@@ -1867,8 +1867,8 @@ FOdysseyVectorPath::Merge( FOdysseyVectorPath* iMergedPath
 
         for( FOdysseyVectorVertex* vertex : vertexList )
         {
-            BLPoint pt = conversionMatrix.mapPoint( vertex->GetX(), vertex->GetY() );
-            BLPoint rd = conversionMatrix.mapVector( 0.7071 * vertex->GetRadius(), 0.7071 * vertex->GetRadius() );
+            BLPoint pt = conversionMatrix.map_point( vertex->GetX(), vertex->GetY() );
+            BLPoint rd = conversionMatrix.map_vector( 0.7071 * vertex->GetRadius(), 0.7071 * vertex->GetRadius() );
             ::ULIS::FVec2D radius = ::ULIS::FVec2D( rd.x, rd.y );
             FOdysseyVectorVertex* newVertex = new FOdysseyVectorVertex( pt.x, pt.y, radius.Distance() );
 
@@ -1888,8 +1888,8 @@ FOdysseyVectorPath::Merge( FOdysseyVectorPath* iMergedPath
                 FOdysseyVectorVertex* vertex1 = cubicSegment->GetVertex(1);
                 FOdysseyVectorHandleSegment* handle0 = cubicSegment->GetHandle(0);
                 FOdysseyVectorHandleSegment* handle1 = cubicSegment->GetHandle(1);
-                BLPoint pt[2] = { conversionMatrix.mapPoint( handle0->GetX(), handle0->GetY() )
-                                , conversionMatrix.mapPoint( handle1->GetX(), handle1->GetY() ) };
+                BLPoint pt[2] = { conversionMatrix.map_point( handle0->GetX(), handle0->GetY() )
+                                , conversionMatrix.map_point( handle1->GetX(), handle1->GetY() ) };
                 FOdysseyVectorVertex* newVertex0 = oAddedVertexArray[vertex0->GetID()];
                 FOdysseyVectorVertex* newVertex1 = oAddedVertexArray[vertex1->GetID()];
                 FOdysseyVectorSegmentCubic* newCubicSegment = new FOdysseyVectorSegmentCubic( this
@@ -1916,8 +1916,8 @@ FOdysseyVectorPath::ApplyMatrix( BLMatrix2D& iMatrix )
     for( FOdysseyVectorVertex* vertex : mVertexList )
     {
         ::ULIS::FVec2D& point = vertex->GetCoords();
-        BLPoint localPt = iMatrix.mapPoint( point.x, point.y );
-        BLPoint localVec = iMatrix.mapVector( 0.70710678118f * vertex->GetRadius()
+        BLPoint localPt = iMatrix.map_point( point.x, point.y );
+        BLPoint localVec = iMatrix.map_vector( 0.70710678118f * vertex->GetRadius()
                                             , 0.70710678118f * vertex->GetRadius() );
         ::ULIS::FVec2D vec = { localVec.x, localVec.y };
 
@@ -1932,8 +1932,8 @@ FOdysseyVectorPath::ApplyMatrix( BLMatrix2D& iMatrix )
             FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segment);
             ::ULIS::FVec2D& ctrlPoint0 = cubicSegment->GetHandle(0)->GetCoords();
             ::ULIS::FVec2D& ctrlPoint1 = cubicSegment->GetHandle(1)->GetCoords();
-            BLPoint localPt0 = iMatrix.mapPoint( ctrlPoint0.x, ctrlPoint0.y );
-            BLPoint localPt1 = iMatrix.mapPoint( ctrlPoint1.x, ctrlPoint1.y );
+            BLPoint localPt0 = iMatrix.map_point( ctrlPoint0.x, ctrlPoint0.y );
+            BLPoint localPt1 = iMatrix.map_point( ctrlPoint1.x, ctrlPoint1.y );
             bool isAligned0 = cubicSegment->GetVertex(0)->IsHandleAligned();
             bool isAligned1 = cubicSegment->GetVertex(1)->IsHandleAligned();
 
@@ -1975,11 +1975,11 @@ FOdysseyVectorPath::SwitchSpace( FOdysseyVectorObject& iNewSpace )
     for( FOdysseyVectorVertex* cubicVertex : mVertexList )
     {
         ::ULIS::FVec2D& point = cubicVertex->GetCoords();
-        BLPoint worldPt = mWorldMatrix.mapPoint( point.x, point.y );
-        BLPoint wordlVec = mWorldMatrix.mapVector( 0.70710678118f * cubicVertex->GetRadius()
+        BLPoint worldPt = mWorldMatrix.map_point( point.x, point.y );
+        BLPoint wordlVec = mWorldMatrix.map_vector( 0.70710678118f * cubicVertex->GetRadius()
                                                  , 0.70710678118f * cubicVertex->GetRadius() );
-        BLPoint localPt = newSpaceInverseWorldMatrix.mapPoint( worldPt );
-        BLPoint localVec = newSpaceInverseWorldMatrix.mapVector( wordlVec );
+        BLPoint localPt = newSpaceInverseWorldMatrix.map_point( worldPt );
+        BLPoint localVec = newSpaceInverseWorldMatrix.map_vector( wordlVec );
         ::ULIS::FVec2D vec = { localVec.x, localVec.y };
 
         point.x = localPt.x;
@@ -1997,12 +1997,12 @@ FOdysseyVectorPath::SwitchSpace( FOdysseyVectorObject& iNewSpace )
             ::ULIS::FVec2D& ctrlPoint1 = cubicSegment->GetHandle(1)->GetCoords();
             BLPoint pt;
 
-            pt = newSpaceInverseWorldMatrix.mapPoint( mWorldMatrix.mapPoint( ctrlPoint0.x, ctrlPoint0.y ) );
+            pt = newSpaceInverseWorldMatrix.map_point( mWorldMatrix.map_point( ctrlPoint0.x, ctrlPoint0.y ) );
 
             ctrlPoint0.x = pt.x;
             ctrlPoint0.y = pt.y;
 
-            pt = newSpaceInverseWorldMatrix.mapPoint( mWorldMatrix.mapPoint( ctrlPoint1.x, ctrlPoint1.y ) );
+            pt = newSpaceInverseWorldMatrix.map_point( mWorldMatrix.map_point( ctrlPoint1.x, ctrlPoint1.y ) );
 
             ctrlPoint1.x = pt.x;
             ctrlPoint1.y = pt.y;
@@ -2133,7 +2133,7 @@ FOdysseyVectorPath::PickShape( const ::ULIS::FRectD &iRoi
 {
     BLImageData imageData;
 
-    iMaskImage.getData( &imageData );
+    iMaskImage.get_data( &imageData );
 
     for( FOdysseyVectorSegment* segment : GetSegmentList() )
     {
@@ -2155,7 +2155,7 @@ FOdysseyVectorPath::PickShape( const ::ULIS::FRectD &iRoi
                 if( ( iX >= 0 && iX < imageData.size.w )
                  && ( iY >= 0 && iY < imageData.size.h ) )
                 {
-                    uint8 *pixel = static_cast<uint8*>(imageData.pixelData);
+                    uint8 *pixel = static_cast<uint8*>(imageData.pixel_data);
                     uint32 offset = ( iY * imageData.size.w ) + iX;
 
                     return ( pixel[offset] ) ? true : false;
@@ -2181,10 +2181,10 @@ FOdysseyVectorPath::PickSegments( double iWorldX
                                 , std::vector<FOdysseyVectorSegment*>& oPickedSegmentArray
                                 , std::vector<double>* oDistanceArray )
 {
-    BLPoint localVector = mInverseWorldMatrix.mapVector( 0.7071f, 0.7071f );
+    BLPoint localVector = mInverseWorldMatrix.map_vector( 0.7071f, 0.7071f );
     ::ULIS::FVec2D factor = { localVector.x * iWorldRadius, localVector.y * iWorldRadius };
     double localRadius = factor.Distance();
-    BLPoint localPoint = mInverseWorldMatrix.mapPoint( iWorldX, iWorldY );
+    BLPoint localPoint = mInverseWorldMatrix.map_point( iWorldX, iWorldY );
     ::ULIS::FRectD pathBBox = mBBox;
 
     // get sure we hit the box be enlarging it with the picking circle radius value.
@@ -2232,13 +2232,13 @@ FOdysseyVectorPath::PickSegments( std::vector<FOdysseyVectorSegment*>& oPickedSe
     BLImageData maskData;
     bool picked = false;
 
-    iBLMaskImage.getData( &maskData );
+    iBLMaskImage.get_data( &maskData );
 
     maskRect = ::ULIS::FRectD( 0, 0, maskData.size.w, maskData.size.h );
 
     for( FOdysseyVectorSegment* segment : mSegmentList )
     {
-        if( segment->Pick( maskRect, (uint8*)maskData.pixelData ) )
+        if( segment->Pick( maskRect, (uint8*)maskData.pixel_data ) )
         {
             oPickedSegmentArray.push_back( segment );
         }

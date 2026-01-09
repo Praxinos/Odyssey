@@ -3,22 +3,20 @@
 // See blend2d.h or LICENSE.md for license and copyright information
 // SPDX-License-Identifier: Zlib
 
-#ifndef BLEND2D_OPENTYPE_OTFPLATFORM_P_H_INCLUDED
-#define BLEND2D_OPENTYPE_OTFPLATFORM_P_H_INCLUDED
+#ifndef BLEND2D_OPENTYPE_OTPLATFORM_P_H_INCLUDED
+#define BLEND2D_OPENTYPE_OTPLATFORM_P_H_INCLUDED
 
-#include "../opentype/otcore_p.h"
+#include <blend2d/opentype/otcore_p.h>
 
 //! \cond INTERNAL
 //! \addtogroup blend2d_opentype_impl
 //! \{
 
-namespace BLOpenType {
-
 //! Platform support for TrueType and OpenType fonts.
 //!
 //! Mostly required by 'cmap' and 'name' tables. This namespace provides all the constants necessary to read the
 //! right information from these tables.
-namespace Platform {
+namespace bl::OpenType::Platform {
 
 //! Platform id.
 enum PlatformId : uint32_t {
@@ -227,8 +225,8 @@ enum WindowsEncodingId : uint32_t {
 
 //! Primary language of Windows platform.
 //!
-//! \note Don't confuse with `WindowsLocaleId`, which is the right enumeration used by `languageId` records in 'cmap'
-//! and 'name' tables, see `WindowsLocaleId`.
+//! \note Don't confuse with \ref WindowsLocaleId, which is the right enumeration used by `language_id` records in 'cmap'
+//! and 'name' tables, see \ref WindowsLocaleId.
 enum WindowsLanguageId : uint32_t {
   kWindowsLanguageNeutral                = 0x00,
   kWindowsLanguageAfrikaans              = 0x36,
@@ -351,7 +349,7 @@ enum WindowsLanguageId : uint32_t {
 };
 
 //! Windows locale is a combination of a primary language (WindowsLanguageId) and geographical location. These IDs
-//! are used by `languageId` member in records stored in 'cmap' and 'name' tables.
+//! are used by `language_id` member in records stored in 'cmap' and 'name' tables.
 //!
 //! \note We omit country in cases where there is only a single country.
 enum WindowsLocaleId : uint32_t {
@@ -562,10 +560,9 @@ enum WindowsLocaleId : uint32_t {
   kWindowsLocaleYoruba                   = 0x046A
 };
 
-} // {Platform}
-} // {BLOpenType}
+} // {bl::OpenType::Platform}
 
 //! \}
 //! \endcond
 
-#endif // BLEND2D_OPENTYPE_OTFPLATFORM_P_H_INCLUDED
+#endif // BLEND2D_OPENTYPE_OTPLATFORM_P_H_INCLUDED

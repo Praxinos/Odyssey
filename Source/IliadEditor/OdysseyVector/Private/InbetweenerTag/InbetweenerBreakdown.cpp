@@ -54,10 +54,10 @@ FInbetweenerBreakdown::GetSourceBBox( bool iWorld )
         worldMatrix.transform( drawing->localMatrix );
 
         {
-            BLPoint p0 = worldMatrix.mapPoint( bbox.x         , bbox.y          );
-            BLPoint p1 = worldMatrix.mapPoint( bbox.x + bbox.w, bbox.y          );
-            BLPoint p2 = worldMatrix.mapPoint( bbox.x + bbox.w, bbox.y + bbox.h );
-            BLPoint p3 = worldMatrix.mapPoint( bbox.x         , bbox.y + bbox.h );
+            BLPoint p0 = worldMatrix.map_point( bbox.x         , bbox.y          );
+            BLPoint p1 = worldMatrix.map_point( bbox.x + bbox.w, bbox.y          );
+            BLPoint p2 = worldMatrix.map_point( bbox.x + bbox.w, bbox.y + bbox.h );
+            BLPoint p3 = worldMatrix.map_point( bbox.x         , bbox.y + bbox.h );
             ::ULIS::FRectD worldBBox = ::ULIS::FRectD::FromMinMax( ::ULIS::FMath::Min4( p0.x, p1.x, p2.x, p3.x )
                                                                  , ::ULIS::FMath::Min4( p0.y, p1.y, p2.y, p3.y )
                                                                  , ::ULIS::FMath::Max4( p0.x, p1.x, p2.x, p3.x )
@@ -84,10 +84,10 @@ FInbetweenerBreakdown::GetTargetBBox( bool iWorld )
 
         {
 
-            BLPoint p0 = worldMatrix.mapPoint( bbox.x         , bbox.y          );
-            BLPoint p1 = worldMatrix.mapPoint( bbox.x + bbox.w, bbox.y          );
-            BLPoint p2 = worldMatrix.mapPoint( bbox.x + bbox.w, bbox.y + bbox.h );
-            BLPoint p3 = worldMatrix.mapPoint( bbox.x         , bbox.y + bbox.h );
+            BLPoint p0 = worldMatrix.map_point( bbox.x         , bbox.y          );
+            BLPoint p1 = worldMatrix.map_point( bbox.x + bbox.w, bbox.y          );
+            BLPoint p2 = worldMatrix.map_point( bbox.x + bbox.w, bbox.y + bbox.h );
+            BLPoint p3 = worldMatrix.map_point( bbox.x         , bbox.y + bbox.h );
             ::ULIS::FRectD worldBBox = ::ULIS::FRectD::FromMinMax( ::ULIS::FMath::Min4( p0.x, p1.x, p2.x, p3.x )
                                                                  , ::ULIS::FMath::Min4( p0.y, p1.y, p2.y, p3.y )
                                                                  , ::ULIS::FMath::Max4( p0.x, p1.x, p2.x, p3.x )
@@ -570,7 +570,7 @@ FInbetweenerBreakdown::Scale( double iX, double iY )
 BLMatrix2D&
 FInbetweenerBreakdown::GetSourceLocalMatrix()
 {
-    static BLMatrix2D identityMatrix = BLMatrix2D::makeIdentity();
+    static BLMatrix2D identityMatrix = BLMatrix2D::make_identity();
     uint32 sourceDrawingIndex = GetSourceDrawingIndex();
 
     if( sourceDrawingIndex == 0 )

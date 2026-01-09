@@ -291,7 +291,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorGro
                 {
                     ::ULIS::FVec2D& localCoords = pickedVertex->GetCoords();
                     double localRadius = pickedVertex->GetRadius();
-                    BLPoint worldCoords = pickedVertex->GetOwner()->GetWorldMatrix().mapPoint( localCoords.x, localCoords.y );
+                    BLPoint worldCoords = pickedVertex->GetOwner()->GetWorldMatrix().map_point( localCoords.x, localCoords.y );
 
                     vertexWorldCoords = ::ULIS::FVec2D( worldCoords.x
                                                       , worldCoords.y );
@@ -316,9 +316,9 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorGro
         if( mPathDrawingMode == ePathDrawingMode::Create )
         {
             BLMatrix2D& pathInverseWorldMatrix = path->GetInverseWorldMatrix();
-            BLPoint localPoint = pathInverseWorldMatrix.mapPoint( vertexWorldCoords.x
+            BLPoint localPoint = pathInverseWorldMatrix.map_point( vertexWorldCoords.x
                                                                 , vertexWorldCoords.y );
-            BLPoint localVector = pathInverseWorldMatrix.mapVector( pointRadius * 0.7071f
+            BLPoint localVector = pathInverseWorldMatrix.map_vector( pointRadius * 0.7071f
                                                                   , pointRadius * 0.7071f );
             double localRadius = ::ULIS::FVec2D( localVector.x, localVector.y ).Distance();
 
@@ -391,7 +391,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorGro
         if( mPathTracer.GetPointBuffer().size() == 1 )
         {
             BLMatrix2D& pathInverseWorldMatrix = path->GetInverseWorldMatrix();
-            BLPoint localVector = pathInverseWorldMatrix.mapVector( pointRadius * 0.7071f
+            BLPoint localVector = pathInverseWorldMatrix.map_vector( pointRadius * 0.7071f
                                                                   , pointRadius * 0.7071f );
             double localRadius = ::ULIS::FVec2D( localVector.x, localVector.y ).Distance();
 
@@ -502,13 +502,13 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorGroup
                             FOdysseyVectorSegment* pickedSegment = pickedSegmentArray[0];
                             BLMatrix2D& inverseWorldMatrix = pickedSegment->GetOwner()->GetInverseWorldMatrix();
                             BLMatrix2D& worldMatrix = pickedSegment->GetOwner()->GetWorldMatrix();
-                            BLPoint localPoint = inverseWorldMatrix.mapPoint( iPointInTexture.x
+                            BLPoint localPoint = inverseWorldMatrix.map_point( iPointInTexture.x
                                                                             , iPointInTexture.y );
                             ::ULIS::FVec2D vertexLocalCoords;
                             double projectedPointT = pickedSegment->ProjectConstrained( ::ULIS::FVec2D( localPoint.x
                                                                                                       , localPoint.y )
                                                                                         , vertexLocalCoords );
-                            BLPoint worldPoint = worldMatrix.mapPoint( vertexLocalCoords.x
+                            BLPoint worldPoint = worldMatrix.map_point( vertexLocalCoords.x
                                                                      , vertexLocalCoords.y );
                             vertexWorldCoords = ::ULIS::FVec2D( worldPoint.x, worldPoint.y );
                         }
@@ -526,7 +526,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorGroup
 
             if( newSegment )
             {
-                BLPoint vertexLocalPoint = path->GetInverseWorldMatrix().mapPoint( vertexWorldCoords.x
+                BLPoint vertexLocalPoint = path->GetInverseWorldMatrix().map_point( vertexWorldCoords.x
                                                                                  , vertexWorldCoords.y );
 
                 // this will snap to the correct location and do nothing in the worst case scenario.

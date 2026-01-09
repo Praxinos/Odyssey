@@ -112,7 +112,7 @@ FOdysseyVectorEngine::RenderHUD( BLContext* iBLContext
 {
 /*
     FOdysseyVectorGroupPaint* scene = iScene;
-    BLImage* image = iBLContext->targetImage();
+    BLImage* image = iBLContext->target_image();
 
     // for some unknown reason there was a case where the proxy, at the loading of the file, called this func
     // and image was nullptr. check it.
@@ -127,10 +127,10 @@ FOdysseyVectorEngine::RenderHUD( BLContext* iBLContext
     image->makeMutable( &mRenderData );
 
     iBLContext->save();
-    iBLContext->resetMatrix();
-    //mBLContext->setCompOp( BL_COMP_OP_SRC_COPY );
-    //mBLContext->setFillAlpha( 0.0f );
-    iBLContext->clearAll();
+    iBLContext->reset_transform();
+    //mBLContext->set_comp_op( BL_COMP_OP_SRC_COPY );
+    //mBLContext->set_fill_alpha( 0.0f );
+    iBLContext->clear_all();
 
     for( IOdysseyVectorHUD *hud : scene->GetCell()->GetHUDList() )
     {
@@ -169,7 +169,7 @@ FOdysseyVectorEngine::Render( BLContext* iBLContext
         return ::ULIS::FRectD( 0.0f, 0.0f, 0.0f, 0.0F );
 
     TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorEngine::Render);
-    BLImage* image = iBLContext->targetImage();
+    BLImage* image = iBLContext->target_image();
     ::ULIS::FRectD sanitizedRect;
     ::ULIS::FRectD screen;
 
@@ -181,7 +181,7 @@ FOdysseyVectorEngine::Render( BLContext* iBLContext
     mDrawingMutex.lock();
 
     // retrieves buffer specs and allows us to draw directly in the buffer
-    image->makeMutable( &mRenderData );
+    image->make_mutable( &mRenderData );
 
     // we need to get a sanitized version of the rendering region because when we tell the
     //  engine to redraw the whole screen, the region W and H values are set to DBL_MAX
@@ -214,23 +214,23 @@ FOdysseyVectorEngine::Render( BLContext* iBLContext
 
 
             iBLContext->save();
-            iBLContext->setCompOp( BL_COMP_OP_SRC_COPY );
+            iBLContext->set_comp_op( BL_COMP_OP_SRC_COPY );
 
             blFillColor.setR( fillColor.R );
             blFillColor.setG( fillColor.G );
             blFillColor.setB( fillColor.B );
             blFillColor.setA( fillColor.A );
 
-            iBLContext->setFillStyle( blFillColor );
+            iBLContext->set_fill_style( blFillColor );
 
-            iBLContext->clipToRect( BLRect( sanitizedRect.x - 1
+            iBLContext->clip_to_rect( BLRect( sanitizedRect.x - 1
                                             , sanitizedRect.y - 1
                                             , sanitizedRect.w + 2
                                             , sanitizedRect.h + 2 ) );
             // Note: we enlarge the block 1 pixel because when FOdysseyVectorBlock renders,
             // the rect seems to be 1 pixel larger. If we don't do this, then the block
             // isn't filled fully and this creates an artefact on the screen.
-            iBLContext->fillRect( BLRect( sanitizedRect.x - 1
+            iBLContext->fill_rect( BLRect( sanitizedRect.x - 1
                                         , sanitizedRect.y - 1
                                         , sanitizedRect.w + 2
                                         , sanitizedRect.h + 2 ) );
@@ -238,9 +238,9 @@ FOdysseyVectorEngine::Render( BLContext* iBLContext
             scene->Draw( iBLContext, this, sanitizedRect, 1.0f, iDrawingFlags );
 
             //--- uncomment to view the invalidation rectangle --- //
-            //iBLContext->setStrokeWidth( 2.0f );
-            //iBLContext->setStrokeStyle( BLRgba32( 0, 255, 0, 255 ) );
-            //iBLContext->strokeRect( BLRect( sanitizedRect.x
+            //iBLContext->set_stroke_width( 2.0f );
+            //iBLContext->set_stroke_style( BLRgba32( 0, 255, 0, 255 ) );
+            //iBLContext->stroke_rect( BLRect( sanitizedRect.x
             //                              , sanitizedRect.y
             //                              , sanitizedRect.w
             //                              , sanitizedRect.h ) );
@@ -252,7 +252,7 @@ FOdysseyVectorEngine::Render( BLContext* iBLContext
     else
     {
         iBLContext->save();
-        iBLContext->clearAll();
+        iBLContext->clear_all();
         iBLContext->restore();
     }
 
@@ -291,7 +291,7 @@ FOdysseyVectorEngine::Render( BLContext* iBLContext
 /*
     if( scene->GetCell()->GetBLMask() )
     {
-        iBLContext->blitImage( BLPoint(0,0), *scene->GetCell()->GetBLMask() );
+        iBLContext->blit_image( BLPoint(0,0), *scene->GetCell()->GetBLMask() );
         iBLContext->flush(BL_CONTEXT_FLUSH_SYNC);
     }
 */
@@ -766,11 +766,11 @@ FOdysseyVectorEngine::FillQuad( BLContext* iBLContext
 {
     if( iOpacity )
     {
-        const BLMatrix2D& userMatrix = iBLContext->userMatrix();
-        BLPoint worldPoint[4] = { userMatrix.mapPoint( iPoint[0].x, iPoint[0].y )
-                                , userMatrix.mapPoint( iPoint[1].x, iPoint[1].y )
-                                , userMatrix.mapPoint( iPoint[2].x, iPoint[2].y )
-                                , userMatrix.mapPoint( iPoint[3].x, iPoint[3].y ) };
+        const BLMatrix2D& user_transform = iBLContext->user_transform();
+        BLPoint worldPoint[4] = { user_transform.map_point( iPoint[0].x, iPoint[0].y )
+                                , user_transform.map_point( iPoint[1].x, iPoint[1].y )
+                                , user_transform.map_point( iPoint[2].x, iPoint[2].y )
+                                , user_transform.map_point( iPoint[3].x, iPoint[3].y ) };
         ::ULIS::FVec2I intPt[4] = { { (int32)worldPoint[0].x, (int32)worldPoint[0].y }
                                   , { (int32)worldPoint[1].x, (int32)worldPoint[1].y }
                                   , { (int32)worldPoint[2].x, (int32)worldPoint[2].y }
@@ -826,10 +826,10 @@ FOdysseyVectorEngine::FillTriangle( BLContext* iBLContext
 {
     if( iOpacity )
     {
-        const BLMatrix2D& userMatrix = iBLContext->userMatrix();
-        BLPoint worldPoint[3] = { userMatrix.mapPoint( iPoint[0].x, iPoint[0].y )
-                                , userMatrix.mapPoint( iPoint[1].x, iPoint[1].y )
-                                , userMatrix.mapPoint( iPoint[2].x, iPoint[2].y ) };
+        const BLMatrix2D& user_transform = iBLContext->user_transform();
+        BLPoint worldPoint[3] = { user_transform.map_point( iPoint[0].x, iPoint[0].y )
+                                , user_transform.map_point( iPoint[1].x, iPoint[1].y )
+                                , user_transform.map_point( iPoint[2].x, iPoint[2].y ) };
         ::ULIS::FVec2I intPt[3] = { { (int32)worldPoint[0].x, (int32)worldPoint[0].y }
                                   , { (int32)worldPoint[1].x, (int32)worldPoint[1].y }
                                   , { (int32)worldPoint[2].x, (int32)worldPoint[2].y } };
@@ -940,7 +940,7 @@ FOdysseyVectorEngine::TracePolygon( const ::ULIS::FVec2I* iPoint
 
                     TraceHorizontalLine( &mHorizontalLineBuffer[i]
                                        , iOpacity
-                                       , (int8*)mRenderData.pixelData
+                                       , (int8*)mRenderData.pixel_data
                                        , mRenderData.size.w
                                        , mRenderData.size.h
                                        , ( mRenderData.format == BL_FORMAT_PRGB32 ) ? 32 : 0
@@ -1161,7 +1161,7 @@ FOdysseyVectorScene::DrawShape( BLContext* iBLContext, double iCombinedOpacity, 
 
     iBLContext->save();
 
-    iBLContext->setCompOp( BL_COMP_OP_SRC_COPY );
+    iBLContext->set_comp_op( BL_COMP_OP_SRC_COPY );
 
 //UE_LOG(LogTemp, Warning, TEXT("Some warning message:%d %d %d %d"), roi.x, roi.y, roi.w, roi.h );
 
@@ -1170,23 +1170,23 @@ FOdysseyVectorScene::DrawShape( BLContext* iBLContext, double iCombinedOpacity, 
     blFillColor.setB( fillColor.B );
     blFillColor.setA( fillColor.A * iCombinedOpacity );
 
-    iBLContext->setFillStyle( blFillColor );
+    iBLContext->set_fill_style( blFillColor );
 
-    //iBLContext->resetMatrix();
-    //blctx->clearAll();
+    //iBLContext->reset_transform();
+    //blctx->clear_all();
     iBLContext->fillAll();
 
     // TODO: possible optimization: only erase the invalidated part.
-    // however, fillRect can do the trick only if the matrix is set to identity.
+    // however, fill_rect can do the trick only if the matrix is set to identity.
     //::ULIS::FRectI& rect = GetEngine()->GetInvalidatedRect();
-    //iBLContext->fillRect( rect.x, rect.y, rect.w, rect.h );
+    //iBLContext->fill_rect( rect.x, rect.y, rect.w, rect.h );
 
     FOdysseyVectorGroupPaint::DrawShape( iBLContext, iCombinedOpacity, iDrawingFlags );
 
     // view the updated zone ( testing purpose only )
-    /*iBLContext.setStrokeStyle(BLRgba32(0xFFFF0000));
-    iBLContext.setStrokeWidth(1.0f);
-    iBLContext.strokeRect( mRoi.x, mRoi.y, mRoi.w, mRoi.h );*/
+    /*iBLContext.set_stroke_style(BLRgba32(0xFFFF0000));
+    iBLContext.set_stroke_width(1.0f);
+    iBLContext.stroke_rect( mRoi.x, mRoi.y, mRoi.w, mRoi.h );*/
     iBLContext->restore();
 }
 

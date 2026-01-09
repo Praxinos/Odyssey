@@ -205,8 +205,8 @@ CutPath( FOdysseyVectorPath* iPath
        , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray )
 {
     BLMatrix2D& inverseWorldMatrix = iPath->GetInverseWorldMatrix();
-    BLPoint localP0 = inverseWorldMatrix.mapPoint( iCutLineP0.x, iCutLineP0.y );
-    BLPoint localP1 = inverseWorldMatrix.mapPoint( iCutLineP1.x, iCutLineP1.y );
+    BLPoint localP0 = inverseWorldMatrix.map_point( iCutLineP0.x, iCutLineP0.y );
+    BLPoint localP1 = inverseWorldMatrix.map_point( iCutLineP1.x, iCutLineP1.y );
     double xmin = ::ULIS::FMath::Min( localP0.x, localP1.x );
     double ymin = ::ULIS::FMath::Min( localP0.y, localP1.y );
     double xmax = ::ULIS::FMath::Max( localP0.x, localP1.x );
@@ -401,7 +401,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUpAddPoint( FOdysseyVectorGroupP
 
     for( FOdysseyVectorSegment* pickedSegment : iPickedSegmentArray )
     {
-        BLPoint point = pickedSegment->GetOwner()->GetInverseWorldMatrix().mapPoint( iPointInTexture.x
+        BLPoint point = pickedSegment->GetOwner()->GetInverseWorldMatrix().map_point( iPointInTexture.x
                                                                                    , iPointInTexture.y );
         ::ULIS::FVec2D projectedPoint;
         double projectedPointT = pickedSegment->ProjectConstrained( ::ULIS::FVec2D( point.x
@@ -810,7 +810,7 @@ UOdysseyPainterEditorVectorPathEditTool::DragSegmentHandle( FOdysseyVectorHandle
     FOdysseyVectorSegment* segment = iHandle->GetOwner();
     FOdysseyVectorPath* path = segment->GetOwnerAsPath();
     FOdysseyVectorVertex* vertex = iHandle->GetAttachedVertex();
-    BLPoint localVector = path->GetInverseWorldMatrix().mapVector( iDeltaX, iDeltaY );
+    BLPoint localVector = path->GetInverseWorldMatrix().map_vector( iDeltaX, iDeltaY );
 
     iHandle->Set( iHandleX + localVector.x
                 , iHandleY + localVector.y );
@@ -824,7 +824,7 @@ UOdysseyPainterEditorVectorPathEditTool::DragVertex( FOdysseyVectorVertex *iVert
                                                    , double iDeltaY )
 {
     FOdysseyVectorPath* path = iVertex->GetOwnerAsPath();
-    BLPoint localVector = path->GetInverseWorldMatrix().mapVector( iDeltaX, iDeltaY );
+    BLPoint localVector = path->GetInverseWorldMatrix().map_vector( iDeltaX, iDeltaY );
 
     iVertex->Set( iVertexX + localVector.x
                 , iVertexY + localVector.y );

@@ -856,10 +856,10 @@ FOdysseyVectorObject::GetBBox( bool iInDepth, bool iWorld )
 
     if ( iWorld == true )
     {
-        BLPoint p0 = mWorldMatrix.mapPoint( bbox.x         , bbox.y          );
-        BLPoint p1 = mWorldMatrix.mapPoint( bbox.x + bbox.w, bbox.y          );
-        BLPoint p2 = mWorldMatrix.mapPoint( bbox.x + bbox.w, bbox.y + bbox.h );
-        BLPoint p3 = mWorldMatrix.mapPoint( bbox.x         , bbox.y + bbox.h );
+        BLPoint p0 = mWorldMatrix.map_point( bbox.x         , bbox.y          );
+        BLPoint p1 = mWorldMatrix.map_point( bbox.x + bbox.w, bbox.y          );
+        BLPoint p2 = mWorldMatrix.map_point( bbox.x + bbox.w, bbox.y + bbox.h );
+        BLPoint p3 = mWorldMatrix.map_point( bbox.x         , bbox.y + bbox.h );
         ::ULIS::FRectD worldBBox = ::ULIS::FRectD::FromMinMax( ::ULIS::FMath::Min4( p0.x, p1.x, p2.x, p3.x )
                                                              , ::ULIS::FMath::Min4( p0.y, p1.y, p2.y, p3.y )
                                                              , ::ULIS::FMath::Max4( p0.x, p1.x, p2.x, p3.x )
@@ -934,9 +934,9 @@ FOdysseyVectorObject::Draw( BLContext* iBLContext
     LockDrawing();
 
     iBLContext->save();
-    iBLContext->transform( mLocalMatrix );
+    iBLContext->apply_transform( mLocalMatrix );
 
-    iBLContext->setCompOp( BL_COMP_OP_SRC_OVER );
+    iBLContext->set_comp_op( BL_COMP_OP_SRC_OVER );
     //Get sure everything is drawn before we draw in the BLend2D buffer.
     iBLContext->flush( BL_CONTEXT_FLUSH_SYNC  );
 
@@ -1582,17 +1582,17 @@ FOdysseyVectorObject::FlipObjects( const std::list<FOdysseyVectorObject*>& iObje
 
     BLMatrix2D::invert( inverseAxisMatrix, axisMatrix );
 
-    flippingMatrix.resetToScaling( iXFactor, iYFactor );
+    flippingMatrix.reset_to_scaling( iXFactor, iYFactor );
 
     for( FOdysseyVectorObject *object : iObjectList )
     {
         BLMatrix2D& objectWorldMatrix = object->GetWorldMatrix();
-        BLPoint objectWorldCenter = objectWorldMatrix.mapPoint( 0.0f, 0.0f );
-        BLPoint objectLocalCenter = inverseAxisMatrix.mapPoint( objectWorldCenter );
-        BLPoint objectLocalFlippedCenter = flippingMatrix.mapPoint( objectLocalCenter );
-        BLPoint objectWorldFlippedCenter = axisMatrix.mapPoint( objectLocalFlippedCenter );
+        BLPoint objectWorldCenter = objectWorldMatrix.map_point( 0.0f, 0.0f );
+        BLPoint objectLocalCenter = inverseAxisMatrix.map_point( objectWorldCenter );
+        BLPoint objectLocalFlippedCenter = flippingMatrix.map_point( objectLocalCenter );
+        BLPoint objectWorldFlippedCenter = axisMatrix.map_point( objectLocalFlippedCenter );
 
-        objectLocalCenter = object->GetParent()->GetInverseWorldMatrix().mapPoint( objectWorldFlippedCenter );
+        objectLocalCenter = object->GetParent()->GetInverseWorldMatrix().map_point( objectWorldFlippedCenter );
 
         object->Translate( objectLocalCenter.x, objectLocalCenter.y );
         object->Scale( iXFactor * object->GetScalingX(), iYFactor * object->GetScalingY() );
@@ -1737,7 +1737,7 @@ FOdysseyVectorObject::MakePaintGroupFromObjects( FOdysseyVectorObject* iParent
             for( FOdysseyVectorBucket* bucket : bucketList )
             {
                 ::ULIS::FVec2D& bucketCoords = bucket->GetCoords();
-                BLPoint bucketWorldCoords = parentWorldMatrix.mapPoint( bucketCoords.x, bucketCoords.y );
+                BLPoint bucketWorldCoords = parentWorldMatrix.map_point( bucketCoords.x, bucketCoords.y );
 
                 // TODO: that's a lot of conversion, kowing that both PickCycle
                 // and FOdysseyVectorBucket() convert to their own space.

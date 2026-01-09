@@ -134,10 +134,10 @@ FOdysseyVectorSection::Init( FOdysseyVectorObject* iOwner // usually the paintgr
         ::ULIS::FVec2D* segmentBezier = cubicSegment->GetBezier();
         FOdysseyVectorObject* segmentOwner = iSegment->GetOwner();
         BLMatrix2D& segmentOwnerWorldMatrix = segmentOwner->GetWorldMatrix();
-        BLPoint worldSegmentBezier[4] = { segmentOwnerWorldMatrix.mapPoint( segmentBezier[0].x, segmentBezier[0].y )
-                                        , segmentOwnerWorldMatrix.mapPoint( segmentBezier[1].x, segmentBezier[1].y )
-                                        , segmentOwnerWorldMatrix.mapPoint( segmentBezier[2].x, segmentBezier[2].y )
-                                        , segmentOwnerWorldMatrix.mapPoint( segmentBezier[3].x, segmentBezier[3].y ) };
+        BLPoint worldSegmentBezier[4] = { segmentOwnerWorldMatrix.map_point( segmentBezier[0].x, segmentBezier[0].y )
+                                        , segmentOwnerWorldMatrix.map_point( segmentBezier[1].x, segmentBezier[1].y )
+                                        , segmentOwnerWorldMatrix.map_point( segmentBezier[2].x, segmentBezier[2].y )
+                                        , segmentOwnerWorldMatrix.map_point( segmentBezier[3].x, segmentBezier[3].y ) };
 
         BLPoint convertedPoint[4];
 
@@ -184,10 +184,10 @@ FOdysseyVectorSection::Init( FOdysseyVectorObject* iOwner // usually the paintgr
         }
 
         // convert to desired space (the paintgroup, normally)
-        convertedPoint[0] = ownerInverseWorldMatrix.mapPoint( mBezier[0].x, mBezier[0].y );
-        convertedPoint[1] = ownerInverseWorldMatrix.mapPoint( mBezier[1].x, mBezier[1].y );
-        convertedPoint[2] = ownerInverseWorldMatrix.mapPoint( mBezier[2].x, mBezier[2].y );
-        convertedPoint[3] = ownerInverseWorldMatrix.mapPoint( mBezier[3].x, mBezier[3].y );
+        convertedPoint[0] = ownerInverseWorldMatrix.map_point( mBezier[0].x, mBezier[0].y );
+        convertedPoint[1] = ownerInverseWorldMatrix.map_point( mBezier[1].x, mBezier[1].y );
+        convertedPoint[2] = ownerInverseWorldMatrix.map_point( mBezier[2].x, mBezier[2].y );
+        convertedPoint[3] = ownerInverseWorldMatrix.map_point( mBezier[3].x, mBezier[3].y );
 
         // copy values directly (we don't use ::ULIS::FVec2D constructor, to save some speed).
         mBezier[0].x = convertedPoint[0].x;
@@ -224,8 +224,8 @@ FOdysseyVectorSection::Init( FOdysseyVectorObject* iOwner // usually the paintgr
         BLPoint convertedPoint[2];
 
         // convert to desired space (the paintgroup, normally)
-        convertedPoint[0] = ownerInverseWorldMatrix.mapPoint( vertex0WorldCoords.x, vertex0WorldCoords.y );
-        convertedPoint[1] = ownerInverseWorldMatrix.mapPoint( vertex1WorldCoords.x, vertex1WorldCoords.y );
+        convertedPoint[0] = ownerInverseWorldMatrix.map_point( vertex0WorldCoords.x, vertex0WorldCoords.y );
+        convertedPoint[1] = ownerInverseWorldMatrix.map_point( vertex1WorldCoords.x, vertex1WorldCoords.y );
 
         mBezier[0].x = convertedPoint[0].x;
         mBezier[0].y = convertedPoint[0].y;
@@ -540,10 +540,10 @@ FOdysseyVectorSection::Print()
 {
     FOdysseyVectorObject* owner0 = mVertex[0]->GetOwner();
     FOdysseyVectorObject* owner1 = mVertex[1]->GetOwner();
-    BLPoint pt0 = owner0->GetWorldMatrix().mapPoint( mVertex[0]->GetCoords().x, mVertex[0]->GetCoords().y );
-    BLPoint pt1 = owner1->GetWorldMatrix().mapPoint( mVertex[1]->GetCoords().x, mVertex[1]->GetCoords().y );
-    BLPoint segpt0 = owner0->GetWorldMatrix().mapPoint( mSegment->GetVertex(0)->GetCoords().x, mSegment->GetVertex(0)->GetCoords().y );
-    BLPoint segpt1 = owner1->GetWorldMatrix().mapPoint( mSegment->GetVertex(1)->GetCoords().x, mSegment->GetVertex(1)->GetCoords().y );
+    BLPoint pt0 = owner0->GetWorldMatrix().map_point( mVertex[0]->GetCoords().x, mVertex[0]->GetCoords().y );
+    BLPoint pt1 = owner1->GetWorldMatrix().map_point( mVertex[1]->GetCoords().x, mVertex[1]->GetCoords().y );
+    BLPoint segpt0 = owner0->GetWorldMatrix().map_point( mSegment->GetVertex(0)->GetCoords().x, mSegment->GetVertex(0)->GetCoords().y );
+    BLPoint segpt1 = owner1->GetWorldMatrix().map_point( mSegment->GetVertex(1)->GetCoords().x, mSegment->GetVertex(1)->GetCoords().y );
 
     //UE_LOG(LogTemp,Warning,TEXT("Section: [x:%.8f y:%.8f] -- [x:%.8f y:%.8f]/segment[x:%f y:%f] -- [x:%f y:%f] - flags : %d"), pt0.x, pt0.y, pt1.x, pt1.y, segpt0.x, segpt0.y, segpt1.x, segpt1.y, iSection->GetFlags() );
     UE_LOG(LogTemp,Warning,TEXT("Section: [x:%.8f y:%.8f] -- [x:%.8f y:%.8f]"), pt0.x, pt0.y, pt1.x, pt1.y );

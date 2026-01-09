@@ -90,7 +90,7 @@ FOdysseyVectorCycle::Merge( FOdysseyVectorCycle* iMergeCycle )
         }
     }
 
-    mCombinedPath.addPath( iMergeCycle->mContourPath );
+    mCombinedPath.add_path( iMergeCycle->mContourPath );
 }
 
 //static
@@ -167,7 +167,7 @@ FOdysseyVectorCycle::FitsIn( FOdysseyVectorCycle* iParentCandidate )
         }
 
         // also check they don't have a vertex in common.
-        if( iParentCandidate->mContourPath.hitTest( pt, BL_FILL_RULE_EVEN_ODD ) != BL_HIT_TEST_IN )
+        if( iParentCandidate->mContourPath.hit_test( pt, BL_FILL_RULE_EVEN_ODD ) != BL_HIT_TEST_IN )
         {
             return false;
         }
@@ -186,7 +186,7 @@ FOdysseyVectorCycle::FitsIn( FOdysseyVectorCycle* iParentCandidate )
         FOdysseyVectorVertex* contourVertex = section->GetVertex( contourVertexIndex );
         ::ULIS::FVec2D vCoords = section->GetVertexCoords( contourVertex );
         BLPoint pt = BLPoint( vCoords.x, vCoords.y );
-        uint32 ret = iParentCandidate->mContourPath.hitTest( pt, BL_FILL_RULE_EVEN_ODD );
+        uint32 ret = iParentCandidate->mContourPath.hit_test( pt, BL_FILL_RULE_EVEN_ODD );
 
         if( ret != BL_HIT_TEST_IN )
         {
@@ -212,7 +212,7 @@ FOdysseyVectorCycle::Build( /*std::vector<FOdysseyVectorVertex*>& iVertexArray
         // Note: section::GetVertexCoords() return the coords in paintgroup's coordinates
         ::ULIS::FVec2D originAt = mContourSectionArray[0]->GetVertexCoords( firstVertex );
 
-        mContourPath.moveTo( originAt.x, originAt.y );
+        mContourPath.move_to( originAt.x, originAt.y );
 
         for( int i = 0; i < arraySize; i++ )
         {
@@ -228,13 +228,13 @@ FOdysseyVectorCycle::Build( /*std::vector<FOdysseyVectorVertex*>& iVertexArray
             // that may not go the same way. We have to run through them the same way.
             if ( sectionVertexIndex < sectionNextVertexIndex )
             {
-                mContourPath.cubicTo( sectionBezier[1].x, sectionBezier[1].y
+                mContourPath.cubic_to( sectionBezier[1].x, sectionBezier[1].y
                                     , sectionBezier[2].x, sectionBezier[2].y
                                     , sectionBezier[3].x, sectionBezier[3].y );
             }
             else
             {
-                mContourPath.cubicTo( sectionBezier[2].x, sectionBezier[2].y
+                mContourPath.cubic_to( sectionBezier[2].x, sectionBezier[2].y
                                     , sectionBezier[1].x, sectionBezier[1].y
                                     , sectionBezier[0].x, sectionBezier[0].y );
             }
@@ -245,7 +245,7 @@ FOdysseyVectorCycle::Build( /*std::vector<FOdysseyVectorVertex*>& iVertexArray
 
     mCombinedPath = mContourPath;
 
-    mContourPath.getBoundingBox( &bbox );
+    mContourPath.get_bounding_box( &bbox );
 
     mBBox = ::ULIS::FRectD::FromMinMax( bbox.x0, bbox.y0, bbox.x1, bbox.y1 );
 }
@@ -314,7 +314,7 @@ FOdysseyVectorCycle::HitTest( double iX, double iY )
 {
     BLPoint pt = { iX, iY };
 
-    uint32 ret = mCombinedPath.hitTest( pt, BL_FILL_RULE_EVEN_ODD );
+    uint32 ret = mCombinedPath.hit_test( pt, BL_FILL_RULE_EVEN_ODD );
 
     return ( ret == BL_HIT_TEST_IN ) ? true : false;
 }
@@ -337,7 +337,7 @@ FOdysseyVectorCycle::StrokePath( BLContext* iBLContext, bool iWorld )
 
         if( iWorld )
         {
-            iBLContext->resetMatrix();
+            iBLContext->reset_transform();
         }
 
         if( iWorld )
@@ -345,21 +345,21 @@ FOdysseyVectorCycle::StrokePath( BLContext* iBLContext, bool iWorld )
             contourPath.transform( worldMatrix );
         }
 
-        iBLContext->strokePath( contourPath );
+        iBLContext->stroke_path( contourPath );
 
         for( int i = 0; i < mInnerSectionArray.size(); i++ )
         {
             ::ULIS::FVec2D* bezier = mInnerSectionArray[i]->GetBezier();
-            BLPoint pt[4] = { iWorld ? worldMatrix.mapPoint( bezier[0].x, bezier[0].y ) : BLPoint( bezier[0].x, bezier[0].y )
-                            , iWorld ? worldMatrix.mapPoint( bezier[1].x, bezier[1].y ) : BLPoint( bezier[1].x, bezier[1].y )
-                            , iWorld ? worldMatrix.mapPoint( bezier[2].x, bezier[2].y ) : BLPoint( bezier[2].x, bezier[2].y )
-                            , iWorld ? worldMatrix.mapPoint( bezier[3].x, bezier[3].y ) : BLPoint( bezier[3].x, bezier[3].y ) };
+            BLPoint pt[4] = { iWorld ? worldMatrix.map_point( bezier[0].x, bezier[0].y ) : BLPoint( bezier[0].x, bezier[0].y )
+                            , iWorld ? worldMatrix.map_point( bezier[1].x, bezier[1].y ) : BLPoint( bezier[1].x, bezier[1].y )
+                            , iWorld ? worldMatrix.map_point( bezier[2].x, bezier[2].y ) : BLPoint( bezier[2].x, bezier[2].y )
+                            , iWorld ? worldMatrix.map_point( bezier[3].x, bezier[3].y ) : BLPoint( bezier[3].x, bezier[3].y ) };
             BLPath sectionPath;
 
-            sectionPath.moveTo ( pt[0] );
-            sectionPath.cubicTo( pt[1], pt[2], pt[3] );
+            sectionPath.move_to ( pt[0] );
+            sectionPath.cubic_to( pt[1], pt[2], pt[3] );
 
-            iBLContext->strokePath( sectionPath );
+            iBLContext->stroke_path( sectionPath );
         }
 
         iBLContext->restore();
@@ -381,8 +381,8 @@ ShowCycle( std::vector<FOdysseyVectorVertex*>& vertexArray
         FOdysseyVectorVertex* vertex0 = segment->GetVertex(0);
         FOdysseyVectorVertex* vertex1 = segment->GetVertex(1);
         FOdysseyVectorObject* owner = vertex0->GetOwner();
-        BLPoint pt0 = owner->GetWorldMatrix().mapPoint( vertex0->GetCoords().x, vertex0->GetCoords().y );
-        BLPoint pt1 = owner->GetWorldMatrix().mapPoint( vertex1->GetCoords().x, vertex1->GetCoords().y );
+        BLPoint pt0 = owner->GetWorldMatrix().map_point( vertex0->GetCoords().x, vertex0->GetCoords().y );
+        BLPoint pt1 = owner->GetWorldMatrix().map_point( vertex1->GetCoords().x, vertex1->GetCoords().y );
 
         UE_LOG(LogTemp,Warning,TEXT("Node: vertex:%d section:%d (%d[x:%f y:%f] -- %d[x:%f y:%f])"), vertexArray[i], sectionArray[i], sectionArray[i]->GetVertex(0), pt0.x, pt0.y, sectionArray[i]->GetVertex(1), pt1.x, pt1.y );
     }
@@ -394,10 +394,10 @@ FOdysseyVectorCycle::GetBBox( bool iWorld )
     if( iWorld )
     {
         BLMatrix2D& worldMatrix = mOwner->GetWorldMatrix();
-        BLPoint pt[4] = { worldMatrix.mapPoint( mBBox.x          , mBBox.y           )
-                        , worldMatrix.mapPoint( mBBox.x + mBBox.w, mBBox.y           )
-                        , worldMatrix.mapPoint( mBBox.x + mBBox.w, mBBox.y + mBBox.h )
-                        , worldMatrix.mapPoint( mBBox.x          , mBBox.y + mBBox.h ) };
+        BLPoint pt[4] = { worldMatrix.map_point( mBBox.x          , mBBox.y           )
+                        , worldMatrix.map_point( mBBox.x + mBBox.w, mBBox.y           )
+                        , worldMatrix.map_point( mBBox.x + mBBox.w, mBBox.y + mBBox.h )
+                        , worldMatrix.map_point( mBBox.x          , mBBox.y + mBBox.h ) };
         double xmin = ::ULIS::FMath::Min4( pt[0].x, pt[1].x, pt[2].x, pt[3].x )
              , ymin = ::ULIS::FMath::Min4( pt[0].y, pt[1].y, pt[2].y, pt[3].y )
              , xmax = ::ULIS::FMath::Max4( pt[0].x, pt[1].x, pt[2].x, pt[3].x )
@@ -426,8 +426,8 @@ FOdysseyVectorCycle::Draw( BLContext* iBLContext
                                     , iMonochromeColor.B
                                     , iMonochromeColor.A );
 
-        iBLContext->setStrokeStyle( BLColor );
-        iBLContext->setFillStyle( BLColor );
+        iBLContext->set_stroke_style( BLColor );
+        iBLContext->set_fill_style( BLColor );
     }
     else
     {
@@ -460,11 +460,11 @@ FOdysseyVectorCycle::Draw( BLContext* iBLContext
                     BLColor1.setB( gradientColor1.B );
                     BLColor1.setA( gradientColor1.A * iOpacity );
 
-                    linear.addStop( 0.0, BLColor0 );
-                    linear.addStop( 1.0, BLColor1 );
+                    linear.add_stop( 0.0, BLColor0 );
+                    linear.add_stop( 1.0, BLColor1 );
 
-                    iBLContext->setStrokeStyle( linear );
-                    iBLContext->setFillStyle( linear );
+                    iBLContext->set_stroke_style( linear );
+                    iBLContext->set_fill_style( linear );
                 }
                 break;
 
@@ -493,11 +493,11 @@ FOdysseyVectorCycle::Draw( BLContext* iBLContext
                     BLColor1.setB( gradientColor1.B );
                     BLColor1.setA( gradientColor1.A * iOpacity );
 
-                    radial.addStop( 0.0, BLColor0 );
-                    radial.addStop( 1.0, BLColor1 );
+                    radial.add_stop( 0.0, BLColor0 );
+                    radial.add_stop( 1.0, BLColor1 );
 
-                    iBLContext->setStrokeStyle( radial );
-                    iBLContext->setFillStyle( radial );
+                    iBLContext->set_stroke_style( radial );
+                    iBLContext->set_fill_style( radial );
                 }
                 break;
 
@@ -509,8 +509,8 @@ FOdysseyVectorCycle::Draw( BLContext* iBLContext
                                                 , color.B
                                                 , color.A * iOpacity );
 
-                    iBLContext->setStrokeStyle( BLColor );
-                    iBLContext->setFillStyle( BLColor );
+                    iBLContext->set_stroke_style( BLColor );
+                    iBLContext->set_fill_style( BLColor );
                 }
                 break;
             }
@@ -523,17 +523,17 @@ FOdysseyVectorCycle::Draw( BLContext* iBLContext
                                         , color.B
                                         , color.A * iOpacity );
 
-            iBLContext->setStrokeStyle( BLColor );
-            iBLContext->setFillStyle( BLColor );
+            iBLContext->set_stroke_style( BLColor );
+            iBLContext->set_fill_style( BLColor );
         }
     }
 
-    iBLContext->setFillRule( BL_FILL_RULE_EVEN_ODD );
-    iBLContext->fillPath( mCombinedPath );
+    iBLContext->set_fill_rule( BL_FILL_RULE_EVEN_ODD );
+    iBLContext->fill_path( mCombinedPath );
 
     iBLContext->save();
-    iBLContext->resetMatrix();
-    iBLContext->setStrokeWidth( 1.0f );
+    iBLContext->reset_transform();
+    iBLContext->set_stroke_width( 1.0f );
 
     // stroke borders or else there will be a small 1 pixel gap. We draw it only once: the cycle responsible for drawing the
     // section is the cycle that was first attached to the section. That way we don't draw it twice. The paint group could be
@@ -546,16 +546,16 @@ FOdysseyVectorCycle::Draw( BLContext* iBLContext
         if( section->GetCycle(0) == this )
         {
             ::ULIS::FVec2D* sectionBezier = section->GetBezier();
-            BLPoint pt[4] = { worldMatrix.mapPoint( sectionBezier[0].x, sectionBezier[0].y )
-                            , worldMatrix.mapPoint( sectionBezier[1].x, sectionBezier[1].y )
-                            , worldMatrix.mapPoint( sectionBezier[2].x, sectionBezier[2].y )
-                            , worldMatrix.mapPoint( sectionBezier[3].x, sectionBezier[3].y ) };
+            BLPoint pt[4] = { worldMatrix.map_point( sectionBezier[0].x, sectionBezier[0].y )
+                            , worldMatrix.map_point( sectionBezier[1].x, sectionBezier[1].y )
+                            , worldMatrix.map_point( sectionBezier[2].x, sectionBezier[2].y )
+                            , worldMatrix.map_point( sectionBezier[3].x, sectionBezier[3].y ) };
             BLPath path;
 
-            path.moveTo( pt[0] );
-            path.cubicTo( pt[1], pt[2], pt[3] );
+            path.move_to( pt[0] );
+            path.cubic_to( pt[1], pt[2], pt[3] );
 
-            iBLContext->strokePath( path );
+            iBLContext->stroke_path( path );
         }
     }
 

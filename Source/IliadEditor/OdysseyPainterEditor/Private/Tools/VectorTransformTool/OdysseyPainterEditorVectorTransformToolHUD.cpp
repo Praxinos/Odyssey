@@ -66,9 +66,9 @@ GetWorldGizmo( FSelectionBox& iSelectionBox
              , ::ULIS::FVec2D& oWorldXAxisLength
              , ::ULIS::FVec2D& oWorldYAxisLength  )
 {
-    BLPoint worldGizmo = iSelectionBox.worldMatrix.mapPoint( iGizmo.x, iGizmo.y );
-    BLPoint worldXAxis = iSelectionBox.worldMatrix.mapVector( 1.0f, 0.0f );
-    BLPoint worldYAxis = iSelectionBox.worldMatrix.mapVector( 0.0f, 1.0f );
+    BLPoint worldGizmo = iSelectionBox.worldMatrix.map_point( iGizmo.x, iGizmo.y );
+    BLPoint worldXAxis = iSelectionBox.worldMatrix.map_vector( 1.0f, 0.0f );
+    BLPoint worldYAxis = iSelectionBox.worldMatrix.map_vector( 0.0f, 1.0f );
     ::ULIS::FVec2D XAxis = ::ULIS::FVec2D( worldXAxis.x, worldXAxis.y );
     ::ULIS::FVec2D YAxis = ::ULIS::FVec2D( worldYAxis.x, worldYAxis.y );
 
@@ -101,10 +101,10 @@ FSelectionBoxScaler;
 static void
 GetWorldScalers( FSelectionBox& iSelectionBox, FSelectionBoxScaler iScaler[4] )
 {
-    BLPoint handle[4] = { iSelectionBox.worldMatrix.mapPoint( iSelectionBox.rect.x                       , iSelectionBox.rect.y                        )
-                        , iSelectionBox.worldMatrix.mapPoint( iSelectionBox.rect.x + iSelectionBox.rect.w, iSelectionBox.rect.y                        )
-                        , iSelectionBox.worldMatrix.mapPoint( iSelectionBox.rect.x + iSelectionBox.rect.w, iSelectionBox.rect.y + iSelectionBox.rect.h )
-                        , iSelectionBox.worldMatrix.mapPoint( iSelectionBox.rect.x                       , iSelectionBox.rect.y + iSelectionBox.rect.h ) };
+    BLPoint handle[4] = { iSelectionBox.worldMatrix.map_point( iSelectionBox.rect.x                       , iSelectionBox.rect.y                        )
+                        , iSelectionBox.worldMatrix.map_point( iSelectionBox.rect.x + iSelectionBox.rect.w, iSelectionBox.rect.y                        )
+                        , iSelectionBox.worldMatrix.map_point( iSelectionBox.rect.x + iSelectionBox.rect.w, iSelectionBox.rect.y + iSelectionBox.rect.h )
+                        , iSelectionBox.worldMatrix.map_point( iSelectionBox.rect.x                       , iSelectionBox.rect.y + iSelectionBox.rect.h ) };
 
     iScaler[0].position = handle[0];
     iScaler[0].flag     = FOdysseyPainterEditorVectorTransformToolHUD::PICK_SCALER_TOPLEFT;
@@ -199,11 +199,11 @@ FOdysseyPainterEditorVectorTransformToolHUD::DrawGizmo( const FOdysseyHUDElement
                        , gizmoColor
                        , bgColor );
 /*
-    iBLContext->setFillStyle( gizmoColor );
-    iBLContext->fillCircle( worldGizmo.x, worldGizmo.y, GIZMO_RADIUS );
-    iBLContext->setStrokeWidth( 1.0f );
-    iBLContext->setStrokeStyle( bgColor );
-    iBLContext->strokeCircle( worldGizmo.x, worldGizmo.y, GIZMO_RADIUS );
+    iBLContext->set_fill_style( gizmoColor );
+    iBLContext->fill_circle( worldGizmo.x, worldGizmo.y, GIZMO_RADIUS );
+    iBLContext->set_stroke_width( 1.0f );
+    iBLContext->set_stroke_style( bgColor );
+    iBLContext->stroke_circle( worldGizmo.x, worldGizmo.y, GIZMO_RADIUS );
 */
     // Axises
     DrawPrimitiveLine( iParams, hudXAxisStart, hudXAxisStart + hudXAxisVector, bgColor, 2.0f );
@@ -266,7 +266,7 @@ FOdysseyPainterEditorVectorTransformToolHUD::PickScalers( double iWorldX, double
 uint32
 FOdysseyPainterEditorVectorTransformToolHUD::PickSelectionBox( double iWorldX, double iWorldY )
 {
-    BLPoint localPt = mSelectionBox.inverseWorldMatrix.mapPoint( iWorldX, iWorldY );
+    BLPoint localPt = mSelectionBox.inverseWorldMatrix.map_point( iWorldX, iWorldY );
     uint32 newFlags = 0;
 
     // inside = translate

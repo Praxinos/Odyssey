@@ -45,10 +45,10 @@ void
 FPointQuadTree::Draw( BLContext* iBLContext, FOdysseyVectorGroupPaint* iScene, uint64 iFlags )
 {
     iBLContext->save();
-    iBLContext->resetMatrix();
-    iBLContext->setStrokeStyle( BLRgba32( 0xFF0000FF )  );
-    iBLContext->setStrokeWidth( 1.0f );
-    iBLContext->strokeRect( mRect.x, mRect.y, mRect.w, mRect.h );
+    iBLContext->reset_transform();
+    iBLContext->set_stroke_style( BLRgba32( 0xFF0000FF )  );
+    iBLContext->set_stroke_width( 1.0f );
+    iBLContext->stroke_rect( mRect.x, mRect.y, mRect.w, mRect.h );
     iBLContext->restore();
 
     for( int i = 0 ; i < 4; i++ )
@@ -138,7 +138,7 @@ MapPath( FOdysseyVectorPath* iPath
     for( FOdysseyVectorVertex* vertex : iPath->GetVertexList() )
     {
         ::ULIS::FVec2D& coords = vertex->GetCoords();
-        BLPoint worldCoords = iPath->GetWorldMatrix().mapPoint( coords.x, coords.y );
+        BLPoint worldCoords = iPath->GetWorldMatrix().map_point( coords.x, coords.y );
         ::ULIS::FVec2D screenCoords = ::ULIS::FVec2D( worldCoords.x, worldCoords.y );
 
         if( iRect.HitTest( screenCoords ) )
@@ -438,15 +438,15 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawText( BLContext* iBLContext
                                                 , uint32 iX
                                                 , uint32 iY )
 {
-    iBLContext->setCompOp( BL_COMP_OP_SRC_OVER  );
-    iBLContext->setFillStyle( iForegroundColor );
-    iBLContext->setStrokeWidth( 10.0f );
+    iBLContext->set_comp_op( BL_COMP_OP_SRC_OVER  );
+    iBLContext->set_fill_style( iForegroundColor );
+    iBLContext->set_stroke_width( 10.0f );
 
-    iBLContext->strokeUtf8Text( BLPoint( iX, iY ), iBLFont, iText );
-    iBLContext->fillUtf8Text( BLPoint( iX, iY ), iBLFont, iText );
+    iBLContext->stroke_utf8_text( BLPoint( iX, iY ), iBLFont, iText );
+    iBLContext->fill_utf8_text( BLPoint( iX, iY ), iBLFont, iText );
 
-//    blctx->setStrokeStyle( BLRgba32( 0xFF000000 ) );
-//    blctx->setStrokeWidth( 1.0f );
+//    blctx->set_stroke_style( BLRgba32( 0xFF000000 ) );
+//    blctx->set_stroke_width( 1.0f );
 //    blctx->strokeUtf8Text( BLPoint( iFrame.x + 10, iFrame.y + iFrame.h - 10 ), mFont, str );
 }
 
@@ -459,7 +459,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::PickPath( FOdysseyVectorGroup* iSelectio
     const BLMatrix2D& worldMatrix = iPath->GetWorldMatrix();
     BLImageData imageData;
 
-    iHUDMaskImage.getData( &imageData );
+    iHUDMaskImage.get_data( &imageData );
 
     for( FOdysseyVectorSegment* segment : iPath->GetSegmentList() )
     {
@@ -483,7 +483,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::PickPath( FOdysseyVectorGroup* iSelectio
                 if( ( iX >= 0 && iX < imageData.size.w )
                  && ( iY >= 0 && iY < imageData.size.h ) )
                 {
-                    uint8 *pixel = static_cast<uint8*>(imageData.pixelData);
+                    uint8 *pixel = static_cast<uint8*>(imageData.pixel_data);
                     uint32 offset = ( iY * imageData.size.w ) + iX;
 
                     return ( pixel[offset] ) ? true : false;
@@ -561,7 +561,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::PickPathPoints( FOdysseyVectorPath* iPat
     for( FOdysseyVectorVertex* vertex : iPath->GetVertexList() )
     {
         ::ULIS::FVec2D perpendicularVector = FOdysseyVectorPath::GetPerpendicularVector( vertex, true );
-        BLPoint worldPerpendicularVector = worldMatrix.mapVector( perpendicularVector.x * vertex->GetRadius()
+        BLPoint worldPerpendicularVector = worldMatrix.map_vector( perpendicularVector.x * vertex->GetRadius()
                                                                 , perpendicularVector.y * vertex->GetRadius() );
 
         // Pick vertex
@@ -738,10 +738,10 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxVertexMode()
     {
         BLPoint p0, p1, p2, p3;
 
-        p0 = mSelectionBox.inverseWorldMatrix.mapPoint( xmin, ymin );
-        p1 = mSelectionBox.inverseWorldMatrix.mapPoint( xmax, ymin );
-        p2 = mSelectionBox.inverseWorldMatrix.mapPoint( xmax, ymax );
-        p3 = mSelectionBox.inverseWorldMatrix.mapPoint( xmin, ymax );
+        p0 = mSelectionBox.inverseWorldMatrix.map_point( xmin, ymin );
+        p1 = mSelectionBox.inverseWorldMatrix.map_point( xmax, ymin );
+        p2 = mSelectionBox.inverseWorldMatrix.map_point( xmax, ymax );
+        p3 = mSelectionBox.inverseWorldMatrix.map_point( xmin, ymax );
 
         mSelectionBox.rect = ::ULIS::FRectD::FromMinMax( ::ULIS::FMath::Min4( p0.x, p1.x, p2.x, p3.x )
                                                        , ::ULIS::FMath::Min4( p0.y, p1.y, p2.y, p3.y )
@@ -801,10 +801,10 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxObjectMode( bool iForc
             ::ULIS::FRectD rect = mSelectionBox.rect;
             BLPoint p0, p1, p2, p3;
 
-            p0 = mSelectionBox.inverseWorldMatrix.mapPoint( rect.x         , rect.y          );
-            p1 = mSelectionBox.inverseWorldMatrix.mapPoint( rect.x + rect.w, rect.y          );
-            p2 = mSelectionBox.inverseWorldMatrix.mapPoint( rect.x + rect.w, rect.y + rect.h );
-            p3 = mSelectionBox.inverseWorldMatrix.mapPoint( rect.x         , rect.y + rect.h );
+            p0 = mSelectionBox.inverseWorldMatrix.map_point( rect.x         , rect.y          );
+            p1 = mSelectionBox.inverseWorldMatrix.map_point( rect.x + rect.w, rect.y          );
+            p2 = mSelectionBox.inverseWorldMatrix.map_point( rect.x + rect.w, rect.y + rect.h );
+            p3 = mSelectionBox.inverseWorldMatrix.map_point( rect.x         , rect.y + rect.h );
 
             mSelectionBox.rect = ::ULIS::FRectD::FromMinMax( ::ULIS::FMath::Min4( p0.x, p1.x, p2.x, p3.x )
                                                            , ::ULIS::FMath::Min4( p0.y, p1.y, p2.y, p3.y )
@@ -852,10 +852,10 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxInbetweenMode( bool iF
             ::ULIS::FRectD rect = mSelectionBox.rect;
             BLPoint p0, p1, p2, p3;
 
-            p0 = mSelectionBox.inverseWorldMatrix.mapPoint( rect.x         , rect.y          );
-            p1 = mSelectionBox.inverseWorldMatrix.mapPoint( rect.x + rect.w, rect.y          );
-            p2 = mSelectionBox.inverseWorldMatrix.mapPoint( rect.x + rect.w, rect.y + rect.h );
-            p3 = mSelectionBox.inverseWorldMatrix.mapPoint( rect.x         , rect.y + rect.h );
+            p0 = mSelectionBox.inverseWorldMatrix.map_point( rect.x         , rect.y          );
+            p1 = mSelectionBox.inverseWorldMatrix.map_point( rect.x + rect.w, rect.y          );
+            p2 = mSelectionBox.inverseWorldMatrix.map_point( rect.x + rect.w, rect.y + rect.h );
+            p3 = mSelectionBox.inverseWorldMatrix.map_point( rect.x         , rect.y + rect.h );
 
             mSelectionBox.rect = ::ULIS::FRectD::FromMinMax( ::ULIS::FMath::Min4( p0.x, p1.x, p2.x, p3.x )
                                                            , ::ULIS::FMath::Min4( p0.y, p1.y, p2.y, p3.y )
@@ -902,10 +902,10 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawSelectionBox( const FOdysseyHUDEleme
     {
         BLMatrix2D& worldMatrix = mSelectionBox.worldMatrix;
         // texture space
-        BLPoint pt[4] = { worldMatrix.mapPoint( mSelectionBox.rect.x                       , mSelectionBox.rect.y                        )
-                        , worldMatrix.mapPoint( mSelectionBox.rect.x + mSelectionBox.rect.w, mSelectionBox.rect.y                        )
-                        , worldMatrix.mapPoint( mSelectionBox.rect.x + mSelectionBox.rect.w, mSelectionBox.rect.y + mSelectionBox.rect.h )
-                        , worldMatrix.mapPoint( mSelectionBox.rect.x                       , mSelectionBox.rect.y + mSelectionBox.rect.h ) };
+        BLPoint pt[4] = { worldMatrix.map_point( mSelectionBox.rect.x                       , mSelectionBox.rect.y                        )
+                        , worldMatrix.map_point( mSelectionBox.rect.x + mSelectionBox.rect.w, mSelectionBox.rect.y                        )
+                        , worldMatrix.map_point( mSelectionBox.rect.x + mSelectionBox.rect.w, mSelectionBox.rect.y + mSelectionBox.rect.h )
+                        , worldMatrix.map_point( mSelectionBox.rect.x                       , mSelectionBox.rect.y + mSelectionBox.rect.h ) };
         BLPath path;
         // HUD space
         FVector2D scr[4] = { TextureToHUD( FVector2D( pt[0].x, pt[0].y ) )
@@ -1215,7 +1215,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawVertex( const FOdysseyHUDElement::FD
     FOdysseyVectorPath* path = iVertex->GetOwnerAsPath();
     BLMatrix2D& worldMatrix = path->GetWorldMatrix();
     // TODO: compute that once and pass it as parameter for all vertices
-    BLPoint worldPoint = worldMatrix.mapPoint( iVertex->GetX(), iVertex->GetY() );
+    BLPoint worldPoint = worldMatrix.map_point( iVertex->GetX(), iVertex->GetY() );
     FVector2D hudPoint = TextureToHUD( FVector2D( worldPoint.x, worldPoint.y ) );
     static FLinearColor greenColor  = FLinearColor(  0.0f,  1.0f,  0.0f, 1.0f );
     static FLinearColor ltgrayColor = FLinearColor(  0.5f,  0.5f,  0.5f, 1.0f );
@@ -1239,8 +1239,8 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawVertex( const FOdysseyHUDElement::FD
 
         iVertex->GetHandlePosition( localHandleCoords );
 
-        texHandleCoords[0] = worldMatrix.mapPoint( localHandleCoords[0].x, localHandleCoords[0].y );
-        texHandleCoords[1] = worldMatrix.mapPoint( localHandleCoords[1].x, localHandleCoords[1].y );
+        texHandleCoords[0] = worldMatrix.map_point( localHandleCoords[0].x, localHandleCoords[0].y );
+        texHandleCoords[1] = worldMatrix.map_point( localHandleCoords[1].x, localHandleCoords[1].y );
 
         hudHandleCoords[0] = TextureToHUD( FVector2D( texHandleCoords[0].x, texHandleCoords[0].y ) );
         hudHandleCoords[1] = TextureToHUD( FVector2D( texHandleCoords[1].x, texHandleCoords[1].y ) );
@@ -1523,11 +1523,11 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawPrimitiveVertex( const FOdysseyHUDEl
 */
 
     // inner
-//    iBLContext->setFillStyle( fgColor );
-//    iBLContext->fillCircle( iWorldx, iWorldY, iRadius );
-//    iBLContext->setStrokeWidth( 1.0f );
-//    iBLContext->setStrokeStyle( bgColor );
-//    iBLContext->strokeCircle( iWorldx, iWorldY, iRadius );
+//    iBLContext->set_fill_style( fgColor );
+//    iBLContext->fill_circle( iWorldx, iWorldY, iRadius );
+//    iBLContext->set_stroke_width( 1.0f );
+//    iBLContext->set_stroke_style( bgColor );
+//    iBLContext->stroke_circle( iWorldx, iWorldY, iRadius );
 }
 
 void
@@ -1550,11 +1550,11 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawPrimitiveHandle( const FOdysseyHUDEl
                              , ESimpleElementBlendMode::SE_BLEND_Masked );
 
     // inner
-//    iBLContext->setFillStyle( fgColor );
-//    iBLContext->fillCircle( iWorldx, iWorldY, iRadius );
-//    iBLContext->setStrokeWidth( 1.0f );
-//    iBLContext->setStrokeStyle( bgColor );
-//    iBLContext->strokeCircle( iWorldx, iWorldY, iRadius );
+//    iBLContext->set_fill_style( fgColor );
+//    iBLContext->fill_circle( iWorldx, iWorldY, iRadius );
+//    iBLContext->set_stroke_width( 1.0f );
+//    iBLContext->set_stroke_style( bgColor );
+//    iBLContext->stroke_circle( iWorldx, iWorldY, iRadius );
 }
 
 void

@@ -6,21 +6,21 @@
 #ifndef BLEND2D_OPENTYPE_OTCORE_P_H_INCLUDED
 #define BLEND2D_OPENTYPE_OTCORE_P_H_INCLUDED
 
-#include "../opentype/otdefs_p.h"
-#include "../support/ptrops_p.h"
+#include <blend2d/opentype/otdefs_p.h>
+#include <blend2d/support/ptrops_p.h>
 
 //! \cond INTERNAL
 //! \addtogroup blend2d_opentype_impl
 //! \{
 
-namespace BLOpenType {
+namespace bl::OpenType {
 
 //! OpenType 'SFNT' header.
 //!
 //! External Resources:
 //!   - https://docs.microsoft.com/en-us/typography/opentype/spec/font-file
 struct SFNTHeader {
-  enum : uint32_t { kMinSize = 12 };
+  enum : uint32_t { kBaseSize = 12 };
 
   enum VersionTag : uint32_t {
     kVersionTagOpenType   = BL_MAKE_TAG('O', 'T', 'T', 'O'),
@@ -31,18 +31,18 @@ struct SFNTHeader {
 
   struct TableRecord {
     UInt32 tag;
-    CheckSum checkSum;
+    CheckSum check_sum;
     UInt32 offset;
     UInt32 length;
   };
 
-  UInt32 versionTag;
-  UInt16 numTables;
-  UInt16 searchRange;
-  UInt16 entrySelector;
-  UInt16 rangeShift;
+  UInt32 version_tag;
+  UInt16 num_tables;
+  UInt16 search_range;
+  UInt16 entry_selector;
+  UInt16 range_shift;
 
-  BL_INLINE const TableRecord* tableRecords() const noexcept { return BLPtrOps::offset<const TableRecord>(this, sizeof(SFNTHeader)); }
+  BL_INLINE const TableRecord* table_records() const noexcept { return PtrOps::offset<const TableRecord>(this, sizeof(SFNTHeader)); }
 };
 
 //! OpenType 'TTCF' header.
@@ -50,31 +50,31 @@ struct SFNTHeader {
 //! External Resources:
 //!   - https://docs.microsoft.com/en-us/typography/opentype/spec/font-file
 struct TTCFHeader {
-  enum : uint32_t { kMinSize = 12 };
+  enum : uint32_t { kBaseSize = 12 };
   enum : uint32_t { kMaxFonts = 65536 };
 
-  BL_INLINE size_t calcSize(uint32_t numFonts) const noexcept {
-    uint32_t headerSize = uint32_t(sizeof(TTCFHeader));
+  BL_INLINE size_t calc_size(uint32_t num_fonts) const noexcept {
+    uint32_t header_size = uint32_t(sizeof(TTCFHeader));
 
-    if (numFonts > kMaxFonts)
+    if (num_fonts > kMaxFonts)
       return 0;
 
     if (version() >= 0x00020000u)
-      headerSize += 12;
+      header_size += 12;
 
-    return headerSize + numFonts * 4;
+    return header_size + num_fonts * 4;
   }
 
   // Version 1.
-  UInt32 ttcTag;
+  UInt32 ttc_tag;
   F16x16 version;
   Array32<UInt32> fonts;
 
   /*
   // Version 2.
-  UInt32 dsigTag;
-  UInt32 dsigLength;
-  UInt32 dsigOffset;
+  UInt32 dsig_tag;
+  UInt32 dsig_length;
+  UInt32 dsig_offset;
   */
 };
 
@@ -84,7 +84,7 @@ struct TTCFHeader {
 //!   - https://docs.microsoft.com/en-us/typography/opentype/spec/head
 //!   - https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6head.html
 struct HeadTable {
-  enum : uint32_t { kMinSize = 54 };
+  enum : uint32_t { kBaseSize = 54 };
 
   enum : uint32_t {
     kCheckSumAdjustment      = BL_MAKE_TAG(0xB1, 0xB0, 0xAF, 0xBA),
@@ -122,25 +122,25 @@ struct HeadTable {
   F16x16 version;
   F16x16 revision;
 
-  UInt32 checkSumAdjustment;
-  UInt32 magicNumber;
+  UInt32 check_sum_adjustment;
+  UInt32 magic_number;
   UInt16 flags;
-  UInt16 unitsPerEm;
+  UInt16 units_per_em;
 
   DateTime created;
   DateTime modified;
 
-  Int16 xMin;
-  Int16 yMin;
-  Int16 xMax;
-  Int16 yMax;
+  Int16 x_min;
+  Int16 y_min;
+  Int16 x_max;
+  Int16 y_max;
 
-  UInt16 macStyle;
+  UInt16 mac_style;
   UInt16 lowestRecPPEM;
 
-  Int16 fontDirectionHint;
-  UInt16 indexToLocFormat;
-  UInt16 glyphDataFormat;
+  Int16 font_direction_hint;
+  UInt16 index_to_loc_format;
+  UInt16 glyph_data_format;
 };
 
 //! OpenType 'maxp' table.
@@ -149,35 +149,35 @@ struct HeadTable {
 //!   - https://docs.microsoft.com/en-us/typography/opentype/spec/maxp
 //!   - https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6maxp.html
 struct MaxPTable {
-  enum : uint32_t { kMinSize = 6 };
+  enum : uint32_t { kBaseSize = 6 };
 
   // V0.5 - Must be used with CFF Glyphs (OpenType).
   struct V0_5 {
     F16x16 version;
-    UInt16 glyphCount;
+    UInt16 glyph_count;
   };
 
   // V1.0 - Must be used with TT Glyphs (TrueType).
   struct V1_0 : public V0_5 {
-    UInt16 maxPoints;
-    UInt16 maxContours;
-    UInt16 maxComponentPoints;
-    UInt16 maxComponentContours;
-    UInt16 maxZones;
-    UInt16 maxTwilightPoints;
-    UInt16 maxStorage;
-    UInt16 maxFunctionDefs;
-    UInt16 maxInstructionDefs;
-    UInt16 maxStackElements;
-    UInt16 maxSizeOfInstructions;
-    UInt16 maxComponentElements;
-    UInt16 maxComponentDepth;
+    UInt16 max_points;
+    UInt16 max_contours;
+    UInt16 max_component_points;
+    UInt16 max_component_contours;
+    UInt16 max_zones;
+    UInt16 max_twilight_points;
+    UInt16 max_storage;
+    UInt16 max_function_defs;
+    UInt16 max_instruction_defs;
+    UInt16 max_stack_elements;
+    UInt16 max_size_of_instructions;
+    UInt16 max_component_elements;
+    UInt16 max_component_depth;
   };
 
   V0_5 header;
 
-  BL_INLINE const V0_5* v0_5() const noexcept { return BLPtrOps::offset<const V0_5>(this, 0); }
-  BL_INLINE const V1_0* v1_0() const noexcept { return BLPtrOps::offset<const V1_0>(this, 0); }
+  BL_INLINE const V0_5* v0_5() const noexcept { return PtrOps::offset<const V0_5>(this, 0); }
+  BL_INLINE const V1_0* v1_0() const noexcept { return PtrOps::offset<const V1_0>(this, 0); }
 };
 
 //! OpenType 'OS/2' table.
@@ -185,9 +185,9 @@ struct MaxPTable {
 //!   - https://docs.microsoft.com/en-us/typography/opentype/spec/os2
 //!   - https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6OS2.html
 struct OS2Table {
-  enum : uint32_t { kMinSize = 68 };
+  enum : uint32_t { kBaseSize = 68 };
 
-  //! OS/2 selection flags used by `OS2::selectionFlags` field.
+  //! OS/2 selection flags used by `OS2::selection_flags` field.
   enum SelectionFlags : uint32_t {
     kSelectionItalic         = 0x0001u,
     kSelectionUnderscore     = 0x0002u,
@@ -202,13 +202,13 @@ struct OS2Table {
   };
 
   struct V0A {
-    enum : uint32_t { kMinSize = 68 };
+    enum : uint32_t { kBaseSize = 68 };
 
     UInt16 version;
-    Int16 xAverateWidth;
-    UInt16 weightClass;
-    UInt16 widthClass;
-    UInt16 embeddingFlags;
+    Int16 xAverageWidth;
+    UInt16 weight_class;
+    UInt16 width_class;
+    UInt16 embedding_flags;
     Int16 ySubscriptXSize;
     Int16 ySubscriptYSize;
     Int16 ySubscriptXOffset;
@@ -219,55 +219,55 @@ struct OS2Table {
     Int16 ySuperscriptYOffset;
     Int16 yStrikeoutSize;
     Int16 yStrikeoutPosition;
-    Int16 familyClass;
+    Int16 family_class;
     UInt8 panose[10];
-    UInt32 unicodeCoverage[4];
-    UInt8 vendorId[4];
-    UInt16 selectionFlags;
-    UInt16 firstChar;
-    UInt16 lastChar;
+    UInt32 unicode_coverage[4];
+    UInt8 vendor_id[4];
+    UInt16 selection_flags;
+    UInt16 first_char;
+    UInt16 last_char;
   };
 
   struct V0B : public V0A {
-    enum : uint32_t { kMinSize = 78 };
+    enum : uint32_t { kBaseSize = 78 };
 
-    Int16 typoAscender;
-    Int16 typoDescender;
-    Int16 typoLineGap;
-    UInt16 winAscent;
-    UInt16 winDescent;
+    Int16 typo_ascender;
+    Int16 typo_descender;
+    Int16 typo_line_gap;
+    UInt16 win_ascent;
+    UInt16 win_descent;
   };
 
   struct V1 : public V0B {
-    enum : uint32_t { kMinSize = 86 };
+    enum : uint32_t { kBaseSize = 86 };
 
-    UInt32 codePageRange[2];
+    UInt32 code_page_range[2];
   };
 
   struct V2 : public V1 {
-    enum : uint32_t { kMinSize = 96 };
+    enum : uint32_t { kBaseSize = 96 };
 
-    Int16 xHeight;
-    Int16 capHeight;
-    UInt16 defaultChar;
-    UInt16 breakChar;
-    UInt16 maxContext;
+    Int16 x_height;
+    Int16 cap_height;
+    UInt16 default_char;
+    UInt16 break_char;
+    UInt16 max_context;
   };
 
   struct V5 : public V2 {
-    enum : uint32_t { kMinSize = 100 };
+    enum : uint32_t { kBaseSize = 100 };
 
-    UInt16 lowerOpticalPointSize;
-    UInt16 upperOpticalPointSize;
+    UInt16 lower_optical_point_size;
+    UInt16 upper_optical_point_size;
   };
 
   V0A header;
 
-  BL_INLINE const V0A* v0a() const noexcept { return BLPtrOps::offset<const V0A>(this, 0); }
-  BL_INLINE const V0B* v0b() const noexcept { return BLPtrOps::offset<const V0B>(this, 0); }
-  BL_INLINE const V1* v1() const noexcept { return BLPtrOps::offset<const V1>(this, 0); }
-  BL_INLINE const V2* v2() const noexcept { return BLPtrOps::offset<const V2>(this, 0); }
-  BL_INLINE const V5* v5() const noexcept { return BLPtrOps::offset<const V5>(this, 0); }
+  BL_INLINE const V0A* v0a() const noexcept { return PtrOps::offset<const V0A>(this, 0); }
+  BL_INLINE const V0B* v0b() const noexcept { return PtrOps::offset<const V0B>(this, 0); }
+  BL_INLINE const V1* v1() const noexcept { return PtrOps::offset<const V1>(this, 0); }
+  BL_INLINE const V2* v2() const noexcept { return PtrOps::offset<const V2>(this, 0); }
+  BL_INLINE const V5* v5() const noexcept { return PtrOps::offset<const V5>(this, 0); }
 };
 
 //! OpenType 'post' table.
@@ -275,13 +275,13 @@ struct OS2Table {
 //!   - https://docs.microsoft.com/en-us/typography/opentype/spec/post
 //!   - https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6Post.html
 struct PostTable {
-  enum : uint32_t { kMinSize = 32 };
+  enum : uint32_t { kBaseSize = 32 };
 
   F16x16 version;
-  F16x16 italicAngle;
-  Int16 underlinePosition;
-  Int16 underlineThickness;
-  UInt32 isFixedPitch;
+  F16x16 italic_angle;
+  Int16 underline_position;
+  Int16 underline_thickness;
+  UInt32 is_fixed_pitch;
   UInt32 minMemType42;
   UInt32 maxMemType42;
   UInt32 minMemType1;
@@ -290,10 +290,10 @@ struct PostTable {
 
 
 namespace CoreImpl {
-BLResult init(OTFaceImpl* faceI, const BLFontData* fontData) noexcept;
+BLResult init(OTFaceImpl* ot_face_impl, OTFaceTables& tables) noexcept;
 } // {CoreImpl}
 
-} // {BLOpenType}
+} // {bl::OpenType}
 
 //! \}
 //! \endcond

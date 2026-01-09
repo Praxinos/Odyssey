@@ -69,10 +69,10 @@ FOdysseyVector::ExtractTransformations( const BLMatrix2D &iMatrix
 FOdysseyVector::MapRect( const BLMatrix2D& iMatrix
                        , const ::ULIS::FRectD& iRect )
 {
-    BLPoint p0 = iMatrix.mapPoint( iRect.x          , iRect.y           );
-    BLPoint p1 = iMatrix.mapPoint( iRect.x + iRect.w, iRect.y           );
-    BLPoint p2 = iMatrix.mapPoint( iRect.x + iRect.w, iRect.y + iRect.h );
-    BLPoint p3 = iMatrix.mapPoint( iRect.x          , iRect.y + iRect.h );
+    BLPoint p0 = iMatrix.map_point( iRect.x          , iRect.y           );
+    BLPoint p1 = iMatrix.map_point( iRect.x + iRect.w, iRect.y           );
+    BLPoint p2 = iMatrix.map_point( iRect.x + iRect.w, iRect.y + iRect.h );
+    BLPoint p3 = iMatrix.map_point( iRect.x          , iRect.y + iRect.h );
     ::ULIS::FRectD bbox = ::ULIS::FRectD::FromMinMax( ::ULIS::FMath::Min4( p0.x, p1.x, p2.x, p3.x )
                                                     , ::ULIS::FMath::Min4( p0.y, p1.y, p2.y, p3.y )
                                                     , ::ULIS::FMath::Max4( p0.x, p1.x, p2.x, p3.x )
@@ -85,7 +85,7 @@ FOdysseyVector::MapRect( const BLMatrix2D& iMatrix
 FOdysseyVector::MapPoint( const BLMatrix2D& iMatrix
                         , const ::ULIS::FVec2D& iPoint )
 {
-    BLPoint pt = iMatrix.mapPoint( iPoint.x, iPoint.y );
+    BLPoint pt = iMatrix.map_point( iPoint.x, iPoint.y );
 
     return ::ULIS::FVec2D( pt.x, pt.y );
 }
@@ -102,7 +102,7 @@ FOdysseyVector::MapPoint( const BLMatrix2D& iMatrix
 FOdysseyVector::MapVector( const BLMatrix2D& iMatrix
                          , const ::ULIS::FVec2D& iPoint )
 {
-    BLPoint pt = iMatrix.mapVector( iPoint.x, iPoint.y );
+    BLPoint pt = iMatrix.map_vector( iPoint.x, iPoint.y );
 
     return ::ULIS::FVec2D( pt.x, pt.y );
 }

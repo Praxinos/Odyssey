@@ -85,8 +85,8 @@ FOdysseyPainterEditorVectorGridToolHUD::DeformCell( FGridCell& iCell )
 
         newCoords = p0p1s + ( ( p3p2s - p0p1s ) * iCell.mPointArray[i].t );
 
-        worldPt = mSelectionBox.worldMatrix.mapPoint( newCoords.x, newCoords.y );
-        objectPt = iCell.mPointArray[i].mDeformedObject->GetInverseWorldMatrix().mapPoint( worldPt.x, worldPt.y );
+        worldPt = mSelectionBox.worldMatrix.map_point( newCoords.x, newCoords.y );
+        objectPt = iCell.mPointArray[i].mDeformedObject->GetInverseWorldMatrix().map_point( worldPt.x, worldPt.y );
 
         iCell.mPointArray[i].mPoint->Set( objectPt.x, objectPt.y );
     }
@@ -186,7 +186,7 @@ FOdysseyPainterEditorVectorGridToolHUD::PickNodes( ::ULIS::FRectD& iWorldRect
         for( int i = 0; i < mNodeArray.size(); i++ )
         {
             FGridNode* node = &mNodeArray[i];
-            BLPoint pt = worldMatrix.mapPoint( node->GetX(), node->GetY() );
+            BLPoint pt = worldMatrix.map_point( node->GetX(), node->GetY() );
             ::ULIS::FVec2D coords = ::ULIS::FVec2D( pt.x, pt.y );
 
             if ( iWorldRect.HitTest( coords ) )
@@ -400,7 +400,7 @@ FOdysseyPainterEditorVectorGridToolHUD::MapPath( FOdysseyVectorPath* iPath
 
     for( FOdysseyVectorVertex* vertex : vertexList )
     {
-        BLPoint pt = conversionMatrix.mapPoint( vertex->GetX(), vertex->GetY() );
+        BLPoint pt = conversionMatrix.map_point( vertex->GetX(), vertex->GetY() );
         double spaceX = pt.x - mSelectionBox.rect.x;
         double spaceY = pt.y - mSelectionBox.rect.y;
 
@@ -416,7 +416,7 @@ FOdysseyPainterEditorVectorGridToolHUD::MapPath( FOdysseyVectorPath* iPath
 
             for( int i = 0; i < 2; i++ )
             {
-                BLPoint pt = conversionMatrix.mapPoint( point[i]->GetX(), point[i]->GetY() );
+                BLPoint pt = conversionMatrix.map_point( point[i]->GetX(), point[i]->GetY() );
                 double spaceX = pt.x - mSelectionBox.rect.x; // Hi again, Elon :) !
                 double spaceY = pt.y - mSelectionBox.rect.y;
 
@@ -441,7 +441,7 @@ FOdysseyPainterEditorVectorGridToolHUD::MapPaintGroupBuckets( FOdysseyVectorGrou
     // map buckets
     for( FOdysseyVectorBucket* bucket : bucketList )
     {
-        BLPoint pt = conversionMatrix.mapPoint( bucket->GetX(), bucket->GetY() );
+        BLPoint pt = conversionMatrix.map_point( bucket->GetX(), bucket->GetY() );
         double spaceX = pt.x - mSelectionBox.rect.x;
         double spaceY = pt.y - mSelectionBox.rect.y;
 

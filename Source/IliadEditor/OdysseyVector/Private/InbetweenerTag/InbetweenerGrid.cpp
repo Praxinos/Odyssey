@@ -772,13 +772,13 @@ FInbetweenerGrid::ComputeARAPInterpolation( FInbetweenerChart::Inbetween* iInbet
     if ( validRouteArray.size() == 0 )
     {
         // get grid center of mass in their respective boundary space
-        BLPoint sourceCenterOfMass = mBreakdown->GetSourceLocalMatrix().mapPoint( mSourceCenterOfMass.x
+        BLPoint sourceCenterOfMass = mBreakdown->GetSourceLocalMatrix().map_point( mSourceCenterOfMass.x
                                                                                 , mSourceCenterOfMass.y );
-        BLPoint targetCenterOfMass = mBreakdown->GetTargetLocalMatrix().mapPoint( mTargetCenterOfMass.x
+        BLPoint targetCenterOfMass = mBreakdown->GetTargetLocalMatrix().map_point( mTargetCenterOfMass.x
                                                                                 , mTargetCenterOfMass.y );
         // convert to inbetween space
-        BLPoint inbetweenSourceCenterOfMass = iInbetween->GetDrawing()->inverseMatrix.mapPoint( sourceCenterOfMass.x, sourceCenterOfMass.y );
-        BLPoint inbetweenTargetCenterOfMass = iInbetween->GetDrawing()->inverseMatrix.mapPoint( targetCenterOfMass.x, targetCenterOfMass.y );
+        BLPoint inbetweenSourceCenterOfMass = iInbetween->GetDrawing()->inverseMatrix.map_point( sourceCenterOfMass.x, sourceCenterOfMass.y );
+        BLPoint inbetweenTargetCenterOfMass = iInbetween->GetDrawing()->inverseMatrix.map_point( targetCenterOfMass.x, targetCenterOfMass.y );
 
         PTAD( idx, 0 ) = inbetweenSourceCenterOfMass.x + ( ( inbetweenTargetCenterOfMass.x - inbetweenSourceCenterOfMass.x ) * t );
         PTAD( idx, 1 ) = inbetweenSourceCenterOfMass.y + ( ( inbetweenTargetCenterOfMass.y - inbetweenSourceCenterOfMass.y ) * t );
@@ -794,7 +794,7 @@ FInbetweenerGrid::ComputeARAPInterpolation( FInbetweenerChart::Inbetween* iInbet
         double waypointT = trajectory->GetWaypointBuffer()[waypointIndex].GetT();
         ::ULIS::FVec2D coords = trajectory->GetPointFromLinearT( waypointT );
 
-        BLPoint inbetweenCoords = iInbetween->GetDrawing()->inverseMatrix.mapPoint( coords.x, coords.y );
+        BLPoint inbetweenCoords = iInbetween->GetDrawing()->inverseMatrix.map_point( coords.x, coords.y );
 
         PTAD( idx, 0 ) = inbetweenCoords.x;
         PTAD( idx, 1 ) = inbetweenCoords.y;

@@ -184,7 +184,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
                 if( inbetweenerTag->GetInterpolationType() == eInbetweenerInterpolationType::ARAP )
                 {
                     BLMatrix2D& ownerInverseWorldMatrix = inbetweenerTag->GetOwner()->GetInverseWorldMatrix();
-                    BLPoint pt = ownerInverseWorldMatrix.mapPoint( iPointInTexture.x, iPointInTexture.y );
+                    BLPoint pt = ownerInverseWorldMatrix.map_point( iPointInTexture.x, iPointInTexture.y );
 
                     addedRoute = inbetweenerTag->AddRoute( ::ULIS::FVec2D( pt.x, pt.y ), true );
 
@@ -384,7 +384,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDragVector( FOdysseyVectorGrou
                 BLMatrix2D ownerInverseWorldMatrix = trajectory->GetRoute()->GetInbetweenerTag()->GetOwner()->GetInverseWorldMatrix();
                 uint32 bezierEndpointIndex = ( mPickedHandle == trajectory->GetHandle(0) ) ? 0 : 3;
                 uint32 bezierHandleIndex   = ( mPickedHandle == trajectory->GetHandle(0) ) ? 1 : 2;
-                BLPoint diff = ownerInverseWorldMatrix.mapVector( deltaPositionCumul.X
+                BLPoint diff = ownerInverseWorldMatrix.map_vector( deltaPositionCumul.X
                                                                 , deltaPositionCumul.Y );
                 ::ULIS::FVec2D* cubicBezier = trajectory->GetCubicBezier();
                 ::ULIS::FVec2D controlPosition = cubicBezier[bezierEndpointIndex];

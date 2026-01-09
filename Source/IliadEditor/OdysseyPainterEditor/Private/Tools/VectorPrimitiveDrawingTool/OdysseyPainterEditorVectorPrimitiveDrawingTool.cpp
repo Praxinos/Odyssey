@@ -149,10 +149,10 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDownVector( FOdysseyVect
     if( ( iKey == EKeys::LeftMouseButton ) && GetWorkingGroup()->IsVisible( true ) )
     {
         FOdysseyVectorObject* parentObject = GetParentObject( iScene );
-        BLPoint localCoords = parentObject->GetInverseWorldMatrix().mapPoint( iPointInTexture.x
+        BLPoint localCoords = parentObject->GetInverseWorldMatrix().map_point( iPointInTexture.x
                                                                             , iPointInTexture.y );
         UOdysseyPaletteEntry* entry = nullptr;
-        BLPoint widthVector = parentObject->GetInverseWorldMatrix().mapVector( 0.7071f * StrokeWidth
+        BLPoint widthVector = parentObject->GetInverseWorldMatrix().map_vector( 0.7071f * StrokeWidth
                                                                              , 0.7071f * StrokeWidth );
         ::ULIS::FVec2D width = ::ULIS::FVec2D( widthVector.x, widthVector.y );
 
@@ -222,7 +222,7 @@ double
 UOdysseyPainterEditorVectorPrimitiveDrawingTool::GetLineRotationAngle( FOdysseyVectorLine* iLine
                                                                      , const FOdysseyPoint& iPointInTexture )
 {
-    BLPoint pt = iLine->GetInverseWorldMatrix().mapPoint( iPointInTexture.x, iPointInTexture.y );
+    BLPoint pt = iLine->GetInverseWorldMatrix().map_point( iPointInTexture.x, iPointInTexture.y );
     ::ULIS::FVec2D hzVector = ::ULIS::FVec2D( 1.0f, 0.0f );
     ::ULIS::FVec2D ptVector = ::ULIS::FVec2D( pt.x, pt.y );
     double angle = 0.0f;
@@ -248,7 +248,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDragVector( FOdysseyVect
     {
         if( mPrimitive )
         {
-            BLPoint bldif = mPrimitive->GetInverseWorldMatrix().mapVector( iPointInTexture.x - mMouseDown.x
+            BLPoint bldif = mPrimitive->GetInverseWorldMatrix().map_vector( iPointInTexture.x - mMouseDown.x
                                                                          , iPointInTexture.y - mMouseDown.y );
             ::ULIS::FVec2D size = ::ULIS::FVec2D( bldif.x, bldif.y );
 
@@ -289,7 +289,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDragVector( FOdysseyVect
                     if( Uniform )
                     {
                         BLMatrix2D& inverseMatrix = line->GetInverseWorldMatrix();
-                        BLPoint pt = inverseMatrix.mapPoint( iPointInTexture.x, iPointInTexture.y );
+                        BLPoint pt = inverseMatrix.map_point( iPointInTexture.x, iPointInTexture.y );
                         double distance = ::ULIS::FVec2D( pt.x, pt.y ).Distance();
                         int rotation = GetLineRotationAngle( line, iPointInTexture ) / M_PI * 180.0f;
 

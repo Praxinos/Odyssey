@@ -3,21 +3,22 @@
 // See blend2d.h or LICENSE.md for license and copyright information
 // SPDX-License-Identifier: Zlib
 
-#include "../api-build_p.h"
-#include "../context.h"
-#include "../math_p.h"
-#include "../matrix_p.h"
-#include "../pipeline/pipedefs_p.h"
-#include "../support/intops_p.h"
-#include "../support/traits_p.h"
+#include <blend2d/core/api-build_p.h>
+#include <blend2d/core/context.h>
+#include <blend2d/core/matrix_p.h>
+#include <blend2d/pipeline/pipedefs_p.h>
+#include <blend2d/support/intops_p.h>
+#include <blend2d/support/math_p.h>
+#include <blend2d/support/traits_p.h>
 
-namespace BLPipeline {
+namespace bl::Pipeline {
+namespace FetchUtils {
 
 // Pipeline - FetchData - Extend Modes
 // ===================================
 
-static BL_INLINE uint32_t blExtendXFromExtendMode(uint32_t extendMode) noexcept {
-  BL_ASSERT(extendMode <= BL_EXTEND_MODE_COMPLEX_MAX_VALUE);
+static BL_INLINE uint32_t extend_xFromExtendMode(uint32_t extend_mode) noexcept {
+  BL_ASSERT(extend_mode <= BL_EXTEND_MODE_COMPLEX_MAX_VALUE);
 
   constexpr uint32_t kTable = (BL_EXTEND_MODE_PAD     <<  0) | // [pad-x     pad-y    ]
                               (BL_EXTEND_MODE_REPEAT  <<  2) | // [repeat-x  repeat-y ]
@@ -28,11 +29,11 @@ static BL_INLINE uint32_t blExtendXFromExtendMode(uint32_t extendMode) noexcept 
                               (BL_EXTEND_MODE_REPEAT  << 12) | // [repeat-x  reflect-y]
                               (BL_EXTEND_MODE_REFLECT << 14) | // [reflect-x pad-y    ]
                               (BL_EXTEND_MODE_REFLECT << 16) ; // [reflect-x repeat-y ]
-  return (kTable >> (extendMode * 2u)) & 0x3u;
+  return (kTable >> (extend_mode * 2u)) & 0x3u;
 }
 
-static BL_INLINE uint32_t blExtendYFromExtendMode(uint32_t extendMode) noexcept {
-  BL_ASSERT(extendMode <= BL_EXTEND_MODE_COMPLEX_MAX_VALUE);
+static BL_INLINE uint32_t extend_yFromExtendMode(uint32_t extend_mode) noexcept {
+  BL_ASSERT(extend_mode <= BL_EXTEND_MODE_COMPLEX_MAX_VALUE);
 
   constexpr uint32_t kTable = (BL_EXTEND_MODE_PAD     <<  0) | // [pad-x     pad-y    ]
                               (BL_EXTEND_MODE_REPEAT  <<  2) | // [repeat-x  repeat-y ]
@@ -43,30 +44,29 @@ static BL_INLINE uint32_t blExtendYFromExtendMode(uint32_t extendMode) noexcept 
                               (BL_EXTEND_MODE_REFLECT << 12) | // [repeat-x  reflect-y]
                               (BL_EXTEND_MODE_PAD     << 14) | // [reflect-x pad-y    ]
                               (BL_EXTEND_MODE_REPEAT  << 16) ; // [reflect-x repeat-y ]
-  return (kTable >> (extendMode * 2u)) & 0x3u;
+  return (kTable >> (extend_mode * 2u)) & 0x3u;
 }
 
 // Pipeline - FetchData - Init Pattern
 // ===================================
 
-static BL_INLINE FetchType blPipeFetchDataInitPatternTxTy(FetchData* fetchData, FetchType fetchBase, uint32_t extendMode, int tx, int ty, bool isFractional) noexcept {
-  FetchData::Pattern& d = fetchData->pattern;
-  uint32_t extendX = blExtendXFromExtendMode(extendMode);
-  uint32_t extendY = blExtendYFromExtendMode(extendMode);
-  uint32_t ixIndex = 17;
+static BL_INLINE Signature init_pattern_tx_ty(FetchData::Pattern& fetch_data, FetchType fetch_base, uint32_t extend_mode, int tx, int ty, bool is_fractional) noexcept {
+  uint32_t extend_x = extend_xFromExtendMode(extend_mode);
+  uint32_t extend_y = extend_yFromExtendMode(extend_mode);
+  uint32_t ix_index = 17;
 
   int rx = 0;
   int ry = 0;
 
   // If the pattern width/height is 1 all extend modes produce the same output. However, it's safer to just set it to
   // PAD as FetchPatternPart requires `width` to be equal or greater than 2 if the extend mode is REPEAT or REFLECT.
-  if (d.src.size.w <= 1) extendX = BL_EXTEND_MODE_PAD;
-  if (d.src.size.h <= 1) extendY = BL_EXTEND_MODE_PAD;
+  if (fetch_data.src.size.w <= 1) extend_x = BL_EXTEND_MODE_PAD;
+  if (fetch_data.src.size.h <= 1) extend_y = BL_EXTEND_MODE_PAD;
 
-  if (extendX >= BL_EXTEND_MODE_REPEAT) {
-    bool isReflect = extendX == BL_EXTEND_MODE_REFLECT;
+  if (extend_x >= BL_EXTEND_MODE_REPEAT) {
+    bool is_reflect = extend_x == BL_EXTEND_MODE_REFLECT;
 
-    rx = int(d.src.size.w) << uint32_t(isReflect);
+    rx = int(fetch_data.src.size.w) << uint32_t(is_reflect);
     if (unsigned(tx) >= unsigned(rx))
       tx %= rx;
     if (tx < 0)
@@ -75,161 +75,178 @@ static BL_INLINE FetchType blPipeFetchDataInitPatternTxTy(FetchData* fetchData, 
     // In extreme cases, when `rx` is very small, fetch4()/fetch8() functions may overflow `x` if they increment more
     // than they can fix by subtracting `rw` in case of overflow (and overflow happens as it's used to start over). To
     // fix this and simplify the compiled code we simply precalculate these constants so they are always safe.
-    ixIndex = blMin<uint32_t>(uint32_t(rx), 17);
+    ix_index = bl_min<uint32_t>(uint32_t(rx), 17);
 
     // Don't specialize `Repeat vs Reflect` when we are not pixel aligned.
-    if (isFractional)
-      extendX = 1; // TODO: Naming...
+    if (is_fractional)
+      extend_x = 1; // TODO: Naming...
   }
 
-  if (extendY >= BL_EXTEND_MODE_REPEAT) {
-    ry = int(d.src.size.h) << uint32_t(extendY == BL_EXTEND_MODE_REFLECT);
+  // Setup v_extend_data initially for PADding, then refine in REPEAT|REFLECT case.
+  FetchData::Pattern::VertExtendData& ext_data = fetch_data.simple.v_extend_data;
+  ext_data.stride[0] = fetch_data.src.stride;
+  ext_data.stride[1] = 0;
+  ext_data.y_stop[0] = uint32_t(fetch_data.src.size.h);
+  ext_data.y_stop[1] = 0;
+  ext_data.y_rewind_offset = 0;
+  ext_data.pixel_ptr_rewind_offset = (extend_y != BL_EXTEND_MODE_REPEAT ? intptr_t(0) : intptr_t(fetch_data.src.size.h - 1)) * fetch_data.src.stride;
+
+  if (extend_y >= BL_EXTEND_MODE_REPEAT) {
+    ry = int(fetch_data.src.size.h) << uint32_t(extend_y == BL_EXTEND_MODE_REFLECT);
     if (unsigned(ty) >= unsigned(ry))
       ty %= ry;
     if (ty < 0)
       ty += ry;
+
+    ext_data.stride[1] = (extend_y == BL_EXTEND_MODE_REPEAT) ? fetch_data.src.stride : -fetch_data.src.stride;
+    ext_data.y_stop[1] = uint32_t(fetch_data.src.size.h);
+    ext_data.y_rewind_offset = uint32_t(fetch_data.src.size.h);
   }
 
-  d.simple.tx = tx;
-  d.simple.ty = ty;
-  d.simple.rx = rx;
-  d.simple.ry = ry;
-  d.simple.ix = blModuloTable[ixIndex];
+  fetch_data.simple.tx = tx;
+  fetch_data.simple.ty = ty;
+  fetch_data.simple.rx = rx;
+  fetch_data.simple.ry = ry;
+  fetch_data.simple.ix = modulo_table[ix_index];
 
-  return FetchType(uint32_t(fetchBase) + extendX);
+  return Signature::from_fetch_type(FetchType(uint32_t(fetch_base) + extend_x));
 }
 
-FetchType FetchData::initPatternAxAy(uint32_t extendMode, int x, int y) noexcept {
-  return blPipeFetchDataInitPatternTxTy(this, FetchType::kPatternAlignedPad, extendMode, -x, -y, false);
+Signature init_pattern_ax_ay(FetchData::Pattern& fetch_data, BLExtendMode extend_mode, int x, int y) noexcept {
+  return init_pattern_tx_ty(fetch_data, FetchType::kPatternAlignedPad, extend_mode, -x, -y, false);
 }
 
-FetchType FetchData::initPatternFxFy(uint32_t extendMode, uint32_t filter, uint32_t bytesPerPixel, int64_t tx64, int64_t ty64) noexcept {
-  blUnused(bytesPerPixel);
+Signature init_pattern_fx_fy(FetchData::Pattern& fetch_data, BLExtendMode extend_mode, BLPatternQuality quality, uint32_t bytes_per_pixel, int64_t tx64, int64_t ty64) noexcept {
+  bl_unused(bytes_per_pixel);
 
-  FetchData::Pattern& d = this->pattern;
-  FetchType fetchBase = FetchType::kPatternAlignedPad;
+  FetchType fetch_base = FetchType::kPatternAlignedPad;
   uint32_t wx = uint32_t(tx64 & 0xFF);
   uint32_t wy = uint32_t(ty64 & 0xFF);
 
-  int tx = -int(((tx64)) >> 8);
-  int ty = -int(((ty64)) >> 8);
+  int tx = -int(tx64 >> 8);
+  int ty = -int(ty64 >> 8);
 
-  // If one or both `wx` or `why` are non-zero it means that the translation is fractional. In that case we must
+  // If one or both `wx` or `wy` are non-zero it means that the translation is fractional. In that case we must
   // calculate weights of [x0 y0], [x1 y0], [x0 y1], and [x1 y1] pixels.
-  bool isFractional = (wx | wy) != 0;
-  if (isFractional) {
-    if (filter == BL_PATTERN_QUALITY_NEAREST) {
+  bool is_fractional = (wx | wy) != 0;
+  if (is_fractional) {
+    if (quality == BL_PATTERN_QUALITY_NEAREST) {
       tx -= (wx >= 128);
       ty -= (wy >= 128);
-      isFractional = false;
+      is_fractional = false;
     }
     else {
-      d.simple.wa = ((      wy) * (      wx)      ) >> 8; // [x0 y0]
-      d.simple.wb = ((      wy) * (256 - wx) + 255) >> 8; // [x1 y0]
-      d.simple.wc = ((256 - wy) * (      wx)      ) >> 8; // [x0 y1]
-      d.simple.wd = ((256 - wy) * (256 - wx) + 255) >> 8; // [x1 y1]
+      fetch_data.simple.wa = ((      wy) * (      wx)      ) >> 8; // [x0 y0]
+      fetch_data.simple.wb = ((      wy) * (256 - wx) + 255) >> 8; // [x1 y0]
+      fetch_data.simple.wc = ((256 - wy) * (      wx)      ) >> 8; // [x0 y1]
+      fetch_data.simple.wd = ((256 - wy) * (256 - wx) + 255) >> 8; // [x1 y1]
 
-      // The FxFy fetcher must work even when one or both `wx` or `wy` are zero, so we always decrement `tx` and `ty`
-      // based on the fetch type.
-      if (wy == 0) {
-        tx--;
-        fetchBase = FetchType::kPatternFxPad;
-      }
-      else if (wx == 0) {
-        ty--;
-        fetchBase = FetchType::kPatternFyPad;
-      }
-      else {
-        tx--;
-        ty--;
-        fetchBase = FetchType::kPatternFxFyPad;
-      }
+      // The FxFy fetcher must work even when one or both `wx` or `wy` are zero, so we always decrement `tx` and `ty`.
+      // In addition, Fx or Fy fetcher can be replaced by FxFy if there is no Fx or Fy implementation (typically this
+      // could happen if we are running portable pipeline without any optimizations).
+      tx--;
+      ty--;
+
+      if (wy == 0)
+        fetch_base = FetchType::kPatternFxPad;
+      else if (wx == 0)
+        fetch_base = FetchType::kPatternFyPad;
+      else
+        fetch_base = FetchType::kPatternFxFyPad;
     }
   }
 
-  return blPipeFetchDataInitPatternTxTy(this, fetchBase, extendMode, tx, ty, isFractional);
+  return init_pattern_tx_ty(fetch_data, fetch_base, extend_mode, tx, ty, is_fractional);
 }
 
-FetchType FetchData::initPatternAffine(uint32_t extendMode, uint32_t filter, uint32_t bytesPerPixel, const BLMatrix2D& m) noexcept {
-  FetchData::Pattern& d = this->pattern;
-
+Signature init_pattern_affine(FetchData::Pattern& fetch_data, BLExtendMode extend_mode, BLPatternQuality quality, uint32_t bytes_per_pixel, const BLMatrix2D& transform) noexcept {
   // Inverted transformation matrix.
-  BLMatrix2D mInv;
-  if (BLMatrix2D::invert(mInv, m) != BL_SUCCESS)
-    return FetchType::kFailure;
-
-  double xx = mInv.m00;
-  double xy = mInv.m01;
-  double yx = mInv.m10;
-  double yy = mInv.m11;
-
-  if (isNearOne(xx) && isNearZero(xy) && isNearZero(yx) && isNearOne(yy)) {
-    return initPatternFxFy(
-      extendMode,
-      filter,
-      bytesPerPixel,
-      blFloorToInt64(-mInv.m20 * 256.0),
-      blFloorToInt64(-mInv.m21 * 256.0));
+  BLMatrix2D inv;
+  if (BL_UNLIKELY(BLMatrix2D::invert(inv, transform) != BL_SUCCESS)) {
+    return Signature::from_pending_flag(1);
   }
 
-  FetchType fetchType =
-    filter == BL_PATTERN_QUALITY_NEAREST
+  // Pattern bounds.
+  int tw = int(fetch_data.src.size.w);
+  int th = int(fetch_data.src.size.h);
+
+  if (BL_UNLIKELY(tw == 0)) {
+    return Signature::from_pending_flag(1);
+  }
+
+  double xx = inv.m00;
+  double xy = inv.m01;
+  double yx = inv.m10;
+  double yy = inv.m11;
+
+  if (bool_and(Math::is_near_one(xx),
+               Math::is_near_zero(xy),
+               Math::is_near_zero(yx),
+               Math::is_near_one(yy))) {
+    int64_t tx64 = Math::floor_to_int64(-inv.m20 * 256.0);
+    int64_t ty64 = Math::floor_to_int64(-inv.m21 * 256.0);
+    return init_pattern_fx_fy(fetch_data, extend_mode, quality, bytes_per_pixel, tx64, ty64);
+  }
+
+  FetchType fetch_type =
+    quality == BL_PATTERN_QUALITY_NEAREST
       ? FetchType::kPatternAffineNNAny
       : FetchType::kPatternAffineBIAny;
 
-  // Pattern bounds.
-  int tw = int(d.src.size.w);
-  int th = int(d.src.size.h);
+#if 1 // BL_TARGET_ARCH_X86
+  uint32_t opt = bl_max(tw, th) < 32767 &&
+                 fetch_data.src.stride >= 0 &&
+                 fetch_data.src.stride <= intptr_t(Traits::max_value<int16_t>());
 
-  uint32_t opt = blMax(tw, th) < 32767 &&
-                 d.src.stride >= 0 &&
-                 d.src.stride <= intptr_t(BLTraits::maxValue<int16_t>());
-
-  // TODO: [PIPEGEN] Not implemented for bilinear yet.
-  if (filter == BL_PATTERN_QUALITY_BILINEAR)
+  // TODO: [JIT] OPTIMIZATION: Not implemented for bilinear yet.
+  if (quality == BL_PATTERN_QUALITY_BILINEAR) {
     opt = 0;
+  }
+#else
+  constexpr uint32_t opt = 0;
+#endif // BL_TARGET_ARCH_X86
 
-  fetchType = FetchType(uint32_t(fetchType) + opt);
+  fetch_type = FetchType(uint32_t(fetch_type) + opt);
 
   // Pattern X/Y extends.
-  uint32_t extendX = blExtendXFromExtendMode(extendMode);
-  uint32_t extendY = blExtendYFromExtendMode(extendMode);
+  uint32_t extend_x = extend_xFromExtendMode(extend_mode);
+  uint32_t extend_y = extend_yFromExtendMode(extend_mode);
 
   // Translation.
-  double tx = mInv.m20;
-  double ty = mInv.m21;
+  double tx = inv.m20;
+  double ty = inv.m21;
 
   tx += 0.5 * (xx + yx);
   ty += 0.5 * (xy + yy);
 
   // 32x32 fixed point scale as double, equals to `pow(2, 32)`.
-  double fpScale = 4294967296.0;
+  double fp_scale = 4294967296.0;
 
   // Overflow check of X/Y. When this check passes we decrement rx/ry from the overflown values.
-  int ox = BLTraits::maxValue<int32_t>();
-  int oy = BLTraits::maxValue<int32_t>();
+  int ox = Traits::max_value<int32_t>();
+  int oy = Traits::max_value<int32_t>();
 
   // Normalization of X/Y. These values are added to the current `px` and `py` when they overflow the repeat|reflect
   // bounds.
   int rx = 0;
   int ry = 0;
 
-  d.affine.minX = 0;
-  d.affine.minY = 0;
+  fetch_data.affine.min_x = 0;
+  fetch_data.affine.min_y = 0;
 
-  d.affine.maxX = int32_t(tw - 1);
-  d.affine.maxY = int32_t(th - 1);
+  fetch_data.affine.max_x = int32_t(tw - 1);
+  fetch_data.affine.max_y = int32_t(th - 1);
 
-  d.affine.corX = int32_t(tw - 1);
-  d.affine.corY = int32_t(th - 1);
+  fetch_data.affine.cor_x = int32_t(tw - 1);
+  fetch_data.affine.cor_y = int32_t(th - 1);
 
-  if (extendX != BL_EXTEND_MODE_PAD) {
-    d.affine.minX = BLTraits::minValue<int32_t>();
-    if (extendX == BL_EXTEND_MODE_REPEAT)
-      d.affine.corX = 0;
+  if (extend_x != BL_EXTEND_MODE_PAD) {
+    fetch_data.affine.min_x = Traits::min_value<int32_t>();
+    if (extend_x == BL_EXTEND_MODE_REPEAT)
+      fetch_data.affine.cor_x = 0;
 
     ox = tw;
-    if (extendX == BL_EXTEND_MODE_REFLECT)
+    if (extend_x == BL_EXTEND_MODE_REFLECT)
       tw *= 2;
 
     if (xx < 0.0) {
@@ -237,22 +254,22 @@ FetchType FetchData::initPatternAffine(uint32_t extendMode, uint32_t filter, uin
       yx = -yx;
       tx = double(tw) - tx;
 
-      if (extendX == BL_EXTEND_MODE_REPEAT) {
+      if (extend_x == BL_EXTEND_MODE_REPEAT) {
         ox = 0;
-        d.affine.corX = d.affine.maxX;
-        d.affine.maxX = -1;
+        fetch_data.affine.cor_x = fetch_data.affine.max_x;
+        fetch_data.affine.max_x = -1;
       }
     }
     ox--;
   }
 
-  if (extendY != BL_EXTEND_MODE_PAD) {
-    d.affine.minY = BLTraits::minValue<int32_t>();
-    if (extendY == BL_EXTEND_MODE_REPEAT)
-      d.affine.corY = 0;
+  if (extend_y != BL_EXTEND_MODE_PAD) {
+    fetch_data.affine.min_y = Traits::min_value<int32_t>();
+    if (extend_y == BL_EXTEND_MODE_REPEAT)
+      fetch_data.affine.cor_y = 0;
 
     oy = th;
-    if (extendY == BL_EXTEND_MODE_REFLECT)
+    if (extend_y == BL_EXTEND_MODE_REFLECT)
       th *= 2;
 
     if (xy < 0.0) {
@@ -260,10 +277,10 @@ FetchType FetchData::initPatternAffine(uint32_t extendMode, uint32_t filter, uin
       yy = -yy;
       ty = double(th) - ty;
 
-      if (extendY == BL_EXTEND_MODE_REPEAT) {
+      if (extend_y == BL_EXTEND_MODE_REPEAT) {
         oy = 0;
-        d.affine.corY = d.affine.maxY;
-        d.affine.maxY = -1;
+        fetch_data.affine.cor_y = fetch_data.affine.max_y;
+        fetch_data.affine.max_y = -1;
       }
     }
     oy--;
@@ -272,7 +289,7 @@ FetchType FetchData::initPatternAffine(uint32_t extendMode, uint32_t filter, uin
   // Keep the center of the pixel at [0.5, 0.5] if the filter is NEAREST so it can properly round to the nearest
   // pixel during the fetch phase. However, if the filter is not NEAREST the `tx` and `ty` have to be translated
   // by -0.5 so the position starts at the beginning of the pixel.
-  if (filter != BL_PATTERN_QUALITY_NEAREST) {
+  if (quality != BL_PATTERN_QUALITY_NEAREST) {
     tx -= 0.5;
     ty -= 0.5;
   }
@@ -283,8 +300,8 @@ FetchType FetchData::initPatternAffine(uint32_t extendMode, uint32_t filter, uin
 
   // Normalize the matrix in a way that it won't overflow the pattern more than once per a single iteration. Happens
   // when scaling part is very small. Only useful for repeated / reflected cases.
-  if (extendX == BL_EXTEND_MODE_PAD) {
-    tw_d = 4294967296.0;
+  if (extend_x == BL_EXTEND_MODE_PAD) {
+    tw_d = 2147483647.0;
   }
   else {
     tx = fmod(tx, tw_d);
@@ -292,8 +309,8 @@ FetchType FetchData::initPatternAffine(uint32_t extendMode, uint32_t filter, uin
     if (xx >= tw_d) xx = fmod(xx, tw_d);
   }
 
-  if (extendY == BL_EXTEND_MODE_PAD) {
-    th_d = 4294967296.0;
+  if (extend_y == BL_EXTEND_MODE_PAD) {
+    th_d = 2147483647.0;
   }
   else {
     ty = fmod(ty, th_d);
@@ -301,61 +318,86 @@ FetchType FetchData::initPatternAffine(uint32_t extendMode, uint32_t filter, uin
     if (xy >= th_d) xy = fmod(xy, th_d);
   }
 
-  d.affine.xx.i64 = blFloorToInt64(xx * fpScale);
-  d.affine.xy.i64 = blFloorToInt64(xy * fpScale);
-  d.affine.yx.i64 = blFloorToInt64(yx * fpScale);
-  d.affine.yy.i64 = blFloorToInt64(yy * fpScale);
+  xx *= fp_scale;
+  xy *= fp_scale;
+  yx *= fp_scale;
+  yy *= fp_scale;
+  tx *= fp_scale;
+  ty *= fp_scale;
 
-  d.affine.tx.i64 = blFloorToInt64(tx * fpScale);
-  d.affine.ty.i64 = blFloorToInt64(ty * fpScale);
-  d.affine.rx.i64 = BLIntOps::shl(int64_t(rx), 32);
-  d.affine.ry.i64 = BLIntOps::shl(int64_t(ry), 32);
+  // To prevent undefined behavior and thus passing invalid integer coordinates to the fetcher, we have to verify that
+  // double to int64 conversion is actually valid. To do that we simply combine min/max in a way to always propagate
+  // NaNs in case there is any.
+  double all_min = bl_min(bl_min(yy, yx), bl_min(xy, xx));
+  double all_max = bl_max(bl_max(xx, xy), bl_max(yx, yy));
 
-  d.affine.ox.i32Hi = ox;
-  d.affine.ox.i32Lo = BLTraits::maxValue<int32_t>();
-  d.affine.oy.i32Hi = oy;
-  d.affine.oy.i32Lo = BLTraits::maxValue<int32_t>();
+  all_min = bl_min(all_min, bl_min(ty, tx));
+  all_max = bl_max(bl_max(tx, ty), all_max);
 
-  d.affine.tw = tw_d;
-  d.affine.th = th_d;
-
-  d.affine.xx2.u64 = d.affine.xx.u64 << 1u;
-  d.affine.xy2.u64 = d.affine.xy.u64 << 1u;
-
-  if (extendX >= BL_EXTEND_MODE_REPEAT && d.affine.xx2.u32Hi >= uint32_t(tw)) d.affine.xx2.u32Hi %= uint32_t(tw);
-  if (extendY >= BL_EXTEND_MODE_REPEAT && d.affine.xy2.u32Hi >= uint32_t(th)) d.affine.xy2.u32Hi %= uint32_t(th);
-
-  if (opt) {
-    d.affine.addrMul[0] = int16_t(bytesPerPixel);
-    d.affine.addrMul[1] = int16_t(d.src.stride);
+  if (all_min >= double(INT64_MIN + 1) && all_max <= double(INT64_MAX)) {
+    fetch_data.affine.xx.i64 = Math::floor_to_int64(xx);
+    fetch_data.affine.xy.i64 = Math::floor_to_int64(xy);
+    fetch_data.affine.yx.i64 = Math::floor_to_int64(yx);
+    fetch_data.affine.yy.i64 = Math::floor_to_int64(yy);
+    fetch_data.affine.tx.i64 = Math::floor_to_int64(tx);
+    fetch_data.affine.ty.i64 = Math::floor_to_int64(ty);
   }
   else {
-    d.affine.addrMul[0] = 0;
-    d.affine.addrMul[1] = 0;
+    fetch_data.affine.xx.i64 = 0;
+    fetch_data.affine.xy.i64 = 0;
+    fetch_data.affine.yx.i64 = 0;
+    fetch_data.affine.yy.i64 = 0;
+    fetch_data.affine.tx.i64 = 0;
+    fetch_data.affine.ty.i64 = 0;
   }
 
-  return fetchType;
+  fetch_data.affine.rx.i64 = IntOps::shl(int64_t(rx), 32);
+  fetch_data.affine.ry.i64 = IntOps::shl(int64_t(ry), 32);
+
+  fetch_data.affine.ox.i32_hi = ox;
+  fetch_data.affine.ox.i32_lo = Traits::max_value<int32_t>();
+  fetch_data.affine.oy.i32_hi = oy;
+  fetch_data.affine.oy.i32_lo = Traits::max_value<int32_t>();
+
+  fetch_data.affine.tw = tw_d;
+  fetch_data.affine.th = th_d;
+
+  fetch_data.affine.xx2.u64 = fetch_data.affine.xx.u64 << 1u;
+  fetch_data.affine.xy2.u64 = fetch_data.affine.xy.u64 << 1u;
+
+  if (extend_x >= BL_EXTEND_MODE_REPEAT && fetch_data.affine.xx2.u32_hi >= uint32_t(tw)) fetch_data.affine.xx2.u32_hi %= uint32_t(tw);
+  if (extend_y >= BL_EXTEND_MODE_REPEAT && fetch_data.affine.xy2.u32_hi >= uint32_t(th)) fetch_data.affine.xy2.u32_hi %= uint32_t(th);
+
+  if (opt) {
+    fetch_data.affine.addr_mul16[0] = int16_t(bytes_per_pixel);
+    fetch_data.affine.addr_mul16[1] = int16_t(fetch_data.src.stride);
+  }
+  else {
+    fetch_data.affine.addr_mul32[0] = int32_t(bytes_per_pixel);
+    fetch_data.affine.addr_mul32[1] = int32_t(fetch_data.src.stride);
+  }
+
+  return Signature::from_fetch_type(fetch_type);
 }
 
 // FetchData - Init Gradient
 // =========================
 
-static BL_INLINE FetchType blPipeFetchDataInitLinearGradient(FetchData* fetchData, const BLLinearGradientValues& values, uint32_t extendMode, const BLMatrix2D& m) noexcept {
-  FetchData::Gradient& d = fetchData->gradient;
+static BL_INLINE Signature init_linear_gradient(FetchData::Gradient& fetch_data, const BLLinearGradientValues& values, BLExtendMode extend_mode, BLGradientQuality quality, const BLMatrix2D& transform) noexcept {
+  BL_ASSERT(extend_mode <= BL_EXTEND_MODE_SIMPLE_MAX_VALUE);
+  BL_ASSERT(fetch_data.lut.size > 0u);
 
   // Inverted transformation matrix.
-  BLMatrix2D mInv;
-  if (BLMatrix2D::invert(mInv, m) != BL_SUCCESS)
-    return FetchType::kFailure;
+  BLMatrix2D inv;
+  if (BLMatrix2D::invert(inv, transform) != BL_SUCCESS)
+    return Signature::from_pending_flag(1);
 
   BLPoint p0(values.x0, values.y0);
   BLPoint p1(values.x1, values.y1);
 
-  uint32_t lutSize = d.lut.size;
-  BL_ASSERT(lutSize > 0);
-
-  bool isPad     = extendMode == BL_EXTEND_MODE_PAD;
-  bool isReflect = extendMode == BL_EXTEND_MODE_REFLECT;
+  uint32_t lut_size = fetch_data.lut.size;
+  uint32_t maxi = extend_mode == BL_EXTEND_MODE_REFLECT ? lut_size * 2u - 1u : lut_size - 1u;
+  uint32_t rori = extend_mode == BL_EXTEND_MODE_REFLECT ? maxi : 0u;
 
   // Distance between [x0, y0] and [x1, y1], before transform.
   double ax = p1.x - p0.x;
@@ -363,30 +405,32 @@ static BL_INLINE FetchType blPipeFetchDataInitLinearGradient(FetchData* fetchDat
   double dist = ax * ax + ay * ay;
 
   // Invert origin and move it to the center of the pixel.
-  BLPoint o = BLPoint(0.5, 0.5) - m.mapPoint(p0);
+  BLPoint o = BLPoint(0.5, 0.5) - transform.map_point(p0);
 
-  double dt = ax * mInv.m00 + ay * mInv.m01;
-  double dy = ax * mInv.m10 + ay * mInv.m11;
+  double dt = ax * inv.m00 + ay * inv.m01;
+  double dy = ax * inv.m10 + ay * inv.m11;
 
-  double scale = double(int64_t(uint64_t(lutSize) << 32)) / dist;
+  double scale = double(int64_t(uint64_t(lut_size) << 32)) / dist;
   double offset = o.x * dt + o.y * dy;
 
   dt *= scale;
   dy *= scale;
   offset *= scale;
 
-  d.linear.dy.i64 = blFloorToInt64(dy);
-  d.linear.dt.i64 = blFloorToInt64(dt);
-  d.linear.dt2.u64 = d.linear.dt.u64 << 1;
-  d.linear.pt[0].i64 = blFloorToInt64(offset);
-  d.linear.pt[1].u64 = d.linear.pt[0].u64 + d.linear.dt.u64;
+  fetch_data.linear.dy.i64 = Math::floor_to_int64(dy);
+  fetch_data.linear.dt.i64 = Math::floor_to_int64(dt);
+  fetch_data.linear.pt[0].i64 = Math::floor_to_int64(offset);
+  fetch_data.linear.pt[1].u64 = fetch_data.linear.pt[0].u64 + fetch_data.linear.dt.u64;
 
-  uint32_t rorSize = isReflect ? lutSize * 2u : lutSize;
-  d.linear.rep.u32Hi = isPad ? uint32_t(0xFFFFFFFFu) : uint32_t(rorSize - 1u);
-  d.linear.rep.u32Lo = 0xFFFFFFFFu;
-  d.linear.msk.u     = isPad ? (lutSize - 1u) * 0x00010001u : (lutSize * 2u - 1u) * 0x00010001u;
+  fetch_data.linear.maxi = maxi;
+  fetch_data.linear.rori = rori;
 
-  return isPad ? FetchType::kGradientLinearPad : FetchType::kGradientLinearRoR;
+  FetchType fetch_type_base =
+    quality < BL_GRADIENT_QUALITY_DITHER
+      ? FetchType::kGradientLinearNNPad
+      : FetchType::kGradientLinearDitherPad;
+
+  return Signature::from_fetch_type(FetchType(uint32_t(fetch_type_base) + uint32_t(extend_mode != BL_EXTEND_MODE_PAD)));
 }
 
 // The radial gradient uses the following equation:
@@ -433,138 +477,226 @@ static BL_INLINE FetchType blPipeFetchDataInitLinearGradient(FetchData* fetchDat
 //
 //   C*x*y: 1st delta `d`  at step `tx/ty`: C*x*ty + C*y*tx + C*tx*ty
 //   C*x*y: 2nd delta `dd` at step `tx/ty`: 2*C * tx*ty
-static BL_INLINE FetchType blPipeFetchDataInitRadialGradient(FetchData* fetchData, const BLRadialGradientValues& values, uint32_t extendMode, const BLMatrix2D& m) noexcept {
-  FetchData::Gradient& d = fetchData->gradient;
+static BL_INLINE Signature init_radial_gradient(FetchData::Gradient& fetch_data, const BLRadialGradientValues& values, BLExtendMode extend_mode, BLGradientQuality quality, const BLMatrix2D& transform) noexcept {
+  BL_ASSERT(extend_mode <= BL_EXTEND_MODE_SIMPLE_MAX_VALUE);
+  BL_ASSERT(fetch_data.lut.size > 0u);
 
-  // Inverted transformation matrix.
-  BLMatrix2D mInv;
-  if (BLMatrix2D::invert(mInv, m) != BL_SUCCESS)
-    return FetchType::kFailure;
+  BLMatrix2D inv;
+  if (BLMatrix2D::invert(inv, transform) != BL_SUCCESS)
+    return Signature::from_pending_flag(1);
 
-  BLPoint c(values.x0, values.y0);
-  BLPoint f(values.x1, values.y1);
+  uint32_t lut_size = fetch_data.lut.size;
+  uint32_t maxi = extend_mode == BL_EXTEND_MODE_REFLECT ? lut_size * 2u - 1u : lut_size - 1u;
+  uint32_t rori = extend_mode == BL_EXTEND_MODE_REFLECT ? maxi : 0u;
 
-  double r = values.r0;
-  uint32_t lutSize = d.lut.size;
+  fetch_data.radial.maxi = maxi;
+  fetch_data.radial.rori = rori;
 
-  BL_ASSERT(lutSize != 0);
-  BL_ASSERT(extendMode <= BL_EXTEND_MODE_SIMPLE_MAX_VALUE);
+  BLPoint cp = BLPoint(values.x0, values.y0);
+  BLPoint fp = BLPoint(values.x1, values.y1);
 
-  BLPoint fOrig = f;
-  f -= c;
+  double cr = values.r0;
+  double fr = values.r1;
 
-  double fxfx = f.x * f.x;
-  double fyfy = f.y * f.y;
+  BLPoint dp = cp - fp;
+  double dr = cr - fr;
 
-  double rr = r * r;
-  double dd = rr - fxfx - fyfy;
+  double sq_dx_plus_dy = Math::square(dp.x) + Math::square(dp.y);
+  double dx_plus_dy = Math::sqrt(sq_dx_plus_dy);
 
-  // If the focal point is near the border we move it slightly to prevent division by zero. This idea comes from
-  // AntiGrain library.
-  if (isNearZero(dd)) {
-    if (!isNearZero(f.x)) f.x += (f.x < 0.0) ? 0.5 : -0.5;
-    if (!isNearZero(f.y)) f.y += (f.y < 0.0) ? 0.5 : -0.5;
+  // Numerical stability falls apart when the focal point is very close to
+  // the border. So shift it slightly away from it to improve stability.
+  double dist_from_border = bl_abs(dx_plus_dy - dr);
+  constexpr double dist_limit = 0.5;
 
-    fxfx = f.x * f.x;
-    fyfy = f.y * f.y;
-    dd = rr - fxfx - fyfy;
+  if (dist_from_border < dist_limit) {
+    BLPoint dp0 = (dp * (dr - dist_limit)) / dx_plus_dy;
+    BLPoint dp1 = (dp * (dr + dist_limit)) / dx_plus_dy;
+
+    double dp0_dist = bl_abs(Math::square(dp0.x) + Math::square(dp0.y) - sq_dx_plus_dy);
+    double dp1_dist = bl_abs(Math::square(dp1.x) + Math::square(dp1.y) - sq_dx_plus_dy);
+
+    dp = (dp0_dist < dp1_dist) ? dp0 : dp1;
+    fp = cp - dp;
+    sq_dx_plus_dy = Math::square(dp.x) + Math::square(dp.y);
   }
 
-  double scale = double(int(lutSize)) / dd;
-  double ax = rr - fyfy;
-  double ay = rr - fxfx;
+  double a = Math::square(dr) - sq_dx_plus_dy;
+  double sq_fr = Math::square(fr);
+  double scale = double(lut_size);
 
-  d.radial.ax = ax;
-  d.radial.ay = ay;
-  d.radial.fx = f.x;
-  d.radial.fy = f.y;
+  double xx = inv.m00;
+  double xy = inv.m01;
+  double yx = inv.m10;
+  double yy = inv.m11;
+  BLPoint tp = BLPoint(inv.m20 + (xx + xy) * 0.5, inv.m21 + (yx + yy) * 0.5) - fp;
 
-  double xx = mInv.m00;
-  double xy = mInv.m01;
-  double yx = mInv.m10;
-  double yy = mInv.m11;
+  fetch_data.radial.tx = tp.x;
+  fetch_data.radial.ty = tp.y;
+  fetch_data.radial.yx = yx;
+  fetch_data.radial.yy = yy;
 
-  d.radial.xx = xx;
-  d.radial.xy = xy;
-  d.radial.yx = yx;
-  d.radial.yy = yy;
-  d.radial.ox = (mInv.m20 - fOrig.x) + 0.5 * (xx + yx);
-  d.radial.oy = (mInv.m21 - fOrig.y) + 0.5 * (xy + yy);
+  double a_mul_4 = a * 4.0;
+  double inv2a = (scale * 0.5) / a; // scale * (1 / 2a) => (scale * 0.5) / a
+  double sq_inv2a = Math::square(inv2a);
 
-  double ax_xx = ax * xx;
-  double ay_xy = ay * xy;
-  double fx_xx = f.x * xx;
-  double fy_xy = f.y * xy;
+  fetch_data.radial.amul4 = a_mul_4;
+  fetch_data.radial.inv2a = inv2a;
+  fetch_data.radial.sq_inv2a = sq_inv2a;
+  fetch_data.radial.sq_fr = sq_fr;
 
-  d.radial.dd = ax_xx * xx + ay_xy * xy + 2.0 * (fx_xx * fy_xy);
-  d.radial.bd = fx_xx + fy_xy;
+  double sq_xx_plus_sq_yx = Math::square(xx) + Math::square(xy);
+  double b0 = 2.0 * (dr * fr + tp.x * dp.x + tp.y * dp.y);
+  double bx = 2.0 * (dp.x * xx + dp.y * xy);
+  double by = 2.0 * (dp.x * yx + dp.y * yy);
 
-  d.radial.ddx = 2.0 * (ax_xx + fy_xy * f.x);
-  d.radial.ddy = 2.0 * (ay_xy + fx_xx * f.y);
+  fetch_data.radial.b0 = -b0;
+  fetch_data.radial.by = -by;
 
-  d.radial.ddd = 2.0 * d.radial.dd;
-  d.radial.scale = scale;
-  d.radial.maxi = (extendMode == BL_EXTEND_MODE_REFLECT) ? int(lutSize * 2 - 1) : int(lutSize - 1);
+  double bx_mul_2 = bx * 2.0;
+  double sq_bx = Math::square(bx);
 
-  return FetchType(uint32_t(FetchType::kGradientRadialPad) + extendMode);
+  double dd0 = sq_bx + bx_mul_2 * b0 + a_mul_4 * (sq_xx_plus_sq_yx + 2.0 * (tp.x * xx + tp.y * xy));
+  double ddy = bx_mul_2 * by + a_mul_4 * (2.0 * (xx * yx + yy * xy));
+
+  double ddd_half = (sq_bx + a_mul_4 * sq_xx_plus_sq_yx);
+  double ddd_half_inv = ddd_half * sq_inv2a;
+
+  fetch_data.radial.dd0 = dd0 - ddd_half;
+  fetch_data.radial.ddy = ddy;
+  fetch_data.radial.f32_bd = float(-bx * inv2a);
+  fetch_data.radial.f32_ddd = float(ddd_half_inv);
+
+  FetchType fetch_type_base =
+    quality < BL_GRADIENT_QUALITY_DITHER
+      ? FetchType::kGradientRadialNNPad
+      : FetchType::kGradientRadialDitherPad;
+
+  return Signature::from_fetch_type(FetchType(uint32_t(fetch_type_base) + uint32_t(extend_mode != BL_EXTEND_MODE_PAD)));
 }
 
-static BL_INLINE FetchType blPipeFetchDataInitConicalGradient(FetchData* fetchData, const BLConicalGradientValues& values, uint32_t extendMode, const BLMatrix2D& m) noexcept {
-  // TODO: Extend mode is not used.
-  blUnused(extendMode);
+// Coefficients used by conic gradient fetcher for 256 entry table. If the table size is different or repeat
+// is not 1 the values have to be scaled by `init_conic_gradient()`. Fetcher always uses scaled values.
+//
+// Polynomial to approximate `atan(x) * N / 2PI`:
+//   `x * (Q0 + x^2 * (Q1 + x^2 * (Q2 + x^2 * Q3)))`
+//
+// The following numbers were obtained by `lolremez` (minmax tool for approximations) for N==256:
+//
+// Atan is an odd function, so we take advantage of it (see lolremez docs):
+//   1. E=|atan(x) * N / 2PI - P(x)                  | <- subs. `P(x)` by `x*Q(x^2))`
+//   2. E=|atan(x) * N / 2PI - x*Q(x^2)              | <- subs. `x^2` by `y`
+//   3. E=|atan(sqrt(y)) * N / 2PI - sqrt(y) * Q(y)  | <- eliminate `y` from Q side - div by `y`
+//   4. E=|atan(sqrt(y)) * N / (2PI * sqrt(y)) - Q(y)|
+//
+// LolRemez C++ code:
+//
+// ```
+//   real f(real const& x) {
+//     real y = sqrt(x);
+//     return atan(y) * real(N) / (real(2) * real::R_PI * y);
+//   }
+//
+//   real g(real const& x) {
+//     return re(sqrt(x));
+//   }
+//
+//   int main(int argc, char **argv) {
+//     RemezSolver<3, real> solver;
+//     solver.Run("1e-1000", 1, f, g, 40);
+//     return 0;
+//   }
+// ```
+static constexpr double conic_gradient_q_coeff_256[4] = {
+  4.071421038552e+1, -1.311160794048e+1, 6.017670215625, -1.623253505085
+};
 
-  FetchData::Gradient& d = fetchData->gradient;
+static BL_INLINE Signature init_conic_gradient(FetchData::Gradient& fetch_data, const BLConicGradientValues& values, BLExtendMode extend_mode, BLGradientQuality quality, const BLMatrix2D& transform) noexcept {
+  bl_unused(extend_mode);
 
   BLPoint c(values.x0, values.y0);
   double angle = values.angle;
+  double repeat = values.repeat;
 
-  uint32_t lutSize = d.lut.size;
-  uint32_t tableId = BLIntOps::ctz(lutSize) - 8;
-  BL_ASSERT(tableId < BLCommonTable::kTableCount);
-
-  BLMatrix2D mNew(m);
-  mNew.rotate(angle, c);
+  uint32_t lut_size = fetch_data.lut.size;
 
   // Invert the origin and move it to the center of the pixel.
-  c = BLPoint(0.5, 0.5) - mNew.mapPoint(c);
+  c = BLPoint(0.5, 0.5) - transform.map_point(c);
 
-  BLMatrix2D mInv;
-  if (BLMatrix2D::invert(mInv, mNew) != BL_SUCCESS)
-    return FetchType::kFailure;
+  BLPoint v = transform.map_vector(BLPoint(1.0, 0.0));
+  double matrix_angle = atan2(v.y, v.x);
 
-  d.conical.xx = mInv.m00;
-  d.conical.xy = mInv.m01;
-  d.conical.yx = mInv.m10;
-  d.conical.yy = mInv.m11;
-  d.conical.ox = c.x * mInv.m00 + c.y * mInv.m10;
-  d.conical.oy = c.x * mInv.m01 + c.y * mInv.m11;
+  BLMatrix2D updated_transform(transform);
+  updated_transform.rotate(-matrix_angle, c);
 
-  d.conical.consts = &blCommonTable.xmm_f_con[tableId];
-  d.conical.maxi = int(lutSize - 1);
+  angle += matrix_angle;
+  double off = Math::frac(angle / -Math::kPI_MUL_2);
 
-  return FetchType::kGradientConical;
+  if (off != 0.0)
+    off = -1.0 + off;
+
+  BLMatrix2D inv;
+  if (BLMatrix2D::invert(inv, updated_transform) != BL_SUCCESS)
+    return Signature::from_pending_flag(1);
+
+  fetch_data.conic.tx = c.x * inv.m00 + c.y * inv.m10;
+  fetch_data.conic.ty = c.x * inv.m01 + c.y * inv.m11;
+  fetch_data.conic.yx = inv.m10;
+  fetch_data.conic.yy = inv.m11;
+
+  double lutSizeD = double(int(lut_size));
+  double repeated_lut_size = lutSizeD * repeat;
+  double qScale = repeated_lut_size / 256.0;
+
+  fetch_data.conic.q_coeff[0] = float(conic_gradient_q_coeff_256[0] * qScale);
+  fetch_data.conic.q_coeff[1] = float(conic_gradient_q_coeff_256[1] * qScale);
+  fetch_data.conic.q_coeff[2] = float(conic_gradient_q_coeff_256[2] * qScale);
+  fetch_data.conic.q_coeff[3] = float(conic_gradient_q_coeff_256[3] * qScale);
+
+  fetch_data.conic.n_div_1_2_4[0] = float(repeated_lut_size);
+  fetch_data.conic.n_div_1_2_4[1] = float(repeated_lut_size * 0.5);
+  fetch_data.conic.n_div_1_2_4[2] = float(repeated_lut_size * 0.25);
+  fetch_data.conic.offset = float(off * repeated_lut_size - 0.5);
+  fetch_data.conic.xx = float(inv.m00);
+
+  fetch_data.conic.maxi = INT32_MAX;
+  fetch_data.conic.rori = lut_size - 1u;
+
+  FetchType fetch_type =
+    quality < BL_GRADIENT_QUALITY_DITHER
+      ? FetchType::kGradientConicNN
+      : FetchType::kGradientConicDither;
+
+  return Signature::from_fetch_type(fetch_type);
 }
 
-FetchType FetchData::initGradient(uint32_t gradientType, const void* values, uint32_t extendMode, const BLGradientLUT* lut, const BLMatrix2D& m) noexcept {
+Signature init_gradient(
+  FetchData::Gradient& fetch_data,
+  BLGradientType gradient_type,
+  BLExtendMode extend_mode,
+  BLGradientQuality quality,
+  const void* values, const void* lut_data, uint32_t lut_size, const BLMatrix2D& transform) noexcept {
+
   // Initialize LUT.
-  this->gradient.lut.data = lut->data();
-  this->gradient.lut.size = uint32_t(lut->size);
+  fetch_data.lut.data = lut_data;
+  fetch_data.lut.size = lut_size;
 
   // Initialize gradient by type.
-  switch (gradientType) {
+  switch (gradient_type) {
     case BL_GRADIENT_TYPE_LINEAR:
-      return blPipeFetchDataInitLinearGradient(this, *static_cast<const BLLinearGradientValues*>(values), extendMode, m);
+      return init_linear_gradient(fetch_data, *static_cast<const BLLinearGradientValues*>(values), extend_mode, quality, transform);
 
     case BL_GRADIENT_TYPE_RADIAL:
-      return blPipeFetchDataInitRadialGradient(this, *static_cast<const BLRadialGradientValues*>(values), extendMode, m);
+      return init_radial_gradient(fetch_data, *static_cast<const BLRadialGradientValues*>(values), extend_mode, quality, transform);
 
-    case BL_GRADIENT_TYPE_CONICAL:
-      return blPipeFetchDataInitConicalGradient(this, *static_cast<const BLConicalGradientValues*>(values), extendMode, m);
+    case BL_GRADIENT_TYPE_CONIC:
+      return init_conic_gradient(fetch_data, *static_cast<const BLConicGradientValues*>(values), extend_mode, quality, transform);
 
     default:
       // Should not happen, but be defensive.
-      return FetchType::kFailure;
+      return Signature::from_pending_flag(1);
   }
 }
 
-} // {BLPipeline}
+} // {FetchUtils}
+} // {bl::Pipeline}

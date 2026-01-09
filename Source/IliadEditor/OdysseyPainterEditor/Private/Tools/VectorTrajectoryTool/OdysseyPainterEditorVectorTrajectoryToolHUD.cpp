@@ -94,7 +94,7 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::PickSourceQuad( FInbetweenerGrid* 
                                                             , double iWorldY
                                                             , double iPickingRadius )
 {
-    BLPoint localPick = iGrid->GetBreakdown()->GetInbetweenerTag()->GetOwner()->GetInverseWorldMatrix().mapPoint( iWorldX, iWorldY );
+    BLPoint localPick = iGrid->GetBreakdown()->GetInbetweenerTag()->GetOwner()->GetInverseWorldMatrix().map_point( iWorldX, iWorldY );
 
     for( FInbetweenerQuad& quad : iGrid->GetQuadBuffer() )
     {
@@ -245,8 +245,8 @@ PickStepFromTag( FOdysseyVectorTagInbetweener* iInbetweenerTag
         for( FInbetweenerTrajectory& trajectory : route->GetTrajectoryBuffer() )
         {
             ::ULIS::FVec2D* cubicBezier = trajectory.GetCubicBezier();
-            BLPoint p0World = ownerWorldMatrix.mapPoint( cubicBezier[0].x, cubicBezier[0].y );
-            BLPoint p3World = ownerWorldMatrix.mapPoint( cubicBezier[3].x, cubicBezier[3].y );
+            BLPoint p0World = ownerWorldMatrix.map_point( cubicBezier[0].x, cubicBezier[0].y );
+            BLPoint p3World = ownerWorldMatrix.map_point( cubicBezier[3].x, cubicBezier[3].y );
 
 
             if( ( ::ULIS::FVec2D( p0World.x, p0World.y )
@@ -292,7 +292,7 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::PickWaypoint( FOdysseyVectorTagInb
                                                                                                    , cubicBezier[2]
                                                                                                    , cubicBezier[3]
                                                                                                    , cubicT );
-                    BLPoint waypointWorld = ownerWorldMatrix.mapPoint( waypointAt.x, waypointAt.y );
+                    BLPoint waypointWorld = ownerWorldMatrix.map_point( waypointAt.x, waypointAt.y );
 
                     if( ( ::ULIS::FVec2D( waypointWorld.x, waypointWorld.y )
                         - ::ULIS::FVec2D( iWorldX  , iWorldY   ) ).Distance() <= iPickingRadius )
@@ -346,8 +346,8 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawTrajectory( const FOdysseyHUDE
     FInbetweenerQuad* quad = iTrajectory->GetQuad();
     ::ULIS::FVec2D* cubicBezier = iTrajectory->GetCubicBezier();
     BLMatrix2D& ownerWorldMatrix = iInbetweenerTag->GetOwner()->GetWorldMatrix();
-    BLPoint p0TexCoords = ownerWorldMatrix.mapPoint( cubicBezier[0].x, cubicBezier[0].y );
-    BLPoint p3TexCoords = ownerWorldMatrix.mapPoint( cubicBezier[3].x, cubicBezier[3].y );
+    BLPoint p0TexCoords = ownerWorldMatrix.map_point( cubicBezier[0].x, cubicBezier[0].y );
+    BLPoint p3TexCoords = ownerWorldMatrix.map_point( cubicBezier[3].x, cubicBezier[3].y );
     FVector2D p0HUDCoords = iParams.mTextureToHUD.Execute( FVector2D( p0TexCoords.x, p0TexCoords.y ) );
     FVector2D p3HUDCoords = iParams.mTextureToHUD.Execute( FVector2D( p3TexCoords.x, p3TexCoords.y ) );
     static FLinearColor whiteColor = FLinearColor( 1.0f, 1.0f, 1.0f, 1.0f );
@@ -365,8 +365,8 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawTrajectory( const FOdysseyHUDE
 
     if( iInbetweenerTag->GetInterpolationType() == eInbetweenerInterpolationType::ARAP )
     {
-        BLPoint p1TexCoords = ownerWorldMatrix.mapPoint( cubicBezier[1].x, cubicBezier[1].y );
-        BLPoint p2TexCoords = ownerWorldMatrix.mapPoint( cubicBezier[2].x, cubicBezier[2].y );
+        BLPoint p1TexCoords = ownerWorldMatrix.map_point( cubicBezier[1].x, cubicBezier[1].y );
+        BLPoint p2TexCoords = ownerWorldMatrix.map_point( cubicBezier[2].x, cubicBezier[2].y );
         FVector2D p1HUDCoords = iParams.mTextureToHUD.Execute( FVector2D( p1TexCoords.x, p1TexCoords.y ) );
         FVector2D p2HUDCoords = iParams.mTextureToHUD.Execute( FVector2D( p2TexCoords.x, p2TexCoords.y ) );
 

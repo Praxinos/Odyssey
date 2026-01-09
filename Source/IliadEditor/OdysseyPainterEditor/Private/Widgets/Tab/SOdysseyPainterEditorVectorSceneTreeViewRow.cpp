@@ -241,7 +241,7 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::GenerateWidgetForColumn ( const FNa
                    {
                        FOdysseyVectorObject* vectorObject = mItem->GetVectorObject();
 
-                       return ( vectorObject->GetLocalMatrix() == BLMatrix2D::makeIdentity() ) ? EVisibility::Hidden
+                       return ( vectorObject->GetLocalMatrix() == BLMatrix2D::make_identity() ) ? EVisibility::Hidden
                                                                                                : EVisibility::Visible;
                    } )
                ];

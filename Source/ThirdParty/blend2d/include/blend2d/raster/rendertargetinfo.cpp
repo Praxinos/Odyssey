@@ -4,18 +4,18 @@
 // See blend2d.h or LICENSE.md for license and copyright information
 // SPDX-License-Identifier: Zlib
 
-#include "../api-build_p.h"
-#include "../gradient_p.h"
-#include "../image_p.h"
-#include "../raster/rastercontext_p.h"
-#include "../raster/renderfetchdata_p.h"
+#include <blend2d/core/api-build_p.h>
+#include <blend2d/core/gradient_p.h>
+#include <blend2d/core/image_p.h>
+#include <blend2d/raster/rastercontext_p.h>
+#include <blend2d/raster/renderfetchdata_p.h>
 
-namespace BLRasterEngine {
+namespace bl::RasterEngine {
 
 // RasterEngine - RenderTargetInfo - Table
 // =======================================
 
-const RenderTargetInfo renderTargetInfoByComponentType[RenderTargetInfo::kPixelComponentCount] = {
+const RenderTargetInfo render_target_info_by_component_type[RenderTargetInfo::kPixelComponentCount] = {
   #define ROW(PixelComponentType, FpBits, FullAlpha) { \
     RenderTargetInfo::PixelComponentType,              \
     0,                                                 \
@@ -36,4 +36,4 @@ const RenderTargetInfo renderTargetInfoByComponentType[RenderTargetInfo::kPixelC
   #undef ROW
 };
 
-} // {BLRasterEngine}
+} // {bl::RasterEngine}

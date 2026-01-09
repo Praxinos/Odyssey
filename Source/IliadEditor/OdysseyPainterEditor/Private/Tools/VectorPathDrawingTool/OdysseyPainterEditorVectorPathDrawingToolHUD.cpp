@@ -126,12 +126,12 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::DrawEdge( BLContext* iBLContext
     pt[3] = BLPoint( iCurrEdge->p0.x - prevEdgePerpendicularVector.x
                    , iCurrEdge->p0.y - prevEdgePerpendicularVector.y );
 
-    iBLContext->fillPolygon( pt, 4 );
+    iBLContext->fill_polygon( pt, 4 );
 
     // draw a thin line between edges for better visual displaying
-    iBLContext->setStrokeWidth( 1.0f );
-    iBLContext->strokeLine( pt[3], pt[0] );
-    iBLContext->strokeLine( pt[2], pt[1] );
+    iBLContext->set_stroke_width( 1.0f );
+    iBLContext->stroke_line( pt[3], pt[0] );
+    iBLContext->stroke_line( pt[2], pt[1] );
 }
 
 void
@@ -222,22 +222,22 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::Draw( BLContext* iBLContext )
         FColor pathcolor = path->GetForegroundColor();
 
         iBLContext->save();
-        iBLContext->resetMatrix();
+        iBLContext->reset_transform();
 
-        iBLContext->setStrokeStyle( BLRgba32( pathcolor.R, pathcolor.G, pathcolor.B, pathcolor.A ) );
-        iBLContext->setStrokeStartCap(BL_STROKE_CAP_BUTT);
-        iBLContext->setStrokeEndCap(BL_STROKE_CAP_BUTT);
+        iBLContext->set_stroke_style( BLRgba32( pathcolor.R, pathcolor.G, pathcolor.B, pathcolor.A ) );
+        iBLContext->set_stroke_start_cap(BL_STROKE_CAP_BUTT);
+        iBLContext->set_stroke_end_cap(BL_STROKE_CAP_BUTT);
 
         for( int n = 1; n < pointBuffer.size(); n++)
         {
             int i = n - 1;
 
-            iBLContext->setStrokeWidth( pointBuffer[i].radius * 2.0f );
-            iBLContext->strokeLine( pointBuffer[i].coords.x, pointBuffer[i].coords.y
+            iBLContext->set_stroke_width( pointBuffer[i].radius * 2.0f );
+            iBLContext->stroke_line( pointBuffer[i].coords.x, pointBuffer[i].coords.y
                                   , pointBuffer[n].coords.x, pointBuffer[n].coords.y );
         }
 
-        iBLContext->setFillStyle( BLRgba32( pathcolor.R, pathcolor.G, pathcolor.B, pathcolor.A ) );
+        iBLContext->set_fill_style( BLRgba32( pathcolor.R, pathcolor.G, pathcolor.B, pathcolor.A ) );
 
         for( int i = 0; i < edgeBuffer.size(); i++ )
         {

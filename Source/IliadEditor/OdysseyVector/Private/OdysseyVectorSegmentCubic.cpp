@@ -286,10 +286,10 @@ bool
 FOdysseyVectorSegmentCubic::Pick( const ::ULIS::FRectD& iMaskRect, uint8* iPixelData )
 {
     BLMatrix2D& worldMatrix = GetOwner()->GetWorldMatrix();
-    BLPoint pt[4] = { worldMatrix.mapPoint( mBezier[0].x, mBezier[0].y )
-                    , worldMatrix.mapPoint( mBezier[1].x, mBezier[1].y )
-                    , worldMatrix.mapPoint( mBezier[2].x, mBezier[2].y )
-                    , worldMatrix.mapPoint( mBezier[3].x, mBezier[3].y ) };
+    BLPoint pt[4] = { worldMatrix.map_point( mBezier[0].x, mBezier[0].y )
+                    , worldMatrix.map_point( mBezier[1].x, mBezier[1].y )
+                    , worldMatrix.map_point( mBezier[2].x, mBezier[2].y )
+                    , worldMatrix.map_point( mBezier[3].x, mBezier[3].y ) };
     ::ULIS::FVec2D worldBezier[4] = { ::ULIS::FVec2D( pt[0].x, pt[0].y )
                                     , ::ULIS::FVec2D( pt[1].x, pt[1].y )
                                     , ::ULIS::FVec2D( pt[2].x, pt[2].y )
@@ -671,18 +671,18 @@ FOdysseyVectorSegmentCubic::DrawStructure( BLContext* iBLContext
                                          , bool iWorld )
 {
     BLMatrix2D& worldMatrix = iParentObject->GetWorldMatrix();
-    BLPoint point0 = iWorld ? worldMatrix.mapPoint( mBezier[0].x, mBezier[0].y ) : BLPoint( mBezier[0].x, mBezier[0].y );
-    BLPoint point1 = iWorld ? worldMatrix.mapPoint( mBezier[3].x, mBezier[3].y ) : BLPoint( mBezier[3].x, mBezier[3].y );
-    BLPoint handlePoint0 = iWorld ? worldMatrix.mapPoint( mBezier[1].x, mBezier[1].y ) : BLPoint( mBezier[1].x, mBezier[1].y );
-    BLPoint handlePoint1 = iWorld ? worldMatrix.mapPoint( mBezier[2].x, mBezier[2].y ) : BLPoint( mBezier[2].x, mBezier[2].y );
+    BLPoint point0 = iWorld ? worldMatrix.map_point( mBezier[0].x, mBezier[0].y ) : BLPoint( mBezier[0].x, mBezier[0].y );
+    BLPoint point1 = iWorld ? worldMatrix.map_point( mBezier[3].x, mBezier[3].y ) : BLPoint( mBezier[3].x, mBezier[3].y );
+    BLPoint handlePoint0 = iWorld ? worldMatrix.map_point( mBezier[1].x, mBezier[1].y ) : BLPoint( mBezier[1].x, mBezier[1].y );
+    BLPoint handlePoint1 = iWorld ? worldMatrix.map_point( mBezier[2].x, mBezier[2].y ) : BLPoint( mBezier[2].x, mBezier[2].y );
     BLPath path;
 
-    path.moveTo( point0 );
-    path.cubicTo( handlePoint0
-                , handlePoint1
-                , point1 );
+    path.move_to( point0 );
+    path.cubic_to( handlePoint0
+                 , handlePoint1
+                 , point1 );
 
-    iBLContext->strokePath( path );
+    iBLContext->stroke_path( path );
 }
 
 void
@@ -692,7 +692,7 @@ FOdysseyVectorSegmentCubic::Draw( BLContext* iBLContext, FOdysseyVectorEngine* i
     std::vector<FOdysseyVectorBezierFragment>& offsetCurve1FragmentArray = mOffsetCurve[1].GetBezierFragmentArray();
     // NOTE: Might not be super fast to call this for each segment
 /*
-    blctx->fillPath( mBLPath );
+    blctx->fill_path( mBLPath );
 */
 
     DrawFractionCache( iBLContext, iVectorEngine );
@@ -702,27 +702,27 @@ FOdysseyVectorSegmentCubic::Draw( BLContext* iBLContext, FOdysseyVectorEngine* i
         BLPath offsetPath;
         BLPath handlePath;
 
-        offsetPath.moveTo ( offsetCurve0FragmentArray[i].bezier[0].x, offsetCurve0FragmentArray[i].bezier[0].y );
+        offsetPath.move_to ( offsetCurve0FragmentArray[i].bezier[0].x, offsetCurve0FragmentArray[i].bezier[0].y );
         offsetPath.cubicTo( offsetCurve0FragmentArray[i].bezier[1].x, offsetCurve0FragmentArray[i].bezier[1].y
                           , offsetCurve0FragmentArray[i].bezier[2].x, offsetCurve0FragmentArray[i].bezier[2].y
                           , offsetCurve0FragmentArray[i].bezier[3].x, offsetCurve0FragmentArray[i].bezier[3].y );
 
-        iBLContext->setStrokeWidth( 0.5f );
-        iBLContext->setStrokeStyle( BLRgba32( 255, 255, 0, 255 ) );
-        iBLContext->strokePath( offsetPath );
-        handlePath.moveTo ( offsetCurve0FragmentArray[i].bezier[0].x, offsetCurve0FragmentArray[i].bezier[0].y );
-        handlePath.lineTo ( offsetCurve0FragmentArray[i].bezier[1].x, offsetCurve0FragmentArray[i].bezier[1].y );
+        iBLContext->set_stroke_width( 0.5f );
+        iBLContext->set_stroke_style( BLRgba32( 255, 255, 0, 255 ) );
+        iBLContext->stroke_path( offsetPath );
+        handlePath.move_to ( offsetCurve0FragmentArray[i].bezier[0].x, offsetCurve0FragmentArray[i].bezier[0].y );
+        handlePath.line_to ( offsetCurve0FragmentArray[i].bezier[1].x, offsetCurve0FragmentArray[i].bezier[1].y );
 
-        iBLContext->setStrokeWidth( 0.5f );
-        iBLContext->setStrokeStyle( BLRgba32( 255, 0, 0, 255 ) );
-        iBLContext->strokePath( handlePath );
+        iBLContext->set_stroke_width( 0.5f );
+        iBLContext->set_stroke_style( BLRgba32( 255, 0, 0, 255 ) );
+        iBLContext->stroke_path( handlePath );
 
-        handlePath.moveTo ( offsetCurve0FragmentArray[i].bezier[3].x, offsetCurve0FragmentArray[i].bezier[3].y );
-        handlePath.lineTo ( offsetCurve0FragmentArray[i].bezier[2].x, offsetCurve0FragmentArray[i].bezier[2].y );
+        handlePath.move_to ( offsetCurve0FragmentArray[i].bezier[3].x, offsetCurve0FragmentArray[i].bezier[3].y );
+        handlePath.line_to ( offsetCurve0FragmentArray[i].bezier[2].x, offsetCurve0FragmentArray[i].bezier[2].y );
 
-        iBLContext->setStrokeWidth( 0.5f );
-        iBLContext->setStrokeStyle( BLRgba32( 255, 0, 0, 255 ) );
-        iBLContext->strokePath( handlePath );
+        iBLContext->set_stroke_width( 0.5f );
+        iBLContext->set_stroke_style( BLRgba32( 255, 0, 0, 255 ) );
+        iBLContext->stroke_path( handlePath );
     }
 
     for( int i = 0; i < offsetCurve1FragmentArray.size(); i++ )
@@ -730,28 +730,28 @@ FOdysseyVectorSegmentCubic::Draw( BLContext* iBLContext, FOdysseyVectorEngine* i
         BLPath offsetPath;
         BLPath handlePath;
 
-        offsetPath.moveTo ( offsetCurve1FragmentArray[i].bezier[0].x, offsetCurve1FragmentArray[i].bezier[0].y );
+        offsetPath.move_to ( offsetCurve1FragmentArray[i].bezier[0].x, offsetCurve1FragmentArray[i].bezier[0].y );
         offsetPath.cubicTo( offsetCurve1FragmentArray[i].bezier[1].x, offsetCurve1FragmentArray[i].bezier[1].y
                           , offsetCurve1FragmentArray[i].bezier[2].x, offsetCurve1FragmentArray[i].bezier[2].y
                           , offsetCurve1FragmentArray[i].bezier[3].x, offsetCurve1FragmentArray[i].bezier[3].y );
 
-        iBLContext->setStrokeWidth( 0.5f );
-        iBLContext->setStrokeStyle( BLRgba32( 255, 255, 0, 255 ) );
-        iBLContext->strokePath( offsetPath );
+        iBLContext->set_stroke_width( 0.5f );
+        iBLContext->set_stroke_style( BLRgba32( 255, 255, 0, 255 ) );
+        iBLContext->stroke_path( offsetPath );
 
-        handlePath.moveTo ( offsetCurve1FragmentArray[i].bezier[0].x, offsetCurve1FragmentArray[i].bezier[0].y );
-        handlePath.lineTo ( offsetCurve1FragmentArray[i].bezier[1].x, offsetCurve1FragmentArray[i].bezier[1].y );
+        handlePath.move_to ( offsetCurve1FragmentArray[i].bezier[0].x, offsetCurve1FragmentArray[i].bezier[0].y );
+        handlePath.line_to ( offsetCurve1FragmentArray[i].bezier[1].x, offsetCurve1FragmentArray[i].bezier[1].y );
 
-        iBLContext->setStrokeWidth( 0.5f );
-        iBLContext->setStrokeStyle( BLRgba32( 255, 0, 255, 255 ) );
-        iBLContext->strokePath( handlePath );
+        iBLContext->set_stroke_width( 0.5f );
+        iBLContext->set_stroke_style( BLRgba32( 255, 0, 255, 255 ) );
+        iBLContext->stroke_path( handlePath );
 
-        handlePath.moveTo ( offsetCurve1FragmentArray[i].bezier[3].x, offsetCurve1FragmentArray[i].bezier[3].y );
-        handlePath.lineTo ( offsetCurve1FragmentArray[i].bezier[2].x, offsetCurve1FragmentArray[i].bezier[2].y );
+        handlePath.move_to ( offsetCurve1FragmentArray[i].bezier[3].x, offsetCurve1FragmentArray[i].bezier[3].y );
+        handlePath.line_to ( offsetCurve1FragmentArray[i].bezier[2].x, offsetCurve1FragmentArray[i].bezier[2].y );
 
-        iBLContext->setStrokeWidth( 0.5f );
-        iBLContext->setStrokeStyle( BLRgba32( 255, 0, 255, 255 ) );
-        iBLContext->strokePath( handlePath );
+        iBLContext->set_stroke_width( 0.5f );
+        iBLContext->set_stroke_style( BLRgba32( 255, 0, 255, 255 ) );
+        iBLContext->stroke_path( handlePath );
     }
 */
 }

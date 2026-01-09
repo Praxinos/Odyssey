@@ -876,7 +876,7 @@ FOdysseyVectorGroupPaint::ApplyMatrix( BLMatrix2D& iMatrix )
     for( FOdysseyVectorBucket* bucket : mBucketList )
     {
         ::ULIS::FVec2D& point = bucket->GetCoords();
-        BLPoint localPt = iMatrix.mapPoint( point.x, point.y );
+        BLPoint localPt = iMatrix.map_point( point.x, point.y );
 
         bucket->Set( localPt.x, localPt.y );
     }
@@ -1006,7 +1006,7 @@ FOdysseyVectorGroupPaint::UpdateBBox()
 void
 FOdysseyVectorGroupPaint::UpdateShape( uint32 iUpdateFlags )
 {
-    BLMatrix2D identityMatrix = BLMatrix2D( BLMatrix2D::makeIdentity() );
+    BLMatrix2D identityMatrix = BLMatrix2D( BLMatrix2D::make_identity() );
 
     if( ( mInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::HIERARCHY] )
      || ( mInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_HIERARCHY] ) )
@@ -1068,11 +1068,11 @@ FOdysseyVectorGroupPaint::UpdateShape( uint32 iUpdateFlags )
                                     ::ULIS::FVec2D& p0Coords = fraction->point[0]->GetCoords();
                                     ::ULIS::FVec2D& p1Coords = fraction->point[1]->GetCoords();
 
-                                    BLPoint lineVertex0 = conversionMatrix.mapPoint( p0Coords.x, p0Coords.y );
+                                    BLPoint lineVertex0 = conversionMatrix.map_point( p0Coords.x, p0Coords.y );
                                     fraction->pointCoordsInParent[0].x = lineVertex0.x;
                                     fraction->pointCoordsInParent[0].y = lineVertex0.y;
 
-                                    BLPoint lineVertex1 = conversionMatrix.mapPoint( p1Coords.x, p1Coords.y );
+                                    BLPoint lineVertex1 = conversionMatrix.map_point( p1Coords.x, p1Coords.y );
                                     fraction->pointCoordsInParent[1].x = lineVertex1.x;
                                     fraction->pointCoordsInParent[1].y = lineVertex1.y;
 
@@ -1223,9 +1223,9 @@ FOdysseyVectorGroupPaint::DrawShape( BLContext* iBLContext
         if( iFlags & FOdysseyVectorEngine::DRAWING_WIREFRAME/* mWireframe*/ )
         {
             iBLContext->save();
-            iBLContext->resetMatrix();
-            iBLContext->setStrokeWidth( 1.0f );
-            iBLContext->setStrokeStyle( BLRgba32( 0xFF, 0x00, 0x00, 0xFF ) );
+            iBLContext->reset_transform();
+            iBLContext->set_stroke_width( 1.0f );
+            iBLContext->set_stroke_style( BLRgba32( 0xFF, 0x00, 0x00, 0xFF ) );
 
             if( mInvalidationFlags.bits.any() == false )
             {
@@ -1244,18 +1244,18 @@ FOdysseyVectorGroupPaint::DrawShape( BLContext* iBLContext
             for( int i = 0; i < mSectionBuffer.size(); i++ )
             {
                 ::ULIS::FVec2D* sectionBezier = mSectionBuffer[i].GetBezier();
-                BLPoint worldPoint[4] = { mWorldMatrix.mapPoint( sectionBezier[0].x, sectionBezier[0].y )
-                                        , mWorldMatrix.mapPoint( sectionBezier[1].x, sectionBezier[1].y )
-                                        , mWorldMatrix.mapPoint( sectionBezier[2].x, sectionBezier[2].y )
-                                        , mWorldMatrix.mapPoint( sectionBezier[3].x, sectionBezier[3].y ) };
+                BLPoint worldPoint[4] = { mWorldMatrix.map_point( sectionBezier[0].x, sectionBezier[0].y )
+                                        , mWorldMatrix.map_point( sectionBezier[1].x, sectionBezier[1].y )
+                                        , mWorldMatrix.map_point( sectionBezier[2].x, sectionBezier[2].y )
+                                        , mWorldMatrix.map_point( sectionBezier[3].x, sectionBezier[3].y ) };
                 BLPath path;
 
-                path.moveTo( worldPoint[0].x, worldPoint[0].y );
+                path.move_to( worldPoint[0].x, worldPoint[0].y );
                 path.cubicTo( worldPoint[1].x, worldPoint[1].y
                             , worldPoint[2].x, worldPoint[2].y
                             , worldPoint[3].x, worldPoint[3].y );
 
-                blctx->strokePath( path );
+                blctx->stroke_path( path );
             }
     */
 
@@ -1271,7 +1271,7 @@ FOdysseyVectorGroupPaint::PickShape( const ::ULIS::FRectD &iRoi, uint32 iSelecti
     return FOdysseyVectorGroup::PickShape( iRoi, iSelectionFlags );
     if( iSelectionFlags & PICK_MATH_BASED )
     {
-        BLPoint pt = mInverseWorldMatrix.mapPoint( iRoi.x, iRoi.y );
+        BLPoint pt = mInverseWorldMatrix.map_point( iRoi.x, iRoi.y );
 
         for( FOdysseyVectorCycle *cycle : mCycleList )
         {
@@ -1486,7 +1486,7 @@ FOdysseyVectorGroupPaint::IntersectSegmentWithBuffer( FOdysseyVectorSegment* iSe
 static void
 PrintVertex( FOdysseyVectorVertex* iVertex )
 {
-    BLPoint pt = iVertex->GetOwner()->GetWorldMatrix().mapPoint( iVertex->GetCoords().x, iVertex->GetCoords().y );
+    BLPoint pt = iVertex->GetOwner()->GetWorldMatrix().map_point( iVertex->GetCoords().x, iVertex->GetCoords().y );
 
     UE_LOG(LogTemp,Warning,TEXT("Vertex: [x:%f y:%f]"), pt.x, pt.y);
 }
@@ -1497,10 +1497,10 @@ PrintSection( FOdysseyVectorSection* iSection)
     FOdysseyVectorObject* owner0 = iSection->GetVertex(0)->GetOwner();
     FOdysseyVectorObject* owner1 = iSection->GetVertex(1)->GetOwner();
     FOdysseyVectorSegment* segment = iSection->GetSegment();
-    BLPoint pt0 = owner0->GetWorldMatrix().mapPoint( iSection->GetVertex(0)->GetCoords().x, iSection->GetVertex(0)->GetCoords().y );
-    BLPoint pt1 = owner1->GetWorldMatrix().mapPoint( iSection->GetVertex(1)->GetCoords().x, iSection->GetVertex(1)->GetCoords().y );
-    BLPoint segpt0 = owner0->GetWorldMatrix().mapPoint( segment->GetVertex(0)->GetCoords().x, segment->GetVertex(0)->GetCoords().y );
-    BLPoint segpt1 = owner1->GetWorldMatrix().mapPoint( segment->GetVertex(1)->GetCoords().x, segment->GetVertex(1)->GetCoords().y );
+    BLPoint pt0 = owner0->GetWorldMatrix().map_point( iSection->GetVertex(0)->GetCoords().x, iSection->GetVertex(0)->GetCoords().y );
+    BLPoint pt1 = owner1->GetWorldMatrix().map_point( iSection->GetVertex(1)->GetCoords().x, iSection->GetVertex(1)->GetCoords().y );
+    BLPoint segpt0 = owner0->GetWorldMatrix().map_point( segment->GetVertex(0)->GetCoords().x, segment->GetVertex(0)->GetCoords().y );
+    BLPoint segpt1 = owner1->GetWorldMatrix().map_point( segment->GetVertex(1)->GetCoords().x, segment->GetVertex(1)->GetCoords().y );
 
     //UE_LOG(LogTemp,Warning,TEXT("Section: [x:%.8f y:%.8f] -- [x:%.8f y:%.8f]/segment[x:%f y:%f] -- [x:%f y:%f] - flags : %d"), pt0.x, pt0.y, pt1.x, pt1.y, segpt0.x, segpt0.y, segpt1.x, segpt1.y, iSection->GetFlags() );
     UE_LOG(LogTemp,Warning,TEXT("Section: [x:%.8f y:%.8f] -- [x:%.8f y:%.8f]"), pt0.x, pt0.y, pt1.x, pt1.y );
@@ -1515,8 +1515,8 @@ PrintCycle( std::vector<FOdysseyVectorVertex*>& vertexArray
     for( int i = 0; i < vertexArray.size(); i++ )
     {
         FOdysseyVectorSegment* segment = sectionArray[i]->GetSegment();
-        BLPoint pt0 = segment->GetOwnerAsPath()->GetWorldMatrix().mapPoint( sectionArray[i]->GetVertex(0)->GetCoords().x, sectionArray[i]->GetVertex(0)->GetCoords().y );
-        BLPoint pt1 = segment->GetOwnerAsPath()->GetWorldMatrix().mapPoint( sectionArray[i]->GetVertex(1)->GetCoords().x, sectionArray[i]->GetVertex(1)->GetCoords().y );
+        BLPoint pt0 = segment->GetOwnerAsPath()->GetWorldMatrix().map_point( sectionArray[i]->GetVertex(0)->GetCoords().x, sectionArray[i]->GetVertex(0)->GetCoords().y );
+        BLPoint pt1 = segment->GetOwnerAsPath()->GetWorldMatrix().map_point( sectionArray[i]->GetVertex(1)->GetCoords().x, sectionArray[i]->GetVertex(1)->GetCoords().y );
 
         UE_LOG(LogTemp,Warning,TEXT("Node: vertex:%d section:%d (%d[x:%f y:%f] -- %d[x:%f y:%f])"), vertexArray[i], sectionArray[i], sectionArray[i]->GetVertex(0), pt0.x, pt0.y, sectionArray[i]->GetVertex(1), pt1.x, pt1.y );
     }
@@ -1699,10 +1699,10 @@ FOdysseyVectorGroupPaint::SetSegmentBBox( FOdysseyVectorSegment* iSegment
     {
         FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(iSegment);
         ::ULIS::FVec2D* bezier = cubicSegment->GetBezier();
-        BLPoint p[4] = { iConversionMatrix.mapPoint( bezier[0].x, bezier[0].y )
-                       , iConversionMatrix.mapPoint( bezier[1].x, bezier[1].y )
-                       , iConversionMatrix.mapPoint( bezier[2].x, bezier[2].y )
-                       , iConversionMatrix.mapPoint( bezier[3].x, bezier[3].y ) };
+        BLPoint p[4] = { iConversionMatrix.map_point( bezier[0].x, bezier[0].y )
+                       , iConversionMatrix.map_point( bezier[1].x, bezier[1].y )
+                       , iConversionMatrix.map_point( bezier[2].x, bezier[2].y )
+                       , iConversionMatrix.map_point( bezier[3].x, bezier[3].y ) };
         double xmin = ::ULIS::FMath::Min4( p[0].x, p[1].x, p[2].x, p[3].x )
              , ymin = ::ULIS::FMath::Min4( p[0].y, p[1].y, p[2].y, p[3].y )
              , xmax = ::ULIS::FMath::Max4( p[0].x, p[1].x, p[2].x, p[3].x )
@@ -1716,8 +1716,8 @@ FOdysseyVectorGroupPaint::SetSegmentBBox( FOdysseyVectorSegment* iSegment
         FOdysseyVectorSegmentExtended* extendedSegment = static_cast<FOdysseyVectorSegmentExtended*>(iSegment);
         ::ULIS::FVec2D& vertex0Coords = extendedSegment->GetVertex(0)->GetCoords();
         ::ULIS::FVec2D& vertex1Coords = extendedSegment->GetVertex(1)->GetCoords();
-        BLPoint p[2] = { iConversionMatrix.mapPoint( vertex0Coords.x, vertex0Coords.y )
-                       , iConversionMatrix.mapPoint( vertex1Coords.x, vertex1Coords.y ) };
+        BLPoint p[2] = { iConversionMatrix.map_point( vertex0Coords.x, vertex0Coords.y )
+                       , iConversionMatrix.map_point( vertex1Coords.x, vertex1Coords.y ) };
         double xmin = ::ULIS::FMath::Min( p[0].x, p[1].x )
              , ymin = ::ULIS::FMath::Min( p[0].y, p[1].y )
              , xmax = ::ULIS::FMath::Max( p[0].x, p[1].x )
@@ -2104,11 +2104,11 @@ FOdysseyVectorGroupPaint::MakeExtendedSegments( FOdysseyVectorVertex* iVertex
             ::ULIS::FVec2D& p0Coords = fraction->point[0]->GetCoords();
             ::ULIS::FVec2D& p1Coords = fraction->point[1]->GetCoords();
 
-            BLPoint lineVertex0 = iConversionMatrix.mapPoint( p0Coords.x, p0Coords.y );
+            BLPoint lineVertex0 = iConversionMatrix.map_point( p0Coords.x, p0Coords.y );
             fraction->pointCoordsInParent[0].x = lineVertex0.x;
             fraction->pointCoordsInParent[0].y = lineVertex0.y;
 
-            BLPoint lineVertex1 = iConversionMatrix.mapPoint( p1Coords.x, p1Coords.y );
+            BLPoint lineVertex1 = iConversionMatrix.map_point( p1Coords.x, p1Coords.y );
             fraction->pointCoordsInParent[1].x = lineVertex1.x;
             fraction->pointCoordsInParent[1].y = lineVertex1.y;
 
@@ -2737,7 +2737,7 @@ FOdysseyVectorGroupPaint::CopyBuckets( FOdysseyVectorGroupPaint* iDestination, b
      for( FOdysseyVectorBucket *bucket : mBucketList )
      {
         ::ULIS::FVec2D bucketCoords = bucket->GetCoords();
-        BLPoint destinationBucketPosition = conversionMatrix.mapPoint( bucketCoords.x, bucketCoords.y );
+        BLPoint destinationBucketPosition = conversionMatrix.map_point( bucketCoords.x, bucketCoords.y );
         FOdysseyVectorBucket *bucketCopy = new FOdysseyVectorBucket( iDestination, 0.0f, 0.0f, bucket->IsPropagated() );
 
         bucket->Copy( bucketCopy );
@@ -2858,10 +2858,10 @@ FOdysseyVectorGroupPaint::GetBBoxFromSelectedVertices( ::ULIS::FRectD& oBBox, bo
             double xmax = oBBox.x + oBBox.w;
             double ymin = oBBox.y;
             double ymax = oBBox.y + oBBox.h;
-            BLPoint p[4] = { mInverseWorldMatrix.mapPoint( xmin, ymin )
-                           , mInverseWorldMatrix.mapPoint( xmax, ymin )
-                           , mInverseWorldMatrix.mapPoint( xmax, ymax )
-                           , mInverseWorldMatrix.mapPoint( xmin, ymax ) };
+            BLPoint p[4] = { mInverseWorldMatrix.map_point( xmin, ymin )
+                           , mInverseWorldMatrix.map_point( xmax, ymin )
+                           , mInverseWorldMatrix.map_point( xmax, ymax )
+                           , mInverseWorldMatrix.map_point( xmin, ymax ) };
 
             oBBox = ::ULIS::FRectD::FromMinMax( ::ULIS::FMath::Min4( p[0].x, p[1].x, p[2].x, p[3].x )
                                               , ::ULIS::FMath::Min4( p[0].y, p[1].y, p[2].y, p[3].y )
@@ -2882,17 +2882,17 @@ FOdysseyVectorGroupPaint::PickBucket( std::vector<FOdysseyVectorBucket*>& oPicke
     //BLImage* maskImage = GetCell()->GetBLMask();
     //BLImageData imageData;
 
-    //maskImage->getData( &imageData );
+    //maskImage->get_data( &imageData );
 
     for( FOdysseyVectorBucket* bucket : mBucketList )
     {
         ::ULIS::FVec2D& localCoords = bucket->GetCoords();
         // convert bucket coordinates to world coordinates. Easier to detect collision inside the picking circle.
-        BLPoint worldCoords = mWorldMatrix.mapPoint( localCoords.x, localCoords.y );
+        BLPoint worldCoords = mWorldMatrix.map_point( localCoords.x, localCoords.y );
         int32 x = (int32) worldCoords.x;
         int32 y = (int32) worldCoords.y;
 
-        if( iSelectionPath.hitTest( worldCoords, BL_FILL_RULE_EVEN_ODD ) == BL_HIT_TEST_IN )
+        if( iSelectionPath.hit_test( worldCoords, BL_FILL_RULE_EVEN_ODD ) == BL_HIT_TEST_IN )
         {
             oPickedBucketArray.push_back( bucket );
         }
@@ -2916,7 +2916,7 @@ FOdysseyVectorGroupPaint::PickBucket( std::vector<FOdysseyVectorBucket*>& oPicke
 FOdysseyVectorCycle*
 FOdysseyVectorGroupPaint::PickCycle( double iWorldX, double iWorldY )
 {
-    BLPoint localCoord = mInverseWorldMatrix.mapPoint( iWorldX, iWorldY );
+    BLPoint localCoord = mInverseWorldMatrix.map_point( iWorldX, iWorldY );
 
     if( mBBox.HitTest( ::ULIS::FVec2D( localCoord.x, localCoord.y ) ) )
     {
@@ -2985,10 +2985,10 @@ FOdysseyVectorGroupPaint::PickSection( FOdysseyVectorSection* iSection
     ::ULIS::FVec2D* bezier = iSection->GetBezier();
     // Note, section are in paingroup coordinates (path's parent), not in path coordinates.
     BLMatrix2D& worldMatrix = iSection->GetOwner()->GetWorldMatrix();
-    BLPoint pt[4] = { worldMatrix.mapPoint( bezier[0].x, bezier[0].y )
-                    , worldMatrix.mapPoint( bezier[1].x, bezier[1].y )
-                    , worldMatrix.mapPoint( bezier[2].x, bezier[2].y )
-                    , worldMatrix.mapPoint( bezier[3].x, bezier[3].y ) };
+    BLPoint pt[4] = { worldMatrix.map_point( bezier[0].x, bezier[0].y )
+                    , worldMatrix.map_point( bezier[1].x, bezier[1].y )
+                    , worldMatrix.map_point( bezier[2].x, bezier[2].y )
+                    , worldMatrix.map_point( bezier[3].x, bezier[3].y ) };
     ::ULIS::FVec2D worldBezier[4] = { ::ULIS::FVec2D( pt[0].x, pt[0].y )
                                     , ::ULIS::FVec2D( pt[1].x, pt[1].y )
                                     , ::ULIS::FVec2D( pt[2].x, pt[2].y )
@@ -3004,7 +3004,7 @@ FOdysseyVectorGroupPaint::PickErasedSections( std::vector<FOdysseyVectorSection*
     BLImageData maskData;
     ::ULIS::FRectD maskRect;
 
-    iBLMaskImage.getData( &maskData );
+    iBLMaskImage.get_data( &maskData );
 
     maskRect = ::ULIS::FRectD( 0, 0, maskData.size.w, maskData.size.h );
 
@@ -3012,7 +3012,7 @@ FOdysseyVectorGroupPaint::PickErasedSections( std::vector<FOdysseyVectorSection*
     {
         if( section.GetSegment()->GetOwner()->GetClass() == FOdysseyVectorPath::StaticClass() )
         {
-            if( PickSection( &section, maskRect, (uint8*) maskData.pixelData ) )
+            if( PickSection( &section, maskRect, (uint8*) maskData.pixel_data ) )
             {
                 oErasedSectionArray.push_back( &section );
             }
@@ -3033,7 +3033,7 @@ FOdysseyVectorGroupPaint::EraseSections( std::vector<FOdysseyVectorObject*>& oAd
     std::vector<FOdysseyVectorSection*> erasedSectionArray;
     BLImageData imageData;
 
-    iBLMaskImage.getData( &imageData );
+    iBLMaskImage.get_data( &imageData );
 
     // first step : relink sections as they were all unlinked after the cycle detection process
     // Note: we don't stitch sections of size 0 here because it disturb the erasing process.
@@ -3176,7 +3176,7 @@ FOdysseyVectorGroupPaint::PickPath( FOdysseyVectorPath* iPath
     const BLMatrix2D& worldMatrix = iPath->GetWorldMatrix();
     BLImageData imageData;
 
-    iHUDMaskImage.getData( &imageData );
+    iHUDMaskImage.get_data( &imageData );
 
     for( FOdysseyVectorSegment* segment : iPath->GetSegmentList() )
     {
@@ -3198,7 +3198,7 @@ FOdysseyVectorGroupPaint::PickPath( FOdysseyVectorPath* iPath
                 if( ( iX >= 0 && iX < imageData.size.w )
                  && ( iY >= 0 && iY < imageData.size.h ) )
                 {
-                    uint8 *pixel = static_cast<uint8*>(imageData.pixelData);
+                    uint8 *pixel = static_cast<uint8*>(imageData.pixel_data);
                     uint32 offset = ( iY * imageData.size.w ) + iX;
 
                     return ( pixel[offset] ) ? true : false;

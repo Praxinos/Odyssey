@@ -3,5 +3,5 @@
 // See blend2d.h or LICENSE.md for license and copyright information
 // SPDX-License-Identifier: Zlib
 
-#include "../api-build_p.h"
-#include "../pipeline/piperuntime_p.h"
+#include <blend2d/core/api-build_p.h>
+#include <blend2d/pipeline/piperuntime_p.h>

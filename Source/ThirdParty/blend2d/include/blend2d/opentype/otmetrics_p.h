@@ -6,14 +6,14 @@
 #ifndef BLEND2D_OPENTYPE_OTMETRICS_P_H_INCLUDED
 #define BLEND2D_OPENTYPE_OTMETRICS_P_H_INCLUDED
 
-#include "../opentype/otcore_p.h"
-#include "../support/ptrops_p.h"
+#include <blend2d/opentype/otcore_p.h>
+#include <blend2d/support/ptrops_p.h>
 
 //! \cond INTERNAL
 //! \addtogroup blend2d_opentype_impl
 //! \{
 
-namespace BLOpenType {
+namespace bl::OpenType {
 
 //! OpenType 'hhea' and 'vhea' tables.
 //!
@@ -21,22 +21,22 @@ namespace BLOpenType {
 //!   - https://docs.microsoft.com/en-us/typography/opentype/spec/hhea
 //!   - https://docs.microsoft.com/en-us/typography/opentype/spec/vhea
 struct XHeaTable {
-  enum : uint32_t { kMinSize = 36 };
+  enum : uint32_t { kBaseSize = 36 };
 
   F16x16 version;
   Int16 ascender;
   Int16 descender;
-  Int16 lineGap;
-  UInt16 maxAdvance;
-  Int16 minLeadingBearing;
-  Int16 minTrailingBearing;
-  Int16 maxExtent;
-  Int16 caretSlopeRise;
-  Int16 caretSlopeRun;
-  Int16 caretOffset;
+  Int16 line_gap;
+  UInt16 max_advance;
+  Int16 min_leading_bearing;
+  Int16 min_trailing_bearing;
+  Int16 max_extent;
+  Int16 caret_slope_rise;
+  Int16 caret_slope_run;
+  Int16 caret_offset;
   Int16 reserved[4];
-  UInt16 longMetricFormat;
-  UInt16 longMetricCount;
+  UInt16 long_metric_format;
+  UInt16 long_metric_count;
 };
 
 //! OpenType 'hmtx' and 'vmtx' tables.
@@ -46,7 +46,7 @@ struct XHeaTable {
 //!   - https://docs.microsoft.com/en-us/typography/opentype/spec/vmtx
 struct XMtxTable {
   // At least one LongMetric.
-  enum : uint32_t { kMinSize = 4  };
+  enum : uint32_t { kBaseSize = 4  };
 
   struct LongMetric {
     UInt16 advance;
@@ -54,30 +54,30 @@ struct XMtxTable {
   };
 
   /*
-  LongMetric lmArray[];
-  Int16 lsbArray[];
+  LongMetric lm_array[];
+  Int16 lsb_array[];
   */
 
   //! Paired advance width and left side bearing values, indexed by glyph ID.
-  BL_INLINE const LongMetric* lmArray() const noexcept { return BLPtrOps::offset<const LongMetric>(this, 0); }
-  //! Leading side bearings for glyph IDs greater than or equal to `metricCount`.
-  BL_INLINE const Int16* lsbArray(size_t metricCount) const noexcept { return BLPtrOps::offset<const Int16>(this, metricCount * sizeof(LongMetric)); }
+  BL_INLINE const LongMetric* lm_array() const noexcept { return PtrOps::offset<const LongMetric>(this, 0); }
+  //! Leading side bearings for glyph IDs greater than or equal to `metric_count`.
+  BL_INLINE const Int16* lsb_array(size_t metric_count) const noexcept { return PtrOps::offset<const Int16>(this, metric_count * sizeof(LongMetric)); }
 };
 
 struct MetricsData {
   //! Metrics tables - 'hmtx' and 'vmtx' (if present).
-  BLFontTableT<XMtxTable> xmtxTable[2];
+  Table<XMtxTable> xmtx_table[2];
   //! Count of LongMetric entries.
-  uint16_t longMetricCount[2];
+  uint16_t long_metric_count[2];
   //! Count of LSB entries.
-  uint16_t lsbArraySize[2];
+  uint16_t lsb_array_size[2];
 };
 
 namespace MetricsImpl {
-BLResult init(OTFaceImpl* faceI, const BLFontData* fontData) noexcept;
+BLResult init(OTFaceImpl* ot_face_impl, OTFaceTables& tables) noexcept;
 } // {MetricsImpl}
 
-} // {BLOpenType}
+} // {bl::OpenType}
 
 //! \}
 //! \endcond

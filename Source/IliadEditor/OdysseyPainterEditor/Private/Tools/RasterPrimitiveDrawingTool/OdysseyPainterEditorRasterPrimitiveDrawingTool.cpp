@@ -280,10 +280,10 @@ UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapeCommit(const TArray<FOdy
 
     BLImage img;
     int stride = maskBlock->BytesPerScanLine();
-    img.createFromData(w, h, BL_FORMAT_PRGB32, (void*)maskBlock->Bits(), stride);
+    img.create_from_data(w, h, BL_FORMAT_PRGB32, (void*)maskBlock->Bits(), stride);
     BLContext blend2DCtx;
     BLContextCreateInfo createInfo{};
-    createInfo.threadCount = FPlatformMisc::NumberOfCoresIncludingHyperthreads();
+    createInfo.thread_count = FPlatformMisc::NumberOfCoresIncludingHyperthreads();
     blend2DCtx.begin(img, createInfo);
 
     bool isLine = Shapes.GetActiveShapeType() == EOdysseyShapeType::kLine;
@@ -301,10 +301,10 @@ UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapeCommit(const TArray<FOdy
     }
 
     BLPath path;
-    path.moveTo(mPath[0].x, mPath[0].y);
+    path.move_to(mPath[0].x, mPath[0].y);
     for ( int i = 1; i < mPath.Num(); i++ )
     {
-        path.lineTo(mPath[i].x, mPath[i].y);
+        path.line_to(mPath[i].x, mPath[i].y);
     }
 
     if ( !isLine && !isBezier || !isLine && Filled)
@@ -318,20 +318,20 @@ UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapeCommit(const TArray<FOdy
 
     if ( Filled && !isLine )
     {
-        blend2DCtx.setFillStyle(blend2DColor);
-        blend2DCtx.fillPath(path);
+        blend2DCtx.set_fill_style(blend2DColor);
+        blend2DCtx.fill_path(path);
     }
     else
     {
         strokeWidth = StrokeWidth;
-        blend2DCtx.setStrokeStyle(blend2DColor);
-        blend2DCtx.setStrokeWidth(strokeWidth);
-        blend2DCtx.strokePath(path);
+        blend2DCtx.set_stroke_style(blend2DColor);
+        blend2DCtx.set_stroke_width(strokeWidth);
+        blend2DCtx.stroke_path(path);
     }
     blend2DCtx.end();
 
     BLBox bbox;
-    path.getBoundingBox(&bbox);
+    path.get_bounding_box(&bbox);
 
     ::ULIS::FRectI invalidRect = ::ULIS::FRectI::FromMinMax(
         bbox.x0 - 1 - strokeWidth / 2,

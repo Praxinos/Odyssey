@@ -76,7 +76,7 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseDownVector( FOdysseyVectorGroupP
                                                           , const FOdysseyPoint& iPointInTexture
                                                           , const FKey& iKey )
 {
-    BLPoint localCoords = iScene->GetInverseWorldMatrix().mapPoint(iPointInTexture.x,iPointInTexture.y);
+    BLPoint localCoords = iScene->GetInverseWorldMatrix().map_point(iPointInTexture.x,iPointInTexture.y);
 
     mDragged = false;
 
@@ -130,7 +130,7 @@ void
 UOdysseyPainterEditorVectorScenePanTool::Scale( FOdysseyVectorGroupPaint* iScene
                                               , const FOdysseyPoint& iPointInTexture )
 {
-    BLPoint worldMouseCoordsBefore = iScene->GetWorldMatrix().mapPoint( mDownLocalMouseX, mDownLocalMouseY );
+    BLPoint worldMouseCoordsBefore = iScene->GetWorldMatrix().map_point( mDownLocalMouseX, mDownLocalMouseY );
     uint32 imageWidth = iScene->GetLayer()->GetWidth();
     uint32 imageHeight = iScene->GetLayer()->GetHeight();
     double factor;
@@ -152,7 +152,7 @@ UOdysseyPainterEditorVectorScenePanTool::Scale( FOdysseyVectorGroupPaint* iScene
 
     iScene->UpdateMatrix();
 
-    BLPoint worldMouseCoordsAfter = iScene->GetWorldMatrix().mapPoint( mDownLocalMouseX, mDownLocalMouseY );
+    BLPoint worldMouseCoordsAfter = iScene->GetWorldMatrix().map_point( mDownLocalMouseX, mDownLocalMouseY );
 
     iScene->Translate( iScene->GetTranslationX() - ( worldMouseCoordsAfter.x - worldMouseCoordsBefore.x )
                      , iScene->GetTranslationY() - ( worldMouseCoordsAfter.y - worldMouseCoordsBefore.y ) );

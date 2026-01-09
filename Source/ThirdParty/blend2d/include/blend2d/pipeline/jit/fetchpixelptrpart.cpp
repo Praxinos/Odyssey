@@ -3,43 +3,33 @@
 // See blend2d.h or LICENSE.md for license and copyright information
 // SPDX-License-Identifier: Zlib
 
-#include "../../api-build_p.h"
-#if BL_TARGET_ARCH_X86 && !defined(BL_BUILD_NO_JIT)
+#include <blend2d/core/api-build_p.h>
+#if !defined(BL_BUILD_NO_JIT)
 
-#include "../../pipeline/jit/fetchpixelptrpart_p.h"
-#include "../../pipeline/jit/pipecompiler_p.h"
+#include <blend2d/pipeline/jit/fetchpixelptrpart_p.h>
+#include <blend2d/pipeline/jit/fetchutilspixelaccess_p.h>
+#include <blend2d/pipeline/jit/pipecompiler_p.h>
 
-namespace BLPipeline {
-namespace JIT {
+namespace bl::Pipeline::JIT {
 
-// BLPipeline::JIT::FetchPixelPtrPart - Construction & Destruction
-// ===============================================================
+// bl::Pipeline::JIT::FetchPixelPtrPart - Construction & Destruction
+// =================================================================
 
-FetchPixelPtrPart::FetchPixelPtrPart(PipeCompiler* pc, FetchType fetchType, uint32_t format) noexcept
-  : FetchPart(pc, fetchType, format) {
+FetchPixelPtrPart::FetchPixelPtrPart(PipeCompiler* pc, FetchType fetch_type, FormatExt format) noexcept
+  : FetchPart(pc, fetch_type, format) {
 
-  /*
-  _maxSimdWidthSupported = SimdWidth::k256;
-  */
-  _maxPixels = kUnlimitedMaxPixels;
+  _part_flags |= PipePartFlags::kMaskedAccess | PipePartFlags::kAdvanceXIsSimple;
+  _max_vec_width_supported = kMaxPlatformWidth;
+  _max_pixels = kUnlimitedMaxPixels;
 }
 
-// BLPipeline::JIT::FetchPixelPtrPart - Fetch
-// ==========================================
+// bl::Pipeline::JIT::FetchPixelPtrPart - Fetch
+// ============================================
 
-void FetchPixelPtrPart::fetch1(Pixel& p, PixelFlags flags) noexcept {
-  pc->xFetchPixel_1x(p, flags, format(), x86::ptr(_ptr), _ptrAlignment);
+void FetchPixelPtrPart::fetch(Pixel& p, PixelCount n, PixelFlags flags, PixelPredicate& predicate) noexcept {
+  FetchUtils::fetch_pixels(pc, p, n, flags, fetch_info(), _ptr, _alignment, AdvanceMode::kNoAdvance, predicate);
 }
 
-void FetchPixelPtrPart::fetch4(Pixel& p, PixelFlags flags) noexcept {
-  pc->xFetchPixel_4x(p, flags, format(), x86::ptr(_ptr), _ptrAlignment);
-}
+} // {bl::Pipeline::JIT}
 
-void FetchPixelPtrPart::fetch8(Pixel& p, PixelFlags flags) noexcept {
-  pc->xFetchPixel_8x(p, flags, format(), x86::ptr(_ptr), _ptrAlignment);
-}
-
-} // {JIT}
-} // {BLPipeline}
-
-#endif
+#endif // !BL_BUILD_NO_JIT

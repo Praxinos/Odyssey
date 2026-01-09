@@ -6,59 +6,61 @@
 #ifndef BLEND2D_SUPPORT_HASHOPS_P_H_INCLUDED
 #define BLEND2D_SUPPORT_HASHOPS_P_H_INCLUDED
 
-#include "../api-internal_p.h"
-#include "../unicode_p.h"
+#include <blend2d/core/api-internal_p.h>
+#include <blend2d/unicode/unicode_p.h>
 
 //! \cond INTERNAL
 //! \addtogroup blend2d_internal
 //! \{
 
-namespace BLHashOps {
+namespace bl {
+namespace HashOps {
 namespace {
 
 //! \name Hash Functions
 //! \{
 
-static BL_INLINE uint32_t hashRound(uint32_t hash, uint32_t c) noexcept {
+static BL_INLINE uint32_t hash_char(uint32_t hash, uint32_t c) noexcept {
   return hash * 65599u + c;
 }
 
-static BL_INLINE uint32_t hashRoundCI(uint32_t hash, uint32_t c) noexcept {
-  return hash * 65599u + blAsciiToLower(c);
+static BL_INLINE uint32_t hash_charCI(uint32_t hash, uint32_t c) noexcept {
+  return hash * 65599u + Unicode::ascii_to_lower(c);
 }
 
 // Gets a hash of the given string `data` of size `size`. Size must be valid
 // as this function doesn't check for a null terminator and allows it in the
 // middle of the string.
-static BL_INLINE uint32_t hashString(const char* data, size_t size) noexcept {
-  uint32_t hashCode = 0;
+static BL_INLINE uint32_t hash_string(const char* data, size_t size) noexcept {
+  uint32_t hash_code = 0;
   for (uint32_t i = 0; i < size; i++)
-    hashCode = hashRound(hashCode, uint8_t(data[i]));
-  return hashCode;
+    hash_code = hash_char(hash_code, uint8_t(data[i]));
+  return hash_code;
 }
 
-static BL_INLINE uint32_t hashString(BLStringView view) noexcept {
-  return hashString(view.data, view.size);
+static BL_INLINE uint32_t hash_string(BLStringView view) noexcept {
+  return hash_string(view.data, view.size);
 }
 
 // Gets a hash of the given string `data` of size `size`. Size must be valid
 // as this function doesn't check for a null terminator and allows it in the
 // middle of the string.
-static BL_INLINE uint32_t hashStringCI(const char* data, size_t size) noexcept {
-  uint32_t hashCode = 0;
+static BL_INLINE uint32_t hash_stringCI(const char* data, size_t size) noexcept {
+  uint32_t hash_code = 0;
   for (uint32_t i = 0; i < size; i++)
-    hashCode = hashRoundCI(hashCode, uint8_t(data[i]));
-  return hashCode;
+    hash_code = hash_charCI(hash_code, uint8_t(data[i]));
+  return hash_code;
 }
 
-static BL_INLINE uint32_t hashStringCI(BLStringView view) noexcept {
-  return hashStringCI(view.data, view.size);
+static BL_INLINE uint32_t hash_stringCI(BLStringView view) noexcept {
+  return hash_stringCI(view.data, view.size);
 }
 
 //! \}
 
 } // {anonymous}
-} // {BLHashOps}
+} // {HashOps}
+} // {bl}
 
 //! \}
 //! \endcond

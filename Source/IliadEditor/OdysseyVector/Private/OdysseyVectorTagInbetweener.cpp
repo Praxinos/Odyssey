@@ -1261,7 +1261,7 @@ FOdysseyVectorTagInbetweener::ResizeDrawings()
     mDrawingBuffer.front().localMatrix   =
     mDrawingBuffer.front().inverseMatrix =
     mDrawingBuffer.front().worldMatrix   =
-    mDrawingBuffer.front().inverseWorldMatrix = BLMatrix2D::makeIdentity();
+    mDrawingBuffer.front().inverseWorldMatrix = BLMatrix2D::make_identity();
 
     DispatchDrawings();
 
@@ -1507,27 +1507,27 @@ FOdysseyVectorTagInbetweener::DrawMotionGrid( uint32 iDrawingIndex
     worldMatrix.transform( mChart.drawingBuffer[iDrawingIndex].matrix );
 
     iBLContext->save();
-    iBLContext->resetMatrix();
+    iBLContext->reset_transform();
 
-    iBLContext->setStrokeStyle( BLRgba32( 255, 0, 255, 255 ) );
-    iBLContext->setStrokeWidth( 1.0f );
+    iBLContext->set_stroke_style( BLRgba32( 255, 0, 255, 255 ) );
+    iBLContext->set_stroke_width( 1.0f );
 
     for( FInbetweenerQuad& quad : mGrid->GetQuadBuffer() )
     {
         FInbetweenerPoint** gridPoint = quad.GetPoints();
-        BLPoint pt[4] = { worldMatrix.mapPoint( gridPoint[0]->GetPosition( eInbetweenerPointPositionType::InterpPosition ).x
+        BLPoint pt[4] = { worldMatrix.map_point( gridPoint[0]->GetPosition( eInbetweenerPointPositionType::InterpPosition ).x
                                               , gridPoint[0]->GetPosition( eInbetweenerPointPositionType::InterpPosition ).y )
-                        , worldMatrix.mapPoint( gridPoint[1]->GetPosition( eInbetweenerPointPositionType::InterpPosition ).x
+                        , worldMatrix.map_point( gridPoint[1]->GetPosition( eInbetweenerPointPositionType::InterpPosition ).x
                                               , gridPoint[1]->GetPosition( eInbetweenerPointPositionType::InterpPosition ).y )
-                        , worldMatrix.mapPoint( gridPoint[2]->GetPosition( eInbetweenerPointPositionType::InterpPosition ).x
+                        , worldMatrix.map_point( gridPoint[2]->GetPosition( eInbetweenerPointPositionType::InterpPosition ).x
                                               , gridPoint[2]->GetPosition( eInbetweenerPointPositionType::InterpPosition ).y )
-                        , worldMatrix.mapPoint( gridPoint[3]->GetPosition( eInbetweenerPointPositionType::InterpPosition ).x
+                        , worldMatrix.map_point( gridPoint[3]->GetPosition( eInbetweenerPointPositionType::InterpPosition ).x
                                               , gridPoint[3]->GetPosition( eInbetweenerPointPositionType::InterpPosition ).y ) };
 
-        iBLContext->strokeLine( pt[0], pt[1] );
-        iBLContext->strokeLine( pt[1], pt[2] );
-        iBLContext->strokeLine( pt[2], pt[3] );
-        iBLContext->strokeLine( pt[3], pt[0] );
+        iBLContext->stroke_line( pt[0], pt[1] );
+        iBLContext->stroke_line( pt[1], pt[2] );
+        iBLContext->stroke_line( pt[2], pt[3] );
+        iBLContext->stroke_line( pt[3], pt[0] );
     }
 
     iBLContext->restore();
@@ -1559,7 +1559,7 @@ FOdysseyVectorTagInbetweener::Draw( FOdysseyVectorCell* iDisplayedCell
         FOdysseyVectorCell* tagCell = mOwner->GetScene()->GetCell();
 
         iBLContext->save();
-        iBLContext->resetMatrix();
+        iBLContext->reset_transform();
 
         // if th eobject hasn't been removed from the scene
         if( iDisplayedCell && tagCell )
@@ -1654,8 +1654,8 @@ FOdysseyVectorTagInbetweener::DrawPathAt( FOdysseyVectorCell* iDisplayedCell
     worldMatrix.transform( iInbetween->GetDrawing()->localMatrix );
     worldMatrix.transform( iInterpolatedPath->mRelativeMatrix );
 
-    iBLContext->setStrokeStyle( BLRgba32( pathColor.R, pathColor.G, pathColor.B, pathColor.A ) );
-    iBLContext->setFillStyle( BLRgba32( pathColor.R, pathColor.G, pathColor.B, pathColor.A ) );
+    iBLContext->set_stroke_style( BLRgba32( pathColor.R, pathColor.G, pathColor.B, pathColor.A ) );
+    iBLContext->set_fill_style( BLRgba32( pathColor.R, pathColor.G, pathColor.B, pathColor.A ) );
 
     brush.Lock();
 
@@ -1701,17 +1701,17 @@ FOdysseyVectorTagInbetweener::DrawPathAt( FOdysseyVectorCell* iDisplayedCell
                                                   ,  localPointPositionq );
                     double radiusi = pointi->GetRadius() * scaling;
                     double radiusn = pointn->GetRadius() * scaling;
-                    BLPoint pt[6] = { worldMatrix.mapPoint( localPointPositioni->x
+                    BLPoint pt[6] = { worldMatrix.map_point( localPointPositioni->x
                                                           , localPointPositioni->y )
-                                    , worldMatrix.mapPoint( localPointPositioni->x + ( perpi.x * radiusi )
+                                    , worldMatrix.map_point( localPointPositioni->x + ( perpi.x * radiusi )
                                                           , localPointPositioni->y + ( perpi.y * radiusi ) )
-                                    , worldMatrix.mapPoint( localPointPositionn->x + ( perpn.x * radiusn )
+                                    , worldMatrix.map_point( localPointPositionn->x + ( perpn.x * radiusn )
                                                           , localPointPositionn->y + ( perpn.y * radiusn ) )
-                                    , worldMatrix.mapPoint( localPointPositionn->x
+                                    , worldMatrix.map_point( localPointPositionn->x
                                                           , localPointPositionn->y )
-                                    , worldMatrix.mapPoint( localPointPositionn->x - ( perpn.x * radiusn )
+                                    , worldMatrix.map_point( localPointPositionn->x - ( perpn.x * radiusn )
                                                           , localPointPositionn->y - ( perpn.y * radiusn ) )
-                                    , worldMatrix.mapPoint( localPointPositioni->x - ( perpi.x * radiusi )
+                                    , worldMatrix.map_point( localPointPositioni->x - ( perpi.x * radiusi )
                                                           , localPointPositioni->y - ( perpi.y * radiusi ) ) };
 
                                         // HUDs pass nullptr as the displayedScene
@@ -1783,21 +1783,21 @@ FOdysseyVectorTagInbetweener::DrawPathAt( FOdysseyVectorCell* iDisplayedCell
                         // we draw lines between the polygons to correct the artefacts,
                         // otherwise there is a thin line between the polygons
                         // line stroking is done in world coordinates because we need a 1 pixel width
-                        iBLContext->setStrokeWidth( 3.0f );
-                        iBLContext->strokeLine( pt[0], pt[1] );
-                        iBLContext->strokeLine( pt[5], pt[0] );
+                        iBLContext->set_stroke_width( 3.0f );
+                        iBLContext->stroke_line( pt[0], pt[1] );
+                        iBLContext->stroke_line( pt[5], pt[0] );
 
-                        iBLContext->fillPolygon( pt, 6 );
+                        iBLContext->fill_polygon( pt, 6 );
                     }
                 }
                 else
                 {
-                    BLPoint pt[2] = { worldMatrix.mapPoint( localPointPositioni->x
+                    BLPoint pt[2] = { worldMatrix.map_point( localPointPositioni->x
                                                           , localPointPositioni->y )
-                                    , worldMatrix.mapPoint( localPointPositionn->x
+                                    , worldMatrix.map_point( localPointPositionn->x
                                                           , localPointPositionn->y ) };
 
-                    iBLContext->strokeLine( pt[0].x, pt[0].y, pt[1].x, pt[1].y );
+                    iBLContext->stroke_line( pt[0].x, pt[0].y, pt[1].x, pt[1].y );
                 }
             }
         }
@@ -1834,7 +1834,7 @@ FOdysseyVectorTagInbetweener::DrawPathAt( FOdysseyVectorCell* iDisplayedCell
         }
 
         iBLContext->save();
-        iBLContext->setMatrix( worldMatrix );
+        iBLContext->set_transform( worldMatrix );
         for( FOdysseyVectorChain& chain : iInterpolatedPath->GetOriginalPath()->GetChainArray() )
         {
             iInterpolatedPath->GetOriginalPath()->DrawChain( iBLContext
@@ -1917,7 +1917,7 @@ FOdysseyVectorTagInbetweener::DrawPathsInbetween( FOdysseyVectorCell* iDisplayed
                                                 , FOdysseyVectorEngine* iEngine )
 {
     iBLContext->save();
-    iBLContext->resetMatrix();
+    iBLContext->reset_transform();
 
     for( FInterpolatedPath& interpolatedPath : mInterpolatedPathBuffer )
     {

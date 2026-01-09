@@ -75,7 +75,7 @@ FOdysseyVectorJoint::Draw( BLContext* iBLContext
                          , uint64 iDrawingFlags )
 {
     FOdysseyVectorPath* path = mVertex->GetOwnerAsPath();
-    const BLMatrix2D worldMatrix = iBLContext->userMatrix();
+    const BLMatrix2D worldMatrix = iBLContext->user_transform();
     FOdysseyVectorBrush& brush = path->GetBrush();
     FColor foregroundColor = path->GetForegroundColor();
     double difU = iEndU - iStartU;
@@ -117,40 +117,40 @@ FOdysseyVectorJoint::Draw( BLContext* iBLContext
         if( mPolygonCache.size() )
         {
             // for filled overlaps
-            iBLContext->setFillRule( BL_FILL_RULE_NON_ZERO );
+            iBLContext->set_fill_rule( BL_FILL_RULE_NON_ZERO );
             BLPath joint;
 
-            joint.moveTo( mPolygonCache[0].point[0].x, mPolygonCache[0].point[0].y );
-            joint.lineTo( mPolygonCache[0].point[1].x, mPolygonCache[0].point[1].y );
+            joint.move_to( mPolygonCache[0].point[0].x, mPolygonCache[0].point[0].y );
+            joint.line_to( mPolygonCache[0].point[1].x, mPolygonCache[0].point[1].y );
 
             for( int i = 0; i < mPolygonCache.size(); i++ )
             {
-                joint.lineTo( mPolygonCache[i].point[2].x, mPolygonCache[i].point[2].y );
+                joint.line_to( mPolygonCache[i].point[2].x, mPolygonCache[i].point[2].y );
             }
 
             joint.close();
 
-            iBLContext->fillPath( joint );
+            iBLContext->fill_path( joint );
         }
 
         //if( mPolygonCache.size() == 0 )
         {
             ::ULIS::FVec2D& vertexCoords =  mVertex->GetCoords();
-            BLPoint vertexWorldCoords = worldMatrix.mapPoint( vertexCoords.x, vertexCoords.y );
+            BLPoint vertexWorldCoords = worldMatrix.map_point( vertexCoords.x, vertexCoords.y );
 
             // this is to prevent a thin line between polygons because BLend2D draw them at sub-pixel level and this
             // might create a thin line between the polygons. So we draw a 1-3 pixel line at the edges.
             iBLContext->save();
-            iBLContext->resetMatrix();
-            iBLContext->setStrokeWidth( 2.0f );  // 1.0 is not enough due to antialiasing
-            iBLContext->strokeLine( BLPoint( vertexWorldCoords.x, vertexWorldCoords.y )
-                                           , worldMatrix.mapPoint( mNextEdgePoint[0].x, mNextEdgePoint[0].y ) );
-            iBLContext->strokeLine( BLPoint( vertexWorldCoords.x, vertexWorldCoords.y )
-                                           , worldMatrix.mapPoint( mNextEdgePoint[1].x, mNextEdgePoint[1].y ) );
-            iBLContext->strokeLine( BLPoint( vertexWorldCoords.x, vertexWorldCoords.y )
-                                           , worldMatrix.mapPoint( mPrevEdgePoint[0].x, mPrevEdgePoint[0].y ) );
-            iBLContext->strokeLine( BLPoint( vertexWorldCoords.x, vertexWorldCoords.y )
-                                           , worldMatrix.mapPoint( mPrevEdgePoint[1].x, mPrevEdgePoint[1].y ) );
+            iBLContext->reset_transform();
+            iBLContext->set_stroke_width( 2.0f );  // 1.0 is not enough due to antialiasing
+            iBLContext->stroke_line( BLPoint( vertexWorldCoords.x, vertexWorldCoords.y )
+                                           , worldMatrix.map_point( mNextEdgePoint[0].x, mNextEdgePoint[0].y ) );
+            iBLContext->stroke_line( BLPoint( vertexWorldCoords.x, vertexWorldCoords.y )
+                                           , worldMatrix.map_point( mNextEdgePoint[1].x, mNextEdgePoint[1].y ) );
+            iBLContext->stroke_line( BLPoint( vertexWorldCoords.x, vertexWorldCoords.y )
+                                           , worldMatrix.map_point( mPrevEdgePoint[0].x, mPrevEdgePoint[0].y ) );
+            iBLContext->stroke_line( BLPoint( vertexWorldCoords.x, vertexWorldCoords.y )
+                                           , worldMatrix.map_point( mPrevEdgePoint[1].x, mPrevEdgePoint[1].y ) );
             iBLContext->restore();
         }
     }
@@ -591,10 +591,10 @@ FOdysseyVectorJoint::GetBBox( bool iWorld )
     if( iWorld )
     {
         BLMatrix2D& worldMatrix = mVertex->GetOwner()->GetWorldMatrix();
-        BLPoint pt[4] = { worldMatrix.mapPoint( mBBox.x          , mBBox.y           )
-                        , worldMatrix.mapPoint( mBBox.x + mBBox.w, mBBox.y           )
-                        , worldMatrix.mapPoint( mBBox.x + mBBox.w, mBBox.y + mBBox.h )
-                        , worldMatrix.mapPoint( mBBox.x          , mBBox.y + mBBox.h ) };
+        BLPoint pt[4] = { worldMatrix.map_point( mBBox.x          , mBBox.y           )
+                        , worldMatrix.map_point( mBBox.x + mBBox.w, mBBox.y           )
+                        , worldMatrix.map_point( mBBox.x + mBBox.w, mBBox.y + mBBox.h )
+                        , worldMatrix.map_point( mBBox.x          , mBBox.y + mBBox.h ) };
         double xmin = ::ULIS::FMath::Min4( pt[0].x, pt[1].x, pt[2].x, pt[3].x )
              , ymin = ::ULIS::FMath::Min4( pt[0].y, pt[1].y, pt[2].y, pt[3].y )
              , xmax = ::ULIS::FMath::Max4( pt[0].x, pt[1].x, pt[2].x, pt[3].x )

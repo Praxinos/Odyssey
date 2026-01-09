@@ -53,7 +53,7 @@ FInbetweenerGridFFD::MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPath
         for( FInterpolatedPoint& interpolatedPoint : interpolatedPointBuffer )
         {
             FOdysseyVectorPoint* originalPoint = interpolatedPoint.GetOriginalPoint();
-            BLPoint pt = conversionMatrix.mapPoint( originalPoint->GetX()
+            BLPoint pt = conversionMatrix.map_point( originalPoint->GetX()
                                                   , originalPoint->GetY() );
 
             int quadIndex = GetQuadIndex( ::ULIS::FVec2D( pt.x, pt.y ) );

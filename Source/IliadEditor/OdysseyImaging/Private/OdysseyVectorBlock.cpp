@@ -88,7 +88,7 @@ FOdysseyVectorBlock::Render( ::ULIS::FBlock& ioBlock, const ::ULIS::FRectI& iRec
     {
         //Render in a BLImage (also resets the internal invalidation rectangle)
         BLContextCreateInfo createInfo{};
-        createInfo.threadCount = FPlatformMisc::NumberOfCoresIncludingHyperthreads();
+        createInfo.thread_count = FPlatformMisc::NumberOfCoresIncludingHyperthreads();
         mBLContext->begin(*mBLImage, createInfo);
         mEngine.Render( mBLContext.Get(), iRect, mVectorCell.Get(), iDrawingFlags);
         mBLContext->end();
@@ -98,8 +98,8 @@ FOdysseyVectorBlock::Render( ::ULIS::FBlock& ioBlock, const ::ULIS::FRectI& iRec
             TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorBlock::Render::ConvertBlock);
             //Get a ULIS block pointing to the BLImage
             BLImageData imgData;
-            mBLImage->getData(&imgData);
-            ::ULIS::FBlock renderBlock((uint8*)imgData.pixelData, mWidth, mHeight, ULIS::Format_BGRA8);
+            mBLImage->get_data(&imgData);
+            ::ULIS::FBlock renderBlock((uint8*)imgData.pixel_data, mWidth, mHeight, ULIS::Format_BGRA8);
 
             //Unpremultiply the render block
             ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(ULIS::Format_BGRA8);
@@ -126,8 +126,8 @@ FOdysseyVectorBlock::RenderHUD( ::ULIS::FBlock& ioBlock )
             TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorBlock::Render::ConvertHUDBlock);
             //Get a ULIS block pointing to the BLImage
             BLImageData imgData;
-            mHUDBlockData->mBLImage->getData(&imgData);
-            ::ULIS::FBlock renderBlock((uint8*)imgData.pixelData, mWidth, mHeight, ULIS::Format_BGRA8);
+            mHUDBlockData->mBLImage->get_data(&imgData);
+            ::ULIS::FBlock renderBlock((uint8*)imgData.pixel_data, mWidth, mHeight, ULIS::Format_BGRA8);
 
             //Unpremultiply the render block
             ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(ULIS::Format_BGRA8);
@@ -230,7 +230,7 @@ FOdysseyVectorBlock::GetHUDBlock()
     mHUDBlockData->mBLContext = MakeShared<BLContext>();
     // Starts BLContext operations on the BLImage
     BLContextCreateInfo createInfo{};
-    createInfo.threadCount = FPlatformMisc::NumberOfCoresIncludingHyperthreads();
+    createInfo.thread_count = FPlatformMisc::NumberOfCoresIncludingHyperthreads();
     mHUDBlockData->mBLContext.Get()->begin(*mHUDBlockData->mBLImage.Get(), createInfo);
 
     block = MakeShared<::ULIS::FBlock>(mWidth, mHeight, mFormat);

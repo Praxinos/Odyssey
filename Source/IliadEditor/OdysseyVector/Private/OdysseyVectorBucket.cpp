@@ -34,7 +34,7 @@ FOdysseyVectorBucket::FOdysseyVectorBucket( FOdysseyVectorObject* iOwner
     iImportFrom->Copy( this );
 
     // alter position
-    ownerSpaceCoords = conversionMatrix.mapPoint( iImportFrom->GetX(), iImportFrom->GetY() );
+    ownerSpaceCoords = conversionMatrix.map_point( iImportFrom->GetX(), iImportFrom->GetY() );
     Set( ownerSpaceCoords.x, ownerSpaceCoords.y );
 }
 

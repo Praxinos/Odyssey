@@ -54,11 +54,11 @@ FOdysseyVectorHUD::DrawCenteredSquare( BLContext* iBLContext
     BLRect rect( iWorldx - iRadius, iWorldY - iRadius, width, width );
 
     // inner
-    iBLContext->setFillStyle( fgColor );
-    iBLContext->fillRect( rect );
-    iBLContext->setStrokeWidth( 1.0f );
-    iBLContext->setStrokeStyle( bgColor );
-    iBLContext->strokeRect( rect );
+    iBLContext->set_fill_style( fgColor );
+    iBLContext->fill_rect( rect );
+    iBLContext->set_stroke_width( 1.0f );
+    iBLContext->set_stroke_style( bgColor );
+    iBLContext->stroke_rect( rect );
 }
 
 /*
@@ -92,7 +92,7 @@ FOdysseyVectorHUD::GetBucketPosition( FOdysseyVectorBucket* iBucket, bool iWorld
     {
         FOdysseyVectorObject* ownerObject = iBucket->GetOwner();
         BLMatrix2D& worldMatrix = ownerObject->GetWorldMatrix();
-        BLPoint worldPosition = worldMatrix.mapPoint( bucketCoords.x, bucketCoords.y );
+        BLPoint worldPosition = worldMatrix.map_point( bucketCoords.x, bucketCoords.y );
 
         return ::ULIS::FVec2D( worldPosition.x, worldPosition.y );
     }
@@ -112,7 +112,7 @@ FOdysseyVectorHUD::GetBucketRadialHandlePosition( FOdysseyVectorBucket* iBucket,
     {
         FOdysseyVectorObject* ownerObject = iBucket->GetOwner();
         BLMatrix2D& worldMatrix = ownerObject->GetWorldMatrix();
-        BLPoint worldPosition = worldMatrix.mapPoint( radialHandleCoords.x, radialHandleCoords.y );
+        BLPoint worldPosition = worldMatrix.map_point( radialHandleCoords.x, radialHandleCoords.y );
 
         return ::ULIS::FVec2D( worldPosition.x, worldPosition.y );
     }
@@ -130,7 +130,7 @@ FOdysseyVectorHUD::GetBucketRadialPosition( FOdysseyVectorBucket* iBucket, bool 
     {
         FOdysseyVectorObject* ownerObject = iBucket->GetOwner();
         BLMatrix2D& worldMatrix = ownerObject->GetWorldMatrix();
-        BLPoint worldPosition = worldMatrix.mapPoint( radialCoords.x, radialCoords.y );
+        BLPoint worldPosition = worldMatrix.map_point( radialCoords.x, radialCoords.y );
 
         return ::ULIS::FVec2D( worldPosition.x, worldPosition.y );
     }
@@ -149,7 +149,7 @@ FOdysseyVectorHUD::GetBucketHandleVector( FOdysseyVectorBucket* iBucket, bool iW
     {
         FOdysseyVectorObject* ownerObject = iBucket->GetOwner();
         BLMatrix2D& worldMatrix = ownerObject->GetWorldMatrix();
-        BLPoint worldVector = worldMatrix.mapVector( handleVector.x, handleVector.y );
+        BLPoint worldVector = worldMatrix.map_vector( handleVector.x, handleVector.y );
         ::ULIS::FVec2D normalizedVector = ::ULIS::FVec2D( worldVector.x, worldVector.y );
 
         normalizedVector.Normalize();

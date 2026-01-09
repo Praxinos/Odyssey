@@ -6,24 +6,26 @@
 #ifndef BLEND2D_SUPPORT_ARENATREE_P_H_INCLUDED
 #define BLEND2D_SUPPORT_ARENATREE_P_H_INCLUDED
 
-#include "../api-internal_p.h"
-#include "../support/algorithm_p.h"
+#include <blend2d/core/api-internal_p.h>
+#include <blend2d/support/algorithm_p.h>
 
 //! \cond INTERNAL
 //! \addtogroup blend2d_internal
 //! \{
 
+namespace bl {
+
 //! \name Arena Allocated Tree
 //! \{
 
-//! BLArenaTree node (base class).
+//! ArenaTree node (base class).
 //!
 //! The color is stored in a least significant bit of the `left` node.
 //!
 //! \note Always use accessors to access left and right nodes.
-class BLArenaTreeNodeBase {
+class ArenaTreeNodeBase {
 public:
-  BL_NONCOPYABLE(BLArenaTreeNodeBase)
+  BL_NONCOPYABLE(ArenaTreeNodeBase)
 
   //! \name Constants
   //! \{
@@ -36,69 +38,69 @@ public:
   //! \name Members
   //! \{
 
-  uintptr_t _treeNodes[2];
+  uintptr_t _tree_nodes[2];
 
   //! \}
 
-  BL_INLINE BLArenaTreeNodeBase() noexcept
-    : _treeNodes { 0, 0 } {}
+  BL_INLINE ArenaTreeNodeBase() noexcept
+    : _tree_nodes { 0, 0 } {}
 
   //! \name Accessors
   //! \{
 
-  BL_INLINE bool hasChild(size_t i) const noexcept { return _treeNodes[i] > kRedMask; }
-  BL_INLINE bool hasLeft() const noexcept { return _treeNodes[0] > kRedMask; }
-  BL_INLINE bool hasRight() const noexcept { return _treeNodes[1] != 0; }
+  BL_INLINE bool has_child(size_t i) const noexcept { return _tree_nodes[i] > kRedMask; }
+  BL_INLINE bool has_left() const noexcept { return _tree_nodes[0] > kRedMask; }
+  BL_INLINE bool has_right() const noexcept { return _tree_nodes[1] != 0; }
 
-  BL_INLINE BLArenaTreeNodeBase* _getChild(size_t i) const noexcept { return (BLArenaTreeNodeBase*)(_treeNodes[i] & kPtrMask); }
-  BL_INLINE BLArenaTreeNodeBase* _getLeft() const noexcept { return (BLArenaTreeNodeBase*)(_treeNodes[0] & kPtrMask); }
-  BL_INLINE BLArenaTreeNodeBase* _getRight() const noexcept { return (BLArenaTreeNodeBase*)(_treeNodes[1]); }
+  BL_INLINE ArenaTreeNodeBase* _get_child(size_t i) const noexcept { return (ArenaTreeNodeBase*)(_tree_nodes[i] & kPtrMask); }
+  BL_INLINE ArenaTreeNodeBase* _get_left() const noexcept { return (ArenaTreeNodeBase*)(_tree_nodes[0] & kPtrMask); }
+  BL_INLINE ArenaTreeNodeBase* _get_right() const noexcept { return (ArenaTreeNodeBase*)(_tree_nodes[1]); }
 
-  BL_INLINE void _setChild(size_t i, BLArenaTreeNodeBase* node) noexcept { _treeNodes[i] = (_treeNodes[i] & kRedMask) | (uintptr_t)node; }
-  BL_INLINE void _setLeft(BLArenaTreeNodeBase* node) noexcept { _treeNodes[0] = (_treeNodes[0] & kRedMask) | (uintptr_t)node; }
-  BL_INLINE void _setRight(BLArenaTreeNodeBase* node) noexcept { _treeNodes[1] = (uintptr_t)node; }
+  BL_INLINE void _set_child(size_t i, ArenaTreeNodeBase* node) noexcept { _tree_nodes[i] = (_tree_nodes[i] & kRedMask) | (uintptr_t)node; }
+  BL_INLINE void _set_left(ArenaTreeNodeBase* node) noexcept { _tree_nodes[0] = (_tree_nodes[0] & kRedMask) | (uintptr_t)node; }
+  BL_INLINE void _set_right(ArenaTreeNodeBase* node) noexcept { _tree_nodes[1] = (uintptr_t)node; }
 
-  template<typename T = BLArenaTreeNodeBase>
-  BL_INLINE T* child(size_t i) const noexcept { return static_cast<T*>(_getChild(i)); }
-  template<typename T = BLArenaTreeNodeBase>
-  BL_INLINE T* left() const noexcept { return static_cast<T*>(_getLeft()); }
-  template<typename T = BLArenaTreeNodeBase>
-  BL_INLINE T* right() const noexcept { return static_cast<T*>(_getRight()); }
+  template<typename T = ArenaTreeNodeBase>
+  BL_INLINE T* child(size_t i) const noexcept { return static_cast<T*>(_get_child(i)); }
+  template<typename T = ArenaTreeNodeBase>
+  BL_INLINE T* left() const noexcept { return static_cast<T*>(_get_left()); }
+  template<typename T = ArenaTreeNodeBase>
+  BL_INLINE T* right() const noexcept { return static_cast<T*>(_get_right()); }
 
-  BL_INLINE bool isRed() const noexcept { return static_cast<bool>(_treeNodes[0] & kRedMask); }
-  BL_INLINE void _makeRed() noexcept { _treeNodes[0] |= kRedMask; }
-  BL_INLINE void _makeBlack() noexcept { _treeNodes[0] &= kPtrMask; }
+  BL_INLINE bool is_red() const noexcept { return static_cast<bool>(_tree_nodes[0] & kRedMask); }
+  BL_INLINE void _make_red() noexcept { _tree_nodes[0] |= kRedMask; }
+  BL_INLINE void _make_black() noexcept { _tree_nodes[0] &= kPtrMask; }
 
   //! \}
 
   //! Tests whether the node is RED (RED node must be non-null and must have RED flag set).
-  static BL_INLINE bool _isValidRed(BLArenaTreeNodeBase* node) noexcept { return node && node->isRed(); }
+  static BL_INLINE bool _is_valid_red(ArenaTreeNodeBase* node) noexcept { return node && node->is_red(); }
 };
 
-//! BLArenaTree node.
+//! ArenaTree node.
 template<typename NodeT>
-class BLArenaTreeNode : public BLArenaTreeNodeBase {
+class ArenaTreeNode : public ArenaTreeNodeBase {
 public:
-  BL_NONCOPYABLE(BLArenaTreeNode)
+  BL_NONCOPYABLE(ArenaTreeNode)
 
-  BL_INLINE BLArenaTreeNode() noexcept
-    : BLArenaTreeNodeBase() {}
+  BL_INLINE ArenaTreeNode() noexcept
+    : ArenaTreeNodeBase() {}
 
   //! \name Accessors
   //! \{
 
-  BL_INLINE NodeT* child(size_t i) const noexcept { return static_cast<NodeT*>(_getChild(i)); }
-  BL_INLINE NodeT* left() const noexcept { return static_cast<NodeT*>(_getLeft()); }
-  BL_INLINE NodeT* right() const noexcept { return static_cast<NodeT*>(_getRight()); }
+  BL_INLINE NodeT* child(size_t i) const noexcept { return static_cast<NodeT*>(_get_child(i)); }
+  BL_INLINE NodeT* left() const noexcept { return static_cast<NodeT*>(_get_left()); }
+  BL_INLINE NodeT* right() const noexcept { return static_cast<NodeT*>(_get_right()); }
 
   //! \}
 };
 
-//! A red-black tree that uses nodes allocated by `BLArenaAllocator`.
+//! A red-black tree that uses nodes allocated by `ArenaAllocator`.
 template<typename NodeT>
-class BLArenaTree {
+class ArenaTree {
 public:
-  BL_NONCOPYABLE(BLArenaTree)
+  BL_NONCOPYABLE(ArenaTree)
 
   typedef NodeT Node;
   NodeT* _root;
@@ -106,10 +108,10 @@ public:
   //! \name Construction & Destruction
   //! \{
 
-  BL_INLINE BLArenaTree() noexcept
+  BL_INLINE ArenaTree() noexcept
     : _root(nullptr) {}
 
-  BL_INLINE BLArenaTree(BLArenaTree&& other) noexcept
+  BL_INLINE ArenaTree(ArenaTree&& other) noexcept
     : _root(other._root) {}
 
   //! \}
@@ -117,59 +119,59 @@ public:
   //! \name Common Functionality
   //! \{
 
-  BL_INLINE void swap(BLArenaTree& other) noexcept {
-    std::swap(_root, other._root);
+  BL_INLINE void swap(ArenaTree& other) noexcept {
+    BLInternal::swap(_root, other._root);
   }
 
   BL_INLINE void reset() noexcept { _root = nullptr; }
 
   //! \}
 
-  //! \name BLArenaTree Functionality
+  //! \name ArenaTree Functionality
   //! \{
 
   //! Insert a node into the tree.
-  template<typename CompareT = BLAlgorithm::CompareOp<BLAlgorithm::SortOrder::kAscending>>
+  template<typename CompareT = CompareOp<SortOrder::kAscending>>
   void insert(NodeT* node, const CompareT& cmp = CompareT()) noexcept {
     // Node to insert must not contain garbage.
-    BL_ASSERT(!node->hasLeft());
-    BL_ASSERT(!node->hasRight());
-    BL_ASSERT(!node->isRed());
+    BL_ASSERT(!node->has_left());
+    BL_ASSERT(!node->has_right());
+    BL_ASSERT(!node->is_red());
 
     if (!_root) {
       _root = node;
       return;
     }
 
-    BLArenaTreeNodeBase head;          // False root node,
-    head._setRight(_root);           // having root on the right.
+    ArenaTreeNodeBase head;          // False root node,
+    head._set_right(_root);           // having root on the right.
 
-    BLArenaTreeNodeBase* g = nullptr;  // Grandparent.
-    BLArenaTreeNodeBase* p = nullptr;  // Parent.
-    BLArenaTreeNodeBase* t = &head;    // Iterator.
-    BLArenaTreeNodeBase* q = _root;    // Query.
+    ArenaTreeNodeBase* g = nullptr;  // Grandparent.
+    ArenaTreeNodeBase* p = nullptr;  // Parent.
+    ArenaTreeNodeBase* t = &head;    // Iterator.
+    ArenaTreeNodeBase* q = _root;    // Query.
 
     size_t dir = 0;                  // Direction for accessing child nodes.
     size_t last = 0;                 // Not needed to initialize, but makes some tools happy.
-    node->_makeRed();                // New nodes are always red and violations fixed appropriately.
+    node->_make_red();                // New nodes are always red and violations fixed appropriately.
 
     // Search down the tree.
     for (;;) {
       if (!q) {
         // Insert new node at the bottom.
         q = node;
-        p->_setChild(dir, node);
+        p->_set_child(dir, node);
       }
-      else if (_isValidRed(q->_getLeft()) && _isValidRed(q->_getRight())) {
+      else if (_is_valid_red(q->_get_left()) && _is_valid_red(q->_get_right())) {
         // Color flip.
-        q->_makeRed();
-        q->_getLeft()->_makeBlack();
-        q->_getRight()->_makeBlack();
+        q->_make_red();
+        q->_get_left()->_make_black();
+        q->_get_right()->_make_black();
       }
 
       // Fix red violation.
-      if (_isValidRed(q) && _isValidRed(p))
-        t->_setChild(t->_getRight() == g, q == p->_getChild(last) ? _singleRotate(g, !last) : _doubleRotate(g, !last));
+      if (_is_valid_red(q) && _is_valid_red(p))
+        t->_set_child(t->_get_right() == g, q == p->_get_child(last) ? _single_rotate(g, !last) : _double_rotate(g, !last));
 
       // Stop if found.
       if (q == node)
@@ -183,36 +185,36 @@ public:
 
       g = p;
       p = q;
-      q = q->_getChild(dir);
+      q = q->_get_child(dir);
     }
 
     // Update root and make it black.
-    _root = static_cast<NodeT*>(head._getRight());
-    _root->_makeBlack();
+    _root = static_cast<NodeT*>(head._get_right());
+    _root->_make_black();
   }
 
   //! Remove a node from the tree.
-  template<typename CompareT = BLAlgorithm::CompareOp<BLAlgorithm::SortOrder::kAscending>>
-  void remove(BLArenaTreeNodeBase* node, const CompareT& cmp = CompareT()) noexcept {
-    BLArenaTreeNodeBase head;          // False root node,
-    head._setRight(_root);           // having root on the right.
+  template<typename CompareT = CompareOp<SortOrder::kAscending>>
+  void remove(ArenaTreeNodeBase* node, const CompareT& cmp = CompareT()) noexcept {
+    ArenaTreeNodeBase head;          // False root node,
+    head._set_right(_root);           // having root on the right.
 
-    BLArenaTreeNodeBase* g = nullptr;  // Grandparent.
-    BLArenaTreeNodeBase* p = nullptr;  // Parent.
-    BLArenaTreeNodeBase* q = &head;    // Query.
+    ArenaTreeNodeBase* g = nullptr;  // Grandparent.
+    ArenaTreeNodeBase* p = nullptr;  // Parent.
+    ArenaTreeNodeBase* q = &head;    // Query.
 
-    BLArenaTreeNodeBase* f  = nullptr; // Found item.
-    BLArenaTreeNodeBase* gf = nullptr; // Found grandparent.
+    ArenaTreeNodeBase* f  = nullptr; // Found item.
+    ArenaTreeNodeBase* gf = nullptr; // Found grandparent.
     size_t dir = 1;                  // Direction (0 or 1).
 
     // Search and push a red down.
-    while (q->hasChild(dir)) {
+    while (q->has_child(dir)) {
       size_t last = dir;
 
       // Update helpers.
       g = p;
       p = q;
-      q = q->_getChild(dir);
+      q = q->_get_child(dir);
       dir = cmp(*static_cast<NodeT*>(q), *static_cast<NodeT*>(node)) < 0;
 
       // Save found node.
@@ -222,38 +224,38 @@ public:
       }
 
       // Push the red node down.
-      if (!_isValidRed(q) && !_isValidRed(q->_getChild(dir))) {
-        if (_isValidRed(q->_getChild(!dir))) {
-          BLArenaTreeNodeBase* child = _singleRotate(q, dir);
-          p->_setChild(last, child);
+      if (!_is_valid_red(q) && !_is_valid_red(q->_get_child(dir))) {
+        if (_is_valid_red(q->_get_child(!dir))) {
+          ArenaTreeNodeBase* child = _single_rotate(q, dir);
+          p->_set_child(last, child);
           p = child;
         }
-        else if (!_isValidRed(q->_getChild(!dir)) && p->_getChild(!last)) {
-          BLArenaTreeNodeBase* s = p->_getChild(!last);
-          if (!_isValidRed(s->_getChild(!last)) && !_isValidRed(s->_getChild(last))) {
+        else if (!_is_valid_red(q->_get_child(!dir)) && p->_get_child(!last)) {
+          ArenaTreeNodeBase* s = p->_get_child(!last);
+          if (!_is_valid_red(s->_get_child(!last)) && !_is_valid_red(s->_get_child(last))) {
             // Color flip.
-            p->_makeBlack();
-            s->_makeRed();
-            q->_makeRed();
+            p->_make_black();
+            s->_make_red();
+            q->_make_red();
           }
           else {
-            size_t dir2 = g->_getRight() == p;
-            BLArenaTreeNodeBase* child = g->_getChild(dir2);
+            size_t dir2 = g->_get_right() == p;
+            ArenaTreeNodeBase* child = g->_get_child(dir2);
 
-            if (_isValidRed(s->_getChild(last))) {
-              child = _doubleRotate(p, last);
-              g->_setChild(dir2, child);
+            if (_is_valid_red(s->_get_child(last))) {
+              child = _double_rotate(p, last);
+              g->_set_child(dir2, child);
             }
-            else if (_isValidRed(s->_getChild(!last))) {
-              child = _singleRotate(p, last);
-              g->_setChild(dir2, child);
+            else if (_is_valid_red(s->_get_child(!last))) {
+              child = _single_rotate(p, last);
+              g->_set_child(dir2, child);
             }
 
             // Ensure correct coloring.
-            q->_makeRed();
-            child->_makeRed();
-            child->_getLeft()->_makeBlack();
-            child->_getRight()->_makeBlack();
+            q->_make_red();
+            child->_make_red();
+            child->_get_left()->_make_black();
+            child->_get_right()->_make_black();
           }
         }
       }
@@ -264,7 +266,7 @@ public:
     BL_ASSERT(f != &head);
     BL_ASSERT(q != &head);
 
-    p->_setChild(p->_getRight() == q, q->_getChild(q->_getLeft() == nullptr));
+    p->_set_child(p->_get_right() == q, q->_get_child(q->_get_left() == nullptr));
 
     // NOTE: The original algorithm used a trick to just copy 'key/value' to `f` and mark `q` for deletion. But
     // this is unacceptable here as we really want to destroy the passed `node`. So, we have to make sure that
@@ -273,19 +275,19 @@ public:
       BL_ASSERT(f != &head);
       BL_ASSERT(f != gf);
 
-      BLArenaTreeNodeBase* n = gf ? gf : &head;
+      ArenaTreeNodeBase* n = gf ? gf : &head;
       dir = (n == &head) ? 1  : cmp(*static_cast<NodeT*>(n), *static_cast<NodeT*>(node)) < 0;
 
       for (;;) {
-        if (n->_getChild(dir) == f) {
-          n->_setChild(dir, q);
+        if (n->_get_child(dir) == f) {
+          n->_set_child(dir, q);
           // RAW copy, including the color.
-          q->_treeNodes[0] = f->_treeNodes[0];
-          q->_treeNodes[1] = f->_treeNodes[1];
+          q->_tree_nodes[0] = f->_tree_nodes[0];
+          q->_tree_nodes[1] = f->_tree_nodes[1];
           break;
         }
 
-        n = n->_getChild(dir);
+        n = n->_get_child(dir);
 
         // Cannot be true as we know that it must reach `f` in few iterations.
         BL_ASSERT(n != nullptr);
@@ -294,19 +296,19 @@ public:
     }
 
     // Update root and make it black.
-    _root = static_cast<NodeT*>(head._getRight());
-    if (_root) _root->_makeBlack();
+    _root = static_cast<NodeT*>(head._get_right());
+    if (_root) _root->_make_black();
   }
 
-  template<typename KeyT, typename CompareT = BLAlgorithm::CompareOp<BLAlgorithm::SortOrder::kAscending>>
+  template<typename KeyT, typename CompareT = CompareOp<SortOrder::kAscending>>
   BL_INLINE NodeT* get(const KeyT& key, const CompareT& cmp = CompareT()) const noexcept {
-    BLArenaTreeNodeBase* node = _root;
+    ArenaTreeNodeBase* node = _root;
     while (node) {
       auto result = cmp(*static_cast<const NodeT*>(node), key);
       if (result == 0) break;
 
       // Go left or right depending on the `result`.
-      node = node->_getChild(result < 0);
+      node = node->_get_child(result < 0);
     }
     return static_cast<NodeT*>(node);
   }
@@ -316,7 +318,7 @@ public:
   //! \name Accessors
   //! \{
 
-  BL_INLINE bool empty() const noexcept { return _root == nullptr; }
+  BL_INLINE bool is_empty() const noexcept { return _root == nullptr; }
   BL_INLINE NodeT* root() const noexcept { return static_cast<NodeT*>(_root); }
 
   //! \}
@@ -324,28 +326,30 @@ public:
   //! \name Internals
   //! \{
 
-  static BL_INLINE bool _isValidRed(BLArenaTreeNodeBase* node) noexcept { return BLArenaTreeNodeBase::_isValidRed(node); }
+  static BL_INLINE bool _is_valid_red(ArenaTreeNodeBase* node) noexcept { return ArenaTreeNodeBase::_is_valid_red(node); }
 
   //! Single rotation.
-  static BL_INLINE BLArenaTreeNodeBase* _singleRotate(BLArenaTreeNodeBase* root, size_t dir) noexcept {
-    BLArenaTreeNodeBase* save = root->_getChild(!dir);
-    root->_setChild(!dir, save->_getChild(dir));
-    save->_setChild( dir, root);
-    root->_makeRed();
-    save->_makeBlack();
+  static BL_INLINE ArenaTreeNodeBase* _single_rotate(ArenaTreeNodeBase* root, size_t dir) noexcept {
+    ArenaTreeNodeBase* save = root->_get_child(!dir);
+    root->_set_child(!dir, save->_get_child(dir));
+    save->_set_child( dir, root);
+    root->_make_red();
+    save->_make_black();
     return save;
   }
 
   //! Double rotation.
-  static BL_INLINE BLArenaTreeNodeBase* _doubleRotate(BLArenaTreeNodeBase* root, size_t dir) noexcept {
-    root->_setChild(!dir, _singleRotate(root->_getChild(!dir), !dir));
-    return _singleRotate(root, dir);
+  static BL_INLINE ArenaTreeNodeBase* _double_rotate(ArenaTreeNodeBase* root, size_t dir) noexcept {
+    root->_set_child(!dir, _single_rotate(root->_get_child(!dir), !dir));
+    return _single_rotate(root, dir);
   }
 
   //! \}
 };
 
 //! \}
+
+} // {bl}
 
 //! \}
 //! \endcond

@@ -48,7 +48,7 @@ FOdysseyVectorSegmentCubicGap::Update( uint32 iUpdateFlags )
                                   , vertex0PathWorldMatrix
                                   , conversionMatrix );
 
-    pt = conversionMatrix.mapPoint( mBezier[0].x, mBezier[0].y );
+    pt = conversionMatrix.map_point( mBezier[0].x, mBezier[0].y );
 
     mBezier[0].x = pt.x;
     mBezier[0].y = pt.y;
@@ -60,7 +60,7 @@ FOdysseyVectorSegmentCubicGap::Update( uint32 iUpdateFlags )
                                   , vertex1PathWorldMatrix
                                   , conversionMatrix );
 
-    pt = conversionMatrix.mapPoint( mBezier[3].x, mBezier[3].y );
+    pt = conversionMatrix.map_point( mBezier[3].x, mBezier[3].y );
 
     mBezier[2].x = pt.x;
     mBezier[2].y = pt.y;

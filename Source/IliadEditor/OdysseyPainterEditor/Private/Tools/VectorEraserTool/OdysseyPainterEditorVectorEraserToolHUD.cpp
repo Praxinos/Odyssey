@@ -99,7 +99,7 @@ FOdysseyPainterEditorVectorEraserToolHUD::Draw( BLContext* iBLContext )
 
     if( mBlending == true )
     {
-        iBLContext->blitImage( BLPoint( 0, 0 ), mBLEraserMask );
+        iBLContext->blit_image( BLPoint( 0, 0 ), mBLEraserMask );
     }
 }
 
@@ -107,18 +107,18 @@ void
 FOdysseyPainterEditorVectorEraserToolHUD::FillCircle( double iX
                                                     , double iY )
 {
-    mBLEraserContext.setFillAlpha( 1.0f );
-    mBLEraserContext.fillCircle( iX, iY, mEraserTool->Radius );
+    mBLEraserContext.set_fill_alpha( 1.0f );
+    mBLEraserContext.fill_circle( iX, iY, mEraserTool->Radius );
 }
 
 void
 FOdysseyPainterEditorVectorEraserToolHUD::StrokeLine( const ::ULIS::FVec2D& iP0
                                                     , const ::ULIS::FVec2D& iP1 )
 {
-    mBLEraserContext.setFillAlpha( 1.0f );
-    mBLEraserContext.setStrokeWidth( mEraserTool->Radius * 2 );
-    mBLEraserContext.strokeLine( iP0.x, iP0.y, iP1.x, iP1.y );
-    mBLEraserContext.fillCircle( iP1.x, iP1.y, mEraserTool->Radius );
+    mBLEraserContext.set_fill_alpha( 1.0f );
+    mBLEraserContext.set_stroke_width( mEraserTool->Radius * 2 );
+    mBLEraserContext.stroke_line( iP0.x, iP0.y, iP1.x, iP1.y );
+    mBLEraserContext.fill_circle( iP1.x, iP1.y, mEraserTool->Radius );
 }
 
 void
@@ -139,9 +139,9 @@ FOdysseyPainterEditorVectorEraserToolHUD::ClearMask()
 {
     mBLEraserContext.save();
 
-    mBLEraserContext.setCompOp( BL_COMP_OP_SRC_COPY );
-    mBLEraserContext.setFillAlpha( 0.0f );
-    mBLEraserContext.clearAll();
+    mBLEraserContext.set_comp_op( BL_COMP_OP_SRC_COPY );
+    mBLEraserContext.set_fill_alpha( 0.0f );
+    mBLEraserContext.clear_all();
     mBLEraserContext.flush( BL_CONTEXT_FLUSH_SYNC );
 
     mBLEraserContext.restore();

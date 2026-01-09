@@ -347,8 +347,8 @@ FInbetweenerTrajectory::FitBezier( const std::vector<::ULIS::FVec2D> &iPointBuff
         if( handleLength[0] ) handleVector[0].Normalize();
         if( handleLength[1] ) handleVector[1].Normalize();
 
-        BLPoint vec0 = sourceLocalInverseMatrix.mapVector( handleVector[0].x, handleVector[0].y );
-        BLPoint vec1 = targetLocalInverseMatrix.mapVector( handleVector[1].x, handleVector[1].y );
+        BLPoint vec0 = sourceLocalInverseMatrix.map_vector( handleVector[0].x, handleVector[0].y );
+        BLPoint vec1 = targetLocalInverseMatrix.map_vector( handleVector[1].x, handleVector[1].y );
 
         mHandle[0].Set( ::ULIS::FVec2D( vec0.x, vec0.y ), handleRatio[0] );
         mHandle[1].Set( ::ULIS::FVec2D( vec1.x, vec1.y ), handleRatio[1] );
@@ -423,8 +423,8 @@ FInbetweenerTrajectory::FitBezier( const std::vector<::ULIS::FVec2D> &data
     if( handleLength[0] ) handleVector[0].Normalize();
     if( handleLength[1] ) handleVector[1].Normalize();
 
-    BLPoint vec0 = sourceLocalInverseMatrix.mapVector( handleVector[0].x, handleVector[0].y );
-    BLPoint vec1 = targetLocalInverseMatrix.mapVector( handleVector[1].x, handleVector[1].y );
+    BLPoint vec0 = sourceLocalInverseMatrix.map_vector( handleVector[0].x, handleVector[0].y );
+    BLPoint vec1 = targetLocalInverseMatrix.map_vector( handleVector[1].x, handleVector[1].y );
 
     mHandle[0].Set( ::ULIS::FVec2D( vec0.x, vec0.y ), handleRatio[0] );
     mHandle[1].Set( ::ULIS::FVec2D( vec1.x, vec1.y ), handleRatio[1] );

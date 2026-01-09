@@ -3,57 +3,34 @@
 // See blend2d.h or LICENSE.md for license and copyright information
 // SPDX-License-Identifier: Zlib
 
-#include "../api-build_p.h"
-#include "../runtime_p.h"
-#include "../pixelops/funcs_p.h"
+#include <blend2d/core/api-build_p.h>
+#include <blend2d/core/runtime_p.h>
+#include <blend2d/pixelops/funcs_p.h>
 
-namespace BLPixelOps {
+namespace bl::PixelOps { Funcs funcs; }
 
-// BLPixelOps - Globals
-// ====================
+// bl::PixelOps - Runtime Registration
+// ===================================
 
-Funcs funcs;
-
-// BLPixelOps - Interpolation Functions
-// ====================================
-
-namespace Interpolation {
-
-BL_HIDDEN void BL_CDECL interpolate_prgb32(uint32_t* dPtr, uint32_t dSize, const BLGradientStop* sPtr, size_t sSize) noexcept;
-
-#ifdef BL_BUILD_OPT_SSE2
-BL_HIDDEN void BL_CDECL interpolate_prgb32_sse2(uint32_t* dPtr, uint32_t dSize, const BLGradientStop* sPtr, size_t sSize) noexcept;
-#endif
-
-#ifdef BL_BUILD_OPT_AVX2
-BL_HIDDEN void BL_CDECL interpolate_prgb32_avx2(uint32_t* dPtr, uint32_t dWidth, const BLGradientStop* sPtr, size_t sSize) noexcept;
-#endif
-
-} // {Interpolation}
-
-} // {BLPixelOps}
-
-// BLPixelOps - Runtime Registration
-// =================================
-
-void blPixelOpsRtInit(BLRuntimeContext* rt) noexcept {
+void bl_pixel_ops_rt_init(BLRuntimeContext* rt) noexcept {
   // Maybe unused, if no architecture dependent optimizations are available.
-  blUnused(rt);
+  bl_unused(rt);
 
-  BLPixelOps::Funcs& funcs = BLPixelOps::funcs;
+  bl::PixelOps::Funcs& funcs = bl::PixelOps::funcs;
 
   // Initialize gradient ops.
-  funcs.interpolate_prgb32 = BLPixelOps::Interpolation::interpolate_prgb32;
+  funcs.interpolate_prgb32 = bl::PixelOps::Interpolation::interpolate_prgb32;
+  funcs.interpolate_prgb64 = bl::PixelOps::Interpolation::interpolate_prgb64;
 
 #ifdef BL_BUILD_OPT_SSE2
-  if (blRuntimeHasSSE2(rt)) {
-    funcs.interpolate_prgb32 = BLPixelOps::Interpolation::interpolate_prgb32_sse2;
+  if (bl_runtime_has_sse2(rt)) {
+    funcs.interpolate_prgb32 = bl::PixelOps::Interpolation::interpolate_prgb32_sse2;
   }
 #endif
 
 #ifdef BL_BUILD_OPT_AVX2
-  if (blRuntimeHasAVX2(rt)) {
-    funcs.interpolate_prgb32 = BLPixelOps::Interpolation::interpolate_prgb32_avx2;
+  if (bl_runtime_has_avx2(rt)) {
+    funcs.interpolate_prgb32 = bl::PixelOps::Interpolation::interpolate_prgb32_avx2;
   }
 #endif
 }

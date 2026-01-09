@@ -137,19 +137,19 @@ FOdysseyPainterEditorVectorSelectionToolHUD::DrawSelectionSpace( BLContext* iBLC
 
         //iScene->GetEngine()->UseImage( mSelectionMask );
 
-        mBLSelectionContext.setCompOp( BL_COMP_OP_SRC_COPY );
+        mBLSelectionContext.set_comp_op( BL_COMP_OP_SRC_COPY );
 
-        mBLSelectionContext.clearAll();
-        mBLSelectionContext.setFillStyle( BLRgba32( 0x80FFFFFF ) );
-        mBLSelectionContext.fillRect( 0, 0, mBLSelectionMask.width(), mBLSelectionMask.height() );
+        mBLSelectionContext.clear_all();
+        mBLSelectionContext.set_fill_style( BLRgba32( 0x80FFFFFF ) );
+        mBLSelectionContext.fill_rect( 0, 0, mBLSelectionMask.width(), mBLSelectionMask.height() );
 
-        mBLSelectionContext.setMatrix( worldMatrix );
-        mBLSelectionContext.setFillStyle( BLRgba32( 0x00000000/*0x800000FF*/ ) );
-        mBLSelectionContext.fillRect( selectionSpaceBBox.x, selectionSpaceBBox.y, selectionSpaceBBox.w, selectionSpaceBBox.h );
+        mBLSelectionContext.set_transform( worldMatrix );
+        mBLSelectionContext.set_fill_style( BLRgba32( 0x00000000/*0x800000FF*/ ) );
+        mBLSelectionContext.fill_rect( selectionSpaceBBox.x, selectionSpaceBBox.y, selectionSpaceBBox.w, selectionSpaceBBox.h );
 
         //iScene->GetEngine()->UseImage( currentImage );
         // blit with current renderer
-        iBLContext->blitImage( topLeft, mBLSelectionMask );
+        iBLContext->blit_image( topLeft, mBLSelectionMask );
     }
 
     mBLSelectionContext.restore();
@@ -230,9 +230,9 @@ FOdysseyPainterEditorVectorSelectionToolHUD::ClearMask()
 {
     mBLSelectionContext.save();
 
-    mBLSelectionContext.setCompOp( BL_COMP_OP_SRC_COPY );
-    mBLSelectionContext.setFillAlpha( 0.0f );
-    mBLSelectionContext.clearAll();
+    mBLSelectionContext.set_comp_op( BL_COMP_OP_SRC_COPY );
+    mBLSelectionContext.set_fill_alpha( 0.0f );
+    mBLSelectionContext.clear_all();
     mBLSelectionContext.flush( BL_CONTEXT_FLUSH_SYNC );
 
     mBLSelectionContext.restore();
@@ -283,9 +283,9 @@ FOdysseyPainterEditorVectorSelectionToolHUD::GenerateCircleMask( double iTexX
 
     mBLSelectionContext.save();
 
-    mBLSelectionContext.setCompOp( BL_COMP_OP_SRC_COPY );
-    mBLSelectionContext.setFillAlpha( 1.0f );
-    mBLSelectionContext.fillCircle( hudCoords.X, hudCoords.Y, iRadius );
+    mBLSelectionContext.set_comp_op( BL_COMP_OP_SRC_COPY );
+    mBLSelectionContext.set_fill_alpha( 1.0f );
+    mBLSelectionContext.fill_circle( hudCoords.X, hudCoords.Y, iRadius );
     mBLSelectionContext.flush( BL_CONTEXT_FLUSH_SYNC );
 
     mBLSelectionContext.restore();
@@ -312,11 +312,11 @@ FOdysseyPainterEditorVectorSelectionToolHUD::GenerateRectangleMask( const std::v
 
     mBLSelectionContext.save();
 
-    mBLSelectionContext.setCompOp( BL_COMP_OP_SRC_COPY );
-    mBLSelectionContext.setFillAlpha( 0.0f );
-    mBLSelectionContext.clearAll();
-    mBLSelectionContext.setFillAlpha( 1.0f );
-    mBLSelectionContext.fillRect( BLRect( xmin, ymin, xmax - xmin, ymax - ymin ) );
+    mBLSelectionContext.set_comp_op( BL_COMP_OP_SRC_COPY );
+    mBLSelectionContext.set_fill_alpha( 0.0f );
+    mBLSelectionContext.clear_all();
+    mBLSelectionContext.set_fill_alpha( 1.0f );
+    mBLSelectionContext.fill_rect( BLRect( xmin, ymin, xmax - xmin, ymax - ymin ) );
     mBLSelectionContext.flush( BL_CONTEXT_FLUSH_SYNC );
 
     mBLSelectionContext.restore();
@@ -332,10 +332,10 @@ FOdysseyPainterEditorVectorSelectionToolHUD::GenerateFreehandMask( const std::ve
 
     mBLSelectionContext.save();
 
-    mBLSelectionContext.setCompOp(BL_COMP_OP_SRC_COPY);
-    /*blctx.setFillStyle( BLRgba32(0x00000000) );*/
-    mBLSelectionContext.setFillAlpha(0.0f);
-    mBLSelectionContext.clearAll();
+    mBLSelectionContext.set_comp_op(BL_COMP_OP_SRC_COPY);
+    /*blctx.set_fill_style( BLRgba32(0x00000000) );*/
+    mBLSelectionContext.set_fill_alpha(0.0f);
+    mBLSelectionContext.clear_all();
 
     if( iTexPointArray.size() )
     {
@@ -345,14 +345,14 @@ FOdysseyPainterEditorVectorSelectionToolHUD::GenerateFreehandMask( const std::ve
         double x1 = hudCoords.X, y1 = hudCoords.Y
              , x2 = hudCoords.X, y2 = hudCoords.Y;
 
-        path.moveTo( hudCoords.X, hudCoords.Y );
+        path.move_to( hudCoords.X, hudCoords.Y );
 
         for( uint32 i = 1; i < iTexPointArray.size(); i++ )
         {
             hudCoords = mCurrentHUDParams.mTextureToHUD.Execute( FVector2D( iTexPointArray[i].x
                                                                           , iTexPointArray[i].y ) );
 
-            path.lineTo( hudCoords.X, hudCoords.Y );
+            path.line_to( hudCoords.X, hudCoords.Y );
 
             if( hudCoords.X < x1 )
             {
@@ -375,12 +375,12 @@ FOdysseyPainterEditorVectorSelectionToolHUD::GenerateFreehandMask( const std::ve
             }
         }
 
-        path.lineTo( hudCoords.X, hudCoords.Y );
+        path.line_to( hudCoords.X, hudCoords.Y );
 
         rect = ::ULIS::FRectD::FromMinMax( x1, y1, x2, y2 );
 
-        mBLSelectionContext.setFillAlpha(1.0f);
-        mBLSelectionContext.fillPath( path );
+        mBLSelectionContext.set_fill_alpha(1.0f);
+        mBLSelectionContext.fill_path( path );
     }
 
     mBLSelectionContext.flush(BL_CONTEXT_FLUSH_SYNC);

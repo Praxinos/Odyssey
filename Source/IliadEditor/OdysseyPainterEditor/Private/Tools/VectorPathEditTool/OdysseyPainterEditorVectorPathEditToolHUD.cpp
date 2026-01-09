@@ -71,9 +71,9 @@ FOdysseyPainterEditorVectorPathEditToolHUD::ClearMask()
 {
     mBLSelectionContext.save();
 
-    mBLSelectionContext.setCompOp( BL_COMP_OP_SRC_COPY );
-    mBLSelectionContext.setFillAlpha( 0.0f );
-    mBLSelectionContext.clearAll();
+    mBLSelectionContext.set_comp_op( BL_COMP_OP_SRC_COPY );
+    mBLSelectionContext.set_fill_alpha( 0.0f );
+    mBLSelectionContext.clear_all();
     mBLSelectionContext.flush( BL_CONTEXT_FLUSH_SYNC );
 
     mBLSelectionContext.restore();
@@ -90,9 +90,9 @@ FOdysseyPainterEditorVectorPathEditToolHUD::GenerateMask( double iTexX
 
     mBLSelectionContext.save();
 
-    mBLSelectionContext.setCompOp( BL_COMP_OP_SRC_COPY );
-    mBLSelectionContext.setFillAlpha( 1.0f );
-    mBLSelectionContext.fillCircle( hudCoords.X, hudCoords.Y, iRadius );
+    mBLSelectionContext.set_comp_op( BL_COMP_OP_SRC_COPY );
+    mBLSelectionContext.set_fill_alpha( 1.0f );
+    mBLSelectionContext.fill_circle( hudCoords.X, hudCoords.Y, iRadius );
     mBLSelectionContext.flush( BL_CONTEXT_FLUSH_SYNC );
 
     mBLSelectionContext.restore();

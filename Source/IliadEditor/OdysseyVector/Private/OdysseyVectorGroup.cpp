@@ -34,7 +34,7 @@ FOdysseyVectorGroup::PickShape( const ::ULIS::FRectD &iRoi, uint32 iSelectionFla
 {
     if( iSelectionFlags & PICK_MATH_BASED )
     {
-        BLPoint pt = mInverseWorldMatrix.mapPoint( iRoi.x, iRoi.y );
+        BLPoint pt = mInverseWorldMatrix.map_point( iRoi.x, iRoi.y );
 
         if( mBBox.HitTest( ::ULIS::FVec2D( pt.x, pt.y ) ) )
         {

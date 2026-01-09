@@ -281,10 +281,10 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorVertexMode( FOdysseyVec
     std::vector<FOdysseyVectorBucket*> pickedBucketArray;
     BLPath selectionPath;
 
-    selectionPath.moveTo( mPointArray[0].x, mPointArray[0].y );
+    selectionPath.move_to( mPointArray[0].x, mPointArray[0].y );
     for( uint32 i = 1; i < mPointArray.size(); i++ )
     {
-        selectionPath.lineTo( mPointArray[i].x, mPointArray[i].y );
+        selectionPath.line_to( mPointArray[i].x, mPointArray[i].y );
     }
     selectionPath.close();
 

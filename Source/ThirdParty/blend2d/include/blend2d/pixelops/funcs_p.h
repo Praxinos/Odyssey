@@ -6,21 +6,37 @@
 #ifndef BLEND2D_PIXELOPS_FUNCS_P_H_INCLUDED
 #define BLEND2D_PIXELOPS_FUNCS_P_H_INCLUDED
 
-#include "../api-internal_p.h"
+#include <blend2d/core/api-internal_p.h>
 
 //! \cond INTERNAL
 //! \addtogroup blend2d_internal
 //! \{
 
-namespace BLPixelOps {
+namespace bl::PixelOps {
 
 struct Funcs {
-  void (BL_CDECL* interpolate_prgb32)(uint32_t* dst, uint32_t dstSize, const BLGradientStop* stops, size_t stopCount) BL_NOEXCEPT;
+  void (BL_CDECL* interpolate_prgb32)(uint32_t* dst, uint32_t dst_size, const BLGradientStop* stops, size_t stop_count) noexcept;
+  void (BL_CDECL* interpolate_prgb64)(uint64_t* dst, uint32_t dst_size, const BLGradientStop* stops, size_t stop_count) noexcept;
 };
 
 extern Funcs funcs;
 
-} // {BLPixelOps}
+namespace Interpolation {
+
+BL_HIDDEN void BL_CDECL interpolate_prgb32(uint32_t* d_ptr, uint32_t d_size, const BLGradientStop* s_ptr, size_t s_size) noexcept;
+BL_HIDDEN void BL_CDECL interpolate_prgb64(uint64_t* d_ptr, uint32_t d_size, const BLGradientStop* s_ptr, size_t s_size) noexcept;
+
+#ifdef BL_BUILD_OPT_SSE2
+BL_HIDDEN void BL_CDECL interpolate_prgb32_sse2(uint32_t* d_ptr, uint32_t d_size, const BLGradientStop* s_ptr, size_t s_size) noexcept;
+#endif
+
+#ifdef BL_BUILD_OPT_AVX2
+BL_HIDDEN void BL_CDECL interpolate_prgb32_avx2(uint32_t* d_ptr, uint32_t d_width, const BLGradientStop* s_ptr, size_t s_size) noexcept;
+#endif
+
+} // {Interpolation}
+
+} // {bl::PixelOps}
 
 //! \}
 //! \endcond

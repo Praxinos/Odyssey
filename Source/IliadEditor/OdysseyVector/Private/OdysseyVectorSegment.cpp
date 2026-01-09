@@ -86,13 +86,13 @@ void
 FOdysseyVectorSegment::DrawFractionCache( BLContext* iBLContext
                                         , FOdysseyVectorEngine* iVectorEngine )
 {
-    const BLMatrix2D worldMatrix = iBLContext->userMatrix();
+    const BLMatrix2D worldMatrix = iBLContext->user_transform();
     std::vector<BLPoint>& pointPool = iVectorEngine->GetBLPointPool( ( mFractionCache.size() * 2 ) + 2 );
     uint32 j = 0;
 
-    iBLContext->setStrokeWidth( 1.0f );
+    iBLContext->set_stroke_width( 1.0f );
     // for filled overlaps
-    iBLContext->setFillRule( BL_FILL_RULE_NON_ZERO );
+    iBLContext->set_fill_rule( BL_FILL_RULE_NON_ZERO );
 
     for ( std::vector<FOdysseyVectorFraction>::iterator it = mFractionCache.begin(); it != mFractionCache.end(); ++it, j++ )
     {
@@ -118,7 +118,7 @@ FOdysseyVectorSegment::DrawFractionCache( BLContext* iBLContext
     pointPool.back().x = mFractionCache.front().polygon.point[5].x;
     pointPool.back().y = mFractionCache.front().polygon.point[5].y;
 
-    iBLContext->fillPolygon( &pointPool[0], pointPool.size() );
+    iBLContext->fill_polygon( &pointPool[0], pointPool.size() );
 
 #ifdef UNUSED
     for ( int i = 0; i < mFractionCache.size(); i++ )
@@ -146,18 +146,18 @@ FOdysseyVectorSegment::DrawFractionCache( BLContext* iBLContext
     // line stroking is done in world coordinates because we need a 1-3 pixel width
 
     iBLContext->save();
-    iBLContext->resetMatrix();
-    iBLContext->setStrokeWidth( 3.0f ); // 1 pixel is not enough due to antialiasing. Lets go with 3
+    iBLContext->reset_transform();
+    iBLContext->set_stroke_width( 3.0f ); // 1 pixel is not enough due to antialiasing. Lets go with 3
 
     for ( int i = 1; i < mFractionCache.size(); i++ )
     {
         BLPath thinLine;
 
-        thinLine.moveTo( worldMatrix.mapPoint( mFractionCache[i].polygon.point[5].x, mFractionCache[i].polygon.point[5].y ) );
-        thinLine.lineTo( worldMatrix.mapPoint( mFractionCache[i].polygon.point[0].x, mFractionCache[i].polygon.point[0].y ) );
-        thinLine.lineTo( worldMatrix.mapPoint( mFractionCache[i].polygon.point[1].x, mFractionCache[i].polygon.point[1].y ) );
+        thinLine.move_to( worldMatrix.map_point( mFractionCache[i].polygon.point[5].x, mFractionCache[i].polygon.point[5].y ) );
+        thinLine.line_to( worldMatrix.map_point( mFractionCache[i].polygon.point[0].x, mFractionCache[i].polygon.point[0].y ) );
+        thinLine.line_to( worldMatrix.map_point( mFractionCache[i].polygon.point[1].x, mFractionCache[i].polygon.point[1].y ) );
 
-        iBLContext->strokePath( thinLine );
+        iBLContext->stroke_path( thinLine );
     }
     iBLContext->restore();
 #endif
@@ -536,10 +536,10 @@ FOdysseyVectorSegment::GetHandleVector( FOdysseyVectorVertex* iVertex, bool iNor
     if( iWorld == true )
     {
         BLMatrix2D& worldMatrix = GetOwner()->GetWorldMatrix();
-        BLPoint p0 = worldMatrix.mapPoint( mBBox.x          , mBBox.y           );
-        BLPoint p1 = worldMatrix.mapPoint( mBBox.x + mBBox.w, mBBox.y           );
-        BLPoint p2 = worldMatrix.mapPoint( mBBox.x + mBBox.w, mBBox.y + mBBox.h );
-        BLPoint p3 = worldMatrix.mapPoint( mBBox.x          , mBBox.y + mBBox.h );
+        BLPoint p0 = worldMatrix.map_point( mBBox.x          , mBBox.y           );
+        BLPoint p1 = worldMatrix.map_point( mBBox.x + mBBox.w, mBBox.y           );
+        BLPoint p2 = worldMatrix.map_point( mBBox.x + mBBox.w, mBBox.y + mBBox.h );
+        BLPoint p3 = worldMatrix.map_point( mBBox.x          , mBBox.y + mBBox.h );
         ::ULIS::FRectD bbox = ::ULIS::FRectD::FromMinMax( ::ULIS::FMath::Min4( p0.x, p1.x, p2.x, p3.x )
                                                         , ::ULIS::FMath::Min4( p0.y, p1.y, p2.y, p3.y )
                                                         , ::ULIS::FMath::Max4( p0.x, p1.x, p2.x, p3.x )

@@ -82,7 +82,7 @@ FOdysseyVectorPathTracer::Flush( FOdysseyVectorVertex* iPreviousVertex
         {
             BLMatrix2D& cubicPathInverseWorldMatrix = mCubicPath->GetInverseWorldMatrix();
             ::ULIS::FVec2D lastPointCoords = mPointBuffer.back().coords;
-            BLPoint localPoint = { cubicPathInverseWorldMatrix.mapPoint( lastPointCoords.x
+            BLPoint localPoint = { cubicPathInverseWorldMatrix.map_point( lastPointCoords.x
                                                                        , lastPointCoords.y ) };
 
             newSegment->GetVertex(1)->Set( localPoint.x, localPoint.y );
@@ -468,9 +468,9 @@ FOdysseyVectorVertex*
 FOdysseyVectorPathTracer::CommitVertex( bool iIsHandleAligned )
 {
     BLMatrix2D& cubicPathInverseWorldMatrix = mCubicPath->GetInverseWorldMatrix();
-    BLPoint localPoint = { cubicPathInverseWorldMatrix.mapPoint( mBestBezier.pt[3].x
+    BLPoint localPoint = { cubicPathInverseWorldMatrix.map_point( mBestBezier.pt[3].x
                                                                , mBestBezier.pt[3].y ) };
-    BLPoint localVector = cubicPathInverseWorldMatrix.mapVector( mBestBezier.lastRecordRadius * 0.7071f
+    BLPoint localVector = cubicPathInverseWorldMatrix.map_vector( mBestBezier.lastRecordRadius * 0.7071f
                                                                , mBestBezier.lastRecordRadius * 0.7071f );
     double localRadius = ::ULIS::FVec2D( localVector.x, localVector.y ).Distance();
     FOdysseyVectorVertex* newVertex = new FOdysseyVectorVertex( localPoint.x
@@ -491,9 +491,9 @@ FOdysseyVectorPathTracer::CommitSegment( FOdysseyVectorVertex* iPreviousVertex
     if( iEndVertex != iPreviousVertex )
     {
         BLMatrix2D& cubicPathInverseWorldMatrix = mCubicPath->GetInverseWorldMatrix();
-        BLPoint localHandlePoint[2] = { cubicPathInverseWorldMatrix.mapPoint( mBestBezier.pt[1].x
+        BLPoint localHandlePoint[2] = { cubicPathInverseWorldMatrix.map_point( mBestBezier.pt[1].x
                                                                             , mBestBezier.pt[1].y )
-                                      , cubicPathInverseWorldMatrix.mapPoint( mBestBezier.pt[2].x
+                                      , cubicPathInverseWorldMatrix.map_point( mBestBezier.pt[2].x
                                                                             , mBestBezier.pt[2].y ) };
         FOdysseyVectorSegmentCubic* newCubicSegment = new FOdysseyVectorSegmentCubic( mCubicPath
                                                                                     , iPreviousVertex

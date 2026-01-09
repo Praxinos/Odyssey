@@ -56,7 +56,7 @@ FOdysseyVectorVertex::GetID()
 ::ULIS::FVec2D
 FOdysseyVectorVertex::GetWorldCoords()
 {
-    BLPoint worldPoint = mOwner->GetWorldMatrix().mapPoint( mCoords.x, mCoords.y );
+    BLPoint worldPoint = mOwner->GetWorldMatrix().map_point( mCoords.x, mCoords.y );
 
     return ::ULIS::FVec2D( worldPoint.x, worldPoint.y );
 }
@@ -1048,7 +1048,7 @@ FOdysseyVectorVertex::GetBoundingBox( bool iWorld )
 
     if( iWorld )
     {
-        BLPoint pt = mOwner->GetWorldMatrix().mapPoint( mCoords.x, mCoords.y );
+        BLPoint pt = mOwner->GetWorldMatrix().map_point( mCoords.x, mCoords.y );
 
         bbox.x = pt.x;
         bbox.y = pt.y;
@@ -1195,19 +1195,19 @@ FOdysseyVectorVertex::DrawJoint( BLContext* iBLContext
     {
         if( IsHandleAligned() == true )
         {
-            const BLMatrix2D worldMatrix = iBLContext->userMatrix();
+            const BLMatrix2D worldMatrix = iBLContext->user_transform();
             ::ULIS::FVec2D localHandlePosition[2];
             BLPoint worldHandlePosition[2];
 
             GetHandlePosition( localHandlePosition );
 
-            worldHandlePosition[0] = worldMatrix.mapPoint( localHandlePosition[0].x, localHandlePosition[0].y );
-            worldHandlePosition[1] = worldMatrix.mapPoint( localHandlePosition[1].x, localHandlePosition[1].y );
+            worldHandlePosition[0] = worldMatrix.map_point( localHandlePosition[0].x, localHandlePosition[0].y );
+            worldHandlePosition[1] = worldMatrix.map_point( localHandlePosition[1].x, localHandlePosition[1].y );
 
             iBLContext->save();
-            iBLContext->resetMatrix();
-            iBLContext->setStrokeWidth( 3.0f ); // 1 pixel is not enough due to antialiasing. Lets go with 3
-            iBLContext->strokeLine( worldHandlePosition[0], worldHandlePosition[1] );
+            iBLContext->reset_transform();
+            iBLContext->set_stroke_width( 3.0f ); // 1 pixel is not enough due to antialiasing. Lets go with 3
+            iBLContext->stroke_line( worldHandlePosition[0], worldHandlePosition[1] );
             iBLContext->restore();
         }
         else

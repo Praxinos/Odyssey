@@ -20,7 +20,7 @@
   #error "blend2d-impl.h header can only be included in C++ mode"
 #endif
 
-#include "blend2d.h"
-#include "blend2d/api-impl.h"
+#include <blend2d/blend2d.h>
+#include <blend2d/core/api-impl.h>
 
 #endif // BLEND2D_IMPL_H_INCLUDED

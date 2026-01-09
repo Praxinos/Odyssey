@@ -6,16 +6,19 @@
 #ifndef BLEND2D_SUPPORT_FIXEDARRAY_P_H_INCLUDED
 #define BLEND2D_SUPPORT_FIXEDARRAY_P_H_INCLUDED
 
-#include "../support/algorithm_p.h"
-#include "../support/memops_p.h"
+#include <blend2d/support/algorithm_p.h>
+#include <blend2d/support/memops_p.h>
+#include <blend2d/support/span_p.h>
 
 //! \cond INTERNAL
 //! \addtogroup blend2d_internal
 //! \{
 
-//! A fixed array that cannot grow.
+namespace bl {
+
+//! A fixed array that cannot grow beyond `N`.
 template<typename T, size_t N>
-class BLFixedArray {
+class FixedArray {
 public:
   //! \name Constants
   //! \{
@@ -35,17 +38,17 @@ public:
   //! \name Construction & Destruction
   //! \{
 
-  BL_INLINE BLFixedArray() noexcept
+  BL_INLINE FixedArray() noexcept
     : _size(0) {}
 
-  BL_INLINE BLFixedArray(const BLFixedArray& other) noexcept { assign(other.data(), other.size()); }
+  BL_INLINE FixedArray(const FixedArray& other) noexcept { assign(other.data(), other.size()); }
 
   //! \}
 
   //! \name Overloaded Operators
   //! \{
 
-  BL_INLINE BLFixedArray& operator=(const BLFixedArray& other) noexcept {
+  BL_INLINE FixedArray& operator=(const FixedArray& other) noexcept {
     assign(other.data(), other.size());
     return *this;
   }
@@ -65,7 +68,7 @@ public:
   //! \name Accessors
   //! \{
 
-  BL_INLINE bool empty() const noexcept { return _size == 0; }
+  BL_INLINE bool is_empty() const noexcept { return _size == 0; }
   BL_INLINE size_t size() const noexcept { return _size; }
   BL_INLINE size_t capacity() const noexcept { return kCapacity; }
 
@@ -86,9 +89,9 @@ public:
   BL_INLINE void clear() noexcept { _size = 0; }
 
   BL_INLINE void assign(const T* data, size_t size) noexcept {
-    BL_ASSERT(_size < _size);
+    BL_ASSERT(size <= kCapacity);
 
-    BLMemOps::copyForwardInlineT(_data, data, size);
+    MemOps::copy_forward_inline_t(_data, data, size);
     _size = size;
   }
 
@@ -100,7 +103,7 @@ public:
   }
 
   template<typename Condition>
-  BL_INLINE void appendIf(const T& item, const Condition& condition) noexcept {
+  BL_INLINE void append_if(const T& item, const Condition& condition) noexcept {
     BL_ASSERT(_size != kCapacity);
 
     _data[_size] = item;
@@ -110,7 +113,7 @@ public:
   BL_INLINE void prepend(const T& item) noexcept {
     BL_ASSERT(_size != kCapacity);
 
-    BLMemOps::copyBackwardInlineT(_data + 1, _data, _size);
+    MemOps::copy_backward_inline_t(_data + 1, _data, _size);
     _data[0] = item;
     _size++;
   }
@@ -119,18 +122,32 @@ public:
     BL_ASSERT(index <= _size);
     BL_ASSERT(_size != kCapacity);
 
-    BLMemOps::copyBackwardInlineT(_data + index + 1, _data + index, (_size - index));
+    MemOps::copy_backward_inline_t(_data + index + 1, _data + index, (_size - index));
     _data[index] = item;
     _size++;
   }
 
-  BL_INLINE void _setSize(size_t size) noexcept {
+  BL_INLINE void _set_size(size_t size) noexcept {
+    BL_ASSERT(size <= kCapacity);
     _size = size;
   }
 
-  BL_INLINE void _incrementSize(size_t n) noexcept {
-    BL_ASSERT(kCapacity - _size >= n);
+  BL_INLINE void _increment_size(size_t n) noexcept {
+    BL_ASSERT(n <= kCapacity - _size);
     _size += n;
+  }
+
+  //! \}
+
+  //! \name Span
+  //! \{
+
+  BL_INLINE Span<T> as_span() const noexcept {
+    return Span<T>(_data, _size);
+  }
+
+  BL_INLINE Span<std::add_const_t<T>> as_cspan() const noexcept {
+    return Span<std::add_const_t<T>>(_data, _size);
   }
 
   //! \}
@@ -149,6 +166,8 @@ public:
 
   //! \}
 };
+
+} // {bl}
 
 //! \}
 //! \endcond

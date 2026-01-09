@@ -6,19 +6,18 @@
 #ifndef BLEND2D_PIPELINE_REFERENCE_COMPOPGENERIC_P_H_INCLUDED
 #define BLEND2D_PIPELINE_REFERENCE_COMPOPGENERIC_P_H_INCLUDED
 
-#include "../../compop_p.h"
-#include "../../pipeline/pipedefs_p.h"
-#include "../../pipeline/reference/pixelgeneric_p.h"
-#include "../../pipeline/reference/fetchgeneric_p.h"
-#include "../../pixelops/scalar_p.h"
-#include "../../support/memops_p.h"
+#include <blend2d/core/compop_p.h>
+#include <blend2d/pipeline/pipedefs_p.h>
+#include <blend2d/pipeline/reference/pixelgeneric_p.h>
+#include <blend2d/pipeline/reference/fetchgeneric_p.h>
+#include <blend2d/pixelops/scalar_p.h>
 
 //! \cond INTERNAL
 //! \addtogroup blend2d_pipeline_reference
 //! \{
 
-namespace BLPipeline {
-namespace Reference {
+namespace bl::Pipeline::Reference {
+namespace {
 
 using Pixel::Repeat;
 
@@ -32,12 +31,12 @@ struct CompOp_SrcCopy_Op {
   };
 
   static BL_INLINE PixelType op_prgb32_prgb32(PixelType d, PixelType s) noexcept {
-    blUnused(d);
+    bl_unused(d);
     return s;
   }
 
   static BL_INLINE PixelType op_prgb32_prgb32(PixelType d, PixelType s, uint32_t m) noexcept {
-    return (d.unpack() * Repeat{255 - m} + s.unpack() * Repeat{m}).div255().pack();
+    return (d.unpack() * Repeat{m ^ 0xFFu} + s.unpack() * Repeat{m}).div255().pack();
   }
 };
 
@@ -53,7 +52,7 @@ struct CompOp_SrcOver_Op {
   // Dca' = Sca + Dca.(1 - Sa)
   // Da'  = Sa  + Da .(1 - Sa)
   static BL_INLINE PixelType op_prgb32_prgb32(PixelType d, PixelType s) noexcept {
-    return s + (d.unpack() * Repeat{BLPixelOps::Scalar::neg255(s.a())}).div255().pack();
+    return s + (d.unpack() * Repeat{PixelOps::Scalar::neg255(s.a())}).div255().pack();
   }
 
   // Dca' = Sca.m + Dca.(1 - Sa.m)
@@ -81,106 +80,111 @@ struct CompOp_Plus_Op {
   }
 };
 
-template<typename OpT, typename PixelT, uint32_t kDstBpp_>
+template<typename OpT, typename PixelT, typename FetchOp, uint32_t kDstBPP_>
 struct CompOp_Base {
   typedef OpT Op;
   typedef PixelT PixelType;
 
   enum : uint32_t {
-    kDstBPP = kDstBpp_,
+    kDstBPP = kDstBPP_,
+    kCompOp = Op::kCompOp,
     kOptimizeOpaque = Op::kOptimizeOpaque
   };
-};
 
-template<typename OpT, typename PixelT, typename FetchOp, uint32_t kDstBPP>
-struct CompOp_Base_PRGB32 : public CompOp_Base<OpT, PixelT, kDstBPP> {
-  typedef CompOp_Base<OpT, PixelT, kDstBPP> Base;
+  FetchOp fetch_op;
 
-  using Base::kOptimizeOpaque;
+  static constexpr FormatExt kFormat = PixelTypeToFormat<PixelT>::kFormat;
 
-  FetchOp fetchOp;
-
-  BL_INLINE CompOp_Base_PRGB32(const void* fetchData) noexcept
-    : fetchOp(fetchData) {}
-
-  BL_INLINE void initRectY(uint32_t x, uint32_t y, uint32_t width) noexcept {
-    fetchOp.initRectY(x, y, width);
+  BL_INLINE void rect_init_fetch(ContextData* ctx_data, const void* fetch_data, uint32_t x_pos, uint32_t y_pos, uint32_t rect_width) noexcept {
+    fetch_op.rect_init_fetch(ctx_data, fetch_data, x_pos, y_pos, rect_width);
   }
 
-  BL_INLINE void beginRectX(uint32_t x) noexcept {
-    fetchOp.beginRectX(x);
+  BL_INLINE void rectStartX(uint32_t x_pos) noexcept {
+    fetch_op.rectStartX(x_pos);
   }
 
-  BL_INLINE void initSpanY(uint32_t y) noexcept {
-    fetchOp.initSpanY(y);
+  BL_INLINE void spanInitY(ContextData* ctx_data, const void* fetch_data, uint32_t y_pos) noexcept {
+    fetch_op.spanInitY(ctx_data, fetch_data, y_pos);
   }
 
-  BL_INLINE void beginSpanX(uint32_t x) noexcept {
-    fetchOp.beginSpanX(x);
+  BL_INLINE void spanStartX(uint32_t x_pos) noexcept {
+    fetch_op.spanStartX(x_pos);
   }
 
-  BL_INLINE void advanceSpanX(uint32_t x, uint32_t diff) noexcept {
-    fetchOp.advanceSpanX(x, diff);
+  BL_INLINE void spanAdvanceX(uint32_t x_pos, uint32_t x_diff) noexcept {
+    fetch_op.spanAdvanceX(x_pos, x_diff);
   }
 
-  BL_INLINE void endSpanX(uint32_t x) noexcept {
-    fetchOp.endSpanX(x);
+  BL_INLINE void spanEndX(uint32_t x_pos) noexcept {
+    fetch_op.spanEndX(x_pos);
   }
 
-  BL_INLINE void advanceY() noexcept {
-    fetchOp.advanceY();
+  BL_INLINE void advance_y() noexcept {
+    fetch_op.advance_y();
   }
 
-  BL_INLINE uint8_t* compositePixelOpaque(uint8_t* dstPtr) noexcept {
+  BL_INLINE uint8_t* composite_pixel_opaque(uint8_t* dst_ptr) noexcept {
     if (uint32_t(OpT::kCompOp) == BL_COMP_OP_SRC_COPY) {
-      BLMemOps::writeU32a(dstPtr, fetchOp.fetch().value());
-      return dstPtr + kDstBPP;
+      PixelIO<PixelT, kFormat>::store(dst_ptr, fetch_op.fetch());
+      return dst_ptr + kDstBPP;
     }
     else {
-      BLMemOps::writeU32a(dstPtr, OpT::op_prgb32_prgb32(PixelT::fromValue(BLMemOps::readU32a(dstPtr)), fetchOp.fetch()).value());
-      return dstPtr + kDstBPP;
+      PixelIO<PixelT, kFormat>::store(dst_ptr, OpT::op_prgb32_prgb32(PixelIO<PixelT, kFormat>::fetch(dst_ptr), fetch_op.fetch()));
+      return dst_ptr + kDstBPP;
     }
   }
 
-  BL_INLINE uint8_t* compositePixelMasked(uint8_t* dstPtr, uint32_t m) noexcept {
-    BLMemOps::writeU32a(dstPtr, OpT::op_prgb32_prgb32(PixelT::fromValue(BLMemOps::readU32a(dstPtr)), fetchOp.fetch(), m).value());
-    return dstPtr + kDstBPP;
+  BL_INLINE uint8_t* composite_pixel_masked(uint8_t* dst_ptr, uint32_t m) noexcept {
+    PixelIO<PixelT, kFormat>::store(dst_ptr, OpT::op_prgb32_prgb32(PixelIO<PixelT, kFormat>::fetch(dst_ptr), fetch_op.fetch(), m));
+    return dst_ptr + kDstBPP;
   }
 
-  BL_INLINE uint8_t* compositeCSpanOpaque(uint8_t* dstPtr, size_t w) noexcept {
+  BL_INLINE uint8_t* compositeCSpanOpaque(uint8_t* dst_ptr, size_t w) noexcept {
     size_t i = w;
     do {
-      dstPtr = compositePixelOpaque(dstPtr);
+      dst_ptr = composite_pixel_opaque(dst_ptr);
     } while (--i);
-    return dstPtr;
+    return dst_ptr;
   }
 
-  BL_INLINE uint8_t* compositeCSpanMasked(uint8_t* dstPtr, size_t w, uint32_t m) noexcept {
+  BL_INLINE uint8_t* compositeCSpanMasked(uint8_t* dst_ptr, size_t w, uint32_t m) noexcept {
     size_t i = w;
     do {
-      dstPtr = compositePixelMasked(dstPtr, m);
+      dst_ptr = composite_pixel_masked(dst_ptr, m);
     } while (--i);
-    return dstPtr;
+    return dst_ptr;
   }
 
-  BL_INLINE uint8_t* compositeCSpan(uint8_t* dstPtr, size_t w, uint32_t m) noexcept {
+  BL_INLINE uint8_t* compositeCSpan(uint8_t* dst_ptr, size_t w, uint32_t m) noexcept {
     if (kOptimizeOpaque && m == 255)
-      return compositeCSpanOpaque(dstPtr, w);
+      return compositeCSpanOpaque(dst_ptr, w);
     else
-      return compositeCSpanMasked(dstPtr, w, m);
+      return compositeCSpanMasked(dst_ptr, w, m);
+  }
+
+  BL_INLINE uint8_t* compositeVSpanWithGA(uint8_t* BL_RESTRICT dst_ptr, const uint8_t* BL_RESTRICT mask_ptr, size_t w) noexcept {
+    size_t i = w;
+    do {
+      uint32_t msk = mask_ptr[0];
+      dst_ptr = composite_pixel_masked(dst_ptr, msk);
+      mask_ptr++;
+    } while (--i);
+    return dst_ptr;
+  }
+
+  BL_INLINE uint8_t* compositeVSpanWithoutGA(uint8_t* BL_RESTRICT dst_ptr, const uint8_t* BL_RESTRICT mask_ptr, uint32_t global_alpha, size_t w) noexcept {
+    size_t i = w;
+    do {
+      uint32_t msk = PixelOps::Scalar::udiv255(uint32_t(mask_ptr[0]) * global_alpha);
+      mask_ptr++;
+      dst_ptr = composite_pixel_masked(dst_ptr, msk);
+    } while (--i);
+    return dst_ptr;
   }
 };
 
-typedef CompOp_Base_PRGB32<CompOp_SrcCopy_Op<Pixel::P32_A8R8G8B8>, Pixel::P32_A8R8G8B8, FetchSolid<Pixel::P32_A8R8G8B8>, 4> CompOp_SrcCopy_PRGB32_Solid;
-typedef CompOp_Base_PRGB32<CompOp_SrcOver_Op<Pixel::P32_A8R8G8B8>, Pixel::P32_A8R8G8B8, FetchSolid<Pixel::P32_A8R8G8B8>, 4> CompOp_SrcOver_PRGB32_Solid;
-typedef CompOp_Base_PRGB32<CompOp_Plus_Op<Pixel::P32_A8R8G8B8>, Pixel::P32_A8R8G8B8, FetchSolid<Pixel::P32_A8R8G8B8>, 4> CompOp_Plus_PRGB32_Solid;
-
-typedef CompOp_Base_PRGB32<CompOp_SrcCopy_Op<Pixel::P32_A8R8G8B8>, Pixel::P32_A8R8G8B8, FetchLinearGradient<Pixel::P32_A8R8G8B8, false>, 4> CompOp_SrcCopy_PRGB32_Linear;
-typedef CompOp_Base_PRGB32<CompOp_SrcOver_Op<Pixel::P32_A8R8G8B8>, Pixel::P32_A8R8G8B8, FetchLinearGradient<Pixel::P32_A8R8G8B8, false>, 4> CompOp_SrcOver_PRGB32_Linear;
-typedef CompOp_Base_PRGB32<CompOp_Plus_Op<Pixel::P32_A8R8G8B8>, Pixel::P32_A8R8G8B8, FetchLinearGradient<Pixel::P32_A8R8G8B8, false>, 4> CompOp_Plus_PRGB32_Linear;
-
-} // {Reference}
-} // {BLPipeline}
+} // {anonymous}
+} // {bl::Pipeline::Reference}
 
 //! \}
 //! \endcond

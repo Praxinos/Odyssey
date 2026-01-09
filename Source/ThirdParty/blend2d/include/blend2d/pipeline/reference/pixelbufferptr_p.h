@@ -6,15 +6,15 @@
 #ifndef BLEND2D_PIPELINE_REFERENCE_PIXELBUFFERPTR_P_H_INCLUDED
 #define BLEND2D_PIPELINE_REFERENCE_PIXELBUFFERPTR_P_H_INCLUDED
 
-#include "../../pipeline/pipedefs_p.h"
-#include "../../support/intops_p.h"
+#include <blend2d/pipeline/pipedefs_p.h>
+#include <blend2d/support/intops_p.h>
 
 //! \cond INTERNAL
 //! \addtogroup blend2d_pipeline_reference
 //! \{
 
-namespace BLPipeline {
-namespace Reference {
+namespace bl::Pipeline::Reference {
+namespace {
 
 template<uint32_t BytesPerPixel>
 class PixelBufferPtr {
@@ -32,13 +32,13 @@ public:
   BL_INLINE uint8_t* ptr() const noexcept { return _ptr; }
   BL_INLINE intptr_t stride() const noexcept { return _stride; }
 
-  BL_INLINE void setPtr(uint8_t* ptr) noexcept { _ptr = ptr; }
-  BL_INLINE void setStride(intptr_t stride) noexcept { _stride = stride; }
+  BL_INLINE void set_ptr(uint8_t* ptr) noexcept { _ptr = ptr; }
+  BL_INLINE void set_stride(intptr_t stride) noexcept { _stride = stride; }
 
   template<typename T>
-  BL_INLINE void initRect(const T& x, const T& y, const T& width) noexcept {
-    advanceY(y);
-    advanceX(x);
+  BL_INLINE void init_rect(const T& x, const T& y, const T& width) noexcept {
+    advance_y(y);
+    advance_x(x);
 
     // Each AdvanceY would advance to the beginning of the next scanline from the
     // end of the current scanline. Since this is a FillRect operation we assume
@@ -47,24 +47,24 @@ public:
   }
 
   template<typename T>
-  BL_INLINE void initGeneric(const T& y) noexcept {
-    advanceY(y);
+  BL_INLINE void init_generic(const T& y) noexcept {
+    advance_y(y);
   }
 
   template<typename T>
-  BL_INLINE void advanceX(const T& x) noexcept { _ptr += size_t(BLIntOps::asStdUInt(x)) * kBytesPerPixel; }
+  BL_INLINE void advance_x(const T& x) noexcept { _ptr += size_t(IntOps::asStdUInt(x)) * kBytesPerPixel; }
   template<typename T>
-  BL_INLINE void advanceY(const T& y) noexcept { _ptr += intptr_t(size_t(BLIntOps::asStdUInt(y))) * _stride; }
+  BL_INLINE void advance_y(const T& y) noexcept { _ptr += intptr_t(size_t(IntOps::asStdUInt(y))) * _stride; }
 
   template<typename T>
-  BL_INLINE void deadvanceX(const T& x) noexcept { _ptr -= size_t(BLIntOps::asStdUInt(x)) * kBytesPerPixel; }
+  BL_INLINE void deadvanceX(const T& x) noexcept { _ptr -= size_t(IntOps::asStdUInt(x)) * kBytesPerPixel; }
 
-  BL_INLINE void advanceX() noexcept { advanceX(1); }
-  BL_INLINE void advanceY() noexcept { advanceY(1); }
+  BL_INLINE void advance_x() noexcept { advance_x(1); }
+  BL_INLINE void advance_y() noexcept { advance_y(1); }
 };
 
-} // {Reference}
-} // {BLPipeline}
+} // {anonymous}
+} // {bl::Pipeline::Reference}
 
 //! \}
 //! \endcond

@@ -1,4 +1,4 @@
-// // This file is part of Blend2D project <https://blend2d.com>
+// This file is part of Blend2D project <https://blend2d.com>
 //
 // See blend2d.h or LICENSE.md for license and copyright information
 // SPDX-License-Identifier: Zlib
@@ -6,46 +6,47 @@
 #ifndef BLEND2D_SUPPORT_ARENAHASHMAP_P_H_INCLUDED
 #define BLEND2D_SUPPORT_ARENAHASHMAP_P_H_INCLUDED
 
-#include "../api-internal_p.h"
-#include "../unicode_p.h"
-#include "../support/arenaallocator_p.h"
+#include <blend2d/core/api-internal_p.h>
+#include <blend2d/support/arenaallocator_p.h>
 
 //! \cond INTERNAL
 //! \addtogroup blend2d_internal
 //! \{
 
+namespace bl {
+
 //! \name Arena Allocated Hash Map
 //! \{
 
-//! Node used by `ZoneHash<>` template.
+//! Node used by `ArenaHash<>` template.
 //!
 //! You must provide function `bool eq(const Key& key)` in order to make
-//! `ZoneHash::get()` working.
-class BLArenaHashMapNode {
+//! `ArenaHash::get()` working.
+class ArenaHashMapNode {
 public:
-  BL_NONCOPYABLE(BLArenaHashMapNode)
+  BL_NONCOPYABLE(ArenaHashMapNode)
 
   //! Next node in the chain, null if it terminates the chain.
-  BLArenaHashMapNode* _hashNext;
+  ArenaHashMapNode* _hash_next;
   //! Precalculated hash-code of key.
-  uint32_t _hashCode;
-  //! Padding, can be reused by any Node that inherits `BLArenaHashMapNode`.
+  uint32_t _hash_code;
+  //! Padding, can be reused by any Node that inherits `ArenaHashMapNode`.
   union {
-    uint32_t _customData;
+    uint32_t _custom_data;
     uint16_t _customDataU16[2];
     uint8_t _customDataU8[4];
   };
 
-  BL_INLINE BLArenaHashMapNode(uint32_t hashCode = 0, uint32_t customData = 0) noexcept
-    : _hashNext(nullptr),
-      _hashCode(hashCode),
-      _customData(customData) {}
+  BL_INLINE ArenaHashMapNode(uint32_t hash_code = 0, uint32_t custom_data = 0) noexcept
+    : _hash_next(nullptr),
+      _hash_code(hash_code),
+      _custom_data(custom_data) {}
 };
 
-//! Base class used by `BLArenaHashMap<>` template to share the common functionality.
-class BLArenaHashMapBase {
+//! Base class used by `ArenaHashMap<>` template to share the common functionality.
+class ArenaHashMapBase {
 public:
-  BL_NONCOPYABLE(BLArenaHashMapBase)
+  BL_NONCOPYABLE(ArenaHashMapBase)
 
   // NOTE: There must be at least 2 embedded buckets, otherwise we wouldn't be
   // able to implement division as multiplication and shift in 32-bit mode the
@@ -58,78 +59,71 @@ public:
     kNullRcpShift = BL_TARGET_ARCH_BITS >= 64 ? 32 : 0
   };
 
-  BLArenaAllocator* _allocator;
+  ArenaAllocator* _allocator {};
   //! Buckets data.
-  BLArenaHashMapNode** _data;
+  ArenaHashMapNode** _data {};
   //! Count of records inserted into the hash table.
-  size_t _size;
+  size_t _size {};
   //! Count of hash buckets.
-  uint32_t _bucketCount;
+  uint32_t _bucket_count = kNullCount;
   //! When buckets array should grow (only checked after insertion).
-  uint32_t _bucketGrow;
-  //! Reciprocal value of `_bucketCount`.
-  uint32_t _rcpValue;
-  //! How many bits to shift right when hash is multiplied with `_rcpValue`.
-  uint8_t _rcpShift;
+  uint32_t _bucket_grow = kNullGrow;
+  //! Reciprocal value of `_bucket_count`.
+  uint32_t _rcp_value = kNullRcpValue;
+  //! How many bits to shift right when hash is multiplied with `_rcp_value`.
+  uint8_t _rcp_shift = kNullRcpShift;
   //! Prime value index in internal prime array.
-  uint8_t _primeIndex;
+  uint8_t _prime_index = 0;
   //! Padding...
-  uint8_t _reserved[2];
+  uint8_t _reserved[2] {};
   //! Embedded and initial hash data.
-  BLArenaHashMapNode* _embedded[kNullCount];
+  ArenaHashMapNode* _embedded[kNullCount] {};
 
   //! \name Construction & Destruction
   //! \{
 
-  BL_INLINE BLArenaHashMapBase(BLArenaAllocator* allocator) noexcept
+  BL_INLINE ArenaHashMapBase(ArenaAllocator* allocator) noexcept
     : _allocator(allocator),
-      _data(_embedded),
-      _size(0),
-      _bucketCount(kNullCount),
-      _bucketGrow(kNullGrow),
-      _rcpValue(kNullRcpValue),
-      _rcpShift(kNullRcpShift),
-      _primeIndex(0),
-      _embedded {} {}
+      _data(_embedded) {}
 
-  BL_INLINE BLArenaHashMapBase(BLArenaHashMapBase&& other) noexcept
+  BL_INLINE ArenaHashMapBase(ArenaHashMapBase&& other) noexcept
     : _allocator(other._allocator),
       _data(other._data),
       _size(other._size),
-      _bucketCount(other._bucketCount),
-      _bucketGrow(other._bucketGrow),
-      _rcpValue(other._rcpValue),
-      _rcpShift(other._rcpShift),
-      _primeIndex(other._primeIndex) {
+      _bucket_count(other._bucket_count),
+      _bucket_grow(other._bucket_grow),
+      _rcp_value(other._rcp_value),
+      _rcp_shift(other._rcp_shift),
+      _prime_index(other._prime_index) {
     other._data = nullptr;
     other._size = 0;
-    other._bucketCount = kNullCount;
-    other._bucketGrow = kNullGrow;
-    other._rcpValue = kNullRcpValue;
-    other._rcpShift = kNullRcpShift;
-    other._primeIndex = 0;
+    other._bucket_count = kNullCount;
+    other._bucket_grow = kNullGrow;
+    other._rcp_value = kNullRcpValue;
+    other._rcp_shift = kNullRcpShift;
+    other._prime_index = 0;
 
-    memcpy(_embedded, other._embedded, kNullCount * sizeof(BLArenaHashMapNode*));
-    memset(other._embedded, 0, kNullCount * sizeof(BLArenaHashMapNode*));
+    memcpy(_embedded, other._embedded, kNullCount * sizeof(ArenaHashMapNode*));
+    memset(other._embedded, 0, kNullCount * sizeof(ArenaHashMapNode*));
   }
 
-  BL_INLINE ~BLArenaHashMapBase() noexcept {
+  BL_INLINE ~ArenaHashMapBase() noexcept {
     if (_data != _embedded)
-      _allocator->release(_data, _bucketCount * sizeof(BLArenaHashMapNode*));
+      _allocator->release(_data, _bucket_count * sizeof(ArenaHashMapNode*));
   }
 
   BL_INLINE void reset() noexcept {
     if (_data != _embedded)
-      _allocator->release(_data, _bucketCount * sizeof(BLArenaHashMapNode*));
+      _allocator->release(_data, _bucket_count * sizeof(ArenaHashMapNode*));
 
     _data = _embedded;
     _size = 0;
-    _bucketCount = kNullCount;
-    _bucketGrow = kNullGrow;
-    _rcpValue = kNullRcpValue;
-    _rcpShift = kNullRcpShift;
-    _primeIndex = 0;
-    memset(_embedded, 0, kNullCount * sizeof(BLArenaHashMapNode*));
+    _bucket_count = kNullCount;
+    _bucket_grow = kNullGrow;
+    _rcp_value = kNullRcpValue;
+    _rcp_shift = kNullRcpShift;
+    _prime_index = 0;
+    memset(_embedded, 0, kNullCount * sizeof(ArenaHashMapNode*));
   }
 
   //! \}
@@ -137,7 +131,7 @@ public:
   //! \name Accessors
   //! \{
 
-  BL_INLINE bool empty() const noexcept { return _size == 0; }
+  BL_INLINE bool is_empty() const noexcept { return _size == 0; }
   BL_INLINE size_t size() const noexcept { return _size; }
 
   //! \}
@@ -145,37 +139,37 @@ public:
   //! \name Internals
   //! \{
 
-  BL_INLINE void _swap(BLArenaHashMapBase& other) noexcept {
-    std::swap(_allocator, other._allocator);
-    std::swap(_data, other._data);
-    std::swap(_size, other._size);
-    std::swap(_bucketCount, other._bucketCount);
-    std::swap(_bucketGrow, other._bucketGrow);
-    std::swap(_rcpValue, other._rcpValue);
-    std::swap(_rcpShift, other._rcpShift);
-    std::swap(_primeIndex, other._primeIndex);
+  BL_INLINE void _swap(ArenaHashMapBase& other) noexcept {
+    BLInternal::swap(_allocator, other._allocator);
+    BLInternal::swap(_data, other._data);
+    BLInternal::swap(_size, other._size);
+    BLInternal::swap(_bucket_count, other._bucket_count);
+    BLInternal::swap(_bucket_grow, other._bucket_grow);
+    BLInternal::swap(_rcp_value, other._rcp_value);
+    BLInternal::swap(_rcp_shift, other._rcp_shift);
+    BLInternal::swap(_prime_index, other._prime_index);
 
     for (uint32_t i = 0; i < kNullCount; i++)
-      std::swap(_embedded[i], other._embedded[i]);
+      BLInternal::swap(_embedded[i], other._embedded[i]);
 
     if (_data == other._embedded) _data = _embedded;
     if (other._data == _embedded) other._data = other._embedded;
   }
 
-  BL_INLINE uint32_t _calcMod(uint32_t hash) const noexcept {
+  BL_INLINE uint32_t _calc_mod(uint32_t hash) const noexcept {
     uint32_t divided =
       BL_TARGET_ARCH_BITS >= 64
-        ? uint32_t((uint64_t(hash) * _rcpValue) >> _rcpShift)
-        : uint32_t((uint64_t(hash) * _rcpValue) >> 32) >> _rcpShift;
+        ? uint32_t((uint64_t(hash) * _rcp_value) >> _rcp_shift)
+        : uint32_t((uint64_t(hash) * _rcp_value) >> 32) >> _rcp_shift;
 
-    uint32_t result = hash - divided * _bucketCount;
-    BL_ASSERT(result < _bucketCount);
+    uint32_t result = hash - divided * _bucket_count;
+    BL_ASSERT(result < _bucket_count);
     return result;
   }
 
-  void _rehash(uint32_t newCount) noexcept;
-  void _insert(BLArenaHashMapNode* node) noexcept;
-  bool _remove(BLArenaHashMapNode* node) noexcept;
+  void _rehash(uint32_t prime_index) noexcept;
+  void _insert(ArenaHashMapNode* node) noexcept;
+  bool _remove(ArenaHashMapNode* node) noexcept;
 
   //! \}
 };
@@ -187,23 +181,23 @@ public:
 //! `get()` the node and then modify it or insert a new node by using `insert()`,
 //! depending on the intention).
 template<typename NodeT>
-class BLArenaHashMap : public BLArenaHashMapBase {
+class ArenaHashMap : public ArenaHashMapBase {
 public:
-  BL_NONCOPYABLE(BLArenaHashMap)
+  BL_NONCOPYABLE(ArenaHashMap)
 
   typedef NodeT Node;
 
   //! \name Construction & Destruction
   //! \{
 
-  BL_INLINE BLArenaHashMap(BLArenaAllocator* allocator) noexcept
-    : BLArenaHashMapBase(allocator) {}
+  BL_INLINE ArenaHashMap(ArenaAllocator* allocator) noexcept
+    : ArenaHashMapBase(allocator) {}
 
-  BL_INLINE BLArenaHashMap(BLArenaHashMap&& other) noexcept
-    : BLArenaHashMap(other) {}
+  BL_INLINE ArenaHashMap(ArenaHashMap&& other) noexcept
+    : ArenaHashMap(other) {}
 
-  BL_INLINE ~BLArenaHashMap() noexcept {
-    if (!std::is_trivially_destructible<NodeT>::value)
+  BL_INLINE ~ArenaHashMap() noexcept {
+    if constexpr (!std::is_trivially_destructible_v<NodeT>)
       _destroy();
   }
 
@@ -212,17 +206,17 @@ public:
   //! \name Utilities
   //! \{
 
-  BL_INLINE void swap(BLArenaHashMap& other) noexcept {
-    BLArenaHashMapBase::_swap(other);
+  BL_INLINE void swap(ArenaHashMap& other) noexcept {
+    ArenaHashMapBase::_swap(other);
   }
 
   BL_NOINLINE void _destroy() noexcept {
-    for (size_t i = 0; i < _bucketCount; i++) {
+    for (size_t i = 0; i < _bucket_count; i++) {
       NodeT* node = static_cast<NodeT*>(_data[i]);
       if (node) {
         do {
-          NodeT* next = static_cast<NodeT*>(node->_hashNext);
-          blCallDtor(*node);
+          NodeT* next = static_cast<NodeT*>(node->_hash_next);
+          bl_call_dtor(*node);
           node = next;
         } while (node);
         _data[i] = nullptr;
@@ -235,16 +229,16 @@ public:
   //! \name Functionality
   //! \{
 
-  BL_INLINE NodeT* nodesByHashCode(uint32_t hashCode) const noexcept {
-    uint32_t hashMod = _calcMod(hashCode);
-    return static_cast<NodeT*>(_data[hashMod]);
+  BL_INLINE NodeT* nodes_by_hash_code(uint32_t hash_code) const noexcept {
+    uint32_t hash_mod = _calc_mod(hash_code);
+    return static_cast<NodeT*>(_data[hash_mod]);
   }
 
   template<typename KeyT>
   BL_INLINE NodeT* get(const KeyT& key) const noexcept {
-    NodeT* node = nodesByHashCode(key.hashCode());
+    NodeT* node = nodes_by_hash_code(key.hash_code());
     while (node && !key.matches(node))
-      node = static_cast<NodeT*>(node->_hashNext);
+      node = static_cast<NodeT*>(node->_hash_next);
     return node;
   }
 
@@ -252,14 +246,14 @@ public:
   BL_INLINE bool remove(NodeT* node) noexcept { return _remove(node); }
 
   template<typename Lambda>
-  BL_INLINE void forEach(Lambda&& f) const noexcept {
-    BLArenaHashMapNode** buckets = _data;
-    uint32_t bucketCount = _bucketCount;
+  BL_INLINE void for_each(Lambda&& f) const noexcept {
+    ArenaHashMapNode** buckets = _data;
+    uint32_t bucket_count = _bucket_count;
 
-    for (uint32_t i = 0; i < bucketCount; i++) {
+    for (uint32_t i = 0; i < bucket_count; i++) {
       Node* node = static_cast<Node*>(buckets[i]);
       while (node) {
-        Node* next = static_cast<Node*>(node->_hashNext);
+        Node* next = static_cast<Node*>(node->_hash_next);
         f(node);
         node = next;
       }
@@ -270,6 +264,8 @@ public:
 };
 
 //! \}
+
+} // {bl}
 
 //! \}
 //! \endcond

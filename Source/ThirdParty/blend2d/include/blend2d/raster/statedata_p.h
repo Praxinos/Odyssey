@@ -6,138 +6,168 @@
 #ifndef BLEND2D_RASTER_STATEDATA_P_H_INCLUDED
 #define BLEND2D_RASTER_STATEDATA_P_H_INCLUDED
 
-#include "../geometry.h"
-#include "../matrix_p.h"
-#include "../path_p.h"
-#include "../raster/styledata_p.h"
+#include <blend2d/core/geometry.h>
+#include <blend2d/core/matrix_p.h>
+#include <blend2d/core/path_p.h>
+#include <blend2d/raster/styledata_p.h>
 
 //! \cond INTERNAL
 //! \addtogroup blend2d_raster_engine_impl
 //! \{
 
-namespace BLRasterEngine {
+namespace bl::RasterEngine {
 
 //! Raster rendering context state - based on public `BLContextState`.
-class RasterContextState : public BLContextState {
+class alignas(16) RasterContextState : public BLContextState {
 public:
-  //! Type of meta matrix.
-  uint8_t metaMatrixType;
-  //! Type of final matrix.
-  uint8_t finalMatrixType;
-  //! Type of meta matrix that scales to fixed point.
-  uint8_t metaMatrixFixedType;
-  //! Type of final matrix that scales to fixed point.
-  uint8_t finalMatrixFixedType;
-  //! Global alpha as integer (0..255 or 0..65535).
-  uint32_t globalAlphaI;
+  union {
+    uint32_t transform_types_packed;
+    struct {
+      //! Type of final transformation matrix that scales to fixed point.
+      uint8_t final_transform_fixed_type;
+      //! Type of meta transformation matrix that scales to fixed point.
+      uint8_t meta_transform_fixed_type;
+      //! Type of final transformation matrix.
+      uint8_t final_transform_type;
+      //! Type of meta transformation matrix.
+      uint8_t meta_transform_type;
+      //! Type of the identity transformation matrix (used by Style API).
+      uint8_t identity_transform_type;
+    };
 
-  //! Curve flattening tolerance scaled by `fpScaleD`.
+    struct {
+      uint8_t fixed_transform_types[2];
+      //! Transform types indexed by \ref BLContextStyleTransformMode (used by Style API).
+      uint8_t transform_types[uint32_t(BL_CONTEXT_STYLE_TRANSFORM_MODE_MAX_VALUE) + 1u];
+    };
+  };
+
+  //! Global alpha as integer (0..255 or 0..65535).
+  uint32_t global_alpha_i;
+  //! Current fill or stroke alpha converted to integer indexed by style slot, see \ref BLContextStyleSlot.
+  uint32_t styleAlphaI[2];
+
+  //! Curve flattening tolerance scaled by `fp_scale_d`.
   double toleranceFixedD;
 
-  //! Fill and stroke styles.
-  StyleData style[BL_CONTEXT_OP_TYPE_MAX_VALUE + 1];
+  //! Fill and stroke styles, and one additional style that is never used in practice, but is used during error checking.
+  StyleData style[2];
 
-  //! Result of `(metaMatrix * userMatrix)`.
-  BLMatrix2D finalMatrix;
-  //! Meta matrix scaled by `fpScale`.
-  BLMatrix2D metaMatrixFixed;
-  //! Result of `(metaMatrix * userMatrix) * fpScale`.
-  BLMatrix2D finalMatrixFixed;
   //! Integral offset to add to input coordinates in case integral transform is ok.
-  BLPointI translationI;
+  BLPointI translation_i;
+
+  //! Meta matrix scaled by `fp_scale`.
+  alignas(16) BLMatrix2D meta_transform_fixed;
+  //! Result of `(meta_transform * user_transform) * fp_scale`.
+  alignas(16) BLMatrix2D final_transform_fixed;
 
   //! Meta clip-box (int).
-  BLBoxI metaClipBoxI;
+  alignas(16) BLBoxI meta_clip_box_i;
   //! Final clip box (int).
-  BLBoxI finalClipBoxI;
+  alignas(16) BLBoxI final_clip_box_i;
   //! Final clip-box (double).
-  BLBox finalClipBoxD;
+  alignas(16) BLBox final_clip_box_d;
 };
 
-//! Structure that holds a previously saved state (see `save()` and `restore()`).
+//! Structure that holds a previously saved state, see \ref BLContext::save() and \ref BLContext::restore().
 //!
 //! \note The struct is designed to have no gaps required by alignment so the order of members doesn't have to make
 //! much sense.
 struct alignas(16) SavedState {
   //! Link to the previous state.
-  SavedState* prevState;
-  //! Stroke options.
-  BLStrokeOptionsCore strokeOptions;
-
+  SavedState* prev_state;
   //! State ID (only valid if a cookie was used).
-  uint64_t stateId;
-  //! Copy of previous `BLRasterContextImpl::_contextFlags`.
-  uint32_t prevContextFlags;
-  //! Global alpha as integer (0..255 or 0..65535).
-  uint32_t globalAlphaI;
+  uint64_t state_id;
 
   //! Context hints.
   BLContextHints hints;
   //! Composition operator.
-  uint8_t compOp;
+  uint8_t comp_op;
   //! Fill rule.
-  uint8_t fillRule;
+  uint8_t fill_rule;
+  //! Current type of a style object of fill and stroke operations indexed by \ref BLContextStyleSlot.
+  uint8_t style_type[2];
+
   //! Clip mode.
-  uint8_t clipMode;
-  //! Type of meta matrix.
-  uint8_t metaMatrixType;
-  //! Type of final matrix.
-  uint8_t finalMatrixType;
-  //! Type of meta matrix that scales to fixed point.
-  uint8_t metaMatrixFixedType;
-  //! Type of final matrix that scales to fixed point.
-  uint8_t finalMatrixFixedType;
+  uint8_t clip_mode;
   //! Padding at the moment.
-  uint8_t reserved[1];
-  //! Approximation options.
-  BLApproximationOptions approximationOptions;
+  uint8_t reserved[7];
+
+  //! Copy of previous `BLRasterContextImpl::_context_flags`.
+  ContextFlags prev_context_flags;
+
+  union {
+    uint32_t transform_types_packed;
+    struct {
+      //! Type of final matrix that scales to fixed point.
+      uint8_t final_transform_fixed_type;
+      //! Type of meta matrix that scales to fixed point.
+      uint8_t meta_transform_fixed_type;
+      //! Type of final matrix.
+      uint8_t final_transform_type;
+      //! Type of meta matrix.
+      uint8_t meta_transform_type;
+    };
+  };
+  //! Global alpha as integer (0..255 or 0..65535).
+  uint32_t global_alpha_i;
+  //! Alpha value (0..255 or 0..65535).
+  uint32_t styleAlphaI[2];
 
   //! Global alpha value [0, 1].
-  double globalAlpha;
+  double global_alpha;
   //! Fill and stroke alpha values [0, 1].
-  double styleAlpha[2];
-
-  //! Final clipBox (double).
-  BLBox finalClipBoxD;
-
+  double style_alpha[2];
   //! Fill and stroke styles.
-  StyleData style[BL_CONTEXT_OP_TYPE_MAX_VALUE + 1];
+  StyleData style[2];
 
-  //! Meta matrix or final matrix (depending on flags).
-  BLMatrix2D altMatrix;
-  //! User matrix.
-  BLMatrix2D userMatrix;
+  //! Approximation options.
+  BLApproximationOptions approximation_options;
+  //! Stroke options.
+  BLStrokeOptionsCore stroke_options;
+
+  //! Final clip_box (double).
+  BLBox final_clip_box_d;
+
   //! Integral translation, if possible.
-  BLPointI translationI;
+  BLPointI translation_i;
+  //! Meta or final transformation matrix (depending on flags).
+  BLMatrix2D alt_transform;
+  //! User transformation matrix.
+  BLMatrix2D user_transform;
+};
+
+struct Matrix2x2 {
+  double m[4];
 };
 
 //! A shared fill state is used by asynchronous rendering context and can be shared between multiple rendering jobs.
 struct SharedFillState {
-  BLBox finalClipBoxFixedD;
-  BLMatrix2D finalMatrixFixed;
+  BLBox final_clip_box_fixed_d;
+  Matrix2x2 final_transform_fixed;
   double toleranceFixedD;
 };
 
 //! A shared stroke state is used by asynchronous rendering context and can be shared between multiple rendering jobs.
 struct SharedBaseStrokeState {
-  BLStrokeOptions strokeOptions;
-  BLApproximationOptions approximationOptions;
+  BLStrokeOptions stroke_options;
+  BLApproximationOptions approximation_options;
 
-  BL_INLINE explicit SharedBaseStrokeState(const BLStrokeOptions& strokeOptions, const BLApproximationOptions& approximationOptions) noexcept
-    : strokeOptions(strokeOptions),
-      approximationOptions(approximationOptions) {}
+  BL_INLINE explicit SharedBaseStrokeState(const BLStrokeOptions& stroke_options, const BLApproximationOptions& approximation_options) noexcept
+    : stroke_options(stroke_options),
+      approximation_options(approximation_options) {}
 };
 
-//! A shared stroke state that is used by strokes with specific transformOrder.
+//! A shared stroke state that is used by strokes with specific transform_order.
 struct SharedExtendedStrokeState : public SharedBaseStrokeState {
-  BLMatrix2D userMatrix;
-  BLMatrix2D metaMatrixFixed;
+  Matrix2x2 user_transform;
+  Matrix2x2 meta_transform_fixed;
 
-  BL_INLINE explicit SharedExtendedStrokeState(const BLStrokeOptions& strokeOptions, const BLApproximationOptions& approximationOptions) noexcept
-    : SharedBaseStrokeState(strokeOptions, approximationOptions) {}
+  BL_INLINE explicit SharedExtendedStrokeState(const BLStrokeOptions& stroke_options, const BLApproximationOptions& approximation_options) noexcept
+    : SharedBaseStrokeState(stroke_options, approximation_options) {}
 };
 
-} // {BLRasterEngine}
+} // {bl::RasterEngine}
 
 //! \}
 //! \endcond

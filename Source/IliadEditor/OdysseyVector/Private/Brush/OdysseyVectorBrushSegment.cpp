@@ -17,37 +17,37 @@ FOdysseyVectorBrushSegment::FOdysseyVectorBrushSegment( FOdysseyVectorSegment* i
 
     if( fractionCache.size() )
     {
-        BLPoint worldFirstPoint = worldMatrix.mapPoint( fractionCache.front().polygon.point[1].x
+        BLPoint worldFirstPoint = worldMatrix.map_point( fractionCache.front().polygon.point[1].x
                                                       , fractionCache.front().polygon.point[1].y );
-        BLPoint worldLastPoint  = worldMatrix.mapPoint( fractionCache.front().polygon.point[5].x
+        BLPoint worldLastPoint  = worldMatrix.map_point( fractionCache.front().polygon.point[5].x
                                                       , fractionCache.front().polygon.point[5].y );
 
-        mBLPath.moveTo( ( worldFirstPoint.x - iBoundingBox.x ) / iBoundingBox.w
+        mBLPath.move_to( ( worldFirstPoint.x - iBoundingBox.x ) / iBoundingBox.w
                       , ( worldFirstPoint.y - iBoundingBox.y ) / iBoundingBox.h );
 
         for( std::vector<FOdysseyVectorFraction>::iterator it = fractionCache.begin(); it != fractionCache.end(); ++it )
         {
             FOdysseyVectorFraction& fraction = (*it);
-            BLPoint worldPoint = worldMatrix.mapPoint( fraction.polygon.point[2].x
+            BLPoint worldPoint = worldMatrix.map_point( fraction.polygon.point[2].x
                                                      , fraction.polygon.point[2].y );
 
             // convert to coords in the 0.0f - 1.0f range
-            mBLPath.lineTo( ( worldPoint.x - iBoundingBox.x ) / iBoundingBox.w
+            mBLPath.line_to( ( worldPoint.x - iBoundingBox.x ) / iBoundingBox.w
                           , ( worldPoint.y - iBoundingBox.y ) / iBoundingBox.h );
         }
 
         for( std::vector<FOdysseyVectorFraction>::reverse_iterator it = fractionCache.rbegin(); it != fractionCache.rend(); ++it )
         {
             FOdysseyVectorFraction& fraction = (*it);
-            BLPoint worldPoint = worldMatrix.mapPoint( fraction.polygon.point[4].x
+            BLPoint worldPoint = worldMatrix.map_point( fraction.polygon.point[4].x
                                                      , fraction.polygon.point[4].y );
 
             // convert to coords in the 0.0f - 1.0f range
-            mBLPath.lineTo( ( worldPoint.x - iBoundingBox.x ) / iBoundingBox.w
+            mBLPath.line_to( ( worldPoint.x - iBoundingBox.x ) / iBoundingBox.w
                           , ( worldPoint.y - iBoundingBox.y ) / iBoundingBox.h );
         }
 
-        mBLPath.lineTo( ( worldLastPoint.x - iBoundingBox.x ) / iBoundingBox.w
+        mBLPath.line_to( ( worldLastPoint.x - iBoundingBox.x ) / iBoundingBox.w
                       , ( worldLastPoint.y - iBoundingBox.y ) / iBoundingBox.h );
 
         //mBLPath.close();
@@ -85,12 +85,12 @@ FOdysseyVectorBrushSegment::Draw( BLContext* iBLContext
                                  , FOdysseyVectorSegment* segment ) -> bool
         {
             std::vector<FOdysseyVectorFraction>& fractionCache = segment->GetFractionCache();
-            const BLPoint* vertexData = mBLPath.vertexData();
+            const BLPoint* vertexData = mBLPath.vertex_data();
             BLPath brushPath;
 
-            //iBLContext->setStrokeWidth( 3.0f );
-            iBLContext->setFillStyle( BLRgba32( 0, 0, 0, 255 ) );
-            iBLContext->setFillRule( BL_FILL_RULE_EVEN_ODD );
+            //iBLContext->set_stroke_width( 3.0f );
+            iBLContext->set_fill_style( BLRgba32( 0, 0, 0, 255 ) );
+            iBLContext->set_fill_rule( BL_FILL_RULE_EVEN_ODD );
 
             if( fractionCache.size() )
             {
@@ -130,9 +130,9 @@ FOdysseyVectorBrushSegment::Draw( BLContext* iBLContext
                     }
 */
 
-                    // if this is the first point it will equal a moveTo command.
-                    if( i == 0 ) brushPath.moveTo( x, y );
-                    else         brushPath.lineTo( x, y );
+                    // if this is the first point it will equal a move_to command.
+                    if( i == 0 ) brushPath.move_to( x, y );
+                    else         brushPath.line_to( x, y );
 
 
                 }
@@ -140,11 +140,11 @@ FOdysseyVectorBrushSegment::Draw( BLContext* iBLContext
                 //brushPath.close();
             }
 
-  //brushPath.moveTo(26, 31);
-  //brushPath.lineTo(642, 132);
-  //brushPath.lineTo(882, 404);
+  //brushPath.move_to(26, 31);
+  //brushPath.line_to(642, 132);
+  //brushPath.line_to(882, 404);
 
-            iBLContext->fillPath( brushPath );
+            iBLContext->fill_path( brushPath );
 
             return false; // continue
         } );

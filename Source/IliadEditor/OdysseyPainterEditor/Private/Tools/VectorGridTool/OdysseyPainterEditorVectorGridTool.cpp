@@ -241,7 +241,7 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDragVector( FOdysseyVectorGroupPaint
 
             if( selectionBox.rect.Area() )
             {
-                BLPoint spaceDif = selectionBox.inverseWorldMatrix.mapVector( iPointInTexture.deltaPosition.X
+                BLPoint spaceDif = selectionBox.inverseWorldMatrix.map_vector( iPointInTexture.deltaPosition.X
                                                                             , iPointInTexture.deltaPosition.Y );
                 std::vector<FGridNode *> nodeArray;
 

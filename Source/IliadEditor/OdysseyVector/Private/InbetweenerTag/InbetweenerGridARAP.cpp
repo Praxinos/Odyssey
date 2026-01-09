@@ -326,7 +326,7 @@ FInbetweenerGridARAP::MapInterpolatedPoints( FInterpolatedObject* iInterplatedOb
     for( FInterpolatedPoint& interpolatedPoint : interpolatedPointBuffer )
     {
         FOdysseyVectorPoint* originalPoint = interpolatedPoint.GetOriginalPoint();
-        BLPoint pt = conversionMatrix.mapPoint( originalPoint->GetX()
+        BLPoint pt = conversionMatrix.map_point( originalPoint->GetX()
                                                 , originalPoint->GetY() );
 
         int quadIndex = GetQuadIndex( ::ULIS::FVec2D( pt.x, pt.y ) );
@@ -470,8 +470,8 @@ FInbetweenerGridARAP::DiscardEmptyQuads( std::vector<FInterpolatedPath>& iPathBu
             {
                 ::ULIS::FVec2D& p0Local = fraction.point[0]->GetCoords();
                 ::ULIS::FVec2D& p1Local = fraction.point[1]->GetCoords();
-                BLPoint pt0 = conversionMatrix.mapPoint( p0Local.x, p0Local.y );
-                BLPoint pt1 = conversionMatrix.mapPoint( p1Local.x, p1Local.y );
+                BLPoint pt0 = conversionMatrix.map_point( p0Local.x, p0Local.y );
+                BLPoint pt1 = conversionMatrix.map_point( p1Local.x, p1Local.y );
                 double xmin = ::ULIS::FMath::Min( pt0.x, pt1.x );
                 double xmax = ::ULIS::FMath::Max( pt0.x, pt1.x );
                 double ymin = ::ULIS::FMath::Min( pt0.y, pt1.y );
@@ -492,10 +492,10 @@ FInbetweenerGridARAP::DiscardEmptyQuads( std::vector<FInterpolatedPath>& iPathBu
                     ::ULIS::FVec2D& p1Local = handle0->GetCoords();
                     ::ULIS::FVec2D& p2Local = handle1->GetCoords();
                     ::ULIS::FVec2D& p3Local = vertex1->GetCoords();
-                    BLPoint pt0 = conversionMatrix.mapPoint( p0Local.x, p0Local.y );
-                    BLPoint pt1 = conversionMatrix.mapPoint( p1Local.x, p1Local.y );
-                    BLPoint pt2 = conversionMatrix.mapPoint( p2Local.x, p2Local.y );
-                    BLPoint pt3 = conversionMatrix.mapPoint( p3Local.x, p3Local.y );
+                    BLPoint pt0 = conversionMatrix.map_point( p0Local.x, p0Local.y );
+                    BLPoint pt1 = conversionMatrix.map_point( p1Local.x, p1Local.y );
+                    BLPoint pt2 = conversionMatrix.map_point( p2Local.x, p2Local.y );
+                    BLPoint pt3 = conversionMatrix.map_point( p3Local.x, p3Local.y );
 
                     IntersectNeededQuads( tagBBox
                                         , ::ULIS::FMath::Min( pt0.x, pt1.x )

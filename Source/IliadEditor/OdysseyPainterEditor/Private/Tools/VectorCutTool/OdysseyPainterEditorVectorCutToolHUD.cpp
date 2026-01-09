@@ -131,19 +131,19 @@ FOdysseyPainterEditorVectorCutToolHUD::DrawSelectionSpace( BLContext* iBLContext
 
         //iScene->GetEngine()->UseImage( mSelectionMask );
 
-        mBLSelectionContext.setCompOp( BL_COMP_OP_SRC_COPY );
+        mBLSelectionContext.set_comp_op( BL_COMP_OP_SRC_COPY );
 
-        mBLSelectionContext.clearAll();
-        mBLSelectionContext.setFillStyle( BLRgba32( 0x80FFFFFF ) );
-        mBLSelectionContext.fillRect( 0, 0, mBLSelectionMask.width(), mBLSelectionMask.height() );
+        mBLSelectionContext.clear_all();
+        mBLSelectionContext.set_fill_style( BLRgba32( 0x80FFFFFF ) );
+        mBLSelectionContext.fill_rect( 0, 0, mBLSelectionMask.width(), mBLSelectionMask.height() );
 
-        mBLSelectionContext.setMatrix( worldMatrix );
-        mBLSelectionContext.setFillStyle( BLRgba32( 0x00000000/*0x800000FF*/ ) );
-        mBLSelectionContext.fillRect( selectionSpaceBBox.x, selectionSpaceBBox.y, selectionSpaceBBox.w, selectionSpaceBBox.h );
+        mBLSelectionContext.set_transform( worldMatrix );
+        mBLSelectionContext.set_fill_style( BLRgba32( 0x00000000/*0x800000FF*/ ) );
+        mBLSelectionContext.fill_rect( selectionSpaceBBox.x, selectionSpaceBBox.y, selectionSpaceBBox.w, selectionSpaceBBox.h );
 
         //iScene->GetEngine()->UseImage( currentImage );
         // blit with current renderer
-        iBLContext->blitImage( topLeft, mBLSelectionMask );
+        iBLContext->blit_image( topLeft, mBLSelectionMask );
     }
 
     mBLSelectionContext.restore();
@@ -254,9 +254,9 @@ FOdysseyPainterEditorVectorCutToolHUD::ClearMask()
 {
     mBLSelectionContext.save();
 
-    mBLSelectionContext.setCompOp( BL_COMP_OP_SRC_COPY );
-    mBLSelectionContext.setFillAlpha( 0.0f );
-    mBLSelectionContext.clearAll();
+    mBLSelectionContext.set_comp_op( BL_COMP_OP_SRC_COPY );
+    mBLSelectionContext.set_fill_alpha( 0.0f );
+    mBLSelectionContext.clear_all();
     mBLSelectionContext.flush( BL_CONTEXT_FLUSH_SYNC );
 
     mBLSelectionContext.restore();
@@ -266,20 +266,20 @@ FOdysseyPainterEditorVectorCutToolHUD::ClearMask()
 FOdysseyPainterEditorVectorCutToolHUD::GenerateCircleMask( double iX, double iY, double iRadius, bool iStroke )
 {
     mBLSelectionContext.save();
-    mBLSelectionContext.setCompOp( BL_COMP_OP_SRC_COPY );
-    mBLSelectionContext.setFillAlpha( 0.0f );
-    mBLSelectionContext.clearAll();
+    mBLSelectionContext.set_comp_op( BL_COMP_OP_SRC_COPY );
+    mBLSelectionContext.set_fill_alpha( 0.0f );
+    mBLSelectionContext.clear_all();
 
     if( iStroke )
     {
-        mBLSelectionContext.setStrokeAlpha( 1.0f );
-        mBLSelectionContext.setStrokeWidth( 1.0f );
-        mBLSelectionContext.strokeCircle( iX, iY, iRadius );
+        mBLSelectionContext.set_stroke_alpha( 1.0f );
+        mBLSelectionContext.set_stroke_width( 1.0f );
+        mBLSelectionContext.stroke_circle( iX, iY, iRadius );
     }
     else
     {
-        mBLSelectionContext.setFillAlpha( 1.0f );
-        mBLSelectionContext.fillCircle( iX, iY, iRadius );
+        mBLSelectionContext.set_fill_alpha( 1.0f );
+        mBLSelectionContext.fill_circle( iX, iY, iRadius );
     }
 
     mBLSelectionContext.flush( BL_CONTEXT_FLUSH_SYNC );
@@ -293,20 +293,20 @@ FOdysseyPainterEditorVectorCutToolHUD::GenerateCircleMask( double iX, double iY,
 FOdysseyPainterEditorVectorCutToolHUD::GenerateRectangleMask( const ::ULIS::FRectD& iRect, bool iStroke )
 {
     mBLSelectionContext.save();
-    mBLSelectionContext.setCompOp( BL_COMP_OP_SRC_COPY );
-    mBLSelectionContext.setFillAlpha( 0.0f );
-    mBLSelectionContext.clearAll();
+    mBLSelectionContext.set_comp_op( BL_COMP_OP_SRC_COPY );
+    mBLSelectionContext.set_fill_alpha( 0.0f );
+    mBLSelectionContext.clear_all();
 
     if( iStroke )
     {
-        mBLSelectionContext.setStrokeAlpha( 1.0f );
-        mBLSelectionContext.setStrokeWidth( 1.0f );
-        mBLSelectionContext.strokeRect( iRect.x, iRect.y, iRect.w, iRect.h );
+        mBLSelectionContext.set_stroke_alpha( 1.0f );
+        mBLSelectionContext.set_stroke_width( 1.0f );
+        mBLSelectionContext.stroke_rect( iRect.x, iRect.y, iRect.w, iRect.h );
     }
     else
     {
-        mBLSelectionContext.setFillAlpha( 1.0f );
-        mBLSelectionContext.fillRect( iRect.x, iRect.y, iRect.w, iRect.h );
+        mBLSelectionContext.set_fill_alpha( 1.0f );
+        mBLSelectionContext.fill_rect( iRect.x, iRect.y, iRect.w, iRect.h );
     }
 
     mBLSelectionContext.flush( BL_CONTEXT_FLUSH_SYNC );
@@ -320,13 +320,13 @@ FOdysseyPainterEditorVectorCutToolHUD::GenerateLineMask( const ::ULIS::FVec2D& i
                                                        , const ::ULIS::FVec2D& iPoint1 )
 {
     mBLSelectionContext.save();
-    mBLSelectionContext.setCompOp( BL_COMP_OP_SRC_COPY );
-    mBLSelectionContext.setFillAlpha( 0.0f );
-    mBLSelectionContext.clearAll();
+    mBLSelectionContext.set_comp_op( BL_COMP_OP_SRC_COPY );
+    mBLSelectionContext.set_fill_alpha( 0.0f );
+    mBLSelectionContext.clear_all();
 
-    mBLSelectionContext.setStrokeAlpha( 1.0f );
-    mBLSelectionContext.setStrokeWidth( 1.0f );
-    mBLSelectionContext.strokeLine( iPoint0.x, iPoint0.y, iPoint1.x, iPoint1.y );
+    mBLSelectionContext.set_stroke_alpha( 1.0f );
+    mBLSelectionContext.set_stroke_width( 1.0f );
+    mBLSelectionContext.stroke_line( iPoint0.x, iPoint0.y, iPoint1.x, iPoint1.y );
 
     mBLSelectionContext.flush( BL_CONTEXT_FLUSH_SYNC );
     mBLSelectionContext.restore();
@@ -345,21 +345,21 @@ FOdysseyPainterEditorVectorCutToolHUD::GenerateFreehandMask( std::vector<::ULIS:
 
     mBLSelectionContext.save();
 
-    mBLSelectionContext.setCompOp(BL_COMP_OP_SRC_COPY);
-    /*blctx.setFillStyle( BLRgba32(0x00000000) );*/
-    mBLSelectionContext.setFillAlpha(0.0f);
-    mBLSelectionContext.clearAll();
+    mBLSelectionContext.set_comp_op(BL_COMP_OP_SRC_COPY);
+    /*blctx.set_fill_style( BLRgba32(0x00000000) );*/
+    mBLSelectionContext.set_fill_alpha(0.0f);
+    mBLSelectionContext.clear_all();
 
     if( iPointArray.size() )
     {
         double x1 = iPointArray[0].x, y1 = iPointArray[0].y
              , x2 = iPointArray[0].x, y2 = iPointArray[0].y;
 
-        path.moveTo( iPointArray[0].x, iPointArray[0].y );
+        path.move_to( iPointArray[0].x, iPointArray[0].y );
 
         for( uint32 i = 1; i < iPointArray.size(); i++ )
         {
-            path.lineTo( iPointArray[i].x, iPointArray[i].y );
+            path.line_to( iPointArray[i].x, iPointArray[i].y );
 
             if( iPointArray[i].x < x1 )
             {
@@ -382,20 +382,20 @@ FOdysseyPainterEditorVectorCutToolHUD::GenerateFreehandMask( std::vector<::ULIS:
             }
         }
 
-        path.lineTo( iPointArray[0].x, iPointArray[0].y );
+        path.line_to( iPointArray[0].x, iPointArray[0].y );
 
         rect = ::ULIS::FRectD::FromMinMax( x1, y1, x2, y2 );
 
         if( iStroke )
         {
-            mBLSelectionContext.setStrokeAlpha(1.0f);
-            mBLSelectionContext.setStrokeWidth( 1.0f );
-            mBLSelectionContext.strokePath( path );
+            mBLSelectionContext.set_stroke_alpha(1.0f);
+            mBLSelectionContext.set_stroke_width( 1.0f );
+            mBLSelectionContext.stroke_path( path );
         }
         else
         {
-            mBLSelectionContext.setFillAlpha(1.0f);
-            mBLSelectionContext.fillPath( path );
+            mBLSelectionContext.set_fill_alpha(1.0f);
+            mBLSelectionContext.fill_path( path );
         }
     }
 

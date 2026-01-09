@@ -160,7 +160,7 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseDragVector( FOdysseyVectorGroupP
             FInbetweenerPoint* gridPoint = mPickedPointArray[i];
             float ratio = ( PickingRadius && MatchingInfluence == eMatchingInfluence::Radial ) ? 1.0f - ( float ) ( mWorldDistanceArray[i] / PickingRadius ) : 1.0f;
             ::ULIS::FVec2D targetPosition = gridPoint->GetTargetPosition();
-            BLPoint localDiff = gridPoint->GetGrid()->GetBreakdown()->GetTargetInverseWorldMatrix().mapVector( iPointInTexture.deltaPosition.X
+            BLPoint localDiff = gridPoint->GetGrid()->GetBreakdown()->GetTargetInverseWorldMatrix().map_vector( iPointInTexture.deltaPosition.X
                                                                                                              , iPointInTexture.deltaPosition.Y );
 
             targetPosition.x += ( localDiff.x * ratio );

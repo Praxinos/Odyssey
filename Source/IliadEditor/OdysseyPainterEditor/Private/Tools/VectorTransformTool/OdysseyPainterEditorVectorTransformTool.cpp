@@ -445,11 +445,11 @@ TransformPoint( FOdysseyVectorPoint* iPoint
 
     if( ownerObject )
     {
-        BLPoint worldCoords = ownerObject->GetWorldMatrix().mapPoint( iOriginalPosition.x, iOriginalPosition.y );
-        BLPoint spaceCoords = iInverseSpaceMatrix.mapPoint( worldCoords.x, worldCoords.y );
-        BLPoint transCoords = iTransformationMatrix.mapPoint( spaceCoords.x, spaceCoords.y );
-        BLPoint newWorldCoords = iSpaceMatrix.mapPoint( transCoords.x, transCoords.y );
-        BLPoint newLocalCoords = ownerObject->GetInverseWorldMatrix().mapPoint( newWorldCoords.x, newWorldCoords.y );
+        BLPoint worldCoords = ownerObject->GetWorldMatrix().map_point( iOriginalPosition.x, iOriginalPosition.y );
+        BLPoint spaceCoords = iInverseSpaceMatrix.map_point( worldCoords.x, worldCoords.y );
+        BLPoint transCoords = iTransformationMatrix.map_point( spaceCoords.x, spaceCoords.y );
+        BLPoint newWorldCoords = iSpaceMatrix.map_point( transCoords.x, transCoords.y );
+        BLPoint newLocalCoords = ownerObject->GetInverseWorldMatrix().map_point( newWorldCoords.x, newWorldCoords.y );
 
         iPoint->Set( newLocalCoords.x, newLocalCoords.y );
     }
@@ -479,7 +479,7 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
         translateBy.y = localDelta.y;
     }
 
-    translateMatrix.resetToTranslation( translateBy.x, translateBy.y );
+    translateMatrix.reset_to_translation( translateBy.x, translateBy.y );
 
     if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_VERTEX )
     {
@@ -661,7 +661,7 @@ UOdysseyPainterEditorVectorTransformTool::RotateObjectSelection( FOdysseyVectorG
     BLMatrix2D rotateMatrix;
     double rotationAngle = GetRotationAngle( iPointInTexture );
 
-    rotateMatrix.resetToRotation( rotationAngle ); // Radians
+    rotateMatrix.reset_to_rotation( rotationAngle ); // Radians
 
     if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_VERTEX )
     {
@@ -832,7 +832,7 @@ UOdysseyPainterEditorVectorTransformTool::MakeSpaceMatrixForRotation()
     double selectionBoxSurface = selectionBox.rect.w * selectionBox.rect.h;
     BLMatrix2D spaceMatrix = selectionBox.worldMatrix;
     ::ULIS::FVec2D& pivot = mTransformHUD->GetGizmo();
-    BLPoint worldPivot = spaceMatrix.mapPoint( pivot.x, pivot.y );
+    BLPoint worldPivot = spaceMatrix.map_point( pivot.x, pivot.y );
 /*
     if( selectionBoxSurface )
     {
@@ -1184,7 +1184,7 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDragVector( FOdysseyVectorGroup
                 if ( mPickedPivot )
                 {
                     BLMatrix2D& inverseWorldMatrix = selectionBox.inverseWorldMatrix;
-                    BLPoint localCoords = inverseWorldMatrix.mapPoint( pointInTexture.x, pointInTexture.y );
+                    BLPoint localCoords = inverseWorldMatrix.map_point( pointInTexture.x, pointInTexture.y );
 
                     mTransformHUD->SetGizmo( localCoords.x, localCoords.y );
                 }
@@ -1275,13 +1275,13 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseUpVector( FOdysseyVectorGroupPa
             // quick fix to place the gizmo at the right place
             FSelectionBox& selectionBox = mTransformHUD->GetSelectionBox();
             ::ULIS::FVec2D& gizmo = mTransformHUD->GetGizmo();
-            BLPoint worldGizmo = selectionBox.worldMatrix.mapPoint( gizmo.x, gizmo.y );
+            BLPoint worldGizmo = selectionBox.worldMatrix.map_point( gizmo.x, gizmo.y );
             // endof quickfix
 
             iScene->GetLayer()->ResetHUD( iScene );
 
             // quick fix to place the gizmo at the right place
-            BLPoint localGizmo = selectionBox.inverseWorldMatrix.mapPoint( worldGizmo );
+            BLPoint localGizmo = selectionBox.inverseWorldMatrix.map_point( worldGizmo );
             mTransformHUD->SetGizmo( localGizmo.x, localGizmo.y );
             // endof quickfix
         }

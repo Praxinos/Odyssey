@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Zlib
 // Official GitHub Repository: https://github.com/blend2d/blend2d
 //
-// Copyright (c) 2008-2021 The Blend2D Authors
+// Copyright (c) 2017-2024 The Blend2D Authors
 //
 // This software is provided 'as-is', without any express or implied
 // warranty. In no event will the authors be held liable for any damages
@@ -26,9 +26,9 @@
 // includes all the necessary files required to use Blend2D library from both
 // C and C++ and it's the only header that is guaranteed to always be provided.
 //
-// Never include directly header files placed in "blend2d" directory. Headers
-// that end with "_p" suffix are private and should never be  included as they
-// are not part of public API and they are not part of blend2d-dev packages.
+// Never include directly header files placed in "blend2d/" directory. Headers
+// that end with "_p" suffix are private and should never be included - they
+// are not part of the public API and they are not part of blend2d-dev packages.
 // ----------------------------------------------------------------------------
 
 #ifndef BLEND2D_H_INCLUDED
@@ -43,36 +43,39 @@
   #pragma warning(disable: 4583) // destructor is not implicitly called.
 #endif
 
-#include "blend2d/api.h"
-#include "blend2d/array.h"
-#include "blend2d/bitset.h"
-#include "blend2d/context.h"
-#include "blend2d/filesystem.h"
-#include "blend2d/font.h"
-#include "blend2d/fontdata.h"
-#include "blend2d/fontdefs.h"
-#include "blend2d/fontface.h"
-#include "blend2d/fontfeaturesettings.h"
-#include "blend2d/fontmanager.h"
-#include "blend2d/fontvariationsettings.h"
-#include "blend2d/format.h"
-#include "blend2d/geometry.h"
-#include "blend2d/glyphbuffer.h"
-#include "blend2d/gradient.h"
-#include "blend2d/image.h"
-#include "blend2d/imagecodec.h"
-#include "blend2d/imagedecoder.h"
-#include "blend2d/imageencoder.h"
-#include "blend2d/matrix.h"
-#include "blend2d/object.h"
-#include "blend2d/path.h"
-#include "blend2d/pattern.h"
-#include "blend2d/pixelconverter.h"
-#include "blend2d/random.h"
-#include "blend2d/rgba.h"
-#include "blend2d/runtime.h"
-#include "blend2d/string.h"
-#include "blend2d/var.h"
+#include <blend2d/core/api.h>
+#include <blend2d/core/array.h>
+#include <blend2d/core/bitarray.h>
+#include <blend2d/core/bitset.h>
+#include <blend2d/core/context.h>
+#include <blend2d/core/filesystem.h>
+#include <blend2d/core/font.h>
+#include <blend2d/core/fontdata.h>
+#include <blend2d/core/fontdefs.h>
+#include <blend2d/core/fontface.h>
+#include <blend2d/core/fontfeaturesettings.h>
+#include <blend2d/core/fontmanager.h>
+#include <blend2d/core/fontvariationsettings.h>
+#include <blend2d/core/format.h>
+#include <blend2d/core/geometry.h>
+#include <blend2d/core/glyphbuffer.h>
+#include <blend2d/core/glyphrun.h>
+#include <blend2d/core/gradient.h>
+#include <blend2d/core/image.h>
+#include <blend2d/core/imagecodec.h>
+#include <blend2d/core/imagedecoder.h>
+#include <blend2d/core/imageencoder.h>
+#include <blend2d/core/matrix.h>
+#include <blend2d/core/object.h>
+#include <blend2d/core/path.h>
+#include <blend2d/core/pattern.h>
+#include <blend2d/core/pixelconverter.h>
+#include <blend2d/core/random.h>
+#include <blend2d/core/rgba.h>
+#include <blend2d/core/runtime.h>
+#include <blend2d/core/runtimescope.h>
+#include <blend2d/core/string.h>
+#include <blend2d/core/var.h>
 
 #if defined(_MSC_VER)
   #pragma warning(pop)

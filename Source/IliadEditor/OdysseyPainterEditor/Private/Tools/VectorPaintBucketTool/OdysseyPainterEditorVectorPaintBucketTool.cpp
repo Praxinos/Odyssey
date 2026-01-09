@@ -237,7 +237,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::GetRotationAngle( FOdysseyVectorBuck
     BLMatrix2D& inverseMatrix = ownerObject->GetInverseWorldMatrix();
     double rotation = iBucket->GetRotation();
     ::ULIS::FVec2D bucketVector = ::ULIS::FVec2D( cos( rotation ), sin( rotation ) );
-    BLPoint pt = inverseMatrix.mapPoint( iPointInTexture.x, iPointInTexture.y );
+    BLPoint pt = inverseMatrix.map_point( iPointInTexture.x, iPointInTexture.y );
     ::ULIS::FVec2D& pivot = iBucket->GetCoords();
     ::ULIS::FVec2D ptVector;
     double angle = 0.0f;
@@ -269,8 +269,8 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseDragVector( FOdysseyVectorGro
             FOdysseyVectorObject* bucketOwner = mPickedBucket->GetOwner();
             FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(bucketOwner);
             BLMatrix2D& inverseWorldMatrix = paintGroup->GetInverseWorldMatrix();
-            BLPoint localPoint = inverseWorldMatrix.mapPoint( iPointInTexture.x, iPointInTexture.y );
-            BLPoint localVector = inverseWorldMatrix.mapVector( iPointInTexture.x - mOldPointInTexture.x
+            BLPoint localPoint = inverseWorldMatrix.map_point( iPointInTexture.x, iPointInTexture.y );
+            BLPoint localVector = inverseWorldMatrix.map_vector( iPointInTexture.x - mOldPointInTexture.x
                                                               , iPointInTexture.y - mOldPointInTexture.y );
 
             switch( mPickedArea )
@@ -414,7 +414,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVectorCreateBucket( FOdysse
             if( bucket == nullptr )
             {
                 BLMatrix2D& inverseWorldMatrix = paintGroup->GetInverseWorldMatrix();
-                BLPoint localCoords = inverseWorldMatrix.mapPoint( iPointInTexture.x, iPointInTexture.y );
+                BLPoint localCoords = inverseWorldMatrix.map_point( iPointInTexture.x, iPointInTexture.y );
 
                 bucket = new FOdysseyVectorBucket( paintGroup
                                                  , localCoords.x
@@ -435,7 +435,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVectorCreateBucket( FOdysse
         for( FOdysseyVectorGroupPaint* paintGroup : mBucketHUD->GetWorkingPaintgroupList() )
         {
             BLMatrix2D& inverseWorldMatrix = paintGroup->GetInverseWorldMatrix();
-            BLPoint localCoords = inverseWorldMatrix.mapPoint( iPointInTexture.x, iPointInTexture.y );
+            BLPoint localCoords = inverseWorldMatrix.map_point( iPointInTexture.x, iPointInTexture.y );
             FOdysseyVectorBucket* bucket = new FOdysseyVectorBucket( paintGroup
                                                                    , localCoords.x
                                                                    , localCoords.y
