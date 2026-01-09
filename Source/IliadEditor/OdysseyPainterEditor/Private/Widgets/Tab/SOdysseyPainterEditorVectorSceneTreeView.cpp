@@ -203,7 +203,7 @@ SOdysseyPainterEditorVectorSceneTreeView::ExpandTree( const TSharedPtr<FVectorSc
 
     if( itemObject->IsSelected() )
     {
-        SetSelection( iItem );
+        SelectedItems.Add( iItem );
     }
 }
 
