@@ -240,6 +240,9 @@ public:
     UOdysseyLayerCell* CopyCell(UOdysseyLayerCell* Cell, int Index = -1);
 
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
+    UOdysseyLayerCell* CopyCellToLayer(UOdysseyLayerCell* Cell, UOdysseyLayer* ToLayer, int Index = -1) const;
+
+    UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     TArray<UOdysseyLayerCell*> CopyCells(TArray<UOdysseyLayerCell*> Cells, int Index = -1);
 
 public:
