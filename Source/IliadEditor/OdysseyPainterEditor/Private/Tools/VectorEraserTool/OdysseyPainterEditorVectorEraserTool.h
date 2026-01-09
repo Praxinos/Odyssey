@@ -95,15 +95,13 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorEraserTool : public UO
     public:
         UPROPERTY( EditAnywhere
                  , Category=EraserTool
-                 , meta = ( Tooltip = "Split Path",
-                            ToolConfiguration ) )
+                 , meta = ( Tooltip = "Split Path" ) )
         bool SplitPath;
 
         UPROPERTY( EditAnywhere
                  , Category=EraserTool
                  , meta = ( Tooltip  = "Radius"
                           , ClampMin = "0"
-                          , UIMin    = "0",
-                            ToolConfiguration ) )
+                          , UIMin    = "0" ) )
         uint32 Radius;
 };

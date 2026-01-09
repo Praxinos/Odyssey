@@ -98,7 +98,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorCutTool : public UOdys
 
     public:
         UPROPERTY( EditAnywhere
-                 , Category = "Shape"
-                 , meta = ( ToolConfiguration ) )
+                 , Category = "Shape" )
         FOdysseyShapes Shapes;
 };

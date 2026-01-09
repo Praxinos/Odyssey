@@ -185,31 +185,31 @@ private:
     void SubPixelBlueprintSetter(bool Value);
 
 public:
-    UPROPERTY(meta=(ForceShowEngineContent, ForceShowPluginContent, ToolConfiguration))
+    UPROPERTY(meta=(ForceShowEngineContent, ForceShowPluginContent))
     TObjectPtr<UOdysseyBrush> Brush;
 
-    UPROPERTY()
+    UPROPERTY(meta=(IgnoreToolConfiguration))
     TObjectPtr<UOdysseyBrushAssetBase> BrushInstance;
 
-    UPROPERTY()
+    UPROPERTY(meta=(IgnoreToolConfiguration))
     TObjectPtr<UOdysseyBrushOptions> BrushOptions;
 
-    UPROPERTY(EditAnywhere, Category="Shape" )
+    UPROPERTY(EditAnywhere, Category="Shape", meta = (IgnoreToolConfiguration))
     FOdysseyShapes Shapes;
 
-    UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="Shape", BlueprintSetter=SubPixelBlueprintSetter, meta=(ToolConfiguration))
+    UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="Shape", BlueprintSetter=SubPixelBlueprintSetter)
     bool SubPixel = true;
 
-    UPROPERTY(EditAnywhere, Category="Interpolation", meta = (ClampMin = "1", UIMin = "1", LinearDeltaSensitivity = "15", Delta = "1", Multiple = "1", ToolConfiguration))
+    UPROPERTY(EditAnywhere, Category="Interpolation", meta = (ClampMin = "1", UIMin = "1", LinearDeltaSensitivity = "15", Delta = "1", Multiple = "1"))
     float   Step = 1.0;
 
-    UPROPERTY( EditAnywhere, Category="Interpolation", meta = (ToolConfiguration))
+    UPROPERTY( EditAnywhere, Category="Interpolation")
     bool    AdaptativeStep = false;
 
-    UPROPERTY( EditInstanceOnly, Category="Interpolation", meta = (ToolConfiguration))
+    UPROPERTY( EditInstanceOnly, Category="Interpolation")
     EOdysseyInterpolationType InterpolationType = EOdysseyInterpolationType::kCatmullRom;
 
-    UPROPERTY(EditInstanceOnly, Category="Blending", meta=(ShowOnlyInnerProperties, ToolConfiguration))
+    UPROPERTY(EditInstanceOnly, Category="Blending", meta=(ShowOnlyInnerProperties))
     FOdysseyBlendParameters BlendParameters;
 
 protected:

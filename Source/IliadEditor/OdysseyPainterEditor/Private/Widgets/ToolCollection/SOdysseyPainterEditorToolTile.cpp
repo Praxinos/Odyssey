@@ -93,14 +93,13 @@ FReply SOdysseyPainterEditorToolTile::OnMouseButtonUp( const FGeometry& MyGeomet
                 UOdysseyPainterEditorTool* editorTool = mEditor->GetEditorToolOfClass(mToolConfig->mToolClass);
                 if (editorTool)
                 {
-                    mEditor->LoadToolFromPropertySnapshot(editorTool, mToolConfig->mSnapshot);
+                    UEngine::FCopyPropertiesForUnrelatedObjectsParams copyParams;
+                    copyParams.bDoDelta = false;
+                    UEngine::CopyPropertiesForUnrelatedObjects(mToolConfig->mTool, editorTool, copyParams);
 
                     // Particular case of UOdysseyPainterEditorRasterDrawingTool where we have to refresh the brush instance to the loaded tool
                     if (editorTool->IsA(UOdysseyPainterEditorRasterDrawingTool::StaticClass()))
                         Cast<UOdysseyPainterEditorRasterDrawingTool>(editorTool)->RefreshBrushInstance();
-
-                    /*else if (editorTool->IsA(UOdysseyPainterEditorAnimationOutOfPegsTool::StaticClass()))
-                        Cast<UOdysseyPainterEditorAnimationOutOfPegsTool>(editorTool)->Load();*/
 
                     mEditor->ActivateMainTool(editorTool);
                 }
@@ -167,7 +166,7 @@ FReply SOdysseyPainterEditorToolTile::OnDrop(const FGeometry& MyGeometry, const 
         if (mDropSide == EDropIndicatorSide::Right)
             targetIndex++;
 
-        UOdysseyPainterEditorToolConfiguration* toolConfig = mCollection->AddToolConfiguration( sourceToolConfig->mToolClass, sourceToolConfig->mSnapshot, sourceToolConfig->mIcon, targetIndex );
+        UOdysseyPainterEditorToolConfiguration* toolConfig = mCollection->AddToolConfiguration( sourceToolConfig->mToolClass, sourceToolConfig->mTool, sourceToolConfig->mIcon, targetIndex );
     }
     else
     {
@@ -330,7 +329,7 @@ bool SOdysseyPainterEditorToolTile::CanDuplicateTool() const
 
 void SOdysseyPainterEditorToolTile::OnDuplicateTool()
 {
-    mCollection->AddToolConfiguration(mToolConfig->mToolClass, mToolConfig->mSnapshot, mToolConfig->mIcon );
+    mCollection->AddToolConfiguration( mToolConfig->mToolClass, mToolConfig->mTool, mToolConfig->mIcon );
 }
 
 bool SOdysseyPainterEditorToolTile::CanChangeIcon() const

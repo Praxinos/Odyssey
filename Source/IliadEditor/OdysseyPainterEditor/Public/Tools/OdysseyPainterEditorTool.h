@@ -5,10 +5,10 @@
 
 #include "CoreMinimal.h"
 #include "Framework/MultiBox/MultiBoxExtender.h"
-#include "ToolMenuOwner.h"
 #include "Input/OdysseyPoint.h"
 #include "OdysseyStyle.h"
 #include "OdysseyHUDElement.h"
+#include "ToolMenuOwner.h"
 #include "Widgets/SWidget.h"
 
 #include "OdysseyPainterEditor.h"
@@ -97,6 +97,7 @@ protected:
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent) override;
     virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
     virtual void PostInitProperties() override;
+    virtual void PostDuplicate(EDuplicateMode::Type DuplicateMode) override;
 
 public:
     void SetEditor(class FOdysseyPainterEditor* iEditor);

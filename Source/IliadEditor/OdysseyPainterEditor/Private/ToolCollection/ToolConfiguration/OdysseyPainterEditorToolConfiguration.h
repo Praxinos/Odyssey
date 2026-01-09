@@ -7,31 +7,14 @@
 #include "Engine/DataAsset.h"
 #include "UObject/ObjectMacros.h"
 #include "Tools/OdysseyPainterEditorTool.h"
-#include "StructUtils/InstancedStruct.h"
 #include "OdysseyPainterEditorToolConfiguration.generated.h"
-
-USTRUCT()
-struct FToolPropertySnapshot
-{
-    GENERATED_BODY()
-
-    // One entry per property
-    UPROPERTY()
-    TMap<FName, FInstancedStruct> Values;
-
-    bool operator==(const FToolPropertySnapshot& iOther) const;
-    bool operator!=(const FToolPropertySnapshot& iOther) const
-    {
-        return !(*this == iOther);
-    }
-};
 
 /**
  * Odyssey Tool Configuration
  * Stores a tool properties and such, so that they can be saved and loaded
  */
 UCLASS(BlueprintType)
-class UOdysseyPainterEditorToolConfiguration : public UDataAsset
+class UOdysseyPainterEditorToolConfiguration : public UObject
 {
     GENERATED_BODY()
 
@@ -39,8 +22,8 @@ public:
     UPROPERTY(EditAnywhere)
     TSubclassOf<UObject> mToolClass;
 
-    UPROPERTY()
-    FToolPropertySnapshot mSnapshot;
+    UPROPERTY(EditAnywhere)
+    TObjectPtr<UOdysseyPainterEditorTool> mTool;
 
     UPROPERTY(EditDefaultsOnly, Category = "Tool")
     FSlateBrush mIcon;

@@ -104,14 +104,12 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPaintBucketTool : publ
     public:
         UPROPERTY( EditAnywhere
                  , Category=PaintBucketTool
-                 , meta = ( ToolTip  = "Propagate"
-                          , ToolConfiguration ) )
+                 , meta = ( ToolTip  = "Propagate" ) )
         bool Propagate;
 
         UPROPERTY( EditAnywhere
                  , Category=PaintBucketTool
-                 , meta = ( ToolTip  = "Color Mode"
-                          , ToolConfiguration ) )
+                 , meta = ( ToolTip  = "Color Mode" ) )
         EPaintBucketToolColorMode ColorMode;
 
         UPROPERTY( EditAnywhere
@@ -120,30 +118,26 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPaintBucketTool : publ
                           , ClampMin = "0.0"
                           , UIMin    = "0.0"
                           , ClampMax = "1.0"
-                          , UIMax    = "1.0"
-                          , ToolConfiguration ) )
+                          , UIMax    = "1.0" ) )
         double Opacity;
 
         UPROPERTY( EditAnywhere
                  , Category=PaintBucketTool
                  , meta = ( ToolTip = "Color1"
                           , EditCondition = "(ColorMode == EPaintBucketToolColorMode::LinearGradient) || (ColorMode == EPaintBucketToolColorMode::RadialGradient)"
-                          , EditConditionHides
-                          , ToolConfiguration ) )
+                          , EditConditionHides ) )
         FColor Color1;
 
         UPROPERTY( EditAnywhere
                  , Category=PaintBucketTool
                  , meta = ( ToolTip = "Color2"
                           , EditCondition = "(ColorMode == EPaintBucketToolColorMode::LinearGradient) || (ColorMode == EPaintBucketToolColorMode::RadialGradient)"
-                          , EditConditionHides
-                          , ToolConfiguration ) )
+                          , EditConditionHides ) )
         FColor Color2;
 
         UPROPERTY( EditAnywhere
                  , Category=PaintBucketTool
-                 , meta = ( ToolTip = "Picking Radius"
-                          , ToolConfiguration) )
+                 , meta = ( ToolTip = "Picking Radius" ) )
         double PickingRadius;
 
     protected:

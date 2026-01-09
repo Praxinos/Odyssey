@@ -131,22 +131,19 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTransformTool : public
                  , Category = TransformTool
                  , meta = ( ToolTip = "Show Inbetweens"
                           , EditCondition = "bInbetweenMode"
-                          , EditConditionHides
-                          , ToolConfiguration ) )
+                          , EditConditionHides ) )
         eShowInbetweens ShowInbetweens;
 
         UPROPERTY( EditAnywhere
                  , Category=TransformTool
                  , meta = ( ToolTip  = "PickingRadius"
                           , ClampMin = "0"
-                          , UIMin    = "0"
-                          , ToolConfiguration ) )
+                          , UIMin    = "0" ) )
         uint32 PickingRadius;
 
         UPROPERTY( EditAnywhere
                  , Category=TransformTool
-                 , meta = ( ToolTip = "Uniform"
-                          , ToolConfiguration ) )
+                 , meta = ( ToolTip = "Uniform" ) )
         bool Uniform;
         bool UniformAtKeyDown;
 
@@ -157,12 +154,10 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTransformTool : public
 
         UPROPERTY( EditAnywhere
                  , Category=TransformTool
-                 , meta = ( ToolTip = "World"
-                          , ToolConfiguration ) )
+                 , meta = ( ToolTip = "World" ) )
         bool World;
 
         UPROPERTY( EditDefaultsOnly
-                 , Category = TransformTool
-                 , meta = ( ToolConfiguration ) )
+                 , Category = TransformTool )
         bool bInbetweenMode;
 };

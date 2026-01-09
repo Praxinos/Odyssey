@@ -50,6 +50,11 @@ UOdysseyPainterEditorTool::PostInitProperties()
     Super::PostInitProperties();
 }
 
+void UOdysseyPainterEditorTool::PostDuplicate(EDuplicateMode::Type DuplicateMode)
+{
+
+}
+
 /* void
 UOdysseyPainterEditorTool::OnToolContextChanged()
 {

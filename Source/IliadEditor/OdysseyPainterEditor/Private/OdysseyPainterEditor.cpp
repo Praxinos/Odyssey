@@ -74,7 +74,6 @@
 
 #include "ToolCollection/OdysseyToolCollection.h"
 #include "ToolCollection/ToolConfiguration/OdysseyPainterEditorToolConfiguration.h"
-#include "ToolCollection/ToolConfiguration/OdysseyPainterEditorToolConfigurationUtils.h"
 #include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
 #include "Tools/RasterEraserTool/OdysseyPainterEditorRasterEraserTool.h"
 #include "Tools/RasterSelectionTool/OdysseyPainterEditorRasterSelectionTool.h"
@@ -3669,189 +3668,16 @@ void FOdysseyPainterEditor::SaveToRecentTools( UOdysseyPainterEditorTool* iTool 
     if( !iTool || !GetEditorToolOfClass(iTool->GetClass() ) )
         return;
 
-    FToolPropertySnapshot toolPropertySnapshot;
-    SaveToolPropertySnapshot( iTool, toolPropertySnapshot );
-
-    if( mRecentTools->ContainsSimilarToolConfiguration( iTool->GetClass(), toolPropertySnapshot ) )
+    if( mRecentTools->ContainsSimilarToolConfiguration( iTool->GetClass(), iTool ) )
         return;
 
-    mRecentTools->AddToolConfiguration( iTool->GetClass(), toolPropertySnapshot, iTool->Icon );
+    TObjectPtr<UOdysseyPainterEditorTool> toolSnapshot;
+    toolSnapshot = DuplicateObject< UOdysseyPainterEditorTool >(iTool, mRecentTools.Get());
+
+    mRecentTools->AddToolConfiguration( iTool->GetClass(), toolSnapshot, iTool->Icon );
 
     if( mRecentTools->GetToolConfigurations().Num() > 10 )
         mRecentTools->RemoveToolConfigurationAtIndex( 0 );
 }
-
-void FOdysseyPainterEditor::SaveToolPropertySnapshot( UOdysseyPainterEditorTool* iTool, FToolPropertySnapshot& oSnapshot )
-{
-    oSnapshot.Values.Reset();
-
-    for( TFieldIterator<FProperty> it( iTool->GetClass() ); it; ++it )
-    {
-        FProperty* property = *it;
-
-        if( !property->HasMetaData( TEXT( "ToolConfiguration" ) ) )
-        {
-            continue;
-        }
-
-        const void* valuePtr = property->ContainerPtrToValuePtr<void>( iTool );
-
-        // Enum
-        if( FEnumProperty* enumProperty = CastField<FEnumProperty>( property ) )
-        {
-            FToolEnumValue data;
-            data.Value = enumProperty->GetUnderlyingProperty()->GetUnsignedIntPropertyValue(valuePtr);
-
-            oSnapshot.Values.Add( property->GetFName(), FInstancedStruct::Make( data ) );
-        }
-        // Bool
-        else if( FBoolProperty* boolProperty = CastField<FBoolProperty>( property ) )
-        {
-            FToolBoolValue data;
-            data.Value = boolProperty->GetPropertyValue( valuePtr );
-
-            oSnapshot.Values.Add( property->GetFName(), FInstancedStruct::Make( data ) );
-        }
-        // Int
-        else if (FIntProperty* intProperty = CastField<FIntProperty>(property))
-        {
-            FToolIntValue data;
-            data.Value = intProperty->GetPropertyValue(valuePtr);
-
-            oSnapshot.Values.Add(property->GetFName(), FInstancedStruct::Make(data));
-        }
-        // Float
-        else if( FFloatProperty* floatProperty = CastField<FFloatProperty>( property ) )
-        {
-            FToolFloatValue data;
-            data.Value = floatProperty->GetPropertyValue( valuePtr );
-
-            oSnapshot.Values.Add( property->GetFName(), FInstancedStruct::Make( data ) );
-        }
-        // Double
-        else if (FDoubleProperty* doubleProperty = CastField<FDoubleProperty>(property))
-        {
-            FToolDoubleValue data;
-            data.Value = doubleProperty->GetPropertyValue( valuePtr );
-
-            oSnapshot.Values.Add( property->GetFName(), FInstancedStruct::Make( data ) );
-        }
-        // Serialized UObject
-        else if( FObjectProperty* objectProperty = CastField<FObjectProperty>( property ) )
-        {
-            FToolObjectValue data;
-            data.Value = objectProperty->GetPropertyValue(valuePtr);
-
-            oSnapshot.Values.Add( property->GetFName(), FInstancedStruct::Make( data ) );
-        }
-        // UStruct
-        else if( FStructProperty* structProperty = CastField<FStructProperty>( property ) )
-        {
-            FInstancedStruct data;
-            data.InitializeAs(structProperty->Struct);
-
-            void* dest = data.GetMutableMemory();
-            const void* src = structProperty->ContainerPtrToValuePtr<void>(iTool);
-
-            structProperty->Struct->CopyScriptStruct(dest, src);
-
-            oSnapshot.Values.Add( property->GetFName(), MoveTemp(data) );
-        }
-    }
-}
-
-void FOdysseyPainterEditor::LoadToolFromPropertySnapshot( UOdysseyPainterEditorTool* iTool, const FToolPropertySnapshot& iSnapshot )
-{
-    for( const auto& pair : iSnapshot.Values )
-    {
-        FProperty* property = iTool->GetClass()->FindPropertyByName( pair.Key );
-
-        if( !property || !property->HasMetaData( TEXT("ToolConfiguration") ) )
-        {
-            continue; // property is removed, renamed or has no meta tag "ToolConfiguration"
-        }
-
-        void* valuePtr = property->ContainerPtrToValuePtr<void>( iTool );
-        const FInstancedStruct& storedData = pair.Value;
-
-        // Enum
-        if( FEnumProperty* enumProperty = CastField<FEnumProperty>( property ) )
-        {
-            const FToolEnumValue* data = storedData.GetPtr<FToolEnumValue>();
-
-            if( data )
-            {
-                enumProperty->GetUnderlyingProperty()->SetIntPropertyValue( valuePtr, data->Value );
-            }
-        }
-        // Bool
-        else if( FBoolProperty* boolProperty = CastField<FBoolProperty>( property ) )
-        {
-            const FToolBoolValue* data = storedData.GetPtr<FToolBoolValue>();
-
-            if (data)
-            {
-                boolProperty->SetPropertyValue( valuePtr, data->Value );
-            }
-        }
-        // Int
-        else if( FIntProperty* intProperty = CastField<FIntProperty>( property ) )
-        {
-            const FToolIntValue* data = storedData.GetPtr<FToolIntValue>();
-
-            if (data)
-            {
-                intProperty->SetPropertyValue( valuePtr, data->Value );
-            }
-        }
-        // Float
-        else if( FFloatProperty* floatProperty = CastField<FFloatProperty>( property ) )
-        {
-            const FToolFloatValue* data = storedData.GetPtr<FToolFloatValue>();
-
-            if (data)
-            {
-                floatProperty->SetPropertyValue( valuePtr, data->Value );
-            }
-        }
-        // Double
-        else if( FDoubleProperty* doubleProperty = CastField<FDoubleProperty>( property ) )
-        {
-            const FToolDoubleValue* data = storedData.GetPtr<FToolDoubleValue>();
-
-            if (data)
-            {
-                doubleProperty->SetPropertyValue( valuePtr, data->Value );
-            }
-        }
-        // Serialized UObject
-        else if( FObjectProperty* objectProperty = CastField<FObjectProperty>( property ) )
-        {
-            const FToolObjectValue* data = storedData.GetPtr<FToolObjectValue>();
-
-            if (data)
-            {
-                objectProperty->SetObjectPropertyValue( valuePtr, data->Value.LoadSynchronous() );
-            }
-        }
-        // UStruct
-        else if( FStructProperty* structProperty = CastField<FStructProperty>( property ) )
-        {
-            if( storedData.GetScriptStruct() == structProperty->Struct )
-            {
-                structProperty->Struct->CopyScriptStruct( valuePtr, storedData.GetMemory() );
-            }
-        }
-    }
-}
-
-/* Instanced UObjects
-if (objectProperty->HasAnyPropertyFlags(CPF_InstancedReference))
-{
-    UObject* objectValue = objectProperty->GetObjectPropertyValue(valuePtr)
-        FToolPropertySnapshot subSnapshot;
-    SaveToolPropertySnapshot(objectValue, subSnapshot);
-    oSnapshot.Values.Add(property->GetFName(), FInstancedStruct::Make(subSnapshot));
-}*/
 
 #undef LOCTEXT_NAMESPACE

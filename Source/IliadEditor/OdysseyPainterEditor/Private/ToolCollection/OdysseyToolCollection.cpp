@@ -3,6 +3,37 @@
 
 #include "OdysseyToolCollection.h"
 
+#include "Serialization/ObjectAndNameAsStringProxyArchive.h"
+#include "ToolCollection/ToolConfiguration/OdysseyPainterEditorToolConfigurationUtils.h"
+
+/////////////////////////////////////////////////////
+// FToolPropertySnapshot
+
+bool FToolPropertySnapshot::operator==(const FToolPropertySnapshot& iOther) const
+{
+    if (Values.Num() != iOther.Values.Num())
+    {
+        return false;
+    }
+
+    TArray<uint8> bufferA;
+    TArray<uint8> bufferB;
+
+    FMemoryWriter memWriterA(bufferA, true);
+    FMemoryWriter memWriterB(bufferB, true);
+
+    FObjectAndNameAsStringProxyArchive arA(memWriterA, false);
+    FObjectAndNameAsStringProxyArchive arB(memWriterB, false);
+
+    arA.SetIsSaving(true);
+    arB.SetIsSaving(true);
+
+    FToolPropertySnapshot::StaticStruct()->SerializeItem(arA, (void*)this, nullptr);
+    FToolPropertySnapshot::StaticStruct()->SerializeItem(arB, (void*)&iOther, nullptr);
+
+    return bufferA == bufferB;
+}
+
 /////////////////////////////////////////////////////
 // OdysseyToolCollection
 
@@ -21,7 +52,7 @@ bool UOdysseyToolCollection::IsCollectionTransient() const
     return false;
 }
 
-UOdysseyPainterEditorToolConfiguration* UOdysseyToolCollection::AddToolConfiguration(UClass* iToolClass, FToolPropertySnapshot& iSnapshotConfig, FSlateBrush& iIcon, int32 iIndex)
+UOdysseyPainterEditorToolConfiguration* UOdysseyToolCollection::AddToolConfiguration(UClass* iToolClass, TObjectPtr<UOdysseyPainterEditorTool>& iTool, FSlateBrush& iIcon, int32 iIndex)
 {
     if( !iToolClass )
         return nullptr;
@@ -31,7 +62,7 @@ UOdysseyPainterEditorToolConfiguration* UOdysseyToolCollection::AddToolConfigura
 
     UOdysseyPainterEditorToolConfiguration* toolConfig = NewObject<UOdysseyPainterEditorToolConfiguration>(this);
     toolConfig->mToolClass = iToolClass;
-    toolConfig->mSnapshot = iSnapshotConfig;
+    toolConfig->mTool = iTool;
     toolConfig->mIcon = iIcon;
 
     Modify();
@@ -96,13 +127,19 @@ int32 UOdysseyToolCollection::GetIndexOfToolConfiguration(UOdysseyPainterEditorT
     return index;
 }
 
-bool UOdysseyToolCollection::ContainsSimilarToolConfiguration(UClass* iToolClass, FToolPropertySnapshot& iSnapshotConfig)
+bool UOdysseyToolCollection::ContainsSimilarToolConfiguration(UClass* iToolClass, UOdysseyPainterEditorTool* iTool)
 {
     check( iToolClass );
 
+    FToolPropertySnapshot toolToCheckSnapshot;
+    UOdysseyToolCollection::ConvertToolToPropertySnapshot( iTool, toolToCheckSnapshot );
+
     for (UOdysseyPainterEditorToolConfiguration* toolConfig : mToolsConfig)
     {
-        if( iSnapshotConfig == toolConfig->mSnapshot )
+        FToolPropertySnapshot toolConfigSnapshot;
+        UOdysseyToolCollection::ConvertToolToPropertySnapshot( toolConfig->mTool, toolConfigSnapshot );
+
+        if( toolToCheckSnapshot == toolConfigSnapshot )
             return true;
     }
 
@@ -112,4 +149,83 @@ bool UOdysseyToolCollection::ContainsSimilarToolConfiguration(UClass* iToolClass
 const TArray<UOdysseyPainterEditorToolConfiguration*> UOdysseyToolCollection::GetToolConfigurations() const
 {
     return mToolsConfig;
+}
+
+void UOdysseyToolCollection::ConvertToolToPropertySnapshot(UOdysseyPainterEditorTool* iTool, FToolPropertySnapshot& oSnapshot)
+{
+    oSnapshot.Values.Reset();
+
+    for (TFieldIterator<FProperty> it(iTool->GetClass()); it; ++it)
+    {
+        FProperty* property = *it;
+
+        if (property->HasMetaData(TEXT("IgnoreToolConfiguration")))
+        {
+            continue;
+        }
+
+        const void* valuePtr = property->ContainerPtrToValuePtr<void>(iTool);
+
+        // Enum
+        if (FEnumProperty* enumProperty = CastField<FEnumProperty>(property))
+        {
+            FToolEnumValue data;
+            data.Value = enumProperty->GetUnderlyingProperty()->GetUnsignedIntPropertyValue(valuePtr);
+
+            oSnapshot.Values.Add(property->GetFName(), FInstancedStruct::Make(data));
+        }
+        // Bool
+        else if (FBoolProperty* boolProperty = CastField<FBoolProperty>(property))
+        {
+            FToolBoolValue data;
+            data.Value = boolProperty->GetPropertyValue(valuePtr);
+
+            oSnapshot.Values.Add(property->GetFName(), FInstancedStruct::Make(data));
+        }
+        // Int
+        else if (FIntProperty* intProperty = CastField<FIntProperty>(property))
+        {
+            FToolIntValue data;
+            data.Value = intProperty->GetPropertyValue(valuePtr);
+
+            oSnapshot.Values.Add(property->GetFName(), FInstancedStruct::Make(data));
+        }
+        // Float
+        else if (FFloatProperty* floatProperty = CastField<FFloatProperty>(property))
+        {
+            FToolFloatValue data;
+            data.Value = floatProperty->GetPropertyValue(valuePtr);
+
+            oSnapshot.Values.Add(property->GetFName(), FInstancedStruct::Make(data));
+        }
+        // Double
+        else if (FDoubleProperty* doubleProperty = CastField<FDoubleProperty>(property))
+        {
+            FToolDoubleValue data;
+            data.Value = doubleProperty->GetPropertyValue(valuePtr);
+
+            oSnapshot.Values.Add(property->GetFName(), FInstancedStruct::Make(data));
+        }
+        // Serialized UObject
+        else if (FObjectProperty* objectProperty = CastField<FObjectProperty>(property))
+        {
+            FToolObjectValue data;
+            data.Value = objectProperty->GetPropertyValue(valuePtr);
+
+            oSnapshot.Values.Add(property->GetFName(), FInstancedStruct::Make(data));
+        }
+        // UStruct
+        else if (FStructProperty* structProperty = CastField<FStructProperty>(property))
+        {
+            FInstancedStruct data;
+            data.InitializeAs(structProperty->Struct);
+
+            void* dest = data.GetMutableMemory();
+            const void* src = structProperty->ContainerPtrToValuePtr<void>(iTool);
+
+            structProperty->Struct->CopyScriptStruct(dest, src);
+
+            oSnapshot.Values.Add(property->GetFName(), MoveTemp(data));
+        }
+    }
 }

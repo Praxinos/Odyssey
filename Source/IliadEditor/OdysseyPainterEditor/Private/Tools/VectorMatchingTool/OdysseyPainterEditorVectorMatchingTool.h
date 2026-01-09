@@ -86,23 +86,20 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorMatchingTool : public 
         UPROPERTY( EditAnywhere
                  , Category = MatchingTool
                  , meta = ( DisplayName = "Show Inbetweens"
-                          , ToolTip = "Show Inbetweens"
-                          , ToolConfiguration ) )
+                          , ToolTip = "Show Inbetweens" ) )
         eShowInbetweens ShowInbetweens;
 
         UPROPERTY( EditAnywhere
                  , Category = MatchingTool
                  , meta = ( ToolTip  = "Picking Radius"
                           , ClampMin = "0"
-                          , UIMin    = "0"
-                          , ToolConfiguration ) )
+                          , UIMin    = "0" ) )
         uint32 PickingRadius;
 
         UPROPERTY( EditAnywhere
                  , Category = MatchingTool
                  , meta = ( DisplayName = "Picking Influence"
-                          , ToolTip  = "Picking Influence"
-                          , ToolConfiguration ) )
+                          , ToolTip  = "Picking Influence" ) )
         eMatchingInfluence MatchingInfluence;
 
         UPROPERTY( EditAnywhere
@@ -112,21 +109,18 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorMatchingTool : public 
                           , ClampMin = "0"
                           , UIMin    = "0"
                           , ClampMax = "20"
-                          , UIMax    = "20"
-                          , ToolConfiguration ) )
+                          , UIMax    = "20" ) )
         uint32 Rigidity;
 
         UPROPERTY( EditAnywhere
                  , Category = MatchingTool
                  , meta = ( DisplayName = "Move picked area only"
-                          , ToolTip  = "Move picked area only"
-                          , ToolConfiguration ) )
+                          , ToolTip  = "Move picked area only" ) )
         bool RigidifySelectionOnly;
 
         UPROPERTY( EditAnywhere
                  , Category = MatchingTool
                  , meta = ( DisplayName = "Grid Display Mode"
-                          , ToolTip  = "Grid Display Mode"
-                          , ToolConfiguration ) )
+                          , ToolTip  = "Grid Display Mode" ) )
         eMatchingGridDisplayMode GridDisplayMode;
 };

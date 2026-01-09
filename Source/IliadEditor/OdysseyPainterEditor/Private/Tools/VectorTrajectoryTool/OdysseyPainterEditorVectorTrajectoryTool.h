@@ -108,8 +108,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTrajectoryTool : publi
                  , Category = TrajectoryTool
                  , meta = ( ToolTip = "Show Inbetweens"
                           , EditCondition = "bInbetweenMode"
-                          , EditConditionHides
-                          , ToolConfiguration ) )
+                          , EditConditionHides ) )
         eShowInbetweens ShowInbetweens;
 
         UPROPERTY( EditAnywhere
@@ -118,13 +117,11 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTrajectoryTool : publi
                           , ClampMin = "1"
                           , UIMin    = "1"
                           , ClampMax = "100"
-                          , UIMax    = "100"
-                          , ToolConfiguration ) )
+                          , UIMax    = "100" ) )
         uint32 PickingRadius;
 
         UPROPERTY( EditAnywhere
                  , Category = MatchingTool
-                 , meta = ( ToolTip  = "Grid Display Mode"
-                          , ToolConfiguration ) )
+                 , meta = ( ToolTip  = "Grid Display Mode" ) )
         eVectorTrajectoryGridDisplayMode GridDisplayMode;
 };

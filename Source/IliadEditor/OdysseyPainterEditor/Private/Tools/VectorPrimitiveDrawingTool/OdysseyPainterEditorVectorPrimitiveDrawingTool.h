@@ -69,28 +69,24 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPrimitiveDrawingTool :
 
     public:
         UPROPERTY( EditAnywhere
-                 , Category = "Shape"
-                 , meta = ( ToolConfiguration ) )
+                 , Category = "Shape" )
         FOdysseyShapes Shapes;
 
         UPROPERTY( EditAnywhere
                  , Category = "Parameters"
-                 , meta = ( ToolTip = "Brush"
-                          , ToolConfiguration ) )
+                 , meta = ( ToolTip = "Brush" ) )
         FOdysseyVectorBrush Brush;
 
         UPROPERTY( EditAnywhere
                  , Category = "Parameters"
                  , meta = ( ToolTip  = "Stroke Width"
                           , ClampMin = "0.0"
-                          , UIMin    = "0.0"
-                          , ToolConfiguration ) )
+                          , UIMin    = "0.0" ) )
         double StrokeWidth;
 
         UPROPERTY( EditAnywhere
                  , Category = "Parameters"
-                 , meta = ( ToolTip  = "Uniform"
-                          , ToolConfiguration ) )
+                 , meta = ( ToolTip  = "Uniform" ) )
         bool Uniform;
         bool UniformAtKeyDown;
 

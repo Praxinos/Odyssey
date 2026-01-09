@@ -97,20 +97,20 @@ private:
     TArray<IOdysseyRenderingAbility*> GetForegroundLayersToExclude(UOdysseyLayer* iLayer) const;
 
 public:
-    UPROPERTY( EditAnywhere, Category=RasterPaintBucketTool, meta = ( ToolConfiguration ) )
+    UPROPERTY( EditAnywhere, Category=RasterPaintBucketTool )
     EOdysseyRasterPaintBucketToolSource Source = EOdysseyRasterPaintBucketToolSource::AllLayers;
-    UPROPERTY( EditAnywhere, Category=RasterPaintBucketTool, meta = ( ToolConfiguration ) )
+    UPROPERTY( EditAnywhere, Category=RasterPaintBucketTool )
     EOdysseyRasterPaintBucketToolColorToleranceSource ColorToleranceSource = EOdysseyRasterPaintBucketToolColorToleranceSource::ColorAndTransparency;
-    UPROPERTY( EditAnywhere, Category=RasterPaintBucketTool, meta = ( ClampMin = "0", ClampMax = "100", UIMin = "0", UIMax = "100", Delta = "1", Multiple="1", Units="Percent", ToolConfiguration ) )
+    UPROPERTY( EditAnywhere, Category=RasterPaintBucketTool, meta = ( ClampMin = "0", ClampMax = "100", UIMin = "0", UIMax = "100", Delta = "1", Multiple="1", Units="Percent" ) )
     float ColorTolerance = 5; //0 - 100%
-    UPROPERTY( EditAnywhere, Category=RasterPaintBucketTool, meta = ( LinearDeltaSensitivity=1, ToolConfiguration ) )
+    UPROPERTY( EditAnywhere, Category=RasterPaintBucketTool, meta = ( LinearDeltaSensitivity=1 ) )
     float Expansion = 2; //pixels positive and negative
-    UPROPERTY( EditAnywhere, Category=RasterPaintBucketTool, meta = ( ClampMin=0, UIMin=0, LinearDeltaSensitivity=1, ToolConfiguration ) )
+    UPROPERTY( EditAnywhere, Category=RasterPaintBucketTool, meta = ( ClampMin=0, UIMin=0, LinearDeltaSensitivity=1 ) )
     float GapTolerance = 2; //pixels positive only
-    UPROPERTY( EditAnywhere, Category=RasterPaintBucketTool, meta = ( ToolConfiguration ) )
+    UPROPERTY( EditAnywhere, Category=RasterPaintBucketTool )
     TArray<FLinearColor> IncludeColors;
 
-    UPROPERTY(EditInstanceOnly, Category="Blending", meta = ( ShowOnlyInnerProperties, ToolConfiguration ) )
+    UPROPERTY(EditInstanceOnly, Category="Blending", meta = ( ShowOnlyInnerProperties ) )
     FOdysseyBlendParameters BlendParameters;
 
 private:

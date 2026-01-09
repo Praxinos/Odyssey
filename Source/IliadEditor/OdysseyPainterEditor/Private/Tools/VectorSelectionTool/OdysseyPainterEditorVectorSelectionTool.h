@@ -91,7 +91,6 @@ protected:
 
 public:
     UPROPERTY( EditAnywhere
-             , Category = "Shape"
-             , meta = ( ToolConfiguration ) )
+             , Category = "Shape" )
     FOdysseyShapes Shapes;
 };

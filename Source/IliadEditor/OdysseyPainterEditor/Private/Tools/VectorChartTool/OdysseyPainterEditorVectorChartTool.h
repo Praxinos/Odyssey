@@ -97,8 +97,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorChartTool : public UOd
                  , Category = ChartTool
                  , meta = ( ToolTip  = "Picking Radius"
                           , ClampMin = "0"
-                          , UIMin    = "0"
-                          , ToolConfiguration ) )
+                          , UIMin    = "0" ) )
         uint32 PickingRadius;
 
         UPROPERTY()
@@ -112,13 +111,11 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorChartTool : public UOd
                           , ClampMax = "5"
                           , UIMax    = "5"
                           , EditCondition = "( EditionMode == eVectorChartEditionMode::EaseInOrOut ) || ( EditionMode == eVectorChartEditionMode::Magnet )"
-                          , EditConditionHides
-                          , ToolConfiguration ) )
+                          , EditConditionHides ) )
         uint32 Factor;
 
         UPROPERTY( EditAnywhere
                  , Category = ChartTool
-                 , meta = ( ToolTip  = "Chart Type"
-                          , ToolConfiguration) )
+                 , meta = ( ToolTip  = "Chart Type" ) )
         eChartType ChartType;
 };

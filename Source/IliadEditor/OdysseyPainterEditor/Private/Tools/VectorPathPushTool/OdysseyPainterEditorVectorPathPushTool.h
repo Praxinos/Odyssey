@@ -82,13 +82,11 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathPushTool : public 
                  , Category=PathPushTool
                  , meta = ( ToolTip  = "Radius"
                           , ClampMin = "0"
-                          , UIMin    = "0"
-                          , ToolConfiguration ) )
+                          , UIMin    = "0" ) )
         uint32 Radius;
 
         UPROPERTY( EditAnywhere
                  , Category=PathPushTool
-                 , meta = ( ToolTip  = "Restrict To Selected Objects"
-                          , ToolConfiguration ) )
+                 , meta = ( ToolTip  = "Restrict To Selected Objects" ) )
         bool RestrictToSelectedObjects;
 };
