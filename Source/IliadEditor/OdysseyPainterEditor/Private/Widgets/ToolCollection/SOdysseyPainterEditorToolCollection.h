@@ -39,6 +39,9 @@ protected:
     void HandleToolsChanged();
     void RefreshToolsGUI();
     EVisibility GetAddButtonVisibility() const;
+    TSharedRef<SWidget> GetCollectionMenuContent();
+
+    void HandleSaveCollection();
 
 protected:
     FOdysseyPainterEditor* mEditor;

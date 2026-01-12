@@ -9,6 +9,10 @@
 #include "ToolCollection/OdysseyToolCollectionDragDropOp.h"
 #include "SOdysseyPainterEditorToolTile.h"
 #include "SPositiveActionButton.h"
+#include "Misc/PackageName.h"
+#include "UObject/Package.h"
+#include "UObject/SavePackage.h"
+
 
 SOdysseyPainterEditorToolCollection::~SOdysseyPainterEditorToolCollection()
 {
@@ -36,7 +40,30 @@ void SOdysseyPainterEditorToolCollection::Construct(const FArguments& InArgs)
         [
             SNew(SExpandableArea)
                 .InitiallyCollapsed(false)
-                .AreaTitle(this, &SOdysseyPainterEditorToolCollection::GetCollectionDisplayName)
+                .HeaderContent()
+                [
+                    SNew(SHorizontalBox)
+                        // Collection name
+                        + SHorizontalBox::Slot()
+                        .FillWidth(1.f)
+                        .VAlign(VAlign_Center)
+                        [
+                            SNew(STextBlock)
+                                .Text(this, &SOdysseyPainterEditorToolCollection::GetCollectionDisplayName)
+                        ]
+                        // Dropdown menu
+                        + SHorizontalBox::Slot()
+                        .AutoWidth()
+                        .VAlign(VAlign_Center)
+                        .Padding(4.f, 0.f)
+                        [
+                            mToolCollection->IsCollectionTransient()
+                                ? SNullWidget::NullWidget
+                                : SNew(SComboButton)
+                                .HasDownArrow(true)
+                                .OnGetMenuContent(this, &SOdysseyPainterEditorToolCollection::GetCollectionMenuContent)
+                        ]
+                ]
                 .BodyContent()
                 [
                     SAssignNew(mToolWrapBox, SWrapBox)
@@ -58,11 +85,18 @@ TSharedRef<SWidget> SOdysseyPainterEditorToolCollection::GenerateToolConfigTile(
         .IsUnlocked(bIsUnlocked);
 }
 
-FText
-SOdysseyPainterEditorToolCollection::GetCollectionDisplayName() const
+FText SOdysseyPainterEditorToolCollection::GetCollectionDisplayName() const
 {
-    return mToolCollection && !mToolCollection->IsCollectionTransient() ? FText::FromString(mToolCollection->GetName())
-                                 : FText::FromString(TEXT("Recent Tools"));
+    if (!mToolCollection || mToolCollection->IsCollectionTransient())
+    {
+        return FText::FromString(TEXT("Recent Tools"));
+    }
+
+    const bool bIsDirty = mToolCollection->GetOutermost() && mToolCollection->GetOutermost()->IsDirty();
+
+    const FString DisplayName = bIsDirty ? FString::Printf(TEXT("%s*"), *mToolCollection->GetName()) : mToolCollection->GetName();
+
+    return FText::FromString(DisplayName);
 }
 
 const FSlateBrush*
@@ -129,4 +163,62 @@ void SOdysseyPainterEditorToolCollection::RefreshToolsGUI()
 EVisibility SOdysseyPainterEditorToolCollection::GetAddButtonVisibility() const
 {
     return bIsUnlocked.Get() ? EVisibility::Visible : EVisibility::Collapsed;
+}
+
+TSharedRef<SWidget> SOdysseyPainterEditorToolCollection::GetCollectionMenuContent()
+{
+    FMenuBuilder menuBuilder(true, nullptr);
+
+    menuBuilder.AddMenuEntry(
+        FText::FromString(TEXT("Save Collection")),
+        FText::FromString(TEXT("Save this tool collection")),
+        FSlateIcon(),
+        FUIAction(
+            FExecuteAction::CreateSP(this, &SOdysseyPainterEditorToolCollection::HandleSaveCollection)
+        )
+    );
+
+    /*MenuBuilder.AddMenuEntry(
+        FText::FromString(TEXT("Remove Collection")),
+        FText::FromString(TEXT("Remove this tool collection from the editor")),
+        FSlateIcon(),
+        FUIAction(
+            FExecuteAction::CreateSP(this, &SOdysseyPainterEditorToolCollection::HandleRemoveCollection)
+        )
+    );*/
+
+    return menuBuilder.MakeWidget();
+}
+
+void SOdysseyPainterEditorToolCollection::HandleSaveCollection()
+{
+    if (!mToolCollection || mToolCollection->IsCollectionTransient())
+    {
+        return;
+    }
+
+    UPackage* package = mToolCollection->GetOutermost();
+    if (!package)
+    {
+        return;
+    }
+
+    if (!package->IsDirty())
+    {
+        return;
+    }
+
+    const FString packageFileName = FPackageName::LongPackageNameToFilename( package->GetName(), FPackageName::GetAssetPackageExtension() );
+
+    FSavePackageArgs saveArgs;
+    saveArgs.TopLevelFlags = RF_Public | RF_Standalone;
+    saveArgs.SaveFlags = SAVE_None;
+    saveArgs.Error = GError;
+
+    UPackage::SavePackage(
+        package,
+        nullptr,
+        *packageFileName,
+        saveArgs
+    );
 }
