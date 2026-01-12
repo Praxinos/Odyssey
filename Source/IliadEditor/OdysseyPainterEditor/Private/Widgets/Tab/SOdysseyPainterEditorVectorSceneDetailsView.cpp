@@ -181,7 +181,11 @@ SOdysseyPainterEditorVectorSceneDetailsView::OnVectorLayerNotify( const FOdyssey
 void
 SOdysseyPainterEditorVectorSceneDetailsView::ParseVectorNotifications( const FOdysseyVectorObjectInvalidationFlags& iInvalidationFlags )
 {
-    if( iInvalidationFlags.bits.any() )
+    if( ( iInvalidationFlags.bits.any() )
+        // DO NOT react to color change events. First it is useless, second it creates issues when picking a color in a
+        // color picker modal window
+     && ( iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::COLOR] == false )
+     && ( iInvalidationFlags.bits[FOdysseyVectorObjectInvalidationFlags::CHILD_COLOR] == false ) )
     {
         Update();
     }

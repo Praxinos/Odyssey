@@ -662,7 +662,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::ExtendContextMenu( FMenuBuilder& iMe
               LOCTEXT("vector-paint-bucket-tool.context-menu.bucket-properties.name", "Bucket properties")
             , LOCTEXT("vector-paint-bucket-tool.context-menu.bucket-properties.tooltip", "Bucket Properties")
             , FSlateIcon()
-            , FUIAction(FExecuteAction::CreateStatic(&UOdysseyPainterEditorVectorPaintBucketTool::BucketProperties, GetEditor(), mPickedBucket )));
+            , FUIAction(FExecuteAction::CreateUObject(this, &UOdysseyPainterEditorVectorPaintBucketTool::BucketProperties, mPickedBucket )));
 
         mPickedBucket = nullptr;
     }
@@ -672,16 +672,15 @@ UOdysseyPainterEditorVectorPaintBucketTool::ExtendContextMenu( FMenuBuilder& iMe
     }
 }
 
-//static
 void
-UOdysseyPainterEditorVectorPaintBucketTool::BucketProperties( FOdysseyPainterEditor* iEditor, FOdysseyVectorBucket* iBucket )
+UOdysseyPainterEditorVectorPaintBucketTool::BucketProperties( FOdysseyVectorBucket* iBucket )
 {
     FPropertyEditorModule& PropertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
     TSharedPtr<IDetailsView> detailsView;
     FDetailsViewArgs DetailsViewArgs;
     UOdysseyPainterEditorVectorBucketView* bucketView = NewObject<UOdysseyPainterEditorVectorBucketView>();
 
-    bucketView->Update( iEditor, iBucket );
+    bucketView->Update( mEditor, iBucket );
 
     DetailsViewArgs.bUpdatesFromSelection = false;
     DetailsViewArgs.bLockable = false;
@@ -709,7 +708,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::BucketProperties( FOdysseyPainterEdi
       ]*/
     ];
 
-    TSharedPtr<FOdysseyPainterEditorViewportTab> viewportTab = iEditor->FindTab<FOdysseyPainterEditorViewportTab>();
+    TSharedPtr<FOdysseyPainterEditorViewportTab> viewportTab = mEditor->FindTab<FOdysseyPainterEditorViewportTab>();
 
     FSlateApplication::Get().AddModalWindow
     (

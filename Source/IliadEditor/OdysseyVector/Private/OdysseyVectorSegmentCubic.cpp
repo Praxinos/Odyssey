@@ -887,7 +887,7 @@ FOdysseyVectorSegmentCubic::BuildVariableAdaptive( FOdysseyVectorPoint* iFromPoi
         ctrlVector[1] = -straightVector;
     }
 
-    if( midTangent.DistanceSquared()
+    if( midTangent.DistanceSquared() // check the bezier is not too small (i.e check it can still be subdivided without rounding errors)
     && ( ( iRecurseDepth < iMinRecurse  )// <-- Force at least N subdivisions
      || ( ( iRecurseDepth < iMaxRecurse ) // <--- do not subdivide forever though.
        && ( ( ctrlVector[0].DotProduct(  straightVector ) < dotLimit )
@@ -994,7 +994,7 @@ FOdysseyVectorSegmentCubic::BuildOffsetCurvesRecursive( ::ULIS::FVec2D iBezier[4
         ctrlVector[1].Normalize();
     }
 
-    if( midTangent.DistanceSquared()
+    if( midTangent.DistanceSquared() // check the bezier is not too small (i.e check it can still be subdivided without rounding errors)
     && ( ( iCurrentRecurse < iMinRecurse ) // <-- Force at least N subdivisions
      || ( ( iCurrentRecurse < iMaxRecurse ) // <--- do not subdivide forever though.
        && ( ( ctrlVector[0].DotProduct(  straightVector ) < iDotLimit )

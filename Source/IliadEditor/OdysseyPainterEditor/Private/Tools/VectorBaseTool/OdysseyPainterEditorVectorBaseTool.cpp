@@ -286,6 +286,18 @@ UOdysseyPainterEditorVectorBaseTool::GetSegmentHandlesFromVertices( const std::v
 }
 
 void
+UOdysseyPainterEditorVectorBaseTool::UnbindLayerDelegates()
+{
+    mWorkingLayer->OnUpdateDelegate().RemoveAll( this );
+}
+
+void
+UOdysseyPainterEditorVectorBaseTool::BindLayerDelegates()
+{
+    mWorkingLayer->OnUpdateDelegate().AddUObject( this, &UOdysseyPainterEditorVectorBaseTool::OnVectorLayerUpdate );
+}
+
+void
 UOdysseyPainterEditorVectorBaseTool::Unload()
 {
     UOdysseyPainterEditorTool::Unload();
@@ -308,7 +320,7 @@ UOdysseyPainterEditorVectorBaseTool::Unload()
 
     if( mWorkingLayer )
     {
-        mWorkingLayer->OnUpdateDelegate().RemoveAll( this );
+        UnbindLayerDelegates();
 
         if( mBaseHUD )
         {
@@ -355,7 +367,7 @@ UOdysseyPainterEditorVectorBaseTool::Load()
             mWorkingCell = mediaVectors[0]->GetScene()->GetCell();
             mWorkingLayer = mWorkingCell->GetLayer();
 
-            mWorkingLayer->OnUpdateDelegate().AddUObject( this, &UOdysseyPainterEditorVectorBaseTool::OnVectorLayerUpdate );
+            BindLayerDelegates();
 
             mWorkingCell->GetLayer()->ClearHUD();
 

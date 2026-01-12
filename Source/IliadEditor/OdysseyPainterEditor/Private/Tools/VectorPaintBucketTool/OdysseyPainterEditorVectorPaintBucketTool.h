@@ -46,7 +46,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPaintBucketTool : publ
         static FOdysseyVectorBucket& GetCopiedBucket();
         static void CopyBucketParam( FOdysseyVectorBucket* iSourceBucket );
         void PasteBucketParam( FOdysseyVectorBucket* iDestinationBucket );
-        static void BucketProperties( FOdysseyPainterEditor* iEditor, FOdysseyVectorBucket* iBucket );
+        void BucketProperties( FOdysseyVectorBucket* iBucket );
 
         //Constructor
         UOdysseyPainterEditorVectorPaintBucketTool();

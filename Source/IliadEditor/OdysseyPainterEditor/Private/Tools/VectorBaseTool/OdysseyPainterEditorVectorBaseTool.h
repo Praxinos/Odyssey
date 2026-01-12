@@ -106,6 +106,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         uint32 GetViewportWidth();
         uint32 GetViewportHeight();
         FOdysseyVectorGroup* GetWorkingGroup() const;
+        void UnbindLayerDelegates();
+        void BindLayerDelegates();
 
     protected:
         virtual uint64 LoadVector( FOdysseyVectorGroupPaint* iScene ){ return 0; };
