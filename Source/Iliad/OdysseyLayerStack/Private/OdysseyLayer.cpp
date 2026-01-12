@@ -672,6 +672,34 @@ UOdysseyLayer::CopyCell(UOdysseyLayerCell* Cell, int Index)
     return cellCopy;
 }
 
+UOdysseyLayerCell*
+UOdysseyLayer::CopyCellToLayer(UOdysseyLayerCell* iCell, UOdysseyLayer* iToLayer, int iIndex) const
+{
+    //No Layer
+    if(!iCell)
+        return nullptr;
+
+    iToLayer->Modify();
+
+    if (iIndex < 0 )
+    {
+        iIndex = iToLayer->Cells.Num();
+    }
+    else
+    {
+        iIndex = FMath::Clamp(iIndex, 0, iToLayer->Cells.Num());
+    }
+
+    //Duplicate the cell
+    FObjectDuplicationParameters params(iCell, iToLayer );
+    UOdysseyLayerCell* cellCopy = Cast<UOdysseyLayerCell>(StaticDuplicateObjectEx(params));
+
+    iToLayer->Cells.Insert( cellCopy, iIndex );
+    iToLayer->CellsChanged();
+
+    return cellCopy;
+}
+
 TArray<UOdysseyLayerCell*>
 UOdysseyLayer::CopyCells(TArray<UOdysseyLayerCell*> iCells, int Index)
 {
