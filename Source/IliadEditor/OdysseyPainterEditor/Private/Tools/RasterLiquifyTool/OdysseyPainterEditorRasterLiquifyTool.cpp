@@ -729,16 +729,31 @@ UOdysseyPainterEditorRasterLiquifyTool::Init()
 void
 UOdysseyPainterEditorRasterLiquifyTool::Reset()
 {
+    // needed by the FOdysseyRasterBlockMutator for recording an undo
+    GEditor->BeginTransaction( LOCTEXT("raster-liquify-tool.transaction.reset","Reset Liquify"));
+
     // restore source images as it was
     for( FAlteredImage& alteredImage : mAlteredImageBuffer )
     {
-        FOdysseyRasterBlockMutator rasterBlockMutator( alteredImage.sourceRasterBlock, false );
-
-        rasterBlockMutator.Copy( alteredImage.sourceBlockCopy, { alteredImage.sourceBlockCopy->Rect() } );
-        rasterBlockMutator.Commit();
+        alteredImage.mutator.Copy( alteredImage.sourceBlockCopy, { alteredImage.sourceBlockCopy->Rect() } );
+        alteredImage.mutator.Commit();
     }
 
     Init();
+
+    // the tool's reference images must be reset after a call to undo or redo
+    if( GUndo )
+    {
+        FCommandChange* undo = new FOdysseyPainterEditorRasterLiquifyToolUndo( this );
+
+        GUndo->StoreUndo( this, TUniquePtr<FCommandChange>(undo) );
+
+        TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
+        if ( source )
+            source->RecordCurrentFrameUndo();
+    }
+
+    GEditor->EndTransaction();
 }
 
 void
