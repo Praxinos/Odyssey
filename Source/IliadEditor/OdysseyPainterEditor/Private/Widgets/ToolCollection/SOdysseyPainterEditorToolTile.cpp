@@ -365,35 +365,24 @@ void SOdysseyPainterEditorToolTile::OnChangeIcon()
     TSharedRef<SWidget> assetPicker = contentBrowserModule.Get().CreateAssetPicker(assetPickerConfig);
 
     // Icon Picker
-    TArray<FName> validIcons;
-    TSet<FName> styleKeys = FAppStyle::Get().GetStyleKeys();
+    TArray< const FSlateBrush* > validIcons;
+    FOdysseyStyle::Get().GetResources(validIcons);
 
-    for (const FName& key : styleKeys)
+    TArray<const FSlateBrush*> filtered;
+
+    const FString prefix = TEXT("ToolCollection");
+
+    for (const FSlateBrush* brush : validIcons)
     {
-        const FSlateBrush* brush = FAppStyle::Get().GetBrush(key);
         if (!brush)
             continue;
 
-        // Must have a resource
-        if (brush->GetResourceName().IsNone())
-            continue;
+        const FName resourceName = brush->GetResourceName();
 
-        // Different tests to ditch checkerboard icons and small ones
-        const FSlateResourceHandle handle = FSlateApplication::Get().GetRenderer()->GetResourceHandle(*brush);
-        if (!handle.IsValid())
+        if (resourceName.ToString().Contains(prefix))
         {
-            continue;
+            filtered.Add(brush);
         }
-
-        const FSlateShaderResourceProxy* proxy = handle.GetResourceProxy();
-
-        if (!proxy || !proxy->Resource)
-            continue;
-
-        if( proxy->ActualSize.X < kTileSize.X || proxy->ActualSize.Y < kTileSize.Y)
-            continue;
-
-        validIcons.Add(key);
     }
 
     // A WrapBox that wraps tiles automatically
@@ -402,26 +391,24 @@ void SOdysseyPainterEditorToolTile::OnChangeIcon()
         .UseAllottedSize(true)          // resize to available width
         .InnerSlotPadding(FVector2D(4, 4));
 
-    for (const FName& iconName : validIcons)
+    for (const FSlateBrush* brush : filtered)
     {
-        const FSlateBrush* brush = FAppStyle::Get().GetBrush(iconName);
-
         iconWrapBox->AddSlot()
             .Padding(0)
             .HAlign(HAlign_Fill)
             [
                 SNew(SButton)
                     .ButtonStyle(FAppStyle::Get(), "HoverHintOnly")
-                    .OnClicked_Lambda([this, iconName, pickerWindow]()
+                    .OnClicked_Lambda([this, brush, pickerWindow]()
                         {
-                            OnStyleIconSelected(iconName);
+                            OnStyleIconSelected(brush);
                             pickerWindow->RequestDestroyWindow();
                             return FReply::Handled();
                         })
                     [
                         SNew(SImage)
                             .Image(brush)
-                            .DesiredSizeOverride(kTileSize) // fixed icon size
+                            .DesiredSizeOverride(kTileSize)// fixed icon size
                     ]
             ];
     }
@@ -469,12 +456,12 @@ void SOdysseyPainterEditorToolTile::OnTextureSelected(const FAssetData& AssetDat
     }
 }
 
-void SOdysseyPainterEditorToolTile::OnStyleIconSelected(FName StyleIconName)
+void SOdysseyPainterEditorToolTile::OnStyleIconSelected(const FSlateBrush* iBrush)
 {
-    if (!mToolConfig || !mCollection)
+    if (!mToolConfig || !mCollection || !iBrush)
         return;
 
     mCollection->Modify();
-    mToolConfig->mIcon = *FAppStyle::Get().GetBrush(StyleIconName);
+    mToolConfig->mIcon = *iBrush;
     mCollection->MarkPackageDirty();
 }

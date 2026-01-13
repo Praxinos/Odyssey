@@ -56,6 +56,10 @@ public:
     void SetupClassIconsAndThumbnails();
     void SetupOdysseyCommands();
     void SetupOdysseyAboutWindow();
+    void SetupOdysseyToolCollection();
+
+private:
+    void RegisterSvgFolder(const FString& iRelativeResourceFolder, const FString& iStyleKeyPrefix, const FVector2D& iIconSize);
 
 public:
     const FVector2D mIcon7x16;
@@ -144,6 +148,7 @@ FOdysseyStyleDefault::Initialize()
     SetupClassIconsAndThumbnails();
     SetupOdysseyCommands();
     SetupOdysseyAboutWindow();
+    SetupOdysseyToolCollection();
 }
 
 void
@@ -823,6 +828,55 @@ FOdysseyStyleDefault::SetupOdysseyAboutWindow()
     Set("Odyssey.About.SmallSubduedText", FTextBlockStyle(FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>("SmallText"))
         .SetColorAndOpacity(FLinearColor(FColor(128, 128, 128)))
     );
+}
+
+void FOdysseyStyleDefault::SetupOdysseyToolCollection()
+{
+    RegisterSvgFolder(
+        TEXT("OdysseyAssetResources/ToolCollection"),
+        TEXT("Odyssey.ToolCollection"),
+        mIcon24x24
+    );
+}
+
+void FOdysseyStyleDefault::RegisterSvgFolder( const FString& iRelativeResourceFolder, const FString& iStyleKeyPrefix, const FVector2D& iIconSize )
+{
+    const TSharedPtr<IPlugin> odysseyPlugin = IPluginManager::Get().FindPlugin(TEXT("Odyssey"));
+    if (!odysseyPlugin.IsValid())
+    {
+        return;
+    }
+
+    const FString absoluteFolder = FPaths::Combine(odysseyPlugin->GetBaseDir(), TEXT("Resources"), iRelativeResourceFolder);
+
+    TArray<FString> svgFiles;
+    IFileManager::Get().FindFilesRecursive(
+        svgFiles,
+        *absoluteFolder,
+        TEXT("*.svg"),
+        true,
+        false
+    );
+
+    for (const FString& filePath : svgFiles)
+    {
+        const FString fileName = FPaths::GetBaseFilename(filePath);
+
+        // Style key example: Odyssey.ToolCollection.fileName
+        const FString styleKey = FString::Printf(
+            TEXT("%s.%s"),
+            *iStyleKeyPrefix,
+            *fileName
+        );
+
+        // Slate resource path
+        const FString slatePath = FPaths::Combine(
+            FPaths::GetCleanFilename(iRelativeResourceFolder),
+            fileName
+        ).Replace(TEXT("\\"), TEXT("/"));
+
+        Set( *styleKey, new IMAGE_BRUSH_SVG(*slatePath, iIconSize));
+    }
 }
 
 /* FSlateOdysseyStyle static initialization

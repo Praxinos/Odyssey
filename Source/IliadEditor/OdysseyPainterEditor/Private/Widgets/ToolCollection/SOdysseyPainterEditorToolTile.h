@@ -64,7 +64,7 @@ private:
     void OnChangeIcon();
 
     void OnTextureSelected(const FAssetData& AssetData);
-    void OnStyleIconSelected(FName StyleIconName);
+    void OnStyleIconSelected(const FSlateBrush* iBrush);
 
 private:
     UOdysseyPainterEditorToolConfiguration* mToolConfig = nullptr;
