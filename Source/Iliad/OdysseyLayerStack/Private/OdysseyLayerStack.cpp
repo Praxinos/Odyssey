@@ -474,23 +474,23 @@ UOdysseyLayerStack::MoveLayer(UOdysseyLayer* Layer, UOdysseyLayer* ParentLayer, 
 }
 
 void
-UOdysseyLayerStack::MoveLayers(TArray<UOdysseyLayer*> Layers, UOdysseyLayer* ParentLayer, int IndexInParent)
+UOdysseyLayerStack::MoveLayers(TArray<UOdysseyLayer*> iLayers, UOdysseyLayer* iParentLayer, int iIndexInParent)
 {
-    if ( !ParentLayer )
-        ParentLayer = LayerRoot;
+    if ( !iParentLayer )
+        iParentLayer = LayerRoot;
 
     //If the given parent can't have children or isn't contained in this layerstack
-    if ( !ParentLayer->CanHaveChildren() || !ContainsLayer(ParentLayer))
+    if ( !iParentLayer->CanHaveChildren() || !ContainsLayer(iParentLayer))
         return;
 
     //Sanitize Layers array
-    Layers.RemoveAll(
-        [this, ParentLayer](UOdysseyLayer* iLayer)
+    iLayers.RemoveAll(
+        [this, iParentLayer](UOdysseyLayer* iLayer)
         {
             if ( !iLayer || !ContainsLayer(iLayer) )
                 return true;
 
-            if ( iLayer == ParentLayer || ParentLayer->IsChildOf(iLayer) )
+            if ( iLayer == iParentLayer || iParentLayer->IsChildOf(iLayer) )
                 return true;
 
             return false;
@@ -498,7 +498,7 @@ UOdysseyLayerStack::MoveLayers(TArray<UOdysseyLayer*> Layers, UOdysseyLayer* Par
     );
 
     //Sort Layers in reverse depth order to ease the insertion of layers in new parent later on
-    Layers.Sort(
+    iLayers.Sort(
         [this](UOdysseyLayer& iLayerA, UOdysseyLayer& iLayerB)
         {
             //true => iLayerA is before iLayerB
@@ -521,23 +521,26 @@ UOdysseyLayerStack::MoveLayers(TArray<UOdysseyLayer*> Layers, UOdysseyLayer* Par
     );
 
     //No Layers
-    if ( Layers.Num() <= 0 )
+    if ( iLayers.Num() <= 0 )
         return;
 
-    int index = FMath::Clamp(IndexInParent, 0, ParentLayer->GetChildren().Num());
-    for (UOdysseyLayer* layer : Layers)
+    int index = FMath::Clamp(iIndexInParent, 0, iParentLayer->GetChildren().Num());
+    for (UOdysseyLayer* layer : iLayers )
     {
         UOdysseyLayer* oldParent = layer->GetParent();
-        bool bChangeParent = oldParent != ParentLayer;
+        bool bChangeParent = oldParent != iParentLayer;
         int oldIndex = oldParent->GetChildren().Find(layer);
         if (!bChangeParent && oldIndex < index)
             index--;
 
         oldParent->RemoveChild(layer);
     }
-    index = FMath::Clamp(IndexInParent, 0, ParentLayer->GetChildren().Num());
-;
-    ParentLayer->AddChildren(Layers, index);
+    index = FMath::Clamp(iIndexInParent, 0, iParentLayer->GetChildren().Num());
+
+    // Keep the original order of the layers
+    Algo::Reverse( iLayers );
+
+    iParentLayer->AddChildren(iLayers, index);
 }
 
 bool
