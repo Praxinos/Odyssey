@@ -9,13 +9,9 @@
 
 FOdysseyVectorUndoTagInbetweenerBreakdownTargetVisibility::~FOdysseyVectorUndoTagInbetweenerBreakdownTargetVisibility()
 {
-    if( mApplied )
+    for( FSnapshotInbetweenerBreakdown& breakdownSnapshot : mBreakdownSnapshotBuffer )
     {
-
-    }
-    else
-    {
-        // nothing to do
+        breakdownSnapshot.Clean( mApplied ? eSnapshotState::Altered : eSnapshotState::Initial );
     }
 }
 
@@ -36,8 +32,8 @@ FOdysseyVectorUndoTagInbetweenerBreakdownTargetVisibility::FOdysseyVectorUndoTag
     for( FInbetweenerBreakdown* breakdown : iBreakdownList )
     {
         mBreakdownSnapshotBuffer.emplace_back( breakdown
-                                             , FSnapshotFlags::Breakdown::TARGETVISIBILITY
-                                             , eSnapshotState::Initial );
+                                             , FSnapshotFlags::Breakdown::TARGETVISIBILITY )
+                                             .RecordState(  eSnapshotState::Initial );
     }
 }
 

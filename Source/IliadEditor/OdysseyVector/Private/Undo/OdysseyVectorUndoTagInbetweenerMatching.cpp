@@ -10,13 +10,9 @@
 
 FOdysseyVectorUndoTagInbetweenerMatching::~FOdysseyVectorUndoTagInbetweenerMatching()
 {
-    if( mApplied )
+    for( FSnapshotInbetweenerBreakdown& breakdownSnapshot : mBreakdownSnapshotBuffer )
     {
-        // nothing to do
-    }
-    else
-    {
-
+        breakdownSnapshot.Clean( mApplied ? eSnapshotState::Altered : eSnapshotState::Initial );
     }
 }
 
@@ -29,8 +25,8 @@ FOdysseyVectorUndoTagInbetweenerMatching::FOdysseyVectorUndoTagInbetweenerMatchi
     for( FInbetweenerBreakdown* breakdown : iBreakdownList )
     {
         mBreakdownSnapshotBuffer.emplace_back( breakdown
-                                             , FSnapshotFlags::Breakdown::GRIDGEOMETRY
-                                             , eSnapshotState::Initial );
+                                             , FSnapshotFlags::Breakdown::GRIDGEOMETRY )
+                                             .RecordState(  eSnapshotState::Initial );
     }
 }
 
@@ -52,8 +48,8 @@ FOdysseyVectorUndoTagInbetweenerMatching::FOdysseyVectorUndoTagInbetweenerMatchi
         for( FInbetweenerBreakdown* breakdown : inbetweenerTag->GetBreakdownList() )
         {
             mBreakdownSnapshotBuffer.emplace_back( breakdown
-                                                 , FSnapshotFlags::Breakdown::GRIDGEOMETRY
-                                                 , eSnapshotState::Initial );
+                                                 , FSnapshotFlags::Breakdown::GRIDGEOMETRY )
+                                                 .RecordState(  eSnapshotState::Initial );
         }
     }
 }

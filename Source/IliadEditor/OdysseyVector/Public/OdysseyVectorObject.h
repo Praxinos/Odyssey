@@ -675,6 +675,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         FOdysseyVectorObject* Pick( FOdysseyVectorGroup* iSelectionSpace
                                   , const ::ULIS::FRectD &iRoi
                                   , const BLImage& iMaskImage );
+        FOdysseyVectorObject* GetAncestorByClassAndTag( uint32 iObjectClass
+                                                      , bool iAsBaseObjectClass
+                                                      , uint32 iTagClass
+                                                      , bool iSelf );
 
     protected:
 

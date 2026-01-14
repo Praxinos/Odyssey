@@ -16,6 +16,7 @@
 #if WITH_EDITOR
 class IOdysseyVectorCell;
 class FInbetweenerBreakdown;
+class FOdysseyVectorTagInbetweener;
 #endif
 
 #if !WITH_EDITOR
@@ -71,7 +72,7 @@ public:
 
 protected:
     virtual void CellsChanged() override;
-    void MakeBreakdownTargetMap();
+    void MakeBreakdownTargetMap( std::list<FOdysseyVectorTagInbetweener*>& oInbetweenerTagList );
     void CheckBreakdownTargetMap();
     void RequestRedrawAllVectorCells();
 

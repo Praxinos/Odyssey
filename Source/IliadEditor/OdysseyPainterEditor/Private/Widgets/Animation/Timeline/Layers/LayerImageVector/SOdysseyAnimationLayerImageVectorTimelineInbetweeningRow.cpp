@@ -42,6 +42,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::~SOdysseyAnimationLaye
 SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow()
     : mPickedBreakdown( nullptr )
     , mCandidateTargetCellBox( 0, 0, 0.0f, 0.0f, 0.0f, 0.0f )
+    , mUndo( nullptr )
 {
     static FSlateColorBrush defaultBrush = FSlateColorBrush ( FLinearColor ( 0.0f, 0.0f, 0.0f, 0.0f ) );
 }
@@ -91,18 +92,19 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonDown( con
 
     if( MouseEvent.IsMouseButtonDown( EKeys::LeftMouseButton ) )
     {
+        mUndo = new FOdysseyVectorUndoTagInbetweenerBreakdownAlter( sharedEnv
+                                                                  , mInbetweenerTag );
+
         // needed for valid GUndo pointer
         GEditor->BeginTransaction(LOCTEXT("vector-timeline-row.transaction.alter","Vector Timeline Alter"));
         if( GUndo )
         {
-            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerBreakdownAlter( sharedEnv
-                                                                                         , mInbetweenerTag );
-
-            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(mUndo) );
 
             mOnTransactCurrentFrame.ExecuteIfBound(TOptional<int>());
         }
-        GEditor->EndTransaction();
+
+        mUndo->Begin();
 
         for( FInbetweenerBreakdown* breakdown : mInbetweenerTag->GetBreakdownList() )
         {
@@ -215,7 +217,6 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonUp( const
     // Call base method
     FReply reply = STableRow<TSharedPtr<FInbetweeningListViewItem>>::OnMouseButtonUp( MyGeometry, MouseEvent );
 
-
     if ( MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton )
     {
         if( mPickedBreakdown )
@@ -237,6 +238,13 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonUp( const
         }
 
         vectorLayer->GetVectorLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+
+        if( mUndo )
+        {
+            mUndo->End();
+
+            mUndo = nullptr;
+        }
 
         reply.ReleaseMouseCapture();
     }

@@ -671,10 +671,8 @@ UOdysseyAnimationLayerImageVector::IsRowVisible(FName iSubRowName) const
 #endif //WITH_EDITOR
 
 void
-UOdysseyAnimationLayerImageVector::MakeBreakdownTargetMap()
+UOdysseyAnimationLayerImageVector::MakeBreakdownTargetMap( std::list<FOdysseyVectorTagInbetweener*>& oInbetweenerTagList )
 {
-    std::list<FOdysseyVectorTagInbetweener*> inbetweenerTagList;
-
     // Make breakdown lookup for adapting the length of the inbetweener tags
     for( FOdysseyVectorTag* sharedTag : mVectorLayer->GetSharedTagList() )
     {
@@ -684,32 +682,12 @@ UOdysseyAnimationLayerImageVector::MakeBreakdownTargetMap()
             // we copy the list because we may alter it.
             std::list<FInbetweenerBreakdown*> breakdownList = inbetweenerTag->GetBreakdownList();
 
-            inbetweenerTagList.push_back( inbetweenerTag );
+            oInbetweenerTagList.push_back( inbetweenerTag );
 
             for( FInbetweenerBreakdown* breakdown : breakdownList )
             {
                 mBreakdownTargetMap.Add( breakdown, breakdown->GetTargetCell() );
             }
-        }
-    }
-
-    if( inbetweenerTagList.size() )
-    {
-        // needed for valid GUndo pointer
-        if( GUndo )
-        {
-            FOdysseyVectorUndo *undo = new FOdysseyVectorUndoTagInbetweenerBreakdownAlter( mVectorLayer.Get()
-                                                                                         , inbetweenerTagList );
-
-            // We use GEditor as the UObject, otherwise if we use "this", at each UNDO, PostEditChangeProperty() will be called
-            // which will again call StoreUndo + this will lead to a crash. I don't know however what will be the consequences
-            // of a call to GEditor::PostEditChangeProperty()
-            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-/*
-            TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
-            if (source)
-                source->RecordCurrentFrameUndo();
-*/
         }
     }
 }
@@ -788,13 +766,40 @@ UOdysseyAnimationLayerImageVector::PostEditChangeProperty( FPropertyChangedEvent
 void
 UOdysseyAnimationLayerImageVector::CellsChanged()
 {
-    MakeBreakdownTargetMap();
+    std::list<FOdysseyVectorTagInbetweener*> inbetweenerTagList;
+
+    MakeBreakdownTargetMap( inbetweenerTagList );
+
+    if( inbetweenerTagList.size() )
+    {
+        FOdysseyVectorUndo *undo = new FOdysseyVectorUndoTagInbetweenerBreakdownAlter( mVectorLayer.Get()
+                                                                                     , inbetweenerTagList );
+
+        // needed for valid GUndo pointer
+        if( GUndo )
+        {
+            // We use GEditor as the UObject, otherwise if we use "this", at each UNDO, PostEditChangeProperty() will be called
+            // which will again call StoreUndo + this will lead to a crash. I don't know however what will be the consequences
+            // of a call to GEditor::PostEditChangeProperty()
+            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+/*
+            TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
+            if (source)
+                source->RecordCurrentFrameUndo();
+*/
+        }
+
+        undo->Begin(); // snapshot before operation
+
+        CheckBreakdownTargetMap();
+
+        undo->End(); // snapshot after operation
+    }
 
     // Put this before calling Super::CellsChanged because the HUD might be refreshed by Super::CellsChanged
     // When reloading the current tool and it needs the vector object hierarchy to be correctly set.
     UpdateSharedEnv();
 
-    CheckBreakdownTargetMap();
 
     Super::CellsChanged();
 }

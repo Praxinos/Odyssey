@@ -56,6 +56,12 @@ FInbetweenerStep::IsAligned()
     return ( mFlags & ALIGNED ) ? true : false;
 }
 
+uint32
+FInbetweenerStep::GetIndex()
+{
+    return ( this - &mRoute->GetStepBuffer()[0] );
+}
+
 FInbetweenerRoute*
 FInbetweenerStep::GetRoute()
 {

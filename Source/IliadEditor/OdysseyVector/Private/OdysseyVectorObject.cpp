@@ -832,13 +832,37 @@ FOdysseyVectorObject::UnlockDrawing()
 }
 
 FOdysseyVectorObject*
-FOdysseyVectorObject::GetAncestorByClass( uint32 iClass, bool iBaseClass, bool iSelf )
+FOdysseyVectorObject::GetAncestorByClassAndTag( uint32 iObjectClass
+                                              , bool iAsBaseObjectClass
+                                              , uint32 iTagClass
+                                              , bool iSelf )
 {
     FOdysseyVectorObject* parent = iSelf ? this : mParent;
 
     while ( parent )
     {
-        if( ( iBaseClass && parent->HasBaseClass( iClass )  ) || parent->GetClass() == iClass )
+        if( ( iAsBaseObjectClass && parent->HasBaseClass( iObjectClass )  ) || parent->GetClass() == iObjectClass )
+        {
+            if( parent->GetTagByType( iTagClass ) )
+            {
+                return parent;
+            }
+        }
+
+        parent = parent->GetParent();
+    }
+
+    return nullptr;
+}
+
+FOdysseyVectorObject*
+FOdysseyVectorObject::GetAncestorByClass( uint32 iClass, bool iAsBaseObjectClass, bool iSelf )
+{
+    FOdysseyVectorObject* parent = iSelf ? this : mParent;
+
+    while ( parent )
+    {
+        if( ( iAsBaseObjectClass && parent->HasBaseClass( iClass )  ) || parent->GetClass() == iClass )
         {
             return parent;
         }

@@ -9,14 +9,7 @@
 
 FOdysseyVectorUndoTagInbetweenerStepAlign::~FOdysseyVectorUndoTagInbetweenerStepAlign()
 {
-    if( mApplied )
-    {
-        // nothing to do
-    }
-    else
-    {
-
-    }
+    mRouteSnapshot.Clean( mApplied ? eSnapshotState::Altered : eSnapshotState::Initial );
 }
 
 FOdysseyVectorUndoTagInbetweenerStepAlign::FOdysseyVectorUndoTagInbetweenerStepAlign( FOdysseyVectorGroupPaint* iScene
@@ -26,9 +19,9 @@ FOdysseyVectorUndoTagInbetweenerStepAlign::FOdysseyVectorUndoTagInbetweenerStepA
     , mInbetweenerTag( iInbetweenerTag )
     , mRouteSnapshot( iRoute
                     , FSnapshotFlags::Route::TRAJECTORIES | FSnapshotFlags::Route::STEPS
-                    , FSnapshotFlags::Trajectory::BEZIER
-                    , eSnapshotState::Initial )
+                    , FSnapshotFlags::Trajectory::BEZIER )
 {
+    mRouteSnapshot.RecordState( eSnapshotState::Initial );
 }
 
 void

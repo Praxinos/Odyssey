@@ -31,7 +31,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoTagInbetweenerParam : public FOdysseyV
         virtual FString ToString() const override;
 
     protected:
-        std::vector<FSnapshotTagInbetweener> mInbetweenerTagSnapshotArray;
+        std::vector<FSnapshotTagInbetweener> mInbetweenerTagSnapshotBuffer;
 };
 
 class ODYSSEYVECTOR_API FOdysseyVectorUndoTagInbetweenerWithThickness : public FOdysseyVectorUndoTagInbetweenerParam

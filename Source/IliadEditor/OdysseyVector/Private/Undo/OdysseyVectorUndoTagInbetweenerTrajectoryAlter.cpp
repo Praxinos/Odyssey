@@ -9,21 +9,15 @@
 
 FOdysseyVectorUndoTagInbetweenerTrajectoryAlter::~FOdysseyVectorUndoTagInbetweenerTrajectoryAlter()
 {
-    if( mApplied )
-    {
-        // nothing to do
-    }
-    else
-    {
-        // nothing to do
-    }
+    mTrajectorySnapshot.Clean( mApplied ? eSnapshotState::Altered : eSnapshotState::Initial );
 }
 
 FOdysseyVectorUndoTagInbetweenerTrajectoryAlter::FOdysseyVectorUndoTagInbetweenerTrajectoryAlter( FOdysseyVectorGroupPaint* iScene
                                                                                                 , FInbetweenerTrajectory* iTrajectory )
     : FOdysseyVectorUndo( iScene->GetLayer() )
-    , mTrajectorySnapshot( iTrajectory, FSnapshotFlags::Trajectory::BEZIER, eSnapshotState::Initial )
+    , mTrajectorySnapshot( iTrajectory, FSnapshotFlags::Trajectory::BEZIER )
 {
+    mTrajectorySnapshot.RecordState( eSnapshotState::Initial );
 }
 
 void

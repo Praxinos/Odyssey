@@ -9,13 +9,9 @@
 
 FOdysseyVectorUndoTagInbetweenerTrajectoryShiftWaypoint::~FOdysseyVectorUndoTagInbetweenerTrajectoryShiftWaypoint()
 {
-    if( mApplied )
+    for( FSnapshotTrajectory& trajectorySnapshot : mTrajectorySnapshotBuffer )
     {
-        // nothing to do
-    }
-    else
-    {
-        // nothing to do
+        trajectorySnapshot.Clean( mApplied ? eSnapshotState::Altered : eSnapshotState::Initial );
     }
 }
 
@@ -24,8 +20,8 @@ FOdysseyVectorUndoTagInbetweenerTrajectoryShiftWaypoint::FOdysseyVectorUndoTagIn
     : FOdysseyVectorUndo( iScene->GetLayer() )
 {
     mTrajectorySnapshotBuffer.emplace_back( iTrajectory
-                                          , FSnapshotFlags::Trajectory::WAYPOINTS
-                                          , eSnapshotState::Initial );
+                                          , FSnapshotFlags::Trajectory::WAYPOINTS )
+                                          .RecordState( eSnapshotState::Initial );
 }
 
 void

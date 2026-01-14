@@ -9,13 +9,9 @@
 
 FOdysseyVectorUndoTagInbetweenerChartAlter::~FOdysseyVectorUndoTagInbetweenerChartAlter()
 {
-    if( mApplied )
+    for( FSnapshotTagInbetweener& inbetweenerTagSnapshot : mInbetweenerTagSnapshotBuffer )
     {
-        // nothing to do
-    }
-    else
-    {
-        // nothing to do
+        inbetweenerTagSnapshot.Clean( mApplied ? eSnapshotState::Altered : eSnapshotState::Initial );
     }
 }
 
@@ -24,11 +20,11 @@ FOdysseyVectorUndoTagInbetweenerChartAlter::FOdysseyVectorUndoTagInbetweenerChar
     : FOdysseyVectorUndo( iScene->GetLayer() )
 {
     mInbetweenerTagSnapshotBuffer.emplace_back( iInbetweenerTag
-                                              , 0
+                                              , FSnapshotFlags::Tag::Inbetweener::BREAKDOWNS
                                               , FSnapshotFlags::Breakdown::CHART
                                               , 0
-                                              , 0
-                                              , eSnapshotState::Initial );
+                                              , 0 )
+                                              .RecordState(  eSnapshotState::Initial );
 }
 
 FOdysseyVectorUndoTagInbetweenerChartAlter::FOdysseyVectorUndoTagInbetweenerChartAlter( FOdysseyVectorGroupPaint* iScene
@@ -40,11 +36,11 @@ FOdysseyVectorUndoTagInbetweenerChartAlter::FOdysseyVectorUndoTagInbetweenerChar
     for( FOdysseyVectorTagInbetweener* inbetweenerTag : iInbetweenerTagList )
     {
         mInbetweenerTagSnapshotBuffer.emplace_back( inbetweenerTag
-                                                  , 0
+                                                  , FSnapshotFlags::Tag::Inbetweener::BREAKDOWNS
                                                   , FSnapshotFlags::Breakdown::CHART
                                                   , 0
-                                                  , 0
-                                                  , eSnapshotState::Initial );
+                                                  , 0 )
+                                                  .RecordState(  eSnapshotState::Initial );
     }
 }
 
@@ -59,11 +55,11 @@ FOdysseyVectorUndoTagInbetweenerChartAlter::FOdysseyVectorUndoTagInbetweenerChar
         FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
 
         mInbetweenerTagSnapshotBuffer.emplace_back( inbetweenerTag
-                                                  , 0
+                                                  , FSnapshotFlags::Tag::Inbetweener::BREAKDOWNS
                                                   , FSnapshotFlags::Breakdown::CHART
                                                   , 0
-                                                  , 0
-                                                  , eSnapshotState::Initial );
+                                                  , 0 )
+                                                  .RecordState(  eSnapshotState::Initial );
     }
 }
 

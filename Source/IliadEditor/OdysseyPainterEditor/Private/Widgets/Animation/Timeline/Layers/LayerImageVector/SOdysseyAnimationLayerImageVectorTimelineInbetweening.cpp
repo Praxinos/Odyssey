@@ -151,6 +151,9 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::OnSelectionChanged( TShar
             }
         }
 
+/* currently Commented-out this undo. It interferes with the FOdysseyVectorUndoTagInbetweenerBreakdownAlter that is
+ * located in SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonDown
+ * meaning that 2 undos are created.
         // needed for valid GUndo pointer
         GEditor->BeginTransaction(LOCTEXT("vector-timeline-inbetweening.transaction.selection-changed","Selection Changed"));
         if( GUndo )
@@ -165,7 +168,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::OnSelectionChanged( TShar
                 //source->RecordCurrentFrameUndo();
         }
         GEditor->EndTransaction();
-
+*/
         TArray<TSharedPtr<FInbetweeningListViewItem>> selectedItems = GetSelectedItems();
 
         // clear selection on all cells
@@ -291,13 +294,13 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::AddBreakdown()
 
     if( selectedInbetweenerTagList.size() )
     {
-        //---------- needed for undos-----------//
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerBreakdownAdd( mAnimationLayerImageVector->GetVectorLayer().Get()
+                                                                                   , selectedInbetweenerTagList );
+
+        //---------- needed for valid GUndo -----------//
         GEditor->BeginTransaction(LOCTEXT("vector-timeline.transaction.add-breakdown", "Add Breakdown"));
         if( GUndo )
         {
-            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerBreakdownAdd( mAnimationLayerImageVector->GetVectorLayer().Get()
-                                                                                       , selectedInbetweenerTagList );
-
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
             FOdysseyPainterEditorModule& painterEditorModule = FModuleManager::GetModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
@@ -309,8 +312,8 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::AddBreakdown()
                     source->RecordCurrentFrameUndo();
             }
         }
-        GEditor->EndTransaction();
-        //--------------------------------------//
+
+        undo->Begin(); // record snapshot before change
 
         for( FOdysseyVectorTagInbetweener* inbetweenerTag : selectedInbetweenerTagList )
         {
@@ -318,19 +321,19 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::AddBreakdown()
             int32 drawingIndex = inbetweenerTag->GetDrawingIndexFromCellIndex( breakdownCellIndex );
             FInbetweenerBreakdown* curBreakdown = inbetweenerTag->GetBreakdown( drawingIndex, true );
 
-            //FOdysseyVectorGroupPaint* scene = inbetweenerTag->GetOwner()->GetScene();
-
             if( curBreakdown )
             {
-                //FInbetweenerBreakdown* newbreakdown = new FInbetweenerBreakdown( inbetweenerTag );
-
-                inbetweenerTag->AddBreakdown( nullptr/*newbreakdown*/, drawingIndex, true, true );
+                inbetweenerTag->AddBreakdown( nullptr, drawingIndex, true, true );
             }
         }
 
         // Updates and request redraw
         mAnimationLayerImageVector->GetVectorLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
         mAnimationLayerImageVector->GetVectorLayer()->RequestRedraw( nullptr, 0 );
+
+        undo->End(); // record snapshot after change
+
+        GEditor->EndTransaction();
     }
 }
 
@@ -349,12 +352,13 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::RemoveBreakdown()
 
     if( selectedInbetweenerTagList.size() )
     {
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerBreakdownRemove( mAnimationLayerImageVector->GetVectorLayer().Get()
+                                                                                      , selectedInbetweenerTagList );
+
         //---------- needed for undos-----------//
         GEditor->BeginTransaction(LOCTEXT("vector-timeline.transaction.remove-breakdown", "Remove Breakdown"));
         if( GUndo )
         {
-            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerBreakdownRemove( mAnimationLayerImageVector->GetVectorLayer().Get()
-                                                                                          , selectedInbetweenerTagList );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -367,8 +371,8 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::RemoveBreakdown()
                     source->RecordCurrentFrameUndo();
             }
         }
-        GEditor->EndTransaction();
-        //--------------------------------------//
+
+        undo->Begin(); // record snapshot before change
 
         for( FOdysseyVectorTagInbetweener* inbetweenerTag : selectedInbetweenerTagList )
         {
@@ -387,6 +391,10 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::RemoveBreakdown()
         // Updates and request redraw
         mAnimationLayerImageVector->GetVectorLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
         mAnimationLayerImageVector->GetVectorLayer()->RequestRedraw( nullptr, 0 );
+
+        undo->End(); // record snapshot after change
+
+        GEditor->EndTransaction();
     }
 }
 

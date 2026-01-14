@@ -9,13 +9,9 @@
 
 FOdysseyVectorUndoTagInbetweenerBreakdownAlter::~FOdysseyVectorUndoTagInbetweenerBreakdownAlter()
 {
-    if( mApplied )
+    for( FSnapshotTagInbetweener& inbetweenerTagSnapshot : mInbetweenerTagSnapshotBuffer )
     {
-        // nothing to do
-    }
-    else
-    {
-
+        inbetweenerTagSnapshot.Clean( mApplied ? eSnapshotState::Altered : eSnapshotState::Initial );
     }
 }
 
@@ -23,34 +19,34 @@ FOdysseyVectorUndoTagInbetweenerBreakdownAlter::FOdysseyVectorUndoTagInbetweener
                                                                                               , FOdysseyVectorTagInbetweener* iInbetweenerTag )
     : FOdysseyVectorUndo( iSharedEnv )
 {
-    mInbetweenerTagSnapshotArray.emplace_back(  iInbetweenerTag
+    mInbetweenerTagSnapshotBuffer.emplace_back(  iInbetweenerTag
                                               , FSnapshotFlags::Tag::Inbetweener::BREAKDOWNS
                                               , ( FSnapshotFlags::Breakdown::GRIDGEOMETRY
                                                 | FSnapshotFlags::Breakdown::CHART )
                                               , ( FSnapshotFlags::Route::TRAJECTORIES
                                                 | FSnapshotFlags::Route::STEPS )
                                               , ( FSnapshotFlags::Trajectory::BEZIER
-                                                | FSnapshotFlags::Trajectory::WAYPOINTS )
-                                              , eSnapshotState::Initial );
+                                                | FSnapshotFlags::Trajectory::WAYPOINTS ) )
+                                              .RecordState(  eSnapshotState::Initial );
 }
 
 FOdysseyVectorUndoTagInbetweenerBreakdownAlter::FOdysseyVectorUndoTagInbetweenerBreakdownAlter( FOdysseyVectorLayer* iSharedEnv
                                                                                               , const std::vector<FOdysseyVectorTagInbetweener*>& iInbetweenerTagArray )
     : FOdysseyVectorUndo( iSharedEnv )
 {
-    mInbetweenerTagSnapshotArray.reserve( iInbetweenerTagArray.size() );
+    mInbetweenerTagSnapshotBuffer.reserve( iInbetweenerTagArray.size() );
 
     for( FOdysseyVectorTagInbetweener* inbetweenerTag : iInbetweenerTagArray )
     {
-        mInbetweenerTagSnapshotArray.emplace_back( inbetweenerTag
+        mInbetweenerTagSnapshotBuffer.emplace_back( inbetweenerTag
                                                  , FSnapshotFlags::Tag::Inbetweener::BREAKDOWNS
                                                  , ( FSnapshotFlags::Breakdown::GRIDGEOMETRY
                                                    | FSnapshotFlags::Breakdown::CHART )
                                                  , ( FSnapshotFlags::Route::TRAJECTORIES
                                                    | FSnapshotFlags::Route::STEPS )
                                                  , ( FSnapshotFlags::Trajectory::BEZIER
-                                                   | FSnapshotFlags::Trajectory::WAYPOINTS )
-                                                 , eSnapshotState::Initial );
+                                                   | FSnapshotFlags::Trajectory::WAYPOINTS ) )
+                                                 .RecordState(  eSnapshotState::Initial );
     }
 }
 
@@ -58,19 +54,37 @@ FOdysseyVectorUndoTagInbetweenerBreakdownAlter::FOdysseyVectorUndoTagInbetweener
                                                                                               , const std::list<FOdysseyVectorTagInbetweener*>& iInbetweenerTagList )
     : FOdysseyVectorUndo( iSharedEnv )
 {
-    mInbetweenerTagSnapshotArray.reserve( iInbetweenerTagList.size() );
+    mInbetweenerTagSnapshotBuffer.reserve( iInbetweenerTagList.size() );
 
     for( FOdysseyVectorTagInbetweener* inbetweenerTag : iInbetweenerTagList )
     {
-        mInbetweenerTagSnapshotArray.emplace_back( inbetweenerTag
+        mInbetweenerTagSnapshotBuffer.emplace_back( inbetweenerTag
                                                  , FSnapshotFlags::Tag::Inbetweener::BREAKDOWNS
                                                  , ( FSnapshotFlags::Breakdown::GRIDGEOMETRY
                                                    | FSnapshotFlags::Breakdown::CHART )
                                                  , ( FSnapshotFlags::Route::TRAJECTORIES
                                                    | FSnapshotFlags::Route::STEPS )
                                                  , ( FSnapshotFlags::Trajectory::BEZIER
-                                                   | FSnapshotFlags::Trajectory::WAYPOINTS )
-                                                 , eSnapshotState::Initial );
+                                                   | FSnapshotFlags::Trajectory::WAYPOINTS ) )
+                                                 .RecordState( eSnapshotState::Initial );
+    }
+}
+
+void
+FOdysseyVectorUndoTagInbetweenerBreakdownAlter::Begin()
+{
+    for( FSnapshotTagInbetweener& inbetweenerTagSnapshot : mInbetweenerTagSnapshotBuffer )
+    {
+        inbetweenerTagSnapshot.RecordState( eSnapshotState::Initial );
+    }
+}
+
+void
+FOdysseyVectorUndoTagInbetweenerBreakdownAlter::End()
+{
+    for( FSnapshotTagInbetweener& inbetweenerTagSnapshot : mInbetweenerTagSnapshotBuffer )
+    {
+        inbetweenerTagSnapshot.RecordState( eSnapshotState::Altered );
     }
 }
 
@@ -80,7 +94,7 @@ FOdysseyVectorUndoTagInbetweenerBreakdownAlter::Apply( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Apply( iIgnored );
 
-    for( FSnapshotTagInbetweener& inbetweenerTagsnapshot : mInbetweenerTagSnapshotArray )
+    for( FSnapshotTagInbetweener& inbetweenerTagsnapshot : mInbetweenerTagSnapshotBuffer )
     {
         inbetweenerTagsnapshot.LoadState( eSnapshotState::Altered );
     }
@@ -95,13 +109,7 @@ FOdysseyVectorUndoTagInbetweenerBreakdownAlter::Revert( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Revert( iIgnored );
 
-    for( FSnapshotTagInbetweener& inbetweenerTagsnapshot : mInbetweenerTagSnapshotArray )
-    {
-        inbetweenerTagsnapshot.RecordState( eSnapshotState::Altered );
-    }
-
-
-    for( FSnapshotTagInbetweener& inbetweenerTagsnapshot : mInbetweenerTagSnapshotArray )
+    for( FSnapshotTagInbetweener& inbetweenerTagsnapshot : mInbetweenerTagSnapshotBuffer )
     {
         inbetweenerTagsnapshot.LoadState( eSnapshotState::Initial );
     }

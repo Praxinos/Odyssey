@@ -13,6 +13,7 @@
 #include "OdysseyVectorGroupPaint.h"
 
 class FOdysseyVectorCell;
+class FOdysseyVectorTagInbetweener;
 
 class ODYSSEYVECTOR_API FOdysseyVectorUndoRemoveObjects : public FOdysseyVectorUndo
 {
@@ -31,6 +32,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoRemoveObjects : public FOdysseyVectorU
         virtual FString ToString() const override;
 
     private:
+        std::vector<FSnapshotTagInbetweener> mInbetweenerTagSnapshotBuffer;
         std::vector<FOdysseyVectorObject*> mRemovedObjectArray;
         FOdysseyVectorCell* mCell;
 };

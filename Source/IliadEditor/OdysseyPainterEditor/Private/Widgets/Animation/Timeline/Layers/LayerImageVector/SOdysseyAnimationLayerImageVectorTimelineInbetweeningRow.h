@@ -12,6 +12,7 @@
 class FOdysseyVectorTagInbetweener;
 class FInbetweeningListViewItem;
 class FInbetweenerBreakdown;
+class FOdysseyVectorUndo;
 
 /**
  * Implements the List View Widget
@@ -94,4 +95,5 @@ class SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow
         //Box containing the cells widgets
         //TSharedPtr<SHorizontalBox> mCellsBox;
         //float mLayoutScaleMultiplier;
+        FOdysseyVectorUndo* mUndo;
 };

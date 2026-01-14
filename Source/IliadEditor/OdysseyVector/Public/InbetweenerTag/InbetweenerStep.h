@@ -23,6 +23,7 @@ class ODYSSEYVECTOR_API FInbetweenerStep
         void SmoothTrajectories();
         FInbetweenerDrawing* GetDrawing();
         FInbetweenerRoute* GetRoute();
+        uint32 GetIndex();
 
     public:
         static const uint32 ALIGNED = ( 1UL << 0 );

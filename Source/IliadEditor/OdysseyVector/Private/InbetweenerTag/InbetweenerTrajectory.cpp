@@ -135,6 +135,12 @@ FInbetweenerTrajectory::Update()
     mFractionBuffer.back().cubicT1 = 1.0f;
 }
 
+uint32
+FInbetweenerTrajectory::GetIndex()
+{
+    return ( this - &mRoute->GetTrajectoryBuffer()[0] );
+}
+
 double
 FInbetweenerTrajectory::GetLinearT( float iCubicT )
 {

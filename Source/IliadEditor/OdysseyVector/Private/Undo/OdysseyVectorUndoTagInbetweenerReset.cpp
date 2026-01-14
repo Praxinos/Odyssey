@@ -10,13 +10,9 @@
 
 FOdysseyVectorUndoTagInbetweenerReset::~FOdysseyVectorUndoTagInbetweenerReset()
 {
-    if( mApplied )
+    for( FSnapshotInbetweenerBreakdown& breakdownSnapshot : mBreakdownSnapshotBuffer )
     {
-        // nothing to do
-    }
-    else
-    {
-
+        breakdownSnapshot.Clean( mApplied ? eSnapshotState::Altered : eSnapshotState::Initial );
     }
 }
 
@@ -32,8 +28,8 @@ FOdysseyVectorUndoTagInbetweenerReset::FOdysseyVectorUndoTagInbetweenerReset( FO
     {
         mBreakdownSnapshotBuffer.emplace_back( breakdown
                                              , ( iResetGridGeometry    ? FSnapshotFlags::Breakdown::GRIDGEOMETRY    : 0 )
-                                             | ( iResetTransformations ? FSnapshotFlags::Breakdown::TRANSFORMATIONS : 0 )
-                                             , eSnapshotState::Initial );
+                                             | ( iResetTransformations ? FSnapshotFlags::Breakdown::TRANSFORMATIONS : 0 ) )
+                                             .RecordState(  eSnapshotState::Initial );
     }
 }
 
@@ -58,8 +54,8 @@ FOdysseyVectorUndoTagInbetweenerReset::FOdysseyVectorUndoTagInbetweenerReset( FO
         {
             mBreakdownSnapshotBuffer.emplace_back( breakdown
                                                  , ( iResetGridGeometry    ? FSnapshotFlags::Breakdown::GRIDGEOMETRY    : 0 )
-                                                 | ( iResetTransformations ? FSnapshotFlags::Breakdown::TRANSFORMATIONS : 0 )
-                                                 , eSnapshotState::Initial );
+                                                 | ( iResetTransformations ? FSnapshotFlags::Breakdown::TRANSFORMATIONS : 0 ) )
+                                                 .RecordState(  eSnapshotState::Initial );
         }
     }
 }

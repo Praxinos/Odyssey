@@ -9,14 +9,7 @@
 
 FOdysseyVectorUndoTagInbetweenerRouteAlter::~FOdysseyVectorUndoTagInbetweenerRouteAlter()
 {
-    if( mApplied )
-    {
-        // nothing to do
-    }
-    else
-    {
-
-    }
+    mRouteSnapshot.Clean( mApplied ? eSnapshotState::Altered : eSnapshotState::Initial );
 }
 
 FOdysseyVectorUndoTagInbetweenerRouteAlter::FOdysseyVectorUndoTagInbetweenerRouteAlter( FOdysseyVectorGroupPaint* iScene
@@ -28,9 +21,9 @@ FOdysseyVectorUndoTagInbetweenerRouteAlter::FOdysseyVectorUndoTagInbetweenerRout
                     , ( FSnapshotFlags::Route::TRAJECTORIES
                       | FSnapshotFlags::Route::STEPS )
                     , ( FSnapshotFlags::Trajectory::BEZIER
-                      | FSnapshotFlags::Trajectory::WAYPOINTS )
-                    , eSnapshotState::Initial )
+                      | FSnapshotFlags::Trajectory::WAYPOINTS ) )
 {
+    mRouteSnapshot.RecordState(  eSnapshotState::Initial );
 }
 
 void

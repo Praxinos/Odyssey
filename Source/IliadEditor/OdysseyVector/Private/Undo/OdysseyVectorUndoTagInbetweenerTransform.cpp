@@ -9,13 +9,9 @@
 
 FOdysseyVectorUndoTagInbetweenerTransform::~FOdysseyVectorUndoTagInbetweenerTransform()
 {
-    if( mApplied )
+    for( FSnapshotInbetweenerBreakdown& breakdownSnapshot : mBreakdownSnapshotBuffer )
     {
-        // nothing to do
-    }
-    else
-    {
-
+        breakdownSnapshot.Clean( mApplied ? eSnapshotState::Altered : eSnapshotState::Initial );
     }
 }
 
@@ -28,8 +24,8 @@ FOdysseyVectorUndoTagInbetweenerTransform::FOdysseyVectorUndoTagInbetweenerTrans
     for( FInbetweenerBreakdown* breakdown : iBreakdownList )
     {
         mBreakdownSnapshotBuffer.emplace_back( breakdown
-                                             , FSnapshotFlags::Breakdown::TRANSFORMATIONS
-                                             , eSnapshotState::Initial );
+                                             , FSnapshotFlags::Breakdown::TRANSFORMATIONS )
+                                             .RecordState( eSnapshotState::Initial );
     }
 }
 

@@ -9,13 +9,9 @@
 
 FOdysseyVectorUndoTagInbetweenerBreakdownAdd::~FOdysseyVectorUndoTagInbetweenerBreakdownAdd()
 {
-    if( mApplied )
+    for( FSnapshotTagInbetweener& inbetweenerTagSnapshot : mInbetweenerTagSnapshotBuffer )
     {
-
-    }
-    else
-    {
-        // nothing to do
+        inbetweenerTagSnapshot.Clean( mApplied ? eSnapshotState::Altered : eSnapshotState::Initial );
     }
 }
 
@@ -41,8 +37,25 @@ FOdysseyVectorUndoTagInbetweenerBreakdownAdd::FOdysseyVectorUndoTagInbetweenerBr
                                                   , FSnapshotFlags::Route::TRAJECTORIES
                                                   | FSnapshotFlags::Route::STEPS
                                                   , FSnapshotFlags::Trajectory::BEZIER
-                                                  | FSnapshotFlags::Trajectory::WAYPOINTS
-                                                  , eSnapshotState::Initial );
+                                                  | FSnapshotFlags::Trajectory::WAYPOINTS );
+    }
+}
+
+void
+FOdysseyVectorUndoTagInbetweenerBreakdownAdd::Begin()
+{
+    for( FSnapshotTagInbetweener& inbetweenerTagSnapshot : mInbetweenerTagSnapshotBuffer )
+    {
+        inbetweenerTagSnapshot.RecordState( eSnapshotState::Initial );
+    }
+}
+
+void
+FOdysseyVectorUndoTagInbetweenerBreakdownAdd::End()
+{
+    for( FSnapshotTagInbetweener& inbetweenerTagSnapshot : mInbetweenerTagSnapshotBuffer )
+    {
+        inbetweenerTagSnapshot.RecordState( eSnapshotState::Altered );
     }
 }
 
@@ -66,12 +79,6 @@ FOdysseyVectorUndoTagInbetweenerBreakdownAdd::Revert( UObject* iIgnored )
 {
     // call method from base class
     FOdysseyVectorUndo::Revert( iIgnored );
-
-    for( FSnapshotTagInbetweener& inbetweenerTagSnapshot : mInbetweenerTagSnapshotBuffer )
-    {
-        inbetweenerTagSnapshot.RecordState( eSnapshotState::Altered ); // will run once
-    }
-
 
     for( FSnapshotTagInbetweener& inbetweenerTagSnapshot : mInbetweenerTagSnapshotBuffer )
     {

@@ -403,11 +403,12 @@ class ODYSSEYVECTOR_API FSnapshotTrajectory
     public:
         virtual ~FSnapshotTrajectory();
         FSnapshotTrajectory( FInbetweenerTrajectory* iTrajectory
-                           , uint64 iSnapshotFlags
-                           , eSnapshotState iState );
+                           , uint64 iSnapshotFlags );
 
         void RecordState( eSnapshotState iState );
         bool LoadState( eSnapshotState iState );
+        uint32 GetIndex() { return mIndex; };
+        void Clean( eSnapshotState iKeepState );
 
         static void WaypointSpacingToArray( FInbetweenerTrajectory* iTrajectory
                                           , std::vector<float>& oSpacingBuffer );
@@ -454,11 +455,11 @@ class ODYSSEYVECTOR_API FSnapshotStep
 
     public:
         virtual ~FSnapshotStep();
-        FSnapshotStep( FInbetweenerStep* iStep
-                     , eSnapshotState iState );
+        FSnapshotStep( FInbetweenerStep* iStep );
 
         void RecordState( eSnapshotState iStateType );
         bool LoadState( eSnapshotState iStateType );
+        uint32 GetIndex() { return mIndex; };
 
         // copy constructor  for safe copies, as we delete states on destruction
         // each copy need its own allocated pointers to those states.
@@ -493,8 +494,6 @@ class ODYSSEYVECTOR_API FSnapshotRoute
     struct State
     {
         bool inited;
-        std::vector<FSnapshotTrajectory> trajectorySnapshotBuffer;
-        std::vector<FSnapshotStep> stepSnapshotBuffer;
 
         State() { inited = false; }
     };
@@ -503,11 +502,13 @@ class ODYSSEYVECTOR_API FSnapshotRoute
         virtual ~FSnapshotRoute();
         FSnapshotRoute( FInbetweenerRoute* iRoute
                       , uint64 iSnapshotflags
-                      , uint64 iTrajectorySnapshotFlags
-                      , eSnapshotState iState );
+                      , uint64 iTrajectorySnapshotFlags );
 
         bool LoadState( eSnapshotState iStateType );
         void RecordState( eSnapshotState iStateType );
+        State* GetState( eSnapshotState iStateType );
+        FInbetweenerRoute* GetRoute() { return mRoute; };
+        void Clean( eSnapshotState iKeepState );
 
         // copy constructor  for safe copies, as we delete states on destruction
         // each copy need its own allocated pointers to those states.
@@ -532,102 +533,17 @@ class ODYSSEYVECTOR_API FSnapshotRoute
         }
 
     protected:
+        FSnapshotTrajectory* GetTrajectorySnapshot( uint32 iTrajectoryIndex );
+        FSnapshotStep* GetStepSnapshot( uint32 iStepIndex );
+
+    protected:
         FInbetweenerRoute* mRoute;
         uint64 mSnapshotFlags;
         uint64 mTrajectorySnapshotFlags;
         State* mInitialState;
         State* mAlteredState;
-};
-
-class ODYSSEYVECTOR_API FSnapshotLayout
-{
-    struct State
-    {
-        bool inited;
-        std::vector<FInbetweenerBreakdown*> breakdownArray;
-        std::vector<uint32> targetBuffer;
-
-        ~State();
-        State() { inited = false; }
-    };
-
-    public:
-        ~FSnapshotLayout();
-        FSnapshotLayout( FOdysseyVectorTagInbetweener* iInbetweenerTag
-                       , eSnapshotState iState );
-
-        void RecordState( eSnapshotState iStateType );
-        bool LoadState( eSnapshotState iStateType );
-
-        // copy constructor  for safe copies, as we delete states on destruction
-        // each copy need its own allocated pointers to those states.
-        FSnapshotLayout ( const FSnapshotLayout& iOther )
-        : mInbetweenerTag ( iOther.mInbetweenerTag )
-        , mInitialState( nullptr )
-        , mAlteredState( nullptr )
-        {
-            if( iOther.mInitialState )
-            {
-                mInitialState = new State();
-                *mInitialState = *iOther.mInitialState;
-            }
-
-            if( iOther.mAlteredState )
-            {
-                mAlteredState = new State();
-                *mAlteredState = *iOther.mAlteredState;
-            }
-        }
-
-    protected:
-        FOdysseyVectorTagInbetweener* mInbetweenerTag;
-        State* mInitialState;
-        State* mAlteredState;
-};
-
-class ODYSSEYVECTOR_API FSnapshotDynamics
-{
-    struct State
-    {
-        bool inited;
-        std::vector<FInbetweenerRoute*> routeArray;
-
-        State() { inited = false; }
-    };
-
-    public:
-        ~FSnapshotDynamics();
-        FSnapshotDynamics();
-        FSnapshotDynamics( FOdysseyVectorTagInbetweener* iInbetweenerTag
-                         , eSnapshotState iState );
-
-        void RecordState( eSnapshotState iStateType );
-        bool LoadState( eSnapshotState iStateType );
-
-        // copy constructor  for safe copies, as we delete states on destruction
-        // each copy need its own allocated pointers to those states.
-        FSnapshotDynamics( const FSnapshotDynamics& iOther )
-        : mInbetweenerTag ( iOther.mInbetweenerTag )
-        , mInitialState( nullptr )
-        , mAlteredState( nullptr )
-        {
-            if( iOther.mInitialState )
-            {
-                mInitialState = new State();
-                *mInitialState = *iOther.mInitialState;
-            }
-
-            if( iOther.mAlteredState )
-            {
-                mAlteredState = new State();
-                *mAlteredState = *iOther.mAlteredState;
-            }
-        }
-
-    protected:
-        FOdysseyVectorTagInbetweener* mInbetweenerTag;
-        State* mInitialState;
-        State* mAlteredState;
+        std::vector<FSnapshotTrajectory> mTrajectorySnapshotBuffer;
+        std::vector<FSnapshotStep> mStepSnapshotBuffer;
 };
 
 class ODYSSEYVECTOR_API FSnapshotInbetweenerChart
@@ -644,8 +560,7 @@ class ODYSSEYVECTOR_API FSnapshotInbetweenerChart
     public:
         ~FSnapshotInbetweenerChart();
         FSnapshotInbetweenerChart( FInbetweenerChart* iChart
-                                 , uint64 iSnapshotFlags
-                                 , eSnapshotState iState );
+                                 , uint64 iSnapshotFlags );
 
         void RecordState( eSnapshotState iStateType );
         bool LoadState( eSnapshotState iStateType );
@@ -683,6 +598,7 @@ class ODYSSEYVECTOR_API FSnapshotInbetweenerBreakdown
     struct State
     {
         bool inited;
+        uint32 target;
         std::vector<::ULIS::FVec2D> gridGeometry;
         double translationX;
         double translationY;
@@ -692,7 +608,6 @@ class ODYSSEYVECTOR_API FSnapshotInbetweenerBreakdown
         double skewX;
         double skewY;
         bool targetVisibility;
-        std::vector<FSnapshotInbetweenerChart> chartSnapshotBuffer;
 
         State() { inited = false; }
     };
@@ -700,11 +615,13 @@ class ODYSSEYVECTOR_API FSnapshotInbetweenerBreakdown
     public:
         virtual ~FSnapshotInbetweenerBreakdown();
         FSnapshotInbetweenerBreakdown( FInbetweenerBreakdown* iBreakdown
-                                     , uint64 iSnapshotFlags
-                                     , eSnapshotState iState );
+                                     , uint64 iSnapshotFlags );
 
         void RecordState( eSnapshotState iStateType );
         bool LoadState( eSnapshotState iStateType );
+        State* GetState( eSnapshotState iStateType );
+        FInbetweenerBreakdown* GetBreakdown() { return mBreakdown; };
+        void Clean( eSnapshotState iKeepState );
 
         // copy constructor  for safe copies, as we delete states on destruction
         // each copy need its own allocated pointers to those states.
@@ -713,6 +630,7 @@ class ODYSSEYVECTOR_API FSnapshotInbetweenerBreakdown
         , mSnapshotFlags ( iOther.mSnapshotFlags )
         , mInitialState( nullptr )
         , mAlteredState( nullptr )
+        , mChartSnapshot ( iOther.mChartSnapshot )
         {
             if( iOther.mInitialState )
             {
@@ -732,6 +650,7 @@ class ODYSSEYVECTOR_API FSnapshotInbetweenerBreakdown
         uint64 mSnapshotFlags;
         State* mInitialState;
         State* mAlteredState;
+        FSnapshotInbetweenerChart mChartSnapshot;
 };
 
 class ODYSSEYVECTOR_API FSnapshotTagInbetweener
@@ -755,10 +674,6 @@ class ODYSSEYVECTOR_API FSnapshotTagInbetweener
         bool square;
         bool withThickness;
         bool constantWidth;
-        std::vector<FSnapshotLayout> layoutSnapshotBuffer;
-        std::vector<FSnapshotDynamics> dynamicsSnapshotBuffer;
-        std::vector<FSnapshotInbetweenerBreakdown> inbetweenerBreakdownSnapshotBuffer;
-        std::vector<FSnapshotRoute> routeSnapshotBuffer;
 
         State() { inited = false; }
     };
@@ -769,11 +684,11 @@ class ODYSSEYVECTOR_API FSnapshotTagInbetweener
                                , uint64 iSnapshotFlags
                                , uint64 iBreakdownSnapshotFlags
                                , uint64 iRouteSnapshotFlags
-                               , uint64 iTrajectorySnapshotFlags
-                               , eSnapshotState iStateType );
+                               , uint64 iTrajectorySnapshotFlags );
 
         void RecordState( eSnapshotState iStateType );
         bool LoadState( eSnapshotState iStateType );
+        void Clean( eSnapshotState iKeepState );
 
         // copy constructor  for safe copies, as we delete states on destruction
         // each copy need its own allocated pointers to those states.
@@ -800,6 +715,10 @@ class ODYSSEYVECTOR_API FSnapshotTagInbetweener
         }
 
     protected:
+        FSnapshotInbetweenerBreakdown* GetBreakdownSnapshot( FInbetweenerBreakdown* breakdown );
+        FSnapshotRoute* GetRouteSnapshot( FInbetweenerRoute* iRoute );
+
+    protected:
         FOdysseyVectorTagInbetweener* mInbetweenerTag;
         uint64 mSnapshotFlags;
         uint64 mBreakdownSnapshotFlags;
@@ -807,6 +726,8 @@ class ODYSSEYVECTOR_API FSnapshotTagInbetweener
         uint64 mTrajectorySnapshotFlags;
         State* mInitialState;
         State* mAlteredState;
+        std::vector<FSnapshotInbetweenerBreakdown> mBreakdownSnapshotBuffer;
+        std::vector<FSnapshotRoute> mRouteSnapshotBuffer;
 };
 
 class ODYSSEYVECTOR_API FSnapshotObject
@@ -1108,6 +1029,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndo : public FCommandChange
 
         // usefull for undos that are "standalone"
         void SetUpdateViaDelegation( bool iUpdateViaDelegation );
+
+        void GetInbetweenerTagList( const std::list<FOdysseyVectorObject*>& iObjectList
+                                  , std::list<FOdysseyVectorTagInbetweener*>& oInbetweenerTagList );
+        void GetInbetweenerTagList( const std::vector<FOdysseyVectorObject*>& iObjectArray
+                                  , std::list<FOdysseyVectorTagInbetweener*>& oInbetweenerTagList );
+        virtual void Begin(){};
+        virtual void End(){};
 
     protected:
         /** Describes this change (for debugging) */

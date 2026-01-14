@@ -56,6 +56,7 @@ class ODYSSEYVECTOR_API FInbetweenerTrajectory
         void Reset();
         double GetCubicT( float iLinearT );
         double GetLinearT( float iCubicT );
+        uint32 GetIndex();
 
     private:
         std::vector<FInbetweenerWaypoint> mWaypointBuffer;
