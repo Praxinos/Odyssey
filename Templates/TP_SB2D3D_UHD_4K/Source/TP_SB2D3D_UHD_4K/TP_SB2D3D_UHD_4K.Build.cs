@@ -2,9 +2,9 @@
 
 using UnrealBuildTool;
 
-public class TP_SB2D3D_4K : ModuleRules
+public class TP_SB2D3D_UHD_4K : ModuleRules
 {
-	public TP_SB2D3D_4K(ReadOnlyTargetRules Target) : base(Target)
+	public TP_SB2D3D_UHD_4K(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
