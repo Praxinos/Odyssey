@@ -24,6 +24,7 @@ UOdysseyPainterEditorVectorMatchingTool::~UOdysseyPainterEditorVectorMatchingToo
 
 UOdysseyPainterEditorVectorMatchingTool::UOdysseyPainterEditorVectorMatchingTool()
     : UOdysseyPainterEditorVectorBaseTool( MakeShared<FOdysseyPainterEditorVectorMatchingToolHUD>( this ), false, true )
+    , mUndo ( nullptr )
     , ShowInbetweens ( eShowInbetweens::None )
     , PickingRadius( 75 )
     , MatchingInfluence( eMatchingInfluence::Radial )
@@ -95,16 +96,18 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseDownVector( FOdysseyVectorGroupP
         GEditor->BeginTransaction(LOCTEXT("vector-matching-tool.transaction.match-grid","Vector Matching Tool"));
         if( GUndo )
         {
-            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerMatching( iScene
-                                                                                   , mMatchingHUD->GetSelectedBreakdownList() );
+            mUndo = new FOdysseyVectorUndoTagInbetweenerMatching( iScene
+                                                                , mMatchingHUD->GetSelectedBreakdownList() );
 
-            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(mUndo) );
 
             TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
             if (source)
                 source->RecordCurrentFrameUndo();
         }
         GEditor->EndTransaction();
+
+        mUndo->Begin(); // snapshot before changes
 
         for( FInbetweenerBreakdown* breakdown : mMatchingHUD->GetSelectedBreakdownList() )
         {
@@ -203,6 +206,13 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseUpVector( FOdysseyVectorGroupPai
     {
         iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
         iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
+
+        if( mUndo )
+        {
+            mUndo->End();
+
+            mUndo = nullptr;
+        }
     }
 
     return true;

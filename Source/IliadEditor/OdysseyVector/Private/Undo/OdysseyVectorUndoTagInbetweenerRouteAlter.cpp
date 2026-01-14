@@ -23,7 +23,18 @@ FOdysseyVectorUndoTagInbetweenerRouteAlter::FOdysseyVectorUndoTagInbetweenerRout
                     , ( FSnapshotFlags::Trajectory::BEZIER
                       | FSnapshotFlags::Trajectory::WAYPOINTS ) )
 {
+}
+
+void
+FOdysseyVectorUndoTagInbetweenerRouteAlter::Begin()
+{
     mRouteSnapshot.RecordState(  eSnapshotState::Initial );
+}
+
+void
+FOdysseyVectorUndoTagInbetweenerRouteAlter::End()
+{
+    mRouteSnapshot.RecordState(  eSnapshotState::Altered );
 }
 
 void
@@ -44,7 +55,6 @@ FOdysseyVectorUndoTagInbetweenerRouteAlter::Revert( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Revert( iIgnored );
 
-    mRouteSnapshot.RecordState( eSnapshotState::Altered );
     mRouteSnapshot.LoadState( eSnapshotState::Initial );
 
     // Update vector scenes and call callbacks if any (for refreshing GUI e.g)

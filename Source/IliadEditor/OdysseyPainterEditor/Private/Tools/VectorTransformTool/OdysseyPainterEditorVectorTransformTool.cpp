@@ -386,6 +386,11 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDownVector( FOdysseyVectorGroup
                                                                  , mTransformHUD->GetSelectedBreakdownList() );
         }
 
+        if( mUndo )
+        {
+            mUndo->Begin(); // snapshot before changes (currently only for the Inbetweener undos)
+        }
+
         if( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_ROTATE )
         {
             mTransformHUD->ShowSelectionBox( false );
@@ -1253,6 +1258,10 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseUpVector( FOdysseyVectorGroupPa
         }
         else
         {
+            // update invalidated objects. Updating via shared Env will invalidate the engine, thus redrawing the image
+            iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+            iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
+
             if( mUndo )
             {
                 // needed for valid GUndo pointer
@@ -1266,11 +1275,9 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseUpVector( FOdysseyVectorGroupPa
                         source->RecordCurrentFrameUndo();
                 }
                 GEditor->EndTransaction();
-            }
 
-            // update invalidated objects. Updating via shared Env will invalidate the engine, thus redrawing the image
-            iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-            iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
+                mUndo->End(); // snapshot after changes
+            }
 
             // quick fix to place the gizmo at the right place
             FSelectionBox& selectionBox = mTransformHUD->GetSelectionBox();

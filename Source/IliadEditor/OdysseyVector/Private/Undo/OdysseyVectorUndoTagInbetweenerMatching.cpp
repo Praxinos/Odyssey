@@ -25,8 +25,7 @@ FOdysseyVectorUndoTagInbetweenerMatching::FOdysseyVectorUndoTagInbetweenerMatchi
     for( FInbetweenerBreakdown* breakdown : iBreakdownList )
     {
         mBreakdownSnapshotBuffer.emplace_back( breakdown
-                                             , FSnapshotFlags::Breakdown::GRIDGEOMETRY )
-                                             .RecordState(  eSnapshotState::Initial );
+                                             , FSnapshotFlags::Breakdown::GRIDGEOMETRY );
     }
 }
 
@@ -48,9 +47,26 @@ FOdysseyVectorUndoTagInbetweenerMatching::FOdysseyVectorUndoTagInbetweenerMatchi
         for( FInbetweenerBreakdown* breakdown : inbetweenerTag->GetBreakdownList() )
         {
             mBreakdownSnapshotBuffer.emplace_back( breakdown
-                                                 , FSnapshotFlags::Breakdown::GRIDGEOMETRY )
-                                                 .RecordState(  eSnapshotState::Initial );
+                                                 , FSnapshotFlags::Breakdown::GRIDGEOMETRY );
         }
+    }
+}
+
+void
+FOdysseyVectorUndoTagInbetweenerMatching::Begin()
+{
+    for( FSnapshotInbetweenerBreakdown& breakdownSnapshot : mBreakdownSnapshotBuffer )
+    {
+        breakdownSnapshot.RecordState( eSnapshotState::Initial );
+    }
+}
+
+void
+FOdysseyVectorUndoTagInbetweenerMatching::End()
+{
+    for( FSnapshotInbetweenerBreakdown& breakdownSnapshot : mBreakdownSnapshotBuffer )
+    {
+        breakdownSnapshot.RecordState( eSnapshotState::Altered );
     }
 }
 
@@ -74,12 +90,6 @@ FOdysseyVectorUndoTagInbetweenerMatching::Revert( UObject* iIgnored )
 {
     // call method from base class
     FOdysseyVectorUndo::Revert( iIgnored );
-
-    for( FSnapshotInbetweenerBreakdown& breakdownSnapshot : mBreakdownSnapshotBuffer )
-    {
-        breakdownSnapshot.RecordState( eSnapshotState::Altered );
-    }
-
 
     for( FSnapshotInbetweenerBreakdown& breakdownSnapshot : mBreakdownSnapshotBuffer )
     {

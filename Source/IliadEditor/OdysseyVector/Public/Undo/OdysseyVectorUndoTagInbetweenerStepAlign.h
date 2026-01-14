@@ -28,6 +28,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoTagInbetweenerStepAlign : public FOdys
         /** called when undoing */
         virtual void Revert( UObject* iIgnored ) override;
 
+        virtual void Begin() override;
+        virtual void End() override;
+
         /** Describes this change (for debugging) */
         virtual FString ToString() const override;
 

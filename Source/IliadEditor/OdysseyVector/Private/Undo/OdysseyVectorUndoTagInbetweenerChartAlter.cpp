@@ -39,8 +39,7 @@ FOdysseyVectorUndoTagInbetweenerChartAlter::FOdysseyVectorUndoTagInbetweenerChar
                                                   , FSnapshotFlags::Tag::Inbetweener::BREAKDOWNS
                                                   , FSnapshotFlags::Breakdown::CHART
                                                   , 0
-                                                  , 0 )
-                                                  .RecordState(  eSnapshotState::Initial );
+                                                  , 0 );
     }
 }
 
@@ -58,8 +57,25 @@ FOdysseyVectorUndoTagInbetweenerChartAlter::FOdysseyVectorUndoTagInbetweenerChar
                                                   , FSnapshotFlags::Tag::Inbetweener::BREAKDOWNS
                                                   , FSnapshotFlags::Breakdown::CHART
                                                   , 0
-                                                  , 0 )
-                                                  .RecordState(  eSnapshotState::Initial );
+                                                  , 0 );
+    }
+}
+
+void
+FOdysseyVectorUndoTagInbetweenerChartAlter::Begin()
+{
+    for( FSnapshotTagInbetweener& inbetweenerTagSnapshot : mInbetweenerTagSnapshotBuffer )
+    {
+        inbetweenerTagSnapshot.RecordState( eSnapshotState::Initial );
+    }
+}
+
+void
+FOdysseyVectorUndoTagInbetweenerChartAlter::End()
+{
+    for( FSnapshotTagInbetweener& inbetweenerTagSnapshot : mInbetweenerTagSnapshotBuffer )
+    {
+        inbetweenerTagSnapshot.RecordState( eSnapshotState::Altered );
     }
 }
 
@@ -83,12 +99,6 @@ FOdysseyVectorUndoTagInbetweenerChartAlter::Revert( UObject* iIgnored )
 {
     // call method from base class
     FOdysseyVectorUndo::Revert( iIgnored );
-
-    for( FSnapshotTagInbetweener& inbetweenerTagSnapshot : mInbetweenerTagSnapshotBuffer )
-    {
-        inbetweenerTagSnapshot.RecordState( eSnapshotState::Altered );
-    }
-
 
     for( FSnapshotTagInbetweener& inbetweenerTagSnapshot : mInbetweenerTagSnapshotBuffer )
     {

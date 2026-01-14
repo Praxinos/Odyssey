@@ -25,6 +25,7 @@ UOdysseyPainterEditorVectorChartTool::~UOdysseyPainterEditorVectorChartTool()
 
 UOdysseyPainterEditorVectorChartTool::UOdysseyPainterEditorVectorChartTool()
     : UOdysseyPainterEditorVectorBaseTool( MakeShared<FOdysseyPainterEditorVectorChartToolHUD>( this ), false, true )
+    , mUndo( nullptr )
     , PickingRadius( 10.0f )
     , EditionMode ( eVectorChartEditionMode::OneByOne )
     , Factor( 1 )
@@ -193,15 +194,15 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDownVector( FOdysseyVectorGroupPain
                 if( mPickedInbetween )
                 {
                     FOdysseyVectorTagInbetweener* inbetweenerTag = mPickedInbetween->GetChart()->GetBreakdown()->GetInbetweenerTag();
+                    mUndo = new FOdysseyVectorUndoTagInbetweenerChartAlter( iScene
+                                                                          , inbetweenerTag );
+                    mUndo->Begin(); // snapshot beforce changes
 
                     // needed for valid GUndo pointer
                     GEditor->BeginTransaction(LOCTEXT("vector-chart-tool.transaction.edit-chart","Vector Chart Tool"));
                     if( GUndo )
                     {
-                        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerChartAlter( iScene
-                                                                                                 , inbetweenerTag );
-
-                        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(mUndo) );
 
                         TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
                         if (source)
@@ -227,15 +228,15 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDownVector( FOdysseyVectorGroupPain
                 if( mPickedBezierPoint )
                 {
                     FOdysseyVectorTagInbetweener* inbetweenerTag = mPickedBezierPoint->GetHUDBezier()->GetChart()->GetBreakdown()->GetInbetweenerTag();
+                    mUndo = new FOdysseyVectorUndoTagInbetweenerChartAlter( iScene
+                                                                          , inbetweenerTag );
+                    mUndo->Begin(); // snapshot beforce changes
 
                     // needed for valid GUndo pointer
                     GEditor->BeginTransaction(LOCTEXT("vector-chart-tool.transaction.edit-chart","Vector Chart Tool"));
                     if( GUndo )
                     {
-                        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerChartAlter( iScene
-                                                                                                 , inbetweenerTag );
-
-                        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(mUndo) );
 
                         TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
                         if (source)
@@ -429,6 +430,13 @@ UOdysseyPainterEditorVectorChartTool::OnMouseUpVector( FOdysseyVectorGroupPaint*
              // update ALL impacted scenes
             iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
             iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
+        }
+
+        if( mUndo )
+        {
+            mUndo->End();
+
+            mUndo = nullptr;
         }
     }
 

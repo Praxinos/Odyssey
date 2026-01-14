@@ -12,6 +12,7 @@
 
 struct FInbetweenerDrawing;
 class FOdysseyPainterEditorVectorChartToolHUD;
+class FOdysseyVectorUndo;
 
 UENUM()
 enum class eChartType : uint8
@@ -89,6 +90,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorChartTool : public UOd
         FInbetweenerChart::HUDBezier::Point* mPickedBezierPoint;
         ::ULIS::FVec2D mMouseAtDown;
         float mStrength;
+        FOdysseyVectorUndo* mUndo;
 
     public:
         UPROPERTY( EditAnywhere

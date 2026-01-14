@@ -15,7 +15,7 @@ class FInbetweenerQuad;
 class FInbetweenerWaypoint;
 class FInbetweenerStep;
 class FInbetweenerRoute;
-
+class FOdysseyVectorUndo;
 
 UENUM()
 enum class eVectorTrajectoryEditionMode : uint8
@@ -101,6 +101,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTrajectoryTool : publi
         FInbetweenerRoute* mPickedRoute;
         FInbetweenerQuad* mHoveredQuad;
         eVectorTrajectoryEditionMode mEditionMode;
+        FOdysseyVectorUndo* mUndo;
 
     public:
         UPROPERTY( EditAnywhere

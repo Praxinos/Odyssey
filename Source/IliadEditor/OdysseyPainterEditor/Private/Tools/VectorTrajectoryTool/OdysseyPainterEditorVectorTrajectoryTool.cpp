@@ -42,6 +42,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::UOdysseyPainterEditorVectorTrajectory
     : UOdysseyPainterEditorVectorBaseTool(MakeShared<FOdysseyPainterEditorVectorTrajectoryToolHUD>( this ), false, true )
     , mHoveredQuad( nullptr )
     , mEditionMode( eVectorTrajectoryEditionMode::Add )
+    , mUndo( nullptr )
     , ShowInbetweens( eShowInbetweens::All )
     , PickingRadius( 10.0f )
     , GridDisplayMode( eVectorTrajectoryGridDisplayMode::AsPoints )
@@ -190,15 +191,19 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
 
                     if( addedRoute )
                     {
+                        mUndo = new FOdysseyVectorUndoTagInbetweenerRouteAdd( iScene
+                                                                            , inbetweenerTag
+                                                                            , addedRoute );
+
+                        mUndo->Begin(); // snapshot before changes
+
                         // needed for valid GUndo pointer
                         GEditor->BeginTransaction(LOCTEXT("vector-trajectory-tool.transaction.add","Vector Trajectory Tool"));
                         if( GUndo )
                         {
-                            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerRouteAdd( iScene
-                                                                                                    , inbetweenerTag
-                                                                                                    , addedRoute );
 
-                            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+
+                            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(mUndo) );
 
                             TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
                             if (source)
@@ -223,14 +228,16 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
 
             if( mPickedHandle )
             {
+                mUndo = new FOdysseyVectorUndoTagInbetweenerTrajectoryAlter( iScene
+                                                                           , mPickedHandle->GetTrajectory() );
+
+                mUndo->Begin(); // snapshot before changes
+
                 // needed for valid GUndo pointer
                 GEditor->BeginTransaction(LOCTEXT("vector-trajectory-tool.transaction.alter","Vector Trajectory Tool"));
                 if( GUndo )
                 {
-                    FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerTrajectoryAlter( iScene
-                                                                                                  , mPickedHandle->GetTrajectory() );
-
-                    GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                    GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(mUndo) );
 
                     TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
                     if (source)
@@ -259,14 +266,16 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
 
                 if( mPickedWaypoint )
                 {
+                    mUndo = new FOdysseyVectorUndoTagInbetweenerTrajectoryShiftWaypoint( iScene
+                                                                                       , mPickedWaypoint->GetTrajectory() );
+
+                    mUndo->Begin(); // snapshot before changes
+
                     // needed for valid GUndo pointer
                     GEditor->BeginTransaction(LOCTEXT("vector-trajectory-tool.transaction.shift","Vector Trajectory Tool"));
                     if( GUndo )
                     {
-                        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerTrajectoryShiftWaypoint( iScene
-                                                                                                              , mPickedWaypoint->GetTrajectory() );
-
-                        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(mUndo) );
 
                         TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
                         if (source)
@@ -434,16 +443,17 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseUpVector( FOdysseyVectorGroupP
         if( mPickedStep )
         {
             FInbetweenerRoute* route = mPickedStep->GetRoute();
+            mUndo = new FOdysseyVectorUndoTagInbetweenerStepAlign( iScene
+                                                                 , route->GetInbetweenerTag()
+                                                                 , route );
+
+            mUndo->Begin(); // snapshot before changes
 
             // needed for valid GUndo pointer
             GEditor->BeginTransaction(LOCTEXT("vector-trajectory-tool.transaction.align","Vector Trajectory Tool"));
             if( GUndo )
             {
-                FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerStepAlign( iScene
-                                                                                        , route->GetInbetweenerTag()
-                                                                                        , route );
-
-                GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(mUndo) );
 
                 TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
                 if (source)
@@ -453,10 +463,17 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseUpVector( FOdysseyVectorGroupP
 
             mPickedStep->SetAligned( mPickedStep->IsAligned() ? false : true );
         }
-    }
 
-    iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
+        iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+        iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
+
+        if( mUndo )
+        {
+            mUndo->End(); // snapshot after changes
+
+            mUndo = nullptr;
+        }
+    }
 
     return true;
 }
@@ -500,15 +517,16 @@ void
 UOdysseyPainterEditorVectorTrajectoryTool::ResetRoute()
 {
     FOdysseyVectorGroupPaint* scene = mPickedRoute->GetInbetweenerTag()->GetOwner()->GetScene();
+    FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerRouteAlter( scene
+                                                                             , mPickedRoute->GetInbetweenerTag()
+                                                                             , mPickedRoute );
+
+    undo->Begin(); // snapshot before change
 
     // needed for valid GUndo pointer
     GEditor->BeginTransaction(LOCTEXT("vector-trajectory-tool.transaction.remove","Vector Trajectory Tool"));
     if( GUndo )
     {
-        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerRouteAlter( scene
-                                                                                 , mPickedRoute->GetInbetweenerTag()
-                                                                                 , mPickedRoute );
-
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
         TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
@@ -521,6 +539,8 @@ UOdysseyPainterEditorVectorTrajectoryTool::ResetRoute()
 
     scene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
     scene->GetLayer()->RequestRedraw( scene->GetCell(), 0 );
+
+    undo->End(); // snapshot after change
 }
 
 void

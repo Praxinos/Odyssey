@@ -28,8 +28,7 @@ FOdysseyVectorUndoTagInbetweenerReset::FOdysseyVectorUndoTagInbetweenerReset( FO
     {
         mBreakdownSnapshotBuffer.emplace_back( breakdown
                                              , ( iResetGridGeometry    ? FSnapshotFlags::Breakdown::GRIDGEOMETRY    : 0 )
-                                             | ( iResetTransformations ? FSnapshotFlags::Breakdown::TRANSFORMATIONS : 0 ) )
-                                             .RecordState(  eSnapshotState::Initial );
+                                             | ( iResetTransformations ? FSnapshotFlags::Breakdown::TRANSFORMATIONS : 0 ) );
     }
 }
 
@@ -54,9 +53,26 @@ FOdysseyVectorUndoTagInbetweenerReset::FOdysseyVectorUndoTagInbetweenerReset( FO
         {
             mBreakdownSnapshotBuffer.emplace_back( breakdown
                                                  , ( iResetGridGeometry    ? FSnapshotFlags::Breakdown::GRIDGEOMETRY    : 0 )
-                                                 | ( iResetTransformations ? FSnapshotFlags::Breakdown::TRANSFORMATIONS : 0 ) )
-                                                 .RecordState(  eSnapshotState::Initial );
+                                                 | ( iResetTransformations ? FSnapshotFlags::Breakdown::TRANSFORMATIONS : 0 ) );
         }
+    }
+}
+
+void
+FOdysseyVectorUndoTagInbetweenerReset::Begin()
+{
+    for( FSnapshotInbetweenerBreakdown& breakdownSnapshot : mBreakdownSnapshotBuffer )
+    {
+        breakdownSnapshot.RecordState( eSnapshotState::Initial );
+    }
+}
+
+void
+FOdysseyVectorUndoTagInbetweenerReset::End()
+{
+    for( FSnapshotInbetweenerBreakdown& breakdownSnapshot : mBreakdownSnapshotBuffer )
+    {
+        breakdownSnapshot.RecordState( eSnapshotState::Altered );
     }
 }
 
@@ -81,10 +97,7 @@ FOdysseyVectorUndoTagInbetweenerReset::Revert( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Revert( iIgnored );
 
-    for( FSnapshotInbetweenerBreakdown& breakdownSnapshot : mBreakdownSnapshotBuffer )
-    {
-        breakdownSnapshot.RecordState( eSnapshotState::Altered );
-    }
+
 
 
     for( FSnapshotInbetweenerBreakdown& breakdownSnapshot : mBreakdownSnapshotBuffer )

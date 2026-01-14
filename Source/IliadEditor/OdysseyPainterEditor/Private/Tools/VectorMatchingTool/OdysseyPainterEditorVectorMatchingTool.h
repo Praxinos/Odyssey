@@ -15,6 +15,7 @@ class FOdysseyVectorTagInbetweener;
 struct FInbetweenerInbetween;
 class  FInbetweenerPoint;
 class  FInbetweenerGrid;
+class FOdysseyVectorUndo;
 
 UENUM()
 enum class eMatchingInfluence : uint8
@@ -79,6 +80,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorMatchingTool : public 
         std::vector<FInbetweenerPoint*> mPickedPointArray;
         std::vector<float> mWorldDistanceArray;
         std::vector<FInbetweenerGrid*> mPickedGridArray;
+        FOdysseyVectorUndo* mUndo;
 
     public:
         UPROPERTY( EditAnywhere

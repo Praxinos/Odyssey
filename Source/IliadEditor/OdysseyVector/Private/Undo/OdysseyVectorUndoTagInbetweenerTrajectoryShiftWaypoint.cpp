@@ -9,19 +9,26 @@
 
 FOdysseyVectorUndoTagInbetweenerTrajectoryShiftWaypoint::~FOdysseyVectorUndoTagInbetweenerTrajectoryShiftWaypoint()
 {
-    for( FSnapshotTrajectory& trajectorySnapshot : mTrajectorySnapshotBuffer )
-    {
-        trajectorySnapshot.Clean( mApplied ? eSnapshotState::Altered : eSnapshotState::Initial );
-    }
+    mTrajectorySnapshot.Clean( mApplied ? eSnapshotState::Altered : eSnapshotState::Initial );
 }
 
 FOdysseyVectorUndoTagInbetweenerTrajectoryShiftWaypoint::FOdysseyVectorUndoTagInbetweenerTrajectoryShiftWaypoint( FOdysseyVectorGroupPaint* iScene
                                                                                                                 , FInbetweenerTrajectory* iTrajectory )
     : FOdysseyVectorUndo( iScene->GetLayer() )
+    , mTrajectorySnapshot ( iTrajectory, FSnapshotFlags::Trajectory::WAYPOINTS )
 {
-    mTrajectorySnapshotBuffer.emplace_back( iTrajectory
-                                          , FSnapshotFlags::Trajectory::WAYPOINTS )
-                                          .RecordState( eSnapshotState::Initial );
+}
+
+void
+FOdysseyVectorUndoTagInbetweenerTrajectoryShiftWaypoint::Begin()
+{
+    mTrajectorySnapshot.RecordState(  eSnapshotState::Initial );
+}
+
+void
+FOdysseyVectorUndoTagInbetweenerTrajectoryShiftWaypoint::End()
+{
+    mTrajectorySnapshot.RecordState(  eSnapshotState::Altered );
 }
 
 void
@@ -30,10 +37,7 @@ FOdysseyVectorUndoTagInbetweenerTrajectoryShiftWaypoint::Apply( UObject* iIgnore
     // call method from base class
     FOdysseyVectorUndo::Apply( iIgnored );
 
-    for( FSnapshotTrajectory& trajectorySnapshot : mTrajectorySnapshotBuffer )
-    {
-        trajectorySnapshot.LoadState( eSnapshotState::Altered );
-    }
+    mTrajectorySnapshot.LoadState( eSnapshotState::Altered );
 
     // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
     Update();
@@ -45,16 +49,7 @@ FOdysseyVectorUndoTagInbetweenerTrajectoryShiftWaypoint::Revert( UObject* iIgnor
     // call method from base class
     FOdysseyVectorUndo::Revert( iIgnored );
 
-    for( FSnapshotTrajectory& trajectorySnapshot : mTrajectorySnapshotBuffer )
-    {
-        trajectorySnapshot.RecordState( eSnapshotState::Altered );
-    }
-
-
-    for( FSnapshotTrajectory& trajectorySnapshot : mTrajectorySnapshotBuffer )
-    {
-        trajectorySnapshot.LoadState( eSnapshotState::Initial );
-    }
+    mTrajectorySnapshot.LoadState( eSnapshotState::Initial );
 
     // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
     Update();
