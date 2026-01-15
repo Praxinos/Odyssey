@@ -22,11 +22,13 @@ UOdysseyLayerCell::PostLoad() //override
 {
     Super::PostLoad();
 
+#if WITH_EDITOR
     if( Mark_DEPRECATED != -1 )
     {
         Marks.Add( 0, FCellMark{ Mark_DEPRECATED } );
         Mark_DEPRECATED = -1;
     }
+#endif
 }
 
 void
@@ -162,6 +164,7 @@ UOdysseyLayerCell::ExposureChanged(bool iIsInteractive)
 {
     if( !iIsInteractive )
     {
+#if WITH_EDITOR
         TArray<int> indexes;
         Marks.GetKeys( indexes );
         for( int index : indexes )
@@ -169,6 +172,7 @@ UOdysseyLayerCell::ExposureChanged(bool iIsInteractive)
             if( index >= Exposure )
                 Marks.Remove( index );
         }
+#endif
     }
 
     if (GetLayer())

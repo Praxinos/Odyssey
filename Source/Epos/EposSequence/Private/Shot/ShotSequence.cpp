@@ -61,7 +61,9 @@ void UShotSequence::Initialize( FFrameRate iTickRate, FFrameRate iDisplayRate )
 
     MovieScene->SetDisplayRate( iDisplayRate );
 
+#if WITH_EDITOR
     MovieScene->SetPlaybackRangeLocked( true );
+#endif
 }
 
 void UShotSequence::PostLoad()

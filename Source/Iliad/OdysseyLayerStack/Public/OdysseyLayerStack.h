@@ -6,7 +6,7 @@
 #include "CoreMinimal.h"
 #include "OdysseyTextureRenderingAbility.h"
 #include "Templates/SubclassOf.h"
-#include "Selection.h"
+//#include "Selection.h"
 
 #if WITH_EDITOR
 #include "OdysseyLayerCellSelection.h"
