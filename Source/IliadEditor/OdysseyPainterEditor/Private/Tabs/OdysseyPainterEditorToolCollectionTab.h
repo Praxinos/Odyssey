@@ -31,9 +31,12 @@ protected:
 protected:
     // Event Listeners
     void OnAssetSelected(const FAssetData& AssetData);
-    FReply OnRemoveCollectionClicked(TWeakObjectPtr<UOdysseyToolCollection> iCollectionToRemove);
     TSharedRef<SWidget> OnGetAddToolCollectionMenuContent();
     FReply OnLockClicked();
+
+    TSharedRef<SWidget> GetCollectionMenuContent(TWeakObjectPtr<UOdysseyToolCollection> iCollection);
+    void HandleSaveCollection(TWeakObjectPtr<UOdysseyToolCollection> iCollection);
+    void HandleRemoveCollection(TWeakObjectPtr<UOdysseyToolCollection> iCollection);
 
 protected:
     bool IsUnlocked() const;

@@ -17,7 +17,9 @@
 #include "SPositiveActionButton.h"
 #include "Widgets/Views/SListView.h"
 #include "Widgets/Layout/SWrapBox.h"
-
+#include "Misc/PackageName.h"
+#include "UObject/Package.h"
+#include "UObject/SavePackage.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -130,16 +132,9 @@ TSharedRef<ITableRow> FOdysseyPainterEditorToolCollectionTab::OnGenerateCollecti
                 .AutoWidth()
                 .VAlign(VAlign_Top)
                 [
-                    SNew(SButton)
-                        .IsEnabled( this, &FOdysseyPainterEditorToolCollectionTab::IsUnlocked )
-                        .ButtonStyle(FAppStyle::Get(), "SimpleButton")
-                        .OnClicked(this, &FOdysseyPainterEditorToolCollectionTab::OnRemoveCollectionClicked, iCollection)
-                        .ToolTipText(FText::FromString("Remove this collection"))
-                        [
-                            SNew(SImage)
-                                .Image(FAppStyle::GetBrush("Icons.Delete"))
-                                .ColorAndOpacity(FSlateColor::UseForeground())
-                        ]
+                    SNew(SComboButton)
+                    .HasDownArrow(true)
+                    .OnGetMenuContent(this, &FOdysseyPainterEditorToolCollectionTab::GetCollectionMenuContent, iCollection)
                 ]
         ];
 }
@@ -230,14 +225,73 @@ void FOdysseyPainterEditorToolCollectionTab::OnAssetSelected(const FAssetData& A
     RefreshCollectionsGUI();
 }
 
-FReply FOdysseyPainterEditorToolCollectionTab::OnRemoveCollectionClicked( TWeakObjectPtr<UOdysseyToolCollection> iCollectionToRemove )
+TSharedRef<SWidget> FOdysseyPainterEditorToolCollectionTab::GetCollectionMenuContent(TWeakObjectPtr<UOdysseyToolCollection> iCollection)
 {
-    if (iCollectionToRemove.IsValid())
+    FMenuBuilder menuBuilder(true, nullptr);
+
+    menuBuilder.AddMenuEntry(
+        FText::FromString(TEXT("Save Collection")),
+        FText::FromString(TEXT("Save this tool collection")),
+        FSlateIcon(),
+        FUIAction(
+            FExecuteAction::CreateSP(this, &FOdysseyPainterEditorToolCollectionTab::HandleSaveCollection, iCollection)
+        )
+    );
+
+    menuBuilder.AddMenuEntry(
+        FText::FromString(TEXT("Remove Collection")),
+        FText::FromString(TEXT("Remove this tool collection from the editor")),
+        FSlateIcon(),
+        FUIAction(
+            FExecuteAction::CreateSP(this, &FOdysseyPainterEditorToolCollectionTab::HandleRemoveCollection, iCollection)
+        )
+    );
+
+    return menuBuilder.MakeWidget();
+}
+
+void FOdysseyPainterEditorToolCollectionTab::HandleSaveCollection(TWeakObjectPtr<UOdysseyToolCollection> iCollection)
+{
+    if (!iCollection.IsValid() || iCollection->IsCollectionTransient())
     {
-        mEditor->RemoveToolCollection(iCollectionToRemove.Get());
-        RefreshCollectionsGUI();
+        return;
     }
-    return FReply::Handled();
+
+    UPackage* package = iCollection->GetOutermost();
+    if (!package)
+    {
+        return;
+    }
+
+    if (!package->IsDirty())
+    {
+        return;
+    }
+
+    const FString packageFileName = FPackageName::LongPackageNameToFilename(package->GetName(), FPackageName::GetAssetPackageExtension());
+
+    FSavePackageArgs saveArgs;
+    saveArgs.TopLevelFlags = RF_Public | RF_Standalone;
+    saveArgs.SaveFlags = SAVE_None;
+    saveArgs.Error = GError;
+
+    UPackage::SavePackage(
+        package,
+        nullptr,
+        *packageFileName,
+        saveArgs
+    );
+}
+
+void FOdysseyPainterEditorToolCollectionTab::HandleRemoveCollection(TWeakObjectPtr<UOdysseyToolCollection> iCollection)
+{
+    if (!iCollection.IsValid() || iCollection->IsCollectionTransient())
+    {
+        return;
+    }
+
+    mEditor->RemoveToolCollection(iCollection.Get());
+    RefreshCollectionsGUI();
 }
 
 #undef LOCTEXT_NAMESPACE
