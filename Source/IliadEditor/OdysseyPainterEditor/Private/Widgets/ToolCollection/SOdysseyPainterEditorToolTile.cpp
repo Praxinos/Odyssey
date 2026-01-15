@@ -45,13 +45,6 @@ SOdysseyPainterEditorToolTile::Construct(const FArguments& InArgs)
                     SNew(SColorBlock)
                         .Color(this, &SOdysseyPainterEditorToolTile::GetTileColor)
                 ]
-
-                // Glow overlay
-                + SOverlay::Slot()
-                [
-                    SNew(SColorBlock)
-                        .Color(this, &SOdysseyPainterEditorToolTile::GetTileColor)
-                ]
                 + SOverlay::Slot() // foreground (icon)
                 .HAlign(HAlign_Center)
                 .VAlign(VAlign_Center)
