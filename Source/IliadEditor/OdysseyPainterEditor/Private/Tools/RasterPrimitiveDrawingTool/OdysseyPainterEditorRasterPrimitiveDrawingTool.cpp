@@ -91,6 +91,8 @@ UOdysseyPainterEditorRasterPrimitiveDrawingTool::GetRasterBlockFromEditor(bool i
 
 bool UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
+    UOdysseyPainterEditorTool::OnMouseDown(iPointInTexture, iKey);
+
     if (iKey != EKeys::LeftMouseButton)
         return false;
 

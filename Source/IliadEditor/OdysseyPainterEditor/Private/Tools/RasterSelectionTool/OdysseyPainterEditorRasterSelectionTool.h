@@ -63,7 +63,7 @@ private:
     void OnShapeAbort();
 
 protected:
-    UPROPERTY(EditAnywhere, Category="Shape")
+    UPROPERTY(EditAnywhere, Category="Shape", meta = (IgnoreToolConfiguration))
     FOdysseyShapes Shapes;
 
     EOdysseySelectionState mSelectionState;

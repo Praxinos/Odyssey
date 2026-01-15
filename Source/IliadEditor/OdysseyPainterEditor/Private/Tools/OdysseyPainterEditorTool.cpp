@@ -50,6 +50,11 @@ UOdysseyPainterEditorTool::PostInitProperties()
     Super::PostInitProperties();
 }
 
+void UOdysseyPainterEditorTool::PostDuplicate(EDuplicateMode::Type DuplicateMode)
+{
+
+}
+
 /* void
 UOdysseyPainterEditorTool::OnToolContextChanged()
 {
@@ -129,6 +134,9 @@ UOdysseyPainterEditorTool::IsActivated() const
 bool
 UOdysseyPainterEditorTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
+    if( GetEditor() )
+        GetEditor()->SaveToRecentTools(this);
+
     return false;
 }
 

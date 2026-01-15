@@ -541,6 +541,8 @@ bool
 UOdysseyPainterEditorVectorBaseTool::OnMouseDown( const FOdysseyPoint& iPointInTexture
                                                 , const FKey& iKey )
 {
+    UOdysseyPainterEditorTool::OnMouseDown(iPointInTexture, iKey);
+
     if( bMouseEventViaHUD )
     {
         // do nothing

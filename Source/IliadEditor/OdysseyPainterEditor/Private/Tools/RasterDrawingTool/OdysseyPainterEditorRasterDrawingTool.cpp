@@ -168,6 +168,8 @@ UOdysseyPainterEditorRasterDrawingTool::GetRasterBlockFromEditor(bool iCreate) c
 bool
 UOdysseyPainterEditorRasterDrawingTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
+    UOdysseyPainterEditorTool::OnMouseDown(iPointInTexture, iKey);
+
     if (iKey != EKeys::LeftMouseButton)
         return false;
 
@@ -334,7 +336,7 @@ void UOdysseyPainterEditorRasterDrawingTool::BindShortcuts(TSharedPtr<FUICommand
     #define MAP_ACTION(action, ...) iCommandList->MapAction( action, FExecuteAction::CreateUObject( this, &UOdysseyPainterEditorRasterDrawingTool::__VA_ARGS__ ) );
     #define MAP_ACTION_REPEAT(action, ...) iCommandList->MapAction( action, FExecuteAction::CreateUObject( this, &UOdysseyPainterEditorRasterDrawingTool::__VA_ARGS__ ), EUIActionRepeatMode::RepeatEnabled );
 
-    MAP_ACTION(painterEditorToolCommands.RefreshBrush, RefreshBrushInstance)
+    MAP_ACTION(painterEditorToolCommands.RefreshBrush, RefreshBrushInstance, true)
     MAP_ACTION_REPEAT(painterEditorToolCommands.IncreaseBrushSize, AddSize, 1)
     MAP_ACTION_REPEAT(painterEditorToolCommands.DecreaseBrushSize, AddSize, -1)
     MAP_ACTION(painterEditorToolCommands.SetAlphaModeNormal, SetAlphaMode, ::ULIS::eAlphaMode::Alpha_Normal )
@@ -601,10 +603,10 @@ UOdysseyPainterEditorRasterDrawingTool::SetBrushContexts(TArray<FOdysseyBrushCon
 }
 
 void
-UOdysseyPainterEditorRasterDrawingTool::RefreshBrushInstance()
+UOdysseyPainterEditorRasterDrawingTool::RefreshBrushInstance(bool iApplyOverrides)
 {
     DestroyBrushInstance();
-    CreateBrushInstance(true);
+    CreateBrushInstance(iApplyOverrides);
     mOnBrushChanged.Broadcast();
 }
 

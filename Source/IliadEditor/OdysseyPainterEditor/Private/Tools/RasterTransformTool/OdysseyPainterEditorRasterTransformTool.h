@@ -97,10 +97,10 @@ private:
     void ResetRasterSelection();
 
 public:
-    UPROPERTY(EditAnywhere, Category="Transform options")
+    UPROPERTY(EditAnywhere, Category="Transform options" )
     bool Perspective = false;
 
-    UPROPERTY(EditAnywhere, Category="Transform options")
+    UPROPERTY(EditAnywhere, Category="Transform options" )
     bool Uniform = false;
 
 private:

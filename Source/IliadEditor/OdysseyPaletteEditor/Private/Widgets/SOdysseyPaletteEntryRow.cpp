@@ -158,8 +158,6 @@ SOdysseyPaletteEntryRow::ComputeItemDropZoneForLeaf(FVector2D iLocalPointerPos, 
             return EItemDropZone::BelowItem;
         }
     }
-
-
 }
 
 

@@ -68,21 +68,21 @@ protected:
     TSharedPtr<FScopedTransaction> mTransaction;
 
 public:
-    UPROPERTY(EditAnywhere, Category="Shape")
+    UPROPERTY(EditAnywhere, Category="Shape", meta=(IgnoreToolConfiguration) )
     FOdysseyShapes Shapes;
 
-    UPROPERTY(EditAnywhere, Category="Parameters", meta=(UIMin=0, ClampMin=0, LinearDeltaSensitivity=1))
+    UPROPERTY(EditAnywhere, Category="Parameters", meta=(UIMin=0, ClampMin=0, LinearDeltaSensitivity=1) )
     float StrokeWidth = 1.0f;
 
-    UPROPERTY(EditAnywhere, Category="Parameters")
+    UPROPERTY(EditAnywhere, Category="Parameters" )
     bool Antialiasing = true;
 
-    UPROPERTY(EditAnywhere, Category="Parameters")
+    UPROPERTY(EditAnywhere, Category="Parameters" )
     bool SubPixel = true;
 
-    UPROPERTY(EditAnywhere, Category="Parameters")
+    UPROPERTY(EditAnywhere, Category="Parameters" )
     bool Filled = true;
 
-    UPROPERTY(EditInstanceOnly, Category="Blending", meta = (ShowOnlyInnerProperties))
+    UPROPERTY(EditInstanceOnly, Category="Blending", meta = (ShowOnlyInnerProperties ) )
     FOdysseyBlendParameters BlendParameters;
 };

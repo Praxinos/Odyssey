@@ -2316,6 +2316,9 @@ bool
 FOdysseyPainterEditorVectorBaseToolHUD::OnMouseDown( const FOdysseyPoint& iPointInTexture
                                                    , const FKey& iKey)
 {
+    if (mBaseTool->GetEditor())
+        mBaseTool->GetEditor()->SaveToRecentTools(mBaseTool);
+
     return mBaseTool->OnMouseDownViaHUD( iPointInTexture, iKey );
 }
 

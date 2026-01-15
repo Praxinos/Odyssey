@@ -79,7 +79,7 @@ public:
     void SetBrushContexts(TArray<FOdysseyBrushContext*>* iContexts);
 
     // Recreates the brush instance
-    void RefreshBrushInstance();
+    void RefreshBrushInstance(bool iApplyOverrides);
 
     void SetBaseSize(float iValue);
 
@@ -186,15 +186,15 @@ private:
 
 public:
     UPROPERTY(meta=(ForceShowEngineContent, ForceShowPluginContent))
-    UOdysseyBrush* Brush;
+    TObjectPtr<UOdysseyBrush> Brush;
 
-    UPROPERTY()
-    UOdysseyBrushAssetBase* BrushInstance;
+    UPROPERTY(meta=(IgnoreToolConfiguration))
+    TObjectPtr<UOdysseyBrushAssetBase> BrushInstance;
 
-    UPROPERTY()
-    UOdysseyBrushOptions* BrushOptions;
+    UPROPERTY(meta=(IgnoreToolConfiguration))
+    TObjectPtr<UOdysseyBrushOptions> BrushOptions;
 
-    UPROPERTY(EditAnywhere, Category="Shape")
+    UPROPERTY(EditAnywhere, Category="Shape", meta = (IgnoreToolConfiguration))
     FOdysseyShapes Shapes;
 
     UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="Shape", BlueprintSetter=SubPixelBlueprintSetter)

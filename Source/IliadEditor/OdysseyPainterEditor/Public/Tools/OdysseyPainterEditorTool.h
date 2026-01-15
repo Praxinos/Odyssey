@@ -5,10 +5,10 @@
 
 #include "CoreMinimal.h"
 #include "Framework/MultiBox/MultiBoxExtender.h"
-#include "ToolMenuOwner.h"
 #include "Input/OdysseyPoint.h"
 #include "OdysseyStyle.h"
 #include "OdysseyHUDElement.h"
+#include "ToolMenuOwner.h"
 #include "Widgets/SWidget.h"
 
 #include "OdysseyPainterEditor.h"
@@ -19,7 +19,7 @@ class FOdysseyPainterEditor;
 class FOdysseyHUDElement;
 class FOdysseyPainterEditorToolInputProcessor;
 
-UCLASS()
+UCLASS(DefaultToInstanced)
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorTool : public UObject
 {
     GENERATED_BODY()
@@ -97,6 +97,7 @@ protected:
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent) override;
     virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
     virtual void PostInitProperties() override;
+    virtual void PostDuplicate(EDuplicateMode::Type DuplicateMode) override;
 
 public:
     void SetEditor(class FOdysseyPainterEditor* iEditor);
@@ -111,7 +112,7 @@ protected:
     TSharedPtr<FUICommandList>          mCommandList;
 
 public:
-    UPROPERTY(EditDefaultsOnly, Category="Tool")
+    UPROPERTY(EditDefaultsOnly, Category = "Tool")
     FSlateBrush Icon;
     bool mIsActivated;
     bool mIsTemporaryTool = false;

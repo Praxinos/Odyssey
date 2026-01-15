@@ -86,6 +86,7 @@ UOdysseyPainterEditorAnimationOutOfPegsTool::~UOdysseyPainterEditorAnimationOutO
 UOdysseyPainterEditorAnimationOutOfPegsTool::UOdysseyPainterEditorAnimationOutOfPegsTool()
 {
     mIsTemporaryTool = true;
+    Icon = *FOdysseyStyle::GetBrush("Animation.Lighttable.OutOfPegs.Button.On");
 }
 
 void
@@ -99,6 +100,8 @@ UOdysseyPainterEditorAnimationOutOfPegsTool::Load()
 bool
 UOdysseyPainterEditorAnimationOutOfPegsTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
+    UOdysseyPainterEditorTool::OnMouseDown(iPointInTexture, iKey);
+
     FOdysseyPoint point = iPointInTexture;
     point.x = FMath::RoundToInt( point.x );
     point.y = FMath::RoundToInt( point.y );

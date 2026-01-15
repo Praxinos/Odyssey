@@ -8,6 +8,7 @@
 
 #include "AssetToolsModule.h"
 #include "CoreMinimal.h"
+#include "IAssetTools.h"
 #include "ISettingsModule.h"
 #include "LevelEditor.h"
 #include "PropertyEditorModule.h"
@@ -27,14 +28,15 @@
 #include "Interfaces/IPluginManager.h"
 #include "OdysseyViewportDrawingEditorCommands.h"
 
+#include "OdysseyAnimation.h"
 #include "OdysseyAnimationCell.h"
 #include "OdysseyAnimationCellThumbnailRenderer.h"
 #include "OdysseyPainterEditorLevelEditorLayout.h"
-#include "OdysseyAnimation.h"
 #include "OdysseyPainterEditorAnimationProjectSettings.h"
 #include "OdysseyPainterEditorAnimationUserSettings.h"
 #include "OdysseyPainterEditorAnimationCommands.h"
 #include "OdysseyPainterEditorFlipbookCommands.h"
+#include "OdysseyToolCollectionAssetTypeActions.h"
 #include "Tools/OutOfPegsTool/OdysseyPainterEditorAnimationOutOfPegsTool.h"
 #include "StandaloneEditor/OdysseyPainterEditorStandaloneToolkit.h"
 
@@ -94,6 +96,7 @@ FOdysseyPainterEditorModule::StartupModule()
     RegisterThumbnailRenderers();
     RegisterEditorMode();
     RegisterPropertyModuleCustomizations();
+    RegisterAssetTypeActions();
 
     FOdysseyVectorBrushCustomization::Register();
     FOdysseyVectorObjectViewPaletteCustomization::Register();
@@ -110,6 +113,7 @@ FOdysseyPainterEditorModule::ShutdownModule()
     UnregisterThumbnailRenderers();
     UnregisterEditorMode();
     UnregisterPropertyModuleCustomizations();
+    UnregisterAssetTypeActions();
 
     FOdysseyVectorBrushCustomization::Unregister();
     FOdysseyVectorObjectViewPaletteCustomization::Unregister();
@@ -265,6 +269,32 @@ FOdysseyPainterEditorModule::UnregisterDetailCustomization()
     FOdysseyShapes::UnregisterDetailCustomization();
     FOdysseyPainterEditorAnimationFlipSystem::UnregisterDetailCustomization();
 }
+
+void
+FOdysseyPainterEditorModule::RegisterAssetTypeActions()
+{
+    IAssetTools& assetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
+
+    // Create Asset Categories
+    EAssetTypeCategories::Type category = assetTools.RegisterAdvancedAssetCategory(FName(TEXT("Odyssey")), LOCTEXT("asset-category.name", "Odyssey"));
+
+    //Create Asset Types Actions
+    mOdysseyTypeActions = MakeShareable(new FOdysseyToolCollectionAssetTypeActions(category));
+
+    //Register created Asset Type Actions
+    assetTools.RegisterAssetTypeActions(mOdysseyTypeActions.ToSharedRef());
+}
+
+void
+FOdysseyPainterEditorModule::UnregisterAssetTypeActions()
+{
+    if (!FModuleManager::Get().IsModuleLoaded("AssetTools"))
+        return;
+
+    IAssetTools& assetTools = FModuleManager::GetModuleChecked<FAssetToolsModule>("AssetTools").Get();
+    assetTools.UnregisterAssetTypeActions(mOdysseyTypeActions.ToSharedRef());
+}
+
 
 IMPLEMENT_MODULE( FOdysseyPainterEditorModule, OdysseyPainterEditor );
 

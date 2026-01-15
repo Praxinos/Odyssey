@@ -72,6 +72,8 @@
 #include "Undo/OdysseyVectorUndoTagInbetweenerMatching.h"
 #include "Undo/OdysseyVectorUndoTagInbetweenerReset.h"
 
+#include "ToolCollection/OdysseyToolCollection.h"
+#include "ToolCollection/ToolConfiguration/OdysseyPainterEditorToolConfiguration.h"
 #include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
 #include "Tools/RasterEraserTool/OdysseyPainterEditorRasterEraserTool.h"
 #include "Tools/RasterSelectionTool/OdysseyPainterEditorRasterSelectionTool.h"
@@ -165,6 +167,7 @@ FOdysseyPainterEditor::FOdysseyPainterEditor(TSharedRef<FBaseToolkit> iToolkit)
     , mVectorMatchingTool(nullptr)
     , mVectorChartTool(nullptr)
     , mOutOfPegsTool(nullptr)
+    , mRecentTools( NewObject<UOdysseyToolCollection>(GetTransientPackage(), NAME_None, RF_Transient) )
     , mAnimationFlipSystem(MakeShared<FOdysseyPainterEditorAnimationFlipSystem>(this))
 {
     UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw(this, &FOdysseyPainterEditor::OnCurrentLayerChanged);
@@ -727,6 +730,7 @@ FOdysseyPainterEditor::OnClose()
 
     delete mHUDSystem;
     mHUDSystem = nullptr;
+    mRecentTools = nullptr;
 
     FOdysseyPainterEditorModule& painterEditorModule = FModuleManager::GetModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
     painterEditorModule.RemoveOpenedEditor(this);
@@ -970,6 +974,60 @@ FOdysseyPainterEditor::PaintColor() const
     return mPaintColor;
 }
 
+UOdysseyPainterEditorTool* FOdysseyPainterEditor::GetEditorToolOfClass(UClass* iToolClass)
+{
+    if( iToolClass == UOdysseyPainterEditorRasterDrawingTool::StaticClass() )
+        return mRasterDrawingTool;
+    else if( iToolClass == UOdysseyPainterEditorRasterEraserTool::StaticClass() )
+        return mRasterEraserTool;
+    else if( iToolClass == UOdysseyPainterEditorRasterSelectionTool::StaticClass() )
+        return mRasterSelectionTool;
+    else if( iToolClass == UOdysseyPainterEditorRasterTransformTool::StaticClass() )
+        return mRasterTransformTool;
+    else if( iToolClass == UOdysseyPainterEditorRasterPrimitiveDrawingTool::StaticClass() )
+        return mRasterPrimitiveDrawingTool;
+    else if( iToolClass == UOdysseyPainterEditorRasterPaintBucketTool::StaticClass() )
+        return mRasterPaintBucketTool;
+    else if( iToolClass == UOdysseyPainterEditorVectorPrimitiveDrawingTool::StaticClass() )
+        return mVectorPrimitiveDrawingTool;
+    else if( iToolClass == UOdysseyPainterEditorVectorPathDrawingTool::StaticClass() )
+        return mVectorPathDrawingTool;
+    else if( iToolClass == UOdysseyPainterEditorVectorPathEditTool::StaticClass() )
+        return mVectorPathEditTool;
+    else if( iToolClass == UOdysseyPainterEditorVectorSelectionTool::StaticClass() )
+        return mVectorSelectionTool;
+    else if( iToolClass == UOdysseyPainterEditorVectorCutTool::StaticClass() )
+        return mVectorCutTool;
+    else if( iToolClass == UOdysseyPainterEditorVectorScenePanTool::StaticClass() )
+        return mVectorScenePanTool;
+    else if( iToolClass == UOdysseyPainterEditorVectorEraserTool::StaticClass() )
+        return mVectorEraserTool;
+    else if( iToolClass == UOdysseyPainterEditorVectorPathPushTool::StaticClass() )
+        return mVectorPathPushTool;
+    else if( iToolClass == UOdysseyPainterEditorVectorPathSmoothTool::StaticClass() )
+        return mVectorPathSmoothTool;
+    else if( iToolClass == UOdysseyPainterEditorVectorPathStitchTool::StaticClass() )
+        return mVectorPathStitchTool;
+    else if( iToolClass == UOdysseyPainterEditorVectorPaintBucketTool::StaticClass() )
+        return mVectorPaintBucketTool;
+    else if( iToolClass == UOdysseyPainterEditorColorPickerTool::StaticClass() )
+        return mColorPickerTool;
+    else if( iToolClass == UOdysseyPainterEditorVectorGridTool::StaticClass() )
+        return mVectorGridTool;
+    else if( iToolClass == UOdysseyPainterEditorVectorTransformTool::StaticClass() )
+        return mVectorTransformTool;
+    else if( iToolClass == UOdysseyPainterEditorVectorMatchingTool::StaticClass() )
+        return mVectorMatchingTool;
+    else if( iToolClass == UOdysseyPainterEditorVectorChartTool::StaticClass() )
+        return mVectorChartTool;
+    else if( iToolClass == UOdysseyPainterEditorVectorTrajectoryTool::StaticClass() )
+        return mVectorTrajectoryTool;
+    /*else if (iToolClass == UOdysseyPainterEditorAnimationOutOfPegsTool::StaticClass())
+        return mOutOfPegsTool;*/
+    else
+        return nullptr;
+}
+
 UOdysseyAnimation*
 FOdysseyPainterEditor::GetAnimation() const
 {
@@ -1036,6 +1094,88 @@ UOdysseyPainterEditorTool*
 FOdysseyPainterEditor::GetCurrentTool() const
 {
     return mCurrentTemporaryTool ? mCurrentTemporaryTool : mCurrentMainTool;
+}
+
+UOdysseyToolCollection* FOdysseyPainterEditor::GetRecentTools() const
+{
+    return mRecentTools.Get();
+}
+
+void FOdysseyPainterEditor::AddToolCollection(UOdysseyToolCollection* iToolCollection)
+{
+    TSharedPtr<FOdysseyPainterEditorSource> source = GetSource();
+    if (!source)
+        return;
+
+    if (!IsValid(iToolCollection))
+        return;
+
+    FSoftObjectPath assetPath(iToolCollection);
+
+    UOdysseyAnimation* animation = GetAnimation();
+    UOdysseyTextureLayerStackUserData* textureUserData = GetTextureUserData();
+    if (animation)
+    {
+        if( !animation->ToolCollections.Contains(assetPath) )
+            animation->ToolCollections.Add( assetPath );
+    }
+    else if (textureUserData)
+    {
+        if (!textureUserData->ToolCollections.Contains(assetPath))
+            textureUserData->ToolCollections.Add(assetPath);
+    }
+}
+
+void FOdysseyPainterEditor::RemoveToolCollection(UOdysseyToolCollection* iToolCollection)
+{
+    UOdysseyAnimation* animation = GetAnimation();
+    UOdysseyTextureLayerStackUserData* textureUserData = GetTextureUserData();
+
+    if (!IsValid(iToolCollection))
+        return;
+
+    FSoftObjectPath assetPath(iToolCollection);
+
+    if (animation)
+    {
+        animation->ToolCollections.Remove(assetPath);
+    }
+    else if (textureUserData)
+    {
+        textureUserData->ToolCollections.Remove(assetPath);
+    }
+}
+
+const TArray<UOdysseyToolCollection*> FOdysseyPainterEditor::GetToolCollections() const
+{
+    TArray<UOdysseyToolCollection*> toolCollections;
+
+    UOdysseyAnimation* animation = GetAnimation();
+    UOdysseyTextureLayerStackUserData* textureUserData = GetTextureUserData();
+    if (animation)
+    {
+        for (const FSoftObjectPath& Path : animation->ToolCollections)
+        {
+            UObject* Obj = Path.TryLoad();
+            if (UOdysseyToolCollection* Col = Cast<UOdysseyToolCollection>(Obj))
+            {
+                toolCollections.Add(Col);
+            }
+        }
+    }
+    else if (textureUserData)
+    {
+        for (const FSoftObjectPath& Path : textureUserData->ToolCollections)
+        {
+            UObject* Obj = Path.TryLoad();
+            if (UOdysseyToolCollection* Col = Cast<UOdysseyToolCollection>(Obj))
+            {
+                toolCollections.Add(Col);
+            }
+        }
+    }
+
+    return toolCollections;
 }
 
 void
@@ -3219,6 +3359,12 @@ FOdysseyPainterEditor::AddReferencedObjects(FReferenceCollector& Collector)
     }
 
     Collector.AddReferencedObject(mCurrentPaletteEntryColor);
+
+    if (mRecentTools.IsValid())
+    {
+        UObject* CollectionObject = mRecentTools.Get();
+        Collector.AddReferencedObject(CollectionObject);
+    }
 }
 
 const TArray<UOdysseyPaletteSet*>
@@ -3515,6 +3661,23 @@ FOdysseyPainterEditor::SetCurrentPaletteColorEntry(UOdysseyPaletteEntryColor* iE
             }
         }
     }
+}
+
+void FOdysseyPainterEditor::SaveToRecentTools( UOdysseyPainterEditorTool* iTool )
+{
+    if( !iTool || !GetEditorToolOfClass(iTool->GetClass() ) )
+        return;
+
+    if( mRecentTools->ContainsSimilarToolConfiguration( iTool->GetClass(), iTool ) )
+        return;
+
+    TObjectPtr<UOdysseyPainterEditorTool> toolSnapshot;
+    toolSnapshot = DuplicateObject< UOdysseyPainterEditorTool >(iTool, mRecentTools.Get());
+
+    mRecentTools->AddToolConfiguration( iTool->GetClass(), toolSnapshot, iTool->Icon );
+
+    if( mRecentTools->GetToolConfigurations().Num() > 10 )
+        mRecentTools->RemoveToolConfigurationAtIndex( 0 );
 }
 
 #undef LOCTEXT_NAMESPACE

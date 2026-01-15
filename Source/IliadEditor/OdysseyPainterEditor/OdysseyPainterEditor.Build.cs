@@ -110,6 +110,7 @@ public class OdysseyPainterEditor : ModuleRules
                 Path.Combine(ModuleDirectory, "Private", "Tabs"),
                 Path.Combine(ModuleDirectory, "Private", "Tabs", "VectorSceneTreeView"),
                 Path.Combine(ModuleDirectory, "Private", "Tools"),
+                Path.Combine(ModuleDirectory, "Private", "ToolCollection"),
                 Path.Combine(ModuleDirectory, "Private", "Widgets"),
                 Path.Combine(ModuleDirectory, "Private", "Widgets", "Animation"),
                 Path.Combine(ModuleDirectory, "Private", "Widgets", "Brush"),

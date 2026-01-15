@@ -52,7 +52,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathStitchTool : publi
                                         , uint32 iUpdateFlags ) override;
 
     private:
-            FOdysseyPainterEditorVectorPathStitchToolHUD* mPathStitchHUD;
+        FOdysseyPainterEditorVectorPathStitchToolHUD* mPathStitchHUD;
 
     public:
         UPROPERTY( EditAnywhere
