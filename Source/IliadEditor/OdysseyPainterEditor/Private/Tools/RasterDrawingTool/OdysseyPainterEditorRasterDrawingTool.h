@@ -79,7 +79,7 @@ public:
     void SetBrushContexts(TArray<FOdysseyBrushContext*>* iContexts);
 
     // Recreates the brush instance
-    void RefreshBrushInstance();
+    void RefreshBrushInstance(bool iApplyOverrides);
 
     void SetBaseSize(float iValue);
 

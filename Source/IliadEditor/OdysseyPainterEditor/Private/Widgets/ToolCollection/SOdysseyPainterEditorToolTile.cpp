@@ -99,7 +99,7 @@ FReply SOdysseyPainterEditorToolTile::OnMouseButtonUp( const FGeometry& MyGeomet
 
                     // Particular case of UOdysseyPainterEditorRasterDrawingTool where we have to refresh the brush instance to the loaded tool
                     if (editorTool->IsA(UOdysseyPainterEditorRasterDrawingTool::StaticClass()))
-                        Cast<UOdysseyPainterEditorRasterDrawingTool>(editorTool)->RefreshBrushInstance();
+                        Cast<UOdysseyPainterEditorRasterDrawingTool>(editorTool)->RefreshBrushInstance(false);
 
                     mEditor->ActivateMainTool(editorTool);
                 }
