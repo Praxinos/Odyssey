@@ -184,6 +184,8 @@ UOdysseyPainterEditorRasterLiquifyTool::OnMouseHover(const FOdysseyPoint& iPoint
 bool
 UOdysseyPainterEditorRasterLiquifyTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
+    UOdysseyPainterEditorTool::OnMouseDown(iPointInTexture, iKey);
+
     uint32 radius = GetRadius();
 
     mMouseAtDown = FVector2D( iPointInTexture.x, iPointInTexture.y );

@@ -986,6 +986,8 @@ UOdysseyPainterEditorTool* FOdysseyPainterEditor::GetEditorToolOfClass(UClass* i
         return mRasterTransformTool;
     else if( iToolClass == UOdysseyPainterEditorRasterPrimitiveDrawingTool::StaticClass() )
         return mRasterPrimitiveDrawingTool;
+    else if (iToolClass == UOdysseyPainterEditorRasterLiquifyTool::StaticClass())
+        return mRasterLiquifyTool;
     else if( iToolClass == UOdysseyPainterEditorRasterPaintBucketTool::StaticClass() )
         return mRasterPaintBucketTool;
     else if( iToolClass == UOdysseyPainterEditorVectorPrimitiveDrawingTool::StaticClass() )
