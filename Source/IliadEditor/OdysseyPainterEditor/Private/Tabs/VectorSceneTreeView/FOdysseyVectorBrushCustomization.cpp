@@ -7,6 +7,7 @@
 #include "IContentBrowserSingleton.h" // for FAssetPickerConfig
 #include "PropertyCustomizationHelpers.h" // for SObjectPropertyEntryBox
 #include "Widgets/Input/SButton.h"
+#include "OdysseyStyle.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -155,12 +156,14 @@ FOdysseyVectorBrushCustomization::UpdateButtonImage( TSharedRef<IPropertyHandle>
 {
     FOdysseyVectorBrush* vectorBrush = GetVectorBrush( StructPropertyHandle );
 
-    if( vectorBrush )
+    if( vectorBrush && vectorBrush->GetTexture() )
     {
         mBrushIcon.Get()->SetResourceObject( vectorBrush->GetTexture() );
+
+        return mBrushIcon.Get();
     }
 
-    return mBrushIcon.Get();
+    return FOdysseyStyle::GetBrush( "VectorBrushCustomization.NoBrush");
 }
 
 void

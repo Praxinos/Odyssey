@@ -80,6 +80,7 @@ public:
     const FVector2D mIcon32x32;
     const FVector2D mIcon40x40;
     const FVector2D mIcon48x48;
+    const FVector2D mIcon64x16;
     const FVector2D mIcon64x64;
     const FVector2D mIcon36x24;
     const FVector2D mIcon128x128;
@@ -118,6 +119,7 @@ FOdysseyStyleDefault::FOdysseyStyleDefault()
     , mIcon32x32( 32.0f, 32.0f )
     , mIcon40x40( 40.0f, 40.0f )
     , mIcon48x48( 48.0f, 48.0f )
+    , mIcon64x16( 64.0f, 16.0f )
     , mIcon64x64( 64.0f, 64.0f )
     , mIcon36x24( 36.0f, 24.0f )
     , mIcon128x128( 128.0f, 128.0f )
@@ -777,6 +779,8 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set("ViewportDrawingEditor.MainTab.ModeTool.Paint", new IMAGE_BRUSH_SVG("OdysseyViewportDrawing/PaintModeTool", mIcon16x16));
 
     Set( "PaletteEditor.Tab.Colors", new IMAGE_BRUSH_SVG( "PaletteEditor/tab_colors", mIcon16x16 ) );
+
+    Set( "VectorBrushCustomization.NoBrush", new IMAGE_BRUSH( "PainterEditor/VectorBrushCustomization/no_brush_64x16", mIcon64x16 ) );
 }
 
 
