@@ -9,7 +9,7 @@
 
 namespace
 {
-    const FName ImportExportShortcuts = "Import & Export Shortcuts";
+    const FName ImportExportAnimationShortcuts = "Import & Export Shortcuts";
     const FName TimelineShortcuts = "Timeline Shortcuts";
     const FName CellsShortcuts = "Cells Shortcuts";
     const FName NavigationShortcuts = "Navigation Shortcuts";
@@ -18,7 +18,7 @@ namespace
 FOdysseyPainterEditorAnimationCommands::FOdysseyPainterEditorAnimationCommands()
     : TCommands<FOdysseyPainterEditorAnimationCommands>( "OdysseyPainterEditorAnimationCommands", LOCTEXT( "editor-commands.name", "Odyssey Animation Editor" ), NAME_None, FOdysseyStyle::GetStyleSetName() )
 {
-    AddBundle(ImportExportShortcuts, LOCTEXT("editor-commands.category.import-export-shortcuts", "Import & Export Shortcuts"));
+    AddBundle( ImportExportAnimationShortcuts, LOCTEXT("editor-commands.category.import-export-shortcuts", "Import & Export Shortcuts"));
     AddBundle(TimelineShortcuts, LOCTEXT("editor-commands.category.timeline-shortcuts", "Timeline Shortcuts"));
     AddBundle(CellsShortcuts, LOCTEXT("editor-commands.category.cells-shortcuts", "Cells Shortcuts"));
     AddBundle(NavigationShortcuts, LOCTEXT("editor-commands.category.navigation-shortcuts", "Navigation Shortcuts"));
@@ -28,10 +28,10 @@ void
 FOdysseyPainterEditorAnimationCommands::RegisterCommands()
 {
 // Import & Export Shortcuts Category
-    UI_BUNDLE_COMMAND( ImportTextureSequence, ImportExportShortcuts, "Import Texture Sequence", "Import several textures from the content-browser in a new layer",                                               EUserInterfaceActionType::Button, FInputChord());
-    UI_BUNDLE_COMMAND( ImportImageSequence, ImportExportShortcuts, "Import Image Sequence", "Import several images from your operating system in a new layer",                                               EUserInterfaceActionType::Button, FInputChord());
-    UI_BUNDLE_COMMAND( ExportImageSequence, ImportExportShortcuts, "Export Image Sequence", "Export the animation as an image sequence on your operating system",                                               EUserInterfaceActionType::Button, FInputChord());
-    UI_BUNDLE_COMMAND( ExportAsFlipbook, ImportExportShortcuts, "Export As Flipbook", "Export the animation as a flipbook",                                               EUserInterfaceActionType::Button, FInputChord());
+    UI_BUNDLE_COMMAND( ImportTextureSequence, ImportExportAnimationShortcuts, "Import Texture Sequence", "Import several textures from the content-browser in a new layer",                                               EUserInterfaceActionType::Button, FInputChord());
+    UI_BUNDLE_COMMAND( ImportImageSequence, ImportExportAnimationShortcuts, "Import Image Sequence", "Import several images from your operating system in a new layer",                                               EUserInterfaceActionType::Button, FInputChord());
+    UI_BUNDLE_COMMAND( ExportImageSequence, ImportExportAnimationShortcuts, "Export Image Sequence", "Export the animation as an image sequence on your operating system",                                               EUserInterfaceActionType::Button, FInputChord());
+    UI_BUNDLE_COMMAND( ExportAsFlipbook, ImportExportAnimationShortcuts, "Export As Flipbook", "Export the animation as a flipbook",                                               EUserInterfaceActionType::Button, FInputChord());
 
 // LayerStack Shortcuts Category
     UI_BUNDLE_COMMAND( NavigateToNextFrame, NavigationShortcuts, "Navigate to next Frame", "Change the current frame to be the next frame in the animation timeline",                                                            EUserInterfaceActionType::Button, FInputChord(EKeys::Semicolon));
