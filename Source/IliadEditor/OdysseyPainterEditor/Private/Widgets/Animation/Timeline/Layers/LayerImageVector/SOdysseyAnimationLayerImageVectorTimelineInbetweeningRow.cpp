@@ -103,6 +103,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonDown( con
 
             mOnTransactCurrentFrame.ExecuteIfBound(TOptional<int>());
         }
+        GEditor->EndTransaction();
 
         mUndo->Begin();
 
