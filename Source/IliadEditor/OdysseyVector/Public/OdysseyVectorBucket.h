@@ -112,7 +112,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorBucket : public FOdysseyVectorPoint
          * @brief Get this bucket's palette set
          * @return the palette set index
          */
-        int GetPaletteSet();
+        int GetPaletteSet(); // TODO: remove, this is unused
 
         /**
          * @brief Get the position of the radial gradient's center, relative to the bucket position.
@@ -208,7 +208,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorBucket : public FOdysseyVectorPoint
          * @brief Set this bucket's palette set
          * @param iPaletteSet the palette set index
          */
-        void SetPaletteSet( int iPaletteSet );
+        void SetPaletteSet( int iPaletteSet );  // TODO: remove, this is unused
 
         /**
          * @brief Set this bucket's propagation policy. A bucket will propagate
@@ -274,7 +274,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorBucket : public FOdysseyVectorPoint
         ::ULIS::FVec2D mRadialOffset; // distance from the radial-gradient to the bucket.
         /* The Palette Entry associated with this vector object, if any*/
         UOdysseyPaletteEntry* mPaletteEntry;
-        int mPaletteSet;
+        int mPaletteSet; // TODO: remove, this is unused
         ::ULIS::FVec2D mLinearP0;
         ::ULIS::FVec2D mLinearP1;
 };

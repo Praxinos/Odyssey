@@ -324,6 +324,8 @@ void
 FOdysseyVectorBucket::SetPaletteEntry( UOdysseyPaletteEntry* iPaletteEntry )
 {
     mPaletteEntry = iPaletteEntry;
+
+    Invalidate();
 }
 
 UOdysseyPaletteEntry*
@@ -332,12 +334,14 @@ FOdysseyVectorBucket::GetPaletteEntry()
     return mPaletteEntry;
 }
 
+// TODO: remove, this is deprecated
 void
 FOdysseyVectorBucket::SetPaletteSet( int iPaletteSet )
 {
     mPaletteSet = iPaletteSet;
 }
 
+// TODO: remove, this is deprecated
 int
 FOdysseyVectorBucket::GetPaletteSet()
 {
