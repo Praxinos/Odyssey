@@ -342,7 +342,16 @@ TSharedRef<SWidget> SOdysseyPainterEditorToolTile::BuildTexturePicker()
         FOnShouldFilterAsset::CreateLambda(
             [](const FAssetData& assetData)
             {
-                return !assetData.GetClass()->IsChildOf(UTexture2D::StaticClass());
+                const FString packagePath = assetData.PackagePath.ToString();
+
+                bool bIsProjectAsset = packagePath.Equals("/Game") || packagePath.StartsWith("/Game/");
+
+                if (!bIsProjectAsset || !assetData.GetClass()->IsChildOf(UTexture2D::StaticClass()))
+                {
+                    return true; // Filter out
+                }
+
+                return false; // Keep it
             }
         );
 
