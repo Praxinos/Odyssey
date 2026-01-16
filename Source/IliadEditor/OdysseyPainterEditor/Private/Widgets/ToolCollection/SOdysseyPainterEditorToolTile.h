@@ -69,6 +69,7 @@ private:
     bool CanChangeIcon() const;
 
     TSharedRef<SWidget> BuildTexturePicker();
+    void OpenTintColorPicker();
     TSharedRef<SWidget> BuildIconPicker(TSharedRef<SWindow> PickerWindow);
     void OnChangeIcon();
 
@@ -90,4 +91,5 @@ private:
 
     EIconPickerTab mActiveTab = EIconPickerTab::Icons;
     TSharedPtr<SWidgetSwitcher> mWidgetSwitcher;
+    FLinearColor mIconTint = FLinearColor::White;
 };

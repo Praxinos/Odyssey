@@ -14,6 +14,8 @@
 #include "Widgets/Layout/SWrapBox.h"
 #include "Widgets/Colors/SColorBlock.h"
 #include "Widgets/Input/SSegmentedControl.h"
+#include "Widgets/Colors/SColorBlock.h"
+#include "Widgets/Colors/SColorPicker.h"
 
 static const FVector2D kTileSize = FVector2D(24.f, 24.f);
 
@@ -362,6 +364,22 @@ TSharedRef<SWidget> SOdysseyPainterEditorToolTile::BuildTexturePicker()
     return contentBrowserModule.Get().CreateAssetPicker(assetPickerConfig);
 }
 
+void SOdysseyPainterEditorToolTile::OpenTintColorPicker()
+{
+    FColorPickerArgs pickerArgs;
+    pickerArgs.bIsModal = true;
+    pickerArgs.bUseAlpha = true;
+    pickerArgs.InitialColorOverride = mIconTint;
+    pickerArgs.OnColorCommitted = FOnLinearColorValueChanged::CreateLambda(
+        [this](FLinearColor newColor)
+        {
+            mIconTint = newColor;
+        }
+    );
+
+    OpenColorPicker(pickerArgs);
+}
+
 TSharedRef<SWidget> SOdysseyPainterEditorToolTile::BuildIconPicker( TSharedRef<SWindow> iPickerWindow )
 {
     TArray<const FSlateBrush*> allBrushes;
@@ -398,6 +416,7 @@ TSharedRef<SWidget> SOdysseyPainterEditorToolTile::BuildIconPicker( TSharedRef<S
                     .OnClicked_Lambda([this, brush, iPickerWindow]()
                         {
                             OnStyleIconSelected(brush);
+                            mIconTint = FLinearColor::White;
                             iPickerWindow->RequestDestroyWindow();
                             return FReply::Handled();
                         })
@@ -405,14 +424,52 @@ TSharedRef<SWidget> SOdysseyPainterEditorToolTile::BuildIconPicker( TSharedRef<S
                         SNew(SImage)
                             .Image(brush)
                             .DesiredSizeOverride(kTileSize)
+                            .ColorAndOpacity_Lambda([this]()
+                                {
+                                    return mIconTint;
+                                })
                     ]
             ];
     }
 
-    return SNew(SScrollBox)
-        + SScrollBox::Slot()
+    return
+        SNew(SVerticalBox)
+        +SVerticalBox::Slot()
+        .AutoHeight()
+        .Padding(4.f)
         [
-            iconWrapBox
+            SNew(SHorizontalBox)
+
+                + SHorizontalBox::Slot()
+                .AutoWidth()
+                .VAlign(VAlign_Center)
+                [
+                    SNew(STextBlock)
+                        .Text(FText::FromString("Icon Tint"))
+                ]
+
+                + SHorizontalBox::Slot()
+                .AutoWidth()
+                .Padding(8.f, 0.f)
+                [
+                    SNew(SColorBlock)
+                        .Color_Lambda([this]() { return mIconTint; })
+                        .Size(FVector2D(32.f, 16.f))
+                        .OnMouseButtonDown_Lambda([this](const FGeometry&, const FPointerEvent&)
+                            {
+                                OpenTintColorPicker();
+                                return FReply::Handled();
+                            })
+                ]
+        ]
+        + SVerticalBox::Slot()
+        [
+            SNew(SScrollBox)
+
+            + SScrollBox::Slot()
+            [
+                iconWrapBox
+            ]
         ];
 }
 
@@ -498,6 +555,7 @@ void SOdysseyPainterEditorToolTile::OnTextureSelected(const FAssetData& AssetDat
         if (mPickerWindowPtr.IsValid())
         {
             mPickerWindowPtr.Pin()->RequestDestroyWindow();
+            mIconTint = FLinearColor::White;
         }
     }
 }
@@ -509,5 +567,6 @@ void SOdysseyPainterEditorToolTile::OnStyleIconSelected(const FSlateBrush* iBrus
 
     mCollection->Modify();
     mToolConfig->mIcon = *iBrush;
+    mToolConfig->mIcon.TintColor = FSlateColor(mIconTint);
     mCollection->MarkPackageDirty();
 }
