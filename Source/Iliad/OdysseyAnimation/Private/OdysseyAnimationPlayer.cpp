@@ -628,7 +628,8 @@ UOdysseyAnimationPlayer::PostLoad()
     if (GetFlags() & RF_ClassDefaultObject)
         return;
 
-    RenderTarget = NewObject<UTextureRenderTarget2D>(this, NAME_None, RF_Public | RF_Transient);
+    if (!RenderTarget)
+        RenderTarget = NewObject<UTextureRenderTarget2D>(this, NAME_None, RF_Public | RF_Transient);
     RenderTarget->RenderTargetFormat = RTF_RGBA16f;
     RenderTarget->bAutoGenerateMips = true;
 
