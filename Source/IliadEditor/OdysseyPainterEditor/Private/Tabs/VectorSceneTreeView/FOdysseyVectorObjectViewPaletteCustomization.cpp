@@ -213,7 +213,8 @@ FOdysseyVectorObjectViewPaletteCustomization::GetCurrentEntryColorAsLinear() con
 void
 FOdysseyVectorObjectViewPaletteCustomization::OnPaletteCurrentColorEntryChanged(UOdysseyPaletteEntryColor* iEntry)
 {
-    mPaletteEntryHandle->SetValue(iEntry);
+    if( GetCurrentEntryColor() != iEntry ) // prevent a useless change
+        mPaletteEntryHandle->SetValue(iEntry);
 }
 
 void FOdysseyVectorObjectViewPaletteCustomization::OnPaletteChanged(const FAssetData& AssetData)
