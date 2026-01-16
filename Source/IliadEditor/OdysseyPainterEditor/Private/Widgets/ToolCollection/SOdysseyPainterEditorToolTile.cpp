@@ -13,6 +13,7 @@
 #include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
 #include "Widgets/Layout/SWrapBox.h"
 #include "Widgets/Colors/SColorBlock.h"
+#include "Widgets/Input/SSegmentedControl.h"
 
 static const FVector2D kTileSize = FVector2D(24.f, 24.f);
 
@@ -330,6 +331,82 @@ bool SOdysseyPainterEditorToolTile::CanChangeIcon() const
     return true;
 }
 
+TSharedRef<SWidget> SOdysseyPainterEditorToolTile::BuildTexturePicker()
+{
+    FAssetPickerConfig assetPickerConfig;
+    assetPickerConfig.Filter.ClassNames.Add(UTexture2D::StaticClass()->GetFName());
+    assetPickerConfig.Filter.bRecursiveClasses = false;
+    assetPickerConfig.SelectionMode = ESelectionMode::Single;
+
+    assetPickerConfig.OnShouldFilterAsset =
+        FOnShouldFilterAsset::CreateLambda(
+            [](const FAssetData& assetData)
+            {
+                return !assetData.GetClass()->IsChildOf(UTexture2D::StaticClass());
+            }
+        );
+
+    assetPickerConfig.OnAssetSelected = FOnAssetSelected::CreateSP( this, &SOdysseyPainterEditorToolTile::OnTextureSelected );
+
+    FContentBrowserModule& contentBrowserModule = FModuleManager::LoadModuleChecked<FContentBrowserModule>("ContentBrowser");
+
+    return contentBrowserModule.Get().CreateAssetPicker(assetPickerConfig);
+}
+
+TSharedRef<SWidget> SOdysseyPainterEditorToolTile::BuildIconPicker( TSharedRef<SWindow> iPickerWindow )
+{
+    TArray<const FSlateBrush*> allBrushes;
+    FOdysseyStyle::Get().GetResources(allBrushes);
+
+    TArray<const FSlateBrush*> filteredBrushes;
+    const FString filter = TEXT("ToolCollection");
+
+    for (const FSlateBrush* brush : allBrushes)
+    {
+        if (!brush)
+        {
+            continue;
+        }
+
+        if (brush->GetResourceName().ToString().Contains(filter))
+        {
+            filteredBrushes.Add(brush);
+        }
+    }
+
+    // Wrap box for icon tiles
+    TSharedRef<SWrapBox> iconWrapBox =
+        SNew(SWrapBox)
+        .UseAllottedSize(true)
+        .InnerSlotPadding(FVector2D(4.f, 4.f));
+
+    for (const FSlateBrush* brush : filteredBrushes)
+    {
+        iconWrapBox->AddSlot()
+            [
+                SNew(SButton)
+                    .ButtonStyle(FAppStyle::Get(), "HoverHintOnly")
+                    .OnClicked_Lambda([this, brush, iPickerWindow]()
+                        {
+                            OnStyleIconSelected(brush);
+                            iPickerWindow->RequestDestroyWindow();
+                            return FReply::Handled();
+                        })
+                    [
+                        SNew(SImage)
+                            .Image(brush)
+                            .DesiredSizeOverride(kTileSize)
+                    ]
+            ];
+    }
+
+    return SNew(SScrollBox)
+        + SScrollBox::Slot()
+        [
+            iconWrapBox
+        ];
+}
+
 void SOdysseyPainterEditorToolTile::OnChangeIcon()
 {
     TSharedRef<SWindow> pickerWindow = SNew(SWindow)
@@ -338,92 +415,59 @@ void SOdysseyPainterEditorToolTile::OnChangeIcon()
         .SupportsMinimize(false)
         .SupportsMaximize(false);
 
-    // Texture Picker
-    FAssetPickerConfig assetPickerConfig;
-    assetPickerConfig.Filter.ClassNames.Add(UTexture2D::StaticClass()->GetFName());
-    assetPickerConfig.Filter.bRecursiveClasses = false;
-    assetPickerConfig.SelectionMode = ESelectionMode::Single;
+    TSharedRef<SWidget> assetPicker = BuildTexturePicker();
+    TSharedRef<SWidget> iconPicker = BuildIconPicker(pickerWindow);
 
-    assetPickerConfig.OnShouldFilterAsset = FOnShouldFilterAsset::CreateLambda(
-        [](const FAssetData& AssetData)
-        {
-            return !AssetData.GetClass()->IsChildOf(UTexture2D::StaticClass());
-        }
-    );
+    TSharedRef<SSegmentedControl<EIconPickerTab>> segmentedControl =
+        SNew(SSegmentedControl<EIconPickerTab>)
+        .Value_Lambda([this]()
+            {
+                return mActiveTab;
+            })
+        .OnValueChanged_Lambda([this](EIconPickerTab newTab)
+            {
+                mActiveTab = newTab;
+                mWidgetSwitcher->SetActiveWidgetIndex( newTab == EIconPickerTab::Textures ? 1 : 0 );
+            })
+        + SSegmentedControl<EIconPickerTab>::Slot(EIconPickerTab::Icons)
+        .Text(FText::FromString("Icons"))
+        + SSegmentedControl<EIconPickerTab>::Slot(EIconPickerTab::Textures)
+        .Text(FText::FromString("Textures"));
 
-    assetPickerConfig.OnAssetSelected = FOnAssetSelected::CreateSP(this, &SOdysseyPainterEditorToolTile::OnTextureSelected);
-
-    FContentBrowserModule& contentBrowserModule = FModuleManager::LoadModuleChecked<FContentBrowserModule>("ContentBrowser");
-
-    TSharedRef<SWidget> assetPicker = contentBrowserModule.Get().CreateAssetPicker(assetPickerConfig);
-
-    // Icon Picker
-    TArray< const FSlateBrush* > validIcons;
-    FOdysseyStyle::Get().GetResources(validIcons);
-
-    TArray<const FSlateBrush*> filtered;
-
-    const FString prefix = TEXT("ToolCollection");
-
-    for (const FSlateBrush* brush : validIcons)
-    {
-        if (!brush)
-            continue;
-
-        const FName resourceName = brush->GetResourceName();
-
-        if (resourceName.ToString().Contains(prefix))
-        {
-            filtered.Add(brush);
-        }
-    }
-
-    // A WrapBox that wraps tiles automatically
-    TSharedRef<SWrapBox> iconWrapBox =
-        SNew(SWrapBox)
-        .UseAllottedSize(true)          // resize to available width
-        .InnerSlotPadding(FVector2D(4, 4));
-
-    for (const FSlateBrush* brush : filtered)
-    {
-        iconWrapBox->AddSlot()
-            .Padding(0)
-            .HAlign(HAlign_Fill)
-            [
-                SNew(SButton)
-                    .ButtonStyle(FAppStyle::Get(), "HoverHintOnly")
-                    .OnClicked_Lambda([this, brush, pickerWindow]()
-                        {
-                            OnStyleIconSelected(brush);
-                            pickerWindow->RequestDestroyWindow();
-                            return FReply::Handled();
-                        })
-                    [
-                        SNew(SImage)
-                            .Image(brush)
-                            .DesiredSizeOverride(kTileSize)// fixed icon size
-                    ]
-            ];
-    }
-
-    TSharedRef<SSplitter> content =
-        SNew(SSplitter)
-        + SSplitter::Slot().Value(0.6f)
+    SAssignNew(mWidgetSwitcher, SWidgetSwitcher)
+        + SWidgetSwitcher::Slot()
+        [
+            iconPicker
+        ]
+        + SWidgetSwitcher::Slot()
         [
             assetPicker
-        ]
-        + SSplitter::Slot().Value(0.4f)
-        [
-            SNew(SScrollBox)
-                + SScrollBox::Slot()
-                [
-                    iconWrapBox
-                ]
         ];
 
-    pickerWindow->SetContent(content);
-    FSlateApplication::Get().AddWindow(pickerWindow);
+    mActiveTab = EIconPickerTab::Icons;
+    mWidgetSwitcher->SetActiveWidgetIndex(0);
+
+    pickerWindow->SetContent(
+        SNew(SVerticalBox)
+        + SVerticalBox::Slot()
+        .AutoHeight()
+        .Padding(4)
+        [
+            segmentedControl
+        ]
+
+        + SVerticalBox::Slot()
+        .FillHeight(1.f)
+        [
+            mWidgetSwitcher.ToSharedRef()
+        ]
+    );
+
     mPickerWindowPtr = pickerWindow;
+
+    FSlateApplication::Get().AddModalWindow(
+        pickerWindow,
+        FSlateApplication::Get().GetActiveTopLevelWindow());
 }
 
 
@@ -432,11 +476,11 @@ void SOdysseyPainterEditorToolTile::OnTextureSelected(const FAssetData& AssetDat
     if( !mToolConfig || !mCollection )
         return;
 
-    UTexture2D* SelectedTexture = Cast<UTexture2D>(AssetData.GetAsset());
-    if( SelectedTexture )
+    UTexture2D* selectedTexture = Cast<UTexture2D>(AssetData.GetAsset());
+    if( selectedTexture )
     {
         FSlateBrush newIcon;
-        newIcon.SetResourceObject(SelectedTexture);
+        newIcon.SetResourceObject(selectedTexture);
         newIcon.ImageSize = kTileSize;
         mCollection->Modify();
         mToolConfig->mIcon = newIcon;

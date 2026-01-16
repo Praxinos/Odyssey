@@ -16,6 +16,12 @@ enum class EDropIndicatorSide
     Right
 };
 
+enum class EIconPickerTab : uint8
+{
+    Textures,
+    Icons
+};
+
 class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorToolTile
     : public SCompoundWidget
 {
@@ -61,6 +67,9 @@ private:
     bool CanDuplicateTool() const;
     void OnDuplicateTool();
     bool CanChangeIcon() const;
+
+    TSharedRef<SWidget> BuildTexturePicker();
+    TSharedRef<SWidget> BuildIconPicker(TSharedRef<SWindow> PickerWindow);
     void OnChangeIcon();
 
     void OnTextureSelected(const FAssetData& AssetData);
@@ -78,4 +87,7 @@ private:
     bool bIsPressed = false;
     bool bIsDragged = false;
     TAttribute<bool> bIsUnlocked;
+
+    EIconPickerTab mActiveTab = EIconPickerTab::Icons;
+    TSharedPtr<SWidgetSwitcher> mWidgetSwitcher;
 };
