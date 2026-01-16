@@ -12,7 +12,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        # ${\color{FFFF00}\textnormal{Version 1.0 du 07/10/2025}}$
+        # ${\color{FFFF00}\textnormal{Version 1.0 du 16/01/2026}}$
 
   - type: markdown
     attributes:
