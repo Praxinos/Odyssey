@@ -100,6 +100,7 @@ FOdysseyVectorBlock::Render( ::ULIS::FBlock& ioBlock, const ::ULIS::FRectI& iRec
             BLImageData imgData;
             mBLImage->get_data(&imgData);
             ::ULIS::FBlock renderBlock((uint8*)imgData.pixel_data, mWidth, mHeight, ULIS::Format_BGRA8);
+            renderBlock.SetBytesPerScanline( imgData.stride);
 
             //Unpremultiply the render block
             ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(ULIS::Format_BGRA8);

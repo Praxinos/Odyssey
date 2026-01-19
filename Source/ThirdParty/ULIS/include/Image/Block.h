@@ -296,6 +296,11 @@ public:
     */
     uint32 BytesPerScanLine() const;
 
+    ULIS_FORCEINLINE void SetBytesPerScanline( uint32 iBytesPerScanline )
+    {
+        mBytesPerScanline = iBytesPerScanline;
+    };
+
     /*!
     Return the numbers of bytes per plane
 
