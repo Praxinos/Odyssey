@@ -707,19 +707,40 @@ FOdysseyPainterEditorAnimationFlipSystem::GetKeyFrame(int iDelta, int& oFrame)
                 if (cellRange.GetLowerBoundValue() > rightLimit)
                     continue;
 
-                if (i == startCellIndex)
-                {
-                    keyFrames.Add(mStartFrame);
-                    currentKeyFrame = keyFrames.Num() - 1;
-                    continue;
-                }
-
                 if (cells[i])
                 {
-                    int markId = cells[i]->GetMark();
-                    if (markId != INDEX_NONE && (markId == mFlipConfiguration.KeysCellMark || mFlipConfiguration.KeysCellMark == ALL_CELLMARKS_INDEX) )
+                    TMap<int, FCellMark> marks_sorted = cells[i]->GetMarks();
+                    marks_sorted.KeySort( TLess<>() );
+
+                    // Loop over all marks
+                    for( TPair<int, FCellMark> pair : marks_sorted )
                     {
-                        keyFrames.Add(FMath::Clamp(cellRange.GetLowerBoundValue(), leftLimit, rightLimit));
+                        int offset = pair.Key;
+                        FCellMark mark = pair.Value;
+
+                        // If the mark is a flip mark
+                        if( mark.Index == mFlipConfiguration.KeysCellMark || mFlipConfiguration.KeysCellMark == ALL_CELLMARKS_INDEX )
+                        {
+                            // Get the corresponding frame of the mark
+                            int32 frame = cellRange.GetLowerBoundValue() + offset;
+                            // Try to store the starting (current) frame during the loop of all marks
+                            // Store it when we find the first mark upper than the starting frame (and for the next ones, juste check the starting frame is not already contained in keyframes)
+                            if( i == startCellIndex && !keyFrames.Contains( mStartFrame ) && mStartFrame < frame )
+                            {
+                                keyFrames.Add( mStartFrame );
+                                currentKeyFrame = keyFrames.Num() - 1;
+                            }
+                            // Add the new frame to the keyframes
+                            if( FMath::IsWithinInclusive( frame, leftLimit, rightLimit ) )
+                                keyFrames.Add( frame );
+                        }
+                    }
+
+                    // It manages the case when the starting frame is in the starting cell but after all its marks
+                    if( i == startCellIndex && cellRange.Contains( mStartFrame ) && !keyFrames.Contains( mStartFrame ) )
+                    {
+                        keyFrames.Add( mStartFrame );
+                        currentKeyFrame = keyFrames.Num() - 1;
                     }
                 }
             }
@@ -808,46 +829,55 @@ FOdysseyPainterEditorAnimationFlipSystem::GetLimits(EOdysseyAnimationFlipLimits 
             UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(mAnimation->GetLayerStack());
             UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerStack->GetCurrentLayer());
 
-            int startCellIndex = INDEX_NONE;
-            UOdysseyLayerCell* startCell = layer->GetCellAtFrame(mStartFrame);
-            if (startCell)
-                startCellIndex = startCell->GetIndexInLayer();
-
-            if (startCellIndex == INDEX_NONE)
+            // Get all marks of the desired type
+            TArray<int> frames;
+            for( const UOdysseyLayerCell* cell : layer->GetCells() )
             {
-                FInt32Range frameRange = layer->GetFrameRange();
-                if (mStartFrame < frameRange.GetLowerBoundValue() )
-                    startCellIndex = -1;
-
-                if (mStartFrame > frameRange.GetUpperBoundValue() )
-                    startCellIndex = layer->GetCells().Num();
-            }
-
-            //Search RightLimit
-            const TArray<UOdysseyLayerCell*>& cells = layer->GetCells();
-            for (int i = startCellIndex + 1; i < cells.Num(); i++)
-            {
-                UOdysseyLayerCell* cell = cells[i];
-                if (!cell)
-                    continue;
-
-                if (cell->GetMark() == mFlipConfiguration.LimitsCellMark || ( mFlipConfiguration.LimitsCellMark == ALL_CELLMARKS_INDEX && cell->GetMark() != INDEX_NONE) )
+                for( TPair<int, FCellMark> pair : cell->GetMarks() )
                 {
-                    oRightLimit = cell->GetFrameRange().GetLowerBoundValue();
-                    break;
+                    int frame = pair.Key;
+                    FCellMark mark = pair.Value;
+                    if( mark.Index == mFlipConfiguration.LimitsCellMark || mFlipConfiguration.LimitsCellMark == ALL_CELLMARKS_INDEX )
+                        frames.Add( cell->GetFrameRange().GetLowerBoundValue() + frame );
                 }
             }
+            // Remove the mark if it corresponds to the mStartFrame
+            // A mark at the mStartFrame is never considered as a limit
+            frames.Remove( mStartFrame );
 
-            for (int i = startCellIndex - 1; i >= 0; i--)
+            // Sort the frames
+            frames.Sort( TLess<>() );
+
+            if( frames.IsEmpty() )
+                return;
+
+            // If mStartFrame is before the first mark, set only the right limit to the first mark
+            if( mStartFrame < frames[0] )
             {
-                UOdysseyLayerCell* cell = cells[i];
-                if (!cell)
-                    continue;
+                oRightLimit = frames[0];
+                return;
+            }
+            // If mStartFrame is after the last mark, set only the last limit to the last mark
+            if( mStartFrame > frames.Last() )
+            {
+                oLeftLimit = frames.Last();
+                return;
+            }
 
-                if (cell->GetMark() == mFlipConfiguration.LimitsCellMark || ( mFlipConfiguration.LimitsCellMark == ALL_CELLMARKS_INDEX && cell->GetMark() != INDEX_NONE) )
+            // Nothing to do more if only 1 mark
+            if( frames.Num() == 1 )
+                return;
+
+            // Now, the mStartFrame is necessarily between 2 marks which are the limits
+            for( int i = 0; i < frames.Num() - 1; i++ )
+            {
+                int frame = frames[i];
+                int next_frame = frames[i + 1];
+                if( mStartFrame > frame && mStartFrame < next_frame ) // Can't use FMath::IsWithin(...) as it is always left inclusive
                 {
-                    oLeftLimit = cell->GetFrameRange().GetLowerBoundValue();
-                    break;
+                    oLeftLimit = frame;
+                    oRightLimit = next_frame;
+                    return;
                 }
             }
         }
