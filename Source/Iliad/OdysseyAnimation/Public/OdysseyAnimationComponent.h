@@ -58,6 +58,8 @@ public:
 
 public:
     virtual void PostLoad() override;
+    virtual void OnRegister() override;
+    virtual void OnUnregister() override;
 
 #if WITH_EDITOR
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent) override;

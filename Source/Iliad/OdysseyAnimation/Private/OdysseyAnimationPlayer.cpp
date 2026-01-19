@@ -628,25 +628,31 @@ UOdysseyAnimationPlayer::PostLoad()
     if (GetFlags() & RF_ClassDefaultObject)
         return;
 
-    if (!RenderTarget)
-        RenderTarget = NewObject<UTextureRenderTarget2D>(this, NAME_None, RF_Public | RF_Transient);
-    RenderTarget->RenderTargetFormat = RTF_RGBA16f;
-    RenderTarget->bAutoGenerateMips = true;
-
-    //will create the texture if needed
+    //Reset delegates
     IOdysseyRenderingAbility::OnRenderingChangedDelegate().RemoveAll(this);
-    if (!Animation)
-        return;
+    IOdysseyRenderingAbility::OnRenderingChangedDelegate().AddUObject(this, &UOdysseyAnimationPlayer::OnRenderingChanged);
 
-    RenderTarget->ResizeTarget(Animation->GetWidth(), Animation->GetHeight());
-    RenderTarget->UpdateResource();
+    //Reset Image Rendering to force a render
+    mInvalidTileMap = FOdysseyInvalidTileMap(64, Animation->GetWidth(), Animation->GetHeight());
+    mImageRenderingComposition.Empty();
+
+    //Resize Render Target To match Animation size if needed
+    if (Animation && (RenderTarget->SizeX != Animation->GetWidth() || RenderTarget->SizeY != Animation->GetHeight()))
+    {
+        RenderTarget->ResizeTarget(Animation->GetWidth(), Animation->GetHeight());
+    }
+
+    // Update RenderTarget resource if it doesn't exist yet
+    if (!RenderTarget->GetResource())
+    {
+        RenderTarget->UpdateResource();
+    }
+
+    //Force update on GPU and Generate Mips
     RenderTarget->UpdateResourceImmediate(false);
 
-    mInvalidTileMap = FOdysseyInvalidTileMap(64, Animation->GetWidth(), Animation->GetHeight());
-
+    //Update Texture if needed
     UpdateTexture();
-
-    IOdysseyRenderingAbility::OnRenderingChangedDelegate().AddUObject(this, &UOdysseyAnimationPlayer::OnRenderingChanged);
 }
 
 void
@@ -657,25 +663,33 @@ UOdysseyAnimationPlayer::PostDuplicate(EDuplicateMode::Type iDuplicateMode)
     if (GetFlags() & RF_ClassDefaultObject)
         return;
 
-    RenderTarget = NewObject<UTextureRenderTarget2D>(this, NAME_None, RF_Public | RF_Transient);
-    RenderTarget->RenderTargetFormat = RTF_RGBA16f;
-    RenderTarget->bAutoGenerateMips = true;
-
-    //will create the texture if needed
+    //Reset delegates
     IOdysseyRenderingAbility::OnRenderingChangedDelegate().RemoveAll(this);
-    if ( !Animation )
-        return;
+    IOdysseyRenderingAbility::OnRenderingChangedDelegate().AddUObject(this, &UOdysseyAnimationPlayer::OnRenderingChanged);
 
-    RenderTarget->ResizeTarget(Animation->GetWidth(), Animation->GetHeight());
-    RenderTarget->UpdateResource();
-    RenderTarget->UpdateResourceImmediate(false);
-
+    //Reset Image Rendering to force a render
     mInvalidTileMap = FOdysseyInvalidTileMap(64, Animation->GetWidth(), Animation->GetHeight());
     mImageRenderingComposition.Empty();
 
-    UpdateTexture();
+    RenderTarget = NewObject<UTextureRenderTarget2D>(this, NAME_None, RF_Public | RF_Transient);
 
-    IOdysseyRenderingAbility::OnRenderingChangedDelegate().AddUObject(this, &UOdysseyAnimationPlayer::OnRenderingChanged);
+    //Resize Render Target To match Animation size if needed
+    if (Animation)
+    {
+        RenderTarget->ResizeTarget(Animation->GetWidth(), Animation->GetHeight());
+    }
+
+    // Update RenderTarget resource if it doesn't exist yet
+    if (!RenderTarget->GetResource())
+    {
+        RenderTarget->UpdateResource();
+    }
+
+    //Force update on GPU and Generate Mips
+    RenderTarget->UpdateResourceImmediate(false);
+
+    //Update Texture if needed
+    UpdateTexture();
 }
 
 struct FOdysseyAnimationPlayerObjectVersion

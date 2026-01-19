@@ -146,8 +146,21 @@ UOdysseyAnimationComponent::PostLoad()
         FVector new_scale = old_scale * FVector( 100.f, 100.f, 1.f ); // Because Plane.Plane mesh is 100x100 and S_1_Unit_Plane.S_1_Unit_Plane is 1x1
         SetRelativeScale3D( new_scale );
     }
+}
 
+void
+UOdysseyAnimationComponent::OnRegister()
+{
+    //Called when duplicating / pasting an actor / component
+    Super::OnRegister();
     CreateMaterialInstance();
+}
+
+void
+UOdysseyAnimationComponent::OnUnregister()
+{
+    //Called when duplicating / pasting an actor / component
+    Super::OnUnregister();
 }
 
 void
