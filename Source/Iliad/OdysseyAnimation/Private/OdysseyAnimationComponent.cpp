@@ -146,14 +146,31 @@ UOdysseyAnimationComponent::PostLoad()
         FVector new_scale = old_scale * FVector( 100.f, 100.f, 1.f ); // Because Plane.Plane mesh is 100x100 and S_1_Unit_Plane.S_1_Unit_Plane is 1x1
         SetRelativeScale3D( new_scale );
     }
+
+    //Create the material instance but do not link the RenderTarget to it immediately
+    //as it could cause white material rendering
+    //Instead we call RefreshMaterialTexture() in OnRegister().
+    CreateMaterialInstance();
 }
 
 void
 UOdysseyAnimationComponent::OnRegister()
 {
-    //Called when duplicating / pasting an actor / component
+    /**
+     * We don't use PostDuplicate, we use OnRegister instead
+     *
+     * Jason Walter from Epic Games said :
+     *
+     * "I looked at the code and PostDuplicate is not recursive for all
+     * components which explains why you don't get a call.
+     * I see other places in the code where people use OnRegister() to
+     * build meta data associated with the component.
+     * For example, the Virtual Camera plugin does this on the VCam component
+     * to ensure some systems are initialized.
+     * OnRegister looks like the way to do this sort of thing."
+     */
     Super::OnRegister();
-    CreateMaterialInstance();
+    RefreshMaterialTexture();
 }
 
 void
@@ -167,9 +184,14 @@ void
 UOdysseyAnimationComponent::CreateMaterialInstance()
 {
     EmptyOverrideMaterials();
+    if (!Material)
+    {
+        MaterialInstance = nullptr;
+        return;
+    }
+
     MaterialInstance = UMaterialInstanceDynamic::Create(Material, GetTransientPackage());
     MaterialInstance->SetFlags(MaterialInstance->GetFlags() | RF_Public);
-    RefreshMaterialTexture();
     UStaticMeshComponent::SetMaterial(0, MaterialInstance);
 }
 
@@ -231,6 +253,7 @@ void
 UOdysseyAnimationComponent::MaterialChanged()
 {
     CreateMaterialInstance();
+    RefreshMaterialTexture();
 }
 
 #if WITH_EDITOR
@@ -278,7 +301,11 @@ void
 UOdysseyAnimationComponent::RefreshMaterialTexture()
 {
     if (!MaterialInstance)
-        return;
+    {
+        CreateMaterialInstance();
+        if (!MaterialInstance)
+            return;
+    }
 
     UOdysseyAnimationPlayer* player = GetPlayer();
     if (!player)
