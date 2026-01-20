@@ -1310,13 +1310,13 @@ FBoardSequenceCustomization::OnGlobalTimeChanged()
 
             if( camera_at_current_frame )
             {
-                if( current_piloted_actor != camera_at_current_frame )
-                    BoardSequenceTools::PilotCamera( sequencer.Get(), current_frame );
+                BoardSequenceTools::PilotCamera( sequencer.Get(), current_frame );
             }
             else
             {
-                //TODO: maybe eject the current piloted actor ?
-                // (as at the current frame, now, there is no camera)
+                // Can't find camera at the current frame (outside track range or section contains a board)
+                sequencer->SetPerspectiveViewportCameraCutEnabled( true );
+                sequencer->ForceEvaluate();
             }
         }
     }
