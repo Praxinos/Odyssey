@@ -105,6 +105,11 @@ void
 UOdysseyTextureLayerImageVector::InitTexture()
 {
     Super::InitTexture();
+
+    UTexture2D* texture = GetRenderTexture();
+    InitTextureWithBlockData(mVectorBlock->GetBlock(mDrawingFlags).Get(), texture, TextureSourceFormatForULISFormat(mVectorBlock->GetFormat()));
+    texture->UpdateResource();
+    FTextureCompilingManager::Get().FinishCompilation({ texture });
 }
 #endif
 
@@ -181,6 +186,8 @@ UOdysseyTextureLayerImageVector::PostLoad()
 
     mVectorBlock = MakeShared<FOdysseyVectorBlock>();
     mVectorBlock->Init(mVectorBlockId, mVectorCell, Width, Height, format);
+    InitTexture();
+
     mVectorBlock->OnInvalidated().AddUObject(this, &UOdysseyTextureLayerImageVector::OnVectorBlockInvalidated);
     mVectorLayer->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
