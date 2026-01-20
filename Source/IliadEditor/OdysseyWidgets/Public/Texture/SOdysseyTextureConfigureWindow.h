@@ -53,10 +53,10 @@ public:
     UPROPERTY(EditAnywhere, Category="OdysseyTextureConfiguration")
     FName                   Name = "T_Drawing";
 
-    UPROPERTY(EditAnywhere, Category="OdysseyTextureConfiguration", meta = (ClampMin = 1, ClampMax = 8192, UIMin = 1, UIMax = 8192))
+    UPROPERTY(EditAnywhere, Category="OdysseyTextureConfiguration", meta = (ClampMin = "16", ClampMax = "8192", UIMin = "16", UIMax = "8192", Multiple = "4", DisplayName = "Width (px)"))
     uint32                  Width = 1024;
 
-    UPROPERTY(EditAnywhere, Category="OdysseyTextureConfiguration", meta=(ClampMin=1, ClampMax=8192, UIMin=1, UIMax=8192) )
+    UPROPERTY(EditAnywhere, Category="OdysseyTextureConfiguration", meta = (ClampMin = "16", ClampMax = "8192", UIMin = "16", UIMax = "8192", Multiple = "4", DisplayName = "Height (px)"))
     uint32                  Height = 1024;
 
     UPROPERTY(EditAnywhere, Category="OdysseyTextureConfiguration")
