@@ -149,8 +149,11 @@ BoardHelpers::ResizeParentSequenceRecursively( UEposMovieSceneSequence* iSequenc
                 }
             }
 
-            TRange<FFrameNumber> full_range = TRange<FFrameNumber>( track->GetAllSections()[0]->GetInclusiveStartFrame(), track->GetAllSections().Last()->GetExclusiveEndFrame() );
-            child_sequence->Resize( UE::MovieScene::DiscreteSize( full_range ) );
+            if( track->GetAllSections().Num() )
+            {
+                TRange<FFrameNumber> full_range = TRange<FFrameNumber>( track->GetAllSections()[0]->GetInclusiveStartFrame(), track->GetAllSections().Last()->GetExclusiveEndFrame() );
+                child_sequence->Resize( UE::MovieScene::DiscreteSize( full_range ) );
+            }
 
             continue;
         }
