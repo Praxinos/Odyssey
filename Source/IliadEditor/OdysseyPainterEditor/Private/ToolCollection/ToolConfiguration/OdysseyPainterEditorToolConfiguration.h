@@ -19,10 +19,10 @@ class UOdysseyPainterEditorToolConfiguration : public UObject
     GENERATED_BODY()
 
 public:
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, Category = "Tool")
     TSubclassOf<UObject> mToolClass;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, Category = "Tool")
     TObjectPtr<UOdysseyPainterEditorTool> mTool;
 
     UPROPERTY(EditDefaultsOnly, Category = "Tool")
