@@ -5,9 +5,11 @@
 
 #include "Modules/ModuleManager.h"
 
+/* Gary
 class FOdysseyPainterEditor;
+*/
 
-class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorModule
+class ARIANEEDITOR_API FArianeEditorModule
     : public IModuleInterface
 {
 public:
@@ -17,11 +19,11 @@ public:
 
 public:
     virtual void OpenStandaloneEditorForAsset( UObject* iAsset );
-
+/* Gary
     void AddOpenedEditor(FOdysseyPainterEditor* iEdtor);
     void RemoveOpenedEditor(FOdysseyPainterEditor* iEdtor);
     FOdysseyPainterEditor* GetOpenedEditorForAsset(UObject* iObject);
-
+*/
 private:
     //Settings
     void RegisterSettings();
@@ -62,5 +64,7 @@ private:
 
 private:
     FDelegateHandle mExtendLevelEditorLayout;
+/* Gary
     TArray<FOdysseyPainterEditor*> mOpenedEditors;
+*/
 };

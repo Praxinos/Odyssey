@@ -56,6 +56,7 @@ public class ArianeEditor : ModuleRules
                 "RawMesh",
                 "Slate",
                 "SlateCore",
+                "StylusInput",
                 "Sequencer",
                 "ToolMenus",
                 "ToolWidgets",
@@ -71,7 +72,7 @@ public class ArianeEditor : ModuleRules
                 //"OdysseyLayerStack",
                 //"OdysseyLayerStackEditor",
                 //"OdysseyRendering",
-                //"OdysseyStyle",
+                "OdysseyStyle",
                 //"OdysseyStylusInput",
                 //"OdysseyTexture",
                 //"OdysseyVector",
@@ -92,7 +93,7 @@ public class ArianeEditor : ModuleRules
                 //"OdysseyPaletteEditor",
                 //"OdysseyRendering",
                 //"OdysseyVector",
-
+                "StylusInput",
                 //"ULIS",
                 //"ULISLoader"
              }
@@ -106,7 +107,6 @@ public class ArianeEditor : ModuleRules
                 //Path.Combine(ModuleDirectory, "Private", "Shapes"),
                 //Path.Combine(ModuleDirectory, "Private", "Shortcuts"),
                 //Path.Combine(ModuleDirectory, "Private", "Sources"),
-                //Path.Combine(ModuleDirectory, "Private", "StandaloneEditor"),
                 //Path.Combine(ModuleDirectory, "Private", "Tabs"),
                 //Path.Combine(ModuleDirectory, "Private", "Tabs", "VectorSceneTreeView"),
                 //Path.Combine(ModuleDirectory, "Private", "Tools"),
@@ -119,7 +119,9 @@ public class ArianeEditor : ModuleRules
                 //Path.Combine(ModuleDirectory, "Private", "Widgets", "Tab"),
                 //Path.Combine(ModuleDirectory, "Private", "Widgets", "Texture"),
                 //Path.Combine(ModuleDirectory, "Private", "Widgets", "Tools"),
-                //Path.Combine(ModuleDirectory, "Private", "WorldCentricEditor"),
+                Path.Combine(ModuleDirectory, "Private", "Tabs"),
+                Path.Combine(ModuleDirectory, "Private", "Tools"),
+                Path.Combine(ModuleDirectory, "Private", "Widgets")
             }
         );
 
@@ -132,7 +134,10 @@ public class ArianeEditor : ModuleRules
                 //Path.Combine(ModuleDirectory, "Public", "Widgets"),
                 //Path.Combine(ModuleDirectory, "Public", "Widgets", "Animation"),
                 //Path.Combine(ModuleDirectory, "Public", "Widgets", "Animation", "Timeline"),
-                //Path.Combine(ModuleDirectory, "Public", "WorldCentricEditor"),
+                Path.Combine(ModuleDirectory, "Public", "WorldCentricEditor"),
+                Path.Combine(ModuleDirectory, "Public", "Tabs"),
+                Path.Combine(ModuleDirectory, "Public", "Tools"),
+                Path.Combine(ModuleDirectory, "Public", "Widgets")
             }
         );
 

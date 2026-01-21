@@ -283,6 +283,11 @@
             "Name": "OdysseyFlipbookEditor",
             "Type": "Editor",
             "LoadingPhase": "Default"
+        },
+        {
+            "Name": "ArianeEditor",
+            "Type": "Editor",
+            "LoadingPhase": "Default"
         }
     ],
     "PreBuildSteps": {

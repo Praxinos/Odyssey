@@ -1,7 +1,7 @@
 // IDDN.FR.001.060015.014.S.X.2019.000.00000
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
-#include "OdysseyPainterEditorModule.h"
+#include "ArianeEditorModule.h"
 
 #include "AssetToolsModule.h"
 #include "CoreMinimal.h"
@@ -14,7 +14,9 @@
 #include "EditorModeRegistry.h"
 #include "Interfaces/IPluginManager.h"
 
-#include "StandaloneEditor/ArianeEditorStandaloneToolkit.h"
+#include "OdysseyStyle.h"
+
+#include "ArianeEditorViewportEdMode.h"
 
 #define LOCTEXT_NAMESPACE "ArianeEditor"
 
@@ -28,30 +30,29 @@ FArianeEditorModule::OpenStandaloneEditorForAsset( UObject* iAsset )
     if (!iAsset)
         return;
 
+/* Gary
     TSharedRef<FArianeEditorStandaloneToolkit> toolkit = MakeShared<FArianeEditorStandaloneToolkit>(iAsset);
     toolkit->Open();
+*/
 }
 
+/* Gary
 void
 FArianeEditorModule::AddOpenedEditor(FOdysseyPainterEditor* iEditor)
 {
-/* Gary
     mOpenedEditors.AddUnique(iEditor);
-*/
 }
+
 
 void
 FArianeEditorModule::RemoveOpenedEditor(FOdysseyPainterEditor* iEditor)
 {
-/* Gary
     mOpenedEditors.Remove(iEditor);
-*/
 }
 
 FOdysseyPainterEditor*
 FArianeEditorModule::GetOpenedEditorForAsset(UObject* iObject)
 {
-/* Gary
     for (FOdysseyPainterEditor* editor : mOpenedEditors)
     {
         UObject* editedObject = editor->GetEditedObject();
@@ -62,13 +63,16 @@ FArianeEditorModule::GetOpenedEditorForAsset(UObject* iObject)
         if (additionalEditedObjects.Contains(iObject))
             return editor;
     }
-*/
+
     return nullptr;
 }
+*/
 
 void
 FArianeEditorModule::StartupModule()
 {
+    RegisterEditorMode();
+
 /* Gary
     RegisterBrushOverrides(); //First thing to do, as it modifies the Brush CDO
     RegisterSettings();
@@ -76,7 +80,6 @@ FArianeEditorModule::StartupModule()
     RegisterLevelEditorLayoutExtensions();
     RegisterDetailCustomizations();
     RegisterThumbnailRenderers();
-    RegisterEditorMode();
     RegisterPropertyModuleCustomizations();
 
     FOdysseyVectorBrushCustomization::Register();
@@ -87,6 +90,8 @@ FArianeEditorModule::StartupModule()
 void
 FArianeEditorModule::ShutdownModule()
 {
+    UnregisterEditorMode();
+
 /* Gary
     UnregisterBrushOverrides();
     UnregisterSettings();
@@ -94,7 +99,6 @@ FArianeEditorModule::ShutdownModule()
     UnregisterLevelEditorLayoutExtensions();
     UnregisterDetailCustomization();
     UnregisterThumbnailRenderers();
-    UnregisterEditorMode();
     UnregisterPropertyModuleCustomizations();
 
     FOdysseyVectorBrushCustomization::Unregister();
@@ -105,17 +109,17 @@ FArianeEditorModule::ShutdownModule()
 void
 FArianeEditorModule::RegisterEditorMode()
 {
-    FEditorModeRegistry::Get().RegisterMode<FOdysseyViewportDrawingEditorEdMode>(
-        FOdysseyViewportDrawingEditorEdMode::EM_OdysseyViewportDrawingEditorEdModeId,
+    FEditorModeRegistry::Get().RegisterMode<FArianeEditorViewportEdMode>(
+        FArianeEditorViewportEdMode::EM_ArianeEditorViewportEdModeId,
         LOCTEXT("ariane-editor-mode.name", "Ariane"),
-        FSlateIcon(FOdysseyStyle::GetStyleSetName(), "OdysseyViewportDrawingEditMode.OdysseyViewportDrawingIcon40", "OdysseyViewportDrawingEditMode.OdysseyViewportDrawingIcon16"),
+        FSlateIcon(FOdysseyStyle::GetStyleSetName(), "ArianeViewportDrawingEditMode.ArianeViewportDrawingIcon40", "ArianeViewportDrawingEditMode.ArianeViewportDrawingIcon16"),
         true, 200 );
 }
 
 void
 FArianeEditorModule::UnregisterEditorMode()
 {
-    FEditorModeRegistry::Get().UnregisterMode(FOdysseyViewportDrawingEditorEdMode::EM_OdysseyViewportDrawingEditorEdModeId);
+    FEditorModeRegistry::Get().UnregisterMode(FArianeEditorViewportEdMode::EM_ArianeEditorViewportEdModeId);
 }
 
 void
