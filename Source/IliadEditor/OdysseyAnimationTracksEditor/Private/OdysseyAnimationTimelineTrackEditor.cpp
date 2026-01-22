@@ -199,28 +199,8 @@ FOdysseyAnimationTimelineTrackEditor::BuildOutlinerColumnWidget(const FBuildColu
     if (!track || !editorViewModel || !outlinerExtension)
         return nullptr;
 
-
-    TSharedPtr<ISequencer> SequencerPtr = GetSequencer();
-    if (!SequencerPtr)
-        return nullptr;
-
-    UOdysseyAnimationComponent* component = nullptr;
-    TArrayView<TWeakObjectPtr<>> boundObjects = SequencerPtr->FindObjectsInCurrentSequence(track->FindObjectBindingGuid());
-    for (TWeakObjectPtr<>& boundObjectPtr : boundObjects)
-    {
-        UObject* boundObject = boundObjectPtr.Get();
-        if (!boundObject)
-            continue;
-
-        if (!boundObject->IsA<UOdysseyAnimationComponent>())
-            continue;
-
-        component = Cast<UOdysseyAnimationComponent>(boundObject);
-        if (!component)
-            continue;
-    }
-
-    if (!component)
+    TWeakPtr<ISequencer> WeakSequencer = GetSequencer();
+    if (!WeakSequencer.IsValid())
         return nullptr;
 
     if (iColumnName == ::UE::Sequencer::FCommonOutlinerNames::Edit)
@@ -301,7 +281,7 @@ FOdysseyAnimationTimelineTrackEditor::BuildOutlinerColumnWidget(const FBuildColu
                 ]
                 + SVerticalBox::Slot()
                 [
-                    SNew(SOdysseyAnimationTimelineTrack, track, iParams, SequencerPtr)
+                    SNew(SOdysseyAnimationTimelineTrack, track, iParams, WeakSequencer.Pin())
                         .Visibility_Lambda(
                             [track]()
                             {
@@ -310,8 +290,27 @@ FOdysseyAnimationTimelineTrackEditor::BuildOutlinerColumnWidget(const FBuildColu
                         )
                         .Clipping(EWidgetClipping::ClipToBoundsAlways)
                         .LayerStack_Lambda(
-                            [component]() -> UOdysseyAnimationLayerStack*
+                            [WeakSequencer, track]() -> UOdysseyAnimationLayerStack*
                             {
+                                if( !WeakSequencer.IsValid() )
+                                    return nullptr;
+
+                                UOdysseyAnimationComponent* component = nullptr;
+                                TArrayView<TWeakObjectPtr<>> boundObjects = WeakSequencer.Pin()->FindObjectsInCurrentSequence( track->FindObjectBindingGuid() );
+                                for( TWeakObjectPtr<>& boundObjectPtr : boundObjects )
+                                {
+                                    UObject* boundObject = boundObjectPtr.Get();
+                                    if( !boundObject )
+                                        continue;
+
+                                    if( !boundObject->IsA<UOdysseyAnimationComponent>() )
+                                        continue;
+
+                                    component = Cast<UOdysseyAnimationComponent>( boundObject );
+                                    if( !component )
+                                        continue;
+                                }
+
                                 if (!component)
                                     return nullptr;
 
