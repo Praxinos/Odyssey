@@ -68,6 +68,9 @@ FOdysseyAnimationTimelineTrackEditor::OnNewActorTrackAdded(const AActor& iActor,
     FScopedTransaction AutoKeyTransaction( LOCTEXT("PropertyChanged", "Animatable Property Changed"), bShouldActuallyTransact );
 
     FGuid componentBinding = FSequencerUtilities::CreateBinding(iSequencer.ToSharedRef(), *animationComponent);
+    // It means animationComponent already has its track
+    if( !componentBinding.IsValid() )
+        return;
 
     UMovieSceneTrack* NewTrack = MovieScene->AddTrack(UOdysseyAnimationTimelineTrack::StaticClass(), componentBinding);
     if (!NewTrack)
