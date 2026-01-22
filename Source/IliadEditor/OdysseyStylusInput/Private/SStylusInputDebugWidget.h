@@ -3,78 +3,105 @@
 
 #pragma once
 
-#include "Widgets/SCompoundWidget.h"
+#include <StylusInput.h>
+#include <Widgets/SCompoundWidget.h>
 
-#include "IOdysseyStylusInputModule.h"
-#include "IStylusState.h"
+#include "TickableEditorObject.h"
+#include "Containers/SpscQueue.h"
+#include "StylusInputPacket.h"
 
-// A debug widget which implements the IStylusMessageHandler interface to get stylus messages
-class SStylusInputDebugWidget
-    : public SCompoundWidget
-    , public IStylusMessageHandler
+namespace UE::StylusInput::DebugWidget
 {
-public:
-    SStylusInputDebugWidget();
-    virtual ~SStylusInputDebugWidget();
+    DECLARE_DELEGATE_OneParam(FOnPacketCallback, const FStylusInputPacket&);
+    DECLARE_DELEGATE_OneParam(FOnDebugEventCallback, const FString&);
 
-    SLATE_BEGIN_ARGS(SStylusInputDebugWidget)
-    {}
-    SLATE_END_ARGS();
-
-    void Construct(const FArguments& InArgs, UOdysseyStylusInputSubsystem& InSubsystem);
-    void OnStylusStateChanged(const TWeakPtr<SWidget> iWidget, const TArray<FStylusState>& InStates, int32 InIndex)
+    class FDebugEventHandlerAsynchronous final : public IStylusInputEventHandler, FTickableEditorObject
     {
-        State = InStates.Last();
-        LastIndex = InIndex;
-    }
+    public:
+        FDebugEventHandlerAsynchronous(FOnPacketCallback&& OnPacketCallback, FOnDebugEventCallback&& OnDebugEventCallback);
 
-private:
-    UOdysseyStylusInputSubsystem* InputSubsystem;
-    FStylusState State;
-    int32 LastIndex;
+        virtual FString GetName() override { return "DebugEventHandlerAsynchronous"; }
 
-    ECheckBoxState IsTouching() const;
-    ECheckBoxState IsInverted() const;
+        virtual void OnPacket(const FStylusInputPacket& Packet, IStylusInputInstance* Instance) override;
+        virtual void OnDebugEvent(const FString& Message, IStylusInputInstance* Instance) override;
 
-    FText GetPositionText() const { return GetVector2Text(State.GetPosition()); }
-    bool IsPositionAvailable() const { return IsAvailable( EStylusInputType::Position ); }
-    FText GetZText() const { return GetFloatText(State.GetZ()); }
-    bool IsZAvailable() const { return IsAvailable( EStylusInputType::Z ); }
+        virtual void Tick(float DeltaTime) override;
+        virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT(StylusInput_DebugEventHandlerAsynchronous, STATGROUP_Tickables); }
 
-    FText GetTiltText() const { return GetFloatText(State.GetTilt()); }
-    bool IsTiltAvailable() const { return IsAvailable( EStylusInputType::Tilt ); }
-    FText GetTiltXText() const { return GetFloatText(State.GetTiltX()); }
-    bool IsTiltXAvailable() const { return IsAvailable( EStylusInputType::Tilt ); }
-    FText GetTiltYText() const { return GetFloatText(State.GetTiltY()); }
-    bool IsTiltYAvailable() const { return IsAvailable( EStylusInputType::Tilt ); }
-    FText GetAzimuthText() const { return GetFloatText(State.GetAzimuth()); }
-    bool IsAzimuthAvailable() const { return IsAvailable( EStylusInputType::Tilt ); }
-    FText GetAltitudeText() const { return GetFloatText(State.GetAltitude()); }
-    bool IsAltitudeAvailable() const { return IsAvailable( EStylusInputType::Tilt ); }
-    FText GetTwistText() const { return GetFloatText(State.GetTwist()); }
-    bool IsTwistAvailable() const { return IsAvailable( EStylusInputType::Twist ); }
+    private:
+        FOnPacketCallback OnPacketCallback;
+        FOnDebugEventCallback OnDebugEventCallback;
 
-    FText GetPressureText() const { return GetFloatText(State.GetPressure()); }
-    bool IsPressureAvailable() const { return IsAvailable( EStylusInputType::Pressure ); }
-    FText GetTangentPressureText() const { return GetFloatText(State.GetTangentPressure()); }
-    bool IsPressureTangentAvailable() const { return IsAvailable( EStylusInputType::TangentPressure ); }
+        TSpscQueue<FStylusInputPacket> PacketQueue;
+        TSpscQueue<FString> DebugEventQueue;
+    };
 
-    FText GetSizeText() const { return GetVector2Text(State.GetSize()); }
-    bool IsSizeAvailable() const { return IsAvailable( EStylusInputType::Size ); }
-
-    FText GetIndexText() const { return FText::FromString(FString::FromInt(LastIndex)); }
-
-    //...
-
-    bool IsAvailable( EStylusInputType iType ) const
+    class FDebugEventHandlerOnGameThread final : public IStylusInputEventHandler
     {
-        const IStylusInputDevice* device = InputSubsystem->GetInputDevice( LastIndex );
-        if( !device )
-            return false;
+    public:
+        FDebugEventHandlerOnGameThread(FOnPacketCallback&& OnPacketCallback, FOnDebugEventCallback&& OnDebugEventCallback);
 
-        return device->GetSupportedInputs().Contains( iType );
-    }
+        virtual FString GetName() override { return "DebugEventHandlerOnGameThread"; }
 
-    static FText GetVector2Text(FVector2D Value);
-    static FText GetFloatText(float Value);
-};
+        virtual void OnPacket(const FStylusInputPacket& Packet, IStylusInputInstance* Instance) override;
+        virtual void OnDebugEvent(const FString& Message, IStylusInputInstance* Instance) override;
+
+    private:
+        FOnPacketCallback OnPacketCallback;
+        FOnDebugEventCallback OnDebugEventCallback;
+    };
+
+    class SStylusInputDebugWidget : public SCompoundWidget
+    {
+    public:
+        SLATE_BEGIN_ARGS(SStylusInputDebugWidget)
+            {
+            }
+        SLATE_END_ARGS()
+
+        virtual ~SStylusInputDebugWidget() override;
+
+        void Construct(const FArguments& Args);
+
+        void NotifyWidgetRelocated();
+
+    private:
+        void AcquireStylusInput();
+        void ReleaseStylusInput();
+        void RegisterEventHandler();
+        void UnregisterEventHandler();
+
+        const IStylusInputTabletContext* GetTabletContext(uint32 TabletContextID);
+        const IStylusInputStylusInfo* GetStylusInfo(uint32 StylusID);
+
+        void OnPacket(const FStylusInputPacket& Packet);
+        void OnDebugEvent(const FString& Message);
+
+        TSharedRef<SWidget> GetInterfaceMenu();
+        void SetInterface(FName InInterface);
+        FName Interface;
+
+        TSharedRef<SWidget> GetEventHandlerThreadMenu();
+        void SetEventHandlerThread(EEventHandlerThread InEventHandlerThread);
+        EEventHandlerThread EventHandlerThread = EEventHandlerThread::OnGameThread;
+
+        IStylusInputInstance* StylusInput = nullptr;
+        TUniquePtr<IStylusInputEventHandler> EventHandler;
+        TWeakPtr<SWindow> StylusInputWindow;
+
+        TMap<uint32, TSharedPtr<IStylusInputTabletContext>> TabletContexts;
+        TMap<uint32, TSharedPtr<IStylusInputStylusInfo>> StylusInfos;
+
+        FString DebugMessages;
+
+        struct FLastPacketData
+        {
+            bool bIsSet = false;
+            FStylusInputPacket Packet;
+            const IStylusInputTabletContext* TabletContext = nullptr;
+            const IStylusInputStylusInfo* StylusInfo = nullptr;
+        };
+
+        FLastPacketData LastPacketData;
+    };
+}

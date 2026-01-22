@@ -45,6 +45,7 @@ namespace UnrealBuildTool.Rules
                     "EditorSubsystem",
                     "Engine",
                     "UnrealEd",
+                    "StylusInput"
                     // ... add other public dependencies that you statically link with here ...
                 }
             );

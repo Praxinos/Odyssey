@@ -206,7 +206,7 @@ TSharedRef<SDockTab> UOdysseyStylusInputSubsystem::OnSpawnPluginTab(const FSpawn
     return SNew(SDockTab)
         .TabRole(ETabRole::NomadTab)
         [
-            SNew(SStylusInputDebugWidget, *this)
+            SNew(UE::StylusInput::DebugWidget::SStylusInputDebugWidget)
         ];
 }
 

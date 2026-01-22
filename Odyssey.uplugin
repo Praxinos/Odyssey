@@ -26,6 +26,10 @@
     "Plugins": [
         {
             "Enabled": true,
+            "Name": "StylusInput"
+        },
+        {
+            "Enabled": true,
             "Name": "LevelSequenceEditor"
         },
         {
