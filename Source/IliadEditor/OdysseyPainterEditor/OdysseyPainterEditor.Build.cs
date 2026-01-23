@@ -102,48 +102,10 @@ public class OdysseyPainterEditor : ModuleRules
 
         PrivateIncludePaths.AddRange(
             Directory.GetDirectories(ModuleDirectory, "Private/*", SearchOption.AllDirectories)
-            /* new string[] {
-                Path.Combine(ModuleDirectory, "Private", "**"),
-                Path.Combine(ModuleDirectory, "Private", "Animation"),
-                Path.Combine(ModuleDirectory, "Private", "Animation", "TimelineTools"),
-                Path.Combine(ModuleDirectory, "Private", "Flipbook"),
-                Path.Combine(ModuleDirectory, "Private", "Layouts"),
-                Path.Combine(ModuleDirectory, "Private", "Shapes"),
-                //Path.Combine(ModuleDirectory, "Private", "Shapes", "Interpolation"),
-                //Path.Combine(ModuleDirectory, "Private", "Shapes", "Smoothing"),
-                Path.Combine(ModuleDirectory, "Private", "Shortcuts"),
-                //Path.Combine(ModuleDirectory, "Private", "Shortcuts", "AnimationTimeline"),
-                Path.Combine(ModuleDirectory, "Private", "Sources"),
-                Path.Combine(ModuleDirectory, "Private", "StandaloneEditor"),
-                Path.Combine(ModuleDirectory, "Private", "Tabs"),
-                Path.Combine(ModuleDirectory, "Private", "Tabs", "VectorSceneTreeView"),
-                Path.Combine(ModuleDirectory, "Private", "Tools"),
-                Path.Combine(ModuleDirectory, "Private", "ToolCollection"),
-                Path.Combine(ModuleDirectory, "Private", "Widgets"),
-                Path.Combine(ModuleDirectory, "Private", "Widgets", "Animation"),
-                Path.Combine(ModuleDirectory, "Private", "Widgets", "Brush"),
-                Path.Combine(ModuleDirectory, "Private", "Widgets", "Color"),
-                Path.Combine(ModuleDirectory, "Private", "Widgets", "Flipbook"),
-                Path.Combine(ModuleDirectory, "Private", "Widgets", "Palette"),
-                Path.Combine(ModuleDirectory, "Private", "Widgets", "Tab"),
-                Path.Combine(ModuleDirectory, "Private", "Widgets", "Texture"),
-                Path.Combine(ModuleDirectory, "Private", "Widgets", "Tools"),
-                Path.Combine(ModuleDirectory, "Private", "WorldCentricEditor"),
-            }*/
         );
 
         PublicIncludePaths.AddRange(
             Directory.GetDirectories(ModuleDirectory, "Public/*", SearchOption.AllDirectories)
-            /* new string[] {
-                Path.Combine(ModuleDirectory, "Public", "Animation"),
-                Path.Combine(ModuleDirectory, "Public", "Sources"),
-                Path.Combine(ModuleDirectory, "Public", "Tools"),
-                Path.Combine(ModuleDirectory, "Public", "Tools", "OutOfPegsTool"),
-                Path.Combine(ModuleDirectory, "Public", "Widgets"),
-                Path.Combine(ModuleDirectory, "Public", "Widgets", "Animation"),
-                Path.Combine(ModuleDirectory, "Public", "Widgets", "Animation", "Timeline"),
-                Path.Combine(ModuleDirectory, "Public", "WorldCentricEditor"),
-            } */
         );
 
         DynamicallyLoadedModuleNames.AddRange(
