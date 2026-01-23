@@ -2,6 +2,7 @@
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
 #include "SOdysseyAnimationCell.h"
+#include "OdysseyAnimationLayer.h"
 #include "OdysseyLayerCell.h"
 #include "OdysseyPainterEditorAnimationProjectSettings.h"
 #include "OdysseyStyle.h"
@@ -59,14 +60,13 @@ SOdysseyAnimationCell::Construct(
             [
                 SNew( SBorder )
                 .BorderImage( brush )
-                .ColorAndOpacity( FLinearColor::White )
+                .BorderBackgroundColor( FLinearColor(1.0f, 1.0f, 1.0f, 0.5f))
                 .Visibility( this, &SOdysseyAnimationCell::GetExposureVisibility )
                 [
-                    SNew( SInlineEditableTextBlock )
+                    SNew( STextBlock )
+                    .TextStyle(FAppStyle::Get(), "SmallText")
                     .Text( this, &SOdysseyAnimationCell::GetExposureText )
                     .ToolTipText( this, &SOdysseyAnimationCell::GetExposureTooltip )
-                    .OnVerifyTextChanged( this, &SOdysseyAnimationCell::OnExposureVerifyTextChanged )
-                    .OnTextCommitted( this, &SOdysseyAnimationCell::OnExposureTextCommitted )
                 ]
             ]
         ]
@@ -77,6 +77,12 @@ SOdysseyAnimationCell::Construct(
 
 EVisibility SOdysseyAnimationCell::GetExposureVisibility() const
 {
+    // Hide when layer does not display cell names
+    // TODO: Maybe have its option in Editor Settings
+    //       instead of relying on Cell Names visibility ?
+    if (!mAnimationLayer->ShouldDisplayCellNames())
+        return EVisibility::Collapsed;
+
     // Hide when there is only 1 exposure
     if( mCell->GetExposure() <= 1 )
         return EVisibility::Collapsed;
@@ -96,38 +102,6 @@ FText SOdysseyAnimationCell::GetExposureText() const
 FText SOdysseyAnimationCell::GetExposureTooltip() const
 {
     return FText::Format( LOCTEXT( "animation.timeline.cell.exposure.tooltip", "Cell contains {0} {0}|plural(one=exposure,other=exposures)" ), mCell->GetExposure() );
-}
-
-bool SOdysseyAnimationCell::OnExposureVerifyTextChanged( const FText& iNewText, FText& oErrorMessage ) const
-{
-    TOptional<int32> exposure = mExposureInterface->FromString( iNewText.ToString(), 0 );
-    if( !exposure.IsSet() )
-    {
-        //oErrorMessage = FText::Format( LOCTEXT( "animation.timeline.cell.exposure.tooltip", "Cell contains {0} {0}|plural(one=exposure,other=exposures)" ), mCell->GetExposure() );
-        return false;
-    }
-
-    if( exposure.GetValue() <= 0 )
-    {
-        return false;
-    }
-
-    return true;
-}
-
-void SOdysseyAnimationCell::OnExposureTextCommitted( const FText& iNewText, ETextCommit::Type iCommitType )
-{
-    if( iCommitType != ETextCommit::OnEnter )
-        return;
-
-    TOptional<int32> exposure = mExposureInterface->FromString( iNewText.ToString(), 0 );
-    if( !exposure.IsSet() )
-        return;
-
-    if( exposure.GetValue() <= 0 )
-        return;
-
-    mCell->SetExposure( exposure.GetValue() );
 }
 
 //---
