@@ -25,7 +25,7 @@
 #include "OdysseyAnimationTimelineTrack.h"
 #include "OdysseyViewportDrawingEditorEdMode.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
-#include "Widgets/Animation/Timeline/SOdysseyAnimationTimelineTreeView.h"
+#include "SOdysseyAnimationTimelineTreeView.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 

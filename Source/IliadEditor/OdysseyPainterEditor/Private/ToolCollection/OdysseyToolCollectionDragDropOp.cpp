@@ -4,8 +4,8 @@
 #include "OdysseyToolCollectionDragDropOp.h"
 
 #include "OdysseyPainterEditor.h"
-#include "ToolCollection/OdysseyToolCollection.h"
-#include "ToolConfiguration/OdysseyPainterEditorToolConfiguration.h"
+#include "OdysseyToolCollection.h"
+#include "OdysseyPainterEditorToolConfiguration.h"
 
 TSharedRef<FOdysseyToolCollectionDragDropOp>
 FOdysseyToolCollectionDragDropOp::Create(UOdysseyPainterEditorToolConfiguration* iToolConfig, UOdysseyToolCollection* iSource, FOdysseyPainterEditor* iEditor)

@@ -72,9 +72,9 @@
 #include "Undo/OdysseyVectorUndoTagInbetweenerMatching.h"
 #include "Undo/OdysseyVectorUndoTagInbetweenerReset.h"
 
-#include "ToolCollection/OdysseyToolCollection.h"
-#include "ToolCollection/ToolConfiguration/OdysseyPainterEditorToolConfiguration.h"
-#include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
+#include "OdysseyToolCollection.h"
+#include "OdysseyPainterEditorToolConfiguration.h"
+#include "OdysseyPainterEditorRasterDrawingTool.h"
 #include "Tools/RasterEraserTool/OdysseyPainterEditorRasterEraserTool.h"
 #include "Tools/RasterSelectionTool/OdysseyPainterEditorRasterSelectionTool.h"
 #include "Tools/RasterTransformTool/OdysseyPainterEditorRasterTransformTool.h"

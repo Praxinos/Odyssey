@@ -4,10 +4,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Tools/RasterBaseTool/OdysseyPainterEditorRasterBaseTool.h"
+#include "OdysseyPainterEditorRasterBaseTool.h"
 #include "OdysseyShape.h"
 #include "OdysseyPaintEngine.h"
-#include "FreehandShape/Interpolation/OdysseyInterpolationTypes.h"
+#include "OdysseyInterpolationTypes.h"
 #include "OdysseyPainterEditorRasterEraserTool.generated.h"
 
 class FOdysseyPaintEngine;

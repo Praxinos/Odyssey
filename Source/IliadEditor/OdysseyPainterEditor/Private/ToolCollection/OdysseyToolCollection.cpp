@@ -4,7 +4,7 @@
 #include "OdysseyToolCollection.h"
 
 #include "Serialization/ObjectAndNameAsStringProxyArchive.h"
-#include "ToolCollection/ToolConfiguration/OdysseyPainterEditorToolConfigurationUtils.h"
+#include "OdysseyPainterEditorToolConfigurationUtils.h"
 
 /////////////////////////////////////////////////////
 // FToolPropertySnapshot

@@ -6,15 +6,15 @@
 #include "CoreMinimal.h"
 #include "UObject/UObjectGlobals.h"
 #include "InputCoreTypes.h"
-#include "Tools/RasterBaseTool/OdysseyPainterEditorRasterBaseTool.h"
+#include "OdysseyPainterEditorRasterBaseTool.h"
 #include "OdysseyBrushBlueprint.h"
 #include "OdysseyBrushOptions.h"
 #include "OdysseyBlendParameters.h"
 #include "OdysseyShape.h"
 #include "OdysseyPaintEngine.h"
 #include "OdysseyBrushContext.h"
-#include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingToolWorker.h"
-#include "FreehandShape/Interpolation/OdysseyInterpolationTypes.h"
+#include "OdysseyPainterEditorRasterDrawingToolWorker.h"
+#include "OdysseyInterpolationTypes.h"
 
 #include "OdysseyPainterEditorRasterDrawingTool.generated.h"
 

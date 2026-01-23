@@ -22,6 +22,8 @@ public class OdysseyPainterEditor : ModuleRules
             OptimizeCode = CodeOptimization.Never;
         }
 
+        bAddDefaultIncludePaths = true;
+
         PrivateIncludePathModuleNames.AddRange(
             new string[] {
                 "Settings",
@@ -99,12 +101,18 @@ public class OdysseyPainterEditor : ModuleRules
         );
 
         PrivateIncludePaths.AddRange(
-            new string[] {
+            Directory.GetDirectories(ModuleDirectory, "Private/*", SearchOption.AllDirectories)
+            /* new string[] {
+                Path.Combine(ModuleDirectory, "Private", "**"),
                 Path.Combine(ModuleDirectory, "Private", "Animation"),
+                Path.Combine(ModuleDirectory, "Private", "Animation", "TimelineTools"),
                 Path.Combine(ModuleDirectory, "Private", "Flipbook"),
                 Path.Combine(ModuleDirectory, "Private", "Layouts"),
                 Path.Combine(ModuleDirectory, "Private", "Shapes"),
+                //Path.Combine(ModuleDirectory, "Private", "Shapes", "Interpolation"),
+                //Path.Combine(ModuleDirectory, "Private", "Shapes", "Smoothing"),
                 Path.Combine(ModuleDirectory, "Private", "Shortcuts"),
+                //Path.Combine(ModuleDirectory, "Private", "Shortcuts", "AnimationTimeline"),
                 Path.Combine(ModuleDirectory, "Private", "Sources"),
                 Path.Combine(ModuleDirectory, "Private", "StandaloneEditor"),
                 Path.Combine(ModuleDirectory, "Private", "Tabs"),
@@ -121,11 +129,12 @@ public class OdysseyPainterEditor : ModuleRules
                 Path.Combine(ModuleDirectory, "Private", "Widgets", "Texture"),
                 Path.Combine(ModuleDirectory, "Private", "Widgets", "Tools"),
                 Path.Combine(ModuleDirectory, "Private", "WorldCentricEditor"),
-            }
+            }*/
         );
 
         PublicIncludePaths.AddRange(
-            new string[] {
+            Directory.GetDirectories(ModuleDirectory, "Public/*", SearchOption.AllDirectories)
+            /* new string[] {
                 Path.Combine(ModuleDirectory, "Public", "Animation"),
                 Path.Combine(ModuleDirectory, "Public", "Sources"),
                 Path.Combine(ModuleDirectory, "Public", "Tools"),
@@ -134,7 +143,7 @@ public class OdysseyPainterEditor : ModuleRules
                 Path.Combine(ModuleDirectory, "Public", "Widgets", "Animation"),
                 Path.Combine(ModuleDirectory, "Public", "Widgets", "Animation", "Timeline"),
                 Path.Combine(ModuleDirectory, "Public", "WorldCentricEditor"),
-            }
+            } */
         );
 
         DynamicallyLoadedModuleNames.AddRange(

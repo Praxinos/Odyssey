@@ -7,7 +7,7 @@
 #include "Widgets/Views/STileView.h"
 
 #include "Tools/OdysseyPainterEditorTool.h"
-#include "ToolCollection/ToolConfiguration/OdysseyPainterEditorToolConfiguration.h"
+#include "OdysseyPainterEditorToolConfiguration.h"
 
 enum class EDropIndicatorSide
 {

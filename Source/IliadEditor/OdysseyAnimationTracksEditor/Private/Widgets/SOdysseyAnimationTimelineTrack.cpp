@@ -3,7 +3,7 @@
 
 #include "Widgets/SOdysseyAnimationTimelineTrack.h"
 
-#include "Widgets/Animation/Timeline/SOdysseyAnimationLayerStackTreeView.h"
+#include "SOdysseyAnimationLayerStackTreeView.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "TrackEditors/SubTrackEditorBase.h"
 #include "OdysseyAnimationTimelineSectionEditor.h"

@@ -9,11 +9,11 @@
 #include "OdysseyHUDElement.h"
 #include "Input/OdysseyPoint.h"
 
-#include "FreehandShape/OdysseyFreehandShape.h"
-#include "RectangleShape/OdysseyRectangleShape.h"
-#include "PolygonShape/OdysseyPolygonShape.h"
-#include "EllipseShape/OdysseyEllipseShape.h"
-#include "BezierShape/OdysseyBezierShape.h"
+#include "OdysseyFreehandShape.h"
+#include "OdysseyRectangleShape.h"
+#include "OdysseyPolygonShape.h"
+#include "OdysseyEllipseShape.h"
+#include "OdysseyBezierShape.h"
 #include "OdysseyPainterEditorViewportTab.h"
 
 #define LOCTEXT_NAMESPACE "OdysseyPainterEditorRasterSelectionTool"

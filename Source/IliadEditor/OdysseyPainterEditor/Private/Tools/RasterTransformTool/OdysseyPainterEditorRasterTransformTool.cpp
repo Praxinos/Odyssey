@@ -16,7 +16,7 @@
 #include "Editor/Transactor.h"
 #include "Framework/Commands/GenericCommands.h"
 #include "ULISEventBuilder.h"
-#include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
+#include "OdysseyPainterEditorRasterDrawingTool.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 

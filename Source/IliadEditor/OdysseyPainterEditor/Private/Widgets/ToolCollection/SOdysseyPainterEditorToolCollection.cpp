@@ -1,12 +1,12 @@
 // IDDN.FR.001.060015.014.S.X.2019.000.00000
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
-#include "Widgets/ToolCollection/SOdysseyPainterEditorToolCollection.h"
+#include "SOdysseyPainterEditorToolCollection.h"
 
 #include "OdysseyPainterEditor.h"
-#include "ToolCollection/OdysseyToolCollection.h"
+#include "OdysseyToolCollection.h"
 #include "Widgets/Layout/SExpandableArea.h"
-#include "ToolCollection/OdysseyToolCollectionDragDropOp.h"
+#include "OdysseyToolCollectionDragDropOp.h"
 #include "SOdysseyPainterEditorToolTile.h"
 #include "SPositiveActionButton.h"
 

@@ -5,12 +5,12 @@
 #include "OdysseyPainterEditor.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 
-#include "FreehandShape/OdysseyFreehandShape.h"
-#include "LineShape/OdysseyLineShape.h"
-#include "RectangleShape/OdysseyRectangleShape.h"
-#include "PolygonShape/OdysseyPolygonShape.h"
-#include "EllipseShape/OdysseyEllipseShape.h"
-#include "BezierShape/OdysseyBezierShape.h"
+#include "OdysseyFreehandShape.h"
+#include "OdysseyLineShape.h"
+#include "OdysseyRectangleShape.h"
+#include "OdysseyPolygonShape.h"
+#include "OdysseyEllipseShape.h"
+#include "OdysseyBezierShape.h"
 
 #include "OdysseyMediaRaster.h"
 #include "OdysseyHUDElement.h"

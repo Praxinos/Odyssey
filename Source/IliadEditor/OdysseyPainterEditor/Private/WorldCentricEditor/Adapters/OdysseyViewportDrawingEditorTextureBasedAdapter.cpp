@@ -7,7 +7,7 @@
 #include "OdysseyViewportDrawingEditorExtension.h"
 #include "OdysseyPainterEditor.h"
 #include "TextureResource.h"
-#include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
+#include "OdysseyPainterEditorRasterDrawingTool.h"
 
 FOdysseyViewportDrawingEditorTextureBasedAdapter::~FOdysseyViewportDrawingEditorTextureBasedAdapter()
 {

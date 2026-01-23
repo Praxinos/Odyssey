@@ -19,7 +19,7 @@
 #include "Widgets/Input/SSegmentedControl.h"
 #include "Widgets/Layout/SWidgetSwitcher.h"
 #include "Widgets/Tab/SOdysseyPainterEditorTools.h"
-#include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
+#include "OdysseyPainterEditorRasterDrawingTool.h"
 
 #define LOCTEXT_NAMESPACE "ViewportDrawingEditor"
 

@@ -15,7 +15,7 @@
 #include "ULISLoaderModule.h"
 #include "ULISUtils.h"
 #include "ULISEventBuilder.h"
-#include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
+#include "OdysseyPainterEditorRasterDrawingTool.h"
 #include "OdysseyViewportDrawingEditorExtension.h"
 #include "OdysseyPainterEditor.h"
 #include "IMeshPaintGeometryAdapter.h"

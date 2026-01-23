@@ -5,7 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "StructUtils/InstancedStruct.h"
-#include "ToolConfiguration/OdysseyPainterEditorToolConfiguration.h"
+#include "OdysseyPainterEditorToolConfiguration.h"
 #include "UObject/ObjectMacros.h"
 
 #include "OdysseyToolCollection.generated.h"

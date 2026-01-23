@@ -17,7 +17,7 @@
 #include "TextureCompiler.h"
 #include "FileHelpers.h"
 #include "Kismet/GameplayStatics.h"
-#include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
+#include "OdysseyPainterEditorRasterDrawingTool.h"
 #include "TexturePaintHelpers.h"
 #include "OdysseyKeyState.h"
 #include "OdysseyPainterEditorCommands.h"

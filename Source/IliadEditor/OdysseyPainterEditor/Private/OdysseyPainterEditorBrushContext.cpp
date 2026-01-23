@@ -7,8 +7,8 @@
 #include "OdysseyPainterEditorViewportTab.h"
 #include "SOdysseyViewport.h"
 
-#include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
-#include "FreehandShape/OdysseyFreehandShape.h"
+#include "OdysseyPainterEditorRasterDrawingTool.h"
+#include "OdysseyFreehandShape.h"
 
 //---
 

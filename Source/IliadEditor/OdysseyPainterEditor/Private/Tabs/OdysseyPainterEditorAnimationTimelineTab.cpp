@@ -5,7 +5,7 @@
 
 #include "OdysseyAnimationLayerImageRaster.h"
 #include "OdysseyAnimationCellImageRaster.h"
-#include "Widgets/Animation/Timeline/SOdysseyAnimationLayerStack.h"
+#include "SOdysseyAnimationLayerStack.h"
 #include "ULISEventBuilder.h"
 #include "ULISLoaderModule.h"
 #include "IContentBrowserSingleton.h"

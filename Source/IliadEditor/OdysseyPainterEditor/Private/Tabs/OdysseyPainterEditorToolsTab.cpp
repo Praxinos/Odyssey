@@ -9,7 +9,7 @@
 #include "Widgets/Views/STileView.h"
 #include "Widgets/Tools/SOdysseyPainterEditorToolsTileView.h"
 #include "Widgets/Tools/SOdysseyPainterEditorToolOptions.h"
-#include "Tools/RasterDrawingTool/Widgets/SOdysseyPainterEditorRasterDrawingToolBrushSelector.h"
+#include "SOdysseyPainterEditorRasterDrawingToolBrushSelector.h"
 #include "OdysseyPainterEditorCommands.h"
 #include "Widgets/Tab/SOdysseyPainterEditorTools.h"
 
