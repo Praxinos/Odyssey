@@ -4,9 +4,11 @@
 #include "ArianeEditor.h"
 #include "ArianeEditorTool.h"
 #include "ArianeEditorToolTab.h"
+#include "ArianePainting3DComponent.h"
 #include "PathDrawingTool/ArianeEditorPathDrawingTool.h"
 // Unreal
 #include "Toolkits/BaseToolkit.h"
+#include "UObject/Object.h"
 
 FArianeEditor::~FArianeEditor()
 {
@@ -151,4 +153,15 @@ FArianeEditor::Init()
 {
     InitTools();
     InitTabs();
+}
+
+void
+FArianeEditor::AddPainting3DComponent( const TArray<class AActor *> iActors )
+{
+    for( AActor* actor : iActors )
+    {
+        actor->AddComponentByClass( UArianePainting3DComponent::StaticClass(), false, FTransform(), false );
+
+        //actor->AddComponent( );
+    }
 }

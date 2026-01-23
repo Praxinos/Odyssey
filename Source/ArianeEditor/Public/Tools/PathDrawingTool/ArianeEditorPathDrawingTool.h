@@ -24,13 +24,24 @@ class ARIANEEDITOR_API UArianeEditorPathDrawingTool : public UArianeEditorTool
         UArianeEditorPathDrawingTool();
 
         //Mouse events
-        virtual bool OnMouseDown( const FVector2D& iViewportCoords, const FKey& iKey, bool iRepeat = false ) override;
-        virtual void OnMouseHover( const FVector2D& iViewportCoords ) override;
-        virtual void OnMouseDrag( const FVector2D& iViewportCoords ) override;
-        virtual bool OnMouseUp( const FVector2D& iViewportCoords, const FKey& iKey ) override;
+        virtual bool OnMouseDown( FEditorViewportClient* iViewportClient
+                                , double iViewportX
+                                , double iViewportY
+                                , const FKey& iKey
+                                , bool iRepeat = false ) override;
+        virtual void OnMouseHover( FEditorViewportClient* iViewportClient
+                                 , double iViewportX
+                                 , double iViewportY ) override;
+        virtual bool OnMouseDrag( FEditorViewportClient* iViewportClient
+                                , double iViewportX
+                                , double iViewportY ) override;
+        virtual bool OnMouseUp( FEditorViewportClient* iViewportClient
+                              , double iViewportX
+                              , double iViewportY
+                              , const FKey& iKey ) override;
 
     protected:
-        TSharedPtr<SWidget> ExtendContextMenu( FMenuBuilder& menu );
+        virtual void ExtendContextMenu( FMenuBuilder& menu );
 
     public:
 
