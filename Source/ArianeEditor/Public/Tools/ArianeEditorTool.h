@@ -10,6 +10,7 @@
 #include "ArianeEditorTool.generated.h"
 
 class FArianeEditor;
+class FSceneView;
 /* Gary
 class FArianeEditorToolInputProcessor;
 */
@@ -19,15 +20,12 @@ class ARIANEEDITOR_API UArianeEditorTool : public UObject
 {
     GENERATED_BODY()
 
-    DECLARE_DELEGATE_RetVal_OneParam(TSharedPtr<SWidget>, FContextMenuFunc, FMenuBuilder&)
-
     public:
         // Destructor
         virtual ~UArianeEditorTool();
 
         //Constructor
         UArianeEditorTool();
-        UArianeEditorTool( FContextMenuFunc iContextMenufunc );
 
     public:
         //Activates the tool
@@ -51,18 +49,33 @@ class ARIANEEDITOR_API UArianeEditorTool : public UObject
 
     public:
         //Mouse events
-        virtual bool OnMouseDown( const FVector2D& iViewportCoords, const FKey& iKey, bool iRepeat = false );
-        virtual void OnMouseHover( const FVector2D& iViewportCoords );
-        virtual void OnMouseDrag( const FVector2D& iViewportCoords );
-        virtual bool OnMouseUp( const FVector2D& iViewportCoords, const FKey& iKey );
+        virtual bool OnMouseDown( FEditorViewportClient* iViewportClient
+                                , double iViewportX
+                                , double iViewportY
+                                , const FKey& iKey
+                                , bool iRepeat = false );
+        virtual void OnMouseHover( FEditorViewportClient* iViewportClient
+                                 , double iViewportX
+                                 , double iViewportY );
+        virtual bool OnMouseDrag( FEditorViewportClient* iViewportClient
+                                , double iViewportX
+                                , double iViewportY );
+        virtual bool OnMouseUp( FEditorViewportClient* iViewportClient
+                              , double iViewportX
+                              , double iViewportY
+                              , const FKey& iKey );
+        virtual bool OnMouseClick( FEditorViewportClient* iViewportClient
+                                 , double iViewportX
+                                 , double iViewportY
+                                 , const FKey& iKey );
         virtual void Tick( float iDeltaTime );
         virtual FText GetTooltip() const;
 
     protected:
         void PopupContextMenu();
         TSharedPtr<SWidget> CreateContextMenu();
-        void ExtendContextMenu( FMenuBuilder& menu );
-
+        virtual void ExtendContextMenu( FMenuBuilder& menu );
+        FSceneView* GetSceneView( FEditorViewportClient* iViewportClient );
 /* Gary
 
         virtual bool OnMouseClick(const FOdysseyPoint& iPointInTexture, const FKey& iKey );
@@ -128,7 +141,7 @@ class ARIANEEDITOR_API UArianeEditorTool : public UObject
 */
         FArianeEditor* mEditor;
         TSharedPtr<FUICommandList> mCommandList;
-        FContextMenuFunc mContextMenuFunc;
+        bool bHasContextMenu;
 
     public:
         UPROPERTY(EditDefaultsOnly, Category = "Tool")

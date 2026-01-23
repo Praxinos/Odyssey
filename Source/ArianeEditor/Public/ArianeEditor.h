@@ -27,6 +27,7 @@ class ARIANEEDITOR_API FArianeEditor
         void RegisterTabSpawners( const TSharedRef< FTabManager >& iTabManager );
         void UnregisterTabSpawners( const TSharedRef< FTabManager >& iTabManager );
         void CloseAllTabs();
+        void AddPainting3DComponent( const TArray<class AActor *> iActors );
 
     protected:
         void AddTool( UArianeEditorTool* iTool );

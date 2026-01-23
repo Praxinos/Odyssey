@@ -163,23 +163,26 @@ FArianeEditorViewportEdMode::InputKey( FEditorViewportClient* iViewportClient
         switch( iEvent )
         {
             case IE_Pressed :
-                currenTool->OnMouseDown( FVector2D( iViewport->GetMouseX()
-                                                  , iViewport->GetMouseY() )
-                                       , iKey
-                                       , false );
+                return currenTool->OnMouseDown( iViewportClient
+                                              , iViewport->GetMouseX()
+                                              , iViewport->GetMouseY()
+                                              , iKey
+                                              , false );
             break;
 
             case IE_Repeat :
-                currenTool->OnMouseDown( FVector2D( iViewport->GetMouseX()
-                                                  , iViewport->GetMouseY() )
-                                       , iKey
-                                       , true );
+                return currenTool->OnMouseDown( iViewportClient
+                                              , iViewport->GetMouseX()
+                                              , iViewport->GetMouseY()
+                                              , iKey
+                                              , true );
             break;
 
             case IE_Released :
-                currenTool->OnMouseUp( FVector2D( iViewport->GetMouseX()
-                                                , iViewport->GetMouseY() )
-                                     , iKey );
+                return currenTool->OnMouseUp( iViewportClient
+                                            , iViewport->GetMouseX()
+                                            , iViewport->GetMouseY()
+                                            , iKey );
             break;
 
             default :
@@ -220,7 +223,9 @@ bool FArianeEditorViewportEdMode::CapturedMouseMove( FEditorViewportClient* iVie
     {
         UArianeEditorTool* currenTool = viewportToolkit->GetEditor().GetCurrentTool();
 
-        currenTool->OnMouseDrag( FVector2D( iMouseX, iMouseY ) );
+        return currenTool->OnMouseDrag( iViewportClient
+                                      , iMouseX
+                                      , iMouseY );
     }
 /* Gary
 #if PLATFORM_MAC
@@ -247,6 +252,13 @@ FArianeEditorViewportEdMode::HandleClick( FEditorViewportClient* InViewportClien
 
     if( viewportToolkit->GetEditor().GetCurrentTool() )
     {
+        UArianeEditorTool* currenTool = viewportToolkit->GetEditor().GetCurrentTool();
+        const FKey& key = Click.GetKey();
+
+        return currenTool->OnMouseClick( InViewportClient
+                                       , Click.GetCursorPos().X
+                                       , Click.GetCursorPos().Y
+                                       , key );
     }
 
 /* Gary
