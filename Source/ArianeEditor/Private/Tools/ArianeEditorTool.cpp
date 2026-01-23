@@ -11,23 +11,13 @@
 #include "Framework/Application/SlateApplication.h"
 #include "Misc/TransactionObjectEvent.h"
 
-
 UArianeEditorTool::~UArianeEditorTool()
 {
 }
 
 UArianeEditorTool::UArianeEditorTool()
     : mEditor (nullptr)
-    , mContextMenuFunc ( nullptr )
-{
-/* Gary
-    mInputProcessor = MakeShared<FArianeEditorToolInputProcessor>(this);
-*/
-}
-
-UArianeEditorTool::UArianeEditorTool( FContextMenuFunc iContextMenufunc )
-    : mEditor (nullptr)
-    , mContextMenuFunc ( iContextMenufunc )
+    , bHasContextMenu ( false )
 {
 /* Gary
     mInputProcessor = MakeShared<FArianeEditorToolInputProcessor>(this);
@@ -112,25 +102,66 @@ UArianeEditorTool::IsActivated() const
     return mEditor->GetCurrentTool() == this;
 }
 
-bool UArianeEditorTool::OnMouseDown( const FVector2D& iViewportCoords, const FKey& iKey, bool iRepeat = false )
+bool UArianeEditorTool::OnMouseDown( FEditorViewportClient* iViewportClient
+                                   , double iViewportX
+                                   , double iViewportY
+                                   , const FKey& iKey
+                                   , bool iRepeat )
 {
     return false;
 }
 
 void
-UArianeEditorTool::OnMouseHover( const FVector2D& iViewportCoords )
-{
-}
-
-void
-UArianeEditorTool::OnMouseDrag( const FVector2D& iViewportCoords )
+UArianeEditorTool::OnMouseHover( FEditorViewportClient* iViewportClient
+                               , double iViewportX
+                               , double iViewportY )
 {
 }
 
 bool
-UArianeEditorTool::OnMouseUp( const FVector2D& iViewportCoords, const FKey& iKey )
+UArianeEditorTool::OnMouseDrag( FEditorViewportClient* iViewportClient
+                              , double iViewportX
+                              , double iViewportY )
 {
     return false;
+}
+
+bool
+UArianeEditorTool::OnMouseUp( FEditorViewportClient* iViewportClient
+                            , double iViewportX
+                            , double iViewportY
+                            , const FKey& iKey )
+{
+    return false;
+}
+
+bool
+UArianeEditorTool::OnMouseClick( FEditorViewportClient* iViewportClient
+                               , double iViewportX
+                               , double iViewportY
+                               , const FKey& iKey )
+{
+    if( iKey == EKeys::RightMouseButton )
+    {
+        if( bHasContextMenu )
+        {
+            PopupContextMenu();
+
+            return true;
+        }
+    }
+
+    return false;
+}
+
+FSceneView*
+UArianeEditorTool::GetSceneView( FEditorViewportClient* iViewportClient )
+{
+    FSceneViewFamilyContext ViewFamily( FSceneViewFamily::ConstructionValues( iViewportClient->Viewport
+                                                                            , iViewportClient->GetScene()
+                                                                            , iViewportClient->EngineShowFlags )
+                                                                            .SetRealtimeUpdate( iViewportClient->IsRealtime() ) );
+    return iViewportClient->CalcSceneView( &ViewFamily );
 }
 
 void
@@ -160,8 +191,8 @@ UArianeEditorTool::CreateContextMenu()
     FMenuBuilder menu( true, mCommandList );
 
     menu.BeginSection("Context Menu");
-    if( mContextMenuFunc.IsBound() )
-        mContextMenuFunc.Execute( menu );
+    if( bHasContextMenu )
+        ExtendContextMenu( menu );
     menu.EndSection();
 
     return menu.MakeWidget();

@@ -72,6 +72,7 @@ public class ArianeEditor : ModuleRules
                 //"OdysseyLayerStack",
                 //"OdysseyLayerStackEditor",
                 //"OdysseyRendering",
+                "Ariane",
                 "OdysseyStyle",
                 //"OdysseyStylusInput",
                 //"OdysseyTexture",
@@ -93,6 +94,7 @@ public class ArianeEditor : ModuleRules
                 //"OdysseyPaletteEditor",
                 //"OdysseyRendering",
                 //"OdysseyVector",
+                "Ariane",
                 "StylusInput",
                 //"ULIS",
                 //"ULISLoader"
