@@ -87,7 +87,7 @@ FReply SOdysseyPainterEditorToolTile::OnMouseButtonUp( const FGeometry& MyGeomet
                     return FReply::Handled().ReleaseMouseCapture();
 
                 UOdysseyPainterEditorTool* editorTool = mEditor->GetEditorToolOfClass(mToolConfig->mToolClass);
-                if (editorTool)
+                if (editorTool && mToolConfig->mTool)
                 {
                     UEngine::FCopyPropertiesForUnrelatedObjectsParams copyParams;
                     copyParams.bDoDelta = false;

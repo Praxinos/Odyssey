@@ -99,10 +99,7 @@ SOdysseyPainterEditorToolCollection::OnAddToolClicked()
     if ( !mEditor || !mEditor->GetCurrentTool() || !mEditor->GetEditorToolOfClass(mEditor->GetCurrentTool()->GetClass()) )
         return FReply::Unhandled();
 
-    TObjectPtr<UOdysseyPainterEditorTool> toolPropertySnapshot;
-    toolPropertySnapshot = DuplicateObject< UOdysseyPainterEditorTool >(mEditor->GetCurrentTool(), mToolCollection);
-
-    mToolCollection->AddToolConfiguration( mEditor->GetCurrentTool()->GetClass(), toolPropertySnapshot, mEditor->GetCurrentTool()->Icon );
+    mToolCollection->AddToolConfiguration( mEditor->GetCurrentTool()->GetClass(), mEditor->GetCurrentTool(), mEditor->GetCurrentTool()->Icon );
 
     HandleToolsChanged();
 
