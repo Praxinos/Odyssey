@@ -67,27 +67,26 @@ FOdysseyAnimationTimelineTrackEditor::OnNewActorTrackAdded(const AActor& iActor,
     const bool bShouldActuallyTransact = !GIsTransacting;        // Don't transact if we're recording in a PIE world.  That type of keyframe capture cannot be undone.
     FScopedTransaction AutoKeyTransaction( LOCTEXT("PropertyChanged", "Animatable Property Changed"), bShouldActuallyTransact );
 
-    FGuid componentBinding = FSequencerUtilities::CreateBinding(iSequencer.ToSharedRef(), *animationComponent);
-    // It means animationComponent already has its track
+    const bool bCreateHandleIfMissing = true;
+    FGuid componentBinding = iSequencer->GetHandleToObject( animationComponent, bCreateHandleIfMissing );
     if( !componentBinding.IsValid() )
         return;
 
-    UMovieSceneTrack* NewTrack = MovieScene->AddTrack(UOdysseyAnimationTimelineTrack::StaticClass(), componentBinding);
-    if (!NewTrack)
-        return;
+    UOdysseyAnimationTimelineTrack* animationTrack = MovieScene->FindTrack<UOdysseyAnimationTimelineTrack>( componentBinding );
+    if( !animationTrack )
+    {
+        animationTrack = MovieScene->AddTrack<UOdysseyAnimationTimelineTrack>( componentBinding );
+        check( animationTrack )
+        animationTrack->Modify();
 
-    UOdysseyAnimationTimelineTrack* animationTrack = Cast<UOdysseyAnimationTimelineTrack>(NewTrack);
-    if (!animationTrack)
-        return;
+        UMovieSceneSection* section = animationTrack->AddNewSection( iSequencer->GetLocalTime().Time.FrameNumber, animationComponent->GetAnimation() );
+        check( section );
+        section->Modify();
 
-    animationTrack->Modify();
-
-    UMovieSceneSection* section = animationTrack->AddNewSection(iSequencer->GetLocalTime().Time.FrameNumber, animationComponent->GetAnimation());
-    section->Modify();
-
-    iSequencer->EmptySelection();
-    iSequencer->SelectSection(section);
-    iSequencer->ThrobSectionSelection();
+        iSequencer->EmptySelection();
+        iSequencer->SelectSection( section );
+        iSequencer->ThrobSectionSelection();
+    }
 }
 
 bool

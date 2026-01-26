@@ -25,6 +25,21 @@ UOdysseyAnimationTimelineSection::UOdysseyAnimationTimelineSection(const FObject
 {
 }
 
+void
+UOdysseyAnimationTimelineSection::SetRange( const TRange<FFrameNumber>& iNewRange )
+{
+    // It should be done in the Super class ? All section types should have this same behavior (?)
+    if( !GetSupportsInfiniteRange() && ( !iNewRange.HasLowerBound() || !iNewRange.HasUpperBound() ) )
+    {
+        // Just to see if this condition happens AND if this condition is relevant
+        // If the caller must be fixed, fix it
+        checkNoEntry();
+        return;
+    }
+
+    Super::SetRange( iNewRange );
+}
+
 //---
 
 // During a copy/paste of a binding (actor) track:
