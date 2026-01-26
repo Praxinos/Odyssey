@@ -796,3 +796,18 @@ body:
         - label: "Compiler Odyssey en Shipping"
         - label: "Compiler un jeu"
         - label: "Lancer un projet en mode jeu (map gymnastique)"
+
+  - type: markdown
+    attributes:
+      value: |
+        ## ${\color{00FF99}\textnormal{---------------------------------------------------------------------}}$
+
+  - type: checkboxes
+    id: runtime
+    attributes:
+      label: "Runtime"
+      options:
+        - label: "Vérifier la compilation au Runtime sans warning"
+        - label: "Vérifier la compilation au Runtime sans erreur"
+        - label: "Vérifier le fonctionnement de la MAP gymnastique"
+        - label: "Vérifier le fonctionnement de la MAP avec le jeu de Pierrick"
