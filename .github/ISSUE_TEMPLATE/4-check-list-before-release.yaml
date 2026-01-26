@@ -284,7 +284,7 @@ body:
         - label: "Liquify Tool Reconstruct"
         - label: "Liquify Tool Adjust"
         - label: "Paint Bucket Tool"
-        - label: "Paint Bucket Tool"
+        - label: "Paint Bucket Blending"
         - label: "Color Picker"
 
   - type: markdown
