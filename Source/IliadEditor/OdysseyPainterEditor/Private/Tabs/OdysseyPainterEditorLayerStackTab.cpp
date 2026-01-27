@@ -19,8 +19,10 @@
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "OdysseyTextureLayerStack.h"
 #include "OdysseyTextureLayerImageRaster.h"
-#include "OdysseyPainterEditorCommands.h"
+#include "OdysseyPainterEditorTextureCommands.h"
 #include "OdysseyPainterEditorTextureSource.h"
+#include "SOdysseyTextureExportAsImageDialog.h"
+#include "SOdysseyTextureExportAsTextureDialog.h"
 #include "OdysseyPainterEditor.h"
 #include "AssetToolsModule.h"
 #include "ULISLoaderModule.h"
@@ -49,6 +51,7 @@ FOdysseyPainterEditorLayerStackTab::~FOdysseyPainterEditorLayerStackTab()
 FOdysseyPainterEditorLayerStackTab::FOdysseyPainterEditorLayerStackTab(FOdysseyPainterEditor* iEditor)
     : FOdysseyEditorTab(LOCTEXT( "layerstack-tab.name", "Layer Stack" ), FSlateIcon( "OdysseyStyle", "PainterEditor.Layers16" ))
     , mEditor(iEditor)
+    , mTextureShortcuts(iEditor)
 {
 }
 
@@ -63,13 +66,6 @@ FOdysseyPainterEditorLayerStackTab::CreateWidget()
 {
     return SNew(SOdysseyTextureLayerStack)
             .LayerStack(this, &FOdysseyPainterEditorLayerStackTab::LayerStack);
-}
-
-void
-FOdysseyPainterEditorLayerStackTab::BindShortcuts(FBaseToolkit* iToolkit)
-{
-    const TSharedRef<FUICommandList>& toolkitCommands = iToolkit->GetToolkitCommands();
-    MapActions(toolkitCommands);
 }
 
 void
@@ -109,25 +105,11 @@ FOdysseyPainterEditorLayerStackTab::LayerStack() const
 //------------------------------------------------------------------------------ Methods
 
 void
-FOdysseyPainterEditorLayerStackTab::MapActions( TSharedPtr<FUICommandList> iCommandList )
-{
-    const FOdysseyPainterEditorCommands& painterEditorCommands = FOdysseyPainterEditorCommands::Get();
-
-    #define MAP_ACTION(action, ...) iCommandList->MapAction( action, FExecuteAction::CreateSP( this, &FOdysseyPainterEditorLayerStackTab::__VA_ARGS__ ), FCanExecuteAction() );
-
-    MAP_ACTION(painterEditorCommands.ImportTexturesAsLayers, ImportTexturesAsLayers )
-    MAP_ACTION(painterEditorCommands.ExportLayersAsTextures, ExportLayersAsTextures )
-    MAP_ACTION(painterEditorCommands.ExportCurrentLayerAsTexture, ExportCurrentLayerAsTexture )
-    MAP_ACTION(painterEditorCommands.ExportTextureToOperatingSystem, ExportTextureToOperatingSystem )
-
-    #undef MAP_ACTION
-}
-
-void
 FOdysseyPainterEditorLayerStackTab::ExtendMenuFile( TSharedRef<FExtender> iExtender )
 {
     TSharedPtr<FUICommandList> commandList = MakeShared<FUICommandList>();
-    MapActions(commandList);
+    mTextureShortcuts.MapActionsToCommandList(commandList.ToSharedRef());
+
     iExtender->AddMenuExtension(
         "OdysseyFile",
         EExtensionHook::After,
@@ -141,10 +123,21 @@ FOdysseyPainterEditorLayerStackTab::ExtendMenuFile( TSharedRef<FExtender> iExten
 
                 iBuilder.BeginSection("OdysseyTexture", LOCTEXT("main-menu.file.texture-import-export-section.name", "Texture Import/Export"));
                 {
-                    iBuilder.AddMenuEntry( FOdysseyPainterEditorCommands::Get().ImportTexturesAsLayers );
-                    iBuilder.AddMenuEntry( FOdysseyPainterEditorCommands::Get().ExportLayersAsTextures );
-                    iBuilder.AddMenuEntry( FOdysseyPainterEditorCommands::Get().ExportCurrentLayerAsTexture );
-                    iBuilder.AddMenuEntry( FOdysseyPainterEditorCommands::Get().ExportTextureToOperatingSystem );
+                    iBuilder.AddSubMenu(
+                        LOCTEXT("layerstack-tab.file-menu.import-submenu.name", "Import"),
+                        LOCTEXT("layerstack-tab.file-menu.import-submenu.tooltip", "Contains Import actions"),
+                        FNewMenuDelegate::CreateRaw(this, &FOdysseyPainterEditorLayerStackTab::BuildImportMenu),
+                        false,
+                        FSlateIcon( "OdysseyStyle", "AnimationEditor.File-Menu.Import" )
+                    );
+
+                    iBuilder.AddSubMenu(
+                        LOCTEXT("layerstack-tab.file-menu.export-submenu.name", "Export"),
+                        LOCTEXT("layerstack-tab.file-menu.export-submenu.tooltip", "Contains Export actions"),
+                        FNewMenuDelegate::CreateRaw(this, &FOdysseyPainterEditorLayerStackTab::BuildExportMenu),
+                        false,
+                        FSlateIcon( "OdysseyStyle", "AnimationEditor.File-Menu.Export" )
+                    );
                 }
                 iBuilder.EndSection();
             }
@@ -153,171 +146,35 @@ FOdysseyPainterEditorLayerStackTab::ExtendMenuFile( TSharedRef<FExtender> iExten
 }
 
 void
-FOdysseyPainterEditorLayerStackTab::ExportTextureToOperatingSystem()
+FOdysseyPainterEditorLayerStackTab::BuildImportMenu(FMenuBuilder& iMenuBuilder)
 {
-    UOdysseyLayerStack* layerStack = LayerStack();
-    if ( !layerStack )
-        return;
-
-    TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
-    if (!source || source->Id() != FOdysseyPainterEditorTextureSource::StaticId())
-        return;
-
-    TSharedPtr<FOdysseyPainterEditorTextureSource> textureSource = StaticCastSharedPtr<FOdysseyPainterEditorTextureSource>(source);
-
-    UTexture* currentTexture = textureSource->GetTexture();
-    IDesktopPlatform* desktopPlatformHandle = FDesktopPlatformModule::Get();
-    TArray< FString > filenames;
-    bool saveSuccess = desktopPlatformHandle->SaveFileDialog(
-        FSlateApplication::Get().FindBestParentWindowHandleForDialogs(nullptr)
-        , LOCTEXT("export-texture-to-os.save-dialog.title", "Select Export Path & Name").ToString()
-        , FPaths::ProjectDir()
-        , currentTexture->GetName()
-        , TEXT("PNG Image (.png)|*.png|BMP Image (.bmp)|*.bmp|TGA Image (.tga)|*.tga|JPG Image (.jpg)|*.jpg")
-        , EFileDialogFlags::None
-        , filenames
+    iMenuBuilder.AddMenuEntry(
+        FOdysseyPainterEditorTextureCommands::Get().ImportImages,
+        NAME_None,
+        LOCTEXT("layerstack-tab.file-menu.import-image.name", "Images...")
     );
 
-    if (filenames.IsEmpty())
-        return;
-
-    FString path = FPaths::GetPath(filenames[0] );
-    FString filename = FPaths::GetBaseFilename(filenames[0]);
-    path = FPaths::ConvertRelativePathToFull( path );
-
-    Odyssey::ExportAsImage(layerStack, 0, EOdysseyExportImageFormat::PNG, filename, path);
-}
-
-
-void
-FOdysseyPainterEditorLayerStackTab::ImportTexturesAsLayers()
-{
-    UOdysseyLayerStack* layerStack = LayerStack();
-    if ( !layerStack )
-        return;
-
-    TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
-    if (!source || source->Id() != FOdysseyPainterEditorTextureSource::StaticId())
-        return;
-
-    TSharedPtr<FOdysseyPainterEditorTextureSource> textureSource = StaticCastSharedPtr<FOdysseyPainterEditorTextureSource>(source);
-    UTexture* currentTexture = textureSource->GetTexture();
-
-    FScopedTransaction ScopedTransaction(LOCTEXT("import-textures-as-layers.transaction.import", "Import Textures As Layers"));
-
-    FOpenAssetDialogConfig openAssetDialogConfig;
-    openAssetDialogConfig.DialogTitleOverride = LOCTEXT( "import-textures-as-layers.open-asset-dialog.title", "Import Textures As Layers" );
-    openAssetDialogConfig.DefaultPath = FPaths::GetPath(currentTexture->GetPathName() );
-    openAssetDialogConfig.bAllowMultipleSelection = true;
-    openAssetDialogConfig.AssetClassNames.Add( UTexture2D::StaticClass()->GetClassPathName() );
-
-    FContentBrowserModule& contentBrowserModule = FModuleManager::LoadModuleChecked<FContentBrowserModule>( "ContentBrowser" );
-    TArray < FAssetData > assetsData = contentBrowserModule.Get().CreateModalOpenAssetDialog( openAssetDialogConfig );
-
-    ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(currentTexture->Source.GetFormat());
-
-    if ( assetsData.Num() > 0 )
-        layerStack->Modify();
-
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
-
-    for( int i = 0; i < assetsData.Num(); i++ )
-    {
-        UOdysseyLayer* layer = layerStack->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass());
-        UOdysseyTextureLayerImageRaster* layerImageRaster = Cast<UOdysseyTextureLayerImageRaster>(layer);
-        if ( !layerImageRaster )
-            continue;
-
-        UTexture2D* openedTexture = static_cast<UTexture2D*>(assetsData[i].GetAsset());
-        ::ULIS::FBlock* textureBlock = NewBlockFromUTextureData(openedTexture, format);
-
-        FOdysseyRasterBlockMutator rasterBlockMutator(layerImageRaster->GetRasterBlock(), false);
-        rasterBlockMutator.EditTilesFromRects(
-            { textureBlock->Rect() },
-            [&](TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyInvalidTileMap& iTileMap) -> TArray<ULIS::FEvent>
-            {
-                ctx.Copy(*textureBlock, *iBlock);
-                ctx.Finish();
-                return {};
-            }
-        );
-        rasterBlockMutator.Commit();
-
-    }
+    iMenuBuilder.AddMenuEntry(
+        FOdysseyPainterEditorTextureCommands::Get().ImportTextures,
+        NAME_None,
+        LOCTEXT("layerstack-tab.file-menu.import-texture.name", "Textures...")
+    );
 }
 
 void
-FOdysseyPainterEditorLayerStackTab::ExportLayersAsTextures()
+FOdysseyPainterEditorLayerStackTab::BuildExportMenu(FMenuBuilder& iMenuBuilder)
 {
-    UOdysseyLayerStack* layerStack = LayerStack();
-    if ( !layerStack )
-        return;
+    iMenuBuilder.AddMenuEntry(
+        FOdysseyPainterEditorTextureCommands::Get().ExportLayersAsImages,
+        NAME_None,
+        LOCTEXT("layerstack-tab.file-menu.export-image.name", "As Images...")
+    );
 
-    TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
-    if (!source || source->Id() != FOdysseyPainterEditorTextureSource::StaticId())
-        return;
-
-    TSharedPtr<FOdysseyPainterEditorTextureSource> textureSource = StaticCastSharedPtr<FOdysseyPainterEditorTextureSource>(source);
-    UTexture* texture = textureSource->GetTexture();
-
-    FSaveAssetDialogConfig saveAssetDialogConfig;
-    saveAssetDialogConfig.DialogTitleOverride = LOCTEXT( "export-layers-as-textures.save-asset-dialog.title", "Export Layers As Texture" );
-    saveAssetDialogConfig.DefaultPath = FPaths::GetPath(texture->GetPathName() );
-    saveAssetDialogConfig.DefaultAssetName = texture->GetName();
-    saveAssetDialogConfig.AssetClassNames.Add( UTexture2D::StaticClass()->GetClassPathName() );
-    saveAssetDialogConfig.ExistingAssetPolicy = ESaveAssetDialogExistingAssetPolicy::AllowButWarn;
-
-    FContentBrowserModule& contentBrowserModule = FModuleManager::LoadModuleChecked<FContentBrowserModule>( "ContentBrowser" );
-    FString saveObjectPath = contentBrowserModule.Get().CreateModalSaveAssetDialog( saveAssetDialogConfig );
-
-    if ( saveObjectPath == "" )
-        return;
-
-    TArray<UOdysseyLayer*> layers = layerStack->GetLayers();
-
-    for( UOdysseyLayer* layer : layers )
-    {
-        if ( layer->CanHaveChildren() ) //avoid exporting folders
-            continue;
-
-        FString assetPath = FPaths::GetPath(saveObjectPath) + "/";
-        FString textureName = FPaths::GetBaseFilename(saveObjectPath) + TEXT("_") + layer->GetLayerName().ToString().Replace(TEXT(" "), TEXT("_"));
-        ::Odyssey::ExportAsTexture(layer, 0, textureName, assetPath );
-    }
-}
-
-void
-FOdysseyPainterEditorLayerStackTab::ExportCurrentLayerAsTexture()
-{
-    UOdysseyLayerStack* layerStack = LayerStack();
-    if ( !layerStack )
-        return;
-
-    if ( !layerStack->GetCurrentLayer() )
-        return;
-
-    TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
-    if (!source || source->Id() != FOdysseyPainterEditorTextureSource::StaticId())
-        return;
-
-    TSharedPtr<FOdysseyPainterEditorTextureSource> textureSource = StaticCastSharedPtr<FOdysseyPainterEditorTextureSource>(source);
-    UTexture* texture = textureSource->GetTexture();
-
-    FSaveAssetDialogConfig saveAssetDialogConfig;
-    saveAssetDialogConfig.DialogTitleOverride = LOCTEXT( "export-current-layer-as-texture.save-asset-dialog.title", "Export Current Layer As Texture" );
-    saveAssetDialogConfig.DefaultPath = FPaths::GetPath(texture->GetPathName() );
-    saveAssetDialogConfig.DefaultAssetName = texture->GetName();
-    saveAssetDialogConfig.AssetClassNames.Add( UTexture2D::StaticClass()->GetClassPathName() );
-    saveAssetDialogConfig.ExistingAssetPolicy = ESaveAssetDialogExistingAssetPolicy::AllowButWarn;
-
-    FContentBrowserModule& contentBrowserModule = FModuleManager::LoadModuleChecked<FContentBrowserModule>( "ContentBrowser" );
-    FString saveObjectPath = contentBrowserModule.Get().CreateModalSaveAssetDialog( saveAssetDialogConfig );
-    if ( saveObjectPath == "" )
-        return;
-
-    FString assetPath = FPaths::GetPath(saveObjectPath) + "/";
-    FString textureName = FPaths::GetBaseFilename(saveObjectPath) + TEXT("_") + layerStack->GetCurrentLayer()->GetLayerName().ToString().Replace(TEXT(" "), TEXT("_"));
-    ::Odyssey::ExportAsTexture(layerStack->GetCurrentLayer(), 0, textureName, assetPath );
+    iMenuBuilder.AddMenuEntry(
+        FOdysseyPainterEditorTextureCommands::Get().ExportLayersAsTextures,
+        NAME_None,
+        LOCTEXT("layerstack-tab.file-menu.export-texture.name", "As Textures...")
+    );
 }
 
 #undef LOCTEXT_NAMESPACE
