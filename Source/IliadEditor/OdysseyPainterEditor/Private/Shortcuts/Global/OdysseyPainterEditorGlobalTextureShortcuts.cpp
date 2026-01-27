@@ -18,6 +18,10 @@
 #include "OdysseyTextureLayerImageRaster.h"
 #include "OdysseyRasterBlockMutator.h"
 
+//Action_ImportImages()
+#include "OdysseyPainterEditorTextureImport.h"
+#include "DesktopPlatformModule.h"
+
 #define LOCTEXT_NAMESPACE "TextureEditor"
 
 FOdysseyPainterEditorGlobalTextureShortcuts::FOdysseyPainterEditorGlobalTextureShortcuts(FOdysseyPainterEditor* iEditor)
@@ -82,7 +86,38 @@ FOdysseyPainterEditorGlobalTextureShortcuts::Action_ExportLayersAsImages()
 void
 FOdysseyPainterEditorGlobalTextureShortcuts::Action_ImportImages()
 {
+    TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
+    if (!source || source->Id() != FOdysseyPainterEditorTextureSource::StaticId())
+        return;
 
+    TSharedPtr<FOdysseyPainterEditorTextureSource> textureSource = StaticCastSharedPtr<FOdysseyPainterEditorTextureSource>(source);
+
+    UTexture2D* texture = textureSource->GetTexture();
+
+    IDesktopPlatform* desktopPlatformHandle = FDesktopPlatformModule::Get();
+    TArray< FString > filenames;
+    bool dialogValidated = desktopPlatformHandle->OpenFileDialog(
+        FSlateApplication::Get().FindBestParentWindowHandleForDialogs(nullptr)
+        , LOCTEXT("texture.import-images.dialog.title", "Select Images to import").ToString()
+        , FPaths::ProjectDir()
+        , texture->GetName()
+        , TEXT("PNG Image (.png)|*.png|BMP Image (.bmp)|*.bmp|TGA Image (.tga)|*.tga|JPG Image (.jpg)|*.jpg|Any (.*)|*.*")
+        , EFileDialogFlags::Multiple
+        , filenames
+    );
+
+    if (!dialogValidated || filenames.Num() <= 0)
+        return;
+
+    filenames.Sort(
+        [](const FString& iA, const FString& iB)
+        {
+            return iA < iB;
+        }
+    );
+
+    FOdysseyPainterEditorTextureImport import;
+    import.ImportImages(texture, filenames);
 }
 
 void
@@ -97,9 +132,7 @@ FOdysseyPainterEditorGlobalTextureShortcuts::Action_ImportTextures()
         return;
 
     TSharedPtr<FOdysseyPainterEditorTextureSource> textureSource = StaticCastSharedPtr<FOdysseyPainterEditorTextureSource>(source);
-    UTexture* currentTexture = textureSource->GetTexture();
-
-    FScopedTransaction ScopedTransaction(LOCTEXT("import-textures-as-layers.transaction.import", "Import Textures As Layers"));
+    UTexture2D* currentTexture = textureSource->GetTexture();
 
     FOpenAssetDialogConfig openAssetDialogConfig;
     openAssetDialogConfig.DialogTitleOverride = LOCTEXT( "import-textures-as-layers.open-asset-dialog.title", "Import Textures As Layers" );
@@ -110,34 +143,16 @@ FOdysseyPainterEditorGlobalTextureShortcuts::Action_ImportTextures()
     FContentBrowserModule& contentBrowserModule = FModuleManager::LoadModuleChecked<FContentBrowserModule>( "ContentBrowser" );
     TArray < FAssetData > assetsData = contentBrowserModule.Get().CreateModalOpenAssetDialog( openAssetDialogConfig );
 
-    ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(currentTexture->Source.GetFormat());
+    if ( assetsData.IsEmpty() )
+        return;
 
-    if ( assetsData.Num() > 0 )
-        layerStack->Modify();
-
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
-
+    TArray<UTexture2D*> texturesToImport;
     for( int i = 0; i < assetsData.Num(); i++ )
     {
-        UOdysseyLayer* layer = layerStack->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass());
-        UOdysseyTextureLayerImageRaster* layerImageRaster = Cast<UOdysseyTextureLayerImageRaster>(layer);
-        if ( !layerImageRaster )
-            continue;
-
         UTexture2D* openedTexture = static_cast<UTexture2D*>(assetsData[i].GetAsset());
-        ::ULIS::FBlock* textureBlock = NewBlockFromUTextureData(openedTexture, format);
-
-        FOdysseyRasterBlockMutator rasterBlockMutator(layerImageRaster->GetRasterBlock(), false);
-        rasterBlockMutator.EditTilesFromRects(
-            { textureBlock->Rect() },
-            [&](TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyInvalidTileMap& iTileMap) -> TArray<ULIS::FEvent>
-            {
-                ctx.Copy(*textureBlock, *iBlock);
-                ctx.Finish();
-                return {};
-            }
-        );
-        rasterBlockMutator.Commit();
-
+        texturesToImport.Add(openedTexture);
     }
+
+    FOdysseyPainterEditorTextureImport import;
+    import.ImportTextures(currentTexture, texturesToImport);
 }
