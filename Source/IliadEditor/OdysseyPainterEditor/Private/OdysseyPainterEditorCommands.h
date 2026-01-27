@@ -23,9 +23,6 @@ public:
     // TCommands interface
     virtual void RegisterCommands() override;
 
-private:
-    void RegisterTextureCommands();
-
 public:
     //About actions
 
@@ -371,9 +368,4 @@ public:
 
     /** Action for changing the current layer's opacity */
     TArray<TSharedPtr<FUICommandInfo>> ChangeLayerOpacity;
-
-    TSharedPtr<FUICommandInfo> ImportTexturesAsLayers;
-    TSharedPtr<FUICommandInfo> ExportLayersAsTextures;
-    TSharedPtr<FUICommandInfo> ExportCurrentLayerAsTexture;
-    TSharedPtr<FUICommandInfo> ExportTextureToOperatingSystem;
 };
