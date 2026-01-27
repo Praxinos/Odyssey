@@ -761,9 +761,11 @@ body:
     attributes:
       label: "Widgets"
       options:
+        - label: "Tester le Widget EUWBP_Import_XDTS"
+        - label: "Tester le Widget EUWBP_Export_XDTS"
         - label: "Tester le Widget EUWBP_Import_Json"
         - label: "Tester le Widget QuickStart"
-
+        
   - type: checkboxes
     id: interface-layout
     attributes:
@@ -797,11 +799,6 @@ body:
         - label: "Compiler un jeu"
         - label: "Lancer un projet en mode jeu (map gymnastique)"
 
-  - type: markdown
-    attributes:
-      value: |
-        ## ${\color{00FF99}\textnormal{---------------------------------------------------------------------}}$
-
   - type: checkboxes
     id: runtime
     attributes:
@@ -811,3 +808,13 @@ body:
         - label: "Vérifier la compilation au Runtime sans erreur"
         - label: "Vérifier le fonctionnement de la MAP gymnastique"
         - label: "Vérifier le fonctionnement de la MAP avec le jeu de Pierrick"
+
+  - type: checkboxes
+    id: migration
+    attributes:
+      label: "Migration"
+      options:
+        - label: "Vérifier les liens avec les Palettes sont conservés lors de la migration du projet avec l'ours"
+        - label: "Vérifier les liens avec les ToolCollection sont conservés lors de la migration du projet avec l'ours"
+        - label: "Vérifier les liens entre les brushes, les fonctions et macros et les textures lors d'une migration"
+        - label: "Vérifier que les BoardSequences et ShotSequence sont toujours correctement liés les uns aux autres lors d'une migration"
