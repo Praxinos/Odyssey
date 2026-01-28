@@ -34,7 +34,7 @@ UOdysseyPainterEditorVectorCutTool::UOdysseyPainterEditorVectorCutTool()
     : UOdysseyPainterEditorVectorBaseTool( MakeShared<FOdysseyPainterEditorVectorCutToolHUD>( this ), false, true )
     , mMouseCursor ( EMouseCursor::Crosshairs )
 {
-    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathCut64");
+    mIconStyleSet = FName(TEXT("PainterEditor.ToolsTab.PathCut64"));
 
     Shapes.AddShapeType( EOdysseyShapeType::kLine, nullptr );
     Shapes.AddShapeType( EOdysseyShapeType::kRectangle, nullptr );

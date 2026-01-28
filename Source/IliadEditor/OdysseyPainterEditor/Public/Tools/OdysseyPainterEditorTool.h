@@ -113,7 +113,7 @@ protected:
 
 public:
     UPROPERTY(EditDefaultsOnly, Category = "Tool")
-    FSlateBrush Icon;
+    FName mIconStyleSet;
     bool mIsActivated;
     bool mIsTemporaryTool = false;
 };

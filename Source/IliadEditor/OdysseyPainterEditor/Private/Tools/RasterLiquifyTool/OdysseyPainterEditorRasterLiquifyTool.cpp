@@ -95,7 +95,7 @@ UOdysseyPainterEditorRasterLiquifyTool::UOdysseyPainterEditorRasterLiquifyTool()
     , bIsMouseLeftButtonDown ( false )
     , mPressure ( 1.0f )
 {
-    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Liquify64");
+    mIconStyleSet = FName(TEXT("PainterEditor.ToolsTab.Liquify64"));
 }
 
 //--------------------------------------------------------------------------------------

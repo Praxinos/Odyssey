@@ -47,7 +47,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::UOdysseyPainterEditorVectorTrajectory
     , PickingRadius( 10.0f )
     , GridDisplayMode( eVectorTrajectoryGridDisplayMode::AsPoints )
 {
-    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Trajectory64");
+    mIconStyleSet = FName(TEXT("PainterEditor.ToolsTab.Trajectory64"));
 
     mTrajectoryHUD = static_cast<FOdysseyPainterEditorVectorTrajectoryToolHUD*>( mBaseHUD.Get() );
 }

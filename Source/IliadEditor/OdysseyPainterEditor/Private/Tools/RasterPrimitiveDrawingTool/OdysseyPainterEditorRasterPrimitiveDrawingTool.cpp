@@ -30,7 +30,7 @@ UOdysseyPainterEditorRasterPrimitiveDrawingTool::UOdysseyPainterEditorRasterPrim
     : mPaintEngine()
     , mShapeHUD(MakeShared<FOdysseyHUDElement>())
 {
-    Icon = *FOdysseyStyle::GetBrush("PainterEditor.ToolsTab.Shapes64");
+    mIconStyleSet = FName(TEXT("PainterEditor.ToolsTab.Shapes64"));
 
     UOdysseyFreehandShape* freehandShape = CreateShape<UOdysseyFreehandShape>("UOdysseyPainterEditorRasterPrimitiveDrawingTool::FreehandShape");
     freehandShape->DisplayHUD(true);

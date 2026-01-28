@@ -46,7 +46,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::UOdysseyPainterEditorVectorPathDrawi
     , mStitchedVertex( nullptr )
     , mPathNumber( 0 )
 {
-    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathDrawing64");
+    mIconStyleSet = FName(TEXT("PainterEditor.ToolsTab.PathDrawing64"));
 
     mPathTracer.SetTracingWidth( (double) TracingFidelity );
 

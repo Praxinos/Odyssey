@@ -35,7 +35,7 @@ UOdysseyPainterEditorRasterPaintBucketTool::~UOdysseyPainterEditorRasterPaintBuc
 UOdysseyPainterEditorRasterPaintBucketTool::UOdysseyPainterEditorRasterPaintBucketTool()
     : mSourceProvider(nullptr)
 {
-    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PaintBucket64");
+    mIconStyleSet = FName(TEXT("PainterEditor.ToolsTab.PaintBucket64"));
 }
 
 //--------------------------------------------------------------------------------------

@@ -31,7 +31,7 @@ UOdysseyPainterEditorVectorChartTool::UOdysseyPainterEditorVectorChartTool()
     , Factor( 1 )
     , ChartType ( eChartType::Partial )
 {
-    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Chart64");
+    mIconStyleSet = FName(TEXT("PainterEditor.ToolsTab.Chart64"));
 
     mChartHUD = static_cast<FOdysseyPainterEditorVectorChartToolHUD*>( mBaseHUD.Get() );
 }

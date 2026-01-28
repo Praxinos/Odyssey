@@ -86,7 +86,7 @@ UOdysseyPainterEditorAnimationOutOfPegsTool::~UOdysseyPainterEditorAnimationOutO
 UOdysseyPainterEditorAnimationOutOfPegsTool::UOdysseyPainterEditorAnimationOutOfPegsTool()
 {
     mIsTemporaryTool = true;
-    Icon = *FOdysseyStyle::GetBrush("Animation.Lighttable.OutOfPegs.Button.On");
+    mIconStyleSet = FName(TEXT("Animation.Lighttable.OutOfPegs.Button.On"));
 }
 
 void

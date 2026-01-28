@@ -38,7 +38,7 @@ SOdysseyPainterEditorToolsTileView::Construct(const FArguments& InArgs)
             .Padding(FMargin(4.f))
             [
                 SNew(SImage)
-                .Image(&tool->Icon)
+                .Image(FOdysseyStyle::GetBrush(tool->mIconStyleSet))
                 .DesiredSizeOverride(FVector2D(20.f, 20.f))
             ]
         ];

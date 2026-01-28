@@ -3678,7 +3678,11 @@ void FOdysseyPainterEditor::SaveToRecentTools( UOdysseyPainterEditorTool* iTool 
     TObjectPtr<UOdysseyPainterEditorTool> toolSnapshot;
     toolSnapshot = DuplicateObject< UOdysseyPainterEditorTool >(iTool, mRecentTools.Get());
 
-    mRecentTools->AddToolConfiguration( iTool->GetClass(), toolSnapshot, iTool->Icon );
+    FIconToolConfiguration iconToolConfig;
+    iconToolConfig.mIconSource = EToolIconSource::Style;
+    iconToolConfig.mIconStyleSet = iTool->mIconStyleSet;
+
+    mRecentTools->AddToolConfiguration( iTool->GetClass(), toolSnapshot, iconToolConfig );
 
     if( mRecentTools->GetToolConfigurations().Num() > 10 )
         mRecentTools->RemoveToolConfigurationAtIndex( 0 );

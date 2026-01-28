@@ -36,6 +36,7 @@ public:
     static const FSlateBrush*   GetNoBrush();
     static const FSlateBrush*   GetOptionalBrush( FName PropertyName, const ANSICHAR* Specifier = NULL, const FSlateBrush* const DefaultBrush = FStyleDefaults::GetNoBrush() );
     static void                 GetResources( TArray< const FSlateBrush* >& OutResources );
+    static TArray< FName >&     GetTrackedStyleSets();
 
     static const FName&         GetStyleSetName();
 
@@ -44,6 +45,10 @@ public:
 
 protected:
     static void SetStyle( const TSharedRef< ISlateStyle >& iNewStyle );
+
+protected:
+    /** An array with all style sets tracked by the style. Useful when searching for a brush from its StyleSet **/
+    static TArray< FName > smTrackedStyleSets;
 
 private:
     /** Singleton instance of the slate style */

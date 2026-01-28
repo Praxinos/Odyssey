@@ -42,7 +42,7 @@ UOdysseyPainterEditorRasterEraserTool::UOdysseyPainterEditorRasterEraserTool()
     , mBlendParameters(true, EOdysseyBlendingMode::kNormal, EOdysseyAlphaMode::kNormal, Opacity)
     , mShapeHUD(MakeShared<FOdysseyHUDElement>())
 {
-    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Eraser64");
+    mIconStyleSet = FName(TEXT("PainterEditor.ToolsTab.Eraser64"));
 
 
     Shapes.AddShapeType(EOdysseyShapeType::kFreehand, CreateShape<UOdysseyFreehandShape>("UOdysseyPainterEditorRasterEraserTool::FreehandShape"));

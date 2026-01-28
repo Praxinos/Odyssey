@@ -69,5 +69,5 @@ FOdysseyToolCollectionDragDropOp::GetIcon() const
     if (!mToolConfig)
         return FAppStyle::GetBrush("ClassIcon.Default");
     else
-        return &mToolConfig->mIcon;
+        return mToolConfig->mIconToolConfiguration.MakeIconBrush();
 }

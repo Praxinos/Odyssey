@@ -24,7 +24,7 @@ UOdysseyPainterEditorVectorScenePanTool::~UOdysseyPainterEditorVectorScenePanToo
 UOdysseyPainterEditorVectorScenePanTool::UOdysseyPainterEditorVectorScenePanTool()
     : UOdysseyPainterEditorVectorBaseTool( MakeShared<FOdysseyPainterEditorVectorScenePanToolHUD>( this ), false, true )
 {
-    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.ScenePan64");
+    mIconStyleSet = FName(TEXT("PainterEditor.ToolsTab.ScenePan64"));
 
     mHasContextMenu = false;
 

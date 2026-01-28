@@ -32,7 +32,7 @@ UOdysseyPainterEditorVectorMatchingTool::UOdysseyPainterEditorVectorMatchingTool
     , RigidifySelectionOnly( false )
     , GridDisplayMode ( eMatchingGridDisplayMode::AsQuads )
 {
-    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Matching64");
+    mIconStyleSet = FName(TEXT("PainterEditor.ToolsTab.Matching64"));
 
     mMatchingHUD = static_cast<FOdysseyPainterEditorVectorMatchingToolHUD*>( mBaseHUD.Get() );
 }

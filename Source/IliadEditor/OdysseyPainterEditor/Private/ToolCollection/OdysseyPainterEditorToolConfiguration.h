@@ -5,9 +5,44 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
-#include "UObject/ObjectMacros.h"
 #include "Tools/OdysseyPainterEditorTool.h"
+#include "UObject/ObjectMacros.h"
+
 #include "OdysseyPainterEditorToolConfiguration.generated.h"
+
+UENUM()
+enum class EToolIconSource : uint8
+{
+    None,
+    Style,
+    Texture
+};
+
+USTRUCT()
+struct FIconToolConfiguration
+{
+    GENERATED_BODY()
+
+public:
+    const FSlateBrush* MakeIconBrush() const;
+
+public:
+    UPROPERTY(EditAnywhere)
+    EToolIconSource mIconSource = EToolIconSource::None;
+
+    // Style icon
+    UPROPERTY(EditAnywhere)
+    FName mIconStyleSet = FName();
+
+    // Texture icon
+    UPROPERTY(EditAnywhere)
+    TObjectPtr<UTexture2D> mIconTexture = nullptr;
+
+    // Tint
+    UPROPERTY(EditAnywhere)
+    FLinearColor mIconTint = FLinearColor::White;
+};
+
 
 /**
  * Odyssey Tool Configuration
@@ -25,6 +60,11 @@ public:
     UPROPERTY(EditAnywhere, Category = "Tool")
     TObjectPtr<UOdysseyPainterEditorTool> mTool;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Tool")
-    FSlateBrush mIcon;
+public:
+    UPROPERTY(EditAnywhere, Category = "Tool")
+    FIconToolConfiguration mIconToolConfiguration;
+
+public:
+    UPROPERTY(EditAnywhere)
+    FSlateBrush mBrush;
 };

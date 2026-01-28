@@ -29,7 +29,7 @@ UOdysseyPainterEditorVectorEraserTool::UOdysseyPainterEditorVectorEraserTool()
     , SplitPath( true )
     , Radius( 20.0f )
 {
-    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Eraser64");
+    mIconStyleSet = FName(TEXT("PainterEditor.ToolsTab.Eraser64"));
 
     mEraserHUD = static_cast<FOdysseyPainterEditorVectorEraserToolHUD*>( mBaseHUD.Get() );
 }

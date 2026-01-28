@@ -54,6 +54,7 @@ public:
 
 private:
     FLinearColor GetTileColor() const;
+    const FSlateBrush* GetIconBrush() const;
     TSharedRef<SWidget> BuildContextMenu();
 
     // Locked = can't modify the tool or the collection
@@ -74,7 +75,7 @@ private:
     void OnChangeIcon();
 
     void OnTextureSelected(const FAssetData& AssetData);
-    void OnStyleIconSelected(const FSlateBrush* iBrush);
+    void OnStyleIconSelected(FName iBrushStyleSet);
 
 private:
     UOdysseyPainterEditorToolConfiguration* mToolConfig = nullptr;

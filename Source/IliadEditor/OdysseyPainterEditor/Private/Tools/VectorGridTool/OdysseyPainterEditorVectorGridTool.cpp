@@ -38,7 +38,7 @@ UOdysseyPainterEditorVectorGridTool::UOdysseyPainterEditorVectorGridTool()
     , PickingRadius( 10.0f )
     , World ( false )
 {
-    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Grid64");
+    mIconStyleSet = FName(TEXT("PainterEditor.ToolsTab.Grid64"));
 
     mGridHUD = static_cast<FOdysseyPainterEditorVectorGridToolHUD*>( mBaseHUD.Get() );
 }

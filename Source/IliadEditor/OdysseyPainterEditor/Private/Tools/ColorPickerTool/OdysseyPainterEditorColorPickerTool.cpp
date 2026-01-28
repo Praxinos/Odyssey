@@ -20,7 +20,7 @@ UOdysseyPainterEditorColorPickerTool::~UOdysseyPainterEditorColorPickerTool()
 
 UOdysseyPainterEditorColorPickerTool::UOdysseyPainterEditorColorPickerTool()
 {
-    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.ColorPicker64");
+    mIconStyleSet = FName(TEXT("PainterEditor.ToolsTab.ColorPicker64"));
 }
 
 //--------------------------------------------------------------------------------------

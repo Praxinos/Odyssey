@@ -48,7 +48,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::UOdysseyPainterEditorVectorPaintBuck
     , mPickedBucket( nullptr )
     , mEditionMode( eVectorPaintBucketEditionMode::Default )
 {
-    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PaintBucket64");
+    mIconStyleSet = FName(TEXT("PainterEditor.ToolsTab.PaintBucket64"));
 
     mBucketHUD = static_cast<FOdysseyPainterEditorVectorPaintBucketToolHUD*>( mBaseHUD.Get() );
 }

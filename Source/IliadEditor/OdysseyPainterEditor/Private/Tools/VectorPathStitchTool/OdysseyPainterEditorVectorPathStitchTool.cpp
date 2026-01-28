@@ -27,7 +27,7 @@ UOdysseyPainterEditorVectorPathStitchTool::UOdysseyPainterEditorVectorPathStitch
     , PickingRadius(20.0f)
 //    , RestrictToSelection( false )
 {
-    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathStitch64");
+    mIconStyleSet = FName(TEXT("PainterEditor.ToolsTab.PathStitch64"));
 
     mPathStitchHUD = static_cast<FOdysseyPainterEditorVectorPathStitchToolHUD*>( mBaseHUD.Get() );
 }

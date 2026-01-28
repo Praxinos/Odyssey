@@ -52,7 +52,7 @@ bool UOdysseyToolCollection::IsCollectionTransient() const
     return false;
 }
 
-UOdysseyPainterEditorToolConfiguration* UOdysseyToolCollection::AddToolConfiguration(UClass* iToolClass, TObjectPtr<UOdysseyPainterEditorTool> iTool, FSlateBrush& iIcon, int32 iIndex)
+UOdysseyPainterEditorToolConfiguration* UOdysseyToolCollection::AddToolConfiguration(UClass* iToolClass, TObjectPtr<UOdysseyPainterEditorTool> iTool, FIconToolConfiguration& iIconToolConfiguration, int32 iIndex)
 {
     if( !iToolClass || !iTool )
         return nullptr;
@@ -63,7 +63,11 @@ UOdysseyPainterEditorToolConfiguration* UOdysseyToolCollection::AddToolConfigura
     UOdysseyPainterEditorToolConfiguration* toolConfig = NewObject<UOdysseyPainterEditorToolConfiguration>(this);
     toolConfig->mToolClass = iToolClass;
     toolConfig->mTool = DuplicateObject<UOdysseyPainterEditorTool>(iTool,this);
-    toolConfig->mIcon = iIcon;
+
+    toolConfig->mIconToolConfiguration.mIconSource = iIconToolConfiguration.mIconSource;
+    toolConfig->mIconToolConfiguration.mIconStyleSet = iIconToolConfiguration.mIconStyleSet;
+    toolConfig->mIconToolConfiguration.mIconTexture = iIconToolConfiguration.mIconTexture;
+    toolConfig->mIconToolConfiguration.mIconTint = iIconToolConfiguration.mIconTint;
 
     Modify();
 

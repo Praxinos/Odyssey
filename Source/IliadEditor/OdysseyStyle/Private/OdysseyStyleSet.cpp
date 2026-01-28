@@ -8,6 +8,7 @@
 #include "SlateOdysseyStyle.h"
 
 TSharedPtr< ISlateStyle > FOdysseyStyle::smInstance = nullptr;
+TArray< FName > FOdysseyStyle::smTrackedStyleSets = TArray< FName >();
 
 /*static*/
 void
@@ -192,4 +193,11 @@ FOdysseyStyle::GetResources( TArray< const FSlateBrush* >& OutResources )
     if( !smInstance )
         return;
     smInstance->GetResources( OutResources );
+}
+
+/*static*/
+TArray< FName >&
+FOdysseyStyle::GetTrackedStyleSets()
+{
+    return FOdysseyStyle::smTrackedStyleSets;
 }

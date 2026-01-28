@@ -90,7 +90,7 @@ SOdysseyPainterEditorToolCollection::GetToolConfigIcon(UOdysseyPainterEditorTool
     if( !iTool)
         return FAppStyle::GetBrush("ClassIcon.Default");
     else
-        return &iTool->mIcon;
+        return iTool->mIconToolConfiguration.MakeIconBrush();
 }
 
 FReply
@@ -99,7 +99,11 @@ SOdysseyPainterEditorToolCollection::OnAddToolClicked()
     if ( !mEditor || !mEditor->GetCurrentTool() || !mEditor->GetEditorToolOfClass(mEditor->GetCurrentTool()->GetClass()) )
         return FReply::Unhandled();
 
-    mToolCollection->AddToolConfiguration( mEditor->GetCurrentTool()->GetClass(), mEditor->GetCurrentTool(), mEditor->GetCurrentTool()->Icon );
+    FIconToolConfiguration iconToolConfig;
+    iconToolConfig.mIconSource = EToolIconSource::Style;
+    iconToolConfig.mIconStyleSet = mEditor->GetCurrentTool()->mIconStyleSet;
+
+    mToolCollection->AddToolConfiguration( mEditor->GetCurrentTool()->GetClass(), mEditor->GetCurrentTool(), iconToolConfig );
 
     HandleToolsChanged();
 

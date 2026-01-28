@@ -51,7 +51,7 @@ UOdysseyPainterEditorVectorTransformTool::UOdysseyPainterEditorVectorTransformTo
     , World( false )
     , bInbetweenMode( false )
 {
-    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Transform64");
+    mIconStyleSet = FName(TEXT("PainterEditor.ToolsTab.Transform64"));
 
     mTransformHUD = static_cast<FOdysseyPainterEditorVectorTransformToolHUD*>( mBaseHUD.Get() );
 }

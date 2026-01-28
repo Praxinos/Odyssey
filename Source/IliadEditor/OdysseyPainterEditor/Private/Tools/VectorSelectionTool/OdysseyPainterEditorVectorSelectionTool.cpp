@@ -33,7 +33,7 @@ UOdysseyPainterEditorVectorSelectionTool::~UOdysseyPainterEditorVectorSelectionT
 UOdysseyPainterEditorVectorSelectionTool::UOdysseyPainterEditorVectorSelectionTool()
     : UOdysseyPainterEditorVectorBaseTool( MakeShared<FOdysseyPainterEditorVectorSelectionToolHUD>( this ), false, true )
 {
-    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Lasso64");
+    mIconStyleSet = FName(TEXT("PainterEditor.ToolsTab.Lasso64"));
 
     Shapes.AddShapeType( EOdysseyShapeType::kRectangle, nullptr );
     Shapes.AddShapeType( EOdysseyShapeType::kEllipse, nullptr );
@@ -47,7 +47,7 @@ UOdysseyPainterEditorVectorSelectionTool::UOdysseyPainterEditorVectorSelectionTo
 UOdysseyPainterEditorVectorSelectionTool::UOdysseyPainterEditorVectorSelectionTool( TSharedPtr<FOdysseyPainterEditorVectorBaseToolHUD> iHUD )
     : UOdysseyPainterEditorVectorBaseTool( iHUD, false, true )
 {
-    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Lasso64");
+    mIconStyleSet = FName(TEXT("PainterEditor.ToolsTab.Lasso64"));
 
     Shapes.AddShapeType( EOdysseyShapeType::kRectangle, nullptr );
     Shapes.AddShapeType( EOdysseyShapeType::kEllipse, nullptr );

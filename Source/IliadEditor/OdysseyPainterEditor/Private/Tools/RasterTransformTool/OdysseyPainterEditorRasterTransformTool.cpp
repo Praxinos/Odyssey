@@ -51,7 +51,7 @@ UOdysseyPainterEditorRasterTransformTool::UOdysseyPainterEditorRasterTransformTo
     , mTransformedBlock(nullptr)
     , mIndexTransaction(0)
 {
-    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Transform64");
+    mIconStyleSet = FName(TEXT("PainterEditor.ToolsTab.Transform64"));
 }
 
 bool
