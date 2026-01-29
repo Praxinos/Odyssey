@@ -1316,7 +1316,10 @@ FBoardSequenceCustomization::OnGlobalTimeChanged()
             {
                 // Can't find camera at the current frame (outside track range or section contains a board)
                 sequencer->SetPerspectiveViewportCameraCutEnabled( true );
+
+                sequencer->EnterSilentMode();
                 sequencer->ForceEvaluate();
+                sequencer->ExitSilentMode();
             }
         }
     }
