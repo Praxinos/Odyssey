@@ -27,19 +27,19 @@ public:
     const FSlateBrush* MakeIconBrush() const;
 
 public:
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, Category = "IconTool")
     EToolIconSource mIconSource = EToolIconSource::None;
 
     // Style icon
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, Category = "IconTool")
     FName mIconStyleSet = FName();
 
     // Texture icon
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, Category = "IconTool")
     TObjectPtr<UTexture2D> mIconTexture = nullptr;
 
     // Tint
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, Category = "IconTool")
     FLinearColor mIconTint = FLinearColor::White;
 };
 
@@ -63,8 +63,4 @@ public:
 public:
     UPROPERTY(EditAnywhere, Category = "Tool")
     FIconToolConfiguration mIconToolConfiguration;
-
-public:
-    UPROPERTY(EditAnywhere)
-    FSlateBrush mBrush;
 };
