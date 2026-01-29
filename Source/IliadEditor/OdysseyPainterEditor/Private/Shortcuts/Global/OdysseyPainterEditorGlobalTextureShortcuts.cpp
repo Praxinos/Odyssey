@@ -8,6 +8,8 @@
 #include "OdysseyPainterEditorTextureSource.h"
 #include "SOdysseyTextureExportAsImageDialog.h"
 #include "SOdysseyTextureExportAsTextureDialog.h"
+#include "SOdysseyTextureImportImagesDialog.h"
+#include "SOdysseyTextureImportTexturesDialog.h"
 
 //Action_ImportTextures()
 #include "ScopedTransaction.h"
@@ -116,8 +118,10 @@ FOdysseyPainterEditorGlobalTextureShortcuts::Action_ImportImages()
         }
     );
 
-    FOdysseyPainterEditorTextureImport import;
-    import.ImportImages(texture, filenames);
+    SOdysseyTextureImportImagesDialog::Open(texture, filenames);
+
+    /* FOdysseyPainterEditorTextureImport import;
+    import.ImportImages(texture, filenames); */
 }
 
 void
@@ -153,6 +157,8 @@ FOdysseyPainterEditorGlobalTextureShortcuts::Action_ImportTextures()
         texturesToImport.Add(openedTexture);
     }
 
-    FOdysseyPainterEditorTextureImport import;
-    import.ImportTextures(currentTexture, texturesToImport);
+    SOdysseyTextureImportTexturesDialog::Open(currentTexture, texturesToImport);
+
+    /*FOdysseyPainterEditorTextureImport import;
+    import.ImportTextures(currentTexture, texturesToImport);*/
 }

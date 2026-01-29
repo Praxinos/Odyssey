@@ -783,6 +783,16 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "PaletteEditor.Tab.Colors", new IMAGE_BRUSH_SVG( "PaletteEditor/tab_colors", mIcon16x16 ) );
 
     Set( "VectorBrushCustomization.NoBrush", new IMAGE_BRUSH( "PainterEditor/VectorBrushCustomization/no_brush_64x16", mIcon64x16 ) );
+
+    Set( "OdysseyImportTexturePositioning.Alignment.TopLeft", new IMAGE_BRUSH_SVG( "PainterEditor/Import/alignment-topLeft", mIcon16x16));
+    Set( "OdysseyImportTexturePositioning.Alignment.Top", new IMAGE_BRUSH_SVG( "PainterEditor/Import/alignment-top", mIcon16x16));
+    Set( "OdysseyImportTexturePositioning.Alignment.TopRight", new IMAGE_BRUSH_SVG( "PainterEditor/Import/alignment-topRight", mIcon16x16));
+    Set( "OdysseyImportTexturePositioning.Alignment.Left", new IMAGE_BRUSH_SVG( "PainterEditor/Import/alignment-left", mIcon16x16));
+    Set( "OdysseyImportTexturePositioning.Alignment.Center", new IMAGE_BRUSH_SVG( "PainterEditor/Import/alignment-center", mIcon16x16));
+    Set( "OdysseyImportTexturePositioning.Alignment.Right", new IMAGE_BRUSH_SVG( "PainterEditor/Import/alignment-right", mIcon16x16));
+    Set( "OdysseyImportTexturePositioning.Alignment.BottomLeft", new IMAGE_BRUSH_SVG( "PainterEditor/Import/alignment-bottomLeft", mIcon16x16));
+    Set( "OdysseyImportTexturePositioning.Alignment.Bottom", new IMAGE_BRUSH_SVG( "PainterEditor/Import/alignment-bottom", mIcon16x16));
+    Set( "OdysseyImportTexturePositioning.Alignment.BottomRight", new IMAGE_BRUSH_SVG( "PainterEditor/Import/alignment-bottomRight", mIcon16x16));
 }
 
 
