@@ -37,6 +37,8 @@ FOdysseyPainterEditorCommands::FOdysseyPainterEditorCommands()
 void
 FOdysseyPainterEditorCommands::RegisterCommands()
 {
+    RegisterTextureCommands();
+
 // Help Shortcuts Category
     UI_BUNDLE_COMMAND( AboutOdyssey, HelpShortcuts, "About Odyssey", "About Odyssey",                                                                       EUserInterfaceActionType::Button, FInputChord() );
     UI_BUNDLE_COMMAND( VisitPraxinosWebsite, HelpShortcuts, "Praxinos Website...", "Praxinos Website...",                                                   EUserInterfaceActionType::Button, FInputChord() );
@@ -212,6 +214,15 @@ FOdysseyPainterEditorCommands::RegisterCommands()
     UI_BUNDLE_COMMAND(PasteCurrentSelectionInNewLayer, UncategorizedYetShortcuts, "Paste Current Selection In New Layer", "Paste current selection In New Layer", EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control | EModifierKey::Shift, EKeys::V));
     UI_BUNDLE_COMMAND(InvertSelection, UncategorizedYetShortcuts, "Invert Current Selection", "Invert Current Selection", EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::I));
 
+}
+
+void
+FOdysseyPainterEditorCommands::RegisterTextureCommands()
+{
+    UI_BUNDLE_COMMAND( ImportTexturesAsLayers, ImportExportShortcuts, "Import Textures As Layers", "Import several textures from the content-browser as layers",                                               EUserInterfaceActionType::Button, FInputChord());
+    UI_BUNDLE_COMMAND( ExportLayersAsTextures, ImportExportShortcuts, "Export Layers As Textures", "Export existing layers as textures within the content-browser",                                            EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::E));
+    UI_BUNDLE_COMMAND( ExportCurrentLayerAsTexture, ImportExportShortcuts, "Export Current Layer As Texture", "Export current layers as texture within the content-browser",                                   EUserInterfaceActionType::Button, FInputChord());
+    UI_BUNDLE_COMMAND( ExportTextureToOperatingSystem, ImportExportShortcuts, "Export Texture To Operating System", "Export current texture to your operating system, several file format are available",      EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::F));
 }
 
 #undef LOCTEXT_NAMESPACE

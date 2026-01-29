@@ -4,7 +4,6 @@
 #pragma once
 
 #include "OdysseyEditorTab.h"
-#include "OdysseyPainterEditorGlobalTextureShortcuts.h"
 
 class FOdysseyPainterEditor;
 class UOdysseyLayerStack;
@@ -23,29 +22,26 @@ public:
 protected:
     virtual const FName& GetId() const override;
     virtual TSharedPtr<SWidget> CreateWidget() override;
+    virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
     virtual void ExtendMenu( TSharedRef<FExtender> iExtender ) override;
     virtual bool CanOpen() const override;
 
 protected:
     // Widget Getters
-    UOdysseyLayerStack* LayerStack() const;
+    virtual UOdysseyLayerStack* LayerStack() const;
 
 protected:
     // Event Listeners
 
 private:
     //Methods
-    void ExtendMenuFile( TSharedRef<FExtender> iExtender );
-    void BuildImportMenu(FMenuBuilder& iMenuBuilder);
-    void BuildExportMenu(FMenuBuilder& iMenuBuilder);
-
-
-    void ExportLayersAsTextures();
-    void ExportLayersAsImages();
-    void ImportImages();
-    void ImportTextures();
+    void MapActions( TSharedPtr<FUICommandList> iCommandList );
+    virtual void ExtendMenuFile( TSharedRef<FExtender> iExtender );
+    virtual void ImportTexturesAsLayers();
+    virtual void ExportTextureToOperatingSystem();
+    virtual void ExportLayersAsTextures();
+    virtual void ExportCurrentLayerAsTexture();
 
 private:
     FOdysseyPainterEditor* mEditor;
-    FOdysseyPainterEditorGlobalTextureShortcuts mTextureShortcuts;
 };

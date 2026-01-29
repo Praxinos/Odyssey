@@ -345,6 +345,16 @@ FOdysseyAnimationImageSequenceExporter::ExportSource(const FSource& iSource, con
     int endFrame = frameRange.GetUpperBoundValue();
 
     FScopedSlowTask progressBar(endFrame - startFrame + 1);
+
+    ::ULIS::eFormat format = ::ULIS::Format_BGRA8;
+    switch(mAnimation->GetFormat())
+    {
+        case EOdysseyAnimationFormat::BGRA8: format = ::ULIS::Format_BGRA8;
+        case EOdysseyAnimationFormat::RGBAF: format = ::ULIS::Format_RGBAF;
+    }
+
+    TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(mAnimation->GetWidth(), mAnimation->GetHeight(), format);
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( format );
     TArray<FGuid> lastRenderingComposition;
 
     for (int i = startFrame; i <= endFrame; i++)

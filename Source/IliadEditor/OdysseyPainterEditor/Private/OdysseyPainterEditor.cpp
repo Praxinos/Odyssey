@@ -102,7 +102,6 @@
 
 #include "Shortcuts/OdysseyLayerStackGlobalShortcuts.h"
 #include "Shortcuts/Global/OdysseyPainterEditorGlobalShortcuts.h"
-#include "Shortcuts/Global/OdysseyPainterEditorGlobalTextureShortcuts.h"
 #include "Shortcuts/Global/OdysseyPainterEditorGlobalToolsShortcuts.h"
 #include "Shortcuts/Global/OdysseyAnimationGlobalShortcuts.h"
 #include "Mesh/FOdysseyMeshSelector.h"
@@ -225,10 +224,9 @@ FOdysseyPainterEditor::Initialize()
         }
     );
 
-    GetShortcuts().Add(MakeShared<FOdysseyPainterEditorGlobalShortcuts>(this));
-    GetShortcuts().Add(MakeShared<FOdysseyPainterEditorGlobalTextureShortcuts>(this));
-    GetShortcuts().Add(MakeShared<FOdysseyPainterEditorGlobalToolsShortcuts>(this));
     GetShortcuts().Add(MakeShared<FOdysseyLayerStackGlobalShortcuts>(layerStack));
+    GetShortcuts().Add(MakeShared<FOdysseyPainterEditorGlobalToolsShortcuts>(this));
+    GetShortcuts().Add(MakeShared<FOdysseyPainterEditorGlobalShortcuts>(this));
     GetShortcuts().Add(MakeShared<FOdysseyAnimationGlobalShortcuts>(animation, currentFrame, onTransactCurrentFrame));
 
     FSlateApplication::Get().RegisterInputPreProcessor(mAnimationFlipSystem);

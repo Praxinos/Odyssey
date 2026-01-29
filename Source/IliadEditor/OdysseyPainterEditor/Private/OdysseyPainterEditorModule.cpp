@@ -35,7 +35,6 @@
 #include "OdysseyPainterEditorAnimationProjectSettings.h"
 #include "OdysseyPainterEditorAnimationUserSettings.h"
 #include "OdysseyPainterEditorAnimationCommands.h"
-#include "OdysseyPainterEditorTextureCommands.h"
 #include "OdysseyPainterEditorFlipbookCommands.h"
 #include "OdysseyToolCollectionAssetTypeActions.h"
 #include "Tools/OutOfPegsTool/OdysseyPainterEditorAnimationOutOfPegsTool.h"
@@ -198,7 +197,6 @@ FOdysseyPainterEditorModule::RegisterCommands()
 {
     FOdysseyPainterEditorCommands::Register();
     FOdysseyPainterEditorAnimationCommands::Register();
-    FOdysseyPainterEditorTextureCommands::Register();
     FOdysseyPainterEditorFlipbookCommands::Register();
     FOdysseyViewportDrawingEditorCommands::Register();
 }
@@ -208,7 +206,6 @@ FOdysseyPainterEditorModule::UnregisterCommands()
 {
     FOdysseyPainterEditorCommands::Unregister();
     FOdysseyPainterEditorAnimationCommands::Unregister();
-    FOdysseyPainterEditorTextureCommands::Unregister();
     FOdysseyPainterEditorFlipbookCommands::Unregister();
     FOdysseyViewportDrawingEditorCommands::Unregister();
 }
