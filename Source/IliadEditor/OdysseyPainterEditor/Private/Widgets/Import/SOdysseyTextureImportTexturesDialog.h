@@ -4,13 +4,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-
+#include "SOdysseyImportTexturePositioning.h"
 class SOdysseyTextureImportTexturesDialog
     : public SCompoundWidget
     //TODO: FGCObject to keep UTexture2D objects alive
 {
 public:
     static bool Open(UTexture* oTexture, TArray< UTexture2D* > iTextures);
+    static bool Open(UTexture* oTexture, TArray< FString > iFilenames);
 
 public:
     SLATE_BEGIN_ARGS(SOdysseyTextureImportTexturesDialog)
@@ -26,5 +27,9 @@ public:
     void Construct(const FArguments& InArgs);
 
 private:
+    static bool Open(FText iTitle, UTexture* oTexture, TArray< UTexture2D* > iTextures);
     void Import();
+
+private:
+    SOdysseyImportTexturePositioning::FData mPositioningData;
 };

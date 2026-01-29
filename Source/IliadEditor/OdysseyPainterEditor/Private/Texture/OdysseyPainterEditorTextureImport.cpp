@@ -128,8 +128,6 @@ FOdysseyPainterEditorTextureImport::ImportImages(UTexture2D* DestinationTexture,
     if ( Paths.Num() <= 0 || !DestinationTexture || (ParentLayer && ParentLayer->GetTexture() != DestinationTexture))
         return {};
 
-    FScopedTransaction ScopedTransaction(LOCTEXT("texture-editor.transaction.import-images", "Import Images"));
-
     FScopedSlowTask progressBar(Paths.Num(), LOCTEXT("texture-editor.import-images.progress-bar.title", "Importing Images"));
     progressBar.MakeDialog();
 
@@ -155,6 +153,7 @@ FOdysseyPainterEditorTextureImport::ImportImages(UTexture2D* DestinationTexture,
         textures.Add(importedTextures[i].Get());
     }
 
+    FScopedTransaction ScopedTransaction(LOCTEXT("texture-editor.transaction.import-images", "Import Images"));
     return ImportTextures(DestinationTexture, textures, ParentLayer, IndexInParent);
 }
 

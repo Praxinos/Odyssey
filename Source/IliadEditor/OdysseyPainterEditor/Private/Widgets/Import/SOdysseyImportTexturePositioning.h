@@ -31,11 +31,22 @@ public:
     };
 
 public:
+    struct FData
+    {
+        EAlignment mAlignment = EAlignment::Center;
+        EOdysseyImportTextureScaling mScaling = EOdysseyImportTextureScaling::None;
+        EOdysseyAntiAliasing mResamplingMethod = EOdysseyAntiAliasing::Bilinear;
+    };
+
+public:
+    DECLARE_DELEGATE_OneParam(FOnChanged, FData);
+
+public:
     SLATE_BEGIN_ARGS(SOdysseyImportTexturePositioning)
         {}
         /** Called when the object value changes */
-        //SLATE_ATTRIBUTE(UOdysseyBrush*, Brush)
-        //SLATE_EVENT( FOnBrushChanged, OnBrushChanged )
+        SLATE_ATTRIBUTE(FData, Data)
+        SLATE_EVENT(FOnChanged, OnChanged)
     SLATE_END_ARGS()
 
 public:
@@ -54,7 +65,6 @@ private:
     void OnResamplingMethodEnumSelectionChanged(int32, ESelectInfo::Type);
 
 private:
-    EAlignment mAlignment = EAlignment::Center;
-    EOdysseyImportTextureScaling mScaling = EOdysseyImportTextureScaling::None;
-    EOdysseyAntiAliasing mResamplingMethod = EOdysseyAntiAliasing::Bilinear;
+    TAttribute<FData> mData;
+    FOnChanged mOnChanged;
 };
