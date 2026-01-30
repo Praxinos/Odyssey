@@ -13,6 +13,7 @@
 #include "CanvasItem.h"
 #include "CanvasTypes.h"
 #include "RenderGraphBuilder.h"
+#include "RenderGraphUtils.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -223,10 +224,34 @@ SOdysseyImportTexturesDialog::Render(UTextureRenderTarget2D* oRenderTarget, int 
                 ETextureCreateFlags::ShaderResource | ETextureCreateFlags::RenderTargetable
             ); */
 
+            AddClearRenderTargetPass(graphBuilder, destinationTexture, FLinearColor::Transparent);
+
             FCanvas* canvas = FCanvas::Create(graphBuilder, destinationTexture, nullptr, FGameTime(), GMaxRHIFeatureLevel);
 
             int32 textureWidth = texture->GetSurfaceWidth();
             int32 textureHeight = texture->GetSurfaceHeight();
+
+            switch(positioningData.mScaling)
+            {
+                case EOdysseyImportTextureScaling::None: break;
+
+                case EOdysseyImportTextureScaling::Scale:
+                {
+                    textureWidth = destinationTexture->Desc.Extent.X;
+                    textureHeight = destinationTexture->Desc.Extent.Y;
+                }
+                break;
+
+                case EOdysseyImportTextureScaling::ScaleAndFit:
+                {
+                    float ratio = FMath::Min(float(destinationTexture->Desc.Extent.X) / texture->GetSurfaceWidth(), float(destinationTexture->Desc.Extent.Y) / texture->GetSurfaceHeight());
+
+                    textureWidth = texture->GetSurfaceWidth() * ratio;
+                    textureHeight = texture->GetSurfaceHeight() * ratio;
+                }
+                break;
+            }
+
             int32 destTextureWidth = destinationTexture->Desc.Extent.X;
             int32 destTextureHeight = destinationTexture->Desc.Extent.Y;
 
@@ -245,7 +270,16 @@ SOdysseyImportTexturesDialog::Render(UTextureRenderTarget2D* oRenderTarget, int 
                 case SOdysseyImportTexturePositioning::EAlignment::BottomRight: texturePosition = FVector2D(destTextureWidth - textureWidth, destTextureHeight - textureHeight); break;
             }
 
-            FCanvasTileItem TileItem(texturePosition, texture->GetResource(), FColor::White);
+            FTexture* tileTexture = graphBuilder.AllocObject<FTexture>();
+            tileTexture->TextureRHI = texture->GetResource()->TextureRHI;
+            tileTexture->SamplerStateRHI = Odyssey::GetSamplerStateForAntiAliasing(positioningData.mResamplingMethod);
+
+            FCanvasTileItem TileItem(
+                texturePosition,
+                tileTexture,
+                FVector2D(textureWidth, textureHeight),
+                FColor::White
+            );
             canvas->DrawItem(TileItem);
             canvas->Flush_RenderThread(graphBuilder);
 
