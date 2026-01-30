@@ -23,8 +23,8 @@ public:
         Top,
         TopRight,
         Left,
-        Right,
         Center,
+        Right,
         BottomLeft,
         Bottom,
         BottomRight

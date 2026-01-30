@@ -24,217 +24,206 @@ SOdysseyImportTexturePositioning::Construct(const FArguments& InArgs)
     FMargin alignmentGridPadding(4.0f);
 
     ChildSlot
-    .HAlign(HAlign_Left)
+    .HAlign(HAlign_Fill)
     .VAlign(VAlign_Top)
     [
-        SNew(SHorizontalBox)
-        + SHorizontalBox::Slot()
-        .AutoWidth()
+        SNew(SVerticalBox)
+        + SVerticalBox::Slot()
+        .Padding(FMargin(0.f, 0.f, 0.f, 4.f))
+        .AutoHeight()
         [
-            SNew(SVerticalBox)
-            + SVerticalBox::Slot()
-            .Padding(FMargin(0.f, 0.f, 0.f, 4.f))
-            .AutoHeight()
-            [
-                SNew(STextBlock)
-                .Text(LOCTEXT("import-texture-dialog.alignment.name", "Alignment"))
-            ]
+            SNew(STextBlock)
+            .Text(LOCTEXT("import-texture-dialog.alignment.name", "Alignment"))
+        ]
 
-            + SVerticalBox::Slot()
-            .Padding(FMargin(0.f, 0.f, 0.f, 4.f))
-            .AutoHeight()
+        + SVerticalBox::Slot()
+        .Padding(FMargin(0.f, 0.f, 0.f, 4.f))
+        .AutoHeight()
+        [
+            SNew(SGridPanel)
+            + SGridPanel::Slot(0, 0)
+            .HAlign(HAlign_Center)
+            .VAlign(VAlign_Center)
+            .Padding(alignmentGridPadding)
             [
-                SNew(SGridPanel)
-                + SGridPanel::Slot(0, 0)
-                .HAlign(HAlign_Center)
-                .VAlign(VAlign_Center)
-                .Padding(alignmentGridPadding)
+                SNew(SCheckBox)
+                .Style( FAppStyle::Get(),  "ToggleButtonCheckbox" )
+                .Padding(alignmentButtonPadding)
+                .HAlign( HAlign_Center )
+                .OnCheckStateChanged( this, &SOdysseyImportTexturePositioning::OnAlignmentCheckBoxStateChanged, EAlignment::TopLeft )
+                .IsChecked( this, &SOdysseyImportTexturePositioning::IsAlignmentChecked, EAlignment::TopLeft )
                 [
-                    SNew(SCheckBox)
-                    .Style( FAppStyle::Get(),  "ToggleButtonCheckbox" )
-                    .Padding(alignmentButtonPadding)
-                    .HAlign( HAlign_Center )
-                    .OnCheckStateChanged( this, &SOdysseyImportTexturePositioning::OnAlignmentCheckBoxStateChanged, EAlignment::TopLeft )
-                    .IsChecked( this, &SOdysseyImportTexturePositioning::IsAlignmentChecked, EAlignment::TopLeft )
-                    [
-                        SNew(SImage)
-                        .Image(FOdysseyStyle::GetBrush("OdysseyImportTexturePositioning.Alignment.TopLeft"))
-                    ]
-                ]
-                + SGridPanel::Slot(1, 0)
-                .HAlign(HAlign_Center)
-                .VAlign(VAlign_Center)
-                .Padding(alignmentGridPadding)
-                [
-                    SNew(SCheckBox)
-                    .Style( FAppStyle::Get(),  "ToggleButtonCheckbox" )
-                    .Padding(alignmentButtonPadding)
-                    .HAlign( HAlign_Center )
-                    .OnCheckStateChanged( this, &SOdysseyImportTexturePositioning::OnAlignmentCheckBoxStateChanged, EAlignment::Top )
-                    .IsChecked( this, &SOdysseyImportTexturePositioning::IsAlignmentChecked, EAlignment::Top )
-                    [
-                        SNew(SImage)
-                        .Image(FOdysseyStyle::GetBrush("OdysseyImportTexturePositioning.Alignment.Top"))
-                    ]
-                ]
-                + SGridPanel::Slot(2, 0)
-                .HAlign(HAlign_Center)
-                .VAlign(VAlign_Center)
-                .Padding(alignmentGridPadding)
-                [
-                    SNew(SCheckBox)
-                    .Style( FAppStyle::Get(),  "ToggleButtonCheckbox" )
-                    .Padding(alignmentButtonPadding)
-                    .HAlign( HAlign_Center )
-                    .OnCheckStateChanged( this, &SOdysseyImportTexturePositioning::OnAlignmentCheckBoxStateChanged, EAlignment::TopRight )
-                    .IsChecked( this, &SOdysseyImportTexturePositioning::IsAlignmentChecked, EAlignment::TopRight )
-                    [
-                        SNew(SImage)
-                        .Image(FOdysseyStyle::GetBrush("OdysseyImportTexturePositioning.Alignment.TopRight"))
-                    ]
-                ]
-                + SGridPanel::Slot(0, 1)
-                .HAlign(HAlign_Center)
-                .VAlign(VAlign_Center)
-                .Padding(alignmentGridPadding)
-                [
-                    SNew(SCheckBox)
-                    .Style( FAppStyle::Get(),  "ToggleButtonCheckbox" )
-                    .Padding(alignmentButtonPadding)
-                    .HAlign( HAlign_Center )
-                    .OnCheckStateChanged( this, &SOdysseyImportTexturePositioning::OnAlignmentCheckBoxStateChanged, EAlignment::Left )
-                    .IsChecked( this, &SOdysseyImportTexturePositioning::IsAlignmentChecked, EAlignment::Left )
-                    [
-                        SNew(SImage)
-                        .Image(FOdysseyStyle::GetBrush("OdysseyImportTexturePositioning.Alignment.Left"))
-                    ]
-                ]
-                + SGridPanel::Slot(1, 1)
-                .HAlign(HAlign_Center)
-                .VAlign(VAlign_Center)
-                .Padding(alignmentGridPadding)
-                [
-                    SNew(SCheckBox)
-                    .Style( FAppStyle::Get(),  "ToggleButtonCheckbox" )
-                    .Padding(alignmentButtonPadding)
-                    .HAlign( HAlign_Center )
-                    .OnCheckStateChanged( this, &SOdysseyImportTexturePositioning::OnAlignmentCheckBoxStateChanged, EAlignment::Center )
-                    .IsChecked( this, &SOdysseyImportTexturePositioning::IsAlignmentChecked, EAlignment::Center )
-                    [
-                        SNew(SImage)
-                        .Image(FOdysseyStyle::GetBrush("OdysseyImportTexturePositioning.Alignment.Center"))
-                    ]
-                ]
-                + SGridPanel::Slot(2, 1)
-                .HAlign(HAlign_Center)
-                .VAlign(VAlign_Center)
-                .Padding(alignmentGridPadding)
-                [
-                    SNew(SCheckBox)
-                    .Style( FAppStyle::Get(),  "ToggleButtonCheckbox" )
-                    .Padding(alignmentButtonPadding)
-                    .HAlign( HAlign_Center )
-                    .OnCheckStateChanged( this, &SOdysseyImportTexturePositioning::OnAlignmentCheckBoxStateChanged, EAlignment::Right )
-                    .IsChecked( this, &SOdysseyImportTexturePositioning::IsAlignmentChecked, EAlignment::Right )
-                    [
-                        SNew(SImage)
-                        .Image(FOdysseyStyle::GetBrush("OdysseyImportTexturePositioning.Alignment.Right"))
-                    ]
-                ]
-                + SGridPanel::Slot(0, 2)
-                .HAlign(HAlign_Center)
-                .VAlign(VAlign_Center)
-                .Padding(alignmentGridPadding)
-                [
-                    SNew(SCheckBox)
-                    .Style( FAppStyle::Get(),  "ToggleButtonCheckbox" )
-                    .Padding(alignmentButtonPadding)
-                    .HAlign( HAlign_Center )
-                    .OnCheckStateChanged( this, &SOdysseyImportTexturePositioning::OnAlignmentCheckBoxStateChanged, EAlignment::BottomLeft )
-                    .IsChecked( this, &SOdysseyImportTexturePositioning::IsAlignmentChecked, EAlignment::BottomLeft )
-                    [
-                        SNew(SImage)
-                        .Image(FOdysseyStyle::GetBrush("OdysseyImportTexturePositioning.Alignment.BottomLeft"))
-                    ]
-                ]
-                + SGridPanel::Slot(1, 2)
-                .HAlign(HAlign_Center)
-                .VAlign(VAlign_Center)
-                .Padding(alignmentGridPadding)
-                [
-                    SNew(SCheckBox)
-                    .Style( FAppStyle::Get(),  "ToggleButtonCheckbox" )
-                    .Padding(alignmentButtonPadding)
-                    .HAlign( HAlign_Center )
-                    .OnCheckStateChanged( this, &SOdysseyImportTexturePositioning::OnAlignmentCheckBoxStateChanged, EAlignment::Bottom )
-                    .IsChecked( this, &SOdysseyImportTexturePositioning::IsAlignmentChecked, EAlignment::Bottom )
-                    [
-                        SNew(SImage)
-                        .Image(FOdysseyStyle::GetBrush("OdysseyImportTexturePositioning.Alignment.Bottom"))
-                    ]
-                ]
-                + SGridPanel::Slot(2, 2)
-                .HAlign(HAlign_Center)
-                .VAlign(VAlign_Center)
-                .Padding(alignmentGridPadding)
-                [
-                    SNew(SCheckBox)
-                    .Style( FAppStyle::Get(),  "ToggleButtonCheckbox" )
-                    .Padding(alignmentButtonPadding)
-                    .HAlign( HAlign_Center )
-                    .OnCheckStateChanged( this, &SOdysseyImportTexturePositioning::OnAlignmentCheckBoxStateChanged, EAlignment::BottomRight )
-                    .IsChecked( this, &SOdysseyImportTexturePositioning::IsAlignmentChecked, EAlignment::BottomRight )
-                    [
-                        SNew(SImage)
-                        .Image(FOdysseyStyle::GetBrush("OdysseyImportTexturePositioning.Alignment.BottomRight"))
-                    ]
+                    SNew(SImage)
+                    .Image(FOdysseyStyle::GetBrush("OdysseyImportTexturePositioning.Alignment.TopLeft"))
                 ]
             ]
-            + SVerticalBox::Slot()
-            .Padding(FMargin(0.f, 0.f, 4.f, 4.f))
-            .AutoHeight()
+            + SGridPanel::Slot(1, 0)
+            .HAlign(HAlign_Center)
+            .VAlign(VAlign_Center)
+            .Padding(alignmentGridPadding)
             [
-                SNew(SHorizontalBox)
-                + SHorizontalBox::Slot()
-                .AutoWidth()
+                SNew(SCheckBox)
+                .Style( FAppStyle::Get(),  "ToggleButtonCheckbox" )
+                .Padding(alignmentButtonPadding)
+                .HAlign( HAlign_Center )
+                .OnCheckStateChanged( this, &SOdysseyImportTexturePositioning::OnAlignmentCheckBoxStateChanged, EAlignment::Top )
+                .IsChecked( this, &SOdysseyImportTexturePositioning::IsAlignmentChecked, EAlignment::Top )
+                [
+                    SNew(SImage)
+                    .Image(FOdysseyStyle::GetBrush("OdysseyImportTexturePositioning.Alignment.Top"))
+                ]
+            ]
+            + SGridPanel::Slot(2, 0)
+            .HAlign(HAlign_Center)
+            .VAlign(VAlign_Center)
+            .Padding(alignmentGridPadding)
+            [
+                SNew(SCheckBox)
+                .Style( FAppStyle::Get(),  "ToggleButtonCheckbox" )
+                .Padding(alignmentButtonPadding)
+                .HAlign( HAlign_Center )
+                .OnCheckStateChanged( this, &SOdysseyImportTexturePositioning::OnAlignmentCheckBoxStateChanged, EAlignment::TopRight )
+                .IsChecked( this, &SOdysseyImportTexturePositioning::IsAlignmentChecked, EAlignment::TopRight )
+                [
+                    SNew(SImage)
+                    .Image(FOdysseyStyle::GetBrush("OdysseyImportTexturePositioning.Alignment.TopRight"))
+                ]
+            ]
+            + SGridPanel::Slot(0, 1)
+            .HAlign(HAlign_Center)
+            .VAlign(VAlign_Center)
+            .Padding(alignmentGridPadding)
+            [
+                SNew(SCheckBox)
+                .Style( FAppStyle::Get(),  "ToggleButtonCheckbox" )
+                .Padding(alignmentButtonPadding)
+                .HAlign( HAlign_Center )
+                .OnCheckStateChanged( this, &SOdysseyImportTexturePositioning::OnAlignmentCheckBoxStateChanged, EAlignment::Left )
+                .IsChecked( this, &SOdysseyImportTexturePositioning::IsAlignmentChecked, EAlignment::Left )
+                [
+                    SNew(SImage)
+                    .Image(FOdysseyStyle::GetBrush("OdysseyImportTexturePositioning.Alignment.Left"))
+                ]
+            ]
+            + SGridPanel::Slot(1, 1)
+            .HAlign(HAlign_Center)
+            .VAlign(VAlign_Center)
+            .Padding(alignmentGridPadding)
+            [
+                SNew(SCheckBox)
+                .Style( FAppStyle::Get(),  "ToggleButtonCheckbox" )
+                .Padding(alignmentButtonPadding)
+                .HAlign( HAlign_Center )
+                .OnCheckStateChanged( this, &SOdysseyImportTexturePositioning::OnAlignmentCheckBoxStateChanged, EAlignment::Center )
+                .IsChecked( this, &SOdysseyImportTexturePositioning::IsAlignmentChecked, EAlignment::Center )
+                [
+                    SNew(SImage)
+                    .Image(FOdysseyStyle::GetBrush("OdysseyImportTexturePositioning.Alignment.Center"))
+                ]
+            ]
+            + SGridPanel::Slot(2, 1)
+            .HAlign(HAlign_Center)
+            .VAlign(VAlign_Center)
+            .Padding(alignmentGridPadding)
+            [
+                SNew(SCheckBox)
+                .Style( FAppStyle::Get(),  "ToggleButtonCheckbox" )
+                .Padding(alignmentButtonPadding)
+                .HAlign( HAlign_Center )
+                .OnCheckStateChanged( this, &SOdysseyImportTexturePositioning::OnAlignmentCheckBoxStateChanged, EAlignment::Right )
+                .IsChecked( this, &SOdysseyImportTexturePositioning::IsAlignmentChecked, EAlignment::Right )
+                [
+                    SNew(SImage)
+                    .Image(FOdysseyStyle::GetBrush("OdysseyImportTexturePositioning.Alignment.Right"))
+                ]
+            ]
+            + SGridPanel::Slot(0, 2)
+            .HAlign(HAlign_Center)
+            .VAlign(VAlign_Center)
+            .Padding(alignmentGridPadding)
+            [
+                SNew(SCheckBox)
+                .Style( FAppStyle::Get(),  "ToggleButtonCheckbox" )
+                .Padding(alignmentButtonPadding)
+                .HAlign( HAlign_Center )
+                .OnCheckStateChanged( this, &SOdysseyImportTexturePositioning::OnAlignmentCheckBoxStateChanged, EAlignment::BottomLeft )
+                .IsChecked( this, &SOdysseyImportTexturePositioning::IsAlignmentChecked, EAlignment::BottomLeft )
+                [
+                    SNew(SImage)
+                    .Image(FOdysseyStyle::GetBrush("OdysseyImportTexturePositioning.Alignment.BottomLeft"))
+                ]
+            ]
+            + SGridPanel::Slot(1, 2)
+            .HAlign(HAlign_Center)
+            .VAlign(VAlign_Center)
+            .Padding(alignmentGridPadding)
+            [
+                SNew(SCheckBox)
+                .Style( FAppStyle::Get(),  "ToggleButtonCheckbox" )
+                .Padding(alignmentButtonPadding)
+                .HAlign( HAlign_Center )
+                .OnCheckStateChanged( this, &SOdysseyImportTexturePositioning::OnAlignmentCheckBoxStateChanged, EAlignment::Bottom )
+                .IsChecked( this, &SOdysseyImportTexturePositioning::IsAlignmentChecked, EAlignment::Bottom )
+                [
+                    SNew(SImage)
+                    .Image(FOdysseyStyle::GetBrush("OdysseyImportTexturePositioning.Alignment.Bottom"))
+                ]
+            ]
+            + SGridPanel::Slot(2, 2)
+            .HAlign(HAlign_Center)
+            .VAlign(VAlign_Center)
+            .Padding(alignmentGridPadding)
+            [
+                SNew(SCheckBox)
+                .Style( FAppStyle::Get(),  "ToggleButtonCheckbox" )
+                .Padding(alignmentButtonPadding)
+                .HAlign( HAlign_Center )
+                .OnCheckStateChanged( this, &SOdysseyImportTexturePositioning::OnAlignmentCheckBoxStateChanged, EAlignment::BottomRight )
+                .IsChecked( this, &SOdysseyImportTexturePositioning::IsAlignmentChecked, EAlignment::BottomRight )
+                [
+                    SNew(SImage)
+                    .Image(FOdysseyStyle::GetBrush("OdysseyImportTexturePositioning.Alignment.BottomRight"))
+                ]
+            ]
+        ]
+        + SVerticalBox::Slot()
+        .Padding(FMargin(0.f, 0.f, 4.f, 4.f))
+        .AutoHeight()
+        [
+            SNew(SHorizontalBox)
+            + SHorizontalBox::Slot()
+            [
+                SNew(SVerticalBox)
+                + SVerticalBox::Slot()
                 .VAlign(VAlign_Center)
                 [
                     SNew(STextBlock)
                     .Text(LOCTEXT("import-texture-dialog.scaling.name", "Scaling"))
                 ]
-                + SHorizontalBox::Slot()
-                [
-                    SNew( SEnumComboBox, StaticEnum<EOdysseyImportTextureScaling>() )
-                    .CurrentValue(this, &SOdysseyImportTexturePositioning::GetScaling)
-                    .OnEnumSelectionChanged(this, &SOdysseyImportTexturePositioning::OnScalingEnumSelectionChanged)
-                ]
-            ]
-            + SVerticalBox::Slot()
-            .Padding(FMargin(0.f, 0.f, 4.f, 4.f))
-            .AutoHeight()
-            [
-                SNew(SHorizontalBox)
-                + SHorizontalBox::Slot()
-                .AutoWidth()
+                + SVerticalBox::Slot()
                 .VAlign(VAlign_Center)
                 [
                     SNew(STextBlock)
                     .Text(LOCTEXT("import-texture-dialog.resampling-method.name", "Resampling Method"))
                 ]
-                + SHorizontalBox::Slot()
+            ]
+            + SHorizontalBox::Slot()
+            [
+                SNew(SVerticalBox)
+                + SVerticalBox::Slot()
+                [
+                    SNew( SEnumComboBox, StaticEnum<EOdysseyImportTextureScaling>() )
+                    .CurrentValue(this, &SOdysseyImportTexturePositioning::GetScaling)
+                    .OnEnumSelectionChanged(this, &SOdysseyImportTexturePositioning::OnScalingEnumSelectionChanged)
+                ]
+                + SVerticalBox::Slot()
                 [
                     SNew( SEnumComboBox, StaticEnum<EOdysseyAntiAliasing>() )
                     .CurrentValue(this, &SOdysseyImportTexturePositioning::GetResamplingMethod)
                     .OnEnumSelectionChanged(this, &SOdysseyImportTexturePositioning::OnResamplingMethodEnumSelectionChanged)
                 ]
+
             ]
-        ]
-        + SHorizontalBox::Slot()
-        .AutoWidth()
-        [
-            SNew(SBox)
-            .WidthOverride(500)
-            .HeightOverride(500)
         ]
     ];
 }
