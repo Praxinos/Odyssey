@@ -5,10 +5,12 @@
 #include "ArianeEditorTool.h"
 #include "ArianeEditorToolTab.h"
 #include "ArianePainting3DComponent.h"
+#include "ArianePainting3DActor.h"
 #include "PathDrawingTool/ArianeEditorPathDrawingTool.h"
 // Unreal
 #include "Toolkits/BaseToolkit.h"
 #include "UObject/Object.h"
+#include "EdMode.h"
 
 FArianeEditor::~FArianeEditor()
 {
@@ -153,6 +155,18 @@ FArianeEditor::Init()
 {
     InitTools();
     InitTabs();
+}
+
+UWorld*
+FArianeEditor::GetWorld()
+{
+    return mToolkit->GetEditorMode()->GetWorld();
+}
+
+void
+FArianeEditor::AddPainting3DActor()
+{
+    GetWorld()->SpawnActor( AArianePainting3DActor::StaticClass() );
 }
 
 void

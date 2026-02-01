@@ -73,6 +73,8 @@ FArianeEditorModule::StartupModule()
 {
     RegisterEditorMode();
 
+    //UToolMenus::RegisterStartupCallback( FSimpleMulticastDelegate::FDelegate::CreateRaw(this, &FArianeEditorModule::RegisterMenus ) );
+
 /* Gary
     RegisterBrushOverrides(); //First thing to do, as it modifies the Brush CDO
     RegisterSettings();
@@ -90,6 +92,8 @@ FArianeEditorModule::StartupModule()
 void
 FArianeEditorModule::ShutdownModule()
 {
+    UToolMenus::UnRegisterStartupCallback( this );
+
     UnregisterEditorMode();
 
 /* Gary
@@ -104,6 +108,14 @@ FArianeEditorModule::ShutdownModule()
     FOdysseyVectorBrushCustomization::Unregister();
     FOdysseyVectorObjectViewPaletteCustomization::Unregister();
 */
+}
+
+void
+FArianeEditorModule::RegisterMenus()
+{
+    UToolMenu* Menu = UToolMenus::Get()->ExtendMenu("ContentBrowser.AssetContextMenu.AssetActionsSubMenu");
+    FToolMenuSection& Section = Menu->FindOrAddSection("AssetContextMoveActions");
+
 }
 
 void

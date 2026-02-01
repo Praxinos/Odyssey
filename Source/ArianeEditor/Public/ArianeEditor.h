@@ -7,6 +7,7 @@ class UArianeEditorTool;
 class FModeToolkit;
 class FArianeEditorTab;
 class FTabManager;
+class UWorld;
 
 /**
  * Base class for a Painting Editor
@@ -28,6 +29,8 @@ class ARIANEEDITOR_API FArianeEditor
         void UnregisterTabSpawners( const TSharedRef< FTabManager >& iTabManager );
         void CloseAllTabs();
         void AddPainting3DComponent( const TArray<class AActor *> iActors );
+        void AddPainting3DActor();
+        UWorld* GetWorld();
 
     protected:
         void AddTool( UArianeEditorTool* iTool );
