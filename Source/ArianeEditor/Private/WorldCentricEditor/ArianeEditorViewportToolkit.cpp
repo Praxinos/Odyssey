@@ -69,6 +69,50 @@ FArianeEditorViewportToolkit::ExtendMenu ( FMenuBuilder& MenuBuilder )
     UE_LOG(LogTemp, Warning, TEXT("TEST"));
 }
 
+/*
+void
+FArianeEditorViewportToolkit::ExtendMenus()
+{
+    UToolMenu* Menu = UToolMenus::Get()->ExtendMenu("ContentBrowser.AssetContextMenu.AssetActionsSubMenu");
+    FToolMenuSection& Section = Menu->FindOrAddSection("AssetContextMoveActions");
+
+    FToolMenuEntry& Entry = Section.AddDynamicEntry("AssetManagerEditorViewCommands", FNewToolMenuSectionDelegate::CreateLambda([](FToolMenuSection& InSection)
+    {
+        UContentBrowserAssetContextMenuContext* Context = InSection.FindContext<UContentBrowserAssetContextMenuContext>();
+        if (Context)
+        {
+            FToolUIActionChoice LockAction(FExecuteAction::CreateLambda([Context]()
+            {
+                FAssetRegistryModule& AssetRegistryModule = FModuleManager::Get().LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
+
+                for(FAssetData SelectedAsset : Context->SelectedAssets)
+                {
+                    if(SelectedAsset.GetPackage()->HasAnyPackageFlags(PKG_DisallowExport) == false)
+                    {
+                        SelectedAsset.GetPackage()->MarkPackageDirty();
+                        SelectedAsset.GetPackage()->SetPackageFlags(PKG_DisallowExport);
+                        AssetRegistryModule.Get().AssetFullyUpdateTags(SelectedAsset.GetAsset());
+                    }
+                }
+            }));
+
+            InSection.AddEntry(FToolMenuEntry::InitMenuEntry(FName("Lock"), FText::FromString("Lock Export"), FText::FromString("Lock this asset. Can't export if locked."), FSlateIcon(FMyStyle::Get().GetStyleSetName(), "MyIconName"), LockAction));
+        }
+    }));
+}
+*/
+
+void
+FArianeEditorViewportToolkit::AddActorMenuEntry( FToolMenuSection& InSection )
+{
+    InSection.AddMenuEntry(
+          FName("MyEntry")
+        , LOCTEXT("ariane-editor.add-actor-menu.add-painting3dactor.name", "Add Painting 3D Actor")
+        , LOCTEXT("ariane-editor.add-actor-menu.add-painting3dactor.tooltip", "Add Painting 3D Actor")
+        , FSlateIcon()
+        , FUIAction( FExecuteAction::CreateRaw( &mEditor, &FArianeEditor::AddPainting3DActor ) ) );
+}
+
 void
 FArianeEditorViewportToolkit::Init( const TSharedPtr<IToolkitHost>& iInitToolkitHost )
 {
@@ -77,13 +121,28 @@ FArianeEditorViewportToolkit::Init( const TSharedPtr<IToolkitHost>& iInitToolkit
 
     mEditor.Init();
 
+    UToolMenu* addMenu = UToolMenus::Get()->ExtendMenu("LevelEditor.LevelEditorToolbar.AddQuickMenu");
+    FToolMenuSection& arianeSection = addMenu->FindOrAddSection("Ariane 3D Painting");
+
+    FToolMenuEntry& Entry = arianeSection.AddDynamicEntry( "3D Painting Actor"
+                                                         , FNewToolMenuSectionDelegate::CreateRaw( this, &FArianeEditorViewportToolkit::AddActorMenuEntry ) );
+
+/*
     mLevelEditorMenuExtender = MakeShared<FExtender>();
-    mLevelEditorMenuExtender->AddMenuExtension( "LevelEditor.ActorContextMenu"
+    mLevelEditorMenuExtender->AddMenuExtension( "LevelEditor.LevelEditorToolbar.AddQuickMenu"
                                               , EExtensionHook::After
                                               , nullptr
                                               , FMenuExtensionDelegate::CreateRaw( this, &FArianeEditorViewportToolkit::ExtendMenu ) );
 
-    LevelEditorModule.GetMenuExtensibilityManager()->AddExtender( mLevelEditorMenuExtender );
+    LevelEditorModule.GetToolBarExtensibilityManager()->AddExtender( mLevelEditorMenuExtender );
+
+    FToolMenuInsert actorMenuInsert = FToolMenuInsert("FileActors", EToolMenuInsertType::After);
+    UToolMenu* ToolbarMenu = UToolMenus::Get()->ExtendMenu("LevelEditor.LevelEditorToolbar.AddQuickMenu");
+    fileMenu->FindOrAddSection("Ariane", FText(), fileMenuInsert);
+    FToolMenuSection& ToolbarSection = ToolbarMenu->AddSection("PrefabSystemSection.BlueprintEditor.Component", INVTEXT("Pefabab System"));
+
+    ToolbarSection.AddDynamicEntry(...);
+*/
 
 /* Gary
     mEditor = MakeShared<FOdysseyPainterEditor>(SharedThis(this));

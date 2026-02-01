@@ -8,11 +8,19 @@
 #include "CoreMinimal.h"
 #include "Components/MeshComponent.h"
 #include "PrimitiveSceneProxy.h"
+#include "StaticMeshResources.h"
+#include "VertexFactory.h"
+#include "RenderResource.h"
+#include "RawIndexBuffer.h"
+// Ariane Headers
 
 #include "ArianePainting3DComponent.generated.h"
 
 class FArianeGeometryProxy;
-struct FStaticMeshVertexBuffers;
+class FArianePath;
+class FArianeVertex;
+class FArianePathGeometry3D;
+class FArianeSegment;
 
 UCLASS()
 class ARIANE_API UArianePainting3DComponent : public UMeshComponent
@@ -28,29 +36,52 @@ class ARIANE_API UArianePainting3DComponent : public UMeshComponent
 
     public:
         virtual void TickComponent( float DeltaTime
-                                    , ELevelTick TickType
-                                    , FActorComponentTickFunction* ThisTickFunction ) override;
+                                  , ELevelTick TickType
+                                  , FActorComponentTickFunction* ThisTickFunction ) override;
         virtual void PostInitProperties() override;
-
         virtual FPrimitiveSceneProxy* CreateSceneProxy() override;
 
     private:
-        virtual FBoxSphereBounds CalcBounds(const FTransform& LocalToWorld) const override;
+        virtual FBoxSphereBounds CalcBounds( const FTransform& LocalToWorld ) const override;
+
+    public:
+        void AddPath( FArianePath* iPath );
+        const TArray<FArianePathGeometry3D*>& GetPathMeshs();
+        void BuildPathMeshs();
 
     protected:
-        FStaticMeshVertexBuffers mMeshVertexBuffers;
-        ULineBatchComponent* mLineBatchComponent;
+        //ULineBatchComponent* LineBatchComponent;
+        TArray<FArianePathGeometry3D*> PathMeshs;
+};
 
-        // testing
+class ARIANE_API FArianePathGeometry3D
+{
     public:
-        TArray<FVector> mVertices;
+        ~FArianePathGeometry3D();
+        FArianePathGeometry3D( UArianePainting3DComponent* InPainting3DComponent, FArianePath* InPath );
+
+        void Build();
+
+        const FStaticMeshVertexBuffers& GetVertexBuffers() const;
+        const FRawStaticIndexBuffer& GetIndexBuffer() const;
+
+    protected:
+        FVector GetAverageVectorAtVertex( FArianeVertex* InVertex );
+        void BuildSegment( FArianeSegment* Segment );
+
+    protected:
+        UArianePainting3DComponent* Painting3DComponent; // to retrieve the up vector
+        FArianePath* Path;
+
+        FStaticMeshVertexBuffers VertexBuffers;
+        FRawStaticIndexBuffer IndexBuffer;
 };
 
 class ARIANE_API FArianeGeometryProxy : public FPrimitiveSceneProxy
 {
     public:
         ~FArianeGeometryProxy();
-        FArianeGeometryProxy( UArianePainting3DComponent* iPainting3DComponent );
+        FArianeGeometryProxy( ERHIFeatureLevel::Type InFeatureLevel, UArianePainting3DComponent* InPainting3DComponent );
 
         virtual SIZE_T GetTypeHash() const override;
         virtual uint32 GetMemoryFootprint( void ) const override;
@@ -60,6 +91,10 @@ class ARIANE_API FArianeGeometryProxy : public FPrimitiveSceneProxy
                                            , const FSceneViewFamily& ViewFamily
                                            , uint32 VisibilityMap
                                            , FMeshElementCollector& Collector) const override;
-    protected:
+        void InitVertexFactory();
+        virtual void DrawStaticElements( FStaticPrimitiveDrawInterface * PDI ) override;
 
+    protected:
+        UArianePainting3DComponent* Painting3DComponent;
+        FVertexFactory VertexFactory;
 };
