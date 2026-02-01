@@ -69,6 +69,7 @@ class ARIANEEDITOR_API FArianeEditorViewportToolkit
     */
     protected:
         void ExtendMenu ( FMenuBuilder& MenuBuilder );
+        void AddActorMenuEntry( FToolMenuSection& InSection );
 
     private:
         FArianeEditorViewportEdMode* mEdMode;

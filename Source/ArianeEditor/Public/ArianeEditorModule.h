@@ -55,6 +55,9 @@ private:
     void RegisterPropertyModuleCustomizations();
     void UnregisterPropertyModuleCustomizations();
 
+   // Menus
+    void RegisterMenus();
+
     void RegisterThumbnailRenderers();
     void UnregisterThumbnailRenderers();
     void RegisterPlacementFactories();

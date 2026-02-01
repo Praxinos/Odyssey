@@ -10,6 +10,7 @@
 #include "ArianeEditorPathDrawingTool.generated.h"
 
 class FArianeEditor;
+class FArianePath;
 
 UCLASS()
 class ARIANEEDITOR_API UArianeEditorPathDrawingTool : public UArianeEditorTool
@@ -42,7 +43,10 @@ class ARIANEEDITOR_API UArianeEditorPathDrawingTool : public UArianeEditorTool
 
     protected:
         virtual void ExtendContextMenu( FMenuBuilder& menu );
+        void PlotVertex( FEditorViewportClient* iViewportClient
+                       , double iViewportX
+                       , double iViewportY );
 
-    public:
-
+    protected:
+        FArianePath* EditedPath;
 };
