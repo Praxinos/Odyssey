@@ -32,12 +32,8 @@ public:
         TArray< UTexture2D* > Textures;
     };
 
-    struct FOutputParams
-    {
 
-    };
-
-    static bool Open(const FInputParams& iInputParams, FOutputParams& oOutputParams);
+    static bool Open(const FInputParams& iInputParams);
 
 public:
     SLATE_BEGIN_ARGS(SOdysseyImportTexturesDialog)
@@ -50,10 +46,13 @@ public:
 public:
     // Construction / Destruction
     ~SOdysseyImportTexturesDialog();
-    void Construct(const FArguments& InArgs, const FInputParams& iInputParams, FOutputParams& oOutputParams);
+    void Construct(const FArguments& InArgs, const FInputParams& iInputParams);
+
+public:
+    UTextureRenderTarget2D* CreateRenderTarget() const;
+    void Render(UTextureRenderTarget2D* oRenderTarget, int iTextureIndex);
 
 private:
-
     ETabs GetActiveTab() const;
     void OnTabChecked(ETabs iTab, ECheckBoxState iState);
 
@@ -65,13 +64,10 @@ private:
     float GetCurrentTextureSliderValue() const;
     void OnCurrentTextureSliderValueChanged(float iValue);
 
-
     void UpdatePreview();
-    void Render(UTextureRenderTarget2D* oRenderTarget, int iTextureIndex);
 
 private:
     FInputParams mInputParams;
-    FOutputParams mOutputParams;
 
     ETabs mActiveTab = ETabs::Positioning;
     SOdysseyImportTexturePositioning::FData mPositioningData;

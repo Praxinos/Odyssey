@@ -59,7 +59,7 @@ FOdysseyImportTexturesViewportClient::Draw( FViewport* iViewport, FCanvas* ioCan
     if (mTexture && mTexture->GetResource())
     {
         float width = mTexture->GetSurfaceWidth() * zoomFactor;
-        float height = mTexture->GetSurfaceWidth() * zoomFactor;
+        float height = mTexture->GetSurfaceHeight() * zoomFactor;
 
         FCanvasTileItem tileItem(
             FVector2D( canvasRect.Min.X + (canvasRect.Width() - width) / 2.f, canvasRect.Min.Y + (canvasRect.Height() - height) / 2.f),

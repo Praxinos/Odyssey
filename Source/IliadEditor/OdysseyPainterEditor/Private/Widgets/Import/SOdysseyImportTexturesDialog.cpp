@@ -18,7 +18,7 @@
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
 bool
-SOdysseyImportTexturesDialog::Open(const FInputParams& iInputParams, FOutputParams& oOutputParams)
+SOdysseyImportTexturesDialog::Open(const FInputParams& iInputParams)
 {
     FText exportText = LOCTEXT("import-textures-dialog.export", "Import" );
     FText cancelText = LOCTEXT("import-textures-dialog.cancel", "Cancel");
@@ -27,7 +27,7 @@ SOdysseyImportTexturesDialog::Open(const FInputParams& iInputParams, FOutputPara
     windowArgs.MinWidth(500);
     windowArgs.MinHeight(500);
 
-    TSharedRef<SOdysseyImportTexturesDialog> importWidget = SNew(SOdysseyImportTexturesDialog, iInputParams, oOutputParams);
+    TSharedRef<SOdysseyImportTexturesDialog> importWidget = SNew(SOdysseyImportTexturesDialog, iInputParams);
 
     TSharedPtr<SCustomDialog> customDialog = SNew( SCustomDialog )
         .Title( iInputParams.Title )
@@ -44,6 +44,20 @@ SOdysseyImportTexturesDialog::Open(const FInputParams& iInputParams, FOutputPara
 
     if (customDialog->ShowModal() != 0)
         return false;
+
+    /*UTextureRenderTarget2D* renderTarget = importWidget->CreateRenderTarget();
+    for (int i = 0; i < iInputParams.Textures; i++)
+    {
+        importWidget->Render(renderTarget, i);
+
+        FImportParams importParams;
+        importParams.RenderTarget = renderTarget;
+        importParams.SourceTextureIndex = i;
+        importParams.SourceName = ;
+
+        iOnImportTexture.ExecuteIfBound(renderTarget);
+    } */
+
     return true;
 }
 
@@ -54,14 +68,11 @@ SOdysseyImportTexturesDialog::~SOdysseyImportTexturesDialog()
 }
 
 void
-SOdysseyImportTexturesDialog::Construct(const FArguments& InArgs, const FInputParams& iInputParams, FOutputParams& oOutputParams)
+SOdysseyImportTexturesDialog::Construct(const FArguments& InArgs, const FInputParams& iInputParams)
 {
     mInputParams = iInputParams;
-    mOutputParams = oOutputParams;
 
-    mPreviewRenderTarget = TStrongObjectPtr<UTextureRenderTarget2D>(NewObject<UTextureRenderTarget2D>());
-    mPreviewRenderTarget->InitAutoFormat(mInputParams.CanvasWidth, mInputParams.CanvasHeight);
-    mPreviewRenderTarget->UpdateResourceImmediate();
+    mPreviewRenderTarget = TStrongObjectPtr<UTextureRenderTarget2D>(CreateRenderTarget());
 
     ChildSlot
     .HAlign(HAlign_Fill)
@@ -202,10 +213,19 @@ SOdysseyImportTexturesDialog::UpdatePreview()
     mSceneViewport->Invalidate(); //Redraws the viewport
 }
 
+UTextureRenderTarget2D*
+SOdysseyImportTexturesDialog::CreateRenderTarget() const
+{
+    UTextureRenderTarget2D* renderTarget = NewObject<UTextureRenderTarget2D>();
+    renderTarget->InitAutoFormat(mInputParams.CanvasWidth, mInputParams.CanvasHeight);
+    renderTarget->UpdateResourceImmediate();
+    return renderTarget;
+}
+
 void
 SOdysseyImportTexturesDialog::Render(UTextureRenderTarget2D* oRenderTarget, int iTextureIndex)
 {
-    UTexture2D* texture = mInputParams.Textures[mCurrentTextureIndex];
+    UTexture2D* texture = mInputParams.Textures[iTextureIndex];
     texture->UpdateResource();
     texture->SetForceMipLevelsToBeResident( 1.0f );
     texture->WaitForStreaming();

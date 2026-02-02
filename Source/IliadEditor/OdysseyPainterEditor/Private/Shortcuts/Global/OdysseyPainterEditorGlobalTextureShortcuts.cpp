@@ -150,9 +150,7 @@ FOdysseyPainterEditorGlobalTextureShortcuts::Action_ImportImages()
     inputParams.CanvasHeight = texture->GetSurfaceHeight();
     inputParams.Textures = textures;
 
-    SOdysseyImportTexturesDialog::FOutputParams outputParams;
-
-    if(!SOdysseyImportTexturesDialog::Open(inputParams, outputParams))
+    if(!SOdysseyImportTexturesDialog::Open(inputParams))
         return;
 
     /*FOdysseyPainterEditorTextureImport import;
@@ -198,9 +196,7 @@ FOdysseyPainterEditorGlobalTextureShortcuts::Action_ImportTextures()
     inputParams.CanvasHeight = currentTexture->GetSurfaceHeight();
     inputParams.Textures = texturesToImport;
 
-    SOdysseyImportTexturesDialog::FOutputParams outputParams;
-
-    if(!SOdysseyImportTexturesDialog::Open(inputParams, outputParams))
+    if(!SOdysseyImportTexturesDialog::Open(inputParams))
         return;
 
     /*FOdysseyPainterEditorTextureImport import;
