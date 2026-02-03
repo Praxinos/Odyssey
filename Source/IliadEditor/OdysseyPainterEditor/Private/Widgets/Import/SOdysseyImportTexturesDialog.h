@@ -4,7 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "SOdysseyImportTexturePositioning.h"
+#include "OdysseyImportTexturesData.h"
 
 class FOdysseyImportTexturesViewportClient;
 
@@ -21,43 +21,25 @@ public:
     };
 
 public:
-    /*static bool Open(UTexture* oTexture, TArray< UTexture2D* > iTextures);
-    static bool Open(UTexture* oTexture, TArray< FString > iFilenames);*/
-
-    struct FInputParams
-    {
-        FText Title;
-        uint32 CanvasWidth = 0;
-        uint32 CanvasHeight = 0;
-        TArray< UTexture2D* > Textures;
-    };
-
-
-    static bool Open(const FInputParams& iInputParams);
+    static bool Open(FText Title, FOdysseyImportTexturesData& ioData);
 
 public:
     SLATE_BEGIN_ARGS(SOdysseyImportTexturesDialog)
         {}
-        /** Called when the object value changes */
-        //SLATE_ATTRIBUTE(UOdysseyBrush*, Brush)
-        //SLATE_EVENT( FOnBrushChanged, OnBrushChanged )
     SLATE_END_ARGS()
 
 public:
     // Construction / Destruction
     ~SOdysseyImportTexturesDialog();
-    void Construct(const FArguments& InArgs, const FInputParams& iInputParams);
+    void Construct(const FArguments& InArgs, const FOdysseyImportTexturesData& ioData);
 
 public:
-    UTextureRenderTarget2D* CreateRenderTarget() const;
-    void Render(UTextureRenderTarget2D* oRenderTarget, int iTextureIndex);
+    FOdysseyImportTexturesData GetImportData() const;
 
 private:
     ETabs GetActiveTab() const;
     void OnTabChecked(ETabs iTab, ECheckBoxState iState);
-
-    SOdysseyImportTexturePositioning::FData GetPositioningData() const;
-    void OnPositioningChanged(SOdysseyImportTexturePositioning::FData iData);
+    void OnPositioningChanged(FOdysseyImportTexturesData iData);
 
     EVisibility GetCurrentTextureSliderVisibility() const;
     float GetCurrentTextureSliderStepSize() const;
@@ -67,10 +49,9 @@ private:
     void UpdatePreview();
 
 private:
-    FInputParams mInputParams;
+    FOdysseyImportTexturesData mImportData;
 
     ETabs mActiveTab = ETabs::Positioning;
-    SOdysseyImportTexturePositioning::FData mPositioningData;
     uint32 mCurrentTextureIndex = 0;
 
     TStrongObjectPtr<UTextureRenderTarget2D> mPreviewRenderTarget;

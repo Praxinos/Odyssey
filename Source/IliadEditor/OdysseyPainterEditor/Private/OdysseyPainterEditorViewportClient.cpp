@@ -109,6 +109,7 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
         return;
 
     // Fully stream in the texture before drawing it.
+    texture->BlockOnAnyAsyncBuild();
     texture->SetForceMipLevelsToBeResident( 30.0f );
     texture->WaitForStreaming();
 

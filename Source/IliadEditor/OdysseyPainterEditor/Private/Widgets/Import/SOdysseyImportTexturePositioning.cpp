@@ -50,8 +50,8 @@ SOdysseyImportTexturePositioning::Construct(const FArguments& InArgs)
                 .Style( FAppStyle::Get(),  "ToggleButtonCheckbox" )
                 .Padding(alignmentButtonPadding)
                 .HAlign( HAlign_Center )
-                .OnCheckStateChanged( this, &SOdysseyImportTexturePositioning::OnAlignmentCheckBoxStateChanged, EAlignment::TopLeft )
-                .IsChecked( this, &SOdysseyImportTexturePositioning::IsAlignmentChecked, EAlignment::TopLeft )
+                .OnCheckStateChanged( this, &SOdysseyImportTexturePositioning::OnAlignmentCheckBoxStateChanged, FOdysseyImportTexturesData::EAlignment::TopLeft )
+                .IsChecked( this, &SOdysseyImportTexturePositioning::IsAlignmentChecked, FOdysseyImportTexturesData::EAlignment::TopLeft )
                 [
                     SNew(SImage)
                     .Image(FOdysseyStyle::GetBrush("OdysseyImportTexturePositioning.Alignment.TopLeft"))
@@ -66,8 +66,8 @@ SOdysseyImportTexturePositioning::Construct(const FArguments& InArgs)
                 .Style( FAppStyle::Get(),  "ToggleButtonCheckbox" )
                 .Padding(alignmentButtonPadding)
                 .HAlign( HAlign_Center )
-                .OnCheckStateChanged( this, &SOdysseyImportTexturePositioning::OnAlignmentCheckBoxStateChanged, EAlignment::Top )
-                .IsChecked( this, &SOdysseyImportTexturePositioning::IsAlignmentChecked, EAlignment::Top )
+                .OnCheckStateChanged( this, &SOdysseyImportTexturePositioning::OnAlignmentCheckBoxStateChanged, FOdysseyImportTexturesData::EAlignment::Top )
+                .IsChecked( this, &SOdysseyImportTexturePositioning::IsAlignmentChecked, FOdysseyImportTexturesData::EAlignment::Top )
                 [
                     SNew(SImage)
                     .Image(FOdysseyStyle::GetBrush("OdysseyImportTexturePositioning.Alignment.Top"))
@@ -82,8 +82,8 @@ SOdysseyImportTexturePositioning::Construct(const FArguments& InArgs)
                 .Style( FAppStyle::Get(),  "ToggleButtonCheckbox" )
                 .Padding(alignmentButtonPadding)
                 .HAlign( HAlign_Center )
-                .OnCheckStateChanged( this, &SOdysseyImportTexturePositioning::OnAlignmentCheckBoxStateChanged, EAlignment::TopRight )
-                .IsChecked( this, &SOdysseyImportTexturePositioning::IsAlignmentChecked, EAlignment::TopRight )
+                .OnCheckStateChanged( this, &SOdysseyImportTexturePositioning::OnAlignmentCheckBoxStateChanged, FOdysseyImportTexturesData::EAlignment::TopRight )
+                .IsChecked( this, &SOdysseyImportTexturePositioning::IsAlignmentChecked, FOdysseyImportTexturesData::EAlignment::TopRight )
                 [
                     SNew(SImage)
                     .Image(FOdysseyStyle::GetBrush("OdysseyImportTexturePositioning.Alignment.TopRight"))
@@ -98,8 +98,8 @@ SOdysseyImportTexturePositioning::Construct(const FArguments& InArgs)
                 .Style( FAppStyle::Get(),  "ToggleButtonCheckbox" )
                 .Padding(alignmentButtonPadding)
                 .HAlign( HAlign_Center )
-                .OnCheckStateChanged( this, &SOdysseyImportTexturePositioning::OnAlignmentCheckBoxStateChanged, EAlignment::Left )
-                .IsChecked( this, &SOdysseyImportTexturePositioning::IsAlignmentChecked, EAlignment::Left )
+                .OnCheckStateChanged( this, &SOdysseyImportTexturePositioning::OnAlignmentCheckBoxStateChanged, FOdysseyImportTexturesData::EAlignment::Left )
+                .IsChecked( this, &SOdysseyImportTexturePositioning::IsAlignmentChecked, FOdysseyImportTexturesData::EAlignment::Left )
                 [
                     SNew(SImage)
                     .Image(FOdysseyStyle::GetBrush("OdysseyImportTexturePositioning.Alignment.Left"))
@@ -114,8 +114,8 @@ SOdysseyImportTexturePositioning::Construct(const FArguments& InArgs)
                 .Style( FAppStyle::Get(),  "ToggleButtonCheckbox" )
                 .Padding(alignmentButtonPadding)
                 .HAlign( HAlign_Center )
-                .OnCheckStateChanged( this, &SOdysseyImportTexturePositioning::OnAlignmentCheckBoxStateChanged, EAlignment::Center )
-                .IsChecked( this, &SOdysseyImportTexturePositioning::IsAlignmentChecked, EAlignment::Center )
+                .OnCheckStateChanged( this, &SOdysseyImportTexturePositioning::OnAlignmentCheckBoxStateChanged, FOdysseyImportTexturesData::EAlignment::Center )
+                .IsChecked( this, &SOdysseyImportTexturePositioning::IsAlignmentChecked, FOdysseyImportTexturesData::EAlignment::Center )
                 [
                     SNew(SImage)
                     .Image(FOdysseyStyle::GetBrush("OdysseyImportTexturePositioning.Alignment.Center"))
@@ -130,8 +130,8 @@ SOdysseyImportTexturePositioning::Construct(const FArguments& InArgs)
                 .Style( FAppStyle::Get(),  "ToggleButtonCheckbox" )
                 .Padding(alignmentButtonPadding)
                 .HAlign( HAlign_Center )
-                .OnCheckStateChanged( this, &SOdysseyImportTexturePositioning::OnAlignmentCheckBoxStateChanged, EAlignment::Right )
-                .IsChecked( this, &SOdysseyImportTexturePositioning::IsAlignmentChecked, EAlignment::Right )
+                .OnCheckStateChanged( this, &SOdysseyImportTexturePositioning::OnAlignmentCheckBoxStateChanged, FOdysseyImportTexturesData::EAlignment::Right )
+                .IsChecked( this, &SOdysseyImportTexturePositioning::IsAlignmentChecked, FOdysseyImportTexturesData::EAlignment::Right )
                 [
                     SNew(SImage)
                     .Image(FOdysseyStyle::GetBrush("OdysseyImportTexturePositioning.Alignment.Right"))
@@ -146,8 +146,8 @@ SOdysseyImportTexturePositioning::Construct(const FArguments& InArgs)
                 .Style( FAppStyle::Get(),  "ToggleButtonCheckbox" )
                 .Padding(alignmentButtonPadding)
                 .HAlign( HAlign_Center )
-                .OnCheckStateChanged( this, &SOdysseyImportTexturePositioning::OnAlignmentCheckBoxStateChanged, EAlignment::BottomLeft )
-                .IsChecked( this, &SOdysseyImportTexturePositioning::IsAlignmentChecked, EAlignment::BottomLeft )
+                .OnCheckStateChanged( this, &SOdysseyImportTexturePositioning::OnAlignmentCheckBoxStateChanged, FOdysseyImportTexturesData::EAlignment::BottomLeft )
+                .IsChecked( this, &SOdysseyImportTexturePositioning::IsAlignmentChecked, FOdysseyImportTexturesData::EAlignment::BottomLeft )
                 [
                     SNew(SImage)
                     .Image(FOdysseyStyle::GetBrush("OdysseyImportTexturePositioning.Alignment.BottomLeft"))
@@ -162,8 +162,8 @@ SOdysseyImportTexturePositioning::Construct(const FArguments& InArgs)
                 .Style( FAppStyle::Get(),  "ToggleButtonCheckbox" )
                 .Padding(alignmentButtonPadding)
                 .HAlign( HAlign_Center )
-                .OnCheckStateChanged( this, &SOdysseyImportTexturePositioning::OnAlignmentCheckBoxStateChanged, EAlignment::Bottom )
-                .IsChecked( this, &SOdysseyImportTexturePositioning::IsAlignmentChecked, EAlignment::Bottom )
+                .OnCheckStateChanged( this, &SOdysseyImportTexturePositioning::OnAlignmentCheckBoxStateChanged, FOdysseyImportTexturesData::EAlignment::Bottom )
+                .IsChecked( this, &SOdysseyImportTexturePositioning::IsAlignmentChecked, FOdysseyImportTexturesData::EAlignment::Bottom )
                 [
                     SNew(SImage)
                     .Image(FOdysseyStyle::GetBrush("OdysseyImportTexturePositioning.Alignment.Bottom"))
@@ -178,8 +178,8 @@ SOdysseyImportTexturePositioning::Construct(const FArguments& InArgs)
                 .Style( FAppStyle::Get(),  "ToggleButtonCheckbox" )
                 .Padding(alignmentButtonPadding)
                 .HAlign( HAlign_Center )
-                .OnCheckStateChanged( this, &SOdysseyImportTexturePositioning::OnAlignmentCheckBoxStateChanged, EAlignment::BottomRight )
-                .IsChecked( this, &SOdysseyImportTexturePositioning::IsAlignmentChecked, EAlignment::BottomRight )
+                .OnCheckStateChanged( this, &SOdysseyImportTexturePositioning::OnAlignmentCheckBoxStateChanged, FOdysseyImportTexturesData::EAlignment::BottomRight )
+                .IsChecked( this, &SOdysseyImportTexturePositioning::IsAlignmentChecked, FOdysseyImportTexturesData::EAlignment::BottomRight )
                 [
                     SNew(SImage)
                     .Image(FOdysseyStyle::GetBrush("OdysseyImportTexturePositioning.Alignment.BottomRight"))
@@ -229,48 +229,48 @@ SOdysseyImportTexturePositioning::Construct(const FArguments& InArgs)
 }
 
 void
-SOdysseyImportTexturePositioning::OnAlignmentCheckBoxStateChanged(ECheckBoxState InCheckState, EAlignment iAlignment)
+SOdysseyImportTexturePositioning::OnAlignmentCheckBoxStateChanged(ECheckBoxState InCheckState, FOdysseyImportTexturesData::EAlignment iAlignment)
 {
     if (InCheckState != ECheckBoxState::Checked)
         return;
 
-    FData positioning = mData.Get();
-    positioning.mAlignment = iAlignment;
-    mOnChanged.ExecuteIfBound(positioning);
+    FOdysseyImportTexturesData importData = mData.Get();
+    importData.SetAlignment(iAlignment);
+    mOnChanged.ExecuteIfBound(importData);
 }
 
 ECheckBoxState
-SOdysseyImportTexturePositioning::IsAlignmentChecked(EAlignment iAlignment) const
+SOdysseyImportTexturePositioning::IsAlignmentChecked(FOdysseyImportTexturesData::EAlignment iAlignment) const
 {
-    return mData.Get().mAlignment == iAlignment ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+    return mData.Get().GetAlignment() == iAlignment ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
 
 int32
 SOdysseyImportTexturePositioning::GetScaling() const
 {
-    return (int32)mData.Get().mScaling;
+    return (int32)mData.Get().GetScaling();
 }
 
 void
 SOdysseyImportTexturePositioning::OnScalingEnumSelectionChanged(int32 iValue, ESelectInfo::Type iSelectInfo)
 {
-    FData positioning = mData.Get();
-    positioning.mScaling = (EOdysseyImportTextureScaling)iValue;
-    mOnChanged.ExecuteIfBound(positioning);
+    FOdysseyImportTexturesData importData = mData.Get();
+    importData.SetScaling((EOdysseyImportTextureScaling)iValue);
+    mOnChanged.ExecuteIfBound(importData);
 }
 
 int32
 SOdysseyImportTexturePositioning::GetResamplingMethod() const
 {
-    return (int32)mData.Get().mResamplingMethod;
+    return (int32)mData.Get().GetResamplingMethod();
 }
 
 void
 SOdysseyImportTexturePositioning::OnResamplingMethodEnumSelectionChanged(int32 iValue, ESelectInfo::Type iSelectInfo)
 {
-    FData positioning = mData.Get();
-    positioning.mResamplingMethod = (EOdysseyAntiAliasing)iValue;
-    mOnChanged.ExecuteIfBound(positioning);
+    FOdysseyImportTexturesData importData = mData.Get();
+    importData.SetResamplingMethod((EOdysseyAntiAliasing)iValue);
+    mOnChanged.ExecuteIfBound(importData);
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -18,7 +18,7 @@
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
 bool
-SOdysseyImportTexturesDialog::Open(const FInputParams& iInputParams)
+SOdysseyImportTexturesDialog::Open(FText iTitle, FOdysseyImportTexturesData& ioData)
 {
     FText exportText = LOCTEXT("import-textures-dialog.export", "Import" );
     FText cancelText = LOCTEXT("import-textures-dialog.cancel", "Cancel");
@@ -27,10 +27,10 @@ SOdysseyImportTexturesDialog::Open(const FInputParams& iInputParams)
     windowArgs.MinWidth(500);
     windowArgs.MinHeight(500);
 
-    TSharedRef<SOdysseyImportTexturesDialog> importWidget = SNew(SOdysseyImportTexturesDialog, iInputParams);
+    TSharedRef<SOdysseyImportTexturesDialog> importWidget = SNew(SOdysseyImportTexturesDialog, ioData);
 
     TSharedPtr<SCustomDialog> customDialog = SNew( SCustomDialog )
-        .Title( iInputParams.Title )
+        .Title( iTitle )
         .UseScrollBox(false)
         .WindowArguments(windowArgs)
         .ClientSize(FVector2D(1000, 500)) //this line also activates Window Resizing
@@ -45,18 +45,7 @@ SOdysseyImportTexturesDialog::Open(const FInputParams& iInputParams)
     if (customDialog->ShowModal() != 0)
         return false;
 
-    /*UTextureRenderTarget2D* renderTarget = importWidget->CreateRenderTarget();
-    for (int i = 0; i < iInputParams.Textures; i++)
-    {
-        importWidget->Render(renderTarget, i);
-
-        FImportParams importParams;
-        importParams.RenderTarget = renderTarget;
-        importParams.SourceTextureIndex = i;
-        importParams.SourceName = ;
-
-        iOnImportTexture.ExecuteIfBound(renderTarget);
-    } */
+    ioData = importWidget->GetImportData();
 
     return true;
 }
@@ -68,11 +57,11 @@ SOdysseyImportTexturesDialog::~SOdysseyImportTexturesDialog()
 }
 
 void
-SOdysseyImportTexturesDialog::Construct(const FArguments& InArgs, const FInputParams& iInputParams)
+SOdysseyImportTexturesDialog::Construct(const FArguments& InArgs, const FOdysseyImportTexturesData& ioData)
 {
-    mInputParams = iInputParams;
+    mImportData = ioData;
 
-    mPreviewRenderTarget = TStrongObjectPtr<UTextureRenderTarget2D>(CreateRenderTarget());
+    mPreviewRenderTarget = TStrongObjectPtr<UTextureRenderTarget2D>(mImportData.CreateRT());
 
     ChildSlot
     .HAlign(HAlign_Fill)
@@ -112,7 +101,7 @@ SOdysseyImportTexturesDialog::Construct(const FArguments& InArgs, const FInputPa
             .MaxWidth(300)
             [
                 SNew(SOdysseyImportTexturePositioning)
-                .Data(this, &SOdysseyImportTexturesDialog::GetPositioningData)
+                .Data(this, &SOdysseyImportTexturesDialog::GetImportData)
                 .OnChanged(this, &SOdysseyImportTexturesDialog::OnPositioningChanged)
             ]
             + SHorizontalBox::Slot()
@@ -121,6 +110,10 @@ SOdysseyImportTexturesDialog::Construct(const FArguments& InArgs, const FInputPa
                 + SVerticalBox::Slot()
                 [
                     SAssignNew(mViewportWidget, SViewport)
+                    .EnableGammaCorrection(false)
+                    .IsEnabled(FSlateApplication::Get().GetNormalExecutionAttribute())
+                    .ShowEffectWhenDisabled(false)
+                    .EnableBlending(true)
                 ]
                 + SVerticalBox::Slot()
                 .AutoHeight()
@@ -139,12 +132,18 @@ SOdysseyImportTexturesDialog::Construct(const FArguments& InArgs, const FInputPa
         ]
     ];
 
-    mViewportClient = MakeShared<FOdysseyImportTexturesViewportClient>(mInputParams.CanvasWidth, mInputParams.CanvasHeight);
+    mViewportClient = MakeShared<FOdysseyImportTexturesViewportClient>(mImportData.GetDestinationWidth(), mImportData.GetDestinationHeight());
     mSceneViewport = MakeShared<FSceneViewport>(mViewportClient.Get(), mViewportWidget);
     mViewportWidget->SetViewportInterface(mSceneViewport.ToSharedRef());
 
     mViewportClient->SetTexture(mPreviewRenderTarget.Get());
     UpdatePreview();
+}
+
+FOdysseyImportTexturesData
+SOdysseyImportTexturesDialog::GetImportData() const
+{
+    return mImportData;
 }
 
 SOdysseyImportTexturesDialog::ETabs
@@ -162,150 +161,49 @@ SOdysseyImportTexturesDialog::OnTabChecked(ETabs iTab, ECheckBoxState iState)
     mActiveTab = iTab;
 }
 
-SOdysseyImportTexturePositioning::FData
-SOdysseyImportTexturesDialog::GetPositioningData() const
-{
-    return mPositioningData;
-}
-
 void
-SOdysseyImportTexturesDialog::OnPositioningChanged(SOdysseyImportTexturePositioning::FData iData)
+SOdysseyImportTexturesDialog::OnPositioningChanged(FOdysseyImportTexturesData iData)
 {
-    mPositioningData = iData;
+    mImportData = iData;
     UpdatePreview();
 }
 
 EVisibility
 SOdysseyImportTexturesDialog::GetCurrentTextureSliderVisibility() const
 {
-    return mInputParams.Textures.Num() - 1 <= 0 ? EVisibility::Collapsed : EVisibility::Visible;
+    return mImportData.GetSourceTextures().Num() - 1 <= 0 ? EVisibility::Collapsed : EVisibility::Visible;
 }
 
 float
 SOdysseyImportTexturesDialog::GetCurrentTextureSliderStepSize() const
 {
-    if (mInputParams.Textures.Num() - 1 <= 0)
+    if (mImportData.GetSourceTextures().Num() - 1 <= 0)
             return 0;
-    return 1.0f / (mInputParams.Textures.Num() - 1);
+    return 1.0f / (mImportData.GetSourceTextures().Num() - 1);
 }
 
 float
 SOdysseyImportTexturesDialog::GetCurrentTextureSliderValue() const
 {
-    if (mInputParams.Textures.Num() - 1 <= 0)
+    if (mImportData.GetSourceTextures().Num() - 1 <= 0)
         return 0;
 
-    return float(mCurrentTextureIndex) / (mInputParams.Textures.Num() - 1);
+    return float(mCurrentTextureIndex) / (mImportData.GetSourceTextures().Num() - 1);
 }
 
 void
 SOdysseyImportTexturesDialog::OnCurrentTextureSliderValueChanged(float iValue)
 {
-    mCurrentTextureIndex = (uint32)FMath::RoundToInt(iValue * (mInputParams.Textures.Num() - 1));
-    //mViewportClient->SetTexture(mInputParams.Textures[mCurrentTextureIndex]);
+    mCurrentTextureIndex = (uint32)FMath::RoundToInt(iValue * (mImportData.GetSourceTextures().Num() - 1));
+    //mViewportClient->SetTexture(mImportData.GetSourceTextures()[mCurrentTextureIndex]);
     UpdatePreview();
 }
 
 void
 SOdysseyImportTexturesDialog::UpdatePreview()
 {
-    Render(mPreviewRenderTarget.Get(), mCurrentTextureIndex);
+    mImportData.Render(mPreviewRenderTarget.Get(), mCurrentTextureIndex);
     mSceneViewport->Invalidate(); //Redraws the viewport
-}
-
-UTextureRenderTarget2D*
-SOdysseyImportTexturesDialog::CreateRenderTarget() const
-{
-    UTextureRenderTarget2D* renderTarget = NewObject<UTextureRenderTarget2D>();
-    renderTarget->InitAutoFormat(mInputParams.CanvasWidth, mInputParams.CanvasHeight);
-    renderTarget->UpdateResourceImmediate();
-    return renderTarget;
-}
-
-void
-SOdysseyImportTexturesDialog::Render(UTextureRenderTarget2D* oRenderTarget, int iTextureIndex)
-{
-    UTexture2D* texture = mInputParams.Textures[iTextureIndex];
-    texture->UpdateResource();
-    texture->SetForceMipLevelsToBeResident( 1.0f );
-    texture->WaitForStreaming();
-
-    FTextureRenderTargetResource* renderTargetResource = oRenderTarget->GameThread_GetRenderTargetResource();
-    ENQUEUE_RENDER_COMMAND(SOdysseyImportTexturesDialog_Render)(
-        [texture, renderTargetResource, positioningData = mPositioningData](FRHICommandListImmediate& RHICmdList)
-        {
-            FRDGBuilder graphBuilder(RHICmdList);
-            FRDGTextureRef destinationTexture = renderTargetResource->GetRenderTargetTexture( graphBuilder );
-
-            /* FRDGTextureDesc renderTextureDesc = FRDGTextureDesc::Create2D(
-                destinationTexture->Desc.Extent,
-                destinationTexture->Desc.Format,
-                FClearValueBinding::Transparent,
-                ETextureCreateFlags::ShaderResource | ETextureCreateFlags::RenderTargetable
-            ); */
-
-            AddClearRenderTargetPass(graphBuilder, destinationTexture, FLinearColor::Transparent);
-
-            FCanvas* canvas = FCanvas::Create(graphBuilder, destinationTexture, nullptr, FGameTime(), GMaxRHIFeatureLevel);
-
-            int32 textureWidth = texture->GetSurfaceWidth();
-            int32 textureHeight = texture->GetSurfaceHeight();
-
-            switch(positioningData.mScaling)
-            {
-                case EOdysseyImportTextureScaling::None: break;
-
-                case EOdysseyImportTextureScaling::Scale:
-                {
-                    textureWidth = destinationTexture->Desc.Extent.X;
-                    textureHeight = destinationTexture->Desc.Extent.Y;
-                }
-                break;
-
-                case EOdysseyImportTextureScaling::ScaleAndFit:
-                {
-                    float ratio = FMath::Min(float(destinationTexture->Desc.Extent.X) / texture->GetSurfaceWidth(), float(destinationTexture->Desc.Extent.Y) / texture->GetSurfaceHeight());
-
-                    textureWidth = texture->GetSurfaceWidth() * ratio;
-                    textureHeight = texture->GetSurfaceHeight() * ratio;
-                }
-                break;
-            }
-
-            int32 destTextureWidth = destinationTexture->Desc.Extent.X;
-            int32 destTextureHeight = destinationTexture->Desc.Extent.Y;
-
-            FVector2D texturePosition;
-
-            switch(positioningData.mAlignment)
-            {
-                case SOdysseyImportTexturePositioning::EAlignment::TopLeft: texturePosition = FVector2D::ZeroVector; break;
-                case SOdysseyImportTexturePositioning::EAlignment::Top: texturePosition = FVector2D((destTextureWidth - textureWidth) / 2.f, 0); break;
-                case SOdysseyImportTexturePositioning::EAlignment::TopRight: texturePosition = FVector2D(destTextureWidth - textureWidth, 0); break;
-                case SOdysseyImportTexturePositioning::EAlignment::Left: texturePosition = FVector2D(0, (destTextureHeight - textureHeight) / 2.f); break;
-                case SOdysseyImportTexturePositioning::EAlignment::Center: texturePosition = FVector2D((destTextureWidth - textureWidth) / 2.f, (destTextureHeight - textureHeight) / 2.f); break;
-                case SOdysseyImportTexturePositioning::EAlignment::Right: texturePosition = FVector2D(destTextureWidth - textureWidth, (destTextureHeight - textureHeight) / 2.f); break;
-                case SOdysseyImportTexturePositioning::EAlignment::BottomLeft: texturePosition = FVector2D(0, destTextureHeight - textureHeight); break;
-                case SOdysseyImportTexturePositioning::EAlignment::Bottom: texturePosition = FVector2D((destTextureWidth - textureWidth) / 2.f, destTextureHeight - textureHeight); break;
-                case SOdysseyImportTexturePositioning::EAlignment::BottomRight: texturePosition = FVector2D(destTextureWidth - textureWidth, destTextureHeight - textureHeight); break;
-            }
-
-            FTexture* tileTexture = graphBuilder.AllocObject<FTexture>();
-            tileTexture->TextureRHI = texture->GetResource()->TextureRHI;
-            tileTexture->SamplerStateRHI = Odyssey::GetSamplerStateForAntiAliasing(positioningData.mResamplingMethod);
-
-            FCanvasTileItem TileItem(
-                texturePosition,
-                tileTexture,
-                FVector2D(textureWidth, textureHeight),
-                FColor::White
-            );
-            canvas->DrawItem(TileItem);
-            canvas->Flush_RenderThread(graphBuilder);
-
-            graphBuilder.Execute();
-        }
-    );
 }
 
 #undef LOCTEXT_NAMESPACE

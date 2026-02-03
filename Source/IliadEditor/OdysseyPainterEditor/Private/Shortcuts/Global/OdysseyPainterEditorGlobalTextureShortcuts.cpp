@@ -144,17 +144,12 @@ FOdysseyPainterEditorGlobalTextureShortcuts::Action_ImportImages()
         textures.Add(importedTextures[i].Get());
     }
 
-    SOdysseyImportTexturesDialog::FInputParams inputParams;
-    inputParams.Title = LOCTEXT("import-textures-dialog.title", "Import Images" );
-    inputParams.CanvasWidth = texture->GetSurfaceWidth();
-    inputParams.CanvasHeight = texture->GetSurfaceHeight();
-    inputParams.Textures = textures;
-
-    if(!SOdysseyImportTexturesDialog::Open(inputParams))
+    FOdysseyImportTexturesData importData(textures, texture->GetSurfaceWidth(), texture->GetSurfaceHeight());
+    if(!SOdysseyImportTexturesDialog::Open(LOCTEXT("import-textures-dialog.title", "Import Images" ), importData))
         return;
 
-    /*FOdysseyPainterEditorTextureImport import;
-    import.ImportTextures(currentTexture, texturesToImport);*/
+    FOdysseyPainterEditorTextureImport import;
+    import.ImportTextures(texture, importData);
 }
 
 void
@@ -190,15 +185,10 @@ FOdysseyPainterEditorGlobalTextureShortcuts::Action_ImportTextures()
         texturesToImport.Add(openedTexture);
     }
 
-    SOdysseyImportTexturesDialog::FInputParams inputParams;
-    inputParams.Title = LOCTEXT("import-textures-dialog.title", "Import Textures" );
-    inputParams.CanvasWidth = currentTexture->GetSurfaceWidth();
-    inputParams.CanvasHeight = currentTexture->GetSurfaceHeight();
-    inputParams.Textures = texturesToImport;
-
-    if(!SOdysseyImportTexturesDialog::Open(inputParams))
+    FOdysseyImportTexturesData importData(texturesToImport, currentTexture->GetSurfaceWidth(), currentTexture->GetSurfaceHeight());
+    if(!SOdysseyImportTexturesDialog::Open(LOCTEXT("import-textures-dialog.title", "Import Textures" ), importData))
         return;
 
-    /*FOdysseyPainterEditorTextureImport import;
-    import.ImportTextures(currentTexture, texturesToImport);*/
+    FOdysseyPainterEditorTextureImport import;
+    import.ImportTextures(currentTexture, importData);
 }

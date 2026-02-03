@@ -4,48 +4,17 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "OdysseyAntiAliasing.h"
-
-UENUM()
-enum class EOdysseyImportTextureScaling : uint8
-{
-    None UMETA(ToolTip="Don't scale"),
-    Scale UMETA(ToolTip="Scales without preserving ratio"),
-    ScaleAndFit UMETA(ToolTip="Scales and preserves ratio")
-};
-
+#include "OdysseyImportTexturesData.h"
 class SOdysseyImportTexturePositioning : public SCompoundWidget
 {
 public:
-    enum class EAlignment
-    {
-        TopLeft,
-        Top,
-        TopRight,
-        Left,
-        Center,
-        Right,
-        BottomLeft,
-        Bottom,
-        BottomRight
-    };
-
-public:
-    struct FData
-    {
-        EAlignment mAlignment = EAlignment::Center;
-        EOdysseyImportTextureScaling mScaling = EOdysseyImportTextureScaling::None;
-        EOdysseyAntiAliasing mResamplingMethod = EOdysseyAntiAliasing::Bilinear;
-    };
-
-public:
-    DECLARE_DELEGATE_OneParam(FOnChanged, FData);
+    DECLARE_DELEGATE_OneParam(FOnChanged, FOdysseyImportTexturesData);
 
 public:
     SLATE_BEGIN_ARGS(SOdysseyImportTexturePositioning)
         {}
         /** Called when the object value changes */
-        SLATE_ATTRIBUTE(FData, Data)
+        SLATE_ATTRIBUTE(FOdysseyImportTexturesData, Data)
         SLATE_EVENT(FOnChanged, OnChanged)
     SLATE_END_ARGS()
 
@@ -55,8 +24,8 @@ public:
     void Construct(const FArguments& InArgs);
 
 private:
-    void OnAlignmentCheckBoxStateChanged(ECheckBoxState InCheckState, EAlignment iAlignment);
-    ECheckBoxState IsAlignmentChecked(EAlignment iAlignment) const;
+    void OnAlignmentCheckBoxStateChanged(ECheckBoxState InCheckState, FOdysseyImportTexturesData::EAlignment iAlignment);
+    ECheckBoxState IsAlignmentChecked(FOdysseyImportTexturesData::EAlignment iAlignment) const;
 
     int32 GetScaling() const;
     void OnScalingEnumSelectionChanged(int32, ESelectInfo::Type);
@@ -65,6 +34,6 @@ private:
     void OnResamplingMethodEnumSelectionChanged(int32, ESelectInfo::Type);
 
 private:
-    TAttribute<FData> mData;
+    TAttribute<FOdysseyImportTexturesData> mData;
     FOnChanged mOnChanged;
 };

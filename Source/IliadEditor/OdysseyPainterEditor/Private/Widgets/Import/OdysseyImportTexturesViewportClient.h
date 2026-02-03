@@ -23,6 +23,8 @@ public:
     // FViewportClient API
     virtual void Draw( FViewport* iViewport, FCanvas* ioCanvas ) override;
 
+    virtual UWorld* GetWorld() const override { return nullptr; }
+
 public:
     // FGCObject API
     virtual void AddReferencedObjects( FReferenceCollector& ioCollector ) override;

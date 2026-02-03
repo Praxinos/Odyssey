@@ -6,6 +6,7 @@
 #include "ImageUtils.h"
 #include "CanvasTypes.h"
 #include "CanvasItem.h"
+#include "Texture2DPreview.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -61,6 +62,7 @@ FOdysseyImportTexturesViewportClient::Draw( FViewport* iViewport, FCanvas* ioCan
         float width = mTexture->GetSurfaceWidth() * zoomFactor;
         float height = mTexture->GetSurfaceHeight() * zoomFactor;
 
+        //TileItem
         FCanvasTileItem tileItem(
             FVector2D( canvasRect.Min.X + (canvasRect.Width() - width) / 2.f, canvasRect.Min.Y + (canvasRect.Height() - height) / 2.f),
             mTexture->GetResource(),
