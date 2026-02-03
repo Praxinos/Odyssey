@@ -55,6 +55,9 @@
 //#include "ActorForWorldTransforms.h"
 //#include "KeyParams.h"
 
+#include "LevelSequenceEditorSubsystem.h"
+#include "MovieSceneBindingReferences.h"
+
 #include UE_INLINE_GENERATED_CPP_BY_NAME(EposSequenceEditorSubsystem)
 
 DEFINE_LOG_CATEGORY(LogEposSequenceEditor);
@@ -93,6 +96,20 @@ void UEposSequenceEditorSubsystem::Initialize(FSubsystemCollectionBase& Collecti
         }));
 
     SequencerModule.GetActionsMenuExtensibilityManager()->AddExtender(FixActorReferencesMenuExtender);
+
+    //...
+
+    // For now we have the binding properties being a separate menu. When the UX is worked out we will likely merge the AssignActor menu away.
+    BindingPropertiesMenuExtender = MakeShareable( new FExtender );
+
+    //...
+
+    BindingPropertiesMenuExtender->AddMenuExtension( "EposConvertBinding", EExtensionHook::First, CommandList, FMenuExtensionDelegate::CreateLambda( [this]( FMenuBuilder& MenuBuilder )
+                                                                                                                                                  {
+                                                                                                                                                      AddConvertBindingsMenu( MenuBuilder );
+                                                                                                                                                  } ) );
+
+    SequencerModule.GetObjectBindingContextMenuExtensibilityManager()->AddExtender( BindingPropertiesMenuExtender );
 
     //...
 }
@@ -370,5 +387,49 @@ void UEposSequenceEditorSubsystem::FixActorReferences()
 }
 
 //...
+
+void UEposSequenceEditorSubsystem::AddConvertBindingsMenu( FMenuBuilder& MenuBuilder )
+{
+    // Binding conversion
+
+    MenuBuilder.AddSubMenu(
+        LOCTEXT( "ConvertBindingLabel", "Convert Selected Binding(s) To..." ),
+        LOCTEXT( "ConvertBindingLabelTooltip", "Convert selected bindings into another binding type" ),
+        FNewMenuDelegate::CreateLambda( [this]( FMenuBuilder& MenuBuilder )
+                                        {
+                                            TSharedPtr<ISequencer> Sequencer = GetActiveSequencer();
+                                            if( Sequencer == nullptr )
+                                            {
+                                                return;
+                                            }
+
+                                            UMovieSceneSequence* const Sequence = Sequencer->GetFocusedMovieSceneSequence();
+                                            if( !IsValid( Sequence ) )
+                                            {
+                                                return;
+                                            }
+
+                                            TArray<FGuid> ObjectBindings;
+                                            Sequencer->GetSelectedObjects( ObjectBindings );
+                                            if( ObjectBindings.Num() == 0 )
+                                            {
+                                                return;
+                                            }
+
+                                            TArray<FSequencerChangeBindingInfo> Bindings;
+                                            const FMovieSceneBindingReferences* BindingReferences = Sequence->GetBindingReferences();
+                                            for( FGuid ObjectGuid : ObjectBindings )
+                                            {
+                                                int32 BindingIndex = 0;
+                                                for( const FMovieSceneBindingReference& Reference : BindingReferences->GetReferences( ObjectGuid ) )
+                                                {
+                                                    Bindings.Add( { Reference.ID, BindingIndex++ } );
+                                                }
+                                            }
+
+                                            ULevelSequenceEditorSubsystem* subsystem = GEditor->GetEditorSubsystem<ULevelSequenceEditorSubsystem>();
+                                            subsystem->AddChangeBindingTypeMenu( MenuBuilder, Sequencer.ToSharedRef(), Bindings, true, TFunction<void()>() );
+                                        } ) );
+}
 
 #undef LOCTEXT_NAMESPACE

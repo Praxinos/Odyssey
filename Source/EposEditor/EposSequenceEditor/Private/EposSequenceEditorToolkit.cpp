@@ -38,6 +38,7 @@
 #include "EposSequenceEditorCommands.h"
 #include "Export/ExportSequencerRenderer.h"
 #include "Misc/EposSequenceEditorPlaybackContext.h"
+#include "Misc/EposSequenceEditorSpawnRegister.h"
 #include "Render/EposSequencePipelineRenderer.h"
 #include "ToolkitHelpers.h"
 #include "Tools/EposSequenceTools.h"
@@ -204,8 +205,7 @@ void FEposSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, con
     const bool bCreateDefaultToolbar = false;
     FAssetEditorToolkit::InitAssetEditor( iMode, iInitToolkitHost, SequencerDefs::sgEposSequencerAppIdentifier, StandaloneDefaultLayout, bCreateDefaultStandaloneMenu, bCreateDefaultToolbar, mSequence );
 
-    //TSharedRef<FTemplateSequenceEditorSpawnRegister> SpawnRegister = MakeShareable( new FTemplateSequenceEditorSpawnRegister() );
-    //SpawnRegister->SetSequencer( Sequencer );
+    TSharedRef<FEposSequenceEditorSpawnRegister> spawnRegister = MakeShareable( new FEposSequenceEditorSpawnRegister() );
 
     // Initialize sequencer.
     FSequencerInitParams sequencerInitParams;
@@ -213,7 +213,7 @@ void FEposSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, con
         sequencerInitParams.RootSequence = mSequence;
         sequencerInitParams.bEditWithinLevelEditor = true;
         sequencerInitParams.ToolkitHost = iInitToolkitHost;
-        //sequencerInitParams.SpawnRegister = SpawnRegister;
+        sequencerInitParams.SpawnRegister = spawnRegister;
         sequencerInitParams.HostCapabilities.bSupportsCurveEditor = true;
         sequencerInitParams.HostCapabilities.bSupportsSaveMovieSceneAsset = true;
         //sequencerInitParams.HostCapabilities.bSupportsRecording = true;
@@ -232,6 +232,8 @@ void FEposSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, con
     }
 
     mSequencer = FModuleManager::LoadModuleChecked<ISequencerModule>( "Sequencer" ).CreateSequencer( sequencerInitParams );
+
+    spawnRegister->SetSequencer( mSequencer );
 
     GoToFocusedSequence( iSequences );
 

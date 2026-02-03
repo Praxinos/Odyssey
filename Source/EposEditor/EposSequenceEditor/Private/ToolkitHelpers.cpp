@@ -399,7 +399,7 @@ ToolkitHelpers::CreateDefaultTracksForActor( ISequencer* iSequencer, AActor* iAc
     }
     else if( iActor->IsA<AOdysseyAnimationActor>() )
     {
-        CreatePropertyTrack( iSequencer, iActor, iBinding, UMovieSceneVisibilityTrack::StaticClass(), "", "bHidden" );
+        CreateTrack( iSequencer, iActor, iBinding, UMovieScene3DTransformTrack::StaticClass() );
     }
     // For skeletal mesh actor
     // - '3DTransform' track

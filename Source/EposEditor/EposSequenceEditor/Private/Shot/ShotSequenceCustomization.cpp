@@ -8,6 +8,7 @@
 #include "LevelEditor.h"
 #include "MVVM/ViewModels/ObjectBindingModel.h"
 #include "MVVM/ViewModels/SequencerEditorViewModel.h"
+#include "SequencerUtilities.h"
 
 #include "EposNamingConventionBlueprintLibrary.h"
 #include "EposSequenceEditorBlueprintLibrary.h"
@@ -813,7 +814,122 @@ FShotSequenceCustomization::ExtendObjectBindingContextMenu(FMenuBuilder& MenuBui
         return;
     }
 
-    //...
+    bool bShowConvert = true;
+
+    if( FMovieScenePossessable* Possessable = MovieScene->FindPossessable( ObjectBindingID ) )
+    {
+        // We can't convert sub-objects to different binding types for now.
+        if( Possessable->GetParent().IsValid() )
+        {
+            bShowConvert = false;
+        }
+        bool bCustomBinding = false;
+        bool bMultipleBindings = false;
+        UObject* ResolutionContext = MovieSceneHelpers::GetResolutionContext( Sequence, ObjectBindingID, Sequencer->GetFocusedTemplateID(), Sequencer->GetSharedPlaybackState() );
+
+        if( const FMovieSceneBindingReferences* BindingReferences = Sequence->GetBindingReferences() )
+        {
+            bCustomBinding = Algo::AnyOf( BindingReferences->GetReferences( ObjectBindingID ), []( const FMovieSceneBindingReference& Reference )
+                                          {
+                                              return Reference.CustomBinding;
+                                          } );
+            bMultipleBindings = BindingReferences->GetReferences( ObjectBindingID ).Num() > 1;
+            UE::UniversalObjectLocator::FResolveParams LocatorResolveParams( ResolutionContext );
+            FMovieSceneBindingResolveParams BindingResolveParams{ Sequence, ObjectBindingID, Sequencer->GetFocusedTemplateID(), ResolutionContext };
+
+            // Can convert to possessable
+            int32 BindingIndex = 0;
+            bool bAnyValidConversions = false;
+            if( Algo::AnyOf( BindingReferences->GetReferences( ObjectBindingID ), [&BindingIndex, Sequencer]( const FMovieSceneBindingReference& BindingReference )
+                             {
+                                 return FSequencerUtilities::CanConvertToPossessable( Sequencer.ToSharedRef(), BindingReference.ID, BindingIndex++ );
+                             } ) )
+            {
+                bAnyValidConversions = true;
+            }
+            else
+            {
+                TArrayView<const TSubclassOf<UMovieSceneCustomBinding>> PrioritySortedCustomBindingTypes = Sequencer->GetSupportedCustomBindingTypes();
+                for( const TSubclassOf<UMovieSceneCustomBinding>& CustomBindingType : PrioritySortedCustomBindingTypes )
+                {
+                    BindingIndex = 0;
+                    if( Algo::AllOf( BindingReferences->GetReferences( ObjectBindingID ), [&BindingIndex, &CustomBindingType, Sequencer]( const FMovieSceneBindingReference& BindingReference )
+                                     {
+                                         return FSequencerUtilities::CanConvertToCustomBinding( Sequencer.ToSharedRef(), BindingReference.ID, CustomBindingType, BindingIndex++ );
+                                     } ) )
+                    {
+                        bAnyValidConversions = true;
+                        break;
+                    }
+                }
+            }
+            if( !bAnyValidConversions )
+            {
+                bShowConvert = false;
+            }
+        }
+
+        // Regular possessable
+        if( !bCustomBinding )
+        {
+            //// Regular possessable
+            //// We don't add anything here, but the extension will
+            //MenuBuilder.BeginSection( "EposPossessable" );
+            //MenuBuilder.EndSection();
+        }
+        else
+        {
+            // IObjectBindingExtension is not accessible as not exported as UE_API
+
+            //MenuBuilder.BeginSection( "EposCustomBinding" );
+            //bool bCustomSpawnable = MovieSceneHelpers::SupportsObjectTemplate( Sequence, ObjectBindingID, Sequencer->GetSharedPlaybackState() );
+            //// Check for custom binding types
+
+            //if( bCustomSpawnable )
+            //{
+            //    MenuBuilder.AddMenuEntry( FSequencerCommands::Get().SaveCurrentSpawnableState );
+
+            //    if( !bMultipleBindings )
+            //    {
+            //        MenuBuilder.AddSubMenu(
+            //            LOCTEXT( "ChangeClassLabel", "Change Class" ),
+            //            LOCTEXT( "ChangeClassTooltip", "Change the class (object template) that this spawns from" ),
+            //            FNewMenuDelegate::CreateLambda( [this]( FMenuBuilder& MenuBuilder )
+            //                                            {
+            //                                                const TSharedPtr<ISequencer> Sequencer = mWeakSequencer.Pin();
+            //                                                if( !Sequencer.IsValid() )
+            //                                                {
+            //                                                    return;
+            //                                                }
+
+            //                                                UMovieSceneSequence* Sequence = Sequencer->GetFocusedMovieSceneSequence();
+
+            //                                                TArray<FSequencerChangeBindingInfo> Bindings;
+            //                                                const FMovieSceneBindingReferences* BindingReferences = Sequence->GetBindingReferences();
+            //                                                for( TViewModelPtr<IObjectBindingExtension> ObjectBindingNode : Sequencer->GetViewModel()->GetSelection()->Outliner.Filter<IObjectBindingExtension>() )
+            //                                                {
+            //                                                    int32 BindingIndex = 0;
+            //                                                    for( const FMovieSceneBindingReference& Reference : BindingReferences->GetReferences( ObjectBindingNode->GetObjectGuid() ) )
+            //                                                    {
+            //                                                        Bindings.Add( { Reference.ID, BindingIndex++ } );
+            //                                                    }
+            //                                                }
+
+            //                                                FSequencerUtilities::AddChangeClassMenu( MenuBuilder, Sequencer.ToSharedRef(), Bindings, TFunction<void()>() );
+            //                                            } ) );
+            //    }
+            //}
+
+            //MenuBuilder.EndSection();
+        }
+    }
+
+    if( bShowConvert )
+    {
+        // We don't add anything here, but the extension will
+        MenuBuilder.BeginSection( "EposConvertBinding" );
+        MenuBuilder.EndSection();
+    }
 
     MenuBuilder.BeginSection("Import/Export", LOCTEXT("ImportExportMenuSectionName", "Import/Export"));
 

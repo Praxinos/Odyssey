@@ -4,6 +4,7 @@
 #include "Board/BoardSequence.h"
 
 #include "Animation/SkeletalMeshActor.h"
+#include "Bindings/MovieSceneSpawnableBinding.h"
 #include "Components/ActorComponent.h"
 #include "Engine/StaticMeshActor.h"
 #include "GameFramework/Actor.h"
@@ -22,6 +23,7 @@
 #include "Tracks/MovieSceneSkeletalAnimationTrack.h"
 #include "SubObjectLocator.h"
 #include "UniversalObjectLocators/ActorLocatorFragment.h"
+#include "UniversalObjectLocators/AnimInstanceLocatorFragment.h"
 #include "Sequencer/MovieSceneControlRigParameterTrack.h"
 #include "Tracks/TemplateSequenceTrack.h"
 
@@ -101,21 +103,13 @@ const FMovieSceneBindingReferences* UBoardSequence::GetBindingReferences() const
     // (No, because FMovieSceneBindingReferences::AddBinding() is not virtual...)
     //
     // (If GetBindingReferences() is not used (aka return nullptr), LocateBoundObjects() is required)
-    return nullptr;
+    //return nullptr;
 
-    //return &BindingReferences;
+    return &BindingReferences;
 }
 
 void UBoardSequence::BindPossessableObject(const FGuid& ObjectId, UObject& PossessedObject, UObject* Context)
 {
-    if( !CanPossessObject( PossessedObject, Context ) )
-    {
-        MovieScene->RemovePossessable( ObjectId );
-        //UnbindPossessableObjects( ObjectId ); // Not necessary (?) as it can't have been added previously (?)
-
-        return;
-    }
-
     if( Context )
     {
         BindingReferences.AddBinding( ObjectId, &PossessedObject, Context );
@@ -138,18 +132,102 @@ bool UBoardSequence::CanRebindPossessable( const FMovieScenePossessable& InPosse
     return !InPossessable.GetParent().IsValid();
 }
 
+// From LevelSequence.cpp
+FGuid UBoardSequence::FindBindingFromObject( UObject* InObject, TSharedRef<const UE::MovieScene::FSharedPlaybackState> SharedPlaybackState ) const
+{
+    if( InObject )
+    {
+        if( FMovieSceneEvaluationState* EvaluationState = SharedPlaybackState->FindCapability<FMovieSceneEvaluationState>() )
+        {
+            FMovieSceneSequenceID SequenceID = EvaluationState->FindSequenceId( this );
+            return EvaluationState->FindCachedObjectId( *InObject, SequenceID, SharedPlaybackState );
+        }
+    }
+    return FGuid();
+}
+
+// From LevelSequence.cpp
+void UBoardSequence::GatherExpiredObjects( const FMovieSceneObjectCache& InObjectCache, TArray<FGuid>& OutInvalidIDs ) const
+{
+    using namespace UE::UniversalObjectLocator;
+
+    TArrayView<const FMovieSceneBindingReference> References = BindingReferences.GetAllReferences();
+    for( int32 Index = 0; Index < References.Num(); ++Index )
+    {
+        const FMovieSceneBindingReference& Reference = References[Index];
+
+        if( Reference.Locator.GetLastFragmentTypeHandle() == FAnimInstanceLocatorFragment::FragmentType )
+        {
+            for( TWeakObjectPtr<> WeakObject : InObjectCache.IterateBoundObjects( Reference.ID ) )
+            {
+                UAnimInstance* AnimInstance = Cast<UAnimInstance>( WeakObject.Get() );
+                if( !AnimInstance || !AnimInstance->GetOwningComponent() || AnimInstance->GetOwningComponent()->GetAnimInstance() != AnimInstance )
+                {
+                    OutInvalidIDs.Add( Reference.ID );
+                }
+            }
+
+            // Skip over subsequent matched IDs
+            while( Index < References.Num() - 1 && References[Index + 1].ID == Reference.ID )
+            {
+                ++Index;
+            }
+        }
+    }
+}
+
+UObject* UBoardSequence::MakeSpawnableTemplateFromInstance( UObject& InSourceObject, FName ObjectName )
+{
+    return MovieSceneHelpers::MakeSpawnableTemplateFromInstance( InSourceObject, MovieScene, ObjectName );
+}
+
+bool UBoardSequence::AllowsSpawnableObjects() const
+{
+    TArray<const TSubclassOf<UMovieSceneCustomBinding>> CustomBindingTypes;
+
+    MovieSceneHelpers::GetPrioritySortedCustomBindingTypes( CustomBindingTypes );
+    for( const TSubclassOf<UMovieSceneCustomBinding>& CustomBindingType : CustomBindingTypes )
+    {
+        const bool bIsCustomSpawnableBinding = CustomBindingType->IsChildOf<UMovieSceneSpawnableBindingBase>();
+        if( bIsCustomSpawnableBinding )
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool UBoardSequence::AllowsCustomBindings() const
+{
+    return true;
+}
+
 #if WITH_EDITOR
 FGuid UBoardSequence::CreatePossessable( UObject* ObjectToPossess ) //override
 {
     return FindOrAddBinding( ObjectToPossess );
 }
-//FGuid UBoardSequence::CreateSpawnable( UObject* ObjectToSpawn ) //override
-//{
-//}
+// From LevelSequence.cpp
+FGuid UBoardSequence::CreateSpawnable( UObject* ObjectToSpawn ) //override
+{
+    if( !MovieScene || !ObjectToSpawn )
+    {
+        return FGuid();
+    }
+
+    FGuid NewGuid = MovieSceneHelpers::TryCreateCustomSpawnableBinding( this, ObjectToSpawn );
+
+    UMovieSceneSpawnTrack* NewSpawnTrack = MovieScene->AddTrack<UMovieSceneSpawnTrack>( NewGuid );
+    if( NewSpawnTrack )
+    {
+        NewSpawnTrack->Modify();
+
+        NewSpawnTrack->AddSection( *NewSpawnTrack->CreateNewSection() );
+    }
+    return NewGuid;
+}
 
 // From LevelSequence.cpp
-
-
 FGuid UBoardSequence::FindOrAddBinding( UObject* InObject )
 {
     using namespace UE::MovieScene;
@@ -228,11 +306,6 @@ FGuid UBoardSequence::FindOrAddBinding( UObject* InObject )
 }
 #endif
 
-void UBoardSequence::LocateBoundObjects(const FGuid& ObjectId, UObject* Context, TArray<UObject*, TInlineAllocator<1>>& OutObjects) const // override
-{
-    BindingReferences.ResolveBinding( ObjectId, Context, OutObjects );
-}
-
 UMovieScene* UBoardSequence::GetMovieScene() const
 {
     return MovieScene;
@@ -277,7 +350,8 @@ UBoardSequence::IsTrackSupportedImpl( TSubclassOf<class UMovieSceneTrack> InTrac
         InTrackClass == UMovieSceneLevelVisibilityTrack::StaticClass() ||
         InTrackClass == UMovieSceneControlRigParameterTrack::StaticClass() ||
         InTrackClass == UMovieSceneSkeletalAnimationTrack::StaticClass() ||
-        InTrackClass == UTemplateSequenceTrack::StaticClass() )
+        InTrackClass == UTemplateSequenceTrack::StaticClass() ||
+        InTrackClass == UMovieSceneSpawnTrack::StaticClass() )
     {
         return ETrackSupport::Supported;
     }

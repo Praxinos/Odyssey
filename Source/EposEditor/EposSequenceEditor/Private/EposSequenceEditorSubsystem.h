@@ -148,6 +148,8 @@ private:
 
     TSharedPtr<ISequencer> GetActiveSequencer();
 
+    void AddConvertBindingsMenu( FMenuBuilder& MenuBuilder );
+
     //...
 
 public:
@@ -171,5 +173,7 @@ private:
     TSharedPtr<FExtender> FixActorReferencesMenuExtender;
 
     //...
+
+    TSharedPtr<FExtender> BindingPropertiesMenuExtender;
 
 };
