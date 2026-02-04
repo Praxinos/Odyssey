@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "OdysseyHUDElement.h"
 
 /////////////////////////////////////////////////////
 // FOdysseyImportTexturesViewportClient
@@ -18,14 +19,14 @@ public:
 
 public:
     void SetTexture(UTexture* iTexture);
+    TSharedRef<FOdysseyHUDElement> GetHUD() const;
 
 public:
     // FViewportClient API
     virtual void Draw( FViewport* iViewport, FCanvas* ioCanvas ) override;
-
     virtual UWorld* GetWorld() const override { return nullptr; }
 
-public:
+private:
     // FGCObject API
     virtual void AddReferencedObjects( FReferenceCollector& ioCollector ) override;
     virtual FString GetReferencerName() const override;
@@ -36,4 +37,5 @@ private:
     uint32 mCanvasHeight;
     TObjectPtr<UTexture2D> mCheckerboardTexture;
     TObjectPtr<UTexture> mTexture;
+    TSharedRef<FOdysseyHUDElement> mHUD;
 };

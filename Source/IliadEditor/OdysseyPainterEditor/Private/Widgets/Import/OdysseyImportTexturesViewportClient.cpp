@@ -21,6 +21,7 @@ FOdysseyImportTexturesViewportClient::~FOdysseyImportTexturesViewportClient()
 FOdysseyImportTexturesViewportClient::FOdysseyImportTexturesViewportClient(uint32 iCanvasWidth, uint32 iCanvasHeight)
     : mCanvasWidth(iCanvasWidth)
     , mCanvasHeight(iCanvasHeight)
+    , mHUD(MakeShared<FOdysseyHUDElement>())
 {
     const UOdysseyPainterEditorSettings& settings = *GetDefault< UOdysseyPainterEditorSettings >();
     mCheckerboardTexture = FImageUtils::CreateCheckerboardTexture( settings.CheckerColorOne, settings.CheckerColorTwo, settings.CheckerSize );
@@ -79,12 +80,40 @@ FOdysseyImportTexturesViewportClient::Draw( FViewport* iViewport, FCanvas* ioCan
         tileItem.BlendMode = (ESimpleElementBlendMode)result;
         ioCanvas->DrawItem( tileItem );
     }
+
+    FOdysseyHUDElement::FDrawHUDParams params;
+    params.mCanvas = ioCanvas;
+    params.mTextureWidth = mTexture->GetSurfaceWidth();
+    params.mTextureHeight = mTexture->GetSurfaceHeight();
+    params.mTextureToHUD = FOdysseyHUDElement::FDrawHUDParams::FTextureToHUD::CreateLambda(
+        [zoomFactor, canvasRect, w = params.mTextureWidth, h = params.mTextureHeight](const FVector2D& iPosition)
+        {
+            FVector2D pos = iPosition;
+            pos -= FVector2D(w, h) / 2.f;
+            pos *= zoomFactor;
+            pos += FVector2D(canvasRect.Width(), canvasRect.Height()) / 2.f;
+            pos += canvasRect.Min;
+            return pos;
+        }
+    );
+
+    //---------------
+
+    //---------------
+
+    mHUD->Draw(params);
 }
 
 void
 FOdysseyImportTexturesViewportClient::SetTexture(UTexture* iTexture)
 {
     mTexture = iTexture;
+}
+
+TSharedRef<FOdysseyHUDElement>
+FOdysseyImportTexturesViewportClient::GetHUD() const
+{
+    return mHUD;
 }
 
 //--------------------------------------------------------------------------------------

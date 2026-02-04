@@ -14,6 +14,7 @@
 #include "CanvasTypes.h"
 #include "RenderGraphBuilder.h"
 #include "RenderGraphUtils.h"
+#include "OdysseyHUDRectangle.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -132,12 +133,34 @@ SOdysseyImportTexturesDialog::Construct(const FArguments& InArgs, const FOdyssey
         ]
     ];
 
+    //Setup Viewport
     mViewportClient = MakeShared<FOdysseyImportTexturesViewportClient>(mImportData.GetDestinationWidth(), mImportData.GetDestinationHeight());
     mSceneViewport = MakeShared<FSceneViewport>(mViewportClient.Get(), mViewportWidget);
     mViewportWidget->SetViewportInterface(mSceneViewport.ToSharedRef());
-
     mViewportClient->SetTexture(mPreviewRenderTarget.Get());
+
+    //Setup HUDs
+    mTextureOutlineHUD = CreateTextureOutlineHUD();
+    mViewportClient->GetHUD()->AddElement(mTextureOutlineHUD);
+
+    //Update Viewport Preview
     UpdatePreview();
+}
+
+TSharedRef<FOdysseyHUDRectangle>
+SOdysseyImportTexturesDialog::CreateTextureOutlineHUD() const
+{
+    TSharedRef<FOdysseyHUDRectangle> hud = MakeShared<FOdysseyHUDRectangle>(FVector2D(0, 0), FVector2D(0, 0));
+
+    FOdysseyHUDElement::FHUDCustomization customization;
+    customization.mColors.Add(FLinearColor::Black);
+    customization.mColors.Add(FLinearColor::White);
+    customization.mGapLength = 0.f;
+    customization.mSegmentLength = 10.f;
+    customization.mSpeed = 10.f;
+    hud->SetCustomization(customization);
+
+    return hud;
 }
 
 FOdysseyImportTexturesData
@@ -195,7 +218,7 @@ void
 SOdysseyImportTexturesDialog::OnCurrentTextureSliderValueChanged(float iValue)
 {
     mCurrentTextureIndex = (uint32)FMath::RoundToInt(iValue * (mImportData.GetSourceTextures().Num() - 1));
-    //mViewportClient->SetTexture(mImportData.GetSourceTextures()[mCurrentTextureIndex]);
+    mViewportClient->SetTexture(mImportData.GetSourceTextures()[mCurrentTextureIndex]);
     UpdatePreview();
 }
 
@@ -203,7 +226,16 @@ void
 SOdysseyImportTexturesDialog::UpdatePreview()
 {
     mImportData.Render(mPreviewRenderTarget.Get(), mCurrentTextureIndex);
-    mSceneViewport->Invalidate(); //Redraws the viewport
+    FVector2D textureSize = mImportData.GetTextureScaledSize(mCurrentTextureIndex);
+    FVector2D texturePosition = mImportData.GetTexturePosition(textureSize);
+    mTextureOutlineHUD->SetTopLeftPoint(texturePosition);
+    mTextureOutlineHUD->SetBottomRightPoint(texturePosition + textureSize);
+}
+
+void
+SOdysseyImportTexturesDialog::Tick( const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime )
+{
+    mSceneViewport->Invalidate(); //Redraws the viewport each tick to display HUD animations
 }
 
 #undef LOCTEXT_NAMESPACE

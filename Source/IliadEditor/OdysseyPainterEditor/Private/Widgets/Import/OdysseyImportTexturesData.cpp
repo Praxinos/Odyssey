@@ -35,6 +35,64 @@ FOdysseyImportTexturesData::CreateRT() const
     return renderTarget;
 }
 
+FVector2D
+FOdysseyImportTexturesData::GetTextureScaledSize(int iSourceTextureIndex) const
+{
+    UTexture2D* sourceTexture = mSourceTextures[iSourceTextureIndex];
+    sourceTexture->BlockOnAnyAsyncBuild();
+    sourceTexture->SetForceMipLevelsToBeResident( 30.0f );
+    sourceTexture->WaitForStreaming();
+
+    FVector2D size(sourceTexture->GetSurfaceWidth(), sourceTexture->GetSurfaceHeight());
+
+    switch(mScaling)
+    {
+        case EOdysseyImportTextureScaling::None: break;
+
+        case EOdysseyImportTextureScaling::Scale:
+        {
+            size = FVector2D(mDestinationWidth, mDestinationHeight);
+        }
+        break;
+
+        case EOdysseyImportTextureScaling::ScaleAndFit:
+        {
+            float ratio = FMath::Min(float(mDestinationWidth) / sourceTexture->GetSurfaceWidth(), float(mDestinationHeight) / sourceTexture->GetSurfaceHeight());
+            size = FVector2D(sourceTexture->GetSurfaceWidth() * ratio, sourceTexture->GetSurfaceHeight() * ratio);
+        }
+        break;
+    }
+
+    return size;
+}
+
+FVector2D
+FOdysseyImportTexturesData::GetTexturePosition(const FVector2D& iTextureSize) const
+{
+    FVector2D texturePosition;
+    switch(mAlignment)
+    {
+        case FOdysseyImportTexturesData::EAlignment::TopLeft: texturePosition = FVector2D::ZeroVector; break;
+        case FOdysseyImportTexturesData::EAlignment::Top: texturePosition = FVector2D((mDestinationWidth - iTextureSize.X) / 2.f, 0); break;
+        case FOdysseyImportTexturesData::EAlignment::TopRight: texturePosition = FVector2D(mDestinationWidth - iTextureSize.X, 0); break;
+        case FOdysseyImportTexturesData::EAlignment::Left: texturePosition = FVector2D(0, (mDestinationHeight - iTextureSize.Y) / 2.f); break;
+        case FOdysseyImportTexturesData::EAlignment::Center: texturePosition = FVector2D((mDestinationWidth - iTextureSize.X) / 2.f, (mDestinationHeight - iTextureSize.Y) / 2.f); break;
+        case FOdysseyImportTexturesData::EAlignment::Right: texturePosition = FVector2D(mDestinationWidth - iTextureSize.X, (mDestinationHeight - iTextureSize.Y) / 2.f); break;
+        case FOdysseyImportTexturesData::EAlignment::BottomLeft: texturePosition = FVector2D(0, mDestinationHeight - iTextureSize.Y); break;
+        case FOdysseyImportTexturesData::EAlignment::Bottom: texturePosition = FVector2D((mDestinationWidth - iTextureSize.X) / 2.f, mDestinationHeight - iTextureSize.Y); break;
+        case FOdysseyImportTexturesData::EAlignment::BottomRight: texturePosition = FVector2D(mDestinationWidth - iTextureSize.X, mDestinationHeight - iTextureSize.Y); break;
+    }
+
+    return texturePosition;
+}
+
+FVector2D
+FOdysseyImportTexturesData::GetTexturePosition(int iSourceTextureIndex) const
+{
+    FVector2D textureSize = GetTextureScaledSize(iSourceTextureIndex);
+    return GetTexturePosition(textureSize);
+}
+
 void
 FOdysseyImportTexturesData::Render(UTextureRenderTarget2D* oRenderTarget, int iSourceTextureIndex) const
 {
@@ -59,47 +117,8 @@ FOdysseyImportTexturesData::Render(UTextureRenderTarget2D* oRenderTarget, int iS
     FCanvas canvas(renderTargetResource, nullptr, FGameTime(), GMaxRHIFeatureLevel);
     FCanvasRenderThreadScope canvasRenderThreadScope(canvas);
 
-    int32 textureWidth = sourceTexture->GetSurfaceWidth();
-    int32 textureHeight = sourceTexture->GetSurfaceHeight();
-
-    switch(mScaling)
-    {
-        case EOdysseyImportTextureScaling::None: break;
-
-        case EOdysseyImportTextureScaling::Scale:
-        {
-            textureWidth = oRenderTarget->GetSurfaceWidth();
-            textureHeight = oRenderTarget->GetSurfaceHeight();
-        }
-        break;
-
-        case EOdysseyImportTextureScaling::ScaleAndFit:
-        {
-            float ratio = FMath::Min(float(oRenderTarget->GetSurfaceWidth()) / sourceTexture->GetSurfaceWidth(), float(oRenderTarget->GetSurfaceHeight()) / sourceTexture->GetSurfaceHeight());
-
-            textureWidth = sourceTexture->GetSurfaceWidth() * ratio;
-            textureHeight = sourceTexture->GetSurfaceHeight() * ratio;
-        }
-        break;
-    }
-
-    int32 destTextureWidth = oRenderTarget->GetSurfaceWidth();
-    int32 destTextureHeight = oRenderTarget->GetSurfaceHeight();
-
-    FVector2D texturePosition;
-
-    switch(mAlignment)
-    {
-        case FOdysseyImportTexturesData::EAlignment::TopLeft: texturePosition = FVector2D::ZeroVector; break;
-        case FOdysseyImportTexturesData::EAlignment::Top: texturePosition = FVector2D((destTextureWidth - textureWidth) / 2.f, 0); break;
-        case FOdysseyImportTexturesData::EAlignment::TopRight: texturePosition = FVector2D(destTextureWidth - textureWidth, 0); break;
-        case FOdysseyImportTexturesData::EAlignment::Left: texturePosition = FVector2D(0, (destTextureHeight - textureHeight) / 2.f); break;
-        case FOdysseyImportTexturesData::EAlignment::Center: texturePosition = FVector2D((destTextureWidth - textureWidth) / 2.f, (destTextureHeight - textureHeight) / 2.f); break;
-        case FOdysseyImportTexturesData::EAlignment::Right: texturePosition = FVector2D(destTextureWidth - textureWidth, (destTextureHeight - textureHeight) / 2.f); break;
-        case FOdysseyImportTexturesData::EAlignment::BottomLeft: texturePosition = FVector2D(0, destTextureHeight - textureHeight); break;
-        case FOdysseyImportTexturesData::EAlignment::Bottom: texturePosition = FVector2D((destTextureWidth - textureWidth) / 2.f, destTextureHeight - textureHeight); break;
-        case FOdysseyImportTexturesData::EAlignment::BottomRight: texturePosition = FVector2D(destTextureWidth - textureWidth, destTextureHeight - textureHeight); break;
-    }
+    FVector2D scaledSize = GetTextureScaledSize(iSourceTextureIndex);
+    FVector2D texturePosition = GetTexturePosition(scaledSize);
 
     FTexture* tileTexture = new FTexture();
     canvasRenderThreadScope.DeferredDelete(tileTexture); //ensures deletion of tileTexture when canvas has finished to draw
@@ -109,7 +128,7 @@ FOdysseyImportTexturesData::Render(UTextureRenderTarget2D* oRenderTarget, int iS
     FCanvasTileItem TileItem(
         texturePosition,
         tileTexture,
-        FVector2D(textureWidth, textureHeight),
+        scaledSize,
         FColor::White
     );
 

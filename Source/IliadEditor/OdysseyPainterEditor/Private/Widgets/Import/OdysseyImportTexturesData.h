@@ -45,6 +45,10 @@ public:
     EOdysseyImportTextureScaling GetScaling() const;
     EOdysseyAntiAliasing GetResamplingMethod() const;
 
+    FVector2D GetTexturePosition(const FVector2D& iTextureSize) const;
+    FVector2D GetTexturePosition(int iSourceTextureIndex) const;
+    FVector2D GetTextureScaledSize(int iSourceTextureIndex) const;
+
     void SetAlignment(EAlignment iAlignment);
     void SetScaling(EOdysseyImportTextureScaling iScaling);
     void SetResamplingMethod(EOdysseyAntiAliasing iMethod);

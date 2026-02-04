@@ -7,6 +7,7 @@
 #include "OdysseyImportTexturesData.h"
 
 class FOdysseyImportTexturesViewportClient;
+class FOdysseyHUDRectangle;
 
 class SOdysseyImportTexturesDialog
     : public SCompoundWidget
@@ -37,6 +38,9 @@ public:
     FOdysseyImportTexturesData GetImportData() const;
 
 private:
+    virtual void Tick( const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime ) override;
+
+private:
     ETabs GetActiveTab() const;
     void OnTabChecked(ETabs iTab, ECheckBoxState iState);
     void OnPositioningChanged(FOdysseyImportTexturesData iData);
@@ -46,6 +50,7 @@ private:
     float GetCurrentTextureSliderValue() const;
     void OnCurrentTextureSliderValueChanged(float iValue);
 
+    TSharedRef<FOdysseyHUDRectangle> CreateTextureOutlineHUD() const;
     void UpdatePreview();
 
 private:
@@ -59,4 +64,5 @@ private:
     TSharedPtr<SViewport> mViewportWidget;
     TSharedPtr<FOdysseyImportTexturesViewportClient> mViewportClient;
     TSharedPtr<FSceneViewport> mSceneViewport;
+    TSharedPtr<FOdysseyHUDRectangle> mTextureOutlineHUD;
 };
