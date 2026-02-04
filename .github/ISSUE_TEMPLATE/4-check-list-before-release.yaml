@@ -298,9 +298,9 @@ body:
         ## ${\color{00FF99}\textnormal{---------------------------------------------------------------------}}$
 
   - type: checkboxes
-    id: tools-vector
+    id: tools-vector-object-mode
     attributes:
-      label: "Vector tools"
+      label: "Vector tools - Object Mode"
       options:
         - label: "Dessiner un path"
         - label: "Dessiner au stylet puis à la souris"
@@ -330,9 +330,16 @@ body:
         - label: "Sélectionner plusieurs paths dans Vector Scene Tree View"
 
   - type: checkboxes
-    id: tools-inbetweener
+    id: tools-vector-vertex-mode
     attributes:
-      label: "Inbetweener"
+      label: "Vector tools - Vertex Mode"
+      options:
+        - label: "Dessiner un path"
+
+  - type: checkboxes
+    id: tools-vector-inbetweener
+    attributes:
+      label: "Vector tools - Inbetweener Mode"
       options:
         - label: "Créer un Tag Inbetweener sur un path (+ undo/redo)"
         - label: "Créer un Tag Inbetweener sur un groupe (+ undo/redo)"
