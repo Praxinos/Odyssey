@@ -302,6 +302,7 @@ body:
     attributes:
       label: "Vector tools - Object Mode"
       options:
+        - label: "UNFINISHED"
         - label: "Dessiner un path"
         - label: "Dessiner au stylet puis à la souris"
         - label: "cocher/décocher stitch et desinner des path connectés"
@@ -334,13 +335,14 @@ body:
     attributes:
       label: "Vector tools - Vertex Mode"
       options:
-        - label: "Dessiner un path"
+        - label: "TODO"
 
   - type: checkboxes
     id: tools-vector-inbetweener
     attributes:
       label: "Vector tools - Inbetweener Mode"
       options:
+        - label: "UNFINISHED"
         - label: "Créer un Tag Inbetweener sur un path (+ undo/redo)"
         - label: "Créer un Tag Inbetweener sur un groupe (+ undo/redo)"
         - label: "Dupliquer un calque ayant un Inbetweener actif (+ undo/redo)"
@@ -364,6 +366,13 @@ body:
         - label: "Faire une interpolation qui ne commence pas à la première image"
         - label: "Faire une interpolation qui va dans le sens classique, de gauche à droite"
         - label: "Faire une interpolation qui va dans le sens inverse, de droite à gauche"
+
+  - type: checkboxes
+    id: vector-scene-tree-view
+    attributes:
+      label: "Vector Scene Tree View"
+      options:
+        - label: "TODO"
 
   - type: markdown
     attributes:
