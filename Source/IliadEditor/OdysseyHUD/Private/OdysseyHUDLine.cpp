@@ -30,32 +30,11 @@ FOdysseyHUDLine::DrawHUD(const FOdysseyHUDElement::FDrawHUDParams& iParams)
     FVector2D startPoint = iParams.mTextureToHUD.Execute(mStartPoint);
     FVector2D endPoint = iParams.mTextureToHUD.Execute(mEndPoint);
 
-    FBatchedElements* batchedElements = iParams.mCanvas->GetBatchedElements(FCanvas::ET_Line);
+    InitDrawCustomizedLine(iParams.mCanvas, customization, FLinearColor::Black);
 
-    TArray<FLinearColor> colors = customization.mColors;
-    if (colors.Num() == 0)
-        colors.Add(FLinearColor::Black);
-
-    int colorIndex = 0;
-    int numColors = colors.Num();
-    float cumulLength = 0.f;
-
-    // Total pattern length (Segment + Gap)
-    float patternLength = customization.mSegmentLength + customization.mGapLength;
-
-    double time = FApp::GetCurrentTime();
-    float timeOffset = FMath::Fmod(time * customization.mSpeed, patternLength);
-
-    DrawCustomizedLine(iParams.mCanvas,
+    DrawCustomizedLine(
         startPoint,
-        endPoint,
-        timeOffset,
-        patternLength,
-        cumulLength,
-        colorIndex,
-        colors,
-        customization,
-        batchedElements
+        endPoint
     );
 
     FOdysseyHUDElement::DrawHUD(iParams);

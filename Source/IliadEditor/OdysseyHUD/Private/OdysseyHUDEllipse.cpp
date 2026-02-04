@@ -33,53 +33,25 @@ FOdysseyHUDEllipse::DrawHUD(const FOdysseyHUDElement::FDrawHUDParams& iParams)
     if (points.Size() < 2)
         return;
 
-    FBatchedElements* batchedElements = iParams.mCanvas->GetBatchedElements(FCanvas::ET_Line);
-
-    TArray<FLinearColor> colors = customization.mColors;
-    if (colors.Num() == 0)
-        colors.Add(FLinearColor::Black);
-
-    int colorIndex = 0;
-    int numColors = colors.Num();
-    float cumulLength = 0.f;
-
-    // Total pattern length (Segment + Gap)
-    float patternLength = customization.mSegmentLength + customization.mGapLength;
-
-    double time = FApp::GetCurrentTime();
-    float timeOffset = FMath::Fmod(time * customization.mSpeed, patternLength);
+    InitDrawCustomizedLine(iParams.mCanvas, customization, FLinearColor::Black);
 
     for (int i = 1; i < points.Size(); i++)
     {
         FVector2D startPoint = iParams.mTextureToHUD.Execute(FVector2D(points[i - 1].x, points[i - 1].y));
         FVector2D endPoint = iParams.mTextureToHUD.Execute(FVector2D(points[i].x, points[i].y));
 
-        DrawCustomizedLine(iParams.mCanvas,
+        DrawCustomizedLine(
             startPoint,
-            endPoint,
-            timeOffset,
-            patternLength,
-            cumulLength,
-            colorIndex,
-            colors,
-            customization,
-            batchedElements
+            endPoint
         );
     }
 
     FVector2D startPoint = iParams.mTextureToHUD.Execute(FVector2D(points[points.Size() - 1].x, points[points.Size() - 1].y));
     FVector2D endPoint = iParams.mTextureToHUD.Execute(FVector2D(points[0].x, points[0].y));
 
-    DrawCustomizedLine(iParams.mCanvas,
+    DrawCustomizedLine(
         startPoint,
-        endPoint,
-        timeOffset,
-        patternLength,
-        cumulLength,
-        colorIndex,
-        colors,
-        customization,
-        batchedElements
+        endPoint
     );
 
     FOdysseyHUDElement::DrawHUD(iParams);

@@ -45,65 +45,29 @@ FOdysseyHUDBezier::DrawHUD(const FOdysseyHUDElement::FDrawHUDParams& iParams)
     if (pointsArray.Size() < 2)
         return;
 
-    FBatchedElements* batchedElements = iParams.mCanvas->GetBatchedElements(FCanvas::ET_Line);
-
-    TArray<FLinearColor> colors = customization.mColors;
-    if (colors.Num() == 0)
-        colors.Add(FLinearColor::Black);
-
-    int colorIndex = 0;
-    int numColors = colors.Num();
-    float cumulLength = 0.f;
-
-    // Total pattern length (Segment + Gap)
-    float patternLength = customization.mSegmentLength + customization.mGapLength;
-
-    double time = FApp::GetCurrentTime();
-    float timeOffset = FMath::Fmod(time * customization.mSpeed, patternLength);
+    InitDrawCustomizedLine(iParams.mCanvas, customization, FLinearColor::Black);
 
     for (int i = 1; i < pointsArray.Size(); i++)
     {
-
         FVector2D startBezierPoint = iParams.mTextureToHUD.Execute(FVector2D(pointsArray[i - 1].x, pointsArray[i - 1].y));
         FVector2D endBezierPoint = iParams.mTextureToHUD.Execute(FVector2D(pointsArray[i].x, pointsArray[i].y));
 
         // Bezier
-        DrawCustomizedLine(iParams.mCanvas,
+        DrawCustomizedLine(
             startBezierPoint,
-            endBezierPoint,
-            timeOffset,
-            patternLength,
-            cumulLength,
-            colorIndex,
-            colors,
-            customization,
-            batchedElements
+            endBezierPoint
         );
     }
 
     // Control lines
-    DrawCustomizedLine(iParams.mCanvas,
+    DrawCustomizedLine(
         startPoint,
-        controlPoint,
-        timeOffset,
-        patternLength,
-        cumulLength,
-        colorIndex,
-        colors,
-        customization,
-        batchedElements
+        controlPoint
     );
 
-    DrawCustomizedLine(iParams.mCanvas,
+    DrawCustomizedLine(
         controlPoint,
-        endPoint,
-        timeOffset,
-        patternLength,
-        cumulLength,
-        colorIndex,
-        colors,
-        customization,
-        batchedElements
+        endPoint
     );
 
     FOdysseyHUDElement::DrawHUD(iParams);

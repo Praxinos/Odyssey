@@ -41,7 +41,38 @@ FOdysseyHUDElement::DrawHUD(const FOdysseyHUDElement::FDrawHUDParams& iParams)
 {
 }
 
-void FOdysseyHUDElement::DrawCustomizedLine(FCanvas* iCanvas, const FVector2D& iStart, const FVector2D& iEnd, float iTimeOffset, float iPatternLength, float& ioCumulLength, int& ioColorIndex, const TArray<FLinearColor>& iColors, const FHUDCustomization& iCustomization, FBatchedElements* iBatchedElements) const
+void
+FOdysseyHUDElement::InitDrawCustomizedLine(FCanvas* iCanvas, const FHUDCustomization& iCustomization, const FLinearColor& iDefaultColor)
+{
+    mCustomizedLinesParams.mCanvas = iCanvas;
+    mCustomizedLinesParams.mBatchedElements = iCanvas->GetBatchedElements(FCanvas::ET_Line);
+    mCustomizedLinesParams.mSegmentLength = iCustomization.mSegmentLength;
+    mCustomizedLinesParams.mGapLength = iCustomization.mGapLength;
+
+    mCustomizedLinesParams.mColors = iCustomization.mColors;
+    if (mCustomizedLinesParams.mColors.Num() == 0)
+        mCustomizedLinesParams.mColors.Add(iDefaultColor);
+
+    mCustomizedLinesParams.mColorIndex = 0;
+
+    // Total pattern length (Segment + Gap)
+    float patternLength = mCustomizedLinesParams.mSegmentLength * mCustomizedLinesParams.mColors.Num() + mCustomizedLinesParams.mGapLength;
+    double time = FPlatformTime::Seconds();
+    float timeOffset = FMath::Fmod(time * iCustomization.mSpeed, patternLength);
+    while(timeOffset > 0.f)
+    {
+        mCustomizedLinesParams.mColorIndex--;
+        if (mCustomizedLinesParams.mColorIndex < 0)
+            mCustomizedLinesParams.mColorIndex = mCustomizedLinesParams.mColors.Num(); //takes the gap into account (so no -1 here)
+
+        timeOffset -= mCustomizedLinesParams.mColorIndex < mCustomizedLinesParams.mColors.Num() ? mCustomizedLinesParams.mSegmentLength : mCustomizedLinesParams.mGapLength;
+    }
+    mCustomizedLinesParams.mStartOffset = -timeOffset;
+}
+
+void
+//FOdysseyHUDElement::DrawCustomizedLine(FCanvas* iCanvas, const FVector2D& iStart, const FVector2D& iEnd, float& ioStartOffset, int& ioColorIndex, const TArray<FLinearColor>& iColors, const FHUDCustomization& iCustomization, FBatchedElements* iBatchedElements) const
+FOdysseyHUDElement::DrawCustomizedLine(const FVector2D& iStart, const FVector2D& iEnd)
 {
     FVector2D dir = iEnd - iStart;
     float segmentLength = dir.Size();
@@ -51,44 +82,43 @@ void FOdysseyHUDElement::DrawCustomizedLine(FCanvas* iCanvas, const FVector2D& i
     dir.Normalize();
     float current = 0.f;
 
-    while (current < segmentLength)
-    {
-        // Absolute position along polygon perimeter, shifted by time offset
-        float globalPos = ioCumulLength + current + iTimeOffset;
-        float cycleOffset = FMath::Fmod(globalPos, iPatternLength);
-        float segmentLeft = iCustomization.mSegmentLength - cycleOffset;
+    float lineMaxLength = mCustomizedLinesParams.mColorIndex < mCustomizedLinesParams.mColors.Num() ? mCustomizedLinesParams.mSegmentLength : mCustomizedLinesParams.mGapLength;
+    float lineSize = FMath::Min(lineMaxLength - mCustomizedLinesParams.mStartOffset, segmentLength);
 
-        if (segmentLeft <= 0.f)
+    while(true)
+    {
+        //Draw only if we're not in a gap
+        if (lineSize > 0.f && mCustomizedLinesParams.mColorIndex < mCustomizedLinesParams.mColors.Num())
         {
-            // We are inside the gap -> skip ahead
-            float skip = -segmentLeft + iCustomization.mGapLength;
-            current += skip;
-            continue;
+            FVector2D segmentStart = iStart + dir * current;
+            FVector2D segmentEnd = iStart + dir * (current + lineSize);
+
+            //UE_LOG(LogTemp, Warning, TEXT("current = %f, mCustomizedLinesParams.mColorIndex = %d"), current, mCustomizedLinesParams.mColorIndex);
+
+
+            mCustomizedLinesParams.mBatchedElements->AddTranslucentLine(
+                FVector(segmentStart, 0.f),
+                FVector(segmentEnd, 0.f),
+                mCustomizedLinesParams.mColors[mCustomizedLinesParams.mColorIndex],
+                mCustomizedLinesParams.mCanvas->GetHitProxyId(),
+                1.f,   // thickness
+                0.f,   // depth bias
+                true   // antialiasing
+            );
         }
 
-        // Draw the remaining length of this segment
-        float available = segmentLength - current;
-        float drawLen = FMath::Min(segmentLeft, available);
+        current += lineSize;
+        if (current >= segmentLength)
+        {
+            mCustomizedLinesParams.mStartOffset = mCustomizedLinesParams.mStartOffset + lineSize;
+            break;
+        }
 
-        FVector2D segmentStart = iStart + dir * current;
-        FVector2D segmentEnd = iStart + dir * (current + drawLen);
-
-        iBatchedElements->AddTranslucentLine(
-            FVector(segmentStart, 0.f),
-            FVector(segmentEnd, 0.f),
-            iColors[ioColorIndex],
-            iCanvas->GetHitProxyId(),
-            1.f,   // thickness
-            0.f,   // depth bias
-            true   // antialiasing
-        );
-
-        // move forward past dash + gap
-        current += drawLen + iCustomization.mGapLength;
-        ioColorIndex = (ioColorIndex + 1) % iColors.Num();
+        mCustomizedLinesParams.mColorIndex = (mCustomizedLinesParams.mColorIndex + 1) % (mCustomizedLinesParams.mColors.Num() + 1);
+        mCustomizedLinesParams.mStartOffset = 0;
+        lineMaxLength = mCustomizedLinesParams.mColorIndex < mCustomizedLinesParams.mColors.Num() ? mCustomizedLinesParams.mSegmentLength : mCustomizedLinesParams.mGapLength;
+        lineSize = FMath::Min(lineMaxLength, segmentLength - current);
     }
-
-    ioCumulLength += segmentLength;
 }
 
 void FOdysseyHUDElement::AddElement(TSharedPtr<FOdysseyHUDElement> iElementToAdd)

@@ -80,7 +80,8 @@ public:
 
 protected:
     virtual void DrawHUD(const FOdysseyHUDElement::FDrawHUDParams& iParams);
-    void DrawCustomizedLine(FCanvas* iCanvas, const FVector2D& iStart, const FVector2D& iEnd, float iTimeOffset, float iPatternLength, float& ioCumulLength, int& ioColorIndex, const TArray<FLinearColor>& iColors, const FHUDCustomization& iCustomization, FBatchedElements* iBatchedElements) const;
+    void InitDrawCustomizedLine(FCanvas* iCanvas, const FHUDCustomization& iCustomization, const FLinearColor& iDefaultColor);
+    void DrawCustomizedLine(const FVector2D& iStart, const FVector2D& iEnd);
 
 protected:
     // FGCObject implementation
@@ -96,6 +97,17 @@ private:
     /** If this element is captured by mouse or keyboard shortcut, then the associated viewport shouldn't do anything else than manipulating this HUD */
     bool mIsCaptured;
     TAttribute<bool> mIsVisible;
+
+    struct FCustomizedLinesParams
+    {
+        FCanvas* mCanvas;
+        float mStartOffset;
+        int mColorIndex;
+        TArray<FLinearColor> mColors;
+        FBatchedElements* mBatchedElements;
+        float mSegmentLength;
+        float mGapLength;
+    } mCustomizedLinesParams;
 };
 
 struct ODYSSEYHUD_API HOdysseyHUDElementHitProxy : public HHitProxy

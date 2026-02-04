@@ -25,56 +25,24 @@ FOdysseyHUDPolygon::DrawHUD(const FOdysseyHUDElement::FDrawHUDParams& iParams)
 
     // If we passed a customization in iParams, we use this one, else, we use the one that is in FOdysseyHUD
     const FOdysseyHUDElement::FHUDCustomization& customization = iParams.mCustomization ? *iParams.mCustomization : mCustomization;
-
     if( customization.mSegmentLength <= 0.f || customization.mGapLength < 0.f )
         return;
 
-    FBatchedElements* batchedElements = iParams.mCanvas->GetBatchedElements(FCanvas::ET_Line);
-
-    TArray<FLinearColor> colors = customization.mColors;
-    if( colors.Num() == 0 )
-        colors.Add(FLinearColor::Black);
-
-    int colorIndex = 0;
-    int numColors = colors.Num();
-    float cumulLength = 0.f;
-
-    // Total pattern length (Segment + Gap)
-    float patternLength = customization.mSegmentLength + customization.mGapLength;
-
-    double time = FApp::GetCurrentTime();
-    float timeOffset = FMath::Fmod(time * customization.mSpeed, patternLength);
+    InitDrawCustomizedLine(iParams.mCanvas, customization, FLinearColor::Black);
 
     // Draw all polygon edges
     for (int i = 1; i < mPoints.Num(); i++)
     {
-        DrawCustomizedLine( iParams.mCanvas,
-                            iParams.mTextureToHUD.Execute(mPoints[i - 1]),
-                            iParams.mTextureToHUD.Execute(mPoints[i]),
-                            timeOffset,
-                            patternLength,
-                            cumulLength,
-                            colorIndex,
-                            colors,
-                            customization,
-                            batchedElements
-                         );
+        DrawCustomizedLine( iParams.mTextureToHUD.Execute(mPoints[i - 1]),
+                            iParams.mTextureToHUD.Execute(mPoints[i]));
     }
 
     // Close polygon if needed (continue pattern seamlessly)
     if (mClosePolygon)
     {
-        DrawCustomizedLine(iParams.mCanvas,
+        DrawCustomizedLine(
             iParams.mTextureToHUD.Execute(mPoints.Last()),
-            iParams.mTextureToHUD.Execute(mPoints[0]),
-            timeOffset,
-            patternLength,
-            cumulLength,
-            colorIndex,
-            colors,
-            customization,
-            batchedElements
-        );
+            iParams.mTextureToHUD.Execute(mPoints[0]));
     }
 
     FOdysseyHUDElement::DrawHUD(iParams);

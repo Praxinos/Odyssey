@@ -31,68 +31,25 @@ FOdysseyHUDRectangle::DrawHUD(const FOdysseyHUDElement::FDrawHUDParams& iParams)
     FVector2D bottomRight = iParams.mTextureToHUD.Execute(mBottomRightPoint);
     FVector2D bottomLeft = iParams.mTextureToHUD.Execute(FVector2D(mTopLeftPoint.X, mBottomRightPoint.Y));
 
-    FBatchedElements* batchedElements = iParams.mCanvas->GetBatchedElements(FCanvas::ET_Line);
-
-    TArray<FLinearColor> colors = customization.mColors;
-    if (colors.Num() == 0)
-        colors.Add(FLinearColor::Black);
-
-    int colorIndex = 0;
-    int numColors = colors.Num();
-    float cumulLength = 0.f;
-
-    // Total pattern length (Segment + Gap)
-    float patternLength = customization.mSegmentLength + customization.mGapLength;
-
-    double time = FApp::GetCurrentTime();
-    float timeOffset = FMath::Fmod(time * customization.mSpeed, patternLength);
-
-    DrawCustomizedLine(iParams.mCanvas,
+    InitDrawCustomizedLine(iParams.mCanvas, customization, FLinearColor::Black);
+    DrawCustomizedLine(
         topLeft,
+        topRight
+    );
+
+    DrawCustomizedLine(
         topRight,
-        timeOffset,
-        patternLength,
-        cumulLength,
-        colorIndex,
-        colors,
-        customization,
-        batchedElements
+        bottomRight
     );
 
-    DrawCustomizedLine(iParams.mCanvas,
-        topRight,
+    DrawCustomizedLine(
         bottomRight,
-        timeOffset,
-        patternLength,
-        cumulLength,
-        colorIndex,
-        colors,
-        customization,
-        batchedElements
+        bottomLeft
     );
 
-    DrawCustomizedLine(iParams.mCanvas,
-        bottomRight,
+    DrawCustomizedLine(
         bottomLeft,
-        timeOffset,
-        patternLength,
-        cumulLength,
-        colorIndex,
-        colors,
-        customization,
-        batchedElements
-    );
-
-    DrawCustomizedLine(iParams.mCanvas,
-        bottomLeft,
-        topLeft,
-        timeOffset,
-        patternLength,
-        cumulLength,
-        colorIndex,
-        colors,
-        customization,
-        batchedElements
+        topLeft
     );
 
     FOdysseyHUDElement::DrawHUD(iParams);
