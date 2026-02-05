@@ -206,32 +206,37 @@ FImportImageSequenceConverter::CreateAnimation( const TArray<FImportImageSequenc
             //---
 
             // Import the textures (create layer, cells, ...)
-            FOdysseyPainterEditorAnimationImport import_sequence;
-            UOdysseyAnimationLayerImageRaster* animation_layer = import_sequence.ImportTextureSequence( new_animation, textures, nullptr, 0 );
+            FOdysseyImportTexturesParameters importParameters;
+            importParameters.Init(textures, new_animation->GetWidth(), new_animation->GetHeight());
+            FOdysseyPainterEditorAnimationImportResult importResult = FOdysseyPainterEditorAnimationImport::ImportTextureSequence( new_animation, importParameters );
 
-            new_animation->GetLayerStack()->SetCurrentLayer( animation_layer );
-
-            //---
-
-            TArray<UOdysseyLayerCell*> cells = animation_layer->GetCells();
-            // To have at least durations as long as cells
-            if( !ensure( durations.Num() >= cells.Num() ) )
+            if (!importResult.mImportedLayers.IsEmpty())
             {
-                int32 diff = cells.Num() - durations.Num();
-                TArray<int32> padding;
-                while( padding.Num() != diff )
-                    padding.Add( 48 ); // Arbitrary
-                durations.Append( padding );
+                UOdysseyAnimationLayerImageRaster* animation_layer = importResult.mImportedLayers[0];
+                new_animation->GetLayerStack()->SetCurrentLayer( animation_layer );
 
-                check( durations.Num() == cells.Num() );
-            }
+                //---
 
-            // Set the exposure of all cells
-            for( int i = 0; i < cells.Num(); i++ )
-            {
-                //int32 duration_in_tick = ConvertFromDisplayRateToTickResolution( iPanels[0].Duration );
+                TArray<UOdysseyLayerCell*> cells = animation_layer->GetCells();
+                // To have at least durations as long as cells
+                if( !ensure( durations.Num() >= cells.Num() ) )
+                {
+                    int32 diff = cells.Num() - durations.Num();
+                    TArray<int32> padding;
+                    while( padding.Num() != diff )
+                        padding.Add( 48 ); // Arbitrary
+                    durations.Append( padding );
 
-                cells[i]->SetExposure( durations[i] );
+                    check( durations.Num() == cells.Num() );
+                }
+
+                // Set the exposure of all cells
+                for( int i = 0; i < cells.Num(); i++ )
+                {
+                    //int32 duration_in_tick = ConvertFromDisplayRateToTickResolution( iPanels[0].Duration );
+
+                    cells[i]->SetExposure( durations[i] );
+                }
             }
         }
     }

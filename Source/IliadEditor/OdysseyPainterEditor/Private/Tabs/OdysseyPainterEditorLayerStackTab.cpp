@@ -51,7 +51,7 @@ FOdysseyPainterEditorLayerStackTab::~FOdysseyPainterEditorLayerStackTab()
 FOdysseyPainterEditorLayerStackTab::FOdysseyPainterEditorLayerStackTab(FOdysseyPainterEditor* iEditor)
     : FOdysseyEditorTab(LOCTEXT( "layerstack-tab.name", "Layer Stack" ), FSlateIcon( "OdysseyStyle", "PainterEditor.Layers16" ))
     , mEditor(iEditor)
-    , mTextureShortcuts(iEditor)
+    , mTextureExportShortcuts(iEditor)
 {
 }
 
@@ -108,7 +108,7 @@ void
 FOdysseyPainterEditorLayerStackTab::ExtendMenuFile( TSharedRef<FExtender> iExtender )
 {
     TSharedPtr<FUICommandList> commandList = MakeShared<FUICommandList>();
-    mTextureShortcuts.MapActionsToCommandList(commandList.ToSharedRef());
+    mTextureExportShortcuts.MapActionsToCommandList(commandList.ToSharedRef());
 
     iExtender->AddMenuExtension(
         "OdysseyFile",

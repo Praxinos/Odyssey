@@ -6,6 +6,8 @@
 #include "CoreMinimal.h"
 #include "OdysseyAntiAliasing.h"
 
+#include "OdysseyImportTexturesParameters.generated.h"
+
 UENUM()
 enum class EOdysseyImportTextureScaling : uint8
 {
@@ -14,34 +16,39 @@ enum class EOdysseyImportTextureScaling : uint8
     ScaleAndFit UMETA(ToolTip="Scales and preserves ratio")
 };
 
-class FOdysseyImportTexturesData
+UENUM()
+enum class EOdysseyImportTextureAlignment
 {
-public:
-    enum class EAlignment
-    {
-        TopLeft,
-        Top,
-        TopRight,
-        Left,
-        Center,
-        Right,
-        BottomLeft,
-        Bottom,
-        BottomRight
-    };
+    TopLeft,
+    Top,
+    TopRight,
+    Left,
+    Center,
+    Right,
+    BottomLeft,
+    Bottom,
+    BottomRight
+};
+
+USTRUCT(BlueprintType)
+struct ODYSSEYPAINTEREDITOR_API FOdysseyImportTexturesParameters
+{
+    GENERATED_BODY()
 
 public:
-    FOdysseyImportTexturesData();
-    FOdysseyImportTexturesData(const TArray< UTexture2D* > iSourceTextures, uint32 iWidth, uint32 iHeight);
+    FOdysseyImportTexturesParameters();
 
 public:
     UTextureRenderTarget2D* CreateRT() const;
     void Render(UTextureRenderTarget2D* oRenderTarget, int iSourceTextureIndex) const;
 
+    void Init(const TArray< UTexture2D* >& iTextures, uint32 iDestinationWidth, uint32 iDestinationHeight);
+    void Init(const TArray<FString>& iFilenames, uint32 iDestinationWidth, uint32 iDestinationHeight);
+
     uint32 GetDestinationWidth() const;
     uint32 GetDestinationHeight() const;
     TArray< UTexture2D* > GetSourceTextures() const;
-    EAlignment GetAlignment() const;
+    EOdysseyImportTextureAlignment GetAlignment() const;
     EOdysseyImportTextureScaling GetScaling() const;
     EOdysseyAntiAliasing GetResamplingMethod() const;
 
@@ -49,7 +56,7 @@ public:
     FVector2D GetTexturePosition(int iSourceTextureIndex) const;
     FVector2D GetTextureScaledSize(int iSourceTextureIndex) const;
 
-    void SetAlignment(EAlignment iAlignment);
+    void SetAlignment(EOdysseyImportTextureAlignment iAlignment);
     void SetScaling(EOdysseyImportTextureScaling iScaling);
     void SetResamplingMethod(EOdysseyAntiAliasing iMethod);
 
@@ -58,7 +65,13 @@ private:
     uint32 mDestinationWidth;
     uint32 mDestinationHeight;
 
-    EAlignment mAlignment = EAlignment::Center;
+protected:
+    UPROPERTY(BlueprintReadWrite)
+    EOdysseyImportTextureAlignment mAlignment = EOdysseyImportTextureAlignment::Center;
+
+    UPROPERTY(BlueprintReadWrite)
     EOdysseyImportTextureScaling mScaling = EOdysseyImportTextureScaling::None;
+
+    UPROPERTY(BlueprintReadWrite)
     EOdysseyAntiAliasing mResamplingMethod = EOdysseyAntiAliasing::Bilinear;
 };

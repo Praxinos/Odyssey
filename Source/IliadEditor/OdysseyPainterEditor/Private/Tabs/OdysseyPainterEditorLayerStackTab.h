@@ -4,7 +4,7 @@
 #pragma once
 
 #include "OdysseyEditorTab.h"
-#include "OdysseyPainterEditorGlobalTextureShortcuts.h"
+#include "OdysseyPainterEditorTextureExportShortcuts.h"
 
 class FOdysseyPainterEditor;
 class UOdysseyLayerStack;
@@ -47,5 +47,5 @@ private:
 
 private:
     FOdysseyPainterEditor* mEditor;
-    FOdysseyPainterEditorGlobalTextureShortcuts mTextureShortcuts;
+    FOdysseyPainterEditorTextureExportShortcuts mTextureExportShortcuts;
 };

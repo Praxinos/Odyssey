@@ -4,6 +4,7 @@
 #pragma once
 
 #include "OdysseyEditorTab.h"
+#include "OdysseyPainterEditorAnimationExportShortcuts.h"
 
 class FOdysseyPainterEditor;
 class UOdysseyAnimationLayerStack;
@@ -32,7 +33,6 @@ public:
 protected:
     virtual const FName& GetId() const override;
     virtual TSharedPtr<SWidget> CreateWidget() override;
-    virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
     virtual void ExtendMenu(TSharedRef<FExtender> iExtender) override;
     virtual bool CanOpen() const override;
 
@@ -55,13 +55,6 @@ private:
     void BuildImportMenu(FMenuBuilder& iMenuBuilder);
     void BuildExportMenu(FMenuBuilder& iMenuBuilder);
 
-    void MapActions( TSharedPtr<FUICommandList> iCommandList );
-
-    virtual void ImportTextureSequence();
-    void ImportImageSequence();
-    void ExportImageSequence();
-    void ExportAsFlipbook();
-
     void StepForward();
     void StepBackward();
 
@@ -78,4 +71,5 @@ private:
     FText mEmptyTimelineMessage;
     TSharedPtr<SWidget> mEmptyTimelineTabWidget;
     TAttribute<FInt32Range> mAnimationValidRange;
+    FOdysseyPainterEditorAnimationExportShortcuts mAnimationExportShortcuts;
 };

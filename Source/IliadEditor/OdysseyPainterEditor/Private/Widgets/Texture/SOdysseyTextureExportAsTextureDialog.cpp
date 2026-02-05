@@ -13,9 +13,6 @@
 #include "SEnumCombo.h"
 #include "Widgets/Input/SNumericEntryBox.h"
 #include "Widgets/Layout/SGridPanel.h"
-#include "DesktopPlatformModule.h"
-#include "ULISLoaderModule.h"
-#include "ULISUtils.h"
 
 #include "Misc/ScopedSlowTask.h"
 
@@ -68,20 +65,6 @@ SOdysseyTextureExportAsTextureDialog::Construct(const FArguments& InArgs, UTextu
             .OnEnumSelectionChanged_Lambda([this](int32 iValue, ESelectInfo::Type iSelectInfo){ mExporter.mSource = (EOdysseyTextureExportAsTextureSource)iValue;})
         ]
     ];
-}
-
-FString
-SOdysseyTextureExportAsTextureDialog::GetSaveFileDialogExtension()
-{
-    switch(mExporter.mFormat)
-    {
-        case EOdysseyExportImageFormat::PNG: return FString::Format(TEXT("{0} (.png)|*.png"), { LOCTEXT("export-image-dialog.format-extension.png", "PNG Image").ToString() } );
-        case EOdysseyExportImageFormat::BMP: return FString::Format(TEXT("{0} (.bmp)|*.bmp"), { LOCTEXT("export-image-dialog.format-extension.bmp", "BMP Image").ToString() } );
-        case EOdysseyExportImageFormat::TGA: return FString::Format(TEXT("{0} (.tga)|*.tga"), { LOCTEXT("export-image-dialog.format-extension.tga", "TGA Image").ToString() } );
-        case EOdysseyExportImageFormat::Jpeg: return FString::Format(TEXT("{0} (.jpg)|*.jpg"), { LOCTEXT("export-image-dialog.format-extension.jpeg", "Jpeg Image").ToString() } );
-    }
-
-    return TEXT("");
 }
 
 FOdysseyTextureAsTextureExporter::FOdysseyTextureAsTextureExporter()

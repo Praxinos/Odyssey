@@ -4,17 +4,17 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "OdysseyImportTexturesData.h"
+#include "OdysseyImportTexturesParameters.h"
 class SOdysseyImportTexturePositioning : public SCompoundWidget
 {
 public:
-    DECLARE_DELEGATE_OneParam(FOnChanged, FOdysseyImportTexturesData);
+    DECLARE_DELEGATE_OneParam(FOnChanged, FOdysseyImportTexturesParameters);
 
 public:
     SLATE_BEGIN_ARGS(SOdysseyImportTexturePositioning)
         {}
         /** Called when the object value changes */
-        SLATE_ATTRIBUTE(FOdysseyImportTexturesData, Data)
+        SLATE_ATTRIBUTE(FOdysseyImportTexturesParameters, Data)
         SLATE_EVENT(FOnChanged, OnChanged)
     SLATE_END_ARGS()
 
@@ -24,8 +24,8 @@ public:
     void Construct(const FArguments& InArgs);
 
 private:
-    void OnAlignmentCheckBoxStateChanged(ECheckBoxState InCheckState, FOdysseyImportTexturesData::EAlignment iAlignment);
-    ECheckBoxState IsAlignmentChecked(FOdysseyImportTexturesData::EAlignment iAlignment) const;
+    void OnAlignmentCheckBoxStateChanged(ECheckBoxState InCheckState, EOdysseyImportTextureAlignment iAlignment);
+    ECheckBoxState IsAlignmentChecked(EOdysseyImportTextureAlignment iAlignment) const;
 
     int32 GetScaling() const;
     void OnScalingEnumSelectionChanged(int32, ESelectInfo::Type);
@@ -34,6 +34,6 @@ private:
     void OnResamplingMethodEnumSelectionChanged(int32, ESelectInfo::Type);
 
 private:
-    TAttribute<FOdysseyImportTexturesData> mData;
+    TAttribute<FOdysseyImportTexturesParameters> mData;
     FOnChanged mOnChanged;
 };

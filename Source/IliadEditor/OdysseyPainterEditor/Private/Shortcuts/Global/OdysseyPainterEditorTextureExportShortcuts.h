@@ -7,12 +7,12 @@
 
 class FOdysseyPainterEditor;
 class FUICommandList;
-class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorGlobalTextureShortcuts
+class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorTextureExportShortcuts
     : public FOdysseyEditorShortcuts
 {
 public:
-    virtual ~FOdysseyPainterEditorGlobalTextureShortcuts() {};
-    FOdysseyPainterEditorGlobalTextureShortcuts(FOdysseyPainterEditor* iEditor);
+    virtual ~FOdysseyPainterEditorTextureExportShortcuts() {};
+    FOdysseyPainterEditorTextureExportShortcuts(FOdysseyPainterEditor* iEditor);
 
 public:
     //Shortcuts

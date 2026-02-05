@@ -39,7 +39,6 @@ public:
 
 public:
     UTexture2D* mTexture = nullptr;
-    EOdysseyExportImageFormat mFormat = EOdysseyExportImageFormat::PNG;
     EOdysseyTextureExportAsTextureSource mSource = EOdysseyTextureExportAsTextureSource::AllLayers;
 };
 
@@ -64,7 +63,6 @@ public:
     void Construct(const FArguments& InArgs, UTexture2D* iTexture);
 
 private:
-    FString GetSaveFileDialogExtension();
     void Export();
 
 private:

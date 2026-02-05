@@ -19,7 +19,7 @@
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
 bool
-SOdysseyImportTexturesDialog::Open(FText iTitle, FOdysseyImportTexturesData& ioData)
+SOdysseyImportTexturesDialog::Open(FText iTitle, FOdysseyImportTexturesParameters& ioData)
 {
     FText exportText = LOCTEXT("import-textures-dialog.export", "Import" );
     FText cancelText = LOCTEXT("import-textures-dialog.cancel", "Cancel");
@@ -58,7 +58,7 @@ SOdysseyImportTexturesDialog::~SOdysseyImportTexturesDialog()
 }
 
 void
-SOdysseyImportTexturesDialog::Construct(const FArguments& InArgs, const FOdysseyImportTexturesData& ioData)
+SOdysseyImportTexturesDialog::Construct(const FArguments& InArgs, const FOdysseyImportTexturesParameters& ioData)
 {
     mImportData = ioData;
 
@@ -163,7 +163,7 @@ SOdysseyImportTexturesDialog::CreateTextureOutlineHUD() const
     return hud;
 }
 
-FOdysseyImportTexturesData
+FOdysseyImportTexturesParameters
 SOdysseyImportTexturesDialog::GetImportData() const
 {
     return mImportData;
@@ -185,7 +185,7 @@ SOdysseyImportTexturesDialog::OnTabChecked(ETabs iTab, ECheckBoxState iState)
 }
 
 void
-SOdysseyImportTexturesDialog::OnPositioningChanged(FOdysseyImportTexturesData iData)
+SOdysseyImportTexturesDialog::OnPositioningChanged(FOdysseyImportTexturesParameters iData)
 {
     mImportData = iData;
     UpdatePreview();

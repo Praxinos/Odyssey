@@ -1,7 +1,7 @@
 // IDDN.FR.001.060015.014.S.X.2019.000.00000
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
-#include "OdysseyPainterEditorGlobalTextureShortcuts.h"
+#include "OdysseyPainterEditorTextureExportShortcuts.h"
 
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorTextureCommands.h"
@@ -26,39 +26,39 @@
 
 #define LOCTEXT_NAMESPACE "TextureEditor"
 
-FOdysseyPainterEditorGlobalTextureShortcuts::FOdysseyPainterEditorGlobalTextureShortcuts(FOdysseyPainterEditor* iEditor)
+FOdysseyPainterEditorTextureExportShortcuts::FOdysseyPainterEditorTextureExportShortcuts(FOdysseyPainterEditor* iEditor)
     : mEditor(iEditor)
 {
 }
 
 void
-FOdysseyPainterEditorGlobalTextureShortcuts::MapActionsToCommandList(TSharedRef<FUICommandList> iCommandList)
+FOdysseyPainterEditorTextureExportShortcuts::MapActionsToCommandList(TSharedRef<FUICommandList> iCommandList)
 {
     FOdysseyEditorShortcuts::MapActionsToCommandList(iCommandList);
 
     iCommandList->MapAction(
         FOdysseyPainterEditorTextureCommands::Get().ExportLayersAsTextures,
-        FExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalTextureShortcuts::Action_ExportLayersAsTextures)
+        FExecuteAction::CreateRaw(this, &FOdysseyPainterEditorTextureExportShortcuts::Action_ExportLayersAsTextures)
     );
 
     iCommandList->MapAction(
         FOdysseyPainterEditorTextureCommands::Get().ExportLayersAsImages,
-        FExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalTextureShortcuts::Action_ExportLayersAsImages)
+        FExecuteAction::CreateRaw(this, &FOdysseyPainterEditorTextureExportShortcuts::Action_ExportLayersAsImages)
     );
 
     iCommandList->MapAction(
         FOdysseyPainterEditorTextureCommands::Get().ImportImages,
-        FExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalTextureShortcuts::Action_ImportImages)
+        FExecuteAction::CreateRaw(this, &FOdysseyPainterEditorTextureExportShortcuts::Action_ImportImages)
     );
 
     iCommandList->MapAction(
         FOdysseyPainterEditorTextureCommands::Get().ImportTextures,
-        FExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalTextureShortcuts::Action_ImportTextures)
+        FExecuteAction::CreateRaw(this, &FOdysseyPainterEditorTextureExportShortcuts::Action_ImportTextures)
     );
 }
 
 void
-FOdysseyPainterEditorGlobalTextureShortcuts::Action_ExportLayersAsTextures()
+FOdysseyPainterEditorTextureExportShortcuts::Action_ExportLayersAsTextures()
 {
     TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
     if (!source || source->Id() != FOdysseyPainterEditorTextureSource::StaticId())
@@ -72,7 +72,7 @@ FOdysseyPainterEditorGlobalTextureShortcuts::Action_ExportLayersAsTextures()
 }
 
 void
-FOdysseyPainterEditorGlobalTextureShortcuts::Action_ExportLayersAsImages()
+FOdysseyPainterEditorTextureExportShortcuts::Action_ExportLayersAsImages()
 {
     TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
     if (!source || source->Id() != FOdysseyPainterEditorTextureSource::StaticId())
@@ -86,7 +86,7 @@ FOdysseyPainterEditorGlobalTextureShortcuts::Action_ExportLayersAsImages()
 }
 
 void
-FOdysseyPainterEditorGlobalTextureShortcuts::Action_ImportImages()
+FOdysseyPainterEditorTextureExportShortcuts::Action_ImportImages()
 {
     TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
     if (!source || source->Id() != FOdysseyPainterEditorTextureSource::StaticId())
@@ -118,42 +118,17 @@ FOdysseyPainterEditorGlobalTextureShortcuts::Action_ImportImages()
         }
     );
 
-    //Convert to textures
-    FScopedSlowTask progressBar(filenames.Num(), LOCTEXT("texture-editor.import-images.progress-bar.title", "Importing Images"));
-    progressBar.MakeDialog();
-
-    TStrongObjectPtr<UTextureFactory> TextureFactory(NewObject<UTextureFactory>());
-    TArray<TStrongObjectPtr<UTexture2D>> importedTextures;
-    importedTextures.Reserve(filenames.Num());
-    for (const FString& filename : filenames)
-    {
-        progressBar.EnterProgressFrame();
-
-        UObject* importedObject = UFactory::StaticImportObject(UTexture2D::StaticClass(), GetTransientPackage(), NAME_None, EObjectFlags::RF_NoFlags, *filename, nullptr, TextureFactory.Get());
-        UTexture2D* importedTexture = Cast<UTexture2D>(importedObject);
-        if (!importedTexture)
-            continue;
-
-        importedTextures.Emplace(importedTexture);
-    }
-
-    TArray<UTexture2D*> textures;
-
-    for (int i = 0; i < importedTextures.Num(); i++)
-    {
-        textures.Add(importedTextures[i].Get());
-    }
-
-    FOdysseyImportTexturesData importData(textures, texture->GetSurfaceWidth(), texture->GetSurfaceHeight());
-    if(!SOdysseyImportTexturesDialog::Open(LOCTEXT("import-textures-dialog.title", "Import Images" ), importData))
+    FOdysseyImportTexturesParameters importParameters;
+    importParameters.Init(filenames, texture->GetSurfaceWidth(), texture->GetSurfaceHeight());
+    if(!SOdysseyImportTexturesDialog::Open(LOCTEXT("import-textures-dialog.title", "Import Images" ), importParameters))
         return;
 
     FOdysseyPainterEditorTextureImport import;
-    import.ImportTextures(texture, importData);
+    import.ImportTextures(texture, importParameters);
 }
 
 void
-FOdysseyPainterEditorGlobalTextureShortcuts::Action_ImportTextures()
+FOdysseyPainterEditorTextureExportShortcuts::Action_ImportTextures()
 {
     TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
     if (!source || source->Id() != FOdysseyPainterEditorTextureSource::StaticId())
@@ -185,10 +160,13 @@ FOdysseyPainterEditorGlobalTextureShortcuts::Action_ImportTextures()
         texturesToImport.Add(openedTexture);
     }
 
-    FOdysseyImportTexturesData importData(texturesToImport, currentTexture->GetSurfaceWidth(), currentTexture->GetSurfaceHeight());
-    if(!SOdysseyImportTexturesDialog::Open(LOCTEXT("import-textures-dialog.title", "Import Textures" ), importData))
+    FOdysseyImportTexturesParameters importParameters;
+    importParameters.Init(texturesToImport, currentTexture->GetSurfaceWidth(), currentTexture->GetSurfaceHeight());
+    if(!SOdysseyImportTexturesDialog::Open(LOCTEXT("import-textures-dialog.title", "Import Textures" ), importParameters))
         return;
 
     FOdysseyPainterEditorTextureImport import;
-    import.ImportTextures(currentTexture, importData);
+    import.ImportTextures(currentTexture, importParameters);
 }
+
+#undef LOCTEXT_NAMESPACE

@@ -4,7 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "OdysseyImportTexturesData.h"
+#include "OdysseyImportTexturesParameters.h"
 
 class FOdysseyImportTexturesViewportClient;
 class FOdysseyHUDRectangle;
@@ -22,7 +22,7 @@ public:
     };
 
 public:
-    static bool Open(FText Title, FOdysseyImportTexturesData& ioData);
+    static bool Open(FText Title, FOdysseyImportTexturesParameters& ioData);
 
 public:
     SLATE_BEGIN_ARGS(SOdysseyImportTexturesDialog)
@@ -32,10 +32,10 @@ public:
 public:
     // Construction / Destruction
     ~SOdysseyImportTexturesDialog();
-    void Construct(const FArguments& InArgs, const FOdysseyImportTexturesData& ioData);
+    void Construct(const FArguments& InArgs, const FOdysseyImportTexturesParameters& ioData);
 
 public:
-    FOdysseyImportTexturesData GetImportData() const;
+    FOdysseyImportTexturesParameters GetImportData() const;
 
 private:
     virtual void Tick( const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime ) override;
@@ -43,7 +43,7 @@ private:
 private:
     ETabs GetActiveTab() const;
     void OnTabChecked(ETabs iTab, ECheckBoxState iState);
-    void OnPositioningChanged(FOdysseyImportTexturesData iData);
+    void OnPositioningChanged(FOdysseyImportTexturesParameters iData);
 
     EVisibility GetCurrentTextureSliderVisibility() const;
     float GetCurrentTextureSliderStepSize() const;
@@ -54,7 +54,7 @@ private:
     void UpdatePreview();
 
 private:
-    FOdysseyImportTexturesData mImportData;
+    FOdysseyImportTexturesParameters mImportData;
 
     ETabs mActiveTab = ETabs::Positioning;
     uint32 mCurrentTextureIndex = 0;

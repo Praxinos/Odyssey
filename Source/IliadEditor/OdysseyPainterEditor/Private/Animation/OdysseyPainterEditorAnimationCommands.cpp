@@ -31,6 +31,7 @@ FOdysseyPainterEditorAnimationCommands::RegisterCommands()
     UI_BUNDLE_COMMAND( ImportTextureSequence, ImportExportAnimationShortcuts, "Import Texture Sequence", "Import several textures from the content-browser in a new layer",                                               EUserInterfaceActionType::Button, FInputChord());
     UI_BUNDLE_COMMAND( ImportImageSequence, ImportExportAnimationShortcuts, "Import Image Sequence", "Import several images from your operating system in a new layer",                                               EUserInterfaceActionType::Button, FInputChord());
     UI_BUNDLE_COMMAND( ExportImageSequence, ImportExportAnimationShortcuts, "Export Image Sequence", "Export the animation as an image sequence on your operating system",                                               EUserInterfaceActionType::Button, FInputChord());
+    UI_BUNDLE_COMMAND( ExportTextureSequence, ImportExportAnimationShortcuts, "Export Texture Sequence", "Export the animation as an texture sequence on your operating system",                                               EUserInterfaceActionType::Button, FInputChord());
     UI_BUNDLE_COMMAND( ExportAsFlipbook, ImportExportAnimationShortcuts, "Export As Flipbook", "Export the animation as a flipbook",                                               EUserInterfaceActionType::Button, FInputChord());
 
 // LayerStack Shortcuts Category

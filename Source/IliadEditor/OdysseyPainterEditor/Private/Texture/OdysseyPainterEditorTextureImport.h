@@ -4,21 +4,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "OdysseyImportTexturesData.h"
+#include "OdysseyImportTexturesParameters.h"
 
-class UOdysseyTextureLayer;
 class UOdysseyTextureLayerImageRaster;
 class UTexture2D;
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorTextureImport
 {
 public:
-    FOdysseyPainterEditorTextureImport();
-
-public:
-    /* TArray<UOdysseyTextureLayerImageRaster*> ImportTextures(UTexture2D* DestinationTexture, TArray<UTexture2D*> InputTextures, UOdysseyTextureLayer* ParentLayer = nullptr, int IndexInParent = 0);
-    TArray<UOdysseyTextureLayerImageRaster*> ImportImages(UTexture2D* DestinationTexture, TArray<FString> Paths, UOdysseyTextureLayer* ParentLayer = nullptr, int IndexInParent = 0); */
-
-
-    static TArray<UOdysseyTextureLayerImageRaster*> ImportTextures(UTexture2D* DestinationTexture, const FOdysseyImportTexturesData& iImportData);
+    static TArray<UOdysseyTextureLayerImageRaster*> ImportTextures(UTexture2D* DestinationTexture, const FOdysseyImportTexturesParameters& iImportData);
 };
