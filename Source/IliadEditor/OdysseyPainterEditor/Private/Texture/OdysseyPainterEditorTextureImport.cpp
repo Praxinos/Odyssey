@@ -53,9 +53,25 @@ FOdysseyPainterEditorTextureImport::ImportTextures(UTexture2D* DestinationTextur
         UOdysseyTextureLayerImageRaster* layer = Cast<UOdysseyTextureLayerImageRaster>(layers[i]);
         iImportData.Render(renderTarget.Get(), i);
 
+        //PATCH: Needed to avoid double sRGB application in GetRenderTargetImage()
+        if (DestinationTexture->SRGB)
+        {
+            renderTarget->RenderTargetFormat = RTF_RGBA8_SRGB;
+            renderTarget->bForceLinearGamma = false;
+        }
+        //PATCH: End
+
         FImage OutImage;
         if (!FImageUtils::GetRenderTargetImage(renderTarget.Get(), OutImage))
             continue;
+
+        //PATCH: Needed to avoid double sRGB application in GetRenderTargetImage()
+        if (DestinationTexture->SRGB)
+        {
+            renderTarget->RenderTargetFormat = RTF_RGBA8;
+            renderTarget->bForceLinearGamma = true;
+        }
+        //PATCH: End
 
         ::ULIS::eFormat format = ULISFormatForRawImageFormat(OutImage.Format);
         ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);

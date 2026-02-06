@@ -88,9 +88,25 @@ FOdysseyPainterEditorAnimationLayerImport::ImportTextureSequence(UOdysseyAnimati
         UOdysseyAnimationCellImageRaster* cell = Cast<UOdysseyAnimationCellImageRaster>(cells[i]);
         iImportData.Render(renderTarget, i);
 
+        //PATCH: Needed to avoid double sRGB application in GetRenderTargetImage()
+        if (animation->GetFormat() == EOdysseyAnimationFormat::BGRA8)
+        {
+            renderTarget->RenderTargetFormat = RTF_RGBA8_SRGB;
+            renderTarget->bForceLinearGamma = false;
+        }
+        //PATCH: End
+
         FImage OutImage;
         if (!FImageUtils::GetRenderTargetImage(renderTarget, OutImage))
             continue;
+
+        //PATCH: Needed to avoid double sRGB application in GetRenderTargetImage()
+        if (animation->GetFormat() == EOdysseyAnimationFormat::BGRA8)
+        {
+            renderTarget->RenderTargetFormat = RTF_RGBA8;
+            renderTarget->bForceLinearGamma = true;
+        }
+        //PATCH: End
 
         ::ULIS::eFormat format = ULISFormatForRawImageFormat(OutImage.Format);
         ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
