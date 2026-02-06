@@ -6,12 +6,14 @@
 #include "OdysseyPainterEditor.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "Widgets/Input/SSegmentedControl.h"
+#include "SOdysseyColorWheel.h"
 #include "Widgets/Color/SOdysseyAdvancedColorWheel.h"
 #include "Widgets/Color/SOdysseyColorSliders.h"
 #include "Widgets/Color/SOdysseyColorHexadecimal.h"
 #include "Widgets/Palette/SOdysseyPainterEditorPaletteSetList.h"
 #include "OdysseyStyle.h"
 #include "Tools/OdysseyPainterEditorTool.h"
+#include "OdysseyPainterEditorTextureSource.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -112,6 +114,37 @@ FOdysseyPainterEditorColorSelectorTab::CreateWidget()
                 .DesiredHeight(  175 )
                 .Color(this, &FOdysseyPainterEditorColorSelectorTab::GetRawColor)
                 .OnColorChanged(this, &FOdysseyPainterEditorColorSelectorTab::OnColorChanged)
+            ]
+            +SVerticalBox::Slot()
+            .AutoHeight()
+            [
+                SNew( SOdysseyColorWheel )
+                .Visibility(this, &FOdysseyPainterEditorColorSelectorTab::GetColorWheelVisibility)
+                .TextureModel_Lambda(
+                    [this]() -> UTexture2D*
+                    {
+                        TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
+                        if (!source)
+                            return nullptr;
+
+                        /*if (source->Id() == FOdysseyPainterEditorAnimationSource::StaticId())
+                        {
+                            TSharedPtr<FOdysseyPainterEditorAnimationSource> animationSource = StaticCastSharedPtr<FOdysseyPainterEditorAnimationSource>(source);
+                            UOdysseyAnimation* animation = animationSource->GetAnimation();
+                            return nullptr;
+                        }*/
+
+                        if (source->Id() == FOdysseyPainterEditorTextureSource::StaticId())
+                        {
+                            TSharedPtr<FOdysseyPainterEditorTextureSource> textureSource = StaticCastSharedPtr<FOdysseyPainterEditorTextureSource>(source);
+                            return textureSource->GetTexture();
+                        }
+
+                        return nullptr;
+                    }
+                )
+                .Color(this, &FOdysseyPainterEditorColorSelectorTab::GetLinearColor)
+                .OnColorChanged(this, &FOdysseyPainterEditorColorSelectorTab::OnLinearColorChanged)
             ]
         ]
 
@@ -270,6 +303,13 @@ FOdysseyPainterEditorColorSelectorTab::GetRawColor() const
     return mEditor->PaintColor().GetValue();
 }
 
+FLinearColor
+FOdysseyPainterEditorColorSelectorTab::GetLinearColor() const
+{
+    ::ULIS::FColor color = mEditor->PaintColor().GetValue();
+    return FLinearColor(color.RedF(), color.GreenF(), color.BlueF(), color.AlphaF());
+}
+
 const FSlateBrush*
 FOdysseyPainterEditorColorSelectorTab::GetExpanderArrowImage(TSharedPtr<SButton> iExpander, bool iIsExpanded) const
 {
@@ -405,6 +445,12 @@ void
 FOdysseyPainterEditorColorSelectorTab::OnColorChanged( eOdysseyEventState::Type iEventState, const ::ULIS::FColor& iColor )
 {
     mEditor->PaintColor( iColor, iEventState == eOdysseyEventState::kSet );
+}
+
+void
+FOdysseyPainterEditorColorSelectorTab::OnLinearColorChanged( eOdysseyEventState::Type iEventState, const FLinearColor& iColor )
+{
+    mEditor->PaintColor( ::ULIS::FColor::FromRGBAF(iColor.R, iColor.G, iColor.B, iColor.A), iEventState == eOdysseyEventState::kSet );
 }
 
 FReply
