@@ -3,6 +3,7 @@
 
 #include "Tools/EposSequenceTools.h"
 
+#include "Bindings/MovieSceneSpawnableActorBinding.h"
 #include "Channels/MovieSceneChannelProxy.h"
 #include "Channels/MovieSceneFloatChannel.h"
 #include "CineCameraActor.h"
@@ -25,9 +26,14 @@
 #include "MovieScene.h"
 #include "MovieSceneSection.h"
 #include "MovieSceneSequence.h"
+#include "Sections/MovieScene3DAttachSection.h"
 #include "Sections/MovieSceneBoolSection.h"
 #include "Sections/MovieSceneSubSection.h"
+#include "SequencerUtilities.h"
+#include "Tracks/MovieScene3DAttachTrack.h"
 #include "Widgets/Notifications/SNotificationList.h"
+#include "Tracks/MovieScene3DTransformTrack.h"
+#include "Sections/MovieScene3DTransformSection.h"
 
 #include "ActorHelpers.h"
 #include "Board/BoardSequence.h"
@@ -88,8 +94,6 @@ ShotSequenceTools::SpawnAnimation( UWorld* iWorld, ACineCameraActor* iCamera, fl
     AOdysseyAnimationActor* animation = iWorld->SpawnActor<AOdysseyAnimationActor>( SpawnParams );
     if( !animation )
         return nullptr;
-
-    animation->SetActorHiddenInGame( true );
 
 #if UE_BUILD_DEBUG
     if( UMaterialInstanceConstant* material = Cast<UMaterialInstanceConstant>( animation->GetAnimationComponent()->GetMaterial( 0 ) ) )
@@ -203,7 +207,8 @@ ShotSequenceTools::SpawnAndBindAnimation( ISequencer& iSequencer, UMovieSceneSeq
 
     //-
 
-    GEditor->ParentActors( iCamera, animation, NAME_None );
+    if( !iAnimationArgs.mSpawnable )
+        GEditor->ParentActors( iCamera, animation, NAME_None );
 
     UEposMovieSceneSequence* epos_sequence = Cast<UEposMovieSceneSequence>( iSequence );
     check( epos_sequence );
@@ -220,7 +225,98 @@ ShotSequenceTools::SpawnAndBindAnimation( ISequencer& iSequencer, UMovieSceneSeq
 
     animation_name = NamingConvention::GenerateAnimationTrackName( iSequencer, *epos_sequence, iSequenceID, animation );
 
-    FGuid animationGuid = iSequencer.CreateBinding( *animation, animation_name );
+    UE::Sequencer::FCreateBindingParams BindingParams;
+    BindingParams.BindingNameOverride = animation_name;
+    BindingParams.bAllowCustomBinding = true;
+    FGuid animationGuid = iSequencer.CreateBinding( *animation, BindingParams );
+
+    //---
+
+    if( iAnimationArgs.mSpawnable )
+    {
+        TSubclassOf<UMovieSceneCustomBinding> CustomBindingClass = UMovieSceneSpawnableActorBinding::StaticClass();
+
+        const FMovieSceneBindingReferences* BindingReferences = iSequence->GetBindingReferences();
+
+        if( BindingReferences )
+        {
+            for( const FMovieSceneBindingReference& Reference : BindingReferences->GetReferences( animationGuid ) )
+            {
+                for( const TSubclassOf<UMovieSceneCustomBinding>& SupportedCustomBindingType : iSequencer.GetSupportedCustomBindingTypes() )
+                {
+                    if( SupportedCustomBindingType && SupportedCustomBindingType->IsChildOf( CustomBindingClass ) &&
+                        SupportedCustomBindingType->GetDefaultObject<UMovieSceneCustomBinding>()->SupportsConversionFromBinding( Reference, animation ) )
+                    {
+                        FMovieScenePossessable* NewPossessable = FSequencerUtilities::ConvertToCustomBinding( iSequencer.AsShared(), animationGuid, CustomBindingClass );
+
+                        if( NewPossessable )
+                        {
+                            for( TWeakObjectPtr<> WeakObject : iSequencer.FindBoundObjects( NewPossessable->GetGuid(), iSequencer.GetFocusedTemplateID() ) ) //TODO: or iSequenceID ?
+                            {
+                                AOdysseyAnimationActor* SpawnedActor = Cast<AOdysseyAnimationActor>( WeakObject.Get() );
+                                if( SpawnedActor )
+                                {
+                                    animation = SpawnedActor;
+                                }
+                            }
+
+                            animationGuid = NewPossessable->GetGuid();
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+
+        //---
+
+        check( iSequencer.GetFocusedTemplateID() == iSequenceID );
+        FGuid newCameraGuid = iSequencer.FindObjectId( *iCamera, iSequencer.GetFocusedTemplateID() ); //TODO: or iSequenceID ?
+        FMovieSceneObjectBindingID attachBindingID = UE::MovieScene::FRelativeObjectBindingID( newCameraGuid );
+
+        UMovieScene3DAttachTrack* attachTrack = iSequence->GetMovieScene()->AddTrack<UMovieScene3DAttachTrack>( animationGuid );
+
+        // Add a placeholder range which will be modified right after to have an infinite range
+        UMovieScene3DAttachSection* attachSection = Cast<UMovieScene3DAttachSection>( attachTrack->AddConstraint( 0, 1, NAME_None, NAME_None, attachBindingID ) );
+        attachSection->SetRange( TRange<FFrameNumber>::All() );
+        //attachSection->AttachmentLocationRule = EAttachmentRule::KeepWorld;
+        //attachSection->AttachmentRotationRule = EAttachmentRule::KeepWorld;
+        //attachSection->AttachmentScaleRule = EAttachmentRule::KeepWorld;
+        //attachSection->DetachmentLocationRule = EDetachmentRule::KeepWorld;
+        //attachSection->DetachmentRotationRule = EDetachmentRule::KeepWorld;
+        //attachSection->DetachmentScaleRule = EDetachmentRule::KeepWorld;
+        attachSection->Modify();
+
+        attachTrack->Modify();
+
+        // Update the default transform channel to take care of the attach track
+        UMovieScene3DTransformTrack* transformTrack = Cast<UMovieScene3DTransformTrack>( iSequence->GetMovieScene()->FindTrack( UMovieScene3DTransformTrack::StaticClass(), animationGuid ) );
+        if( transformTrack )
+        {
+            if( transformTrack->GetAllSections().Num() )
+            {
+                FTransform world_actor_transform = animation->GetActorTransform();
+                FTransform relative_transform = world_actor_transform.GetRelativeTransform( iCamera->GetActorTransform() );
+
+                UMovieScene3DTransformSection* TransformSection = Cast<UMovieScene3DTransformSection>( transformTrack->GetAllSections()[0] );
+
+                TArrayView<FMovieSceneDoubleChannel*> DoubleChannels = TransformSection->GetChannelProxy().GetChannels<FMovieSceneDoubleChannel>();
+                DoubleChannels[0]->SetDefault( relative_transform.GetLocation().X );
+                DoubleChannels[1]->SetDefault( relative_transform.GetLocation().Y );
+                DoubleChannels[2]->SetDefault( relative_transform.GetLocation().Z );
+
+                DoubleChannels[3]->SetDefault( relative_transform.GetRotation().Euler().X );
+                DoubleChannels[4]->SetDefault( relative_transform.GetRotation().Euler().Y );
+                DoubleChannels[5]->SetDefault( relative_transform.GetRotation().Euler().Z );
+
+                DoubleChannels[6]->SetDefault( relative_transform.GetScale3D().X );
+                DoubleChannels[7]->SetDefault( relative_transform.GetScale3D().Y );
+                DoubleChannels[8]->SetDefault( relative_transform.GetScale3D().Z );
+            }
+        }
+    }
+
+    //---
 
     //iSequencer.OnActorAddedToSequencer().Broadcast( animation, animationGuid ); // Already called when creating the binding for animation
 

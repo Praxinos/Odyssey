@@ -83,7 +83,7 @@ public:
     UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category=BoardTrack)
     FLinearColor ShotSectionColor { .6f, .39f, .94f, .25f };
 
-    /** Select the background color of shot sections. */
+    /** Go to first frame of the section when creating an animation via a board section. */
     UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category=BoardTrack)
     bool GoToSectionStartFrameAfterCreationState = true;
 };
@@ -120,6 +120,10 @@ private:
     void UpdateValues();
 
 public:
+    /** Use spawnable when creating camera/animation actors */
+    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category=Settings)
+    bool bSpawnable = true;
+
     /** Specifies Camera stuff. (UpdateValues() must be called after camera modifications) */
     UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category=Settings, meta=(ShowOnlyInnerProperties))
     FCameraSettings CameraSettings;
@@ -134,7 +138,7 @@ public:
 
     /** The default duration for new section in seconds. */
     UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category=BoardTrack, meta=(ClampMin=0.1f, Units=s))
-    float DefaultSectionDuration { 3 };
+    float DefaultSectionDuration = 3;
 
     /** Specifies Board track stuff. */
     UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category=Settings, meta=(ShowOnlyInnerProperties))

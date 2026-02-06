@@ -3152,6 +3152,7 @@ SCinematicBoardSectionAnimations::CreateAnimation( TSharedRef<FString> iAnimatio
     UMovieSceneSection* section_object = mBoardSection.Pin()->GetSectionObject();
     FAnimationArgs animation_args;
     animation_args.mName = *iAnimationName;
+    animation_args.mSpawnable = GetDefault<UEposTracksEditorSettings>()->bSpawnable;
     BoardSequenceTools::CreateAnimation( sequencer, section_object->GetInclusiveStartFrame(), animation_args );
 }
 

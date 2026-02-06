@@ -201,8 +201,10 @@ SCinematicBoardSectionThumbnails::CreateCameraWithAnimation( TSharedRef<FString>
     UMovieSceneSection* section_object = mBoardSection.Pin()->GetSectionObject();
     FCameraArgs camera_args;
     camera_args.mName = *iCameraName;
+    camera_args.mSpawnable = GetDefault<UEposTracksEditorSettings>()->bSpawnable;
     FAnimationArgs animation_args;
     animation_args.mName = *iAnimationName;
+    animation_args.mSpawnable = GetDefault<UEposTracksEditorSettings>()->bSpawnable;
     BoardSequenceTools::CreateCameraWithAnimation( sequencer, section_object->GetInclusiveStartFrame(), camera_args, animation_args );
 }
 

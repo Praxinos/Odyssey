@@ -21,6 +21,7 @@
 #include "OdysseyAnimationTimelineSection.h"
 #include "OdysseyLayer.h"
 #include "OdysseyLayerStack.h"
+#include "Settings/EposTracksEditorSettings.h"
 #include "Shot/ShotSequence.h"
 #include "Styles/EposSequenceEditorStyle.h"
 #include "Styles/EposTracksEditorStyle.h"
@@ -164,7 +165,11 @@ FShotSequenceCustomization::BindCommands( TSharedPtr<FUICommandList> ioCommandLi
                                           TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
                                           if( !sequencer )
                                               return;
-                                          ShotSequenceTools::CreateCameraWithAnimation( sequencer.Get() );
+                                          FCameraArgs camera_args;
+                                          camera_args.mSpawnable = GetDefault<UEposTracksEditorSettings>()->bSpawnable;
+                                          FAnimationArgs animation_args;
+                                          animation_args.mSpawnable = GetDefault<UEposTracksEditorSettings>()->bSpawnable;
+                                          ShotSequenceTools::CreateCameraWithAnimation( sequencer.Get(), camera_args, animation_args );
                                       } ),
         FCanExecuteAction::CreateLambda( [this]()
                                          {
@@ -276,7 +281,9 @@ FShotSequenceCustomization::BindCommands( TSharedPtr<FUICommandList> ioCommandLi
                                           TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
                                           if( !sequencer )
                                               return;
-                                          ShotSequenceTools::CreateAnimation( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
+                                          FAnimationArgs animation_args;
+                                          animation_args.mSpawnable = GetDefault<UEposTracksEditorSettings>()->bSpawnable;
+                                          ShotSequenceTools::CreateAnimation( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, animation_args );
                                       } ),
         FCanExecuteAction::CreateLambda( [this]()
                                          {

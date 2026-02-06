@@ -162,7 +162,7 @@ UBoardSequenceEditorBlueprintLibrary::ImportImageSequence( const FString& iBoard
 
     const FImportImageSequenceStruct& image_struct = image_sequence_importer.GetImageSequenceStruct();
 
-    FImportImageSequenceConverter( &image_struct, CurrentSequencer, board_sequence );
+    FImportImageSequenceConverter( &image_struct, iOptions.bSpawnable, CurrentSequencer, board_sequence );
 
     return board_sequence;
 }
@@ -171,7 +171,7 @@ UBoardSequenceEditorBlueprintLibrary::ImportImageSequence( const FString& iBoard
 
 //static
 void
-UBoardSequenceEditorBlueprintLibrary::CreateCameraWithAnimation( UMovieSceneSubSection* iSubSection )
+UBoardSequenceEditorBlueprintLibrary::CreateCameraWithAnimation( UMovieSceneSubSection* iSubSection, bool iSpawnable )
 {
     UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( iSubSection );
 
@@ -184,13 +184,15 @@ UBoardSequenceEditorBlueprintLibrary::CreateCameraWithAnimation( UMovieSceneSubS
     ISequencer* sequencer = CurrentSequencer.Pin().Get();
 
     FCameraArgs camera_args;
+    camera_args.mSpawnable = iSpawnable;
     FAnimationArgs animation_args;
-    BoardSequenceTools::CreateCameraWithAnimation( sequencer, *board_section, board_section->GetTrueRange().GetLowerBoundValue() );
+    animation_args.mSpawnable = iSpawnable;
+    BoardSequenceTools::CreateCameraWithAnimation( sequencer, *board_section, board_section->GetTrueRange().GetLowerBoundValue(), camera_args, animation_args );
 }
 
 //static
 void
-UBoardSequenceEditorBlueprintLibrary::CreateAnimation( UMovieSceneSubSection* iSubSection )
+UBoardSequenceEditorBlueprintLibrary::CreateAnimation( UMovieSceneSubSection* iSubSection, bool iSpawnable )
 {
     UMovieSceneCinematicBoardSection* board_section = Cast<UMovieSceneCinematicBoardSection>( iSubSection );
 
@@ -202,8 +204,9 @@ UBoardSequenceEditorBlueprintLibrary::CreateAnimation( UMovieSceneSubSection* iS
 
     ISequencer* sequencer = CurrentSequencer.Pin().Get();
 
-    //FAnimationArgs plane_args;
-    BoardSequenceTools::CreateAnimation( sequencer, *board_section, board_section->GetTrueRange().GetLowerBoundValue() );
+    FAnimationArgs animation_args;
+    animation_args.mSpawnable = iSpawnable;
+    BoardSequenceTools::CreateAnimation( sequencer, *board_section, board_section->GetTrueRange().GetLowerBoundValue(), animation_args );
 }
 
 //static
@@ -494,7 +497,7 @@ UShotSequenceEditorBlueprintLibrary::StepToPreviousShot()
 
 //static
 void
-UShotSequenceEditorBlueprintLibrary::CreateCameraWithAnimation()
+UShotSequenceEditorBlueprintLibrary::CreateCameraWithAnimation( bool iSpawnable )
 {
     if( !CurrentSequencer.IsValid() )
         return;
@@ -502,21 +505,24 @@ UShotSequenceEditorBlueprintLibrary::CreateCameraWithAnimation()
     ISequencer* sequencer = CurrentSequencer.Pin().Get();
 
     FCameraArgs camera_args;
+    camera_args.mSpawnable = iSpawnable;
     FAnimationArgs animation_args;
-    ShotSequenceTools::CreateCameraWithAnimation( sequencer );
+    animation_args.mSpawnable = iSpawnable;
+    ShotSequenceTools::CreateCameraWithAnimation( sequencer, camera_args, animation_args );
 }
 
 //static
 void
-UShotSequenceEditorBlueprintLibrary::CreateAnimation()
+UShotSequenceEditorBlueprintLibrary::CreateAnimation( bool iSpawnable )
 {
     if( !CurrentSequencer.IsValid() )
         return;
 
     ISequencer* sequencer = CurrentSequencer.Pin().Get();
 
-    //FAnimationArgs plane_args;
-    ShotSequenceTools::CreateAnimation( sequencer, 0 );
+    FAnimationArgs animation_args;
+    animation_args.mSpawnable = iSpawnable;
+    ShotSequenceTools::CreateAnimation( sequencer, 0, animation_args );
 }
 
 //static

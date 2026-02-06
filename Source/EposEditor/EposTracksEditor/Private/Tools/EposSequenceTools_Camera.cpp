@@ -3,6 +3,7 @@
 
 #include "Tools/EposSequenceTools.h"
 
+#include "Bindings/MovieSceneSpawnableActorBinding.h"
 #include "Channels/MovieSceneChannelProxy.h"
 #include "Channels/MovieSceneFloatChannel.h"
 #include "CineCameraActor.h"
@@ -18,6 +19,7 @@
 #include "MovieSceneSection.h"
 #include "MovieSceneSequence.h"
 #include "MovieSceneToolHelpers.h"
+#include "SequencerUtilities.h"
 #include "Tracks/MovieScene3DTransformTrack.h"
 #include "Widgets/Notifications/SNotificationList.h"
 
@@ -286,9 +288,53 @@ ShotSequenceTools::SpawnAndBindCamera( ISequencer& iSequencer, UMovieSceneSequen
 
     camera_name = NamingConvention::GenerateCameraTrackName( iSequencer, *epos_sequence, iSequenceID, camera );
 
-    FGuid CameraGuid = iSequencer.CreateBinding( *camera, camera_name );
+    UE::Sequencer::FCreateBindingParams BindingParams;
+    BindingParams.BindingNameOverride = camera_name;
+    BindingParams.bAllowCustomBinding = true;
+    FGuid CameraGuid = iSequencer.CreateBinding( *camera, BindingParams );
     if( !CameraGuid.IsValid() )
         return nullptr;
+
+    //---
+
+    if( iCameraArgs.mSpawnable )
+    {
+        TSubclassOf<UMovieSceneCustomBinding> CustomBindingClass = UMovieSceneSpawnableActorBinding::StaticClass();
+
+        const FMovieSceneBindingReferences* BindingReferences = iSequence->GetBindingReferences();
+
+        if( BindingReferences )
+        {
+            for( const FMovieSceneBindingReference& Reference : BindingReferences->GetReferences( CameraGuid ) )
+            {
+                for( const TSubclassOf<UMovieSceneCustomBinding>& SupportedCustomBindingType : iSequencer.GetSupportedCustomBindingTypes() )
+                {
+                    if( SupportedCustomBindingType && SupportedCustomBindingType->IsChildOf( CustomBindingClass ) &&
+                        SupportedCustomBindingType->GetDefaultObject<UMovieSceneCustomBinding>()->SupportsConversionFromBinding( Reference, camera ) )
+                    {
+                        FMovieScenePossessable* NewPossessable = FSequencerUtilities::ConvertToCustomBinding( iSequencer.AsShared(), CameraGuid, CustomBindingClass );
+
+                        if( NewPossessable )
+                        {
+                            for( TWeakObjectPtr<> WeakObject : iSequencer.FindBoundObjects( NewPossessable->GetGuid(), iSequencer.GetFocusedTemplateID() ) )
+                            {
+                                ACineCameraActor* SpawnedActor = Cast<ACineCameraActor>( WeakObject.Get() );
+                                if( SpawnedActor )
+                                {
+                                    camera = SpawnedActor;
+                                }
+                            }
+
+                            CameraGuid = NewPossessable->GetGuid();
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    //---
 
     iSequencer.OnActorAddedToSequencer().Broadcast( camera, CameraGuid );
 

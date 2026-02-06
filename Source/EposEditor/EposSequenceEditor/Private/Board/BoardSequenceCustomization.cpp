@@ -31,6 +31,7 @@
 #include "OdysseyAnimationActor.h"
 #include "OdysseyViewportDrawingEditorEdMode.h"
 #include "Settings/EposSequenceEditorSettings.h"
+#include "Settings/EposTracksEditorSettings.h"
 #include "Shot/ShotSequence.h"
 #include "Styles/EposSequenceEditorStyle.h"
 #include "Styles/EposTracksEditorStyle.h"
@@ -162,7 +163,11 @@ FBoardSequenceCustomization::BindCommands( TSharedPtr<FUICommandList> ioCommandL
                                           TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
                                           if( !sequencer )
                                               return;
-                                          BoardSequenceTools::CreateCameraWithAnimation( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
+                                          FCameraArgs camera_args;
+                                          camera_args.mSpawnable = GetDefault<UEposTracksEditorSettings>()->bSpawnable;
+                                          FAnimationArgs animation_args;
+                                          animation_args.mSpawnable = GetDefault<UEposTracksEditorSettings>()->bSpawnable;
+                                          BoardSequenceTools::CreateCameraWithAnimation( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, camera_args, animation_args );
                                       } ),
         FCanExecuteAction::CreateLambda( [this]()
                                          {
@@ -272,7 +277,9 @@ FBoardSequenceCustomization::BindCommands( TSharedPtr<FUICommandList> ioCommandL
                                           TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
                                           if( !sequencer )
                                               return;
-                                          BoardSequenceTools::CreateAnimation( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
+                                          FAnimationArgs animation_args;
+                                          animation_args.mSpawnable = GetDefault<UEposTracksEditorSettings>()->bSpawnable;
+                                          BoardSequenceTools::CreateAnimation( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, animation_args );
                                       } ),
         FCanExecuteAction::CreateLambda( [this]()
                                          {

@@ -17,7 +17,7 @@ class UShotSequence;
 class FImportImageSequenceConverter
 {
 public:
-    FImportImageSequenceConverter( const FImportImageSequenceStruct* iImageSequenceStruct, TWeakPtr<ISequencer> iSequencer, UBoardSequence* ioBoardSequence );
+    FImportImageSequenceConverter( const FImportImageSequenceStruct* iImageSequenceStruct, bool iSpawnable, TWeakPtr<ISequencer> iSequencer, UBoardSequence* ioBoardSequence );
 
 private:
     void Convert();
@@ -37,6 +37,7 @@ private:
     TWeakPtr<ISequencer>                mSequencer;
 
     const FImportImageSequenceStruct*   mImageSequenceStruct;
+    bool                                mSpawnable;
 
     UBoardSequence*                     mBoardSequence;
 };

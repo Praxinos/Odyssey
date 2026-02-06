@@ -820,7 +820,7 @@ SNewStoryboardSettings::OnCreateStoryboard()
         TSharedPtr<ISequencer> sequencer = eposSequenceEditor ? eposSequenceEditor->GetSequencer() : nullptr;
         check( sequencer.IsValid() );
 
-        FImportImageSequenceConverter( &mImageSequenceStruct, sequencer, board_sequence );
+        FImportImageSequenceConverter( &mImageSequenceStruct, mImportImageSequenceSettings->Options.bSpawnable, sequencer, board_sequence );
     }
 
     //---

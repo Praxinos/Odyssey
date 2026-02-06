@@ -40,6 +40,7 @@ void EjectAnyActor();
 struct FCameraArgs
 {
     FString mName;
+    bool mSpawnable;
 };
 
 struct FAnimationArgs
@@ -47,6 +48,7 @@ struct FAnimationArgs
     FString mName;
     TOptional<float> mMargin;
     TWeakObjectPtr<UOdysseyAnimation> mAnimation;
+    bool mSpawnable;
 };
 
 struct FAnimationCutArgs
@@ -214,7 +216,7 @@ public:
     * @param ISequencer     iSequencer to add a new camera.
     * @param FFrameNumber   iFrameNumber to get the board section.
     */
-    static void CreateCameraWithAnimation( ISequencer* iSequencer, FFrameNumber iFrameNumber, const FCameraArgs& iCameraArgs = FCameraArgs(), const FAnimationArgs& iAnimationArgs = FAnimationArgs() );
+    static void CreateCameraWithAnimation( ISequencer* iSequencer, FFrameNumber iFrameNumber, const FCameraArgs& iCameraArgs, const FAnimationArgs& iAnimationArgs );
 
     /**
     *  Create a new camera (actor & track & cameracut track) in the board section
@@ -223,7 +225,7 @@ public:
     * @param UMovieSceneSubSection  iSubSection to add a new camera.
     * @param FFrameNumber           iFrameNumber to get the board section.
     */
-    static void CreateCameraWithAnimation( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, const FCameraArgs& iCameraArgs = FCameraArgs(), const FAnimationArgs& iAnimationArgs = FAnimationArgs() );
+    static void CreateCameraWithAnimation( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, const FCameraArgs& iCameraArgs, const FAnimationArgs& iAnimationArgs );
 
 public:
     /**
@@ -410,7 +412,7 @@ public:
     * @param ISequencer     iSequencer to add a new animation.
     * @param FFrameNumber   iFrameNumber to get the board section.
     */
-    static void CreateAnimation( ISequencer* iSequencer, FFrameNumber iFrameNumber, const FAnimationArgs& iAnimationArgs = FAnimationArgs() );
+    static void CreateAnimation( ISequencer* iSequencer, FFrameNumber iFrameNumber, const FAnimationArgs& iAnimationArgs );
 
     /**
     *  Create a new animation (actor & track) in the board section
@@ -419,7 +421,7 @@ public:
     * @param UMovieSceneSubSection  iSubSection to add a new animation.
     * @param FFrameNumber           iFrameNumber to get the board section.
     */
-    static void CreateAnimation( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, const FAnimationArgs& iAnimationArgs = FAnimationArgs() );
+    static void CreateAnimation( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, const FAnimationArgs& iAnimationArgs );
 
     /**
     *  Can a animation be created in the board section ?
@@ -788,7 +790,7 @@ public:
     *
     * @param ISequencer iSequencer to add Camera track and CameraCut track.
     */
-    static void CreateCameraWithAnimation( ISequencer* iSequencer, const FCameraArgs& iCameraArgs = FCameraArgs(), const FAnimationArgs& iAnimationArgs = FAnimationArgs() );
+    static void CreateCameraWithAnimation( ISequencer* iSequencer, const FCameraArgs& iCameraArgs, const FAnimationArgs& iAnimationArgs );
 
     static bool CanCreateCamera( ISequencer* iSequencer );
 
@@ -866,7 +868,7 @@ public:
 
 // Inside EposSequenceTools_Animation
 public:
-    static void CreateAnimation( ISequencer* iSequencer, FFrameNumber iFrameNumber, const FAnimationArgs& iAnimationArgs = FAnimationArgs() );
+    static void CreateAnimation( ISequencer* iSequencer, FFrameNumber iFrameNumber, const FAnimationArgs& iAnimationArgs );
 
     static bool CanCreateAnimation( ISequencer* iSequencer, FFrameNumber iFrameNumber );
 

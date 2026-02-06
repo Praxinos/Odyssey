@@ -19,6 +19,7 @@
 #include "NiagaraActor.h"
 #include "PaperFlipbookActor.h"
 #include "Sections/MovieSceneSubSection.h"
+#include "Tracks/MovieScene3DAttachTrack.h"
 #include "Tracks/MovieSceneFadeTrack.h"
 #include "Tracks/MovieSceneLevelVisibilityTrack.h"
 #include "Tracks/MovieSceneAudioTrack.h"
@@ -484,7 +485,8 @@ UShotSequence::IsTrackSupportedImpl( TSubclassOf<class UMovieSceneTrack> InTrack
         InTrackClass == UMovieSceneControlRigParameterTrack::StaticClass() ||
         InTrackClass == UMovieSceneSkeletalAnimationTrack::StaticClass() ||
         InTrackClass == UTemplateSequenceTrack::StaticClass() ||
-        InTrackClass == UMovieSceneSpawnTrack::StaticClass() )
+        InTrackClass == UMovieSceneSpawnTrack::StaticClass() ||
+        InTrackClass == UMovieScene3DAttachTrack::StaticClass() )
     {
         return ETrackSupport::Supported;
     }
