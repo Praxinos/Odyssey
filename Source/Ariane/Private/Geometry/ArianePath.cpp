@@ -12,6 +12,7 @@ FArianePath::~FArianePath()
 
 FArianePath::FArianePath()
 {
+    Material = NewObject<UMaterial>();
 }
 
 void
@@ -58,4 +59,10 @@ const TArray<FArianeVertex*>&
 FArianePath::GetVertices()
 {
     return Vertices;
+}
+
+UMaterial*
+FArianePath::GetMaterial()
+{
+    return Material;
 }

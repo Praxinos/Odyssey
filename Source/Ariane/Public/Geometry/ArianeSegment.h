@@ -35,7 +35,8 @@ class ARIANE_API FArianeSegment
         void Link();
         void Unlink();
 
-        FArianeVertex* GetVertex(uint32 Index);
+        FArianeVertex* GetVertex( uint32 Index );
+        FArianeVertex* GetOtherVertex( FArianeVertex* Vertex );
         const TArray<FArianePoint*>& GetFractionPoints();
 
         void AllocateCache( uint32 VertexCount, uint32 TriangleCount );
@@ -44,12 +45,12 @@ class ARIANE_API FArianeSegment
         const TArray<uint32>& GetIndexCache();
         const TArray<Fraction>& GetFractionCache();
 
-        FVector GetVectorAt( double T, bool bNormalize );
+        FVector GetTangentVectorAt( double T, bool bNormalize );
 
         uint32 GetFractionCount();
         FVector GetAverageVectorAt( double T );
         FVector GetVectorLeavingFromVertex( FArianeVertex* Vertex, bool bNormalize );
-        uint32 GetFractionPointT( uint32 FractionPointIndex );
+        float GetFractionPointT( uint32 FractionPointIndex );
 
     protected:
         FArianeObject* Owner;
