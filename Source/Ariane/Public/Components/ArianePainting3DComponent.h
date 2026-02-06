@@ -9,7 +9,7 @@
 #include "Components/MeshComponent.h"
 #include "PrimitiveSceneProxy.h"
 #include "StaticMeshResources.h"
-#include "VertexFactory.h"
+#include "LocalVertexFactory.h"
 #include "RenderResource.h"
 #include "RawIndexBuffer.h"
 // Ariane Headers
@@ -64,10 +64,23 @@ class ARIANE_API FArianePathGeometry3D
 
         const FStaticMeshVertexBuffers& GetVertexBuffers() const;
         const FRawStaticIndexBuffer& GetIndexBuffer() const;
+        FArianePath* GetPath();
+        FLocalVertexFactory& GetVertexFactory();
 
     protected:
-        FVector GetAverageVectorAtVertex( FArianeVertex* InVertex );
-        void BuildSegment( FArianeSegment* Segment );
+        void BuildSegment( FArianeSegment* Segment
+                         , FVector& InOutPreviousPerpendicularVector );
+        void InitVertexFactory();
+        FVector GetPerpendicularVector( FArianeVertex* Vertex
+                                      , FVector& PreviousVector
+                                      , bool bNormalize );
+        FVector GetTangentVectorAt( FArianeSegment* Segment
+                                  , const FVector& PerpendicularVector
+                                  , double T
+                                  , bool bNormalize );
+        FVector GetTangentVectorAt( FArianeSegment* Segment
+                                  , double T
+                                  , bool bNormalize );
 
     protected:
         UArianePainting3DComponent* Painting3DComponent; // to retrieve the up vector
@@ -75,6 +88,7 @@ class ARIANE_API FArianePathGeometry3D
 
         FStaticMeshVertexBuffers VertexBuffers;
         FRawStaticIndexBuffer IndexBuffer;
+        FLocalVertexFactory VertexFactory;
 };
 
 class ARIANE_API FArianeGeometryProxy : public FPrimitiveSceneProxy
@@ -96,5 +110,4 @@ class ARIANE_API FArianeGeometryProxy : public FPrimitiveSceneProxy
 
     protected:
         UArianePainting3DComponent* Painting3DComponent;
-        FVertexFactory VertexFactory;
 };

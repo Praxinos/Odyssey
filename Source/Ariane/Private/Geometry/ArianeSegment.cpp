@@ -21,7 +21,7 @@ FArianeSegment::FArianeSegment( FArianeVertex* iVertex0, FArianeVertex* iVertex1
     FractionPoints.Add( iVertex1 );
 }
 
-uint32
+float
 FArianeSegment::GetFractionPointT( uint32 FractionPointIndex )
 {
     return FractionPointsT[FractionPointIndex];
@@ -54,7 +54,7 @@ FArianeSegment::GetVertex( uint32 Index )
 }
 
 FVector
-FArianeSegment::GetVectorAt( double T, bool bNormalize )
+FArianeSegment::GetTangentVectorAt( double T, bool bNormalize )
 {
     FVector RetVector = ( Vertices[1]->GetPosition() - Vertices[0]->GetPosition() );
 
@@ -124,6 +124,17 @@ FArianeSegment::GetVectorLeavingFromVertex( FArianeVertex* Vertex, bool bNormali
     }
 
     return RetVector;
+}
+
+FArianeVertex*
+FArianeSegment::GetOtherVertex( FArianeVertex* Vertex )
+{
+    if( ( Vertices[0] != Vertex ) && ( Vertices[1] != Vertex )  )
+    {
+        return nullptr;
+    }
+
+    return ( Vertices[0] == Vertex ) ? Vertices[1] : Vertices[0];
 }
 
 FVector

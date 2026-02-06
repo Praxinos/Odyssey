@@ -14,14 +14,16 @@ class ARIANE_API FArianeVertex : public FArianePoint
 {
     public:
         ~FArianeVertex();
-        FArianeVertex( double X, double Y, double Z );
-        FArianeVertex( const FVector& iPosition );
+        FArianeVertex( double X, double Y, double Z, double InRadius );
+        FArianeVertex( const FVector& iPosition, double InRadius );
 
         void AddSegment( FArianeSegment* iSegment );
         void RemoveSegment( FArianeSegment* iSegment );
 
         void SetOwner( FArianeObject* iOwner );
         const TArray<FArianeSegment*>& GetSegments();
+
+        double  GetRadius();
 
     protected:
         FArianeObject* Owner;
