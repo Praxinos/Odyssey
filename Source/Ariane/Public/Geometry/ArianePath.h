@@ -26,9 +26,10 @@ class ARIANE_API FArianePath : public FArianeObject
 
         const TArray<FArianeSegment*>& GetSegments();
         const TArray<FArianeVertex*>& GetVertices();
+        UMaterial* GetMaterial();
 
     protected:
         TArray<FArianeSegment*> Segments;
         TArray<FArianeVertex*> Vertices;
-
+        UMaterial* Material;
 };

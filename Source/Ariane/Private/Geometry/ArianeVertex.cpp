@@ -8,14 +8,15 @@ FArianeVertex::~FArianeVertex()
 {
 }
 
-FArianeVertex::FArianeVertex( double X, double Y, double Z )
+FArianeVertex::FArianeVertex( double X, double Y, double Z, double InRadius )
     : FArianePoint( X, Y, Z )
+    , Radius( InRadius )
 {
 }
 
-FArianeVertex::FArianeVertex( const FVector& iPosition )
+FArianeVertex::FArianeVertex( const FVector& iPosition, double InRadius )
     // Delegating constructor
-    : FArianePoint( iPosition )
+    : FArianeVertex( iPosition.X, iPosition.Y, iPosition.Z, InRadius )
 {
 }
 
@@ -41,4 +42,10 @@ const TArray<FArianeSegment*>&
 FArianeVertex::GetSegments()
 {
     return Segments;
+}
+
+double
+FArianeVertex::GetRadius()
+{
+    return Radius;
 }

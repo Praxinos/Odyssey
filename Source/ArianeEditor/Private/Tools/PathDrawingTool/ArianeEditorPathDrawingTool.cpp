@@ -46,7 +46,11 @@ UArianeEditorPathDrawingTool::OnMouseDown( FEditorViewportClient* iViewportClien
 
                 painting3DComponent->AddPath( EditedPath );
 
-                PlotVertex( iViewportClient, iViewportX, iViewportY );
+                //PlotVertex( iViewportClient, iViewportX, iViewportY );
+                //PlotVertex( iViewportClient, iViewportX + 100, iViewportY );
+                //PlotVertex( iViewportClient, iViewportX + 200, iViewportY );
+                /*PlotVertex( iViewportClient, iViewportX + 250, iViewportY + 100 );
+                PlotVertex( iViewportClient, iViewportX + 400, iViewportY + 60 );*/
             }
         }
 
@@ -149,7 +153,8 @@ UArianeEditorPathDrawingTool::PlotVertex( FEditorViewportClient* iViewportClient
                 FVector localCoords = actorWorldTransform.Inverse().TransformFVector4( intersectAt );
                 FArianeVertex *vertex0 = EditedPath->GetVertices().Num() ? EditedPath->GetVertices().Last()
                                                                          : nullptr;
-                FArianeVertex *vertex1 = new FArianeVertex( localCoords );
+
+                FArianeVertex *vertex1 = new FArianeVertex( localCoords, 1.0f );
 
                 EditedPath->AddVertex( vertex1 );
 
