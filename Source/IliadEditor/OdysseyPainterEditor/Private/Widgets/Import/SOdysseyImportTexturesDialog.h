@@ -42,8 +42,10 @@ private:
 
 private:
     ETabs GetActiveTab() const;
+    int32 GetActiveTabIndex() const;
     void OnTabChecked(ETabs iTab, ECheckBoxState iState);
     void OnPositioningChanged(FOdysseyImportTexturesParameters iData);
+    void OnScanCleanerChanged(FOdysseyImportTexturesParameters iData);
 
     EVisibility GetCurrentTextureSliderVisibility() const;
     float GetCurrentTextureSliderStepSize() const;

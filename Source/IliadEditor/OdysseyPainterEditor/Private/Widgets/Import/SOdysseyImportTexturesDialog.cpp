@@ -3,10 +3,12 @@
 
 #include "SOdysseyImportTexturesDialog.h"
 #include "SOdysseyImportTexturePositioning.h"
+#include "SOdysseyImportTextureScanCleaner.h"
 #include "Dialog/SCustomDialog.h"
 #include "Widgets/SViewport.h"
 #include "Widgets/Input/SSegmentedControl.h"
 #include "Widgets/Input/SSlider.h"
+#include "Widgets/Layout/SWidgetSwitcher.h"
 #include "OdysseyImportTexturesViewportClient.h"
 #include "Slate/SceneViewport.h"
 #include "Engine/TextureRenderTarget2D.h"
@@ -83,12 +85,12 @@ SOdysseyImportTexturesDialog::Construct(const FArguments& InArgs, const FOdyssey
             .ToolTip(LOCTEXT("import-textures-dialog.tab.positioning.tooltip", "Positioning"))
 
             //Move Tool
-            /* + SSegmentedControl<ETabs>::Slot(ETabs::ScanCleaner)
+            + SSegmentedControl<ETabs>::Slot(ETabs::ScanCleaner)
             .Text(LOCTEXT("import-textures-dialog.tab.scan-cleaner.name", "Scan Cleaner"))
             .ToolTip(LOCTEXT("import-textures-dialog.tab.scan-cleaner.tooltip", "Scan Cleaner"))
 
             //Cut Tool
-            + SSegmentedControl<ETabs>::Slot(ETabs::PegsStabilization)
+            /*+ SSegmentedControl<ETabs>::Slot(ETabs::PegsStabilization)
             .Text(LOCTEXT("import-textures-dialog.tab.pegs-stabilization.name", "Pegs Stabilization"))
             .ToolTip(LOCTEXT("import-textures-dialog.tab.pegs-stabilization.tooltip", "Pegs Stabilization")) */
         ]
@@ -101,9 +103,20 @@ SOdysseyImportTexturesDialog::Construct(const FArguments& InArgs, const FOdyssey
             .MinWidth(300)
             .MaxWidth(300)
             [
-                SNew(SOdysseyImportTexturePositioning)
-                .Data(this, &SOdysseyImportTexturesDialog::GetImportData)
-                .OnChanged(this, &SOdysseyImportTexturesDialog::OnPositioningChanged)
+                SNew(SWidgetSwitcher)
+                .WidgetIndex(this, &SOdysseyImportTexturesDialog::GetActiveTabIndex)
+                + SWidgetSwitcher::Slot()
+                [
+                    SNew(SOdysseyImportTexturePositioning)
+                    .Data(this, &SOdysseyImportTexturesDialog::GetImportData)
+                    .OnChanged(this, &SOdysseyImportTexturesDialog::OnPositioningChanged)
+                ]
+                + SWidgetSwitcher::Slot()
+                [
+                    SNew(SOdysseyImportTextureScanCleaner)
+                    .Data(this, &SOdysseyImportTexturesDialog::GetImportData)
+                    .OnChanged(this, &SOdysseyImportTexturesDialog::OnScanCleanerChanged)
+                ]
             ]
             + SHorizontalBox::Slot()
             [
@@ -175,6 +188,12 @@ SOdysseyImportTexturesDialog::GetActiveTab() const
     return mActiveTab;
 }
 
+int32
+SOdysseyImportTexturesDialog::GetActiveTabIndex() const
+{
+    return (int32)mActiveTab;
+}
+
 void
 SOdysseyImportTexturesDialog::OnTabChecked(ETabs iTab, ECheckBoxState iState)
 {
@@ -186,6 +205,13 @@ SOdysseyImportTexturesDialog::OnTabChecked(ETabs iTab, ECheckBoxState iState)
 
 void
 SOdysseyImportTexturesDialog::OnPositioningChanged(FOdysseyImportTexturesParameters iData)
+{
+    mImportData = iData;
+    UpdatePreview();
+}
+
+void
+SOdysseyImportTexturesDialog::OnScanCleanerChanged(FOdysseyImportTexturesParameters iData)
 {
     mImportData = iData;
     UpdatePreview();

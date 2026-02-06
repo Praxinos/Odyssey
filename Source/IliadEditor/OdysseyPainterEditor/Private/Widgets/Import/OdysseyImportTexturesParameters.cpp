@@ -208,6 +208,18 @@ FOdysseyImportTexturesParameters::GetResamplingMethod() const
     return mResamplingMethod;
 }
 
+bool
+FOdysseyImportTexturesParameters::GetIsScanCleanerActivated() const
+{
+    return mIsScanCleanerActivated;
+}
+
+void
+FOdysseyImportTexturesParameters::SetIsScanCleanerActivated(bool iIsActivated)
+{
+    mIsScanCleanerActivated = iIsActivated;
+}
+
 void
 FOdysseyImportTexturesParameters::SetAlignment(EOdysseyImportTextureAlignment iAlignment)
 {

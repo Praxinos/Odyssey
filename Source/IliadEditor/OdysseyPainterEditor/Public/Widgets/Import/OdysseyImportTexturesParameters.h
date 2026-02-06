@@ -52,6 +52,9 @@ public:
     EOdysseyImportTextureScaling GetScaling() const;
     EOdysseyAntiAliasing GetResamplingMethod() const;
 
+    bool GetIsScanCleanerActivated() const;
+    void SetIsScanCleanerActivated(bool iIsActivated);
+
     FVector2D GetTexturePosition(const FVector2D& iTextureSize) const;
     FVector2D GetTexturePosition(int iSourceTextureIndex) const;
     FVector2D GetTextureScaledSize(int iSourceTextureIndex) const;
@@ -66,6 +69,7 @@ private:
     uint32 mDestinationHeight;
 
 protected:
+    //Positioning
     UPROPERTY(BlueprintReadWrite)
     EOdysseyImportTextureAlignment mAlignment = EOdysseyImportTextureAlignment::Center;
 
@@ -74,4 +78,7 @@ protected:
 
     UPROPERTY(BlueprintReadWrite)
     EOdysseyAntiAliasing mResamplingMethod = EOdysseyAntiAliasing::Bilinear;
+
+    //Scan Cleaner
+    bool mIsScanCleanerActivated = false;
 };
