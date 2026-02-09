@@ -5,17 +5,16 @@
 
 #include "CoreMinimal.h"
 #include "OdysseyImportTexturesParameters.h"
-class SOdysseyImportTextureScanCleaner : public SCompoundWidget
+#include "Curves/CurveFloat.h"
+class SOdysseyImportTextureScanCleaner
+    : public SCompoundWidget
 {
-public:
-    DECLARE_DELEGATE_OneParam(FOnChanged, FOdysseyImportTexturesParameters);
-
 public:
     SLATE_BEGIN_ARGS(SOdysseyImportTextureScanCleaner)
         {}
         /** Called when the object value changes */
-        SLATE_ATTRIBUTE(FOdysseyImportTexturesParameters, Data)
-        SLATE_EVENT(FOnChanged, OnChanged)
+        SLATE_ARGUMENT(FOdysseyImportTexturesParameters*, Data)
+        SLATE_EVENT(FSimpleDelegate, OnChanged)
     SLATE_END_ARGS()
 
 public:
@@ -23,11 +22,26 @@ public:
     ~SOdysseyImportTextureScanCleaner();
     void Construct(const FArguments& InArgs);
 
+public:
+    bool IsActivated() const;
+
 private:
     void OnActivateCheckBoxStateChanged(ECheckBoxState InCheckState);
     ECheckBoxState IsActivateChecked() const;
 
+    void OnSetInputViewRange(float Min, float Max);
+    void OnSetOutputViewRange(float Min, float Max);
+
+    void OnUpdateCurve( UCurveBase* Curve, EPropertyChangeType::Type ChangeType);
+
 private:
-    TAttribute<FOdysseyImportTexturesParameters> mData;
-    FOnChanged mOnChanged;
+    FOdysseyImportTexturesParameters* mData;
+    FSimpleDelegate mOnChanged;
+
+    TSharedPtr<class SCurveEditor> mCurveEditor;
+
+    float mViewMinInput = -0.05f;
+    float mViewMaxInput = 1.05f;
+    float mViewMinOutput = -0.05f;
+    float mViewMaxOutput = 1.05f;
 };

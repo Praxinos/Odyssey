@@ -234,43 +234,40 @@ SOdysseyImportTexturePositioning::OnAlignmentCheckBoxStateChanged(ECheckBoxState
     if (InCheckState != ECheckBoxState::Checked)
         return;
 
-    FOdysseyImportTexturesParameters importData = mData.Get();
-    importData.SetAlignment(iAlignment);
-    mOnChanged.ExecuteIfBound(importData);
+    mData->SetAlignment(iAlignment);
+    mOnChanged.ExecuteIfBound();
 }
 
 ECheckBoxState
 SOdysseyImportTexturePositioning::IsAlignmentChecked(EOdysseyImportTextureAlignment iAlignment) const
 {
-    return mData.Get().GetAlignment() == iAlignment ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+    return mData->GetAlignment() == iAlignment ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
 
 int32
 SOdysseyImportTexturePositioning::GetScaling() const
 {
-    return (int32)mData.Get().GetScaling();
+    return (int32)mData->GetScaling();
 }
 
 void
 SOdysseyImportTexturePositioning::OnScalingEnumSelectionChanged(int32 iValue, ESelectInfo::Type iSelectInfo)
 {
-    FOdysseyImportTexturesParameters importData = mData.Get();
-    importData.SetScaling((EOdysseyImportTextureScaling)iValue);
-    mOnChanged.ExecuteIfBound(importData);
+    mData->SetScaling((EOdysseyImportTextureScaling)iValue);
+    mOnChanged.ExecuteIfBound();
 }
 
 int32
 SOdysseyImportTexturePositioning::GetResamplingMethod() const
 {
-    return (int32)mData.Get().GetResamplingMethod();
+    return (int32)mData->GetResamplingMethod();
 }
 
 void
 SOdysseyImportTexturePositioning::OnResamplingMethodEnumSelectionChanged(int32 iValue, ESelectInfo::Type iSelectInfo)
 {
-    FOdysseyImportTexturesParameters importData = mData.Get();
-    importData.SetResamplingMethod((EOdysseyAntiAliasing)iValue);
-    mOnChanged.ExecuteIfBound(importData);
+    mData->SetResamplingMethod((EOdysseyAntiAliasing)iValue);
+    mOnChanged.ExecuteIfBound();
 }
 
 #undef LOCTEXT_NAMESPACE

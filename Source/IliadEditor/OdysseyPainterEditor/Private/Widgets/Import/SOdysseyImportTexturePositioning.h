@@ -8,14 +8,11 @@
 class SOdysseyImportTexturePositioning : public SCompoundWidget
 {
 public:
-    DECLARE_DELEGATE_OneParam(FOnChanged, FOdysseyImportTexturesParameters);
-
-public:
     SLATE_BEGIN_ARGS(SOdysseyImportTexturePositioning)
         {}
         /** Called when the object value changes */
-        SLATE_ATTRIBUTE(FOdysseyImportTexturesParameters, Data)
-        SLATE_EVENT(FOnChanged, OnChanged)
+        SLATE_ARGUMENT(FOdysseyImportTexturesParameters*, Data)
+        SLATE_EVENT(FSimpleDelegate, OnChanged)
     SLATE_END_ARGS()
 
 public:
@@ -34,6 +31,6 @@ private:
     void OnResamplingMethodEnumSelectionChanged(int32, ESelectInfo::Type);
 
 private:
-    TAttribute<FOdysseyImportTexturesParameters> mData;
-    FOnChanged mOnChanged;
+    FOdysseyImportTexturesParameters* mData;
+    FSimpleDelegate mOnChanged;
 };

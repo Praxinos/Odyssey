@@ -23,6 +23,9 @@
 bool
 SOdysseyImportTexturesDialog::Open(FText iTitle, FOdysseyImportTexturesParameters& ioData)
 {
+    if (ioData.GetSourceTextures().IsEmpty())
+        return false;
+
     FText exportText = LOCTEXT("import-textures-dialog.export", "Import" );
     FText cancelText = LOCTEXT("import-textures-dialog.cancel", "Cancel");
 
@@ -108,13 +111,13 @@ SOdysseyImportTexturesDialog::Construct(const FArguments& InArgs, const FOdyssey
                 + SWidgetSwitcher::Slot()
                 [
                     SNew(SOdysseyImportTexturePositioning)
-                    .Data(this, &SOdysseyImportTexturesDialog::GetImportData)
+                    .Data(&mImportData)
                     .OnChanged(this, &SOdysseyImportTexturesDialog::OnPositioningChanged)
                 ]
                 + SWidgetSwitcher::Slot()
                 [
                     SNew(SOdysseyImportTextureScanCleaner)
-                    .Data(this, &SOdysseyImportTexturesDialog::GetImportData)
+                    .Data(&mImportData)
                     .OnChanged(this, &SOdysseyImportTexturesDialog::OnScanCleanerChanged)
                 ]
             ]
@@ -204,16 +207,14 @@ SOdysseyImportTexturesDialog::OnTabChecked(ETabs iTab, ECheckBoxState iState)
 }
 
 void
-SOdysseyImportTexturesDialog::OnPositioningChanged(FOdysseyImportTexturesParameters iData)
+SOdysseyImportTexturesDialog::OnPositioningChanged()
 {
-    mImportData = iData;
     UpdatePreview();
 }
 
 void
-SOdysseyImportTexturesDialog::OnScanCleanerChanged(FOdysseyImportTexturesParameters iData)
+SOdysseyImportTexturesDialog::OnScanCleanerChanged()
 {
-    mImportData = iData;
     UpdatePreview();
 }
 

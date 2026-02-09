@@ -30,12 +30,28 @@ enum class EOdysseyImportTextureAlignment
     BottomRight
 };
 
+class FOdysseyImportTexturesParametersGC
+    : public FGCObject
+{
+public:
+    FOdysseyImportTexturesParametersGC(struct FOdysseyImportTexturesParameters* iParameters);
+
+private:
+    // FGCObject API
+    virtual void AddReferencedObjects( FReferenceCollector& ioCollector ) override;
+    virtual FString GetReferencerName() const override;
+
+private:
+    struct FOdysseyImportTexturesParameters* mParameters;
+};
+
 USTRUCT(BlueprintType)
 struct ODYSSEYPAINTEREDITOR_API FOdysseyImportTexturesParameters
 {
     GENERATED_BODY()
 
 public:
+    ~FOdysseyImportTexturesParameters();
     FOdysseyImportTexturesParameters();
 
 public:
@@ -51,6 +67,7 @@ public:
     EOdysseyImportTextureAlignment GetAlignment() const;
     EOdysseyImportTextureScaling GetScaling() const;
     EOdysseyAntiAliasing GetResamplingMethod() const;
+    UCurveFloat* GetScanCleanerCurve() const;
 
     bool GetIsScanCleanerActivated() const;
     void SetIsScanCleanerActivated(bool iIsActivated);
@@ -64,7 +81,14 @@ public:
     void SetResamplingMethod(EOdysseyAntiAliasing iMethod);
 
 private:
-    TArray< UTexture2D* > mSourceTextures;
+    void OnUpdateCurve( UCurveBase* Curve, EPropertyChangeType::Type ChangeType);
+    void UpdateScanCleanerCurveTextures();
+
+private:
+    friend class FOdysseyImportTexturesParametersGC;
+    FOdysseyImportTexturesParametersGC mGC;
+
+    TArray< TObjectPtr<UTexture2D> > mSourceTextures;
     uint32 mDestinationWidth;
     uint32 mDestinationHeight;
 
@@ -81,4 +105,7 @@ protected:
 
     //Scan Cleaner
     bool mIsScanCleanerActivated = false;
+    TObjectPtr<UCurveFloat> mScanCleanerCurve;
+    TObjectPtr<UTexture2D> mScanCleanerCurveTexture;
+
 };

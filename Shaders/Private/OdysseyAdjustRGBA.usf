@@ -1,0 +1,38 @@
+#include "/Engine/Public/Platform.ush"
+
+//Step 1 : Create a Mask from GreyF Texture in renderTarget1
+//Step 2 : Adjust RGB colors in renderTarget2
+//Step 3 : Combine renderTarget1 and renderTarget2
+
+Texture2D SourceTexture;
+SamplerState SourceTextureSampler;
+
+Texture2D AdjustCurveTexture;
+SamplerState AdjustCurveTextureSampler;
+
+void MainPS(
+    float4 SvPosition : SV_POSITION,
+	out float4 OutColor : SV_Target0
+)
+{
+    uint Width;
+    uint Height;
+    uint NumberOfLevels;
+
+    SourceTexture.GetDimensions(0, Width, Height, NumberOfLevels);
+    float2 coords;
+    coords.x = SvPosition.x / Width;
+    coords.y = SvPosition.y / Height;
+    float4 src = SourceTexture.Sample(SourceTextureSampler, coords);
+
+    //((pos * 1023.f) + 0.5f) / 1024.f centers positions in pixels centers;
+    float pos_x = ((src.x * 1023.f) + 0.5f) / 1024.f;
+    float pos_y = ((src.y * 1023.f) + 0.5f) / 1024.f;
+    float pos_z = ((src.z * 1023.f) + 0.5f) / 1024.f;
+    float pos_w = ((src.w * 1023.f) + 0.5f) / 1024.f;
+
+    OutColor.x = AdjustCurveTexture.Sample(AdjustCurveTextureSampler, float2(pos_x, 0.f)).x;
+    OutColor.y = AdjustCurveTexture.Sample(AdjustCurveTextureSampler, float2(pos_y, 0.f)).y;
+    OutColor.z = AdjustCurveTexture.Sample(AdjustCurveTextureSampler, float2(pos_z, 0.f)).z;
+    OutColor.w = AdjustCurveTexture.Sample(AdjustCurveTextureSampler, float2(pos_w, 0.f)).w;
+}

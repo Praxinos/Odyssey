@@ -11,7 +11,6 @@ class FOdysseyHUDRectangle;
 
 class SOdysseyImportTexturesDialog
     : public SCompoundWidget
-    //TODO: FGCObject to keep UTexture2D objects alive
 {
 public:
     enum class ETabs : uint8
@@ -44,8 +43,8 @@ private:
     ETabs GetActiveTab() const;
     int32 GetActiveTabIndex() const;
     void OnTabChecked(ETabs iTab, ECheckBoxState iState);
-    void OnPositioningChanged(FOdysseyImportTexturesParameters iData);
-    void OnScanCleanerChanged(FOdysseyImportTexturesParameters iData);
+    void OnPositioningChanged();
+    void OnScanCleanerChanged();
 
     EVisibility GetCurrentTextureSliderVisibility() const;
     float GetCurrentTextureSliderStepSize() const;

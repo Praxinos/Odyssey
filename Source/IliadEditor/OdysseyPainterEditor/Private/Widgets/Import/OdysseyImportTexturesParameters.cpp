@@ -10,13 +10,51 @@
 #include "RenderGraphUtils.h"
 #include "ScreenPass.h"
 #include "Factories/TextureFactory.h"
+#include "OdysseyScanCleanerShader.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
 
-FOdysseyImportTexturesParameters::FOdysseyImportTexturesParameters()
+FOdysseyImportTexturesParametersGC::FOdysseyImportTexturesParametersGC(FOdysseyImportTexturesParameters* iParameters)
+    : mParameters(iParameters)
 {
+}
 
+//--------------------------------------------------------------------------------------
+//------------------------------------------------------------------------ FGCObject API
+void
+FOdysseyImportTexturesParametersGC::AddReferencedObjects( FReferenceCollector& ioCollector )
+{
+    ioCollector.AddReferencedObjects( mParameters->mSourceTextures );
+    ioCollector.AddReferencedObject( mParameters->mScanCleanerCurve );
+}
+
+FString FOdysseyImportTexturesParametersGC::GetReferencerName() const
+{
+    return TEXT("FOdysseyImportTexturesParametersGC");
+}
+
+//--------------------------------------------------------------------------------------
+//----------------------------------------------------- FOdysseyImportTexturesParameters
+
+FOdysseyImportTexturesParameters::~FOdysseyImportTexturesParameters()
+{
+    mScanCleanerCurve->OnUpdateCurve.RemoveAll(this);
+}
+
+FOdysseyImportTexturesParameters::FOdysseyImportTexturesParameters()
+    : mGC(this)
+{
+    mScanCleanerCurve = NewObject<UCurveFloat>();
+    mScanCleanerCurve->FloatCurve.AddKey(0.f, 0.f);
+    mScanCleanerCurve->FloatCurve.AddKey(0.25f, 0.f);
+    mScanCleanerCurve->FloatCurve.AddKey(0.75f, 1.f);
+    mScanCleanerCurve->FloatCurve.AddKey(1.f, 1.f);
+    mScanCleanerCurve->OnUpdateCurve.AddRaw(this, &FOdysseyImportTexturesParameters::OnUpdateCurve);
+
+    mScanCleanerCurveTexture = NewObject<UTexture2D>();
+
+    UpdateScanCleanerCurveTextures();
 }
 
 void
@@ -60,6 +98,21 @@ FOdysseyImportTexturesParameters::Init(const TArray<FString>& iFilenames, uint32
     {
         mSourceTextures.Add(importedTextures[i].Get());
     }
+}
+
+void
+FOdysseyImportTexturesParameters::UpdateScanCleanerCurveTextures()
+{
+    FOdysseyScanCleanerShader::InitTextureFromCurves(
+        mScanCleanerCurveTexture.Get(),
+        mScanCleanerCurve->FloatCurve
+    );
+}
+
+void
+FOdysseyImportTexturesParameters::OnUpdateCurve( UCurveBase* Curve, EPropertyChangeType::Type ChangeType)
+{
+    UpdateScanCleanerCurveTextures();
 }
 
 UTextureRenderTarget2D*
@@ -129,6 +182,43 @@ FOdysseyImportTexturesParameters::GetTexturePosition(int iSourceTextureIndex) co
     return GetTexturePosition(textureSize);
 }
 
+
+
+class FOdysseyCanvasRenderTarget final : public FRenderTarget
+{
+public:
+    FOdysseyCanvasRenderTarget(FRDGTextureRef InRDGTexture)
+        : RDGTexture(InRDGTexture)
+    {}
+
+    FIntPoint GetSizeXY() const override
+    {
+        return RDGTexture->Desc.Extent;
+    }
+
+    const FTextureRHIRef& GetRenderTargetTexture() const override
+    {
+        static FTextureRHIRef NullRef;
+        return NullRef;
+    }
+
+    FRDGTextureRef GetRenderTargetTexture(FRDGBuilder&) const override
+    {
+        return RDGTexture;
+    }
+
+    virtual float GetDisplayGamma() const override
+    {
+        //PATCH: We had to add that to Odyssey
+        //so that Canvas can retrieve the right Gamma
+        //instead of the default 2.2 gamma
+
+        return 1.0f; //not portable, we assume we need this exact value hear to work in linear gamma
+    }
+
+    FRDGTextureRef RDGTexture;
+};
+
 void
 FOdysseyImportTexturesParameters::Render(UTextureRenderTarget2D* oRenderTarget, int iSourceTextureIndex) const
 {
@@ -137,20 +227,115 @@ FOdysseyImportTexturesParameters::Render(UTextureRenderTarget2D* oRenderTarget, 
     sourceTexture->SetForceMipLevelsToBeResident( 30.0f );
     sourceTexture->WaitForStreaming();
 
+    UTexture2D* scanCleanerCurveTextureR = mScanCleanerCurveTexture;
+    scanCleanerCurveTextureR->BlockOnAnyAsyncBuild();
+    scanCleanerCurveTextureR->SetForceMipLevelsToBeResident( 30.0f );
+    scanCleanerCurveTextureR->WaitForStreaming();
+
     FTextureRenderTargetResource* renderTargetResource = oRenderTarget->GameThread_GetRenderTargetResource();
 
     //Clear RenderTarget
     ENQUEUE_RENDER_COMMAND(SOdysseyImportTexturesDialog_Render)(
-        [renderTargetResource](FRHICommandListImmediate& RHICmdList)
+        [
+            this,
+            iSourceTextureIndex,
+            sourceTextureRHI = sourceTexture->GetResource()->TextureRHI,
+            adjustCurveTextureRHI = mScanCleanerCurveTexture->GetResource()->TextureRHI,
+            renderTargetResource
+        ](FRHICommandListImmediate& RHICmdList)
         {
-            FRDGBuilder graphBuilder(RHICmdList);
-            FRDGTextureRef destinationTexture = renderTargetResource->GetRenderTargetTexture( graphBuilder );
-            AddClearRenderTargetPass(graphBuilder, destinationTexture, FLinearColor::Transparent);
-            graphBuilder.Execute();
+            TRefCountPtr<IPooledRenderTarget> extractedSourceRenderTarget;
+
+            { //Step 1 : Scan Cleaner
+                FRDGBuilder graphBuilder(RHICmdList);
+                FRDGTextureRef sourceTexture = graphBuilder.RegisterExternalTexture(CreateRenderTarget(sourceTextureRHI, TEXT("SOdysseyImportTexturesDialog_Render::sourceTexture")));
+                FRDGTextureRef adjustCurveTexture = graphBuilder.RegisterExternalTexture(CreateRenderTarget(adjustCurveTextureRHI, TEXT("SOdysseyImportTexturesDialog_Render::adjustCurveTexture")));
+
+                ETextureCreateFlags textureFlags = ETextureCreateFlags::ShaderResource | ETextureCreateFlags::RenderTargetable;
+                textureFlags |= sourceTexture->Desc.Flags & ETextureCreateFlags::SRGB;
+                FRDGTextureDesc sourceTextureDesc = FRDGTextureDesc::Create2D(
+                    sourceTexture->Desc.Extent,
+                    sourceTexture->Desc.Format,
+                    FClearValueBinding::Transparent,
+                    textureFlags
+                );
+                FRDGTextureRef sourceRenderTarget = graphBuilder.CreateTexture(sourceTextureDesc, TEXT("SOdysseyImportTexturesDialog_Render::sourceTexture"));
+
+                if (mIsScanCleanerActivated)
+                {
+                    FOdysseyScanCleanerShader::ScanCleaner(
+                        graphBuilder,
+                        GMaxRHIFeatureLevel,
+                        sourceTexture,
+                        adjustCurveTexture,
+                        sourceRenderTarget
+                    );
+                }
+                else
+                {
+                    AddDrawTexturePass(
+                        graphBuilder,
+                        FScreenPassViewInfo(),
+                        sourceTexture,
+                        sourceRenderTarget
+                    );
+                    /*AddCopyTexturePass(
+                        graphBuilder,
+                        sourceTexture,
+                        sourceRenderTarget
+                    );*/
+                }
+
+                graphBuilder.QueueTextureExtraction(sourceRenderTarget, &extractedSourceRenderTarget);
+                graphBuilder.Execute();
+            }
+
+            { //Step 2 : Positioning
+                FRDGBuilder graphBuilder(RHICmdList);
+                FRDGTextureRef destinationTexture = renderTargetResource->GetRenderTargetTexture( graphBuilder );
+                AddClearRenderTargetPass(graphBuilder, destinationTexture, FLinearColor::Transparent);
+
+                /*TEST: Canvas */
+                FRDGTextureRef sourceRenderTarget = graphBuilder.RegisterExternalTexture(extractedSourceRenderTarget);
+
+                //FCanvas* canvas = FCanvas::Create(graphBuilder, destinationTexture, nullptr, FGameTime(), GMaxRHIFeatureLevel);
+
+                //PATCH: FOdysseyCanvasRenderTarget allows us to use the correct Gamma value here
+                FCanvas* canvas = graphBuilder.AllocObject<FCanvas>(
+                    graphBuilder.AllocObject<FOdysseyCanvasRenderTarget>(destinationTexture),
+                    nullptr,
+                    FGameTime(),
+                    GMaxRHIFeatureLevel,
+                    1.0f
+                );
+                //PATCH: END
+
+                FVector2D scaledSize = GetTextureScaledSize(iSourceTextureIndex);
+                FVector2D texturePosition = GetTexturePosition(scaledSize);
+
+                FTexture* tileTexture = graphBuilder.AllocObject<FTexture>();
+
+                tileTexture->TextureRHI = sourceRenderTarget->GetRHI(); //sourceTextureRHI;
+                tileTexture->SamplerStateRHI = Odyssey::GetSamplerStateForAntiAliasing(mResamplingMethod);
+
+                FCanvasTileItem TileItem(
+                    texturePosition,
+                    tileTexture,
+                    scaledSize,
+                    FColor::White
+                );
+
+                canvas->DrawItem(TileItem);
+                canvas->Flush_RenderThread(graphBuilder);
+
+                /** END TEST */
+
+                graphBuilder.Execute();
+            }
         }
     );
 
-    FCanvas canvas(renderTargetResource, nullptr, FGameTime(), GMaxRHIFeatureLevel);
+    /* FCanvas canvas(renderTargetResource, nullptr, FGameTime(), GMaxRHIFeatureLevel);
     FCanvasRenderThreadScope canvasRenderThreadScope(canvas);
 
     FVector2D scaledSize = GetTextureScaledSize(iSourceTextureIndex);
@@ -169,7 +354,7 @@ FOdysseyImportTexturesParameters::Render(UTextureRenderTarget2D* oRenderTarget, 
     );
 
     canvas.DrawItem(TileItem);
-    canvas.Flush_GameThread();
+    canvas.Flush_GameThread(); */
 }
 
 uint32
@@ -214,6 +399,12 @@ FOdysseyImportTexturesParameters::GetIsScanCleanerActivated() const
     return mIsScanCleanerActivated;
 }
 
+UCurveFloat*
+FOdysseyImportTexturesParameters::GetScanCleanerCurve() const
+{
+    return mScanCleanerCurve.Get();
+}
+
 void
 FOdysseyImportTexturesParameters::SetIsScanCleanerActivated(bool iIsActivated)
 {
@@ -237,6 +428,5 @@ FOdysseyImportTexturesParameters::SetResamplingMethod(EOdysseyAntiAliasing iMeth
 {
     mResamplingMethod = iMethod;
 }
-
 
 #undef LOCTEXT_NAMESPACE
