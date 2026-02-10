@@ -1003,6 +1003,16 @@ BoardSequenceTools::SelectSingleAnimation( ISequencer* iSequencer, UMovieSceneSu
 void
 ShotSequenceTools::SelectSingleAnimation( ISequencer& iSequencer, UMovieSceneSubSection* iParentSection, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iAnimationBinding )
 {
+    // Section selection must be done first, to call our callback in toolkit helpers which change the current frame (when section selection changed)
+    // otherwise spawnable won't be loaded and so not found
+
+    // To unselect section(s)
+    iSequencer.EmptySelection();
+    // And then select the current one
+    iSequencer.SelectSection( iParentSection );
+
+    //---
+
     auto objects = iSequencer.FindBoundObjects( iAnimationBinding, iSequenceID );
 
     // Get the animation(s) corresponding to the one(s) on the current clicked row
@@ -1010,11 +1020,6 @@ ShotSequenceTools::SelectSingleAnimation( ISequencer& iSequencer, UMovieSceneSub
     TArray<AOdysseyAnimationActor*> animations;
     for( auto object : objects )
         animations.Add( Cast<AOdysseyAnimationActor>( object ) );
-
-    // To unselect section(s)
-    iSequencer.EmptySelection();
-    // And then select the current one
-    iSequencer.SelectSection( iParentSection );
 
     // To unselect all actors
     GEditor->SelectNone( true, true );
@@ -1040,6 +1045,16 @@ BoardSequenceTools::SelectMultiAnimation( ISequencer* iSequencer, UMovieSceneSub
 void
 ShotSequenceTools::SelectMultiAnimation( ISequencer& iSequencer, UMovieSceneSubSection* iParentSection, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iAnimationBinding )
 {
+    // Section selection must be done first, to call our callback in toolkit helpers which change the current frame (when section selection changed)
+    // otherwise spawnable won't be loaded and so not found
+
+    // To unselect section(s)
+    iSequencer.EmptySelection();
+    // And then select the current one
+    iSequencer.SelectSection( iParentSection );
+
+    //---
+
     auto objects = iSequencer.FindBoundObjects( iAnimationBinding, iSequenceID );
 
     // Get the animation(s) corresponding to the one(s) on the current clicked row
@@ -1061,11 +1076,6 @@ ShotSequenceTools::SelectMultiAnimation( ISequencer& iSequencer, UMovieSceneSubS
         else
             animations_selected.Add( animation_self );
     }
-
-    // To unselect section(s)
-    iSequencer.EmptySelection();
-    // And then select the current one
-    iSequencer.SelectSection( iParentSection );
 
     // To unselect all actors
     GEditor->SelectNone( true, true );

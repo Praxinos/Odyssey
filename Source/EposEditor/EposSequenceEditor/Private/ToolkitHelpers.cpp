@@ -490,7 +490,7 @@ ToolkitHelpers::PatchStandardCameraCutTrack( ISequencer* iSequencer, AActor* iAc
     movieScene->RemoveCameraCutTrack();
 
     FGuid camera_guid;
-    ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( *iSequencer, sequence, sequence_id, &camera_guid );
+    /*ACineCameraActor* camera =*/ ShotSequenceHelpers::GetCamera( *iSequencer, sequence, sequence_id, &camera_guid );
 
     //TODO: maybe get the size of the existing section
     // But as it should only be called in FSequencer::AddActors(), after an auto track creation, it should be ok to replace without taking care to of the existing section
