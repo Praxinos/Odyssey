@@ -165,9 +165,6 @@ public:
         bool mTrackCreated = false;
         TArray<TWeakObjectPtr<UOdysseyAnimationTimelineSection>> mSections;
         bool mSectionsCreated = false;
-
-        TWeakObjectPtr<AOdysseyAnimationActor> mAnimationActor;
-        FGuid mAnimationComponentBinding; // The binding of the root component of the timeline
     };
     static FFindOrCreateTimelineResult                  FindTimelineTrackAndSections( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iAnimationBinding, TOptional<FFrameNumber> iFrameNumber = TOptional<FFrameNumber>() );
 
@@ -180,8 +177,6 @@ public:
         bool mTrackCreated { false };
         TArray<TWeakObjectPtr<UMovieSceneSection>>          mSections;
         bool mSectionsCreated { false };
-
-        FGuid mRootComponentBinding; // The binding of the root component of the plane
     };
     static FFindOrCreateMaterialParameterResult         FindMaterialParameterTrackAndSections( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iBinding, TOptional<FFrameNumber> iFrameNumber = TOptional<FFrameNumber>() );
     static FFindOrCreateMaterialParameterResult         FindOrCreateMaterialParameterTrackAndSections( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iBinding, TOptional<FFrameNumber> iFrameNumber = TOptional<FFrameNumber>() );

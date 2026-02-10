@@ -91,7 +91,7 @@ FExportConverter::ProcessAnimationCuts( UShotSequence& iShotSequence, FMovieScen
         AOdysseyAnimationActor* animation_actor = animation_actors[animation_bindings.IndexOfByKey( animation_binding )];
         check( animation_actor );
         ShotSequenceHelpers::FFindOrCreateTimelineResult result = ShotSequenceHelpers::FindTimelineTrackAndSections( *sequencer, &iShotSequence, iSequenceId, animation_binding );
-        check( animation_actors.Contains( result.mAnimationActor.Get() ) );
+        //check( animation_actors.Contains( result.mAnimationActor.Get() ) );
 
         for( TWeakObjectPtr<UOdysseyAnimationTimelineSection> section : result.mSections )
         {

@@ -3,6 +3,7 @@
 
 #include "EposSequenceHelpers.h"
 
+#include "Bindings/MovieSceneSpawnableBinding.h"
 #include "Channels/MovieSceneChannelProxy.h"
 #include "Channels/MovieSceneObjectPathChannel.h"
 #include "CineCameraActor.h"
@@ -177,6 +178,32 @@ BoardSequenceHelpers::GetCameraRecursive( IMovieScenePlayer& iPlayer, UMovieScen
 
         return camera;
     }
+
+    return nullptr;
+}
+
+static
+UObject*
+FindSpawnedObjectOrTemplate( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iBinding )
+{
+    TArrayView<TWeakObjectPtr<>> weakObjectsView = iPlayer.FindBoundObjects( iBinding, iSequenceID );
+    if( weakObjectsView.Num() )
+        return weakObjectsView[0].Get();
+
+    //---
+
+    TArray<TWeakObjectPtr<>> weakObjects;
+    if( FMovieSceneBindingReferences* bindingReferences = iSequence->GetBindingReferences() )
+    {
+        int32 reference_count = bindingReferences->GetReferences( iBinding ).Num();
+        for( int binding_index = 0; binding_index < reference_count; binding_index++ )
+        {
+            weakObjects.Add( MovieSceneHelpers::GetObjectTemplate( iSequence, iBinding, iPlayer.GetSharedPlaybackState(), binding_index ) );
+        }
+    }
+
+    if( weakObjects.Num() )
+        return weakObjects[0].Get();
 
     return nullptr;
 }
@@ -724,18 +751,7 @@ ShotSequenceHelpers::FindAnimationVisibilityTrackAndSections( IMovieScenePlayer&
     if( !moviescene )
         return result;
 
-    FMovieSceneBinding* binding = moviescene->FindBinding( iAnimationBinding );
-    if( !binding )
-        return result;
-
-    const TArray<UMovieSceneTrack*>& tracks = binding->GetTracks();
-    for( auto track : tracks )
-    {
-        result.mTrack = Cast<UMovieSceneVisibilityTrack>( track );
-        if( result.mTrack.IsValid() )
-            break;
-    }
-
+    result.mTrack = moviescene->FindTrack<UMovieSceneVisibilityTrack>( iAnimationBinding );
     if( !result.mTrack.IsValid() )
         return result;
 
@@ -760,6 +776,51 @@ ShotSequenceHelpers::FindAnimationVisibilityTrackAndSections( IMovieScenePlayer&
     return result;
 }
 
+template<typename TrackClass>
+static
+FGuid
+FindSingleChildBindingWithTrack( UMovieScene* iMovieScene, FGuid iParentBinding )
+{
+    TArray<FGuid> child_bindings;
+
+    for( int32 possessableIndex = 0; possessableIndex < iMovieScene->GetPossessableCount(); ++possessableIndex )
+    {
+        const FMovieScenePossessable& possessable = iMovieScene->GetPossessable( possessableIndex );
+
+        TrackClass* track = iMovieScene->FindTrack<TrackClass>( possessable.GetGuid() );
+        if( !track )
+            continue;
+
+        //---
+
+        auto CheckLineage = []( UMovieScene* iMovieScene, FGuid iChildBinding, FGuid iParentBinding ) -> bool
+            {
+                FGuid current_binding = iChildBinding;
+                while( current_binding.IsValid() )
+                {
+                    if( current_binding == iParentBinding )
+                        return true;
+
+                    current_binding = iMovieScene->FindPossessable( current_binding )->GetParent();
+                }
+
+                return false;
+            };
+
+        if( CheckLineage( iMovieScene, possessable.GetGuid(), iParentBinding ) )
+        {
+            child_bindings.Add( possessable.GetGuid() );
+        }
+    }
+
+    if( child_bindings.IsEmpty() )
+        return FGuid();
+
+    // Assume there is only ONE "TrackClass" in the hierarchy of iParentBinding
+    check( child_bindings.Num() == 1 );
+
+    return child_bindings[0];
+}
 
 //static
 ShotSequenceHelpers::FFindOrCreateTimelineResult
@@ -771,27 +832,14 @@ ShotSequenceHelpers::FindTimelineTrackAndSections( IMovieScenePlayer& iPlayer, U
     if( !moviescene )
         return result;
 
-    TArrayView<TWeakObjectPtr<>> objects = iPlayer.FindBoundObjects( iAnimationBinding, iSequenceID );
-    if( objects.Num() != 1 )
-        return result;
-    AOdysseyAnimationActor* animation = Cast<AOdysseyAnimationActor>( objects[0] );
-    if( !animation )
-        return result;
-    if( !animation->GetAnimationComponent() )
-        return result;
-
-    FGuid animation_component_binding = iPlayer.FindCachedObjectId( *animation->GetAnimationComponent(), iSequenceID );
-    if( !animation_component_binding.IsValid() )
+    FGuid child_binding_with_timeline = FindSingleChildBindingWithTrack<UOdysseyAnimationTimelineTrack>( moviescene, iAnimationBinding );
+    if( !child_binding_with_timeline.IsValid() )
         return result;
 
     //---
 
-    result.mAnimationActor = animation;
-
-    result.mAnimationComponentBinding = animation_component_binding;
-
-    result.mTrack = moviescene->FindTrack<UOdysseyAnimationTimelineTrack>( result.mAnimationComponentBinding );
-    if( !result.mTrack.IsValid() )
+    result.mTrack = moviescene->FindTrack<UOdysseyAnimationTimelineTrack>( child_binding_with_timeline );
+    if( !ensure( result.mTrack.IsValid() ) )
         return result;
 
     //---
@@ -825,29 +873,27 @@ ShotSequenceHelpers::GetAllAnimationCutTimes( IMovieScenePlayer& iPlayer, UMovie
     if( !moviescene )
         return times;
 
-    TArray<AOdysseyAnimationActor*> animations;
-    TArray<FGuid> guids;
-    int32 nb_animation = GetAllAnimations( iPlayer, iSequence, iSequenceID, iAnimationSelection, &animations, &guids );
+    TArray<FGuid> animation_guids;
+    int32 nb_animation = GetAllAnimations( iPlayer, iSequence, iSequenceID, iAnimationSelection, nullptr, &animation_guids );
     if( !nb_animation )
         return times;
 
-    for( int i = 0; i < animations.Num(); i++ )
+    for( int i = 0; i < animation_guids.Num(); i++ )
     {
-        AOdysseyAnimationActor* animation = animations[i];
-        FGuid guid = guids[i];
+        FGuid animation_guid = animation_guids[i];
 
-        FGuid animation_component = iPlayer.FindCachedObjectId( *animation->GetRootComponent(), iSequenceID );
-        if( !animation_component.IsValid() )
+        FGuid child_binding_with_timeline = FindSingleChildBindingWithTrack<UOdysseyAnimationTimelineTrack>( moviescene, animation_guid );
+        if( !child_binding_with_timeline.IsValid() )
             continue;
 
-        UOdysseyAnimationTimelineTrack* track = moviescene->FindTrack<UOdysseyAnimationTimelineTrack>( animation_component );
-        if( !track )
+        UOdysseyAnimationTimelineTrack* track = moviescene->FindTrack<UOdysseyAnimationTimelineTrack>( child_binding_with_timeline );
+        if( !ensure(track) )
             continue;
 
         for( auto section : track->GetAllSections() )
         {
             UOdysseyAnimationTimelineSection* section_timeline = Cast<UOdysseyAnimationTimelineSection>( section );
-            if( !section_timeline )
+            if( !ensure( section_timeline ) )
                 continue;
 
             const FOdysseyAnimationCutChannel& channel = section_timeline->GetAnimationCutChannel();
@@ -924,32 +970,13 @@ ShotSequenceHelpers::FindMaterialParameterTrackAndSections( IMovieScenePlayer& i
     if( !moviescene )
         return result;
 
-    TArrayView<TWeakObjectPtr<>> objects = iPlayer.FindBoundObjects( iBinding, iSequenceID );
-    if( objects.Num() != 1 )
-        return result;
-    AActor* a = Cast<AActor>( objects[0] );
-    UActorComponent* component = a->FindComponentByClass<UOdysseyAnimationComponent>();
-    if( !component )
-        component = a->GetRootComponent();
-    if( !component )
-        return result;
-
-    //APlaneActor* plane = Cast<APlaneActor>( objects[0] );
-    //AOdysseyAnimationActor* animation = Cast<AOdysseyAnimationActor>( objects[0] );
-    //AActor* actor = plane ? Cast<AActor>( plane ) : Cast<AActor>( animation );
-    //if( !actor )
-    //    return result;
-
-    //FGuid root_component_binding = iPlayer.FindCachedObjectId( *actor->GetRootComponent(), iSequenceID );
-    FGuid root_component_binding = iPlayer.FindCachedObjectId( *component, iSequenceID );
-    if( !root_component_binding.IsValid() )
+    FGuid child_binding_with_material = FindSingleChildBindingWithTrack<UMovieSceneComponentMaterialTrack>( moviescene, iBinding );
+    if( !child_binding_with_material.IsValid() )
         return result;
 
     //---
 
-    result.mRootComponentBinding = root_component_binding;
-
-    result.mTrack = moviescene->FindTrack<UMovieSceneComponentMaterialTrack>( result.mRootComponentBinding ); // Get only the material track of the first "material 0", should be ok as animation actor have only 1 material associated
+    result.mTrack = moviescene->FindTrack<UMovieSceneComponentMaterialTrack>( child_binding_with_material ); // Get only the material track of the first "material 0", should be ok as animation actor have only 1 material associated
     if( !result.mTrack.IsValid() )
         return result;
 
@@ -995,9 +1022,26 @@ ShotSequenceHelpers::FindOrCreateMaterialParameterTrackAndSections( IMovieSceneP
 
     if( !result.mTrack.IsValid() )
     {
+        // Many assumptions here:
+        // - binding must be an actor (as this function should always be called on an actor binding)
+        // - component binding must exist
+        // - component binding must allow component material track
+        AActor* actor = Cast<AActor>( FindSpawnedObjectOrTemplate( iPlayer, iSequence, iSequenceID, iBinding ) );
+        UActorComponent* component = actor->FindComponentByClass<UOdysseyAnimationComponent>();
+        if( !component )
+            component = actor->GetRootComponent();
+        if( !component )
+            return result;
+
+        FGuid child_binding_with_material = iPlayer.FindCachedObjectId( *component, iSequenceID );
+        if( !child_binding_with_material.IsValid() )
+            return result;
+
+        //---
+
         result.mTrackCreated = true;
 
-        UMovieSceneTrack* track = iSequence->GetMovieScene()->AddTrack( UMovieSceneComponentMaterialTrack::StaticClass(), result.mRootComponentBinding );
+        UMovieSceneTrack* track = iSequence->GetMovieScene()->AddTrack<UMovieSceneComponentMaterialTrack>( child_binding_with_material );
         result.mTrack = Cast<UMovieSceneComponentMaterialTrack>( track );
 
         FComponentMaterialInfo material_info = { FName(), 0, EComponentMaterialType::IndexedMaterial }; //TODO: iMaterialTrackIndex;
@@ -1418,9 +1462,8 @@ ShotSequenceHelpers::BuildAnimationsTransformChannelProxy( IMovieScenePlayer& iP
 {
     TMap<FGuid, FChannelProxyBySectionMap> maps;
 
-    TArray<AOdysseyAnimationActor*> animations;
     TArray<FGuid> bindings;
-    /*int animation_count =*/ ShotSequenceHelpers::GetAllAnimations( iPlayer, iSequence, iSequenceID, EGetAnimation::kAll, &animations, &bindings );
+    /*int animation_count =*/ ShotSequenceHelpers::GetAllAnimations( iPlayer, iSequence, iSequenceID, EGetAnimation::kAll, nullptr, &bindings );
 
     for( auto binding : bindings )
     {
@@ -1486,9 +1529,8 @@ ShotSequenceHelpers::BuildAnimationsTimelineChannelProxy( IMovieScenePlayer& iPl
 {
     TMap<FGuid, FChannelProxyBySectionMap> maps;
 
-    TArray<AOdysseyAnimationActor*> animations;
     TArray<FGuid> bindings;
-    /*int animation_count =*/ ShotSequenceHelpers::GetAllAnimations( iPlayer, iSequence, iSequenceID, EGetAnimation::kAll, &animations, &bindings );
+    /*int animation_count =*/ ShotSequenceHelpers::GetAllAnimations( iPlayer, iSequence, iSequenceID, EGetAnimation::kAll, nullptr, &bindings );
 
     for( FGuid binding : bindings )
     {
@@ -1543,9 +1585,8 @@ ShotSequenceHelpers::BuildAnimationsOpacityChannelProxy( IMovieScenePlayer& iPla
 {
     TMap<FGuid, FChannelProxyBySectionMap> maps;
 
-    TArray<AOdysseyAnimationActor*> animations;
     TArray<FGuid> bindings;
-    /*int animation_count =*/ ShotSequenceHelpers::GetAllAnimations( iPlayer, iSequence, iSequenceID, EGetAnimation::kAll, &animations, &bindings );
+    /*int animation_count =*/ ShotSequenceHelpers::GetAllAnimations( iPlayer, iSequence, iSequenceID, EGetAnimation::kAll, nullptr, &bindings );
 
     for( auto binding : bindings )
     {
