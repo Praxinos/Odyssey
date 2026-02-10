@@ -15,9 +15,28 @@ FArianeVertex::FArianeVertex( double X, double Y, double Z, double InRadius )
 }
 
 FArianeVertex::FArianeVertex( const FVector& iPosition, double InRadius )
-    // Delegating constructor
-    : FArianeVertex( iPosition.X, iPosition.Y, iPosition.Z, InRadius )
+    : FArianePoint( iPosition )
+    , Radius( InRadius )
 {
+}
+
+FArianeVertex::FArianeVertex( const FVector& iPosition, const FVector& InNormal, double InRadius )
+    : FArianePoint( iPosition )
+    , Radius( InRadius )
+    , Normal ( InNormal )
+{
+}
+
+void
+FArianeVertex::SetNormal( const FVector& InNormal )
+{
+    Normal = InNormal;
+}
+
+const FVector&
+FArianeVertex::GetNormal()
+{
+    return Normal;
 }
 
 void
