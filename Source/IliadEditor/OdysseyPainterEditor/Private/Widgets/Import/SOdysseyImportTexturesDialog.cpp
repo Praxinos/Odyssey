@@ -121,6 +121,7 @@ SOdysseyImportTexturesDialog::Construct(const FArguments& InArgs, const FOdyssey
                 ]
             ]
             + SHorizontalBox::Slot()
+            .Padding(FMargin(0.f, 0.f, 4.f, 0.f))
             [
                 SNew(SVerticalBox)
                 + SVerticalBox::Slot()
@@ -173,7 +174,6 @@ SOdysseyImportTexturesDialog::Construct(const FArguments& InArgs, const FOdyssey
                         )
                         .TypeInterface(MakeShareable( new TNumericUnitTypeInterface<float>( EUnit::Percentage ) ))
                         .AllowSpin(true)
-                        .ShiftMultiplier(10)
                         .Delta(1)
                         .MinValue(0)
                         .MinSliderValue(0)

@@ -52,7 +52,6 @@ FOdysseyImportTexturesViewportClient::Draw( FViewport* iViewport, FCanvas* ioCan
     {
         FCanvasTileItem tileItem(
             FVector2D(0, 0),
-            //FVector2D( canvasRect.Min.X + (canvasRect.Width() - width) / 2.f, canvasRect.Min.Y + (canvasRect.Height() - height) / 2.f),
             mCheckerboardTexture->GetResource(),
             FVector2D(mCanvasWidth, mCanvasHeight),
             FVector2D(0, 0),
@@ -117,10 +116,11 @@ void
 FOdysseyImportTexturesViewportClient::SetZoom(float iZoom, const FVector2D& iZoomPosition )
 {
     //Zooms in the center of the viewport
+    float zoom = FMath::Max(iZoom, mMinZoom);
     float oldZoom = GetZoom();
 
     mTransform *= FTranslationMatrix(FVector(-iZoomPosition, 0));
-    mTransform *= FScaleMatrix(iZoom / oldZoom);
+    mTransform *= FScaleMatrix(zoom / oldZoom);
     mTransform *= FTranslationMatrix(FVector(iZoomPosition, 0));
 }
 
@@ -141,6 +141,22 @@ FOdysseyImportTexturesViewportClient::InputKey(const FInputKeyEventArgs& iEventA
         else if (iEventArgs.Key == EKeys::RightMouseButton)
         {
             mIsZooming = true;
+        }
+        else if (iEventArgs.Key == EKeys::MouseScrollUp)
+        {
+            //ZoomIn
+            float sliderPos = FMath::Loge(GetZoom());
+            sliderPos += 0.1f;
+            float newZoom = FMath::Exp(sliderPos);
+            SetZoom(newZoom, mInitialMousePosition);
+        }
+        else if (iEventArgs.Key == EKeys::MouseScrollDown)
+        {
+            //ZoomOut
+            float sliderPos = FMath::Loge(GetZoom());
+            sliderPos -= 0.1f;
+            float newZoom = FMath::Exp(sliderPos);
+            SetZoom(newZoom, mInitialMousePosition);
         }
     }
 
@@ -174,7 +190,7 @@ FOdysseyImportTexturesViewportClient::CapturedMouseMove( FViewport* InViewport, 
 
         if (delta.X > KINDA_SMALL_NUMBER || delta.X < KINDA_SMALL_NUMBER)
         {
-            float zoom = FMath::Max( FMath::Exp(delta.X / smoothness), 0.f );
+            float zoom = FMath::Max( FMath::Exp(delta.X / smoothness), mMinZoom );
             mTransform = mInitialTransform;
             mTransform *= FTranslationMatrix(FVector(-mInitialMousePosition, 0));
             mTransform *= FScaleMatrix(zoom);
@@ -189,7 +205,7 @@ FOdysseyImportTexturesViewportClient::InitTransform(FViewport* InViewport)
     FIntRect canvasPadding(10.f, 10.f, -10.f, -10.f);
     const FIntRect& canvasRect = FIntRect(0, 0, InViewport->GetSizeXY().X, InViewport->GetSizeXY().Y) + canvasPadding;
 
-    float minZoomFactor = FMath::Min(float(canvasRect.Width()) / mCanvasWidth, float(canvasRect.Height()) / mCanvasHeight);
+    mMinZoom = FMath::Min(float(canvasRect.Width()) / mCanvasWidth, float(canvasRect.Height()) / mCanvasHeight);
 
     float canvasCenter_x = mCanvasWidth  / 2.f;
     float canvasCenter_y = mCanvasHeight / 2.f;
@@ -199,7 +215,7 @@ FOdysseyImportTexturesViewportClient::InitTransform(FViewport* InViewport)
 
     mTransform = FMatrix::Identity;
     mTransform *= FTranslationMatrix(FVector(-canvasCenter_x, -canvasCenter_y,0));
-    mTransform *= FScaleMatrix(minZoomFactor); //Zoom
+    mTransform *= FScaleMatrix(mMinZoom); //Zoom
     mTransform *= FTranslationMatrix(FVector(viewportCenter_x, viewportCenter_y,0));
 
     mTranformInitialized = true;

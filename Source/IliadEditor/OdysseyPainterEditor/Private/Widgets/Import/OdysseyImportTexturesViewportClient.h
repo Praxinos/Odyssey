@@ -53,6 +53,7 @@ private:
     FMatrix mTransform;
     bool mIsPanning = false;
     bool mIsZooming = false;
+    float mMinZoom;
     FMatrix mInitialTransform;
     FVector2D mInitialMousePosition;
 };

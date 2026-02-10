@@ -68,6 +68,10 @@ public:
     EOdysseyImportTextureScaling GetScaling() const;
     EOdysseyAntiAliasing GetResamplingMethod() const;
     UCurveFloat* GetScanCleanerCurve() const;
+    float GetScanCleanerColorSaturation() const;
+    float GetScanCleanerColorValue() const;
+    void SetScanCleanerColorSaturation(float iSaturation);
+    void SetScanCleanerColorValue(float iValue);
 
     bool GetIsScanCleanerActivated() const;
     void SetIsScanCleanerActivated(bool iIsActivated);
@@ -107,5 +111,7 @@ protected:
     bool mIsScanCleanerActivated = false;
     TObjectPtr<UCurveFloat> mScanCleanerCurve;
     TObjectPtr<UTexture2D> mScanCleanerCurveTexture;
+    float mScanCleanerColorSaturation = 1.f;
+    float mScanCleanerColorValue = 1.f;
 
 };

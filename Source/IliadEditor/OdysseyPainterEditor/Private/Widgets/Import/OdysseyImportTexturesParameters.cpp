@@ -234,14 +234,21 @@ FOdysseyImportTexturesParameters::Render(UTextureRenderTarget2D* oRenderTarget, 
 
     FTextureRenderTargetResource* renderTargetResource = oRenderTarget->GameThread_GetRenderTargetResource();
 
+    FVector2D scaledSize = GetTextureScaledSize(iSourceTextureIndex);
+    FVector2D texturePosition = GetTexturePosition(scaledSize);
+
     //Clear RenderTarget
     ENQUEUE_RENDER_COMMAND(SOdysseyImportTexturesDialog_Render)(
         [
-            this,
-            iSourceTextureIndex,
             sourceTextureRHI = sourceTexture->GetResource()->TextureRHI,
             adjustCurveTextureRHI = mScanCleanerCurveTexture->GetResource()->TextureRHI,
-            renderTargetResource
+            renderTargetResource,
+            colorSaturation = mScanCleanerColorSaturation,
+            colorValue = mScanCleanerColorValue,
+            isScanCleanerActivated = mIsScanCleanerActivated,
+            scaledSize,
+            texturePosition,
+            resamplingMethod = mResamplingMethod
         ](FRHICommandListImmediate& RHICmdList)
         {
             TRefCountPtr<IPooledRenderTarget> extractedSourceRenderTarget;
@@ -261,14 +268,16 @@ FOdysseyImportTexturesParameters::Render(UTextureRenderTarget2D* oRenderTarget, 
                 );
                 FRDGTextureRef sourceRenderTarget = graphBuilder.CreateTexture(sourceTextureDesc, TEXT("SOdysseyImportTexturesDialog_Render::sourceTexture"));
 
-                if (mIsScanCleanerActivated)
+                if (isScanCleanerActivated)
                 {
                     FOdysseyScanCleanerShader::ScanCleaner(
                         graphBuilder,
                         GMaxRHIFeatureLevel,
                         sourceTexture,
                         adjustCurveTexture,
-                        sourceRenderTarget
+                        sourceRenderTarget,
+                        colorSaturation,
+                        colorValue
                     );
                 }
                 else
@@ -310,13 +319,10 @@ FOdysseyImportTexturesParameters::Render(UTextureRenderTarget2D* oRenderTarget, 
                 );
                 //PATCH: END
 
-                FVector2D scaledSize = GetTextureScaledSize(iSourceTextureIndex);
-                FVector2D texturePosition = GetTexturePosition(scaledSize);
-
                 FTexture* tileTexture = graphBuilder.AllocObject<FTexture>();
 
                 tileTexture->TextureRHI = sourceRenderTarget->GetRHI(); //sourceTextureRHI;
-                tileTexture->SamplerStateRHI = Odyssey::GetSamplerStateForAntiAliasing(mResamplingMethod);
+                tileTexture->SamplerStateRHI = Odyssey::GetSamplerStateForAntiAliasing(resamplingMethod);
 
                 FCanvasTileItem TileItem(
                     texturePosition,
@@ -334,27 +340,6 @@ FOdysseyImportTexturesParameters::Render(UTextureRenderTarget2D* oRenderTarget, 
             }
         }
     );
-
-    /* FCanvas canvas(renderTargetResource, nullptr, FGameTime(), GMaxRHIFeatureLevel);
-    FCanvasRenderThreadScope canvasRenderThreadScope(canvas);
-
-    FVector2D scaledSize = GetTextureScaledSize(iSourceTextureIndex);
-    FVector2D texturePosition = GetTexturePosition(scaledSize);
-
-    FTexture* tileTexture = new FTexture();
-    canvasRenderThreadScope.DeferredDelete(tileTexture); //ensures deletion of tileTexture when canvas has finished to draw
-    tileTexture->TextureRHI = sourceTexture->GetResource()->TextureRHI;
-    tileTexture->SamplerStateRHI = Odyssey::GetSamplerStateForAntiAliasing(mResamplingMethod);
-
-    FCanvasTileItem TileItem(
-        texturePosition,
-        tileTexture,
-        scaledSize,
-        FColor::White
-    );
-
-    canvas.DrawItem(TileItem);
-    canvas.Flush_GameThread(); */
 }
 
 uint32
@@ -403,6 +388,30 @@ UCurveFloat*
 FOdysseyImportTexturesParameters::GetScanCleanerCurve() const
 {
     return mScanCleanerCurve.Get();
+}
+
+float
+FOdysseyImportTexturesParameters::GetScanCleanerColorSaturation() const
+{
+    return mScanCleanerColorSaturation;
+}
+
+float
+FOdysseyImportTexturesParameters::GetScanCleanerColorValue() const
+{
+    return mScanCleanerColorValue;
+}
+
+void
+FOdysseyImportTexturesParameters::SetScanCleanerColorSaturation(float iSaturation)
+{
+    mScanCleanerColorSaturation = iSaturation;
+}
+
+void
+FOdysseyImportTexturesParameters::SetScanCleanerColorValue(float iValue)
+{
+    mScanCleanerColorValue = iValue;
 }
 
 void

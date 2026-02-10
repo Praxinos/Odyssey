@@ -35,7 +35,9 @@ void FOdysseyScanCleanerShader::ScanCleaner(
     ERHIFeatureLevel::Type iFeatureLevel,
     FRDGTextureRef iSourceTexture,
     FRDGTextureRef iAdjustCurveTexture,
-    FRDGTextureRef iDestinationTexture
+    FRDGTextureRef iDestinationTexture,
+    float iColorSaturation,
+    float iColorValue
 )
 {
     FRDGTextureRef sourceTexture = iSourceTexture;
@@ -70,6 +72,8 @@ void FOdysseyScanCleanerShader::ScanCleaner(
     shaderParameters->SourceTextureSampler = Odyssey::GetSamplerStateForAntiAliasing(EOdysseyAntiAliasing::NearestNeighbor);
     shaderParameters->AdjustCurveTexture = adjustCurveTexture;
     shaderParameters->AdjustCurveTextureSampler = Odyssey::GetSamplerStateForAntiAliasing(EOdysseyAntiAliasing::Bilinear);
+    shaderParameters->ColorSaturation = iColorSaturation;
+    shaderParameters->ColorValue = iColorValue;
 
     //Create Shader
     FGlobalShaderMap* GlobalShaderMap = GetGlobalShaderMap(iFeatureLevel);

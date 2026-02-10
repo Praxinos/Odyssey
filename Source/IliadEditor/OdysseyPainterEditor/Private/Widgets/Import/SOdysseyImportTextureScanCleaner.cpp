@@ -4,6 +4,8 @@
 #include "SOdysseyImportTextureScanCleaner.h"
 
 #include "SCurveEditor.h"
+#include "Widgets/Input/SNumericEntryBox.h"
+#include "Widgets/Input/NumericUnitTypeInterface.inl"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -53,14 +55,96 @@ SOdysseyImportTextureScanCleaner::Construct(const FArguments& InArgs)
         .Padding(FMargin(0.f, 0.f, 0.f, 4.f))
         .AutoHeight()
         [
-            SAssignNew(mCurveEditor, SCurveEditor)
+            SNew(SHorizontalBox)
+            + SHorizontalBox::Slot()
+            [
+                SNew(STextBlock)
+                .Text(LOCTEXT("import-texture-dialog.scan-cleaner.color-saturation", "Color Saturation"))
+            ]
 
+            + SHorizontalBox::Slot()
+            [
+                SNew(SNumericEntryBox<float>)
+                .IsEnabled_Lambda([this]() { return mData->GetIsScanCleanerActivated();})
+                .Value_Lambda(
+                    [this]()
+                    {
+                        return mData->GetScanCleanerColorSaturation() * 100.f;
+                    }
+                )
+                .TypeInterface(MakeShareable( new TNumericUnitTypeInterface<float>( EUnit::Percentage ) ))
+                .AllowSpin(true)
+                .LinearDeltaSensitivity(5)
+                .Delta(1)
+                .MinValue(0)
+                .MinSliderValue(0)
+                .MaxValue(TOptional<float>())
+                .MaxSliderValue(TOptional<float>())
+                .MinFractionalDigits(0)
+                .MaxFractionalDigits(0)
+                .OnValueChanged_Lambda(
+                    [this](float iValue)
+                    {
+                        mData->SetScanCleanerColorSaturation(iValue / 100.f);
+                        mOnChanged.ExecuteIfBound();
+                    }
+                )
+            ]
+        ]
+
+        + SVerticalBox::Slot()
+        .Padding(FMargin(0.f, 0.f, 0.f, 4.f))
+        .AutoHeight()
+        [
+            SNew(SHorizontalBox)
+            + SHorizontalBox::Slot()
+            [
+                SNew(STextBlock)
+                .Text(LOCTEXT("import-texture-dialog.scan-cleaner.color-value", "Color Value"))
+            ]
+
+            + SHorizontalBox::Slot()
+            [
+                SNew(SNumericEntryBox<float>)
+                .IsEnabled_Lambda([this]() { return mData->GetIsScanCleanerActivated();})
+                .Value_Lambda(
+                    [this]()
+                    {
+                        return mData->GetScanCleanerColorValue() * 100.f;
+                    }
+                )
+                .TypeInterface(MakeShareable( new TNumericUnitTypeInterface<float>( EUnit::Percentage ) ))
+                .AllowSpin(true)
+                .Delta(1)
+                .LinearDeltaSensitivity(5)
+                .MinValue(0)
+                .MinSliderValue(0)
+                .MaxValue(TOptional<float>())
+                .MaxSliderValue(TOptional<float>())
+                .MinFractionalDigits(0)
+                .MaxFractionalDigits(0)
+                .OnValueChanged_Lambda(
+                    [this](float iValue)
+                    {
+                        mData->SetScanCleanerColorValue(iValue / 100.f);
+                        mOnChanged.ExecuteIfBound();
+                    }
+                )
+            ]
+        ]
+
+        + SVerticalBox::Slot()
+        .Padding(FMargin(0.f, 0.f, 0.f, 4.f))
+        .AutoHeight()
+        [
             /*
                 "Input" is X axis
                 "Output" is Y axis
-                "TimelineLength" is the length of the highlighted part of the editor (Here we work in the range [0, 1] so the timeline length is 1.0f)
+                "TimelineLength" is the length of the highlighted part of the editor (We don't want it to be highlighted so it's 0.f)
             */
 
+            SAssignNew(mCurveEditor, SCurveEditor)
+            .IsEnabled_Lambda([this]() { return mData->GetIsScanCleanerActivated();})
             .ViewMinInput_Lambda( [this]() { return mViewMinInput; })
             .ViewMaxInput_Lambda( [this]() { return mViewMaxInput; })
             .ViewMinOutput_Lambda( [this]() { return mViewMinOutput; })

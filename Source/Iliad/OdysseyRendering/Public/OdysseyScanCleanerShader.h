@@ -18,6 +18,9 @@ BEGIN_SHADER_PARAMETER_STRUCT(FOdysseyScanCleanerShaderParameters, )
     SHADER_PARAMETER_RDG_TEXTURE(Texture2D, AdjustCurveTexture)
     SHADER_PARAMETER_SAMPLER(SamplerState, AdjustCurveTextureSampler)
 
+    SHADER_PARAMETER(float, ColorSaturation)
+    SHADER_PARAMETER(float, ColorValue)
+
     RENDER_TARGET_BINDING_SLOTS()
 END_SHADER_PARAMETER_STRUCT()
 
@@ -29,7 +32,9 @@ public:
         ERHIFeatureLevel::Type iFeatureLevel,
         FRDGTextureRef iSourceTexture,
         FRDGTextureRef iAdjustCurveTexture,
-        FRDGTextureRef iDestinationTexture
+        FRDGTextureRef iDestinationTexture,
+        float iColorSaturation,
+        float iColorValue
     );
 
     static void InitTextureFromCurves(
