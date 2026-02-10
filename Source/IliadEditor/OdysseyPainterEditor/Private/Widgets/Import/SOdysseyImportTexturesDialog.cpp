@@ -17,6 +17,8 @@
 #include "RenderGraphBuilder.h"
 #include "RenderGraphUtils.h"
 #include "OdysseyHUDRectangle.h"
+#include "Widgets/Input/SNumericEntryBox.h"
+#include "Widgets/Input/NumericUnitTypeInterface.inl"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -82,17 +84,14 @@ SOdysseyImportTexturesDialog::Construct(const FArguments& InArgs, const FOdyssey
             .Value(this, &SOdysseyImportTexturesDialog::GetActiveTab)
             .OnValueChecked(this, &SOdysseyImportTexturesDialog::OnTabChecked)
 
-            //Selection Tool
             + SSegmentedControl<ETabs>::Slot(ETabs::Positioning)
             .Text(LOCTEXT("import-textures-dialog.tab.positioning.name", "Positioning"))
             .ToolTip(LOCTEXT("import-textures-dialog.tab.positioning.tooltip", "Positioning"))
 
-            //Move Tool
             + SSegmentedControl<ETabs>::Slot(ETabs::ScanCleaner)
             .Text(LOCTEXT("import-textures-dialog.tab.scan-cleaner.name", "Scan Cleaner"))
             .ToolTip(LOCTEXT("import-textures-dialog.tab.scan-cleaner.tooltip", "Scan Cleaner"))
 
-            //Cut Tool
             /*+ SSegmentedControl<ETabs>::Slot(ETabs::PegsStabilization)
             .Text(LOCTEXT("import-textures-dialog.tab.pegs-stabilization.name", "Pegs Stabilization"))
             .ToolTip(LOCTEXT("import-textures-dialog.tab.pegs-stabilization.tooltip", "Pegs Stabilization")) */
@@ -144,6 +143,54 @@ SOdysseyImportTexturesDialog::Construct(const FArguments& InArgs, const FOdyssey
                     .PreventThrottling(true)
                     .MouseUsesStep(true)
                     .IndentHandle(true)
+                ]
+                + SVerticalBox::Slot()
+                .AutoHeight()
+                [
+                    SNew(SHorizontalBox)
+                    + SHorizontalBox::Slot()
+                    .AutoWidth()
+                    .Padding(FMargin(0.f, 0.f, 4.f, 0.f))
+                    .VAlign(VAlign_Center)
+                    [
+                        SNew(STextBlock)
+                        .Text(LOCTEXT("import-texture-dialog.viewport.zoom", "Zoom"))
+                    ]
+
+                    + SHorizontalBox::Slot()
+                    .MinWidth(70)
+                    .MaxWidth(70)
+                    [
+                        SNew(SNumericEntryBox<float>)
+                        .Value_Lambda(
+                            [this]()
+                            {
+                                if (!mViewportClient)
+                                    return 1.0f;
+
+                                return mViewportClient->GetZoom() * 100.f;
+                            }
+                        )
+                        .TypeInterface(MakeShareable( new TNumericUnitTypeInterface<float>( EUnit::Percentage ) ))
+                        .AllowSpin(true)
+                        .ShiftMultiplier(10)
+                        .Delta(1)
+                        .MinValue(0)
+                        .MinSliderValue(0)
+                        .MaxValue(TOptional<float>())
+                        .MaxSliderValue(TOptional<float>())
+                        .MinFractionalDigits(0)
+                        .MaxFractionalDigits(0)
+                        .OnValueChanged_Lambda(
+                            [this](float iValue)
+                            {
+                                if (!mViewportClient)
+                                    return;
+
+                                mViewportClient->SetZoom(iValue / 100.f, mSceneViewport->GetSizeXY() / 2.f );
+                            }
+                        )
+                    ]
                 ]
             ]
         ]

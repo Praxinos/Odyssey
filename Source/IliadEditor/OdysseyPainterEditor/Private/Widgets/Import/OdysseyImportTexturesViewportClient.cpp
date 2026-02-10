@@ -4,9 +4,11 @@
 #include "OdysseyImportTexturesViewportClient.h"
 #include "OdysseyPainterEditorSettings.h"
 #include "ImageUtils.h"
-#include "CanvasTypes.h"
 #include "CanvasItem.h"
+#include "CanvasTypes.h"
+#include "CanvasRender.h"
 #include "Texture2DPreview.h"
+#include "OdysseyAntiAliasing.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -25,6 +27,11 @@ FOdysseyImportTexturesViewportClient::FOdysseyImportTexturesViewportClient(uint3
 {
     const UOdysseyPainterEditorSettings& settings = *GetDefault< UOdysseyPainterEditorSettings >();
     mCheckerboardTexture = FImageUtils::CreateCheckerboardTexture( settings.CheckerColorOne, settings.CheckerColorTwo, settings.CheckerSize );
+
+    mNearestNeighborTexture = MakeUnique<FTexture>();
+    mNearestNeighborTexture->SamplerStateRHI = Odyssey::GetSamplerStateForAntiAliasing(EOdysseyAntiAliasing::NearestNeighbor);
+    mBilinearTexture = MakeUnique<FTexture>();
+    mBilinearTexture->SamplerStateRHI = Odyssey::GetSamplerStateForAntiAliasing(EOdysseyAntiAliasing::Bilinear);
 }
 
 //--------------------------------------------------------------------------------------
@@ -32,26 +39,24 @@ FOdysseyImportTexturesViewportClient::FOdysseyImportTexturesViewportClient(uint3
 void
 FOdysseyImportTexturesViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanvas )
 {
+    if (!mTranformInitialized)
+        InitTransform(iViewport);
+
     const UOdysseyPainterEditorSettings& settings = *GetDefault<UOdysseyPainterEditorSettings>();
     ioCanvas->Clear(settings.BackgroundColor);
 
-
-    FIntRect canvasPadding(10.f, 10.f, -10.f, -10.f);
-    const FIntRect& canvasRect = ioCanvas->GetViewRect() + canvasPadding;
-    float zoomFactor = FMath::Min(float(canvasRect.Width()) / mCanvasWidth, float(canvasRect.Height()) / mCanvasHeight);
+    ioCanvas->PushRelativeTransform(mTransform); //
 
     // Draw background Checker
     if (mCheckerboardTexture)
     {
-        float width = mCanvasWidth * zoomFactor;
-        float height = mCanvasHeight * zoomFactor;
-
         FCanvasTileItem tileItem(
-            FVector2D( canvasRect.Min.X + (canvasRect.Width() - width) / 2.f, canvasRect.Min.Y + (canvasRect.Height() - height) / 2.f),
-            mCheckerboardTexture->GetResource(),
-            FVector2D(width, height),
             FVector2D(0, 0),
-            FVector2D( width / mCheckerboardTexture->GetSurfaceWidth(), height / mCheckerboardTexture->GetSurfaceHeight() ),
+            //FVector2D( canvasRect.Min.X + (canvasRect.Width() - width) / 2.f, canvasRect.Min.Y + (canvasRect.Height() - height) / 2.f),
+            mCheckerboardTexture->GetResource(),
+            FVector2D(mCanvasWidth, mCanvasHeight),
+            FVector2D(0, 0),
+            FVector2D( mCanvasWidth / mCheckerboardTexture->GetSurfaceWidth(), mCanvasHeight / mCheckerboardTexture->GetSurfaceHeight() ),
             FLinearColor::White
         );
         tileItem.BlendMode = SE_BLEND_Opaque;
@@ -60,13 +65,17 @@ FOdysseyImportTexturesViewportClient::Draw( FViewport* iViewport, FCanvas* ioCan
 
     if (mTexture && mTexture->GetResource())
     {
-        float width = mTexture->GetSurfaceWidth() * zoomFactor;
-        float height = mTexture->GetSurfaceHeight() * zoomFactor;
+        float width = mTexture->GetSurfaceWidth();
+        float height = mTexture->GetSurfaceHeight();
+
+        mNearestNeighborTexture->TextureRHI = mTexture->GetResource()->TextureRHI;
+        mBilinearTexture->TextureRHI = mTexture->GetResource()->TextureRHI;
+        FTexture* tileTexture = GetZoom() <= 1.5 ? mBilinearTexture.Get() : mNearestNeighborTexture.Get();
 
         //TileItem
         FCanvasTileItem tileItem(
-            FVector2D( canvasRect.Min.X + (canvasRect.Width() - width) / 2.f, canvasRect.Min.Y + (canvasRect.Height() - height) / 2.f),
-            mTexture->GetResource(),
+            FVector2D( 0, 0 ),
+            tileTexture,
             FVector2D(width, height),
             FVector2D(0, 0),
             FVector2D( 1.f, 1.f ),
@@ -86,22 +95,114 @@ FOdysseyImportTexturesViewportClient::Draw( FViewport* iViewport, FCanvas* ioCan
     params.mTextureWidth = mTexture->GetSurfaceWidth();
     params.mTextureHeight = mTexture->GetSurfaceHeight();
     params.mTextureToHUD = FOdysseyHUDElement::FDrawHUDParams::FTextureToHUD::CreateLambda(
-        [zoomFactor, canvasRect, w = params.mTextureWidth, h = params.mTextureHeight](const FVector2D& iPosition)
+        [](const FVector2D& iPosition)
         {
-            FVector2D pos = iPosition;
-            pos -= FVector2D(w, h) / 2.f;
-            pos *= zoomFactor;
-            pos += FVector2D(canvasRect.Width(), canvasRect.Height()) / 2.f;
-            pos += canvasRect.Min;
-            return pos;
+            return iPosition;
         }
     );
 
-    //---------------
-
-    //---------------
-
     mHUD->Draw(params);
+
+    ioCanvas->PopTransform();
+}
+
+float
+FOdysseyImportTexturesViewportClient::GetZoom() const
+{
+    FVector dummy(1.f, 1.f, 1.f);
+    return mTransform.TransformVector(dummy).X;
+}
+
+void
+FOdysseyImportTexturesViewportClient::SetZoom(float iZoom, const FVector2D& iZoomPosition )
+{
+    //Zooms in the center of the viewport
+    float oldZoom = GetZoom();
+
+    mTransform *= FTranslationMatrix(FVector(-iZoomPosition, 0));
+    mTransform *= FScaleMatrix(iZoom / oldZoom);
+    mTransform *= FTranslationMatrix(FVector(iZoomPosition, 0));
+}
+
+bool
+FOdysseyImportTexturesViewportClient::InputKey(const FInputKeyEventArgs& iEventArgs)
+{
+    if( iEventArgs.Event == EInputEvent::IE_Repeat )
+        return false;
+
+    if( iEventArgs.Event == EInputEvent::IE_Pressed )
+    {
+        mInitialTransform = mTransform;
+        mInitialMousePosition = FVector2D(iEventArgs.Viewport->GetMouseX(), iEventArgs.Viewport->GetMouseY());
+        if ( iEventArgs.Key == EKeys::LeftMouseButton )
+        {
+            mIsPanning = true;
+        }
+        else if (iEventArgs.Key == EKeys::RightMouseButton)
+        {
+            mIsZooming = true;
+        }
+    }
+
+    if( iEventArgs.Event == EInputEvent::IE_Released )
+    {
+        if ( iEventArgs.Key == EKeys::LeftMouseButton )
+        {
+            mIsPanning = false;
+        }
+        else if (iEventArgs.Key == EKeys::RightMouseButton)
+        {
+            mIsZooming = false;
+        }
+    }
+    return true; //consume event
+}
+
+void
+FOdysseyImportTexturesViewportClient::CapturedMouseMove( FViewport* InViewport, int32 InMouseX, int32 InMouseY )
+{
+    FVector2D mousePosition(InMouseX, InMouseY);
+    FVector2D delta = mousePosition - mInitialMousePosition;
+
+    if (mIsPanning)
+    {
+        mTransform = mInitialTransform * FTranslationMatrix(FVector(delta, 0));
+    }
+    else if (mIsZooming)
+    {
+        float smoothness = 200.f; //TODO: do a Setting to let the user change it at will
+
+        if (delta.X > KINDA_SMALL_NUMBER || delta.X < KINDA_SMALL_NUMBER)
+        {
+            float zoom = FMath::Max( FMath::Exp(delta.X / smoothness), 0.f );
+            mTransform = mInitialTransform;
+            mTransform *= FTranslationMatrix(FVector(-mInitialMousePosition, 0));
+            mTransform *= FScaleMatrix(zoom);
+            mTransform *= FTranslationMatrix(FVector(mInitialMousePosition, 0));
+        }
+    }
+}
+
+void
+FOdysseyImportTexturesViewportClient::InitTransform(FViewport* InViewport)
+{
+    FIntRect canvasPadding(10.f, 10.f, -10.f, -10.f);
+    const FIntRect& canvasRect = FIntRect(0, 0, InViewport->GetSizeXY().X, InViewport->GetSizeXY().Y) + canvasPadding;
+
+    float minZoomFactor = FMath::Min(float(canvasRect.Width()) / mCanvasWidth, float(canvasRect.Height()) / mCanvasHeight);
+
+    float canvasCenter_x = mCanvasWidth  / 2.f;
+    float canvasCenter_y = mCanvasHeight / 2.f;
+
+    float viewportCenter_x = InViewport->GetSizeXY().X  / 2.f;
+    float viewportCenter_y = InViewport->GetSizeXY().Y / 2.f;
+
+    mTransform = FMatrix::Identity;
+    mTransform *= FTranslationMatrix(FVector(-canvasCenter_x, -canvasCenter_y,0));
+    mTransform *= FScaleMatrix(minZoomFactor); //Zoom
+    mTransform *= FTranslationMatrix(FVector(viewportCenter_x, viewportCenter_y,0));
+
+    mTranformInitialized = true;
 }
 
 void

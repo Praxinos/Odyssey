@@ -20,16 +20,23 @@ public:
 public:
     void SetTexture(UTexture* iTexture);
     TSharedRef<FOdysseyHUDElement> GetHUD() const;
+    float GetZoom() const;
+    void SetZoom(float iZoom, const FVector2D& iZoomPosition);
 
 public:
     // FViewportClient API
     virtual void Draw( FViewport* iViewport, FCanvas* ioCanvas ) override;
     virtual UWorld* GetWorld() const override { return nullptr; }
+    virtual bool InputKey(const FInputKeyEventArgs& EventArgs) override;
+    virtual void CapturedMouseMove( FViewport* InViewport, int32 InMouseX, int32 InMouseY ) override;
 
 private:
     // FGCObject API
     virtual void AddReferencedObjects( FReferenceCollector& ioCollector ) override;
     virtual FString GetReferencerName() const override;
+
+private:
+    void InitTransform(FViewport* InViewport);
 
 private:
     // Private Data Members
@@ -38,4 +45,14 @@ private:
     TObjectPtr<UTexture2D> mCheckerboardTexture;
     TObjectPtr<UTexture> mTexture;
     TSharedRef<FOdysseyHUDElement> mHUD;
+
+    TUniquePtr<FTexture> mNearestNeighborTexture;
+    TUniquePtr<FTexture> mBilinearTexture;
+
+    bool mTranformInitialized = false;
+    FMatrix mTransform;
+    bool mIsPanning = false;
+    bool mIsZooming = false;
+    FMatrix mInitialTransform;
+    FVector2D mInitialMousePosition;
 };
