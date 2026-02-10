@@ -16,6 +16,7 @@ class ARIANE_API FArianeVertex : public FArianePoint
         ~FArianeVertex();
         FArianeVertex( double X, double Y, double Z, double InRadius );
         FArianeVertex( const FVector& iPosition, double InRadius );
+        FArianeVertex( const FVector& iPosition, const FVector& InNormal, double InRadius );
 
         void AddSegment( FArianeSegment* iSegment );
         void RemoveSegment( FArianeSegment* iSegment );
@@ -25,10 +26,14 @@ class ARIANE_API FArianeVertex : public FArianePoint
 
         double  GetRadius();
 
+        void SetNormal( const FVector& InNormal );
+        const FVector& GetNormal();
+
     protected:
         FArianeObject* Owner;
 
         double Radius;
+        FVector Normal;
 
         TArray<FArianeSegment*> Segments;
 };

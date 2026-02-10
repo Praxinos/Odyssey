@@ -66,3 +66,8 @@ FArianePath::GetMaterial()
 {
     return Material;
 }
+
+void
+FArianePath::Invalidate()
+{
+}

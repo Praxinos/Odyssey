@@ -143,18 +143,19 @@ UArianeEditorPathDrawingTool::PlotVertex( FEditorViewportClient* iViewportClient
             actorWorldPlane = planeVector;
 
             actorWorldPlane.W = - ( ( actorWorldPlane.X * actorWorldPosition.X )
-                                    + ( actorWorldPlane.Y * actorWorldPosition.Y )
-                                    + ( actorWorldPlane.Z * actorWorldPosition.Z ) );
+                                  + ( actorWorldPlane.Y * actorWorldPosition.Y )
+                                  + ( actorWorldPlane.Z * actorWorldPosition.Z ) );
 
             View->DeprojectFVector2D( FVector2D( iViewportX, iViewportY ), rayOrigin, rayDirection );
 
             if( Intersect( actorWorldPlane, rayOrigin, rayDirection, intersectAt  ) > 0.0f )
             {
                 FVector localCoords = actorWorldTransform.Inverse().TransformFVector4( intersectAt );
+                FVector localNormal = actorWorldTransform.Inverse().TransformVector( planeVector );
                 FArianeVertex *vertex0 = EditedPath->GetVertices().Num() ? EditedPath->GetVertices().Last()
                                                                          : nullptr;
 
-                FArianeVertex *vertex1 = new FArianeVertex( localCoords, 1.0f );
+                FArianeVertex *vertex1 = new FArianeVertex( localCoords, localNormal, 1.0f );
 
                 EditedPath->AddVertex( vertex1 );
 

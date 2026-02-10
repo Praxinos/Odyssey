@@ -18,6 +18,16 @@
 // testing
 #include "Components/LineBatchComponent.h"
 
+
+void
+FTestVertex::AddSegment( uint32 ObjectIndex
+                       , uint32 SegmentIndex
+                       , uint32 SegmentClass
+                       , uint32 IndexInSegment )
+{
+
+}
+
 UArianePainting3DComponent::~UArianePainting3DComponent()
 {
 }
@@ -47,6 +57,17 @@ UArianePainting3DComponent::PostInitProperties ()
 {
     Super::PostInitProperties();
 
+/*
+    TestStructs.SetNum(5);
+
+    TestStructs[0].dummy = 0;
+    TestStructs[1].dummy = 1;
+    TestStructs[2].dummy = 2;
+    TestStructs[3].dummy = 3;
+    TestStructs[4].dummy = 4;
+
+    TestStructs.RemoveAt( 2 );
+*/
     //InitVertexFactoryData( mGeometryProxy->VertexFactory, &mMeshVertexBuffers );
 }
 
@@ -152,6 +173,7 @@ FArianePathGeometry3D::FArianePathGeometry3D( UArianePainting3DComponent* InPain
 
 FVector
 FArianePathGeometry3D::GetTangentVectorAt( FArianeSegment* Segment
+                                         , FVector* OptionalPerpendicularVector
                                          , double T
                                          , bool bNormalize )
 {
@@ -176,7 +198,8 @@ FArianePathGeometry3D::GetTangentVectorAt( FArianeSegment* Segment
 
             if( AverageVector.IsNearlyZero() == false )
             {
-                FVector Perpendicular = AverageVector.Cross( SegmentVector );
+                FVector Perpendicular = OptionalPerpendicularVector ? *OptionalPerpendicularVector
+                                                                    : AverageVector.Cross( SegmentVector );
 
                 TangentVector = Perpendicular.Cross( AverageVector );
             }
@@ -378,8 +401,106 @@ FArianePathGeometry3D::GetPerpendicularVector( FArianeVertex* Vertex
 */
 
 void
-FArianePathGeometry3D::BuildSegment( FArianeSegment* Segment
-                                   , FVector& InOutPreviousPerpendicularVector )
+FArianePathGeometry3D::BuildSegmentAsFlat( FArianeSegment* Segment
+                                         , FVector& InOutPreviousPerpendicularVector )
+{
+    FArianeVertex* SegmentVertices[2] = { Segment->GetVertex(0)
+                                        , Segment->GetVertex(1) };
+    double Radius0 = SegmentVertices[0]->GetRadius();
+    double Radius1 = SegmentVertices[1]->GetRadius();
+    double DeltaRadius = Radius1 - Radius0;
+    FVector Normal0 = SegmentVertices[0]->GetNormal();
+    FVector Normal1 = SegmentVertices[1]->GetNormal();
+    FVector DeltaNormal = Normal1 - Normal0;
+    FVector SegmentVector = SegmentVertices[1]->GetPosition() - SegmentVertices[0]->GetPosition();
+
+    Segment->AllocateCache( ( Segment->GetFractionCount() + 1 ) * 2
+                          , ( Segment->GetFractionCount() * 2 ) );
+
+    TArray<FModelVertex>& ModelVertexCache = const_cast<TArray<FModelVertex>&>(Segment->GetModelVertexCache());
+    TArray<uint32>& IndexCache = const_cast<TArray<uint32>&>(Segment->GetIndexCache());
+    TArray<FArianeSegment::Fraction>& FractionCache = const_cast<TArray<FArianeSegment::Fraction>&>(Segment->GetFractionCache());
+    TArray<FArianePoint*>& FractionPoints = const_cast<TArray<FArianePoint*>&>(Segment->GetFractionPoints());
+
+    for( int32 FractionPointIndex = 0; FractionPointIndex < FractionPoints.Num(); FractionPointIndex++ )
+    {
+        FArianePoint* Point = FractionPoints[FractionPointIndex];
+        float PointT = Segment->GetFractionPointT( FractionPointIndex );
+        uint32 ModelVertexOffset = FractionPointIndex * 2;
+        double PointRadius = Radius0 + ( DeltaRadius * PointT );
+        FVector PerpendicularVector = Normal0 + ( DeltaNormal * PointT );
+        FVector TangentVector = GetTangentVectorAt( Segment
+                                                  , nullptr
+                                                  , PointT
+                                                  , false );
+
+        if( PerpendicularVector.Normalize() )
+        {
+            FVector UpVector = PerpendicularVector.Cross( TangentVector );
+            FModelVertex* ModelVertex0 = &ModelVertexCache[ModelVertexOffset+0];
+            FModelVertex* ModelVertex1 = &ModelVertexCache[ModelVertexOffset+1];
+
+            if( UpVector.Normalize() )
+            {
+                FVector NewPosition0 = Point->GetPosition() + ( UpVector * PointRadius );
+                FVector NewPosition1 = Point->GetPosition() - ( UpVector * PointRadius );
+
+                ModelVertex0->Position.X = NewPosition0.X;
+                ModelVertex0->Position.Y = NewPosition0.Y;
+                ModelVertex0->Position.Z = NewPosition0.Z;
+
+                ModelVertex1->Position.X = NewPosition1.X;
+                ModelVertex1->Position.Y = NewPosition1.Y;
+                ModelVertex1->Position.Z = NewPosition1.Z;
+            }
+        }
+    }
+
+    for( int32 FractionIndex = 0; FractionIndex < FractionCache.Num(); FractionIndex++ )
+    {
+        FArianeSegment::Fraction& SegmentFraction = FractionCache[FractionIndex];
+        uint32 ModelVertexOffset0 =   FractionIndex * 2;
+        uint32 ModelVertexOffset1 = ( FractionIndex + 1 ) * 2;
+        FVector3f SampleVec0 = ModelVertexCache[ModelVertexOffset0 + 1].Position
+                             - ModelVertexCache[ModelVertexOffset0 + 0].Position;
+        FVector3f SampleVec1 = ModelVertexCache[ModelVertexOffset1 + 1].Position
+                             - ModelVertexCache[ModelVertexOffset1 + 0].Position;
+
+        bool Twisted = ( SampleVec0.Dot( SampleVec1 ) < 0.0f ) ? true : false;
+
+        uint32 Triangle0Index = ( FractionIndex * 2 * 3 ); // 2 triangles per quad, 3 indexes per tirangle
+        uint32 Triangle1Index = Triangle0Index + 3;
+
+        if( Twisted == false )
+        {
+            // first triangle
+            IndexCache[Triangle0Index+0] = ModelVertexOffset1 + 1;
+            IndexCache[Triangle0Index+1] = ModelVertexOffset0 + 1;
+            IndexCache[Triangle0Index+2] = ModelVertexOffset0;
+
+            // second triangle
+            IndexCache[Triangle1Index+0] = ModelVertexOffset0;
+            IndexCache[Triangle1Index+1] = ModelVertexOffset1;
+            IndexCache[Triangle1Index+2] = ModelVertexOffset1 + 1;
+        }
+        else
+        {
+            // first triangle
+            IndexCache[Triangle0Index+0] = ModelVertexOffset1;
+            IndexCache[Triangle0Index+1] = ModelVertexOffset0 + 1;
+            IndexCache[Triangle0Index+2] = ModelVertexOffset0;
+
+            // second triangle
+            IndexCache[Triangle1Index+0] = ModelVertexOffset0;
+            IndexCache[Triangle1Index+1] = ModelVertexOffset1 + 1;
+            IndexCache[Triangle1Index+2] = ModelVertexOffset1;
+        }
+    }
+}
+
+void
+FArianePathGeometry3D::BuildSegmentAsTube( FArianeSegment* Segment
+                                         , FVector& InOutPreviousPerpendicularVector )
 {
     FArianeVertex* SegmentVertices[2] = { Segment->GetVertex(0)
                                         , Segment->GetVertex(1) };
@@ -413,7 +534,7 @@ FArianePathGeometry3D::BuildSegment( FArianeSegment* Segment
         //FVector PerpendicularVector = SegmentVector.Cross( Painting3DComponent->GetUpVector() );
         double PointRadius = Radius0 + ( DeltaRadius * PointT );
         FVector TangentVector = GetTangentVectorAt( Segment
-                                                  //, PerpendicularVector
+                                                  , nullptr
                                                   , PointT
                                                   , false );
 
@@ -446,21 +567,42 @@ FArianePathGeometry3D::BuildSegment( FArianeSegment* Segment
         FArianeSegment::Fraction& SegmentFraction = FractionCache[FractionIndex];
         uint32 ModelVertexOffset0 =   FractionIndex       * Divisions;
         uint32 ModelVertexOffset1 = ( FractionIndex + 1 ) * Divisions;
+        FVector3f SampleVec0 = ModelVertexCache[ModelVertexOffset0 + 1].Position
+                             - ModelVertexCache[ModelVertexOffset0 + 0].Position;
+        FVector3f SampleVec1 = ModelVertexCache[ModelVertexOffset1 + 1].Position
+                             - ModelVertexCache[ModelVertexOffset1 + 0].Position;
 
-        for( uint32 i = 0; i < Divisions; i++ )
+        bool Twisted = ( SampleVec0.Dot( SampleVec1 ) < 0.0f ) ? true : false;
+
+        for( uint32 i = 0, j = ( Divisions * 2 ) - 1; i < Divisions; i++, j-- )
         {
             uint32 Triangle0Index = ( FractionIndex * Divisions * 2 * 3 ) + ( i * 2 * 3 ); // 2 triangles per quad, 3 indexes per tirangle
             uint32 Triangle1Index = Triangle0Index + 3;
 
-            // first triangles
-            IndexCache[Triangle0Index+2] = ModelVertexOffset0 + ( ( i     ) % Divisions );
-            IndexCache[Triangle0Index+1] = ModelVertexOffset0 + ( ( i + 1 ) % Divisions );
-            IndexCache[Triangle0Index+0] = ModelVertexOffset1 + ( ( i + 1 ) % Divisions );
+            if( Twisted == false )
+            {
+                // first triangle
+                IndexCache[Triangle0Index+0] = ModelVertexOffset1 + ( ( i + 1 ) % Divisions );
+                IndexCache[Triangle0Index+1] = ModelVertexOffset0 + ( ( i + 1 ) % Divisions );
+                IndexCache[Triangle0Index+2] = ModelVertexOffset0 + ( ( i     ) % Divisions );
 
-            // second triangles
-            IndexCache[Triangle1Index+2] = ModelVertexOffset1 + ( ( i + 1 ) % Divisions );
-            IndexCache[Triangle1Index+1] = ModelVertexOffset1 + ( ( i     ) % Divisions );
-            IndexCache[Triangle1Index+0] = ModelVertexOffset0 + ( ( i     ) % Divisions );
+                // second triangle
+                IndexCache[Triangle1Index+0] = ModelVertexOffset0 + ( ( i     ) % Divisions );
+                IndexCache[Triangle1Index+1] = ModelVertexOffset1 + ( ( i     ) % Divisions );
+                IndexCache[Triangle1Index+2] = ModelVertexOffset1 + ( ( i + 1 ) % Divisions );
+            }
+            else
+            {
+                // first triangle
+                IndexCache[Triangle0Index+0] = ModelVertexOffset1 + ( ( j - 1 ) % Divisions );
+                IndexCache[Triangle0Index+1] = ModelVertexOffset0 + ( ( i + 1 ) % Divisions );
+                IndexCache[Triangle0Index+2] = ModelVertexOffset0 + ( ( i     ) % Divisions );
+
+                // second triangle
+                IndexCache[Triangle1Index+0] = ModelVertexOffset0 + ( ( i     ) % Divisions );
+                IndexCache[Triangle1Index+1] = ModelVertexOffset1 + ( ( j     ) % Divisions );
+                IndexCache[Triangle1Index+2] = ModelVertexOffset1 + ( ( j - 1 ) % Divisions );
+            }
         }
     }
 }
@@ -553,7 +695,7 @@ FArianePathGeometry3D::Build()
 
         //if( Segment->IsInvalidated() )
         //{
-            BuildSegment( Segment, PreviousPerpendicularVector );
+            BuildSegmentAsFlat( Segment, PreviousPerpendicularVector );
         //}
 
         TotalModelVertexCount += Segment->GetModelVertexCache().Num();

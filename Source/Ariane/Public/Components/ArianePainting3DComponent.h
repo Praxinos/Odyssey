@@ -22,6 +22,39 @@ class FArianeVertex;
 class FArianePathGeometry3D;
 class FArianeSegment;
 
+struct FTestSegment;
+
+USTRUCT(BlueprintType)
+struct ARIANE_API FTestVertex
+{
+    GENERATED_BODY()
+
+    struct SegmentLink
+    {
+        uint32 ObjectIndex;
+        uint32 SegmentIndex;
+        uint32 SegmentClass;
+        uint32 IndexInSegment;
+    };
+
+    TArray<SegmentLink> SegmentLinks;
+
+    void AddSegment( uint32 ObjectIndex
+                   , uint32 SegmentIndex
+                   , uint32 SegmentClass
+                   , uint32 IndexInSegment );
+
+    //virtual void PostEditChangeProperty (FPropertyChangedEvent & PropertyChangedEvent ) override;
+};
+
+USTRUCT(BlueprintType)
+struct ARIANE_API FTestSegment
+{
+    GENERATED_BODY()
+
+    int dummy;
+};
+
 UCLASS()
 class ARIANE_API UArianePainting3DComponent : public UMeshComponent
 {
@@ -52,6 +85,7 @@ class ARIANE_API UArianePainting3DComponent : public UMeshComponent
     protected:
         //ULineBatchComponent* LineBatchComponent;
         TArray<FArianePathGeometry3D*> PathMeshs;
+        TArray<FArianePath*> InvalidatedPaths;
 };
 
 class ARIANE_API FArianePathGeometry3D
@@ -68,17 +102,14 @@ class ARIANE_API FArianePathGeometry3D
         FLocalVertexFactory& GetVertexFactory();
 
     protected:
-        void BuildSegment( FArianeSegment* Segment
-                         , FVector& InOutPreviousPerpendicularVector );
+        void BuildSegmentAsTube( FArianeSegment* Segment
+                               , FVector& InOutPreviousPerpendicularVector );
+        void BuildSegmentAsFlat( FArianeSegment* Segment
+                               , FVector& InOutPreviousPerpendicularVector );
+
         void InitVertexFactory();
-        FVector GetPerpendicularVector( FArianeVertex* Vertex
-                                      , FVector& PreviousVector
-                                      , bool bNormalize );
         FVector GetTangentVectorAt( FArianeSegment* Segment
-                                  , const FVector& PerpendicularVector
-                                  , double T
-                                  , bool bNormalize );
-        FVector GetTangentVectorAt( FArianeSegment* Segment
+                                  , FVector* OptionalPerpendicularVector
                                   , double T
                                   , bool bNormalize );
 
