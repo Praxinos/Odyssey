@@ -256,12 +256,12 @@ SCinematicBoardSectionCameraTitle::OnMouseButtonUp( const FGeometry& MyGeometry,
         UMovieSceneSection* section_object = board_section->GetSectionObject();
         ISequencer* sequencer = board_section->GetSequencer().Get();
 
-        ACineCameraActor* camera = BoardSequenceHelpers::GetCamera( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
-
         // To unselect section(s)
         sequencer->EmptySelection();
         // And then select the current one
         sequencer->SelectSection( section_object );
+
+        ACineCameraActor* camera = BoardSequenceHelpers::GetCamera( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
 
         // To unselect all actors
         GEditor->SelectNone( true, true );
