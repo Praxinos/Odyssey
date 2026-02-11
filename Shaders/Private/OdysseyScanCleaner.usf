@@ -81,7 +81,7 @@ void MainPS(
     OutColor.x = src.x;
     OutColor.y = src.y;
     OutColor.z = src.z;
-    OutColor.w = result.x;
+    OutColor.w = src.w * result.x;
 
     //Grey
     /* OutColor.x = 0.f;//src.x;

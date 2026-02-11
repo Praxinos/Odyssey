@@ -262,11 +262,11 @@ FOdysseyImportTexturesParameters::Render(UTextureRenderTarget2D* oRenderTarget, 
                 textureFlags |= sourceTexture->Desc.Flags & ETextureCreateFlags::SRGB;
                 FRDGTextureDesc sourceTextureDesc = FRDGTextureDesc::Create2D(
                     sourceTexture->Desc.Extent,
-                    sourceTexture->Desc.Format,
+                    PF_FloatRGBA,
                     FClearValueBinding::Transparent,
                     textureFlags
                 );
-                FRDGTextureRef sourceRenderTarget = graphBuilder.CreateTexture(sourceTextureDesc, TEXT("SOdysseyImportTexturesDialog_Render::sourceTexture"));
+                FRDGTextureRef sourceRenderTarget = graphBuilder.CreateTexture(sourceTextureDesc, TEXT("SOdysseyImportTexturesDialog_Render::sourceRenderTarget"));
 
                 if (isScanCleanerActivated)
                 {
@@ -286,7 +286,10 @@ FOdysseyImportTexturesParameters::Render(UTextureRenderTarget2D* oRenderTarget, 
                         graphBuilder,
                         FScreenPassViewInfo(),
                         sourceTexture,
-                        sourceRenderTarget
+                        sourceRenderTarget,
+                        FIntPoint(0, 0),
+                        FIntPoint(0, 0),
+                        sourceTexture->Desc.Extent
                     );
                     /*AddCopyTexturePass(
                         graphBuilder,
