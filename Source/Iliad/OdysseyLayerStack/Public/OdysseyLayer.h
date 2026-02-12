@@ -313,6 +313,8 @@ public:
     virtual TArray<FGuid> GetRenderingComposition(uint64 iRenderType, int iFrame) const override;
     virtual FIntRect GetDefaultRenderRect() const override;
 
+    virtual bool TryModify( bool bAlwaysMarkDirty = true );
+
     virtual UTextureRenderTarget2D* CreateRenderingRenderTarget() const override;
 #if WITH_EDITOR
     virtual UTexture2D* CreateExportTexture(UObject* Outer, FName Name, EObjectFlags Flags = RF_NoFlags) override;

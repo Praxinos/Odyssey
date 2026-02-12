@@ -94,6 +94,17 @@ UOdysseyLayer::PostDuplicate(EDuplicateMode::Type iDuplicateMode)
         child->Parent = this;
 }
 
+bool
+UOdysseyLayer::TryModify( bool bAlwaysMarkDirty /*= true*/ )
+{
+    if( !IsEditable() )
+        return false;
+
+    Modify( bAlwaysMarkDirty );
+
+    return true;
+}
+
 void
 UOdysseyLayer::InvalidateCellsFrameRanges()
 {
@@ -447,6 +458,8 @@ UOdysseyLayer::AddCellsInteractive(int Index, int Count)
         Index = FMath::Clamp(Index, 0, Cells.Num());
     }
 
+    //TODO: Why TryModify() is not called ?! like in AddCells() ?!
+
     TArray<UOdysseyLayerCell*> cells;
     for (int i = 0; i < Count; i++)
     {
@@ -482,7 +495,8 @@ UOdysseyLayer::AddCells(TSubclassOf<UOdysseyLayerCell> CellType, int Index, int 
     if (!SupportedCellTypes.Contains(cellType))
         return {};
 
-    Modify();
+    if( !TryModify() )
+        return {};
 
     if (Index < 0 )
     {
@@ -523,7 +537,8 @@ UOdysseyLayer::RemoveCell(UOdysseyLayerCell* Cell)
 void
 UOdysseyLayer::RemoveCells(const TArray<UOdysseyLayerCell*>& iCells)
 {
-    Modify();
+    if( !TryModify() )
+        return;
 
     TArray<UOdysseyLayerCell*> cells;
     for (UOdysseyLayerCell* cell : iCells)
@@ -548,7 +563,8 @@ UOdysseyLayer::RemoveCellAtIndex(int Index)
     if (Index < 0 || Index >= Cells.Num())
         return;
 
-    Modify();
+    if( !TryModify() )
+        return;
 
     if (Cells[Index])
         Cells[Index]->IndexInLayer = INDEX_NONE;
@@ -560,7 +576,8 @@ UOdysseyLayer::RemoveCellAtIndex(int Index)
 void
 UOdysseyLayer::RemoveAllCells()
 {
-    Modify();
+    if( !TryModify() )
+        return;
 
     Cells.Empty();
     CellsChanged();
@@ -620,7 +637,8 @@ UOdysseyLayer::ReverseCells( const TArray<UOdysseyLayerCell*>& iCellsToReverse )
     {
         TArray<UOdysseyLayerCell*> sortedSelectedCells;
 
-        Modify();
+        if( !TryModify() )
+            return false;
 
         if( AreCellsContiguous( iCellsToReverse, sortedSelectedCells ) )
         {
@@ -651,7 +669,8 @@ UOdysseyLayer::CopyCell(UOdysseyLayerCell* Cell, int Index)
     if(!Cell)
         return nullptr;
 
-    Modify();
+    if( !TryModify() )
+        return nullptr;
 
     if (Index < 0 )
     {
@@ -679,7 +698,8 @@ UOdysseyLayer::CopyCellToLayer(UOdysseyLayerCell* iCell, UOdysseyLayer* iToLayer
     if(!iCell)
         return nullptr;
 
-    iToLayer->Modify();
+    if( !iToLayer->TryModify() )
+        return nullptr;
 
     if (iIndex < 0 )
     {
@@ -726,7 +746,8 @@ UOdysseyLayer::CopyCells(TArray<UOdysseyLayerCell*> iCells, int Index)
     if (iCells.IsEmpty())
         return cellCopies;
 
-    Modify();
+    if( !TryModify() )
+        return cellCopies;
 
     for (UOdysseyLayerCell* cell : iCells)
     {
@@ -914,7 +935,8 @@ UOdysseyLayer::GetDefaultRenderRect() const
 void
 UOdysseyLayer::SetCellsOffset(int Value)
 {
-    Modify();
+    if( !TryModify() )
+        return;
 
     CellsOffset = Value;
     InvalidateCellsFrameRanges();
@@ -924,7 +946,8 @@ UOdysseyLayer::SetCellsOffset(int Value)
 void
 UOdysseyLayer::SetPreBehaviour(EOdysseyLayerImagePostBehaviour Value)
 {
-    Modify();
+    if( !TryModify() )
+        return;
 
     PreBehaviour = Value;
     RenderingCompositionChanged();
@@ -933,7 +956,8 @@ UOdysseyLayer::SetPreBehaviour(EOdysseyLayerImagePostBehaviour Value)
 void
 UOdysseyLayer::SetPostBehaviour(EOdysseyLayerImagePostBehaviour Value)
 {
-    Modify();
+    if( !TryModify() )
+        return;
 
     PostBehaviour = Value;
     RenderingCompositionChanged();
@@ -948,7 +972,8 @@ UOdysseyLayer::AddChild(UOdysseyLayer* Layer, int IndexInParent)
 void
 UOdysseyLayer::AddChildren(TArray<UOdysseyLayer*> Layers, int IndexInParent)
 {
-    Modify();
+    if( !TryModify() )
+        return;
 
     for (UOdysseyLayer* layer : Layers)
         ensure(!layer->Parent);
@@ -973,6 +998,7 @@ UOdysseyLayer::AddChildren(TArray<UOdysseyLayer*> Layers, int IndexInParent)
 
     for (UOdysseyLayer* layer : Layers)
     {
+        // Allow reparenting layers even if they are read only
         layer->Modify();
         layer->Parent = this;
     }
@@ -1007,10 +1033,12 @@ UOdysseyLayer::RemoveChildren(TArray<UOdysseyLayer*> Layers)
     if (Layers.Num() <= 0)
         return;
 
-    Modify();
+    if( !TryModify() )
+        return;
 
     for (UOdysseyLayer* layer : Layers)
     {
+        // Allow unparenting layers even if they are read only
         layer->Modify();
         layer->Parent = nullptr;
         Children.Remove(layer);
@@ -1027,14 +1055,18 @@ UOdysseyLayer::RemoveChildren(TArray<UOdysseyLayer*> Layers)
 void
 UOdysseyLayer::SetLayerName(FText Value)
 {
-    Modify();
+    if( !TryModify() )
+        return;
+
     Name = Value;
 }
 
 void
 UOdysseyLayer::SetIsActivated(bool Value)
 {
-    Modify();
+    if( !TryModify() )
+        return;
+
     bIsActivated = Value;
     if (Parent)
         Parent->RenderingCompositionChanged();
@@ -1044,7 +1076,9 @@ UOdysseyLayer::SetIsActivated(bool Value)
 void
 UOdysseyLayer::SetIsLocked(bool Value)
 {
-    Modify();
+    if( !TryModify() )
+        return;
+
     bIsLocked = Value;
 }
 
@@ -1085,7 +1119,9 @@ UOdysseyLayer::SetDisplayCellNames(bool Value)
 void
 UOdysseyLayer::SetBlendMode(EOdysseyBlendingMode Value)
 {
-    Modify();
+    if( !TryModify() )
+        return;
+
     BlendMode = Value;
     RenderingChanged();
 }
@@ -1093,7 +1129,9 @@ UOdysseyLayer::SetBlendMode(EOdysseyBlendingMode Value)
 void
 UOdysseyLayer::SetOpacity(float Value)
 {
-    Modify();
+    if( !TryModify() )
+        return;
+
     Opacity = Value;
     RenderingChanged();
 }
@@ -1102,7 +1140,9 @@ UOdysseyLayer::SetOpacity(float Value)
 void
 UOdysseyLayer::SetOpacityInteractive(float Value)
 {
-    Modify();
+    if( !TryModify() )
+        return;
+
     Opacity = Value;
     RenderingChanged(true);
 }
@@ -1110,7 +1150,9 @@ UOdysseyLayer::SetOpacityInteractive(float Value)
 void
 UOdysseyLayer::SetCellsOffsetInteractive(float Value)
 {
-    Modify();
+    if( !TryModify() )
+        return;
+
     CellsOffset = Value;
     InvalidateCellsFrameRanges();
     RenderingCompositionChanged(true);

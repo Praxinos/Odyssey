@@ -196,6 +196,9 @@ UOdysseyAnimationLayerImageVector::RequestRedrawAllVectorCells()
 void
 UOdysseyAnimationLayerImageVector::SetIsWireframe(bool Value)
 {
+    if( !TryModify() )
+        return;
+
     bIsWireframe = Value;
 
     RequestRedrawAllVectorCells();
@@ -206,6 +209,9 @@ UOdysseyAnimationLayerImageVector::SetIsWireframe(bool Value)
 void
 UOdysseyAnimationLayerImageVector::SetIsColored(bool Value)
 {
+    if( !TryModify() )
+        return;
+
     bIsColored = Value;
 
     RequestRedrawAllVectorCells();
@@ -299,17 +305,16 @@ UOdysseyAnimationLayerImageVector::CreateMediaVector(int iFrameIndex)
 void
 UOdysseyAnimationLayerImageVector::AutoCreateCell(int iFrameIndex)
 {
-    if (IsLockedRecursively())
-        return;
-
-    FScopedTransaction transaction(LOCTEXT("layer-image-vector.create-cell-transaction", "Create Cell"));
-
     FInt32Range range = GetFrameRange();
 
     //Check if iFrameIndex is Out Of Range
     if ( iFrameIndex < range.GetLowerBoundValue())
     {
-        Modify();
+        FScopedTransaction transaction(LOCTEXT("layer-image-vector.create-cell-transaction", "Create Cell"));
+
+        if( !TryModify() )
+            return;
+
         //Add a frame at current frame and extend it
         UOdysseyLayerCell* cell = AddCell(UOdysseyAnimationCellImageVector::StaticClass(), 0);
         cell->SetExposure(range.GetLowerBoundValue() - iFrameIndex);
@@ -319,7 +324,11 @@ UOdysseyAnimationLayerImageVector::AutoCreateCell(int iFrameIndex)
 
     if ( iFrameIndex > range.GetUpperBoundValue())
     {
-        Modify();
+        FScopedTransaction transaction( LOCTEXT( "layer-image-vector.create-cell-transaction", "Create Cell" ) );
+
+        if( !TryModify() )
+            return;
+
         int cellExposure = Cells.Last()->GetExposure() + iFrameIndex - range.GetUpperBoundValue() - 1;
         Cells.Last()->SetExposure(cellExposure);
         UOdysseyLayerCell* cell = AddCell(UOdysseyAnimationCellImageVector::StaticClass());
@@ -330,14 +339,12 @@ UOdysseyAnimationLayerImageVector::AutoCreateCell(int iFrameIndex)
 void
 UOdysseyAnimationLayerImageVector::Merge(const TArray<UOdysseyLayer*>& iLayers)
 {
-    if (IsLockedRecursively())
-        return;
-
     UOdysseyAnimation* animation = GetAnimation();
     if ( !animation )
         return;
 
-    Modify();
+    if( !TryModify() )
+        return;
 
     //Get all frame ranges and combine them
     TArray<FInt32Range> frameRanges = {};
