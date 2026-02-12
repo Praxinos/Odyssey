@@ -183,6 +183,8 @@ UBoardSequenceEditorBlueprintLibrary::CreateCameraWithAnimation( UMovieSceneSubS
 
     ISequencer* sequencer = CurrentSequencer.Pin().Get();
 
+    sequencer->SetLocalTimeDirectly( board_section->GetTrueRange().GetLowerBoundValue() );
+
     FCameraArgs camera_args;
     camera_args.mSpawnable = iSpawnable;
     FAnimationArgs animation_args;
@@ -203,6 +205,8 @@ UBoardSequenceEditorBlueprintLibrary::CreateAnimation( UMovieSceneSubSection* iS
         return;
 
     ISequencer* sequencer = CurrentSequencer.Pin().Get();
+
+    sequencer->SetLocalTimeDirectly( board_section->GetTrueRange().GetLowerBoundValue() );
 
     FAnimationArgs animation_args;
     animation_args.mSpawnable = iSpawnable;
@@ -519,6 +523,8 @@ UShotSequenceEditorBlueprintLibrary::CreateAnimation( bool iSpawnable )
         return;
 
     ISequencer* sequencer = CurrentSequencer.Pin().Get();
+
+    sequencer->SetLocalTimeDirectly( 0 );
 
     FAnimationArgs animation_args;
     animation_args.mSpawnable = iSpawnable;

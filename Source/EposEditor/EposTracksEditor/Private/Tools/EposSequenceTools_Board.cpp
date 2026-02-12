@@ -906,8 +906,10 @@ CinematicBoardTrackTools::CloneSection( ISequencer* iSequencer, UMovieSceneCinem
 void
 ShotSequenceTools::CloneInnerContent( ISequencer* iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, bool iEmptyDrawings )
 {
+    checkNoEntry(); //TODO: ShotSequenceHelpers::GetCamera????() because used to check the parent ...
+
     FGuid camera_guid;
-    ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( *iSequencer, iSequence, iSequenceID, &camera_guid );
+    ACineCameraActor* camera = nullptr; // ShotSequenceHelpers::GetCamera( *iSequencer, iSequence, iSequenceID, &camera_guid );
     if( !camera )
         return;
 

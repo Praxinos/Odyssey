@@ -143,17 +143,66 @@ BoardSequenceHelpers::GetInnerSequence( IMovieScenePlayer& iPlayer, UMovieSceneS
 //---
 
 //static
-ACineCameraActor*
-BoardSequenceHelpers::GetCamera( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID, FGuid* oCameraBinding )
+FGuid
+BoardSequenceHelpers::GetCameraBinding( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID )
 {
     FInnerSequenceResult result = GetInnerSequence( iPlayer, iSubSection, iSequenceID );
 
-    return ShotSequenceHelpers::GetCamera( iPlayer, result.mInnerSequence, result.mInnerSequenceId, oCameraBinding );
+    return ShotSequenceHelpers::GetCameraBinding( iPlayer, result.mInnerSequence, result.mInnerSequenceId );
 }
 
 //static
 ACineCameraActor*
-BoardSequenceHelpers::GetCameraRecursive( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FFrameNumber& iFrameNumber, FGuid* oCameraBinding, UMovieSceneSequence** oSequence, FMovieSceneSequenceID* oSequenceID )
+BoardSequenceHelpers::GetCameraSpawned( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID, FGuid iCameraBinding )
+{
+    FInnerSequenceResult result = GetInnerSequence( iPlayer, iSubSection, iSequenceID );
+
+    return ShotSequenceHelpers::GetCameraSpawned( iPlayer, result.mInnerSequence, result.mInnerSequenceId, iCameraBinding );
+}
+
+//static
+ACineCameraActor*
+BoardSequenceHelpers::GetCameraSpawnedOrTemplate( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID, FGuid iCameraBinding )
+{
+    FInnerSequenceResult result = GetInnerSequence( iPlayer, iSubSection, iSequenceID );
+
+    return ShotSequenceHelpers::GetCameraSpawnedOrTemplate( iPlayer, result.mInnerSequence, result.mInnerSequenceId, iCameraBinding );
+}
+
+//static
+FGuid
+BoardSequenceHelpers::GetCameraBindingRecursive( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FFrameNumber& iFrameNumber, UMovieSceneSequence** oSequence, FMovieSceneSequenceID* oSequenceID )
+{
+    FInnerSequenceResult result = GetInnerSequence( iPlayer, iSequence, iSequenceID, iFrameNumber );
+
+    if( !result.mInnerSequence )
+        return FGuid();
+
+    // if we are on a shot subsequence
+    if( result.mInnerSequence->IsA<UShotSequence>() )
+    {
+        *oSequence = result.mInnerSequence;
+        *oSequenceID = result.mInnerSequenceId;
+
+        FGuid camera_binding = ShotSequenceHelpers::GetCameraBinding( iPlayer, result.mInnerSequence, result.mInnerSequenceId );
+
+        return camera_binding;
+    }
+
+    // if we are on a board subsequence
+    if( result.mInnerSequence->IsA<UBoardSequence>() )
+    {
+        FGuid camera_binding = BoardSequenceHelpers::GetCameraBindingRecursive( iPlayer, result.mInnerSequence, result.mInnerSequenceId, result.mInnerTime.FloorToFrame(), oSequence, oSequenceID );
+
+        return camera_binding;
+    }
+
+    return FGuid();
+}
+
+//static
+ACineCameraActor*
+BoardSequenceHelpers::GetCameraSpawnedRecursive( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FFrameNumber& iFrameNumber, FGuid iCameraBinding, UMovieSceneSequence** oSequence, FMovieSceneSequenceID* oSequenceID )
 {
     FInnerSequenceResult result = GetInnerSequence( iPlayer, iSequence, iSequenceID, iFrameNumber );
 
@@ -166,7 +215,7 @@ BoardSequenceHelpers::GetCameraRecursive( IMovieScenePlayer& iPlayer, UMovieScen
         *oSequence = result.mInnerSequence;
         *oSequenceID = result.mInnerSequenceId;
 
-        ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( iPlayer, result.mInnerSequence, result.mInnerSequenceId, oCameraBinding );
+        ACineCameraActor* camera = ShotSequenceHelpers::GetCameraSpawned( iPlayer, result.mInnerSequence, result.mInnerSequenceId, iCameraBinding );
 
         return camera;
     }
@@ -174,7 +223,38 @@ BoardSequenceHelpers::GetCameraRecursive( IMovieScenePlayer& iPlayer, UMovieScen
     // if we are on a board subsequence
     if( result.mInnerSequence->IsA<UBoardSequence>() )
     {
-        ACineCameraActor* camera = BoardSequenceHelpers::GetCameraRecursive( iPlayer, result.mInnerSequence, result.mInnerSequenceId, result.mInnerTime.FloorToFrame(), oCameraBinding, oSequence, oSequenceID );
+        ACineCameraActor* camera = BoardSequenceHelpers::GetCameraSpawnedRecursive( iPlayer, result.mInnerSequence, result.mInnerSequenceId, result.mInnerTime.FloorToFrame(), iCameraBinding, oSequence, oSequenceID );
+
+        return camera;
+    }
+
+    return nullptr;
+}
+
+//static
+ACineCameraActor*
+BoardSequenceHelpers::GetCameraSpawnedOrTemplateRecursive( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FFrameNumber& iFrameNumber, FGuid iCameraBinding, UMovieSceneSequence** oSequence, FMovieSceneSequenceID* oSequenceID )
+{
+    FInnerSequenceResult result = GetInnerSequence( iPlayer, iSequence, iSequenceID, iFrameNumber );
+
+    if( !result.mInnerSequence )
+        return nullptr;
+
+    // if we are on a shot subsequence
+    if( result.mInnerSequence->IsA<UShotSequence>() )
+    {
+        *oSequence = result.mInnerSequence;
+        *oSequenceID = result.mInnerSequenceId;
+
+        ACineCameraActor* camera = ShotSequenceHelpers::GetCameraSpawnedOrTemplate( iPlayer, result.mInnerSequence, result.mInnerSequenceId, iCameraBinding );
+
+        return camera;
+    }
+
+    // if we are on a board subsequence
+    if( result.mInnerSequence->IsA<UBoardSequence>() )
+    {
+        ACineCameraActor* camera = BoardSequenceHelpers::GetCameraSpawnedOrTemplateRecursive( iPlayer, result.mInnerSequence, result.mInnerSequenceId, result.mInnerTime.FloorToFrame(), iCameraBinding, oSequence, oSequenceID );
 
         return camera;
     }
@@ -191,6 +271,9 @@ FindSpawnedObjectOrTemplate( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iS
         return weakObjectsView[0].Get();
 
     //---
+
+    if( !iSequence )
+        return nullptr;
 
     TArray<TWeakObjectPtr<>> weakObjects;
     if( FMovieSceneBindingReferences* bindingReferences = iSequence->GetBindingReferences() )
@@ -209,31 +292,53 @@ FindSpawnedObjectOrTemplate( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iS
 }
 
 //static
-ACineCameraActor*
-ShotSequenceHelpers::GetCamera( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid* oCameraBinding )
+FGuid
+ShotSequenceHelpers::GetCameraBinding( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID )
 {
     UMovieScene* movieScene = iSequence ? iSequence->GetMovieScene() : nullptr;
     if( !movieScene )
-        return nullptr;
+        return FGuid();
 
-    ACineCameraActor* ExistingCamera = nullptr;
+    //TODO: maybe check the cameracut track to get the binding ?
+
     for( int i = 0; i < movieScene->GetPossessableCount(); i++ )
     {
         FMovieScenePossessable possessable = movieScene->GetPossessable( i );
 
-        for( TWeakObjectPtr<> WeakObject : iPlayer.FindBoundObjects( possessable.GetGuid(), iSequenceID ) )
+        ACineCameraActor* existingCamera = Cast<ACineCameraActor>( FindSpawnedObjectOrTemplate( iPlayer, iSequence, iSequenceID, possessable.GetGuid() ) );
+        if( existingCamera )
         {
-            ExistingCamera = Cast<ACineCameraActor>( WeakObject.Get() );
-
-            if( ExistingCamera )
-            {
-                if( oCameraBinding )
-                    *oCameraBinding = possessable.GetGuid();
-
-                return ExistingCamera;
-            }
+            return possessable.GetGuid();
         }
     }
+
+    return FGuid();
+}
+
+//static
+ACineCameraActor*
+ShotSequenceHelpers::GetCameraSpawned( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iCameraBinding )
+{
+    if( !iCameraBinding.IsValid() )
+        return nullptr;
+
+    TArrayView<TWeakObjectPtr<>> weakObjects = iPlayer.FindBoundObjects( iCameraBinding, iSequenceID );
+    if( weakObjects.Num() )
+        return Cast<ACineCameraActor>( weakObjects[0].Get() );
+
+    return nullptr;
+}
+
+//static
+ACineCameraActor*
+ShotSequenceHelpers::GetCameraSpawnedOrTemplate( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iCameraBinding )
+{
+    if( !iCameraBinding.IsValid() )
+        return nullptr;
+
+    UObject* object = FindSpawnedObjectOrTemplate( iPlayer, iSequence, iSequenceID, iCameraBinding );
+    if( object )
+        return Cast<ACineCameraActor>( object );
 
     return nullptr;
 }
@@ -1402,8 +1507,7 @@ ShotSequenceHelpers::BuildCameraTransformChannelProxy( IMovieScenePlayer& iPlaye
 {
     FChannelProxyBySectionMap map;
 
-    FGuid camera_binding;
-    /*ACineCameraActor* camera =*/ ShotSequenceHelpers::GetCamera( iPlayer, iSequence, iSequenceID, &camera_binding );
+    FGuid camera_binding = ShotSequenceHelpers::GetCameraBinding( iPlayer, iSequence, iSequenceID );
 
     //---
 

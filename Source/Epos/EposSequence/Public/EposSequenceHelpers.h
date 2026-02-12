@@ -98,9 +98,13 @@ public:
     static FInnerSequenceResult GetInnerSequence( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceId, const FFrameNumber& iFrameNumber );
 
 public:
-    static ACineCameraActor*    GetCamera( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID, FGuid* oCameraBinding = nullptr );
+    static FGuid                GetCameraBinding( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID );
+    static ACineCameraActor*    GetCameraSpawned( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID, FGuid iCameraBinding );
+    static ACineCameraActor*    GetCameraSpawnedOrTemplate( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID, FGuid iCameraBinding );
 
-    static ACineCameraActor*    GetCameraRecursive( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FFrameNumber& iFrameNumber, FGuid* oCameraBinding, UMovieSceneSequence** oSequence, FMovieSceneSequenceID* oSequenceID );
+    static FGuid                GetCameraBindingRecursive( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FFrameNumber& iFrameNumber, UMovieSceneSequence** oSequence, FMovieSceneSequenceID* oSequenceID );
+    static ACineCameraActor*    GetCameraSpawnedRecursive( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FFrameNumber& iFrameNumber, FGuid iCameraBinding, UMovieSceneSequence** oSequence, FMovieSceneSequenceID* oSequenceID );
+    static ACineCameraActor*    GetCameraSpawnedOrTemplateRecursive( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FFrameNumber& iFrameNumber, FGuid iCameraBinding, UMovieSceneSequence** oSequence, FMovieSceneSequenceID* oSequenceID );
 
     /** Get all transform keys of all cameras recursively.
       * @param UMovieSceneSubSection    iSubSection to gather all camera transform keys.
@@ -135,7 +139,9 @@ struct EPOSSEQUENCE_API FKeyOpacity
 class EPOSSEQUENCE_API ShotSequenceHelpers
 {
 public:
-    static ACineCameraActor*    GetCamera( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid* oCameraBinding = nullptr );
+    static FGuid                GetCameraBinding( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID );
+    static ACineCameraActor*    GetCameraSpawned( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iCameraBinding );
+    static ACineCameraActor*    GetCameraSpawnedOrTemplate( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iCameraBinding );
 
     /** Get all transform keys for the camera.
       * @param UMovieSceneSequence*     iSequence to get the camera transform keys.

@@ -12,9 +12,11 @@
 #include "MovieSceneSection.h"
 #include "MovieSceneSequence.h"
 #include "MovieSceneTimeHelpers.h"
+#include "Sections/MovieSceneSubSection.h"
 
 #include "ActorHelpers.h"
 #include "Board/BoardSequence.h"
+#include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "EposSequenceHelpers.h"
 #include "OdysseyAnimationActor.h"
 #include "ScalingComponent.h"
@@ -162,24 +164,62 @@ ShotSequenceTools::RenameBinding( ISequencer& iSequencer, UMovieSceneSequence* i
 
 //---
 
-TArray<TWeakObjectPtr<AActor>> ShotSequenceTools::mDirectActorsSelectedHistory;
+TArray<ShotSequenceTools::FBindingAndActorClass> ShotSequenceTools::mDirectBindingsSelectedHistory;
 
 //static
 void
-BoardSequenceTools::AddSelectedActorToHistory( AActor* iActor )
+BoardSequenceTools::AddSelectedActorToHistory( ISequencer* iSequencer, AActor* iActor )
 {
-    ShotSequenceTools::AddSelectedActorToHistory( iActor );
+    ShotSequenceTools::AddSelectedActorToHistory( iSequencer, iActor );
 }
 
 //static
 void
-ShotSequenceTools::AddSelectedActorToHistory( AActor* iActor )
+ShotSequenceTools::AddSelectedActorToHistory( ISequencer* iSequencer, AActor* iActor )
 {
     if( !iActor )
         return;
 
-    mDirectActorsSelectedHistory.Remove( iActor );
-    mDirectActorsSelectedHistory.Add( iActor );
+    UMovieSceneSequence* sequence = iSequencer->GetFocusedMovieSceneSequence();
+    FMovieSceneSequenceID sequenceId = iSequencer->GetFocusedTemplateID();
+
+    if( sequence->IsA<UBoardSequence>() )
+    {
+        UMovieScene* moviescene = sequence->GetMovieScene();
+        UMovieSceneCinematicBoardTrack* board_track = moviescene ? moviescene->FindTrack<UMovieSceneCinematicBoardTrack>() : nullptr;
+        TArray<UMovieSceneSection*> sections = board_track ? board_track->GetAllSections() : TArray<UMovieSceneSection*>();
+        for( UMovieSceneSection* section : sections )
+        {
+            UMovieSceneSubSection* subsection = Cast<UMovieSceneSubSection>( section );
+            if( !subsection )
+                continue;
+
+            FGuid binding = iSequencer->FindCachedObjectId( *iActor, subsection->GetSequenceID() );
+            if( binding.IsValid() )
+            {
+                FBindingAndActorClass entry = { binding, subsection->GetSequenceID(), iActor->GetClass() };
+                mDirectBindingsSelectedHistory.RemoveAll( [entry]( const FBindingAndActorClass& iEntry )
+                                                          {
+                                                              return iEntry.Guid == entry.Guid;
+                                                          } );
+                mDirectBindingsSelectedHistory.Add( entry );
+            }
+        }
+    }
+    else if( sequence->IsA<UShotSequence>() )
+    {
+        FGuid binding = iSequencer->FindCachedObjectId( *iActor, sequenceId );
+        if( binding.IsValid() )
+        {
+            FBindingAndActorClass entry = { binding, sequenceId, iActor->GetClass() };
+            mDirectBindingsSelectedHistory.RemoveAll( [entry]( const FBindingAndActorClass& iEntry )
+                                                      {
+                                                          return iEntry.Guid == entry.Guid;
+                                                      } );
+            mDirectBindingsSelectedHistory.Add( entry );
+        }
+    }
+
 }
 
 //static
@@ -238,29 +278,29 @@ ShotSequenceTools::GuessActorToSelect( ISequencer* iSequencer, UMovieSceneSequen
     // - drag on some shots (to select some animations)
     // - open another map
     // - actors in the cache are all invalid
-    mDirectActorsSelectedHistory.RemoveAll( []( TWeakObjectPtr<AActor> iActor )
-                                                               {
-                                                                   return !iActor.IsValid();
-                                                               } );
+    mDirectBindingsSelectedHistory.RemoveAll( []( FBindingAndActorClass iEntry )
+                                              {
+                                                  return !iEntry.Guid.IsValid();
+                                              } );
 
     // Auto-select camera if it's the last actor type directly selected by the user
-    if( mDirectActorsSelectedHistory.Num()
-        && mDirectActorsSelectedHistory.Last()->IsA<ACineCameraActor>() )
+    if( mDirectBindingsSelectedHistory.Num()
+        && mDirectBindingsSelectedHistory.Last().ActorClass == ACineCameraActor::StaticClass() )
     //if( actors.Num() )
     {
-        UMovieSceneSequence* sequence = nullptr;
-        FMovieSceneSequenceID sequenceId = MovieSceneSequenceID::Invalid;
         if( iSequence->IsA<UBoardSequence>() )
         {
-            ACineCameraActor* camera = BoardSequenceHelpers::GetCameraRecursive( *iSequencer, iSequence, iSequenceId, iFrameNumber, nullptr, &sequence, &sequenceId );
+            UMovieSceneSequence* sequence = nullptr;
+            FMovieSceneSequenceID sequenceId = MovieSceneSequenceID::Invalid;
+            FGuid camera_binding = BoardSequenceHelpers::GetCameraBindingRecursive( *iSequencer, iSequence, iSequenceId, iFrameNumber, &sequence, &sequenceId );
+            ACineCameraActor* camera = ShotSequenceHelpers::GetCameraSpawned( *iSequencer, sequence, sequenceId, camera_binding );
 
             return camera;
         }
         else if( iSequence->IsA<UShotSequence>() )
         {
-            sequence = iSequence;
-            sequenceId = iSequenceId;
-            ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( *iSequencer, iSequence, iSequenceId, nullptr );
+            FGuid camera_binding = ShotSequenceHelpers::GetCameraBinding( *iSequencer, iSequence, iSequenceId );
+            ACineCameraActor* camera = ShotSequenceHelpers::GetCameraSpawned( *iSequencer, iSequence, iSequenceId, camera_binding );
 
             return camera;
         }
@@ -293,7 +333,6 @@ ShotSequenceTools::GuessActorToSelect( ISequencer* iSequencer, UMovieSceneSequen
             ShotSequenceHelpers::GetAllAnimations( *iSequencer, iSequence, iSequenceId, EGetAnimation::kAll, &animations, &unordered_bindings );
         }
 
-
         // Animation not found AND no sequence (shot) found, so nothing can be guess
         if( !sequence )
             return nullptr;
@@ -302,13 +341,16 @@ ShotSequenceTools::GuessActorToSelect( ISequencer* iSequencer, UMovieSceneSequen
         TArray<FGuid> ordered_bindings;
         ShotSequenceTools::SortBindings( animations, unordered_bindings, sequence->GetMovieScene(), &ordered_animations, &ordered_bindings );
 
-        if( ordered_animations.Num() )
+        if( ordered_bindings.Num() )
         {
             int32 max_preferred_index = INDEX_NONE;
-            for( AActor* animation : ordered_animations )
+            for( FGuid binding : ordered_bindings )
             {
-                int32 current_index;
-                if( mDirectActorsSelectedHistory.FindLast( animation, current_index ) )
+                int32 current_index = mDirectBindingsSelectedHistory.FindLastByPredicate( [binding]( const FBindingAndActorClass& iEntry )
+                                                                                          {
+                                                                                              return iEntry.Guid == binding;
+                                                                                          } );
+                if( current_index != INDEX_NONE )
                 {
                     if( current_index > max_preferred_index )
                         max_preferred_index = current_index;
@@ -316,13 +358,22 @@ ShotSequenceTools::GuessActorToSelect( ISequencer* iSequencer, UMovieSceneSequen
             }
 
             AActor* preferred_animation = nullptr;
-            if( mDirectActorsSelectedHistory.IsValidIndex( max_preferred_index ) )
-                preferred_animation = mDirectActorsSelectedHistory[max_preferred_index].Get();
+            if( mDirectBindingsSelectedHistory.IsValidIndex( max_preferred_index ) )
+            {
+                TArrayView<TWeakObjectPtr<>> weakObjects = iSequencer->FindBoundObjects( mDirectBindingsSelectedHistory[max_preferred_index].Guid, mDirectBindingsSelectedHistory[max_preferred_index].SequenceId );
+                if( weakObjects.Num() )
+                    preferred_animation = Cast<AActor>( weakObjects[0] );
+            }
 
             if( !preferred_animation )
             {
                 preferred_animation = ordered_animations[0];
-                mDirectActorsSelectedHistory.Add( preferred_animation );
+
+                if( preferred_animation )
+                {
+                    FBindingAndActorClass entry = { ordered_bindings[0], sequenceId, preferred_animation->GetClass() };
+                    mDirectBindingsSelectedHistory.Add( entry );
+                }
             }
 
             return preferred_animation;

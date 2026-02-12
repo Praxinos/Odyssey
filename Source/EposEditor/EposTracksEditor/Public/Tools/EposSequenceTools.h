@@ -174,7 +174,7 @@ public:
 
 public:
     /**  Add an actor to an history list, to be able to know later which actor best fit during auto-selection actor */
-    static void AddSelectedActorToHistory( AActor* iActor );
+    static void AddSelectedActorToHistory( ISequencer* iSequencer, AActor* iActor );
 
 public:
     static void RenameBinding( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FGuid iBinding, FString iNewLabel );
@@ -189,7 +189,9 @@ public:
     * @param FGuid*                 oCameraBinding to get the camera binding.
     * @return ACineCameraActor* the camera actor.
     */
-    static ACineCameraActor* GetCamera( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FGuid* oCameraBinding = nullptr );
+    static FGuid             GetCameraBinding( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection );
+    static ACineCameraActor* GetCameraSpawned( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FGuid iCameraBinding );
+    static ACineCameraActor* GetCameraSpawnedOrTemplate( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FGuid iCameraBinding );
 
     /**
     *  Find the camera of the board section
@@ -199,7 +201,9 @@ public:
     * @param FGuid*             oCameraBinding to get the camera binding.
     * @return ACineCameraActor* the camera actor.
     */
-    static ACineCameraActor* GetCamera( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid* oCameraBinding = nullptr );
+    static FGuid             GetCameraBinding( ISequencer* iSequencer, FFrameNumber iFrameNumber );
+    static ACineCameraActor* GetCameraSpawned( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iCameraBinding );
+    static ACineCameraActor* GetCameraSpawnedOrTemplate( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iCameraBinding );
 
     /**
     *  Can a camera be created in the board section ?
@@ -756,9 +760,15 @@ private:
 
 public:
     /**  Add an actor to an history list, to be able to know later which actor best fit during auto-selection actor */
-    static void AddSelectedActorToHistory( AActor* iActor );
+    static void AddSelectedActorToHistory( ISequencer* iSequencer, AActor* iActor );
 protected:
-    static TArray<TWeakObjectPtr<AActor>> mDirectActorsSelectedHistory;
+    struct FBindingAndActorClass
+    {
+        FGuid Guid;
+        FMovieSceneSequenceID SequenceId;
+        TSubclassOf<AActor> ActorClass;
+    };
+    static TArray<FBindingAndActorClass> mDirectBindingsSelectedHistory;
 
 public:
     static void RenameBinding( ISequencer* iSequencer, FGuid iBinding, FString iNewLabel );
@@ -783,7 +793,9 @@ public:
     *
     * @param ISequencer iSequencer to add Camera track and CameraCut track.
     */
-    static ACineCameraActor* GetCamera( ISequencer* iSequencer, FGuid* oCameraBinding = nullptr );
+    static FGuid             GetCameraBinding( ISequencer* iSequencer );
+    static ACineCameraActor* GetCameraSpawned( ISequencer* iSequencer, FGuid iCameraBinding );
+    static ACineCameraActor* GetCameraSpawnedOrTemplate( ISequencer* iSequencer, FGuid iCameraBinding );
 
     /**
     *  Add a Camera track
@@ -830,8 +842,8 @@ private:
     static TArray<AActor*> CameraAdded( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid CameraGuid, ACineCameraActor* iCamera, FFrameNumber FrameNumber, const FAnimationArgs* iAnimationArgs );
     static void CreateCameraCut( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FGuid iCameraGuid, FFrameNumber iFrameNumber );
 
-    static bool SnapCameraToViewport( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, ACineCameraActor* ioCamera, FGuid iCameraGuid, FFrameNumber iFrameNumber, const FTransform& iNewTransform, EMovieSceneKeyInterpolation iInterpolation );
-    static void SnapCameraToViewport( ISequencer& iSequencer, UMovieSceneSequence* iSequence, ACineCameraActor* ioCamera, FGuid iCameraGuid, FFrameNumber iFrameNumber );
+    static bool SnapCameraToViewport( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iCameraGuid, FFrameNumber iFrameNumber, const FTransform& iNewTransform, EMovieSceneKeyInterpolation iInterpolation );
+    static void SnapCameraToViewport( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iCameraGuid, FFrameNumber iFrameNumber );
     static void DeleteCameraKey( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TArrayView<TWeakObjectPtr<UMovieSceneSection>> iSections, TArrayView<FMovieSceneChannelHandle> iChannelHandles, TArrayView<FKeyHandle> iKeyHandles );
     static bool IsPilotingCamera( ISequencer* iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID );
     static void PilotCamera( ISequencer* iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber );

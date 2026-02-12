@@ -1001,16 +1001,21 @@ FShotSequenceCustomization::ExtendObjectBindingContextMenu(FMenuBuilder& MenuBui
 void
 FShotSequenceCustomization::OnObjectSelectedMulti( const TArray<UObject*>& iObjects, bool bForceRefresh )
 {
+    if( !mWeakSequencer.IsValid() )
+        return;
+
+    TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+
     // Store an history of selected actors to know later (when scrubbing) which actor best fit the auto-selection
     for( UObject* object : iObjects )
     {
         ACineCameraActor* camera = Cast<ACineCameraActor>( object );
         if( camera )
-            ShotSequenceTools::AddSelectedActorToHistory( camera );
+            ShotSequenceTools::AddSelectedActorToHistory( sequencer.Get(), camera );
 
         AOdysseyAnimationActor* animation = Cast<AOdysseyAnimationActor>( object );
         if( animation )
-            ShotSequenceTools::AddSelectedActorToHistory( animation );
+            ShotSequenceTools::AddSelectedActorToHistory( sequencer.Get(), animation );
     }
 }
 
@@ -1050,26 +1055,28 @@ FShotSequenceCustomization::OnGlobalTimeChanged()
         //TArray<AActor*> actor_selected;
         //selection->GetSelectedObjects<AActor>( actor_selected );
 
+        int32 something_selected = 0;
         TArray<UMovieSceneTrack*> selected_tracks;
         sequencer->GetSelectedTracks( selected_tracks );
+        something_selected += selected_tracks.Num();
         TArray<TPair<UMovieSceneTrack*, int32>> selected_track_rows;
         sequencer->GetSelectedTrackRows( selected_track_rows );
+        something_selected += selected_track_rows.Num();
         TArray<UMovieSceneFolder*> selected_folders;
         sequencer->GetSelectedFolders( selected_folders );
+        something_selected += selected_folders.Num();
         TArray<UMovieSceneSection*> selected_sections;
         sequencer->GetSelectedSections( selected_sections );
+        something_selected += selected_sections.Num();
         TArray<const IKeyArea*> selected_key_areas;
         sequencer->GetSelectedKeyAreas( selected_key_areas );
+        something_selected += selected_key_areas.Num();
         TArray<FGuid> selected_bindings;
         sequencer->GetSelectedObjects( selected_bindings );
+        something_selected += selected_bindings.Num();
 
         // Check if something is already selected by the sequencer
-        bool nothing_selected = selected_tracks.IsEmpty()
-            && selected_track_rows.IsEmpty()
-            && selected_folders.IsEmpty()
-            && selected_sections.IsEmpty()
-            && selected_key_areas.IsEmpty()
-            && selected_bindings.IsEmpty();
+        bool nothing_selected = !something_selected;
 
         // if nothing is selected by the sequencer, always select an actor in the board track
         if( nothing_selected )

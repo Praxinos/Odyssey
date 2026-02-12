@@ -368,7 +368,8 @@ NamingConvention::GenerateCameraActorPathName( const IMovieScenePlayer& iPlayer,
             if( !Cast<UEposMovieSceneSequence>( sequence ) )
                 continue;
 
-            ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( *player, sequence, sequence_id );
+            FGuid camera_binding = ShotSequenceHelpers::GetCameraBinding( *player, sequence, sequence_id );
+            ACineCameraActor* camera = ShotSequenceHelpers::GetCameraSpawnedOrTemplate( *player, sequence, sequence_id, camera_binding );
             if( !camera )
                 continue;
 
@@ -452,7 +453,8 @@ NamingConvention::GenerateAnimationActorPathName( const IMovieScenePlayer& iPlay
     FString animation_path;
     FString camera_name;
 
-    ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( *player, current_sequence, iSequenceID );
+    FGuid camera_binding = ShotSequenceHelpers::GetCameraBinding( *player, current_sequence, iSequenceID );
+    ACineCameraActor* camera = ShotSequenceHelpers::GetCameraSpawnedOrTemplate( *player, current_sequence, iSequenceID, camera_binding );
     if( camera )
     {
         animation_path = camera->GetFolderPath().ToString();

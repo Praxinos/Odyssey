@@ -251,7 +251,7 @@ ShotSequenceTools::SpawnAndBindAnimation( ISequencer& iSequencer, UMovieSceneSeq
 
                         if( NewPossessable )
                         {
-                            for( TWeakObjectPtr<> WeakObject : iSequencer.FindBoundObjects( NewPossessable->GetGuid(), iSequencer.GetFocusedTemplateID() ) ) //TODO: or iSequenceID ?
+                            for( TWeakObjectPtr<> WeakObject : iSequencer.FindBoundObjects( NewPossessable->GetGuid(), iSequenceID ) )
                             {
                                 AOdysseyAnimationActor* SpawnedActor = Cast<AOdysseyAnimationActor>( WeakObject.Get() );
                                 if( SpawnedActor )
@@ -270,8 +270,8 @@ ShotSequenceTools::SpawnAndBindAnimation( ISequencer& iSequencer, UMovieSceneSeq
 
         //---
 
-        check( iSequencer.GetFocusedTemplateID() == iSequenceID );
-        FGuid newCameraGuid = iSequencer.FindObjectId( *iCamera, iSequencer.GetFocusedTemplateID() ); //TODO: or iSequenceID ?
+        //check( iSequencer.GetFocusedTemplateID() == iSequenceID );
+        FGuid newCameraGuid = iSequencer.FindObjectId( *iCamera, iSequenceID );
         FMovieSceneObjectBindingID attachBindingID = UE::MovieScene::FRelativeObjectBindingID( newCameraGuid );
 
         UMovieScene3DAttachTrack* attachTrack = iSequence->GetMovieScene()->AddTrack<UMovieScene3DAttachTrack>( animationGuid );
@@ -384,8 +384,8 @@ BoardSequenceTools::CanCreateAnimation( ISequencer* iSequencer, FFrameNumber iFr
     if( result.mInnerSequence->IsA<UBoardSequence>() )
         return false;
 
-    ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( *iSequencer, result.mInnerSequence, result.mInnerSequenceId );
-    if( !camera )
+    FGuid camera_binding = ShotSequenceHelpers::GetCameraBinding( *iSequencer, result.mInnerSequence, result.mInnerSequenceId );
+    if( !camera_binding.IsValid() )
         return false;
 
     return true;
@@ -407,8 +407,8 @@ ShotSequenceTools::CanCreateAnimation( ISequencer* iSequencer, FFrameNumber iFra
     if( !sequence )
         return false;
 
-    ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( *iSequencer, sequence, sequence_id );
-    if( !camera )
+    FGuid camera_binding = ShotSequenceHelpers::GetCameraBinding( *iSequencer, sequence, sequence_id );
+    if( !camera_binding.IsValid() )
         return false;
 
     return true;
@@ -418,10 +418,9 @@ ShotSequenceTools::CanCreateAnimation( ISequencer* iSequencer, FFrameNumber iFra
 void
 ShotSequenceTools::CreateAnimation( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, const FAnimationArgs& iAnimationArgs )
 {
-    FGuid camera_guid;
-    ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( iSequencer, iSequence, iSequenceID, &camera_guid );
-
-    if( !camera )
+    FGuid camera_binding = ShotSequenceHelpers::GetCameraBinding( iSequencer, iSequence, iSequenceID );
+    ACineCameraActor* camera = ShotSequenceHelpers::GetCameraSpawned( iSequencer, iSequence, iSequenceID, camera_binding );
+    if( !ensureMsgf(camera, TEXT( "In case of a spawnable, it means it is not spawned, the sequence is not the focused one by the sequencer" ) ) )
         return;
 
     ULevelEditorSubsystem* levelEditorSubsystem = GEditor->GetEditorSubsystem<ULevelEditorSubsystem>();
@@ -447,7 +446,7 @@ ShotSequenceTools::CreateAnimation( ISequencer& iSequencer, UMovieSceneSequence*
 
         //---
 
-        animation_actor = ShotSequenceTools::SpawnAndBindAnimation( iSequencer, iSequence, iSequenceID, camera_guid, camera, iFrameNumber, iAnimationArgs, nullptr );
+        animation_actor = ShotSequenceTools::SpawnAndBindAnimation( iSequencer, iSequence, iSequenceID, camera_binding, camera, iFrameNumber, iAnimationArgs, nullptr );
 
         //---
 
