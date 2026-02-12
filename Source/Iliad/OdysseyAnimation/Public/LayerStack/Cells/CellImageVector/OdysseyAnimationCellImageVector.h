@@ -58,6 +58,7 @@ public:
 #if WITH_EDITOR
 public:
     virtual FOdysseyMediaProvider GetMediaProvider() const override;
+    virtual void Clear() override;
     void OnRefreshReferencedPalette(UOdysseyPalette* iPalette);
 
 public:

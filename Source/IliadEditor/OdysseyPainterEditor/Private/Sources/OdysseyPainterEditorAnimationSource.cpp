@@ -250,71 +250,32 @@ FOdysseyPainterEditorAnimationSource::Clear()
     if (!player)
         return;
 
-#if WITH_EDITOR
-    FScopedTransaction ScopedTransaction(transactionName);
-#endif
-    FOdysseyMediaProvider mediaProvider = currentLayer->GetMediaProvider(player->GetCurrentFrame().FrameNumber.Value);
-    if ( mediaProvider.IsLocked() )
-        return;
-
-    if ( mediaProvider.HasMedia<FOdysseyMediaRaster>() )
+    TArray<UOdysseyLayerCell*> selectedCells = GetLayerStack()->GetCellSelection()->GetSelectedCells();
+    if (selectedCells.IsEmpty())
     {
-        TArray<TSharedPtr<FOdysseyMediaRaster>> mediasRaster = mediaProvider.GetOrCreateMedias<FOdysseyMediaRaster>();
-        for (TSharedPtr<FOdysseyMediaRaster> mediaRaster : mediasRaster)
-        {
-            TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRaster->GetRasterBlock();
-            if (!rasterBlock)
-                continue;
 
-            FOdysseyRasterBlockMutator mutator(rasterBlock);
-            mutator.EditTilesFromRects(
-                { ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) },
-                [&](TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
-                {
-                    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
-                    ::ULIS::FEvent eventClear;
-                    ctx.Clear(*iBlock, ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventClear);
-                    return { eventClear };
-                }
-            );
-            mutator.Commit();
+        UOdysseyLayerCell* cell = currentLayer->GetCellAtFrame(player->GetCurrentFrame().FrameNumber.Value);
+        if (!cell)
+            return;
 
-            FOdysseyAnimationCurrentFrameMutator currentFrameMutator(player);
-            currentFrameMutator.Set(player->GetCurrentFrame().FrameNumber.Value);
-            currentFrameMutator.Commit();
-        }
+        FScopedTransaction ScopedTransaction(transactionName);
+        cell->Clear();
+
+        FOdysseyAnimationCurrentFrameMutator currentFrameMutator(player);
+        currentFrameMutator.Set(player->GetCurrentFrame().FrameNumber.Value);
+        currentFrameMutator.Commit();
     }
-    else if (mediaProvider.HasMedia<FOdysseyMediaVector>())
+    else
     {
-        UOdysseyAnimationLayerImageVector* imageVectorLayer = Cast<UOdysseyAnimationLayerImageVector>(currentLayer);
-        TArray<TSharedPtr<FOdysseyMediaVector>> mediasVector = mediaProvider.GetOrCreateMedias<FOdysseyMediaVector>();
-
-        for (TSharedPtr<FOdysseyMediaVector> mediaVector : mediasVector)
+        FScopedTransaction ScopedTransaction(transactionName);
+        for(UOdysseyLayerCell* cell : selectedCells)
         {
-            FOdysseyVectorCell* vectorCell = mediaVector->GetScene()->GetCell();
-
-            // needed for undos
-            GEditor->BeginTransaction(transactionName);
-            if (GUndo)
-            {
-                FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSceneClear( vectorCell->GetScene() );
-
-                GUndo->StoreUndo(GEditor, TUniquePtr<FOdysseyVectorUndo>(undo));
-
-                FOdysseyAnimationCurrentFrameMutator currentFrameMutator(player);
-                currentFrameMutator.Set(player->GetCurrentFrame().FrameNumber.Value);
-                currentFrameMutator.Commit();
-            }
-            GEditor->EndTransaction();
-
-            vectorCell->SetScene( new FOdysseyVectorGroupPaint("Scene") );
-            vectorCell->GetLayer()->RequestRedraw( vectorCell, 0 );
+            cell->Clear();
         }
 
-        if( imageVectorLayer )
-        {
-            imageVectorLayer->GetVectorLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-        }
+        FOdysseyAnimationCurrentFrameMutator currentFrameMutator(player);
+        currentFrameMutator.Set(selectedCells[0]->GetFrameRange().GetLowerBoundValue());
+        currentFrameMutator.Commit();
     }
 }
 

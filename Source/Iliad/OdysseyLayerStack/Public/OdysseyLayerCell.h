@@ -122,6 +122,10 @@ public:
 
     UFUNCTION(BlueprintCallable, Category="Odyssey|Cell")
     void SetOutOfPegs(FOdysseyLayerCellOutOfPegs Value);
+
+    //Clears all the data from the cell
+    UFUNCTION(BlueprintCallable, Category="Odyssey|Cell")
+    virtual void Clear() {};
 #endif
 
 public:

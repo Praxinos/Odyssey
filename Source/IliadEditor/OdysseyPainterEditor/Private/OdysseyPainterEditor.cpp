@@ -650,21 +650,6 @@ FOdysseyPainterEditor::ExtendAssetEditorToolbar(UToolMenu* iToolbar)
                 painterEditor->ExtendToolbarToolParameters(iToolMenu);
             }
         )
-
-        /* FNewToolBarDelegateLegacy::CreateLambda(
-            [](FToolBarBuilder& iBuilder, UToolMenu* iToolMenu)
-            {
-                const UOdysseyPainterEditorToolMenuContext* Context = iToolMenu->FindContext<UOdysseyPainterEditorToolMenuContext>();
-                if (!Context)
-                    return;
-
-                FOdysseyPainterEditor* painterEditor = Context->PainterEditor;
-                if (!painterEditor)
-                    return;
-
-                painterEditor->ExtendToolbarToolParameters(iBuilder);
-            }
-        )*/
     );
 }
 
@@ -701,35 +686,6 @@ FOdysseyPainterEditor::ExtendToolbarSaveAssetButton(UToolMenu* iToolMenu)
             EUserInterfaceActionType::Button
         )
     );
-
-    /* FButtonArgs saveAssetButtonArgs;
-    saveAssetButtonArgs.ToolTipOverride = LOCTEXT("top-tab.save-asset", "Saves the painted asset");
-    saveAssetButtonArgs.IconOverride = FSlateIcon("OdysseyStyle", "PainterEditor.TopBar.Save32");
-    saveAssetButtonArgs.ExtensionHook = "Save";
-    saveAssetButtonArgs.UserInterfaceActionType = EUserInterfaceActionType::Button;
-    saveAssetButtonArgs.Action = FUIAction(
-        FExecuteAction::CreateLambda(
-            [this]()
-            {
-                TArray<UPackage*> packages;
-                UObject* editedObject = GetEditedObject();
-                if (editedObject)
-                    packages.Add(editedObject->GetOutermost());
-
-                TArray<UObject*> additionalEditedObjects = GetAdditionalEditedObjects();
-                for( UObject* additionalEditedObject : additionalEditedObjects )
-                {
-                    packages.Add( additionalEditedObject->GetOutermost() );
-                }
-
-                FEditorFileUtils::PromptForCheckoutAndSave(packages, true, false);
-            }
-        )
-    );
-
-    iBuilder.BeginSection("Asset");
-        iBuilder.AddToolBarButton(saveAssetButtonArgs);
-    iBuilder.EndSection(); */
 }
 
 void
