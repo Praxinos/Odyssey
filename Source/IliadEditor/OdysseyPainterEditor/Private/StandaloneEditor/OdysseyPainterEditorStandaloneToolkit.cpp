@@ -67,7 +67,6 @@ FOdysseyPainterEditorStandaloneToolkit::Open()
 {
     mEditor = MakeShared<FOdysseyPainterEditor>(SharedThis(this));
     mEditor->Initialize();
-    mEditor->InitTabs();
 
     TArray<UObject*> editedObjects = mEditor->GetAdditionalEditedObjects(); //Editor can add some side edited objects
     editedObjects.Add(mEditedObject);
@@ -175,18 +174,6 @@ FOdysseyPainterEditorStandaloneToolkit::SaveAssetAs_Execute()
     FAssetEditorToolkit::SaveAssetAs_Execute();
 
     AssetEditorSubsystem->OnAssetEditorRequestedOpen().Remove(openAssetHandle);
-}
-
-bool
-FOdysseyPainterEditorStandaloneToolkit::OnRequestClose()
-{
-    return mEditor->OnCloseRequested();
-}
-
-void
-FOdysseyPainterEditorStandaloneToolkit::OnClose()
-{
-    mEditor->OnClose();
 }
 
 void

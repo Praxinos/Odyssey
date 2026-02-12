@@ -54,12 +54,6 @@ FOdysseyViewportDrawingEditorMeshBasedAdapter::SetTool(UOdysseyPainterEditorTool
 }
 
 void
-FOdysseyViewportDrawingEditorMeshBasedAdapter::Finalize()
-{
-    IOdysseyViewportDrawingEditorAdapter::Finalize();
-}
-
-void
 FOdysseyViewportDrawingEditorMeshBasedAdapter::SetTexture(UTexture* iTexture)
 {
     FinalizeRenderTarget();

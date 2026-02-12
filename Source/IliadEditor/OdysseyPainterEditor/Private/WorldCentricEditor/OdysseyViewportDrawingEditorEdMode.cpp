@@ -254,16 +254,7 @@ void FOdysseyViewportDrawingEditorEdMode::Exit()
         Toolkit.Reset();
     }
 
-    if (mViewportDrawingEditorToolkit)
-    {
-        mViewportDrawingEditorToolkit->GetEditor()->OnClose();
-        mViewportDrawingEditorToolkit = nullptr;
-    }
     mViewportDrawingEditorExtension = nullptr;
-
-    //mViewportDrawingEditorPainter->Finalize();
-    //delete mViewportDrawingEditorPainter;
-    //mViewportDrawingEditorPainter = nullptr;
 
     // Call parent implementation
     FEdMode::Exit();

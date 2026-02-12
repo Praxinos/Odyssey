@@ -29,7 +29,6 @@ class FOdysseyVectorPath;
 class UOdysseyPalette;
 class UOdysseyPaletteSet;
 class UOdysseyPaletteEntryColor;
-class FOdysseyPainterEditorGUI;
 class FOdysseyPainterEditorFlipbookListener;
 class UPaperSprite;
 class UTexture2D;
@@ -96,7 +95,6 @@ public:
     template<class T> void RemoveTab();
     template<class T> TSharedPtr<T> FindTab() const;
     const TArray<TSharedPtr<FOdysseyEditorTab>>& GetTabs() const;
-    void InitTabs();
     void CloseAllTabs();
 
     void RegisterTabSpawners( const TSharedRef<FTabManager>& iTabManager );
@@ -116,8 +114,6 @@ public:
     void ExtendMenu( TSharedRef<FExtender> iExtender );
     void ExtendLevelEditorToolbar( UToolMenu* iToolbar );
     void ExtendAssetEditorToolbar( UToolMenu* iToolbar );
-    bool OnCloseRequested();
-    void OnClose();
     TArray<UObject*> GetAdditionalEditedObjects();
     void InitToolMenuContext(FToolMenuContext& MenuContext);
 
@@ -246,9 +242,8 @@ public:
     TSharedPtr<FBaseToolkit> GetToolkit() const;
     TSharedPtr<FOdysseyPainterEditorSource>              GetSource() const;
     template<class T> TSharedPtr<T> GetSourceTyped() const;
-    virtual FOdysseyPainterEditorGUI*                    GetGUI();
 
-    virtual FOdysseyHUDElement*                              HUDSystem() const;
+    virtual TSharedPtr<FOdysseyHUDElement>                              HUDSystem() const;
     virtual const FOdysseyBrushColor&                        PaintColor() const;
 
     UOdysseyAnimation*                                       GetAnimation() const;
@@ -381,6 +376,13 @@ protected:
 
 private:
     void InitTools();
+    void InitTabs();
+    void InitShortcuts();
+
+    //TODO: Move these shortcuts in FOdysseyAnimationGlobalShortcuts files
+    void SwitchTabletAPI();
+    void ClearCurrentLayer();
+    void ToggleEraserButton();
 
     UOdysseyPainterEditorTool* FindDefaultToolForCurrentLayer();
 
@@ -411,12 +413,11 @@ protected:
 
     TArray<TObjectPtr<UOdysseyPainterEditorTool>> mMainTools;
     TArray<TObjectPtr<UOdysseyPainterEditorTool>> mTemporaryTools;
-    TSharedPtr<FOdysseyPainterEditorGUI>                mGUI;
 
     uint64                          mVectorHUDFlags;
     uint64                          mVectorDrawingFlags;
 
-    FOdysseyHUDElement*             mHUDSystem;
+    TSharedPtr<FOdysseyHUDElement>  mHUDSystem;
     TSharedPtr<FOdysseyPainterEditorRasterSelection> mRasterSelection;
     TArray<FOdysseyBrushContext*>   mBrushContexts;
     FOdysseyBrushColor              mPaintColor;
@@ -455,8 +456,7 @@ protected:
 
     TMap<UClass*, UOdysseyPainterEditorTool*> mCurrentMainToolPerLayerClass;
 
-    UPROPERTY() // Prevents GC of this transient tool collection
-    TStrongObjectPtr<UOdysseyToolCollection> mRecentTools;
+    UOdysseyToolCollection* mRecentTools;
 
     FName mToolbarMenuName;
 

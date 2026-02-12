@@ -63,7 +63,6 @@ public:
 
 public:
     virtual void Initialize() override;
-    virtual void Finalize() override;
     virtual void SetTool(UOdysseyPainterEditorTool* iTool) override;
     virtual void SetTexture(UTexture* iTexture) override;
 

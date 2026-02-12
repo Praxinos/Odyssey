@@ -22,8 +22,6 @@ public:
 protected:
     // FAssetEditorToolkit interface
     virtual void SaveAssetAs_Execute() override;
-    virtual bool OnRequestClose() override;
-    virtual void OnClose() override;
     virtual void RegisterTabSpawners(const TSharedRef<FTabManager>& iTabManager) override;
     virtual void UnregisterTabSpawners(const TSharedRef<FTabManager>& iTabManager) override;
     virtual FText GetToolkitName() const override;

@@ -47,7 +47,6 @@ public:
     //from IAssetEditorInstance
     virtual FName GetEditorName() const override;
     virtual void FocusWindow(UObject* ObjectToFocusOn = nullptr) override;
-    virtual bool CloseWindow() override;
     virtual bool IsPrimaryEditor() const override;
     virtual void InvokeTab(const struct FTabId& TabId) override;
     virtual FName GetToolbarTabId() const override;

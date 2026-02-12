@@ -41,11 +41,6 @@ void FOdysseyViewportDrawingEditorScreenBasedAdapter::Initialize()
     mState = eState::kIdleReady;
 }
 
-void FOdysseyViewportDrawingEditorScreenBasedAdapter::Finalize()
-{
-    IOdysseyViewportDrawingEditorAdapter::Finalize();
-}
-
 void FOdysseyViewportDrawingEditorScreenBasedAdapter::SetTool(UOdysseyPainterEditorTool* iTool)
 {
     IOdysseyViewportDrawingEditorAdapter::SetTool(iTool);

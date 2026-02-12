@@ -47,6 +47,14 @@
 
 FOdysseyViewportDrawingEditorExtension::~FOdysseyViewportDrawingEditorExtension()
 {
+    SetActor(nullptr);
+    mPaintingAdapter->SetTexture(nullptr);
+
+    FCoreUObjectDelegates::OnObjectPropertyChanged.RemoveAll(this);
+    GetEditor()->OnSourceChanged().RemoveAll(this);
+    FLevelEditorSequencerIntegration::Get().GetOnSequencersChanged().RemoveAll(this);
+    ClearAllDelegatesSequencers();
+    mSequencers.Empty();
 }
 
 FOdysseyViewportDrawingEditorExtension::FOdysseyViewportDrawingEditorExtension()
@@ -87,24 +95,6 @@ FOdysseyViewportDrawingEditorExtension::Initialize()
 
     mGUI = MakeShareable(new FOdysseyViewportDrawingEditorGUI(this));
     mGUI->Initialize();
-}
-
-void
-FOdysseyViewportDrawingEditorExtension::Finalize()
-{
-    mGUI->Finalize();
-
-    SetActor(nullptr);
-
-    mPaintingAdapter->SetTexture(nullptr);
-    mPaintingAdapter->Finalize();
-    mPaintingAdapter = nullptr;
-
-    FCoreUObjectDelegates::OnObjectPropertyChanged.RemoveAll(this);
-    GetEditor()->OnSourceChanged().RemoveAll(this);
-    FLevelEditorSequencerIntegration::Get().GetOnSequencersChanged().RemoveAll(this);
-    ClearAllDelegatesSequencers();
-    mSequencers.Empty();
 }
 
 void
