@@ -302,8 +302,10 @@ UOdysseyTextureLayerImageVector::Serialize(FArchive& Ar)
 void
 UOdysseyTextureLayerImageVector::SetIsWireframe(bool Value)
 {
-    if( !TryModify() )
+    if( !IsEditable() )
         return;
+
+    Modify();
 
     bIsWireframe = Value;
     mVectorCell->GetLayer()->RequestRedraw( mVectorCell.Get(), 0 );
@@ -313,8 +315,10 @@ UOdysseyTextureLayerImageVector::SetIsWireframe(bool Value)
 void
 UOdysseyTextureLayerImageVector::SetIsColored(bool Value)
 {
-    if( !TryModify() )
+    if( !IsEditable() )
         return;
+
+    Modify();
 
     bIsColored = Value;
     mVectorCell->GetLayer()->RequestRedraw( mVectorCell.Get(), 0 );
@@ -373,8 +377,10 @@ UOdysseyTextureLayerImageVector::OnVectorBlockInvalidated( const TArray<::ULIS::
 void
 UOdysseyTextureLayerImageVector::Merge(const TArray<UOdysseyLayer*>& iLayers)
 {
-    if( !TryModify() )
+    if( !IsEditable() )
         return;
+
+    Modify();
 
     FOdysseyVectorGroupPaint* destinationScene = mVectorCell->GetScene();
 

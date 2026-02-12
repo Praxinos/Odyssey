@@ -130,8 +130,10 @@ UOdysseyAnimationLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
     if ( !animation )
         return;
 
-    if( !TryModify() )
+    if( !IsEditable() )
         return;
+
+    Modify();
 
     //Get all frame ranges and combine them
     TArray<FInt32Range> frameRanges = {};
@@ -316,6 +318,9 @@ UOdysseyAnimationLayerImageRaster::CreateMediaRaster(int iFrameIndex)
 void
 UOdysseyAnimationLayerImageRaster::AutoCreateCell(int iFrameIndex)
 {
+    if( !IsEditable() )
+        return;
+
     //Check if iFrameIndex is Out Of Range
     FInt32Range range = GetFrameRange();
 
@@ -323,11 +328,8 @@ UOdysseyAnimationLayerImageRaster::AutoCreateCell(int iFrameIndex)
     if (iFrameIndex == range.GetLowerBoundValue() && iFrameIndex == range.GetUpperBoundValue())
     {
         //Add a frame at current frame and extend it
-        if( !TryModify() )
-            return;
-
         FScopedTransaction transaction(LOCTEXT("layer-image-raster.create-cell-transaction", "Create Cell"));
-
+        Modify();
         UOdysseyLayerCell* cell = AddCell(UOdysseyAnimationCellImageRaster::StaticClass(), 0);
         return;
     }
@@ -335,11 +337,8 @@ UOdysseyAnimationLayerImageRaster::AutoCreateCell(int iFrameIndex)
     if ( iFrameIndex < range.GetLowerBoundValue())
     {
         //Add a frame at current frame and extend it
-        if( !TryModify() )
-            return;
-
         FScopedTransaction transaction( LOCTEXT( "layer-image-raster.create-cell-transaction", "Create Cell" ) );
-
+        Modify();
         UOdysseyLayerCell* cell = AddCell(UOdysseyAnimationCellImageRaster::StaticClass(), 0);
         cell->SetExposure(range.GetLowerBoundValue() - iFrameIndex);
         SetCellsOffset(GetCellsOffset() - cell->GetExposure());
@@ -348,11 +347,8 @@ UOdysseyAnimationLayerImageRaster::AutoCreateCell(int iFrameIndex)
 
     if ( iFrameIndex > range.GetUpperBoundValue())
     {
-        if( !TryModify() )
-            return;
-
         FScopedTransaction transaction( LOCTEXT( "layer-image-raster.create-cell-transaction", "Create Cell" ) );
-
+        Modify();
         UOdysseyLayerCell* lastCell = Cells.IsEmpty() ? nullptr : Cells.Last();
         int cellExposure = iFrameIndex - CellsOffset + 1;
         if(lastCell)
@@ -370,9 +366,10 @@ UOdysseyAnimationLayerImageRaster::AutoCreateCell(int iFrameIndex)
 void
 UOdysseyAnimationLayerImageRaster::SetIsAlphaLocked(bool Value)
 {
-    if( !TryModify() )
+    if( !IsEditable() )
         return;
 
+    Modify();
     bIsAlphaLocked = Value;
 }
 

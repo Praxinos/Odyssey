@@ -198,8 +198,10 @@ UOdysseyTextureLayerImageRaster::OnBlockCommited(const TArray<::ULIS::FRectI>& i
 void
 UOdysseyTextureLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
 {
-    if( !TryModify() )
+    if( !IsEditable() )
         return;
+
+    Modify();
 
     FIntRect rect = GetDefaultRenderRect();
     TStrongObjectPtr<UTextureRenderTarget2D> layerRenderTarget(CreateRenderingRenderTarget());
@@ -404,8 +406,10 @@ UOdysseyTextureLayerImageRaster::GetRenderingComposition(uint64 iRenderType, int
 void
 UOdysseyTextureLayerImageRaster::SetIsAlphaLocked(bool Value)
 {
-    if( !TryModify() )
+    if( !IsEditable() )
         return;
+
+    Modify();
 
     bIsAlphaLocked = Value;
 }

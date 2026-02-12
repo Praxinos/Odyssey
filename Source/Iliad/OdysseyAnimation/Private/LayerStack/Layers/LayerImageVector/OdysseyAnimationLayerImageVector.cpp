@@ -196,8 +196,10 @@ UOdysseyAnimationLayerImageVector::RequestRedrawAllVectorCells()
 void
 UOdysseyAnimationLayerImageVector::SetIsWireframe(bool Value)
 {
-    if( !TryModify() )
+    if( !IsEditable() )
         return;
+
+    Modify();
 
     bIsWireframe = Value;
 
@@ -209,8 +211,10 @@ UOdysseyAnimationLayerImageVector::SetIsWireframe(bool Value)
 void
 UOdysseyAnimationLayerImageVector::SetIsColored(bool Value)
 {
-    if( !TryModify() )
+    if( !IsEditable() )
         return;
+
+    Modify();
 
     bIsColored = Value;
 
@@ -305,6 +309,9 @@ UOdysseyAnimationLayerImageVector::CreateMediaVector(int iFrameIndex)
 void
 UOdysseyAnimationLayerImageVector::AutoCreateCell(int iFrameIndex)
 {
+    if( !IsEditable() )
+        return;
+
     FInt32Range range = GetFrameRange();
 
     //Check if iFrameIndex is Out Of Range
@@ -312,8 +319,7 @@ UOdysseyAnimationLayerImageVector::AutoCreateCell(int iFrameIndex)
     {
         FScopedTransaction transaction(LOCTEXT("layer-image-vector.create-cell-transaction", "Create Cell"));
 
-        if( !TryModify() )
-            return;
+        Modify();
 
         //Add a frame at current frame and extend it
         UOdysseyLayerCell* cell = AddCell(UOdysseyAnimationCellImageVector::StaticClass(), 0);
@@ -326,8 +332,7 @@ UOdysseyAnimationLayerImageVector::AutoCreateCell(int iFrameIndex)
     {
         FScopedTransaction transaction( LOCTEXT( "layer-image-vector.create-cell-transaction", "Create Cell" ) );
 
-        if( !TryModify() )
-            return;
+        Modify();
 
         int cellExposure = Cells.Last()->GetExposure() + iFrameIndex - range.GetUpperBoundValue() - 1;
         Cells.Last()->SetExposure(cellExposure);
@@ -343,8 +348,10 @@ UOdysseyAnimationLayerImageVector::Merge(const TArray<UOdysseyLayer*>& iLayers)
     if ( !animation )
         return;
 
-    if( !TryModify() )
+    if( !IsEditable() )
         return;
+
+    Modify();
 
     //Get all frame ranges and combine them
     TArray<FInt32Range> frameRanges = {};
