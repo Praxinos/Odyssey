@@ -53,6 +53,7 @@ public:
 
 public:
     //Events
+    FSimpleMulticastDelegate& OnAnimationChanged();
     FSimpleMulticastDelegate& OnCursorFrameChanged();
     FSimpleMulticastDelegate& OnCurrentFrameChanged();
     FSimpleMulticastDelegate& OnDisplayedFrameChanged();
@@ -70,6 +71,7 @@ protected:
 #endif
 
     void AnimationChanged();
+    void LODGroupChanged();
 
 public:
     UFUNCTION(BlueprintCallable, Category="Odyssey|AnimationPlayer")
@@ -141,6 +143,9 @@ public:
     UFUNCTION(BlueprintPure, Category = "Odyssey|AnimationPlayer")
     void GetCustomPlayRange(FFrameNumber& StartFrame, FFrameNumber& EndFrame);
 
+    void SetLODGroup(enum TextureGroup iTextureGroup);
+    enum TextureGroup GetLODGroup() const;
+
 #if WITH_EDITOR
     void SetRenderType(TAttribute<uint64> iRenderType);
     uint64 GetRenderType() const;
@@ -161,29 +166,32 @@ private:
     void OnRenderingChanged(const FOdysseyRenderingChangedEvent& iEvent);
 
 private:
-    UPROPERTY()
+    UPROPERTY( EditAnywhere, Category="Animation" )
     TObjectPtr<UOdysseyAnimation> Animation;
 
-    UPROPERTY()
+    UPROPERTY( EditAnywhere, Category="Animation" )
     bool IsLoopingInPlayRange = false;
 
-    UPROPERTY()
+    UPROPERTY( EditAnywhere, Category="Animation" )
     EOdysseyAnimationPlayerPlayRange PlayRange = EOdysseyAnimationPlayerPlayRange::AnimationBounds; //Infinite, Custom
 
-    UPROPERTY()
+    UPROPERTY( EditAnywhere, Category="Animation", meta=(EditConditionHides, EditCondition="PlayRange==EOdysseyAnimationPlayerPlayRange::Custom") )
     FFrameNumber CustomPlayRangeStartFrame;
 
-    UPROPERTY()
+    UPROPERTY( EditAnywhere, Category="Animation", meta=(EditConditionHides, EditCondition="PlayRange==EOdysseyAnimationPlayerPlayRange::Custom") )
     FFrameNumber CustomPlayRangeEndFrame;
 
-    UPROPERTY()
+    UPROPERTY( EditAnywhere, Category="Animation" )
     EOdysseyAnimationPlayerPostBehaviour PreBehaviour = EOdysseyAnimationPlayerPostBehaviour::Loop;
 
-    UPROPERTY()
+    UPROPERTY( EditAnywhere, Category="Animation" )
     EOdysseyAnimationPlayerPostBehaviour PostBehaviour = EOdysseyAnimationPlayerPostBehaviour::Loop;
 
+    UPROPERTY( EditAnywhere, Category="Animation", meta=(DisplayName="Texture Group"), AssetRegistrySearchable )
+    TEnumAsByte<enum TextureGroup> LODGroup = TEXTUREGROUP_Pixels2D;
+
 public:
-    UPROPERTY()
+    UPROPERTY( EditAnywhere, BlueprintReadWrite, Category="Animation" )
     float PlayRate = 1.0f; //1.0f means 100% of the animation framepersecond
 
     UPROPERTY(Transient, DuplicateTransient)
@@ -208,6 +216,7 @@ private:
 
 private:
     //Events
+    FSimpleMulticastDelegate mOnAnimationChanged;
     FSimpleMulticastDelegate mOnCurrentFrameChanged;
     FSimpleMulticastDelegate mOnDisplayedFrameChanged;
     FSimpleMulticastDelegate mOnCursorFrameChanged;
