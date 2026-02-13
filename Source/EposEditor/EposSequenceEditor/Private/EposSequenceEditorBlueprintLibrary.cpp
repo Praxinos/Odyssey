@@ -733,7 +733,7 @@ UEposSequenceEditorBlueprintLibrary::SetCameraFocalLengthAndScaleActor( TArray<A
 
     TArray<TWeakObjectPtr<AActor>> actors( ioActor );
 
-    ShotSequenceTools::SetCameraFocalLengthAndScaleActor( actors, ioCamera, iNewFocalLength, iScaleType );
+    ShotSequenceTools::SetCameraFocalLengthAndScaleActor( actors, ioCamera, iNewFocalLength, iScaleType, CurrentSequencer.Pin() );
 }
 
 //static

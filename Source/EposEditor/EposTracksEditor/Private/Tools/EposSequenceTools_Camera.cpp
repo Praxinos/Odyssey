@@ -1502,8 +1502,12 @@ ShotSequenceTools::GotoNextCameraPosition( ISequencer& iSequencer, UMovieSceneSe
 
 //static
 bool
-ShotSequenceTools::SetCameraFocalLengthAndScaleActor( TArray<TWeakObjectPtr<AActor>> ioActors, ACineCameraActor* ioCamera, float iNewFocalLength, EScaleActor iScaleType )
+ShotSequenceTools::SetCameraFocalLengthAndScaleActor( TArray<TWeakObjectPtr<AActor>> ioActors, ACineCameraActor* ioCamera, float iNewFocalLength, EScaleActor iScaleType, TSharedPtr<ISequencer> iSequencer )
 {
+    //const FScopedTransaction transaction( LOCTEXT( "transaction.set-camera-focal-length-and-scale-actor", "Set Camera Focal Length and Scale Actor" ) );
+
+    //---
+
     struct FParameterCache
     {
         TWeakObjectPtr<AActor> mActor;
@@ -1535,6 +1539,8 @@ ShotSequenceTools::SetCameraFocalLengthAndScaleActor( TArray<TWeakObjectPtr<AAct
 
         FVector new_camera_view_size = ActorHelpers::ComputeSizeOfCameraView( ioCamera, old_parameter.mCurrentDistance );
 
+        bool update_channels = false;
+
         switch( iScaleType )
         {
             // Until EScaleActor::kFitToCamera will be removed
@@ -1548,6 +1554,8 @@ ShotSequenceTools::SetCameraFocalLengthAndScaleActor( TArray<TWeakObjectPtr<AAct
                 FVector new_actor_scale = old_parameter.mActorScale * ratio;
 
                 old_parameter.mActor->SetActorScale3D( new_actor_scale );
+
+                update_channels = true;
             }
             break;
 
@@ -1556,6 +1564,58 @@ ShotSequenceTools::SetCameraFocalLengthAndScaleActor( TArray<TWeakObjectPtr<AAct
                 break;
 
             default: checkNoEntry();
+        }
+
+        if( iSequencer.IsValid() && update_channels )
+        {
+            ISequencer* sequencer = iSequencer.Get();
+            UMovieSceneSequence* sequence = sequencer->GetFocusedMovieSceneSequence();
+            FMovieSceneSequenceID sequence_id = sequencer->GetFocusedTemplateID();
+            FFrameNumber frame = sequencer->GetLocalTime().Time.GetFrame();
+
+            if( sequence->IsA<UBoardSequence>() )
+            {
+                BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, sequence, sequence_id, frame );
+                sequence = result.mInnerSequence;
+                sequence_id = result.mInnerSequenceId;
+                frame = result.mInnerTime.GetFrame();
+            }
+
+            FGuid binding = sequencer->FindObjectId( *old_parameter.mActor, sequence_id );
+
+            // Update the default transform channel to take care of the attach track
+            UMovieScene3DTransformTrack* transformTrack = Cast<UMovieScene3DTransformTrack>( sequence->GetMovieScene()->FindTrack<UMovieScene3DTransformTrack>( binding ) );
+            if( transformTrack )
+            {
+                if( transformTrack->GetAllSections().Num() )
+                {
+                    UMovieScene3DTransformSection* transformSection = Cast<UMovieScene3DTransformSection>( transformTrack->GetAllSections()[0] );
+
+                    // Set to EKeyGroupMode::KeyGroup, otherwise it will be overwritten by EMovieSceneTransformChannel::All
+                    // in GetTransformKeys() as (certainly) iSequencer.GetKeyGroupMode() == EKeyGroupMode::KeyAll
+                    EKeyGroupMode backup_groupmode = sequencer->GetKeyGroupMode();
+                    sequencer->SetKeyGroupMode( EKeyGroupMode::KeyGroup );
+
+                    FTransformData newTransformData( old_parameter.mActor->GetActorTransform() );
+
+                    FGeneratedTrackKeys generated_keys;
+                    GetTransformKeys( *sequencer, TOptional<FTransformData>(), newTransformData, EMovieSceneTransformChannel::Scale, old_parameter.mActor.Get(), transformSection, generated_keys );
+
+                    // For now, just update the default values of channels
+                    // The problem with creating new keys is:
+                    // - camera has NO keys for its focal length (so a unique default value for all frames)
+                    // - on frame X, the focal length changes -> new scale for the animation -> create a new key
+                    // - on frame X+n, the focal length changes -> new scale for the animation -> create a new key
+                    // BUT the key on frame X won't be relevant anymore as the focal length of the camera is also changed on frame X
+                    for( const FMovieSceneChannelValueSetter& generated_key : generated_keys )
+                    {
+                        generated_key->ApplyDefault( transformSection, transformSection->GetChannelProxy(), EKeyFrameTrackEditorSetDefault::SetDefaultOnAddKeys );
+                    }
+                    //bool key_created = AddKeysToSection( *sequencer, transformSection, sequencer->GetLocalTime().Time.GetFrame(), generated_keys, ESequencerKeyMode::AutoKey, EKeyFrameTrackEditorSetDefault::SetDefaultOnAddKeys );
+
+                    sequencer->SetKeyGroupMode( backup_groupmode );
+                }
+            }
         }
     }
 

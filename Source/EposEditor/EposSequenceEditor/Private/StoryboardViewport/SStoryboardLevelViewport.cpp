@@ -2449,7 +2449,7 @@ SStoryboardLevelViewport::SetCameraFocalLength( float iFocalLength )
             actors.Add( child );
     }
 
-    ShotSequenceTools::SetCameraFocalLengthAndScaleActor( actors, mCameraToFocalLength.Get(), iFocalLength, mScaleActorType );
+    ShotSequenceTools::SetCameraFocalLengthAndScaleActor( actors, mCameraToFocalLength.Get(), iFocalLength, mScaleActorType, mCurrentSquencer.Pin() );
 }
 
 //---
