@@ -4,30 +4,35 @@
 #pragma once
 
 #include "OdysseyAnimation.h"
+#include "OdysseyImportTexturesParameters.h"
+
+#include "OdysseyPainterEditorAnimationImport.generated.h"
 
 class UOdysseyAnimationCellImageRaster;
 class UOdysseyAnimationLayer;
 class UOdysseyAnimationLayerImageRaster;
 class UTexture2D;
 
+USTRUCT(BlueprintType)
+struct FOdysseyPainterEditorAnimationImportResult
+{
+    GENERATED_BODY()
+
+    UPROPERTY(BlueprintReadWrite)
+    TArray<UOdysseyAnimationLayerImageRaster*> mImportedLayers;
+
+    UPROPERTY(BlueprintReadWrite)
+    TArray<UOdysseyAnimationCellImageRaster*> mImportedCells;
+};
+
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorAnimationImport
 {
 public:
-    FOdysseyPainterEditorAnimationImport();
-
-public:
-    UOdysseyAnimationLayerImageRaster* ImportTextureSequence(UOdysseyAnimation* Animation, TArray<UTexture2D*> Textures, UOdysseyAnimationLayer* ParentLayer = nullptr, int IndexInParent = 0);
-
-    UOdysseyAnimationLayerImageRaster* ImportImageSequence(UOdysseyAnimation* Animation, TArray<FString> Paths, UOdysseyAnimationLayer* ParentLayer = nullptr, int IndexInParent = 0);
+    static FOdysseyPainterEditorAnimationImportResult ImportTextureSequence(UOdysseyAnimation* Animation, const FOdysseyImportTexturesParameters& iImportData);
 };
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorAnimationLayerImport
 {
 public:
-    FOdysseyPainterEditorAnimationLayerImport();
-
-public:
-    TArray<UOdysseyAnimationCellImageRaster*> ImportTextureSequence(UOdysseyAnimationLayerImageRaster* Layer, TArray<UTexture2D*> Textures, int iCellIndex = -1);
-
-    TArray<UOdysseyAnimationCellImageRaster*> ImportImageSequence(UOdysseyAnimationLayerImageRaster* Layer, TArray<FString> Paths, int iCellIndex = -1);
+    static FOdysseyPainterEditorAnimationImportResult ImportTextureSequence(UOdysseyAnimationLayerImageRaster* Layer, const FOdysseyImportTexturesParameters& iImportData, int iCellIndex = -1);
 };

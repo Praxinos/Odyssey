@@ -442,7 +442,7 @@ UOdysseyTextureLayerStack::UpdateRenderTargetFormat()
 
     ETextureSourceFormat textureSourceFormat = texture->Source.GetFormat();
     //bool expectSRGB = false; //(textureSourceFormat == TSF_BGRA8 || textureSourceFormat == TSF_G8) && texture->SRGB;
-    ETextureRenderTargetFormat format = RTF_RGBA8_SRGB;
+    ETextureRenderTargetFormat format = RTF_RGBA8;
 
     switch(textureSourceFormat)
     {
@@ -497,7 +497,7 @@ UOdysseyTextureLayerStack::CreateRenderingRenderTarget() const
     FTextureCompilingManager::Get().FinishCompilation({ texture });
 
     ETextureSourceFormat textureSourceFormat = texture->Source.GetFormat();
-    ETextureRenderTargetFormat format = RTF_RGBA8_SRGB;
+    ETextureRenderTargetFormat format = RTF_RGBA8;
 
     switch(textureSourceFormat)
     {

@@ -32,6 +32,9 @@ public:
     /** Action used to export the animation as an image sequence */
     TSharedPtr<FUICommandInfo> ExportImageSequence;
 
+    /** Action used to export the animation as a texture sequence */
+    TSharedPtr<FUICommandInfo> ExportTextureSequence;
+
     /** Action used to export the animation as an image sequence */
     TSharedPtr<FUICommandInfo> ExportAsFlipbook;
 

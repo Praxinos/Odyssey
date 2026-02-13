@@ -27,18 +27,20 @@
 #define LOCTEXT_NAMESPACE "UOdysseyPainterEditorAnimationFunctionLibrary"
 
 
-UOdysseyAnimationLayerImageRaster*
-UOdysseyPainterEditorAnimationFunctionLibrary::ImportTextureSequence(UOdysseyAnimation* Animation, TArray<UTexture2D*> Textures, UOdysseyAnimationLayer* ParentLayer, int IndexInParent)
+FOdysseyPainterEditorAnimationImportResult
+UOdysseyPainterEditorAnimationFunctionLibrary::ImportTextureSequence(UOdysseyAnimation* Animation, TArray<UTexture2D*> Textures, FOdysseyImportTexturesParameters Parameters)
 {
-    FOdysseyPainterEditorAnimationImport import_animation;
-    return import_animation.ImportTextureSequence( Animation, Textures, ParentLayer, IndexInParent );
+    FOdysseyImportTexturesParameters params = Parameters;
+    params.Init(Textures, Animation->GetWidth(), Animation->GetHeight());
+    return FOdysseyPainterEditorAnimationImport::ImportTextureSequence( Animation, params );
 }
 
-UOdysseyAnimationLayerImageRaster*
-UOdysseyPainterEditorAnimationFunctionLibrary::ImportImageSequence(UOdysseyAnimation* Animation, TArray<FString> Paths, UOdysseyAnimationLayer* ParentLayer, int IndexInParent)
+FOdysseyPainterEditorAnimationImportResult
+UOdysseyPainterEditorAnimationFunctionLibrary::ImportImageSequence(UOdysseyAnimation* Animation, TArray<FString> Paths, FOdysseyImportTexturesParameters Parameters )
 {
-    FOdysseyPainterEditorAnimationImport import_animation;
-    return import_animation.ImportImageSequence( Animation, Paths, ParentLayer, IndexInParent );
+    FOdysseyImportTexturesParameters params = Parameters;
+    params.Init(Paths, Animation->GetWidth(), Animation->GetHeight());
+    return FOdysseyPainterEditorAnimationImport::ImportTextureSequence( Animation, params );
 }
 
 TArray<FString>
@@ -114,18 +116,28 @@ UOdysseyPainterEditorAnimationFunctionLibrary::ExportAsFlipbook(UOdysseyAnimatio
     );
 }
 
-TArray<UOdysseyAnimationCellImageRaster*>
-UOdysseyPainterEditorAnimationLayerFunctionLibrary::ImportTextureSequence(UOdysseyAnimationLayerImageRaster* Layer, TArray<UTexture2D*> Textures, int iCellIndex)
+FOdysseyPainterEditorAnimationImportResult
+UOdysseyPainterEditorAnimationLayerFunctionLibrary::ImportTextureSequence(UOdysseyAnimationLayerImageRaster* Layer, TArray<UTexture2D*> Textures, FOdysseyImportTexturesParameters Parameters, int CellIndex)
 {
-    FOdysseyPainterEditorAnimationLayerImport import_layer;
-    return import_layer.ImportTextureSequence( Layer, Textures, iCellIndex );
+    UOdysseyAnimation* animation = Layer->GetAnimation();
+    if (!animation)
+        return FOdysseyPainterEditorAnimationImportResult();
+
+    FOdysseyImportTexturesParameters params = Parameters;
+    params.Init(Textures, animation->GetWidth(), animation->GetHeight());
+    return FOdysseyPainterEditorAnimationLayerImport::ImportTextureSequence( Layer, params, CellIndex );
 }
 
-TArray<UOdysseyAnimationCellImageRaster*>
-UOdysseyPainterEditorAnimationLayerFunctionLibrary::ImportImageSequence(UOdysseyAnimationLayerImageRaster* Layer, TArray<FString> Paths, int iCellIndex)
+FOdysseyPainterEditorAnimationImportResult
+UOdysseyPainterEditorAnimationLayerFunctionLibrary::ImportImageSequence(UOdysseyAnimationLayerImageRaster* Layer, TArray<FString> Paths, FOdysseyImportTexturesParameters Parameters, int CellIndex)
 {
-    FOdysseyPainterEditorAnimationLayerImport import_layer;
-    return import_layer.ImportImageSequence( Layer, Paths, iCellIndex );
+    UOdysseyAnimation* animation = Layer->GetAnimation();
+    if (!animation)
+        return FOdysseyPainterEditorAnimationImportResult();
+
+    FOdysseyImportTexturesParameters params = Parameters;
+    params.Init(Paths, animation->GetWidth(), animation->GetHeight());
+    return FOdysseyPainterEditorAnimationLayerImport::ImportTextureSequence( Layer, params, CellIndex );
 }
 
 TArray<FString>

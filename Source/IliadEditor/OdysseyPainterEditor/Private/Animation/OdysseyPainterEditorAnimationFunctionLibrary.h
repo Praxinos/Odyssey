@@ -14,10 +14,10 @@ class UOdysseyPainterEditorAnimationFunctionLibrary : public UBlueprintFunctionL
 
 public:
     UFUNCTION(BlueprintCallable, Category="Odyssey|Animation")
-    static UOdysseyAnimationLayerImageRaster* ImportTextureSequence(UOdysseyAnimation* Animation, TArray<UTexture2D*> Textures, UOdysseyAnimationLayer* ParentLayer = nullptr, int IndexInParent = 0);
+    static FOdysseyPainterEditorAnimationImportResult ImportTextureSequence(UOdysseyAnimation* Animation, TArray<UTexture2D*> Textures, FOdysseyImportTexturesParameters Parameters);
 
     UFUNCTION(BlueprintCallable, Category="Odyssey|Animation")
-    static UOdysseyAnimationLayerImageRaster* ImportImageSequence(UOdysseyAnimation* Animation, TArray<FString> Paths, UOdysseyAnimationLayer* ParentLayer = nullptr, int IndexInParent = 0);
+    static FOdysseyPainterEditorAnimationImportResult ImportImageSequence(UOdysseyAnimation* Animation, TArray<FString> Paths, FOdysseyImportTexturesParameters Parameters);
 
     UFUNCTION(BlueprintCallable, Category="Odyssey|Animation")
     static FString ExportFrameAsImage(
@@ -59,10 +59,10 @@ class UOdysseyPainterEditorAnimationLayerFunctionLibrary : public UBlueprintFunc
 
 public:
     UFUNCTION(BlueprintCallable, Category="Odyssey|Animation")
-    static TArray<UOdysseyAnimationCellImageRaster*> ImportTextureSequence(UOdysseyAnimationLayerImageRaster* Layer, TArray<UTexture2D*> Textures, int CellIndex = -1);
+    static FOdysseyPainterEditorAnimationImportResult ImportTextureSequence(UOdysseyAnimationLayerImageRaster* Layer, TArray<UTexture2D*> Textures, FOdysseyImportTexturesParameters Parameters, int CellIndex = -1);
 
     UFUNCTION(BlueprintCallable, Category="Odyssey|Animation")
-    static TArray<UOdysseyAnimationCellImageRaster*> ImportImageSequence(UOdysseyAnimationLayerImageRaster* Layer, TArray<FString> Paths, int CellIndex = -1);
+    static FOdysseyPainterEditorAnimationImportResult ImportImageSequence(UOdysseyAnimationLayerImageRaster* Layer, TArray<FString> Paths, FOdysseyImportTexturesParameters Parameters, int CellIndex = -1);
 
     UFUNCTION(BlueprintCallable, Category="Odyssey|Animation")
     static FString ExportFrameAsImage(

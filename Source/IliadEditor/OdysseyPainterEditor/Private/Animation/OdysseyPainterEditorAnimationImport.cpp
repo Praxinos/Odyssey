@@ -29,135 +29,91 @@
 
 #define LOCTEXT_NAMESPACE "FOdysseyPainterEditorAnimationImport"
 
-//---
-
-FOdysseyPainterEditorAnimationImport::FOdysseyPainterEditorAnimationImport()
+FOdysseyPainterEditorAnimationImportResult
+FOdysseyPainterEditorAnimationImport::ImportTextureSequence(UOdysseyAnimation* Animation, const FOdysseyImportTexturesParameters& iImportData)
 {
-}
+    FOdysseyPainterEditorAnimationImportResult result;
 
-UOdysseyAnimationLayerImageRaster*
-FOdysseyPainterEditorAnimationImport::ImportTextureSequence(UOdysseyAnimation* Animation, TArray<UTexture2D*> Textures, UOdysseyAnimationLayer* ParentLayer, int IndexInParent)
-{
-    if ( Textures.Num() <= 0 || !Animation || (ParentLayer && ParentLayer->GetAnimation() != Animation))
-        return nullptr;
+    if ( iImportData.GetSourceTextures().Num() <= 0 || !Animation )
+        return result;
 
     UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(Animation->GetLayerStack());
     if ( !layerStack )
-        return nullptr;
+        return result;
 
     FScopedTransaction ScopedTransaction(LOCTEXT("LayerStack", "Import Textures Sequence"));
     layerStack->Modify();
 
-    UOdysseyLayer* layer = layerStack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass(), ParentLayer, IndexInParent);
+    UOdysseyLayer* layer = layerStack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass());
     UOdysseyAnimationLayerImageRaster* layerImageRaster = Cast<UOdysseyAnimationLayerImageRaster>(layer);
 
-    FScopedSlowTask progressBar(Textures.Num(), LOCTEXT("animation-editor.import-texture-dialog.progress-bar.title", "Importing Texture Sequence"));
+    FScopedSlowTask progressBar(iImportData.GetSourceTextures().Num(), LOCTEXT("animation-editor.import-texture-dialog.progress-bar.title", "Importing Texture Sequence"));
     progressBar.MakeDialog();
 
-    FOdysseyPainterEditorAnimationLayerImport import_layer;
-    import_layer.ImportTextureSequence(layerImageRaster, Textures, 0);
+    result = FOdysseyPainterEditorAnimationLayerImport::ImportTextureSequence(layerImageRaster, iImportData, 0);
 
-    return layerImageRaster;
+    result.mImportedLayers.Add(layerImageRaster);
+
+    return result;
 }
 
-UOdysseyAnimationLayerImageRaster*
-FOdysseyPainterEditorAnimationImport::ImportImageSequence(UOdysseyAnimation* Animation, TArray<FString> Paths, UOdysseyAnimationLayer* ParentLayer, int IndexInParent)
+FOdysseyPainterEditorAnimationImportResult
+FOdysseyPainterEditorAnimationLayerImport::ImportTextureSequence(UOdysseyAnimationLayerImageRaster* Layer, const FOdysseyImportTexturesParameters& iImportData, int iCellIndex)
 {
-    if ( Paths.Num() <= 0 || !Animation || (ParentLayer && ParentLayer->GetAnimation() != Animation))
-        return nullptr;
+    FOdysseyPainterEditorAnimationImportResult result;
 
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(Animation->GetLayerStack());
-    if ( !layerStack )
-        return nullptr;
-
-    FScopedTransaction ScopedTransaction(LOCTEXT("animation-editor.transaction.import-image-sequence", "Import Image Sequence"));
-    UOdysseyAnimationLayerImageRaster* layer = Cast<UOdysseyAnimationLayerImageRaster>(layerStack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass(), ParentLayer, IndexInParent));
-
-    FOdysseyPainterEditorAnimationLayerImport import_layer;
-    import_layer.ImportImageSequence(layer, Paths, 0);
-
-    return layer;
-}
-
-//---
-
-FOdysseyPainterEditorAnimationLayerImport::FOdysseyPainterEditorAnimationLayerImport()
-{
-}
-
-TArray<UOdysseyAnimationCellImageRaster*>
-FOdysseyPainterEditorAnimationLayerImport::ImportTextureSequence(UOdysseyAnimationLayerImageRaster* Layer, TArray<UTexture2D*> Textures, int iCellIndex)
-{
-    if ( Textures.Num() <= 0 || !Layer)
-        return {};
+    if ( iImportData.GetSourceTextures().Num() <= 0 || !Layer)
+        return result;
 
     UOdysseyAnimation* animation = Layer->GetAnimation();
     if( !animation )
-        return {};
+        return result;
 
     if (iCellIndex != INDEX_NONE)
         iCellIndex = FMath::Clamp(iCellIndex, 0, Layer->GetCells().Num());
 
     FScopedTransaction ScopedTransaction(LOCTEXT("LayerStack", "Import Textures Sequence"));
 
-    FScopedSlowTask progressBar(Textures.Num(), LOCTEXT("animation-editor.import-texture-dialog.progress-bar.title", "Importing Texture Sequence"));
+    FScopedSlowTask progressBar(iImportData.GetSourceTextures().Num(), LOCTEXT("animation-editor.import-texture-dialog.progress-bar.title", "Importing Texture Sequence"));
     progressBar.MakeDialog();
 
-    TArray<UOdysseyLayerCell*> cells = Layer->AddCells(UOdysseyAnimationCellImageRaster::StaticClass(), iCellIndex, Textures.Num());
+    TArray<UOdysseyLayerCell*> cells = Layer->AddCells(UOdysseyAnimationCellImageRaster::StaticClass(), iCellIndex, iImportData.GetSourceTextures().Num());
     TArray<UOdysseyAnimationCellImageRaster*> rasterCells;
 
-    TStrongObjectPtr<UTextureRenderTarget2D> renderTarget(NewObject<UTextureRenderTarget2D>());
-    renderTarget->RenderTargetFormat = RTF_RGBA8_SRGB;
-    renderTarget->bForceLinearGamma = false;
-    FIntRect dstRect = Layer->GetDefaultRenderRect();
-    renderTarget->InitAutoFormat(dstRect.Width(), dstRect.Height());
-
+    UTextureRenderTarget2D* renderTarget = iImportData.CreateRT();
     for( int i = 0; i < cells.Num(); i++ )
     {
         progressBar.EnterProgressFrame();
 
         UOdysseyAnimationCellImageRaster* cell = Cast<UOdysseyAnimationCellImageRaster>(cells[i]);
-        UTexture2D* texture = Textures[i];
-        texture->BlockOnAnyAsyncBuild();
-        FIntRect srcRect(0, 0, texture->GetSurfaceWidth(), texture->GetSurfaceHeight());
+        iImportData.Render(renderTarget, i);
 
-        const ERHIFeatureLevel::Type featureLevel = GMaxRHIFeatureLevel;
-
-        ENQUEUE_RENDER_COMMAND(ImportTextureSequence)(
-            [renderTarget, texture, dstRect, srcRect, featureLevel](FRHICommandListImmediate& RHICmdList)
-            {
-                FRDGBuilder graphBuilder(RHICmdList);
-
-                FRDGTextureRef renderTargetTexture = renderTarget->GetRenderTargetResource()->GetRenderTargetTexture( graphBuilder );
-                FRDGTextureRef externalTexture = graphBuilder.RegisterExternalTexture(CreateRenderTarget(texture->GetResource()->TextureRHI, TEXT("UOdysseyPainterEditorAnimationLayerFunctionLibrary::ImportTextureSequence::texture")));
-
-                AddClearRenderTargetPass(graphBuilder, renderTargetTexture, FLinearColor::Transparent, dstRect);
-                AddDrawTexturePass(
-                    graphBuilder,
-                    FScreenPassViewInfo(),
-                    externalTexture,
-                    renderTargetTexture,
-                    srcRect.Min,
-                    srcRect.Size(),
-                    dstRect.Min,
-                    srcRect.Size()
-                );
-
-                //execution du graph
-                graphBuilder.Execute();
-            }
-        );
+        //PATCH: Needed to avoid double sRGB application in GetRenderTargetImage()
+        if (animation->GetFormat() == EOdysseyAnimationFormat::BGRA8)
+        {
+            renderTarget->RenderTargetFormat = RTF_RGBA8_SRGB;
+            renderTarget->bForceLinearGamma = false;
+        }
+        //PATCH: End
 
         FImage OutImage;
-        if (!FImageUtils::GetRenderTargetImage(renderTarget.Get(), OutImage))
+        if (!FImageUtils::GetRenderTargetImage(renderTarget, OutImage))
             continue;
+
+        //PATCH: Needed to avoid double sRGB application in GetRenderTargetImage()
+        if (animation->GetFormat() == EOdysseyAnimationFormat::BGRA8)
+        {
+            renderTarget->RenderTargetFormat = RTF_RGBA8;
+            renderTarget->bForceLinearGamma = true;
+        }
+        //PATCH: End
 
         ::ULIS::eFormat format = ULISFormatForRawImageFormat(OutImage.Format);
         ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
-        TSharedPtr<::ULIS::FBlock> block = MakeShareable(new ::ULIS::FBlock( dstRect.Width(), dstRect.Height(), format ));
+        TSharedPtr<::ULIS::FBlock> block = MakeShareable(new ::ULIS::FBlock( renderTarget->GetSurfaceWidth(), renderTarget->GetSurfaceHeight(), format ));
         CopyImageToBlock(OutImage, block.Get());
 
-        rasterCells.Add(cell);
+        result.mImportedCells.Add(cell);
 
         TSharedPtr<FOdysseyRasterBlock> rasterBlock = cell->GetRasterBlock();
         FOdysseyRasterBlockMutator rasterBlockMutator(rasterBlock, false);
@@ -166,60 +122,7 @@ FOdysseyPainterEditorAnimationLayerImport::ImportTextureSequence(UOdysseyAnimati
         rasterBlockMutator.Commit();
     }
 
-    return rasterCells;
-}
-
-TArray<UOdysseyAnimationCellImageRaster*>
-FOdysseyPainterEditorAnimationLayerImport::ImportImageSequence(UOdysseyAnimationLayerImageRaster* Layer, TArray<FString> Paths, int iCellIndex)
-{
-    if ( Paths.Num() <= 0 || !Layer)
-        return {};
-
-    UOdysseyAnimation* animation = Layer->GetAnimation();
-    if( !animation )
-        return {};
-
-    ::ULIS::eFormat format = ::ULIS::Format_BGRA8;
-    switch(animation->GetFormat())
-    {
-        case EOdysseyAnimationFormat::BGRA8: format = ::ULIS::Format_BGRA8;
-        case EOdysseyAnimationFormat::RGBAF: format = ::ULIS::Format_RGBAF;
-    }
-
-    if (iCellIndex != INDEX_NONE)
-        iCellIndex = FMath::Clamp(iCellIndex, 0, Layer->GetCells().Num());
-
-    FScopedSlowTask progressBar(Paths.Num(), LOCTEXT("animation-editor.import-image-sequence.progress-bar.title", "Importing Image Sequence"));
-    progressBar.MakeDialog();
-
-    TStrongObjectPtr<UTextureFactory> TextureFactory(NewObject<UTextureFactory>());
-    TArray<TStrongObjectPtr<UTexture2D>> importedTextures;
-    importedTextures.Reserve(Paths.Num());
-    for (const FString& filename : Paths)
-    {
-        progressBar.EnterProgressFrame();
-
-        UObject* importedObject = UFactory::StaticImportObject(UTexture2D::StaticClass(), GetTransientPackage(), NAME_None, EObjectFlags::RF_NoFlags, *filename, nullptr, TextureFactory.Get());
-        UTexture2D* importedTexture = Cast<UTexture2D>(importedObject);
-        if (!importedTexture)
-            continue;
-
-        importedTextures.Emplace(importedTexture);
-    }
-
-    #if WITH_EDITOR
-        FScopedTransaction ScopedTransaction(LOCTEXT("animation-editor.transaction.import-image-sequence", "Import Image Sequence"));
-    #endif
-
-    TArray<UTexture2D*> textures;
-
-    for (int i = 0; i < importedTextures.Num(); i++)
-    {
-        textures.Add(importedTextures[i].Get());
-    }
-
-    FOdysseyPainterEditorAnimationLayerImport import_layer;
-    return import_layer.ImportTextureSequence(Layer, textures, iCellIndex);
+    return result;
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -101,7 +101,6 @@
 
 #include "Shortcuts/OdysseyLayerStackGlobalShortcuts.h"
 #include "Shortcuts/Global/OdysseyPainterEditorGlobalShortcuts.h"
-#include "Shortcuts/Global/OdysseyPainterEditorGlobalToolsShortcuts.h"
 #include "Shortcuts/Global/OdysseyAnimationGlobalShortcuts.h"
 #include "Mesh/FOdysseyMeshSelector.h"
 #include "OdysseyPainterEditorSource.h"
@@ -316,9 +315,8 @@ FOdysseyPainterEditor::InitShortcuts()
         }
     );
 
-    GetShortcuts().Add(MakeShared<FOdysseyLayerStackGlobalShortcuts>(layerStack));
-    GetShortcuts().Add(MakeShared<FOdysseyPainterEditorGlobalToolsShortcuts>(this));
     GetShortcuts().Add(MakeShared<FOdysseyPainterEditorGlobalShortcuts>(this));
+    GetShortcuts().Add(MakeShared<FOdysseyLayerStackGlobalShortcuts>(layerStack));
     GetShortcuts().Add(MakeShared<FOdysseyAnimationGlobalShortcuts>(animation, currentFrame, onTransactCurrentFrame));
 }
 

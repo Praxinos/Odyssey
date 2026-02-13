@@ -1,0 +1,211 @@
+// IDDN.FR.001.060015.014.S.X.2019.000.00000
+// ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
+
+#include "SOdysseyImportTextureScanCleaner.h"
+
+#include "SCurveEditor.h"
+#include "Widgets/Input/SNumericEntryBox.h"
+#include "Widgets/Input/NumericUnitTypeInterface.inl"
+
+#define LOCTEXT_NAMESPACE "PainterEditor"
+
+// Construction / Destruction
+SOdysseyImportTextureScanCleaner::~SOdysseyImportTextureScanCleaner()
+{
+
+}
+
+void
+SOdysseyImportTextureScanCleaner::Construct(const FArguments& InArgs)
+{
+    mData = InArgs._Data;
+    mOnChanged = InArgs._OnChanged;
+
+    mData->GetScanCleanerCurve()->OnUpdateCurve.AddSP(SharedThis(this), &SOdysseyImportTextureScanCleaner::OnUpdateCurve);
+
+    FMargin alignmentButtonPadding(4.0f);
+
+    ChildSlot
+    .HAlign(HAlign_Fill)
+    .VAlign(VAlign_Top)
+    [
+        SNew(SVerticalBox)
+        + SVerticalBox::Slot()
+        .Padding(FMargin(0.f, 0.f, 0.f, 4.f))
+        .AutoHeight()
+        [
+            SNew(SHorizontalBox)
+            + SHorizontalBox::Slot()
+            [
+                SNew(STextBlock)
+                .Text(LOCTEXT("import-texture-dialog.scan-cleaner.activate", "Activate Scan Cleaner"))
+            ]
+
+            + SHorizontalBox::Slot()
+            [
+                SNew(SCheckBox)
+                //.Padding(alignmentButtonPadding)
+                //.HAlign( HAlign_Center )
+                .OnCheckStateChanged( this, &SOdysseyImportTextureScanCleaner::OnActivateCheckBoxStateChanged)
+                .IsChecked( this, &SOdysseyImportTextureScanCleaner::IsActivateChecked )
+            ]
+        ]
+
+        + SVerticalBox::Slot()
+        .Padding(FMargin(0.f, 0.f, 0.f, 4.f))
+        .AutoHeight()
+        [
+            SNew(SHorizontalBox)
+            + SHorizontalBox::Slot()
+            [
+                SNew(STextBlock)
+                .Text(LOCTEXT("import-texture-dialog.scan-cleaner.color-saturation", "Color Saturation"))
+            ]
+
+            + SHorizontalBox::Slot()
+            [
+                SNew(SNumericEntryBox<float>)
+                .IsEnabled_Lambda([this]() { return mData->GetIsScanCleanerActivated();})
+                .Value_Lambda(
+                    [this]()
+                    {
+                        return mData->GetScanCleanerColorSaturation() * 100.f;
+                    }
+                )
+                .TypeInterface(MakeShareable( new TNumericUnitTypeInterface<float>( EUnit::Percentage ) ))
+                .AllowSpin(true)
+                .LinearDeltaSensitivity(5)
+                .Delta(1)
+                .MinValue(0)
+                .MinSliderValue(0)
+                .MaxValue(TOptional<float>())
+                .MaxSliderValue(TOptional<float>())
+                .MinFractionalDigits(0)
+                .MaxFractionalDigits(0)
+                .OnValueChanged_Lambda(
+                    [this](float iValue)
+                    {
+                        mData->SetScanCleanerColorSaturation(iValue / 100.f);
+                        mOnChanged.ExecuteIfBound();
+                    }
+                )
+            ]
+        ]
+
+        + SVerticalBox::Slot()
+        .Padding(FMargin(0.f, 0.f, 0.f, 4.f))
+        .AutoHeight()
+        [
+            SNew(SHorizontalBox)
+            + SHorizontalBox::Slot()
+            [
+                SNew(STextBlock)
+                .Text(LOCTEXT("import-texture-dialog.scan-cleaner.color-value", "Color Value"))
+            ]
+
+            + SHorizontalBox::Slot()
+            [
+                SNew(SNumericEntryBox<float>)
+                .IsEnabled_Lambda([this]() { return mData->GetIsScanCleanerActivated();})
+                .Value_Lambda(
+                    [this]()
+                    {
+                        return mData->GetScanCleanerColorValue() * 100.f;
+                    }
+                )
+                .TypeInterface(MakeShareable( new TNumericUnitTypeInterface<float>( EUnit::Percentage ) ))
+                .AllowSpin(true)
+                .Delta(1)
+                .LinearDeltaSensitivity(5)
+                .MinValue(0)
+                .MinSliderValue(0)
+                .MaxValue(TOptional<float>())
+                .MaxSliderValue(TOptional<float>())
+                .MinFractionalDigits(0)
+                .MaxFractionalDigits(0)
+                .OnValueChanged_Lambda(
+                    [this](float iValue)
+                    {
+                        mData->SetScanCleanerColorValue(iValue / 100.f);
+                        mOnChanged.ExecuteIfBound();
+                    }
+                )
+            ]
+        ]
+
+        + SVerticalBox::Slot()
+        .Padding(FMargin(0.f, 0.f, 0.f, 4.f))
+        .AutoHeight()
+        [
+            /*
+                "Input" is X axis
+                "Output" is Y axis
+                "TimelineLength" is the length of the highlighted part of the editor (We don't want it to be highlighted so it's 0.f)
+            */
+
+            SAssignNew(mCurveEditor, SCurveEditor)
+            .IsEnabled_Lambda([this]() { return mData->GetIsScanCleanerActivated();})
+            .ViewMinInput_Lambda( [this]() { return mViewMinInput; })
+            .ViewMaxInput_Lambda( [this]() { return mViewMaxInput; })
+            .ViewMinOutput_Lambda( [this]() { return mViewMinOutput; })
+            .ViewMaxOutput_Lambda( [this]() { return mViewMaxOutput; })
+            .DataMinInput(-0.05f) //can't scroll before 0.f
+            .DataMaxInput(1.05f) //can't scroll past 1.f
+            .TimelineLength(0.f)
+            //.InputSnap(0.5f) //Snap value on X axis
+            //.OutputSnap(1.0f)  //Snap value on Y axis
+            //.InputSnappingEnabled(true) //Activate Snap on X axis
+            //.OutputSnappingEnabled(true) //Activate Snap on Y axis
+            //.AreCurvesVisible(false) //doew not seem to change anything
+            //.DrawCurve(false) //if false, draw only keys and not the curve itself
+            .DesiredSize(FVector2D(300, 300))
+            .HideUI(false) //if true, hides the overlay UI when mouse is out of the widget
+            //.AllowZoomOutput(false) //if false, force the Y axis zoom to be fixed
+            .AlwaysDisplayColorCurves(true)
+            .AlwaysHideGradientEditor(true)
+            .ZoomToFitVertical(false) //Simulates a click on the Zoom To Fit Vertically button when creating the widget
+            .ZoomToFitHorizontal(false) //Simulates a click on the Zoom To Fit Vertically button when creating the widget
+            .OnSetInputViewRange(this, &SOdysseyImportTextureScanCleaner::OnSetInputViewRange)
+            .OnSetOutputViewRange(this, &SOdysseyImportTextureScanCleaner::OnSetOutputViewRange)
+            .ShowZoomButtons(false)
+        ]
+    ];
+
+    mCurveEditor->SetCurveOwner(mData->GetScanCleanerCurve());
+}
+
+void
+SOdysseyImportTextureScanCleaner::OnActivateCheckBoxStateChanged(ECheckBoxState InCheckState)
+{
+    mData->SetIsScanCleanerActivated(InCheckState == ECheckBoxState::Checked);
+    mOnChanged.ExecuteIfBound();
+}
+
+ECheckBoxState
+SOdysseyImportTextureScanCleaner::IsActivateChecked() const
+{
+    return mData->GetIsScanCleanerActivated() ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+}
+
+void
+SOdysseyImportTextureScanCleaner::OnSetInputViewRange(float Min, float Max)
+{
+    mViewMinInput = -0.05f;
+    mViewMaxInput = 1.05f;
+}
+
+void
+SOdysseyImportTextureScanCleaner::OnSetOutputViewRange(float Min, float Max)
+{
+    float range = Max - Min;
+    mViewMinOutput = FMath::Max(Min, -0.05f);
+    mViewMaxOutput = mViewMinOutput + range;
+}
+
+void
+SOdysseyImportTextureScanCleaner::OnUpdateCurve( UCurveBase* Curve, EPropertyChangeType::Type ChangeType)
+{
+    mOnChanged.ExecuteIfBound(); //Allows to refresh viewport
+}
+
+#undef LOCTEXT_NAMESPACE
