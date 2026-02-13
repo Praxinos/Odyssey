@@ -12,6 +12,12 @@
 #include "UObject/DevObjectVersion.h"
 
 FSimpleMulticastDelegate&
+UOdysseyAnimationPlayer::OnAnimationChanged()
+{
+    return mOnAnimationChanged;
+}
+
+FSimpleMulticastDelegate&
 UOdysseyAnimationPlayer::OnCursorFrameChanged()
 {
     return mOnCursorFrameChanged;
@@ -42,6 +48,7 @@ UOdysseyAnimationPlayer::PostInitProperties()
         return;
 
     RenderTarget = NewObject<UTextureRenderTarget2D>(this, NAME_None, RF_Public | RF_Transient);
+    RenderTarget->LODGroup = LODGroup;
     RenderTarget->RenderTargetFormat = RTF_RGBA16f;
     RenderTarget->bAutoGenerateMips = true;
     RenderTarget->UpdateResource();
@@ -484,6 +491,7 @@ UOdysseyAnimationPlayer::AnimationChanged()
     if (!Animation)
     {
         RenderTarget->ResizeTarget(1, 1);
+        mOnAnimationChanged.Broadcast();
         return;
     }
 
@@ -495,6 +503,20 @@ UOdysseyAnimationPlayer::AnimationChanged()
     UpdateTexture();
 
     IOdysseyRenderingAbility::OnRenderingChangedDelegate().AddUObject(this, &UOdysseyAnimationPlayer::OnRenderingChanged);
+
+    mOnAnimationChanged.Broadcast();
+}
+
+void
+UOdysseyAnimationPlayer::LODGroupChanged()
+{
+    RenderTarget->LODGroup = LODGroup;
+    RenderTarget->UpdateResource();
+    RenderTarget->UpdateResourceImmediate(false);
+
+    mInvalidTileMap.Clear();
+    mImageRenderingComposition.Empty();
+    UpdateTexture();
 }
 
 void
@@ -584,10 +606,25 @@ UOdysseyAnimationPlayer::GetIgnorePrePostBehaviour() const
 }
 
 void
+UOdysseyAnimationPlayer::SetLODGroup(enum TextureGroup iTextureGroup)
+{
+    LODGroup = iTextureGroup;
+    LODGroupChanged();
+}
+
+enum TextureGroup
+UOdysseyAnimationPlayer::GetLODGroup() const
+{
+    return LODGroup;
+}
+
+void
 UOdysseyAnimationPlayer::PropertyChanged(const FName& iPropertyName)
 {
     if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationPlayer, Animation) )
         AnimationChanged();
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationPlayer, LODGroup) )
+        LODGroupChanged();
 }
 
 void
@@ -632,6 +669,11 @@ UOdysseyAnimationPlayer::PostLoad()
     IOdysseyRenderingAbility::OnRenderingChangedDelegate().RemoveAll(this);
     IOdysseyRenderingAbility::OnRenderingChangedDelegate().AddUObject(this, &UOdysseyAnimationPlayer::OnRenderingChanged);
 
+    //Ensure Render Target has the right options
+    RenderTarget->LODGroup = LODGroup;
+    RenderTarget->RenderTargetFormat = RTF_RGBA16f;
+    RenderTarget->bAutoGenerateMips = true;
+
     //Reset Image Rendering to force a render
     mInvalidTileMap = FOdysseyInvalidTileMap(64, Animation->GetWidth(), Animation->GetHeight());
     mImageRenderingComposition.Empty();
@@ -672,6 +714,9 @@ UOdysseyAnimationPlayer::PostDuplicate(EDuplicateMode::Type iDuplicateMode)
     mImageRenderingComposition.Empty();
 
     RenderTarget = NewObject<UTextureRenderTarget2D>(this, NAME_None, RF_Public | RF_Transient);
+    RenderTarget->LODGroup = LODGroup;
+    RenderTarget->RenderTargetFormat = RTF_RGBA16f;
+    RenderTarget->bAutoGenerateMips = true;
 
     //Resize Render Target To match Animation size if needed
     if (Animation)

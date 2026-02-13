@@ -464,10 +464,20 @@ FOdysseyPainterEditorAnimationFlipSystem::FlipTo(int iDelta)
 }
 
 bool
+FOdysseyPainterEditorAnimationFlipSystem::HandleKeyDownEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent)
+{
+    //Intercept ALL events while flipping
+    return mIsFlipping;
+}
+
+bool
 FOdysseyPainterEditorAnimationFlipSystem::HandleKeyUpEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent)
 {
+    if (!mIsFlipping)
+        return false;
+
     EndFlipping();
-    return false; //false means Unreal will continue as if we did nothing
+    return true; //false means Unreal will continue as if we did nothing
 }
 
 bool
@@ -509,6 +519,48 @@ FOdysseyPainterEditorAnimationFlipSystem::HandleMouseMoveEvent(FSlateApplication
 
     mMousePositionReference = MouseEvent.GetScreenSpacePosition();
     return false;
+}
+
+bool
+FOdysseyPainterEditorAnimationFlipSystem::HandleAnalogInputEvent(FSlateApplication& SlateApp, const FAnalogInputEvent& InAnalogInputEvent)
+{
+    //Intercept ALL events while flipping
+    return mIsFlipping;
+}
+
+bool
+FOdysseyPainterEditorAnimationFlipSystem::HandleMouseButtonDownEvent( FSlateApplication& SlateApp, const FPointerEvent& MouseEvent)
+{
+    //Intercept ALL events while flipping
+    return mIsFlipping;
+}
+
+bool
+FOdysseyPainterEditorAnimationFlipSystem::HandleMouseButtonUpEvent( FSlateApplication& SlateApp, const FPointerEvent& MouseEvent)
+{
+    //Intercept ALL events while flipping
+    return mIsFlipping;
+}
+
+bool
+FOdysseyPainterEditorAnimationFlipSystem::HandleMouseButtonDoubleClickEvent(FSlateApplication& SlateApp, const FPointerEvent& MouseEvent)
+{
+    //Intercept ALL events while flipping
+    return mIsFlipping;
+}
+
+bool
+FOdysseyPainterEditorAnimationFlipSystem::HandleMouseWheelOrGestureEvent(FSlateApplication& SlateApp, const FPointerEvent& InWheelEvent, const FPointerEvent* InGestureEvent)
+{
+    //Intercept ALL events while flipping
+    return mIsFlipping;
+}
+
+bool
+FOdysseyPainterEditorAnimationFlipSystem::HandleMotionDetectedEvent(FSlateApplication& SlateApp, const FMotionEvent& MotionEvent)
+{
+    //Intercept ALL events while flipping
+    return mIsFlipping;
 }
 
 void

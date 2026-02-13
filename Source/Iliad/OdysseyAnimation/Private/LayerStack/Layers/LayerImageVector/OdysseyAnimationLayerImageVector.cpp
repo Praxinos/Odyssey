@@ -196,6 +196,11 @@ UOdysseyAnimationLayerImageVector::RequestRedrawAllVectorCells()
 void
 UOdysseyAnimationLayerImageVector::SetIsWireframe(bool Value)
 {
+    if( !IsEditable() )
+        return;
+
+    Modify();
+
     bIsWireframe = Value;
 
     RequestRedrawAllVectorCells();
@@ -206,6 +211,11 @@ UOdysseyAnimationLayerImageVector::SetIsWireframe(bool Value)
 void
 UOdysseyAnimationLayerImageVector::SetIsColored(bool Value)
 {
+    if( !IsEditable() )
+        return;
+
+    Modify();
+
     bIsColored = Value;
 
     RequestRedrawAllVectorCells();
@@ -299,17 +309,18 @@ UOdysseyAnimationLayerImageVector::CreateMediaVector(int iFrameIndex)
 void
 UOdysseyAnimationLayerImageVector::AutoCreateCell(int iFrameIndex)
 {
-    if (IsLockedRecursively())
+    if( !IsEditable() )
         return;
-
-    FScopedTransaction transaction(LOCTEXT("layer-image-vector.create-cell-transaction", "Create Cell"));
 
     FInt32Range range = GetFrameRange();
 
     //Check if iFrameIndex is Out Of Range
     if ( iFrameIndex < range.GetLowerBoundValue())
     {
+        FScopedTransaction transaction(LOCTEXT("layer-image-vector.create-cell-transaction", "Create Cell"));
+
         Modify();
+
         //Add a frame at current frame and extend it
         UOdysseyLayerCell* cell = AddCell(UOdysseyAnimationCellImageVector::StaticClass(), 0);
         cell->SetExposure(range.GetLowerBoundValue() - iFrameIndex);
@@ -319,7 +330,10 @@ UOdysseyAnimationLayerImageVector::AutoCreateCell(int iFrameIndex)
 
     if ( iFrameIndex > range.GetUpperBoundValue())
     {
+        FScopedTransaction transaction( LOCTEXT( "layer-image-vector.create-cell-transaction", "Create Cell" ) );
+
         Modify();
+
         int cellExposure = Cells.Last()->GetExposure() + iFrameIndex - range.GetUpperBoundValue() - 1;
         Cells.Last()->SetExposure(cellExposure);
         UOdysseyLayerCell* cell = AddCell(UOdysseyAnimationCellImageVector::StaticClass());
@@ -330,11 +344,11 @@ UOdysseyAnimationLayerImageVector::AutoCreateCell(int iFrameIndex)
 void
 UOdysseyAnimationLayerImageVector::Merge(const TArray<UOdysseyLayer*>& iLayers)
 {
-    if (IsLockedRecursively())
-        return;
-
     UOdysseyAnimation* animation = GetAnimation();
     if ( !animation )
+        return;
+
+    if( !IsEditable() )
         return;
 
     Modify();

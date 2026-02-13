@@ -26,7 +26,11 @@
 #include "OdysseyPixelFormat.h"
 #include "ULISUtils.h"
 #include "UObject/ObjectSaveContext.h"
+#include "Undo/OdysseyVectorUndo.h"
+#include "Undo/OdysseyVectorUndoSceneClear.h"
 #endif
+
+#define LOCTEXT_NAMESPACE "Animation"
 
 UOdysseyAnimationCellImageVector::~UOdysseyAnimationCellImageVector()
 {
@@ -384,4 +388,21 @@ UOdysseyAnimationCellImageVector::OnRefreshReferencedPalette(UOdysseyPalette* iP
         vectorCell->GetLayer()->RequestRedraw(vectorCell, 0);
     }
 }
+
+void
+UOdysseyAnimationCellImageVector::Clear()
+{
+    // needed for undos
+    if (GUndo)
+    {
+        FScopedTransaction ScopedTransaction(LOCTEXT("animation-cell-vector.clear", "Clear"));
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSceneClear( mVectorCell->GetScene() );
+        GUndo->StoreUndo(GEditor, TUniquePtr<FOdysseyVectorUndo>(undo));
+    }
+
+    mVectorCell->SetScene( new FOdysseyVectorGroupPaint("Scene") );
+    mVectorCell->GetLayer()->RequestRedraw( mVectorCell.Get(), 0 );
+    mVectorCell->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+}
+
 #endif

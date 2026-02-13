@@ -70,27 +70,37 @@ public:
 protected:
     //Property changed methods
     void Initialize();
-    virtual void ModeChanged();
-    virtual void AnimationChanged();
-    virtual void PlayerChanged();
+    void ModeChanged();
+    void AnimationChanged();
+    void PlayerChanged();
+    void LODGroupChanged();
     void MaterialChanged();
     void CreateMaterialInstance();
+
+    void OnPlayerAnimationChanged();
+    void RescaleToMatchAnimation(UOdysseyAnimation* iAnimation);
 
 private:
     void RefreshMaterialTexture();
 
 protected:
+    UPROPERTY( EditAnywhere, Category="Animation")
+    TObjectPtr<UMaterialInterface> Material;
+
     UPROPERTY(EditAnywhere, Category="Animation")
     EOdysseyAnimationComponentMode Mode = EOdysseyAnimationComponentMode::Animation;
 
     UPROPERTY( EditAnywhere, Category="Animation", meta=(EditCondition = "Mode==EOdysseyAnimationComponentMode::Animation", EditConditionHides))
     TObjectPtr<UOdysseyAnimation> Animation;
 
+    UPROPERTY()
+    TObjectPtr<UOdysseyAnimationPlayer> PreviousPlayer; //Only used to remove delegates from Player property when it changes
+
     UPROPERTY( EditAnywhere, Category="Animation", meta=(EditCondition = "Mode==EOdysseyAnimationComponentMode::Player", EditConditionHides))
     TObjectPtr<UOdysseyAnimationPlayer> Player;
 
-    UPROPERTY( EditAnywhere, Category="Animation")
-    TObjectPtr<UMaterialInterface> Material;
+    UPROPERTY( EditAnywhere, Category="Animation", meta=(DisplayName="Texture Group"), AssetRegistrySearchable )
+    TEnumAsByte<enum TextureGroup> LODGroup = TEXTUREGROUP_Pixels2D;
 
 private:
     UPROPERTY()

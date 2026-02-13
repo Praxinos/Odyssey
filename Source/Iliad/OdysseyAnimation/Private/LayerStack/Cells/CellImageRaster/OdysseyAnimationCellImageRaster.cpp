@@ -23,7 +23,10 @@
 #include "TextureCompiler.h"
 #include "UObject/ObjectSaveContext.h"
 #include "OdysseyRasterBlockMutator.h"
+
 #endif
+
+#define LOCTEXT_NAMESPACE "Animation"
 
 UOdysseyAnimationCellImageRaster::UOdysseyAnimationCellImageRaster()
 {
@@ -274,4 +277,26 @@ UOdysseyAnimationCellImageRaster::PreSave(FObjectPreSaveContext SaveContext)
 
     //InitTexture();
 }
+
+void
+UOdysseyAnimationCellImageRaster::Clear()
+{
+    FScopedTransaction ScopedTransaction(LOCTEXT("animation-cell-raster.clear", "Clear"));
+
+    TSharedPtr<FOdysseyRasterBlock> rasterBlock = GetRasterBlock();
+
+    FOdysseyRasterBlockMutator mutator(rasterBlock);
+    mutator.EditTilesFromRects(
+        { ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) },
+        [&](TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+        {
+            ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
+            ::ULIS::FEvent eventClear;
+            ctx.Clear(*iBlock, ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventClear);
+            return { eventClear };
+        }
+    );
+    mutator.Commit();
+}
+
 #endif

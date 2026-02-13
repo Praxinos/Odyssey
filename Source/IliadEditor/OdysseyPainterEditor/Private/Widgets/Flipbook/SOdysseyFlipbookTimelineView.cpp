@@ -87,14 +87,6 @@ SOdysseyFlipbookTimelineView::Rebuild()
 
         FUIAction Zoom100Action(FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::OnZoomMenuEntryClicked, 1.0));
         ZoomMenuBuilder.AddMenuEntry(LOCTEXT("timeline.zoom.100percent.name", "100%"), LOCTEXT("timeline.zoom.100percent.tooltip", "Show the texture in its original size."), FSlateIcon(), Zoom100Action);
-
-        FUIAction Zoom200Action(FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::OnZoomMenuEntryClicked, 2.0));
-        ZoomMenuBuilder.AddMenuEntry(LOCTEXT("timeline.zoom.200percent.name", "200%"), LOCTEXT("timeline.zoom.200percent.tooltip", "Show the texture at twice its size."), FSlateIcon(), Zoom200Action);
-
-        FUIAction Zoom400Action(FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineView::OnZoomMenuEntryClicked, 4.0));
-        ZoomMenuBuilder.AddMenuEntry(LOCTEXT("timeline.zoom.400percent.name", "400%"), LOCTEXT("timeline.zoom.400percent.tooltip", "Show the texture at four times its size."), FSlateIcon(), Zoom400Action);
-
-        ZoomMenuBuilder.AddMenuSeparator();
     }
 
     ChildSlot.AttachWidget(

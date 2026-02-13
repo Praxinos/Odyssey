@@ -30,7 +30,7 @@ FOdysseyAnimationTimelineMoveTool::OnMouseButtonDown(const FMouseEventParams& iP
     {
         mOffsettingLayer = true;
         mLayerOffsetData.mIsDragDetected = false;
-        mLayerOffsetData.mMousePosition = iParams.mMouseEvent.GetScreenSpacePosition().X;
+        mLayerOffsetData.mMousePosition = iParams.mMouseEvent.GetScreenSpacePosition();
         mLayerOffsetData.mInitialOffset = iParams.mLayer->GetCellsOffset();
 
         return FReply::Handled().DetectDrag(iParams.mWidget.ToSharedRef(), EKeys::LeftMouseButton);
@@ -71,7 +71,7 @@ FOdysseyAnimationTimelineMoveTool::OnMouseMove(const FMouseEventParams& iParams)
     if ( mOffsettingLayer && mLayerOffsetData.mIsDragDetected)
     {
         const int minOffset = 0;
-        float mouseOffset = iParams.mMouseEvent.GetScreenSpacePosition().X - mLayerOffsetData.mMousePosition;
+        float mouseOffset = iParams.mGeometry.AbsoluteToLocal(iParams.mMouseEvent.GetScreenSpacePosition() - mLayerOffsetData.mMousePosition + iParams.mGeometry.GetAbsolutePosition()).X;
         int offset = (int)(mLayerOffsetData.mInitialOffset + (mouseOffset / mTimelinePosition->GetFrameSize()));
 
         iParams.mLayer->SetCellsOffsetInteractive(FMath::Max(minOffset, offset));

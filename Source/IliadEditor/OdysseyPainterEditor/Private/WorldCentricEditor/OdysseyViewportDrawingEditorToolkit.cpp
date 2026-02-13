@@ -68,10 +68,6 @@ FOdysseyViewportDrawingEditorToolkit::Initialize(
     //Finish Initialization
     Init(iInitToolkitHost);
 
-    FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>(TEXT("LevelEditor"));
-
-    mEditor->InitTabs();
-
     static FString menuName = TEXT("LevelEditor.MainMenu");
 
     //Add Odyssey Specific section to the main menu to add entries at the right place easier
@@ -102,6 +98,8 @@ FOdysseyViewportDrawingEditorToolkit::Initialize(
 
     mLevelEditorMenuExtender = MakeShared<FExtender>();
     mEditor->ExtendMenu( mLevelEditorMenuExtender.ToSharedRef() );
+
+    FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>(TEXT("LevelEditor"));
     LevelEditorModule.GetMenuExtensibilityManager()->AddExtender(mLevelEditorMenuExtender);
 
     mEditor->BindShortcuts(this);
@@ -161,12 +159,6 @@ void
 FOdysseyViewportDrawingEditorToolkit::FocusWindow(UObject* ObjectToFocusOn)
 {
     //---
-}
-
-bool
-FOdysseyViewportDrawingEditorToolkit::CloseWindow()
-{
-    return mEditor->OnCloseRequested();
 }
 
 bool

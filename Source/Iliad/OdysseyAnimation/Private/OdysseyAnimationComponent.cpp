@@ -151,6 +151,13 @@ UOdysseyAnimationComponent::PostLoad()
     //as it could cause white material rendering
     //Instead we call RefreshMaterialTexture() in OnRegister().
     CreateMaterialInstance();
+
+    if (Player)
+    {
+        PreviousPlayer = Player;
+        Player->OnAnimationChanged().RemoveAll(this);
+        Player->OnAnimationChanged().AddUObject(this, &UOdysseyAnimationComponent::OnPlayerAnimationChanged);
+    }
 }
 
 void
@@ -202,38 +209,51 @@ UOdysseyAnimationComponent::ModeChanged()
 }
 
 void
+UOdysseyAnimationComponent::RescaleToMatchAnimation(UOdysseyAnimation* iAnimation)
+{
+    if (!iAnimation)
+        return;
+
+    float scaleW = (float)iAnimation->GetWidth() / (float)iAnimation->GetHeight();
+    SetRelativeScale3D(FVector(scaleW * 100.f, 1 * 100.f, 1)); // *100: to have something more visible than 1x1
+    MarkRenderStateDirty();
+}
+
+void
 UOdysseyAnimationComponent::AnimationChanged()
 {
     if (Mode == EOdysseyAnimationComponentMode::Animation)
     {
         DefaultPlayer->SetAnimation(Animation);
-        if (Animation)
-        {
-            float scaleW = (float)Animation->GetWidth() / (float)Animation->GetHeight();
-            SetRelativeScale3D(FVector(scaleW * 100.f, 1 * 100.f, 1)); // *100: to have something more visible than 1x1
-        }
-        MarkRenderStateDirty();
+        RescaleToMatchAnimation(Animation);
+    }
+}
+
+void
+UOdysseyAnimationComponent::OnPlayerAnimationChanged()
+{
+    if (Mode == EOdysseyAnimationComponentMode::Player)
+    {
+        if (Player)
+            RescaleToMatchAnimation(Player->GetAnimation());
     }
 }
 
 void
 UOdysseyAnimationComponent::PlayerChanged()
 {
-    if (Mode == EOdysseyAnimationComponentMode::Player)
-    {
-        if (Player)
-        {
-            UOdysseyAnimation* animation = Player->GetAnimation();
-            if (animation)
-            {
-                UFUNCTION(Category = "Actions", CallInEditor)
-                float scaleW = (float)animation->GetWidth() / (float)animation->GetHeight();
-                SetRelativeScale3D(FVector(scaleW * 100.f, 1 * 100.f, 1)); // *100: to have something more visible than 1x1
-            }
-        }
+    if (PreviousPlayer)
+        PreviousPlayer->OnAnimationChanged().RemoveAll(this);
 
-        RefreshMaterialTexture();
+    PreviousPlayer = Player;
+
+    if (Player)
+    {
+        Player->OnAnimationChanged().RemoveAll(this);
+        Player->OnAnimationChanged().AddUObject(this, &UOdysseyAnimationComponent::OnPlayerAnimationChanged);
+        RescaleToMatchAnimation(Player->GetAnimation());
     }
+    RefreshMaterialTexture();
 }
 
 UMaterialInterface*
@@ -256,6 +276,12 @@ UOdysseyAnimationComponent::MaterialChanged()
     RefreshMaterialTexture();
 }
 
+void
+UOdysseyAnimationComponent::LODGroupChanged()
+{
+    DefaultPlayer->SetLODGroup(LODGroup);
+}
+
 #if WITH_EDITOR
 void
 UOdysseyAnimationComponent::PropertyChanged(const FName& iPropertyName)
@@ -268,6 +294,8 @@ UOdysseyAnimationComponent::PropertyChanged(const FName& iPropertyName)
         PlayerChanged();
     if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationComponent, Material) )
         MaterialChanged();
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationComponent, LODGroup) )
+        LODGroupChanged();
 }
 
 void

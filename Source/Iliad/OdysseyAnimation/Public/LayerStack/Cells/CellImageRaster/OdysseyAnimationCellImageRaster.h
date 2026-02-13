@@ -51,6 +51,7 @@ public:
 public:
     TSharedPtr<FOdysseyRasterBlock> GetRasterBlock() const;
     virtual FOdysseyMediaProvider GetMediaProvider() const override;
+    virtual void Clear() override;
 
 public:
     virtual void PostLoad() override;

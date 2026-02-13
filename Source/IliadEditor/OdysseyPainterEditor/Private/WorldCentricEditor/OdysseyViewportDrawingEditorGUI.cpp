@@ -40,12 +40,6 @@ FOdysseyViewportDrawingEditorGUI::Initialize()
 }
 
 void
-FOdysseyViewportDrawingEditorGUI::Finalize()
-{
-
-}
-
-void
 FOdysseyViewportDrawingEditorGUI::CustomizeAnimationEditorTimeline()
 {
     FOdysseyPainterEditor* editor = mExtension->GetEditor();

@@ -17,7 +17,6 @@ public:
 
 public:
     void Initialize();
-    void Finalize();
 
 private:
     void CustomizeAnimationEditorTimeline();

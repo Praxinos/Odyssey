@@ -27,6 +27,6 @@ private:
     {
         float mInitialOffset;
         bool mIsDragDetected = false;
-        double mMousePosition;
+        FVector2D mMousePosition;
     } mLayerOffsetData;
 };
