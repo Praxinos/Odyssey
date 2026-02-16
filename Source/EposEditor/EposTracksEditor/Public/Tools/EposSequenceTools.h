@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "Curves/KeyHandle.h"
+#include "KeyframeTrackEditor.h"
 #include "Misc/Guid.h"
 #include "KeyParams.h"
 #include "Misc/FrameNumber.h"
@@ -780,11 +781,18 @@ public:
     static void SortBindings( TArray<AOdysseyAnimationActor*> iAnimationActors, TArray<FGuid> iBindings, UMovieScene* iMovieScene, TArray<AOdysseyAnimationActor*>* oOrderedAnimationActors, TArray<FGuid>* oOrderedBindings );
 
 public:
-    static bool MoveAndScaleActor( AActor* ioActor, const ACineCameraActor* iCamera, float iNewDistance, EScaleActor iScaleType );
+    static bool MoveAndScaleActor( AActor* ioActor, const ACineCameraActor* iCamera, float iNewDistance, EScaleActor iScaleType, TSharedPtr<ISequencer> iSequencer );
     static bool CanMoveAndScaleActor( const AActor* iActor, const ACineCameraActor* iCamera );
 
-    static bool FitActorToCameraView( AActor* ioActor, const ACineCameraActor* iCamera );
+    static bool FitActorToCameraView( AActor* ioActor, const ACineCameraActor* iCamera, TSharedPtr<ISequencer> iSequencer );
     static bool CanFitActorToCameraView( const AActor* iActor, const ACineCameraActor* iCamera );
+
+private:
+    // Mainly from ...\UE_4.26\Engine\Source\Editor\MovieSceneTools\Private\TrackEditors\TransformTrackEditor.cpp
+    static void GetTransformKeys( ISequencer& iSequencer, const TOptional<FTransformData>& LastTransform, const FTransformData& CurrentTransform, EMovieSceneTransformChannel ChannelsToKey, UObject* Object, UMovieSceneSection* Section, FGeneratedTrackKeys& OutGeneratedKeys );
+    static bool AddKeysToSection( ISequencer& iSequencer, UMovieSceneSection* Section, FFrameNumber KeyTime, const FGeneratedTrackKeys& Keys, ESequencerKeyMode KeyMode, EKeyFrameTrackEditorSetDefault SetDefault );
+
+    static void UpdateChannel( TSharedPtr<ISequencer> iSequencer, AActor* ioActor, const ACineCameraActor* iCamera, EMovieSceneTransformChannel iChannelsToApply );
 
 // Inside EposSequenceTools_Camera
 public:

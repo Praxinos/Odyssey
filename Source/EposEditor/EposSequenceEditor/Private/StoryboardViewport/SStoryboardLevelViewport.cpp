@@ -2087,7 +2087,7 @@ SStoryboardLevelViewport::SetMoveAndScaleActorDistance( float iDistance )
 
     ACineCameraActor* camera = Cast<ACineCameraActor>( mActorToMove->GetAttachParentActor() );
 
-    ShotSequenceTools::MoveAndScaleActor( mActorToMove.Get(), camera, iDistance, mScaleActorType );
+    ShotSequenceTools::MoveAndScaleActor( mActorToMove.Get(), camera, iDistance, mScaleActorType, mCurrentSquencer.Pin() );
 }
 
 void
@@ -2193,7 +2193,7 @@ SStoryboardLevelViewport::OnActorSelectedForActorDistance( AActor* ioActor )
     }
 
     // Select the closest distance from the camera to move the "plane to move"
-    ShotSequenceTools::MoveAndScaleActor( mActorToMove.Get(), camera, FMath::Min( distances ), mScaleActorType );
+    ShotSequenceTools::MoveAndScaleActor( mActorToMove.Get(), camera, FMath::Min( distances ), mScaleActorType, mCurrentSquencer.Pin() );
 }
 
 static
@@ -2388,7 +2388,7 @@ SStoryboardLevelViewport::OnFitActorToCameraView()
     {
         ACineCameraActor* camera = Cast<ACineCameraActor>( mActorToMove->GetAttachParentActor() );
 
-        ShotSequenceTools::FitActorToCameraView( mActorToMove.Get(), camera );
+        ShotSequenceTools::FitActorToCameraView( mActorToMove.Get(), camera, mCurrentSquencer.Pin() );
     }
 
     if( mCameraToFocalLength.IsValid() )
@@ -2406,7 +2406,7 @@ SStoryboardLevelViewport::OnFitActorToCameraView()
 
         for( TWeakObjectPtr<AActor> actor : actors )
         {
-            ShotSequenceTools::FitActorToCameraView( actor.Get(), mCameraToFocalLength.Get() );
+            ShotSequenceTools::FitActorToCameraView( actor.Get(), mCameraToFocalLength.Get(), mCurrentSquencer.Pin() );
         }
     }
 

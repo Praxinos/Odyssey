@@ -721,7 +721,7 @@ UEposSequenceEditorBlueprintLibrary::MoveAndScaleActor( AActor* ioActor, const A
     if( !ioActor || !iCamera )
         return;
 
-    ShotSequenceTools::MoveAndScaleActor( ioActor, iCamera, iNewDistance, iScaleType );
+    ShotSequenceTools::MoveAndScaleActor( ioActor, iCamera, iNewDistance, iScaleType, CurrentSequencer.Pin() );
 }
 
 //static
@@ -743,7 +743,7 @@ UEposSequenceEditorBlueprintLibrary::FitActorToCameraView( AActor* ioActor, cons
     if( !ioActor || !iCamera )
         return;
 
-    ShotSequenceTools::FitActorToCameraView( ioActor, iCamera );
+    ShotSequenceTools::FitActorToCameraView( ioActor, iCamera, CurrentSequencer.Pin() );
 }
 
 //---

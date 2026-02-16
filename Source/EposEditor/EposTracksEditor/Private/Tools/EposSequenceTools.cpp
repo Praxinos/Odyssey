@@ -13,6 +13,8 @@
 #include "MovieSceneSequence.h"
 #include "MovieSceneTimeHelpers.h"
 #include "Sections/MovieSceneSubSection.h"
+#include "Tracks/MovieScene3DAttachTrack.h"
+#include "Tracks/MovieScene3DTransformTrack.h"
 
 #include "ActorHelpers.h"
 #include "Board/BoardSequence.h"
@@ -432,6 +434,291 @@ ShotSequenceTools::SortBindings( TArray<AOdysseyAnimationActor*> iAnimationActor
 }
 
 //---
+//---
+//---
+
+static
+float
+UnwindChannel( const float& OldValue, float NewValue )
+{
+    while( NewValue - OldValue > 180.0f )
+    {
+        NewValue -= 360.0f;
+    }
+    while( NewValue - OldValue < -180.0f )
+    {
+        NewValue += 360.0f;
+    }
+    return NewValue;
+}
+static
+FRotator
+UnwindRotator( const FRotator& InOld, const FRotator& InNew )
+{
+    FRotator Result;
+    Result.Pitch = UnwindChannel( InOld.Pitch, InNew.Pitch );
+    Result.Yaw = UnwindChannel( InOld.Yaw, InNew.Yaw );
+    Result.Roll = UnwindChannel( InOld.Roll, InNew.Roll );
+    return Result;
+}
+
+// From ...\UE_4.26\Engine\Source\Editor\MovieSceneTools\Private\TrackEditors\TransformTrackEditor.cpp
+//static
+void
+ShotSequenceTools::GetTransformKeys( ISequencer& iSequencer, const TOptional<FTransformData>& LastTransform, const FTransformData& CurrentTransform, EMovieSceneTransformChannel ChannelsToKey, UObject* Object, UMovieSceneSection* Section, FGeneratedTrackKeys& OutGeneratedKeys )
+{
+    UMovieScene3DTransformSection* TransformSection = Cast<UMovieScene3DTransformSection>( Section );
+    EMovieSceneTransformChannel TransformMask = TransformSection->GetMask().GetChannels();
+
+    using namespace UE::MovieScene;
+
+    bool bLastVectorIsValid = LastTransform.IsSet();
+
+    // If key all is enabled, for a key on all the channels
+    if( iSequencer.GetKeyGroupMode() == EKeyGroupMode::KeyAll )
+    {
+        bLastVectorIsValid = false;
+        ChannelsToKey = EMovieSceneTransformChannel::All;
+    }
+
+    //FBuiltInComponentTypes* BuiltInComponents = FBuiltInComponentTypes::Get();
+
+    //FTransformData RecomposedTransform = RecomposeTransform( CurrentTransform, Object, Section );
+
+    // Set translation keys/defaults
+    {
+        bool bKeyX = EnumHasAnyFlags( ChannelsToKey, EMovieSceneTransformChannel::TranslationX );
+        bool bKeyY = EnumHasAnyFlags( ChannelsToKey, EMovieSceneTransformChannel::TranslationY );
+        bool bKeyZ = EnumHasAnyFlags( ChannelsToKey, EMovieSceneTransformChannel::TranslationZ );
+
+        if( bLastVectorIsValid )
+        {
+            bKeyX &= !FMath::IsNearlyEqual( LastTransform->Translation.X, CurrentTransform.Translation.X );
+            bKeyY &= !FMath::IsNearlyEqual( LastTransform->Translation.Y, CurrentTransform.Translation.Y );
+            bKeyZ &= !FMath::IsNearlyEqual( LastTransform->Translation.Z, CurrentTransform.Translation.Z );
+        }
+
+        if( iSequencer.GetKeyGroupMode() == EKeyGroupMode::KeyGroup && ( bKeyX || bKeyY || bKeyZ ) )
+        {
+            bKeyX = bKeyY = bKeyZ = true;
+        }
+
+        if( !EnumHasAnyFlags( TransformMask, EMovieSceneTransformChannel::TranslationX ) )
+        {
+            bKeyX = false;
+        }
+        if( !EnumHasAnyFlags( TransformMask, EMovieSceneTransformChannel::TranslationY ) )
+        {
+            bKeyY = false;
+        }
+        if( !EnumHasAnyFlags( TransformMask, EMovieSceneTransformChannel::TranslationZ ) )
+        {
+            bKeyZ = false;
+        }
+
+        FVector KeyVector = CurrentTransform.Translation;
+        //FVector KeyVector = RecomposedTransform.Translation;
+
+        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneDoubleChannel>( 0, KeyVector.X, bKeyX ) );
+        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneDoubleChannel>( 1, KeyVector.Y, bKeyY ) );
+        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneDoubleChannel>( 2, KeyVector.Z, bKeyZ ) );
+    }
+
+    // Set rotation keys/defaults
+    {
+        bool bKeyX = EnumHasAnyFlags( ChannelsToKey, EMovieSceneTransformChannel::RotationX );
+        bool bKeyY = EnumHasAnyFlags( ChannelsToKey, EMovieSceneTransformChannel::RotationY );
+        bool bKeyZ = EnumHasAnyFlags( ChannelsToKey, EMovieSceneTransformChannel::RotationZ );
+
+        FRotator KeyRotator = CurrentTransform.Rotation;
+        if( bLastVectorIsValid )
+        {
+            KeyRotator = UnwindRotator( LastTransform->Rotation, CurrentTransform.Rotation );
+
+            bKeyX &= !FMath::IsNearlyEqual( LastTransform->Rotation.Roll, KeyRotator.Roll );
+            bKeyY &= !FMath::IsNearlyEqual( LastTransform->Rotation.Pitch, KeyRotator.Pitch );
+            bKeyZ &= !FMath::IsNearlyEqual( LastTransform->Rotation.Yaw, KeyRotator.Yaw );
+        }
+
+        if( iSequencer.GetKeyGroupMode() == EKeyGroupMode::KeyGroup && ( bKeyX || bKeyY || bKeyZ ) )
+        {
+            bKeyX = bKeyY = bKeyZ = true;
+        }
+
+        if( !EnumHasAnyFlags( TransformMask, EMovieSceneTransformChannel::RotationX ) )
+        {
+            bKeyX = false;
+        }
+        if( !EnumHasAnyFlags( TransformMask, EMovieSceneTransformChannel::RotationY ) )
+        {
+            bKeyY = false;
+        }
+        if( !EnumHasAnyFlags( TransformMask, EMovieSceneTransformChannel::RotationZ ) )
+        {
+            bKeyZ = false;
+        }
+
+        // Do we need to unwind re-composed rotations?
+        //KeyRotator = UnwindRotator( CurrentTransform.Rotation, RecomposedTransform.Rotation );
+        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneDoubleChannel>( 3, KeyRotator.Roll, bKeyX ) );
+        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneDoubleChannel>( 4, KeyRotator.Pitch, bKeyY ) );
+        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneDoubleChannel>( 5, KeyRotator.Yaw, bKeyZ ) );
+
+    }
+
+    // Set scale keys/defaults
+    {
+        bool bKeyX = EnumHasAnyFlags( ChannelsToKey, EMovieSceneTransformChannel::ScaleX );
+        bool bKeyY = EnumHasAnyFlags( ChannelsToKey, EMovieSceneTransformChannel::ScaleY );
+        bool bKeyZ = EnumHasAnyFlags( ChannelsToKey, EMovieSceneTransformChannel::ScaleZ );
+
+        if( bLastVectorIsValid )
+        {
+            bKeyX &= !FMath::IsNearlyEqual( LastTransform->Scale.X, CurrentTransform.Scale.X );
+            bKeyY &= !FMath::IsNearlyEqual( LastTransform->Scale.Y, CurrentTransform.Scale.Y );
+            bKeyZ &= !FMath::IsNearlyEqual( LastTransform->Scale.Z, CurrentTransform.Scale.Z );
+        }
+
+        if( iSequencer.GetKeyGroupMode() == EKeyGroupMode::KeyGroup && ( bKeyX || bKeyY || bKeyZ ) )
+        {
+            bKeyX = bKeyY = bKeyZ = true;
+        }
+
+        if( !EnumHasAnyFlags( TransformMask, EMovieSceneTransformChannel::ScaleX ) )
+        {
+            bKeyX = false;
+        }
+        if( !EnumHasAnyFlags( TransformMask, EMovieSceneTransformChannel::ScaleY ) )
+        {
+            bKeyY = false;
+        }
+        if( !EnumHasAnyFlags( TransformMask, EMovieSceneTransformChannel::ScaleZ ) )
+        {
+            bKeyZ = false;
+        }
+
+        FVector KeyVector = CurrentTransform.Scale;
+        //FVector KeyVector = RecomposedTransform.Scale;
+        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneDoubleChannel>( 6, KeyVector.X, bKeyX ) );
+        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneDoubleChannel>( 7, KeyVector.Y, bKeyY ) );
+        OutGeneratedKeys.Add( FMovieSceneChannelValueSetter::Create<FMovieSceneDoubleChannel>( 8, KeyVector.Z, bKeyZ ) );
+    }
+}
+
+// From ...\UE_4.26\Engine\Source\Editor\MovieSceneTools\Public\KeyframeTrackEditor.h
+//static
+bool
+ShotSequenceTools::AddKeysToSection( ISequencer& iSequencer, UMovieSceneSection* Section, FFrameNumber KeyTime, const FGeneratedTrackKeys& Keys, ESequencerKeyMode KeyMode, EKeyFrameTrackEditorSetDefault SetDefault )
+{
+    EAutoChangeMode AutoChangeMode = iSequencer.GetAutoChangeMode();
+
+    FMovieSceneChannelProxy& Proxy = Section->GetChannelProxy();
+
+    const bool bSetDefaults = iSequencer.GetAutoSetTrackDefaults() && ( SetDefault != EKeyFrameTrackEditorSetDefault::DoNotSetDefault );
+
+    // The default value is a value for the channel when there are no keyframes. For example, if you add keys and
+    // then delete them all, the default value is the value of the channel. In the implementation of ApplyDefault,
+    // all the setters check that the default value is only set when there are NO keyframes. So, ApplyDefault needs
+    // to be called here in AddKeysToSection BEFORE any keys are added.
+    if( bSetDefaults )
+    {
+        for( const FMovieSceneChannelValueSetter& GeneratedKey : Keys )
+        {
+            GeneratedKey->ApplyDefault( Section, Proxy, SetDefault );
+        }
+    }
+
+    bool key_created = false;
+
+    if( KeyMode != ESequencerKeyMode::AutoKey || AutoChangeMode == EAutoChangeMode::AutoKey || AutoChangeMode == EAutoChangeMode::All )
+    {
+        EMovieSceneKeyInterpolation InterpolationMode = iSequencer.GetKeyInterpolation();
+
+        const bool bKeyEvenIfUnchanged =
+            KeyMode == ESequencerKeyMode::ManualKeyForced ||
+            iSequencer.GetKeyGroupMode() == EKeyGroupMode::KeyAll ||
+            iSequencer.GetKeyGroupMode() == EKeyGroupMode::KeyGroup;
+
+        const bool bKeyEvenIfEmpty =
+            ( KeyMode == ESequencerKeyMode::AutoKey && AutoChangeMode == EAutoChangeMode::All ) ||
+            KeyMode == ESequencerKeyMode::ManualKeyForced;
+
+        for( const FMovieSceneChannelValueSetter& GeneratedKey : Keys )
+        {
+            key_created |= GeneratedKey->Apply( Section, Proxy, KeyTime, InterpolationMode, bKeyEvenIfUnchanged, bKeyEvenIfEmpty );
+        }
+    }
+
+    return key_created;
+}
+
+//static
+void
+ShotSequenceTools::UpdateChannel( TSharedPtr<ISequencer> iSequencer, AActor* iActor, const ACineCameraActor* iCamera, EMovieSceneTransformChannel iChannelsToApply )
+{
+    if( !iSequencer.IsValid() )
+        return;
+
+    ISequencer* sequencer = iSequencer.Get();
+    UMovieSceneSequence* sequence = sequencer->GetFocusedMovieSceneSequence();
+    FMovieSceneSequenceID sequence_id = sequencer->GetFocusedTemplateID();
+    FFrameNumber frame = sequencer->GetLocalTime().Time.GetFrame();
+
+    if( sequence->IsA<UBoardSequence>() )
+    {
+        BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, sequence, sequence_id, frame );
+        sequence = result.mInnerSequence;
+        sequence_id = result.mInnerSequenceId;
+        frame = result.mInnerTime.GetFrame();
+    }
+
+    FGuid binding = sequencer->FindObjectId( *iActor, sequence_id );
+
+    // Update the default transform channel to take care of the attach track
+    UMovieScene3DTransformTrack* transformTrack = Cast<UMovieScene3DTransformTrack>( sequence->GetMovieScene()->FindTrack<UMovieScene3DTransformTrack>( binding ) );
+    if( transformTrack )
+    {
+        if( transformTrack->GetAllSections().Num() )
+        {
+            UMovieScene3DTransformSection* transformSection = Cast<UMovieScene3DTransformSection>( transformTrack->GetAllSections()[0] );
+
+            // Set to EKeyGroupMode::KeyGroup, otherwise it will be overwritten by EMovieSceneTransformChannel::All
+            // in GetTransformKeys() as (certainly) iSequencer.GetKeyGroupMode() == EKeyGroupMode::KeyAll
+            EKeyGroupMode backup_groupmode = sequencer->GetKeyGroupMode();
+            sequencer->SetKeyGroupMode( EKeyGroupMode::KeyGroup );
+
+            FTransformData newTransformData( iActor->GetActorTransform() );
+
+            UMovieScene3DAttachTrack* attachTrack = sequence->GetMovieScene()->FindTrack<UMovieScene3DAttachTrack>( binding );
+            if( attachTrack && EnumHasAnyFlags( iChannelsToApply, EMovieSceneTransformChannel::Translation ) )
+            {
+                FTransform world_actor_transform = iActor->GetActorTransform();
+                FTransform relative_transform = world_actor_transform.GetRelativeTransform( iCamera->GetActorTransform() );
+
+                newTransformData = relative_transform;
+            }
+
+            FGeneratedTrackKeys generated_keys;
+            ShotSequenceTools::GetTransformKeys( *sequencer, TOptional<FTransformData>(), newTransformData, iChannelsToApply, iActor, transformSection, generated_keys );
+
+            // For now, just update the default values of channels
+            // The problem with creating new keys is:
+            // - camera has NO keys for its focal length (so a unique default value for all frames)
+            // - on frame X, the focal length changes -> new scale for the animation -> create a new key
+            // - on frame X+n, the focal length changes -> new scale for the animation -> create a new key
+            // BUT the key on frame X won't be relevant anymore as the focal length of the camera is also changed on frame X
+            for( const FMovieSceneChannelValueSetter& generated_key : generated_keys )
+            {
+                generated_key->ApplyDefault( transformSection, transformSection->GetChannelProxy(), EKeyFrameTrackEditorSetDefault::SetDefaultOnAddKeys );
+            }
+            //bool key_created = ShotSequenceTools::AddKeysToSection( *sequencer, transformSection, sequencer->GetLocalTime().Time.GetFrame(), generated_keys, ESequencerKeyMode::AutoKey, EKeyFrameTrackEditorSetDefault::SetDefaultOnAddKeys );
+
+            sequencer->SetKeyGroupMode( backup_groupmode );
+        }
+    }
+}
+
+//---
 
 //static
 bool
@@ -468,7 +755,7 @@ ShotSequenceTools::CanMoveAndScaleActor( const AActor* iActor, const ACineCamera
 
 //static
 bool
-ShotSequenceTools::MoveAndScaleActor( AActor* ioActor, const ACineCameraActor* iCamera, float iNewDistance, EScaleActor iScaleType )
+ShotSequenceTools::MoveAndScaleActor( AActor* ioActor, const ACineCameraActor* iCamera, float iNewDistance, EScaleActor iScaleType, TSharedPtr<ISequencer> iSequencer )
 {
     if( !ShotSequenceTools::CanMoveAndScaleActor( ioActor, iCamera ) )
         return false;
@@ -493,6 +780,8 @@ ShotSequenceTools::MoveAndScaleActor( AActor* ioActor, const ACineCameraActor* i
     FVector new_animation_location = iCamera->GetActorLocation() + ( ioActor->GetActorLocation() - iCamera->GetActorLocation() ).GetSafeNormal() * iNewDistance;
     ioActor->SetActorLocation( new_animation_location );
 
+    bool update_channels = false;
+
     switch( iScaleType )
     {
         // Until EScaleActor::kFitToCamera will be removed
@@ -505,6 +794,8 @@ ShotSequenceTools::MoveAndScaleActor( AActor* ioActor, const ACineCameraActor* i
             FVector new_actor_scale = old_parameter.mActorScale * ratio;
 
             ioActor->SetActorScale3D( new_actor_scale );
+
+            update_channels = true;
         }
         break;
 
@@ -514,6 +805,10 @@ ShotSequenceTools::MoveAndScaleActor( AActor* ioActor, const ACineCameraActor* i
 
         default: checkNoEntry();
     }
+
+    UpdateChannel( iSequencer, ioActor, iCamera, EMovieSceneTransformChannel::Translation );
+    if( update_channels )
+        UpdateChannel( iSequencer, ioActor, iCamera, EMovieSceneTransformChannel::Scale );
 
     return true;
 }
@@ -527,7 +822,7 @@ ShotSequenceTools::CanFitActorToCameraView( const AActor* iActor, const ACineCam
 
 //static
 bool
-ShotSequenceTools::FitActorToCameraView( AActor* ioActor, const ACineCameraActor* iCamera )
+ShotSequenceTools::FitActorToCameraView( AActor* ioActor, const ACineCameraActor* iCamera, TSharedPtr<ISequencer> iSequencer )
 {
     if( !CanFitActorToCameraView( ioActor, iCamera ) )
         return false;
@@ -541,6 +836,8 @@ ShotSequenceTools::FitActorToCameraView( AActor* ioActor, const ACineCameraActor
         scale = scaling_component->ComputeScaleWithScaleAndMargin( new_camera_view_size );
 
     ioActor->SetActorScale3D( scale );
+
+    UpdateChannel( iSequencer, ioActor, iCamera, EMovieSceneTransformChannel::Scale );
 
     return true;
 }
