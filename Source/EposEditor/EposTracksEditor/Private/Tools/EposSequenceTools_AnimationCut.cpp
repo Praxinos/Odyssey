@@ -318,7 +318,7 @@ BoardSequenceTools::HasPreviousAnimationCut( ISequencer* iSequencer, FFrameNumbe
     // Check on all animations
     // As the changement of auto-selection animation will always select one of them each time the current frame change
     //TArray<FFrameNumber> times = ShotSequenceHelpers::GetAllAnimationCutTimes( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, EGetAnimation::kSelectedOrAll );
-    TArray<FFrameNumber> times = ShotSequenceHelpers::GetAllAnimationCutTimes( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, EGetAnimation::kAll );
+    TArray<FFrameNumber> times = ShotSequenceHelpers::GetAllAnimationCutTimes( *iSequencer, result.mInnerSequence, result.mInnerSequenceId );
     int32 index = times.FindLastByPredicate( [result]( FFrameNumber iCurrentFrame ) { return iCurrentFrame < result.mInnerTime.GetFrame(); } );
 
     return index != INDEX_NONE;
@@ -335,7 +335,7 @@ ShotSequenceTools::GotoPreviousAnimationCut( ISequencer* iSequencer, FFrameNumbe
 bool
 ShotSequenceTools::HasPreviousAnimationCut( ISequencer* iSequencer, FFrameNumber iFrameNumber )
 {
-    TArray<FFrameNumber> times = ShotSequenceHelpers::GetAllAnimationCutTimes( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), EGetAnimation::kAll ); // See comment above #315
+    TArray<FFrameNumber> times = ShotSequenceHelpers::GetAllAnimationCutTimes( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID() ); // See comment above #315
     int32 index = times.FindLastByPredicate( [iFrameNumber]( FFrameNumber iCurrentFrame ) { return iCurrentFrame < iFrameNumber; } );
 
     return index != INDEX_NONE;
@@ -345,7 +345,7 @@ ShotSequenceTools::HasPreviousAnimationCut( ISequencer* iSequencer, FFrameNumber
 void
 ShotSequenceTools::GotoPreviousAnimationCut( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber )
 {
-    TArray<FFrameNumber> times = ShotSequenceHelpers::GetAllAnimationCutTimes( iSequencer, iSequence, iSequenceID, EGetAnimation::kAll ); // See comment above #315
+    TArray<FFrameNumber> times = ShotSequenceHelpers::GetAllAnimationCutTimes( iSequencer, iSequence, iSequenceID ); // See comment above #315
 
     int32 index = times.FindLastByPredicate( [iFrameNumber]( FFrameNumber iCurrentFrame ) { return iCurrentFrame < iFrameNumber; } );
     if( index == INDEX_NONE )
@@ -385,7 +385,7 @@ BoardSequenceTools::HasNextAnimationCut( ISequencer* iSequencer, FFrameNumber iF
     if( !result.mInnerSequence )
         return false;
 
-    TArray<FFrameNumber> times = ShotSequenceHelpers::GetAllAnimationCutTimes( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, EGetAnimation::kAll ); // See comment above #315
+    TArray<FFrameNumber> times = ShotSequenceHelpers::GetAllAnimationCutTimes( *iSequencer, result.mInnerSequence, result.mInnerSequenceId ); // See comment above #315
     FFrameNumber* next_time = times.FindByPredicate( [result]( FFrameNumber iCurrentFrame ) { return iCurrentFrame > result.mInnerTime.GetFrame(); } );
 
     return !!next_time;
@@ -402,7 +402,7 @@ ShotSequenceTools::GotoNextAnimationCut( ISequencer* iSequencer, FFrameNumber iF
 bool
 ShotSequenceTools::HasNextAnimationCut( ISequencer* iSequencer, FFrameNumber iFrameNumber )
 {
-    TArray<FFrameNumber> times = ShotSequenceHelpers::GetAllAnimationCutTimes( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), EGetAnimation::kAll ); // See comment above #315
+    TArray<FFrameNumber> times = ShotSequenceHelpers::GetAllAnimationCutTimes( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID() ); // See comment above #315
     FFrameNumber* next_time = times.FindByPredicate( [iFrameNumber]( FFrameNumber iCurrentFrame ) { return iCurrentFrame > iFrameNumber; } );
 
     return !!next_time;
@@ -412,7 +412,7 @@ ShotSequenceTools::HasNextAnimationCut( ISequencer* iSequencer, FFrameNumber iFr
 void
 ShotSequenceTools::GotoNextAnimationCut( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber )
 {
-    TArray<FFrameNumber> times = ShotSequenceHelpers::GetAllAnimationCutTimes( iSequencer, iSequence, iSequenceID, EGetAnimation::kAll ); // See comment above #315
+    TArray<FFrameNumber> times = ShotSequenceHelpers::GetAllAnimationCutTimes( iSequencer, iSequence, iSequenceID ); // See comment above #315
 
     FFrameNumber* next_time = times.FindByPredicate( [iFrameNumber]( FFrameNumber iCurrentFrame ) { return iCurrentFrame > iFrameNumber; } );
     if( !next_time )

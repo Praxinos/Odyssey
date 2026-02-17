@@ -326,13 +326,13 @@ ShotSequenceTools::GuessActorToSelect( ISequencer* iSequencer, UMovieSceneSequen
         FMovieSceneSequenceID sequenceId = MovieSceneSequenceID::Invalid;
         if( iSequence->IsA<UBoardSequence>() )
         {
-            BoardSequenceHelpers::GetAllAnimationsRecursive( *iSequencer, iSequence, iSequenceId, EGetAnimation::kAll, iFrameNumber, &animations, &unordered_bindings, &sequence, &sequenceId );
+            BoardSequenceHelpers::GetAllAnimationsRecursive( *iSequencer, iSequence, iSequenceId, iFrameNumber, &animations, &unordered_bindings, &sequence, &sequenceId );
         }
         else if( iSequence->IsA<UShotSequence>() )
         {
             sequence = iSequence;
             sequenceId = iSequenceId;
-            ShotSequenceHelpers::GetAllAnimations( *iSequencer, iSequence, iSequenceId, EGetAnimation::kAll, &animations, &unordered_bindings );
+            ShotSequenceHelpers::GetAllAnimations( *iSequencer, iSequence, iSequenceId, &animations, &unordered_bindings );
         }
 
         // Animation not found AND no sequence (shot) found, so nothing can be guess

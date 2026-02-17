@@ -346,7 +346,7 @@ ShotSequenceHelpers::GetCameraSpawnedOrTemplate( IMovieScenePlayer& iPlayer, UMo
 
 //static
 int32
-BoardSequenceHelpers::GetAllAnimationsRecursive( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, EGetAnimation iAnimationSelection, const FFrameNumber& iFrameNumber, TArray<AOdysseyAnimationActor*>* oAnimations, TArray<FGuid>* oAnimationBindings, UMovieSceneSequence** oSequence, FMovieSceneSequenceID* oSequenceID )
+BoardSequenceHelpers::GetAllAnimationsRecursive( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FFrameNumber& iFrameNumber, TArray<AOdysseyAnimationActor*>* oAnimations, TArray<FGuid>* oAnimationBindings, UMovieSceneSequence** oSequence, FMovieSceneSequenceID* oSequenceID )
 {
     FInnerSequenceResult result = GetInnerSequence( iPlayer, iSequence, iSequenceID, iFrameNumber );
 
@@ -359,7 +359,7 @@ BoardSequenceHelpers::GetAllAnimationsRecursive( IMovieScenePlayer& iPlayer, UMo
         *oSequence = result.mInnerSequence;
         *oSequenceID = result.mInnerSequenceId;
 
-        int animation_count = ShotSequenceHelpers::GetAllAnimations( iPlayer, result.mInnerSequence, result.mInnerSequenceId, iAnimationSelection, oAnimations, oAnimationBindings );
+        int animation_count = ShotSequenceHelpers::GetAllAnimations( iPlayer, result.mInnerSequence, result.mInnerSequenceId, oAnimations, oAnimationBindings );
 
         return animation_count;
     }
@@ -367,7 +367,7 @@ BoardSequenceHelpers::GetAllAnimationsRecursive( IMovieScenePlayer& iPlayer, UMo
     // if we are on a board subsequence
     if( result.mInnerSequence->IsA<UBoardSequence>() )
     {
-        int animation_count = BoardSequenceHelpers::GetAllAnimationsRecursive( iPlayer, result.mInnerSequence, result.mInnerSequenceId, iAnimationSelection, result.mInnerTime.FloorToFrame(), oAnimations, oAnimationBindings, oSequence, oSequenceID );
+        int animation_count = BoardSequenceHelpers::GetAllAnimationsRecursive( iPlayer, result.mInnerSequence, result.mInnerSequenceId, result.mInnerTime.FloorToFrame(), oAnimations, oAnimationBindings, oSequence, oSequenceID );
 
         return animation_count;
     }
@@ -377,7 +377,7 @@ BoardSequenceHelpers::GetAllAnimationsRecursive( IMovieScenePlayer& iPlayer, UMo
 
 //static
 int32
-ShotSequenceHelpers::GetAllAnimations( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, EGetAnimation iAnimationSelection, TArray<AOdysseyAnimationActor*>* oAnimations, TArray<FGuid>* oAnimationBindings )
+ShotSequenceHelpers::GetAllAnimations( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TArray<AOdysseyAnimationActor*>* oAnimations, TArray<FGuid>* oAnimationBindings )
 {
     if( oAnimations )
         oAnimations->Empty();
@@ -390,12 +390,6 @@ ShotSequenceHelpers::GetAllAnimations( IMovieScenePlayer& iPlayer, UMovieSceneSe
 
     TArray<AOdysseyAnimationActor*> animations;
     TArray<FGuid> animation_bindings;
-
-    TArray<AOdysseyAnimationActor*> animations_selected;
-    TArray<FGuid> animation_bindings_selected;
-
-    TArray<AOdysseyAnimationActor*> animations_not_selected;
-    TArray<FGuid> animation_bindings_not_selected;
 
     for( int i = 0; i < movieScene->GetPossessableCount(); i++ )
     {
@@ -408,68 +402,22 @@ ShotSequenceHelpers::GetAllAnimations( IMovieScenePlayer& iPlayer, UMovieSceneSe
             if( !animation )
                 continue;
 
-            switch( iAnimationSelection )
-            {
-                case EGetAnimation::kAll:
-                    animations.Add( animation );
-                    animation_bindings.Add( possessable.GetGuid() );
-                    break;
-                case EGetAnimation::kSelectedOnly:
-                    if( animation->IsSelected() )
-                    {
-                        animations.Add( animation );
-                        animation_bindings.Add( possessable.GetGuid() );
-                    }
-                    break;
-                default:
-                case EGetAnimation::kSelectedOrAll:
-                    if( animation->IsSelected() )
-                    {
-                        animations_selected.Add( animation );
-                        animation_bindings_selected.Add( possessable.GetGuid() );
-                    }
-                    else
-                    {
-                        animations_not_selected.Add( animation );
-                        animation_bindings_not_selected.Add( possessable.GetGuid() );
-                    }
-                    break;
-            }
+            animations.Add( animation );
+            animation_bindings.Add( possessable.GetGuid() );
         }
     }
 
-    if( animations.Num() )
-    {
-        if( oAnimations )
-            oAnimations->Append( animations );
-        if( oAnimationBindings )
-            oAnimationBindings->Append( animation_bindings );
+    if( oAnimations )
+        *oAnimations = animations;
+    if( oAnimationBindings )
+        *oAnimationBindings = animation_bindings;
 
-        return animations.Num();
-    }
-    else if( animations_selected.Num() )
-    {
-        if( oAnimations )
-            oAnimations->Append( animations_selected );
-        if( oAnimationBindings )
-            oAnimationBindings->Append( animation_bindings_selected );
-
-        return animations_selected.Num();
-    }
-    else
-    {
-        if( oAnimations )
-            oAnimations->Append( animations_not_selected );
-        if( oAnimationBindings )
-            oAnimationBindings->Append( animation_bindings_not_selected );
-
-        return animations_not_selected.Num();
-    }
+    return animations.Num();
 }
 
 //static
 int32
-ShotSequenceHelpers::GetAttachedAnimations( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, EGetAnimation iAnimationSelection, TArray<AOdysseyAnimationActor*>* oAnimations, TArray<FGuid>* oAnimationBindings )
+ShotSequenceHelpers::GetAttachedAnimations( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TArray<AOdysseyAnimationActor*>* oAnimations, TArray<FGuid>* oAnimationBindings )
 {
     if( oAnimations )
         oAnimations->Empty();
@@ -482,12 +430,6 @@ ShotSequenceHelpers::GetAttachedAnimations( IMovieScenePlayer& iPlayer, UMovieSc
 
     TArray<AOdysseyAnimationActor*> animations;
     TArray<FGuid> animation_bindings;
-
-    TArray<AOdysseyAnimationActor*> animations_selected;
-    TArray<FGuid> animation_bindings_selected;
-
-    TArray<AOdysseyAnimationActor*> animations_not_selected;
-    TArray<FGuid> animation_bindings_not_selected;
 
     for( int i = 0; i < movieScene->GetPossessableCount(); i++ )
     {
@@ -508,63 +450,17 @@ ShotSequenceHelpers::GetAttachedAnimations( IMovieScenePlayer& iPlayer, UMovieSc
             if( !ParentActor ) //TODO: confirm by comparing with the camera ? or is it enough as the animations are in the movie scene ?
                 continue;
 
-            switch( iAnimationSelection )
-            {
-                case EGetAnimation::kAll:
-                    animations.Add( animation );
-                    animation_bindings.Add( possessable.GetGuid() );
-                    break;
-                case EGetAnimation::kSelectedOnly:
-                    if( animation->IsSelected() )
-                    {
-                        animations.Add( animation );
-                        animation_bindings.Add( possessable.GetGuid() );
-                    }
-                    break;
-                default:
-                case EGetAnimation::kSelectedOrAll:
-                    if( animation->IsSelected() )
-                    {
-                        animations_selected.Add( animation );
-                        animation_bindings_selected.Add( possessable.GetGuid() );
-                    }
-                    else
-                    {
-                        animations_not_selected.Add( animation );
-                        animation_bindings_not_selected.Add( possessable.GetGuid() );
-                    }
-                    break;
-            }
+            animations.Add( animation );
+            animation_bindings.Add( possessable.GetGuid() );
         }
     }
 
-    if( animations.Num() )
-    {
-        if( oAnimations )
-            oAnimations->Append( animations );
-        if( oAnimationBindings )
-            oAnimationBindings->Append( animation_bindings );
+    if( oAnimations )
+        *oAnimations = animations;
+    if( oAnimationBindings )
+        *oAnimationBindings = animation_bindings;
 
-        return animations.Num();
-    }
-    else if( animations_selected.Num() )
-    {
-        if( oAnimations )
-            oAnimations->Append( animations_selected );
-        if( oAnimationBindings )
-            oAnimationBindings->Append( animation_bindings_selected );
-
-        return animations_selected.Num();
-    }
-    else
-    {
-        if( oAnimations )
-            oAnimations->Append( animations_not_selected );
-        if( oAnimationBindings )
-            oAnimationBindings->Append( animation_bindings_not_selected );
-
-        return animations_not_selected.Num();
-    }
+    return animations.Num();
 }
 
 
@@ -970,7 +866,7 @@ ShotSequenceHelpers::FindTimelineTrackAndSections( IMovieScenePlayer& iPlayer, U
 
 //static
 TArray<FFrameNumber>
-ShotSequenceHelpers::GetAllAnimationCutTimes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, EGetAnimation iAnimationSelection )
+ShotSequenceHelpers::GetAllAnimationCutTimes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID )
 {
     TArray<FFrameNumber> times;
 
@@ -979,7 +875,7 @@ ShotSequenceHelpers::GetAllAnimationCutTimes( IMovieScenePlayer& iPlayer, UMovie
         return times;
 
     TArray<FGuid> animation_guids;
-    int32 nb_animation = GetAllAnimations( iPlayer, iSequence, iSequenceID, iAnimationSelection, nullptr, &animation_guids );
+    int32 nb_animation = GetAllAnimations( iPlayer, iSequence, iSequenceID, nullptr, &animation_guids );
     if( !nb_animation )
         return times;
 
@@ -1567,7 +1463,7 @@ ShotSequenceHelpers::BuildAnimationsTransformChannelProxy( IMovieScenePlayer& iP
     TMap<FGuid, FChannelProxyBySectionMap> maps;
 
     TArray<FGuid> bindings;
-    /*int animation_count =*/ ShotSequenceHelpers::GetAllAnimations( iPlayer, iSequence, iSequenceID, EGetAnimation::kAll, nullptr, &bindings );
+    /*int animation_count =*/ ShotSequenceHelpers::GetAllAnimations( iPlayer, iSequence, iSequenceID, nullptr, &bindings );
 
     for( auto binding : bindings )
     {
@@ -1634,7 +1530,7 @@ ShotSequenceHelpers::BuildAnimationsTimelineChannelProxy( IMovieScenePlayer& iPl
     TMap<FGuid, FChannelProxyBySectionMap> maps;
 
     TArray<FGuid> bindings;
-    /*int animation_count =*/ ShotSequenceHelpers::GetAllAnimations( iPlayer, iSequence, iSequenceID, EGetAnimation::kAll, nullptr, &bindings );
+    /*int animation_count =*/ ShotSequenceHelpers::GetAllAnimations( iPlayer, iSequence, iSequenceID, nullptr, &bindings );
 
     for( FGuid binding : bindings )
     {
@@ -1690,7 +1586,7 @@ ShotSequenceHelpers::BuildAnimationsOpacityChannelProxy( IMovieScenePlayer& iPla
     TMap<FGuid, FChannelProxyBySectionMap> maps;
 
     TArray<FGuid> bindings;
-    /*int animation_count =*/ ShotSequenceHelpers::GetAllAnimations( iPlayer, iSequence, iSequenceID, EGetAnimation::kAll, nullptr, &bindings );
+    /*int animation_count =*/ ShotSequenceHelpers::GetAllAnimations( iPlayer, iSequence, iSequenceID, nullptr, &bindings );
 
     for( auto binding : bindings )
     {

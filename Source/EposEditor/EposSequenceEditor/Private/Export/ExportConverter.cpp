@@ -84,7 +84,7 @@ FExportConverter::ProcessAnimationCuts( UShotSequence& iShotSequence, FMovieScen
 
     TArray<AOdysseyAnimationActor*> animation_actors;
     TArray<FGuid> animation_bindings;
-    /*int32 num_animations =*/ ShotSequenceHelpers::GetAllAnimations( *sequencer, &iShotSequence, iSequenceId, EGetAnimation::kAll, &animation_actors, &animation_bindings );
+    /*int32 num_animations =*/ ShotSequenceHelpers::GetAllAnimations( *sequencer, &iShotSequence, iSequenceId, &animation_actors, &animation_bindings );
 
     for( FGuid animation_binding : animation_bindings )
     {

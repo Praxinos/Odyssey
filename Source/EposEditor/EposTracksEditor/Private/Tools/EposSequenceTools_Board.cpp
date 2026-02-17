@@ -983,7 +983,7 @@ ShotSequenceTools::CloneInnerContent( ISequencer* iSequencer, UMovieSceneSequenc
 
     TArray<AOdysseyAnimationActor*> animations;
     TArray<FGuid> animation_bindings;
-    int32 animation_count = ShotSequenceHelpers::GetAllAnimations( *iSequencer, iSequence, iSequenceID, EGetAnimation::kAll, &animations, &animation_bindings );
+    int32 animation_count = ShotSequenceHelpers::GetAllAnimations( *iSequencer, iSequence, iSequenceID, &animations, &animation_bindings );
 
     for( int i = 0; i < animation_count; i++ )
     {

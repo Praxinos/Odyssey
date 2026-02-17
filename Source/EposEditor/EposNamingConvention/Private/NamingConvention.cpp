@@ -239,7 +239,7 @@ FindAllAnimationPaths( const IMovieScenePlayer& iPlayer, FRelevantPathMap& oPare
         FMovieSceneSequenceID sequence_id = pair.Key;
 
         TArray<AOdysseyAnimationActor*> animation_actors;
-        ShotSequenceHelpers::GetAllAnimations( player, sequence, sequence_id, EGetAnimation::kAll, &animation_actors, nullptr );
+        ShotSequenceHelpers::GetAllAnimations( player, sequence, sequence_id, &animation_actors, nullptr );
 
         for( auto animation_actor : animation_actors )
         {
