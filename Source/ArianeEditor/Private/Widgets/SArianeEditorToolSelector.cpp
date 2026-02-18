@@ -24,7 +24,6 @@ SArianeEditorToolSelector::SArianeEditorToolSelector()
 void
 SArianeEditorToolSelector::Construct(const FArguments& InArgs, FArianeEditor* iEditor)
 {
-    mOnToolSelected = InArgs._OnToolSelected;
     mEditor = iEditor;
 
     const FCheckBoxStyle* checkboxStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("OdysseyCheckBoxStyle.ToggleButton");
@@ -62,10 +61,10 @@ SArianeEditorToolSelector::Construct(const FArguments& InArgs, FArianeEditor* iE
 }
 
 void
-SArianeEditorToolSelector::OnToolCheckStateChanged(ECheckBoxState InValue, UArianeEditorTool* iTool)
+SArianeEditorToolSelector::OnToolCheckStateChanged( ECheckBoxState InValue, UArianeEditorTool* iTool )
 {
     if (InValue == ECheckBoxState::Checked)
-        mOnToolSelected.ExecuteIfBound(iTool);
+        mEditor->SetCurrentTool( iTool );
 }
 
 EVisibility

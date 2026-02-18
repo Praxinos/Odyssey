@@ -52,6 +52,10 @@ class ARIANE_API FArianeSegment
         FVector GetVectorLeavingFromVertex( FArianeVertex* Vertex, bool bNormalize );
         float GetFractionPointT( uint32 FractionPointIndex );
 
+        const FBoxSphereBounds& GetBounds();
+        void UpdateBounds();
+        void Update();
+
     protected:
         FArianeObject* Owner;
         FArianeVertex* Vertices[2];
@@ -61,4 +65,6 @@ class ARIANE_API FArianeSegment
         TArray<Fraction> FractionCache;
         TArray<FModelVertex> ModelVertexCache;
         TArray<uint32> IndexCache;
+        FBoxSphereBounds Bounds;
+        double Length;
 };

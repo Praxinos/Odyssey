@@ -47,6 +47,14 @@ class ARIANEEDITOR_API UArianeEditorPathDrawingTool : public UArianeEditorTool
                        , double iViewportX
                        , double iViewportY );
 
+    public:
+        UPROPERTY( EditAnywhere
+                 , Category=PathDrawingTool
+                 , meta = ( ToolTip = "Radius"
+                          , ClampMin = "0.0"
+                          , UIMin = "0.0" ) )
+        double Radius;
+
     protected:
         FArianePath* EditedPath;
 };
