@@ -20,6 +20,9 @@ AArianePainting3DActor::AArianePainting3DActor()
     RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("SceneComp"));
 
     painting3DComponent->SetupAttachment( RootComponent );
+
+    // Add this so that the Component show in the Outliner
+    AddInstanceComponent( painting3DComponent );
 }
 
 void

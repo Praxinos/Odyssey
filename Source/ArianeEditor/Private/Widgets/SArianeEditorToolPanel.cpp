@@ -3,6 +3,7 @@
 
 #include "Widgets/SArianeEditorToolPanel.h"
 #include "Widgets/SArianeEditorToolSelector.h"
+#include "Widgets/SArianeEditorToolOptions.h"
 #include "ArianeEditor.h"
 /* Gary
 #include "Widgets/Tools/SArianeEditorToolPanelTileView.h"
@@ -23,20 +24,15 @@ SArianeEditorToolPanel::Construct(const FArguments& InArgs, FArianeEditor* iEdit
     ChildSlot
     [
         SNew(SHorizontalBox)
-/* Gary
         + SHorizontalBox::Slot()
         [
             SNew(SScrollBox)
             + SScrollBox::Slot()
             .FillSize(1.0f)
             [
-
-                SNew(SArianeEditorToolOptions)
-                .Tool_Raw(this, &SArianeEditorToolPanel::GetCurrentTool)
-
+                SNew( SArianeEditorToolOptions, iEditor )
             ]
         ]
-*/
         + SHorizontalBox::Slot()
         .AutoWidth()
         [
@@ -44,27 +40,8 @@ SArianeEditorToolPanel::Construct(const FArguments& InArgs, FArianeEditor* iEdit
             + SScrollBox::Slot()
             .AutoSize()
             [
-                SNew( SArianeEditorToolSelector, mEditor )
-                .OnToolSelected(this, &SArianeEditorToolPanel::OnToolSelected)
+                SNew( SArianeEditorToolSelector, iEditor )
             ]
         ]
     ];
-}
-
-//--------------------------------------------------------------------------------------
-//----------------------------------------------------------------------- Widget Getters
-
-UArianeEditorTool*
-SArianeEditorToolPanel::GetCurrentTool() const
-{
-    return mEditor->GetCurrentTool();
-}
-
-//--------------------------------------------------------------------------------------
-//---------------------------------------------------------------------- Event Listeners
-
-void
-SArianeEditorToolPanel::OnToolSelected(UArianeEditorTool* iTool )
-{
-    mEditor->SetCurrentTool( iTool );
 }

@@ -27,10 +27,6 @@ class ARIANEEDITOR_API SArianeEditorToolPanel
 
         void Construct(const FArguments& InArgs, FArianeEditor* iEditor);
 
-    private:
-        UArianeEditorTool* GetCurrentTool() const;
-        void OnToolSelected(UArianeEditorTool* iTool);
-
     protected:
         FArianeEditor* mEditor;
 };

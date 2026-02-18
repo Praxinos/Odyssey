@@ -13,7 +13,12 @@ class UWorld;
  * Base class for a Painting Editor
  */
 class ARIANEEDITOR_API FArianeEditor
+    : public FGCObject //Allows us to register External UObject in Garbage Collector
 {
+    public:
+        DECLARE_MULTICAST_DELEGATE( FOnPreChangeCurrentTool );
+        DECLARE_MULTICAST_DELEGATE( FOnPostChangeCurrentTool );
+
     public:
         ~FArianeEditor();
         FArianeEditor( FModeToolkit* iToolkit );
@@ -32,6 +37,13 @@ class ARIANEEDITOR_API FArianeEditor
         void AddPainting3DActor();
         UWorld* GetWorld();
 
+        // FGCObject overrides
+        virtual void AddReferencedObjects( FReferenceCollector& Collector ) override;
+        virtual FString GetReferencerName() const override;
+
+        FOnPreChangeCurrentTool& OnPreChangeCurrentToolDelegate();
+        FOnPostChangeCurrentTool& OnPostChangeCurrentToolDelegate();
+
     protected:
         void AddTool( UArianeEditorTool* iTool );
         void RemoveTool( UArianeEditorTool* iTool );
@@ -44,6 +56,9 @@ class ARIANEEDITOR_API FArianeEditor
 
 
     protected:
+        FOnPreChangeCurrentTool OnPreChangeCurrentTool;
+        FOnPostChangeCurrentTool OnPostChangeCurrentTool;
+
         FModeToolkit* mToolkit;
         FName mName;
         TArray<UArianeEditorTool*> mTools;
