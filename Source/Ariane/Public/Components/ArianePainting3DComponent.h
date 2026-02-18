@@ -13,6 +13,7 @@
 #include "RenderResource.h"
 #include "RawIndexBuffer.h"
 // Ariane Headers
+#include "ArianeObject.h"
 
 #include "ArianePainting3DComponent.generated.h"
 
@@ -22,37 +23,32 @@ class FArianeVertex;
 class FArianePathGeometry3D;
 class FArianeSegment;
 
-struct FTestSegment;
-
-USTRUCT(BlueprintType)
-struct ARIANE_API FTestVertex
+class ARIANE_API FArianeGeometryProxy : public FPrimitiveSceneProxy
 {
-    GENERATED_BODY()
+    public:
+        ~FArianeGeometryProxy();
+        FArianeGeometryProxy( ERHIFeatureLevel::Type InFeatureLevel, UArianePainting3DComponent* InPainting3DComponent );
 
-    struct SegmentLink
-    {
-        uint32 ObjectIndex;
-        uint32 SegmentIndex;
-        uint32 SegmentClass;
-        uint32 IndexInSegment;
-    };
+        virtual SIZE_T GetTypeHash() const override;
+        virtual uint32 GetMemoryFootprint( void ) const override;
 
-    TArray<SegmentLink> SegmentLinks;
+        virtual FPrimitiveViewRelevance GetViewRelevance( const FSceneView* View ) const override;
+        virtual void GetDynamicMeshElements( const TArray<const FSceneView*>& Views
+                                           , const FSceneViewFamily& ViewFamily
+                                           , uint32 VisibilityMap
+                                           , FMeshElementCollector& Collector) const override;
+        void InitVertexFactory();
+        virtual void DrawStaticElements( FStaticPrimitiveDrawInterface * PDI ) override;
 
-    void AddSegment( uint32 ObjectIndex
-                   , uint32 SegmentIndex
-                   , uint32 SegmentClass
-                   , uint32 IndexInSegment );
-
-    //virtual void PostEditChangeProperty (FPropertyChangedEvent & PropertyChangedEvent ) override;
+    protected:
+        UArianePainting3DComponent* Painting3DComponent;
 };
 
-USTRUCT(BlueprintType)
-struct ARIANE_API FTestSegment
+UENUM(BlueprintType)
+enum class EArianePainting3DGeometryMode : uint8
 {
-    GENERATED_BODY()
-
-    int dummy;
+    Tube = 0,
+    Flat = 1,
 };
 
 UCLASS()
@@ -74,71 +70,26 @@ class ARIANE_API UArianePainting3DComponent : public UMeshComponent
         virtual void PostInitProperties() override;
         virtual FPrimitiveSceneProxy* CreateSceneProxy() override;
 
+        #if WITH_EDITOR
+        virtual void PostEditChangeProperty( FPropertyChangedEvent& event ) override;
+        #endif
+
     private:
         virtual FBoxSphereBounds CalcBounds( const FTransform& LocalToWorld ) const override;
 
     public:
         void AddPath( FArianePath* iPath );
-        const TArray<FArianePathGeometry3D*>& GetPathMeshs();
-        void BuildPathMeshs();
+        const TArray<FArianePath*>& GetPaths();
+        void Update();
+
+    public:
+        UPROPERTY( EditAnywhere
+                 , Category = Painting3D )
+        EArianePainting3DGeometryMode GeometryMode;
 
     protected:
+
         //ULineBatchComponent* LineBatchComponent;
-        TArray<FArianePathGeometry3D*> PathMeshs;
-        TArray<FArianePath*> InvalidatedPaths;
-};
-
-class ARIANE_API FArianePathGeometry3D
-{
-    public:
-        ~FArianePathGeometry3D();
-        FArianePathGeometry3D( UArianePainting3DComponent* InPainting3DComponent, FArianePath* InPath );
-
-        void Build();
-
-        const FStaticMeshVertexBuffers& GetVertexBuffers() const;
-        const FRawStaticIndexBuffer& GetIndexBuffer() const;
-        FArianePath* GetPath();
-        FLocalVertexFactory& GetVertexFactory();
-
-    protected:
-        void BuildSegmentAsTube( FArianeSegment* Segment
-                               , FVector& InOutPreviousPerpendicularVector );
-        void BuildSegmentAsFlat( FArianeSegment* Segment
-                               , FVector& InOutPreviousPerpendicularVector );
-
-        void InitVertexFactory();
-        FVector GetTangentVectorAt( FArianeSegment* Segment
-                                  , FVector* OptionalPerpendicularVector
-                                  , double T
-                                  , bool bNormalize );
-
-    protected:
-        UArianePainting3DComponent* Painting3DComponent; // to retrieve the up vector
-        FArianePath* Path;
-
-        FStaticMeshVertexBuffers VertexBuffers;
-        FRawStaticIndexBuffer IndexBuffer;
-        FLocalVertexFactory VertexFactory;
-};
-
-class ARIANE_API FArianeGeometryProxy : public FPrimitiveSceneProxy
-{
-    public:
-        ~FArianeGeometryProxy();
-        FArianeGeometryProxy( ERHIFeatureLevel::Type InFeatureLevel, UArianePainting3DComponent* InPainting3DComponent );
-
-        virtual SIZE_T GetTypeHash() const override;
-        virtual uint32 GetMemoryFootprint( void ) const override;
-
-        virtual FPrimitiveViewRelevance GetViewRelevance( const FSceneView* View ) const override;
-        virtual void GetDynamicMeshElements( const TArray<const FSceneView*>& Views
-                                           , const FSceneViewFamily& ViewFamily
-                                           , uint32 VisibilityMap
-                                           , FMeshElementCollector& Collector) const override;
-        void InitVertexFactory();
-        virtual void DrawStaticElements( FStaticPrimitiveDrawInterface * PDI ) override;
-
-    protected:
-        UArianePainting3DComponent* Painting3DComponent;
+        FArianeObject RootObject;
+        TArray<FArianePath*> Paths;
 };

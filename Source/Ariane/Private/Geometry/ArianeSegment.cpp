@@ -11,6 +11,7 @@ FArianeSegment::~FArianeSegment()
 
 FArianeSegment::FArianeSegment( FArianeVertex* iVertex0, FArianeVertex* iVertex1 )
     : Vertices { iVertex0, iVertex1 }
+    , Length ( 0.0f )
 {
     FractionCache.Emplace( iVertex0, iVertex1 );
 
@@ -163,4 +164,44 @@ FArianeSegment::GetAverageVectorAt( double T )
     }
 
     return AverageVector;
+}
+
+const FBoxSphereBounds&
+FArianeSegment::GetBounds()
+{
+    return Bounds;
+}
+
+void
+FArianeSegment::UpdateBounds()
+{
+    FVector Min = FVector (  DBL_MAX,  DBL_MAX,  DBL_MAX );
+    FVector Max = FVector ( -DBL_MAX, -DBL_MAX, -DBL_MAX );
+
+    Bounds = FBoxSphereBounds();
+
+    if( Length )
+    {
+        for( FModelVertex ModelVertex : ModelVertexCache )
+        {
+            if( ModelVertex.Position.X < Min.X ) Min.X = ModelVertex.Position.X;
+            if( ModelVertex.Position.Y < Min.Y ) Min.Y = ModelVertex.Position.Y;
+            if( ModelVertex.Position.Z < Min.Z ) Min.Z = ModelVertex.Position.Z;
+            if( ModelVertex.Position.X > Max.X ) Max.X = ModelVertex.Position.X;
+            if( ModelVertex.Position.Y > Max.Y ) Max.Y = ModelVertex.Position.Y;
+            if( ModelVertex.Position.Z > Max.Z ) Max.Z = ModelVertex.Position.Z;
+        }
+
+        Bounds.Origin = ( Min + Max ) * 0.5f;
+        Bounds.BoxExtent = ( Max - Bounds.Origin );
+        Bounds.SphereRadius = Bounds.BoxExtent.Length();
+    }
+}
+
+void
+FArianeSegment::Update()
+{
+    Length = ( GetVertex(1)->GetPosition() - GetVertex(0)->GetPosition() ).Length();
+
+    UpdateBounds();
 }

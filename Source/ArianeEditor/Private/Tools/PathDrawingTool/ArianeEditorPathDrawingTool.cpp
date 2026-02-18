@@ -20,7 +20,8 @@ UArianeEditorPathDrawingTool::~UArianeEditorPathDrawingTool()
 }
 
 UArianeEditorPathDrawingTool::UArianeEditorPathDrawingTool()
-    : EditedPath( nullptr )
+    : Radius( 5.0f )
+    , EditedPath( nullptr )
 {
     bHasContextMenu = true;
 }
@@ -42,7 +43,7 @@ UArianeEditorPathDrawingTool::OnMouseDown( FEditorViewportClient* iViewportClien
 
             if( painting3DComponent )
             {
-                EditedPath = new FArianePath();
+                EditedPath = new FArianePath( painting3DComponent );
 
                 painting3DComponent->AddPath( EditedPath );
 
@@ -155,7 +156,7 @@ UArianeEditorPathDrawingTool::PlotVertex( FEditorViewportClient* iViewportClient
                 FArianeVertex *vertex0 = EditedPath->GetVertices().Num() ? EditedPath->GetVertices().Last()
                                                                          : nullptr;
 
-                FArianeVertex *vertex1 = new FArianeVertex( localCoords, localNormal, 1.0f );
+                FArianeVertex *vertex1 = new FArianeVertex( localCoords, localNormal, Radius );
 
                 EditedPath->AddVertex( vertex1 );
 
@@ -166,6 +167,8 @@ UArianeEditorPathDrawingTool::PlotVertex( FEditorViewportClient* iViewportClient
                     EditedPath->AddSegment( segment );
                 }
             }
+
+            painting3DComponent->Update( );
 
             break;
         }

@@ -15,12 +15,8 @@ class ARIANEEDITOR_API SArianeEditorToolSelector
     : public SCompoundWidget
 {
     public:
-        DECLARE_DELEGATE_OneParam( FOnToolSelected, UArianeEditorTool* );
-
-    public:
         SLATE_BEGIN_ARGS(SArianeEditorToolSelector)
             {}
-            SLATE_EVENT( FOnToolSelected, OnToolSelected )
         SLATE_END_ARGS()
 
     public:
@@ -29,13 +25,13 @@ class ARIANEEDITOR_API SArianeEditorToolSelector
 
         void Construct( const FArguments& InArgs, FArianeEditor* iEditor );
 
-    private:
+    protected:
         void OnToolCheckStateChanged(ECheckBoxState InValue, UArianeEditorTool* iTool);
         EVisibility ToolVisibility(UArianeEditorTool* iTool) const;
         ECheckBoxState IsToolChecked(UArianeEditorTool* iTool) const;
         FText ToolTooltip(UArianeEditorTool* iTool) const;
 
-    private:
-        FOnToolSelected mOnToolSelected;
+
+    protected:
         FArianeEditor* mEditor;
 };

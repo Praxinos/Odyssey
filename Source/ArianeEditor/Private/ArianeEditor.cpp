@@ -58,12 +58,16 @@ FArianeEditor::AddTool( UArianeEditorTool* iTool )
 void
 FArianeEditor::SetCurrentTool( UArianeEditorTool* iTool )
 {
+    OnPreChangeCurrentTool.Broadcast();
+
     if( mCurrentTool )
     {
         mCurrentTool->Unload();
     }
 
     mCurrentTool = iTool;
+
+    OnPostChangeCurrentTool.Broadcast();
 }
 
 void
@@ -178,4 +182,31 @@ FArianeEditor::AddPainting3DComponent( const TArray<class AActor *> iActors )
 
         //actor->AddComponent( );
     }
+}
+
+FArianeEditor::FOnPreChangeCurrentTool&
+FArianeEditor::OnPreChangeCurrentToolDelegate()
+{
+    return OnPreChangeCurrentTool;
+}
+
+FArianeEditor::FOnPostChangeCurrentTool&
+FArianeEditor::OnPostChangeCurrentToolDelegate()
+{
+    return OnPostChangeCurrentTool;
+}
+
+void
+FArianeEditor::AddReferencedObjects( FReferenceCollector& Collector )
+{
+    for ( TObjectPtr<UArianeEditorTool> tool : mTools )
+    {
+        Collector.AddReferencedObject(tool);
+    }
+}
+
+FString
+FArianeEditor::GetReferencerName() const
+{
+    return "FArianeEditor";
 }
