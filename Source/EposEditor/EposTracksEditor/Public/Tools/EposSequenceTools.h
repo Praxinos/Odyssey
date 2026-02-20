@@ -183,30 +183,6 @@ public:
 // Inside EposSequenceTools_Camera
 public:
     /**
-    *  Find the camera of the board section
-    *
-    * @param ISequencer             iSequencer to get the camera.
-    * @param UMovieSceneSubSection  iSubSection to get the camera.
-    * @param FGuid*                 oCameraBinding to get the camera binding.
-    * @return ACineCameraActor* the camera actor.
-    */
-    static FGuid             GetCameraBinding( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection );
-    static ACineCameraActor* GetCameraSpawned( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FGuid iCameraBinding );
-    static ACineCameraActor* GetCameraSpawnedOrTemplate( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FGuid iCameraBinding );
-
-    /**
-    *  Find the camera of the board section
-    *
-    * @param ISequencer         iSequencer to get the camera.
-    * @param FFrameNumber       iFrameNumber to get the board section.
-    * @param FGuid*             oCameraBinding to get the camera binding.
-    * @return ACineCameraActor* the camera actor.
-    */
-    static FGuid             GetCameraBinding( ISequencer* iSequencer, FFrameNumber iFrameNumber );
-    static ACineCameraActor* GetCameraSpawned( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iCameraBinding );
-    static ACineCameraActor* GetCameraSpawnedOrTemplate( ISequencer* iSequencer, FFrameNumber iFrameNumber, FGuid iCameraBinding );
-
-    /**
     *  Can a camera be created in the board section ?
     *
     * @param ISequencer         iSequencer to get the camera.
@@ -436,16 +412,6 @@ public:
     * @return bool
     */
     static bool CanCreateAnimation( ISequencer* iSequencer, FFrameNumber iFrameNumber );
-
-    /**
-    *  Get all animations (actor & track bindings) in the board section
-    *
-    * @param ISequencer     iSequencer to get animations.
-    * @param FFrameNumber   iFrameNumber to get the board section.
-    * @param TArray<AOdysseyAnimationActor*>*   oAnimations to get all animation actors.
-    * @param TArray<FGuid>*                     oAnimationBindings to get all animation bindings.
-    */
-    static int32 GetAllAnimations( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<AOdysseyAnimationActor*>* oAnimations = nullptr, TArray<FGuid>* oAnimationBindings = nullptr );
 
     /**
     *  Detach a animation of the camera in the board section
@@ -778,7 +744,7 @@ private:
     static void RenameBinding( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iBinding, FString iNewLabel );
 
 public:
-    static void SortBindings( TArray<AOdysseyAnimationActor*> iAnimationActors, TArray<FGuid> iBindings, UMovieScene* iMovieScene, TArray<AOdysseyAnimationActor*>* oOrderedAnimationActors, TArray<FGuid>* oOrderedBindings );
+    static void SortBindings( TArray<FGuid> iBindings, UMovieScene* iMovieScene, TArray<FGuid>* oOrderedBindings );
 
 public:
     static bool MoveAndScaleActor( AActor* ioActor, const ACineCameraActor* iCamera, float iNewDistance, EScaleActor iScaleType, TSharedPtr<ISequencer> iSequencer );
@@ -796,15 +762,6 @@ private:
 
 // Inside EposSequenceTools_Camera
 public:
-    /**
-    *  Find a Camera from the camera track
-    *
-    * @param ISequencer iSequencer to add Camera track and CameraCut track.
-    */
-    static FGuid             GetCameraBinding( ISequencer* iSequencer );
-    static ACineCameraActor* GetCameraSpawned( ISequencer* iSequencer, FGuid iCameraBinding );
-    static ACineCameraActor* GetCameraSpawnedOrTemplate( ISequencer* iSequencer, FGuid iCameraBinding );
-
     /**
     *  Add a Camera track
     *
@@ -892,8 +849,6 @@ public:
 
     static bool CanCreateAnimation( ISequencer* iSequencer, FFrameNumber iFrameNumber );
 
-    static int32 GetAllAnimations( ISequencer* iSequencer, TArray<AOdysseyAnimationActor*>* oAnimations = nullptr, TArray<FGuid>* oAnimationBindings = nullptr );
-
     static void DetachAnimation( ISequencer* iSequencer, TArray<FGuid> iAnimationBindings );
     static void DetachAnimation( ISequencer* iSequencer, FGuid iAnimationBinding );
 
@@ -924,6 +879,8 @@ private:
     static AOdysseyAnimationActor* SpawnAndBindAnimation( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iCameraGuid, ACineCameraActor* iCamera, FFrameNumber iFrameNumber, const FAnimationArgs& iAnimationArgs, FGuid* oGuid );
 
 public:
+    static int32 FilterSelectedAnimations( TArray<AOdysseyAnimationActor*> iAnimationActors, TArray<AOdysseyAnimationActor*>* oSelectedAnimations );
+    static int32 FilterSelectedAnimationsOrAllAnimations( TArray<AOdysseyAnimationActor*> iAnimationActors, TArray<AOdysseyAnimationActor*>* oSelectedAnimations );
     static int32 FilterSelectedAnimations( TArray<AOdysseyAnimationActor*> iAnimationActors, TArray<FGuid> iAnimationBindings, TArray<AOdysseyAnimationActor*>* oSelectedAnimations, TArray<FGuid>* oSelectedAnimationBindings );
     static int32 FilterSelectedAnimationsOrAllAnimations( TArray<AOdysseyAnimationActor*> iAnimationActors, TArray<FGuid> iAnimationBindings, TArray<AOdysseyAnimationActor*>* oSelectedAnimations, TArray<FGuid>* oSelectedAnimationBindings );
 

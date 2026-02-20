@@ -981,17 +981,22 @@ ShotSequenceTools::CloneInnerContent( ISequencer* iSequencer, UMovieSceneSequenc
     //    CloneInnerPlane( iSequencer, iSequence, iSequenceID, iSequence->GetMovieScene(), iEmptyDrawings, planes[i], plane_bindings[i], cloned_camera, attachPlaneToCamera );
     //}
 
-    TArray<AOdysseyAnimationActor*> animations;
-    TArray<FGuid> animation_bindings;
-    int32 animation_count = ShotSequenceHelpers::GetAllAnimations( *iSequencer, iSequence, iSequenceID, &animations, &animation_bindings );
+    TArray<FGuid> animation_bindings = ShotSequenceHelpers::GetAnimationBindings( *iSequencer, iSequence, iSequenceID );
+    //TArray<AOdysseyAnimationActor*> animation_actors = ShotSequenceHelpers::GetAnimationSpawnedOrTemplate( *iSequencer, iSequence, iSequenceID, animation_bindings );
 
-    for( int i = 0; i < animation_count; i++ )
-    {
-        AActor* ParentActor = animations[i]->GetAttachParentActor();
-        bool attachAnimationToCamera = ( ParentActor && ParentActor == camera );
+    checkNoEntry(); //TODO: check and update CloneInnerAnimation() to know if it can be called with GetAnimationSpawnedOrTemplate() !!!
 
-        CloneInnerAnimation( iSequencer, iSequence, iSequenceID, iSequence->GetMovieScene(), animations[i], animation_bindings[i], cloned_camera, attachAnimationToCamera );
-    }
+    //TArray<AOdysseyAnimationActor*> animations;
+    //TArray<FGuid> animation_bindings;
+    //int32 animation_count = ShotSequenceHelpers::GetAllAnimations( *iSequencer, iSequence, iSequenceID, &animations, &animation_bindings );
+
+    //for( int i = 0; i < animation_count; i++ )
+    //{
+    //    AActor* ParentActor = animations[i]->GetAttachParentActor();
+    //    bool attachAnimationToCamera = ( ParentActor && ParentActor == camera );
+
+    //    CloneInnerAnimation( iSequencer, iSequence, iSequenceID, iSequence->GetMovieScene(), animations[i], animation_bindings[i], cloned_camera, attachAnimationToCamera );
+    //}
 
     //---
 

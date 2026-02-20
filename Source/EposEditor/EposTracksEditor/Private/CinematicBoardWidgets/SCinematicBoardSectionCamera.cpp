@@ -439,7 +439,7 @@ SCinematicBoardSectionCameraTransform::BuildKeyContextMenu( FMenuBuilder& ioMenu
     UMovieScene* inner_moviescene = inner_sequence ? inner_sequence->GetMovieScene() : nullptr;
     ISequencer* sequencer = board_section->GetSequencer().Get();
 
-    FGuid camera_binding = BoardSequenceTools::GetCameraBinding( sequencer, subsection );
+    FGuid camera_binding = BoardSequenceHelpers::GetCameraBinding( *sequencer, subsection, sequencer->GetFocusedTemplateID() );
 
     FText camera_track_text = inner_moviescene ? inner_moviescene->GetObjectDisplayName( camera_binding ) : FText::GetEmpty();
 
@@ -471,7 +471,7 @@ SCinematicBoardSectionCameraTransform::GetAreaTooltipText() const //override
     UMovieScene* inner_moviescene = inner_sequence ? inner_sequence->GetMovieScene() : nullptr;
     ISequencer* sequencer = board_section->GetSequencer().Get();
 
-    FGuid camera_binding = BoardSequenceTools::GetCameraBinding( sequencer, subsection );
+    FGuid camera_binding = BoardSequenceHelpers::GetCameraBinding( *sequencer, subsection, sequencer->GetFocusedTemplateID() );
 
     FText camera_track_text = inner_moviescene ? inner_moviescene->GetObjectDisplayName( camera_binding ) : FText::GetEmpty();
 

@@ -472,8 +472,53 @@ ShotSequenceTools::CreateAnimation( ISequencer& iSequencer, UMovieSceneSequence*
 
 //static
 int32
+ShotSequenceTools::FilterSelectedAnimations( TArray<AOdysseyAnimationActor*> iAnimationActors, TArray<AOdysseyAnimationActor*>* oSelectedAnimations )
+{
+    if( oSelectedAnimations )
+        oSelectedAnimations->Empty();
+
+    int32 animation_count = iAnimationActors.Num();
+
+    USelection* selection = GEditor->GetSelectedActors();
+
+    int32 animation_selected_count = 0;
+    for( int i = 0; i < animation_count; i++ )
+    {
+        if( !selection->IsSelected( iAnimationActors[i] ) )
+            continue;
+
+        if( oSelectedAnimations )
+            oSelectedAnimations->Add( iAnimationActors[i] );
+
+        animation_selected_count++;
+    }
+
+    return animation_selected_count;
+}
+
+//static
+int32
+ShotSequenceTools::FilterSelectedAnimationsOrAllAnimations( TArray<AOdysseyAnimationActor*> iAnimationActors, TArray<AOdysseyAnimationActor*>* oSelectedAnimations )
+{
+    if( oSelectedAnimations )
+        oSelectedAnimations->Empty();
+
+    int32 animation_selected_count = FilterSelectedAnimations( iAnimationActors, oSelectedAnimations );
+    if( animation_selected_count )
+        return animation_selected_count;
+
+    if( oSelectedAnimations )
+        *oSelectedAnimations = iAnimationActors;
+
+    return iAnimationActors.Num();
+}
+
+//static
+int32
 ShotSequenceTools::FilterSelectedAnimations( TArray<AOdysseyAnimationActor*> iAnimationActors, TArray<FGuid> iAnimationBindings, TArray<AOdysseyAnimationActor*>* oSelectedAnimations, TArray<FGuid>* oSelectedAnimationBindings )
 {
+    check( iAnimationActors.Num() == iAnimationBindings.Num() );
+
     if( oSelectedAnimations )
         oSelectedAnimations->Empty();
     if( oSelectedAnimationBindings )
@@ -519,35 +564,6 @@ ShotSequenceTools::FilterSelectedAnimationsOrAllAnimations( TArray<AOdysseyAnima
         *oSelectedAnimationBindings = iAnimationBindings;
 
     return iAnimationActors.Num();
-}
-
-//static
-int32
-BoardSequenceTools::GetAllAnimations( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<AOdysseyAnimationActor*>* oAnimations, TArray<FGuid>* oAnimationBindings )
-{
-    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
-    if( !result.mInnerSequence )
-        return 0;
-
-    if( result.mInnerSequence->IsA<UBoardSequence>() )
-        return 0;
-
-    TArray<AOdysseyAnimationActor*> animation_actors;
-    TArray<FGuid> animation_bindings;
-    ShotSequenceHelpers::GetAllAnimations( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, &animation_actors, &animation_bindings );
-
-    return ShotSequenceTools::FilterSelectedAnimationsOrAllAnimations( animation_actors, animation_bindings, oAnimations, oAnimationBindings );
-}
-
-//static
-int32
-ShotSequenceTools::GetAllAnimations( ISequencer* iSequencer, TArray<AOdysseyAnimationActor*>* oAnimations, TArray<FGuid>* oAnimationBindings )
-{
-    TArray<AOdysseyAnimationActor*> animation_actors;
-    TArray<FGuid> animation_bindings;
-    ShotSequenceHelpers::GetAllAnimations( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), &animation_actors, &animation_bindings );
-
-    return ShotSequenceTools::FilterSelectedAnimationsOrAllAnimations( animation_actors, animation_bindings, oAnimations, oAnimationBindings );
 }
 
 //---
@@ -891,8 +907,7 @@ BoardSequenceTools::IsAnimationInEditionMode( ISequencer* iSequencer, const UMov
 
     bool is_edited = false;
 
-    TArray<FGuid> animation_bindings;
-    ShotSequenceHelpers::GetAllAnimations( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, nullptr, &animation_bindings );
+    TArray<FGuid> animation_bindings = ShotSequenceHelpers::GetAnimationBindings( *iSequencer, result.mInnerSequence, result.mInnerSequenceId );
 
     for( FGuid animation_binding : animation_bindings )
     {
@@ -1116,12 +1131,16 @@ ShotSequenceTools::SelectMultiAnimation( ISequencer& iSequencer, UMovieSceneSubS
     // Otherwise the filter will always return empty arrays
 
     // Get all the currently selected animations inside the whole current shot
-    TArray<AOdysseyAnimationActor*> animation_actors;
-    TArray<FGuid> animation_bindings;
-    ShotSequenceHelpers::GetAllAnimations( iSequencer, iSequence, iSequenceID, &animation_actors, &animation_bindings );
-    TArray<AOdysseyAnimationActor*> animation_actors_selected;
-    TArray<FGuid> animation_bindings_selected;
-    FilterSelectedAnimations( animation_actors, animation_bindings, &animation_actors_selected, &animation_bindings_selected );
+    TSet<AOdysseyAnimationActor*> animation_actors_selected;
+    TArray<FGuid> animation_bindings = ShotSequenceHelpers::GetAnimationBindings( iSequencer, iSequence, iSequenceID );
+    for( FGuid animation_binding : animation_bindings )
+    {
+        TArray<AOdysseyAnimationActor*> animation_actors = ShotSequenceHelpers::GetAnimationSpawned( iSequencer, iSequence, iSequenceID, animation_binding );
+
+        TArray<AOdysseyAnimationActor*> current_animation_actors_selected;
+        ShotSequenceTools::FilterSelectedAnimations( animation_actors, &current_animation_actors_selected );
+        animation_actors_selected.Append( current_animation_actors_selected );
+    }
 
     //---
 
@@ -1135,17 +1154,17 @@ ShotSequenceTools::SelectMultiAnimation( ISequencer& iSequencer, UMovieSceneSubS
 
     //---
 
-    auto objects = iSequencer.FindBoundObjects( iAnimationBinding, iSequenceID );
+    TArrayView<TWeakObjectPtr<>> objects = iSequencer.FindBoundObjects( iAnimationBinding, iSequenceID );
 
     // Get the animation(s) corresponding to the one(s) on the current clicked row
     // It's an array, but generally it should always be only 1 entry
     TArray<AOdysseyAnimationActor*> animations_self;
-    for( auto object : objects )
+    for( TWeakObjectPtr<> object : objects )
         animations_self.Add( Cast<AOdysseyAnimationActor>( object ) );
 
     // Add the self animation to the selection
     // or remove it from the selection if it was already selected
-    for( auto animation_self : animations_self )
+    for( AOdysseyAnimationActor* animation_self : animations_self )
     {
         if( animation_actors_selected.Contains( animation_self ) )
             animation_actors_selected.Remove( animation_self );
@@ -1156,7 +1175,7 @@ ShotSequenceTools::SelectMultiAnimation( ISequencer& iSequencer, UMovieSceneSubS
     // To unselect all actors
     GEditor->SelectNone( true, true );
     // And then select the current one(s)
-    for( auto animation_selected : animation_actors_selected )
+    for( AOdysseyAnimationActor* animation_selected : animation_actors_selected )
         GEditor->SelectActor( animation_selected, true /* bInSelected */, true /* bNotify */, true /* bSelectEvenIfHidden */ );
 }
 

@@ -238,25 +238,30 @@ FindAllAnimationPaths( const IMovieScenePlayer& iPlayer, FRelevantPathMap& oPare
         UMovieSceneSequence* sequence = pair.Value;
         FMovieSceneSequenceID sequence_id = pair.Key;
 
-        TArray<AOdysseyAnimationActor*> animation_actors;
-        ShotSequenceHelpers::GetAllAnimations( player, sequence, sequence_id, &animation_actors, nullptr );
+        if( !sequence->IsA<UShotSequence>() )
+            continue;
 
-        for( auto animation_actor : animation_actors )
+        TArray<FGuid> animation_bindings = ShotSequenceHelpers::GetAnimationBindings( player, sequence, sequence_id );
+        for( FGuid animation_binding : animation_bindings )
         {
-            const UOdysseyAnimation* animation = animation_actor->GetAnimationComponent() ? animation_actor->GetAnimationComponent()->GetAnimation() : nullptr;
-            if( !animation )
-                continue;
+            TArray<AOdysseyAnimationActor*> animation_actors = ShotSequenceHelpers::GetAnimationSpawnedOrTemplate( player, sequence, sequence_id, animation_binding );
+            for( AOdysseyAnimationActor* animation_actor : animation_actors )
+            {
+                const UOdysseyAnimation* animation = animation_actor->GetAnimationComponent() ? animation_actor->GetAnimationComponent()->GetAnimation() : nullptr;
+                if( !animation )
+                    continue;
 
-            //-
+                //-
 
-            FString animation_pathname = animation->GetPackage()->GetName();
-            FString animation_path = FPackageName::GetLongPackagePath( animation_pathname );
+                FString animation_pathname = animation->GetPackage()->GetName();
+                FString animation_path = FPackageName::GetLongPackagePath( animation_pathname );
 
-            int32* count = map_path_to_count.Find( animation_path );
-            if( count )
-                *count = *count + 1;
-            else
-                map_path_to_count.Add( animation_path, 1 );
+                int32* count = map_path_to_count.Find( animation_path );
+                if( count )
+                    *count = *count + 1;
+                else
+                    map_path_to_count.Add( animation_path, 1 );
+            }
         }
     }
 
@@ -365,7 +370,7 @@ NamingConvention::GenerateCameraActorPathName( const IMovieScenePlayer& iPlayer,
             UMovieSceneSequence* sequence = pair.Value.GetSequence();
             FMovieSceneSequenceID sequence_id = pair.Key;
 
-            if( !Cast<UEposMovieSceneSequence>( sequence ) )
+            if( !sequence->IsA<UShotSequence>() )
                 continue;
 
             FGuid camera_binding = ShotSequenceHelpers::GetCameraBinding( *player, sequence, sequence_id );

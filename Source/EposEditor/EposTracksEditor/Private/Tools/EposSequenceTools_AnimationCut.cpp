@@ -303,6 +303,8 @@ BoardSequenceTools::GotoPreviousAnimationCut( ISequencer* iSequencer, FFrameNumb
     BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
     if( !result.mInnerSequence )
         return;
+    if( result.mInnerSequence->IsA<UBoardSequence>() )
+        return;
 
     ShotSequenceTools::GotoPreviousAnimationCut( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, result.mInnerTime.GetFrame() );
 }
@@ -313,6 +315,8 @@ BoardSequenceTools::HasPreviousAnimationCut( ISequencer* iSequencer, FFrameNumbe
 {
     BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
     if( !result.mInnerSequence )
+        return false;
+    if( result.mInnerSequence->IsA<UBoardSequence>() )
         return false;
 
     // Check on all animations
@@ -373,6 +377,8 @@ BoardSequenceTools::GotoNextAnimationCut( ISequencer* iSequencer, FFrameNumber i
     BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
     if( !result.mInnerSequence )
         return;
+    if( result.mInnerSequence->IsA<UBoardSequence>() )
+        return;
 
     ShotSequenceTools::GotoNextAnimationCut( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, result.mInnerTime.GetFrame() );
 }
@@ -383,6 +389,8 @@ BoardSequenceTools::HasNextAnimationCut( ISequencer* iSequencer, FFrameNumber iF
 {
     BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
     if( !result.mInnerSequence )
+        return false;
+    if( result.mInnerSequence->IsA<UBoardSequence>() )
         return false;
 
     TArray<FFrameNumber> times = ShotSequenceHelpers::GetAllAnimationCutTimes( *iSequencer, result.mInnerSequence, result.mInnerSequenceId ); // See comment above #315

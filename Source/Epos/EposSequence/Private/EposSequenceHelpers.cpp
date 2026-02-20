@@ -148,6 +148,9 @@ BoardSequenceHelpers::GetCameraBinding( IMovieScenePlayer& iPlayer, const UMovie
 {
     FInnerSequenceResult result = GetInnerSequence( iPlayer, iSubSection, iSequenceID );
 
+    if( result.mInnerSequence->IsA<UBoardSequence>() )
+        return FGuid();
+
     return ShotSequenceHelpers::GetCameraBinding( iPlayer, result.mInnerSequence, result.mInnerSequenceId );
 }
 
@@ -157,6 +160,9 @@ BoardSequenceHelpers::GetCameraSpawned( IMovieScenePlayer& iPlayer, const UMovie
 {
     FInnerSequenceResult result = GetInnerSequence( iPlayer, iSubSection, iSequenceID );
 
+    if( result.mInnerSequence->IsA<UBoardSequence>() )
+        return nullptr;
+
     return ShotSequenceHelpers::GetCameraSpawned( iPlayer, result.mInnerSequence, result.mInnerSequenceId, iCameraBinding );
 }
 
@@ -165,6 +171,51 @@ ACineCameraActor*
 BoardSequenceHelpers::GetCameraSpawnedOrTemplate( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID, FGuid iCameraBinding )
 {
     FInnerSequenceResult result = GetInnerSequence( iPlayer, iSubSection, iSequenceID );
+
+    if( result.mInnerSequence->IsA<UBoardSequence>() )
+        return nullptr;
+
+    return ShotSequenceHelpers::GetCameraSpawnedOrTemplate( iPlayer, result.mInnerSequence, result.mInnerSequenceId, iCameraBinding );
+}
+
+//static
+FGuid
+BoardSequenceHelpers::GetCameraBinding( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FFrameNumber& iFrameNumber )
+{
+    check( !iSequence || iSequence->IsA<UBoardSequence>() );
+
+    FInnerSequenceResult result = GetInnerSequence( iPlayer, iSequence, iSequenceID, iFrameNumber );
+
+    if( result.mInnerSequence->IsA<UBoardSequence>() )
+        return FGuid();
+
+    return ShotSequenceHelpers::GetCameraBinding( iPlayer, result.mInnerSequence, result.mInnerSequenceId );
+}
+
+//static
+ACineCameraActor*
+BoardSequenceHelpers::GetCameraSpawned( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FFrameNumber& iFrameNumber, FGuid iCameraBinding )
+{
+    check( !iSequence || iSequence->IsA<UBoardSequence>() );
+
+    FInnerSequenceResult result = GetInnerSequence( iPlayer, iSequence, iSequenceID, iFrameNumber );
+
+    if( result.mInnerSequence->IsA<UBoardSequence>() )
+        return nullptr;
+
+    return ShotSequenceHelpers::GetCameraSpawned( iPlayer, result.mInnerSequence, result.mInnerSequenceId, iCameraBinding );
+}
+
+//static
+ACineCameraActor*
+BoardSequenceHelpers::GetCameraSpawnedOrTemplate( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FFrameNumber& iFrameNumber, FGuid iCameraBinding )
+{
+    check( !iSequence || iSequence->IsA<UBoardSequence>() );
+
+    FInnerSequenceResult result = GetInnerSequence( iPlayer, iSequence, iSequenceID, iFrameNumber );
+
+    if( result.mInnerSequence->IsA<UBoardSequence>() )
+        return nullptr;
 
     return ShotSequenceHelpers::GetCameraSpawnedOrTemplate( iPlayer, result.mInnerSequence, result.mInnerSequenceId, iCameraBinding );
 }
@@ -200,101 +251,42 @@ BoardSequenceHelpers::GetCameraBindingRecursive( IMovieScenePlayer& iPlayer, UMo
     return FGuid();
 }
 
-//static
-ACineCameraActor*
-BoardSequenceHelpers::GetCameraSpawnedRecursive( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FFrameNumber& iFrameNumber, FGuid iCameraBinding, UMovieSceneSequence** oSequence, FMovieSceneSequenceID* oSequenceID )
-{
-    FInnerSequenceResult result = GetInnerSequence( iPlayer, iSequence, iSequenceID, iFrameNumber );
-
-    if( !result.mInnerSequence )
-        return nullptr;
-
-    // if we are on a shot subsequence
-    if( result.mInnerSequence->IsA<UShotSequence>() )
-    {
-        *oSequence = result.mInnerSequence;
-        *oSequenceID = result.mInnerSequenceId;
-
-        ACineCameraActor* camera = ShotSequenceHelpers::GetCameraSpawned( iPlayer, result.mInnerSequence, result.mInnerSequenceId, iCameraBinding );
-
-        return camera;
-    }
-
-    // if we are on a board subsequence
-    if( result.mInnerSequence->IsA<UBoardSequence>() )
-    {
-        ACineCameraActor* camera = BoardSequenceHelpers::GetCameraSpawnedRecursive( iPlayer, result.mInnerSequence, result.mInnerSequenceId, result.mInnerTime.FloorToFrame(), iCameraBinding, oSequence, oSequenceID );
-
-        return camera;
-    }
-
-    return nullptr;
-}
-
-//static
-ACineCameraActor*
-BoardSequenceHelpers::GetCameraSpawnedOrTemplateRecursive( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FFrameNumber& iFrameNumber, FGuid iCameraBinding, UMovieSceneSequence** oSequence, FMovieSceneSequenceID* oSequenceID )
-{
-    FInnerSequenceResult result = GetInnerSequence( iPlayer, iSequence, iSequenceID, iFrameNumber );
-
-    if( !result.mInnerSequence )
-        return nullptr;
-
-    // if we are on a shot subsequence
-    if( result.mInnerSequence->IsA<UShotSequence>() )
-    {
-        *oSequence = result.mInnerSequence;
-        *oSequenceID = result.mInnerSequenceId;
-
-        ACineCameraActor* camera = ShotSequenceHelpers::GetCameraSpawnedOrTemplate( iPlayer, result.mInnerSequence, result.mInnerSequenceId, iCameraBinding );
-
-        return camera;
-    }
-
-    // if we are on a board subsequence
-    if( result.mInnerSequence->IsA<UBoardSequence>() )
-    {
-        ACineCameraActor* camera = BoardSequenceHelpers::GetCameraSpawnedOrTemplateRecursive( iPlayer, result.mInnerSequence, result.mInnerSequenceId, result.mInnerTime.FloorToFrame(), iCameraBinding, oSequence, oSequenceID );
-
-        return camera;
-    }
-
-    return nullptr;
-}
-
 static
-UObject*
+TArray<UObject*>
 FindSpawnedObjectOrTemplate( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iBinding )
 {
+    TArray<UObject*> objects;
+
     TArrayView<TWeakObjectPtr<>> weakObjectsView = iPlayer.FindBoundObjects( iBinding, iSequenceID );
-    if( weakObjectsView.Num() )
-        return weakObjectsView[0].Get();
+    CopyFromWeakArray( objects, weakObjectsView );
+    if( objects.Num() )
+        return objects;
 
     //---
 
     if( !iSequence )
-        return nullptr;
+        return TArray<UObject*>();
 
-    TArray<TWeakObjectPtr<>> weakObjects;
     if( FMovieSceneBindingReferences* bindingReferences = iSequence->GetBindingReferences() )
     {
         int32 reference_count = bindingReferences->GetReferences( iBinding ).Num();
         for( int binding_index = 0; binding_index < reference_count; binding_index++ )
         {
-            weakObjects.Add( MovieSceneHelpers::GetObjectTemplate( iSequence, iBinding, iPlayer.GetSharedPlaybackState(), binding_index ) );
+            UObject* object = MovieSceneHelpers::GetObjectTemplate( iSequence, iBinding, iPlayer.GetSharedPlaybackState(), binding_index );
+            if( object )
+                objects.Add( object );
         }
     }
 
-    if( weakObjects.Num() )
-        return weakObjects[0].Get();
-
-    return nullptr;
+    return objects;
 }
 
 //static
 FGuid
 ShotSequenceHelpers::GetCameraBinding( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID )
 {
+    check( !iSequence || iSequence->IsA<UShotSequence>() );
+
     UMovieScene* movieScene = iSequence ? iSequence->GetMovieScene() : nullptr;
     if( !movieScene )
         return FGuid();
@@ -305,9 +297,13 @@ ShotSequenceHelpers::GetCameraBinding( IMovieScenePlayer& iPlayer, UMovieSceneSe
     {
         FMovieScenePossessable possessable = movieScene->GetPossessable( i );
 
-        ACineCameraActor* existingCamera = Cast<ACineCameraActor>( FindSpawnedObjectOrTemplate( iPlayer, iSequence, iSequenceID, possessable.GetGuid() ) );
-        if( existingCamera )
+        TArray<UObject*> objects = FindSpawnedObjectOrTemplate( iPlayer, iSequence, iSequenceID, possessable.GetGuid() );
+        for( UObject* object : objects )
         {
+            ACineCameraActor* camera = Cast<ACineCameraActor>( object );
+            if( !camera )
+                continue;
+
             return possessable.GetGuid();
         }
     }
@@ -319,6 +315,8 @@ ShotSequenceHelpers::GetCameraBinding( IMovieScenePlayer& iPlayer, UMovieSceneSe
 ACineCameraActor*
 ShotSequenceHelpers::GetCameraSpawned( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iCameraBinding )
 {
+    check( !iSequence || iSequence->IsA<UShotSequence>() );
+
     if( !iCameraBinding.IsValid() )
         return nullptr;
 
@@ -333,25 +331,32 @@ ShotSequenceHelpers::GetCameraSpawned( IMovieScenePlayer& iPlayer, UMovieSceneSe
 ACineCameraActor*
 ShotSequenceHelpers::GetCameraSpawnedOrTemplate( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iCameraBinding )
 {
+    check( !iSequence || iSequence->IsA<UShotSequence>() );
+
     if( !iCameraBinding.IsValid() )
         return nullptr;
 
-    UObject* object = FindSpawnedObjectOrTemplate( iPlayer, iSequence, iSequenceID, iCameraBinding );
-    if( object )
-        return Cast<ACineCameraActor>( object );
+    TArray<UObject*> objects = FindSpawnedObjectOrTemplate( iPlayer, iSequence, iSequenceID, iCameraBinding );
+    for( UObject* object : objects )
+    {
+        ACineCameraActor* camera = Cast<ACineCameraActor>( object );
+        if( !camera )
+            continue;
+
+        return camera;
+    }
 
     return nullptr;
 }
 
 
 //static
-int32
-BoardSequenceHelpers::GetAllAnimationsRecursive( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FFrameNumber& iFrameNumber, TArray<AOdysseyAnimationActor*>* oAnimations, TArray<FGuid>* oAnimationBindings, UMovieSceneSequence** oSequence, FMovieSceneSequenceID* oSequenceID )
+TArray<FGuid>
+BoardSequenceHelpers::GetAnimationBindingsRecursive( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FFrameNumber& iFrameNumber, UMovieSceneSequence** oSequence, FMovieSceneSequenceID* oSequenceID )
 {
     FInnerSequenceResult result = GetInnerSequence( iPlayer, iSequence, iSequenceID, iFrameNumber );
-
     if( !result.mInnerSequence )
-        return 0;
+        return TArray<FGuid>();
 
     // if we are on a shot subsequence
     if( result.mInnerSequence->IsA<UShotSequence>() )
@@ -359,60 +364,182 @@ BoardSequenceHelpers::GetAllAnimationsRecursive( IMovieScenePlayer& iPlayer, UMo
         *oSequence = result.mInnerSequence;
         *oSequenceID = result.mInnerSequenceId;
 
-        int animation_count = ShotSequenceHelpers::GetAllAnimations( iPlayer, result.mInnerSequence, result.mInnerSequenceId, oAnimations, oAnimationBindings );
-
-        return animation_count;
+        return ShotSequenceHelpers::GetAnimationBindings( iPlayer, result.mInnerSequence, result.mInnerSequenceId );
     }
 
     // if we are on a board subsequence
     if( result.mInnerSequence->IsA<UBoardSequence>() )
     {
-        int animation_count = BoardSequenceHelpers::GetAllAnimationsRecursive( iPlayer, result.mInnerSequence, result.mInnerSequenceId, result.mInnerTime.FloorToFrame(), oAnimations, oAnimationBindings, oSequence, oSequenceID );
-
-        return animation_count;
+        return BoardSequenceHelpers::GetAnimationBindingsRecursive( iPlayer, result.mInnerSequence, result.mInnerSequenceId, result.mInnerTime.FloorToFrame(), oSequence, oSequenceID );
     }
 
-    return 0;
+    return TArray<FGuid>();
+}
+
+
+//static
+TArray<FGuid>
+BoardSequenceHelpers::GetAnimationBindings( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID )
+{
+    FInnerSequenceResult result = GetInnerSequence( iPlayer, iSubSection, iSequenceID );
+    if( !result.mInnerSequence )
+        return TArray<FGuid>();
+    if( result.mInnerSequence->IsA<UBoardSequence>() )
+        return TArray<FGuid>();
+
+    return ShotSequenceHelpers::GetAnimationBindings( iPlayer, result.mInnerSequence, result.mInnerSequenceId );
 }
 
 //static
-int32
-ShotSequenceHelpers::GetAllAnimations( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TArray<AOdysseyAnimationActor*>* oAnimations, TArray<FGuid>* oAnimationBindings )
+TArray<AOdysseyAnimationActor*>
+BoardSequenceHelpers::GetAnimationSpawned( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID, FGuid iAnimationBinding )
 {
-    if( oAnimations )
-        oAnimations->Empty();
-    if( oAnimationBindings )
-        oAnimationBindings->Empty();
+    FInnerSequenceResult result = GetInnerSequence( iPlayer, iSubSection, iSequenceID );
+    if( !result.mInnerSequence )
+        return TArray<AOdysseyAnimationActor*>();
+    if( result.mInnerSequence->IsA<UBoardSequence>() )
+        return TArray<AOdysseyAnimationActor*>();
+
+    return ShotSequenceHelpers::GetAnimationSpawned( iPlayer, result.mInnerSequence, result.mInnerSequenceId, iAnimationBinding );
+}
+
+//static
+TArray<AOdysseyAnimationActor*>
+BoardSequenceHelpers::GetAnimationSpawnedOrTemplate( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID, FGuid iAnimationBinding )
+{
+    FInnerSequenceResult result = GetInnerSequence( iPlayer, iSubSection, iSequenceID );
+    if( !result.mInnerSequence )
+        return TArray<AOdysseyAnimationActor*>();
+    if( result.mInnerSequence->IsA<UBoardSequence>() )
+        return TArray<AOdysseyAnimationActor*>();
+
+    return ShotSequenceHelpers::GetAnimationSpawnedOrTemplate( iPlayer, result.mInnerSequence, result.mInnerSequenceId, iAnimationBinding );
+}
+
+//static
+TArray<FGuid>
+BoardSequenceHelpers::GetAnimationBindings( IMovieScenePlayer & iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FFrameNumber& iFrameNumber )
+{
+    check( !iSequence || iSequence->IsA<UBoardSequence>() );
+
+    FInnerSequenceResult result = GetInnerSequence( iPlayer, iSequence, iSequenceID, iFrameNumber );
+    if( !result.mInnerSequence )
+        return TArray<FGuid>();
+    if( result.mInnerSequence->IsA<UBoardSequence>() )
+        return TArray<FGuid>();
+
+    return ShotSequenceHelpers::GetAnimationBindings( iPlayer, result.mInnerSequence, result.mInnerSequenceId );
+}
+
+//static
+TArray<AOdysseyAnimationActor*>
+BoardSequenceHelpers::GetAnimationSpawned( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FFrameNumber& iFrameNumber, FGuid iAnimationBinding )
+{
+    check( !iSequence || iSequence->IsA<UBoardSequence>() );
+
+    FInnerSequenceResult result = GetInnerSequence( iPlayer, iSequence, iSequenceID, iFrameNumber );
+    if( !result.mInnerSequence )
+        return TArray<AOdysseyAnimationActor*>();
+    if( result.mInnerSequence->IsA<UBoardSequence>() )
+        return TArray<AOdysseyAnimationActor*>();
+
+    return ShotSequenceHelpers::GetAnimationSpawned( iPlayer, result.mInnerSequence, result.mInnerSequenceId, iAnimationBinding );
+}
+
+//static
+TArray<AOdysseyAnimationActor*>
+BoardSequenceHelpers::GetAnimationSpawnedOrTemplate( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FFrameNumber& iFrameNumber, FGuid iAnimationBinding )
+{
+    check( !iSequence || iSequence->IsA<UBoardSequence>() );
+
+    FInnerSequenceResult result = GetInnerSequence( iPlayer, iSequence, iSequenceID, iFrameNumber );
+    if( !result.mInnerSequence )
+        return TArray<AOdysseyAnimationActor*>();
+    if( result.mInnerSequence->IsA<UBoardSequence>() )
+        return TArray<AOdysseyAnimationActor*>();
+
+    return ShotSequenceHelpers::GetAnimationSpawnedOrTemplate( iPlayer, result.mInnerSequence, result.mInnerSequenceId, iAnimationBinding );
+}
+
+//static
+TArray<FGuid>
+ShotSequenceHelpers::GetAnimationBindings( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID )
+{
+    check( !iSequence || iSequence->IsA<UShotSequence>() );
+
+    TArray<FGuid> bindings;
 
     UMovieScene* movieScene = iSequence ? iSequence->GetMovieScene() : nullptr;
     if( !movieScene )
-        return 0;
-
-    TArray<AOdysseyAnimationActor*> animations;
-    TArray<FGuid> animation_bindings;
+        return bindings;
 
     for( int i = 0; i < movieScene->GetPossessableCount(); i++ )
     {
         FMovieScenePossessable possessable = movieScene->GetPossessable( i );
 
-        for( TWeakObjectPtr<> WeakObject : iPlayer.FindBoundObjects( possessable.GetGuid(), iSequenceID ) )
+        TArray<UObject*> objects = FindSpawnedObjectOrTemplate( iPlayer, iSequence, iSequenceID, possessable.GetGuid() );
+        for( UObject* object : objects )
         {
-            AOdysseyAnimationActor* animation = Cast<AOdysseyAnimationActor>( WeakObject.Get() );
-
-            if( !animation )
+            AOdysseyAnimationActor* animation_actor = Cast<AOdysseyAnimationActor>( object );
+            if( !animation_actor )
                 continue;
 
-            animations.Add( animation );
-            animation_bindings.Add( possessable.GetGuid() );
+            bindings.AddUnique( possessable.GetGuid() );
         }
     }
 
-    if( oAnimations )
-        *oAnimations = animations;
-    if( oAnimationBindings )
-        *oAnimationBindings = animation_bindings;
+    return bindings;
+}
 
-    return animations.Num();
+//static
+TArray<AOdysseyAnimationActor*>
+ShotSequenceHelpers::GetAnimationSpawned( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iAnimationBinding )
+{
+    check( !iSequence || iSequence->IsA<UShotSequence>() );
+
+    /* Warning:
+    * iSequence is not used here
+    * so GuessActorToSelect() will set it to nullptr
+    * but it's because I'm lazy
+    * GuessActorToSelect() should set it the right way ...
+    */
+    TArray<AOdysseyAnimationActor*> animation_actors;
+
+    TArrayView<TWeakObjectPtr<>> weakObjects = iPlayer.FindBoundObjects( iAnimationBinding, iSequenceID );
+    for( TWeakObjectPtr<> weakObject : weakObjects )
+    {
+        if( !weakObject.IsValid() )
+            continue;
+
+        AOdysseyAnimationActor* animation_actor = Cast<AOdysseyAnimationActor>( weakObject.Get() );
+        if( !animation_actor )
+            continue;
+
+        animation_actors.Add( animation_actor );
+    }
+
+    return animation_actors;
+}
+
+//static
+TArray<AOdysseyAnimationActor*>
+ShotSequenceHelpers::GetAnimationSpawnedOrTemplate( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iAnimationBinding )
+{
+    check( !iSequence || iSequence->IsA<UShotSequence>() );
+
+    TArray<AOdysseyAnimationActor*> animation_actors;
+
+    TArray<UObject*> objects = FindSpawnedObjectOrTemplate( iPlayer, iSequence, iSequenceID, iAnimationBinding );
+    for( UObject* object : objects )
+    {
+        AOdysseyAnimationActor* animation_actor = Cast<AOdysseyAnimationActor>( object );
+        if( !animation_actor )
+            continue;
+
+        animation_actors.AddUnique( animation_actor );
+    }
+
+    return animation_actors;
 }
 
 //static
@@ -866,24 +993,34 @@ ShotSequenceHelpers::FindTimelineTrackAndSections( IMovieScenePlayer& iPlayer, U
 
 //static
 TArray<FFrameNumber>
+BoardSequenceHelpers::GetAllAnimationCutTimes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FFrameNumber& iFrameNumber )
+{
+    FInnerSequenceResult result = GetInnerSequence( iPlayer, iSequence, iSequenceID, iFrameNumber );
+    if( result.mInnerSequence->IsA<UBoardSequence>() )
+        return TArray<FFrameNumber>();
+
+    return ShotSequenceHelpers::GetAllAnimationCutTimes( iPlayer, result.mInnerSequence, result.mInnerSequenceId );
+}
+
+//static
+TArray<FFrameNumber>
 ShotSequenceHelpers::GetAllAnimationCutTimes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID )
 {
+    check( !iSequence || iSequence->IsA<UShotSequence>() );
+
     TArray<FFrameNumber> times;
 
     UMovieScene* moviescene = iSequence ? iSequence->GetMovieScene() : nullptr;
     if( !moviescene )
         return times;
 
-    TArray<FGuid> animation_guids;
-    int32 nb_animation = GetAllAnimations( iPlayer, iSequence, iSequenceID, nullptr, &animation_guids );
-    if( !nb_animation )
+    TArray<FGuid> animation_bindings = ShotSequenceHelpers::GetAnimationBindings( iPlayer, iSequence, iSequenceID );
+    if( animation_bindings.IsEmpty() )
         return times;
 
-    for( int i = 0; i < animation_guids.Num(); i++ )
+    for( FGuid animation_binding : animation_bindings )
     {
-        FGuid animation_guid = animation_guids[i];
-
-        FGuid child_binding_with_timeline = FindSingleChildBindingWithTrack<UOdysseyAnimationTimelineTrack>( moviescene, animation_guid );
+        FGuid child_binding_with_timeline = FindSingleChildBindingWithTrack<UOdysseyAnimationTimelineTrack>( moviescene, animation_binding );
         if( !child_binding_with_timeline.IsValid() )
             continue;
 
@@ -1027,7 +1164,8 @@ ShotSequenceHelpers::FindOrCreateMaterialParameterTrackAndSections( IMovieSceneP
         // - binding must be an actor (as this function should always be called on an actor binding)
         // - component binding must exist
         // - component binding must allow component material track
-        AActor* actor = Cast<AActor>( FindSpawnedObjectOrTemplate( iPlayer, iSequence, iSequenceID, iBinding ) );
+        TArray<UObject*> objects = FindSpawnedObjectOrTemplate( iPlayer, iSequence, iSequenceID, iBinding );
+        AActor* actor = Cast<AActor>( objects[0] );
         UActorComponent* component = actor->FindComponentByClass<UOdysseyAnimationComponent>();
         if( !component )
             component = actor->GetRootComponent();
@@ -1394,6 +1532,9 @@ BoardSequenceHelpers::BuildCameraTransformChannelProxy( IMovieScenePlayer& iPlay
 {
     FInnerSequenceResult result = GetInnerSequence( iPlayer, iSubSection, iSequenceID );
 
+    if( result.mInnerSequence->IsA<UBoardSequence>() )
+        return FChannelProxyBySectionMap();
+
     return ShotSequenceHelpers::BuildCameraTransformChannelProxy( iPlayer, result.mInnerSequence, result.mInnerSequenceId );
 }
 
@@ -1453,6 +1594,9 @@ BoardSequenceHelpers::BuildAnimationsTransformChannelProxy( IMovieScenePlayer& i
 {
     FInnerSequenceResult result = GetInnerSequence( iPlayer, iSubSection, iSequenceID );
 
+    if( result.mInnerSequence->IsA<UBoardSequence>() )
+        return TMap<FGuid, FChannelProxyBySectionMap>();
+
     return ShotSequenceHelpers::BuildAnimationsTransformChannelProxy( iPlayer, result.mInnerSequence, result.mInnerSequenceId );
 }
 
@@ -1462,16 +1606,15 @@ ShotSequenceHelpers::BuildAnimationsTransformChannelProxy( IMovieScenePlayer& iP
 {
     TMap<FGuid, FChannelProxyBySectionMap> maps;
 
-    TArray<FGuid> bindings;
-    /*int animation_count =*/ ShotSequenceHelpers::GetAllAnimations( iPlayer, iSequence, iSequenceID, nullptr, &bindings );
+    TArray<FGuid> animation_bindings = ShotSequenceHelpers::GetAnimationBindings( iPlayer, iSequence, iSequenceID );
 
-    for( auto binding : bindings )
+    for( auto animation_binding : animation_bindings )
     {
         FChannelProxyBySectionMap map;
 
         //---
 
-        TArray<UMovieScene3DTransformSection*> animation_transform_sections = ShotSequenceHelpers::GetAnimationTransformSections( iPlayer, iSequence, iSequenceID, binding );
+        TArray<UMovieScene3DTransformSection*> animation_transform_sections = ShotSequenceHelpers::GetAnimationTransformSections( iPlayer, iSequence, iSequenceID, animation_binding );
         for( auto animation_transform_section : animation_transform_sections )
         {
             FMovieSceneChannelProxyData ChannelIndirection;
@@ -1508,7 +1651,7 @@ ShotSequenceHelpers::BuildAnimationsTransformChannelProxy( IMovieScenePlayer& iP
             //    camera_transform_section->OnSignatureChanged().AddUObject( this, &UMovieSceneCinematicBoardSection::HandleInvalidateChannelProxy );
         }
 
-        maps.Add( binding, map );
+        maps.Add( animation_binding, map );
     }
 
     return maps;
@@ -1520,6 +1663,9 @@ BoardSequenceHelpers::BuildAnimationsTimelineChannelProxy( IMovieScenePlayer& iP
 {
     FInnerSequenceResult result = GetInnerSequence( iPlayer, iSubSection, iSequenceID );
 
+    if( result.mInnerSequence->IsA<UBoardSequence>() )
+        return TMap<FGuid, FChannelProxyBySectionMap>();
+
     return ShotSequenceHelpers::BuildAnimationsTimelineChannelProxy( iPlayer, result.mInnerSequence, result.mInnerSequenceId );
 }
 
@@ -1529,16 +1675,15 @@ ShotSequenceHelpers::BuildAnimationsTimelineChannelProxy( IMovieScenePlayer& iPl
 {
     TMap<FGuid, FChannelProxyBySectionMap> maps;
 
-    TArray<FGuid> bindings;
-    /*int animation_count =*/ ShotSequenceHelpers::GetAllAnimations( iPlayer, iSequence, iSequenceID, nullptr, &bindings );
+    TArray<FGuid> animation_bindings = ShotSequenceHelpers::GetAnimationBindings( iPlayer, iSequence, iSequenceID );
 
-    for( FGuid binding : bindings )
+    for( FGuid animation_binding : animation_bindings )
     {
         FChannelProxyBySectionMap map;
 
         //---
 
-        FFindOrCreateTimelineResult result = FindTimelineTrackAndSections( iPlayer, iSequence, iSequenceID, binding );
+        FFindOrCreateTimelineResult result = FindTimelineTrackAndSections( iPlayer, iSequence, iSequenceID, animation_binding );
 
         for( TWeakObjectPtr<UOdysseyAnimationTimelineSection> animation_timeline_section : result.mSections )
         {
@@ -1564,7 +1709,7 @@ ShotSequenceHelpers::BuildAnimationsTimelineChannelProxy( IMovieScenePlayer& iPl
             //    camera_transform_section->OnSignatureChanged().AddUObject( this, &UMovieSceneCinematicBoardSection::HandleInvalidateChannelProxy );
         }
 
-        maps.Add( binding, map );
+        maps.Add( animation_binding, map );
     }
 
     return maps;
@@ -1576,6 +1721,9 @@ BoardSequenceHelpers::BuildAnimationsOpacityChannelProxy( IMovieScenePlayer& iPl
 {
     FInnerSequenceResult result = GetInnerSequence( iPlayer, iSubSection, iSequenceID );
 
+    if( result.mInnerSequence->IsA<UBoardSequence>() )
+        return TMap<FGuid, FChannelProxyBySectionMap>();
+
     return ShotSequenceHelpers::BuildAnimationsOpacityChannelProxy( iPlayer, result.mInnerSequence, result.mInnerSequenceId );
 }
 
@@ -1585,16 +1733,15 @@ ShotSequenceHelpers::BuildAnimationsOpacityChannelProxy( IMovieScenePlayer& iPla
 {
     TMap<FGuid, FChannelProxyBySectionMap> maps;
 
-    TArray<FGuid> bindings;
-    /*int animation_count =*/ ShotSequenceHelpers::GetAllAnimations( iPlayer, iSequence, iSequenceID, nullptr, &bindings );
+    TArray<FGuid> animation_bindings = ShotSequenceHelpers::GetAnimationBindings( iPlayer, iSequence, iSequenceID );
 
-    for( auto binding : bindings )
+    for( auto animation_binding : animation_bindings )
     {
         FChannelProxyBySectionMap map;
 
         //---
 
-        FFindOrCreateMaterialParameterResult result = FindMaterialParameterTrackAndSections( iPlayer, iSequence, iSequenceID, binding );
+        FFindOrCreateMaterialParameterResult result = FindMaterialParameterTrackAndSections( iPlayer, iSequence, iSequenceID, animation_binding );
 
         for( auto animation_opacity_section : result.mSections )
         {
@@ -1633,7 +1780,7 @@ ShotSequenceHelpers::BuildAnimationsOpacityChannelProxy( IMovieScenePlayer& iPla
             //    camera_transform_section->OnSignatureChanged().AddUObject( this, &UMovieSceneCinematicBoardSection::HandleInvalidateChannelProxy );
         }
 
-        maps.Add( binding, map );
+        maps.Add( animation_binding, map );
     }
 
     return maps;

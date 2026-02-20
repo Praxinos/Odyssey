@@ -141,6 +141,29 @@ FShotSequenceCustomization::MovieSceneDataChanged( EMovieSceneDataChangeType iTy
 
 //---
 
+static
+TArray<FGuid>
+GetSelectedOrAllAnimationBindings( TSharedPtr<ISequencer> iSequencer )
+{
+    if( !iSequencer )
+        return TArray<FGuid>();
+
+    TSet<FGuid> animation_bindings_selected;
+    TArray<FGuid> animation_bindings = ShotSequenceHelpers::GetAnimationBindings( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID() );
+    for( FGuid animation_binding : animation_bindings )
+    {
+        TArray<AOdysseyAnimationActor*> animation_actors = ShotSequenceHelpers::GetAnimationSpawned( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), animation_binding );
+
+        TArray<AOdysseyAnimationActor*> animation_actors_selected_of_binding;
+        ShotSequenceTools::FilterSelectedAnimations( animation_actors, &animation_actors_selected_of_binding );
+
+        if( animation_actors_selected_of_binding.Num() )
+            animation_bindings_selected.Add( animation_binding );
+    }
+
+    return animation_bindings_selected.Array();
+}
+
 void
 FShotSequenceCustomization::BindCommands( TSharedPtr<FUICommandList> ioCommandList )
 {
@@ -333,9 +356,8 @@ FShotSequenceCustomization::BindCommands( TSharedPtr<FUICommandList> ioCommandLi
                                           TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
                                           if( !sequencer )
                                               return;
-                                          TArray<FGuid> animation_bindings;
-                                          int32 animation_count = ShotSequenceTools::GetAllAnimations( sequencer.Get(), nullptr, &animation_bindings );
-                                          if( animation_count != 1 )
+                                          TArray<FGuid> animation_bindings = GetSelectedOrAllAnimationBindings( sequencer );
+                                          if( animation_bindings.Num() != 1 )
                                               return;
                                           ShotSequenceTools::CreateAnimationCut( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, animation_bindings[0] );
                                       } ),
@@ -344,9 +366,8 @@ FShotSequenceCustomization::BindCommands( TSharedPtr<FUICommandList> ioCommandLi
                                              TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
                                              if( !sequencer )
                                                  return false;
-                                             TArray<FGuid> animation_bindings;
-                                             int32 animation_count = ShotSequenceTools::GetAllAnimations( sequencer.Get(), nullptr, &animation_bindings );
-                                             if( animation_count != 1 )
+                                             TArray<FGuid> animation_bindings = GetSelectedOrAllAnimationBindings( sequencer );
+                                             if( animation_bindings.Num() != 1 )
                                                  return false;
                                              return ShotSequenceTools::CanCreateAnimationCut( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, animation_bindings[0] );
                                          } ),
@@ -356,7 +377,8 @@ FShotSequenceCustomization::BindCommands( TSharedPtr<FUICommandList> ioCommandLi
                                                   TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
                                                   if( !sequencer )
                                                       return false;
-                                                  return ShotSequenceTools::GetAllAnimations( sequencer.Get() ) <= 1;
+                                                  TArray<FGuid> animation_bindings = GetSelectedOrAllAnimationBindings( sequencer );
+                                                  return animation_bindings.Num() <= 1;
                                               } )
     );
 
@@ -483,10 +505,9 @@ FShotSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuil
             if( !sequencer )
                 return LOCTEXT( "enable-lighttable-tooltip", "Enable the lighttable" );
 
-            TArray<FGuid> animation_bindings;
-            int32 animation_count = ShotSequenceTools::GetAllAnimations( sequencer.Get(), nullptr, &animation_bindings );
-            //check( animation_count == 1 );
-            if( animation_count != 1 )
+            TArray<FGuid> animation_bindings = GetSelectedOrAllAnimationBindings( sequencer );
+            //check( animation_bindings.Num() == 1 );
+            if( animation_bindings.Num() != 1 )
                 return LOCTEXT( "enable-lighttable-tooltip", "Enable the lighttable" );
 
             if( LighttableTools::IsOn( *sequencer, sequencer->GetFocusedMovieSceneSequence(), sequencer->GetFocusedTemplateID(), animation_bindings[0] ) )
@@ -501,10 +522,9 @@ FShotSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuil
             if( !sequencer )
                 return FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "LighttableOff" );
 
-            TArray<FGuid> animation_bindings;
-            int32 animation_count = ShotSequenceTools::GetAllAnimations( sequencer.Get(), nullptr, &animation_bindings );
-            //check( animation_count == 1 );
-            if( animation_count != 1 )
+            TArray<FGuid> animation_bindings = GetSelectedOrAllAnimationBindings( sequencer );
+            //check( animation_bindings.Num() == 1 );
+            if( animation_bindings.Num() != 1 )
                 return FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "LighttableOff" );
 
             if( LighttableTools::IsOn( *sequencer, sequencer->GetFocusedMovieSceneSequence(), sequencer->GetFocusedTemplateID(), animation_bindings[0] ) )
@@ -523,9 +543,8 @@ FShotSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuil
                                           if( !sequencer )
                                               return;
 
-                                          TArray<FGuid> animation_bindings;
-                                          int32 animation_count = ShotSequenceTools::GetAllAnimations( sequencer.Get(), nullptr, &animation_bindings );
-                                          if( animation_count != 1 )
+                                          TArray<FGuid> animation_bindings = GetSelectedOrAllAnimationBindings( sequencer );
+                                          if( animation_bindings.Num() != 1 )
                                               return;
 
                                           if( LighttableTools::IsOn( *sequencer, sequencer->GetFocusedMovieSceneSequence(), sequencer->GetFocusedTemplateID(), animation_bindings[0] ) )
@@ -539,7 +558,8 @@ FShotSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuil
                                              if( !sequencer )
                                                  return false;
 
-                                             return ShotSequenceTools::GetAllAnimations( sequencer.Get() ) == 1;
+                                             TArray<FGuid> animation_bindings = GetSelectedOrAllAnimationBindings( sequencer );
+                                             return animation_bindings.Num() == 1;
                                          } ),
         FIsActionChecked(),
         FIsActionButtonVisible::CreateLambda( [this]()
@@ -548,7 +568,8 @@ FShotSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuil
                                                   if( !sequencer )
                                                       return false;
 
-                                                  return ShotSequenceTools::GetAllAnimations( sequencer.Get() ) <= 1;
+                                                  TArray<FGuid> animation_bindings = GetSelectedOrAllAnimationBindings( sequencer );
+                                                  return animation_bindings.Num() <= 1;
                                               } ) ),
         NAME_None,
         FText::GetEmpty(),
@@ -566,7 +587,8 @@ FShotSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuil
                                                       if( !sequencer )
                                                           return false;
 
-                                                      return ShotSequenceTools::GetAllAnimations( sequencer.Get() ) > 1;
+                                                      TArray<FGuid> animation_bindings = GetSelectedOrAllAnimationBindings( sequencer );
+                                                      return animation_bindings.Num() > 1;
                                                   } )
         ),
         FOnGetContent::CreateRaw( this, &FShotSequenceCustomization::MakeLighttableMenu ),
@@ -595,7 +617,8 @@ FShotSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuil
                                                       if( !sequencer )
                                                           return false;
 
-                                                      return ShotSequenceTools::GetAllAnimations( sequencer.Get() ) > 1;
+                                                      TArray<FGuid> animation_bindings = GetSelectedOrAllAnimationBindings( sequencer );
+                                                      return animation_bindings.Num() > 1;
                                                   } )
         ),
         FOnGetContent::CreateRaw( this, &FShotSequenceCustomization::MakeAnimationCutMenu ),
@@ -635,16 +658,15 @@ FShotSequenceCustomization::MakeLighttableMenu()
 
     FMenuBuilder MenuBuilder( true, sequencer ? sequencer->GetCommandBindings() : nullptr );
 
-    TArray<AOdysseyAnimationActor*> animations;
-    TArray<FGuid> animation_bindings;
-    int32 animation_count = ShotSequenceTools::GetAllAnimations( sequencer.Get(), &animations, &animation_bindings );
-    if( !animation_count )
+    TArray<FGuid> animation_bindings = GetSelectedOrAllAnimationBindings( sequencer );
+    if( !animation_bindings.Num() )
         return SNullWidget::NullWidget;
 
-    for( int i = 0; i < animation_count; i++ )
+    for( FGuid animation_binding : animation_bindings )
     {
-        AOdysseyAnimationActor* animation = animations[i];
-        FGuid animation_binding = animation_bindings[i];
+        TArray<AOdysseyAnimationActor*> animation_actors = BoardSequenceHelpers::GetAnimationSpawned( *sequencer, sequencer->GetFocusedMovieSceneSequence(), sequencer->GetFocusedTemplateID(), sequencer->GetLocalTime().Time.FrameNumber, animation_binding );
+        if( animation_actors.IsEmpty() )
+            continue;
 
         FText tooltip;
         if( LighttableTools::IsOn( *sequencer, sequencer->GetFocusedMovieSceneSequence(), sequencer->GetFocusedTemplateID(), animation_binding ) )
@@ -659,7 +681,7 @@ FShotSequenceCustomization::MakeLighttableMenu()
             icon = FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "LighttableOff" );
 
         MenuBuilder.AddMenuEntry(
-            FText::FromString( animation->GetActorLabel() ),
+            FText::FromString( animation_actors[0]->GetActorLabel() ),
             tooltip,
             icon,
             FUIAction(
@@ -726,19 +748,18 @@ FShotSequenceCustomization::MakeAnimationCutMenu()
 
     FMenuBuilder MenuBuilder( true, sequencer ? sequencer->GetCommandBindings() : nullptr );
 
-    TArray<AOdysseyAnimationActor*> animations;
-    TArray<FGuid> animation_bindings;
-    int32 animation_count = ShotSequenceTools::GetAllAnimations( sequencer.Get(), &animations, &animation_bindings );
-    if( !animation_count )
+    TArray<FGuid> animation_bindings = GetSelectedOrAllAnimationBindings( sequencer );
+    if( !animation_bindings.Num() )
         return SNullWidget::NullWidget;
 
-    for( int i = 0; i < animation_count; i++ )
+    for( FGuid animation_binding : animation_bindings )
     {
-        AOdysseyAnimationActor* animation = animations[i];
-        FGuid animation_binding = animation_bindings[i];
+        TArray<AOdysseyAnimationActor*> animation_actors = BoardSequenceHelpers::GetAnimationSpawned( *sequencer, sequencer->GetFocusedMovieSceneSequence(), sequencer->GetFocusedTemplateID(), sequencer->GetLocalTime().Time.FrameNumber, animation_binding );
+        if( animation_actors.IsEmpty() )
+            continue;
 
         MenuBuilder.AddMenuEntry(
-            FText::FromString( animation->GetActorLabel() ),
+            FText::FromString( animation_actors[0]->GetActorLabel() ),
             //LOCTEXT( "LockPlayback", "Lock to Display Rate at Runtime" ),
             FText::GetEmpty(),
             //LOCTEXT( "LockPlayback_Description", "When enabled, causes all runtime evaluation and the engine FPS to be locked to the current display frame rate" ),

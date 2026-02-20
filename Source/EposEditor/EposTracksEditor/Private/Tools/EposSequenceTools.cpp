@@ -320,28 +320,27 @@ ShotSequenceTools::GuessActorToSelect( ISequencer* iSequencer, UMovieSceneSequen
     //    && ShotSequenceTools::mDirectActorsSelectedHistory.Last()->IsA<AOdysseyAnimationActor>() )
     //if( actors.Num() )
     {
-        TArray<AOdysseyAnimationActor*> animations;
         TArray<FGuid> unordered_bindings;
         UMovieSceneSequence* sequence = nullptr;
         FMovieSceneSequenceID sequenceId = MovieSceneSequenceID::Invalid;
         if( iSequence->IsA<UBoardSequence>() )
         {
-            BoardSequenceHelpers::GetAllAnimationsRecursive( *iSequencer, iSequence, iSequenceId, iFrameNumber, &animations, &unordered_bindings, &sequence, &sequenceId );
+            unordered_bindings = BoardSequenceHelpers::GetAnimationBindingsRecursive( *iSequencer, iSequence, iSequenceId, iFrameNumber, &sequence, &sequenceId );
         }
         else if( iSequence->IsA<UShotSequence>() )
         {
             sequence = iSequence;
             sequenceId = iSequenceId;
-            ShotSequenceHelpers::GetAllAnimations( *iSequencer, iSequence, iSequenceId, &animations, &unordered_bindings );
+
+            unordered_bindings = ShotSequenceHelpers::GetAnimationBindings( *iSequencer, iSequence, iSequenceId );
         }
 
         // Animation not found AND no sequence (shot) found, so nothing can be guess
         if( !sequence )
             return nullptr;
 
-        TArray<AOdysseyAnimationActor*> ordered_animations;
         TArray<FGuid> ordered_bindings;
-        ShotSequenceTools::SortBindings( animations, unordered_bindings, sequence->GetMovieScene(), &ordered_animations, &ordered_bindings );
+        ShotSequenceTools::SortBindings( unordered_bindings, sequence->GetMovieScene(), &ordered_bindings );
 
         if( ordered_bindings.Num() )
         {
@@ -362,19 +361,23 @@ ShotSequenceTools::GuessActorToSelect( ISequencer* iSequencer, UMovieSceneSequen
             AActor* preferred_animation = nullptr;
             if( mDirectBindingsSelectedHistory.IsValidIndex( max_preferred_index ) )
             {
-                TArrayView<TWeakObjectPtr<>> weakObjects = iSequencer->FindBoundObjects( mDirectBindingsSelectedHistory[max_preferred_index].Guid, mDirectBindingsSelectedHistory[max_preferred_index].SequenceId );
-                if( weakObjects.Num() )
-                    preferred_animation = Cast<AActor>( weakObjects[0] );
+                TArray<AOdysseyAnimationActor*> animation_actors = ShotSequenceHelpers::GetAnimationSpawned( *iSequencer, nullptr /* TODO: must also be stored in historic ... */ , mDirectBindingsSelectedHistory[max_preferred_index].SequenceId, mDirectBindingsSelectedHistory[max_preferred_index].Guid );
+                if( animation_actors.Num() )
+                    preferred_animation = animation_actors[0];
             }
 
             if( !preferred_animation )
             {
-                preferred_animation = ordered_animations[0];
-
-                if( preferred_animation )
+                TArray<AOdysseyAnimationActor*> animation_actors = ShotSequenceHelpers::GetAnimationSpawned( *iSequencer, sequence, sequenceId, ordered_bindings[0] );
+                if( animation_actors.Num() )
                 {
-                    FBindingAndActorClass entry = { ordered_bindings[0], sequenceId, preferred_animation->GetClass() };
-                    mDirectBindingsSelectedHistory.Add( entry );
+                    preferred_animation = animation_actors[0];
+
+                    if( preferred_animation )
+                    {
+                        FBindingAndActorClass entry = { ordered_bindings[0], sequenceId, preferred_animation->GetClass() };
+                        mDirectBindingsSelectedHistory.Add( entry );
+                    }
                 }
             }
 
@@ -391,45 +394,36 @@ ShotSequenceTools::GuessActorToSelect( ISequencer* iSequencer, UMovieSceneSequen
 
 //static
 void
-ShotSequenceTools::SortBindings( TArray<AOdysseyAnimationActor*> iAnimationActors, TArray<FGuid> iBindings, UMovieScene* iMovieScene, TArray<AOdysseyAnimationActor*>* oOrderedAnimationActors, TArray<FGuid>* oOrderedBindings )
+ShotSequenceTools::SortBindings( TArray<FGuid> iBindings, UMovieScene* iMovieScene, TArray<FGuid>* oOrderedBindings )
 {
-    check( iAnimationActors.Num() == iBindings.Num() );
-
-    struct FBindingAndAnimationActor
-    {
-        FMovieSceneBinding* Binding;
-        AOdysseyAnimationActor* AnimationActor;
-    };
-
     // Find their corresponding scene binding
-    TArray<FBindingAndAnimationActor> binding_and_animation_actors;
+    TArray<FMovieSceneBinding*> bindings;
     for( int i = 0; i < iBindings.Num(); i++ )
     {
-        binding_and_animation_actors.Add( { iMovieScene->FindBinding( iBindings[i] ), iAnimationActors[i] } );
+        bindings.Add( iMovieScene->FindBinding( iBindings[i] ) );
     }
 
     // Sort scene bindings by their sorting order/name
     // (This should match the native sorting of tracks inside shot)
-    Algo::StableSort( binding_and_animation_actors, [iMovieScene]( const FBindingAndAnimationActor& iA, const FBindingAndAnimationActor& iB )
+    Algo::StableSort( bindings, [iMovieScene]( const FMovieSceneBinding* iA, const FMovieSceneBinding* iB )
                       {
                           // If at least one of the binding was not already sorted (by drag'n drop in shot), use the name to sort both
-                          if( iA.Binding->GetSortingOrder() == -1 || iB.Binding->GetSortingOrder() == -1 )
+                          if( iA->GetSortingOrder() == -1 || iB->GetSortingOrder() == -1 )
                           {
-                              FString nameA = iMovieScene->GetObjectDisplayName( iA.Binding->GetObjectGuid() ).ToString();
-                              FString nameB = iMovieScene->GetObjectDisplayName( iB.Binding->GetObjectGuid() ).ToString();
+                              FString nameA = iMovieScene->GetObjectDisplayName( iA->GetObjectGuid() ).ToString();
+                              FString nameB = iMovieScene->GetObjectDisplayName( iB->GetObjectGuid() ).ToString();
 
                               return nameA < nameB;
                           }
                           // Otherwise just use the set sorting order
                           else
-                              return iA.Binding->GetSortingOrder() < iB.Binding->GetSortingOrder();
+                              return iA->GetSortingOrder() < iB->GetSortingOrder();
                       } );
 
     // Get all animations in the gui order
-    for( auto ordered_binding_and_animation_actor : binding_and_animation_actors )
+    for( FMovieSceneBinding* ordered_binding : bindings )
     {
-        oOrderedBindings->Add( ordered_binding_and_animation_actor.Binding->GetObjectGuid() );
-        oOrderedAnimationActors->Add( ordered_binding_and_animation_actor.AnimationActor );
+        oOrderedBindings->Add( ordered_binding->GetObjectGuid() );
     }
 }
 

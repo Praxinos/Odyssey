@@ -95,9 +95,11 @@ public:
     static ACineCameraActor*    GetCameraSpawned( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID, FGuid iCameraBinding );
     static ACineCameraActor*    GetCameraSpawnedOrTemplate( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID, FGuid iCameraBinding );
 
+    static FGuid                GetCameraBinding( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FFrameNumber& iFrameNumber );
+    static ACineCameraActor*    GetCameraSpawned( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FFrameNumber& iFrameNumber, FGuid iCameraBinding );
+    static ACineCameraActor*    GetCameraSpawnedOrTemplate( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FFrameNumber& iFrameNumber, FGuid iCameraBinding );
+
     static FGuid                GetCameraBindingRecursive( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FFrameNumber& iFrameNumber, UMovieSceneSequence** oSequence, FMovieSceneSequenceID* oSequenceID );
-    static ACineCameraActor*    GetCameraSpawnedRecursive( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FFrameNumber& iFrameNumber, FGuid iCameraBinding, UMovieSceneSequence** oSequence, FMovieSceneSequenceID* oSequenceID );
-    static ACineCameraActor*    GetCameraSpawnedOrTemplateRecursive( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FFrameNumber& iFrameNumber, FGuid iCameraBinding, UMovieSceneSequence** oSequence, FMovieSceneSequenceID* oSequenceID );
 
     /** Get all transform keys of all cameras recursively.
       * @param UMovieSceneSubSection    iSubSection to gather all camera transform keys.
@@ -107,7 +109,18 @@ public:
     static TArray<FFrameTime>   GetCameraTransformTimesRecursive( const UMovieSceneSubSection& iSubSection, TArray<FFrameTime>& oDefaultFrameTimes );
 
 public:
-    static int32                GetAllAnimationsRecursive( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FFrameNumber& iFrameNumber, TArray<AOdysseyAnimationActor*>* oAnimations, TArray<FGuid>* oAnimationBindings, UMovieSceneSequence** oSequence, FMovieSceneSequenceID* oSequenceID );
+    static TArray<FGuid>                    GetAnimationBindingsRecursive( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FFrameNumber& iFrameNumber, UMovieSceneSequence** oSequence, FMovieSceneSequenceID* oSequenceID );
+
+    static TArray<FGuid>                    GetAnimationBindings( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID );
+    static TArray<AOdysseyAnimationActor*>  GetAnimationSpawned( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID, FGuid iAnimationBinding );
+    static TArray<AOdysseyAnimationActor*>  GetAnimationSpawnedOrTemplate( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID, FGuid iAnimationBinding );
+
+    static TArray<FGuid>                    GetAnimationBindings( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FFrameNumber& iFrameNumber );
+    static TArray<AOdysseyAnimationActor*>  GetAnimationSpawned( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FFrameNumber& iFrameNumber, FGuid iAnimationBinding );
+    static TArray<AOdysseyAnimationActor*>  GetAnimationSpawnedOrTemplate( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FFrameNumber& iFrameNumber, FGuid iAnimationBinding );
+
+public:
+    static TArray<FFrameNumber>             GetAllAnimationCutTimes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FFrameNumber& iFrameNumber );
 
 public:
     static FChannelProxyBySectionMap                BuildCameraTransformChannelProxy( IMovieScenePlayer& iPlayer, const UMovieSceneSubSection& iSubSection, FMovieSceneSequenceIDRef iSequenceID );
@@ -143,7 +156,9 @@ public:
       */
     static TArray<FFrameNumber> GetCameraTransformTimes( UMovieSceneSequence* iSequence, TOptional<FFrameNumber>* oDefaultFrame = nullptr );
 
-    static int32                GetAllAnimations( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TArray<AOdysseyAnimationActor*>* oAnimations, TArray<FGuid>* oAnimationBindings );
+    static TArray<FGuid>                    GetAnimationBindings( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID );
+    static TArray<AOdysseyAnimationActor*>  GetAnimationSpawned( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iAnimationBinding );
+    static TArray<AOdysseyAnimationActor*>  GetAnimationSpawnedOrTemplate( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iAnimationBinding );
     static int32                GetAttachedAnimations( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TArray<AOdysseyAnimationActor*>* oAnimations, TArray<FGuid>* oAnimationBindings );
 
 public:
