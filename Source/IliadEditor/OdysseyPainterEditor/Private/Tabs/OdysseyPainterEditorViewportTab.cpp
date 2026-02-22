@@ -492,6 +492,14 @@ FOdysseyPainterEditorViewportTab::BindShortcuts(FBaseToolkit* iToolkit)
     #undef MAP_ACTION
 }
 
+void FOdysseyPainterEditorViewportTab::OnTabClosed(TSharedRef<SDockTab> iDockTab)
+{
+    if( mViewportClient )
+        mViewportClient->UnregisterWindow();
+
+    FOdysseyEditorTab::OnTabClosed(iDockTab);
+}
+
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------- Public Getters
 

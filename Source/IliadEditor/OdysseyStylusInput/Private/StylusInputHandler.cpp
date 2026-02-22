@@ -12,67 +12,110 @@ using namespace UE::StylusInput;
 
 #define LOCTEXT_NAMESPACE "StylusInput"
 
-FStylusInputHandler::FStylusInputHandler()
+FOdysseyStylusInputHandler::FOdysseyStylusInputHandler()
 {
 }
 
-FStylusInputHandler::~FStylusInputHandler()
+FOdysseyStylusInputHandler::~FOdysseyStylusInputHandler()
 {
-    for (TPair<TSharedPtr<SWindow>, IStylusInputInstance*> Pair : StylusInputInstances)
+    if( StylusInputInstance )
     {
-        IStylusInputInstance* InputInstance = Pair.Value;
-        InputInstance->RemoveEventHandler(this);
-        ReleaseInstance(InputInstance);
+        StylusInputInstance->RemoveEventHandler(this);
+        ReleaseInstance(StylusInputInstance);
+        StylusInputInstance = nullptr;
+        StylusInputWindow = nullptr;
     }
 }
 
-bool FStylusInputHandler::RegisterWindow(const TSharedRef<SWidget>& Widget)
+bool FOdysseyStylusInputHandler::RegisterWindow(const TSharedRef<SWidget>& Widget)
 {
     TSharedPtr<SWindow> Window = FSlateApplication::Get().FindWidgetWindow(Widget);
     if (!Window)
     {
+        UE_LOG(LogTemp, Display, TEXT("NoWindow"));
         return false;
     }
 
-    if (StylusInputInstances.Contains(Window))
+    if( StylusInputWindow.Pin().Get() == Window.Get() )
     {
         return false;
     }
 
-    IStylusInputInstance* InputInstance = CreateInstance(*Window);
+    UnregisterWindow();
+
+    UE_LOG(LogTemp, Display, TEXT("Preregister"));
+
+    IStylusInputInstance* InputInstance = CreateInstance(*Window, "Wintab", false);
+    //IStylusInputInstance* InputInstance = CreateInstance(*Window);
+
+    UE_LOG(LogTemp, Display, TEXT("PreInstance"))
+
     if (!InputInstance)
     {
         return false;
     }
+    UE_LOG(LogTemp, Display, TEXT("PostInstance"))
+
 
     InputInstance->AddEventHandler(this, EEventHandlerThread::OnGameThread);
-    StylusInputInstances.Add(Window, InputInstance);
+
+    StylusInputWindow = Window;
+    StylusInputInstance = InputInstance;
+    UE_LOG(LogTemp, Display, TEXT("Postregister"))
+
     return true;
 }
 
-FString FStylusInputHandler::GetName()
+
+bool FOdysseyStylusInputHandler::UnregisterWindow()
+{
+    if (StylusInputInstance || StylusInputWindow.IsValid())
+    {
+        StylusInputInstance->RemoveEventHandler(this);
+        ReleaseInstance(StylusInputInstance);
+        StylusInputInstance = nullptr;
+        StylusInputWindow = nullptr;
+        UE_LOG(LogTemp, Display, TEXT("Unregister"))
+        return true;
+    }
+    return false;
+}
+
+FString FOdysseyStylusInputHandler::GetName()
 {
     return "OdysseyStylusInputHandler";
 }
 
-void FStylusInputHandler::OnPacket(const FStylusInputPacket& Packet, IStylusInputInstance* Instance)
+/*
+void FOdysseyStylusInputHandler::OnPacket(const FStylusInputPacket& Packet, IStylusInputInstance* Instance)
 {
+    PacketQueue.Enqueue(Packet);
+    PrintPacket(Packet);
     if (Packet.Type != EPacketType::Invalid &&
         Packet.Type != EPacketType::AboveDigitizer)
     {
         ProcessPacket(Packet, Instance);
     }
-}
+}*/
 
-void FStylusInputHandler::ProcessPacket(const FStylusInputPacket& Packet, IStylusInputInstance* Instance)
+void FOdysseyStylusInputHandler::PrintPacket(const UE::StylusInput::FStylusInputPacket& Packet)
 {
-    const IStylusInputTabletContext* TabletContext = GetTabletContext(Instance, Packet.TabletContextID);
-    const ETabletSupportedProperties SupportedProperties = TabletContext->GetSupportedProperties();
-    const bool bSupportsNormalPressure = (SupportedProperties & ETabletSupportedProperties::NormalPressure) != ETabletSupportedProperties::None;
-    ActivePressure = bSupportsNormalPressure ? Packet.NormalPressure : 1.0f;
+    UE_LOG(LogTemp, Display, TEXT("-------------------"))
+    UE_LOG(LogTemp, Display, TEXT("TabletContextID %d"), Packet.TabletContextID)
+    UE_LOG(LogTemp, Display, TEXT("CursorID %d"), Packet.CursorID)
+    UE_LOG(LogTemp, Display, TEXT("Type %d"), Packet.Type)
+    UE_LOG(LogTemp, Display, TEXT("PenStatus %d"), Packet.PenStatus)
+    UE_LOG(LogTemp, Display, TEXT("X %lf"), Packet.X)
+    UE_LOG(LogTemp, Display, TEXT("Y %lf"), Packet.Y)
+    UE_LOG(LogTemp, Display, TEXT("Z %lf"), Packet.Z)
+    UE_LOG(LogTemp, Display, TEXT("NormalPressure %lf"), Packet.NormalPressure)
 }
 
-const IStylusInputTabletContext* FStylusInputHandler::GetTabletContext(IStylusInputInstance* Instance, uint32 TabletContextID)
+void FOdysseyStylusInputHandler::ProcessPacket(const FStylusInputPacket& Packet, IStylusInputInstance* Instance)
+{
+}
+
+const IStylusInputTabletContext* FOdysseyStylusInputHandler::GetTabletContext(IStylusInputInstance* Instance, uint32 TabletContextID)
 {
     if (!Instance)
     {

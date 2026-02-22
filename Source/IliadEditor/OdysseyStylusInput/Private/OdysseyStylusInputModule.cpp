@@ -106,6 +106,8 @@ void UOdysseyStylusInputSubsystem::Deinitialize()
 
 void UOdysseyStylusInputSubsystem::SetStylusInputDriver(EOdysseyStylusInputDriver iDriver)
 {
+    InputInterface = nullptr;
+/*
     if (iDriver == mDriver)
         return;
 
@@ -135,7 +137,7 @@ void UOdysseyStylusInputSubsystem::SetStylusInputDriver(EOdysseyStylusInputDrive
             InputInterface = nullptr;
     }
 
-    OnStylusInputChangedCB.ExecuteIfBound(InputInterface);
+    OnStylusInputChangedCB.ExecuteIfBound(InputInterface);*/
 }
 
 //---

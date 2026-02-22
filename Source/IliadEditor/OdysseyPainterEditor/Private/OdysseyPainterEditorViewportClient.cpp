@@ -77,8 +77,8 @@ FOdysseyPainterEditorViewportClient::FOdysseyPainterEditorViewportClient( FOdyss
 {
     check( mOdysseyPainterEditorViewportPtr.IsValid() );
 
-    InputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
-    InputSubsystem->AddMessageHandler( *this );
+    //InputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
+    //InputSubsystem->AddMessageHandler( *this );
 
     ENQUEUE_RENDER_COMMAND(InitOdysseyPainterEditorViewportClientTextures)(
         [&](FRHICommandListImmediate& RHICmdList)
@@ -106,6 +106,8 @@ FOdysseyPainterEditorViewportClient::FOdysseyPainterEditorViewportClient( FOdyss
 void
 FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanvas )
 {
+    RegisterWindow(mOdysseyPainterEditorViewportPtr.Pin().ToSharedRef());
+
     const UOdysseyPainterEditorSettings& settings = *GetDefault<UOdysseyPainterEditorSettings>();
     ioCanvas->Clear(settings.GetBackgroundColor());
 
@@ -915,38 +917,71 @@ FOdysseyPainterEditorViewportClient::StylusStateToPoint(const FStylusState& iSta
     return point;
 }
 
+FOdysseyPoint FOdysseyPainterEditorViewportClient::StylusPacketToPoint(const UE::StylusInput::FStylusInputPacket& iPacket)
+{
+    TSharedPtr<SOdysseyViewport> odysseyViewportWidget = mOdysseyPainterEditorViewportPtr.Pin();
+    if (!odysseyViewportWidget)
+        return FOdysseyPoint();
+
+    TSharedPtr< SViewport > viewportWidget = odysseyViewportWidget->GetViewportWidget();
+    TSharedPtr<FOdysseySceneViewport> viewport = odysseyViewportWidget->GetViewport();
+
+    TSharedPtr<SWindow> Window = FSlateApplication::Get().FindWidgetWindow(viewportWidget->AsShared());
+
+    float scale_dpi = viewport->GetCachedGeometry().GetAccumulatedLayoutTransform().GetScale();
+    FVector2D position_in_viewport = viewportWidget->GetCachedGeometry().AbsoluteToLocal( FVector2D( iPacket.X, iPacket.Y ) ) * scale_dpi;
+    position_in_viewport += Window->GetRectInScreen().GetTopLeft();
+
+    FOdysseyPoint point(position_in_viewport.X
+        , position_in_viewport.Y
+        , iPacket.Z
+        , iPacket.NormalPressure
+        , iPacket.TimerTick
+        , iPacket.AltitudeOrientation
+        , iPacket.AzimuthOrientation
+        , iPacket.TwistOrientation
+        , iPacket.PitchRotation
+        , iPacket.RollRotation
+        , iPacket.YawRotation);
+
+    TArray<FKey> pressedKeys = mKeysPressed;
+    pressedKeys.AddUnique(FOdysseyKeyState::GetLastKey());
+    point.keysDown = pressedKeys;
+
+    return point;
+}
+
 void
 FOdysseyPainterEditorViewportClient::ReadStylusInput()
 {
     if (!mIsRecordingStylus)
         return;
 
-    for (int i = mLastStylusEventIndex; i < mStylusStates.Num(); i++ )
+    UE::StylusInput::FStylusInputPacket packet;
+    while (PacketQueue.Dequeue(packet))
     {
-        const FStylusState& state = mStylusStates[i];
-
-        FOdysseyPoint point = StylusStateToPoint(state);
+        FOdysseyPoint point = StylusPacketToPoint(packet);
 
         //Force MouseDown when using the Right Mouse Button to allow hovered mouse clicks
-        if (!mStylusIsDown && (state.IsStylusDown() || mMouseButton == EKeys::RightMouseButton ))
+        if (!mStylusIsDown && (packet.PenStatus == UE::StylusInput::EPenStatus::CursorIsTouching || mMouseButton == EKeys::RightMouseButton ))
         {
             //MouseDown
             MouseDown(point);
             mStylusIsDown = true;
-            mLastStylusEventIndex = i;
+            mLastStylusEventIndex = packet.SerialNumber;
         }
-        else if (mStylusIsDown && !state.IsStylusDown() && !mKeysPressed.Contains(mMouseButton))
+        else if (mStylusIsDown && packet.PenStatus != UE::StylusInput::EPenStatus::CursorIsTouching && !mKeysPressed.Contains(mMouseButton))
         {
             //MouseUp
             MouseUp(point);
             mStylusIsDown = false;
-            mLastStylusEventIndex = i;
+            mLastStylusEventIndex = packet.SerialNumber;
         }
         else if (mStylusIsDown)
         {
             //MouseMove
             MouseDrag(point);
-            mLastStylusEventIndex = i;
+            mLastStylusEventIndex = packet.SerialNumber;
             //CapturedMouseMoveWithStrokePoint( point );
         }
     }
@@ -979,6 +1014,38 @@ FOdysseyPainterEditorViewportClient::OnStylusStateChanged( const TWeakPtr<SWidge
     mStylusStates = iStates;
     mLastStylusEventIndex = 0;
 
+    ReadStylusInput();
+}
+
+void FOdysseyPainterEditorViewportClient::OnPacket(const UE::StylusInput::FStylusInputPacket& Packet, UE::StylusInput::IStylusInputInstance* Instance)
+{
+    //PrintPacket(Packet);
+    mStylusLastEventTime = std::chrono::steady_clock::now();
+
+    TSharedPtr<SOdysseyViewport> odysseyViewportWidget = mOdysseyPainterEditorViewportPtr.Pin();
+    if (!odysseyViewportWidget)
+        return;
+
+    //If we don't have a surface, then we don't interact with anything
+    UTexture* texture = odysseyViewportWidget->GetTexture();
+    if (!texture)
+        return;
+
+    /*
+    TSharedPtr<SWidget> inWidget = iWidget.Pin();
+    if (!inWidget)
+        return;
+
+    TSharedPtr< SViewport > viewport = odysseyViewportWidget->GetViewportWidget();
+    if (inWidget != viewport)
+        return;
+    */
+
+    //---
+    PacketQueue.Enqueue(Packet);
+    mLastStylusEventIndex = 0;
+
+    PrintPacket(Packet);
     ReadStylusInput();
 }
 

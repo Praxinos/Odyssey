@@ -111,6 +111,10 @@ FOdysseyEditorTab::GetTabManager() const
     return mTabManager.Pin();
 }
 
+void FOdysseyEditorTab::OnTabClosed(TSharedRef<SDockTab> iDockTab)
+{
+}
+
 void
 FOdysseyEditorTab::Register( TSharedRef<FWorkspaceItem>& iWorkspaceMenuCategoryRef)
 {
@@ -146,8 +150,9 @@ FOdysseyEditorTab::Unregister()
 TSharedRef< SDockTab >
 FOdysseyEditorTab::SpawnTab( const FSpawnTabArgs& iArgs )
 {
-    return SNew( SDockTab )
+    return SAssignNew( mTab, SDockTab )
         .Label( mDisplayName )
+        .OnTabClosed( this, &FOdysseyEditorTab::OnTabClosed)
         [
             mWidget.ToSharedRef()
         ];

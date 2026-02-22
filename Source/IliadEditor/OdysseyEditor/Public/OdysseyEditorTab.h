@@ -34,6 +34,7 @@ public:
 
     void SetTabManager(TSharedPtr< FTabManager > iTabManager);
     TSharedPtr< FTabManager > GetTabManager() const;
+    virtual void OnTabClosed(TSharedRef<SDockTab> iDockTab);
     void Register(TSharedRef<FWorkspaceItem>& iWorkspaceMenuCategoryRef);
     void Unregister();
 
@@ -47,4 +48,5 @@ private:
     FSlateIcon mIcon;
     TSharedPtr<SWidget> mWidget;
     TWeakPtr< FTabManager > mTabManager;
+    TSharedPtr< SDockTab > mTab;
 };

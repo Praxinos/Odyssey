@@ -28,6 +28,7 @@ protected:
     virtual const FName& GetId() const override;
     virtual TSharedPtr<SWidget> CreateWidget() override;
     virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
+    virtual void OnTabClosed(TSharedRef<SDockTab> DockTab) override;
 
     virtual void BuildOptionsMenu( FMenuBuilder& ioMenuBuilder );
     virtual void BuildBackgroundSubMenu( FMenuBuilder& ioMenuBuilder );

@@ -11,12 +11,13 @@
 #include "TickableEditorObject.h"
 
 #include "Widgets/SWidget.h"
+#include "Containers/SpscQueue.h"
 
-class FStylusInputHandler final : public UE::StylusInput::IStylusInputEventHandler
+class ODYSSEYSTYLUSINPUT_API FOdysseyStylusInputHandler : public UE::StylusInput::IStylusInputEventHandler
 {
 public:
-    FStylusInputHandler();
-    virtual ~FStylusInputHandler() override;
+    FOdysseyStylusInputHandler();
+    virtual ~FOdysseyStylusInputHandler() override;
 
     /**
      * Registers the window containing the given Widget for Stylus input handling.
@@ -26,20 +27,24 @@ public:
      * @return True if the window was registered, false if the window was invalid or was previously registered.
      */
     bool RegisterWindow(const TSharedRef<SWidget>& Widget);
-
+    bool UnregisterWindow();
 
     // IStylusInputEventHandler implementation
     virtual FString GetName() override;
-    virtual void OnPacket(const UE::StylusInput::FStylusInputPacket& Packet, UE::StylusInput::IStylusInputInstance* Instance) override;
+    //virtual void OnPacket(const UE::StylusInput::FStylusInputPacket& Packet, UE::StylusInput::IStylusInputInstance* Instance) override;
+
+    void PrintPacket(const UE::StylusInput::FStylusInputPacket& Packet);
+
+public:
+    TSpscQueue<UE::StylusInput::FStylusInputPacket> PacketQueue;
 
 private:
     void ProcessPacket(const UE::StylusInput::FStylusInputPacket& Packet, UE::StylusInput::IStylusInputInstance* Instance);
     const UE::StylusInput::IStylusInputTabletContext* GetTabletContext(UE::StylusInput::IStylusInputInstance* Instance, uint32 TabletContextID);
 
-    TMap<TSharedPtr<SWindow>, UE::StylusInput::IStylusInputInstance*> StylusInputInstances;
     TMap<uint32, TSharedPtr<UE::StylusInput::IStylusInputTabletContext>> TabletContexts;
-
-    float ActivePressure = 1.0f;
+    UE::StylusInput::IStylusInputInstance* StylusInputInstance = nullptr;
+    TWeakPtr<SWindow> StylusInputWindow;
 };
 
 //#endif // ENABLE_STYLUS_SUPPORT

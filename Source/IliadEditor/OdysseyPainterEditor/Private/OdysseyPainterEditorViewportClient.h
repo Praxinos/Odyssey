@@ -17,6 +17,7 @@
 
 #include <chrono>
 #include <ULIS>
+#include "StylusInputHandler.h"
 
 class UOdysseyStylusInputSubsystem;
 class FCanvas;
@@ -35,6 +36,7 @@ class FOdysseyPainterEditorViewportClient
     : public FViewportClient
     , public FGCObject
     , public IStylusMessageHandler
+    , public FOdysseyStylusInputHandler
 {
 public:
     DECLARE_DELEGATE_TwoParams(FOnPickColor, eOdysseyEventState::Type, const FVector2D&)
@@ -77,9 +79,13 @@ public:
     virtual TOptional< TSharedRef< SWidget > >  MapCursor( FViewport* iViewport, const FCursorReply& iCursorReply ) override;
 
     virtual void OnStylusStateChanged( const TWeakPtr<SWidget> iWidget, const TArray<FStylusState>& iStates, int32 iIndex ) override;
+    virtual void OnPacket(const UE::StylusInput::FStylusInputPacket& Packet, UE::StylusInput::IStylusInputInstance* Instance) override;
+
     void StartStylusInputRecord();
     void StopStylusInputRecord();
     FOdysseyPoint StylusStateToPoint(const FStylusState& iState);
+    FOdysseyPoint StylusPacketToPoint(const UE::StylusInput::FStylusInputPacket& iPacket);
+
     void ReadStylusInput();
 
     virtual EMouseCaptureMode GetMouseCaptureMode() const override;
@@ -164,7 +170,7 @@ private:
     bool                                    mIsMouseDown = false;
     FKey                                    mMouseButton;
     FOdysseyPoint                           mMouseDownReference;
-    FVector2D                           mHUDMouseDownReference;
+    FVector2D                               mHUDMouseDownReference;
 
 
     TArray<FStylusState> mStylusStates;
