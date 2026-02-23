@@ -9,8 +9,8 @@ FArianeSegmentCubic::~FArianeSegmentCubic()
 {
 }
 
-FArianeSegmentCubic::FArianeSegmentCubic( FArianeVertex* iVertex0, FArianeVertex* iVertex1 )
-    : FArianeSegment( iVertex0, iVertex1 )
+FArianeSegmentCubic::FArianeSegmentCubic( FArianeObject* Owner, FArianeVertex* iVertex0, FArianeVertex* iVertex1 )
+    : FArianeSegment( Owner, iVertex0, iVertex1 )
     , Handle0( this, iVertex0->GetPosition() )
     , Handle1( this, iVertex1->GetPosition() )
 {

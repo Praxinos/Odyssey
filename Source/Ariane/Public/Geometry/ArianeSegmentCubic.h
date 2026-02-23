@@ -15,7 +15,7 @@ class ARIANE_API FArianeSegmentCubic : public FArianeSegment
 {
     public:
         ~FArianeSegmentCubic();
-        FArianeSegmentCubic( FArianeVertex* iVertex0, FArianeVertex* iVertex1 );
+        FArianeSegmentCubic( FArianeObject* Owner, FArianeVertex* iVertex0, FArianeVertex* iVertex1 );
 
     protected:
         FArianeHandleSegment Handle0;

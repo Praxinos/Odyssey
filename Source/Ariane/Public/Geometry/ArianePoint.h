@@ -6,10 +6,16 @@
 // Unreal headers
 #include "CoreMinimal.h"
 
-class ARIANE_API FArianePoint
+#include "ArianePoint.generated.h"
+
+USTRUCT(BlueprintType)
+struct ARIANE_API FArianePoint
 {
+    GENERATED_BODY()
+
     public:
         ~FArianePoint();
+        FArianePoint(){};
         FArianePoint( double iX, double iY, double iZ );
         FArianePoint( const FVector& iPosition );
 
