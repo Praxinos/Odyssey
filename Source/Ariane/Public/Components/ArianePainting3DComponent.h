@@ -12,16 +12,18 @@
 #include "LocalVertexFactory.h"
 #include "RenderResource.h"
 #include "RawIndexBuffer.h"
+#include "StructUtils/InstancedStruct.h"
 // Ariane Headers
 #include "ArianeObject.h"
+#include "ArianeVertex.h" // TODO : replace with ID handles
 
 #include "ArianePainting3DComponent.generated.h"
 
 class FArianeGeometryProxy;
-class FArianePath;
-class FArianeVertex;
+struct FArianePath;
+struct FArianeVertex;
 class FArianePathGeometry3D;
-class FArianeSegment;
+struct FArianeSegment;
 
 class ARIANE_API FArianeGeometryProxy : public FPrimitiveSceneProxy
 {
@@ -78,18 +80,20 @@ class ARIANE_API UArianePainting3DComponent : public UMeshComponent
         virtual FBoxSphereBounds CalcBounds( const FTransform& LocalToWorld ) const override;
 
     public:
-        void AddPath( FArianePath* iPath );
-        const TArray<FArianePath*>& GetPaths();
+        FArianePath* AllocPath();
+        FArianeObject* AllocObject();
+        TArray<FInstancedStruct>& GetInstancedObjects();
         void Update();
+        FArianeObject* GetObject( const FGuid& InGuid );
 
     public:
         UPROPERTY( EditAnywhere
                  , Category = Painting3D )
         EArianePainting3DGeometryMode GeometryMode;
 
-    protected:
+        UPROPERTY( BlueprintReadWrite )
+        TArray<FInstancedStruct> InstancedObjects;
 
-        //ULineBatchComponent* LineBatchComponent;
-        FArianeObject RootObject;
-        TArray<FArianePath*> Paths;
+        UPROPERTY( BlueprintReadWrite )
+        FArianeObjectID RootObjectID;
 };

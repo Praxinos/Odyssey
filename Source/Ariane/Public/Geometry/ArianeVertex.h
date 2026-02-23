@@ -5,35 +5,47 @@
 
 // Unreal headers
 #include "CoreMinimal.h"
+#include "ArianeID.h"
 #include "ArianePoint.h"
+#include "ArianeVertex.generated.h"
 
-class FArianeObject;
-class FArianeSegment;
+struct FArianeObject;
+struct FArianeSegment;
+class UArianePainting3DComponent;
 
-class ARIANE_API FArianeVertex : public FArianePoint
+USTRUCT(BlueprintType)
+struct ARIANE_API FArianeVertex : public FArianePoint
 {
+    GENERATED_BODY()
+
     public:
         ~FArianeVertex();
-        FArianeVertex( double X, double Y, double Z, double InRadius );
-        FArianeVertex( const FVector& iPosition, double InRadius );
-        FArianeVertex( const FVector& iPosition, const FVector& InNormal, double InRadius );
+        FArianeVertex(){};
+        FArianeVertex( FArianeObject* Owner, const FVector& iPosition, const FVector& InNormal, double InRadius );
 
         void AddSegment( FArianeSegment* iSegment );
         void RemoveSegment( FArianeSegment* iSegment );
 
-        void SetOwner( FArianeObject* iOwner );
         const TArray<FArianeSegment*>& GetSegments();
-
+        FArianeObject* GetOwner();
         double  GetRadius();
 
         void SetNormal( const FVector& InNormal );
         const FVector& GetNormal();
 
-    protected:
-        FArianeObject* Owner;
+    public:
+        UPROPERTY( EditAnywhere )
+        FGuid Guid;
 
+        UPROPERTY( EditAnywhere )
+        FArianeObjectID OwnerID;
+
+        UPROPERTY( EditAnywhere )
         double Radius;
+
+        UPROPERTY( EditAnywhere )
         FVector Normal;
 
+    protected:
         TArray<FArianeSegment*> Segments;
 };
