@@ -37,15 +37,19 @@ UArianeEditorPathDrawingTool::OnMouseDown( FEditorViewportClient* iViewportClien
     {
         UEditorActorSubsystem* editorActorSubsystem = GEditor->GetEditorSubsystem<UEditorActorSubsystem>();
 
+        GEditor->BeginTransaction(FText::FromString("Create object"));
+
         for( AActor* actor : editorActorSubsystem->GetSelectedLevelActors() )
         {
             UArianePainting3DComponent* painting3DComponent = Cast<UArianePainting3DComponent>(actor->GetComponentByClass( UArianePainting3DComponent::StaticClass() ));
 
             if( painting3DComponent )
             {
-                EditedPath = new FArianePath( painting3DComponent );
+                EditedPath = painting3DComponent->AllocPath();
 
-                painting3DComponent->AddPath( EditedPath );
+                painting3DComponent->Modify();
+
+                painting3DComponent->RootObjectID.GetObject()->AppendChild( EditedPath );
 
                 //PlotVertex( iViewportClient, iViewportX, iViewportY );
                 //PlotVertex( iViewportClient, iViewportX + 100, iViewportY );
@@ -153,18 +157,18 @@ UArianeEditorPathDrawingTool::PlotVertex( FEditorViewportClient* iViewportClient
             {
                 FVector localCoords = actorWorldTransform.Inverse().TransformFVector4( intersectAt );
                 FVector localNormal = actorWorldTransform.Inverse().TransformVector( planeVector );
-                FArianeVertex *vertex0 = EditedPath->GetVertices().Num() ? EditedPath->GetVertices().Last()
+                FArianeVertex *Vertex0 = EditedPath->GetVertices().Num() ? EditedPath->GetVertices().Last().GetVertex()
                                                                          : nullptr;
 
-                FArianeVertex *vertex1 = new FArianeVertex( localCoords, localNormal, Radius );
+                FArianeVertex *Vertex1 = EditedPath->AllocVertex( localCoords, localNormal, Radius );
 
-                EditedPath->AddVertex( vertex1 );
+                EditedPath->AddVertex( Vertex1 );
 
-                if( vertex0 )
+                if( Vertex0 )
                 {
-                    FArianeSegment *segment = new FArianeSegment( vertex0, vertex1 );
+                    FArianeSegment *Segment = EditedPath->AllocSegment( Vertex0, Vertex1 );
 
-                    EditedPath->AddSegment( segment );
+                    EditedPath->AddSegment( Segment );
                 }
             }
 
@@ -196,7 +200,7 @@ UArianeEditorPathDrawingTool::OnMouseUp( FEditorViewportClient* iViewportClient
 {
     if( iKey == EKeys::LeftMouseButton )
     {
-
+        GEditor->EndTransaction();
 
 
         return true;

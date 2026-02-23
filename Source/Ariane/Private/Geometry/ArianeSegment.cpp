@@ -4,13 +4,23 @@
 // Ariane headers
 #include "ArianeSegment.h"
 #include "ArianeVertex.h"
+#include "ArianeObject.h"
 
 FArianeSegment::~FArianeSegment()
 {
 }
 
-FArianeSegment::FArianeSegment( FArianeVertex* iVertex0, FArianeVertex* iVertex1 )
-    : Vertices { iVertex0, iVertex1 }
+FArianeSegment::FArianeSegment( )
+    : Guid( FGuid::NewGuid() )
+    , OwnerID()
+    , Length ( 0.0f )
+{
+}
+
+FArianeSegment::FArianeSegment( FArianeObject* Owner, FArianeVertex* iVertex0, FArianeVertex* iVertex1 )
+    : Guid( FGuid::NewGuid() )
+    , OwnerID( Owner )
+    , Vertices { iVertex0, iVertex1 }
     , Length ( 0.0f )
 {
     FractionCache.Emplace( iVertex0, iVertex1 );
@@ -28,36 +38,36 @@ FArianeSegment::GetFractionPointT( uint32 FractionPointIndex )
     return FractionPointsT[FractionPointIndex];
 }
 
-void
-FArianeSegment::SetOwner( FArianeObject* iOwner )
+FArianeObject*
+FArianeSegment::GetOwner()
 {
-    Owner = iOwner;
+    return OwnerID.GetObject();
 }
 
 void
 FArianeSegment::Link()
 {
-    Vertices[0]->AddSegment( this );
-    Vertices[1]->AddSegment( this );
+    Vertices[0].GetVertex()->AddSegment( this );
+    Vertices[1].GetVertex()->AddSegment( this );
 }
 
 void
 FArianeSegment::Unlink()
 {
-    Vertices[0]->RemoveSegment( this );
-    Vertices[1]->RemoveSegment( this );
+    Vertices[0].GetVertex()->RemoveSegment( this );
+    Vertices[1].GetVertex()->RemoveSegment( this );
 }
 
 FArianeVertex*
 FArianeSegment::GetVertex( uint32 Index )
 {
-    return Vertices[Index];
+    return Vertices[Index].GetVertex();
 }
 
 FVector
 FArianeSegment::GetTangentVectorAt( double T, bool bNormalize )
 {
-    FVector RetVector = ( Vertices[1]->GetPosition() - Vertices[0]->GetPosition() );
+    FVector RetVector = ( Vertices[1].GetVertex()->GetPosition() - Vertices[0].GetVertex()->GetPosition() );
 
     if( bNormalize && ( RetVector.SquaredLength() != 0.0f ) )
     {
@@ -109,14 +119,14 @@ FArianeSegment::GetVectorLeavingFromVertex( FArianeVertex* Vertex, bool bNormali
 {
     FVector RetVector;
 
-    if( Vertex == Vertices[0] )
+    if( Vertex == Vertices[0].GetVertex() )
     {
-        RetVector = Vertices[1]->GetPosition() - Vertices[0]->GetPosition();
+        RetVector = Vertices[1].GetVertex()->GetPosition() - Vertices[0].GetVertex()->GetPosition();
     }
 
-    if( Vertex == Vertices[1] )
+    if( Vertex == Vertices[1].GetVertex() )
     {
-        RetVector = Vertices[0]->GetPosition() - Vertices[1]->GetPosition();
+        RetVector = Vertices[0].GetVertex()->GetPosition() - Vertices[1].GetVertex()->GetPosition();
     }
 
     if( bNormalize && ( RetVector.SquaredLength() != 0.0f ) )
@@ -130,12 +140,12 @@ FArianeSegment::GetVectorLeavingFromVertex( FArianeVertex* Vertex, bool bNormali
 FArianeVertex*
 FArianeSegment::GetOtherVertex( FArianeVertex* Vertex )
 {
-    if( ( Vertices[0] != Vertex ) && ( Vertices[1] != Vertex )  )
+    if( ( Vertices[0].GetVertex() != Vertex ) && ( Vertices[1].GetVertex() != Vertex )  )
     {
         return nullptr;
     }
 
-    return ( Vertices[0] == Vertex ) ? Vertices[1] : Vertices[0];
+    return ( Vertices[0].GetVertex() == Vertex ) ? Vertices[1].GetVertex() : Vertices[0].GetVertex();
 }
 
 FVector
@@ -145,7 +155,7 @@ FArianeSegment::GetAverageVectorAt( double T )
 
     if( ( T == 0.0f ) || ( T == 1.0f ) )
     {
-        FArianeVertex* Vertex = T == 0.0f ? Vertices[0] : Vertices[1];
+        FArianeVertex* Vertex = T == 0.0f ? Vertices[0].GetVertex() : Vertices[1].GetVertex();
 
         if( Vertex->GetSegments().Num() )
         {

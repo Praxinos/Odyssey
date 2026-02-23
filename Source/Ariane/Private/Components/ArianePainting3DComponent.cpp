@@ -26,6 +26,8 @@ UArianePainting3DComponent::~UArianePainting3DComponent()
 UArianePainting3DComponent::UArianePainting3DComponent()
     : GeometryMode ( EArianePainting3DGeometryMode::Tube )
 {
+    RootObjectID = FArianeObjectID( AllocObject() );
+
     PrimaryComponentTick.bCanEverTick = true;
     PrimaryComponentTick.bStartWithTickEnabled = true;
     PrimaryComponentTick.SetTickFunctionEnable(true);
@@ -36,6 +38,22 @@ UArianePainting3DComponent::UArianePainting3DComponent()
     bTickInEditor = true;
 
     //LineBatchComponent = CreateDefaultSubobject<ULineBatchComponent>(TEXT("LineBatcher"));
+}
+
+FArianeObject*
+UArianePainting3DComponent::GetObject( const FGuid& InGuid )
+{
+    for( FInstancedStruct& InstancedObject : InstancedObjects )
+    {
+        FArianeObject* Object = InstancedObject.GetMutablePtr<FArianeObject>();
+
+        if( Object->Guid == InGuid )
+        {
+            return Object;
+        }
+    }
+
+    return nullptr;
 }
 
 FPrimitiveSceneProxy*
@@ -91,26 +109,47 @@ UArianePainting3DComponent::CalcBounds(const FTransform& LocalToWorld) const
 {
     FBoxSphereBounds RetBounds = Super::CalcBounds( FTransform::Identity );
 
-    for( FArianePath* Path : Paths )
+    for( const FInstancedStruct& InstancedObject : InstancedObjects )
     {
-        RetBounds = RetBounds + Path->GetBounds();
+        const FArianeObject* Object = InstancedObject.GetPtr<FArianeObject>();
+
+        if( const_cast<FArianeObject*>(Object)->GetClass() == FArianePath::StaticClass() )
+        {
+            const FArianePath* Path = static_cast<const FArianePath*>(Object);
+
+            RetBounds = RetBounds + const_cast<FArianePath*>(Path)->GetBounds();
+        }
     }
 
     return RetBounds.TransformBy( LocalToWorld );
 }
 
-void
-UArianePainting3DComponent::AddPath( FArianePath* Path )
+FArianeObject*
+UArianePainting3DComponent::AllocObject()
 {
-    Paths.Add( Path );
+    InstancedObjects.Add( FInstancedStruct::Make<FArianeObject>( this ) );
 
-    RootObject.AppendChild( Path );
+    FArianeObject* NewObject = InstancedObjects.Last().GetMutablePtr<FArianeObject>();
+
+    return NewObject;
 }
 
-const
-TArray<FArianePath*>& UArianePainting3DComponent::GetPaths()
+FArianePath*
+UArianePainting3DComponent::AllocPath()
 {
-    return Paths;
+    InstancedObjects.Add( FInstancedStruct::Make<FArianePath>( this ) );
+
+    FArianePath* NewPath = InstancedObjects.Last().GetMutablePtr<FArianePath>();
+
+    //RootObjectID.GetObject()->AppendChild( NewPath );
+
+    return NewPath;
+}
+
+TArray<FInstancedStruct>&
+UArianePainting3DComponent::GetInstancedObjects()
+{
+    return InstancedObjects;
 }
 
 void
@@ -119,15 +158,22 @@ UArianePainting3DComponent::Update()
     FArianeGeometryProxy* GeometryProxy = static_cast<FArianeGeometryProxy*>(GetSceneProxy());
     TArray<UMaterialInterface*> UsedMaterials;
 
-    RootObject.Update( true );
+    RootObjectID.GetObject()->Update( true );
 
     // will call CalcBounds (nb: calling UMeshComponent::UpdateBounds() does not work sometimes, especially when then
     // path starts empty but this works.
     UpdateComponentToWorld();
 
-    for( FArianePath* Path: Paths )
+    for( FInstancedStruct& InstancedObject : InstancedObjects )
     {
-        UsedMaterials.Add( Path->GetMaterial() );
+        FArianeObject* Object = InstancedObject.GetMutablePtr<FArianeObject>();
+
+        if( Object->GetClass() == FArianePath::StaticClass() )
+        {
+            FArianePath* Path = static_cast<FArianePath*>(Object);
+
+            UsedMaterials.Add( Path->GetMaterial() );
+        }
     }
 
     GeometryProxy->SetUsedMaterialForVerification( UsedMaterials );
@@ -138,14 +184,21 @@ UArianePainting3DComponent::PostEditChangeProperty( FPropertyChangedEvent& event
 {
     if( event.GetPropertyName() == GET_MEMBER_NAME_CHECKED( UArianePainting3DComponent, GeometryMode ) )
     {
-        for( FArianePath* Path : Paths )
+        for( FInstancedStruct& InstancedObject : InstancedObjects )
         {
-            Path->Invalidate( FArianePathInvalidationFlags()
-                              .SetVertexGeometry()
-                              .SetSegmentGeometry() );
+            FArianeObject* Object = InstancedObject.GetMutablePtr<FArianeObject>();
+
+            if( Object->GetClass() == FArianePath::StaticClass() )
+            {
+                FArianePath* Path = static_cast<FArianePath*>(Object);
+
+                Path->Invalidate( FArianePathInvalidationFlags()
+                                  .SetVertexGeometry()
+                                  .SetSegmentGeometry() );
+            }
         }
 
-        RootObject.Update( true );
+        RootObjectID.GetObject()->Update( true );
     }
 
     Super::PostEditChangeProperty( event );
@@ -169,48 +222,54 @@ FArianeGeometryProxy::DrawStaticElements( FStaticPrimitiveDrawInterface * PDI )
 {
     FMeshBatch MeshBatch;
 
-    for ( FArianePath* Path : Painting3DComponent->GetPaths() )
+    for ( FInstancedStruct& InstancedObject : Painting3DComponent->GetInstancedObjects() )
     {
-        FArianePathGeometry3D* Mesh = Path->GetGeometry3D();
+        FArianeObject* Object = InstancedObject.GetMutablePtr<FArianeObject>();
 
-        if( Mesh->GetIndexBuffer().GetNumIndices() )
+        if( Object->GetClass() == FArianePath::StaticClass() )
         {
-            UMaterialInterface* MaterialInterface = Mesh->GetPath()->GetMaterial();
-            //UMaterialInterface* MaterialInterface = UMaterial::GetDefaultMaterial( MD_Surface );
+            FArianePath* Path = static_cast<FArianePath*>(Object);
+            FArianePathGeometry3D* Mesh = Path->GetGeometry3D();
 
-            FMeshBatchElement& BatchElement = MeshBatch.Elements[0];
+            if( Mesh->GetIndexBuffer().GetNumIndices() )
+            {
+                UMaterialInterface* MaterialInterface = Mesh->GetPath()->GetMaterial();
+                //UMaterialInterface* MaterialInterface = UMaterial::GetDefaultMaterial( MD_Surface );
 
-            BatchElement.IndexBuffer = &Mesh->GetIndexBuffer();
+                FMeshBatchElement& BatchElement = MeshBatch.Elements[0];
 
-            //Mesh.bWireframe = bWireframe;
-            MeshBatch.VertexFactory = &Mesh->GetVertexFactory();
-            MeshBatch.MaterialRenderProxy = MaterialInterface->GetRenderProxy();
+                BatchElement.IndexBuffer = &Mesh->GetIndexBuffer();
 
-            //Additional data
-            BatchElement.FirstIndex = 0;
-            BatchElement.NumPrimitives = Mesh->GetIndexBuffer().GetNumIndices() / 3;
-            BatchElement.MinVertexIndex = 0;
-            BatchElement.MaxVertexIndex = Mesh->GetVertexBuffers().PositionVertexBuffer.GetNumVertices() - 1;
+                //Mesh.bWireframe = bWireframe;
+                MeshBatch.VertexFactory = Mesh->GetVertexFactory();
+                MeshBatch.MaterialRenderProxy = MaterialInterface->GetRenderProxy();
 
-            MeshBatch.ReverseCulling = IsLocalToWorldDeterminantNegative();
-            MeshBatch.Type = PT_TriangleList;
-            MeshBatch.DepthPriorityGroup = SDPG_World;
-            MeshBatch.bCanApplyViewModeOverrides = false;
-            MeshBatch.bDisableBackfaceCulling = true; // draw both sides
+                //Additional data
+                BatchElement.FirstIndex = 0;
+                BatchElement.NumPrimitives = Mesh->GetIndexBuffer().GetNumIndices() / 3;
+                BatchElement.MinVertexIndex = 0;
+                BatchElement.MaxVertexIndex = Mesh->GetVertexBuffers().PositionVertexBuffer.GetNumVertices() - 1;
 
-            // Else the virtual texture check fails in RuntimeVirtualTextureRender.cpp:338
-            // and the static mesh isn't rendered at all
-            MeshBatch.LODIndex = 0;
+                MeshBatch.ReverseCulling = IsLocalToWorldDeterminantNegative();
+                MeshBatch.Type = PT_TriangleList;
+                MeshBatch.DepthPriorityGroup = SDPG_World;
+                MeshBatch.bCanApplyViewModeOverrides = false;
+                MeshBatch.bDisableBackfaceCulling = true; // draw both sides
 
-            // Runtime virtual texture mesh elements.
-            MeshBatch.CastShadow = 0;
-            MeshBatch.bUseAsOccluder = 0;
-            MeshBatch.bUseForDepthPass = 0;
-            MeshBatch.bUseForMaterial = 0;
-            MeshBatch.bDitheredLODTransition = 0;
-            MeshBatch.bRenderToVirtualTexture = 1;
+                // Else the virtual texture check fails in RuntimeVirtualTextureRender.cpp:338
+                // and the static mesh isn't rendered at all
+                MeshBatch.LODIndex = 0;
 
-            PDI->DrawMesh(MeshBatch, FLT_MAX);
+                // Runtime virtual texture mesh elements.
+                MeshBatch.CastShadow = 0;
+                MeshBatch.bUseAsOccluder = 0;
+                MeshBatch.bUseForDepthPass = 0;
+                MeshBatch.bUseForMaterial = 0;
+                MeshBatch.bDitheredLODTransition = 0;
+                MeshBatch.bRenderToVirtualTexture = 1;
+
+                PDI->DrawMesh(MeshBatch, FLT_MAX);
+            }
         }
     }
 }
@@ -225,87 +284,93 @@ FArianeGeometryProxy::GetDynamicMeshElements( const TArray<const FSceneView*>& V
     {
         const FSceneView* View = Views[ViewIndex];
 
-        for ( FArianePath* Path : Painting3DComponent->GetPaths() )
+        for ( FInstancedStruct& InstancedObject : Painting3DComponent->GetInstancedObjects() )
         {
-            FArianePathGeometry3D* Mesh = Path->GetGeometry3D();
+            FArianeObject* Object = InstancedObject.GetMutablePtr<FArianeObject>();
 
-            if( Mesh->GetIndexBuffer().GetNumIndices() && Mesh->GetIndexBuffer().IsInitialized() )
+            if( Object->GetClass() == FArianePath::StaticClass() )
             {
+                FArianePath* Path = static_cast<FArianePath*>(Object);
+                FArianePathGeometry3D* Mesh = Path->GetGeometry3D();
+
+                if( Mesh->GetIndexBuffer().GetNumIndices() && Mesh->GetIndexBuffer().IsInitialized() )
+                {
 
 
-/*
-                FDynamicPrimitiveUniformBuffer& DynamicPrimitiveUniformBuffer = Collector.AllocateOneFrameResource<FDynamicPrimitiveUniformBuffer>();
-                DynamicPrimitiveUniformBuffer.Set( FMatrix::Identity
-                                                 , FMatrix::Identity
-                                                 , GetBounds()
-                                                 , GetLocalBounds()
-                                                 , false, false
-                                                 //, DrawsVelocity()
-                                                 , false );
-*/
+    /*
+                    FDynamicPrimitiveUniformBuffer& DynamicPrimitiveUniformBuffer = Collector.AllocateOneFrameResource<FDynamicPrimitiveUniformBuffer>();
+                    DynamicPrimitiveUniformBuffer.Set( FMatrix::Identity
+                                                     , FMatrix::Identity
+                                                     , GetBounds()
+                                                     , GetLocalBounds()
+                                                     , false, false
+                                                     //, DrawsVelocity()
+                                                     , false );
+    */
 
 
 
 
-/*
-                auto* MaterialProxy = new FColoredMaterialRenderProxy( GEngine->Materi ->GetRenderProxy() );
-                Collector.RegisterOneFrameMaterialProxy( MaterialProxy );
-*/
-                UMaterialInterface* MaterialInterface = Mesh->GetPath()->GetMaterial();
-                //UMaterialInterface* MaterialInterface = UMaterial::GetDefaultMaterial( MD_Surface );
+    /*
+                    auto* MaterialProxy = new FColoredMaterialRenderProxy( GEngine->Materi ->GetRenderProxy() );
+                    Collector.RegisterOneFrameMaterialProxy( MaterialProxy );
+    */
+                    UMaterialInterface* MaterialInterface = Mesh->GetPath()->GetMaterial();
+                    //UMaterialInterface* MaterialInterface = UMaterial::GetDefaultMaterial( MD_Surface );
 
-                // Allocate a mesh batch and get a ref to the first element
-                FMeshBatch& MeshBatch = Collector.AllocateMesh();
-                FMeshBatchElement& BatchElement = MeshBatch.Elements[0];
+                    // Allocate a mesh batch and get a ref to the first element
+                    FMeshBatch& MeshBatch = Collector.AllocateMesh();
+                    FMeshBatchElement& BatchElement = MeshBatch.Elements[0];
 
-                BatchElement.IndexBuffer = &Mesh->GetIndexBuffer();
+                    BatchElement.IndexBuffer = &Mesh->GetIndexBuffer();
 
-                //Mesh.bWireframe = bWireframe;
-                MeshBatch.VertexFactory = &Mesh->GetVertexFactory();
-                MeshBatch.MaterialRenderProxy = MaterialInterface->GetRenderProxy();;
+                    //Mesh.bWireframe = bWireframe;
+                    MeshBatch.VertexFactory = Mesh->GetVertexFactory();
+                    MeshBatch.MaterialRenderProxy = MaterialInterface->GetRenderProxy();;
 
-                //The LocalVertexFactory uses a uniform buffer to pass primitve data like the local to world transform for this frame and for the previous one
-                //Most of this data can be fetched using the helper function below
-                bool bHasPrecomputedVolumetricLightmap;
-                FMatrix PreviousLocalToWorld;
-                int32 SingleCaptureIndex;
-                bool bOutputVelocity;
+                    //The LocalVertexFactory uses a uniform buffer to pass primitve data like the local to world transform for this frame and for the previous one
+                    //Most of this data can be fetched using the helper function below
+                    bool bHasPrecomputedVolumetricLightmap;
+                    FMatrix PreviousLocalToWorld;
+                    int32 SingleCaptureIndex;
+                    bool bOutputVelocity;
 
-                GetScene().GetPrimitiveUniformShaderParameters_RenderThread( GetPrimitiveSceneInfo()
-                                                                           , bHasPrecomputedVolumetricLightmap
-                                                                           , PreviousLocalToWorld
-                                                                           , SingleCaptureIndex
-                                                                           , bOutputVelocity );
+                    GetScene().GetPrimitiveUniformShaderParameters_RenderThread( GetPrimitiveSceneInfo()
+                                                                               , bHasPrecomputedVolumetricLightmap
+                                                                               , PreviousLocalToWorld
+                                                                               , SingleCaptureIndex
+                                                                               , bOutputVelocity );
 
-                //Alloate a temporary primitive uniform buffer, fill it with the data and set it in the batch element
-                FDynamicPrimitiveUniformBuffer& DynamicPrimitiveUniformBuffer = Collector.AllocateOneFrameResource<FDynamicPrimitiveUniformBuffer>();
+                    //Alloate a temporary primitive uniform buffer, fill it with the data and set it in the batch element
+                    FDynamicPrimitiveUniformBuffer& DynamicPrimitiveUniformBuffer = Collector.AllocateOneFrameResource<FDynamicPrimitiveUniformBuffer>();
 
-                DynamicPrimitiveUniformBuffer.Set( Collector.GetRHICommandList()
-                                                 , GetLocalToWorld()
-                                                 , PreviousLocalToWorld
-                                                 , GetBounds()
-                                                 , GetLocalBounds()
-                                                 , true
-                                                 , bHasPrecomputedVolumetricLightmap
-                                              // , DrawsVelocity()
-                                                 , bOutputVelocity );
+                    DynamicPrimitiveUniformBuffer.Set( Collector.GetRHICommandList()
+                                                     , GetLocalToWorld()
+                                                     , PreviousLocalToWorld
+                                                     , GetBounds()
+                                                     , GetLocalBounds()
+                                                     , true
+                                                     , bHasPrecomputedVolumetricLightmap
+                                                  // , DrawsVelocity()
+                                                     , bOutputVelocity );
 
-                BatchElement.PrimitiveUniformBufferResource = &DynamicPrimitiveUniformBuffer.UniformBuffer;
-                BatchElement.PrimitiveIdMode = PrimID_DynamicPrimitiveShaderData;
+                    BatchElement.PrimitiveUniformBufferResource = &DynamicPrimitiveUniformBuffer.UniformBuffer;
+                    BatchElement.PrimitiveIdMode = PrimID_DynamicPrimitiveShaderData;
 
-                //Additional data
-                BatchElement.FirstIndex = 0;
-                BatchElement.NumPrimitives = Mesh->GetIndexBuffer().GetNumIndices() / 3;
-                BatchElement.MinVertexIndex = 0;
-                BatchElement.MaxVertexIndex = Mesh->GetVertexBuffers().PositionVertexBuffer.GetNumVertices() - 1;
-                MeshBatch.ReverseCulling = IsLocalToWorldDeterminantNegative();
-                MeshBatch.Type = PT_TriangleList;
-                MeshBatch.DepthPriorityGroup = SDPG_World;
-                MeshBatch.bCanApplyViewModeOverrides = false;
-                MeshBatch.bDisableBackfaceCulling = true; // draw both sides
+                    //Additional data
+                    BatchElement.FirstIndex = 0;
+                    BatchElement.NumPrimitives = Mesh->GetIndexBuffer().GetNumIndices() / 3;
+                    BatchElement.MinVertexIndex = 0;
+                    BatchElement.MaxVertexIndex = Mesh->GetVertexBuffers().PositionVertexBuffer.GetNumVertices() - 1;
+                    MeshBatch.ReverseCulling = IsLocalToWorldDeterminantNegative();
+                    MeshBatch.Type = PT_TriangleList;
+                    MeshBatch.DepthPriorityGroup = SDPG_World;
+                    MeshBatch.bCanApplyViewModeOverrides = false;
+                    MeshBatch.bDisableBackfaceCulling = true; // draw both sides
 
-                //Add the batch to the collector
-                Collector.AddMesh( ViewIndex, MeshBatch );
+                    //Add the batch to the collector
+                    Collector.AddMesh( ViewIndex, MeshBatch );
+                }
             }
         }
     }

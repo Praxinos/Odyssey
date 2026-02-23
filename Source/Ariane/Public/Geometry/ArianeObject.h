@@ -5,6 +5,12 @@
 
 // Unreal headers
 #include "CoreMinimal.h"
+#include "ArianeID.h"
+
+#include "ArianeObject.generated.h"
+
+class UArianePainting3DComponent;
+struct FArianeObject;
 
 struct ARIANE_API FArianeInvalidationFlags
 {
@@ -37,11 +43,24 @@ struct ARIANE_API FArianeObjectInvalidationFlags : FArianeInvalidationFlags
         uint32 Hierarchy : 1 = 0;
 };
 
-class ARIANE_API FArianeObject
+USTRUCT(BlueprintType)
+struct ARIANE_API FArianeObject
 {
+    GENERATED_BODY()
+
+    private:
+        static const uint32 mStaticClass = 0x7b527cb6; // value is crc32 FArianeObject
+
     public:
-        ~FArianeObject();
+        static uint32 StaticClass() { return mStaticClass; };
+        virtual uint32 GetClass() { return mStaticClass; };
+        //virtual bool HasBaseClass( uint32 iBaseClassID );
+
+    public:
+        virtual ~FArianeObject();
         FArianeObject();
+
+        FArianeObject( UArianePainting3DComponent* InPainting3DComponent );
 
         void AppendChild( FArianeObject* iChild );
         void PrependChild( FArianeObject* iChild );
@@ -56,10 +75,22 @@ class ARIANE_API FArianeObject
     protected:
         void InvalidateChild( FArianeObject* Child );
 
+    public:
+        UPROPERTY( EditAnywhere )
+        UArianePainting3DComponent* Painting3DComponent;
+
+        UPROPERTY( EditAnywhere )
+        FGuid Guid;
+
+        UPROPERTY( EditAnywhere )
+        TArray<FArianeObjectID> ChildrenID;
+
+        UPROPERTY( EditAnywhere )
+        FArianeObjectID ParentID;
+
     protected:
-        TArray<FArianeObject*> Children;
         TArray<FArianeObject*> InvalidatedChildren;
-        FArianeObject* Parent;
+
         FBoxSphereBounds Bounds;
         FArianeInvalidationFlags* InvalidationFlags;
 };

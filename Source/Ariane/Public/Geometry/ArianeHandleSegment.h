@@ -6,8 +6,8 @@
 // Unreal headers
 #include "CoreMinimal.h"
 
-class FArianeObject;
-class FArianeSegment;
+struct FArianeObject;
+struct FArianeSegment;
 
 class ARIANE_API FArianeHandleSegment
 {

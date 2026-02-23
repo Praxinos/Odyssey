@@ -6,14 +6,19 @@
 // Unreal headers
 #include "CoreMinimal.h"
 #include "IndexTypes.h"
-#include "ArianePoint.h"
+#include "ArianeVertex.h"
+#include "ArianeID.h"
 
-class FArianeObject;
-class FArianeVertex;
+#include "ArianeSegment.generated.h"
 
+struct FArianeObject;
+struct FArianeVertex;
 
-class ARIANE_API FArianeSegment
+USTRUCT(BlueprintType)
+struct ARIANE_API FArianeSegment
 {
+    GENERATED_BODY()
+
     public:
         struct Fraction
         {
@@ -28,9 +33,11 @@ class ARIANE_API FArianeSegment
 
     public:
         ~FArianeSegment();
-        FArianeSegment( FArianeVertex* iVertex0, FArianeVertex* iVertex1 );
+        FArianeSegment();
+        FArianeSegment( FArianeObject* Owner, FArianeVertex* iVertex0, FArianeVertex* iVertex1 );
 
         void SetOwner( FArianeObject* iOwner );
+        FArianeObject* GetOwner();
 
         void Link();
         void Unlink();
@@ -56,10 +63,17 @@ class ARIANE_API FArianeSegment
         void UpdateBounds();
         void Update();
 
-    protected:
-        FArianeObject* Owner;
-        FArianeVertex* Vertices[2];
+    public:
+        UPROPERTY( EditAnywhere )
+        FArianeVertexID Vertices[2];
 
+        UPROPERTY( EditAnywhere )
+        FGuid Guid;
+
+        UPROPERTY( EditAnywhere )
+        FArianeObjectID OwnerID;
+
+    protected:
         TArray<float> FractionPointsT;
         TArray<FArianePoint*> FractionPoints;
         TArray<Fraction> FractionCache;

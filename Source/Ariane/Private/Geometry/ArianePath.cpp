@@ -18,65 +18,173 @@
 FArianePath::~FArianePath()
 {
     delete Geometry3D;
+
+    UE_LOG( LogTemp, Warning, TEXT("FArianePath::DTOR %llu"), (uint64*)this );
 }
 
-FArianePath::FArianePath( UArianePainting3DComponent* InPainting3DComponent )
-    : Geometry3D ( new FArianePathGeometry3D( InPainting3DComponent, this ) )
+FArianePath::FArianePath()
+    : FArianeObject()
+    , Geometry3D ( new FArianePathGeometry3D( this ) )
 {
     InvalidationFlags = new FArianePathInvalidationFlags();
 
     Material = NewObject<UMaterial>();
+
+    UE_LOG( LogTemp, Warning, TEXT("Default FArianePath::CTOR %llu"), (uint64*)this );
+}
+
+FArianePath::FArianePath( UArianePainting3DComponent* InPainting3DComponent )
+    : FArianeObject ( InPainting3DComponent )
+    , Geometry3D ( new FArianePathGeometry3D( this ) )
+{
+    InvalidationFlags = new FArianePathInvalidationFlags();
+
+    Material = NewObject<UMaterial>();
+
+    UE_LOG( LogTemp, Warning, TEXT("Manual FArianePath::CTOR %llu"), (uint64*)this );
+
+/*
+    AddVertex( new FArianeVertex( FVector( 0, 0, 0 ), FVector( 0, 0, 0 ), 1.0f ) );
+
+    FArianeVertex *v0 = GetVertices()[0].GetMutablePtr<FArianeVertex>();
+
+    AddVertex( new FArianeVertex( FVector( 0, 0, 0 ), FVector( 0, 0, 0 ), 1.0f ) );
+
+                   v0 = GetVertices()[0].GetMutablePtr<FArianeVertex>();
+    FArianeVertex *v1 = GetVertices()[1].GetMutablePtr<FArianeVertex>();
+*/
 }
 
 void
-FArianePath::AddVertex( FArianeVertex* iVertex )
+FArianePath::PostLoad()
 {
-    Vertices.Push( iVertex );
+    if( Geometry3D == nullptr )
+    {
+        Geometry3D = new FArianePathGeometry3D( this );
 
-    iVertex->SetOwner( this );
+        InvalidationFlags = new FArianePathInvalidationFlags();
+
+        Material = NewObject<UMaterial>();
+    }
+}
+
+FArianeVertex*
+FArianePath::AllocVertex( const FVector& iPosition, const FVector& InNormal, double InRadius )
+{
+    InstancedVertices.Push( FInstancedStruct::Make<FArianeVertex>( this, iPosition, InNormal, InRadius ) );
+
+    FArianeVertex* NewVertex = InstancedVertices.Last().GetMutablePtr<FArianeVertex>();
+
+    return NewVertex;
+}
+
+void
+FArianePath::RemoveVertex( FArianeVertex* iVertex, bool bRemoveFromInstancedVertices )
+{
+    Vertices.RemoveAll( [iVertex]( FArianeVertexID& VertexID ) -> bool
+    {
+        return ( iVertex == VertexID.GetVertex() ) ? true : false;
+    } );
+
+    Invalidate( FArianePathInvalidationFlags().SetVertexTopology() );
+
+    if( bRemoveFromInstancedVertices )
+    {
+        InstancedVertices.RemoveAll( [iVertex]( FInstancedStruct& Struct ) -> bool
+        {
+            return ( iVertex == Struct.GetPtr<FArianeVertex>() ) ? true : false;
+        } );
+    }
+}
+
+FArianeVertex*
+FArianePath::GetVertexByGuid( const FGuid& InGuid )
+{
+    for( FInstancedStruct& InstancedVertex : InstancedVertices )
+    {
+        FArianeVertex* Vertex = InstancedVertex.GetMutablePtr<FArianeVertex>();
+
+        if( Vertex->Guid == InGuid )
+        {
+            return Vertex;
+        }
+    }
+
+    return nullptr;
+}
+
+FArianeSegment*
+FArianePath::GetSegmentByGuid( const FGuid& InGuid )
+{
+    for( FInstancedStruct& InstancedSegment : InstancedSegments )
+    {
+        FArianeSegment* Segment = InstancedSegment.GetMutablePtr<FArianeSegment>();
+
+        if( Segment->Guid == InGuid )
+        {
+            return Segment;
+        }
+    }
+
+    return nullptr;
+}
+
+FArianeSegment*
+FArianePath::AllocSegment( FArianeVertex* Vertex0, FArianeVertex* Vertex1 )
+{
+    InstancedSegments.Push( FInstancedStruct::Make<FArianeSegment>( this, Vertex0, Vertex1 ) );
+
+    FArianeSegment* NewSegment = InstancedSegments.Last().GetMutablePtr<FArianeSegment>();
+
+    return NewSegment;
+}
+
+void
+FArianePath::AddVertex( FArianeVertex* Vertex )
+{
+    Vertices.Add( FArianeVertexID( Vertex ) );
 
     Invalidate( FArianePathInvalidationFlags().SetVertexTopology() );
 }
 
 void
-FArianePath::RemoveVertex( FArianeVertex* iVertex )
+FArianePath::AddSegment( FArianeSegment* Segment )
 {
-    Vertices.Remove( iVertex );
+    Segment->Link();
 
-    iVertex->SetOwner( nullptr );
-
-    Invalidate( FArianePathInvalidationFlags().SetVertexTopology() );
-}
-
-void
-FArianePath::AddSegment( FArianeSegment* iSegment )
-{
-    Segments.Push( iSegment );
-
-    iSegment->Link();
-    iSegment->SetOwner( nullptr );
+    Segments.Add( FArianeSegmentID( Segment ) );
 
     Invalidate( FArianePathInvalidationFlags().SetSegmentTopology() );
 }
 
 void
-FArianePath::RemoveSegment( FArianeSegment* iSegment )
+FArianePath::RemoveSegment( FArianeSegment* Segment, bool bRemoveFromInstancedSegments )
 {
-    Segments.Remove( iSegment );
+    Segments.RemoveAll( [Segment]( FArianeSegmentID& SegmentID ) -> bool
+    {
+        return ( Segment == SegmentID.GetSegment() ) ? true : false;
+    } );
 
-    iSegment->Unlink();
-    iSegment->SetOwner( nullptr );
+    Segment->Unlink();
 
     Invalidate( FArianePathInvalidationFlags().SetSegmentTopology() );
+
+    if( bRemoveFromInstancedSegments )
+    {
+        InstancedSegments.RemoveAll( [Segment]( const FInstancedStruct& Struct ) -> bool
+        {
+            return ( Segment == Struct.GetPtr<FArianeSegment>() ) ? true : false;
+        } );
+    }
 }
 
-const TArray<FArianeSegment*>&
+TArray<FArianeSegmentID>&
 FArianePath::GetSegments()
 {
     return Segments;
 }
 
-const TArray<FArianeVertex*>&
+TArray<FArianeVertexID>&
 FArianePath::GetVertices()
 {
     return Vertices;
@@ -93,8 +201,10 @@ FArianePath::UpdateBounds()
 {
     Bounds = FBoxSphereBounds();
 
-    for( FArianeSegment* Segment : Segments )
+    for( FInstancedStruct& InstancedSegment : InstancedSegments )
     {
+        FArianeSegment* Segment = InstancedSegment.GetMutablePtr<FArianeSegment>();
+
         Bounds = Bounds + Segment->GetBounds();
     }
 }
@@ -127,18 +237,21 @@ FArianePath::GetGeometry3D()
 
 FArianePathGeometry3D::~FArianePathGeometry3D()
 {
-    IndexBuffer.ReleaseResource();
-    VertexFactory.ReleaseResource();
+    if( VertexFactory )
+    {
+        IndexBuffer.ReleaseResource();
+        VertexBuffers.PositionVertexBuffer.ReleaseResource();
+        VertexBuffers.StaticMeshVertexBuffer.ReleaseResource();
+
+        VertexFactory->ReleaseResource();
+    }
 }
 
-FArianePathGeometry3D::FArianePathGeometry3D( UArianePainting3DComponent* InPainting3DComponent
-                                            , FArianePath* InPath )
-    : Painting3DComponent ( InPainting3DComponent )
-    , Path( InPath )
-    , VertexFactory ( InPainting3DComponent->GetScene()->GetFeatureLevel(), "Path Vertex Factory" )
+FArianePathGeometry3D::FArianePathGeometry3D( FArianePath* InPath )
+    : Path( InPath )
+    , VertexFactory ( Path->Painting3DComponent ? new FLocalVertexFactory( Path->Painting3DComponent->GetScene()->GetFeatureLevel(), "Path Vertex Factory" ) : nullptr )
 {
 }
-
 
 FVector
 FArianePathGeometry3D::GetTangentVectorAt( FArianeSegment* Segment
@@ -507,7 +620,7 @@ FArianePathGeometry3D::BuildSegmentAsTube( FArianeSegment* Segment
                                                   , PointT
                                                   , false );
 
-        FVector PerpendicularVector = TangentVector.Cross( Painting3DComponent->GetUpVector() );
+        FVector PerpendicularVector = TangentVector.Cross( Path->Painting3DComponent->GetUpVector() );
 
         PerpendicularVector.Normalize();
 
@@ -594,7 +707,7 @@ FArianePathGeometry3D::GetPath()
     return Path;
 }
 
-FLocalVertexFactory&
+FLocalVertexFactory*
 FArianePathGeometry3D::GetVertexFactory()
 {
     return VertexFactory;
@@ -626,14 +739,14 @@ FArianePathGeometry3D::InitVertexFactory()
             //Use the RHI vertex buffers to create the needed Vertex stream components in an FDataType instance, and then set it as the data of the vertex factory
             FLocalVertexFactory::FDataType Data;
 
-            VertexBuffers.PositionVertexBuffer.BindPositionVertexBuffer( &VertexFactory, Data );
-            VertexBuffers.StaticMeshVertexBuffer.BindPackedTexCoordVertexBuffer( &VertexFactory, Data );
-            VertexBuffers.StaticMeshVertexBuffer.BindTangentVertexBuffer( &VertexFactory, Data );
+            VertexBuffers.PositionVertexBuffer.BindPositionVertexBuffer( VertexFactory, Data );
+            VertexBuffers.StaticMeshVertexBuffer.BindPackedTexCoordVertexBuffer( VertexFactory, Data );
+            VertexBuffers.StaticMeshVertexBuffer.BindTangentVertexBuffer( VertexFactory, Data );
 
-            VertexFactory.SetData( Data );
+            VertexFactory->SetData( Data );
 
             //Initalize the vertex factory using the data that we just set, this will call the InitRHI() method that we implemented in out vertex factory
-            InitOrUpdateResource( RHICmdList, &VertexFactory );
+            InitOrUpdateResource( RHICmdList, VertexFactory );
         } );
 
     ENQUEUE_RENDER_COMMAND(IndexBufferInit)(
@@ -650,17 +763,18 @@ FArianePathGeometry3D::Build()
     uint32 TotalIndexCount = 0;
     TArray<uint32> Indices;
     TArray<FModelVertex> ModelVertices;
-    FVector PreviousPerpendicularVector = Painting3DComponent->GetUpVector();//FVector::Zero();
+    FVector PreviousPerpendicularVector = Path->Painting3DComponent->GetUpVector();//FVector::Zero();
 
     // TODO : update  invalidated segments only
-    for( FArianeSegment* Segment : Path->GetSegments() )
+    for( FArianeSegmentID& SegmentID : Path->GetSegments() )
     {
+        FArianeSegment* Segment = SegmentID.GetSegment();
         FArianeVertex* segmentVertices[2] = { Segment->GetVertex(0)
                                             , Segment->GetVertex(1) };
         uint32 SegmentIndexCount = 0;
         FModelVertex storedVertex;
 
-        switch( Painting3DComponent->GeometryMode )
+        switch( Path->Painting3DComponent->GeometryMode )
         {
             case EArianePainting3DGeometryMode::Flat :
                 BuildSegmentAsFlat( Segment, PreviousPerpendicularVector );
@@ -686,8 +800,10 @@ FArianePathGeometry3D::Build()
     TotalModelVertexCount = 0;
     TotalIndexCount = 0;
 
-    for( FArianeSegment* Segment : Path->GetSegments() )
+    for( FArianeSegmentID& SegmentID : Path->GetSegments() )
     {
+        FArianeSegment* Segment = SegmentID.GetSegment();
+
         if( Segment->GetIndexCache().Num() )
         {
             const TArray<FModelVertex>& SegmentModelVertexCache = Segment->GetModelVertexCache();

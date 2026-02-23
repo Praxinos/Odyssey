@@ -3,6 +3,8 @@
 
 // Ariane headers
 #include "ArianeObject.h"
+#include "StructUtils/InstancedStruct.h"
+#include "ArianePainting3DComponent.h"
 
 void
 FArianeInvalidationFlags::AND( FArianeInvalidationFlags& Result
@@ -55,17 +57,25 @@ FArianeObject::~FArianeObject()
 }
 
 FArianeObject::FArianeObject()
-    : Parent ( nullptr )
+    : Painting3DComponent( nullptr )
+    , Guid ( FGuid::NewGuid() )
+    , ParentID ()
+    , InvalidationFlags ( new FArianeObjectInvalidationFlags() )
 {
-    InvalidationFlags = new FArianeObjectInvalidationFlags();
+}
+
+FArianeObject::FArianeObject( UArianePainting3DComponent* InPainting3DComponent )
+    : FArianeObject()
+{
+    Painting3DComponent = InPainting3DComponent;
 }
 
 void
 FArianeObject::AppendChild( FArianeObject* Child )
 {
-    Children.Add( Child );
+    ChildrenID.Add( FArianeObjectID( Child ) );
 
-    Child->Parent = this;
+    Child->ParentID = FArianeObjectID( this );
 
     Invalidate( FArianeObjectInvalidationFlags().SetHierarchy() );
 }
@@ -73,9 +83,9 @@ FArianeObject::AppendChild( FArianeObject* Child )
 void
 FArianeObject::PrependChild( FArianeObject* Child )
 {
-    Children.Insert( Child, 0 );
+    ChildrenID.Insert( FArianeObjectID( Child ), 0 );
 
-    Child->Parent = this;
+    Child->ParentID = FArianeObjectID( this );
 
     Invalidate( FArianeObjectInvalidationFlags().SetHierarchy() );
 }
@@ -83,11 +93,13 @@ FArianeObject::PrependChild( FArianeObject* Child )
 void
 FArianeObject::AddChild( FArianeObject* Child, FArianeObject* InsertAfter )
 {
-    Children.Insert( Child, Children.Find( InsertAfter ) );
+/*
+    ChildrenID.Insert( FArianeObjectID( Child ), ChildrenID.Find( FArianeObjectID( InsertAfter ) ) );
 
-    Child->Parent = this;
+    Child->ParentID = FArianeObjectID( this );
 
     Invalidate( FArianeObjectInvalidationFlags().SetHierarchy() );
+*/
 }
 
 void
@@ -98,18 +110,18 @@ FArianeObject::InvalidateChild( FArianeObject* Child )
         InvalidatedChildren.Add( Child );
     }
 
-    if( Parent )
+    if( ParentID.GetObject() )
     {
-        Parent->InvalidateChild( this );
+        ParentID.GetObject()->InvalidateChild( this );
     }
 }
 
 void
 FArianeObject::Invalidate( const FArianeObjectInvalidationFlags& InInvalidationFlags )
 {
-    if ( Parent )
+    if ( ParentID.GetObject() )
     {
-        Parent->InvalidateChild( this );
+        ParentID.GetObject()->InvalidateChild( this );
     }
 
     FArianeInvalidationFlags::OR( *InvalidationFlags, *InvalidationFlags, InInvalidationFlags );

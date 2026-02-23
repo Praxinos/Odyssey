@@ -10,27 +10,31 @@
 #include "LocalVertexFactory.h"
 #include "RenderResource.h"
 #include "RawIndexBuffer.h"
+#include "StructUtils/InstancedStruct.h"
 // Ariane Headers
+#include "ArianeID.h"
 #include "ArianeObject.h"
 
-class FArianeSegment;
-class FArianeVertex;
+#include "ArianePath.generated.h"
+
+struct FArianeSegment;
+struct FArianeVertex;
 class UMaterial;
 class UArianePainting3DComponent;
-class FArianePath;
+struct FArianePath;
 
 class ARIANE_API FArianePathGeometry3D
 {
     public:
         ~FArianePathGeometry3D();
-        FArianePathGeometry3D( UArianePainting3DComponent* InPainting3DComponent, FArianePath* InPath );
+        FArianePathGeometry3D( FArianePath* InPath );
 
         void Build();
 
         const FStaticMeshVertexBuffers& GetVertexBuffers() const;
         const FRawStaticIndexBuffer& GetIndexBuffer() const;
         FArianePath* GetPath();
-        FLocalVertexFactory& GetVertexFactory();
+        FLocalVertexFactory* GetVertexFactory();
 
     protected:
         void BuildSegmentAsTube( FArianeSegment* Segment
@@ -45,12 +49,11 @@ class ARIANE_API FArianePathGeometry3D
                                   , bool bNormalize );
 
     protected:
-        UArianePainting3DComponent* Painting3DComponent; // to retrieve the up vector
         FArianePath* Path;
 
         FStaticMeshVertexBuffers VertexBuffers;
         FRawStaticIndexBuffer IndexBuffer;
-        FLocalVertexFactory VertexFactory;
+        FLocalVertexFactory* VertexFactory;
 };
 
 struct ARIANE_API FArianePathInvalidationFlags : FArianeObjectInvalidationFlags
@@ -65,36 +68,67 @@ struct ARIANE_API FArianePathInvalidationFlags : FArianeObjectInvalidationFlags
         FArianePathInvalidationFlags& SetSegmentTopology() { SegmentTopology = 1; return *this; };
 
     public:
-        int VertexGeometry  : 1  = 0;
-        int SegmentGeometry : 1  = 0;
-        int VertexTopology  : 1  = 0;
-        int SegmentTopology : 1  = 0;
+        uint32 VertexGeometry  : 1  = 0;
+        uint32 SegmentGeometry : 1  = 0;
+        uint32 VertexTopology  : 1  = 0;
+        uint32 SegmentTopology : 1  = 0;
 };
 
-class ARIANE_API FArianePath : public FArianeObject
+USTRUCT(BlueprintType)
+struct ARIANE_API FArianePath : public FArianeObject
 {
+    GENERATED_BODY()
+
+    private:
+        static const uint32 mStaticClass = 0xf13c7476; // value is crc32 FArianePath
+
     public:
-        ~FArianePath();
+        static uint32 StaticClass() { return mStaticClass; };
+        virtual uint32 GetClass() { return mStaticClass; };
+        //virtual bool HasBaseClass( uint32 iBaseClassID );
+
+    public:
+        virtual ~FArianePath();
+        FArianePath();
         FArianePath( UArianePainting3DComponent* InPainting3DComponent );
 
     public:
-        void AddVertex( FArianeVertex* iVertex );
-        void AddSegment( FArianeSegment* iSegment );
+        FArianeVertex* AllocVertex( const FVector& iPosition, const FVector& InNormal, double InRadius );
+        FArianeSegment* AllocSegment( FArianeVertex* iVertex0, FArianeVertex* iVertex1 );
 
-        void RemoveVertex( FArianeVertex* iVertex );
-        void RemoveSegment( FArianeSegment* iSegment );
+        void AddVertex( FArianeVertex* Vertex );
+        void AddSegment( FArianeSegment* Segment );
 
-        const TArray<FArianeSegment*>& GetSegments();
-        const TArray<FArianeVertex*>& GetVertices();
+        void RemoveVertex( FArianeVertex* iVertex, bool bRemoveFromInstancedVertices = true );
+        void RemoveSegment( FArianeSegment* iSegment, bool bRemoveFromInstancedSegments = true );
+
+        TArray<FArianeSegmentID>& GetSegments();
+        TArray<FArianeVertexID>& GetVertices();
+
         UMaterial* GetMaterial();
         bool Update( bool Recurse ) override;
         FArianePathGeometry3D* GetGeometry3D();
         virtual void UpdateBounds() override;
+        FArianeVertex* GetVertexByGuid( const FGuid& InGuid );
+        FArianeSegment* GetSegmentByGuid( const FGuid& InGuid );
+        virtual void PostLoad();
+
+
+    public:
+        UPROPERTY( EditAnywhere )
+        TArray<FArianeVertexID> Vertices;
+
+        UPROPERTY( EditAnywhere )
+        TArray<FArianeSegmentID> Segments;
+
+        UPROPERTY( EditAnywhere )
+        TArray<FInstancedStruct> InstancedVertices;
+
+        UPROPERTY( EditAnywhere )
+        TArray<FInstancedStruct> InstancedSegments;
 
     protected:
         FArianePathGeometry3D* Geometry3D;
-        TArray<FArianeSegment*> Segments;
-        TArray<FArianeVertex*> Vertices;
         UMaterial* Material;
 
 };

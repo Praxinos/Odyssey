@@ -3,25 +3,17 @@
 
 // Ariane headers
 #include "ArianeVertex.h"
+#include "ArianePath.h"
+#include "ArianePainting3DComponent.h"
 
 FArianeVertex::~FArianeVertex()
 {
 }
 
-FArianeVertex::FArianeVertex( double X, double Y, double Z, double InRadius )
-    : FArianePoint( X, Y, Z )
-    , Radius( InRadius )
-{
-}
-
-FArianeVertex::FArianeVertex( const FVector& iPosition, double InRadius )
+FArianeVertex::FArianeVertex( FArianeObject* Owner, const FVector& iPosition, const FVector& InNormal, double InRadius )
     : FArianePoint( iPosition )
-    , Radius( InRadius )
-{
-}
-
-FArianeVertex::FArianeVertex( const FVector& iPosition, const FVector& InNormal, double InRadius )
-    : FArianePoint( iPosition )
+    , Guid( FGuid::NewGuid() )
+    , OwnerID( Owner )
     , Radius( InRadius )
     , Normal ( InNormal )
 {
@@ -39,10 +31,10 @@ FArianeVertex::GetNormal()
     return Normal;
 }
 
-void
-FArianeVertex::SetOwner( FArianeObject* iOwner )
+FArianeObject*
+FArianeVertex::GetOwner()
 {
-    Owner = iOwner;
+    return OwnerID.GetObject();
 }
 
 void

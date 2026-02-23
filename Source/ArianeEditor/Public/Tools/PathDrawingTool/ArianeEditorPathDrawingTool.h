@@ -10,7 +10,7 @@
 #include "ArianeEditorPathDrawingTool.generated.h"
 
 class FArianeEditor;
-class FArianePath;
+struct FArianePath;
 
 UCLASS()
 class ARIANEEDITOR_API UArianeEditorPathDrawingTool : public UArianeEditorTool
