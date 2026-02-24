@@ -148,11 +148,15 @@ GetSelectedOrAllAnimationBindings( TSharedPtr<ISequencer> iSequencer )
     if( !iSequencer )
         return TArray<FGuid>();
 
+    UMovieSceneSequence* focusedSequence = iSequencer->GetFocusedMovieSceneSequence();
+    FMovieSceneSequenceID focusedSequenceId = iSequencer->GetFocusedTemplateID();
+    FFrameNumber localFrameNumber = iSequencer->GetLocalTime().Time.FrameNumber;
+
     TSet<FGuid> animation_bindings_selected;
-    TArray<FGuid> animation_bindings = BoardSequenceHelpers::GetAnimationBindings( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iSequencer->GetLocalTime().Time.FrameNumber );
+    TArray<FGuid> animation_bindings = BoardSequenceHelpers::GetAnimationBindings( *iSequencer, focusedSequence, focusedSequenceId, localFrameNumber );
     for( FGuid animation_binding : animation_bindings )
     {
-        TArray<AOdysseyAnimationActor*> animation_actors = BoardSequenceHelpers::GetAnimationSpawned( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iSequencer->GetLocalTime().Time.FrameNumber, animation_binding );
+        TArray<AOdysseyAnimationActor*> animation_actors = BoardSequenceHelpers::GetAnimationSpawned( *iSequencer, focusedSequence, focusedSequenceId, localFrameNumber, animation_binding );
 
         TArray<AOdysseyAnimationActor*> animation_actors_selected_of_binding;
         ShotSequenceTools::FilterSelectedAnimations( animation_actors, &animation_actors_selected_of_binding );
@@ -161,7 +165,71 @@ GetSelectedOrAllAnimationBindings( TSharedPtr<ISequencer> iSequencer )
             animation_bindings_selected.Add( animation_binding );
     }
 
-    return animation_bindings_selected.Array();
+    // Get all bindings if no selection
+    if( animation_bindings_selected.IsEmpty() )
+        animation_bindings_selected.Append( animation_bindings );
+
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, focusedSequence, focusedSequenceId, localFrameNumber );
+
+    TArray<FGuid> animation_bindings_selected_sorted;
+    ShotSequenceTools::SortBindings( animation_bindings_selected.Array(), result.mInnerSequence->GetMovieScene(), &animation_bindings_selected_sorted );
+
+    return animation_bindings_selected_sorted;
+}
+
+static
+TArray<FGuid>
+GetSelectedOrAllAttachedAnimationBindings( TSharedPtr<ISequencer> iSequencer )
+{
+    if( !iSequencer )
+        return TArray<FGuid>();
+
+    TArray<FGuid> animation_bindings = GetSelectedOrAllAnimationBindings( iSequencer );
+    if( animation_bindings.IsEmpty() )
+        return animation_bindings;
+
+    //---
+
+    UMovieSceneSequence* focusedSequence = iSequencer->GetFocusedMovieSceneSequence();
+    FMovieSceneSequenceID focusedSequenceId = iSequencer->GetFocusedTemplateID();
+    FFrameNumber localFrameNumber = iSequencer->GetLocalTime().Time.FrameNumber;
+
+    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, focusedSequence, focusedSequenceId, localFrameNumber );
+
+    TSet<FGuid> animation_bindings_attached;
+    for( FGuid animation_binding : animation_bindings )
+    {
+        ShotSequenceHelpers::FFindOrCreateAnimationAttachResult attach_result = ShotSequenceHelpers::FindAnimationAttachTrackAndSections( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, animation_binding/*, result.mInnerTime.GetFrame()*/ );
+        if( attach_result.mSections.Num() )
+        {
+            animation_bindings_attached.Add( animation_binding );
+        }
+        else
+        {
+            TArray<AOdysseyAnimationActor*> animation_actors = BoardSequenceHelpers::GetAnimationSpawned( *iSequencer, focusedSequence, focusedSequenceId, localFrameNumber, animation_binding );
+
+            auto IsAttached = []( const AOdysseyAnimationActor* iAnimationActor )
+                {
+                    if( !iAnimationActor )
+                        return false;
+
+                    USceneComponent* RootComp = iAnimationActor->GetRootComponent();
+                    if( !RootComp || !RootComp->GetAttachParent() )
+                        return false;
+
+                    AActor* ParentActor = RootComp->GetAttachParent()->GetOwner();
+                    if( !ParentActor ) //TODO: confirm by comparing with the camera ? or is it enough as the animations are in the movie scene ?
+                        return false;
+
+                    return true;
+                };
+
+            if( Algo::AnyOf( animation_actors, IsAttached ) )
+                animation_bindings_attached.Add( animation_binding );
+        }
+    }
+
+    return animation_bindings_attached.Array();
 }
 
 void
@@ -320,9 +388,8 @@ FBoardSequenceCustomization::BindCommands( TSharedPtr<FUICommandList> ioCommandL
                                           TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
                                           if( !sequencer )
                                               return;
-                                          TArray<FGuid> animation_bindings;
-                                          int32 animation_count = BoardSequenceTools::GetAttachedAnimations( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, nullptr, &animation_bindings );
-                                          if( animation_count != 1 )
+                                          TArray<FGuid> animation_bindings = GetSelectedOrAllAttachedAnimationBindings( sequencer );
+                                          if( animation_bindings.Num() != 1 )
                                               return;
                                           BoardSequenceTools::DetachAnimation( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, animation_bindings[0] );
                                       } ),
@@ -331,8 +398,8 @@ FBoardSequenceCustomization::BindCommands( TSharedPtr<FUICommandList> ioCommandL
                                              TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
                                              if( !sequencer )
                                                  return false;
-                                             int32 animation_count = BoardSequenceTools::GetAttachedAnimations( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
-                                             if( animation_count > 1 )
+                                             TArray<FGuid> animation_bindings = GetSelectedOrAllAttachedAnimationBindings( sequencer );
+                                             if( animation_bindings.Num() > 1 )
                                              {
                                                  FNotificationInfo Info( LOCTEXT( "multiple-animations", "There are multiple animations. Select one of them." ) );
                                                  Info.ExpireDuration = 5.0f;
@@ -340,7 +407,7 @@ FBoardSequenceCustomization::BindCommands( TSharedPtr<FUICommandList> ioCommandL
                                                  if (notification)
                                                     notification->SetCompletionState( SNotificationItem::CS_Fail );
                                              }
-                                             if( animation_count != 1 )
+                                             if( animation_bindings.Num() != 1 )
                                                  return false;
                                              return true;
                                          } ),
@@ -350,7 +417,8 @@ FBoardSequenceCustomization::BindCommands( TSharedPtr<FUICommandList> ioCommandL
                                                   TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
                                                   if( !sequencer )
                                                       return false;
-                                                  return BoardSequenceTools::GetAttachedAnimations( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber ) <= 1;
+                                                  TArray<FGuid> animation_bindings = GetSelectedOrAllAttachedAnimationBindings( sequencer );
+                                                  return animation_bindings.Num() <= 1;
                                               } )
     );
 
@@ -749,7 +817,8 @@ FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBui
                                                       TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
                                                       if( !sequencer )
                                                           return false;
-                                                      return BoardSequenceTools::GetAttachedAnimations( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber ) > 1;
+                                                      TArray<FGuid> animation_bindings = GetSelectedOrAllAttachedAnimationBindings( sequencer );
+                                                      return animation_bindings.Num() > 1;
                                                   } )
         ),
         FOnGetContent::CreateRaw( this, &FBoardSequenceCustomization::MakeAnimationMenu ),
@@ -962,20 +1031,18 @@ FBoardSequenceCustomization::MakeAnimationMenu()
     TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
 
     FMenuBuilder MenuBuilder( true, sequencer ? sequencer->GetCommandBindings() : nullptr );
-
-    TArray<AOdysseyAnimationActor*> animations;
-    TArray<FGuid> animation_bindings;
-    int32 animation_count = BoardSequenceTools::GetAttachedAnimations( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, &animations, &animation_bindings );
-    if( !animation_count )
+    TArray<FGuid> animation_bindings = GetSelectedOrAllAttachedAnimationBindings( sequencer );
+    if( animation_bindings.IsEmpty() )
         return SNullWidget::NullWidget;
 
-    for( int i = 0; i < animation_count; i++ )
+    for( FGuid animation_binding : animation_bindings )
     {
-        AOdysseyAnimationActor* animation = animations[i];
-        FGuid animation_binding = animation_bindings[i];
+        TArray<AOdysseyAnimationActor*> animation_actors = BoardSequenceHelpers::GetAnimationSpawned( *sequencer, sequencer->GetFocusedMovieSceneSequence(), sequencer->GetFocusedTemplateID(), sequencer->GetLocalTime().Time.FrameNumber, animation_binding );
+        if( animation_actors.IsEmpty() )
+            continue;
 
         MenuBuilder.AddMenuEntry(
-            FText::FromString( animation->GetActorLabel() ),
+            FText::FromString( animation_actors[0]->GetActorLabel() ),
             FText::GetEmpty(),
             FSlateIcon(),
             FUIAction(
@@ -1002,7 +1069,7 @@ FBoardSequenceCustomization::MakeLighttableMenu()
     FMenuBuilder MenuBuilder( true, sequencer ? sequencer->GetCommandBindings() : nullptr );
 
     TArray<FGuid> animation_bindings = GetSelectedOrAllAnimationBindings( sequencer );
-    if( !animation_bindings.Num() )
+    if( animation_bindings.IsEmpty() )
         return SNullWidget::NullWidget;
 
     for( FGuid animation_binding : animation_bindings )
@@ -1070,7 +1137,7 @@ FBoardSequenceCustomization::MakeAnimationCutMenu()
     FMenuBuilder MenuBuilder( true, sequencer ? sequencer->GetCommandBindings() : nullptr );
 
     TArray<FGuid> animation_bindings = GetSelectedOrAllAnimationBindings( sequencer );
-    if( !animation_bindings.Num() )
+    if( animation_bindings.IsEmpty() )
         return SNullWidget::NullWidget;
 
     for( FGuid animation_binding : animation_bindings )

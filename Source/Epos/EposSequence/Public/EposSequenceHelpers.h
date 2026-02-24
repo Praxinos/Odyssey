@@ -19,6 +19,8 @@ class UEposMovieSceneSequence;
 class UMaterialInstance;
 class UMaterialInstanceConstant;
 class UMovieScene;
+class UMovieScene3DAttachSection;
+class UMovieScene3DAttachTrack;
 class UMovieScene3DTransformSection;
 class UMovieSceneBoolSection;
 class UMovieSceneComponentMaterialTrack;
@@ -159,7 +161,17 @@ public:
     static TArray<FGuid>                    GetAnimationBindings( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID );
     static TArray<AOdysseyAnimationActor*>  GetAnimationSpawned( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iAnimationBinding );
     static TArray<AOdysseyAnimationActor*>  GetAnimationSpawnedOrTemplate( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iAnimationBinding );
-    static int32                GetAttachedAnimations( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TArray<AOdysseyAnimationActor*>* oAnimations, TArray<FGuid>* oAnimationBindings );
+
+public:
+    struct FFindOrCreateAnimationAttachResult
+    {
+        TWeakObjectPtr<UMovieScene3DAttachTrack>      mTrack;
+        bool mTrackCreated{ false };
+        TArray<TWeakObjectPtr<UMovieScene3DAttachSection>>  mSections;
+        bool mSectionsCreated{ false };
+    };
+    static FFindOrCreateAnimationAttachResult       FindAnimationAttachTrackAndSections( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iAnimationBinding, TOptional<FFrameNumber> iFrameNumber = TOptional<FFrameNumber>() );
+    //static FFindOrCreateAnimationAttachResult     FindOrCreateAnimationAttachTrackAndSections( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iAnimationBinding, TOptional<FFrameNumber> iFrameNumber = TOptional<FFrameNumber>() );
 
 public:
     struct FFindOrCreateAnimationVisibilityResult

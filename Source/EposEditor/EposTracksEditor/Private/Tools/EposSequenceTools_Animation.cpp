@@ -719,37 +719,6 @@ ShotSequenceTools::DetachAnimation( ISequencer& iSequencer, UMovieSceneSequence*
 //---
 
 //static
-int32
-BoardSequenceTools::GetAttachedAnimations( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<AOdysseyAnimationActor*>* oAnimations, TArray<FGuid>* oAnimationBindings )
-{
-    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iFrameNumber );
-    if( !result.mInnerSequence )
-        return 0;
-
-    if( result.mInnerSequence->IsA<UBoardSequence>() )
-        return 0;
-
-    TArray<AOdysseyAnimationActor*> animation_actors;
-    TArray<FGuid> animation_bindings;
-    ShotSequenceHelpers::GetAttachedAnimations( *iSequencer, result.mInnerSequence, result.mInnerSequenceId, &animation_actors, &animation_bindings );
-
-    return ShotSequenceTools::FilterSelectedAnimationsOrAllAnimations( animation_actors, animation_bindings, oAnimations, oAnimationBindings );
-}
-
-//static
-int32
-ShotSequenceTools::GetAttachedAnimations( ISequencer* iSequencer, TArray<AOdysseyAnimationActor*>* oAnimations, TArray<FGuid>* oAnimationBindings )
-{
-    TArray<AOdysseyAnimationActor*> animation_actors;
-    TArray<FGuid> animation_bindings;
-    ShotSequenceHelpers::GetAttachedAnimations( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), &animation_actors, &animation_bindings );
-
-    return ShotSequenceTools::FilterSelectedAnimationsOrAllAnimations( animation_actors, animation_bindings, oAnimations, oAnimationBindings );
-}
-
-//---
-
-//static
 void
 BoardSequenceTools::DeleteAnimation( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<FGuid> iAnimationBindings )
 {

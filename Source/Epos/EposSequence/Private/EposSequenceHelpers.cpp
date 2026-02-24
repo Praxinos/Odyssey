@@ -22,12 +22,14 @@
 #include "MovieSceneSection.h"
 #include "MovieSceneSequence.h"
 #include "MovieSceneSequenceVisitor.h"
-#include "Sections/MovieSceneSubSection.h"
+#include "Sections/MovieScene3DAttachSection.h"
 #include "Sections/MovieScene3DTransformSection.h"
 #include "Sections/MovieSceneBoolSection.h"
-#include "Sections/MovieSceneParameterSection.h"
 #include "Sections/MovieSceneComponentMaterialParameterSection.h"
+#include "Sections/MovieSceneParameterSection.h"
 #include "Sections/MovieScenePrimitiveMaterialSection.h"
+#include "Sections/MovieSceneSubSection.h"
+#include "Tracks/MovieScene3DAttachTrack.h"
 #include "Tracks/MovieScene3DTransformTrack.h"
 #include "Tracks/MovieSceneMaterialTrack.h"
 #include "Tracks/MovieScenePrimitiveMaterialTrack.h"
@@ -543,55 +545,6 @@ ShotSequenceHelpers::GetAnimationSpawnedOrTemplate( IMovieScenePlayer& iPlayer, 
 }
 
 //static
-int32
-ShotSequenceHelpers::GetAttachedAnimations( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TArray<AOdysseyAnimationActor*>* oAnimations, TArray<FGuid>* oAnimationBindings )
-{
-    if( oAnimations )
-        oAnimations->Empty();
-    if( oAnimationBindings )
-        oAnimationBindings->Empty();
-
-    UMovieScene* movieScene = iSequence ? iSequence->GetMovieScene() : nullptr;
-    if( !movieScene )
-        return 0;
-
-    TArray<AOdysseyAnimationActor*> animations;
-    TArray<FGuid> animation_bindings;
-
-    for( int i = 0; i < movieScene->GetPossessableCount(); i++ )
-    {
-        FMovieScenePossessable possessable = movieScene->GetPossessable( i );
-
-        for( TWeakObjectPtr<> WeakObject : iPlayer.FindBoundObjects( possessable.GetGuid(), iSequenceID ) )
-        {
-            AOdysseyAnimationActor* animation = Cast<AOdysseyAnimationActor>( WeakObject.Get() );
-
-            if( !animation )
-                continue;
-
-            USceneComponent* RootComp = animation->GetRootComponent();
-            if( !RootComp || !RootComp->GetAttachParent() )
-                continue;
-
-            AActor* ParentActor = RootComp->GetAttachParent()->GetOwner();
-            if( !ParentActor ) //TODO: confirm by comparing with the camera ? or is it enough as the animations are in the movie scene ?
-                continue;
-
-            animations.Add( animation );
-            animation_bindings.Add( possessable.GetGuid() );
-        }
-    }
-
-    if( oAnimations )
-        *oAnimations = animations;
-    if( oAnimationBindings )
-        *oAnimationBindings = animation_bindings;
-
-    return animations.Num();
-}
-
-
-//static
 FQualifiedFrameTime
 EposSequenceHelpers::GetIntermediateTime( IMovieScenePlayer& iPlayer, FQualifiedFrameTime iGlobalTime, FMovieSceneSequenceIDRef iToSequenceId )
 {
@@ -868,6 +821,41 @@ EposSequenceHelpers::GetNotes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* 
     return note_sections;
 }
 
+
+//static
+ShotSequenceHelpers::FFindOrCreateAnimationAttachResult
+ShotSequenceHelpers::FindAnimationAttachTrackAndSections( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iAnimationBinding, TOptional<FFrameNumber> iFrameNumber )
+{
+    FFindOrCreateAnimationAttachResult result;
+
+    UMovieScene* moviescene = iSequence ? iSequence->GetMovieScene() : nullptr;
+    if( !moviescene )
+        return result;
+
+    result.mTrack = moviescene->FindTrack<UMovieScene3DAttachTrack>( iAnimationBinding );
+    if( !result.mTrack.IsValid() )
+        return result;
+
+    //---
+
+    if( iFrameNumber.IsSet() )
+    {
+        for( auto section : result.mTrack->GetAllSections() )
+        {
+            if( section->IsTimeWithinSection( iFrameNumber.GetValue() ) )
+            {
+                result.mSections.Add( Cast<UMovieScene3DAttachSection>( section ) );
+            }
+        }
+    }
+    else
+    {
+        for( auto section : result.mTrack->GetAllSections() )
+            result.mSections.Add( Cast<UMovieScene3DAttachSection>( section ) );
+    }
+
+    return result;
+}
 
 //static
 ShotSequenceHelpers::FFindOrCreateAnimationVisibilityResult

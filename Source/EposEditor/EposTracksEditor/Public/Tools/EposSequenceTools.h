@@ -447,16 +447,6 @@ public:
     *  Get all animations (actor & track bindings) attached to the camera in the board section
     *
     * @param ISequencer     iSequencer to get animations.
-    * @param FFrameNumber   iFrameNumber to get the board section.
-    * @param TArray<AOdysseyAnimationActor*>*   oAnimations to get all animation actors.
-    * @param TArray<FGuid>*                     oAnimationBindings to get all animation bindings.
-    */
-    static int32 GetAttachedAnimations( ISequencer* iSequencer, FFrameNumber iFrameNumber, TArray<AOdysseyAnimationActor*>* oAnimations = nullptr, TArray<FGuid>* oAnimationBindings = nullptr );
-
-    /**
-    *  Get all animations (actor & track bindings) attached to the camera in the board section
-    *
-    * @param ISequencer     iSequencer to get animations.
     * @param UMovieSceneSubSection  iSubSection to check all animations.
     */
     static bool IsAnimationInEditionMode( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection );
@@ -853,8 +843,6 @@ public:
     static void DetachAnimation( ISequencer* iSequencer, FGuid iAnimationBinding );
 
     static bool CanDetachAnimation( ISequencer* iSequencer, FGuid iAnimationBinding );
-
-    static int32 GetAttachedAnimations( ISequencer* iSequencer, TArray<AOdysseyAnimationActor*>* oAnimations = nullptr, TArray<FGuid>* oAnimationBindings = nullptr );
 
     static bool IsAnimationInEditionMode( ISequencer* iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, UOdysseyAnimation* iAnimation );
 
