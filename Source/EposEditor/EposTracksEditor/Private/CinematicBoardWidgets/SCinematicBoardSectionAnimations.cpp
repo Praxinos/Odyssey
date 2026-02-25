@@ -299,6 +299,7 @@ SCinematicBoardSectionAnimationTitle::Construct( const FArguments& InArgs, TShar
             if( animation_actors_selected.Num() )
                 animation_bindings_selected.Add( animation_binding );
         }
+        animation_bindings = animation_bindings_selected.Array();
 
         if( animation_bindings.Contains( mBinding.GetGuid() ) )
             ::ToggleKeysAreaVisibility5( section_object, animation_bindings, mBinding.GetGuid() );
@@ -406,6 +407,7 @@ SCinematicBoardSectionAnimationTitle::Construct( const FArguments& InArgs, TShar
             if( animation_actors_selected.Num() )
                 animation_bindings_selected.Add( animation_binding );
         }
+        animation_bindings = animation_bindings_selected.Array();
 
         if( animation_bindings.Contains( mBinding.GetGuid() ) )
             BoardSequenceTools::DetachAnimation( sequencer, subsection_object, animation_bindings );
@@ -471,6 +473,7 @@ SCinematicBoardSectionAnimationTitle::Construct( const FArguments& InArgs, TShar
             if( animation_actors_selected.Num() )
                 animation_bindings_selected.Add( animation_binding );
         }
+        animation_bindings = animation_bindings_selected.Array();
 
         if( animation_bindings.Contains( mBinding.GetGuid() ) )
             BoardSequenceTools::CreateAnimationCut( sequencer, subsection_object, local_frame, animation_bindings );
@@ -811,6 +814,7 @@ SCinematicBoardSectionAnimationTitle::ToggleAnimationVisibility()
         if( animation_actors_selected.Num() )
             animation_bindings_selected.Add( animation_binding );
     }
+    animation_bindings = animation_bindings_selected.Array();
 
     if( animation_bindings.Contains( mBinding.GetGuid() ) )
         BoardSequenceTools::ToggleAnimationVisibility( sequencer, *subsection_object, animation_bindings, mBinding.GetGuid() );
@@ -850,6 +854,7 @@ SCinematicBoardSectionAnimationTitle::ToggleLighttable()
         if( animation_actors_selected.Num() )
             animation_bindings_selected.Add( animation_binding );
     }
+    animation_bindings = animation_bindings_selected.Array();
 
     // This is the current animation which is the reference state
     bool is_reference_on = LighttableTools::IsOn( *sequencer, result.mInnerSequence, result.mInnerSequenceId, mBinding.GetGuid() );
@@ -2944,6 +2949,7 @@ SCinematicBoardSectionAnimation::BuildContextMenu( FMenuBuilder& ioMenuBuilder )
         if( animation_actors_selected.Num() )
             animation_bindings_selected.Add( animation_binding );
     }
+    animation_bindings = animation_bindings_selected.Array();
 
     if( !animation_bindings.Contains( mBinding.GetGuid() ) )
     {

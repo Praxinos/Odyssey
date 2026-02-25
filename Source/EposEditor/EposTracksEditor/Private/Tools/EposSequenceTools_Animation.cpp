@@ -599,25 +599,43 @@ ShotSequenceTools::CanDetachAnimation( ISequencer* iSequencer, FGuid iAnimationB
 bool
 ShotSequenceTools::CanDetachAnimation( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TArray<FGuid> iAnimationBindings )
 {
-    TArray<AOdysseyAnimationActor*> animations;
-    for( auto animation_binding : iAnimationBindings )
+    TSet<ACineCameraActor*> cameras;
+    for( FGuid animation_binding : iAnimationBindings )
     {
-        for( auto object : iSequencer.FindBoundObjects( animation_binding, iSequenceID ) )
+        ShotSequenceHelpers::FFindOrCreateAnimationAttachResult attach_result = ShotSequenceHelpers::FindAnimationAttachTrackAndSections( iSequencer, iSequence, iSequenceID, animation_binding );
+        for( TWeakObjectPtr<UMovieScene3DAttachSection> weak_attach_section : attach_result.mSections )
         {
-            AOdysseyAnimationActor* animation = Cast<AOdysseyAnimationActor>( object );
-            // It seems it can happen (animation == nullptr) when actors are moved from one (sub)level to another (sub)level in the Levels panel
-            // During the move (maybe):
-            // - the actor is removed from a level
-            // - then the binding is invalid
-            // - a tick occurs (which calls all CanExecute() of every commands)
-            // - then try to resolve the binding which are still invalid
-            if( animation )
-                animations.Add( animation );
+            const FMovieSceneObjectBindingID& attach_object_binding = weak_attach_section->GetConstraintBindingID();
+            TArrayView<TWeakObjectPtr<>> weak_attached_objects = attach_object_binding.ResolveBoundObjects( iSequenceID, iSequencer );
+            for( TWeakObjectPtr<> weak_attached_object : weak_attached_objects )
+                cameras.Add( Cast<ACineCameraActor>( weak_attached_object ) );
         }
     }
 
+    cameras.Remove( nullptr );
+
+    if( cameras.Num() )
+        return true;
+
+    //---
+
+    TSet<AOdysseyAnimationActor*> animations;
+    for( FGuid animation_binding : iAnimationBindings )
+    {
+        for( TWeakObjectPtr<> object : iSequencer.FindBoundObjects( animation_binding, iSequenceID ) )
+            animations.Add( Cast<AOdysseyAnimationActor>( object ) );
+    }
+
+    // It seems it can happen (FindBoundObjects() == nullptr) when actors are moved from one (sub)level to another (sub)level in the Levels panel
+    // During the move (maybe):
+    // - the actor is removed from a level
+    // - then the binding is invalid
+    // - a tick occurs (which calls all CanExecute() of every commands)
+    // - then try to resolve the binding which are still invalid
+    animations.Remove( nullptr );
+
     bool can_detach = false;
-    for( auto animation : animations )
+    for( AOdysseyAnimationActor* animation : animations )
     {
         USceneComponent* RootComp = animation->GetRootComponent();
         if( !RootComp || !RootComp->GetAttachParent() )
@@ -689,27 +707,85 @@ ShotSequenceTools::DetachAnimation( ISequencer* iSequencer, FGuid iAnimationBind
 void
 ShotSequenceTools::DetachAnimation( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, TArray<FGuid> iAnimationBindings )
 {
-    TArray<AOdysseyAnimationActor*> animations;
+    const FScopedTransaction transaction( LOCTEXT( "DetachAnimation", "Detach Animation" ) );
 
-    for( auto animation_binding : iAnimationBindings )
+    TSet<FGuid> animation_bindings_to_transform;
+
+    for( FGuid animation_binding : iAnimationBindings )
     {
-        for( auto object : iSequencer.FindBoundObjects( animation_binding, iSequenceID ) )
-            animations.Add( Cast<AOdysseyAnimationActor>( object ) );
+        ShotSequenceHelpers::FFindOrCreateAnimationAttachResult attach_result = ShotSequenceHelpers::FindAnimationAttachTrackAndSections( iSequencer, iSequence, iSequenceID, animation_binding );
+        if( attach_result.mTrack.IsValid() )
+        {
+            iSequence->GetMovieScene()->RemoveTrack( *attach_result.mTrack );
+
+            animation_bindings_to_transform.Add( animation_binding );
+        }
     }
 
     //---
 
-    const FScopedTransaction transaction( LOCTEXT( "DetachAnimation", "Detach Animation" ) );
+    TSet<AOdysseyAnimationActor*> animations;
 
-    //---
+    for( FGuid animation_binding : iAnimationBindings )
+    {
+        for( TWeakObjectPtr<> object : iSequencer.FindBoundObjects( animation_binding, iSequenceID ) )
+        {
+            animations.Add( Cast<AOdysseyAnimationActor>( object ) );
+
+            animation_bindings_to_transform.Add( animation_binding );
+        }
+    }
 
     GEditor->SelectNone( true, true );
     // It's certainly safe to not check if CanDetachAnimation() is ok (like CreateOpacity()/CreateAnimation)
     // as DetachSelectedActors() does the check
-    for( auto animation : animations )
+    for( AOdysseyAnimationActor* animation : animations )
         GEditor->SelectActor( animation, true /* bInSelected */, true /* bNotify */, true /* bSelectEvenIfHidden */ );
 
     GEditor->DetachSelectedActors();
+
+    //---
+
+    for( FGuid animation_binding : animation_bindings_to_transform )
+    {
+        //ACineCameraActor* camera = nullptr;
+        //for( TWeakObjectPtr<UMovieScene3DAttachSection> weak_attach_section : attach_result.mSections )
+        //{
+        //    const FMovieSceneObjectBindingID& attach_object_binding = weak_attach_section->GetConstraintBindingID();
+        //    TArrayView<TWeakObjectPtr<>> weak_attached_objects = attach_object_binding.ResolveBoundObjects( iSequenceID, iSequencer );
+        //    for( TWeakObjectPtr<> weak_attached_object : weak_attached_objects )
+        //        camera =  Cast<ACineCameraActor>( weak_attached_object );
+        //}
+
+        // Update the default transform channel to take care of the no more existing attach track
+        UMovieScene3DTransformTrack* transformTrack = Cast<UMovieScene3DTransformTrack>( iSequence->GetMovieScene()->FindTrack( UMovieScene3DTransformTrack::StaticClass(), animation_binding ) );
+        if( transformTrack )
+        {
+            TArray<AOdysseyAnimationActor*> animation_actors = ShotSequenceHelpers::GetAnimationSpawnedOrTemplate( iSequencer, iSequence, iSequenceID, animation_binding );
+            AOdysseyAnimationActor* animation_actor = animation_actors[0];
+
+            if( transformTrack->GetAllSections().Num() )
+            {
+                FTransform world_actor_transform = animation_actor->GetActorTransform();
+                //FTransform relative_transform = world_actor_transform.GetRelativeTransform( camera->GetActorTransform() );
+
+                UMovieScene3DTransformSection* TransformSection = Cast<UMovieScene3DTransformSection>( transformTrack->GetAllSections()[0] );
+
+                TArrayView<FMovieSceneDoubleChannel*> DoubleChannels = TransformSection->GetChannelProxy().GetChannels<FMovieSceneDoubleChannel>();
+                DoubleChannels[0]->SetDefault( world_actor_transform.GetLocation().X );
+                DoubleChannels[1]->SetDefault( world_actor_transform.GetLocation().Y );
+                DoubleChannels[2]->SetDefault( world_actor_transform.GetLocation().Z );
+
+                DoubleChannels[3]->SetDefault( world_actor_transform.GetRotation().Euler().X );
+                DoubleChannels[4]->SetDefault( world_actor_transform.GetRotation().Euler().Y );
+                DoubleChannels[5]->SetDefault( world_actor_transform.GetRotation().Euler().Z );
+
+                DoubleChannels[6]->SetDefault( world_actor_transform.GetScale3D().X );
+                DoubleChannels[7]->SetDefault( world_actor_transform.GetScale3D().Y );
+                DoubleChannels[8]->SetDefault( world_actor_transform.GetScale3D().Z );
+            }
+        }
+    }
 
     //---
 
