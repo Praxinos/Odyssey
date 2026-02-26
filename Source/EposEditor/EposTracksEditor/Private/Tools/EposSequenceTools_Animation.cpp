@@ -1013,18 +1013,10 @@ ShotSequenceTools::IsAnimationVisible( ISequencer* iSequencer, FGuid iAnimationB
 bool
 ShotSequenceTools::IsAnimationVisible( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iAnimationBinding )
 {
-    ShotSequenceHelpers::FFindOrCreateAnimationVisibilityResult animation_visibility_result = ShotSequenceHelpers::FindAnimationVisibilityTrackAndSections( iSequencer, iSequence, iSequenceID, iAnimationBinding );
+    TArray<AOdysseyAnimationActor*> animation_actors = ShotSequenceHelpers::GetAnimationSpawnedOrTemplate( iSequencer, iSequence, iSequenceID, iAnimationBinding );
+    AOdysseyAnimationActor* animation_actor = animation_actors[0];
 
-    if( !animation_visibility_result.mTrack.IsValid() )
-        return false;
-
-    if( animation_visibility_result.mSections.Num() == 0 )
-        return false;
-
-    for( auto section : animation_visibility_result.mSections )
-        return section->GetChannel().GetDefault().Get( false );
-
-    return false;
+    return animation_actor->GetRootComponent()->IsVisible();
 }
 
 //---
@@ -1086,15 +1078,8 @@ ShotSequenceTools::ToggleAnimationVisibility( ISequencer& iSequencer, UMovieScen
 
     for( auto animation_binding : iAnimationBindings )
     {
-        ShotSequenceHelpers::FFindOrCreateAnimationVisibilityResult animation_visibility_result = ShotSequenceHelpers::FindAnimationVisibilityTrackAndSections( iSequencer, iSequence, iSequenceID, animation_binding );
-
-        if( !animation_visibility_result.mTrack.IsValid() )
-            continue;
-
-        if( animation_visibility_result.mSections.Num() == 0 )
-            continue;
-
-        //---
+        TArray<AOdysseyAnimationActor*> animation_actors = ShotSequenceHelpers::GetAnimationSpawnedOrTemplate( iSequencer, iSequence, iSequenceID, animation_binding );
+        AOdysseyAnimationActor* animation_actor = animation_actors[0];
 
         // Invert the visibility of the animation
         bool new_animation_visibility = !IsAnimationVisible( iSequencer, iSequence, iSequenceID, animation_binding );
@@ -1102,15 +1087,27 @@ ShotSequenceTools::ToggleAnimationVisibility( ISequencer& iSequencer, UMovieScen
         if( iAnimationReference.IsSet() )
             new_animation_visibility = !reference_animation_visibility;
 
-        for( auto section : animation_visibility_result.mSections )
-        {
-            section->Modify();
+        // With this function, when the spawnable is destroyed and respawned (scrubbing outside the section), this value is not stored
+        //animation_actor->GetRootComponent()->SetVisibility( new_animation_visibility );
 
-            section->GetChannel().SetDefault( new_animation_visibility );
+        // When using this way, it works like when the property is clicked on the details panel
+        // (But I don't know why)
+        USceneComponent* component = animation_actor->GetRootComponent();
+        if( component != nullptr )
+        {
+            FProperty* ChangedProperty = FindFProperty<FProperty>( USceneComponent::StaticClass(), component->GetVisiblePropertyName() );
+            component->PreEditChange( ChangedProperty );
+
+            component->SetVisibleFlag( new_animation_visibility );
+
+            FPropertyChangedEvent PropertyChangedEvent( ChangedProperty );
+            //component->PostEditChangeProperty( PropertyChangedEvent );
+            FEditPropertyChain PropertyChain;
+            PropertyChain.AddHead( ChangedProperty );
+            FPropertyChangedChainEvent PropertyChainEvent( PropertyChain, PropertyChangedEvent );
+            component->PostEditChangeChainProperty( PropertyChainEvent );
         }
     }
-
-    iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::TrackValueChanged );
 }
 
 //---

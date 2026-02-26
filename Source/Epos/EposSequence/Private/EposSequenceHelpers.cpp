@@ -857,41 +857,6 @@ ShotSequenceHelpers::FindAnimationAttachTrackAndSections( IMovieScenePlayer& iPl
     return result;
 }
 
-//static
-ShotSequenceHelpers::FFindOrCreateAnimationVisibilityResult
-ShotSequenceHelpers::FindAnimationVisibilityTrackAndSections( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iAnimationBinding, TOptional<FFrameNumber> iFrameNumber )
-{
-    FFindOrCreateAnimationVisibilityResult result;
-
-    UMovieScene* moviescene = iSequence ? iSequence->GetMovieScene() : nullptr;
-    if( !moviescene )
-        return result;
-
-    result.mTrack = moviescene->FindTrack<UMovieSceneVisibilityTrack>( iAnimationBinding );
-    if( !result.mTrack.IsValid() )
-        return result;
-
-    //---
-
-    if( iFrameNumber.IsSet() )
-    {
-        for( auto section : result.mTrack->GetAllSections() )
-        {
-            if( section->IsTimeWithinSection( iFrameNumber.GetValue() ) )
-            {
-                result.mSections.Add( Cast<UMovieSceneBoolSection>( section ) );
-            }
-        }
-    }
-    else
-    {
-        for( auto section : result.mTrack->GetAllSections() )
-            result.mSections.Add( Cast<UMovieSceneBoolSection>( section ) );
-    }
-
-    return result;
-}
-
 template<typename TrackClass>
 static
 FGuid

@@ -174,17 +174,6 @@ public:
     //static FFindOrCreateAnimationAttachResult     FindOrCreateAnimationAttachTrackAndSections( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iAnimationBinding, TOptional<FFrameNumber> iFrameNumber = TOptional<FFrameNumber>() );
 
 public:
-    struct FFindOrCreateAnimationVisibilityResult
-    {
-        TWeakObjectPtr<UMovieSceneVisibilityTrack>      mTrack;
-        bool mTrackCreated{ false };
-        TArray<TWeakObjectPtr<UMovieSceneBoolSection>>  mSections;
-        bool mSectionsCreated{ false };
-    };
-    static FFindOrCreateAnimationVisibilityResult       FindAnimationVisibilityTrackAndSections( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iAnimationBinding, TOptional<FFrameNumber> iFrameNumber = TOptional<FFrameNumber>() );
-    //static FFindOrCreateAnimationVisibilityResult     FindOrCreateAnimationVisibilityTrackAndSections( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iAnimationBinding, TOptional<FFrameNumber> iFrameNumber = TOptional<FFrameNumber>() );
-
-public:
     struct FFindOrCreateTimelineResult
     {
         TWeakObjectPtr<UOdysseyAnimationTimelineTrack>           mTrack;

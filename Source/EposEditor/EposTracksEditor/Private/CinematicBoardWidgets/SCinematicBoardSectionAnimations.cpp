@@ -600,56 +600,60 @@ SCinematicBoardSectionAnimationTitle::Construct( const FArguments& InArgs, TShar
 
     //---
 
-    auto IsWarning = [this]() -> bool
-    {
-        FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
-        const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
-        ISequencer* sequencer = board_section->GetSequencer().Get();
+    // This code is kept as an example to display a warning button in the animation titlebar
+    // - to indicate a mismatch of sections length
+    // - ...
 
-        BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
+    //auto IsWarning = [this]() -> bool
+    //{
+    //    FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+    //    const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
+    //    ISequencer* sequencer = board_section->GetSequencer().Get();
 
-        //-
+    //    BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, *subsection_object, sequencer->GetFocusedTemplateID() );
 
-        ShotSequenceHelpers::FFindOrCreateAnimationVisibilityResult animation_visibility_result = ShotSequenceHelpers::FindAnimationVisibilityTrackAndSections( *sequencer, result.mInnerSequence, result.mInnerSequenceId, mBinding.GetGuid() );
+    //    //-
 
-        if( !animation_visibility_result.mTrack.IsValid() )
-            return false;
+    //    ShotSequenceHelpers::FFindOrCreateAnimationVisibilityResult animation_visibility_result = ShotSequenceHelpers::FindAnimationVisibilityTrackAndSections( *sequencer, result.mInnerSequence, result.mInnerSequenceId, mBinding.GetGuid() );
 
-        if( animation_visibility_result.mSections.Num() == 0 )
-            return false;
+    //    if( !animation_visibility_result.mTrack.IsValid() )
+    //        return false;
 
-        TRange<FFrameNumber> full_range( TRange<FFrameNumber>::Empty() );
-        for( auto section : animation_visibility_result.mSections )
-            full_range = TRange<FFrameNumber>::Hull( full_range, section->GetTrueRange() );
+    //    if( animation_visibility_result.mSections.Num() == 0 )
+    //        return false;
 
-        return full_range != result.mInnerMovieScene->GetPlaybackRange();
-    };
+    //    TRange<FFrameNumber> full_range( TRange<FFrameNumber>::Empty() );
+    //    for( auto section : animation_visibility_result.mSections )
+    //        full_range = TRange<FFrameNumber>::Hull( full_range, section->GetTrueRange() );
 
-    auto GetWarningTooltip = [this]() -> FText
-    {
-        return LOCTEXT( "warning-tooltip", "Warning: the animation visibility track doesn't match the shot length, set it maually" );
-    };
+    //    return full_range != result.mInnerMovieScene->GetPlaybackRange();
+    //};
 
-    resize_params.ClippingPriority = int32(ePriority::VeryLow) + 10;
+    //auto GetWarningTooltip = [this]() -> FText
+    //{
+    //    return LOCTEXT( "warning-tooltip", "Warning: the animation visibility track doesn't match the shot length, set it maually" );
+    //};
 
-    LeftToolbarBuilder.AddToolBarButton(
-        FUIAction(
-            FExecuteAction(),
-            FCanExecuteAction(),
-            FGetActionCheckState(),
-            FIsActionButtonVisible::CreateLambda( IsWarning )
-        ),
-        NAME_None,
-        FText::GetEmpty(),
-        MakeAttributeLambda( GetWarningTooltip ),
-        FSlateIcon( FAppStyle::Get().GetStyleSetName(), "Icons.Warning" ),
-        EUserInterfaceActionType::Button,
-        NAME_None,
-        TAttribute<EVisibility>(),
-        //mOptionalWidgetsVisibility,
-        TAttribute<FText>(),
-        resize_params
-    );
+    //resize_params.ClippingPriority = int32(ePriority::VeryLow) + 10;
+
+    //LeftToolbarBuilder.AddToolBarButton(
+    //    FUIAction(
+    //        FExecuteAction(),
+    //        FCanExecuteAction(),
+    //        FGetActionCheckState(),
+    //        FIsActionButtonVisible::CreateLambda( IsWarning )
+    //    ),
+    //    NAME_None,
+    //    FText::GetEmpty(),
+    //    MakeAttributeLambda( GetWarningTooltip ),
+    //    FSlateIcon( FAppStyle::Get().GetStyleSetName(), "Icons.Warning" ),
+    //    EUserInterfaceActionType::Button,
+    //    NAME_None,
+    //    TAttribute<EVisibility>(),
+    //    //mOptionalWidgetsVisibility,
+    //    TAttribute<FText>(),
+    //    resize_params
+    //);
 
     //---
 
