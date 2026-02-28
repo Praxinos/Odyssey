@@ -381,7 +381,7 @@ private:
 
     //TODO: Move these shortcuts in FOdysseyAnimationGlobalShortcuts files
     void SwitchTabletAPI();
-    void ClearCurrentLayer();
+    void ClearCurrentLayerOrSelection();
     void ToggleEraserButton();
 
     UOdysseyPainterEditorTool* FindDefaultToolForCurrentLayer();

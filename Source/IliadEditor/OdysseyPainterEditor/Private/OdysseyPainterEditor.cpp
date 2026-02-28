@@ -26,6 +26,7 @@
 #include "OdysseyLayerCell.h"
 #include "OdysseyLayerStack.h"
 #include "OdysseyEditorLayoutBuilder.h"
+#include "OdysseyRasterBlock.h"
 #include "OdysseyTextureLayerImageVector.h"
 #include "OdysseyTextureLayerStackUserData.h"
 #include "OdysseyPainterEditorBrushContext.h"
@@ -546,7 +547,7 @@ FOdysseyPainterEditor::BindShortcuts(FBaseToolkit* iToolkit)
     MAP_ACTION(painterEditorCommands.SwitchTabletAPI, SwitchTabletAPI )
 
     //Need to rethink the commands and shortcuts to put them in the right place and not in GUI
-    MAP_ACTION(painterEditorCommands.ClearCurrentLayer, ClearCurrentLayer)
+    MAP_ACTION(painterEditorCommands.ClearCurrentLayer, ClearCurrentLayerOrSelection)
 
     MAP_ACTION(painterEditorCommands.ToggleEraserButton, ToggleEraserButton)
 
@@ -564,8 +565,69 @@ FOdysseyPainterEditor::SwitchTabletAPI()
 }
 
 void
-FOdysseyPainterEditor::ClearCurrentLayer()
+FOdysseyPainterEditor::ClearCurrentLayerOrSelection()
 {
+    if( !mRasterSelection->IsEmpty() )
+    {
+        TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaRaster>();
+        if (mediaRasters.Num() <= 0)
+            return;
+
+        FOdysseyCoreEditorModule& odysseyCoreEditorModule = FModuleManager::Get().LoadModuleChecked<FOdysseyCoreEditorModule>(TEXT("OdysseyCoreEditor"));
+
+        TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRasters[0]->GetRasterBlock();
+        TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = rasterBlock->GetBlock();
+
+        ::ULIS::FRectI boundingBox = rasterBlock->GetRect();
+
+        TSharedPtr<::ULIS::FBlock> copyBlock = MakeShared<::ULIS::FBlock>(boundingBox.w, boundingBox.h, rasterBlock->GetFormat());
+
+        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
+        ::ULIS::FEvent clearEvent, copyEvent;
+        ctx.Clear(*copyBlock);
+        ctx.Finish();
+
+        TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> maskBlock = mRasterSelection->GetBlock();
+
+        if (maskBlock)
+        {
+            ctx.Copy(
+                *block,
+                *copyBlock,
+                boundingBox,
+                ::ULIS::FVec2I(0, 0),
+                ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
+                0,
+                nullptr,
+                &copyEvent
+            );
+
+            ctx.FilterInto(
+                [](const ::ULIS::FPixel& iSrcPixel, ::ULIS::FPixel& iDstPixel, uint64 iNumPixels)
+                {
+                    for (int i = 0; i < iNumPixels; i++, iSrcPixel.Next(), iDstPixel.Next())
+                    {
+                        iDstPixel.SetAlphaF(iDstPixel.AlphaF() * iSrcPixel.GreyF());
+                    }
+                }
+                , *maskBlock
+                , *copyBlock
+                , boundingBox
+                , ::ULIS::FVec2I(0, 0)
+                , ::ULIS::FSchedulePolicy::MultiScanlines
+                , 1
+                , &copyEvent
+                , nullptr
+            );
+
+            ctx.Finish();
+        }
+
+        mSource->ClearFromCopyBlock(copyBlock);
+
+        return;
+    }
+
     if( mSource )
         mSource->Clear();
 }
@@ -742,11 +804,7 @@ FOdysseyPainterEditor::ExtendToolbarToolParameters(UToolMenu* iToolMenu)
                 FExecuteAction::CreateLambda(
                     [this]()
                     {
-                        TSharedPtr<FOdysseyPainterEditorSource> source = GetSource();
-                        if (!source)
-                            return;
-
-                        source->Clear();
+                        ClearCurrentLayerOrSelection();
                     }
                 )
             ),
