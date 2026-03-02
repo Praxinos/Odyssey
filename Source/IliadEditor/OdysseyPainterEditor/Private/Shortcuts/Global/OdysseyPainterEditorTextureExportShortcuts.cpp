@@ -120,7 +120,7 @@ FOdysseyPainterEditorTextureExportShortcuts::Action_ImportImages()
 
     FOdysseyImportTexturesParameters importParameters;
     importParameters.Init(filenames, texture->GetSurfaceWidth(), texture->GetSurfaceHeight());
-    if(!SOdysseyImportTexturesDialog::Open(LOCTEXT("import-textures-dialog.title", "Import Images" ), importParameters))
+    if(!SOdysseyImportTexturesDialog::Open(LOCTEXT("import-images-dialog.title", "Import Images" ), importParameters))
         return;
 
     FOdysseyPainterEditorTextureImport import;

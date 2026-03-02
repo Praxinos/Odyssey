@@ -300,3 +300,5 @@ UOdysseyAnimationCellImageRaster::Clear()
 }
 
 #endif
+
+#undef LOCTEXT_NAMESPACE

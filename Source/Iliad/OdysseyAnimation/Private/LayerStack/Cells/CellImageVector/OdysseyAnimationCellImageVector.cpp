@@ -406,3 +406,5 @@ UOdysseyAnimationCellImageVector::Clear()
 }
 
 #endif
+
+#undef LOCTEXT_NAMESPACE

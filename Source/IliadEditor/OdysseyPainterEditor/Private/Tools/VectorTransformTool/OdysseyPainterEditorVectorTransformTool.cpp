@@ -1373,7 +1373,7 @@ UOdysseyPainterEditorVectorTransformTool::CreateModifierSegmentControl()
            .ToolTip( LOCTEXT("vector-transform-tool.scaling-center.ctrl.name", "Scaling center: selection center (CTRL)") )
 #endif
 #if PLATFORM_MAC
-           .ToolTip( LOCTEXT("vector-transform-tool.scaling-center.ctrl.name", "Scaling center: selection center (CMD)") )
+           .ToolTip( LOCTEXT("vector-transform-tool.scaling-center.cmd.name", "Scaling center: selection center (CMD)") )
 #endif
            [
                SNew(SBorder)
@@ -1390,7 +1390,7 @@ UOdysseyPainterEditorVectorTransformTool::CreateModifierSegmentControl()
            .ToolTip( LOCTEXT("vector-transform-tool.scaling-center.shift.name", "Scaling center: gizmo (ALT)") )
 #endif
 #if PLATFORM_MAC
-           .ToolTip( LOCTEXT("vector-transform-tool.scaling-center.shift.name", "Scaling center: gizmo (OPTION)") )
+           .ToolTip( LOCTEXT("vector-transform-tool.scaling-center.option.name", "Scaling center: gizmo (OPTION)") )
 #endif
            [
                SNew(SBorder)

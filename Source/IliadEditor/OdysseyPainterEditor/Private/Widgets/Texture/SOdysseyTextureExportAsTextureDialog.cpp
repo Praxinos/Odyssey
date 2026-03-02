@@ -23,9 +23,9 @@ SOdysseyTextureExportAsTextureDialog::Open(UTexture2D* iTexture)
 {
     TSharedPtr<SCustomDialog> customDialog;
 
-    FText dialogTitle = LOCTEXT("export-image-dialog.title", "Export As Texture" );
-    FText exportText = LOCTEXT("export-image-dialog.export", "Export" );
-    FText cancelText = LOCTEXT("export-image-dialog.cancel", "Cancel");
+    FText dialogTitle = LOCTEXT("export-texture-dialog.title", "Export As Texture" );
+    FText exportText = LOCTEXT("export-texture-dialog.export", "Export" );
+    FText cancelText = LOCTEXT("export-texture-dialog.cancel", "Cancel");
 
 
     TSharedRef<SOdysseyTextureExportAsTextureDialog> exportImageWidget = SNew(SOdysseyTextureExportAsTextureDialog, iTexture);
@@ -55,7 +55,7 @@ SOdysseyTextureExportAsTextureDialog::Construct(const FArguments& InArgs, UTextu
         + SGridPanel::Slot(0, 0)
         [
             SNew(STextBlock)
-            .Text(LOCTEXT("export-image-dialog.source.name", "Source"))
+            .Text(LOCTEXT("export-texture-dialog.source.name", "Source"))
         ]
         + SGridPanel::Slot(1, 0)
         [
