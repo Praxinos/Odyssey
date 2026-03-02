@@ -567,7 +567,7 @@ FOdysseyPainterEditor::SwitchTabletAPI()
 void
 FOdysseyPainterEditor::ClearCurrentLayerOrSelection()
 {
-    if( !mRasterSelection->IsEmpty() )
+    if( !mRasterSelection->IsEmpty() && GetCurrentTool()->IsA(UOdysseyPainterEditorRasterBaseTool::StaticClass()))
     {
         TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaRaster>();
         if (mediaRasters.Num() <= 0)
