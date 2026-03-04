@@ -6,31 +6,29 @@
 // Unreal headers
 #include "CoreMinimal.h"
 #include "ArianeID.h"
+#include <functional>
 
 #include "ArianeObject.generated.h"
 
 class UArianePainting3DComponent;
 struct FArianeObject;
 
-struct ARIANE_API FArianeInvalidationFlags
+struct ARIANE_API FArianeObjectInvalidationFlags
 {
     public:
-        static void AND( FArianeInvalidationFlags& Result
-                       , const FArianeInvalidationFlags& LHS
-                       , const FArianeInvalidationFlags& RHS );
-        static void OR( FArianeInvalidationFlags& Result
-                      , const FArianeInvalidationFlags& LHS
-                      , const FArianeInvalidationFlags& RHS );
-        void Clear();
+        static const uint32 StaticClass() { return 0xd8793c00; }; // value is crc32 FArianeObjectInvalidationFlags
+        virtual uint32 GetClass() { return StaticClass(); };
+        virtual bool HasBaseClass( uint32 BaseClass ) const;
 
-    protected:
-        virtual uint32 GetSize() const = 0;
-};
+    public:
+        virtual FArianeObjectInvalidationFlags& AND( const FArianeObjectInvalidationFlags& RHS );
+        virtual FArianeObjectInvalidationFlags& OR( const FArianeObjectInvalidationFlags& RHS );
+        virtual FArianeObjectInvalidationFlags& SetAll();
+        virtual FArianeObjectInvalidationFlags& Clear();
+        virtual bool HasAny();
 
-struct ARIANE_API FArianeObjectInvalidationFlags : FArianeInvalidationFlags
-{
-    protected:
-        virtual uint32 GetSize() const override { return sizeof( FArianeObjectInvalidationFlags ); };
+    public:
+        static void ClearOwn( FArianeObjectInvalidationFlags& Flags );
 
     public:
         FArianeObjectInvalidationFlags& SetAltered()  { Selected  = 1; return *this; };
@@ -68,12 +66,16 @@ struct ARIANE_API FArianeObject
         void Invalidate( const FArianeObjectInvalidationFlags& InInvalidationFlags );
         void GetInvalidatedObjects( TArray<FArianeObject*> OutInvalidatedObjects, bool Recurse );
         virtual bool Update( bool Recurse );
-        FArianeInvalidationFlags& GetInvalidationFlags();
+        FArianeObjectInvalidationFlags& GetInvalidationFlags();
         const FBoxSphereBounds& GetBounds();
         virtual void UpdateBounds();
+        virtual void InvalidatePointerCache();
+
+        virtual void PostEditUndo(){};
 
     protected:
         void InvalidateChild( FArianeObject* Child );
+        void InvalidatePointerCache( TArray<FArianeObjectID>& ObjectIDArray );
 
     public:
         UPROPERTY( EditAnywhere )
@@ -89,8 +91,8 @@ struct ARIANE_API FArianeObject
         FArianeObjectID ParentID;
 
     protected:
-        TArray<FArianeObject*> InvalidatedChildren;
+        TArray<FArianeObjectID> InvalidatedChildrenID;
 
         FBoxSphereBounds Bounds;
-        FArianeInvalidationFlags* InvalidationFlags;
+        FArianeObjectInvalidationFlags* InvalidationFlags;
 };

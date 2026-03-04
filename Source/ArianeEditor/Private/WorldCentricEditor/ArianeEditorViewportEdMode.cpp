@@ -5,10 +5,14 @@
 #include "ArianeEditorViewportEdMode.h"
 #include "ArianeEditorViewportToolkit.h"
 #include "ArianeEditorTool.h"
-
+// Odyssey
+#include "IOdysseyStylusInputModule.h"
 // Unreal
 #include "EdMode.h"
 #include "EditorModeManager.h"
+#include "LevelEditorViewport.h"
+#include "SEditorViewport.h"
+#include "Slate/SceneViewport.h"
 
 /* Gary
 
@@ -50,16 +54,23 @@ FArianeEditorViewportEdMode::~FArianeEditorViewportEdMode()
     {
         GEditor->OnEditorClose().RemoveAll(this);
     }
+
+    UOdysseyStylusInputSubsystem* inputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
+    inputSubsystem->RemoveMessageHandler(*this);
 }
 
 FArianeEditorViewportEdMode::FArianeEditorViewportEdMode()
     : FEdMode()
+    , bStylusInUse( false )
 {
     GEditor->OnEditorClose().AddRaw(this, &FArianeEditorViewportEdMode::OnEditorClose);
 }
 
 void FArianeEditorViewportEdMode::Initialize()
 {
+    UOdysseyStylusInputSubsystem* inputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
+
+    inputSubsystem->AddMessageHandler(*this);
 }
 
 void FArianeEditorViewportEdMode::AddReferencedObjects(FReferenceCollector& Collector)
@@ -124,10 +135,114 @@ bool FArianeEditorViewportEdMode::Select(AActor* InActor, bool bInSelected)
     return FEdMode::Select( InActor, bInSelected );
 }
 
-bool FArianeEditorViewportEdMode::MouseMove( FEditorViewportClient* iViewportClient
-                                           , FViewport* iViewport
-                                           , int32 iMouseX
-                                           , int32 iMouseY )
+void
+FArianeEditorViewportEdMode::OnStylusStateChanged( const TWeakPtr<SWidget> iWidget
+                                                 , const TArray<FStylusState>& iStates
+                                                 , int32 iIndex )
+{
+/*
+    mStylusLastEventTime = std::chrono::steady_clock::now();
+
+    if ( !IsReadyToDraw() || !mLastKnownViewport )
+        return;
+
+    TSharedPtr<SWidget> inWidget = iWidget.Pin();
+    if( !inWidget)
+        return;
+
+    TSharedPtr< SViewport > viewport = GCurrentLevelEditingViewportClient->GetEditorViewportWidget()->GetSceneViewport()->GetViewportWidget().Pin();
+    if( inWidget != viewport )
+        return;
+
+    //---
+
+    mStylusStates = iStates;
+    mLastStylusEventIndex = 0;
+
+    ReadStylusInput();
+*/
+
+    for ( const FStylusState& StylusState : iStates )
+    {
+        TSharedPtr< SViewport > viewportWidget = GCurrentLevelEditingViewportClient->GetEditorViewportWidget()->GetSceneViewport()->GetViewportWidget().Pin();
+        float scaleDPI = viewportWidget->GetCachedGeometry().GetAccumulatedLayoutTransform().GetScale();
+        FVector2D positionInViewport = viewportWidget->GetCachedGeometry().AbsoluteToLocal( StylusState.GetPosition() ) * scaleDPI;
+        static bool PreviouslyDown = false;
+
+        if( StylusState.IsStylusDown() )
+        {
+            if( PreviouslyDown == false )
+            {
+                InputKey_Private( GCurrentLevelEditingViewportClient
+                                , GCurrentLevelEditingViewportClient->GetEditorViewportWidget()->GetSceneViewport().Get()
+                                , EKeys::LeftMouseButton
+                                , FArianePointerState( positionInViewport.X, positionInViewport.Y, StylusState )
+                                , EInputEvent::IE_Pressed );
+
+                bStylusInUse = true;
+            }
+            else
+            {
+                CapturedMouseMove_Private( GCurrentLevelEditingViewportClient
+                                         , GCurrentLevelEditingViewportClient->GetEditorViewportWidget()->GetSceneViewport().Get()
+                                         , FArianePointerState( positionInViewport.X, positionInViewport.Y, StylusState ) );
+
+                bStylusInUse = true;
+            }
+
+            PreviouslyDown = true;
+        }
+        else
+        {
+            if( PreviouslyDown == true )
+            {
+                InputKey_Private( GCurrentLevelEditingViewportClient
+                                , GCurrentLevelEditingViewportClient->GetEditorViewportWidget()->GetSceneViewport().Get()
+                                , EKeys::LeftMouseButton
+                                , FArianePointerState( positionInViewport.X, positionInViewport.Y, StylusState )
+                                , EInputEvent::IE_Released );
+
+                bStylusInUse = false;
+                PreviouslyDown = false;
+
+                break;
+            }
+            // Mouse Hover does not need to be handled, we use the "normal" MouseMove callback.
+        }
+/*
+        //Don't manage MouseDown when using the Right Mouse Button to allow hovered mouse clicks
+        if (!mStylusIsDown && state.IsStylusDown() && mStylusButton != EKeys::RightMouseButton)
+        {
+            //MouseDown
+            MouseDown(ray, mStylusButton);
+
+            mStylusIsDown = true;
+            mLastStylusEventIndex = i;
+        }
+        else if (mStylusIsDown && !state.IsStylusDown() && mStylusButton != EKeys::RightMouseButton)
+        {
+            //MouseUp
+            MouseUp(ray, mStylusButton);
+
+            mStylusIsDown = false;
+            mLastStylusEventIndex = i;
+        }
+        //Force Right Mouse Button Drag
+        else if (mStylusIsDown || mStylusButton == EKeys::RightMouseButton)
+        {
+            //MouseMove
+            MouseDrag(ray);
+
+            mLastStylusEventIndex = i;
+        }
+*/
+    }
+
+}
+
+bool FArianeEditorViewportEdMode::MouseMove_Private( FEditorViewportClient* iViewportClient
+                                                   , FViewport* iViewport
+                                                   , const FArianePointerState& State )
 {
     TSharedPtr<FArianeEditorViewportToolkit> viewportToolkit = GetArianeEditorViewportToolkit();
 
@@ -145,14 +260,26 @@ bool FArianeEditorViewportEdMode::MouseMove( FEditorViewportClient* iViewportCli
 
     return adapter->MouseMove(iViewportClient, iViewport, iMouseX, iMouseY);
 */
+
     return false;
 }
 
+bool FArianeEditorViewportEdMode::MouseMove( FEditorViewportClient* iViewportClient
+                                           , FViewport* iViewport
+                                           , int32 iMouseX
+                                           , int32 iMouseY )
+{
+    return ( bStylusInUse ) ? true : MouseMove_Private( iViewportClient
+                                                      , iViewport
+                                                      , FArianePointerState( iMouseX, iMouseY ) );
+}
+
 bool
-FArianeEditorViewportEdMode::InputKey( FEditorViewportClient* iViewportClient
-                                     , FViewport* iViewport
-                                     , FKey iKey
-                                     , EInputEvent iEvent )
+FArianeEditorViewportEdMode::InputKey_Private( FEditorViewportClient* iViewportClient
+                                             , FViewport* iViewport
+                                             , FKey iKey
+                                             , const FArianePointerState& State
+                                             , EInputEvent iEvent )
 {
     TSharedPtr<FArianeEditorViewportToolkit> viewportToolkit = GetArianeEditorViewportToolkit();
 
@@ -164,25 +291,22 @@ FArianeEditorViewportEdMode::InputKey( FEditorViewportClient* iViewportClient
         {
             case IE_Pressed :
                 return currenTool->OnMouseDown( iViewportClient
-                                              , iViewport->GetMouseX()
-                                              , iViewport->GetMouseY()
                                               , iKey
+                                              , State
                                               , false );
             break;
 
             case IE_Repeat :
                 return currenTool->OnMouseDown( iViewportClient
-                                              , iViewport->GetMouseX()
-                                              , iViewport->GetMouseY()
-                                              , iKey
-                                              , true );
+                                                , iKey
+                                                , State
+                                                , true );
             break;
 
             case IE_Released :
                 return currenTool->OnMouseUp( iViewportClient
-                                            , iViewport->GetMouseX()
-                                            , iViewport->GetMouseY()
-                                            , iKey );
+                                            , iKey
+                                            , State );
             break;
 
             default :
@@ -209,13 +333,26 @@ FArianeEditorViewportEdMode::InputKey( FEditorViewportClient* iViewportClient
 
     return adapter->InputKey(iViewportClient, iViewport, iKey, iEvent);
 */
+
     return false;
 }
 
-bool FArianeEditorViewportEdMode::CapturedMouseMove( FEditorViewportClient* iViewportClient
-                                                   , FViewport* iViewport
-                                                   , int32 iMouseX
-                                                   , int32 iMouseY )
+bool
+FArianeEditorViewportEdMode::InputKey( FEditorViewportClient* iViewportClient
+                                     , FViewport* iViewport
+                                     , FKey iKey
+                                     , EInputEvent iEvent )
+{
+    return ( bStylusInUse ) ? true : InputKey_Private( iViewportClient
+                                                     , iViewport
+                                                     , iKey
+                                                     , FArianePointerState( iViewport->GetMouseX(), iViewport->GetMouseY() )
+                                                     , iEvent );
+}
+
+bool FArianeEditorViewportEdMode::CapturedMouseMove_Private( FEditorViewportClient* iViewportClient
+                                                           , FViewport* iViewport
+                                                           , const FArianePointerState& State )
 {
     TSharedPtr<FArianeEditorViewportToolkit> viewportToolkit = GetArianeEditorViewportToolkit();
 
@@ -224,8 +361,7 @@ bool FArianeEditorViewportEdMode::CapturedMouseMove( FEditorViewportClient* iVie
         UArianeEditorTool* currenTool = viewportToolkit->GetEditor().GetCurrentTool();
 
         return currenTool->OnMouseDrag( iViewportClient
-                                      , iMouseX
-                                      , iMouseY );
+                                      , State );
     }
 /* Gary
 #if PLATFORM_MAC
@@ -240,25 +376,36 @@ bool FArianeEditorViewportEdMode::CapturedMouseMove( FEditorViewportClient* iVie
 
     return adapter->CapturedMouseMove(iViewportClient, iViewport, iMouseX, iMouseY);
 */
+
     return false;
 }
 
+bool FArianeEditorViewportEdMode::CapturedMouseMove( FEditorViewportClient* iViewportClient
+                                                   , FViewport* iViewport
+                                                   , int32 iMouseX
+                                                   , int32 iMouseY )
+{
+    return ( bStylusInUse ) ? true : CapturedMouseMove_Private( iViewportClient
+                                                              , iViewport
+                                                              , FArianePointerState( iMouseX, iMouseY ) );
+}
+
 bool
-FArianeEditorViewportEdMode::HandleClick( FEditorViewportClient* InViewportClient
-                                        , HHitProxy* HitProxy
-                                        , const FViewportClick& Click )
+FArianeEditorViewportEdMode::HandleClick_Private( FEditorViewportClient* InViewportClient
+                                                , HHitProxy* HitProxy
+                                                , const FViewportClick& Click
+                                                , const FArianePointerState& State )
 {
     TSharedPtr<FArianeEditorViewportToolkit> viewportToolkit = GetArianeEditorViewportToolkit();
 
     if( viewportToolkit->GetEditor().GetCurrentTool() )
     {
         UArianeEditorTool* currenTool = viewportToolkit->GetEditor().GetCurrentTool();
-        const FKey& key = Click.GetKey();
+        const FKey& Key = Click.GetKey();
 
         return currenTool->OnMouseClick( InViewportClient
-                                       , Click.GetCursorPos().X
-                                       , Click.GetCursorPos().Y
-                                       , key );
+                                       , Key
+                                       , State );
     }
 
 /* Gary
@@ -269,6 +416,18 @@ FArianeEditorViewportEdMode::HandleClick( FEditorViewportClient* InViewportClien
     return adapter->HandleClick(InViewportClient, HitProxy, Click);
 */
     return false;
+}
+
+bool
+FArianeEditorViewportEdMode::HandleClick( FEditorViewportClient* InViewportClient
+                                        , HHitProxy* HitProxy
+                                        , const FViewportClick& Click )
+{
+    return ( bStylusInUse ) ? true : HandleClick_Private( InViewportClient
+                                                        , HitProxy
+                                                        , Click
+                                                        , FArianePointerState( Click.GetCursorPos().X
+                                                                             , Click.GetCursorPos().Y ) );
 }
 
 bool

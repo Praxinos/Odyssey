@@ -21,6 +21,9 @@ struct ARIANE_API FArianePoint
 
         const FVector& GetPosition();
 
-    protected:
+        virtual void PostEditUndo(){};
+
+    public:
+        UPROPERTY( EditAnywhere )
         FVector Position;
 };

@@ -37,6 +37,15 @@ FArianeObjectID::GetObject()
     return CachedObject;
 }
 
+void
+FArianeObjectID::InvalidatePointerCache()
+{
+    CachedObject = nullptr;
+}
+
+
+///////////////////////// VertexID
+
 FArianeVertexID::FArianeVertexID()
     : Painting3DComponent( nullptr )
     , CachedVertex( nullptr )
@@ -71,8 +80,13 @@ FArianeVertexID::GetVertex()
     return CachedVertex;
 };
 
+void
+FArianeVertexID::InvalidatePointerCache()
+{
+    CachedVertex = nullptr;
+}
 
-
+////////////////////// SegmentID
 
 FArianeSegmentID::FArianeSegmentID()
     : Painting3DComponent( nullptr )
@@ -107,3 +121,9 @@ FArianeSegmentID::GetSegment()
 
     return CachedSegment;
 };
+
+void
+FArianeSegmentID::InvalidatePointerCache()
+{
+    CachedSegment = nullptr;
+}
