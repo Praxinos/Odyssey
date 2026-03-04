@@ -103,9 +103,8 @@ UArianeEditorTool::IsActivated() const
 }
 
 bool UArianeEditorTool::OnMouseDown( FEditorViewportClient* iViewportClient
-                                   , double iViewportX
-                                   , double iViewportY
                                    , const FKey& iKey
+                                   , const FArianePointerState& State
                                    , bool iRepeat )
 {
     return false;
@@ -113,33 +112,29 @@ bool UArianeEditorTool::OnMouseDown( FEditorViewportClient* iViewportClient
 
 void
 UArianeEditorTool::OnMouseHover( FEditorViewportClient* iViewportClient
-                               , double iViewportX
-                               , double iViewportY )
+                               , const FArianePointerState& State )
 {
 }
 
 bool
 UArianeEditorTool::OnMouseDrag( FEditorViewportClient* iViewportClient
-                              , double iViewportX
-                              , double iViewportY )
+                              , const FArianePointerState& State )
 {
     return false;
 }
 
 bool
 UArianeEditorTool::OnMouseUp( FEditorViewportClient* iViewportClient
-                            , double iViewportX
-                            , double iViewportY
-                            , const FKey& iKey )
+                            , const FKey& iKey
+                            , const FArianePointerState& State )
 {
     return false;
 }
 
 bool
 UArianeEditorTool::OnMouseClick( FEditorViewportClient* iViewportClient
-                               , double iViewportX
-                               , double iViewportY
-                               , const FKey& iKey )
+                               , const FKey& iKey
+                               , const FArianePointerState& State )
 {
     if( iKey == EKeys::RightMouseButton )
     {

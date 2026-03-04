@@ -15,58 +15,125 @@
 #include "RawIndexBuffer.h"
 #include "Materials/MaterialRenderProxy.h"
 
+bool
+FArianePathInvalidationFlags::HasBaseClass( uint32 BaseClass ) const
+{
+    if( StaticClass() == BaseClass )
+    {
+        return true;
+    }
+
+    return Super::HasBaseClass( BaseClass );
+}
+
+FArianePathInvalidationFlags&
+FArianePathInvalidationFlags::AND( const FArianeObjectInvalidationFlags& RHS )
+{
+    if( RHS.HasBaseClass( FArianePathInvalidationFlags::StaticClass() ) )
+    {
+        VertexGeometry  &= ((FArianePathInvalidationFlags&)RHS).VertexGeometry;
+        SegmentGeometry &= ((FArianePathInvalidationFlags&)RHS).SegmentGeometry;
+        VertexTopology  &= ((FArianePathInvalidationFlags&)RHS).VertexTopology;
+        SegmentTopology &= ((FArianePathInvalidationFlags&)RHS).SegmentTopology;
+    }
+
+    Super::AND( RHS );
+
+    return *this;
+}
+
+FArianePathInvalidationFlags&
+FArianePathInvalidationFlags::OR( const FArianeObjectInvalidationFlags& RHS )
+{
+    if( RHS.HasBaseClass( FArianePathInvalidationFlags::StaticClass() ) )
+    {
+        VertexGeometry  |= ((FArianePathInvalidationFlags&)RHS).VertexGeometry;
+        SegmentGeometry |= ((FArianePathInvalidationFlags&)RHS).SegmentGeometry;
+        VertexTopology  |= ((FArianePathInvalidationFlags&)RHS).VertexTopology;
+        SegmentTopology |= ((FArianePathInvalidationFlags&)RHS).SegmentTopology;
+    }
+
+    Super::OR( RHS );
+
+    return *this;
+}
+
+FArianePathInvalidationFlags&
+FArianePathInvalidationFlags::SetAll()
+{
+    VertexGeometry  =
+    SegmentGeometry =
+    VertexTopology  =
+    SegmentTopology = 1;
+
+    Super::SetAll();
+
+    return *this;
+}
+
+void
+FArianePathInvalidationFlags::ClearOwn( FArianePathInvalidationFlags& Flags )
+{
+    Flags.VertexGeometry  =
+    Flags.SegmentGeometry =
+    Flags.VertexTopology  =
+    Flags.SegmentTopology = 0;
+}
+
+FArianePathInvalidationFlags&
+FArianePathInvalidationFlags::Clear()
+{
+    FArianePathInvalidationFlags::ClearOwn( *this );
+
+    Super::Clear();
+
+    return *this;
+}
+
+bool
+FArianePathInvalidationFlags::HasAny()
+{
+    return ( VertexGeometry
+          || SegmentGeometry
+          || VertexTopology
+          || SegmentTopology ) ? true : Super::HasAny();
+}
+
 FArianePath::~FArianePath()
 {
-    delete Geometry3D;
-
-    UE_LOG( LogTemp, Warning, TEXT("FArianePath::DTOR %llu"), (uint64*)this );
+    //UE_LOG( LogTemp, Warning, TEXT("FArianePath::DTOR %llu"), (uint64*)this );
 }
 
 FArianePath::FArianePath()
     : FArianeObject()
-    , Geometry3D ( new FArianePathGeometry3D( this ) )
+    , Geometry3D ( this )
 {
     InvalidationFlags = new FArianePathInvalidationFlags();
 
-    Material = NewObject<UMaterial>();
-
-    UE_LOG( LogTemp, Warning, TEXT("Default FArianePath::CTOR %llu"), (uint64*)this );
+    //UE_LOG( LogTemp, Warning, TEXT("Default FArianePath::CTOR %llu"), (uint64*)this );
 }
 
 FArianePath::FArianePath( UArianePainting3DComponent* InPainting3DComponent )
     : FArianeObject ( InPainting3DComponent )
-    , Geometry3D ( new FArianePathGeometry3D( this ) )
+    , Geometry3D ( this )
 {
     InvalidationFlags = new FArianePathInvalidationFlags();
-
-    Material = NewObject<UMaterial>();
-
-    UE_LOG( LogTemp, Warning, TEXT("Manual FArianePath::CTOR %llu"), (uint64*)this );
-
-/*
-    AddVertex( new FArianeVertex( FVector( 0, 0, 0 ), FVector( 0, 0, 0 ), 1.0f ) );
-
-    FArianeVertex *v0 = GetVertices()[0].GetMutablePtr<FArianeVertex>();
-
-    AddVertex( new FArianeVertex( FVector( 0, 0, 0 ), FVector( 0, 0, 0 ), 1.0f ) );
-
-                   v0 = GetVertices()[0].GetMutablePtr<FArianeVertex>();
-    FArianeVertex *v1 = GetVertices()[1].GetMutablePtr<FArianeVertex>();
-*/
 }
 
+/*
 void
 FArianePath::PostLoad()
 {
-    if( Geometry3D == nullptr )
+    //if( Geometry3D == nullptr )
     {
-        Geometry3D = new FArianePathGeometry3D( this );
+        //Geometry3D = new FArianePathGeometry3D( this );
 
         InvalidationFlags = new FArianePathInvalidationFlags();
 
         Material = NewObject<UMaterial>();
     }
 }
+*/
 
 FArianeVertex*
 FArianePath::AllocVertex( const FVector& iPosition, const FVector& InNormal, double InRadius )
@@ -190,12 +257,6 @@ FArianePath::GetVertices()
     return Vertices;
 }
 
-UMaterial*
-FArianePath::GetMaterial()
-{
-    return Material;
-}
-
 void
 FArianePath::UpdateBounds()
 {
@@ -206,6 +267,24 @@ FArianePath::UpdateBounds()
         FArianeSegment* Segment = InstancedSegment.GetMutablePtr<FArianeSegment>();
 
         Bounds = Bounds + Segment->GetBounds();
+    }
+}
+
+void
+FArianePath::PostEditUndo()
+{
+    for( FInstancedStruct& InstancedSegment : InstancedSegments )
+    {
+        FArianeSegment* Segment = InstancedSegment.GetMutablePtr<FArianeSegment>();
+
+        Segment->PostEditUndo();
+    }
+
+    for( FInstancedStruct& InstancedVertex : InstancedVertices )
+    {
+        FArianeVertex* Vertex = InstancedVertex.GetMutablePtr<FArianeVertex>();
+
+        Vertex->PostEditUndo();
     }
 }
 
@@ -221,15 +300,49 @@ FArianePath::Update( bool Recurse )
      || PathInvalidationFlags->SegmentGeometry
      || PathInvalidationFlags->SegmentTopology )
     {
-        Geometry3D->Build();
+        Geometry3D.Build();
 
         UpdateBounds();
+
+        PathInvalidationFlags->VertexGeometry
+      = PathInvalidationFlags->VertexTopology
+      = PathInvalidationFlags->SegmentGeometry
+      = PathInvalidationFlags->SegmentTopology = 0;
     }
 
     return true; // update succeeded
 }
 
-FArianePathGeometry3D*
+
+void
+FArianePath::InvalidatePointerCache( TArray<FArianeVertexID>& VertexIDArray )
+{
+    for( FArianeVertexID& VertexID : VertexIDArray )
+    {
+        VertexID.InvalidatePointerCache();
+    }
+}
+
+void
+FArianePath::InvalidatePointerCache( TArray<FArianeSegmentID>& SegmentIDArray )
+{
+    for( FArianeSegmentID& SegmentID : SegmentIDArray )
+    {
+        SegmentID.InvalidatePointerCache();
+    }
+}
+
+void
+FArianePath::InvalidatePointerCache()
+{
+    Super::InvalidatePointerCache();
+
+    InvalidatePointerCache( Vertices );
+    InvalidatePointerCache( Segments );
+}
+
+
+FArianePathGeometry3D&
 FArianePath::GetGeometry3D()
 {
     return Geometry3D;
@@ -244,12 +357,14 @@ FArianePathGeometry3D::~FArianePathGeometry3D()
         VertexBuffers.StaticMeshVertexBuffer.ReleaseResource();
 
         VertexFactory->ReleaseResource();
+
+        delete VertexFactory;
     }
 }
 
 FArianePathGeometry3D::FArianePathGeometry3D( FArianePath* InPath )
     : Path( InPath )
-    , VertexFactory ( Path->Painting3DComponent ? new FLocalVertexFactory( Path->Painting3DComponent->GetScene()->GetFeatureLevel(), "Path Vertex Factory" ) : nullptr )
+    , VertexFactory ( nullptr )
 {
 }
 
@@ -727,11 +842,20 @@ static inline void InitOrUpdateResource( FRHICommandListImmediate& RHICmdList
 }
 
 void
-FArianePathGeometry3D::InitVertexFactory()
+FArianePathGeometry3D::InitVertexFactory( TArray<FModelVertex>& ModelVertices
+                                        , TArray<uint32>& Indices )
 {
+    if( VertexFactory == nullptr )
+    {
+        VertexFactory = new FLocalVertexFactory( Path->Painting3DComponent->GetWorld()->GetFeatureLevel(), "Path Vertex Factory" );
+    }
+
     ENQUEUE_RENDER_COMMAND(StaticMeshVertexBuffersLegacyInit)(
-        [this](FRHICommandListImmediate& RHICmdList)
+        [ this
+        , ModelVerticesAsync = MoveTemp(ModelVertices) ] ( FRHICommandListImmediate& RHICmdList )
         {
+            VertexBuffers.InitModelBuffers( const_cast<TArray<FModelVertex>&>(ModelVerticesAsync) );
+
             //Initialize or update the RHI vertex buffers
             InitOrUpdateResource( RHICmdList, &VertexBuffers.PositionVertexBuffer );
             InitOrUpdateResource( RHICmdList, &VertexBuffers.StaticMeshVertexBuffer );
@@ -750,8 +874,11 @@ FArianePathGeometry3D::InitVertexFactory()
         } );
 
     ENQUEUE_RENDER_COMMAND(IndexBufferInit)(
-        [this](FRHICommandListImmediate& RHICmdList)
+        [ this
+        , IndicesAsync = MoveTemp(Indices) ] ( FRHICommandListImmediate& RHICmdList )
         {
+            IndexBuffer.SetIndices( IndicesAsync, EIndexBufferStride::Type::Force32Bit );
+
             InitOrUpdateResource( RHICmdList, &IndexBuffer );
         } );
 }
@@ -828,8 +955,11 @@ FArianePathGeometry3D::Build()
         }
     }
 
-    VertexBuffers.InitModelBuffers( ModelVertices );
-    IndexBuffer.SetIndices( Indices, EIndexBufferStride::Type::Force32Bit );
+    if( ModelVertices.Num() )
+    {
+        //VertexBuffers.InitModelBuffers( ModelVertices );
+        //IndexBuffer.SetIndices( Indices, EIndexBufferStride::Type::Force32Bit );
 
-    InitVertexFactory();
+        InitVertexFactory( ModelVertices, Indices );
+    }
 }

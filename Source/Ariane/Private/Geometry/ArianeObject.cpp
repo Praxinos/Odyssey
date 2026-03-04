@@ -6,50 +6,77 @@
 #include "StructUtils/InstancedStruct.h"
 #include "ArianePainting3DComponent.h"
 
-void
-FArianeInvalidationFlags::AND( FArianeInvalidationFlags& Result
-                             , const FArianeInvalidationFlags& LHS
-                             , const FArianeInvalidationFlags& RHS )
-{
-    uint8* MemRes = (uint8*)&Result;
-    const uint8* MemLHS = (uint8*)&LHS;
-    const uint8* MemRHS = (uint8*)&RHS;
 
-    for( uint32 i = 0; i < Result.GetSize(); i++ )
+bool
+FArianeObjectInvalidationFlags::HasBaseClass( uint32 BaseClass ) const
+{
+    if( StaticClass() == BaseClass )
     {
-        uint8 MemLHSValue = ( i < LHS.GetSize() ) ? MemLHS[i] : 0;
-        uint8 MemRHSValue = ( i < RHS.GetSize() ) ? MemRHS[i] : 0;
-
-        MemRes[i] = MemLHSValue & MemRHSValue;
+        return true;
     }
+
+    return false;
 }
 
-void
-FArianeInvalidationFlags::OR( FArianeInvalidationFlags& Result
-                            , const FArianeInvalidationFlags& LHS
-                            , const FArianeInvalidationFlags& RHS )
+FArianeObjectInvalidationFlags&
+FArianeObjectInvalidationFlags::AND( const FArianeObjectInvalidationFlags& RHS )
 {
-    uint8* MemRes = (uint8*)&Result;
-    const uint8* MemLHS = (uint8*)&LHS;
-    const uint8* MemRHS = (uint8*)&RHS;
-
-    for( uint32 i = 0; i < Result.GetSize(); i++ )
+    if( RHS.HasBaseClass( FArianeObjectInvalidationFlags::StaticClass() ) )
     {
-        uint8 MemLHSValue = ( i < LHS.GetSize() ) ? MemLHS[i] : 0;
-        uint8 MemRHSValue = ( i < RHS.GetSize() ) ? MemRHS[i] : 0;
-
-        MemRes[i] = MemLHS[i] | MemRHS[i];
+        Selected  &= ((FArianeObjectInvalidationFlags&)RHS).Selected;
+        Altered   &= ((FArianeObjectInvalidationFlags&)RHS).Altered;
+        Hierarchy &= ((FArianeObjectInvalidationFlags&)RHS).Hierarchy;
     }
+
+    return *this;
+}
+
+FArianeObjectInvalidationFlags&
+FArianeObjectInvalidationFlags::OR( const FArianeObjectInvalidationFlags& RHS )
+{
+    if( RHS.HasBaseClass( FArianeObjectInvalidationFlags::StaticClass() ) )
+    {
+        Selected  |= ((FArianeObjectInvalidationFlags&)RHS).Selected;
+        Altered   |= ((FArianeObjectInvalidationFlags&)RHS).Altered;
+        Hierarchy |= ((FArianeObjectInvalidationFlags&)RHS).Hierarchy;
+    }
+
+    return *this;
+}
+
+FArianeObjectInvalidationFlags&
+FArianeObjectInvalidationFlags::SetAll()
+{
+    Selected  = 1;
+    Altered   = 1;
+    Hierarchy = 1;
+
+    return *this;
+}
+
+FArianeObjectInvalidationFlags&
+FArianeObjectInvalidationFlags::Clear()
+{
+    FArianeObjectInvalidationFlags::ClearOwn( *this );
+
+    return *this;
+}
+
+bool
+FArianeObjectInvalidationFlags::HasAny()
+{
+    return ( Selected
+          || Altered
+          || Hierarchy );
 }
 
 void
-FArianeInvalidationFlags::Clear()
+FArianeObjectInvalidationFlags::ClearOwn( FArianeObjectInvalidationFlags& Flags )
 {
-    FMemory::Memzero( this, GetSize() );
+    Flags.Selected  = 0;
+    Flags.Altered   = 0;
+    Flags.Hierarchy = 0;
 }
-
-
-
 
 
 FArianeObject::~FArianeObject()
@@ -105,9 +132,12 @@ FArianeObject::AddChild( FArianeObject* Child, FArianeObject* InsertAfter )
 void
 FArianeObject::InvalidateChild( FArianeObject* Child )
 {
-    if( InvalidatedChildren.Find( Child ) == INDEX_NONE )
+    if( InvalidatedChildrenID.FindByPredicate( [Child]( FArianeObjectID& ObjectID ) -> bool
+                                               {
+                                                   return ( ObjectID.Guid == Child->Guid ) ? true : false;
+                                               } ) == nullptr )
     {
-        InvalidatedChildren.Add( Child );
+        InvalidatedChildrenID.Add( FArianeObjectID( Child ) );
     }
 
     if( ParentID.GetObject() )
@@ -124,19 +154,19 @@ FArianeObject::Invalidate( const FArianeObjectInvalidationFlags& InInvalidationF
         ParentID.GetObject()->InvalidateChild( this );
     }
 
-    FArianeInvalidationFlags::OR( *InvalidationFlags, *InvalidationFlags, InInvalidationFlags );
+    InvalidationFlags->OR( InInvalidationFlags );
 }
 
 void
 FArianeObject::GetInvalidatedObjects( TArray<FArianeObject*> OutInvalidatedObjects, bool Recurse )
 {
-    for( FArianeObject* InvalidatedObject : InvalidatedChildren )
+    for( FArianeObjectID& InvalidatedObject : InvalidatedChildrenID )
     {
-        OutInvalidatedObjects.Add( InvalidatedObject );
+        OutInvalidatedObjects.Add( InvalidatedObject.GetObject() );
 
         if( Recurse )
         {
-            InvalidatedObject->GetInvalidatedObjects( OutInvalidatedObjects, Recurse );
+            InvalidatedObject.GetObject()->GetInvalidatedObjects( OutInvalidatedObjects, Recurse );
         }
     }
 }
@@ -146,16 +176,18 @@ FArianeObject::Update( bool Recurse )
 {
     if( Recurse )
     {
-        InvalidatedChildren.RemoveAll( [&Recurse](  FArianeObject* InvalidatedObject )
+        InvalidatedChildrenID.RemoveAll( [&Recurse](  FArianeObjectID& InvalidatedObjectID )
             {
-                return InvalidatedObject->Update( Recurse );
+                return InvalidatedObjectID.GetObject()->Update( Recurse );
             } );
     }
 
-    return InvalidatedChildren.Num() ? false : true;
+    FArianeObjectInvalidationFlags::ClearOwn( *InvalidationFlags );
+
+    return InvalidatedChildrenID.Num() ? false : true;
 }
 
-FArianeInvalidationFlags&
+FArianeObjectInvalidationFlags&
 FArianeObject::GetInvalidationFlags()
 {
     return *InvalidationFlags;
@@ -172,4 +204,23 @@ void
 FArianeObject::UpdateBounds()
 {
 
+}
+
+void
+FArianeObject::InvalidatePointerCache( TArray<FArianeObjectID>& ObjectIDArray )
+{
+    for( FArianeObjectID& ObjectID : ObjectIDArray )
+    {
+        ObjectID.InvalidatePointerCache();
+    }
+}
+
+void
+FArianeObject::InvalidatePointerCache()
+{
+    InvalidatePointerCache( ChildrenID );
+
+    ParentID.InvalidatePointerCache();
+
+    InvalidatePointerCache( InvalidatedChildrenID );
 }

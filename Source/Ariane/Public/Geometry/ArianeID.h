@@ -24,6 +24,7 @@ struct ARIANE_API FArianeObjectID
         FArianeObjectID( FArianeObject* Object );
 
         FArianeObject* GetObject();
+        void InvalidatePointerCache();
 
     public:
         UPROPERTY( EditAnywhere )
@@ -47,6 +48,7 @@ struct ARIANE_API FArianeVertexID
         FArianeVertexID( FArianeVertex* InVertex );
 
         FArianeVertex* GetVertex();
+        void InvalidatePointerCache();
 
     public:
         UPROPERTY( EditAnywhere )
@@ -74,6 +76,7 @@ struct ARIANE_API FArianeSegmentID
         FArianeSegmentID( FArianeSegment* InSegment );
 
         FArianeSegment* GetSegment();
+        void InvalidatePointerCache();
 
     public:
         UPROPERTY( EditAnywhere )

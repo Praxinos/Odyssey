@@ -7,10 +7,14 @@
 #include "CoreMinimal.h"
 #include "Framework/MultiBox/MultiBoxExtender.h"
 // Ariane
+#include "ArianePointerState.h"
+
 #include "ArianeEditorTool.generated.h"
 
 class FArianeEditor;
 class FSceneView;
+class FStylusState;
+
 /* Gary
 class FArianeEditorToolInputProcessor;
 */
@@ -50,24 +54,19 @@ class ARIANEEDITOR_API UArianeEditorTool : public UObject
     public:
         //Mouse events
         virtual bool OnMouseDown( FEditorViewportClient* iViewportClient
-                                , double iViewportX
-                                , double iViewportY
                                 , const FKey& iKey
+                                , const FArianePointerState& State
                                 , bool iRepeat = false );
         virtual void OnMouseHover( FEditorViewportClient* iViewportClient
-                                 , double iViewportX
-                                 , double iViewportY );
+                                 , const FArianePointerState& State );
         virtual bool OnMouseDrag( FEditorViewportClient* iViewportClient
-                                , double iViewportX
-                                , double iViewportY );
+                                , const FArianePointerState& State );
         virtual bool OnMouseUp( FEditorViewportClient* iViewportClient
-                              , double iViewportX
-                              , double iViewportY
-                              , const FKey& iKey );
+                              , const FKey& iKey
+                              , const FArianePointerState& State );
         virtual bool OnMouseClick( FEditorViewportClient* iViewportClient
-                                 , double iViewportX
-                                 , double iViewportY
-                                 , const FKey& iKey );
+                                 , const FKey& iKey
+                                 , const FArianePointerState& State );
         virtual void Tick( float iDeltaTime );
         virtual FText GetTooltip() const;
 

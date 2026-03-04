@@ -40,6 +40,82 @@ UArianePainting3DComponent::UArianePainting3DComponent()
     //LineBatchComponent = CreateDefaultSubobject<ULineBatchComponent>(TEXT("LineBatcher"));
 }
 
+void
+UArianePainting3DComponent::PrintPointers()
+{
+    for( FInstancedStruct& InstancedObject : InstancedObjects )
+    {
+        FArianeObject* Object = InstancedObject.GetMutablePtr<FArianeObject>();
+
+        UE_LOG( LogTemp, Warning, TEXT("PTR:%llu"), (uint64) Object );
+    }
+}
+
+void
+UArianePainting3DComponent::PostLoad()
+{
+    Super::PostLoad();
+
+    for( FInstancedStruct& InstancedStruct : InstancedObjects )
+    {
+        FArianeObject* Object = InstancedStruct.GetMutablePtr<FArianeObject>();
+
+        Object->InvalidatePointerCache();
+        Object->PostEditUndo();
+    }
+
+    // Second part, invalidate Path Segments to rebuild the VertexFactory
+    for( FInstancedStruct& InstancedStruct : InstancedObjects )
+    {
+        FArianeObject* Object = InstancedStruct.GetMutablePtr<FArianeObject>();
+
+        if( Object->GetClass() == FArianePath::StaticClass() )
+        {
+            FArianePath* Path = static_cast<FArianePath*>(Object);
+            FArianePathInvalidationFlags Flags = FArianePathInvalidationFlags();
+
+            Path->Invalidate( Flags.SetAll() );
+        }
+    }
+
+    //RootObjectID.GetObject()->Update( true );
+    Update();
+}
+
+void
+UArianePainting3DComponent::PostEditUndo()
+{
+    Super::PostEditUndo();
+
+    // first part, invalidate all pointers that were allocated from FInstancedStructs
+    RootObjectID.InvalidatePointerCache();
+
+    for( FInstancedStruct& InstancedStruct : InstancedObjects )
+    {
+        FArianeObject* Object = InstancedStruct.GetMutablePtr<FArianeObject>();
+
+        Object->InvalidatePointerCache();
+        Object->PostEditUndo();
+    }
+
+    // Second part, invalidate Path Segments to rebuild the VertexFactory
+    for( FInstancedStruct& InstancedStruct : InstancedObjects )
+    {
+        FArianeObject* Object = InstancedStruct.GetMutablePtr<FArianeObject>();
+
+        if( Object->GetClass() == FArianePath::StaticClass() )
+        {
+            FArianePath* Path = static_cast<FArianePath*>(Object);
+            FArianePathInvalidationFlags Flags = FArianePathInvalidationFlags();
+
+            Path->Invalidate( Flags.SetAll() );
+        }
+    }
+
+    //RootObjectID.GetObject()->Update( true );
+    Update();
+}
+
 FArianeObject*
 UArianePainting3DComponent::GetObject( const FGuid& InGuid )
 {
@@ -59,13 +135,7 @@ UArianePainting3DComponent::GetObject( const FGuid& InGuid )
 FPrimitiveSceneProxy*
 UArianePainting3DComponent::CreateSceneProxy()
 {
-    return new FArianeGeometryProxy(GetScene()->GetFeatureLevel(), this);
-}
-
-void
-UArianePainting3DComponent::PostInitProperties ()
-{
-    Super::PostInitProperties();
+    return new FArianeGeometryProxy( GetScene()->GetFeatureLevel(), this );
 }
 
 void
@@ -156,7 +226,6 @@ void
 UArianePainting3DComponent::Update()
 {
     FArianeGeometryProxy* GeometryProxy = static_cast<FArianeGeometryProxy*>(GetSceneProxy());
-    TArray<UMaterialInterface*> UsedMaterials;
 
     RootObjectID.GetObject()->Update( true );
 
@@ -164,19 +233,8 @@ UArianePainting3DComponent::Update()
     // path starts empty but this works.
     UpdateComponentToWorld();
 
-    for( FInstancedStruct& InstancedObject : InstancedObjects )
-    {
-        FArianeObject* Object = InstancedObject.GetMutablePtr<FArianeObject>();
-
-        if( Object->GetClass() == FArianePath::StaticClass() )
-        {
-            FArianePath* Path = static_cast<FArianePath*>(Object);
-
-            UsedMaterials.Add( Path->GetMaterial() );
-        }
-    }
-
-    GeometryProxy->SetUsedMaterialForVerification( UsedMaterials );
+    UsedMaterials.Empty();
+    //UsedMaterials.Add( Material );
 }
 
 void
@@ -222,6 +280,8 @@ FArianeGeometryProxy::DrawStaticElements( FStaticPrimitiveDrawInterface * PDI )
 {
     FMeshBatch MeshBatch;
 
+    Painting3DComponent->GetSceneProxy()->SetUsedMaterialForVerification( Painting3DComponent->UsedMaterials );
+
     for ( FInstancedStruct& InstancedObject : Painting3DComponent->GetInstancedObjects() )
     {
         FArianeObject* Object = InstancedObject.GetMutablePtr<FArianeObject>();
@@ -229,26 +289,26 @@ FArianeGeometryProxy::DrawStaticElements( FStaticPrimitiveDrawInterface * PDI )
         if( Object->GetClass() == FArianePath::StaticClass() )
         {
             FArianePath* Path = static_cast<FArianePath*>(Object);
-            FArianePathGeometry3D* Mesh = Path->GetGeometry3D();
+            FArianePathGeometry3D& Mesh = Path->GetGeometry3D();
 
-            if( Mesh->GetIndexBuffer().GetNumIndices() )
+            if( Mesh.GetIndexBuffer().GetNumIndices() )
             {
-                UMaterialInterface* MaterialInterface = Mesh->GetPath()->GetMaterial();
-                //UMaterialInterface* MaterialInterface = UMaterial::GetDefaultMaterial( MD_Surface );
+                //UMaterialInterface* MaterialInterface = Painting3DComponent->Material;
+                UMaterialInterface* MaterialInterface = UMaterial::GetDefaultMaterial( MD_Surface );
 
                 FMeshBatchElement& BatchElement = MeshBatch.Elements[0];
 
-                BatchElement.IndexBuffer = &Mesh->GetIndexBuffer();
+                BatchElement.IndexBuffer = &Mesh.GetIndexBuffer();
 
                 //Mesh.bWireframe = bWireframe;
-                MeshBatch.VertexFactory = Mesh->GetVertexFactory();
+                MeshBatch.VertexFactory = Mesh.GetVertexFactory();
                 MeshBatch.MaterialRenderProxy = MaterialInterface->GetRenderProxy();
 
                 //Additional data
                 BatchElement.FirstIndex = 0;
-                BatchElement.NumPrimitives = Mesh->GetIndexBuffer().GetNumIndices() / 3;
+                BatchElement.NumPrimitives = Mesh.GetIndexBuffer().GetNumIndices() / 3;
                 BatchElement.MinVertexIndex = 0;
-                BatchElement.MaxVertexIndex = Mesh->GetVertexBuffers().PositionVertexBuffer.GetNumVertices() - 1;
+                BatchElement.MaxVertexIndex = Mesh.GetVertexBuffers().PositionVertexBuffer.GetNumVertices() - 1;
 
                 MeshBatch.ReverseCulling = IsLocalToWorldDeterminantNegative();
                 MeshBatch.Type = PT_TriangleList;
@@ -280,6 +340,8 @@ FArianeGeometryProxy::GetDynamicMeshElements( const TArray<const FSceneView*>& V
                                             , uint32 VisibilityMap
                                             , FMeshElementCollector& Collector) const
 {
+    Painting3DComponent->GetSceneProxy()->SetUsedMaterialForVerification( Painting3DComponent->UsedMaterials );
+
     for( int32 ViewIndex = 0; ViewIndex < Views.Num(); ViewIndex++ )
     {
         const FSceneView* View = Views[ViewIndex];
@@ -288,12 +350,12 @@ FArianeGeometryProxy::GetDynamicMeshElements( const TArray<const FSceneView*>& V
         {
             FArianeObject* Object = InstancedObject.GetMutablePtr<FArianeObject>();
 
-            if( Object->GetClass() == FArianePath::StaticClass() )
+            if( ( Object->GetClass() == FArianePath::StaticClass() )  )
             {
                 FArianePath* Path = static_cast<FArianePath*>(Object);
-                FArianePathGeometry3D* Mesh = Path->GetGeometry3D();
+                FArianePathGeometry3D& Mesh = Path->GetGeometry3D();
 
-                if( Mesh->GetIndexBuffer().GetNumIndices() && Mesh->GetIndexBuffer().IsInitialized() )
+                if( Mesh.GetIndexBuffer().GetNumIndices() && Mesh.GetIndexBuffer().IsInitialized() )
                 {
 
 
@@ -315,17 +377,17 @@ FArianeGeometryProxy::GetDynamicMeshElements( const TArray<const FSceneView*>& V
                     auto* MaterialProxy = new FColoredMaterialRenderProxy( GEngine->Materi ->GetRenderProxy() );
                     Collector.RegisterOneFrameMaterialProxy( MaterialProxy );
     */
-                    UMaterialInterface* MaterialInterface = Mesh->GetPath()->GetMaterial();
-                    //UMaterialInterface* MaterialInterface = UMaterial::GetDefaultMaterial( MD_Surface );
+                    //UMaterialInterface* MaterialInterface = Painting3DComponent->Material;
+                    UMaterialInterface* MaterialInterface = UMaterial::GetDefaultMaterial( MD_Surface );
 
                     // Allocate a mesh batch and get a ref to the first element
                     FMeshBatch& MeshBatch = Collector.AllocateMesh();
                     FMeshBatchElement& BatchElement = MeshBatch.Elements[0];
 
-                    BatchElement.IndexBuffer = &Mesh->GetIndexBuffer();
+                    BatchElement.IndexBuffer = &Mesh.GetIndexBuffer();
 
                     //Mesh.bWireframe = bWireframe;
-                    MeshBatch.VertexFactory = Mesh->GetVertexFactory();
+                    MeshBatch.VertexFactory = Mesh.GetVertexFactory();
                     MeshBatch.MaterialRenderProxy = MaterialInterface->GetRenderProxy();;
 
                     //The LocalVertexFactory uses a uniform buffer to pass primitve data like the local to world transform for this frame and for the previous one
@@ -359,9 +421,9 @@ FArianeGeometryProxy::GetDynamicMeshElements( const TArray<const FSceneView*>& V
 
                     //Additional data
                     BatchElement.FirstIndex = 0;
-                    BatchElement.NumPrimitives = Mesh->GetIndexBuffer().GetNumIndices() / 3;
+                    BatchElement.NumPrimitives = Mesh.GetIndexBuffer().GetNumIndices() / 3;
                     BatchElement.MinVertexIndex = 0;
-                    BatchElement.MaxVertexIndex = Mesh->GetVertexBuffers().PositionVertexBuffer.GetNumVertices() - 1;
+                    BatchElement.MaxVertexIndex = Mesh.GetVertexBuffers().PositionVertexBuffer.GetNumVertices() - 1;
                     MeshBatch.ReverseCulling = IsLocalToWorldDeterminantNegative();
                     MeshBatch.Type = PT_TriangleList;
                     MeshBatch.DepthPriorityGroup = SDPG_World;
