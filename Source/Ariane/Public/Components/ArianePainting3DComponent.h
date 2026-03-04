@@ -69,15 +69,21 @@ class ARIANE_API UArianePainting3DComponent : public UMeshComponent
         virtual void TickComponent( float DeltaTime
                                   , ELevelTick TickType
                                   , FActorComponentTickFunction* ThisTickFunction ) override;
-        virtual void PostInitProperties() override;
+        virtual void PostLoad() override;
         virtual FPrimitiveSceneProxy* CreateSceneProxy() override;
 
         #if WITH_EDITOR
         virtual void PostEditChangeProperty( FPropertyChangedEvent& event ) override;
+
+        virtual void PostEditUndo() override;
         #endif
+
+        // debug
+        void PrintPointers();
 
     private:
         virtual FBoxSphereBounds CalcBounds( const FTransform& LocalToWorld ) const override;
+
 
     public:
         FArianePath* AllocPath();
@@ -96,4 +102,6 @@ class ARIANE_API UArianePainting3DComponent : public UMeshComponent
 
         UPROPERTY( BlueprintReadWrite )
         FArianeObjectID RootObjectID;
+
+        TArray<UMaterialInterface*> UsedMaterials;
 };

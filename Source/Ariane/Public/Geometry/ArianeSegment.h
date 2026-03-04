@@ -63,6 +63,9 @@ struct ARIANE_API FArianeSegment
         void UpdateBounds();
         void Update();
 
+        virtual void PostEditUndo();
+        void Init();
+
     public:
         UPROPERTY( EditAnywhere )
         FArianeVertexID Vertices[2];

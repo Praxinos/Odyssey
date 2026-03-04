@@ -26,26 +26,21 @@ class ARIANEEDITOR_API UArianeEditorPathDrawingTool : public UArianeEditorTool
 
         //Mouse events
         virtual bool OnMouseDown( FEditorViewportClient* iViewportClient
-                                , double iViewportX
-                                , double iViewportY
                                 , const FKey& iKey
+                                , const FArianePointerState& State
                                 , bool iRepeat = false ) override;
         virtual void OnMouseHover( FEditorViewportClient* iViewportClient
-                                 , double iViewportX
-                                 , double iViewportY ) override;
+                                 , const FArianePointerState& State ) override;
         virtual bool OnMouseDrag( FEditorViewportClient* iViewportClient
-                                , double iViewportX
-                                , double iViewportY ) override;
+                                , const FArianePointerState& State ) override;
         virtual bool OnMouseUp( FEditorViewportClient* iViewportClient
-                              , double iViewportX
-                              , double iViewportY
-                              , const FKey& iKey ) override;
+                              , const FKey& iKey
+                              , const FArianePointerState& State ) override;
 
     protected:
         virtual void ExtendContextMenu( FMenuBuilder& menu );
         void PlotVertex( FEditorViewportClient* iViewportClient
-                       , double iViewportX
-                       , double iViewportY );
+                       , const FArianePointerState& State );
 
     public:
         UPROPERTY( EditAnywhere

@@ -11,6 +11,9 @@
 #include "RenderResource.h"
 #include "RawIndexBuffer.h"
 #include "StructUtils/InstancedStruct.h"
+
+#include "DynamicMeshBuilder.h"
+
 // Ariane Headers
 #include "ArianeID.h"
 #include "ArianeObject.h"
@@ -42,7 +45,8 @@ class ARIANE_API FArianePathGeometry3D
         void BuildSegmentAsFlat( FArianeSegment* Segment
                                , FVector& InOutPreviousPerpendicularVector );
 
-        void InitVertexFactory();
+        void InitVertexFactory( TArray<FModelVertex>& ModelVertices
+                              , TArray<uint32>& Indices );
         FVector GetTangentVectorAt( FArianeSegment* Segment
                                   , FVector* OptionalPerpendicularVector
                                   , double T
@@ -58,8 +62,23 @@ class ARIANE_API FArianePathGeometry3D
 
 struct ARIANE_API FArianePathInvalidationFlags : FArianeObjectInvalidationFlags
 {
-    protected:
-        virtual uint32 GetSize() const override { return sizeof( FArianePathInvalidationFlags ); };
+    private:
+        typedef FArianeObjectInvalidationFlags Super;
+
+    public:
+        static const uint32 StaticClass() { return 0xb2a965bc; }; // value is crc32 FArianePathInvalidationFlags
+        virtual uint32 GetClass() { return StaticClass(); };
+        virtual bool HasBaseClass( uint32 BaseClass ) const override;
+
+    public:
+        virtual FArianePathInvalidationFlags& AND( const FArianeObjectInvalidationFlags& RHS ) override;
+        virtual FArianePathInvalidationFlags& OR( const FArianeObjectInvalidationFlags& RHS ) override;
+        virtual FArianePathInvalidationFlags& SetAll() override;
+        virtual FArianePathInvalidationFlags& Clear() override;
+        virtual bool HasAny() override;
+
+    public:
+        void ClearOwn( FArianePathInvalidationFlags& Flags );
 
     public:
         FArianePathInvalidationFlags& SetVertexGeometry()  { VertexGeometry  = 1; return *this; };
@@ -105,14 +124,19 @@ struct ARIANE_API FArianePath : public FArianeObject
         TArray<FArianeSegmentID>& GetSegments();
         TArray<FArianeVertexID>& GetVertices();
 
-        UMaterial* GetMaterial();
         bool Update( bool Recurse ) override;
-        FArianePathGeometry3D* GetGeometry3D();
+        FArianePathGeometry3D& GetGeometry3D();
         virtual void UpdateBounds() override;
+        virtual void InvalidatePointerCache() override;
         FArianeVertex* GetVertexByGuid( const FGuid& InGuid );
         FArianeSegment* GetSegmentByGuid( const FGuid& InGuid );
-        virtual void PostLoad();
+        //virtual void PostLoad();
 
+        virtual void PostEditUndo();
+
+    protected:
+        static void InvalidatePointerCache( TArray<FArianeVertexID>& VertexIDArray );
+        static void InvalidatePointerCache( TArray<FArianeSegmentID>& SegmentIDArray );
 
     public:
         UPROPERTY( EditAnywhere )
@@ -128,7 +152,7 @@ struct ARIANE_API FArianePath : public FArianeObject
         TArray<FInstancedStruct> InstancedSegments;
 
     protected:
-        FArianePathGeometry3D* Geometry3D;
-        UMaterial* Material;
+        FArianePathGeometry3D Geometry3D;
+
 
 };

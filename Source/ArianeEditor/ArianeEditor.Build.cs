@@ -74,7 +74,7 @@ public class ArianeEditor : ModuleRules
                 //"OdysseyRendering",
                 "Ariane",
                 "OdysseyStyle",
-                //"OdysseyStylusInput",
+                "OdysseyStylusInput",
                 //"OdysseyTexture",
                 //"OdysseyVector",
                 //"OdysseyWidgets",

@@ -33,6 +33,8 @@ struct ARIANE_API FArianeVertex : public FArianePoint
         void SetNormal( const FVector& InNormal );
         const FVector& GetNormal();
 
+        virtual void PostEditUndo(){};
+
     public:
         UPROPERTY( EditAnywhere )
         FGuid Guid;

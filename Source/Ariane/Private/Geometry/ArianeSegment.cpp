@@ -23,13 +23,7 @@ FArianeSegment::FArianeSegment( FArianeObject* Owner, FArianeVertex* iVertex0, F
     , Vertices { iVertex0, iVertex1 }
     , Length ( 0.0f )
 {
-    FractionCache.Emplace( iVertex0, iVertex1 );
-
-    FractionPointsT.Add( 0.0f );
-    FractionPointsT.Add( 1.0f );
-
-    FractionPoints.Add( iVertex0 );
-    FractionPoints.Add( iVertex1 );
+    Init();
 }
 
 float
@@ -80,8 +74,8 @@ FArianeSegment::GetTangentVectorAt( double T, bool bNormalize )
 void
 FArianeSegment::AllocateCache( uint32 VertexCount, uint32 TriangleCount )
 {
-    ModelVertexCache.SetNum( VertexCount );
-    IndexCache.SetNum( TriangleCount * 3 );
+    ModelVertexCache.SetNumZeroed( VertexCount );
+    IndexCache.SetNumZeroed( TriangleCount * 3 );
 }
 
 const TArray<FArianeSegment::Fraction>&
@@ -214,4 +208,28 @@ FArianeSegment::Update()
     Length = ( GetVertex(1)->GetPosition() - GetVertex(0)->GetPosition() ).Length();
 
     UpdateBounds();
+}
+
+void
+FArianeSegment::Init()
+{
+    FractionCache.Empty();
+    FractionPoints.Empty();
+    FractionPointsT.Empty();
+
+    FractionCache.Emplace( Vertices[0].GetVertex(), Vertices[1].GetVertex() );
+
+    FractionPointsT.Add( 0.0f );
+    FractionPointsT.Add( 1.0f );
+
+    FractionPoints.Add( Vertices[0].GetVertex() );
+    FractionPoints.Add( Vertices[1].GetVertex() );
+}
+
+void
+FArianeSegment::PostEditUndo()
+{
+    Init();
+
+    OwnerID.GetObject()->Invalidate( FArianeObjectInvalidationFlags().SetAltered() );
 }
