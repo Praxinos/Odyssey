@@ -169,6 +169,10 @@ GetSelectedOrAllAnimationBindings( TSharedPtr<ISequencer> iSequencer )
     if( animation_bindings_selected.IsEmpty() )
         animation_bindings_selected.Append( animation_bindings );
 
+    // When the board sequence is empty at the current frame
+    if( animation_bindings.IsEmpty() )
+        return TArray<FGuid>();
+
     BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *iSequencer, focusedSequence, focusedSequenceId, localFrameNumber );
 
     TArray<FGuid> animation_bindings_selected_sorted;
