@@ -220,6 +220,7 @@ FArianePath::AddSegment( FArianeSegment* Segment )
     Segment->Link();
 
     Segments.Add( FArianeSegmentID( Segment ) );
+    InvalidatedSegments.Add( Segment );
 
     Invalidate( FArianePathInvalidationFlags().SetSegmentTopology() );
 }
@@ -231,6 +232,8 @@ FArianePath::RemoveSegment( FArianeSegment* Segment, bool bRemoveFromInstancedSe
     {
         return ( Segment == SegmentID.GetSegment() ) ? true : false;
     } );
+
+    InvalidatedSegments.Remove( Segment );
 
     Segment->Unlink();
 
@@ -249,6 +252,12 @@ TArray<FArianeSegmentID>&
 FArianePath::GetSegments()
 {
     return Segments;
+}
+
+TArray<FArianeSegment*>&
+FArianePath::GetInvalidatedSegments()
+{
+    return InvalidatedSegments;
 }
 
 TArray<FArianeVertexID>&
@@ -271,21 +280,33 @@ FArianePath::UpdateBounds()
 }
 
 void
+FArianePath::InvalidateSegment( FArianeSegment* Segment )
+{
+    InvalidatedSegments.Add( Segment );
+}
+
+void
 FArianePath::PostEditUndo()
 {
+    InvalidatedSegments.Empty();
+
     for( FInstancedStruct& InstancedSegment : InstancedSegments )
     {
         FArianeSegment* Segment = InstancedSegment.GetMutablePtr<FArianeSegment>();
 
-        Segment->PostEditUndo();
+        InvalidateSegment( Segment );
     }
 
+    Invalidate( FArianePathInvalidationFlags().SetAll() );
+
+/** Unimplemented
     for( FInstancedStruct& InstancedVertex : InstancedVertices )
     {
         FArianeVertex* Vertex = InstancedVertex.GetMutablePtr<FArianeVertex>();
 
-        Vertex->PostEditUndo();
+        InvalidateVertex( Vertex );
     }
+*/
 }
 
 bool
@@ -331,16 +352,6 @@ FArianePath::InvalidatePointerCache( TArray<FArianeSegmentID>& SegmentIDArray )
         SegmentID.InvalidatePointerCache();
     }
 }
-
-void
-FArianePath::InvalidatePointerCache()
-{
-    Super::InvalidatePointerCache();
-
-    InvalidatePointerCache( Vertices );
-    InvalidatePointerCache( Segments );
-}
-
 
 FArianePathGeometry3D&
 FArianePath::GetGeometry3D()
@@ -893,13 +904,14 @@ FArianePathGeometry3D::Build()
     FVector PreviousPerpendicularVector = Path->Painting3DComponent->GetUpVector();//FVector::Zero();
 
     // TODO : update  invalidated segments only
-    for( FArianeSegmentID& SegmentID : Path->GetSegments() )
+    for( FArianeSegment* Segment : Path->GetInvalidatedSegments() )
     {
-        FArianeSegment* Segment = SegmentID.GetSegment();
         FArianeVertex* segmentVertices[2] = { Segment->GetVertex(0)
                                             , Segment->GetVertex(1) };
         uint32 SegmentIndexCount = 0;
         FModelVertex storedVertex;
+
+        Segment->Update();
 
         switch( Path->Painting3DComponent->GeometryMode )
         {
@@ -914,8 +926,13 @@ FArianePathGeometry3D::Build()
             default:
             break;
         }
+    }
 
-        Segment->Update();
+    Path->GetInvalidatedSegments().Empty();
+
+    for( FArianeSegmentID& SegmentID : Path->GetSegments() )
+    {
+        FArianeSegment* Segment = SegmentID.GetSegment();
 
         TotalModelVertexCount += Segment->GetModelVertexCache().Num();
         TotalIndexCount += Segment->GetIndexCache().Num();

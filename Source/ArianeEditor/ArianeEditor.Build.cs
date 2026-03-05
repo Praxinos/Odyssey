@@ -96,6 +96,7 @@ public class ArianeEditor : ModuleRules
                 //"OdysseyVector",
                 "Ariane",
                 "StylusInput",
+                "ApplicationCore",
                 //"ULIS",
                 //"ULISLoader"
              }

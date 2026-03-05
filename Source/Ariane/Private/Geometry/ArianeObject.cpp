@@ -205,22 +205,3 @@ FArianeObject::UpdateBounds()
 {
 
 }
-
-void
-FArianeObject::InvalidatePointerCache( TArray<FArianeObjectID>& ObjectIDArray )
-{
-    for( FArianeObjectID& ObjectID : ObjectIDArray )
-    {
-        ObjectID.InvalidatePointerCache();
-    }
-}
-
-void
-FArianeObject::InvalidatePointerCache()
-{
-    InvalidatePointerCache( ChildrenID );
-
-    ParentID.InvalidatePointerCache();
-
-    InvalidatePointerCache( InvalidatedChildrenID );
-}

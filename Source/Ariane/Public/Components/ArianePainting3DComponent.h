@@ -84,7 +84,6 @@ class ARIANE_API UArianePainting3DComponent : public UMeshComponent
     private:
         virtual FBoxSphereBounds CalcBounds( const FTransform& LocalToWorld ) const override;
 
-
     public:
         FArianePath* AllocPath();
         FArianeObject* AllocObject();
@@ -104,4 +103,7 @@ class ARIANE_API UArianePainting3DComponent : public UMeshComponent
         FArianeObjectID RootObjectID;
 
         TArray<UMaterialInterface*> UsedMaterials;
+
+    public:
+        mutable FCriticalSection InstancedObjectsAccessRW;
 };

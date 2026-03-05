@@ -69,7 +69,6 @@ struct ARIANE_API FArianeObject
         FArianeObjectInvalidationFlags& GetInvalidationFlags();
         const FBoxSphereBounds& GetBounds();
         virtual void UpdateBounds();
-        virtual void InvalidatePointerCache();
 
         virtual void PostEditUndo(){};
 
