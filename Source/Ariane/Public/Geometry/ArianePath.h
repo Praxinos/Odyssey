@@ -122,17 +122,18 @@ struct ARIANE_API FArianePath : public FArianeObject
         void RemoveSegment( FArianeSegment* iSegment, bool bRemoveFromInstancedSegments = true );
 
         TArray<FArianeSegmentID>& GetSegments();
+        TArray<FArianeSegment*>& GetInvalidatedSegments();
         TArray<FArianeVertexID>& GetVertices();
 
         bool Update( bool Recurse ) override;
         FArianePathGeometry3D& GetGeometry3D();
         virtual void UpdateBounds() override;
-        virtual void InvalidatePointerCache() override;
         FArianeVertex* GetVertexByGuid( const FGuid& InGuid );
         FArianeSegment* GetSegmentByGuid( const FGuid& InGuid );
         //virtual void PostLoad();
 
         virtual void PostEditUndo();
+        void InvalidateSegment( FArianeSegment* Segment );
 
     protected:
         static void InvalidatePointerCache( TArray<FArianeVertexID>& VertexIDArray );
@@ -154,5 +155,5 @@ struct ARIANE_API FArianePath : public FArianeObject
     protected:
         FArianePathGeometry3D Geometry3D;
 
-
+        TArray<FArianeSegment*> InvalidatedSegments;
 };

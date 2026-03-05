@@ -9,15 +9,18 @@
 #include "ArianeSegment.h"
 #include "ArianeHandleSegment.h"
 
-class FArianeHandleSegment;
+struct FArianeHandleSegment;
 
-class ARIANE_API FArianeSegmentCubic : public FArianeSegment
+struct ARIANE_API FArianeSegmentCubic : public FArianeSegment
 {
     public:
         ~FArianeSegmentCubic();
         FArianeSegmentCubic( FArianeObject* Owner, FArianeVertex* iVertex0, FArianeVertex* iVertex1 );
 
     protected:
+        UPROPERTY( EditAnywhere )
         FArianeHandleSegment Handle0;
+
+        UPROPERTY( EditAnywhere )
         FArianeHandleSegment Handle1;
 };

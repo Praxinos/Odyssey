@@ -186,14 +186,24 @@ FArianeSegment::UpdateBounds()
 
     if( Length )
     {
-        for( FModelVertex ModelVertex : ModelVertexCache )
+        for( int32 i = 0; i < FractionPoints.Num(); i++ )
         {
-            if( ModelVertex.Position.X < Min.X ) Min.X = ModelVertex.Position.X;
-            if( ModelVertex.Position.Y < Min.Y ) Min.Y = ModelVertex.Position.Y;
-            if( ModelVertex.Position.Z < Min.Z ) Min.Z = ModelVertex.Position.Z;
-            if( ModelVertex.Position.X > Max.X ) Max.X = ModelVertex.Position.X;
-            if( ModelVertex.Position.Y > Max.Y ) Max.Y = ModelVertex.Position.Y;
-            if( ModelVertex.Position.Z > Max.Z ) Max.Z = ModelVertex.Position.Z;
+            FArianePoint* FractionPoint = FractionPoints[i];
+            float FractionPointRadius = FractionPointsRadius[i];
+            const FVector FractionPointPosition = FractionPoint->GetPosition();
+            FVector FractionPointMax = FVector( FractionPointPosition.X + FractionPointRadius
+                                              , FractionPointPosition.Y + FractionPointRadius
+                                              , FractionPointPosition.Z + FractionPointRadius );
+            FVector FractionPointMin = FVector( FractionPointPosition.X - FractionPointRadius
+                                              , FractionPointPosition.Y - FractionPointRadius
+                                              , FractionPointPosition.Z - FractionPointRadius );
+
+            if( FractionPointMin.X < Min.X ) Min.X = FractionPointMin.X;
+            if( FractionPointMin.Y < Min.Y ) Min.Y = FractionPointMin.Y;
+            if( FractionPointMin.Z < Min.Z ) Min.Z = FractionPointMin.Z;
+            if( FractionPointMax.X > Max.X ) Max.X = FractionPointMax.X;
+            if( FractionPointMax.Y > Max.Y ) Max.Y = FractionPointMax.Y;
+            if( FractionPointMax.Z > Max.Z ) Max.Z = FractionPointMax.Z;
         }
 
         Bounds.Origin = ( Min + Max ) * 0.5f;
@@ -205,6 +215,8 @@ FArianeSegment::UpdateBounds()
 void
 FArianeSegment::Update()
 {
+    Init();
+
     Length = ( GetVertex(1)->GetPosition() - GetVertex(0)->GetPosition() ).Length();
 
     UpdateBounds();
@@ -222,14 +234,9 @@ FArianeSegment::Init()
     FractionPointsT.Add( 0.0f );
     FractionPointsT.Add( 1.0f );
 
+    FractionPointsRadius.Add( Vertices[0].GetVertex()->GetRadius() );
+    FractionPointsRadius.Add( Vertices[1].GetVertex()->GetRadius() );
+
     FractionPoints.Add( Vertices[0].GetVertex() );
     FractionPoints.Add( Vertices[1].GetVertex() );
-}
-
-void
-FArianeSegment::PostEditUndo()
-{
-    Init();
-
-    OwnerID.GetObject()->Invalidate( FArianeObjectInvalidationFlags().SetAltered() );
 }

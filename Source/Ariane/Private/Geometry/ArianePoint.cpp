@@ -23,3 +23,15 @@ FArianePoint::GetPosition()
 {
     return Position;
 }
+
+void
+FArianePoint::SetPosition( double X, double Y, double Z )
+{
+    Position = FVector( X, Y, Z );
+}
+
+void
+FArianePoint::SetPosition( const FVector& InPosition )
+{
+    Position = InPosition;
+}

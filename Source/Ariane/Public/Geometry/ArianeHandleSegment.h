@@ -5,26 +5,61 @@
 
 // Unreal headers
 #include "CoreMinimal.h"
+// Ariane headers
+#include "ArianePoint.h"
+
+#include "ArianeHandleSegment.generated.h"
 
 struct FArianeObject;
 struct FArianeSegment;
 
-class ARIANE_API FArianeHandleSegment
+USTRUCT(BlueprintType)
+struct ARIANE_API FArianeHandleSegment : public FArianePoint
 {
+    GENERATED_BODY()
+
     public:
         ~FArianeHandleSegment();
-        FArianeHandleSegment( FArianeSegment* iOwnerSegment, double iX, double iY, double iZ );
-        FArianeHandleSegment( FArianeSegment* iOwnerSegment, const FVector& iPosition );
+        FArianeHandleSegment(){};
 
-        void SetPosition( double iX, double iY, double iZ );
-        void SetPosition( const FVector& iPosition );
+        /**
+         * @brief Constructor
+         * @param InOwnerSegment handle's owner segment
+         * @param X the desired handle's X position
+         * @param Y the desired handle's Y position
+         * @param Z the desired handle's Z position
+         */
+        FArianeHandleSegment( FArianeSegment* iOwnerSegment, double X, double Y, double Z );
+
+        /**
+         * @brief Constructor
+         * @param InOwnerSegment handle's owner segment
+         * @param InPosition the desired handle's position
+         */
+        FArianeHandleSegment( FArianeSegment* InOwnerSegment, const FVector& InPosition );
+
+        /**
+         * @brief Set the handle's position
+         * @param X the desired handle's X position
+         * @param Y the desired handle's Y position
+         * @param Z the desired handle's Z position
+         */
+        void SetPosition( double X, double Y, double Z );
+
+        /**
+         * @brief Set the handle's position
+         * @param InPosition the desired handle's position
+         */
+        void SetPosition( const FVector& InPosition );
+
+        /**
+         * @brief Get the handle's position
+         * @return The handle's position
+         */
         const FVector& GetPosition();
 
-        void SetOwner( FArianeObject* iOwner );
+        void SetOwnerSegment( FArianeSegment* InOwnerSegment );
 
     protected:
         FArianeSegment* OwnerSegment;
-        FVector Position;
-
-        TArray<uint32> Indices;
 };
