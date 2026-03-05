@@ -13,6 +13,8 @@
 #include "LevelEditorViewport.h"
 #include "SEditorViewport.h"
 #include "Slate/SceneViewport.h"
+#include "GameFramework/InputDeviceSubsystem.h"
+#include "GenericPlatform/GenericPlatformInputDeviceMapper.h"
 
 /* Gary
 
@@ -64,6 +66,14 @@ FArianeEditorViewportEdMode::FArianeEditorViewportEdMode()
     , bStylusInUse( false )
 {
     GEditor->OnEditorClose().AddRaw(this, &FArianeEditorViewportEdMode::OnEditorClose);
+}
+
+void
+FArianeEditorViewportEdMode::FlushStylusInput()
+{
+    UOdysseyStylusInputSubsystem* inputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
+
+    inputSubsystem->Flush();
 }
 
 void FArianeEditorViewportEdMode::Initialize()
@@ -269,6 +279,8 @@ bool FArianeEditorViewportEdMode::MouseMove( FEditorViewportClient* iViewportCli
                                            , int32 iMouseX
                                            , int32 iMouseY )
 {
+    FlushStylusInput();
+
     return ( bStylusInUse ) ? true : MouseMove_Private( iViewportClient
                                                       , iViewport
                                                       , FArianePointerState( iMouseX, iMouseY ) );

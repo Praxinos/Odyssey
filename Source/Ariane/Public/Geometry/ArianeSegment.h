@@ -62,8 +62,6 @@ struct ARIANE_API FArianeSegment
         const FBoxSphereBounds& GetBounds();
         void UpdateBounds();
         void Update();
-
-        virtual void PostEditUndo();
         void Init();
 
     public:
@@ -78,6 +76,7 @@ struct ARIANE_API FArianeSegment
 
     protected:
         TArray<float> FractionPointsT;
+        TArray<float> FractionPointsRadius;
         TArray<FArianePoint*> FractionPoints;
         TArray<Fraction> FractionCache;
         TArray<FModelVertex> ModelVertexCache;

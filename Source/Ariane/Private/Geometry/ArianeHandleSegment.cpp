@@ -6,14 +6,12 @@
 
 FArianeHandleSegment::~FArianeHandleSegment()
 {
-
 }
 
 FArianeHandleSegment::FArianeHandleSegment( FArianeSegment* iOwnerSegment, double iX, double iY, double iZ )
-    : OwnerSegment ( iOwnerSegment )
-    , Position( iX, iY, iZ )
+    : FArianePoint( iX, iY, iZ )
+    , OwnerSegment ( iOwnerSegment )
 {
-
 }
 
 FArianeHandleSegment::FArianeHandleSegment( FArianeSegment* iOwnerSegment, const FVector& iPosition )
@@ -23,17 +21,25 @@ FArianeHandleSegment::FArianeHandleSegment( FArianeSegment* iOwnerSegment, const
 }
 
 void
-FArianeHandleSegment::SetPosition( double iX, double iY, double iZ )
+FArianeHandleSegment::SetPosition( double InX, double InY, double InZ )
 {
+    Super::SetPosition( InX, InY, InZ );
 }
 
 void
 FArianeHandleSegment::SetPosition( const FVector& iPosition )
 {
+    Super::SetPosition( iPosition );
 }
 
 const FVector&
 FArianeHandleSegment::GetPosition()
 {
     return Position;
+}
+
+void
+FArianeHandleSegment::SetOwnerSegment( FArianeSegment* InOwnerSegment )
+{
+    OwnerSegment = InOwnerSegment;
 }

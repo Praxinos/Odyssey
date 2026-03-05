@@ -60,7 +60,6 @@ UArianePainting3DComponent::PostLoad()
     {
         FArianeObject* Object = InstancedStruct.GetMutablePtr<FArianeObject>();
 
-        Object->InvalidatePointerCache();
         Object->PostEditUndo();
     }
 
@@ -94,7 +93,7 @@ UArianePainting3DComponent::PostEditUndo()
     {
         FArianeObject* Object = InstancedStruct.GetMutablePtr<FArianeObject>();
 
-        Object->InvalidatePointerCache();
+        //Object->InvalidatePointerCache();
         Object->PostEditUndo();
     }
 
@@ -197,9 +196,13 @@ UArianePainting3DComponent::CalcBounds(const FTransform& LocalToWorld) const
 FArianeObject*
 UArianePainting3DComponent::AllocObject()
 {
+    InstancedObjectsAccessRW.Lock();
     InstancedObjects.Add( FInstancedStruct::Make<FArianeObject>( this ) );
+    InstancedObjectsAccessRW.Unlock();
 
     FArianeObject* NewObject = InstancedObjects.Last().GetMutablePtr<FArianeObject>();
+
+
 
     return NewObject;
 }
@@ -207,9 +210,12 @@ UArianePainting3DComponent::AllocObject()
 FArianePath*
 UArianePainting3DComponent::AllocPath()
 {
+    InstancedObjectsAccessRW.Lock();
     InstancedObjects.Add( FInstancedStruct::Make<FArianePath>( this ) );
+    InstancedObjectsAccessRW.Unlock();
 
     FArianePath* NewPath = InstancedObjects.Last().GetMutablePtr<FArianePath>();
+
 
     //RootObjectID.GetObject()->AppendChild( NewPath );
 
@@ -315,6 +321,7 @@ FArianeGeometryProxy::DrawStaticElements( FStaticPrimitiveDrawInterface * PDI )
                 MeshBatch.DepthPriorityGroup = SDPG_World;
                 MeshBatch.bCanApplyViewModeOverrides = false;
                 MeshBatch.bDisableBackfaceCulling = true; // draw both sides
+                MeshBatch.CastShadow = false;
 
                 // Else the virtual texture check fails in RuntimeVirtualTextureRender.cpp:338
                 // and the static mesh isn't rendered at all
@@ -327,6 +334,7 @@ FArianeGeometryProxy::DrawStaticElements( FStaticPrimitiveDrawInterface * PDI )
                 MeshBatch.bUseForMaterial = 0;
                 MeshBatch.bDitheredLODTransition = 0;
                 MeshBatch.bRenderToVirtualTexture = 1;
+
 
                 PDI->DrawMesh(MeshBatch, FLT_MAX);
             }
@@ -341,6 +349,8 @@ FArianeGeometryProxy::GetDynamicMeshElements( const TArray<const FSceneView*>& V
                                             , FMeshElementCollector& Collector) const
 {
     Painting3DComponent->GetSceneProxy()->SetUsedMaterialForVerification( Painting3DComponent->UsedMaterials );
+
+    Painting3DComponent->InstancedObjectsAccessRW.Lock();
 
     for( int32 ViewIndex = 0; ViewIndex < Views.Num(); ViewIndex++ )
     {
@@ -429,6 +439,7 @@ FArianeGeometryProxy::GetDynamicMeshElements( const TArray<const FSceneView*>& V
                     MeshBatch.DepthPriorityGroup = SDPG_World;
                     MeshBatch.bCanApplyViewModeOverrides = false;
                     MeshBatch.bDisableBackfaceCulling = true; // draw both sides
+                    MeshBatch.CastShadow = false;
 
                     //Add the batch to the collector
                     Collector.AddMesh( ViewIndex, MeshBatch );
@@ -436,6 +447,8 @@ FArianeGeometryProxy::GetDynamicMeshElements( const TArray<const FSceneView*>& V
             }
         }
     }
+
+    Painting3DComponent->InstancedObjectsAccessRW.Unlock();
 }
 
 FPrimitiveViewRelevance

@@ -88,6 +88,7 @@ class ARIANEEDITOR_API FArianeEditorViewportEdMode : public FEdMode, public ISty
                                 , const FArianePointerState& State );
 
         FArianePointerState StylusStateToPointerState( const FStylusState& StylusState );
+        void FlushStylusInput();
 
     private:
         void OnEditorClose();
