@@ -500,6 +500,14 @@ void FOdysseyPainterEditorViewportTab::OnTabClosed(TSharedRef<SDockTab> iDockTab
     FOdysseyEditorTab::OnTabClosed(iDockTab);
 }
 
+void FOdysseyPainterEditorViewportTab::CloseTab()
+{
+    if (mViewportClient)
+        mViewportClient->UnregisterWindow();
+
+    FOdysseyEditorTab::CloseTab();
+}
+
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------- Public Getters
 

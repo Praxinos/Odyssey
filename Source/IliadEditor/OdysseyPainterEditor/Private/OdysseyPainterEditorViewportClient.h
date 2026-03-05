@@ -19,7 +19,6 @@
 #include <ULIS>
 #include "StylusInputHandler.h"
 
-class UOdysseyStylusInputSubsystem;
 class FCanvas;
 class UTexture2D;
 
@@ -35,7 +34,6 @@ class FOdysseyHUDElement;
 class FOdysseyPainterEditorViewportClient
     : public FViewportClient
     , public FGCObject
-    , public IStylusMessageHandler
     , public FOdysseyStylusInputHandler
 {
 public:
@@ -78,12 +76,10 @@ public:
     virtual EMouseCursor::Type                  GetCursor( FViewport* iViewport, int32 iX, int32 iY ) override;
     virtual TOptional< TSharedRef< SWidget > >  MapCursor( FViewport* iViewport, const FCursorReply& iCursorReply ) override;
 
-    virtual void OnStylusStateChanged( const TWeakPtr<SWidget> iWidget, const TArray<FStylusState>& iStates, int32 iIndex ) override;
     virtual void OnPacket(const UE::StylusInput::FStylusInputPacket& Packet, UE::StylusInput::IStylusInputInstance* Instance) override;
 
     void StartStylusInputRecord();
     void StopStylusInputRecord();
-    FOdysseyPoint StylusStateToPoint(const FStylusState& iState);
     FOdysseyPoint StylusPacketToPoint(const UE::StylusInput::FStylusInputPacket& iPacket);
 
     void ReadStylusInput();
@@ -134,7 +130,6 @@ private:
 
 private:
     // Private Data Members
-    UOdysseyStylusInputSubsystem*           InputSubsystem;
     FOdysseyPainterEditor*                    mOdysseyPainterEditor;
     TWeakPtr<SOdysseyViewport>              mOdysseyPainterEditorViewportPtr;
     FOdysseyMeshSelector*                   mMeshSelector;
@@ -173,7 +168,6 @@ private:
     FVector2D                               mHUDMouseDownReference;
 
 
-    TArray<FStylusState> mStylusStates;
     bool mIsRecordingStylus = false;
     int mLastStylusEventIndex = 0;
     bool mStylusIsDown = false;

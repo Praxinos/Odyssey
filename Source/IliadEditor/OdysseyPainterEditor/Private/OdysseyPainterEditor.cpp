@@ -824,6 +824,36 @@ FOdysseyPainterEditor::ExtendToolbarToolParameters(UToolMenu* iToolMenu)
     }
 }
 
+void
+FOdysseyPainterEditor::OnClose()
+{
+    for(TSharedPtr<FOdysseyEditorTab> tab : mTabs )
+        tab->CloseTab();
+
+    //Here is where we should clean everything prior to editor destruction
+    mTabs.Empty(); //ensure all tabs are destroyed, because some need the editor on destruction
+
+    //BE CAREFUL: OnClose can be called twice when quiting Unreal Engine
+    // due to a bug in Unreal code
+
+    SetSource(nullptr);
+
+    for (TSharedPtr<FOdysseyPainterEditorExtension> extension : mExtensions)
+        extension->Finalize();
+
+    mGUI->Finalize();
+
+    UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
+    FSlateApplication::Get().UnregisterInputPreProcessor(mAnimationFlipSystem);
+
+    delete mHUDSystem;
+    mHUDSystem = nullptr;
+    mRecentTools = nullptr;
+
+    FOdysseyPainterEditorModule& painterEditorModule = FModuleManager::GetModuleChecked<FOdysseyPainterEditorModule>("OdysseyPainterEditor");
+    painterEditorModule.RemoveOpenedEditor(this);
+}
+
 FSimpleMulticastDelegate&
 FOdysseyPainterEditor::OnCurrentMainToolChanged()
 {

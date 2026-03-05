@@ -50,8 +50,9 @@ IOdysseyViewportDrawingEditorAdapter::Initialize()
 
     editor->OnCurrentToolChanged().AddRaw(this, &IOdysseyViewportDrawingEditorAdapter::OnCurrentToolChanged);
 
+    /*
     UOdysseyStylusInputSubsystem* inputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
-    inputSubsystem->AddMessageHandler(*this);
+    inputSubsystem->AddMessageHandler(*this);*/
 
     SetTool(editor->GetCurrentTool());
 
@@ -69,8 +70,9 @@ IOdysseyViewportDrawingEditorAdapter::Finalize()
     if (editor)
         editor->OnCurrentToolChanged().RemoveAll(this);
 
+    /*
     UOdysseyStylusInputSubsystem* inputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
-    inputSubsystem->RemoveMessageHandler(*this);
+    inputSubsystem->RemoveMessageHandler(*this);*/
 }
 
 void
@@ -790,8 +792,9 @@ IOdysseyViewportDrawingEditorAdapter::StartStylusInputRecord(const FKey& iMouseB
     //Down
     ReadStylusInput();
 
+    /*
     UOdysseyStylusInputSubsystem* inputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
-    inputSubsystem->Flush(); //Get late stylus events
+    inputSubsystem->Flush(); //Get late stylus events*/
 }
 
 void
@@ -803,8 +806,9 @@ IOdysseyViewportDrawingEditorAdapter::StopStylusInputRecord()
     ReadStylusInput();
     mStylusButton = FKey();
 
+    /*
     UOdysseyStylusInputSubsystem* inputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
-    inputSubsystem->Flush(); //Get late stylus events
+    inputSubsystem->Flush(); //Get late stylus events*/
 
     //UP
     mIsRecordingStylus = false;

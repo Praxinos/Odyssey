@@ -45,8 +45,8 @@ bool FOdysseyStylusInputHandler::RegisterWindow(const TSharedRef<SWidget>& Widge
 
     UE_LOG(LogTemp, Display, TEXT("Preregister"));
 
-    IStylusInputInstance* InputInstance = CreateInstance(*Window, "Wintab", false);
-    //IStylusInputInstance* InputInstance = CreateInstance(*Window);
+    //IStylusInputInstance* InputInstance = CreateInstance(*Window, "Wintab", false);
+    IStylusInputInstance* InputInstance = CreateInstance(*Window);
 
     UE_LOG(LogTemp, Display, TEXT("PreInstance"))
 
@@ -86,18 +86,6 @@ FString FOdysseyStylusInputHandler::GetName()
     return "OdysseyStylusInputHandler";
 }
 
-/*
-void FOdysseyStylusInputHandler::OnPacket(const FStylusInputPacket& Packet, IStylusInputInstance* Instance)
-{
-    PacketQueue.Enqueue(Packet);
-    PrintPacket(Packet);
-    if (Packet.Type != EPacketType::Invalid &&
-        Packet.Type != EPacketType::AboveDigitizer)
-    {
-        ProcessPacket(Packet, Instance);
-    }
-}*/
-
 void FOdysseyStylusInputHandler::PrintPacket(const UE::StylusInput::FStylusInputPacket& Packet)
 {
     UE_LOG(LogTemp, Display, TEXT("-------------------"))
@@ -109,6 +97,7 @@ void FOdysseyStylusInputHandler::PrintPacket(const UE::StylusInput::FStylusInput
     UE_LOG(LogTemp, Display, TEXT("Y %lf"), Packet.Y)
     UE_LOG(LogTemp, Display, TEXT("Z %lf"), Packet.Z)
     UE_LOG(LogTemp, Display, TEXT("NormalPressure %lf"), Packet.NormalPressure)
+    UE_LOG(LogTemp, Display, TEXT("TimerTick %d"), Packet.TimerTick)
 }
 
 void FOdysseyStylusInputHandler::ProcessPacket(const FStylusInputPacket& Packet, IStylusInputInstance* Instance)

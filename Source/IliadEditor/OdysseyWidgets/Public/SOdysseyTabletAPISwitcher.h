@@ -4,7 +4,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "OdysseyStylusInputDriver.h"
 
 /**
  * About screen contents widget
@@ -21,6 +20,7 @@ public:
     /**
      * Constructs the about screen widgets
      */
+     /*
     void Construct( const FArguments& iArgs );
 
     static void Open();
@@ -34,5 +34,5 @@ private:
 
 private:
     TSharedPtr<EOdysseyStylusInputDriver>       mTabletAPISelected;
-    TArray<TSharedPtr<EOdysseyStylusInputDriver>> mOptions;
+    TArray<TSharedPtr<EOdysseyStylusInputDriver>> mOptions;*/
 };

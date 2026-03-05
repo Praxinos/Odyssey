@@ -31,7 +31,6 @@ public:
 
     // IStylusInputEventHandler implementation
     virtual FString GetName() override;
-    //virtual void OnPacket(const UE::StylusInput::FStylusInputPacket& Packet, UE::StylusInput::IStylusInputInstance* Instance) override;
 
     void PrintPacket(const UE::StylusInput::FStylusInputPacket& Packet);
 

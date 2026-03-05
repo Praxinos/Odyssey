@@ -3,13 +3,12 @@
 
 #include "SOdysseyTabletAPISwitcher.h"
 
-#include "OdysseyStylusInputSettings.h"
 #include "Dialog/SCustomDialog.h"
 
 #define LOCTEXT_NAMESPACE "Widgets"
 
 //---
-
+/*
 void
 SOdysseyTabletAPISwitcher::Open()
 {
@@ -31,7 +30,7 @@ SOdysseyTabletAPISwitcher::Open()
             apiSwitcher.ToSharedRef()
         ];
 
-    if( customDialog->ShowModal() == 0/*OK*/ )
+    if( customDialog->ShowModal() == 0OK )
     {
         settings->StylusInputDriver = *(apiSwitcher->TabletAPISelected().Get());
         settings->RefreshStylusInputDriver();
@@ -101,5 +100,5 @@ SOdysseyTabletAPISwitcher::GetComboBoxTabletAPISelectedAsText() const
 {
     return UOdysseyStylusInputSettings::GetFormatText( mTabletAPISelected );
 }
-
+*/
 #undef LOCTEXT_NAMESPACE

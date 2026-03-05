@@ -115,6 +115,10 @@ void FOdysseyEditorTab::OnTabClosed(TSharedRef<SDockTab> iDockTab)
 {
 }
 
+void FOdysseyEditorTab::CloseTab()
+{
+}
+
 void
 FOdysseyEditorTab::Register( TSharedRef<FWorkspaceItem>& iWorkspaceMenuCategoryRef)
 {
