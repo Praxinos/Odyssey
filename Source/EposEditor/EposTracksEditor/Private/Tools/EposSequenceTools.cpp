@@ -202,7 +202,7 @@ ShotSequenceTools::AddSelectedActorToHistory( ISequencer* iSequencer, AActor* iA
                 FBindingAndActorClass entry = { binding, subsection->GetSequenceID(), iActor->GetClass() };
                 mDirectBindingsSelectedHistory.RemoveAll( [entry]( const FBindingAndActorClass& iEntry )
                                                           {
-                                                              return iEntry.Guid == entry.Guid;
+                                                              return iEntry.Guid == entry.Guid && iEntry.SequenceId == entry.SequenceId;
                                                           } );
                 mDirectBindingsSelectedHistory.Add( entry );
             }
@@ -216,7 +216,7 @@ ShotSequenceTools::AddSelectedActorToHistory( ISequencer* iSequencer, AActor* iA
             FBindingAndActorClass entry = { binding, sequenceId, iActor->GetClass() };
             mDirectBindingsSelectedHistory.RemoveAll( [entry]( const FBindingAndActorClass& iEntry )
                                                       {
-                                                          return iEntry.Guid == entry.Guid;
+                                                          return iEntry.Guid == entry.Guid && iEntry.SequenceId == entry.SequenceId;
                                                       } );
             mDirectBindingsSelectedHistory.Add( entry );
         }
@@ -282,7 +282,7 @@ ShotSequenceTools::GuessActorToSelect( ISequencer* iSequencer, UMovieSceneSequen
     // - actors in the cache are all invalid
     mDirectBindingsSelectedHistory.RemoveAll( []( FBindingAndActorClass iEntry )
                                               {
-                                                  return !iEntry.Guid.IsValid();
+                                                  return !iEntry.Guid.IsValid() || iEntry.SequenceId == MovieSceneSequenceID::Invalid;
                                               } );
 
     // Auto-select camera if it's the last actor type directly selected by the user
@@ -347,9 +347,9 @@ ShotSequenceTools::GuessActorToSelect( ISequencer* iSequencer, UMovieSceneSequen
             int32 max_preferred_index = INDEX_NONE;
             for( FGuid binding : ordered_bindings )
             {
-                int32 current_index = mDirectBindingsSelectedHistory.FindLastByPredicate( [binding]( const FBindingAndActorClass& iEntry )
+                int32 current_index = mDirectBindingsSelectedHistory.FindLastByPredicate( [binding, sequenceId]( const FBindingAndActorClass& iEntry )
                                                                                           {
-                                                                                              return iEntry.Guid == binding;
+                                                                                              return iEntry.Guid == binding && iEntry.SequenceId == sequenceId;
                                                                                           } );
                 if( current_index != INDEX_NONE )
                 {
