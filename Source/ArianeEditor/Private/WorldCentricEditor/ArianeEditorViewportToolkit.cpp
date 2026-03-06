@@ -417,9 +417,7 @@ FArianeEditorViewportToolkit::GetBaseToolkitName() const
 void
 FArianeEditorViewportToolkit::InvokeUI()
 {
-    FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>(TEXT("LevelEditor"));
-
-    mEditor.RegisterTabSpawners( LevelEditorModule.GetLevelEditorTabManager()->AsShared() );
+    mEditor.RegisterTabSpawners();
 
 /* Gary
     if (GEditor)
@@ -452,7 +450,7 @@ FArianeEditorViewportToolkit::ShutdownUI()
         GEditor->OnEditorClose().RemoveAll(this);
 
     mEditor.CloseAllTabs();
-    mEditor.UnregisterTabSpawners(LevelEditorModule.GetLevelEditorTabManager()->AsShared());
+    mEditor.UnregisterTabSpawners();
 
 /* Gary
     LevelEditorModule.GetMenuExtensibilityManager()->RemoveExtender(mLevelEditorMenuExtender);

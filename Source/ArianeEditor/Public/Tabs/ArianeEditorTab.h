@@ -3,11 +3,13 @@
 
 #pragma once
 
-
+// Unreal
+#include "CoreMinimal.h"
 #include "Textures/SlateIcon.h"
 
 class FBaseToolkit;
 class FTabManager;
+class SWidget;
 
 class ARIANEEDITOR_API FArianeEditorTab :
     public TSharedFromThis<FArianeEditorTab>
@@ -71,19 +73,18 @@ public:
 
     virtual void ExtendMenu( TSharedRef<FExtender> Extender );
 
-    void SetTabManager(TSharedPtr< FTabManager > TabManager);
-    TSharedPtr< FTabManager > GetTabManager() const;
     void Register(TSharedRef<FWorkspaceItem>& iWorkspaceMenuCategoryRef);
     void Unregister();
 
-public:
-    const FText&                        DisplayName() const;
-    const FSlateIcon&                   Icon() const;
-    virtual const TSharedPtr<SWidget>&  Widget() const;
+    /** Get the tab's widget */
+    virtual const TSharedPtr<SWidget>&  GetWidget() const;
 
 private:
-    FText mDisplayName;
-    FSlateIcon mIcon;
-    TSharedPtr<SWidget> mWidget;
-    TSharedPtr<FTabManager> mTabManager;
+    static TSharedPtr< FTabManager > GetTabManager();
+
+
+private:
+    FText DisplayName;
+    FSlateIcon Icon;
+    TSharedPtr<SWidget> Widget;
 };

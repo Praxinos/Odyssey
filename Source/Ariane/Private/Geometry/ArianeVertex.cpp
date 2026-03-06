@@ -4,6 +4,7 @@
 // Ariane headers
 #include "ArianeVertex.h"
 #include "ArianePath.h"
+#include "ArianeSegment.h"
 #include "ArianePainting3DComponent.h"
 
 FArianeVertex::~FArianeVertex()
@@ -35,6 +36,21 @@ FArianeObject*
 FArianeVertex::GetOwner()
 {
     return OwnerID.GetObject();
+}
+
+void
+FArianeVertex::InvalidateSegments()
+{
+    for( FArianeSegment* Segment : Segments )
+    {
+        Segment->Invalidate();
+    }
+}
+
+void
+FArianeVertex::Invalidate()
+{
+    InvalidateSegments();
 }
 
 void

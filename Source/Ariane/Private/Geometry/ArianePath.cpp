@@ -211,6 +211,8 @@ FArianePath::AddVertex( FArianeVertex* Vertex )
 {
     Vertices.Add( FArianeVertexID( Vertex ) );
 
+    Vertex->Invalidate();
+
     Invalidate( FArianePathInvalidationFlags().SetVertexTopology() );
 }
 
@@ -219,8 +221,12 @@ FArianePath::AddSegment( FArianeSegment* Segment )
 {
     Segment->Link();
 
+    Segment->GetVertex(0)->Invalidate(); // will invalidate all connected segments for smoothing
+    Segment->GetVertex(1)->Invalidate(); // will invalidate all connected segments for smoothing
+
     Segments.Add( FArianeSegmentID( Segment ) );
-    InvalidatedSegments.Add( Segment );
+
+    Segment->Invalidate();
 
     Invalidate( FArianePathInvalidationFlags().SetSegmentTopology() );
 }
@@ -280,6 +286,12 @@ FArianePath::UpdateBounds()
 }
 
 void
+FArianePath::InvalidateVertex( FArianeVertex* Vertex )
+{
+    InvalidatedVertices.Add( Vertex );
+}
+
+void
 FArianePath::InvalidateSegment( FArianeSegment* Segment )
 {
     InvalidatedSegments.Add( Segment );
@@ -288,25 +300,27 @@ FArianePath::InvalidateSegment( FArianeSegment* Segment )
 void
 FArianePath::PostEditUndo()
 {
-    InvalidatedSegments.Empty();
-
     for( FInstancedStruct& InstancedSegment : InstancedSegments )
     {
         FArianeSegment* Segment = InstancedSegment.GetMutablePtr<FArianeSegment>();
 
-        InvalidateSegment( Segment );
+        Segment->PostEditUndo();
+        Segment->Link();
     }
 
-    Invalidate( FArianePathInvalidationFlags().SetAll() );
+    Invalidate( FArianePathInvalidationFlags().SetSegmentGeometry() );
+}
 
-/** Unimplemented
-    for( FInstancedStruct& InstancedVertex : InstancedVertices )
+void
+FArianePath::PostLoad()
+{
+    for( FInstancedStruct& InstancedSegment : InstancedSegments )
     {
-        FArianeVertex* Vertex = InstancedVertex.GetMutablePtr<FArianeVertex>();
+        FArianeSegment* Segment = InstancedSegment.GetMutablePtr<FArianeSegment>();
 
-        InvalidateVertex( Vertex );
+        Segment->PostLoad();
+        Segment->Link();
     }
-*/
 }
 
 bool
@@ -334,22 +348,32 @@ FArianePath::Update( bool Recurse )
     return true; // update succeeded
 }
 
+void
+FArianePath::InvalidateAllSegments()
+{
+    for( FArianeSegmentID& SegmentID : Segments )
+    {
+        InvalidatedSegments.Add( SegmentID.GetSegment() );
+    }
+
+    Invalidate( FArianePathInvalidationFlags().SetSegmentGeometry() );
+}
 
 void
-FArianePath::InvalidatePointerCache( TArray<FArianeVertexID>& VertexIDArray )
+FArianePath::InvalidateCache( TArray<FArianeVertexID>& VertexIDArray )
 {
     for( FArianeVertexID& VertexID : VertexIDArray )
     {
-        VertexID.InvalidatePointerCache();
+        VertexID.InvalidateCache();
     }
 }
 
 void
-FArianePath::InvalidatePointerCache( TArray<FArianeSegmentID>& SegmentIDArray )
+FArianePath::InvalidateCache( TArray<FArianeSegmentID>& SegmentIDArray )
 {
     for( FArianeSegmentID& SegmentID : SegmentIDArray )
     {
-        SegmentID.InvalidatePointerCache();
+        SegmentID.InvalidateCache();
     }
 }
 
