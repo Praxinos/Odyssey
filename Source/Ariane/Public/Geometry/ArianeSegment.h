@@ -38,7 +38,8 @@ struct ARIANE_API FArianeSegment
 
         void SetOwner( FArianeObject* iOwner );
         FArianeObject* GetOwner();
-
+        virtual void PostLoad();
+        virtual void PostEditUndo();
         void Link();
         void Unlink();
 
@@ -63,6 +64,7 @@ struct ARIANE_API FArianeSegment
         void UpdateBounds();
         void Update();
         void Init();
+        void Invalidate();
 
     public:
         UPROPERTY( EditAnywhere )

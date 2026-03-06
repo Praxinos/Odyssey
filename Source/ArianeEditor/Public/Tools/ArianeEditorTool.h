@@ -47,14 +47,23 @@ class ARIANEEDITOR_API UArianeEditorTool : public UObject
         virtual bool OnMouseClick( FEditorViewportClient* iViewportClient
                                  , const FKey& iKey
                                  , const FArianePointerState& State );
-        virtual void Tick( float iDeltaTime );
-        virtual FText GetTooltip() const;
-        virtual void Activate();
-        virtual bool IsActivable() const;
-        virtual bool IsActivated() const;
-        virtual void Inactivate();
 
+        virtual void Tick( float iDeltaTime );
+
+        /** Get the tool's tooltip */
+        virtual FText GetTooltip() const;
+        /** Is the tool activable ? */
+        virtual bool IsActivable() const;
+        /** Is the tool activated ? */
+        virtual bool IsActivated() const;
+
+        /** Callback for when the tool is activated */
+        virtual void Activate();
+        /** Callback for when the tool is inactivated */
+        virtual void Inactivate();
+        /** Callback for when the tool is loaded */
         virtual void Load();
+        /** Callback for when the tool is unloaded */
         virtual void Unload();
 
     protected:
@@ -125,8 +134,8 @@ class ARIANEEDITOR_API UArianeEditorTool : public UObject
         TSharedPtr<FOdysseyHUDElement>      mHUD;
 
 */
-        FArianeEditor* mEditor;
-        TSharedPtr<FUICommandList> mCommandList;
+        FArianeEditor* Editor;
+        TSharedPtr<FUICommandList> CommandList;
         bool bHasContextMenu;
 
     public:

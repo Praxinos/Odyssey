@@ -21,15 +21,14 @@ class ARIANEEDITOR_API FArianeEditorViewportToolkit
         FArianeEditorViewportToolkit( FArianeEditorViewportEdMode* iViewportDrawingEditorEdMode );
 
         virtual void Init( const TSharedPtr<IToolkitHost>& iInitToolkitHost ) override;
-    /* Gary
-        TSharedPtr<FArianeEditor> GetEditor() const;
-    */
+
         virtual TSharedPtr<SWidget> GetInlineContent() const override;
         virtual FEdMode* GetEditorMode() const override;
 
         /** IToolkit interface */
         virtual FName GetToolkitFName() const override;
         virtual FText GetBaseToolkitName() const override;
+
     /* Gary
         void OnAddEditedObject(UObject* iObject);
         void OnRemoveEditedObject(UObject* iObject);

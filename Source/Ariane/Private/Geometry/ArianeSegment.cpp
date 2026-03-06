@@ -5,6 +5,7 @@
 #include "ArianeSegment.h"
 #include "ArianeVertex.h"
 #include "ArianeObject.h"
+#include "ArianePath.h"
 
 FArianeSegment::~FArianeSegment()
 {
@@ -22,6 +23,18 @@ FArianeSegment::FArianeSegment( FArianeObject* Owner, FArianeVertex* iVertex0, F
     , OwnerID( Owner )
     , Vertices { iVertex0, iVertex1 }
     , Length ( 0.0f )
+{
+    Init();
+}
+
+void
+FArianeSegment::PostLoad()
+{
+    Init();
+}
+
+void
+FArianeSegment::PostEditUndo()
 {
     Init();
 }
@@ -215,11 +228,20 @@ FArianeSegment::UpdateBounds()
 void
 FArianeSegment::Update()
 {
-    Init();
-
     Length = ( GetVertex(1)->GetPosition() - GetVertex(0)->GetPosition() ).Length();
 
     UpdateBounds();
+}
+
+void
+FArianeSegment::Invalidate()
+{
+    if( OwnerID.GetObject()->GetClass() == FArianePath::StaticClass() )
+    {
+        FArianePath* Path = static_cast<FArianePath*>( OwnerID.GetObject() );
+
+        Path->InvalidateSegment( this );
+    }
 }
 
 void
@@ -239,4 +261,6 @@ FArianeSegment::Init()
 
     FractionPoints.Add( Vertices[0].GetVertex() );
     FractionPoints.Add( Vertices[1].GetVertex() );
+
+    Invalidate();
 }

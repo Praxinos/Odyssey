@@ -12,22 +12,23 @@
 #include "Toolkits/BaseToolkit.h"
 #include "UObject/Object.h"
 #include "EdMode.h"
+#include "LevelEditor.h"
 
 FArianeEditor::~FArianeEditor()
 {
 }
 
 FArianeEditor::FArianeEditor( FArianeEditorViewportToolkit* iToolkit )
-    : mToolkit( iToolkit )
-    , mName("ArianeEditor")
-    , mCurrentTool ( nullptr )
+    : Toolkit( iToolkit )
+    , Name("ArianeEditor")
+    , CurrentTool ( nullptr )
 {
 }
 
 FArianeEditorViewportToolkit*
 FArianeEditor::GetToolkit()
 {
-    return mToolkit;
+    return Toolkit;
 }
 
 // Tools ------------------------------
@@ -35,25 +36,25 @@ FArianeEditor::GetToolkit()
 const TArray<UArianeEditorTool*>&
 FArianeEditor::GetTools()
 {
-    return mTools;
+    return Tools;
 }
 
 UArianeEditorTool*
 FArianeEditor::GetCurrentTool()
 {
-    return mCurrentTool;
+    return CurrentTool;
 }
 
 void
 FArianeEditor::RemoveTool( UArianeEditorTool* iTool )
 {
-    mTools.Remove( iTool );
+    Tools.Remove( iTool );
 }
 
 void
 FArianeEditor::AddTool( UArianeEditorTool* iTool )
 {
-    mTools.Add( iTool );
+    Tools.Add( iTool );
 }
 
 void
@@ -61,12 +62,12 @@ FArianeEditor::SetCurrentTool( UArianeEditorTool* iTool )
 {
     OnPreChangeCurrentTool.Broadcast();
 
-    if( mCurrentTool )
+    if( CurrentTool )
     {
-        mCurrentTool->Unload();
+        CurrentTool->Unload();
     }
 
-    mCurrentTool = iTool;
+    CurrentTool = iTool;
 
     OnPostChangeCurrentTool.Broadcast();
 }
@@ -76,7 +77,7 @@ FArianeEditor::InitTools()
 {
     AddTool( NewObject<UArianeEditorPathDrawingTool>() );
 
-    for( UArianeEditorTool* tool : mTools )
+    for( UArianeEditorTool* tool : Tools )
     {
         tool->SetEditor( this );
     }
@@ -87,13 +88,13 @@ FArianeEditor::InitTools()
 void
 FArianeEditor::RemoveTab( TSharedPtr<FArianeEditorTab> iTab )
 {
-    mTabs.Remove( iTab );
+    Tabs.Remove( iTab );
 }
 
 void
 FArianeEditor::AddTab( TSharedPtr<FArianeEditorTab> iTab)
 {
-    mTabs.Add( iTab );
+    Tabs.Add( iTab );
 }
 
 void
@@ -101,7 +102,7 @@ FArianeEditor::InitTabs()
 {
     AddTab( MakeShared<FArianeEditorToolTab>(this) );
 
-    for (const TSharedPtr<FArianeEditorTab> tab : mTabs)
+    for (const TSharedPtr<FArianeEditorTab> tab : Tabs)
     {
         tab->Init();
     }
@@ -110,13 +111,13 @@ FArianeEditor::InitTabs()
 const TArray<TSharedPtr<FArianeEditorTab>>&
 FArianeEditor::GetTabs() const
 {
-    return mTabs;
+    return Tabs;
 }
 
 void
 FArianeEditor::CloseAllTabs()
 {
-    for (TSharedPtr<FArianeEditorTab> tab : mTabs)
+    for (TSharedPtr<FArianeEditorTab> tab : Tabs)
     {
         if ( tab->IsOpen() )
         {
@@ -126,24 +127,25 @@ FArianeEditor::CloseAllTabs()
 }
 
 void
-FArianeEditor::RegisterTabSpawners( const TSharedRef<FTabManager>& iTabManager )
+FArianeEditor::RegisterTabSpawners()
 {
-    TSharedPtr<FWorkspaceItem> workspaceMenuCategory = iTabManager->AddLocalWorkspaceMenuCategory(FText::FromName( mName ));
+    FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>(TEXT("LevelEditor"));
+    TSharedPtr<FTabManager> TabManager = LevelEditorModule.GetLevelEditorTabManager()->AsShared();
+    TSharedPtr<FWorkspaceItem> workspaceMenuCategory = TabManager->AddLocalWorkspaceMenuCategory(FText::FromName( Name ));
     TSharedRef<FWorkspaceItem> workspaceMenuCategoryRef = workspaceMenuCategory.ToSharedRef();
 
-    for ( TSharedPtr<FArianeEditorTab> tab : mTabs )
+    for ( TSharedPtr<FArianeEditorTab> tab : Tabs )
     {
-        tab->SetTabManager( iTabManager );
         tab->Register( workspaceMenuCategoryRef );
     }
 }
 
 void
-FArianeEditor::UnregisterTabSpawners( const TSharedRef< FTabManager >& iTabManager )
+FArianeEditor::UnregisterTabSpawners()
 {
-    for ( TSharedPtr<FArianeEditorTab> tab : mTabs )
+    for ( TSharedPtr<FArianeEditorTab> tab : Tabs )
     {
-        tab->Unregister( );
+        tab->Unregister();
     }
 }
 
@@ -152,7 +154,7 @@ FArianeEditor::UnregisterTabSpawners( const TSharedRef< FTabManager >& iTabManag
 const FName&
 FArianeEditor::GetId() const
 {
-    return mName;
+    return Name;
 }
 
 void
@@ -165,7 +167,7 @@ FArianeEditor::Init()
 UWorld*
 FArianeEditor::GetWorld()
 {
-    return mToolkit->GetEditorMode()->GetWorld();
+    return Toolkit->GetEditorMode()->GetWorld();
 }
 
 void
@@ -180,8 +182,6 @@ FArianeEditor::AddPainting3DComponent( const TArray<class AActor *> iActors )
     for( AActor* actor : iActors )
     {
         actor->AddComponentByClass( UArianePainting3DComponent::StaticClass(), false, FTransform(), false );
-
-        //actor->AddComponent( );
     }
 }
 
@@ -200,7 +200,7 @@ FArianeEditor::OnPostChangeCurrentToolDelegate()
 void
 FArianeEditor::AddReferencedObjects( FReferenceCollector& Collector )
 {
-    for ( TObjectPtr<UArianeEditorTool> tool : mTools )
+    for ( TObjectPtr<UArianeEditorTool> tool : Tools )
     {
         Collector.AddReferencedObject(tool);
     }

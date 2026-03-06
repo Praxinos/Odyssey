@@ -58,6 +58,10 @@ struct ARIANE_API FArianeHandleSegment : public FArianePoint
          */
         const FVector& GetPosition();
 
+        /**
+         * @brief Set the handle's owner segment
+         * @param the handle's owner segment
+         */
         void SetOwnerSegment( FArianeSegment* InOwnerSegment );
 
     protected:

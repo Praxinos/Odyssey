@@ -26,6 +26,7 @@ UArianePainting3DComponent::~UArianePainting3DComponent()
 UArianePainting3DComponent::UArianePainting3DComponent()
     : GeometryMode ( EArianePainting3DGeometryMode::Tube )
 {
+    // Nb: this object will be destroyed automatically when loading from the disc, as the TArray is replaced entirely.
     RootObjectID = FArianeObjectID( AllocObject() );
 
     PrimaryComponentTick.bCanEverTick = true;
@@ -60,10 +61,11 @@ UArianePainting3DComponent::PostLoad()
     {
         FArianeObject* Object = InstancedStruct.GetMutablePtr<FArianeObject>();
 
-        Object->PostEditUndo();
+        Object->PostLoad();
     }
 
     // Second part, invalidate Path Segments to rebuild the VertexFactory
+/*
     for( FInstancedStruct& InstancedStruct : InstancedObjects )
     {
         FArianeObject* Object = InstancedStruct.GetMutablePtr<FArianeObject>();
@@ -76,6 +78,7 @@ UArianePainting3DComponent::PostLoad()
             Path->Invalidate( Flags.SetAll() );
         }
     }
+*/
 
     //RootObjectID.GetObject()->Update( true );
     Update();
@@ -86,18 +89,18 @@ UArianePainting3DComponent::PostEditUndo()
 {
     Super::PostEditUndo();
 
-    // first part, invalidate all pointers that were allocated from FInstancedStructs
-    RootObjectID.InvalidatePointerCache();
+    // RootObjectID won't have its cache reset after Undoing, we have to force it.
+    RootObjectID.InvalidateCache();
 
     for( FInstancedStruct& InstancedStruct : InstancedObjects )
     {
         FArianeObject* Object = InstancedStruct.GetMutablePtr<FArianeObject>();
 
-        //Object->InvalidatePointerCache();
         Object->PostEditUndo();
     }
 
     // Second part, invalidate Path Segments to rebuild the VertexFactory
+/*
     for( FInstancedStruct& InstancedStruct : InstancedObjects )
     {
         FArianeObject* Object = InstancedStruct.GetMutablePtr<FArianeObject>();
@@ -110,6 +113,7 @@ UArianePainting3DComponent::PostEditUndo()
             Path->Invalidate( Flags.SetAll() );
         }
     }
+*/
 
     //RootObjectID.GetObject()->Update( true );
     Update();
@@ -256,9 +260,7 @@ UArianePainting3DComponent::PostEditChangeProperty( FPropertyChangedEvent& event
             {
                 FArianePath* Path = static_cast<FArianePath*>(Object);
 
-                Path->Invalidate( FArianePathInvalidationFlags()
-                                  .SetVertexGeometry()
-                                  .SetSegmentGeometry() );
+                Path->InvalidateAllSegments();
             }
         }
 
