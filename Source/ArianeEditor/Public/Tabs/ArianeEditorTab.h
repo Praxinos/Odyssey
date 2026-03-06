@@ -15,25 +15,63 @@ class ARIANEEDITOR_API FArianeEditorTab :
 public:
     // Construction / Destruction
     virtual ~FArianeEditorTab();
-    FArianeEditorTab(FText iDisplayName, FSlateIcon iIcon);
+    FArianeEditorTab( FText DisplayName, FSlateIcon InIcon);
 
 public:
+    /** Init the tab */
     virtual void Init();
+
+    /** Open the tab */
     void Open();
+
+    /** Close the tab */
     void Close();
+
+    /** Check if the tab is open */
     bool IsOpen() const;
+
+    /**
+    * @brief Get the tab's name
+    * @return the tab's name
+    */
     const FText& GetName() const;
+
+    /**
+    * @brief Get the tab's icon
+    * @return the tab's icon
+    */
     const FSlateIcon& GetIcon() const;
 
-public:
+    /** Check if the tab can open */
     virtual bool CanOpen() const;
-    virtual const FName& GetId() const = 0;
-    virtual TSharedPtr<SWidget> CreateWidget() = 0;
-    virtual void BindShortcuts(FBaseToolkit* iToolkit);
-    virtual TSharedRef<SDockTab> SpawnTab(const FSpawnTabArgs& iArgs);
-    virtual void ExtendMenu( TSharedRef<FExtender> iExtender );
 
-    void SetTabManager(TSharedPtr< FTabManager > iTabManager);
+    /**
+    * @brief Get the tab's ID
+    * @return the tab's ID
+    */
+    virtual const FName& GetId() const = 0;
+
+    /**
+    * @brief Create the tab's widget
+    * @return the tab's widget
+    */
+    virtual TSharedPtr<SWidget> CreateWidget() = 0;
+
+    /**
+    * @brief Bind shortcuts
+    * @param Toolkit the toolkit
+    */
+    virtual void BindShortcuts(FBaseToolkit* Toolkit);
+
+    /**
+    * @brief Spawn the tab
+    * @param Args
+    */
+    virtual TSharedRef<SDockTab> SpawnTab( const FSpawnTabArgs& Args );
+
+    virtual void ExtendMenu( TSharedRef<FExtender> Extender );
+
+    void SetTabManager(TSharedPtr< FTabManager > TabManager);
     TSharedPtr< FTabManager > GetTabManager() const;
     void Register(TSharedRef<FWorkspaceItem>& iWorkspaceMenuCategoryRef);
     void Unregister();

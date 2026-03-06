@@ -32,26 +32,6 @@ class ARIANEEDITOR_API UArianeEditorTool : public UObject
         UArianeEditorTool();
 
     public:
-        //Activates the tool
-        UFUNCTION(BlueprintCallable, Category="Tools")
-        virtual void Activate();
-
-        //Inactivates the tool
-        UFUNCTION(BlueprintPure, Category="Tools")
-        virtual bool IsActivable() const;
-
-        //Inactivates the tool
-        UFUNCTION(BlueprintPure, Category="Tools")
-        virtual bool IsActivated() const;
-
-        //Inactivates the tool
-        UFUNCTION(BlueprintCallable, Category="Tools")
-        virtual void Inactivate();
-
-        virtual void Load();
-        virtual void Unload();
-
-    public:
         //Mouse events
         virtual bool OnMouseDown( FEditorViewportClient* iViewportClient
                                 , const FKey& iKey
@@ -69,6 +49,13 @@ class ARIANEEDITOR_API UArianeEditorTool : public UObject
                                  , const FArianePointerState& State );
         virtual void Tick( float iDeltaTime );
         virtual FText GetTooltip() const;
+        virtual void Activate();
+        virtual bool IsActivable() const;
+        virtual bool IsActivated() const;
+        virtual void Inactivate();
+
+        virtual void Load();
+        virtual void Unload();
 
     protected:
         void PopupContextMenu();

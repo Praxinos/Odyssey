@@ -24,7 +24,7 @@ class ARIANEEDITOR_API UArianeEditorPathDrawingTool : public UArianeEditorTool
         //Constructor
         UArianeEditorPathDrawingTool();
 
-        //Mouse events
+        //Mouse events overrides
         virtual bool OnMouseDown( FEditorViewportClient* iViewportClient
                                 , const FKey& iKey
                                 , const FArianePointerState& State
@@ -38,8 +38,14 @@ class ARIANEEDITOR_API UArianeEditorPathDrawingTool : public UArianeEditorTool
                               , const FArianePointerState& State ) override;
 
     protected:
-        virtual void ExtendContextMenu( FMenuBuilder& menu );
-        void PlotVertex( FEditorViewportClient* iViewportClient
+        virtual void ExtendContextMenu( FMenuBuilder& menu ) override;
+
+        /**
+         * @brief Create a new vertex
+         * @param ViewportClient
+         * @param State the state of the input device (mouse or stylus)
+         */
+        void PlotVertex( FEditorViewportClient* ViewportClient
                        , const FArianePointerState& State );
 
     public:
