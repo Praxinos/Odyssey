@@ -98,12 +98,9 @@ struct ARIANE_API FArianePath : public FArianeObject
 {
     GENERATED_BODY()
 
-    private:
-        static const uint32 mStaticClass = 0xf13c7476; // value is crc32 FArianePath
-
     public:
-        static uint32 StaticClass() { return mStaticClass; };
-        virtual uint32 GetClass() { return mStaticClass; };
+        static uint32 StaticClass() { return 0xf13c7476; }; // value is crc32 FArianePath
+        virtual uint32 GetClass() override { return StaticClass(); };
         //virtual bool HasBaseClass( uint32 iBaseClassID );
 
     public:
@@ -132,12 +129,16 @@ struct ARIANE_API FArianePath : public FArianeObject
         FArianeSegment* GetSegmentByGuid( const FGuid& InGuid );
         //virtual void PostLoad();
 
+        virtual void PostLoad();
         virtual void PostEditUndo();
+
+        void InvalidateVertex( FArianeVertex* Vertex );
         void InvalidateSegment( FArianeSegment* Segment );
+        void InvalidateAllSegments();
 
     protected:
-        static void InvalidatePointerCache( TArray<FArianeVertexID>& VertexIDArray );
-        static void InvalidatePointerCache( TArray<FArianeSegmentID>& SegmentIDArray );
+        static void InvalidateCache( TArray<FArianeVertexID>& VertexIDArray );
+        static void InvalidateCache( TArray<FArianeSegmentID>& SegmentIDArray );
 
     public:
         UPROPERTY( EditAnywhere )
@@ -156,4 +157,5 @@ struct ARIANE_API FArianePath : public FArianeObject
         FArianePathGeometry3D Geometry3D;
 
         TArray<FArianeSegment*> InvalidatedSegments;
+        TArray<FArianeVertex*> InvalidatedVertices;
 };

@@ -56,9 +56,6 @@ FArianeEditorViewportEdMode::~FArianeEditorViewportEdMode()
     {
         GEditor->OnEditorClose().RemoveAll(this);
     }
-
-    UOdysseyStylusInputSubsystem* inputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
-    inputSubsystem->RemoveMessageHandler(*this);
 }
 
 FArianeEditorViewportEdMode::FArianeEditorViewportEdMode()
@@ -78,9 +75,7 @@ FArianeEditorViewportEdMode::FlushStylusInput()
 
 void FArianeEditorViewportEdMode::Initialize()
 {
-    UOdysseyStylusInputSubsystem* inputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
 
-    inputSubsystem->AddMessageHandler(*this);
 }
 
 void FArianeEditorViewportEdMode::AddReferencedObjects(FReferenceCollector& Collector)
@@ -483,6 +478,22 @@ FArianeEditorViewportEdMode::GetArianeEditorViewportToolkit() const
 }
 
 void
+FArianeEditorViewportEdMode::ListenStylusInput()
+{
+    UOdysseyStylusInputSubsystem* inputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
+
+    inputSubsystem->AddMessageHandler(*this);
+}
+
+void
+FArianeEditorViewportEdMode::IgnoreStylusInput()
+{
+    UOdysseyStylusInputSubsystem* inputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
+
+    inputSubsystem->RemoveMessageHandler(*this);
+}
+
+void
 FArianeEditorViewportEdMode::Enter()
 {
     TSharedPtr<FArianeEditorViewportToolkit> arianeToolkit = MakeShared<FArianeEditorViewportToolkit>(this);
@@ -492,6 +503,8 @@ FArianeEditorViewportEdMode::Enter()
     Toolkit = StaticCastSharedPtr<FModeToolkit>(arianeToolkit);
 
     Toolkit->Init( Owner->GetToolkitHost() );
+
+    ListenStylusInput();
 
 /* Gary
     //checkf(mViewportDrawingEditorPainter != nullptr, TEXT("ViewportDrawingEditorPainter was not created"));
@@ -550,6 +563,8 @@ FArianeEditorViewportEdMode::Enter()
 
 void FArianeEditorViewportEdMode::Exit()
 {
+    IgnoreStylusInput();
+
 /* Gary
     // Restore selection color
     GEngine->RestoreSelectedMaterialColor();

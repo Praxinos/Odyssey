@@ -16,7 +16,7 @@ UArianeEditorTool::~UArianeEditorTool()
 }
 
 UArianeEditorTool::UArianeEditorTool()
-    : mEditor (nullptr)
+    : Editor (nullptr)
     , bHasContextMenu ( false )
 {
 /* Gary
@@ -27,13 +27,13 @@ UArianeEditorTool::UArianeEditorTool()
 void
 UArianeEditorTool::SetEditor(FArianeEditor* iEditor)
 {
-    mEditor = iEditor;
+    Editor = iEditor;
 }
 
 FArianeEditor*
 UArianeEditorTool::GetEditor() const
 {
-    return mEditor;
+    return Editor;
 }
 
 void
@@ -99,7 +99,7 @@ UArianeEditorTool::IsActivable() const
 bool
 UArianeEditorTool::IsActivated() const
 {
-    return mEditor->GetCurrentTool() == this;
+    return Editor->GetCurrentTool() == this;
 }
 
 bool UArianeEditorTool::OnMouseDown( FEditorViewportClient* iViewportClient
@@ -183,7 +183,7 @@ UArianeEditorTool::PopupContextMenu()
 TSharedPtr<SWidget>
 UArianeEditorTool::CreateContextMenu()
 {
-    FMenuBuilder menu( true, mCommandList );
+    FMenuBuilder menu( true, CommandList );
 
     menu.BeginSection("Context Menu");
     if( bHasContextMenu )

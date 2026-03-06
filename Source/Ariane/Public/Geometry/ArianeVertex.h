@@ -25,6 +25,8 @@ struct ARIANE_API FArianeVertex : public FArianePoint
 
         void AddSegment( FArianeSegment* iSegment );
         void RemoveSegment( FArianeSegment* iSegment );
+        void InvalidateSegments();
+        void Invalidate();
 
         const TArray<FArianeSegment*>& GetSegments();
         FArianeObject* GetOwner();

@@ -6,6 +6,7 @@
 // Unreal headers
 #include "Framework/Docking/TabManager.h"
 #include "Widgets/Docking/SDockTab.h"
+#include "LevelEditor.h"
 
 /////////////////////////////////////////////////////
 // FArianeEditorTab
@@ -15,10 +16,10 @@ FArianeEditorTab::~FArianeEditorTab()
 {
 }
 
-FArianeEditorTab::FArianeEditorTab(FText iDisplayName, FSlateIcon iIcon)
-    : mDisplayName(iDisplayName)
-    , mIcon(iIcon)
-    , mWidget(nullptr)
+FArianeEditorTab::FArianeEditorTab(FText InDisplayName, FSlateIcon InIcon)
+    : DisplayName(InDisplayName)
+    , Icon(InIcon)
+    , Widget(nullptr)
 {
 }
 
@@ -28,7 +29,7 @@ FArianeEditorTab::FArianeEditorTab(FText iDisplayName, FSlateIcon iIcon)
 void
 FArianeEditorTab::Init()
 {
-    mWidget = CreateWidget();
+    Widget = CreateWidget();
 }
 
 void
@@ -72,13 +73,13 @@ FArianeEditorTab::CanOpen() const
 const FText&
 FArianeEditorTab::GetName() const
 {
-    return mDisplayName;
+    return DisplayName;
 }
 
 const FSlateIcon&
 FArianeEditorTab::GetIcon() const
 {
-    return mIcon;
+    return Icon;
 }
 
 //--------------------------------------------------------------------------------------
@@ -97,16 +98,12 @@ FArianeEditorTab::ExtendMenu( TSharedRef<FExtender> iExtender )
 //--------------------------------------------------------------------------------------
 //--------------------------------------------------------------------- Spawner callback
 
-void
-FArianeEditorTab::SetTabManager( TSharedPtr<FTabManager> iTabManager)
-{
-    mTabManager = iTabManager;
-}
-
 TSharedPtr< FTabManager >
-FArianeEditorTab::GetTabManager() const
+FArianeEditorTab::GetTabManager()
 {
-    return mTabManager;
+    FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>(TEXT("LevelEditor"));
+
+    return LevelEditorModule.GetLevelEditorTabManager()->AsShared();
 }
 
 void
@@ -123,9 +120,9 @@ FArianeEditorTab::Register( TSharedRef<FWorkspaceItem>& iWorkspaceMenuCategoryRe
     );
 
     tabManager->RegisterTabSpawner(GetId(), onSpawnTab )
-        .SetDisplayName( DisplayName() )
+        .SetDisplayName( DisplayName )
         .SetGroup(iWorkspaceMenuCategoryRef)
-        .SetIcon( Icon() )
+        .SetIcon( GetIcon() )
         .SetReadOnlyBehavior( ETabReadOnlyBehavior::Hidden )
         .SetMenuType( menuType );
 }
@@ -142,30 +139,17 @@ TSharedRef< SDockTab >
 FArianeEditorTab::SpawnTab( const FSpawnTabArgs& iArgs )
 {
     return SNew( SDockTab )
-        .Label( mDisplayName )
+        .Label( DisplayName )
         [
-            mWidget.ToSharedRef()
+            Widget.ToSharedRef()
         ];
 }
-
 
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Getters
 
-const FText&
-FArianeEditorTab::DisplayName() const
-{
-    return mDisplayName;
-}
-
-const FSlateIcon&
-FArianeEditorTab::Icon() const
-{
-    return mIcon;
-}
-
 const TSharedPtr<SWidget>&
-FArianeEditorTab::Widget() const
+FArianeEditorTab::GetWidget() const
 {
-    return mWidget;
+    return Widget;
 }

@@ -46,12 +46,9 @@ struct ARIANE_API FArianeObject
 {
     GENERATED_BODY()
 
-    private:
-        static const uint32 mStaticClass = 0x7b527cb6; // value is crc32 FArianeObject
-
     public:
-        static uint32 StaticClass() { return mStaticClass; };
-        virtual uint32 GetClass() { return mStaticClass; };
+        static uint32 StaticClass() { return 0x7b527cb6; }; // value is crc32 FArianeObject
+        virtual uint32 GetClass() { return StaticClass(); };
         //virtual bool HasBaseClass( uint32 iBaseClassID );
 
     public:
@@ -70,6 +67,7 @@ struct ARIANE_API FArianeObject
         const FBoxSphereBounds& GetBounds();
         virtual void UpdateBounds();
 
+        virtual void PostLoad(){};
         virtual void PostEditUndo(){};
 
     protected:

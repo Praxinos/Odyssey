@@ -96,10 +96,10 @@ class ARIANE_API UArianePainting3DComponent : public UMeshComponent
                  , Category = Painting3D )
         EArianePainting3DGeometryMode GeometryMode;
 
-        UPROPERTY( BlueprintReadWrite )
+        UPROPERTY( EditAnywhere )
         TArray<FInstancedStruct> InstancedObjects;
 
-        UPROPERTY( BlueprintReadWrite )
+        UPROPERTY( EditAnywhere )
         FArianeObjectID RootObjectID;
 
         TArray<UMaterialInterface*> UsedMaterials;

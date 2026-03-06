@@ -38,7 +38,7 @@ FArianeObjectID::GetObject()
 }
 
 void
-FArianeObjectID::InvalidatePointerCache()
+FArianeObjectID::InvalidateCache()
 {
     CachedObject = nullptr;
 }
@@ -81,7 +81,7 @@ FArianeVertexID::GetVertex()
 };
 
 void
-FArianeVertexID::InvalidatePointerCache()
+FArianeVertexID::InvalidateCache()
 {
     CachedVertex = nullptr;
 }
@@ -123,7 +123,7 @@ FArianeSegmentID::GetSegment()
 };
 
 void
-FArianeSegmentID::InvalidatePointerCache()
+FArianeSegmentID::InvalidateCache()
 {
     CachedSegment = nullptr;
 }

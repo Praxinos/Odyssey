@@ -8,6 +8,8 @@
 #include "ArianePath.h"
 #include "ArianeVertex.h"
 #include "ArianeSegmentCubic.h"
+// Odyssey
+#include "OdysseyStyle.h"
 // Unreal headers
 #include "Subsystems/EditorActorSubsystem.h"
 #include "SceneView.h"
@@ -24,6 +26,8 @@ UArianeEditorPathDrawingTool::UArianeEditorPathDrawingTool()
     : Radius( 5.0f )
     , EditedPath( nullptr )
 {
+    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathDrawing64");
+
     bHasContextMenu = true;
 }
 
@@ -225,7 +229,7 @@ UArianeEditorPathDrawingTool::ExtendContextMenu( FMenuBuilder& menu )
           LOCTEXT("ariane-path-drawing-tool.context-menu.add-painting3D-component.name", "Add Painting3D component")
         , LOCTEXT("ariane-path-drawing-tool.context-menu.add-painting3D-component.tooltip", "Add Painting3D component")
         , FSlateIcon()
-        , FUIAction( FExecuteAction::CreateRaw( mEditor
+        , FUIAction( FExecuteAction::CreateRaw( Editor
                                               , &FArianeEditor::AddPainting3DComponent
                                               , editorActorSubsystem->GetSelectedLevelActors() ) ) );
 }
