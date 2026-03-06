@@ -3,6 +3,7 @@
 
 #include "ArianeEditor.h"
 #include "ArianeEditorTool.h"
+#include "ArianeEditorViewportToolkit.h"
 #include "ArianeEditorToolTab.h"
 #include "ArianePainting3DComponent.h"
 #include "ArianePainting3DActor.h"
@@ -16,14 +17,14 @@ FArianeEditor::~FArianeEditor()
 {
 }
 
-FArianeEditor::FArianeEditor( FModeToolkit* iToolkit )
+FArianeEditor::FArianeEditor( FArianeEditorViewportToolkit* iToolkit )
     : mToolkit( iToolkit )
     , mName("ArianeEditor")
     , mCurrentTool ( nullptr )
 {
 }
 
-FModeToolkit*
+FArianeEditorViewportToolkit*
 FArianeEditor::GetToolkit()
 {
     return mToolkit;
@@ -142,7 +143,7 @@ FArianeEditor::UnregisterTabSpawners( const TSharedRef< FTabManager >& iTabManag
 {
     for ( TSharedPtr<FArianeEditorTab> tab : mTabs )
     {
-        tab->Unregister();
+        tab->Unregister( );
     }
 }
 
