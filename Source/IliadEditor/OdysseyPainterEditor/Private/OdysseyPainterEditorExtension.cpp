@@ -8,7 +8,7 @@ FOdysseyPainterEditorExtension::~FOdysseyPainterEditorExtension()
 
 }
 
-FOdysseyPainterEditorExtension::FOdysseyPainterEditorExtension(FOdysseyPainterEditor* iEditor)
+FOdysseyPainterEditorExtension::FOdysseyPainterEditorExtension(TSharedPtr<FOdysseyPainterEditor> iEditor)
     : mEditor(iEditor)
 {
 
@@ -44,10 +44,10 @@ FOdysseyPainterEditorExtension::BuildLayout(FOdysseyEditorLayoutBuilder& iBuilde
 
 }
 
-FOdysseyPainterEditor*
+TSharedPtr<FOdysseyPainterEditor>
 FOdysseyPainterEditorExtension::GetEditor() const
 {
-    return mEditor;
+    return mEditor.Pin();
 }
 
 void

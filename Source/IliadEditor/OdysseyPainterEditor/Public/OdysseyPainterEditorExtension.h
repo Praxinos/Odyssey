@@ -18,7 +18,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorExtension
 public:
     // Construction / Destruction
     virtual ~FOdysseyPainterEditorExtension();
-    FOdysseyPainterEditorExtension( FOdysseyPainterEditor* iEditor );
+    FOdysseyPainterEditorExtension( TSharedPtr<FOdysseyPainterEditor> iEditor );
 
 public:
     virtual void Initialize();
@@ -27,12 +27,12 @@ public:
     virtual void BindShortcuts(FBaseToolkit* iToolkit);
     virtual void BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder);
 
-    FOdysseyPainterEditor* GetEditor() const;
+    TSharedPtr<FOdysseyPainterEditor> GetEditor() const;
 
 public:
     virtual void AddReferencedObjects(FReferenceCollector& Collector);
     virtual FString GetReferencerName() const;
 
-public:
-    FOdysseyPainterEditor* mEditor;
+private:
+    TWeakPtr<FOdysseyPainterEditor> mEditor;
 };

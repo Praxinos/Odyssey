@@ -44,12 +44,16 @@ IOdysseyViewportDrawingEditorAdapter::IOdysseyViewportDrawingEditorAdapter(FOdys
 void
 IOdysseyViewportDrawingEditorAdapter::Initialize()
 {
-    mExtension->GetEditor()->OnCurrentToolChanged().AddRaw(this, &IOdysseyViewportDrawingEditorAdapter::OnCurrentToolChanged);
+    TSharedPtr<FOdysseyPainterEditor> editor = mExtension->GetEditor();
+    if (!editor)
+        return;
+
+    editor->OnCurrentToolChanged().AddRaw(this, &IOdysseyViewportDrawingEditorAdapter::OnCurrentToolChanged);
 
     UOdysseyStylusInputSubsystem* inputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
     inputSubsystem->AddMessageHandler(*this);
 
-    SetTool(mExtension->GetEditor()->GetCurrentTool());
+    SetTool(editor->GetCurrentTool());
 
     mState = eState::kIdleReady;
 }
@@ -60,7 +64,10 @@ IOdysseyViewportDrawingEditorAdapter::Finalize()
     mState = eState::kIdle;
     SetTexture(nullptr);
     SetTool(nullptr);
-    mExtension->GetEditor()->OnCurrentToolChanged().RemoveAll(this);
+
+    TSharedPtr<FOdysseyPainterEditor> editor = mExtension->GetEditor();
+    if (editor)
+        editor->OnCurrentToolChanged().RemoveAll(this);
 
     UOdysseyStylusInputSubsystem* inputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
     inputSubsystem->RemoveMessageHandler(*this);
@@ -82,8 +89,12 @@ IOdysseyViewportDrawingEditorAdapter::GetTexture() const
 void
 IOdysseyViewportDrawingEditorAdapter::OnCurrentToolChanged()
 {
+    TSharedPtr<FOdysseyPainterEditor> editor = mExtension->GetEditor();
+    if (!editor)
+        return;
+
     //If the tool is a drawing tool, we need to prepare the brushInstance to draw in a 3D Context
-    SetTool(mExtension->GetEditor()->GetCurrentTool());
+    SetTool(editor->GetCurrentTool());
 }
 
 void
@@ -134,7 +145,11 @@ void IOdysseyViewportDrawingEditorAdapter::Paint()
 {
     if (mIsPickingColor)
     {
-        mExtension->GetEditor()->GetColorPickerTool()->PickColorMove(mCurrentStrokeRay.mPoint);
+        TSharedPtr<FOdysseyPainterEditor> editor = mExtension->GetEditor();
+        if (!editor)
+            return;
+
+        editor->GetColorPickerTool()->PickColorMove(mCurrentStrokeRay.mPoint);
         return;
     }
 
@@ -302,11 +317,12 @@ bool IOdysseyViewportDrawingEditorAdapter::MouseMove(FEditorViewportClient* iVie
 
     mIsPickingColor = false;
 
-    if( mExtension->GetEditor()->GetCurrentTool() )
+    TSharedPtr<FOdysseyPainterEditor> editor = mExtension->GetEditor();
+    if( editor && editor->GetCurrentTool() )
     {
-        mExtension->GetEditor()->GetCurrentTool()->OnMouseHover( mCurrentStrokeRay.mPoint );
+        editor->GetCurrentTool()->OnMouseHover( mCurrentStrokeRay.mPoint );
 
-        mMouseCursor = mExtension->GetEditor()->GetCurrentTool()->GetMouseCursor();
+        mMouseCursor = editor->GetCurrentTool()->GetMouseCursor();
         mOverrideMouseCursor = true;
     }
 
@@ -354,7 +370,11 @@ bool IOdysseyViewportDrawingEditorAdapter::InputKey(FEditorViewportClient* iView
             return true;
 
         //Tool
-        UOdysseyPainterEditorTool* selectedTool = mExtension->GetEditor()->GetCurrentTool();
+        TSharedPtr<FOdysseyPainterEditor> editor = mExtension->GetEditor();
+        if (!editor)
+            return false;
+
+        UOdysseyPainterEditorTool* selectedTool = editor->GetCurrentTool();
         if (!selectedTool)
             return false;
 
@@ -559,6 +579,10 @@ bool IOdysseyViewportDrawingEditorAdapter::CapturedMouseMove(FEditorViewportClie
 bool
 IOdysseyViewportDrawingEditorAdapter::HandleClick(FEditorViewportClient* iViewportClient, HHitProxy* iHitProxy, const FViewportClick& iClick)
 {
+    TSharedPtr<FOdysseyPainterEditor> editor = mExtension->GetEditor();
+    if (!editor)
+        return false;
+
     if(!IsReadyToDraw())
         return false;
 
@@ -589,7 +613,7 @@ IOdysseyViewportDrawingEditorAdapter::HandleClick(FEditorViewportClient* iViewpo
     mLastStrokeRay = mCurrentStrokeRay;
     mCurrentStrokeRay = strokeRay;
 
-    UOdysseyPainterEditorTool* selectedTool = mExtension->GetEditor()->GetCurrentTool();
+    UOdysseyPainterEditorTool* selectedTool = editor->GetCurrentTool();
     if (selectedTool)
         return selectedTool->OnMouseClick(mCurrentStrokeRay.mPoint, iClick.GetKey());
 
@@ -602,6 +626,10 @@ IOdysseyViewportDrawingEditorAdapter::HandleClick(FEditorViewportClient* iViewpo
 void
 IOdysseyViewportDrawingEditorAdapter::MouseDown(const FOdysseyRay& iRay, const FKey& iMouseButton)
 {
+    TSharedPtr<FOdysseyPainterEditor> editor = mExtension->GetEditor();
+    if (!editor)
+        return;
+
     if(!IsReadyToDraw())
         return;
 
@@ -618,7 +646,7 @@ IOdysseyViewportDrawingEditorAdapter::MouseDown(const FOdysseyRay& iRay, const F
     {
         mState = eState::kCapturedByEditor;
         mMouseButton = iMouseButton;
-        mExtension->GetEditor()->GetColorPickerTool()->PickColorMove(mCurrentStrokeRay.mPoint);
+        editor->GetColorPickerTool()->PickColorMove(mCurrentStrokeRay.mPoint);
         return;
     }
 
@@ -642,6 +670,10 @@ IOdysseyViewportDrawingEditorAdapter::MouseDown(const FOdysseyRay& iRay, const F
 void
 IOdysseyViewportDrawingEditorAdapter::MouseUp(const FOdysseyRay& iRay, const FKey& iMouseButton)
 {
+    TSharedPtr<FOdysseyPainterEditor> editor = mExtension->GetEditor();
+    if (!editor)
+        return;
+
     if(!IsReadyToDraw())
         return;
 
@@ -659,7 +691,7 @@ IOdysseyViewportDrawingEditorAdapter::MouseUp(const FOdysseyRay& iRay, const FKe
     {
         mState = eState::kIdleReady;
         mMouseButton = FKey();
-        mExtension->GetEditor()->GetColorPickerTool()->PickColorUp(mCurrentStrokeRay.mPoint);
+        editor->GetColorPickerTool()->PickColorUp(mCurrentStrokeRay.mPoint);
         return;
     }
 
@@ -707,10 +739,14 @@ IOdysseyViewportDrawingEditorAdapter::MouseDrag(const FOdysseyRay& iRay)
 bool
 IOdysseyViewportDrawingEditorAdapter::KeyDown(FKey iKey)
 {
+    TSharedPtr<FOdysseyPainterEditor> editor = mExtension->GetEditor();
+    if (!editor)
+        return false;
+
     if(!IsReadyToDraw())
         return false;
 
-    UOdysseyPainterEditorTool* selectedTool = mExtension->GetEditor()->GetCurrentTool();
+    UOdysseyPainterEditorTool* selectedTool = editor->GetCurrentTool();
     if (selectedTool)
         return selectedTool->OnKeyDown(iKey);
 
@@ -720,10 +756,14 @@ IOdysseyViewportDrawingEditorAdapter::KeyDown(FKey iKey)
 bool
 IOdysseyViewportDrawingEditorAdapter::KeyUp(FKey iKey)
 {
+    TSharedPtr<FOdysseyPainterEditor> editor = mExtension->GetEditor();
+    if (!editor)
+        return false;
+
     if(!IsReadyToDraw())
         return false;
 
-    UOdysseyPainterEditorTool* selectedTool = mExtension->GetEditor()->GetCurrentTool();
+    UOdysseyPainterEditorTool* selectedTool = editor->GetCurrentTool();
     if (selectedTool)
         return selectedTool->OnKeyUp(iKey);
 

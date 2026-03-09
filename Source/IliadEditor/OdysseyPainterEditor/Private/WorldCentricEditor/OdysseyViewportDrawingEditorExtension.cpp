@@ -49,9 +49,12 @@ FOdysseyViewportDrawingEditorExtension::~FOdysseyViewportDrawingEditorExtension(
 {
     SetActor(nullptr);
     mPaintingAdapter->SetTexture(nullptr);
-
     FCoreUObjectDelegates::OnObjectPropertyChanged.RemoveAll(this);
-    GetEditor()->OnSourceChanged().RemoveAll(this);
+
+    TSharedPtr<FOdysseyPainterEditor> editor = GetEditor();
+    if (editor)
+        editor->OnSourceChanged().RemoveAll(this);
+
     FLevelEditorSequencerIntegration::Get().GetOnSequencersChanged().RemoveAll(this);
     ClearAllDelegatesSequencers();
     mSequencers.Empty();
@@ -68,7 +71,7 @@ FOdysseyViewportDrawingEditorExtension::FOdysseyViewportDrawingEditorExtension()
     , mCurrentSource(nullptr)
 {}
 
-FOdysseyViewportDrawingEditorExtension::FOdysseyViewportDrawingEditorExtension(FOdysseyPainterEditor* iEditor)
+FOdysseyViewportDrawingEditorExtension::FOdysseyViewportDrawingEditorExtension(TSharedPtr<FOdysseyPainterEditor> iEditor)
     : FOdysseyPainterEditorExtension(iEditor)
     , mGUI(nullptr)
     , mPaintingAdapterMethod(EOdysseyViewportDrawingPaintingAdapterMethod::OdysseyTextureBased)
@@ -85,7 +88,10 @@ FOdysseyViewportDrawingEditorExtension::Initialize()
 {
     //Handle Object Property Changed Callback to refresh when actors's visibility changes for example
     FCoreUObjectDelegates::OnObjectPropertyChanged.AddRaw(this,&FOdysseyViewportDrawingEditorExtension::OnObjectPropertyChanged);
-    GetEditor()->OnSourceChanged().AddRaw(this, &FOdysseyViewportDrawingEditorExtension::OnSourceChanged);
+
+    TSharedPtr<FOdysseyPainterEditor> editor = GetEditor();
+    if (editor)
+        editor->OnSourceChanged().AddRaw(this, &FOdysseyViewportDrawingEditorExtension::OnSourceChanged);
 
     FLevelEditorSequencerIntegration::Get().GetOnSequencersChanged().AddRaw( this, &FOdysseyViewportDrawingEditorExtension::OnSequencersChanged );
     mSequencers = FLevelEditorSequencerIntegration::Get().GetSequencers();
@@ -100,7 +106,11 @@ FOdysseyViewportDrawingEditorExtension::Initialize()
 void
 FOdysseyViewportDrawingEditorExtension::OnSourceChanged()
 {
-    TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
+    TSharedPtr<FOdysseyPainterEditor> editor = GetEditor();
+    if (!editor)
+        return;
+
+    TSharedPtr<FOdysseyPainterEditorSource> source = editor->GetSource();
 
     if (mCurrentSource == source)
         return;
@@ -439,7 +449,12 @@ FOdysseyViewportDrawingEditorExtension::SetTextureInternal(UTexture* iTexture)
     }
 
     mTexture = nullptr;
-    mEditor->SetSource(nullptr);
+
+    TSharedPtr<FOdysseyPainterEditor> editor = GetEditor();
+    if (!editor)
+        return;
+
+    editor->SetSource(nullptr);
 
     if (!iTexture)
         return;
@@ -451,7 +466,7 @@ FOdysseyViewportDrawingEditorExtension::SetTextureInternal(UTexture* iTexture)
         UTexture2D* texture = Cast<UTexture2D>(mTexture);
 
         TSharedPtr<FOdysseyPainterEditorTextureSource> source = MakeShared<FOdysseyPainterEditorTextureSource>(texture);
-        mEditor->SetSource(source);
+        editor->SetSource(source);
     }
 
     if (mTexture->IsA(UTextureRenderTarget2D::StaticClass()) && mComponent->IsA<UOdysseyAnimationComponent>())
@@ -464,7 +479,7 @@ FOdysseyViewportDrawingEditorExtension::SetTextureInternal(UTexture* iTexture)
         if( !animationSource )
             return;
         animationSource->SetExternalPlayer(animationComponent->GetPlayer());
-        mEditor->SetSource(animationSource);
+        editor->SetSource(animationSource);
     }
 
     if (mTexture->IsA(UMediaTexture::StaticClass()))
@@ -486,7 +501,8 @@ FOdysseyViewportDrawingEditorExtension::SetTextureInternal(UTexture* iTexture)
 
                 UOdysseyAnimation* animation = Cast<UOdysseyAnimation>(mediaSource);
                 TSharedPtr<FOdysseyPainterEditorAnimationSource> animationSource = MakeShared<FOdysseyPainterEditorAnimationSource>(animation);
-                mEditor->SetSource(animationSource);
+
+                editor->SetSource(animationSource);
             }
         }
         else
@@ -644,6 +660,10 @@ FOdysseyViewportDrawingEditorExtension::EnsureMediaPlateIsOpened()
 void
 FOdysseyViewportDrawingEditorExtension::Tick(float iDeltaTime)
 {
+    TSharedPtr<FOdysseyPainterEditor> editor = GetEditor();
+    if (!editor)
+        return;
+
     if (mTexture && mTexture->IsA(UMediaTexture::StaticClass()))
     {
         UMediaTexture* texture = Cast<UMediaTexture>(mTexture);
@@ -667,7 +687,7 @@ FOdysseyViewportDrawingEditorExtension::Tick(float iDeltaTime)
                 {
                     UOdysseyAnimation* animation = Cast<UOdysseyAnimation>(mediaSource);
                     TSharedPtr<FOdysseyPainterEditorAnimationSource> animationSource = MakeShared<FOdysseyPainterEditorAnimationSource>(animation);
-                    mEditor->SetSource(animationSource);
+                    editor->SetSource(animationSource);
                 }
 
                 if (wasOpened)
@@ -682,7 +702,7 @@ FOdysseyViewportDrawingEditorExtension::Tick(float iDeltaTime)
         }
         else if (mCurrentSource)
         {
-            mEditor->SetSource(nullptr);
+            editor->SetSource(nullptr);
         }
     }
 }
@@ -1062,7 +1082,11 @@ FOdysseyViewportDrawingEditorExtension::SyncMediaPlayerWithAnimationPlayer()
 void
 FOdysseyViewportDrawingEditorExtension::SyncMediaPlayerWithAnimationCurrentFrame()
 {
-    UOdysseyAnimationPlayer* player = mEditor->GetAnimationPlayer();
+    TSharedPtr<FOdysseyPainterEditor> editor = GetEditor();
+    if (!editor)
+        return;
+
+    UOdysseyAnimationPlayer* player = editor->GetAnimationPlayer();
     if (!player)
         return;
     SyncMediaPlayerWithAnimationFrame(player->GetDisplayedFrame().FrameNumber.Value);

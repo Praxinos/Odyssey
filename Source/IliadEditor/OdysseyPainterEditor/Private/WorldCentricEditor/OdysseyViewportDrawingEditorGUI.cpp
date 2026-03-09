@@ -36,13 +36,18 @@ FOdysseyViewportDrawingEditorGUI::Initialize()
 {
     CustomizeAnimationEditorTimeline();
 
-    mExtension->GetEditor()->RemoveTab<FOdysseyPainterEditorToolsTab>();
+    TSharedPtr<FOdysseyPainterEditor> editor = mExtension->GetEditor();
+    if (editor)
+        editor->RemoveTab<FOdysseyPainterEditorToolsTab>();
 }
 
 void
 FOdysseyViewportDrawingEditorGUI::CustomizeAnimationEditorTimeline()
 {
-    FOdysseyPainterEditor* editor = mExtension->GetEditor();
+    TSharedPtr<FOdysseyPainterEditor> editor = mExtension->GetEditor();
+    if (!editor)
+        return;
+
     TSharedPtr<FOdysseyPainterEditorAnimationTimelineTab> timelineTab = editor->FindTab<FOdysseyPainterEditorAnimationTimelineTab>();
     if (!timelineTab)
         return;

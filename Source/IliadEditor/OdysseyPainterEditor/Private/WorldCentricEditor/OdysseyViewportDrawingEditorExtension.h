@@ -39,7 +39,7 @@ public:
     // Construction / Destruction
     virtual ~FOdysseyViewportDrawingEditorExtension();
     FOdysseyViewportDrawingEditorExtension();
-    FOdysseyViewportDrawingEditorExtension( FOdysseyPainterEditor* iEditor );
+    FOdysseyViewportDrawingEditorExtension( TSharedPtr<FOdysseyPainterEditor> iEditor );
 
 public:
     virtual void Initialize() override;

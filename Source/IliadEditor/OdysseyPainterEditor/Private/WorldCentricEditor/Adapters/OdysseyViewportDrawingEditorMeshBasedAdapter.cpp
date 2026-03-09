@@ -153,9 +153,13 @@ void FOdysseyViewportDrawingEditorMeshBasedAdapter::FinishPainting()
 
 void FOdysseyViewportDrawingEditorMeshBasedAdapter::RenderInteractorWidget(const FSceneView* iView, FViewport* iViewport, FPrimitiveDrawInterface* iPDI)
 {
+    TSharedPtr<FOdysseyPainterEditor> editor = mExtension->GetEditor();
+    if (!editor)
+        return;
+
     UOdysseyPainterEditorRasterDrawingTool* drawingTool = nullptr;
-    if (mExtension->GetEditor()->GetCurrentTool() && mExtension->GetEditor()->GetCurrentTool()->IsA(UOdysseyPainterEditorRasterDrawingTool::StaticClass()))
-        drawingTool = Cast<UOdysseyPainterEditorRasterDrawingTool>(mExtension->GetEditor()->GetCurrentTool());
+    if (editor->GetCurrentTool() && editor->GetCurrentTool()->IsA(UOdysseyPainterEditorRasterDrawingTool::StaticClass()))
+        drawingTool = Cast<UOdysseyPainterEditorRasterDrawingTool>(editor->GetCurrentTool());
     else
         return;
 
@@ -318,9 +322,13 @@ float FOdysseyViewportDrawingEditorMeshBasedAdapter::GetStampQuality()
 
 ::ULIS::FEvent FOdysseyViewportDrawingEditorMeshBasedAdapter::StampOverride(UOdysseyBrushAssetBase::FStampParams iStampParams)
 {
+    TSharedPtr<FOdysseyPainterEditor> editor = mExtension->GetEditor();
+    if (!editor)
+        return iStampParams.mEvent;
+
     UOdysseyPainterEditorRasterDrawingTool* drawingTool = nullptr;
-    if (mExtension->GetEditor()->GetCurrentTool()->IsA(UOdysseyPainterEditorRasterDrawingTool::StaticClass()))
-        drawingTool = Cast<UOdysseyPainterEditorRasterDrawingTool>(mExtension->GetEditor()->GetCurrentTool());
+    if (editor->GetCurrentTool()->IsA(UOdysseyPainterEditorRasterDrawingTool::StaticClass()))
+        drawingTool = Cast<UOdysseyPainterEditorRasterDrawingTool>(editor->GetCurrentTool());
 
     if( !drawingTool )
         return iStampParams.mEvent;

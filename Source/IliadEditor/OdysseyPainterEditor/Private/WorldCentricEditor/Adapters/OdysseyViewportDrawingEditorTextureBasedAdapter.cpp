@@ -22,8 +22,12 @@ FOdysseyViewportDrawingEditorTextureBasedAdapter::FOdysseyViewportDrawingEditorT
 void
 FOdysseyViewportDrawingEditorTextureBasedAdapter::Initialize()
 {
+    TSharedPtr<FOdysseyPainterEditor> editor = mExtension->GetEditor();
+    if (!editor)
+        return;
+
     IOdysseyViewportDrawingEditorAdapter::Initialize();
-    mExtension->GetEditor()->GetRasterDrawingTool()->SetBaseSize(0);
+    editor->GetRasterDrawingTool()->SetBaseSize(0);
 }
 
 void FOdysseyViewportDrawingEditorTextureBasedAdapter::FinishPainting()
@@ -39,9 +43,13 @@ void FOdysseyViewportDrawingEditorTextureBasedAdapter::RenderInteractorWidget(co
 
 ::ULIS::FEvent FOdysseyViewportDrawingEditorTextureBasedAdapter::StampOverride(UOdysseyBrushAssetBase::FStampParams iStampParams)
 {
+    TSharedPtr<FOdysseyPainterEditor> editor = mExtension->GetEditor();
+    if (!editor)
+        return iStampParams.mEvent;
+
     UOdysseyPainterEditorRasterDrawingTool* drawingTool = nullptr;
-    if (mExtension->GetEditor()->GetCurrentTool()->IsA(UOdysseyPainterEditorRasterDrawingTool::StaticClass()))
-        drawingTool = Cast<UOdysseyPainterEditorRasterDrawingTool>(mExtension->GetEditor()->GetCurrentTool());
+    if (editor->GetCurrentTool()->IsA(UOdysseyPainterEditorRasterDrawingTool::StaticClass()))
+        drawingTool = Cast<UOdysseyPainterEditorRasterDrawingTool>(editor->GetCurrentTool());
 
     if (mStopDrawing == true || !drawingTool)
         return iStampParams.mEvent;

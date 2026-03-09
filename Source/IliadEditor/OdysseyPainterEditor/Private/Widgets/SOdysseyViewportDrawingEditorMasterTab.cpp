@@ -193,7 +193,7 @@ SOdysseyViewportDrawingEditorMasterTab::Construct(const FArguments& InArgs, FOdy
             +SWidgetSwitcher::Slot()
             [
                 SNew(SOdysseyPainterEditorTools)
-                .Editor(mExtension->GetEditor())
+                .Editor(mExtension->GetEditor().Get())
             ]
         ]
     ];
@@ -381,6 +381,10 @@ SOdysseyViewportDrawingEditorMasterTab::OnActorChanged(const FAssetData& iAssetD
 FReply
 SOdysseyViewportDrawingEditorMasterTab::OnMeshComponentChanged(const FString iName)
 {
+    TSharedPtr<FOdysseyPainterEditor> editor = mExtension->GetEditor();
+    if (!editor)
+        return FReply::Unhandled();
+
     if( mExtension->Component()->GetName() == iName ) return FReply::Handled();
 
     for( int i = 0; i < mExtension->SelectableComponents().Num(); i++ )
@@ -391,7 +395,7 @@ SOdysseyViewportDrawingEditorMasterTab::OnMeshComponentChanged(const FString iNa
         }
     }
 
-    mExtension->GetEditor()->GetRasterDrawingTool()->SetBaseSize(mExtension->GetMeshComponentMaxSize());
+    editor->GetRasterDrawingTool()->SetBaseSize(mExtension->GetMeshComponentMaxSize());
 
     return FReply::Handled();
 }
@@ -441,13 +445,21 @@ SOdysseyViewportDrawingEditorMasterTab::GetWidgetIndex() const
 UOdysseyPainterEditorTool*
 SOdysseyViewportDrawingEditorMasterTab::GetCurrentTool() const
 {
-    return mExtension->GetEditor()->GetCurrentTool();
+    TSharedPtr<FOdysseyPainterEditor> editor = mExtension->GetEditor();
+    if (!editor)
+        return nullptr;
+
+    return editor->GetCurrentTool();
 }
 
 void
 SOdysseyViewportDrawingEditorMasterTab::OnToolSelected(UOdysseyPainterEditorTool* iTool)
 {
-    mExtension->GetEditor()->ActivateMainTool(iTool);
+    TSharedPtr<FOdysseyPainterEditor> editor = mExtension->GetEditor();
+    if (!editor)
+        return;
+
+    editor->ActivateMainTool(iTool);
 }
 
 #undef LOCTEXT_NAMESPACE

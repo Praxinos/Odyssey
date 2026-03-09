@@ -33,8 +33,6 @@ FOdysseyPainterEditorViewportTab::StaticId()
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyPainterEditorViewportTab::~FOdysseyPainterEditorViewportTab()
 {
-    if (mViewport)
-        mViewport->GetViewport()->ViewportResizedEvent.RemoveAll(this);
 }
 
 FOdysseyPainterEditorViewportTab::FOdysseyPainterEditorViewportTab(FOdysseyPainterEditor* iEditor)
@@ -74,7 +72,6 @@ FOdysseyPainterEditorViewportTab::CreateWidget()
     mViewportClient->OnKeyUp().BindRaw(this, &FOdysseyPainterEditorViewportTab::OnViewportKeyUp);
 
     mViewport->SetViewportClient(mViewportClient);
-    //mViewport->GetViewport()->ViewportResizedEvent.AddRaw(this, &FOdysseyPainterEditorViewportTab::OnViewportSizeChanged);
 
     return mViewport;
 }
@@ -335,14 +332,5 @@ FOdysseyPainterEditorViewportTab::OnZoomOutExponential()
 {
     mViewport->ZoomExponential(mViewport->GetZoom(), -0.1);
 }
-
-/* void FOdysseyPainterEditorViewportTab::OnViewportSizeChanged(FViewport* iViewport, uint32 iUnused)
-{
-    if ( iViewport == mViewport->GetViewport().Get() )
-    {
-        mEditor->HUDSystem()->RebuildHUDSurface( FVector2D( iViewport->GetSizeXY() ));
-        mEditor->PersistentHUDSystem()->RebuildHUDSurface(FVector2D(iViewport->GetSizeXY()));
-    }
-} */
 
 #undef LOCTEXT_NAMESPACE
