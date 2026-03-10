@@ -203,7 +203,7 @@ FOdysseyPainterEditorCommands::RegisterCommands()
     UI_BUNDLE_COMMAND( RasterTranformToolTogglePerspectiveMode, ToolsShortcuts, "Raster Transform Tool : Toggle Perspective Mode", "Toggle the perspective mode for the Raster Transform Tool", EUserInterfaceActionType::Button, FInputChord() );
 
     // Uncategorized Yet Shortcuts. Will be triggered last if no shortcut above has been.
-    UI_BUNDLE_COMMAND(ClearCurrentLayer, UncategorizedYetShortcuts, "Clear Current Layer", "Clear current layer", EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::Delete));
+    UI_BUNDLE_COMMAND(ClearCurrentLayer, UncategorizedYetShortcuts, "Clear Current Layer", "Clear current layer", EUserInterfaceActionType::Button, FInputChord(EKeys::BackSpace));
     UI_BUNDLE_COMMAND(SelectAll, UncategorizedYetShortcuts, "Select All", "Select All", EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::A));
     UI_BUNDLE_COMMAND(ClearCurrentSelection, UncategorizedYetShortcuts, "Clear Current Selection", "Clear current selection", EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::D));
     UI_BUNDLE_COMMAND(CopyCurrentSelection, UncategorizedYetShortcuts, "Copy Current Selection", "Copy current selection", EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::C));
