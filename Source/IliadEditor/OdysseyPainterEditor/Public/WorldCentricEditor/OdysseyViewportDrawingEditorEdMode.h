@@ -30,13 +30,6 @@ public:
     virtual void Enter() override;
     virtual void Exit() override;
 
-    /** FGCObject interface */
-    virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
-    virtual FString GetReferencerName() const override
-    {
-        return "OdysseyViewportDrawingEditorEdMode";
-    }
-
     // FEdMode interface.
     virtual bool UsesToolkits() const override { return true; }
 
@@ -65,6 +58,5 @@ private:
 
 private:
     TSharedPtr<FOdysseyViewportDrawingEditorToolkit> mViewportDrawingEditorToolkit;
-    FOdysseyViewportDrawingEditorPainter* mViewportDrawingEditorPainter;
     TSharedPtr<FOdysseyViewportDrawingEditorExtension> mViewportDrawingEditorExtension;
 };

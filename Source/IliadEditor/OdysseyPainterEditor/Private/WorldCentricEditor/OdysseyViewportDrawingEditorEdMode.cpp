@@ -54,14 +54,6 @@ void FOdysseyViewportDrawingEditorEdMode::Initialize()
 {
 }
 
-void FOdysseyViewportDrawingEditorEdMode::AddReferencedObjects(FReferenceCollector& Collector)
-{
-    // Call parent implementation
-    FEdMode::AddReferencedObjects(Collector);
-    //if (mViewportDrawingEditorPainter)
-        //mViewportDrawingEditorPainter->AddReferencedObjects(Collector);
-}
-
 void FOdysseyViewportDrawingEditorEdMode::Render(const FSceneView* View,FViewport* Viewport,FPrimitiveDrawInterface* PDI)
 {
     if (!mViewportDrawingEditorExtension)
@@ -189,8 +181,6 @@ void FOdysseyViewportDrawingEditorEdMode::Enter()
 {
     FEdMode::Enter();
 
-    //checkf(mViewportDrawingEditorPainter != nullptr, TEXT("ViewportDrawingEditorPainter was not created"));
-
     if (UsesToolkits() && !Toolkit.IsValid())
     {
         mViewportDrawingEditorToolkit = MakeShared<FOdysseyViewportDrawingEditorToolkit>(this);
@@ -255,6 +245,7 @@ void FOdysseyViewportDrawingEditorEdMode::Exit()
     }
 
     mViewportDrawingEditorExtension = nullptr;
+    mViewportDrawingEditorToolkit = nullptr;
 
     // Call parent implementation
     FEdMode::Exit();
