@@ -140,13 +140,15 @@ FOdysseyViewportDrawingEditorToolkit::RebuildLevelEditorMenu() const
 void
 FOdysseyViewportDrawingEditorToolkit::OnAddEditedObject(UObject* iObject)
 {
-    GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->NotifyAssetOpened( iObject, this );
+    if (GEditor)
+        GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->NotifyAssetOpened( iObject, this );
 }
 
 void
 FOdysseyViewportDrawingEditorToolkit::OnRemoveEditedObject(UObject* iObject)
 {
-    GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->NotifyAssetClosed( iObject, this );
+    if (GEditor)
+        GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->NotifyAssetClosed( iObject, this );
 }
 
 FName
