@@ -26,41 +26,41 @@ public:
     /** Destructor */
     virtual ~FArianeEditorViewportEdMode();
 
-    /** Override from FGCObject */
+    /** Overriden from FGCObject */
     virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
-    /** Override from FGCObject */
+    /** Overriden from FGCObject */
     virtual FString GetReferencerName() const override
     {
         return "ArianeEditorViewportEdMode";
     }
-    /** Override from FEdMode. */
+    /** Overriden from FEdMode. */
     virtual bool UsesToolkits() const override { return true; }
 
-    /** Override from FEdMode. */
+    /** Overriden from FEdMode. */
     virtual void Initialize() override;
 
-    /** Override from FEdMode. */
+    /** Overriden from FEdMode. */
     virtual void Enter() override;
 
-    /** Override from FEdMode. */
+    /** Overriden from FEdMode. */
     virtual void Exit() override;
 
-    /** Override from FEdMode. */
+    /** Overriden from FEdMode. */
     virtual void Render(const FSceneView* View,FViewport* Viewport,FPrimitiveDrawInterface* PDI) override;
 
-    /** Override from FEdMode. */
+    /** Overriden from FEdMode. */
     virtual void DrawHUD(FEditorViewportClient* ViewportClient,FViewport* Viewport,const FSceneView* View,FCanvas* Canvas) override;
 
-    /** Override from FEdMode. */
+    /** Overriden from FEdMode. */
     virtual bool Select(AActor* InActor, bool bInSelected) override;
 
-    /** Override from FEdMode. */
+    /** Overriden from FEdMode. */
     virtual bool MouseMove( FEditorViewportClient* iViewportClient
                           , FViewport* iViewport
                           , int32 iMouseX
                           , int32 iMouseY ) override;
 
-    // Override from FEdMode
+    // Overriden from FEdMode
     virtual bool InputKey( FEditorViewportClient* iViewportClient
                          , FViewport* iViewport
                          , FKey iKey
@@ -72,21 +72,21 @@ public:
                                   , int32 iMouseX
                                   , int32 iMouseY ) override;
 
-    // Override from FEdMode
+    // Overriden from FEdMode
     virtual bool HandleClick( FEditorViewportClient* InViewportClient
                             , HHitProxy* HitProxy
                             , const FViewportClick& Click ) override;
 
-    // Override from FEdMode
+    // Overriden from FEdMode
     virtual bool AllowWidgetMove() override { return false; }
 
-    // Override from FEdMode
+    // Overriden from FEdMode
     virtual bool ShouldDrawWidget() const override { return false; }
 
-    // Override from FEdMode
+    // Overriden from FEdMode
     virtual bool UsesTransformWidget() const override { return false; }
 
-    // Override from FEdMode
+    // Overriden from FEdMode
     virtual bool GetCursor(EMouseCursor::Type& OutCursor) const override;
 
 

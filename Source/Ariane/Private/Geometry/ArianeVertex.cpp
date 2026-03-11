@@ -45,6 +45,8 @@ FArianeVertex::InvalidateSegments()
     {
         Segment->Invalidate();
     }
+
+    // TODO: invalidate the owner
 }
 
 void

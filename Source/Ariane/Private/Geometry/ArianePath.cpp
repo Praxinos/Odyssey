@@ -31,10 +31,10 @@ FArianePathInvalidationFlags::AND( const FArianeObjectInvalidationFlags& RHS )
 {
     if( RHS.HasBaseClass( FArianePathInvalidationFlags::StaticClass() ) )
     {
-        VertexGeometry  &= ((FArianePathInvalidationFlags&)RHS).VertexGeometry;
-        SegmentGeometry &= ((FArianePathInvalidationFlags&)RHS).SegmentGeometry;
-        VertexTopology  &= ((FArianePathInvalidationFlags&)RHS).VertexTopology;
-        SegmentTopology &= ((FArianePathInvalidationFlags&)RHS).SegmentTopology;
+        VertexAltered &= ((FArianePathInvalidationFlags&)RHS).VertexAltered;
+        SegmentAltered &= ((FArianePathInvalidationFlags&)RHS).SegmentAltered;
+        VertexAddedOrRemoved &= ((FArianePathInvalidationFlags&)RHS).VertexAddedOrRemoved;
+        SegmentAddedOrRemoved &= ((FArianePathInvalidationFlags&)RHS).SegmentAddedOrRemoved;
     }
 
     Super::AND( RHS );
@@ -47,10 +47,10 @@ FArianePathInvalidationFlags::OR( const FArianeObjectInvalidationFlags& RHS )
 {
     if( RHS.HasBaseClass( FArianePathInvalidationFlags::StaticClass() ) )
     {
-        VertexGeometry  |= ((FArianePathInvalidationFlags&)RHS).VertexGeometry;
-        SegmentGeometry |= ((FArianePathInvalidationFlags&)RHS).SegmentGeometry;
-        VertexTopology  |= ((FArianePathInvalidationFlags&)RHS).VertexTopology;
-        SegmentTopology |= ((FArianePathInvalidationFlags&)RHS).SegmentTopology;
+        VertexAltered |= ((FArianePathInvalidationFlags&)RHS).VertexAltered;
+        SegmentAltered |= ((FArianePathInvalidationFlags&)RHS).SegmentAltered;
+        VertexAddedOrRemoved |= ((FArianePathInvalidationFlags&)RHS).VertexAddedOrRemoved;
+        SegmentAddedOrRemoved |= ((FArianePathInvalidationFlags&)RHS).SegmentAddedOrRemoved;
     }
 
     Super::OR( RHS );
@@ -61,10 +61,10 @@ FArianePathInvalidationFlags::OR( const FArianeObjectInvalidationFlags& RHS )
 FArianePathInvalidationFlags&
 FArianePathInvalidationFlags::SetAll()
 {
-    VertexGeometry  =
-    SegmentGeometry =
-    VertexTopology  =
-    SegmentTopology = 1;
+    VertexAltered  =
+    SegmentAltered =
+    VertexAddedOrRemoved  =
+    SegmentAddedOrRemoved = 1;
 
     Super::SetAll();
 
@@ -74,10 +74,10 @@ FArianePathInvalidationFlags::SetAll()
 void
 FArianePathInvalidationFlags::ClearOwn( FArianePathInvalidationFlags& Flags )
 {
-    Flags.VertexGeometry  =
-    Flags.SegmentGeometry =
-    Flags.VertexTopology  =
-    Flags.SegmentTopology = 0;
+    Flags.VertexAltered  =
+    Flags.SegmentAltered =
+    Flags.VertexAddedOrRemoved  =
+    Flags.SegmentAddedOrRemoved = 0;
 }
 
 FArianePathInvalidationFlags&
@@ -93,10 +93,10 @@ FArianePathInvalidationFlags::Clear()
 bool
 FArianePathInvalidationFlags::HasAny()
 {
-    return ( VertexGeometry
-          || SegmentGeometry
-          || VertexTopology
-          || SegmentTopology ) ? true : Super::HasAny();
+    return ( VertexAltered
+          || SegmentAltered
+          || VertexAddedOrRemoved
+          || SegmentAddedOrRemoved ) ? true : Super::HasAny();
 }
 
 FArianePath::~FArianePath()
@@ -153,7 +153,7 @@ FArianePath::RemoveVertex( FArianeVertex* iVertex, bool bRemoveFromInstancedVert
         return ( iVertex == VertexID.GetVertex() ) ? true : false;
     } );
 
-    Invalidate( FArianePathInvalidationFlags().SetVertexTopology() );
+    Invalidate( FArianePathInvalidationFlags().SetVertexAddedOrRemoved() );
 
     if( bRemoveFromInstancedVertices )
     {
@@ -213,7 +213,7 @@ FArianePath::AddVertex( FArianeVertex* Vertex )
 
     Vertex->Invalidate();
 
-    Invalidate( FArianePathInvalidationFlags().SetVertexTopology() );
+    Invalidate( FArianePathInvalidationFlags().SetVertexAddedOrRemoved() );
 }
 
 void
@@ -228,7 +228,7 @@ FArianePath::AddSegment( FArianeSegment* Segment )
 
     Segment->Invalidate();
 
-    Invalidate( FArianePathInvalidationFlags().SetSegmentTopology() );
+    Invalidate( FArianePathInvalidationFlags().SetSegmentAddedOrRemoved() );
 }
 
 void
@@ -243,7 +243,7 @@ FArianePath::RemoveSegment( FArianeSegment* Segment, bool bRemoveFromInstancedSe
 
     Segment->Unlink();
 
-    Invalidate( FArianePathInvalidationFlags().SetSegmentTopology() );
+    Invalidate( FArianePathInvalidationFlags().SetSegmentAddedOrRemoved() );
 
     if( bRemoveFromInstancedSegments )
     {
@@ -308,7 +308,7 @@ FArianePath::PostEditUndo()
         Segment->Link();
     }
 
-    Invalidate( FArianePathInvalidationFlags().SetSegmentGeometry() );
+    Invalidate( FArianePathInvalidationFlags().SetSegmentAltered() );
 }
 
 void
@@ -330,19 +330,19 @@ FArianePath::Update( bool Recurse )
 
     FArianeObject::Update( Recurse );
 
-    if( PathInvalidationFlags->VertexGeometry
-     || PathInvalidationFlags->VertexTopology
-     || PathInvalidationFlags->SegmentGeometry
-     || PathInvalidationFlags->SegmentTopology )
+    if( PathInvalidationFlags->VertexAltered
+     || PathInvalidationFlags->VertexAddedOrRemoved
+     || PathInvalidationFlags->SegmentAltered
+     || PathInvalidationFlags->SegmentAddedOrRemoved )
     {
         Geometry3D.Build();
 
         UpdateBounds();
 
-        PathInvalidationFlags->VertexGeometry
-      = PathInvalidationFlags->VertexTopology
-      = PathInvalidationFlags->SegmentGeometry
-      = PathInvalidationFlags->SegmentTopology = 0;
+        PathInvalidationFlags->VertexAltered
+      = PathInvalidationFlags->VertexAddedOrRemoved
+      = PathInvalidationFlags->SegmentAltered
+      = PathInvalidationFlags->SegmentAddedOrRemoved = 0;
     }
 
     return true; // update succeeded
@@ -356,25 +356,7 @@ FArianePath::InvalidateAllSegments()
         InvalidatedSegments.Add( SegmentID.GetSegment() );
     }
 
-    Invalidate( FArianePathInvalidationFlags().SetSegmentGeometry() );
-}
-
-void
-FArianePath::InvalidateCache( TArray<FArianeVertexID>& VertexIDArray )
-{
-    for( FArianeVertexID& VertexID : VertexIDArray )
-    {
-        VertexID.InvalidateCache();
-    }
-}
-
-void
-FArianePath::InvalidateCache( TArray<FArianeSegmentID>& SegmentIDArray )
-{
-    for( FArianeSegmentID& SegmentID : SegmentIDArray )
-    {
-        SegmentID.InvalidateCache();
-    }
+    Invalidate( FArianePathInvalidationFlags().SetSegmentAltered() );
 }
 
 FArianePathGeometry3D&

@@ -473,7 +473,7 @@ FArianeEditorViewportToolkit::GetInlineContent() const
     return SNew(SArianeEditorMasterPanel, const_cast<FArianeEditor*>(&mEditor) );
 }
 
-FEdMode*
+FArianeEditorViewportEdMode*
 FArianeEditorViewportToolkit::GetEditorMode() const
 {
     return mEdMode;

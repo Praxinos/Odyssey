@@ -5,12 +5,11 @@
 
 #include "Toolkits/BaseToolkit.h"
 #include "ArianeEditor.h"
+#include "ArianeEditorViewportEdMode.h"
 
-class FArianeEditorViewportEdMode;
 class FArianeViewportDrawingEditor;
 class FArianeViewportDrawingEditorExtension;
 class FEdMode;
-
 
 class ARIANEEDITOR_API FArianeEditorViewportToolkit
     : public FModeToolkit
@@ -20,10 +19,14 @@ class ARIANEEDITOR_API FArianeEditorViewportToolkit
         ~FArianeEditorViewportToolkit();
         FArianeEditorViewportToolkit( FArianeEditorViewportEdMode* iViewportDrawingEditorEdMode );
 
+        /** Overriden from FModeToolkit */
         virtual void Init( const TSharedPtr<IToolkitHost>& iInitToolkitHost ) override;
 
+        /** Overriden from FModeToolkit */
         virtual TSharedPtr<SWidget> GetInlineContent() const override;
-        virtual FEdMode* GetEditorMode() const override;
+
+        /** Overriden from FModeToolkit */
+        virtual FArianeEditorViewportEdMode* GetEditorMode() const override;
 
         /** IToolkit interface */
         virtual FName GetToolkitFName() const override;
@@ -33,6 +36,7 @@ class ARIANEEDITOR_API FArianeEditorViewportToolkit
         void OnAddEditedObject(UObject* iObject);
         void OnRemoveEditedObject(UObject* iObject);
     */
+        /** Overriden from FModeToolkit */
         virtual void ExtendSecondaryModeToolbar(UToolMenu *InModeToolbarMenu) override;
 
         FArianeEditor& GetEditor();
@@ -45,19 +49,32 @@ class ARIANEEDITOR_API FArianeEditorViewportToolkit
     */
 
     public:
-        //from IAssetEditorInstance
+        /** Overriden from IAssetEditorInstance */
         virtual FName GetEditorName() const override;
+        /** Overriden from IAssetEditorInstance */
         virtual void FocusWindow(UObject* ObjectToFocusOn = nullptr) override;
+        /** Overriden from IAssetEditorInstance */
         virtual bool CloseWindow() override;
+        /** Overriden from IAssetEditorInstance */
         virtual bool IsPrimaryEditor() const override;
+        /** Overriden from IAssetEditorInstance */
         virtual void InvokeTab(const struct FTabId& TabId) override;
+        /** Overriden from IAssetEditorInstance */
         virtual FName GetToolbarTabId() const override;
+        /** Overriden from IAssetEditorInstance */
         virtual TSharedPtr<class FTabManager> GetAssociatedTabManager() override;
+        /** Overriden from IAssetEditorInstance */
         virtual double GetLastActivationTime() override;
+        /** Overriden from IAssetEditorInstance */
         virtual void RemoveEditingAsset(UObject* Asset) override;
+
+        /** Overriden from FModeToolkit */
         virtual void RequestModeUITabs() override;
+        /** Overriden from FModeToolkit */
         virtual void InvokeUI() override;
+        /** Overriden from FModeToolkit */
         virtual void ShutdownUI() override;
+
     /* Gary
         void RebuildLevelEditorMenu() const;
 

@@ -81,16 +81,16 @@ struct ARIANE_API FArianePathInvalidationFlags : FArianeObjectInvalidationFlags
         void ClearOwn( FArianePathInvalidationFlags& Flags );
 
     public:
-        FArianePathInvalidationFlags& SetVertexGeometry()  { VertexGeometry  = 1; return *this; };
-        FArianePathInvalidationFlags& SetSegmentGeometry() { SegmentGeometry = 1; return *this; };
-        FArianePathInvalidationFlags& SetVertexTopology()  { VertexTopology  = 1; return *this; };
-        FArianePathInvalidationFlags& SetSegmentTopology() { SegmentTopology = 1; return *this; };
+        FArianePathInvalidationFlags& SetVertexAltered()  { VertexAltered  = 1; return *this; };
+        FArianePathInvalidationFlags& SetSegmentAltered() { SegmentAltered = 1; return *this; };
+        FArianePathInvalidationFlags& SetVertexAddedOrRemoved()  { VertexAddedOrRemoved  = 1; return *this; };
+        FArianePathInvalidationFlags& SetSegmentAddedOrRemoved() { SegmentAddedOrRemoved = 1; return *this; };
 
     public:
-        uint32 VertexGeometry  : 1  = 0;
-        uint32 SegmentGeometry : 1  = 0;
-        uint32 VertexTopology  : 1  = 0;
-        uint32 SegmentTopology : 1  = 0;
+        uint32 VertexAltered  : 1  = 0;
+        uint32 SegmentAltered : 1  = 0;
+        uint32 VertexAddedOrRemoved  : 1  = 0;
+        uint32 SegmentAddedOrRemoved : 1  = 0;
 };
 
 USTRUCT(BlueprintType)
@@ -109,36 +109,103 @@ struct ARIANE_API FArianePath : public FArianeObject
         FArianePath( UArianePainting3DComponent* InPainting3DComponent );
 
     public:
+        /**
+         * @brief Alloc a vertex. Nb: the vertex is a allocated inside a FInstancedStruct,
+         * hence supports the unreal reflection system.
+         * @param iPosition vertex's position
+         * @param InNormal vertex's normal vector (perpendicular to the plan it was drawn on)
+         * @param InRadius vertex's radius
+         * @return a pointer to the allocated vertex
+         */
         FArianeVertex* AllocVertex( const FVector& iPosition, const FVector& InNormal, double InRadius );
-        FArianeSegment* AllocSegment( FArianeVertex* iVertex0, FArianeVertex* iVertex1 );
 
+        /**
+         * @brief Alloc a segment. Nb: the segment is a allocated inside a FInstancedStruct,
+         * hence supports the unreal reflection system.
+         * @param Vertex0 first vertex
+         * @param Vertex1 second vertex
+         * @return a pointer to the allocated segment
+         */
+        FArianeSegment* AllocSegment( FArianeVertex* Vertex0, FArianeVertex* Vertex1 );
+
+        /**
+         * @brief Add a vertex to this path.
+         * @param Vertex the vertex.
+         */
         void AddVertex( FArianeVertex* Vertex );
+
+        /**
+         * @brief Add a segment to this path.
+         * @param Segment the segment.
+         */
         void AddSegment( FArianeSegment* Segment );
 
+        /**
+         * @brief Remove a vertex from this path.
+         * @param Vertex the vertex.
+         * @param bRemoveFromInstancedVertices true to remove from allocated vertices, false otherwise.
+         */
         void RemoveVertex( FArianeVertex* iVertex, bool bRemoveFromInstancedVertices = true );
-        void RemoveSegment( FArianeSegment* iSegment, bool bRemoveFromInstancedSegments = true );
 
-        TArray<FArianeSegmentID>& GetSegments();
-        TArray<FArianeSegment*>& GetInvalidatedSegments();
+        /**
+         * @brief Remove a segment from this path.
+         * @param Segment the segment.
+         * @param bRemoveFromInstancedVertices true to remove from allocated segments, false otherwise.
+         */
+        void RemoveSegment( FArianeSegment* Segment, bool bRemoveFromInstancedSegments = true );
+
+        /** Get all the vertices added to this path */
         TArray<FArianeVertexID>& GetVertices();
 
-        bool Update( bool Recurse ) override;
+        /** Get all the invalidated vertices */
+        TArray<FArianeSegment*>& GetInvalidatedVertices();
+
+        /** Get all the segments added to this path */
+        TArray<FArianeSegmentID>& GetSegments();
+
+        /** Get all the invalidated segments */
+        TArray<FArianeSegment*>& GetInvalidatedSegments();
+
+        /** Get the 3D geometry buffers */
         FArianePathGeometry3D& GetGeometry3D();
-        virtual void UpdateBounds() override;
+
+        /**
+         * @brief Get a vertex by its Guid
+         * @param InGuid the Guid.
+         * @return the first vertex with this Guid or nullptr if none
+         */
         FArianeVertex* GetVertexByGuid( const FGuid& InGuid );
+
+        /**
+         * @brief Get a segment by its Guid
+         * @param InGuid the Guid.
+         * @return the first segment with this Guid or nullptr if none
+         */
         FArianeSegment* GetSegmentByGuid( const FGuid& InGuid );
-        //virtual void PostLoad();
 
-        virtual void PostLoad();
-        virtual void PostEditUndo();
-
+        /**
+         * @brief Mark a vertex as invalidated
+         * @param Vertex the vertex.
+         */
         void InvalidateVertex( FArianeVertex* Vertex );
+
+        /**
+         * @brief Mark a segment as invalidated
+         * @param Segment the segment.
+         */
         void InvalidateSegment( FArianeSegment* Segment );
+
+        /** Invalidate all segments */
         void InvalidateAllSegments();
 
-    protected:
-        static void InvalidateCache( TArray<FArianeVertexID>& VertexIDArray );
-        static void InvalidateCache( TArray<FArianeSegmentID>& SegmentIDArray );
+        /** overriden from ArianeObject */
+        bool Update( bool Recurse ) override;
+        /** overriden from ArianeObject */
+        virtual void UpdateBounds() override;
+        /** overriden from ArianeObject */
+        virtual void PostLoad() override;
+        /** overriden from ArianeObject */
+        virtual void PostEditUndo() override;
 
     public:
         UPROPERTY( EditAnywhere )

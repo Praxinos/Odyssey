@@ -47,7 +47,16 @@ struct ARIANE_API FArianeObject
     GENERATED_BODY()
 
     public:
+        /**
+         * @brief Get the class type
+         * @return the class type
+         */
         static uint32 StaticClass() { return 0x7b527cb6; }; // value is crc32 FArianeObject
+
+        /**
+         * @brief Get the object type
+         * @return the object type
+         */
         virtual uint32 GetClass() { return StaticClass(); };
         //virtual bool HasBaseClass( uint32 iBaseClassID );
 
@@ -57,22 +66,65 @@ struct ARIANE_API FArianeObject
 
         FArianeObject( UArianePainting3DComponent* InPainting3DComponent );
 
-        void AppendChild( FArianeObject* iChild );
-        void PrependChild( FArianeObject* iChild );
-        void AddChild( FArianeObject* Child, FArianeObject* InsertAfter );
+        /**
+         * @brief Add a child to this object at the end of the list of children.
+         * @param Child the child to add
+         */
+        void AppendChild( FArianeObject* Child );
+
+        /**
+         * @brief Add a child to this object at the beginning of the list of children.
+         * @param Child the child to add
+         */
+        void PrependChild( FArianeObject* Child );
+
+        /**
+         * @brief Insert a child to this object's list of children.
+         * @param Child the child to add
+         * @param InsertAfter insert the added child after this one.
+         */
+        void InsertChild( FArianeObject* Child, FArianeObject* InsertAfter );
+
+        /**
+         * @brief Mark the object as invalidated. It will also invalidate the whole chain of parents.
+         * @param InInvalidationFlags the setted flags. They will be combined with the existing ones (via the OR operand).
+         */
         void Invalidate( const FArianeObjectInvalidationFlags& InInvalidationFlags );
-        void GetInvalidatedObjects( TArray<FArianeObject*> OutInvalidatedObjects, bool Recurse );
-        virtual bool Update( bool Recurse );
+
+        /**
+         * @brief Get the list of invalidated children, recursively if desired.
+         * @param OutInvalidatedObjects the array to fill with invalidated children.
+         * @param bRecurse recurse inside sub-objects.
+         */
+        void GetInvalidatedChildren( TArray<FArianeObject*> OutInvalidatedObjects, bool bRecurse );
+
+        /**
+         * @brief Update the object
+         * @param bRecurse Update recursively
+         */
+        virtual bool Update( bool bRecurse );
+
+        /** Get the invalidation flags */
         FArianeObjectInvalidationFlags& GetInvalidationFlags();
+
+        /** Get object's bounds */
         const FBoxSphereBounds& GetBounds();
+
+        /** Update object's bounds */
         virtual void UpdateBounds();
 
+        /** Run any object-specific task required immediately after loading an object */
         virtual void PostLoad(){};
+
+        /** Run any object-specific task required immediately after undoing / redoing */
         virtual void PostEditUndo(){};
 
     protected:
+        /**
+         * @brief Invalidate a child. It will also invalidate the whole chain of parents.
+         * @param Child the child to invalidate.
+         */
         void InvalidateChild( FArianeObject* Child );
-        void InvalidatePointerCache( TArray<FArianeObjectID>& ObjectIDArray );
 
     public:
         UPROPERTY( EditAnywhere )
