@@ -118,21 +118,24 @@ FArianeObject::PrependChild( FArianeObject* Child )
 }
 
 void
-FArianeObject::AddChild( FArianeObject* Child, FArianeObject* InsertAfter )
+FArianeObject::InsertChild( FArianeObject* Child, FArianeObject* InsertAfter )
 {
-/*
-    ChildrenID.Insert( FArianeObjectID( Child ), ChildrenID.Find( FArianeObjectID( InsertAfter ) ) );
+    int FoundObjectIndex = ChildrenID.IndexOfByPredicate( [Child]( const FArianeObjectID& ObjectID ) -> bool
+                                                          {
+                                                              return ( ObjectID.Guid == Child->Guid ) ? true : false;
+                                                          } );
+
+    ChildrenID.Insert( FArianeObjectID( Child ), FoundObjectIndex + 1 );
 
     Child->ParentID = FArianeObjectID( this );
 
     Invalidate( FArianeObjectInvalidationFlags().SetHierarchy() );
-*/
 }
 
 void
 FArianeObject::InvalidateChild( FArianeObject* Child )
 {
-    if( InvalidatedChildrenID.FindByPredicate( [Child]( FArianeObjectID& ObjectID ) -> bool
+    if( InvalidatedChildrenID.FindByPredicate( [Child]( const FArianeObjectID& ObjectID ) -> bool
                                                {
                                                    return ( ObjectID.Guid == Child->Guid ) ? true : false;
                                                } ) == nullptr )
@@ -158,15 +161,15 @@ FArianeObject::Invalidate( const FArianeObjectInvalidationFlags& InInvalidationF
 }
 
 void
-FArianeObject::GetInvalidatedObjects( TArray<FArianeObject*> OutInvalidatedObjects, bool Recurse )
+FArianeObject::GetInvalidatedChildren( TArray<FArianeObject*> OutInvalidatedObjects, bool bRecurse )
 {
     for( FArianeObjectID& InvalidatedObject : InvalidatedChildrenID )
     {
         OutInvalidatedObjects.Add( InvalidatedObject.GetObject() );
 
-        if( Recurse )
+        if( bRecurse )
         {
-            InvalidatedObject.GetObject()->GetInvalidatedObjects( OutInvalidatedObjects, Recurse );
+            InvalidatedObject.GetObject()->GetInvalidatedChildren( OutInvalidatedObjects, bRecurse );
         }
     }
 }

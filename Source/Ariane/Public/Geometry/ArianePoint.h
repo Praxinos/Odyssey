@@ -16,14 +16,39 @@ struct ARIANE_API FArianePoint
     public:
         ~FArianePoint();
         FArianePoint(){};
-        FArianePoint( double iX, double iY, double iZ );
-        FArianePoint( const FVector& iPosition );
 
+        /**
+         * @brief Constructor
+         * @param X coordinate along the X axis.
+         * @param Y coordinate along the Y axis.
+         * @param Z coordinate along the Z axis.
+         */
+        FArianePoint( double X, double Y, double Z );
+
+        /**
+         * @brief Constructor
+         * @param InPosition vertex's position.
+         */
+        FArianePoint( const FVector& InPosition );
+
+        /** Get the vertex's position */
         const FVector& GetPosition();
 
-        void SetPosition( double iX, double iY, double iZ );
-        void SetPosition( const FVector& iPosition );
+        /**
+         * @brief Set the vertex's position in space.
+         * @param X coordinate along the X axis.
+         * @param Y coordinate along the Y axis.
+         * @param Z coordinate along the Z axis.
+         */
+        void SetPosition( double X, double Y, double Z );
 
+        /**
+         * @brief Set the vertex's position in space.
+         * @param InPosition vertex's position.
+         */
+        void SetPosition( const FVector& InPosition );
+
+        /** Run any object-specific task required immediately after undoing / redoing */
         virtual void PostEditUndo(){};
 
     protected:
