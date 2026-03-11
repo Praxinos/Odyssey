@@ -675,7 +675,11 @@ UOdysseyAnimationPlayer::PostLoad()
     RenderTarget->bAutoGenerateMips = true;
 
     //Reset Image Rendering to force a render
-    mInvalidTileMap = FOdysseyInvalidTileMap(64, Animation->GetWidth(), Animation->GetHeight());
+    if (Animation)
+        mInvalidTileMap = FOdysseyInvalidTileMap(64, Animation->GetWidth(), Animation->GetHeight());
+    else
+        mInvalidTileMap = FOdysseyInvalidTileMap(64, 1, 1);
+
     mImageRenderingComposition.Empty();
 
     //Resize Render Target To match Animation size if needed
@@ -710,7 +714,11 @@ UOdysseyAnimationPlayer::PostDuplicate(EDuplicateMode::Type iDuplicateMode)
     IOdysseyRenderingAbility::OnRenderingChangedDelegate().AddUObject(this, &UOdysseyAnimationPlayer::OnRenderingChanged);
 
     //Reset Image Rendering to force a render
-    mInvalidTileMap = FOdysseyInvalidTileMap(64, Animation->GetWidth(), Animation->GetHeight());
+    if (Animation)
+        mInvalidTileMap = FOdysseyInvalidTileMap(64, Animation->GetWidth(), Animation->GetHeight());
+    else
+        mInvalidTileMap = FOdysseyInvalidTileMap(64, 1, 1);
+
     mImageRenderingComposition.Empty();
 
     RenderTarget = NewObject<UTextureRenderTarget2D>(this, NAME_None, RF_Public | RF_Transient);
