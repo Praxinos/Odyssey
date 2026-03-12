@@ -90,6 +90,12 @@ private:
     void OnObjectPropertyChanged(UObject* iObject, struct FPropertyChangedEvent& iPropertyChangedEvent);
     void OnSourceChanged();
 
+    void SetupSourceTexture();
+    void SetupSourceAnimation();
+
+    void CleanSourceTexture();
+    void CleanSourceAnimation();
+
 private:
     // FTickableEditorObject implementation
     virtual void Tick(float DeltaTime) override;

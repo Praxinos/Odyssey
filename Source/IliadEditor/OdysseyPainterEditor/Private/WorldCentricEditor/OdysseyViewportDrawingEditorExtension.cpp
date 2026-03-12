@@ -51,6 +51,9 @@ FOdysseyViewportDrawingEditorExtension::~FOdysseyViewportDrawingEditorExtension(
     mPaintingAdapter->SetTexture(nullptr);
     FCoreUObjectDelegates::OnObjectPropertyChanged.RemoveAll(this);
 
+    CleanSourceTexture();
+    CleanSourceAnimation();
+
     TSharedPtr<FOdysseyPainterEditor> editor = GetEditor();
     if (editor)
         editor->OnSourceChanged().RemoveAll(this);
@@ -104,6 +107,74 @@ FOdysseyViewportDrawingEditorExtension::Initialize()
 }
 
 void
+FOdysseyViewportDrawingEditorExtension::SetupSourceTexture()
+{
+    //If the source is a texture, then change its parameters for display reasons
+    if( mCurrentSource->Id() == FOdysseyPainterEditorTextureSource::StaticId() )
+    {
+        TSharedPtr<FOdysseyPainterEditorTextureSource> textureSource = StaticCastSharedPtr<FOdysseyPainterEditorTextureSource>( mCurrentSource );
+        UTexture2D* texture = textureSource->GetTexture();
+        if( texture )
+        {
+            mPreviousMipSettings = texture->MipGenSettings;
+            texture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
+            texture->UpdateResource();
+            FTextureCompilingManager::Get().FinishCompilation( { texture } );
+            texture->MarkPackageDirty();
+        }
+    }
+}
+void
+FOdysseyViewportDrawingEditorExtension::SetupSourceAnimation()
+{
+    //If the source is an animation
+    if( mCurrentSource && mCurrentSource->Id() == FOdysseyPainterEditorAnimationSource::StaticId() )
+    {
+        TSharedPtr<FOdysseyPainterEditorAnimationSource> animationSource = StaticCastSharedPtr<FOdysseyPainterEditorAnimationSource>( mCurrentSource );
+        UOdysseyAnimationPlayer* player = animationSource->GetAnimationPlayer();
+        if( player )
+        {
+            player->OnCursorFrameChanged().AddRaw( this, &FOdysseyViewportDrawingEditorExtension::OnAnimationPlayerCursorFrameChanged );
+        }
+    }
+}
+
+void
+FOdysseyViewportDrawingEditorExtension::CleanSourceTexture()
+{
+    //If the source was a texture, then revert its parameters to their original values
+    if( mCurrentSource && mCurrentSource->Id() == FOdysseyPainterEditorTextureSource::StaticId() )
+    {
+        TSharedPtr<FOdysseyPainterEditorTextureSource> textureSource = StaticCastSharedPtr<FOdysseyPainterEditorTextureSource>( mCurrentSource );
+        UTexture2D* texture = textureSource->GetTexture();
+        if( texture )
+        {
+            texture->MipGenSettings = mPreviousMipSettings;
+            texture->UpdateResource();
+            FTextureCompilingManager::Get().FinishCompilation( { texture } );
+            texture->MarkPackageDirty();
+            //TODO: if user quits Unreal without quitting Odyssey mode first, the texture stays in NoMipMaps.
+            //Not the end of the world, but if users notice it, we may want to dig deeper into this issue.
+            //This is a better alternative than forcing the save of the texture though (which was the previous version of this code)
+        }
+    }
+}
+void
+FOdysseyViewportDrawingEditorExtension::CleanSourceAnimation()
+{
+    //If the source was an animation
+    if( mCurrentSource && mCurrentSource->Id() == FOdysseyPainterEditorAnimationSource::StaticId() )
+    {
+        TSharedPtr<FOdysseyPainterEditorAnimationSource> animationSource = StaticCastSharedPtr<FOdysseyPainterEditorAnimationSource>( mCurrentSource );
+        UOdysseyAnimationPlayer* player = animationSource->GetAnimationPlayer();
+        if( player )
+        {
+            player->OnCursorFrameChanged().RemoveAll( this );
+        }
+    }
+}
+
+void
 FOdysseyViewportDrawingEditorExtension::OnSourceChanged()
 {
     TSharedPtr<FOdysseyPainterEditor> editor = GetEditor();
@@ -117,63 +188,15 @@ FOdysseyViewportDrawingEditorExtension::OnSourceChanged()
 
     mPaintingAdapter->SetTexture(nullptr);
 
-    //If the source was a texture, then revert its parameters to their original values
-    if (mCurrentSource && mCurrentSource->Id() == FOdysseyPainterEditorTextureSource::StaticId())
-    {
-        TSharedPtr<FOdysseyPainterEditorTextureSource> textureSource = StaticCastSharedPtr<FOdysseyPainterEditorTextureSource>(mCurrentSource);
-        UTexture2D* texture = textureSource->GetTexture();
-        if (texture)
-        {
-            texture->MipGenSettings = mPreviousMipSettings;
-            texture->UpdateResource();
-            FTextureCompilingManager::Get().FinishCompilation({ texture });
-            texture->MarkPackageDirty();
-            //TODO: if user quits Unreal without quitting Odyssey mode first, the texture stays in NoMipMaps.
-            //Not the end of the world, but if users notice it, we may want to dig deeper into this issue.
-            //This is a better alternative than forcing the save of the texture though (which was the previous version of this code)
-        }
-    }
-
-    //If the source was an animation
-    if (mCurrentSource && mCurrentSource->Id() == FOdysseyPainterEditorAnimationSource::StaticId())
-    {
-        TSharedPtr<FOdysseyPainterEditorAnimationSource> animationSource = StaticCastSharedPtr<FOdysseyPainterEditorAnimationSource>(mCurrentSource);
-        UOdysseyAnimationPlayer* player = animationSource->GetAnimationPlayer();
-        if (player)
-        {
-            player->OnCursorFrameChanged().RemoveAll(this);
-        }
-    }
+    CleanSourceTexture();
+    CleanSourceAnimation();
 
     mCurrentSource = source;
     if (!source)
         return;
 
-    //If the source is a texture, then change its parameters for display reasons
-    if (mCurrentSource->Id() == FOdysseyPainterEditorTextureSource::StaticId())
-    {
-        TSharedPtr<FOdysseyPainterEditorTextureSource> textureSource = StaticCastSharedPtr<FOdysseyPainterEditorTextureSource>(mCurrentSource);
-        UTexture2D* texture = textureSource->GetTexture();
-        if (texture)
-        {
-            mPreviousMipSettings = texture->MipGenSettings;
-            texture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
-            texture->UpdateResource();
-            FTextureCompilingManager::Get().FinishCompilation({ texture });
-            texture->MarkPackageDirty();
-        }
-    }
-
-    //If the source is an animation
-    if (mCurrentSource && mCurrentSource->Id() == FOdysseyPainterEditorAnimationSource::StaticId())
-    {
-        TSharedPtr<FOdysseyPainterEditorAnimationSource> animationSource = StaticCastSharedPtr<FOdysseyPainterEditorAnimationSource>(mCurrentSource);
-        UOdysseyAnimationPlayer* player = animationSource->GetAnimationPlayer();
-        if (player)
-        {
-            player->OnCursorFrameChanged().AddRaw(this, &FOdysseyViewportDrawingEditorExtension::OnAnimationPlayerCursorFrameChanged);
-        }
-    }
+    SetupSourceTexture();
+    SetupSourceAnimation();
 
     mPaintingAdapter->SetTexture(Texture());
 }
