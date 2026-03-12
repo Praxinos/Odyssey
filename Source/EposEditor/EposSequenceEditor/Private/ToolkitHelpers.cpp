@@ -105,6 +105,8 @@ ToolkitHelpers::CreateTrack( ISequencer* iSequencer, AActor* iActor, const FGuid
         {
             auto TransformSection = Cast<UMovieScene3DTransformSection>( NewSection );
 
+            TransformSection->SetCompletionMode( EMovieSceneCompletionMode::KeepState );
+
             FTransform Transform = iActor->GetTransform();
 
             if( USceneComponent* SceneComponent = Cast<USceneComponent>( iActor->GetRootComponent() ) )

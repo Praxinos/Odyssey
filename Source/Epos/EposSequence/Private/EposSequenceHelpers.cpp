@@ -150,7 +150,7 @@ BoardSequenceHelpers::GetCameraBinding( IMovieScenePlayer& iPlayer, const UMovie
 {
     FInnerSequenceResult result = GetInnerSequence( iPlayer, iSubSection, iSequenceID );
 
-    if( result.mInnerSequence->IsA<UBoardSequence>() )
+    if( !result.mInnerSequence || result.mInnerSequence->IsA<UBoardSequence>() )
         return FGuid();
 
     return ShotSequenceHelpers::GetCameraBinding( iPlayer, result.mInnerSequence, result.mInnerSequenceId );
@@ -162,7 +162,7 @@ BoardSequenceHelpers::GetCameraSpawned( IMovieScenePlayer& iPlayer, const UMovie
 {
     FInnerSequenceResult result = GetInnerSequence( iPlayer, iSubSection, iSequenceID );
 
-    if( result.mInnerSequence->IsA<UBoardSequence>() )
+    if( !result.mInnerSequence || result.mInnerSequence->IsA<UBoardSequence>() )
         return nullptr;
 
     return ShotSequenceHelpers::GetCameraSpawned( iPlayer, result.mInnerSequence, result.mInnerSequenceId, iCameraBinding );
@@ -174,7 +174,7 @@ BoardSequenceHelpers::GetCameraSpawnedOrTemplate( IMovieScenePlayer& iPlayer, co
 {
     FInnerSequenceResult result = GetInnerSequence( iPlayer, iSubSection, iSequenceID );
 
-    if( result.mInnerSequence->IsA<UBoardSequence>() )
+    if( !result.mInnerSequence || result.mInnerSequence->IsA<UBoardSequence>() )
         return nullptr;
 
     return ShotSequenceHelpers::GetCameraSpawnedOrTemplate( iPlayer, result.mInnerSequence, result.mInnerSequenceId, iCameraBinding );
@@ -188,7 +188,7 @@ BoardSequenceHelpers::GetCameraBinding( IMovieScenePlayer& iPlayer, UMovieSceneS
 
     FInnerSequenceResult result = GetInnerSequence( iPlayer, iSequence, iSequenceID, iFrameNumber );
 
-    if( result.mInnerSequence->IsA<UBoardSequence>() )
+    if( !result.mInnerSequence || result.mInnerSequence->IsA<UBoardSequence>() )
         return FGuid();
 
     return ShotSequenceHelpers::GetCameraBinding( iPlayer, result.mInnerSequence, result.mInnerSequenceId );
@@ -202,7 +202,7 @@ BoardSequenceHelpers::GetCameraSpawned( IMovieScenePlayer& iPlayer, UMovieSceneS
 
     FInnerSequenceResult result = GetInnerSequence( iPlayer, iSequence, iSequenceID, iFrameNumber );
 
-    if( result.mInnerSequence->IsA<UBoardSequence>() )
+    if( !result.mInnerSequence || result.mInnerSequence->IsA<UBoardSequence>() )
         return nullptr;
 
     return ShotSequenceHelpers::GetCameraSpawned( iPlayer, result.mInnerSequence, result.mInnerSequenceId, iCameraBinding );
@@ -216,7 +216,7 @@ BoardSequenceHelpers::GetCameraSpawnedOrTemplate( IMovieScenePlayer& iPlayer, UM
 
     FInnerSequenceResult result = GetInnerSequence( iPlayer, iSequence, iSequenceID, iFrameNumber );
 
-    if( result.mInnerSequence->IsA<UBoardSequence>() )
+    if( !result.mInnerSequence || result.mInnerSequence->IsA<UBoardSequence>() )
         return nullptr;
 
     return ShotSequenceHelpers::GetCameraSpawnedOrTemplate( iPlayer, result.mInnerSequence, result.mInnerSequenceId, iCameraBinding );
