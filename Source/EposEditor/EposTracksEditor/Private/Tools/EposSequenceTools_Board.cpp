@@ -17,6 +17,7 @@
 #include "MovieSceneTimeHelpers.h"
 #include "MovieSceneToolHelpers.h"
 #include "MovieSceneToolsProjectSettings.h"
+#include "SequencerUtilities.h"
 #include "Subsystems/EditorActorSubsystem.h"
 #include "UObject/UObjectIterator.h"
 #include "Widgets/Notifications/SNotificationList.h"
@@ -906,12 +907,16 @@ CinematicBoardTrackTools::CloneSection( ISequencer* iSequencer, UMovieSceneCinem
 void
 ShotSequenceTools::CloneInnerContent( ISequencer* iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, bool iEmptyDrawings )
 {
-    checkNoEntry(); //TODO: ShotSequenceHelpers::GetCamera????() because used to check the parent ...
-
-    FGuid camera_guid;
-    ACineCameraActor* camera = nullptr; // ShotSequenceHelpers::GetCamera( *iSequencer, iSequence, iSequenceID, &camera_guid );
+    FGuid camera_guid = ShotSequenceHelpers::GetCameraBinding( *iSequencer, iSequence, iSequenceID );
+    ACineCameraActor* camera = ShotSequenceHelpers::GetCameraSpawnedOrTemplate( *iSequencer, iSequence, iSequenceID, camera_guid );
     if( !camera )
         return;
+
+    UObject* object = MovieSceneHelpers::GetObjectTemplate( iSequence, camera_guid, iSequencer->GetSharedPlaybackState(), 0 );
+    ACineCameraActor* camera_template = Cast<ACineCameraActor>( object );
+
+    bool bIsSpawnable = MovieSceneHelpers::IsBoundToAnySpawnable( iSequence, camera_guid, iSequencer->GetSharedPlaybackState() );
+    check( bIsSpawnable == !!camera_template );
 
     //---
 
@@ -922,11 +927,19 @@ ShotSequenceTools::CloneInnerContent( ISequencer* iSequencer, UMovieSceneSequenc
 
     //---
 
-    FActorSpawnParameters cameraSpawnParams;
-    cameraSpawnParams.Template = camera;
-    ACineCameraActor* cloned_camera = camera->GetWorld()->SpawnActor<ACineCameraActor>( cameraSpawnParams );
-    if( !cloned_camera )
-        return;
+    ACineCameraActor* cloned_camera = nullptr;
+    if( bIsSpawnable )
+    {
+        cloned_camera = camera;
+    }
+    else
+    {
+        FActorSpawnParameters cameraSpawnParams;
+        cameraSpawnParams.Template = camera;
+        cloned_camera = camera->GetWorld()->SpawnActor<ACineCameraActor>( cameraSpawnParams );
+        if( !cloned_camera )
+            return;
+    }
 
     UEposMovieSceneSequence* epos_sequence = Cast<UEposMovieSceneSequence>( iSequence );
     check( epos_sequence );
@@ -941,29 +954,22 @@ ShotSequenceTools::CloneInnerContent( ISequencer* iSequencer, UMovieSceneSequenc
 
     //-
 
-    cloned_camera_name = NamingConvention::GenerateCameraTrackName( *iSequencer, *epos_sequence, iSequenceID, cloned_camera );
+    if( !bIsSpawnable )
+    {
+        cTemporarySwitchInner switch_to( *iSequencer, iSequenceID );
 
-    // This part will create a new guid for the possessable, I don't know if it's wanted (just for info)
-    //FMovieScenePossessable new_possessable( cloned_camera_name, cloned_camera->GetClass() );
-    //iSequence->GetMovieScene()->ReplacePossessable( camera_guid, new_possessable );
-    //iSequence->UnbindPossessableObjects( camera_guid );
-    //iSequence->BindPossessableObject( new_possessable.GetGuid(), *cloned_camera, iSequencer->GetPlaybackContext() );
+        FSequencerUtilities::ReplaceBindingWithActors( iSequencer->AsShared(), { cloned_camera }, FMovieSceneBindingProxy{ camera_guid, iSequence } );
+    }
 
-    // This part will keep the same guid for the possessable and only change the name
-    iSequence->UnbindPossessableObjects( camera_guid );
-    iSequence->BindPossessableObject( camera_guid, *cloned_camera, iSequencer->GetPlaybackContext() );
-    // Original code for changing possessable name
-    //iSequence->GetMovieScene()->FindPossessable( camera_guid )->SetName( cloned_camera_name );
-    // This way will call FActorLabelUtilities::RenameExistingActor() again
-    //ShotSequenceTools::RenameBinding( *iSequencer, iSequence, iSequenceID, camera_guid, cloned_camera_name );
-    // So just replace the name in the existing possessable, and its corresponding 'binding' inside ReplacePossessable()
     FMovieScenePossessable* possessable = iSequence->GetMovieScene()->FindPossessable( camera_guid );
     if( possessable )
     {
-        FMovieScenePossessable new_possessable( *possessable );
-        new_possessable.SetName( cloned_camera_name );
-        iSequence->GetMovieScene()->ReplacePossessable( camera_guid, new_possessable );
+        cloned_camera_name = NamingConvention::GenerateCameraTrackName( *iSequencer, *epos_sequence, iSequenceID, cloned_camera );
+        possessable->SetName( cloned_camera_name );
     }
+
+    if( bIsSpawnable )
+        MovieSceneHelpers::CopyObjectTemplate( iSequence, camera_guid, cloned_camera, iSequencer->GetSharedPlaybackState(), 0 );
 
     iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemsChanged );
 
@@ -982,21 +988,25 @@ ShotSequenceTools::CloneInnerContent( ISequencer* iSequencer, UMovieSceneSequenc
     //}
 
     TArray<FGuid> animation_bindings = ShotSequenceHelpers::GetAnimationBindings( *iSequencer, iSequence, iSequenceID );
-    //TArray<AOdysseyAnimationActor*> animation_actors = ShotSequenceHelpers::GetAnimationSpawnedOrTemplate( *iSequencer, iSequence, iSequenceID, animation_bindings );
 
-    checkNoEntry(); //TODO: check and update CloneInnerAnimation() to know if it can be called with GetAnimationSpawnedOrTemplate() !!!
+    for( FGuid animation_binding : animation_bindings )
+    {
+        TArray<AOdysseyAnimationActor*> animation_actors = ShotSequenceHelpers::GetAnimationSpawnedOrTemplate( *iSequencer, iSequence, iSequenceID, animation_binding );
+        if( animation_actors.IsEmpty() )
+            continue;
 
-    //TArray<AOdysseyAnimationActor*> animations;
-    //TArray<FGuid> animation_bindings;
-    //int32 animation_count = ShotSequenceHelpers::GetAllAnimations( *iSequencer, iSequence, iSequenceID, &animations, &animation_bindings );
+        if( bIsSpawnable )
+        {
+            CloneInnerAnimation( iSequencer, iSequence, iSequenceID, iSequence->GetMovieScene(), animation_binding, bIsSpawnable, cloned_camera, false /* not used with spawnable */ );
+        }
+        else
+        {
+            AActor* parentActor = animation_actors[0]->GetAttachParentActor();
+            bool attachAnimationToCamera = ( parentActor && parentActor == camera ); //TODO: do it inside CloneInnerAnimation() ???
 
-    //for( int i = 0; i < animation_count; i++ )
-    //{
-    //    AActor* ParentActor = animations[i]->GetAttachParentActor();
-    //    bool attachAnimationToCamera = ( ParentActor && ParentActor == camera );
-
-    //    CloneInnerAnimation( iSequencer, iSequence, iSequenceID, iSequence->GetMovieScene(), animations[i], animation_bindings[i], cloned_camera, attachAnimationToCamera );
-    //}
+            CloneInnerAnimation( iSequencer, iSequence, iSequenceID, iSequence->GetMovieScene(), animation_binding, bIsSpawnable, cloned_camera, attachAnimationToCamera );
+        }
+    }
 
     //---
 
@@ -1093,20 +1103,33 @@ ShotSequenceTools::CloneInnerContent( ISequencer* iSequencer, UMovieSceneSequenc
 
 //static
 void
-ShotSequenceTools::CloneInnerAnimation( ISequencer* iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, UMovieScene* iMovieScene, AOdysseyAnimationActor* iAnimationToClone, FGuid iAnimationBinding, ACineCameraActor* iClonedCamera, bool iAttachAnimationToCamera )
+ShotSequenceTools::CloneInnerAnimation( ISequencer* iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, UMovieScene* iMovieScene, FGuid iAnimationBinding, bool iIsSpawnable, ACineCameraActor* iClonedCamera, bool iAttachAnimationToCamera )
 {
-    UEditorActorSubsystem* editorActorSubsystem = GEditor->GetEditorSubsystem<UEditorActorSubsystem>();
-
-    TArray<AActor*> actors = editorActorSubsystem->DuplicateActors( { iAnimationToClone }, iAnimationToClone->GetWorld() );
-    AOdysseyAnimationActor* cloned_animation = Cast<AOdysseyAnimationActor>( actors.Num() ? actors[0] : nullptr );
-    if( !cloned_animation )
+    TArray<AOdysseyAnimationActor*> animation_actors_to_clone = ShotSequenceHelpers::GetAnimationSpawnedOrTemplate( *iSequencer, iSequence, iSequenceID, iAnimationBinding );
+    if( animation_actors_to_clone.IsEmpty() )
         return;
 
-    //FActorSpawnParameters animationSpawnParams;
-    //animationSpawnParams.Template = iAnimationToClone;
-    //AOdysseyAnimationActor* cloned_animation = iAnimationToClone->GetWorld()->SpawnActor<AOdysseyAnimationActor>( animationSpawnParams );
-    //if( !cloned_animation )
-    //    return;
+    //UObject* object = MovieSceneHelpers::GetObjectTemplate( iSequence, iAnimationBinding, iSequencer->GetSharedPlaybackState(), 0 );
+    //AOdysseyAnimationActor* animation_template = Cast<AOdysseyAnimationActor>( object );
+
+    AOdysseyAnimationActor* animation_actor_to_clone = animation_actors_to_clone[0];
+
+    //---
+
+    AOdysseyAnimationActor* cloned_animation = nullptr;
+    if( iIsSpawnable )
+    {
+        cloned_animation = animation_actor_to_clone;
+    }
+    else
+    {
+        UEditorActorSubsystem* editorActorSubsystem = GEditor->GetEditorSubsystem<UEditorActorSubsystem>();
+
+        TArray<AActor*> actors = editorActorSubsystem->DuplicateActors( { animation_actor_to_clone }, animation_actor_to_clone->GetWorld() );
+        cloned_animation = Cast<AOdysseyAnimationActor>( actors.Num() ? actors[0] : nullptr );
+        if( !cloned_animation )
+            return;
+    }
 
     UEposMovieSceneSequence* epos_sequence = Cast<UEposMovieSceneSequence>( iSequence );
     check( epos_sequence );
@@ -1114,44 +1137,55 @@ ShotSequenceTools::CloneInnerAnimation( ISequencer* iSequencer, UMovieSceneSeque
     FString cloned_animation_path;
     FString cloned_animation_name;
     NamingConvention::GenerateAnimationActorPathName( *iSequencer, *epos_sequence, iSequenceID, cloned_animation_path, cloned_animation_name );
-    cloned_animation_name = iAnimationToClone->GetActorLabel(); // As the animation actor is cloned, just keep the same name (let see when shot/camera name are a part of the animation name...)
+    cloned_animation_name = animation_actor_to_clone->GetActorLabel(); // As the animation actor is cloned, just keep the same name (let see when shot/camera name are a part of the animation name...)
 
     cloned_animation->SetFolderPath( *cloned_animation_path );
     FActorLabelUtilities::RenameExistingActor( cloned_animation, cloned_animation_name, false ); // The shot name is displayed in another column in the world outliner
 
-    cloned_animation->SetActorTransform( iAnimationToClone->GetTransform() ); // Should be done, because for attached animation, its new transform are totally weird
-    cloned_animation->SetActorHiddenInGame( true ); // As it was created with the class constructor which set it to true, otherwise the actor to clone is certainly displayed, then the cloned actor will have false by default
-
     //-
 
-    if( iAttachAnimationToCamera )
-        GEditor->ParentActors( iClonedCamera, cloned_animation, NAME_None );
+    if( !iIsSpawnable )
+    {
+        cloned_animation->SetActorTransform( animation_actor_to_clone->GetTransform() ); // Should be done, because for attached animation, its new transform are totally weird
+        //cloned_animation->SetActorHiddenInGame( true ); // As it was created with the class constructor which set it to true, otherwise the actor to clone is certainly displayed, then the cloned actor will have false by default
 
-    //-
+        //-
 
-    cloned_animation_name = NamingConvention::GenerateAnimationTrackName( *iSequencer, *epos_sequence, iSequenceID, cloned_animation );
+        if( iAttachAnimationToCamera )
+            GEditor->ParentActors( iClonedCamera, cloned_animation, NAME_None );
 
-    iSequence->UnbindPossessableObjects( iAnimationBinding );
-    iSequence->BindPossessableObject( iAnimationBinding, *cloned_animation, iSequencer->GetPlaybackContext() );
-    iMovieScene->FindPossessable( iAnimationBinding )->SetName( cloned_animation_name );
+        //-
+
+        cTemporarySwitchInner switch_to( *iSequencer, iSequenceID );
+
+        FSequencerUtilities::ReplaceBindingWithActors( iSequencer->AsShared(), { cloned_animation }, FMovieSceneBindingProxy{ iAnimationBinding, iSequence } );
+    }
+
+    FMovieScenePossessable* possessable = iSequence->GetMovieScene()->FindPossessable( iAnimationBinding );
+    if( possessable )
+    {
+        cloned_animation_name = NamingConvention::GenerateAnimationTrackName( *iSequencer, *epos_sequence, iSequenceID, cloned_animation );
+        possessable->SetName( cloned_animation_name );
+    }
 
     iSequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemsChanged );
 
     //---
 
-    TMap<UOdysseyAnimation*, UOdysseyAnimation*> original_to_new_animation_map;
-
-    //---
-
-    UOdysseyAnimation* new_animation = ProjectAssetTools::CloneAnimation( *iSequencer, iSequence, iSequenceID, iAnimationToClone->GetAnimationComponent()->GetAnimation() );
+    UOdysseyAnimation* new_animation = ProjectAssetTools::CloneAnimation( *iSequencer, iSequence, iSequenceID, animation_actor_to_clone->GetAnimationComponent()->GetAnimation() );
     if( !new_animation )
         return;
+
+    TMap<UOdysseyAnimation*, UOdysseyAnimation*> original_to_new_animation_map;
 
     original_to_new_animation_map.Add( cloned_animation->GetAnimationComponent()->GetAnimation(), new_animation );
 
     FTransform transform = cloned_animation->GetTransform();
     cloned_animation->GetAnimationComponent()->InitializeFromAnimation( new_animation );
     cloned_animation->SetActorTransform( transform );
+
+    if( iIsSpawnable )
+        MovieSceneHelpers::CopyObjectTemplate( iSequence, iAnimationBinding, cloned_animation, iSequencer->GetSharedPlaybackState(), 0 );
 
     ShotSequenceHelpers::FFindOrCreateTimelineResult result = ShotSequenceHelpers::FindTimelineTrackAndSections( *iSequencer, epos_sequence, iSequenceID, iAnimationBinding );
     for( TWeakObjectPtr<UOdysseyAnimationTimelineSection> section : result.mSections )
