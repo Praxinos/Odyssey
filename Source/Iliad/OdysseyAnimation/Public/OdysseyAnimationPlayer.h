@@ -73,7 +73,6 @@ public:
     FSimpleMulticastDelegate& OnDisplayedFrameChanged();
 
 protected:
-    virtual void PostInitProperties() override;
     virtual void PostLoad() override;
     virtual void PostDuplicate(EDuplicateMode::Type iDuplicateMode) override;
     virtual void Serialize(FArchive& Ar) override;

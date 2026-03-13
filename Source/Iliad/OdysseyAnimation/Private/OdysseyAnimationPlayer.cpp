@@ -40,21 +40,6 @@ UOdysseyAnimationPlayer::UOdysseyAnimationPlayer()
 }
 
 void
-UOdysseyAnimationPlayer::PostInitProperties()
-{
-    Super::PostInitProperties();
-
-    if (HasAnyFlags(RF_ClassDefaultObject))
-        return;
-
-    RenderTarget = NewObject<UTextureRenderTarget2D>(this, NAME_None, RF_Public | RF_Transient);
-    RenderTarget->LODGroup = LODGroup;
-    RenderTarget->RenderTargetFormat = RTF_RGBA16f;
-    RenderTarget->bAutoGenerateMips = true;
-    RenderTarget->UpdateResource();
-}
-
-void
 UOdysseyAnimationPlayer::Play(bool iBackward)
 {
     if (!Animation)
@@ -162,6 +147,33 @@ UOdysseyAnimationPlayer::SeekToFrame(FFrameTime iFrame)
 UTextureRenderTarget2D*
 UOdysseyAnimationPlayer::GetRenderTarget()
 {
+    if (!RenderTarget)
+    {
+        RenderTarget = NewObject<UTextureRenderTarget2D>(this, NAME_None, RF_Public | RF_Transient);
+        RenderTarget->LODGroup = LODGroup;
+        RenderTarget->RenderTargetFormat = RTF_RGBA16f;
+        RenderTarget->bAutoGenerateMips = true;
+
+        if (Animation)
+        {
+            GetRenderTarget()->ResizeTarget(Animation->GetWidth(), Animation->GetHeight());
+        }
+        else
+        {
+            RenderTarget->ResizeTarget(1, 1);
+        }
+
+        mImageRenderingComposition.Empty();
+
+        if (!RenderTarget->GetResource())
+        {
+            RenderTarget->UpdateResource();
+        }
+
+        //Force update on GPU and Generate Mips
+        RenderTarget->UpdateResourceImmediate(false);
+    }
+
     return RenderTarget;
 }
 
@@ -246,8 +258,6 @@ UOdysseyAnimationPlayer::ApplyPreBehaviour(FFrameTime iFrame) const
             FInt32Range frameRange = Animation->GetFrameRange();
             FFrameTime leftBound = FFrameTime(frameRange.GetLowerBoundValue());
             FFrameTime rightBound = FFrameTime(frameRange.GetUpperBoundValue());
-            /*FFrameTime positiveFrame = (iFrame - leftBound + 1) * -1;
-            oFrame = rightBound - (positiveFrame % duration) + leftBound; */
 
             return rightBound - ((leftBound - iFrame) % duration);
         }
@@ -314,7 +324,7 @@ UOdysseyAnimationPlayer::Tick(float iDeltaTime)
     if (GetFlags() & RF_ClassDefaultObject)
         return;
 
-    if (!Animation || !RenderTarget)
+    if (!Animation || !GetRenderTarget())
         return;
 
     if (Status == EOdysseyAnimationPlayerStatus::Playing)
@@ -411,7 +421,7 @@ UOdysseyAnimationPlayer::UpdateTexture()
     if (!Animation)
         return;
 
-    if( !RenderTarget->GameThread_GetRenderTargetResource() )
+    if( !GetRenderTarget()->GameThread_GetRenderTargetResource() )
         return;
 
     FFrameTime frame = mDisplayedFrame;
@@ -421,14 +431,9 @@ UOdysseyAnimationPlayer::UpdateTexture()
     {
         mImageRenderingComposition = imageRenderingComposition;
 
-        RenderTarget->WaitForPendingInitOrStreaming();
-        Animation->Render_GameThread(RenderTarget, frame.GetFrame(), renderType );
-        RenderTarget->UpdateResourceImmediate(false); //Update MipMaps
-
-        /* FlushRenderingCommands();
-        FRenderCommandFence fence;
-        fence.BeginFence();
-        fence.Wait(); */
+        GetRenderTarget()->WaitForPendingInitOrStreaming();
+        Animation->Render_GameThread(GetRenderTarget(), frame.GetFrame(), renderType );
+        GetRenderTarget()->UpdateResourceImmediate(false); //Update MipMaps
 
         mInvalidTileMap.Clear();
         return;
@@ -436,19 +441,14 @@ UOdysseyAnimationPlayer::UpdateTexture()
 
     if (!mInvalidTileMap.InvalidTiles().IsEmpty())
     {
-        RenderTarget->WaitForPendingInitOrStreaming();
+        GetRenderTarget()->WaitForPendingInitOrStreaming();
 
         TArray<FIntRect> invalidTiles = mInvalidTileMap.InvalidRects();
         for (const FIntRect& rect : invalidTiles)
         {
-            Animation->Render_GameThread(RenderTarget, frame.GetFrame(), renderType, rect);
+            Animation->Render_GameThread(GetRenderTarget(), frame.GetFrame(), renderType, rect);
         }
-        RenderTarget->UpdateResourceImmediate(false); //Update MipMaps
-
-        /* FlushRenderingCommands();
-        FRenderCommandFence fence;
-        fence.BeginFence();
-        fence.Wait(); */
+        GetRenderTarget()->UpdateResourceImmediate(false); //Update MipMaps
 
         mInvalidTileMap.Clear();
     }
@@ -490,13 +490,13 @@ UOdysseyAnimationPlayer::AnimationChanged()
     IOdysseyRenderingAbility::OnRenderingChangedDelegate().RemoveAll(this);
     if (!Animation)
     {
-        RenderTarget->ResizeTarget(1, 1);
+        GetRenderTarget()->ResizeTarget(1, 1);
         mOnAnimationChanged.Broadcast();
         return;
     }
 
-    RenderTarget->ResizeTarget(Animation->GetWidth(), Animation->GetHeight());
-    RenderTarget->UpdateResourceImmediate(false);
+    GetRenderTarget()->ResizeTarget(Animation->GetWidth(), Animation->GetHeight());
+    GetRenderTarget()->UpdateResourceImmediate(false);
 
     mInvalidTileMap = FOdysseyInvalidTileMap(64, Animation->GetWidth(), Animation->GetHeight());
 
@@ -510,9 +510,9 @@ UOdysseyAnimationPlayer::AnimationChanged()
 void
 UOdysseyAnimationPlayer::LODGroupChanged()
 {
-    RenderTarget->LODGroup = LODGroup;
-    RenderTarget->UpdateResource();
-    RenderTarget->UpdateResourceImmediate(false);
+    GetRenderTarget()->LODGroup = LODGroup;
+    GetRenderTarget()->UpdateResource();
+    GetRenderTarget()->UpdateResourceImmediate(false);
 
     mInvalidTileMap.Clear();
     mImageRenderingComposition.Empty();
@@ -630,15 +630,19 @@ UOdysseyAnimationPlayer::PropertyChanged(const FName& iPropertyName)
 void
 UOdysseyAnimationPlayer::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent)
 {
-    Super::PostEditChangeProperty(PropertyChangedEvent);
-
     if (GetFlags() & RF_ClassDefaultObject)
+    {
+        Super::PostEditChangeProperty(PropertyChangedEvent);
         return;
+    }
 
-    if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
-        return;
+    bool isInteractive = PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive;
+    if (!isInteractive)
+    {
+        PropertyChanged(PropertyChangedEvent.GetMemberPropertyName());
+    }
 
-    PropertyChanged(PropertyChangedEvent.GetMemberPropertyName());
+    Super::PostEditChangeProperty(PropertyChangedEvent);
 }
 
 void
@@ -669,11 +673,6 @@ UOdysseyAnimationPlayer::PostLoad()
     IOdysseyRenderingAbility::OnRenderingChangedDelegate().RemoveAll(this);
     IOdysseyRenderingAbility::OnRenderingChangedDelegate().AddUObject(this, &UOdysseyAnimationPlayer::OnRenderingChanged);
 
-    //Ensure Render Target has the right options
-    RenderTarget->LODGroup = LODGroup;
-    RenderTarget->RenderTargetFormat = RTF_RGBA16f;
-    RenderTarget->bAutoGenerateMips = true;
-
     //Reset Image Rendering to force a render
     if (Animation)
         mInvalidTileMap = FOdysseyInvalidTileMap(64, Animation->GetWidth(), Animation->GetHeight());
@@ -681,24 +680,6 @@ UOdysseyAnimationPlayer::PostLoad()
         mInvalidTileMap = FOdysseyInvalidTileMap(64, 1, 1);
 
     mImageRenderingComposition.Empty();
-
-    //Resize Render Target To match Animation size if needed
-    if (Animation && (RenderTarget->SizeX != Animation->GetWidth() || RenderTarget->SizeY != Animation->GetHeight()))
-    {
-        RenderTarget->ResizeTarget(Animation->GetWidth(), Animation->GetHeight());
-    }
-
-    // Update RenderTarget resource if it doesn't exist yet
-    if (!RenderTarget->GetResource())
-    {
-        RenderTarget->UpdateResource();
-    }
-
-    //Force update on GPU and Generate Mips
-    RenderTarget->UpdateResourceImmediate(false);
-
-    //Update Texture if needed
-    UpdateTexture();
 }
 
 void
@@ -720,29 +701,6 @@ UOdysseyAnimationPlayer::PostDuplicate(EDuplicateMode::Type iDuplicateMode)
         mInvalidTileMap = FOdysseyInvalidTileMap(64, 1, 1);
 
     mImageRenderingComposition.Empty();
-
-    RenderTarget = NewObject<UTextureRenderTarget2D>(this, NAME_None, RF_Public | RF_Transient);
-    RenderTarget->LODGroup = LODGroup;
-    RenderTarget->RenderTargetFormat = RTF_RGBA16f;
-    RenderTarget->bAutoGenerateMips = true;
-
-    //Resize Render Target To match Animation size if needed
-    if (Animation)
-    {
-        RenderTarget->ResizeTarget(Animation->GetWidth(), Animation->GetHeight());
-    }
-
-    // Update RenderTarget resource if it doesn't exist yet
-    if (!RenderTarget->GetResource())
-    {
-        RenderTarget->UpdateResource();
-    }
-
-    //Force update on GPU and Generate Mips
-    RenderTarget->UpdateResourceImmediate(false);
-
-    //Update Texture if needed
-    UpdateTexture();
 }
 
 struct FOdysseyAnimationPlayerObjectVersion

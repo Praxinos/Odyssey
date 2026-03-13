@@ -57,13 +57,15 @@ public:
     void SetAnimationMaterial(UMaterialInterface* iMaterial);
 
 public:
+    virtual void PostInitProperties();
     virtual void PostLoad() override;
-    virtual void OnRegister() override;
-    virtual void OnUnregister() override;
 
 #if WITH_EDITOR
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent) override;
+    virtual void PostEditChangeChainProperty(FPropertyChangedChainEvent& PropertyChangedEvent) override;
     virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
+    virtual void PostEditImport() override;
+
     virtual void PropertyChanged(const FName& iPropertyName);
 #endif
 
@@ -103,9 +105,9 @@ protected:
     TEnumAsByte<enum TextureGroup> LODGroup = TEXTUREGROUP_Pixels2D;
 
 private:
-    UPROPERTY()
+    UPROPERTY(Instanced)
     TObjectPtr<UOdysseyAnimationPlayer> DefaultPlayer;
 
-    UPROPERTY(Transient, DuplicateTransient)
+    UPROPERTY(Transient)
     TObjectPtr<UMaterialInstanceDynamic> MaterialInstance;
 };

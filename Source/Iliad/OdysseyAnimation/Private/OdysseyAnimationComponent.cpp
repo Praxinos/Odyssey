@@ -99,14 +99,12 @@ UOdysseyAnimationComponent::UOdysseyAnimationComponent(const FObjectInitializer&
     bCastStaticShadow = false;
     bCastDynamicShadow = true;
     bSelectable = true;
-    DefaultPlayer = CreateDefaultSubobject<UOdysseyAnimationPlayer>(TEXT("DefaultPlayer"));
 }
 
 void
 UOdysseyAnimationComponent::Initialize()
 {
     SetStaticMesh( LoadObject<UStaticMesh>( this, TEXT( "/Odyssey/Meshes/S_1_Unit_Plane.S_1_Unit_Plane" ) ) );
-    //GetStaticMesh()->GetBounds().BoxExtent.X * 2.0f) // x2 to have length not radius
     SetAnimationMaterial(LoadObject<UMaterial>(this, TEXT("/Odyssey/Animation2D/DefaultAnimationMaterial.DefaultAnimationMaterial")));
 }
 
@@ -130,6 +128,18 @@ UOdysseyAnimationComponent::InitializeFromPlayer(UOdysseyAnimationPlayer* iPlaye
 }
 
 void
+UOdysseyAnimationComponent::PostInitProperties()
+{
+    Super::PostInitProperties();
+
+    if (HasAnyFlags(RF_ClassDefaultObject))
+        return;
+
+    if (!DefaultPlayer)
+        DefaultPlayer = NewObject<UOdysseyAnimationPlayer>(this, TEXT("DefaultPlayer"), RF_Public | RF_Transactional);
+}
+
+void
 UOdysseyAnimationComponent::PostLoad()
 {
     Super::PostLoad();
@@ -147,10 +157,11 @@ UOdysseyAnimationComponent::PostLoad()
         SetRelativeScale3D( new_scale );
     }
 
-    //Create the material instance but do not link the RenderTarget to it immediately
-    //as it could cause white material rendering
-    //Instead we call RefreshMaterialTexture() in OnRegister().
-    CreateMaterialInstance();
+    if (!MaterialInstance)
+    {
+        CreateMaterialInstance();
+        RefreshMaterialTexture();
+    }
 
     if (Player)
     {
@@ -161,30 +172,14 @@ UOdysseyAnimationComponent::PostLoad()
 }
 
 void
-UOdysseyAnimationComponent::OnRegister()
+UOdysseyAnimationComponent::PostEditImport()
 {
-    /**
-     * We don't use PostDuplicate, we use OnRegister instead
-     *
-     * Jason Walter from Epic Games said :
-     *
-     * "I looked at the code and PostDuplicate is not recursive for all
-     * components which explains why you don't get a call.
-     * I see other places in the code where people use OnRegister() to
-     * build meta data associated with the component.
-     * For example, the Virtual Camera plugin does this on the VCam component
-     * to ensure some systems are initialized.
-     * OnRegister looks like the way to do this sort of thing."
-     */
-    Super::OnRegister();
-    RefreshMaterialTexture();
-}
+    Super::PostEditImport();
 
-void
-UOdysseyAnimationComponent::OnUnregister()
-{
-    //Called when duplicating / pasting an actor / component
-    Super::OnUnregister();
+    // Make sure to update the material after duplicating this component
+    // When duplicating an actor PostDuplicate() is not called on its components
+    CreateMaterialInstance();
+    RefreshMaterialTexture();
 }
 
 void
@@ -272,8 +267,8 @@ UOdysseyAnimationComponent::SetAnimationMaterial(UMaterialInterface* iMaterial)
 void
 UOdysseyAnimationComponent::MaterialChanged()
 {
-    CreateMaterialInstance();
-    RefreshMaterialTexture();
+    MaterialInstance->Parent = Material;
+    MaterialInstance->PostEditChange();
 }
 
 void
@@ -301,12 +296,27 @@ UOdysseyAnimationComponent::PropertyChanged(const FName& iPropertyName)
 void
 UOdysseyAnimationComponent::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent)
 {
+    bool isInteractive = PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive;
+    if (!isInteractive)
+    {
+        PropertyChanged(PropertyChangedEvent.GetPropertyName());
+    }
+
     Super::PostEditChangeProperty(PropertyChangedEvent);
+}
 
-    if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
-        return;
+void
+UOdysseyAnimationComponent::PostEditChangeChainProperty(FPropertyChangedChainEvent& PropertyChangedEvent)
+{
+    //PostEditChangeChainProperty is called on the Archetype Component Object before PostEditChangeProperty
+    //This fixes incoherences like  UOdysseyAnimationComponent::Animation != UOdysseyAnimationPlayer::Animation
+    bool isInteractive = PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive;
+    if (!isInteractive)
+    {
+        PropertyChanged(PropertyChangedEvent.GetPropertyName());
+    }
 
-    PropertyChanged(PropertyChangedEvent.GetPropertyName());
+    Super::PostEditChangeChainProperty(PropertyChangedEvent);
 }
 
 void
@@ -342,6 +352,8 @@ UOdysseyAnimationComponent::RefreshMaterialTexture()
     UTextureRenderTarget2D* renderTarget = player->GetRenderTarget();
     if (renderTarget)
     {
+        UTexture* prevTexture = MaterialInstance->K2_GetTextureParameterValue("AnimationTexture");
+
         MaterialInstance->SetTextureParameterValue("AnimationTexture", renderTarget);
     }
     else
@@ -349,16 +361,5 @@ UOdysseyAnimationComponent::RefreshMaterialTexture()
         //Needed because SetTextureParameterValue does nothing if texture is nullptr
         MaterialInstance->ClearParameterValues();
     }
-
-#if WITH_EDITOR
-    MaterialInstance->PostEditChange();
-#endif
-
-    FMaterialUpdateContext UpdateContext(FMaterialUpdateContext::EOptions::Default, GMaxRHIShaderPlatform);
-    UpdateContext.AddMaterialInstance(MaterialInstance);
-
-#if WITH_EDITOR
-    MaterialInstance->MarkPackageDirty();
-#endif
-
+    MaterialInstance->EnsureIsComplete();
 }
