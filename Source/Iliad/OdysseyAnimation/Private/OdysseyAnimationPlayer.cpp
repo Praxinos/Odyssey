@@ -18,6 +18,12 @@ UOdysseyAnimationPlayer::OnAnimationChanged()
 }
 
 FSimpleMulticastDelegate&
+UOdysseyAnimationPlayer::OnRenderTargetChanged()
+{
+    return mOnRenderTargetChanged;
+}
+
+FSimpleMulticastDelegate&
 UOdysseyAnimationPlayer::OnCursorFrameChanged()
 {
     return mOnCursorFrameChanged;
@@ -37,6 +43,10 @@ UOdysseyAnimationPlayer::OnDisplayedFrameChanged()
 
 UOdysseyAnimationPlayer::UOdysseyAnimationPlayer()
 {
+    if (GetFlags() & RF_ClassDefaultObject)
+        return;
+
+    IOdysseyRenderingAbility::OnRenderingChangedDelegate().AddUObject(this, &UOdysseyAnimationPlayer::OnRenderingChanged);
 }
 
 void
@@ -144,36 +154,44 @@ UOdysseyAnimationPlayer::SeekToFrame(FFrameTime iFrame)
         mOnCurrentFrameChanged.Broadcast();
 }
 
+void
+UOdysseyAnimationPlayer::InitializeRenderTarget()
+{
+    if (!RenderTarget || RenderTarget->GetOuter() != this)
+    {
+        RenderTarget = NewObject<UTextureRenderTarget2D>(this, NAME_None, RF_Public);
+        mOnRenderTargetChanged.Broadcast();
+    }
+
+    RenderTarget->LODGroup = LODGroup;
+    RenderTarget->RenderTargetFormat = RTF_RGBA16f;
+    RenderTarget->bAutoGenerateMips = true;
+
+    if (Animation)
+    {
+        RenderTarget->ResizeTarget(Animation->GetWidth(), Animation->GetHeight());
+        mInvalidTileMap = FOdysseyInvalidTileMap(64, Animation->GetWidth(), Animation->GetHeight());
+    }
+    else
+    {
+        RenderTarget->ResizeTarget(1, 1);
+        mInvalidTileMap = FOdysseyInvalidTileMap(64, 1, 1);
+    }
+
+    mImageRenderingComposition.Empty();
+
+    if (!RenderTarget->GetResource())
+    {
+        RenderTarget->UpdateResource();
+    }
+
+    //Force update on GPU and Generate Mips
+    RenderTarget->UpdateResourceImmediate(false);
+}
+
 UTextureRenderTarget2D*
 UOdysseyAnimationPlayer::GetRenderTarget()
 {
-    if (!RenderTarget)
-    {
-        RenderTarget = NewObject<UTextureRenderTarget2D>(this, NAME_None, RF_Public | RF_Transient);
-        RenderTarget->LODGroup = LODGroup;
-        RenderTarget->RenderTargetFormat = RTF_RGBA16f;
-        RenderTarget->bAutoGenerateMips = true;
-
-        if (Animation)
-        {
-            GetRenderTarget()->ResizeTarget(Animation->GetWidth(), Animation->GetHeight());
-        }
-        else
-        {
-            RenderTarget->ResizeTarget(1, 1);
-        }
-
-        mImageRenderingComposition.Empty();
-
-        if (!RenderTarget->GetResource())
-        {
-            RenderTarget->UpdateResource();
-        }
-
-        //Force update on GPU and Generate Mips
-        RenderTarget->UpdateResourceImmediate(false);
-    }
-
     return RenderTarget;
 }
 
@@ -421,7 +439,7 @@ UOdysseyAnimationPlayer::UpdateTexture()
     if (!Animation)
         return;
 
-    if( !GetRenderTarget()->GameThread_GetRenderTargetResource() )
+    if( !RenderTarget->GameThread_GetRenderTargetResource() )
         return;
 
     FFrameTime frame = mDisplayedFrame;
@@ -431,9 +449,9 @@ UOdysseyAnimationPlayer::UpdateTexture()
     {
         mImageRenderingComposition = imageRenderingComposition;
 
-        GetRenderTarget()->WaitForPendingInitOrStreaming();
-        Animation->Render_GameThread(GetRenderTarget(), frame.GetFrame(), renderType );
-        GetRenderTarget()->UpdateResourceImmediate(false); //Update MipMaps
+        RenderTarget->WaitForPendingInitOrStreaming();
+        Animation->Render_GameThread(RenderTarget, frame.GetFrame(), renderType );
+        RenderTarget->UpdateResourceImmediate(false); //Update MipMaps
 
         mInvalidTileMap.Clear();
         return;
@@ -441,14 +459,14 @@ UOdysseyAnimationPlayer::UpdateTexture()
 
     if (!mInvalidTileMap.InvalidTiles().IsEmpty())
     {
-        GetRenderTarget()->WaitForPendingInitOrStreaming();
+        RenderTarget->WaitForPendingInitOrStreaming();
 
         TArray<FIntRect> invalidTiles = mInvalidTileMap.InvalidRects();
         for (const FIntRect& rect : invalidTiles)
         {
-            Animation->Render_GameThread(GetRenderTarget(), frame.GetFrame(), renderType, rect);
+            Animation->Render_GameThread(RenderTarget, frame.GetFrame(), renderType, rect);
         }
-        GetRenderTarget()->UpdateResourceImmediate(false); //Update MipMaps
+        RenderTarget->UpdateResourceImmediate(false); //Update MipMaps
 
         mInvalidTileMap.Clear();
     }
@@ -487,23 +505,8 @@ UOdysseyAnimationPlayer::OnRenderingChanged(const FOdysseyRenderingChangedEvent&
 void
 UOdysseyAnimationPlayer::AnimationChanged()
 {
-    IOdysseyRenderingAbility::OnRenderingChangedDelegate().RemoveAll(this);
-    if (!Animation)
-    {
-        GetRenderTarget()->ResizeTarget(1, 1);
-        mOnAnimationChanged.Broadcast();
-        return;
-    }
-
-    GetRenderTarget()->ResizeTarget(Animation->GetWidth(), Animation->GetHeight());
-    GetRenderTarget()->UpdateResourceImmediate(false);
-
-    mInvalidTileMap = FOdysseyInvalidTileMap(64, Animation->GetWidth(), Animation->GetHeight());
-
+    InitializeRenderTarget();
     UpdateTexture();
-
-    IOdysseyRenderingAbility::OnRenderingChangedDelegate().AddUObject(this, &UOdysseyAnimationPlayer::OnRenderingChanged);
-
     mOnAnimationChanged.Broadcast();
 }
 
@@ -646,6 +649,26 @@ UOdysseyAnimationPlayer::PostEditChangeProperty( FPropertyChangedEvent& Property
 }
 
 void
+UOdysseyAnimationPlayer::PostEditChangeChainProperty(FPropertyChangedChainEvent& PropertyChangedEvent)
+{
+    if (GetFlags() & RF_ClassDefaultObject)
+    {
+        Super::PostEditChangeChainProperty(PropertyChangedEvent);
+        return;
+    }
+
+    //PostEditChangeChainProperty is called on the Archetype Component Object before PostEditChangeProperty
+    //This fixes incoherences like  UOdysseyAnimationComponent::Animation != UOdysseyAnimationPlayer::Animation
+    bool isInteractive = PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive;
+    if (!isInteractive)
+    {
+        PropertyChanged(PropertyChangedEvent.GetPropertyName());
+    }
+
+    Super::PostEditChangeChainProperty(PropertyChangedEvent);
+}
+
+void
 UOdysseyAnimationPlayer::PostTransacted(const FTransactionObjectEvent& iTransactionEvent)
 {
     Super::PostTransacted(iTransactionEvent);
@@ -662,6 +685,40 @@ UOdysseyAnimationPlayer::PostTransacted(const FTransactionObjectEvent& iTransact
 #endif
 
 void
+UOdysseyAnimationPlayer::PostInitProperties()
+{
+    Super::PostInitProperties();
+
+    if (GetFlags() & RF_ClassDefaultObject)
+        return;
+
+    if (GetFlags() & RF_ArchetypeObject)
+    {
+        RenderTarget = nullptr;
+        return;
+    }
+
+    InitializeRenderTarget();
+}
+
+void
+UOdysseyAnimationPlayer::PostReinitProperties()
+{
+    Super::PostReinitProperties();
+
+    if (GetFlags() & RF_ClassDefaultObject)
+        return;
+
+    if (GetFlags() & RF_ArchetypeObject)
+    {
+        RenderTarget = nullptr;
+        return;
+    }
+
+    InitializeRenderTarget();
+}
+
+void
 UOdysseyAnimationPlayer::PostLoad()
 {
     Super::PostLoad();
@@ -669,17 +726,13 @@ UOdysseyAnimationPlayer::PostLoad()
     if (GetFlags() & RF_ClassDefaultObject)
         return;
 
-    //Reset delegates
-    IOdysseyRenderingAbility::OnRenderingChangedDelegate().RemoveAll(this);
-    IOdysseyRenderingAbility::OnRenderingChangedDelegate().AddUObject(this, &UOdysseyAnimationPlayer::OnRenderingChanged);
+    if (GetFlags() & RF_ArchetypeObject)
+    {
+        RenderTarget = nullptr;
+        return;
+    }
 
-    //Reset Image Rendering to force a render
-    if (Animation)
-        mInvalidTileMap = FOdysseyInvalidTileMap(64, Animation->GetWidth(), Animation->GetHeight());
-    else
-        mInvalidTileMap = FOdysseyInvalidTileMap(64, 1, 1);
-
-    mImageRenderingComposition.Empty();
+    InitializeRenderTarget();
 }
 
 void
@@ -690,17 +743,30 @@ UOdysseyAnimationPlayer::PostDuplicate(EDuplicateMode::Type iDuplicateMode)
     if (GetFlags() & RF_ClassDefaultObject)
         return;
 
-    //Reset delegates
-    IOdysseyRenderingAbility::OnRenderingChangedDelegate().RemoveAll(this);
-    IOdysseyRenderingAbility::OnRenderingChangedDelegate().AddUObject(this, &UOdysseyAnimationPlayer::OnRenderingChanged);
+    if (GetFlags() & RF_ArchetypeObject)
+    {
+        RenderTarget = nullptr;
+        return;
+    }
 
-    //Reset Image Rendering to force a render
-    if (Animation)
-        mInvalidTileMap = FOdysseyInvalidTileMap(64, Animation->GetWidth(), Animation->GetHeight());
-    else
-        mInvalidTileMap = FOdysseyInvalidTileMap(64, 1, 1);
+    InitializeRenderTarget();
+}
 
-    mImageRenderingComposition.Empty();
+void
+UOdysseyAnimationPlayer::PostEditImport()
+{
+    Super::PostEditImport();
+
+    if (GetFlags() & RF_ClassDefaultObject)
+        return;
+
+    if (GetFlags() & RF_ArchetypeObject)
+    {
+        RenderTarget = nullptr;
+        return;
+    }
+
+    InitializeRenderTarget();
 }
 
 struct FOdysseyAnimationPlayerObjectVersion

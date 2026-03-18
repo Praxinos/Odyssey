@@ -73,6 +73,7 @@ UOdysseyAnimationComponent::SetPlayer(UOdysseyAnimationPlayer* iPlayer)
         return;
 
     Player = iPlayer;
+    PlayerChanged();
 }
 
 void
@@ -82,6 +83,7 @@ UOdysseyAnimationComponent::SetMode(EOdysseyAnimationComponentMode iMode)
         return;
 
     Mode = iMode;
+    ModeChanged();
 }
 
 UOdysseyAnimationComponent::UOdysseyAnimationComponent(const FObjectInitializer& ObjectInitializer)
@@ -99,19 +101,17 @@ UOdysseyAnimationComponent::UOdysseyAnimationComponent(const FObjectInitializer&
     bCastStaticShadow = false;
     bCastDynamicShadow = true;
     bSelectable = true;
-}
 
-void
-UOdysseyAnimationComponent::Initialize()
-{
+    DefaultPlayer = CreateDefaultSubobject<UOdysseyAnimationPlayer>(TEXT("DefaultPlayer"));
     SetStaticMesh( LoadObject<UStaticMesh>( this, TEXT( "/Odyssey/Meshes/S_1_Unit_Plane.S_1_Unit_Plane" ) ) );
-    SetAnimationMaterial(LoadObject<UMaterial>(this, TEXT("/Odyssey/Animation2D/DefaultAnimationMaterial.DefaultAnimationMaterial")));
+    Material = LoadObject<UMaterial>(this, TEXT("/Odyssey/Animation2D/DefaultAnimationMaterial.DefaultAnimationMaterial"));
+
+    DefaultPlayer->OnRenderTargetChanged().AddUObject(this, &UOdysseyAnimationComponent::OnDefaultPlayerRenderTargetChanged);
 }
 
 void
 UOdysseyAnimationComponent::InitializeFromAnimation(UOdysseyAnimation* iAnimation)
 {
-    Initialize();
     SetMode(EOdysseyAnimationComponentMode::Animation);
     SetAnimation(iAnimation);
     SetPlayer(nullptr);
@@ -121,7 +121,6 @@ UOdysseyAnimationComponent::InitializeFromAnimation(UOdysseyAnimation* iAnimatio
 void
 UOdysseyAnimationComponent::InitializeFromPlayer(UOdysseyAnimationPlayer* iPlayer)
 {
-    Initialize();
     SetMode(EOdysseyAnimationComponentMode::Animation);
     SetAnimation(nullptr);
     SetPlayer(iPlayer);
@@ -135,8 +134,18 @@ UOdysseyAnimationComponent::PostInitProperties()
     if (HasAnyFlags(RF_ClassDefaultObject))
         return;
 
-    if (!DefaultPlayer)
-        DefaultPlayer = NewObject<UOdysseyAnimationPlayer>(this, TEXT("DefaultPlayer"), RF_Public | RF_Transactional);
+    UpdateMaterialInstance();
+}
+
+void
+UOdysseyAnimationComponent::PostReinitProperties()
+{
+    Super::PostReinitProperties();
+
+    if (HasAnyFlags(RF_ClassDefaultObject))
+        return;
+
+    UpdateMaterialInstance();
 }
 
 void
@@ -157,11 +166,7 @@ UOdysseyAnimationComponent::PostLoad()
         SetRelativeScale3D( new_scale );
     }
 
-    if (!MaterialInstance)
-    {
-        CreateMaterialInstance();
-        RefreshMaterialTexture();
-    }
+    UpdateMaterialInstance();
 
     if (Player)
     {
@@ -172,35 +177,56 @@ UOdysseyAnimationComponent::PostLoad()
 }
 
 void
+UOdysseyAnimationComponent::PostDuplicate(bool bDuplicateForPIE)
+{
+    Super::PostDuplicate(bDuplicateForPIE);
+
+    // Make sure to update the material after duplicating this component
+    // When duplicating an actor PostDuplicate() is not called on its components
+    UpdateMaterialInstance();
+}
+
+void
 UOdysseyAnimationComponent::PostEditImport()
 {
     Super::PostEditImport();
 
     // Make sure to update the material after duplicating this component
     // When duplicating an actor PostDuplicate() is not called on its components
-    CreateMaterialInstance();
-    RefreshMaterialTexture();
+    UpdateMaterialInstance();
+}
+
+TStructOnScope<FActorComponentInstanceData>
+UOdysseyAnimationComponent::GetComponentInstanceData() const
+{
+    return MakeStructOnScope<FActorComponentInstanceData, FOdysseyAnimationComponentInstanceData>(this);
 }
 
 void
-UOdysseyAnimationComponent::CreateMaterialInstance()
+UOdysseyAnimationComponent::ApplyComponentInstanceData(FOdysseyAnimationComponentInstanceData* ComponentInstanceData)
 {
-    EmptyOverrideMaterials();
-    if (!Material)
-    {
-        MaterialInstance = nullptr;
+    if (!ComponentInstanceData)
         return;
-    }
 
-    MaterialInstance = UMaterialInstanceDynamic::Create(Material, GetTransientPackage());
-    MaterialInstance->SetFlags(MaterialInstance->GetFlags() | RF_Public);
-    UStaticMeshComponent::SetMaterial(0, MaterialInstance);
+    Material = ComponentInstanceData->Material;
+    Mode = ComponentInstanceData->Mode;
+    Player = ComponentInstanceData->Player;
+    Animation = ComponentInstanceData->Animation;
+    LODGroup = ComponentInstanceData->LODGroup;
+
+    MaterialChanged();
+    ModeChanged();
+    PlayerChanged();
+    AnimationChanged();
+    LODGroupChanged();
+
+    //TODO: Copy important parameters to DefaultPlayer
 }
 
 void
 UOdysseyAnimationComponent::ModeChanged()
 {
-    RefreshMaterialTexture();
+    UpdateMaterialInstance();
 }
 
 void
@@ -222,6 +248,12 @@ UOdysseyAnimationComponent::AnimationChanged()
         DefaultPlayer->SetAnimation(Animation);
         RescaleToMatchAnimation(Animation);
     }
+}
+
+void
+UOdysseyAnimationComponent::OnDefaultPlayerRenderTargetChanged()
+{
+    UpdateMaterialInstance();
 }
 
 void
@@ -248,7 +280,7 @@ UOdysseyAnimationComponent::PlayerChanged()
         Player->OnAnimationChanged().AddUObject(this, &UOdysseyAnimationComponent::OnPlayerAnimationChanged);
         RescaleToMatchAnimation(Player->GetAnimation());
     }
-    RefreshMaterialTexture();
+    UpdateMaterialInstance();
 }
 
 UMaterialInterface*
@@ -267,8 +299,7 @@ UOdysseyAnimationComponent::SetAnimationMaterial(UMaterialInterface* iMaterial)
 void
 UOdysseyAnimationComponent::MaterialChanged()
 {
-    MaterialInstance->Parent = Material;
-    MaterialInstance->PostEditChange();
+    UpdateMaterialInstance();
 }
 
 void
@@ -336,30 +367,185 @@ UOdysseyAnimationComponent::PostTransacted(const FTransactionObjectEvent& iTrans
 #endif
 
 void
-UOdysseyAnimationComponent::RefreshMaterialTexture()
+UOdysseyAnimationComponent::UpdateMaterialInstance()
 {
-    if (!MaterialInstance)
+    if (!Material)
     {
-        CreateMaterialInstance();
-        if (!MaterialInstance)
-            return;
+        UStaticMeshComponent::SetMaterial(0, nullptr);
+        return;
+    }
+
+    UMaterialInstanceDynamic* materialInstance = Cast<UMaterialInstanceDynamic>(UStaticMeshComponent::GetMaterial(0));
+    if (!materialInstance || materialInstance->GetOuter() != this)
+    {
+        materialInstance = UMaterialInstanceDynamic::Create(Material, this);
+        //materialInstance->SetFlags(RF_Public);
+        UStaticMeshComponent::SetMaterial(0, materialInstance);
+    }
+
+    if (materialInstance->Parent != Material)
+    {
+        materialInstance->Parent = Material;
+        materialInstance->PostEditChange();
     }
 
     UOdysseyAnimationPlayer* player = GetPlayer();
     if (!player)
+    {
+        materialInstance->ClearParameterValues();
         return;
+    }
 
     UTextureRenderTarget2D* renderTarget = player->GetRenderTarget();
-    if (renderTarget)
-    {
-        UTexture* prevTexture = MaterialInstance->K2_GetTextureParameterValue("AnimationTexture");
-
-        MaterialInstance->SetTextureParameterValue("AnimationTexture", renderTarget);
-    }
-    else
+    if (!renderTarget)
     {
         //Needed because SetTextureParameterValue does nothing if texture is nullptr
-        MaterialInstance->ClearParameterValues();
+        materialInstance->ClearParameterValues();
+        return;
     }
-    MaterialInstance->EnsureIsComplete();
+
+    materialInstance->SetTextureParameterValue("AnimationTexture", renderTarget);
+}
+
+//======================================================================================
+
+//NEEDED BY FOdysseyStaticMeshComponentInstanceDataPATCH
+#include "StaticMeshComponentLODInfo.h"
+
+FOdysseyStaticMeshComponentInstanceDataPATCH::FOdysseyStaticMeshComponentInstanceDataPATCH(const UStaticMeshComponent* SourceComponent)
+    : FPrimitiveComponentInstanceData(SourceComponent)
+    , StaticMesh(SourceComponent->GetStaticMesh())
+{
+    for (const FStaticMeshComponentLODInfo& LODDataEntry : SourceComponent->LODData)
+    {
+        CachedStaticLighting.Add(LODDataEntry.OriginalMapBuildDataId);
+        CachedStaticLighting.Add(LODDataEntry.MapBuildDataId);
+    }
+
+    // Backup the texture streaming data.
+    StreamingTextureData = SourceComponent->StreamingTextureData;
+#if WITH_EDITORONLY_DATA
+    MaterialStreamingRelativeBoxes = SourceComponent->MaterialStreamingRelativeBoxes;
+#endif
+
+    // Cache instance vertex colors
+    for (int32 LODIndex = 0; LODIndex < SourceComponent->LODData.Num(); ++LODIndex)
+    {
+        const FStaticMeshComponentLODInfo& LODInfo = SourceComponent->LODData[LODIndex];
+
+        // Note: we don't need to check LODInfo.PaintedVertices here since it's not always required.
+        if (LODInfo.OverrideVertexColors && LODInfo.OverrideVertexColors->GetNumVertices() > 0)
+        {
+            AddVertexColorData(LODInfo, LODIndex);
+        }
+    }
+}
+
+bool FOdysseyStaticMeshComponentInstanceDataPATCH::ContainsData() const
+{
+    return Super::ContainsData()
+        || StreamingTextureData.Num() > 0
+        || CachedStaticLighting.Num() > 0
+#if WITH_EDITORONLY_DATA
+        || MaterialStreamingRelativeBoxes.Num() > 0
+#endif
+        || StaticMesh != nullptr;
+}
+
+void FOdysseyStaticMeshComponentInstanceDataPATCH::ApplyToComponent(UActorComponent* Component, const ECacheApplyPhase CacheApplyPhase)
+{
+    Super::ApplyToComponent(Component, CacheApplyPhase);
+    if (CacheApplyPhase == ECacheApplyPhase::PostUserConstructionScript)
+    {
+        CastChecked<UStaticMeshComponent>(Component)->ApplyComponentInstanceData(reinterpret_cast<FStaticMeshComponentInstanceData*>(this));
+    }
+}
+
+void FOdysseyStaticMeshComponentInstanceDataPATCH::AddReferencedObjects(FReferenceCollector& Collector)
+{
+    Super::AddReferencedObjects(Collector);
+    Collector.AddReferencedObject(StaticMesh);
+}
+
+/** Add vertex color data for a specified LOD before RerunConstructionScripts is called */
+void FOdysseyStaticMeshComponentInstanceDataPATCH::AddVertexColorData(const struct FStaticMeshComponentLODInfo& LODInfo, uint32 LODIndex)
+{
+    if (VertexColorLODs.Num() <= (int32)LODIndex)
+    {
+        VertexColorLODs.SetNum(LODIndex + 1);
+    }
+    FStaticMeshVertexColorLODData& VertexColorData = VertexColorLODs[LODIndex];
+    VertexColorData.LODIndex = LODIndex;
+    VertexColorData.PaintedVertices = LODInfo.PaintedVertices;
+    LODInfo.OverrideVertexColors->GetVertexColors(VertexColorData.VertexBufferColors);
+}
+
+/** Re-apply vertex color data after RerunConstructionScripts is called */
+bool FOdysseyStaticMeshComponentInstanceDataPATCH::ApplyVertexColorData(UStaticMeshComponent* StaticMeshComponent) const
+{
+    bool bAppliedAnyData = false;
+
+    if (StaticMeshComponent != NULL)
+    {
+        StaticMeshComponent->SetLODDataCount(VertexColorLODs.Num(), StaticMeshComponent->LODData.Num());
+
+        // Its possible that we have recreated LODs in SetLODDataCount that existed prior
+        // to reconstruction, but not *rebuilt* them because static lighting usage was clobbered
+        // by the construction script. In this case we should recover the GUIDs we had before
+        // so we dont end up creating new (non-deterministic) data
+        for(int32 LODIndex = 0; LODIndex < StaticMeshComponent->LODData.Num(); ++LODIndex)
+        {
+            FStaticMeshComponentLODInfo& LODInfo = StaticMeshComponent->LODData[LODIndex];
+            if(CachedStaticLighting.IsValidIndex((LODIndex*2)+1))
+            {
+                LODInfo.OriginalMapBuildDataId = CachedStaticLighting[(LODIndex*2)];
+                LODInfo.MapBuildDataId = CachedStaticLighting[(LODIndex*2)+1];
+            }
+        }
+
+        for (int32 LODDataIndex = 0; LODDataIndex < VertexColorLODs.Num(); ++LODDataIndex)
+        {
+            const FStaticMeshVertexColorLODData& VertexColorLODData = VertexColorLODs[LODDataIndex];
+            uint32 LODIndex = VertexColorLODData.LODIndex;
+
+            if (StaticMeshComponent->LODData.IsValidIndex(LODIndex))
+            {
+                FStaticMeshComponentLODInfo& LODInfo = StaticMeshComponent->LODData[LODIndex];
+                // this component could have been constructed from a template
+                // that had its own vert color overrides; so before we apply
+                // the instance's color data, we need to clear the old
+                // vert colors (so we can properly call InitFromColorArray())
+                StaticMeshComponent->RemoveInstanceVertexColorsFromLOD(LODIndex);
+                // may not be null at the start (could have been initialized
+                // from a  component template with vert coloring), but should
+                // be null at this point, after RemoveInstanceVertexColorsFromLOD()
+                if (LODInfo.OverrideVertexColors == NULL && VertexColorLODData.VertexBufferColors.Num() > 0)
+                {
+                    LODInfo.PaintedVertices = VertexColorLODData.PaintedVertices;
+
+                    LODInfo.OverrideVertexColors = new FColorVertexBuffer;
+                    LODInfo.OverrideVertexColors->InitFromColorArray(VertexColorLODData.VertexBufferColors);
+
+                    check(LODInfo.OverrideVertexColors->GetStride() > 0);
+                    BeginInitResource(LODInfo.OverrideVertexColors);
+                    bAppliedAnyData = true;
+                }
+            }
+        }
+    }
+
+    return bAppliedAnyData;
+}
+
+//=======================================================================================
+
+FOdysseyAnimationComponentInstanceData::FOdysseyAnimationComponentInstanceData(const UOdysseyAnimationComponent* SourceComponent)
+    : FOdysseyStaticMeshComponentInstanceDataPATCH(SourceComponent)
+{
+    Material = SourceComponent->Material;
+    Mode = SourceComponent->Mode;
+    Animation = SourceComponent->Animation;
+    Player = SourceComponent->Player;
+    LODGroup = SourceComponent->LODGroup;
+    DefaultPlayer = SourceComponent->DefaultPlayer;
 }

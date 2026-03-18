@@ -68,17 +68,22 @@ public:
 public:
     //Events
     FSimpleMulticastDelegate& OnAnimationChanged();
+    FSimpleMulticastDelegate& OnRenderTargetChanged();
     FSimpleMulticastDelegate& OnCursorFrameChanged();
     FSimpleMulticastDelegate& OnCurrentFrameChanged();
     FSimpleMulticastDelegate& OnDisplayedFrameChanged();
 
 protected:
+    virtual void PostInitProperties() override;
+    virtual void PostReinitProperties() override;
     virtual void PostLoad() override;
     virtual void PostDuplicate(EDuplicateMode::Type iDuplicateMode) override;
     virtual void Serialize(FArchive& Ar) override;
 
 #if WITH_EDITOR
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent) override;
+    virtual void PostEditChangeChainProperty(FPropertyChangedChainEvent& PropertyChangedEvent) override;
+    virtual void PostEditImport() override;
     virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
     void PropertyChanged(const FName& iPropertyName);
 #endif
@@ -172,6 +177,7 @@ protected:
     virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT(UOdysseyAnimation, STATGROUP_Tickables); }
 
 private:
+    void InitializeRenderTarget();
     FFrameTime ApplyPreBehaviour(FFrameTime iFrame) const;
     FFrameTime ApplyPostBehaviour(FFrameTime iFrame) const;
     void UpdateTexture();
@@ -229,6 +235,7 @@ private:
 private:
     //Events
     FSimpleMulticastDelegate mOnAnimationChanged;
+    FSimpleMulticastDelegate mOnRenderTargetChanged;
     FSimpleMulticastDelegate mOnCurrentFrameChanged;
     FSimpleMulticastDelegate mOnDisplayedFrameChanged;
     FSimpleMulticastDelegate mOnCursorFrameChanged;
