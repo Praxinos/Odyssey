@@ -281,10 +281,14 @@ FOdysseyPaletteEditorToolkit::AddEntry(UClass* iEntryClass)
 #endif
 
     UOdysseyPaletteEntry* currentEntry = nullptr;
-    TArray< UOdysseyPaletteEntry* > selectedEntries = mTreeView->GetSelectedItems();
-    if (!selectedEntries.IsEmpty())
+
+    if (mTreeView) //mTreeView can be null if the treeview tab is not opened at toolkit startup
     {
-        currentEntry = selectedEntries.Last();
+        TArray< UOdysseyPaletteEntry* > selectedEntries = mTreeView->GetSelectedItems();
+        if (!selectedEntries.IsEmpty())
+        {
+            currentEntry = selectedEntries.Last();
+        }
     }
 
     if (currentEntry)
