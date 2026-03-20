@@ -378,12 +378,13 @@ UOdysseyAnimationComponent::UpdateMaterialInstance()
     UMaterialInstanceDynamic* materialInstance = Cast<UMaterialInstanceDynamic>(UStaticMeshComponent::GetMaterial(0));
     if (!materialInstance || materialInstance->GetOuter() != this)
     {
+        //A material instance is needed to be either {transient} or {public + standalone} (saved in its own asset)
+        //If not, we get an error when saving the object containing it (here when we save the actor containing the component)
+        //Here the material instance is not saved in its own asset so we set it to be transient
+        //And we also define its Outer to be this, because it is owned by the Component even if it's Transient
         materialInstance = UMaterialInstanceDynamic::Create(Material, this);
-
-        //Need to set the MaterialInstance RF_Public flag
-        //otherwise we get an error when saving an actor containing this component
-        //(at least with blueprint actors)
-        materialInstance->SetFlags(RF_Public);
+        materialInstance->SetFlags(RF_Transient);
+        //materialInstance->SetFlags(RF_Public);
         UStaticMeshComponent::SetMaterial(0, materialInstance);
     }
 
