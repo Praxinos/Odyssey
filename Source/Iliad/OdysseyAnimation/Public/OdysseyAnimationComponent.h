@@ -71,6 +71,7 @@ public:
     virtual void PropertyChanged(const FName& iPropertyName);
 #endif
 
+    virtual void OnComponentCreated() override;
 protected:
     //Property changed methods
     //void Initialize();
@@ -111,6 +112,8 @@ protected:
 private:
     UPROPERTY(Instanced)
     TObjectPtr<UOdysseyAnimationPlayer> DefaultPlayer;
+
+    //bool bNeedUpdateMaterialInstance = true;
 
 private:
     friend struct FOdysseyAnimationComponentInstanceData;

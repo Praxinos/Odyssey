@@ -134,7 +134,7 @@ UOdysseyAnimationComponent::PostInitProperties()
     if (HasAnyFlags(RF_ClassDefaultObject))
         return;
 
-    UpdateMaterialInstance();
+    //bNeedUpdateMaterialInstance
 }
 
 void
@@ -145,7 +145,7 @@ UOdysseyAnimationComponent::PostReinitProperties()
     if (HasAnyFlags(RF_ClassDefaultObject))
         return;
 
-    UpdateMaterialInstance();
+    //UpdateMaterialInstance();
 }
 
 void
@@ -166,7 +166,7 @@ UOdysseyAnimationComponent::PostLoad()
         SetRelativeScale3D( new_scale );
     }
 
-    UpdateMaterialInstance();
+    //UpdateMaterialInstance();
 
     if (Player)
     {
@@ -183,7 +183,7 @@ UOdysseyAnimationComponent::PostDuplicate(bool bDuplicateForPIE)
 
     // Make sure to update the material after duplicating this component
     // When duplicating an actor PostDuplicate() is not called on its components
-    UpdateMaterialInstance();
+    //UpdateMaterialInstance();
 }
 
 void
@@ -193,7 +193,7 @@ UOdysseyAnimationComponent::PostEditImport()
 
     // Make sure to update the material after duplicating this component
     // When duplicating an actor PostDuplicate() is not called on its components
-    UpdateMaterialInstance();
+    //UpdateMaterialInstance();
 }
 
 TStructOnScope<FActorComponentInstanceData>
@@ -214,11 +214,26 @@ UOdysseyAnimationComponent::ApplyComponentInstanceData(FOdysseyAnimationComponen
     Animation = ComponentInstanceData->Animation;
     LODGroup = ComponentInstanceData->LODGroup;
 
-    MaterialChanged();
-    ModeChanged();
-    PlayerChanged();
-    AnimationChanged();
-    LODGroupChanged();
+    //Here we don't call AnimationChanged() and similar "*Changed()" functions
+    //to avoid calling RescaleToMatchAnimation()
+    //The correct Transform is already applied by UStaticMeshComponent::ApplyComponentInstanceData()
+    //Calling RescaleToMatchAnimation() here would prevent change the component scale in the details Panel
+
+    DefaultPlayer->SetLODGroup(LODGroup);
+    DefaultPlayer->SetAnimation(Animation);
+
+    if (PreviousPlayer)
+        PreviousPlayer->OnAnimationChanged().RemoveAll(this);
+
+    PreviousPlayer = Player;
+
+    if (Player)
+    {
+        Player->OnAnimationChanged().RemoveAll(this);
+        Player->OnAnimationChanged().AddUObject(this, &UOdysseyAnimationComponent::OnPlayerAnimationChanged);
+    }
+
+    UpdateMaterialInstance();
 
     //TODO: Copy important parameters to DefaultPlayer
 }
@@ -253,7 +268,7 @@ UOdysseyAnimationComponent::AnimationChanged()
 void
 UOdysseyAnimationComponent::OnDefaultPlayerRenderTargetChanged()
 {
-    UpdateMaterialInstance();
+    //UpdateMaterialInstance();
 }
 
 void
@@ -410,6 +425,13 @@ UOdysseyAnimationComponent::UpdateMaterialInstance()
     }
 
     materialInstance->SetTextureParameterValue("AnimationTexture", renderTarget);
+}
+
+void
+UOdysseyAnimationComponent::OnComponentCreated()
+{
+    Super::OnComponentCreated();
+    UpdateMaterialInstance();
 }
 
 //======================================================================================
