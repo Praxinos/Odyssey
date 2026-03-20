@@ -379,7 +379,11 @@ UOdysseyAnimationComponent::UpdateMaterialInstance()
     if (!materialInstance || materialInstance->GetOuter() != this)
     {
         materialInstance = UMaterialInstanceDynamic::Create(Material, this);
-        //materialInstance->SetFlags(RF_Public);
+
+        //Need to set the MaterialInstance RF_Public flag
+        //otherwise we get an error when saving an actor containing this component
+        //(at least with blueprint actors)
+        materialInstance->SetFlags(RF_Public);
         UStaticMeshComponent::SetMaterial(0, materialInstance);
     }
 
