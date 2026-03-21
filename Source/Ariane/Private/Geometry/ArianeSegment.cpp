@@ -39,12 +39,6 @@ FArianeSegment::PostEditUndo()
     Init();
 }
 
-float
-FArianeSegment::GetFractionPointT( uint32 FractionPointIndex )
-{
-    return FractionPointsT[FractionPointIndex];
-}
-
 FArianeObject*
 FArianeSegment::GetOwner()
 {
@@ -92,21 +86,21 @@ FArianeSegment::AllocateCache( uint32 VertexCount, uint32 TriangleCount )
 }
 
 const TArray<FArianeSegment::Fraction>&
-FArianeSegment::GetFractionCache()
+FArianeSegment::GetFractions()
 {
-    return FractionCache;
+    return Fractions;
 }
 
-const TArray<FArianePoint*>&
-FArianeSegment::GetFractionPoints()
+const TArray<FArianeSegment::FractionStep>&
+FArianeSegment::GetFractionSteps()
 {
-    return FractionPoints;
+    return FractionSteps;
 }
 
 uint32
 FArianeSegment::GetFractionCount()
 {
-    return GetFractionCache().Num();
+    return Fractions.Num();
 }
 
 const TArray<FModelVertex>&
@@ -171,24 +165,25 @@ FArianeSegment::UpdateBounds()
 
     if( Length )
     {
-        for( int32 i = 0; i < FractionPoints.Num(); i++ )
+        for( int32 i = 0; i < FractionSteps.Num(); i++ )
         {
-            FArianePoint* FractionPoint = FractionPoints[i];
-            float FractionPointRadius = FractionPointsRadius[i];
-            const FVector FractionPointPosition = FractionPoint->GetPosition();
-            FVector FractionPointMax = FVector( FractionPointPosition.X + FractionPointRadius
-                                              , FractionPointPosition.Y + FractionPointRadius
-                                              , FractionPointPosition.Z + FractionPointRadius );
-            FVector FractionPointMin = FVector( FractionPointPosition.X - FractionPointRadius
-                                              , FractionPointPosition.Y - FractionPointRadius
-                                              , FractionPointPosition.Z - FractionPointRadius );
+            FractionStep& Step = FractionSteps[i];
+            FArianePoint* Point = Step.Point;
+            float PointRadius = Step.Radius;
+            const FVector PointPosition = Point->GetPosition();
+            FVector PointMax = FVector( PointPosition.X + PointRadius
+                                      , PointPosition.Y + PointRadius
+                                      , PointPosition.Z + PointRadius );
+            FVector PointMin = FVector( PointPosition.X - PointRadius
+                                      , PointPosition.Y - PointRadius
+                                      , PointPosition.Z - PointRadius );
 
-            if( FractionPointMin.X < Min.X ) Min.X = FractionPointMin.X;
-            if( FractionPointMin.Y < Min.Y ) Min.Y = FractionPointMin.Y;
-            if( FractionPointMin.Z < Min.Z ) Min.Z = FractionPointMin.Z;
-            if( FractionPointMax.X > Max.X ) Max.X = FractionPointMax.X;
-            if( FractionPointMax.Y > Max.Y ) Max.Y = FractionPointMax.Y;
-            if( FractionPointMax.Z > Max.Z ) Max.Z = FractionPointMax.Z;
+            if( PointMin.X < Min.X ) Min.X = PointMin.X;
+            if( PointMin.Y < Min.Y ) Min.Y = PointMin.Y;
+            if( PointMin.Z < Min.Z ) Min.Z = PointMin.Z;
+            if( PointMax.X > Max.X ) Max.X = PointMax.X;
+            if( PointMax.Y > Max.Y ) Max.Y = PointMax.Y;
+            if( PointMax.Z > Max.Z ) Max.Z = PointMax.Z;
         }
 
         Bounds.Origin = ( Min + Max ) * 0.5f;
@@ -208,31 +203,80 @@ FArianeSegment::Update()
 void
 FArianeSegment::Invalidate()
 {
-    if( OwnerID.GetObject()->GetClass() == FArianePath::StaticClass() )
+    if( OwnerID.GetObject() )
     {
-        FArianePath* Path = static_cast<FArianePath*>( OwnerID.GetObject() );
+        if( OwnerID.GetObject()->GetClass() == FArianePath::StaticClass() )
+        {
+            FArianePath* Path = static_cast<FArianePath*>( OwnerID.GetObject() );
 
-        Path->InvalidateSegment( this );
+            Path->InvalidateSegment( this );
+        }
     }
 }
 
 void
 FArianeSegment::Init()
 {
-    FractionCache.Empty();
-    FractionPoints.Empty();
-    FractionPointsT.Empty();
+    Fractions.Empty();
+    FractionSteps.Empty();
 
-    FractionCache.Emplace( Vertices[0].GetVertex(), Vertices[1].GetVertex() );
+    FractionSteps.Emplace( Vertices[0].GetVertex(), 0.0f, Vertices[0].GetVertex()->GetRadius() );
+    FractionSteps.Emplace( Vertices[1].GetVertex(), 1.0f, Vertices[1].GetVertex()->GetRadius() );
 
-    FractionPointsT.Add( 0.0f );
-    FractionPointsT.Add( 1.0f );
-
-    FractionPointsRadius.Add( Vertices[0].GetVertex()->GetRadius() );
-    FractionPointsRadius.Add( Vertices[1].GetVertex()->GetRadius() );
-
-    FractionPoints.Add( Vertices[0].GetVertex() );
-    FractionPoints.Add( Vertices[1].GetVertex() );
+    Fractions.Emplace( &FractionSteps[0], &FractionSteps[1] );
 
     Invalidate();
+}
+
+const FGuid&
+FArianeSegment::GetGuid()
+{
+    return Guid;
+}
+
+FVector
+FArianeSegment::GetPointAt( double T )
+{
+    FVector V0Coords = GetVertex(0)->GetPosition();
+    FVector V1Coords = GetVertex(1)->GetPosition();
+
+    return V0Coords + ( V1Coords - V0Coords ) * T;
+}
+
+FVector
+FArianeSegment::GetNormalAt( double T )
+{
+    FVector V0Coords = GetVertex(0)->GetNormal();
+    FVector V1Coords = GetVertex(1)->GetNormal();
+
+    return V0Coords + ( V1Coords - V0Coords ) * T;
+}
+
+FArianeSegment*
+FArianeSegment::Extract( FArianeObject* NewSegmentOwner
+                       , FArianeVertex* NewSegmentVertex0
+                       , float T0
+                       , FArianeVertex* NewSegmentVertex1
+                       , float T1 )
+{
+    FVector DeltaPosition = GetVertex(1)->GetPosition() - GetVertex(0)->GetPosition();
+    FVector DeltaNormal = GetVertex(1)->GetNormal() - GetVertex(0)->GetNormal();
+    double DeltaRadius = GetVertex(1)->GetRadius() - GetVertex(0)->GetRadius();
+
+    NewSegmentVertex0->SetPosition( GetVertex(0)->GetPosition() + DeltaPosition * T0 );
+    NewSegmentVertex0->SetNormal( GetVertex(0)->GetNormal() + DeltaNormal * T0 );
+    NewSegmentVertex0->SetRadius( GetVertex(0)->GetRadius() + DeltaRadius * T0 );
+
+    NewSegmentVertex1->SetPosition( GetVertex(0)->GetPosition() + DeltaPosition * T1 );
+    NewSegmentVertex1->SetNormal( GetVertex(0)->GetNormal() + DeltaNormal * T1 );
+    NewSegmentVertex1->SetRadius( GetVertex(0)->GetRadius() + DeltaRadius * T1 );
+
+    if( NewSegmentOwner->GetClass() == FArianePath::StaticClass() )
+    {
+        FArianePath* Path = static_cast<FArianePath*>( NewSegmentOwner );
+
+        return Path->AllocSegment( NewSegmentVertex0, NewSegmentVertex1 );
+    }
+
+    return nullptr;
 }

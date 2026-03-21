@@ -66,6 +66,17 @@ struct ARIANE_API FArianeVertex : public FArianePoint
         /** Get this vertex's normal vector */
         const FVector& GetNormal();
 
+        const FGuid& GetGuid();
+        FArianeSegment* GetOtherSegment( FArianeSegment* Segment );
+
+        bool IsChained() { return bChained; };
+        void SetChained( bool bInChained ) { bChained = bInChained; };
+        FArianeSegment* GetFirstSegment();
+        uint32 GetIndex( FArianeSegment* Segment );
+        void SetID( uint32 InID );
+        uint32 GetID();
+        void SetRadius( double InRadius );
+
     public:
         UPROPERTY( EditAnywhere )
         FGuid Guid;
@@ -81,4 +92,7 @@ struct ARIANE_API FArianeVertex : public FArianePoint
 
     protected:
         TArray<FArianeSegment*> Segments;
+        uint32 ID;
+
+        bool bChained : 1;
 };

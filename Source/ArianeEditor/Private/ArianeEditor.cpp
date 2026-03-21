@@ -8,11 +8,16 @@
 #include "ArianePainting3DComponent.h"
 #include "ArianePainting3DActor.h"
 #include "PathDrawingTool/ArianeEditorPathDrawingTool.h"
+#include "EraserTool/ArianeEditorEraserTool.h"
 // Unreal
 #include "Toolkits/BaseToolkit.h"
 #include "UObject/Object.h"
 #include "EdMode.h"
 #include "LevelEditor.h"
+#include "FileHelpers.h"
+#include "Subsystems/EditorActorSubsystem.h"
+
+#define LOCTEXT_NAMESPACE "ArianeEditor"
 
 FArianeEditor::~FArianeEditor()
 {
@@ -29,6 +34,136 @@ FArianeEditorViewportToolkit*
 FArianeEditor::GetToolkit()
 {
     return Toolkit;
+}
+
+void
+FArianeEditor::ExtendToolbarSaveAssetButton( UToolMenu* iToolMenu )
+{
+    FToolMenuSection& assetSection = iToolMenu->AddSection("Asset");
+
+    assetSection.AddEntry(
+        FToolMenuEntry::InitToolBarButton(
+            NAME_None,
+            FUIAction(
+                FExecuteAction::CreateLambda(
+                    [this]()
+                    {
+                        FEditorFileUtils::SaveMap( GetWorld(), GetWorld()->GetPathName() );
+                    }
+                )
+            ),
+            FText(),
+            LOCTEXT("top-tab.save-asset", "Saves the painted asset"),
+            FSlateIcon("OdysseyStyle", "PainterEditor.TopBar.Save32"),
+            EUserInterfaceActionType::Button
+        )
+    );
+}
+
+void
+FArianeEditor::ClearPainting3DComponents()
+{
+    UEditorActorSubsystem* editorActorSubsystem = GEditor->GetEditorSubsystem<UEditorActorSubsystem>();
+
+    for( AActor* actor : editorActorSubsystem->GetSelectedLevelActors() )
+    {
+        UArianePainting3DComponent* painting3DComponent = Cast<UArianePainting3DComponent>(actor->GetComponentByClass( UArianePainting3DComponent::StaticClass() ));
+
+        if( GEditor->IsTransactionActive() )
+            painting3DComponent->Modify();
+
+        if( painting3DComponent )
+        {
+            painting3DComponent->ResetHierarchy();
+        }
+    }
+}
+
+void
+FArianeEditor::ExtendToolbarToolParameters( UToolMenu* iToolMenu )
+{
+    FToolMenuSection& undoRedoSection = iToolMenu->AddSection("UndoRedo");
+
+    undoRedoSection.AddEntry(
+        FToolMenuEntry::InitToolBarButton(
+            "Undo",
+            FUIAction(
+                FExecuteAction::CreateLambda( [this]()
+                                              {
+                                                  GEditor->UndoTransaction(true);
+                                              } )
+            ),
+            FText(),
+            LOCTEXT("top-tab.undo", "Undo the previous action."),
+            FSlateIcon("OdysseyStyle", "PainterEditor.TopBar.Undo32"),
+            EUserInterfaceActionType::Button
+        )
+    );
+
+    undoRedoSection.AddEntry(
+        FToolMenuEntry::InitToolBarButton(
+            "Redo",
+            FUIAction(
+                FExecuteAction::CreateLambda( [this]()
+                                              {
+                                                  GEditor->RedoTransaction();
+                                              } )
+            ),
+            FText(),
+            LOCTEXT("top-tab.redo", "Redo the next action."),
+            FSlateIcon("OdysseyStyle", "PainterEditor.TopBar.Redo32"),
+            EUserInterfaceActionType::Button
+        )
+    );
+
+    FToolMenuSection& clearCanvasSection = iToolMenu->AddSection("ClearPainting3DActors");
+
+    clearCanvasSection.AddEntry(
+        FToolMenuEntry::InitToolBarButton(
+            "ClearPainting3DActors",
+            FUIAction(
+                FExecuteAction::CreateLambda(
+                    [this]()
+                    {
+                        GEditor->BeginTransaction(FText::FromString("Clear selected Painting3D actors"));
+
+                        ClearPainting3DComponents();
+
+                        GEditor->EndTransaction();
+                    }
+                )
+            ),
+            FText(),
+            LOCTEXT("ariane-top-tab-.clear", "Clear selected Painting3D actors."),
+            FSlateIcon("OdysseyStyle", "PainterEditor.TopBar.Clear32"),
+            EUserInterfaceActionType::Button
+        )
+    );
+
+/*
+    UOdysseyPainterEditorTool* currentTool = GetCurrentTool();
+    if (currentTool)
+    {
+        currentTool->ExtendToolbar(iToolMenu);
+    }
+*/
+}
+
+void
+FArianeEditor::ExtendLevelEditorToolbar( UToolMenu* iToolbar )
+{
+    //mToolbarMenuName = iToolbar->GetMenuName();
+
+    iToolbar->AddDynamicSection(
+        "ToolParameters",
+        FNewToolMenuDelegate::CreateLambda(
+            [this](UToolMenu* iToolMenu)
+            {
+                ExtendToolbarSaveAssetButton(iToolMenu);
+                ExtendToolbarToolParameters(iToolMenu);
+            }
+        )
+    );
 }
 
 // Tools ------------------------------
@@ -76,11 +211,15 @@ void
 FArianeEditor::InitTools()
 {
     AddTool( NewObject<UArianeEditorPathDrawingTool>() );
+    AddTool( NewObject<UArianeEditorEraserTool>() );
 
     for( UArianeEditorTool* tool : Tools )
     {
-        tool->SetEditor( this );
+        tool->Init( this );
     }
+
+    // Set the first tool as the default one
+    SetCurrentTool( Tools[0] );
 }
 
 // --------------------- Tabs
@@ -170,10 +309,10 @@ FArianeEditor::GetWorld()
     return Toolkit->GetEditorMode()->GetWorld();
 }
 
-void
+AArianePainting3DActor*
 FArianeEditor::AddPainting3DActor()
 {
-    GetWorld()->SpawnActor( AArianePainting3DActor::StaticClass() );
+    return Cast<AArianePainting3DActor>(GetWorld()->SpawnActor( AArianePainting3DActor::StaticClass() ));
 }
 
 void
@@ -211,3 +350,5 @@ FArianeEditor::GetReferencerName() const
 {
     return "FArianeEditor";
 }
+
+#undef LOCTEXT_NAMESPACE

@@ -104,30 +104,6 @@ void FArianeEditorViewportEdMode::Render(const FSceneView* View,FViewport* Viewp
 */
 }
 
-void
-FArianeEditorViewportEdMode::DrawHUD(FEditorViewportClient* ViewportClient,FViewport* Viewport,const FSceneView* View,FCanvas* Canvas)
-{
-/* Gary
-    if (!mViewportDrawingEditorExtension || !mViewportDrawingEditorExtension->IsPlaneComponent())
-        return;
-
-    TSharedPtr<SWidget> viewportWidget = ViewportClient->GetEditorViewportWidget();
-    TSharedPtr<SWindow> window = FSlateApplication::Get().FindWidgetWindow(viewportWidget.ToSharedRef());
-
-    if( !window )
-        return;
-
-    float scaleFactor = FSlateApplication::Get().GetApplicationScale() * window->GetNativeWindow()->GetDPIScaleFactor();
-
-    FOdysseyHUDElement::FDrawHUDParams params;
-    if (!mViewportDrawingEditorExtension->GetDrawHUDParams(View, Canvas, scaleFactor, params))
-        return;
-
-    GetEditor()->HUDSystem()->Draw(params);
-*/
-}
-
-
 bool FArianeEditorViewportEdMode::Select(AActor* InActor, bool bInSelected)
 {
 /* Gary
@@ -602,5 +578,41 @@ FArianeEditorViewportEdMode::GetEditor() const
     return mViewportDrawingEditorToolkit->GetEditor().Get();
 }
 */
+
+void
+FArianeEditorViewportEdMode::DrawHUD ( FEditorViewportClient* ViewportClient
+                                     , FViewport* Viewport
+                                     , const FSceneView* View
+                                     , FCanvas* Canvas )
+{
+    TSharedPtr<FArianeEditorViewportToolkit> viewportToolkit = GetArianeEditorViewportToolkit();
+
+    if( viewportToolkit->GetEditor().GetCurrentTool() )
+    {
+        UArianeEditorTool* currenTool = viewportToolkit->GetEditor().GetCurrentTool();
+
+        currenTool->DrawHUD( ViewportClient, Viewport, View, Canvas  );
+    }
+
+/* Gary
+    if (!mViewportDrawingEditorExtension || !mViewportDrawingEditorExtension->IsPlaneComponent())
+        return;
+
+    TSharedPtr<SWidget> viewportWidget = ViewportClient->GetEditorViewportWidget();
+    TSharedPtr<SWindow> window = FSlateApplication::Get().FindWidgetWindow(viewportWidget.ToSharedRef());
+
+    if( !window )
+        return;
+
+    float scaleFactor = FSlateApplication::Get().GetApplicationScale() * window->GetNativeWindow()->GetDPIScaleFactor();
+
+    FOdysseyHUDElement::FDrawHUDParams params;
+    if (!mViewportDrawingEditorExtension->GetDrawHUDParams(View, Canvas, scaleFactor, params))
+        return;
+
+    GetEditor()->HUDSystem()->Draw(params);
+*/
+}
+
 
 #undef LOCTEXT_NAMESPACE

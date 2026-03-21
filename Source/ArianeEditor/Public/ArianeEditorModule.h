@@ -5,6 +5,8 @@
 
 #include "Modules/ModuleManager.h"
 
+class AArianePainting3DActor;
+
 /* Gary
 class FOdysseyPainterEditor;
 */
@@ -46,6 +48,12 @@ private:
     //Editor Mode
     void RegisterEditorMode();
     void UnregisterEditorMode();
+
+    void RegisterToolbarButton();
+    void UnregisterToolbarButton();
+    void AddToolbarButton( FToolBarBuilder &builder );
+    void OnEngineInit();
+    void ActivateEdMode( AArianePainting3DActor* Painting3DActor );
 
     //Shaders
     void RegisterShaders();

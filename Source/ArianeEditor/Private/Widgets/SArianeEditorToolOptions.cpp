@@ -30,7 +30,7 @@ SArianeEditorToolOptions::Construct( const FArguments& InArgs, FArianeEditor* iE
     DetailsViewArgs.NameAreaSettings = FDetailsViewArgs::HideNameArea;
 
     mDetailsView = PropertyEditorModule.CreateDetailView( DetailsViewArgs );
-    mDetailsView->SetObject( nullptr );
+    mDetailsView->SetObject( mEditor->GetCurrentTool() );
 
     this->ChildSlot
     [

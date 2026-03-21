@@ -50,6 +50,11 @@ class ARIANEEDITOR_API UArianeEditorTool : public UObject
 
         virtual void Tick( float iDeltaTime );
 
+        virtual void DrawHUD ( FEditorViewportClient* ViewportClient
+                             , FViewport* Viewport
+                             , const FSceneView* View
+                             , FCanvas* Canvas );
+
         /** Get the tool's tooltip */
         virtual FText GetTooltip() const;
         /** Is the tool activable ? */
@@ -122,7 +127,7 @@ class ARIANEEDITOR_API UArianeEditorTool : public UObject
         virtual void PostDuplicate(EDuplicateMode::Type DuplicateMode) override;
 
     public:
-        void SetEditor(class FArianeEditor* iEditor);
+        virtual void Init( FArianeEditor* iEditor );
         FArianeEditor* GetEditor() const;
 /* Gary
         //template<class T> T* GetEditorAs() const { return static_cast<T*>(mEditor); };

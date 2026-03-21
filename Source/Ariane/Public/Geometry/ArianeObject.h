@@ -47,6 +47,9 @@ struct ARIANE_API FArianeObject
     GENERATED_BODY()
 
     public:
+        enum class TraversalReturnValue{ Continue, IgnoreChildren, Stop };
+
+    public:
         /**
          * @brief Get the class type
          * @return the class type
@@ -119,16 +122,31 @@ struct ARIANE_API FArianeObject
         /** Run any object-specific task required immediately after undoing / redoing */
         virtual void PostEditUndo(){};
 
+        virtual void ExportProperties( FArianeObject* DestObject );
+        FVector GetTranslation();
+        FVector GetRotationInDegrees();
+        FVector GetScaling();
+        UArianePainting3DComponent* GetPainting3DComponent();
+        const FGuid& GetGuid();
+        void Traverse( TFunction<TraversalReturnValue(FArianeObject*)> Callback );
+        FArianeObject* GetParent();
+        void SetParent( FArianeObject* Parent );
+        void RemoveChild( FArianeObject* ChildToRemove );
+
     protected:
         /**
          * @brief Invalidate a child. It will also invalidate the whole chain of parents.
          * @param Child the child to invalidate.
          */
         void InvalidateChild( FArianeObject* Child );
+        TraversalReturnValue Traverse_Private( TFunction<TraversalReturnValue(FArianeObject*)> Callback );
 
-    public:
+    protected:
         UPROPERTY( EditAnywhere )
         UArianePainting3DComponent* Painting3DComponent;
+
+        UPROPERTY( EditAnywhere )
+        FName Name;
 
         UPROPERTY( EditAnywhere )
         FGuid Guid;
@@ -138,6 +156,15 @@ struct ARIANE_API FArianeObject
 
         UPROPERTY( EditAnywhere )
         FArianeObjectID ParentID;
+
+        UPROPERTY( EditAnywhere )
+        FVector Translation;
+
+        UPROPERTY( EditAnywhere )
+        FVector RotationInDegrees;
+
+        UPROPERTY( EditAnywhere )
+        FVector Scaling;
 
     protected:
         TArray<FArianeObjectID> InvalidatedChildrenID;

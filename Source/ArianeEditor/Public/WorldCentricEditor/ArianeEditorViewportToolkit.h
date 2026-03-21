@@ -89,7 +89,7 @@ class ARIANEEDITOR_API FArianeEditorViewportToolkit
 
     private:
         FArianeEditorViewportEdMode* mEdMode;
-        FArianeEditor mEditor;
+        FArianeEditor Editor;
 /*
         TSharedPtr<FArianeViewportDrawingEditorExtension> mViewportDrawingExtension;
         FEdMode* mEdMode;

@@ -1,8 +1,13 @@
 // IDDN.FR.001.060015.014.S.X.2019.000.00000
 // ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
 
+// Ariane headers
 #include "ArianeEditorModule.h"
-
+#include "ArianeEditorCommands.h"
+#include "ArianeEditorViewportToolkit.h"
+#include "ArianeEditor.h"
+#include "ArianePainting3DActor.h"
+// Unreal headers
 #include "AssetToolsModule.h"
 #include "CoreMinimal.h"
 #include "ISettingsModule.h"
@@ -13,6 +18,7 @@
 #include "ActorFactories/ActorFactory.h"
 #include "EditorModeRegistry.h"
 #include "Interfaces/IPluginManager.h"
+#include "EditorModeManager.h"
 
 #include "OdysseyStyle.h"
 
@@ -75,6 +81,10 @@ FArianeEditorModule::StartupModule()
 
     //UToolMenus::RegisterStartupCallback( FSimpleMulticastDelegate::FDelegate::CreateRaw(this, &FArianeEditorModule::RegisterMenus ) );
 
+    //FCoreDelegates::OnPostEngineInit.AddRaw(this, &FArianeEditorModule::OnEngineInit );
+
+    RegisterToolbarButton();
+
 /* Gary
     RegisterBrushOverrides(); //First thing to do, as it modifies the Brush CDO
     RegisterSettings();
@@ -87,6 +97,12 @@ FArianeEditorModule::StartupModule()
     FOdysseyVectorBrushCustomization::Register();
     FOdysseyVectorObjectViewPaletteCustomization::Register();
 */
+}
+
+void
+FArianeEditorModule::OnEngineInit()
+{
+    //UToolMenus::RegisterStartupCallback( FSimpleMulticastDelegate::FDelegate::CreateRaw( this, &FArianeEditorModule::RegisterToolbarButton ) );
 }
 
 void
@@ -108,6 +124,84 @@ FArianeEditorModule::ShutdownModule()
     FOdysseyVectorBrushCustomization::Unregister();
     FOdysseyVectorObjectViewPaletteCustomization::Unregister();
 */
+}
+
+void
+FArianeEditorModule::AddToolbarButton( FToolBarBuilder &builder )
+{
+    builder.AddToolBarButton( FArianeEditorCommands::Get().LaunchAriane
+                            , NAME_None
+                            , LOCTEXT("WorldProperties_Override", "My Button")
+                            , LOCTEXT("WorldProperties_ToolTipOverride", "Click me to display a message")
+                            , TAttribute<FSlateIcon>(), "LevelToolbarWorldSettings" );
+}
+
+void
+FArianeEditorModule::ActivateEdMode( AArianePainting3DActor* Painting3DActor )
+{
+    FEditorModeTools& ModeTools = GLevelEditorModeTools();
+
+    ModeTools.ActivateMode( FArianeEditorViewportEdMode::EM_ArianeEditorViewportEdModeId );
+
+    FEdMode* EdMode = ModeTools.GetActiveMode( FArianeEditorViewportEdMode::EM_ArianeEditorViewportEdModeId );
+
+    if( EdMode )
+    {
+        FArianeEditorViewportEdMode* ArianeEdMode = static_cast<FArianeEditorViewportEdMode*>(EdMode);
+        TSharedPtr<FModeToolkit> Toolkit = ArianeEdMode->GetToolkit();
+        TSharedPtr<FArianeEditorViewportToolkit> ArianeToolkit = StaticCastSharedPtr<FArianeEditorViewportToolkit>(Toolkit);
+
+        if( Painting3DActor == nullptr )
+        {
+            Painting3DActor = ArianeToolkit->GetEditor().AddPainting3DActor();
+        }
+
+        // Select the actor
+        GEditor->SelectNone( true, true );
+        GEditor->SelectActor( Painting3DActor, true, true );
+    }
+}
+
+void
+FArianeEditorModule::RegisterToolbarButton()
+{
+    // Extend the "File" section of the main toolbar
+    UToolMenu* ToolbarMenu = UToolMenus::Get()->ExtendMenu( "LevelEditor.LevelEditorToolBar.AssetsToolBar");
+    FToolMenuSection* ToolbarSection = ToolbarMenu->FindSection("Content");
+
+    if( ToolbarSection )
+    {
+        FToolMenuEntry ArianeLauncherEntry = FToolMenuEntry::InitToolBarButton( TEXT("MyCustomButtonName")
+                                                                              , FExecuteAction::CreateLambda( [this]()
+                                                                              {
+                                                                                  ActivateEdMode( nullptr );
+                                                                                  //GetModeManager()->ActivateMode( EM_ArianeEditorViewportEdModeId );
+                                                                              } ) );
+
+        // Add after the Unreal's "Add Actor" button
+        //ArianeLauncherEntry.InsertPosition = FToolMenuInsert( "AddQuick", EToolMenuInsertType::Before );
+
+        ToolbarSection->AddEntry( ArianeLauncherEntry );
+    }
+
+/*
+    FLevelEditorModule& LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor");
+    TSharedPtr<FExtender> Extenders = LevelEditorModule.GetToolBarExtensibilityManager()->GetAllExtenders();
+
+    TSharedPtr<FExtender> MyExtender = MakeShareable(new FExtender);
+    MyExtender->AddToolBarExtension( "Settings"
+                                   , EExtensionHook::After
+                                   , NULL
+                                   , FToolBarExtensionDelegate::CreateRaw( this
+                                                                         , &FArianeEditorModule::AddToolbarButton ) );
+
+    LevelEditorModule.GetToolBarExtensibilityManager()->AddExtender( MyExtender );
+*/
+}
+
+void
+FArianeEditorModule::UnregisterToolbarButton()
+{
 }
 
 void
@@ -202,8 +296,8 @@ FArianeEditorModule::UnregisterSettings()
 void
 FArianeEditorModule::RegisterCommands()
 {
+    FArianeEditorCommands::Register();
 /* Gary
-    FOdysseyPainterEditorCommands::Register();
     FOdysseyPainterEditorAnimationCommands::Register();
     FOdysseyPainterEditorFlipbookCommands::Register();
     FOdysseyViewportDrawingEditorCommands::Register();

@@ -1,0 +1,1095 @@
+// IDDN.FR.001.060015.014.S.X.2019.000.00000
+// ODYSSEY is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2019
+
+// Ariane headers
+#include "EraserTool/ArianeEditorEraserTool.h"
+#include "ArianeEditor.h"
+#include "ArianePainting3DComponent.h"
+#include "ArianePath.h"
+#include "ArianeVertex.h"
+#include "ArianeSegmentCubic.h"
+// Odyssey
+#include "OdysseyStyle.h"
+// Unreal headers
+#include "Subsystems/EditorActorSubsystem.h"
+#include "SceneView.h"
+#include "Math/UnrealMathUtility.h"
+#include "IStylusState.h"
+#include "Engine/CanvasRenderTarget2D.h"
+#include "Engine/Canvas.h"
+#include "CanvasTypes.h"
+#include "CanvasItem.h"
+
+#define LOCTEXT_NAMESPACE "ArianeEditor"
+
+UArianeEditorEraserTool::~UArianeEditorEraserTool()
+{
+}
+
+UArianeEditorEraserTool::UArianeEditorEraserTool()
+    : Size( 20.0f )
+    , bSplit ( true )
+    , CanvasRenderTarget ( nullptr )
+    , Brush( nullptr )
+{
+    Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathDrawing64");
+
+    bHasContextMenu = true;
+}
+
+void
+UArianeEditorEraserTool::Init( FArianeEditor* InEditor )
+{
+    Super::Init( InEditor );
+
+    CanvasRenderTarget = UCanvasRenderTarget2D::CreateCanvasRenderTarget2D( GetWorld()
+                                                                          , UCanvasRenderTarget2D::StaticClass()
+                                                                          , 1024
+                                                                          , 1024 );
+
+    //CanvasRenderTarget->SetShouldClearRenderTargetOnReceiveUpdate( false );
+    //CanvasRenderTarget->OnCanvasRenderTargetUpdate.AddDynamic( this, &UArianeEditorEraserTool::StampBrush );
+    //CanvasRenderTarget->UpdateResource();
+
+    //ClearCanvas();
+
+    Brush = UTexture2D::CreateTransient( Size, Size, PF_B8G8R8A8 );
+
+    Brush->UpdateResource();
+
+    UpdateBrush();
+}
+
+UArianeEditorEraserTool::FWayFragment::FWayFragment( FArianeSegment* InSegment
+                                                   , FWayPoint* InWayPoint0
+                                                   , FWayPoint* InWayPoint1
+                                                   , bool bInErased )
+{
+    Segment = InSegment;
+
+    WayPoint0 = InWayPoint0;
+    WayPoint1 = InWayPoint1;
+
+    WayPoint0->Fragments.Push( this );
+    WayPoint1->Fragments.Push( this );
+
+    bErased = bInErased;
+
+    if( WayPoint0->Flags & FWayPoint::Original )
+    {
+        T0 = WayPoint0->OriginalVertex->GetIndex( Segment );
+    }
+    else
+    {
+        T0 = WayPoint0->T;
+    }
+
+    if( WayPoint1->Flags & FWayPoint::Original )
+    {
+        T1 = WayPoint1->OriginalVertex->GetIndex( Segment );
+    }
+    else
+    {
+        T1 = WayPoint1->T;
+    }
+/*
+    if( segment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
+    {
+        FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segment);
+        ::ULIS::FVec2D* cubicSegmentBezier = cubicSegment->GetBezier();
+
+        if( t0 < t1 )
+        {
+            FOdysseyVector::BezierExtract( cubicSegmentBezier[0]
+                                         , cubicSegmentBezier[1]
+                                         , cubicSegmentBezier[2]
+                                         , cubicSegmentBezier[3]
+                                         , t0
+                                         , t1
+                                         , bezier[0]
+                                         , bezier[1]
+                                         , bezier[2]
+                                         , bezier[3] );
+        }
+        else
+        {
+            FOdysseyVector::BezierExtract( cubicSegmentBezier[0]
+                                         , cubicSegmentBezier[1]
+                                         , cubicSegmentBezier[2]
+                                         , cubicSegmentBezier[3]
+                                         , t1
+                                         , t0
+                                         , bezier[3]
+                                         , bezier[2]
+                                         , bezier[1]
+                                         , bezier[0] );
+        }
+    }
+*/
+}
+
+UArianeEditorEraserTool::FWayFragment*
+UArianeEditorEraserTool::FWayFragment::GetNext()
+{
+    for( FWayFragment* candidateFragment : WayPoint1->Fragments )
+    {
+        if( candidateFragment->WayPoint0 == WayPoint1 )
+        {
+            return candidateFragment;
+        }
+    }
+
+    return nullptr;
+}
+
+UArianeEditorEraserTool::FWayFragment*
+UArianeEditorEraserTool::FWayFragment::GetPrev()
+{
+    for( FWayFragment* candidateFragment : WayPoint0->Fragments )
+    {
+        if( candidateFragment->WayPoint1 == WayPoint0 )
+        {
+            return candidateFragment;
+        }
+    }
+
+    return nullptr;
+}
+
+void
+UArianeEditorEraserTool::VertexToWaypoint( FSceneView* View
+                                         , const FTransform& WorldTransform
+                                         , FArianeVertex* Vertex
+                                         , TArray<FWayPoint>& OutWayPoints )
+{
+    FVector2D ScreenCoords;
+
+    View->ProjectWorldToScreen( WorldTransform.TransformVector( Vertex->GetPosition() )
+                              , View->UnconstrainedViewRect
+                              , View->ViewMatrices.GetViewProjectionMatrix()
+                              , ScreenCoords
+                              , true ); // calc outside view position
+
+    uint8 alpha = GetAlpha( ScreenCoords.X, ScreenCoords.Y );
+
+    if( alpha == 0 ) // vertex in dark zone, keep it
+    {
+        OutWayPoints.Emplace( Vertex
+                            , FWayPoint::OutsideErasureArea
+                            | FWayPoint::Original );
+    }
+    else
+    {
+        OutWayPoints.Emplace( Vertex
+                            , FWayPoint::InsideErasureArea
+                            | FWayPoint::Original );
+    }
+}
+
+// returns true if there were any intersection with the erasure zone
+bool
+UArianeEditorEraserTool::CheckContrast( uint8 iAlphaValue0, uint8 iAlphaValue1 )
+{
+    if( ( ( iAlphaValue0 == 0 ) && iAlphaValue1 )
+     || ( iAlphaValue0 && ( iAlphaValue1 == 0 ) ) )
+    {
+        return true;
+    }
+
+    return false;
+}
+
+// returns current alpha value
+uint8
+UArianeEditorEraserTool::GetAlpha( int32 X, int32 Y )
+{
+    FTextureRenderTargetResource* RTResource = CanvasRenderTarget->GameThread_GetRenderTargetResource();
+    FReadSurfaceDataFlags ReadFlags(RCM_UNorm);
+    FIntRect InRect( X, Y, X + 1, Y + 1 );
+    TArray<FColor> SinglePixelArray;
+
+    RTResource->ReadPixels( SinglePixelArray, ReadFlags, InRect );
+
+    return ( SinglePixelArray.Num() > 0 ) ? SinglePixelArray[0].A : 0;
+}
+
+void
+UArianeEditorEraserTool::TraceLine( FArianePath* Path
+                                  , FArianeSegment* Segment
+                                  , const FArianeSegment::FractionStep* Step0
+                                  , int32 ScreenX0
+                                  , int32 ScreenY0
+                                  , const FArianeSegment::FractionStep* Step1
+                                  , int32 ScreenX1
+                                  , int32 ScreenY1
+                                  , TArray<FWayPoint>& OutWayPointBuffer
+                                  , TArray<FMetaFragment>& OutMetaFragmentBuffer
+                                  , bool iRevert )
+{
+    int32  dx  = ( ScreenX1 - ScreenX0 );
+    uint32 ddx = abs ( dx );
+    int32  dy  = ( ScreenY1 - ScreenY0 );
+    uint32 ddy = abs ( dy );
+    double dt  = ( Step1->T - Step0->T );
+    int32  dd  = ( ddx > ddy ) ? ddx : ddy;
+    int32  px  = ( dx > 0 ) ? 1 : -1;
+    int32  py  = ( dy > 0 ) ? 1 : -1;
+    double pt  = ( dd ) ? dt / dd : 0.0f;
+    int32  x   = ScreenX0;
+    int32  y   = ScreenY0;
+    double t   = Step0->T;
+    uint32 cumul = 0;
+    uint8 LastAlphaValue = GetAlpha( ScreenX0, ScreenY0 );
+    double LastT = Step0->T;
+
+    if ( ddx > ddy )
+    {
+        for ( uint32 i = 0; i <= ddx; i++ )
+        {
+            uint8 AlphaValue = GetAlpha( x, y );
+
+            if( CheckContrast( AlphaValue, LastAlphaValue ) )
+            {
+                // coords will always be right outside the erasure area
+                double BestT = AlphaValue ? LastT : t;
+                uint32 WaypointID = OutWayPointBuffer.Num();
+
+                OutWayPointBuffer.Emplace( BestT, FWayPoint::BordersErasureArea );
+
+                OutMetaFragmentBuffer.Emplace( Segment
+                                             , WaypointID - 1
+                                             , WaypointID
+                                             , LastAlphaValue ? true : false );
+            }
+
+            LastAlphaValue = AlphaValue;
+            LastT = t;
+
+            cumul += ddy;
+            x     += px;
+            t     += pt;
+
+            if ( cumul >= ddx )
+            {
+                cumul -= ddx;
+                y     += py;
+            }
+        }
+    }
+    else
+    {
+        for ( uint32 i = 0; i <= ddy; i++ )
+        {
+            uint8 AlphaValue = GetAlpha( x, y );
+
+            if( CheckContrast( AlphaValue, LastAlphaValue ) )
+            {
+                // coords will always be right outside the erasure area
+                double BestT = AlphaValue ? LastT : t;
+                uint32 WaypointID = OutWayPointBuffer.Num();
+
+                OutWayPointBuffer.Emplace( BestT, FWayPoint::BordersErasureArea );
+
+                OutMetaFragmentBuffer.Emplace( Segment
+                                             , WaypointID - 1
+                                             , WaypointID
+                                             , LastAlphaValue ? true : false );
+            }
+
+            LastAlphaValue = AlphaValue;
+            LastT = t;
+
+            cumul += ddx;
+            y     += py;
+            t     += pt;
+
+            if ( cumul >= ddy )
+            {
+                cumul -= ddy;
+                x     += px;
+            }
+        }
+    }
+}
+
+bool
+UArianeEditorEraserTool::ErasePaths( FSceneView* View
+                                   , UArianePainting3DComponent* Painting3DComponent )
+{
+    TArray<FArianePath*> AddedPaths;
+    TArray<FArianeVertex*> AddedVertices;
+    TArray<FArianeSegment*> AddedSegments;
+    TArray<FArianePath*> RemovedPaths;
+    TArray<FArianeVertex*> RemovedVertices;
+    TArray<FArianeSegment*> RemovedSegments;
+
+    Painting3DComponent->GetRootObject()->Traverse( [ this
+                                                    , View
+                                                    , Painting3DComponent
+                                                    , &AddedPaths
+                                                    , &AddedVertices
+                                                    , &AddedSegments
+                                                    , &RemovedPaths
+                                                    , &RemovedVertices
+                                                    , &RemovedSegments ] ( FArianeObject* TravesedObject ) -> FArianeObject::TraversalReturnValue
+    {
+        if( TravesedObject->GetClass() == FArianePath::StaticClass() )
+        {
+            FArianePath* Path = static_cast<FArianePath*>( TravesedObject );
+
+            for( const FArianePath::Chain& Chain : Path->GetChains() )
+            {
+                TArray<FWayPoint> WayPoints;
+                TArray<FWayFragment> WayFragments;
+
+                WayPoints.Reserve( 100 );
+                WayFragments.Reserve( 100 );
+
+                bool Hit = EraseChainSegments( View
+                                             , Painting3DComponent
+                                             , Path
+                                             , Chain
+                                             , WayPoints
+                                             , WayFragments );
+
+                if( Hit )
+                {
+                    // proceed now we know we have hit anything
+                    // determine which vertices / segments will be deleted and which will be kept
+                    // it differs in SPLIT and NOSPLIT modes. SPLIT modes removes only those erased,
+                    // split removes all
+                    ParseChainWayPoints( Painting3DComponent
+                                       , Path
+                                       , Chain
+                                       , WayPoints
+                                       , WayFragments
+                                       , AddedPaths
+                                       , AddedVertices
+                                       , AddedSegments
+                                       , RemovedPaths
+                                       , RemovedVertices
+                                       , RemovedSegments );
+                }
+            }
+        }
+
+        return FArianeObject::TraversalReturnValue::Continue;
+    } );
+
+    for( FArianeSegment* RemovedSegment : RemovedSegments )
+    {
+        // Remove and Free
+        static_cast<FArianePath*>(RemovedSegment->GetOwner())->RemoveSegment( RemovedSegment, true );
+    }
+
+    for( FArianeVertex* RemovedVertex : RemovedVertices )
+    {
+        // Remove and Free
+        static_cast<FArianePath*>(RemovedVertex->GetOwner())->RemoveVertex( RemovedVertex, true );
+    }
+
+    for( FArianePath* RemovedPath : RemovedPaths )
+    {
+        static_cast<FArianePath*>(RemovedPath->GetParent())->RemoveChild( RemovedPath );
+    }
+
+
+    for( FArianePath* AddedPath : AddedPaths )
+    {
+        AddedPath->GetParent()->AppendChild( AddedPath );
+    }
+
+    for( FArianeVertex* AddedVertex : AddedVertices )
+    {
+        // Add
+        static_cast<FArianePath*>(AddedVertex->GetOwner())->AddVertex( AddedVertex );
+    }
+
+    for( FArianeSegment* AddedSegment : AddedSegments )
+    {
+        // Add
+        static_cast<FArianePath*>(AddedSegment->GetOwner())->AddSegment( AddedSegment );
+    }
+
+    // TODO: check for empty paths
+
+    Painting3DComponent->Update();
+
+    return false;
+}
+
+
+//static
+UArianeEditorEraserTool::FWayFragment*
+UArianeEditorEraserTool::GetStartFragment( FWayFragment* Fragment )
+{
+    FWayFragment* CurrFragment = Fragment;
+
+    // extend prev
+    while( CurrFragment )
+    {
+        FWayFragment* PrevFragment = CurrFragment->GetPrev();
+
+        if( ( PrevFragment == nullptr )
+         || ( PrevFragment == Fragment ) // loop prevention
+         || ( ( PrevFragment->bErased == true ) &&  ( CurrFragment->bErased == false ) ) )
+        {
+            return CurrFragment;
+        }
+
+        CurrFragment = PrevFragment;
+    }
+
+    return nullptr; // this case should never be met anyways. theorically
+}
+
+// static
+UArianeEditorEraserTool::ESegmentAdditionFlags
+UArianeEditorEraserTool::SegmentAdditionPolicy( FWayFragment* Fragment, bool bSplit )
+{
+    ESegmentAdditionFlags retFlags = ESegmentAdditionFlags::RemoveOriginalSegment;
+    FWayFragment* PrevFragment = Fragment->GetPrev();
+
+    if( bSplit )
+    {
+        if( Fragment->bErased == false )
+        {
+            if( ( PrevFragment == nullptr ) || PrevFragment->bErased )
+            {
+                retFlags |= ESegmentAdditionFlags::CreateNewPath;
+            }
+        }
+    }
+    else
+    {
+        if( Fragment->bErased == true )
+        {
+            retFlags |= ESegmentAdditionFlags::RemoveOriginalSegment;
+        }
+    }
+
+    if( Fragment->bErased == false )
+    {
+        retFlags |= ESegmentAdditionFlags::CreateDerivedSegment;
+    }
+
+    return retFlags;
+}
+
+// static
+UArianeEditorEraserTool::EVertexAdditionFlags
+UArianeEditorEraserTool::VertexAdditionPolicy( FWayPoint* WayPoint, bool bSplit )
+{
+    EVertexAdditionFlags retFlags = EVertexAdditionFlags::None;
+
+    if( bSplit )
+    {
+        if( WayPoint->Flags & FWayPoint::Original )
+        {
+            retFlags |= ( EVertexAdditionFlags::RemoveOriginalVertex );
+/*
+            if( WayPoint->Flags & FWayPoint::BordersErasureArea )
+            {
+                if( WayPoint->Vertex->GetSegmentCount() == 2 )
+                {
+                    retFlags |= ( EVertexAdditionFlags::CreateDerivedVertex );
+                }
+            }
+*/
+            if( WayPoint->Flags & FWayPoint::OutsideErasureArea )
+            {
+                retFlags |= ( EVertexAdditionFlags::CreateDerivedVertex );
+            }
+        }
+    }
+    else
+    {
+        if( WayPoint->Flags & FWayPoint::InsideErasureArea )
+        {
+            if( WayPoint->Flags & FWayPoint::Original )
+            {
+                retFlags |= EVertexAdditionFlags::RemoveOriginalVertex;
+            }
+        }
+    }
+
+    if( WayPoint->Flags & FWayPoint::BordersErasureArea )
+    {
+        if( ( WayPoint->Flags & FWayPoint::Original ) == 0 )
+        {
+            retFlags |= EVertexAdditionFlags::CreateBoundaryVertex;
+        }
+    }
+
+    return retFlags;
+}
+
+FArianeVertex*
+UArianeEditorEraserTool::AssignVertex( FArianePath* OwnerPath
+                                     , FWayPoint& WayPoint
+                                     , TArray<FArianeVertex*>& OutAddedVertices
+                                     , TArray<FArianeVertex*>& OutRemovedVertices
+                                     , bool bSplit )
+{
+    if( WayPoint.AssignedVertex == nullptr )
+    {
+        EVertexAdditionFlags VertexAdditionFlags = VertexAdditionPolicy( &WayPoint, bSplit );
+
+        if( ( VertexAdditionFlags & EVertexAdditionFlags::RemoveOriginalVertex ) == EVertexAdditionFlags::RemoveOriginalVertex )
+        {
+            // mark original vertex for deletion. No duplicates (duplicates happen in case of loops)
+            if( OutRemovedVertices.Find( WayPoint.OriginalVertex ) == INDEX_NONE )
+            {
+                OutRemovedVertices.Add( WayPoint.OriginalVertex );
+            }
+        }
+
+        // boundary vertices are guaranteed unique per nature, no need to check uniqueness
+        if( ( VertexAdditionFlags & EVertexAdditionFlags::CreateBoundaryVertex ) == EVertexAdditionFlags::CreateBoundaryVertex )
+        {
+            WayPoint.AssignedVertex = OwnerPath->AllocVertex( FVector::Zero(), FVector::Zero(), 0.0f );
+
+            OwnerPath->AddVertex( WayPoint.AssignedVertex );
+
+            OutAddedVertices.Add( WayPoint.AssignedVertex );
+        }
+
+        if( ( VertexAdditionFlags & EVertexAdditionFlags::CreateDerivedVertex ) == EVertexAdditionFlags::CreateDerivedVertex )
+        {
+            //bool bHandleAligned = WayPoint.OriginalVertex->IsHandleAligned();
+
+            WayPoint.AssignedVertex = OwnerPath->AllocVertex( FVector::Zero(), FVector::Zero(), 0.0f );
+
+            OwnerPath->AddVertex( WayPoint.AssignedVertex );
+
+            //WayPoint.Vertex->SetHandleAligned( bHandleAligned );
+
+            OutAddedVertices.Add( WayPoint.AssignedVertex );
+        }
+    }
+
+    return WayPoint.AssignedVertex;
+}
+
+void
+UArianeEditorEraserTool::ParseChainWayPoints( UArianePainting3DComponent* Painting3DComponent
+                                            , FArianePath* ChainPath
+                                            , const FArianePath::Chain& Chain
+                                            , TArray<FWayPoint>& WayPoints
+                                            , TArray<FWayFragment>& WayFragments
+                                            , TArray<FArianePath*>& OutAddedPaths
+                                            , TArray<FArianeVertex*>& OutAddedVertices
+                                            , TArray<FArianeSegment*>& OutAddedSegments
+                                            , TArray<FArianePath*>& OutRemovedPaths
+                                            , TArray<FArianeVertex*>& OutRemovedVertices
+                                            , TArray<FArianeSegment*>& OutRemovedSegments )
+{
+    uint32 addedSegmentCountBeforeAlter = OutAddedSegments.Num();
+    FArianePath* CurrentPath = ChainPath;
+
+    if( WayPoints.Num() )
+    {
+        FWayPoint& FirstWayPoint = WayPoints[0];
+        FWayFragment *FirstFragment = &WayFragments[0];
+        FWayFragment *StartFragment = GetStartFragment( FirstFragment );
+        FWayFragment *CurrFragment = StartFragment;
+
+        while( CurrFragment )
+        {
+            FWayPoint* WayPoint0 = CurrFragment->WayPoint0;
+            FWayPoint* WayPoint1 = CurrFragment->WayPoint1;
+            ESegmentAdditionFlags SegmentAdditionFlags = SegmentAdditionPolicy( CurrFragment, bSplit );
+            FWayFragment* NextFragment = CurrFragment->GetNext();
+
+            if( ( SegmentAdditionFlags & ESegmentAdditionFlags::RemoveOriginalSegment ) == ESegmentAdditionFlags::RemoveOriginalSegment )
+            {
+                // mark original segment for deletion. No duplicates
+                if( OutRemovedSegments.Find( CurrFragment->Segment ) == INDEX_NONE )
+                {
+                    OutRemovedSegments.Add( CurrFragment->Segment );
+                }
+            }
+
+            if( ( SegmentAdditionFlags & ESegmentAdditionFlags::CreateNewPath ) == ESegmentAdditionFlags::CreateNewPath )
+            {
+                CurrentPath = Painting3DComponent->AllocPath();
+                // for postprocessing. the path is not added to the parent yet
+                CurrentPath->SetParent( ChainPath->GetParent() );
+
+                ChainPath->ExportProperties( CurrentPath );
+
+                OutAddedPaths.Add( CurrentPath );
+
+                if( OutRemovedPaths.Find( ChainPath ) == INDEX_NONE )
+                {
+                    OutRemovedPaths.Add( ChainPath );
+                }
+            }
+
+            if( ( SegmentAdditionFlags & ESegmentAdditionFlags::CreateDerivedSegment ) == ESegmentAdditionFlags::CreateDerivedSegment )
+            {
+                FArianeVertex* DestVertex0 = AssignVertex( CurrentPath
+                                                         , *WayPoint0
+                                                         , OutAddedVertices
+                                                         , OutRemovedVertices
+                                                         , bSplit );
+                FArianeVertex* DestVertex1 = AssignVertex( CurrentPath
+                                                         , *WayPoint1
+                                                         , OutAddedVertices
+                                                         , OutRemovedVertices
+                                                         , bSplit );
+
+                FArianeSegment* NewSegment = CurrFragment->Segment->Extract( CurrentPath
+                                                                           , DestVertex0
+                                                                           , CurrFragment->T0
+                                                                           , DestVertex1
+                                                                           , CurrFragment->T1 );
+                // mark new segment for addition
+                OutAddedSegments.Add( NewSegment );
+            }
+
+            CurrFragment = ( NextFragment == StartFragment ) ? nullptr : NextFragment;
+        }
+    }
+}
+
+
+bool
+UArianeEditorEraserTool::EraseChainSegments( FSceneView* View
+                                           , UArianePainting3DComponent* Painting3DComponent
+                                           , FArianePath* Path
+                                           , const FArianePath::Chain& Chain
+                                           , TArray<FWayPoint>& OutWayPoints
+                                           , TArray<FWayFragment>& OutWayFragments )
+{
+    //const FTransform& WorldTransform = Painting3DComponent->GetComponentTransform();
+    const FTransform& WorldTransform = Painting3DComponent->GetOwner()->GetRootComponent()->GetComponentTransform();
+
+    FArianeVertex* FirstVertex = Chain.LeadingVertex;
+    TArray<FMetaFragment> MetaFragmentBuffer;
+    bool bHasHit = false;
+
+    if( Chain.Segments.Num() )
+    {
+        OutWayPoints.Empty();
+        // reserve 4 point per segment to limit reallocations (just for performance)
+        OutWayPoints.Reserve( ( Chain.Segments.Num() * 4 ) );
+
+        // reserve 3 meta segment per segment to limit reallocations (just for performance)
+        MetaFragmentBuffer.Reserve( Chain.Segments.Num() * 3 );
+
+        // create WayPoints for each Vertex of the chain
+        VertexToWaypoint( View, WorldTransform, Chain.LeadingVertex, OutWayPoints );
+
+        // then create WayPoints at each intersection
+        Chain.IterateSegments( [ this
+                               , Path
+                               , Chain
+                               , View
+                               , &OutWayPoints
+                               , &MetaFragmentBuffer
+                               , &bHasHit
+                               , &WorldTransform ]( FArianeVertex* Vertex, FArianeSegment* Segment ) -> bool
+        {
+            // for better precision when the line has only few fractions. This is slow
+            // and will be changed.
+            //segment->Update( FArianeObject::UPDATE_NEEDPOLYLINE );
+
+            const TArray<FArianeSegment::Fraction>& Fractions = Segment->GetFractions();
+            FArianeVertex* OtherVertex = Segment->GetOtherVertex( Vertex );
+            FArianeSegment* NextSegment = OtherVertex->GetOtherSegment( Segment );
+            bool revert = ( Vertex == Segment->GetVertex(0) ) ? false : true;
+
+            // create waypoints when the alpha value of the mask changes
+            if( revert == false )
+            {
+                for( auto it = Fractions.begin(); it != Fractions.end(); ++it )
+                {
+                    const FArianeSegment::Fraction& Fraction = *it;
+                    const FArianeSegment::FractionStep* Step0 = Fraction.Steps[0];
+                    const FArianeSegment::FractionStep* Step1 = Fraction.Steps[1];
+                    FVector2D ScreenCoords0;
+                    FVector2D ScreenCoords1;
+
+                    View->ProjectWorldToScreen( WorldTransform.TransformVector( Step0->Point->GetPosition() )
+                                              , View->UnconstrainedViewRect
+                                              , View->ViewMatrices.GetViewProjectionMatrix()
+                                              , ScreenCoords0 );
+
+                    View->ProjectWorldToScreen( WorldTransform.TransformVector( Step1->Point->GetPosition() )
+                                              , View->UnconstrainedViewRect
+                                              , View->ViewMatrices.GetViewProjectionMatrix()
+                                              , ScreenCoords1 );
+
+                    TraceLine( Path
+                             , Segment
+                             , Step0
+                             , ScreenCoords0.X
+                             , ScreenCoords0.Y
+                             , Step1
+                             , ScreenCoords1.X
+                             , ScreenCoords1.Y
+                             , OutWayPoints
+                             , MetaFragmentBuffer
+                             , revert );
+                }
+            }
+            else
+            {
+                for( auto it = Fractions.rbegin(); it != Fractions.rend(); ++it )
+                {
+                    const FArianeSegment::Fraction& Fraction = *it;
+                    const FArianeSegment::FractionStep* Step0 = Fraction.Steps[0];
+                    const FArianeSegment::FractionStep* Step1 = Fraction.Steps[1];
+                    FVector2D ScreenCoords0;
+                    FVector2D ScreenCoords1;
+
+                    View->ProjectWorldToScreen( Step0->Point->GetPosition()
+                                              , View->UnconstrainedViewRect
+                                              , WorldTransform.ToMatrixWithScale()
+                                              , ScreenCoords0 );
+
+                    View->ProjectWorldToScreen( Step1->Point->GetPosition()
+                                              , View->UnconstrainedViewRect
+                                              , WorldTransform.ToMatrixWithScale()
+                                              , ScreenCoords1 );
+
+                    TraceLine( Path
+                             , Segment
+                             , Step1
+                             , ScreenCoords1.X
+                             , ScreenCoords1.Y
+                             , Step0
+                             , ScreenCoords0.X
+                             , ScreenCoords0.Y
+                             , OutWayPoints
+                             , MetaFragmentBuffer
+                             , revert );
+                }
+            }
+
+            uint32 LastFragmentWayPoint0Index;
+            uint32 LastFragmentWayPoint1Index;
+
+            if( Chain.LeadingVertex != OtherVertex )
+            {
+                // create the last for the final vertex of the segment
+                VertexToWaypoint( View, WorldTransform, OtherVertex, OutWayPoints );
+
+                LastFragmentWayPoint0Index = OutWayPoints.Num() - 2;
+                LastFragmentWayPoint1Index = OutWayPoints.Num() - 1;
+            }
+            else // loop detected
+            {
+                LastFragmentWayPoint0Index = OutWayPoints.Num() - 1;
+                LastFragmentWayPoint1Index = 0;
+            }
+
+            // last fragment
+            MetaFragmentBuffer.Emplace( Segment
+                                      , LastFragmentWayPoint0Index
+                                      , LastFragmentWayPoint1Index
+                                      , ( OutWayPoints[LastFragmentWayPoint1Index].Flags & FWayPoint::InsideErasureArea ) ? true : false );
+
+            return false; // keep iterating;
+        } );
+    }
+
+    OutWayFragments.Empty();
+    OutWayFragments.Reserve( MetaFragmentBuffer.Num() );
+
+    // create fragments afterwards so that the waypoint pointers won't change due to array growing with push_backs
+    for( FMetaFragment& MetaFragment : MetaFragmentBuffer )
+    {
+        FWayPoint* WayPoint0 = &OutWayPoints[MetaFragment.WayPoint0Index];
+        FWayPoint* WayPoint1 = &OutWayPoints[MetaFragment.WayPoint1Index];
+
+        OutWayFragments.Emplace( MetaFragment.Segment
+                               , WayPoint0
+                               , WayPoint1
+                               , MetaFragment.bErased );
+
+        if( ( WayPoint0->Flags & FWayPoint::OutsideErasureArea ) == 0 )
+        {
+            bHasHit = true;
+        }
+
+        if( ( WayPoint1->Flags & FWayPoint::OutsideErasureArea ) == 0 )
+        {
+            bHasHit = true;
+        }
+    }
+
+    return bHasHit;
+}
+
+void
+UArianeEditorEraserTool::ClearCanvas()
+{
+    FTextureRenderTargetResource* RTResource = CanvasRenderTarget->GameThread_GetRenderTargetResource();
+    FCanvas Canvas( RTResource, nullptr, GetWorld(), GMaxRHIFeatureLevel );
+
+    Canvas.Clear( FLinearColor( 1.0f, 1.0f, 1.0f, 0.0f ) );
+    Canvas.Flush_GameThread();
+}
+
+void
+UArianeEditorEraserTool::ResizeCanvas( uint32 Width, uint32 Height )
+{
+    CanvasRenderTarget->SizeX = Width;
+    CanvasRenderTarget->SizeY = Height;
+
+    CanvasRenderTarget->UpdateResource();
+}
+
+bool
+UArianeEditorEraserTool::OnMouseDown( FEditorViewportClient* iViewportClient
+                                    , const FKey& iKey
+                                    , const FArianePointerState& PointerState
+                                    , bool iRepeat )
+{
+    ResizeCanvas( iViewportClient->Viewport->GetSizeXY().X
+                , iViewportClient->Viewport->GetSizeXY().Y );
+    ClearCanvas();
+
+    if( iKey == EKeys::LeftMouseButton )
+    {
+        MouseRecords[0] = MouseRecords[1] = FIntVector2( PointerState.ViewportX, PointerState.ViewportY );
+        // Will call UArianeEditorEraserTool::StampBrush()
+        //CanvasRenderTarget->UpdateResource();
+        StampBrush();
+
+        return true;
+    }
+
+    return false;
+}
+
+void
+UArianeEditorEraserTool::OnMouseHover( FEditorViewportClient* iViewportClient
+                                     , const FArianePointerState& State )
+{
+
+}
+
+bool
+UArianeEditorEraserTool::OnMouseDrag( FEditorViewportClient* iViewportClient
+                                    , const FArianePointerState& PointerState )
+{
+    if( iViewportClient->Viewport->KeyState( EKeys::LeftMouseButton ) )
+    {
+        MouseRecords[1] = FIntVector2( PointerState.ViewportX, PointerState.ViewportY );
+        // Will call UArianeEditorEraserTool::StampBrush()
+        //CanvasRenderTarget->UpdateResource();
+
+        StampBrush();
+
+        MouseRecords[0] = MouseRecords[1];
+    }
+
+    return false;
+}
+
+bool
+UArianeEditorEraserTool::OnMouseUp( FEditorViewportClient* iViewportClient
+                                  , const FKey& iKey
+                                  , const FArianePointerState& PointerState )
+{
+    if( iKey == EKeys::LeftMouseButton )
+    {
+        UEditorActorSubsystem* editorActorSubsystem = GEditor->GetEditorSubsystem<UEditorActorSubsystem>();
+
+        MouseRecords[1] = FIntVector2( PointerState.ViewportX, PointerState.ViewportY );
+        // Will call UArianeEditorEraserTool::StampBrush()
+        //CanvasRenderTarget->UpdateResource();
+        StampBrush();
+
+        GEditor->BeginTransaction(FText::FromString("Erase object"));
+
+        for( AActor* actor : editorActorSubsystem->GetSelectedLevelActors() )
+        {
+            UArianePainting3DComponent* painting3DComponent = Cast<UArianePainting3DComponent>(actor->GetComponentByClass( UArianePainting3DComponent::StaticClass() ));
+
+            if( painting3DComponent )
+            {
+                painting3DComponent->Modify();
+
+                ErasePaths( GetSceneView( iViewportClient ), painting3DComponent );
+            }
+        }
+        GEditor->EndTransaction();
+
+        ClearCanvas();
+
+        return true;
+    }
+
+    if( iKey == EKeys::RightMouseButton )
+    {
+
+        return false;
+    }
+
+    return false;
+}
+
+void
+UArianeEditorEraserTool::ExtendContextMenu( FMenuBuilder& menu )
+{
+}
+
+void
+UArianeEditorEraserTool::DrawHUD ( FEditorViewportClient* ViewportClient
+                                 , FViewport* Viewport
+                                 , const FSceneView* View
+                                 , FCanvas* HUDCanvas )
+{
+    HUDCanvas->DrawTile(
+        0, 0,
+        CanvasRenderTarget->SizeX, CanvasRenderTarget->SizeY,
+        0.0f, 0.0f, 1.0f, 1.0f, // UVs
+        FLinearColor::White,
+        CanvasRenderTarget->GetResource(),
+        true
+    );
+}
+
+void
+UArianeEditorEraserTool::ResizeBrush()
+{
+    Brush->GetPlatformData()->SizeX = Size;
+    Brush->GetPlatformData()->SizeY = Size;
+
+    FTexture2DMipMap& Mip = Brush->GetPlatformData()->Mips[0];
+
+    Mip.SizeX = Size;
+    Mip.SizeY = Size;
+    Mip.BulkData.Lock(LOCK_READ_WRITE);
+    Mip.BulkData.Realloc(Size * Size * 4); // PF_B8G8R8A8
+    Mip.BulkData.Unlock();
+
+    Brush->UpdateResource();
+}
+
+void
+UArianeEditorEraserTool::StampBrush()
+{
+    FTextureRenderTargetResource* RTResource = CanvasRenderTarget->GameThread_GetRenderTargetResource();
+    FCanvas Canvas(RTResource, nullptr, GetWorld(), GMaxRHIFeatureLevel);
+
+    FIntVector2 DeltaMouse = MouseRecords[1] - MouseRecords[0];
+    int32 LenSq = ( DeltaMouse.X * DeltaMouse.X ) + ( DeltaMouse.Y * DeltaMouse.Y );
+    int32 Len = LenSq ? sqrt( LenSq ) : 0;
+    FVector2D StampAt = FVector2D( MouseRecords[0].X, MouseRecords[0].Y );
+
+    if( Len )
+    {
+        FVector2D Step = FVector2D( ( double ) DeltaMouse.X / Len
+                                  , ( double ) DeltaMouse.Y / Len );
+
+        for( int32 i = 0; i < Len; i++ )
+        {
+            FCanvasTileItem Tile = FCanvasTileItem( FVector2D( StampAt.X - ( Size * 0.5f )
+                                                             , StampAt.Y  -( Size * 0.5f ) )
+                                                  , Brush->GetResource()
+                                                  , FVector2D( Size, Size )
+                                                  , FLinearColor::White );
+
+            Tile.SetColor( FLinearColor::White );
+            Tile.BlendMode = SE_BLEND_AlphaComposite;
+            Canvas.DrawItem(Tile);
+
+            StampAt += Step;
+        }
+
+        Canvas.Flush_GameThread();
+    }
+}
+
+/*
+void
+UArianeEditorEraserTool::StampBrush( UCanvas* Canvas, int32 Width, int32 Height )
+{
+    FIntVector2 DeltaMouse = MouseRecords[1] - MouseRecords[0];
+    int32 LenSq = ( DeltaMouse.X * DeltaMouse.X ) + ( DeltaMouse.Y * DeltaMouse.Y );
+    int32 Len = LenSq ? sqrt( LenSq ) : 0;
+    FIntVector2 StampAt = MouseRecords[0];
+
+    if( Len )
+    {
+        FIntVector2 Step = DeltaMouse / Len;
+
+        for( int32 i = 0; i < Len; i++ )
+        {
+            Canvas->K2_DrawTexture( Brush
+                                  , FVector2D( StampAt.X - ( Size * 0.5f )
+                                             , StampAt.Y  -( Size * 0.5f ) )
+                                  , FVector2D( Size, Size )
+                                  , FVector2D( 0.0f ,0.0f )
+                                  , FVector2D( 1.0f, 1.0f )
+                                  , FLinearColor::White
+                                  , EBlendMode::BLEND_Translucent );
+
+            StampAt += Step;
+        }
+    }
+}
+*/
+
+void
+UArianeEditorEraserTool::FillBrush()
+{
+    FTexture2DMipMap& Mip = Brush->GetPlatformData()->Mips[0];
+    void* Data = Mip.BulkData.Lock(LOCK_READ_WRITE);
+    FColor* Pixels = static_cast<FColor*>(Data);
+
+    float Center = Size / 2.0f;
+    float Radius = Size / 2.0f;
+
+    for ( int32 y = 0; y < Size; y++ )
+    {
+        for ( int32 x = 0; x < Size; x++ )
+        {
+            float Dist = FVector2D::Distance(FVector2D(x, y), FVector2D(Center, Center));
+            float Alpha = FMath::Clamp((Radius - Dist) / 2.0f, 0.0f, 1.0f); // Anti-aliasing 2 pixels
+            uint32 Offset = y * Size + x;
+
+            Pixels[Offset].A = Alpha * 255;
+            Pixels[Offset].R = Pixels[Offset].G = Pixels[Offset].B = 255;
+        }
+    }
+
+    Mip.BulkData.Unlock();
+
+    Brush->UpdateResource();
+}
+
+void
+UArianeEditorEraserTool::UpdateBrush()
+{
+    ResizeBrush();
+    FillBrush();
+}
+
+void
+UArianeEditorEraserTool::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent)
+{
+    Super::PostEditChangeProperty(PropertyChangedEvent);
+    FName PropertyName = PropertyChangedEvent.GetPropertyName();
+    FName MemberPropertyName = PropertyChangedEvent.GetMemberPropertyName();
+
+    if( PropertyName == GET_MEMBER_NAME_CHECKED( UArianeEditorEraserTool, Size ) )
+    {
+        UpdateBrush();
+    }
+/*
+    PropertyChanged( PropertyChangedEvent.GetPropertyName()
+                   , PropertyChangedEvent.GetMemberPropertyName()
+                   , PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive );
+
+    PostPropertyChanged( PropertyChangedEvent.GetMemberPropertyName()
+                       , PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive );
+*/
+}
+
+#undef LOCTEXT_NAMESPACE

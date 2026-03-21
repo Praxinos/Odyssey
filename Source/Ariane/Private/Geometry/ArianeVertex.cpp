@@ -17,6 +17,7 @@ FArianeVertex::FArianeVertex( FArianeObject* Owner, const FVector& iPosition, co
     , OwnerID( Owner )
     , Radius( InRadius )
     , Normal ( InNormal )
+    , bChained( false )
 {
 }
 
@@ -73,8 +74,58 @@ FArianeVertex::GetSegments()
     return Segments;
 }
 
+void
+FArianeVertex::SetRadius( double InRadius )
+{
+    Radius = InRadius;
+}
+
 double
 FArianeVertex::GetRadius()
 {
     return Radius;
+}
+
+const FGuid&
+FArianeVertex::GetGuid()
+{
+    return Guid;
+}
+
+FArianeSegment*
+FArianeVertex::GetOtherSegment( FArianeSegment* Segment )
+{
+    for( FArianeSegment* otherSegment : Segments )
+    {
+        if( otherSegment != Segment )
+        {
+            return otherSegment;
+        }
+    }
+
+    return nullptr;
+}
+
+FArianeSegment*
+FArianeVertex::GetFirstSegment()
+{
+    return Segments.Num() ? Segments.Last() : nullptr;
+}
+
+uint32
+FArianeVertex::GetIndex( FArianeSegment* Segment )
+{
+    return ( this == Segment->GetVertex( 0 ) ) ? 0 : 1;
+}
+
+void
+FArianeVertex::SetID( uint32 InID )
+{
+    ID = InID;
+}
+
+uint32
+FArianeVertex::GetID()
+{
+    return ID;
 }
