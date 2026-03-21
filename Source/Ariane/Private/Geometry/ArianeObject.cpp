@@ -98,11 +98,32 @@ FArianeObject::FArianeObject( UArianePainting3DComponent* InPainting3DComponent 
 }
 
 void
+FArianeObject::RemoveChild( FArianeObject* ChildToRemove )
+{
+    ChildrenID.RemoveAll( [ ChildToRemove ](  FArianeObjectID& ChildObjectID ) -> bool
+    {
+        return ( ChildToRemove->GetGuid() == ChildObjectID.Guid );
+    } );
+
+    InvalidatedChildrenID.RemoveAll( [ ChildToRemove ](  FArianeObjectID& ChildObjectID ) -> bool
+    {
+        return ( ChildToRemove->GetGuid() == ChildObjectID.Guid );
+    } );
+
+    Invalidate( FArianeObjectInvalidationFlags().SetHierarchy() );
+
+    ChildToRemove->SetParent( nullptr );
+    ChildToRemove->Invalidate( FArianeObjectInvalidationFlags().SetHierarchy() );
+    // update now because the child won't be recursively updatable from a parent object
+    ChildToRemove->Update( true );
+}
+
+void
 FArianeObject::AppendChild( FArianeObject* Child )
 {
     ChildrenID.Add( FArianeObjectID( Child ) );
 
-    Child->ParentID = FArianeObjectID( this );
+    Child->SetParent( this );
 
     Invalidate( FArianeObjectInvalidationFlags().SetHierarchy() );
 }
@@ -112,7 +133,7 @@ FArianeObject::PrependChild( FArianeObject* Child )
 {
     ChildrenID.Insert( FArianeObjectID( Child ), 0 );
 
-    Child->ParentID = FArianeObjectID( this );
+    Child->SetParent( this );
 
     Invalidate( FArianeObjectInvalidationFlags().SetHierarchy() );
 }
@@ -127,7 +148,7 @@ FArianeObject::InsertChild( FArianeObject* Child, FArianeObject* InsertAfter )
 
     ChildrenID.Insert( FArianeObjectID( Child ), FoundObjectIndex + 1 );
 
-    Child->ParentID = FArianeObjectID( this );
+    Child->SetParent( this );
 
     Invalidate( FArianeObjectInvalidationFlags().SetHierarchy() );
 }
@@ -174,6 +195,38 @@ FArianeObject::GetInvalidatedChildren( TArray<FArianeObject*> OutInvalidatedObje
     }
 }
 
+FArianeObject::TraversalReturnValue
+FArianeObject::Traverse_Private( TFunction<TraversalReturnValue(FArianeObject*)> Callback )
+{
+    TraversalReturnValue Ret = Callback( this );
+
+    if( Ret == TraversalReturnValue::Stop )
+    {
+        return Ret;
+    }
+
+    if( ( Ret == TraversalReturnValue::IgnoreChildren ) == 0 )
+    {
+        for( FArianeObjectID& ChildID : ChildrenID )
+        {
+            TraversalReturnValue ChildRet = ChildID.GetObject()->Traverse_Private( Callback );
+
+            if( ChildRet == TraversalReturnValue::Stop )
+            {
+                return ChildRet;
+            }
+        }
+    }
+
+    return Ret;
+}
+
+void
+FArianeObject::Traverse( TFunction<TraversalReturnValue(FArianeObject*)> Callback )
+{
+    Traverse_Private( Callback );
+}
+
 bool
 FArianeObject::Update( bool Recurse )
 {
@@ -207,4 +260,55 @@ void
 FArianeObject::UpdateBounds()
 {
 
+}
+
+FVector
+FArianeObject::GetTranslation()
+{
+    return Translation;
+}
+
+FVector
+FArianeObject::GetRotationInDegrees()
+{
+    return RotationInDegrees;
+}
+
+FVector
+FArianeObject::GetScaling()
+{
+    return Scaling;
+}
+
+UArianePainting3DComponent*
+FArianeObject::GetPainting3DComponent()
+{
+    return Painting3DComponent;
+}
+
+const FGuid&
+FArianeObject::GetGuid()
+{
+    return Guid;
+}
+
+void
+FArianeObject::ExportProperties( FArianeObject* DestObject )
+{
+    DestObject->Name = Name;
+    DestObject->Translation = Translation;
+    DestObject->RotationInDegrees = RotationInDegrees;
+    DestObject->Scaling = Scaling;
+}
+
+FArianeObject*
+FArianeObject::GetParent()
+{
+    return ParentID.GetObject();
+}
+
+void
+FArianeObject::SetParent( FArianeObject* Parent )
+{
+    ParentID = FArianeObjectID( Parent );
 }

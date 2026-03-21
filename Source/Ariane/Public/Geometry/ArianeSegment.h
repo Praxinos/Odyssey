@@ -20,15 +20,30 @@ struct ARIANE_API FArianeSegment
     GENERATED_BODY()
 
     public:
-        struct Fraction
+        struct FractionStep
         {
-            ~Fraction(){};
-            Fraction( FArianePoint* P0, FArianePoint* P1 )
-                : Points { P0, P1 }
+            ~FractionStep(){};
+            FractionStep( FArianePoint* InPoint, float InT, float InRadius )
+                : Point( InPoint )
+                , T ( InT )
+                , Radius( InRadius )
             {
             };
 
-            FArianePoint* Points[2];
+            FArianePoint* Point;
+            float T;
+            float Radius;
+        };
+
+        struct Fraction
+        {
+            ~Fraction(){};
+            Fraction( FractionStep* S0, FractionStep* S1 )
+                : Steps { S0, S1 }
+            {
+            };
+
+            FractionStep* Steps[2];
         };
 
     public:
@@ -41,7 +56,7 @@ struct ARIANE_API FArianeSegment
          * @param Vertex0 first vertex
          * @param Vertex1 second vertex
          */
-        FArianeSegment( FArianeObject* Owner, FArianeVertex* Vertex0, FArianeVertex* Vertex1 );
+        FArianeSegment( FArianeObject* InOwner, FArianeVertex* Vertex0, FArianeVertex* Vertex1 );
 
         /** Get the segment's owner object */
         FArianeObject* GetOwner();
@@ -73,7 +88,7 @@ struct ARIANE_API FArianeSegment
         FArianeVertex* GetOtherVertex( FArianeVertex* Vertex );
 
         /** Get an array of fraction points composing the segment */
-        const TArray<FArianePoint*>& GetFractionPoints();
+        const TArray<FractionStep>& GetFractionSteps();
 
         /**
          * @brief Allocate FModelVertex cache and Index cache for building a polygonal shape
@@ -89,13 +104,10 @@ struct ARIANE_API FArianeSegment
         const TArray<uint32>& GetIndexCache();
 
         /** Get the fraction cache */
-        const TArray<Fraction>& GetFractionCache();
+        const TArray<Fraction>& GetFractions();
 
         /** Get the fraction count */
         uint32 GetFractionCount();
-
-        /** Get the value of T at the specified index of the fraction point */
-        float GetFractionPointT( uint32 FractionPointIndex );
 
         /**
          * @brief Get the tangent vector at parametric value T
@@ -116,6 +128,16 @@ struct ARIANE_API FArianeSegment
         /** Invalidate the segment */
         void Invalidate();
 
+        const FGuid& GetGuid();
+
+        FVector GetPointAt( double T );
+        FVector GetNormalAt( double T );
+        virtual FArianeSegment* Extract( FArianeObject* NewSegmentOwner
+                                       , FArianeVertex* NewSegmentVertex0
+                                       , float T0
+                                       , FArianeVertex* NewSegmentVertex1
+                                       , float T1 );
+
     protected:
         /** Update the segment's bounds */
         void UpdateBounds();
@@ -134,10 +156,8 @@ struct ARIANE_API FArianeSegment
         FArianeObjectID OwnerID;
 
     protected:
-        TArray<float> FractionPointsT;
-        TArray<float> FractionPointsRadius;
-        TArray<FArianePoint*> FractionPoints;
-        TArray<Fraction> FractionCache;
+        TArray<FractionStep> FractionSteps;
+        TArray<Fraction> Fractions;
         TArray<FModelVertex> ModelVertexCache;
         TArray<uint32> IndexCache;
         FBoxSphereBounds Bounds;

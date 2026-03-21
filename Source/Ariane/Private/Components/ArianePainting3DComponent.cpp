@@ -26,8 +26,7 @@ UArianePainting3DComponent::~UArianePainting3DComponent()
 UArianePainting3DComponent::UArianePainting3DComponent()
     : GeometryMode ( EArianePainting3DGeometryMode::Tube )
 {
-    // Nb: this object will be destroyed automatically when loading from the disc, as the TArray is replaced entirely.
-    RootObjectID = FArianeObjectID( AllocObject() );
+    ResetHierarchy();
 
     PrimaryComponentTick.bCanEverTick = true;
     PrimaryComponentTick.bStartWithTickEnabled = true;
@@ -120,13 +119,19 @@ UArianePainting3DComponent::PostEditUndo()
 }
 
 FArianeObject*
+UArianePainting3DComponent::GetRootObject()
+{
+    return RootObjectID.GetObject();
+}
+
+FArianeObject*
 UArianePainting3DComponent::GetObject( const FGuid& InGuid )
 {
     for( FInstancedStruct& InstancedObject : InstancedObjects )
     {
         FArianeObject* Object = InstancedObject.GetMutablePtr<FArianeObject>();
 
-        if( Object->Guid == InGuid )
+        if( Object->GetGuid() == InGuid )
         {
             return Object;
         }
@@ -270,6 +275,14 @@ UArianePainting3DComponent::PostEditChangeProperty( FPropertyChangedEvent& event
     Super::PostEditChangeProperty( event );
 }
 
+void
+UArianePainting3DComponent::ResetHierarchy()
+{
+    InstancedObjects.Empty();
+    // Nb: this object will be destroyed automatically when loading from the disc, as the TArray is replaced entirely.
+    RootObjectID = FArianeObjectID( AllocObject() );
+}
+
 //--------------------------------------------------------------------------------------------------
 
 FArianeGeometryProxy::~FArianeGeometryProxy()
@@ -289,11 +302,11 @@ FArianeGeometryProxy::DrawStaticElements( FStaticPrimitiveDrawInterface * PDI )
     FMeshBatch MeshBatch;
 
     Painting3DComponent->GetSceneProxy()->SetUsedMaterialForVerification( Painting3DComponent->UsedMaterials );
+    Painting3DComponent->InstancedObjectsAccessRW.Lock();
 
-    for ( FInstancedStruct& InstancedObject : Painting3DComponent->GetInstancedObjects() )
+    Painting3DComponent->GetRootObject()->Traverse( [ this
+                                                    , &MeshBatch ]( FArianeObject* Object ) -> FArianeObject::TraversalReturnValue
     {
-        FArianeObject* Object = InstancedObject.GetMutablePtr<FArianeObject>();
-
         if( Object->GetClass() == FArianePath::StaticClass() )
         {
             FArianePath* Path = static_cast<FArianePath*>(Object);
@@ -336,12 +349,15 @@ FArianeGeometryProxy::DrawStaticElements( FStaticPrimitiveDrawInterface * PDI )
                 MeshBatch.bUseForMaterial = 0;
                 MeshBatch.bDitheredLODTransition = 0;
                 MeshBatch.bRenderToVirtualTexture = 1;
-
-
-                PDI->DrawMesh(MeshBatch, FLT_MAX);
             }
         }
-    }
+
+        return FArianeObject::TraversalReturnValue::Continue;
+    } );
+
+    PDI->DrawMesh(MeshBatch, FLT_MAX);
+
+    Painting3DComponent->InstancedObjectsAccessRW.Unlock();
 }
 
 void
@@ -351,17 +367,16 @@ FArianeGeometryProxy::GetDynamicMeshElements( const TArray<const FSceneView*>& V
                                             , FMeshElementCollector& Collector) const
 {
     Painting3DComponent->GetSceneProxy()->SetUsedMaterialForVerification( Painting3DComponent->UsedMaterials );
-
     Painting3DComponent->InstancedObjectsAccessRW.Lock();
 
     for( int32 ViewIndex = 0; ViewIndex < Views.Num(); ViewIndex++ )
     {
         const FSceneView* View = Views[ViewIndex];
 
-        for ( FInstancedStruct& InstancedObject : Painting3DComponent->GetInstancedObjects() )
+        Painting3DComponent->GetRootObject()->Traverse( [ this
+                                                        , ViewIndex
+                                                        , &Collector ]( FArianeObject* Object ) -> FArianeObject::TraversalReturnValue
         {
-            FArianeObject* Object = InstancedObject.GetMutablePtr<FArianeObject>();
-
             if( ( Object->GetClass() == FArianePath::StaticClass() )  )
             {
                 FArianePath* Path = static_cast<FArianePath*>(Object);
@@ -447,7 +462,9 @@ FArianeGeometryProxy::GetDynamicMeshElements( const TArray<const FSceneView*>& V
                     Collector.AddMesh( ViewIndex, MeshBatch );
                 }
             }
-        }
+
+            return FArianeObject::TraversalReturnValue::Continue;
+        } );
     }
 
     Painting3DComponent->InstancedObjectsAccessRW.Unlock();

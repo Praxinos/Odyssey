@@ -7,6 +7,8 @@
 #include "CoreMinimal.h"
 // Ariane
 #include "ArianeEditorTool.h"
+#include "ArianePainting3DComponent.h" // for EArianePainting3DGeometryMode
+
 #include "ArianeEditorPathDrawingTool.generated.h"
 
 class FArianeEditor;
@@ -50,11 +52,18 @@ protected:
 
 public:
     UPROPERTY( EditAnywhere
-                , Category=PathDrawingTool
-                , meta = ( ToolTip = "Radius"
-                        , ClampMin = "0.0"
-                        , UIMin = "0.0" ) )
-    double Radius;
+             , Category = PathDrawingTool
+             , meta = ( ToolTip = "Size"
+                      , ClampMin = "0.0"
+                      , UIMin = "0.0" ) )
+    double Size;
+
+    UPROPERTY( EditAnywhere
+             , Category = PathDrawingTool )
+    bool bPressureSensitivity;
+
+    //UPROPERTY( EditAnywhere )
+    //EArianePainting3DGeometryMode LineType;
 
 protected:
     FArianePath* EditedPath;

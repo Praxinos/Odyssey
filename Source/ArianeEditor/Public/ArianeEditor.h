@@ -11,6 +11,7 @@ class FArianeEditorViewportToolkit;
 class FArianeEditorTab;
 class FTabManager;
 class UWorld;
+class AArianePainting3DActor;
 
 /**
  * Base class for a Painting Editor
@@ -27,73 +28,74 @@ public:
     FArianeEditor( FArianeEditorViewportToolkit* iToolkit );
 
     /**
-        * @brief Add a painting3D Component to specified actors
-        * @param Actors an array of actors
-        */
+     * @brief Add a painting3D Component to specified actors
+     * @param Actors an array of actors
+     */
     void AddPainting3DComponent( const TArray<class AActor *> Actors );
 
     /**
-        * @brief Add a painting3D Actor (Actor+Component)
-        */
-    void AddPainting3DActor();
+     * @brief Add a painting3D Actor (Actor+Component)
+     * @return the newly created Painting 3D Actor
+     */
+    AArianePainting3DActor* AddPainting3DActor();
 
     /**
-        * @brief Close all Tabs
-        */
+     * @brief Close all Tabs
+     */
     void CloseAllTabs();
 
     /** Init */
     void Init();
 
     /**
-        * @brief Get the currentl tool
-        * @return the current tool
-        */
+     * @brief Get the currentl tool
+     * @return the current tool
+     */
     UArianeEditorTool* GetCurrentTool();
 
     const FName& GetId() const;
 
     /**
-        * @brief Get all tabs
-        * @return an array of tabs
-        */
+     * @brief Get all tabs
+     * @return an array of tabs
+     */
     const TArray<TSharedPtr<FArianeEditorTab>>& GetTabs() const;
 
     /**
-        * @brief Get the toolkit
-        * @return the toolkit
-        */
+     * @brief Get the toolkit
+     * @return the toolkit
+     */
     FArianeEditorViewportToolkit* GetToolkit();
 
     /**
-        * @brief Get the tools
-        * @return an array of all the tools
-        */
+     * @brief Get the tools
+     * @return an array of all the tools
+     */
     const TArray<UArianeEditorTool*>& GetTools();
 
     /**
-        * @brief Get the World
-        * @return The World
-        */
+     * @brief Get the World
+     * @return The World
+     */
     UWorld* GetWorld();
 
     /**
-        * @brief Register tab spawners
-        * @param TabManager the tab manager
-        */
+     * @brief Register tab spawners
+     * @param TabManager the tab manager
+     */
     void RegisterTabSpawners();
 
     /**
-        * @brief Set the current tool
-        * @param Tool the tool to set as the current tool
-        */
+     * @brief Set the current tool
+     * @param Tool the tool to set as the current tool
+     */
 
     void SetCurrentTool( UArianeEditorTool* Tool );
 
     /**
-        * @brief Unregister tab spawners
-        * @param TabManager the tab manager
-        */
+     * @brief Unregister tab spawners
+     * @param TabManager the tab manager
+     */
     void UnregisterTabSpawners();
 
 
@@ -105,37 +107,42 @@ public:
     FOnPreChangeCurrentTool& OnPreChangeCurrentToolDelegate();
     FOnPostChangeCurrentTool& OnPostChangeCurrentToolDelegate();
 
+    void ExtendLevelEditorToolbar( UToolMenu* iToolbar );
+
 protected:
     /**
-        * @brief Add a tool
-        * @param Tool the tool to add
-        */
+     * @brief Add a tool
+     * @param Tool the tool to add
+     */
     void AddTool( UArianeEditorTool* Tool );
 
     /**
-        * @brief Removee a tool
-        * @param Tool the tool to remove
-        */
+     * @brief Removee a tool
+     * @param Tool the tool to remove
+     */
     void RemoveTool( UArianeEditorTool* Tool );
 
     /** Init all tools */
     void InitTools();
 
     /**
-        * @brief Add a tab
-        * @param Tab the tab to add
-        */
+     * @brief Add a tab
+     * @param Tab the tab to add
+     */
     void AddTab( TSharedPtr<FArianeEditorTab> Tab );
 
     /**
-        * @brief Remove a tab
-        * @param Tab the tab to remove
-        */
+     * @brief Remove a tab
+     * @param Tab the tab to remove
+     */
     void RemoveTab( TSharedPtr<FArianeEditorTab> Tab );
 
     /** Init all tabs */
     void InitTabs();
 
+    void ExtendToolbarSaveAssetButton( UToolMenu* iToolMenu );
+    void ExtendToolbarToolParameters( UToolMenu* iToolMenu );
+    void ClearPainting3DComponents();
 
 protected:
     FOnPreChangeCurrentTool OnPreChangeCurrentTool;

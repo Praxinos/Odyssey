@@ -99,9 +99,69 @@ FArianePathInvalidationFlags::HasAny()
           || SegmentAddedOrRemoved ) ? true : Super::HasAny();
 }
 
+//------------------- chain
+
+FArianePath::Chain::~Chain()
+{
+}
+
+FArianePath::Chain::Chain( FArianePath* Path, FArianeVertex* UnchainedVertex )
+{
+    FArianeVertex* CurrentVertex = UnchainedVertex;
+    FArianeSegment* CurrentSegment = CurrentVertex->GetFirstSegment();
+
+    Segments.Reserve( Path->GetSegments().Num() );
+
+    LeadingVertex = CurrentVertex;
+
+    CurrentVertex->SetChained( true );
+
+    while( CurrentSegment )
+    {
+        FArianeVertex* nextVertex = CurrentSegment->GetOtherVertex( CurrentVertex );
+
+        Segments.Push( CurrentSegment );
+
+        if( nextVertex->IsChained() == false )
+        {
+            FArianeSegment* nextSegment = nextVertex->GetOtherSegment( CurrentSegment );
+
+            nextVertex->SetChained( true );
+
+            CurrentVertex = nextVertex;
+            CurrentSegment = nextSegment;
+        }
+        else
+        {
+            CurrentVertex = nextVertex;
+            CurrentSegment = nullptr;
+        }
+    }
+}
+
+// callback must return false to keep iterating
+void
+FArianePath::Chain::IterateSegments( TFunction<bool( FArianeVertex*, FArianeSegment*)> Callback ) const
+{
+    FArianeVertex* CurrentVertex = LeadingVertex;
+
+    for( FArianeSegment* Segment : Segments )
+    {
+        FArianeVertex* NextVertex = Segment->GetOtherVertex( CurrentVertex );
+
+        if( Callback( CurrentVertex, Segment ) == true )
+        {
+            return;
+        }
+
+        CurrentVertex = NextVertex;
+    }
+}
+
+//--------------------- Path
+
 FArianePath::~FArianePath()
 {
-    //UE_LOG( LogTemp, Warning, TEXT("FArianePath::DTOR %llu"), (uint64*)this );
 }
 
 FArianePath::FArianePath()
@@ -109,8 +169,6 @@ FArianePath::FArianePath()
     , Geometry3D ( this )
 {
     InvalidationFlags = new FArianePathInvalidationFlags();
-
-    //UE_LOG( LogTemp, Warning, TEXT("Default FArianePath::CTOR %llu"), (uint64*)this );
 }
 
 FArianePath::FArianePath( UArianePainting3DComponent* InPainting3DComponent )
@@ -135,6 +193,12 @@ FArianePath::PostLoad()
 }
 */
 
+const TArray<FArianePath::Chain>&
+FArianePath::GetChains()
+{
+    return Chains;
+}
+
 FArianeVertex*
 FArianePath::AllocVertex( const FVector& iPosition, const FVector& InNormal, double InRadius )
 {
@@ -146,20 +210,20 @@ FArianePath::AllocVertex( const FVector& iPosition, const FVector& InNormal, dou
 }
 
 void
-FArianePath::RemoveVertex( FArianeVertex* iVertex, bool bRemoveFromInstancedVertices )
+FArianePath::RemoveVertex( FArianeVertex* Vertex, bool bRemoveFromInstancedVertices )
 {
-    Vertices.RemoveAll( [iVertex]( FArianeVertexID& VertexID ) -> bool
+    Vertices.RemoveAll( [Vertex]( FArianeVertexID& VertexID ) -> bool
     {
-        return ( iVertex == VertexID.GetVertex() ) ? true : false;
+        return ( Vertex == VertexID.GetVertex() ) ? true : false;
     } );
 
     Invalidate( FArianePathInvalidationFlags().SetVertexAddedOrRemoved() );
 
     if( bRemoveFromInstancedVertices )
     {
-        InstancedVertices.RemoveAll( [iVertex]( FInstancedStruct& Struct ) -> bool
+        InstancedVertices.RemoveAll( [Vertex]( FInstancedStruct& Struct ) -> bool
         {
-            return ( iVertex == Struct.GetPtr<FArianeVertex>() ) ? true : false;
+            return ( Vertex == Struct.GetPtr<FArianeVertex>() ) ? true : false;
         } );
     }
 }
@@ -323,12 +387,39 @@ FArianePath::PostLoad()
     }
 }
 
+void
+FArianePath::FindChains()
+{
+    Chains.Empty();
+
+    // Clean
+    for( FArianeVertexID& VertexID : Vertices )
+    {
+        VertexID.GetVertex()->SetChained( false );
+    }
+
+    // Mark
+    for( FArianeVertexID& VertexID : Vertices )
+    {
+        if( VertexID.GetVertex()->IsChained() == false )
+        {
+            Chains.Emplace( this, VertexID.GetVertex() );
+        }
+    }
+}
+
 bool
 FArianePath::Update( bool Recurse )
 {
     FArianePathInvalidationFlags* PathInvalidationFlags = static_cast<FArianePathInvalidationFlags*>(InvalidationFlags);
 
     FArianeObject::Update( Recurse );
+
+    if( PathInvalidationFlags->VertexAddedOrRemoved
+     || PathInvalidationFlags->SegmentAddedOrRemoved )
+    {
+        FindChains();
+    }
 
     if( PathInvalidationFlags->VertexAltered
      || PathInvalidationFlags->VertexAddedOrRemoved
@@ -338,12 +429,12 @@ FArianePath::Update( bool Recurse )
         Geometry3D.Build();
 
         UpdateBounds();
-
-        PathInvalidationFlags->VertexAltered
-      = PathInvalidationFlags->VertexAddedOrRemoved
-      = PathInvalidationFlags->SegmentAltered
-      = PathInvalidationFlags->SegmentAddedOrRemoved = 0;
     }
+
+      PathInvalidationFlags->VertexAltered
+    = PathInvalidationFlags->VertexAddedOrRemoved
+    = PathInvalidationFlags->SegmentAltered
+    = PathInvalidationFlags->SegmentAddedOrRemoved = 0;
 
     return true; // update succeeded
 }
@@ -633,19 +724,18 @@ FArianePathGeometry3D::BuildSegmentAsFlat( FArianeSegment* Segment
 
     TArray<FModelVertex>& ModelVertexCache = const_cast<TArray<FModelVertex>&>(Segment->GetModelVertexCache());
     TArray<uint32>& IndexCache = const_cast<TArray<uint32>&>(Segment->GetIndexCache());
-    TArray<FArianeSegment::Fraction>& FractionCache = const_cast<TArray<FArianeSegment::Fraction>&>(Segment->GetFractionCache());
-    TArray<FArianePoint*>& FractionPoints = const_cast<TArray<FArianePoint*>&>(Segment->GetFractionPoints());
+    const TArray<FArianeSegment::Fraction>& Fractions = Segment->GetFractions();
+    const TArray<FArianeSegment::FractionStep>& FractionSteps = Segment->GetFractionSteps();
 
-    for( int32 FractionPointIndex = 0; FractionPointIndex < FractionPoints.Num(); FractionPointIndex++ )
+    for( int32 FractionStepIndex = 0; FractionStepIndex < FractionSteps.Num(); FractionStepIndex++ )
     {
-        FArianePoint* Point = FractionPoints[FractionPointIndex];
-        float PointT = Segment->GetFractionPointT( FractionPointIndex );
-        uint32 ModelVertexOffset = FractionPointIndex * 2;
-        double PointRadius = Radius0 + ( DeltaRadius * PointT );
-        FVector PerpendicularVector = Normal0 + ( DeltaNormal * PointT );
+        const FArianeSegment::FractionStep& Step = FractionSteps[FractionStepIndex];
+        uint32 ModelVertexOffset = FractionStepIndex * 2;
+        double PointRadius = Radius0 + ( DeltaRadius * Step.T );
+        FVector PerpendicularVector = Normal0 + ( DeltaNormal * Step.T );
         FVector TangentVector = GetTangentVectorAt( Segment
                                                   , nullptr
-                                                  , PointT
+                                                  , Step.T
                                                   , false );
 
         if( PerpendicularVector.Normalize() )
@@ -656,8 +746,8 @@ FArianePathGeometry3D::BuildSegmentAsFlat( FArianeSegment* Segment
 
             if( UpVector.Normalize() )
             {
-                FVector NewPosition0 = Point->GetPosition() + ( UpVector * PointRadius );
-                FVector NewPosition1 = Point->GetPosition() - ( UpVector * PointRadius );
+                FVector NewPosition0 = Step.Point->GetPosition() + ( UpVector * PointRadius );
+                FVector NewPosition1 = Step.Point->GetPosition() - ( UpVector * PointRadius );
 
                 ModelVertex0->Position.X = NewPosition0.X;
                 ModelVertex0->Position.Y = NewPosition0.Y;
@@ -670,9 +760,9 @@ FArianePathGeometry3D::BuildSegmentAsFlat( FArianeSegment* Segment
         }
     }
 
-    for( int32 FractionIndex = 0; FractionIndex < FractionCache.Num(); FractionIndex++ )
+    for( int32 FractionIndex = 0; FractionIndex < Fractions.Num(); FractionIndex++ )
     {
-        FArianeSegment::Fraction& SegmentFraction = FractionCache[FractionIndex];
+        const FArianeSegment::Fraction& SegmentFraction = Fractions[FractionIndex];
         uint32 ModelVertexOffset0 =   FractionIndex * 2;
         uint32 ModelVertexOffset1 = ( FractionIndex + 1 ) * 2;
         FVector3f SampleVec0 = ModelVertexCache[ModelVertexOffset0 + 1].Position
@@ -734,25 +824,24 @@ FArianePathGeometry3D::BuildSegmentAsTube( FArianeSegment* Segment
 
     TArray<FModelVertex>& ModelVertexCache = const_cast<TArray<FModelVertex>&>(Segment->GetModelVertexCache());
     TArray<uint32>& IndexCache = const_cast<TArray<uint32>&>(Segment->GetIndexCache());
-    TArray<FArianeSegment::Fraction>& FractionCache = const_cast<TArray<FArianeSegment::Fraction>&>(Segment->GetFractionCache());
-    TArray<FArianePoint*>& FractionPoints = const_cast<TArray<FArianePoint*>&>(Segment->GetFractionPoints());
+    const TArray<FArianeSegment::Fraction>& Fractions = Segment->GetFractions();
+    const TArray<FArianeSegment::FractionStep>& FractionSteps = Segment->GetFractionSteps();
 
-    for( int32 FractionPointIndex = 0; FractionPointIndex < FractionPoints.Num(); FractionPointIndex++ )
+    for( int32 FractionStepIndex = 0; FractionStepIndex < FractionSteps.Num(); FractionStepIndex++ )
     {
-        FArianePoint* Point = FractionPoints[FractionPointIndex];
-        float PointT = Segment->GetFractionPointT( FractionPointIndex );
-        uint32 ModelVertexOffset = FractionPointIndex * Divisions;
+        const FArianeSegment::FractionStep& Step = FractionSteps[FractionStepIndex];
+        uint32 ModelVertexOffset = FractionStepIndex * Divisions;
         //FVector PerpendicularVector = PerpendicularVector0 + ( DiffPerpendicularVector * PointT );
         //FVector UpVector = UpVector0 + ( DiffUpVector * PointT );
         //FVector TangentVector = PerpendicularVector.Cross( UpVector );
         //FVector PerpendicularVector = SegmentVector.Cross( Painting3DComponent->GetUpVector() );
-        double PointRadius = Radius0 + ( DeltaRadius * PointT );
+        double PointRadius = Radius0 + ( DeltaRadius * Step.T );
         FVector TangentVector = GetTangentVectorAt( Segment
                                                   , nullptr
-                                                  , PointT
+                                                  , Step.T
                                                   , false );
 
-        FVector PerpendicularVector = TangentVector.Cross( Path->Painting3DComponent->GetUpVector() );
+        FVector PerpendicularVector = TangentVector.Cross( Path->GetPainting3DComponent()->GetUpVector() );
 
         PerpendicularVector.Normalize();
 
@@ -765,7 +854,7 @@ FArianePathGeometry3D::BuildSegmentAsTube( FArianeSegment* Segment
             {
                 FRotator Rotator = UKismetMathLibrary::RotatorFromAxisAndAngle( TangentVector, AngleInDegrees );
                 FModelVertex* ModelVertex = &ModelVertexCache[ModelVertexOffset+j];
-                FVector RotatedPosition = Point->GetPosition() + ( Rotator.RotateVector( PerpendicularVector ) * PointRadius );
+                FVector RotatedPosition = Step.Point->GetPosition() + ( Rotator.RotateVector( PerpendicularVector ) * PointRadius );
 
                 ModelVertex->Position.X = RotatedPosition.X;
                 ModelVertex->Position.Y = RotatedPosition.Y;
@@ -776,9 +865,9 @@ FArianePathGeometry3D::BuildSegmentAsTube( FArianeSegment* Segment
         }
     }
 
-    for( int32 FractionIndex = 0; FractionIndex < FractionCache.Num(); FractionIndex++ )
+    for( int32 FractionIndex = 0; FractionIndex < Fractions.Num(); FractionIndex++ )
     {
-        FArianeSegment::Fraction& SegmentFraction = FractionCache[FractionIndex];
+        const FArianeSegment::Fraction& SegmentFraction = Fractions[FractionIndex];
         uint32 ModelVertexOffset0 =   FractionIndex       * Divisions;
         uint32 ModelVertexOffset1 = ( FractionIndex + 1 ) * Divisions;
         FVector3f SampleVec0 = ModelVertexCache[ModelVertexOffset0 + 1].Position
@@ -864,7 +953,7 @@ FArianePathGeometry3D::InitVertexFactory( TArray<FModelVertex>& ModelVertices
 {
     if( VertexFactory == nullptr )
     {
-        VertexFactory = new FLocalVertexFactory( Path->Painting3DComponent->GetWorld()->GetFeatureLevel(), "Path Vertex Factory" );
+        VertexFactory = new FLocalVertexFactory( Path->GetPainting3DComponent()->GetWorld()->GetFeatureLevel(), "Path Vertex Factory" );
     }
 
     ENQUEUE_RENDER_COMMAND(StaticMeshVertexBuffersLegacyInit)(
@@ -907,7 +996,7 @@ FArianePathGeometry3D::Build()
     uint32 TotalIndexCount = 0;
     TArray<uint32> Indices;
     TArray<FModelVertex> ModelVertices;
-    FVector PreviousPerpendicularVector = Path->Painting3DComponent->GetUpVector();//FVector::Zero();
+    FVector PreviousPerpendicularVector = Path->GetPainting3DComponent()->GetUpVector();//FVector::Zero();
 
     // TODO : update  invalidated segments only
     for( FArianeSegment* Segment : Path->GetInvalidatedSegments() )
@@ -919,7 +1008,7 @@ FArianePathGeometry3D::Build()
 
         Segment->Update();
 
-        switch( Path->Painting3DComponent->GeometryMode )
+        switch( Path->GetPainting3DComponent()->GeometryMode )
         {
             case EArianePainting3DGeometryMode::Flat :
                 BuildSegmentAsFlat( Segment, PreviousPerpendicularVector );

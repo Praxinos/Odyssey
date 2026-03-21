@@ -23,8 +23,10 @@ UArianeEditorPathDrawingTool::~UArianeEditorPathDrawingTool()
 }
 
 UArianeEditorPathDrawingTool::UArianeEditorPathDrawingTool()
-    : Radius( 5.0f )
+    : Size( 5.0f )
+    , bPressureSensitivity( false )
     , EditedPath( nullptr )
+    //, LineType ( EArianePainting3DGeometryMode::Flat )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathDrawing64");
 
@@ -41,7 +43,7 @@ UArianeEditorPathDrawingTool::OnMouseDown( FEditorViewportClient* iViewportClien
     {
         UEditorActorSubsystem* editorActorSubsystem = GEditor->GetEditorSubsystem<UEditorActorSubsystem>();
 
-        GEditor->BeginTransaction(FText::FromString("Create object"));
+        GEditor->BeginTransaction(FText::FromString("Draw Path"));
 
         for( AActor* actor : editorActorSubsystem->GetSelectedLevelActors() )
         {
@@ -109,30 +111,14 @@ float Intersect ( const FVector4& iPlane
     return 0.0f;
 }
 
-// insipired from gluProject
-FVector Project( FEditorViewportClient* iViewportClient
-               , FSceneView* iSceneView
-               , const FVector& iWorldPosition )
-{
-    const FMatrix& viewProjectionMatrix = iSceneView->ViewMatrices.GetProjectionMatrix();
-    FIntPoint viewportSize = iViewportClient->Viewport->GetSizeXY();
-    FVector winPosition;
-
-    FVector4 screenPosition = viewProjectionMatrix.TransformFVector4( FVector4( iWorldPosition, 1.0f ) );
-
-    winPosition.X = 0.0f + ( ( viewportSize.X * screenPosition.X ) + 1.0f ) * 0.5f;
-    winPosition.Y = 0.0f + ( ( viewportSize.Y * screenPosition.Y ) + 1.0f ) * 0.5f;
-    winPosition.Z = ( screenPosition.Z + 1.0f ) * 0.5f;
-
-    return winPosition;
-}
-
 void
 UArianeEditorPathDrawingTool::PlotVertex( FEditorViewportClient* iViewportClient
                                         , const FArianePointerState& PointerState )
 {
     UEditorActorSubsystem* editorActorSubsystem = GEditor->GetEditorSubsystem<UEditorActorSubsystem>();
     FSceneView* View = GetSceneView( iViewportClient );
+    double Radius = bPressureSensitivity ? ( Size * 0.5f * PointerState.Pressure )
+                                         : ( Size * 0.5f );
 
     for( AActor* actor : editorActorSubsystem->GetSelectedLevelActors() )
     {
@@ -167,7 +153,8 @@ UArianeEditorPathDrawingTool::PlotVertex( FEditorViewportClient* iViewportClient
                 FArianeVertex *Vertex0 = EditedPath->GetVertices().Num() ? EditedPath->GetVertices().Last().GetVertex()
                                                                          : nullptr;
 
-                FArianeVertex *Vertex1 = EditedPath->AllocVertex( localCoords, localNormal, Radius * PointerState.Pressure );
+
+                FArianeVertex *Vertex1 = EditedPath->AllocVertex( localCoords, localNormal, Radius );
 
                 EditedPath->AddVertex( Vertex1 );
 
@@ -223,6 +210,7 @@ UArianeEditorPathDrawingTool::OnMouseUp( FEditorViewportClient* iViewportClient
 void
 UArianeEditorPathDrawingTool::ExtendContextMenu( FMenuBuilder& menu )
 {
+/*
     UEditorActorSubsystem* editorActorSubsystem = GEditor->GetEditorSubsystem<UEditorActorSubsystem>();
 
     menu.AddMenuEntry(
@@ -232,6 +220,7 @@ UArianeEditorPathDrawingTool::ExtendContextMenu( FMenuBuilder& menu )
         , FUIAction( FExecuteAction::CreateRaw( Editor
                                               , &FArianeEditor::AddPainting3DComponent
                                               , editorActorSubsystem->GetSelectedLevelActors() ) ) );
+*/
 }
 
 #undef LOCTEXT_NAMESPACE

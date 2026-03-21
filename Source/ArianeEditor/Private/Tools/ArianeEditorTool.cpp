@@ -25,7 +25,7 @@ UArianeEditorTool::UArianeEditorTool()
 }
 
 void
-UArianeEditorTool::SetEditor(FArianeEditor* iEditor)
+UArianeEditorTool::Init( FArianeEditor* iEditor )
 {
     Editor = iEditor;
 }
@@ -319,4 +319,13 @@ UArianeEditorTool::PostTransacted( const FTransactionObjectEvent& iTransactionEv
         );
     }
 */
+}
+
+void
+UArianeEditorTool::DrawHUD ( FEditorViewportClient* ViewportClient
+                           , FViewport* Viewport
+                           , const FSceneView* View
+                           , FCanvas* Canvas )
+{
+
 }

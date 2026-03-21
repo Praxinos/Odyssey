@@ -81,6 +81,10 @@ class ARIANE_API UArianePainting3DComponent : public UMeshComponent
         // debug
         void PrintPointers();
 
+        void ResetHierarchy();
+
+        FArianeObject* GetRootObject();
+
     private:
         virtual FBoxSphereBounds CalcBounds( const FTransform& LocalToWorld ) const override;
 

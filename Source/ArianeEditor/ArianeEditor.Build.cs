@@ -86,7 +86,7 @@ public class ArianeEditor : ModuleRules
         PublicDependencyModuleNames.AddRange(
              new string[] {
                 //"OdysseyBrush",
-                //"OdysseyCoreEditor",
+                "OdysseyCoreEditor",
                 //"OdysseyEditor",
                 //"OdysseyHUD",
                 //"OdysseyMedia",

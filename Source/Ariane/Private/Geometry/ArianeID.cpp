@@ -16,11 +16,15 @@ FArianeObjectID::FArianeObjectID()
 }
 
 FArianeObjectID::FArianeObjectID( FArianeObject* Object )
-    : CachedObject( nullptr )
+    : Painting3DComponent( nullptr )
+    , CachedObject( nullptr )
 {
-    Painting3DComponent = Object->Painting3DComponent;
+    if( Object )
+    {
+        Painting3DComponent = Object->GetPainting3DComponent();
 
-    Guid = Object->Guid;
+        Guid = Object->GetGuid();
+    }
 }
 
 FArianeObject*
@@ -55,11 +59,11 @@ FArianeVertexID::FArianeVertexID()
 FArianeVertexID::FArianeVertexID( FArianeVertex* Vertex )
     : CachedVertex( nullptr )
 {
-    Painting3DComponent = Vertex->GetOwner()->Painting3DComponent;
+    Painting3DComponent = Vertex->GetOwner()->GetPainting3DComponent();
 
-    Guid = Vertex->Guid;
+    Guid = Vertex->GetGuid();
 
-    OwnerGuid = Vertex->GetOwner()->Guid;
+    OwnerGuid = Vertex->GetOwner()->GetGuid();
 }
 
 FArianeVertex*
@@ -97,11 +101,11 @@ FArianeSegmentID::FArianeSegmentID()
 FArianeSegmentID::FArianeSegmentID( FArianeSegment* Segment )
     : CachedSegment( nullptr )
 {
-    Painting3DComponent = Segment->GetOwner()->Painting3DComponent;
+    Painting3DComponent = Segment->GetOwner()->GetPainting3DComponent();
 
-    Guid = Segment->Guid;
+    Guid = Segment->GetGuid();
 
-    OwnerGuid = Segment->GetOwner()->Guid;
+    OwnerGuid = Segment->GetOwner()->GetGuid();
 }
 
 FArianeSegment*

@@ -34,21 +34,21 @@
 FArianeEditorViewportToolkit::~FArianeEditorViewportToolkit()
 {
 /* Gary
-    TArray<UObject*> objects = mEditor->GetAdditionalEditedObjects();
+    TArray<UObject*> objects = Editor.GetAdditionalEditedObjects();
     for (int i = 0; i < objects.Num(); i++)
     {
         if (objects[i])
             OnRemoveEditedObject(objects[i]);
     }
-    mEditor->OnAddEditedObjectDelegate().RemoveAll(this);
-    mEditor->OnRemoveEditedObjectDelegate().RemoveAll(this);
+    Editor.OnAddEditedObjectDelegate().RemoveAll(this);
+    Editor.OnRemoveEditedObjectDelegate().RemoveAll(this);
 */
-    mEditor = nullptr;
+    Editor = nullptr;
 }
 
 FArianeEditorViewportToolkit::FArianeEditorViewportToolkit( FArianeEditorViewportEdMode* iEdMode )
     : mEdMode( iEdMode )
-    , mEditor( this )
+    , Editor( this )
 /* Gary
     , mTabSaved(false)
 */
@@ -59,14 +59,13 @@ FArianeEditorViewportToolkit::FArianeEditorViewportToolkit( FArianeEditorViewpor
 TSharedPtr<FOdysseyPainterEditor>
 FArianeEditorViewportToolkit::GetEditor() const
 {
-    return mEditor;
+    return Editor;
 }
 */
 
 void
 FArianeEditorViewportToolkit::ExtendMenu ( FMenuBuilder& MenuBuilder )
 {
-    UE_LOG(LogTemp, Warning, TEXT("TEST"));
 }
 
 /*
@@ -110,7 +109,10 @@ FArianeEditorViewportToolkit::AddActorMenuEntry( FToolMenuSection& InSection )
         , LOCTEXT("ariane-editor.add-actor-menu.add-painting3dactor.name", "Add Painting 3D Actor")
         , LOCTEXT("ariane-editor.add-actor-menu.add-painting3dactor.tooltip", "Add Painting 3D Actor")
         , FSlateIcon()
-        , FUIAction( FExecuteAction::CreateRaw( &mEditor, &FArianeEditor::AddPainting3DActor ) ) );
+        , FUIAction( FExecuteAction::CreateLambda( [this]()
+                                                   {
+                                                       Editor.FArianeEditor::AddPainting3DActor();
+                                                   } ) ) );
 }
 
 void
@@ -119,7 +121,7 @@ FArianeEditorViewportToolkit::Init( const TSharedPtr<IToolkitHost>& iInitToolkit
     FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>(TEXT("LevelEditor"));
     FModeToolkit::Init( iInitToolkitHost );
 
-    mEditor.Init();
+    Editor.Init();
 
     UToolMenu* addMenu = UToolMenus::Get()->ExtendMenu("LevelEditor.LevelEditorToolbar.AddQuickMenu");
     FToolMenuSection& arianeSection = addMenu->FindOrAddSection("Ariane 3D Painting");
@@ -145,13 +147,13 @@ FArianeEditorViewportToolkit::Init( const TSharedPtr<IToolkitHost>& iInitToolkit
 */
 
 /* Gary
-    mEditor = MakeShared<FOdysseyPainterEditor>(SharedThis(this));
+    Editor = MakeShared<FOdysseyPainterEditor>(SharedThis(this));
 
-    mViewportDrawingExtension = MakeShared<FArianeViewportDrawingEditorExtension>(mEditor.Get());
-    mEditor->AddExtension(mViewportDrawingExtension.ToSharedRef());
-    mEditor->Initialize();
+    mViewportDrawingExtension = MakeShared<FArianeViewportDrawingEditorExtension>(Editor.Get());
+    Editor.AddExtension(mViewportDrawingExtension.ToSharedRef());
+    Editor.Initialize();
 
-    TArray<UObject*> objects = mEditor->GetAdditionalEditedObjects();
+    TArray<UObject*> objects = Editor.GetAdditionalEditedObjects();
     for (int i = 0; i < objects.Num(); i++)
     {
         if (objects[i])
@@ -161,7 +163,7 @@ FArianeEditorViewportToolkit::Init( const TSharedPtr<IToolkitHost>& iInitToolkit
     //Finish Initialization
     Init(iInitToolkitHost);
 
-    mEditor->InitTabs();
+    Editor.InitTabs();
 
     static FString menuName = TEXT("LevelEditor.MainMenu");
 
@@ -192,12 +194,12 @@ FArianeEditorViewportToolkit::Init( const TSharedPtr<IToolkitHost>& iInitToolkit
     helpMenu->FindOrAddSection("OdysseyHelp");
 
     mLevelEditorMenuExtender = MakeShared<FExtender>();
-    mEditor->ExtendMenu( mLevelEditorMenuExtender.ToSharedRef() );
+    Editor.ExtendMenu( mLevelEditorMenuExtender.ToSharedRef() );
     LevelEditorModule.GetMenuExtensibilityManager()->AddExtender(mLevelEditorMenuExtender);
 
-    mEditor->BindShortcuts(this);
-    mEditor->OnAddEditedObjectDelegate().AddRaw(this, &FArianeEditorViewportToolkit::OnAddEditedObject);
-    mEditor->OnRemoveEditedObjectDelegate().AddRaw(this, &FArianeEditorViewportToolkit::OnRemoveEditedObject);
+    Editor.BindShortcuts(this);
+    Editor.OnAddEditedObjectDelegate().AddRaw(this, &FArianeEditorViewportToolkit::OnAddEditedObject);
+    Editor.OnRemoveEditedObjectDelegate().AddRaw(this, &FArianeEditorViewportToolkit::OnRemoveEditedObject);
 
     RebuildLevelEditorMenu();
 */
@@ -206,11 +208,10 @@ FArianeEditorViewportToolkit::Init( const TSharedPtr<IToolkitHost>& iInitToolkit
 void
 FArianeEditorViewportToolkit::ExtendSecondaryModeToolbar(UToolMenu* InModeToolbarMenu)
 {
-/* Gary
-    mEditor->ExtendLevelEditorToolbar( InModeToolbarMenu );
-
+    Editor.ExtendLevelEditorToolbar( InModeToolbarMenu );
+/*
     FName menuName = InModeToolbarMenu->GetMenuName();
-    mEditor->OnRegenerateToolbarAndMenus().BindLambda(
+    Editor.OnRegenerateToolbarAndMenus().BindLambda(
         [menuName]()
         {
             UToolMenus::Get()->RefreshMenuWidget(menuName);
@@ -256,7 +257,7 @@ FArianeEditorViewportToolkit::GetEditorName() const
 FArianeEditor&
 FArianeEditorViewportToolkit::GetEditor()
 {
-    return mEditor;
+    return Editor;
 }
 
 void
@@ -269,7 +270,7 @@ bool
 FArianeEditorViewportToolkit::CloseWindow()
 {
 /* Gary
-    return mEditor->OnCloseRequested();
+    return Editor.OnCloseRequested();
 */
     return false;
 }
@@ -321,7 +322,7 @@ void
 FArianeEditorViewportToolkit::SaveOpenedTabs()
 {
     TArray<FName> tabIds;
-    const TArray<TSharedPtr<FOdysseyEditorTab>>& tabs = mEditor->GetTabs();
+    const TArray<TSharedPtr<FOdysseyEditorTab>>& tabs = Editor.GetTabs();
     for (TSharedPtr<FOdysseyEditorTab> tab : tabs)
     {
         if (tab->IsOpened())
@@ -392,7 +393,7 @@ FArianeEditorViewportToolkit::LoadOpenedTabs()
         }
     }
 
-    const TArray<TSharedPtr<FOdysseyEditorTab>>& tabs = mEditor->GetTabs();
+    const TArray<TSharedPtr<FOdysseyEditorTab>>& tabs = Editor.GetTabs();
     for (TSharedPtr<FOdysseyEditorTab> tab : tabs)
     {
         if (!tabIds.Contains(tab->GetId()))
@@ -417,7 +418,7 @@ FArianeEditorViewportToolkit::GetBaseToolkitName() const
 void
 FArianeEditorViewportToolkit::InvokeUI()
 {
-    mEditor.RegisterTabSpawners();
+    Editor.RegisterTabSpawners();
 
 /* Gary
     if (GEditor)
@@ -449,8 +450,8 @@ FArianeEditorViewportToolkit::ShutdownUI()
     if (GEditor)
         GEditor->OnEditorClose().RemoveAll(this);
 
-    mEditor.CloseAllTabs();
-    mEditor.UnregisterTabSpawners();
+    Editor.CloseAllTabs();
+    Editor.UnregisterTabSpawners();
 
 /* Gary
     LevelEditorModule.GetMenuExtensibilityManager()->RemoveExtender(mLevelEditorMenuExtender);
@@ -470,7 +471,7 @@ FArianeEditorViewportToolkit::OnEditorClose()
 TSharedPtr<SWidget>
 FArianeEditorViewportToolkit::GetInlineContent() const
 {
-    return SNew(SArianeEditorMasterPanel, const_cast<FArianeEditor*>(&mEditor) );
+    return SNew(SArianeEditorMasterPanel, const_cast<FArianeEditor*>(&Editor) );
 }
 
 FArianeEditorViewportEdMode*
@@ -499,7 +500,7 @@ FArianeEditorViewportToolkit::GetOpenedTabIdsSavedPath() const
 /* void
 FArianeEditorViewportToolkit::BuildToolPalette( FName iPalette, class FToolBarBuilder& ioToolbarBuilder )
 {
-    const TArray<TSharedPtr<FOdysseyEditorTab>>& tabs = mEditor->GetTabs();
+    const TArray<TSharedPtr<FOdysseyEditorTab>>& tabs = Editor.GetTabs();
     for (TSharedPtr<FOdysseyEditorTab> tab : tabs)
     {
         FFormatNamedArguments Args;
