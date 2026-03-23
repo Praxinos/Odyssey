@@ -41,6 +41,12 @@ UOdysseyAnimationPlayer::OnDisplayedFrameChanged()
     return mOnDisplayedFrameChanged;
 }
 
+FSimpleMulticastDelegate&
+UOdysseyAnimationPlayer::OnStatusChanged()
+{
+    return mOnStatusChanged;
+}
+
 UOdysseyAnimationPlayer::UOdysseyAnimationPlayer()
 {
     if (GetFlags() & RF_ClassDefaultObject)
@@ -80,6 +86,8 @@ UOdysseyAnimationPlayer::Play(bool iBackward)
         break;
     }
     SeekToFrame(newFrame);
+    mOnStatusChanged.Broadcast();
+    BP_OnStatusChanged.Broadcast();
 }
 
 void
@@ -92,6 +100,8 @@ UOdysseyAnimationPlayer::Pause()
         EndScrub();
 
     Status = EOdysseyAnimationPlayerStatus::Paused;
+    mOnStatusChanged.Broadcast();
+    BP_OnStatusChanged.Broadcast();
 }
 
 void
@@ -108,6 +118,8 @@ UOdysseyAnimationPlayer::Stop()
 
     Status = EOdysseyAnimationPlayerStatus::Stopped;
     SeekToFrame(mCurrentFrame);
+    mOnStatusChanged.Broadcast();
+    BP_OnStatusChanged.Broadcast();
 }
 
 void
@@ -152,6 +164,8 @@ UOdysseyAnimationPlayer::SeekToFrame(FFrameTime iFrame)
 
     if (currentFrameChanged)
         mOnCurrentFrameChanged.Broadcast();
+
+    BP_OnFrameChanged.Broadcast();
 }
 
 void
@@ -532,6 +546,8 @@ UOdysseyAnimationPlayer::BeginScrub()
         Stop();
 
     Status = EOdysseyAnimationPlayerStatus::Scrubbing;
+    mOnStatusChanged.Broadcast();
+    BP_OnStatusChanged.Broadcast();
 }
 
 void
@@ -542,6 +558,8 @@ UOdysseyAnimationPlayer::EndScrub()
 
     Status = EOdysseyAnimationPlayerStatus::Stopped;
     SeekToFrame(mCursorFrame);
+    mOnStatusChanged.Broadcast();
+    BP_OnStatusChanged.Broadcast();
 }
 
 void

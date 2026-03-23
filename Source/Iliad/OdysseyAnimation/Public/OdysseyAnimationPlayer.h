@@ -66,12 +66,15 @@ public:
     UOdysseyAnimationPlayer();
 
 public:
-    //Events
+    DECLARE_DYNAMIC_MULTICAST_DELEGATE(FSimpleDynamicMulticastDelegate);
+
+    //C++ Events
     FSimpleMulticastDelegate& OnAnimationChanged();
     FSimpleMulticastDelegate& OnRenderTargetChanged();
     FSimpleMulticastDelegate& OnCursorFrameChanged();
-    FSimpleMulticastDelegate& OnCurrentFrameChanged();
     FSimpleMulticastDelegate& OnDisplayedFrameChanged();
+    FSimpleMulticastDelegate& OnCurrentFrameChanged();
+    FSimpleMulticastDelegate& OnStatusChanged();
 
 protected:
     virtual void PostInitProperties() override;
@@ -212,10 +215,15 @@ public:
     UPROPERTY( EditAnywhere, BlueprintReadWrite, Category="Animation" )
     float PlayRate = 1.0f; //1.0f means 100% of the animation framepersecond
 
-    UPROPERTY(Transient, DuplicateTransient)
+    UPROPERTY( Transient, DuplicateTransient )
     TObjectPtr<UTextureRenderTarget2D> RenderTarget;
+public:
+    //Blueprint Events
+    UPROPERTY(BlueprintAssignable, Category = Events, meta = (DisplayName = "On Frame Changed"))
+    FSimpleDynamicMulticastDelegate BP_OnFrameChanged;
 
-    int mPatchDelayFirstRender = 0;
+    UPROPERTY(BlueprintAssignable, Category = Events, meta = (DisplayName = "On Status Changed"))
+    FSimpleDynamicMulticastDelegate BP_OnStatusChanged;
 
 private:
 #if WITH_EDITOR
@@ -233,10 +241,11 @@ private:
     EOdysseyAnimationPlayerStatus Status = EOdysseyAnimationPlayerStatus::Stopped;
 
 private:
-    //Events
+    //C++ Events
     FSimpleMulticastDelegate mOnAnimationChanged;
     FSimpleMulticastDelegate mOnRenderTargetChanged;
     FSimpleMulticastDelegate mOnCurrentFrameChanged;
     FSimpleMulticastDelegate mOnDisplayedFrameChanged;
     FSimpleMulticastDelegate mOnCursorFrameChanged;
+    FSimpleMulticastDelegate mOnStatusChanged;
 };
