@@ -6,6 +6,7 @@
 #include "ArianePath.h"
 #include "ArianeSegment.h"
 #include "ArianeVertex.h"
+#include "ArianeLayerFolder.h"
 // Unreal headers
 #include "Engine/EngineBaseTypes.h"
 #include "StaticMeshResources.h"
@@ -24,7 +25,6 @@ UArianePainting3DComponent::~UArianePainting3DComponent()
 }
 
 UArianePainting3DComponent::UArianePainting3DComponent()
-    : GeometryMode ( EArianePainting3DGeometryMode::Tube )
 {
     ResetHierarchy();
 
@@ -36,6 +36,8 @@ UArianePainting3DComponent::UArianePainting3DComponent()
     bWantsInitializeComponent = true;
     bAutoActivate = true;
     bTickInEditor = true;
+
+    RootFolder = NewObject<UArianeLayerFolder>( this );
 
     //LineBatchComponent = CreateDefaultSubobject<ULineBatchComponent>(TEXT("LineBatcher"));
 }
@@ -217,10 +219,10 @@ UArianePainting3DComponent::AllocObject()
 }
 
 FArianePath*
-UArianePainting3DComponent::AllocPath()
+UArianePainting3DComponent::AllocPath( EArianePathLineType InLineType )
 {
     InstancedObjectsAccessRW.Lock();
-    InstancedObjects.Add( FInstancedStruct::Make<FArianePath>( this ) );
+    InstancedObjects.Add( FInstancedStruct::Make<FArianePath>( this, InLineType ) );
     InstancedObjectsAccessRW.Unlock();
 
     FArianePath* NewPath = InstancedObjects.Last().GetMutablePtr<FArianePath>();
@@ -255,6 +257,7 @@ UArianePainting3DComponent::Update()
 void
 UArianePainting3DComponent::PostEditChangeProperty( FPropertyChangedEvent& event )
 {
+    /*
     if( event.GetPropertyName() == GET_MEMBER_NAME_CHECKED( UArianePainting3DComponent, GeometryMode ) )
     {
         for( FInstancedStruct& InstancedObject : InstancedObjects )
@@ -271,6 +274,7 @@ UArianePainting3DComponent::PostEditChangeProperty( FPropertyChangedEvent& event
 
         RootObjectID.GetObject()->Update( true );
     }
+    */
 
     Super::PostEditChangeProperty( event );
 }
@@ -281,6 +285,20 @@ UArianePainting3DComponent::ResetHierarchy()
     InstancedObjects.Empty();
     // Nb: this object will be destroyed automatically when loading from the disc, as the TArray is replaced entirely.
     RootObjectID = FArianeObjectID( AllocObject() );
+}
+
+
+void
+UArianePainting3DComponent::DeleteInstancedObject( FArianeObject* Object )
+{
+    InstancedObjectsAccessRW.Lock();
+
+    InstancedObjects.RemoveAll( [Object]( FInstancedStruct& Struct ) -> bool
+    {
+        return ( Object == Struct.GetPtr<FArianeObject>() ) ? true : false;
+    } );
+
+    InstancedObjectsAccessRW.Unlock();
 }
 
 //--------------------------------------------------------------------------------------------------

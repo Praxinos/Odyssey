@@ -27,6 +27,7 @@ public class Ariane : ModuleRules
                 Path.Combine(ModuleDirectory, "Private", "Components"),
                 Path.Combine(ModuleDirectory, "Private", "Actors"),
                 Path.Combine(ModuleDirectory, "Private", "Geometry"),
+                Path.Combine(ModuleDirectory, "Private", "LayerStack"),
             }
         );
 
@@ -35,6 +36,7 @@ public class Ariane : ModuleRules
                 Path.Combine(ModuleDirectory, "Public", "Components"),
                 Path.Combine(ModuleDirectory, "Public", "Actors"),
                 Path.Combine(ModuleDirectory, "Public", "Geometry"),
+                Path.Combine(ModuleDirectory, "Public", "LayerStack"),
             }
         );
 

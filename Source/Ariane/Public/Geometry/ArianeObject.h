@@ -131,7 +131,7 @@ struct ARIANE_API FArianeObject
         void Traverse( TFunction<TraversalReturnValue(FArianeObject*)> Callback );
         FArianeObject* GetParent();
         void SetParent( FArianeObject* Parent );
-        void RemoveChild( FArianeObject* ChildToRemove );
+        void RemoveChild( FArianeObject* ChildToRemove, bool bRemoveFromInstancedObjects );
 
     protected:
         /**

@@ -8,6 +8,7 @@
 // Ariane
 #include "ArianeEditorTool.h"
 #include "ArianePainting3DComponent.h" // for EArianePainting3DGeometryMode
+#include "ArianePath.h"
 
 #include "ArianeEditorPathDrawingTool.generated.h"
 
@@ -62,8 +63,9 @@ public:
              , Category = PathDrawingTool )
     bool bPressureSensitivity;
 
-    //UPROPERTY( EditAnywhere )
-    //EArianePainting3DGeometryMode LineType;
+    UPROPERTY( EditAnywhere
+             , Category = PathDrawingTool )
+    EArianePathLineType LineType;
 
 protected:
     FArianePath* EditedPath;

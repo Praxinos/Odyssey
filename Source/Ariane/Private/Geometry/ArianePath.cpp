@@ -167,13 +167,16 @@ FArianePath::~FArianePath()
 FArianePath::FArianePath()
     : FArianeObject()
     , Geometry3D ( this )
+    , LineType( EArianePathLineType::Tube )
 {
     InvalidationFlags = new FArianePathInvalidationFlags();
 }
 
-FArianePath::FArianePath( UArianePainting3DComponent* InPainting3DComponent )
+FArianePath::FArianePath( UArianePainting3DComponent* InPainting3DComponent
+                        , EArianePathLineType InLineType )
     : FArianeObject ( InPainting3DComponent )
     , Geometry3D ( this )
+    , LineType ( InLineType )
 {
     InvalidationFlags = new FArianePathInvalidationFlags();
 }
@@ -362,8 +365,25 @@ FArianePath::InvalidateSegment( FArianeSegment* Segment )
 }
 
 void
+FArianePath::SetLineType( EArianePathLineType InLineType )
+{
+    LineType = InLineType;
+
+    Invalidate( FArianePathInvalidationFlags().SetSegmentAltered()
+                                              .SetVertexAltered() );
+}
+
+EArianePathLineType
+FArianePath::GetLineType()
+{
+    return LineType;
+}
+
+void
 FArianePath::PostEditUndo()
 {
+    Super::PostEditUndo();
+
     for( FInstancedStruct& InstancedSegment : InstancedSegments )
     {
         FArianeSegment* Segment = InstancedSegment.GetMutablePtr<FArianeSegment>();
@@ -372,12 +392,17 @@ FArianePath::PostEditUndo()
         Segment->Link();
     }
 
-    Invalidate( FArianePathInvalidationFlags().SetSegmentAltered() );
+    Invalidate( FArianePathInvalidationFlags().SetSegmentAltered()
+                                              .SetSegmentAddedOrRemoved()
+                                              .SetVertexAltered()
+                                              .SetVertexAddedOrRemoved() );
 }
 
 void
 FArianePath::PostLoad()
 {
+    Super::PostLoad();
+
     for( FInstancedStruct& InstancedSegment : InstancedSegments )
     {
         FArianeSegment* Segment = InstancedSegment.GetMutablePtr<FArianeSegment>();
@@ -385,6 +410,11 @@ FArianePath::PostLoad()
         Segment->PostLoad();
         Segment->Link();
     }
+
+    Invalidate( FArianePathInvalidationFlags().SetSegmentAltered()
+                                              .SetSegmentAddedOrRemoved()
+                                              .SetVertexAltered()
+                                              .SetVertexAddedOrRemoved() );
 }
 
 void
@@ -1008,13 +1038,13 @@ FArianePathGeometry3D::Build()
 
         Segment->Update();
 
-        switch( Path->GetPainting3DComponent()->GeometryMode )
+        switch( Path->GetLineType() )
         {
-            case EArianePainting3DGeometryMode::Flat :
+            case EArianePathLineType::Flat :
                 BuildSegmentAsFlat( Segment, PreviousPerpendicularVector );
             break;
 
-            case EArianePainting3DGeometryMode::Tube :
+            case EArianePathLineType::Tube :
                 BuildSegmentAsTube( Segment, PreviousPerpendicularVector );
             break;
 
@@ -1067,7 +1097,7 @@ FArianePathGeometry3D::Build()
         }
     }
 
-    if( ModelVertices.Num() )
+    //if( ModelVertices.Num() )
     {
         //VertexBuffers.InitModelBuffers( ModelVertices );
         //IndexBuffer.SetIndices( Indices, EIndexBufferStride::Type::Force32Bit );

@@ -14,16 +14,18 @@
 #include "RawIndexBuffer.h"
 #include "StructUtils/InstancedStruct.h"
 // Ariane Headers
-#include "ArianeObject.h"
-#include "ArianeVertex.h" // TODO : replace with ID handles
+#include "ArianeID.h"
+#include "ArianePath.h" // for EArianePathLineType
 
 #include "ArianePainting3DComponent.generated.h"
 
 class FArianeGeometryProxy;
+struct FArianeObject;
 struct FArianePath;
 struct FArianeVertex;
 class FArianePathGeometry3D;
 struct FArianeSegment;
+class UArianeLayerFolder;
 
 class ARIANE_API FArianeGeometryProxy : public FPrimitiveSceneProxy
 {
@@ -44,13 +46,6 @@ class ARIANE_API FArianeGeometryProxy : public FPrimitiveSceneProxy
 
     protected:
         UArianePainting3DComponent* Painting3DComponent;
-};
-
-UENUM(BlueprintType)
-enum class EArianePainting3DGeometryMode : uint8
-{
-    Tube = 0,
-    Flat = 1,
 };
 
 UCLASS()
@@ -84,22 +79,19 @@ class ARIANE_API UArianePainting3DComponent : public UMeshComponent
         void ResetHierarchy();
 
         FArianeObject* GetRootObject();
+        void DeleteInstancedObject( FArianeObject* Object );
 
     private:
         virtual FBoxSphereBounds CalcBounds( const FTransform& LocalToWorld ) const override;
 
     public:
-        FArianePath* AllocPath();
+        FArianePath* AllocPath( EArianePathLineType InLineType );
         FArianeObject* AllocObject();
         TArray<FInstancedStruct>& GetInstancedObjects();
         void Update();
         FArianeObject* GetObject( const FGuid& InGuid );
 
     public:
-        UPROPERTY( EditAnywhere
-                 , Category = Painting3D )
-        EArianePainting3DGeometryMode GeometryMode;
-
         UPROPERTY( EditAnywhere )
         TArray<FInstancedStruct> InstancedObjects;
 
@@ -107,6 +99,9 @@ class ARIANE_API UArianePainting3DComponent : public UMeshComponent
         FArianeObjectID RootObjectID;
 
         TArray<UMaterialInterface*> UsedMaterials;
+
+        UPROPERTY()
+        UArianeLayerFolder* RootFolder;
 
     public:
         mutable FCriticalSection InstancedObjectsAccessRW;
