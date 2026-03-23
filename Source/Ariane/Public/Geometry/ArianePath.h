@@ -26,6 +26,13 @@ class UMaterial;
 class UArianePainting3DComponent;
 struct FArianePath;
 
+UENUM(BlueprintType)
+enum class EArianePathLineType : uint8
+{
+    Tube = 0,
+    Flat = 1,
+};
+
 class ARIANE_API FArianePathGeometry3D
 {
     public:
@@ -120,7 +127,7 @@ public:
 public:
     virtual ~FArianePath();
     FArianePath();
-    FArianePath( UArianePainting3DComponent* InPainting3DComponent );
+    FArianePath( UArianePainting3DComponent* InPainting3DComponent, EArianePathLineType InLineType );
 
 public:
     /**
@@ -223,6 +230,8 @@ public:
 
     void FindChains();
     const TArray<Chain>& GetChains();
+    void SetLineType( EArianePathLineType LineType );
+    EArianePathLineType GetLineType();
 
 protected:
     UPROPERTY( EditAnywhere )
@@ -236,6 +245,9 @@ protected:
 
     UPROPERTY( EditAnywhere )
     TArray<FInstancedStruct> InstancedSegments;
+
+    UPROPERTY( EditAnywhere )
+    EArianePathLineType LineType;
 
 protected:
     FArianePathGeometry3D Geometry3D;

@@ -55,7 +55,7 @@ UArianeEditorPathDrawingTool::OnMouseDown( FEditorViewportClient* iViewportClien
 
                 painting3DComponent->Modify();
 
-                EditedPath = painting3DComponent->AllocPath();
+                EditedPath = painting3DComponent->AllocPath( LineType );
 
                 painting3DComponent->RootObjectID.GetObject()->AppendChild( EditedPath );
 
@@ -152,7 +152,6 @@ UArianeEditorPathDrawingTool::PlotVertex( FEditorViewportClient* iViewportClient
                 FVector localNormal = actorWorldTransform.Inverse().TransformVector( planeVector );
                 FArianeVertex *Vertex0 = EditedPath->GetVertices().Num() ? EditedPath->GetVertices().Last().GetVertex()
                                                                          : nullptr;
-
 
                 FArianeVertex *Vertex1 = EditedPath->AllocVertex( localCoords, localNormal, Radius );
 

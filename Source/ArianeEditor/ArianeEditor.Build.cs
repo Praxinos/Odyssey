@@ -124,7 +124,7 @@ public class ArianeEditor : ModuleRules
                 //Path.Combine(ModuleDirectory, "Private", "Widgets", "Tools"),
                 Path.Combine(ModuleDirectory, "Private", "Tabs"),
                 Path.Combine(ModuleDirectory, "Private", "Tools"),
-                Path.Combine(ModuleDirectory, "Private", "Widgets")
+                Path.Combine(ModuleDirectory, "Private", "Widgets"),
             }
         );
 
@@ -140,7 +140,7 @@ public class ArianeEditor : ModuleRules
                 Path.Combine(ModuleDirectory, "Public", "WorldCentricEditor"),
                 Path.Combine(ModuleDirectory, "Public", "Tabs"),
                 Path.Combine(ModuleDirectory, "Public", "Tools"),
-                Path.Combine(ModuleDirectory, "Public", "Widgets")
+                Path.Combine(ModuleDirectory, "Public", "Widgets"),
             }
         );
 

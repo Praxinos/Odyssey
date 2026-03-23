@@ -16,6 +16,7 @@ class FArianeEditor;
 class UArianePainting3DComponent;
 class UCanvasRenderTarget2D;
 struct FArianeVertex;
+class FEditorViewportClient;
 
 UCLASS()
 class ARIANEEDITOR_API UArianeEditorEraserTool : public UArianeEditorTool
@@ -153,19 +154,23 @@ public:
 protected:
     virtual void ExtendContextMenu( FMenuBuilder& menu ) override;
 
-    bool ErasePaths( FSceneView* View
+    bool ErasePaths( FEditorViewportClient* ViewportClient
                    , UArianePainting3DComponent* Painting3DComponent );
-    bool EraseChainSegments( FSceneView* View
+    bool EraseChainSegments( FEditorViewportClient* ViewportClient
+                           , FSceneView* View
                            , UArianePainting3DComponent* Painting3DComponent
                            , FArianePath* Path
                            , const FArianePath::Chain& Chain
+                           , const TArray<FColor>& Pixels
                            , TArray<FWayPoint>& oWayPointBuffer
                            , TArray<FWayFragment>& oWayFragmentBuffer );
-    void VertexToWaypoint( FSceneView* View
+    void VertexToWaypoint( FEditorViewportClient* ViewportClient
+                         , FSceneView* View
                          , const FTransform& WorldTransform
                          , FArianeVertex* Vertex
+                         , const TArray<FColor>& Pixels
                          , TArray<FWayPoint>& oWayPointBuffer );
-    uint8 GetAlpha( int32 iX, int32 iY );
+    uint8 GetAlpha( int32 X, int32 Y, const TArray<FColor>& Pixels );
     void TraceLine( FArianePath* Path
                   , FArianeSegment* Segment
                   , const FArianeSegment::FractionStep* Step0
@@ -174,9 +179,13 @@ protected:
                   , const FArianeSegment::FractionStep* Step1
                   , int32 ScreenX1
                   , int32 ScreenY1
+                  , const TArray<FColor>& Pixels
                   , TArray<FWayPoint>& OutWayPointBuffer
                   , TArray<FMetaFragment>& OutMetaFragmentBuffer
                   , bool iRevert );
+    static FVector2D ProjectWorldToScreen( FEditorViewportClient* ViewportClient
+                                         , FSceneView* View
+                                         , const FVector& WorldPosition );
     static bool CheckContrast( uint8 iAlphaValue0, uint8 iAlphaValue1 );
     void ResizeCanvas( uint32 Width, uint32 Height );
     void UpdateBrush();

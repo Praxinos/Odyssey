@@ -156,23 +156,38 @@ UArianeEditorEraserTool::FWayFragment::GetPrev()
     return nullptr;
 }
 
-void
-UArianeEditorEraserTool::VertexToWaypoint( FSceneView* View
-                                         , const FTransform& WorldTransform
-                                         , FArianeVertex* Vertex
-                                         , TArray<FWayPoint>& OutWayPoints )
+FVector2D
+UArianeEditorEraserTool::ProjectWorldToScreen( FEditorViewportClient* ViewportClient
+                                             , FSceneView* View
+                                             , const FVector& WorldPosition )
 {
     FVector2D ScreenCoords;
+    FIntRect Rect = FIntRect( 0, 0, ViewportClient->Viewport->GetSizeXY().X, ViewportClient->Viewport->GetSizeXY().Y );
 
-    View->ProjectWorldToScreen( WorldTransform.TransformVector( Vertex->GetPosition() )
-                              , View->UnconstrainedViewRect
+    View->ProjectWorldToScreen( WorldPosition
+                              , Rect
                               , View->ViewMatrices.GetViewProjectionMatrix()
                               , ScreenCoords
                               , true ); // calc outside view position
 
-    uint8 alpha = GetAlpha( ScreenCoords.X, ScreenCoords.Y );
+    return ScreenCoords;
+}
 
-    if( alpha == 0 ) // vertex in dark zone, keep it
+void
+UArianeEditorEraserTool::VertexToWaypoint( FEditorViewportClient* ViewportClient
+                                         , FSceneView* View
+                                         , const FTransform& WorldTransform
+                                         , FArianeVertex* Vertex
+                                         , const TArray<FColor>& Pixels
+                                         , TArray<FWayPoint>& OutWayPoints )
+{
+    FVector2D ScreenCoords = ProjectWorldToScreen( ViewportClient
+                                                 , View
+                                                 , WorldTransform.TransformPosition( Vertex->GetPosition() ) );
+
+    uint8 AlphaValue = GetAlpha( ScreenCoords.X, ScreenCoords.Y, Pixels );
+
+    if( AlphaValue == 0 ) // vertex in dark zone, keep it
     {
         OutWayPoints.Emplace( Vertex
                             , FWayPoint::OutsideErasureArea
@@ -201,16 +216,17 @@ UArianeEditorEraserTool::CheckContrast( uint8 iAlphaValue0, uint8 iAlphaValue1 )
 
 // returns current alpha value
 uint8
-UArianeEditorEraserTool::GetAlpha( int32 X, int32 Y )
+UArianeEditorEraserTool::GetAlpha( int32 X, int32 Y, const TArray<FColor>& Pixels )
 {
-    FTextureRenderTargetResource* RTResource = CanvasRenderTarget->GameThread_GetRenderTargetResource();
-    FReadSurfaceDataFlags ReadFlags(RCM_UNorm);
-    FIntRect InRect( X, Y, X + 1, Y + 1 );
-    TArray<FColor> SinglePixelArray;
+    if( ( X >= 0 ) && ( X < CanvasRenderTarget->SizeX  )
+     && ( Y >= 0 ) && ( Y < CanvasRenderTarget->SizeY  ) )
+    {
+        uint32 Offset = ( Y * CanvasRenderTarget->SizeX ) + X;
 
-    RTResource->ReadPixels( SinglePixelArray, ReadFlags, InRect );
+        return Pixels[Offset].A;
+    }
 
-    return ( SinglePixelArray.Num() > 0 ) ? SinglePixelArray[0].A : 0;
+    return 0;
 }
 
 void
@@ -222,6 +238,7 @@ UArianeEditorEraserTool::TraceLine( FArianePath* Path
                                   , const FArianeSegment::FractionStep* Step1
                                   , int32 ScreenX1
                                   , int32 ScreenY1
+                                  , const TArray<FColor>& Pixels
                                   , TArray<FWayPoint>& OutWayPointBuffer
                                   , TArray<FMetaFragment>& OutMetaFragmentBuffer
                                   , bool iRevert )
@@ -239,14 +256,14 @@ UArianeEditorEraserTool::TraceLine( FArianePath* Path
     int32  y   = ScreenY0;
     double t   = Step0->T;
     uint32 cumul = 0;
-    uint8 LastAlphaValue = GetAlpha( ScreenX0, ScreenY0 );
+    uint8 LastAlphaValue = GetAlpha( ScreenX0, ScreenY0, Pixels );
     double LastT = Step0->T;
 
     if ( ddx > ddy )
     {
         for ( uint32 i = 0; i <= ddx; i++ )
         {
-            uint8 AlphaValue = GetAlpha( x, y );
+            uint8 AlphaValue = GetAlpha( x, y, Pixels );
 
             if( CheckContrast( AlphaValue, LastAlphaValue ) )
             {
@@ -280,7 +297,7 @@ UArianeEditorEraserTool::TraceLine( FArianePath* Path
     {
         for ( uint32 i = 0; i <= ddy; i++ )
         {
-            uint8 AlphaValue = GetAlpha( x, y );
+            uint8 AlphaValue = GetAlpha( x, y, Pixels );
 
             if( CheckContrast( AlphaValue, LastAlphaValue ) )
             {
@@ -313,19 +330,31 @@ UArianeEditorEraserTool::TraceLine( FArianePath* Path
 }
 
 bool
-UArianeEditorEraserTool::ErasePaths( FSceneView* View
+UArianeEditorEraserTool::ErasePaths( FEditorViewportClient* ViewportClient
                                    , UArianePainting3DComponent* Painting3DComponent )
 {
+    FTextureRenderTargetResource* RTResource = CanvasRenderTarget->GameThread_GetRenderTargetResource();
     TArray<FArianePath*> AddedPaths;
     TArray<FArianeVertex*> AddedVertices;
     TArray<FArianeSegment*> AddedSegments;
     TArray<FArianePath*> RemovedPaths;
     TArray<FArianeVertex*> RemovedVertices;
     TArray<FArianeSegment*> RemovedSegments;
+    TArray<FColor> Pixels;
+    uint32 Width = CanvasRenderTarget->SizeX;
+    uint32 Height = CanvasRenderTarget->SizeY;
+    FSceneView* View = GetSceneView( ViewportClient );
+
+    RTResource->ReadPixels( Pixels
+                          , FReadSurfaceDataFlags(RCM_UNorm)
+                          , FIntRect( 0, 0, Width, Height ) );
 
     Painting3DComponent->GetRootObject()->Traverse( [ this
+                                                    , ViewportClient
                                                     , View
                                                     , Painting3DComponent
+                                                    , Pixels
+                                                    , Width
                                                     , &AddedPaths
                                                     , &AddedVertices
                                                     , &AddedSegments
@@ -345,10 +374,12 @@ UArianeEditorEraserTool::ErasePaths( FSceneView* View
                 WayPoints.Reserve( 100 );
                 WayFragments.Reserve( 100 );
 
-                bool Hit = EraseChainSegments( View
+                bool Hit = EraseChainSegments( ViewportClient
+                                             , View
                                              , Painting3DComponent
                                              , Path
                                              , Chain
+                                             , Pixels
                                              , WayPoints
                                              , WayFragments );
 
@@ -390,7 +421,7 @@ UArianeEditorEraserTool::ErasePaths( FSceneView* View
 
     for( FArianePath* RemovedPath : RemovedPaths )
     {
-        static_cast<FArianePath*>(RemovedPath->GetParent())->RemoveChild( RemovedPath );
+        static_cast<FArianePath*>(RemovedPath->GetParent())->RemoveChild( RemovedPath, true );
     }
 
 
@@ -447,7 +478,7 @@ UArianeEditorEraserTool::GetStartFragment( FWayFragment* Fragment )
 UArianeEditorEraserTool::ESegmentAdditionFlags
 UArianeEditorEraserTool::SegmentAdditionPolicy( FWayFragment* Fragment, bool bSplit )
 {
-    ESegmentAdditionFlags retFlags = ESegmentAdditionFlags::RemoveOriginalSegment;
+    ESegmentAdditionFlags retFlags = ESegmentAdditionFlags::None;
     FWayFragment* PrevFragment = Fragment->GetPrev();
 
     if( bSplit )
@@ -486,7 +517,6 @@ UArianeEditorEraserTool::VertexAdditionPolicy( FWayPoint* WayPoint, bool bSplit 
     {
         if( WayPoint->Flags & FWayPoint::Original )
         {
-            retFlags |= ( EVertexAdditionFlags::RemoveOriginalVertex );
 /*
             if( WayPoint->Flags & FWayPoint::BordersErasureArea )
             {
@@ -587,6 +617,14 @@ UArianeEditorEraserTool::ParseChainWayPoints( UArianePainting3DComponent* Painti
     uint32 addedSegmentCountBeforeAlter = OutAddedSegments.Num();
     FArianePath* CurrentPath = ChainPath;
 
+    if( bSplit )
+    {
+        if( OutRemovedPaths.Find( ChainPath ) == INDEX_NONE )
+        {
+            OutRemovedPaths.Add( ChainPath );
+        }
+    }
+
     if( WayPoints.Num() )
     {
         FWayPoint& FirstWayPoint = WayPoints[0];
@@ -612,18 +650,13 @@ UArianeEditorEraserTool::ParseChainWayPoints( UArianePainting3DComponent* Painti
 
             if( ( SegmentAdditionFlags & ESegmentAdditionFlags::CreateNewPath ) == ESegmentAdditionFlags::CreateNewPath )
             {
-                CurrentPath = Painting3DComponent->AllocPath();
+                CurrentPath = Painting3DComponent->AllocPath( ChainPath->GetLineType() );
                 // for postprocessing. the path is not added to the parent yet
                 CurrentPath->SetParent( ChainPath->GetParent() );
 
                 ChainPath->ExportProperties( CurrentPath );
 
                 OutAddedPaths.Add( CurrentPath );
-
-                if( OutRemovedPaths.Find( ChainPath ) == INDEX_NONE )
-                {
-                    OutRemovedPaths.Add( ChainPath );
-                }
             }
 
             if( ( SegmentAdditionFlags & ESegmentAdditionFlags::CreateDerivedSegment ) == ESegmentAdditionFlags::CreateDerivedSegment )
@@ -655,10 +688,12 @@ UArianeEditorEraserTool::ParseChainWayPoints( UArianePainting3DComponent* Painti
 
 
 bool
-UArianeEditorEraserTool::EraseChainSegments( FSceneView* View
+UArianeEditorEraserTool::EraseChainSegments( FEditorViewportClient* ViewportClient
+                                           , FSceneView* View
                                            , UArianePainting3DComponent* Painting3DComponent
                                            , FArianePath* Path
                                            , const FArianePath::Chain& Chain
+                                           , const TArray<FColor>& Pixels
                                            , TArray<FWayPoint>& OutWayPoints
                                            , TArray<FWayFragment>& OutWayFragments )
 {
@@ -679,13 +714,15 @@ UArianeEditorEraserTool::EraseChainSegments( FSceneView* View
         MetaFragmentBuffer.Reserve( Chain.Segments.Num() * 3 );
 
         // create WayPoints for each Vertex of the chain
-        VertexToWaypoint( View, WorldTransform, Chain.LeadingVertex, OutWayPoints );
+        VertexToWaypoint( ViewportClient, View, WorldTransform, Chain.LeadingVertex, Pixels, OutWayPoints );
 
         // then create WayPoints at each intersection
         Chain.IterateSegments( [ this
                                , Path
                                , Chain
+                               , ViewportClient
                                , View
+                               , &Pixels
                                , &OutWayPoints
                                , &MetaFragmentBuffer
                                , &bHasHit
@@ -708,18 +745,10 @@ UArianeEditorEraserTool::EraseChainSegments( FSceneView* View
                     const FArianeSegment::Fraction& Fraction = *it;
                     const FArianeSegment::FractionStep* Step0 = Fraction.Steps[0];
                     const FArianeSegment::FractionStep* Step1 = Fraction.Steps[1];
-                    FVector2D ScreenCoords0;
-                    FVector2D ScreenCoords1;
-
-                    View->ProjectWorldToScreen( WorldTransform.TransformVector( Step0->Point->GetPosition() )
-                                              , View->UnconstrainedViewRect
-                                              , View->ViewMatrices.GetViewProjectionMatrix()
-                                              , ScreenCoords0 );
-
-                    View->ProjectWorldToScreen( WorldTransform.TransformVector( Step1->Point->GetPosition() )
-                                              , View->UnconstrainedViewRect
-                                              , View->ViewMatrices.GetViewProjectionMatrix()
-                                              , ScreenCoords1 );
+                    FVector WorlCoords0 = WorldTransform.TransformPosition( Step0->Point->GetPosition() ) ;
+                    FVector WorlCoords1 = WorldTransform.TransformPosition( Step1->Point->GetPosition() ) ;
+                    FVector2D ScreenCoords0 = ProjectWorldToScreen( ViewportClient, View, WorlCoords0 );
+                    FVector2D ScreenCoords1 = ProjectWorldToScreen( ViewportClient, View, WorlCoords1 );
 
                     TraceLine( Path
                              , Segment
@@ -729,6 +758,7 @@ UArianeEditorEraserTool::EraseChainSegments( FSceneView* View
                              , Step1
                              , ScreenCoords1.X
                              , ScreenCoords1.Y
+                             , Pixels
                              , OutWayPoints
                              , MetaFragmentBuffer
                              , revert );
@@ -741,18 +771,10 @@ UArianeEditorEraserTool::EraseChainSegments( FSceneView* View
                     const FArianeSegment::Fraction& Fraction = *it;
                     const FArianeSegment::FractionStep* Step0 = Fraction.Steps[0];
                     const FArianeSegment::FractionStep* Step1 = Fraction.Steps[1];
-                    FVector2D ScreenCoords0;
-                    FVector2D ScreenCoords1;
-
-                    View->ProjectWorldToScreen( Step0->Point->GetPosition()
-                                              , View->UnconstrainedViewRect
-                                              , WorldTransform.ToMatrixWithScale()
-                                              , ScreenCoords0 );
-
-                    View->ProjectWorldToScreen( Step1->Point->GetPosition()
-                                              , View->UnconstrainedViewRect
-                                              , WorldTransform.ToMatrixWithScale()
-                                              , ScreenCoords1 );
+                    FVector WorlCoords0 = WorldTransform.TransformPosition( Step0->Point->GetPosition() ) ;
+                    FVector WorlCoords1 = WorldTransform.TransformPosition( Step1->Point->GetPosition() ) ;
+                    FVector2D ScreenCoords0 = ProjectWorldToScreen( ViewportClient, View, WorlCoords0 );
+                    FVector2D ScreenCoords1 = ProjectWorldToScreen( ViewportClient, View, WorlCoords1 );
 
                     TraceLine( Path
                              , Segment
@@ -762,6 +784,7 @@ UArianeEditorEraserTool::EraseChainSegments( FSceneView* View
                              , Step0
                              , ScreenCoords0.X
                              , ScreenCoords0.Y
+                             , Pixels
                              , OutWayPoints
                              , MetaFragmentBuffer
                              , revert );
@@ -774,7 +797,7 @@ UArianeEditorEraserTool::EraseChainSegments( FSceneView* View
             if( Chain.LeadingVertex != OtherVertex )
             {
                 // create the last for the final vertex of the segment
-                VertexToWaypoint( View, WorldTransform, OtherVertex, OutWayPoints );
+                VertexToWaypoint( ViewportClient, View, WorldTransform, OtherVertex, Pixels, OutWayPoints );
 
                 LastFragmentWayPoint0Index = OutWayPoints.Num() - 2;
                 LastFragmentWayPoint1Index = OutWayPoints.Num() - 1;
@@ -891,7 +914,7 @@ UArianeEditorEraserTool::OnMouseDrag( FEditorViewportClient* iViewportClient
 }
 
 bool
-UArianeEditorEraserTool::OnMouseUp( FEditorViewportClient* iViewportClient
+UArianeEditorEraserTool::OnMouseUp( FEditorViewportClient* ViewportClient
                                   , const FKey& iKey
                                   , const FArianePointerState& PointerState )
 {
@@ -914,7 +937,7 @@ UArianeEditorEraserTool::OnMouseUp( FEditorViewportClient* iViewportClient
             {
                 painting3DComponent->Modify();
 
-                ErasePaths( GetSceneView( iViewportClient ), painting3DComponent );
+                ErasePaths( ViewportClient, painting3DComponent );
             }
         }
         GEditor->EndTransaction();

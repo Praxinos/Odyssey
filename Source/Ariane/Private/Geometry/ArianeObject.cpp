@@ -98,7 +98,7 @@ FArianeObject::FArianeObject( UArianePainting3DComponent* InPainting3DComponent 
 }
 
 void
-FArianeObject::RemoveChild( FArianeObject* ChildToRemove )
+FArianeObject::RemoveChild( FArianeObject* ChildToRemove, bool bRemoveFromInstancedObjects )
 {
     ChildrenID.RemoveAll( [ ChildToRemove ](  FArianeObjectID& ChildObjectID ) -> bool
     {
@@ -116,6 +116,11 @@ FArianeObject::RemoveChild( FArianeObject* ChildToRemove )
     ChildToRemove->Invalidate( FArianeObjectInvalidationFlags().SetHierarchy() );
     // update now because the child won't be recursively updatable from a parent object
     ChildToRemove->Update( true );
+
+    if( bRemoveFromInstancedObjects )
+    {
+        Painting3DComponent->DeleteInstancedObject( ChildToRemove );
+    }
 }
 
 void
