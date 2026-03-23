@@ -773,9 +773,6 @@ struct FOdysseyAnimationPlayerObjectVersion
 {
     enum Type
     {
-        // Before any version changes were made
-        BeforeCustomVersionWasAdded,
-
         // Added the Play Range system
         AddPlayRange,
 
@@ -799,6 +796,7 @@ UOdysseyAnimationPlayer::Serialize(FArchive& Ar)
 {
     Super::Serialize(Ar);
 
+    Ar.UsingCustomVersion(FOdysseyAnimationPlayerObjectVersion::GUID);
     if( Ar.IsLoading() && Ar.CustomVer(FOdysseyAnimationPlayerObjectVersion::GUID) < FOdysseyAnimationPlayerObjectVersion::AddPlayRange )
     {
         PlayRange = EOdysseyAnimationPlayerPlayRange::Infinite;
