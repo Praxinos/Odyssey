@@ -647,6 +647,38 @@ FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBui
 
     ToolbarBuilder.BeginStyleOverride( sSequencerToolbarStyleName );
 
+    //ToolbarBuilder.AddSeparator();
+    //ToolbarBuilder.AddToolBarButton( FUIAction(
+    //    FExecuteAction::CreateLambda( [this]()
+    //                                  {
+    //                                      TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+    //                                      if( !sequencer )
+    //                                          return;
+
+    //                                      BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, sequencer->GetFocusedMovieSceneSequence(), sequencer->GetFocusedTemplateID(), sequencer->GetLocalTime().Time.FrameNumber );
+
+    //                                      //ShotSequenceTools::CloneInnerContent( sequencer.Get(), result.mInnerSequence, result.mInnerSequenceId, false );
+
+    //                                      TArray<FGuid> animation_guids = ShotSequenceHelpers::GetAnimationBindings( *sequencer, result.mInnerSequence, result.mInnerSequenceId );
+    //                                      AOdysseyAnimationActor* animation_actor = ShotSequenceHelpers::GetAnimationSpawned( *sequencer, result.mInnerSequence, result.mInnerSequenceId, animation_guids[0] )[0];
+
+    //                                      UObject* object = MovieSceneHelpers::GetObjectTemplate( result.mInnerSequence, animation_guids[0], sequencer->GetSharedPlaybackState(), 0 );
+    //                                      AOdysseyAnimationActor* animation_template = Cast<AOdysseyAnimationActor>( object );
+
+    //                                      //FGuid camera_guid = ShotSequenceHelpers::GetCameraBinding( *sequencer, result.mInnerSequence, result.mInnerSequenceId );
+    //                                      //ACineCameraActor* camera = ShotSequenceHelpers::GetCameraSpawnedOrTemplate( *sequencer, result.mInnerSequence, result.mInnerSequenceId, camera_guid );
+    //                                      //if( !camera )
+    //                                      //    return;
+
+    //                                      //UObject* object = MovieSceneHelpers::GetObjectTemplate( result.mInnerSequence, camera_guid, sequencer->GetSharedPlaybackState(), 0 );
+    //                                      //ACineCameraActor* camera_template = Cast<ACineCameraActor>( object );
+    //                                  } ) ),
+    //    NAME_None,
+    //    FText::FromString( TEXT( "DEBUG" ) ),
+    //    FText::GetEmpty(),
+    //    FSlateIcon( FEposSequenceEditorStyle::Get().GetStyleSetName(), "Settings" )
+    //);
+
     ToolbarBuilder.AddSeparator();
 
     ToolbarBuilder.AddToolBarButton( FEposSequenceEditorCommands::Get().CreateCameraAtCurrentTime );

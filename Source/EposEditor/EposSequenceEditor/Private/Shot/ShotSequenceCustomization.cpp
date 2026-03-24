@@ -409,6 +409,22 @@ FShotSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuil
 
     ToolbarBuilder.BeginStyleOverride( sSequencerToolbarStyleName );
 
+    //ToolbarBuilder.AddSeparator();
+    //ToolbarBuilder.AddToolBarButton( FUIAction(
+    //    FExecuteAction::CreateLambda( [this]()
+    //                                  {
+    //                                      TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+    //                                      if( !sequencer )
+    //                                          return;
+
+    //                                      //ShotSequenceTools::CloneInnerContent( sequencer.Get(), sequencer->GetFocusedMovieSceneSequence(), sequencer->GetFocusedTemplateID(), false );
+    //                                  } ) ),
+    //    NAME_None,
+    //    FText::FromString( TEXT( "DEBUG" ) ),
+    //    FText::GetEmpty(),
+    //    FSlateIcon( FEposSequenceEditorStyle::Get().GetStyleSetName(), "Settings" )
+    //);
+
     ToolbarBuilder.AddSeparator();
 
     ToolbarBuilder.AddToolBarButton( FEposSequenceEditorCommands::Get().CreateCameraAtCurrentTime );
