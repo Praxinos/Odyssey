@@ -213,6 +213,9 @@ UOdysseyAnimationComponent::ApplyComponentInstanceData(FOdysseyAnimationComponen
     Player = ComponentInstanceData->Player;
     Animation = ComponentInstanceData->Animation;
     LODGroup = ComponentInstanceData->LODGroup;
+    AutoScale = ComponentInstanceData->AutoScale;
+    AutoScaleSize = ComponentInstanceData->AutoScaleSize;
+    AutoScaleMode = ComponentInstanceData->AutoScaleMode;
 
     //Here we don't call AnimationChanged() and similar "*Changed()" functions
     //to avoid calling RescaleToMatchAnimation()
@@ -250,8 +253,29 @@ UOdysseyAnimationComponent::RescaleToMatchAnimation(UOdysseyAnimation* iAnimatio
     if (!iAnimation)
         return;
 
-    float scaleW = (float)iAnimation->GetWidth() / (float)iAnimation->GetHeight();
-    SetRelativeScale3D(FVector(scaleW * 100.f, 1 * 100.f, 1)); // *100: to have something more visible than 1x1
+    if (!AutoScale)
+        return;
+
+    float scale = 1.0f;
+    FVector scaleVector(1.0f, 1.0f, 1.0f);
+    switch (AutoScaleMode)
+    {
+        case EOdysseyAnimationComponentScaling::AdjustWidth:
+        {
+            scale = (float)iAnimation->GetWidth() / (float)iAnimation->GetHeight();
+            scaleVector = FVector(scale * AutoScaleSize, AutoScaleSize, AutoScaleSize);
+        }
+        break;
+
+        case EOdysseyAnimationComponentScaling::AdjustHeight:
+        {
+            scale = (float)iAnimation->GetHeight() / (float)iAnimation->GetWidth();
+            scaleVector = FVector(AutoScaleSize, scale *AutoScaleSize, AutoScaleSize);
+        }
+        break;
+    }
+
+    SetRelativeScale3D(scaleVector);
     MarkRenderStateDirty();
 }
 
@@ -304,11 +328,56 @@ UOdysseyAnimationComponent::GetAnimationMaterial() const
     return Material;
 }
 
+bool
+UOdysseyAnimationComponent::GetAutoScale() const
+{
+    return AutoScale;
+}
+
+float
+UOdysseyAnimationComponent::GetAutoScaleSize() const
+{
+    return AutoScaleSize;
+}
+
+EOdysseyAnimationComponentScaling
+UOdysseyAnimationComponent::GetAutoScaleMode() const
+{
+    return AutoScaleMode;
+}
+
 void
 UOdysseyAnimationComponent::SetAnimationMaterial(UMaterialInterface* iMaterial)
 {
     Material = iMaterial;
     MaterialChanged();
+}
+
+void
+UOdysseyAnimationComponent::SetAutoScale(bool Value)
+{
+    Modify();
+
+    AutoScale = Value;
+    AutoScaleChanged();
+}
+
+void
+UOdysseyAnimationComponent::SetAutoScaleSize(float Size)
+{
+    Modify();
+
+    AutoScaleSize = Size;
+    AutoScaleChanged();
+}
+
+void
+UOdysseyAnimationComponent::SetAutoScaleMode(EOdysseyAnimationComponentScaling iMode)
+{
+    Modify();
+
+    AutoScaleMode = iMode;
+    AutoScaleChanged();
 }
 
 void
@@ -323,31 +392,42 @@ UOdysseyAnimationComponent::LODGroupChanged()
     DefaultPlayer->SetLODGroup(LODGroup);
 }
 
+void
+UOdysseyAnimationComponent::AutoScaleChanged()
+{
+    RescaleToMatchAnimation(Animation);
+}
+
 #if WITH_EDITOR
 void
-UOdysseyAnimationComponent::PropertyChanged(const FName& iPropertyName)
+UOdysseyAnimationComponent::PropertyChanged(const FName& iPropertyName, bool iIsInteractive)
 {
-    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationComponent, Mode) )
-        ModeChanged();
-    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationComponent, Animation) )
-        AnimationChanged();
-    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationComponent, Player) )
-        PlayerChanged();
-    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationComponent, Material) )
-        MaterialChanged();
-    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationComponent, LODGroup) )
-        LODGroupChanged();
+    if (!iIsInteractive)
+    {
+        if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationComponent, Mode) )
+            ModeChanged();
+        if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationComponent, Animation) )
+            AnimationChanged();
+        if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationComponent, Player) )
+            PlayerChanged();
+        if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationComponent, Material) )
+            MaterialChanged();
+        if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationComponent, LODGroup) )
+            LODGroupChanged();
+    }
+
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationComponent, AutoScale) ||
+        iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationComponent, AutoScaleSize) ||
+        iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationComponent, AutoScaleMode)
+        )
+        AutoScaleChanged();
 }
 
 void
 UOdysseyAnimationComponent::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent)
 {
     bool isInteractive = PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive;
-    if (!isInteractive)
-    {
-        PropertyChanged(PropertyChangedEvent.GetPropertyName());
-    }
-
+    PropertyChanged(PropertyChangedEvent.GetPropertyName(), isInteractive);
     Super::PostEditChangeProperty(PropertyChangedEvent);
 }
 
@@ -357,11 +437,7 @@ UOdysseyAnimationComponent::PostEditChangeChainProperty(FPropertyChangedChainEve
     //PostEditChangeChainProperty is called on the Archetype Component Object before PostEditChangeProperty
     //This fixes incoherences like  UOdysseyAnimationComponent::Animation != UOdysseyAnimationPlayer::Animation
     bool isInteractive = PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive;
-    if (!isInteractive)
-    {
-        PropertyChanged(PropertyChangedEvent.GetPropertyName());
-    }
-
+    PropertyChanged(PropertyChangedEvent.GetPropertyName(), isInteractive);
     Super::PostEditChangeChainProperty(PropertyChangedEvent);
 }
 
@@ -376,7 +452,7 @@ UOdysseyAnimationComponent::PostTransacted(const FTransactionObjectEvent& iTrans
     const TArray<FName>& changedPropertyNames = iTransactionEvent.GetChangedProperties();
     for ( const FName& propertyName : changedPropertyNames )
     {
-        PropertyChanged(propertyName);
+        PropertyChanged(propertyName, false);
     }
 }
 #endif
@@ -575,4 +651,7 @@ FOdysseyAnimationComponentInstanceData::FOdysseyAnimationComponentInstanceData(c
     Player = SourceComponent->Player;
     LODGroup = SourceComponent->LODGroup;
     DefaultPlayer = SourceComponent->DefaultPlayer;
+    AutoScale = SourceComponent->AutoScale;
+    AutoScaleSize = SourceComponent->AutoScaleSize;
+    AutoScaleMode = SourceComponent->AutoScaleMode;
 }

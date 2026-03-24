@@ -17,6 +17,13 @@ enum class EOdysseyAnimationComponentMode
     Player
 };
 
+UENUM()
+enum class EOdysseyAnimationComponentScaling
+{
+    AdjustWidth,
+    AdjustHeight
+};
+
 /**
  * A component containing an animation to attach to an actor
  */
@@ -44,6 +51,15 @@ public:
     UFUNCTION(BlueprintPure, Category = "Odyssey|AnimationComponent")
     UMaterialInterface* GetAnimationMaterial() const;
 
+    UFUNCTION(BlueprintPure, Category = "Odyssey|AnimationComponent")
+    bool GetAutoScale() const;
+
+    UFUNCTION(BlueprintPure, Category = "Odyssey|AnimationComponent")
+    float GetAutoScaleSize() const;
+
+    UFUNCTION(BlueprintPure, Category = "Odyssey|AnimationComponent")
+    EOdysseyAnimationComponentScaling GetAutoScaleMode() const;
+
     UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationComponent")
     void SetAnimation(UOdysseyAnimation* Animation);
 
@@ -55,6 +71,15 @@ public:
 
     UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationComponent")
     void SetAnimationMaterial(UMaterialInterface* Material);
+
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationComponent")
+    void SetAutoScale(bool Value);
+
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationComponent")
+    void SetAutoScaleSize(float Size);
+
+    UFUNCTION(BlueprintCallable, Category = "Odyssey|AnimationComponent")
+    void SetAutoScaleMode(EOdysseyAnimationComponentScaling Mode);
 
 public:
     virtual void PostInitProperties() override;
@@ -68,7 +93,7 @@ public:
     virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
     virtual void PostEditImport() override;
 
-    virtual void PropertyChanged(const FName& iPropertyName);
+    virtual void PropertyChanged(const FName& iPropertyName, bool iIsInteractive);
 #endif
 
     virtual void OnComponentCreated() override;
@@ -80,6 +105,7 @@ protected:
     void PlayerChanged();
     void LODGroupChanged();
     void MaterialChanged();
+    void AutoScaleChanged();
 
     void OnDefaultPlayerRenderTargetChanged();
     void OnPlayerAnimationChanged();
@@ -108,6 +134,15 @@ protected:
 
     UPROPERTY( EditAnywhere, Category="Animation", meta=(DisplayName="Texture Group"), AssetRegistrySearchable )
     TEnumAsByte<enum TextureGroup> LODGroup = TEXTUREGROUP_Pixels2D;
+
+    UPROPERTY(EditAnywhere, Category="Animation")
+    bool AutoScale = true;
+
+    UPROPERTY(EditAnywhere, Category="Animation", meta=(EditCondition = "AutoScale", EditConditionHides))
+    float AutoScaleSize = 100.f;
+
+    UPROPERTY(EditAnywhere, Category="Animation", meta=(EditCondition = "AutoScale", EditConditionHides))
+    EOdysseyAnimationComponentScaling AutoScaleMode = EOdysseyAnimationComponentScaling::AdjustWidth;
 
 private:
     UPROPERTY(Instanced)
@@ -205,4 +240,13 @@ public:
 
     UPROPERTY()
     TObjectPtr<UOdysseyAnimationPlayer> DefaultPlayer;
+
+    UPROPERTY(EditAnywhere, Category="Animation")
+    bool AutoScale = true;
+
+    UPROPERTY(EditAnywhere, Category="Animation")
+    float AutoScaleSize = 100.f;
+
+    UPROPERTY(EditAnywhere, Category="Animation")
+    EOdysseyAnimationComponentScaling AutoScaleMode = EOdysseyAnimationComponentScaling::AdjustWidth;
 };
