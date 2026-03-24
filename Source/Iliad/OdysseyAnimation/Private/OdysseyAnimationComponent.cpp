@@ -126,8 +126,6 @@ UOdysseyAnimationComponent::UOdysseyAnimationComponent(const FObjectInitializer&
     DefaultPlayer = CreateDefaultSubobject<UOdysseyAnimationPlayer>(TEXT("DefaultPlayer"));
     SetStaticMesh( LoadObject<UStaticMesh>( this, TEXT( "/Odyssey/Meshes/S_1_Unit_Plane.S_1_Unit_Plane" ) ) );
     Material = LoadObject<UMaterial>(this, TEXT("/Odyssey/Animation2D/DefaultAnimationMaterial.DefaultAnimationMaterial"));
-
-    DefaultPlayer->OnRenderTargetChanged().AddUObject(this, &UOdysseyAnimationComponent::OnDefaultPlayerRenderTargetChanged);
 }
 
 void
@@ -147,17 +145,15 @@ UOdysseyAnimationComponent::InitializeFromPlayer(UOdysseyAnimationPlayer* iPlaye
     SetPlayer(iPlayer);
 }
 
-void
-UOdysseyAnimationComponent::PostInitProperties()
-{
-    Super::PostInitProperties();
+/*
+Here to remember that PostReinitProperties can be called
+after PostInitProperties when creating an object with a Template
+Example: NewObject<Type>(Outer, Name, Flags, TemplateObject);
 
-    if (HasAnyFlags(RF_ClassDefaultObject))
-        return;
-
-    //bNeedUpdateMaterialInstance
-}
-
+PostReinitProperties will be called after
+the properties of TemplateObject have been copied to the new object.
+*/
+/*
 void
 UOdysseyAnimationComponent::PostReinitProperties()
 {
@@ -165,9 +161,8 @@ UOdysseyAnimationComponent::PostReinitProperties()
 
     if (HasAnyFlags(RF_ClassDefaultObject))
         return;
-
-    //UpdateMaterialInstance();
 }
+*/
 
 void
 UOdysseyAnimationComponent::PostLoad()
@@ -187,34 +182,12 @@ UOdysseyAnimationComponent::PostLoad()
         SetRelativeScale3D( new_scale );
     }
 
-    //UpdateMaterialInstance();
-
     if (Player)
     {
         PreviousPlayer = Player;
         Player->OnAnimationChanged().RemoveAll(this);
         Player->OnAnimationChanged().AddUObject(this, &UOdysseyAnimationComponent::OnPlayerAnimationChanged);
     }
-}
-
-void
-UOdysseyAnimationComponent::PostDuplicate(bool bDuplicateForPIE)
-{
-    Super::PostDuplicate(bDuplicateForPIE);
-
-    // Make sure to update the material after duplicating this component
-    // When duplicating an actor PostDuplicate() is not called on its components
-    //UpdateMaterialInstance();
-}
-
-void
-UOdysseyAnimationComponent::PostEditImport()
-{
-    Super::PostEditImport();
-
-    // Make sure to update the material after duplicating this component
-    // When duplicating an actor PostDuplicate() is not called on its components
-    //UpdateMaterialInstance();
 }
 
 TStructOnScope<FActorComponentInstanceData>
@@ -308,12 +281,6 @@ UOdysseyAnimationComponent::AnimationChanged()
         DefaultPlayer->SetAnimation(Animation);
         RescaleToMatchAnimation(Animation);
     }
-}
-
-void
-UOdysseyAnimationComponent::OnDefaultPlayerRenderTargetChanged()
-{
-    //UpdateMaterialInstance();
 }
 
 void
@@ -481,6 +448,7 @@ UOdysseyAnimationComponent::UpdateMaterialInstance()
         //If not, we get an error when saving the object containing it (here when we save the actor containing the component)
         //Here the material instance is not saved in its own asset so we set it to be transient
         //And we also define its Outer to be this, because it is owned by the Component even if it's Transient
+        //By the way UImagePlateComponent in the ImagePlate Plugin does exactly the same
         materialInstance = UMaterialInstanceDynamic::Create(Material, this);
         materialInstance->SetFlags(RF_Transient);
         //materialInstance->SetFlags(RF_Public);
@@ -512,11 +480,20 @@ UOdysseyAnimationComponent::UpdateMaterialInstance()
 }
 
 void
+UOdysseyAnimationComponent::OnRegister()
+{
+    Super::OnRegister();
+    UpdateMaterialInstance();
+}
+
+/*
+void
 UOdysseyAnimationComponent::OnComponentCreated()
 {
     Super::OnComponentCreated();
     UpdateMaterialInstance();
 }
+*/
 
 //======================================================================================
 

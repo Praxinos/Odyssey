@@ -82,24 +82,18 @@ public:
     void SetAutoScaleMode(EOdysseyAnimationComponentScaling Mode);
 
 public:
-    virtual void PostInitProperties() override;
-    virtual void PostReinitProperties() override;
-    virtual void PostDuplicate(bool bDuplicateForPIE) override;
     virtual void PostLoad() override;
 
 #if WITH_EDITOR
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent) override;
     virtual void PostEditChangeChainProperty(FPropertyChangedChainEvent& PropertyChangedEvent) override;
     virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
-    virtual void PostEditImport() override;
 
     virtual void PropertyChanged(const FName& iPropertyName, bool iIsInteractive);
 #endif
-
-    virtual void OnComponentCreated() override;
+    virtual void OnRegister() override;
 protected:
     //Property changed methods
-    //void Initialize();
     void ModeChanged();
     void AnimationChanged();
     void PlayerChanged();
@@ -107,7 +101,6 @@ protected:
     void MaterialChanged();
     void AutoScaleChanged();
 
-    void OnDefaultPlayerRenderTargetChanged();
     void OnPlayerAnimationChanged();
     void RescaleToMatchAnimation(UOdysseyAnimation* iAnimation);
 
@@ -147,8 +140,6 @@ protected:
 private:
     UPROPERTY(Instanced)
     TObjectPtr<UOdysseyAnimationPlayer> DefaultPlayer;
-
-    //bool bNeedUpdateMaterialInstance = true;
 
 private:
     friend struct FOdysseyAnimationComponentInstanceData;
