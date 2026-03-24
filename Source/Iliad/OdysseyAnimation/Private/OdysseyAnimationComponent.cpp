@@ -56,11 +56,19 @@ UOdysseyAnimationComponent::GetMode() const
     return Mode;
 }
 
+UMaterialInterface*
+UOdysseyAnimationComponent::GetAnimationMaterial() const
+{
+    return Material;
+}
+
 void
 UOdysseyAnimationComponent::SetAnimation(UOdysseyAnimation* iAnimation)
 {
     if (iAnimation == Animation )
         return;
+
+    Modify();
 
     Animation = iAnimation;
     AnimationChanged();
@@ -72,6 +80,8 @@ UOdysseyAnimationComponent::SetPlayer(UOdysseyAnimationPlayer* iPlayer)
     if (iPlayer == Player )
         return;
 
+    Modify();
+
     Player = iPlayer;
     PlayerChanged();
 }
@@ -82,8 +92,19 @@ UOdysseyAnimationComponent::SetMode(EOdysseyAnimationComponentMode iMode)
     if (iMode == Mode )
         return;
 
+    Modify();
+
     Mode = iMode;
     ModeChanged();
+}
+
+void
+UOdysseyAnimationComponent::SetAnimationMaterial( UMaterialInterface* iMaterial )
+{
+    Modify();
+
+    Material = iMaterial;
+    MaterialChanged();
 }
 
 UOdysseyAnimationComponent::UOdysseyAnimationComponent(const FObjectInitializer& ObjectInitializer)
@@ -322,12 +343,6 @@ UOdysseyAnimationComponent::PlayerChanged()
     UpdateMaterialInstance();
 }
 
-UMaterialInterface*
-UOdysseyAnimationComponent::GetAnimationMaterial() const
-{
-    return Material;
-}
-
 bool
 UOdysseyAnimationComponent::GetAutoScale() const
 {
@@ -344,13 +359,6 @@ EOdysseyAnimationComponentScaling
 UOdysseyAnimationComponent::GetAutoScaleMode() const
 {
     return AutoScaleMode;
-}
-
-void
-UOdysseyAnimationComponent::SetAnimationMaterial(UMaterialInterface* iMaterial)
-{
-    Material = iMaterial;
-    MaterialChanged();
 }
 
 void
