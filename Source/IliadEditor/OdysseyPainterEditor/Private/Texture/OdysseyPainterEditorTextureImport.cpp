@@ -51,6 +51,7 @@ FOdysseyPainterEditorTextureImport::ImportTextures(UTexture2D* DestinationTextur
         progressBar.EnterProgressFrame();
 
         UOdysseyTextureLayerImageRaster* layer = Cast<UOdysseyTextureLayerImageRaster>(layers[i]);
+        layer->SetLayerName(FText::FromString(iImportData.GetTextureName(i)));
         iImportData.Render(renderTarget.Get(), i);
 
         //PATCH: Needed to avoid double sRGB application in GetRenderTargetImage()

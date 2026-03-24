@@ -183,6 +183,12 @@ FOdysseyImportTexturesParameters::GetTexturePosition(int iSourceTextureIndex) co
 }
 
 
+FString
+FOdysseyImportTexturesParameters::GetTextureName(int iSourceTextureIndex) const
+{
+    UTexture2D* sourceTexture = mSourceTextures[iSourceTextureIndex];
+    return sourceTexture->GetName();
+}
 
 class FOdysseyCanvasRenderTarget final : public FRenderTarget
 {

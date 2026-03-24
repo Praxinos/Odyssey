@@ -79,6 +79,7 @@ public:
     FVector2D GetTexturePosition(const FVector2D& iTextureSize) const;
     FVector2D GetTexturePosition(int iSourceTextureIndex) const;
     FVector2D GetTextureScaledSize(int iSourceTextureIndex) const;
+    FString GetTextureName(int iSourceTextureIndex) const;
 
     void SetAlignment(EOdysseyImportTextureAlignment iAlignment);
     void SetScaling(EOdysseyImportTextureScaling iScaling);
