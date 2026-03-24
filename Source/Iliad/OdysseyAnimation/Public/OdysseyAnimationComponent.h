@@ -20,7 +20,7 @@ enum class EOdysseyAnimationComponentMode
 /**
  * A component containing an animation to attach to an actor
  */
-UCLASS(Blueprintable, ClassGroup=(Animation), /*HideCategories=(Materials),*/ editinlinenew, meta=(BlueprintSpawnableComponent, PrioritizeCategories="Actions"))
+UCLASS(Blueprintable, ClassGroup=(Animation), HideCategories=(Materials), editinlinenew, meta=(BlueprintSpawnableComponent, PrioritizeCategories="Actions"))
 class ODYSSEYANIMATION_API UOdysseyAnimationComponent : public UStaticMeshComponent
 {
     GENERATED_UCLASS_BODY()
