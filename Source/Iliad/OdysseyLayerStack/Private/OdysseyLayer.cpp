@@ -5,6 +5,7 @@
 
 #include "OdysseyLayerStack.h"
 #include "OdysseyLayerCell.h"
+#include "OdysseyLayerRoot.h"
 #include "Misc/TransactionObjectEvent.h"
 #include "RenderGraphBuilder.h"
 #include "RenderGraphUtils.h"
@@ -75,6 +76,12 @@ UOdysseyLayer::PostDuplicate(EDuplicateMode::Type iDuplicateMode)
 
     // See comment (REALLY) in ...\Plugins\Odyssey\Source\Iliad\OdysseyLayerStack\Private\OdysseyLayerStack.cpp#590: CopyLayerInternal()
 
+    //PATCH---------------------------
+    FText old_current_layer;
+    if( IsA<UOdysseyLayerRoot>() )
+        old_current_layer = GetLayerStack()->GetCurrentLayer()->GetLayerName();
+    //--------------------------------
+
     TArray<UOdysseyLayer*> children = GetChildren();
     Children.Empty();
 
@@ -92,6 +99,18 @@ UOdysseyLayer::PostDuplicate(EDuplicateMode::Type iDuplicateMode)
     Children.Append( duplicated_children );
     for( UOdysseyLayer* child : duplicated_children )
         child->Parent = this;
+
+    //PATCH---------------------------
+    if( IsA<UOdysseyLayerRoot>() )
+    {
+        TArray<UOdysseyLayer*> layers = GetLayerStack()->GetLayers();
+        for( UOdysseyLayer* layer : layers )
+        {
+            if( layer->GetLayerName().EqualTo( old_current_layer ) )
+                GetLayerStack()->SetCurrentLayer( layer ); // Call delegate ?! or make a new function ?
+        }
+    }
+    //--------------------------------
 }
 
 void
