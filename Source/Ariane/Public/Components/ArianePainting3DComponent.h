@@ -26,6 +26,8 @@ struct FArianeVertex;
 class FArianePathGeometry3D;
 struct FArianeSegment;
 class UArianeLayerFolder;
+class UArianeLayer;
+class UArianeLayerStack;
 
 class ARIANE_API FArianeGeometryProxy : public FPrimitiveSceneProxy
 {
@@ -53,56 +55,58 @@ class ARIANE_API UArianePainting3DComponent : public UMeshComponent
 {
     GENERATED_BODY()
 
-    public:
-        ~UArianePainting3DComponent();
-        UArianePainting3DComponent();
+public:
+    ~UArianePainting3DComponent();
+    UArianePainting3DComponent();
 
-    protected:
-        virtual void BeginPlay() override;
+protected:
+    virtual void BeginPlay() override;
 
-    public:
-        virtual void TickComponent( float DeltaTime
-                                  , ELevelTick TickType
-                                  , FActorComponentTickFunction* ThisTickFunction ) override;
-        virtual void PostLoad() override;
-        virtual FPrimitiveSceneProxy* CreateSceneProxy() override;
+public:
+    virtual void TickComponent( float DeltaTime
+                              , ELevelTick TickType
+                              , FActorComponentTickFunction* ThisTickFunction ) override;
+    virtual void PostLoad() override;
+    virtual FPrimitiveSceneProxy* CreateSceneProxy() override;
 
-        #if WITH_EDITOR
-        virtual void PostEditChangeProperty( FPropertyChangedEvent& event ) override;
+    #if WITH_EDITOR
+    virtual void PostEditChangeProperty( FPropertyChangedEvent& event ) override;
 
-        virtual void PostEditUndo() override;
-        #endif
+    virtual void PostEditUndo() override;
+    #endif
 
-        // debug
-        void PrintPointers();
+    // debug
+    void PrintPointers();
 
-        void ResetHierarchy();
+    void ResetHierarchy();
 
-        FArianeObject* GetRootObject();
-        void DeleteInstancedObject( FArianeObject* Object );
+    FArianeObject* GetRootObject();
+    void DeleteInstancedObject( FArianeObject* Object );
 
-    private:
-        virtual FBoxSphereBounds CalcBounds( const FTransform& LocalToWorld ) const override;
+    UArianeLayerStack* GetLayerStack();
 
-    public:
-        FArianePath* AllocPath( EArianePathLineType InLineType );
-        FArianeObject* AllocObject();
-        TArray<FInstancedStruct>& GetInstancedObjects();
-        void Update();
-        FArianeObject* GetObject( const FGuid& InGuid );
+private:
+    virtual FBoxSphereBounds CalcBounds( const FTransform& LocalToWorld ) const override;
 
-    public:
-        UPROPERTY( EditAnywhere )
-        TArray<FInstancedStruct> InstancedObjects;
+public:
+    FArianePath* AllocPath( EArianePathLineType InLineType );
+    FArianeObject* AllocObject();
+    TArray<FInstancedStruct>& GetInstancedObjects();
+    void Update();
+    FArianeObject* GetObject( const FGuid& InGuid );
 
-        UPROPERTY( EditAnywhere )
-        FArianeObjectID RootObjectID;
+public:
+    UPROPERTY( EditAnywhere )
+    TArray<FInstancedStruct> InstancedObjects;
 
-        TArray<UMaterialInterface*> UsedMaterials;
+    UPROPERTY( EditAnywhere )
+    FArianeObjectID RootObjectID;
 
-        UPROPERTY()
-        UArianeLayerFolder* RootFolder;
+    TArray<UMaterialInterface*> UsedMaterials;
 
-    public:
-        mutable FCriticalSection InstancedObjectsAccessRW;
+    UPROPERTY()
+    UArianeLayerStack* LayerStack;
+
+public:
+    mutable FCriticalSection InstancedObjectsAccessRW;
 };

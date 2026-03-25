@@ -16,11 +16,13 @@
 #include "LevelEditor.h"
 #include "FileHelpers.h"
 #include "Subsystems/EditorActorSubsystem.h"
+#include "Selection.h"
 
 #define LOCTEXT_NAMESPACE "ArianeEditor"
 
 FArianeEditor::~FArianeEditor()
 {
+    USelection::SelectionChangedEvent.RemoveAll( this );
 }
 
 FArianeEditor::FArianeEditor( FArianeEditorViewportToolkit* iToolkit )
@@ -28,7 +30,11 @@ FArianeEditor::FArianeEditor( FArianeEditorViewportToolkit* iToolkit )
     , Name("ArianeEditor")
     , CurrentTool ( nullptr )
 {
+    // Component selection is managed by ArianeEditor in order to emulate a Pre/Post Selection event behavior
+    USelection::SelectionChangedEvent.AddRaw( this, &FArianeEditor::OnEditorSelectionChanged );
 }
+
+
 
 FArianeEditorViewportToolkit*
 FArianeEditor::GetToolkit()
@@ -195,7 +201,7 @@ FArianeEditor::AddTool( UArianeEditorTool* iTool )
 void
 FArianeEditor::SetCurrentTool( UArianeEditorTool* iTool )
 {
-    OnPreChangeCurrentTool.Broadcast();
+    OnPreCurrentToolChanged.Broadcast();
 
     if( CurrentTool )
     {
@@ -204,7 +210,7 @@ FArianeEditor::SetCurrentTool( UArianeEditorTool* iTool )
 
     CurrentTool = iTool;
 
-    OnPostChangeCurrentTool.Broadcast();
+    OnPostCurrentToolChanged.Broadcast();
 }
 
 void
@@ -324,16 +330,75 @@ FArianeEditor::AddPainting3DComponent( const TArray<class AActor *> iActors )
     }
 }
 
-FArianeEditor::FOnPreChangeCurrentTool&
-FArianeEditor::OnPreChangeCurrentToolDelegate()
+
+void
+FArianeEditor::OnEditorSelectionChanged( UObject* NewSelection )
 {
-    return OnPreChangeCurrentTool;
+    USelection* SelectionSet = Cast<USelection>(NewSelection);
+
+    OnPre3DPaintingComponentSelectionChanged.Broadcast();
+
+    if( SelectionSet )
+    {
+        TArray<UObject*> SelectedObjects;
+
+        SelectionSet->GetSelectedObjects( SelectedObjects );
+
+        if( SelectedObjects.Num() )
+        {
+            for( UObject* SelectedObject : SelectedObjects )
+            {
+                // Filter calls to the world we are interested in, because USelection::SelectionChangedEvent is a static
+                // delegate and could be called by other Editor Tabs.
+                if( SelectedObject->GetWorld() == GetWorld() )
+                {
+                    if( SelectedObject->GetClass() == AArianePainting3DActor::StaticClass() )
+                    {
+                        AArianePainting3DActor* Painting3DActor = Cast<AArianePainting3DActor>(SelectedObject);
+
+                        CurrentPainting3DComponent = Cast<UArianePainting3DComponent>( Painting3DActor->GetComponentByClass( UArianePainting3DComponent::StaticClass() ) );
+                    }
+
+                    if( SelectedObject->GetClass() == UArianePainting3DComponent::StaticClass() )
+                    {
+                        CurrentPainting3DComponent = Cast<UArianePainting3DComponent>( SelectedObject );
+                    }
+                }
+            }
+        }
+    }
+
+    OnPost3DPaintingComponentSelectionChanged.Broadcast();
 }
 
-FArianeEditor::FOnPostChangeCurrentTool&
-FArianeEditor::OnPostChangeCurrentToolDelegate()
+UArianePainting3DComponent*
+FArianeEditor::GetCurrentPainting3DComponent()
 {
-    return OnPostChangeCurrentTool;
+    return CurrentPainting3DComponent.Get();
+}
+
+FArianeEditor::FOnCurrentToolChanged&
+FArianeEditor::OnPreCurrentToolChangedDelegate()
+{
+    return OnPreCurrentToolChanged;
+}
+
+FArianeEditor::FOnCurrentToolChanged&
+FArianeEditor::OnPostCurrentToolChangedDelegate()
+{
+    return OnPostCurrentToolChanged;
+}
+
+FArianeEditor::FOn3DPaintingComponentSelectionChanged&
+FArianeEditor::OnPre3DPaintingComponentSelectionChangedDelegate()
+{
+    return OnPre3DPaintingComponentSelectionChanged;
+}
+
+FArianeEditor::FOn3DPaintingComponentSelectionChanged&
+FArianeEditor::OnPost3DPaintingComponentSelectionChangedDelegate()
+{
+    return OnPost3DPaintingComponentSelectionChanged;
 }
 
 void

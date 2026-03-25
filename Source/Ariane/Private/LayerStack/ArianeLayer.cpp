@@ -3,12 +3,14 @@
 
 // Ariane headers
 #include "ArianeLayer.h"
+#include "ArianeLayerFolder.h"
 
 UArianeLayer::~UArianeLayer()
 {
 }
 
 UArianeLayer::UArianeLayer()
+    : bVisible ( true )
 {
 /*
     PrimaryComponentTick.bCanEverTick = true;
@@ -20,4 +22,48 @@ UArianeLayer::UArianeLayer()
     bAutoActivate = true;
     bTickInEditor = true;
 */
+}
+
+UArianeLayerFolder*
+UArianeLayer::GetParent()
+{
+    return Cast<UArianeLayerFolder>(GetOuter());
+}
+
+void
+UArianeLayer::SetVisible( bool bInVisible )
+{
+    bVisible = bInVisible;
+}
+
+bool
+UArianeLayer::IsVisible( bool bHierarchical )
+{
+    if( bHierarchical )
+    {
+        UArianeLayerFolder* ParentLayer = GetParent();
+
+        return ParentLayer ? ( ParentLayer->IsVisible( bHierarchical ) && bVisible ) : bVisible;
+    }
+
+    return bVisible;
+}
+
+void
+UArianeLayer::SetLocked( bool bInLocked )
+{
+    bLocked = bInLocked;
+}
+
+bool
+UArianeLayer::IsLocked( bool bHierarchical )
+{
+    if( bHierarchical )
+    {
+        UArianeLayerFolder* ParentLayer = GetParent();
+
+        return ParentLayer ? ( ParentLayer->IsLocked( bHierarchical ) && bLocked ) : bLocked;
+    }
+
+    return bLocked;
 }

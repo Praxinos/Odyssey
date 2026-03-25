@@ -12,16 +12,18 @@ class FArianeEditorTab;
 class FTabManager;
 class UWorld;
 class AArianePainting3DActor;
+class UArianePainting3DComponent;
 
 /**
  * Base class for a Painting Editor
  */
 class ARIANEEDITOR_API FArianeEditor
     : public FGCObject //Allows us to register External UObject in Garbage Collector
+    , public TSharedFromThis<FArianeEditor>
 {
 public:
-    DECLARE_MULTICAST_DELEGATE( FOnPreChangeCurrentTool );
-    DECLARE_MULTICAST_DELEGATE( FOnPostChangeCurrentTool );
+    DECLARE_MULTICAST_DELEGATE( FOnCurrentToolChanged );
+    DECLARE_MULTICAST_DELEGATE( FOn3DPaintingComponentSelectionChanged );
 
 public:
     ~FArianeEditor();
@@ -104,10 +106,13 @@ public:
     virtual FString GetReferencerName() const override;
 
     // Delegates
-    FOnPreChangeCurrentTool& OnPreChangeCurrentToolDelegate();
-    FOnPostChangeCurrentTool& OnPostChangeCurrentToolDelegate();
+    FOnCurrentToolChanged& OnPreCurrentToolChangedDelegate();
+    FOnCurrentToolChanged& OnPostCurrentToolChangedDelegate();
+    FOn3DPaintingComponentSelectionChanged& OnPre3DPaintingComponentSelectionChangedDelegate();
+    FOn3DPaintingComponentSelectionChanged& OnPost3DPaintingComponentSelectionChangedDelegate();
 
     void ExtendLevelEditorToolbar( UToolMenu* iToolbar );
+    UArianePainting3DComponent* GetCurrentPainting3DComponent();
 
 protected:
     /**
@@ -143,14 +148,19 @@ protected:
     void ExtendToolbarSaveAssetButton( UToolMenu* iToolMenu );
     void ExtendToolbarToolParameters( UToolMenu* iToolMenu );
     void ClearPainting3DComponents();
+    void OnEditorSelectionChanged( UObject* NewSelection );
 
 protected:
-    FOnPreChangeCurrentTool OnPreChangeCurrentTool;
-    FOnPostChangeCurrentTool OnPostChangeCurrentTool;
+    FOnCurrentToolChanged OnPreCurrentToolChanged;
+    FOnCurrentToolChanged OnPostCurrentToolChanged;
+
+    FOn3DPaintingComponentSelectionChanged OnPre3DPaintingComponentSelectionChanged;
+    FOn3DPaintingComponentSelectionChanged OnPost3DPaintingComponentSelectionChanged;
 
     FArianeEditorViewportToolkit* Toolkit;
     FName Name;
     TArray<UArianeEditorTool*> Tools;
     TArray<TSharedPtr<FArianeEditorTab>> Tabs;
     UArianeEditorTool* CurrentTool;
+    TWeakObjectPtr<UArianePainting3DComponent> CurrentPainting3DComponent;
 };

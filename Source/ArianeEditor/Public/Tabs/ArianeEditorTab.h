@@ -79,6 +79,8 @@ public:
     /** Get the tab's widget */
     virtual const TSharedPtr<SWidget>&  GetWidget() const;
 
+    bool IsOpened();
+
 private:
     static TSharedPtr< FTabManager > GetTabManager();
 

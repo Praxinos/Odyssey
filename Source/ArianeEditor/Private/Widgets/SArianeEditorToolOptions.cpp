@@ -19,7 +19,7 @@ SArianeEditorToolOptions::Construct( const FArguments& InArgs, FArianeEditor* iE
 {
     FPropertyEditorModule& PropertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
 
-    mEditor = iEditor;
+    Editor = iEditor;
 
     // Create a details view
     FDetailsViewArgs DetailsViewArgs;
@@ -29,19 +29,19 @@ SArianeEditorToolOptions::Construct( const FArguments& InArgs, FArianeEditor* iE
     DetailsViewArgs.bAllowSearch = false;
     DetailsViewArgs.NameAreaSettings = FDetailsViewArgs::HideNameArea;
 
-    mDetailsView = PropertyEditorModule.CreateDetailView( DetailsViewArgs );
-    mDetailsView->SetObject( mEditor->GetCurrentTool() );
+    DetailsView = PropertyEditorModule.CreateDetailView( DetailsViewArgs );
+    DetailsView->SetObject( Editor->GetCurrentTool() );
 
     this->ChildSlot
     [
-        mDetailsView.ToSharedRef()
+        DetailsView.ToSharedRef()
     ];
 
-    mEditor->OnPostChangeCurrentToolDelegate().AddSP( this, &SArianeEditorToolOptions::OnPostChangeCurrentTool );
+    Editor->OnPostCurrentToolChangedDelegate().AddSP( this, &SArianeEditorToolOptions::OnPostCurrentToolChanged );
 }
 
 void
-SArianeEditorToolOptions::OnPostChangeCurrentTool()
+SArianeEditorToolOptions::OnPostCurrentToolChanged()
 {
-    mDetailsView->SetObject( mEditor->GetCurrentTool() );
+    DetailsView->SetObject( Editor->GetCurrentTool() );
 }

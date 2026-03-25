@@ -20,7 +20,16 @@ class ARIANE_API UArianeLayerFolder : public UArianeLayer
         ~UArianeLayerFolder();
         UArianeLayerFolder();
 
+        void SetExpanded( bool bInExpanded );
+        bool IsExpanded();
+        const TArray<UArianeLayer*>& GetChildren();
+        void AddChild( UArianeLayer* Orphan );
+        void RemoveChild( UArianeLayer* Child );
+
     protected:
         UPROPERTY()
         TArray<UArianeLayer*> Children;
+
+        UPROPERTY()
+        bool bExpanded;
 };

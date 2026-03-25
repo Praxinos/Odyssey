@@ -17,9 +17,9 @@ SArianeEditorToolPanel::SArianeEditorToolPanel()
 {}
 
 void
-SArianeEditorToolPanel::Construct(const FArguments& InArgs, FArianeEditor* iEditor)
+SArianeEditorToolPanel::Construct(const FArguments& InArgs, FArianeEditor* InEditor)
 {
-    mEditor = iEditor;
+    Editor = InEditor;
 
     ChildSlot
     [
@@ -30,7 +30,7 @@ SArianeEditorToolPanel::Construct(const FArguments& InArgs, FArianeEditor* iEdit
             + SScrollBox::Slot()
             .FillSize(1.0f)
             [
-                SNew( SArianeEditorToolOptions, iEditor )
+                SNew( SArianeEditorToolOptions, Editor )
             ]
         ]
         + SHorizontalBox::Slot()
@@ -40,7 +40,7 @@ SArianeEditorToolPanel::Construct(const FArguments& InArgs, FArianeEditor* iEdit
             + SScrollBox::Slot()
             .AutoSize()
             [
-                SNew( SArianeEditorToolSelector, iEditor )
+                SNew( SArianeEditorToolSelector, Editor )
             ]
         ]
     ];
