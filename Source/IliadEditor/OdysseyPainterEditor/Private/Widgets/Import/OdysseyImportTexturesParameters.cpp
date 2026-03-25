@@ -243,6 +243,19 @@ void
 FOdysseyImportTexturesParameters::Render(UTextureRenderTarget2D* oRenderTarget, int iSourceTextureIndex) const
 {
     UTexture2D* sourceTexture = mSourceTextures[iSourceTextureIndex];
+
+    //Remove any compression from the imported texture
+    //otherwise it will copy the compression artifacts
+    //in the layer
+
+
+    FTextureFormatSettings textureFormatSettings;
+    sourceTexture->GetLayerFormatSettings(0, textureFormatSettings);
+    uint8 previousCompressionNone = textureFormatSettings.CompressionNone;
+    textureFormatSettings.CompressionNone = 1;
+    sourceTexture->SetLayerFormatSettings(0, textureFormatSettings);
+    sourceTexture->UpdateResource();
+
     sourceTexture->BlockOnAnyAsyncBuild();
     sourceTexture->SetForceMipLevelsToBeResident( 30.0f );
     sourceTexture->WaitForStreaming();
@@ -363,6 +376,11 @@ FOdysseyImportTexturesParameters::Render(UTextureRenderTarget2D* oRenderTarget, 
             }
         }
     );
+
+    //Set the compression back to its original value
+    textureFormatSettings.CompressionNone = previousCompressionNone;
+    sourceTexture->SetLayerFormatSettings(0, textureFormatSettings);
+    sourceTexture->UpdateResource();
 }
 
 uint32
