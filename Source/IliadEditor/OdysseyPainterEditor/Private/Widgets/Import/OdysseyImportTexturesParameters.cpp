@@ -63,6 +63,12 @@ FOdysseyImportTexturesParameters::Init(const TArray< UTexture2D* >& iTextures, u
     mSourceTextures = iTextures;
     mDestinationWidth = iDestinationWidth;
     mDestinationHeight = iDestinationHeight;
+
+    mSourceTextureNames.Reserve(mSourceTextures.Num());
+    for(UTexture2D* texture : mSourceTextures)
+    {
+        mSourceTextureNames.Emplace(texture->GetName());
+    }
 }
 
 void
@@ -78,8 +84,8 @@ FOdysseyImportTexturesParameters::Init(const TArray<FString>& iFilenames, uint32
     progressBar.MakeDialog();
 
     TStrongObjectPtr<UTextureFactory> TextureFactory(NewObject<UTextureFactory>());
-    TArray<TStrongObjectPtr<UTexture2D>> importedTextures;
-    importedTextures.Reserve(iFilenames.Num());
+    mSourceTextures.Reserve(iFilenames.Num());
+    mSourceTextureNames.Reserve(iFilenames.Num());
     for (const FString& filename : iFilenames)
     {
         progressBar.EnterProgressFrame();
@@ -89,9 +95,6 @@ FOdysseyImportTexturesParameters::Init(const TArray<FString>& iFilenames, uint32
         if (!importedTexture)
             continue;
 
-        //Set the texture name so it can be retrieved as layer names
-
-        importedObject->Rename(*FPaths::GetBaseFilename(filename, true));
 
         //Remove any compression from the imported texture
         //otherwise it will copy the compression artifacts
@@ -103,14 +106,8 @@ FOdysseyImportTexturesParameters::Init(const TArray<FString>& iFilenames, uint32
         importedTexture->SetLayerFormatSettings(0, textureFormatSettings);
         importedTexture->UpdateResource();
 
-        importedTextures.Emplace(importedTexture);
-    }
-
-    TArray<UTexture2D*> textures;
-
-    for (int i = 0; i < importedTextures.Num(); i++)
-    {
-        mSourceTextures.Add(importedTextures[i].Get());
+        mSourceTextures.Emplace(importedTexture);
+        mSourceTextureNames.Emplace(FPaths::GetBaseFilename(filename, true));
     }
 }
 
@@ -200,8 +197,7 @@ FOdysseyImportTexturesParameters::GetTexturePosition(int iSourceTextureIndex) co
 FString
 FOdysseyImportTexturesParameters::GetTextureName(int iSourceTextureIndex) const
 {
-    UTexture2D* sourceTexture = mSourceTextures[iSourceTextureIndex];
-    return sourceTexture->GetName();
+    return mSourceTextureNames[iSourceTextureIndex];
 }
 
 class FOdysseyCanvasRenderTarget final : public FRenderTarget

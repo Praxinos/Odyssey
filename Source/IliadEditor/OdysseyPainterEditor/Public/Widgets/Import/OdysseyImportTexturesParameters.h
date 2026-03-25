@@ -94,6 +94,7 @@ private:
     FOdysseyImportTexturesParametersGC mGC;
 
     TArray< TObjectPtr<UTexture2D> > mSourceTextures;
+    TArray< FString > mSourceTextureNames;
     uint32 mDestinationWidth;
     uint32 mDestinationHeight;
 
