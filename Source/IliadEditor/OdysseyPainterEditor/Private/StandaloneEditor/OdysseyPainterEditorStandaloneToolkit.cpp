@@ -135,12 +135,6 @@ FOdysseyPainterEditorStandaloneToolkit::Open()
     RegenerateMenusAndToolbars();
 
     mEditor->SetEditedObject(mEditedObject);
-
-    // Since the editor creates its tabs before setting its source, the tool collection tab can't find collections,
-    // since they are stored in the edited object, hence the force GUI refresh here
-    TSharedPtr<FOdysseyPainterEditorToolCollectionTab> toolCollectionTab = mEditor->FindTab<FOdysseyPainterEditorToolCollectionTab>();
-    if( toolCollectionTab )
-        toolCollectionTab->RefreshCollectionsGUI();
 }
 
 //--------------------------------------------------------------------------------------

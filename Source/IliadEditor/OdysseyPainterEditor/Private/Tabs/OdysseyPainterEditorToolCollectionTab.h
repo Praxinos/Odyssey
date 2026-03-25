@@ -41,9 +41,10 @@ protected:
 protected:
     bool IsUnlocked() const;
     const FSlateBrush* GetLockIcon() const;
-
-public:
     void RefreshCollectionsGUI();
+    void OnSourceChanged();
+    void AddToolCollection(UOdysseyToolCollection* iToolCollection);
+    void RemoveToolCollection(UOdysseyToolCollection* iToolCollection);
 
 private:
     FOdysseyPainterEditor* mEditor;

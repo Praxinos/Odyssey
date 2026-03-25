@@ -3,8 +3,10 @@
 
 #include "OdysseyPainterEditorToolCollectionTab.h"
 #include "Widgets/Input/SButton.h"
+#include "OdysseyAnimation.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorCommands.h"
+#include "OdysseyTextureLayerStackUserData.h"
 #include "Tools/OdysseyPainterEditorTool.h"
 #include "Widgets/Views/STileView.h"
 #include "Widgets/Tools/SOdysseyPainterEditorToolsTileView.h"
@@ -56,6 +58,9 @@ FOdysseyPainterEditorToolCollectionTab::GetId() const
 TSharedPtr<SWidget>
 FOdysseyPainterEditorToolCollectionTab::CreateWidget()
 {
+    mEditor->OnSourceChanged().RemoveAll( this );
+    mEditor->OnSourceChanged().AddSP( this, &FOdysseyPainterEditorToolCollectionTab::OnSourceChanged );
+
     TSharedPtr<SWidget> widget = SNew(SVerticalBox)
         + SVerticalBox::Slot() //Recent tools
         .AutoHeight()
@@ -99,6 +104,8 @@ FOdysseyPainterEditorToolCollectionTab::CreateWidget()
                 .OnGenerateRow(this, &FOdysseyPainterEditorToolCollectionTab::OnGenerateCollectionRow)
                 .SelectionMode(ESelectionMode::None)
         ];
+
+    RefreshCollectionsGUI();
 
     return widget;
 }
@@ -183,7 +190,6 @@ FOdysseyPainterEditorToolCollectionTab::OnGetAddToolCollectionMenuContent()
 FReply FOdysseyPainterEditorToolCollectionTab::OnLockClicked()
 {
     bIsUnlocked = !bIsUnlocked;
-    RefreshCollectionsGUI();
     return FReply::Handled();
 }
 
@@ -197,22 +203,85 @@ const FSlateBrush* FOdysseyPainterEditorToolCollectionTab::GetLockIcon() const
     return bIsUnlocked ? FAppStyle::Get().GetBrush("Icons.Unlock") : FAppStyle::Get().GetBrush("Icons.Lock");
 }
 
+void FOdysseyPainterEditorToolCollectionTab::AddToolCollection(UOdysseyToolCollection* iToolCollection)
+{
+    if (!IsValid(iToolCollection))
+        return;
+
+    FSoftObjectPath assetPath(iToolCollection);
+    UOdysseyAnimation* animation = mEditor->GetAnimation();
+    UOdysseyTextureLayerStackUserData* textureUserData = mEditor->GetTextureUserData();
+
+    if (animation)
+    {
+        animation->ToolCollections.AddUnique( assetPath );
+    }
+    else if (textureUserData)
+    {
+        textureUserData->ToolCollections.AddUnique(assetPath);
+    }
+}
+
+void FOdysseyPainterEditorToolCollectionTab::RemoveToolCollection(UOdysseyToolCollection* iToolCollection)
+{
+    if (!IsValid(iToolCollection))
+        return;
+
+
+    FSoftObjectPath assetPath(iToolCollection);
+    UOdysseyAnimation* animation = mEditor->GetAnimation();
+    UOdysseyTextureLayerStackUserData* textureUserData = mEditor->GetTextureUserData();
+
+    if (animation)
+    {
+        animation->ToolCollections.Remove(assetPath);
+    }
+    else if (textureUserData)
+    {
+        textureUserData->ToolCollections.Remove(assetPath);
+    }
+}
+
+void
+FOdysseyPainterEditorToolCollectionTab::OnSourceChanged()
+{
+    RefreshCollectionsGUI();
+}
+
 void FOdysseyPainterEditorToolCollectionTab::RefreshCollectionsGUI()
 {
+    if (!mEditor)
+        return;
+
     mSelectedCollections.Empty();
 
-    if (mEditor)
+    UOdysseyAnimation* animation = mEditor->GetAnimation();
+    UOdysseyTextureLayerStackUserData* textureUserData = mEditor->GetTextureUserData();
+    if (animation)
     {
-        for (UOdysseyToolCollection* collection : mEditor->GetToolCollections())
+        for (const FSoftObjectPath& Path : animation->ToolCollections)
         {
-            mSelectedCollections.Add(collection);
-        }
-
-        if (mCollectionsListView.IsValid())
-        {
-            mCollectionsListView->RequestListRefresh();
+            UObject* Obj = Path.TryLoad();
+            if (UOdysseyToolCollection* Col = Cast<UOdysseyToolCollection>(Obj))
+            {
+                mSelectedCollections.Add(Col);
+            }
         }
     }
+    else if (textureUserData)
+    {
+        for (const FSoftObjectPath& Path : textureUserData->ToolCollections)
+        {
+            UObject* Obj = Path.TryLoad();
+            if (UOdysseyToolCollection* Col = Cast<UOdysseyToolCollection>(Obj))
+            {
+                mSelectedCollections.Add(Col);
+            }
+        }
+    }
+
+    if (mCollectionsListView)
+        mCollectionsListView->RequestListRefresh();
 }
 
 void FOdysseyPainterEditorToolCollectionTab::OnAssetSelected(const FAssetData& AssetData)
@@ -221,7 +290,7 @@ void FOdysseyPainterEditorToolCollectionTab::OnAssetSelected(const FAssetData& A
     if (!collection)
         return;
 
-    mEditor->AddToolCollection(collection);
+    AddToolCollection(collection);
     RefreshCollectionsGUI();
 }
 
@@ -290,7 +359,7 @@ void FOdysseyPainterEditorToolCollectionTab::HandleRemoveCollection(TWeakObjectP
         return;
     }
 
-    mEditor->RemoveToolCollection(iCollection.Get());
+    RemoveToolCollection(iCollection.Get());
     RefreshCollectionsGUI();
 }
 
