@@ -75,25 +75,25 @@ class ARIANEEDITOR_API FArianeEditorViewportToolkit
         /** Overriden from FModeToolkit */
         virtual void ShutdownUI() override;
 
-    /* Gary
+
         void RebuildLevelEditorMenu() const;
 
         FString GetOpenedTabIdsSavedPath() const;
         void LoadOpenedTabs();
         void SaveOpenedTabs();
         void OnEditorClose();
-    */
+
     protected:
         void ExtendMenu ( FMenuBuilder& MenuBuilder );
         void AddActorMenuEntry( FToolMenuSection& InSection );
 
     private:
-        FArianeEditorViewportEdMode* mEdMode;
-        FArianeEditor Editor;
+        FArianeEditorViewportEdMode* EdMode;
+        TSharedPtr<FArianeEditor> Editor;
 /*
         TSharedPtr<FArianeViewportDrawingEditorExtension> mViewportDrawingExtension;
         FEdMode* mEdMode;
         bool mTabSaved;
 */
-        TSharedPtr<FExtender> mLevelEditorMenuExtender;
+        TSharedPtr<FExtender> LevelEditorMenuExtender;
 };

@@ -17,7 +17,7 @@ class ARIANEEDITOR_API SArianeEditorToolPanel
     public:
         SLATE_BEGIN_ARGS(SArianeEditorToolPanel)
             {}
-            SLATE_ARGUMENT(UArianeEditorTool*, CurrentTool)
+            //SLATE_ARGUMENT(UArianeEditorTool*, CurrentTool)
         SLATE_END_ARGS()
 
     public:
@@ -25,8 +25,8 @@ class ARIANEEDITOR_API SArianeEditorToolPanel
         ~SArianeEditorToolPanel();
         SArianeEditorToolPanel();
 
-        void Construct(const FArguments& InArgs, FArianeEditor* iEditor);
+        void Construct(const FArguments& InArgs, FArianeEditor* InEditor);
 
     protected:
-        FArianeEditor* mEditor;
+        FArianeEditor* Editor;
 };

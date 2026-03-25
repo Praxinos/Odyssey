@@ -43,6 +43,17 @@ FArianeEditorTab::Open()
     }
 }
 
+bool
+FArianeEditorTab::IsOpened()
+{
+    TSharedPtr< FTabManager > tabManager = GetTabManager();
+    if (!tabManager)
+        return false;
+
+    TSharedPtr< SDockTab > livetab = tabManager->FindExistingLiveTab(FTabId(GetId()));
+    return !!livetab;
+}
+
 void
 FArianeEditorTab::Close()
 {

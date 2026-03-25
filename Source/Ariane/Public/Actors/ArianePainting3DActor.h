@@ -22,11 +22,7 @@ class ARIANE_API AArianePainting3DActor : public AActor
 
     protected:
         virtual void BeginPlay() override;
+
     public:
         virtual void Tick(float DeltaTime) override;
-
-    protected:
-        UPROPERTY( EditAnywhere
-                 , Category = ArianePainting3DActor )
-        UArianePainting3DComponent* mPainting3DComponent;
 };

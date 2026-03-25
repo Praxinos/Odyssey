@@ -6,32 +6,33 @@
 #include "ArianeEditorTab.h"
 
 class FArianeEditor;
-class UArianeEditorTool;
+class UArianeLayerStack;
 
-class ARIANEEDITOR_API FArianeEditorToolTab : public FArianeEditorTab
+class FArianeEditorLayerStackTab :
+    public FArianeEditorTab
 {
 public:
     static const FName& StaticId();
 
 public:
     // Construction / Destruction
-    virtual ~FArianeEditorToolTab();
-    FArianeEditorToolTab(FArianeEditor* InEditor);
+    virtual ~FArianeEditorLayerStackTab();
+    FArianeEditorLayerStackTab(FArianeEditor* iEditor);
 
 protected:
-    // FOdysseyEditorTab interface
     virtual const FName& GetId() const override;
     virtual TSharedPtr<SWidget> CreateWidget() override;
     virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
+    virtual void ExtendMenu( TSharedRef<FExtender> iExtender ) override;
+    virtual bool CanOpen() const override;
 
 protected:
     // Event Listeners
-    void OnToolSelected(UArianeEditorTool* iTool);
 
-protected:
-    // Widget Getters
-    int WidgetIndex() const;
-    UArianeEditorTool* GetCurrentTool() const;
+private:
+    //Methods
+    void MapActions( TSharedPtr<FUICommandList> iCommandList );
+    virtual void ExtendMenuFile( TSharedRef<FExtender> iExtender );
 
 private:
     FArianeEditor* Editor;

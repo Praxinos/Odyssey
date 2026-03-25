@@ -9,6 +9,7 @@ UArianeLayerFolder::~UArianeLayerFolder()
 }
 
 UArianeLayerFolder::UArianeLayerFolder()
+    : bExpanded ( true )
 {
 /*
     ResetHierarchy();
@@ -22,4 +23,40 @@ UArianeLayerFolder::UArianeLayerFolder()
     bAutoActivate = true;
     bTickInEditor = true;
 */
+}
+
+void
+UArianeLayerFolder::SetExpanded( bool bInExpanded )
+{
+    bExpanded = bInExpanded;
+}
+
+bool
+UArianeLayerFolder::IsExpanded()
+{
+    return bExpanded;
+}
+
+const TArray<UArianeLayer*>&
+UArianeLayerFolder::GetChildren()
+{
+    return Children;
+}
+
+void
+UArianeLayerFolder::AddChild( UArianeLayer* Orphan )
+{
+    // Rename() is used to define the parent object
+    Orphan->Rename( nullptr, this );
+
+    Children.Add( Orphan );
+}
+
+void
+UArianeLayerFolder::RemoveChild( UArianeLayer* Child )
+{
+    Children.Remove( Child );
+
+    // Rename() is used to define the parent object
+    Child->Rename( nullptr, nullptr );
 }

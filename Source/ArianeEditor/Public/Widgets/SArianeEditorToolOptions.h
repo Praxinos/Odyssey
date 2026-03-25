@@ -26,9 +26,9 @@ class ARIANEEDITOR_API SArianeEditorToolOptions
         void Construct( const  FArguments&  InArgs, FArianeEditor* iEditor );
 
     protected:
-        void OnPostChangeCurrentTool();
+        void OnPostCurrentToolChanged();
 
     protected:
-        TSharedPtr<IDetailsView> mDetailsView;
-        FArianeEditor* mEditor;
+        TSharedPtr<IDetailsView> DetailsView;
+        FArianeEditor* Editor;
 };

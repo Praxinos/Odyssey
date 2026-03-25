@@ -17,11 +17,18 @@ class ARIANE_API UArianeLayer : public UObject
 {
     GENERATED_BODY()
 
-    public:
-        ~UArianeLayer();
-        UArianeLayer();
+public:
+    ~UArianeLayer();
+    UArianeLayer();
 
-    public:
+    UArianeLayerFolder* GetParent();
+
+    void SetVisible( bool bInVisible );
+    bool IsVisible( bool bHierarchical );
+    void SetLocked( bool bInLocked );
+    bool IsLocked( bool bHierarchical );
+
+public:
 /*
         virtual void TickComponent( float DeltaTime
                                   , ELevelTick TickType
@@ -34,4 +41,10 @@ class ARIANE_API UArianeLayer : public UObject
         virtual void PostEditUndo() override;
         #endif
 */
+protected:
+    UPROPERTY()
+    bool bVisible;
+
+    UPROPERTY()
+    bool bLocked;
 };

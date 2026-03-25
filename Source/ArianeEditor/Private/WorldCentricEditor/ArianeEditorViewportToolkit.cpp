@@ -4,6 +4,8 @@
 #include "ArianeEditorViewportToolkit.h"
 #include "ArianeEditorViewportEdMode.h"
 #include "ArianeEditor.h"
+#include "ArianeEditorTab.h"
+#include "ArianeEditorLayerStackTab.h"
 #include "SArianeEditorMasterPanel.h"
 
 // Unreal headers
@@ -47,8 +49,8 @@ FArianeEditorViewportToolkit::~FArianeEditorViewportToolkit()
 }
 
 FArianeEditorViewportToolkit::FArianeEditorViewportToolkit( FArianeEditorViewportEdMode* iEdMode )
-    : mEdMode( iEdMode )
-    , Editor( this )
+    : EdMode( iEdMode )
+    , Editor( MakeShared<FArianeEditor>(this) )
 /* Gary
     , mTabSaved(false)
 */
@@ -111,7 +113,7 @@ FArianeEditorViewportToolkit::AddActorMenuEntry( FToolMenuSection& InSection )
         , FSlateIcon()
         , FUIAction( FExecuteAction::CreateLambda( [this]()
                                                    {
-                                                       Editor.FArianeEditor::AddPainting3DActor();
+                                                       Editor->FArianeEditor::AddPainting3DActor();
                                                    } ) ) );
 }
 
@@ -121,7 +123,7 @@ FArianeEditorViewportToolkit::Init( const TSharedPtr<IToolkitHost>& iInitToolkit
     FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>(TEXT("LevelEditor"));
     FModeToolkit::Init( iInitToolkitHost );
 
-    Editor.Init();
+    Editor->Init();
 
     UToolMenu* addMenu = UToolMenus::Get()->ExtendMenu("LevelEditor.LevelEditorToolbar.AddQuickMenu");
     FToolMenuSection& arianeSection = addMenu->FindOrAddSection("Ariane 3D Painting");
@@ -130,13 +132,13 @@ FArianeEditorViewportToolkit::Init( const TSharedPtr<IToolkitHost>& iInitToolkit
                                                          , FNewToolMenuSectionDelegate::CreateRaw( this, &FArianeEditorViewportToolkit::AddActorMenuEntry ) );
 
 /*
-    mLevelEditorMenuExtender = MakeShared<FExtender>();
-    mLevelEditorMenuExtender->AddMenuExtension( "LevelEditor.LevelEditorToolbar.AddQuickMenu"
+    LevelEditorMenuExtender = MakeShared<FExtender>();
+    LevelEditorMenuExtender->AddMenuExtension( "LevelEditor.LevelEditorToolbar.AddQuickMenu"
                                               , EExtensionHook::After
                                               , nullptr
                                               , FMenuExtensionDelegate::CreateRaw( this, &FArianeEditorViewportToolkit::ExtendMenu ) );
 
-    LevelEditorModule.GetToolBarExtensibilityManager()->AddExtender( mLevelEditorMenuExtender );
+    LevelEditorModule.GetToolBarExtensibilityManager()->AddExtender( LevelEditorMenuExtender );
 
     FToolMenuInsert actorMenuInsert = FToolMenuInsert("FileActors", EToolMenuInsertType::After);
     UToolMenu* ToolbarMenu = UToolMenus::Get()->ExtendMenu("LevelEditor.LevelEditorToolbar.AddQuickMenu");
@@ -193,9 +195,9 @@ FArianeEditorViewportToolkit::Init( const TSharedPtr<IToolkitHost>& iInitToolkit
     UToolMenu* helpMenu = UToolMenus::Get()->ExtendMenu(*(menuName + FString(".Help")));
     helpMenu->FindOrAddSection("OdysseyHelp");
 
-    mLevelEditorMenuExtender = MakeShared<FExtender>();
-    Editor.ExtendMenu( mLevelEditorMenuExtender.ToSharedRef() );
-    LevelEditorModule.GetMenuExtensibilityManager()->AddExtender(mLevelEditorMenuExtender);
+    LevelEditorMenuExtender = MakeShared<FExtender>();
+    Editor.ExtendMenu( LevelEditorMenuExtender.ToSharedRef() );
+    LevelEditorModule.GetMenuExtensibilityManager()->AddExtender(LevelEditorMenuExtender);
 
     Editor.BindShortcuts(this);
     Editor.OnAddEditedObjectDelegate().AddRaw(this, &FArianeEditorViewportToolkit::OnAddEditedObject);
@@ -208,7 +210,7 @@ FArianeEditorViewportToolkit::Init( const TSharedPtr<IToolkitHost>& iInitToolkit
 void
 FArianeEditorViewportToolkit::ExtendSecondaryModeToolbar(UToolMenu* InModeToolbarMenu)
 {
-    Editor.ExtendLevelEditorToolbar( InModeToolbarMenu );
+    Editor->ExtendLevelEditorToolbar( InModeToolbarMenu );
 /*
     FName menuName = InModeToolbarMenu->GetMenuName();
     Editor.OnRegenerateToolbarAndMenus().BindLambda(
@@ -257,7 +259,7 @@ FArianeEditorViewportToolkit::GetEditorName() const
 FArianeEditor&
 FArianeEditorViewportToolkit::GetEditor()
 {
-    return Editor;
+    return *Editor.Get();
 }
 
 void
@@ -317,16 +319,16 @@ FArianeEditorViewportToolkit::RequestModeUITabs()
     FModeToolkit::RequestModeUITabs();
 }
 
-/* Gary
 void
 FArianeEditorViewportToolkit::SaveOpenedTabs()
 {
     TArray<FName> tabIds;
-    const TArray<TSharedPtr<FOdysseyEditorTab>>& tabs = Editor.GetTabs();
-    for (TSharedPtr<FOdysseyEditorTab> tab : tabs)
+    const TArray<TSharedPtr<FArianeEditorTab>>& tabs = Editor->GetTabs();
+
+    for (TSharedPtr<FArianeEditorTab> tab : tabs)
     {
-        if (tab->IsOpened())
-            tabIds.Add(tab->GetId());
+        if ( tab->IsOpened() )
+            tabIds.Add( tab->GetId() );
     }
 
     FString savedPath = GetOpenedTabIdsSavedPath();
@@ -359,13 +361,15 @@ FArianeEditorViewportToolkit::LoadOpenedTabs()
         return;
 
     TArray<FName> tabIds = {
-        FOdysseyPainterEditorToolsTab::StaticId(),
-        FOdysseyPainterEditorVectorSceneTreeViewTab::StaticId(),
-        FOdysseyPainterEditorAnimationDetailsTab::StaticId(),
-        FOdysseyPainterEditorTextureDetailsTab::StaticId(),
-        FOdysseyPainterEditorAnimationTimelineTab::StaticId(),
-        FOdysseyPainterEditorColorSelectorTab::StaticId(),
-        FOdysseyPainterEditorLayerStackTab::StaticId(),
+        //FArianeEditorToolsTab::StaticId(),
+        FArianeEditorLayerStackTab::StaticId(),
+
+        //FOdysseyPainterEditorVectorSceneTreeViewTab::StaticId(),
+        //FOdysseyPainterEditorAnimationDetailsTab::StaticId(),
+        //FOdysseyPainterEditorTextureDetailsTab::StaticId(),
+        //FOdysseyPainterEditorAnimationTimelineTab::StaticId(),
+        //FOdysseyPainterEditorColorSelectorTab::StaticId(),
+        //FOdysseyPainterEditorLayerStackTab::StaticId(),
     };
 
     FString FileContents;
@@ -393,15 +397,14 @@ FArianeEditorViewportToolkit::LoadOpenedTabs()
         }
     }
 
-    const TArray<TSharedPtr<FOdysseyEditorTab>>& tabs = Editor.GetTabs();
-    for (TSharedPtr<FOdysseyEditorTab> tab : tabs)
+    const TArray<TSharedPtr<FArianeEditorTab>>& tabs = Editor->GetTabs();
+    for (TSharedPtr<FArianeEditorTab> tab : tabs)
     {
         if (!tabIds.Contains(tab->GetId()))
             continue;
         tab->Open();
     }
 }
-*/
 
 FName
 FArianeEditorViewportToolkit::GetToolkitFName() const
@@ -418,7 +421,7 @@ FArianeEditorViewportToolkit::GetBaseToolkitName() const
 void
 FArianeEditorViewportToolkit::InvokeUI()
 {
-    Editor.RegisterTabSpawners();
+    Editor->RegisterTabSpawners();
 
 /* Gary
     if (GEditor)
@@ -450,12 +453,12 @@ FArianeEditorViewportToolkit::ShutdownUI()
     if (GEditor)
         GEditor->OnEditorClose().RemoveAll(this);
 
-    Editor.CloseAllTabs();
-    Editor.UnregisterTabSpawners();
+    Editor->CloseAllTabs();
+    Editor->UnregisterTabSpawners();
 
 /* Gary
-    LevelEditorModule.GetMenuExtensibilityManager()->RemoveExtender(mLevelEditorMenuExtender);
-    mLevelEditorMenuExtender = nullptr;
+    LevelEditorModule.GetMenuExtensibilityManager()->RemoveExtender(LevelEditorMenuExtender);
+    LevelEditorMenuExtender = nullptr;
     RebuildLevelEditorMenu();
 */
 }
@@ -471,13 +474,13 @@ FArianeEditorViewportToolkit::OnEditorClose()
 TSharedPtr<SWidget>
 FArianeEditorViewportToolkit::GetInlineContent() const
 {
-    return SNew(SArianeEditorMasterPanel, const_cast<FArianeEditor*>(&Editor) );
+    return SNew(SArianeEditorMasterPanel, const_cast<FArianeEditor*>(Editor.Get()) );
 }
 
 FArianeEditorViewportEdMode*
 FArianeEditorViewportToolkit::GetEditorMode() const
 {
-    return mEdMode;
+    return EdMode;
 }
 
 /* Gary
@@ -488,20 +491,18 @@ FArianeEditorViewportToolkit::GetViewportDrawingExtension() const
 }
 */
 
-/* Gary
 FString
 FArianeEditorViewportToolkit::GetOpenedTabIdsSavedPath() const
 {
-    FString filename = FString("OdysseyLayout.json");
-    return FPaths::Combine(FPlatformProcess::UserSettingsDir(), FApp::GetEpicProductIdentifier(), TEXT("Editor"), TEXT("Odyssey"), filename);
+    FString filename = FString("ArianeLayout.json");
+    return FPaths::Combine(FPlatformProcess::UserSettingsDir(), FApp::GetEpicProductIdentifier(), TEXT("Editor"), TEXT("Ariane"), filename);
 }
-*/
 
 /* void
 FArianeEditorViewportToolkit::BuildToolPalette( FName iPalette, class FToolBarBuilder& ioToolbarBuilder )
 {
-    const TArray<TSharedPtr<FOdysseyEditorTab>>& tabs = Editor.GetTabs();
-    for (TSharedPtr<FOdysseyEditorTab> tab : tabs)
+    const TArray<TSharedPtr<FArianeEditorTab>>& tabs = Editor.GetTabs();
+    for (TSharedPtr<FArianeEditorTab> tab : tabs)
     {
         FFormatNamedArguments Args;
         Args.Add("TabName", tab->GetName());
@@ -512,7 +513,7 @@ FArianeEditorViewportToolkit::BuildToolPalette( FName iPalette, class FToolBarBu
         );
 
         ioToolbarBuilder.AddToolBarButton(
-            FUIAction(FExecuteAction::CreateSP( tab.ToSharedRef(), &FOdysseyEditorTab::Open) ),
+            FUIAction(FExecuteAction::CreateSP( tab.ToSharedRef(), &FArianeEditorTab::Open) ),
             NAME_None,
             tab->GetName(),
             description,

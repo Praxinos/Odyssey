@@ -25,9 +25,9 @@ FArianeEditorToolTab::~FArianeEditorToolTab()
 {
 }
 
-FArianeEditorToolTab::FArianeEditorToolTab( FArianeEditor* iEditor )
+FArianeEditorToolTab::FArianeEditorToolTab( FArianeEditor* InEditor )
     : FArianeEditorTab( LOCTEXT( "tool-tab.name", "ToolTab" ), FSlateIcon( "OdysseyStyle", "PainterEditor.Tools" ))
-    , mEditor(iEditor)
+    , Editor(InEditor)
 {
 }
 
@@ -40,8 +40,7 @@ FArianeEditorToolTab::GetId() const
 TSharedPtr<SWidget>
 FArianeEditorToolTab::CreateWidget()
 {
-    return SNew( SArianeEditorToolPanel, mEditor )
-           .CurrentTool( nullptr );
+    return SNew( SArianeEditorToolPanel, Editor );
 }
 
 void

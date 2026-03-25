@@ -6,6 +6,7 @@
 #include "ArianePath.h"
 #include "ArianeSegment.h"
 #include "ArianeVertex.h"
+#include "ArianeLayerStack.h"
 #include "ArianeLayerFolder.h"
 // Unreal headers
 #include "Engine/EngineBaseTypes.h"
@@ -37,7 +38,7 @@ UArianePainting3DComponent::UArianePainting3DComponent()
     bAutoActivate = true;
     bTickInEditor = true;
 
-    RootFolder = NewObject<UArianeLayerFolder>( this );
+    LayerStack = CreateDefaultSubobject<UArianeLayerStack>(TEXT("LayerStack"));
 
     //LineBatchComponent = CreateDefaultSubobject<ULineBatchComponent>(TEXT("LineBatcher"));
 }
@@ -118,6 +119,12 @@ UArianePainting3DComponent::PostEditUndo()
 
     //RootObjectID.GetObject()->Update( true );
     Update();
+}
+
+UArianeLayerStack*
+UArianePainting3DComponent::GetLayerStack()
+{
+    return LayerStack;
 }
 
 FArianeObject*
