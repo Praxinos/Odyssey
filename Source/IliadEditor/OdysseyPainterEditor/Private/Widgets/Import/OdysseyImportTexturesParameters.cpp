@@ -89,6 +89,16 @@ FOdysseyImportTexturesParameters::Init(const TArray<FString>& iFilenames, uint32
         if (!importedTexture)
             continue;
 
+        //Remove any compression from the imported texture
+        //otherwise it will copy the compression artifacts
+        //in the layer
+        FTextureFormatSettings textureFormatSettings;
+        importedTexture->GetLayerFormatSettings(0, textureFormatSettings);
+        textureFormatSettings.CompressionNone = 1;
+        importedTexture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
+        importedTexture->SetLayerFormatSettings(0, textureFormatSettings);
+        importedTexture->UpdateResource();
+
         importedTextures.Emplace(importedTexture);
     }
 
