@@ -89,6 +89,10 @@ FOdysseyImportTexturesParameters::Init(const TArray<FString>& iFilenames, uint32
         if (!importedTexture)
             continue;
 
+        //Set the texture name so it can be retrieved as layer names
+
+        importedObject->Rename(*FPaths::GetBaseFilename(filename, true));
+
         //Remove any compression from the imported texture
         //otherwise it will copy the compression artifacts
         //in the layer
