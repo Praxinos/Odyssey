@@ -9,6 +9,11 @@
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
+#define CURVEWIDGET_INPUT_MIN -0.05f
+#define CURVEWIDGET_INPUT_MAX 1.05f
+#define CURVEWIDGET_OUTPUT_MIN -0.05f
+#define CURVEWIDGET_OUTPUT_MAX 1.20f //let's some space to display Time and Value widgets
+
 // Construction / Destruction
 SOdysseyImportTextureScanCleaner::~SOdysseyImportTextureScanCleaner()
 {
@@ -18,6 +23,11 @@ SOdysseyImportTextureScanCleaner::~SOdysseyImportTextureScanCleaner()
 void
 SOdysseyImportTextureScanCleaner::Construct(const FArguments& InArgs)
 {
+    mViewMinInput = CURVEWIDGET_INPUT_MIN;
+    mViewMaxInput = CURVEWIDGET_INPUT_MAX;
+    mViewMinOutput = CURVEWIDGET_OUTPUT_MIN;
+    mViewMaxOutput = CURVEWIDGET_OUTPUT_MAX;
+
     mData = InArgs._Data;
     mOnChanged = InArgs._OnChanged;
 
@@ -149,8 +159,8 @@ SOdysseyImportTextureScanCleaner::Construct(const FArguments& InArgs)
             .ViewMaxInput_Lambda( [this]() { return mViewMaxInput; })
             .ViewMinOutput_Lambda( [this]() { return mViewMinOutput; })
             .ViewMaxOutput_Lambda( [this]() { return mViewMaxOutput; })
-            .DataMinInput(-0.05f) //can't scroll before 0.f
-            .DataMaxInput(1.05f) //can't scroll past 1.f
+            .DataMinInput(CURVEWIDGET_INPUT_MIN) //can't scroll before 0.f
+            .DataMaxInput(CURVEWIDGET_INPUT_MAX) //can't scroll past 1.f
             .TimelineLength(0.f)
             //.InputSnap(0.5f) //Snap value on X axis
             //.OutputSnap(1.0f)  //Snap value on Y axis
@@ -160,7 +170,7 @@ SOdysseyImportTextureScanCleaner::Construct(const FArguments& InArgs)
             //.DrawCurve(false) //if false, draw only keys and not the curve itself
             .DesiredSize(FVector2D(300, 300))
             .HideUI(false) //if true, hides the overlay UI when mouse is out of the widget
-            //.AllowZoomOutput(false) //if false, force the Y axis zoom to be fixed
+            .AllowZoomOutput(false) //if false, force the Y axis zoom to be fixed
             .AlwaysDisplayColorCurves(true)
             .AlwaysHideGradientEditor(true)
             .ZoomToFitVertical(false) //Simulates a click on the Zoom To Fit Vertically button when creating the widget
@@ -190,21 +200,32 @@ SOdysseyImportTextureScanCleaner::IsActivateChecked() const
 void
 SOdysseyImportTextureScanCleaner::OnSetInputViewRange(float Min, float Max)
 {
-    mViewMinInput = -0.05f;
-    mViewMaxInput = 1.05f;
+    mViewMinInput = CURVEWIDGET_INPUT_MIN;
+    mViewMaxInput = CURVEWIDGET_INPUT_MAX;
 }
 
 void
 SOdysseyImportTextureScanCleaner::OnSetOutputViewRange(float Min, float Max)
 {
     float range = Max - Min;
-    mViewMinOutput = FMath::Max(Min, -0.05f);
+    mViewMinOutput = FMath::Max(Min, CURVEWIDGET_OUTPUT_MIN);
     mViewMaxOutput = mViewMinOutput + range;
 }
 
 void
 SOdysseyImportTextureScanCleaner::OnUpdateCurve( UCurveBase* Curve, EPropertyChangeType::Type ChangeType)
 {
+    FRichCurve& curve = mData->GetScanCleanerCurve()->FloatCurve;
+    for (auto it = curve.GetKeyHandleIterator(); it; it++)
+    {
+        FKeyHandle keyHandle = *it;
+        float keyTime = curve.GetKeyTime(keyHandle);
+        float keyValue = curve.GetKeyValue(keyHandle);
+
+        curve.SetKeyTime(keyHandle, FMath::Clamp(keyTime, 0.f, 1.f));
+        curve.SetKeyValue(keyHandle, FMath::Clamp(keyValue, 0.f, 1.f));
+    }
+
     mOnChanged.ExecuteIfBound(); //Allows to refresh viewport
 }
 

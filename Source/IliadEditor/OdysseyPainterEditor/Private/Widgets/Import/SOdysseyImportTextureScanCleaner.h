@@ -40,8 +40,8 @@ private:
 
     TSharedPtr<class SCurveEditor> mCurveEditor;
 
-    float mViewMinInput = -0.05f;
-    float mViewMaxInput = 1.05f;
-    float mViewMinOutput = -0.05f;
-    float mViewMaxOutput = 1.05f;
+    float mViewMinInput;
+    float mViewMaxInput;
+    float mViewMinOutput;
+    float mViewMaxOutput;
 };
