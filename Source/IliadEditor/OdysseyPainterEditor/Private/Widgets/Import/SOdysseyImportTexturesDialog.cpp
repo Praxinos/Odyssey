@@ -292,7 +292,6 @@ void
 SOdysseyImportTexturesDialog::OnCurrentTextureSliderValueChanged(float iValue)
 {
     mCurrentTextureIndex = (uint32)FMath::RoundToInt(iValue * (mImportData.GetSourceTextures().Num() - 1));
-    mViewportClient->SetTexture(mImportData.GetSourceTextures()[mCurrentTextureIndex]);
     UpdatePreview();
 }
 
