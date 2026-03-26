@@ -131,7 +131,7 @@ FOdysseyPainterEditorAnimationExportShortcuts::Action_ImportImageSequence()
     bool dialogValidated = desktopPlatformHandle->OpenFileDialog(
         FSlateApplication::Get().FindBestParentWindowHandleForDialogs(nullptr)
         , LOCTEXT("animation.import-images.dialog.title", "Select Images to import").ToString()
-        , FPaths::ProjectDir()
+        , FString() //Allows the dialog to open in the last folder the dialog opened
         , animation->GetName()
         , TEXT("PNG Image (.png)|*.png|BMP Image (.bmp)|*.bmp|TGA Image (.tga)|*.tga|JPG Image (.jpg)|*.jpg|Any (.*)|*.*")
         , EFileDialogFlags::Multiple
