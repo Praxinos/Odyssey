@@ -9,8 +9,8 @@
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
-#define CURVEWIDGET_INPUT_MIN -0.05f
-#define CURVEWIDGET_INPUT_MAX 1.05f
+#define CURVEWIDGET_INPUT_MIN -0.1f
+#define CURVEWIDGET_INPUT_MAX 1.1f
 #define CURVEWIDGET_OUTPUT_MIN -0.05f
 #define CURVEWIDGET_OUTPUT_MAX 1.20f //let's some space to display Time and Value widgets
 
